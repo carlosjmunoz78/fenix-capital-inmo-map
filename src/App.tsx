@@ -1,11 +1,13 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { Calculator, LogOut, Minimize2, Moon, Sun, X } from 'lucide-react';
 import type { Session } from '@supabase/supabase-js';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { calculateMortgage, FORMULA_VERSION } from './calculator';
 import { fetchAppApi, supabase } from './supabase';
 
 type Theme = 'light' | 'dark';
 type SessionContext = { actor_code?: string; role?: string; worker_id?: string; [key: string]: unknown };
+type NavItem = { label: string; route: string; resource?: string };
 type NavData = { items?: Array<{ label?: string; route?: string; resource?: string }>; [key: string]: unknown };
 type CalcState = {
   principal: number;
@@ -18,10 +20,26 @@ type CalcState = {
   minimized: boolean;
 };
 
-const fallbackMenu = ['Inicio','Expedientes','Bancos','Contactos','Inmobiliarias','Tasaciones','Firmas','Documentación','Financieros','Visitadores','Agenda/Tareas','Informes','Buscador'];
+const fallbackMenu: NavItem[] = [
+  { label:'Inicio', route:'/inicio' },
+  { label:'Expedientes', route:'/expedientes' },
+  { label:'Bancos', route:'/bancos' },
+  { label:'Contactos', route:'/contactos' },
+  { label:'Inmobiliarias', route:'/inmobiliarias' },
+  { label:'Tasaciones', route:'/tasaciones' },
+  { label:'Firmas', route:'/firmas' },
+  { label:'Documentación', route:'/documentacion' },
+  { label:'Financieros', route:'/equipo/financieros' },
+  { label:'Visitadores', route:'/visitas' },
+  { label:'Agenda/Tareas', route:'/tareas' },
+  { label:'Informes', route:'/informes' },
+  { label:'Buscador', route:'/buscar' }
+];
 const defaultCalc: CalcState = { principal: 100000, rate: 3, years: 30, purchasePrice: '', income: '', other: '', open: true, minimized: false };
 
 export default function App(){
+  const navigate = useNavigate();
+  const location = useLocation();
   const [theme,setTheme]=useState<Theme>(() => (sessionStorage.getItem('fenix-theme') as Theme) || 'light');
   const [session,setSession]=useState<Session|null>(null);
   const [ctx,setCtx]=useState<SessionContext|null>(null);
@@ -59,6 +77,10 @@ export default function App(){
   },[session?.user?.id]);
 
   useEffect(()=>{
+    if(session?.user?.id && location.pathname==='/') navigate('/inicio',{replace:true});
+  },[session?.user?.id,location.pathname,navigate]);
+
+  useEffect(()=>{
     if(!session?.user?.id)return;
     sessionStorage.setItem(`fenix-calc:${session.user.id}`,JSON.stringify(calc));
   },[calc,session?.user?.id]);
@@ -69,7 +91,11 @@ export default function App(){
     }catch{return null}
   },[calc]);
 
-  const menu = nav?.items?.map(x=>x.label).filter((x):x is string=>Boolean(x)) || fallbackMenu;
+  const menuItems: NavItem[] = (nav?.items || [])
+    .filter((x): x is {label:string;route:string;resource?:string} => Boolean(x.label && x.route))
+    .map(x=>({label:x.label,route:x.route,resource:x.resource}));
+  const effectiveMenu = menuItems.length ? menuItems : fallbackMenu;
+  const activeItem = effectiveMenu.find(item => location.pathname===item.route || (item.route!=='/inicio' && location.pathname.startsWith(`${item.route}/`))) || effectiveMenu[0];
 
   async function login(e:FormEvent){
     e.preventDefault();setAuthError('');setLoadingLogin(true);
@@ -83,6 +109,7 @@ export default function App(){
     if(uid)sessionStorage.removeItem(`fenix-calc:${uid}`);
     setCalc(defaultCalc);setCtx(null);setNav(null);setPassword('');
     await supabase.auth.signOut();
+    navigate('/',{replace:true});
   }
 
   if(!authReady)return <div className="auth-shell"><p>Validando sesión TEST…</p></div>;
@@ -104,20 +131,20 @@ export default function App(){
   return <div className="app-shell">
     <aside className="sidebar">
       <div className="brand"><div className="brand-mark">F</div><div><strong>FÉNIX CAPITAL</strong><span>PRE-PROD · Fase 1</span></div></div>
-      <nav>{menu.map((item,i)=><button className={i===0?'nav-item active':'nav-item'} key={item}>{item}</button>)}</nav>
+      <nav>{effectiveMenu.map(item=><button className={activeItem?.route===item.route?'nav-item active':'nav-item'} key={item.route} onClick={()=>navigate(item.route)}>{item.label}</button>)}</nav>
     </aside>
     <main className="main">
       <header className="topbar">
-        <div><h1>Inicio</h1><p>{ctx?.actor_code ? `${ctx.actor_code} · ${ctx.role||'Rol TEST'}` : 'Sesión TEST autenticada'}</p></div>
+        <div><h1>{activeItem?.label || 'Inicio'}</h1><p>{ctx?.actor_code ? `${ctx.actor_code} · ${ctx.role||'Rol TEST'}` : 'Sesión TEST autenticada'}</p></div>
         <div className="top-actions">
           <button className="theme-toggle" onClick={()=>setTheme(theme==='light'?'dark':'light')} aria-label="Cambiar tema">{theme==='light'?<Moon size={18}/>:<Sun size={18}/>}<span>{theme==='light'?'Oscuro':'Claro'}</span></button>
           <button className="logout" onClick={logout} aria-label="Cerrar sesión"><LogOut size={17}/><span>Salir</span></button>
           <div className="avatar">{(ctx?.actor_code||'TT').slice(0,2)}</div>
         </div>
       </header>
-      <section className="hero-card"><div><span className="eyebrow">CONTROL OPERATIVO</span><h2>Frontend TEST conectado a Supabase Auth</h2><p>El menú y el contexto se solicitan al backend con JWT. La calculadora conserva estado solo dentro de la sesión del usuario autenticado y se limpia al salir.</p></div><div className="hero-kpi"><strong>{ctx?.actor_code||'TEST'}</strong><span>{ctx?.role||'validando scope'}</span></div></section>
+      <section className="hero-card"><div><span className="eyebrow">RUTA INTERNA</span><h2>{activeItem?.label || 'Inicio'} · entorno TEST</h2><p>La navegación usa rutas internas del SPA y conserva el contexto autorizado. La Calculadora PRO permanece transversal sin recargar la aplicación.</p></div><div className="hero-kpi"><strong>{ctx?.actor_code||'TEST'}</strong><span>{activeItem?.route || location.pathname}</span></div></section>
       <section className="grid">
-        <article className="card"><span className="eyebrow">SIGUIENTE</span><h3>QA navegador A→B</h3><p>Login FIN-A, navegación, CAL-001, logout, login FIN-B y comprobación de que el estado privado anterior no reaparece.</p></article>
+        <article className="card"><span className="eyebrow">NAVEGACIÓN</span><h3>Router interno activo</h3><p>Back/forward y cambio de módulo se resuelven dentro de la APP, sin enlaces directos a Notion.</p></article>
         <article className="card"><span className="eyebrow">SEGURIDAD</span><h3>JWT + RBAC servidor</h3><p>La UI consume contexto y navegación autorizados; no envía rol o worker como autoridad confiable.</p></article>
         <article className="card"><span className="eyebrow">CAL-001</span><h3>Motor validado</h3><p>Amortización francesa · fórmula {FORMULA_VERSION}.</p></article>
       </section>
@@ -125,7 +152,7 @@ export default function App(){
 
     {!calc.open && <button className="calc-launcher" onClick={()=>setCalc(v=>({...v,open:true,minimized:false}))}><Calculator size={20}/>Calculadora PRO</button>}
     {calc.open && <section className={calc.minimized?'calc-panel minimized':'calc-panel'} aria-label="Calculadora Hipotecaria PRO">
-      <header><div><span className="eyebrow">CAL-001</span><strong>Calculadora Hipotecaria PRO</strong></div><div className="calc-actions"><button onClick={()=>setCalc(v=>({...v,minimized:!v.minimized}))}><Minimize2 size={17}/></button><button onClick={()=>setCalc(v=>({...v,open:false}))}><X size={17}/></button></div></header>
+      <header><div><span className="eyebrow">CAL-001</span><strong>Calculadora Hipotecaria PRO</strong></div><div className="calc-actions"><button aria-label="Minimizar calculadora" onClick={()=>setCalc(v=>({...v,minimized:!v.minimized}))}><Minimize2 size={17}/></button><button aria-label="Cerrar calculadora" onClick={()=>setCalc(v=>({...v,open:false}))}><X size={17}/></button></div></header>
       {!calc.minimized && <div className="calc-body">
         <div className="calc-grid">
           <label>Importe €<input type="number" min="1" value={calc.principal} onChange={e=>setCalc(v=>({...v,principal:Number(e.target.value)}))}/></label>
