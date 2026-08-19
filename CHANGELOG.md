@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-08-20 · Publicación PRE-PROD
+
+### Deployment
+- GitHub Pages habilitado para el repositorio.
+- Workflow corregido para publicar únicamente desde `push` directo a `preprod-app-phase1`; los eventos `pull_request` quedan como QA-only.
+- Se fuerza nueva ejecución de publicación después de la activación de Pages para obtener un deployment limpio y verificable.
+
 ## 2026-08-19 · PRE-PROD Fase 1
 
 ### Añadido
