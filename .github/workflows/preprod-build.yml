@@ -60,25 +60,25 @@ jobs:
           if-no-files-found: ignore
 
       - name: Build GitHub Pages PRE-PROD
-        if: github.event_name != 'pull_request'
+        if: github.ref == 'refs/heads/preprod-app-phase1' || github.head_ref == 'preprod-app-phase1'
         run: |
           npx vite build --base=/fenix-capital-inmo-map/ --outDir dist-pages
           cp dist-pages/index.html dist-pages/404.html
 
       - name: Configure GitHub Pages
-        if: github.event_name != 'pull_request'
+        if: github.ref == 'refs/heads/preprod-app-phase1' || github.head_ref == 'preprod-app-phase1'
         uses: actions/configure-pages@v5
         with:
           enablement: true
 
       - name: Upload GitHub Pages artifact
-        if: github.event_name != 'pull_request'
+        if: github.ref == 'refs/heads/preprod-app-phase1' || github.head_ref == 'preprod-app-phase1'
         uses: actions/upload-pages-artifact@v3
         with:
           path: dist-pages
 
   deploy-preprod-pages:
-    if: github.event_name != 'pull_request'
+    if: github.ref == 'refs/heads/preprod-app-phase1' || github.head_ref == 'preprod-app-phase1'
     needs: build-and-browser-qa
     runs-on: ubuntu-latest
     environment:
