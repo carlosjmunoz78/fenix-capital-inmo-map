@@ -20,21 +20,7 @@ type CalcState = {
   minimized: boolean;
 };
 
-const fallbackMenu: NavItem[] = [
-  { label:'Inicio', route:'/inicio' },
-  { label:'Expedientes', route:'/expedientes' },
-  { label:'Bancos', route:'/bancos' },
-  { label:'Contactos', route:'/contactos' },
-  { label:'Inmobiliarias', route:'/inmobiliarias' },
-  { label:'Tasaciones', route:'/tasaciones' },
-  { label:'Firmas', route:'/firmas' },
-  { label:'Documentación', route:'/documentacion' },
-  { label:'Financieros', route:'/equipo/financieros' },
-  { label:'Visitadores', route:'/visitas' },
-  { label:'Agenda/Tareas', route:'/tareas' },
-  { label:'Informes', route:'/informes' },
-  { label:'Buscador', route:'/buscar' }
-];
+const fallbackMenu: NavItem[] = [{ label:'Inicio', route:'/inicio' }];
 const defaultCalc: CalcState = { principal: 100000, rate: 3, years: 30, purchasePrice: '', income: '', other: '', open: true, minimized: false };
 
 export default function App(){
