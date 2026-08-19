@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - preprod-app-phase1
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
