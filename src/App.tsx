@@ -22,6 +22,20 @@ type CalcState = {
 
 const fallbackMenu: NavItem[] = [{ label:'Inicio', route:'/inicio' }];
 const defaultCalc: CalcState = { principal: 100000, rate: 3, years: 30, purchasePrice: '', income: '', other: '', open: true, minimized: false };
+const testLoginAliases: Record<string,string> = {
+  dirtest: 'dir-test@test.fenixcapital.es',
+  fina: 'fin-a@test.fenixcapital.es',
+  finb: 'fin-b@test.fenixcapital.es',
+  visa: 'vis-a@test.fenixcapital.es',
+  visb: 'vis-b@test.fenixcapital.es'
+};
+
+function resolveTestLogin(value:string){
+  const trimmed=value.trim().toLowerCase();
+  if(trimmed.includes('@')) return trimmed;
+  const alias=trimmed.replace(/[\s_-]+/g,'');
+  return testLoginAliases[alias] || '';
+}
 
 export default function App(){
   const navigate = useNavigate();
@@ -32,7 +46,7 @@ export default function App(){
   const [ctx,setCtx]=useState<SessionContext|null>(null);
   const [nav,setNav]=useState<NavData|null>(null);
   const [authReady,setAuthReady]=useState(false);
-  const [email,setEmail]=useState('');
+  const [loginId,setLoginId]=useState('');
   const [password,setPassword]=useState('');
   const [authError,setAuthError]=useState('');
   const [loadingLogin,setLoadingLogin]=useState(false);
@@ -86,9 +100,16 @@ export default function App(){
   const activeItem = effectiveMenu.find(item => location.pathname===item.route || (item.route!=='/inicio' && location.pathname.startsWith(`${item.route}/`))) || effectiveMenu[0];
 
   async function login(e:FormEvent){
-    e.preventDefault();setAuthError('');setLoadingLogin(true);
+    e.preventDefault();
+    setAuthError('');
+    const email=resolveTestLogin(loginId);
+    if(!email){
+      setAuthError('Usuario TEST no reconocido. Puedes escribir DIR-TEST, FIN-A, FIN-B, VIS-A, VIS-B, con espacios o guiones.');
+      return;
+    }
+    setLoadingLogin(true);
     const {error}=await supabase.auth.signInWithPassword({email,password});
-    if(error)setAuthError('No se pudo iniciar sesión TEST. Revisa las credenciales.');
+    if(error)setAuthError('No se pudo iniciar sesión TEST. Revisa la contraseña.');
     setLoadingLogin(false);
   }
 
@@ -107,11 +128,11 @@ export default function App(){
   if(!session)return <div className="auth-shell">
     <button className="theme-toggle auth-theme" onClick={()=>setTheme(theme==='light'?'dark':'light')} aria-label="Cambiar tema">{theme==='light'?<Moon size={18}/>:<Sun size={18}/>}<span>{theme==='light'?'Oscuro':'Claro'}</span></button>
     <form className="auth-card" onSubmit={login}>
-      <div className="brand auth-brand"><div className="brand-mark">F</div><div><strong>FÉNIX CAPITAL</strong><span>APP PRE-PROD · Fase 1</span></div></div>
+      <div className="brand auth-brand"><div className="brand-mark" role="img" aria-label="Logotipo Fénix Capital"/><div><strong>FÉNIX CAPITAL</strong><span>APP PRE-PROD · Fase 1</span></div></div>
       <span className="eyebrow">AUTH TEST</span>
       <h1>Acceso seguro</h1>
       <p>Usa únicamente las identidades TEST autorizadas. No se aceptan datos reales.</p>
-      <label>Email TEST<input type="email" autoComplete="username" value={email} onChange={e=>setEmail(e.target.value)} required/></label>
+      <label>Usuario o email TEST<input type="text" autoComplete="username" value={loginId} onChange={e=>setLoginId(e.target.value)} placeholder="Ej. FIN-A o FIN A" required/></label>
       <label>Contraseña<input type="password" autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} required/></label>
       {authError&&<div className="warning">{authError}</div>}
       <button className="primary" disabled={loadingLogin}>{loadingLogin?'Entrando…':'Entrar'}</button>
@@ -120,7 +141,7 @@ export default function App(){
 
   return <div className="app-shell">
     <aside className="sidebar">
-      <div className="brand"><div className="brand-mark">F</div><div><strong>FÉNIX CAPITAL</strong><span>PRE-PROD · Fase 1</span></div></div>
+      <div className="brand"><div className="brand-mark" role="img" aria-label="Logotipo Fénix Capital"/><div><strong>FÉNIX CAPITAL</strong><span>PRE-PROD · Fase 1</span></div></div>
       <nav>{effectiveMenu.map(item=><button className={activeItem?.route===item.route?'nav-item active':'nav-item'} key={item.route} onClick={()=>navigate(item.route)}>{item.label}</button>)}</nav>
     </aside>
     <main className="main">
