@@ -1,6 +1,6 @@
 name: PRE-PROD App Build
 
-# GitHub Pages source enabled for PRE-PROD publish validation; fresh retry after repository Pages activation.
+# GitHub Pages PRE-PROD publisher: publish only from direct branch pushes; PR runs remain QA-only.
 on:
   push:
     branches:
@@ -61,26 +61,23 @@ jobs:
           if-no-files-found: ignore
 
       - name: Build GitHub Pages PRE-PROD
-        if: github.ref == 'refs/heads/preprod-app-phase1' || github.head_ref == 'preprod-app-phase1'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/preprod-app-phase1'
         run: |
           npx vite build --base=/fenix-capital-inmo-map/ --outDir dist-pages
           cp dist-pages/index.html dist-pages/404.html
 
       - name: Configure GitHub Pages
-        if: github.ref == 'refs/heads/preprod-app-phase1' || github.head_ref == 'preprod-app-phase1'
-        continue-on-error: true
+        if: github.event_name == 'push' && github.ref == 'refs/heads/preprod-app-phase1'
         uses: actions/configure-pages@v5
-        with:
-          enablement: true
 
       - name: Upload GitHub Pages artifact
-        if: github.ref == 'refs/heads/preprod-app-phase1' || github.head_ref == 'preprod-app-phase1'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/preprod-app-phase1'
         uses: actions/upload-pages-artifact@v3
         with:
           path: dist-pages
 
   deploy-preprod-pages:
-    if: github.ref == 'refs/heads/preprod-app-phase1' || github.head_ref == 'preprod-app-phase1'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/preprod-app-phase1'
     needs: build-and-browser-qa
     runs-on: ubuntu-latest
     environment:
@@ -89,5 +86,4 @@ jobs:
     steps:
       - name: Deploy PRE-PROD to GitHub Pages
         id: deployment
-        continue-on-error: true
         uses: actions/deploy-pages@v4
