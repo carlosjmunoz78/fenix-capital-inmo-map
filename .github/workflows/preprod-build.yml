@@ -1,6 +1,6 @@
 name: PRE-PROD App Build
 
-# GitHub Pages PRE-PROD publisher: publish only from direct branch pushes; PR runs remain QA-only.
+# PRE-PROD: QA on PR/push. GitHub Pages branch snapshot is prepared from the validated PRE-PROD branch without touching main.
 on:
   push:
     branches:
@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -61,10 +61,29 @@ jobs:
           if-no-files-found: ignore
 
       - name: Build GitHub Pages PRE-PROD
-        if: github.event_name == 'push' && github.ref == 'refs/heads/preprod-app-phase1'
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/preprod-app-phase1') || (github.event_name == 'pull_request' && github.head_ref == 'preprod-app-phase1')
         run: |
           npx vite build --base=/fenix-capital-inmo-map/ --outDir dist-pages
           cp dist-pages/index.html dist-pages/404.html
+          touch dist-pages/.nojekyll
+
+      - name: Prepare gh-pages snapshot
+        if: github.event_name == 'pull_request' && github.head_ref == 'preprod-app-phase1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          rm -rf /tmp/fenix-gh-pages
+          mkdir -p /tmp/fenix-gh-pages
+          cp -R dist-pages/. /tmp/fenix-gh-pages/
+          cd /tmp/fenix-gh-pages
+          git init
+          git checkout -b gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "deploy: PRE-PROD Pages snapshot ${GITHUB_SHA}"
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git push --force origin gh-pages
 
       - name: Configure GitHub Pages
         if: github.event_name == 'push' && github.ref == 'refs/heads/preprod-app-phase1'
