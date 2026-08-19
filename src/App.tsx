@@ -4,6 +4,7 @@ import type { Session } from '@supabase/supabase-js';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { calculateMortgage, FORMULA_VERSION } from './calculator';
 import { fetchAppApi, supabase } from './supabase';
+import './logo.css';
 
 type Theme = 'light' | 'dark';
 type SessionContext = { actor_code?: string; role?: string; worker_id?: string; [key: string]: unknown };
