@@ -22,8 +22,6 @@ jobs:
   build-and-browser-qa:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    outputs:
-      pages_ready: ${{ steps.pages_config.outcome == 'success' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -68,7 +66,6 @@ jobs:
           cp dist-pages/index.html dist-pages/404.html
 
       - name: Configure GitHub Pages
-        id: pages_config
         if: github.ref == 'refs/heads/preprod-app-phase1' || github.head_ref == 'preprod-app-phase1'
         continue-on-error: true
         uses: actions/configure-pages@v5
@@ -76,13 +73,13 @@ jobs:
           enablement: true
 
       - name: Upload GitHub Pages artifact
-        if: steps.pages_config.outcome == 'success'
+        if: github.ref == 'refs/heads/preprod-app-phase1' || github.head_ref == 'preprod-app-phase1'
         uses: actions/upload-pages-artifact@v3
         with:
           path: dist-pages
 
   deploy-preprod-pages:
-    if: needs.build-and-browser-qa.outputs.pages_ready == 'true'
+    if: github.ref == 'refs/heads/preprod-app-phase1' || github.head_ref == 'preprod-app-phase1'
     needs: build-and-browser-qa
     runs-on: ubuntu-latest
     environment:
@@ -91,4 +88,5 @@ jobs:
     steps:
       - name: Deploy PRE-PROD to GitHub Pages
         id: deployment
+        continue-on-error: true
         uses: actions/deploy-pages@v4
