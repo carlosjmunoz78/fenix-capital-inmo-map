@@ -1,5 +1,6 @@
 name: PRE-PROD App Build
 
+# GitHub Pages source enabled for PRE-PROD publish validation.
 on:
   push:
     branches:
