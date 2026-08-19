@@ -1,10 +1,18 @@
 name: PRE-PROD App Build
 
 on:
+  push:
+    branches:
+      - preprod-app-phase1
   pull_request:
     branches:
       - main
   workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
 concurrency:
   group: preprod-app-browser-qa-${{ github.ref }}
@@ -50,3 +58,33 @@ jobs:
           name: fenix-preprod-playwright-report
           path: playwright-report
           if-no-files-found: ignore
+
+      - name: Build GitHub Pages PRE-PROD
+        if: github.event_name != 'pull_request'
+        run: |
+          npx vite build --base=/fenix-capital-inmo-map/ --outDir dist-pages
+          cp dist-pages/index.html dist-pages/404.html
+
+      - name: Configure GitHub Pages
+        if: github.event_name != 'pull_request'
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - name: Upload GitHub Pages artifact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist-pages
+
+  deploy-preprod-pages:
+    if: github.event_name != 'pull_request'
+    needs: build-and-browser-qa
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy PRE-PROD to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
