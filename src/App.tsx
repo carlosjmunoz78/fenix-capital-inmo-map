@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { Calculator, LogOut, Minimize2, Moon, Sun, X } from 'lucide-react';
 import type { Session } from '@supabase/supabase-js';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -40,6 +40,7 @@ const defaultCalc: CalcState = { principal: 100000, rate: 3, years: 30, purchase
 export default function App(){
   const navigate = useNavigate();
   const location = useLocation();
+  const suppressCalcPersistence = useRef(false);
   const [theme,setTheme]=useState<Theme>(() => (sessionStorage.getItem('fenix-theme') as Theme) || 'light');
   const [session,setSession]=useState<Session|null>(null);
   const [ctx,setCtx]=useState<SessionContext|null>(null);
@@ -64,6 +65,7 @@ export default function App(){
 
   useEffect(()=>{
     if(!session?.user?.id){setCtx(null);setNav(null);setCalc(defaultCalc);return;}
+    suppressCalcPersistence.current = false;
     const key=`fenix-calc:${session.user.id}`;
     const saved=sessionStorage.getItem(key);
     if(saved){try{setCalc({...defaultCalc,...JSON.parse(saved)})}catch{setCalc(defaultCalc)}} else setCalc(defaultCalc);
@@ -77,13 +79,13 @@ export default function App(){
   },[session?.user?.id]);
 
   useEffect(()=>{
-    if(session?.user?.id && location.pathname==='/') navigate('/inicio',{replace:true});
-  },[session?.user?.id,location.pathname,navigate]);
-
-  useEffect(()=>{
-    if(!session?.user?.id)return;
+    if(!session?.user?.id || suppressCalcPersistence.current)return;
     sessionStorage.setItem(`fenix-calc:${session.user.id}`,JSON.stringify(calc));
   },[calc,session?.user?.id]);
+
+  useEffect(()=>{
+    if(session?.user?.id && location.pathname==='/') navigate('/inicio',{replace:true});
+  },[session?.user?.id,location.pathname,navigate]);
 
   const result=useMemo(()=>{
     try{
@@ -106,9 +108,11 @@ export default function App(){
 
   async function logout(){
     const uid=session?.user?.id;
+    suppressCalcPersistence.current = true;
     if(uid)sessionStorage.removeItem(`fenix-calc:${uid}`);
-    setCalc(defaultCalc);setCtx(null);setNav(null);setPassword('');
+    setCtx(null);setNav(null);setPassword('');
     await supabase.auth.signOut();
+    setCalc(defaultCalc);
     navigate('/',{replace:true});
   }
 
