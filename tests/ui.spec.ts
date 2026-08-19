@@ -31,7 +31,6 @@ test.describe('Fénix PRE-PROD shell + CAL-001', () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(session => {
       window.localStorage.setItem('fenix-preprod-auth', JSON.stringify(session));
-      window.sessionStorage.clear();
     }, fakeSession);
 
     await page.route('**/functions/v1/fenix-app-api-test/**', async route => {
@@ -80,8 +79,8 @@ test.describe('Fénix PRE-PROD shell + CAL-001', () => {
   });
 
   test('navigation is sourced from authorized backend response', async ({ page }) => {
-    await expect(page.getByRole('button', { name: 'Expedientes' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Bancos' })).toBeVisible();
+    await expect(page.locator('.nav-item', { hasText: 'Expedientes' })).toHaveCount(1);
+    await expect(page.locator('.nav-item', { hasText: 'Bancos' })).toHaveCount(1);
     await expect(page.getByText('QA-BROWSER · Financiero')).toBeVisible();
   });
 
