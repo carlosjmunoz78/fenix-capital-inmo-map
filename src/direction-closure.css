@@ -61,8 +61,13 @@
   filter:drop-shadow(0 6px 14px rgba(255,255,255,.08)) drop-shadow(0 8px 18px rgba(0,0,0,.24))!important;
 }
 
-/* Avatar pequeño: solo desplazar la imagen hacia abajo dentro del círculo. */
-.dir-help-person{overflow:hidden!important;border-radius:50%!important}
+/* Avatar pequeño: usar solo el <img> real; eliminar el background antiguo que estaba tapando el ajuste. */
+.dir-help-person{
+  overflow:hidden!important;
+  border-radius:50%!important;
+  background-image:none!important;
+  background:#fff!important;
+}
 .dir-help-avatar{
   display:block!important;
   visibility:visible!important;
@@ -71,7 +76,7 @@
   height:100%!important;
   object-fit:cover!important;
   object-position:center center!important;
-  transform:translateY(5px) scale(.90)!important;
+  transform:translateY(7px) scale(.86)!important;
   transform-origin:center center!important;
 }
 
