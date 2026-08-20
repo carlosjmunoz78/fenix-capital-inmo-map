@@ -4,9 +4,6 @@ import { BrowserRouter } from 'react-router-dom';
 import './styles.css';
 import './logo.css';
 import App from './App';
-import { runPreprodBootstrapOnce } from './preprodBootstrap';
-
-void runPreprodBootstrapOnce();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
