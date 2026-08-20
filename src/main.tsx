@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import './styles.css';
 import './logo.css';
 import './direction-viewport.css';
+import './direction-polish.css';
 import App from './App';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
