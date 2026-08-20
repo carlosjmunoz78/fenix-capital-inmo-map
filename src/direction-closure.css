@@ -126,6 +126,10 @@
 .calc-launcher.dir-calc-launcher svg{width:16px!important;height:16px!important;color:#fff!important;flex:0 0 auto}
 .calc-launcher.dir-calc-launcher:hover{background:#e95500!important;background-color:#e95500!important}
 
+/* Título interno visible: sin “PRO”. */
+.calc-panel>header>div:first-child>strong{font-size:0!important}
+.calc-panel>header>div:first-child>strong::after{content:'Calculadora Hipotecaria';font-size:13px!important;font-weight:700;line-height:1.2}
+
 /* Mantener equilibrio en escritorio grande */
 @media(min-width:1440px){
   .dir-content{padding-top:16px!important}
