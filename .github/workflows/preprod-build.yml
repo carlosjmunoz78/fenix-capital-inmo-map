@@ -35,6 +35,12 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Dependency versions
+        run: npm list --depth=0
+
+      - name: Capture generated lockfile
+        run: cat package-lock.json
+
       - name: Install Chromium browser
         run: npx playwright install chromium
         timeout-minutes: 5
