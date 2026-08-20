@@ -31,24 +31,44 @@
 .dir-team-person>small{font-size:8.75px!important;line-height:1.35!important}
 .dir-team-person dt,.dir-team-person dd{font-size:8.75px!important;line-height:1.35!important}
 
-/* Ana vertical: una sola imagen. Ocultamos el duplicado <img> y usamos el recurso canónico de fondo. */
+/* Marca: FÉNIX CAPITAL debe leerse en ambos temas */
+.dir-brand strong{color:#FF5F00!important}
+.dir-shell[data-dir-theme='dark'] .dir-brand strong{color:#FF5F00!important}
+
+/* Ana vertical: mantener exactamente su tamaño actual y mostrar el asset canónico real. */
 .dir-person-wrap{
-  background:#f2eee9 url('./assets/ana-canonical.svg') center bottom/contain no-repeat!important;
+  background:linear-gradient(180deg,#fff9f6,#f7f4f2)!important;
   overflow:hidden!important;
   isolation:isolate!important;
 }
-.dir-person-photo{display:none!important}
+.dir-person-photo{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  width:100%!important;
+  height:100%!important;
+  object-fit:contain!important;
+  object-position:center bottom!important;
+  mix-blend-mode:normal!important;
+  filter:drop-shadow(0 6px 14px rgba(0,0,0,.08))!important;
+}
 .dir-shell[data-dir-theme='dark'] .dir-person-wrap{
-  background:#d9d4d1 url('./assets/ana-canonical.svg') center bottom/contain no-repeat!important;
-  border-right:1px solid rgba(0,0,0,.08)!important;
+  background:linear-gradient(180deg,#2b2828,#202022)!important;
+}
+.dir-shell[data-dir-theme='dark'] .dir-person-photo{
+  visibility:visible!important;
+  opacity:1!important;
+  filter:drop-shadow(0 6px 14px rgba(255,255,255,.08)) drop-shadow(0 8px 18px rgba(0,0,0,.24))!important;
 }
 
-/* Avatar pequeño: conservar el retrato fiable ya preparado en .dir-help-person y evitar que otro <img> lo tape. */
-.dir-help-avatar{display:none!important}
-.dir-help-card{padding:13px 12px 12px!important;gap:9px!important}
-.dir-help-card strong{font-size:12px!important;line-height:1.3!important}
-.dir-help-card span{font-size:10.5px!important;line-height:1.35!important}
-.dir-help-card button{height:32px!important;font-size:10.5px!important}
+/* Avatar pequeño: mantener exactamente el tamaño actual y mostrar el mismo Ana canónico. */
+.dir-help-avatar{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  object-fit:cover!important;
+  object-position:center 18%!important;
+}
 
 /* Topbar y perfil: más legibilidad y aire, sin cambiar avatar ni estructura */
 .dir-topbar{height:70px!important;padding:0 24px!important;gap:18px!important}
@@ -68,22 +88,23 @@
 .dir-quick-grid button{height:70px!important;font-size:11.5px!important;line-height:1.25!important;padding:0 12px!important;gap:8px!important}
 .dir-quick-grid button svg{width:25px!important;height:25px!important}
 
-/* Calculadora: tamaño original, relleno naranja real. El texto visible queda en “Calculadora”. */
+/* Calculadora: único tamaño que se reduce. Fondo naranja sólido y sin “PRO”. */
 .calc-launcher.dir-calc-launcher{
   min-height:0!important;
-  height:auto!important;
-  padding:13px 17px!important;
-  gap:9px!important;
+  height:38px!important;
+  padding:0 13px!important;
+  gap:7px!important;
   font-size:0!important;
   background:#FF5F00!important;
+  background-color:#FF5F00!important;
   background-image:none!important;
   border:0!important;
   color:#fff!important;
-  box-shadow:0 8px 18px rgba(255,95,0,.22)!important;
+  box-shadow:0 7px 16px rgba(255,95,0,.20)!important;
 }
-.calc-launcher.dir-calc-launcher::after{content:'Calculadora';font-size:12px;font-weight:700;line-height:1;color:#fff}
-.calc-launcher.dir-calc-launcher svg{color:#fff!important;flex:0 0 auto}
-.calc-launcher.dir-calc-launcher:hover{background:#e95500!important}
+.calc-launcher.dir-calc-launcher::after{content:'Calculadora';font-size:11px;font-weight:700;line-height:1;color:#fff}
+.calc-launcher.dir-calc-launcher svg{width:18px!important;height:18px!important;color:#fff!important;flex:0 0 auto}
+.calc-launcher.dir-calc-launcher:hover{background:#e95500!important;background-color:#e95500!important}
 
 /* Mantener equilibrio en escritorio grande */
 @media(min-width:1440px){
