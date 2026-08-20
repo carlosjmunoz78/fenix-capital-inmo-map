@@ -5,6 +5,7 @@ import './styles.css';
 import './logo.css';
 import './direction-viewport.css';
 import './direction-polish.css';
+import './direction-final.css';
 import App from './App';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
