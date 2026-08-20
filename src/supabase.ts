@@ -15,7 +15,7 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
 export async function fetchAppApi<T>(path: string, init?: RequestInit): Promise<{ status: number; data: T | null }> {
   const { data: { session } } = await supabase.auth.getSession();
   const token = session?.access_token;
-  const response = await fetch(`${SUPABASE_URL}/functions/v1/fenix-app-api-test${path}`, {
+  const response = await fetch(`${SUPABASE_URL}/functions/v1/fenix-app-gateway-test${path}`, {
     ...init,
     headers: {
       'content-type': 'application/json',
