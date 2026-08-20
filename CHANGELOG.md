@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-08-20 · Sincronización Vercel PRE-PROD
+
+### Deployment
+- Se fuerza una nueva publicación desde la rama `preprod-app-phase1` tras conectar el repositorio Git en Vercel.
+- Objetivo: publicar en Vercel la versión actual que incluye logotipo Fénix, acceso TEST y recuperación de contraseña.
+
 ## 2026-08-20 · Publicación PRE-PROD
 
 ### Deployment
