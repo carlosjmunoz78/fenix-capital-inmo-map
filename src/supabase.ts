@@ -23,7 +23,18 @@ export async function fetchAppApi<T>(path: string, init?: RequestInit): Promise<
       ...(token ? { Authorization: `Bearer ${token}` } : {})
     }
   });
-  let data: T | null = null;
-  try { data = await response.json() as T; } catch { data = null; }
-  return { status: response.status, data };
+
+  let raw: unknown = null;
+  try { raw = await response.json(); } catch { raw = null; }
+
+  // The real session endpoint returns { ok: true, context: {...} }.
+  // Normalize it here so the app always receives the actual actor/role object.
+  const normalized = path === '/session/context'
+    && raw
+    && typeof raw === 'object'
+    && 'context' in raw
+      ? (raw as { context?: unknown }).context ?? null
+      : raw;
+
+  return { status: response.status, data: normalized as T | null };
 }
