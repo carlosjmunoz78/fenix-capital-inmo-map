@@ -1,0 +1,44 @@
+/* Dirección · ajuste canónico de escala y Ana */
+.dir-person-wrap{
+  background-image:url('./assets/ana-canonical.svg')!important;
+  background-repeat:no-repeat!important;
+  background-size:contain!important;
+  background-position:center bottom!important;
+}
+.dir-person-photo{display:none!important}
+.dir-help-person{
+  width:42px!important;
+  height:42px!important;
+  border-radius:50%!important;
+  overflow:hidden!important;
+  background:#fff url('./assets/ana-canonical.svg') no-repeat 50% 2%!important;
+  background-size:100px auto!important;
+}
+.dir-help-avatar{display:none!important}
+
+/* En portátil/escritorio mantenemos el layout de escritorio; no colapsar antes de tiempo. */
+@media (min-width:821px) and (max-width:1200px){
+  .dir-shell{grid-template-columns:196px minmax(0,1fr)!important}
+  .dir-brand{justify-content:flex-start!important;padding:0 6px 13px!important}
+  .dir-brand>span:last-child{display:inline!important}
+  .dir-nav-item{justify-content:flex-start!important;padding:0 11px!important;font-size:13px!important}
+  .dir-nav-item span{display:inline!important}
+  .dir-help-card{display:grid!important}
+  .dir-topbar{grid-template-columns:auto minmax(330px,1fr) auto!important}
+  .dir-user-copy{display:block!important}
+  .dir-theme-toggle{width:auto!important;padding:0 11px!important;justify-content:center!important}
+  .dir-theme-toggle span{display:inline!important}
+  .dir-dashboard-top{grid-template-columns:minmax(300px,31%) minmax(0,1fr)!important}
+  .dir-kpis{grid-template-columns:repeat(5,minmax(0,1fr))!important}
+  .dir-mid-grid{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr)!important}
+  .dir-quick-grid{grid-template-columns:repeat(6,minmax(0,1fr))!important}
+}
+
+/* Altura intermedia: ligeramente mayor que la versión casi válida, sin sobredimensionar. */
+@media (min-width:821px){
+  .dir-priority-card{min-height:305px!important}
+  .dir-table-card.priorities .dir-empty-state{min-height:164px!important}
+  .dir-mid-grid .dir-table-card{min-height:196px!important}
+  .dir-mid-grid .dir-empty-state{min-height:160px!important}
+  .dir-quick-grid button{height:66px!important}
+}
