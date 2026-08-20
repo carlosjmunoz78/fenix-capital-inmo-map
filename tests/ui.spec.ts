@@ -28,12 +28,13 @@ const nav = {
   ]
 };
 
-test.describe('Fénix PRE-PROD shell + CAL-001', () => {
+test.describe('Fénix app shell + calculadora', () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(session => {
       if (!window.localStorage.getItem('fenix-preprod-auth')) {
         window.localStorage.setItem('fenix-preprod-auth', JSON.stringify(session));
       }
+      window.localStorage.setItem('fenix-remember-device', 'true');
     }, fakeSessionA);
 
     await page.route('**/functions/v1/fenix-app-api-test/**', async route => {
@@ -53,7 +54,7 @@ test.describe('Fénix PRE-PROD shell + CAL-001', () => {
     await expect(page).toHaveURL(/\/inicio$/);
   });
 
-  test('COM-THEME-001 toggles and persists in session', async ({ page }) => {
+  test('theme toggles and persists in session', async ({ page }) => {
     const root = page.locator('html');
     await expect(root).toHaveAttribute('data-theme', 'light');
     await page.getByRole('button', { name: 'Cambiar tema' }).click();
@@ -62,12 +63,12 @@ test.describe('Fénix PRE-PROD shell + CAL-001', () => {
     await expect(root).toHaveAttribute('data-theme', 'dark');
   });
 
-  test('CAL-001 computes reference case locally', async ({ page }) => {
+  test('calculator computes reference case locally', async ({ page }) => {
     await expect(page.getByText('421,60 €')).toBeVisible();
-    await expect(page.getByText('Simulación matemática. No implica aprobación bancaria ni sustituye validación de Belén.')).toBeVisible();
+    await expect(page.getByText('Simulación orientativa. No implica aprobación bancaria.')).toBeVisible();
   });
 
-  test('CAL-001 minimize and restore preserves inputs', async ({ page }) => {
+  test('calculator minimize and restore preserves inputs', async ({ page }) => {
     const amount = page.getByLabel('Importe €');
     await amount.fill('135000');
     await page.getByRole('button', { name: 'Minimizar calculadora' }).click();
@@ -76,20 +77,22 @@ test.describe('Fénix PRE-PROD shell + CAL-001', () => {
     await expect(amount).toHaveValue('135000');
   });
 
-  test('CAL-001 close and launcher restore', async ({ page }) => {
+  test('calculator close and launcher restore', async ({ page }) => {
     await page.getByRole('button', { name: 'Cerrar calculadora' }).click();
     await expect(page.getByRole('region', { name: 'Calculadora Hipotecaria PRO' })).toHaveCount(0);
     await page.getByRole('button', { name: /Calculadora PRO/ }).click();
     await expect(page.getByRole('region', { name: 'Calculadora Hipotecaria PRO' })).toBeVisible();
   });
 
-  test('navigation is sourced from authorized backend response', async ({ page }) => {
+  test('navigation is sourced from authorized backend response without exposing actor codes', async ({ page }) => {
     await expect(page.locator('.nav-item', { hasText: 'Expedientes' })).toHaveCount(1);
     await expect(page.locator('.nav-item', { hasText: 'Bancos' })).toHaveCount(1);
-    await expect(page.getByText('QA-BROWSER · Financiero')).toBeVisible();
+    await expect(page.getByText('Financiero', { exact: true })).toBeVisible();
+    await expect(page.getByText('QA-BROWSER')).toHaveCount(0);
+    await expect(page.getByText(/PRE-PROD|AUTH TEST|CAL-001|JWT \+ RBAC|RUTA INTERNA/)).toHaveCount(0);
   });
 
-  test('router back-forward preserves CAL state', async ({ page }, testInfo) => {
+  test('router back-forward preserves calculator state', async ({ page }, testInfo) => {
     if (!testInfo.project.name.includes('desktop')) test.skip();
     const amount = page.getByLabel('Importe €');
     await amount.fill('135000');
@@ -113,7 +116,10 @@ test.describe('Fénix PRE-PROD shell + CAL-001', () => {
     await page.getByRole('button', { name: 'Cerrar sesión' }).click();
     await expect(page.getByRole('heading', { name: 'Acceso seguro' })).toBeVisible();
     expect(await page.evaluate(()=>window.sessionStorage.getItem('fenix-calc:aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'))).toBeNull();
-    await page.evaluate(session => window.localStorage.setItem('fenix-preprod-auth', JSON.stringify(session)), fakeSessionB);
+    await page.evaluate(session => {
+      window.localStorage.setItem('fenix-preprod-auth', JSON.stringify(session));
+      window.localStorage.setItem('fenix-remember-device', 'true');
+    }, fakeSessionB);
     await page.reload();
     await expect(page.getByLabel('Importe €')).toHaveValue('100000');
     expect(await page.evaluate(()=>window.sessionStorage.getItem('fenix-calc:aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'))).toBeNull();
