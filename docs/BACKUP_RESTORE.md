@@ -5,8 +5,11 @@ Garantizar que el frontend PRE-PROD pueda recuperarse sin depender de memoria de
 
 ## Copias mínimas
 - Git: historial de `preprod-app-phase1`.
-- Snapshot de código: rama `backup/preprod-phase1-2026-08-19`.
-- Último SHA funcional de referencia: `45cf273f787517fd592e4b64750530e8e93dec5f`.
+- Snapshots de código verificados:
+  - `backup/preprod-phase1-2026-08-19`.
+  - `backup/preprod-phase1-2026-08-20`.
+- Head documental/operativo actual de `preprod-app-phase1` al reconciliar este runbook: `a7bbbe224f65a505810017d782cfc15bd33fc6fb`.
+- Último SHA funcional de referencia con CI/Browser QA previamente registrado: `45cf273f787517fd592e4b64750530e8e93dec5f`.
 - Artefactos CI del run verde `32306269964`:
   - `fenix-preprod-dist` · artifact ID `9384830838` · digest `sha256:f8162605ceaca592723e8ae9d6d7717dfe171ade6bd47e60229830bc3ee37b9f`.
   - `fenix-preprod-playwright-report` · artifact ID `9384831193` · digest `sha256:b10e4020f336d16de9fabad293984c38b3759840769d91e226e3a7c00e881f1c`.
@@ -32,3 +35,8 @@ Un backup recuperable no equivale a un deployment válido. Antes de marcar recup
 
 ## Verificación de backup
 Un backup solo se considera útil si existe SHA recuperable, la CI puede reconstruirlo, los artefactos tienen digest registrado y el entorno TEST mantiene aislamiento por usuario/rol.
+
+## Regla de seguridad
+- No modificar `main` durante restauración PRE-PROD.
+- No copiar passwords, JWT, `service_role` ni OTP a este documento.
+- Si el head actual contiene solo cambios documentales posteriores al último CI verde, restaurar funcionalidad desde el SHA verde y reaplicar documentación de forma controlada; no asumir que "último commit" equivale a "último build validado".
