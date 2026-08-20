@@ -37,7 +37,7 @@ test.describe('Fénix app shell + calculadora', () => {
       window.localStorage.setItem('fenix-remember-device', 'true');
     }, fakeSessionA);
 
-    await page.route('**/functions/v1/fenix-app-api-test/**', async route => {
+    await page.route('**/functions/v1/fenix-app-gateway-test/**', async route => {
       const url = route.request().url();
       if (url.endsWith('/session/context')) {
         return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ actor_code: 'QA-BROWSER', role: 'Financiero' }) });
