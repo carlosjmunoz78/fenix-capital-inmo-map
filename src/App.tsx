@@ -24,7 +24,6 @@ type CalcState = {
 const fallbackMenu: NavItem[] = [{ label:'Inicio', route:'/inicio' }];
 const defaultCalc: CalcState = { principal: 100000, rate: 3, years: 30, purchasePrice: '', income: '', other: '', open: true, minimized: false };
 const testLoginAliases: Record<string,string> = {
-  dirtest: 'carlosj.munozcabeza@gmail.com',
   fina: 'fin-a@test.fenixcapital.es',
   finb: 'fin-b@test.fenixcapital.es',
   visa: 'vis-a@test.fenixcapital.es',
@@ -117,7 +116,7 @@ export default function App(){
     setResetMessage('');
     const email=resolveTestLogin(loginId);
     if(!email){
-      setAuthError('Usuario TEST no reconocido. Puedes escribir DIR-TEST, FIN-A, FIN-B, VIS-A, VIS-B, con espacios o guiones.');
+      setAuthError('Usuario TEST no reconocido. Usa FIN-A, FIN-B, VIS-A, VIS-B o el email TEST autorizado de Dirección.');
       return;
     }
     setLoadingLogin(true);
@@ -131,7 +130,7 @@ export default function App(){
     setResetMessage('');
     const email=resolveTestLogin(loginId);
     if(!email){
-      setAuthError('Escribe primero tu usuario TEST: DIR-TEST, FIN-A, FIN-B, VIS-A o VIS-B.');
+      setAuthError('Escribe FIN-A, FIN-B, VIS-A, VIS-B o el email TEST autorizado de Dirección.');
       return;
     }
     setLoadingReset(true);
@@ -206,7 +205,7 @@ export default function App(){
       <h1>Acceso seguro</h1>
       <p>Usa únicamente las identidades TEST autorizadas. No se aceptan datos reales.</p>
       <div className="auth-fields">
-        <label className="auth-field" htmlFor="fenix-test-user"><span>Usuario o email TEST</span><input id="fenix-test-user" type="text" autoComplete="username" value={loginId} onChange={e=>setLoginId(e.target.value)} placeholder="Ej. DIR-TEST o FIN-A" required/></label>
+        <label className="auth-field" htmlFor="fenix-test-user"><span>Usuario o email TEST</span><input id="fenix-test-user" type="text" autoComplete="username" value={loginId} onChange={e=>setLoginId(e.target.value)} placeholder="Ej. FIN-A o email TEST" required/></label>
         <label className="auth-field" htmlFor="fenix-test-password"><span>Contraseña</span><input id="fenix-test-password" type="password" autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="Escribe tu contraseña TEST" required/></label>
       </div>
       {authError&&<div className="warning">{authError}</div>}
