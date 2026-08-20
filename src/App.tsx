@@ -24,7 +24,7 @@ type CalcState = {
 const fallbackMenu: NavItem[] = [{ label:'Inicio', route:'/inicio' }];
 const defaultCalc: CalcState = { principal: 100000, rate: 3, years: 30, purchasePrice: '', income: '', other: '', open: true, minimized: false };
 const testLoginAliases: Record<string,string> = {
-  dirtest: 'dir-test@test.fenixcapital.es',
+  dirtest: 'carlosj.munozcabeza@gmail.com',
   fina: 'fin-a@test.fenixcapital.es',
   finb: 'fin-b@test.fenixcapital.es',
   visa: 'vis-a@test.fenixcapital.es',
@@ -54,6 +54,8 @@ export default function App(){
   const [loadingLogin,setLoadingLogin]=useState(false);
   const [loadingReset,setLoadingReset]=useState(false);
   const [passwordRecovery,setPasswordRecovery]=useState(false);
+  const [recoveryEmail,setRecoveryEmail]=useState('');
+  const [recoveryCode,setRecoveryCode]=useState('');
   const [newPassword,setNewPassword]=useState('');
   const [confirmPassword,setConfirmPassword]=useState('');
   const [calc,setCalc]=useState<CalcState>(defaultCalc);
@@ -136,33 +138,34 @@ export default function App(){
     const {error}=await supabase.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin});
     setLoadingReset(false);
     if(error){
-      setAuthError('No se pudo iniciar la recuperación. Inténtalo de nuevo o solicita un restablecimiento TEST al administrador.');
+      setAuthError('No se pudo iniciar la recuperación. Inténtalo de nuevo.');
       return;
     }
-    setResetMessage('Recuperación solicitada. Revisa el correo asociado a ese usuario TEST y abre el enlace para crear una nueva contraseña.');
+    setRecoveryEmail(email);
+    setPasswordRecovery(true);
+    setResetMessage('Código enviado. Revisa tu correo e introdúcelo aquí para crear una nueva contraseña.');
   }
 
   async function saveRecoveredPassword(e:FormEvent){
     e.preventDefault();
     setAuthError('');
-    if(newPassword.length<8){
-      setAuthError('La nueva contraseña debe tener al menos 8 caracteres.');
-      return;
-    }
-    if(newPassword!==confirmPassword){
-      setAuthError('Las contraseñas no coinciden.');
-      return;
-    }
+    const email=recoveryEmail || resolveTestLogin(loginId);
+    const token=recoveryCode.trim().replace(/\s+/g,'');
+    if(!email){setAuthError('No se ha podido identificar el usuario TEST. Vuelve al acceso y solicita un código nuevo.');return;}
+    if(!/^\d{6}$/.test(token)){setAuthError('El código de recuperación debe tener 6 dígitos.');return;}
+    if(newPassword.length<8){setAuthError('La nueva contraseña debe tener al menos 8 caracteres.');return;}
+    if(newPassword!==confirmPassword){setAuthError('Las contraseñas no coinciden.');return;}
     setLoadingLogin(true);
+    const verified=await supabase.auth.verifyOtp({email,token,type:'recovery'});
+    if(verified.error){
+      setLoadingLogin(false);
+      setAuthError('El código no es válido o ha caducado. Solicita uno nuevo.');
+      return;
+    }
     const {error}=await supabase.auth.updateUser({password:newPassword});
     setLoadingLogin(false);
-    if(error){
-      setAuthError('No se pudo guardar la nueva contraseña. Abre de nuevo el enlace de recuperación.');
-      return;
-    }
-    setNewPassword('');
-    setConfirmPassword('');
-    setPasswordRecovery(false);
+    if(error){setAuthError('El código se validó, pero no se pudo guardar la nueva contraseña.');return;}
+    setRecoveryCode('');setNewPassword('');setConfirmPassword('');setPasswordRecovery(false);setResetMessage('');
     navigate('/inicio',{replace:true});
   }
 
@@ -184,11 +187,14 @@ export default function App(){
       <div className="brand auth-brand"><div className="brand-mark" role="img" aria-label="Logotipo Fénix Capital"/><div><strong>FÉNIX CAPITAL</strong><span>APP PRE-PROD · Fase 1</span></div></div>
       <span className="eyebrow">RECUPERAR ACCESO</span>
       <h1>Nueva contraseña</h1>
-      <p>Crea una nueva contraseña para tu usuario TEST.</p>
+      <p>Introduce el código de 6 dígitos recibido por correo y crea tu nueva contraseña.</p>
+      {resetMessage&&<div className="warning">{resetMessage}</div>}
+      <label htmlFor="fenix-recovery-code">Código de recuperación<input id="fenix-recovery-code" inputMode="numeric" autoComplete="one-time-code" value={recoveryCode} onChange={e=>setRecoveryCode(e.target.value.replace(/\D/g,'').slice(0,6))} placeholder="000000" required/></label>
       <label htmlFor="fenix-new-password">Nueva contraseña<input id="fenix-new-password" type="password" autoComplete="new-password" value={newPassword} onChange={e=>setNewPassword(e.target.value)} required/></label>
       <label htmlFor="fenix-confirm-password">Repite la contraseña<input id="fenix-confirm-password" type="password" autoComplete="new-password" value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)} required/></label>
       {authError&&<div className="warning">{authError}</div>}
-      <button className="primary" disabled={loadingLogin}>{loadingLogin?'Guardando…':'Guardar nueva contraseña'}</button>
+      <button className="primary" disabled={loadingLogin}>{loadingLogin?'Validando y guardando…':'Guardar nueva contraseña'}</button>
+      <button type="button" className="theme-toggle" style={{marginTop:12,width:'100%',justifyContent:'center'}} onClick={()=>{setPasswordRecovery(false);setRecoveryCode('');setAuthError('');setResetMessage('')}}>Volver al acceso</button>
     </form>
   </div>;
 
@@ -200,7 +206,7 @@ export default function App(){
       <h1>Acceso seguro</h1>
       <p>Usa únicamente las identidades TEST autorizadas. No se aceptan datos reales.</p>
       <div className="auth-fields">
-        <label className="auth-field" htmlFor="fenix-test-user"><span>Usuario o email TEST</span><input id="fenix-test-user" type="text" autoComplete="username" value={loginId} onChange={e=>setLoginId(e.target.value)} placeholder="Ej. FIN-A o FIN A" required/></label>
+        <label className="auth-field" htmlFor="fenix-test-user"><span>Usuario o email TEST</span><input id="fenix-test-user" type="text" autoComplete="username" value={loginId} onChange={e=>setLoginId(e.target.value)} placeholder="Ej. DIR-TEST o FIN-A" required/></label>
         <label className="auth-field" htmlFor="fenix-test-password"><span>Contraseña</span><input id="fenix-test-password" type="password" autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="Escribe tu contraseña TEST" required/></label>
       </div>
       {authError&&<div className="warning">{authError}</div>}
