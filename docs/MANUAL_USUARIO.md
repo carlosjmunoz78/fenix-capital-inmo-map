@@ -1,12 +1,14 @@
 # Manual de usuario · APP Fénix Capital · Fase 1 PRE-PROD
 
 ## Acceso
-La APP PRE-PROD se abre en `https://fenix-capital-preprod.vercel.app`.
+La APP PRE-PROD se abre en el host PRE-PROD que figure como validado en el runbook de deployment. No se considera una URL cerrada hasta superar smoke HTTPS real.
 
-La pantalla de acceso admite únicamente identidades TEST autorizadas durante PRE-PROD. `DIR-TEST` puede escribirse directamente como usuario. No introducir datos reales de clientes en pruebas.
+La pantalla de acceso admite únicamente identidades TEST autorizadas durante PRE-PROD. Los alias disponibles en cliente son `FIN-A`, `FIN-B`, `VIS-A` y `VIS-B`. Dirección debe usar temporalmente su email TEST autorizado para evitar publicar una dirección personal dentro del código del repositorio público.
+
+No introducir datos reales de clientes en pruebas.
 
 ## Recuperar contraseña
-1. Escribe tu usuario TEST, por ejemplo `DIR-TEST`.
+1. Escribe tu usuario TEST. Para Financiero/Visitador puedes usar `FIN-A`, `FIN-B`, `VIS-A` o `VIS-B`. Dirección usa temporalmente su email TEST autorizado.
 2. Pulsa **¿Has olvidado tu contraseña?**.
 3. La APP solicitará a Supabase un código de recuperación.
 4. Revisa el correo asociado al usuario TEST.
@@ -54,6 +56,7 @@ Usar siempre `Salir`. Después del logout, la siguiente identidad TEST no debe v
 ## Buen uso en PRE-PROD
 - Usar solo datos sintéticos.
 - No copiar contraseñas, códigos OTP ni tokens a documentos o capturas compartidas.
+- No introducir PII real salvo el identificador TEST expresamente autorizado para Dirección mientras se sustituye por un alias corporativo dedicado.
 - Informar de cualquier pantalla que conserve datos después del logout.
 - No considerar un resultado de CAL-001 como dictamen financiero.
 
