@@ -1,6 +1,6 @@
 @media (min-width:1200px){
-  .dir-priority-card{min-height:clamp(340px,42vh,430px)!important}
-  .dir-right-top .priorities .dir-empty-state{min-height:clamp(190px,24vh,255px)!important}
-  .dir-mid-grid .dir-table-card .dir-empty-state{min-height:clamp(205px,25vh,285px)!important}
-  .dir-quick-grid button{height:clamp(72px,8vh,88px)!important}
+  .dir-priority-card{min-height:clamp(305px,34vh,340px)!important}
+  .dir-right-top .priorities .dir-empty-state{min-height:clamp(160px,19vh,190px)!important}
+  .dir-mid-grid .dir-table-card .dir-empty-state{min-height:clamp(160px,20vh,205px)!important}
+  .dir-quick-grid button{height:clamp(64px,7vh,72px)!important}
 }
