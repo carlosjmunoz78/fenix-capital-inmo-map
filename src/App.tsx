@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
-import { Calculator, LogOut, Minimize2, Moon, Sun, X } from 'lucide-react';
+import { Calculator, Eye, EyeOff, LogOut, Minimize2, Moon, Sun, X } from 'lucide-react';
 import type { Session } from '@supabase/supabase-js';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { calculateMortgage } from './calculator';
@@ -37,6 +37,22 @@ function resolveLogin(value:string){
   return testLoginAliases[alias] || '';
 }
 
+const passwordFieldWrapStyle = { position:'relative' as const };
+const passwordEyeStyle = {
+  position:'absolute' as const,
+  right:'8px',
+  bottom:'7px',
+  width:'34px',
+  height:'34px',
+  border:'0',
+  borderRadius:'8px',
+  background:'transparent',
+  color:'var(--muted)',
+  display:'grid',
+  placeItems:'center',
+  cursor:'pointer'
+};
+
 export default function App(){
   const navigate = useNavigate();
   const location = useLocation();
@@ -48,6 +64,7 @@ export default function App(){
   const [authReady,setAuthReady]=useState(false);
   const [loginId,setLoginId]=useState('');
   const [password,setPassword]=useState('');
+  const [showPassword,setShowPassword]=useState(false);
   const [rememberDevice,setRememberDevice]=useState(()=>localStorage.getItem('fenix-remember-device')==='true');
   const [authError,setAuthError]=useState('');
   const [resetMessage,setResetMessage]=useState('');
@@ -58,6 +75,8 @@ export default function App(){
   const [recoveryCode,setRecoveryCode]=useState('');
   const [newPassword,setNewPassword]=useState('');
   const [confirmPassword,setConfirmPassword]=useState('');
+  const [showNewPassword,setShowNewPassword]=useState(false);
+  const [showConfirmPassword,setShowConfirmPassword]=useState(false);
   const [calc,setCalc]=useState<CalcState>(defaultCalc);
 
   useEffect(()=>{
@@ -162,7 +181,7 @@ export default function App(){
     }
     setRecoveryEmail(email);
     setPasswordRecovery(true);
-    setResetMessage('Código enviado. Revisa tu correo e introdúcelo aquí para crear una nueva contraseña.');
+    setResetMessage('Código enviado. Revisa tu correo e introdúcelo completo para crear una nueva contraseña.');
   }
 
   async function saveRecoveredPassword(e:FormEvent){
@@ -171,7 +190,7 @@ export default function App(){
     const email=recoveryEmail || resolveLogin(loginId);
     const token=recoveryCode.trim().replace(/\s+/g,'');
     if(!email){setAuthError('No se ha podido identificar el usuario. Vuelve al acceso y solicita un código nuevo.');return;}
-    if(!/^\d{6}$/.test(token)){setAuthError('El código de recuperación debe tener 6 dígitos.');return;}
+    if(!/^\d{4,12}$/.test(token)){setAuthError('Introduce el código numérico completo recibido por correo.');return;}
     if(newPassword.length<8){setAuthError('La nueva contraseña debe tener al menos 8 caracteres.');return;}
     if(newPassword!==confirmPassword){setAuthError('Las contraseñas no coinciden.');return;}
     setLoadingLogin(true);
@@ -185,6 +204,7 @@ export default function App(){
     setLoadingLogin(false);
     if(error){setAuthError('El código se validó, pero no se pudo guardar la nueva contraseña.');return;}
     setRecoveryCode('');setNewPassword('');setConfirmPassword('');setPasswordRecovery(false);setResetMessage('');
+    setShowNewPassword(false);setShowConfirmPassword(false);
     navigate('/inicio',{replace:true});
   }
 
@@ -193,7 +213,7 @@ export default function App(){
     suppressCalcPersistence.current = true;
     if(uid)sessionStorage.removeItem(`fenix-calc:${uid}`);
     sessionStorage.removeItem('fenix-session-active');
-    setCtx(null);setNav(null);setPassword('');
+    setCtx(null);setNav(null);setPassword('');setShowPassword(false);
     await supabase.auth.signOut();
     setCalc(defaultCalc);
     navigate('/',{replace:true});
@@ -206,14 +226,14 @@ export default function App(){
     <form className="auth-card" onSubmit={saveRecoveredPassword}>
       <div className="brand auth-brand"><div className="brand-mark" role="img" aria-label="Logotipo Fénix Capital"/><div><strong>FÉNIX CAPITAL</strong><span>Área privada</span></div></div>
       <h1>Nueva contraseña</h1>
-      <p>Introduce el código de 6 dígitos recibido por correo y crea tu nueva contraseña.</p>
+      <p>Introduce el código recibido por correo completo y crea tu nueva contraseña.</p>
       {resetMessage&&<div className="warning">{resetMessage}</div>}
-      <label htmlFor="fenix-recovery-code">Código de recuperación<input id="fenix-recovery-code" inputMode="numeric" autoComplete="one-time-code" value={recoveryCode} onChange={e=>setRecoveryCode(e.target.value.replace(/\D/g,'').slice(0,6))} placeholder="000000" required/></label>
-      <label htmlFor="fenix-new-password">Nueva contraseña<input id="fenix-new-password" type="password" autoComplete="new-password" value={newPassword} onChange={e=>setNewPassword(e.target.value)} required/></label>
-      <label htmlFor="fenix-confirm-password">Repite la contraseña<input id="fenix-confirm-password" type="password" autoComplete="new-password" value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)} required/></label>
+      <label htmlFor="fenix-recovery-code">Código de recuperación<input id="fenix-recovery-code" inputMode="numeric" autoComplete="one-time-code" value={recoveryCode} onChange={e=>setRecoveryCode(e.target.value.replace(/\D/g,'').slice(0,12))} placeholder="Código recibido" required/></label>
+      <label htmlFor="fenix-new-password">Nueva contraseña<div style={passwordFieldWrapStyle}><input id="fenix-new-password" type={showNewPassword?'text':'password'} autoComplete="new-password" value={newPassword} onChange={e=>setNewPassword(e.target.value)} style={{paddingRight:'48px'}} required/><button type="button" style={passwordEyeStyle} onClick={()=>setShowNewPassword(v=>!v)} aria-label={showNewPassword?'Ocultar nueva contraseña':'Mostrar nueva contraseña'}>{showNewPassword?<EyeOff size={19}/>:<Eye size={19}/>}</button></div></label>
+      <label htmlFor="fenix-confirm-password">Repite la contraseña<div style={passwordFieldWrapStyle}><input id="fenix-confirm-password" type={showConfirmPassword?'text':'password'} autoComplete="new-password" value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)} style={{paddingRight:'48px'}} required/><button type="button" style={passwordEyeStyle} onClick={()=>setShowConfirmPassword(v=>!v)} aria-label={showConfirmPassword?'Ocultar contraseña repetida':'Mostrar contraseña repetida'}>{showConfirmPassword?<EyeOff size={19}/>:<Eye size={19}/>}</button></div></label>
       {authError&&<div className="warning">{authError}</div>}
       <button className="primary" disabled={loadingLogin}>{loadingLogin?'Validando y guardando…':'Guardar nueva contraseña'}</button>
-      <button type="button" className="secondary-action" onClick={()=>{setPasswordRecovery(false);setRecoveryCode('');setAuthError('');setResetMessage('')}}>Volver al acceso</button>
+      <button type="button" className="secondary-action" onClick={()=>{setPasswordRecovery(false);setRecoveryCode('');setAuthError('');setResetMessage('');setShowNewPassword(false);setShowConfirmPassword(false)}}>Volver al acceso</button>
     </form>
   </div>;
 
@@ -225,7 +245,7 @@ export default function App(){
       <p>Accede con tu usuario y contraseña.</p>
       <div className="auth-fields">
         <label className="auth-field" htmlFor="fenix-user"><span>Usuario o email</span><input id="fenix-user" type="text" autoComplete="username" value={loginId} onChange={e=>setLoginId(e.target.value)} placeholder="Usuario o email" required/></label>
-        <label className="auth-field" htmlFor="fenix-password"><span>Contraseña</span><input id="fenix-password" type="password" autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="Contraseña" required/></label>
+        <label className="auth-field" htmlFor="fenix-password"><span>Contraseña</span><div style={passwordFieldWrapStyle}><input id="fenix-password" type={showPassword?'text':'password'} autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="Contraseña" style={{paddingRight:'48px'}} required/><button type="button" style={passwordEyeStyle} onClick={()=>setShowPassword(v=>!v)} aria-label={showPassword?'Ocultar contraseña':'Mostrar contraseña'}>{showPassword?<EyeOff size={19}/>:<Eye size={19}/>}</button></div></label>
       </div>
       <label className="remember-row" htmlFor="fenix-remember-device"><input id="fenix-remember-device" type="checkbox" checked={rememberDevice} onChange={e=>setRememberDevice(e.target.checked)}/><span>Recordarme en este dispositivo</span></label>
       {authError&&<div className="warning">{authError}</div>}
