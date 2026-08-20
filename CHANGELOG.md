@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-08-20 · Reproducibilidad cerrada en PRE-PROD
+
+### Dependencias
+- Se eliminaron todas las referencias `latest` del `package.json` y se fijaron las versiones exactas que habían superado Build + Browser QA.
+- Versiones directas fijadas: `@supabase/supabase-js 2.112.3`, `lucide-react 1.33.0`, `react 19.2.8`, `react-dom 19.2.8`, `react-router-dom 7.18.2`, `typescript 7.0.2`, `vite 8.2.2`, `@playwright/test 1.62.1`, `@types/react 19.2.18`, `@types/react-dom 19.2.4`.
+- Node queda fijado a `24.x`.
+- `package-lock.json` lockfileVersion 3 queda versionado en PRE-PROD mediante commit automático controlado `36fd42efbd0ea2765ac4513d4a64fe49d498fc76`.
+- El workflow usa `npm ci` cuando el lockfile existe y solo cae a `npm install` para bootstrap inicial.
+
+### Validación
+- El commit del lockfile fue creado por `github-actions[bot]`, por lo que su ejecución PR asociada quedó en `action_required` sin jobs; no representa un fallo del código.
+- Este commit documental posterior se usa deliberadamente para volver a ejecutar CI con actor normal sobre el lockfile ya versionado y validar el camino real `npm ci`.
+
 ## 2026-08-20 · Cierre técnico y trazabilidad reconciliada
 
 ### Validación canónica
