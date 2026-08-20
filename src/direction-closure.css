@@ -61,13 +61,18 @@
   filter:drop-shadow(0 6px 14px rgba(255,255,255,.08)) drop-shadow(0 8px 18px rgba(0,0,0,.24))!important;
 }
 
-/* Avatar pequeño: mantener exactamente el tamaño actual y mostrar el mismo Ana canónico. */
+/* Avatar pequeño: solo reencuadre; no cambia el tamaño del círculo ni el layout. */
+.dir-help-person{overflow:hidden!important;border-radius:50%!important}
 .dir-help-avatar{
   display:block!important;
   visibility:visible!important;
   opacity:1!important;
+  width:100%!important;
+  height:100%!important;
   object-fit:cover!important;
-  object-position:center 18%!important;
+  object-position:center 30%!important;
+  transform:scale(.92)!important;
+  transform-origin:center center!important;
 }
 
 /* Topbar y perfil: más legibilidad y aire, sin cambiar avatar ni estructura */
