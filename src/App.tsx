@@ -176,7 +176,12 @@ export default function App(){
     const {error}=await supabase.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin});
     setLoadingReset(false);
     if(error){
-      setAuthError('No se pudo iniciar la recuperación. Inténtalo de nuevo.');
+      const authFailure=error as {status?:number;code?:string};
+      if(authFailure.status===429 || authFailure.code==='over_email_send_rate_limit'){
+        setAuthError('Has solicitado varios códigos seguidos. Por seguridad, espera unos minutos antes de volver a intentarlo.');
+      }else{
+        setAuthError('No se pudo iniciar la recuperación. Inténtalo de nuevo.');
+      }
       return;
     }
     setRecoveryEmail(email);
