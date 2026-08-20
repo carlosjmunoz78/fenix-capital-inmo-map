@@ -87,7 +87,7 @@ test.describe('Fénix app shell + calculadora', () => {
   test('navigation is sourced from authorized backend response without exposing actor codes', async ({ page }) => {
     await expect(page.locator('.nav-item', { hasText: 'Expedientes' })).toHaveCount(1);
     await expect(page.locator('.nav-item', { hasText: 'Bancos' })).toHaveCount(1);
-    await expect(page.getByText('Financiero', { exact: true })).toBeVisible();
+    await expect(page.locator('.topbar p')).toHaveText('Financiero');
     await expect(page.getByText('QA-BROWSER')).toHaveCount(0);
     await expect(page.getByText(/PRE-PROD|AUTH TEST|CAL-001|JWT \+ RBAC|RUTA INTERNA/)).toHaveCount(0);
   });
@@ -98,7 +98,7 @@ test.describe('Fénix app shell + calculadora', () => {
     await amount.fill('135000');
     await page.getByRole('button', { name: 'Expedientes' }).click();
     await expect(page).toHaveURL(/\/expedientes$/);
-    await expect(page.getByRole('heading', { name: 'Expedientes', exact: true })).toBeVisible();
+    await expect(page.locator('.topbar h1')).toHaveText('Expedientes');
     await page.getByRole('button', { name: 'Bancos' }).click();
     await expect(page).toHaveURL(/\/bancos$/);
     await page.goBack();
