@@ -1,0 +1,5 @@
+/* Ajuste puntual: Ana vertical más grande sin alterar el bloque ni el layout. */
+.dir-person-photo{
+  object-fit:cover!important;
+  object-position:42% bottom!important;
+}
