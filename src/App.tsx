@@ -133,8 +133,10 @@ export default function App(){
       <span className="eyebrow">AUTH TEST</span>
       <h1>Acceso seguro</h1>
       <p>Usa únicamente las identidades TEST autorizadas. No se aceptan datos reales.</p>
-      <label>Usuario o email TEST<input type="text" autoComplete="username" value={loginId} onChange={e=>setLoginId(e.target.value)} placeholder="Ej. FIN-A o FIN A" required/></label>
-      <label>Contraseña<input type="password" autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} required/></label>
+      <div className="auth-fields">
+        <label className="auth-field" htmlFor="fenix-test-user"><span>Usuario o email TEST</span><input id="fenix-test-user" type="text" autoComplete="username" value={loginId} onChange={e=>setLoginId(e.target.value)} placeholder="Ej. FIN-A o FIN A" required/></label>
+        <label className="auth-field" htmlFor="fenix-test-password"><span>Contraseña</span><input id="fenix-test-password" type="password" autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="Escribe tu contraseña TEST" required/></label>
+      </div>
       {authError&&<div className="warning">{authError}</div>}
       <button className="primary" disabled={loadingLogin}>{loadingLogin?'Entrando…':'Entrar'}</button>
     </form>
