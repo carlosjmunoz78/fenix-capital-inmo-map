@@ -108,21 +108,21 @@
 .dir-quick-grid button{height:70px!important;font-size:11.5px!important;line-height:1.25!important;padding:0 12px!important;gap:8px!important}
 .dir-quick-grid button svg{width:25px!important;height:25px!important}
 
-/* Calculadora: launcher compacto, naranja y visualmente sin “PRO”. */
+/* Calculadora: launcher compacto, naranja y sin “PRO” visible. */
 .calc-launcher.dir-calc-launcher{
   min-height:0!important;
   height:34px!important;
   padding:0 10px!important;
   gap:6px!important;
   font-size:0!important;
+  color:transparent!important;
   background:#FF5F00!important;
   background-color:#FF5F00!important;
   background-image:none!important;
   border:0!important;
-  color:#fff!important;
   box-shadow:0 6px 14px rgba(255,95,0,.18)!important;
 }
-.calc-launcher.dir-calc-launcher::after{content:'Calculadora';font-size:10.5px;font-weight:700;line-height:1;color:#fff}
+.calc-launcher.dir-calc-launcher::after{content:'Calculadora';font-size:10.5px;font-weight:700;line-height:1;color:#fff!important}
 .calc-launcher.dir-calc-launcher svg{width:16px!important;height:16px!important;color:#fff!important;flex:0 0 auto}
 .calc-launcher.dir-calc-launcher:hover{background:#e95500!important;background-color:#e95500!important}
 
