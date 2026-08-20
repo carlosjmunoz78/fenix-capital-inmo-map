@@ -4,7 +4,9 @@ import type { Session } from '@supabase/supabase-js';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { calculateMortgage } from './calculator';
 import { fetchAppApi, supabase } from './supabase';
+import DirectionDashboard from './DirectionDashboard';
 import './logo.css';
+import './direction.css';
 
 type Theme = 'light' | 'dark';
 type SessionContext = { actor_code?: string; role?: string; worker_id?: string; [key: string]: unknown };
@@ -259,6 +261,11 @@ export default function App(){
       <button type="button" className="forgot-link" onClick={requestPasswordReset} disabled={loadingReset}>{loadingReset?'Solicitando…':'¿Has olvidado tu contraseña?'}</button>
     </form>
   </div>;
+
+  const isDirection = ctx?.actor_code==='DIR-TEST' || roleLabel.toLowerCase().includes('direccion') || roleLabel.toLowerCase().includes('dirección');
+  if(isDirection && location.pathname==='/inicio'){
+    return <DirectionDashboard onNavigate={route=>navigate(route)} onLogout={logout} calc={calc} setCalc={setCalc} result={result}/>;
+  }
 
   return <div className="app-shell">
     <aside className="sidebar">
