@@ -23,6 +23,8 @@ import {
   Users,
   X
 } from 'lucide-react';
+import fenixLogoReference from './fenix-logo-reference.svg';
+import belenDirectorReference from './belen-director-reference.svg';
 
 type CalcState = {
   principal:number;
@@ -86,13 +88,13 @@ const banks = [
 export default function DirectionDashboard({onNavigate,onLogout,calc,setCalc,result}:Props){
   return <div className="dir-shell">
     <aside className="dir-sidebar">
-      <div className="dir-logo-wrap"><img src="/fenix-capital-inmo-map/fenix-logo-reference.svg" alt="Fénix Capital Hipotecas"/></div>
+      <div className="dir-logo-wrap"><img src={fenixLogoReference} alt="Fénix Capital Hipotecas"/></div>
       <nav className="dir-nav">
         {menu.map(([label,route,Icon],i)=><button key={label} className={i===0?'dir-nav-item active':'dir-nav-item'} onClick={()=>onNavigate(route)}><Icon size={16}/><span>{label}</span></button>)}
       </nav>
       <div className="dir-help-card">
         <div><strong>¿Necesitas ayuda?</strong><span>Pregunta a Ana, tu asistente inteligente.</span></div>
-        <div className="dir-help-person"><div className="dir-mini-avatar">A</div></div>
+        <div className="dir-help-person"><img className="dir-help-avatar" src={belenDirectorReference} alt="Ana"/></div>
         <button>Abrir chat con Ana <span>→</span></button>
       </div>
     </aside>
@@ -103,7 +105,7 @@ export default function DirectionDashboard({onNavigate,onLogout,calc,setCalc,res
         <div className="dir-search"><Search size={16}/><input placeholder="Buscar expediente, cliente, banco, inmobiliaria, contacto..."/><Search size={15}/></div>
         <div className="dir-top-right">
           <button className="dir-bell" aria-label="Notificaciones"><Bell size={19}/><span>4</span></button>
-          <img className="dir-top-avatar" src="/fenix-capital-inmo-map/belen-director-reference.svg" alt="Belén Muñoz"/>
+          <img className="dir-top-avatar" src={belenDirectorReference} alt="Belén Muñoz"/>
           <div className="dir-user-copy"><strong>Belén Muñoz</strong><span>Directora Financiera</span></div>
           <ChevronDown size={15}/>
           <button className="dir-logout" onClick={onLogout} aria-label="Cerrar sesión"><LogOut size={16}/></button>
@@ -113,7 +115,7 @@ export default function DirectionDashboard({onNavigate,onLogout,calc,setCalc,res
       <div className="dir-content">
         <section className="dir-dashboard-top">
           <article className="dir-priority-card">
-            <div className="dir-person-wrap"><img src="/fenix-capital-inmo-map/belen-director-reference.svg" alt="Belén Muñoz"/></div>
+            <div className="dir-person-wrap"><img src={belenDirectorReference} alt="Belén Muñoz"/></div>
             <div className="dir-priority-copy">
               <h1>Hola Belén, buenos días 👋</h1>
               <p>Estas son tus prioridades de hoy.</p>
