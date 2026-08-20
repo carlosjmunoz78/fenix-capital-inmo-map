@@ -1,0 +1,126 @@
+/* Dirección · cierre visual canónico */
+
+/* Perfil superior real */
+.dir-avatar{
+  width:40px!important;
+  height:40px!important;
+  flex:0 0 40px!important;
+  border-radius:50%!important;
+  font-size:0!important;
+  background-image:url('data:image/webp;base64,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');
+  background-size:cover!important;
+  background-position:center 20%!important;
+  background-repeat:no-repeat!important;
+  background-color:#f2eee9!important;
+  border:1px solid rgba(255,95,0,.16)!important;
+  box-shadow:0 2px 10px rgba(35,24,18,.10)!important;
+}
+.dir-user-copy strong{font-size:12.5px!important;line-height:1.15!important}
+.dir-user-copy span{font-size:10.5px!important;line-height:1.2!important;margin-top:2px!important}
+
+/* Ana vertical: imagen por encima del fondo, nunca detrás */
+.dir-person-wrap{
+  background-image:url('./assets/ana-canonical.svg'),radial-gradient(circle at 45% 30%,rgba(255,126,69,.15),rgba(255,255,255,0) 56%),linear-gradient(180deg,#fffaf7 0%,#f7f1ec 100%)!important;
+  background-repeat:no-repeat,no-repeat,no-repeat!important;
+  background-size:contain,100% 100%,100% 100%!important;
+  background-position:center bottom,center,center!important;
+  overflow:hidden!important;
+}
+.dir-shell[data-dir-theme='dark'] .dir-person-wrap{
+  background-image:url('./assets/ana-canonical.svg'),radial-gradient(circle at 48% 34%,rgba(255,122,66,.30),rgba(91,48,33,.16) 35%,rgba(29,27,27,0) 66%),linear-gradient(155deg,#2c2524 0%,#211f20 48%,#18191b 100%)!important;
+  background-size:contain,100% 100%,100% 100%!important;
+  background-position:center bottom,center,center!important;
+  filter:none!important;
+}
+
+/* Ana pequeña: más grande y con recorte facial legible */
+.dir-help-card{grid-template-columns:minmax(0,1fr) 58px!important;column-gap:10px!important;padding:14px 12px 12px!important}
+.dir-help-person{
+  width:56px!important;
+  height:56px!important;
+  border-radius:50%!important;
+  overflow:hidden!important;
+  background-image:url('data:image/png;base64,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')!important;
+  background-size:cover!important;
+  background-position:center 18%!important;
+  background-repeat:no-repeat!important;
+  background-color:#fff!important;
+  border:2px solid rgba(255,255,255,.95)!important;
+  box-shadow:0 3px 12px rgba(40,24,17,.16)!important;
+}
+.dir-shell[data-dir-theme='dark'] .dir-help-person{border-color:rgba(255,255,255,.20)!important;box-shadow:0 0 0 3px rgba(255,112,48,.08),0 5px 16px rgba(0,0,0,.30)!important}
+.dir-help-card strong{font-size:12.5px!important;line-height:1.2!important}
+.dir-help-card span{font-size:11px!important;line-height:1.45!important}
+.dir-help-card>button{height:38px!important;font-size:10.5px!important;font-weight:700!important;margin-top:4px!important}
+
+/* Topbar y jerarquía tipográfica: menú lateral se mantiene */
+.dir-advanced{font-size:12px!important;font-weight:650!important}
+.dir-search input{font-size:12.5px!important;line-height:1.25!important}
+.dir-theme-toggle{font-size:11.5px!important;font-weight:650!important}
+.dir-priority-copy h1{font-size:14.5px!important;line-height:1.2!important}
+.dir-priority-copy>p{font-size:11.5px!important;line-height:1.35!important}
+.dir-empty-compact strong{font-size:10.5px!important;line-height:1.25!important}
+.dir-empty-compact small{font-size:9.8px!important;line-height:1.35!important}
+.dir-kpi>span{font-size:9.4px!important;line-height:1.28!important;letter-spacing:.012em!important;font-weight:700!important}
+.dir-kpi>strong{font-size:24px!important;line-height:1!important}
+.dir-kpi>small{font-size:9px!important;line-height:1.25!important}
+.dir-section-head strong{font-size:11.2px!important;line-height:1.2!important;letter-spacing:.012em!important;font-weight:700!important}
+.dir-section-head button{font-size:9.7px!important}
+.dir-empty-state>span{font-size:11.7px!important;line-height:1.3!important}
+.dir-empty-state>small{font-size:10px!important;line-height:1.45!important}
+.dir-empty-state>button{font-size:9.7px!important;font-weight:650!important}
+.dir-quick h2{font-size:11.5px!important;letter-spacing:.02em!important}
+
+/* Accesos rápidos: realmente recalibrados */
+.dir-quick-grid{gap:12px!important}
+.dir-quick-grid button{
+  min-height:74px!important;
+  height:74px!important;
+  padding:0 18px!important;
+  gap:12px!important;
+  justify-content:flex-start!important;
+  font-size:11.5px!important;
+  font-weight:600!important;
+  border-radius:12px!important;
+  border:1px solid #e7ddd7!important;
+  background:linear-gradient(180deg,#fff 0%,#fffaf7 100%)!important;
+  box-shadow:0 2px 8px rgba(69,42,26,.04)!important;
+}
+.dir-quick-grid button svg{width:22px!important;height:22px!important;flex:0 0 auto!important}
+.dir-quick-grid button:hover{transform:translateY(-1px)!important;border-color:#ffc3a7!important;box-shadow:0 5px 16px rgba(125,66,35,.08)!important}
+.dir-shell[data-dir-theme='dark'] .dir-quick-grid button{
+  background:linear-gradient(155deg,rgba(52,47,46,.96),rgba(38,37,39,.98))!important;
+  border-color:rgba(255,143,92,.18)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025),0 5px 16px rgba(0,0,0,.10)!important;
+}
+.dir-shell[data-dir-theme='dark'] .dir-quick-grid button:hover{background:linear-gradient(155deg,#3d302c,#29272a)!important;border-color:rgba(255,132,72,.34)!important}
+
+/* Calculadora: compacta, premium y alineada con el sistema */
+.dir-calc-launcher{
+  min-height:52px!important;
+  height:52px!important;
+  padding:0 18px!important;
+  border-radius:14px!important;
+  font-size:12.5px!important;
+  font-weight:750!important;
+  background:linear-gradient(135deg,#ff6a24,#e95312)!important;
+  border:1px solid rgba(179,66,12,.20)!important;
+  box-shadow:0 8px 24px rgba(218,80,19,.20)!important;
+}
+.calc-panel.minimized{
+  width:292px!important;
+  min-height:54px!important;
+  border-radius:14px!important;
+  overflow:hidden!important;
+  border:1px solid rgba(255,95,0,.18)!important;
+  box-shadow:0 10px 28px rgba(40,24,17,.16)!important;
+}
+.calc-panel.minimized>header{min-height:54px!important;height:54px!important;padding:0 12px 0 16px!important;border-bottom:0!important}
+.calc-panel.minimized>header strong{font-size:12.5px!important;font-weight:750!important}
+.calc-panel.minimized .calc-actions button{width:30px!important;height:30px!important;border-radius:8px!important}
+.dir-shell[data-dir-theme='dark']~.calc-panel.minimized,.dir-shell[data-dir-theme='dark'] .calc-panel.minimized{background:linear-gradient(150deg,#312a29,#232326)!important;border-color:rgba(255,127,68,.20)!important}
+
+@media(max-width:1200px){
+  .dir-quick-grid button{padding:0 12px!important;font-size:10.5px!important;gap:8px!important}
+  .dir-quick-grid button svg{width:20px!important;height:20px!important}
+}
