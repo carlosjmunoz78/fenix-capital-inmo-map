@@ -2,7 +2,7 @@ import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { Calculator, LogOut, Minimize2, Moon, Sun, X } from 'lucide-react';
 import type { Session } from '@supabase/supabase-js';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { calculateMortgage, FORMULA_VERSION } from './calculator';
+import { calculateMortgage } from './calculator';
 import { fetchAppApi, supabase } from './supabase';
 import './logo.css';
 
@@ -30,7 +30,7 @@ const testLoginAliases: Record<string,string> = {
   visb: 'vis-b@test.fenixcapital.es'
 };
 
-function resolveTestLogin(value:string){
+function resolveLogin(value:string){
   const trimmed=value.trim().toLowerCase();
   if(trimmed.includes('@')) return trimmed;
   const alias=trimmed.replace(/[\s_-]+/g,'');
@@ -48,6 +48,7 @@ export default function App(){
   const [authReady,setAuthReady]=useState(false);
   const [loginId,setLoginId]=useState('');
   const [password,setPassword]=useState('');
+  const [rememberDevice,setRememberDevice]=useState(()=>localStorage.getItem('fenix-remember-device')==='true');
   const [authError,setAuthError]=useState('');
   const [resetMessage,setResetMessage]=useState('');
   const [loadingLogin,setLoadingLogin]=useState(false);
@@ -65,12 +66,22 @@ export default function App(){
   },[theme]);
 
   useEffect(()=>{
-    supabase.auth.getSession().then(({data})=>{setSession(data.session);setAuthReady(true)});
+    let mounted=true;
+    supabase.auth.getSession().then(async ({data})=>{
+      const remembered=localStorage.getItem('fenix-remember-device')==='true';
+      const activeThisBrowser=sessionStorage.getItem('fenix-session-active')==='1';
+      if(data.session && !remembered && !activeThisBrowser){
+        await supabase.auth.signOut();
+        if(mounted){setSession(null);setAuthReady(true);}
+        return;
+      }
+      if(mounted){setSession(data.session);setAuthReady(true);}
+    });
     const {data:{subscription}}=supabase.auth.onAuthStateChange((event,next)=>{
       setSession(next);
       if(event==='PASSWORD_RECOVERY') setPasswordRecovery(true);
     });
-    return ()=>subscription.unsubscribe();
+    return ()=>{mounted=false;subscription.unsubscribe();};
   },[]);
 
   useEffect(()=>{
@@ -109,28 +120,37 @@ export default function App(){
     .map(x=>({label:x.label,route:x.route,resource:x.resource}));
   const effectiveMenu = menuItems.length ? menuItems : fallbackMenu;
   const activeItem = effectiveMenu.find(item => location.pathname===item.route || (item.route!=='/inicio' && location.pathname.startsWith(`${item.route}/`))) || effectiveMenu[0];
+  const roleLabel=ctx?.role || 'Usuario';
+  const avatarLabel=roleLabel.slice(0,2).toUpperCase();
 
   async function login(e:FormEvent){
     e.preventDefault();
     setAuthError('');
     setResetMessage('');
-    const email=resolveTestLogin(loginId);
+    const email=resolveLogin(loginId);
     if(!email){
-      setAuthError('Usuario TEST no reconocido. Usa FIN-A, FIN-B, VIS-A, VIS-B o el email TEST autorizado de Dirección.');
+      setAuthError('No hemos reconocido ese usuario. Revisa los datos de acceso.');
       return;
     }
     setLoadingLogin(true);
     const {error}=await supabase.auth.signInWithPassword({email,password});
-    if(error)setAuthError('No se pudo iniciar sesión TEST. Revisa la contraseña.');
+    if(error){
+      setAuthError('No se pudo iniciar sesión. Revisa el usuario y la contraseña.');
+      setLoadingLogin(false);
+      return;
+    }
+    localStorage.setItem('fenix-remember-device',rememberDevice?'true':'false');
+    if(rememberDevice) sessionStorage.removeItem('fenix-session-active');
+    else sessionStorage.setItem('fenix-session-active','1');
     setLoadingLogin(false);
   }
 
   async function requestPasswordReset(){
     setAuthError('');
     setResetMessage('');
-    const email=resolveTestLogin(loginId);
+    const email=resolveLogin(loginId);
     if(!email){
-      setAuthError('Escribe FIN-A, FIN-B, VIS-A, VIS-B o el email TEST autorizado de Dirección.');
+      setAuthError('Escribe primero tu usuario o email.');
       return;
     }
     setLoadingReset(true);
@@ -148,9 +168,9 @@ export default function App(){
   async function saveRecoveredPassword(e:FormEvent){
     e.preventDefault();
     setAuthError('');
-    const email=recoveryEmail || resolveTestLogin(loginId);
+    const email=recoveryEmail || resolveLogin(loginId);
     const token=recoveryCode.trim().replace(/\s+/g,'');
-    if(!email){setAuthError('No se ha podido identificar el usuario TEST. Vuelve al acceso y solicita un código nuevo.');return;}
+    if(!email){setAuthError('No se ha podido identificar el usuario. Vuelve al acceso y solicita un código nuevo.');return;}
     if(!/^\d{6}$/.test(token)){setAuthError('El código de recuperación debe tener 6 dígitos.');return;}
     if(newPassword.length<8){setAuthError('La nueva contraseña debe tener al menos 8 caracteres.');return;}
     if(newPassword!==confirmPassword){setAuthError('Las contraseñas no coinciden.');return;}
@@ -172,19 +192,19 @@ export default function App(){
     const uid=session?.user?.id;
     suppressCalcPersistence.current = true;
     if(uid)sessionStorage.removeItem(`fenix-calc:${uid}`);
+    sessionStorage.removeItem('fenix-session-active');
     setCtx(null);setNav(null);setPassword('');
     await supabase.auth.signOut();
     setCalc(defaultCalc);
     navigate('/',{replace:true});
   }
 
-  if(!authReady)return <div className="auth-shell"><p>Validando sesión TEST…</p></div>;
+  if(!authReady)return <div className="auth-shell"><p>Validando sesión…</p></div>;
 
   if(passwordRecovery)return <div className="auth-shell">
     <button className="theme-toggle auth-theme" onClick={()=>setTheme(theme==='light'?'dark':'light')} aria-label="Cambiar tema">{theme==='light'?<Moon size={18}/>:<Sun size={18}/>}<span>{theme==='light'?'Oscuro':'Claro'}</span></button>
     <form className="auth-card" onSubmit={saveRecoveredPassword}>
-      <div className="brand auth-brand"><div className="brand-mark" role="img" aria-label="Logotipo Fénix Capital"/><div><strong>FÉNIX CAPITAL</strong><span>APP PRE-PROD · Fase 1</span></div></div>
-      <span className="eyebrow">RECUPERAR ACCESO</span>
+      <div className="brand auth-brand"><div className="brand-mark" role="img" aria-label="Logotipo Fénix Capital"/><div><strong>FÉNIX CAPITAL</strong><span>Área privada</span></div></div>
       <h1>Nueva contraseña</h1>
       <p>Introduce el código de 6 dígitos recibido por correo y crea tu nueva contraseña.</p>
       {resetMessage&&<div className="warning">{resetMessage}</div>}
@@ -193,53 +213,53 @@ export default function App(){
       <label htmlFor="fenix-confirm-password">Repite la contraseña<input id="fenix-confirm-password" type="password" autoComplete="new-password" value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)} required/></label>
       {authError&&<div className="warning">{authError}</div>}
       <button className="primary" disabled={loadingLogin}>{loadingLogin?'Validando y guardando…':'Guardar nueva contraseña'}</button>
-      <button type="button" className="theme-toggle" style={{marginTop:12,width:'100%',justifyContent:'center'}} onClick={()=>{setPasswordRecovery(false);setRecoveryCode('');setAuthError('');setResetMessage('')}}>Volver al acceso</button>
+      <button type="button" className="secondary-action" onClick={()=>{setPasswordRecovery(false);setRecoveryCode('');setAuthError('');setResetMessage('')}}>Volver al acceso</button>
     </form>
   </div>;
 
   if(!session)return <div className="auth-shell">
     <button className="theme-toggle auth-theme" onClick={()=>setTheme(theme==='light'?'dark':'light')} aria-label="Cambiar tema">{theme==='light'?<Moon size={18}/>:<Sun size={18}/>}<span>{theme==='light'?'Oscuro':'Claro'}</span></button>
     <form className="auth-card" onSubmit={login}>
-      <div className="brand auth-brand"><div className="brand-mark" role="img" aria-label="Logotipo Fénix Capital"/><div><strong>FÉNIX CAPITAL</strong><span>APP PRE-PROD · Fase 1</span></div></div>
-      <span className="eyebrow">AUTH TEST</span>
+      <div className="brand auth-brand"><div className="brand-mark" role="img" aria-label="Logotipo Fénix Capital"/><div><strong>FÉNIX CAPITAL</strong><span>Área privada</span></div></div>
       <h1>Acceso seguro</h1>
-      <p>Usa únicamente las identidades TEST autorizadas. No se aceptan datos reales.</p>
+      <p>Accede con tu usuario y contraseña.</p>
       <div className="auth-fields">
-        <label className="auth-field" htmlFor="fenix-test-user"><span>Usuario o email TEST</span><input id="fenix-test-user" type="text" autoComplete="username" value={loginId} onChange={e=>setLoginId(e.target.value)} placeholder="Ej. FIN-A o email TEST" required/></label>
-        <label className="auth-field" htmlFor="fenix-test-password"><span>Contraseña</span><input id="fenix-test-password" type="password" autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="Escribe tu contraseña TEST" required/></label>
+        <label className="auth-field" htmlFor="fenix-user"><span>Usuario o email</span><input id="fenix-user" type="text" autoComplete="username" value={loginId} onChange={e=>setLoginId(e.target.value)} placeholder="Usuario o email" required/></label>
+        <label className="auth-field" htmlFor="fenix-password"><span>Contraseña</span><input id="fenix-password" type="password" autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="Contraseña" required/></label>
       </div>
+      <label className="remember-row" htmlFor="fenix-remember-device"><input id="fenix-remember-device" type="checkbox" checked={rememberDevice} onChange={e=>setRememberDevice(e.target.checked)}/><span>Recordarme en este dispositivo</span></label>
       {authError&&<div className="warning">{authError}</div>}
       {resetMessage&&<div className="warning">{resetMessage}</div>}
       <button className="primary" disabled={loadingLogin}>{loadingLogin?'Entrando…':'Entrar'}</button>
-      <button type="button" className="theme-toggle" style={{marginTop:12,width:'100%',justifyContent:'center'}} onClick={requestPasswordReset} disabled={loadingReset}>{loadingReset?'Solicitando…':'¿Has olvidado tu contraseña?'}</button>
+      <button type="button" className="forgot-link" onClick={requestPasswordReset} disabled={loadingReset}>{loadingReset?'Solicitando…':'¿Has olvidado tu contraseña?'}</button>
     </form>
   </div>;
 
   return <div className="app-shell">
     <aside className="sidebar">
-      <div className="brand"><div className="brand-mark" role="img" aria-label="Logotipo Fénix Capital"/><div><strong>FÉNIX CAPITAL</strong><span>PRE-PROD · Fase 1</span></div></div>
+      <div className="brand"><div className="brand-mark" role="img" aria-label="Logotipo Fénix Capital"/><div><strong>FÉNIX CAPITAL</strong><span>Área privada</span></div></div>
       <nav>{effectiveMenu.map(item=><button className={activeItem?.route===item.route?'nav-item active':'nav-item'} key={item.route} onClick={()=>navigate(item.route)}>{item.label}</button>)}</nav>
     </aside>
     <main className="main">
       <header className="topbar">
-        <div><h1>{activeItem?.label || 'Inicio'}</h1><p>{ctx?.actor_code ? `${ctx.actor_code} · ${ctx.role||'Rol TEST'}` : 'Sesión TEST autenticada'}</p></div>
+        <div><h1>{activeItem?.label || 'Inicio'}</h1><p>{roleLabel}</p></div>
         <div className="top-actions">
           <button className="theme-toggle" onClick={()=>setTheme(theme==='light'?'dark':'light')} aria-label="Cambiar tema">{theme==='light'?<Moon size={18}/>:<Sun size={18}/>}<span>{theme==='light'?'Oscuro':'Claro'}</span></button>
           <button className="logout" onClick={logout} aria-label="Cerrar sesión"><LogOut size={17}/><span>Salir</span></button>
-          <div className="avatar">{(ctx?.actor_code||'TT').slice(0,2)}</div>
+          <div className="avatar">{avatarLabel}</div>
         </div>
       </header>
-      <section className="hero-card"><div><span className="eyebrow">RUTA INTERNA</span><h2>{activeItem?.label || 'Inicio'} · entorno TEST</h2><p>La navegación usa rutas internas del SPA y conserva el contexto autorizado. La Calculadora PRO permanece transversal sin recargar la aplicación.</p></div><div className="hero-kpi"><strong>{ctx?.actor_code||'TEST'}</strong><span>{activeItem?.route || location.pathname}</span></div></section>
+      <section className="hero-card"><div><span className="eyebrow">FÉNIX CAPITAL</span><h2>{activeItem?.label || 'Inicio'}</h2><p>Tu espacio de trabajo centralizado. Accede a la información y herramientas disponibles según tu perfil.</p></div><div className="hero-kpi"><strong>{roleLabel}</strong><span>Sesión activa</span></div></section>
       <section className="grid">
-        <article className="card"><span className="eyebrow">NAVEGACIÓN</span><h3>Router interno activo</h3><p>Back/forward y cambio de módulo se resuelven dentro de la APP, sin enlaces directos a Notion.</p></article>
-        <article className="card"><span className="eyebrow">SEGURIDAD</span><h3>JWT + RBAC servidor</h3><p>La UI consume contexto y navegación autorizados; no envía rol o worker como autoridad confiable.</p></article>
-        <article className="card"><span className="eyebrow">CAL-001</span><h3>Motor validado</h3><p>Amortización francesa · fórmula {FORMULA_VERSION}.</p></article>
+        <article className="card"><span className="eyebrow">TRABAJO</span><h3>Acceso centralizado</h3><p>Consulta y gestiona desde aquí los módulos habilitados para tu perfil.</p></article>
+        <article className="card"><span className="eyebrow">SEGURIDAD</span><h3>Acceso protegido</h3><p>La información disponible se adapta automáticamente a tus permisos.</p></article>
+        <article className="card"><span className="eyebrow">HERRAMIENTAS</span><h3>Calculadora hipotecaria</h3><p>La calculadora permanece disponible mientras trabajas en cualquier módulo.</p></article>
       </section>
     </main>
 
     {!calc.open && <button className="calc-launcher" onClick={()=>setCalc(v=>({...v,open:true,minimized:false}))}><Calculator size={20}/>Calculadora PRO</button>}
     {calc.open && <section className={calc.minimized?'calc-panel minimized':'calc-panel'} aria-label="Calculadora Hipotecaria PRO">
-      <header><div><span className="eyebrow">CAL-001</span><strong>Calculadora Hipotecaria PRO</strong></div><div className="calc-actions"><button aria-label="Minimizar calculadora" onClick={()=>setCalc(v=>({...v,minimized:!v.minimized}))}><Minimize2 size={17}/></button><button aria-label="Cerrar calculadora" onClick={()=>setCalc(v=>({...v,open:false}))}><X size={17}/></button></div></header>
+      <header><div><strong>Calculadora Hipotecaria PRO</strong></div><div className="calc-actions"><button aria-label="Minimizar calculadora" onClick={()=>setCalc(v=>({...v,minimized:!v.minimized}))}><Minimize2 size={17}/></button><button aria-label="Cerrar calculadora" onClick={()=>setCalc(v=>({...v,open:false}))}><X size={17}/></button></div></header>
       {!calc.minimized && <div className="calc-body">
         <div className="calc-grid">
           <label>Importe €<input type="number" min="1" value={calc.principal} onChange={e=>setCalc(v=>({...v,principal:Number(e.target.value)}))}/></label>
@@ -250,7 +270,7 @@ export default function App(){
           <label>Otras cuotas €/mes<input type="number" min="0" value={calc.other} onChange={e=>setCalc(v=>({...v,other:e.target.value===''?'':Number(e.target.value)}))}/></label>
         </div>
         {result ? <div className="result-box"><div><span>Cuota estimada</span><strong>{result.monthlyPayment.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})} €</strong></div><div className="result-row"><span>Total pagado <b>{result.totalPaid.toLocaleString('es-ES')} €</b></span><span>Intereses <b>{result.estimatedInterest.toLocaleString('es-ES')} €</b></span></div>{result.financingPct!==null&&<div className="result-row"><span>Financiación <b>{result.financingPct}%</b></span>{result.effortPct!==null&&<span>Esfuerzo <b>{result.effortPct}%</b></span>}</div>}{result.warnings.map(w=><div className="warning" key={w}>{w}</div>)}</div> : <div className="warning">Revisa importe, plazo y tipo.</div>}
-        <p className="calc-note">Simulación matemática. No implica aprobación bancaria ni sustituye validación de Belén.</p>
+        <p className="calc-note">Simulación orientativa. No implica aprobación bancaria.</p>
       </div>}
     </section>}
   </div>
