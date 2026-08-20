@@ -61,12 +61,19 @@
   filter:drop-shadow(0 6px 14px rgba(255,255,255,.08)) drop-shadow(0 8px 18px rgba(0,0,0,.24))!important;
 }
 
-/* Avatar pequeño: usar solo el <img> real; eliminar el background antiguo que estaba tapando el ajuste. */
+/* Avatar pequeño Ana: retrato aprobado con auriculares, sin círculo ni fondo. */
 .dir-help-person{
-  overflow:hidden!important;
-  border-radius:50%!important;
+  overflow:visible!important;
+  border-radius:0!important;
+  background:none!important;
   background-image:none!important;
-  background:#fff!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+.dir-shell[data-dir-theme='dark'] .dir-help-person{
+  border:0!important;
+  box-shadow:none!important;
+  background:none!important;
 }
 .dir-help-avatar{
   display:block!important;
@@ -74,10 +81,13 @@
   opacity:1!important;
   width:100%!important;
   height:100%!important;
-  object-fit:cover!important;
+  object-fit:contain!important;
   object-position:center center!important;
-  transform:translateY(7px) scale(.86)!important;
-  transform-origin:center center!important;
+  transform:none!important;
+  border-radius:0!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
 }
 
 /* Topbar y perfil: más legibilidad y aire, sin cambiar avatar ni estructura */
