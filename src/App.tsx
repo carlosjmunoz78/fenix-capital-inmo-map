@@ -50,7 +50,12 @@ export default function App(){
   const [loginId,setLoginId]=useState('');
   const [password,setPassword]=useState('');
   const [authError,setAuthError]=useState('');
+  const [resetMessage,setResetMessage]=useState('');
   const [loadingLogin,setLoadingLogin]=useState(false);
+  const [loadingReset,setLoadingReset]=useState(false);
+  const [passwordRecovery,setPasswordRecovery]=useState(false);
+  const [newPassword,setNewPassword]=useState('');
+  const [confirmPassword,setConfirmPassword]=useState('');
   const [calc,setCalc]=useState<CalcState>(defaultCalc);
 
   useEffect(()=>{
@@ -60,12 +65,16 @@ export default function App(){
 
   useEffect(()=>{
     supabase.auth.getSession().then(({data})=>{setSession(data.session);setAuthReady(true)});
-    const {data:{subscription}}=supabase.auth.onAuthStateChange((_event,next)=>setSession(next));
+    const {data:{subscription}}=supabase.auth.onAuthStateChange((event,next)=>{
+      setSession(next);
+      if(event==='PASSWORD_RECOVERY') setPasswordRecovery(true);
+    });
     return ()=>subscription.unsubscribe();
   },[]);
 
   useEffect(()=>{
     if(!session?.user?.id){setCtx(null);setNav(null);setCalc(defaultCalc);return;}
+    if(passwordRecovery)return;
     suppressCalcPersistence.current = false;
     const key=`fenix-calc:${session.user.id}`;
     const saved=sessionStorage.getItem(key);
@@ -77,16 +86,16 @@ export default function App(){
       setCtx(c.status===200?c.data:null);
       setNav(n.status===200?n.data:null);
     });
-  },[session?.user?.id]);
+  },[session?.user?.id,passwordRecovery]);
 
   useEffect(()=>{
-    if(!session?.user?.id || suppressCalcPersistence.current)return;
+    if(!session?.user?.id || suppressCalcPersistence.current || passwordRecovery)return;
     sessionStorage.setItem(`fenix-calc:${session.user.id}`,JSON.stringify(calc));
-  },[calc,session?.user?.id]);
+  },[calc,session?.user?.id,passwordRecovery]);
 
   useEffect(()=>{
-    if(session?.user?.id && location.pathname==='/') navigate('/inicio',{replace:true});
-  },[session?.user?.id,location.pathname,navigate]);
+    if(session?.user?.id && !passwordRecovery && location.pathname==='/') navigate('/inicio',{replace:true});
+  },[session?.user?.id,passwordRecovery,location.pathname,navigate]);
 
   const result=useMemo(()=>{
     try{
@@ -103,6 +112,7 @@ export default function App(){
   async function login(e:FormEvent){
     e.preventDefault();
     setAuthError('');
+    setResetMessage('');
     const email=resolveTestLogin(loginId);
     if(!email){
       setAuthError('Usuario TEST no reconocido. Puedes escribir DIR-TEST, FIN-A, FIN-B, VIS-A, VIS-B, con espacios o guiones.');
@@ -112,6 +122,48 @@ export default function App(){
     const {error}=await supabase.auth.signInWithPassword({email,password});
     if(error)setAuthError('No se pudo iniciar sesión TEST. Revisa la contraseña.');
     setLoadingLogin(false);
+  }
+
+  async function requestPasswordReset(){
+    setAuthError('');
+    setResetMessage('');
+    const email=resolveTestLogin(loginId);
+    if(!email){
+      setAuthError('Escribe primero tu usuario TEST: DIR-TEST, FIN-A, FIN-B, VIS-A o VIS-B.');
+      return;
+    }
+    setLoadingReset(true);
+    const {error}=await supabase.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin});
+    setLoadingReset(false);
+    if(error){
+      setAuthError('No se pudo iniciar la recuperación. Inténtalo de nuevo o solicita un restablecimiento TEST al administrador.');
+      return;
+    }
+    setResetMessage('Recuperación solicitada. Revisa el correo asociado a ese usuario TEST y abre el enlace para crear una nueva contraseña.');
+  }
+
+  async function saveRecoveredPassword(e:FormEvent){
+    e.preventDefault();
+    setAuthError('');
+    if(newPassword.length<8){
+      setAuthError('La nueva contraseña debe tener al menos 8 caracteres.');
+      return;
+    }
+    if(newPassword!==confirmPassword){
+      setAuthError('Las contraseñas no coinciden.');
+      return;
+    }
+    setLoadingLogin(true);
+    const {error}=await supabase.auth.updateUser({password:newPassword});
+    setLoadingLogin(false);
+    if(error){
+      setAuthError('No se pudo guardar la nueva contraseña. Abre de nuevo el enlace de recuperación.');
+      return;
+    }
+    setNewPassword('');
+    setConfirmPassword('');
+    setPasswordRecovery(false);
+    navigate('/inicio',{replace:true});
   }
 
   async function logout(){
@@ -126,6 +178,20 @@ export default function App(){
 
   if(!authReady)return <div className="auth-shell"><p>Validando sesión TEST…</p></div>;
 
+  if(passwordRecovery)return <div className="auth-shell">
+    <button className="theme-toggle auth-theme" onClick={()=>setTheme(theme==='light'?'dark':'light')} aria-label="Cambiar tema">{theme==='light'?<Moon size={18}/>:<Sun size={18}/>}<span>{theme==='light'?'Oscuro':'Claro'}</span></button>
+    <form className="auth-card" onSubmit={saveRecoveredPassword}>
+      <div className="brand auth-brand"><div className="brand-mark" role="img" aria-label="Logotipo Fénix Capital"/><div><strong>FÉNIX CAPITAL</strong><span>APP PRE-PROD · Fase 1</span></div></div>
+      <span className="eyebrow">RECUPERAR ACCESO</span>
+      <h1>Nueva contraseña</h1>
+      <p>Crea una nueva contraseña para tu usuario TEST.</p>
+      <label htmlFor="fenix-new-password">Nueva contraseña<input id="fenix-new-password" type="password" autoComplete="new-password" value={newPassword} onChange={e=>setNewPassword(e.target.value)} required/></label>
+      <label htmlFor="fenix-confirm-password">Repite la contraseña<input id="fenix-confirm-password" type="password" autoComplete="new-password" value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)} required/></label>
+      {authError&&<div className="warning">{authError}</div>}
+      <button className="primary" disabled={loadingLogin}>{loadingLogin?'Guardando…':'Guardar nueva contraseña'}</button>
+    </form>
+  </div>;
+
   if(!session)return <div className="auth-shell">
     <button className="theme-toggle auth-theme" onClick={()=>setTheme(theme==='light'?'dark':'light')} aria-label="Cambiar tema">{theme==='light'?<Moon size={18}/>:<Sun size={18}/>}<span>{theme==='light'?'Oscuro':'Claro'}</span></button>
     <form className="auth-card" onSubmit={login}>
@@ -138,7 +204,9 @@ export default function App(){
         <label className="auth-field" htmlFor="fenix-test-password"><span>Contraseña</span><input id="fenix-test-password" type="password" autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="Escribe tu contraseña TEST" required/></label>
       </div>
       {authError&&<div className="warning">{authError}</div>}
+      {resetMessage&&<div className="warning">{resetMessage}</div>}
       <button className="primary" disabled={loadingLogin}>{loadingLogin?'Entrando…':'Entrar'}</button>
+      <button type="button" className="theme-toggle" style={{marginTop:12,width:'100%',justifyContent:'center'}} onClick={requestPasswordReset} disabled={loadingReset}>{loadingReset?'Solicitando…':'¿Has olvidado tu contraseña?'}</button>
     </form>
   </div>;
 
