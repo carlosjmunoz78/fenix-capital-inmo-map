@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-08-20 · Cierre técnico y trazabilidad reconciliada
+
+### Validación canónica
+- Head validado previo a esta corrección documental: `e6d462f8a9d957628f92e74cc1399f1bc8a976ec`.
+- Workflow `PRE-PROD App Build` run `32350058573`: `completed / success`.
+- Browser QA: 19 passed, 8 skipped intencionadamente, 0 failed.
+- Artefacto `fenix-preprod-dist`: ID `9399513568`, digest `sha256:010d6948e556c1481a72e2cc2cf6413bb6ff3c16b32d465baa4f7f2fe106362d`.
+- Artefacto `fenix-preprod-playwright-report`: ID `9399513977`, digest `sha256:88beb3505fb73e8026ab1b1b8a068a0537c1de3d252cde118b7c9d58d457d234`.
+- `gh-pages` existe y contiene el snapshot generado por GitHub Actions; el repositorio informa `has_pages=true`.
+
+### Estado de hosting
+- Vercel **no se considera verificado actualmente**: la integración del team autorizado sigue mostrando 0 proyectos visibles y no existe evidencia suficiente para cerrar un smoke HTTPS desde esa vía.
+- GitHub Pages queda como alternativa preparada, pero no se marca host PRE-PROD cerrado hasta verificar respuesta HTTPS real.
+- Cualquier referencia histórica a `success` de Vercel describe un intento/deployment previo y **no sustituye** el gate actual `URL accesible + smoke real + SHA identificado`.
+
+### Seguridad y gobierno
+- `main` permanece sin fusionar.
+- PR #1 continúa draft.
+- PROD y WordPress siguen fuera de alcance hasta cierre técnico explícito.
+
 ## 2026-08-20 · Auth PRE-PROD y limpieza técnica
 
 ### Auth
@@ -12,23 +32,23 @@
 - `fenix-auth-email-fix-once` retirado como one-shot y dejado en `410 Gone` con `verify_jwt=true`.
 - Snapshot adicional creado: `backup/preprod-phase1-2026-08-20`.
 
-### Validación
-- `PRE-PROD App Build` run #97: 19 passed, 8 skipped intencionadamente, 0 failed.
-- Vercel reporta estado `success` sobre el último commit limpio.
+### Validación histórica
+- Browser QA sintético: 19 passed, 8 skipped intencionadamente, 0 failed en ejecuciones verdes.
 - `main` permanece sin fusión; PR #1 continúa draft.
 
 ## 2026-08-20 · Sincronización Vercel PRE-PROD
 
 ### Deployment
-- Se fuerza una nueva publicación desde la rama `preprod-app-phase1` tras conectar el repositorio Git en Vercel.
-- Objetivo: publicar en Vercel la versión actual que incluye logotipo Fénix, acceso TEST y recuperación de contraseña.
+- Se intentó publicar desde la rama `preprod-app-phase1` tras conectar el repositorio Git en Vercel.
+- Objetivo: publicar la versión actual con logotipo Fénix, acceso TEST y recuperación de contraseña.
+- Este intento no se considera cierre del hosting mientras no exista URL recuperable y smoke HTTPS verificable desde la integración autorizada.
 
 ## 2026-08-20 · Publicación PRE-PROD
 
 ### Deployment
 - GitHub Pages habilitado para el repositorio.
-- Workflow corregido para publicar únicamente desde `push` directo a `preprod-app-phase1`; los eventos `pull_request` quedan como QA-only.
-- Se fuerza nueva ejecución de publicación después de la activación de Pages para obtener un deployment limpio y verificable.
+- Workflow configurado para publicar desde `push` directo a `preprod-app-phase1`; los eventos `pull_request` mantienen QA y preparación de snapshot.
+- Se genera build específico con base `/fenix-capital-inmo-map/`, `404.html` para fallback SPA y `.nojekyll`.
 
 ## 2026-08-19 · PRE-PROD Fase 1
 
