@@ -35,7 +35,7 @@
 .dir-brand strong{color:#FF5F00!important}
 .dir-shell[data-dir-theme='dark'] .dir-brand strong{color:#FF5F00!important}
 
-/* Ana vertical: mantener exactamente su tamaño actual y mostrar el asset canónico real. */
+/* Ana vertical: mismo bloque, solo un poco más grande y ligeramente a la derecha. */
 .dir-person-wrap{
   background:linear-gradient(180deg,#fff9f6,#f7f4f2)!important;
   overflow:hidden!important;
@@ -49,6 +49,8 @@
   height:100%!important;
   object-fit:contain!important;
   object-position:center bottom!important;
+  transform:translateX(6px) scale(1.10)!important;
+  transform-origin:center bottom!important;
   mix-blend-mode:normal!important;
   filter:drop-shadow(0 6px 14px rgba(0,0,0,.08))!important;
 }
