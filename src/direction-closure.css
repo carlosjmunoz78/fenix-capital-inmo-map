@@ -31,36 +31,21 @@
 .dir-team-person>small{font-size:8.75px!important;line-height:1.35!important}
 .dir-team-person dt,.dir-team-person dd{font-size:8.75px!important;line-height:1.35!important}
 
-/* Ana vertical: escenario neutro independiente del tema para que no se pierdan
-   ni zonas blancas ni negras sobre el fondo oscuro de la interfaz. */
+/* Ana vertical: una sola imagen. Ocultamos el duplicado <img> y usamos el recurso canónico de fondo. */
 .dir-person-wrap{
-  background:linear-gradient(180deg,#d9d4d1 0%,#eeeae7 54%,#d2cbc7 100%)!important;
+  background:#f2eee9 url('./assets/ana-canonical.svg') center bottom/contain no-repeat!important;
   overflow:hidden!important;
   isolation:isolate!important;
 }
-.dir-person-photo{
-  object-fit:contain!important;
-  object-position:center bottom!important;
-  mix-blend-mode:normal!important;
-  filter:drop-shadow(0 8px 16px rgba(0,0,0,.18))!important;
-}
+.dir-person-photo{display:none!important}
 .dir-shell[data-dir-theme='dark'] .dir-person-wrap{
-  background:linear-gradient(180deg,#d9d4d1 0%,#eeeae7 54%,#d2cbc7 100%)!important;
+  background:#d9d4d1 url('./assets/ana-canonical.svg') center bottom/contain no-repeat!important;
   border-right:1px solid rgba(0,0,0,.08)!important;
 }
 
-/* Avatar pequeño de Ana: mismo recurso, más limpio y legible en ambos temas */
-.dir-help-avatar{
-  width:42px!important;
-  height:42px!important;
-  border-radius:50%!important;
-  object-fit:cover!important;
-  object-position:center 18%!important;
-  background:#ded8d4!important;
-  border:2px solid rgba(255,95,0,.28)!important;
-  box-shadow:0 3px 10px rgba(0,0,0,.12)!important;
-}
-.dir-help-card{padding:13px 12px 12px!important;grid-template-columns:1fr 44px!important;gap:9px!important}
+/* Avatar pequeño: conservar el retrato fiable ya preparado en .dir-help-person y evitar que otro <img> lo tape. */
+.dir-help-avatar{display:none!important}
+.dir-help-card{padding:13px 12px 12px!important;gap:9px!important}
 .dir-help-card strong{font-size:12px!important;line-height:1.3!important}
 .dir-help-card span{font-size:10.5px!important;line-height:1.35!important}
 .dir-help-card button{height:32px!important;font-size:10.5px!important}
@@ -76,15 +61,27 @@
 .dir-user-copy strong{font-size:12px!important;line-height:1.25!important}
 .dir-user-copy span{font-size:10px!important;line-height:1.3!important}
 
-/* Accesos rápidos: dejar de parecer miniaturas */
+/* Accesos rápidos */
 .dir-quick{margin-top:13px!important}
 .dir-quick h2{font-size:12px!important;line-height:1.3!important;margin-bottom:9px!important;letter-spacing:.025em!important}
 .dir-quick-grid{gap:11px!important}
 .dir-quick-grid button{height:70px!important;font-size:11.5px!important;line-height:1.25!important;padding:0 12px!important;gap:8px!important}
 .dir-quick-grid button svg{width:25px!important;height:25px!important}
 
-/* Calculadora: solo presencia visual del launcher; no se altera funcionalidad */
-.dir-calc-launcher{font-size:13px!important;min-height:46px!important;padding:0 16px!important;gap:9px!important}
+/* Calculadora: tamaño original, relleno naranja real, sin pseudo-elementos. */
+.calc-launcher.dir-calc-launcher{
+  min-height:0!important;
+  height:auto!important;
+  padding:13px 17px!important;
+  gap:9px!important;
+  font-size:12px!important;
+  background:#FF5F00!important;
+  border:0!important;
+  color:#fff!important;
+  box-shadow:0 8px 18px rgba(255,95,0,.22)!important;
+}
+.calc-launcher.dir-calc-launcher svg{color:#fff!important}
+.calc-launcher.dir-calc-launcher:hover{background:#e95500!important}
 
 /* Mantener equilibrio en escritorio grande */
 @media(min-width:1440px){
@@ -107,6 +104,5 @@
   .dir-topbar{min-height:64px!important;padding:8px 10px!important}
   .dir-priority-copy{padding:14px 12px!important}
   .dir-priority-copy h1{font-size:16px!important}
-  .dir-person-photo{max-height:270px!important}
   .dir-quick-grid button{height:64px!important;font-size:10.5px!important}
 }
