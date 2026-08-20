@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-08-20 · Auth PRE-PROD y limpieza técnica
+
+### Auth
+- `DIR-TEST` queda resuelto contra el correo real autorizado para pruebas de recuperación.
+- La recuperación se adapta a OTP de 6 dígitos con `verifyOtp(..., type: 'recovery')` y cambio posterior de contraseña.
+- El bloqueo observado en la última prueba es exclusivamente el rate limit del SMTP integrado de Supabase; no se interpreta como fallo funcional de la APP.
+
+### Limpieza
+- Eliminado `src/preprodBootstrap.ts` y retirada su invocación desde `src/main.tsx`.
+- `fenix-auth-email-fix-once` retirado como one-shot y dejado en `410 Gone` con `verify_jwt=true`.
+- Snapshot adicional creado: `backup/preprod-phase1-2026-08-20`.
+
+### Validación
+- `PRE-PROD App Build` run #97: 19 passed, 8 skipped intencionadamente, 0 failed.
+- Vercel reporta estado `success` sobre el último commit limpio.
+- `main` permanece sin fusión; PR #1 continúa draft.
+
 ## 2026-08-20 · Sincronización Vercel PRE-PROD
 
 ### Deployment
