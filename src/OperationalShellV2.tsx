@@ -6,20 +6,185 @@ import { fetchNotionRuntime } from './notionRuntime';
 import { fenixLogo, anaAvatar } from './assets/visualAssets';
 import './operational.css';
 
-type Theme='light'|'dark';type Ctx={actor_code?:string;role?:string};type NavItem={label:string;route:string;resource?:string};type AnyRow=Record<string,unknown>;type ModuleDef={title:string;endpoint?:string;description:string;icon:typeof Home};
+type Theme='light'|'dark';
+type Ctx={actor_code?:string;role?:string};
+type NavItem={label:string;route:string;resource?:string};
+type AnyRow=Record<string,unknown>;
+type ModuleDef={title:string;endpoint?:string;description:string;icon:typeof Home};
+
 const modules:Record<string,ModuleDef>={
-'/expedientes':{title:'Expedientes',endpoint:'/expedientes',description:'Cartera hipotecaria autorizada para tu perfil.',icon:FolderOpen},'/bancos':{title:'Bancos',endpoint:'/bancos',description:'Entidades y capacidades bancarias disponibles.',icon:Landmark},'/contactos':{title:'Contactos',endpoint:'/contactos',description:'Vista federada según rol: clientes, bancos e inmobiliarias.',icon:Users},'/inmobiliarias':{title:'Inmobiliarias',endpoint:'/inmobiliarias',description:'Cartera B2B autorizada por usuario y ámbito.',icon:Building2},'/tasaciones':{title:'Tasaciones',endpoint:'/tasaciones',description:'Pre-tasación, tasación, desviaciones y validación.',icon:FileText},'/firmas':{title:'Firmas',endpoint:'/firmas',description:'FEIN, notaría y cierre de firma.',icon:FileCheck2},'/documentacion':{title:'Documentación',endpoint:'/documentos',description:'Documentos y versiones dentro del ámbito autorizado.',icon:FileText},'/financieros':{title:'Financieros',endpoint:'/personal',description:'Carga operativa del equipo financiero.',icon:UserRound},'/visitadores':{title:'Visitadores',endpoint:'/visitadores',description:'Cartera B2B por visitador con aislamiento por rol.',icon:Users},'/agenda':{title:'Agenda',endpoint:'/tareas',description:'Tareas, vencimientos y trabajo asignado.',icon:CalendarDays},'/tareas':{title:'Agenda',endpoint:'/tareas',description:'Tareas, vencimientos y trabajo asignado.',icon:CalendarDays},'/informes':{title:'Informes',description:'Informes vivos y trazables de PRE-PROD.',icon:FileText},'/economia':{title:'Economía',description:'Panel económico reservado a Dirección.',icon:Landmark},'/buscar':{title:'Buscador',description:'Búsqueda transversal según permisos efectivos.',icon:Search}};
-const fallbackNav:NavItem[]=[{label:'Inicio',route:'/inicio'},{label:'Expedientes',route:'/expedientes'},{label:'Bancos',route:'/bancos'},{label:'Contactos',route:'/contactos'},{label:'Inmobiliarias',route:'/inmobiliarias'},{label:'Tasaciones',route:'/tasaciones'},{label:'Firmas',route:'/firmas'},{label:'Documentación',route:'/documentacion'},{label:'Financieros',route:'/financieros'},{label:'Visitadores',route:'/visitadores'},{label:'Agenda',route:'/agenda'},{label:'Informes',route:'/informes'}];
+  '/bancos/contactos':{title:'Contactos bancarios',description:'Contactos bancarios canónicos disponibles para el ámbito financiero.',icon:UserRound},
+  '/expedientes':{title:'Expedientes',endpoint:'/expedientes',description:'Cartera hipotecaria autorizada para tu perfil.',icon:FolderOpen},
+  '/bancos':{title:'Bancos',endpoint:'/bancos',description:'Entidades y capacidades bancarias disponibles.',icon:Landmark},
+  '/contactos':{title:'Contactos',endpoint:'/contactos',description:'Vista federada según rol: clientes, bancos e inmobiliarias.',icon:Users},
+  '/inmobiliarias':{title:'Inmobiliarias',endpoint:'/inmobiliarias',description:'Cartera B2B autorizada por usuario y ámbito.',icon:Building2},
+  '/tasaciones':{title:'Tasaciones',description:'Pre-tasación, tasación, desviaciones y validación.',icon:FileText},
+  '/firmas':{title:'Firmas',description:'FEIN, notaría y cierre de firma.',icon:FileCheck2},
+  '/documentacion':{title:'Documentación',description:'Documentos y versiones dentro del ámbito autorizado.',icon:FileText},
+  '/financieros':{title:'Financieros',endpoint:'/personal',description:'Carga operativa del equipo financiero.',icon:UserRound},
+  '/visitadores':{title:'Visitadores',endpoint:'/visitadores',description:'Cartera B2B por visitador con aislamiento por rol.',icon:Users},
+  '/agenda':{title:'Agenda',description:'Tareas, vencimientos y trabajo asignado.',icon:CalendarDays},
+  '/tareas':{title:'Agenda',description:'Tareas, vencimientos y trabajo asignado.',icon:CalendarDays},
+  '/informes':{title:'Informes',description:'Informes vivos y trazables de PRE-PROD.',icon:FileText},
+  '/economia':{title:'Economía',description:'Panel económico reservado a Dirección.',icon:Landmark},
+  '/buscar':{title:'Buscador',description:'Búsqueda transversal según permisos efectivos.',icon:Search}
+};
+
+const canonicalPaths:Record<string,string>={
+  '/expedientes':'/expedientes',
+  '/contactos':'/clientes',
+  '/inmobiliarias':'/inmobiliarias',
+  '/tasaciones':'/tasaciones',
+  '/firmas':'/firmas',
+  '/documentacion':'/documentos',
+  '/agenda':'/tareas',
+  '/tareas':'/tareas',
+  '/bancos/contactos':'/contactos-bancarios'
+};
+
+const fallbackNav:NavItem[]=[
+  {label:'Inicio',route:'/inicio'},{label:'Expedientes',route:'/expedientes'},{label:'Bancos',route:'/bancos'},
+  {label:'Contactos',route:'/contactos'},{label:'Inmobiliarias',route:'/inmobiliarias'},{label:'Tasaciones',route:'/tasaciones'},
+  {label:'Firmas',route:'/firmas'},{label:'Documentación',route:'/documentacion'},{label:'Financieros',route:'/financieros'},
+  {label:'Visitadores',route:'/visitadores'},{label:'Agenda',route:'/agenda'},{label:'Informes',route:'/informes'}
+];
+
 function pathKey(pathname:string){return Object.keys(modules).find(k=>pathname===k||pathname.startsWith(`${k}/`))||'';}
-function normalizeNav(data:unknown):NavItem[]{if(!data||typeof data!=='object')return [];const items=(data as {items?:unknown[]}).items;if(!Array.isArray(items))return [];return items.map(x=>{if(typeof x==='string')return{label:x.replace(/^\//,'').replace(/(^|-)\w/g,m=>m.replace('-','').toUpperCase())||'Inicio',route:x};if(x&&typeof x==='object'){const o=x as Record<string,unknown>;if(typeof o.route==='string')return{label:typeof o.label==='string'?o.label:o.route.replace(/^\//,''),route:o.route,resource:typeof o.resource==='string'?o.resource:undefined};}return null;}).filter((x):x is NavItem=>Boolean(x));}
-function rowsFrom(data:unknown):AnyRow[]{if(!data||typeof data!=='object')return [];const d=data as Record<string,unknown>;for(const key of ['items','expedientes','bancos','inmobiliarias','documentos','tareas','tasaciones','firmas','results','reports'])if(Array.isArray(d[key]))return d[key] as AnyRow[];return [];}
-function prettyKey(k:string){return k.replaceAll('_',' ').replace(/\b\w/g,m=>m.toUpperCase());}function prettyValue(v:unknown){if(v===null||v===undefined||v==='')return '—';if(typeof v==='boolean')return v?'Sí':'No';if(typeof v==='object')return JSON.stringify(v);return String(v);}function firstString(row:AnyRow,keys:string[]){for(const k of keys){const v=row[k];if(typeof v==='string'&&v.trim())return v.trim();}return '';}
-function detailRoute(key:string,row:AnyRow){if(key==='/expedientes'){const code=firstString(row,['expediente_code','code','codigo','id']);return code?`/expedientes/${encodeURIComponent(code)}`:'';}if(key==='/inmobiliarias'){const code=firstString(row,['inmobiliaria_code','code','codigo','id']);return code?`/inmobiliarias/${encodeURIComponent(code)}`:'';}if(key==='/contactos'){const id=firstString(row,['id','contact_id','contacto_id','contact_key']);return id?`/contactos/${encodeURIComponent(id)}`:'';}if(key==='/buscar'){const destino=firstString(row,['destino','route','ruta']);if(destino.startsWith('/expedientes/')||destino.startsWith('/contactos/')||destino.startsWith('/inmobiliarias/'))return destino;}return '';}
-async function fetchReports(){const {data:{session}}=await supabase.auth.getSession();if(!session?.access_token)return{status:401,data:null};const r=await fetch(`${SUPABASE_URL}/functions/v1/fenix-reports-api-test/reports`,{headers:{Authorization:`Bearer ${session.access_token}`}});let data:unknown=null;try{data=await r.json()}catch{data=null}return{status:r.status,data};}
-export default function OperationalShellV2(){const location=useLocation(),navigate=useNavigate(),key=pathKey(location.pathname),module=modules[key];const[sessionReady,setSessionReady]=useState(false),[logged,setLogged]=useState(false),[ctx,setCtx]=useState<Ctx|null>(null);const[nav,setNav]=useState<NavItem[]>([]),[theme,setTheme]=useState<Theme>(()=>(sessionStorage.getItem('fenix-theme') as Theme)||'light');const[loading,setLoading]=useState(false),[status,setStatus]=useState<number|null>(null),[rows,setRows]=useState<AnyRow[]>([]),[message,setMessage]=useState('');const[search,setSearch]=useState(()=>new URLSearchParams(location.search).get('q')||'');
-useEffect(()=>{let alive=true;supabase.auth.getSession().then(({data})=>{if(alive){setLogged(Boolean(data.session));setSessionReady(true)}});const{data:{subscription}}=supabase.auth.onAuthStateChange((_e,s)=>{setLogged(Boolean(s));setSessionReady(true)});return()=>{alive=false;subscription.unsubscribe()};},[]);useEffect(()=>{document.documentElement.dataset.theme=theme;sessionStorage.setItem('fenix-theme',theme);},[theme]);useEffect(()=>{if(!logged||!module)return;Promise.all([fetchAppApi<Ctx>('/session/context'),fetchAppApi<unknown>('/navigation')]).then(([c,n])=>{setCtx(c.status===200?c.data:null);setNav(n.status===200?normalizeNav(n.data):[]);});},[logged,module?.title]);
-useEffect(()=>{if(!logged||!module)return;let alive=true;async function load(){setLoading(true);setRows([]);setMessage('');setStatus(null);if(key==='/economia'){setMessage('Economía queda reservada a la fase de Dirección. No se muestran cifras inventadas.');setStatus(503);setLoading(false);return;}if(key==='/buscar'){const q=new URLSearchParams(location.search).get('q')?.trim()||'';if(q.length<2){setMessage('Escribe al menos 2 caracteres para buscar.');setStatus(200);setLoading(false);return;}const r=await fetchAppApi<unknown>(`/search?q=${encodeURIComponent(q)}`);if(!alive)return;setStatus(r.status);setRows(rowsFrom(r.data));if(r.status!==200)setMessage('No se pudo completar la búsqueda.');setLoading(false);return;}if(key==='/informes'){const r=await fetchReports();if(!alive)return;setStatus(r.status);setRows(rowsFrom(r.data));if(r.status!==200)setMessage('No se pudieron cargar los informes.');setLoading(false);return;}
-if(['/expedientes','/contactos','/inmobiliarias'].includes(key)){const path=key==='/contactos'?'/clientes':key;const r=await fetchNotionRuntime<unknown>(path);if(!alive)return;setStatus(r.status);setRows(rowsFrom(r.data));if(r.status===403)setMessage('Tu perfil no tiene acceso a este módulo.');else if(r.status!==200)setMessage('No se pudo leer la fuente canónica de Notion.');setLoading(false);return;}
-if(!module.endpoint){setMessage('Módulo pendiente de conexión PRE-PROD.');setStatus(503);setLoading(false);return;}const r=await fetchAppApi<unknown>(module.endpoint);if(!alive)return;setStatus(r.status);setRows(rowsFrom(r.data));if(r.status===403)setMessage('Tu perfil no tiene acceso a este módulo.');else if(r.status!==200)setMessage('No se pudo cargar el módulo.');setLoading(false);}load();return()=>{alive=false};},[logged,key,location.search,module?.endpoint]);
-const effectiveNav=useMemo(()=>nav.length?nav:fallbackNav,[nav]);const columns=useMemo(()=>{const first=rows[0];if(!first)return[];return Object.keys(first).filter(k=>!['id','synthetic','updated_at','created_at','owner_actor_code','fuente','destino'].includes(k)).slice(0,6);},[rows]);if(!sessionReady||!logged||!module)return null;const Icon=module.icon;function submitSearch(){const q=search.trim();navigate(q?`/buscar?q=${encodeURIComponent(q)}`:'/buscar');}async function logout(){await supabase.auth.signOut();window.location.href=import.meta.env.BASE_URL;}
-return <div className="ops-root" data-theme={theme}><aside className="ops-side"><button className="ops-brand" onClick={()=>navigate('/inicio')}><img src={fenixLogo} alt=""/><strong>FÉNIX CAPITAL</strong></button><nav>{effectiveNav.map(item=><button key={item.route} className={location.pathname===item.route?'active':''} onClick={()=>navigate(item.route)}>{item.label}</button>)}</nav><button className="ops-ana" onClick={()=>navigate('/ana')}><img src={anaAvatar} alt="Ana"/><span><strong>Hablar con Ana</strong><small>Asistente de Fénix Capital</small></span></button></aside><main className="ops-main"><header className="ops-top"><div className="ops-search"><Search size={17}/><input value={search} onChange={e=>setSearch(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')submitSearch()}} placeholder="Buscar expediente, cliente, banco, inmobiliaria..."/><button onClick={submitSearch}>Buscar</button></div><div className="ops-top-actions"><button onClick={()=>setTheme(theme==='light'?'dark':'light')} aria-label="Cambiar tema">{theme==='light'?<Moon size={17}/>:<Sun size={17}/>} {theme==='light'?'Oscuro':'Claro'}</button><div className="ops-profile"><strong>{ctx?.role||'Usuario'}</strong></div><button onClick={logout} aria-label="Cerrar sesión"><LogOut size={17}/></button></div></header><section className="ops-content"><div className="ops-title"><div><span className="ops-icon"><Icon size={20}/></span><div><h1>{module.title}</h1><p>{module.description}</p></div></div><span className={status===200?'ops-live ok':'ops-live'}>{loading?'Cargando…':status===200?'Datos vivos':'PRE-PROD'}</span></div><article className="ops-ana-card"><img src={anaAvatar} alt="Ana"/><div><strong>Ana</strong><p>Te muestro solo información permitida por tu sesión. Si falta una conexión, lo indico en lugar de inventar datos.</p></div></article>{message&&<div className="ops-message">{message}</div>}{!loading&&status===200&&rows.length===0&&!message&&<div className="ops-empty"><strong>Sin registros visibles</strong><span>No hay datos para tu ámbito actual.</span></div>}{rows.length>0&&<div className="ops-table-card"><div className="ops-table-head"><strong>{rows.length} registros</strong><span>{['/expedientes','/contactos','/inmobiliarias'].includes(key)?'Fuente canónica Notion':'Fuente autorizada PRE-PROD'}</span></div><div className="ops-table-wrap"><table><thead><tr>{columns.map(c=><th key={c}>{prettyKey(c)}</th>)}</tr></thead><tbody>{rows.map((row,i)=>{const route=detailRoute(key,row);return <tr key={String(row.id??row.expediente_code??row.inmobiliaria_code??row.tarea_code??row.appraisal_code??row.firma_code??row.actor_code??i)} className={route?'ops-clickable-row':''} tabIndex={route?0:undefined} onClick={()=>route&&navigate(route)} onKeyDown={e=>{if(route&&(e.key==='Enter'||e.key===' ')){e.preventDefault();navigate(route)}}}>{columns.map(c=><td key={c}>{prettyValue(row[c])}</td>)}</tr>})}</tbody></table></div></div>}</section></main></div>}
+function normalizeNav(data:unknown):NavItem[]{
+  if(!data||typeof data!=='object')return [];
+  const items=(data as {items?:unknown[]}).items;
+  if(!Array.isArray(items))return [];
+  return items.map(x=>{
+    if(typeof x==='string')return{label:x.replace(/^\//,'').replace(/(^|-)\w/g,m=>m.replace('-','').toUpperCase())||'Inicio',route:x};
+    if(x&&typeof x==='object'){
+      const o=x as Record<string,unknown>;
+      if(typeof o.route==='string')return{label:typeof o.label==='string'?o.label:o.route.replace(/^\//,''),route:o.route,resource:typeof o.resource==='string'?o.resource:undefined};
+    }
+    return null;
+  }).filter((x):x is NavItem=>Boolean(x));
+}
+function rowsFrom(data:unknown):AnyRow[]{
+  if(!data||typeof data!=='object')return [];
+  const d=data as Record<string,unknown>;
+  for(const k of ['items','expedientes','bancos','inmobiliarias','documentos','tareas','tasaciones','firmas','results','reports']){
+    if(Array.isArray(d[k]))return d[k] as AnyRow[];
+  }
+  return [];
+}
+function prettyKey(k:string){return k.replaceAll('_',' ').replace(/\b\w/g,m=>m.toUpperCase());}
+function prettyValue(v:unknown){
+  if(v===null||v===undefined||v==='')return '—';
+  if(typeof v==='boolean')return v?'Sí':'No';
+  if(Array.isArray(v))return v.length?v.map(x=>typeof x==='object'?JSON.stringify(x):String(x)).join(', '):'—';
+  if(typeof v==='object')return JSON.stringify(v);
+  return String(v);
+}
+function firstString(row:AnyRow,keys:string[]){for(const k of keys){const v=row[k];if(typeof v==='string'&&v.trim())return v.trim();}return '';}
+function detailRoute(key:string,row:AnyRow){
+  if(key==='/expedientes'){const code=firstString(row,['expediente_code','code','codigo','id']);return code?`/expedientes/${encodeURIComponent(code)}`:'';}
+  if(key==='/inmobiliarias'){const code=firstString(row,['inmobiliaria_code','code','codigo','id']);return code?`/inmobiliarias/${encodeURIComponent(code)}`:'';}
+  if(key==='/contactos'){const id=firstString(row,['id','contact_id','contacto_id','contact_key']);return id?`/contactos/${encodeURIComponent(id)}`:'';}
+  if(key==='/buscar'){
+    const destino=firstString(row,['destino','route','ruta']);
+    if(destino.startsWith('/expedientes/')||destino.startsWith('/contactos/')||destino.startsWith('/inmobiliarias/'))return destino;
+  }
+  return '';
+}
+async function fetchReports(){
+  const {data:{session}}=await supabase.auth.getSession();
+  if(!session?.access_token)return{status:401,data:null};
+  const r=await fetch(`${SUPABASE_URL}/functions/v1/fenix-reports-api-test/reports`,{headers:{Authorization:`Bearer ${session.access_token}`}});
+  let data:unknown=null;try{data=await r.json()}catch{data=null}
+  return{status:r.status,data};
+}
+
+export default function OperationalShellV2(){
+  const location=useLocation(),navigate=useNavigate(),key=pathKey(location.pathname),module=modules[key];
+  const[sessionReady,setSessionReady]=useState(false),[logged,setLogged]=useState(false),[ctx,setCtx]=useState<Ctx|null>(null);
+  const[nav,setNav]=useState<NavItem[]>([]),[theme,setTheme]=useState<Theme>(()=>(sessionStorage.getItem('fenix-theme') as Theme)||'light');
+  const[loading,setLoading]=useState(false),[status,setStatus]=useState<number|null>(null),[rows,setRows]=useState<AnyRow[]>([]),[message,setMessage]=useState('');
+  const[search,setSearch]=useState(()=>new URLSearchParams(location.search).get('q')||'');
+
+  useEffect(()=>{
+    let alive=true;
+    supabase.auth.getSession().then(({data})=>{if(alive){setLogged(Boolean(data.session));setSessionReady(true)}});
+    const{data:{subscription}}=supabase.auth.onAuthStateChange((_e,s)=>{setLogged(Boolean(s));setSessionReady(true)});
+    return()=>{alive=false;subscription.unsubscribe()};
+  },[]);
+  useEffect(()=>{document.documentElement.dataset.theme=theme;sessionStorage.setItem('fenix-theme',theme);},[theme]);
+  useEffect(()=>{
+    if(!logged||!module)return;
+    Promise.all([fetchAppApi<Ctx>('/session/context'),fetchAppApi<unknown>('/navigation')]).then(([c,n])=>{
+      setCtx(c.status===200?c.data:null);setNav(n.status===200?normalizeNav(n.data):[]);
+    });
+  },[logged,module?.title]);
+
+  useEffect(()=>{
+    if(!logged||!module)return;
+    let alive=true;
+    async function load(){
+      setLoading(true);setRows([]);setMessage('');setStatus(null);
+      if(key==='/economia'){
+        setMessage('Economía queda reservada a la fase de Dirección. No se muestran cifras inventadas.');setStatus(503);setLoading(false);return;
+      }
+      if(key==='/buscar'){
+        const q=new URLSearchParams(location.search).get('q')?.trim()||'';
+        if(q.length<2){setMessage('Escribe al menos 2 caracteres para buscar.');setStatus(200);setLoading(false);return;}
+        const r=await fetchAppApi<unknown>(`/search?q=${encodeURIComponent(q)}`);
+        if(!alive)return;setStatus(r.status);setRows(rowsFrom(r.data));if(r.status!==200)setMessage('No se pudo completar la búsqueda.');setLoading(false);return;
+      }
+      if(key==='/informes'){
+        const r=await fetchReports();if(!alive)return;setStatus(r.status);setRows(rowsFrom(r.data));if(r.status!==200)setMessage('No se pudieron cargar los informes.');setLoading(false);return;
+      }
+      const canonical=canonicalPaths[key];
+      if(canonical){
+        const r=await fetchNotionRuntime<unknown>(canonical);
+        if(!alive)return;
+        setStatus(r.status);setRows(rowsFrom(r.data));
+        if(r.status===403)setMessage('Tu perfil no tiene acceso a este módulo o registro.');
+        else if(r.status!==200)setMessage('No se pudo leer la fuente canónica de Notion.');
+        setLoading(false);return;
+      }
+      if(!module.endpoint){setMessage('Módulo pendiente de conexión PRE-PROD.');setStatus(503);setLoading(false);return;}
+      const r=await fetchAppApi<unknown>(module.endpoint);
+      if(!alive)return;setStatus(r.status);setRows(rowsFrom(r.data));
+      if(r.status===403)setMessage('Tu perfil no tiene acceso a este módulo.');else if(r.status!==200)setMessage('No se pudo cargar el módulo.');
+      setLoading(false);
+    }
+    load();return()=>{alive=false};
+  },[logged,key,location.search,module?.endpoint]);
+
+  const effectiveNav=useMemo(()=>nav.length?nav:fallbackNav,[nav]);
+  const columns=useMemo(()=>{
+    const first=rows[0];if(!first)return[];
+    return Object.keys(first).filter(k=>!['id','synthetic','updated_at','created_at','actualizado','owner_actor_code','fuente','destino'].includes(k)).slice(0,6);
+  },[rows]);
+  if(!sessionReady||!logged||!module)return null;
+  const Icon=module.icon;
+  function submitSearch(){const q=search.trim();navigate(q?`/buscar?q=${encodeURIComponent(q)}`:'/buscar');}
+  async function logout(){await supabase.auth.signOut();window.location.href=import.meta.env.BASE_URL;}
+  const sourceLabel=canonicalPaths[key]?'Fuente canónica Notion':'Fuente autorizada PRE-PROD';
+
+  return <div className="ops-root" data-theme={theme}>
+    <aside className="ops-side">
+      <button className="ops-brand" onClick={()=>navigate('/inicio')}><img src={fenixLogo} alt=""/><strong>FÉNIX CAPITAL</strong></button>
+      <nav>{effectiveNav.map(item=><button key={item.route} className={location.pathname===item.route?'active':''} onClick={()=>navigate(item.route)}>{item.label}</button>)}</nav>
+      <button className="ops-ana" onClick={()=>navigate('/ana')}><img src={anaAvatar} alt="Ana"/><span><strong>Hablar con Ana</strong><small>Asistente de Fénix Capital</small></span></button>
+    </aside>
+    <main className="ops-main">
+      <header className="ops-top">
+        <div className="ops-search"><Search size={17}/><input value={search} onChange={e=>setSearch(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')submitSearch()}} placeholder="Buscar expediente, cliente, banco, inmobiliaria..."/><button onClick={submitSearch}>Buscar</button></div>
+        <div className="ops-top-actions"><button onClick={()=>setTheme(theme==='light'?'dark':'light')} aria-label="Cambiar tema">{theme==='light'?<Moon size={17}/>:<Sun size={17}/>} {theme==='light'?'Oscuro':'Claro'}</button><div className="ops-profile"><strong>{ctx?.role||'Usuario'}</strong></div><button onClick={logout} aria-label="Cerrar sesión"><LogOut size={17}/></button></div>
+      </header>
+      <section className="ops-content">
+        <div className="ops-title"><div><span className="ops-icon"><Icon size={20}/></span><div><h1>{module.title}</h1><p>{module.description}</p></div></div><span className={status===200?'ops-live ok':'ops-live'}>{loading?'Cargando…':status===200?'Datos vivos':'PRE-PROD'}</span></div>
+        <article className="ops-ana-card"><img src={anaAvatar} alt="Ana"/><div><strong>Ana</strong><p>Te muestro solo información permitida por tu sesión. Si falta una conexión, lo indico en lugar de inventar datos.</p></div></article>
+        {key==='/bancos'&&<div className="ops-message" style={{display:'flex',gap:8,alignItems:'center',justifyContent:'space-between',flexWrap:'wrap'}}><span>Los contactos bancarios canónicos están disponibles dentro de este módulo.</span><button onClick={()=>navigate('/bancos/contactos')}>Ver contactos bancarios</button></div>}
+        {key==='/bancos/contactos'&&<div className="ops-message"><button onClick={()=>navigate('/bancos')}>← Volver a Bancos</button></div>}
+        {message&&<div className="ops-message">{message}</div>}
+        {!loading&&status===200&&rows.length===0&&!message&&<div className="ops-empty"><strong>Sin registros visibles</strong><span>No hay datos para tu ámbito actual.</span></div>}
+        {rows.length>0&&<div className="ops-table-card"><div className="ops-table-head"><strong>{rows.length} registros</strong><span>{sourceLabel}</span></div><div className="ops-table-wrap"><table><thead><tr>{columns.map(c=><th key={c}>{prettyKey(c)}</th>)}</tr></thead><tbody>{rows.map((row,i)=>{const route=detailRoute(key,row);return <tr key={String(row.id??row.expediente_code??row.inmobiliaria_code??row.tarea_code??row.appraisal_code??row.firma_code??row.actor_code??i)} className={route?'ops-clickable-row':''} tabIndex={route?0:undefined} onClick={()=>route&&navigate(route)} onKeyDown={e=>{if(route&&(e.key==='Enter'||e.key===' ')){e.preventDefault();navigate(route)}}}>{columns.map(c=><td key={c}>{prettyValue(row[c])}</td>)}</tr>})}</tbody></table></div></div>}
+      </section>
+    </main>
+  </div>;
+}
