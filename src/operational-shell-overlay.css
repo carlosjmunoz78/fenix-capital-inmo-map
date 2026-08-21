@@ -1,0 +1,4 @@
+#root:has(> .ops-root) > .app-shell > .sidebar,
+#root:has(> .ops-root) > .app-shell > .main{
+  display:none !important;
+}
