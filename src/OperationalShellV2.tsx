@@ -84,6 +84,10 @@ function detailRoute(key:string,row:AnyRow){
   if(key==='/expedientes'){const code=firstString(row,['expediente_code','code','codigo','id']);return code?`/expedientes/${encodeURIComponent(code)}`:'';}
   if(key==='/inmobiliarias'){const code=firstString(row,['inmobiliaria_code','code','codigo','id']);return code?`/inmobiliarias/${encodeURIComponent(code)}`:'';}
   if(key==='/contactos'){const id=firstString(row,['id','contact_id','contacto_id','contact_key']);return id?`/contactos/${encodeURIComponent(id)}`:'';}
+  if(key==='/agenda'||key==='/tareas'){const id=firstString(row,['id','tarea_id','tarea_code']);return id?`/tareas/${encodeURIComponent(id)}`:'';}
+  if(key==='/documentacion'){const id=firstString(row,['id','documento_id','document_code']);return id?`/documentacion/${encodeURIComponent(id)}`:'';}
+  if(key==='/tasaciones'){const id=firstString(row,['id','tasacion_id','appraisal_code']);return id?`/tasaciones/${encodeURIComponent(id)}`:'';}
+  if(key==='/firmas'){const id=firstString(row,['id','firma_id','firma_code']);return id?`/firmas/${encodeURIComponent(id)}`:'';}
   if(key==='/buscar'){
     const destino=firstString(row,['destino','route','ruta']);
     if(destino.startsWith('/expedientes/')||destino.startsWith('/contactos/')||destino.startsWith('/inmobiliarias/'))return destino;
