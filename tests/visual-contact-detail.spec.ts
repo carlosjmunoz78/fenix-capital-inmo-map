@@ -19,7 +19,7 @@ test.describe('Fénix PRE-PROD · ficha maestra de Contacto',()=>{
   await expect(page.getByText('FICHA DE CONTACTO')).toBeVisible();
   await expect(page.getByRole('heading',{name:'CARMELO',exact:true}).first()).toBeVisible();
   await expect(page.getByText('IDENTIDAD Y RELACIÓN')).toBeVisible();
-  await expect(page.getByText('SIGUIENTE PASO')).toBeVisible();
+  await expect(page.getByText('SIGUIENTE PASO',{exact:true})).toBeVisible();
   await expect(page.getByText('Formalizado').first()).toBeVisible();
   await expect(page.getByText('No existe una próxima acción registrada. Ana no completará el dato por suposición.')).toBeVisible();
   await expect(page.getByRole('button',{name:'Preparar WhatsApp'})).toBeVisible();
