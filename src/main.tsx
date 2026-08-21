@@ -12,6 +12,7 @@ import App from './App';
 import OperationalShellV2 from './OperationalShellV2';
 import AnaGovernance from './AnaGovernance';
 import VisitasShell from './VisitasShell';
+import CommunicationsShell from './CommunicationsShell';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -20,6 +21,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <OperationalShellV2 />
       <AnaGovernance />
       <VisitasShell />
+      <CommunicationsShell />
     </BrowserRouter>
   </React.StrictMode>
 );
