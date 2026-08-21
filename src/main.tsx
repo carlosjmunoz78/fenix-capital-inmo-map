@@ -13,6 +13,7 @@ import './calculator-no-pro.css';
 import './operational-shell-overlay.css';
 import App from './App';
 import OperationalShellV2 from './OperationalShellV2';
+import ContactosShell from './ContactosShell';
 import AnaGovernance from './AnaGovernance';
 import VisitasShell from './VisitasShell';
 import CommunicationsShell from './CommunicationsShell';
@@ -26,6 +27,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <CalculatorLabelGuard />
       <App />
       <OperationalShellV2 />
+      <ContactosShell />
       <AnaGovernance />
       <VisitasShell />
       <CommunicationsShell />
