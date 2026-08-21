@@ -7,69 +7,61 @@
 - El ZIP `FENIX_CEREBRO_OS_CHECKPOINT_06` se usa como especificación funcional y fuente de lógica, NO se copia encima del frontend porque pertenece a una arquitectura Vinext/servidor distinta.
 - Mantener como patrón visual el sistema Dirección ya validado y las 44 capturas de Work.
 
-## Hallazgo clave
-El frontend runnable del repositorio y el Checkpoint 06 no son el mismo proyecto técnico. La vía rápida y segura es PORTAR al runtime real los contratos funcionales del Checkpoint 06, no sustituir el repositorio.
-
-## Estado consolidado de este checkpoint
-1. Verificada rama `preprod-app-phase1`, commit histórico `63766c1cf9222ab55ed94fa9968568885a3ee10b`, workflow y `gh-pages`.
-2. Verificado Supabase PRE-PROD y Edge Functions activas.
-3. RPC server-side activas para Expedientes, Inmobiliarias, Contactos federados y Visitadores.
-4. `fenix-app-gateway-test` actualizado a v5 con autenticación fail-closed y rutas:
-   - `/health`
-   - `/personal`
-   - `/expedientes`
-   - `/inmobiliarias`
-   - `/contactos`
-   - `/visitadores`
-   - `/ana/correcciones`
-   - proxy autorizado hacia `fenix-app-api-test` para el resto.
-5. Contactos PRE-PROD funciona como vista federada por rol sin crear una base duplicada:
+## Estado consolidado
+1. Rama, workflow, Vercel y `gh-pages` verificados.
+2. Expedientes, Bancos, Inmobiliarias, Tasaciones, Firmas, Documentación, Agenda, Informes y Buscador ya tienen backend PRE-PROD autorizado.
+3. Contactos federados conectados sin crear base duplicada:
    - Dirección: clientes + bancos + inmobiliarias.
    - Financiero: sus clientes + bancos.
    - Visitador: inmobiliarias de su cartera.
-6. Visitadores queda aislado por rol:
-   - Dirección ve el equipo Visitador.
+4. Visitadores conectado con RBAC:
+   - Dirección ve equipo.
    - Visitador ve su propio ámbito.
    - Financiero recibe 403.
-7. Se han preparado las dos personas de prueba solicitadas usando identidades ya existentes, sin crear cuentas innecesarias:
-   - `FIN-A` muestra nombre `Carlos` y rol Financiero.
-   - `VIS-A` muestra nombre `Carlos` y rol Visitador.
-   Los actor codes e identidades A/B se mantienen para no romper las pruebas de aislamiento.
-8. Gobierno de Ana implementado en PRE-PROD:
-   - cualquier usuario puede explicar qué sugirió Ana y por qué no debe hacerse así;
-   - la corrección queda `Pendiente`;
-   - solo Dirección puede aprobar/rechazar;
-   - si se aprueba, queda `approved_rule` y pasa a `Aprobada`;
-   - control de versión evita dobles decisiones concurrentes.
-   - ciclo PRE-PROD probado: creación por Financiero → aprobación por Dirección → versión 2.
-9. Frontend conectado mediante `OperationalShellV2` para Expedientes, Bancos, Contactos, Inmobiliarias, Tasaciones, Firmas, Documentación, Financieros, Visitadores, Agenda, Informes y Buscador.
-10. `AnaGovernance` montado en `/ana` con cuadro de corrección y revisión de Dirección.
-11. La calculadora se muestra sin la palabra comercial `PRO` en la interfaz visible.
-12. Vercel ha compilado y desplegado en verde el commit `27f1c3c9899adbcd5c9deb8e044e2a5d45d9788a`.
+5. Personas de prueba solicitadas, reutilizando identidades A/B para conservar QA:
+   - `FIN-A` = Carlos · Financiero.
+   - `VIS-A` = Carlos · Visitador.
+6. Gobierno de Ana conectado:
+   - usuario explica qué sugirió Ana y por qué no debe hacerse así;
+   - queda Pendiente;
+   - solo Dirección aprueba/rechaza;
+   - aprobación genera `approved_rule` y aumenta versión;
+   - ciclo probado FIN-A → DIR-TEST → Aprobada v2.
+7. Visitas/gestiones B2B conectado:
+   - tabla `preprod_test.gestiones_b2b`;
+   - canales Visita/Llamada/WhatsApp/Email/Otro;
+   - resultado, próximo contacto, próxima acción, estado y versión;
+   - creación solo sobre inmobiliaria del ámbito permitido;
+   - Dirección ve todas, Visitador solo las suyas, Financiero 403;
+   - fixture probado: `VIS-A/Carlos` ve 1 gestión, `VIS-B` no la ve y Dirección sí.
+8. Frontend:
+   - `OperationalShellV2` para módulos operativos;
+   - `AnaGovernance` en `/ana`;
+   - `VisitasShell` en `/visitas`;
+   - calculadora visible sin palabra comercial `PRO`.
+9. Edge Functions:
+   - `fenix-app-gateway-test` v5;
+   - `fenix-visitas-api-test` v1.
+10. Último build funcional verificado en Vercel: commit `0069a5c833a368709ac503a191788fdbfcbce667` → `success`.
 
-## QA ejecutado en este checkpoint
-- Contactos Dirección: 6 registros visibles en fixture sintético autorizado.
-- Contactos Financiero `FIN-A/Carlos`: solo su cliente + bancos.
-- Contactos Visitador `VIS-A/Carlos`: solo su inmobiliaria.
-- Visitadores solicitado por Financiero: 403.
-- Visitadores solicitado por Dirección: lista de equipo.
-- Visitador `VIS-A/Carlos`: solo su propia ficha/cartera.
-- Ana: corrección creada por FIN-A, aprobada por DIR-TEST, estado final `Aprobada`, versión 2.
+## QA de aislamiento ya ejecutado
+- Dirección Contactos: ve todos los fixtures autorizados.
+- Financiero Carlos: solo cliente propio + bancos.
+- Visitador Carlos: solo inmobiliaria propia.
+- Financiero → Visitadores: 403.
+- Dirección → Visitadores: equipo completo.
+- Visitador Carlos → Visitadores: solo su ficha/cartera.
+- Visitador Carlos → Visitas: solo su actividad.
+- VIS-B no puede leer actividad VIS-A.
+- Dirección sí puede verla.
+- Ana: corrección creada, revisada y aprobada con control de versión.
 
-## Lo que NO se da todavía por cerrado
-- Las fuentes PRE-PROD siguen siendo fixtures aislados en Supabase; la sincronización canónica con Notion debe conectarse sin romper el RBAC ya probado.
-- Email/WhatsApp dispone de backend de comunicaciones y evidencia Brevo, pero aún falta integrarlo en las fichas y validar el transporte final de lanzamiento.
-- Visitas/gestiones B2B todavía requiere su endpoint y pantalla operativa completa.
-- Fichas detalle de Contacto, Inmobiliaria y Expediente todavía deben reconciliar botones/acciones contra las capturas.
-- No se declara Fase 1 lista hasta E2E completo Dirección/Financiero/Visitador y QA visual.
-
-## Siguiente orden exacto
-1. Visitas/gestiones B2B del Visitador + creación/modificación con auditoría.
-2. Comunicaciones desde Contacto/Expediente/Inmobiliaria: preparar → revisar → autorizar → enviar, manteniendo Brevo desacoplado como proveedor.
-3. Sincronización canónica Notion ↔ runtime PRE-PROD de forma controlada y sin duplicar fuentes.
-4. Fichas detalle y botones reales según las 44 capturas.
-5. E2E Dirección / Carlos-Financiero / Carlos-Visitador + aislamiento A↔B.
-6. QA visual y cierre de diferencias.
+## Pendiente real
+1. Comunicaciones desde las fichas: preparar → revisar → autorizar → enviar → guardar resultado, usando Brevo inicialmente pero con proveedor desacoplado.
+2. Sincronización canónica Notion ↔ runtime PRE-PROD sin romper el RBAC probado.
+3. Fichas detalle de Expediente, Contacto e Inmobiliaria con botones reales según las capturas.
+4. E2E completo Dirección / Carlos-Financiero / Carlos-Visitador con URLs forzadas y errores esperados.
+5. QA visual contra las 44 capturas.
 
 ## Criterio de cierre
-Fase 1 solo puede marcarse lista cuando Dirección, Financiero y Visitador puedan trabajar con datos vivos autorizados, botones reales, auditoría, errores explícitos y sin mocks/snapshots silenciosos.
+Fase 1 solo se marca lista cuando Dirección, Financiero y Visitador puedan trabajar con datos vivos autorizados, mutaciones auditadas, comunicaciones controladas, errores explícitos y sin mocks silenciosos.
