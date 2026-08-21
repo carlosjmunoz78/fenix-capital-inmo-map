@@ -8,6 +8,7 @@ import './direction-polish.css';
 import './direction-final.css';
 import './direction-closure.css';
 import './ana-vertical-size.css';
+import './calculator-no-pro.css';
 import App from './App';
 import OperationalShellV2 from './OperationalShellV2';
 import AnaGovernance from './AnaGovernance';
