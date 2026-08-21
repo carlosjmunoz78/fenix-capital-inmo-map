@@ -1,0 +1,42 @@
+import {test,expect} from '@playwright/test';
+
+const fakeSession={
+  access_token:'eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwicm9sZSI6ImF1dGhlbnRpY2F0ZWQiLCJzdWIiOiJhYWFhYWFhYS1hYWFhLTRhYWEtOGFhYS1hYWFhYWFhYWFhYWEiLCJlbWFpbCI6ImRpcmVjY2lvbkBmZW5peC50ZXN0IiwiZXhwIjoxOTk5OTk5OTk5fQ.',
+  token_type:'bearer',expires_in:3600,expires_at:1999999999,refresh_token:'qa-direction-not-real',
+  user:{id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',aud:'authenticated',role:'authenticated',email:'direccion@fenix.test',app_metadata:{},user_metadata:{},created_at:'2026-08-19T00:00:00.000Z'}
+};
+
+const navigation={items:[
+  {label:'Inicio',route:'/inicio'},{label:'Expedientes',route:'/expedientes'},{label:'Bancos',route:'/bancos'},
+  {label:'Contactos',route:'/contactos'},{label:'Inmobiliarias',route:'/inmobiliarias'},{label:'Tasaciones',route:'/tasaciones'},
+  {label:'Firmas',route:'/firmas'},{label:'Documentación',route:'/documentacion'},{label:'Financieros',route:'/financieros'},
+  {label:'Visitadores',route:'/visitadores'},{label:'Economía',route:'/economia'},{label:'Agenda',route:'/agenda'},{label:'Informes',route:'/informes'}
+]};
+
+test.describe('Fénix PRE-PROD · contrato visual Inicio Dirección',()=>{
+  test('Inicio conserva patrón maestro y genera evidencia visual',async({page},testInfo)=>{
+    if(!testInfo.project.name.includes('desktop'))test.skip();
+    await page.addInitScript(session=>{window.localStorage.setItem('fenix-preprod-auth',JSON.stringify(session));window.localStorage.setItem('fenix-remember-device','true');},fakeSession);
+    await page.route('**/functions/v1/fenix-app-gateway-test/**',async route=>{
+      const u=route.request().url();
+      if(u.endsWith('/session/context'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({actor_code:'DIR-TEST',role:'Direccion'})});
+      if(u.endsWith('/navigation'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(navigation)});
+      if(u.endsWith('/personal'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[],pending_profiles:5})});
+      return route.fulfill({status:404,contentType:'application/json',body:'{}'});
+    });
+    await page.goto('/inicio');
+    await expect(page.locator('.dir-shell')).toBeVisible();
+    await expect(page.getByRole('button',{name:'Inicio Fénix Capital'})).toBeVisible();
+    await expect(page.getByText('Hola Belén, buenos días')).toBeVisible();
+    await expect(page.getByRole('button',{name:/Abrir chat con Ana/})).toBeVisible();
+    await expect(page.locator('.dir-person-photo')).toBeVisible();
+    await expect(page.locator('.dir-help-avatar')).toBeVisible();
+    await expect(page.getByText('ACCESOS RÁPIDOS')).toBeVisible();
+    await expect(page.getByRole('region',{name:'Calculadora Hipotecaria'})).toBeVisible();
+    await expect(page.getByText(/\bPRO\b/)).toHaveCount(0);
+    await expect(page.locator('.dir-sidebar')).toBeVisible();
+    await expect(page.locator('.dir-topbar')).toBeVisible();
+    const shot=await page.screenshot({fullPage:true});
+    await testInfo.attach('inicio-direccion-qa',{body:shot,contentType:'image/png'});
+  });
+});
