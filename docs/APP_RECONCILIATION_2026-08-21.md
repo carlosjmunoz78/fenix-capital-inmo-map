@@ -31,7 +31,7 @@
    - aislamiento VIS-A ↔ VIS-B probado.
 7. Comunicaciones controladas conectadas en PRE-PROD:
    - workspace `/comunicaciones` y `/comunicaciones/nueva`;
-   - `fenix-communications-gateway-test` v1 con CORS + validación real de JWT;
+   - `fenix-communications-gateway-test` con CORS + validación real de JWT;
    - flujo: preparar → revisar → autorizar → transportar → registrar resultado;
    - Carlos Financiero no puede autoautorizar mensajes que requieren aprobación (`403 approval_required`);
    - Dirección sí puede autorizar;
@@ -39,14 +39,21 @@
    - modo `SIMULATED` probado con éxito y `external_sent=false`;
    - idempotencia, hashes, versiones, intentos e historial quedan persistidos;
    - navegación PRE-PROD incluye Comunicaciones para Dirección, Financiero y Visitador.
-8. Brevo real sigue desacoplado mediante `fenix-brevo-api-preprod`; ya existe evidencia histórica E2E de envío y webhooks, pero el workspace nuevo no ejecuta envíos externos durante QA sin habilitación expresa del transporte.
-9. Frontend operativo:
+8. Brevo real está desacoplado detrás del circuito de Comunicaciones. El envío externo PRE-PROD permanece cerrado salvo autorización + allowlist + configuración server-side.
+9. Fichas detalle montadas y operativas:
+   - `/expedientes/:id`;
+   - `/contactos/:id`;
+   - `/inmobiliarias/:id`;
+   - acciones contextuales a Comunicaciones, Documentación, Tasaciones, Firma y Gestión B2B según tipo.
+10. Los listados de Expedientes, Contactos e Inmobiliarias ya abren su ficha detalle autorizada mediante clic o teclado; Buscador puede abrir destinos soportados cuando recibe ruta.
+11. Frontend operativo:
    - `OperationalShellV2`;
+   - `DetailShell`;
    - `AnaGovernance`;
    - `VisitasShell`;
    - `CommunicationsShell`;
    - calculadora sin palabra comercial `PRO`.
-10. Último build de Comunicaciones: commit `dafd8fea1a9d8c196b972aef4af4a93aee769b25` → Vercel `success`.
+12. Último build funcional de navegación a detalle: commit `aaa7580ca530b5356ab2d92678966acdf77acc34` → Vercel `success`.
 
 ## QA de aislamiento ya ejecutado
 - Dirección Contactos: todos los fixtures autorizados.
@@ -57,13 +64,15 @@
 - VIS-B no lee actividad VIS-A.
 - Ana: corrección creada y aprobada con control de versión.
 - Comunicaciones: Financiero prepara; no puede aprobar; Dirección aprueba; simulación controlada sin envío externo.
+- Expedientes: FIN-A lista solo `EXP-FIN-A-001`; FIN-B solo `EXP-FIN-B-001`; Dirección ve ambos.
+- URL forzada Inmobiliaria: VIS-A abre `INM-VIS-A-001`; VIS-B sobre esa misma ficha recibe `403`; Dirección la abre correctamente.
 
 ## Pendiente real
-1. Activar transporte Brevo real desde el circuito de Comunicaciones con gate explícito, destinatario válido y registro de provider_message_id/eventos; WhatsApp sujeto a plantilla/consentimiento/reglas del proveedor.
-2. Sincronización canónica Notion ↔ runtime PRE-PROD sin romper RBAC ni duplicar fuente maestra.
-3. Fichas detalle de Expediente, Contacto e Inmobiliaria con acciones reales: preparar Email/WhatsApp, abrir documentos, tareas, tasación, firma y seguimiento.
-4. E2E completo Dirección / Carlos-Financiero / Carlos-Visitador con URLs forzadas.
-5. QA visual contra las 44 capturas y cierre de diferencias.
+1. Sincronización canónica Notion ↔ runtime PRE-PROD sin romper RBAC ni duplicar fuente maestra.
+2. Completar E2E navegador Dirección / Carlos-Financiero / Carlos-Visitador, incluyendo URL forzada de Expediente y Contacto.
+3. Convertir acciones contextuales restantes en mutaciones específicas desde ficha, sin obligar a volver al listado cuando no proceda.
+4. QA visual contra las 44 capturas y cierre de diferencias claro/oscuro, densidad, topbar, Ana, calculadora y responsive.
+5. Solo después: habilitación controlada de un envío Brevo real a destinatario QA permitido si aporta valor de cierre.
 
 ## Criterio de cierre
 Fase 1 solo se marca lista cuando Dirección, Financiero y Visitador puedan trabajar con datos vivos autorizados, mutaciones auditadas, comunicaciones controladas, errores explícitos y sin mocks silenciosos.
