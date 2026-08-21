@@ -24,7 +24,7 @@ test.describe('Fénix PRE-PROD · ficha maestra de expediente',()=>{
   await expect(page.getByText('SITUACIÓN ACTUAL')).toBeVisible();
   await expect(page.getByRole('heading',{name:'Datos económicos'})).toBeVisible();
   await expect(page.getByText('Los campos sin fuente conectada se muestran vacíos, nunca inventados.')).toBeVisible();
-  await expect(page.getByText('Confirmar documentación pendiente')).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Confirmar documentación pendiente',exact:true})).toBeVisible();
   await expect(page.getByRole('button',{name:/Que lo haga Ana/})).toBeVisible();
   await expect(page.getByRole('button',{name:/Ayúdame/})).toBeVisible();
   await expect(page.getByRole('button',{name:/Lo hago yo/})).toBeVisible();
