@@ -31,7 +31,7 @@ test.describe('Fénix PRE-PROD · acciones contextuales operativas',()=>{
    await page.getByLabel(c.field).selectOption({label:c.option});
    await expect(page.getByRole('button',{name:'Confirmar y guardar'})).toHaveCount(0);
    await page.getByRole('button',{name:'Revisar antes de guardar'}).click();
-   await expect(page.getByText('Vista previa')).toBeVisible();
+   await expect(page.getByText('Vista previa',{exact:true})).toBeVisible();
    await page.getByRole('button',{name:'Confirmar y guardar'}).click();
    await expect(page.getByText('Cambios guardados y auditados en Notion.')).toBeVisible();
    expect(posted.action).toBe('update');expect(posted.changes[c.change]).toBe(c.option);
