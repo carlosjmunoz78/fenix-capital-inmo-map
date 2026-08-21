@@ -1,0 +1,55 @@
+import {useEffect,useMemo,useState} from 'react';
+import {useLocation,useNavigate} from 'react-router-dom';
+import {LogOut,Moon,Search,Sun} from 'lucide-react';
+import {fetchAppApi,supabase} from './supabase';
+import {fetchNotionRuntime} from './notionRuntime';
+import {anaAvatar,anaVertical,fenixLogo} from './assets/visualAssets';
+import './operational.css';
+import './tasaciones-polish.css';
+
+type Theme='light'|'dark';
+type Ctx={actor_code?:string;role?:string};
+type NavItem={label:string;route:string};
+type Row=Record<string,unknown>;
+const fallbackNav:NavItem[]=[{label:'Inicio',route:'/inicio'},{label:'Expedientes',route:'/expedientes'},{label:'Bancos',route:'/bancos'},{label:'Contactos',route:'/contactos'},{label:'Inmobiliarias',route:'/inmobiliarias'},{label:'Tasaciones',route:'/tasaciones'},{label:'Firmas',route:'/firmas'},{label:'Documentación',route:'/documentacion'},{label:'Financieros',route:'/financieros'},{label:'Visitadores',route:'/visitadores'},{label:'Agenda',route:'/agenda'},{label:'Informes',route:'/informes'}];
+function normalizeNav(data:unknown):NavItem[]{if(!data||typeof data!=='object')return[];const items=(data as{items?:unknown[]}).items;if(!Array.isArray(items))return[];return items.map(x=>{if(typeof x==='string')return{label:x.replace(/^\//,'')||'Inicio',route:x};if(x&&typeof x==='object'){const o=x as Record<string,unknown>;if(typeof o.route==='string')return{label:typeof o.label==='string'?o.label:o.route.replace(/^\//,''),route:o.route};}return null;}).filter((x):x is NavItem=>Boolean(x));}
+function rowsFrom(data:unknown):Row[]{if(!data||typeof data!=='object')return[];const d=data as Record<string,unknown>;return Array.isArray(d.items)?d.items as Row[]:[];}
+function text(row:Row,keys:string[]){for(const k of keys){const v=row[k];if(typeof v==='string'&&v.trim())return v.trim();}return'';}
+function idOf(r:Row){return text(r,['id','tasacion_id','appraisal_code','code']);}
+function addressOf(r:Row){return text(r,['direccion','dirección','inmueble','domicilio','direccion_inmueble'])||'Inmueble sin dirección visible';}
+function stateOf(r:Row){return text(r,['estado','estado_tasacion','estado_tasación'])||'Sin estado';}
+function appraiserOf(r:Row){return text(r,['tasador','tasadora','empresa_tasadora','proveedor'])||'No disponible';}
+function dateOf(r:Row){return text(r,['fecha_informe','fecha_visita','fecha','fecha_tasacion','fecha_tasación'])||'No disponible';}
+function amountOf(r:Row){const keys=['importe','valor_tasacion','valor_tasación','valor','importe_tasacion'];for(const k of keys){const v=r[k];if(typeof v==='number')return new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(v);if(typeof v==='string'&&v.trim())return v.trim();}return'No disponible';}
+function hasReport(r:Row){return Boolean(text(r,['pdf','url_pdf','informe','documento','archivo']))||/informe|emitid|finaliz|complet/i.test(stateOf(r));}
+function pending(r:Row){return /pendiente|solicit|visita|curso|proceso/i.test(stateOf(r));}
+
+export default function TasacionesShell(){
+ const location=useLocation(),navigate=useNavigate();const active=location.pathname==='/tasaciones';
+ const[sessionReady,setSessionReady]=useState(false),[logged,setLogged]=useState(false),[ctx,setCtx]=useState<Ctx|null>(null),[nav,setNav]=useState<NavItem[]>([]),[theme,setTheme]=useState<Theme>(()=>(sessionStorage.getItem('fenix-theme') as Theme)||'light');
+ const[rows,setRows]=useState<Row[]>([]),[status,setStatus]=useState<number|null>(null),[loading,setLoading]=useState(false),[message,setMessage]=useState('');
+ const[query,setQuery]=useState(''),[state,setState]=useState(''),[order,setOrder]=useState('fecha');
+ useEffect(()=>{if(!active)return;let alive=true;supabase.auth.getSession().then(({data})=>{if(alive){setLogged(Boolean(data.session));setSessionReady(true)}});const{data:{subscription}}=supabase.auth.onAuthStateChange((_e,s)=>{setLogged(Boolean(s));setSessionReady(true)});return()=>{alive=false;subscription.unsubscribe()};},[active]);
+ useEffect(()=>{if(!active)return;document.documentElement.dataset.theme=theme;sessionStorage.setItem('fenix-theme',theme);},[active,theme]);
+ useEffect(()=>{if(!active||!logged)return;Promise.all([fetchAppApi<Ctx>('/session/context'),fetchAppApi<unknown>('/navigation')]).then(([c,n])=>{setCtx(c.status===200?c.data:null);setNav(n.status===200?normalizeNav(n.data):[]);});},[active,logged]);
+ useEffect(()=>{if(!active||!logged)return;let alive=true;(async()=>{setLoading(true);setMessage('');const r=await fetchNotionRuntime<unknown>('/tasaciones');if(!alive)return;setStatus(r.status);setRows(r.status===200?rowsFrom(r.data):[]);if(r.status===403)setMessage('Tu perfil no tiene acceso a este módulo o registro.');else if(r.status!==200)setMessage('No se pudo leer la fuente canónica de Tasaciones.');setLoading(false);})();return()=>{alive=false}},[active,logged]);
+ const effectiveNav=nav.length?nav:fallbackNav;
+ const states=useMemo(()=>Array.from(new Set(rows.map(stateOf).filter(Boolean))).sort(),[rows]);
+ const visible=useMemo(()=>{const q=query.trim().toLowerCase();const out=rows.filter(r=>{const hay=Object.values(r).filter(v=>typeof v==='string'||typeof v==='number').join(' ').toLowerCase();return(!q||hay.includes(q))&&(!state||stateOf(r)===state)});return[...out].sort((a,b)=>order==='estado'?stateOf(a).localeCompare(stateOf(b),'es'):order==='direccion'?addressOf(a).localeCompare(addressOf(b),'es'):dateOf(b).localeCompare(dateOf(a),'es'));},[rows,query,state,order]);
+ const withReport=useMemo(()=>rows.filter(hasReport).length,[rows]);const pendingCount=useMemo(()=>rows.filter(pending).length,[rows]);
+ if(!active||!sessionReady||!logged)return null;
+ async function logout(){await supabase.auth.signOut();window.location.href=import.meta.env.BASE_URL;}
+ return <div className="ops-root tas-root" data-theme={theme}>
+  <aside className="ops-side"><button className="ops-brand" onClick={()=>navigate('/inicio')}><img src={fenixLogo} alt=""/><strong>FÉNIX CAPITAL</strong></button><nav>{effectiveNav.map(item=><button key={item.route} className={item.route==='/tasaciones'?'active':''} onClick={()=>navigate(item.route)}>{item.label}</button>)}</nav><button className="ops-ana" onClick={()=>navigate('/ana')}><img src={anaAvatar} alt="Ana"/><span><strong>Ana está contigo</strong><small>Cuando quieras, avanzamos paso a paso.</small></span></button></aside>
+  <main className="ops-main"><header className="ops-top"><div className="ops-search"><Search size={17}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Buscar dirección, tasador o estado..."/><button>Buscar</button></div><div className="ops-top-actions"><button onClick={()=>setTheme(theme==='light'?'dark':'light')} aria-label="Cambiar tema">{theme==='light'?<Moon size={17}/>:<Sun size={17}/>} {theme==='light'?'Oscuro':'Claro'}</button><div className="ops-profile"><strong>{ctx?.role||'Usuario'}</strong></div><button onClick={logout} aria-label="Cerrar sesión"><LogOut size={17}/></button></div></header>
+   <section className="ops-content tas-content">
+    <section className="tas-ana-hero"><div className="tas-ana-photo"><img src={anaVertical} alt="Ana"/></div><div className="tas-ana-body"><span>ANA · EN ESTA PANTALLA</span><h2>¿Qué hacemos ahora?</h2><p>Una tasación clara evita dudas: revisamos estado, documento y siguiente paso sin inventar valores.</p><div className="tas-next"><button onClick={()=>setState(states.find(s=>/pendiente|solicit|curso|visita/i.test(s))||'')}><b>1</b><strong>Revisar pendientes</strong><small>Ver y preparar →</small></button><button onClick={()=>setOrder('fecha')}><b>2</b><strong>Ordenar por fecha</strong><small>Ver y preparar →</small></button><button onClick={()=>navigate('/documentacion')}><b>3</b><strong>Comprobar informes</strong><small>Ver documentación →</small></button></div><button className="tas-upload" onClick={()=>navigate('/documentacion')}>↑ Subir tasación</button></div></section>
+    <div className="tas-title"><div><small>TASACIÓN Y VALORACIÓN</small><h1>Tasaciones</h1><p>{status===200?`${rows.length} tasaciones visibles en tu ámbito autorizado.`:'Lectura canónica según permisos.'}</p></div><span className={status===200?'ops-live ok':'ops-live'}>{loading?'Cargando…':status===200?'Datos vivos':'PRE-PROD'}</span></div>
+    {message&&<div className="ops-message">{message}</div>}
+    {status===200&&<><section className="tas-kpis"><article><small>EN FUENTE</small><strong>{rows.length}</strong><span>Registros visibles canónicos</span></article><article><small>CON INFORME</small><strong>{withReport}</strong><span>Derivado de señal documental/estado</span></article><article><small>PENDIENTES</small><strong>{pendingCount}</strong><span>Derivado del estado visible</span></article></section>
+     <section className="tas-filter"><div className="tas-filter-head"><div><small>CONTROL DOCUMENTAL</small><h2>Tasaciones disponibles</h2></div><span>{visible.length} visibles</span></div><label>BUSCAR<input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Dirección, tasador o referencia"/></label><div className="tas-filter-grid"><label>ESTADO<select value={state} onChange={e=>setState(e.target.value)}><option value="">Todos</option>{states.map(v=><option key={v}>{v}</option>)}</select></label><label>ORDENAR POR<select value={order} onChange={e=>setOrder(e.target.value)}><option value="fecha">Fecha</option><option value="direccion">Dirección</option><option value="estado">Estado</option></select></label><button onClick={()=>{setQuery('');setState('');setOrder('fecha')}}>Limpiar</button></div></section>
+     {loading?<div className="ops-empty"><strong>Cargando…</strong></div>:visible.length===0?<div className="ops-empty"><strong>Sin tasaciones visibles</strong><span>No hay registros para estos filtros o para tu ámbito actual.</span></div>:<div className="ops-table-card tas-table"><div className="ops-table-head"><strong>{visible.length} registros</strong><span>Fuente canónica Notion</span></div><div className="ops-table-wrap"><table><thead><tr><th>Inmueble</th><th>Estado</th><th>Tasador / Tasadora</th><th>Fecha</th><th>Valor visible</th><th></th></tr></thead><tbody>{visible.map((r,i)=>{const id=idOf(r);return <tr key={id||i} className={id?'ops-clickable-row':''} tabIndex={id?0:undefined} onClick={()=>id&&navigate(`/tasaciones/${encodeURIComponent(id)}`)} onKeyDown={e=>{if(id&&(e.key==='Enter'||e.key===' ')){e.preventDefault();navigate(`/tasaciones/${encodeURIComponent(id)}`)}}}><td><strong>{addressOf(r)}</strong></td><td>{stateOf(r)}</td><td>{appraiserOf(r)}</td><td>{dateOf(r)}</td><td>{amountOf(r)}</td><td>{id?'→':''}</td></tr>})}</tbody></table></div></div>}</>}
+   </section>
+  </main>
+ </div>;
+}
