@@ -13,6 +13,7 @@ import OperationalShellV2 from './OperationalShellV2';
 import AnaGovernance from './AnaGovernance';
 import VisitasShell from './VisitasShell';
 import CommunicationsShell from './CommunicationsShell';
+import DetailShell from './DetailShell';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -22,6 +23,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <AnaGovernance />
       <VisitasShell />
       <CommunicationsShell />
+      <DetailShell />
     </BrowserRouter>
   </React.StrictMode>
 );
