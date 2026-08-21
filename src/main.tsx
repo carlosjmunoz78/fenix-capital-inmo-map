@@ -16,10 +16,12 @@ import AnaGovernance from './AnaGovernance';
 import VisitasShell from './VisitasShell';
 import CommunicationsShell from './CommunicationsShell';
 import DetailShell from './DetailShell';
+import CalculatorLabelGuard from './CalculatorLabelGuard';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <BrowserRouter basename={import.meta.env.BASE_URL}>
+      <CalculatorLabelGuard />
       <App />
       <OperationalShellV2 />
       <AnaGovernance />
