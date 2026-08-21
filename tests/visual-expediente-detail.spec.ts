@@ -20,7 +20,7 @@ test.describe('Fénix PRE-PROD · ficha maestra de expediente',()=>{
   await expect(page.getByText('FICHA MAESTRA')).toBeVisible();
   await expect(page.getByRole('heading',{name:'JORGE Y ALEX',exact:true})).toBeVisible();
   await expect(page.getByText('RECORRIDO DEL EXPEDIENTE')).toBeVisible();
-  await expect(page.getByText('Tasación',{exact:true}).first()).toBeVisible();
+  await expect(page.locator('.detail-phase-track small').filter({hasText:'Tasación'})).toBeVisible();
   await expect(page.getByText('SITUACIÓN ACTUAL')).toBeVisible();
   await expect(page.getByRole('heading',{name:'Datos económicos'})).toBeVisible();
   await expect(page.getByText('Los campos sin fuente conectada se muestran vacíos, nunca inventados.')).toBeVisible();
