@@ -16,6 +16,7 @@ import OperationalShellV2 from './OperationalShellV2';
 import ContactosShell from './ContactosShell';
 import ContactDetailShell from './ContactDetailShell';
 import InmobiliariasShell from './InmobiliariasShell';
+import InmobiliariaDetailShell from './InmobiliariaDetailShell';
 import AnaGovernance from './AnaGovernance';
 import VisitasShell from './VisitasShell';
 import CommunicationsShell from './CommunicationsShell';
@@ -32,6 +33,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <ContactosShell />
       <ContactDetailShell />
       <InmobiliariasShell />
+      <InmobiliariaDetailShell />
       <AnaGovernance />
       <VisitasShell />
       <CommunicationsShell />
