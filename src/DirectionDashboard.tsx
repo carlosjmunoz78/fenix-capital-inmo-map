@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { fetchAppApi } from './supabase';
 import { anaAvatar, anaVertical, fenixLogo } from './assets/visualAssets';
+import { useDirectionLiveData } from './useDirectionLiveData';
 
 type CalcState={principal:number;rate:number;years:number;purchasePrice:number|'';income:number|'';other:number|'';open:boolean;minimized:boolean};
 type MortgageResult={monthlyPayment:number;totalPaid:number;estimatedInterest:number;financingPct:number|null;effortPct:number|null;warnings:string[]}|null;
@@ -53,6 +54,7 @@ const refinementCss=`
 .dir-kpis{gap:8px;margin-bottom:9px}.dir-kpi{height:103px;padding:11px 10px 8px}.dir-kpi>svg{width:18px;height:18px;left:9px;top:11px}.dir-kpi>span{font-size:7.5px;margin-left:25px;min-height:21px}.dir-kpi>strong{font-size:21px;margin-top:8px}.dir-kpi>small{font-size:7.5px;margin-top:4px}
 .dir-section-head{height:34px;padding:0 11px}.dir-section-head strong{font-size:9.5px}.dir-section-head button{font-size:8.5px}
 .dir-empty-state{min-height:140px;padding:18px 22px}.dir-empty-state>span{font-size:10.5px}.dir-empty-state>small{font-size:8.5px;max-width:390px}.dir-empty-state>button{font-size:8.5px;padding:7px 10px}
+.dir-live-priorities{display:grid;gap:6px;padding:9px}.dir-live-priority{display:grid;grid-template-columns:1fr auto;gap:5px 10px;width:100%;text-align:left;padding:9px 10px;border:1px solid #ececec;border-radius:10px;background:#fff;color:inherit;cursor:pointer}.dir-live-priority strong{font-size:9.5px}.dir-live-priority small{font-size:8px;color:#777}.dir-live-priority b{grid-row:1/3;grid-column:2;font-size:8px;color:#f36c21;align-self:center}
 .dir-mid-grid{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:10px;margin-top:10px}
 .dir-team-person{min-width:178px;padding:9px}.dir-team-person>strong{font-size:9px}.dir-team-person>small{font-size:7.5px}.dir-team-person dt,.dir-team-person dd{font-size:7.5px}
 .dir-quick{margin-top:10px}.dir-quick h2{font-size:10px;margin-bottom:7px}.dir-quick-grid{gap:10px}.dir-quick-grid button{height:62px;font-size:9px}.dir-quick-grid button svg{width:24px;height:24px}
@@ -63,11 +65,11 @@ const refinementCss=`
 .dir-shell[data-dir-theme='dark'] .dir-nav-item{color:#d7d7db}.dir-shell[data-dir-theme='dark'] .dir-nav-item svg{color:#aaaab2}
 .dir-shell[data-dir-theme='dark'] .dir-nav-item:hover,.dir-shell[data-dir-theme='dark'] .dir-profile:hover{background:#28282c}
 .dir-shell[data-dir-theme='dark'] .dir-nav-item.active{background:#3a241d;color:#ff7a42}
-.dir-shell[data-dir-theme='dark'] .dir-help-card,.dir-shell[data-dir-theme='dark'] .dir-kpi,.dir-shell[data-dir-theme='dark'] .dir-table-card,.dir-shell[data-dir-theme='dark'] .dir-quick-grid button,.dir-shell[data-dir-theme='dark'] .dir-search,.dir-shell[data-dir-theme='dark'] .dir-advanced,.dir-shell[data-dir-theme='dark'] .dir-theme-toggle,.dir-shell[data-dir-theme='dark'] .dir-team-person{background:#202023;color:#f4f4f5;border-color:#39393e}
+.dir-shell[data-dir-theme='dark'] .dir-help-card,.dir-shell[data-dir-theme='dark'] .dir-kpi,.dir-shell[data-dir-theme='dark'] .dir-table-card,.dir-shell[data-dir-theme='dark'] .dir-quick-grid button,.dir-shell[data-dir-theme='dark'] .dir-search,.dir-shell[data-dir-theme='dark'] .dir-advanced,.dir-shell[data-dir-theme='dark'] .dir-theme-toggle,.dir-shell[data-dir-theme='dark'] .dir-team-person,.dir-shell[data-dir-theme='dark'] .dir-live-priority{background:#202023;color:#f4f4f5;border-color:#39393e}
 .dir-shell[data-dir-theme='dark'] .dir-search input,.dir-shell[data-dir-theme='dark'] .dir-search button,.dir-shell[data-dir-theme='dark'] .dir-bell,.dir-shell[data-dir-theme='dark'] .dir-logout{color:#d0d0d5}
 .dir-shell[data-dir-theme='dark'] .dir-empty-state,.dir-shell[data-dir-theme='dark'] .dir-empty-compact{background:#242427;color:#d2d2d6;border-color:#3b3b40}
 .dir-shell[data-dir-theme='dark'] .dir-empty-state>span,.dir-shell[data-dir-theme='dark'] .dir-empty-compact strong{color:#f0f0f2}
-.dir-shell[data-dir-theme='dark'] .dir-empty-state>small,.dir-shell[data-dir-theme='dark'] .dir-empty-compact small,.dir-shell[data-dir-theme='dark'] .dir-user-copy span,.dir-shell[data-dir-theme='dark'] .dir-help-card span{color:#aaaab2}
+.dir-shell[data-dir-theme='dark'] .dir-empty-state>small,.dir-shell[data-dir-theme='dark'] .dir-empty-compact small,.dir-shell[data-dir-theme='dark'] .dir-user-copy span,.dir-shell[data-dir-theme='dark'] .dir-help-card span,.dir-shell[data-dir-theme='dark'] .dir-live-priority small{color:#aaaab2}
 .dir-shell[data-dir-theme='dark'] .dir-section-head{border-color:#35353a}.dir-shell[data-dir-theme='dark'] .dir-priority-card{background:#202023;border-color:#39393e}.dir-shell[data-dir-theme='dark'] .dir-person-wrap{background:linear-gradient(180deg,#272326,#1d1d1f)}
 .dir-shell[data-dir-theme='dark'] .dir-theme-toggle:hover,.dir-shell[data-dir-theme='dark'] .dir-kpi:hover,.dir-shell[data-dir-theme='dark'] .dir-team-person:hover,.dir-shell[data-dir-theme='dark'] .dir-quick-grid button:hover{background:#2c2929;border-color:#70402c}
 @media(min-width:1440px){.dir-shell{grid-template-columns:214px minmax(0,1fr)}.dir-sidebar{padding-left:16px;padding-right:16px}.dir-content{padding-left:22px;padding-right:22px}.dir-dashboard-top{grid-template-columns:minmax(330px,30%) minmax(0,1fr)}.dir-priority-card{grid-template-columns:minmax(130px,38%) 1fr}.dir-kpi{height:108px}.dir-empty-state{min-height:150px}.dir-quick-grid button{height:66px}}
@@ -82,6 +84,7 @@ export default function DirectionDashboard({onNavigate,onLogout,calc,setCalc,res
   const [search,setSearch]=useState('');
   const [theme,setTheme]=useState<Theme>(()=>(sessionStorage.getItem('fenix-theme') as Theme)||'light');
   const teamRail=useRef<HTMLDivElement|null>(null);
+  const live=useDirectionLiveData();
 
   useEffect(()=>{
     document.documentElement.dataset.theme=theme;
@@ -104,6 +107,7 @@ export default function DirectionDashboard({onNavigate,onLogout,calc,setCalc,res
     onNavigate(q?`/buscar?q=${encodeURIComponent(q)}`:'/buscar');
   }
   function scrollTeam(direction:number){teamRail.current?.scrollBy({left:direction*280,behavior:'smooth'});}
+  function kpiValue(ready:boolean,value:number){return ready?String(value):'—';}
 
   return <div className="dir-shell" data-dir-theme={theme}>
     <style>{refinementCss}</style>
@@ -125,7 +129,7 @@ export default function DirectionDashboard({onNavigate,onLogout,calc,setCalc,res
         <div className="dir-search"><Search size={17}/><input value={search} onChange={e=>setSearch(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')runSearch()}} placeholder="Buscar expediente, cliente, banco, inmobiliaria, contacto..."/><button onClick={runSearch} aria-label="Buscar"><Search size={16}/></button></div>
         <div className="dir-top-right">
           <button className="dir-theme-toggle" onClick={()=>setTheme(theme==='light'?'dark':'light')} aria-label="Cambiar tema">{theme==='light'?<Moon size={16}/>:<Sun size={16}/>}<span>{theme==='light'?'Oscuro':'Claro'}</span></button>
-          <button className="dir-bell" aria-label="Notificaciones" onClick={()=>onNavigate('/tareas')}><Bell size={20}/></button>
+          <button className="dir-bell" aria-label="Notificaciones" onClick={()=>onNavigate('/agenda')}><Bell size={20}/></button>
           <button className="dir-profile" onClick={()=>onNavigate('/perfil')}><div className="dir-avatar">B</div><div className="dir-user-copy"><strong>Belén Muñoz</strong><span>Directora Financiera</span></div><ChevronDown size={16}/></button>
           <button className="dir-logout" onClick={onLogout} aria-label="Cerrar sesión"><LogOut size={17}/></button>
         </div>
@@ -137,22 +141,22 @@ export default function DirectionDashboard({onNavigate,onLogout,calc,setCalc,res
             <div className="dir-person-wrap"><img className="dir-person-photo" src={anaVertical} alt="Ana"/></div>
             <div className="dir-priority-copy">
               <h1>Hola Belén, buenos días 👋</h1><p>Estas son tus prioridades de hoy.</p>
-              <div className="dir-empty-compact"><AlertTriangle size={17}/><span><strong>Sin alertas reales cargadas</strong><small>Las prioridades aparecerán aquí cuando estén conectadas a expedientes y tareas reales.</small></span></div>
-              <button className="dir-alert-button" onClick={()=>onNavigate('/tareas')}>Ver todas las alertas <span>›</span></button>
+              {live.tareasReady&&live.priorities.length?<div className="dir-empty-compact"><AlertTriangle size={17}/><span><strong>{live.priorities.length} prioridades reales disponibles</strong><small>Proceden de Agenda/Tareas y respetan tu ámbito autorizado.</small></span></div>:<div className="dir-empty-compact"><AlertTriangle size={17}/><span><strong>{live.tareasReady?'Sin tareas pendientes visibles':'Prioridades no disponibles'}</strong><small>{live.tareasReady?'No hay tareas pendientes en la fuente visible.':'La fuente canónica no ha podido confirmar prioridades.'}</small></span></div>}
+              <button className="dir-alert-button" onClick={()=>onNavigate('/agenda')}>Ver Agenda/Tareas <span>›</span></button>
             </div>
           </article>
 
           <div className="dir-right-top">
             <section className="dir-kpis">
-              <button className="dir-kpi" onClick={()=>onNavigate('/expedientes')}><FolderOpen size={18}/><span>EXPEDIENTES<br/>EN CURSO</span><strong>—</strong><small>Dato real pendiente</small></button>
-              <button className="dir-kpi" onClick={()=>onNavigate('/firmas')}><FileCheck2 size={18}/><span>FIRMAS<br/>ESTE MES</span><strong>—</strong><small>Dato real pendiente</small></button>
-              <button className="dir-kpi" onClick={()=>onNavigate('/firmas')}><FileCheck2 size={18}/><span>FIRMADOS<br/>ESTE MES</span><strong>—</strong><small>Dato real pendiente</small></button>
-              <button className="dir-kpi" onClick={()=>onNavigate('/expedientes')}><AlertTriangle size={18}/><span>EN RIESGO</span><strong>—</strong><small>Dato real pendiente</small></button>
-              <button className="dir-kpi" onClick={()=>onNavigate('/economia')}><Gauge size={18}/><span>HONORARIOS<br/>PENDIENTES</span><strong>—</strong><small>Dato real pendiente</small></button>
+              <button className="dir-kpi" onClick={()=>onNavigate('/expedientes')}><FolderOpen size={18}/><span>EXPEDIENTES<br/>EN CURSO</span><strong>{kpiValue(live.expedientesReady,live.openExp)}</strong><small>{live.expedientesReady?'Derivado de estado/fase canónica':'Dato no disponible'}</small></button>
+              <button className="dir-kpi" onClick={()=>onNavigate('/firmas')}><FileCheck2 size={18}/><span>FIRMAS<br/>ESTE MES</span><strong>{kpiValue(live.firmasReady,live.firmasMes)}</strong><small>{live.firmasReady?'Fechas canónicas del mes':'Dato no disponible'}</small></button>
+              <button className="dir-kpi" onClick={()=>onNavigate('/firmas')}><FileCheck2 size={18}/><span>FIRMADOS<br/>ESTE MES</span><strong>{kpiValue(live.firmasReady,live.signedMes)}</strong><small>{live.firmasReady?'Estado + fecha canónicos':'Dato no disponible'}</small></button>
+              <button className="dir-kpi" onClick={()=>onNavigate('/expedientes')}><AlertTriangle size={18}/><span>EN RIESGO</span><strong>{kpiValue(live.expedientesReady,live.riskExp)}</strong><small>{live.expedientesReady?'Solo riesgo explícito visible':'Dato no disponible'}</small></button>
+              <button className="dir-kpi" onClick={()=>onNavigate('/economia')}><Gauge size={18}/><span>HONORARIOS<br/>PENDIENTES</span><strong>—</strong><small>Sin fuente económica suficiente</small></button>
             </section>
             <section className="dir-table-card priorities">
-              <div className="dir-section-head"><strong>PRIORIDADES Y TAREAS</strong><button onClick={()=>onNavigate('/tareas')}>Ver todas</button></div>
-              <div className="dir-empty-state"><span>No se muestran tareas ficticias.</span><small>Las tareas reales se cargarán aquí desde Agenda/Tareas.</small><button onClick={()=>onNavigate('/tareas')}>Abrir Agenda/Tareas</button></div>
+              <div className="dir-section-head"><strong>PRIORIDADES Y TAREAS</strong><button onClick={()=>onNavigate('/agenda')}>Ver todas</button></div>
+              {live.tareasReady&&live.priorities.length?<div className="dir-live-priorities">{live.priorities.map((p,i)=><button className="dir-live-priority" key={p.id||`${p.title}-${i}`} onClick={()=>p.id?onNavigate(`/tareas/${encodeURIComponent(p.id)}`):onNavigate('/agenda')}><strong>{p.title}</strong><small>{p.state} · {p.due}</small><b>ABRIR</b></button>)}</div>:<div className="dir-empty-state"><span>{live.tareasReady?'No hay tareas pendientes visibles.':'No se muestran tareas sin fuente confirmada.'}</span><small>{live.tareasReady?'Agenda está al día para el ámbito visible.':'Abre Agenda para consultar directamente la fuente canónica.'}</small><button onClick={()=>onNavigate('/agenda')}>Abrir Agenda/Tareas</button></div>}
             </section>
           </div>
         </section>
