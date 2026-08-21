@@ -50,7 +50,8 @@ test.describe('Fénix app shell + calculadora', () => {
     await page.route('**/auth/v1/logout**', route => route.fulfill({ status: 204, body: '' }));
 
     await page.goto('/');
-    await expect(page.getByRole('region', { name: 'Calculadora Hipotecaria PRO' })).toBeVisible();
+    await expect(page.getByRole('region', { name: 'Calculadora Hipotecaria' })).toBeVisible();
+    await expect(page.getByText(/\bPRO\b/)).toHaveCount(0);
     await expect(page).toHaveURL(/\/inicio$/);
   });
 
@@ -72,16 +73,16 @@ test.describe('Fénix app shell + calculadora', () => {
     const amount = page.getByLabel('Importe €');
     await amount.fill('135000');
     await page.getByRole('button', { name: 'Minimizar calculadora' }).click();
-    await expect(page.getByRole('region', { name: 'Calculadora Hipotecaria PRO' })).toHaveClass(/minimized/);
+    await expect(page.getByRole('region', { name: 'Calculadora Hipotecaria' })).toHaveClass(/minimized/);
     await page.getByRole('button', { name: 'Minimizar calculadora' }).click();
     await expect(amount).toHaveValue('135000');
   });
 
   test('calculator close and launcher restore', async ({ page }) => {
     await page.getByRole('button', { name: 'Cerrar calculadora' }).click();
-    await expect(page.getByRole('region', { name: 'Calculadora Hipotecaria PRO' })).toHaveCount(0);
-    await page.getByRole('button', { name: /Calculadora PRO/ }).click();
-    await expect(page.getByRole('region', { name: 'Calculadora Hipotecaria PRO' })).toBeVisible();
+    await expect(page.getByRole('region', { name: 'Calculadora Hipotecaria' })).toHaveCount(0);
+    await page.getByRole('button', { name: 'Calculadora' }).click();
+    await expect(page.getByRole('region', { name: 'Calculadora Hipotecaria' })).toBeVisible();
   });
 
   test('navigation is sourced from authorized backend response without exposing actor codes', async ({ page }) => {
@@ -128,14 +129,14 @@ test.describe('Fénix app shell + calculadora', () => {
   test('mobile keeps theme control and calculator usable', async ({ page }, testInfo) => {
     if (!testInfo.project.name.includes('mobile')) test.skip();
     await expect(page.getByRole('button', { name: 'Cambiar tema' })).toBeVisible();
-    await expect(page.getByRole('region', { name: 'Calculadora Hipotecaria PRO' })).toBeVisible();
+    await expect(page.getByRole('region', { name: 'Calculadora Hipotecaria' })).toBeVisible();
     await expect(page.locator('.sidebar')).toBeHidden();
   });
 
   test('tablet collapses sidebar without hiding app controls', async ({ page }, testInfo) => {
     if (!testInfo.project.name.includes('tablet')) test.skip();
     await expect(page.getByRole('button', { name: 'Cambiar tema' })).toBeVisible();
-    await expect(page.getByRole('region', { name: 'Calculadora Hipotecaria PRO' })).toBeVisible();
+    await expect(page.getByRole('region', { name: 'Calculadora Hipotecaria' })).toBeVisible();
     await expect(page.locator('.sidebar')).toBeVisible();
   });
 });
