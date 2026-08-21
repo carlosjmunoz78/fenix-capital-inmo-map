@@ -40,7 +40,7 @@ test.describe('Fénix PRE-PROD · contrato RBAC por rol',()=>{
       await page.goto(c.allowedRoute);
       await expect(page.getByText('Datos vivos')).toBeVisible();
       await expect(page.getByText('Fuente canónica Notion')).toBeVisible();
-      await expect(page.getByText(c.role)).toBeVisible();
+      await expect(page.locator('.ops-profile')).toContainText(c.role);
       if(c.actor==='FIN-A')await expect(page.getByText('QA FIN-A EXP')).toBeVisible();
       if(c.actor==='FIN-B')await expect(page.getByText('QA FIN-B EXP')).toBeVisible();
       if(c.actor==='VIS-A')await expect(page.getByText('QA VIS-A INMO')).toBeVisible();
