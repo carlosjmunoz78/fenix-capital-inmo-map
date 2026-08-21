@@ -9,13 +9,13 @@ import './direction-final.css';
 import './direction-closure.css';
 import './ana-vertical-size.css';
 import App from './App';
-import OperationalShell from './OperationalShell';
+import OperationalShellV2 from './OperationalShellV2';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <BrowserRouter basename={import.meta.env.BASE_URL}>
       <App />
-      <OperationalShell />
+      <OperationalShellV2 />
     </BrowserRouter>
   </React.StrictMode>
 );
