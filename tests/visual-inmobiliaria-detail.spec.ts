@@ -19,7 +19,7 @@ test.describe('Fénix PRE-PROD · ficha maestra de Inmobiliaria',()=>{
   const root=page.locator('.inmo-detail-root');
   await expect(root).toBeVisible();
   await expect(root.getByText('FICHA DE INMOBILIARIA',{exact:true})).toBeVisible();
-  await expect(root.getByRole('heading',{name:'ADAIX LUCENA',exact:true})).toBeVisible();
+  await expect(root.getByRole('heading',{level:1,name:'ADAIX LUCENA',exact:true})).toBeVisible();
   await expect(root.getByText('RELACIÓN B2B',{exact:true})).toBeVisible();
   await expect(root.getByText('SIGUIENTE PASO',{exact:true})).toBeVisible();
   await expect(root.getByText('2026-08-24',{exact:true})).toBeVisible();
