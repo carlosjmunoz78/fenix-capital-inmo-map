@@ -11,6 +11,7 @@ import './ana-vertical-size.css';
 import App from './App';
 import OperationalShellV2 from './OperationalShellV2';
 import AnaGovernance from './AnaGovernance';
+import VisitasShell from './VisitasShell';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -18,6 +19,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <App />
       <OperationalShellV2 />
       <AnaGovernance />
+      <VisitasShell />
     </BrowserRouter>
   </React.StrictMode>
 );
