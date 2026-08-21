@@ -7,6 +7,7 @@ import './direction-viewport.css';
 import './direction-polish.css';
 import './direction-final.css';
 import './direction-closure.css';
+import './direction-profile-polish.css';
 import './ana-vertical-size.css';
 import './calculator-no-pro.css';
 import './operational-shell-overlay.css';
