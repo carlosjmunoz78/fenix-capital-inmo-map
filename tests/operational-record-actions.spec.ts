@@ -7,8 +7,8 @@ const fakeSession={
 };
 const id='aaaaaaaa-1111-4111-8111-bbbbbbbbbbbb';
 async function boot(page:any,role='Direccion'){
- await page.addInitScript(session=>{window.localStorage.setItem('fenix-preprod-auth',JSON.stringify(session));window.localStorage.setItem('fenix-remember-device','true');},fakeSession);
- await page.route('**/functions/v1/fenix-app-gateway-test/**',async r=>{const u=r.request().url();if(u.endsWith('/session/context'))return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({actor_code:role==='Direccion'?'DIR-TEST':'FIN-A',role})});if(u.endsWith('/navigation'))return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[{label:'Inicio',route:'/inicio'},{label:'Agenda',route:'/agenda'},{label:'Documentación',route:'/documentacion'},{label:'Tasaciones',route:'/tasaciones'},{label:'Firmas',route:'/firmas'}]})});return r.fulfill({status:404,body:'{}'});});
+ await page.addInitScript((session:any)=>{window.localStorage.setItem('fenix-preprod-auth',JSON.stringify(session));window.localStorage.setItem('fenix-remember-device','true');},fakeSession);
+ await page.route('**/functions/v1/fenix-app-gateway-test/**',async (r:any)=>{const u=r.request().url();if(u.endsWith('/session/context'))return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({actor_code:role==='Direccion'?'DIR-TEST':'FIN-A',role})});if(u.endsWith('/navigation'))return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[{label:'Inicio',route:'/inicio'},{label:'Agenda',route:'/agenda'},{label:'Documentación',route:'/documentacion'},{label:'Tasaciones',route:'/tasaciones'},{label:'Firmas',route:'/firmas'}]})});if(u.endsWith('/personal'))return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[{actor_code:'FIN-A',name:'Financiero A',role:'Financiero'}],pending_profiles:0})});if(u.endsWith('/visitadores'))return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[{actor_code:'VIS-A',nombre:'Visitador A',rol:'Visitador'}]})});return r.fulfill({status:404,body:'{}'});});
 }
 
 test.describe('Fénix PRE-PROD · acciones contextuales operativas',()=>{
@@ -37,6 +37,35 @@ test.describe('Fénix PRE-PROD · acciones contextuales operativas',()=>{
    expect(posted.action).toBe('update');expect(posted.changes[c.change]).toBe(c.option);
   });
  }
+ test('Dirección puede trasladar una tarea con preview y escritura auditada',async({page},testInfo)=>{
+  if(!testInfo.project.name.includes('desktop'))test.skip();
+  await boot(page,'Direccion');
+  const payload={id,tarea:'Tarea reasignable',estado:'Pendiente',id_trabajador_operativo:'FIN-B'};
+  await page.route(`**/functions/v1/fenix-notion-runtime-test/tareas/${id}`,r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({source:'notion_canonical',item:payload})}));
+  await page.route('**/functions/v1/fenix-notion-runtime-test/tareas',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[payload]})}));
+  let posted:any=null;
+  await page.route(`**/functions/v1/fenix-notion-actions-test/tareas/${id}/action`,async r=>{posted=JSON.parse(r.request().postData()||'{}');return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,updated:['ID trabajador operativo']})});});
+  await page.goto(`/tareas/${id}`);
+  await expect(page.getByRole('heading',{name:'Tarea reasignable'})).toBeVisible();
+  await expect(page.getByLabel('Trasladar tarea a')).toBeVisible();
+  await page.getByLabel('Trasladar tarea a').selectOption('FIN-A');
+  await expect(page.getByRole('button',{name:'Confirmar y guardar'})).toHaveCount(0);
+  await page.getByRole('button',{name:'Revisar antes de guardar'}).click();
+  await expect(page.getByText('Id Trabajador Operativo: FIN-A',{exact:true})).toBeVisible();
+  await page.getByRole('button',{name:'Confirmar y guardar'}).click();
+  await expect(page.getByText('Cambios guardados y auditados en Notion.')).toBeVisible();
+  expect(posted.action).toBe('update');
+  expect(posted.changes.id_trabajador_operativo).toBe('FIN-A');
+ });
+ test('Financiero no ve control de traslado de tarea',async({page},testInfo)=>{
+  if(!testInfo.project.name.includes('desktop'))test.skip();
+  await boot(page,'Financiero');
+  const payload={id,tarea:'Tarea propia',estado:'Pendiente',id_trabajador_operativo:'FIN-A'};
+  await page.route(`**/functions/v1/fenix-notion-runtime-test/tareas/${id}`,r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({source:'notion_canonical',item:payload})}));
+  await page.goto(`/tareas/${id}`);
+  await expect(page.getByRole('heading',{name:'Tarea propia'})).toBeVisible();
+  await expect(page.getByLabel('Trasladar tarea a')).toHaveCount(0);
+ });
  test('403 de detalle operativo no expone formulario de escritura',async({page},testInfo)=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();
   await boot(page,'Financiero');
