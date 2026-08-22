@@ -129,7 +129,7 @@ export default function DirectionDashboard({onNavigate,onLogout,calc,setCalc,res
         <div className="dir-search"><Search size={17}/><input value={search} onChange={e=>setSearch(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')runSearch()}} placeholder="Buscar expediente, cliente, banco, inmobiliaria, contacto..."/><button onClick={runSearch} aria-label="Buscar"><Search size={16}/></button></div>
         <div className="dir-top-right">
           <button className="dir-theme-toggle" onClick={()=>setTheme(theme==='light'?'dark':'light')} aria-label="Cambiar tema">{theme==='light'?<Moon size={16}/>:<Sun size={16}/>}<span>{theme==='light'?'Oscuro':'Claro'}</span></button>
-          <button className="dir-bell" aria-label="Notificaciones" onClick={()=>onNavigate('/agenda')}><Bell size={20}/></button>
+          <button className="dir-bell" aria-label="Notificaciones" onClick={()=>onNavigate('/notificaciones')}><Bell size={20}/></button>
           <button className="dir-profile" onClick={()=>onNavigate('/perfil')}><div className="dir-avatar">B</div><div className="dir-user-copy"><strong>Belén Muñoz</strong><span>Directora Financiera</span></div><ChevronDown size={16}/></button>
           <button className="dir-logout" onClick={onLogout} aria-label="Cerrar sesión"><LogOut size={17}/></button>
         </div>
@@ -156,7 +156,7 @@ export default function DirectionDashboard({onNavigate,onLogout,calc,setCalc,res
             </section>
             <section className="dir-table-card priorities">
               <div className="dir-section-head"><strong>PRIORIDADES Y TAREAS</strong><button onClick={()=>onNavigate('/agenda')}>Ver todas</button></div>
-              {live.tareasReady&&live.priorities.length?<div className="dir-live-priorities">{live.priorities.map((p,i)=><button className="dir-live-priority" key={p.id||`${p.title}-${i}`} onClick={()=>p.id?onNavigate(`/tareas/${encodeURIComponent(p.id)}`):onNavigate('/agenda')}><strong>{p.title}</strong><small>{p.state} · {p.due}</small><b>ABRIR</b></button>)}</div>:<div className="dir-empty-state"><span>{live.tareasReady?'No hay tareas pendientes visibles.':'No se muestran tareas sin fuente confirmada.'}</span><small>{live.tareasReady?'Agenda está al día para el ámbito visible.':'Abre Agenda para consultar directamente la fuente canónica.'}</small><button onClick={()=>onNavigate('/agenda')}>Abrir Agenda/Tareas</button></div>}
+              {live.tareasReady&&live.priorities.length?<div className="dir-live-priorities">{live.priorities.map((p,i)=><button className="dir-live-priority" key={p.id||`${p.title}-${i}`} onClick={()=>onNavigate('/agenda')}><strong>{p.title}</strong><small>{p.state} · {p.due}</small><b>ABRIR</b></button>)}</div>:<div className="dir-empty-state"><span>{live.tareasReady?'No hay tareas pendientes visibles.':'No se muestran tareas sin fuente confirmada.'}</span><small>{live.tareasReady?'Agenda está al día para el ámbito visible.':'Abre Agenda para consultar directamente la fuente canónica.'}</small><button onClick={()=>onNavigate('/agenda')}>Abrir Agenda/Tareas</button></div>}
             </section>
           </div>
         </section>
