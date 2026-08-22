@@ -16,13 +16,15 @@ const cases:RoleCase[]=[
   {actor:'VIS-B',role:'Visitador',allowedRoute:'/inmobiliarias',allowedEndpoint:'inmobiliarias',allowedPayload:{items:[{id:'55555555-5555-4555-8555-555555555555',inmobiliaria:'QA VIS-B INMO',estado:'Activa'}]},deniedRoute:'/expedientes',deniedEndpoint:'expedientes'}
 ];
 
+function navigationFor(role:string){
+  if(role==='Visitador')return[{label:'Inicio',route:'/inicio'},{label:'Inmobiliarias',route:'/inmobiliarias'},{label:'Contactos',route:'/contactos'},{label:'Visitas',route:'/visitas'},{label:'Agenda',route:'/agenda'},{label:'Documentación',route:'/documentacion'},{label:'Informes',route:'/informes'},{label:'Notificaciones',route:'/notificaciones'},{label:'Buscar',route:'/buscar'},{label:'Mi perfil',route:'/perfil'}];
+  if(role==='Financiero')return[{label:'Inicio',route:'/inicio'},{label:'Expedientes',route:'/expedientes'},{label:'Bancos',route:'/bancos'},{label:'Contactos',route:'/contactos'},{label:'Documentación',route:'/documentacion'},{label:'Firmas',route:'/firmas'},{label:'Tasaciones',route:'/tasaciones'},{label:'Agenda',route:'/agenda'},{label:'Informes',route:'/informes'},{label:'Notificaciones',route:'/notificaciones'},{label:'Buscar',route:'/buscar'},{label:'Mi perfil',route:'/perfil'}];
+  return[{label:'Inicio',route:'/inicio'},{label:'Expedientes',route:'/expedientes'},{label:'Bancos',route:'/bancos'},{label:'Contactos',route:'/contactos'},{label:'Inmobiliarias',route:'/inmobiliarias'},{label:'Tasaciones',route:'/tasaciones'},{label:'Firmas',route:'/firmas'},{label:'Documentación',route:'/documentacion'},{label:'Financieros',route:'/financieros'},{label:'Visitadores',route:'/visitadores'},{label:'Agenda',route:'/agenda'},{label:'Economía',route:'/economia'},{label:'Informes',route:'/informes'},{label:'Notificaciones',route:'/notificaciones'},{label:'Comunicaciones',route:'/comunicaciones'},{label:'Buscar',route:'/buscar'},{label:'Mi perfil',route:'/perfil'}];
+}
+
 async function boot(page:any,c:RoleCase){
   await page.addInitScript(session=>{window.localStorage.setItem('fenix-preprod-auth',JSON.stringify(session));window.localStorage.setItem('fenix-remember-device','true');},fakeSession);
-  const navItems=c.role==='Visitador'
-    ?[{label:'Inicio',route:'/inicio'},{label:'Inmobiliarias',route:'/inmobiliarias'},{label:'Agenda',route:'/agenda'}]
-    :c.role==='Financiero'
-      ?[{label:'Inicio',route:'/inicio'},{label:'Expedientes',route:'/expedientes'},{label:'Contactos',route:'/contactos'},{label:'Tasaciones',route:'/tasaciones'},{label:'Firmas',route:'/firmas'},{label:'Documentación',route:'/documentacion'},{label:'Agenda',route:'/agenda'}]
-      :[{label:'Inicio',route:'/inicio'},{label:'Expedientes',route:'/expedientes'},{label:'Contactos',route:'/contactos'},{label:'Inmobiliarias',route:'/inmobiliarias'},{label:'Tasaciones',route:'/tasaciones'},{label:'Firmas',route:'/firmas'},{label:'Documentación',route:'/documentacion'},{label:'Agenda',route:'/agenda'}];
+  const navItems=navigationFor(c.role);
   await page.route('**/functions/v1/fenix-app-gateway-test/**',async route=>{
     const u=route.request().url();
     if(u.endsWith('/session/context'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({actor_code:c.actor,role:c.role})});
@@ -46,6 +48,20 @@ test.describe('Fénix PRE-PROD · contrato RBAC por rol',()=>{
       if(c.actor==='VIS-A')await expect(page.getByText('QA VIS-A INMO')).toBeVisible();
       if(c.actor==='VIS-B')await expect(page.getByText('QA VIS-B INMO')).toBeVisible();
       if(c.actor==='DIR-TEST')await expect(page.getByText('QA DIR EXP')).toBeVisible();
+      const nav=page.locator('.ops-side nav');
+      await expect(nav.getByRole('button',{name:'Notificaciones',exact:true})).toBeVisible();
+      if(c.role==='Direccion'){
+        await expect(nav.getByRole('button',{name:'Economía',exact:true})).toBeVisible();
+        await expect(nav.getByRole('button',{name:'Financieros',exact:true})).toBeVisible();
+        await expect(nav.getByRole('button',{name:'Visitadores',exact:true})).toBeVisible();
+        await expect(nav.getByRole('button',{name:'Comunicaciones',exact:true})).toBeVisible();
+      }else{
+        await expect(nav.getByRole('button',{name:'Economía',exact:true})).toHaveCount(0);
+        await expect(nav.getByRole('button',{name:'Financieros',exact:true})).toHaveCount(0);
+        await expect(nav.getByRole('button',{name:'Visitadores',exact:true})).toHaveCount(0);
+        await expect(nav.getByRole('button',{name:'Comunicaciones',exact:true})).toHaveCount(0);
+      }
+      if(c.role==='Visitador')await expect(nav.getByRole('button',{name:'Bancos',exact:true})).toHaveCount(0);
     });
 
     if(c.deniedRoute){
