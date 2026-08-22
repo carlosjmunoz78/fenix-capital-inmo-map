@@ -41,11 +41,13 @@ import CommunicationsShell from './CommunicationsShell';
 import DetailShellGate from './DetailShellGate';
 import OperationalRecordDetail from './OperationalRecordDetail';
 import CalculatorLabelGuard from './CalculatorLabelGuard';
+import ProfileLauncherGuard from './ProfileLauncherGuard';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <BrowserRouter basename={import.meta.env.BASE_URL}>
       <CalculatorLabelGuard />
+      <ProfileLauncherGuard />
       <App />
       <RoleHomeShell />
       <ProfileShell />
