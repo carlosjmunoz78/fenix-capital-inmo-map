@@ -10,7 +10,8 @@ Este documento registra la reconciliación técnica de la APP Fénix en PRE-PROD
 - PR #1 se mantiene abierto y en draft.
 - Login: Supabase Auth PRE-PROD.
 - Navegación y perfiles operativos: gateway autorizado.
-- Datos operativos: runtime Notion TEST/PRE-PROD con RBAC de backend y aislamiento por registro.
+- La respuesta viva de `/navigation` puede entregar rutas como strings; el cliente las normaliza centralmente a `{route,label}` sin modificar autorización ni fabricar rutas.
+- Datos operativos: runtimes Notion TEST/PRE-PROD con RBAC de backend y aislamiento por registro.
 - Escrituras operativas: actions TEST con vista previa obligatoria antes de confirmar.
 - Calculadora hipotecaria global: local, persistente por sesión/usuario, minimizable y sin `PRO` visible.
 - Ana: contextual, con preview antes de acciones sensibles y sin escritura implícita.
@@ -33,27 +34,42 @@ Este documento registra la reconciliación técnica de la APP Fénix en PRE-PROD
 - Informes.
 - Buscador avanzado.
 - Centro de avisos: derivado únicamente de tareas canónicas pendientes con fecha o criticidad explícita; no se simula una fuente de notificaciones inexistente.
+- Notarías: directorio maestro canónico + ficha individual, separado del flujo operativo FEIN/acta/firma.
 - Visitas B2B: preview antes de crear/completar.
 - Mi perfil.
 
 ## Mi perfil · cierre 22/08/2026
 
-- El perfil ya no depende de una entrada de menú: la identidad/avatar de la cabecera abre `/perfil` mediante ratón, Enter o Espacio.
+- El perfil no depende de una entrada de menú: la identidad/avatar de la cabecera abre `/perfil` mediante ratón, Enter o Espacio.
 - El comportamiento se aplica tanto al shell base como a los shells operativos que exponen `.ops-profile`.
+- La navegación PRE-PROD elimina `/perfil` de los menús de Dirección, Financiero y Visitador.
 - La ficha usa nombre, email y rol únicamente desde sesión/contexto autorizado.
 - Si Supabase Auth entrega una fotografía HTTPS en `avatar_url`, `picture`, `photo_url` o `foto`, se muestra esa imagen real en formato grande.
 - Si la sesión no aporta imagen, se mantienen iniciales como fallback; no se genera ni inventa una fotografía.
-- Evidencia CI: run #662 `32544557221`, **198 tests / 76 passed / 122 skips intencionales / 0 fallos**.
-- Artifact dist: `9468095830`, 253591 bytes, SHA256 `f762718992d41142a635588d9be24713de40ac7bdeb7730e2b5856a2125504a0`.
-- Playwright report: `9468096202`, 3615066 bytes, SHA256 `40bd5e32c848a725a70a9403c3aae42f8cb27baf8ed104fe857befdb6cd5e5e4`.
-- Snapshot gh-pages: `664b98e`, generado desde merge SHA CI `030a87a64e5959ec111531cfab1a0769773a04e5`.
-- El smoke HTTPS público sigue sin considerarse verificado porque `deploy-preprod-pages` permanece omitido.
 
-## Auditoría Notarías · sin duplicar datos
+## Notarías · cierre canónico 22/08/2026
 
-Se confirmó que ya existe una base maestra `Notarías · Fénix Capital` y una base operativa distinta `Notaría y firma · Fénix Capital`. No se crea ninguna base nueva.
+No se creó ninguna base duplicada. Se reutilizan dos fuentes ya existentes y conceptualmente distintas:
 
-La base maestra de notarías contiene, entre otros, los campos: Notaría, Activo, Dirección, Localidad, Notario / oficial principal, Teléfono, Email, Horario / observaciones, Notas y Última firma. La base operativa de firma enlaza con esa maestra mediante `Notaría maestra` y mantiene el flujo FEIN/acta/firma. Antes de crear una pantalla `/notarias`, debe existir y verificarse una ruta de lectura autorizada desde la app; el runtime actual documentado no expone `/notarias`, por lo que no se debe inventar un endpoint ni leer Notion directamente desde el navegador.
+- `Notarías · Fénix Capital`: directorio maestro. Data source canónico `053afd8f-0809-4d24-8006-1afd265e03a9`.
+- `Notaría y firma · Fénix Capital`: flujo operativo de FEIN, acta y firma, enlazado con el directorio mediante `Notaría maestra`.
+
+Se desplegó el runtime PRE-PROD `fenix-notarias-runtime-test` v1, de solo lectura, con autenticación y RBAC propios. Expone `/health`, `/notarias` y `/notarias/:id`; Dirección y Financiero pueden leer el directorio y Visitador recibe 403. El navegador no consulta Notion directamente.
+
+La UI `/notarias` y `/notarias/:id` muestra exclusivamente campos existentes del directorio: nombre, activo, dirección, localidad, notario/oficial principal, teléfono, email, horario/observaciones, notas y última firma. Los KPI de la lista se limitan a conteo visible, activos explícitos y localidades únicas. No se completan datos ausentes.
+
+La navegación PRE-PROD incorpora `/notarias` para Dirección y Financiero, pero no para Visitador. La forma real de navegación del gateway, que devuelve rutas como strings, queda normalizada centralmente en `fetchAppApi` y cubierta por QA.
+
+## Evidencia verde vigente
+
+CI #688 `32545090609` sobre head `4d8363f3d16d199c40db62e197c4b674c4e42801`: **GREEN**.
+
+- Browser QA: **207 tests / 79 passed / 128 skips intencionales / 0 fallos**.
+- Build TypeScript/Vite: SUCCESS.
+- Artifact dist: `9468250688`, 255611 bytes, SHA256 `b6f931408d1e8b3afbb043f1edac71c7f7d04384d2ea5dab10fdcf136625471a`.
+- Playwright report: `9468251025`, 3621978 bytes, SHA256 `91d06065ba1b40694fd6e9708fcf644c0f376a60902b711f5b1e3a09218b1901`.
+- Snapshot gh-pages: `bf0525a`, generado desde merge SHA CI `93d46027151d0a9bf70775226eef20ea113cf5fb`.
+- `deploy-preprod-pages` permanece omitido; el smoke HTTPS público todavía no se considera verificado.
 
 ## Deuda de asignaciones operativas
 
