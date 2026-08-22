@@ -13,7 +13,7 @@ const advice={
  human:{instruction:'Llama al cliente y confirma qué documentación puede aportar hoy.',must_record:'resultado real + compromiso + una sola siguiente acción'},
  ana:{would_do:'Puedo preparar una comunicación idempotente, pero no la enviaré ni cerraré la tarea sin un gate posterior.',can_execute:true,execution_kind:'prepare_contact'},
  client:{name:'JORGE Y ALEX',email:'jorge@example.test',phone:'600000000'},
- people:{count:3,titulares:2,avalistas:1,missing_docs:1,items:[{id:'p1',name:'Jorge',role:'Titular comprador',docs_complete:true,reviewed:true},{id:'p2',name:'Alex',role:'Titular comprador',docs_complete:true,reviewed:true},{id:'p3',name:'María',role:'Avalista',docs_complete:false,reviewed:true}]},
+ people:{count:3,titulares:2,avalistas:1,missing_data:1,missing_docs:1,next_person_data:{person_id:'p3',person_name:'María',field:{key:'situacion_laboral',label:'Situación laboral'}},items:[{id:'p1',name:'Jorge',role:'Titular comprador',docs_complete:true,reviewed:true},{id:'p2',name:'Alex',role:'Titular comprador',docs_complete:true,reviewed:true},{id:'p3',name:'María',role:'Avalista',docs_complete:false,reviewed:false,next_missing_field:{key:'situacion_laboral',label:'Situación laboral'}}]},
  execution_modes:{ana:true,help:true,manual:true},
  channels:{
   llamada:{canal:'Llamada',objetivo:'Confirmar documentación pendiente',guion:'Hola, Jorge y Alex. Soy de Fénix Capital y os llamo para confirmar la documentación pendiente del expediente.',preguntas:['¿Tenéis ya la vida laboral actualizada?','¿Cuándo podéis enviarla?'],resultado_esperado:'Confirmar disponibilidad y fijar una sola siguiente acción.'},
@@ -30,7 +30,7 @@ test.describe('Fénix PRE-PROD · ficha maestra de expediente',()=>{
   await page.addInitScript(session=>{window.localStorage.setItem('fenix-preprod-auth',JSON.stringify(session));window.localStorage.setItem('fenix-remember-device','true');},fakeSession);
   await page.route('**/functions/v1/fenix-app-gateway-test/**',async r=>{const u=r.request().url();if(u.endsWith('/session/context'))return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({actor_code:'DIR-TEST',role:'Direccion'})});if(u.endsWith('/navigation'))return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[{label:'Inicio',route:'/inicio'},{label:'Expedientes',route:'/expedientes'}]})});return r.fulfill({status:404,body:'{}'});});
   await page.route(`**/functions/v1/fenix-notion-runtime-test/expedientes/${id}`,r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({source:'notion_canonical',item})}));
-  await page.route(`**/functions/v1/fenix-notion-runtime-test/expedientes/${id}/compradores`,r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({count:3,titulares:2,avalistas:1,items:advice.people.items})}));
+  await page.route(`**/functions/v1/fenix-notion-runtime-test/expedientes/${id}/compradores`,r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({count:3,titulares:2,avalistas:1,items:[{id:'p1',nombre:'Jorge',rol_operacion:'Titular comprador',documentacion_completa:true,datos_revisados_financiero:true},{id:'p2',nombre:'Alex',rol_operacion:'Titular comprador',documentacion_completa:true,datos_revisados_financiero:true},{id:'p3',nombre:'María',rol_operacion:'Avalista',documentacion_completa:false,datos_revisados_financiero:false}]})}));
   await page.route('**/functions/v1/fenix-notion-runtime-test/expedientes',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[item]})}));
   await page.route(`**/functions/v1/fenix-expediente-assistant-test/expedientes/${id}/advice`,r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify(advice)}));
   let prepCalls=0;
@@ -46,7 +46,9 @@ test.describe('Fénix PRE-PROD · ficha maestra de expediente',()=>{
   await expect(page.getByRole('heading',{name:'Confirmar documentación pendiente',exact:true})).toBeVisible();
   await expect(page.getByText('Porque falta documentación crítica antes de poder avanzar de fase.')).toBeVisible();
   await expect(page.getByText('3 intervinientes',{exact:true})).toBeVisible();
-  await expect(page.getByText('2 titulares · 1 avalista · 1 con documentación pendiente',{exact:true})).toBeVisible();
+  await expect(page.getByText('2 titulares · 1 avalista · 1 con datos pendientes · 1 con documentación pendiente',{exact:true})).toBeVisible();
+  await expect(page.getByText('Siguiente dato pendiente: Situación laboral de María.',{exact:true})).toBeVisible();
+  await expect(page.getByRole('button',{name:'Completar este dato',exact:true})).toBeVisible();
   await expect(page.getByText('Lo que recuerdo de este expediente',{exact:true})).toBeVisible();
   const doAna=page.getByRole('button',{name:'Que lo haga Ana',exact:true});
   await expect(doAna).toBeEnabled();
