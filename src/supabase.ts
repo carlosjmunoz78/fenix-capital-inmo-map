@@ -35,6 +35,31 @@ function authenticatedContextFallback(session:Awaited<ReturnType<typeof supabase
  return{actor_code:actorCode,role,context_source:'authenticated-user-metadata'};
 }
 
+async function authenticatedEdgeFetch<T>(functionName:string,path:string,init?:RequestInit):Promise<{status:number;data:T|null}>{
+  const {data:{session}}=await supabase.auth.getSession();
+  const token=session?.access_token;
+  if(!token)return{status:401,data:null};
+  let response:Response;
+  try{
+    response=await fetch(`${SUPABASE_URL}/functions/v1/${functionName}${path}`,{
+      ...init,
+      headers:{
+        'content-type':'application/json',
+        ...(init?.headers||{}),
+        Authorization:`Bearer ${token}`,
+        apikey:SUPABASE_PUBLISHABLE_KEY
+      }
+    });
+  }catch{return{status:0,data:null};}
+  let raw:unknown=null;
+  try{raw=await response.json();}catch{raw=null;}
+  return{status:response.status,data:raw as T|null};
+}
+
+export async function fetchAnaApi<T>(path:string,init?:RequestInit):Promise<{status:number;data:T|null}>{
+  return authenticatedEdgeFetch<T>('fenix-ana-api-test',path,init);
+}
+
 export async function fetchAppApi<T>(path: string, init?: RequestInit): Promise<{ status: number; data: T | null }> {
   const { data: { session } } = await supabase.auth.getSession();
   const token = session?.access_token;
