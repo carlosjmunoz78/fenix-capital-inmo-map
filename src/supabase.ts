@@ -27,20 +27,42 @@ function normalizeNavigation(raw:unknown){
  return{...obj,items:normalized};
 }
 
+function authenticatedContextFallback(session:Awaited<ReturnType<typeof supabase.auth.getSession>>['data']['session']){
+ const metadata=session?.user?.user_metadata as Record<string,unknown>|undefined;
+ const actorCode=typeof metadata?.actor_code==='string'?metadata.actor_code:(typeof metadata?.fenix_test_actor==='string'?metadata.fenix_test_actor:'');
+ if(!actorCode)return null;
+ const role=actorCode==='DIR-TEST'?'Dirección':actorCode.startsWith('FIN-')?'Financiero':actorCode.startsWith('VIS-')?'Visitador':'Usuario';
+ return{actor_code:actorCode,role,context_source:'authenticated-user-metadata'};
+}
+
 export async function fetchAppApi<T>(path: string, init?: RequestInit): Promise<{ status: number; data: T | null }> {
   const { data: { session } } = await supabase.auth.getSession();
   const token = session?.access_token;
-  const response = await fetch(`${SUPABASE_URL}/functions/v1/fenix-app-gateway-test${path}`, {
-    ...init,
-    headers: {
-      'content-type': 'application/json',
-      ...(init?.headers || {}),
-      ...(token ? { Authorization: `Bearer ${token}` } : {})
+  let response:Response;
+  try{
+    response = await fetch(`${SUPABASE_URL}/functions/v1/fenix-app-gateway-test${path}`, {
+      ...init,
+      headers: {
+        'content-type': 'application/json',
+        ...(init?.headers || {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      }
+    });
+  }catch{
+    if(path==='/session/context'){
+      const fallback=authenticatedContextFallback(session);
+      if(fallback)return{status:200,data:fallback as T};
     }
-  });
+    return{status:0,data:null};
+  }
 
   let raw: unknown = null;
   try { raw = await response.json(); } catch { raw = null; }
+
+  if(path==='/session/context'&&!response.ok){
+    const fallback=authenticatedContextFallback(session);
+    if(fallback)return{status:200,data:fallback as T};
+  }
 
   const normalized = path === '/session/context'
     && raw
