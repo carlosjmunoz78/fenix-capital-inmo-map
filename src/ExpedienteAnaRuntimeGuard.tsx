@@ -1,8 +1,8 @@
 import {useEffect,useMemo,useState} from 'react';
 import {createPortal} from 'react-dom';
 import {useLocation,useNavigate} from 'react-router-dom';
-import {Phone,Mail,MessageCircle,ShieldCheck,Users} from 'lucide-react';
-import {SUPABASE_URL,supabase} from './supabase';
+import {Phone,Mail,MessageCircle,ShieldCheck,Users,Brain} from 'lucide-react';
+import {SUPABASE_URL,supabase,fetchMemoryApi} from './supabase';
 import {anaAvatar} from './assets/visualAssets';
 import './expediente-ana-runtime.css';
 
@@ -20,6 +20,8 @@ type Advice={
  };
  execution_modes?:{ana?:boolean;help?:boolean;manual?:boolean};
 };
+type MemoryItem={id:string;detail:string;memory_class?:string;source_actor?:string;created_at?:string;evidence_count?:number};
+type MemoryEnvelope={ok?:boolean;status?:number;items?:MemoryItem[]};
 
 function isNotionId(v:string){return /^[0-9a-f]{32}$/i.test(v.replaceAll('-',''));}
 async function fetchAdvice(id:string){
@@ -35,9 +37,9 @@ export default function ExpedienteAnaRuntimeGuard(){
  const location=useLocation(),navigate=useNavigate();
  const match=location.pathname.match(/^\/expedientes\/([^/]+)$/),id=match?.[1]?decodeURIComponent(match[1]):'';
  const active=Boolean(match&&isNotionId(id));
- const[advice,setAdvice]=useState<Advice|null>(null),[status,setStatus]=useState<number|null>(null),[target,setTarget]=useState<Element|null>(null),[channel,setChannel]=useState<'llamada'|'whatsapp'|'email'>('llamada'),[mode,setMode]=useState<'help'|'manual'|null>(null);
+ const[advice,setAdvice]=useState<Advice|null>(null),[status,setStatus]=useState<number|null>(null),[target,setTarget]=useState<Element|null>(null),[channel,setChannel]=useState<'llamada'|'whatsapp'|'email'>('llamada'),[mode,setMode]=useState<'help'|'manual'|null>(null),[memory,setMemory]=useState<MemoryItem[]>([]);
 
- useEffect(()=>{if(!active){setAdvice(null);setStatus(null);return;}let alive=true;void fetchAdvice(id).then(r=>{if(alive){setStatus(r.status);setAdvice(r.status===200?r.data:null)}});return()=>{alive=false}},[active,id]);
+ useEffect(()=>{if(!active){setAdvice(null);setStatus(null);setMemory([]);return;}let alive=true;void Promise.all([fetchAdvice(id),fetchMemoryApi<MemoryEnvelope>('/context',{method:'POST',body:JSON.stringify({origin_type:'expediente',origin_code:id})})]).then(([r,m])=>{if(!alive)return;setStatus(r.status);setAdvice(r.status===200?r.data:null);setMemory(m.status===200?(m.data?.items??[]).slice(0,3):[]);});return()=>{alive=false}},[active,id]);
  useEffect(()=>{if(!active)return;const attach=()=>{const el=document.querySelector('.detail-next-action');if(el){setTarget(el);el.classList.toggle('exp-ana-runtime-ready',Boolean(advice&&status===200));}};attach();const obs=new MutationObserver(attach);obs.observe(document.body,{childList:true,subtree:true});return()=>{obs.disconnect();document.querySelector('.detail-next-action')?.classList.remove('exp-ana-runtime-ready')}},[active,advice,status]);
  const usable=active&&status===200&&advice&&target;
  const channelData=useMemo(()=>advice?.channels?.[channel]??null,[advice,channel]);
@@ -65,6 +67,7 @@ export default function ExpedienteAnaRuntimeGuard(){
     <p><b>Por qué:</b> {advice.why||advice.blocking_reason||'No hay una justificación canónica disponible todavía.'}</p>
     {(advice.evidence?.phase||advice.evidence?.blocking_reason||advice.evidence?.task_id)&&<div className="exp-ana-evidence-line"><ShieldCheck size={15}/><span>{advice.evidence?.phase?`Fase: ${advice.evidence.phase}`:''}{advice.evidence?.blocking_reason?` · Bloqueo: ${advice.evidence.blocking_reason}`:''}{advice.evidence?.task_id?` · Tarea origen vinculada`:''}</span></div>}
     {people&&<div className="exp-ana-people-line"><Users size={16}/><div><strong>{people.count??0} interviniente{(people.count??0)===1?'':'s'}</strong><span>{people.titulares??0} titular{(people.titulares??0)===1?'':'es'} · {people.avalistas??0} avalista{(people.avalistas??0)===1?'':'s'} · {people.missing_docs??0} con documentación pendiente</span></div><button onClick={goPeople}>Ver personas</button></div>}
+    {memory.length>0&&<section className="exp-ana-memory" aria-label="Contexto recordado por Ana"><div className="exp-ana-memory-head"><Brain size={16}/><strong>Lo que recuerdo de este expediente</strong></div>{memory.map(x=><article key={x.id}><small>{x.memory_class||'Contexto'}{x.source_actor?` · ${x.source_actor}`:''}</small><p>{x.detail}</p></article>)}</section>}
 
     <div className="exp-ana-runtime-modes">
       <button disabled={!canAna} title={canAna?'':advice.ana?.blocked_by||'Ana todavía no tiene autoridad para ejecutar esta acción.'}>Que lo haga Ana</button>
