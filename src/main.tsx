@@ -41,6 +41,7 @@ import NotificationsShell from './NotificationsShell';
 import NotariasShell from './NotariasShell';
 import NotariaDetailShell from './NotariaDetailShell';
 import AnaGovernance from './AnaGovernance';
+import AnaUniversalGuard from './AnaUniversalGuard';
 import VisitasShell from './VisitasShell';
 import CommunicationsShell from './CommunicationsShell';
 import DetailShellGate from './DetailShellGate';
@@ -56,6 +57,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <CalculatorLabelGuard />
       <ProfileLauncherGuard />
       <OperationalAdvancedSearchGuard />
+      <AnaUniversalGuard />
       <App />
       <RoleHomeShell />
       <ProfileShell />
