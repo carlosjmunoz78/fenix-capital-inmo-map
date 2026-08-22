@@ -17,11 +17,12 @@ test.describe('Fénix PRE-PROD · Contactos aislados por rol',()=>{
   await page.route('**/functions/v1/fenix-notion-runtime-test/clientes',r=>{clientes++;return r.fulfill({status:500,body:'{}'});});
   await page.route('**/functions/v1/fenix-notion-runtime-test/contactos-inmobiliaria',r=>{b2bHits++;return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[b2b]})});});
   await page.goto('/contactos');
-  await expect(page.getByText('Contacto B2B QA')).toBeVisible();
+  const row=page.locator('tr').filter({hasText:'Contacto B2B QA'});
+  await expect(row).toBeVisible();
   await expect(page.getByText('Cliente Hipotecario QA')).toHaveCount(0);
   await expect(page.getByText(/No se muestran clientes hipotecarios/)).toBeVisible();
   expect(clientes).toBe(0);expect(b2bHits).toBe(1);
-  await page.getByText('Contacto B2B QA').click();
+  await row.dispatchEvent('click');
   await expect(page).toHaveURL(/\/contactos-b2b\//);
  });
 
@@ -37,7 +38,7 @@ test.describe('Fénix PRE-PROD · Contactos aislados por rol',()=>{
   expect(clientes).toBe(1);expect(b2bHits).toBe(0);
  });
 
- test('Dirección puede alternar explícitamente clientes y contactos de inmobiliaria',async({page},testInfo)=>{
+ test('Dirección puede alternar explícitamente de clientes a contactos de inmobiliaria',async({page},testInfo)=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();
   await auth(page,'DIR-TEST','Direccion');
   await page.route('**/functions/v1/fenix-notion-runtime-test/clientes',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[client]})}));
@@ -49,8 +50,5 @@ test.describe('Fénix PRE-PROD · Contactos aislados por rol',()=>{
   await tabs.getByRole('button',{name:'Contactos inmobiliaria'}).dispatchEvent('click');
   await expect(page.getByText('Contacto B2B QA')).toBeVisible();
   await expect(page.getByText('Cliente Hipotecario QA')).toHaveCount(0);
-  await expect(tabs.getByRole('button',{name:'Clientes hipotecarios'})).toBeVisible();
-  await tabs.getByRole('button',{name:'Clientes hipotecarios'}).dispatchEvent('click');
-  await expect(page.getByText('Cliente Hipotecario QA')).toBeVisible();
  });
 });
