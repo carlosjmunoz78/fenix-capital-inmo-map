@@ -5,7 +5,7 @@ const client={id:'aaaaaaaa111141118111bbbbbbbbbbbb',cliente:'Cliente Hipotecario
 const b2b={id:'bbbbbbbb111141118111cccccccccccc',contacto:'Contacto B2B QA',cargo:'Responsable',inmobiliaria:'Inmo QA',proximo_contacto:'2026-08-26'};
 
 async function auth(page:any,actorCode:string,role:string){
- await page.addInitScript(({session})=>{localStorage.setItem('fenix-preprod-auth',JSON.stringify(session));}, {session:fakeSession(actorCode,`${actorCode.toLowerCase()}@fenix.test`)});
+ await page.addInitScript(({session})=>{localStorage.setItem('fenix-preprod-auth',JSON.stringify(session));localStorage.setItem('fenix-remember-device','true');}, {session:fakeSession(actorCode,`${actorCode.toLowerCase()}@fenix.test`)});
  await page.route('**/functions/v1/fenix-app-gateway-test/**',async(r:any)=>{const u=r.request().url();if(u.endsWith('/session/context'))return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({actor_code:actorCode,role})});if(u.endsWith('/navigation'))return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[{label:'Inicio',route:'/inicio'},{label:'Contactos',route:'/contactos'},{label:'Inmobiliarias',route:'/inmobiliarias'}]})});return r.fulfill({status:404,body:'{}'});});
 }
 
@@ -44,9 +44,10 @@ test.describe('Fénix PRE-PROD · Contactos aislados por rol',()=>{
   await page.route('**/functions/v1/fenix-notion-runtime-test/contactos-inmobiliaria',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[b2b]})}));
   await page.goto('/contactos');
   await expect(page.getByText('Cliente Hipotecario QA')).toBeVisible();
-  const tabs=page.getByTestId('contact-scope-tabs');
-  await expect(tabs).toBeVisible();
-  await tabs.getByRole('button',{name:'Contactos inmobiliaria'}).dispatchEvent('click');
+  await expect(page.getByTestId('contact-scope-tabs')).toBeVisible();
+  const b2bTab=page.getByRole('button',{name:'Contactos inmobiliaria',exact:true});
+  await expect(b2bTab).toBeVisible();
+  await b2bTab.dispatchEvent('click');
   await expect(page.getByText('Contacto B2B QA')).toBeVisible();
   await expect(page.getByText('Cliente Hipotecario QA')).toHaveCount(0);
  });
