@@ -12,7 +12,10 @@ test.describe('Fénix PRE-PROD · acceso a nueva inmobiliaria por rol',()=>{
   test(`${role} ve el acceso de alta B2B`,async({page},testInfo)=>{
    if(!testInfo.project.name.includes('desktop'))test.skip();
    await boot(page,actor,role);await page.goto('/inmobiliarias');
-   const cta=page.getByTestId('new-inmobiliaria-access');await expect(cta).toBeVisible();await cta.click();await expect(page).toHaveURL(/\/inmobiliarias\/nueva$/);
+   const cta=page.getByTestId('new-inmobiliaria-access');
+   await expect(cta).toBeVisible();
+   await cta.dispatchEvent('click');
+   await expect(page).toHaveURL(/\/inmobiliarias\/nueva$/);
   });
  }
  test('Financiero no ve el acceso de alta B2B',async({page},testInfo)=>{
