@@ -30,6 +30,7 @@ import TasacionesShell from './TasacionesShell';
 import AgendaShell from './AgendaShell';
 import FirmasShell from './FirmasShell';
 import DocumentacionShell from './DocumentacionShell';
+import ContextEvidenceUpload from './ContextEvidenceUpload';
 import FinancierosShell from './FinancierosShell';
 import FinancieroDetailShell from './FinancieroDetailShell';
 import VisitadoresShell from './VisitadoresShell';
@@ -60,6 +61,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <OperationalAdvancedSearchGuard />
       <AnaUniversalGuard />
       <AnaInboxAccessGuard />
+      <ContextEvidenceUpload />
       <App />
       <RoleHomeShell />
       <ProfileShell />
