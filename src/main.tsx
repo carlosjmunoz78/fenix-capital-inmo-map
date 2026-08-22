@@ -12,6 +12,7 @@ import './ana-vertical-size.css';
 import './calculator-no-pro.css';
 import './operational-shell-overlay.css';
 import App from './App';
+import RoleHomeShell from './RoleHomeShell';
 import OperationalShellV2 from './OperationalShellV2';
 import ContactosShell from './ContactosShell';
 import ContactDetailShell from './ContactDetailShell';
@@ -35,6 +36,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <BrowserRouter basename={import.meta.env.BASE_URL}>
       <CalculatorLabelGuard />
       <App />
+      <RoleHomeShell />
       <OperationalShellV2 />
       <ContactosShell />
       <ContactDetailShell />
