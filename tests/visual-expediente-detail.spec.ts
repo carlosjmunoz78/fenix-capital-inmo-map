@@ -7,15 +7,31 @@ const fakeSession={
 };
 const id='aaaaaaaa111141118111bbbbbbbbbbbb';
 const item={id,expediente:'JORGE Y ALEX',cliente:'JORGE Y ALEX',fase:'Tasación',riesgo:'Medio',proxima_accion:'Confirmar documentación pendiente'};
+const advice={
+ ok:true,status:200,action:'Confirmar documentación pendiente',why:'Porque falta documentación crítica antes de poder avanzar de fase.',
+ evidence:{task_id:'task-1',phase:'Tasación',blocking_reason:'Falta vida laboral actualizada'},
+ human:{instruction:'Llama al cliente y confirma qué documentación puede aportar hoy.',must_record:'resultado real + compromiso + una sola siguiente acción'},
+ ana:{would_do:'Revisaría el expediente, prepararía el contacto exacto y registraría el resultado después.',can_execute:false,blocked_by:'Ejecución autónoma completa todavía no autorizada.'},
+ client:{name:'JORGE Y ALEX',email:'jorge@example.test',phone:'600000000'},
+ execution_modes:{ana:false,help:true,manual:true},
+ channels:{
+  llamada:{canal:'Llamada',objetivo:'Confirmar documentación pendiente',guion:'Hola, Jorge y Alex. Soy de Fénix Capital y os llamo para confirmar la documentación pendiente del expediente.',preguntas:['¿Tenéis ya la vida laboral actualizada?','¿Cuándo podéis enviarla?'],resultado_esperado:'Confirmar disponibilidad y fijar una sola siguiente acción.'},
+  whatsapp:{canal:'WhatsApp',texto:'Hola, Jorge y Alex. Para avanzar con vuestro expediente necesitamos confirmar la documentación pendiente.'},
+  email:{canal:'Email',asunto:'Fénix Capital · documentación pendiente',cuerpo:'Hola, Jorge y Alex:\n\nNecesitamos confirmar la documentación pendiente para seguir avanzando.'}
+ }
+};
 
 test.describe('Fénix PRE-PROD · ficha maestra de expediente',()=>{
- test('resumen, recorrido y gobierno Ana respetan el patrón maestro sin inventar datos',async({page},testInfo)=>{
+ test('resumen, recorrido y Ana usan consejo dinámico con motivo y guiones exactos',async({page},testInfo)=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();
   await page.setViewportSize({width:1600,height:900});
   await page.addInitScript(session=>{window.localStorage.setItem('fenix-preprod-auth',JSON.stringify(session));window.localStorage.setItem('fenix-remember-device','true');},fakeSession);
   await page.route('**/functions/v1/fenix-app-gateway-test/**',async r=>{const u=r.request().url();if(u.endsWith('/session/context'))return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({actor_code:'DIR-TEST',role:'Direccion'})});if(u.endsWith('/navigation'))return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[{label:'Inicio',route:'/inicio'},{label:'Expedientes',route:'/expedientes'}]})});return r.fulfill({status:404,body:'{}'});});
   await page.route(`**/functions/v1/fenix-notion-runtime-test/expedientes/${id}`,r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({source:'notion_canonical',item})}));
+  await page.route(`**/functions/v1/fenix-notion-runtime-test/expedientes/${id}/compradores`,r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({count:0,titulares:0,avalistas:0,items:[]})}));
   await page.route('**/functions/v1/fenix-notion-runtime-test/expedientes',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[item]})}));
+  await page.route(`**/functions/v1/fenix-expediente-assistant-test/expedientes/${id}/advice`,r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify(advice)}));
+  await page.route('**/functions/v1/fenix-ana-api-test/capabilities',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,capabilities:{can_ana_execute:false,can_ana_help:true,can_manual_execute:true,can_upload_evidence:true,can_correct_ana:true,can_view_learning_inbox:true}})}));
   await page.goto(`/expedientes/${id}`);
   await expect(page.getByText('FICHA MAESTRA')).toBeVisible();
   await expect(page.getByRole('heading',{name:'JORGE Y ALEX',exact:true})).toBeVisible();
@@ -24,10 +40,18 @@ test.describe('Fénix PRE-PROD · ficha maestra de expediente',()=>{
   await expect(page.getByText('SITUACIÓN ACTUAL')).toBeVisible();
   await expect(page.getByRole('heading',{name:'Datos económicos'})).toBeVisible();
   await expect(page.getByText('Los campos sin fuente conectada se muestran vacíos, nunca inventados.')).toBeVisible();
+  await expect(page.getByTestId('expediente-ana-runtime')).toBeVisible();
   await expect(page.getByRole('heading',{name:'Confirmar documentación pendiente',exact:true})).toBeVisible();
-  await expect(page.getByRole('button',{name:/Que lo haga Ana/})).toBeVisible();
-  await expect(page.getByRole('button',{name:/Ayúdame/})).toBeVisible();
-  await expect(page.getByRole('button',{name:/Lo hago yo/})).toBeVisible();
+  await expect(page.getByText('Porque falta documentación crítica antes de poder avanzar de fase.')).toBeVisible();
+  await expect(page.getByText('Fase: Tasación · Bloqueo: Falta vida laboral actualizada · Tarea origen vinculada')).toBeVisible();
+  await expect(page.getByRole('button',{name:'Que lo haga Ana',exact:true})).toBeDisabled();
+  await expect(page.getByRole('button',{name:'Ayúdame',exact:true})).toBeVisible();
+  await expect(page.getByRole('button',{name:'Lo hago yo',exact:true})).toBeVisible();
+  await expect(page.getByText('Hola, Jorge y Alex. Soy de Fénix Capital y os llamo para confirmar la documentación pendiente del expediente.')).toBeVisible();
+  await page.getByRole('button',{name:'WhatsApp',exact:true}).click();
+  await expect(page.getByText('Hola, Jorge y Alex. Para avanzar con vuestro expediente necesitamos confirmar la documentación pendiente.')).toBeVisible();
+  await page.getByRole('button',{name:'Email',exact:true}).click();
+  await expect(page.getByText('Fénix Capital · documentación pendiente',{exact:true})).toBeVisible();
   await expect(page.getByText(/\bPRO\b/)).toHaveCount(0);
   const shot=await page.screenshot({fullPage:true});
   await testInfo.attach('ficha-expediente-master-1600',{body:shot,contentType:'image/png'});
