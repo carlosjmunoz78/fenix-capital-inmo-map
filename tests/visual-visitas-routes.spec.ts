@@ -45,9 +45,11 @@ test.describe('Fénix PRE-PROD · rutas dedicadas de Visitas',()=>{
     await page.goto('/visitas/VIS-001');
     const root=page.locator('.visitas-root');
     await expect(root.getByRole('heading',{level:1,name:'Ficha de visita / gestión',exact:true})).toBeVisible();
-    await expect(root.getByText('INM-001',{exact:true})).toBeVisible();
-    await expect(root.getByText('Presentación',{exact:true})).toBeVisible();
-    await expect(root.getByText('Llamar',{exact:true})).toBeVisible();
+    const ficha=root.getByLabel('Ficha de visita');
+    await expect(ficha).toBeVisible();
+    await expect(ficha).toContainText('INM-001');
+    await expect(ficha).toContainText('Presentación');
+    await expect(ficha).toContainText('Llamar');
     await root.getByRole('button',{name:'Revisar para marcar hecha'}).click();
     expect(updates).toBe(0);
     await expect(root.getByLabel('Vista previa de actualización de gestión')).toBeVisible();
