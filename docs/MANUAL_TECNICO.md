@@ -39,7 +39,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-La referencia verde vigente es CI #690 `32545169273`: **207 tests / 79 passed / 128 skips intencionales / 0 fallos**. Los skips corresponden principalmente a casos deliberadamente restringidos por proyecto/viewport; no deben interpretarse como fallos.
+La referencia verde vigente es CI #694 `32545314353`: **207 tests / 79 passed / 128 skips intencionales / 0 fallos**. Los skips corresponden principalmente a casos deliberadamente restringidos por proyecto/viewport; no deben interpretarse como fallos.
 
 La batería cubre, entre otros: shell, tema, CAL-001, navegación real normalizada, responsive, back/forward, logout, RBAC por rol, aislamiento 403, módulos canónicos, perfil desde cabecera, foto de sesión, preview antes de escritura, Notarías y ausencia de `PRO` visible.
 
@@ -104,7 +104,7 @@ Las pantallas específicas se montan en `src/main.tsx`. `OperationalShellGate` y
 Workflow: `.github/workflows/preprod-build.yml`.
 Orden actual: checkout → Node 24 → dependencias → Chromium → build → Browser QA → artefactos → build de snapshot GitHub Pages → push `gh-pages`.
 
-El snapshot `gh-pages` no equivale por sí solo a un smoke HTTPS público. El job `deploy-preprod-pages` permanece omitido, por lo que el smoke público sigue pendiente de verificación real.
+El snapshot `gh-pages` no equivale por sí solo a un smoke HTTPS público. El despliegue público solo se considera validado cuando el job `deploy-preprod-pages` finaliza correctamente en un run de `push` de `preprod-app-phase1` y después se verifica la URL HTTPS.
 
 ## 12. Seguridad
 - Nunca incluir `service_role` ni `NOTION_TOKEN` en frontend.
