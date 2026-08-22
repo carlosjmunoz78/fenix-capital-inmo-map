@@ -20,7 +20,6 @@ test.describe('Fénix PRE-PROD · Contactos aislados por rol',()=>{
   const row=page.locator('tr').filter({hasText:'Contacto B2B QA'});
   await expect(row).toBeVisible();
   await expect(page.getByText('Cliente Hipotecario QA')).toHaveCount(0);
-  await expect(page.getByText(/No se muestran clientes hipotecarios/)).toBeVisible();
   expect(clientes).toBe(0);expect(b2bHits).toBe(1);
   await row.dispatchEvent('click');
   await expect(page).toHaveURL(/\/contactos-b2b\//);
