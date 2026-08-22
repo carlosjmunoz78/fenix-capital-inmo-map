@@ -27,6 +27,7 @@ type Advice={
 type MemoryItem={id:string;detail:string;memory_class?:string;source_actor?:string;created_at?:string;evidence_count?:number};
 type MemoryEnvelope={ok?:boolean;status?:number;items?:MemoryItem[]};
 type ExecResult={ok?:boolean;status?:number;reused?:boolean;no_op?:boolean;communication_page_id?:string;channel?:string;external_sent?:boolean;requires_approval?:boolean;error?:string};
+type PeopleChangedDetail={expedienteId?:string;personId?:string;kind?:'updated'|'created'};
 
 function isNotionId(v:string){return /^[0-9a-f]{32}$/i.test(v.replaceAll('-',''));}
 async function edgeJson<T>(path:string,init?:RequestInit){
@@ -44,6 +45,7 @@ export default function ExpedienteAnaRuntimeGuard(){
  const[advice,setAdvice]=useState<Advice|null>(null),[status,setStatus]=useState<number|null>(null),[target,setTarget]=useState<Element|null>(null),[channel,setChannel]=useState<'llamada'|'whatsapp'|'email'>('llamada'),[mode,setMode]=useState<'help'|'manual'|null>(null),[memory,setMemory]=useState<MemoryItem[]>([]),[execBusy,setExecBusy]=useState(false),[execMsg,setExecMsg]=useState('');
 
  useEffect(()=>{if(!active){setAdvice(null);setStatus(null);setMemory([]);setExecMsg('');return;}let alive=true;void Promise.all([fetchAdvice(id),fetchMemoryApi<MemoryEnvelope>('/context',{method:'POST',body:JSON.stringify({origin_type:'expediente',origin_code:id})})]).then(([r,m])=>{if(!alive)return;setStatus(r.status);setAdvice(r.status===200?r.data:null);setMemory(m.status===200?(m.data?.items??[]).slice(0,3):[]);});return()=>{alive=false}},[active,id]);
+ useEffect(()=>{if(!active)return;let alive=true;const refresh=(event:Event)=>{const detail=(event as CustomEvent<PeopleChangedDetail>).detail;if(detail?.expedienteId!==id)return;void fetchAdvice(id).then(r=>{if(!alive)return;setStatus(r.status);setAdvice(r.status===200?r.data:null);setExecMsg('')})};window.addEventListener('fenix-expediente-people-changed',refresh as EventListener);return()=>{alive=false;window.removeEventListener('fenix-expediente-people-changed',refresh as EventListener)}},[active,id]);
  useEffect(()=>{if(!active)return;const attach=()=>{const el=document.querySelector('.detail-next-action');if(el){setTarget(el);el.classList.toggle('exp-ana-runtime-ready',Boolean(advice&&status===200));}};attach();const obs=new MutationObserver(attach);obs.observe(document.body,{childList:true,subtree:true});return()=>{obs.disconnect();document.querySelector('.detail-next-action')?.classList.remove('exp-ana-runtime-ready')}},[active,advice,status]);
  const usable=active&&status===200&&advice&&target;
  const channelData=useMemo(()=>advice?.channels?.[channel]??null,[advice,channel]);
@@ -78,15 +80,15 @@ export default function ExpedienteAnaRuntimeGuard(){
   const section=document.querySelector('.exp-people');
   section?.scrollIntoView({behavior:'smooth',block:'start'});
   const articles=Array.from(section?.querySelectorAll('.exp-person')??[]) as HTMLElement[];
-  const article=articles.find(item=>item.textContent?.includes(next.person_name));
+  const article=articles.find(item=>item.dataset.personId===next.person_id)||articles.find(item=>item.textContent?.includes(next.person_name));
   if(!article)return;
-  const toggle=article.querySelector('.exp-person-toggle') as HTMLButtonElement|null;
-  if(toggle&&!article.querySelector('.exp-person-body'))toggle.click();
-  window.setTimeout(()=>{
-   const edit=Array.from(article.querySelectorAll('button')).find(button=>button.textContent?.includes('Editar datos manualmente')) as HTMLButtonElement|undefined;
+  const openEditor=()=>{
+   const edit=article.querySelector(`[data-testid="edit-person-${next.person_id}"]`) as HTMLButtonElement|null||Array.from(article.querySelectorAll('button')).find(button=>button.textContent?.includes('Editar datos manualmente')) as HTMLButtonElement|undefined;
    edit?.click();
    article.scrollIntoView({behavior:'smooth',block:'center'});
-  },220);
+  };
+  const toggle=article.querySelector('.exp-person-toggle') as HTMLButtonElement|null;
+  if(toggle&&!article.querySelector('.exp-person-body')){toggle.click();window.setTimeout(openEditor,80)}else openEditor();
  }
  function goMissingDocs(){
   const first=people?.items?.find(person=>person.docs_complete===false||person.docs_complete==null);
