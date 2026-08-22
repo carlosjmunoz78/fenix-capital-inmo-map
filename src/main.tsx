@@ -15,6 +15,7 @@ import App from './App';
 import RoleHomeShell from './RoleHomeShell';
 import ProfileShell from './ProfileShell';
 import OperationalShellV2 from './OperationalShellV2';
+import BancosShell from './BancosShell';
 import ContactosShell from './ContactosShell';
 import ContactDetailShell from './ContactDetailShell';
 import InmobiliariasShell from './InmobiliariasShell';
@@ -40,6 +41,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <RoleHomeShell />
       <ProfileShell />
       <OperationalShellV2 />
+      <BancosShell />
       <ContactosShell />
       <ContactDetailShell />
       <InmobiliariasShell />
