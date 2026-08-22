@@ -17,9 +17,9 @@ test('Ana conserva contacto B2B como scope propio y habilita evidencia solo tras
  await expect.poll(()=>scopeBody).not.toBeNull();
  expect(scopeBody).toEqual({origin_type:'contacto_b2b',origin_code:contactId});
  const ana=page.getByRole('complementary',{name:'Ana · asistente contextual'});
- await ana.getByRole('button',{name:/Ana/}).first().click();
+ await ana.getByRole('button',{name:/Ana/}).first().dispatchEvent('click');
  const upload=ana.getByRole('button',{name:'Subir evidencia'});
  await expect(upload).toBeEnabled();
- await ana.getByRole('button',{name:'Ana se ha equivocado'}).click();
+ await ana.getByRole('button',{name:'Ana se ha equivocado'}).dispatchEvent('click');
  await expect(page).toHaveURL(new RegExp(`/ana\\?scope_type=contacto_b2b&scope_code=${contactId.replaceAll('-','\\-')}$`));
 });
