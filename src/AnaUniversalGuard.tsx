@@ -20,7 +20,8 @@ const hiddenRoots=['/','/perfil','/ana'];
 const BUCKET='fenix-preprod-documents-test';
 
 function scopeFromPath(path:string):Scope{
-  const parts=path.split('/').filter(Boolean),root=parts[0]||'inicio',id=parts[1]||'';
+  const parts=path.split('/').filter(Boolean),root=parts[0]||'inicio',rawId=parts[1]||'';
+  const id=['nuevo','nueva','new'].includes(rawId.toLowerCase())?'':rawId;
   const map:Record<string,{type:string;label:string}>={
     expedientes:{type:'expediente',label:'expediente'},contactos:{type:'contacto',label:'contacto'},inmobiliarias:{type:'inmobiliaria',label:'inmobiliaria'},
     tareas:{type:'tarea',label:'tarea'},agenda:{type:'tarea',label:'agenda'},visitas:{type:'visita',label:'visita'},bancos:{type:'banco',label:'banco'},
@@ -32,6 +33,7 @@ function scopeFromPath(path:string):Scope{
 
 function nextText(scope:Scope){
   if(scope.type==='general')return 'Revisa la prioridad que aparece en esta pantalla y actúa sobre el primer bloqueo real.';
+  if(!scope.code)return `Completa los datos mínimos del nuevo ${scope.label}; cuando exista el registro podré vincular evidencia y correcciones a su ficha.`;
   return `Revisa la siguiente acción del ${scope.label}, confirma la evidencia vigente y registra el resultado real al terminar.`;
 }
 
@@ -40,7 +42,7 @@ export default function AnaUniversalGuard(){
   const scope=useMemo(()=>scopeFromPath(location.pathname),[location.pathname]);
   const [logged,setLogged]=useState(false),[caps,setCaps]=useState<Caps|null>(null),[open,setOpen]=useState(false),[mode,setMode]=useState<'help'|'manual'|null>(null);
   const [scopeAllowed,setScopeAllowed]=useState(false),[evidenceOpen,setEvidenceOpen]=useState(false),[evidenceText,setEvidenceText]=useState(''),[evidenceMessage,setEvidenceMessage]=useState(''),[uploading,setUploading]=useState(false);
-  const hide=hiddenRoots.some(p=>location.pathname===p)||(location.pathname.startsWith('/ana/'))||location.pathname.includes('/nuevo');
+  const hide=hiddenRoots.some(p=>location.pathname===p)||(location.pathname.startsWith('/ana/'));
 
   useEffect(()=>{let alive=true;supabase.auth.getSession().then(({data})=>{if(alive)setLogged(Boolean(data.session))});const {data:{subscription}}=supabase.auth.onAuthStateChange((_e,s)=>setLogged(Boolean(s)));return()=>{alive=false;subscription.unsubscribe()};},[]);
   useEffect(()=>{if(!logged||hide)return;fetchAnaApi<Envelope>('/capabilities').then(r=>setCaps(r.status===200?r.data?.capabilities??null:null));},[logged,hide,location.pathname]);
@@ -100,8 +102,8 @@ export default function AnaUniversalGuard(){
       {mode==='help'&&<p className="ana-inline-note">Ana te acompaña: revisa primero evidencia y bloqueo; después ejecuta una sola acción y registra el resultado.</p>}
       {mode==='manual'&&<p className="ana-inline-note">Modo manual activo. Al terminar, registra qué ocurrió y cualquier contexto útil para la próxima gestión.</p>}
       <div className="ana-secondary-actions">
-        <button disabled={!caps.can_upload_evidence||!scopeAllowed} onClick={()=>setEvidenceOpen(v=>!v)} title={!scope.code?'Abre primero una ficha concreta.':!scopeAllowed?'Este origen todavía no tiene un scope de carga autorizado.':''}><FileUp size={15}/> Subir evidencia</button>
-        <button disabled={!caps.can_correct_ana||!scope.code} onClick={()=>navigate(correctionUrl)}><MessageSquareWarning size={15}/> Ana se ha equivocado</button>
+        <button disabled={!caps.can_upload_evidence||!scopeAllowed} onClick={()=>setEvidenceOpen(v=>!v)} title={!scope.code?'Primero guarda el registro para poder relacionar la evidencia.':!scopeAllowed?'Este origen todavía no tiene un scope de carga autorizado.':''}><FileUp size={15}/> Subir evidencia</button>
+        <button disabled={!caps.can_correct_ana||!scope.code} onClick={()=>navigate(correctionUrl)} title={!scope.code?'Primero guarda el registro para vincular la corrección a su origen.':''}><MessageSquareWarning size={15}/> Ana se ha equivocado</button>
         <button disabled={!caps.can_view_learning_inbox} onClick={()=>caps.can_view_learning_inbox&&navigate('/ana')} title={caps.learning_inbox_disabled_reason||''}>Correcciones</button>
       </div>
       {evidenceOpen&&scopeAllowed&&<div className="ana-evidence-panel">
