@@ -1,7 +1,7 @@
 import {useEffect,useMemo,useState} from 'react';
 import {createPortal} from 'react-dom';
 import {useLocation,useNavigate} from 'react-router-dom';
-import {Phone,Mail,MessageCircle,ShieldCheck,Users,Brain,CheckCircle2,Plus,FileUp} from 'lucide-react';
+import {Phone,Mail,MessageCircle,ShieldCheck,Users,Brain,CheckCircle2,Plus,FileUp,Pencil} from 'lucide-react';
 import {SUPABASE_URL,supabase,fetchMemoryApi} from './supabase';
 import {anaAvatar} from './assets/visualAssets';
 import './expediente-ana-runtime.css';
@@ -12,7 +12,11 @@ type Advice={
  human?:{instruction?:string;must_record?:string};
  ana?:{would_do?:string;can_execute?:boolean;blocked_by?:string;execution_kind?:string};
  client?:{name?:string|null;email?:string|null;phone?:string|null};
- people?:{count?:number;titulares?:number;avalistas?:number;missing_docs?:number;items?:Array<{id:string;name:string;role?:string|null;docs_complete?:boolean|null;reviewed?:boolean|null}>};
+ people?:{
+  count?:number;titulares?:number;avalistas?:number;missing_docs?:number;missing_data?:number;
+  next_person_data?:{person_id:string;person_name:string;field:{key:string;label:string}}|null;
+  items?:Array<{id:string;name:string;role?:string|null;docs_complete?:boolean|null;reviewed?:boolean|null;missing_fields?:Array<{key:string;label:string}>;next_missing_field?:{key:string;label:string}|null}>;
+ };
  channels?:{
   llamada?:{canal?:string;objetivo?:string;guion?:string;preguntas?:string[];resultado_esperado?:string}|null;
   whatsapp?:{canal?:string;texto?:string}|null;
@@ -68,6 +72,22 @@ export default function ExpedienteAnaRuntimeGuard(){
    add?.click();
   },250);
  }
+ function goMissingData(){
+  const next=people?.next_person_data;
+  if(!next)return;
+  const section=document.querySelector('.exp-people');
+  section?.scrollIntoView({behavior:'smooth',block:'start'});
+  const articles=Array.from(section?.querySelectorAll('.exp-person')??[]) as HTMLElement[];
+  const article=articles.find(item=>item.textContent?.includes(next.person_name));
+  if(!article)return;
+  const toggle=article.querySelector('.exp-person-toggle') as HTMLButtonElement|null;
+  if(toggle&&!article.querySelector('.exp-person-body'))toggle.click();
+  window.setTimeout(()=>{
+   const edit=Array.from(article.querySelectorAll('button')).find(button=>button.textContent?.includes('Editar datos manualmente')) as HTMLButtonElement|undefined;
+   edit?.click();
+   article.scrollIntoView({behavior:'smooth',block:'center'});
+  },220);
+ }
  function goMissingDocs(){
   const first=people?.items?.find(person=>person.docs_complete===false||person.docs_complete==null);
   if(first?.id)navigate(`/documentacion?expediente=${encodeURIComponent(id)}&comprador=${encodeURIComponent(first.id)}&upload=1`);
@@ -82,8 +102,8 @@ export default function ExpedienteAnaRuntimeGuard(){
     <h2>{action}</h2>
     <p><b>Por qué:</b> {advice.why||advice.blocking_reason||'No hay una justificación canónica disponible todavía.'}</p>
     {(advice.evidence?.phase||advice.evidence?.blocking_reason||advice.evidence?.task_id)&&<div className="exp-ana-evidence-line"><ShieldCheck size={15}/><span>{advice.evidence?.phase?`Fase: ${advice.evidence.phase}`:''}{advice.evidence?.blocking_reason?` · Bloqueo: ${advice.evidence.blocking_reason}`:''}{advice.evidence?.task_id?` · Tarea origen vinculada`:''}</span></div>}
-    {people&&<div className="exp-ana-people-line"><Users size={16}/><div><strong>{people.count??0} interviniente{(people.count??0)===1?'':'s'}</strong><span>{people.titulares??0} titular{(people.titulares??0)===1?'':'es'} · {people.avalistas??0} avalista{(people.avalistas??0)===1?'':'s'} · {people.missing_docs??0} con documentación pendiente</span></div><button onClick={goPeople}>Ver personas</button></div>}
-    {people&&((people.count??0)===0||(people.missing_docs??0)>0)&&<div className="exp-ana-evidence-line" data-testid="expediente-people-next-step"><ShieldCheck size={15}/><span>{(people.count??0)===0?'Falta identificar al menos un interviniente antes de continuar el expediente.':'Hay documentación pendiente de intervinientes; conviene completarla antes del siguiente gate.'}</span>{(people.count??0)===0?<button type="button" onClick={goAddPerson}><Plus size={14}/> Añadir persona ahora</button>:<button type="button" onClick={goMissingDocs}><FileUp size={14}/> Subir siguiente documento</button>}</div>}
+    {people&&<div className="exp-ana-people-line"><Users size={16}/><div><strong>{people.count??0} interviniente{(people.count??0)===1?'':'s'}</strong><span>{people.titulares??0} titular{(people.titulares??0)===1?'':'es'} · {people.avalistas??0} avalista{(people.avalistas??0)===1?'':'s'} · {people.missing_data??0} con datos pendientes · {people.missing_docs??0} con documentación pendiente</span></div><button onClick={goPeople}>Ver personas</button></div>}
+    {people&&((people.count??0)===0||(people.missing_data??0)>0||(people.missing_docs??0)>0)&&<div className="exp-ana-evidence-line" data-testid="expediente-people-next-step"><ShieldCheck size={15}/><span>{(people.count??0)===0?'Falta identificar al menos un interviniente antes de continuar el expediente.':(people.missing_data??0)>0&&people.next_person_data?`Siguiente dato pendiente: ${people.next_person_data.field.label} de ${people.next_person_data.person_name}.`:'Hay documentación pendiente de intervinientes; conviene completarla antes del siguiente gate.'}</span>{(people.count??0)===0?<button type="button" onClick={goAddPerson}><Plus size={14}/> Añadir persona ahora</button>:(people.missing_data??0)>0&&people.next_person_data?<button type="button" onClick={goMissingData}><Pencil size={14}/> Completar este dato</button>:<button type="button" onClick={goMissingDocs}><FileUp size={14}/> Subir siguiente documento</button>}</div>}
     {memory.length>0&&<section className="exp-ana-memory" aria-label="Contexto recordado por Ana"><div className="exp-ana-memory-head"><Brain size={16}/><strong>Lo que recuerdo de este expediente</strong></div>{memory.map(x=><article key={x.id}><small>{x.memory_class||'Contexto'}{x.source_actor?` · ${x.source_actor}`:''}</small><p>{x.detail}</p></article>)}</section>}
 
     <div className="exp-ana-runtime-modes">
