@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+import { ChangeEvent, useEffect, useMemo, useState } from 'react';
 import { ChevronDown, ChevronUp, FileUp, MessageSquareWarning, Sparkles } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { anaAvatar } from './assets/visualAssets';
-import { fetchAnaApi, supabase } from './supabase';
+import { fetchAnaApi, fetchEvidenceApi, supabase } from './supabase';
 import './ana-universal.css';
 
 type Caps={
@@ -10,24 +10,23 @@ type Caps={
   can_ana_help?:boolean;can_manual_execute?:boolean;can_upload_evidence?:boolean;can_correct_ana?:boolean;
   can_view_learning_inbox?:boolean;can_decide_learning?:boolean;learning_inbox_disabled_reason?:string|null;
 };
-type Envelope={capabilities?:Caps};
-type Scope={type:string;code:string;label:string;uploadSupported:boolean};
+type Envelope={capabilities?:Caps;ok?:boolean;error?:string};
+type Scope={type:string;code:string;label:string};
+type Prepare={ok?:boolean;upload_id?:string;storage_path?:string;token?:string;max_bytes?:number;error?:string};
+type Complete={ok?:boolean;reused?:boolean;no_op?:boolean;document_page_id?:string;error?:string};
 
 const hiddenRoots=['/','/perfil','/ana'];
+const BUCKET='fenix-preprod-documents-test';
 
 function scopeFromPath(path:string):Scope{
   const parts=path.split('/').filter(Boolean),root=parts[0]||'inicio',id=parts[1]||'';
-  const map:Record<string,{type:string;label:string;upload:boolean}>={
-    expedientes:{type:'expediente',label:'expediente',upload:true},
-    contactos:{type:'contacto',label:'contacto',upload:false},
-    inmobiliarias:{type:'inmobiliaria',label:'inmobiliaria',upload:true},
-    tareas:{type:'tarea',label:'tarea',upload:false},agenda:{type:'tarea',label:'agenda',upload:false},
-    visitas:{type:'visita',label:'visita',upload:false},bancos:{type:'banco',label:'banco',upload:false},
-    tasaciones:{type:'tasacion',label:'tasación',upload:false},firmas:{type:'firma',label:'firma',upload:false},
-    documentacion:{type:'documento',label:'documentación',upload:false},documentos:{type:'documento',label:'documento',upload:false},
-    comunicaciones:{type:'comunicacion',label:'comunicación',upload:false},inicio:{type:'general',label:'inicio',upload:false}
+  const map:Record<string,{type:string;label:string}>={
+    expedientes:{type:'expediente',label:'expediente'},contactos:{type:'contacto',label:'contacto'},inmobiliarias:{type:'inmobiliaria',label:'inmobiliaria'},
+    tareas:{type:'tarea',label:'tarea'},agenda:{type:'tarea',label:'agenda'},visitas:{type:'visita',label:'visita'},bancos:{type:'banco',label:'banco'},
+    tasaciones:{type:'tasacion',label:'tasación'},firmas:{type:'firma',label:'firma'},documentacion:{type:'documento',label:'documentación'},documentos:{type:'documento',label:'documento'},
+    comunicaciones:{type:'comunicacion',label:'comunicación'},inicio:{type:'general',label:'inicio'}
   };
-  const x=map[root]||{type:root,label:root,upload:false};return{type:x.type,code:id,label:x.label,uploadSupported:x.upload&&Boolean(id)};
+  const x=map[root]||{type:root,label:root};return{type:x.type,code:id,label:x.label};
 }
 
 function nextText(scope:Scope){
@@ -39,14 +38,43 @@ export default function AnaUniversalGuard(){
   const location=useLocation(),navigate=useNavigate();
   const scope=useMemo(()=>scopeFromPath(location.pathname),[location.pathname]);
   const [logged,setLogged]=useState(false),[caps,setCaps]=useState<Caps|null>(null),[open,setOpen]=useState(false),[mode,setMode]=useState<'help'|'manual'|null>(null);
+  const [scopeAllowed,setScopeAllowed]=useState(false),[evidenceOpen,setEvidenceOpen]=useState(false),[evidenceText,setEvidenceText]=useState(''),[evidenceMessage,setEvidenceMessage]=useState(''),[uploading,setUploading]=useState(false);
   const hide=hiddenRoots.some(p=>location.pathname===p)||(location.pathname.startsWith('/ana/'))||location.pathname.includes('/nuevo');
 
   useEffect(()=>{let alive=true;supabase.auth.getSession().then(({data})=>{if(alive)setLogged(Boolean(data.session))});const {data:{subscription}}=supabase.auth.onAuthStateChange((_e,s)=>setLogged(Boolean(s)));return()=>{alive=false;subscription.unsubscribe()};},[]);
   useEffect(()=>{if(!logged||hide)return;fetchAnaApi<Envelope>('/capabilities').then(r=>setCaps(r.status===200?r.data?.capabilities??null:null));},[logged,hide,location.pathname]);
+  useEffect(()=>{
+    setScopeAllowed(false);setEvidenceOpen(false);setEvidenceMessage('');
+    if(!logged||hide||!scope.code||scope.type==='general'||scope.type==='banco')return;
+    fetchEvidenceApi<Envelope>('/scope',{method:'POST',body:JSON.stringify({origin_type:scope.type,origin_code:scope.code})}).then(r=>setScopeAllowed(r.status===200&&Boolean(r.data?.ok)));
+  },[logged,hide,scope.type,scope.code,location.pathname]);
   if(!logged||hide||!caps)return null;
 
   const correctionUrl=`/ana?scope_type=${encodeURIComponent(scope.type)}${scope.code?`&scope_code=${encodeURIComponent(scope.code)}`:''}`;
-  const evidenceUrl=scope.uploadSupported?`/documentacion?scope_type=${encodeURIComponent(scope.type)}&scope_code=${encodeURIComponent(scope.code)}&upload=1`:'';
+
+  async function saveFile(file:File,kind:'documento'|'texto_conversacion'|'audio_conversacion'|'comentario'){
+    setEvidenceMessage('');setUploading(true);
+    const p=await fetchEvidenceApi<Prepare>('/prepare',{method:'POST',body:JSON.stringify({origin_type:scope.type,origin_code:scope.code,evidence_kind:kind,filename:file.name,mime_type:file.type||'application/octet-stream'})});
+    if(p.status!==200||!p.data?.upload_id||!p.data.storage_path||!p.data.token){setUploading(false);setEvidenceMessage('No se pudo preparar la carga en este contexto.');return;}
+    if(p.data.max_bytes&&file.size>p.data.max_bytes){setUploading(false);setEvidenceMessage('El archivo supera el tamaño permitido en PRE-PROD.');return;}
+    const up=await supabase.storage.from(BUCKET).uploadToSignedUrl(p.data.storage_path,p.data.token,file,{contentType:file.type||undefined});
+    if(up.error){setUploading(false);setEvidenceMessage('No se pudo subir el archivo.');return;}
+    const done=await fetchEvidenceApi<Complete>('/complete',{method:'POST',body:JSON.stringify({upload_id:p.data.upload_id,title:file.name})});
+    setUploading(false);
+    if(done.status===200&&done.data?.ok){setEvidenceMessage(done.data.reused?'Esta evidencia ya estaba guardada; no se ha duplicado.':'Evidencia guardada y vinculada al contexto.');if(kind==='texto_conversacion'||kind==='comentario')setEvidenceText('');}
+    else setEvidenceMessage('La carga llegó al almacenamiento, pero no pudo cerrarse de forma segura.');
+  }
+
+  async function uploadSelected(e:ChangeEvent<HTMLInputElement>){
+    const file=e.target.files?.[0];e.target.value='';if(!file)return;
+    const kind=file.type.startsWith('audio/')?'audio_conversacion':'documento';
+    await saveFile(file,kind);
+  }
+  async function saveText(kind:'texto_conversacion'|'comentario'){
+    const value=evidenceText.trim();if(!value){setEvidenceMessage('Escribe el texto que quieres guardar.');return;}
+    const name=kind==='comentario'?`comentario-${Date.now()}.txt`:`conversacion-${Date.now()}.txt`;
+    await saveFile(new File([value],name,{type:'text/plain'}),kind);
+  }
 
   return <aside className={`ana-universal ${open?'open':''}`} aria-label="Ana · asistente contextual">
     <button className="ana-universal-head" onClick={()=>setOpen(v=>!v)} aria-expanded={open}>
@@ -61,11 +89,17 @@ export default function AnaUniversalGuard(){
       {mode==='help'&&<p className="ana-inline-note">Ana te acompaña: revisa primero evidencia y bloqueo; después ejecuta una sola acción y registra el resultado.</p>}
       {mode==='manual'&&<p className="ana-inline-note">Modo manual activo. Al terminar, registra qué ocurrió y cualquier contexto útil para la próxima gestión.</p>}
       <div className="ana-secondary-actions">
-        <button disabled={!caps.can_upload_evidence||!evidenceUrl} onClick={()=>evidenceUrl&&navigate(evidenceUrl)} title={!evidenceUrl?'La carga desde este tipo de entidad se habilitará cuando el backend común tenga el scope validado':''}><FileUp size={15}/> Subir evidencia</button>
-        <button disabled={!caps.can_correct_ana} onClick={()=>navigate(correctionUrl)}><MessageSquareWarning size={15}/> Ana se ha equivocado</button>
+        <button disabled={!caps.can_upload_evidence||!scopeAllowed} onClick={()=>setEvidenceOpen(v=>!v)} title={!scope.code?'Abre primero una ficha concreta.':!scopeAllowed?'Este origen todavía no tiene un scope de carga autorizado.':''}><FileUp size={15}/> Subir evidencia</button>
+        <button disabled={!caps.can_correct_ana||!scope.code} onClick={()=>navigate(correctionUrl)}><MessageSquareWarning size={15}/> Ana se ha equivocado</button>
         <button disabled={!caps.can_view_learning_inbox} onClick={()=>caps.can_view_learning_inbox&&navigate('/ana')} title={caps.learning_inbox_disabled_reason||''}>Correcciones</button>
       </div>
-      <small className="ana-evidence-hint">Texto y documentos quedan ligados al contexto. Audio: se conservará como evidencia, sin transcripción automática en esta fase.</small>
+      {evidenceOpen&&scopeAllowed&&<div className="ana-evidence-panel">
+        <label className="ana-file-button">Documento o audio<input type="file" accept=".pdf,.png,.jpg,.jpeg,.txt,.mp3,.m4a,.wav,.webm,audio/*" onChange={e=>void uploadSelected(e)} disabled={uploading}/></label>
+        <textarea value={evidenceText} onChange={e=>setEvidenceText(e.target.value)} rows={3} placeholder="Pega aquí una conversación o escribe un comentario/contexto" disabled={uploading}/>
+        <div className="ana-evidence-actions"><button disabled={uploading||!evidenceText.trim()} onClick={()=>void saveText('texto_conversacion')}>Guardar conversación</button><button disabled={uploading||!evidenceText.trim()} onClick={()=>void saveText('comentario')}>Guardar comentario</button></div>
+        {evidenceMessage&&<small className="ana-evidence-result">{evidenceMessage}</small>}
+      </div>}
+      <small className="ana-evidence-hint">Texto y documentos quedan ligados al contexto. Audio: se conserva como evidencia, sin transcripción automática en esta fase.</small>
     </div>}
   </aside>;
 }
