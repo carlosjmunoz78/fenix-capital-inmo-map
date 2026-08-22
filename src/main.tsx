@@ -46,12 +46,14 @@ import TaskCreateShell from './TaskCreateShell';
 import OperationalRecordDetail from './OperationalRecordDetail';
 import CalculatorLabelGuard from './CalculatorLabelGuard';
 import ProfileLauncherGuard from './ProfileLauncherGuard';
+import OperationalAdvancedSearchGuard from './OperationalAdvancedSearchGuard';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <BrowserRouter basename={import.meta.env.BASE_URL}>
       <CalculatorLabelGuard />
       <ProfileLauncherGuard />
+      <OperationalAdvancedSearchGuard />
       <App />
       <RoleHomeShell />
       <ProfileShell />
