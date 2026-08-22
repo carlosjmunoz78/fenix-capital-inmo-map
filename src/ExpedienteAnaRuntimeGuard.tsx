@@ -1,7 +1,7 @@
 import {useEffect,useMemo,useState} from 'react';
 import {createPortal} from 'react-dom';
 import {useLocation,useNavigate} from 'react-router-dom';
-import {Phone,Mail,MessageCircle,ShieldCheck} from 'lucide-react';
+import {Phone,Mail,MessageCircle,ShieldCheck,Users} from 'lucide-react';
 import {SUPABASE_URL,supabase} from './supabase';
 import {anaAvatar} from './assets/visualAssets';
 import './expediente-ana-runtime.css';
@@ -12,6 +12,7 @@ type Advice={
  human?:{instruction?:string;must_record?:string};
  ana?:{would_do?:string;can_execute?:boolean;blocked_by?:string};
  client?:{name?:string|null;email?:string|null;phone?:string|null};
+ people?:{count?:number;titulares?:number;avalistas?:number;missing_docs?:number;items?:Array<{id:string;name:string;role?:string|null;docs_complete?:boolean|null;reviewed?:boolean|null}>};
  channels?:{
   llamada?:{canal?:string;objetivo?:string;guion?:string;preguntas?:string[];resultado_esperado?:string}|null;
   whatsapp?:{canal?:string;texto?:string}|null;
@@ -45,6 +46,7 @@ export default function ExpedienteAnaRuntimeGuard(){
  const canAna=Boolean(advice.ana?.can_execute||advice.execution_modes?.ana);
  const canHelp=advice.execution_modes?.help!==false;
  const canManual=advice.execution_modes?.manual!==false;
+ const people=advice.people;
  function prepareMessage(kind:'whatsapp'|'email'){
   const q=new URLSearchParams({scope_type:'expediente',scope_code:id,channel:kind==='whatsapp'?'WhatsApp':'Email'});
   if(kind==='whatsapp'&&advice?.channels?.whatsapp?.texto)q.set('body',advice.channels.whatsapp.texto);
@@ -54,6 +56,7 @@ export default function ExpedienteAnaRuntimeGuard(){
   }
   navigate(`/comunicaciones/nueva?${q.toString()}`);
  }
+ function goPeople(){document.querySelector('.exp-people')?.scrollIntoView({behavior:'smooth',block:'start'});}
  return createPortal(<div className="exp-ana-runtime-content" data-testid="expediente-ana-runtime">
    <img src={anaAvatar} alt="Ana"/>
    <div className="exp-ana-runtime-main">
@@ -61,6 +64,7 @@ export default function ExpedienteAnaRuntimeGuard(){
     <h2>{action}</h2>
     <p><b>Por qué:</b> {advice.why||advice.blocking_reason||'No hay una justificación canónica disponible todavía.'}</p>
     {(advice.evidence?.phase||advice.evidence?.blocking_reason||advice.evidence?.task_id)&&<div className="exp-ana-evidence-line"><ShieldCheck size={15}/><span>{advice.evidence?.phase?`Fase: ${advice.evidence.phase}`:''}{advice.evidence?.blocking_reason?` · Bloqueo: ${advice.evidence.blocking_reason}`:''}{advice.evidence?.task_id?` · Tarea origen vinculada`:''}</span></div>}
+    {people&&<div className="exp-ana-people-line"><Users size={16}/><div><strong>{people.count??0} interviniente{(people.count??0)===1?'':'s'}</strong><span>{people.titulares??0} titular{(people.titulares??0)===1?'':'es'} · {people.avalistas??0} avalista{(people.avalistas??0)===1?'':'s'} · {people.missing_docs??0} con documentación pendiente</span></div><button onClick={goPeople}>Ver personas</button></div>}
 
     <div className="exp-ana-runtime-modes">
       <button disabled={!canAna} title={canAna?'':advice.ana?.blocked_by||'Ana todavía no tiene autoridad para ejecutar esta acción.'}>Que lo haga Ana</button>
