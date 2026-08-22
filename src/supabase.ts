@@ -68,6 +68,10 @@ export async function fetchMemoryApi<T>(path:string,init?:RequestInit):Promise<{
   return authenticatedEdgeFetch<T>('fenix-memory-api-test',path,init);
 }
 
+export async function fetchB2BActionsApi<T>(path:string,init?:RequestInit):Promise<{status:number;data:T|null}>{
+  return authenticatedEdgeFetch<T>('fenix-b2b-actions-test',path,init);
+}
+
 export async function fetchAppApi<T>(path: string, init?: RequestInit): Promise<{ status: number; data: T | null }> {
   const { data: { session } } = await supabase.auth.getSession();
   const token = session?.access_token;
