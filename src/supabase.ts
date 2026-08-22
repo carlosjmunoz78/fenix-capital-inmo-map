@@ -31,7 +31,11 @@ function authenticatedContextFallback(session:Awaited<ReturnType<typeof supabase
  const metadata=session?.user?.user_metadata as Record<string,unknown>|undefined;
  const actorCode=typeof metadata?.actor_code==='string'?metadata.actor_code:(typeof metadata?.fenix_test_actor==='string'?metadata.fenix_test_actor:'');
  if(!actorCode)return null;
- const role=actorCode==='DIR-TEST'?'Dirección':actorCode.startsWith('FIN-')?'Financiero':actorCode.startsWith('VIS-')?'Visitador':'Usuario';
+ // This fallback preserves only the already-known operational UI role while the
+ // canonical /session/context endpoint is temporarily unavailable. It must never
+ // be used to grant Carlos-only administrative capabilities; those remain
+ // server-authoritative gates keyed by canonical actor/context.
+ const role=(actorCode==='DIR-TEST'||actorCode==='CARLOS-ADMIN')?'Dirección':actorCode.startsWith('FIN-')?'Financiero':actorCode.startsWith('VIS-')?'Visitador':'Usuario';
  return{actor_code:actorCode,role,context_source:'authenticated-user-metadata'};
 }
 
