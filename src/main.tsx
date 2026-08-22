@@ -36,7 +36,7 @@ import SearchShell from './SearchShell';
 import AnaGovernance from './AnaGovernance';
 import VisitasShell from './VisitasShell';
 import CommunicationsShell from './CommunicationsShell';
-import DetailShell from './DetailShell';
+import DetailShellGate from './DetailShellGate';
 import OperationalRecordDetail from './OperationalRecordDetail';
 import CalculatorLabelGuard from './CalculatorLabelGuard';
 
@@ -69,7 +69,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <AnaGovernance />
       <VisitasShell />
       <CommunicationsShell />
-      <DetailShell />
+      <DetailShellGate />
       <OperationalRecordDetail />
     </BrowserRouter>
   </React.StrictMode>
