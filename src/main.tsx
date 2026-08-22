@@ -35,6 +35,8 @@ import EconomiaShell from './EconomiaShell';
 import InformesShell from './InformesShell';
 import SearchShell from './SearchShell';
 import NotificationsShell from './NotificationsShell';
+import NotariasShell from './NotariasShell';
+import NotariaDetailShell from './NotariaDetailShell';
 import AnaGovernance from './AnaGovernance';
 import VisitasShell from './VisitasShell';
 import CommunicationsShell from './CommunicationsShell';
@@ -72,6 +74,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <InformesShell />
       <SearchShell />
       <NotificationsShell />
+      <NotariasShell />
+      <NotariaDetailShell />
       <AnaGovernance />
       <VisitasShell />
       <CommunicationsShell />
