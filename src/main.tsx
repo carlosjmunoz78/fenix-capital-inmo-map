@@ -20,6 +20,7 @@ import BancoDetailShell from './BancoDetailShell';
 import BankContactsShell from './BankContactsShell';
 import BankContactDetailShell from './BankContactDetailShell';
 import ContactosShell from './ContactosShell';
+import ContactCreateShell from './ContactCreateShell';
 import ContactDetailShell from './ContactDetailShell';
 import InmobiliariasShell from './InmobiliariasShell';
 import InmobiliariaDetailShell from './InmobiliariaDetailShell';
@@ -60,6 +61,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <BankContactsShell />
       <BankContactDetailShell />
       <ContactosShell />
+      <ContactCreateShell />
       <ContactDetailShell />
       <InmobiliariasShell />
       <InmobiliariaDetailShell />
