@@ -59,7 +59,7 @@ export default function ExpedienteAnaRuntimeGuard(){
   navigate(`/comunicaciones/nueva?${q.toString()}`);
  }
  function goPeople(){document.querySelector('.exp-people')?.scrollIntoView({behavior:'smooth',block:'start'});}
- function executionChannel(){if(channelData)return channel==='email'?'Email':channel==='whatsapp'?'WhatsApp':'Llamada';if(advice.channels?.email)return'Email';if(advice.channels?.whatsapp)return'WhatsApp';if(advice.channels?.llamada)return'Llamada';return null;}
+ function executionChannel(){if(channelData)return channel==='email'?'Email':channel==='whatsapp'?'WhatsApp':'Llamada';if(advice?.channels?.email)return'Email';if(advice?.channels?.whatsapp)return'WhatsApp';if(advice?.channels?.llamada)return'Llamada';return null;}
  async function letAnaDoIt(){const ch=executionChannel();if(!canAna||!ch||execBusy)return;setExecBusy(true);setExecMsg('');const r=await edgeJson<ExecResult>(`/expedientes/${encodeURIComponent(id)}/prepare-contact`,{method:'POST',body:JSON.stringify({channel:ch})});setExecBusy(false);if((r.status===200||r.status===201)&&r.data?.ok){setExecMsg(r.data.reused?'Ana ya había preparado esta comunicación; no la he duplicado.':'Ana ha preparado la comunicación en Fénix Uno. No se ha enviado: queda pendiente del gate correspondiente.');}else if(r.data?.error==='no_contact_gate')setExecMsg('No puedo preparar contacto: el cliente figura como No contactar.');else if(r.data?.error==='channel_recipient_missing')setExecMsg('Ese canal no tiene destinatario disponible.');else setExecMsg('No he ejecutado nada porque el gate de seguridad no se pudo validar.');}
  return createPortal(<div className="exp-ana-runtime-content" data-testid="expediente-ana-runtime">
    <img src={anaAvatar} alt="Ana"/>
