@@ -26,7 +26,7 @@ async function actionApi(resource:Resource,id:string,changes:Record<string,unkno
 
 export default function OperationalRecordDetail(){
  const location=useLocation(),navigate=useNavigate();
- const match=location.pathname.match(/^\/(tareas|documentacion|tasaciones|firmas)\/([^/]+)$/);const active=Boolean(match);const key=match?.[1]||'';const id=match?.[2]?decodeURIComponent(match[2]):'';const def=defs[key];
+ const match=location.pathname.match(/^\/(tareas|documentacion|tasaciones|firmas)\/([^/]+)$/);const key=match?.[1]||'';const id=match?.[2]?decodeURIComponent(match[2]):'';const active=Boolean(match&&id!=='nueva');const def=defs[key];
  const[ctx,setCtx]=useState<Ctx|null>(null),[status,setStatus]=useState<number|null>(null),[data,setData]=useState<any>(null),[loading,setLoading]=useState(false),[msg,setMsg]=useState('');
  const[changes,setChanges]=useState<Record<string,unknown>>({}),[preview,setPreview]=useState(false),[busy,setBusy]=useState(false),[saveMsg,setSaveMsg]=useState('');
  const[assignees,setAssignees]=useState<Assignee[]>([]);
