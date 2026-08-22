@@ -25,7 +25,7 @@ function nameOf(row:Row){return text(row,['cliente','nombre','nombre_alias','con
 function relationOf(row:Row){return text(row,['relacion','relación','tipo','perfil','estado_comercial','cargo'])||'—';}
 function expedienteOf(row:Row){return text(row,['expediente','expediente_code','codigo_expediente','código_expediente'])||'—';}
 function inmoOf(row:Row){return text(row,['inmobiliaria','inmobiliaria_nombre','nombre_inmobiliaria'])||'—';}
-function roleKind(role?:string){const r=(role||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();return r==='direccion'?'direccion':r==='visitador'?'visitador':r==='financiero'?'financiero':'otro';}
+function roleKind(role?:string,actorCode?:string){const actor=(actorCode||'').toUpperCase();if(actor==='DIR-TEST'||actor==='CARLOS-ADMIN')return'direccion';const r=(role||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();return r==='direccion'?'direccion':r==='visitador'?'visitador':r==='financiero'?'financiero':'otro';}
 
 export default function ContactosShell(){
  const location=useLocation(),navigate=useNavigate();const active=location.pathname==='/contactos';
@@ -36,7 +36,7 @@ export default function ContactosShell(){
  useEffect(()=>{if(!active)return;let alive=true;supabase.auth.getSession().then(({data})=>{if(alive){setLogged(Boolean(data.session));setSessionReady(true)}});const{data:{subscription}}=supabase.auth.onAuthStateChange((_e,s)=>{setLogged(Boolean(s));setSessionReady(true)});return()=>{alive=false;subscription.unsubscribe()};},[active]);
  useEffect(()=>{if(!active)return;document.documentElement.dataset.theme=theme;sessionStorage.setItem('fenix-theme',theme);},[active,theme]);
  useEffect(()=>{if(!active||!logged)return;let alive=true;Promise.all([fetchAppApi<Ctx>('/session/context'),fetchAppApi<unknown>('/navigation')]).then(([c,n])=>{if(!alive)return;setCtx(c.status===200?c.data:null);setNav(n.status===200?normalizeNav(n.data):[]);});return()=>{alive=false};},[active,logged]);
- const kind=roleKind(ctx?.role),isDirection=kind==='direccion',isVisitador=kind==='visitador';
+ const kind=roleKind(ctx?.role,ctx?.actor_code),isDirection=kind==='direccion',isVisitador=kind==='visitador';
  const effectiveMode:ContactMode=isVisitador?'b2b':kind==='financiero'?'clientes':mode;
  useEffect(()=>{if(!active||!logged||!ctx||kind==='otro')return;let alive=true;(async()=>{setLoading(true);setMessage('');setRows([]);setStatus(null);const endpoint=effectiveMode==='b2b'?'/contactos-inmobiliaria':'/clientes';const r=await fetchNotionRuntime<unknown>(endpoint);if(!alive)return;setStatus(r.status);setRows(r.status===200?rowsFrom(r.data):[]);if(r.status===403)setMessage(effectiveMode==='b2b'?'Tu perfil no tiene acceso a contactos B2B fuera de su cartera o zona autorizada.':'Tu perfil no tiene acceso a clientes hipotecarios fuera de su ámbito.');else if(r.status!==200)setMessage(effectiveMode==='b2b'?'No se pudo leer la fuente canónica de contactos de inmobiliaria.':'No se pudo leer la fuente canónica de clientes hipotecarios.');setLoading(false);})();return()=>{alive=false}},[active,logged,ctx,kind,effectiveMode]);
  const effectiveNav=nav.length?nav:fallbackNav;
