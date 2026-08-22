@@ -22,7 +22,7 @@ export default function B2BContactDetailShell(){
  useEffect(()=>{if(active&&logged)void load();},[active,logged,id]);
  const allowed=ctx?.role==='Direccion'||ctx?.role==='Visitador';
  if(!active||!ready||!logged)return null;
- function edit(){setPreview(false);setMessage('');}
+ function edit(){if(preview)setPreview(false);setMessage('');}
  function review(){if(!allowed||nombre.trim().length<2)return;setPreview(true);setMessage('');}
  async function save(e:FormEvent){e.preventDefault();if(!allowed||!preview)return;setBusy(true);const r=await fetchB2BActionsApi<Envelope>(`/contactos/${encodeURIComponent(id)}/update`,{method:'POST',body:JSON.stringify({nombre:nombre.trim(),apellidos:apellidos.trim(),cargo:cargo.trim(),email:email.trim(),telefono:telefono.trim()})});setBusy(false);if(r.status===200){setPreview(false);await load(false);setMessage('Contacto B2B actualizado dentro de tu ámbito autorizado.');}else if(r.status===403)setMessage('No puedes modificar este contacto B2B.');else setMessage(`No se pudo actualizar (${r.data?.error||r.status}).`);}
  async function logout(){await supabase.auth.signOut();window.location.href=import.meta.env.BASE_URL;}
