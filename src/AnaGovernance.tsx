@@ -18,7 +18,7 @@ export default function AnaGovernance(){
   const active=location.pathname==='/ana'||location.pathname.startsWith('/ana/');
   const params=useMemo(()=>new URLSearchParams(location.search),[location.search]);
   const scopeType=params.get('scope_type')?.trim()||params.get('resource')?.trim()||'general';
-  const scopeCode=params.get('scope_code')?.trim()||'';
+  const scopeCode=params.get('scope_code')?.trim()||params.get('contact_id')?.trim()||params.get('inmobiliaria_id')?.trim()||params.get('expediente_id')?.trim()||params.get('task_id')?.trim()||'';
   useEffect(()=>{let alive=true;supabase.auth.getSession().then(({data})=>{if(alive){setLogged(Boolean(data.session));setReady(true)}});const {data:{subscription}}=supabase.auth.onAuthStateChange((_e,s)=>{setLogged(Boolean(s));setReady(true)});return()=>{alive=false;subscription.unsubscribe()};},[]);
   useEffect(()=>{document.documentElement.dataset.theme=theme;sessionStorage.setItem('fenix-theme',theme);},[theme]);
   useEffect(()=>{
