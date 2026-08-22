@@ -25,6 +25,8 @@ import ContactDetailShell from './ContactDetailShell';
 import InmobiliariasShell from './InmobiliariasShell';
 import InmobiliariaCreateShell from './InmobiliariaCreateShell';
 import InmobiliariaDetailShell from './InmobiliariaDetailShell';
+import B2BContactCreateLauncher from './B2BContactCreateLauncher';
+import B2BContactCreateShell from './B2BContactCreateShell';
 import ExpedienteCreateShell from './ExpedienteCreateShell';
 import TasacionesShell from './TasacionesShell';
 import AgendaShell from './AgendaShell';
@@ -64,6 +66,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <AnaInboxAccessGuard />
       <ContextEvidenceUpload />
       <ExpedienteAnaRuntimeGuard />
+      <B2BContactCreateLauncher />
       <App />
       <RoleHomeShell />
       <ProfileShell />
@@ -78,6 +81,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <InmobiliariasShell />
       <InmobiliariaCreateShell />
       <InmobiliariaDetailShell />
+      <B2BContactCreateShell />
       <ExpedienteCreateShell />
       <TasacionesShell />
       <AgendaShell />
