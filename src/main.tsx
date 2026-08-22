@@ -41,6 +41,7 @@ import AnaGovernance from './AnaGovernance';
 import VisitasShell from './VisitasShell';
 import CommunicationsShell from './CommunicationsShell';
 import DetailShellGate from './DetailShellGate';
+import TaskCreateShell from './TaskCreateShell';
 import OperationalRecordDetail from './OperationalRecordDetail';
 import CalculatorLabelGuard from './CalculatorLabelGuard';
 import ProfileLauncherGuard from './ProfileLauncherGuard';
@@ -80,6 +81,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <VisitasShell />
       <CommunicationsShell />
       <DetailShellGate />
+      <TaskCreateShell />
       <OperationalRecordDetail />
     </BrowserRouter>
   </React.StrictMode>
