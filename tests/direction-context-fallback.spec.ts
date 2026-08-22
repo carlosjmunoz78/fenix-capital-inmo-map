@@ -22,7 +22,7 @@ const directionSession = {
   }
 };
 
-test('authenticated DIR-TEST keeps Direction UI if context gateway is temporarily unavailable', async ({ page }) => {
+test('authenticated DIR-TEST keeps Direction UI if context gateway is temporarily unavailable', async ({ page }, testInfo) => {
   await page.addInitScript(session => {
     window.localStorage.setItem('fenix-preprod-auth', JSON.stringify(session));
     window.localStorage.setItem('fenix-remember-device', 'true');
@@ -36,8 +36,11 @@ test('authenticated DIR-TEST keeps Direction UI if context gateway is temporaril
 
   await expect(page).toHaveURL(/\/inicio$/);
   await expect(page.getByText('Hola Belén, buenos días', { exact: false })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Buscador avanzado' })).toBeVisible();
   await expect(page.getByText('Usuario', { exact: true })).toHaveCount(0);
-  await expect(page.getByRole('button', { name: 'Calculadora' })).toHaveCount(0);
   await expect(page.getByRole('region', { name: 'Calculadora Hipotecaria' })).toBeVisible();
+  await expect(page.getByText(/\bPRO\b/)).toHaveCount(0);
+
+  const advanced = page.getByRole('button', { name: 'Buscador avanzado' });
+  if (testInfo.project.name.includes('mobile')) await expect(advanced).toBeHidden();
+  else await expect(advanced).toBeVisible();
 });
