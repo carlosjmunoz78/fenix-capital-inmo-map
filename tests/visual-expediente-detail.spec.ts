@@ -21,9 +21,10 @@ const advice={
   email:{canal:'Email',asunto:'Fénix Capital · documentación pendiente',cuerpo:'Hola, Jorge y Alex:\n\nNecesitamos confirmar la documentación pendiente para seguir avanzando.'}
  }
 };
+const memory={ok:true,status:200,items:[{id:'m1',detail:'El cliente indicó que puede aportar la documentación mañana y pidió que se le recuerde.',memory_class:'Compromiso',source_actor:'FIN-A',created_at:'2026-08-22T10:00:00Z',evidence_count:1}]};
 
 test.describe('Fénix PRE-PROD · ficha maestra de expediente',()=>{
- test('resumen, recorrido y Ana usan consejo dinámico con motivo, personas y guiones exactos',async({page},testInfo)=>{
+ test('resumen, recorrido y Ana usan consejo dinámico con motivo, personas, memoria y guiones exactos',async({page},testInfo)=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();
   await page.setViewportSize({width:1600,height:900});
   await page.addInitScript(session=>{window.localStorage.setItem('fenix-preprod-auth',JSON.stringify(session));window.localStorage.setItem('fenix-remember-device','true');},fakeSession);
@@ -32,6 +33,7 @@ test.describe('Fénix PRE-PROD · ficha maestra de expediente',()=>{
   await page.route(`**/functions/v1/fenix-notion-runtime-test/expedientes/${id}/compradores`,r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({count:3,titulares:2,avalistas:1,items:advice.people.items})}));
   await page.route('**/functions/v1/fenix-notion-runtime-test/expedientes',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[item]})}));
   await page.route(`**/functions/v1/fenix-expediente-assistant-test/expedientes/${id}/advice`,r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify(advice)}));
+  await page.route('**/functions/v1/fenix-memory-api-test/context',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify(memory)}));
   await page.route('**/functions/v1/fenix-ana-api-test/capabilities',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,capabilities:{can_ana_execute:false,can_ana_help:true,can_manual_execute:true,can_upload_evidence:true,can_correct_ana:true,can_view_learning_inbox:true}})}));
   await page.goto(`/expedientes/${id}`);
   await expect(page.getByText('FICHA MAESTRA')).toBeVisible();
@@ -48,6 +50,8 @@ test.describe('Fénix PRE-PROD · ficha maestra de expediente',()=>{
   await expect(page.getByText('3 intervinientes',{exact:true})).toBeVisible();
   await expect(page.getByText('2 titulares · 1 avalista · 1 con documentación pendiente',{exact:true})).toBeVisible();
   await expect(page.getByText('3 personas en la operación',{exact:true})).toBeVisible();
+  await expect(page.getByText('Lo que recuerdo de este expediente',{exact:true})).toBeVisible();
+  await expect(page.getByText('El cliente indicó que puede aportar la documentación mañana y pidió que se le recuerde.',{exact:true})).toBeVisible();
   await expect(page.getByRole('button',{name:'Que lo haga Ana',exact:true})).toBeDisabled();
   await expect(page.getByRole('button',{name:'Ayúdame',exact:true})).toBeVisible();
   await expect(page.getByRole('button',{name:'Lo hago yo',exact:true})).toBeVisible();
