@@ -1,10 +1,10 @@
 import {useLocation} from 'react-router-dom';
 import OperationalShellV2 from './OperationalShellV2';
 
-const dedicatedExact=new Set(['/contactos','/inmobiliarias','/tasaciones','/agenda','/firmas','/documentacion','/financieros','/visitadores','/informes','/buscar','/bancos','/bancos/contactos','/economia','/notificaciones','/notarias']);
+const dedicatedExact=new Set(['/contactos','/inmobiliarias','/tasaciones','/agenda','/firmas','/documentacion','/financieros','/visitadores','/informes','/buscar','/bancos','/bancos/contactos','/economia','/notificaciones','/notarias','/visitas']);
 
 export default function OperationalShellGate(){
  const {pathname}=useLocation();
- if(dedicatedExact.has(pathname)||/^\/bancos\/contactos\//.test(pathname)||/^\/bancos\/[^/]+$/.test(pathname)||/^\/financieros\/[^/]+$/.test(pathname)||/^\/visitadores\/[^/]+$/.test(pathname)||/^\/notarias\/[^/]+$/.test(pathname))return null;
+ if(dedicatedExact.has(pathname)||/^\/bancos\/contactos\//.test(pathname)||/^\/bancos\/[^/]+$/.test(pathname)||/^\/financieros\/[^/]+$/.test(pathname)||/^\/visitadores\/[^/]+$/.test(pathname)||/^\/notarias\/[^/]+$/.test(pathname)||/^\/visitas\/[^/]+$/.test(pathname))return null;
  return <OperationalShellV2/>;
 }
