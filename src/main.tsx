@@ -27,6 +27,7 @@ import InmobiliariaCreateShell from './InmobiliariaCreateShell';
 import InmobiliariaDetailShell from './InmobiliariaDetailShell';
 import B2BContactCreateLauncher from './B2BContactCreateLauncher';
 import B2BContactCreateShell from './B2BContactCreateShell';
+import B2BContactDetailShell from './B2BContactDetailShell';
 import ExpedienteCreateShell from './ExpedienteCreateShell';
 import TasacionesShell from './TasacionesShell';
 import AgendaShell from './AgendaShell';
@@ -82,6 +83,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <InmobiliariaCreateShell />
       <InmobiliariaDetailShell />
       <B2BContactCreateShell />
+      <B2BContactDetailShell />
       <ExpedienteCreateShell />
       <TasacionesShell />
       <AgendaShell />
