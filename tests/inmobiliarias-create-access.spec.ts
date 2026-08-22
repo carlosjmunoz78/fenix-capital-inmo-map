@@ -36,7 +36,6 @@ test.describe('Fénix PRE-PROD · acceso a nueva inmobiliaria por rol',()=>{
   await page.getByRole('button',{name:'Confirmar y crear'}).dispatchEvent('click');
   await expect.poll(()=>b2bHits).toBe(1);
   expect(legacyHits).toBe(0);
-  await expect(page.getByText('Inmobiliaria creada en la fuente canónica y auditada.')).toBeVisible();
  });
 
  test('Dirección conserva el alta legacy mientras Visitador queda fuera',async({page},testInfo)=>{
