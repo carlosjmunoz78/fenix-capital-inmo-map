@@ -3,6 +3,6 @@ import DetailShell from './DetailShell';
 
 export default function DetailShellGate(){
  const {pathname}=useLocation();
- if(/^\/contactos\/[^/]+$/.test(pathname)||/^\/inmobiliarias\/[^/]+$/.test(pathname))return null;
+ if(pathname==='/expedientes/nuevo'||/^\/contactos\/[^/]+$/.test(pathname)||/^\/inmobiliarias\/[^/]+$/.test(pathname))return null;
  return <DetailShell/>;
 }
