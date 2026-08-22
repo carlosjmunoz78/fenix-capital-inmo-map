@@ -1,7 +1,7 @@
 import {useEffect,useMemo,useState} from 'react';
 import {createPortal} from 'react-dom';
 import {useLocation,useNavigate} from 'react-router-dom';
-import {Phone,Mail,MessageCircle,ShieldCheck,Users,Brain,CheckCircle2} from 'lucide-react';
+import {Phone,Mail,MessageCircle,ShieldCheck,Users,Brain,CheckCircle2,Plus,FileUp} from 'lucide-react';
 import {SUPABASE_URL,supabase,fetchMemoryApi} from './supabase';
 import {anaAvatar} from './assets/visualAssets';
 import './expediente-ana-runtime.css';
@@ -59,6 +59,20 @@ export default function ExpedienteAnaRuntimeGuard(){
   navigate(`/comunicaciones/nueva?${q.toString()}`);
  }
  function goPeople(){document.querySelector('.exp-people')?.scrollIntoView({behavior:'smooth',block:'start'});}
+ function goAddPerson(){
+  const section=document.querySelector('.exp-people');
+  section?.scrollIntoView({behavior:'smooth',block:'start'});
+  window.setTimeout(()=>{
+   const buttons=Array.from(section?.querySelectorAll('button')??[]);
+   const add=buttons.find(button=>button.textContent?.includes('Añadir persona')) as HTMLButtonElement|undefined;
+   add?.click();
+  },250);
+ }
+ function goMissingDocs(){
+  const first=people?.items?.find(person=>person.docs_complete===false||person.docs_complete==null);
+  if(first?.id)navigate(`/documentacion?expediente=${encodeURIComponent(id)}&comprador=${encodeURIComponent(first.id)}&upload=1`);
+  else navigate(`/documentacion?expediente=${encodeURIComponent(id)}&upload=1`);
+ }
  function executionChannel(){if(channelData)return channel==='email'?'Email':channel==='whatsapp'?'WhatsApp':'Llamada';if(advice?.channels?.email)return'Email';if(advice?.channels?.whatsapp)return'WhatsApp';if(advice?.channels?.llamada)return'Llamada';return null;}
  async function letAnaDoIt(){const ch=executionChannel();if(!canAna||!ch||execBusy)return;setExecBusy(true);setExecMsg('');const r=await edgeJson<ExecResult>(`/expedientes/${encodeURIComponent(id)}/prepare-contact`,{method:'POST',body:JSON.stringify({channel:ch})});setExecBusy(false);if((r.status===200||r.status===201)&&r.data?.ok){setExecMsg(r.data.reused?'Ana ya había preparado esta comunicación; no la he duplicado.':'Ana ha preparado la comunicación en Fénix Uno. No se ha enviado: queda pendiente del gate correspondiente.');}else if(r.data?.error==='no_contact_gate')setExecMsg('No puedo preparar contacto: el cliente figura como No contactar.');else if(r.data?.error==='channel_recipient_missing')setExecMsg('Ese canal no tiene destinatario disponible.');else setExecMsg('No he ejecutado nada porque el gate de seguridad no se pudo validar.');}
  return createPortal(<div className="exp-ana-runtime-content" data-testid="expediente-ana-runtime">
@@ -69,6 +83,7 @@ export default function ExpedienteAnaRuntimeGuard(){
     <p><b>Por qué:</b> {advice.why||advice.blocking_reason||'No hay una justificación canónica disponible todavía.'}</p>
     {(advice.evidence?.phase||advice.evidence?.blocking_reason||advice.evidence?.task_id)&&<div className="exp-ana-evidence-line"><ShieldCheck size={15}/><span>{advice.evidence?.phase?`Fase: ${advice.evidence.phase}`:''}{advice.evidence?.blocking_reason?` · Bloqueo: ${advice.evidence.blocking_reason}`:''}{advice.evidence?.task_id?` · Tarea origen vinculada`:''}</span></div>}
     {people&&<div className="exp-ana-people-line"><Users size={16}/><div><strong>{people.count??0} interviniente{(people.count??0)===1?'':'s'}</strong><span>{people.titulares??0} titular{(people.titulares??0)===1?'':'es'} · {people.avalistas??0} avalista{(people.avalistas??0)===1?'':'s'} · {people.missing_docs??0} con documentación pendiente</span></div><button onClick={goPeople}>Ver personas</button></div>}
+    {people&&((people.count??0)===0||(people.missing_docs??0)>0)&&<div className="exp-ana-evidence-line" data-testid="expediente-people-next-step"><ShieldCheck size={15}/><span>{(people.count??0)===0?'Falta identificar al menos un interviniente antes de continuar el expediente.':'Hay documentación pendiente de intervinientes; conviene completarla antes del siguiente gate.'}</span>{(people.count??0)===0?<button type="button" onClick={goAddPerson}><Plus size={14}/> Añadir persona ahora</button>:<button type="button" onClick={goMissingDocs}><FileUp size={14}/> Subir siguiente documento</button>}</div>}
     {memory.length>0&&<section className="exp-ana-memory" aria-label="Contexto recordado por Ana"><div className="exp-ana-memory-head"><Brain size={16}/><strong>Lo que recuerdo de este expediente</strong></div>{memory.map(x=><article key={x.id}><small>{x.memory_class||'Contexto'}{x.source_actor?` · ${x.source_actor}`:''}</small><p>{x.detail}</p></article>)}</section>}
 
     <div className="exp-ana-runtime-modes">
