@@ -13,7 +13,7 @@ Este documento registra la reconciliación técnica de la APP Fénix en PRE-PROD
 - La respuesta viva de `/navigation` puede entregar rutas como strings; el cliente las normaliza centralmente a `{route,label}` sin modificar autorización ni fabricar rutas.
 - Datos operativos: runtimes Notion TEST/PRE-PROD con RBAC de backend y aislamiento por registro.
 - Escrituras operativas: actions TEST con vista previa obligatoria antes de confirmar.
-- Calculadora hipotecaria global: local, persistente por sesión/usuario, minimizable y sin `PRO` visible.
+- Calculadora hipotecaria global: local, persistente por sesión/usuario, minimizable y sin `PRO` visible ni en el shell base ni en Inicio Dirección.
 - Ana: contextual, con preview antes de acciones sensibles y sin escritura implícita.
 
 ## Pantallas específicas reconciliadas
@@ -47,6 +47,13 @@ Este documento registra la reconciliación técnica de la APP Fénix en PRE-PROD
 - Si Supabase Auth entrega una fotografía HTTPS en `avatar_url`, `picture`, `photo_url` o `foto`, se muestra esa imagen real en formato grande.
 - Si la sesión no aporta imagen, se mantienen iniciales como fallback; no se genera ni inventa una fotografía.
 
+## Ana contextual · endurecimiento 22/08/2026
+
+- Las correcciones preparadas desde una pantalla conservan `resource/scope_type`, `scope_code`, corrección, motivo y regla propuesta al abrir `/ana`.
+- El formulario de gobierno de Ana precarga el contexto recibido en la URL y lo envía al backend de correcciones en lugar de degradarlo siempre a `general`.
+- La corrección sigue sin convertirse en norma automáticamente; Dirección mantiene la decisión final.
+- No se añade ninguna capacidad de alta de registros que el backend no soporte todavía.
+
 ## Notarías · cierre canónico 22/08/2026
 
 No se creó ninguna base duplicada. Se reutilizan dos fuentes ya existentes y conceptualmente distintas:
@@ -62,14 +69,16 @@ La navegación PRE-PROD incorpora `/notarias` para Dirección y Financiero, pero
 
 ## Evidencia verde vigente
 
-CI #688 `32545090609` sobre head `4d8363f3d16d199c40db62e197c4b674c4e42801`: **GREEN**.
+CI #716 `32565818628` sobre head `e82e5f4b0d062fcb0c1d9eb6192e544ef38f3b2c`: **GREEN**.
 
-- Browser QA: **207 tests / 79 passed / 128 skips intencionales / 0 fallos**.
 - Build TypeScript/Vite: SUCCESS.
-- Artifact dist: `9468250688`, 255611 bytes, SHA256 `b6f931408d1e8b3afbb043f1edac71c7f7d04384d2ea5dab10fdcf136625471a`.
-- Playwright report: `9468251025`, 3621978 bytes, SHA256 `91d06065ba1b40694fd6e9708fcf644c0f376a60902b711f5b1e3a09218b1901`.
-- Snapshot gh-pages: `bf0525a`, generado desde merge SHA CI `93d46027151d0a9bf70775226eef20ea113cf5fb`.
-- `deploy-preprod-pages` permanece omitido; el smoke HTTPS público todavía no se considera verificado.
+- Browser QA: SUCCESS.
+- Artifact dist: `9474058883`, SHA256 `5643e4ff2200e049267b60a9de64a010df5353c17889cbdf421f4ef06cfb8ba5`.
+- Playwright report: `9474059204`, SHA256 `744251e2e43b200ba32acfa625ca55ef85c430d147088d6165f58d610ff3d5cb`.
+- Snapshot PRE-PROD GitHub Pages: SUCCESS dentro del run de PR.
+- `deploy-preprod-pages` permanece omitido en el run de PR; el smoke HTTPS público todavía no se considera verificado.
+
+Los commits posteriores de endurecimiento de Ana deben obtener su propio CI verde antes de sustituir esta evidencia como último head validado.
 
 ## Deuda de asignaciones operativas
 
