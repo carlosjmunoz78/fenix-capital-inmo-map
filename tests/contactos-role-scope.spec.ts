@@ -44,10 +44,13 @@ test.describe('Fénix PRE-PROD · Contactos aislados por rol',()=>{
   await page.route('**/functions/v1/fenix-notion-runtime-test/contactos-inmobiliaria',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[b2b]})}));
   await page.goto('/contactos');
   await expect(page.getByText('Cliente Hipotecario QA')).toBeVisible();
-  await page.getByRole('button',{name:'Contactos inmobiliaria'}).click();
+  const tabs=page.getByTestId('contact-scope-tabs');
+  await expect(tabs).toBeVisible();
+  await tabs.getByRole('button',{name:'Contactos inmobiliaria'}).dispatchEvent('click');
   await expect(page.getByText('Contacto B2B QA')).toBeVisible();
   await expect(page.getByText('Cliente Hipotecario QA')).toHaveCount(0);
-  await page.getByRole('button',{name:'Clientes hipotecarios'}).click();
+  await expect(tabs.getByRole('button',{name:'Clientes hipotecarios'})).toBeVisible();
+  await tabs.getByRole('button',{name:'Clientes hipotecarios'}).dispatchEvent('click');
   await expect(page.getByText('Cliente Hipotecario QA')).toBeVisible();
  });
 });
