@@ -11,13 +11,17 @@ const items=[
  {id:'cccccccc111141118111dddddddddddd',inmobiliaria:'PENDIENTE',localidad:'Córdoba',estado:'Sin llamar'}
 ];
 
+async function mockInmo(page:any){
+ await page.addInitScript((session:any)=>{window.localStorage.setItem('fenix-preprod-auth',JSON.stringify(session));window.localStorage.setItem('fenix-remember-device','true');},fakeSession);
+ await page.route('**/functions/v1/fenix-app-gateway-test/**',async (r:any)=>{const u=r.request().url();if(u.endsWith('/session/context'))return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({actor_code:'DIR-TEST',role:'Direccion'})});if(u.endsWith('/navigation'))return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[{label:'Inicio',route:'/inicio'},{label:'Inmobiliarias',route:'/inmobiliarias'}]})});if(u.endsWith('/ana/correcciones'))return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[]})});return r.fulfill({status:404,body:'{}'});});
+ await page.route('**/functions/v1/fenix-notion-runtime-test/inmobiliarias',(r:any)=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({source:'notion_canonical',items})}));
+}
+
 test.describe('Fénix PRE-PROD · contrato visual Inmobiliarias',()=>{
  test('usa datos canónicos, KPIs derivados y patrón B2B maestro',async({page},testInfo)=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();
   await page.setViewportSize({width:1600,height:900});
-  await page.addInitScript(session=>{window.localStorage.setItem('fenix-preprod-auth',JSON.stringify(session));window.localStorage.setItem('fenix-remember-device','true');},fakeSession);
-  await page.route('**/functions/v1/fenix-app-gateway-test/**',async r=>{const u=r.request().url();if(u.endsWith('/session/context'))return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({actor_code:'DIR-TEST',role:'Direccion'})});if(u.endsWith('/navigation'))return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[{label:'Inicio',route:'/inicio'},{label:'Inmobiliarias',route:'/inmobiliarias'}]})});return r.fulfill({status:404,body:'{}'});});
-  await page.route('**/functions/v1/fenix-notion-runtime-test/inmobiliarias',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({source:'notion_canonical',items})}));
+  await mockInmo(page);
   await page.goto('/inmobiliarias');
   await expect(page.getByRole('heading',{name:'Inmobiliarias',exact:true}).first()).toBeVisible();
   await expect(page.getByText('COLABORACIÓN B2B',{exact:true})).toBeVisible();
@@ -34,5 +38,18 @@ test.describe('Fénix PRE-PROD · contrato visual Inmobiliarias',()=>{
   await expect(page.getByText(/\bPRO\b/)).toHaveCount(0);
   const shot=await page.screenshot({fullPage:true});
   await testInfo.attach('inmobiliarias-master-1600',{body:shot,contentType:'image/png'});
+ });
+
+ test('traslada a Ana la corrección y el motivo sin perder contexto',async({page},testInfo)=>{
+  if(!testInfo.project.name.includes('desktop'))test.skip();
+  await mockInmo(page);
+  await page.goto('/inmobiliarias');
+  await page.getByPlaceholder('Qué cambiarías...').fill('No priorizar por antigüedad');
+  await page.getByPlaceholder('Motivo de la corrección').fill('Primero debe revisarse la criticidad');
+  await page.getByRole('button',{name:'Preparar para revisión'}).click();
+  await expect(page).toHaveURL(/\/ana\?/);
+  await expect(page.getByText('Contexto: inmobiliaria',{exact:true})).toBeVisible();
+  await expect(page.getByLabel('¿Qué sugirió Ana?')).toHaveValue('No priorizar por antigüedad');
+  await expect(page.getByLabel('¿Por qué no debe hacerse así?')).toHaveValue('Primero debe revisarse la criticidad');
  });
 });
