@@ -83,8 +83,9 @@ export default function ExpedienteAnaRuntimeGuard(){
   const article=articles.find(item=>item.dataset.personId===next.person_id)||articles.find(item=>item.textContent?.includes(next.person_name));
   if(!article)return;
   const openEditor=()=>{
-   const edit=article.querySelector(`[data-testid="edit-person-${next.person_id}"]`) as HTMLButtonElement|null||Array.from(article.querySelectorAll('button')).find(button=>button.textContent?.includes('Editar datos manualmente')) as HTMLButtonElement|undefined;
-   edit?.click();
+   const byId=article.querySelector(`[data-testid="edit-person-${next.person_id}"]`) as HTMLButtonElement|null;
+   const fallback=Array.from(article.querySelectorAll('button')).find(button=>button.textContent?.includes('Editar datos manualmente')) as HTMLButtonElement|undefined;
+   (byId||fallback)?.click();
    article.scrollIntoView({behavior:'smooth',block:'center'});
   };
   const toggle=article.querySelector('.exp-person-toggle') as HTMLButtonElement|null;
