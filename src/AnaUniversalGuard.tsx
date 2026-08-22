@@ -2,7 +2,7 @@ import { ChangeEvent, useEffect, useMemo, useState } from 'react';
 import { ChevronDown, ChevronUp, FileUp, MessageSquareWarning, Sparkles } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { anaAvatar } from './assets/visualAssets';
-import { fetchAnaApi, fetchEvidenceApi, supabase } from './supabase';
+import { fetchAnaApi, fetchEvidenceApi, fetchMemoryApi, supabase } from './supabase';
 import './ana-universal.css';
 
 type Caps={
@@ -14,6 +14,7 @@ type Envelope={capabilities?:Caps;ok?:boolean;error?:string};
 type Scope={type:string;code:string;label:string};
 type Prepare={ok?:boolean;upload_id?:string;storage_path?:string;token?:string;max_bytes?:number;error?:string};
 type Complete={ok?:boolean;reused?:boolean;no_op?:boolean;document_page_id?:string;error?:string};
+type MemoryResult={ok?:boolean;reused?:boolean;no_op?:boolean;activity_page_id?:string;error?:string};
 
 const hiddenRoots=['/','/perfil','/ana'];
 const BUCKET='fenix-preprod-documents-test';
@@ -52,17 +53,27 @@ export default function AnaUniversalGuard(){
 
   const correctionUrl=`/ana?scope_type=${encodeURIComponent(scope.type)}${scope.code?`&scope_code=${encodeURIComponent(scope.code)}`:''}`;
 
-  async function saveFile(file:File,kind:'documento'|'texto_conversacion'|'audio_conversacion'|'comentario'){
+  async function rememberText(text:string,kind:'texto_conversacion'|'comentario',evidencePageId:string){
+    const key=`memory:${evidencePageId}:${kind}`;
+    return fetchMemoryApi<MemoryResult>('/remember',{method:'POST',body:JSON.stringify({origin_type:scope.type,origin_code:scope.code,detail:text,evidence_page_id:evidencePageId,memory_class:'Contexto',idempotency_key:key})});
+  }
+
+  async function saveFile(file:File,kind:'documento'|'texto_conversacion'|'audio_conversacion'|'comentario',memoryText?:string){
     setEvidenceMessage('');setUploading(true);
     const p=await fetchEvidenceApi<Prepare>('/prepare',{method:'POST',body:JSON.stringify({origin_type:scope.type,origin_code:scope.code,evidence_kind:kind,filename:file.name,mime_type:file.type||'application/octet-stream'})});
     if(p.status!==200||!p.data?.upload_id||!p.data.storage_path||!p.data.token){setUploading(false);setEvidenceMessage('No se pudo preparar la carga en este contexto.');return;}
     if(p.data.max_bytes&&file.size>p.data.max_bytes){setUploading(false);setEvidenceMessage('El archivo supera el tamaño permitido en PRE-PROD.');return;}
-    const up=await supabase.storage.from(BUCKET).uploadToSignedUrl(p.data.storage_path,p.data.token,file,{contentType:file.type||undefined});
+    const up=await supabase.storage.from(BUCKET).uploadToSignedUrl(p.data.storage_path,p.data.token,file,file.type?{contentType:file.type}:{});
     if(up.error){setUploading(false);setEvidenceMessage('No se pudo subir el archivo.');return;}
     const done=await fetchEvidenceApi<Complete>('/complete',{method:'POST',body:JSON.stringify({upload_id:p.data.upload_id,title:file.name})});
-    setUploading(false);
-    if(done.status===200&&done.data?.ok){setEvidenceMessage(done.data.reused?'Esta evidencia ya estaba guardada; no se ha duplicado.':'Evidencia guardada y vinculada al contexto.');if(kind==='texto_conversacion'||kind==='comentario')setEvidenceText('');}
-    else setEvidenceMessage('La carga llegó al almacenamiento, pero no pudo cerrarse de forma segura.');
+    if(done.status===200&&done.data?.ok){
+      let memoryOk=true;
+      if(memoryText&&done.data.document_page_id){const m=await rememberText(memoryText,kind==='comentario'?'comentario':'texto_conversacion',done.data.document_page_id);memoryOk=m.status===200||m.status===201;}
+      setUploading(false);
+      if(!memoryOk){setEvidenceMessage('La evidencia quedó guardada, pero la memoria relacional no pudo vincularse todavía.');return;}
+      setEvidenceMessage(done.data.reused?'Esta evidencia ya estaba guardada; no se ha duplicado.':'Evidencia guardada, vinculada al contexto y disponible para la siguiente gestión.');
+      if(kind==='texto_conversacion'||kind==='comentario')setEvidenceText('');
+    }else{setUploading(false);setEvidenceMessage('La carga llegó al almacenamiento, pero no pudo cerrarse de forma segura.');}
   }
 
   async function uploadSelected(e:ChangeEvent<HTMLInputElement>){
@@ -73,7 +84,7 @@ export default function AnaUniversalGuard(){
   async function saveText(kind:'texto_conversacion'|'comentario'){
     const value=evidenceText.trim();if(!value){setEvidenceMessage('Escribe el texto que quieres guardar.');return;}
     const name=kind==='comentario'?`comentario-${Date.now()}.txt`:`conversacion-${Date.now()}.txt`;
-    await saveFile(new File([value],name,{type:'text/plain'}),kind);
+    await saveFile(new File([value],name,{type:'text/plain'}),kind,value);
   }
 
   return <aside className={`ana-universal ${open?'open':''}`} aria-label="Ana · asistente contextual">
@@ -99,7 +110,7 @@ export default function AnaUniversalGuard(){
         <div className="ana-evidence-actions"><button disabled={uploading||!evidenceText.trim()} onClick={()=>void saveText('texto_conversacion')}>Guardar conversación</button><button disabled={uploading||!evidenceText.trim()} onClick={()=>void saveText('comentario')}>Guardar comentario</button></div>
         {evidenceMessage&&<small className="ana-evidence-result">{evidenceMessage}</small>}
       </div>}
-      <small className="ana-evidence-hint">Texto y documentos quedan ligados al contexto. Audio: se conserva como evidencia, sin transcripción automática en esta fase.</small>
+      <small className="ana-evidence-hint">Texto y documentos quedan ligados al contexto. Las conversaciones/comentarios de texto quedan disponibles como memoria relacional. Audio: se conserva como evidencia, sin transcripción automática en esta fase.</small>
     </div>}
   </aside>;
 }
