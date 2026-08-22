@@ -21,6 +21,7 @@ export default function AnaGovernance(){
   const scopeCode=params.get('scope_code')?.trim()||params.get('contact_id')?.trim()||params.get('inmobiliaria_id')?.trim()||params.get('expediente_id')?.trim()||params.get('task_id')?.trim()||'';
   useEffect(()=>{let alive=true;supabase.auth.getSession().then(({data})=>{if(alive){setLogged(Boolean(data.session));setReady(true)}});const {data:{subscription}}=supabase.auth.onAuthStateChange((_e,s)=>{setLogged(Boolean(s));setReady(true)});return()=>{alive=false;subscription.unsubscribe()};},[]);
   useEffect(()=>{document.documentElement.dataset.theme=theme;sessionStorage.setItem('fenix-theme',theme);},[theme]);
+  useEffect(()=>{if(!active)return;if(params.get('mode')==='do'&&scopeType==='contacto'&&!scopeCode&&!params.get('channel')&&!params.get('correction'))navigate('/contactos/nuevo',{replace:true});},[active,params,scopeType,scopeCode,navigate]);
   useEffect(()=>{
     if(!active)return;
     const preparedSuggestion=params.get('correction')?.trim()||'';
