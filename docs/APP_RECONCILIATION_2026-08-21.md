@@ -52,7 +52,16 @@ Este documento registra la reconciliación técnica de la APP Fénix en PRE-PROD
 - Las correcciones preparadas desde una pantalla conservan `resource/scope_type`, `scope_code`, corrección, motivo y regla propuesta al abrir `/ana`.
 - El formulario de gobierno de Ana precarga el contexto recibido en la URL y lo envía al backend de correcciones en lugar de degradarlo siempre a `general`.
 - La corrección sigue sin convertirse en norma automáticamente; Dirección mantiene la decisión final.
-- No se añade ninguna capacidad de alta de registros que el backend no soporte todavía.
+- No se añade capacidad de alta de registros mientras el backend de creación no esté validado específicamente.
+
+## Agenda · traslado de tareas · cierre 22/08/2026
+
+- La ficha canónica de tarea permite a Dirección trasladar una tarea a otra persona activa del equipo utilizando `ID trabajador operativo` de la fuente Notion existente.
+- Los destinos se obtienen de las fuentes autorizadas de personal financiero y visitadores; no se crean responsables por texto libre ni por inferencia.
+- Financiero y Visitador no ven el control de traslado.
+- El backend `fenix-notion-actions-test` v3 valida identidad, rol y destino activo antes de escribir y mantiene auditoría de la mutación.
+- El cambio pasa por la misma vista previa obligatoria que el resto de escrituras: seleccionar → revisar → confirmar → guardar.
+- No se utiliza el RPC histórico que reasigna la tabla `preprod_test.tareas`, porque Agenda opera sobre la fuente Notion canónica y mezclar ambos almacenes produciría divergencia.
 
 ## Notarías · cierre canónico 22/08/2026
 
@@ -69,16 +78,14 @@ La navegación PRE-PROD incorpora `/notarias` para Dirección y Financiero, pero
 
 ## Evidencia verde vigente
 
-CI #716 `32565818628` sobre head `e82e5f4b0d062fcb0c1d9eb6192e544ef38f3b2c`: **GREEN**.
+CI #726 `32566382106` sobre head `ad0baa9ae5ce9ee68adf38fa75770b6c99d62b8d`: **GREEN**.
 
 - Build TypeScript/Vite: SUCCESS.
-- Browser QA: SUCCESS.
-- Artifact dist: `9474058883`, SHA256 `5643e4ff2200e049267b60a9de64a010df5353c17889cbdf421f4ef06cfb8ba5`.
-- Playwright report: `9474059204`, SHA256 `744251e2e43b200ba32acfa625ca55ef85c430d147088d6165f58d610ff3d5cb`.
+- Browser QA: SUCCESS, incluido traslado de tareas Dirección y ausencia del control para Financiero.
+- Artifact dist: `9474193125`, SHA256 `50de37cb3e3acc6328ce1b3a46d57a6582c6ca17e64a6d32d6d14ebd350a270d`.
+- Playwright report: `9474193271`, SHA256 `034c87940ebe8bda0655e790a93823a9c798d5302c12e3269cde3061e857c05d`.
 - Snapshot PRE-PROD GitHub Pages: SUCCESS dentro del run de PR.
 - `deploy-preprod-pages` permanece omitido en el run de PR; el smoke HTTPS público todavía no se considera verificado.
-
-Los commits posteriores de endurecimiento de Ana deben obtener su propio CI verde antes de sustituir esta evidencia como último head validado.
 
 ## Deuda de asignaciones operativas
 
