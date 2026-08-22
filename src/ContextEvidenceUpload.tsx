@@ -1,0 +1,19 @@
+import {ChangeEvent,useMemo,useState} from 'react';
+import {FileUp,X} from 'lucide-react';
+import {useLocation,useNavigate} from 'react-router-dom';
+import {fetchEvidenceApi,supabase} from './supabase';
+
+const BUCKET='fenix-preprod-documents-test';
+type Prepare={ok?:boolean;upload_id?:string;storage_path?:string;token?:string;max_bytes?:number};
+type Complete={ok?:boolean;reused?:boolean;document_page_id?:string};
+
+export default function ContextEvidenceUpload(){
+ const location=useLocation(),navigate=useNavigate();const params=useMemo(()=>new URLSearchParams(location.search),[location.search]);
+ const expediente=params.get('expediente')||'',comprador=params.get('comprador')||'',active=params.get('upload')==='1'&&Boolean(expediente||comprador);
+ const [busy,setBusy]=useState(false),[msg,setMsg]=useState('');
+ if(!active)return null;
+ const originType=comprador?'comprador':'expediente',originCode=comprador||expediente;
+ async function choose(e:ChangeEvent<HTMLInputElement>){const file=e.target.files?.[0];e.target.value='';if(!file)return;setBusy(true);setMsg('');const p=await fetchEvidenceApi<Prepare>('/prepare',{method:'POST',body:JSON.stringify({origin_type:originType,origin_code:originCode,evidence_kind:file.type.startsWith('audio/')?'audio_conversacion':'documento',filename:file.name,mime_type:file.type||'application/octet-stream'})});if(p.status!==200||!p.data?.upload_id||!p.data.storage_path||!p.data.token){setBusy(false);setMsg('No se pudo preparar la carga para esta persona/expediente.');return;}if(p.data.max_bytes&&file.size>p.data.max_bytes){setBusy(false);setMsg('El archivo supera el tamaño permitido.');return;}const up=await supabase.storage.from(BUCKET).uploadToSignedUrl(p.data.storage_path,p.data.token,file,file.type?{contentType:file.type}:{});if(up.error){setBusy(false);setMsg('No se pudo subir el archivo.');return;}const done=await fetchEvidenceApi<Complete>('/complete',{method:'POST',body:JSON.stringify({upload_id:p.data.upload_id,title:file.name})});setBusy(false);if(done.status===200&&done.data?.ok)setMsg(done.data.reused?'Ese documento ya estaba relacionado; no se ha duplicado.':comprador?'Documento guardado y relacionado con esta persona y el expediente.':'Documento guardado y relacionado con el expediente.');else setMsg('El archivo no pudo cerrarse de forma segura.');}
+ function close(){const q=new URLSearchParams(location.search);q.delete('upload');navigate(`${location.pathname}${q.toString()?`?${q}`:''}`,{replace:true});}
+ return <section className="ops-message" style={{display:'grid',gap:10,border:'2px solid #870064'}} aria-label="Subir documentación contextual"><div style={{display:'flex',justifyContent:'space-between',gap:10,alignItems:'center'}}><div><strong>{comprador?'Subir documentación de esta persona':'Subir documentación del expediente'}</strong><p style={{margin:'4px 0 0'}}>El archivo quedará enlazado al contexto correcto; no se mezclará con otra persona.</p></div><button onClick={close} aria-label="Cerrar"><X size={16}/></button></div><label className="primary" style={{display:'inline-flex',alignItems:'center',justifyContent:'center',gap:7,cursor:busy?'wait':'pointer',padding:10,borderRadius:10}}><FileUp size={17}/>{busy?'Subiendo…':'Elegir documento o audio'}<input type="file" accept=".pdf,.png,.jpg,.jpeg,.txt,.mp3,.m4a,.wav,.webm,audio/*" onChange={e=>void choose(e)} disabled={busy} style={{display:'none'}}/></label>{msg&&<strong>{msg}</strong>}</section>;
+}
