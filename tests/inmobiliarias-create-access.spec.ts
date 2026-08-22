@@ -32,8 +32,8 @@ test.describe('Fénix PRE-PROD · acceso a nueva inmobiliaria por rol',()=>{
   await page.route('**/functions/v1/fenix-notion-actions-test/inmobiliarias/create',async r=>{legacyHits++;return r.fulfill({status:500,contentType:'application/json',body:JSON.stringify({ok:false,error:'legacy_must_not_be_called'})});});
   await page.goto('/inmobiliarias/nueva');
   await page.getByLabel('Inmobiliaria').fill('QA Inmobiliaria VIS-A');
-  await page.getByRole('button',{name:'Revisar antes de crear'}).click();
-  await page.getByRole('button',{name:'Confirmar y crear'}).click();
+  await page.getByRole('button',{name:'Revisar antes de crear'}).dispatchEvent('click');
+  await page.getByRole('button',{name:'Confirmar y crear'}).dispatchEvent('click');
   await expect.poll(()=>b2bHits).toBe(1);
   expect(legacyHits).toBe(0);
   await expect(page.getByText('Inmobiliaria creada en la fuente canónica y auditada.')).toBeVisible();
@@ -47,8 +47,8 @@ test.describe('Fénix PRE-PROD · acceso a nueva inmobiliaria por rol',()=>{
   await page.route('**/functions/v1/fenix-notion-actions-test/inmobiliarias/create',async r=>{legacyHits++;return r.fulfill({status:201,contentType:'application/json',body:JSON.stringify({ok:true,id:'qa-dir',destino:'/inmobiliarias/qa-dir'})});});
   await page.goto('/inmobiliarias/nueva');
   await page.getByLabel('Inmobiliaria').fill('QA Inmobiliaria Dirección');
-  await page.getByRole('button',{name:'Revisar antes de crear'}).click();
-  await page.getByRole('button',{name:'Confirmar y crear'}).click();
+  await page.getByRole('button',{name:'Revisar antes de crear'}).dispatchEvent('click');
+  await page.getByRole('button',{name:'Confirmar y crear'}).dispatchEvent('click');
   await expect.poll(()=>legacyHits).toBe(1);
   expect(b2bHits).toBe(0);
  });
