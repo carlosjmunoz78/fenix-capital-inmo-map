@@ -61,8 +61,8 @@ export default function AnaGovernance(){
 
   async function submit(e:FormEvent){
     e.preventDefault();setMessage('');
-    if(!caps?.can_correct_ana){setMessage('No tienes permiso para registrar correcciones en este contexto.');return;}
-    if(reason.trim().length<2||suggestion.trim().length<2){setMessage('Indica qué sugirió Ana y qué debe corregirse.');return;}
+    if(caps?.can_correct_ana===false){setMessage('No tienes permiso para registrar correcciones en este contexto.');return;}
+    if(reason.trim().length<2||suggestion.trim().length<2){setMessage('Indica qué sugirió Ana y por qué no debe hacerse así.');return;}
     setSaving(true);
     const payload:Record<string,unknown>={scope_type:scopeType,ana_suggestion:suggestion,user_reason:reason,proposed_rule:rule||null,idempotency_key:createKey.current};if(scopeCode)payload.scope_code=scopeCode;
     const r=await fetchAnaApi<ApiEnvelope<Correction>>('/corrections',{method:'POST',body:JSON.stringify(payload)});
@@ -94,6 +94,7 @@ export default function AnaGovernance(){
 
   async function logout(){await supabase.auth.signOut();window.location.href=import.meta.env.BASE_URL;}
   const inboxAllowed=Boolean(caps?.can_view_learning_inbox);
+  const correctionAllowed=caps?.can_correct_ana!==false;
 
   return <div className="ops-root" data-theme={theme}>
     <aside className="ops-side">
@@ -108,10 +109,10 @@ export default function AnaGovernance(){
 
         <article className="ops-ana-card"><img src={anaAvatar} alt="Ana"/><div><strong>Ana</strong><p>{inboxAllowed?'Aquí te reúno las correcciones que se han ido registrando en expedientes, contactos, comunicaciones, tareas y demás módulos. Tú decides qué pasa a regla, qué queda como excepción, qué solo sirve para este caso y qué descartamos.':'Te seguiré diciendo qué conviene hacer y podrás corregirme en cada caso. La revisión global del aprendizaje está capada para tu rol en esta fase.'}</p></div></article>
 
-        {(correctionContext||inboxAllowed)&&caps?.can_correct_ana&&<form className="ops-message" onSubmit={submit} style={{display:'grid',gap:10}}>
+        {(correctionContext||inboxAllowed)&&correctionAllowed&&<form className="ops-message" onSubmit={submit} style={{display:'grid',gap:10}}>
           <strong>Ana se ha equivocado</strong>{scopeType!=='general'&&<small>Contexto: {scopeType}{scopeCode?` · ${scopeCode}`:''}</small>}
-          <label>¿Qué recomendó Ana?<textarea value={suggestion} onChange={e=>setSuggestion(e.target.value)} rows={2} style={{width:'100%'}}/></label>
-          <label>¿Qué ocurrió / qué debería corregirse?<textarea value={reason} onChange={e=>setReason(e.target.value)} rows={3} style={{width:'100%'}}/></label>
+          <label>¿Qué sugirió Ana?<textarea value={suggestion} onChange={e=>setSuggestion(e.target.value)} rows={2} style={{width:'100%'}}/></label>
+          <label>¿Por qué no debe hacerse así?<textarea value={reason} onChange={e=>setReason(e.target.value)} rows={3} style={{width:'100%'}}/></label>
           <label>Posible regla o aprendizaje (opcional)<textarea value={rule} onChange={e=>setRule(e.target.value)} rows={2} style={{width:'100%'}}/></label>
           <button className="primary" disabled={saving}>{saving?'Guardando…':'Guardar corrección'}</button>
         </form>}
