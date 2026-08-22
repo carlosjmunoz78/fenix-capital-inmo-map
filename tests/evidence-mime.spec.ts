@@ -30,7 +30,7 @@ test.describe('Fénix PRE-PROD · MIME seguro de evidencia contextual',()=>{
   await page.route('**/functions/v1/fenix-evidence-api-test/prepare',async r=>{payloads.push(r.request().postDataJSON());return r.fulfill({status:400,contentType:'application/json',body:'{}'});});
   await page.goto(`/documentacion?expediente=${expediente}&upload=1`);
   await page.locator('input[type=file]').setInputFiles({name:'llamada.m4a',mimeType:'audio/x-m4a',buffer:Buffer.from('qa-audio')});
-  expect(payloads).toHaveLength(1);
+  await expect.poll(()=>payloads.length).toBe(1);
   expect(payloads[0]).toMatchObject({evidence_kind:'audio_conversacion',mime_type:'audio/x-m4a'});
  });
 
