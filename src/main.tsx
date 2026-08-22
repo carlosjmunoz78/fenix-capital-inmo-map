@@ -23,6 +23,7 @@ import ContactosShell from './ContactosShell';
 import ContactCreateShell from './ContactCreateShell';
 import ContactDetailShell from './ContactDetailShell';
 import InmobiliariasShell from './InmobiliariasShell';
+import InmobiliariaCreateAccess from './InmobiliariaCreateAccess';
 import InmobiliariaCreateShell from './InmobiliariaCreateShell';
 import InmobiliariaDetailShell from './InmobiliariaDetailShell';
 import B2BContactCreateLauncher from './B2BContactCreateLauncher';
@@ -80,6 +81,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <ContactCreateShell />
       <ContactDetailShell />
       <InmobiliariasShell />
+      <InmobiliariaCreateAccess />
       <InmobiliariaCreateShell />
       <InmobiliariaDetailShell />
       <B2BContactCreateShell />
