@@ -22,6 +22,7 @@ import AgendaShell from './AgendaShell';
 import FirmasShell from './FirmasShell';
 import DocumentacionShell from './DocumentacionShell';
 import FinancierosShell from './FinancierosShell';
+import VisitadoresShell from './VisitadoresShell';
 import AnaGovernance from './AnaGovernance';
 import VisitasShell from './VisitasShell';
 import CommunicationsShell from './CommunicationsShell';
@@ -44,6 +45,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <FirmasShell />
       <DocumentacionShell />
       <FinancierosShell />
+      <VisitadoresShell />
       <AnaGovernance />
       <VisitasShell />
       <CommunicationsShell />
