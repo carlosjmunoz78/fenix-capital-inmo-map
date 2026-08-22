@@ -25,7 +25,7 @@ const adviceAfterSave={...advice,people:{...advice.people,next_person_data:{pers
 const memory={ok:true,status:200,items:[{id:'m1',detail:'El cliente indicó que puede aportar la documentación mañana y pidió que se le recuerde.',memory_class:'Compromiso',source_actor:'FIN-A',created_at:'2026-08-22T10:00:00Z',evidence_count:1}]};
 
 test.describe('Fénix PRE-PROD · ficha maestra de expediente',()=>{
- test('Ana usa datos vivos, apunta por person_id, recalcula y prepara contacto idempotente',async({page},testInfo)=>{
+ test('Ana usa datos vivos, apunta por person_id, recalcula sin recarga y prepara contacto idempotente',async({page},testInfo)=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();
   await page.setViewportSize({width:1600,height:900});
   await page.addInitScript(session=>{window.localStorage.setItem('fenix-preprod-auth',JSON.stringify(session));window.localStorage.setItem('fenix-remember-device','true');},fakeSession);
@@ -56,10 +56,12 @@ test.describe('Fénix PRE-PROD · ficha maestra de expediente',()=>{
   await expect(maria).toBeVisible();
   await expect(maria.getByTestId('save-person-p3')).toBeVisible();
   await maria.locator('label').filter({hasText:'Situación laboral'}).locator('select').selectOption('Funcionario');
+  await page.evaluate(()=>{(window as any).__fenixAnaNoReload='alive';});
   await maria.getByTestId('save-person-p3').dispatchEvent('click');
   await expect(page.getByText('Datos de la persona guardados y auditados.',{exact:true})).toBeVisible();
   await expect(page.getByText('Siguiente dato pendiente: Situación laboral de María.',{exact:true})).toHaveCount(0);
   await expect(page.getByText('Siguiente dato pendiente: Sueldo neto mensual de María.',{exact:true})).toBeVisible();
+  await expect.poll(()=>page.evaluate(()=>(window as any).__fenixAnaNoReload)).toBe('alive');
   await expect(page.getByText('Lo que recuerdo de este expediente',{exact:true})).toBeVisible();
   const doAna=page.getByRole('button',{name:'Que lo haga Ana',exact:true});
   await expect(doAna).toBeEnabled();
