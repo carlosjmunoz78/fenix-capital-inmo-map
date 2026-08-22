@@ -27,6 +27,7 @@ import FirmasShell from './FirmasShell';
 import DocumentacionShell from './DocumentacionShell';
 import FinancierosShell from './FinancierosShell';
 import VisitadoresShell from './VisitadoresShell';
+import VisitadorDetailShell from './VisitadorDetailShell';
 import InformesShell from './InformesShell';
 import SearchShell from './SearchShell';
 import AnaGovernance from './AnaGovernance';
@@ -56,6 +57,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <DocumentacionShell />
       <FinancierosShell />
       <VisitadoresShell />
+      <VisitadorDetailShell />
       <InformesShell />
       <SearchShell />
       <AnaGovernance />
