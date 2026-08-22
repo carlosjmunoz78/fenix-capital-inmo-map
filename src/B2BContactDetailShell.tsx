@@ -1,4 +1,4 @@
-import {FormEvent,useEffect,useState} from 'react';
+import {useEffect,useState} from 'react';
 import {useLocation,useNavigate} from 'react-router-dom';
 import {ArrowLeft,LogOut,Moon,Save,Sun,UserRound} from 'lucide-react';
 import {fetchAppApi,fetchB2BActionsApi,supabase} from './supabase';
@@ -23,8 +23,8 @@ export default function B2BContactDetailShell(){
  const allowed=ctx?.role==='Direccion'||ctx?.role==='Visitador';
  if(!active||!ready||!logged)return null;
  function edit(){if(preview)setPreview(false);setMessage('');}
- function review(e:React.MouseEvent<HTMLButtonElement>){e.preventDefault();e.stopPropagation();if(!allowed||nombre.trim().length<2)return;setPreview(true);setMessage('');}
- async function save(e:FormEvent){e.preventDefault();if(!allowed||!preview)return;setBusy(true);const r=await fetchB2BActionsApi<Envelope>(`/contactos/${encodeURIComponent(id)}/update`,{method:'POST',body:JSON.stringify({nombre:nombre.trim(),apellidos:apellidos.trim(),cargo:cargo.trim(),email:email.trim(),telefono:telefono.trim()})});setBusy(false);if(r.status===200){setPreview(false);setMessage('Contacto B2B actualizado dentro de tu ámbito autorizado.');void load(false);}else if(r.status===403)setMessage('No puedes modificar este contacto B2B.');else setMessage(`No se pudo actualizar (${r.data?.error||r.status}).`);}
+ function review(){if(!allowed||nombre.trim().length<2||busy)return;setPreview(true);setMessage('');}
+ async function save(){if(!allowed||!preview||busy)return;setBusy(true);const r=await fetchB2BActionsApi<Envelope>(`/contactos/${encodeURIComponent(id)}/update`,{method:'POST',body:JSON.stringify({nombre:nombre.trim(),apellidos:apellidos.trim(),cargo:cargo.trim(),email:email.trim(),telefono:telefono.trim()})});setBusy(false);if(r.status===200){setPreview(false);setMessage('Contacto B2B actualizado dentro de tu ámbito autorizado.');void load(false);}else if(r.status===403)setMessage('No puedes modificar este contacto B2B.');else setMessage(`No se pudo actualizar (${r.data?.error||r.status}).`);}
  async function logout(){await supabase.auth.signOut();window.location.href=import.meta.env.BASE_URL;}
  const inmo=data?.inmobiliaria;
  return <div className="ops-root" data-theme={theme} style={{zIndex:6900}}>
@@ -33,10 +33,10 @@ export default function B2BContactDetailShell(){
    <section className="ops-content"><div className="ops-title"><div><span className="ops-icon"><UserRound size={20}/></span><div><h1>{data?.item?.contacto||'Contacto de inmobiliaria'}</h1><p>{inmo?.nombre||'Inmobiliaria'}{inmo?.localidad?` · ${inmo.localidad}`:''}</p></div></div><span className="ops-live ok">PRE-PROD</span></div>
     <article className="ops-ana-card"><img src={anaAvatar} alt="Ana"/><div><strong>Ana</strong><p>Este contacto pertenece al ámbito B2B. Un Visitador puede verlo y modificarlo solo si la inmobiliaria está en su cartera o zona autorizada.</p></div></article>
     {message&&<div className="ops-message">{message}</div>}
-    {status===200&&data?.item&&<form className="ops-message" onSubmit={save} style={{display:'grid',gap:12}}>
+    {status===200&&data?.item&&<form className="ops-message" onSubmit={e=>e.preventDefault()} style={{display:'grid',gap:12}}>
       <label>Nombre<input value={nombre} onChange={e=>{setNombre(e.target.value);edit()}} maxLength={100} required/></label><label>Apellidos<input value={apellidos} onChange={e=>{setApellidos(e.target.value);edit()}} maxLength={120}/></label><label>Cargo<input value={cargo} onChange={e=>{setCargo(e.target.value);edit()}} maxLength={120}/></label><label>Teléfono<input value={telefono} onChange={e=>{setTelefono(e.target.value);edit()}} maxLength={40} inputMode="tel"/></label><label>Email<input value={email} onChange={e=>{setEmail(e.target.value);edit()}} maxLength={200} type="email"/></label>
       {preview&&<div className="ops-message" data-testid="b2b-contact-preview"><strong>Vista previa</strong><div>Nombre: {[nombre.trim(),apellidos.trim()].filter(Boolean).join(' ')}</div><div>Cargo: {cargo.trim()||'No indicado'}</div><div>Teléfono: {telefono.trim()||'No indicado'}</div><div>Email: {email.trim()||'No indicado'}</div><small>La inmobiliaria asociada no cambia en esta edición.</small></div>}
-      {allowed?<div style={{display:'flex',gap:8,flexWrap:'wrap'}}>{preview&&<button type="button" onClick={()=>setPreview(false)}>Volver</button>}{preview?<button type="submit" className="primary" disabled={busy||nombre.trim().length<2}><Save size={16}/>{busy?'Guardando…':'Confirmar cambios'}</button>:<button type="button" className="primary" disabled={busy||nombre.trim().length<2} onClick={review}><Save size={16}/>Revisar cambios</button>}</div>:<div className="ops-message">Tu perfil no puede modificar contactos B2B.</div>}
+      {allowed?<div style={{display:'flex',gap:8,flexWrap:'wrap'}}>{preview&&<button type="button" onClick={()=>setPreview(false)}>Volver</button>}<button type="button" data-testid="b2b-contact-primary-action" className="primary" disabled={busy||nombre.trim().length<2} onClick={()=>preview?void save():review()}><Save size={16}/>{busy?'Guardando…':preview?'Confirmar cambios':'Revisar cambios'}</button></div>:<div className="ops-message">Tu perfil no puede modificar contactos B2B.</div>}
     </form>}
    </section>
   </main>
