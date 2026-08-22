@@ -21,18 +21,21 @@ const advice={
   email:{canal:'Email',asunto:'Fénix Capital · documentación pendiente',cuerpo:'Hola, Jorge y Alex:\n\nNecesitamos confirmar la documentación pendiente para seguir avanzando.'}
  }
 };
+const adviceAfterSave={...advice,people:{...advice.people,next_person_data:{person_id:'p3',person_name:'María',field:{key:'sueldo_neto_mensual',label:'Sueldo neto mensual'}},items:[{id:'p1',name:'Jorge',role:'Titular comprador',docs_complete:true,reviewed:true},{id:'p2',name:'Alex',role:'Titular comprador',docs_complete:true,reviewed:true},{id:'p3',name:'María',role:'Avalista',docs_complete:false,reviewed:false,next_missing_field:{key:'sueldo_neto_mensual',label:'Sueldo neto mensual'}}]}};
 const memory={ok:true,status:200,items:[{id:'m1',detail:'El cliente indicó que puede aportar la documentación mañana y pidió que se le recuerde.',memory_class:'Compromiso',source_actor:'FIN-A',created_at:'2026-08-22T10:00:00Z',evidence_count:1}]};
 
 test.describe('Fénix PRE-PROD · ficha maestra de expediente',()=>{
- test('Ana usa datos vivos y prepara contacto idempotente sin enviar',async({page},testInfo)=>{
+ test('Ana usa datos vivos, apunta por person_id, recalcula y prepara contacto idempotente',async({page},testInfo)=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();
   await page.setViewportSize({width:1600,height:900});
   await page.addInitScript(session=>{window.localStorage.setItem('fenix-preprod-auth',JSON.stringify(session));window.localStorage.setItem('fenix-remember-device','true');},fakeSession);
   await page.route('**/functions/v1/fenix-app-gateway-test/**',async r=>{const u=r.request().url();if(u.endsWith('/session/context'))return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({actor_code:'DIR-TEST',role:'Direccion'})});if(u.endsWith('/navigation'))return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[{label:'Inicio',route:'/inicio'},{label:'Expedientes',route:'/expedientes'}]})});return r.fulfill({status:404,body:'{}'});});
   await page.route(`**/functions/v1/fenix-notion-runtime-test/expedientes/${id}`,r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({source:'notion_canonical',item})}));
-  await page.route(`**/functions/v1/fenix-notion-runtime-test/expedientes/${id}/compradores`,r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({count:3,titulares:2,avalistas:1,items:[{id:'p1',nombre:'Jorge',rol_operacion:'Titular comprador',documentacion_completa:true,datos_revisados_financiero:true},{id:'p2',nombre:'Alex',rol_operacion:'Titular comprador',documentacion_completa:true,datos_revisados_financiero:true},{id:'p3',nombre:'María',rol_operacion:'Avalista',documentacion_completa:false,datos_revisados_financiero:false}]})}));
+  let personSaved=false;
+  await page.route(`**/functions/v1/fenix-notion-runtime-test/expedientes/${id}/compradores`,r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({count:3,titulares:2,avalistas:1,items:[{id:'p1',nombre:'Jorge',rol_operacion:'Titular comprador',documentacion_completa:true,datos_revisados_financiero:true},{id:'p2',nombre:'Alex',rol_operacion:'Titular comprador',documentacion_completa:true,datos_revisados_financiero:true},{id:'p3',nombre:'María',rol_operacion:'Avalista',situacion_laboral:personSaved?'Funcionario':null,documentacion_completa:false,datos_revisados_financiero:false}]})}));
   await page.route('**/functions/v1/fenix-notion-runtime-test/expedientes',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[item]})}));
-  await page.route(`**/functions/v1/fenix-expediente-assistant-test/expedientes/${id}/advice`,r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify(advice)}));
+  await page.route(`**/functions/v1/fenix-expediente-assistant-test/expedientes/${id}/advice`,r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify(personSaved?adviceAfterSave:advice)}));
+  await page.route('**/functions/v1/fenix-comprador-action-test/compradores/p3/action',async r=>{personSaved=true;return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,status:200})});});
   let prepCalls=0;
   await page.route(`**/functions/v1/fenix-expediente-assistant-test/expedientes/${id}/prepare-contact`,async r=>{prepCalls++;return r.fulfill({status:prepCalls===1?201:200,contentType:'application/json',body:JSON.stringify({ok:true,status:prepCalls===1?201:200,reused:prepCalls>1,no_op:prepCalls>1,communication_page_id:'comm-page-1',channel:'Llamada',external_sent:false,requires_approval:true})});});
   await page.route('**/functions/v1/fenix-memory-api-test/context',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify(memory)}));
@@ -48,7 +51,15 @@ test.describe('Fénix PRE-PROD · ficha maestra de expediente',()=>{
   await expect(page.getByText('3 intervinientes',{exact:true})).toBeVisible();
   await expect(page.getByText('2 titulares · 1 avalista · 1 con datos pendientes · 1 con documentación pendiente',{exact:true})).toBeVisible();
   await expect(page.getByText('Siguiente dato pendiente: Situación laboral de María.',{exact:true})).toBeVisible();
-  await expect(page.getByRole('button',{name:'Completar este dato',exact:true})).toBeVisible();
+  await page.getByRole('button',{name:'Completar este dato',exact:true}).dispatchEvent('click');
+  const maria=page.getByTestId('exp-person-p3');
+  await expect(maria).toBeVisible();
+  await expect(maria.getByTestId('save-person-p3')).toBeVisible();
+  await maria.locator('label').filter({hasText:'Situación laboral'}).locator('select').selectOption('Funcionario');
+  await maria.getByTestId('save-person-p3').dispatchEvent('click');
+  await expect(page.getByText('Datos de la persona guardados y auditados.',{exact:true})).toBeVisible();
+  await expect(page.getByText('Siguiente dato pendiente: Situación laboral de María.',{exact:true})).toHaveCount(0);
+  await expect(page.getByText('Siguiente dato pendiente: Sueldo neto mensual de María.',{exact:true})).toBeVisible();
   await expect(page.getByText('Lo que recuerdo de este expediente',{exact:true})).toBeVisible();
   const doAna=page.getByRole('button',{name:'Que lo haga Ana',exact:true});
   await expect(doAna).toBeEnabled();
