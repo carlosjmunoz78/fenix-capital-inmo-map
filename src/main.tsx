@@ -14,7 +14,7 @@ import './operational-shell-overlay.css';
 import App from './App';
 import RoleHomeShell from './RoleHomeShell';
 import ProfileShell from './ProfileShell';
-import OperationalShellV2 from './OperationalShellV2';
+import OperationalShellGate from './OperationalShellGate';
 import BancosShell from './BancosShell';
 import BancoDetailShell from './BancoDetailShell';
 import BankContactsShell from './BankContactsShell';
@@ -47,7 +47,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <App />
       <RoleHomeShell />
       <ProfileShell />
-      <OperationalShellV2 />
+      <OperationalShellGate />
       <BancosShell />
       <BancoDetailShell />
       <BankContactsShell />
