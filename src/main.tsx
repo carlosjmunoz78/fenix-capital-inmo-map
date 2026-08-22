@@ -23,6 +23,7 @@ import ContactosShell from './ContactosShell';
 import ContactCreateShell from './ContactCreateShell';
 import ContactDetailShell from './ContactDetailShell';
 import InmobiliariasShell from './InmobiliariasShell';
+import InmobiliariaCreateShell from './InmobiliariaCreateShell';
 import InmobiliariaDetailShell from './InmobiliariaDetailShell';
 import TasacionesShell from './TasacionesShell';
 import AgendaShell from './AgendaShell';
@@ -66,6 +67,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <ContactCreateShell />
       <ContactDetailShell />
       <InmobiliariasShell />
+      <InmobiliariaCreateShell />
       <InmobiliariaDetailShell />
       <TasacionesShell />
       <AgendaShell />
