@@ -23,7 +23,7 @@ function scopeFromPath(path:string):Scope{
   const parts=path.split('/').filter(Boolean),root=parts[0]||'inicio',rawId=parts[1]||'';
   const id=['nuevo','nueva','new'].includes(rawId.toLowerCase())?'':rawId;
   const map:Record<string,{type:string;label:string}>={
-    expedientes:{type:'expediente',label:'expediente'},contactos:{type:'contacto',label:'contacto'},inmobiliarias:{type:'inmobiliaria',label:'inmobiliaria'},
+    expedientes:{type:'expediente',label:'expediente'},contactos:{type:'contacto',label:'contacto'},'contactos-b2b':{type:'contacto_b2b',label:'contacto de inmobiliaria'},inmobiliarias:{type:'inmobiliaria',label:'inmobiliaria'},
     tareas:{type:'tarea',label:'tarea'},agenda:{type:'tarea',label:'agenda'},visitas:{type:'visita',label:'visita'},bancos:{type:'banco',label:'banco'},
     tasaciones:{type:'tasacion',label:'tasación'},firmas:{type:'firma',label:'firma'},documentacion:{type:'documento',label:'documentación'},documentos:{type:'documento',label:'documento'},
     comunicaciones:{type:'comunicacion',label:'comunicación'},inicio:{type:'general',label:'inicio'}
