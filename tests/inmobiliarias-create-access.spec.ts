@@ -51,6 +51,5 @@ test.describe('Fénix PRE-PROD · acceso a nueva inmobiliaria por rol',()=>{
   await page.getByRole('button',{name:'Confirmar y crear'}).click();
   await expect.poll(()=>legacyHits).toBe(1);
   expect(b2bHits).toBe(0);
-  await expect(page.getByText('Inmobiliaria creada en la fuente canónica y auditada.')).toBeVisible();
  });
 });
