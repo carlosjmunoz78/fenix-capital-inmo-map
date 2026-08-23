@@ -26,6 +26,7 @@ function normalizeNavigation(raw:unknown){
  }).filter(Boolean);
  return{...obj,items:normalized};
 }
+function safeNavigationFallback(){return{items:[{route:'/inicio',label:'Inicio'}],degraded:true};}
 
 function authenticatedContextFallback(session:Awaited<ReturnType<typeof supabase.auth.getSession>>['data']['session']){
  const metadata=session?.user?.user_metadata as Record<string,unknown>|undefined;
@@ -94,6 +95,7 @@ export async function fetchAppApi<T>(path: string, init?: RequestInit): Promise<
       const fallback=authenticatedContextFallback(session);
       if(fallback)return{status:200,data:fallback as T};
     }
+    if(path==='/navigation')return{status:200,data:safeNavigationFallback() as T};
     return{status:0,data:null};
   }
 
@@ -104,6 +106,7 @@ export async function fetchAppApi<T>(path: string, init?: RequestInit): Promise<
     const fallback=authenticatedContextFallback(session);
     if(fallback)return{status:200,data:fallback as T};
   }
+  if(path==='/navigation'&&!response.ok)return{status:200,data:safeNavigationFallback() as T};
 
   const normalized = path === '/session/context'
     && raw
