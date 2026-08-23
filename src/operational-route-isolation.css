@@ -1,0 +1,63 @@
+/*
+ * Aislamiento transversal de pantallas operativas.
+ * Mientras exista un .ops-root activo, el shell legacy de App no puede pintar,
+ * capturar eventos ni aportar un segundo scroll. La calculadora global permanece
+ * visible y utilizable como excepción explícita.
+ */
+html:has(#root > .ops-root),
+body:has(#root > .ops-root){
+  height:100%!important;
+  overflow:hidden!important;
+}
+
+#root:has(> .ops-root){
+  height:100vh!important;
+  overflow:hidden!important;
+}
+
+#root:has(> .ops-root) > .app-shell{
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
+
+#root:has(> .ops-root) > .app-shell > .sidebar,
+#root:has(> .ops-root) > .app-shell > .main{
+  display:none!important;
+}
+
+#root:has(> .ops-root) > .app-shell > .calc-panel,
+#root:has(> .ops-root) > .app-shell > .calc-launcher{
+  visibility:visible!important;
+  pointer-events:auto!important;
+}
+
+.ops-root{
+  position:fixed!important;
+  inset:0!important;
+  height:100vh!important;
+  min-height:0!important;
+  overflow:hidden!important;
+}
+
+.ops-root > .ops-main{
+  height:100vh!important;
+  min-height:0!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  overscroll-behavior:contain!important;
+}
+
+/* Ana y la corrección forman un bloque vertical: la corrección va siempre debajo. */
+.inmo-root .inmo-correct,
+.informes-root .informes-correct,
+.comm-root .comm-correct{
+  grid-column:1 / -1!important;
+  scroll-margin-top:104px!important;
+  scroll-margin-bottom:340px!important;
+}
+
+@media(max-width:650px){
+  .ops-root > .ops-main{
+    height:calc(100vh - 58px)!important;
+  }
+}
