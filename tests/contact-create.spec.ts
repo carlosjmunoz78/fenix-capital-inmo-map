@@ -23,7 +23,7 @@ test.describe('Fénix PRE-PROD · alta canónica de contactos',()=>{
  test('Financiero crea el contacto para su propia identidad',async({page},testInfo)=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();await boot(page,'Financiero');let posted:any=null;
   await page.route('**/functions/v1/fenix-notion-actions-test/clientes/create',async r=>{posted=JSON.parse(r.request().postData()||'{}');return r.fulfill({status:201,contentType:'application/json',body:JSON.stringify({ok:true,id:'bbbbbbbb-1111-4111-8111-dddddddddddd'})});});
-  await page.goto('/contactos/nuevo');await page.getByLabel('Nombre').fill('Cliente propio');await expect(page.getByLabel('Responsable financiero')).toHaveValue('FIN-A');await page.getByRole('button',{name:'Revisar antes de crear'}).click();await page.getByRole('button',{name:'Confirmar y crear'}).click();expect(posted.id_financiero_operativo).toBe('FIN-A');
+  await page.goto('/contactos/nuevo');await page.getByLabel('Nombre').fill('Cliente propio');await expect(page.getByLabel('Responsable financiero')).toHaveValue('FIN-A');await page.getByRole('button',{name:'Revisar antes de crear'}).click();await page.getByRole('button',{name:'Confirmar y crear'}).click();await expect.poll(()=>posted?.id_financiero_operativo).toBe('FIN-A');
  });
  test('un duplicado no se vuelve a crear',async({page},testInfo)=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();await boot(page,'Direccion');
