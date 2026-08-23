@@ -4,37 +4,36 @@
  * capturar eventos ni aportar un segundo scroll. La calculadora global permanece
  * visible y utilizable como excepción explícita.
  */
-html:has(#root > .ops-root),
-body:has(#root > .ops-root){
+html:has(#root .ops-root),
+body:has(#root .ops-root){
   height:100%!important;
   overflow:hidden!important;
 }
 
-#root:has(> .ops-root){
+#root:has(.ops-root){
   height:100vh!important;
   overflow:hidden!important;
 }
 
-#root:has(> .ops-root) > .app-shell{
+#root:has(.ops-root) > .app-shell{
   visibility:hidden!important;
   pointer-events:none!important;
 }
 
-/* Algunos descendientes legacy restablecían pointer-events:auto y podían interceptar
-   clics tras hacer scroll. Se desactiva todo el árbol salvo la calculadora explícita. */
-#root:has(> .ops-root) > .app-shell *{
+/* Ningún descendiente del shell legacy puede reactivar eventos por sus propias reglas. */
+#root:has(.ops-root) > .app-shell *{
   pointer-events:none!important;
 }
 
-#root:has(> .ops-root) > .app-shell > .sidebar,
-#root:has(> .ops-root) > .app-shell > .main{
+#root:has(.ops-root) > .app-shell > .sidebar,
+#root:has(.ops-root) > .app-shell > .main{
   display:none!important;
 }
 
-#root:has(> .ops-root) > .app-shell > .calc-panel,
-#root:has(> .ops-root) > .app-shell > .calc-launcher,
-#root:has(> .ops-root) > .app-shell > .calc-panel *,
-#root:has(> .ops-root) > .app-shell > .calc-launcher *{
+#root:has(.ops-root) > .app-shell > .calc-panel,
+#root:has(.ops-root) > .app-shell > .calc-launcher,
+#root:has(.ops-root) > .app-shell > .calc-panel * ,
+#root:has(.ops-root) > .app-shell > .calc-launcher *{
   visibility:visible!important;
   pointer-events:auto!important;
 }
