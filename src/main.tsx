@@ -63,12 +63,14 @@ import OperationalIdentityGuard from './OperationalIdentityGuard';
 import OperationalLogoutGuard from './OperationalLogoutGuard';
 import RouteAccessGuard from './RouteAccessGuard';
 import CreateRouteAuthorizedNav from './CreateRouteAuthorizedNav';
+import ExpedienteFollowupConfirmationGuard from './ExpedienteFollowupConfirmationGuard';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <BrowserRouter basename={import.meta.env.BASE_URL}>
       <RouteAccessGuard />
       <CreateRouteAuthorizedNav />
+      <ExpedienteFollowupConfirmationGuard />
       <CalculatorLabelGuard />
       <ProfileLauncherGuard />
       <OperationalAdvancedSearchGuard />
