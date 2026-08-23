@@ -11,7 +11,7 @@ const rows=[
 ];
 
 test.describe('Fénix PRE-PROD · contrato visual Expedientes',()=>{
- test('Expedientes mantiene patrón maestro, datos canónicos y navegación a ficha',async({page},testInfo)=>{
+ test('Expedientes mantiene patrón maestro, datos canónicos, sticky y ordenación por cabecera',async({page},testInfo)=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();
   await page.setViewportSize({width:1600,height:900});
   await page.addInitScript(session=>{window.localStorage.setItem('fenix-preprod-auth',JSON.stringify(session));window.localStorage.setItem('fenix-remember-device','true');},fakeSession);
@@ -26,6 +26,22 @@ test.describe('Fénix PRE-PROD · contrato visual Expedientes',()=>{
   await expect(page.locator('.ops-top')).toBeVisible();
   await expect(page.getByRole('button',{name:'Cambiar tema'})).toBeVisible();
   await expect(page.getByText(/\bPRO\b/)).toHaveCount(0);
+  const table=page.locator('.ops-sortable-table');
+  await expect(table).toBeVisible();
+  const firstHeader=table.locator('thead th').first();
+  const firstHeaderButton=firstHeader.locator('button');
+  expect(await firstHeader.evaluate(el=>getComputedStyle(el).position)).toBe('sticky');
+  await expect(firstHeaderButton).toBeVisible();
+  await firstHeaderButton.click();
+  await expect(firstHeader).toHaveAttribute('aria-sort','ascending');
+  await expect(table.locator('tbody tr').first().locator('td').first()).toContainText('Expediente QA 1');
+  await firstHeaderButton.click();
+  await expect(firstHeader).toHaveAttribute('aria-sort','descending');
+  await expect(table.locator('tbody tr').first().locator('td').first()).toContainText('Expediente QA 2');
+  const dateHeader=table.locator('thead th').nth(3);
+  await dateHeader.locator('button').click();
+  await expect(dateHeader).toHaveAttribute('aria-sort','ascending');
+  await expect(table.locator('tbody tr').first().locator('td').nth(3)).toContainText('2026-08-24');
   const shot=await page.screenshot({fullPage:true});
   await testInfo.attach('expedientes-qa-1600',{body:shot,contentType:'image/png'});
   await page.getByText('Expediente QA 1').click();
