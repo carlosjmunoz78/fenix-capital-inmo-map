@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 
 const id='aaaaaaaa-1111-4111-8111-bbbbbbbbbbbb';
-const fakeSession={access_token:'eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwicm9sZSI6ImF1dGhlbnRpY2F0ZWQiLCJzdWIiOiJhYWFhYWFhYS1hYWFhLTRhYWEtOGFhYS1hYWFhYWFhYWFhYWEiLCJleHAiOjE5OTk5OTk5OTl9.',token_type:'bearer',expires_in:3600,expires_at:1999999999,refresh_token:'qa-inmo-visibility-not-real',user:{id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',aud:'authenticated',role:'authenticated',email:'qa@fenix.test',app_metadata:{},user_metadata:{actor_code:'DIR-TEST'},created_at:'2026-08-23T00:00:00.000Z'}};
+const fakeSession={access_token:'eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJhdWQiOiJub25lIiwidHlwIjoiSldUIn0.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwicm9sZSI6ImF1dGhlbnRpY2F0ZWQiLCJzdWIiOiJhYWFhYWFhYS1hYWFhLTRhYWEtOGFhYS1hYWFhYWFhYWFhYWEiLCJleHAiOjE5OTk5OTk5OTl9.',token_type:'bearer',expires_in:3600,expires_at:1999999999,refresh_token:'qa-inmo-visibility-not-real',user:{id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',aud:'authenticated',role:'authenticated',email:'qa@fenix.test',app_metadata:{},user_metadata:{actor_code:'DIR-TEST'},created_at:'2026-08-23T00:00:00.000Z'}};
 
 async function boot(page:any,role:'Direccion'|'Financiero'|'Visitador',navigationStatus=200){
  await page.addInitScript(session=>{localStorage.setItem('fenix-preprod-auth',JSON.stringify(session));localStorage.setItem('fenix-remember-device','true');},fakeSession);
@@ -20,7 +20,7 @@ test.describe('Fénix PRE-PROD · visibilidad Inmobiliarias + navegación de fic
    await page.goto('/inmobiliarias');
    const nav=page.locator('.ops-side nav');
    await expect(nav.getByRole('button',{name:'Inmobiliarias',exact:true})).toBeVisible();
-   await expect(page.getByRole('heading',{name:'Inmobiliarias'})).toBeVisible();
+   await expect(page.getByRole('heading',{name:'Inmobiliarias',exact:true})).toBeVisible();
    await expect(page.getByText('Inmo visible QA',{exact:true})).toBeVisible();
   });
  }
@@ -34,6 +34,6 @@ test.describe('Fénix PRE-PROD · visibilidad Inmobiliarias + navegación de fic
   await expect(nav.getByRole('button',{name:'Inicio',exact:true})).toBeVisible();
   await expect(nav.getByRole('button',{name:'Inmobiliarias',exact:true})).toHaveCount(0);
   await expect(nav.getByRole('button',{name:'Expedientes',exact:true})).toHaveCount(0);
-  await expect(page.getByRole('heading',{name:'Inmo detalle QA'})).toBeVisible();
+  await expect(page.locator('h1').filter({hasText:'Inmo detalle QA'})).toBeVisible();
  });
 });
