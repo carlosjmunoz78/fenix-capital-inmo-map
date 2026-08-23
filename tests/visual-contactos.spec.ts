@@ -11,7 +11,7 @@ const items=[
 ];
 
 test.describe('Fénix PRE-PROD · contrato visual Contactos',()=>{
- test('Contactos usa shell específico, datos canónicos y patrón maestro',async({page},testInfo)=>{
+ test('Contactos usa shell específico, datos canónicos, sticky y ordenación por cabecera',async({page},testInfo)=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();
   await page.setViewportSize({width:1600,height:900});
   await page.addInitScript(session=>{window.localStorage.setItem('fenix-preprod-auth',JSON.stringify(session));window.localStorage.setItem('fenix-remember-device','true');},fakeSession);
@@ -29,6 +29,16 @@ test.describe('Fénix PRE-PROD · contrato visual Contactos',()=>{
   await expect(page.getByText('CARMelo')).toBeVisible();
   expect(hits).toBe(1);
   await expect(page.getByText(/\bPRO\b/)).toHaveCount(0);
+  const table=page.locator('.ops-sortable-table');
+  await expect(table).toBeVisible();
+  const nameButton=table.getByRole('button',{name:'Contacto',exact:true});
+  const nameHeader=table.locator('thead th').nth(0);
+  await expect(nameHeader).toHaveAttribute('aria-sort','ascending');
+  expect(await nameHeader.evaluate(el=>getComputedStyle(el).position)).toBe('sticky');
+  await expect(table.locator('tbody tr').first().locator('td').first()).toContainText('ANA LUQUE ROMERO MESA');
+  await nameButton.click();
+  await expect(nameHeader).toHaveAttribute('aria-sort','descending');
+  await expect(table.locator('tbody tr').first().locator('td').first()).toContainText('CARMelo');
   const shot=await page.screenshot({fullPage:true});
   await testInfo.attach('contactos-master-1600',{body:shot,contentType:'image/png'});
  });
