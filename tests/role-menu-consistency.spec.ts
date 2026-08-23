@@ -11,11 +11,12 @@ async function boot(page:any){
  await page.route('**/functions/v1/fenix-ana-test/**',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({capabilities:{can_view_learning_inbox:false,can_correct_ana:true,can_decide_learning:false}})}));
  await page.route('**/functions/v1/fenix-notion-runtime-test/**',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({source:'notion_canonical',items:[]})}));
  await page.route('**/functions/v1/fenix-reports-api-test/**',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[]})}));
+ await page.route('**/functions/v1/fenix-communications-gateway-test/**',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[]})}));
 }
 async function labels(page:any,selector:string){return page.locator(selector).getByRole('button').evaluateAll((nodes:any[])=>nodes.map(n=>(n.textContent||'').trim()).filter(Boolean));}
 async function waitFullMenu(page:any,selector:string){await expect(page.locator(selector).getByRole('button',{name:'Inmobiliarias',exact:true})).toBeVisible();await expect(page.locator(selector).getByRole('button',{name:'Buscar',exact:true})).toBeVisible();}
 
-test('Dirección conserva exactamente el mismo menú autorizado en Inicio, Inmobiliarias, Informes y Ana',async({page},testInfo)=>{
+test('Dirección conserva exactamente el mismo menú autorizado en Inicio, Inmobiliarias, Informes, Comunicaciones y Ana',async({page},testInfo)=>{
  if(!testInfo.project.name.includes('desktop'))test.skip();
  await boot(page);
  await page.goto('/inicio');
@@ -33,6 +34,13 @@ test('Dirección conserva exactamente el mismo menú autorizado en Inicio, Inmob
  await expect(page.locator('.informes-root .ops-top')).toBeVisible();
  await expect(page.locator('.informes-ana-hero')).toBeVisible();
  await expect(page.locator('.informes-correct textarea')).toBeVisible();
+ await page.goto('/comunicaciones');
+ await waitFullMenu(page,'.ops-side nav');
+ const comunicaciones=await labels(page,'.ops-side nav');
+ expect(comunicaciones).toEqual(items.map(x=>x.label));
+ await expect(page.locator('.comm-root .ops-top')).toBeVisible();
+ await expect(page.locator('.comm-ana-hero')).toBeVisible();
+ await expect(page.locator('.comm-correct textarea')).toBeVisible();
  await page.goto('/ana');
  await waitFullMenu(page,'.ops-side nav');
  const ana=await labels(page,'.ops-side nav');
