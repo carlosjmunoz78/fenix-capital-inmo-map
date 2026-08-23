@@ -2,34 +2,40 @@
    Solo remates de legibilidad, aire, Ana, accesos rápidos y calculadora.
    No altera layout maestro, rutas, datos ni lógica. */
 
+/* El marco maestro queda fijo: menú izquierdo y barra superior siempre visibles;
+   solo desplaza el espacio central de trabajo. */
+.dir-shell{height:100vh!important;min-height:0!important;overflow:hidden!important}
+.dir-main{height:100vh!important;min-height:0!important;overflow:auto!important;overscroll-behavior:contain!important}
+.dir-topbar{position:sticky!important;top:0!important;z-index:40!important}
+
 /* Tipografía y respiración: recuperar jerarquía sin rediseñar */
 .dir-priority-copy{padding:18px 16px 14px!important}
 .dir-priority-copy h1{font-size:18px!important;line-height:1.25!important;margin-bottom:6px!important;letter-spacing:-.01em!important}
 .dir-priority-copy>p{font-size:12px!important;line-height:1.45!important;margin-bottom:14px!important}
 
 .dir-kpis{gap:10px!important;margin-bottom:11px!important}
-.dir-kpi{height:112px!important;padding:13px 12px 10px!important}
-.dir-kpi>svg{width:19px!important;height:19px!important;left:11px!important;top:13px!important}
-.dir-kpi>span{font-size:9.5px!important;line-height:1.25!important;margin-left:28px!important;min-height:24px!important;letter-spacing:.015em!important}
-.dir-kpi>strong{font-size:24px!important;line-height:1!important;margin-top:9px!important}
-.dir-kpi>small{font-size:8.75px!important;line-height:1.3!important;margin-top:6px!important}
+.dir-kpi{height:128px!important;padding:14px 13px 11px!important}
+.dir-kpi>svg{width:20px!important;height:20px!important;left:12px!important;top:14px!important}
+.dir-kpi>span{font-size:10px!important;line-height:1.25!important;margin-left:30px!important;min-height:26px!important;letter-spacing:.015em!important}
+.dir-kpi>strong{font-size:26px!important;line-height:1!important;margin-top:10px!important}
+.dir-kpi>small{font-size:9px!important;line-height:1.35!important;margin-top:7px!important}
 
-.dir-section-head{height:40px!important;padding:0 14px!important}
-.dir-section-head strong{font-size:11px!important;letter-spacing:.025em!important}
-.dir-section-head button{font-size:10px!important}
-.dir-empty-state{min-height:150px!important;padding:22px 24px!important}
-.dir-empty-state>span{font-size:12px!important;line-height:1.35!important}
-.dir-empty-state>small{font-size:9.75px!important;line-height:1.45!important;max-width:460px!important}
-.dir-empty-state>button{font-size:9.75px!important;padding:8px 12px!important}
-.dir-empty-compact{padding:13px 11px!important;gap:10px!important}
-.dir-empty-compact strong{font-size:10.75px!important;line-height:1.35!important}
-.dir-empty-compact small{font-size:9.25px!important;line-height:1.4!important}
-.dir-alert-button{height:35px!important;font-size:10.5px!important;margin-top:12px!important}
+.dir-section-head{height:42px!important;padding:0 14px!important}
+.dir-section-head strong{font-size:11.5px!important;letter-spacing:.025em!important}
+.dir-section-head button{font-size:10.5px!important}
+.dir-empty-state{min-height:170px!important;padding:24px 26px!important}
+.dir-empty-state>span{font-size:12.5px!important;line-height:1.4!important}
+.dir-empty-state>small{font-size:10px!important;line-height:1.5!important;max-width:480px!important}
+.dir-empty-state>button{font-size:10px!important;padding:9px 13px!important}
+.dir-empty-compact{padding:14px 12px!important;gap:10px!important}
+.dir-empty-compact strong{font-size:11px!important;line-height:1.4!important}
+.dir-empty-compact small{font-size:9.5px!important;line-height:1.45!important}
+.dir-alert-button{height:37px!important;font-size:11px!important;margin-top:13px!important}
 
-.dir-team-person{min-width:190px!important;padding:11px!important}
-.dir-team-person>strong{font-size:10.5px!important;line-height:1.3!important}
-.dir-team-person>small{font-size:8.75px!important;line-height:1.35!important}
-.dir-team-person dt,.dir-team-person dd{font-size:8.75px!important;line-height:1.35!important}
+.dir-team-person{min-width:198px!important;padding:12px!important}
+.dir-team-person>strong{font-size:11px!important;line-height:1.35!important}
+.dir-team-person>small{font-size:9px!important;line-height:1.4!important}
+.dir-team-person dt,.dir-team-person dd{font-size:9px!important;line-height:1.4!important}
 
 /* Marca: FÉNIX CAPITAL debe leerse en ambos temas */
 .dir-brand strong{color:#FF5F00!important}
@@ -136,20 +142,22 @@
 @media(min-width:1440px){
   .dir-content{padding-top:16px!important}
   .dir-priority-copy h1{font-size:19px!important}
-  .dir-kpi{height:116px!important}
-  .dir-kpi>strong{font-size:25px!important}
+  .dir-kpi{height:132px!important}
+  .dir-kpi>strong{font-size:27px!important}
   .dir-quick-grid button{height:74px!important;font-size:12px!important}
 }
 
 /* No romper responsive ya existente */
 @media(max-width:1100px){
   .dir-topbar{padding-left:16px!important;padding-right:16px!important}
-  .dir-kpi{height:108px!important}
+  .dir-kpi{height:116px!important}
   .dir-kpi>span{font-size:9px!important}
   .dir-quick-grid button{height:66px!important}
 }
 
 @media(max-width:760px){
+  .dir-shell{height:auto!important;min-height:100vh!important;overflow:visible!important}
+  .dir-main{height:auto!important;min-height:0!important;overflow:visible!important}
   .dir-topbar{min-height:64px!important;padding:8px 10px!important}
   .dir-priority-copy{padding:14px 12px!important}
   .dir-priority-copy h1{font-size:16px!important}
