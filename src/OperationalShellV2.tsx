@@ -34,9 +34,7 @@ const modules:Record<string,ModuleDef>={
 const canonicalPaths:Record<string,string>={
   '/expedientes':'/expedientes','/contactos':'/clientes','/inmobiliarias':'/inmobiliarias','/tasaciones':'/tasaciones','/firmas':'/firmas','/documentacion':'/documentos','/agenda':'/tareas','/tareas':'/tareas','/bancos/contactos':'/contactos-bancarios'
 };
-const fallbackNav:NavItem[]=[
-  {label:'Inicio',route:'/inicio'},{label:'Expedientes',route:'/expedientes'},{label:'Bancos',route:'/bancos'},{label:'Contactos',route:'/contactos'},{label:'Inmobiliarias',route:'/inmobiliarias'},{label:'Tasaciones',route:'/tasaciones'},{label:'Firmas',route:'/firmas'},{label:'Documentación',route:'/documentacion'},{label:'Financieros',route:'/financieros'},{label:'Visitadores',route:'/visitadores'},{label:'Agenda',route:'/agenda'},{label:'Informes',route:'/informes'}
-];
+const fallbackNav:NavItem[]=[{label:'Inicio',route:'/inicio'}];
 function pathKey(pathname:string){return Object.keys(modules).find(k=>pathname===k||pathname.startsWith(`${k}/`))||'';}
 function normalizeNav(data:unknown):NavItem[]{if(!data||typeof data!=='object')return[];const items=(data as{items?:unknown[]}).items;if(!Array.isArray(items))return[];return items.map(x=>{if(typeof x==='string')return{label:x.replace(/^\//,'').replace(/(^|-)\w/g,m=>m.replace('-','').toUpperCase())||'Inicio',route:x};if(x&&typeof x==='object'){const o=x as Record<string,unknown>;if(typeof o.route==='string')return{label:typeof o.label==='string'?o.label:o.route.replace(/^\//,''),route:o.route,resource:typeof o.resource==='string'?o.resource:undefined};}return null;}).filter((x):x is NavItem=>Boolean(x));}
 function rowsFrom(data:unknown):AnyRow[]{if(!data||typeof data!=='object')return[];const d=data as Record<string,unknown>;for(const k of ['items','expedientes','bancos','inmobiliarias','documentos','tareas','tasaciones','firmas','results','reports'])if(Array.isArray(d[k]))return d[k] as AnyRow[];return[];}
