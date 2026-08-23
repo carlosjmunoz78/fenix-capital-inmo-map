@@ -10,7 +10,9 @@ const navigation={items:[
   {label:'Inicio',route:'/inicio'},{label:'Expedientes',route:'/expedientes'},{label:'Bancos',route:'/bancos'},
   {label:'Contactos',route:'/contactos'},{label:'Inmobiliarias',route:'/inmobiliarias'},{label:'Tasaciones',route:'/tasaciones'},
   {label:'Firmas',route:'/firmas'},{label:'Documentación',route:'/documentacion'},{label:'Financieros',route:'/financieros'},
-  {label:'Visitadores',route:'/visitadores'},{label:'Economía',route:'/economia'},{label:'Agenda',route:'/agenda'},{label:'Informes',route:'/informes'}
+  {label:'Visitadores',route:'/visitadores'},{label:'Economía',route:'/economia'},{label:'Agenda',route:'/agenda'},{label:'Informes',route:'/informes'},
+  {label:'Notarías',route:'/notarias'},{label:'Avisos',route:'/notificaciones'},{label:'Comunicaciones',route:'/comunicaciones'},
+  {label:'Buscar',route:'/buscar'}
 ]};
 
 test.describe('Fénix PRE-PROD · contrato visual Inicio Dirección',()=>{
@@ -48,7 +50,11 @@ test.describe('Fénix PRE-PROD · contrato visual Inicio Dirección',()=>{
     await expect(page.getByText('ACCESOS RÁPIDOS')).toBeVisible();
     await expect(page.getByRole('region',{name:'Calculadora Hipotecaria'})).toBeVisible();
     await expect(page.getByText(/\bPRO\b/)).toHaveCount(0);
-    await expect(page.locator('.dir-sidebar')).toBeVisible();
+    const sidebar=page.locator('.dir-sidebar');
+    await expect(sidebar).toBeVisible();
+    for(const label of ['Notarías','Avisos','Comunicaciones'])await expect(sidebar.getByRole('button',{name:label,exact:true})).toBeVisible();
+    await expect(sidebar.getByRole('button',{name:'Buscar',exact:true})).toHaveCount(0);
+    await expect(page.getByRole('button',{name:'Buscador avanzado',exact:true})).toBeVisible();
     await expect(page.locator('.dir-topbar')).toBeVisible();
     const shot=await page.screenshot({fullPage:true});
     await testInfo.attach('inicio-direccion-qa',{body:shot,contentType:'image/png'});
