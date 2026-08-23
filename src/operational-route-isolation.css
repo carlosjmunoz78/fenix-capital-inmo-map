@@ -4,8 +4,8 @@
  * capturar eventos ni aportar un segundo scroll. La calculadora global permanece
  * visible y utilizable como excepción explícita.
  */
-html:has(#root .ops-root),
-body:has(#root .ops-root){
+html:has(.ops-root),
+body:has(.ops-root){
   height:100%!important;
   overflow:hidden!important;
 }
@@ -15,25 +15,30 @@ body:has(#root .ops-root){
   overflow:hidden!important;
 }
 
-#root:has(.ops-root) > .app-shell{
+/*
+ * El shell legacy puede convivir como hermano del shell operativo. Usamos body:has
+ * como guardia global porque algunos shells se montan fuera de la jerarquía directa
+ * esperada por #root durante la composición de React/portales.
+ */
+body:has(.ops-root) #root > .app-shell{
   visibility:hidden!important;
   pointer-events:none!important;
 }
 
-/* Ningún descendiente del shell legacy puede reactivar eventos por sus propias reglas. */
-#root:has(.ops-root) > .app-shell *{
+body:has(.ops-root) #root > .app-shell *{
   pointer-events:none!important;
 }
 
-#root:has(.ops-root) > .app-shell > .sidebar,
-#root:has(.ops-root) > .app-shell > .main{
+body:has(.ops-root) #root > .app-shell > .sidebar,
+body:has(.ops-root) #root > .app-shell > .main{
   display:none!important;
 }
 
-#root:has(.ops-root) > .app-shell > .calc-panel,
-#root:has(.ops-root) > .app-shell > .calc-launcher,
-#root:has(.ops-root) > .app-shell > .calc-panel * ,
-#root:has(.ops-root) > .app-shell > .calc-launcher *{
+/* La calculadora global es la única excepción del shell legacy. */
+body:has(.ops-root) #root > .app-shell > .calc-panel,
+body:has(.ops-root) #root > .app-shell > .calc-launcher,
+body:has(.ops-root) #root > .app-shell > .calc-panel *,
+body:has(.ops-root) #root > .app-shell > .calc-launcher *{
   visibility:visible!important;
   pointer-events:auto!important;
 }
