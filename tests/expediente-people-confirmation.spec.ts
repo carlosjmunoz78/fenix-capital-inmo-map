@@ -19,7 +19,7 @@ test('añadir interviniente exige revisar y confirmar; editar invalida preview',
  await page.route(`**/functions/v1/fenix-notion-runtime-test/expedientes/${id}/compradores`,r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({count:0,titulares:0,avalistas:0,items:[]})}));
  await page.route(`**/functions/v1/fenix-comprador-action-test/expedientes/${id}/compradores`,r=>{creates++;return r.fulfill({status:201,contentType:'application/json',body:JSON.stringify({ok:true,id:'p-new'})});});
  await page.goto(`/expedientes/${id}`);
- await page.getByRole('button',{name:'Añadir persona'}).click();
+ await page.getByRole('button',{name:'Añadir persona',exact:true}).click();
  const panel=page.getByLabel('Personas de la operación');
  await panel.getByText('Añadir interviniente',{exact:true}).waitFor();
  await panel.locator('label').filter({hasText:'Nombre'}).locator('input').fill('María');
