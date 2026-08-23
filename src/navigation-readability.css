@@ -54,3 +54,6 @@
   .dir-help-card button{height:34px!important;font-size:11.5px!important;border-radius:8px!important}
   .dir-help-person .dir-avatar{width:42px!important;height:42px!important;font-size:12px!important}
 }
+
+/* En la calculadora el usuario solo necesita cerrar: se elimina el control de minimizar. */
+.calc-actions button[aria-label='Minimizar calculadora']{display:none!important}
