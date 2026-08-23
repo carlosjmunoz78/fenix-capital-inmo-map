@@ -36,11 +36,7 @@ const navMeta:Record<string,{label:string;Icon:typeof Home}>={
   '/notificaciones':{label:'Avisos',Icon:Bell},
   '/comunicaciones':{label:'Comunicaciones',Icon:FileText}
 };
-const fallbackMenu:MenuItem[]=[
-  ['/inicio','Inicio'],['/expedientes','Expedientes'],['/bancos','Bancos'],['/contactos','Contactos'],
-  ['/inmobiliarias','Inmobiliarias'],['/tasaciones','Tasaciones'],['/firmas','Firmas'],['/documentacion','Documentación'],
-  ['/financieros','Financieros'],['/visitadores','Visitadores'],['/economia','Economía'],['/agenda','Agenda'],['/informes','Informes']
-].map(([route,label])=>({route,label,Icon:navMeta[route].Icon}));
+const fallbackMenu:MenuItem[]=[{route:'/inicio',label:'Inicio',Icon:Home}];
 
 const initials=(name:string)=>name.split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]?.toUpperCase()).join('')||'FC';
 
@@ -164,7 +160,7 @@ export default function DirectionDashboard({onNavigate,onLogout,calc,setCalc,res
         <div className="dir-top-right">
           <button className="dir-theme-toggle" onClick={()=>setTheme(theme==='light'?'dark':'light')} aria-label="Cambiar tema">{theme==='light'?<Moon size={16}/>:<Sun size={16}/>}<span>{theme==='light'?'Oscuro':'Claro'}</span></button>
           <button className="dir-bell" aria-label="Notificaciones" onClick={()=>onNavigate('/notificaciones')}><Bell size={20}/></button>
-          <button className="dir-profile" onClick={()=>onNavigate('/perfil')}><div className="dir-avatar">B</div><div className="dir-user-copy"><strong>Belén Muñoz</strong><span>Directora Financiera</span></div><ChevronDown size={16}/></button>
+          <button className="dir-profile" onClick={()=>onNavigate('/perfil')}><div className="dir-avatar">D</div><div className="dir-user-copy"><strong>Dirección</strong><span>Dirección</span></div><ChevronDown size={16}/></button>
           <button className="dir-logout" onClick={onLogout} aria-label="Cerrar sesión"><LogOut size={17}/></button>
         </div>
       </header>
@@ -174,7 +170,7 @@ export default function DirectionDashboard({onNavigate,onLogout,calc,setCalc,res
           <article className="dir-priority-card">
             <div className="dir-person-wrap"><img className="dir-person-photo" src={anaVertical} alt="Ana"/></div>
             <div className="dir-priority-copy">
-              <h1>Hola Belén, buenos días 👋</h1><p>Estas son tus prioridades de hoy.</p>
+              <h1>Buenos días 👋</h1><p>Estas son tus prioridades de hoy.</p>
               {live.tareasReady&&live.priorities.length?<div className="dir-empty-compact"><AlertTriangle size={17}/><span><strong>{live.priorities.length} prioridades reales disponibles</strong><small>Proceden de Agenda/Tareas y respetan tu ámbito autorizado.</small></span></div>:<div className="dir-empty-compact"><AlertTriangle size={17}/><span><strong>{live.tareasReady?'Sin tareas pendientes visibles':'Prioridades no disponibles'}</strong><small>{live.tareasReady?'No hay tareas pendientes en la fuente visible.':'La fuente canónica no ha podido confirmar prioridades.'}</small></span></div>}
               <button className="dir-alert-button" onClick={()=>onNavigate('/agenda')}>Ver Agenda/Tareas <span>›</span></button>
             </div>
