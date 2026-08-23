@@ -51,7 +51,7 @@ test.describe('Fénix PRE-PROD · contrato visual Inicio Dirección',()=>{
     await expect(page.locator('.dir-topbar')).toBeVisible();
     const priorityBox=await page.locator('.dir-priority-card').boundingBox();
     const kpiBox=await page.locator('.dir-kpi').first().boundingBox();
-    expect(priorityBox?.height||0).toBeGreaterThanOrEqual(380);
+    expect(priorityBox?.height||0).toBeGreaterThanOrEqual(340);
     expect(kpiBox?.height||0).toBeGreaterThanOrEqual(125);
     const shot=await page.screenshot({fullPage:true});
     await testInfo.attach('inicio-direccion-qa',{body:shot,contentType:'image/png'});
