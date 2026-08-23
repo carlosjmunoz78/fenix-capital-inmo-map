@@ -61,10 +61,12 @@ import OperationalAdvancedSearchGuard from './OperationalAdvancedSearchGuard';
 import DirectionIdentityGuard from './DirectionIdentityGuard';
 import OperationalIdentityGuard from './OperationalIdentityGuard';
 import OperationalLogoutGuard from './OperationalLogoutGuard';
+import RouteAccessGuard from './RouteAccessGuard';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <BrowserRouter basename={import.meta.env.BASE_URL}>
+      <RouteAccessGuard />
       <CalculatorLabelGuard />
       <ProfileLauncherGuard />
       <OperationalAdvancedSearchGuard />
