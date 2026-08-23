@@ -14,17 +14,19 @@ async function boot(page:any){
   if(u.endsWith('/navigation'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[{label:'Inicio',route:'/inicio'},{label:'Contactos',route:'/contactos'}]})});
   return route.fulfill({status:404,contentType:'application/json',body:'{}'});
  });
+ await page.route('**/functions/v1/fenix-notion-runtime-test/expedientes',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[]})}));
  await page.route('**/functions/v1/fenix-notion-runtime-test/clientes',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[]})}));
 }
 
 test.describe('Fénix PRE-PROD · acceso a Mi perfil desde cabecera',()=>{
- test('avatar del shell base abre Mi perfil sin entrada de menú',async({page},testInfo)=>{
+ test('identidad del Inicio Financiero abre Mi perfil sin entrada de menú',async({page},testInfo)=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();
   await boot(page);
   await page.goto('/inicio');
-  const avatar=page.locator('.app-shell .avatar');
-  await expect(avatar).toHaveAttribute('aria-label','Abrir mi perfil');
-  await avatar.click();
+  const profile=page.locator('.role-home .ops-profile');
+  await expect(profile).toBeVisible();
+  await expect(profile).toHaveAttribute('aria-label','Abrir mi perfil');
+  await profile.click();
   await expect(page).toHaveURL(/\/perfil$/);
   await expect(page.getByRole('heading',{name:'Perfil QA',exact:true})).toBeVisible();
  });
