@@ -1,0 +1,8 @@
+/* Dirección · cierre de dimensiones maestras desktop.
+   Mantiene responsive tablet/móvil existente; iguala Inicio al shell operativo aprobado. */
+@media (min-width:1101px){
+  .dir-shell{grid-template-columns:238px minmax(0,1fr)!important}
+  .dir-sidebar{padding-left:16px!important;padding-right:16px!important}
+  .dir-priority-card{min-height:430px!important}
+  .dir-topbar{height:72px!important}
+}
