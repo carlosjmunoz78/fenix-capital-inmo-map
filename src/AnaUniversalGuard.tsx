@@ -54,6 +54,8 @@ export default function AnaUniversalGuard(){
   if(!logged||hide||!caps)return null;
 
   const correctionUrl=`/ana?scope_type=${encodeURIComponent(scope.type)}${scope.code?`&scope_code=${encodeURIComponent(scope.code)}`:''}`;
+  const executeNeedsActionContext=Boolean(caps.ana_execute_requires_action_context);
+  const executeEnabled=Boolean(caps.can_ana_execute&&!executeNeedsActionContext);
 
   async function rememberText(text:string,kind:'texto_conversacion'|'comentario',evidencePageId:string){
     const key=`memory:${evidencePageId}:${kind}`;
@@ -95,7 +97,7 @@ export default function AnaUniversalGuard(){
     </button>
     {open&&<div className="ana-universal-body">
       <div className="ana-action-grid">
-        <button disabled={!caps.can_ana_execute} title={caps.can_ana_execute?'':'Ana todavía no puede ejecutar esta acción sin un gate específico'}><Sparkles size={15}/> Que lo haga Ana</button>
+        <button disabled={!executeEnabled} title={executeNeedsActionContext?'La ejecución directa requiere una acción concreta con vista previa y confirmación.':executeEnabled?'':'Ana todavía no puede ejecutar esta acción'}><Sparkles size={15}/> Que lo haga Ana</button>
         <button className={mode==='help'?'selected':''} disabled={!caps.can_ana_help} onClick={()=>setMode('help')}>Ayúdame</button>
         <button className={mode==='manual'?'selected':''} disabled={!caps.can_manual_execute} onClick={()=>setMode('manual')}>Lo hago yo</button>
       </div>
