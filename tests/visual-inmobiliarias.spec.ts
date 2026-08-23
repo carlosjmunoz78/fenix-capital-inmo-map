@@ -56,10 +56,10 @@ test.describe('Fénix PRE-PROD · contrato visual Inmobiliarias',()=>{
   await expect(table).toBeVisible();
   const nameButton=table.getByRole('button',{name:'Inmobiliaria',exact:true});
   const stateButton=table.getByRole('button',{name:'Estado',exact:true});
-  const nameHeader=table.locator('th').filter({has:nameButton});
-  const stateHeader=table.locator('th').filter({has:stateButton});
+  const nameHeader=table.locator('thead th').nth(0);
+  const stateHeader=table.locator('thead th').nth(2);
   await expect(nameHeader).toHaveAttribute('aria-sort','ascending');
-  const sticky=await table.locator('thead th').first().evaluate(el=>getComputedStyle(el).position);
+  const sticky=await nameHeader.evaluate(el=>getComputedStyle(el).position);
   expect(sticky).toBe('sticky');
   const firstName=()=>table.locator('tbody tr').first().locator('td').first().innerText();
   expect(await firstName()).toBe('ADAIX LUCENA');
