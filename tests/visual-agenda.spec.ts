@@ -12,7 +12,7 @@ const items=[
 ];
 
 test.describe('Fénix PRE-PROD · contrato visual Agenda',()=>{
- test('muestra tareas canónicas y selección sin escribir datos',async({page},testInfo)=>{
+ test('muestra tareas canónicas, selección y patrón sticky/sort sin escribir datos',async({page},testInfo)=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();
   await page.setViewportSize({width:1600,height:900});
   await page.addInitScript(session=>{window.localStorage.setItem('fenix-preprod-auth',JSON.stringify(session));window.localStorage.setItem('fenix-remember-device','true');},fakeSession);
@@ -29,6 +29,24 @@ test.describe('Fénix PRE-PROD · contrato visual Agenda',()=>{
   await expect(root.getByText('COMPLETADAS',{exact:true})).toBeVisible();
   await expect(root.getByText('VENCIDAS',{exact:true})).toBeVisible();
   await expect(root.getByText('Llamar a cliente',{exact:true})).toBeVisible();
+  const table=root.locator('.ops-sortable-table');
+  const scroll=root.locator('.ops-sortable-scroll');
+  await expect(table).toBeVisible();
+  await expect(scroll).toBeVisible();
+  await expect.poll(()=>scroll.evaluate(el=>getComputedStyle(el).overflowY)).toMatch(/auto|scroll/);
+  const dateHeader=table.locator('thead th').nth(3);
+  await expect(dateHeader).toHaveAttribute('aria-sort','ascending');
+  await expect.poll(()=>dateHeader.evaluate(el=>getComputedStyle(el).position)).toBe('sticky');
+  await expect(table.locator('tbody tr').first().getByText('Revisar documentación',{exact:true})).toBeVisible();
+  const taskHeader=table.locator('thead th').nth(1);
+  const taskButton=taskHeader.locator('button');
+  await expect(taskButton).toBeVisible();
+  await taskButton.click();
+  await expect(taskHeader).toHaveAttribute('aria-sort','ascending');
+  await expect(table.locator('tbody tr').first().getByText('Llamar a cliente',{exact:true})).toBeVisible();
+  await taskButton.click();
+  await expect(taskHeader).toHaveAttribute('aria-sort','descending');
+  await expect(table.locator('tbody tr').first().getByText('Seguimiento inmobiliaria',{exact:true})).toBeVisible();
   await root.getByLabel('Seleccionar Llamar a cliente').check();
   await expect(root.getByText('1 tareas seleccionadas',{exact:true})).toBeVisible();
   await expect(root.getByText('La selección no modifica datos.',{exact:true})).toBeVisible();
