@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlertTriangle, BarChart3, Bell, Building2, CalendarDays, Calculator,
   ChevronDown, ChevronLeft, ChevronRight, FileCheck2, FileText, FolderOpen,
@@ -14,14 +14,33 @@ type MortgageResult={monthlyPayment:number;totalPaid:number;estimatedInterest:nu
 type Props={onNavigate:(route:string)=>void;onLogout:()=>void;calc:CalcState;setCalc:(updater:(value:CalcState)=>CalcState)=>void;result:MortgageResult};
 type Person={name:string;role:string;expedientes:number;firmas_mes:number};
 type PersonalResponse={items?:Person[];pending_profiles?:number};
+type NavResponse={items?:Array<{label?:string;route?:string}|string>};
 type Theme='light'|'dark';
 
-const menu=[
-  ['Inicio','/inicio',Home],['Expedientes','/expedientes',FolderOpen],['Bancos','/bancos',Landmark],
-  ['Contactos','/contactos',Users],['Inmobiliarias','/inmobiliarias',Building2],['Tasaciones','/tasaciones',FileText],
-  ['Firmas','/firmas',FileCheck2],['Documentación','/documentacion',FileText],['Financieros','/financieros',UserRound],
-  ['Visitadores','/visitadores',Users],['Economía','/economia',Gauge],['Agenda','/agenda',CalendarDays],['Informes','/informes',BarChart3]
-] as const;
+type MenuItem={label:string;route:string;Icon:typeof Home};
+const navMeta:Record<string,{label:string;Icon:typeof Home}>={
+  '/inicio':{label:'Inicio',Icon:Home},
+  '/expedientes':{label:'Expedientes',Icon:FolderOpen},
+  '/bancos':{label:'Bancos',Icon:Landmark},
+  '/contactos':{label:'Contactos',Icon:Users},
+  '/inmobiliarias':{label:'Inmobiliarias',Icon:Building2},
+  '/tasaciones':{label:'Tasaciones',Icon:FileText},
+  '/firmas':{label:'Firmas',Icon:FileCheck2},
+  '/documentacion':{label:'Documentación',Icon:FileText},
+  '/financieros':{label:'Financieros',Icon:UserRound},
+  '/visitadores':{label:'Visitadores',Icon:Users},
+  '/economia':{label:'Economía',Icon:Gauge},
+  '/agenda':{label:'Agenda',Icon:CalendarDays},
+  '/informes':{label:'Informes',Icon:BarChart3},
+  '/notarias':{label:'Notarías',Icon:Landmark},
+  '/notificaciones':{label:'Avisos',Icon:Bell},
+  '/comunicaciones':{label:'Comunicaciones',Icon:FileText}
+};
+const fallbackMenu:MenuItem[]=[
+  ['/inicio','Inicio'],['/expedientes','Expedientes'],['/bancos','Bancos'],['/contactos','Contactos'],
+  ['/inmobiliarias','Inmobiliarias'],['/tasaciones','Tasaciones'],['/firmas','Firmas'],['/documentacion','Documentación'],
+  ['/financieros','Financieros'],['/visitadores','Visitadores'],['/economia','Economía'],['/agenda','Agenda'],['/informes','Informes']
+].map(([route,label])=>({route,label,Icon:navMeta[route].Icon}));
 
 const initials=(name:string)=>name.split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]?.toUpperCase()).join('')||'FC';
 
@@ -81,6 +100,7 @@ export default function DirectionDashboard({onNavigate,onLogout,calc,setCalc,res
   const [people,setPeople]=useState<Person[]>([]);
   const [peopleLoading,setPeopleLoading]=useState(true);
   const [pendingProfiles,setPendingProfiles]=useState(0);
+  const [authorizedNav,setAuthorizedNav]=useState<MenuItem[]>([]);
   const [search,setSearch]=useState('');
   const [theme,setTheme]=useState<Theme>(()=>(sessionStorage.getItem('fenix-theme') as Theme)||'light');
   const teamRail=useRef<HTMLDivElement|null>(null);
@@ -93,14 +113,28 @@ export default function DirectionDashboard({onNavigate,onLogout,calc,setCalc,res
 
   useEffect(()=>{
     let alive=true;
-    fetchAppApi<PersonalResponse>('/personal').then(r=>{
+    Promise.all([fetchAppApi<PersonalResponse>('/personal'),fetchAppApi<NavResponse>('/navigation')]).then(([p,n])=>{
       if(!alive)return;
-      setPeople(r.status===200?(r.data?.items??[]):[]);
-      setPendingProfiles(r.status===200?(r.data?.pending_profiles??0):0);
+      setPeople(p.status===200?(p.data?.items??[]):[]);
+      setPendingProfiles(p.status===200?(p.data?.pending_profiles??0):0);
       setPeopleLoading(false);
+      if(n.status===200&&Array.isArray(n.data?.items)){
+        const seen=new Set<string>();
+        const next:MenuItem[]=[];
+        for(const raw of n.data.items){
+          const route=typeof raw==='string'?raw:raw?.route;
+          if(!route||route==='/buscar'||seen.has(route)||!navMeta[route])continue;
+          const supplied=typeof raw==='string'?'':raw?.label?.trim()||'';
+          next.push({route,label:supplied||navMeta[route].label,Icon:navMeta[route].Icon});
+          seen.add(route);
+        }
+        setAuthorizedNav(next);
+      }
     }).catch(()=>{if(alive)setPeopleLoading(false)});
     return()=>{alive=false};
   },[]);
+
+  const effectiveMenu=useMemo(()=>authorizedNav.length?authorizedNav:fallbackMenu,[authorizedNav]);
 
   function runSearch(){
     const q=search.trim();
@@ -115,7 +149,7 @@ export default function DirectionDashboard({onNavigate,onLogout,calc,setCalc,res
       <button className="dir-brand" onClick={()=>onNavigate('/inicio')} aria-label="Inicio Fénix Capital">
         <img className="dir-brand-logo" src={fenixLogo} alt=""/><span><strong>FÉNIX CAPITAL</strong></span>
       </button>
-      <nav className="dir-nav">{menu.map(([label,route,Icon],i)=><button key={label} className={i===0?'dir-nav-item active':'dir-nav-item'} onClick={()=>onNavigate(route)}><Icon size={17}/><span>{label}</span></button>)}</nav>
+      <nav className="dir-nav">{effectiveMenu.map(({label,route,Icon})=><button key={route} className={route==='/inicio'?'dir-nav-item active':'dir-nav-item'} onClick={()=>onNavigate(route)}><Icon size={17}/><span>{label}</span></button>)}</nav>
       <div className="dir-help-card">
         <div><strong>¿Necesitas ayuda?</strong><span>Pregunta a Ana, tu asistente inteligente.</span></div>
         <div className="dir-help-person"><img className="dir-help-avatar" src={anaAvatar} alt="Ana"/></div>
