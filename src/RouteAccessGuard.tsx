@@ -3,7 +3,6 @@ import {useLocation,useNavigate} from 'react-router-dom';
 import {fetchAppApi,supabase} from './supabase';
 
 type NavPayload={items?:unknown[]};
-
 type NavItem={route:string};
 
 const ALWAYS_ALLOWED=new Set(['/','/inicio','/perfil','/ana']);
@@ -11,7 +10,7 @@ const ROOTS=['/expedientes','/contactos','/inmobiliarias','/tasaciones','/agenda
 
 function normalizePath(value:string){
  const bare=(value||'/').split('?')[0].split('#')[0];
- if(bare==='/' )return '/';
+ if(bare==='/')return '/';
  return `/${bare.replace(/^\/+|\/+$/g,'')}`;
 }
 
@@ -33,6 +32,7 @@ function canonicalRoot(pathname:string){
  const path=normalizePath(pathname);
  if(path==='/tareas'||path.startsWith('/tareas/'))return '/agenda';
  if(path==='/bancos/contactos'||path.startsWith('/bancos/contactos/'))return '/bancos';
+ if(path==='/contactos-b2b'||path.startsWith('/contactos-b2b/'))return '/contactos';
  return ROOTS.find(root=>path===root||path.startsWith(`${root}/`))||null;
 }
 
@@ -40,10 +40,9 @@ export function isRouteAuthorized(pathname:string,navRoutes:string[],navigationR
  const path=normalizePath(pathname);
  if(ALWAYS_ALLOWED.has(path))return true;
  const root=canonicalRoot(path);
- if(!root)return false;
- if(!navigationResolved)return false;
+ if(!root||!navigationResolved)return false;
  const normalized=navRoutes.map(normalizePath);
- return normalized.some(route=>route===root||route.startsWith(`${root}/`)||root.startsWith(`${route}/`));
+ return normalized.some(route=>route===root||path===route||path.startsWith(`${route}/`));
 }
 
 export default function RouteAccessGuard(){
