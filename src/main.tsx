@@ -15,7 +15,9 @@ import './operational-mobile-nav.css';
 import './operational-fixed-topbar.css';
 import './operational-route-isolation.css';
 import './brand-name-theme.css';
+import './direction-master-home.css';
 import App from './App';
+import DirectionHomeAnaCorrection from './DirectionHomeAnaCorrection';
 import RoleHomeShell from './RoleHomeShell';
 import ProfileShell from './ProfileShell';
 import OperationalShellGate from './OperationalShellGate';
@@ -88,6 +90,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <ExpedienteAnaRuntimeGuard />
       <B2BContactCreateLauncher />
       <App />
+      <DirectionHomeAnaCorrection />
       <RoleHomeShell />
       <ProfileShell />
       <OperationalShellGate />
