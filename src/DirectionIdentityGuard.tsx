@@ -7,6 +7,7 @@ type Ctx={role?:string};
 function clean(value:unknown){return typeof value==='string'&&value.trim()?value.trim():'';}
 function firstName(name:string){return name.split(/\s+/).filter(Boolean)[0]||'';}
 function initials(name:string){return name.split(/\s+/).filter(Boolean).slice(0,2).map(p=>p[0]?.toUpperCase()).join('')||'D';}
+function setText(node:Element|null,value:string){if(node&&node.textContent!==value)node.textContent=value;}
 
 export default function DirectionIdentityGuard(){
  const location=useLocation();
@@ -26,17 +27,13 @@ export default function DirectionIdentityGuard(){
    const patch=()=>{
     const root=document.querySelector('.dir-shell');
     if(!root)return;
-    const profileName=root.querySelector('.dir-user-copy strong');
-    const profileRole=root.querySelector('.dir-user-copy span');
-    const avatar=root.querySelector('.dir-avatar');
-    const greeting=root.querySelector('.dir-priority-copy h1');
-    if(profileName)profileName.textContent=name||role;
-    if(profileRole)profileRole.textContent=role;
-    if(avatar)avatar.textContent=initials(name||role);
-    if(greeting)greeting.textContent=name?`Hola ${firstName(name)}, buenos días 👋`:'Buenos días 👋';
+    setText(root.querySelector('.dir-user-copy strong'),name||role);
+    setText(root.querySelector('.dir-user-copy span'),role);
+    setText(root.querySelector('.dir-avatar'),initials(name||role));
+    setText(root.querySelector('.dir-priority-copy h1'),name?`Hola ${firstName(name)}, buenos días 👋`:'Buenos días 👋');
    };
    patch();
-   observer=new MutationObserver(patch);
+   observer=new MutationObserver(()=>patch());
    observer.observe(document.body,{childList:true,subtree:true});
    timer=window.setTimeout(()=>observer?.disconnect(),10000);
   }
