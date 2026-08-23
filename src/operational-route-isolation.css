@@ -20,13 +20,21 @@ body:has(#root > .ops-root){
   pointer-events:none!important;
 }
 
+/* Algunos descendientes legacy restablecían pointer-events:auto y podían interceptar
+   clics tras hacer scroll. Se desactiva todo el árbol salvo la calculadora explícita. */
+#root:has(> .ops-root) > .app-shell *{
+  pointer-events:none!important;
+}
+
 #root:has(> .ops-root) > .app-shell > .sidebar,
 #root:has(> .ops-root) > .app-shell > .main{
   display:none!important;
 }
 
 #root:has(> .ops-root) > .app-shell > .calc-panel,
-#root:has(> .ops-root) > .app-shell > .calc-launcher{
+#root:has(> .ops-root) > .app-shell > .calc-launcher,
+#root:has(> .ops-root) > .app-shell > .calc-panel *,
+#root:has(> .ops-root) > .app-shell > .calc-launcher *{
   visibility:visible!important;
   pointer-events:auto!important;
 }
