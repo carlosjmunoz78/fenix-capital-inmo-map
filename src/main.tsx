@@ -11,6 +11,7 @@ import './direction-profile-polish.css';
 import './ana-vertical-size.css';
 import './calculator-no-pro.css';
 import './operational-shell-overlay.css';
+import './operational-mobile-nav.css';
 import App from './App';
 import RoleHomeShell from './RoleHomeShell';
 import ProfileShell from './ProfileShell';
