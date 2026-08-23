@@ -1,0 +1,26 @@
+/* Patrón maestro transversal: la cabecera superior permanece visible en todas las pantallas operativas. */
+@media (min-width:651px){
+  .ops-root>.ops-main{padding-top:72px!important;}
+  .ops-root>.ops-main>.ops-top{
+    position:fixed!important;
+    top:0!important;
+    left:238px!important;
+    right:0!important;
+    width:auto!important;
+    z-index:7600!important;
+  }
+}
+@media (min-width:651px) and (max-width:900px){
+  .ops-root>.ops-main{padding-top:66px!important;}
+  .ops-root>.ops-main>.ops-top{left:96px!important;min-height:66px!important;}
+}
+@media (max-width:650px){
+  .ops-root>.ops-main>.ops-top{
+    position:fixed!important;
+    top:0!important;
+    left:0!important;
+    right:0!important;
+    z-index:7600!important;
+  }
+  .ops-root>.ops-main{padding-top:66px!important;}
+}
