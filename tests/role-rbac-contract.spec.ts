@@ -10,16 +10,16 @@ type RoleCase={actor:string;role:string;allowedRoute:string;allowedEndpoint:stri
 
 const cases:RoleCase[]=[
   {actor:'DIR-TEST',role:'Direccion',allowedRoute:'/expedientes',allowedEndpoint:'expedientes',allowedPayload:{items:[{id:'11111111-1111-4111-8111-111111111111',expediente:'QA DIR EXP',fase:'Estudio'}]},deniedRoute:'',deniedEndpoint:''},
-  {actor:'FIN-A',role:'Financiero',allowedRoute:'/expedientes',allowedEndpoint:'expedientes',allowedPayload:{items:[{id:'22222222-2222-4222-8222-222222222222',expediente:'QA FIN-A EXP',fase:'Estudio'}]},deniedRoute:'/inmobiliarias',deniedEndpoint:'inmobiliarias'},
-  {actor:'FIN-B',role:'Financiero',allowedRoute:'/expedientes',allowedEndpoint:'expedientes',allowedPayload:{items:[{id:'33333333-3333-4333-8333-333333333333',expediente:'QA FIN-B EXP',fase:'Estudio'}]},deniedRoute:'/inmobiliarias',deniedEndpoint:'inmobiliarias'},
+  {actor:'FIN-A',role:'Financiero',allowedRoute:'/expedientes',allowedEndpoint:'expedientes',allowedPayload:{items:[{id:'22222222-2222-4222-8222-222222222222',expediente:'QA FIN-A EXP',fase:'Estudio'}]},deniedRoute:'',deniedEndpoint:''},
+  {actor:'FIN-B',role:'Financiero',allowedRoute:'/expedientes',allowedEndpoint:'expedientes',allowedPayload:{items:[{id:'33333333-3333-4333-8333-333333333333',expediente:'QA FIN-B EXP',fase:'Estudio'}]},deniedRoute:'',deniedEndpoint:''},
   {actor:'VIS-A',role:'Visitador',allowedRoute:'/inmobiliarias',allowedEndpoint:'inmobiliarias',allowedPayload:{items:[{id:'44444444-4444-4444-8444-444444444444',inmobiliaria:'QA VIS-A INMO',estado:'Activa'}]},deniedRoute:'/expedientes',deniedEndpoint:'expedientes'},
   {actor:'VIS-B',role:'Visitador',allowedRoute:'/inmobiliarias',allowedEndpoint:'inmobiliarias',allowedPayload:{items:[{id:'55555555-5555-4555-8555-555555555555',inmobiliaria:'QA VIS-B INMO',estado:'Activa'}]},deniedRoute:'/expedientes',deniedEndpoint:'expedientes'}
 ];
 
 function navigationFor(role:string){
-  if(role==='Visitador')return[{label:'Inicio',route:'/inicio'},{label:'Inmobiliarias',route:'/inmobiliarias'},{label:'Contactos',route:'/contactos'},{label:'Visitas',route:'/visitas'},{label:'Agenda',route:'/agenda'},{label:'Documentación',route:'/documentacion'},{label:'Informes',route:'/informes'},{label:'Notificaciones',route:'/notificaciones'},{label:'Buscar',route:'/buscar'},{label:'Mi perfil',route:'/perfil'}];
-  if(role==='Financiero')return[{label:'Inicio',route:'/inicio'},{label:'Expedientes',route:'/expedientes'},{label:'Bancos',route:'/bancos'},{label:'Contactos',route:'/contactos'},{label:'Documentación',route:'/documentacion'},{label:'Firmas',route:'/firmas'},{label:'Tasaciones',route:'/tasaciones'},{label:'Agenda',route:'/agenda'},{label:'Informes',route:'/informes'},{label:'Notificaciones',route:'/notificaciones'},{label:'Buscar',route:'/buscar'},{label:'Mi perfil',route:'/perfil'}];
-  return[{label:'Inicio',route:'/inicio'},{label:'Expedientes',route:'/expedientes'},{label:'Bancos',route:'/bancos'},{label:'Contactos',route:'/contactos'},{label:'Inmobiliarias',route:'/inmobiliarias'},{label:'Tasaciones',route:'/tasaciones'},{label:'Firmas',route:'/firmas'},{label:'Documentación',route:'/documentacion'},{label:'Financieros',route:'/financieros'},{label:'Visitadores',route:'/visitadores'},{label:'Agenda',route:'/agenda'},{label:'Economía',route:'/economia'},{label:'Informes',route:'/informes'},{label:'Notificaciones',route:'/notificaciones'},{label:'Comunicaciones',route:'/comunicaciones'},{label:'Buscar',route:'/buscar'},{label:'Mi perfil',route:'/perfil'}];
+  if(role==='Visitador')return[{label:'Inicio',route:'/inicio'},{label:'Inmobiliarias',route:'/inmobiliarias'},{label:'Contactos',route:'/contactos'},{label:'Visitas',route:'/visitas'},{label:'Agenda',route:'/agenda'},{label:'Documentación',route:'/documentacion'},{label:'Informes',route:'/informes'},{label:'Notificaciones',route:'/notificaciones'},{label:'Buscar',route:'/buscar'}];
+  if(role==='Financiero')return[{label:'Inicio',route:'/inicio'},{label:'Expedientes',route:'/expedientes'},{label:'Bancos',route:'/bancos'},{label:'Contactos',route:'/contactos'},{label:'Inmobiliarias',route:'/inmobiliarias'},{label:'Documentación',route:'/documentacion'},{label:'Firmas',route:'/firmas'},{label:'Tasaciones',route:'/tasaciones'},{label:'Agenda',route:'/agenda'},{label:'Informes',route:'/informes'},{label:'Notarías',route:'/notarias'},{label:'Notificaciones',route:'/notificaciones'},{label:'Buscar',route:'/buscar'}];
+  return[{label:'Inicio',route:'/inicio'},{label:'Expedientes',route:'/expedientes'},{label:'Bancos',route:'/bancos'},{label:'Contactos',route:'/contactos'},{label:'Inmobiliarias',route:'/inmobiliarias'},{label:'Tasaciones',route:'/tasaciones'},{label:'Firmas',route:'/firmas'},{label:'Documentación',route:'/documentacion'},{label:'Financieros',route:'/financieros'},{label:'Visitadores',route:'/visitadores'},{label:'Agenda',route:'/agenda'},{label:'Economía',route:'/economia'},{label:'Informes',route:'/informes'},{label:'Notarías',route:'/notarias'},{label:'Notificaciones',route:'/notificaciones'},{label:'Comunicaciones',route:'/comunicaciones'},{label:'Buscar',route:'/buscar'}];
 }
 
 async function boot(page:any,c:RoleCase){
@@ -50,18 +50,27 @@ test.describe('Fénix PRE-PROD · contrato RBAC por rol',()=>{
       if(c.actor==='DIR-TEST')await expect(page.getByText('QA DIR EXP')).toBeVisible();
       const nav=page.locator('.ops-side nav');
       await expect(nav.getByRole('button',{name:'Notificaciones',exact:true})).toBeVisible();
+      await expect(nav.getByRole('button',{name:'Mi perfil',exact:true})).toHaveCount(0);
       if(c.role==='Direccion'){
         await expect(nav.getByRole('button',{name:'Economía',exact:true})).toBeVisible();
         await expect(nav.getByRole('button',{name:'Financieros',exact:true})).toBeVisible();
         await expect(nav.getByRole('button',{name:'Visitadores',exact:true})).toBeVisible();
         await expect(nav.getByRole('button',{name:'Comunicaciones',exact:true})).toBeVisible();
+        await expect(nav.getByRole('button',{name:'Notarías',exact:true})).toBeVisible();
       }else{
         await expect(nav.getByRole('button',{name:'Economía',exact:true})).toHaveCount(0);
         await expect(nav.getByRole('button',{name:'Financieros',exact:true})).toHaveCount(0);
         await expect(nav.getByRole('button',{name:'Visitadores',exact:true})).toHaveCount(0);
         await expect(nav.getByRole('button',{name:'Comunicaciones',exact:true})).toHaveCount(0);
       }
-      if(c.role==='Visitador')await expect(nav.getByRole('button',{name:'Bancos',exact:true})).toHaveCount(0);
+      if(c.role==='Financiero'){
+        await expect(nav.getByRole('button',{name:'Inmobiliarias',exact:true})).toBeVisible();
+        await expect(nav.getByRole('button',{name:'Notarías',exact:true})).toBeVisible();
+      }
+      if(c.role==='Visitador'){
+        await expect(nav.getByRole('button',{name:'Bancos',exact:true})).toHaveCount(0);
+        await expect(nav.getByRole('button',{name:'Notarías',exact:true})).toHaveCount(0);
+      }
     });
 
     if(c.deniedRoute){
