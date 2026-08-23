@@ -59,6 +59,7 @@ import ProfileLauncherGuard from './ProfileLauncherGuard';
 import OperationalAdvancedSearchGuard from './OperationalAdvancedSearchGuard';
 import DirectionIdentityGuard from './DirectionIdentityGuard';
 import OperationalIdentityGuard from './OperationalIdentityGuard';
+import OperationalLogoutGuard from './OperationalLogoutGuard';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -68,6 +69,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <OperationalAdvancedSearchGuard />
       <DirectionIdentityGuard />
       <OperationalIdentityGuard />
+      <OperationalLogoutGuard />
       <AnaUniversalGuard />
       <AnaInboxAccessGuard />
       <ContextEvidenceUpload />
