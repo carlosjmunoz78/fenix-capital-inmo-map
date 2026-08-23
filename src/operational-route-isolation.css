@@ -47,10 +47,13 @@ body:has(#root > .ops-root){
   overscroll-behavior:contain!important;
 }
 
-/* Ana y la corrección forman un bloque vertical: la corrección va siempre debajo. */
+/* Ana y la corrección forman un bloque vertical: la corrección va siempre debajo.
+   El margen de scroll evita que la cabecera fija o la calculadora flotante intercepten
+   los controles cuando el navegador desplaza el bloque a la vista. */
 .inmo-root .inmo-correct,
 .informes-root .informes-correct,
-.comm-root .comm-correct{
+.comm-root .comm-correct,
+.fin-root .fin-correct{
   grid-column:1 / -1!important;
   scroll-margin-top:104px!important;
   scroll-margin-bottom:340px!important;
