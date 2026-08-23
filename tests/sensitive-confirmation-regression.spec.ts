@@ -41,6 +41,6 @@ test.describe('Fénix PRE-PROD · confirmación sensible transversal',()=>{
  });
 
  test('Ana universal no ofrece ejecución directa sin contexto de acción específico',async({page},testInfo)=>{
-  if(!testInfo.project.name.includes('desktop'))test.skip();await boot(page);await page.route('**/functions/v1/fenix-notion-runtime-test/contactos',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[]})}));await page.goto('/contactos');const ana=page.getByLabel('Ana · asistente contextual');await ana.getByRole('button',{name:/Ana/}).first().click();const execute=ana.getByRole('button',{name:'Que lo haga Ana'});await expect(execute).toBeDisabled();
+  if(!testInfo.project.name.includes('desktop'))test.skip();await boot(page);await page.route('**/functions/v1/fenix-notion-runtime-test/contactos',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[]})}));await page.goto('/contactos');const ana=page.getByLabel('Ana · asistente contextual');await ana.getByRole('button',{name:/Ana/}).first().dispatchEvent('click');const execute=ana.getByRole('button',{name:'Que lo haga Ana'});await expect(execute).toBeDisabled();
  });
 });
