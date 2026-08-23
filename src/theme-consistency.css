@@ -1,0 +1,40 @@
+/* Global theme contract: no light cards or controls may remain inside an operational dark shell. */
+.ops-root[data-theme='dark']{
+  color-scheme:dark;
+  --fenix-dark-bg:#151516;
+  --fenix-dark-surface:#202023;
+  --fenix-dark-surface-2:#262629;
+  --fenix-dark-border:#3a3a3f;
+  --fenix-dark-text:#f2f2f4;
+  --fenix-dark-muted:#aaaab2;
+}
+.ops-root[data-theme='dark'] :where(input,textarea,select){
+  background:var(--fenix-dark-surface-2)!important;
+  color:var(--fenix-dark-text)!important;
+  border-color:var(--fenix-dark-border)!important;
+}
+.ops-root[data-theme='dark'] :where(input,textarea)::placeholder{color:#8f8f97!important}
+.ops-root[data-theme='dark'] :where(.inmo-kpis article,.inmo-insights article,.inmo-filter,.inmo-table,.informes-kpis article,.informes-group,.informes-note,.comm-form,.comm-reason,.comm-correct,.informes-correct,.inmo-correct){
+  background:var(--fenix-dark-surface)!important;
+  color:var(--fenix-dark-text)!important;
+  border-color:var(--fenix-dark-border)!important;
+  box-shadow:none!important;
+}
+.ops-root[data-theme='dark'] :where(.inmo-ana-hero,.informes-ana-hero,.comm-ana-hero){
+  background:linear-gradient(135deg,#242124,#1e1e20)!important;
+  color:var(--fenix-dark-text)!important;
+  border-color:#51372c!important;
+}
+.ops-root[data-theme='dark'] :where(.inmo-ana-body p,.informes-ana-body p,.comm-ana-body p,.inmo-kpis span,.informes-kpis span,.informes-note p,.inmo-insights p){color:var(--fenix-dark-muted)!important}
+.ops-root[data-theme='dark'] :where(.inmo-next button,.informes-list button,.inmo-filter button,.inmo-insights button,.inmo-correct button,.informes-correct button,.comm-correct button){
+  background:var(--fenix-dark-surface-2)!important;
+  color:var(--fenix-dark-text)!important;
+  border-color:var(--fenix-dark-border)!important;
+}
+.ops-root[data-theme='dark'] :where(.inmo-next button:hover,.informes-list button:hover,.inmo-filter button:hover,.inmo-insights button:hover){background:#2d2928!important;border-color:#70402c!important}
+.ops-root[data-theme='dark'] :where(.ops-table-wrap,.ops-table-card table){background:var(--fenix-dark-surface)!important}
+
+/* Direction follows the same surface contract. */
+.dir-shell[data-dir-theme='dark']{color-scheme:dark}
+.dir-shell[data-dir-theme='dark'] :where(input,textarea,select){background:#262629!important;color:#f2f2f4!important;border-color:#3a3a3f!important}
+.dir-shell[data-dir-theme='dark'] :where(input,textarea)::placeholder{color:#8f8f97!important}
