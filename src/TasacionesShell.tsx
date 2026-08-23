@@ -28,8 +28,9 @@ function amountOf(r:Row){const v=amountRaw(r);if(typeof v==='number')return new 
 function hasReport(r:Row){return Boolean(text(r,['pdf','url_pdf','informe','documento','archivo']))||/informe|emitid|finaliz|complet/i.test(stateOf(r));}
 function pending(r:Row){return /pendiente|solicit|visita|curso|proceso/i.test(stateOf(r));}
 function compareText(a:string,b:string){return a.localeCompare(b,'es',{sensitivity:'base',numeric:true});}
-function sortValue(r:Row,key:SortKey){if(key==='estado')return stateOf(r);if(key==='tasador')return appraiserOf(r);if(key==='fecha')return dateOf(r);if(key==='valor')return amountRaw(r);return addressOf(r);}
-function compareValue(a:unknown,b:unknown){if(a===null||a===undefined||a==='')return b===null||b===undefined||b===''?0:1;if(b===null||b===undefined||b==='')return-1;if(typeof a==='number'&&typeof b==='number')return a-b;const sa=String(a),sb=String(b);if(/^\d{4}-\d{2}-\d{2}/.test(sa)&&/^\d{4}-\d{2}-\d{2}/.test(sb)){const da=Date.parse(sa),db=Date.parse(sb);if(Number.isFinite(da)&&Number.isFinite(db))return da-db;}return compareText(sa,sb);}
+function sortValue(r:Row,key:SortKey){if(key==='estado')return stateOf(r);if(key==='tasador')return appraiserOf(r);if(key==='fecha')return dateOf(r)==='No disponible'?null:dateOf(r);if(key==='valor')return amountRaw(r);return addressOf(r);}
+function isMissing(v:unknown){return v===null||v===undefined||v==='';}
+function compareValue(a:unknown,b:unknown){if(typeof a==='number'&&typeof b==='number')return a-b;const sa=String(a),sb=String(b);if(/^\d{4}-\d{2}-\d{2}/.test(sa)&&/^\d{4}-\d{2}-\d{2}/.test(sb)){const da=Date.parse(sa),db=Date.parse(sb);if(Number.isFinite(da)&&Number.isFinite(db))return da-db;}return compareText(sa,sb);}
 
 export default function TasacionesShell(){
  const location=useLocation(),navigate=useNavigate();const active=location.pathname==='/tasaciones';
@@ -42,7 +43,7 @@ export default function TasacionesShell(){
  useEffect(()=>{if(!active||!logged)return;let alive=true;(async()=>{setLoading(true);setMessage('');setStatus(null);setRows([]);try{const r=await fetchNotionRuntime<unknown>('/tasaciones');if(!alive)return;setStatus(r.status);setRows(r.status===200?rowsFrom(r.data):[]);if(r.status===403)setMessage('Tu perfil no tiene acceso a este módulo o registro.');else if(r.status!==200)setMessage('No se pudo leer la fuente canónica de Tasaciones.');}catch{if(!alive)return;setStatus(0);setRows([]);setMessage('No se pudo conectar con la fuente canónica de Tasaciones.');}finally{if(alive)setLoading(false);}})();return()=>{alive=false}},[active,logged]);
  const effectiveNav=nav.length?nav:fallbackNav;
  const states=useMemo(()=>Array.from(new Set(rows.map(stateOf).filter(Boolean))).sort(compareText),[rows]);
- const visible=useMemo(()=>{const q=query.trim().toLowerCase();const out=rows.filter(r=>{const hay=Object.values(r).filter(v=>typeof v==='string'||typeof v==='number').join(' ').toLowerCase();return(!q||hay.includes(q))&&(!state||stateOf(r)===state)});const direction=sortDir==='asc'?1:-1;return[...out].sort((a,b)=>{const primary=compareValue(sortValue(a,sortKey),sortValue(b,sortKey));if(primary!==0)return primary*direction;return compareText(addressOf(a),addressOf(b))*direction;});},[rows,query,state,sortKey,sortDir]);
+ const visible=useMemo(()=>{const q=query.trim().toLowerCase();const out=rows.filter(r=>{const hay=Object.values(r).filter(v=>typeof v==='string'||typeof v==='number').join(' ').toLowerCase();return(!q||hay.includes(q))&&(!state||stateOf(r)===state)});const direction=sortDir==='asc'?1:-1;return[...out].sort((a,b)=>{const av=sortValue(a,sortKey),bv=sortValue(b,sortKey);if(isMissing(av)!==isMissing(bv))return isMissing(av)?1:-1;const primary=compareValue(av,bv);if(primary!==0)return primary*direction;return compareText(addressOf(a),addressOf(b))*direction;});},[rows,query,state,sortKey,sortDir]);
  const withReport=useMemo(()=>rows.filter(hasReport).length,[rows]);const pendingCount=useMemo(()=>rows.filter(pending).length,[rows]);
  if(!active||!sessionReady||!logged)return null;
  async function logout(){await supabase.auth.signOut();window.location.href=import.meta.env.BASE_URL;}
