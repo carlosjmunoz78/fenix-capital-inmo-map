@@ -10,7 +10,8 @@ import './profile-shell.css';
 type Theme='light'|'dark';
 type Ctx={role?:string;actor_code?:string;worker_id?:string};
 type NavItem={label:string;route:string};
-function normalizeNav(data:unknown):NavItem[]{if(!data||typeof data!=='object')return[];const xs=(data as{items?:unknown[]}).items;if(!Array.isArray(xs))return[];return xs.map(x=>x&&typeof x==='object'?x as Record<string,unknown>:null).filter(Boolean).map(x=>({label:typeof x!.label==='string'?x!.label:'',route:typeof x!.route==='string'?x!.route:''})).filter(x=>x.label&&x.route);}
+function labelFromRoute(route:string){return route.replace(/^\//,'').replaceAll('-',' ').replace(/\b\w/g,m=>m.toUpperCase())||'Inicio';}
+function normalizeNav(data:unknown):NavItem[]{if(!data||typeof data!=='object')return[];const xs=(data as{items?:unknown[]}).items;if(!Array.isArray(xs))return[];return xs.map(x=>{if(typeof x==='string'&&x.startsWith('/'))return{label:labelFromRoute(x),route:x};if(x&&typeof x==='object'){const o=x as Record<string,unknown>;if(typeof o.route==='string'&&o.route.startsWith('/'))return{label:typeof o.label==='string'&&o.label.trim()?o.label.trim():labelFromRoute(o.route),route:o.route};}return null;}).filter((x):x is NavItem=>Boolean(x)).filter(x=>x.route!=='/buscar'&&x.route!=='/perfil');}
 function sessionIdentity(session:Session|null){const meta=session?.user?.user_metadata as Record<string,unknown>|undefined;const candidate=[meta?.full_name,meta?.name,meta?.nombre].find(v=>typeof v==='string'&&v.trim());const image=[meta?.avatar_url,meta?.picture,meta?.photo_url,meta?.foto].find(v=>typeof v==='string'&&/^https:\/\//i.test(v.trim()));return{email:session?.user?.email??'',name:typeof candidate==='string'?candidate.trim():'',photo:typeof image==='string'?image.trim():''};}
 export default function ProfileShell(){
  const location=useLocation(),navigate=useNavigate();const active=location.pathname==='/perfil';
