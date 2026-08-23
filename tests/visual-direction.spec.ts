@@ -26,16 +26,9 @@ test.describe('Fénix PRE-PROD · contrato visual Inicio Dirección',()=>{
       if(u.endsWith('/personal'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[],pending_profiles:5})});
       return route.fulfill({status:404,contentType:'application/json',body:'{}'});
     });
-    await page.route('**/functions/v1/fenix-notion-runtime-test/expedientes',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({source:'notion_canonical',items:[
-      {id:'e1',estado:'En curso',riesgo:'Alto'},{id:'e2',fase:'Tasación',riesgo:'Bajo'},{id:'e3',estado:'Firmado'}
-    ]})}));
-    await page.route('**/functions/v1/fenix-notion-runtime-test/firmas',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({source:'notion_canonical',items:[
-      {id:'f1',estado:'Programada',fecha_hora_firma:'2026-08-25T10:00:00'},{id:'f2',estado:'Firmada',fecha_hora_firma:'2026-08-20T12:00:00'}
-    ]})}));
-    await page.route('**/functions/v1/fenix-notion-runtime-test/tareas',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({source:'notion_canonical',items:[
-      {id:'t1',tarea:'Revisar expediente prioritario',estado:'Pendiente',fecha_limite:'2026-08-22',completada:false},
-      {id:'t2',tarea:'Tarea ya cerrada',estado:'Completada',fecha_limite:'2026-08-21',completada:true}
-    ]})}));
+    await page.route('**/functions/v1/fenix-notion-runtime-test/expedientes',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({source:'notion_canonical',items:[{id:'e1',estado:'En curso',riesgo:'Alto'},{id:'e2',fase:'Tasación',riesgo:'Bajo'},{id:'e3',estado:'Firmado'}]})}));
+    await page.route('**/functions/v1/fenix-notion-runtime-test/firmas',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({source:'notion_canonical',items:[{id:'f1',estado:'Programada',fecha_hora_firma:'2026-08-25T10:00:00'},{id:'f2',estado:'Firmada',fecha_hora_firma:'2026-08-20T12:00:00'}]})}));
+    await page.route('**/functions/v1/fenix-notion-runtime-test/tareas',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({source:'notion_canonical',items:[{id:'t1',tarea:'Revisar expediente prioritario',estado:'Pendiente',fecha_limite:'2026-08-22',completada:false},{id:'t2',tarea:'Tarea ya cerrada',estado:'Completada',fecha_limite:'2026-08-21',completada:true}]})}));
     await page.goto('/inicio');
     await expect(page.locator('.dir-shell')).toBeVisible();
     await expect(page.getByRole('button',{name:'Inicio Fénix Capital'})).toBeVisible();
@@ -48,14 +41,18 @@ test.describe('Fénix PRE-PROD · contrato visual Inicio Dirección',()=>{
     await expect(kpis.getByText('2',{exact:true}).first()).toBeVisible();
     await expect(kpis.getByText('1',{exact:true})).toHaveCount(2);
     await expect(page.getByText('ACCESOS RÁPIDOS')).toBeVisible();
+    await expect(page.getByRole('button',{name:'Inmobiliarias',exact:true}).last()).toBeVisible();
     await expect(page.getByRole('region',{name:'Calculadora Hipotecaria'})).toBeVisible();
     await expect(page.getByText(/\bPRO\b/)).toHaveCount(0);
     const sidebar=page.locator('.dir-sidebar');
     await expect(sidebar).toBeVisible();
-    for(const label of ['Notarías','Avisos','Comunicaciones'])await expect(sidebar.getByRole('button',{name:label,exact:true})).toBeVisible();
-    await expect(sidebar.getByRole('button',{name:'Buscar',exact:true})).toHaveCount(0);
+    for(const label of ['Inmobiliarias','Notarías','Avisos','Comunicaciones','Buscar'])await expect(sidebar.getByRole('button',{name:label,exact:true})).toBeVisible();
     await expect(page.getByRole('button',{name:'Buscador avanzado',exact:true})).toBeVisible();
     await expect(page.locator('.dir-topbar')).toBeVisible();
+    const priorityBox=await page.locator('.dir-priority-card').boundingBox();
+    const kpiBox=await page.locator('.dir-kpi').first().boundingBox();
+    expect(priorityBox?.height||0).toBeGreaterThanOrEqual(380);
+    expect(kpiBox?.height||0).toBeGreaterThanOrEqual(125);
     const shot=await page.screenshot({fullPage:true});
     await testInfo.attach('inicio-direccion-qa',{body:shot,contentType:'image/png'});
   });
