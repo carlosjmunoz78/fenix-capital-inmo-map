@@ -18,24 +18,32 @@ async function mockInmo(page:any){
 }
 
 test.describe('Fénix PRE-PROD · contrato visual Inmobiliarias',()=>{
- test('usa datos canónicos, KPIs derivados y patrón B2B maestro',async({page},testInfo)=>{
+ test('usa datos canónicos, Ana viva, KPIs y gráficos B2B reales',async({page},testInfo)=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();
   await page.setViewportSize({width:1600,height:900});
   await mockInmo(page);
   await page.goto('/inmobiliarias');
   await expect(page.getByRole('heading',{name:'Inmobiliarias',exact:true}).first()).toBeVisible();
   await expect(page.getByText('COLABORACIÓN B2B',{exact:true})).toBeVisible();
-  await expect(page.getByText('ANA · EN ESTA PANTALLA',{exact:true})).toBeVisible();
+  await expect(page.getByText('ANA · LECTURA VIVA DE INMOBILIARIAS',{exact:true})).toBeVisible();
+  await expect(page.locator('[data-testid="inmo-ana-live-summary"]')).toContainText('1 inmobiliarias con señal explícita de primer contacto pendiente');
   await expect(page.getByText('Datos vivos',{exact:true})).toBeVisible();
   await expect(page.getByText('EN FUENTE',{exact:true})).toBeVisible();
   await expect(page.getByText('ACTIVAS',{exact:true})).toBeVisible();
   await expect(page.getByText('EN PROCESO',{exact:true})).toBeVisible();
   await expect(page.getByText('SIN LLAMAR',{exact:true})).toBeVisible();
-  await expect(page.getByText('DISTRIBUCIÓN POR LOCALIDAD',{exact:true})).toBeVisible();
-  await expect(page.getByText('Prioridad comercial',{exact:true})).toBeVisible();
+  await expect(page.getByText('RANKING POR LOCALIDAD',{exact:true})).toBeVisible();
+  await expect(page.getByText('DISTRIBUCIÓN POR ESTADO',{exact:true})).toBeVisible();
+  await expect(page.locator('[data-testid="inmo-locality-chart"] .inmo-bar-row')).toHaveCount(2);
+  await expect(page.locator('[data-testid="inmo-state-chart"] .inmo-bar-row')).toHaveCount(3);
   await expect(page.getByText('ADAIX LUCENA',{exact:true})).toBeVisible();
   await expect(page.getByText('Fuente canónica Notion',{exact:true})).toBeVisible();
   await expect(page.getByText(/\bPRO\b/)).toHaveCount(0);
+  const correction=page.locator('.inmo-correct');
+  const hero=page.locator('.inmo-ana-hero');
+  const correctionBox=await correction.boundingBox();
+  const anaCopyBox=await page.locator('.inmo-ana-body').boundingBox();
+  expect((correctionBox?.y||0)).toBeGreaterThan((anaCopyBox?.y||0)+(anaCopyBox?.height||0)-10);
   const shot=await page.screenshot({fullPage:true});
   await testInfo.attach('inmobiliarias-master-1600',{body:shot,contentType:'image/png'});
  });
