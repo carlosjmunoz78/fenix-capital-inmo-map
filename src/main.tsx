@@ -16,6 +16,7 @@ import './operational-fixed-topbar.css';
 import './operational-route-isolation.css';
 import './brand-name-theme.css';
 import './theme-consistency.css';
+import './direction-master-sizing.css';
 import App from './App';
 import RoleHomeShell from './RoleHomeShell';
 import ProfileShell from './ProfileShell';
