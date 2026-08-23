@@ -1,14 +1,17 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { CalendarDays, LogOut, Moon, Sun } from 'lucide-react';
-import { supabase, SUPABASE_URL } from './supabase';
+import { fetchAppApi, supabase, SUPABASE_URL } from './supabase';
 import { anaAvatar, fenixLogo } from './assets/visualAssets';
 import './operational.css';
 
 type Row={activity_code:string;owner_actor_code:string;inmobiliaria_code:string;canal:string;resultado?:string|null;proximo_contacto?:string|null;proxima_accion?:string|null;estado:string;version:number};
 type Theme='light'|'dark';
+type NavItem={label:string;route:string};
 type PendingCreate={inmobiliaria_code:string;canal:string;resultado:string;proxima_accion:string}|null;
 type PendingDone=Row|null;
+function normalizeNav(data:unknown):NavItem[]{if(!data||typeof data!=='object')return[];const items=(data as{items?:unknown[]}).items;if(!Array.isArray(items))return[];return items.map(x=>{if(typeof x==='string')return{label:x.replace(/^\//,'')||'Inicio',route:x};if(x&&typeof x==='object'){const o=x as Record<string,unknown>;if(typeof o.route==='string')return{label:typeof o.label==='string'?o.label:o.route.replace(/^\//,''),route:o.route};}return null;}).filter((x):x is NavItem=>Boolean(x));}
+const fallbackNav:NavItem[]=[{label:'Inicio',route:'/inicio'}];
 
 async function api(path:string,init?:RequestInit){
   const {data:{session}}=await supabase.auth.getSession();
@@ -27,7 +30,7 @@ export default function VisitasShell(){
   const isNew=location.pathname==='/visitas/nueva';
   const detailMatch=location.pathname.match(/^\/visitas\/([^/]+)$/);
   const detailCode=detailMatch&&detailMatch[1]!=='nueva'?decodeURIComponent(detailMatch[1]):null;
-  const [ready,setReady]=useState(false),[logged,setLogged]=useState(false),[rows,setRows]=useState<Row[]>([]),[message,setMessage]=useState(''),[loading,setLoading]=useState(false);
+  const [ready,setReady]=useState(false),[logged,setLogged]=useState(false),[rows,setRows]=useState<Row[]>([]),[message,setMessage]=useState(''),[loading,setLoading]=useState(false),[nav,setNav]=useState<NavItem[]>([]);
   const [inmo,setInmo]=useState(''),[canal,setCanal]=useState('Visita'),[resultado,setResultado]=useState(''),[proxima,setProxima]=useState('');
   const [pendingCreate,setPendingCreate]=useState<PendingCreate>(null),[pendingDone,setPendingDone]=useState<PendingDone>(null);
   const [theme,setTheme]=useState<Theme>(()=>(sessionStorage.getItem('fenix-theme') as Theme)||'light');
@@ -35,6 +38,7 @@ export default function VisitasShell(){
 
   useEffect(()=>{let alive=true;supabase.auth.getSession().then(({data})=>{if(alive){setLogged(Boolean(data.session));setReady(true)}});const {data:{subscription}}=supabase.auth.onAuthStateChange((_e,s)=>{setLogged(Boolean(s));setReady(true)});return()=>{alive=false;subscription.unsubscribe()};},[]);
   useEffect(()=>{document.documentElement.dataset.theme=theme;sessionStorage.setItem('fenix-theme',theme);},[theme]);
+  useEffect(()=>{if(!active||!logged)return;let alive=true;fetchAppApi<unknown>('/navigation').then(r=>{if(alive)setNav(r.status===200?normalizeNav(r.data):[])}).catch(()=>{if(alive)setNav([])});return()=>{alive=false};},[active,logged]);
 
   async function load(){
     setLoading(true);
@@ -48,6 +52,7 @@ export default function VisitasShell(){
   useEffect(()=>{setPendingCreate(null);setPendingDone(null);setMessage('');},[location.pathname]);
 
   if(!active||!ready||!logged)return null;
+  const effectiveNav=nav.length?nav:fallbackNav;
 
   function submit(e:FormEvent){
     e.preventDefault();
@@ -103,7 +108,7 @@ export default function VisitasShell(){
   return <div className="ops-root visitas-root" data-theme={theme}>
     <aside className="ops-side">
       <button className="ops-brand" onClick={()=>navigate('/inicio')}><img src={fenixLogo} alt=""/><strong>FÉNIX CAPITAL</strong></button>
-      <nav><button onClick={()=>navigate('/inicio')}>Inicio</button><button onClick={()=>navigate('/inmobiliarias')}>Inmobiliarias</button><button className="active" onClick={()=>navigate('/visitas')}>Visitas / gestiones</button><button onClick={()=>navigate('/agenda')}>Agenda</button></nav>
+      <nav>{effectiveNav.map(item=><button key={item.route} className={item.route==='/visitas'?'active':''} onClick={()=>navigate(item.route)}>{item.label}</button>)}</nav>
       <button className="ops-ana" onClick={()=>navigate('/ana')}><img src={anaAvatar} alt="Ana"/><span><strong>Hablar con Ana</strong><small>Asistente de Fénix Capital</small></span></button>
     </aside>
     <main className="ops-main">
