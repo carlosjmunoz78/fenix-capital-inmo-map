@@ -57,6 +57,7 @@ import OperationalRecordDetail from './OperationalRecordDetail';
 import CalculatorLabelGuard from './CalculatorLabelGuard';
 import ProfileLauncherGuard from './ProfileLauncherGuard';
 import OperationalAdvancedSearchGuard from './OperationalAdvancedSearchGuard';
+import DirectionIdentityGuard from './DirectionIdentityGuard';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -64,6 +65,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <CalculatorLabelGuard />
       <ProfileLauncherGuard />
       <OperationalAdvancedSearchGuard />
+      <DirectionIdentityGuard />
       <AnaUniversalGuard />
       <AnaInboxAccessGuard />
       <ContextEvidenceUpload />
