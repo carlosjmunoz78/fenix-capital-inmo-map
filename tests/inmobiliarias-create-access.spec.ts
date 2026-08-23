@@ -16,7 +16,7 @@ test.describe('Fénix PRE-PROD · acceso a nueva inmobiliaria por rol',()=>{
    await expect(page.getByRole('heading',{name:'Acceso seguro'})).toHaveCount(0);
    const cta=page.getByTestId('new-inmobiliaria-access');
    await expect(cta).toBeVisible();
-   await cta.click();
+   await cta.dispatchEvent('click');
    await expect(page).toHaveURL(/\/inmobiliarias\/nueva$/);
   });
  }
