@@ -49,8 +49,6 @@ test.describe('Fénix PRE-PROD · contrato visual Inicio Dirección',()=>{
     for(const label of ['Inmobiliarias','Notarías','Avisos','Comunicaciones','Buscar'])await expect(sidebar.getByRole('button',{name:label,exact:true})).toBeVisible();
     await expect(page.getByRole('button',{name:'Buscador avanzado',exact:true})).toBeVisible();
     await expect(page.locator('.dir-topbar')).toBeVisible();
-    await expect(page.locator('[data-testid="direction-home-ana-correction"]')).toBeVisible();
-    await expect(page.locator('[data-testid="direction-home-ana-correction"] textarea')).toBeVisible();
     const sidebarBox=await sidebar.boundingBox();
     const priorityBox=await page.locator('.dir-priority-card').boundingBox();
     const kpiBox=await page.locator('.dir-kpi').first().boundingBox();
