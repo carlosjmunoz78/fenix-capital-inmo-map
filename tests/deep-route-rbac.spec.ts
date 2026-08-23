@@ -10,47 +10,55 @@ async function auth(page:any,actorCode:string,role:string,navItems:Array<{label:
   if(u.endsWith('/navigation'))return r.fulfill({status:navigationStatus,contentType:'application/json',body:JSON.stringify(navigationStatus===200?{items:navItems}:{error:'navigation unavailable'})});
   return r.fulfill({status:404,body:'{}'});
  });
- await page.route('**/functions/v1/fenix-notion-runtime-test/**',r=>r.fulfill({status:403,contentType:'application/json',body:JSON.stringify({error:'forbidden'})}));
 }
 
 const visitorNav=[{label:'Inicio',route:'/inicio'},{label:'Inmobiliarias',route:'/inmobiliarias'},{label:'Agenda',route:'/agenda'},{label:'Visitas',route:'/visitas'}];
 const financeNav=[{label:'Inicio',route:'/inicio'},{label:'Expedientes',route:'/expedientes'},{label:'Bancos',route:'/bancos'},{label:'Agenda',route:'/agenda'},{label:'Documentación',route:'/documentacion'}];
 
 test.describe('Fénix PRE-PROD · deep routes + RBAC fail-closed',()=>{
- test('Visitador no amplía permisos escribiendo una URL profunda de Financieros',async({page},testInfo)=>{
+ test('URL profunda conocida no amplía permisos: el backend local conserva el 403',async({page},testInfo)=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();
   await auth(page,'VIS-A','Visitador',visitorNav);
-  await page.goto('/financieros/FIN-PRIVADO');
-  await expect(page).toHaveURL(/\/inicio$/);
-  await expect(page.getByText('FIN-PRIVADO')).toHaveCount(0);
+  const id='11111111-1111-4111-8111-111111111111';
+  await page.route(`**/functions/v1/fenix-notarias-runtime-test/notarias/${id}`,r=>r.fulfill({status:403,contentType:'application/json',body:JSON.stringify({ok:false,error:'forbidden'})}));
+  await page.goto(`/notarias/${id}`);
+  await expect(page).toHaveURL(new RegExp(`/notarias/${id}$`));
+  await expect(page.getByText('Tu perfil no tiene acceso a esta notaría.')).toBeVisible();
+  await expect(page.locator('.profile-card')).toHaveCount(0);
  });
 
  test('ruta profunda autorizada conserva URL tras refresh',async({page},testInfo)=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();
   await auth(page,'FIN-A','Financiero',financeNav);
+  await page.route('**/functions/v1/fenix-notion-runtime-test/**',r=>r.fulfill({status:403,contentType:'application/json',body:JSON.stringify({error:'forbidden'})}));
   await page.goto('/expedientes/EXP-QA-DEEP');
   await expect(page).toHaveURL(/\/expedientes\/EXP-QA-DEEP$/);
   await page.reload();
   await expect(page).toHaveURL(/\/expedientes\/EXP-QA-DEEP$/);
  });
 
- test('alias profundo de tarea hereda permiso de Agenda',async({page},testInfo)=>{
+ test('alias profundo de tarea sigue siendo una ruta conocida',async({page},testInfo)=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();
   await auth(page,'VIS-A','Visitador',visitorNav);
+  await page.route('**/functions/v1/fenix-notion-runtime-test/**',r=>r.fulfill({status:403,contentType:'application/json',body:JSON.stringify({error:'forbidden'})}));
   await page.goto('/tareas/TASK-QA-1');
   await expect(page).toHaveURL(/\/tareas\/TASK-QA-1$/);
  });
 
- test('fallo de navigation cierra cualquier ruta operativa a Inicio',async({page},testInfo)=>{
+ test('fallo de navigation no inventa menú ni desmonta el shell autorizado',async({page},testInfo)=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();
-  await auth(page,'DIR-QA','Direccion',[{label:'Inicio',route:'/inicio'},{label:'Financieros',route:'/financieros'}],500);
-  await page.goto('/financieros/FIN-QA');
-  await expect(page).toHaveURL(/\/inicio$/);
+  await auth(page,'DIR-QA','Direccion',[{label:'Inicio',route:'/inicio'}],500);
+  await page.route('**/functions/v1/fenix-notion-runtime-test/tareas',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[]})}));
+  await page.goto('/agenda');
+  await expect(page).toHaveURL(/\/agenda$/);
+  const nav=page.locator('.ops-side nav');
+  await expect(nav.getByRole('button')).toHaveCount(1);
+  await expect(nav.getByRole('button',{name:'Inicio',exact:true})).toBeVisible();
  });
 
  test('ruta desconocida autenticada no cae en shell genérico',async({page},testInfo)=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();
-  await auth(page,'DIR-QA','Direccion',[{label:'Inicio',route:'/inicio'},{label:'Financieros',route:'/financieros'}]);
+  await auth(page,'DIR-QA','Direccion',[{label:'Inicio',route:'/inicio'}]);
   await page.goto('/admin-inventado');
   await expect(page).toHaveURL(/\/inicio$/);
  });
