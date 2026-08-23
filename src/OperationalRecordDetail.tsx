@@ -8,6 +8,7 @@ import './operational.css';
 
 type AnyRow=Record<string,any>;
 type Ctx={role?:string};
+type NavItem={label:string;route:string};
 type Resource='tareas'|'documentos'|'tasaciones'|'firmas';
 type Def={resource:Resource;listRoute:string;runtime:string;title:string;icon:typeof FileText};
 type Assignee={actor_code:string;name:string;role:string};
@@ -22,15 +23,17 @@ const defs:Record<string,Def>={
 function isNotionId(v:string){return /^[0-9a-f]{32}$/i.test(v.replaceAll('-',''));}
 function pretty(k:string){return k.replaceAll('_',' ').replace(/\b\w/g,m=>m.toUpperCase())}
 function val(v:any){if(v===null||v===undefined||v==='')return '—';if(typeof v==='boolean')return v?'Sí':'No';if(Array.isArray(v))return v.length?v.map(x=>typeof x==='object'?(x.name||x.id||JSON.stringify(x)):String(x)).join(', '):'—';if(typeof v==='object')return JSON.stringify(v);return String(v)}
+function normalizeNav(data:unknown):NavItem[]{if(!data||typeof data!=='object')return[];const items=(data as{items?:unknown[]}).items;if(!Array.isArray(items))return[];return items.map(x=>{if(typeof x==='string')return{label:x.replace(/^\//,'')||'Inicio',route:x};if(x&&typeof x==='object'){const o=x as Record<string,unknown>;if(typeof o.route==='string')return{label:typeof o.label==='string'?o.label:o.route.replace(/^\//,''),route:o.route};}return null;}).filter((x):x is NavItem=>Boolean(x));}
+const fallbackNav:NavItem[]=[{label:'Inicio',route:'/inicio'}];
 async function actionApi(resource:Resource,id:string,changes:Record<string,unknown>){const{data:{session}}=await supabase.auth.getSession();if(!session?.access_token)return{status:401,data:null as any};const r=await fetch(`${SUPABASE_URL}/functions/v1/fenix-notion-actions-test/${resource}/${encodeURIComponent(id)}/action`,{method:'POST',headers:{'content-type':'application/json',Authorization:`Bearer ${session.access_token}`},body:JSON.stringify({action:'update',changes})});let data:any=null;try{data=await r.json()}catch{}return{status:r.status,data};}
 
 export default function OperationalRecordDetail(){
  const location=useLocation(),navigate=useNavigate();
  const match=location.pathname.match(/^\/(tareas|documentacion|tasaciones|firmas)\/([^/]+)$/);const key=match?.[1]||'';const id=match?.[2]?decodeURIComponent(match[2]):'';const active=Boolean(match&&id!=='nueva');const def=defs[key];
- const[ctx,setCtx]=useState<Ctx|null>(null),[status,setStatus]=useState<number|null>(null),[data,setData]=useState<any>(null),[loading,setLoading]=useState(false),[msg,setMsg]=useState('');
+ const[ctx,setCtx]=useState<Ctx|null>(null),[nav,setNav]=useState<NavItem[]>([]),[status,setStatus]=useState<number|null>(null),[data,setData]=useState<any>(null),[loading,setLoading]=useState(false),[msg,setMsg]=useState('');
  const[changes,setChanges]=useState<Record<string,unknown>>({}),[preview,setPreview]=useState(false),[busy,setBusy]=useState(false),[saveMsg,setSaveMsg]=useState('');
  const[assignees,setAssignees]=useState<Assignee[]>([]);
- useEffect(()=>{if(!active||!def)return;fetchAppApi<Ctx>('/session/context').then(r=>setCtx(r.status===200?r.data:null));},[active,key]);
+ useEffect(()=>{if(!active||!def)return;let alive=true;Promise.all([fetchAppApi<Ctx>('/session/context'),fetchAppApi<unknown>('/navigation')]).then(([c,n])=>{if(!alive)return;setCtx(c.status===200?c.data:null);setNav(n.status===200?normalizeNav(n.data):[])}).catch(()=>{if(alive){setCtx(null);setNav([])}});return()=>{alive=false};},[active,key]);
  useEffect(()=>{
   if(!active||def?.resource!=='tareas'||ctx?.role!=='Direccion'){setAssignees([]);return;}
   let alive=true;
@@ -46,13 +49,13 @@ export default function OperationalRecordDetail(){
  async function load(){if(!active||!def||!isNotionId(id)){setStatus(404);setMsg('No se ha encontrado la ficha canónica.');return;}setLoading(true);setMsg('');const r=await fetchNotionRuntime<any>(`${def.runtime}/${encodeURIComponent(id)}`);setStatus(r.status);setData(r.data);setLoading(false);if(r.status===403)setMsg('Tu perfil no puede abrir este registro.');else if(r.status===404)setMsg('No se ha encontrado el registro.');else if(r.status!==200)setMsg('No se pudo cargar el registro.');}
  useEffect(()=>{void load();setChanges({});setPreview(false);setSaveMsg('');},[active,key,id]);
  const item=useMemo(()=>data?.item??null,[data]);
- if(!active||!def)return null;const Icon=def.icon;const fields=item?Object.keys(item).filter(k=>!['id','fuente','destino','synthetic'].includes(k)):[];const display=item?.tarea||item?.documento||item?.tasación||item?.tasacion||item?.firma||item?.title||def.title;
+ if(!active||!def)return null;const Icon=def.icon;const fields=item?Object.keys(item).filter(k=>!['id','fuente','destino','synthetic'].includes(k)):[];const display=item?.tarea||item?.documento||item?.tasación||item?.tasacion||item?.firma||item?.title||def.title;const effectiveNav=nav.length?nav:fallbackNav;
  function set(k:string,v:unknown){setChanges(c=>({...c,[k]:v}));setPreview(false);setSaveMsg('');}
  const clean=Object.fromEntries(Object.entries(changes).filter(([,v])=>v!==''&&v!==undefined));
  async function save(){if(!Object.keys(clean).length)return;setBusy(true);setSaveMsg('');const r=await actionApi(def.resource,id,clean);setBusy(false);if(r.status===200){setSaveMsg('Cambios guardados y auditados en Notion.');setChanges({});setPreview(false);await load();}else if(r.status===403)setSaveMsg('Tu perfil no puede modificar este registro.');else setSaveMsg(`No se pudo guardar (${r.data?.error||r.status}).`);}
  return <div className="ops-root" style={{zIndex:5400}} data-theme={(sessionStorage.getItem('fenix-theme')||'light')}>
-  <aside className="ops-side"><button className="ops-brand" onClick={()=>navigate('/inicio')}><img src={fenixLogo} alt=""/><strong>FÉNIX CAPITAL</strong></button><nav><button onClick={()=>navigate(def.listRoute)}><ArrowLeft size={15}/> Volver</button></nav><button className="ops-ana" onClick={()=>navigate('/ana')}><img src={anaAvatar} alt="Ana"/><span><strong>Hablar con Ana</strong><small>Asistente de Fénix Capital</small></span></button></aside>
-  <main className="ops-main"><header className="ops-top"><strong>{def.title}</strong></header><section className="ops-content">
+  <aside className="ops-side"><button className="ops-brand" onClick={()=>navigate('/inicio')}><img src={fenixLogo} alt=""/><strong>FÉNIX CAPITAL</strong></button><nav>{effectiveNav.map(item=><button key={item.route} className={item.route===def.listRoute?'active':''} onClick={()=>navigate(item.route)}>{item.label}</button>)}</nav><button className="ops-ana" onClick={()=>navigate('/ana')}><img src={anaAvatar} alt="Ana"/><span><strong>Hablar con Ana</strong><small>Asistente de Fénix Capital</small></span></button></aside>
+  <main className="ops-main"><header className="ops-top"><strong>{def.title}</strong></header><section className="ops-content"><button className="inmo-detail-back" onClick={()=>navigate(def.listRoute)}><ArrowLeft size={15}/> Volver a {def.title==='Tarea'?'Agenda':def.title==='Documento'?'Documentación':def.title==='Tasación'?'Tasaciones':'Firmas'}</button>
    <div className="ops-title"><div><span className="ops-icon"><Icon size={20}/></span><div><h1>{display}</h1><p>Fuente canónica Notion · acciones limitadas por rol y propietario.</p></div></div><span className={status===200?'ops-live ok':'ops-live'}>{loading?'Cargando…':status===200?'Notion vivo':'PRE-PROD'}</span></div>
    <article className="ops-ana-card"><img src={anaAvatar} alt="Ana"/><div><strong>Ana</strong><p>Primero te enseño una vista previa. Nada se guarda hasta que confirmes la acción.</p></div></article>
    {msg&&<div className="ops-message">{msg}</div>}
