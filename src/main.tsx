@@ -14,6 +14,7 @@ import './operational-shell-overlay.css';
 import './operational-mobile-nav.css';
 import './operational-fixed-topbar.css';
 import './operational-route-isolation.css';
+import './brand-name-theme.css';
 import App from './App';
 import RoleHomeShell from './RoleHomeShell';
 import ProfileShell from './ProfileShell';
