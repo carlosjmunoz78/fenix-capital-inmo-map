@@ -31,11 +31,11 @@ test.describe('Fénix PRE-PROD · ficha maestra de expediente',()=>{
   await page.addInitScript(session=>{window.localStorage.setItem('fenix-preprod-auth',JSON.stringify(session));window.localStorage.setItem('fenix-remember-device','true');},fakeSession);
   await page.route('**/functions/v1/fenix-app-gateway-test/**',async r=>{const u=r.request().url();if(u.endsWith('/session/context'))return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({actor_code:'DIR-TEST',role:'Direccion'})});if(u.endsWith('/navigation'))return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[{label:'Inicio',route:'/inicio'},{label:'Expedientes',route:'/expedientes'}]})});return r.fulfill({status:404,body:'{}'});});
   await page.route(`**/functions/v1/fenix-notion-runtime-test/expedientes/${id}`,r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({source:'notion_canonical',item})}));
-  let personSaved=false;
+  let personSaved=false,personWrites=0;
   await page.route(`**/functions/v1/fenix-notion-runtime-test/expedientes/${id}/compradores`,r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({count:3,titulares:2,avalistas:1,items:[{id:'p1',nombre:'Jorge',rol_operacion:'Titular comprador',documentacion_completa:true,datos_revisados_financiero:true},{id:'p2',nombre:'Alex',rol_operacion:'Titular comprador',documentacion_completa:true,datos_revisados_financiero:true},{id:'p3',nombre:'María',rol_operacion:'Avalista',situacion_laboral:personSaved?'Funcionario':null,documentacion_completa:false,datos_revisados_financiero:false}]})}));
   await page.route('**/functions/v1/fenix-notion-runtime-test/expedientes',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[item]})}));
   await page.route(`**/functions/v1/fenix-expediente-assistant-test/expedientes/${id}/advice`,r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify(personSaved?adviceAfterSave:advice)}));
-  await page.route('**/functions/v1/fenix-comprador-action-test/compradores/p3/action',async r=>{personSaved=true;return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,status:200})});});
+  await page.route('**/functions/v1/fenix-comprador-action-test/compradores/p3/action',async r=>{personWrites++;personSaved=true;return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,status:200})});});
   let prepCalls=0;
   await page.route(`**/functions/v1/fenix-expediente-assistant-test/expedientes/${id}/prepare-contact`,async r=>{prepCalls++;return r.fulfill({status:prepCalls===1?201:200,contentType:'application/json',body:JSON.stringify({ok:true,status:prepCalls===1?201:200,reused:prepCalls>1,no_op:prepCalls>1,communication_page_id:'comm-page-1',channel:'Llamada',external_sent:false,requires_approval:true})});});
   await page.route('**/functions/v1/fenix-memory-api-test/context',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify(memory)}));
@@ -58,6 +58,11 @@ test.describe('Fénix PRE-PROD · ficha maestra de expediente',()=>{
   await maria.locator('label').filter({hasText:'Situación laboral'}).locator('select').selectOption('Funcionario');
   await page.evaluate(()=>{(window as any).__fenixAnaNoReload='alive';});
   await maria.getByTestId('save-person-p3').dispatchEvent('click');
+  expect(personWrites).toBe(0);
+  await expect(maria.getByTestId('edit-person-preview-p3')).toBeVisible();
+  await expect(maria.getByTestId('save-person-p3')).toContainText('Confirmar y guardar');
+  await maria.getByTestId('save-person-p3').dispatchEvent('click');
+  await expect.poll(()=>personWrites).toBe(1);
   await expect(page.getByText('Datos de la persona guardados y auditados.',{exact:true})).toBeVisible();
   await expect(page.getByText('Siguiente dato pendiente: Situación laboral de María.',{exact:true})).toHaveCount(0);
   await expect(page.getByText('Siguiente dato pendiente: Sueldo neto mensual de María.',{exact:true})).toBeVisible();
