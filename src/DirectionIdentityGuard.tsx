@@ -1,6 +1,7 @@
 import {useEffect} from 'react';
 import {useLocation} from 'react-router-dom';
 import {fetchAppApi,supabase} from './supabase';
+import DirectionStateGuard from './DirectionStateGuard';
 
 type Ctx={role?:string};
 
@@ -40,5 +41,5 @@ export default function DirectionIdentityGuard(){
   void apply();
   return()=>{stopped=true;observer?.disconnect();if(timer)window.clearTimeout(timer)};
  },[location.pathname]);
- return null;
+ return <DirectionStateGuard/>;
 }
