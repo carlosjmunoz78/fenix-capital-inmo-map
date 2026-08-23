@@ -29,9 +29,12 @@ body:has(.ops-root) .app-shell *{
   pointer-events:none!important;
 }
 
-body:has(.ops-root) .app-shell > .sidebar,
-body:has(.ops-root) .app-shell > .main{
+/* Oculta el chrome legacy aunque cambie su profundidad en el DOM. */
+body:has(.ops-root) .app-shell .sidebar,
+body:has(.ops-root) .app-shell .main{
   display:none!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
 }
 
 /* La calculadora global es la única excepción del shell legacy. */
@@ -57,6 +60,9 @@ body:has(.ops-root) .app-shell > .calc-launcher *{
   overflow-y:auto!important;
   overflow-x:hidden!important;
   overscroll-behavior:contain!important;
+  /* Reserva una zona segura al enfocar/scrollar controles bajo topbar y calculadora. */
+  scroll-padding-top:112px!important;
+  scroll-padding-bottom:380px!important;
 }
 
 /* Ana y la corrección forman un bloque vertical: la corrección va siempre debajo.
@@ -67,12 +73,23 @@ body:has(.ops-root) .app-shell > .calc-launcher *{
 .comm-root .comm-correct,
 .fin-root .fin-correct{
   grid-column:1 / -1!important;
-  scroll-margin-top:104px!important;
-  scroll-margin-bottom:340px!important;
+  scroll-margin-top:112px!important;
+  scroll-margin-bottom:380px!important;
+}
+
+/* Los controles finales de corrección también tienen margen propio: Playwright,
+   teclado y navegadores pueden desplazar directamente el botón en lugar del bloque. */
+.fin-root .fin-correct textarea,
+.fin-root .fin-correct input,
+.fin-root .fin-correct button{
+  scroll-margin-top:112px!important;
+  scroll-margin-bottom:380px!important;
 }
 
 @media(max-width:650px){
   .ops-root > .ops-main{
     height:calc(100vh - 58px)!important;
+    scroll-padding-top:86px!important;
+    scroll-padding-bottom:240px!important;
   }
 }
