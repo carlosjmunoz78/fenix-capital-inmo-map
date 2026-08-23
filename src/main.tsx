@@ -12,7 +12,6 @@ import './ana-vertical-size.css';
 import './calculator-no-pro.css';
 import './operational-shell-overlay.css';
 import './operational-mobile-nav.css';
-import './operational-fixed-topbar.css';
 import App from './App';
 import RoleHomeShell from './RoleHomeShell';
 import ProfileShell from './ProfileShell';
@@ -65,11 +64,13 @@ import OperationalLogoutGuard from './OperationalLogoutGuard';
 import RouteAccessGuard from './RouteAccessGuard';
 import CreateRouteAuthorizedNav from './CreateRouteAuthorizedNav';
 import ExpedienteFollowupConfirmationGuard from './ExpedienteFollowupConfirmationGuard';
+import OperationalRouteScrollReset from './OperationalRouteScrollReset';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <BrowserRouter basename={import.meta.env.BASE_URL}>
       <RouteAccessGuard />
+      <OperationalRouteScrollReset />
       <CreateRouteAuthorizedNav />
       <ExpedienteFollowupConfirmationGuard />
       <CalculatorLabelGuard />
