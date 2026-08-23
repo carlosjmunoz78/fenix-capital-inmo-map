@@ -4,6 +4,14 @@ import {useNavigate} from 'react-router-dom';
 const BUTTON_CLASS='ops-advanced-search-guard';
 const STYLE_ID='ops-advanced-search-guard-style';
 
+function isDirectionProfile(root:HTMLElement){
+ const dataRole=root.getAttribute('data-role')||'';
+ const copyRole=root.querySelector<HTMLElement>('.ops-profile-copy small')?.textContent||'';
+ const legacyRole=root.querySelector<HTMLElement>('small')?.textContent||'';
+ const legacyStrong=root.querySelector<HTMLElement>('strong')?.textContent||'';
+ return /direcci[oó]n/i.test(`${dataRole} ${copyRole} ${legacyRole} ${legacyStrong}`);
+}
+
 export default function OperationalAdvancedSearchGuard(){
  const navigate=useNavigate();
  useEffect(()=>{
@@ -21,8 +29,8 @@ export default function OperationalAdvancedSearchGuard(){
   }
   const wire=()=>{
    document.querySelectorAll<HTMLElement>('.ops-top').forEach(top=>{
-    const profile=top.querySelector<HTMLElement>('.ops-profile strong');
-    const isDirection=/direcci[oó]n/i.test(profile?.textContent||'');
+    const profile=top.querySelector<HTMLElement>('.ops-profile');
+    const isDirection=profile?isDirectionProfile(profile):false;
     const existing=top.querySelector<HTMLButtonElement>(`.${BUTTON_CLASS}`);
     if(!isDirection){existing?.remove();return;}
     if(existing)return;
@@ -39,7 +47,7 @@ export default function OperationalAdvancedSearchGuard(){
   };
   wire();
   const observer=new MutationObserver(wire);
-  observer.observe(document.body,{childList:true,subtree:true,characterData:true});
+  observer.observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['data-role']});
   return()=>observer.disconnect();
  },[navigate]);
  return null;
