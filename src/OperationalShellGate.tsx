@@ -5,6 +5,16 @@ const dedicatedExact=new Set(['/contactos','/inmobiliarias','/tasaciones','/agen
 
 export default function OperationalShellGate(){
  const {pathname}=useLocation();
- if(dedicatedExact.has(pathname)||/^\/bancos\/contactos\//.test(pathname)||/^\/bancos\/[^/]+$/.test(pathname)||/^\/financieros\/[^/]+$/.test(pathname)||/^\/visitadores\/[^/]+$/.test(pathname)||/^\/notarias\/[^/]+$/.test(pathname)||/^\/visitas\/[^/]+$/.test(pathname))return null;
+ if(
+  dedicatedExact.has(pathname)
+  || /^\/expedientes\/[^/]+$/.test(pathname)
+  || /^\/tareas\/[^/]+$/.test(pathname)
+  || /^\/bancos\/contactos\//.test(pathname)
+  || /^\/bancos\/[^/]+$/.test(pathname)
+  || /^\/financieros\/[^/]+$/.test(pathname)
+  || /^\/visitadores\/[^/]+$/.test(pathname)
+  || /^\/notarias\/[^/]+$/.test(pathname)
+  || /^\/visitas\/[^/]+$/.test(pathname)
+ )return null;
  return <OperationalShellV2/>;
 }
