@@ -11,6 +11,7 @@ type Correction={
   ana_suggestion:string;user_reason:string;proposed_rule?:string|null;approved_rule?:string|null;
   status:'Pendiente'|'Aprobada'|'Rechazada';version:number;review_reason?:string|null;decision_kind?:DecisionKind|null;
 };
+type PendingDecision={correction:Correction;kind:DecisionKind;comment:string;approvedRule:string|null}|null;
 type Ctx={actor_code?:string;role?:string};
 type Capabilities={
   show_ana_execute?:boolean;can_ana_execute?:boolean;ana_execute_requires_action_context?:boolean;
@@ -29,7 +30,8 @@ export default function AnaGovernance(){
   const [logged,setLogged]=useState(false),[ready,setReady]=useState(false),[ctx,setCtx]=useState<Ctx|null>(null);
   const [caps,setCaps]=useState<Capabilities|null>(null),[items,setItems]=useState<Correction[]>([]);
   const [suggestion,setSuggestion]=useState(''),[reason,setReason]=useState(''),[rule,setRule]=useState(''),[message,setMessage]=useState(''),[saving,setSaving]=useState(false);
-  const [reviewing,setReviewing]=useState<string|null>(null),[comments,setComments]=useState<Record<string,string>>({});
+  const [correctionPreview,setCorrectionPreview]=useState(false);
+  const [reviewing,setReviewing]=useState<string|null>(null),[comments,setComments]=useState<Record<string,string>>({}),[pendingDecision,setPendingDecision]=useState<PendingDecision>(null);
   const [theme,setTheme]=useState<Theme>(()=>(sessionStorage.getItem('fenix-theme') as Theme)||'light');
   const createKey=useRef(`ana-ui:${crypto.randomUUID()}`);
   const active=location.pathname==='/ana'||location.pathname.startsWith('/ana/');
@@ -38,7 +40,7 @@ export default function AnaGovernance(){
   const scopeCode=params.get('scope_code')?.trim()||params.get('contact_id')?.trim()||params.get('inmobiliaria_id')?.trim()||params.get('expediente_id')?.trim()||params.get('task_id')?.trim()||'';
   const correctionContext=scopeType!=='general'||Boolean(scopeCode)||Boolean(params.get('correction'));
 
-  useEffect(()=>{let alive=true;supabase.auth.getSession().then(({data})=>{if(alive){setLogged(Boolean(data.session));setReady(true)}});const {data:{subscription}}=supabase.auth.onAuthStateChange((_e,s)=>{setLogged(Boolean(s));setReady(true)});return()=>{alive=false;subscription.unsubscribe()};},[]);
+  useEffect(()=>{let alive=true;supabase.auth.getSession().then(({data})=>{if(alive){setLogged(Boolean(data.session));setReady(true)}});const{data:{subscription}}=supabase.auth.onAuthStateChange((_e,s)=>{setLogged(Boolean(s));setReady(true)});return()=>{alive=false;subscription.unsubscribe()};},[]);
   useEffect(()=>{document.documentElement.dataset.theme=theme;sessionStorage.setItem('fenix-theme',theme);},[theme]);
   useEffect(()=>{if(!active)return;if(params.get('mode')==='do'&&scopeType==='contacto'&&!scopeCode&&!params.get('channel')&&!params.get('correction'))navigate('/contactos/nuevo',{replace:true});},[active,params,scopeType,scopeCode,navigate]);
   useEffect(()=>{if(!active)return;const s=params.get('correction')?.trim()||'',r=params.get('reason')?.trim()||'',p=params.get('rule')?.trim()||'';if(s)setSuggestion(s);if(r)setReason(r);if(p)setRule(p);},[active,params]);
@@ -59,32 +61,41 @@ export default function AnaGovernance(){
   useEffect(()=>{if(active&&logged)void load();},[active,logged]);
   if(!active||!ready||!logged)return null;
 
+  function editCorrection(){setCorrectionPreview(false);setMessage('');}
   async function submit(e:FormEvent){
     e.preventDefault();setMessage('');
     if(caps?.can_correct_ana===false){setMessage('No tienes permiso para registrar correcciones en este contexto.');return;}
     if(reason.trim().length<2||suggestion.trim().length<2){setMessage('Indica qué sugirió Ana y por qué no debe hacerse así.');return;}
+    if(!correctionPreview){setCorrectionPreview(true);return;}
     setSaving(true);
     const payload:Record<string,unknown>={scope_type:scopeType,ana_suggestion:suggestion,user_reason:reason,proposed_rule:rule||null,idempotency_key:createKey.current};if(scopeCode)payload.scope_code=scopeCode;
     const r=await fetchAnaApi<ApiEnvelope<Correction>>('/corrections',{method:'POST',body:JSON.stringify(payload)});
     setSaving(false);
     if(r.status===200||r.status===201){
-      setSuggestion('');setReason('');setRule('');createKey.current=`ana-ui:${crypto.randomUUID()}`;
+      setSuggestion('');setReason('');setRule('');setCorrectionPreview(false);createKey.current=`ana-ui:${crypto.randomUUID()}`;
       setMessage(r.data?.reused?'La corrección ya estaba registrada; no se ha duplicado.':'Corrección guardada. Ana la ha dejado preparada para revisión de Belén.');
       await load();
-    }else setMessage('No se pudo guardar la corrección.');
+    }else if(r.status===403){setCorrectionPreview(false);setMessage('No tienes permiso para registrar correcciones en este contexto.');}
+    else setMessage('No se pudo guardar la corrección.');
   }
 
-  async function decide(c:Correction,kind:DecisionKind){
+  function prepareDecision(c:Correction,kind:DecisionKind){
     if(!caps?.can_decide_learning)return;
     const comment=(comments[c.correction_code]||'').trim();
     if(kind!=='descartar'&&!comment){setMessage('Añade un comentario de Belén antes de clasificar esta corrección.');return;}
+    const approvedRule=kind==='regla'?(c.proposed_rule||c.user_reason):null;
+    setPendingDecision({correction:c,kind,comment,approvedRule});
+    setMessage('');
+  }
+  async function confirmDecision(){
+    const pending=pendingDecision;if(!pending||!caps?.can_decide_learning)return;
+    const {correction:c,kind,comment,approvedRule}=pending;
     setReviewing(`${c.correction_code}:${kind}`);setMessage('');
     const idem=`ana-decision:${c.correction_code}:${c.version}:${kind}`;
-    const approved=kind==='regla'?(c.proposed_rule||c.user_reason):null;
     const r=await fetchAnaApi<ApiEnvelope<Correction>>(`/corrections/${encodeURIComponent(c.correction_code)}/decision`,{
-      method:'POST',body:JSON.stringify({expectedVersion:c.version,decision_kind:kind,comment,approved_rule:approved,idempotency_key:idem})
+      method:'POST',body:JSON.stringify({expectedVersion:c.version,decision_kind:kind,comment,approved_rule:approvedRule,idempotency_key:idem})
     });
-    setReviewing(null);
+    setReviewing(null);setPendingDecision(null);
     if(r.status===200){
       setMessage(r.data?.reused?`La decisión ${decisionLabel[kind]} ya estaba registrada; no se ha duplicado.`:`Corrección clasificada como ${decisionLabel[kind]}.`);
       setComments(v=>{const n={...v};delete n[c.correction_code];return n;});await load();
@@ -111,14 +122,17 @@ export default function AnaGovernance(){
 
         {(correctionContext||inboxAllowed)&&correctionAllowed&&<form className="ops-message" onSubmit={submit} style={{display:'grid',gap:10}}>
           <strong>Ana se ha equivocado</strong>{scopeType!=='general'&&<small>Contexto: {scopeType}{scopeCode?` · ${scopeCode}`:''}</small>}
-          <label>¿Qué sugirió Ana?<textarea value={suggestion} onChange={e=>setSuggestion(e.target.value)} rows={2} style={{width:'100%'}}/></label>
-          <label>¿Por qué no debe hacerse así?<textarea value={reason} onChange={e=>setReason(e.target.value)} rows={3} style={{width:'100%'}}/></label>
-          <label>Posible regla o aprendizaje (opcional)<textarea value={rule} onChange={e=>setRule(e.target.value)} rows={2} style={{width:'100%'}}/></label>
-          <button className="primary" disabled={saving}>{saving?'Guardando…':'Guardar corrección'}</button>
+          <label>¿Qué sugirió Ana?<textarea value={suggestion} onChange={e=>{setSuggestion(e.target.value);editCorrection()}} rows={2} style={{width:'100%'}}/></label>
+          <label>¿Por qué no debe hacerse así?<textarea value={reason} onChange={e=>{setReason(e.target.value);editCorrection()}} rows={3} style={{width:'100%'}}/></label>
+          <label>Posible regla o aprendizaje (opcional)<textarea value={rule} onChange={e=>{setRule(e.target.value);editCorrection()}} rows={2} style={{width:'100%'}}/></label>
+          {correctionPreview&&<div className="ops-message" data-testid="ana-correction-preview" style={{margin:0}}><strong>Revisar corrección antes de guardar</strong><div>Contexto: {scopeType}{scopeCode?` · ${scopeCode}`:''}</div><div>Sugirió Ana: {suggestion.trim()}</div><div>Motivo: {reason.trim()}</div><div>Regla propuesta: {rule.trim()||'Ninguna'}</div><small>No se escribirá nada hasta confirmar.</small></div>}
+          <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>{correctionPreview&&<button type="button" onClick={()=>setCorrectionPreview(false)} disabled={saving}>Volver</button>}<button className="primary" disabled={saving}>{saving?'Guardando…':correctionPreview?'Confirmar y guardar':'Revisar antes de guardar'}</button></div>
         </form>}
 
         {!inboxAllowed&&<div className="ops-message"><strong>Correcciones globales capadas</strong><p>{caps?.learning_inbox_disabled_reason||'En Fase 1, solo Belén puede revisar y clasificar el aprendizaje global.'}</p><p>Desde cada expediente, contacto, visita o tarea sí podrás corregir a Ana y adjuntar contexto/evidencia.</p></div>}
         {message&&<div className="ops-message">{message}</div>}
+
+        {pendingDecision&&<div className="ops-message" data-testid="ana-decision-preview"><strong>Revisar clasificación antes de aplicar</strong><div>Corrección: {pendingDecision.correction.correction_code}</div><div>Clasificación: {decisionLabel[pendingDecision.kind]}</div><div>Comentario: {pendingDecision.comment||'Sin comentario'}</div><div>Regla aprobada: {pendingDecision.approvedRule||'No aplica'}</div><small>No se ejecutará ninguna decisión hasta confirmar.</small><div style={{display:'flex',gap:8,marginTop:10,flexWrap:'wrap'}}><button type="button" onClick={()=>setPendingDecision(null)} disabled={Boolean(reviewing)}>Cancelar</button><button type="button" className="primary" onClick={()=>void confirmDecision()} disabled={Boolean(reviewing)}>{reviewing?'Guardando…':'Confirmar clasificación'}</button></div></div>}
 
         {inboxAllowed&&<div className="ops-table-card">
           <div className="ops-table-head"><strong>Correcciones pendientes de Belén</strong><span>{items.length} pendiente{items.length===1?'':'s'}</span></div>
@@ -126,7 +140,7 @@ export default function AnaGovernance(){
           <tbody>{items.length===0?<tr><td colSpan={7}>No hay correcciones pendientes.</td></tr>:items.map(c=><tr key={c.correction_code}>
             <td>{c.scope_type}{c.scope_code?<><br/><small>{c.scope_code}</small></>:null}</td><td>{c.created_by_actor_code}</td><td>{c.ana_suggestion}</td><td>{c.user_reason}</td><td>{c.proposed_rule||'—'}</td>
             <td><textarea aria-label={`Comentario Belén ${c.correction_code}`} value={comments[c.correction_code]||''} onChange={e=>setComments(v=>({...v,[c.correction_code]:e.target.value}))} rows={3} style={{minWidth:190}} placeholder="Matiz, condición o motivo"/></td>
-            <td><div style={{display:'grid',gap:6,minWidth:180}}>{(Object.keys(decisionLabel) as DecisionKind[]).map(kind=><button key={kind} disabled={Boolean(reviewing)} onClick={()=>void decide(c,kind)}>{reviewing===`${c.correction_code}:${kind}`?'Guardando…':decisionLabel[kind]}</button>)}</div></td>
+            <td><div style={{display:'grid',gap:6,minWidth:180}}>{(Object.keys(decisionLabel) as DecisionKind[]).map(kind=><button key={kind} type="button" disabled={Boolean(reviewing)} onClick={()=>prepareDecision(c,kind)}>{decisionLabel[kind]}</button>)}</div></td>
           </tr>)}</tbody></table></div>
         </div>}
       </section>
