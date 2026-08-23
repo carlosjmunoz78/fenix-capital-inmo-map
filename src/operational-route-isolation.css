@@ -16,29 +16,29 @@ body:has(.ops-root){
 }
 
 /*
- * El shell legacy puede convivir como hermano del shell operativo. Usamos body:has
- * como guardia global porque algunos shells se montan fuera de la jerarquía directa
- * esperada por #root durante la composición de React/portales.
+ * El shell legacy puede quedar montado como hermano o dentro de una capa intermedia.
+ * La guardia es deliberadamente global para que ninguna variante de composición
+ * pueda recuperar interacción por accidente.
  */
-body:has(.ops-root) #root > .app-shell{
+body:has(.ops-root) .app-shell{
   visibility:hidden!important;
   pointer-events:none!important;
 }
 
-body:has(.ops-root) #root > .app-shell *{
+body:has(.ops-root) .app-shell *{
   pointer-events:none!important;
 }
 
-body:has(.ops-root) #root > .app-shell > .sidebar,
-body:has(.ops-root) #root > .app-shell > .main{
+body:has(.ops-root) .app-shell > .sidebar,
+body:has(.ops-root) .app-shell > .main{
   display:none!important;
 }
 
 /* La calculadora global es la única excepción del shell legacy. */
-body:has(.ops-root) #root > .app-shell > .calc-panel,
-body:has(.ops-root) #root > .app-shell > .calc-launcher,
-body:has(.ops-root) #root > .app-shell > .calc-panel *,
-body:has(.ops-root) #root > .app-shell > .calc-launcher *{
+body:has(.ops-root) .app-shell > .calc-panel,
+body:has(.ops-root) .app-shell > .calc-launcher,
+body:has(.ops-root) .app-shell > .calc-panel *,
+body:has(.ops-root) .app-shell > .calc-launcher *{
   visibility:visible!important;
   pointer-events:auto!important;
 }
