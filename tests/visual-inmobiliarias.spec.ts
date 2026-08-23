@@ -40,12 +40,36 @@ test.describe('Fénix PRE-PROD · contrato visual Inmobiliarias',()=>{
   await expect(page.getByText('Fuente canónica Notion',{exact:true})).toBeVisible();
   await expect(page.getByText(/\bPRO\b/)).toHaveCount(0);
   const correction=page.locator('.inmo-correct');
-  const hero=page.locator('.inmo-ana-hero');
   const correctionBox=await correction.boundingBox();
   const anaCopyBox=await page.locator('.inmo-ana-body').boundingBox();
   expect((correctionBox?.y||0)).toBeGreaterThan((anaCopyBox?.y||0)+(anaCopyBox?.height||0)-10);
   const shot=await page.screenshot({fullPage:true});
   await testInfo.attach('inmobiliarias-master-1600',{body:shot,contentType:'image/png'});
+ });
+
+ test('cabecera queda sticky y las columnas ordenan en ambos sentidos',async({page},testInfo)=>{
+  if(!testInfo.project.name.includes('desktop'))test.skip();
+  await page.setViewportSize({width:1600,height:900});
+  await mockInmo(page);
+  await page.goto('/inmobiliarias');
+  const table=page.locator('.ops-sortable-table');
+  await expect(table).toBeVisible();
+  const nameHeader=table.locator('th').filter({has:page.getByRole('button',{name:/Inmobiliaria/})});
+  const stateHeader=table.locator('th').filter({has:page.getByRole('button',{name:/Estado/})});
+  await expect(nameHeader).toHaveAttribute('aria-sort','ascending');
+  const sticky=await table.locator('thead th').first().evaluate(el=>getComputedStyle(el).position);
+  expect(sticky).toBe('sticky');
+  const firstName=()=>table.locator('tbody tr').first().locator('td').first().innerText();
+  expect(await firstName()).toBe('ADAIX LUCENA');
+  await page.getByRole('button',{name:/Inmobiliaria/}).click();
+  await expect(nameHeader).toHaveAttribute('aria-sort','descending');
+  expect(await firstName()).toBe('PRUEBA INMO');
+  await page.getByRole('button',{name:/Estado/}).click();
+  await expect(stateHeader).toHaveAttribute('aria-sort','ascending');
+  expect(await table.locator('tbody tr').first().locator('td').nth(2).innerText()).toBe('Activa');
+  await page.getByRole('button',{name:/Estado/}).click();
+  await expect(stateHeader).toHaveAttribute('aria-sort','descending');
+  expect(await table.locator('tbody tr').first().locator('td').nth(2).innerText()).toBe('Sin llamar');
  });
 
  test('traslada a Ana la corrección y el motivo sin perder contexto',async({page},testInfo)=>{
