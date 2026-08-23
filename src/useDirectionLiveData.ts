@@ -4,6 +4,7 @@ import {fetchNotionRuntime} from './notionRuntime';
 type Row=Record<string,unknown>;
 type LoadState={status:number|null;rows:Row[]};
 export type DirectionPriority={id:string;title:string;due:string;state:string};
+export type DirectionLiveStatus={expedientes:number|null;firmas:number|null;tareas:number|null};
 
 function rowsFrom(data:unknown):Row[]{
  if(!data||typeof data!=='object')return[];
@@ -42,6 +43,10 @@ export function useDirectionLiveData(){
   setFir({status:f.status,rows:f.status===200?rowsFrom(f.data):[]});
   setTasks({status:t.status,rows:t.status===200?rowsFrom(t.data):[]});
  })();return()=>{alive=false};},[]);
+ useEffect(()=>{
+  const detail:DirectionLiveStatus={expedientes:exp.status,firmas:fir.status,tareas:tasks.status};
+  window.dispatchEvent(new CustomEvent<DirectionLiveStatus>('fenix-direction-live-status',{detail}));
+ },[exp.status,fir.status,tasks.status]);
  const data=useMemo(()=>{
   const openExp=exp.rows.filter(isOpenExp).length;
   const riskExp=exp.rows.filter(isRisk).length;
@@ -54,6 +59,7 @@ export function useDirectionLiveData(){
   ...data,
   expedientesReady:exp.status===200,
   firmasReady:fir.status===200,
-  tareasReady:tasks.status===200
+  tareasReady:tasks.status===200,
+  statuses:{expedientes:exp.status,firmas:fir.status,tareas:tasks.status} as DirectionLiveStatus
  };
 }
