@@ -164,7 +164,9 @@
   .dir-quick-grid button{height:64px!important;font-size:10.5px!important}
 }
 
-/* Inicio: título limpio y útil; se mantiene la etiqueta naranja INICIO. */
+/* Inicio: título limpio y útil. */
+.dir-shell .dir-page-heading>div>small{font-size:0!important}
+.dir-shell .dir-page-heading>div>small::after{content:'INICIO';font-size:10px!important;line-height:1!important;font-weight:800!important;letter-spacing:.12em!important;color:#f36c21!important}
 .dir-shell .dir-page-heading h1{font-size:0!important}
 .dir-shell .dir-page-heading h1::after{
   content:'Resumen ejecutivo';
@@ -175,12 +177,13 @@
 }
 .dir-shell .dir-page-heading>div>p{display:none!important}
 
-/* Buscador de Inicio: elimina la costura/borde fantasma junto al botón naranja. */
+/* Buscador de Inicio: el botón naranja cierra el contenedor sin cola ni costura. */
 .dir-shell .dir-search{
   overflow:hidden!important;
   isolation:isolate!important;
   position:relative!important;
   background-clip:padding-box!important;
+  padding:0!important;
 }
 .dir-shell .dir-search input{
   min-width:0!important;
@@ -191,8 +194,6 @@
 .dir-shell .dir-search button{
   position:relative!important;
   z-index:2!important;
-  flex:0 0 42px!important;
-  width:42px!important;
   margin:0!important;
   border:0!important;
   border-left:0!important;
