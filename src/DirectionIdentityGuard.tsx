@@ -36,12 +36,12 @@ export default function DirectionIdentityGuard(){
    const ctx=c.status===200?c.data:null;
    const selfRow=p.status===200?(p.data?.items??[]).find(row=>rowMatchesSelf(row,ctx)):undefined;
    const name=sessionName||rowName(selfRow);
-   const displayName=name||'Usuario';
+   const displayName=name||'Mi perfil';
    const patch=()=>{
     const root=document.querySelector('.dir-shell');
     if(!root)return;
     setText(root.querySelector('.dir-user-copy strong'),displayName);
-    setText(root.querySelector('.dir-user-copy span'),'Mi perfil');
+    setText(root.querySelector('.dir-user-copy span'),name?'Mi perfil':'Identidad no disponible');
     setText(root.querySelector('.dir-avatar'),initials(displayName));
     const salutation=daypart();
     setText(root.querySelector('.dir-priority-copy h1'),name?`Hola ${firstName(name)}, ${salutation}`:`${salutation.charAt(0).toUpperCase()}${salutation.slice(1)}`);
