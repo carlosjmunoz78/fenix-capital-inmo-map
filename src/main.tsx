@@ -76,6 +76,7 @@ import DirectionKpiDrilldownGuard from './DirectionKpiDrilldownGuard';
 import DirectionPriorityActionGuard from './DirectionPriorityActionGuard';
 import DirectionKpiLabelGuard from './DirectionKpiLabelGuard';
 import DirectionAnaInsight from './DirectionAnaInsight';
+import DirectionExecutiveOverviewGuard from './DirectionExecutiveOverviewGuard';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -94,6 +95,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <DirectionPriorityActionGuard />
       <DirectionKpiLabelGuard />
       <DirectionAnaInsight />
+      <DirectionExecutiveOverviewGuard />
       <AnaUniversalGuard />
       <AnaInboxAccessGuard />
       <ContextEvidenceUpload />
