@@ -21,24 +21,42 @@ test('Visitadores muestra carga explícita y luego vacío autorizado',async({pag
   return r.fulfill({status:404,contentType:'application/json',body:'{}'});
  });
  await page.goto('/visitadores');
- await expect(page.getByText('Consultando únicamente el equipo autorizado para tu sesión.')).toBeVisible();
- await expect(page.getByText('Sin perfiles visibles')).toBeVisible();
+ await expect(page.getByTestId('visitadores-loading')).toContainText('Consultando únicamente el equipo autorizado para tu sesión.');
+ await expect(page.getByTestId('visitadores-empty')).toBeVisible();
+ await expect(page.locator('.vis-kpis')).toBeVisible();
 });
 
-test('Visitadores distingue 403 de error de carga',async({page},testInfo)=>{
+test('Visitadores distingue 403 de error de carga y falla cerrado en navegación',async({page},testInfo)=>{
  if(!testInfo.project.name.includes('desktop'))test.skip();
  await seed(page);
  let denied=true;
  await page.route('**/functions/v1/fenix-app-gateway-test/**',async r=>{
   const u=r.request().url();
   if(u.endsWith('/session/context'))return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({actor_code:'FIN-A',role:'Financiero'})});
-  if(u.endsWith('/navigation'))return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:['/inicio']})});
+  if(u.endsWith('/navigation'))return r.fulfill({status:500,contentType:'application/json',body:'{}'});
   if(u.endsWith('/visitadores'))return r.fulfill({status:denied?403:503,contentType:'application/json',body:'{}'});
   return r.fulfill({status:404,contentType:'application/json',body:'{}'});
  });
  await page.goto('/visitadores');
- await expect(page.getByText('Tu perfil no tiene acceso a este módulo.')).toBeVisible();
+ await expect(page.getByTestId('visitadores-forbidden')).toHaveText('Tu perfil no tiene acceso a este módulo.');
+ await expect(page.locator('.ops-side nav button')).toHaveCount(1);
+ await expect(page.locator('.ops-side nav button')).toHaveText('Inicio');
+ await expect(page.locator('.vis-kpis')).toHaveCount(0);
  denied=false;
  await page.reload();
- await expect(page.getByText('No se pudo cargar el equipo de visitadores.')).toBeVisible();
+ await expect(page.getByTestId('visitadores-error')).toHaveText('No se pudo cargar el equipo de visitadores.');
+ await expect(page.locator('.vis-kpis')).toHaveCount(0);
+});
+
+test('Visitadores limpia datos y termina loading ante fallo de red',async({page},testInfo)=>{
+ if(!testInfo.project.name.includes('desktop'))test.skip();
+ await seed(page);
+ await page.route('**/functions/v1/fenix-app-gateway-test/**',async r=>{await r.abort('failed');});
+ await page.goto('/visitadores');
+ await expect(page.getByTestId('visitadores-error')).toHaveText('No se pudo conectar con el equipo de visitadores.');
+ await expect(page.getByTestId('visitadores-loading')).toHaveCount(0);
+ await expect(page.locator('.vis-kpis')).toHaveCount(0);
+ await expect(page.locator('.vis-grid article')).toHaveCount(0);
+ await expect(page.locator('.ops-side nav button')).toHaveCount(1);
+ await expect(page.locator('.ops-side nav button')).toHaveText('Inicio');
 });
