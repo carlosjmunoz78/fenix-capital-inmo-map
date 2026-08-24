@@ -48,7 +48,7 @@ export default function DirectionExecutiveOverviewGuard(){
  const catalog=(data?.bank_catalog??[]).filter(x=>x.id&&x.banco).slice(0,3);
  const showPreview=status===200&&banks.length<3&&catalog.length>=3;
  const podium=showPreview?catalog.map((b,i)=>({...b,firmadas_mes:0,previstas_mes:0,preview:true,place:i+1})):banks.map((b,i)=>({...b,preview:false,place:i+1}));
- const team=people.filter(p=>/financier/i.test(String(p.role??''))&&personName(p)).sort((a,b)=>num(b.firmas_mes)-num(a.firmas_mes)||num(b.expedientes)-num(a.expedientes)||personName(a).localeCompare(personName(b),'es')).slice(0,5);
+ const team=[...people].sort((a,b)=>num(b.firmas_mes)-num(a.firmas_mes)||num(b.expedientes)-num(a.expedientes)||personName(a).localeCompare(personName(b),'es')).slice(0,5);
  const maxBank=Math.max(1,...banks.map(x=>x.firmadas_mes+x.previstas_mes));
  const maxTeam=Math.max(1,...team.map(x=>num(x.firmas_mes)+num(x.expedientes)));
  const bankView=bankTarget?createPortal(<div className="dir-exec-panel dir-exec-bank" data-testid="direction-bank-ranking">
