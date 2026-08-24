@@ -5,6 +5,7 @@ type Row=Record<string,unknown>;
 type LoadState={status:number|null;rows:Row[]};
 export type DirectionPriority={id:string;title:string;reason:string;due:string;state:string;route:string;action:string;severity:'critical'|'high'|'normal'};
 export type DirectionLiveStatus={expedientes:number|null;firmas:number|null;tareas:number|null};
+export type DirectionLiveSnapshot={openExp:number;riskExp:number;riskSupported:boolean;firmasMes:number;signedMes:number;priorities:DirectionPriority[];expedientesReady:boolean;firmasReady:boolean;tareasReady:boolean;statuses:DirectionLiveStatus};
 
 function rowsFrom(data:unknown):Row[]{
  if(!data||typeof data!=='object')return[];
@@ -38,7 +39,8 @@ function taskPriority(r:Row):DirectionPriority{
  const {type,code}=taskScope(r),state=taskState(r),rawDue=taskDueRaw(r),visibleTitle=taskTitle(r);
  const scoped=type==='expediente'&&code?`Expediente ${code}`:type==='inmobiliaria'&&code?`Inmobiliaria ${code}`:code||'Tarea pendiente';
  const title=visibleTitle||`Revisar ${scoped}`;
- const overdue=rawDue?new Date(rawDue.replace(' ','T')).getTime()<Date.now():false;
+ const dueTime=rawDue?new Date(rawDue.replace(' ','T')).getTime():Number.NaN;
+ const overdue=rawDue&&!Number.isNaN(dueTime)&&dueTime<Date.now();
  const reason=rawDue?`${overdue?'Vencida':'Pendiente'} · ${dateLabel(rawDue)} · ${state}`:`${state}. La fuente no expone una fecha límite.`;
  return{id:taskId(r),title,reason,due:dateLabel(rawDue),state,route:taskRoute(r),action:'Abrir tarea',severity:overdue?'high':'normal'};
 }
@@ -83,11 +85,13 @@ export function useDirectionLiveData(){
   const priorities:DirectionPriority[]=[...signaturePriorities,...riskPriorities,...taskPriorities].sort((a,b)=>{const rank={critical:0,high:1,normal:2};return rank[a.severity]-rank[b.severity];}).slice(0,3);
   return{openExp,riskExp,riskSupported,firmasMes,signedMes,priorities};
  },[exp.rows,fir.rows,tasks.rows]);
- return{
+ const snapshot:DirectionLiveSnapshot={
   ...data,
   expedientesReady:exp.status===200,
   firmasReady:fir.status===200,
   tareasReady:tasks.status===200,
-  statuses:{expedientes:exp.status,firmas:fir.status,tareas:tasks.status} as DirectionLiveStatus
+  statuses:{expedientes:exp.status,firmas:fir.status,tareas:tasks.status}
  };
+ useEffect(()=>{window.dispatchEvent(new CustomEvent<DirectionLiveSnapshot>('fenix-direction-live-data',{detail:snapshot}));},[snapshot.openExp,snapshot.riskExp,snapshot.riskSupported,snapshot.firmasMes,snapshot.signedMes,snapshot.priorities,snapshot.expedientesReady,snapshot.firmasReady,snapshot.tareasReady,snapshot.statuses.expedientes,snapshot.statuses.firmas,snapshot.statuses.tareas]);
+ return snapshot;
 }
