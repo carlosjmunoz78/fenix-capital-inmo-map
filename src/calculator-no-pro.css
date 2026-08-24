@@ -1,4 +1,7 @@
-.calc-launcher{font-size:0}
+.calc-launcher{font-size:0;background:var(--orange)!important;color:#fff!important}
+.calc-launcher:hover,.calc-launcher:focus-visible{background:var(--orange)!important}
 .calc-launcher::after{content:'Calculadora';font-size:14px;font-weight:700;line-height:1}
+.calc-panel{background:var(--panel)!important;color:var(--text)!important;border-color:var(--border)!important}
+.calc-panel>header{background:var(--panel)!important;border-color:var(--border)!important}
 .calc-panel>header>div:first-child>strong{font-size:0}
 .calc-panel>header>div:first-child>strong::after{content:'Calculadora Hipotecaria';font-size:14px;font-weight:800;line-height:1.2}
