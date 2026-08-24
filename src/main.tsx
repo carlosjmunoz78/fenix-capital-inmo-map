@@ -65,6 +65,7 @@ import CalculatorLabelGuard from './CalculatorLabelGuard';
 import ProfileLauncherGuard from './ProfileLauncherGuard';
 import OperationalAdvancedSearchGuard from './OperationalAdvancedSearchGuard';
 import DirectionIdentityGuard from './DirectionIdentityGuard';
+import DirectionLiveOperationsGuard from './DirectionLiveOperationsGuard';
 import OperationalIdentityGuard from './OperationalIdentityGuard';
 import OperationalLogoutGuard from './OperationalLogoutGuard';
 import RouteAccessGuard from './RouteAccessGuard';
@@ -83,6 +84,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <ProfileLauncherGuard />
       <OperationalAdvancedSearchGuard />
       <DirectionIdentityGuard />
+      <DirectionLiveOperationsGuard />
       <OperationalIdentityGuard />
       <OperationalLogoutGuard />
       <AnaUniversalGuard />
