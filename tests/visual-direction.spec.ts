@@ -16,7 +16,7 @@ const navigation={items:[
 ]};
 
 test.describe('Fénix PRE-PROD · contrato visual Inicio Dirección',()=>{
-  test('Inicio conserva patrón maestro, usa datos canónicos y genera evidencia visual',async({page},testInfo)=>{
+  test('Inicio conserva patrón maestro, identidad real, escala legible y tema persistente',async({page},testInfo)=>{
     if(!testInfo.project.name.includes('desktop'))test.skip();
     await page.addInitScript(session=>{window.localStorage.setItem('fenix-preprod-auth',JSON.stringify(session));window.localStorage.setItem('fenix-remember-device','true');},fakeSession);
     await page.route('**/functions/v1/fenix-app-gateway-test/**',async route=>{
@@ -32,8 +32,10 @@ test.describe('Fénix PRE-PROD · contrato visual Inicio Dirección',()=>{
     await page.goto('/inicio');
     await expect(page.locator('.dir-shell')).toBeVisible();
     await expect(page.getByRole('button',{name:'Inicio Fénix Capital'})).toBeVisible();
-    await expect(page.getByText('Hola Belén, buenos días')).toBeVisible();
-    await expect(page.getByRole('button',{name:/Abrir chat con Ana/})).toBeVisible();
+    await expect(page.getByText('Hola Belén Muñoz, buenos días')).toBeVisible();
+    await expect(page.getByRole('button',{name:'Abrir perfil de Belén Muñoz'})).toBeVisible();
+    await expect(page.getByText('Dirección',{exact:true})).toHaveCount(0);
+    await expect(page.getByRole('button',{name:/Hablar con Ana/})).toBeVisible();
     await expect(page.locator('.dir-person-photo')).toBeVisible();
     await expect(page.locator('.dir-help-avatar')).toBeVisible();
     await expect(page.getByText('Revisar expediente prioritario',{exact:true})).toBeVisible();
@@ -53,13 +55,15 @@ test.describe('Fénix PRE-PROD · contrato visual Inicio Dirección',()=>{
     const priorityBox=await page.locator('.dir-priority-card').boundingBox();
     const kpiBox=await page.locator('.dir-kpi').first().boundingBox();
     expect(sidebarBox?.width||0).toBeGreaterThanOrEqual(230);
-    expect(priorityBox?.height||0).toBeGreaterThanOrEqual(420);
-    expect(kpiBox?.height||0).toBeGreaterThanOrEqual(138);
+    expect(priorityBox?.height||0).toBeGreaterThanOrEqual(450);
+    expect(kpiBox?.height||0).toBeGreaterThanOrEqual(150);
     const brand=page.locator('.dir-brand strong');
-    expect(await brand.evaluate(el=>getComputedStyle(el).color)).toBe('rgb(244, 116, 31)');
+    expect(await brand.evaluate(el=>getComputedStyle(el).color)).toBe('rgb(17, 17, 17)');
     await page.getByRole('button',{name:'Cambiar tema'}).click();
     expect(await brand.evaluate(el=>getComputedStyle(el).color)).toBe('rgb(255, 255, 255)');
+    expect(await page.evaluate(()=>sessionStorage.getItem('fenix-theme'))).toBe('dark');
+    expect(await page.evaluate(()=>localStorage.getItem('fenix-theme'))).toBe('dark');
     const shot=await page.screenshot({fullPage:true});
-    await testInfo.attach('inicio-direccion-qa',{body:shot,contentType:'image/png'});
+    await testInfo.attach('inicio-direccion-premium-qa',{body:shot,contentType:'image/png'});
   });
 });
