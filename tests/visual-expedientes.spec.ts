@@ -11,7 +11,7 @@ const rows=[
 ];
 
 test.describe('Fénix PRE-PROD · contrato visual Expedientes',()=>{
- test('Expedientes mantiene patrón maestro, datos canónicos, sticky y ordenación por cabecera',async({page},testInfo)=>{
+ test('Expedientes mantiene patrón maestro, datos canónicos, scroll acotado, sticky y ordenación por cabecera',async({page},testInfo)=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();
   await page.setViewportSize({width:1600,height:900});
   await page.addInitScript(session=>{window.localStorage.setItem('fenix-preprod-auth',JSON.stringify(session));window.localStorage.setItem('fenix-remember-device','true');},fakeSession);
@@ -28,6 +28,9 @@ test.describe('Fénix PRE-PROD · contrato visual Expedientes',()=>{
   await expect(page.getByText(/\bPRO\b/)).toHaveCount(0);
   const table=page.locator('.ops-sortable-table');
   await expect(table).toBeVisible();
+  const scroll=table.locator('xpath=..');
+  expect(await scroll.evaluate(el=>getComputedStyle(el).overflowY)).toBe('auto');
+  expect(await scroll.evaluate(el=>getComputedStyle(el).maxHeight)).not.toBe('none');
   const firstHeader=table.locator('thead th').first();
   const firstHeaderButton=firstHeader.locator('button');
   expect(await firstHeader.evaluate(el=>getComputedStyle(el).position)).toBe('sticky');
