@@ -1,4 +1,4 @@
-import {useEffect} from 'react';
+import {useLayoutEffect} from 'react';
 import {useLocation} from 'react-router-dom';
 import {fetchAppApi,supabase} from './supabase';
 import DirectionStateGuard from './DirectionStateGuard';
@@ -19,15 +19,40 @@ function rowMatchesSelf(row:Row,ctx:Ctx|null){
 }
 function rowName(row:Row|undefined){if(!row)return'';return clean(row.name)||clean(row.nombre)||clean(row.full_name)||clean(row.display_name);}
 function contextName(ctx:Ctx|null){return clean(ctx?.display_name)||clean(ctx?.full_name)||clean(ctx?.name);}
+function storedIdentity(){
+ try{
+  const raw=localStorage.getItem('fenix-preprod-auth');
+  if(!raw)return'';
+  const parsed=JSON.parse(raw) as {user?:{user_metadata?:Record<string,unknown>}};
+  const meta=parsed.user?.user_metadata||{};
+  return clean(meta.full_name)||clean(meta.name)||clean(meta.nombre)||clean(meta.display_name);
+ }catch{return'';}
+}
 
 export default function DirectionIdentityGuard(){
  const location=useLocation();
- useEffect(()=>{
+ useLayoutEffect(()=>{
   if(location.pathname!=='/inicio')return;
   let stopped=false;
   let observer:MutationObserver|null=null;
   let refreshTimer:number|undefined;
-  async function apply(){
+  let resolvedName=storedIdentity();
+  let resolvedRole='Usuario';
+  const patch=()=>{
+   const root=document.querySelector('.dir-shell');
+   if(!root)return;
+   const displayName=resolvedName||'Mi perfil';
+   setText(root.querySelector('.dir-user-copy strong'),displayName);
+   setText(root.querySelector('.dir-user-copy span'),resolvedName?resolvedRole:'Identidad no disponible');
+   setText(root.querySelector('.dir-avatar'),initials(displayName));
+   const salutation=daypart();
+   setText(root.querySelector('.dir-priority-copy h1'),resolvedName?`Hola ${firstName(resolvedName)}, ${salutation}`:`${salutation.charAt(0).toUpperCase()}${salutation.slice(1)}`);
+  };
+  patch();
+  observer=new MutationObserver(()=>patch());
+  observer.observe(document.body,{childList:true,subtree:true});
+  refreshTimer=window.setInterval(patch,60_000);
+  async function refine(){
    const {data:{session}}=await supabase.auth.getSession();
    if(stopped||!session)return;
    const meta=(session.user.user_metadata||{}) as Record<string,unknown>;
@@ -36,24 +61,11 @@ export default function DirectionIdentityGuard(){
    if(stopped)return;
    const ctx=c.status===200?c.data:null;
    const selfRow=p.status===200?(p.data?.items??[]).find(row=>rowMatchesSelf(row,ctx)):undefined;
-   const name=sessionName||contextName(ctx)||rowName(selfRow);
-   const displayName=name||'Mi perfil';
-   const role=clean(ctx?.role)||'Usuario';
-   const patch=()=>{
-    const root=document.querySelector('.dir-shell');
-    if(!root)return;
-    setText(root.querySelector('.dir-user-copy strong'),displayName);
-    setText(root.querySelector('.dir-user-copy span'),name?role:'Identidad no disponible');
-    setText(root.querySelector('.dir-avatar'),initials(displayName));
-    const salutation=daypart();
-    setText(root.querySelector('.dir-priority-copy h1'),name?`Hola ${firstName(name)}, ${salutation}`:`${salutation.charAt(0).toUpperCase()}${salutation.slice(1)}`);
-   };
+   resolvedName=sessionName||contextName(ctx)||rowName(selfRow)||resolvedName;
+   resolvedRole=clean(ctx?.role)||resolvedRole;
    patch();
-   observer=new MutationObserver(()=>patch());
-   observer.observe(document.body,{childList:true,subtree:true});
-   refreshTimer=window.setInterval(patch,60_000);
   }
-  void apply();
+  void refine();
   return()=>{stopped=true;observer?.disconnect();if(refreshTimer)window.clearInterval(refreshTimer)};
  },[location.pathname]);
  return <DirectionStateGuard/>;
