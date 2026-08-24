@@ -77,7 +77,7 @@ export default function DirectionAnaInsight(){
    <span>{current.eyebrow}</span>
    <strong>{current.title}</strong>
    <p>{current.detail}</p>
-   {insights.length>1&&<div className="dir-ana-insight-nav"><small>{index%insights.length+1}/{insights.length} · actualización viva</small><div><button type="button" aria-label="Actualización anterior de Ana" onClick={()=>move(-1)}>‹</button><button type="button" aria-label="Siguiente actualización de Ana" onClick={()=>move(1)}>›</button></div></div>}
+   {insights.length>1&&<div className="dir-ana-insight-nav"><small>{index%insights.length+1}/{insights.length}</small><div><button type="button" aria-label="Actualización anterior de Ana" onClick={()=>move(-1)}>‹</button><button type="button" aria-label="Siguiente actualización de Ana" onClick={()=>move(1)}>›</button></div></div>}
   </section>,target
  );
 }
