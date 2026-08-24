@@ -71,12 +71,13 @@ export default function DirectionAnaInsight(){
 
  if(!target||!insights.length)return null;
  const current=insights[index%insights.length];
+ const move=(delta:number)=>setIndex(i=>(i+delta+insights.length)%insights.length);
  return createPortal(
   <section className="dir-ana-insight" aria-live="polite" aria-label="Información clave de Ana">
    <span>{current.eyebrow}</span>
    <strong>{current.title}</strong>
    <p>{current.detail}</p>
-   {insights.length>1&&<small>{index%insights.length+1}/{insights.length} · actualización viva</small>}
+   {insights.length>1&&<div className="dir-ana-insight-nav"><small>{index%insights.length+1}/{insights.length} · actualización viva</small><div><button type="button" aria-label="Actualización anterior de Ana" onClick={()=>move(-1)}>‹</button><button type="button" aria-label="Siguiente actualización de Ana" onClick={()=>move(1)}>›</button></div></div>}
   </section>,target
  );
 }
