@@ -22,16 +22,16 @@ function taskState(r:Row){return text(r,['estado','status'])||'Pendiente';}
 function taskDueRaw(r:Row){return text(r,['fecha_limite','fecha_límite','vencimiento','fecha','due_date']);}
 function taskDone(r:Row){return bool(r,['completada','completado','done'])||/complet|cerrad|hecha/i.test(taskState(r));}
 function expState(r:Row){return text(r,['estado','fase','phase','stage','status']);}
-function expRisk(r:Row){return text(r,['riesgo','risk','nivel_riesgo']);}
-export function isOpenDirectionExpediente(r:Row){const s=expState(r);return !/firmad|cerrad|anulad|cancelad|pasado|desistid/i.test(s);}
-export function isExplicitRiskDirectionExpediente(r:Row){const risk=expRisk(r);return /alto|cr[ií]tic|riesgo|bloquead/i.test(risk);}
+function expRisk(r:Row){return text(r,['riesgo','risk','nivel_riesgo','semaforo','semáforo']);}
+export function isOpenDirectionExpediente(r:Row){const s=expState(r);return !/firmad|posventa|perdid|cerrad|anulad|cancelad|pasado|desistid/i.test(s);}
+export function isExplicitRiskDirectionExpediente(r:Row){const risk=expRisk(r);return /alto|cr[ií]tic|riesgo|bloquead|atenci[oó]n|urgente/i.test(risk)&&isOpenDirectionExpediente(r);}
 function firmaId(r:Row){return text(r,['id','firma_id','firma_code','code']);}
 function firmaExp(r:Row){return text(r,['expediente_code','expediente','operacion','operación']);}
 function firmaState(r:Row){return text(r,['estado','estado_firma','status']);}
-function firmaDate(r:Row){return text(r,['fecha_hora_firma','fecha_firma','fecha','fecha_fein']);}
+function firmaDate(r:Row){return text(r,['fecha_hora_firma','fecha_firma']);}
 export function isSignedDirectionFirma(r:Row){return /firmad|complet|cerrad/i.test(firmaState(r));}
 export function isThisMonthDirectionDate(value:string){if(!value)return false;const d=new Date(value.replace(' ','T'));if(Number.isNaN(d.getTime()))return false;const now=new Date();return d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth();}
-export function isPlannedThisMonthDirectionFirma(r:Row){return !isSignedDirectionFirma(r)&&isThisMonthDirectionDate(firmaDate(r));}
+export function isPlannedThisMonthDirectionFirma(r:Row){return !isSignedDirectionFirma(r)&&Boolean(firmaDate(r))&&isThisMonthDirectionDate(firmaDate(r));}
 function dateLabel(value:string){if(!value)return'Sin fecha visible';const d=new Date(value.replace(' ','T'));return Number.isNaN(d.getTime())?value:new Intl.DateTimeFormat('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'}).format(d);}
 function taskScope(r:Row){const type=text(r,['scope_type']);const code=text(r,['scope_code']);return{type,code};}
 function taskRoute(r:Row){const id=taskId(r);return id?`/tareas/${encodeURIComponent(id)}`:'/agenda';}
@@ -75,10 +75,10 @@ export function useDirectionLiveData(){
  },[exp.status,fir.status,tasks.status]);
  const data=useMemo(()=>{
   const openExp=exp.rows.filter(isOpenDirectionExpediente).length;
-  const riskSupported=exp.rows.some(r=>hasAny(r,['riesgo','risk','nivel_riesgo']));
+  const riskSupported=exp.rows.some(r=>hasAny(r,['riesgo','risk','nivel_riesgo','semaforo','semáforo']));
   const riskExp=riskSupported?exp.rows.filter(isExplicitRiskDirectionExpediente).length:0;
   const firmasMes=fir.rows.filter(isPlannedThisMonthDirectionFirma).length;
-  const signedMes=fir.rows.filter(r=>isSignedDirectionFirma(r)&&isThisMonthDirectionDate(firmaDate(r))).length;
+  const signedMes=fir.rows.filter(r=>isSignedDirectionFirma(r)&&Boolean(firmaDate(r))&&isThisMonthDirectionDate(firmaDate(r))).length;
   const signaturePriorities=fir.rows.filter(isPlannedThisMonthDirectionFirma).map(firmaPriority);
   const riskPriorities=riskSupported?exp.rows.filter(isExplicitRiskDirectionExpediente).map(riskPriority):[];
   const taskPriorities=tasks.rows.filter(r=>!taskDone(r)).map(taskPriority).sort((a,b)=>{const rank={critical:0,high:1,normal:2};const d=rank[a.severity]-rank[b.severity];return d||a.due.localeCompare(b.due,'es');});
