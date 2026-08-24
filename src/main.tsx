@@ -18,6 +18,7 @@ import './brand-name-theme.css';
 import './theme-consistency.css';
 import './direction-master-sizing.css';
 import './navigation-readability.css';
+import './direction-ana-live.css';
 import App from './App';
 import RoleHomeShell from './RoleHomeShell';
 import ProfileShell from './ProfileShell';
@@ -74,6 +75,7 @@ import OperationalRouteScrollReset from './OperationalRouteScrollReset';
 import DirectionKpiDrilldownGuard from './DirectionKpiDrilldownGuard';
 import DirectionPriorityActionGuard from './DirectionPriorityActionGuard';
 import DirectionKpiLabelGuard from './DirectionKpiLabelGuard';
+import DirectionAnaInsight from './DirectionAnaInsight';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -91,6 +93,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <DirectionKpiDrilldownGuard />
       <DirectionPriorityActionGuard />
       <DirectionKpiLabelGuard />
+      <DirectionAnaInsight />
       <AnaUniversalGuard />
       <AnaInboxAccessGuard />
       <ContextEvidenceUpload />
