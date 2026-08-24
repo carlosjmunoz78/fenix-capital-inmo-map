@@ -16,8 +16,8 @@ export default function OperationalAdvancedSearchGuard(){
 .ops-top,.dir-topbar{height:74px!important;min-height:74px!important;padding:0 18px!important;gap:12px!important;min-width:0!important}
 .ops-top{display:grid!important;grid-template-columns:auto minmax(180px,1fr) auto!important;align-items:center!important}
 .dir-topbar{grid-template-columns:auto minmax(220px,1fr) auto!important}
-.ops-search,.dir-search{height:42px!important;border-radius:10px!important;min-width:0!important;max-width:none!important;width:100%!important}
-.ops-search input,.dir-search input{min-width:0!important}
+.ops-search,.dir-search{height:42px!important;border:1px solid #e4e4e8!important;border-radius:10px!important;min-width:0!important;max-width:none!important;width:100%!important;display:flex!important;align-items:center!important;overflow:hidden!important;background:#fff!important}
+.ops-search input,.dir-search input{min-width:0!important;flex:1 1 auto!important;height:100%!important;border:0!important;background:transparent!important;padding:0 12px!important;outline:none!important}
 .ops-search button,.dir-search button{height:100%!important;min-width:72px!important;width:auto!important;padding:0 14px!important;border:0!important;border-left:1px solid #e55218!important;background:#ff5f00!important;color:#fff!important;font-size:11px!important;font-weight:800!important;border-radius:0 9px 9px 0!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;flex:0 0 auto}
 .ops-search button:hover,.dir-search button:hover{background:#e95500!important}.ops-search button svg,.dir-search button svg{display:none!important}
 .ops-top-actions,.dir-top-right{margin-left:0!important;display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:7px!important;min-width:0!important;max-width:100%!important}
@@ -36,6 +36,17 @@ export default function OperationalAdvancedSearchGuard(){
 `;
    document.head.appendChild(style);
   }
+  const ensureSearch=(top:HTMLElement)=>{
+   let search=top.querySelector<HTMLElement>('.ops-search');
+   if(!search){
+    search=document.createElement('div');search.className='ops-search';
+    const input=document.createElement('input');input.type='search';input.placeholder='Buscar expediente, cliente, banco, inmobiliaria...';input.setAttribute('aria-label','Búsqueda global');
+    search.appendChild(input);
+    const actions=top.querySelector('.ops-top-actions');
+    top.insertBefore(search,actions||null);
+   }
+   return search;
+  };
   const normalizeSearch=(root:HTMLElement)=>{
    const search=root.querySelector<HTMLElement>('.ops-search,.dir-search');
    if(!search)return;
@@ -73,9 +84,8 @@ export default function OperationalAdvancedSearchGuard(){
   };
   const wire=()=>{
    document.querySelectorAll<HTMLElement>('.ops-top').forEach(top=>{
+    const search=ensureSearch(top);
     let existing=top.querySelector<HTMLButtonElement>(`.${BUTTON_CLASS}`);
-    const search=top.querySelector<HTMLElement>('.ops-search');
-    if(!search)return;
     if(!existing){existing=document.createElement('button');existing.type='button';existing.className=BUTTON_CLASS;existing.addEventListener('click',()=>navigate('/buscar'));top.insertBefore(existing,search);}
     if(existing.textContent!=='Buscador avanzado')existing.textContent='Buscador avanzado';
     existing.setAttribute('aria-label','Buscador avanzado');
