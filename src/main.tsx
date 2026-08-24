@@ -73,6 +73,7 @@ import ExpedienteFollowupConfirmationGuard from './ExpedienteFollowupConfirmatio
 import OperationalRouteScrollReset from './OperationalRouteScrollReset';
 import DirectionKpiDrilldownGuard from './DirectionKpiDrilldownGuard';
 import DirectionPriorityActionGuard from './DirectionPriorityActionGuard';
+import DirectionKpiLabelGuard from './DirectionKpiLabelGuard';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -89,6 +90,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <OperationalLogoutGuard />
       <DirectionKpiDrilldownGuard />
       <DirectionPriorityActionGuard />
+      <DirectionKpiLabelGuard />
       <AnaUniversalGuard />
       <AnaInboxAccessGuard />
       <ContextEvidenceUpload />
