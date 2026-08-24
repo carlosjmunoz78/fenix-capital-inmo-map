@@ -13,10 +13,13 @@ export default function DirectionKpiLabelGuard(){
     const label=button.querySelector(':scope > span') as HTMLElement|null;
     if(!label)continue;
     const txt=(label.textContent||'').toUpperCase();
-    if(txt.includes('FIRMAS')&&!txt.includes('FIRMADOS')){
+    if(txt.includes('FIRMAS')&&!txt.includes('FIRMADOS')&&!txt.includes('PREVISTAS')){
      label.innerHTML='FIRMAS<br/>PREVISTAS ESTE MES';
+    }
+    const updated=(label.textContent||'').toUpperCase();
+    if(updated.includes('FIRMAS')&&updated.includes('PREVISTAS')&&!updated.includes('FIRMADOS')){
      const note=button.querySelector(':scope > small') as HTMLElement|null;
-     if(note&&/fecha|dato no disponible/i.test(note.textContent||''))note.textContent='Solo fecha de firma canónica del mes';
+     if(note&&/fecha|dato no disponible/i.test(note.textContent||'')&&note.textContent!=='Solo fecha de firma canónica del mes')note.textContent='Solo fecha de firma canónica del mes';
     }
    }
   };
