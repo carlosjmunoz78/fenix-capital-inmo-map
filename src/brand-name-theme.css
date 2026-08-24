@@ -3,7 +3,7 @@
 .dir-brand strong,
 .app-shell .brand strong,
 .auth-brand strong{
-  color:#f4741f!important;
+  color:#111!important;
 }
 
 .ops-root[data-theme='dark'] .ops-brand strong,
