@@ -3,7 +3,7 @@ import {useLocation} from 'react-router-dom';
 import {fetchAppApi,supabase} from './supabase';
 import DirectionStateGuard from './DirectionStateGuard';
 
-type Ctx={role?:string;actor_code?:string;worker_id?:string};
+type Ctx={role?:string;actor_code?:string;worker_id?:string;display_name?:string;full_name?:string;name?:string};
 type Row=Record<string,unknown>;
 type PersonalResponse={items?:Row[]};
 
@@ -18,6 +18,7 @@ function rowMatchesSelf(row:Row,ctx:Ctx|null){
  return Boolean((actor&&rowActor===actor)||(worker&&rowWorker===worker));
 }
 function rowName(row:Row|undefined){if(!row)return'';return clean(row.name)||clean(row.nombre)||clean(row.full_name)||clean(row.display_name);}
+function contextName(ctx:Ctx|null){return clean(ctx?.display_name)||clean(ctx?.full_name)||clean(ctx?.name);}
 
 export default function DirectionIdentityGuard(){
  const location=useLocation();
@@ -35,7 +36,7 @@ export default function DirectionIdentityGuard(){
    if(stopped)return;
    const ctx=c.status===200?c.data:null;
    const selfRow=p.status===200?(p.data?.items??[]).find(row=>rowMatchesSelf(row,ctx)):undefined;
-   const name=sessionName||rowName(selfRow);
+   const name=sessionName||contextName(ctx)||rowName(selfRow);
    const displayName=name||'Mi perfil';
    const patch=()=>{
     const root=document.querySelector('.dir-shell');
