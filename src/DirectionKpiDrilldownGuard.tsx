@@ -17,7 +17,7 @@ const SPECS:Record<string,Spec>={
 };
 
 function monthNow(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;}
-function euro(v:unknown){return typeof v==='number'&&Number.isFinite(v)?`${v.toLocaleString('es-ES',{maximumFractionDigits:2})} €`:'—';}
+function euro(v:unknown){if(typeof v!=='number'||!Number.isFinite(v))return'—';const negative=v<0;const absolute=Math.abs(v);const fixed=absolute.toFixed(2);const[whole,decimals]=fixed.split('.');const grouped=whole.replace(/\B(?=(\d{3})+(?!\d))/g,'.');const cents=decimals==='00'?'':`,`+decimals.replace(/0$/,'');return `${negative?'-':''}${grouped}${cents} €`;}
 function pretty(v:unknown,key:string){if(v===null||v===undefined||v==='')return'—';if(key.includes('honorarios')||key.includes('comision')||key.includes('neto')||key.includes('importe'))return euro(v);if(Array.isArray(v))return v.length?v.join(', '):'—';return String(v);}
 async function fetchKpi(key:string):Promise<{status:number;data:Payload|null}>{const{data:{session}}=await supabase.auth.getSession();if(!session?.access_token)return{status:401,data:null};const q=new URLSearchParams({key,month:monthNow()});const r=await fetch(`${SUPABASE_URL}/functions/v1/fenix-direction-kpis-test?${q.toString()}`,{headers:{Authorization:`Bearer ${session.access_token}`}});let data:Payload|null=null;try{data=await r.json()}catch{data=null}return{status:r.status,data};}
 
