@@ -30,23 +30,27 @@ export default function VisitasShell(){
   const isNew=location.pathname==='/visitas/nueva';
   const detailMatch=location.pathname.match(/^\/visitas\/([^/]+)$/);
   const detailCode=detailMatch&&detailMatch[1]!=='nueva'?decodeURIComponent(detailMatch[1]):null;
-  const [ready,setReady]=useState(false),[logged,setLogged]=useState(false),[rows,setRows]=useState<Row[]>([]),[message,setMessage]=useState(''),[loading,setLoading]=useState(false),[nav,setNav]=useState<NavItem[]>([]);
+  const [ready,setReady]=useState(false),[logged,setLogged]=useState(false),[rows,setRows]=useState<Row[]>([]),[message,setMessage]=useState(''),[loading,setLoading]=useState(false),[status,setStatus]=useState<number|null>(null),[nav,setNav]=useState<NavItem[]>([]);
   const [inmo,setInmo]=useState(''),[canal,setCanal]=useState('Visita'),[resultado,setResultado]=useState(''),[proxima,setProxima]=useState('');
   const [pendingCreate,setPendingCreate]=useState<PendingCreate>(null),[pendingDone,setPendingDone]=useState<PendingDone>(null);
   const [theme,setTheme]=useState<Theme>(()=>(sessionStorage.getItem('fenix-theme') as Theme)||'light');
   const detail=useMemo(()=>detailCode?rows.find(r=>r.activity_code===detailCode)||null:null,[detailCode,rows]);
 
-  useEffect(()=>{let alive=true;supabase.auth.getSession().then(({data})=>{if(alive){setLogged(Boolean(data.session));setReady(true)}});const {data:{subscription}}=supabase.auth.onAuthStateChange((_e,s)=>{setLogged(Boolean(s));setReady(true)});return()=>{alive=false;subscription.unsubscribe()};},[]);
+  useEffect(()=>{let alive=true;supabase.auth.getSession().then(({data})=>{if(alive){setLogged(Boolean(data.session));setReady(true)}});const {data:{subscription}}=supabase.auth.onAuthStateChange((_e,s)=>{if(alive){setLogged(Boolean(s));setReady(true)}});return()=>{alive=false;subscription.unsubscribe()};},[]);
   useEffect(()=>{document.documentElement.dataset.theme=theme;sessionStorage.setItem('fenix-theme',theme);},[theme]);
   useEffect(()=>{if(!active||!logged)return;let alive=true;fetchAppApi<unknown>('/navigation').then(r=>{if(alive)setNav(r.status===200?normalizeNav(r.data):[])}).catch(()=>{if(alive)setNav([])});return()=>{alive=false};},[active,logged]);
 
   async function load(){
-    setLoading(true);
-    const r=await api('/visitas');
-    setLoading(false);
-    if(r.status===200){setRows(r.data?.items??[]);setMessage('');}
-    else if(r.status===403)setMessage('Tu perfil no tiene acceso a gestiones B2B.');
-    else setMessage('No se pudieron cargar las gestiones.');
+    setLoading(true);setStatus(null);setMessage('');setRows([]);
+    try{
+      const r=await api('/visitas');
+      setStatus(r.status);
+      if(r.status===200){setRows(Array.isArray(r.data?.items)?r.data.items:[]);setMessage('');}
+      else if(r.status===403){setRows([]);setMessage('Tu perfil no tiene acceso a gestiones B2B.');}
+      else{setRows([]);setMessage(r.status===0?'No se pudo conectar con las gestiones autorizadas.':'No se pudieron cargar las gestiones.');}
+    }catch{
+      setStatus(0);setRows([]);setMessage('No se pudo conectar con las gestiones autorizadas.');
+    }finally{setLoading(false);}
   }
   useEffect(()=>{if(active&&logged)void load();},[active,logged]);
   useEffect(()=>{setPendingCreate(null);setPendingDone(null);setMessage('');},[location.pathname]);
@@ -56,32 +60,37 @@ export default function VisitasShell(){
 
   function submit(e:FormEvent){
     e.preventDefault();
+    if(status!==200)return;
     setMessage('');
     setPendingCreate({inmobiliaria_code:inmo.trim(),canal,resultado:resultado.trim(),proxima_accion:proxima.trim()});
     setPendingDone(null);
   }
   async function confirmCreate(){
-    if(!pendingCreate)return;
+    if(!pendingCreate||status!==200)return;
     setLoading(true);
-    const r=await api('/visitas',{method:'POST',body:JSON.stringify(pendingCreate)});
-    setLoading(false);
-    if(r.status===201){
-      setResultado('');setProxima('');setPendingCreate(null);setMessage('Gestión registrada.');
-      await load();
-      if(isNew)navigate('/visitas');
-    }else if(r.status===403)setMessage('Esa inmobiliaria no pertenece a tu cartera.');
-    else setMessage('No se pudo registrar la gestión.');
+    try{
+      const r=await api('/visitas',{method:'POST',body:JSON.stringify(pendingCreate)});
+      if(r.status===201){
+        setResultado('');setProxima('');setPendingCreate(null);setMessage('Gestión registrada.');
+        await load();
+        if(isNew)navigate('/visitas');
+      }else if(r.status===403)setMessage('Esa inmobiliaria no pertenece a tu cartera.');
+      else setMessage('No se pudo registrar la gestión.');
+    }catch{setMessage('No se pudo conectar para registrar la gestión.');}
+    finally{setLoading(false);}
   }
-  function prepareDone(row:Row){setPendingDone(row);setPendingCreate(null);setMessage('');}
+  function prepareDone(row:Row){if(status!==200)return;setPendingDone(row);setPendingCreate(null);setMessage('');}
   async function confirmDone(){
-    const row=pendingDone;if(!row)return;
+    const row=pendingDone;if(!row||status!==200)return;
     setLoading(true);
-    const r=await api(`/visitas/${encodeURIComponent(row.activity_code)}`,{method:'POST',body:JSON.stringify({expected_version:row.version,resultado:row.resultado||'Gestión realizada',proximo_contacto:row.proximo_contacto||null,proxima_accion:row.proxima_accion||'',estado:'Hecha'})});
-    setLoading(false);
-    if(r.status===200){setPendingDone(null);setMessage('Gestión actualizada.');await load();}
-    else if(r.status===409)setMessage('La gestión cambió desde que la abriste. Recarga antes de confirmar.');
-    else if(r.status===403)setMessage('Tu perfil no puede modificar esta gestión.');
-    else setMessage('No se pudo actualizar la gestión.');
+    try{
+      const r=await api(`/visitas/${encodeURIComponent(row.activity_code)}`,{method:'POST',body:JSON.stringify({expected_version:row.version,resultado:row.resultado||'Gestión realizada',proximo_contacto:row.proximo_contacto||null,proxima_accion:row.proxima_accion||'',estado:'Hecha'})});
+      if(r.status===200){setPendingDone(null);setMessage('Gestión actualizada.');await load();}
+      else if(r.status===409)setMessage('La gestión cambió desde que la abriste. Recarga antes de confirmar.');
+      else if(r.status===403)setMessage('Tu perfil no puede modificar esta gestión.');
+      else setMessage('No se pudo actualizar la gestión.');
+    }catch{setMessage('No se pudo conectar para actualizar la gestión.');}
+    finally{setLoading(false);}
   }
   async function logout(){await supabase.auth.signOut();window.location.href=import.meta.env.BASE_URL;}
 
@@ -93,13 +102,13 @@ export default function VisitasShell(){
     <button className="primary" disabled={loading}>Revisar antes de registrar</button>
   </form>;
 
-  const previewCreate=pendingCreate&&<section className="ops-message" aria-label="Vista previa de nueva gestión">
+  const previewCreate=pendingCreate&&status===200&&<section className="ops-message" aria-label="Vista previa de nueva gestión">
     <strong>Vista previa antes de guardar</strong>
     <p><b>Inmobiliaria:</b> {pendingCreate.inmobiliaria_code}<br/><b>Canal:</b> {pendingCreate.canal}<br/><b>Resultado:</b> {pendingCreate.resultado||'Sin resultado indicado'}<br/><b>Próxima acción:</b> {pendingCreate.proxima_accion||'Sin próxima acción indicada'}</p>
     <div style={{display:'flex',gap:8}}><button className="primary" disabled={loading} onClick={()=>void confirmCreate()}>Confirmar y registrar</button><button disabled={loading} onClick={()=>setPendingCreate(null)}>Cancelar</button></div>
   </section>;
 
-  const previewDone=pendingDone&&<section className="ops-message" aria-label="Vista previa de actualización de gestión">
+  const previewDone=pendingDone&&status===200&&<section className="ops-message" aria-label="Vista previa de actualización de gestión">
     <strong>Vista previa antes de marcar hecha</strong>
     <p><b>Inmobiliaria:</b> {pendingDone.inmobiliaria_code}<br/><b>Canal:</b> {pendingDone.canal}<br/><b>Estado actual:</b> {pendingDone.estado}<br/><b>Nuevo estado:</b> Hecha</p>
     <div style={{display:'flex',gap:8}}><button className="primary" disabled={loading} onClick={()=>void confirmDone()}>Confirmar actualización</button><button disabled={loading} onClick={()=>setPendingDone(null)}>Cancelar</button></div>
@@ -114,27 +123,31 @@ export default function VisitasShell(){
     <main className="ops-main">
       <header className="ops-top"><div className="ops-profile"><strong>Gestión B2B</strong></div><div className="ops-top-actions"><button onClick={()=>setTheme(theme==='light'?'dark':'light')} aria-label="Cambiar tema">{theme==='light'?<Moon size={17}/>:<Sun size={17}/>} {theme==='light'?'Oscuro':'Claro'}</button><button onClick={logout} aria-label="Cerrar sesión"><LogOut size={17}/></button></div></header>
       <section className="ops-content">
-        <div className="ops-title"><div><span className="ops-icon"><CalendarDays size={20}/></span><div><h1>{isNew?'Nueva visita / gestión':detailCode?'Ficha de visita / gestión':'Visitas y gestiones'}</h1><p>{isNew?'Registra una nueva gestión dentro de la cartera autorizada.':detailCode?'Consulta la gestión y prepara cualquier cambio antes de guardarlo.':'Visita, llamada, WhatsApp o email; resultado y siguiente acción dentro de tu cartera.'}</p></div></div><span className="ops-live ok">RBAC activo</span></div>
+        <div className="ops-title"><div><span className="ops-icon"><CalendarDays size={20}/></span><div><h1>{isNew?'Nueva visita / gestión':detailCode?'Ficha de visita / gestión':'Visitas y gestiones'}</h1><p>{isNew?'Registra una nueva gestión dentro de la cartera autorizada.':detailCode?'Consulta la gestión y prepara cualquier cambio antes de guardarlo.':'Visita, llamada, WhatsApp o email; resultado y siguiente acción dentro de tu cartera.'}</p></div></div><span className={status===200?'ops-live ok':'ops-live'}>{loading?'Cargando…':status===200?'RBAC activo':'PRE-PROD'}</span></div>
         <article className="ops-ana-card"><img src={anaAvatar} alt="Ana"/><div><strong>Ana</strong><p>Registra cada contacto con la inmobiliaria. Antes de escribir, revisas exactamente qué se va a guardar.</p></div></article>
 
-        {isNew&&<><button onClick={()=>navigate('/visitas')}>← Volver a visitas</button>{createForm}{previewCreate}</>}
+        {loading&&status===null&&<div className="ops-message" role="status" data-testid="visitas-loading">Cargando gestiones autorizadas…</div>}
+        {!loading&&status===403&&<div className="ops-message" data-testid="visitas-forbidden">{message}</div>}
+        {!loading&&status!==null&&status!==200&&status!==403&&<div className="ops-message" data-testid="visitas-error">{message}</div>}
+
+        {isNew&&<><button onClick={()=>navigate('/visitas')}>← Volver a visitas</button>{status===200&&createForm}{previewCreate}</>}
 
         {detailCode&&<>
           <button onClick={()=>navigate('/visitas')}>← Volver a visitas</button>
-          {!loading&&!detail&&<div className="ops-message">La gestión no está disponible en tu ámbito autorizado.</div>}
-          {detail&&<article className="ops-message" aria-label="Ficha de visita"><h2>{detail.inmobiliaria_code}</h2><p><b>Código:</b> {detail.activity_code}<br/><b>Canal:</b> {detail.canal}<br/><b>Resultado:</b> {detail.resultado||'No disponible'}<br/><b>Próxima acción:</b> {detail.proxima_accion||'No disponible'}<br/><b>Próximo contacto:</b> {detail.proximo_contacto||'No disponible'}<br/><b>Estado:</b> {detail.estado}</p>{detail.estado==='Pendiente'&&<button onClick={()=>prepareDone(detail)}>Revisar para marcar hecha</button>}</article>}
+          {!loading&&status===200&&!detail&&<div className="ops-message" data-testid="visitas-detail-missing">La gestión no está disponible en tu ámbito autorizado.</div>}
+          {status===200&&detail&&<article className="ops-message" aria-label="Ficha de visita"><h2>{detail.inmobiliaria_code}</h2><p><b>Código:</b> {detail.activity_code}<br/><b>Canal:</b> {detail.canal}<br/><b>Resultado:</b> {detail.resultado||'No disponible'}<br/><b>Próxima acción:</b> {detail.proxima_accion||'No disponible'}<br/><b>Próximo contacto:</b> {detail.proximo_contacto||'No disponible'}<br/><b>Estado:</b> {detail.estado}</p>{detail.estado==='Pendiente'&&<button onClick={()=>prepareDone(detail)}>Revisar para marcar hecha</button>}</article>}
           {previewDone}
         </>}
 
-        {!isNew&&!detailCode&&<>
+        {!isNew&&!detailCode&&status===200&&<>
           <div style={{display:'flex',justifyContent:'flex-end'}}><button className="primary" onClick={()=>navigate('/visitas/nueva')}>Nueva visita / gestión</button></div>
           {createForm}
           {previewCreate}
           {previewDone}
           {message&&<div className="ops-message">{message}</div>}
-          <div className="ops-table-card"><div className="ops-table-head"><strong>{rows.length} gestiones</strong><span>PRE-PROD autorizado</span></div><div className="ops-table-wrap"><table><thead><tr><th>Inmobiliaria</th><th>Canal</th><th>Resultado</th><th>Próxima acción</th><th>Estado</th><th>Acción</th></tr></thead><tbody>{rows.map(r=><tr key={r.activity_code}><td>{r.inmobiliaria_code}</td><td>{r.canal}</td><td>{r.resultado||'—'}</td><td>{r.proxima_accion||'—'}</td><td>{r.estado}</td><td><div style={{display:'flex',gap:6}}><button onClick={()=>navigate(`/visitas/${encodeURIComponent(r.activity_code)}`)}>Abrir</button>{r.estado==='Pendiente'?<button onClick={()=>prepareDone(r)}>Revisar para marcar hecha</button>:null}</div></td></tr>)}</tbody></table></div></div>
+          {rows.length===0?<div className="ops-empty" data-testid="visitas-empty"><strong>Sin gestiones visibles</strong><span>No hay visitas o seguimientos dentro de tu ámbito autorizado.</span></div>:<div className="ops-table-card"><div className="ops-table-head"><strong>{rows.length} gestiones</strong><span>PRE-PROD autorizado</span></div><div className="ops-table-wrap"><table><thead><tr><th>Inmobiliaria</th><th>Canal</th><th>Resultado</th><th>Próxima acción</th><th>Estado</th><th>Acción</th></tr></thead><tbody>{rows.map(r=><tr key={r.activity_code}><td>{r.inmobiliaria_code}</td><td>{r.canal}</td><td>{r.resultado||'—'}</td><td>{r.proxima_accion||'—'}</td><td>{r.estado}</td><td><div style={{display:'flex',gap:6}}><button onClick={()=>navigate(`/visitas/${encodeURIComponent(r.activity_code)}`)}>Abrir</button>{r.estado==='Pendiente'?<button onClick={()=>prepareDone(r)}>Revisar para marcar hecha</button>:null}</div></td></tr>)}</tbody></table></div></div>}
         </>}
-        {(isNew||detailCode)&&message&&<div className="ops-message">{message}</div>}
+        {(isNew||detailCode)&&status===200&&message&&<div className="ops-message">{message}</div>}
       </section>
     </main>
   </div>;
