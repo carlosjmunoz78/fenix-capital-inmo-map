@@ -2,6 +2,7 @@ import {useEffect} from 'react';
 import {useNavigate} from 'react-router-dom';
 
 const BUTTON_CLASS='ops-advanced-search-guard';
+const THEME_CLASS='ops-theme-guard';
 const STYLE_ID='ops-advanced-search-guard-style';
 
 export default function OperationalAdvancedSearchGuard(){
@@ -21,6 +22,7 @@ export default function OperationalAdvancedSearchGuard(){
 .ops-search button:hover,.dir-search button:hover{background:#e95500!important}.ops-search button svg,.dir-search button svg{display:none!important}
 .ops-top-actions,.dir-top-right{margin-left:0!important;display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:7px!important;min-width:0!important;max-width:100%!important}
 .ops-top-actions>button,.ops-profile,.dir-theme-toggle,.dir-profile,.dir-logout,.dir-bell{min-height:38px!important;height:38px!important;border-radius:10px!important;flex:0 0 auto}
+.${THEME_CLASS}{border:1px solid #e7e7ea;background:#fff;color:#424248;padding:0 10px;font-size:10px;font-weight:750;cursor:pointer}
 .ops-profile{display:flex!important;align-items:center!important;gap:7px!important;padding:3px 7px!important;min-width:0!important;max-width:176px!important;overflow:hidden!important}
 .ops-profile-copy{display:grid;line-height:1.05;min-width:0;overflow:hidden}.ops-profile-copy strong{font-size:11px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:112px}.ops-profile-copy small{font-size:8.5px;color:#8a8a90;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:112px}
 .ops-profile-avatar,.ops-profile img[data-auth-avatar='true']{width:30px;height:30px;border-radius:50%;object-fit:cover;display:grid;place-items:center;background:#870064;color:#fff;font-size:9.5px;font-weight:800;flex:0 0 auto}
@@ -50,6 +52,25 @@ export default function OperationalAdvancedSearchGuard(){
    if(button.textContent!=='Buscar')button.textContent='Buscar';
    button.setAttribute('aria-label','Buscar');
   };
+  const ensureTheme=(top:HTMLElement)=>{
+   let actions=top.querySelector<HTMLElement>('.ops-top-actions');
+   if(!actions){actions=document.createElement('div');actions.className='ops-top-actions';top.appendChild(actions);}
+   let button=actions.querySelector<HTMLButtonElement>('button[aria-label="Cambiar tema"],button.theme-toggle');
+   if(button){button.setAttribute('aria-label','Cambiar tema');return;}
+   button=document.createElement('button');button.type='button';button.className=THEME_CLASS;button.setAttribute('aria-label','Cambiar tema');
+   const syncLabel=()=>{const root=top.closest<HTMLElement>('.ops-root');const dark=root?.dataset.theme==='dark'||document.documentElement.dataset.theme==='dark';button!.textContent=dark?'Claro':'Oscuro';};
+   button.addEventListener('click',()=>{
+    const base=document.querySelector<HTMLButtonElement>('.topbar .theme-toggle');
+    if(base&&!top.contains(base))base.click();
+    else{
+      const dark=(sessionStorage.getItem('fenix-theme')||document.documentElement.dataset.theme)==='dark';
+      const next=dark?'light':'dark';sessionStorage.setItem('fenix-theme',next);document.documentElement.dataset.theme=next;
+      document.querySelectorAll<HTMLElement>('.ops-root').forEach(root=>root.dataset.theme=next);
+    }
+    window.setTimeout(syncLabel,0);
+   });
+   actions.insertBefore(button,actions.firstChild);syncLabel();
+  };
   const wire=()=>{
    document.querySelectorAll<HTMLElement>('.ops-top').forEach(top=>{
     let existing=top.querySelector<HTMLButtonElement>(`.${BUTTON_CLASS}`);
@@ -58,7 +79,7 @@ export default function OperationalAdvancedSearchGuard(){
     if(!existing){existing=document.createElement('button');existing.type='button';existing.className=BUTTON_CLASS;existing.addEventListener('click',()=>navigate('/buscar'));top.insertBefore(existing,search);}
     if(existing.textContent!=='Buscador avanzado')existing.textContent='Buscador avanzado';
     existing.setAttribute('aria-label','Buscador avanzado');
-    normalizeSearch(top);
+    normalizeSearch(top);ensureTheme(top);
    });
    document.querySelectorAll<HTMLElement>('.dir-topbar').forEach(top=>normalizeSearch(top));
   };
