@@ -32,8 +32,8 @@ test.describe('Fénix PRE-PROD · contrato visual Inicio Dirección',()=>{
     await page.goto('/inicio');
     await expect(page.locator('.dir-shell')).toBeVisible();
     await expect(page.getByRole('button',{name:'Inicio Fénix Capital'})).toBeVisible();
-    await expect(page.getByText('Hola Belén Muñoz, buenos días')).toBeVisible();
-    await expect(page.getByRole('button',{name:'Abrir perfil de Belén Muñoz'})).toBeVisible();
+    await expect(page.locator('.dir-priority-copy h1')).toContainText('Belén Muñoz');
+    await expect(page.locator('.dir-user-copy strong')).toHaveText('Belén Muñoz');
     await expect(page.getByText('Dirección',{exact:true})).toHaveCount(0);
     await expect(page.getByRole('button',{name:/Hablar con Ana/})).toBeVisible();
     await expect(page.locator('.dir-person-photo')).toBeVisible();
