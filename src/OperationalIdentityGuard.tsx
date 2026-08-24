@@ -25,6 +25,10 @@ export default function OperationalIdentityGuard(){
    const visibleName=name||'Mi perfil';
    const avatarUrl=safeAvatar(meta.avatar_url)||safeAvatar(meta.picture);
    const patch=()=>{
+    document.querySelectorAll<HTMLElement>('.ops-top').forEach(top=>{
+     const profiles=Array.from(top.querySelectorAll<HTMLElement>('.ops-profile'));
+     profiles.slice(1).forEach(extra=>extra.remove());
+    });
     document.querySelectorAll<HTMLElement>('.ops-profile').forEach(root=>{
      if(root.getAttribute('data-role')!==role)root.setAttribute('data-role',role);
      const title=name?`${name} · ${role}`:role;if(root.getAttribute('title')!==title)root.setAttribute('title',title);
