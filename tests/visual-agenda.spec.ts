@@ -34,10 +34,15 @@ test.describe('Fénix PRE-PROD · contrato visual Agenda',()=>{
   await expect(table).toBeVisible();
   await expect(scroll).toBeVisible();
   await expect.poll(()=>scroll.evaluate(el=>getComputedStyle(el).overflowY)).toMatch(/auto|scroll/);
+  await expect.poll(()=>scroll.evaluate(el=>getComputedStyle(el).maxHeight)).not.toBe('none');
   const dateHeader=table.locator('thead th').nth(3);
+  const dateButton=dateHeader.locator('button');
   await expect(dateHeader).toHaveAttribute('aria-sort','ascending');
   await expect.poll(()=>dateHeader.evaluate(el=>getComputedStyle(el).position)).toBe('sticky');
   await expect(table.locator('tbody tr').first().getByText('Revisar documentación',{exact:true})).toBeVisible();
+  await dateButton.click();
+  await expect(dateHeader).toHaveAttribute('aria-sort','descending');
+  await expect(table.locator('tbody tr').first().getByText('Llamar a cliente',{exact:true})).toBeVisible();
   const taskHeader=table.locator('thead th').nth(1);
   const taskButton=taskHeader.locator('button');
   await expect(taskButton).toBeVisible();
