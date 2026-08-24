@@ -1,19 +1,19 @@
 import {useEffect} from 'react';
 import {useLocation,useNavigate} from 'react-router-dom';
-import {useDirectionLiveData} from './useDirectionLiveData';
+import type {DirectionLiveSnapshot} from './useDirectionLiveData';
 
 function norm(value:string){return value.replace(/\s+/g,' ').trim().toUpperCase();}
 
 export default function DirectionLiveOperationsGuard(){
  const location=useLocation();
  const navigate=useNavigate();
- const live=useDirectionLiveData();
  useEffect(()=>{
   if(location.pathname!=='/inicio')return;
   let stopped=false;
   let observer:MutationObserver|null=null;
+  let live:DirectionLiveSnapshot|null=null;
   const patch=()=>{
-   if(stopped)return;
+   if(stopped||!live)return;
    const root=document.querySelector('.dir-shell');
    if(!root)return;
    const kpis=Array.from(root.querySelectorAll<HTMLButtonElement>('.dir-kpi'));
@@ -54,8 +54,9 @@ export default function DirectionLiveOperationsGuard(){
     else{heroButton.textContent='Abrir Agenda/Tareas';heroButton.dataset.livePriorityRoute='/agenda';}
    }
    const priorityButtons=Array.from(root.querySelectorAll<HTMLButtonElement>('.dir-live-priority'));
-   priorityButtons.forEach((button,index)=>{const p=live.priorities[index];if(!p)return;button.dataset.livePriorityRoute=p.route;const strong=button.querySelector('strong');if(strong)strong.textContent=p.title;const small=button.querySelector('small');if(small)small.textContent=p.reason;const action=button.querySelector('b');if(action)action.textContent=p.action.toUpperCase();});
+   priorityButtons.forEach((button,index)=>{const p=live!.priorities[index];if(!p)return;button.dataset.livePriorityRoute=p.route;const strong=button.querySelector('strong');if(strong)strong.textContent=p.title;const small=button.querySelector('small');if(small)small.textContent=p.reason;const action=button.querySelector('b');if(action)action.textContent=p.action.toUpperCase();});
   };
+  const onLive=(event:Event)=>{live=(event as CustomEvent<DirectionLiveSnapshot>).detail;patch();};
   const capture=(event:Event)=>{
    const target=event.target as Element|null;
    const kpi=target?.closest<HTMLButtonElement>('.dir-kpi');
@@ -68,10 +69,10 @@ export default function DirectionLiveOperationsGuard(){
    const route=priority?.dataset.livePriorityRoute;
    if(priority&&route){event.preventDefault();event.stopPropagation();navigate(route);}
   };
-  patch();
+  window.addEventListener('fenix-direction-live-data',onLive as EventListener);
   observer=new MutationObserver(patch);observer.observe(document.body,{childList:true,subtree:true});
   document.addEventListener('click',capture,true);
-  return()=>{stopped=true;observer?.disconnect();document.removeEventListener('click',capture,true)};
- },[location.pathname,navigate,live.openExp,live.firmasMes,live.signedMes,live.riskExp,live.riskSupported,live.expedientesReady,live.firmasReady,live.tareasReady,live.priorities]);
+  return()=>{stopped=true;observer?.disconnect();window.removeEventListener('fenix-direction-live-data',onLive as EventListener);document.removeEventListener('click',capture,true)};
+ },[location.pathname,navigate]);
  return null;
 }
