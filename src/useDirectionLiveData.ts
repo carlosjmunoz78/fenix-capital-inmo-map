@@ -23,6 +23,7 @@ function taskDueRaw(r:Row){return text(r,['fecha_limite','fecha_límite','vencim
 function taskDone(r:Row){return bool(r,['completada','completado','done'])||/complet|cerrad|hecha/i.test(taskState(r));}
 function expState(r:Row){return text(r,['estado','fase','phase','stage','status']);}
 function expRisk(r:Row){return text(r,['riesgo','risk','nivel_riesgo','semaforo','semáforo']);}
+function expCode(r:Row){return text(r,['expediente_code','code','codigo','id']);}
 export function isOpenDirectionExpediente(r:Row){const s=expState(r);return !/firmad|posventa|perdid|cerrad|anulad|cancelad|pasado|desistid/i.test(s);}
 export function isExplicitRiskDirectionExpediente(r:Row){const risk=expRisk(r);return /alto|cr[ií]tic|riesgo|bloquead|atenci[oó]n|urgente/i.test(risk)&&isOpenDirectionExpediente(r);}
 function firmaId(r:Row){return text(r,['id','firma_id','firma_code','code']);}
@@ -50,8 +51,12 @@ function firmaPriority(r:Row):DirectionPriority{
  return{id,title:`Preparar firma ${exp}`,reason:missing.length?`Firma prevista ${when}. Falta ${missing.join(', ')}.`:`Firma prevista ${when}. Requiere revisión antes del cierre.`,due:when,state:firmaState(r)||'Prevista',route:id?`/firmas/${encodeURIComponent(id)}`:'/firmas?firma=mes-actual&estado=prevista',action:'Revisar firma',severity:missing.length?'critical':'high'};
 }
 function riskPriority(r:Row):DirectionPriority{
- const code=text(r,['expediente_code','code','codigo','id']),risk=expRisk(r)||'Riesgo explícito';
+ const code=expCode(r),risk=expRisk(r)||'Riesgo explícito';
  return{id:code,title:`Revisar expediente ${code||'en riesgo'}`,reason:`La fuente marca ${risk}.`,due:'Atención inmediata',state:risk,route:code?`/expedientes/${encodeURIComponent(code)}`:'/expedientes?riesgo=si',action:'Abrir expediente',severity:'critical'};
+}
+function openExpPriority(r:Row):DirectionPriority{
+ const code=expCode(r),state=expState(r)||'En curso';
+ return{id:code,title:`Revisar expediente ${code||'en curso'}`,reason:`Expediente activo · ${state}.`,due:'Seguimiento operativo',state,route:code?`/expedientes/${encodeURIComponent(code)}`:'/expedientes?estado=en-curso',action:'Abrir expediente',severity:'normal'};
 }
 
 export function useDirectionLiveData(){
@@ -74,15 +79,28 @@ export function useDirectionLiveData(){
   window.dispatchEvent(new CustomEvent<DirectionLiveStatus>('fenix-direction-live-status',{detail}));
  },[exp.status,fir.status,tasks.status]);
  const data=useMemo(()=>{
-  const openExp=exp.rows.filter(isOpenDirectionExpediente).length;
+  const openRows=exp.rows.filter(isOpenDirectionExpediente);
+  const openExp=openRows.length;
   const riskSupported=exp.rows.some(r=>hasAny(r,['riesgo','risk','nivel_riesgo','semaforo','semáforo']));
-  const riskExp=riskSupported?exp.rows.filter(isExplicitRiskDirectionExpediente).length:0;
+  const riskRows=riskSupported?exp.rows.filter(isExplicitRiskDirectionExpediente):[];
+  const riskExp=riskRows.length;
   const firmasMes=fir.rows.filter(isPlannedThisMonthDirectionFirma).length;
   const signedMes=fir.rows.filter(r=>isSignedDirectionFirma(r)&&Boolean(firmaDate(r))&&isThisMonthDirectionDate(firmaDate(r))).length;
   const signaturePriorities=fir.rows.filter(isPlannedThisMonthDirectionFirma).map(firmaPriority);
-  const riskPriorities=riskSupported?exp.rows.filter(isExplicitRiskDirectionExpediente).map(riskPriority):[];
+  const riskPriorities=riskRows.map(riskPriority);
   const taskPriorities=tasks.rows.filter(r=>!taskDone(r)).map(taskPriority).sort((a,b)=>{const rank={critical:0,high:1,normal:2};const d=rank[a.severity]-rank[b.severity];return d||a.due.localeCompare(b.due,'es');});
-  const priorities:DirectionPriority[]=[...signaturePriorities,...riskPriorities,...taskPriorities].sort((a,b)=>{const rank={critical:0,high:1,normal:2};return rank[a.severity]-rank[b.severity];}).slice(0,3);
+  const reserved=new Set(riskRows.map(expCode).filter(Boolean));
+  const openExpPriorities=openRows.filter(r=>!reserved.has(expCode(r))).map(openExpPriority);
+  const candidates=[...signaturePriorities,...riskPriorities,...taskPriorities,...openExpPriorities];
+  const seen=new Set<string>();
+  const priorities:DirectionPriority[]=[];
+  const rank={critical:0,high:1,normal:2};
+  for(const p of candidates.sort((a,b)=>rank[a.severity]-rank[b.severity])){
+   const key=`${p.route}|${p.title}`;
+   if(seen.has(key))continue;
+   seen.add(key);priorities.push(p);
+   if(priorities.length===3)break;
+  }
   return{openExp,riskExp,riskSupported,firmasMes,signedMes,priorities};
  },[exp.rows,fir.rows,tasks.rows]);
  const snapshot:DirectionLiveSnapshot={
