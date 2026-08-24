@@ -1,12 +1,14 @@
 import {useEffect,useState} from 'react';
 import {createPortal} from 'react-dom';
 import {useLocation,useNavigate} from 'react-router-dom';
-import {supabase,SUPABASE_URL} from './supabase';
+import {fetchAppApi,supabase,SUPABASE_URL} from './supabase';
 import './direction-executive-overview.css';
 
 type BankRank={id:string;banco:string;firmadas_mes:number;previstas_mes:number};
 type TeamRank={id:string;nombre:string;codigo:string;firmadas_mes:number;previstas_mes:number;expedientes_en_curso:number;test?:boolean};
 type Payload={ok?:boolean;bank_ranking?:BankRank[];team?:TeamRank[];bank_sample?:{firmadas_con_banco?:number;previstas_con_banco?:number};error?:string};
+type Row=Record<string,unknown>;
+type PreviewBank={id:string;banco:string};
 
 function monthNow(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;}
 async function fetchOverview(){
@@ -18,6 +20,8 @@ async function fetchOverview(){
  return{status:r.status,data};
 }
 function pct(v:number,max:number){return `${Math.max(8,Math.round((v/Math.max(1,max))*100))}%`;}
+function rowsFrom(data:unknown):Row[]{if(!data||typeof data!=='object')return[];const d=data as Record<string,unknown>;for(const k of ['items','bancos','results'])if(Array.isArray(d[k]))return d[k] as Row[];return[];}
+function first(row:Row,keys:string[]){for(const k of keys){const v=row[k];if(typeof v==='string'&&v.trim())return v.trim();if(typeof v==='number')return String(v);}return'';}
 
 export default function DirectionExecutiveOverviewGuard(){
  const location=useLocation(),navigate=useNavigate();
@@ -25,20 +29,23 @@ export default function DirectionExecutiveOverviewGuard(){
  const[teamTarget,setTeamTarget]=useState<HTMLElement|null>(null);
  const[status,setStatus]=useState<number|null>(null);
  const[data,setData]=useState<Payload|null>(null);
+ const[previewBanks,setPreviewBanks]=useState<PreviewBank[]>([]);
  useEffect(()=>{
   if(location.pathname!=='/inicio'){setBankTarget(null);setTeamTarget(null);return;}
   let stopped=false;let obs:MutationObserver|null=null;
   const attach=()=>{if(stopped)return;const bank=document.querySelector('.bank-card') as HTMLElement|null;const team=document.querySelector('.team-card') as HTMLElement|null;if(bank&&team){setBankTarget(bank);setTeamTarget(team);bank.dataset.executiveOverview='true';team.dataset.executiveOverview='true';obs?.disconnect();return;}obs=new MutationObserver(attach);obs.observe(document.body,{childList:true,subtree:true});};
   attach();return()=>{stopped=true;obs?.disconnect();document.querySelectorAll('[data-executive-overview]').forEach(el=>el.removeAttribute('data-executive-overview'));setBankTarget(null);setTeamTarget(null)};
  },[location.pathname]);
- useEffect(()=>{if(location.pathname!=='/inicio')return;let alive=true;setStatus(null);setData(null);fetchOverview().then(r=>{if(!alive)return;setStatus(r.status);setData(r.data)}).catch(()=>{if(alive){setStatus(0);setData(null)}});return()=>{alive=false}},[location.pathname]);
+ useEffect(()=>{if(location.pathname!=='/inicio')return;let alive=true;setStatus(null);setData(null);setPreviewBanks([]);Promise.all([fetchOverview(),fetchAppApi<unknown>('/bancos')]).then(([r,b])=>{if(!alive)return;setStatus(r.status);setData(r.data);if(b.status===200){const canon=rowsFrom(b.data).map(row=>({id:first(row,['id','banco_code','code']),banco:first(row,['nombre','name','banco','entidad'])})).filter(x=>x.id&&x.banco).slice(0,3);setPreviewBanks(canon);}}).catch(()=>{if(alive){setStatus(0);setData(null);setPreviewBanks([])}});return()=>{alive=false}},[location.pathname]);
  const banks=(data?.bank_ranking??[]).slice(0,3);
  const team=(data?.team??[]).filter(x=>!x.test).slice(0,5);
+ const showPreview=status===200&&banks.length<3&&previewBanks.length>=3;
+ const podium=showPreview?previewBanks.slice(0,3).map((b,i)=>({...b,firmadas_mes:0,previstas_mes:0,preview:true,place:i+1})):banks.map((b,i)=>({...b,preview:false,place:i+1}));
  const maxBank=Math.max(1,...banks.map(x=>x.firmadas_mes+x.previstas_mes));
  const maxTeam=Math.max(1,...team.map(x=>x.firmadas_mes+x.previstas_mes+x.expedientes_en_curso));
  const bankView=bankTarget?createPortal(<div className="dir-exec-panel dir-exec-bank" data-testid="direction-bank-ranking">
-  <div className="dir-exec-title"><div><small>RENDIMIENTO REAL</small><strong>Top 3 bancos</strong></div><button onClick={()=>navigate('/bancos')}>Ver todos</button></div>
-  {status===null?<div className="dir-exec-empty">Calculando con datos canónicos…</div>:status!==200?<div className="dir-exec-empty">Ranking no disponible ahora. No se muestran estimaciones.</div>:banks.length===0?<div className="dir-exec-empty"><strong>Sin muestra suficiente este mes</strong><span>El ranking aparecerá cuando existan firmas enlazadas de forma segura a una oferta y un banco.</span></div>:<div className="dir-exec-bars">{banks.map((r,i)=><button key={r.id} className="dir-exec-row" onClick={()=>navigate(`/bancos/${encodeURIComponent(r.id)}`)}><b className="dir-rank-medal">{i+1}</b><span className="dir-exec-copy"><strong>{r.banco}</strong><small>{r.firmadas_mes} firmadas · {r.previstas_mes} previstas</small><i><u style={{width:pct(r.firmadas_mes+r.previstas_mes,maxBank)}}/></i></span><em>Ficha ›</em></button>)}</div>}
+  <div className="dir-exec-title"><div><small>{showPreview?'PREVIEW VISUAL · BANCOS CANÓNICOS':'RENDIMIENTO REAL'}</small><strong>Top 3 bancos</strong></div><button onClick={()=>navigate('/bancos')}>Ver todos</button></div>
+  {status===null?<div className="dir-exec-empty">Calculando con datos canónicos…</div>:status!==200?<div className="dir-exec-empty">Ranking no disponible ahora. No se muestran estimaciones.</div>:podium.length===0?<div className="dir-exec-empty"><strong>Sin muestra suficiente este mes</strong><span>El ranking aparecerá cuando existan firmas enlazadas de forma segura a una oferta y un banco.</span></div>:<div className={`dir-exec-bars${showPreview?' is-preview':''}`}>{podium.map((r)=><button key={r.id} className={`dir-exec-row rank-${r.place}`} onClick={()=>navigate(`/bancos/${encodeURIComponent(r.id)}`)}><b className="dir-rank-medal">{r.place}</b><span className="dir-exec-copy"><strong>{r.banco}</strong>{r.preview?<small>Posición visual de muestra · sin clasificación real</small>:<small>{r.firmadas_mes} firmadas · {r.previstas_mes} previstas</small>}{!r.preview&&<i><u style={{width:pct(r.firmadas_mes+r.previstas_mes,maxBank)}}/></i>}</span><em>Ficha ›</em></button>)}</div>}
  </div>,bankTarget):null;
  const teamView=teamTarget?createPortal(<div className="dir-exec-panel dir-exec-team" data-testid="direction-financial-team">
   <div className="dir-exec-title"><div><small>EQUIPO FINANCIERO</small><strong>Actividad del mes</strong></div><button onClick={()=>navigate('/financieros')}>Ver equipo</button></div>
