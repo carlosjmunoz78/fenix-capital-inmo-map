@@ -4,14 +4,6 @@ import {useNavigate} from 'react-router-dom';
 const BUTTON_CLASS='ops-advanced-search-guard';
 const STYLE_ID='ops-advanced-search-guard-style';
 
-function isDirectionProfile(root:HTMLElement){
- const dataRole=root.getAttribute('data-role')||'';
- const copyRole=root.querySelector<HTMLElement>('.ops-profile-copy small')?.textContent||'';
- const legacyRole=root.querySelector<HTMLElement>('small')?.textContent||'';
- const legacyStrong=root.querySelector<HTMLElement>('strong')?.textContent||'';
- return /direcci[oó]n/i.test(`${dataRole} ${copyRole} ${legacyRole} ${legacyStrong}`);
-}
-
 export default function OperationalAdvancedSearchGuard(){
  const navigate=useNavigate();
  useEffect(()=>{
@@ -19,7 +11,7 @@ export default function OperationalAdvancedSearchGuard(){
    const style=document.createElement('style');
    style.id=STYLE_ID;
    style.textContent=`
-.${BUTTON_CLASS}{height:36px;border:1px solid #e4e4e8;border-radius:9px;background:#fff;color:#424248;padding:0 12px;font-size:10px;font-weight:750;cursor:pointer;white-space:nowrap}
+.${BUTTON_CLASS}{height:42px;border:1px solid #e4e4e8;border-radius:10px;background:#fff;color:#424248;padding:0 14px;font-size:11px;font-weight:750;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center}
 .${BUTTON_CLASS}:hover{border-color:#f0cdbd;background:#fff8f4;color:#e95d27}
 .ops-root[data-theme='dark'] .${BUTTON_CLASS}{background:#202023;color:#f2f2f4;border-color:#3a3a3f}
 .ops-root[data-theme='dark'] .${BUTTON_CLASS}:hover{background:#2b2522;border-color:#70402c;color:#ff7a42}
@@ -29,25 +21,26 @@ export default function OperationalAdvancedSearchGuard(){
   }
   const wire=()=>{
    document.querySelectorAll<HTMLElement>('.ops-top').forEach(top=>{
-    const profile=top.querySelector<HTMLElement>('.ops-profile');
-    const isDirection=profile?isDirectionProfile(profile):false;
     const existing=top.querySelector<HTMLButtonElement>(`.${BUTTON_CLASS}`);
-    if(!isDirection){existing?.remove();return;}
-    if(existing)return;
+    if(existing){
+      if(existing.textContent!=='Buscador avanzado')existing.textContent='Buscador avanzado';
+      existing.setAttribute('aria-label','Buscador avanzado');
+      return;
+    }
     const search=top.querySelector<HTMLElement>('.ops-search');
     if(!search)return;
     const button=document.createElement('button');
     button.type='button';
     button.className=BUTTON_CLASS;
-    button.textContent='Búsqueda avanzada';
-    button.setAttribute('aria-label','Búsqueda avanzada');
+    button.textContent='Buscador avanzado';
+    button.setAttribute('aria-label','Buscador avanzado');
     button.addEventListener('click',()=>navigate('/buscar'));
     top.insertBefore(button,search);
    });
   };
   wire();
   const observer=new MutationObserver(wire);
-  observer.observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['data-role']});
+  observer.observe(document.body,{childList:true,subtree:true});
   return()=>observer.disconnect();
  },[navigate]);
  return null;
