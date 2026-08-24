@@ -40,8 +40,11 @@ test.describe('Fénix PRE-PROD · contrato visual Inicio Dirección',()=>{
     await expect(page.locator('.dir-help-avatar')).toBeVisible();
     await expect(page.getByText('Revisar expediente prioritario',{exact:true})).toBeVisible();
     const kpis=page.locator('.dir-kpis');
-    await expect(kpis.getByText('2',{exact:true}).first()).toBeVisible();
-    await expect(kpis.getByText('1',{exact:true})).toHaveCount(2);
+    await expect(kpis.getByRole('button',{name:/EXPEDIENTES\s+EN CURSO/i}).locator('strong')).toHaveText('2');
+    await expect(kpis.getByRole('button',{name:/FIRMAS\s+ESTE MES/i}).locator('strong')).toHaveText('1');
+    await expect(kpis.getByRole('button',{name:/FIRMADOS\s+ESTE MES/i}).locator('strong')).toHaveText('1');
+    await expect(kpis.getByRole('button',{name:/EN RIESGO/i}).locator('strong')).toHaveText('1');
+    await expect(kpis.getByRole('button',{name:/HONORARIOS\s+PENDIENTES/i}).locator('strong')).toHaveText('—');
     await expect(page.getByText('ACCESOS RÁPIDOS')).toBeVisible();
     await expect(page.getByRole('button',{name:'Inmobiliarias',exact:true}).last()).toBeVisible();
     await expect(page.getByRole('region',{name:'Calculadora Hipotecaria'})).toBeVisible();
