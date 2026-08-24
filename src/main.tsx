@@ -72,6 +72,7 @@ import CreateRouteAuthorizedNav from './CreateRouteAuthorizedNav';
 import ExpedienteFollowupConfirmationGuard from './ExpedienteFollowupConfirmationGuard';
 import OperationalRouteScrollReset from './OperationalRouteScrollReset';
 import DirectionKpiDrilldownGuard from './DirectionKpiDrilldownGuard';
+import DirectionPriorityActionGuard from './DirectionPriorityActionGuard';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -87,6 +88,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <OperationalIdentityGuard />
       <OperationalLogoutGuard />
       <DirectionKpiDrilldownGuard />
+      <DirectionPriorityActionGuard />
       <AnaUniversalGuard />
       <AnaInboxAccessGuard />
       <ContextEvidenceUpload />
