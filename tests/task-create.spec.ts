@@ -44,6 +44,8 @@ test.describe('Fénix PRE-PROD · alta canónica de tareas',()=>{
   await expect(page.getByLabel('Responsable')).toHaveAttribute('readonly','');
   await page.getByRole('button',{name:'Revisar antes de crear'}).click();
   await page.getByRole('button',{name:'Confirmar y crear'}).click();
+  await expect(page.getByText('Tarea creada en la fuente canónica y auditada.')).toBeVisible();
+  expect(posted).not.toBeNull();
   expect(posted.id_trabajador_operativo).toBe('FIN-A');
  });
 });
