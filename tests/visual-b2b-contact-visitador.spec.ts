@@ -15,14 +15,8 @@ test.describe('Fénix PRE-PROD · Visitador contacto B2B',()=>{
    return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,status:200,item:{id:contactId,nombre:'Carlos',apellidos:'Prueba',contacto:'Carlos Prueba',cargo:'Agente',email:'carlos@example.test',telefono:'600000001',activo:true,inmobiliaria_id:inmoId},inmobiliaria:{id:inmoId,nombre:'Inmo QA',localidad:'Córdoba'}})});
   });
   await page.goto(`/contactos-b2b/${contactId}`);
-  await expect(page.getByRole('heading',{name:'Carlos Prueba'})).toBeVisible();
-  await expect(page.getByText('Inmo QA · Córdoba')).toBeVisible();
-  await expect(page.locator('.ops-profile strong').filter({hasText:'Visitador'})).toBeVisible();
-  const cargo=page.getByLabel('Cargo');await cargo.fill('Responsable comercial');
-  await page.getByRole('button',{name:'Revisar cambios'}).click();
-  await expect(page.getByText('Vista previa')).toBeVisible();
-  await page.getByRole('button',{name:'Confirmar cambios'}).click();
-  await expect(page.getByText('Contacto B2B actualizado dentro de tu ámbito autorizado.')).toBeVisible();
-  await expect(page.getByRole('heading',{name:'Carlos Prueba'})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Carlos Prueba'})).toBeVisible();await expect(page.getByText('Inmo QA · Córdoba')).toBeVisible();
+  await expect(page.locator('.ops-profile-copy small').filter({hasText:'Visitador'})).toBeVisible();
+  const cargo=page.getByLabel('Cargo');await cargo.fill('Responsable comercial');await page.getByRole('button',{name:'Revisar cambios'}).click();await expect(page.getByText('Vista previa')).toBeVisible();await page.getByRole('button',{name:'Confirmar cambios'}).click();await expect(page.getByText('Contacto B2B actualizado dentro de tu ámbito autorizado.')).toBeVisible();await expect(page.getByRole('heading',{name:'Carlos Prueba'})).toBeVisible();
  });
 });
