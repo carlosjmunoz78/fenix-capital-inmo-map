@@ -11,7 +11,7 @@ import { useDirectionLiveData } from './useDirectionLiveData';
 
 type CalcState={principal:number;rate:number;years:number;purchasePrice:number|'';income:number|'';other:number|'';open:boolean;minimized:boolean};
 type MortgageResult={monthlyPayment:number;totalPaid:number;estimatedInterest:number;financingPct:number|null;effortPct:number|null;warnings:string[]}|null;
-type Props={onNavigate:(route:string)=>void;onLogout:()=>void;calc:CalcState;setCalc:(updater:(value:CalcState)=>CalcState)=>void;result:MortgageResult};
+type Props={onNavigate:(route:string)=>void;onLogout:()=>void;profileName:string;calc:CalcState;setCalc:(updater:(value:CalcState)=>CalcState)=>void;result:MortgageResult};
 type Person={name:string;role:string;expedientes:number;firmas_mes:number};
 type PersonalResponse={items?:Person[];pending_profiles?:number};
 type NavResponse={items?:Array<{label?:string;route?:string}|string>};
@@ -38,46 +38,47 @@ const navMeta:Record<string,{label:string;Icon:typeof Home}>={
   '/buscar':{label:'Buscar',Icon:Search}
 };
 const fallbackMenu:MenuItem[]=[{route:'/inicio',label:'Inicio',Icon:Home}];
-
 const initials=(name:string)=>name.split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]?.toUpperCase()).join('')||'FC';
 
 const refinementCss=`
-.dir-shell{grid-template-columns:196px minmax(0,1fr);font-size:14px}
-.dir-sidebar{padding:18px 14px 18px}
-.dir-brand{height:64px;gap:10px;padding:0 6px 13px}
-.dir-brand-logo{width:39px;height:31px;object-fit:contain;display:block;flex:0 0 auto}
-.dir-brand strong{font-size:13px;letter-spacing:.035em}
-.dir-nav{gap:4px;padding-top:12px;overflow-y:auto;min-height:0;scrollbar-width:thin}
-.dir-nav-item{height:38px;min-height:38px;font-size:13px;gap:11px;padding:0 11px}
-.dir-nav-item svg{width:17px;height:17px}
-.dir-help-card{padding:12px 11px 11px;grid-template-columns:1fr 42px;gap:8px}
-.dir-help-card strong{font-size:11.5px}.dir-help-card span{font-size:10px}.dir-help-card button{height:30px;font-size:10px}
-.dir-help-avatar{width:40px;height:40px;border-radius:50%;object-fit:cover;object-position:center 18%;background:#fff;display:block}
-.dir-topbar{height:66px;padding:0 22px;grid-template-columns:auto minmax(360px,560px) 1fr;gap:16px}
-.dir-advanced{height:35px;padding:0 14px;font-size:11px}
-.dir-search{height:35px}.dir-search input{font-size:11px}
-.dir-theme-toggle{height:35px;border:1px solid #e7e7e7;background:#fff;color:#333;border-radius:8px;padding:0 11px;display:flex;align-items:center;gap:7px;font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap}
+.dir-shell{grid-template-columns:236px minmax(0,1fr);font-size:15px;min-height:100vh}
+.dir-sidebar{padding:20px 16px 20px}
+.dir-brand{height:72px;gap:12px;padding:0 8px 15px}
+.dir-brand-logo{width:44px;height:35px;object-fit:contain;display:block;flex:0 0 auto}
+.dir-brand strong{font-size:14px;letter-spacing:.04em;color:#111}
+.dir-nav{gap:5px;padding-top:14px;overflow-y:auto;min-height:0;scrollbar-width:thin}
+.dir-nav-item{height:43px;min-height:43px;font-size:13.5px;gap:12px;padding:0 13px}
+.dir-nav-item svg{width:18px;height:18px}
+.dir-help-card{padding:15px 13px 13px;grid-template-columns:1fr 48px;gap:10px}
+.dir-help-card strong{font-size:12.5px}.dir-help-card span{font-size:10.5px;line-height:1.4}.dir-help-card button{height:34px;font-size:10.5px}
+.dir-help-avatar{width:46px;height:46px;border-radius:50%;object-fit:cover;object-position:center 18%;background:#fff;display:block}
+.dir-topbar{height:74px;padding:0 26px;grid-template-columns:auto minmax(420px,680px) 1fr;gap:18px}
+.dir-advanced{height:42px;padding:0 16px;font-size:12px;border-radius:10px}
+.dir-search{height:42px;border-radius:10px}.dir-search input{font-size:12.5px}.dir-search button{width:42px}
+.dir-theme-toggle{height:42px;border:1px solid #e7e7e7;background:#fff;color:#333;border-radius:10px;padding:0 13px;display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap}
 .dir-theme-toggle:hover{border-color:#ffd3c0;background:#fffaf7}
-.dir-bell,.dir-logout{width:32px;height:32px}.dir-profile{gap:9px}.dir-user-copy strong{font-size:11px}.dir-user-copy span{font-size:9px}.dir-avatar{width:34px;height:34px}
-.dir-content{max-width:none;width:100%;padding:22px 24px 28px;margin:0}
-.dir-dashboard-top{grid-template-columns:minmax(390px,34%) minmax(0,1fr);gap:18px}
-.dir-priority-card{grid-template-columns:minmax(165px,39%) 1fr;min-height:390px}
+.dir-bell,.dir-logout{width:38px;height:38px}.dir-profile{gap:10px;padding:4px 7px;border-radius:10px}.dir-user-copy strong{font-size:12px}.dir-user-copy span{font-size:9.5px}.dir-avatar{width:38px;height:38px;font-size:11px}
+.dir-content{max-width:none;width:100%;padding:30px 34px 42px;margin:0}
+.dir-page-heading{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;margin:0 0 22px}.dir-page-heading small{display:block;font-size:10px;font-weight:800;letter-spacing:.12em;color:#f36c21;margin-bottom:5px}.dir-page-heading h1{font-size:30px;line-height:1.1;margin:0;color:inherit}.dir-page-heading p{font-size:13px;color:#777;margin:7px 0 0}
+.dir-dashboard-top{grid-template-columns:minmax(450px,38%) minmax(0,1fr);gap:24px;align-items:stretch}
+.dir-priority-card{grid-template-columns:minmax(190px,41%) 1fr;min-height:460px;border-radius:16px;overflow:hidden}
 .dir-person-wrap{background:linear-gradient(180deg,#fff9f6,#f7f4f2)}
 .dir-person-photo{display:block;width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 6px 14px rgba(0,0,0,.08))}
-.dir-priority-copy{padding:24px 20px 18px}.dir-priority-copy h1{font-size:22px;margin-bottom:8px}.dir-priority-copy>p{font-size:14px;margin-bottom:18px}
-.dir-empty-compact{padding:16px 14px;grid-template-columns:22px 1fr;gap:12px}.dir-empty-compact strong{font-size:13px}.dir-empty-compact small{font-size:11px;line-height:1.45}
-.dir-alert-button{height:42px;font-size:12px;margin-top:16px}
-.dir-kpis{gap:12px;margin-bottom:14px}.dir-kpi{height:132px;padding:16px 14px 12px}.dir-kpi>svg{width:22px;height:22px;left:13px;top:15px}.dir-kpi>span{font-size:10px;margin-left:31px;min-height:27px}.dir-kpi>strong{font-size:29px;margin-top:10px}.dir-kpi>small{font-size:10px;margin-top:6px;line-height:1.35}
-.dir-section-head{height:48px;padding:0 16px}.dir-section-head strong{font-size:12px}.dir-section-head button{font-size:11px}
-.dir-empty-state{min-height:190px;padding:28px 28px}.dir-empty-state>span{font-size:14px}.dir-empty-state>small{font-size:11px;max-width:520px;line-height:1.5}.dir-empty-state>button{font-size:11px;padding:9px 13px}
-.dir-live-priorities{display:grid;gap:9px;padding:13px}.dir-live-priority{display:grid;grid-template-columns:1fr auto;gap:7px 12px;width:100%;text-align:left;padding:13px 14px;border:1px solid #ececec;border-radius:10px;background:#fff;color:inherit;cursor:pointer}.dir-live-priority strong{font-size:12px}.dir-live-priority small{font-size:10px;color:#777}.dir-live-priority b{grid-row:1/3;grid-column:2;font-size:10px;color:#f36c21;align-self:center}
-.dir-mid-grid{grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);gap:18px;margin-top:18px}
-.dir-team-person{min-width:220px;padding:14px}.dir-team-person>strong{font-size:12px}.dir-team-person>small{font-size:10px}.dir-team-person dt,.dir-team-person dd{font-size:10px}
-.dir-quick{margin-top:10px}.dir-quick h2{font-size:10px;margin-bottom:7px}.dir-quick-grid{gap:10px}.dir-quick-grid button{height:62px;font-size:9px}.dir-quick-grid button svg{width:24px;height:24px}
+.dir-priority-copy{padding:32px 26px 24px}.dir-priority-copy h1{font-size:27px;margin-bottom:9px}.dir-priority-copy>p{font-size:15px;margin-bottom:22px}
+.dir-empty-compact{padding:19px 17px;grid-template-columns:24px 1fr;gap:14px;border-radius:12px}.dir-empty-compact strong{font-size:14px}.dir-empty-compact small{font-size:11.5px;line-height:1.5}
+.dir-alert-button{height:46px;font-size:12.5px;margin-top:18px;border-radius:10px}
+.dir-right-top{display:flex;flex-direction:column;min-width:0}
+.dir-kpis{gap:14px;margin-bottom:18px}.dir-kpi{height:154px;padding:19px 16px 14px;border-radius:14px}.dir-kpi>svg{width:24px;height:24px;left:15px;top:17px}.dir-kpi>span{font-size:10.5px;margin-left:34px;min-height:30px}.dir-kpi>strong{font-size:34px;margin-top:11px}.dir-kpi>small{font-size:10.5px;margin-top:7px;line-height:1.4}
+.dir-table-card{border-radius:16px}.dir-section-head{height:56px;padding:0 19px}.dir-section-head strong{font-size:12.5px}.dir-section-head button{font-size:11.5px}
+.dir-empty-state{min-height:220px;padding:34px 32px}.dir-empty-state>span{font-size:15px}.dir-empty-state>small{font-size:12px;max-width:560px;line-height:1.55}.dir-empty-state>button{font-size:11.5px;padding:10px 14px}
+.dir-live-priorities{display:grid;gap:10px;padding:15px}.dir-live-priority{display:grid;grid-template-columns:1fr auto;gap:8px 14px;width:100%;text-align:left;padding:15px 16px;border:1px solid #ececec;border-radius:12px;background:#fff;color:inherit;cursor:pointer}.dir-live-priority strong{font-size:12.5px}.dir-live-priority small{font-size:10.5px;color:#777}.dir-live-priority b{grid-row:1/3;grid-column:2;font-size:10.5px;color:#f36c21;align-self:center}
+.dir-mid-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;margin-top:24px}
+.dir-team-person{min-width:245px;padding:17px}.dir-team-person>strong{font-size:12.5px}.dir-team-person>small{font-size:10.5px}.dir-team-person dt,.dir-team-person dd{font-size:10.5px}
+.dir-quick{margin-top:24px}.dir-quick h2{font-size:11px;margin-bottom:10px;letter-spacing:.08em}.dir-quick-grid{gap:12px}.dir-quick-grid button{height:82px;font-size:10.5px;border-radius:13px}.dir-quick-grid button svg{width:28px;height:28px}
 .dir-calc-launcher{font-size:12px!important}
 .dir-shell[data-dir-theme='dark']{background:#151516;color:#f4f4f5}
 .dir-shell[data-dir-theme='dark'] .dir-sidebar,.dir-shell[data-dir-theme='dark'] .dir-main,.dir-shell[data-dir-theme='dark'] .dir-topbar{background:#1b1b1d;color:#f4f4f5;border-color:#343438}
-.dir-shell[data-dir-theme='dark'] .dir-brand{background:#1b1b1d;border-color:#343438;color:#f4f4f5}
+.dir-shell[data-dir-theme='dark'] .dir-brand{background:#1b1b1d;border-color:#343438;color:#f4f4f5}.dir-shell[data-dir-theme='dark'] .dir-brand strong{color:#fff}
 .dir-shell[data-dir-theme='dark'] .dir-nav-item{color:#d7d7db}.dir-shell[data-dir-theme='dark'] .dir-nav-item svg{color:#aaaab2}
 .dir-shell[data-dir-theme='dark'] .dir-nav-item:hover,.dir-shell[data-dir-theme='dark'] .dir-profile:hover{background:#28282c}
 .dir-shell[data-dir-theme='dark'] .dir-nav-item.active{background:#3a241d;color:#ff7a42}
@@ -85,27 +86,28 @@ const refinementCss=`
 .dir-shell[data-dir-theme='dark'] .dir-search input,.dir-shell[data-dir-theme='dark'] .dir-search button,.dir-shell[data-dir-theme='dark'] .dir-bell,.dir-shell[data-dir-theme='dark'] .dir-logout{color:#d0d0d5}
 .dir-shell[data-dir-theme='dark'] .dir-empty-state,.dir-shell[data-dir-theme='dark'] .dir-empty-compact{background:#242427;color:#d2d2d6;border-color:#3b3b40}
 .dir-shell[data-dir-theme='dark'] .dir-empty-state>span,.dir-shell[data-dir-theme='dark'] .dir-empty-compact strong{color:#f0f0f2}
-.dir-shell[data-dir-theme='dark'] .dir-empty-state>small,.dir-shell[data-dir-theme='dark'] .dir-empty-compact small,.dir-shell[data-dir-theme='dark'] .dir-user-copy span,.dir-shell[data-dir-theme='dark'] .dir-help-card span,.dir-shell[data-dir-theme='dark'] .dir-live-priority small{color:#aaaab2}
+.dir-shell[data-dir-theme='dark'] .dir-empty-state>small,.dir-shell[data-dir-theme='dark'] .dir-empty-compact small,.dir-shell[data-dir-theme='dark'] .dir-user-copy span,.dir-shell[data-dir-theme='dark'] .dir-help-card span,.dir-shell[data-dir-theme='dark'] .dir-live-priority small,.dir-shell[data-dir-theme='dark'] .dir-page-heading p{color:#aaaab2}
 .dir-shell[data-dir-theme='dark'] .dir-section-head{border-color:#35353a}.dir-shell[data-dir-theme='dark'] .dir-priority-card{background:#202023;border-color:#39393e}.dir-shell[data-dir-theme='dark'] .dir-person-wrap{background:linear-gradient(180deg,#272326,#1d1d1f)}
 .dir-shell[data-dir-theme='dark'] .dir-theme-toggle:hover,.dir-shell[data-dir-theme='dark'] .dir-kpi:hover,.dir-shell[data-dir-theme='dark'] .dir-team-person:hover,.dir-shell[data-dir-theme='dark'] .dir-quick-grid button:hover{background:#2c2929;border-color:#70402c}
-@media(min-width:1440px){.dir-shell{grid-template-columns:214px minmax(0,1fr)}.dir-sidebar{padding-left:16px;padding-right:16px}.dir-content{padding:24px 28px 30px}.dir-dashboard-top{grid-template-columns:minmax(430px,33%) minmax(0,1fr)}.dir-priority-card{grid-template-columns:minmax(175px,39%) 1fr;min-height:410px}.dir-kpi{height:138px}.dir-empty-state{min-height:200px}.dir-quick-grid button{height:66px}}
-@media(max-width:1100px){.dir-shell{grid-template-columns:82px 1fr}.dir-brand{justify-content:center;padding:0 0 10px}.dir-brand>span:last-child{display:none}.dir-brand-logo{width:42px;height:33px}.dir-nav-item{justify-content:center;padding:0}.dir-nav-item span,.dir-help-card{display:none}.dir-topbar{grid-template-columns:auto minmax(260px,1fr) auto}.dir-user-copy{display:none}.dir-dashboard-top{grid-template-columns:280px 1fr}.dir-kpis{grid-template-columns:repeat(3,1fr)}.dir-mid-grid{grid-template-columns:1fr}.dir-quick-grid{grid-template-columns:repeat(3,1fr)}.dir-theme-toggle span{display:none}.dir-theme-toggle{width:35px;padding:0;justify-content:center}}
-@media(max-width:760px){.dir-shell{display:block}.dir-sidebar{display:none}.dir-topbar{height:auto;min-height:62px;grid-template-columns:1fr auto;padding:8px 10px}.dir-advanced{display:none}.dir-search{grid-column:1/2}.dir-top-right{grid-column:2/3}.dir-content{padding:12px}.dir-dashboard-top{grid-template-columns:1fr}.dir-priority-card{grid-template-columns:125px 1fr;min-height:330px}.dir-person-photo{max-height:300px}.dir-kpis{grid-template-columns:repeat(2,1fr)}.dir-kpi:last-child{grid-column:1/-1}.dir-quick-grid{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:1440px){.dir-shell{grid-template-columns:244px minmax(0,1fr)}.dir-sidebar{padding-left:18px;padding-right:18px}.dir-content{padding:34px 40px 46px}.dir-dashboard-top{grid-template-columns:minmax(480px,37%) minmax(0,1fr)}.dir-priority-card{grid-template-columns:minmax(205px,41%) 1fr;min-height:480px}.dir-kpi{height:160px}.dir-empty-state{min-height:230px}.dir-quick-grid button{height:86px}}
+@media(max-width:1180px){.dir-shell{grid-template-columns:88px 1fr}.dir-brand{justify-content:center;padding:0 0 12px}.dir-brand>span:last-child{display:none}.dir-brand-logo{width:44px;height:35px}.dir-nav-item{justify-content:center;padding:0}.dir-nav-item span,.dir-help-card{display:none}.dir-topbar{grid-template-columns:auto minmax(280px,1fr) auto}.dir-user-copy{display:none}.dir-dashboard-top{grid-template-columns:320px 1fr}.dir-kpis{grid-template-columns:repeat(3,1fr)}.dir-mid-grid{grid-template-columns:1fr}.dir-quick-grid{grid-template-columns:repeat(3,1fr)}.dir-theme-toggle span{display:none}.dir-theme-toggle{width:42px;padding:0;justify-content:center}}
+@media(max-width:760px){.dir-shell{display:block}.dir-sidebar{display:none}.dir-topbar{height:auto;min-height:66px;grid-template-columns:1fr auto;padding:10px 12px}.dir-advanced{display:none}.dir-search{grid-column:1/2}.dir-top-right{grid-column:2/3}.dir-content{padding:16px}.dir-page-heading{margin-bottom:16px}.dir-page-heading h1{font-size:24px}.dir-dashboard-top{grid-template-columns:1fr}.dir-priority-card{grid-template-columns:135px 1fr;min-height:360px}.dir-person-photo{max-height:320px}.dir-kpis{grid-template-columns:repeat(2,1fr)}.dir-kpi:last-child{grid-column:1/-1}.dir-quick-grid{grid-template-columns:repeat(2,1fr)}}
 `;
 
-export default function DirectionDashboard({onNavigate,onLogout,calc,setCalc,result}:Props){
+export default function DirectionDashboard({onNavigate,onLogout,profileName,calc,setCalc,result}:Props){
   const [people,setPeople]=useState<Person[]>([]);
   const [peopleLoading,setPeopleLoading]=useState(true);
   const [pendingProfiles,setPendingProfiles]=useState(0);
   const [authorizedNav,setAuthorizedNav]=useState<MenuItem[]>([]);
   const [search,setSearch]=useState('');
-  const [theme,setTheme]=useState<Theme>(()=>(sessionStorage.getItem('fenix-theme') as Theme)||'light');
+  const [theme,setTheme]=useState<Theme>(()=>((sessionStorage.getItem('fenix-theme')||localStorage.getItem('fenix-theme')) as Theme)||'light');
   const teamRail=useRef<HTMLDivElement|null>(null);
   const live=useDirectionLiveData();
 
   useEffect(()=>{
     document.documentElement.dataset.theme=theme;
     sessionStorage.setItem('fenix-theme',theme);
+    localStorage.setItem('fenix-theme',theme);
   },[theme]);
 
   useEffect(()=>{
@@ -132,12 +134,8 @@ export default function DirectionDashboard({onNavigate,onLogout,calc,setCalc,res
   },[]);
 
   const effectiveMenu=useMemo(()=>authorizedNav.length?authorizedNav:fallbackMenu,[authorizedNav]);
-
-  function runSearch(){
-    const q=search.trim();
-    onNavigate(q?`/buscar?q=${encodeURIComponent(q)}`:'/buscar');
-  }
-  function scrollTeam(direction:number){teamRail.current?.scrollBy({left:direction*280,behavior:'smooth'});}
+  function runSearch(){const q=search.trim();onNavigate(q?`/buscar?q=${encodeURIComponent(q)}`:'/buscar');}
+  function scrollTeam(direction:number){teamRail.current?.scrollBy({left:direction*300,behavior:'smooth'});}
   function kpiValue(ready:boolean,value:number){return ready?String(value):'—';}
 
   return <div className="dir-shell" data-dir-theme={theme}>
@@ -146,44 +144,45 @@ export default function DirectionDashboard({onNavigate,onLogout,calc,setCalc,res
       <button className="dir-brand" onClick={()=>onNavigate('/inicio')} aria-label="Inicio Fénix Capital">
         <img className="dir-brand-logo" src={fenixLogo} alt=""/><span><strong>FÉNIX CAPITAL</strong></span>
       </button>
-      <nav className="dir-nav">{effectiveMenu.map(({label,route,Icon})=><button key={route} className={route==='/inicio'?'dir-nav-item active':'dir-nav-item'} onClick={()=>onNavigate(route)}><Icon size={17}/><span>{label}</span></button>)}</nav>
+      <nav className="dir-nav">{effectiveMenu.map(({label,route,Icon})=><button key={route} className={route==='/inicio'?'dir-nav-item active':'dir-nav-item'} onClick={()=>onNavigate(route)}><Icon size={18}/><span>{label}</span></button>)}</nav>
       <div className="dir-help-card">
-        <div><strong>¿Necesitas ayuda?</strong><span>Pregunta a Ana, tu asistente inteligente.</span></div>
+        <div><strong>¿Necesitas ayuda?</strong><span>Habla con Ana, tu asistente inteligente.</span></div>
         <div className="dir-help-person"><img className="dir-help-avatar" src={anaAvatar} alt="Ana"/></div>
-        <button onClick={()=>onNavigate('/ana')}>Abrir chat con Ana <span>→</span></button>
+        <button onClick={()=>onNavigate('/ana')}>Hablar con Ana <span>→</span></button>
       </div>
     </aside>
 
     <main className="dir-main">
       <header className="dir-topbar">
-        <button className="dir-advanced" onClick={()=>onNavigate('/buscar')}><SlidersHorizontal size={16}/>Buscador avanzado</button>
-        <div className="dir-search"><Search size={17}/><input value={search} onChange={e=>setSearch(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')runSearch()}} placeholder="Buscar expediente, cliente, banco, inmobiliaria, contacto..."/><button onClick={runSearch} aria-label="Buscar"><Search size={16}/></button></div>
+        <button className="dir-advanced" onClick={()=>onNavigate('/buscar')}><SlidersHorizontal size={17}/>Buscador avanzado</button>
+        <div className="dir-search"><Search size={18}/><input value={search} onChange={e=>setSearch(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')runSearch()}} placeholder="Buscar expediente, cliente, banco, inmobiliaria, contacto..."/><button onClick={runSearch} aria-label="Buscar"><Search size={17}/></button></div>
         <div className="dir-top-right">
-          <button className="dir-theme-toggle" onClick={()=>setTheme(theme==='light'?'dark':'light')} aria-label="Cambiar tema">{theme==='light'?<Moon size={16}/>:<Sun size={16}/>}<span>{theme==='light'?'Oscuro':'Claro'}</span></button>
+          <button className="dir-theme-toggle" onClick={()=>setTheme(theme==='light'?'dark':'light')} aria-label="Cambiar tema">{theme==='light'?<Moon size={17}/>:<Sun size={17}/>}<span>{theme==='light'?'Oscuro':'Claro'}</span></button>
           <button className="dir-bell" aria-label="Notificaciones" onClick={()=>onNavigate('/notificaciones')}><Bell size={20}/></button>
-          <button className="dir-profile" onClick={()=>onNavigate('/perfil')}><div className="dir-avatar">D</div><div className="dir-user-copy"><strong>Dirección</strong><span>Dirección</span></div><ChevronDown size={16}/></button>
+          <button className="dir-profile" onClick={()=>onNavigate('/perfil')} aria-label={`Abrir perfil de ${profileName}`}><div className="dir-avatar">{initials(profileName)}</div><div className="dir-user-copy"><strong>{profileName}</strong><span>Mi perfil</span></div><ChevronDown size={16}/></button>
           <button className="dir-logout" onClick={onLogout} aria-label="Cerrar sesión"><LogOut size={17}/></button>
         </div>
       </header>
 
       <div className="dir-content">
+        <div className="dir-page-heading"><div><small>PANEL PRINCIPAL</small><h1>Inicio</h1><p>Resumen operativo de tu ámbito autorizado.</p></div></div>
         <section className="dir-dashboard-top">
           <article className="dir-priority-card">
             <div className="dir-person-wrap"><img className="dir-person-photo" src={anaVertical} alt="Ana"/></div>
             <div className="dir-priority-copy">
-              <h1>Buenos días 👋</h1><p>Estas son tus prioridades de hoy.</p>
-              {live.tareasReady&&live.priorities.length?<div className="dir-empty-compact"><AlertTriangle size={17}/><span><strong>{live.priorities.length} prioridades reales disponibles</strong><small>Proceden de Agenda/Tareas y respetan tu ámbito autorizado.</small></span></div>:<div className="dir-empty-compact"><AlertTriangle size={17}/><span><strong>{live.tareasReady?'Sin tareas pendientes visibles':'Prioridades no disponibles'}</strong><small>{live.tareasReady?'No hay tareas pendientes en la fuente visible.':'La fuente canónica no ha podido confirmar prioridades.'}</small></span></div>}
+              <h1>Hola {profileName}, buenos días</h1><p>Estas son tus prioridades de hoy.</p>
+              {live.tareasReady&&live.priorities.length?<div className="dir-empty-compact"><AlertTriangle size={18}/><span><strong>{live.priorities.length} prioridades reales disponibles</strong><small>Proceden de Agenda/Tareas y respetan tu ámbito autorizado.</small></span></div>:<div className="dir-empty-compact"><AlertTriangle size={18}/><span><strong>{live.tareasReady?'Sin tareas pendientes visibles':'Prioridades no disponibles'}</strong><small>{live.tareasReady?'No hay tareas pendientes en la fuente visible.':'La fuente canónica no ha podido confirmar prioridades.'}</small></span></div>}
               <button className="dir-alert-button" onClick={()=>onNavigate('/agenda')}>Ver Agenda/Tareas <span>›</span></button>
             </div>
           </article>
 
           <div className="dir-right-top">
             <section className="dir-kpis">
-              <button className="dir-kpi" onClick={()=>onNavigate('/expedientes')}><FolderOpen size={18}/><span>EXPEDIENTES<br/>EN CURSO</span><strong>{kpiValue(live.expedientesReady,live.openExp)}</strong><small>{live.expedientesReady?'Derivado de estado/fase canónica':'Dato no disponible'}</small></button>
-              <button className="dir-kpi" onClick={()=>onNavigate('/firmas')}><FileCheck2 size={18}/><span>FIRMAS<br/>ESTE MES</span><strong>{kpiValue(live.firmasReady,live.firmasMes)}</strong><small>{live.firmasReady?'Fechas canónicas del mes':'Dato no disponible'}</small></button>
-              <button className="dir-kpi" onClick={()=>onNavigate('/firmas')}><FileCheck2 size={18}/><span>FIRMADOS<br/>ESTE MES</span><strong>{kpiValue(live.firmasReady,live.signedMes)}</strong><small>{live.firmasReady?'Estado + fecha canónicos':'Dato no disponible'}</small></button>
-              <button className="dir-kpi" onClick={()=>onNavigate('/expedientes')}><AlertTriangle size={18}/><span>EN RIESGO</span><strong>{kpiValue(live.expedientesReady,live.riskExp)}</strong><small>{live.expedientesReady?'Solo riesgo explícito visible':'Dato no disponible'}</small></button>
-              <button className="dir-kpi" onClick={()=>onNavigate('/economia')}><Gauge size={18}/><span>HONORARIOS<br/>PENDIENTES</span><strong>—</strong><small>Sin fuente económica suficiente</small></button>
+              <button className="dir-kpi" onClick={()=>onNavigate('/expedientes')}><FolderOpen size={20}/><span>EXPEDIENTES<br/>EN CURSO</span><strong>{kpiValue(live.expedientesReady,live.openExp)}</strong><small>{live.expedientesReady?'Derivado de estado/fase canónica':'Dato no disponible'}</small></button>
+              <button className="dir-kpi" onClick={()=>onNavigate('/firmas')}><FileCheck2 size={20}/><span>FIRMAS<br/>ESTE MES</span><strong>{kpiValue(live.firmasReady,live.firmasMes)}</strong><small>{live.firmasReady?'Fechas canónicas del mes':'Dato no disponible'}</small></button>
+              <button className="dir-kpi" onClick={()=>onNavigate('/firmas')}><FileCheck2 size={20}/><span>FIRMADOS<br/>ESTE MES</span><strong>{kpiValue(live.firmasReady,live.signedMes)}</strong><small>{live.firmasReady?'Estado + fecha canónicos':'Dato no disponible'}</small></button>
+              <button className="dir-kpi" onClick={()=>onNavigate('/expedientes')}><AlertTriangle size={20}/><span>EN RIESGO</span><strong>{kpiValue(live.expedientesReady,live.riskExp)}</strong><small>{live.expedientesReady?'Solo riesgo explícito visible':'Dato no disponible'}</small></button>
+              <button className="dir-kpi" onClick={()=>onNavigate('/economia')}><Gauge size={20}/><span>HONORARIOS<br/>PENDIENTES</span><strong>—</strong><small>Sin fuente económica suficiente</small></button>
             </section>
             <section className="dir-table-card priorities">
               <div className="dir-section-head"><strong>PRIORIDADES Y TAREAS</strong><button onClick={()=>onNavigate('/agenda')}>Ver todas</button></div>
@@ -195,12 +194,7 @@ export default function DirectionDashboard({onNavigate,onLogout,calc,setCalc,res
         <section className="dir-mid-grid">
           <article className="dir-table-card team-card">
             <div className="dir-section-head"><strong>EQUIPO FINANCIERO</strong><div className="dir-team-head-actions"><button aria-label="Anterior" onClick={()=>scrollTeam(-1)}><ChevronLeft size={14}/></button><button aria-label="Siguiente" onClick={()=>scrollTeam(1)}><ChevronRight size={14}/></button><button onClick={()=>onNavigate('/financieros')}>Ver todos</button></div></div>
-            {peopleLoading?<div className="dir-empty-state"><span>Cargando personal…</span></div>:
-              people.length?<div className="dir-team-rail" ref={teamRail}>{people.map(p=><button className="dir-team-person" key={p.name} onClick={()=>onNavigate('/financieros')}>
-                <div className="dir-team-avatar">{initials(p.name)}</div><strong>{p.name}</strong><small>{p.role}</small>
-                <dl><div><dt>Expedientes</dt><dd>{p.expedientes}</dd></div><div><dt>Firmas mes</dt><dd>{p.firmas_mes}</dd></div></dl>
-              </button>)}</div>:
-              <div className="dir-empty-state"><span>Aún no hay personal real con ficha completa.</span><small>{pendingProfiles>0?`${pendingProfiles} identidad(es) TEST quedan ocultas hasta tener perfil real.`:'Cuando se dé de alta personal real, sus fichas aparecerán automáticamente aquí.'}</small><button onClick={()=>onNavigate('/financieros')}>Gestionar financieros</button></div>}
+            {peopleLoading?<div className="dir-empty-state"><span>Cargando personal…</span></div>:people.length?<div className="dir-team-rail" ref={teamRail}>{people.map(p=><button className="dir-team-person" key={p.name} onClick={()=>onNavigate('/financieros')}><div className="dir-team-avatar">{initials(p.name)}</div><strong>{p.name}</strong><small>{p.role}</small><dl><div><dt>Expedientes</dt><dd>{p.expedientes}</dd></div><div><dt>Firmas mes</dt><dd>{p.firmas_mes}</dd></div></dl></button>)}</div>:<div className="dir-empty-state"><span>Aún no hay personal real con ficha completa.</span><small>{pendingProfiles>0?`${pendingProfiles} identidad(es) TEST quedan ocultas hasta tener perfil real.`:'Cuando se dé de alta personal real, sus fichas aparecerán automáticamente aquí.'}</small><button onClick={()=>onNavigate('/financieros')}>Gestionar financieros</button></div>}
           </article>
           <article className="dir-table-card bank-card">
             <div className="dir-section-head"><strong>RANKING BANCOS</strong><button onClick={()=>onNavigate('/bancos')}>Ver análisis completo</button></div>
@@ -209,12 +203,7 @@ export default function DirectionDashboard({onNavigate,onLogout,calc,setCalc,res
         </section>
 
         <section className="dir-quick"><h2>ACCESOS RÁPIDOS</h2><div className="dir-quick-grid">
-          <button onClick={()=>onNavigate('/expedientes/nuevo')}><FolderOpen/>+ Nuevo expediente</button>
-          <button onClick={()=>onNavigate('/contactos/nuevo')}><UserRound/>+ Nuevo contacto</button>
-          <button onClick={()=>onNavigate('/inmobiliarias')}><Building2/>Inmobiliarias</button>
-          <button onClick={()=>onNavigate('/agenda')}><CalendarDays/>Agenda</button>
-          <button onClick={()=>onNavigate('/documentacion')}><FileText/>Documentación</button>
-          <button onClick={()=>onNavigate('/informes')}><BarChart3/>Informes</button>
+          <button onClick={()=>onNavigate('/expedientes/nuevo')}><FolderOpen/>+ Nuevo expediente</button><button onClick={()=>onNavigate('/contactos/nuevo')}><UserRound/>+ Nuevo contacto</button><button onClick={()=>onNavigate('/inmobiliarias')}><Building2/>Inmobiliarias</button><button onClick={()=>onNavigate('/agenda')}><CalendarDays/>Agenda</button><button onClick={()=>onNavigate('/documentacion')}><FileText/>Documentación</button><button onClick={()=>onNavigate('/informes')}><BarChart3/>Informes</button>
         </div></section>
       </div>
     </main>
@@ -222,14 +211,7 @@ export default function DirectionDashboard({onNavigate,onLogout,calc,setCalc,res
     {!calc.open&&<button className="calc-launcher dir-calc-launcher" onClick={()=>setCalc(v=>({...v,open:true,minimized:false}))}><Calculator size={20}/>Calculadora</button>}
     {calc.open&&<section className={calc.minimized?'calc-panel minimized':'calc-panel'} aria-label="Calculadora Hipotecaria">
       <header><div><strong>Calculadora Hipotecaria</strong></div><div className="calc-actions"><button aria-label="Minimizar calculadora" onClick={()=>setCalc(v=>({...v,minimized:!v.minimized}))}><Minimize2 size={17}/></button><button aria-label="Cerrar calculadora" onClick={()=>setCalc(v=>({...v,open:false}))}><X size={17}/></button></div></header>
-      {!calc.minimized&&<div className="calc-body"><div className="calc-grid">
-        <label>Importe €<input type="number" min="1" value={calc.principal} onChange={e=>setCalc(v=>({...v,principal:Number(e.target.value)}))}/></label>
-        <label>TIN anual %<input type="number" min="0" step="0.01" value={calc.rate} onChange={e=>setCalc(v=>({...v,rate:Number(e.target.value)}))}/></label>
-        <label>Plazo años<input type="number" min="1" value={calc.years} onChange={e=>setCalc(v=>({...v,years:Number(e.target.value)}))}/></label>
-        <label>Precio compra €<input type="number" min="0" value={calc.purchasePrice} onChange={e=>setCalc(v=>({...v,purchasePrice:e.target.value===''?'':Number(e.target.value)}))}/></label>
-        <label>Ingresos netos €/mes<input type="number" min="0" value={calc.income} onChange={e=>setCalc(v=>({...v,income:e.target.value===''?'':Number(e.target.value)}))}/></label>
-        <label>Otras cuotas €/mes<input type="number" min="0" value={calc.other} onChange={e=>setCalc(v=>({...v,other:e.target.value===''?'':Number(e.target.value)}))}/></label>
-      </div>{result?<div className="result-box"><div><span>Cuota estimada</span><strong>{result.monthlyPayment.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})} €</strong></div><div className="result-row"><span>Total pagado <b>{result.totalPaid.toLocaleString('es-ES')} €</b></span><span>Intereses <b>{result.estimatedInterest.toLocaleString('es-ES')} €</b></span></div>{result.financingPct!==null&&<div className="result-row"><span>Financiación <b>{result.financingPct}%</b></span>{result.effortPct!==null&&<span>Esfuerzo <b>{result.effortPct}%</b></span>}</div>}{result.warnings.map(w=><div className="warning" key={w}>{w}</div>)}</div>:<div className="warning">Revisa importe, plazo y tipo.</div>}<p className="calc-note">Simulación orientativa. No implica aprobación bancaria.</p></div>}
+      {!calc.minimized&&<div className="calc-body"><div className="calc-grid"><label>Importe €<input type="number" min="1" value={calc.principal} onChange={e=>setCalc(v=>({...v,principal:Number(e.target.value)}))}/></label><label>TIN anual %<input type="number" min="0" step="0.01" value={calc.rate} onChange={e=>setCalc(v=>({...v,rate:Number(e.target.value)}))}/></label><label>Plazo años<input type="number" min="1" value={calc.years} onChange={e=>setCalc(v=>({...v,years:Number(e.target.value)}))}/></label><label>Precio compra €<input type="number" min="0" value={calc.purchasePrice} onChange={e=>setCalc(v=>({...v,purchasePrice:e.target.value===''?'':Number(e.target.value)}))}/></label><label>Ingresos netos €/mes<input type="number" min="0" value={calc.income} onChange={e=>setCalc(v=>({...v,income:e.target.value===''?'':Number(e.target.value)}))}/></label><label>Otras cuotas €/mes<input type="number" min="0" value={calc.other} onChange={e=>setCalc(v=>({...v,other:e.target.value===''?'':Number(e.target.value)}))}/></label></div>{result?<div className="result-box"><div><span>Cuota estimada</span><strong>{result.monthlyPayment.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})} €</strong></div><div className="result-row"><span>Total pagado <b>{result.totalPaid.toLocaleString('es-ES')} €</b></span><span>Intereses <b>{result.estimatedInterest.toLocaleString('es-ES')} €</b></span></div>{result.financingPct!==null&&<div className="result-row"><span>Financiación <b>{result.financingPct}%</b></span>{result.effortPct!==null&&<span>Esfuerzo <b>{result.effortPct}%</b></span>}</div>}{result.warnings.map(w=><div className="warning" key={w}>{w}</div>)}</div>:<div className="warning">Revisa importe, plazo y tipo.</div>}<p className="calc-note">Simulación orientativa. No implica aprobación bancaria.</p></div>}
     </section>}
   </div>;
 }
