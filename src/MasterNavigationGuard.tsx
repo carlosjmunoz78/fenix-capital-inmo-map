@@ -1,27 +1,10 @@
 import { useEffect } from 'react';
+import { fetchAppApi } from './supabase';
 
-const masterNavigation=[
-  {label:'Inicio',route:'/inicio'},
-  {label:'Expedientes',route:'/expedientes'},
-  {label:'Bancos',route:'/bancos'},
-  {label:'Contactos',route:'/contactos'},
-  {label:'Inmobiliarias',route:'/inmobiliarias'},
-  {label:'Tasaciones',route:'/tasaciones'},
-  {label:'Firmas',route:'/firmas'},
-  {label:'Documentación',route:'/documentacion'},
-  {label:'Financieros',route:'/financieros'},
-  {label:'Visitadores',route:'/visitadores'},
-  {label:'Obras Nuevas',route:'/obras-nuevas'},
-  {label:'Herencias',route:'/herencias'},
-  {label:'Agenda',route:'/agenda'},
-  {label:'Economía',route:'/economia'},
-  {label:'Informes',route:'/informes'},
-  {label:'Notarías',route:'/notarias'},
-  {label:'Registros de la Propiedad',route:'/registros-propiedad'},
-  {label:'Comunicaciones',route:'/comunicaciones'},
-  {label:'Notificaciones',route:'/notificaciones'},
-  {label:'Mi perfil',route:'/perfil'}
-] as const;
+type NavItem={label?:string;route?:string};
+type NavResponse={items?:NavItem[]};
+
+type MasterItem={label:string;route:string};
 
 function normalizeLabel(value:string){return value.replace(/\s+/g,' ').trim().toLocaleLowerCase('es');}
 function navigateTo(route:string){
@@ -36,51 +19,75 @@ function setButtonLabel(button:HTMLButtonElement,label:string){
   if(span)span.textContent=label;
   else button.textContent=label;
 }
-function enforceNavigation(nav:HTMLElement){
+function isMasterNavigation(items:MasterItem[]){
+  const routes=new Set(items.map(item=>item.route));
+  return routes.has('/obras-nuevas')&&routes.has('/herencias')&&routes.has('/perfil');
+}
+function enforceNavigation(nav:HTMLElement,masterNavigation:MasterItem[]){
   const buttons=Array.from(nav.querySelectorAll(':scope > button')).filter((node):node is HTMLButtonElement=>node instanceof HTMLButtonElement);
   if(!buttons.length)return;
-
   const desired=masterNavigation.map(item=>normalizeLabel(item.label));
   const current=buttons.map(button=>normalizeLabel(button.textContent||''));
   if(current.length===desired.length&&current.every((value,index)=>value===desired[index]))return;
-
   const existing=new Map<string,HTMLButtonElement>();
   for(const button of buttons){
     const label=normalizeLabel(button.textContent||'');
     if(label&&!existing.has(label))existing.set(label,button);
   }
-
+  const aliases=new Map<string,string>([['notificaciones','avisos']]);
   const template=buttons[0];
   const fragment=document.createDocumentFragment();
   for(const item of masterNavigation){
     const key=normalizeLabel(item.label);
-    let button=existing.get(key);
+    const alias=aliases.get(key);
+    let button=existing.get(key)||(alias?existing.get(alias):undefined);
     if(!button){
       button=template.cloneNode(true) as HTMLButtonElement;
       button.classList.remove('active');
       button.removeAttribute('aria-current');
       setButtonLabel(button,item.label);
       button.addEventListener('click',event=>{event.preventDefault();navigateTo(item.route)});
+    }else if(normalizeLabel(button.textContent||'')!==key){
+      setButtonLabel(button,item.label);
     }
     button.dataset.masterRoute=item.route;
+    const pathname=window.location.pathname;
+    const active=pathname.endsWith(item.route)||pathname.includes(`${item.route}/`);
+    button.classList.toggle('active',active);
+    if(active)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');
     fragment.appendChild(button);
   }
-
   nav.replaceChildren(fragment);
-}
-function apply(){
-  document.querySelectorAll<HTMLElement>('.dir-nav,.sidebar nav,.ops-side nav').forEach(enforceNavigation);
 }
 
 export default function MasterNavigationGuard(){
   useEffect(()=>{
-    let raf=0;
+    let alive=true,observer:MutationObserver|null=null,raf=0;
+    let masterNavigation:MasterItem[]=[];
+    const apply=()=>{
+      if(!masterNavigation.length)return;
+      document.querySelectorAll<HTMLElement>('.dir-nav,.sidebar nav,.ops-side nav').forEach(nav=>enforceNavigation(nav,masterNavigation));
+    };
     const schedule=()=>{if(raf)return;raf=requestAnimationFrame(()=>{raf=0;apply()})};
-    apply();
-    const observer=new MutationObserver(schedule);
-    observer.observe(document.body,{childList:true,subtree:true});
-    window.addEventListener('popstate',schedule);
-    return()=>{observer.disconnect();window.removeEventListener('popstate',schedule);if(raf)cancelAnimationFrame(raf)};
+    fetchAppApi<NavResponse>('/navigation').then(result=>{
+      if(!alive||result.status!==200||!Array.isArray(result.data?.items))return;
+      const items=result.data.items
+        .filter((item):item is Required<NavItem>=>Boolean(item&&typeof item.label==='string'&&typeof item.route==='string'))
+        .map(item=>({label:item.label.trim(),route:item.route.trim()}))
+        .filter(item=>item.label&&item.route);
+      if(!isMasterNavigation(items))return;
+      masterNavigation=items;
+      apply();
+      observer=new MutationObserver(schedule);
+      observer.observe(document.body,{childList:true,subtree:true});
+      window.addEventListener('popstate',schedule);
+    }).catch(()=>{});
+    return()=>{
+      alive=false;
+      observer?.disconnect();
+      window.removeEventListener('popstate',schedule);
+      if(raf)cancelAnimationFrame(raf);
+    };
   },[]);
   return null;
 }
