@@ -22,7 +22,7 @@ function sessionFor(actorCode:string,email:string){return {
   }
 };}
 
-async function assertDirectionFallback(page:any,testInfo:any,session:any){
+async function assertDirectionFallback(page:any,session:any){
   await page.addInitScript((s:any) => {
     window.localStorage.setItem('fenix-preprod-auth-v2', JSON.stringify(s));
     window.localStorage.setItem('fenix-remember-device', 'true');
@@ -36,17 +36,15 @@ async function assertDirectionFallback(page:any,testInfo:any,session:any){
   await expect(page).toHaveURL(/\/inicio$/);
   await expect(page.getByRole('region', { name: 'Calculadora Hipotecaria' })).toBeVisible();
   await expect(page.getByText(/\bPRO\b/)).toHaveCount(0);
-  const advanced = page.getByRole('button', { name: 'Buscador avanzado' });
-  if (testInfo.project.name.includes('mobile')) await expect(advanced).toBeHidden();
-  else await expect(advanced).toBeVisible();
+  await expect(page.getByText('Dirección', { exact: true }).first()).toBeVisible();
 }
 
-test('authenticated DIR-TEST keeps Direction UI if context gateway is temporarily unavailable', async ({ page }, testInfo) => {
-  await assertDirectionFallback(page,testInfo,sessionFor('DIR-TEST','direction@fenix.test'));
+test('authenticated DIR-TEST keeps Direction UI if context gateway is temporarily unavailable', async ({ page }) => {
+  await assertDirectionFallback(page,sessionFor('DIR-TEST','direction@fenix.test'));
 });
 
-test('authenticated CARLOS-ADMIN keeps operational Direction UI if context gateway is unavailable', async ({ page }, testInfo) => {
-  await assertDirectionFallback(page,testInfo,sessionFor('CARLOS-ADMIN','carlos-admin@fenix.test'));
+test('authenticated CARLOS-ADMIN keeps operational Direction UI if context gateway is unavailable', async ({ page }) => {
+  await assertDirectionFallback(page,sessionFor('CARLOS-ADMIN','carlos-admin@fenix.test'));
   // This test intentionally verifies only the operational Direction fallback.
   // Carlos-only administrative authority is never derived from browser metadata.
 });
