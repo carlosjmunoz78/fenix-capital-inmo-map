@@ -19,6 +19,7 @@ import './theme-consistency.css';
 import './direction-master-sizing.css';
 import './navigation-readability.css';
 import './direction-ana-live.css';
+import './direction-ana-half.css';
 import App from './App';
 import RoleHomeShell from './RoleHomeShell';
 import ProfileShell from './ProfileShell';
