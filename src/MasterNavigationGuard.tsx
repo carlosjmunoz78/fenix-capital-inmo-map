@@ -20,7 +20,6 @@ const masterNavigation=[
   {label:'Registros de la Propiedad',route:'/registros-propiedad'},
   {label:'Comunicaciones',route:'/comunicaciones'},
   {label:'Notificaciones',route:'/notificaciones'},
-  {label:'Ajustes',route:'/ajustes'},
   {label:'Mi perfil',route:'/perfil'}
 ] as const;
 
