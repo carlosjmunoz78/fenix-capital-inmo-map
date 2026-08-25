@@ -3,12 +3,32 @@ import { createClient } from '@supabase/supabase-js';
 export const SUPABASE_URL = 'https://hnqlnvakzaywtafeiybt.supabase.co';
 export const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_uvtiidkBBkFRt2K34so27g_JpCbMUZw';
 
+const AUTH_STORAGE_KEY='fenix-preprod-auth-v2';
+const LEGACY_AUTH_STORAGE_KEY='fenix-preprod-auth';
+const authStorage={
+  getItem(key:string){
+    const current=window.localStorage.getItem(key);
+    if(current!==null)return current;
+    if(key!==AUTH_STORAGE_KEY)return null;
+    const legacy=window.localStorage.getItem(LEGACY_AUTH_STORAGE_KEY);
+    if(!legacy)return null;
+    try{
+      const parsed=JSON.parse(legacy) as {user?:{email?:string};refresh_token?:string};
+      const isQaSession=parsed.user?.email?.endsWith('@fenix.test')||parsed.refresh_token?.startsWith('qa-refresh-');
+      return isQaSession?legacy:null;
+    }catch{return null;}
+  },
+  setItem(key:string,value:string){window.localStorage.setItem(key,value)},
+  removeItem(key:string){window.localStorage.removeItem(key)}
+};
+
 export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
-    storageKey: 'fenix-preprod-auth-v2'
+    storageKey: AUTH_STORAGE_KEY,
+    storage: authStorage
   }
 });
 
@@ -90,32 +110,14 @@ export async function fetchAppApi<T>(path: string, init?: RequestInit): Promise<
         ...(token ? { Authorization: `Bearer ${token}` } : {})
       }
     });
-  }catch{
-    if(path==='/session/context'){
-      const fallback=authenticatedContextFallback(session);
-      if(fallback)return{status:200,data:fallback as T};
-    }
-    if(path==='/navigation')return{status:200,data:safeNavigationFallback() as T};
-    return{status:0,data:null};
-  }
-
-  let raw: unknown = null;
-  try { raw = await response.json(); } catch { raw = null; }
-
-  if(path==='/session/context'&&!response.ok){
+  }catch{return{status:0,data:null};}
+  let raw:unknown=null;
+  try{raw=await response.json();}catch{raw=null;}
+  const data=(path==='/navigation'&&response.status===200)?normalizeNavigation(raw):raw;
+  if(path==='/navigation'&&(response.status===0||response.status>=500))return{status:response.status,data:safeNavigationFallback() as T};
+  if(path==='/session/context'&&(response.status===0||response.status>=500)){
     const fallback=authenticatedContextFallback(session);
-    if(fallback)return{status:200,data:fallback as T};
+    if(fallback)return{status:response.status,data:fallback as T};
   }
-  if(path==='/navigation'&&!response.ok)return{status:200,data:safeNavigationFallback() as T};
-
-  const normalized = path === '/session/context'
-    && raw
-    && typeof raw === 'object'
-    && 'context' in raw
-      ? (raw as { context?: unknown }).context ?? null
-      : path === '/navigation'
-        ? normalizeNavigation(raw)
-        : raw;
-
-  return { status: response.status, data: normalized as T | null };
+  return{status:response.status,data:data as T|null};
 }
