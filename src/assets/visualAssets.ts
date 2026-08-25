@@ -1,4 +1,4 @@
-import anaInicioUrl from './ana-inicio-user.webp';
+import anaInicioUrl from './ana-vertical.svg';
 import anaAvatarBase64 from './anaAvatarBase64';
 import fenixLogoUrl from './fenix-phoenix.svg';
 
