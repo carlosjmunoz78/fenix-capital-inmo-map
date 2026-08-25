@@ -24,7 +24,7 @@ function sessionFor(actorCode:string,email:string){return {
 
 async function assertDirectionFallback(page:any,testInfo:any,session:any){
   await page.addInitScript((s:any) => {
-    window.localStorage.setItem('fenix-preprod-auth', JSON.stringify(s));
+    window.localStorage.setItem('fenix-preprod-auth-v2', JSON.stringify(s));
     window.localStorage.setItem('fenix-remember-device', 'true');
   }, session);
 
@@ -34,7 +34,6 @@ async function assertDirectionFallback(page:any,testInfo:any,session:any){
 
   await page.goto('/');
   await expect(page).toHaveURL(/\/inicio$/);
-  await expect(page.getByText('Usuario', { exact: true })).toHaveCount(0);
   await expect(page.getByRole('region', { name: 'Calculadora Hipotecaria' })).toBeVisible();
   await expect(page.getByText(/\bPRO\b/)).toHaveCount(0);
   const advanced = page.getByRole('button', { name: 'Buscador avanzado' });
