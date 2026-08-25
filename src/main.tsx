@@ -81,6 +81,7 @@ import DirectionAnaInsight from './DirectionAnaInsight';
 import DirectionExecutiveOverviewGuard from './DirectionExecutiveOverviewGuard';
 import DirectionAnaUrgentGuard from './DirectionAnaUrgentGuard';
 import AnaKnowledgeBlock from './AnaKnowledgeBlock';
+import MasterNavigationGuard from './MasterNavigationGuard';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -102,6 +103,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <DirectionExecutiveOverviewGuard />
       <DirectionAnaUrgentGuard />
       <AnaKnowledgeBlock />
+      <MasterNavigationGuard />
       <AnaUniversalGuard />
       <AnaInboxAccessGuard />
       <ContextEvidenceUpload />
