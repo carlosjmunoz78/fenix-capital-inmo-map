@@ -1,4 +1,4 @@
-import anaVerticalUploaded from './ana-vertical-uploaded.webp';
+import anaVerticalUploaded from './ana-vertical-fixed.webp';
 import anaAvatarBase64 from './anaAvatarBase64';
 import fenixLogoUrl from './fenix-phoenix.svg';
 
