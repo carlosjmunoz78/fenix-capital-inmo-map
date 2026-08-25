@@ -8,7 +8,7 @@ const session={
 
 test('shell operativo mantiene navegación autorizada, tema y calculadora utilizables en móvil',async({page},testInfo)=>{
  if(!testInfo.project.name.includes('mobile'))test.skip();
- await page.addInitScript(s=>{localStorage.setItem('fenix-preprod-auth',JSON.stringify(s));localStorage.setItem('fenix-remember-device','true');},session);
+ await page.addInitScript(s=>{localStorage.setItem('fenix-preprod-auth-v2',JSON.stringify(s));localStorage.setItem('fenix-remember-device','true');},session);
  await page.route('**/functions/v1/fenix-app-gateway-test/**',async r=>{
   const u=r.request().url();
   if(u.endsWith('/session/context'))return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({actor_code:'FIN-A',role:'Financiero'})});
@@ -25,6 +25,9 @@ test('shell operativo mantiene navegación autorizada, tema y calculadora utiliz
  await expect(nav.getByRole('button',{name:'Bancos',exact:true})).toBeVisible();
  await shell.getByRole('button',{name:'Cambiar tema'}).click();
  await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
+ await expect(page.getByRole('region',{name:'Calculadora Hipotecaria'})).toHaveCount(0);
+ await expect(page.getByRole('button',{name:'Calculadora'})).toBeVisible();
+ await page.getByRole('button',{name:'Calculadora'}).click();
  await expect(page.getByRole('region',{name:'Calculadora Hipotecaria'})).toBeVisible();
  await nav.getByRole('button',{name:'Bancos',exact:true}).click();
  await expect(page).toHaveURL(/\/bancos$/);

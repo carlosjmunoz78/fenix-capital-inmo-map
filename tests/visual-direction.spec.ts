@@ -18,7 +18,7 @@ const navigation={items:[
 test.describe('Fénix PRE-PROD · contrato visual Inicio Dirección',()=>{
   test('Inicio conserva patrón maestro, identidad real, escala legible y tema persistente',async({page},testInfo)=>{
     if(!testInfo.project.name.includes('desktop'))test.skip();
-    await page.addInitScript(session=>{window.localStorage.setItem('fenix-preprod-auth',JSON.stringify(session));window.localStorage.setItem('fenix-remember-device','true');},fakeSession);
+    await page.addInitScript(session=>{window.localStorage.setItem('fenix-preprod-auth-v2',JSON.stringify(session));window.localStorage.setItem('fenix-remember-device','true');},fakeSession);
     await page.route('**/functions/v1/fenix-app-gateway-test/**',async route=>{
       const u=route.request().url();
       if(u.endsWith('/session/context'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({actor_code:'DIR-TEST',role:'Direccion'})});
@@ -47,7 +47,8 @@ test.describe('Fénix PRE-PROD · contrato visual Inicio Dirección',()=>{
     await expect(kpis.getByRole('button',{name:/HONORARIOS\s+PENDIENTES/i}).locator('strong')).toHaveText('—');
     await expect(page.getByText('ACCESOS RÁPIDOS')).toBeVisible();
     await expect(page.getByRole('button',{name:'Inmobiliarias',exact:true}).last()).toBeVisible();
-    await expect(page.getByRole('region',{name:'Calculadora Hipotecaria'})).toBeVisible();
+    await expect(page.getByRole('region',{name:'Calculadora Hipotecaria'})).toHaveCount(0);
+    await expect(page.getByRole('button',{name:'Calculadora'})).toBeVisible();
     await expect(page.getByText(/\bPRO\b/)).toHaveCount(0);
     const sidebar=page.locator('.dir-sidebar');
     await expect(sidebar).toBeVisible();

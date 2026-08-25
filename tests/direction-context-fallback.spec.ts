@@ -34,7 +34,8 @@ async function assertFailClosedContext(page:any,session:any){
 
   await page.goto('/');
   await expect(page).toHaveURL(/\/inicio$/);
-  await expect(page.getByRole('region', { name: 'Calculadora Hipotecaria' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Calculadora Hipotecaria' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Calculadora' })).toBeVisible();
   await expect(page.getByText(/\bPRO\b/)).toHaveCount(0);
   await expect(page.getByText('Dirección', { exact: true })).toHaveCount(0);
 }
