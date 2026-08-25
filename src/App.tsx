@@ -10,6 +10,7 @@ import './direction.css';
 
 type Theme = 'light' | 'dark';
 type SessionContext = { actor_code?: string; role?: string; worker_id?: string; [key: string]: unknown };
+type SessionContextPayload = SessionContext | { context?: SessionContext; [key: string]: unknown };
 type NavItem = { label: string; route: string; resource?: string };
 type NavData = { items?: Array<{ label?: string; route?: string; resource?: string }>; [key: string]: unknown };
 type CalcState = {
@@ -24,7 +25,7 @@ type CalcState = {
 };
 
 const fallbackMenu: NavItem[] = [{ label:'Inicio', route:'/inicio' }];
-const defaultCalc: CalcState = { principal: 100000, rate: 3, years: 30, purchasePrice: '', income: '', other: '', open: true, minimized: false };
+const defaultCalc: CalcState = { principal: 100000, rate: 3, years: 30, purchasePrice: '', income: '', other: '', open: false, minimized: false };
 const testLoginAliases: Record<string,string> = {
   fina: 'fin-a@test.fenixcapital.es',
   finb: 'fin-b@test.fenixcapital.es',
@@ -37,6 +38,13 @@ function resolveLogin(value:string){
   if(trimmed.includes('@')) return trimmed;
   const alias=trimmed.replace(/[\s_-]+/g,'');
   return testLoginAliases[alias] || '';
+}
+
+function unwrapSessionContext(data:SessionContextPayload|null|undefined):SessionContext|null{
+  if(!data || typeof data!=='object') return null;
+  const nested=(data as {context?:unknown}).context;
+  if(nested && typeof nested==='object') return nested as SessionContext;
+  return data as SessionContext;
 }
 
 const passwordFieldWrapStyle = { position:'relative' as const };
@@ -111,12 +119,15 @@ export default function App(){
     suppressCalcPersistence.current = false;
     const key=`fenix-calc:${session.user.id}`;
     const saved=sessionStorage.getItem(key);
-    if(saved){try{setCalc({...defaultCalc,...JSON.parse(saved)})}catch{setCalc(defaultCalc)}} else setCalc(defaultCalc);
+    if(saved){
+      try{setCalc({...defaultCalc,...JSON.parse(saved),open:false,minimized:false})}
+      catch{setCalc(defaultCalc)}
+    } else setCalc(defaultCalc);
     Promise.all([
-      fetchAppApi<SessionContext>('/session/context'),
+      fetchAppApi<SessionContextPayload>('/session/context'),
       fetchAppApi<NavData>('/navigation')
     ]).then(([c,n])=>{
-      setCtx(c.status===200?c.data:null);
+      setCtx(c.status===200?unwrapSessionContext(c.data):null);
       setNav(n.status===200?n.data:null);
     });
   },[session?.user?.id,passwordRecovery]);
