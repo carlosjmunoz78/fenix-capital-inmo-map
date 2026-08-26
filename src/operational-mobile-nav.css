@@ -9,5 +9,5 @@
   .ops-root:not(.role-home)>.ops-main{height:100vh}
   .ops-root:not(.role-home) .ops-content{padding-top:66px}
   .ops-root[data-theme='dark']:not(.role-home)>.ops-side{background:#202023;border-bottom-color:#343438}
-  html.exp-master-active .ops-root:not(.role-home)>.ops-side{z-index:1000!important}
+  html.exp-master-active .ops-root:not(.role-home)>.ops-side{z-index:10001!important}
 }
