@@ -1,31 +1,8 @@
 import { useEffect } from 'react';
 import { fetchAppApi } from './supabase';
+import { normalizeNavigation, orderAuthorizedNavigation, type NavItem } from './masterNavigation';
 
-type NavItem={label?:string;route?:string};
-type NavResponse={items?:NavItem[]};
-type MasterItem={label:string;route:string};
-
-const MASTER_ORDER:MasterItem[]=[
-  {label:'Inicio',route:'/inicio'},
-  {label:'Expedientes',route:'/expedientes'},
-  {label:'Bancos',route:'/bancos'},
-  {label:'Contactos',route:'/contactos'},
-  {label:'Inmobiliarias',route:'/inmobiliarias'},
-  {label:'Tasaciones',route:'/tasaciones'},
-  {label:'Firmas',route:'/firmas'},
-  {label:'Documentación',route:'/documentacion'},
-  {label:'Financieros',route:'/financieros'},
-  {label:'Visitadores',route:'/visitadores'},
-  {label:'Obras Nuevas',route:'/obras-nuevas'},
-  {label:'Herencias',route:'/herencias'},
-  {label:'Agenda',route:'/agenda'},
-  {label:'Economía',route:'/economia'},
-  {label:'Informes',route:'/informes'},
-  {label:'Notarías',route:'/notarias'},
-  {label:'Registros de la Propiedad',route:'/registros-propiedad'},
-  {label:'Comunicaciones',route:'/comunicaciones'},
-  {label:'Notificaciones',route:'/notificaciones'}
-];
+type NavResponse={items?:unknown[]};
 
 function normalizeLabel(value:string){return value.replace(/\s+/g,' ').trim().toLocaleLowerCase('es');}
 function navigateTo(route:string){
@@ -40,21 +17,14 @@ function setButtonLabel(button:HTMLButtonElement,label:string){
   if(span)span.textContent=label;
   else button.textContent=label;
 }
-function directionNavigation(items:MasterItem[]){
-  const authorized=new Set(items.map(item=>item.route));
-  const isDirection=authorized.has('/financieros')&&authorized.has('/economia')&&authorized.has('/comunicaciones');
-  if(!isDirection)return [];
-  const visualAdditions=new Set(['/obras-nuevas','/herencias','/registros-propiedad']);
-  return MASTER_ORDER.filter(item=>authorized.has(item.route)||visualAdditions.has(item.route));
-}
-function markManaged(nav:HTMLElement,buttons:HTMLButtonElement[],desiredNavigation:MasterItem[]){
+function markManaged(nav:HTMLElement,buttons:HTMLButtonElement[],desiredNavigation:NavItem[]){
   nav.dataset.masterNavigation='true';
   buttons.forEach((button,index)=>{
     const item=desiredNavigation[index];
     if(item)button.dataset.masterRoute=item.route;
   });
 }
-function enforceNavigation(nav:HTMLElement,desiredNavigation:MasterItem[]){
+function enforceNavigation(nav:HTMLElement,desiredNavigation:NavItem[]){
   const buttons=Array.from(nav.querySelectorAll(':scope > button')).filter((node):node is HTMLButtonElement=>node instanceof HTMLButtonElement);
   if(!buttons.length)return;
   const desired=desiredNavigation.map(item=>normalizeLabel(item.label));
@@ -101,19 +71,15 @@ function enforceNavigation(nav:HTMLElement,desiredNavigation:MasterItem[]){
 export default function MasterNavigationGuard(){
   useEffect(()=>{
     let alive=true,observer:MutationObserver|null=null,raf=0;
-    let desiredNavigation:MasterItem[]=[];
+    let desiredNavigation:NavItem[]=[];
     const apply=()=>{
       if(!desiredNavigation.length)return;
       document.querySelectorAll<HTMLElement>('.dir-nav,.ops-side nav').forEach(nav=>enforceNavigation(nav,desiredNavigation));
     };
     const schedule=()=>{if(raf)return;raf=requestAnimationFrame(()=>{raf=0;apply()})};
     fetchAppApi<NavResponse>('/navigation').then(result=>{
-      if(!alive||result.status!==200||!Array.isArray(result.data?.items))return;
-      const items=result.data.items
-        .filter((item):item is Required<NavItem>=>Boolean(item&&typeof item.label==='string'&&typeof item.route==='string'))
-        .map(item=>({label:item.label.trim(),route:item.route.trim()}))
-        .filter(item=>item.label&&item.route);
-      desiredNavigation=directionNavigation(items);
+      if(!alive||result.status!==200)return;
+      desiredNavigation=orderAuthorizedNavigation(normalizeNavigation(result.data));
       if(!desiredNavigation.length)return;
       apply();
       observer=new MutationObserver(schedule);
