@@ -73,6 +73,7 @@ export default function App(){
   const [ctx,setCtx]=useState<SessionContext|null>(null);
   const [nav,setNav]=useState<NavData|null>(null);
   const [authReady,setAuthReady]=useState(false);
+  const [workspaceReady,setWorkspaceReady]=useState(false);
   const [loginId,setLoginId]=useState('');
   const [password,setPassword]=useState('');
   const [showPassword,setShowPassword]=useState(false);
@@ -115,8 +116,9 @@ export default function App(){
   },[]);
 
   useEffect(()=>{
-    if(!session?.user?.id){setCtx(null);setNav(null);setCalc(defaultCalc);return;}
+    if(!session?.user?.id){setCtx(null);setNav(null);setWorkspaceReady(false);setCalc(defaultCalc);return;}
     if(passwordRecovery)return;
+    setWorkspaceReady(false);
     suppressCalcPersistence.current = false;
     const key=`fenix-calc:${session.user.id}`;
     const saved=sessionStorage.getItem(key);
@@ -130,7 +132,7 @@ export default function App(){
     ]).then(([c,n])=>{
       setCtx(c.status===200?unwrapSessionContext(c.data):null);
       setNav(n.status===200?n.data:null);
-    });
+    }).finally(()=>setWorkspaceReady(true));
   },[session?.user?.id,passwordRecovery]);
 
   useEffect(()=>{
@@ -232,13 +234,14 @@ export default function App(){
     suppressCalcPersistence.current = true;
     if(uid)sessionStorage.removeItem(`fenix-calc:${uid}`);
     sessionStorage.removeItem('fenix-session-active');
-    setCtx(null);setNav(null);setPassword('');setShowPassword(false);
+    setCtx(null);setNav(null);setWorkspaceReady(false);setPassword('');setShowPassword(false);
     await supabase.auth.signOut();
     setCalc(defaultCalc);
     navigate('/',{replace:true});
   }
 
   if(!authReady)return <TransitionScreen/>;
+  if(session && !passwordRecovery && !workspaceReady)return <TransitionScreen/>;
 
   if(passwordRecovery)return <div className="auth-shell">
     <button className="theme-toggle auth-theme" onClick={()=>setTheme(theme==='light'?'dark':'light')} aria-label="Cambiar tema">{theme==='light'?<Moon size={18}/>:<Sun size={18}/>}<span>{theme==='light'?'Oscuro':'Claro'}</span></button>
