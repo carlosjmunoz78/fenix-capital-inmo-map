@@ -3,8 +3,7 @@ import {useLocation,useNavigate} from 'react-router-dom';
 import {Building2} from 'lucide-react';
 import {fetchAppApi,supabase} from './supabase';
 import {normalizeNavigation,orderAuthorizedNavigation,type NavItem} from './masterNavigation';
-import OperationalSidebar from './OperationalSidebar';
-import OperationalTopbar from './OperationalTopbar';
+import OperationalShellFrame from './OperationalShellFrame';
 import './operational.css';
 import './notarias-polish.css';
 
@@ -26,14 +25,8 @@ export default function RegistrosPropiedadShell(){
  async function logout(){await supabase.auth.signOut();window.location.href=import.meta.env.BASE_URL;}
  const role=ctx?.role||'Usuario';
 
- return <div className="ops-root notarias-root" data-theme={theme}>
-  <OperationalSidebar navigation={effectiveNav} activeRoute={ROUTE} anaSubtitle="Te ayudo con registros y documentación."/>
-  <main className="ops-main">
-   <OperationalTopbar theme={theme} onToggleTheme={()=>setTheme(theme==='light'?'dark':'light')} query={q} onQueryChange={setQ} placeholder="Buscar registro, localidad..." name={role} role="" initials={role.slice(0,2).toUpperCase()} onLogout={logout}/>
-   <section className="ops-content notarias-content">
-    <div className="ops-title"><div><span className="ops-icon"><Building2 size={20}/></span><div><small>MÓDULO PENDIENTE</small><h1>Registros de la Propiedad</h1><p>La navegación ya respeta el contrato global autorizado. El módulo funcional completo se construirá en su fase final.</p></div></div></div>
-    <div className="ops-empty" data-testid="property-registry-placeholder"><strong>Módulo todavía no desarrollado</strong><span>Listado, alta, ficha editable y personal asociado se incorporarán al final, siguiendo el patrón de Inmobiliarias y sin inventar datos.</span></div>
-   </section>
-  </main>
- </div>;
+ return <OperationalShellFrame className="notarias-root" theme={theme} navigation={effectiveNav} activeRoute={ROUTE} anaSubtitle="Te ayudo con registros y documentación." query={q} onQueryChange={setQ} searchPlaceholder="Buscar registro, localidad..." name={role} role="" initials={role.slice(0,2).toUpperCase()} onToggleTheme={()=>setTheme(theme==='light'?'dark':'light')} onLogout={logout} contentClassName="notarias-content">
+  <div className="ops-title"><div><span className="ops-icon"><Building2 size={20}/></span><div><small>MÓDULO PENDIENTE</small><h1>Registros de la Propiedad</h1><p>La navegación ya respeta el contrato global autorizado. El módulo funcional completo se construirá en su fase final.</p></div></div></div>
+  <div className="ops-empty" data-testid="property-registry-placeholder"><strong>Módulo todavía no desarrollado</strong><span>Listado, alta, ficha editable y personal asociado se incorporarán al final, siguiendo el patrón de Inmobiliarias y sin inventar datos.</span></div>
+ </OperationalShellFrame>;
 }
