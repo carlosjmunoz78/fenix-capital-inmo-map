@@ -1,8 +1,10 @@
 import {FormEvent,useEffect,useMemo,useState} from 'react';
 import {useLocation,useNavigate} from 'react-router-dom';
-import {ArrowLeft,FolderPlus,LogOut,Moon,Save,Sun} from 'lucide-react';
+import {FolderPlus,LogOut,Moon,Save,Sun} from 'lucide-react';
 import {fetchAppApi,SUPABASE_URL,supabase} from './supabase';
-import {anaAvatar,fenixLogo} from './assets/visualAssets';
+import {anaAvatar} from './assets/visualAssets';
+import OperationalShellFrame from './OperationalShellFrame';
+import type {NavItem} from './masterNavigation';
 import './operational.css';
 
 type Theme='light'|'dark';
@@ -10,6 +12,8 @@ type Ctx={actor_code?:string;role?:string};
 type Assignee={actor_code:string;name:string;role:string};
 type PersonalResponse={items?:Array<{actor_code?:string;name?:string;role?:string}>};
 type CreateResponse={ok?:boolean;id?:string;destino?:string;error?:string;cliente_id?:string;cliente_destino?:string;cliente_reutilizado?:boolean};
+
+const expedienteCreateNav:NavItem[]=[{label:'← Volver a Expedientes',route:'/expedientes'}];
 
 async function createExpediente(payload:Record<string,unknown>){
  const{data:{session}}=await supabase.auth.getSession();if(!session?.access_token)return{status:401,data:null as CreateResponse|null};
@@ -31,21 +35,34 @@ export default function ExpedienteCreateShell(){
  function edit(){setPreview(false);setMessage('');setResult(null);}
  async function submit(e:FormEvent){e.preventDefault();if(!valid)return;if(!preview){setPreview(true);setMessage('');return;}setBusy(true);setMessage('');const r=await createExpediente(payload);setBusy(false);setResult(r.data);if(r.status===201&&r.data?.ok){setMessage(r.data.cliente_reutilizado?'Expediente creado y enlazado al contacto existente. No se ha duplicado el cliente.':'Expediente y contacto de cliente creados y enlazados en las fuentes canónicas.');setPreview(false);}else if(r.status===403&&r.data?.error==='contact_owned_by_other_financial'){setMessage('El contacto ya existe y pertenece a otro ámbito financiero. No se ha creado ningún expediente duplicado.');setPreview(false);}else if(r.status===403)setMessage('Tu perfil no puede abrir este expediente.');else setMessage(`No se pudo crear el expediente (${r.data?.error||r.status}).`);}
  async function logout(){await supabase.auth.signOut();window.location.href=import.meta.env.BASE_URL;}
- return <div className="ops-root" data-theme={theme} style={{zIndex:5700}}>
-  <aside className="ops-side"><button className="ops-brand" onClick={()=>navigate('/inicio')}><img src={fenixLogo} alt=""/><strong>FÉNIX CAPITAL</strong></button><nav><button onClick={()=>navigate('/expedientes')}><ArrowLeft size={15}/> Volver a Expedientes</button></nav><button className="ops-ana" onClick={()=>navigate('/ana')}><img src={anaAvatar} alt="Ana"/><span><strong>Ana está contigo</strong><small>El cliente se crea o se reutiliza automáticamente.</small></span></button></aside>
-  <main className="ops-main"><header className="ops-top"><strong>Nuevo expediente</strong><div className="ops-top-actions"><button onClick={()=>setTheme(theme==='light'?'dark':'light')} aria-label="Cambiar tema">{theme==='light'?<Moon size={17}/>:<Sun size={17}/>} {theme==='light'?'Oscuro':'Claro'}</button><div className="ops-profile"><strong>{ctx?.role||'Usuario'}</strong></div><button onClick={logout} aria-label="Cerrar sesión"><LogOut size={17}/></button></div></header>
-   <section className="ops-content"><div className="ops-title"><div><span className="ops-icon"><FolderPlus size={20}/></span><div><h1>Nuevo expediente</h1><p>Alta canónica del expediente y resolución automática del contacto del cliente.</p></div></div><span className="ops-live ok">PRE-PROD</span></div>
-    <article className="ops-ana-card"><img src={anaAvatar} alt="Ana"/><div><strong>Ana</strong><p>Al confirmar, primero busco el contacto por email o teléfono. Si ya existe, lo reutilizo; si no existe, lo creo y lo enlazo al expediente. Nunca se obliga a dar de alta el contacto dos veces.</p></div></article>
-    {!allowed?<div className="ops-message">Tu perfil no puede crear expedientes.</div>:<form className="ops-message" onSubmit={submit} style={{display:'grid',gap:12}}>
-      <div style={{display:'grid',gridTemplateColumns:'repeat(2,minmax(0,1fr))',gap:10}}><label>Nombre<input value={nombre} onChange={e=>{setNombre(e.target.value);edit()}} maxLength={100} required/></label><label>Apellidos<input value={apellidos} onChange={e=>{setApellidos(e.target.value);edit()}} maxLength={100}/></label><label>Teléfono<input value={telefono} onChange={e=>{setTelefono(e.target.value);edit()}} maxLength={40} inputMode="tel"/></label><label>Email<input value={email} onChange={e=>{setEmail(e.target.value);edit()}} maxLength={200} type="email"/></label><label>Localidad<input value={localidad} onChange={e=>{setLocalidad(e.target.value);edit()}} maxLength={160}/></label><label>Precio vivienda €<input value={precio} onChange={e=>{setPrecio(e.target.value);edit()}} type="number" min="0" step="1"/></label><label>Importe solicitado €<input value={importe} onChange={e=>{setImporte(e.target.value);edit()}} type="number" min="0" step="1"/></label></div>
-      {ctx?.role==='Direccion'?<label>Responsable financiero<select value={target} onChange={e=>{setTarget(e.target.value);edit()}}><option value="">Sin asignar por ahora</option>{assignees.map(a=><option key={a.actor_code} value={a.actor_code}>{a.name}</option>)}</select><small>El expediente y el contacto comparten la misma asignación cuando se elige responsable.</small></label>:<label>Responsable financiero<input aria-label="Responsable financiero" value={target||ctx?.actor_code||''} readOnly/></label>}
-      <label><input type="checkbox" checked={consent} onChange={e=>{setConsent(e.target.checked);edit()}}/> Consentimiento comercial confirmado</label>
-      {preview&&<div className="ops-message"><strong>Vista previa antes de crear</strong><div>Cliente: {[nombre.trim(),apellidos.trim()].filter(Boolean).join(' ')}</div><div>Teléfono: {telefono.trim()||'No indicado'}</div><div>Email: {email.trim()||'No indicado'}</div><div>Localidad: {localidad.trim()||'No indicada'}</div><div>Precio vivienda: {precio||'No indicado'}</div><div>Importe solicitado: {importe||'No indicado'}</div><div>Responsable: {assignees.find(a=>a.actor_code===target)?.name||target||'Sin asignar'}</div><small>Al confirmar, el sistema reutilizará un contacto coincidente por email/teléfono o creará uno nuevo y lo enlazará al expediente.</small></div>}
-      {message&&<div className="ops-message">{message}</div>}
-      {!result?.ok&&<div style={{display:'flex',gap:8,flexWrap:'wrap'}}>{preview&&<button type="button" onClick={()=>setPreview(false)}>Volver</button>}<button className="primary" disabled={!valid||busy}><Save size={16}/>{busy?'Creando…':preview?'Confirmar y crear':'Revisar antes de crear'}</button></div>}
-      {result?.ok&&<div style={{display:'flex',gap:8,flexWrap:'wrap'}}><button type="button" onClick={()=>navigate('/expedientes')}>Volver a Expedientes</button>{result.cliente_destino&&<button type="button" onClick={()=>navigate(result.cliente_destino!)}>Abrir contacto</button>}{result.destino&&<button type="button" className="primary" onClick={()=>navigate(result.destino!)}>Abrir expediente</button>}</div>}
-    </form>}
-   </section>
-  </main>
- </div>;
+ const topbar=<header className="ops-top"><strong>Nuevo expediente</strong><div className="ops-top-actions"><button onClick={()=>setTheme(theme==='light'?'dark':'light')} aria-label="Cambiar tema">{theme==='light'?<Moon size={17}/>:<Sun size={17}/>} {theme==='light'?'Oscuro':'Claro'}</button><div className="ops-profile"><strong>{ctx?.role||'Usuario'}</strong></div><button onClick={logout} aria-label="Cerrar sesión"><LogOut size={17}/></button></div></header>;
+ return <OperationalShellFrame
+  className="expediente-create-root"
+  theme={theme}
+  navigation={expedienteCreateNav}
+  activeRoute="/expedientes"
+  anaSubtitle="El cliente se crea o se reutiliza automáticamente."
+  anaRoute="/ana"
+  query=""
+  onQueryChange={()=>{}}
+  searchPlaceholder=""
+  name={ctx?.role||'Usuario'}
+  role=""
+  initials={(ctx?.role||'U').slice(0,2).toUpperCase()}
+  onToggleTheme={()=>setTheme(theme==='light'?'dark':'light')}
+  onLogout={logout}
+  topbar={topbar}
+ >
+   <div className="ops-title"><div><span className="ops-icon"><FolderPlus size={20}/></span><div><h1>Nuevo expediente</h1><p>Alta canónica del expediente y resolución automática del contacto del cliente.</p></div></div><span className="ops-live ok">PRE-PROD</span></div>
+   <article className="ops-ana-card"><img src={anaAvatar} alt="Ana"/><div><strong>Ana</strong><p>Al confirmar, primero busco el contacto por email o teléfono. Si ya existe, lo reutilizo; si no existe, lo creo y lo enlazo al expediente. Nunca se obliga a dar de alta el contacto dos veces.</p></div></article>
+   {!allowed?<div className="ops-message">Tu perfil no puede crear expedientes.</div>:<form className="ops-message" onSubmit={submit} style={{display:'grid',gap:12}}>
+     <div style={{display:'grid',gridTemplateColumns:'repeat(2,minmax(0,1fr))',gap:10}}><label>Nombre<input value={nombre} onChange={e=>{setNombre(e.target.value);edit()}} maxLength={100} required/></label><label>Apellidos<input value={apellidos} onChange={e=>{setApellidos(e.target.value);edit()}} maxLength={100}/></label><label>Teléfono<input value={telefono} onChange={e=>{setTelefono(e.target.value);edit()}} maxLength={40} inputMode="tel"/></label><label>Email<input value={email} onChange={e=>{setEmail(e.target.value);edit()}} maxLength={200} type="email"/></label><label>Localidad<input value={localidad} onChange={e=>{setLocalidad(e.target.value);edit()}} maxLength={160}/></label><label>Precio vivienda €<input value={precio} onChange={e=>{setPrecio(e.target.value);edit()}} type="number" min="0" step="1"/></label><label>Importe solicitado €<input value={importe} onChange={e=>{setImporte(e.target.value);edit()}} type="number" min="0" step="1"/></label></div>
+     {ctx?.role==='Direccion'?<label>Responsable financiero<select value={target} onChange={e=>{setTarget(e.target.value);edit()}}><option value="">Sin asignar por ahora</option>{assignees.map(a=><option key={a.actor_code} value={a.actor_code}>{a.name}</option>)}</select><small>El expediente y el contacto comparten la misma asignación cuando se elige responsable.</small></label>:<label>Responsable financiero<input aria-label="Responsable financiero" value={target||ctx?.actor_code||''} readOnly/></label>}
+     <label><input type="checkbox" checked={consent} onChange={e=>{setConsent(e.target.checked);edit()}}/> Consentimiento comercial confirmado</label>
+     {preview&&<div className="ops-message"><strong>Vista previa antes de crear</strong><div>Cliente: {[nombre.trim(),apellidos.trim()].filter(Boolean).join(' ')}</div><div>Teléfono: {telefono.trim()||'No indicado'}</div><div>Email: {email.trim()||'No indicado'}</div><div>Localidad: {localidad.trim()||'No indicada'}</div><div>Precio vivienda: {precio||'No indicado'}</div><div>Importe solicitado: {importe||'No indicado'}</div><div>Responsable: {assignees.find(a=>a.actor_code===target)?.name||target||'Sin asignar'}</div><small>Al confirmar, el sistema reutilizará un contacto coincidente por email/teléfono o creará uno nuevo y lo enlazará al expediente.</small></div>}
+     {message&&<div className="ops-message">{message}</div>}
+     {!result?.ok&&<div style={{display:'flex',gap:8,flexWrap:'wrap'}}>{preview&&<button type="button" onClick={()=>setPreview(false)}>Volver</button>}<button className="primary" disabled={!valid||busy}><Save size={16}/>{busy?'Creando…':preview?'Confirmar y crear':'Revisar antes de crear'}</button></div>}
+     {result?.ok&&<div style={{display:'flex',gap:8,flexWrap:'wrap'}}><button type="button" onClick={()=>navigate('/expedientes')}>Volver a Expedientes</button>{result.cliente_destino&&<button type="button" onClick={()=>navigate(result.cliente_destino!)}>Abrir contacto</button>}{result.destino&&<button type="button" className="primary" onClick={()=>navigate(result.destino!)}>Abrir expediente</button>}</div>}
+   </form>}
+ </OperationalShellFrame>;
 }
