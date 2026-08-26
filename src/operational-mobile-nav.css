@@ -10,5 +10,5 @@
   .ops-root:not(.role-home) .ops-content{padding-top:66px}
   .ops-root[data-theme='dark']:not(.role-home)>.ops-side{background:#202023;border-bottom-color:#343438}
   html.exp-master-active .ops-root:not(.role-home)>.ops-side{z-index:10001!important}
-  #root:has(> .ops-root:not(.role-home)) .calc-panel{max-height:calc(100vh - 130px)}
+  html:has(.ops-root:not(.role-home)) .calc-panel{top:122px!important;bottom:8px!important;max-height:none!important}
 }
