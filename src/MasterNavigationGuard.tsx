@@ -3,8 +3,29 @@ import { fetchAppApi } from './supabase';
 
 type NavItem={label?:string;route?:string};
 type NavResponse={items?:NavItem[]};
-
 type MasterItem={label:string;route:string};
+
+const MASTER_ORDER:MasterItem[]=[
+  {label:'Inicio',route:'/inicio'},
+  {label:'Expedientes',route:'/expedientes'},
+  {label:'Bancos',route:'/bancos'},
+  {label:'Contactos',route:'/contactos'},
+  {label:'Inmobiliarias',route:'/inmobiliarias'},
+  {label:'Tasaciones',route:'/tasaciones'},
+  {label:'Firmas',route:'/firmas'},
+  {label:'Documentación',route:'/documentacion'},
+  {label:'Financieros',route:'/financieros'},
+  {label:'Visitadores',route:'/visitadores'},
+  {label:'Obras Nuevas',route:'/obras-nuevas'},
+  {label:'Herencias',route:'/herencias'},
+  {label:'Agenda',route:'/agenda'},
+  {label:'Economía',route:'/economia'},
+  {label:'Informes',route:'/informes'},
+  {label:'Notarías',route:'/notarias'},
+  {label:'Registros de la Propiedad',route:'/registros-propiedad'},
+  {label:'Comunicaciones',route:'/comunicaciones'},
+  {label:'Notificaciones',route:'/notificaciones'}
+];
 
 function normalizeLabel(value:string){return value.replace(/\s+/g,' ').trim().toLocaleLowerCase('es');}
 function navigateTo(route:string){
@@ -19,14 +40,16 @@ function setButtonLabel(button:HTMLButtonElement,label:string){
   if(span)span.textContent=label;
   else button.textContent=label;
 }
-function isMasterNavigation(items:MasterItem[]){
-  const routes=new Set(items.map(item=>item.route));
-  return routes.has('/obras-nuevas')&&routes.has('/herencias')&&routes.has('/perfil');
+function desiredForAuthorized(items:MasterItem[]){
+  const authorized=new Set(items.map(item=>item.route));
+  const directionMenu=authorized.has('/financieros')&&authorized.has('/economia')&&authorized.has('/comunicaciones');
+  const directionAdditions=new Set(['/obras-nuevas','/herencias','/registros-propiedad']);
+  return MASTER_ORDER.filter(item=>authorized.has(item.route)||(directionMenu&&directionAdditions.has(item.route)));
 }
-function enforceNavigation(nav:HTMLElement,masterNavigation:MasterItem[]){
+function enforceNavigation(nav:HTMLElement,desiredNavigation:MasterItem[]){
   const buttons=Array.from(nav.querySelectorAll(':scope > button')).filter((node):node is HTMLButtonElement=>node instanceof HTMLButtonElement);
   if(!buttons.length)return;
-  const desired=masterNavigation.map(item=>normalizeLabel(item.label));
+  const desired=desiredNavigation.map(item=>normalizeLabel(item.label));
   const current=buttons.map(button=>normalizeLabel(button.textContent||''));
   if(current.length===desired.length&&current.every((value,index)=>value===desired[index]))return;
   const existing=new Map<string,HTMLButtonElement>();
@@ -37,7 +60,7 @@ function enforceNavigation(nav:HTMLElement,masterNavigation:MasterItem[]){
   const aliases=new Map<string,string>([['notificaciones','avisos']]);
   const template=buttons[0];
   const fragment=document.createDocumentFragment();
-  for(const item of masterNavigation){
+  for(const item of desiredNavigation){
     const key=normalizeLabel(item.label);
     const alias=aliases.get(key);
     let button=existing.get(key)||(alias?existing.get(alias):undefined);
@@ -63,10 +86,10 @@ function enforceNavigation(nav:HTMLElement,masterNavigation:MasterItem[]){
 export default function MasterNavigationGuard(){
   useEffect(()=>{
     let alive=true,observer:MutationObserver|null=null,raf=0;
-    let masterNavigation:MasterItem[]=[];
+    let desiredNavigation:MasterItem[]=[];
     const apply=()=>{
-      if(!masterNavigation.length)return;
-      document.querySelectorAll<HTMLElement>('.dir-nav,.sidebar nav,.ops-side nav').forEach(nav=>enforceNavigation(nav,masterNavigation));
+      if(!desiredNavigation.length)return;
+      document.querySelectorAll<HTMLElement>('.dir-nav,.sidebar nav,.ops-side nav').forEach(nav=>enforceNavigation(nav,desiredNavigation));
     };
     const schedule=()=>{if(raf)return;raf=requestAnimationFrame(()=>{raf=0;apply()})};
     fetchAppApi<NavResponse>('/navigation').then(result=>{
@@ -75,8 +98,8 @@ export default function MasterNavigationGuard(){
         .filter((item):item is Required<NavItem>=>Boolean(item&&typeof item.label==='string'&&typeof item.route==='string'))
         .map(item=>({label:item.label.trim(),route:item.route.trim()}))
         .filter(item=>item.label&&item.route);
-      if(!isMasterNavigation(items))return;
-      masterNavigation=items;
+      desiredNavigation=desiredForAuthorized(items);
+      if(!desiredNavigation.length)return;
       apply();
       observer=new MutationObserver(schedule);
       observer.observe(document.body,{childList:true,subtree:true});
