@@ -1,0 +1,70 @@
+import { useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { BarChart3, Bell, Building2, CalendarDays, ChevronDown, FileCheck2, FileText, FolderOpen, Gauge, Home, Landmark, LogOut, Moon, Search, SlidersHorizontal, Sun, UserRound, Users } from 'lucide-react';
+import { fetchAppApi, supabase } from './supabase';
+import { anaVertical, fenixLogo } from './assets/visualAssets';
+
+type Theme='light'|'dark';
+type NavItem={label?:string;route?:string};
+type NavResponse={items?:NavItem[]};
+type MenuItem={label:string;route:string;Icon:typeof Home};
+
+const icons:Record<string,typeof Home>={
+  '/inicio':Home,'/expedientes':FolderOpen,'/bancos':Landmark,'/contactos':Users,'/inmobiliarias':Building2,
+  '/tasaciones':FileText,'/firmas':FileCheck2,'/documentacion':FileText,'/financieros':UserRound,'/visitadores':Users,
+  '/obras-nuevas':Building2,'/herencias':FileText,'/agenda':CalendarDays,'/economia':Gauge,'/informes':BarChart3,
+  '/notarias':Landmark,'/registros-propiedad':Building2,'/comunicaciones':FileText,'/notificaciones':Bell,'/perfil':UserRound
+};
+
+const css=`
+html.exp-master-active .ops-side,html.exp-master-active .ops-top{display:none!important}
+html.exp-master-active .ops-root{display:block!important;min-height:100vh!important;background:#f7f7f8!important;color:#1d1d1f!important}
+html.exp-master-active .ops-main{margin-left:236px!important;padding-top:74px!important;min-height:100vh!important;background:#f7f7f8!important}
+html.exp-master-active .ops-content{max-width:none!important;width:100%!important;padding:30px 34px 42px!important;margin:0!important}
+html.exp-master-active .exp-ana-hero{display:none!important}
+html.exp-master-active .ops-title{margin:0 0 22px!important;padding:0!important;align-items:flex-end!important}
+html.exp-master-active .ops-title .ops-icon,html.exp-master-active .ops-title .exp-eyebrow{display:none!important}
+html.exp-master-active .ops-title h1{font-size:30px!important;line-height:1.1!important;margin:0!important}
+html.exp-master-active .ops-title p{font-size:13px!important;color:#777!important;margin-top:7px!important}
+html.exp-master-active .ops-live{align-self:flex-start!important}
+html.exp-master-active .exp-filter-card{margin-top:0!important}
+html.exp-master-active .exp-table .ops-table-wrap{max-height:430px!important;overflow:auto!important;scrollbar-width:thin!important}
+html.exp-master-active .exp-table thead{position:sticky!important;top:0!important;z-index:2!important;background:#fff!important}
+html.exp-master-active .ops-table-card{margin-bottom:0!important}
+.exp-master-sidebar{position:fixed;inset:0 auto 0 0;width:236px;z-index:900;background:#fff;border-right:1px solid #ededed;padding:20px 16px;display:flex;flex-direction:column;color:#222}
+.exp-master-brand{height:72px;border:0;border-bottom:1px solid #f0f0f0;background:transparent;display:flex;align-items:center;gap:12px;padding:0 8px 15px;cursor:pointer;text-align:left;color:inherit}
+.exp-master-brand img{width:44px;height:35px;object-fit:contain}.exp-master-brand strong{font-size:14px;letter-spacing:.04em}
+.exp-master-nav{display:flex;flex-direction:column;gap:5px;padding-top:14px;overflow-y:auto;min-height:0;scrollbar-width:thin;flex:1}
+.exp-master-nav button{height:43px;min-height:43px;border:0;background:transparent;border-radius:10px;display:flex;align-items:center;gap:12px;padding:0 13px;font-size:13.5px;color:#555;cursor:pointer;text-align:left}
+.exp-master-nav button svg{width:18px;height:18px;color:#8d8d93}.exp-master-nav button:hover{background:#faf6f3}.exp-master-nav button.active{background:#fff1ea;color:#f36c21;font-weight:700}.exp-master-nav button.active svg{color:#f36c21}
+.exp-master-help{margin-top:12px;border:1px solid #e8e8e8;border-radius:13px;padding:15px 13px 13px;background:#fff;display:grid;grid-template-columns:1fr 48px;gap:10px;color:#222}
+.exp-master-help strong{font-size:12.5px}.exp-master-help span{display:block;font-size:10.5px;line-height:1.4;color:#777;margin-top:4px}.exp-master-help img{width:46px;height:58px;object-fit:contain;object-position:center bottom;display:block}
+.exp-master-help button{grid-column:1/-1;height:34px;border:1px solid #f0d7c9;background:#fff;border-radius:9px;color:#f36c21;font-size:10.5px;font-weight:700;cursor:pointer}
+.exp-master-topbar{position:fixed;left:236px;right:0;top:0;height:74px;z-index:899;background:#fff;border-bottom:1px solid #ededed;padding:0 26px;display:grid;grid-template-columns:auto minmax(420px,680px) 1fr;gap:18px;align-items:center;color:#222}
+.exp-master-advanced{height:42px;padding:0 16px;border:1px solid #e7e7e7;background:#fff;border-radius:10px;display:flex;align-items:center;gap:8px;font-size:12px;color:#444;cursor:pointer}
+.exp-master-search{height:42px;border:1px solid #e7e7e7;background:#fff;border-radius:10px;display:grid;grid-template-columns:38px 1fr 42px;align-items:center;overflow:hidden}.exp-master-search>svg{margin:auto;color:#999}.exp-master-search input{height:100%;border:0;outline:0;background:transparent;font-size:12.5px;color:inherit}.exp-master-search button{height:100%;border:0;border-left:1px solid #eee;background:#fff;display:grid;place-items:center;color:#777;cursor:pointer}
+.exp-master-actions{display:flex;align-items:center;justify-content:flex-end;gap:10px;min-width:0}.exp-master-theme,.exp-master-bell,.exp-master-profile,.exp-master-logout{border:1px solid #e7e7e7;background:#fff;color:#333;cursor:pointer}.exp-master-theme{height:42px;border-radius:10px;padding:0 13px;display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700}.exp-master-bell,.exp-master-logout{width:38px;height:38px;border-radius:10px;display:grid;place-items:center}.exp-master-profile{height:46px;border:0;border-radius:10px;padding:4px 7px;display:flex;align-items:center;gap:10px;min-width:0}.exp-master-avatar{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:#fff3ed;color:#f36c21;font-size:11px;font-weight:800;border:1px solid #ffe0cf}.exp-master-user{min-width:0;text-align:left}.exp-master-user strong{display:block;max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px}.exp-master-user span{display:block;font-size:9.5px;color:#888;margin-top:2px}
+.exp-master-footer{margin-top:24px}.exp-master-footer h2{font-size:11px;margin:0 0 10px;letter-spacing:.08em}.exp-master-quick{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}.exp-master-quick button{height:82px;border:1px solid #e8e8e8;background:#fff;border-radius:13px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;font-size:10.5px;color:#333;cursor:pointer}.exp-master-quick button svg{width:28px;height:28px;color:#f36c21}.exp-master-quick button:hover{border-color:#ffd3c0;background:#fffaf7}
+html[data-theme='dark'].exp-master-active .ops-root,html[data-theme='dark'].exp-master-active .ops-main{background:#151516!important;color:#f4f4f5!important}html[data-theme='dark'] .exp-master-sidebar,html[data-theme='dark'] .exp-master-topbar{background:#1b1b1d;color:#f4f4f5;border-color:#343438}html[data-theme='dark'] .exp-master-brand{border-color:#343438}html[data-theme='dark'] .exp-master-nav button{color:#d7d7db}html[data-theme='dark'] .exp-master-nav button:hover{background:#28282c}html[data-theme='dark'] .exp-master-nav button.active{background:#3a241d;color:#ff7a42}html[data-theme='dark'] .exp-master-help,html[data-theme='dark'] .exp-master-advanced,html[data-theme='dark'] .exp-master-search,html[data-theme='dark'] .exp-master-search button,html[data-theme='dark'] .exp-master-theme,html[data-theme='dark'] .exp-master-bell,html[data-theme='dark'] .exp-master-profile,html[data-theme='dark'] .exp-master-logout,html[data-theme='dark'] .exp-master-quick button{background:#202023;color:#f4f4f5;border-color:#39393e}html[data-theme='dark'].exp-master-active .exp-table thead{background:#202023!important}
+@media(max-width:1180px){html.exp-master-active .ops-main{margin-left:88px!important}.exp-master-sidebar{width:88px;padding:20px 10px}.exp-master-brand{justify-content:center;padding-left:0;padding-right:0}.exp-master-brand strong,.exp-master-nav button span,.exp-master-help{display:none}.exp-master-nav button{justify-content:center;padding:0}.exp-master-topbar{left:88px;grid-template-columns:auto minmax(280px,1fr) auto}.exp-master-user,.exp-master-theme span{display:none}.exp-master-theme{width:42px;padding:0;justify-content:center}.exp-master-quick{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:760px){html.exp-master-active .ops-main{margin-left:0!important;padding-top:66px!important}html.exp-master-active .ops-content{padding:16px!important}.exp-master-sidebar{display:none}.exp-master-topbar{left:0;height:66px;padding:10px 12px;grid-template-columns:1fr auto}.exp-master-advanced{display:none}.exp-master-search{grid-column:1}.exp-master-actions{grid-column:2}.exp-master-profile,.exp-master-bell{display:none}.exp-master-quick{grid-template-columns:repeat(2,1fr)}html.exp-master-active .exp-table .ops-table-wrap{max-height:390px!important}}
+`;
+
+function initials(name:string){return name.split(/\s+/).filter(Boolean).slice(0,2).map(v=>v[0]?.toUpperCase()).join('')||'FC'}
+
+export default function ExpedientesMasterChrome(){
+  const location=useLocation(),navigate=useNavigate();
+  const active=location.pathname==='/expedientes';
+  const [nav,setNav]=useState<MenuItem[]>([]),[theme,setTheme]=useState<Theme>(()=>(sessionStorage.getItem('fenix-theme') as Theme)||'light');
+  const [name,setName]=useState('Usuario'),[mount,setMount]=useState<HTMLElement|null>(null),[search,setSearch]=useState('');
+  useEffect(()=>{if(!active)return;document.documentElement.classList.add('exp-master-active');return()=>document.documentElement.classList.remove('exp-master-active')},[active]);
+  useEffect(()=>{if(!active)return;document.documentElement.dataset.theme=theme;sessionStorage.setItem('fenix-theme',theme)},[active,theme]);
+  useEffect(()=>{if(!active)return;let alive=true;Promise.all([fetchAppApi<NavResponse>('/navigation'),supabase.auth.getSession()]).then(([n,s])=>{if(!alive)return;if(n.status===200&&Array.isArray(n.data?.items)){setNav(n.data.items.filter((x):x is Required<NavItem>=>Boolean(x?.label&&x?.route)).map(x=>({label:x.label,route:x.route,Icon:icons[x.route]||Home})))}const meta=s.data.session?.user?.user_metadata as Record<string,unknown>|undefined;const v=[meta?.full_name,meta?.name,meta?.display_name].find(x=>typeof x==='string'&&x.trim());setName(typeof v==='string'?v.trim():'Usuario')});return()=>{alive=false}},[active]);
+  useEffect(()=>{if(!active){setMount(null);return}const place=()=>{const content=document.querySelector('.ops-content');if(!content)return;let node=document.querySelector('.exp-master-footer-mount') as HTMLElement|null;if(!node){node=document.createElement('div');node.className='exp-master-footer-mount';content.appendChild(node)}setMount(node)};place();const observer=new MutationObserver(place);observer.observe(document.body,{childList:true,subtree:true});return()=>{observer.disconnect();document.querySelector('.exp-master-footer-mount')?.remove()}},[active]);
+  const menu=useMemo(()=>nav,[nav]);
+  if(!active)return null;
+  const runSearch=()=>{const q=search.trim();navigate(q?`/buscar?q=${encodeURIComponent(q)}`:'/buscar')};
+  const logout=async()=>{await supabase.auth.signOut();window.location.href=import.meta.env.BASE_URL};
+  return <><style>{css}</style><aside className="exp-master-sidebar"><button className="exp-master-brand" onClick={()=>navigate('/inicio')}><img src={fenixLogo} alt=""/><strong>FÉNIX CAPITAL</strong></button><nav className="exp-master-nav">{menu.map(({label,route,Icon})=><button key={route} className={route==='/expedientes'?'active':''} onClick={()=>navigate(route)}><Icon size={18}/><span>{label}</span></button>)}</nav><div className="exp-master-help"><div><strong>¿Necesitas ayuda?</strong><span>Habla con Ana, tu asistente inteligente.</span></div><img src={anaVertical} alt="Ana"/><button onClick={()=>navigate('/ana')}>Hablar con Ana →</button></div></aside><header className="exp-master-topbar"><button className="exp-master-advanced" onClick={()=>navigate('/buscar')}><SlidersHorizontal size={17}/>Buscador avanzado</button><div className="exp-master-search"><Search size={18}/><input value={search} onChange={e=>setSearch(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')runSearch()}} placeholder="Buscar expediente, cliente, banco, inmobiliaria, contacto..."/><button onClick={runSearch} aria-label="Buscar"><Search size={17}/></button></div><div className="exp-master-actions"><button className="exp-master-theme" onClick={()=>setTheme(theme==='light'?'dark':'light')} aria-label="Cambiar tema">{theme==='light'?<Moon size={17}/>:<Sun size={17}/>}<span>{theme==='light'?'Oscuro':'Claro'}</span></button><button className="exp-master-bell" onClick={()=>navigate('/notificaciones')} aria-label="Notificaciones"><Bell size={20}/></button><button className="exp-master-profile" onClick={()=>navigate('/perfil')}><div className="exp-master-avatar">{initials(name)}</div><div className="exp-master-user"><strong>{name}</strong><span>Mi perfil</span></div><ChevronDown size={16}/></button><button className="exp-master-logout" onClick={logout} aria-label="Cerrar sesión"><LogOut size={17}/></button></div></header>{mount&&createPortal(<section className="exp-master-footer dir-quick"><h2>ACCESOS RÁPIDOS</h2><div className="exp-master-quick dir-quick-grid"><button onClick={()=>navigate('/expedientes/nuevo')}><FolderOpen/>+ Nuevo expediente</button><button onClick={()=>navigate('/contactos/nuevo')}><UserRound/>+ Nuevo contacto</button><button onClick={()=>navigate('/inmobiliarias')}><Building2/>Inmobiliarias</button><button onClick={()=>navigate('/agenda')}><CalendarDays/>Agenda</button><button onClick={()=>navigate('/documentacion')}><FileText/>Documentación</button><button onClick={()=>navigate('/informes')}><BarChart3/>Informes</button></div></section>,mount)}</>;
+}
