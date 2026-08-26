@@ -18,6 +18,9 @@ export default function OperationalLogoutGuard(){
     };
 
     const ensureLogout=(top:HTMLElement)=>{
+      // Dirección ya aporta su logout declarativo dentro de DirectionTopbar.
+      // No inyectar un segundo control ahora que esa cabecera también comparte `.ops-top`.
+      if(top.classList.contains('dir-topbar'))return;
       let actions=top.querySelector<HTMLElement>('.ops-top-actions');
       if(!actions){
         actions=document.createElement('div');
