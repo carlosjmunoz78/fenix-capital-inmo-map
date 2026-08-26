@@ -1,5 +1,9 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const webServerCommand=process.env.PLAYWRIGHT_SKIP_BUILD==='1'
+  ? 'npm run preview -- --host 127.0.0.1'
+  : 'npm run build && npm run preview -- --host 127.0.0.1';
+
 export default defineConfig({
   testDir: './tests',
   timeout: 30_000,
@@ -12,14 +16,22 @@ export default defineConfig({
     screenshot: 'only-on-failure'
   },
   webServer: {
-    command: 'npm run build && npm run preview -- --host 127.0.0.1',
+    command: webServerCommand,
     url: 'http://127.0.0.1:4173',
     reuseExistingServer: false,
     timeout: 120_000
   },
   projects: [
     { name: 'desktop-chromium', use: { ...devices['Desktop Chrome'] } },
-    { name: 'tablet-chromium', use: { viewport: { width: 820, height: 1180 } } },
-    { name: 'mobile-chromium', use: { ...devices['Pixel 7'] } }
+    {
+      name: 'tablet-chromium',
+      testMatch: ['**/ui.spec.ts','**/direction-context-fallback.spec.ts'],
+      use: { viewport: { width: 820, height: 1180 } }
+    },
+    {
+      name: 'mobile-chromium',
+      testMatch: ['**/ui.spec.ts','**/direction-context-fallback.spec.ts','**/operational-mobile-shell.spec.ts'],
+      use: { ...devices['Pixel 7'] }
+    }
   ]
 });
