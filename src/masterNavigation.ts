@@ -24,6 +24,7 @@ export const MASTER_NAVIGATION_ORDER:NavItem[]=[
 
 const masterByRoute=new Map(MASTER_NAVIGATION_ORDER.map(item=>[item.route,item]));
 const masterIndex=new Map(MASTER_NAVIGATION_ORDER.map((item,index)=>[item.route,index]));
+const directionSidebarExcludedRoutes=new Set(['/buscar','/perfil']);
 
 export function normalizeNavigation(data:unknown):NavItem[]{
   if(!data||typeof data!=='object')return[];
@@ -63,4 +64,8 @@ export function orderAuthorizedNavigation(items:NavItem[]):NavItem[]{
       if(bi===undefined)return -1;
       return ai-bi;
     });
+}
+
+export function directionSidebarNavigation(items:NavItem[]):NavItem[]{
+  return orderAuthorizedNavigation(items).filter(item=>!directionSidebarExcludedRoutes.has(item.route));
 }
