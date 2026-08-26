@@ -2,15 +2,15 @@ import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { CalendarDays, LogOut, Moon, Sun } from 'lucide-react';
 import { fetchAppApi, supabase, SUPABASE_URL } from './supabase';
-import { anaAvatar, fenixLogo } from './assets/visualAssets';
+import { anaAvatar } from './assets/visualAssets';
+import OperationalShellFrame from './OperationalShellFrame';
+import { normalizeNavigation, type NavItem } from './masterNavigation';
 import './operational.css';
 
 type Row={activity_code:string;owner_actor_code:string;inmobiliaria_code:string;canal:string;resultado?:string|null;proximo_contacto?:string|null;proxima_accion?:string|null;estado:string;version:number};
 type Theme='light'|'dark';
-type NavItem={label:string;route:string};
 type PendingCreate={inmobiliaria_code:string;canal:string;resultado:string;proxima_accion:string}|null;
 type PendingDone=Row|null;
-function normalizeNav(data:unknown):NavItem[]{if(!data||typeof data!=='object')return[];const items=(data as{items?:unknown[]}).items;if(!Array.isArray(items))return[];return items.map(x=>{if(typeof x==='string')return{label:x.replace(/^\//,'')||'Inicio',route:x};if(x&&typeof x==='object'){const o=x as Record<string,unknown>;if(typeof o.route==='string')return{label:typeof o.label==='string'?o.label:o.route.replace(/^\//,''),route:o.route};}return null;}).filter((x):x is NavItem=>Boolean(x));}
 const fallbackNav:NavItem[]=[{label:'Inicio',route:'/inicio'}];
 
 async function api(path:string,init?:RequestInit){
@@ -38,7 +38,7 @@ export default function VisitasShell(){
 
   useEffect(()=>{let alive=true;supabase.auth.getSession().then(({data})=>{if(alive){setLogged(Boolean(data.session));setReady(true)}});const {data:{subscription}}=supabase.auth.onAuthStateChange((_e,s)=>{if(alive){setLogged(Boolean(s));setReady(true)}});return()=>{alive=false;subscription.unsubscribe()};},[]);
   useEffect(()=>{document.documentElement.dataset.theme=theme;sessionStorage.setItem('fenix-theme',theme);},[theme]);
-  useEffect(()=>{if(!active||!logged)return;let alive=true;fetchAppApi<unknown>('/navigation').then(r=>{if(alive)setNav(r.status===200?normalizeNav(r.data):[])}).catch(()=>{if(alive)setNav([])});return()=>{alive=false};},[active,logged]);
+  useEffect(()=>{if(!active||!logged)return;let alive=true;fetchAppApi<unknown>('/navigation').then(r=>{if(alive)setNav(r.status===200?normalizeNavigation(r.data):[])}).catch(()=>{if(alive)setNav([])});return()=>{alive=false};},[active,logged]);
 
   async function load(){
     setLoading(true);setStatus(null);setMessage('');setRows([]);
@@ -114,41 +114,49 @@ export default function VisitasShell(){
     <div style={{display:'flex',gap:8}}><button className="primary" disabled={loading} onClick={()=>void confirmDone()}>Confirmar actualización</button><button disabled={loading} onClick={()=>setPendingDone(null)}>Cancelar</button></div>
   </section>;
 
-  return <div className="ops-root visitas-root" data-theme={theme}>
-    <aside className="ops-side">
-      <button className="ops-brand" onClick={()=>navigate('/inicio')}><img src={fenixLogo} alt=""/><strong>FÉNIX CAPITAL</strong></button>
-      <nav>{effectiveNav.map(item=><button key={item.route} className={item.route==='/visitas'?'active':''} onClick={()=>navigate(item.route)}>{item.label}</button>)}</nav>
-      <button className="ops-ana" onClick={()=>navigate('/ana')}><img src={anaAvatar} alt="Ana"/><span><strong>Hablar con Ana</strong><small>Asistente de Fénix Capital</small></span></button>
-    </aside>
-    <main className="ops-main">
-      <header className="ops-top"><div className="ops-profile"><strong>Gestión B2B</strong></div><div className="ops-top-actions"><button onClick={()=>setTheme(theme==='light'?'dark':'light')} aria-label="Cambiar tema">{theme==='light'?<Moon size={17}/>:<Sun size={17}/>} {theme==='light'?'Oscuro':'Claro'}</button><button onClick={logout} aria-label="Cerrar sesión"><LogOut size={17}/></button></div></header>
-      <section className="ops-content">
-        <div className="ops-title"><div><span className="ops-icon"><CalendarDays size={20}/></span><div><h1>{isNew?'Nueva visita / gestión':detailCode?'Ficha de visita / gestión':'Visitas y gestiones'}</h1><p>{isNew?'Registra una nueva gestión dentro de la cartera autorizada.':detailCode?'Consulta la gestión y prepara cualquier cambio antes de guardarlo.':'Visita, llamada, WhatsApp o email; resultado y siguiente acción dentro de tu cartera.'}</p></div></div><span className={status===200?'ops-live ok':'ops-live'}>{loading?'Cargando…':status===200?'RBAC activo':'PRE-PROD'}</span></div>
-        <article className="ops-ana-card"><img src={anaAvatar} alt="Ana"/><div><strong>Ana</strong><p>Registra cada contacto con la inmobiliaria. Antes de escribir, revisas exactamente qué se va a guardar.</p></div></article>
+  const topbar=<header className="ops-top"><div className="ops-profile"><strong>Gestión B2B</strong></div><div className="ops-top-actions"><button onClick={()=>setTheme(theme==='light'?'dark':'light')} aria-label="Cambiar tema">{theme==='light'?<Moon size={17}/>:<Sun size={17}/>} {theme==='light'?'Oscuro':'Claro'}</button><button onClick={logout} aria-label="Cerrar sesión"><LogOut size={17}/></button></div></header>;
 
-        {loading&&status===null&&<div className="ops-message" role="status" data-testid="visitas-loading">Cargando gestiones autorizadas…</div>}
-        {!loading&&status===403&&<div className="ops-message" data-testid="visitas-forbidden">{message}</div>}
-        {!loading&&status!==null&&status!==200&&status!==403&&<div className="ops-message" data-testid="visitas-error">{message}</div>}
+  return <OperationalShellFrame
+    className="visitas-root"
+    theme={theme}
+    navigation={effectiveNav}
+    activeRoute="/visitas"
+    anaSubtitle="Asistente de Fénix Capital"
+    anaRoute="/ana"
+    query=""
+    onQueryChange={()=>{}}
+    searchPlaceholder=""
+    name="Gestión B2B"
+    role=""
+    initials="GB"
+    onToggleTheme={()=>setTheme(theme==='light'?'dark':'light')}
+    onLogout={logout}
+    topbar={topbar}
+  >
+    <div className="ops-title"><div><span className="ops-icon"><CalendarDays size={20}/></span><div><h1>{isNew?'Nueva visita / gestión':detailCode?'Ficha de visita / gestión':'Visitas y gestiones'}</h1><p>{isNew?'Registra una nueva gestión dentro de la cartera autorizada.':detailCode?'Consulta la gestión y prepara cualquier cambio antes de guardarlo.':'Visita, llamada, WhatsApp o email; resultado y siguiente acción dentro de tu cartera.'}</p></div></div><span className={status===200?'ops-live ok':'ops-live'}>{loading?'Cargando…':status===200?'RBAC activo':'PRE-PROD'}</span></div>
+    <article className="ops-ana-card"><img src={anaAvatar} alt="Ana"/><div><strong>Ana</strong><p>Registra cada contacto con la inmobiliaria. Antes de escribir, revisas exactamente qué se va a guardar.</p></div></article>
 
-        {isNew&&<><button onClick={()=>navigate('/visitas')}>← Volver a visitas</button>{status===200&&createForm}{previewCreate}</>}
+    {loading&&status===null&&<div className="ops-message" role="status" data-testid="visitas-loading">Cargando gestiones autorizadas…</div>}
+    {!loading&&status===403&&<div className="ops-message" data-testid="visitas-forbidden">{message}</div>}
+    {!loading&&status!==null&&status!==200&&status!==403&&<div className="ops-message" data-testid="visitas-error">{message}</div>}
 
-        {detailCode&&<>
-          <button onClick={()=>navigate('/visitas')}>← Volver a visitas</button>
-          {!loading&&status===200&&!detail&&<div className="ops-message" data-testid="visitas-detail-missing">La gestión no está disponible en tu ámbito autorizado.</div>}
-          {status===200&&detail&&<article className="ops-message" aria-label="Ficha de visita"><h2>{detail.inmobiliaria_code}</h2><p><b>Código:</b> {detail.activity_code}<br/><b>Canal:</b> {detail.canal}<br/><b>Resultado:</b> {detail.resultado||'No disponible'}<br/><b>Próxima acción:</b> {detail.proxima_accion||'No disponible'}<br/><b>Próximo contacto:</b> {detail.proximo_contacto||'No disponible'}<br/><b>Estado:</b> {detail.estado}</p>{detail.estado==='Pendiente'&&<button onClick={()=>prepareDone(detail)}>Revisar para marcar hecha</button>}</article>}
-          {previewDone}
-        </>}
+    {isNew&&<><button onClick={()=>navigate('/visitas')}>← Volver a visitas</button>{status===200&&createForm}{previewCreate}</>}
 
-        {!isNew&&!detailCode&&status===200&&<>
-          <div style={{display:'flex',justifyContent:'flex-end'}}><button className="primary" onClick={()=>navigate('/visitas/nueva')}>Nueva visita / gestión</button></div>
-          {createForm}
-          {previewCreate}
-          {previewDone}
-          {message&&<div className="ops-message">{message}</div>}
-          {rows.length===0?<div className="ops-empty" data-testid="visitas-empty"><strong>Sin gestiones visibles</strong><span>No hay visitas o seguimientos dentro de tu ámbito autorizado.</span></div>:<div className="ops-table-card"><div className="ops-table-head"><strong>{rows.length} gestiones</strong><span>PRE-PROD autorizado</span></div><div className="ops-table-wrap"><table><thead><tr><th>Inmobiliaria</th><th>Canal</th><th>Resultado</th><th>Próxima acción</th><th>Estado</th><th>Acción</th></tr></thead><tbody>{rows.map(r=><tr key={r.activity_code}><td>{r.inmobiliaria_code}</td><td>{r.canal}</td><td>{r.resultado||'—'}</td><td>{r.proxima_accion||'—'}</td><td>{r.estado}</td><td><div style={{display:'flex',gap:6}}><button onClick={()=>navigate(`/visitas/${encodeURIComponent(r.activity_code)}`)}>Abrir</button>{r.estado==='Pendiente'?<button onClick={()=>prepareDone(r)}>Revisar para marcar hecha</button>:null}</div></td></tr>)}</tbody></table></div></div>}
-        </>}
-        {(isNew||detailCode)&&status===200&&message&&<div className="ops-message">{message}</div>}
-      </section>
-    </main>
-  </div>;
+    {detailCode&&<>
+      <button onClick={()=>navigate('/visitas')}>← Volver a visitas</button>
+      {!loading&&status===200&&!detail&&<div className="ops-message" data-testid="visitas-detail-missing">La gestión no está disponible en tu ámbito autorizado.</div>}
+      {status===200&&detail&&<article className="ops-message" aria-label="Ficha de visita"><h2>{detail.inmobiliaria_code}</h2><p><b>Código:</b> {detail.activity_code}<br/><b>Canal:</b> {detail.canal}<br/><b>Resultado:</b> {detail.resultado||'No disponible'}<br/><b>Próxima acción:</b> {detail.proxima_accion||'No disponible'}<br/><b>Próximo contacto:</b> {detail.proximo_contacto||'No disponible'}<br/><b>Estado:</b> {detail.estado}</p>{detail.estado==='Pendiente'&&<button onClick={()=>prepareDone(detail)}>Revisar para marcar hecha</button>}</article>}
+      {previewDone}
+    </>}
+
+    {!isNew&&!detailCode&&status===200&&<>
+      <div style={{display:'flex',justifyContent:'flex-end'}}><button className="primary" onClick={()=>navigate('/visitas/nueva')}>Nueva visita / gestión</button></div>
+      {createForm}
+      {previewCreate}
+      {previewDone}
+      {message&&<div className="ops-message">{message}</div>}
+      {rows.length===0?<div className="ops-empty" data-testid="visitas-empty"><strong>Sin gestiones visibles</strong><span>No hay visitas o seguimientos dentro de tu ámbito autorizado.</span></div>:<div className="ops-table-card"><div className="ops-table-head"><strong>{rows.length} gestiones</strong><span>PRE-PROD autorizado</span></div><div className="ops-table-wrap"><table><thead><tr><th>Inmobiliaria</th><th>Canal</th><th>Resultado</th><th>Próxima acción</th><th>Estado</th><th>Acción</th></tr></thead><tbody>{rows.map(r=><tr key={r.activity_code}><td>{r.inmobiliaria_code}</td><td>{r.canal}</td><td>{r.resultado||'—'}</td><td>{r.proxima_accion||'—'}</td><td>{r.estado}</td><td><div style={{display:'flex',gap:6}}><button onClick={()=>navigate(`/visitas/${encodeURIComponent(r.activity_code)}`)}>Abrir</button>{r.estado==='Pendiente'?<button onClick={()=>prepareDone(r)}>Revisar para marcar hecha</button>:null}</div></td></tr>)}</tbody></table></div></div>}
+    </>}
+    {(isNew||detailCode)&&status===200&&message&&<div className="ops-message">{message}</div>}
+  </OperationalShellFrame>;
 }
