@@ -1,14 +1,10 @@
 import { useEffect } from 'react';
 import { fetchAppApi } from './supabase';
-import { normalizeNavigation, orderAuthorizedNavigation, type NavItem } from './masterNavigation';
+import { directionSidebarNavigation, isDirectionNavigation, normalizeNavigation, type NavItem } from './masterNavigation';
 
 type NavResponse={items?:unknown[]};
 
 function normalizeLabel(value:string){return value.replace(/\s+/g,' ').trim().toLocaleLowerCase('es');}
-function isDirectionNavigation(items:NavItem[]){
-  const routes=new Set(items.map(item=>item.route));
-  return routes.has('/financieros')&&routes.has('/economia')&&routes.has('/comunicaciones');
-}
 function navigateTo(route:string){
   const base=import.meta.env.BASE_URL.endsWith('/')?import.meta.env.BASE_URL:`${import.meta.env.BASE_URL}/`;
   const target=`${base}${route.replace(/^\//,'')}`;
@@ -78,9 +74,6 @@ export default function MasterNavigationGuard(){
     let desiredNavigation:NavItem[]=[];
     const apply=()=>{
       if(!desiredNavigation.length)return;
-      // Transitional guard: only the legacy Direction navigation is DOM-managed.
-      // Operational shells own their React navigation declaratively and must never
-      // be mutated behind React's back, otherwise async navigation updates duplicate nodes.
       document.querySelectorAll<HTMLElement>('.dir-nav').forEach(nav=>enforceNavigation(nav,desiredNavigation));
     };
     const schedule=()=>{if(raf)return;raf=requestAnimationFrame(()=>{raf=0;apply()})};
@@ -88,7 +81,7 @@ export default function MasterNavigationGuard(){
       if(!alive||result.status!==200)return;
       const authorized=normalizeNavigation(result.data);
       if(!isDirectionNavigation(authorized))return;
-      desiredNavigation=orderAuthorizedNavigation(authorized);
+      desiredNavigation=directionSidebarNavigation(authorized);
       if(!desiredNavigation.length)return;
       apply();
       observer=new MutationObserver(schedule);
