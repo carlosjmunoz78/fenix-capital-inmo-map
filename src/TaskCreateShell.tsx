@@ -1,8 +1,10 @@
 import {FormEvent,useEffect,useMemo,useState} from 'react';
 import {useLocation,useNavigate} from 'react-router-dom';
-import {ArrowLeft,CalendarDays,LogOut,Moon,Save,Sun} from 'lucide-react';
+import {CalendarDays,LogOut,Moon,Save,Sun} from 'lucide-react';
 import {fetchAppApi,SUPABASE_URL,supabase} from './supabase';
-import {anaAvatar,fenixLogo} from './assets/visualAssets';
+import {anaAvatar} from './assets/visualAssets';
+import OperationalShellFrame from './OperationalShellFrame';
+import type {NavItem} from './masterNavigation';
 import './operational.css';
 
 type Theme='light'|'dark';
@@ -11,6 +13,8 @@ type Assignee={actor_code:string;name:string;role:string};
 type PersonalResponse={items?:Array<{actor_code?:string;name?:string;role?:string}>};
 type VisitadoresResponse={items?:Array<{actor_code?:string;nombre?:string;rol?:string}>};
 type CreateResponse={ok?:boolean;id?:string;destino?:string;error?:string};
+
+const taskCreateNav:NavItem[]=[{label:'← Volver a Agenda',route:'/agenda'}];
 
 async function createTask(payload:Record<string,unknown>){
  const{data:{session}}=await supabase.auth.getSession();
@@ -35,22 +39,35 @@ export default function TaskCreateShell(){
  function edit(){setPreview(false);setMessage('');setCreated(null);}
  async function submit(e:FormEvent){e.preventDefault();if(!valid)return;if(!preview){setPreview(true);setMessage('');return;}setBusy(true);setMessage('');const r=await createTask(payload);setBusy(false);if(r.status===201&&r.data?.ok){setCreated(r.data);setMessage('Tarea creada en la fuente canónica y auditada.');setPreview(false);}else if(r.status===403)setMessage('Tu perfil no puede crear esta tarea con ese responsable.');else setMessage(`No se pudo crear la tarea (${r.data?.error||r.status}).`);}
  async function logout(){await supabase.auth.signOut();window.location.href=import.meta.env.BASE_URL;}
- return <div className="ops-root" data-theme={theme} style={{zIndex:5600}}>
-  <aside className="ops-side"><button className="ops-brand" onClick={()=>navigate('/inicio')}><img src={fenixLogo} alt=""/><strong>FÉNIX CAPITAL</strong></button><nav><button onClick={()=>navigate('/agenda')}><ArrowLeft size={15}/> Volver a Agenda</button></nav><button className="ops-ana" onClick={()=>navigate('/ana')}><img src={anaAvatar} alt="Ana"/><span><strong>Ana está contigo</strong><small>Primero revisamos; después creamos.</small></span></button></aside>
-  <main className="ops-main"><header className="ops-top"><strong>Nueva tarea</strong><div className="ops-top-actions"><button onClick={()=>setTheme(theme==='light'?'dark':'light')} aria-label="Cambiar tema">{theme==='light'?<Moon size={17}/>:<Sun size={17}/>} {theme==='light'?'Oscuro':'Claro'}</button><div className="ops-profile"><strong>{ctx?.role||'Usuario'}</strong></div><button onClick={logout} aria-label="Cerrar sesión"><LogOut size={17}/></button></div></header>
-   <section className="ops-content"><div className="ops-title"><div><span className="ops-icon"><CalendarDays size={20}/></span><div><h1>Nueva tarea</h1><p>Alta canónica con responsable explícito y confirmación previa.</p></div></div><span className="ops-live ok">PRE-PROD</span></div>
-    <article className="ops-ana-card"><img src={anaAvatar} alt="Ana"/><div><strong>Ana</strong><p>No asigno personas por intuición. El responsable debe ser una identidad activa y autorizada.</p></div></article>
-    <form className="ops-message" onSubmit={submit} style={{display:'grid',gap:12}}>
-      <label>Tarea<input value={title} onChange={e=>{setTitle(e.target.value);edit()}} maxLength={200} placeholder="Describe la tarea" required/></label>
-      {isDirection?<label>Responsable<select value={target} onChange={e=>{setTarget(e.target.value);edit()}} required><option value="">Selecciona una persona activa</option>{assignees.map(a=><option key={a.actor_code} value={a.actor_code}>{a.name} · {a.role}</option>)}</select></label>:<label>Responsable<input value={target||ctx?.actor_code||''} readOnly aria-label="Responsable"/><small>La tarea queda asignada a tu identidad operativa.</small></label>}
-      <label>Criticidad<select value={criticality} onChange={e=>{setCriticality(e.target.value);edit()}}><option value="">Sin especificar</option><option>Normal</option><option>Importante</option><option>Crítica</option></select></label>
-      <label>Fecha límite<input type="date" value={due} onChange={e=>{setDue(e.target.value);edit()}}/></label>
-      {preview&&<div className="ops-message"><strong>Vista previa</strong><div>Tarea: {title.trim()}</div><div>Responsable: {assignees.find(a=>a.actor_code===target)?.name||target}</div><div>Estado inicial: Pendiente</div>{criticality&&<div>Criticidad: {criticality}</div>}{due&&<div>Fecha límite: {due}</div>}<small>Confirma para crear exactamente esta tarea en Notion.</small></div>}
-      {message&&<div className="ops-message">{message}</div>}
-      {!created&&<div style={{display:'flex',gap:8,flexWrap:'wrap'}}>{preview&&<button type="button" onClick={()=>setPreview(false)}>Volver</button>}<button className="primary" disabled={!valid||busy}><Save size={16}/>{busy?'Creando…':preview?'Confirmar y crear':'Revisar antes de crear'}</button></div>}
-      {created&&<div style={{display:'flex',gap:8,flexWrap:'wrap'}}><button type="button" className="primary" onClick={()=>navigate('/agenda')}>Volver a Agenda</button>{created.destino&&<button type="button" onClick={()=>navigate(created.destino!)}>Abrir tarea creada</button>}</div>}
-    </form>
-   </section>
-  </main>
- </div>;
+ const topbar=<header className="ops-top"><strong>Nueva tarea</strong><div className="ops-top-actions"><button onClick={()=>setTheme(theme==='light'?'dark':'light')} aria-label="Cambiar tema">{theme==='light'?<Moon size={17}/>:<Sun size={17}/>} {theme==='light'?'Oscuro':'Claro'}</button><div className="ops-profile"><strong>{ctx?.role||'Usuario'}</strong></div><button onClick={logout} aria-label="Cerrar sesión"><LogOut size={17}/></button></div></header>;
+ return <OperationalShellFrame
+  className="task-create-root"
+  theme={theme}
+  navigation={taskCreateNav}
+  activeRoute="/agenda"
+  anaSubtitle="Primero revisamos; después creamos."
+  anaRoute="/ana"
+  query=""
+  onQueryChange={()=>{}}
+  searchPlaceholder=""
+  name={ctx?.role||'Usuario'}
+  role=""
+  initials={(ctx?.role||'U').slice(0,2).toUpperCase()}
+  onToggleTheme={()=>setTheme(theme==='light'?'dark':'light')}
+  onLogout={logout}
+  topbar={topbar}
+ >
+   <div className="ops-title"><div><span className="ops-icon"><CalendarDays size={20}/></span><div><h1>Nueva tarea</h1><p>Alta canónica con responsable explícito y confirmación previa.</p></div></div><span className="ops-live ok">PRE-PROD</span></div>
+   <article className="ops-ana-card"><img src={anaAvatar} alt="Ana"/><div><strong>Ana</strong><p>No asigno personas por intuición. El responsable debe ser una identidad activa y autorizada.</p></div></article>
+   <form className="ops-message" onSubmit={submit} style={{display:'grid',gap:12}}>
+     <label>Tarea<input value={title} onChange={e=>{setTitle(e.target.value);edit()}} maxLength={200} placeholder="Describe la tarea" required/></label>
+     {isDirection?<label>Responsable<select value={target} onChange={e=>{setTarget(e.target.value);edit()}} required><option value="">Selecciona una persona activa</option>{assignees.map(a=><option key={a.actor_code} value={a.actor_code}>{a.name} · {a.role}</option>)}</select></label>:<label>Responsable<input value={target||ctx?.actor_code||''} readOnly aria-label="Responsable"/><small>La tarea queda asignada a tu identidad operativa.</small></label>}
+     <label>Criticidad<select value={criticality} onChange={e=>{setCriticality(e.target.value);edit()}}><option value="">Sin especificar</option><option>Normal</option><option>Importante</option><option>Crítica</option></select></label>
+     <label>Fecha límite<input type="date" value={due} onChange={e=>{setDue(e.target.value);edit()}}/></label>
+     {preview&&<div className="ops-message"><strong>Vista previa</strong><div>Tarea: {title.trim()}</div><div>Responsable: {assignees.find(a=>a.actor_code===target)?.name||target}</div><div>Estado inicial: Pendiente</div>{criticality&&<div>Criticidad: {criticality}</div>}{due&&<div>Fecha límite: {due}</div>}<small>Confirma para crear exactamente esta tarea en Notion.</small></div>}
+     {message&&<div className="ops-message">{message}</div>}
+     {!created&&<div style={{display:'flex',gap:8,flexWrap:'wrap'}}>{preview&&<button type="button" onClick={()=>setPreview(false)}>Volver</button>}<button className="primary" disabled={!valid||busy}><Save size={16}/>{busy?'Creando…':preview?'Confirmar y crear':'Revisar antes de crear'}</button></div>}
+     {created&&<div style={{display:'flex',gap:8,flexWrap:'wrap'}}><button type="button" className="primary" onClick={()=>navigate('/agenda')}>Volver a Agenda</button>{created.destino&&<button type="button" onClick={()=>navigate(created.destino!)}>Abrir tarea creada</button>}</div>}
+   </form>
+ </OperationalShellFrame>;
 }
