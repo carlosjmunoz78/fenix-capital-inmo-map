@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { calculateMortgage } from './calculator';
 import { fetchAppApi, supabase } from './supabase';
 import DirectionDashboard from './DirectionDashboard';
+import TransitionScreen from './TransitionScreen';
 import './logo.css';
 import './direction.css';
 
@@ -237,7 +238,7 @@ export default function App(){
     navigate('/',{replace:true});
   }
 
-  if(!authReady)return <div className="auth-shell"><p>Validando sesión…</p></div>;
+  if(!authReady)return <TransitionScreen/>;
 
   if(passwordRecovery)return <div className="auth-shell">
     <button className="theme-toggle auth-theme" onClick={()=>setTheme(theme==='light'?'dark':'light')} aria-label="Cambiar tema">{theme==='light'?<Moon size={18}/>:<Sun size={18}/>}<span>{theme==='light'?'Oscuro':'Claro'}</span></button>
