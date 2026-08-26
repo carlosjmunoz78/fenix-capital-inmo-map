@@ -10,9 +10,10 @@ const navigation={items:[
   {label:'Inicio',route:'/inicio'},{label:'Expedientes',route:'/expedientes'},{label:'Bancos',route:'/bancos'},
   {label:'Contactos',route:'/contactos'},{label:'Inmobiliarias',route:'/inmobiliarias'},{label:'Tasaciones',route:'/tasaciones'},
   {label:'Firmas',route:'/firmas'},{label:'Documentación',route:'/documentacion'},{label:'Financieros',route:'/financieros'},
-  {label:'Visitadores',route:'/visitadores'},{label:'Economía',route:'/economia'},{label:'Agenda',route:'/agenda'},{label:'Informes',route:'/informes'},
-  {label:'Notarías',route:'/notarias'},{label:'Avisos',route:'/notificaciones'},{label:'Comunicaciones',route:'/comunicaciones'},
-  {label:'Buscar',route:'/buscar'}
+  {label:'Visitadores',route:'/visitadores'},{label:'Obras Nuevas',route:'/obras-nuevas'},{label:'Herencias',route:'/herencias'},
+  {label:'Agenda',route:'/agenda'},{label:'Economía',route:'/economia'},{label:'Informes',route:'/informes'},
+  {label:'Notarías',route:'/notarias'},{label:'Registros de la Propiedad',route:'/registros-propiedad'},
+  {label:'Comunicaciones',route:'/comunicaciones'},{label:'Notificaciones',route:'/notificaciones'}
 ]};
 
 test.describe('Fénix PRE-PROD · contrato visual Inicio Dirección',()=>{
@@ -52,7 +53,9 @@ test.describe('Fénix PRE-PROD · contrato visual Inicio Dirección',()=>{
     await expect(page.getByText(/\bPRO\b/)).toHaveCount(0);
     const sidebar=page.locator('.dir-sidebar');
     await expect(sidebar).toBeVisible();
-    for(const label of ['Inmobiliarias','Notarías','Avisos','Comunicaciones','Buscar'])await expect(sidebar.getByRole('button',{name:label,exact:true})).toBeVisible();
+    for(const label of ['Inmobiliarias','Obras Nuevas','Herencias','Notarías','Registros de la Propiedad','Comunicaciones','Notificaciones'])await expect(sidebar.getByRole('button',{name:label,exact:true})).toBeVisible();
+    await expect(sidebar.getByRole('button',{name:'Avisos',exact:true})).toHaveCount(0);
+    await expect(sidebar.getByRole('button',{name:'Buscar',exact:true})).toHaveCount(0);
     await expect(page.getByRole('button',{name:'Buscador avanzado',exact:true})).toBeVisible();
     await expect(page.locator('.dir-topbar')).toBeVisible();
     const sidebarBox=await sidebar.boundingBox();
