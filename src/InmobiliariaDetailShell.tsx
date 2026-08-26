@@ -1,31 +1,31 @@
 import {useEffect,useMemo,useState} from 'react';
 import {useLocation,useNavigate} from 'react-router-dom';
-import {ArrowLeft,LogOut,Moon,Search,Sun,Save} from 'lucide-react';
+import {ArrowLeft,Save} from 'lucide-react';
 import {fetchAppApi,fetchB2BActionsApi,supabase} from './supabase';
 import {fetchNotionRuntime} from './notionRuntime';
-import {anaAvatar,anaVertical,fenixLogo} from './assets/visualAssets';
+import {anaVertical} from './assets/visualAssets';
+import {normalizeNavigation,type NavItem} from './masterNavigation';
+import OperationalShellFrame from './OperationalShellFrame';
 import './operational.css';
 import './inmobiliaria-detail.css';
 
 type Theme='light'|'dark';
 type Ctx={actor_code?:string;role?:string};
-type NavItem={label:string;route:string};
 type Row=Record<string,unknown>;
 function isNotionId(v:string){return /^[0-9a-f]{32}$/i.test(v.replaceAll('-',''));}
 function text(row:Row|undefined,keys:string[]){if(!row)return'';for(const k of keys){const v=row[k];if(typeof v==='string'&&v.trim())return v.trim();}return'';}
 function value(row:Row|undefined,keys:string[]){if(!row)return null;for(const k of keys){const v=row[k];if(v!==undefined&&v!==null&&v!=='')return v;}return null;}
-function normalizeNav(data:unknown):NavItem[]{if(!data||typeof data!=='object')return[];const items=(data as{items?:unknown[]}).items;if(!Array.isArray(items))return[];return items.map(x=>{if(typeof x==='string')return{label:x.replace(/^\//,'')||'Inicio',route:x};if(x&&typeof x==='object'){const o=x as Record<string,unknown>;if(typeof o.route==='string')return{label:typeof o.label==='string'?o.label:o.route.replace(/^\//,''),route:o.route};}return null;}).filter((x):x is NavItem=>Boolean(x));}
 const fallbackNav:NavItem[]=[{label:'Inicio',route:'/inicio'}];
 async function actionApi(id:string,changes:Record<string,unknown>){return fetchB2BActionsApi<any>(`/inmobiliarias/${encodeURIComponent(id)}/update`,{method:'POST',body:JSON.stringify(changes)});}
 
 export default function InmobiliariaDetailShell(){
  const location=useLocation(),navigate=useNavigate();const match=location.pathname.match(/^\/inmobiliarias\/([^/]+)$/);const id=match?.[1]?decodeURIComponent(match[1]):'';const active=Boolean(match&&isNotionId(id));
- const[sessionReady,setSessionReady]=useState(false),[logged,setLogged]=useState(false),[ctx,setCtx]=useState<Ctx|null>(null),[nav,setNav]=useState<NavItem[]>([]),[theme,setTheme]=useState<Theme>(()=>(sessionStorage.getItem('fenix-theme') as Theme)||'light');
+ const[sessionReady,setSessionReady]=useState(false),[logged,setLogged]=useState(false),[ctx,setCtx]=useState<Ctx|null>(null),[nav,setNav]=useState<NavItem[]>([]),[theme,setTheme]=useState<Theme>(()=>(sessionStorage.getItem('fenix-theme') as Theme)||'light'),[query,setQuery]=useState('');
  const[status,setStatus]=useState<number|null>(null),[row,setRow]=useState<Row|null>(null),[message,setMessage]=useState(''),[loading,setLoading]=useState(false),[correction,setCorrection]=useState(''),[reason,setReason]=useState('');
  const[notes,setNotes]=useState(''),[nextContact,setNextContact]=useState(''),[preview,setPreview]=useState(false),[saving,setSaving]=useState(false),[saveMsg,setSaveMsg]=useState('');
  useEffect(()=>{if(!active)return;let alive=true;supabase.auth.getSession().then(({data})=>{if(alive){setLogged(Boolean(data.session));setSessionReady(true)}});const{data:{subscription}}=supabase.auth.onAuthStateChange((_e,s)=>{setLogged(Boolean(s));setSessionReady(true)});return()=>{alive=false;subscription.unsubscribe()};},[active]);
  useEffect(()=>{if(!active)return;document.documentElement.dataset.theme=theme;sessionStorage.setItem('fenix-theme',theme);},[active,theme]);
- useEffect(()=>{if(!active||!logged)return;Promise.all([fetchAppApi<Ctx>('/session/context'),fetchAppApi<unknown>('/navigation')]).then(([c,n])=>{setCtx(c.status===200?c.data:null);setNav(n.status===200?normalizeNav(n.data):[]);});},[active,logged]);
+ useEffect(()=>{if(!active||!logged)return;Promise.all([fetchAppApi<Ctx>('/session/context'),fetchAppApi<unknown>('/navigation')]).then(([c,n])=>{setCtx(c.status===200?c.data:null);setNav(n.status===200?normalizeNavigation(n.data):[]);});},[active,logged]);
  async function load(){setLoading(true);setMessage('');const r=await fetchNotionRuntime<any>(`/inmobiliarias/${encodeURIComponent(id)}`);setStatus(r.status);setRow(r.status===200?(r.data?.item||null):null);if(r.status===403)setMessage('Tu perfil no puede abrir esta inmobiliaria.');else if(r.status===404)setMessage('No se ha encontrado la inmobiliaria.');else if(r.status!==200)setMessage('No se pudo cargar la inmobiliaria canónica.');setLoading(false);}
  useEffect(()=>{if(!active||!logged)return;void load();},[active,logged,id]);
  const effectiveNav=nav.length?nav:fallbackNav;
@@ -45,10 +45,7 @@ export default function InmobiliariaDetailShell(){
  async function logout(){await supabase.auth.signOut();window.location.href=import.meta.env.BASE_URL;}
  function prepareCorrection(){if(!correction.trim()||!reason.trim())return;const q=new URLSearchParams({mode:'help',resource:'inmobiliaria',inmobiliaria_id:id,correction:correction.trim(),reason:reason.trim()});navigate(`/ana?${q.toString()}`);}
  async function save(){if(!preview){setPreview(true);return;}if(!notes.trim()&&!nextContact)return;setSaving(true);setSaveMsg('');const changes:Record<string,unknown>={};if(notes.trim())changes.notas=notes.trim();if(nextContact)changes.proximo_contacto_b2b=nextContact;const r=await actionApi(id,changes);setSaving(false);if(r.status===200){setSaveMsg('Seguimiento B2B guardado dentro de tu ámbito autorizado.');setNotes('');setNextContact('');setPreview(false);await load();}else if(r.status===403)setSaveMsg('Tu perfil no puede modificar esta inmobiliaria o queda fuera de tu zona/cartera.');else setSaveMsg(`No se pudo guardar el seguimiento (${r.data?.error||r.status}).`);}
- return <div className="ops-root inmo-detail-root" data-theme={theme}>
-  <aside className="ops-side"><button className="ops-brand" onClick={()=>navigate('/inicio')}><img src={fenixLogo} alt=""/><strong>FÉNIX CAPITAL</strong></button><nav>{effectiveNav.map(item=><button key={item.route} className={item.route==='/inmobiliarias'?'active':''} onClick={()=>navigate(item.route)}>{item.label}</button>)}</nav><button className="ops-ana" onClick={()=>navigate('/ana')}><img src={anaAvatar} alt="Ana"/><span><strong>Ana está contigo</strong><small>Cuando quieras, avanzamos paso a paso.</small></span></button></aside>
-  <main className="ops-main"><header className="ops-top"><button className="inmo-detail-filter" onClick={()=>navigate('/inmobiliarias')}>Filtros avanzados</button><div className="ops-search"><Search size={17}/><input placeholder="Buscar inmobiliaria, contacto o expediente..."/><button onClick={()=>navigate('/inmobiliarias')}>Buscar</button></div><div className="ops-top-actions"><button onClick={()=>setTheme(theme==='light'?'dark':'light')} aria-label="Cambiar tema">{theme==='light'?<Moon size={17}/>:<Sun size={17}/>} {theme==='light'?'Oscuro':'Claro'}</button><div className="ops-profile"><strong>{ctx?.role||'Usuario'}</strong></div><button onClick={logout} aria-label="Cerrar sesión"><LogOut size={17}/></button></div></header>
-   <section className="ops-content inmo-detail-content">
+ return <OperationalShellFrame className="inmo-detail-root" theme={theme} navigation={effectiveNav} activeRoute="/inmobiliarias" anaSubtitle="Cuando quieras, avanzamos paso a paso." query={query} onQueryChange={setQuery} searchPlaceholder="Buscar inmobiliaria, contacto o expediente..." searchActionLabel="Filtros avanzados" onSearchAction={()=>navigate('/inmobiliarias')} name={ctx?.role||'Usuario'} role="" initials={(ctx?.role||'US').slice(0,2).toUpperCase()} onToggleTheme={()=>setTheme(theme==='light'?'dark':'light')} onLogout={logout} contentClassName="inmo-detail-content">
     <section className="inmo-detail-ana"><div className="inmo-detail-ana-photo"><img src={anaVertical} alt="Ana"/></div><div className="inmo-detail-ana-body"><span>ANA · EN ESTA PANTALLA</span><h2>¿Qué hacemos ahora?</h2><p>Una colaboración sólida se cuida con seguimiento, contexto y una próxima acción clara.</p><div className="inmo-detail-next"><button onClick={()=>document.getElementById('inmo-followup')?.scrollIntoView({behavior:'smooth'})}><b>1</b><strong>Revisar próximo contacto</strong><small>Ver y preparar →</small></button><button onClick={()=>navigate(`/ana?mode=do&resource=inmobiliaria&inmobiliaria_id=${encodeURIComponent(id)}`)}><b>2</b><strong>Preparar conversación B2B</strong><small>Ver y preparar →</small></button><button onClick={()=>document.getElementById('inmo-relationship')?.scrollIntoView({behavior:'smooth'})}><b>3</b><strong>Comprobar relación y zona</strong><small>Ver y preparar →</small></button></div></div>
      <article className="inmo-detail-correct"><span>CORREGIR A ANA</span><h3>¿En qué me equivoco?</h3><p>La corrección se prepara para revisión con el contexto de esta inmobiliaria; no cambia reglas automáticamente.</p><textarea value={correction} onChange={e=>setCorrection(e.target.value)} placeholder="Qué cambiarías..." rows={4}/><input value={reason} onChange={e=>setReason(e.target.value)} placeholder="Motivo de la corrección"/><button disabled={!correction.trim()||!reason.trim()} onClick={prepareCorrection}>Preparar para revisión</button></article>
     </section>
@@ -61,7 +58,5 @@ export default function InmobiliariaDetailShell(){
       <article className="inmo-detail-card"><span>SIGUIENTE PASO</span><h2>{next||'Definir próximo contacto B2B'}</h2><p>{next?'La siguiente acción procede de la fuente canónica.':'No existe un próximo contacto registrado. Ana no completará el dato por suposición.'}</p><div className="inmo-detail-actions"><button className="primary" onClick={()=>navigate(`/ana?mode=do&resource=inmobiliaria&inmobiliaria_id=${encodeURIComponent(id)}&channel=whatsapp`)}>Preparar WhatsApp</button><button onClick={()=>navigate(`/ana?mode=do&resource=inmobiliaria&inmobiliaria_id=${encodeURIComponent(id)}&channel=email`)}>Preparar correo</button><button onClick={()=>navigate(`/agenda?inmobiliaria=${encodeURIComponent(id)}`)}>Crear tarea</button></div></article></section>
      <section className="inmo-followup-card" id="inmo-followup"><div className="inmo-followup-head"><div><span>SEGUIMIENTO CONTEXTUAL</span><h2>Actualizar relación B2B</h2></div><small>Escritura con gate de cartera/zona · PRE-PROD</small></div><label>Notas<textarea rows={3} value={notes} onChange={e=>{setNotes(e.target.value);setPreview(false)}} placeholder="Contexto operativo sin duplicar datos..."/></label><label>Próximo contacto B2B<input type="date" value={nextContact} onChange={e=>{setNextContact(e.target.value);setPreview(false)}}/></label>{preview&&<div className="inmo-preview"><strong>Vista previa antes de guardar</strong><span>Notas: {notes.trim()||'Sin cambios'}</span><span>Próximo contacto: {nextContact||'Sin cambios'}</span></div>}<div className="inmo-followup-actions"><button className="primary" disabled={saving||(!notes.trim()&&!nextContact)} onClick={save}><Save size={16}/>{saving?'Guardando…':preview?'Confirmar y guardar':'Revisar cambios'}</button>{saveMsg&&<span>{saveMsg}</span>}</div></section>
     </>}
-   </section>
-  </main>
- </div>;
+ </OperationalShellFrame>;
 }
