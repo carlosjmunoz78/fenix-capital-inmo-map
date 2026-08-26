@@ -47,12 +47,22 @@ function directionNavigation(items:MasterItem[]){
   const visualAdditions=new Set(['/obras-nuevas','/herencias','/registros-propiedad']);
   return MASTER_ORDER.filter(item=>authorized.has(item.route)||visualAdditions.has(item.route));
 }
+function markManaged(nav:HTMLElement,buttons:HTMLButtonElement[],desiredNavigation:MasterItem[]){
+  nav.dataset.masterNavigation='true';
+  buttons.forEach((button,index)=>{
+    const item=desiredNavigation[index];
+    if(item)button.dataset.masterRoute=item.route;
+  });
+}
 function enforceNavigation(nav:HTMLElement,desiredNavigation:MasterItem[]){
   const buttons=Array.from(nav.querySelectorAll(':scope > button')).filter((node):node is HTMLButtonElement=>node instanceof HTMLButtonElement);
   if(!buttons.length)return;
   const desired=desiredNavigation.map(item=>normalizeLabel(item.label));
   const current=buttons.map(button=>normalizeLabel(button.textContent||''));
-  if(current.length===desired.length&&current.every((value,index)=>value===desired[index]))return;
+  if(current.length===desired.length&&current.every((value,index)=>value===desired[index])){
+    markManaged(nav,buttons,desiredNavigation);
+    return;
+  }
   const existing=new Map<string,HTMLButtonElement>();
   for(const button of buttons){
     const label=normalizeLabel(button.textContent||'');
@@ -61,6 +71,7 @@ function enforceNavigation(nav:HTMLElement,desiredNavigation:MasterItem[]){
   const aliases=new Map<string,string>([['notificaciones','avisos']]);
   const template=buttons[0];
   const fragment=document.createDocumentFragment();
+  const managed:HTMLButtonElement[]=[];
   for(const item of desiredNavigation){
     const key=normalizeLabel(item.label);
     const alias=aliases.get(key);
@@ -79,9 +90,12 @@ function enforceNavigation(nav:HTMLElement,desiredNavigation:MasterItem[]){
     const active=pathname.endsWith(item.route)||pathname.includes(`${item.route}/`);
     button.classList.toggle('active',active);
     if(active)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');
+    managed.push(button);
     fragment.appendChild(button);
   }
+  nav.dataset.masterNavigation='true';
   nav.replaceChildren(fragment);
+  markManaged(nav,managed,desiredNavigation);
 }
 
 export default function MasterNavigationGuard(){
