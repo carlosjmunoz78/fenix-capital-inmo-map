@@ -21,28 +21,33 @@
 
 .auth-card:has(#fenix-user) .auth-brand{
   margin-left:54%;
-  margin-bottom:28px;
+  margin-bottom:24px;
 }
 
 .auth-card:has(#fenix-user) h1{
-  font-size:31px;
+  font-size:24px;
   line-height:1.15;
   margin-left:54%;
+  color:var(--muted);
+  font-weight:650;
 }
 
 .auth-card:has(#fenix-user) > p{
   margin-left:54%;
-  margin-top:12px;
+  margin-top:14px;
   max-width:none;
+  font-size:0;
 }
 
 .auth-card:has(#fenix-user) > p::before{
   content:"Soy Ana, tu asistente. ¿Empezamos?";
   display:block;
-  font-size:20px;
-  line-height:1.4;
-  font-weight:650;
+  font-size:34px;
+  line-height:1.12;
+  letter-spacing:-.025em;
+  font-weight:800;
   color:var(--text);
+  max-width:430px;
 }
 
 .auth-card:has(#fenix-user)::after{
@@ -57,7 +62,7 @@
 
 .auth-card:has(#fenix-user) .auth-fields{
   margin-left:54%;
-  margin-top:26px;
+  margin-top:30px;
 }
 
 .auth-card:has(#fenix-user) .auth-field,
@@ -104,6 +109,6 @@
     bottom:auto;
     width:auto;
   }
-  .auth-card:has(#fenix-user) h1{font-size:27px}
-  .auth-card:has(#fenix-user) > p::before{font-size:17px}
+  .auth-card:has(#fenix-user) h1{font-size:21px}
+  .auth-card:has(#fenix-user) > p::before{font-size:28px;max-width:none}
 }
