@@ -3,7 +3,7 @@ import {useLocation,useNavigate} from 'react-router-dom';
 import {Building2,LogOut,Moon,Search,Sun} from 'lucide-react';
 import {fetchAppApi,supabase} from './supabase';
 import {normalizeNavigation,orderAuthorizedNavigation,type NavItem} from './masterNavigation';
-import {anaAvatar,fenixLogo} from './assets/visualAssets';
+import OperationalSidebar from './OperationalSidebar';
 import './operational.css';
 import './notarias-polish.css';
 
@@ -25,11 +25,7 @@ export default function RegistrosPropiedadShell(){
  async function logout(){await supabase.auth.signOut();window.location.href=import.meta.env.BASE_URL;}
 
  return <div className="ops-root notarias-root" data-theme={theme}>
-  <aside className="ops-side">
-   <button className="ops-brand" onClick={()=>navigate('/inicio')}><img src={fenixLogo} alt=""/><strong>FÉNIX CAPITAL</strong></button>
-   <nav>{effectiveNav.map(i=><button key={i.route} className={i.route===ROUTE?'active':''} onClick={()=>navigate(i.route)}>{i.label}</button>)}</nav>
-   <button className="ops-ana" onClick={()=>navigate('/ana')}><img src={anaAvatar} alt="Ana"/><span><strong>Ana está contigo</strong><small>Te ayudo con registros y documentación.</small></span></button>
-  </aside>
+  <OperationalSidebar navigation={effectiveNav} activeRoute={ROUTE} anaSubtitle="Te ayudo con registros y documentación."/>
   <main className="ops-main">
    <header className="ops-top">
     <div className="ops-search"><Search size={17}/><input value={q} onChange={e=>setQ(e.target.value)} placeholder="Buscar registro, localidad..."/></div>
