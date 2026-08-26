@@ -9,11 +9,26 @@
   .ops-root:not(.role-home)>.ops-main{height:100vh}
   .ops-root:not(.role-home) .ops-content{padding-top:66px}
   .ops-root[data-theme='dark']:not(.role-home)>.ops-side{background:#202023;border-bottom-color:#343438}
-  html:has(.ops-root:not(.role-home)) .calc-panel{top:122px!important;bottom:auto!important;height:calc(100vh - 130px)!important;max-height:calc(100vh - 130px)!important;overflow:auto!important;pointer-events:none!important}
-  html:has(.ops-root:not(.role-home)) .calc-panel *{pointer-events:none!important}
-  html:has(.ops-root:not(.role-home)) .calc-panel button,
-  html:has(.ops-root:not(.role-home)) .calc-panel input,
-  html:has(.ops-root:not(.role-home)) .calc-panel select,
-  html:has(.ops-root:not(.role-home)) .calc-panel textarea,
-  html:has(.ops-root:not(.role-home)) .calc-panel a{pointer-events:auto!important}
+
+  /* El shell operativo y la calculadora legacy son hermanos con stacking contexts
+     distintos. Para que la calculadora siga visible y utilizable sin bloquear la
+     navegación móvil, el contenedor legacy deja pasar eventos y solo sus controles
+     interactivos recuperan pointer-events. */
+  #root:has(> .ops-root:not(.role-home)) > .app-shell{pointer-events:none!important}
+  #root:has(> .ops-root:not(.role-home)) > .app-shell .calc-launcher{pointer-events:auto!important}
+  #root:has(> .ops-root:not(.role-home)) > .app-shell .calc-panel{
+    top:122px!important;
+    bottom:auto!important;
+    height:calc(100vh - 130px)!important;
+    max-height:calc(100vh - 130px)!important;
+    overflow:auto!important;
+    pointer-events:none!important;
+  }
+  #root:has(> .ops-root:not(.role-home)) > .app-shell .calc-panel *{pointer-events:none!important}
+  #root:has(> .ops-root:not(.role-home)) > .app-shell .calc-panel button,
+  #root:has(> .ops-root:not(.role-home)) > .app-shell .calc-panel input,
+  #root:has(> .ops-root:not(.role-home)) > .app-shell .calc-panel select,
+  #root:has(> .ops-root:not(.role-home)) > .app-shell .calc-panel textarea,
+  #root:has(> .ops-root:not(.role-home)) > .app-shell .calc-panel a,
+  #root:has(> .ops-root:not(.role-home)) > .app-shell .calc-panel label{pointer-events:auto!important}
 }
