@@ -1,6 +1,6 @@
 @media(max-width:650px){
   .ops-root .ops-side{display:none}
-  .ops-root:not(.role-home)>.ops-side{display:block;position:fixed;left:0;right:0;top:62px;bottom:auto;z-index:30;min-height:0;height:52px;padding:4px 8px;background:#fff;border:0;border-bottom:1px solid #ececef;overflow:hidden}
+  .ops-root:not(.role-home)>.ops-side{display:block;position:fixed;left:0;right:0;top:62px;bottom:auto;z-index:10001!important;min-height:0;height:52px;padding:4px 8px;background:#fff;border:0;border-bottom:1px solid #ececef;overflow:hidden}
   .ops-root:not(.role-home)>.ops-side .ops-brand,.ops-root:not(.role-home)>.ops-side .ops-ana{display:none}
   .ops-root:not(.role-home)>.ops-side nav{display:flex;gap:6px;padding:0;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none}
   .ops-root:not(.role-home)>.ops-side nav::-webkit-scrollbar{display:none}
@@ -9,6 +9,5 @@
   .ops-root:not(.role-home)>.ops-main{height:100vh}
   .ops-root:not(.role-home) .ops-content{padding-top:66px}
   .ops-root[data-theme='dark']:not(.role-home)>.ops-side{background:#202023;border-bottom-color:#343438}
-  html.exp-master-active .ops-root:not(.role-home)>.ops-side{z-index:10001!important}
   html:has(.ops-root:not(.role-home)) .calc-panel{top:122px!important;bottom:8px!important;max-height:none!important}
 }
