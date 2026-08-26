@@ -15,7 +15,7 @@ type Props={
 };
 
 export default function DirectionTopbar({theme,search,profileName,initials,onSearchChange,onSearch,onNavigate,onToggleTheme,onLogout}:Props){
- return <header className="dir-topbar">
+ return <header className="ops-top dir-topbar">
   <button className="dir-advanced" onClick={()=>onNavigate('/buscar')}><SlidersHorizontal size={17}/>Buscador avanzado</button>
   <div className="dir-search"><Search size={18}/><input value={search} onChange={e=>onSearchChange(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')onSearch()}} placeholder="Buscar expediente, cliente, banco, inmobiliaria, contacto..."/><button onClick={onSearch} aria-label="Buscar"><Search size={17}/></button></div>
   <div className="dir-top-right">
