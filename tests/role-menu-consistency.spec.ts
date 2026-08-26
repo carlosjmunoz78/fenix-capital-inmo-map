@@ -2,7 +2,7 @@ import {test,expect} from '@playwright/test';
 
 const fakeSession={access_token:'eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwicm9sZSI6ImF1dGhlbnRpY2F0ZWQiLCJzdWIiOiJhYWFhYWFhYS1hYWFhLTRhYWEtOGFhYS1hYWFhYWFhYWFhYWEiLCJleHAiOjE5OTk5OTk5OTl9.',token_type:'bearer',expires_in:3600,expires_at:1999999999,refresh_token:'qa-menu-consistency-not-real',user:{id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',aud:'authenticated',role:'authenticated',email:'qa@fenix.test',app_metadata:{},user_metadata:{},created_at:'2026-08-23T00:00:00.000Z'}};
 const items=[
- {label:'Inicio',route:'/inicio'},{label:'Expedientes',route:'/expedientes'},{label:'Bancos',route:'/bancos'},{label:'Contactos',route:'/contactos'},{label:'Inmobiliarias',route:'/inmobiliarias'},{label:'Tasaciones',route:'/tasaciones'},{label:'Firmas',route:'/firmas'},{label:'Documentación',route:'/documentacion'},{label:'Financieros',route:'/financieros'},{label:'Visitadores',route:'/visitadores'},{label:'Economía',route:'/economia'},{label:'Agenda',route:'/agenda'},{label:'Informes',route:'/informes'},{label:'Notarías',route:'/notarias'},{label:'Avisos',route:'/notificaciones'},{label:'Comunicaciones',route:'/comunicaciones'},{label:'Buscar',route:'/buscar'}
+ {label:'Inicio',route:'/inicio'},{label:'Expedientes',route:'/expedientes'},{label:'Bancos',route:'/bancos'},{label:'Contactos',route:'/contactos'},{label:'Inmobiliarias',route:'/inmobiliarias'},{label:'Tasaciones',route:'/tasaciones'},{label:'Firmas',route:'/firmas'},{label:'Documentación',route:'/documentacion'},{label:'Financieros',route:'/financieros'},{label:'Visitadores',route:'/visitadores'},{label:'Obras Nuevas',route:'/obras-nuevas'},{label:'Herencias',route:'/herencias'},{label:'Agenda',route:'/agenda'},{label:'Economía',route:'/economia'},{label:'Informes',route:'/informes'},{label:'Notarías',route:'/notarias'},{label:'Registros de la Propiedad',route:'/registros-propiedad'},{label:'Comunicaciones',route:'/comunicaciones'},{label:'Notificaciones',route:'/notificaciones'}
 ];
 
 async function boot(page:any){
@@ -14,9 +14,9 @@ async function boot(page:any){
  await page.route('**/functions/v1/fenix-communications-gateway-test/**',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[]})}));
 }
 async function labels(page:any,selector:string){return page.locator(selector).getByRole('button').evaluateAll((nodes:any[])=>nodes.map(n=>(n.textContent||'').trim()).filter(Boolean));}
-async function waitFullMenu(page:any,selector:string){await expect(page.locator(selector).getByRole('button',{name:'Inmobiliarias',exact:true})).toBeVisible();await expect(page.locator(selector).getByRole('button',{name:'Buscar',exact:true})).toBeVisible();}
+async function waitFullMenu(page:any,selector:string){await expect(page.locator(selector).getByRole('button',{name:'Inmobiliarias',exact:true})).toBeVisible();await expect(page.locator(selector).getByRole('button',{name:'Notificaciones',exact:true})).toBeVisible();}
 
-test('Dirección conserva exactamente el mismo menú autorizado en Inicio, Inmobiliarias, Informes, Comunicaciones y Ana',async({page},testInfo)=>{
+test('Dirección conserva exactamente el mismo menú aprobado en Inicio, Inmobiliarias, Informes, Comunicaciones y Ana',async({page},testInfo)=>{
  if(!testInfo.project.name.includes('desktop'))test.skip();
  await boot(page);
  await page.goto('/inicio');
