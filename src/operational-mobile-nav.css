@@ -9,5 +9,11 @@
   .ops-root:not(.role-home)>.ops-main{height:100vh}
   .ops-root:not(.role-home) .ops-content{padding-top:66px}
   .ops-root[data-theme='dark']:not(.role-home)>.ops-side{background:#202023;border-bottom-color:#343438}
-  html:has(.ops-root:not(.role-home)) .calc-panel{top:122px!important;bottom:auto!important;height:calc(100vh - 130px)!important;max-height:calc(100vh - 130px)!important;overflow:auto!important}
+  html:has(.ops-root:not(.role-home)) .calc-panel{top:122px!important;bottom:auto!important;height:calc(100vh - 130px)!important;max-height:calc(100vh - 130px)!important;overflow:auto!important;pointer-events:none!important}
+  html:has(.ops-root:not(.role-home)) .calc-panel *{pointer-events:none!important}
+  html:has(.ops-root:not(.role-home)) .calc-panel button,
+  html:has(.ops-root:not(.role-home)) .calc-panel input,
+  html:has(.ops-root:not(.role-home)) .calc-panel select,
+  html:has(.ops-root:not(.role-home)) .calc-panel textarea,
+  html:has(.ops-root:not(.role-home)) .calc-panel a{pointer-events:auto!important}
 }
