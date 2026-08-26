@@ -78,7 +78,10 @@ export default function MasterNavigationGuard(){
     let desiredNavigation:NavItem[]=[];
     const apply=()=>{
       if(!desiredNavigation.length)return;
-      document.querySelectorAll<HTMLElement>('.dir-nav,.ops-side nav').forEach(nav=>enforceNavigation(nav,desiredNavigation));
+      // Transitional guard: only the legacy Direction navigation is DOM-managed.
+      // Operational shells own their React navigation declaratively and must never
+      // be mutated behind React's back, otherwise async navigation updates duplicate nodes.
+      document.querySelectorAll<HTMLElement>('.dir-nav').forEach(nav=>enforceNavigation(nav,desiredNavigation));
     };
     const schedule=()=>{if(raf)return;raf=requestAnimationFrame(()=>{raf=0;apply()})};
     fetchAppApi<NavResponse>('/navigation').then(result=>{
