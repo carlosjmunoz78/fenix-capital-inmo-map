@@ -83,7 +83,7 @@ export default function OperationalAdvancedSearchGuard(){
    actions.insertBefore(button,actions.firstChild);syncLabel();
   };
   const wire=()=>{
-   document.querySelectorAll<HTMLElement>('.ops-top').forEach(top=>{
+   document.querySelectorAll<HTMLElement>('.ops-top:not(.dir-topbar)').forEach(top=>{
     const search=ensureSearch(top);
     let existing=top.querySelector<HTMLButtonElement>(`.${BUTTON_CLASS}`);
     if(!existing){existing=document.createElement('button');existing.type='button';existing.className=BUTTON_CLASS;existing.addEventListener('click',()=>navigate('/buscar'));top.insertBefore(existing,search);}
