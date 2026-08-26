@@ -31,6 +31,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 24
+          cache: npm
 
       - name: Install dependencies reproducibly
         run: |
@@ -58,6 +59,12 @@ jobs:
             git push origin HEAD:preprod-app-phase1
           fi
 
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
       - name: Install Chromium browser
         run: npx playwright install chromium
         timeout-minutes: 5
@@ -66,6 +73,8 @@ jobs:
         run: npm run build
 
       - name: Browser QA
+        env:
+          PLAYWRIGHT_SKIP_BUILD: '1'
         run: npm run test:e2e
 
       - name: Upload dist
