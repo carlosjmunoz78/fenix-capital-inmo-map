@@ -27,6 +27,7 @@ export default function DirectionOperationalFrame({theme,navigation,search,profi
   navigation={navigation}
   activeRoute="/inicio"
   anaSubtitle="Habla con Ana, tu asistente inteligente."
+  sidebarVariant="direction"
   query={search}
   onQueryChange={onSearchChange}
   searchPlaceholder="Buscar expediente, cliente, banco, inmobiliaria, contacto..."
@@ -36,7 +37,9 @@ export default function DirectionOperationalFrame({theme,navigation,search,profi
   onToggleTheme={onToggleTheme}
   onLogout={onLogout}
   topbar={topbar}
+  mainClassName="dir-main"
   contentClassName="dir-content"
+  legacyDirectionTheme
  >
   {children}
  </OperationalShellFrame>;
