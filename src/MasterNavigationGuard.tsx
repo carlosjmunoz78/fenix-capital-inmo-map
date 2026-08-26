@@ -40,11 +40,12 @@ function setButtonLabel(button:HTMLButtonElement,label:string){
   if(span)span.textContent=label;
   else button.textContent=label;
 }
-function desiredForAuthorized(items:MasterItem[]){
+function directionNavigation(items:MasterItem[]){
   const authorized=new Set(items.map(item=>item.route));
-  const directionMenu=authorized.has('/financieros')&&authorized.has('/economia')&&authorized.has('/comunicaciones');
-  const directionAdditions=new Set(['/obras-nuevas','/herencias','/registros-propiedad']);
-  return MASTER_ORDER.filter(item=>authorized.has(item.route)||(directionMenu&&directionAdditions.has(item.route)));
+  const isDirection=authorized.has('/financieros')&&authorized.has('/economia')&&authorized.has('/comunicaciones');
+  if(!isDirection)return [];
+  const visualAdditions=new Set(['/obras-nuevas','/herencias','/registros-propiedad']);
+  return MASTER_ORDER.filter(item=>authorized.has(item.route)||visualAdditions.has(item.route));
 }
 function enforceNavigation(nav:HTMLElement,desiredNavigation:MasterItem[]){
   const buttons=Array.from(nav.querySelectorAll(':scope > button')).filter((node):node is HTMLButtonElement=>node instanceof HTMLButtonElement);
@@ -89,7 +90,7 @@ export default function MasterNavigationGuard(){
     let desiredNavigation:MasterItem[]=[];
     const apply=()=>{
       if(!desiredNavigation.length)return;
-      document.querySelectorAll<HTMLElement>('.dir-nav,.sidebar nav,.ops-side nav').forEach(nav=>enforceNavigation(nav,desiredNavigation));
+      document.querySelectorAll<HTMLElement>('.dir-nav,.ops-side nav').forEach(nav=>enforceNavigation(nav,desiredNavigation));
     };
     const schedule=()=>{if(raf)return;raf=requestAnimationFrame(()=>{raf=0;apply()})};
     fetchAppApi<NavResponse>('/navigation').then(result=>{
@@ -98,7 +99,7 @@ export default function MasterNavigationGuard(){
         .filter((item):item is Required<NavItem>=>Boolean(item&&typeof item.label==='string'&&typeof item.route==='string'))
         .map(item=>({label:item.label.trim(),route:item.route.trim()}))
         .filter(item=>item.label&&item.route);
-      desiredNavigation=desiredForAuthorized(items);
+      desiredNavigation=directionNavigation(items);
       if(!desiredNavigation.length)return;
       apply();
       observer=new MutationObserver(schedule);
