@@ -5,6 +5,10 @@ import { normalizeNavigation, orderAuthorizedNavigation, type NavItem } from './
 type NavResponse={items?:unknown[]};
 
 function normalizeLabel(value:string){return value.replace(/\s+/g,' ').trim().toLocaleLowerCase('es');}
+function isDirectionNavigation(items:NavItem[]){
+  const routes=new Set(items.map(item=>item.route));
+  return routes.has('/financieros')&&routes.has('/economia')&&routes.has('/comunicaciones');
+}
 function navigateTo(route:string){
   const base=import.meta.env.BASE_URL.endsWith('/')?import.meta.env.BASE_URL:`${import.meta.env.BASE_URL}/`;
   const target=`${base}${route.replace(/^\//,'')}`;
@@ -79,7 +83,9 @@ export default function MasterNavigationGuard(){
     const schedule=()=>{if(raf)return;raf=requestAnimationFrame(()=>{raf=0;apply()})};
     fetchAppApi<NavResponse>('/navigation').then(result=>{
       if(!alive||result.status!==200)return;
-      desiredNavigation=orderAuthorizedNavigation(normalizeNavigation(result.data));
+      const authorized=normalizeNavigation(result.data);
+      if(!isDirectionNavigation(authorized))return;
+      desiredNavigation=orderAuthorizedNavigation(authorized);
       if(!desiredNavigation.length)return;
       apply();
       observer=new MutationObserver(schedule);
