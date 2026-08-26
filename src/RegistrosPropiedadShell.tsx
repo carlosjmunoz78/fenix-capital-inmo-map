@@ -1,9 +1,10 @@
 import {useEffect,useState} from 'react';
 import {useLocation,useNavigate} from 'react-router-dom';
-import {Building2,LogOut,Moon,Search,Sun} from 'lucide-react';
+import {Building2} from 'lucide-react';
 import {fetchAppApi,supabase} from './supabase';
 import {normalizeNavigation,orderAuthorizedNavigation,type NavItem} from './masterNavigation';
 import OperationalSidebar from './OperationalSidebar';
+import OperationalTopbar from './OperationalTopbar';
 import './operational.css';
 import './notarias-polish.css';
 
@@ -23,14 +24,12 @@ export default function RegistrosPropiedadShell(){
  const effectiveNav=nav.length?nav:fallbackNav;
  if(!active||!ready||!logged||authorized!==true)return null;
  async function logout(){await supabase.auth.signOut();window.location.href=import.meta.env.BASE_URL;}
+ const role=ctx?.role||'Usuario';
 
  return <div className="ops-root notarias-root" data-theme={theme}>
   <OperationalSidebar navigation={effectiveNav} activeRoute={ROUTE} anaSubtitle="Te ayudo con registros y documentación."/>
   <main className="ops-main">
-   <header className="ops-top">
-    <div className="ops-search"><Search size={17}/><input value={q} onChange={e=>setQ(e.target.value)} placeholder="Buscar registro, localidad..."/></div>
-    <div className="ops-top-actions"><button onClick={()=>setTheme(theme==='light'?'dark':'light')} aria-label="Cambiar tema">{theme==='light'?<Moon size={17}/>:<Sun size={17}/>} {theme==='light'?'Oscuro':'Claro'}</button><div className="ops-profile"><strong>{ctx?.role||'Usuario'}</strong></div><button onClick={logout} aria-label="Cerrar sesión"><LogOut size={17}/></button></div>
-   </header>
+   <OperationalTopbar theme={theme} onToggleTheme={()=>setTheme(theme==='light'?'dark':'light')} query={q} onQueryChange={setQ} placeholder="Buscar registro, localidad..." name={role} role="" initials={role.slice(0,2).toUpperCase()} onLogout={logout}/>
    <section className="ops-content notarias-content">
     <div className="ops-title"><div><span className="ops-icon"><Building2 size={20}/></span><div><small>MÓDULO PENDIENTE</small><h1>Registros de la Propiedad</h1><p>La navegación ya respeta el contrato global autorizado. El módulo funcional completo se construirá en su fase final.</p></div></div></div>
     <div className="ops-empty" data-testid="property-registry-placeholder"><strong>Módulo todavía no desarrollado</strong><span>Listado, alta, ficha editable y personal asociado se incorporarán al final, siguiendo el patrón de Inmobiliarias y sin inventar datos.</span></div>
