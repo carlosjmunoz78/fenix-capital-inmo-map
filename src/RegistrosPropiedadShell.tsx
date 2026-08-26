@@ -2,7 +2,7 @@ import {useEffect,useState} from 'react';
 import {useLocation,useNavigate} from 'react-router-dom';
 import {Building2} from 'lucide-react';
 import {fetchAppApi,supabase} from './supabase';
-import {normalizeNavigation,orderAuthorizedNavigation,type NavItem} from './masterNavigation';
+import {directionSidebarNavigation,isDirectionNavigation,normalizeNavigation,orderAuthorizedNavigation,type NavItem} from './masterNavigation';
 import OperationalShellFrame from './OperationalShellFrame';
 import './operational.css';
 import './notarias-polish.css';
@@ -18,7 +18,7 @@ export default function RegistrosPropiedadShell(){
 
  useEffect(()=>{if(!active)return;let alive=true;supabase.auth.getSession().then(({data})=>{if(alive){setLogged(Boolean(data.session));setReady(true)}});const{data:{subscription}}=supabase.auth.onAuthStateChange((_e,s)=>{setLogged(Boolean(s));setReady(true)});return()=>{alive=false;subscription.unsubscribe()};},[active]);
  useEffect(()=>{if(active){document.documentElement.dataset.theme=theme;sessionStorage.setItem('fenix-theme',theme)}},[active,theme]);
- useEffect(()=>{if(!active||!logged)return;let alive=true;Promise.all([fetchAppApi<Ctx>('/session/context'),fetchAppApi<unknown>('/navigation')]).then(([c,n])=>{if(!alive)return;setCtx(c.status===200?c.data:null);const parsed=n.status===200?orderAuthorizedNavigation(normalizeNavigation(n.data)):[];setNav(parsed);const canUse=parsed.some(i=>i.route===ROUTE);setAuthorized(canUse);if(!canUse)navigate('/inicio',{replace:true});}).catch(()=>{if(alive){setAuthorized(false);navigate('/inicio',{replace:true});}});return()=>{alive=false};},[active,logged,navigate]);
+ useEffect(()=>{if(!active||!logged)return;let alive=true;Promise.all([fetchAppApi<Ctx>('/session/context'),fetchAppApi<unknown>('/navigation')]).then(([c,n])=>{if(!alive)return;setCtx(c.status===200?c.data:null);const normalized=n.status===200?normalizeNavigation(n.data):[];const parsed=isDirectionNavigation(normalized)?directionSidebarNavigation(normalized):orderAuthorizedNavigation(normalized);setNav(parsed);const canUse=normalized.some(i=>i.route===ROUTE);setAuthorized(canUse);if(!canUse)navigate('/inicio',{replace:true});}).catch(()=>{if(alive){setAuthorized(false);navigate('/inicio',{replace:true});}});return()=>{alive=false};},[active,logged,navigate]);
 
  const effectiveNav=nav.length?nav:fallbackNav;
  if(!active||!ready||!logged||authorized!==true)return null;
