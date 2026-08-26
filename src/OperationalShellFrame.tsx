@@ -23,15 +23,16 @@ type Props={
  initials:string;
  onToggleTheme:()=>void;
  onLogout:()=>void|Promise<void>;
+ topbar?:ReactNode;
  contentClassName?:string;
  children:ReactNode;
 };
 
-export default function OperationalShellFrame({className='',theme,navigation,activeRoute,anaSubtitle,anaRoute,query,onQueryChange,searchPlaceholder,searchActionLabel,onSearchAction,name,role,avatarUrl='',initials,onToggleTheme,onLogout,contentClassName='',children}:Props){
+export default function OperationalShellFrame({className='',theme,navigation,activeRoute,anaSubtitle,anaRoute,query,onQueryChange,searchPlaceholder,searchActionLabel,onSearchAction,name,role,avatarUrl='',initials,onToggleTheme,onLogout,topbar,contentClassName='',children}:Props){
  return <div className={`ops-root ${className}`.trim()} data-theme={theme}>
   <OperationalSidebar navigation={navigation} activeRoute={activeRoute} anaSubtitle={anaSubtitle} anaRoute={anaRoute}/>
   <main className="ops-main">
-   <OperationalTopbar theme={theme} onToggleTheme={onToggleTheme} query={query} onQueryChange={onQueryChange} placeholder={searchPlaceholder} searchActionLabel={searchActionLabel} onSearchAction={onSearchAction} name={name} role={role} avatarUrl={avatarUrl} initials={initials} onLogout={onLogout}/>
+   {topbar??<OperationalTopbar theme={theme} onToggleTheme={onToggleTheme} query={query} onQueryChange={onQueryChange} placeholder={searchPlaceholder} searchActionLabel={searchActionLabel} onSearchAction={onSearchAction} name={name} role={role} avatarUrl={avatarUrl} initials={initials} onLogout={onLogout}/>} 
    <section className={`ops-content ${contentClassName}`.trim()}>{children}</section>
   </main>
  </div>;
