@@ -1,8 +1,10 @@
 import {FormEvent,useEffect,useMemo,useState} from 'react';
 import {useLocation,useNavigate} from 'react-router-dom';
-import {ArrowLeft,Building2,LogOut,Moon,Save,Sun} from 'lucide-react';
+import {Building2,LogOut,Moon,Save,Sun} from 'lucide-react';
 import {fetchAppApi,fetchB2BActionsApi,SUPABASE_URL,supabase} from './supabase';
-import {anaAvatar,fenixLogo} from './assets/visualAssets';
+import {anaAvatar} from './assets/visualAssets';
+import type {NavItem} from './masterNavigation';
+import OperationalShellFrame from './OperationalShellFrame';
 import './operational.css';
 
 type Theme='light'|'dark';
@@ -10,6 +12,8 @@ type Ctx={actor_code?:string;role?:string};
 type Assignee={actor_code:string;name:string;role:string};
 type VisitadoresResponse={items?:Array<{actor_code?:string;nombre?:string;rol?:string}>};
 type CreateResponse={ok?:boolean;id?:string;destino?:string;error?:string;existing_id?:string;reused?:boolean;no_op?:boolean;zone?:string|null};
+
+const createNav:NavItem[]=[{label:'Volver a Inmobiliarias',route:'/inmobiliarias'}];
 
 async function createLegacyInmobiliaria(payload:Record<string,unknown>){const{data:{session}}=await supabase.auth.getSession();if(!session?.access_token)return{status:401,data:null as CreateResponse|null};const r=await fetch(`${SUPABASE_URL}/functions/v1/fenix-notion-actions-test/inmobiliarias/create`,{method:'POST',headers:{'content-type':'application/json',Authorization:`Bearer ${session.access_token}`},body:JSON.stringify(payload)});let data:CreateResponse|null=null;try{data=await r.json()}catch{}return{status:r.status,data};}
 async function createInmobiliaria(role:string|undefined,payload:Record<string,unknown>){if(role==='Visitador')return fetchB2BActionsApi<CreateResponse>('/inmobiliarias/create',{method:'POST',body:JSON.stringify(payload)});return createLegacyInmobiliaria(payload);}
@@ -27,10 +31,9 @@ export default function InmobiliariaCreateShell(){
  function edit(){setPreview(false);setMessage('');setResult(null);}
  async function submit(e:FormEvent){e.preventDefault();if(!valid)return;if(!preview){setPreview(true);setMessage('');return;}setBusy(true);setMessage('');const r=await createInmobiliaria(ctx?.role,payload);setBusy(false);setResult(r.data);if((r.status===201||r.status===200)&&r.data?.ok){setMessage(r.data?.reused?'La inmobiliaria ya existía: no se ha duplicado.':'Inmobiliaria creada en la fuente canónica y auditada.');setPreview(false);}else if(r.status===409&&r.data?.error==='duplicate_inmobiliaria'){setMessage('Ya existe una inmobiliaria coincidente. No se ha creado un duplicado.');setPreview(false);}else if(r.status===409&&r.data?.error==='zone_not_configured'){setMessage('Tu perfil de Visitador no tiene zona operativa configurada. La creación queda bloqueada.');setPreview(false);}else if(r.status===403)setMessage('Tu perfil no puede crear esta inmobiliaria o queda fuera de tu ámbito.');else setMessage(`No se pudo crear la inmobiliaria (${r.data?.error||r.status}).`);}
  async function logout(){await supabase.auth.signOut();window.location.href=import.meta.env.BASE_URL;}
- return <div className="ops-root" data-theme={theme} style={{zIndex:5600}}>
-  <aside className="ops-side"><button className="ops-brand" onClick={()=>navigate('/inicio')}><img src={fenixLogo} alt=""/><strong>FÉNIX CAPITAL</strong></button><nav><button onClick={()=>navigate('/inmobiliarias')}><ArrowLeft size={15}/> Volver a Inmobiliarias</button></nav><button className="ops-ana" onClick={()=>navigate('/ana')}><img src={anaAvatar} alt="Ana"/><span><strong>Ana está contigo</strong><small>No duplicamos ni asignamos por intuición.</small></span></button></aside>
-  <main className="ops-main"><header className="ops-top"><strong>Nueva inmobiliaria</strong><div className="ops-top-actions"><button onClick={()=>setTheme(theme==='light'?'dark':'light')} aria-label="Cambiar tema">{theme==='light'?<Moon size={17}/>:<Sun size={17}/>} {theme==='light'?'Oscuro':'Claro'}</button><div className="ops-profile"><strong>{ctx?.role||'Usuario'}</strong></div><button onClick={logout} aria-label="Cerrar sesión"><LogOut size={17}/></button></div></header>
-   <section className="ops-content"><div className="ops-title"><div><span className="ops-icon"><Building2 size={20}/></span><div><h1>Nueva inmobiliaria</h1><p>Alta B2B mínima, canónica y con responsable explícito.</p></div></div><span className="ops-live ok">PRE-PROD</span></div>
+ const topbar=<header className="ops-top"><strong>Nueva inmobiliaria</strong><div className="ops-top-actions"><button onClick={()=>setTheme(theme==='light'?'dark':'light')} aria-label="Cambiar tema">{theme==='light'?<Moon size={17}/>:<Sun size={17}/>} {theme==='light'?'Oscuro':'Claro'}</button><div className="ops-profile"><strong>{ctx?.role||'Usuario'}</strong></div><button onClick={logout} aria-label="Cerrar sesión"><LogOut size={17}/></button></div></header>;
+ return <OperationalShellFrame className="inmo-create-root" theme={theme} navigation={createNav} activeRoute="" anaSubtitle="No duplicamos ni asignamos por intuición." query="" onQueryChange={()=>{}} searchPlaceholder="" name={ctx?.role||'Usuario'} role="" initials={(ctx?.role||'U').slice(0,2).toUpperCase()} onToggleTheme={()=>setTheme(theme==='light'?'dark':'light')} onLogout={logout} topbar={topbar}>
+   <div className="ops-title"><div><span className="ops-icon"><Building2 size={20}/></span><div><h1>Nueva inmobiliaria</h1><p>Alta B2B mínima, canónica y con responsable explícito.</p></div></div><span className="ops-live ok">PRE-PROD</span></div>
     <article className="ops-ana-card"><img src={anaAvatar} alt="Ana"/><div><strong>Ana</strong><p>{ctx?.role==='Visitador'?'La alta queda automáticamente limitada a tu identidad y zona operativa autenticadas.':'Antes de crear, comprobamos duplicados por email, teléfono o nombre + localidad.'}</p></div></article>
     {!allowed?<div className="ops-message">Tu perfil no puede crear inmobiliarias.</div>:<form className="ops-message" onSubmit={submit} style={{display:'grid',gap:12}}>
       <label>Inmobiliaria<input value={nombre} onChange={e=>{setNombre(e.target.value);edit()}} maxLength={200} required/></label><label>Localidad<input value={localidad} onChange={e=>{setLocalidad(e.target.value);edit()}} maxLength={160}/></label><label>Dirección<input value={direccion} onChange={e=>{setDireccion(e.target.value);edit()}} maxLength={300}/></label><label>Teléfono<input value={telefono} onChange={e=>{setTelefono(e.target.value);edit()}} maxLength={40} inputMode="tel"/></label><label>Email<input value={email} onChange={e=>{setEmail(e.target.value);edit()}} maxLength={200} type="email"/></label>
@@ -40,7 +43,5 @@ export default function InmobiliariaCreateShell(){
       {!result?.ok&&result?.error!=='duplicate_inmobiliaria'&&<div style={{display:'flex',gap:8,flexWrap:'wrap'}}>{preview&&<button type="button" onClick={()=>setPreview(false)}>Volver</button>}<button className="primary" disabled={!valid||busy}><Save size={16}/>{busy?'Creando…':preview?'Confirmar y crear':'Revisar antes de crear'}</button></div>}
       {(result?.ok||result?.error==='duplicate_inmobiliaria')&&<div style={{display:'flex',gap:8,flexWrap:'wrap'}}><button type="button" onClick={()=>navigate('/inmobiliarias')}>Volver a Inmobiliarias</button>{result.destino&&<button type="button" className="primary" onClick={()=>navigate(result.destino!)}>{result.reused||result.error==='duplicate_inmobiliaria'?'Abrir inmobiliaria existente':'Abrir inmobiliaria creada'}</button>}</div>}
     </form>}
-   </section>
-  </main>
- </div>;
+ </OperationalShellFrame>;
 }
