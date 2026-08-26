@@ -55,5 +55,9 @@
   .dir-help-person .dir-avatar{width:42px!important;height:42px!important;font-size:12px!important}
 }
 
+/* Mientras el guard temporal recompone el menú, React puede insertar durante un frame
+   un botón original adicional. Queda fuera del árbol accesible hasta la reconciliación. */
+[data-master-navigation='true'] > button:not([data-master-route]){display:none!important}
+
 /* En la calculadora el usuario solo necesita cerrar: se elimina el control de minimizar. */
 .calc-actions button[aria-label='Minimizar calculadora']{display:none!important}
