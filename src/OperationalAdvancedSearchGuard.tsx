@@ -88,11 +88,11 @@ export default function OperationalAdvancedSearchGuard(){
    actions.insertBefore(button,actions.firstChild);syncLabel();
   };
   const ensureFooter=(root:HTMLElement)=>{
+   if(root.querySelector(':scope > .ops-shared-footer'))return;
    const main=root.querySelector<HTMLElement>(':scope > .ops-main');
    if(!main)return;
-   const existing=main.querySelector<HTMLElement>('.ops-shared-footer,.ops-runtime-footer');
+   const existing=main.querySelector<HTMLElement>('.ops-runtime-footer');
    if(existing){
-    existing.classList.add('ops-runtime-footer');
     if(existing.textContent!=='FÉNIX CAPITAL · CEREBRO')existing.textContent='FÉNIX CAPITAL · CEREBRO';
     return;
    }
