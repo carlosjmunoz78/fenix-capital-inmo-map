@@ -46,6 +46,12 @@ function normalizeNavigation(raw:unknown){
  }).filter(Boolean);
  return{...obj,items:normalized};
 }
+function normalizeSessionContext(raw:unknown){
+ if(!raw||typeof raw!=='object')return raw;
+ const obj=raw as Record<string,unknown>;
+ const nested=obj.context;
+ return nested&&typeof nested==='object'?nested:raw;
+}
 function safeNavigationFallback(){return{items:[{route:'/inicio',label:'Inicio'}],degraded:true};}
 
 function authenticatedContextFallback(session:Awaited<ReturnType<typeof supabase.auth.getSession>>['data']['session']){
@@ -113,7 +119,11 @@ export async function fetchAppApi<T>(path: string, init?: RequestInit): Promise<
   }catch{return{status:0,data:null};}
   let raw:unknown=null;
   try{raw=await response.json();}catch{raw=null;}
-  const data=(path==='/navigation'&&response.status===200)?normalizeNavigation(raw):raw;
+  const data=path==='/navigation'&&response.status===200
+    ?normalizeNavigation(raw)
+    :path==='/session/context'&&response.status===200
+      ?normalizeSessionContext(raw)
+      :raw;
   if(path==='/navigation'&&(response.status===0||response.status>=500))return{status:response.status,data:safeNavigationFallback() as T};
   if(path==='/session/context'&&(response.status===0||response.status>=500)){
     const fallback=authenticatedContextFallback(session);
