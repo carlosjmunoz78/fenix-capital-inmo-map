@@ -28,7 +28,7 @@ export default function InformesShell(){
  const effectiveNav=nav.length?(direction?directionSidebarNavigation(nav):nav):fallbackNav;
  const visible=useMemo(()=>{const q=query.trim().toLowerCase();if(!q)return rows;return rows.filter(r=>Object.values(r).filter(v=>typeof v==='string'||typeof v==='number').join(' ').toLowerCase().includes(q));},[rows,query]);
  const grouped=useMemo(()=>{const m=new Map<string,Row[]>();for(const r of visible){const category=first(r,['categoria','categoría','category','tipo'])||'Sin categoría';m.set(category,[...(m.get(category)||[]),r]);}return [...m.entries()];},[visible]);
- const latest=useMemo(()=>visible.map(r=>first(r,['generado_en','fecha','created_at','fecha_generacion','fecha-generación'])).filter(Boolean).sort().reverse()[0]||'No disponible',[visible]);
+ const latest=useMemo(()=>visible.map(r=>first(r,['generado_en','fecha','created_at','fecha_generacion','fecha_generación'])).filter(Boolean).sort().reverse()[0]||'No disponible',[visible]);
  if(!active||!ready||!logged)return null;
  function openReport(r:Row){const url=first(r,['pdf_url','url','archivo_url','download_url']);if(/^https?:\/\//i.test(url))window.open(url,'_blank','noopener,noreferrer');}
  function sendCorrection(){const text=correction.trim();if(!text)return;const q=new URLSearchParams({mode:'help',resource:'informe',correction:text});navigate(`/ana?${q.toString()}`);}
@@ -45,7 +45,7 @@ export default function InformesShell(){
  </>;
  if(direction){
   const profileName=ctx?.display_name||ctx?.role||'Usuario';
-  return <DirectionOperationalFrame theme={theme} navigation={effectiveNav} search={query} profileName={profileName} initials={initials(profileName)} onSearchChange={setQuery} onSearch={()=>{}} onNavigate={route=>navigate(route)} onToggleTheme={()=>setTheme(theme==='light'?'dark':'light')} onLogout={logout} activeRoute="/informes" contentClassName="dir-content informes-content">{body}</DirectionOperationalFrame>;
+  return <DirectionOperationalFrame className="dir-shell informes-root informes-direction" theme={theme} navigation={effectiveNav} search={query} profileName={profileName} initials={initials(profileName)} onSearchChange={setQuery} onSearch={()=>{}} onNavigate={route=>navigate(route)} onToggleTheme={()=>setTheme(theme==='light'?'dark':'light')} onLogout={logout} activeRoute="/informes" contentClassName="dir-content informes-content">{body}</DirectionOperationalFrame>;
  }
  return <OperationalShellFrame className="informes-root" theme={theme} navigation={effectiveNav} activeRoute="/informes" anaSubtitle="Cuando quieras, avanzamos paso a paso." sidebarVariant="default" query={query} onQueryChange={setQuery} searchPlaceholder="Buscar informe, categoría o periodo..." searchActionLabel="Buscar" onSearchAction={()=>{}} name={ctx?.role||'Usuario'} role={ctx?.role||''} initials={(ctx?.role||'U').slice(0,2).toUpperCase()} onToggleTheme={()=>setTheme(theme==='light'?'dark':'light')} onLogout={logout} contentClassName="informes-content">{body}</OperationalShellFrame>;
 }
