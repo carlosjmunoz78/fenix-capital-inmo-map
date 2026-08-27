@@ -19,8 +19,9 @@ const visuallyHidden={position:'absolute' as const,width:1,height:1,padding:0,ma
 export default function DirectionTopbar({theme,search,profileName,initials,onSearchChange,onSearch,onNavigate,onToggleTheme,onLogout}:Props){
  const neutral=profileName==='Mi perfil'||profileName==='Usuario';
  const role=neutral?'Identidad no disponible':'Direccion';
+ const advancedStyle={height:37,border:`1px solid ${theme==='dark'?'#3a3a3f':'#e7e7ea'}`,background:theme==='dark'?'#202023':'#fff',borderRadius:9,padding:'0 11px',fontWeight:700,fontSize:11,color:theme==='dark'?'#f2f2f4':'#424248',cursor:'pointer',whiteSpace:'nowrap' as const};
  return <header className="ops-top dir-topbar">
-  <button type="button" aria-label="Buscador avanzado" onClick={()=>onNavigate('/buscar')} style={{height:39,border:'1px solid #e7e7ea',background:'#fff',borderRadius:9,padding:'0 13px',fontWeight:700,color:'#424248',cursor:'pointer',whiteSpace:'nowrap'}}>Buscador avanzado</button>
+  <button type="button" aria-label="Buscador avanzado" onClick={()=>onNavigate('/buscar')} style={advancedStyle}>Buscador avanzado</button>
   <div className="ops-search"><Search size={17}/><input value={search} onChange={e=>onSearchChange(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')onSearch()}} placeholder="Buscar expediente, cliente, banco, inmobiliaria, contacto..."/><button type="button" onClick={onSearch} aria-label="Buscar">Buscar</button></div>
   <div className="ops-top-actions">
    <button aria-label="Cambiar tema" onClick={onToggleTheme}>{theme==='light'?<Moon size={17}/>:<Sun size={17}/>} {theme==='light'?'Oscuro':'Claro'}</button>
