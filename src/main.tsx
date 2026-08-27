@@ -23,6 +23,7 @@ import './direction-ana-live.css';
 import './direction-ana-half.css';
 import './login-layout-fix.css';
 import App from './App';
+import GlobalOperationalFooter from './GlobalOperationalFooter';
 import RoleHomeShell from './RoleHomeShell';
 import ProfileShell from './ProfileShell';
 import OperationalShellGate from './OperationalShellGate';
@@ -148,6 +149,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <DetailShellGate />
       <TaskCreateShell />
       <OperationalRecordDetail />
+      <GlobalOperationalFooter />
     </BrowserRouter>
   </React.StrictMode>
 );
