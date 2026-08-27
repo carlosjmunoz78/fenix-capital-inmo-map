@@ -4,6 +4,7 @@ import ExpedienteDetailAuthorizedNav from './ExpedienteDetailAuthorizedNav';
 
 export default function DetailShellGate(){
  const {pathname}=useLocation();
- if(pathname==='/expedientes/nuevo'||/^\/contactos\/[^/]+$/.test(pathname)||/^\/inmobiliarias\/[^/]+$/.test(pathname))return null;
+ const isExpedienteDetail=/^\/expedientes\/[^/]+$/.test(pathname)&&pathname!=='/expedientes/nuevo';
+ if(!isExpedienteDetail)return null;
  return <><DetailShell/><ExpedienteDetailAuthorizedNav/></>;
 }
