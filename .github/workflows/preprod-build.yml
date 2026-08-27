@@ -99,8 +99,8 @@ jobs:
           cp dist-pages/index.html dist-pages/404.html
           touch dist-pages/.nojekyll
 
-      - name: Prepare gh-pages snapshot
-        if: github.event_name == 'pull_request' && github.head_ref == 'preprod-app-phase1'
+      - name: Publish validated PRE-PROD snapshot to gh-pages
+        if: github.event_name == 'push' && github.ref == 'refs/heads/preprod-app-phase1'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -116,22 +116,3 @@ jobs:
           git commit -m "deploy: PRE-PROD Pages snapshot ${GITHUB_SHA}"
           git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           git push --force origin gh-pages
-
-      - name: Configure GitHub Pages
-        if: github.event_name == 'push' && github.ref == 'refs/heads/preprod-app-phase1'
-        uses: actions/configure-pages@v5
-
-      - name: Upload GitHub Pages artifact
-        if: github.event_name == 'push' && github.ref == 'refs/heads/preprod-app-phase1'
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist-pages
-
-  deploy-preprod-pages:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/preprod-app-phase1'
-    needs: build-and-browser-qa
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploy PRE-PROD to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
