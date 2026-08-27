@@ -1,8 +1,15 @@
-import {useEffect} from 'react';
+import {useEffect,useLayoutEffect} from 'react';
 import {useLocation} from 'react-router-dom';
 
 export default function OperationalRouteScrollReset(){
  const {pathname,search}=useLocation();
+ useLayoutEffect(()=>{
+  const legacy=document.querySelectorAll<HTMLElement>('.app-shell > .sidebar,.app-shell > .main');
+  legacy.forEach(node=>{
+   node.setAttribute('aria-hidden','true');
+   node.inert=true;
+  });
+ },[pathname]);
  useEffect(()=>{
   const reset=()=>{
    const main=document.querySelector<HTMLElement>('.ops-root .ops-main');
