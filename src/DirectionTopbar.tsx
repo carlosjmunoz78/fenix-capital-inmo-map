@@ -20,7 +20,7 @@ export default function DirectionTopbar({theme,search,profileName,initials,onSea
   <div className="ops-search dir-search"><Search size={17}/><input value={search} onChange={e=>onSearchChange(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')onSearch()}} placeholder="Buscar expediente, cliente, banco, inmobiliaria, contacto..."/><button type="button" onClick={onSearch} aria-label="Buscar">Buscar</button></div>
   <div className="ops-top-actions dir-top-right">
    <button className="dir-theme-toggle" aria-label="Cambiar tema" onClick={onToggleTheme}>{theme==='light'?<Moon size={17}/>:<Sun size={17}/>} {theme==='light'?'Oscuro':'Claro'}</button>
-   <button className="ops-profile dir-profile" onClick={()=>onNavigate('/perfil')} aria-label={`Abrir perfil de ${profileName}`}><span className="ops-profile-avatar dir-avatar" aria-hidden="true">{initials}</span><span className="ops-profile-copy dir-user-copy"><strong>{profileName}</strong><span>Dirección</span></span></button>
+   <button className="ops-profile dir-profile" onClick={()=>onNavigate('/perfil')} aria-label={`Abrir perfil de ${profileName}`}><span className="ops-profile-avatar dir-avatar" aria-hidden="true">{initials}</span><span className="ops-profile-copy dir-user-copy"><strong>{profileName}</strong><small>Dirección</small></span></button>
    <button className="dir-logout" onClick={onLogout} aria-label="Cerrar sesión"><LogOut size={17}/></button>
   </div>
  </header>;
