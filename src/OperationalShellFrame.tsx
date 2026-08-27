@@ -60,7 +60,9 @@ export default function OperationalShellFrame({className='',theme,navigation,act
   <OperationalSidebar navigation={navigation} activeRoute={activeRoute} anaSubtitle={anaSubtitle} anaRoute={anaRoute} variant={sidebarVariant}/>
   <main className={`ops-main ${mainClassName}`.trim()}>
    {renderedTopbar}
-   <section className={`ops-content ${contentClassName}`.trim()}>{children}</section>
+   <section className={`ops-content ${contentClassName}`.trim()}>{children}
+    <footer className="ops-footer" style={{marginTop:'28px',padding:'16px 0 6px',borderTop:'1px solid var(--border,#e5e7eb)',color:'var(--muted,#667085)',fontSize:'11px',letterSpacing:'.08em',textAlign:'center'}}>FÉNIX CAPITAL · CEREBRO</footer>
+   </section>
   </main>
  </div>;
 }
