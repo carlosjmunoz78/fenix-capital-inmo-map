@@ -17,12 +17,15 @@ type Props={
  onNavigate:(route:string)=>void;
  onToggleTheme:()=>void;
  onLogout:()=>void;
+ activeRoute?:string;
+ contentClassName?:string;
+ anaSubtitle?:string;
  children:ReactNode;
 };
 
 const failClosedNavigation:NavItem[]=[{label:'Inicio',route:'/inicio'}];
 
-export default function DirectionOperationalFrame({theme,navigation,search,profileName,initials,onSearchChange,onSearch,onNavigate,onToggleTheme,onLogout,children}:Props){
+export default function DirectionOperationalFrame({theme,navigation,search,profileName,initials,onSearchChange,onSearch,onNavigate,onToggleTheme,onLogout,activeRoute='/inicio',contentClassName='dir-content',anaSubtitle='Habla con Ana, tu asistente inteligente.',children}:Props){
  const[authorizedNavigation,setAuthorizedNavigation]=useState<NavItem[]|null>(null);
  useEffect(()=>{
   let alive=true;
@@ -41,8 +44,8 @@ export default function DirectionOperationalFrame({theme,navigation,search,profi
   className="dir-shell"
   theme={theme}
   navigation={effectiveNavigation.length?effectiveNavigation:failClosedNavigation}
-  activeRoute="/inicio"
-  anaSubtitle="Habla con Ana, tu asistente inteligente."
+  activeRoute={activeRoute}
+  anaSubtitle={anaSubtitle}
   sidebarVariant="direction"
   query={search}
   onQueryChange={onSearchChange}
@@ -54,7 +57,7 @@ export default function DirectionOperationalFrame({theme,navigation,search,profi
   onLogout={onLogout}
   topbar={topbar}
   mainClassName="dir-main"
-  contentClassName="dir-content"
+  contentClassName={contentClassName}
   legacyDirectionTheme
  >
   {children}
