@@ -112,6 +112,7 @@ export async function fetchAppApi<T>(path: string, init?: RequestInit): Promise<
       ...init,
       headers: {
         'content-type': 'application/json',
+        apikey: SUPABASE_PUBLISHABLE_KEY,
         ...(init?.headers || {}),
         ...(token ? { Authorization: `Bearer ${token}` } : {})
       }
