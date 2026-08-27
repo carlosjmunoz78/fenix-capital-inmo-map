@@ -91,7 +91,11 @@ export default function OperationalAdvancedSearchGuard(){
    const main=root.querySelector<HTMLElement>(':scope > .ops-main');
    if(!main)return;
    const existing=main.querySelector<HTMLElement>('.ops-shared-footer,.ops-runtime-footer');
-   if(existing){existing.classList.add('ops-runtime-footer');existing.textContent='FÉNIX CAPITAL · CEREBRO';return;}
+   if(existing){
+    existing.classList.add('ops-runtime-footer');
+    if(existing.textContent!=='FÉNIX CAPITAL · CEREBRO')existing.textContent='FÉNIX CAPITAL · CEREBRO';
+    return;
+   }
    const footer=document.createElement('footer');
    footer.className='ops-runtime-footer';
    footer.textContent='FÉNIX CAPITAL · CEREBRO';
