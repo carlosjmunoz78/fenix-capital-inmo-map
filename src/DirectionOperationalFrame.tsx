@@ -2,7 +2,6 @@ import {useEffect,useState,type ReactNode} from 'react';
 import {fetchAppApi} from './supabase';
 import {directionSidebarNavigation,normalizeNavigation,type NavItem} from './masterNavigation';
 import OperationalShellFrame from './OperationalShellFrame';
-import DirectionTopbar from './DirectionTopbar';
 
 type Theme='light'|'dark';
 
@@ -22,7 +21,7 @@ type Props={
 
 const failClosedNavigation:NavItem[]=[{label:'Inicio',route:'/inicio'}];
 
-export default function DirectionOperationalFrame({theme,navigation,search,profileName,initials,onSearchChange,onSearch,onNavigate,onToggleTheme,onLogout,children}:Props){
+export default function DirectionOperationalFrame({theme,navigation,search,profileName,initials,onSearchChange,onSearch,onNavigate:_onNavigate,onToggleTheme,onLogout,children}:Props){
  const[authorizedNavigation,setAuthorizedNavigation]=useState<NavItem[]|null>(null);
  useEffect(()=>{
   let alive=true;
@@ -36,7 +35,6 @@ export default function DirectionOperationalFrame({theme,navigation,search,profi
   return()=>{alive=false};
  },[]);
  const effectiveNavigation=authorizedNavigation??directionSidebarNavigation(navigation);
- const topbar=<DirectionTopbar theme={theme} search={search} profileName={profileName} initials={initials} onSearchChange={onSearchChange} onSearch={onSearch} onNavigate={onNavigate} onToggleTheme={onToggleTheme} onLogout={onLogout}/>;
  return <OperationalShellFrame
   className="dir-shell"
   theme={theme}
@@ -47,12 +45,13 @@ export default function DirectionOperationalFrame({theme,navigation,search,profi
   query={search}
   onQueryChange={onSearchChange}
   searchPlaceholder="Buscar expediente, cliente, banco, inmobiliaria, contacto..."
+  searchActionLabel="Buscar"
+  onSearchAction={onSearch}
   name={profileName}
   role="Mi perfil"
   initials={initials}
   onToggleTheme={onToggleTheme}
   onLogout={onLogout}
-  topbar={topbar}
   mainClassName="dir-main"
   contentClassName="dir-content"
   legacyDirectionTheme
