@@ -34,6 +34,26 @@
 .ops-root[data-theme='dark'] :where(.inmo-next button:hover,.informes-list button:hover,.inmo-filter button:hover,.inmo-insights button:hover){background:#2d2928!important;border-color:#70402c!important}
 .ops-root[data-theme='dark'] :where(.ops-table-wrap,.ops-table-card table){background:var(--fenix-dark-surface)!important}
 
+/* Shared footer / quick-access block must follow the operational theme too. */
+.ops-root[data-theme='dark'] .ops-shared-quick{
+  background:transparent!important;
+  color:var(--fenix-dark-text)!important;
+  border-color:transparent!important;
+}
+.ops-root[data-theme='dark'] .ops-shared-quick h2{color:var(--fenix-dark-text)!important}
+.ops-root[data-theme='dark'] .ops-shared-quick .dir-quick-grid button{
+  background:linear-gradient(155deg,var(--fenix-dark-surface-2),var(--fenix-dark-surface))!important;
+  color:var(--fenix-dark-text)!important;
+  border-color:var(--fenix-dark-border)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025),0 5px 16px rgba(0,0,0,.10)!important;
+}
+.ops-root[data-theme='dark'] .ops-shared-quick .dir-quick-grid button:hover{
+  background:#2d2928!important;
+  color:var(--fenix-dark-text)!important;
+  border-color:#70402c!important;
+}
+.ops-root[data-theme='dark'] .ops-shared-quick .dir-quick-grid button svg{color:#ff7a34!important}
+
 /* Direction follows the same surface contract. */
 .dir-shell[data-dir-theme='dark']{color-scheme:dark}
 .dir-shell[data-dir-theme='dark'] :where(input,textarea,select){background:#262629!important;color:#f2f2f4!important;border-color:#3a3a3f!important}
