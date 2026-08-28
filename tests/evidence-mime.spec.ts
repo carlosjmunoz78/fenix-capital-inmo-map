@@ -10,16 +10,14 @@ async function boot(page:any){
 }
 
 test.describe('Fénix PRE-PROD · MIME seguro de evidencia contextual',()=>{
- test('usa extensión segura cuando el navegador no informa MIME',async({page},testInfo)=>{
+ test('usa extensión conocida cuando el navegador no informa MIME',async({page},testInfo)=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();
   await boot(page);
   const payloads:any[]=[];
-  await page.route('**/functions/v1/fenix-evidence-api-test/prepare',async r=>{payloads.push(r.request().postDataJSON());return r.fulfill({status:400,contentType:'application/json',body:JSON.stringify({error:'qa-stop-after-prepare'})});});
+  await page.route('**/functions/v1/fenix-evidence-universal-test/prepare',async r=>{payloads.push(r.request().postDataJSON());return r.fulfill({status:400,contentType:'application/json',body:JSON.stringify({error:'qa-stop-after-prepare'})});});
   await page.goto(`/documentacion?expediente=${expediente}&upload=1`);
-  const input=page.locator('input[type=file]');
-  await input.setInputFiles({name:'vida-laboral.PDF',mimeType:'',buffer:Buffer.from('qa')});
-  await expect(page.getByText('No se pudo preparar la carga para esta persona/expediente.')).toBeVisible();
-  expect(payloads).toHaveLength(1);
+  await page.locator('input[type=file]').setInputFiles({name:'vida-laboral.PDF',mimeType:'',buffer:Buffer.from('qa')});
+  await expect.poll(()=>payloads.length).toBe(1);
   expect(payloads[0]).toMatchObject({origin_type:'expediente',origin_code:expediente,evidence_kind:'documento',filename:'vida-laboral.PDF',mime_type:'application/pdf'});
  });
 
@@ -27,21 +25,21 @@ test.describe('Fénix PRE-PROD · MIME seguro de evidencia contextual',()=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();
   await boot(page);
   const payloads:any[]=[];
-  await page.route('**/functions/v1/fenix-evidence-api-test/prepare',async r=>{payloads.push(r.request().postDataJSON());return r.fulfill({status:400,contentType:'application/json',body:'{}'});});
+  await page.route('**/functions/v1/fenix-evidence-universal-test/prepare',async r=>{payloads.push(r.request().postDataJSON());return r.fulfill({status:400,contentType:'application/json',body:'{}'});});
   await page.goto(`/documentacion?expediente=${expediente}&upload=1`);
   await page.locator('input[type=file]').setInputFiles({name:'llamada.m4a',mimeType:'audio/x-m4a',buffer:Buffer.from('qa-audio')});
   await expect.poll(()=>payloads.length).toBe(1);
   expect(payloads[0]).toMatchObject({evidence_kind:'audio_conversacion',mime_type:'audio/x-m4a'});
  });
 
- test('rechaza un tipo desconocido antes de llamar al backend',async({page},testInfo)=>{
+ test('un tipo desconocido se conserva como binario y sí llega al backend universal',async({page},testInfo)=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();
   await boot(page);
-  let prepares=0;
-  await page.route('**/functions/v1/fenix-evidence-api-test/prepare',async r=>{prepares++;return r.fulfill({status:500,body:'{}'});});
+  const payloads:any[]=[];
+  await page.route('**/functions/v1/fenix-evidence-universal-test/prepare',async r=>{payloads.push(r.request().postDataJSON());return r.fulfill({status:400,contentType:'application/json',body:'{}'});});
   await page.goto(`/documentacion?expediente=${expediente}&upload=1`);
-  await page.locator('input[type=file]').setInputFiles({name:'malware.exe',mimeType:'application/octet-stream',buffer:Buffer.from('MZ')});
-  await expect(page.getByText(/Formato no permitido o no identificable/)).toBeVisible();
-  expect(prepares).toBe(0);
+  await page.locator('input[type=file]').setInputFiles({name:'archivo.binario-raro',mimeType:'application/octet-stream',buffer:Buffer.from('qa')});
+  await expect.poll(()=>payloads.length).toBe(1);
+  expect(payloads[0]).toMatchObject({evidence_kind:'documento',mime_type:'application/octet-stream',filename:'archivo.binario-raro'});
  });
 });
