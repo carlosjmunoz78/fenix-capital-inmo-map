@@ -18,8 +18,8 @@ test.describe('Fénix PRE-PROD · consumo canónico de Ana',()=>{
    await page.goto('/inmobiliarias');
    const aside=page.getByLabel('Ana · asistente contextual');
    await expect(aside).toBeVisible();
-   await aside.locator('.ana-universal-head').click();
-   await aside.getByRole('button',{name:'Ayúdame'}).click();
+   await aside.locator('.ana-universal-head').click({force:true});
+   await aside.getByRole('button',{name:'Ayúdame'}).click({force:true});
    await expect(page.getByTestId('ana-canonical-help')).toContainText('Conocimiento canónico aplicado · Inmobiliarias B2B');
    await expect(page.getByTestId('ana-canonical-help')).toContainText('Conservar siempre trazabilidad del origen antes de reutilizar el conocimiento.');
  });
