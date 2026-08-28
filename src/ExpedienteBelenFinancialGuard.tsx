@@ -8,7 +8,7 @@ type Person={role?:string|null;situacion_laboral?:string|null;next_missing_field
 type Advice={action?:string|null;why?:string;blocking_reason?:string;evidence?:{phase?:string|null;blocking_reason?:string|null};people?:{items?:Person[]}};
 type Rule={id:string;category:string;text:string;requires_belen?:boolean};
 type ApprovedRule={id:string;category?:string;text:string;condition?:string|null;reason?:string|null;confidence?:number|null;version?:string|null;revalidate?:boolean};
-type Envelope={ok?:boolean;status?:number;source?:string;authority?:string;baseline?:Rule[];approved_rules?:ApprovedRule[];approved_count?:number;requires_belen_gate?:boolean;policy?:string};
+type Envelope={ok?:boolean;status?:number;source?:string;source_page_id?:string;snapshot_date?:string;authority?:string;baseline?:Rule[];approved_rules?:ApprovedRule[];approved_count?:number;requires_belen_gate?:boolean;policy?:string};
 
 function isNotionId(v:string){return /^[0-9a-f]{32}$/i.test(v.replaceAll('-',''));}
 async function edgeJson<T>(slug:string,path:string,init?:RequestInit){
@@ -36,10 +36,10 @@ export default function ExpedienteBelenFinancialGuard(){
  if(!active||!target||!ctx)return null;
  const baseline=(ctx.baseline||[]).slice(0,6),approved=(ctx.approved_rules||[]).filter(x=>x.text).slice(0,3);
  if(!baseline.length&&!approved.length)return null;
- return createPortal(<section className="exp-ana-memory" data-testid="expediente-belen-financial-context" aria-label="Criterios de Belén que Ana está usando">
-   <div className="exp-ana-memory-head"><Brain size={16}/><strong>Criterios de Belén que Ana está usando</strong></div>
-   {baseline.map(x=><article key={x.id}><small>{x.category}</small><p>{x.text}</p></article>)}
-   {approved.map(x=><article key={x.id}><small>{x.category||'Criterio financiero'}</small><p>{x.text}</p>{x.condition&&<em>Aplica cuando: {x.condition}</em>}</article>)}
+ return createPortal(<section className="exp-ana-memory" data-testid="expediente-belen-financial-context" aria-label="Conocimiento financiero de Belén que Ana consulta">
+   <div className="exp-ana-memory-head"><Brain size={16}/><strong>Conocimiento financiero de Belén que Ana consulta</strong></div>
+   {baseline.length>0&&<div data-testid="belen-financial-guidance"><small>GUÍA OPERATIVA · BASE MAESTRA BELÉN</small>{baseline.map(x=><article key={x.id} data-knowledge-id={x.id}><small>{x.category}</small><p>{x.text}</p></article>)}<p><em>Esta guía orienta el análisis y el siguiente paso. No convierte por sí sola una experiencia operativa en una regla automática.</em></p></div>}
+   {approved.length>0&&<div data-testid="belen-financial-approved-rules"><small>REGLAS FINANCIERAS APROBADAS</small>{approved.map(x=><article key={x.id} data-knowledge-id={x.id}><small>{x.category||'Criterio financiero aprobado'}</small><p>{x.text}</p>{x.condition&&<em>Aplica cuando: {x.condition}</em>}</article>)}</div>}
    <div className="exp-ana-evidence-line"><ShieldCheck size={15}/><span>Si hay una excepción, una duda financiera material o un criterio bancario que pueda haber cambiado, Ana lo eleva a Belén antes de darlo por válido.</span></div>
  </section>,target);
 }
