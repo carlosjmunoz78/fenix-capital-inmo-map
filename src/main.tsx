@@ -17,6 +17,8 @@ import './operational-fixed-topbar.css';
 import './operational-route-isolation.css';
 import './brand-name-theme.css';
 import './theme-consistency.css';
+import './operational-chrome-premium.css';
+import './directory-create.css';
 import './direction-master-sizing.css';
 import './navigation-readability.css';
 import './direction-ana-live.css';
