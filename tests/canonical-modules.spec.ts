@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 const fakeSession={
-  access_token:'eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwicm9sZSI6ImF1dGhlbnRpY2F0ZWQiLCJzdWIiOiJhYWFhYWFhYS1hYWFhLTRhYWEtOGFhYS1hYWFhYWFhYWFhYWEiLCJlbWFpbCI6InFhYUBmZW5peC50ZXN0IiwiZXhwIjoxOTk5OTk5OTk5fQ.',
+  access_token:'eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJhdWQiOiJub25lIiwidHlwIjoiSldUIn0.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwicm9sZSI6ImF1dGhlbnRpY2F0ZWQiLCJzdWIiOiJhYWFhYWFhYS1hYWFhLTRhYWEtOGFhYS1hYWFhYWFhYWFhYWEiLCJlbWFpbCI6InFhYUBmZW5peC50ZXN0IiwiZXhwIjoxOTk5OTk5OTk5fQ.',
   token_type:'bearer',expires_in:3600,expires_at:1999999999,refresh_token:'qa-not-real',
   user:{id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',aud:'authenticated',role:'authenticated',email:'qa@fenix.test',app_metadata:{},user_metadata:{},created_at:'2026-08-19T00:00:00.000Z'}
 };
@@ -40,9 +40,11 @@ test.describe('Fénix PRE-PROD · módulos canónicos',()=>{
       let hits=0;
       await page.route(`**/functions/v1/fenix-notion-runtime-test/${endpoint}`,r=>{hits++;return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify(payload)});});
       await page.goto(route);
-      await expect(page.getByText(route==='/inmobiliarias'?'Datos actualizados':'Datos vivos')).toBeVisible();
-      if(route!=='/inmobiliarias')await expect(page.getByText('Fuente canónica Notion')).toBeVisible();
-      else await expect(page.getByText('QA INMO')).toBeVisible();
+      const modernStatus=route==='/expedientes'||route==='/contactos'||route==='/inmobiliarias';
+      await expect(page.getByText(modernStatus?'Datos actualizados':'Datos vivos')).toBeVisible();
+      if(route!=='/inmobiliarias'&&route!=='/contactos')await expect(page.getByText('Fuente canónica Notion')).toBeVisible();
+      if(route==='/contactos')await expect(page.getByText('QA CLIENTE')).toBeVisible();
+      if(route==='/inmobiliarias')await expect(page.getByText('QA INMO')).toBeVisible();
       expect(hits).toBe(1);
     });
   }
