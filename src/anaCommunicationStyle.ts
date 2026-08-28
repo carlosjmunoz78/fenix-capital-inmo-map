@@ -35,12 +35,19 @@ export const ANA_RELATIONAL_PRINCIPLES=[
 
 function clean(v:string|undefined|null){return String(v??'').trim().replace(/[.]+$/,'');}
 function lowerFirst(v:string){return v?`${v.charAt(0).toLowerCase()}${v.slice(1)}`:'';}
-function firstName(v:string){return clean(v).split(/\s+/)[0]||'Hola';}
+function displayFirstName(v:string){const s=clean(v).toLocaleLowerCase('es-ES');return s?s.charAt(0).toLocaleUpperCase('es-ES')+s.slice(1):'';}
+function recipientName(v:string){
+ const raw=clean(v);
+ if(!raw)return 'Hola';
+ const joined=raw.split(/\s+(?:y|&|e)\s+/i).map(part=>displayFirstName(part.split(/\s+/)[0]||'')).filter(Boolean);
+ if(joined.length>1)return joined.join(' y ');
+ return displayFirstName(raw.split(/\s+/)[0]||'')||'Hola';
+}
 
 export function applyAnaRelationalStyle<T extends AnaStyleInput>(input:T):T{
  const action=clean(input.action);
  if(!action)return input;
- const who=firstName(input.name||'');
+ const who=recipientName(input.name||'');
  const step=lowerFirst(action);
  const current=input.channels||{};
  const reason=clean(input.why);
