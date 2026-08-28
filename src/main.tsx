@@ -60,6 +60,7 @@ import RegistrosPropiedadShell from './RegistrosPropiedadShell';
 import AnaGovernance from './AnaGovernance';
 import AnaUniversalGuard from './AnaUniversalGuard';
 import AnaInboxAccessGuard from './AnaInboxAccessGuard';
+import AnaKnowledgeReviewGuard from './AnaKnowledgeReviewGuard';
 import ExpedienteAnaRuntimeGuard from './ExpedienteAnaRuntimeGuard';
 import VisitasShell from './VisitasShell';
 import CommunicationsShell from './CommunicationsShell';
@@ -106,6 +107,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <AnaKnowledgeBlock />
       <AnaUniversalGuard />
       <AnaInboxAccessGuard />
+      <AnaKnowledgeReviewGuard />
       <ContextEvidenceUpload />
       <ExpedienteAnaRuntimeGuard />
       <B2BContactCreateLauncher />
