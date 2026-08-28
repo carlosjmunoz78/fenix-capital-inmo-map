@@ -4,6 +4,7 @@ import {useLocation,useNavigate} from 'react-router-dom';
 import {Phone,Mail,MessageCircle,ShieldCheck,Users,Brain,CheckCircle2,Plus,FileUp,Pencil} from 'lucide-react';
 import {SUPABASE_URL,supabase,fetchMemoryApi} from './supabase';
 import {anaAvatar} from './assets/visualAssets';
+import {applyAnaRelationalStyle} from './anaCommunicationStyle';
 import './expediente-ana-runtime.css';
 
 type Advice={
@@ -37,6 +38,7 @@ async function edgeJson<T>(path:string,init?:RequestInit){
  let data:T|null=null;try{data=await r.json()}catch{}return{status:r.status,data};
 }
 async function fetchAdvice(id:string){return edgeJson<Advice>(`/expedientes/${encodeURIComponent(id)}/advice`);}
+function styledAdvice(a:Advice|null){return a?applyAnaRelationalStyle({...a,name:a.client?.name}):null;}
 
 export default function ExpedienteAnaRuntimeGuard(){
  const location=useLocation(),navigate=useNavigate();
@@ -44,13 +46,13 @@ export default function ExpedienteAnaRuntimeGuard(){
  const active=Boolean(match&&isNotionId(id));
  const[advice,setAdvice]=useState<Advice|null>(null),[status,setStatus]=useState<number|null>(null),[target,setTarget]=useState<Element|null>(null),[channel,setChannel]=useState<'llamada'|'whatsapp'|'email'>('llamada'),[mode,setMode]=useState<'help'|'manual'|null>(null),[memory,setMemory]=useState<MemoryItem[]>([]),[execBusy,setExecBusy]=useState(false),[execMsg,setExecMsg]=useState('');
 
- useEffect(()=>{if(!active){setAdvice(null);setStatus(null);setMemory([]);setExecMsg('');return;}let alive=true;void Promise.all([fetchAdvice(id),fetchMemoryApi<MemoryEnvelope>('/context',{method:'POST',body:JSON.stringify({origin_type:'expediente',origin_code:id})})]).then(([r,m])=>{if(!alive)return;setStatus(r.status);setAdvice(r.status===200?r.data:null);setMemory(m.status===200?(m.data?.items??[]).slice(0,3):[]);});return()=>{alive=false}},[active,id]);
- useEffect(()=>{if(!active)return;let alive=true;const refresh=(event:Event)=>{const detail=(event as CustomEvent<PeopleChangedDetail>).detail;if(detail?.expedienteId!==id)return;void fetchAdvice(id).then(r=>{if(!alive)return;setStatus(r.status);setAdvice(r.status===200?r.data:null);setExecMsg('')})};window.addEventListener('fenix-expediente-people-changed',refresh as EventListener);return()=>{alive=false;window.removeEventListener('fenix-expediente-people-changed',refresh as EventListener)}},[active,id]);
+ useEffect(()=>{if(!active){setAdvice(null);setStatus(null);setMemory([]);setExecMsg('');return;}let alive=true;void Promise.all([fetchAdvice(id),fetchMemoryApi<MemoryEnvelope>('/context',{method:'POST',body:JSON.stringify({origin_type:'expediente',origin_code:id})})]).then(([r,m])=>{if(!alive)return;setStatus(r.status);setAdvice(r.status===200?styledAdvice(r.data):null);setMemory(m.status===200?(m.data?.items??[]).slice(0,3):[]);});return()=>{alive=false}},[active,id]);
+ useEffect(()=>{if(!active)return;let alive=true;const refresh=(event:Event)=>{const detail=(event as CustomEvent<PeopleChangedDetail>).detail;if(detail?.expedienteId!==id)return;void fetchAdvice(id).then(r=>{if(!alive)return;setStatus(r.status);setAdvice(r.status===200?styledAdvice(r.data):null);setExecMsg('')})};window.addEventListener('fenix-expediente-people-changed',refresh as EventListener);return()=>{alive=false;window.removeEventListener('fenix-expediente-people-changed',refresh as EventListener)}},[active,id]);
  useEffect(()=>{if(!active)return;const attach=()=>{const el=document.querySelector('.detail-next-action');if(el){setTarget(el);el.classList.toggle('exp-ana-runtime-ready',Boolean(advice&&status===200));}};attach();const obs=new MutationObserver(attach);obs.observe(document.body,{childList:true,subtree:true});return()=>{obs.disconnect();document.querySelector('.detail-next-action')?.classList.remove('exp-ana-runtime-ready')}},[active,advice,status]);
  const usable=active&&status===200&&advice&&target;
  const channelData=useMemo(()=>advice?.channels?.[channel]??null,[advice,channel]);
  if(!usable)return null;
- const action=advice.action||'No existe todavía una siguiente acción canónica.';
+ const action=advice.action||'No existe todavía una siguiente acción disponible.';
  const canAna=Boolean(advice.ana?.can_execute||advice.execution_modes?.ana);
  const canHelp=advice.execution_modes?.help!==false;
  const canManual=advice.execution_modes?.manual!==false;
@@ -97,20 +99,20 @@ export default function ExpedienteAnaRuntimeGuard(){
   else navigate(`/documentacion?expediente=${encodeURIComponent(id)}&upload=1`);
  }
  function executionChannel(){if(channelData)return channel==='email'?'Email':channel==='whatsapp'?'WhatsApp':'Llamada';if(advice?.channels?.email)return'Email';if(advice?.channels?.whatsapp)return'WhatsApp';if(advice?.channels?.llamada)return'Llamada';return null;}
- async function letAnaDoIt(){const ch=executionChannel();if(!canAna||!ch||execBusy)return;setExecBusy(true);setExecMsg('');const r=await edgeJson<ExecResult>(`/expedientes/${encodeURIComponent(id)}/prepare-contact`,{method:'POST',body:JSON.stringify({channel:ch})});setExecBusy(false);if((r.status===200||r.status===201)&&r.data?.ok){setExecMsg(r.data.reused?'Ana ya había preparado esta comunicación; no la he duplicado.':'Ana ha preparado la comunicación en Fénix Uno. No se ha enviado: queda pendiente del gate correspondiente.');}else if(r.data?.error==='no_contact_gate')setExecMsg('No puedo preparar contacto: el cliente figura como No contactar.');else if(r.data?.error==='channel_recipient_missing')setExecMsg('Ese canal no tiene destinatario disponible.');else setExecMsg('No he ejecutado nada porque el gate de seguridad no se pudo validar.');}
+ async function letAnaDoIt(){const ch=executionChannel();if(!canAna||!ch||execBusy)return;setExecBusy(true);setExecMsg('');const r=await edgeJson<ExecResult>(`/expedientes/${encodeURIComponent(id)}/prepare-contact`,{method:'POST',body:JSON.stringify({channel:ch})});setExecBusy(false);if((r.status===200||r.status===201)&&r.data?.ok){setExecMsg(r.data.reused?'Ana ya había preparado esta comunicación; no la he duplicado.':'Ana ha preparado la comunicación en Fénix Uno. No se ha enviado: queda pendiente de revisión.');}else if(r.data?.error==='no_contact_gate')setExecMsg('No puedo preparar contacto: el cliente figura como No contactar.');else if(r.data?.error==='channel_recipient_missing')setExecMsg('Ese canal no tiene destinatario disponible.');else setExecMsg('No he ejecutado nada porque no se pudo validar la seguridad de la acción.');}
  return createPortal(<div className="exp-ana-runtime-content" data-testid="expediente-ana-runtime">
    <img src={anaAvatar} alt="Ana"/>
    <div className="exp-ana-runtime-main">
     <span>ANA · SIGUIENTE MEJOR ACCIÓN · DATOS VIVOS</span>
     <h2>{action}</h2>
-    <p><b>Por qué:</b> {advice.why||advice.blocking_reason||'No hay una justificación canónica disponible todavía.'}</p>
+    <p><b>Por qué:</b> {advice.why||advice.blocking_reason||'No hay una justificación disponible todavía.'}</p>
     {(advice.evidence?.phase||advice.evidence?.blocking_reason||advice.evidence?.task_id)&&<div className="exp-ana-evidence-line"><ShieldCheck size={15}/><span>{advice.evidence?.phase?`Fase: ${advice.evidence.phase}`:''}{advice.evidence?.blocking_reason?` · Bloqueo: ${advice.evidence.blocking_reason}`:''}{advice.evidence?.task_id?` · Tarea origen vinculada`:''}</span></div>}
     {people&&<div className="exp-ana-people-line"><Users size={16}/><div><strong>{people.count??0} interviniente{(people.count??0)===1?'':'s'}</strong><span>{people.titulares??0} titular{(people.titulares??0)===1?'':'es'} · {people.avalistas??0} avalista{(people.avalistas??0)===1?'':'s'} · {people.missing_data??0} con datos pendientes · {people.missing_docs??0} con documentación pendiente</span></div><button onClick={goPeople}>Ver personas</button></div>}
-    {people&&((people.count??0)===0||(people.missing_data??0)>0||(people.missing_docs??0)>0)&&<div className="exp-ana-evidence-line" data-testid="expediente-people-next-step"><ShieldCheck size={15}/><span>{(people.count??0)===0?'Falta identificar al menos un interviniente antes de continuar el expediente.':(people.missing_data??0)>0&&people.next_person_data?`Siguiente dato pendiente: ${people.next_person_data.field.label} de ${people.next_person_data.person_name}.`:'Hay documentación pendiente de intervinientes; conviene completarla antes del siguiente gate.'}</span>{(people.count??0)===0?<button type="button" onClick={goAddPerson}><Plus size={14}/> Añadir persona ahora</button>:(people.missing_data??0)>0&&people.next_person_data?<button type="button" onClick={goMissingData}><Pencil size={14}/> Completar este dato</button>:<button type="button" onClick={goMissingDocs}><FileUp size={14}/> Subir siguiente documento</button>}</div>}
+    {people&&((people.count??0)===0||(people.missing_data??0)>0||(people.missing_docs??0)>0)&&<div className="exp-ana-evidence-line" data-testid="expediente-people-next-step"><ShieldCheck size={15}/><span>{(people.count??0)===0?'Falta identificar al menos un interviniente antes de continuar el expediente.':(people.missing_data??0)>0&&people.next_person_data?`Siguiente dato pendiente: ${people.next_person_data.field.label} de ${people.next_person_data.person_name}.`:'Hay documentación pendiente de intervinientes; conviene completarla antes del siguiente paso.'}</span>{(people.count??0)===0?<button type="button" onClick={goAddPerson}><Plus size={14}/> Añadir persona ahora</button>:(people.missing_data??0)>0&&people.next_person_data?<button type="button" onClick={goMissingData}><Pencil size={14}/> Completar este dato</button>:<button type="button" onClick={goMissingDocs}><FileUp size={14}/> Subir siguiente documento</button>}</div>}
     {memory.length>0&&<section className="exp-ana-memory" aria-label="Contexto recordado por Ana"><div className="exp-ana-memory-head"><Brain size={16}/><strong>Lo que recuerdo de este expediente</strong></div>{memory.map(x=><article key={x.id}><small>{x.memory_class||'Contexto'}{x.source_actor?` · ${x.source_actor}`:''}</small><p>{x.detail}</p></article>)}</section>}
 
     <div className="exp-ana-runtime-modes">
-      <button disabled={!canAna||execBusy} onClick={()=>void letAnaDoIt()} title={canAna?'Ana preparará una comunicación idempotente y no la enviará sin el gate posterior.':advice.ana?.blocked_by||'Ana todavía no tiene autoridad para ejecutar esta acción.'}>{execBusy?'Ana está preparando…':'Que lo haga Ana'}</button>
+      <button disabled={!canAna||execBusy} onClick={()=>void letAnaDoIt()} title={canAna?'Ana preparará una comunicación y no la enviará sin revisión posterior.':advice.ana?.blocked_by||'Ana todavía no tiene autoridad para ejecutar esta acción.'}>{execBusy?'Ana está preparando…':'Que lo haga Ana'}</button>
       <button className={mode==='help'?'selected':''} disabled={!canHelp} onClick={()=>setMode('help')}>Ayúdame</button>
       <button className={mode==='manual'?'selected':''} disabled={!canManual} onClick={()=>setMode('manual')}>Lo hago yo</button>
     </div>
@@ -118,7 +120,7 @@ export default function ExpedienteAnaRuntimeGuard(){
     <div className="exp-ana-runtime-explain">
       <article><small>SI LO HACES TÚ</small><p>{advice.human?.instruction||'Realiza una sola acción y registra el resultado real.'}</p><em>Registrar después: {advice.human?.must_record||'resultado real y una sola siguiente acción.'}</em></article>
       <article><small>SI LO HAGO YO</small><p>{advice.ana?.would_do||'Ana revisará el contexto, preparará la ejecución exacta y pedirá la autoridad necesaria antes de actuar.'}</p>{!canAna&&<em>{advice.ana?.blocked_by||'Ejecución autónoma todavía bloqueada.'}</em>}{canAna&&<em>En esta fase “hacerlo” significa preparar y registrar la acción segura; no enviar ni cerrar resultados que todavía dependen del cliente.</em>}</article>
-      <article><small>SI TE AYUDO</small><p>{mode==='help'?'Te guío con este paso sin ejecutarlo: revisa el guion o mensaje, confirma que refleja el caso y registra el resultado cuando termines.':'Pulsa Ayúdame para trabajar este paso guiado sin que Ana lo ejecute.'}</p></article>
+      <article><small>SI TE AYUDO</small><p>{mode==='help'?'Te guío con este paso sin ejecutarlo: primero entendemos la situación, resolvemos dudas y cerramos un único siguiente paso.':'Pulsa Ayúdame para trabajar este paso guiado sin que Ana lo ejecute.'}</p></article>
     </div>
 
     <section className="exp-ana-channels" aria-label="Canales preparados por Ana">
