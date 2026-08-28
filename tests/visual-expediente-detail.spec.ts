@@ -59,7 +59,10 @@ test.describe('Fénix PRE-PROD · ficha maestra de expediente',()=>{
   await expect(page.locator('.detail-phase-track small').filter({hasText:'Tasación'})).toBeVisible();
   await expect(page.getByTestId('expediente-ana-runtime')).toBeVisible();
   await expect(page.getByTestId('expediente-belen-financial-context')).toBeVisible();
-  await expect(page.getByText('Criterios de Belén que Ana está usando',{exact:true})).toBeVisible();
+  await expect(page.getByText('Conocimiento financiero de Belén que Ana consulta',{exact:true})).toBeVisible();
+  await expect(page.getByTestId('belen-financial-guidance')).toBeVisible();
+  await expect(page.getByText('GUÍA OPERATIVA · BASE MAESTRA BELÉN',{exact:true})).toBeVisible();
+  await expect(page.getByTestId('belen-financial-approved-rules')).toHaveCount(0);
   await expect(page.getByText(/documentación mínima operativa: vida laboral actualizada/)).toBeVisible();
   await expect(page.getByText(/Si hay una excepción, una duda financiera material o un criterio bancario que pueda haber cambiado/)).toBeVisible();
   await expect(page.getByTestId('expediente-bank-ranking')).toBeVisible();
