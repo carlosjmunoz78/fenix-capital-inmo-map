@@ -27,7 +27,7 @@ test.describe('Fénix PRE-PROD · gates de aprendizaje de Ana',()=>{
   await page.getByRole('button',{name:'Revisar antes de guardar'}).click();
   expect(correctionPosts).toBe(0);
   await expect(page.getByTestId('ana-correction-preview')).toBeVisible();
-  await page.getByLabel('Posible regla o aprendizaje (opcional)').fill('Validar identidad primero');
+  await page.getByLabel('Posible criterio o aprendizaje (opcional)').fill('Validar identidad primero');
   await expect(page.getByTestId('ana-correction-preview')).toHaveCount(0);
   expect(correctionPosts).toBe(0);
   await page.getByRole('button',{name:'Revisar antes de guardar'}).click();
@@ -35,7 +35,7 @@ test.describe('Fénix PRE-PROD · gates de aprendizaje de Ana',()=>{
   await expect.poll(()=>correctionPosts).toBe(1);
 
   await page.getByLabel('Comentario Belén corr-1').fill('Aplicar solo con identidad validada');
-  await page.getByRole('button',{name:'Regla',exact:true}).click();
+  await page.getByRole('button',{name:'Criterio general',exact:true}).click();
   expect(decisionPosts).toBe(0);
   await expect(page.getByTestId('ana-decision-preview')).toBeVisible();
   await expect(page.getByText('Aplicar solo con identidad validada',{exact:true})).toBeVisible();
