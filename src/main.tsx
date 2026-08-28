@@ -63,6 +63,7 @@ import RegistrosPropiedadShell from './RegistrosPropiedadShell';
 import RegistroPropiedadDetailShell from './RegistroPropiedadDetailShell';
 import DirectoryCreateShell from './DirectoryCreateShell';
 import SpecialCasesShell from './SpecialCasesShell';
+import SpecialCaseDetailExperience from './SpecialCaseDetailExperience';
 import AnaGovernance from './AnaGovernance';
 import AnaUniversalGuard from './AnaUniversalGuard';
 import AnaInboxAccessGuard from './AnaInboxAccessGuard';
@@ -127,6 +128,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <FinancialModuleBelenGuard />
       <ExpedienteKnowledgeGuard />
       <B2BContactCreateLauncher />
+      <SpecialCaseDetailExperience />
       <App />
       <RoleHomeShell />
       <ProfileShell />
