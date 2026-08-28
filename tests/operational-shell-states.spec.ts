@@ -41,7 +41,7 @@ test('OperationalShellV2 diferencia 403 de error técnico',async({page},testInfo
  await page.unroute('**/functions/v1/fenix-notion-runtime-test/expedientes');
  await baseRoutes(page,{status:500,body:{items:[{expediente_code:'NO-DEBE-VERSE'}]}});
  await page.reload();
- await expect(page.getByTestId('ops-error')).toContainText('No se pudo leer la fuente canónica de Notion.');
+ await expect(page.getByTestId('ops-error')).toContainText('No se pudo leer la información actualizada de Expedientes.');
  await expect(page.getByTestId('ops-forbidden')).toHaveCount(0);
  await expect(page.getByText('NO-DEBE-VERSE')).toHaveCount(0);
 });
