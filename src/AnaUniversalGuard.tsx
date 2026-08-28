@@ -2,7 +2,7 @@ import { ChangeEvent, useEffect, useMemo, useState } from 'react';
 import { ChevronDown, ChevronUp, FileUp, MessageSquareWarning, Sparkles } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { anaAvatar } from './assets/visualAssets';
-import { fetchAnaApi, fetchEvidenceApi, fetchMemoryApi, supabase } from './supabase';
+import { fetchAnaApi, fetchAnaCanonicalApi, fetchEvidenceApi, fetchMemoryApi, supabase } from './supabase';
 import './ana-universal.css';
 
 type Caps={
@@ -15,6 +15,8 @@ type Scope={type:string;code:string;label:string};
 type Prepare={ok?:boolean;upload_id?:string;storage_path?:string;token?:string;max_bytes?:number;error?:string};
 type Complete={ok?:boolean;reused?:boolean;no_op?:boolean;document_page_id?:string;error?:string};
 type MemoryResult={ok?:boolean;reused?:boolean;no_op?:boolean;activity_page_id?:string;error?:string};
+type CanonicalRule={id:string;domain:string;rule:string;source:string;confidence:number;exception:boolean;test:boolean;approved:boolean;state:string;date:string};
+type CanonicalEnvelope={ok?:boolean;items?:CanonicalRule[];domain?:string;canonical_only?:boolean};
 
 const hiddenRoots=['/','/perfil','/ana'];
 const BUCKET='fenix-preprod-documents-test';
@@ -31,6 +33,15 @@ function scopeFromPath(path:string):Scope{
   const x=map[root]||{type:root,label:root};return{type:x.type,code:id,label:x.label};
 }
 
+function domainForScope(scope:Scope){
+  if(['inmobiliaria','visita','contacto_b2b'].includes(scope.type))return 'Inmobiliarias B2B';
+  if(['expediente','contacto','banco','tasacion','firma','notaria','registro_propiedad'].includes(scope.type))return 'Hipotecas';
+  if(scope.type==='documento')return 'Documentación';
+  if(scope.type==='comunicacion')return 'Comunicaciones';
+  if(scope.type==='economia')return 'Finanzas';
+  return 'Operaciones';
+}
+
 function nextText(scope:Scope){
   if(scope.type==='general')return 'Revisa la prioridad que aparece en esta pantalla y actúa sobre el primer bloqueo real.';
   if(!scope.code)return `Completa los datos mínimos del nuevo ${scope.label}; cuando exista el registro podré vincular evidencia y correcciones a su ficha.`;
@@ -40,12 +51,19 @@ function nextText(scope:Scope){
 export default function AnaUniversalGuard(){
   const location=useLocation(),navigate=useNavigate();
   const scope=useMemo(()=>scopeFromPath(location.pathname),[location.pathname]);
+  const domain=useMemo(()=>domainForScope(scope),[scope.type]);
   const [logged,setLogged]=useState(false),[caps,setCaps]=useState<Caps|null>(null),[open,setOpen]=useState(false),[mode,setMode]=useState<'help'|'manual'|null>(null);
   const [scopeAllowed,setScopeAllowed]=useState(false),[evidenceOpen,setEvidenceOpen]=useState(false),[evidenceText,setEvidenceText]=useState(''),[evidenceMessage,setEvidenceMessage]=useState(''),[uploading,setUploading]=useState(false);
+  const [canonicalRules,setCanonicalRules]=useState<CanonicalRule[]>([]),[canonicalLoaded,setCanonicalLoaded]=useState(false);
   const hide=hiddenRoots.some(p=>location.pathname===p)||(location.pathname.startsWith('/ana/'));
 
   useEffect(()=>{let alive=true;supabase.auth.getSession().then(({data})=>{if(alive)setLogged(Boolean(data.session))});const {data:{subscription}}=supabase.auth.onAuthStateChange((_e,s)=>setLogged(Boolean(s)));return()=>{alive=false;subscription.unsubscribe()};},[]);
   useEffect(()=>{if(!logged||hide)return;fetchAnaApi<Envelope>('/capabilities').then(r=>setCaps(r.status===200?r.data?.capabilities??null:null));},[logged,hide,location.pathname]);
+  useEffect(()=>{
+    setCanonicalRules([]);setCanonicalLoaded(false);
+    if(!logged||hide)return;
+    fetchAnaCanonicalApi<CanonicalEnvelope>(`/rules?domain=${encodeURIComponent(domain)}`).then(r=>{setCanonicalRules(r.status===200?(r.data?.items??[]):[]);setCanonicalLoaded(true);});
+  },[logged,hide,domain,location.pathname]);
   useEffect(()=>{
     setScopeAllowed(false);setEvidenceOpen(false);setEvidenceMessage('');
     if(!logged||hide||!scope.code||scope.type==='general'||scope.type==='banco')return;
@@ -101,7 +119,7 @@ export default function AnaUniversalGuard(){
         <button className={mode==='help'?'selected':''} disabled={!caps.can_ana_help} onClick={()=>setMode('help')}>Ayúdame</button>
         <button className={mode==='manual'?'selected':''} disabled={!caps.can_manual_execute} onClick={()=>setMode('manual')}>Lo hago yo</button>
       </div>
-      {mode==='help'&&<p className="ana-inline-note">Ana te acompaña: revisa primero evidencia y bloqueo; después ejecuta una sola acción y registra el resultado.</p>}
+      {mode==='help'&&<div className="ana-inline-note" data-testid="ana-canonical-help"><p>Ana te acompaña: revisa primero evidencia y bloqueo; después ejecuta una sola acción y registra el resultado.</p>{canonicalLoaded&&canonicalRules.length>0&&<div><strong>Conocimiento canónico aplicado · {domain}</strong>{canonicalRules.slice(0,3).map(r=><p key={r.id}>• {r.rule}{r.exception?' · Excepción/precedente':''}</p>)}</div>}{canonicalLoaded&&canonicalRules.length===0&&<small>No hay reglas canónicas aprobadas para este dominio.</small>}</div>}
       {mode==='manual'&&<p className="ana-inline-note">Modo manual activo. Al terminar, registra qué ocurrió y cualquier contexto útil para la próxima gestión.</p>}
       <div className="ana-secondary-actions">
         <button disabled={!caps.can_upload_evidence||!scopeAllowed} onClick={()=>setEvidenceOpen(v=>!v)} title={!scope.code?'Primero guarda el registro para poder relacionar la evidencia.':!scopeAllowed?'Este origen todavía no tiene un scope de carga autorizado.':''}><FileUp size={15}/> Subir evidencia</button>
