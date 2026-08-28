@@ -45,7 +45,7 @@ test('La ficha de registro carga datos y personal relacionado',async({page},test
  await page.getByRole('button',{name:'Abrir ficha →'}).click();
  await expect(page).toHaveURL(new RegExp(`/registros-propiedad/${registryId}$`));
  await expect(page.getByRole('heading',{level:1,name:'Registro de la Propiedad de Cabra'})).toBeVisible();
- await expect(page.getByText('Nota simple · certificaciones',{exact:true})).toBeVisible();
+ await expect(page.getByText(/Servicios telemáticos:.*Nota simple · certificaciones/)).toBeVisible();
  await expect(page.locator('[data-testid="property-registry-staff"]')).toBeVisible();
  await expect(page.getByText('Lucía Registro QA',{exact:true})).toBeVisible();
  await expect(page.getByText('Contacto operativo',{exact:true})).toBeVisible();
