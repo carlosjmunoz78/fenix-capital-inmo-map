@@ -10,7 +10,7 @@ async function boot(page:any){
 }
 
 test.describe('Fénix PRE-PROD · revisión de conocimiento de Ana',()=>{
- test('no clasifica hasta revisión y confirmación',async({page},testInfo)=>{
+ test('no clasifica hasta revisión y confirmación y no muestra jerga técnica',async({page},testInfo)=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();
   await boot(page);
   let decisionPosts=0;
@@ -21,13 +21,19 @@ test.describe('Fénix PRE-PROD · revisión de conocimiento de Ana',()=>{
    return r.fulfill({status:404,contentType:'application/json',body:'{}'});
   });
   await page.goto('/ana');
-  await expect(page.getByTestId('ana-knowledge-review')).toBeVisible();
-  await expect(page.getByText('1 aportación pendiente queda reservada a otra autoridad.')).toBeVisible();
+  const review=page.getByTestId('ana-knowledge-review');
+  await expect(review).toBeVisible();
+  await expect(page.getByText('1 aportación pendiente queda reservada a otra persona responsable.')).toBeVisible();
+  await expect(review).not.toContainText('PRE-PROD');
+  await expect(review).not.toContainText('runtime');
+  await expect(review).not.toContainText('canónica');
   await page.getByLabel('Comentario revisión knowledge-page-1').fill('Aplicar como criterio B2B general.');
-  await page.getByRole('button',{name:'Regla canónica'}).click();
+  await page.getByRole('button',{name:'Criterio aprobado'}).click();
   expect(decisionPosts).toBe(0);
-  await expect(page.getByTestId('knowledge-decision-preview')).toBeVisible();
+  const preview=page.getByTestId('knowledge-decision-preview');
+  await expect(preview).toBeVisible();
   await expect(page.getByText('Aplicar como criterio B2B general.',{exact:true})).toBeVisible();
+  await expect(preview).toContainText('quedará aprobado para que Ana pueda reutilizarlo cuando corresponda');
   await page.getByRole('button',{name:'Confirmar clasificación'}).click();
   await expect.poll(()=>decisionPosts).toBe(1);
  });
