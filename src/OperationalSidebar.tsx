@@ -16,7 +16,7 @@ type Props={
 export default function OperationalSidebar({navigation,activeRoute,anaSubtitle='Cuando quieras, avanzamos paso a paso.',anaRoute='/ana',variant='default',className='',theme,ariaLabel}:Props){
  const navigate=useNavigate();
  const anaCard=<button className="ops-ana ops-ana-modern" aria-label="Hablar con Ana" onClick={()=>navigate(anaRoute)}>
-  <span className="ops-ana-avatar-wrap" aria-hidden="true"><img className="ops-ana-avatar" src={anaAvatar} alt=""/><i/></span>
+  <span className="ops-ana-avatar-wrap" aria-hidden="true"><img className="ops-ana-avatar dir-help-avatar" src={anaAvatar} alt=""/><i/></span>
   <span className="ops-ana-copy"><small className="ops-ana-kicker">ANA · ASISTENTE FÉNIX</small><strong>Ana está contigo</strong><small className="ops-ana-subtitle">{anaSubtitle}</small></span>
   <span className="ops-ana-arrow" aria-hidden="true">→</span>
  </button>;
