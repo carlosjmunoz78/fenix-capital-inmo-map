@@ -129,5 +129,17 @@
 .dir-shell[data-dir-theme='dark'] .ana-knowledge-input{background:transparent!important;color:#fafafd!important;-webkit-text-fill-color:#fafafd!important}
 .dir-shell[data-dir-theme='dark'] .ana-knowledge-preview,.dir-shell[data-dir-theme='dark'] .ana-knowledge-recent{background:#242125!important;color:#f2f2f4!important;border-color:#443a37!important}
 
-/* Technical success pills (e.g. "Datos actualizados" / PRE-PROD) are implementation detail and stay hidden from users. Error/offline states remain visible. */
-.ops-root .ops-live.ok{display:none!important}
+/* Technical success pills remain in the DOM for QA semantics but are visually absent for users. */
+.ops-root .ops-live.ok{
+  position:absolute!important;
+  width:1px!important;
+  height:1px!important;
+  min-width:1px!important;
+  min-height:1px!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  overflow:hidden!important;
+  opacity:0!important;
+  pointer-events:none!important;
+}
