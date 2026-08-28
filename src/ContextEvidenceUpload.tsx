@@ -6,6 +6,13 @@ import {SUPABASE_PUBLISHABLE_KEY,SUPABASE_URL,supabase} from './supabase';
 const BUCKET='fenix-preprod-documents-test';
 const FUNCTION='fenix-evidence-universal-test';
 const AUDIO_EXTENSIONS=['.mp3','.m4a','.wav','.webm','.ogg','.oga','.opus','.aac','.flac'];
+const MIME_BY_EXT:Record<string,string>={
+ '.pdf':'application/pdf','.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.gif':'image/gif','.webp':'image/webp','.svg':'image/svg+xml',
+ '.txt':'text/plain','.csv':'text/csv','.json':'application/json','.xml':'application/xml','.zip':'application/zip','.doc':'application/msword',
+ '.docx':'application/vnd.openxmlformats-officedocument.wordprocessingml.document','.xls':'application/vnd.ms-excel','.xlsx':'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+ '.ppt':'application/vnd.ms-powerpoint','.pptx':'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+ '.mp3':'audio/mpeg','.m4a':'audio/mp4','.wav':'audio/wav','.webm':'audio/webm','.ogg':'audio/ogg','.oga':'audio/ogg','.opus':'audio/opus','.aac':'audio/aac','.flac':'audio/flac'
+};
 
 type OriginCtx={type:string;code:string;label:string;staging:boolean};
 type Prepare={ok?:boolean;upload_id?:string;storage_path?:string;token?:string;max_bytes?:number};
@@ -40,7 +47,13 @@ function isAudio(file:File){
  const name=file.name.toLowerCase();
  return AUDIO_EXTENSIONS.some(ext=>name.endsWith(ext));
 }
-function mimeOf(file:File){const mime=(file.type||'').trim().toLowerCase();return mime||'application/octet-stream';}
+function mimeOf(file:File){
+ const direct=(file.type||'').trim().toLowerCase();
+ if(direct)return direct;
+ const lower=file.name.toLowerCase();
+ for(const[ext,mime]of Object.entries(MIME_BY_EXT))if(lower.endsWith(ext))return mime;
+ return'application/octet-stream';
+}
 
 async function evidenceFetch<T>(path:string,init?:RequestInit):Promise<{status:number;data:T|null}>{
  const{data:{session}}=await supabase.auth.getSession();
