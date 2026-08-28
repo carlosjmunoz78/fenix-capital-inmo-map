@@ -43,7 +43,7 @@ test('La ficha de registro carga datos canónicos y personal relacionado',async(
  await page.goto('/registros-propiedad');
  await page.getByRole('button',{name:'Abrir ficha →'}).click();
  await expect(page).toHaveURL(new RegExp(`/registros-propiedad/${registryId}$`));
- await expect(page.getByRole('heading',{name:'Registro de la Propiedad de Cabra'})).toBeVisible();
+ await expect(page.getByRole('heading',{level:1,name:'Registro de la Propiedad de Cabra'})).toBeVisible();
  await expect(page.getByText('Nota simple · certificaciones')).toBeVisible();
  await expect(page.locator('[data-testid="property-registry-staff"]')).toBeVisible();
  await expect(page.getByRole('heading',{name:'Lucía Registro QA'})).toBeVisible();
