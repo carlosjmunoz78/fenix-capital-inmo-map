@@ -57,6 +57,7 @@ import NotificationsShell from './NotificationsShell';
 import NotariasShell from './NotariasShell';
 import NotariaDetailShell from './NotariaDetailShell';
 import RegistrosPropiedadShell from './RegistrosPropiedadShell';
+import RegistroPropiedadDetailShell from './RegistroPropiedadDetailShell';
 import AnaGovernance from './AnaGovernance';
 import AnaUniversalGuard from './AnaUniversalGuard';
 import AnaInboxAccessGuard from './AnaInboxAccessGuard';
@@ -152,6 +153,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <NotariasShell />
       <NotariaDetailShell />
       <RegistrosPropiedadShell />
+      <RegistroPropiedadDetailShell />
       <AnaGovernance />
       <VisitasShell />
       <CommunicationsShell />
