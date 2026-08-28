@@ -14,12 +14,16 @@ async function boot(page:any){
  await page.route('**/functions/v1/fenix-ana-api-test/**',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({capabilities:{can_ana_help:true,can_manual_execute:true,can_upload_evidence:false,can_correct_ana:true,can_view_learning_inbox:false,ana_execute_requires_action_context:true}})}));
  await page.route('**/functions/v1/fenix-ana-canonical-test/**',async r=>{
    expect(r.request().url()).toContain('domain=Inmobiliarias%20B2B');
-   return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,domain:'Inmobiliarias B2B',canonical_only:true,items:[{id:'rule-1',domain:'Inmobiliarias B2B',rule:'TEST F3.5: en una aportación B2B, conservar siempre trazabilidad del origen antes de reutilizar el conocimiento.',source:'CEREBRO/QA',confidence:100,exception:false,test:true,approved:true,state:'Aplicada',date:'2026-08-28'}]})});
+   return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
+     ok:true,domain:'Inmobiliarias B2B',canonical_only:true,exception_policy:'precedent_requires_context_review',
+     items:[{id:'rule-1',domain:'Inmobiliarias B2B',rule:'TEST F3.5: en una aportación B2B, conservar siempre trazabilidad del origen antes de reutilizar el conocimiento.',source:'CEREBRO/QA',confidence:100,exception:false,test:true,approved:true,state:'Aplicada',date:'2026-08-28'}],
+     precedents:[{id:'precedent-1',domain:'Inmobiliarias B2B',rule:'TEST F3.7: excepción aislada que nunca debe aplicarse como regla general.',source:'CEREBRO/QA',confidence:100,exception:true,test:true,approved:true,state:'Aplicada',date:'2026-08-28'}]
+   })});
  });
 }
 
 test.describe('Fénix PRE-PROD · consumo canónico de Ana',()=>{
- test('la Ana visible de Inmobiliarias incorpora la regla canónica del dominio',async({page},testInfo)=>{
+ test('la Ana visible de Inmobiliarias incorpora la regla general y no aplica precedentes como regla',async({page},testInfo)=>{
    if(!testInfo.project.name.includes('desktop'))test.skip();
    await boot(page);
    await page.goto('/inmobiliarias');
@@ -27,5 +31,14 @@ test.describe('Fénix PRE-PROD · consumo canónico de Ana',()=>{
    await expect(summary).toBeVisible();
    await expect(summary).toContainText('Criterio canónico vigente:');
    await expect(summary).toContainText('conservar siempre trazabilidad del origen antes de reutilizar el conocimiento.');
+   await expect(summary).not.toContainText('excepción aislada que nunca debe aplicarse como regla general');
+
+   const aside=page.getByLabel('Ana · asistente contextual');
+   await expect(aside).toBeVisible();
+   await aside.locator('.ana-universal-head').click({force:true});
+   await aside.getByRole('button',{name:'Ayúdame'}).click({force:true});
+   const help=page.getByTestId('ana-canonical-help');
+   await expect(help).toContainText('conservar siempre trazabilidad del origen antes de reutilizar el conocimiento.');
+   await expect(help).not.toContainText('excepción aislada que nunca debe aplicarse como regla general');
  });
 });
