@@ -29,23 +29,25 @@ test('Registros de la Propiedad queda visible tras Notarías y abre el directori
  await registrosButton.click();
  await expect(page).toHaveURL(/\/registros-propiedad$/);
  await expect(page.locator('[data-testid="property-registry-live"]')).toBeVisible();
- await expect(page.getByRole('heading',{name:'Registro de la Propiedad de Cabra'})).toBeVisible();
- await expect(page.getByText('Cabra · Doña Mencía')).toBeVisible();
+ await expect(page.getByText('Registro de la Propiedad de Cabra',{exact:true})).toBeVisible();
+ await expect(page.getByText('Cabra · Doña Mencía',{exact:true})).toBeVisible();
+ await expect(page.locator('[data-testid="property-registry-ana-hero"]')).toBeVisible();
  const shell=page.locator('.ops-side nav');
  await expect(shell.getByRole('button',{name:'Registros de la Propiedad',exact:true})).toBeVisible();
  const shellLabels=await labels(page,'.ops-side nav');
  expect(shellLabels).toEqual(homeLabels);
 });
 
-test('La ficha de registro carga datos canónicos y personal relacionado',async({page},testInfo)=>{
+test('La ficha de registro carga datos y personal relacionado',async({page},testInfo)=>{
  if(!testInfo.project.name.includes('desktop'))test.skip();
  await boot(page);
  await page.goto('/registros-propiedad');
  await page.getByRole('button',{name:'Abrir ficha →'}).click();
  await expect(page).toHaveURL(new RegExp(`/registros-propiedad/${registryId}$`));
  await expect(page.getByRole('heading',{level:1,name:'Registro de la Propiedad de Cabra'})).toBeVisible();
- await expect(page.getByText('Nota simple · certificaciones')).toBeVisible();
+ await expect(page.getByText('Nota simple · certificaciones',{exact:true})).toBeVisible();
  await expect(page.locator('[data-testid="property-registry-staff"]')).toBeVisible();
- await expect(page.getByRole('heading',{name:'Lucía Registro QA'})).toBeVisible();
- await expect(page.getByText('Contacto operativo')).toBeVisible();
+ await expect(page.getByText('Lucía Registro QA',{exact:true})).toBeVisible();
+ await expect(page.getByText('Contacto operativo',{exact:true})).toBeVisible();
+ await expect(page.locator('[data-testid="property-registry-detail-ana-hero"]')).toBeVisible();
 });
