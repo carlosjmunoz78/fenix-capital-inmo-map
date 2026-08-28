@@ -1,6 +1,6 @@
 import {useEffect,useMemo,useState} from 'react';
 import {useLocation,useNavigate} from 'react-router-dom';
-import {fetchAppApi,supabase} from './supabase';
+import {fetchAnaCanonicalApi,fetchAppApi,supabase} from './supabase';
 import {fetchNotionRuntime} from './notionRuntime';
 import {anaVertical} from './assets/visualAssets';
 import {normalizeNavigation,type NavItem} from './masterNavigation';
@@ -14,6 +14,8 @@ type Ctx={actor_code?:string;role?:string};
 type Row=Record<string,unknown>;
 type SortKey='nombre'|'localidad'|'estado'|'control';
 type SortDir='asc'|'desc';
+type CanonicalRule={id:string;domain:string;rule:string;source:string;confidence:number;exception:boolean;test:boolean;approved:boolean;state:string;date:string};
+type CanonicalEnvelope={ok?:boolean;items?:CanonicalRule[];domain?:string;canonical_only?:boolean};
 const fallbackNav:NavItem[]=[{label:'Inicio',route:'/inicio'}];
 function rowsFrom(data:unknown):Row[]{if(!data||typeof data!=='object')return[];const d=data as Record<string,unknown>;return Array.isArray(d.items)?d.items as Row[]:[];}
 function text(row:Row,keys:string[]){for(const k of keys){const v=row[k];if(typeof v==='string'&&v.trim())return v.trim();}return'';}
@@ -32,10 +34,12 @@ export default function InmobiliariasShell(){
  const location=useLocation(),navigate=useNavigate();const active=location.pathname==='/inmobiliarias';
  const[sessionReady,setSessionReady]=useState(false),[logged,setLogged]=useState(false),[ctx,setCtx]=useState<Ctx|null>(null),[nav,setNav]=useState<NavItem[]>([]),[theme,setTheme]=useState<Theme>(()=>(sessionStorage.getItem('fenix-theme') as Theme)||'light');
  const[rows,setRows]=useState<Row[]>([]),[status,setStatus]=useState<number|null>(null),[loading,setLoading]=useState(false),[message,setMessage]=useState('');
+ const[canonicalRules,setCanonicalRules]=useState<CanonicalRule[]>([]);
  const[query,setQuery]=useState(''),[state,setState]=useState(''),[locality,setLocality]=useState(''),[sortKey,setSortKey]=useState<SortKey>('nombre'),[sortDir,setSortDir]=useState<SortDir>('asc');const[correction,setCorrection]=useState(''),[reason,setReason]=useState('');
  useEffect(()=>{if(!active)return;let alive=true;supabase.auth.getSession().then(({data})=>{if(alive){setLogged(Boolean(data.session));setSessionReady(true)}});const{data:{subscription}}=supabase.auth.onAuthStateChange((_e,s)=>{setLogged(Boolean(s));setSessionReady(true)});return()=>{alive=false;subscription.unsubscribe()};},[active]);
  useEffect(()=>{if(!active)return;document.documentElement.dataset.theme=theme;sessionStorage.setItem('fenix-theme',theme);},[active,theme]);
  useEffect(()=>{if(!active||!logged)return;Promise.all([fetchAppApi<Ctx>('/session/context'),fetchAppApi<unknown>('/navigation')]).then(([c,n])=>{setCtx(c.status===200?c.data:null);setNav(n.status===200?normalizeNavigation(n.data):[]);});},[active,logged]);
+ useEffect(()=>{if(!active||!logged)return;let alive=true;fetchAnaCanonicalApi<CanonicalEnvelope>('/rules?domain=Inmobiliarias%20B2B').then(r=>{if(alive)setCanonicalRules(r.status===200?(r.data?.items??[]):[])});return()=>{alive=false}},[active,logged]);
  useEffect(()=>{if(!active||!logged)return;let alive=true;(async()=>{setLoading(true);setStatus(null);setRows([]);setMessage('');const r=await fetchNotionRuntime<unknown>('/inmobiliarias');if(!alive)return;setStatus(r.status);setRows(r.status===200?rowsFrom(r.data):[]);if(r.status===403)setMessage('Tu perfil no tiene acceso a este módulo o registro.');else if(r.status!==200)setMessage('No se pudo leer la fuente canónica de Inmobiliarias.');setLoading(false);})();return()=>{alive=false}},[active,logged]);
  const effectiveNav=nav.length?nav:fallbackNav;
  const states=useMemo(()=>Array.from(new Set(rows.map(stateOf).filter(Boolean))).sort((a,b)=>{const rank=businessStateRank(a)-businessStateRank(b);return rank||compareText(a,b)}),[rows]);
@@ -47,14 +51,13 @@ export default function InmobiliariasShell(){
  const localityMax=useMemo(()=>Math.max(1,...localityRank.map(([,n])=>n)),[localityRank]);
  const stateMax=useMemo(()=>Math.max(1,...stateRank.map(([,n])=>n)),[stateRank]);
  const anaSummary=useMemo(()=>{
-  if(loading)return'Ahora mismo estoy leyendo la cartera autorizada para no darte una recomendación con datos incompletos.';
-  if(status!==200)return'No tengo una lectura canónica suficiente de esta cartera. No voy a inventar una prioridad.';
-  if(rows.length===0)return'No hay inmobiliarias visibles en tu ámbito actual, así que no hay una prioridad comercial que pueda justificar.';
-  const top=localityRank[0];
-  if(neverCount>0)return`Hay ${neverCount} inmobiliarias con señal explícita de primer contacto pendiente. Empezaría por revisar esas antes de abrir nuevos seguimientos${top?`; ${top[0]} concentra ${top[1]} registros visibles`:''}.`;
-  if(processCount>0)return`Hay ${processCount} inmobiliarias en proceso o seguimiento y ${activeCount} activas. Priorizaría las que ya tienen una relación abierta antes de dispersar actividad${top?`; la mayor concentración visible está en ${top[0]} con ${top[1]} registros`:''}.`;
-  return`Veo ${rows.length} inmobiliarias en tu ámbito, de las que ${activeCount} aparecen activas. No detecto una señal explícita de primer contacto pendiente; revisaría la distribución por estado antes de decidir la siguiente acción.`;
- },[loading,status,rows.length,localityRank,neverCount,processCount,activeCount]);
+  let base:string;
+  if(loading)base='Ahora mismo estoy leyendo la cartera autorizada para no darte una recomendación con datos incompletos.';
+  else if(status!==200)base='No tengo una lectura canónica suficiente de esta cartera. No voy a inventar una prioridad.';
+  else if(rows.length===0)base='No hay inmobiliarias visibles en tu ámbito actual, así que no hay una prioridad comercial que pueda justificar.';
+  else{const top=localityRank[0];if(neverCount>0)base=`Hay ${neverCount} inmobiliarias con señal explícita de primer contacto pendiente. Empezaría por revisar esas antes de abrir nuevos seguimientos${top?`; ${top[0]} concentra ${top[1]} registros visibles`:''}.`;else if(processCount>0)base=`Hay ${processCount} inmobiliarias en proceso o seguimiento y ${activeCount} activas. Priorizaría las que ya tienen una relación abierta antes de dispersar actividad${top?`; la mayor concentración visible está en ${top[0]} con ${top[1]} registros`:''}.`;else base=`Veo ${rows.length} inmobiliarias en tu ámbito, de las que ${activeCount} aparecen activas. No detecto una señal explícita de primer contacto pendiente; revisaría la distribución por estado antes de decidir la siguiente acción.`;}
+  const rule=canonicalRules[0];return rule?`${base} Criterio canónico vigente: ${rule.rule}${rule.exception?' (excepción / precedente)':''}`:base;
+ },[loading,status,rows.length,localityRank,neverCount,processCount,activeCount,canonicalRules]);
  if(!active||!sessionReady||!logged)return null;
  async function logout(){await supabase.auth.signOut();window.location.href=import.meta.env.BASE_URL;}
  function prepareCorrection(){if(!correction.trim()||!reason.trim())return;const q=new URLSearchParams({mode:'help',resource:'inmobiliaria',correction:correction.trim(),reason:reason.trim()});navigate(`/ana?${q.toString()}`);}
