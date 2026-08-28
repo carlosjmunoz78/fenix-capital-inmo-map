@@ -91,6 +91,10 @@ export async function fetchAnaApi<T>(path:string,init?:RequestInit):Promise<{sta
   return authenticatedEdgeFetch<T>('fenix-ana-api-test',path,init);
 }
 
+export async function fetchAnaKnowledgeApi<T>(path:string,init?:RequestInit):Promise<{status:number;data:T|null}>{
+  return authenticatedEdgeFetch<T>('fenix-ana-knowledge-test',path,init);
+}
+
 export async function fetchEvidenceApi<T>(path:string,init?:RequestInit):Promise<{status:number;data:T|null}>{
   return authenticatedEdgeFetch<T>('fenix-evidence-api-test',path,init);
 }
