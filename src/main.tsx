@@ -64,6 +64,7 @@ import AnaGovernance from './AnaGovernance';
 import AnaUniversalGuard from './AnaUniversalGuard';
 import AnaInboxAccessGuard from './AnaInboxAccessGuard';
 import AnaKnowledgeReviewGuard from './AnaKnowledgeReviewGuard';
+import AnaTopCorrectionGuard from './AnaTopCorrectionGuard';
 import ExpedienteAnaRuntimeGuard from './ExpedienteAnaRuntimeGuard';
 import ExpedienteBelenFinancialGuard from './ExpedienteBelenFinancialGuard';
 import ExpedienteBankRankingGuard from './ExpedienteBankRankingGuard';
@@ -115,6 +116,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <AnaUniversalGuard />
       <AnaInboxAccessGuard />
       <AnaKnowledgeReviewGuard />
+      <AnaTopCorrectionGuard />
       <ContextEvidenceUpload />
       <ExpedienteAnaRuntimeGuard />
       <ExpedienteBelenFinancialGuard />
