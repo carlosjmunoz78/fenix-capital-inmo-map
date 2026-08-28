@@ -40,6 +40,6 @@ test('Contactos diferencia 403 de error técnico',async({page},testInfo)=>{
  await page.unroute('**/functions/v1/fenix-notion-runtime-test/clientes');
  await baseRoutes(page,{status:500});
  await page.reload();
- await expect(page.getByTestId('contact-error')).toContainText('No se pudo leer la fuente canónica de clientes hipotecarios.');
+ await expect(page.getByTestId('contact-error')).toContainText('No se pudo leer la información actualizada de Contactos.');
  await expect(page.getByTestId('contact-forbidden')).toHaveCount(0);
 });
