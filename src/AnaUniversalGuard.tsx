@@ -28,7 +28,8 @@ function scopeFromPath(path:string):Scope{
     expedientes:{type:'expediente',label:'expediente'},contactos:{type:'contacto',label:'contacto'},'contactos-b2b':{type:'contacto_b2b',label:'contacto de inmobiliaria'},inmobiliarias:{type:'inmobiliaria',label:'inmobiliaria'},
     tareas:{type:'tarea',label:'tarea'},agenda:{type:'tarea',label:'agenda'},visitas:{type:'visita',label:'visita'},bancos:{type:'banco',label:'banco'},
     tasaciones:{type:'tasacion',label:'tasación'},firmas:{type:'firma',label:'firma'},documentacion:{type:'documento',label:'documentación'},documentos:{type:'documento',label:'documento'},
-    comunicaciones:{type:'comunicacion',label:'comunicación'},inicio:{type:'general',label:'inicio'}
+    comunicaciones:{type:'comunicacion',label:'comunicación'},notarias:{type:'notaria',label:'notaría'},'registros-propiedad':{type:'registro_propiedad',label:'registro de la propiedad'},
+    economia:{type:'economia',label:'economía'},inicio:{type:'general',label:'inicio'}
   };
   const x=map[root]||{type:root,label:root};return{type:x.type,code:id,label:x.label};
 }
@@ -119,7 +120,7 @@ export default function AnaUniversalGuard(){
         <button className={mode==='help'?'selected':''} disabled={!caps.can_ana_help} onClick={()=>setMode('help')}>Ayúdame</button>
         <button className={mode==='manual'?'selected':''} disabled={!caps.can_manual_execute} onClick={()=>setMode('manual')}>Lo hago yo</button>
       </div>
-      {mode==='help'&&<div className="ana-inline-note" data-testid="ana-canonical-help"><p>Ana te acompaña: revisa primero evidencia y bloqueo; después ejecuta una sola acción y registra el resultado.</p>{canonicalLoaded&&canonicalRules.length>0&&<div><strong>Conocimiento canónico aplicado · {domain}</strong>{canonicalRules.slice(0,3).map(r=><p key={r.id}>• {r.rule}{r.exception?' · Excepción/precedente':''}</p>)}</div>}{canonicalLoaded&&canonicalRules.length===0&&<small>No hay reglas canónicas aprobadas para este dominio.</small>}</div>}
+      {mode==='help'&&<div className="ana-inline-note" data-testid="ana-canonical-help"><p>Ana te acompaña: revisa primero evidencia y bloqueo; después ejecuta una sola acción y registra el resultado.</p>{canonicalLoaded&&canonicalRules.length>0&&<div><strong>Criterios aprendidos por Ana · {domain}</strong>{canonicalRules.slice(0,3).map(r=><p key={r.id}>• {r.rule}</p>)}</div>}{canonicalLoaded&&canonicalRules.length===0&&<small>Ana no tiene todavía criterios aprobados para este ámbito.</small>}</div>}
       {mode==='manual'&&<p className="ana-inline-note">Modo manual activo. Al terminar, registra qué ocurrió y cualquier contexto útil para la próxima gestión.</p>}
       <div className="ana-secondary-actions">
         <button disabled={!caps.can_upload_evidence||!scopeAllowed} onClick={()=>setEvidenceOpen(v=>!v)} title={!scope.code?'Primero guarda el registro para poder relacionar la evidencia.':!scopeAllowed?'Este origen todavía no tiene un scope de carga autorizado.':''}><FileUp size={15}/> Subir evidencia</button>
