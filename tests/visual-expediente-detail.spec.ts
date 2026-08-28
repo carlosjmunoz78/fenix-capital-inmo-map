@@ -23,9 +23,14 @@ const advice={
 };
 const adviceAfterSave={...advice,people:{...advice.people,next_person_data:{person_id:'p3',person_name:'María',field:{key:'sueldo_neto_mensual',label:'Sueldo neto mensual'}},items:[{id:'p1',name:'Jorge',role:'Titular comprador',docs_complete:true,reviewed:true},{id:'p2',name:'Alex',role:'Titular comprador',docs_complete:true,reviewed:true},{id:'p3',name:'María',role:'Avalista',docs_complete:false,reviewed:false,next_missing_field:{key:'sueldo_neto_mensual',label:'Sueldo neto mensual'}}]}};
 const memory={ok:true,status:200,items:[{id:'m1',detail:'El cliente indicó que puede aportar la documentación mañana y pidió que se le recuerde.',memory_class:'Compromiso',source_actor:'FIN-A',created_at:'2026-08-22T10:00:00Z',evidence_count:1}]};
+const financialContext={ok:true,status:200,source:'Base Maestra Belén · Motor financiero CEREBRO',authority:'Belén',approved_count:0,baseline:[
+ {id:'BEL-DOC-001',category:'Documentación',text:'Antes de banco, documentación mínima operativa: vida laboral actualizada, contrato, 3 nóminas, movimientos bancarios, DNI y recibos de préstamos cuando existan.'},
+ {id:'BEL-TAS-001',category:'Tasación',text:'Pre-tasación con nota simple y fotos. Si la expectativa se separa del patrón de zona, bloquear y pedir autorización antes de continuar. La validación técnica final corresponde al banco.',requires_belen:true},
+ {id:'BEL-GOV-001',category:'Gobierno',text:'Un caso aislado no crea una regla general. Las decisiones financieras, legales, contractuales y de firma mantienen validación humana; Belén conserva la autoridad financiera final mientras el aprendizaje no esté suficientemente validado.',requires_belen:true}
+],approved_rules:[],requires_belen_gate:true};
 
 test.describe('Fénix PRE-PROD · ficha maestra de expediente',()=>{
- test('Ana usa datos vivos, comunicación empática, recalcula sin recarga y prepara contacto idempotente',async({page},testInfo)=>{
+ test('Ana usa datos vivos, contexto de Belén, comunicación empática, recalcula sin recarga y prepara contacto idempotente',async({page},testInfo)=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();
   await page.setViewportSize({width:1600,height:900});
   await page.addInitScript(session=>{window.localStorage.setItem('fenix-preprod-auth',JSON.stringify(session));window.localStorage.setItem('fenix-remember-device','true');},fakeSession);
@@ -35,6 +40,7 @@ test.describe('Fénix PRE-PROD · ficha maestra de expediente',()=>{
   await page.route(`**/functions/v1/fenix-notion-runtime-test/expedientes/${id}/compradores`,r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({count:3,titulares:2,avalistas:1,items:[{id:'p1',nombre:'Jorge',rol_operacion:'Titular comprador',documentacion_completa:true,datos_revisados_financiero:true},{id:'p2',nombre:'Alex',rol_operacion:'Titular comprador',documentacion_completa:true,datos_revisados_financiero:true},{id:'p3',nombre:'María',rol_operacion:'Avalista',situacion_laboral:personSaved?'Funcionario':null,documentacion_completa:false,datos_revisados_financiero:false}]})}));
   await page.route('**/functions/v1/fenix-notion-runtime-test/expedientes',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[item]})}));
   await page.route(`**/functions/v1/fenix-expediente-assistant-test/expedientes/${id}/advice`,r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify(personSaved?adviceAfterSave:advice)}));
+  await page.route('**/functions/v1/fenix-belen-financial-context-test/context',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify(financialContext)}));
   await page.route('**/functions/v1/fenix-comprador-action-test/compradores/p3/action',async r=>{personWrites++;personSaved=true;return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,status:200})});});
   let prepCalls=0;
   await page.route(`**/functions/v1/fenix-expediente-assistant-test/expedientes/${id}/prepare-contact`,async r=>{prepCalls++;return r.fulfill({status:prepCalls===1?201:200,contentType:'application/json',body:JSON.stringify({ok:true,status:prepCalls===1?201:200,reused:prepCalls>1,no_op:prepCalls>1,communication_page_id:'comm-page-1',channel:'Llamada',external_sent:false,requires_approval:true})});});
@@ -46,6 +52,10 @@ test.describe('Fénix PRE-PROD · ficha maestra de expediente',()=>{
   await expect(page.getByText('RECORRIDO DEL EXPEDIENTE')).toBeVisible();
   await expect(page.locator('.detail-phase-track small').filter({hasText:'Tasación'})).toBeVisible();
   await expect(page.getByTestId('expediente-ana-runtime')).toBeVisible();
+  await expect(page.getByTestId('expediente-belen-financial-context')).toBeVisible();
+  await expect(page.getByText('Criterios de Belén que Ana está usando',{exact:true})).toBeVisible();
+  await expect(page.getByText(/documentación mínima operativa: vida laboral actualizada/)).toBeVisible();
+  await expect(page.getByText(/Si hay una excepción, una duda financiera material o un criterio bancario que pueda haber cambiado/)).toBeVisible();
   await expect(page.getByRole('heading',{name:'Confirmar documentación pendiente',exact:true})).toBeVisible();
   await expect(page.getByText('Porque falta documentación crítica antes de poder avanzar de fase.')).toBeVisible();
   await expect(page.getByText('3 intervinientes',{exact:true})).toBeVisible();
