@@ -24,7 +24,7 @@ async function boot(page:any){
 }
 
 test.describe('Fénix PRE-PROD · conocimiento aprobado en expediente',()=>{
- test('Ana muestra reglas aprobadas de Hipotecas y no reutiliza precedentes como regla',async({page},testInfo)=>{
+ test('Ana muestra reglas aprobadas, conserva trazabilidad interna y no reutiliza precedentes',async({page},testInfo)=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();
   await boot(page);
   await page.goto(`/expedientes/${id}`);
@@ -32,5 +32,8 @@ test.describe('Fénix PRE-PROD · conocimiento aprobado en expediente',()=>{
   await expect(block).toBeVisible();
   await expect(block).toContainText('Antes de avanzar tras una tasación, validar la documentación financiera pendiente.');
   await expect(block).not.toContainText('Excepción aislada de banco que no debe aplicarse como regla general.');
+  await expect(block).toHaveAttribute('data-knowledge-domain','Hipotecas');
+  await expect(block).toHaveAttribute('data-knowledge-ids','h1');
+  expect(await block.getAttribute('data-knowledge-ids')).not.toContain('h2');
  });
 });
