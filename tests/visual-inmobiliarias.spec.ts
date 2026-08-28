@@ -27,7 +27,7 @@ test.describe('Fénix PRE-PROD · contrato visual Inmobiliarias',()=>{
   await expect(page.getByText('COLABORACIÓN B2B',{exact:true})).toBeVisible();
   await expect(page.getByText('ANA · LECTURA VIVA DE INMOBILIARIAS',{exact:true})).toBeVisible();
   await expect(page.locator('[data-testid="inmo-ana-live-summary"]')).toContainText('1 inmobiliarias con señal explícita de primer contacto pendiente');
-  await expect(page.getByText('Datos vivos',{exact:true})).toBeVisible();
+  await expect(page.getByText('Datos actualizados',{exact:true})).toBeVisible();
   await expect(page.getByText('EN FUENTE',{exact:true})).toBeVisible();
   await expect(page.getByText('ACTIVAS',{exact:true})).toBeVisible();
   await expect(page.getByText('EN PROCESO',{exact:true})).toBeVisible();
