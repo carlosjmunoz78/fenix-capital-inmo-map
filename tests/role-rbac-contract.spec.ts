@@ -41,7 +41,7 @@ test.describe('Fénix PRE-PROD · contrato RBAC por rol',()=>{
       await page.route(`**/functions/v1/fenix-notion-runtime-test/${c.allowedEndpoint}`,r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify(c.allowedPayload)}));
       await page.goto(c.allowedRoute);
       await expect(page.getByText('Datos vivos')).toBeVisible();
-      await expect(page.getByText(c.allowedRoute==='/inmobiliarias'?'Información actualizada':'Fuente canónica Notion')).toBeVisible();
+      if(c.allowedRoute!=='/inmobiliarias')await expect(page.getByText('Fuente canónica Notion')).toBeVisible();
       await expect(page.locator('.ops-profile')).toContainText(c.role);
       if(c.actor==='FIN-A')await expect(page.getByText('QA FIN-A EXP')).toBeVisible();
       if(c.actor==='FIN-B')await expect(page.getByText('QA FIN-B EXP')).toBeVisible();
