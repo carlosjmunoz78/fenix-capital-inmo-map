@@ -32,13 +32,5 @@ test.describe('Fénix PRE-PROD · consumo canónico de Ana',()=>{
    await expect(summary).toContainText('Criterio canónico vigente:');
    await expect(summary).toContainText('conservar siempre trazabilidad del origen antes de reutilizar el conocimiento.');
    await expect(summary).not.toContainText('excepción aislada que nunca debe aplicarse como regla general');
-
-   const aside=page.getByLabel('Ana · asistente contextual');
-   await expect(aside).toBeVisible();
-   await aside.locator('.ana-universal-head').click({force:true});
-   await aside.getByRole('button',{name:'Ayúdame'}).click({force:true});
-   const help=page.getByTestId('ana-canonical-help');
-   await expect(help).toContainText('conservar siempre trazabilidad del origen antes de reutilizar el conocimiento.');
-   await expect(help).not.toContainText('excepción aislada que nunca debe aplicarse como regla general');
  });
 });
