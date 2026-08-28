@@ -54,7 +54,77 @@
 }
 .ops-root[data-theme='dark'] .ops-shared-quick .dir-quick-grid button svg{color:#ff7a34!important}
 
+/* Ana knowledge: premium, readable and writable in both themes. */
+.ana-knowledge-card{
+  transition:background .18s ease,border-color .18s ease,color .18s ease,box-shadow .18s ease;
+}
+.ana-knowledge-input{caret-color:#f36c21!important}
+.ana-knowledge-input:focus{outline:none!important}
+.ops-root[data-theme='dark'] .ana-knowledge-card{
+  background:linear-gradient(145deg,#232326,#1d1d20)!important;
+  color:var(--fenix-dark-text)!important;
+  border-color:#3c3c42!important;
+  box-shadow:0 16px 38px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.025)!important;
+}
+.ops-root[data-theme='dark'] .ana-knowledge-icon{
+  background:linear-gradient(145deg,#3d271f,#2d211d)!important;
+  color:#ff7a42!important;
+  border:1px solid #5a382a!important;
+}
+.ops-root[data-theme='dark'] .ana-knowledge-copy strong,
+.ops-root[data-theme='dark'] .ana-knowledge-preview strong,
+.ops-root[data-theme='dark'] .ana-knowledge-recent strong{color:var(--fenix-dark-text)!important}
+.ops-root[data-theme='dark'] .ana-knowledge-copy span,
+.ops-root[data-theme='dark'] .ana-knowledge-status,
+.ops-root[data-theme='dark'] .ana-knowledge-hint,
+.ops-root[data-theme='dark'] .ana-knowledge-preview small,
+.ops-root[data-theme='dark'] .ana-knowledge-recent-item small{color:var(--fenix-dark-muted)!important}
+.ops-root[data-theme='dark'] .ana-knowledge-history{
+  background:var(--fenix-dark-surface-2)!important;
+  color:#dedee3!important;
+  border-color:var(--fenix-dark-border)!important;
+}
+.ops-root[data-theme='dark'] .ana-knowledge-history:hover{
+  background:#302826!important;
+  color:#ff7a42!important;
+  border-color:#70402c!important;
+}
+.ops-root[data-theme='dark'] .ana-knowledge-input-wrap{
+  background:#19191b!important;
+  border-color:#414147!important;
+  box-shadow:inset 0 1px 8px rgba(0,0,0,.14)!important;
+}
+.ops-root[data-theme='dark'] .ana-knowledge-input-wrap:focus-within{
+  background:#1d1d20!important;
+  border-color:#ff7a42!important;
+  box-shadow:0 0 0 3px rgba(255,122,66,.11),inset 0 1px 8px rgba(0,0,0,.14)!important;
+}
+.ops-root[data-theme='dark'] .ana-knowledge-input{
+  background:transparent!important;
+  color:#fafafd!important;
+  -webkit-text-fill-color:#fafafd!important;
+}
+.ops-root[data-theme='dark'] .ana-knowledge-input::placeholder{color:#85858e!important;-webkit-text-fill-color:#85858e!important}
+.ops-root[data-theme='dark'] .ana-knowledge-preview,
+.ops-root[data-theme='dark'] .ana-knowledge-recent{
+  background:#242125!important;
+  color:var(--fenix-dark-text)!important;
+  border-color:#443a37!important;
+}
+.ops-root[data-theme='dark'] .ana-knowledge-recent-item{border-color:#3d3d43!important}
+.ops-root[data-theme='dark'] .ana-knowledge-submit{
+  background:linear-gradient(135deg,#ff7a34,#ed6220)!important;
+  color:#fff!important;
+  box-shadow:0 8px 22px rgba(243,108,33,.25)!important;
+}
+.ops-root[data-theme='dark'] .ana-knowledge-submit:disabled{box-shadow:none!important}
+
 /* Direction follows the same surface contract. */
 .dir-shell[data-dir-theme='dark']{color-scheme:dark}
 .dir-shell[data-dir-theme='dark'] :where(input,textarea,select){background:#262629!important;color:#f2f2f4!important;border-color:#3a3a3f!important}
 .dir-shell[data-dir-theme='dark'] :where(input,textarea)::placeholder{color:#8f8f97!important}
+.dir-shell[data-dir-theme='dark'] .ana-knowledge-card{background:linear-gradient(145deg,#232326,#1d1d20)!important;color:#f2f2f4!important;border-color:#3c3c42!important;box-shadow:0 16px 38px rgba(0,0,0,.22)!important}
+.dir-shell[data-dir-theme='dark'] .ana-knowledge-input-wrap{background:#19191b!important;border-color:#414147!important}
+.dir-shell[data-dir-theme='dark'] .ana-knowledge-input-wrap:focus-within{background:#1d1d20!important;border-color:#ff7a42!important;box-shadow:0 0 0 3px rgba(255,122,66,.11)!important}
+.dir-shell[data-dir-theme='dark'] .ana-knowledge-input{background:transparent!important;color:#fafafd!important;-webkit-text-fill-color:#fafafd!important}
+.dir-shell[data-dir-theme='dark'] .ana-knowledge-preview,.dir-shell[data-dir-theme='dark'] .ana-knowledge-recent{background:#242125!important;color:#f2f2f4!important;border-color:#443a37!important}
