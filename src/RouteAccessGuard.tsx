@@ -3,7 +3,7 @@ import {useLocation,useNavigate} from 'react-router-dom';
 import {supabase} from './supabase';
 
 const ALWAYS_ALLOWED=new Set(['/','/inicio','/perfil','/ana']);
-const KNOWN_ROOTS=['/expedientes','/contactos','/contactos-b2b','/inmobiliarias','/tasaciones','/agenda','/tareas','/firmas','/documentacion','/financieros','/visitadores','/economia','/informes','/buscar','/bancos','/notificaciones','/notarias','/registros-propiedad','/visitas','/comunicaciones'];
+const KNOWN_ROOTS=['/expedientes','/contactos','/contactos-b2b','/inmobiliarias','/tasaciones','/agenda','/tareas','/firmas','/documentacion','/financieros','/visitadores','/economia','/informes','/buscar','/bancos','/notificaciones','/notarias','/registros-propiedad','/obras-nuevas','/herencias','/visitas','/comunicaciones'];
 
 function normalizePath(value:string){
  const bare=(value||'/').split('?')[0].split('#')[0];
