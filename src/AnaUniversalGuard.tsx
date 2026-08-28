@@ -85,7 +85,7 @@ export default function AnaUniversalGuard(){
     setEvidenceMessage('');setUploading(true);
     const p=await fetchEvidenceApi<Prepare>('/prepare',{method:'POST',body:JSON.stringify({origin_type:scope.type,origin_code:scope.code,evidence_kind:kind,filename:file.name,mime_type:file.type||'application/octet-stream'})});
     if(p.status!==200||!p.data?.upload_id||!p.data.storage_path||!p.data.token){setUploading(false);setEvidenceMessage('No se pudo preparar la carga en este contexto.');return;}
-    if(p.data.max_bytes&&file.size>p.data.max_bytes){setUploading(false);setEvidenceMessage('El archivo supera el tamaño permitido en PRE-PROD.');return;}
+    if(p.data.max_bytes&&file.size>p.data.max_bytes){setUploading(false);setEvidenceMessage('El archivo supera el tamaño permitido.');return;}
     const up=await supabase.storage.from(BUCKET).uploadToSignedUrl(p.data.storage_path,p.data.token,file,file.type?{contentType:file.type}:{});
     if(up.error){setUploading(false);setEvidenceMessage('No se pudo subir el archivo.');return;}
     const done=await fetchEvidenceApi<Complete>('/complete',{method:'POST',body:JSON.stringify({upload_id:p.data.upload_id,title:file.name})});
@@ -123,7 +123,7 @@ export default function AnaUniversalGuard(){
       {mode==='help'&&<div className="ana-inline-note" data-testid="ana-canonical-help"><p>Ana te acompaña: revisa primero evidencia y bloqueo; después ejecuta una sola acción y registra el resultado.</p>{canonicalLoaded&&canonicalRules.length>0&&<div><strong>Criterios aprendidos por Ana · {domain}</strong>{canonicalRules.slice(0,3).map(r=><p key={r.id}>• {r.rule}</p>)}</div>}{canonicalLoaded&&canonicalRules.length===0&&<small>Ana no tiene todavía criterios aprobados para este ámbito.</small>}</div>}
       {mode==='manual'&&<p className="ana-inline-note">Modo manual activo. Al terminar, registra qué ocurrió y cualquier contexto útil para la próxima gestión.</p>}
       <div className="ana-secondary-actions">
-        <button disabled={!caps.can_upload_evidence||!scopeAllowed} onClick={()=>setEvidenceOpen(v=>!v)} title={!scope.code?'Primero guarda el registro para poder relacionar la evidencia.':!scopeAllowed?'Este origen todavía no tiene un scope de carga autorizado.':''}><FileUp size={15}/> Subir evidencia</button>
+        <button disabled={!caps.can_upload_evidence||!scopeAllowed} onClick={()=>setEvidenceOpen(v=>!v)} title={!scope.code?'Primero guarda el registro para poder relacionar la evidencia.':!scopeAllowed?'Esta ficha todavía no admite carga de evidencia.':''}><FileUp size={15}/> Subir evidencia</button>
         <button disabled={!caps.can_correct_ana||!scope.code} onClick={()=>navigate(correctionUrl)} title={!scope.code?'Primero guarda el registro para vincular la corrección a su origen.':''}><MessageSquareWarning size={15}/> Ana se ha equivocado</button>
         <button disabled={!caps.can_view_learning_inbox} onClick={()=>caps.can_view_learning_inbox&&navigate('/ana')} title={caps.learning_inbox_disabled_reason||''}>Correcciones</button>
       </div>
