@@ -62,6 +62,7 @@ import AnaUniversalGuard from './AnaUniversalGuard';
 import AnaInboxAccessGuard from './AnaInboxAccessGuard';
 import AnaKnowledgeReviewGuard from './AnaKnowledgeReviewGuard';
 import ExpedienteAnaRuntimeGuard from './ExpedienteAnaRuntimeGuard';
+import ExpedienteKnowledgeGuard from './ExpedienteKnowledgeGuard';
 import VisitasShell from './VisitasShell';
 import CommunicationsShell from './CommunicationsShell';
 import DetailShellGate from './DetailShellGate';
@@ -110,6 +111,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <AnaKnowledgeReviewGuard />
       <ContextEvidenceUpload />
       <ExpedienteAnaRuntimeGuard />
+      <ExpedienteKnowledgeGuard />
       <B2BContactCreateLauncher />
       <App />
       <RoleHomeShell />
