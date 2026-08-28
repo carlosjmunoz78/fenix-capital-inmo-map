@@ -11,15 +11,20 @@ const rows=[
 ];
 
 test.describe('Fénix PRE-PROD · contrato visual Expedientes',()=>{
- test('Expedientes mantiene patrón maestro, datos canónicos, scroll acotado, sticky y ordenación por cabecera',async({page},testInfo)=>{
+ test('Expedientes mantiene Ana, estadísticas, gráficos, datos canónicos, scroll acotado, sticky y ordenación por cabecera',async({page},testInfo)=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();
   await page.setViewportSize({width:1600,height:900});
   await page.addInitScript(session=>{window.localStorage.setItem('fenix-preprod-auth',JSON.stringify(session));window.localStorage.setItem('fenix-remember-device','true');},fakeSession);
   await page.route('**/functions/v1/fenix-app-gateway-test/**',async r=>{const u=r.request().url();if(u.endsWith('/session/context'))return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({actor_code:'DIR-TEST',role:'Direccion'})});if(u.endsWith('/navigation'))return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[{label:'Inicio',route:'/inicio'},{label:'Expedientes',route:'/expedientes'},{label:'Bancos',route:'/bancos'},{label:'Contactos',route:'/contactos'},{label:'Inmobiliarias',route:'/inmobiliarias'},{label:'Tasaciones',route:'/tasaciones'},{label:'Firmas',route:'/firmas'},{label:'Documentación',route:'/documentacion'},{label:'Agenda',route:'/agenda'}]})});return r.fulfill({status:404,body:'{}'});});
   await page.route('**/functions/v1/fenix-notion-runtime-test/expedientes',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:rows})}));
   await page.goto('/expedientes');
+  await expect(page.locator('[data-testid="expedientes-ana-hero"]')).toBeVisible();
+  await expect(page.getByText('ANA · EXPEDIENTES',{exact:true})).toBeVisible();
   await expect(page.getByRole('heading',{name:'Expedientes',exact:true})).toBeVisible();
   await expect(page.getByText('Fuente canónica Notion')).toBeVisible();
+  await expect(page.locator('[data-testid="expedientes-live"]')).toBeVisible();
+  await expect(page.getByText('DISTRIBUCIÓN POR FASE',{exact:true})).toBeVisible();
+  await expect(page.locator('.exp-filter-card')).toBeVisible();
   await expect(page.getByText('2 registros')).toBeVisible();
   await expect(page.getByText('Expediente QA 1')).toBeVisible();
   await expect(page.locator('.ops-side')).toBeVisible();
