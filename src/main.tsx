@@ -63,6 +63,7 @@ import AnaInboxAccessGuard from './AnaInboxAccessGuard';
 import AnaKnowledgeReviewGuard from './AnaKnowledgeReviewGuard';
 import ExpedienteAnaRuntimeGuard from './ExpedienteAnaRuntimeGuard';
 import ExpedienteBelenFinancialGuard from './ExpedienteBelenFinancialGuard';
+import ExpedienteBankRankingGuard from './ExpedienteBankRankingGuard';
 import FinancialModuleBelenGuard from './FinancialModuleBelenGuard';
 import ExpedienteKnowledgeGuard from './ExpedienteKnowledgeGuard';
 import VisitasShell from './VisitasShell';
@@ -114,6 +115,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <ContextEvidenceUpload />
       <ExpedienteAnaRuntimeGuard />
       <ExpedienteBelenFinancialGuard />
+      <ExpedienteBankRankingGuard />
       <FinancialModuleBelenGuard />
       <ExpedienteKnowledgeGuard />
       <B2BContactCreateLauncher />
