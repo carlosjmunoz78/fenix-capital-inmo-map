@@ -37,7 +37,7 @@ test.describe('Fénix PRE-PROD · contrato visual Inmobiliarias',()=>{
   await expect(page.locator('[data-testid="inmo-locality-chart"] .inmo-bar-row')).toHaveCount(2);
   await expect(page.locator('[data-testid="inmo-state-chart"] .inmo-bar-row')).toHaveCount(3);
   await expect(page.getByText('ADAIX LUCENA',{exact:true})).toBeVisible();
-  await expect(page.getByText('Fuente canónica Notion',{exact:true})).toBeVisible();
+  await expect(page.getByText('Información actualizada',{exact:true})).toBeVisible();
   await expect(page.getByText(/\bPRO\b/)).toHaveCount(0);
   const correction=page.locator('.inmo-correct');
   const correctionBox=await correction.boundingBox();
