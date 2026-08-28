@@ -40,6 +40,6 @@ test('Inmobiliarias diferencia 403 de error técnico',async({page},testInfo)=>{
  await page.unroute('**/functions/v1/fenix-notion-runtime-test/inmobiliarias');
  await baseRoutes(page,{status:500});
  await page.reload();
- await expect(page.getByTestId('inmo-error')).toContainText('No se pudo leer la fuente canónica de Inmobiliarias.');
+ await expect(page.getByTestId('inmo-error')).toContainText('No se pudo leer la información actualizada de Inmobiliarias.');
  await expect(page.getByTestId('inmo-forbidden')).toHaveCount(0);
 });
