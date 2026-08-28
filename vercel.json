@@ -4,10 +4,7 @@
   "outputDirectory": "dist",
   "framework": "vite",
   "git": {
-    "deploymentEnabled": {
-      "*": false,
-      "preprod-app-phase1": true
-    }
+    "deploymentEnabled": false
   },
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
