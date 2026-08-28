@@ -99,6 +99,44 @@ jobs:
           cp dist-pages/index.html dist-pages/404.html
           touch dist-pages/.nojekyll
 
+          # Vercel is currently connected to gh-pages and invokes `npm run build`.
+          # Keep the branch as a static snapshot, but make that build deterministic
+          # instead of failing because package.json is absent.
+          cat > dist-pages/package.json <<'JSON'
+          {
+            "name": "fenix-capital-preprod-static",
+            "private": true,
+            "version": "1.0.0",
+            "scripts": {
+              "build": "node build-static.cjs"
+            }
+          }
+          JSON
+
+          cat > dist-pages/build-static.cjs <<'JS'
+          const fs = require('fs');
+          const path = require('path');
+
+          const root = process.cwd();
+          const out = path.join(root, 'dist');
+          fs.rmSync(out, { recursive: true, force: true });
+          fs.mkdirSync(out, { recursive: true });
+
+          const skip = new Set(['dist', '.git', 'node_modules', 'package.json', 'package-lock.json', 'build-static.cjs', 'vercel.json']);
+          for (const name of fs.readdirSync(root)) {
+            if (skip.has(name)) continue;
+            fs.cpSync(path.join(root, name), path.join(out, name), { recursive: true });
+          }
+          JS
+
+          cat > dist-pages/vercel.json <<'JSON'
+          {
+            "buildCommand": "npm run build",
+            "outputDirectory": "dist",
+            "cleanUrls": false
+          }
+          JSON
+
       - name: Publish validated PRE-PROD snapshot to gh-pages
         if: github.event_name == 'push' && github.ref == 'refs/heads/preprod-app-phase1'
         env:
