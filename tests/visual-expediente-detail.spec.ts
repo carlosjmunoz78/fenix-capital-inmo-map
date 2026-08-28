@@ -25,7 +25,7 @@ const adviceAfterSave={...advice,people:{...advice.people,next_person_data:{pers
 const memory={ok:true,status:200,items:[{id:'m1',detail:'El cliente indicó que puede aportar la documentación mañana y pidió que se le recuerde.',memory_class:'Compromiso',source_actor:'FIN-A',created_at:'2026-08-22T10:00:00Z',evidence_count:1}]};
 
 test.describe('Fénix PRE-PROD · ficha maestra de expediente',()=>{
- test('Ana usa datos vivos, apunta por person_id, recalcula sin recarga y prepara contacto idempotente',async({page},testInfo)=>{
+ test('Ana usa datos vivos, comunicación empática, recalcula sin recarga y prepara contacto idempotente',async({page},testInfo)=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();
   await page.setViewportSize({width:1600,height:900});
   await page.addInitScript(session=>{window.localStorage.setItem('fenix-preprod-auth',JSON.stringify(session));window.localStorage.setItem('fenix-remember-device','true');},fakeSession);
@@ -71,14 +71,17 @@ test.describe('Fénix PRE-PROD · ficha maestra de expediente',()=>{
   const doAna=page.getByRole('button',{name:'Que lo haga Ana',exact:true});
   await expect(doAna).toBeEnabled();
   await doAna.click();
-  await expect(page.getByText('Ana ha preparado la comunicación en Fénix Uno. No se ha enviado: queda pendiente del gate correspondiente.',{exact:true})).toBeVisible();
+  await expect(page.getByText('Ana ha preparado la comunicación en Fénix Uno. No se ha enviado: queda pendiente de revisión.',{exact:true})).toBeVisible();
   await doAna.click();
   await expect(page.getByText('Ana ya había preparado esta comunicación; no la he duplicado.',{exact:true})).toBeVisible();
   expect(prepCalls).toBe(2);
   await page.getByRole('button',{name:'WhatsApp',exact:true}).click();
-  await expect(page.getByText('Hola, Jorge y Alex. Para avanzar con vuestro expediente necesitamos confirmar la documentación pendiente.')).toBeVisible();
+  await expect(page.getByText(/Espero que estés bien\. Para seguir avanzando con tu expediente/)).toBeVisible();
+  await expect(page.getByText(/Si necesitas ayuda o ahora no te viene bien/)).toBeVisible();
   await page.getByRole('button',{name:'Email',exact:true}).click();
   await expect(page.getByText('Fénix Capital · documentación pendiente',{exact:true})).toBeVisible();
+  await expect(page.getByText(/Queremos que el proceso te resulte lo más claro y sencillo posible/)).toBeVisible();
+  await expect(page.getByText(/dínoslo y buscamos contigo la mejor forma de resolverlo/)).toBeVisible();
   await expect(page.getByText(/\bPRO\b/)).toHaveCount(0);
   const shot=await page.screenshot({fullPage:true});
   await testInfo.attach('ficha-expediente-master-1600',{body:shot,contentType:'image/png'});
