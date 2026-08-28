@@ -39,7 +39,13 @@ export default function ExpedienteKnowledgeGuard(){
 
  if(!active||!target||rules.length===0)return null;
  return createPortal(
-  <section className="exp-ana-memory" data-testid="expediente-ana-learned-criteria" aria-label="Criterios aprendidos por Ana">
+  <section
+   className="exp-ana-memory"
+   data-testid="expediente-ana-learned-criteria"
+   data-knowledge-domain="Hipotecas"
+   data-knowledge-ids={rules.map(rule=>rule.id).join(',')}
+   aria-label="Criterios aprendidos por Ana"
+  >
    <div className="exp-ana-memory-head"><Brain size={16}/><strong>Criterios aprendidos por Ana</strong></div>
    {rules.map(rule=><article key={rule.id}><p>{rule.rule}</p></article>)}
   </section>,
