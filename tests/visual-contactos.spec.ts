@@ -11,7 +11,7 @@ const items=[
 ];
 
 test.describe('Fénix PRE-PROD · contrato visual Contactos',()=>{
- test('Contactos usa shell específico, datos canónicos, sticky y ordenación por cabecera',async({page},testInfo)=>{
+ test('Contactos usa patrón maestro con Ana, gráficos, filtros prefijados, sticky y ordenación',async({page},testInfo)=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();
   await page.setViewportSize({width:1600,height:900});
   await page.addInitScript(session=>{window.localStorage.setItem('fenix-preprod-auth',JSON.stringify(session));window.localStorage.setItem('fenix-remember-device','true');},fakeSession);
@@ -20,12 +20,14 @@ test.describe('Fénix PRE-PROD · contrato visual Contactos',()=>{
   await page.route('**/functions/v1/fenix-notion-runtime-test/clientes',r=>{hits++;return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({source:'notion_canonical',items})});});
   await page.goto('/contactos');
   await expect(page.getByRole('heading',{name:'Contactos',exact:true})).toBeVisible();
-  await expect(page.getByText('ANA · EN ESTA PANTALLA')).toBeVisible();
-  await expect(page.getByText('Datos vivos')).toBeVisible();
-  await expect(page.getByText('Fuente canónica Notion')).toBeVisible();
+  await expect(page.getByText('ANA · CONTACTOS')).toBeVisible();
+  await expect(page.getByText('Datos actualizados')).toBeVisible();
+  await expect(page.getByTestId('contactos-preset-search')).toBeVisible();
+  await expect(page.getByText('DISTRIBUCIÓN POR ESTADO')).toBeVisible();
   await expect(page.getByText('CON SEGUIMIENTO')).toBeVisible();
   await expect(page.getByText('FORMALIZADOS')).toBeVisible();
   await expect(page.getByText('SIN PRÓXIMA ACCIÓN')).toBeVisible();
+  await expect(page.getByRole('button',{name:'+ Nuevo contacto'})).toBeVisible();
   await expect(page.getByText('CARMelo')).toBeVisible();
   expect(hits).toBe(1);
   await expect(page.getByText(/\bPRO\b/)).toHaveCount(0);
