@@ -27,6 +27,7 @@ import RoleHomeShell from './RoleHomeShell';
 import ProfileShell from './ProfileShell';
 import OperationalShellGate from './OperationalShellGate';
 import BancosShell from './BancosShell';
+import BankCreateShell from './BankCreateShell';
 import BancoDetailShell from './BancoDetailShell';
 import BankContactsShell from './BankContactsShell';
 import BankContactDetailShell from './BankContactDetailShell';
@@ -126,6 +127,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <ProfileShell />
       <OperationalShellGate />
       <BancosShell />
+      <BankCreateShell />
       <BancoDetailShell />
       <BankContactsShell />
       <BankContactDetailShell />
