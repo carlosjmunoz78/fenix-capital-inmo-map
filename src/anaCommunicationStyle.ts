@@ -37,7 +37,7 @@ function clean(v:string|undefined|null){return String(v??'').trim().replace(/[.]
 function lowerFirst(v:string){return v?`${v.charAt(0).toLowerCase()}${v.slice(1)}`:'';}
 function firstName(v:string){return clean(v).split(/\s+/)[0]||'Hola';}
 
-export function applyAnaRelationalStyle(input:AnaStyleInput):AnaStyleInput{
+export function applyAnaRelationalStyle<T extends AnaStyleInput>(input:T):T{
  const action=clean(input.action);
  if(!action)return input;
  const who=firstName(input.name||'');
@@ -63,5 +63,5 @@ export function applyAnaRelationalStyle(input:AnaStyleInput):AnaStyleInput{
   ],
   resultado_esperado:`Entender la situación real, resolver fricción si existe y acordar un único siguiente paso sobre: ${action}.`
  }:current.llamada;
- return {...input,channels:{...current,llamada,whatsapp,email}};
+ return {...input,channels:{...current,llamada,whatsapp,email}} as T;
 }
