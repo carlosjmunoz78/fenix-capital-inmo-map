@@ -28,9 +28,14 @@ const financialContext={ok:true,status:200,source:'Base Maestra Belén · Motor 
  {id:'BEL-TAS-001',category:'Tasación',text:'Pre-tasación con nota simple y fotos. Si la expectativa se separa del patrón de zona, bloquear y pedir autorización antes de continuar. La validación técnica final corresponde al banco.',requires_belen:true},
  {id:'BEL-GOV-001',category:'Gobierno',text:'Un caso aislado no crea una regla general. Las decisiones financieras, legales, contractuales y de firma mantienen validación humana; Belén conserva la autoridad financiera final mientras el aprendizaje no esté suficientemente validado.',requires_belen:true}
 ],approved_rules:[],requires_belen_gate:true};
+const bankRanking={ok:true,status:200,ranking:[
+ {bank_id:'bank-1',bank:'Banco Uno',score:91,reasons:['Tiene financiación alta informada.','Funcionario figura como perfil fuerte.'],risks:[],confidence:90},
+ {bank_id:'bank-2',bank:'Banco Dos',score:78,reasons:['LTV habitual 95% compatible con el porcentaje solicitado.'],risks:['Condiciones sin revisión reciente; revalidar antes de enviar.'],confidence:75},
+ {bank_id:'bank-3',bank:'Banco Tres',score:66,reasons:['Admite temporales.'],risks:['No consta financiación 100 %.'],confidence:65}
+],policy:'Orientación por encaje con datos vivos. No equivale a aprobación bancaria. Belén mantiene la decisión financiera final.',requires_belen_gate:true};
 
 test.describe('Fénix PRE-PROD · ficha maestra de expediente',()=>{
- test('Ana usa datos vivos, contexto de Belén, comunicación empática, recalcula sin recarga y prepara contacto idempotente',async({page},testInfo)=>{
+ test('Ana usa datos vivos, contexto de Belén, ranking bancario, comunicación empática, recalcula sin recarga y prepara contacto idempotente',async({page},testInfo)=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();
   await page.setViewportSize({width:1600,height:900});
   await page.addInitScript(session=>{window.localStorage.setItem('fenix-preprod-auth',JSON.stringify(session));window.localStorage.setItem('fenix-remember-device','true');},fakeSession);
@@ -41,6 +46,7 @@ test.describe('Fénix PRE-PROD · ficha maestra de expediente',()=>{
   await page.route('**/functions/v1/fenix-notion-runtime-test/expedientes',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[item]})}));
   await page.route(`**/functions/v1/fenix-expediente-assistant-test/expedientes/${id}/advice`,r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify(personSaved?adviceAfterSave:advice)}));
   await page.route('**/functions/v1/fenix-belen-financial-context-test/context',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify(financialContext)}));
+  await page.route(`**/functions/v1/fenix-bank-ranking-test/expedientes/${id}/ranking`,r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify(bankRanking)}));
   await page.route('**/functions/v1/fenix-comprador-action-test/compradores/p3/action',async r=>{personWrites++;personSaved=true;return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,status:200})});});
   let prepCalls=0;
   await page.route(`**/functions/v1/fenix-expediente-assistant-test/expedientes/${id}/prepare-contact`,async r=>{prepCalls++;return r.fulfill({status:prepCalls===1?201:200,contentType:'application/json',body:JSON.stringify({ok:true,status:prepCalls===1?201:200,reused:prepCalls>1,no_op:prepCalls>1,communication_page_id:'comm-page-1',channel:'Llamada',external_sent:false,requires_approval:true})});});
@@ -56,6 +62,11 @@ test.describe('Fénix PRE-PROD · ficha maestra de expediente',()=>{
   await expect(page.getByText('Criterios de Belén que Ana está usando',{exact:true})).toBeVisible();
   await expect(page.getByText(/documentación mínima operativa: vida laboral actualizada/)).toBeVisible();
   await expect(page.getByText(/Si hay una excepción, una duda financiera material o un criterio bancario que pueda haber cambiado/)).toBeVisible();
+  await expect(page.getByTestId('expediente-bank-ranking')).toBeVisible();
+  await expect(page.getByText('Bancos con mejor encaje para este expediente',{exact:true})).toBeVisible();
+  await expect(page.getByText('Banco Uno',{exact:true})).toBeVisible();
+  await expect(page.getByText(/OPCIÓN 1 · ENCAJE 91\/100/)).toBeVisible();
+  await expect(page.getByText(/No es una aprobación del banco y la estrategia financiera final sigue pasando por Belén/)).toBeVisible();
   await expect(page.getByRole('heading',{name:'Confirmar documentación pendiente',exact:true})).toBeVisible();
   await expect(page.getByText('Porque falta documentación crítica antes de poder avanzar de fase.')).toBeVisible();
   await expect(page.getByText('3 intervinientes',{exact:true})).toBeVisible();
