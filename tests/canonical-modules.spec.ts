@@ -41,7 +41,8 @@ test.describe('Fénix PRE-PROD · módulos canónicos',()=>{
       await page.route(`**/functions/v1/fenix-notion-runtime-test/${endpoint}`,r=>{hits++;return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify(payload)});});
       await page.goto(route);
       await expect(page.getByText('Datos vivos')).toBeVisible();
-      await expect(page.getByText(route==='/inmobiliarias'?'Información actualizada':'Fuente canónica Notion')).toBeVisible();
+      if(route!=='/inmobiliarias')await expect(page.getByText('Fuente canónica Notion')).toBeVisible();
+      else await expect(page.getByText('QA INMO')).toBeVisible();
       expect(hits).toBe(1);
     });
   }
