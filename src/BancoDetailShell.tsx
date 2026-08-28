@@ -19,7 +19,7 @@ function norm(v:string){return v.toLowerCase().normalize('NFD').replace(/[\u0300
 const fallbackNav:NavItem[]=[{label:'Inicio',route:'/inicio'}];
 
 export default function BancoDetailShell(){
- const location=useLocation(),navigate=useNavigate();const match=location.pathname.match(/^\/bancos\/([^/]+)$/);const rawId=match?.[1]||'';const id=decodeURIComponent(rawId);const active=Boolean(match&&id&&id!=='contactos');
+ const location=useLocation(),navigate=useNavigate();const match=location.pathname.match(/^\/bancos\/([^/]+)$/);const rawId=match?.[1]||'';const id=decodeURIComponent(rawId);const active=Boolean(match&&id&&id!=='contactos'&&id!=='nuevo');
  const[ready,setReady]=useState(false),[logged,setLogged]=useState(false),[theme,setTheme]=useState<Theme>(()=>(sessionStorage.getItem('fenix-theme') as Theme)||'light'),[ctx,setCtx]=useState<Ctx|null>(null),[nav,setNav]=useState<NavItem[]>([]),[banks,setBanks]=useState<Row[]>([]),[contacts,setContacts]=useState<Row[]>([]),[status,setStatus]=useState<number|null>(null),[query,setQuery]=useState('');
  useEffect(()=>{let alive=true;supabase.auth.getSession().then(({data})=>{if(alive){setLogged(Boolean(data.session));setReady(true)}});const{data:{subscription}}=supabase.auth.onAuthStateChange((_e,s)=>{setLogged(Boolean(s));setReady(true)});return()=>{alive=false;subscription.unsubscribe()};},[]);
  useEffect(()=>{document.documentElement.dataset.theme=theme;sessionStorage.setItem('fenix-theme',theme)},[theme]);
@@ -27,22 +27,9 @@ export default function BancoDetailShell(){
  const bank=useMemo(()=>banks.find(r=>{const rid=first(r,['id','banco_code','code','codigo']);const name=first(r,['nombre','name','banco','entidad']);return rid===id||norm(name)===norm(id);}),[banks,id]);
  const bankName=first(bank,['nombre','name','banco','entidad'])||id;
  const relatedContacts=useMemo(()=>contacts.filter(r=>{const values=['banco','entidad','banco_nombre','nombre_banco','banco_id','id_banco'].map(k=>first(r,[k])).filter(Boolean).map(norm);return values.includes(norm(bankName))||values.includes(norm(id));}),[contacts,bankName,id]);
- const fields=[
-  ['Perfil de clientes',first(bank,['perfil','perfil_clientes','descripcion','criterio'])],
-  ['100%',boolText(bank,['admite_100','financiacion_100','cien_por_cien'])],
-  ['90%',boolText(bank,['admite_90','financiacion_90','noventa_por_cien'])],
-  ['80%',boolText(bank,['admite_80','financiacion_80','ochenta_por_cien'])],
-  ['Doble garantía',boolText(bank,['doble_garantia','admite_doble_garantia'])],
-  ['Tipo fijo',first(bank,['tipo_fijo','fijo','condiciones_fijo'])||'No informado'],
-  ['Tipo mixto',first(bank,['tipo_mixto','mixto','condiciones_mixto'])||'No informado'],
-  ['Tipo variable',first(bank,['tipo_variable','variable','condiciones_variable'])||'No informado'],
-  ['Bonificaciones',first(bank,['bonificaciones','vinculaciones','vinculacion'])||'No informado'],
-  ['Tasadoras',first(bank,['tasadoras','tasadoras_aceptadas'])||'No informado'],
-  ['No quiere',first(bank,['no_quiere','exclusiones','no_admite'])||'No informado']
- ] as const;
+ const fields=[['Perfil de clientes',first(bank,['perfil','perfil_clientes','descripcion','criterio'])],['100%',boolText(bank,['admite_100','financiacion_100','cien_por_cien'])],['90%',boolText(bank,['admite_90','financiacion_90','noventa_por_cien'])],['80%',boolText(bank,['admite_80','financiacion_80','ochenta_por_cien'])],['Doble garantía',boolText(bank,['doble_garantia','admite_doble_garantia'])],['Tipo fijo',first(bank,['tipo_fijo','fijo','condiciones_fijo'])||'No informado'],['Tipo mixto',first(bank,['tipo_mixto','mixto','condiciones_mixto'])||'No informado'],['Tipo variable',first(bank,['tipo_variable','variable','condiciones_variable'])||'No informado'],['Bonificaciones',first(bank,['bonificaciones','vinculaciones','vinculacion'])||'No informado'],['Tasadoras',first(bank,['tasadoras','tasadoras_aceptadas'])||'No informado'],['No quiere',first(bank,['no_quiere','exclusiones','no_admite'])||'No informado']] as const;
  if(!active||!ready||!logged)return null;
- async function logout(){await supabase.auth.signOut();window.location.href=import.meta.env.BASE_URL;}
- function submitSearch(){const q=query.trim();navigate(q?`/buscar?q=${encodeURIComponent(q)}`:'/buscar');}
+ async function logout(){await supabase.auth.signOut();window.location.href=import.meta.env.BASE_URL;}function submitSearch(){const q=query.trim();navigate(q?`/buscar?q=${encodeURIComponent(q)}`:'/buscar');}
  const effectiveNav=nav.length?nav:fallbackNav;
  return <OperationalShellFrame className="banco-detail-root" theme={theme} navigation={effectiveNav} activeRoute="/bancos" anaSubtitle="Compara condiciones solo con datos autorizados." query={query} onQueryChange={setQuery} searchPlaceholder="Buscar expediente, cliente, banco..." searchActionLabel="Buscar" onSearchAction={submitSearch} name={ctx?.role||'Usuario'} role="" initials={(ctx?.role||'U').slice(0,2).toUpperCase()} onToggleTheme={()=>setTheme(theme==='light'?'dark':'light')} onLogout={logout} contentClassName="banco-detail-content">
   <section className="banco-detail-ana"><div className="banco-detail-ana-photo"><img src={anaVertical} alt="Ana"/></div><div><span>ANA · EN ESTA PANTALLA</span><h2>¿Qué quieres comprobar de esta entidad?</h2><p>Te enseño únicamente criterios disponibles en la fuente autorizada. Lo que no conste se marca como no informado.</p><div className="banco-detail-actions"><button onClick={()=>document.getElementById('criterios-banco')?.scrollIntoView({behavior:'smooth'})}>1 <strong>Revisar criterios</strong><small>Ver condiciones →</small></button><button onClick={()=>document.getElementById('contactos-banco')?.scrollIntoView({behavior:'smooth'})}>2 <strong>Ver contactos</strong><small>Ir a personas →</small></button><button onClick={()=>navigate(`/ana?resource=banco&banco=${encodeURIComponent(bankName)}`)}>3 <strong>Comparar con Ana</strong><small>Preparar análisis →</small></button></div></div></section>
