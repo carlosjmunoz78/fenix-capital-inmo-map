@@ -29,7 +29,7 @@ test.describe('Fénix PRE-PROD · consumo canónico de Ana',()=>{
    await page.goto('/inmobiliarias');
    const summary=page.getByTestId('inmo-ana-live-summary');
    await expect(summary).toBeVisible();
-   await expect(summary).toContainText('Criterio canónico vigente:');
+   await expect(summary).toContainText('Criterio aprendido por Ana:');
    await expect(summary).toContainText('conservar siempre trazabilidad del origen antes de reutilizar el conocimiento.');
    await expect(summary).not.toContainText('excepción aislada que nunca debe aplicarse como regla general');
  });
