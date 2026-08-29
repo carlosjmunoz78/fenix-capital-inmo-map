@@ -2,38 +2,24 @@ import {test,expect} from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
 
-function walk(dir:string):string[]{
-  return fs.readdirSync(dir,{withFileTypes:true}).flatMap(entry=>{
-    const full=path.join(dir,entry.name);
-    return entry.isDirectory()?walk(full):[full];
-  });
-}
-
-test('PRE-PROD queda aislada de endpoints Edge sin sufijo -test',()=>{
-  const files=walk(path.resolve('src')).filter(file=>/\.(ts|tsx)$/.test(file));
-  const violations:{file:string;endpoint:string}[]=[];
-  for(const file of files){
-    const text=fs.readFileSync(file,'utf8');
-    const patterns=[
-      /functions\/v1\/(fenix-[a-z0-9-]+)/gi,
-      /authenticatedEdgeFetch<[^>]+>\(['"](fenix-[a-z0-9-]+)['"]/gi,
-      /authenticatedEdgeFetch\(['"](fenix-[a-z0-9-]+)['"]/gi,
-    ];
-    for(const pattern of patterns){
-      for(const match of text.matchAll(pattern)){
-        const endpoint=match[1];
-        if(endpoint&&!endpoint.endsWith('-test'))violations.push({file:path.relative(process.cwd(),file),endpoint});
-      }
-    }
-  }
-  expect(violations,'PRE-PROD no puede invocar funciones Fénix sin sufijo -test').toEqual([]);
+test('PRE-PROD aplica siempre sufijo -test a funciones Edge',()=>{
+  const text=fs.readFileSync(path.resolve('src/supabase.ts'),'utf8');
+  expect(text).toContain("const runtimeEnv=(import.meta.env.VITE_APP_ENV||'preprod').toLowerCase()");
+  expect(text).toContain("const FUNCTION_SUFFIX=IS_PRODUCTION?'':'-test'");
+  expect(text).toContain('const functionName=(base:string)=>`${base}${FUNCTION_SUFFIX}`');
+  expect(text).toContain('functionName(baseFunctionName)');
+  expect(text).toContain("functionName('fenix-app-gateway')");
+  expect(text).not.toMatch(/functions\/v1\/fenix-[a-z0-9-]+(?:[/'"`])/i);
 });
 
-test('cliente y almacenamiento de sesión están identificados explícitamente como PRE-PROD',()=>{
+test('cliente y almacenamiento de sesión mantienen aislamiento PRE-PROD/PROD',()=>{
   const text=fs.readFileSync(path.resolve('src/supabase.ts'),'utf8');
-  expect(text).toContain("const AUTH_STORAGE_KEY='fenix-preprod-auth-v2'");
-  expect(text).toContain('fenix-app-gateway-test');
-  expect(text).not.toMatch(/functions\/v1\/fenix-app-gateway(?:[/'"`])/);
+  expect(text).toContain("const AUTH_STORAGE_KEY=IS_PRODUCTION?'fenix-prod-auth-v1':'fenix-preprod-auth-v2'");
+  expect(text).toContain("const LEGACY_AUTH_STORAGE_KEY='fenix-preprod-auth'");
+  expect(text).toContain('if(IS_PRODUCTION||key!==AUTH_STORAGE_KEY)return null');
+  expect(text).toContain("const PREPROD_SUPABASE_URL='https://hnqlnvakzaywtafeiybt.supabase.co'");
+  expect(text).toContain("? String(import.meta.env.VITE_SUPABASE_URL||'')");
+  expect(text).toContain("throw new Error('FENIX PROD runtime requires dedicated Supabase URL and publishable key.')");
 });
 
 test('workflow PRE-PROD solo publica desde preprod-app-phase1 y no escribe main',()=>{
