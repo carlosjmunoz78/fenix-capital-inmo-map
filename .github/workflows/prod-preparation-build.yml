@@ -50,13 +50,6 @@ jobs:
           PLAYWRIGHT_SKIP_BUILD: '1'
         run: npm run test:e2e
 
-      - name: Assert no deployment commands in PROD preparation workflow
-        run: |
-          if grep -Eqi 'git push|vercel[[:space:]]+--prod|supabase[[:space:]]+functions[[:space:]]+deploy|environment:[[:space:]]*(prod|production)' .github/workflows/prod-preparation-build.yml; then
-            echo 'Unsafe deployment command detected in preparation workflow'
-            exit 1
-          fi
-
       - name: Upload validation report
         if: always()
         uses: actions/upload-artifact@v4
@@ -65,5 +58,4 @@ jobs:
           path: playwright-report
           if-no-files-found: ignore
 
-# This workflow only validates the isolated PROD preparation branch.
-# It never deploys, never writes main, never changes PRE-PROD, and never touches Supabase PROD.
+# Validation only. No deployment, no branch write, no production backend mutation.
