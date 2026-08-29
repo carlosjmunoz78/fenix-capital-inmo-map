@@ -16,6 +16,13 @@ async function boot(page:any){
 async function labels(page:any,selector:string){return page.locator(selector).getByRole('button').evaluateAll((nodes:any[])=>nodes.map(n=>(n.textContent||'').trim()).filter(Boolean));}
 async function waitFullMenu(page:any,selector:string){await expect(page.locator(selector).getByRole('button',{name:'Inmobiliarias',exact:true})).toBeVisible();await expect(page.locator(selector).getByRole('button',{name:'Notificaciones',exact:true})).toBeVisible();}
 
+async function expectUnifiedAnaCorrection(page:any){
+ const block=page.getByTestId('ana-top-correction');
+ await expect(block).toBeVisible();
+ await expect(block.getByRole('heading',{name:'¿En qué me equivoco?',exact:true})).toBeVisible();
+ await expect(block.getByLabel('Corrección para Ana')).toBeVisible();
+}
+
 test('Dirección conserva exactamente el mismo menú aprobado en Inicio, Inmobiliarias, Informes, Comunicaciones y Ana',async({page},testInfo)=>{
  if(!testInfo.project.name.includes('desktop'))test.skip();
  await boot(page);
@@ -27,20 +34,23 @@ test('Dirección conserva exactamente el mismo menú aprobado en Inicio, Inmobil
  await waitFullMenu(page,'.ops-side nav');
  const inmo=await labels(page,'.ops-side nav');
  expect(inmo).toEqual(items.map(x=>x.label));
+ await expectUnifiedAnaCorrection(page);
  await page.goto('/informes');
  await waitFullMenu(page,'.ops-side nav');
  const informes=await labels(page,'.ops-side nav');
  expect(informes).toEqual(items.map(x=>x.label));
  await expect(page.locator('.informes-root .ops-top')).toBeVisible();
  await expect(page.locator('.informes-ana-hero')).toBeVisible();
- await expect(page.locator('.informes-correct textarea')).toBeVisible();
+ await expectUnifiedAnaCorrection(page);
+ await expect(page.locator('.informes-correct')).toBeHidden();
  await page.goto('/comunicaciones');
  await waitFullMenu(page,'.ops-side nav');
  const comunicaciones=await labels(page,'.ops-side nav');
  expect(comunicaciones).toEqual(items.map(x=>x.label));
  await expect(page.locator('.comm-root .ops-top')).toBeVisible();
  await expect(page.locator('.comm-ana-hero')).toBeVisible();
- await expect(page.locator('.comm-correct textarea')).toBeVisible();
+ await expectUnifiedAnaCorrection(page);
+ await expect(page.locator('.comm-correct')).toBeHidden();
  await page.goto('/ana');
  await waitFullMenu(page,'.ops-side nav');
  const ana=await labels(page,'.ops-side nav');
