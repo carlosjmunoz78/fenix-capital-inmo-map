@@ -101,12 +101,14 @@ import DirectionAnaInsight from './DirectionAnaInsight';
 import DirectionExecutiveOverviewGuard from './DirectionExecutiveOverviewGuard';
 import DirectionAnaUrgentGuard from './DirectionAnaUrgentGuard';
 import AnaKnowledgeBlock from './AnaKnowledgeBlock';
+import OperationalUniformityGuard from './OperationalUniformityGuard';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <BrowserRouter basename={import.meta.env.BASE_URL}>
       <RouteAccessGuard />
       <OperationalRouteScrollReset />
+      <OperationalUniformityGuard />
       <CreateRouteAuthorizedNav />
       <ExpedienteFollowupConfirmationGuard />
       <CalculatorLabelGuard />
