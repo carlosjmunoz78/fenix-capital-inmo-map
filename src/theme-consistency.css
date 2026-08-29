@@ -234,3 +234,7 @@
 
 /* Preserve primary/orange actions after neutral-button normalization. */
 .ops-root :where(button.primary,.tas-upload,.ana-knowledge-submit){background:#f4741f!important;color:#fff!important;border-color:#f4741f!important}
+
+/* Repeatable contact channels: phones and emails are collections, not single-value UI fields. */
+.multi-contact-group{display:grid;gap:9px;border:1px solid var(--border,#e5e5e9);border-radius:13px;padding:12px;background:var(--surface,#fff)}
+.multi-contact-head{display:flex;align-items:center;justify-content:space-between;gap:12px}.multi-contact-head>button{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border,#dedee3);border-radius:9px;padding:8px 10px;font-weight:750}.multi-contact-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px;align-items:center}.multi-contact-row>button{width:38px;height:38px;display:grid;place-items:center;border:1px solid var(--border,#dedee3);border-radius:9px}.ops-root[data-theme='dark'] .multi-contact-group{background:var(--fenix-dark-surface)!important;border-color:var(--fenix-dark-border)!important}.ops-root[data-theme='dark'] .multi-contact-head>button,.ops-root[data-theme='dark'] .multi-contact-row>button{background:var(--fenix-dark-surface-2)!important;color:var(--fenix-dark-text)!important;border-color:var(--fenix-dark-border)!important}
