@@ -23,10 +23,10 @@ test.describe('Fénix PRE-PROD · estados Tasaciones dedicado',()=>{
   await page.route('**/functions/v1/fenix-notion-runtime-test/tasaciones',async r=>{await new Promise(resolve=>setTimeout(resolve,450));return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[]})});});
   await page.goto('/tasaciones');
   await expect(page.getByTestId('tas-loading')).toBeVisible();
-  await expect(page.getByText('EN FUENTE',{exact:true})).toHaveCount(0);
+  await expect(page.getByText('TASACIONES',{exact:true})).toHaveCount(0);
   await expect(page.getByTestId('tas-empty')).toBeVisible();
   await expect(page.getByTestId('tas-loading')).toHaveCount(0);
-  await expect(page.getByText('EN FUENTE',{exact:true})).toBeVisible();
+  await expect(page.getByText('TASACIONES',{exact:true})).toBeVisible();
  });
 
  test('distingue 403 y 5xx sin mostrar filas devueltas por error',async({page},testInfo)=>{
