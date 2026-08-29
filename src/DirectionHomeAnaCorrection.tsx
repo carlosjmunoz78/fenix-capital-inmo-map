@@ -14,12 +14,12 @@ export default function DirectionHomeAnaCorrection(){
     if(!active){setHost(null);return;}
     let mount:HTMLElement|null=null;
     const find=()=>{
-      const target=document.querySelector('.dir-right-top');
-      if(!target)return;
+      const dashboard=document.querySelector('.dir-dashboard-top');
+      if(!dashboard)return;
       if(!mount){
         mount=document.createElement('div');
         mount.className='dir-home-ana-correction-host';
-        target.insertBefore(mount,target.firstChild);
+        dashboard.insertAdjacentElement('afterend',mount);
         setHost(mount);
       }
     };
