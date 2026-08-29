@@ -7,6 +7,7 @@ import './ana-top-correction.css';
 const MODULE_HERO_SELECTOR='[class*="-ana-hero"], .vis-ana';
 const FALLBACK_ANA_SELECTOR='.ops-ana-card, .dir-priority-copy';
 const TITLE_SELECTOR=':scope > .ops-title, :scope > .inmo-title, :scope > .tas-title, :scope > .firmas-title, :scope > .fin-title, :scope > .vis-title, :scope > .informes-title, :scope > .inmo-detail-title';
+const KPI_SELECTOR=':scope > .tas-kpis, :scope > .firmas-kpis, :scope > .fin-kpis, :scope > .vis-kpis, :scope > .inmo-kpis, :scope > [class$="-kpis"]';
 
 function resourceFromPath(pathname:string){
  const clean=pathname.replace(/^\/+|\/+$/g,'');
@@ -65,6 +66,32 @@ function normalizeHeaderBeforeAna(hero:Element){
  if(title&&title!==anchor&&title.nextElementSibling!==anchor)parent.insertBefore(title,anchor);
 }
 
+function normalizeEvidenceLauncher(hero:Element){
+ const launcher=document.querySelector<HTMLElement>('[data-testid="context-evidence-open"]');
+ if(!launcher)return;
+ const content=(hero.closest('.ops-content,.dir-content') as HTMLElement|null)??hero.parentElement;
+ if(!content)return;
+ const kpis=content.querySelector(KPI_SELECTOR);
+ const anchor=kpis??hero;
+ if(anchor.parentElement===content&&anchor.nextElementSibling!==launcher)content.insertBefore(launcher,anchor.nextElementSibling);
+ launcher.classList.add('context-evidence-inline');
+ launcher.style.setProperty('position','static','important');
+ launcher.style.setProperty('right','auto','important');
+ launcher.style.setProperty('bottom','auto','important');
+ launcher.style.setProperty('z-index','1','important');
+ launcher.style.setProperty('display','inline-flex','important');
+ launcher.style.setProperty('width','100%','important');
+ launcher.style.setProperty('justify-content','center','important');
+ launcher.style.setProperty('border','1px solid #f4741f','important');
+ launcher.style.setProperty('border-radius','12px','important');
+ launcher.style.setProperty('padding','12px 16px','important');
+ launcher.style.setProperty('background','#f4741f','important');
+ launcher.style.setProperty('color','#fff','important');
+ launcher.style.setProperty('box-shadow','none','important');
+ launcher.style.setProperty('margin','0','important');
+ for(const duplicate of document.querySelectorAll<HTMLElement>('.firma-upload-inline,.doc-upload-inline'))duplicate.style.setProperty('display','none','important');
+}
+
 function visibleElement(selector:string){
  const candidates=[...document.querySelectorAll(selector)];
  return candidates.find(el=>{
@@ -118,6 +145,7 @@ export default function AnaTopCorrectionGuard(){
    }
    standardizeHero(visible);
    normalizeHeaderBeforeAna(visible);
+   normalizeEvidenceLauncher(visible);
 
    for(const child of Array.from(visible.children)){
     if(child.matches('[class$="-correct"], .informes-correct, .comm-correct')&&!child.matches('.inmo-correct')&&!child.classList.contains('ana-obsolete-correction')){
