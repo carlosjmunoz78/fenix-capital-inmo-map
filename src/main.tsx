@@ -48,6 +48,8 @@ import TasacionesShell from './TasacionesShell';
 import AgendaShell from './AgendaShell';
 import FirmasShell from './FirmasShell';
 import DocumentacionShell from './DocumentacionShell';
+import DocumentViewerShell from './DocumentViewerShell';
+import ExpedienteDocumentsGuard from './ExpedienteDocumentsGuard';
 import ContextEvidenceUpload from './ContextEvidenceUpload';
 import FinancierosShell from './FinancierosShell';
 import FinancieroDetailShell from './FinancieroDetailShell';
@@ -128,6 +130,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <AnaKnowledgeReviewGuard />
       <AnaTopCorrectionGuard />
       <ContextEvidenceUpload />
+      <ExpedienteDocumentsGuard />
       <ExpedienteAnaRuntimeGuard />
       <ExpedienteBelenFinancialGuard />
       <ExpedienteBankRankingGuard />
@@ -158,6 +161,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <AgendaShell />
       <FirmasShell />
       <DocumentacionShell />
+      <DocumentViewerShell />
       <FinancierosShell />
       <FinancieroDetailShell />
       <VisitadoresShell />
