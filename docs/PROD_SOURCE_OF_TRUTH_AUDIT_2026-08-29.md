@@ -4,7 +4,7 @@
 Auditoría de solo lectura. No modifica Notion, no importa datos, no toca `main`, no despliega PROD y no activa usuarios.
 
 ## Resultado principal actualizado
-La reconciliación de **Expedientes** ya está cerrada a nivel de población e identidad de migración:
+La reconciliación de **Expedientes** está cerrada a nivel de población e identidad de migración:
 - `01_Expedientes_PRO` = **LEGACY SOURCE** auditada con 46 registros.
 - `Expedientes · Fénix Capital` = **CONFIRMED CURRENT SOURCE** para continuar la preparación de la app.
 
@@ -15,76 +15,79 @@ La confirmación se basa en claves de deduplicación existentes, no en coinciden
 - Base: `01_Expedientes_PRO`
 - Data source: `collection://37581b1a-756d-8145-ae8c-000b661e45e0`
 - Registros: 46.
-- Mantiene relaciones históricas con contactos, inmobiliarias, banco, documentación, tareas, notas, comisiones y financiero.
 
 ### Fuente actual reconciliada
 - Base: `Expedientes · Fénix Capital`
 - Database id: `261907a8-dab5-4a61-865e-a9598dc4e015`
 - Data source: `collection://993423d0-8d3e-411e-bd2c-dceae3cb893b`
 - Registros actuales: 72.
-- Es una base distinta, no una vista del data source legado.
-- Su esquema es sustancialmente más amplio: comprador/es, cliente, acciones Fénix, actividad, comunicaciones, condiciones económicas, controles documentales y financieros, gates Belén, deduplicación y relaciones operativas propias.
-
-### Reconciliación de población
-- Total fuente actual: **72**.
-- Registros con `Clave deduplicación` del patrón `exp-legado-*`: **46**.
-- Esas 46 claves son **únicas**: no hay ninguna clave legado duplicada en la fuente actual.
-- El número coincide exactamente con los **46 registros** de `01_Expedientes_PRO`.
-- Los **26 registros restantes** de la fuente actual están todos marcados explícitamente en el título como `TEST · ...` / `TEST ...`.
-- Dentro de esos 26 aparecen escenarios QA, PRE-BANCO, V17, concurrencia, comunicaciones, expedientes ficticios y otros casos de prueba; varios llevan además `Estado migración = Migrado TEST`.
+- 46 registros tienen `Clave deduplicación = exp-legado-*`, sin duplicados.
+- Los otros 26 están identificados explícitamente como TEST/QA.
 
 ### Conclusión Expedientes
-La diferencia `72 - 46 = 26` no representa 26 expedientes reales nuevos pendientes de reconciliación. Representa una población de prueba claramente identificada.
-
-Por tanto:
 - `01_Expedientes_PRO` → `LEGACY`.
-- `Expedientes · Fénix Capital` → `CONFIRMED` como fuente actual de trabajo para la preparación de la app.
-- Para una futura carga PROD, los 26 `TEST` deben clasificarse `EXCLUIR_QA_DEMO` y no migrarse como datos reales.
-- Los 46 mapeados por clave legado deben conservar el vínculo origen→destino para reconciliación/idempotencia.
+- `Expedientes · Fénix Capital` → `CONFIRMED` como fuente actual.
+- Los 26 TEST → `EXCLUIR_QA_DEMO` para una futura carga PROD.
+- Los 46 legado conservan mapeo 1:1 origen→destino por clave deduplicación.
 
-Esta confirmación **no autoriza** todavía una carga PROD. Queda pendiente clasificar dentro de esos 46 qué expedientes son `REAL_ACTIVO`, `REAL_HISTORICO`, `REVISAR` o exclusión estructural, y validar sus relaciones necesarias.
+Esta confirmación no autoriza todavía una carga PROD.
 
 ## Inmobiliarias
-### Candidata histórica auditada
+### Fuente legado auditada
 - Base: `03_Inmobiliarias_PRO`
 - Data source: `collection://37581b1a-756d-8164-927b-000b18504dbb`
-- Registros auditados previamente: 247.
+- Registros actuales comprobados: **247**.
 
-### Base operativa más reciente localizada
+### Fuente actual
 - Base: `Inmobiliarias · Fénix Capital`
 - Database id: `fe4674ca-6f2e-4089-a76d-9fea0a94ffcf`
 - Data source: `collection://5d5e1471-3131-4299-ab3e-de6a6c34be1a`
-- Es una base distinta del data source `03_Inmobiliarias_PRO`.
-- Incluye relaciones a contactos/clientes, estado B2B, deduplicación, geocodificación, condiciones económicas, cadencia, asignación territorial, estado de migración y controles operativos.
+- Registros actuales: **405**.
+- Registros con `Clave deduplicación`: **404**.
+- Registros con `ID legado CRM`: **249**.
+- Los 249 `ID legado CRM` son únicos: no se han detectado IDs legado duplicados en la fuente actual.
+- Distribución de `Estado migración`: 242 `Migrado TEST`, 154 `Preparado`, 7 `Incidencia`, 2 sin estado.
 
-**Estado fuente:** `CANDIDATE` para `03_Inmobiliarias_PRO`; `CANDIDATE_HIGHER_PRIORITY` para `Inmobiliarias · Fénix Capital`. Falta reconciliar conteos e IDs antes de fijar canon definitivo.
+### Interpretación segura
+`Migrado TEST` en esta base es un **estado de migración PRE-PROD**, no una prueba suficiente de que el registro sea ficticio. No se excluyen 242 inmobiliarias por ese campo.
+
+La fuente actual dispone de campos específicos de reconciliación (`ID legado CRM`, `Clave deduplicación`, `Validado contra origen`) y de un view `PRE-PROD · Control migración`, lo que confirma que fue diseñada como destino/maestro operativo de la migración.
+
+Existe una discrepancia pendiente: la fuente legado auditada contiene 247 registros, mientras la fuente actual contiene 249 filas con `ID legado CRM`. Como no hay IDs repetidos, quedan **2 IDs legado adicionales** cuyo origen debe determinarse antes de declarar cerrada la reconciliación 1:1.
+
+**Estado fuente provisional:**
+- `03_Inmobiliarias_PRO` → `LEGACY` como fuente histórica de referencia.
+- `Inmobiliarias · Fénix Capital` → `CANDIDATE_HIGHER_PRIORITY`, muy probablemente fuente actual, pendiente únicamente de resolver la diferencia 247↔249 y separar con seguridad las 156 filas sin ID legado.
 
 ## Contactos B2B
-El elemento localizado como `Contactos inmobiliaria` con id `3bf81b1a-756d-8193-9b31-c9a6e8d9e102` **no es una base de contactos**. Es un registro de control de migración dentro de `Control migración · Fénix Capital`.
+### Fuente actual localizada
+La base destino sí existe y ha quedado localizada:
+- Base: `Contactos inmobiliaria · Fénix Capital`
+- Database id: `2710a815-ffe9-43c6-a576-de197c75f604`
+- Data source: `collection://fcd0c063-31fe-4c7c-aeaa-461632b34967`
 
-Ese control documenta:
-- origen: CRM legado · contactos B2B;
-- destino: `Contactos inmobiliaria · Fénix Capital`;
-- 28 registros origen y 28 destino;
-- 28 IDs legado únicos;
-- 28/28 relaciones con inmobiliaria destino resueltas;
-- QA parcial y no apto para corte todavía;
-- una incidencia de dato pendiente y permisos/E2E aún no validados.
+Su esquema incluye `ID legado CRM`, `Clave deduplicación`, `Estado migración`, `Validado contra origen` y relación directa con `Inmobiliarias · Fénix Capital`.
 
-**Estado fuente:** `UNKNOWN/CANDIDATE` para `02_Contactos_PRO`; debe localizarse y auditarse la base destino `Contactos inmobiliaria · Fénix Capital` antes de fijar source of truth.
+### Población actual
+- Total: **51** contactos inmobiliarios.
+- Con `ID legado CRM`: **30**.
+- IDs legado duplicados detectados: **0**.
+- `Estado migración = Migrado TEST`: **29**.
+- `Validado contra origen = true`: **20**.
 
-## Consecuencia para el manifiesto existente
-El manifiesto de 46 expedientes de `01_Expedientes_PRO` sigue siendo válido como clasificación del legado, pero ahora debe interpretarse junto con el mapeo 1:1 por `exp-legado-*` hacia la fuente actual.
+El control de migración anterior documentaba 28 origen / 28 destino. La base actual ya ha evolucionado a 51 registros y 30 con ID legado, por lo que ese control histórico no puede usarse como conteo vigente.
 
-La fuente actual de 72 registros no debe migrarse en bloque: 46 corresponden al legado y 26 son TEST/QA explícitos.
+**Estado fuente:** `Contactos inmobiliaria · Fénix Capital` pasa de `UNKNOWN` a `CANDIDATE_HIGHER_PRIORITY`. Para declararla `CONFIRMED` falta reconciliar los 30 IDs legado con su origen exacto y clasificar los 21 contactos sin ID legado como nuevos reales, manuales, QA o pendientes.
+
+`02_Contactos_PRO` sigue siendo una fuente candidata/legado para comparación, pero no debe declararse maestra por defecto.
 
 ## Gate de canonización restante
 Antes de preparar cualquier carga real:
 1. Mantener el mapping de los 46 expedientes legado ↔ actuales mediante `Clave deduplicación`.
-2. Clasificar los 46 mapeados en `REAL_ACTIVO`, `REAL_HISTORICO`, `REVISAR` o exclusión estructural; no usar los 26 TEST.
-3. Validar relaciones de los expedientes reales: cliente/contacto, inmobiliaria, financiero, banco, documentación y demás relaciones necesarias.
-4. Reconciliar `03_Inmobiliarias_PRO` ↔ `Inmobiliarias · Fénix Capital`.
-5. Localizar/fetch de `Contactos inmobiliaria · Fénix Capital` y compararla con `02_Contactos_PRO`.
+2. Clasificar los 46 expedientes mapeados en `REAL_ACTIVO`, `REAL_HISTORICO`, `REVISAR` o exclusión estructural; no usar los 26 TEST.
+3. Resolver en Inmobiliarias la diferencia **247 legado vs 249 IDs legado actuales** y clasificar las 156 filas sin ID legado.
+4. Reconciliar los **30 contactos B2B con ID legado** contra su fuente de origen y clasificar los 21 sin ID legado.
+5. Validar relaciones: inmobiliaria↔contactos y expedientes↔inmobiliaria/contacto/financiero/banco/documentación.
 6. Solo después emitir manifiesto PROD definitivo e idempotente.
 
 ## Regla de seguridad
