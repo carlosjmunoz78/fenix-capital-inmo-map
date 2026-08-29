@@ -70,6 +70,8 @@ import AnaInboxAccessGuard from './AnaInboxAccessGuard';
 import AnaKnowledgeReviewGuard from './AnaKnowledgeReviewGuard';
 import AnaTopCorrectionGuard from './AnaTopCorrectionGuard';
 import DirectionHomeAnaCorrection from './DirectionHomeAnaCorrection';
+import DocumentDetailAnaGuard from './DocumentDetailAnaGuard';
+import DirectoryRowOpenGuard from './DirectoryRowOpenGuard';
 import ExpedienteAnaRuntimeGuard from './ExpedienteAnaRuntimeGuard';
 import ExpedienteBelenFinancialGuard from './ExpedienteBelenFinancialGuard';
 import ExpedienteBankRankingGuard from './ExpedienteBankRankingGuard';
@@ -118,6 +120,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <DirectionExecutiveOverviewGuard />
       <DirectionAnaUrgentGuard />
       <DirectionHomeAnaCorrection />
+      <DocumentDetailAnaGuard />
+      <DirectoryRowOpenGuard />
       <AnaKnowledgeBlock />
       <AnaUniversalGuard />
       <AnaInboxAccessGuard />
