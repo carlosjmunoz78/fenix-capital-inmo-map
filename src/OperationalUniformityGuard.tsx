@@ -56,7 +56,7 @@ export default function OperationalUniformityGuard(){
    if(!root){setSidebarHost(null);setFooterHost(null);return;}
 
    const directSide=root.querySelector(':scope > .ops-side') as HTMLElement|null;
-   const canonical=Boolean(directSide?.querySelector('.ops-ana-modern'));
+   const canonical=Boolean(directSide?.querySelector('.ops-ana-modern'))&&!directSide?.classList.contains('dir-sidebar');
    if(directSide&&!canonical)directSide.classList.add('ops-legacy-side-hidden');
    let sideHost=root.querySelector(':scope > .ops-uniform-sidebar-host') as HTMLElement|null;
    if(!canonical&&!sideHost){
@@ -73,6 +73,12 @@ export default function OperationalUniformityGuard(){
    if(!existing&&!fhost){fhost=document.createElement('div');fhost.className='ops-uniform-footer-host';content.appendChild(fhost);}
    if(existing&&fhost){fhost.remove();fhost=null;}
    setFooterHost(current=>current===fhost?current:fhost);
+
+   const currentQuick=(content.querySelector(':scope > .ops-shared-quick')||content.querySelector(':scope > .ops-uniform-footer-host > .ops-shared-quick')) as HTMLElement|null;
+   const knowledge=document.querySelector('.ana-knowledge-mount') as HTMLElement|null;
+   if(currentQuick&&knowledge&&currentQuick.nextElementSibling!==knowledge){
+    currentQuick.insertAdjacentElement('afterend',knowledge);
+   }
   };
   place();
   const observer=new MutationObserver(place);observer.observe(document.body,{childList:true,subtree:true});
