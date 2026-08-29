@@ -14,7 +14,7 @@ test('PROD exige configuración Supabase dedicada y separa almacenamiento auth',
 
 test('PRE-PROD conserva funciones -test y PROD usa nombres sin sufijo', async () => {
   expect(source).toContain("const FUNCTION_SUFFIX=IS_PRODUCTION?'':'-test'");
-  expect(source).toContain("functionName('fenix-app-gateway')");
+  expect(source).toContain("authenticatedEdgeFetch<T>('fenix-app-gateway'");
   expect(source).toContain("authenticatedEdgeFetch<T>('fenix-ana-api'");
   expect(source).not.toContain("authenticatedEdgeFetch<T>('fenix-ana-api-test'");
 });
