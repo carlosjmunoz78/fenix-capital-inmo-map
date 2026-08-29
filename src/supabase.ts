@@ -1,15 +1,31 @@
 import { createClient } from '@supabase/supabase-js';
 
-export const SUPABASE_URL = 'https://hnqlnvakzaywtafeiybt.supabase.co';
-export const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_uvtiidkBBkFRt2K34so27g_JpCbMUZw';
+const runtimeEnv=(import.meta.env.VITE_APP_ENV||'preprod').toLowerCase();
+export const IS_PRODUCTION=runtimeEnv==='production'||runtimeEnv==='prod';
 
-const AUTH_STORAGE_KEY='fenix-preprod-auth-v2';
+const PREPROD_SUPABASE_URL='https://hnqlnvakzaywtafeiybt.supabase.co';
+const PREPROD_SUPABASE_PUBLISHABLE_KEY='sb_publishable_uvtiidkBBkFRt2K34so27g_JpCbMUZw';
+
+export const SUPABASE_URL=IS_PRODUCTION
+  ? String(import.meta.env.VITE_SUPABASE_URL||'')
+  : String(import.meta.env.VITE_SUPABASE_URL||PREPROD_SUPABASE_URL);
+export const SUPABASE_PUBLISHABLE_KEY=IS_PRODUCTION
+  ? String(import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY||'')
+  : String(import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY||PREPROD_SUPABASE_PUBLISHABLE_KEY);
+
+if(IS_PRODUCTION&&(!SUPABASE_URL||!SUPABASE_PUBLISHABLE_KEY)){
+  throw new Error('FENIX PROD runtime requires dedicated Supabase URL and publishable key.');
+}
+
+const FUNCTION_SUFFIX=IS_PRODUCTION?'':'-test';
+const functionName=(base:string)=>`${base}${FUNCTION_SUFFIX}`;
+const AUTH_STORAGE_KEY=IS_PRODUCTION?'fenix-prod-auth-v1':'fenix-preprod-auth-v2';
 const LEGACY_AUTH_STORAGE_KEY='fenix-preprod-auth';
 const authStorage={
   getItem(key:string){
     const current=window.localStorage.getItem(key);
     if(current!==null)return current;
-    if(key!==AUTH_STORAGE_KEY)return null;
+    if(IS_PRODUCTION||key!==AUTH_STORAGE_KEY)return null;
     const legacy=window.localStorage.getItem(LEGACY_AUTH_STORAGE_KEY);
     if(!legacy)return null;
     try{
@@ -56,19 +72,24 @@ function safeNavigationFallback(){return{items:[{route:'/inicio',label:'Inicio'}
 
 function authenticatedContextFallback(session:Awaited<ReturnType<typeof supabase.auth.getSession>>['data']['session']){
  const metadata=session?.user?.user_metadata as Record<string,unknown>|undefined;
- const actorCode=typeof metadata?.actor_code==='string'?metadata.actor_code:(typeof metadata?.fenix_test_actor==='string'?metadata.fenix_test_actor:'');
+ const actorCode=typeof metadata?.actor_code==='string'
+   ?metadata.actor_code
+   :!IS_PRODUCTION&&typeof metadata?.fenix_test_actor==='string'
+     ?metadata.fenix_test_actor
+     :'';
  if(!actorCode)return null;
- const role=(actorCode==='DIR-TEST'||actorCode==='CARLOS-ADMIN')?'Dirección':actorCode.startsWith('FIN-')?'Financiero':actorCode.startsWith('VIS-')?'Visitador':'Usuario';
+ const explicitRole=typeof metadata?.role==='string'?metadata.role:'';
+ const role=explicitRole||((actorCode==='DIR-TEST'||actorCode==='CARLOS-ADMIN')?'Dirección':actorCode.startsWith('FIN-')?'Financiero':actorCode.startsWith('VIS-')?'Visitador':'Usuario');
  return{actor_code:actorCode,role,context_source:'authenticated-user-metadata'};
 }
 
-async function authenticatedEdgeFetch<T>(functionName:string,path:string,init?:RequestInit):Promise<{status:number;data:T|null}>{
+async function authenticatedEdgeFetch<T>(baseFunctionName:string,path:string,init?:RequestInit):Promise<{status:number;data:T|null}>{
   const {data:{session}}=await supabase.auth.getSession();
   const token=session?.access_token;
   if(!token)return{status:401,data:null};
   let response:Response;
   try{
-    response=await fetch(`${SUPABASE_URL}/functions/v1/${functionName}${path}`,{
+    response=await fetch(`${SUPABASE_URL}/functions/v1/${functionName(baseFunctionName)}${path}`,{
       ...init,
       headers:{
         'content-type':'application/json',
@@ -84,27 +105,27 @@ async function authenticatedEdgeFetch<T>(functionName:string,path:string,init?:R
 }
 
 export async function fetchAnaApi<T>(path:string,init?:RequestInit):Promise<{status:number;data:T|null}>{
-  return authenticatedEdgeFetch<T>('fenix-ana-api-test',path,init);
+  return authenticatedEdgeFetch<T>('fenix-ana-api',path,init);
 }
 
 export async function fetchAnaKnowledgeApi<T>(path:string,init?:RequestInit):Promise<{status:number;data:T|null}>{
-  return authenticatedEdgeFetch<T>('fenix-ana-knowledge-test',path,init);
+  return authenticatedEdgeFetch<T>('fenix-ana-knowledge',path,init);
 }
 
 export async function fetchAnaCanonicalApi<T>(path:string,init?:RequestInit):Promise<{status:number;data:T|null}>{
-  return authenticatedEdgeFetch<T>('fenix-ana-canonical-test',path,init);
+  return authenticatedEdgeFetch<T>('fenix-ana-canonical',path,init);
 }
 
 export async function fetchEvidenceApi<T>(path:string,init?:RequestInit):Promise<{status:number;data:T|null}>{
-  return authenticatedEdgeFetch<T>('fenix-evidence-api-test',path,init);
+  return authenticatedEdgeFetch<T>('fenix-evidence-api',path,init);
 }
 
 export async function fetchMemoryApi<T>(path:string,init?:RequestInit):Promise<{status:number;data:T|null}>{
-  return authenticatedEdgeFetch<T>('fenix-memory-api-test',path,init);
+  return authenticatedEdgeFetch<T>('fenix-memory-api',path,init);
 }
 
 export async function fetchB2BActionsApi<T>(path:string,init?:RequestInit):Promise<{status:number;data:T|null}>{
-  return authenticatedEdgeFetch<T>('fenix-b2b-actions-test',path,init);
+  return authenticatedEdgeFetch<T>('fenix-b2b-actions',path,init);
 }
 
 export async function fetchAppApi<T>(path: string, init?: RequestInit): Promise<{ status: number; data: T | null }> {
@@ -112,7 +133,7 @@ export async function fetchAppApi<T>(path: string, init?: RequestInit): Promise<
   const token = session?.access_token;
   let response:Response;
   try{
-    response = await fetch(`${SUPABASE_URL}/functions/v1/fenix-app-gateway-test${path}`, {
+    response = await fetch(`${SUPABASE_URL}/functions/v1/${functionName('fenix-app-gateway')}${path}`, {
       ...init,
       headers: {
         'content-type': 'application/json',
