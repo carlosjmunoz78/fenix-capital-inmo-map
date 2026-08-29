@@ -13,14 +13,8 @@ body:has(.fin-root) .ops-root:not(.fin-root){display:none!important}
 .fin-next button{display:grid;grid-template-columns:28px 1fr;grid-template-rows:auto auto;text-align:left;gap:2px 8px;border:1px solid var(--border,#e5e7eb);border-radius:16px;padding:14px;background:var(--surface,#fff);color:inherit}
 .fin-next b{grid-row:1/3;display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:rgba(244,116,31,.12);color:#f4741f}
 .fin-next small{color:var(--muted,#667085)}
-.fin-correct{position:relative;z-index:220;isolation:isolate;display:grid;grid-template-columns:minmax(230px,.8fr) minmax(320px,1.35fr) minmax(220px,.8fr) auto;gap:12px;align-items:end;background:var(--surface,#fff);border:1px solid var(--border,#e5e7eb);border-radius:22px;padding:18px;scroll-margin-top:120px!important;scroll-margin-bottom:400px!important}
-.fin-correct>div{align-self:center}
-.fin-correct strong{display:block;font-size:16px;margin:4px 0}
-.fin-correct p{font-size:12px;line-height:1.45}
-.fin-correct textarea,.fin-correct input{width:100%;border:1px solid var(--border,#d0d5dd);border-radius:13px;padding:12px;background:var(--surface,#fff);color:inherit;box-sizing:border-box}
-.fin-correct textarea{min-height:72px;resize:vertical}
-.fin-correct button{position:relative;z-index:2;height:46px;border:0;border-radius:13px;background:#f4741f;color:#fff;font-weight:800;padding:0 17px}
-.fin-correct button:disabled{opacity:.45;cursor:not-allowed}
+/* La corrección canónica la renderiza AnaTopCorrectionGuard. El bloque legacy local se oculta para evitar duplicados. */
+.fin-correct{display:none!important}
 .fin-title{display:flex;justify-content:space-between;align-items:flex-end}
 .fin-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
 .fin-kpis article,.fin-filter,.fin-grid article,.fin-charts article{background:var(--surface,#fff);border:1px solid var(--border,#e5e7eb);border-radius:20px;padding:18px}
@@ -49,8 +43,8 @@ body:has(.fin-root) .ops-root:not(.fin-root){display:none!important}
 .fin-grid dl div{padding:10px;border-radius:12px;background:rgba(148,163,184,.08)}
 .fin-grid dt{font-size:10px;color:var(--muted,#667085)}
 .fin-grid dd{margin:3px 0 0;font-size:18px;font-weight:800}
-.fin-root[data-theme='dark'] .fin-ana-hero,.fin-root[data-theme='dark'] .fin-correct,.fin-root[data-theme='dark'] .fin-kpis article,.fin-root[data-theme='dark'] .fin-charts article,.fin-root[data-theme='dark'] .fin-filter,.fin-root[data-theme='dark'] .fin-grid article,.fin-root[data-theme='dark'] .fin-next button{background:#202023;border-color:#39393e;color:#f4f4f5}
-.fin-root[data-theme='dark'] .fin-correct textarea,.fin-root[data-theme='dark'] .fin-correct input,.fin-root[data-theme='dark'] .fin-filter input{background:#19191b;border-color:#44444a;color:#f4f4f5}
-@media(max-width:1200px){.fin-correct{grid-template-columns:1fr 1fr}.fin-correct>div{grid-column:1/-1}.fin-correct button{align-self:stretch}.fin-charts{grid-template-columns:1fr}}
+.fin-root[data-theme='dark'] .fin-ana-hero,.fin-root[data-theme='dark'] .fin-kpis article,.fin-root[data-theme='dark'] .fin-charts article,.fin-root[data-theme='dark'] .fin-filter,.fin-root[data-theme='dark'] .fin-grid article,.fin-root[data-theme='dark'] .fin-next button{background:#202023;border-color:#39393e;color:#f4f4f5}
+.fin-root[data-theme='dark'] .fin-filter input{background:#19191b;border-color:#44444a;color:#f4f4f5}
+@media(max-width:1200px){.fin-charts{grid-template-columns:1fr}}
 @media(max-width:1000px){.fin-ana-hero{grid-template-columns:160px 1fr}.fin-next{grid-template-columns:1fr}.fin-kpis{grid-template-columns:1fr}}
-@media(max-width:760px){.fin-ana-hero{grid-template-columns:1fr}.fin-ana-photo{min-height:180px}.fin-ana-photo img{height:180px}.fin-title,.fin-filter{align-items:flex-start;flex-direction:column}.fin-filter label{width:100%}.fin-correct{grid-template-columns:1fr}.fin-correct>div{grid-column:auto}.fin-bar-row{grid-template-columns:100px 1fr 30px}}
+@media(max-width:760px){.fin-ana-hero{grid-template-columns:1fr}.fin-ana-photo{min-height:180px}.fin-ana-photo img{height:180px}.fin-title,.fin-filter{align-items:flex-start;flex-direction:column}.fin-filter label{width:100%}.fin-bar-row{grid-template-columns:100px 1fr 30px}}
