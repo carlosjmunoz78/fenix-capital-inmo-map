@@ -1,4 +1,4 @@
-import {Fragment,useEffect,useState} from 'react';
+import {Fragment,useEffect,useMemo,useState} from 'react';
 import {createPortal} from 'react-dom';
 import {useLocation,useNavigate} from 'react-router-dom';
 import {anaVertical} from './assets/visualAssets';
@@ -94,12 +94,12 @@ export default function AnaTopCorrectionGuard(){
  const[specialHost,setSpecialHost]=useState<HTMLElement|null>(null);
  const[correction,setCorrection]=useState('');
  const[reason,setReason]=useState('');
- const specialCopy=specialCreateCopy(location.pathname);
+ const specialCopy=useMemo(()=>specialCreateCopy(location.pathname),[location.pathname]);
 
  useEffect(()=>{
   setCorrection('');setReason('');setTarget(null);setSpecialHost(null);
   let host:HTMLElement|null=null;
-  if(specialCreateCopy(location.pathname)){
+  if(specialCopy){
    const content=document.querySelector('.ops-content');
    if(content){
     host=document.createElement('div');
