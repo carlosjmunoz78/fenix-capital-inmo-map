@@ -6,7 +6,7 @@ import './ana-top-correction.css';
 
 const MODULE_HERO_SELECTOR='[class*="-ana-hero"], .vis-ana';
 const FALLBACK_ANA_SELECTOR='.ops-ana-card, .dir-priority-copy';
-const TITLE_SELECTOR=':scope > .ops-title, :scope > .inmo-title, :scope > .tas-title, :scope > .firmas-title, :scope > .fin-title, :scope > .vis-title, :scope > .informes-title, :scope > .inmo-detail-title';
+const TITLE_SELECTOR=':scope > .ops-title, :scope > .inmo-title, :scope > .tas-title, :scope > .firmas-title, :scope > .fin-title, :scope > .vis-title, :scope > .informes-title, :scope > .agenda-title, :scope > .eco-title, :scope > .notif-title, :scope > .inmo-detail-title';
 
 function resourceFromPath(pathname:string){
  const clean=pathname.replace(/^\/+|\/+$/g,'');
@@ -21,7 +21,10 @@ function resourceFromPath(pathname:string){
   documentacion:'documentacion',
   herencias:'herencia',
   'obras-nuevas':'obra-nueva',
-  informes:'informe'
+  informes:'informe',
+  agenda:'tareas',
+  economia:'economia',
+  notificaciones:'agenda'
  };
  return map[root]||root;
 }
@@ -112,8 +115,11 @@ export default function AnaTopCorrectionGuard(){
    }
    const visible=visibleElement(MODULE_HERO_SELECTOR)??visibleElement(FALLBACK_ANA_SELECTOR);
    if(!visible){setTarget(current=>current===null?current:null);return;}
-   if(specialCopy&&visible.matches('.ops-ana-card')){
-    visible.classList.add('ana-obsolete-correction');
+   if(specialCopy){
+    if(visible.matches('.ops-ana-card'))visible.classList.add('ana-obsolete-correction');
+    const specialHero=document.querySelector('.special-create-ana-hero');
+    if(specialHero){standardizeHero(specialHero);normalizeHeaderBeforeAna(specialHero);}
+    setTarget(current=>current===null?current:null);
     return;
    }
    standardizeHero(visible);
@@ -151,8 +157,21 @@ export default function AnaTopCorrectionGuard(){
   navigate(`/ana?${q.toString()}`);
  }
 
+ const correctionBlock=<article className="ana-top-correction" data-testid="ana-top-correction">
+  <div className="ana-top-correction-copy">
+   <span>CORREGIR A ANA</span>
+   <h3>¿En qué me equivoco?</h3>
+   <p>Dime qué dato, criterio o recomendación está mal. Lo revisaré con el contexto de esta pantalla antes de incorporar la corrección.</p>
+  </div>
+  <div className="ana-top-correction-fields">
+   <textarea rows={3} value={correction} onChange={e=>setCorrection(e.target.value)} placeholder="Qué cambiarías..." aria-label="Corrección para Ana"/>
+   <input value={reason} onChange={e=>setReason(e.target.value)} placeholder="Motivo de la corrección" aria-label="Motivo de la corrección"/>
+   <button type="button" disabled={!correction.trim()} onClick={prepare}>Preparar para revisión</button>
+  </div>
+ </article>;
+
  return <Fragment>
-  {specialCopy&&specialHost&&createPortal(
+  {specialCopy&&specialHost&&createPortal(<>
    <section className="inmo-ana-hero special-create-ana-hero" data-testid="special-create-ana-hero">
     <div className="inmo-ana-photo"><img src={anaVertical} alt="Ana"/></div>
     <div className="inmo-ana-body">
@@ -165,21 +184,9 @@ export default function AnaTopCorrectionGuard(){
       <button type="button"><b>3</b><strong>Lo hago yo</strong><small>Continuar abajo ↓</small></button>
      </div>
     </div>
-   </section>,specialHost
-  )}
-  {target&&createPortal(
-   <article className="ana-top-correction" data-testid="ana-top-correction">
-    <div className="ana-top-correction-copy">
-     <span>CORREGIR A ANA</span>
-     <h3>¿En qué me equivoco?</h3>
-     <p>Dime qué dato, criterio o recomendación está mal. Lo revisaré con el contexto de esta pantalla antes de incorporar la corrección.</p>
-    </div>
-    <div className="ana-top-correction-fields">
-     <textarea rows={3} value={correction} onChange={e=>setCorrection(e.target.value)} placeholder="Qué cambiarías..." aria-label="Corrección para Ana"/>
-     <input value={reason} onChange={e=>setReason(e.target.value)} placeholder="Motivo de la corrección" aria-label="Motivo de la corrección"/>
-     <button type="button" disabled={!correction.trim()} onClick={prepare}>Preparar para revisión</button>
-    </div>
-   </article>,target
-  )}
+   </section>
+   {correctionBlock}
+  </>,specialHost)}
+  {target&&createPortal(correctionBlock,target)}
  </Fragment>;
 }
