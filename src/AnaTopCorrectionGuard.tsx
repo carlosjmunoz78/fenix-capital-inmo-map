@@ -50,6 +50,17 @@ function standardizeHero(hero:Element){
  if(next&&!next.classList.contains('inmo-next'))next.classList.add('inmo-next');
 }
 
+function isLegacyCorrectionHost(el:Element){
+ const text=(el.textContent||'').toLowerCase();
+ return Boolean(
+  el.querySelector('textarea[placeholder*="cambiar" i],textarea[placeholder*="correg" i]')||
+  text.includes('qué necesita atención')||
+  text.includes('en qué me equivoco')||
+  text.includes('corregir a ana')||
+  text.includes('biblioteca disponible')
+ );
+}
+
 export default function AnaTopCorrectionGuard(){
  const location=useLocation(),navigate=useNavigate();
  const[target,setTarget]=useState<Element|null>(null);
@@ -83,10 +94,15 @@ export default function AnaTopCorrectionGuard(){
    })??null;
    if(!visible){setTarget(current=>current===null?current:null);return;}
    standardizeHero(visible);
-   const obsoleteReportCorrection=visible.querySelector(':scope > .informes-correct');
-   if(obsoleteReportCorrection&&!obsoleteReportCorrection.classList.contains('ana-obsolete-correction'))obsoleteReportCorrection.classList.add('ana-obsolete-correction');
+
+   for(const child of Array.from(visible.children)){
+    if(child.matches('[class$="-correct"], .informes-correct, .comm-correct')&&!child.matches('.inmo-correct')&&!child.classList.contains('ana-obsolete-correction')){
+     child.classList.add('ana-obsolete-correction');
+    }
+   }
+
    const localHost=visible.querySelector(':scope > .inmo-correct');
-   if(localHost){
+   if(localHost&&isLegacyCorrectionHost(localHost)){
     if(!localHost.classList.contains('ana-standard-correction-host'))localHost.classList.add('ana-standard-correction-host');
     setTarget(current=>current===localHost?current:localHost);
     return;
