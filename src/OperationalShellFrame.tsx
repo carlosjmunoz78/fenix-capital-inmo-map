@@ -1,5 +1,5 @@
-import {cloneElement,isValidElement,useEffect,useState,type ReactElement,type ReactNode} from 'react';
-import {BarChart3,Building2,CalendarDays,FileText,FolderOpen,UserRound} from 'lucide-react';
+import {cloneElement,isValidElement,useEffect,useRef,useState,type ReactElement,type ReactNode} from 'react';
+import {BarChart3,Building2,CalendarDays,FileText,FolderOpen,Menu,UserRound,X} from 'lucide-react';
 import {useNavigate} from 'react-router-dom';
 import type {NavItem} from './masterNavigation';
 import OperationalSidebar from './OperationalSidebar';
@@ -53,9 +53,27 @@ type Props={
 export default function OperationalShellFrame({className='',theme,navigation,activeRoute,anaSubtitle,anaRoute,sidebarVariant='default',query,onQueryChange,searchPlaceholder,searchActionLabel,onSearchAction,name,role,avatarUrl='',initials,onToggleTheme,onLogout,topbar,mainClassName='',contentClassName='',legacyDirectionTheme=false,children}:Props){
  const navigate=useNavigate();
  const[effectiveTheme,setEffectiveTheme]=useState<Theme>(()=>storedTheme(theme));
+ const[mobileNavOpen,setMobileNavOpen]=useState(false);
+ const menuButtonRef=useRef<HTMLButtonElement>(null);
+ const drawerRef=useRef<HTMLDivElement>(null);
  useEffect(()=>{persistTheme(effectiveTheme)},[effectiveTheme]);
  useEffect(()=>{if(theme!==effectiveTheme)onToggleTheme()},[theme,effectiveTheme,onToggleTheme]);
+ useEffect(()=>{
+  if(!mobileNavOpen)return;
+  const previous=document.activeElement as HTMLElement|null;
+  const first=drawerRef.current?.querySelector<HTMLButtonElement>('button');
+  first?.focus();
+  function onKeyDown(event:KeyboardEvent){
+   if(event.key==='Escape'){
+    setMobileNavOpen(false);
+    requestAnimationFrame(()=>menuButtonRef.current?.focus());
+   }
+  }
+  window.addEventListener('keydown',onKeyDown);
+  return()=>{window.removeEventListener('keydown',onKeyDown);if(previous&&document.contains(previous))previous.focus();};
+ },[mobileNavOpen]);
  function toggleTheme(){setEffectiveTheme(current=>current==='light'?'dark':'light');}
+ function closeMobileNav(){setMobileNavOpen(false);requestAnimationFrame(()=>menuButtonRef.current?.focus());}
  const renderedTopbar=topbar&&isValidElement(topbar)
   ?cloneElement(topbar as ReactElement<any>,{theme:effectiveTheme,onToggleTheme:toggleTheme})
   :topbar??<OperationalTopbar theme={effectiveTheme} onToggleTheme={toggleTheme} query={query} onQueryChange={onQueryChange} placeholder={searchPlaceholder} searchActionLabel={searchActionLabel} onSearchAction={onSearchAction} name={name} role={role} avatarUrl={avatarUrl} initials={initials} onLogout={onLogout}/>;
@@ -71,9 +89,14 @@ export default function OperationalShellFrame({className='',theme,navigation,act
   {route:'/informes',label:'Informes',Icon:BarChart3}
  ].filter(item=>can(item.route));
  const showSharedFooter=activeRoute!=='/inicio';
- return <div className={rootClass} data-theme={effectiveTheme} data-dir-theme={legacyDirectionTheme?effectiveTheme:undefined}>
-  <style>{`.ops-root>.ops-side{grid-column:1!important;visibility:visible!important;opacity:1!important;z-index:7800!important}.ops-root>.ops-main{grid-column:2!important}.ops-root.ops-direction-frame{grid-template-columns:238px minmax(0,1fr)!important}@media(max-width:1000px) and (min-width:901px){.ops-root.ops-direction-frame{grid-template-columns:96px minmax(0,1fr)!important}}@media(max-width:900px){.ops-root.ops-direction-frame{grid-template-columns:96px minmax(0,1fr)!important}}@media(max-width:760px){.ops-root.ops-direction-frame{display:block!important}.ops-root.ops-direction-frame>.ops-side{display:none!important}.ops-root.ops-direction-frame>.ops-main{grid-column:auto!important}}`}</style>
+ return <div className={rootClass} data-theme={effectiveTheme} data-dir-theme={legacyDirectionTheme?effectiveTheme:undefined} data-mobile-nav={mobileNavOpen?'open':'closed'}>
+  <style>{`.ops-root>.ops-side{grid-column:1!important;visibility:visible!important;opacity:1!important;z-index:7800!important}.ops-root>.ops-main{grid-column:2!important}.ops-root.ops-direction-frame{grid-template-columns:238px minmax(0,1fr)!important}@media(max-width:1000px) and (min-width:901px){.ops-root.ops-direction-frame{grid-template-columns:96px minmax(0,1fr)!important}}@media(max-width:900px){.ops-root.ops-direction-frame{grid-template-columns:96px minmax(0,1fr)!important}}@media(max-width:760px){.ops-root.ops-direction-frame{display:block!important}.ops-root.ops-direction-frame>.ops-main{grid-column:auto!important}}`}</style>
+  <button ref={menuButtonRef} type="button" className="ops-mobile-menu-button" aria-label={mobileNavOpen?'Cerrar menú':'Abrir menú'} aria-expanded={mobileNavOpen} aria-controls="ops-mobile-drawer" onClick={()=>setMobileNavOpen(open=>!open)}>{mobileNavOpen?<X aria-hidden="true"/>:<Menu aria-hidden="true"/>}<span>Menú</span></button>
   <OperationalSidebar navigation={navigation} activeRoute={activeRoute} anaSubtitle={anaSubtitle} anaRoute={anaRoute} variant={sidebarVariant}/>
+  <div ref={drawerRef} id="ops-mobile-drawer" className="ops-mobile-drawer" role="dialog" aria-modal="true" aria-label="Navegación principal" aria-hidden={!mobileNavOpen}>
+   <OperationalSidebar navigation={navigation} activeRoute={activeRoute} anaSubtitle={anaSubtitle} anaRoute={anaRoute} variant={sidebarVariant} className="ops-mobile-drawer-sidebar" onNavigate={closeMobileNav}/>
+  </div>
+  <button type="button" className="ops-mobile-backdrop" aria-label="Cerrar menú" tabIndex={mobileNavOpen?0:-1} onClick={closeMobileNav}/>
   <main className={`ops-main ${mainClassName}`.trim()}>
    {renderedTopbar}
    <section className={`ops-content ${contentClassName}`.trim()}>
