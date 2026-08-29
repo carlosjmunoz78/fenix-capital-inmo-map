@@ -2,10 +2,11 @@ import {FormEvent,useEffect,useMemo,useState} from 'react';
 import {useLocation,useNavigate} from 'react-router-dom';
 import {CalendarDays,LogOut,Moon,Save,Sun} from 'lucide-react';
 import {fetchAppApi,SUPABASE_URL,supabase} from './supabase';
-import {anaAvatar} from './assets/visualAssets';
+import {anaVertical} from './assets/visualAssets';
 import OperationalShellFrame from './OperationalShellFrame';
 import type {NavItem} from './masterNavigation';
 import './operational.css';
+import './inmobiliarias-polish.css';
 
 type Theme='light'|'dark';
 type Ctx={actor_code?:string;role?:string};
@@ -58,7 +59,7 @@ export default function TaskCreateShell(){
   topbar={topbar}
  >
    <div className="ops-title"><div><span className="ops-icon"><CalendarDays size={20}/></span><div><h1>Nueva tarea</h1><p>Alta canónica con responsable explícito y confirmación previa.</p></div></div><span className="ops-live ok">PRE-PROD</span></div>
-   <article className="ops-ana-card"><img src={anaAvatar} alt="Ana"/><div><strong>Ana</strong><p>No asigno personas por intuición. El responsable debe ser una identidad activa y autorizada.</p></div></article>
+   <section className="inmo-ana-hero"><div className="inmo-ana-photo"><img src={anaVertical} alt="Ana"/></div><div className="inmo-ana-body"><span>ANA · NUEVA TAREA</span><h2>Vamos a crearla con responsable y siguiente paso claros</h2><p>No asigno personas por intuición. Primero definimos la tarea, el responsable autorizado, la prioridad y la fecha; después revisas exactamente lo que se va a crear.</p><div className="inmo-next"><button type="button" onClick={()=>document.querySelector<HTMLInputElement>('input[placeholder="Describe la tarea"]')?.focus()}><b>1</b><strong>Completar tarea</strong><small>Ir a datos →</small></button><button type="button" onClick={()=>navigate('/ana?mode=help&resource=tarea&intent=nueva')}><b>2</b><strong>Ayúdame</strong><small>Preparar con Ana →</small></button><button type="button" onClick={()=>document.querySelector<HTMLFormElement>('form.ops-message')?.scrollIntoView({behavior:'smooth'})}><b>3</b><strong>Lo hago yo</strong><small>Continuar abajo ↓</small></button></div></div></section>
    <form className="ops-message" onSubmit={submit} style={{display:'grid',gap:12}}>
      <label>Tarea<input value={title} onChange={e=>{setTitle(e.target.value);edit()}} maxLength={200} placeholder="Describe la tarea" required/></label>
      {isDirection?<label>Responsable<select value={target} onChange={e=>{setTarget(e.target.value);edit()}} required><option value="">Selecciona una persona activa</option>{assignees.map(a=><option key={a.actor_code} value={a.actor_code}>{a.name} · {a.role}</option>)}</select></label>:<label>Responsable<input value={target||ctx?.actor_code||''} readOnly aria-label="Responsable"/><small>La tarea queda asignada a tu identidad operativa.</small></label>}
