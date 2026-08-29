@@ -8,7 +8,7 @@ test('PRE-PROD aplica siempre sufijo -test a funciones Edge',()=>{
   expect(text).toContain("const FUNCTION_SUFFIX=IS_PRODUCTION?'':'-test'");
   expect(text).toContain('const functionName=(base:string)=>`${base}${FUNCTION_SUFFIX}`');
   expect(text).toContain('functionName(baseFunctionName)');
-  expect(text).toContain("functionName('fenix-app-gateway')");
+  expect(text).toContain("authenticatedEdgeFetch<T>('fenix-app-gateway'");
   expect(text).not.toMatch(/functions\/v1\/fenix-[a-z0-9-]+(?:[/'"`])/i);
 });
 
