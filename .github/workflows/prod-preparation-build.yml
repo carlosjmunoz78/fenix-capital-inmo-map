@@ -1,0 +1,69 @@
+name: PROD Preparation Build
+
+on:
+  push:
+    branches:
+      - prod-preparation
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: prod-preparation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-prod-preparation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies reproducibly
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Dependency versions
+        run: npm list --depth=0
+
+      - name: Install Chromium browser
+        run: npx playwright install chromium
+        timeout-minutes: 5
+
+      - name: Build PRE-PROD-compatible code path
+        run: npm run build
+
+      - name: Browser QA
+        env:
+          PLAYWRIGHT_SKIP_BUILD: '1'
+        run: npm run test:e2e
+
+      - name: Assert no deployment commands in PROD preparation workflow
+        run: |
+          if grep -Eqi 'git push|vercel[[:space:]]+--prod|supabase[[:space:]]+functions[[:space:]]+deploy|environment:[[:space:]]*(prod|production)' .github/workflows/prod-preparation-build.yml; then
+            echo 'Unsafe deployment command detected in preparation workflow'
+            exit 1
+          fi
+
+      - name: Upload validation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fenix-prod-preparation-playwright-report
+          path: playwright-report
+          if-no-files-found: ignore
+
+# This workflow only validates the isolated PROD preparation branch.
+# It never deploys, never writes main, never changes PRE-PROD, and never touches Supabase PROD.
