@@ -16,7 +16,9 @@ test('workflow PRE-PROD no incorpora promoción automática a main o PROD',()=>{
   expect(workflow).toContain("github.ref == 'refs/heads/preprod-app-phase1'");
   expect(workflow).not.toMatch(/git push[^\n]*HEAD:main/);
   expect(workflow).not.toMatch(/git push[^\n]*\bmain\b/);
-  expect(workflow).not.toMatch(/deploy[^\n]*(?:prod|production)/i);
+  expect(workflow).not.toMatch(/\benvironment\s*:\s*(?:prod|production)\b/i);
+  expect(workflow).not.toMatch(/\bvercel\b[^\n]*--prod\b/i);
+  expect(workflow).not.toMatch(/\bdeploy[-_: ]*(?:prod|production)\b/i);
 });
 
 test('PRE-PROD conserva separación técnica del backend de producción',()=>{
