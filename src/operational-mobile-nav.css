@@ -1,26 +1,114 @@
-@media(max-width:650px){
-  .ops-root .ops-side{display:none}
-  .ops-root:not(.role-home)>.ops-side{display:block;position:fixed;left:0;right:0;top:62px;bottom:auto;z-index:10001!important;min-height:0;height:52px;padding:4px 8px;background:#fff;border:0;border-bottom:1px solid #ececef;overflow:hidden}
-  .ops-root:not(.role-home)>.ops-side .ops-brand,.ops-root:not(.role-home)>.ops-side .ops-ana{display:none}
-  .ops-root:not(.role-home)>.ops-side nav{display:flex;gap:6px;padding:0;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none}
-  .ops-root:not(.role-home)>.ops-side nav::-webkit-scrollbar{display:none}
-  .ops-root:not(.role-home)>.ops-side nav button{flex:0 0 auto;height:44px;min-width:max-content;padding:0 12px;font-size:11px;text-align:center;white-space:nowrap}
-  .ops-root:not(.role-home)>.ops-side nav button::first-letter{font-size:inherit}
-  .ops-root:not(.role-home)>.ops-main{height:100vh}
-  .ops-root:not(.role-home) .ops-content{padding-top:66px}
-  .ops-root[data-theme='dark']:not(.role-home)>.ops-side{background:#202023;border-bottom-color:#343438}
+.ops-mobile-menu-button,.ops-mobile-drawer,.ops-mobile-backdrop{display:none}
+
+@media(max-width:760px){
+  .ops-root>.ops-side{display:none!important}
+  .ops-root>.ops-main{height:100vh;min-height:100vh}
+  .ops-root .ops-content{padding-top:62px}
+
+  .ops-mobile-menu-button{
+    display:inline-flex;
+    position:fixed;
+    left:12px;
+    top:10px;
+    z-index:10030;
+    min-width:88px;
+    height:42px;
+    align-items:center;
+    justify-content:center;
+    gap:7px;
+    border:1px solid #dedee3;
+    border-radius:12px;
+    background:#fff;
+    color:#25252a;
+    font:inherit;
+    font-size:13px;
+    font-weight:800;
+    box-shadow:0 8px 24px rgba(0,0,0,.09);
+    cursor:pointer;
+  }
+  .ops-mobile-menu-button svg{width:19px;height:19px}
+  .ops-mobile-menu-button:focus-visible{outline:3px solid rgba(255,95,0,.3);outline-offset:2px}
+
+  .ops-mobile-drawer{
+    display:block;
+    position:fixed;
+    inset:0 auto 0 0;
+    width:min(86vw,330px);
+    z-index:10025;
+    transform:translateX(-104%);
+    transition:transform .2s ease;
+    pointer-events:none;
+  }
+  .ops-root[data-mobile-nav='open']>.ops-mobile-drawer{transform:translateX(0);pointer-events:auto}
+  .ops-mobile-drawer>.ops-side,
+  .ops-mobile-drawer>.ops-side.dir-sidebar{
+    display:flex!important;
+    position:absolute!important;
+    inset:0!important;
+    width:100%!important;
+    height:100%!important;
+    min-height:100%!important;
+    padding:70px 14px 16px!important;
+    flex-direction:column!important;
+    overflow-y:auto!important;
+    background:#fff!important;
+    border-right:1px solid #e8e8ec!important;
+    box-shadow:18px 0 42px rgba(0,0,0,.18)!important;
+    visibility:visible!important;
+    opacity:1!important;
+    z-index:1!important;
+  }
+  .ops-mobile-drawer>.ops-side .ops-brand{display:flex!important;position:absolute;top:15px;left:112px;right:14px;height:40px;min-height:40px;margin:0!important;padding:0 8px!important;justify-content:flex-start!important}
+  .ops-mobile-drawer>.ops-side .ops-brand img{width:34px!important;height:34px!important;object-fit:contain!important}
+  .ops-mobile-drawer>.ops-side .ops-brand strong{font-size:12px!important}
+  .ops-mobile-drawer>.ops-side nav,
+  .ops-mobile-drawer>.ops-side .dir-nav{display:flex!important;flex:1 0 auto!important;flex-direction:column!important;gap:6px!important;padding:8px 0!important;overflow:visible!important}
+  .ops-mobile-drawer>.ops-side nav button,
+  .ops-mobile-drawer>.ops-side .dir-nav-item{
+    display:flex!important;
+    width:100%!important;
+    min-height:44px!important;
+    height:auto!important;
+    flex:0 0 auto!important;
+    align-items:center!important;
+    justify-content:flex-start!important;
+    padding:10px 14px!important;
+    text-align:left!important;
+    white-space:normal!important;
+    border-radius:10px!important;
+    font-size:13px!important;
+  }
+  .ops-mobile-drawer>.ops-side nav button.active,
+  .ops-mobile-drawer>.ops-side .dir-nav-item.active{font-weight:900!important}
+  .ops-mobile-drawer>.ops-side .ops-ana{display:flex!important;flex:0 0 auto!important;margin-top:12px!important}
+
+  .ops-mobile-backdrop{
+    display:block;
+    position:fixed;
+    inset:0;
+    z-index:10020;
+    border:0;
+    padding:0;
+    background:rgba(18,18,22,.46);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .2s ease;
+  }
+  .ops-root[data-mobile-nav='open']>.ops-mobile-backdrop{opacity:1;pointer-events:auto}
+
+  .ops-root[data-theme='dark'] .ops-mobile-menu-button{background:#202023;color:#f8f8fa;border-color:#39393f}
+  .ops-root[data-theme='dark'] .ops-mobile-drawer>.ops-side,
+  .ops-root[data-theme='dark'] .ops-mobile-drawer>.ops-side.dir-sidebar{background:#202023!important;border-right-color:#343438!important}
 
   /* El shell operativo y la calculadora legacy son hermanos con stacking contexts
-     distintos. Para que la calculadora siga visible y utilizable sin bloquear la
-     navegación móvil, el contenedor legacy deja pasar eventos y solo sus controles
-     interactivos recuperan pointer-events. */
+     distintos. La calculadora permanece disponible sin bloquear el drawer. */
   #root:has(> .ops-root:not(.role-home)) > .app-shell{pointer-events:none!important}
   #root:has(> .ops-root:not(.role-home)) > .app-shell .calc-launcher{pointer-events:auto!important}
   #root:has(> .ops-root:not(.role-home)) > .app-shell .calc-panel{
-    top:122px!important;
+    top:62px!important;
     bottom:auto!important;
-    height:calc(100vh - 130px)!important;
-    max-height:calc(100vh - 130px)!important;
+    height:calc(100vh - 70px)!important;
+    max-height:calc(100vh - 70px)!important;
     overflow:auto!important;
     pointer-events:none!important;
   }
@@ -31,4 +119,8 @@
   #root:has(> .ops-root:not(.role-home)) > .app-shell .calc-panel textarea,
   #root:has(> .ops-root:not(.role-home)) > .app-shell .calc-panel a,
   #root:has(> .ops-root:not(.role-home)) > .app-shell .calc-panel label{pointer-events:auto!important}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .ops-mobile-drawer,.ops-mobile-backdrop{transition:none!important}
 }
