@@ -12,7 +12,7 @@ async function boot(page:any,role='Direccion'){
 test.describe('Fénix PRE-PROD · confirmación sensible transversal',()=>{
  test('alta de contacto no escribe antes de confirmar y editar invalida la preview',async({page},testInfo)=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();await boot(page);let posts=0;
-  await page.route('**/functions/v1/fenix-notion-actions-test/clientes/create',r=>{posts++;return r.fulfill({status:201,contentType:'application/json',body:JSON.stringify({ok:true,id:'aaaaaaaa-1111-4111-8111-dddddddddddd'})});});
+  await page.route('**/functions/v1/fenix-contactos-unified-test',r=>{posts++;return r.fulfill({status:201,contentType:'application/json',body:JSON.stringify({ok:true,id:'aaaaaaaa-1111-4111-8111-dddddddddddd'})});});
   await page.goto('/contactos/nuevo');await page.getByLabel('Nombre').fill('María');await page.getByRole('button',{name:'Revisar antes de crear'}).click();expect(posts).toBe(0);await expect(page.getByRole('button',{name:'Confirmar y crear'})).toBeVisible();await page.getByLabel('Apellidos').fill('Segura');await expect(page.getByRole('button',{name:'Confirmar y crear'})).toHaveCount(0);expect(posts).toBe(0);await page.getByRole('button',{name:'Revisar antes de crear'}).click();await page.getByRole('button',{name:'Confirmar y crear'}).click();await expect.poll(()=>posts).toBe(1);
  });
  test('alta de expediente exige doble paso antes del POST',async({page},testInfo)=>{
