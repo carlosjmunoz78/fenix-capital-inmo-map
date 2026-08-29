@@ -11,10 +11,30 @@ export default function AnaKnowledgePlacementGuard(){
  const location=useLocation();
  useEffect(()=>{
   const place=()=>{
-   const quick=[...document.querySelectorAll('.ops-root .ops-shared-quick, .ops-root .dir-quick')].filter(isVisible).at(-1) as HTMLElement|undefined;
+   const roots=[...document.querySelectorAll('.ops-root')].filter(isVisible);
+   const root=roots.at(-1) as HTMLElement|undefined;
+   if(!root)return;
+   const content=root.querySelector('.ops-content') as HTMLElement|null;
+   if(!content)return;
    const mount=document.querySelector('.ana-knowledge-mount') as HTMLElement|null;
-   if(!quick||!mount)return;
-   if(quick.nextElementSibling!==mount)quick.insertAdjacentElement('afterend',mount);
+   if(!mount)return;
+   const footerHost=content.querySelector(':scope > .ops-uniform-footer-host') as HTMLElement|null;
+   const directQuick=content.querySelector(':scope > .ops-shared-quick, :scope > .dir-quick') as HTMLElement|null;
+   if(footerHost){
+    const alreadyFinal=footerHost.nextElementSibling===mount&&mount.parentElement===content&&mount===content.lastElementChild;
+    if(!alreadyFinal){
+     content.appendChild(footerHost);
+     content.appendChild(mount);
+    }
+    return;
+   }
+   if(directQuick){
+    const alreadyFinal=directQuick.nextElementSibling===mount&&mount.parentElement===content&&mount===content.lastElementChild;
+    if(!alreadyFinal){
+     content.appendChild(directQuick);
+     content.appendChild(mount);
+    }
+   }
   };
   place();
   const observer=new MutationObserver(place);
