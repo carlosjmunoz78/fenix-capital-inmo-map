@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 
-const runtimeEnv=(import.meta.env.VITE_APP_ENV||'preprod').toLowerCase();
+const runtimeEnv=(import.meta.env.VITE_FENIX_ENV||'preprod').toLowerCase();
 export const IS_PRODUCTION=runtimeEnv==='production'||runtimeEnv==='prod';
 
 const PREPROD_SUPABASE_URL='https://hnqlnvakzaywtafeiybt.supabase.co';
@@ -124,36 +124,19 @@ export async function fetchMemoryApi<T>(path:string,init?:RequestInit):Promise<{
   return authenticatedEdgeFetch<T>('fenix-memory-api',path,init);
 }
 
-export async function fetchB2BActionsApi<T>(path:string,init?:RequestInit):Promise<{status:number;data:T|null}>{
+export async function fetchB2BActions<T>(path:string,init?:RequestInit):Promise<{status:number;data:T|null}>{
   return authenticatedEdgeFetch<T>('fenix-b2b-actions',path,init);
 }
 
-export async function fetchAppApi<T>(path: string, init?: RequestInit): Promise<{ status: number; data: T | null }> {
-  const { data: { session } } = await supabase.auth.getSession();
-  const token = session?.access_token;
-  let response:Response;
-  try{
-    response = await fetch(`${SUPABASE_URL}/functions/v1/${functionName('fenix-app-gateway')}${path}`, {
-      ...init,
-      headers: {
-        'content-type': 'application/json',
-        apikey: SUPABASE_PUBLISHABLE_KEY,
-        ...(init?.headers || {}),
-        ...(token ? { Authorization: `Bearer ${token}` } : {})
-      }
-    });
-  }catch{return{status:0,data:null};}
-  let raw:unknown=null;
-  try{raw=await response.json();}catch{raw=null;}
-  const data=path==='/navigation'&&response.status===200
-    ?normalizeNavigation(raw)
-    :path==='/session/context'&&response.status===200
-      ?normalizeSessionContext(raw)
-      :raw;
-  if(path==='/navigation'&&(response.status===0||response.status>=500))return{status:response.status,data:safeNavigationFallback() as T};
-  if(path==='/session/context'&&(response.status===0||response.status>=500)){
+export async function fetchAppApi<T>(path:string,init?:RequestInit):Promise<{status:number;data:T|null}>{
+  const result=await authenticatedEdgeFetch<T>('fenix-app-gateway',path,init);
+  if(path==='/navigation'&&(result.status===0||result.status>=500))return{status:200,data:safeNavigationFallback() as T};
+  if(path==='/session/context'&&(result.status===0||result.status>=500)){
+    const {data:{session}}=await supabase.auth.getSession();
     const fallback=authenticatedContextFallback(session);
-    if(fallback)return{status:response.status,data:fallback as T};
+    if(fallback)return{status:200,data:fallback as T};
   }
-  return{status:response.status,data:data as T|null};
+  if(path==='/navigation'&&result.status===200&&result.data)return{status:200,data:normalizeNavigation(result.data) as T};
+  if(path==='/session/context'&&result.status===200&&result.data)return{status:200,data:normalizeSessionContext(result.data) as T};
+  return result;
 }
