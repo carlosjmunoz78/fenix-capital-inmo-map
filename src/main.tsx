@@ -45,6 +45,7 @@ import B2BContactCreateLauncher from './B2BContactCreateLauncher';
 import B2BContactCreateShell from './B2BContactCreateShell';
 import B2BContactDetailShell from './B2BContactDetailShell';
 import ExpedienteCreateShell from './ExpedienteCreateShell';
+import ExpedienteCreateAnaGuard from './ExpedienteCreateAnaGuard';
 import TasacionesShell from './TasacionesShell';
 import AgendaShell from './AgendaShell';
 import FirmasShell from './FirmasShell';
@@ -145,6 +146,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <FinancialModuleBelenGuard />
       <ExpedienteKnowledgeGuard />
       <ExpedienteCommercialTermsGuard />
+      <ExpedienteCreateAnaGuard />
       <B2BContactCreateLauncher />
       <SpecialCaseDetailExperience />
       <SpecialCaseIntervenientContactGuard />
