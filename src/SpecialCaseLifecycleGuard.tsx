@@ -1,4 +1,4 @@
-import {useEffect,useMemo,useState} from 'react';
+import {useEffect,useState} from 'react';
 import {createPortal} from 'react-dom';
 import {useLocation} from 'react-router-dom';
 import {ArchiveRestore,PauseCircle,Power,RotateCcw,X} from 'lucide-react';
@@ -53,13 +53,14 @@ export default function SpecialCaseLifecycleGuard(){
     return()=>{cancelled=true;cancelAnimationFrame(frame);owned?.remove();setTarget(null)};
   },[active,pathname]);
 
-  if(!active||!target)return null;
   const currentState=row?.estado??row?.fase??'';
   const normalized=text(currentState).toLowerCase();
   const isPaused=normalized.includes('paus');
   const isClosed=normalized.includes('baja')||normalized.includes('cerrad')||normalized.includes('finaliz');
   const canReactivate=isPaused||isClosed;
-  const pauseSummary=useMemo(()=>indefinite?'Pausa sin fecha de reactivación':pauseUntil?`Pausa hasta ${pauseUntil}`:'Selecciona una fecha o marca pausa indefinida',[indefinite,pauseUntil]);
+  const pauseSummary=indefinite?'Pausa sin fecha de reactivación':pauseUntil?`Pausa hasta ${pauseUntil}`:'Selecciona una fecha o marca pausa indefinida';
+
+  if(!active||!target)return null;
 
   function closeModal(){setMode(null);setMessage('');}
   function prepare(){
