@@ -82,6 +82,7 @@ import ExpedienteBelenFinancialGuard from './ExpedienteBelenFinancialGuard';
 import ExpedienteBankRankingGuard from './ExpedienteBankRankingGuard';
 import FinancialModuleBelenGuard from './FinancialModuleBelenGuard';
 import ExpedienteKnowledgeGuard from './ExpedienteKnowledgeGuard';
+import ExpedienteCommercialTermsGuard from './ExpedienteCommercialTermsGuard';
 import VisitasShell from './VisitasShell';
 import CommunicationsShell from './CommunicationsShell';
 import DetailShellGate from './DetailShellGate';
@@ -143,6 +144,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <ExpedienteBankRankingGuard />
       <FinancialModuleBelenGuard />
       <ExpedienteKnowledgeGuard />
+      <ExpedienteCommercialTermsGuard />
       <B2BContactCreateLauncher />
       <SpecialCaseDetailExperience />
       <SpecialCaseIntervenientContactGuard />
