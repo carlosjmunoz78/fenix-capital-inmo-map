@@ -93,10 +93,12 @@ export default function OperationalShellFrame({className='',theme,navigation,act
   <style>{`.ops-root>.ops-side{grid-column:1!important;visibility:visible!important;opacity:1!important;z-index:7800!important}.ops-root>.ops-main{grid-column:2!important}.ops-root.ops-direction-frame{grid-template-columns:238px minmax(0,1fr)!important}@media(max-width:1000px) and (min-width:901px){.ops-root.ops-direction-frame{grid-template-columns:96px minmax(0,1fr)!important}}@media(max-width:900px){.ops-root.ops-direction-frame{grid-template-columns:96px minmax(0,1fr)!important}}@media(max-width:760px){.ops-root.ops-direction-frame{display:block!important}.ops-root.ops-direction-frame>.ops-main{grid-column:auto!important}}`}</style>
   <button ref={menuButtonRef} type="button" className="ops-mobile-menu-button" aria-label={mobileNavOpen?'Cerrar menú':'Abrir menú'} aria-expanded={mobileNavOpen} aria-controls="ops-mobile-drawer" onClick={()=>setMobileNavOpen(open=>!open)}>{mobileNavOpen?<X aria-hidden="true"/>:<Menu aria-hidden="true"/>}<span>Menú</span></button>
   <OperationalSidebar navigation={navigation} activeRoute={activeRoute} anaSubtitle={anaSubtitle} anaRoute={anaRoute} variant={sidebarVariant}/>
-  <div ref={drawerRef} id="ops-mobile-drawer" className="ops-mobile-drawer" role="dialog" aria-modal="true" aria-label="Navegación principal" aria-hidden={!mobileNavOpen}>
-   <OperationalSidebar navigation={navigation} activeRoute={activeRoute} anaSubtitle={anaSubtitle} anaRoute={anaRoute} variant={sidebarVariant} className="ops-mobile-drawer-sidebar" onNavigate={closeMobileNav}/>
-  </div>
-  <button type="button" className="ops-mobile-backdrop" aria-label="Cerrar menú" tabIndex={mobileNavOpen?0:-1} onClick={closeMobileNav}/>
+  {mobileNavOpen&&<>
+   <div ref={drawerRef} id="ops-mobile-drawer" className="ops-mobile-drawer" role="dialog" aria-modal="true" aria-label="Navegación principal">
+    <OperationalSidebar navigation={navigation} activeRoute={activeRoute} anaSubtitle={anaSubtitle} anaRoute={anaRoute} variant={sidebarVariant} className="ops-mobile-drawer-sidebar" onNavigate={closeMobileNav}/>
+   </div>
+   <button type="button" className="ops-mobile-backdrop" aria-label="Cerrar menú" onClick={closeMobileNav}/>
+  </>}
   <main className={`ops-main ${mainClassName}`.trim()}>
    {renderedTopbar}
    <section className={`ops-content ${contentClassName}`.trim()}>
