@@ -2,10 +2,11 @@ import {FormEvent,useEffect,useMemo,useState} from 'react';
 import {useLocation,useNavigate} from 'react-router-dom';
 import {LogOut,Moon,Save,Sun,UserRound} from 'lucide-react';
 import {fetchAppApi,SUPABASE_URL,supabase} from './supabase';
-import {anaAvatar} from './assets/visualAssets';
+import {anaVertical} from './assets/visualAssets';
 import OperationalShellFrame from './OperationalShellFrame';
 import type {NavItem} from './masterNavigation';
 import './operational.css';
+import './contact-detail.css';
 
 type Theme='light'|'dark';
 type Ctx={actor_code?:string;role?:string};
@@ -52,7 +53,7 @@ export default function ContactCreateShell(){
   topbar={topbar}
  >
    <div className="ops-title"><div><span className="ops-icon"><UserRound size={20}/></span><div><h1>Nuevo contacto</h1><p>Alta mínima, canónica y sin asignaciones inferidas.</p></div></div><span className="ops-live ok">PRE-PROD</span></div>
-   <article className="ops-ana-card"><img src={anaAvatar} alt="Ana"/><div><strong>Ana</strong><p>Antes de crear, compruebo duplicados por email y teléfono. Dirección puede dejar el contacto sin asignar hasta decidir responsable.</p></div></article>
+   <section className="contact-create-ana-hero"><div className="contact-detail-ana-photo"><img src={anaVertical} alt="Ana"/></div><div className="contact-detail-ana-body"><span>ANA · NUEVO CONTACTO</span><h2>Vamos a dejar el contacto bien creado desde el principio</h2><p>Compruebo duplicados por email y teléfono, reviso qué datos faltan y te indico el siguiente paso sin inventar asignaciones.</p><div className="contact-detail-next"><button type="button" onClick={()=>document.querySelector<HTMLInputElement>('input[required]')?.focus()}><b>1</b><strong>Qué necesita atención</strong><small>Completar identidad →</small></button><button type="button" onClick={()=>navigate('/ana?mode=help&resource=contacto_nuevo')}><b>2</b><strong>Qué estoy comprobando</strong><small>Duplicados y coherencia →</small></button><button type="button" onClick={()=>document.querySelector<HTMLFormElement>('form.ops-message')?.scrollIntoView({behavior:'smooth'})}><b>3</b><strong>Siguiente paso</strong><small>Revisar y crear →</small></button></div></div></section>
    {!allowed?<div className="ops-message">Tu perfil no puede crear contactos de cliente.</div>:<form className="ops-message" onSubmit={submit} style={{display:'grid',gap:12}}>
      <label>Nombre<input value={nombre} onChange={e=>{setNombre(e.target.value);edit()}} maxLength={100} required/></label><label>Apellidos<input value={apellidos} onChange={e=>{setApellidos(e.target.value);edit()}} maxLength={100}/></label><label>Teléfono<input value={telefono} onChange={e=>{setTelefono(e.target.value);edit()}} maxLength={40} inputMode="tel"/></label><label>Email<input value={email} onChange={e=>{setEmail(e.target.value);edit()}} maxLength={200} type="email"/></label>
      {ctx?.role==='Direccion'?<label>Responsable financiero<select value={target} onChange={e=>{setTarget(e.target.value);edit()}}><option value="">Sin asignar por ahora</option>{assignees.map(a=><option key={a.actor_code} value={a.actor_code}>{a.name}</option>)}</select><small>No se asigna nadie por intuición.</small></label>:<label>Responsable financiero<input aria-label="Responsable financiero" value={target||ctx?.actor_code||''} readOnly/></label>}
