@@ -8,7 +8,20 @@ const TARGET_SELECTOR='[class*="-ana-hero"], .ops-ana-card, .dir-priority-copy';
 
 function resourceFromPath(pathname:string){
  const clean=pathname.replace(/^\/+|\/+$/g,'');
- return clean||'inicio';
+ const root=clean.split('/')[0]||'inicio';
+ const map:Record<string,string>={
+  expedientes:'expediente',
+  bancos:'banco',
+  contactos:'contacto',
+  inmobiliarias:'inmobiliaria',
+  tasaciones:'tasacion',
+  firmas:'firma',
+  documentacion:'documentacion',
+  herencias:'herencia',
+  'obras-nuevas':'obra-nueva',
+  informes:'informe'
+ };
+ return map[root]||root;
 }
 
 function specialCreateCopy(pathname:string){
@@ -23,6 +36,18 @@ function specialCreateCopy(pathname:string){
   body:'Te ayudo a ordenar promotor, documentación, validaciones, interlocutores y siguiente acción para que la operación empiece en la fase correcta.'
  };
  return null;
+}
+
+function standardizeHero(hero:Element){
+ if(!hero.matches('[class*="-ana-hero"]'))return;
+ hero.classList.add('ana-standardized-hero');
+ const children=Array.from(hero.children);
+ const photo=children.find(el=>Boolean(el.querySelector(':scope > img[alt="Ana"]')));
+ photo?.classList.add('inmo-ana-photo');
+ const body=children.find(el=>Boolean(el.querySelector(':scope > h2')));
+ body?.classList.add('inmo-ana-body');
+ const next=body?Array.from(body.children).find(el=>el.tagName==='DIV'&&Boolean(el.querySelector(':scope > button'))):null;
+ next?.classList.add('inmo-next');
 }
 
 export default function AnaTopCorrectionGuard(){
@@ -54,9 +79,18 @@ export default function AnaTopCorrectionGuard(){
    const visible=candidates.find(el=>{
     const r=(el as HTMLElement).getBoundingClientRect();
     const style=getComputedStyle(el as HTMLElement);
-    const alreadyHasLocalCorrection=Boolean(el.querySelector('.inmo-correct,.dir-home-ana-correction'));
-    return !alreadyHasLocalCorrection&&r.width>0&&r.height>0&&style.display!=='none'&&style.visibility!=='hidden';
+    return r.width>0&&r.height>0&&style.display!=='none'&&style.visibility!=='hidden';
    })??null;
+   if(!visible){setTarget(null);return;}
+   standardizeHero(visible);
+   const obsoleteReportCorrection=visible.querySelector(':scope > .informes-correct');
+   obsoleteReportCorrection?.classList.add('ana-obsolete-correction');
+   const localHost=visible.querySelector(':scope > .inmo-correct');
+   if(localHost){
+    localHost.classList.add('ana-standard-correction-host');
+    setTarget(localHost);
+    return;
+   }
    setTarget(visible);
   };
   find();
@@ -96,13 +130,13 @@ export default function AnaTopCorrectionGuard(){
    <article className="ana-top-correction" data-testid="ana-top-correction">
     <div className="ana-top-correction-copy">
      <span>CORREGIR A ANA</span>
-     <h3>Ana, ¿en qué me equivoco?</h3>
+     <h3>¿En qué me equivoco?</h3>
      <p>Dime qué dato, criterio o recomendación está mal. Lo revisaré con el contexto de esta pantalla antes de incorporar la corrección.</p>
     </div>
     <div className="ana-top-correction-fields">
-     <textarea rows={3} value={correction} onChange={e=>setCorrection(e.target.value)} placeholder="Ej.: aquí no es así; lo correcto es..." aria-label="Corrección para Ana"/>
-     <input value={reason} onChange={e=>setReason(e.target.value)} placeholder="Motivo o contexto adicional (opcional)" aria-label="Motivo de la corrección"/>
-     <button type="button" disabled={!correction.trim()} onClick={prepare}>Revisar corrección con Ana</button>
+     <textarea rows={3} value={correction} onChange={e=>setCorrection(e.target.value)} placeholder="Qué cambiarías..." aria-label="Corrección para Ana"/>
+     <input value={reason} onChange={e=>setReason(e.target.value)} placeholder="Motivo de la corrección" aria-label="Motivo de la corrección"/>
+     <button type="button" disabled={!correction.trim()} onClick={prepare}>Preparar para revisión</button>
     </div>
    </article>,target
   )}
