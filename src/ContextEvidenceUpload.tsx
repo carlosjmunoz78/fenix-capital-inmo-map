@@ -1,4 +1,5 @@
 import {ChangeEvent,useEffect,useMemo,useRef,useState} from 'react';
+import {createPortal} from 'react-dom';
 import {FileAudio,FileUp,X} from 'lucide-react';
 import {useLocation,useNavigate} from 'react-router-dom';
 import {SUPABASE_PUBLISHABLE_KEY,SUPABASE_URL,supabase} from './supabase';
@@ -81,10 +82,30 @@ export default function ContextEvidenceUpload(){
  },[params]);
  const context=explicit??routeContext(location.pathname);
  const legacyOpen=location.pathname==='/documentacion'&&params.get('upload')==='1'&&Boolean(explicit);
- const[open,setOpen]=useState(false),[busy,setBusy]=useState(false),[msg,setMsg]=useState(''),[queue,setQueue]=useState<Queue|null>(null);
+ const[open,setOpen]=useState(false),[busy,setBusy]=useState(false),[msg,setMsg]=useState(''),[queue,setQueue]=useState<Queue|null>(null),[inlineHost,setInlineHost]=useState<HTMLElement|null>(null);
  const autoUploading=useRef(false);
 
  useEffect(()=>{if(legacyOpen)setOpen(true)},[legacyOpen]);
+ useEffect(()=>{
+  if(!context){setInlineHost(null);return;}
+  const host=document.createElement('div');
+  host.className='context-evidence-inline-host';
+  const place=()=>{
+   const content=document.querySelector<HTMLElement>('.ops-content,.dir-content');
+   if(!content)return;
+   const kpis=content.querySelector<HTMLElement>(':scope > .tas-kpis, :scope > .firmas-kpis, :scope > .fin-kpis, :scope > .vis-kpis, :scope > .inmo-kpis, :scope > [class$="-kpis"]');
+   const hero=content.querySelector<HTMLElement>(':scope > [class*="-ana-hero"], :scope > .vis-ana, :scope > .ops-ana-card, :scope > .dir-priority-copy');
+   const anchor=kpis??hero;
+   if(anchor){if(anchor.nextElementSibling!==host)content.insertBefore(host,anchor.nextElementSibling)}else if(host.parentElement!==content)content.insertBefore(host,content.firstChild);
+   if(content.closest('.firmas-root')){host.style.gridColumn='1';host.style.gridRow='4'}else{host.style.gridColumn='';host.style.gridRow=''}
+   for(const duplicate of document.querySelectorAll<HTMLElement>('.firma-upload-inline,.doc-upload-inline'))duplicate.style.setProperty('display','none','important');
+  };
+  place();
+  setInlineHost(host);
+  const observer=new MutationObserver(place);
+  observer.observe(document.body,{childList:true,subtree:true});
+  return()=>{observer.disconnect();host.remove();setInlineHost(null)};
+ },[location.pathname,Boolean(context)]);
  useEffect(()=>{
   if(!queue||!context||context.staging||!context.code||queue.originType!==context.type||busy||autoUploading.current)return;
   autoUploading.current=true;
@@ -143,8 +164,9 @@ export default function ContextEvidenceUpload(){
  }
  const staged=queue?.originType===activeContext.type?queue.files.length:0;
  const label=activeContext.staging?`Preparar archivos para ${activeContext.label}`:`Subir archivos a ${activeContext.label}`;
+ const launcher=<button type="button" data-testid="context-evidence-open" onClick={()=>setOpen(true)} style={{width:'100%',border:'1px solid #f4741f',borderRadius:12,padding:'12px 16px',display:'inline-flex',alignItems:'center',justifyContent:'center',gap:8,background:'#f4741f',color:'#fff',fontWeight:800,boxShadow:'none',cursor:'pointer'}}><FileUp size={17}/>{staged?`${staged} archivo${staged===1?'':'s'} preparado${staged===1?'':'s'}`:'Subir documentos / audio'}</button>;
  return <>
-  <button type="button" data-testid="context-evidence-open" onClick={()=>setOpen(true)} style={{position:'fixed',right:22,bottom:98,zIndex:7200,border:0,borderRadius:999,padding:'11px 15px',display:'inline-flex',alignItems:'center',gap:8,background:'#870064',color:'#fff',fontWeight:800,boxShadow:'0 12px 32px rgba(61,13,50,.24)',cursor:'pointer'}}><FileUp size={17}/>{staged?`${staged} archivo${staged===1?'':'s'} preparado${staged===1?'':'s'}`:'Subir documentos / audio'}</button>
+  {inlineHost&&createPortal(launcher,inlineHost)}
   {open&&<div role="presentation" style={{position:'fixed',inset:0,zIndex:9999,background:'rgba(20,16,24,.42)',display:'grid',placeItems:'center',padding:18}}><section className="ops-message" style={{display:'grid',gap:14,border:'2px solid #870064',width:'min(620px,100%)',maxHeight:'88vh',overflow:'auto',background:'var(--panel,#fff)',boxShadow:'0 24px 70px rgba(0,0,0,.28)'}} aria-label="Subir archivos contextuales"><div style={{display:'flex',justifyContent:'space-between',gap:12,alignItems:'flex-start'}}><div><strong style={{fontSize:18}}>{label}</strong><p style={{margin:'5px 0 0'}}>Admite cualquier tipo de archivo, incluido audio. El original se conserva sin ejecutarlo ni transformarlo y queda enlazado al contexto correcto.</p></div><button type="button" onClick={close} aria-label="Cerrar"><X size={16}/></button></div>{activeContext.staging&&<div style={{padding:11,borderRadius:12,background:'rgba(135,0,100,.07)'}}><strong>La ficha aún no existe.</strong><div>Selecciona ahora los archivos y los mantendré preparados en esta sesión. Al crear y abrir la ficha se asociarán automáticamente.</div></div>}<label className="primary" style={{display:'inline-flex',alignItems:'center',justifyContent:'center',gap:8,cursor:busy?'wait':'pointer',padding:12,borderRadius:12}}>{/audio/i.test(msg)?<FileAudio size={18}/>:<FileUp size={18}/>} {busy?'Subiendo y enlazando…':activeContext.staging?'Elegir cualquier archivo':'Elegir archivos o audios'}<input type="file" multiple onChange={e=>void choose(e)} disabled={busy} style={{display:'none'}}/></label>{staged>0&&<small>{staged} archivo{staged===1?'':'s'} pendiente{staged===1?'':'s'} de que exista la ficha.</small>}{msg&&<strong>{msg}</strong>}<small>Tamaño máximo actual por archivo: 12 MB. Los audios se conservan como evidencia original y quedan marcados como audio pendiente de tratamiento posterior.</small></section></div>}
  </>;
 }
