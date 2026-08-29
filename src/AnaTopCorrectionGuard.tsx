@@ -5,6 +5,7 @@ import {anaVertical} from './assets/visualAssets';
 import './ana-top-correction.css';
 
 const TARGET_SELECTOR='[class*="-ana-hero"], .ops-ana-card, .dir-priority-copy';
+const TITLE_SELECTOR=':scope > .ops-title, :scope > .inmo-title, :scope > .tas-title, :scope > .firmas-title, :scope > .inmo-detail-title';
 
 function resourceFromPath(pathname:string){
  const clean=pathname.replace(/^\/+|\/+$/g,'');
@@ -35,6 +36,11 @@ function specialCreateCopy(pathname:string){
   title:'Vamos a abrir la obra nueva con todo lo necesario',
   body:'Te ayudo a ordenar promotor, documentación, validaciones, interlocutores y siguiente acción para que la operación empiece en la fase correcta.'
  };
+ if(pathname==='/documentacion/nuevo')return{
+  label:'ANA · NUEVA DOCUMENTACIÓN',
+  title:'Vamos a crear el documento con el mismo criterio del resto de la app',
+  body:'Te ayudo a clasificarlo, vincularlo al contexto correcto y dejar preparado el siguiente paso sin inventar datos.'
+ };
  return null;
 }
 
@@ -48,6 +54,14 @@ function standardizeHero(hero:Element){
  if(body&&!body.classList.contains('inmo-ana-body'))body.classList.add('inmo-ana-body');
  const next=body?Array.from(body.children).find(el=>el.tagName==='DIV'&&Boolean(el.querySelector(':scope > button'))):null;
  if(next&&!next.classList.contains('inmo-next'))next.classList.add('inmo-next');
+}
+
+function normalizeHeaderBeforeAna(hero:Element){
+ const anchor=(hero.closest('.special-create-ana-host') as Element|null)??hero;
+ const parent=anchor.parentElement;
+ if(!parent)return;
+ const title=parent.querySelector(TITLE_SELECTOR);
+ if(title&&title!==anchor&&title.nextElementSibling!==anchor)parent.insertBefore(title,anchor);
 }
 
 function isLegacyCorrectionHost(el:Element){
@@ -93,7 +107,12 @@ export default function AnaTopCorrectionGuard(){
     return r.width>0&&r.height>0&&style.display!=='none'&&style.visibility!=='hidden';
    })??null;
    if(!visible){setTarget(current=>current===null?current:null);return;}
+   if(specialCopy&&visible.matches('.ops-ana-card')){
+    visible.classList.add('ana-obsolete-correction');
+    return;
+   }
    standardizeHero(visible);
+   normalizeHeaderBeforeAna(visible);
 
    for(const child of Array.from(visible.children)){
     if(child.matches('[class$="-correct"], .informes-correct, .comm-correct')&&!child.matches('.inmo-correct')&&!child.classList.contains('ana-obsolete-correction')){
@@ -114,7 +133,7 @@ export default function AnaTopCorrectionGuard(){
   obs.observe(document.body,{childList:true,subtree:true});
   const raf=requestAnimationFrame(find);
   return()=>{cancelAnimationFrame(raf);obs.disconnect();host?.remove()};
- },[location.pathname]);
+ },[location.pathname,specialCopy]);
 
  function prepare(){
   if(!correction.trim())return;
