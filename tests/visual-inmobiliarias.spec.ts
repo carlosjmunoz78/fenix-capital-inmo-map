@@ -39,7 +39,9 @@ test.describe('Fénix PRE-PROD · contrato visual Inmobiliarias',()=>{
   await expect(page.getByText('ADAIX LUCENA',{exact:true})).toBeVisible();
   await expect(page.getByText('Fuente canónica Notion',{exact:true})).toHaveCount(0);
   await expect(page.getByText(/\bPRO\b/)).toHaveCount(0);
-  const correction=page.locator('.inmo-correct');
+  const correction=page.getByTestId('ana-top-correction');
+  await expect(correction).toBeVisible();
+  await expect(correction.getByRole('heading',{name:'¿En qué me equivoco?',exact:true})).toBeVisible();
   const correctionBox=await correction.boundingBox();
   const anaCopyBox=await page.locator('.inmo-ana-body').boundingBox();
   expect((correctionBox?.y||0)).toBeGreaterThan((anaCopyBox?.y||0)+(anaCopyBox?.height||0)-10);
@@ -78,9 +80,11 @@ test.describe('Fénix PRE-PROD · contrato visual Inmobiliarias',()=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();
   await mockInmo(page);
   await page.goto('/inmobiliarias');
-  await page.getByPlaceholder('Qué cambiarías...').fill('No priorizar por antigüedad');
-  await page.getByPlaceholder('Motivo de la corrección').fill('Primero debe revisarse la criticidad');
-  await page.getByRole('button',{name:'Preparar para revisión'}).click();
+  const correction=page.getByTestId('ana-top-correction');
+  await expect(correction).toBeVisible();
+  await correction.getByLabel('Corrección para Ana').fill('No priorizar por antigüedad');
+  await correction.getByLabel('Motivo de la corrección').fill('Primero debe revisarse la criticidad');
+  await correction.getByRole('button',{name:'Preparar para revisión'}).click();
   await expect(page).toHaveURL(/\/ana\?/);
   await expect(page.getByText('Contexto: inmobiliaria',{exact:true})).toBeVisible();
   await expect(page.getByLabel('¿Qué sugirió Ana?')).toHaveValue('No priorizar por antigüedad');
