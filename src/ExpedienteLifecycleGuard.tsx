@@ -1,34 +1,36 @@
-import {useMemo,useState} from 'react';
+import {useEffect,useMemo,useState} from 'react';
+import {useLocation} from 'react-router-dom';
 import {ArchiveRestore,PauseCircle,Power,RotateCcw,X} from 'lucide-react';
+import {fetchNotionRuntime} from './notionRuntime';
 import './expediente-lifecycle.css';
 
 type Mode='pause'|'close'|'reactivate'|null;
-type Props={
-  canonical:boolean;
-  currentState:unknown;
-  expedienteCode:string;
-};
-
 const CLOSE_REASONS=['Cliente no compra','Cliente desiste','Operación aplazada','No viable','Perdido frente a competencia','Duplicado / error','Otro'];
+function text(v:unknown){if(Array.isArray(v))return v.map(String).join(', ');return String(v??'');}
+function isNotionId(v:string){return /^[0-9a-f]{32}$/i.test(v.replaceAll('-',''));}
+function pick(row:Record<string,any>|null,keys:string[]){if(!row)return null;for(const k of keys){const v=row[k];if(v!==undefined&&v!==null&&v!=='')return v}return null;}
 
-function text(v:unknown){
-  if(Array.isArray(v))return v.map(String).join(', ');
-  return String(v??'');
-}
-
-export default function ExpedienteLifecycleGuard({canonical,currentState,expedienteCode}:Props){
+export default function ExpedienteLifecycleGuard(){
+  const {pathname}=useLocation();
+  const match=pathname.match(/^\/expedientes\/([^/]+)$/);
+  const expedienteCode=match?.[1]?decodeURIComponent(match[1]):'';
+  const [canonical,setCanonical]=useState(false);
+  const [currentState,setCurrentState]=useState<unknown>(null);
   const [mode,setMode]=useState<Mode>(null);
   const [pauseUntil,setPauseUntil]=useState('');
   const [indefinite,setIndefinite]=useState(false);
   const [reason,setReason]=useState('Cliente no compra');
   const [note,setNote]=useState('');
   const [message,setMessage]=useState('');
+
+  useEffect(()=>{if(!expedienteCode||!isNotionId(expedienteCode))return;let alive=true;(async()=>{const r=await fetchNotionRuntime<any>(`/expedientes/${encodeURIComponent(expedienteCode)}`);if(!alive||r.status!==200)return;const item=r.data?.item||null;setCanonical(r.data?.source==='notion_canonical');setCurrentState(pick(item,['estado','fase','fase_actual','estado_fase']));})();return()=>{alive=false}},[expedienteCode]);
+
+  if(!expedienteCode||pathname==='/expedientes/nuevo')return null;
   const normalized=text(currentState).toLowerCase();
   const isPaused=normalized.includes('paus');
   const isClosed=normalized.includes('baja')||normalized.includes('perdido')||normalized.includes('cerrad');
   const canReactivate=isPaused||isClosed;
   const pauseSummary=useMemo(()=>indefinite?'Pausa sin fecha de reactivación':pauseUntil?`Pausa hasta ${pauseUntil}`:'Selecciona una fecha o marca pausa indefinida',[indefinite,pauseUntil]);
-
   function closeModal(){setMode(null);setMessage('');}
   function prepare(){
     if(!canonical){setMessage('Esta acción solo estará disponible sobre el expediente canónico.');return;}
