@@ -31,15 +31,26 @@ export default function SpecialCaseLifecycleGuard(){
   useEffect(()=>{if(!active)return;let alive=true;fetchSpecialCasesRuntime<Envelope>(`/${kind}/${encodeURIComponent(caseCode)}`).then(r=>{if(alive&&r.status===200)setRow(r.data?.item??null)});return()=>{alive=false}},[active,kind,caseCode]);
   useEffect(()=>{
     if(!active){setTarget(null);return;}
-    let cancelled=false,frame=0;
+    let cancelled=false,frame=0,owned:HTMLElement|null=null;
     const find=()=>{
       if(cancelled)return;
-      const host=document.querySelector('.special-detail-experience-host');
-      if(host){setTarget(host);return;}
+      const experience=document.querySelector('.special-detail-experience-host');
+      const parent=experience?.parentElement;
+      if(experience&&parent){
+        let host=parent.querySelector(':scope > .special-case-lifecycle-host') as HTMLElement|null;
+        if(!host){
+          host=document.createElement('div');
+          host.className='special-case-lifecycle-host';
+          experience.insertAdjacentElement('afterend',host);
+          owned=host;
+        }
+        setTarget(host);
+        return;
+      }
       frame=requestAnimationFrame(find);
     };
     frame=requestAnimationFrame(find);
-    return()=>{cancelled=true;cancelAnimationFrame(frame);setTarget(null)};
+    return()=>{cancelled=true;cancelAnimationFrame(frame);owned?.remove();setTarget(null)};
   },[active,pathname]);
 
   if(!active||!target)return null;
