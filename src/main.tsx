@@ -68,6 +68,7 @@ import RegistroPropiedadDetailShell from './RegistroPropiedadDetailShell';
 import DirectoryCreateShell from './DirectoryCreateShell';
 import SpecialCasesShell from './SpecialCasesShell';
 import SpecialCaseDetailExperience from './SpecialCaseDetailExperience';
+import SpecialCaseLifecycleGuard from './SpecialCaseLifecycleGuard';
 import SpecialCaseIntervenientContactGuard from './SpecialCaseIntervenientContactGuard';
 import TaskDetailExperienceGuard from './TaskDetailExperienceGuard';
 import AnaGovernance from './AnaGovernance';
@@ -149,6 +150,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <ExpedienteCreateAnaGuard />
       <B2BContactCreateLauncher />
       <SpecialCaseDetailExperience />
+      <SpecialCaseLifecycleGuard />
       <SpecialCaseIntervenientContactGuard />
       <TaskDetailExperienceGuard />
       <App />
