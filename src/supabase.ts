@@ -128,6 +128,10 @@ export async function fetchB2BActions<T>(path:string,init?:RequestInit):Promise<
   return authenticatedEdgeFetch<T>('fenix-b2b-actions',path,init);
 }
 
+export async function fetchB2BActionsApi<T>(path:string,init?:RequestInit):Promise<{status:number;data:T|null}>{
+  return fetchB2BActions<T>(path,init);
+}
+
 export async function fetchAppApi<T>(path:string,init?:RequestInit):Promise<{status:number;data:T|null}>{
   const result=await authenticatedEdgeFetch<T>('fenix-app-gateway',path,init);
   if(path==='/navigation'&&(result.status===0||result.status>=500))return{status:200,data:safeNavigationFallback() as T};
