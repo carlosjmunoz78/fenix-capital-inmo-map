@@ -1,22 +1,22 @@
-# Backup y restauración · PRE-PROD Fase 1
+# Backup y restauración · PRE-PROD
 
 ## Objetivo
 Garantizar que el frontend PRE-PROD pueda recuperarse sin depender de memoria de sesión ni de cambios manuales no trazados.
 
 ## Copias mínimas
 - Git: historial de `preprod-app-phase1`.
-- Snapshots de código verificados:
+- Snapshots históricos de código verificados:
   - `backup/preprod-phase1-2026-08-19`.
   - `backup/preprod-phase1-2026-08-20`.
-- SHA reproducible canónico validado: `cc206c410adedf2bfcf3a5527e1f87c7e9f285e4`.
+- SHA reproducible canónico validado actual: `42cc9852db74dae482bb1c5ee7eefa8dbeb1a1dc`.
+- Snapshot GitHub Pages correspondiente: `efeec066d9055a7e3d63da381b3bb12d421b18da` con mensaje exacto `deploy: PRE-PROD Pages snapshot 42cc9852db74dae482bb1c5ee7eefa8dbeb1a1dc`.
 - `package.json` con versiones directas fijadas y `package-lock.json` lockfileVersion 3 versionado.
 - Node objetivo CI: `24.x`.
-- Workflow verde canónico: `PRE-PROD App Build` run `32351314083`.
-- Resultado del run: `npm ci` success + Build success + Browser QA success + artefactos success + snapshot `gh-pages` success.
-- Browser QA: 19 passed, 8 skipped intencionadamente, 0 failed.
-- Artefactos CI canónicos:
-  - `fenix-preprod-dist` · artifact ID `9399962154` · digest `sha256:196cfe24b564f24759a356a3fc9800f6bd8303eeb52e16d0f839f095c6a22abd`.
-  - `fenix-preprod-playwright-report` · artifact ID `9399962776` · digest `sha256:1560e71c47a70f5226f4d84a3c0a867d61a4ca3abb7f3b492a3dee82534e7de3`.
+- Workflow verde canónico actual: `PRE-PROD App Build` run `33266665953` / #2722.
+- Resultado del run: instalación reproducible success + Build success + Browser QA success + artefactos success + build Pages success + publicación snapshot `gh-pages` success.
+- Artefactos CI canónicos actuales:
+  - `fenix-preprod-dist` · artifact ID `9718883094` · digest `sha256:22de1d34f67df44035f174d9a369bc44f393549a4e42debde3a1d6b35ee2802e`.
+  - `fenix-preprod-playwright-report` · artifact ID `9718883282` · digest `sha256:45c8e890612430b599926cee8844ebb5068d02e6e68e0e836267ff4295ca63b6`.
 - Supabase: migraciones SQL versionadas y listado de Edge Functions desplegadas. Las claves y secretos no se copian a documentación.
 - Notion: páginas maestras de continuidad y especificación, sin exportar PII real a fixtures.
 
@@ -35,12 +35,14 @@ Garantizar que el frontend PRE-PROD pueda recuperarse sin depender de memoria de
 - Revalidar RLS/RPC/Edge Functions y 401/403/404/409 antes de considerar recuperado el entorno.
 
 ## Gate de despliegue
-Un backup recuperable no equivale a un deployment válido. Antes de marcar recuperación completa debe existir URL HTTPS PRE-PROD verificable y smoke test superado. Mientras Vercel no exponga un proyecto recuperable o GitHub Pages no quede confirmado públicamente, la recuperación queda validada a nivel código/CI/artefacto, no a nivel host.
+Un backup recuperable no equivale a un deployment válido. Antes de marcar recuperación completa debe existir URL HTTPS PRE-PROD verificable y smoke test superado. GitHub Pages PRE-PROD debe corresponder al SHA exacto validado; un snapshot de otro commit no sirve como evidencia del HEAD actual.
 
 ## Verificación de backup
 Un backup solo se considera útil si existe SHA recuperable, el lockfile está versionado, la CI puede reconstruirlo con `npm ci`, los artefactos tienen digest registrado y el entorno TEST mantiene aislamiento por usuario/rol.
 
 ## Regla de seguridad
 - No modificar `main` durante restauración PRE-PROD.
+- No tocar PROD ni Supabase PROD desde este procedimiento.
 - No copiar passwords, JWT, `service_role` ni OTP a este documento.
-- No sustituir el SHA canónico por el último commit sin confirmar primero CI verde.
+- No sustituir el SHA canónico por el último commit sin confirmar primero CI verde y snapshot exacto.
+- Las funciones evolutivas posteriores al arranque real de la app (OCR transversal, audio→texto, chat interno, notificaciones/búsqueda avanzadas y demás mejoras de uso) no forman parte de este gate de recuperación.
