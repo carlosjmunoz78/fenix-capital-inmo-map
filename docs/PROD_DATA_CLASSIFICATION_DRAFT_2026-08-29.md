@@ -3,15 +3,20 @@
 ## Estado del gate técnico
 El runtime dual PRE-PROD/PROD ha superado Build y Browser QA en `prod-preparation`. Esta clasificación no autoriza carga en PROD ni modifica Notion.
 
-## Fuente maestra auditada
+## Fuentes candidatas auditadas
+Hasta completar la reconciliación de source of truth, estas fuentes se consideran candidatas, no maestras definitivas:
 - Expedientes: `01_Expedientes_PRO`
 - Contactos: `02_Contactos_PRO`
 - Inmobiliarias: `03_Inmobiliarias_PRO`
 
-## Volumen actual
+La auditoría posterior ha localizado bases operativas distintas y más recientes para Expedientes e Inmobiliarias. Véase `docs/PROD_SOURCE_OF_TRUTH_AUDIT_2026-08-29.md`.
+
+## Volumen de las candidatas *_PRO
 - Expedientes: 46
 - Contactos: 160
 - Inmobiliarias: 247
+
+Estos conteos describen esas fuentes concretas; no representan todavía el volumen canónico definitivo de PROD.
 
 ## Criterio de clasificación
 Cada registro se clasificará en una de estas cuatro categorías:
@@ -23,7 +28,7 @@ Cada registro se clasificará en una de estas cuatro categorías:
 
 No se clasifica un registro como real solo porque su nombre no contenga TEST/DEMO/PRUEBA.
 
-## Expedientes · distribución de estados detectada
+## Expedientes · distribución de estados detectada en `01_Expedientes_PRO`
 - `Documentación completa`: 13
 - `Finalizado`: 12
 - Sin estado: 9
@@ -41,7 +46,7 @@ No se clasifica un registro como real solo porque su nombre no contenga TEST/DEM
 - Sin estado o combinaciones anómalas (`ESTADO`, `Cambio de luz`, estados simultáneos incompatibles) → `REVISAR` hasta validación individual.
 - Cualquier registro QA/DEMO confirmado → `EXCLUIR_QA_DEMO`, independientemente de su estado.
 
-## Riesgos de calidad ya detectados
+## Riesgos de calidad ya detectados en las candidatas *_PRO
 ### Expedientes
 - 1 sin título de expediente.
 - 2 sin cliente.
@@ -71,19 +76,21 @@ Prioridad de integridad:
 No se crearán relaciones ficticias para completar huecos.
 
 ## Orden seguro de trabajo
-1. Cerrar clasificación individual de `REVISAR` y localizar cualquier QA/DEMO real.
-2. Generar manifiesto de migración de solo lectura con IDs origen + clase + motivo.
-3. Validar duplicados y claves de reconciliación.
-4. Preparar carga idempotente en un backend PROD vacío.
-5. Ejecutar dry-run y reconciliación de conteos/relaciones.
-6. Solo después, cargar datos reales y hacer smoke QA.
+1. Confirmar source of truth por entidad (`CONFIRMED`, `CANDIDATE`, `LEGACY`, `UNKNOWN`).
+2. Reconciliar la población de las fuentes candidatas con las bases operativas más recientes.
+3. Cerrar clasificación individual de `REVISAR` y localizar cualquier QA/DEMO real.
+4. Generar manifiesto de migración definitivo de solo lectura con IDs origen + clase + motivo.
+5. Validar duplicados y claves de reconciliación.
+6. Preparar carga idempotente en un backend PROD vacío.
+7. Ejecutar dry-run y reconciliación de conteos/relaciones.
+8. Solo después, cargar datos reales y hacer smoke QA.
 
 ## Bloqueos antes de cargar PROD
-- No migrar los 46/160/247 en bloque sin clasificación.
+- No migrar los 46/160/247 en bloque como si fueran conteos canónicos definitivos.
 - No borrar ni corregir silenciosamente datos fuente en Notion.
 - No mezclar datos PRE-PROD con PROD.
 - No reutilizar actores QA ni credenciales PRE-PROD.
 - No activar usuarios reales hasta reconciliación y rollback validados.
 
 ## Siguiente paso
-Construir el manifiesto de clasificación de expedientes comenzando por los registros con estado nulo o anómalo, y después extenderlo a contactos e inmobiliarias relacionados. La clasificación debe basarse en datos existentes y dejar como `REVISAR` cualquier caso dudoso.
+Reconciliar primero `01_Expedientes_PRO` con `Expedientes · Fénix Capital` y `03_Inmobiliarias_PRO` con `Inmobiliarias · Fénix Capital`; localizar después la base destino real `Contactos inmobiliaria · Fénix Capital`. Solo con esa canonización cerrada se convertirá el manifiesto provisional en manifiesto de carga PROD.
