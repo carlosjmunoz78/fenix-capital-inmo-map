@@ -50,6 +50,13 @@ jobs:
           PLAYWRIGHT_SKIP_BUILD: '1'
         run: npm run test:e2e
 
+      - name: Validate isolated PROD build path with inert values
+        env:
+          VITE_FENIX_ENV: prod
+          VITE_SUPABASE_URL: https://prod.invalid
+          VITE_SUPABASE_PUBLISHABLE_KEY: prod-build-validation-placeholder
+        run: npm run build
+
       - name: Upload validation report
         if: always()
         uses: actions/upload-artifact@v4
@@ -58,4 +65,5 @@ jobs:
           path: playwright-report
           if-no-files-found: ignore
 
-# Validation only. No deployment, no branch write, no production backend mutation.
+# Validation only. Dummy PROD values prove the production code path builds without
+# reusing PRE-PROD fallbacks. No deployment, no branch write, no backend contact or mutation.
