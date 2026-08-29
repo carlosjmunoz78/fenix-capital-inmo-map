@@ -46,11 +46,16 @@ export default function AnaTopCorrectionGuard(){
    }
   }
   const find=()=>{
+   if(location.pathname.replace(/\/+$/,'')==='/inicio'){
+    setTarget(null);
+    return;
+   }
    const candidates=[...document.querySelectorAll(TARGET_SELECTOR)];
    const visible=candidates.find(el=>{
     const r=(el as HTMLElement).getBoundingClientRect();
     const style=getComputedStyle(el as HTMLElement);
-    return r.width>0&&r.height>0&&style.display!=='none'&&style.visibility!=='hidden';
+    const alreadyHasLocalCorrection=Boolean(el.querySelector('.inmo-correct,.dir-home-ana-correction'));
+    return !alreadyHasLocalCorrection&&r.width>0&&r.height>0&&style.display!=='none'&&style.visibility!=='hidden';
    })??null;
    setTarget(visible);
   };
