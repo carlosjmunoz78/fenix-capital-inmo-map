@@ -55,34 +55,31 @@ export default function OperationalUniformityGuard(){
    const root=roots.at(-1) as HTMLElement|undefined;
    if(!root){setSidebarHost(null);setFooterHost(null);return;}
 
+   // Inicio/Dirección already owns its canonical sidebar contract; never overlay it.
+   const isHome=location.pathname.replace(/\/+$/,'')==='/inicio'||root.classList.contains('dir-shell');
    const directSide=root.querySelector(':scope > .ops-side') as HTMLElement|null;
-   const canonical=Boolean(directSide?.querySelector('.ops-ana-modern'))&&!directSide?.classList.contains('dir-sidebar');
-   if(directSide&&!canonical)directSide.classList.add('ops-legacy-side-hidden');
    let sideHost=root.querySelector(':scope > .ops-uniform-sidebar-host') as HTMLElement|null;
-   if(!canonical&&!sideHost){
+   if(isHome||directSide){
+    if(sideHost){sideHost.remove();sideHost=null;}
+   }else if(!sideHost){
     sideHost=document.createElement('div');sideHost.className='ops-uniform-sidebar-host';
     root.insertBefore(sideHost,root.firstChild);
    }
-   if(canonical&&sideHost){sideHost.remove();sideHost=null;}
    setSidebarHost(current=>current===sideHost?current:sideHost);
 
    const content=root.querySelector('.ops-content') as HTMLElement|null;
    if(!content){setFooterHost(null);return;}
    const existing=content.querySelector(':scope > .ops-shared-quick') as HTMLElement|null;
    let fhost=content.querySelector(':scope > .ops-uniform-footer-host') as HTMLElement|null;
-   if(!existing&&!fhost){fhost=document.createElement('div');fhost.className='ops-uniform-footer-host';content.appendChild(fhost);}
-   if(existing&&fhost){fhost.remove();fhost=null;}
-   setFooterHost(current=>current===fhost?current:fhost);
-
-   const currentQuick=(content.querySelector(':scope > .ops-shared-quick')||content.querySelector(':scope > .ops-uniform-footer-host > .ops-shared-quick')) as HTMLElement|null;
-   const knowledge=document.querySelector('.ana-knowledge-mount') as HTMLElement|null;
-   if(currentQuick&&knowledge&&currentQuick.nextElementSibling!==knowledge){
-    currentQuick.insertAdjacentElement('afterend',knowledge);
+   if(!existing&&!fhost&&location.pathname.replace(/\/+$/,'')!=='/inicio'){
+    fhost=document.createElement('div');fhost.className='ops-uniform-footer-host';content.appendChild(fhost);
    }
+   if((existing||location.pathname.replace(/\/+$/,'')==='/inicio')&&fhost){fhost.remove();fhost=null;}
+   setFooterHost(current=>current===fhost?current:fhost);
   };
   place();
   const observer=new MutationObserver(place);observer.observe(document.body,{childList:true,subtree:true});
-  return()=>{observer.disconnect();document.querySelectorAll('.ops-uniform-sidebar-host,.ops-uniform-footer-host').forEach(x=>x.remove());document.querySelectorAll('.ops-legacy-side-hidden').forEach(x=>x.classList.remove('ops-legacy-side-hidden'));};
+  return()=>{observer.disconnect();document.querySelectorAll('.ops-uniform-sidebar-host,.ops-uniform-footer-host').forEach(x=>x.remove());};
  },[location.pathname]);
 
  return <>
