@@ -143,3 +143,94 @@
   opacity:0!important;
   pointer-events:none!important;
 }
+
+/*
+ * FÉNIX GLOBAL SURFACE CONTRACT
+ * Every operational block must obey the selected theme. Module CSS is allowed to
+ * define layout, but never to leave a white island in dark mode or a dark island
+ * in light mode. Orange semantic accents remain untouched.
+ */
+.ops-root[data-theme='light']{
+  color-scheme:light;
+  --ops-bg:#f7f7f8;
+  --ops-card:#fff;
+  --surface:#fff;
+  --border:#e5e5e9;
+  --muted:#686870;
+  color:#202024!important;
+}
+.ops-root[data-theme='dark']{
+  --ops-bg:var(--fenix-dark-bg);
+  --ops-card:var(--fenix-dark-surface);
+  --surface:var(--fenix-dark-surface);
+  --border:var(--fenix-dark-border);
+  --muted:var(--fenix-dark-muted);
+  background:var(--fenix-dark-bg)!important;
+  color:var(--fenix-dark-text)!important;
+}
+.ops-root[data-theme='light'] :where(.ops-main,.ops-content){color:#202024!important}
+.ops-root[data-theme='dark'] :where(.ops-main,.ops-content){background:var(--fenix-dark-bg)!important;color:var(--fenix-dark-text)!important}
+
+/* Generic cards, panels, forms and Ana containers. */
+.ops-root[data-theme='dark'] :where(
+  .ops-message,.ops-table-card,.ops-empty,.ops-icon,
+  [class*='-card'],[class*='-panel'],[class*='-filter'],[class*='-correct'],[class*='-form'],[class*='-hero'],
+  [class*='-kpis'] article,[class*='-grid']>article,
+  details[class],form[class]
+){
+  background:var(--fenix-dark-surface)!important;
+  color:var(--fenix-dark-text)!important;
+  border-color:var(--fenix-dark-border)!important;
+}
+.ops-root[data-theme='light'] :where(
+  .ops-message,.ops-table-card,.ops-empty,.ops-icon,
+  [class*='-card'],[class*='-panel'],[class*='-filter'],[class*='-correct'],[class*='-form'],[class*='-hero'],
+  [class*='-kpis'] article,[class*='-grid']>article,
+  details[class],form[class]
+){
+  background:#fff!important;
+  color:#202024!important;
+  border-color:#e5e5e9!important;
+}
+
+/* Neutral interactive blocks: inputs, selects, textareas and non-primary buttons. */
+.ops-root[data-theme='dark'] :where(input,textarea,select,button:not(.primary):not(.ana-knowledge-submit):not(.tas-upload)){
+  color:var(--fenix-dark-text)!important;
+  border-color:var(--fenix-dark-border)!important;
+}
+.ops-root[data-theme='dark'] :where(input,textarea,select){background:var(--fenix-dark-surface-2)!important}
+.ops-root[data-theme='dark'] :where(button:not(.primary):not(.ana-knowledge-submit):not(.tas-upload)){
+  background:var(--fenix-dark-surface-2)!important;
+}
+.ops-root[data-theme='light'] :where(input,textarea,select,button:not(.primary):not(.ana-knowledge-submit):not(.tas-upload)){
+  background:#fff!important;
+  color:#202024!important;
+  border-color:#dedee3!important;
+}
+
+/* Text contract: normal copy follows the theme; orange semantic labels keep their own rules. */
+.ops-root[data-theme='dark'] :where(h1,h2,h3,h4,h5,h6,p,label,strong){color:var(--fenix-dark-text)}
+.ops-root[data-theme='dark'] :where(p,label,small){--theme-copy-color:var(--fenix-dark-muted)}
+.ops-root[data-theme='dark'] :where(p,label){color:var(--theme-copy-color)}
+.ops-root[data-theme='light'] :where(h1,h2,h3,h4,h5,h6,p,label,strong){color:#202024}
+.ops-root[data-theme='light'] :where(p,label){color:#5f5f67}
+
+/* Known create/detail surfaces that previously leaked white in dark mode. */
+.ops-root[data-theme='dark'] :where(
+  .directory-people-panel,.directory-person-card,.directory-person-head button,.directory-add-person,
+  .inmo-detail-card,.inmo-followup-card,.inmo-preview,
+  .tas-ana-hero,.tas-kpis article,.tas-filter,.tas-next button,
+  .firmas-ana-hero,.firmas-kpis article,.firmas-filter,.firma-card,.firma-card-docs a,.firma-doc-missing,
+  .doc-library-card,.doc-library-card>a,.doc-library-card>button,
+  .ana-top-correction,.ana-top-correction-fields textarea,.ana-top-correction-fields input
+){
+  background:var(--fenix-dark-surface)!important;
+  color:var(--fenix-dark-text)!important;
+  border-color:var(--fenix-dark-border)!important;
+}
+.ops-root[data-theme='dark'] :where(.tas-next button,.firma-card-docs a,.firma-doc-missing,.directory-person-head button,.ana-top-correction-fields textarea,.ana-top-correction-fields input){background:var(--fenix-dark-surface-2)!important}
+.ops-root[data-theme='dark'] .ops-icon{background:#2c2421!important;color:#ff7a34!important;border:1px solid #55362b!important}
+.ops-root[data-theme='light'] .ops-icon{background:#fff7f2!important;color:#f4741f!important;border:1px solid #f3dfd4!important}
+
+/* Preserve primary/orange actions after neutral-button normalization. */
+.ops-root :where(button.primary,.tas-upload,.ana-knowledge-submit){background:#f4741f!important;color:#fff!important;border-color:#f4741f!important}
