@@ -48,20 +48,28 @@ Esta confirmación no autoriza todavía una carga PROD.
 - Los 249 `ID legado CRM` son únicos: no se han detectado IDs legado duplicados en la fuente actual.
 - Distribución de `Estado migración`: 242 `Migrado TEST`, 154 `Preparado`, 7 `Incidencia`, 2 sin estado.
 
+### Reconciliación 247 ↔ 249 resuelta
+La diferencia de dos IDs legado ya está explicada por dos registros de prueba explícitos en la fuente actual:
+- `TEST · Inmobiliaria Alfa · PRE-PROD` → `ID legado CRM = TEST-INMO-001`.
+- `TEST · Inmobiliaria Beta · PRE-PROD` → `ID legado CRM = TEST-INMO-002`.
+
+Ambos tienen `Estado migración = Migrado TEST` y claves de deduplicación `test-*`. Por tanto, los **249 IDs legado actuales = 247 de población legado + 2 IDs QA/TEST explícitos**.
+
+El origen legado `03_Inmobiliarias_PRO` no contiene un campo `ID legado CRM`, por lo que esta reconciliación cierra la diferencia de población, pero no permite afirmar un cruce técnico fila-a-fila exclusivamente por ID desde la fuente antigua. La preservación de nombres, claves, relaciones y controles de migración debe seguir formando parte del gate de integridad.
+
 ### Interpretación segura
-`Migrado TEST` en esta base es un **estado de migración PRE-PROD**, no una prueba suficiente de que el registro sea ficticio. No se excluyen 242 inmobiliarias por ese campo.
+`Migrado TEST` en esta base es un **estado de migración PRE-PROD**, no una prueba suficiente de que el registro sea ficticio. Solo se excluyen automáticamente los dos registros anteriores porque están identificados explícitamente como TEST también por nombre e ID.
 
 La fuente actual dispone de campos específicos de reconciliación (`ID legado CRM`, `Clave deduplicación`, `Validado contra origen`) y de un view `PRE-PROD · Control migración`, lo que confirma que fue diseñada como destino/maestro operativo de la migración.
 
-Existe una discrepancia pendiente: la fuente legado auditada contiene 247 registros, mientras la fuente actual contiene 249 filas con `ID legado CRM`. Como no hay IDs repetidos, quedan **2 IDs legado adicionales** cuyo origen debe determinarse antes de declarar cerrada la reconciliación 1:1.
-
-**Estado fuente provisional:**
-- `03_Inmobiliarias_PRO` → `LEGACY` como fuente histórica de referencia.
-- `Inmobiliarias · Fénix Capital` → `CANDIDATE_HIGHER_PRIORITY`, muy probablemente fuente actual, pendiente únicamente de resolver la diferencia 247↔249 y separar con seguridad las 156 filas sin ID legado.
+**Estado fuente actualizado:**
+- `03_Inmobiliarias_PRO` → `LEGACY`.
+- `Inmobiliarias · Fénix Capital` → `CONFIRMED CURRENT SOURCE` para la preparación de la app.
+- Los 2 registros `TEST-INMO-*` → `EXCLUIR_QA_DEMO` para futura carga PROD.
+- Las 156 filas sin `ID legado CRM` requieren clasificación separada como altas nuevas, captación, QA, manuales o pendientes; no se excluyen ni se consideran reales automáticamente.
 
 ## Contactos B2B
 ### Fuente actual localizada
-La base destino sí existe y ha quedado localizada:
 - Base: `Contactos inmobiliaria · Fénix Capital`
 - Database id: `2710a815-ffe9-43c6-a576-de197c75f604`
 - Data source: `collection://fcd0c063-31fe-4c7c-aeaa-461632b34967`
@@ -75,20 +83,31 @@ Su esquema incluye `ID legado CRM`, `Clave deduplicación`, `Estado migración`,
 - `Estado migración = Migrado TEST`: **29**.
 - `Validado contra origen = true`: **20**.
 
-El control de migración anterior documentaba 28 origen / 28 destino. La base actual ya ha evolucionado a 51 registros y 30 con ID legado, por lo que ese control histórico no puede usarse como conteo vigente.
+### Reconciliación de los 30 IDs legado
+El control de migración histórico documentaba **28 origen / 28 destino** y 28 IDs legado únicos. La diferencia actual de dos IDs queda explicada por dos contactos QA explícitos:
+- `TEST · Ana Alfa · PRE-PROD` → `ID legado CRM = TEST-CONT-INMO-001`.
+- `TEST · Luis Beta · PRE-PROD` → `ID legado CRM = TEST-CONT-INMO-002`.
 
-**Estado fuente:** `Contactos inmobiliaria · Fénix Capital` pasa de `UNKNOWN` a `CANDIDATE_HIGHER_PRIORITY`. Para declararla `CONFIRMED` falta reconciliar los 30 IDs legado con su origen exacto y clasificar los 21 contactos sin ID legado como nuevos reales, manuales, QA o pendientes.
+Ambos tienen `Estado migración = Migrado TEST` y están relacionados con las inmobiliarias TEST correspondientes.
 
-`02_Contactos_PRO` sigue siendo una fuente candidata/legado para comparación, pero no debe declararse maestra por defecto.
+Por tanto, los **30 IDs legado actuales = 28 contactos legado documentados + 2 contactos QA/TEST explícitos**.
+
+**Estado fuente actualizado:**
+- `Contactos inmobiliaria · Fénix Capital` → `CONFIRMED CURRENT SOURCE` para la preparación de la app.
+- Los dos contactos `TEST-CONT-INMO-*` → `EXCLUIR_QA_DEMO`.
+- Los 28 restantes con ID legado se conservan como población de migración real a reconciliar por integridad de campos/relaciones, no por su mera existencia.
+- Los 21 contactos sin ID legado requieren clasificación como nuevas altas reales, manuales, QA o pendientes.
+- `02_Contactos_PRO` queda como fuente legado/candidata de comparación, no como maestra operativa.
 
 ## Gate de canonización restante
 Antes de preparar cualquier carga real:
 1. Mantener el mapping de los 46 expedientes legado ↔ actuales mediante `Clave deduplicación`.
 2. Clasificar los 46 expedientes mapeados en `REAL_ACTIVO`, `REAL_HISTORICO`, `REVISAR` o exclusión estructural; no usar los 26 TEST.
-3. Resolver en Inmobiliarias la diferencia **247 legado vs 249 IDs legado actuales** y clasificar las 156 filas sin ID legado.
-4. Reconciliar los **30 contactos B2B con ID legado** contra su fuente de origen y clasificar los 21 sin ID legado.
-5. Validar relaciones: inmobiliaria↔contactos y expedientes↔inmobiliaria/contacto/financiero/banco/documentación.
-6. Solo después emitir manifiesto PROD definitivo e idempotente.
+3. Clasificar las 156 inmobiliarias sin `ID legado CRM`, excluyendo únicamente los dos `TEST-INMO-*` ya identificados.
+4. Validar integridad de los 247 registros legado representados en la fuente actual mediante nombres/claves/relaciones y controles de migración disponibles.
+5. Validar los 28 contactos B2B legado y clasificar los 21 sin ID legado; excluir únicamente los dos `TEST-CONT-INMO-*` identificados.
+6. Validar relaciones: inmobiliaria↔contactos y expedientes↔inmobiliaria/contacto/financiero/banco/documentación.
+7. Solo después emitir manifiesto PROD definitivo e idempotente.
 
 ## Regla de seguridad
 No se corrige, fusiona o borra nada en Notion durante esta auditoría. No se inventan relaciones. Esta reconciliación es de solo lectura y no supone activación de PROD.
