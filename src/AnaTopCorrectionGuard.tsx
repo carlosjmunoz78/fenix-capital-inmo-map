@@ -4,8 +4,9 @@ import {useLocation,useNavigate} from 'react-router-dom';
 import {anaVertical} from './assets/visualAssets';
 import './ana-top-correction.css';
 
-const TARGET_SELECTOR='[class*="-ana-hero"], .ops-ana-card, .dir-priority-copy';
-const TITLE_SELECTOR=':scope > .ops-title, :scope > .inmo-title, :scope > .tas-title, :scope > .firmas-title, :scope > .inmo-detail-title';
+const MODULE_HERO_SELECTOR='[class*="-ana-hero"], .vis-ana';
+const FALLBACK_ANA_SELECTOR='.ops-ana-card, .dir-priority-copy';
+const TITLE_SELECTOR=':scope > .ops-title, :scope > .inmo-title, :scope > .tas-title, :scope > .firmas-title, :scope > .fin-title, :scope > .vis-title, :scope > .informes-title, :scope > .inmo-detail-title';
 
 function resourceFromPath(pathname:string){
  const clean=pathname.replace(/^\/+|\/+$/g,'');
@@ -45,7 +46,7 @@ function specialCreateCopy(pathname:string){
 }
 
 function standardizeHero(hero:Element){
- if(!hero.matches('[class*="-ana-hero"]')||hero.classList.contains('ana-standardized-hero'))return;
+ if((!hero.matches('[class*="-ana-hero"]')&&!hero.matches('.vis-ana'))||hero.classList.contains('ana-standardized-hero'))return;
  hero.classList.add('ana-standardized-hero');
  const children=Array.from(hero.children);
  const photo=children.find(el=>Boolean(el.querySelector(':scope > img[alt="Ana"]')));
@@ -62,6 +63,15 @@ function normalizeHeaderBeforeAna(hero:Element){
  if(!parent)return;
  const title=parent.querySelector(TITLE_SELECTOR);
  if(title&&title!==anchor&&title.nextElementSibling!==anchor)parent.insertBefore(title,anchor);
+}
+
+function visibleElement(selector:string){
+ const candidates=[...document.querySelectorAll(selector)];
+ return candidates.find(el=>{
+  const r=(el as HTMLElement).getBoundingClientRect();
+  const style=getComputedStyle(el as HTMLElement);
+  return r.width>0&&r.height>0&&style.display!=='none'&&style.visibility!=='hidden';
+ })??null;
 }
 
 function isLegacyCorrectionHost(el:Element){
@@ -100,12 +110,7 @@ export default function AnaTopCorrectionGuard(){
     setTarget(current=>current===null?current:null);
     return;
    }
-   const candidates=[...document.querySelectorAll(TARGET_SELECTOR)];
-   const visible=candidates.find(el=>{
-    const r=(el as HTMLElement).getBoundingClientRect();
-    const style=getComputedStyle(el as HTMLElement);
-    return r.width>0&&r.height>0&&style.display!=='none'&&style.visibility!=='hidden';
-   })??null;
+   const visible=visibleElement(MODULE_HERO_SELECTOR)??visibleElement(FALLBACK_ANA_SELECTOR);
    if(!visible){setTarget(current=>current===null?current:null);return;}
    if(specialCopy&&visible.matches('.ops-ana-card')){
     visible.classList.add('ana-obsolete-correction');
