@@ -4,7 +4,7 @@ import path from 'node:path';
 
 test('PRE-PROD aplica siempre sufijo -test a funciones Edge',()=>{
   const text=fs.readFileSync(path.resolve('src/supabase.ts'),'utf8');
-  expect(text).toContain("const runtimeEnv=(import.meta.env.VITE_APP_ENV||'preprod').toLowerCase()");
+  expect(text).toContain("const runtimeEnv=(import.meta.env.VITE_FENIX_ENV||'preprod').toLowerCase()");
   expect(text).toContain("const FUNCTION_SUFFIX=IS_PRODUCTION?'':'-test'");
   expect(text).toContain('const functionName=(base:string)=>`${base}${FUNCTION_SUFFIX}`');
   expect(text).toContain('functionName(baseFunctionName)');
