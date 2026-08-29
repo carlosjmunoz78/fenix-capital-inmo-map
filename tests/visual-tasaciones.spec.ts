@@ -24,7 +24,7 @@ test.describe('Fénix PRE-PROD · contrato visual Tasaciones',()=>{
   await expect(root.getByRole('heading',{name:'Tasaciones',exact:true})).toBeVisible();
   await expect(root.getByText('ANA · EN ESTA PANTALLA')).toBeVisible();
   await expect(root.getByText('Datos vivos')).toBeVisible();
-  await expect(root.getByText('EN FUENTE',{exact:true})).toBeVisible();
+  await expect(root.getByText('TASACIONES',{exact:true})).toBeVisible();
   await expect(root.getByText('CON INFORME',{exact:true})).toBeVisible();
   await expect(root.getByText('PENDIENTES',{exact:true})).toBeVisible();
   await expect(root.getByText('CONTROL DOCUMENTAL',{exact:true})).toBeVisible();
