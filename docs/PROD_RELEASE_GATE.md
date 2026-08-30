@@ -51,6 +51,7 @@ Secuencia obligatoria:
 10. Si todo queda verde, abrir la app a Dirección/Belén y comenzar la convivencia controlada con el CRM antiguo como respaldo, sin pedir una nueva confirmación de microgestión.
 
 ## Lo que NO constituye una promoción válida
+- No fusionar PR #2 sin orden explícita. Esta protección histórica se mantiene; además, ningún PR sustituye el cumplimiento de los gates técnicos y de datos del candidato vigente.
 - Fusionar un PR por sí solo sin cumplir los gates técnicos y de datos.
 - Copiar el código PRE-PROD a `main` sin preparar el entorno PROD.
 - Reutilizar credenciales, almacenamiento de sesión o Edge Functions PRE-PROD en PROD.
