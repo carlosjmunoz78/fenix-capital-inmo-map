@@ -51,15 +51,23 @@ Esto mejora la evidencia de composición del expediente: hay dos personas reales
 
 ## Contexto bancario observado en esos expedientes
 
-El CRM legado contiene contexto bancario para varios de estos casos. Este contexto NO se transforma automáticamente en `Envíos a banco` porque la lista histórica no prueba por sí sola que hubiese un envío real.
+El CRM legado contiene contexto bancario para varios de estos casos. Este contexto NO se transforma automáticamente en `Envíos a banco` porque una relación bancaria histórica o una lista de bancos no prueba por sí sola fecha, actor, envío documental, propuesta u oferta.
 
-- ANTONIO: BBVA + ING; además 2 relaciones bancarias estructuradas.
-- JONATAN, MACARENA Y JOSE ANTONIO: BBVA.
-- LEYDE: BBVA + Caja Rural de Granada Rincón de la Victoria.
+- ANTONIO: lista histórica BBVA + ING. Además, el expediente tiene dos relaciones bancarias estructuradas y se han resuelto contra `04_Bancos_PRO`: una apunta inequívocamente a `BBVA` y otra a `ING`. Esto confirma asociación estructurada del expediente con ambos bancos, pero no demuestra por sí solo que existiera un envío operativo equivalente al modelo actual.
+- JONATAN, MACARENA Y JOSE ANTONIO: BBVA en lista histórica; sin relación bancaria estructurada observada en esta auditoría.
+- LEYDE: BBVA + Caja Rural de Granada Rincón de la Victoria en lista histórica; sin relación bancaria estructurada observada en esta auditoría.
 - LOLA FONSECA PABLO: ING + ABANCA. Las notas sí mencionan expresamente `PRE OK EN ABANCA`, lo que constituye evidencia más fuerte de interacción con ABANCA que la mera lista histórica, pero todavía no se crea un `Envío a banco` sin reconciliar el modelo y fecha/actor de la operación.
-- NICOLAS: UCI; además 1 relación bancaria estructurada.
+- NICOLAS: lista histórica UCI y una relación bancaria estructurada. La relación se ha resuelto contra `04_Bancos_PRO` y apunta inequívocamente a `UCI`. Confirma asociación estructurada con UCI, pero no equivale automáticamente a un envío documentado en el modelo nuevo.
 - Paco Martín: sin banco histórico informado en esta consulta.
-- SAMRA IMRAN: ING.
+- SAMRA IMRAN: ING en lista histórica; sin relación bancaria estructurada observada en esta auditoría.
+
+### Resultado del subgate bancario estructurado
+
+En toda la población legacy, los únicos expedientes con `🏦 Banco (relación)` no vacío son `ANTONIO` y `NICOLAS`:
+- `ANTONIO → BBVA + ING`
+- `NICOLAS → UCI`
+
+`BANK_STRUCTURED_MAPPING = CLOSED` a nivel de identificación de banco. Sigue abierto el gate de operación bancaria: no se fabricarán `Envíos a banco` ni `Ofertas` sin evidencia suficiente de que esas acciones ocurrieron y sin encajar fecha/actor/estado en el modelo actual.
 
 ## Criterio de migración
 
@@ -68,5 +76,5 @@ El CRM legado contiene contexto bancario para varios de estos casos. Este contex
 3. Excluir los 2 registros estructurales del gate de cliente real.
 4. No reutilizar contactos B2B/gerentes como clientes aunque el nombre coincida.
 5. Conservar evidencia documental de identidad sin inventar campos extraídos que aún no estén verificados.
-6. Preservar contexto bancario histórico como contexto; crear `Envíos`/`Ofertas` solo si existe evidencia operativa suficiente y compatible con el modelo actual.
+6. Preservar contexto bancario histórico como contexto; las relaciones estructuradas identifican banco, pero no se convierten automáticamente en `Envíos`/`Ofertas` sin evidencia operativa suficiente y compatible con el modelo actual.
 7. Repetir esta reconciliación dentro del corte delta final inmediatamente antes del lanzamiento.
