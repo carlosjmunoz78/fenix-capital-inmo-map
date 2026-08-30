@@ -38,6 +38,23 @@ jobs:
             echo "NOTION_TOKEN_READY=no"
           fi
 
+      - name: Report PROD runtime credential readiness
+        env:
+          PROD_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          PROD_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+        shell: bash
+        run: |
+          if [ -n "$PROD_SUPABASE_URL" ]; then
+            echo "PROD_SUPABASE_URL_READY=yes"
+          else
+            echo "PROD_SUPABASE_URL_READY=no"
+          fi
+          if [ -n "$PROD_SUPABASE_PUBLISHABLE_KEY" ]; then
+            echo "PROD_SUPABASE_PUBLISHABLE_KEY_READY=yes"
+          else
+            echo "PROD_SUPABASE_PUBLISHABLE_KEY_READY=no"
+          fi
+
       - name: Install dependencies reproducibly
         run: |
           if [ -f package-lock.json ]; then
@@ -77,6 +94,6 @@ jobs:
           if-no-files-found: ignore
 
 # Validation only. Dummy PROD values prove the production code path builds without
-# reusing PRE-PROD fallbacks. The credential readiness step reports presence only;
-# it never prints or contacts Notion with the secret. No deployment, no branch write,
-# no backend contact or mutation.
+# reusing PRE-PROD fallbacks. Credential readiness steps report presence only;
+# they never print secret values or contact external services. No deployment,
+# no branch write, no backend contact or mutation.
