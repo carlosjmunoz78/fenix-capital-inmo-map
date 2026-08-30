@@ -40,8 +40,8 @@ jobs:
 
       - name: Report PROD runtime credential readiness
         env:
-          PROD_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          PROD_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          PROD_SUPABASE_URL: ${{ secrets.PROD_SUPABASE_URL }}
+          PROD_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
         shell: bash
         run: |
           if [ -n "$PROD_SUPABASE_URL" ]; then
