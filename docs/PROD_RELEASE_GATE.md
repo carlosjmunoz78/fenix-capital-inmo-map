@@ -1,11 +1,13 @@
 # Gate de promoción a PROD · Fénix Capital CEREBRO OS
 
 ## Estado actual
-- `preprod-app-phase1` es el entorno de trabajo y validación.
-- El HEAD PRE-PROD validado antes de este documento es `443b6c20cd9e7066f96c463b43a1fe80215923b3`.
-- Su workflow PUSH `33267019422` / #2724 terminó en `success` con Build, Browser QA, artefactos, GitHub Pages y publicación de snapshot en verde.
-- Snapshot `gh-pages`: `4dac3d7f364a09e7c44419cc359bfc6efd62851e`, mensaje exacto `deploy: PRE-PROD Pages snapshot 443b6c20cd9e7066f96c463b43a1fe80215923b3`.
-- `main` no se considera actualmente una APP PROD preparada. No se debe asumir que existe una promoción segura simplemente por fusionar código.
+- Candidato PROD actual: rama `prod-preparation`, HEAD `3316677c0371fd8baf88c4eb1177d76c6c73bbc0` antes de esta actualización de estado.
+- PRE-PROD App Build #2744 / `33311396855`: `success`.
+- PROD Preparation Build #75 / `33311394383`: `success`.
+- Browser QA del candidato: 282 passed / 9 skipped / 0 failed.
+- Supabase PROD ya está reconocido por GitHub Actions: `PROD_SUPABASE_URL_READY=yes` y `PROD_SUPABASE_PUBLISHABLE_KEY_READY=yes`.
+- El Repository secret `NOTION_TOKEN` ha sido confirmado en GitHub; esta actualización dispara una nueva validación para comprobar que Actions lo recibe en la ejecución posterior.
+- `main` no se considera todavía una APP PROD activada: la promoción real sigue condicionada a todos los gates técnicos, de datos, migración y smoke.
 
 ## Regla operativa vigente de promoción
 Ninguna versión pasa a PROD por automatismo: debe cumplir todos los gates técnicos, de datos, credenciales y smoke definidos en este documento. La orden explícita operativa vigente autoriza a proseguir sin confirmaciones repetitivas cuando esos gates estén efectivamente en verde; no autoriza a saltarse gates ni a promover con CI rojo.
