@@ -2,11 +2,11 @@
 
 ## Estado
 
-Auditoría de solo lectura. No se ha borrado ni modificado el CRM legado. No se han creado envíos bancarios ni ofertas nuevas.
+Auditoría de solo lectura sobre identidad de cliente y contexto bancario. No se ha borrado ni modificado el CRM legado. No se han creado envíos bancarios ni ofertas nuevas.
 
 ## Credencial de migración documental
 
-El workflow de preparación #57 ha confirmado `NOTION_TOKEN_READY=no` en GitHub Actions. El pipeline documental está construido y validado, pero la ejecución automática de los 118 archivos no puede arrancar desde GitHub hasta que exista el secreto `NOTION_TOKEN`.
+El workflow de preparación #57 confirmó `NOTION_TOKEN_READY=no` en GitHub Actions. El pipeline documental está construido y validado, pero la ejecución automática de los 118 archivos no puede arrancar desde GitHub hasta que exista el secreto `NOTION_TOKEN`.
 
 ## Clientes pendientes en expedientes legado
 
@@ -20,7 +20,7 @@ Los otros 7 son expedientes reales con texto de cliente presente en el CRM legad
 - ANTONIO → cliente legado `ANTONIO`
 - JONATAN, MACARENA Y JOSE ANTONIO → mismo texto cliente
 - LEYDE → cliente legado `LEYDE`
-- LOLA FONSECA PABLO → texto legado `LOLA FUENSECA` (discrepancia ortográfica; revisar antes de vincular)
+- LOLA FONSECA PABLO → texto legado `LOLA FUENSECA`
 - NICOLAS → cliente legado `NICOLAS`
 - Paco Martín → cliente legado `Paco Martín`
 - SAMRA IMRAN → texto legado `SAMRA`
@@ -29,10 +29,11 @@ Los otros 7 son expedientes reales con texto de cliente presente en el CRM legad
 
 Se ha consultado la fuente canónica actual de clientes sin escribir datos.
 
-- No existe coincidencia exacta de título para ninguno de esos siete textos legacy.
-- Existen candidatos parciales por nombre, por ejemplo más de un `Antonio`, por lo que un enlace automático por texto produciría riesgo de identidad incorrecta.
-- La discrepancia `LOLA FONSECA PABLO` ↔ `LOLA FUENSECA` confirma que tampoco debe usarse una regla de similitud como sustituto de identidad.
-- Resultado: `CLIENT_LINK_GATE = OPEN` para esos 7 casos hasta disponer de evidencia adicional (teléfono, email, DNI/NIE u otra relación inequívoca). No se ha creado ni modificado ningún cliente.
+- No existe coincidencia exacta segura para esos siete expedientes.
+- Existen candidatos parciales por nombre en algunos casos, especialmente `Antonio`, por lo que un enlace automático por texto produciría riesgo de identidad incorrecta.
+- Consultas específicas por `Jonatan`, `Macarena` y `Leyde` no devolvieron candidatos en la fuente canónica actual.
+- La consulta por `Lola`, `Sara`, `Samra` y `Nicolas` solo devolvió un registro que contiene `Sara`: `JESUS EGEA Y SARA`. Ese registro tiene su propio `ID legado CRM`, teléfono y expediente asociado, por lo que es una identidad distinta y NO debe reutilizarse para `LOLA FONSECA PABLO`.
+- Resultado: `CLIENT_LINK_GATE = OPEN` para esos 7 casos hasta disponer de evidencia adicional inequívoca. No se ha creado ni modificado ningún cliente.
 
 ### Comprobación adicional contra `02_Contactos_PRO`
 
@@ -41,9 +42,12 @@ Se ha comprobado la fuente amplia de contactos del CRM legado para evitar confun
 - El expediente `Paco Martín` sí tiene una relación legacy en `02_Contactos_PRO`, pero el registro relacionado está clasificado como `Gerente inmobiliaria`, asociado a inmobiliaria, y su propia nota indica que fue corregido porque antes había quedado como cliente durante una migración. Por tanto, esa relación NO sirve como identidad canónica de cliente y no debe copiarse a `Cliente`.
 - Para el nombre `Antonio` existen registros legacy exactos clasificados como `Gerente inmobiliaria` en distintas inmobiliarias. Esto demuestra que el nombre aislado tampoco identifica al cliente del expediente `ANTONIO`.
 - Los otros expedientes pendientes no tienen relación `02_Contactos_PRO` que permita resolver de forma inequívoca la identidad en esta comprobación.
-- El texto de notas de `LOLA FONSECA PABLO` confirma que la operación corresponde a Lola y su hija Sara, pero no aporta por sí solo un identificador canónico suficiente para crear/vincular cliente automáticamente.
 
-Conclusión: no se reutilizará `02_Contactos_PRO` como atajo para rellenar `Cliente`. Se priorizará evidencia inequívoca y se mantendrán estos casos abiertos hasta el corte final o hasta encontrar identificadores verificables.
+### Evidencia documental de `LOLA FONSECA PABLO`
+
+La ficha legacy de `LOLA FONSECA PABLO` contiene 13 adjuntos reales. Entre los nombres de archivo se observan `DNI_LOLA.pdf` y `DNI_SARA.pdf`, además de documentación laboral y bancaria separada de ambas personas. Las notas internas indican que Lola y su hija Sara solicitan la hipoteca, aunque la compraventa se haría solo a nombre de Lola.
+
+Esto mejora la evidencia de composición del expediente: hay dos personas reales diferenciadas, Lola y Sara. Sin embargo, el nombre de archivo no expone por sí mismo DNI/NIE, teléfono o email verificable; por tanto no autoriza crear o enlazar automáticamente una identidad canónica. Se preserva para la migración documental y futura verificación humana/automatizada segura.
 
 ## Contexto bancario observado en esos expedientes
 
@@ -52,7 +56,7 @@ El CRM legado contiene contexto bancario para varios de estos casos. Este contex
 - ANTONIO: BBVA + ING; además 2 relaciones bancarias estructuradas.
 - JONATAN, MACARENA Y JOSE ANTONIO: BBVA.
 - LEYDE: BBVA + Caja Rural de Granada Rincón de la Victoria.
-- LOLA FONSECA PABLO: ING + ABANCA.
+- LOLA FONSECA PABLO: ING + ABANCA. Las notas sí mencionan expresamente `PRE OK EN ABANCA`, lo que constituye evidencia más fuerte de interacción con ABANCA que la mera lista histórica, pero todavía no se crea un `Envío a banco` sin reconciliar el modelo y fecha/actor de la operación.
 - NICOLAS: UCI; además 1 relación bancaria estructurada.
 - Paco Martín: sin banco histórico informado en esta consulta.
 - SAMRA IMRAN: ING.
@@ -63,5 +67,6 @@ El CRM legado contiene contexto bancario para varios de estos casos. Este contex
 2. Resolver las 7 relaciones de cliente reales únicamente con identidad canónica inequívoca; no fusionar por simple parecido de nombre.
 3. Excluir los 2 registros estructurales del gate de cliente real.
 4. No reutilizar contactos B2B/gerentes como clientes aunque el nombre coincida.
-5. Preservar contexto bancario histórico como contexto; crear `Envíos`/`Ofertas` solo si existe evidencia de operación real.
-6. Repetir esta reconciliación dentro del corte delta final inmediatamente antes del lanzamiento.
+5. Conservar evidencia documental de identidad sin inventar campos extraídos que aún no estén verificados.
+6. Preservar contexto bancario histórico como contexto; crear `Envíos`/`Ofertas` solo si existe evidencia operativa suficiente y compatible con el modelo actual.
+7. Repetir esta reconciliación dentro del corte delta final inmediatamente antes del lanzamiento.
