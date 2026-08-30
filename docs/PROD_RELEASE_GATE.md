@@ -8,7 +8,7 @@
 - `main` no se considera actualmente una APP PROD preparada. No se debe asumir que existe una promoción segura simplemente por fusionar código.
 
 ## Regla operativa vigente de promoción
-La promoción sigue siendo gateada técnicamente: nada pasa a PROD con CI rojo, datos inconsistentes o un entorno no aislado. Sin embargo, existe instrucción operativa vigente de Carlos de **no actuar como cuello de botella y proseguir automáticamente cuando el estado esté en verde**, con el objetivo de poner la app en marcha cuanto antes.
+Ninguna versión pasa a PROD por automatismo: debe cumplir todos los gates técnicos, de datos, credenciales y smoke definidos en este documento. La orden explícita operativa vigente autoriza a proseguir sin confirmaciones repetitivas cuando esos gates estén efectivamente en verde; no autoriza a saltarse gates ni a promover con CI rojo.
 
 Por tanto:
 - no se pedirán confirmaciones repetitivas para pasos normales, reversibles y técnicamente validados de preparación, migración, cutover o lanzamiento;
@@ -83,6 +83,7 @@ Quedan fuera del gate de lanzamiento inicial y se priorizarán después de que l
 - Capas visuales, carruseles, efectos y microinteracciones no necesarias para la operativa inicial.
 
 ## Seguridad
+- No tocar `main`, PROD, WordPress ni Supabase PROD mientras un gate de promoción esté rojo o el entorno PROD separado no esté verificado.
 - No promover con CI rojo ni debilitar pruebas para conseguir un verde artificial.
 - No copiar secretos a documentación ni repositorio.
 - No inventar endpoints, tablas, permisos o reglas de negocio para completar una promoción.
@@ -90,4 +91,4 @@ Quedan fuera del gate de lanzamiento inicial y se priorizarán después de que l
 - Ante credenciales realmente inaccesibles o coste obligatorio, señalar el bloqueo concreto y seguir avanzando en todo lo demás.
 
 ## Criterio de cierre
-Este documento define un flujo de avance continuo: **verde → prosigue; rojo → corrige y revalida**. La autorización operativa vigente permite avanzar sin convertir a Carlos en un gate manual para cada paso. La activación real solo queda condicionada a que los gates técnicos, de datos, credenciales y smoke estén efectivamente en verde y a mantener el CRM antiguo intacto como respaldo.
+Este documento define un flujo de avance continuo: **verde → prosigue; rojo → corrige y revalida**. La orden explícita operativa vigente permite avanzar sin convertir a Carlos en un gate manual para cada paso. La activación real solo queda condicionada a que los gates técnicos, de datos, credenciales y smoke estén efectivamente en verde y a mantener el CRM antiguo intacto como respaldo.
