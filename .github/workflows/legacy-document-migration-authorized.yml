@@ -1,0 +1,69 @@
+name: Legacy Document Migration Authorized Trigger
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+
+jobs:
+  migrate-legacy-documents:
+    if: >-
+      github.event.issue.pull_request &&
+      github.event.issue.number == 3 &&
+      github.event.comment.body == 'MIGRATE_118' &&
+      github.event.comment.author_association == 'OWNER'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+      EXECUTE_LEGACY_DOCUMENT_MIGRATION: YES
+    steps:
+      - name: Checkout validated PROD candidate
+        uses: actions/checkout@v4
+        with:
+          ref: e2a6f5e8931ace2cc6e5e2520fe31ee758d52683
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Verify token is configured
+        shell: bash
+        run: |
+          test -n "$NOTION_TOKEN" || { echo 'NOTION_TOKEN secret is not configured'; exit 2; }
+
+      - name: Refresh signed legacy file manifest
+        run: node scripts/audit-legacy-document-files.mjs legacy-document-files-manifest.json
+
+      - name: Build exact 118-file transfer plan
+        run: node scripts/build-legacy-document-transfer-plan.mjs legacy-document-files-manifest.json legacy-expediente-destination-map.json legacy-document-transfer-plan.json
+
+      - name: Execute idempotent migration
+        run: node scripts/execute-legacy-document-migration.mjs legacy-document-files-manifest.json legacy-expediente-destination-map.json legacy-document-migration-report.json
+
+      - name: Reconcile execution report
+        shell: bash
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const r=JSON.parse(fs.readFileSync('legacy-document-migration-report.json','utf8'));
+          if(r.status!=='COMPLETE') throw new Error(`migration status=${r.status}`);
+          if((r.created?.length||0)+(r.skipped_existing?.length||0)!==118) throw new Error('migration reconciliation is not 118/118');
+          if((r.failed?.length||0)!==0) throw new Error(`migration has ${r.failed.length} failures`);
+          console.log(`RECONCILED: ${r.created.length} created + ${r.skipped_existing.length} existing = 118`);
+          NODE
+
+      - name: Upload migration evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: legacy-document-migration-evidence-${{ github.run_id }}
+          if-no-files-found: warn
+          retention-days: 30
+          path: |
+            legacy-document-files-manifest.json
+            legacy-document-transfer-plan.json
+            legacy-document-migration-report.json
