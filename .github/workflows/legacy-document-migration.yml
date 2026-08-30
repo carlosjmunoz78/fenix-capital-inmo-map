@@ -39,10 +39,10 @@ jobs:
         run: node scripts/audit-legacy-document-files.mjs legacy-document-files-manifest.json
 
       - name: Build exact 118-file transfer plan
-        run: node scripts/build-legacy-document-transfer-plan.mjs legacy-document-files-manifest.json legacy-expediente-destination-map.json legacy-document-transfer-plan.json
+        run: node scripts/build-legacy-document-transfer-plan.mjs legacy-document-files-manifest.json data/legacy-expediente-destination-map.json legacy-document-transfer-plan.json
 
       - name: Execute idempotent migration
-        run: node scripts/execute-legacy-document-migration.mjs legacy-document-files-manifest.json legacy-expediente-destination-map.json legacy-document-migration-report.json
+        run: node scripts/execute-legacy-document-migration.mjs legacy-document-files-manifest.json data/legacy-expediente-destination-map.json legacy-document-migration-report.json
 
       - name: Reconcile execution report
         shell: bash
