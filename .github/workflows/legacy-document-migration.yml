@@ -1,6 +1,11 @@
 name: Legacy Document Migration
 
 on:
+  push:
+    branches:
+      - prod-preparation
+    paths:
+      - '.github/workflows/legacy-document-migration.yml'
   workflow_dispatch:
     inputs:
       confirm:
@@ -13,7 +18,7 @@ permissions:
 
 jobs:
   migrate-legacy-documents:
-    if: ${{ inputs.confirm == 'MIGRATE_118' }}
+    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.confirm == 'MIGRATE_118') || (github.event_name == 'push' && github.event.head_commit.message == 'ops(data): execute controlled legacy document migration') }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
