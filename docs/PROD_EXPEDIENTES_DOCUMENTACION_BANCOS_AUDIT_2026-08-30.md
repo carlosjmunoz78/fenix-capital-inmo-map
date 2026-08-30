@@ -13,9 +13,48 @@ Verificación realizada tras la asignación:
 ## Documentación histórica
 Fuente legado: `01_Expedientes_PRO`.
 
-Inventario confirmado:
-- 37/46 expedientes tienen `📎 Documentación adjunta` histórica.
+### Inventario corregido y verificado
+Una primera agregación interpretó de forma demasiado amplia la presencia del campo de adjuntos. La verificación con `json_array_length` fija la cifra correcta:
+- **31/46 expedientes tienen archivos reales en `📎 Documentación adjunta`**.
 - Total de archivos adjuntos legacy detectados: **118**.
+- Los 31 expedientes con archivos están **31/31 mapeados** a su expediente actual mediante `Clave deduplicación = exp-legado-<id_origen>`.
+- Se ha comprobado además mediante lectura de una ficha legado que Notion conserva el nombre original del archivo dentro de la referencia de adjunto; por ejemplo, en `ANA LUQUE ROMERO MESA` aparecen `CERTIF.HACIENDA_ANA.pdf` y `CERTIF.SEG.SOCIAL_ANA.pdf`.
+
+### Manifiesto por expediente
+| Expediente | Archivos legacy |
+|---|---:|
+| JESUS EGEA Y SARA | 2 |
+| GABRIELA LUCICA IORGA | 9 |
+| CARMELO | 2 |
+| ISABEL | 10 |
+| PACO Y TAMARA | 1 |
+| MARCOS | 2 |
+| FRANCISCA DURAN TABARES | 2 |
+| JORGE Y ALEX | 2 |
+| FRANCISCO VALDERRAMA Y GEMA LLAMAS | 1 |
+| ROSELIS Y RODERICK | 1 |
+| JONATAN, MACARENA Y JOSE ANTONIO | 2 |
+| YESICA Y RUBEN | 6 |
+| FRANCISCO Y ESTHER | 1 |
+| JAVIER | 1 |
+| ANA LUQUE ROMERO MESA | 2 |
+| SERGIO GAITAN Y GEMA VELASCO | 2 |
+| KARLA | 2 |
+| MARIA BENILDE GOMEZ DE ARANDA PEREA | 1 |
+| JAVIER VILLA GUZMAN | 2 |
+| JAVIER NAVARRO (MAÑO) | 8 |
+| NURIA | 1 |
+| MARIA RONCERO Y FRANCISCO | 11 |
+| CARLOS Y MARIA | 1 |
+| MARIA JESUS | 1 |
+| Mª CARMEN VELA ORTIZ | 1 |
+| THAILAN Y ANGELA | 1 |
+| FELISA Y MAGDALENA | 1 |
+| KIKO LOPERA | 12 |
+| LOLA FONSECA PABLO | 13 |
+| SAMRA IMRAN | 10 |
+| CRISTINA GRACIA | 7 |
+| **TOTAL** | **118** |
 
 Fuente nueva: `Documentación · Fénix Capital`.
 
@@ -27,8 +66,9 @@ Estado actual comprobado:
 
 Conclusión:
 - La estructura documental nueva existe, pero los 118 binarios históricos no están todavía representados como archivos operativos en la nueva base.
+- La identidad expediente-origen está resuelta para los 31 expedientes que contienen archivos, por lo que ya existe un destino inequívoco por expediente.
 - No es seguro dar por migrada la documentación solo porque existan registros documentales relacionados.
-- El gate documental requiere inventario y migración controlada de los archivos históricos, manteniendo relación con expediente y sin perder el origen.
+- La migración binaria no se ejecutará reutilizando IDs de archivo internos a ciegas: antes debe existir un método de copia que preserve contenido, nombre y relación y permita verificar accesibilidad en destino.
 - No se deben recrear tipos de documento ni clasificaciones si el archivo legacy no aporta evidencia suficiente.
 
 ## Bancos históricos
@@ -48,11 +88,12 @@ Conclusión:
 
 ## Gate antes de PROD
 1. Mantener Belén como financiero inicial en los 46 expedientes legado.
-2. Inventariar los 118 archivos legacy por expediente y preservar su identidad/origen.
-3. Migrar los archivos al modelo `Documentación · Fénix Capital` solo con relación exacta al expediente y sin inventar metadatos.
-4. Comprobar que el número de archivos migrados coincide con el inventario aceptado y que son accesibles desde la ficha del expediente.
-5. Reconciliar bancos distinguiendo: enviado realmente, considerado/candidato y simple referencia histórica.
-6. Ejecutar un corte final del CRM antiguo inmediatamente antes del lanzamiento para incorporar cambios y archivos añadidos desde esta auditoría.
+2. Mantener este manifiesto de 118 archivos como baseline documental y repetir el recuento en el corte final previo al lanzamiento.
+3. Obtener cada binario legacy mediante mecanismo de copia soportado, conservar nombre/origen y vincularlo únicamente al expediente exacto ya mapeado.
+4. Migrar al modelo `Documentación · Fénix Capital` sin inventar tipo, estado o metadatos no demostrados.
+5. Verificar tras la copia: 118/118 archivos esperados, apertura real del archivo y relación correcta con expediente.
+6. Reconciliar bancos distinguiendo: enviado realmente, considerado/candidato y simple referencia histórica.
+7. Ejecutar un corte final del CRM antiguo inmediatamente antes del lanzamiento para incorporar cambios y archivos añadidos desde esta auditoría.
 
 ## Regla de seguridad
 No se borran ni se sustituyen adjuntos legacy durante la transición. El CRM antiguo seguirá siendo fuente de contraste durante el periodo de convivencia hasta que la integridad documental y bancaria quede validada.
