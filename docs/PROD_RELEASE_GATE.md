@@ -90,6 +90,7 @@ Quedan fuera del gate de lanzamiento inicial y se priorizarán después de que l
 - No inventar endpoints, tablas, permisos o reglas de negocio para completar una promoción.
 - No ejecutar borrados o desactivaciones irreversibles del CRM antiguo como parte del cutover.
 - Ante credenciales realmente inaccesibles o coste obligatorio, señalar el bloqueo concreto y seguir avanzando en todo lo demás.
+- Los manifiestos y planes generados durante migraciones deben quedar fuera del repositorio mediante `.gitignore`; nunca se versionan URLs firmadas temporales, credenciales ni artefactos generados con metadatos sensibles.
 
 ## Criterio de cierre
 Este documento define un flujo de avance continuo: **verde → prosigue; rojo → corrige y revalida**. La orden explícita operativa vigente permite avanzar sin convertir a Carlos en un gate manual para cada paso. La activación real solo queda condicionada a que los gates técnicos, de datos, credenciales y smoke estén efectivamente en verde y a mantener el CRM antiguo intacto como respaldo.
