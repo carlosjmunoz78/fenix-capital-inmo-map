@@ -44,7 +44,9 @@ La fuente nueva tiene 26 relaciones `Inmobiliaria`:
 - además ha canonizado 2 de los 3 casos texto-only: `KIKO LOPERA` y `SAMRA IMRAN`;
 - `Paco Martín` sigue sin relación `Inmobiliaria` en el CRM nuevo.
 
-Por tanto, los dos casos adicionales respecto de las 24 relaciones estructuradas ya están justificados por evidencia del propio origen. No se ha inventado ninguna inmobiliaria. El único pendiente de este subbloque es validar/canonizar `Paco Martín → Martin` si existe evidencia suficiente sobre qué registro actual corresponde.
+La evidencia canónica para `Paco Martín → MARTIN INMOBILIARIA` queda ahora fuertemente respaldada sin realizar ninguna escritura: el contacto legado `Paco Martín` está tipado como `Gerente inmobiliaria`, tiene email en el dominio `martininmobiliaria.es` y el expediente legado contiene inmobiliaria texto `Martin`; en el CRM nuevo existe `MARTIN INMOBILIARIA`, Lucena, con el mismo dominio corporativo y `ID legado CRM` que apunta al registro histórico de MARTIN INMOBILIARIA. Esta evidencia permite considerar resuelto el mapping lógico de origen, aunque la relación del expediente no se escribe automáticamente dentro de esta auditoría.
+
+Por tanto, los dos casos adicionales respecto de las 24 relaciones estructuradas están justificados por evidencia del propio origen y el tercer caso (`Paco Martín`) ya tiene destino canónico identificado. No se ha inventado ninguna inmobiliaria.
 
 ### Financiero — gap operativo cerrado
 El antiguo tiene 42/46 relaciones financieras históricas. Por decisión operativa explícita del 2026-08-30, de momento todos los expedientes se asignan a Belén. Esa regla ya se aplicó en el CRM nuevo y se verificó 46/46 en `Financiero ficha`.
@@ -63,7 +65,7 @@ Las listas históricas se conservan como contexto y no se transforman automátic
 
 ## Gate relacional antes de lanzar
 1. Cliente: resolver con evidencia los 7 expedientes reales todavía sin relación; excluir del gate de cliente real los 2 registros estructurales.
-2. Inmobiliaria: diferencia 26 vs 24 explicada y cerrada; revisar únicamente `Paco Martín → Martin` antes del corte final si hay evidencia canónica suficiente.
+2. Inmobiliaria: mapping lógico de origen cerrado, incluido `Paco Martín → MARTIN INMOBILIARIA`; queda únicamente aplicar la relación cuando corresponda dentro de la carga/corrección autorizada.
 3. Financiero: CERRADO operativamente por regla temporal Belén 46/46.
 4. Documentación: ejecutar la migración de 118 archivos cuando el runtime disponga de credencial y reconciliar 118/118.
 5. Banco: preservar contexto y crear relaciones operativas solo con evidencia de envío/oferta real.
@@ -73,6 +75,6 @@ Las listas históricas se conservan como contexto y no se transforman automátic
 ## Estado
 `RELATION_GATE = OPEN`.
 
-Subgates cerrados: `FINANCIERO = CLOSED`, `INMOBILIARIA_DIFF_26_VS_24 = CLOSED`.
+Subgates cerrados: `FINANCIERO = CLOSED`, `INMOBILIARIA_DIFF_26_VS_24 = CLOSED`, `PACO_MARTIN_MAPPING = CLOSED`.
 
-Pendientes principales: `DOCUMENTACION_118`, `CLIENTE_7_REALES`, `PACO_MARTIN_INMOBILIARIA`, contexto bancario verificable y corte delta final.
+Pendientes principales: `DOCUMENTACION_118`, `CLIENTE_7_REALES`, contexto bancario verificable y corte delta final.
