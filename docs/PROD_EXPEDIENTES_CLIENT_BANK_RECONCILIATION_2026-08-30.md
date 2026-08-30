@@ -43,6 +43,19 @@ Se ha comprobado la fuente amplia de contactos del CRM legado para evitar confun
 - Para el nombre `Antonio` existen registros legacy exactos clasificados como `Gerente inmobiliaria` en distintas inmobiliarias. Esto demuestra que el nombre aislado tampoco identifica al cliente del expediente `ANTONIO`.
 - Los otros expedientes pendientes no tienen relación `02_Contactos_PRO` que permita resolver de forma inequívoca la identidad en esta comprobación.
 
+### Comprobación de `08_Notas_PRO`
+
+Se ha agotado también la ruta de notas estructuradas del CRM legado para los siete expedientes reales pendientes. Los siete tienen `08_Notas_PRO = null`:
+- ANTONIO
+- JONATAN, MACARENA Y JOSE ANTONIO
+- LEYDE
+- LOLA FONSECA PABLO
+- NICOLAS
+- Paco Martín
+- SAMRA IMRAN
+
+Por tanto, `08_Notas_PRO` no aporta teléfono, email, DNI/NIE ni otro identificador estructurado adicional para resolver estos enlaces. No se fuerza ninguna identidad por ausencia de evidencia.
+
 ### Evidencia documental de `LOLA FONSECA PABLO`
 
 La ficha legacy de `LOLA FONSECA PABLO` contiene 13 adjuntos reales. Entre los nombres de archivo se observan `DNI_LOLA.pdf` y `DNI_SARA.pdf`, además de documentación laboral y bancaria separada de ambas personas. Las notas internas indican que Lola y su hija Sara solicitan la hipoteca, aunque la compraventa se haría solo a nombre de Lola.
@@ -75,6 +88,7 @@ En toda la población legacy, los únicos expedientes con `🏦 Banco (relación
 2. Resolver las 7 relaciones de cliente reales únicamente con identidad canónica inequívoca; no fusionar por simple parecido de nombre.
 3. Excluir los 2 registros estructurales del gate de cliente real.
 4. No reutilizar contactos B2B/gerentes como clientes aunque el nombre coincida.
-5. Conservar evidencia documental de identidad sin inventar campos extraídos que aún no estén verificados.
-6. Preservar contexto bancario histórico como contexto; las relaciones estructuradas identifican banco, pero no se convierten automáticamente en `Envíos`/`Ofertas` sin evidencia operativa suficiente y compatible con el modelo actual.
-7. Repetir esta reconciliación dentro del corte delta final inmediatamente antes del lanzamiento.
+5. No usar `08_Notas_PRO` como fuente de identidad para estos siete casos: está vacío en los siete.
+6. Conservar evidencia documental de identidad sin inventar campos extraídos que aún no estén verificados.
+7. Preservar contexto bancario histórico como contexto; las relaciones estructuradas identifican banco, pero no se convierten automáticamente en `Envíos`/`Ofertas` sin evidencia operativa suficiente y compatible con el modelo actual.
+8. Repetir esta reconciliación dentro del corte delta final inmediatamente antes del lanzamiento.
