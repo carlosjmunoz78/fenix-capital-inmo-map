@@ -34,6 +34,17 @@ Se ha consultado la fuente canónica actual de clientes sin escribir datos.
 - La discrepancia `LOLA FONSECA PABLO` ↔ `LOLA FUENSECA` confirma que tampoco debe usarse una regla de similitud como sustituto de identidad.
 - Resultado: `CLIENT_LINK_GATE = OPEN` para esos 7 casos hasta disponer de evidencia adicional (teléfono, email, DNI/NIE u otra relación inequívoca). No se ha creado ni modificado ningún cliente.
 
+### Comprobación adicional contra `02_Contactos_PRO`
+
+Se ha comprobado la fuente amplia de contactos del CRM legado para evitar confundir contactos B2B con clientes particulares.
+
+- El expediente `Paco Martín` sí tiene una relación legacy en `02_Contactos_PRO`, pero el registro relacionado está clasificado como `Gerente inmobiliaria`, asociado a inmobiliaria, y su propia nota indica que fue corregido porque antes había quedado como cliente durante una migración. Por tanto, esa relación NO sirve como identidad canónica de cliente y no debe copiarse a `Cliente`.
+- Para el nombre `Antonio` existen registros legacy exactos clasificados como `Gerente inmobiliaria` en distintas inmobiliarias. Esto demuestra que el nombre aislado tampoco identifica al cliente del expediente `ANTONIO`.
+- Los otros expedientes pendientes no tienen relación `02_Contactos_PRO` que permita resolver de forma inequívoca la identidad en esta comprobación.
+- El texto de notas de `LOLA FONSECA PABLO` confirma que la operación corresponde a Lola y su hija Sara, pero no aporta por sí solo un identificador canónico suficiente para crear/vincular cliente automáticamente.
+
+Conclusión: no se reutilizará `02_Contactos_PRO` como atajo para rellenar `Cliente`. Se priorizará evidencia inequívoca y se mantendrán estos casos abiertos hasta el corte final o hasta encontrar identificadores verificables.
+
 ## Contexto bancario observado en esos expedientes
 
 El CRM legado contiene contexto bancario para varios de estos casos. Este contexto NO se transforma automáticamente en `Envíos a banco` porque la lista histórica no prueba por sí sola que hubiese un envío real.
@@ -51,5 +62,6 @@ El CRM legado contiene contexto bancario para varios de estos casos. Este contex
 1. Mantener CRM antiguo operativo y sin borrados.
 2. Resolver las 7 relaciones de cliente reales únicamente con identidad canónica inequívoca; no fusionar por simple parecido de nombre.
 3. Excluir los 2 registros estructurales del gate de cliente real.
-4. Preservar contexto bancario histórico como contexto; crear `Envíos`/`Ofertas` solo si existe evidencia de operación real.
-5. Repetir esta reconciliación dentro del corte delta final inmediatamente antes del lanzamiento.
+4. No reutilizar contactos B2B/gerentes como clientes aunque el nombre coincida.
+5. Preservar contexto bancario histórico como contexto; crear `Envíos`/`Ofertas` solo si existe evidencia de operación real.
+6. Repetir esta reconciliación dentro del corte delta final inmediatamente antes del lanzamiento.
