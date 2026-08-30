@@ -27,6 +27,17 @@ jobs:
           node-version: 24
           cache: npm
 
+      - name: Report Notion migration credential readiness
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+        shell: bash
+        run: |
+          if [ -n "$NOTION_TOKEN" ]; then
+            echo "NOTION_TOKEN_READY=yes"
+          else
+            echo "NOTION_TOKEN_READY=no"
+          fi
+
       - name: Install dependencies reproducibly
         run: |
           if [ -f package-lock.json ]; then
@@ -66,4 +77,6 @@ jobs:
           if-no-files-found: ignore
 
 # Validation only. Dummy PROD values prove the production code path builds without
-# reusing PRE-PROD fallbacks. No deployment, no branch write, no backend contact or mutation.
+# reusing PRE-PROD fallbacks. The credential readiness step reports presence only;
+# it never prints or contacts Notion with the secret. No deployment, no branch write,
+# no backend contact or mutation.
