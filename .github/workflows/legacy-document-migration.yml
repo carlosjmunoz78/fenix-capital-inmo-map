@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   migrate-legacy-documents:
-    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.confirm == 'MIGRATE_118') || (github.event_name == 'push' && github.event.head_commit.message == 'ops(data): execute controlled legacy document migration') }}
+    if: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.confirm == 'MIGRATE_118') }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
