@@ -24,10 +24,10 @@ Objetivo: fijar una referencia cuantitativa previa al corte final del CRM legado
 - El esquema de destino existe (`Archivo tratado` + relación `Expediente`), pero este baseline NO afirma que los binarios hayan sido transferidos.
 
 ## CI asociado
-- Candidato `prod-preparation`: `e93b1bbf81d4289b48c02d758aca6fa3740a04d6`.
-- PROD Preparation Build #70 / `33308144852`: SUCCESS.
-- PRE-PROD PR check #2739 / `33308146770`: SUCCESS.
-- Artefacto QA #70: `fenix-prod-preparation-playwright-report`, id `9731156850`, digest `sha256:589c2ae6ad220d7c419c3c3851b2f83fa71beee9e9bf82da7c5e535d35951395`.
+- Baseline versionado en candidato `prod-preparation`: `028fce479e029a372fe363df6915f3124e9a0b49`.
+- PROD Preparation Build #71 / `33308878638`: SUCCESS.
+- PRE-PROD PR check #2740 / `33308881003`: SUCCESS.
+- El baseline queda técnicamente validado sobre el mismo SHA antes de iniciar cualquier corte final.
 
 ## Regla de delta final
 Este baseline NO congela el CRM antiguo. Justo antes del lanzamiento se debe volver a leer el origen y comparar contra esta referencia y contra el manifiesto reconciliado vigente. Cualquier alta, cambio de estado, relación, documento, baja, pausa, reactivación o modificación operativa posterior debe entrar en el delta final mediante mapping estable e idempotente.
