@@ -6,15 +6,16 @@ export const IS_PRODUCTION=productionHostname||runtimeEnv==='production'||runtim
 
 const PROD_SUPABASE_URL='https://cluhljgonannaafpmblx.supabase.co';
 const PROD_SUPABASE_PUBLISHABLE_KEY='sb_publishable_yjISKmA5UPfF3d7NitP_DA_j5LGydh0';
-const PREPROD_SUPABASE_URL='https://hnqlnvakzaywtafeiybt.supabase.co';
-const PREPROD_SUPABASE_PUBLISHABLE_KEY='sb_publishable_uvtiidkBBkFRt2K34so27g_JpCbMUZw';
 
 export const SUPABASE_URL=IS_PRODUCTION
   ? String(import.meta.env.VITE_SUPABASE_URL||PROD_SUPABASE_URL)
-  : String(import.meta.env.VITE_SUPABASE_URL||PREPROD_SUPABASE_URL);
+  : String(import.meta.env.VITE_SUPABASE_URL||'');
 export const SUPABASE_PUBLISHABLE_KEY=IS_PRODUCTION
   ? String(import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY||PROD_SUPABASE_PUBLISHABLE_KEY)
-  : String(import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY||PREPROD_SUPABASE_PUBLISHABLE_KEY);
+  : String(import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY||'');
+if(!SUPABASE_URL||!SUPABASE_PUBLISHABLE_KEY){
+  throw new Error(IS_PRODUCTION?'Configuración Supabase PROD incompleta':'Configuración Supabase PRE-PROD incompleta');
+}
 
 const FUNCTION_SUFFIX=IS_PRODUCTION?'':'-test';
 const functionName=(base:string)=>`${base}${FUNCTION_SUFFIX}`;
