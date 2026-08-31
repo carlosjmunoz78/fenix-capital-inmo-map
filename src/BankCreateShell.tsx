@@ -1,6 +1,6 @@
 import {useEffect,useState} from 'react';
 import {useLocation,useNavigate} from 'react-router-dom';
-import {ArrowLeft,Landmark,Plus,X} from 'lucide-react';
+import {Landmark,Plus,X} from 'lucide-react';
 import {fetchAppApi,IS_PRODUCTION,SUPABASE_URL,supabase} from './supabase';
 import {normalizeNavigation,type NavItem} from './masterNavigation';
 import OperationalShellFrame from './OperationalShellFrame';
@@ -40,7 +40,6 @@ export default function BankCreateShell(){
   setMessage(`No se pudo crear el banco (${data?.error||response.status}).`)
  }
  return <OperationalShellFrame theme={theme} navigation={nav.length?nav:fallbackNav} activeRoute="/bancos" query={globalQuery} onQueryChange={setGlobalQuery} searchPlaceholder="Buscar en toda la app..." searchActionLabel="Buscar" onSearchAction={globalSearch} name={ctx?.role||'Usuario'} role="" initials={(ctx?.role||'U').slice(0,2).toUpperCase()} onToggleTheme={()=>setTheme(theme==='light'?'dark':'light')} onLogout={logout}>
-  <button className="secondary-action" onClick={()=>navigate('/bancos')}><ArrowLeft size={15}/> Volver a Bancos</button>
   <div className="ops-title"><div><span className="ops-icon"><Landmark size={20}/></span><div><h1>Nuevo banco</h1><p>Alta controlada de entidad, contacto y criterios principales.</p></div></div><span className="ops-live ok">{IS_PRODUCTION?'PROD':'PRE-PROD'}</span></div>
   <section className="inmo-ana-hero"><div className="inmo-ana-photo"><img src={anaVertical} alt="Ana"/></div><div className="inmo-ana-body"><span>ANA · NUEVO BANCO</span><h2>Registramos solo información conocida y revisada</h2><p>La ficha se crea únicamente después de revisar y confirmar. Los datos no informados permanecen vacíos; Ana no completa condiciones bancarias por suposición.</p><div className="inmo-next"><button onClick={()=>document.getElementById('nueva-ficha-banco')?.scrollIntoView({behavior:'smooth'})}><b>1</b><strong>Completar ficha</strong><small>Ir a datos →</small></button><button onClick={()=>navigate('/bancos/contactos')}><b>2</b><strong>Revisar contactos</strong><small>Abrir contactos →</small></button><button onClick={prepareWithAna}><b>3</b><strong>Ayúdame con Ana</strong><small>Analizar la ficha →</small></button></div></div></section>
   {!canCreate&&<div className="ops-message">Tu perfil puede consultar Bancos, pero no crear nuevas entidades.</div>}

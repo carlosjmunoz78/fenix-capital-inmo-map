@@ -55,7 +55,6 @@ export default function OperationalUniformityGuard(){
    const root=roots.at(-1) as HTMLElement|undefined;
    if(!root){setSidebarHost(null);setFooterHost(null);return;}
 
-   // Inicio/Dirección already owns its canonical sidebar contract; never overlay it.
    const isHome=location.pathname.replace(/\/+$/,'')==='/inicio'||root.classList.contains('dir-shell');
    const directSide=root.querySelector(':scope > .ops-side') as HTMLElement|null;
    let sideHost=root.querySelector(':scope > .ops-uniform-sidebar-host') as HTMLElement|null;
