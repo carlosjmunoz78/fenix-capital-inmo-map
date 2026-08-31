@@ -12,35 +12,20 @@ jobs:
   diagnose:
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    env:
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
-      CLOUDFLARE_API_KEY: ${{ secrets.CLOUDFLARE_API_KEY }}
-      CF_API_KEY: ${{ secrets.CF_API_KEY }}
-      CLOUDFLARE_GLOBAL_API_KEY: ${{ secrets.CLOUDFLARE_GLOBAL_API_KEY }}
-      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
     steps:
-      - name: DNS and HTTP diagnostics
+      - name: Test current live and GitHub Pages target
         shell: bash
         run: |
           set -u
           stamp="$(date +%s)"
-          echo '=== SECRET AVAILABILITY (values never printed) ==='
-          for name in CLOUDFLARE_API_TOKEN CF_API_TOKEN CLOUDFLARE_API_KEY CF_API_KEY CLOUDFLARE_GLOBAL_API_KEY VERCEL_TOKEN; do
-            if [ -n "${!name:-}" ]; then echo "$name=SET"; else echo "$name=UNSET"; fi
-          done
-          echo '=== DNS CNAME ==='
+          echo '=== LIVE DNS ==='
           dig +short app.fenixcapital.es CNAME || true
-          echo '=== DNS A ==='
-          dig +short app.fenixcapital.es A || true
-          echo '=== DNS AAAA ==='
-          dig +short app.fenixcapital.es AAAA || true
-          echo '=== NS fenixcapital.es ==='
-          dig +short fenixcapital.es NS || true
-          echo '=== HTTP HEAD CACHE-BUST ==='
-          curl -sSIL --max-time 30 -H 'Cache-Control: no-cache' "https://app.fenixcapital.es/?diag=${stamp}" || true
-          echo '=== LIVE SHA CACHE-BUST ==='
-          curl -sS -D - --max-time 30 -H 'Cache-Control: no-cache' "https://app.fenixcapital.es/PROD_SOURCE_SHA.txt?diag=${stamp}" || true
-          echo
-          echo '=== ASSET REFERENCES ==='
+          echo '=== LIVE ASSETS ==='
           curl -sS --max-time 30 -H 'Cache-Control: no-cache' "https://app.fenixcapital.es/?diag=${stamp}" | grep -Eo '/assets/[^" ]+\.(js|css)' | head -20 || true
+          echo '=== GITHUB PAGES ROOT ==='
+          curl -sSIL --max-time 30 "https://carlosjmunoz78.github.io/fenix-capital-inmo-map/" || true
+          echo '=== GITHUB PAGES PROD SHA ==='
+          curl -sS -D - --max-time 30 "https://carlosjmunoz78.github.io/fenix-capital-inmo-map/PROD_SOURCE_SHA.txt" || true
+          echo
+          echo '=== GITHUB PAGES ASSETS ==='
+          curl -sS --max-time 30 "https://carlosjmunoz78.github.io/fenix-capital-inmo-map/" | grep -Eo '/[^" ]*assets/[^" ]+\.(js|css)' | head -20 || true
