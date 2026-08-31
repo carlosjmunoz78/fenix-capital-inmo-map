@@ -39,7 +39,7 @@ function normalizeProdRows(path:string,data:unknown):unknown{
 }
 
 async function fetchProdCompatibility<T>(path:string):Promise<{status:number;data:T|null}>{
-  const contactMode=path==='/clientes'?'Cliente':path==='/contactos-inmobiliaria'?'Inmobiliaria':null;
+  const contactMode=path==='/clientes'?'Cliente':path==='/contactos-inmobiliaria'?'Contacto inmobiliaria':null;
   const gatewayPath=contactMode?'/contactos':path;
   const result=await fetchAppApi<unknown>(gatewayPath);
   if(result.status!==200||!result.data)return {status:result.status,data:result.data as T|null};
