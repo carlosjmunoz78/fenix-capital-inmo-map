@@ -80,7 +80,7 @@ async function fetchProdCompatibility<T>(path:string):Promise<{status:number;dat
     if(!document)return {status:404,data:null};
     const view=await fetchAppApi<Record<string,unknown>>(`${path}/view`);
     const signedUrl=view.status===200&&view.data&&typeof view.data.signed_url==='string'?view.data.signed_url:'';
-    return {status:200,data:{...detail.data,item:{...document,...(signedUrl?{url:signedUrl}:{})}} as T};
+    return {status:200,data:{...detail.data,item:{...document,...(signedUrl?{url:signedUrl}: {})}} as T};
   }
 
   const gatewayPath=contactMode?'/contactos':path;
