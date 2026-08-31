@@ -7,27 +7,20 @@ on:
 
 permissions:
   contents: read
-  pages: write
+  pages: read
 
 jobs:
   diagnose:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 15
     env:
       GH_TOKEN: ${{ github.token }}
     steps:
-      - name: Inspect and restart GitHub Pages custom-domain TLS
+      - name: Inspect GitHub Pages state
         shell: bash
         run: |
           set -euo pipefail
           api="https://api.github.com/repos/${GITHUB_REPOSITORY}/pages"
-          echo '=== CURRENT PAGES STATE ==='
-          curl -fsS -H "Authorization: Bearer ${GH_TOKEN}" -H 'Accept: application/vnd.github+json' "$api" | python -m json.tool
-          echo '=== RESTART CUSTOM DOMAIN PROVISIONING ==='
-          curl -fsS -X PUT -H "Authorization: Bearer ${GH_TOKEN}" -H 'Accept: application/vnd.github+json' -H 'Content-Type: application/json' "$api" -d '{"cname":null}' >/dev/null || true
-          sleep 3
-          curl -fsS -X PUT -H "Authorization: Bearer ${GH_TOKEN}" -H 'Accept: application/vnd.github+json' -H 'Content-Type: application/json' "$api" -d '{"cname":"app.fenixcapital.es"}' >/dev/null || true
-          echo '=== PAGES STATE AFTER RESTART ==='
           curl -fsS -H "Authorization: Bearer ${GH_TOKEN}" -H 'Accept: application/vnd.github+json' "$api" | python -m json.tool
 
       - name: Wait for HTTPS certificate and exact PROD build
@@ -36,8 +29,8 @@ jobs:
           set -euo pipefail
           expected='066807d19376f5dac100833e5ba7350688290961'
           test "$(dig +short app.fenixcapital.es CNAME | tail -1)" = 'carlosjmunoz78.github.io.'
-          for i in $(seq 1 36); do
-            echo "TLS attempt ${i}/36"
+          for i in $(seq 1 48); do
+            echo "TLS attempt ${i}/48"
             cert=$(echo | openssl s_client -servername app.fenixcapital.es -connect app.fenixcapital.es:443 2>/dev/null | openssl x509 -noout -subject -ext subjectAltName 2>/dev/null || true)
             echo "$cert"
             if echo "$cert" | grep -F 'DNS:app.fenixcapital.es' >/dev/null; then
