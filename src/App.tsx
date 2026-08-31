@@ -3,7 +3,7 @@ import { Calculator, Eye, EyeOff, LogOut, Minimize2, Moon, Sun, X } from 'lucide
 import type { Session } from '@supabase/supabase-js';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { calculateMortgage } from './calculator';
-import { fetchAppApi, supabase } from './supabase';
+import { fetchAppApi, IS_PRODUCTION, supabase } from './supabase';
 import DirectionDashboard from './DirectionDashboard';
 import TransitionScreen from './TransitionScreen';
 import './logo.css';
@@ -37,6 +37,7 @@ const testLoginAliases: Record<string,string> = {
 function resolveLogin(value:string){
   const trimmed=value.trim().toLowerCase();
   if(trimmed.includes('@')) return trimmed;
+  if(IS_PRODUCTION)return '';
   const alias=trimmed.replace(/[\s_-]+/g,'');
   return testLoginAliases[alias] || '';
 }
@@ -297,7 +298,7 @@ export default function App(){
     </form>
   </div>;
 
-  const isDirection = ctx?.actor_code==='DIR-TEST' || roleLabel.toLowerCase().includes('direccion') || roleLabel.toLowerCase().includes('dirección');
+  const isDirection = (!IS_PRODUCTION && ctx?.actor_code==='DIR-TEST') || roleLabel.toLowerCase().includes('direccion') || roleLabel.toLowerCase().includes('dirección');
   if(isDirection && location.pathname==='/inicio'){
     return <DirectionDashboard onNavigate={route=>navigate(route)} onLogout={logout} calc={calc} setCalc={setCalc} result={result}/>;
   }
