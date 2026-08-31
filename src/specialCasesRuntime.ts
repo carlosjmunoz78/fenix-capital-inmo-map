@@ -1,7 +1,8 @@
-import {SUPABASE_URL,supabase} from './supabase';
+import {IS_PRODUCTION,SUPABASE_URL,supabase} from './supabase';
 import {demoDetail,demoRows,isDemoSpecialCase} from './specialCasesDemo';
 
 export async function fetchSpecialCasesRuntime<T>(path:string){
+ if(IS_PRODUCTION)return{status:503,data:null as T|null};
  const clean=path.split('?')[0];
  const detail=clean.match(/^\/(herencias|obras-nuevas)\/([^/]+)$/);
  if(detail&&isDemoSpecialCase(decodeURIComponent(detail[2]))){
@@ -28,6 +29,7 @@ export type SpecialCaseCreatePayload={
 };
 
 export async function createSpecialCaseRuntime<T>(path:'/herencias'|'/obras-nuevas',payload:SpecialCaseCreatePayload){
+ if(IS_PRODUCTION)return{status:503,data:null as T|null};
  const{data:{session}}=await supabase.auth.getSession();
  if(!session?.access_token)return{status:401,data:null as T|null};
  const r=await fetch(`${SUPABASE_URL}/functions/v1/fenix-special-cases-runtime-test${path}`,{
