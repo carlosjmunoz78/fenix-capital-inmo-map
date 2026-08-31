@@ -23,7 +23,7 @@ env:
 jobs:
   runtime-smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - name: Checkout production source
         uses: actions/checkout@v4
@@ -57,6 +57,25 @@ jobs:
           test "$status" = "200"
           grep -qi '<!doctype html' "$body"
           grep -qi 'fenix' "$body"
+
+      - name: APP domain serves this exact main SHA
+        if: github.ref == 'refs/heads/main'
+        shell: bash
+        run: |
+          set -euo pipefail
+          expected="${GITHUB_SHA}"
+          live=""
+          for attempt in $(seq 1 30); do
+            live="$(curl --silent --show-error --location --max-time 20 --header 'Cache-Control: no-cache' "${APP_URL}/PROD_SOURCE_SHA.txt?sha=${expected}&attempt=${attempt}" 2>/dev/null | tr -d '\r\n[:space:]' || true)"
+            if [ "$live" = "$expected" ]; then
+              echo "Live domain is serving expected SHA: $expected"
+              exit 0
+            fi
+            echo "Waiting for live deployment ($attempt/30). Expected=$expected Live=${live:-unavailable}"
+            sleep 10
+          done
+          echo "Live domain did not converge to expected SHA. Expected=$expected Last=${live:-unavailable}" >&2
+          exit 1
 
       - name: Gateway health is PROD and reachable
         shell: bash
