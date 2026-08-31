@@ -12,6 +12,19 @@ test('PRE-PROD aplica siempre sufijo -test a funciones Edge',()=>{
   expect(text).not.toMatch(/functions\/v1\/fenix-[a-z0-9-]+(?:[/'"`])/i);
 });
 
+test('runtimes PRE-PROD explícitos fallan cerrados en PROD antes de tocar endpoints -test',()=>{
+  const files=['src/notionRuntime.ts','src/notariasRuntime.ts','src/registrosRuntime.ts','src/specialCasesRuntime.ts','src/DirectionKpiDrilldownGuard.tsx'];
+  for(const file of files){
+    const text=fs.readFileSync(path.resolve(file),'utf8');
+    expect(text,`${file} debe importar IS_PRODUCTION`).toContain('IS_PRODUCTION');
+    const guard=text.indexOf('if(IS_PRODUCTION)');
+    const testEndpoint=text.indexOf('-test');
+    expect(guard,`${file} debe tener gate PROD`).toBeGreaterThan(-1);
+    expect(testEndpoint,`${file} debe conservar endpoint PRE-PROD`).toBeGreaterThan(-1);
+    expect(guard,`${file} debe cortar PROD antes del endpoint -test`).toBeLessThan(testEndpoint);
+  }
+});
+
 test('cliente y almacenamiento de sesión mantienen aislamiento PRE-PROD/PROD',()=>{
   const text=fs.readFileSync(path.resolve('src/supabase.ts'),'utf8');
   expect(text).toContain("const AUTH_STORAGE_KEY=IS_PRODUCTION?'fenix-prod-auth-v1':'fenix-preprod-auth-v2'");
