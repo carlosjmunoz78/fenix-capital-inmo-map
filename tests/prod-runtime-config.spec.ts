@@ -5,11 +5,13 @@ const source=fs.readFileSync('src/supabase.ts','utf8');
 const envExample=fs.readFileSync('.env.production.example','utf8');
 
 test('PROD exige configuración Supabase dedicada y separa almacenamiento auth', async () => {
-  expect(source).toContain("const runtimeEnv=(import.meta.env.VITE_FENIX_ENV||'preprod').toLowerCase()");
+  expect(source).toContain("const runtimeEnv=(import.meta.env.VITE_FENIX_ENV||'').toLowerCase()");
+  expect(source).toContain("window.location.hostname==='app.fenixcapital.es'");
   expect(source).toContain("runtimeEnv==='production'||runtimeEnv==='prod'");
+  expect(source).toContain("const PROD_SUPABASE_URL='https://cluhljgonannaafpmblx.supabase.co'");
   expect(source).toContain("IS_PRODUCTION?'fenix-prod-auth-v1':'fenix-preprod-auth-v2'");
-  expect(source).toContain("if(IS_PRODUCTION&&(!SUPABASE_URL||!SUPABASE_PUBLISHABLE_KEY))");
-  expect(source).toContain("throw new Error('FENIX PROD runtime requires dedicated Supabase URL and publishable key.')");
+  expect(source).toContain("throw new Error(IS_PRODUCTION?'Configuración Supabase PROD incompleta':'Configuración Supabase PRE-PROD incompleta')");
+  expect(source).not.toContain('https://hnqlnvakzaywtafeiybt.supabase.co');
 });
 
 test('PRE-PROD conserva funciones -test y PROD usa nombres sin sufijo', async () => {
