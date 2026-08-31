@@ -83,6 +83,7 @@ export default function App(){
   const [loadingLogin,setLoadingLogin]=useState(false);
   const [loadingReset,setLoadingReset]=useState(false);
   const [passwordRecovery,setPasswordRecovery]=useState(false);
+  const [recoveryLinkVerified,setRecoveryLinkVerified]=useState(false);
   const [recoveryEmail,setRecoveryEmail]=useState('');
   const [recoveryCode,setRecoveryCode]=useState('');
   const [newPassword,setNewPassword]=useState('');
@@ -101,6 +102,11 @@ export default function App(){
     supabase.auth.getSession().then(async ({data})=>{
       const remembered=localStorage.getItem('fenix-remember-device')==='true';
       const activeThisBrowser=sessionStorage.getItem('fenix-session-active')==='1';
+      const recoveryUrl=window.location.hash.includes('type=recovery')||window.location.search.includes('type=recovery');
+      if(data.session && recoveryUrl){
+        if(mounted){setSession(data.session);setPasswordRecovery(true);setRecoveryLinkVerified(true);setAuthReady(true);}
+        return;
+      }
       if(data.session && !remembered && !activeThisBrowser){
         await supabase.auth.signOut();
         if(mounted){setSession(null);setAuthReady(true);}
@@ -110,7 +116,11 @@ export default function App(){
     });
     const {data:{subscription}}=supabase.auth.onAuthStateChange((event,next)=>{
       setSession(next);
-      if(event==='PASSWORD_RECOVERY') setPasswordRecovery(true);
+      if(event==='PASSWORD_RECOVERY'){
+        setPasswordRecovery(true);
+        setRecoveryLinkVerified(Boolean(next));
+        setResetMessage('Enlace de recuperación validado. Crea ahora tu nueva contraseña.');
+      }
     });
     return ()=>{mounted=false;subscription.unsubscribe();};
   },[]);
@@ -189,44 +199,54 @@ export default function App(){
       return;
     }
     setLoadingReset(true);
-    const {error}=await supabase.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin});
+    const {error}=await supabase.auth.resetPasswordForEmail(email,{redirectTo:`${window.location.origin}/`});
     setLoadingReset(false);
     if(error){
       const authFailure=error as {status?:number;code?:string};
       if(authFailure.status===429 || authFailure.code==='over_email_send_rate_limit'){
-        setAuthError('Has solicitado varios códigos seguidos. Por seguridad, espera unos minutos antes de volver a intentarlo.');
+        setAuthError('Has solicitado varias recuperaciones seguidas. Por seguridad, espera unos minutos antes de volver a intentarlo.');
       }else{
         setAuthError('No se pudo iniciar la recuperación. Inténtalo de nuevo.');
       }
       return;
     }
     setRecoveryEmail(email);
+    setRecoveryLinkVerified(false);
     setPasswordRecovery(true);
-    setResetMessage('Código enviado. Revisa tu correo e introdúcelo completo para crear una nueva contraseña.');
+    setResetMessage('Recuperación enviada. Usa el enlace del correo; si tu mensaje incluye un código, también puedes introducirlo aquí.');
   }
 
   async function saveRecoveredPassword(e:FormEvent){
     e.preventDefault();
     setAuthError('');
-    const email=recoveryEmail || resolveLogin(loginId);
-    const token=recoveryCode.trim().replace(/\s+/g,'');
-    if(!email){setAuthError('No se ha podido identificar el usuario. Vuelve al acceso y solicita un código nuevo.');return;}
-    if(!/^\d{4,12}$/.test(token)){setAuthError('Introduce el código numérico completo recibido por correo.');return;}
     if(newPassword.length<8){setAuthError('La nueva contraseña debe tener al menos 8 caracteres.');return;}
     if(newPassword!==confirmPassword){setAuthError('Las contraseñas no coinciden.');return;}
     setLoadingLogin(true);
-    const verified=await supabase.auth.verifyOtp({email,token,type:'recovery'});
-    if(verified.error){
-      setLoadingLogin(false);
-      setAuthError('El código no es válido o ha caducado. Solicita uno nuevo.');
-      return;
+    if(!recoveryLinkVerified){
+      const email=recoveryEmail || resolveLogin(loginId);
+      const token=recoveryCode.trim().replace(/\s+/g,'');
+      if(!email){setLoadingLogin(false);setAuthError('No se ha podido identificar el usuario. Vuelve al acceso y solicita una recuperación nueva.');return;}
+      if(!/^\d{4,12}$/.test(token)){setLoadingLogin(false);setAuthError('Introduce el código numérico completo recibido por correo o abre el enlace de recuperación.');return;}
+      const verified=await supabase.auth.verifyOtp({email,token,type:'recovery'});
+      if(verified.error){
+        setLoadingLogin(false);
+        setAuthError('El código no es válido o ha caducado. Solicita una recuperación nueva.');
+        return;
+      }
+      setRecoveryLinkVerified(true);
     }
     const {error}=await supabase.auth.updateUser({password:newPassword});
     setLoadingLogin(false);
-    if(error){setAuthError('El código se validó, pero no se pudo guardar la nueva contraseña.');return;}
-    setRecoveryCode('');setNewPassword('');setConfirmPassword('');setPasswordRecovery(false);setResetMessage('');
+    if(error){setAuthError('La recuperación se validó, pero no se pudo guardar la nueva contraseña.');return;}
+    sessionStorage.setItem('fenix-session-active','1');
+    setRecoveryCode('');setNewPassword('');setConfirmPassword('');setPasswordRecovery(false);setRecoveryLinkVerified(false);setResetMessage('');
     setShowNewPassword(false);setShowConfirmPassword(false);
     navigate('/inicio',{replace:true});
+  }
+
+  async function leavePasswordRecovery(){
+    if(recoveryLinkVerified) await supabase.auth.signOut();
+    setPasswordRecovery(false);setRecoveryLinkVerified(false);setRecoveryCode('');setNewPassword('');setConfirmPassword('');setAuthError('');setResetMessage('');setShowNewPassword(false);setShowConfirmPassword(false);
   }
 
   async function logout(){
@@ -248,14 +268,14 @@ export default function App(){
     <form className="auth-card" onSubmit={saveRecoveredPassword}>
       <div className="brand auth-brand"><div className="brand-mark" role="img" aria-label="Logotipo Fénix Capital"/><div><strong>FÉNIX CAPITAL</strong><span>Área privada</span></div></div>
       <h1>Nueva contraseña</h1>
-      <p>Introduce el código recibido por correo completo y crea tu nueva contraseña.</p>
+      <p>{recoveryLinkVerified?'El enlace de recuperación ya está validado. Crea tu nueva contraseña.':'Abre el enlace recibido por correo o introduce el código de recuperación si aparece en tu mensaje.'}</p>
       {resetMessage&&<div className="warning">{resetMessage}</div>}
-      <label htmlFor="fenix-recovery-code">Código de recuperación<input id="fenix-recovery-code" inputMode="numeric" autoComplete="one-time-code" value={recoveryCode} onChange={e=>setRecoveryCode(e.target.value.replace(/\D/g,'').slice(0,12))} placeholder="Código recibido" required/></label>
+      {!recoveryLinkVerified&&<label htmlFor="fenix-recovery-code">Código de recuperación<input id="fenix-recovery-code" inputMode="numeric" autoComplete="one-time-code" value={recoveryCode} onChange={e=>setRecoveryCode(e.target.value.replace(/\D/g,'').slice(0,12))} placeholder="Código recibido (si aparece en el correo)"/></label>}
       <label htmlFor="fenix-new-password">Nueva contraseña<div style={passwordFieldWrapStyle}><input id="fenix-new-password" type={showNewPassword?'text':'password'} autoComplete="new-password" value={newPassword} onChange={e=>setNewPassword(e.target.value)} style={{paddingRight:'48px'}} required/><button type="button" style={passwordEyeStyle} onClick={()=>setShowNewPassword(v=>!v)} aria-label={showNewPassword?'Ocultar nueva contraseña':'Mostrar nueva contraseña'}>{showNewPassword?<EyeOff size={19}/>:<Eye size={19}/>}</button></div></label>
       <label htmlFor="fenix-confirm-password">Repite la contraseña<div style={passwordFieldWrapStyle}><input id="fenix-confirm-password" type={showConfirmPassword?'text':'password'} autoComplete="new-password" value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)} style={{paddingRight:'48px'}} required/><button type="button" style={passwordEyeStyle} onClick={()=>setShowConfirmPassword(v=>!v)} aria-label={showConfirmPassword?'Ocultar contraseña repetida':'Mostrar contraseña repetida'}>{showConfirmPassword?<EyeOff size={19}/>:<Eye size={19}/>}</button></div></label>
       {authError&&<div className="warning">{authError}</div>}
       <button className="primary" disabled={loadingLogin}>{loadingLogin?'Validando y guardando…':'Guardar nueva contraseña'}</button>
-      <button type="button" className="secondary-action" onClick={()=>{setPasswordRecovery(false);setRecoveryCode('');setAuthError('');setResetMessage('');setShowNewPassword(false);setShowConfirmPassword(false)}}>Volver al acceso</button>
+      <button type="button" className="secondary-action" onClick={leavePasswordRecovery}>Volver al acceso</button>
     </form>
   </div>;
 

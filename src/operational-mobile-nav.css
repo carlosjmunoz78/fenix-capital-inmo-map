@@ -1,15 +1,17 @@
 .ops-mobile-menu-button,.ops-mobile-drawer,.ops-mobile-backdrop{display:none}
 
 @media(max-width:760px){
+  /* The hamburger drawer replaces the legacy 58px bottom navigation entirely. */
+  .ops-root{padding-bottom:0!important;min-height:100dvh!important;height:100dvh!important}
   .ops-root>.ops-side{display:none!important}
-  .ops-root>.ops-main{height:100vh;min-height:100vh}
-  .ops-root .ops-content{padding-top:62px}
+  .ops-root>.ops-main{height:100dvh!important;min-height:100dvh!important;max-height:100dvh!important;padding-bottom:0!important}
+  .ops-root .ops-content{padding-top:62px;padding-bottom:max(28px,env(safe-area-inset-bottom))!important}
 
   .ops-mobile-menu-button{
     display:inline-flex;
     position:fixed;
     left:12px;
-    top:10px;
+    top:max(10px,env(safe-area-inset-top));
     z-index:10030;
     min-width:88px;
     height:42px;
@@ -33,11 +35,14 @@
     display:block;
     position:fixed;
     inset:0 auto 0 0;
-    width:min(86vw,330px);
+    width:min(88vw,350px);
+    height:100dvh;
+    max-height:100dvh;
     z-index:10025;
     transform:translateX(-104%);
     transition:transform .2s ease;
     pointer-events:none;
+    overflow:hidden;
   }
   .ops-root[data-mobile-nav='open']>.ops-mobile-drawer{transform:translateX(0);pointer-events:auto}
   .ops-mobile-drawer>.ops-side,
@@ -45,12 +50,17 @@
     display:flex!important;
     position:absolute!important;
     inset:0!important;
+    box-sizing:border-box!important;
     width:100%!important;
-    height:100%!important;
-    min-height:100%!important;
-    padding:70px 14px 16px!important;
+    height:100dvh!important;
+    min-height:0!important;
+    max-height:100dvh!important;
+    padding:max(70px,calc(env(safe-area-inset-top) + 58px)) 14px max(22px,calc(env(safe-area-inset-bottom) + 14px))!important;
     flex-direction:column!important;
+    overflow-x:hidden!important;
     overflow-y:auto!important;
+    overscroll-behavior:contain!important;
+    -webkit-overflow-scrolling:touch;
     background:#fff!important;
     border-right:1px solid #e8e8ec!important;
     box-shadow:18px 0 42px rgba(0,0,0,.18)!important;
@@ -58,11 +68,11 @@
     opacity:1!important;
     z-index:1!important;
   }
-  .ops-mobile-drawer>.ops-side .ops-brand{display:flex!important;position:absolute;top:15px;left:112px;right:14px;height:40px;min-height:40px;margin:0!important;padding:0 8px!important;justify-content:flex-start!important}
+  .ops-mobile-drawer>.ops-side .ops-brand{display:flex!important;position:absolute;top:max(15px,env(safe-area-inset-top));left:112px;right:14px;height:40px;min-height:40px;margin:0!important;padding:0 8px!important;justify-content:flex-start!important}
   .ops-mobile-drawer>.ops-side .ops-brand img{width:34px!important;height:34px!important;object-fit:contain!important}
   .ops-mobile-drawer>.ops-side .ops-brand strong{font-size:12px!important}
   .ops-mobile-drawer>.ops-side nav,
-  .ops-mobile-drawer>.ops-side .dir-nav{display:flex!important;flex:1 0 auto!important;flex-direction:column!important;gap:6px!important;padding:8px 0!important;overflow:visible!important}
+  .ops-mobile-drawer>.ops-side .dir-nav{display:flex!important;flex:0 0 auto!important;flex-direction:column!important;gap:6px!important;padding:8px 0 18px!important;overflow:visible!important}
   .ops-mobile-drawer>.ops-side nav button,
   .ops-mobile-drawer>.ops-side .dir-nav-item{
     display:flex!important;
@@ -80,7 +90,7 @@
   }
   .ops-mobile-drawer>.ops-side nav button.active,
   .ops-mobile-drawer>.ops-side .dir-nav-item.active{font-weight:900!important}
-  .ops-mobile-drawer>.ops-side .ops-ana{display:flex!important;flex:0 0 auto!important;margin-top:12px!important}
+  .ops-mobile-drawer>.ops-side .ops-ana{display:flex!important;flex:0 0 auto!important;margin-top:12px!important;margin-bottom:4px!important}
 
   .ops-mobile-backdrop{
     display:block;
@@ -100,15 +110,14 @@
   .ops-root[data-theme='dark'] .ops-mobile-drawer>.ops-side,
   .ops-root[data-theme='dark'] .ops-mobile-drawer>.ops-side.dir-sidebar{background:#202023!important;border-right-color:#343438!important}
 
-  /* El shell operativo y la calculadora legacy son hermanos con stacking contexts
-     distintos. La calculadora permanece disponible sin bloquear el drawer. */
+  /* The shell and legacy calculator are siblings with different stacking contexts. */
   #root:has(> .ops-root:not(.role-home)) > .app-shell{pointer-events:none!important}
   #root:has(> .ops-root:not(.role-home)) > .app-shell .calc-launcher{pointer-events:auto!important}
   #root:has(> .ops-root:not(.role-home)) > .app-shell .calc-panel{
-    top:62px!important;
+    top:max(62px,calc(env(safe-area-inset-top) + 52px))!important;
     bottom:auto!important;
-    height:calc(100vh - 70px)!important;
-    max-height:calc(100vh - 70px)!important;
+    height:calc(100dvh - max(70px,calc(env(safe-area-inset-top) + 60px)))!important;
+    max-height:calc(100dvh - max(70px,calc(env(safe-area-inset-top) + 60px)))!important;
     overflow:auto!important;
     pointer-events:none!important;
   }
