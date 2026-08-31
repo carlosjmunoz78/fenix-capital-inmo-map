@@ -1,7 +1,7 @@
 import {useEffect,useMemo,useState} from 'react';
 import {createPortal} from 'react-dom';
 import {useLocation,useNavigate} from 'react-router-dom';
-import {supabase,SUPABASE_URL} from './supabase';
+import {IS_PRODUCTION,supabase,SUPABASE_URL} from './supabase';
 import './direction-kpi-drilldown.css';
 
 type Row=Record<string,unknown>;
@@ -19,7 +19,12 @@ const SPECS:Record<string,Spec>={
 function monthNow(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;}
 function euro(v:unknown){if(typeof v!=='number'||!Number.isFinite(v))return'—';const negative=v<0;const absolute=Math.abs(v);const fixed=absolute.toFixed(2);const[whole,decimals]=fixed.split('.');const grouped=whole.replace(/\B(?=(\d{3})+(?!\d))/g,'.');const cents=decimals==='00'?'':`,`+decimals.replace(/0$/,'');return `${negative?'-':''}${grouped}${cents} €`;}
 function pretty(v:unknown,key:string){if(v===null||v===undefined||v==='')return'—';if(key.includes('honorarios')||key.includes('comision')||key.includes('neto')||key.includes('importe'))return euro(v);if(Array.isArray(v))return v.length?v.join(', '):'—';return String(v);}
-async function fetchKpi(key:string):Promise<{status:number;data:Payload|null}>{const{data:{session}}=await supabase.auth.getSession();if(!session?.access_token)return{status:401,data:null};const q=new URLSearchParams({key,month:monthNow()});const r=await fetch(`${SUPABASE_URL}/functions/v1/fenix-direction-kpis-test?${q.toString()}`,{headers:{Authorization:`Bearer ${session.access_token}`}});let data:Payload|null=null;try{data=await r.json()}catch{data=null}return{status:r.status,data};}
+async function fetchKpi(key:string):Promise<{status:number;data:Payload|null}>{
+ // Direction KPI drilldowns are backed by a PRE-PROD-only `*-test` function.
+ // PROD must never probe that namespace; fail closed locally until a dedicated
+ // PROD KPI contract is deployed and validated.
+ if(IS_PRODUCTION)return{status:503,data:null};
+ const{data:{session}}=await supabase.auth.getSession();if(!session?.access_token)return{status:401,data:null};const q=new URLSearchParams({key,month:monthNow()});const r=await fetch(`${SUPABASE_URL}/functions/v1/fenix-direction-kpis-test?${q.toString()}`,{headers:{Authorization:`Bearer ${session.access_token}`}});let data:Payload|null=null;try{data=await r.json()}catch{data=null}return{status:r.status,data};}
 
 function kpiFromButton(button:HTMLElement){const t=(button.textContent||'').toUpperCase();if(t.includes('HONORARIOS'))return'honorarios-pendientes';if(t.includes('EN RIESGO'))return'expedientes-en-riesgo';if(t.includes('FIRMADOS'))return'firmadas';if(t.includes('FIRMAS'))return'firmas-previstas';if(t.includes('EXPEDIENTES'))return'expedientes-en-curso';return'';}
 
