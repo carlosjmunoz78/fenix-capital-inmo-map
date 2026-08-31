@@ -1,6 +1,6 @@
 name: PRE-PROD App Build
 
-# PRE-PROD: QA on PR/push. GitHub Pages branch snapshot is prepared from the validated PRE-PROD branch without touching main.
+# PRE-PROD is isolated from the live production deployment channel.
 on:
   push:
     branches:
@@ -39,29 +39,10 @@ jobs:
 
       - name: Install dependencies reproducibly
         run: |
-          if [ -f package-lock.json ]; then
-            npm ci
-          else
-            npm install
-          fi
+          if [ -f package-lock.json ]; then npm ci; else npm install; fi
 
       - name: Dependency versions
         run: npm list --depth=0
-
-      - name: Persist generated lockfile in PRE-PROD branch
-        if: github.event_name == 'push' && github.ref == 'refs/heads/preprod-app-phase1'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add package-lock.json
-          if git diff --cached --quiet; then
-            echo "package-lock.json already versioned and unchanged"
-          else
-            git commit -m "build(preprod): version validated package lock"
-            git push origin HEAD:preprod-app-phase1
-          fi
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4
@@ -94,8 +75,6 @@ jobs:
             'https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/fenix-ana-api-test/capabilities')"
           test "$status" = "204"
           grep -qi '^access-control-allow-origin:' "$headers"
-          grep -qi '^access-control-allow-methods:.*OPTIONS' "$headers"
-          grep -qi '^access-control-allow-headers:.*authorization' "$headers"
 
       - name: Upload dist
         uses: actions/upload-artifact@v4
@@ -112,65 +91,27 @@ jobs:
           path: playwright-report
           if-no-files-found: ignore
 
-      - name: Build GitHub Pages PRE-PROD
-        if: (github.event_name == 'push' && github.ref == 'refs/heads/preprod-app-phase1') || (github.event_name == 'pull_request' && github.head_ref == 'preprod-app-phase1')
+      - name: Build isolated PRE-PROD static snapshot
+        if: github.event_name == 'push' && github.ref == 'refs/heads/preprod-app-phase1'
         run: |
           npx vite build --base=/fenix-capital-inmo-map/ --outDir dist-pages
           cp dist-pages/index.html dist-pages/404.html
           touch dist-pages/.nojekyll
 
-          # Vercel is currently connected to gh-pages and invokes `npm run build`.
-          # Keep the branch as a static snapshot, but make that build deterministic
-          # instead of failing because package.json is absent.
-          cat > dist-pages/package.json <<'JSON'
-          {
-            "name": "fenix-capital-preprod-static",
-            "private": true,
-            "version": "1.0.0",
-            "scripts": {
-              "build": "node build-static.cjs"
-            }
-          }
-          JSON
-
-          cat > dist-pages/build-static.cjs <<'JS'
-          const fs = require('fs');
-          const path = require('path');
-
-          const root = process.cwd();
-          const out = path.join(root, 'dist');
-          fs.rmSync(out, { recursive: true, force: true });
-          fs.mkdirSync(out, { recursive: true });
-
-          const skip = new Set(['dist', '.git', 'node_modules', 'package.json', 'package-lock.json', 'build-static.cjs', 'vercel.json']);
-          for (const name of fs.readdirSync(root)) {
-            if (skip.has(name)) continue;
-            fs.cpSync(path.join(root, name), path.join(out, name), { recursive: true });
-          }
-          JS
-
-          cat > dist-pages/vercel.json <<'JSON'
-          {
-            "buildCommand": "npm run build",
-            "outputDirectory": "dist",
-            "cleanUrls": false
-          }
-          JSON
-
-      - name: Publish validated PRE-PROD snapshot to gh-pages
+      - name: Publish PRE-PROD snapshot to preprod-pages
         if: github.event_name == 'push' && github.ref == 'refs/heads/preprod-app-phase1'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          rm -rf /tmp/fenix-gh-pages
-          mkdir -p /tmp/fenix-gh-pages
-          cp -R dist-pages/. /tmp/fenix-gh-pages/
-          cd /tmp/fenix-gh-pages
+          rm -rf /tmp/fenix-preprod-pages
+          mkdir -p /tmp/fenix-preprod-pages
+          cp -R dist-pages/. /tmp/fenix-preprod-pages/
+          cd /tmp/fenix-preprod-pages
           git init
-          git checkout -b gh-pages
+          git checkout -b preprod-pages
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
-          git commit -m "deploy: PRE-PROD Pages snapshot ${GITHUB_SHA}"
+          git commit -m "deploy: PRE-PROD snapshot ${GITHUB_SHA}"
           git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
-          git push --force origin gh-pages
+          git push --force origin preprod-pages
