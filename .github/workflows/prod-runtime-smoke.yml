@@ -40,6 +40,22 @@ jobs:
           test "$status" = "401"
           grep -q 'identity_not_linked' /tmp/gateway-body
 
+      - name: Ana API accepts browser CORS preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          headers="$(mktemp)"
+          status="$(curl --silent --show-error --output /dev/null --dump-header "$headers" --write-out '%{http_code}' --max-time 20 \
+            -X OPTIONS \
+            -H 'Origin: https://app.fenixcapital.es' \
+            -H 'Access-Control-Request-Method: GET' \
+            -H 'Access-Control-Request-Headers: authorization,apikey' \
+            "${PROD_URL}/functions/v1/fenix-ana-api/capabilities")"
+          test "$status" = "204"
+          grep -qi '^access-control-allow-origin: https://app.fenixcapital.es' "$headers"
+          grep -qi '^access-control-allow-methods:.*OPTIONS' "$headers"
+          grep -qi '^access-control-allow-headers:.*authorization' "$headers"
+
       - name: Ana Notion secret is configured without exposing it
         shell: bash
         run: |
