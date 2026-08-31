@@ -23,10 +23,15 @@ test('workflow PRE-PROD no incorpora promoción automática a main o PROD',()=>{
 
 test('PRE-PROD conserva separación técnica del backend de producción',()=>{
   const supabase=fs.readFileSync(path.resolve('src/supabase.ts'),'utf8');
-  expect(supabase).toContain("const runtimeEnv=(import.meta.env.VITE_FENIX_ENV||'preprod').toLowerCase()");
+  const workflow=fs.readFileSync(path.resolve('.github/workflows/preprod-build.yml'),'utf8');
+  expect(supabase).toContain("const runtimeEnv=(import.meta.env.VITE_FENIX_ENV||'').toLowerCase()");
+  expect(supabase).toContain("const productionHostname=typeof window!=='undefined'&&window.location.hostname==='app.fenixcapital.es'");
   expect(supabase).toContain("const FUNCTION_SUFFIX=IS_PRODUCTION?'':'-test'");
   expect(supabase).toContain("const AUTH_STORAGE_KEY=IS_PRODUCTION?'fenix-prod-auth-v1':'fenix-preprod-auth-v2'");
-  expect(supabase).toContain("? String(import.meta.env.VITE_SUPABASE_URL||'')");
+  expect(supabase).toContain(": String(import.meta.env.VITE_SUPABASE_URL||'')");
   expect(supabase).toContain('if(IS_PRODUCTION||key!==AUTH_STORAGE_KEY)return null');
+  expect(supabase).not.toContain('https://hnqlnvakzaywtafeiybt.supabase.co');
+  expect(workflow).toContain('VITE_FENIX_ENV: preprod');
+  expect(workflow).toContain('VITE_SUPABASE_URL: https://hnqlnvakzaywtafeiybt.supabase.co');
   expect(supabase).not.toMatch(/functions\/v1\/fenix-[a-z0-9-]+(?:[/'"`])/i);
 });
