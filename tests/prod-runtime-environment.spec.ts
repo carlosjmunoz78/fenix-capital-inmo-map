@@ -6,7 +6,8 @@ test('app.fenixcapital.es is forced to canonical PROD even if build env is missi
  const source=fs.readFileSync(path.resolve('src/supabase.ts'),'utf8');
  expect(source).toContain("window.location.hostname==='app.fenixcapital.es'");
  expect(source).toContain("https://cluhljgonannaafpmblx.supabase.co");
- expect(source).toContain("https://hnqlnvakzaywtafeiybt.supabase.co");
+ expect(source).not.toContain("https://hnqlnvakzaywtafeiybt.supabase.co");
+ expect(source).toContain("Configuración Supabase PRE-PROD incompleta");
 });
 
 test('PROD smoke compiles with explicit PROD runtime and rejects PRE-PROD backend in bundle',()=>{
