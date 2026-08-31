@@ -1,11 +1,12 @@
 import {useEffect,useMemo,useState} from 'react';
 import {useLocation,useNavigate} from 'react-router-dom';
 import {BarChart3,CalendarCheck2,Landmark,Moon,Search,Sun,TrendingUp} from 'lucide-react';
-import {fetchAppApi,supabase} from './supabase';
+import {fetchAppApi,IS_PRODUCTION,supabase} from './supabase';
 import {fetchNotionRuntime} from './notionRuntime';
 import {fetchSpecialCasesRuntime} from './specialCasesRuntime';
 import {normalizeNavigation,type NavItem} from './masterNavigation';
 import OperationalShellFrame from './OperationalShellFrame';
+import EconomiaProdShell from './EconomiaProdShell';
 import {anaVertical} from './assets/visualAssets';
 import {FENIX_COMMERCIAL_KNOWLEDGE} from './fenixCommercialKnowledge';
 import {buildEconomyProjection} from './economyProjection';
@@ -20,7 +21,8 @@ function dateOf(r:Row){const raw=first(r,['fecha_hora_firma','fecha_firma','fech
 function signed(r:Row){return /firmad|cerrad|complet/i.test(first(r,['estado','status','fase']));}
 function openExp(r:Row){const s=first(r,['estado','status','fase','phase']).toLowerCase();return !/(firmad|cerrad|cancel|anulad|archivad|complet|ca[ií]d|perdid|rechaz|desist|no viable)/i.test(s);}
 function money(n:number){const rounded=Math.round(n);return `${String(rounded).replace(/\B(?=(\d{3})+(?!\d))/g,'.')} €`}
-export default function EconomiaShell(){
+
+function EconomiaPreprodShell(){
  const location=useLocation(),navigate=useNavigate();const active=location.pathname==='/economia';const[ready,setReady]=useState(false),[logged,setLogged]=useState(false),[theme,setTheme]=useState<Theme>(()=>(sessionStorage.getItem('fenix-theme') as Theme)||'light'),[ctx,setCtx]=useState<Ctx|null>(null),[nav,setNav]=useState<NavItem[]>([]),[exp,setExp]=useState<Row[]>([]),[fir,setFir]=useState<Row[]>([]),[her,setHer]=useState<Row[]>([]),[obr,setObr]=useState<Row[]>([]),[specialComplete,setSpecialComplete]=useState(true),[status,setStatus]=useState<number|null>(null),[loading,setLoading]=useState(false),[message,setMessage]=useState('');
  useEffect(()=>{if(!active)return;let alive=true;supabase.auth.getSession().then(({data})=>{if(alive){setLogged(Boolean(data.session));setReady(true)}});const{data:{subscription}}=supabase.auth.onAuthStateChange((_e,s)=>{setLogged(Boolean(s));setReady(true)});return()=>{alive=false;subscription.unsubscribe()};},[active]);
  useEffect(()=>{if(!active)return;document.documentElement.dataset.theme=theme;sessionStorage.setItem('fenix-theme',theme)},[active,theme]);
@@ -41,3 +43,5 @@ export default function EconomiaShell(){
   <section className="eco-grid"><article><BarChart3/><div><small>VOLUMEN FINANCIADO</small><strong>No disponible</strong><p>La fuente actual no garantiza un importe financiero agregable sin ambigüedad.</p></div></article><article data-testid="economia-fee-knowledge"><BarChart3/><div><small>HONORARIOS / COMISIONES</small><strong>Tarifario cargado</strong><p>{FENIX_COMMERCIAL_KNOWLEDGE.mortgage.rule} {FENIX_COMMERCIAL_KNOWLEDGE.mortgage.agencyRule} {FENIX_COMMERCIAL_KNOWLEDGE.newBuild.rule} {FENIX_COMMERCIAL_KNOWLEDGE.inheritance.rule}</p></div></article><article><BarChart3/><div><small>GASTOS GENERALES Y RENTABILIDAD FINAL</small><strong>No disponible</strong><p>El margen mostrado arriba descuenta la comisión de inmobiliaria cuando procede, pero no inventa otros gastos que aún no tengan fuente económica validada.</p></div></article><article><BarChart3/><div><small>PROYECCIÓN Y OBJETIVOS</small><strong>No disponible</strong><p>No se extrapolan objetivos o crecimiento a partir de datos incompletos.</p></div></article></section><section className="eco-readonly"><strong>Panel 100% informativo</strong><span>Las cifras son base sin IVA. La cartera prevista se recalcula con los datos canónicos; una operación caída deja de sumar inmediatamente y queda registrada como potencial perdido.</span></section></>}
  </OperationalShellFrame>;
 }
+
+export default function EconomiaShell(){return IS_PRODUCTION?<EconomiaProdShell/>:<EconomiaPreprodShell/>;}
