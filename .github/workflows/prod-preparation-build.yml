@@ -58,27 +58,6 @@ jobs:
             exit 2
           fi
 
-      - name: Validate canonical Notion datasource read access
-        env:
-          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          body="$(mktemp)"
-          status="$(curl --silent --show-error --output "$body" --write-out '%{http_code}' --max-time 20 \
-            -X POST \
-            -H "Authorization: Bearer ${NOTION_TOKEN}" \
-            -H 'Notion-Version: 2025-09-03' \
-            -H 'Content-Type: application/json' \
-            --data '{"page_size":1}' \
-            'https://api.notion.com/v1/data_sources/56665cb7-4277-4557-acff-f6fd46601e77/query')"
-          if [ "$status" != "200" ]; then
-            code="$(node -e "try{const x=require('fs').readFileSync(process.argv[1],'utf8');const j=JSON.parse(x);process.stdout.write(String(j.code||'unknown'))}catch{}" "$body")"
-            echo "Canonical Notion datasource read failed: HTTP ${status}, code=${code:-unknown}" >&2
-            exit 3
-          fi
-          echo 'CANONICAL_NOTION_DATASOURCE_READ=yes'
-
       - name: Install dependencies reproducibly
         run: |
           if [ -f package-lock.json ]; then
@@ -118,6 +97,7 @@ jobs:
           if-no-files-found: ignore
 
 # Validation only. Dummy PROD values prove the production code path builds without
-# reusing PRE-PROD fallbacks. Release checks report credential presence and verify
-# read-only access to the canonical Notion datasource without printing secret values
-# or response content. No deployment, branch write or backend mutation occurs here.
+# reusing PRE-PROD fallbacks. The release credential gate reports presence only;
+# it never prints secret values or contacts external services. Runtime Notion reachability
+# is covered separately by the PROD runtime smoke through the deployed Ana handler.
+# No deployment, branch write, backend contact or mutation occurs here.
