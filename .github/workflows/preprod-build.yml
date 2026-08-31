@@ -77,6 +77,22 @@ jobs:
           PLAYWRIGHT_SKIP_BUILD: '1'
         run: npm run test:e2e
 
+      - name: PRE-PROD Ana CORS smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          headers="$(mktemp)"
+          status="$(curl --silent --show-error --output /dev/null --dump-header "$headers" --write-out '%{http_code}' --max-time 20 \
+            -X OPTIONS \
+            -H 'Origin: https://carlosjmunoz78.github.io' \
+            -H 'Access-Control-Request-Method: GET' \
+            -H 'Access-Control-Request-Headers: authorization,apikey' \
+            'https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/fenix-ana-api-test/capabilities')"
+          test "$status" = "204"
+          grep -qi '^access-control-allow-origin:' "$headers"
+          grep -qi '^access-control-allow-methods:.*OPTIONS' "$headers"
+          grep -qi '^access-control-allow-headers:.*authorization' "$headers"
+
       - name: Upload dist
         uses: actions/upload-artifact@v4
         with:
