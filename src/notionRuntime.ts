@@ -40,6 +40,19 @@ function normalizeProdRows(path:string,data:unknown):unknown{
 
 async function fetchProdCompatibility<T>(path:string):Promise<{status:number;data:T|null}>{
   const contactMode=path==='/clientes'?'Cliente':path==='/contactos-inmobiliaria'?'Contacto inmobiliaria':null;
+  const documentDetail=path.match(/^\/documentos\/([^/]+)$/);
+
+  if(documentDetail){
+    const detail=await fetchAppApi<Record<string,unknown>>(path);
+    if(detail.status!==200||!detail.data)return {status:detail.status,data:detail.data as T|null};
+    const envelope=asEnvelope(detail.data);
+    const document=envelope?.document&&typeof envelope.document==='object'?envelope.document as Row:null;
+    if(!document)return {status:404,data:null};
+    const view=await fetchAppApi<Record<string,unknown>>(`${path}/view`);
+    const signedUrl=view.status===200&&view.data&&typeof view.data.signed_url==='string'?view.data.signed_url:'';
+    return {status:200,data:{...detail.data,item:{...document,...(signedUrl?{url:signedUrl}: {})}} as T};
+  }
+
   const gatewayPath=contactMode?'/contactos':path;
   const result=await fetchAppApi<unknown>(gatewayPath);
   if(result.status!==200||!result.data)return {status:result.status,data:result.data as T|null};
