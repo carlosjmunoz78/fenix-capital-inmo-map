@@ -5,6 +5,7 @@ import {useLocation,useNavigate} from 'react-router-dom';
 import {fetchAppApi} from './supabase';
 import {normalizeNavigation,type NavItem} from './masterNavigation';
 import OperationalSidebar from './OperationalSidebar';
+import FirmaCreateShell from './FirmaCreateShell';
 import './operational-uniformity.css';
 
 type Ctx={role?:string};
@@ -37,5 +38,5 @@ export default function OperationalUniformityGuard(){
   place();const observer=new MutationObserver(place);observer.observe(document.body,{childList:true,subtree:true});
   return()=>{observer.disconnect();document.querySelectorAll('.ops-uniform-sidebar-host,.ops-uniform-footer-host').forEach(x=>x.remove());document.querySelectorAll('.ops-side.ops-legacy-side-hidden').forEach(x=>x.classList.remove('ops-legacy-side-hidden'))};
  },[location.pathname]);
- return <>{sidebarHost&&createPortal(<OperationalSidebar navigation={navigation} activeRoute={activeRoute}/>,sidebarHost)}{footerHost&&quickLinks.length>0&&createPortal(<section className="dir-quick ops-shared-quick" aria-label="Accesos rápidos"><h2>ACCESOS RÁPIDOS</h2><div className="dir-quick-grid">{quickLinks.map(({route,label,Icon})=><button key={route} type="button" onClick={()=>navigate(route)}><Icon/>{label}</button>)}</div></section>,footerHost)}</>;
+ return <><FirmaCreateShell/>{sidebarHost&&createPortal(<OperationalSidebar navigation={navigation} activeRoute={activeRoute}/>,sidebarHost)}{footerHost&&quickLinks.length>0&&createPortal(<section className="dir-quick ops-shared-quick" aria-label="Accesos rápidos"><h2>ACCESOS RÁPIDOS</h2><div className="dir-quick-grid">{quickLinks.map(({route,label,Icon})=><button key={route} type="button" onClick={()=>navigate(route)}><Icon/>{label}</button>)}</div></section>,footerHost)}</>;
 }
