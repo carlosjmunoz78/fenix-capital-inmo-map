@@ -13,7 +13,11 @@ permissions:
 env:
   APP_URL: https://app.fenixcapital.es
   PROD_URL: https://cluhljgonannaafpmblx.supabase.co
+  PREPROD_URL: https://hnqlnvakzaywtafeiybt.supabase.co
   PROD_PUBLISHABLE_KEY: sb_publishable_yjISKmA5UPfF3d7NitP_DA_j5LGydh0
+  VITE_FENIX_ENV: production
+  VITE_SUPABASE_URL: https://cluhljgonannaafpmblx.supabase.co
+  VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_yjISKmA5UPfF3d7NitP_DA_j5LGydh0
   LEGACY_ANON_JWT: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsdWhsamdvbmFubmFhZnBtYmx4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgwODM4MTIsImV4cCI6MjEwMzY1OTgxMn0.PGSqCe7BGLV4rKBOmhZiLtDAmjQzE7mT1JXVpPCW-f8
 
 jobs:
@@ -35,6 +39,13 @@ jobs:
 
       - name: Compile production frontend
         run: npm run build
+
+      - name: Production bundle is bound to canonical PROD only
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -R --fixed-strings "$PROD_URL" dist >/dev/null
+          ! grep -R --fixed-strings "$PREPROD_URL" dist
 
       - name: APP domain serves deployed frontend
         shell: bash

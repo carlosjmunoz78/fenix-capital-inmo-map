@@ -4,11 +4,14 @@ import path from 'node:path';
 
 test('PRE-PROD aplica siempre sufijo -test a funciones Edge',()=>{
   const text=fs.readFileSync(path.resolve('src/supabase.ts'),'utf8');
-  expect(text).toContain("const runtimeEnv=(import.meta.env.VITE_FENIX_ENV||'preprod').toLowerCase()");
+  const workflow=fs.readFileSync(path.resolve('.github/workflows/preprod-build.yml'),'utf8');
+  expect(text).toContain("const runtimeEnv=(import.meta.env.VITE_FENIX_ENV||'').toLowerCase()");
   expect(text).toContain("const FUNCTION_SUFFIX=IS_PRODUCTION?'':'-test'");
   expect(text).toContain('const functionName=(base:string)=>`${base}${FUNCTION_SUFFIX}`');
   expect(text).toContain('functionName(baseFunctionName)');
   expect(text).toContain("authenticatedEdgeFetch<T>('fenix-app-gateway'");
+  expect(workflow).toContain('VITE_FENIX_ENV: preprod');
+  expect(workflow).toContain('VITE_SUPABASE_URL: https://hnqlnvakzaywtafeiybt.supabase.co');
   expect(text).not.toMatch(/functions\/v1\/fenix-[a-z0-9-]+(?:[/'"`])/i);
 });
 
@@ -28,12 +31,14 @@ test('runtimes PRE-PROD explícitos fallan cerrados en PROD antes de tocar endpo
 
 test('cliente y almacenamiento de sesión mantienen aislamiento PRE-PROD/PROD',()=>{
   const text=fs.readFileSync(path.resolve('src/supabase.ts'),'utf8');
+  const workflow=fs.readFileSync(path.resolve('.github/workflows/preprod-build.yml'),'utf8');
   expect(text).toContain("const AUTH_STORAGE_KEY=IS_PRODUCTION?'fenix-prod-auth-v1':'fenix-preprod-auth-v2'");
   expect(text).toContain("const LEGACY_AUTH_STORAGE_KEY='fenix-preprod-auth'");
   expect(text).toContain('if(IS_PRODUCTION||key!==AUTH_STORAGE_KEY)return null');
-  expect(text).toContain("const PREPROD_SUPABASE_URL='https://hnqlnvakzaywtafeiybt.supabase.co'");
-  expect(text).toContain("? String(import.meta.env.VITE_SUPABASE_URL||'')");
-  expect(text).toContain("throw new Error('FENIX PROD runtime requires dedicated Supabase URL and publishable key.')");
+  expect(text).toContain("const PROD_SUPABASE_URL='https://cluhljgonannaafpmblx.supabase.co'");
+  expect(text).not.toContain('https://hnqlnvakzaywtafeiybt.supabase.co');
+  expect(text).toContain(": String(import.meta.env.VITE_SUPABASE_URL||'')");
+  expect(workflow).toContain('VITE_SUPABASE_URL: https://hnqlnvakzaywtafeiybt.supabase.co');
 });
 
 test('workflow PRE-PROD solo publica desde preprod-app-phase1 y no escribe main',()=>{
