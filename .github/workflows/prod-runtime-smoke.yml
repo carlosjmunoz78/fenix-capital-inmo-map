@@ -4,12 +4,14 @@ on:
   push:
     branches:
       - prod-preparation
+      - main
   workflow_dispatch:
 
 permissions:
   contents: read
 
 env:
+  APP_URL: https://app.fenixcapital.es
   PROD_URL: https://cluhljgonannaafpmblx.supabase.co
   PROD_PUBLISHABLE_KEY: sb_publishable_yjISKmA5UPfF3d7NitP_DA_j5LGydh0
   LEGACY_ANON_JWT: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsdWhsamdvbmFubmFhZnBtYmx4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgwODM4MTIsImV4cCI6MjEwMzY1OTgxMn0.PGSqCe7BGLV4rKBOmhZiLtDAmjQzE7mT1JXVpPCW-f8
@@ -19,6 +21,17 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      - name: APP domain serves deployed frontend
+        shell: bash
+        run: |
+          set -euo pipefail
+          headers="$(mktemp)"
+          body="$(mktemp)"
+          status="$(curl --silent --show-error --location --output "$body" --dump-header "$headers" --write-out '%{http_code}' --max-time 30 "$APP_URL/")"
+          test "$status" = "200"
+          grep -qi '<!doctype html' "$body"
+          grep -qi 'fenix' "$body"
+
       - name: Gateway health is PROD and reachable
         shell: bash
         run: |
@@ -39,6 +52,17 @@ jobs:
             "${PROD_URL}/functions/v1/fenix-app-gateway/session/context")"
           test "$status" = "401"
           grep -q 'identity_not_linked' /tmp/gateway-body
+
+      - name: Directory and economy APIs fail closed anonymously
+        shell: bash
+        run: |
+          set -euo pipefail
+          for path in fenix-directory-api/notarias fenix-directory-api/registros-propiedad fenix-economia-api/economia; do
+            status="$(curl --silent --output /tmp/fenix-api-body --write-out '%{http_code}' --max-time 20 \
+              -H "apikey: ${PROD_PUBLISHABLE_KEY}" \
+              "${PROD_URL}/functions/v1/${path}")"
+            test "$status" = "401"
+          done
 
       - name: Ana API accepts browser CORS preflight
         shell: bash
@@ -68,7 +92,5 @@ jobs:
             echo 'NOTION_TOKEN is not available to fenix-ana-knowledge' >&2
             exit 1
           fi
-          # The legacy anon JWT is valid at the platform layer but is not a real user.
-          # Reaching the function handler must therefore fail closed in session resolution.
           test "$status" = "500"
           grep -q 'session_context_failed' /tmp/ana-body
