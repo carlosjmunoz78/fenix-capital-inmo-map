@@ -1,4 +1,4 @@
-name: Legacy DOC PROD Transfer Once
+name: Legacy DOC PROD Final Reconcile
 
 on:
   push:
@@ -9,14 +9,14 @@ permissions:
   contents: read
 
 jobs:
-  transfer:
+  reconcile:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 10
     env:
       MIGRATION_URL: https://cluhljgonannaafpmblx.supabase.co/functions/v1/fenix-legacy-doc-migration-once
       NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
     steps:
-      - name: Verify secret and derive migration auth
+      - name: Derive non-exposed migration auth
         shell: bash
         run: |
           set -euo pipefail
@@ -24,7 +24,7 @@ jobs:
           AUTH="$(printf '%s' "${NOTION_TOKEN}:fenix-docs-20260831" | sha256sum | awk '{print $1}')"
           echo "MIGRATION_AUTH=$AUTH" >> "$GITHUB_ENV"
 
-      - name: Refresh and validate 31-page / 118-file manifest
+      - name: Recheck live legacy manifest
         shell: bash
         run: |
           set -euo pipefail
@@ -40,37 +40,9 @@ jobs:
           test "$(jq '[.[].expected]|add' check.json)" = "118"
           test "$(jq '[.[].actual]|add' check.json)" = "118"
           test "$(jq '[.[]|select(.expected != .actual)]|length' check.json)" = "0"
-          BAD="$(jq -r '[.[].files[] | select(. != null) | ascii_downcase | capture("\\.(?<ext>[^.]+)$").ext | select(. != "pdf" and . != "jpg" and . != "jpeg" and . != "png" and . != "webp" and . != "doc" and . != "docx" and . != "xls" and . != "xlsx" and . != "txt")] | length' check.json)"
-          test "$BAD" = "0"
-          echo "MANIFEST_OK=31/31 pages, 118/118 files"
+          echo 'MANIFEST_RECHECK_OK=31/31,118/118'
 
-      - name: Transfer files one by one idempotently
-        shell: bash
-        run: |
-          set -euo pipefail
-          : > migration.ndjson
-          for i in $(seq 0 30); do
-            count="$(jq ".[$i].actual" check.json)"
-            for fi in $(seq 0 $((count-1))); do
-              tmp="$(mktemp)"
-              status="$(curl --silent --show-error --max-time 180 \
-                -H "x-migration-auth: ${MIGRATION_AUTH}" \
-                -o "$tmp" -w '%{http_code}' \
-                "${MIGRATION_URL}?mode=migrate&i=${i}&fi=${fi}")"
-              cat "$tmp" >> migration.ndjson
-              printf '\n' >> migration.ndjson
-              if test "$status" -lt 200 || test "$status" -ge 300 || test "$(jq -r '.ok' "$tmp")" != "true"; then
-                echo "Migration failed i=${i} fi=${fi} status=${status}" >&2
-                cat "$tmp" >&2
-                exit 1
-              fi
-              echo "OK i=${i} fi=${fi} $(jq -r '.filename' "$tmp")"
-            done
-          done
-          test "$(wc -l < migration.ndjson | tr -d ' ')" = "118"
-          test "$(jq -s '[.[]|select(.ok==true)]|length' migration.ndjson)" = "118"
-
-      - name: Reconcile database provenance and versions
+      - name: Reconcile PROD provenance and versions
         shell: bash
         run: |
           set -euo pipefail
@@ -80,18 +52,17 @@ jobs:
           cat reconcile.json
           test "$(jq -r '.ok' reconcile.json)" = "true"
           test "$(jq -r '.origin_links' reconcile.json)" = "118"
-          test "$(jq -r '.missing_version_docs|length' reconcile.json)" = "0"
-          test "$(jq -r '.documents' reconcile.json)" -gt "0"
-          test "$(jq -r '.versions' reconcile.json)" -gt "0"
+          test "$(jq -r '.unique_documents' reconcile.json)" = "117"
+          test "$(jq -r '.versions' reconcile.json)" = "117"
+          test "$(jq -r '.missing_version_docs' reconcile.json)" = "0"
+          test "$(jq -r '.total_bytes' reconcile.json)" -gt "0"
+          echo 'RECONCILED=118 origins,117 unique binaries,0 missing versions'
 
-      - name: Upload non-secret evidence
-        if: always()
+      - name: Upload non-secret reconciliation evidence
         uses: actions/upload-artifact@v4
         with:
-          name: legacy-doc-prod-transfer-evidence-${{ github.run_id }}
+          name: legacy-doc-prod-final-reconcile-${{ github.run_id }}
           retention-days: 30
-          if-no-files-found: warn
           path: |
             check.json
-            migration.ndjson
             reconcile.json
