@@ -41,12 +41,13 @@ test('cliente y almacenamiento de sesión mantienen aislamiento PRE-PROD/PROD',(
   expect(workflow).toContain('VITE_SUPABASE_URL: https://hnqlnvakzaywtafeiybt.supabase.co');
 });
 
-test('workflow PRE-PROD solo publica desde preprod-app-phase1 y no escribe main',()=>{
+test('workflow PRE-PROD solo publica desde preprod-app-phase1 y no toca canales PROD',()=>{
   const text=fs.readFileSync(path.resolve('.github/workflows/preprod-build.yml'),'utf8');
   expect(text).toContain('name: PRE-PROD App Build');
   expect(text).toContain('- preprod-app-phase1');
   expect(text).toContain("github.ref == 'refs/heads/preprod-app-phase1'");
-  expect(text).toContain('git push origin HEAD:preprod-app-phase1');
+  expect(text).toContain('git push --force origin preprod-pages');
+  expect(text).not.toContain('git push --force origin gh-pages');
   expect(text).not.toMatch(/git push[^\n]*\bmain\b/);
   expect(text).not.toMatch(/git push[^\n]*HEAD:main/);
 });
