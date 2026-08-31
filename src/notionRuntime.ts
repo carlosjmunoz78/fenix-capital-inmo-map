@@ -1,6 +1,9 @@
-import {supabase,SUPABASE_URL} from './supabase';
+import {fetchAppApi,IS_PRODUCTION,supabase,SUPABASE_URL} from './supabase';
 
 export async function fetchNotionRuntime<T=unknown>(path:string):Promise<{status:number;data:T|null}>{
+  if(IS_PRODUCTION){
+    return fetchAppApi<T>(path);
+  }
   const {data:{session}}=await supabase.auth.getSession();
   if(!session?.access_token)return {status:401,data:null};
   const r=await fetch(`${SUPABASE_URL}/functions/v1/fenix-notion-runtime-test${path}`,{
