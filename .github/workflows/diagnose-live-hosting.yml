@@ -12,12 +12,23 @@ jobs:
   diagnose:
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+      CLOUDFLARE_API_KEY: ${{ secrets.CLOUDFLARE_API_KEY }}
+      CF_API_KEY: ${{ secrets.CF_API_KEY }}
+      CLOUDFLARE_GLOBAL_API_KEY: ${{ secrets.CLOUDFLARE_GLOBAL_API_KEY }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
     steps:
       - name: DNS and HTTP diagnostics
         shell: bash
         run: |
           set -u
           stamp="$(date +%s)"
+          echo '=== SECRET AVAILABILITY (values never printed) ==='
+          for name in CLOUDFLARE_API_TOKEN CF_API_TOKEN CLOUDFLARE_API_KEY CF_API_KEY CLOUDFLARE_GLOBAL_API_KEY VERCEL_TOKEN; do
+            if [ -n "${!name:-}" ]; then echo "$name=SET"; else echo "$name=UNSET"; fi
+          done
           echo '=== DNS CNAME ==='
           dig +short app.fenixcapital.es CNAME || true
           echo '=== DNS A ==='
@@ -31,10 +42,5 @@ jobs:
           echo '=== LIVE SHA CACHE-BUST ==='
           curl -sS -D - --max-time 30 -H 'Cache-Control: no-cache' "https://app.fenixcapital.es/PROD_SOURCE_SHA.txt?diag=${stamp}" || true
           echo
-          echo '=== HTML PREFIX CACHE-BUST ==='
-          curl -sS --max-time 30 -H 'Cache-Control: no-cache' "https://app.fenixcapital.es/?diag=${stamp}" | head -c 3000 || true
-          echo
           echo '=== ASSET REFERENCES ==='
           curl -sS --max-time 30 -H 'Cache-Control: no-cache' "https://app.fenixcapital.es/?diag=${stamp}" | grep -Eo '/assets/[^" ]+\.(js|css)' | head -20 || true
-          echo '=== TLS CERT ==='
-          echo | openssl s_client -servername app.fenixcapital.es -connect app.fenixcapital.es:443 2>/dev/null | openssl x509 -noout -subject -issuer -dates -ext subjectAltName || true
