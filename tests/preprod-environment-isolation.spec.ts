@@ -18,10 +18,11 @@ test('runtimes PRE-PROD explícitos fallan cerrados en PROD antes de tocar endpo
     const text=fs.readFileSync(path.resolve(file),'utf8');
     expect(text,`${file} debe importar IS_PRODUCTION`).toContain('IS_PRODUCTION');
     const guard=text.indexOf('if(IS_PRODUCTION)');
-    const testEndpoint=text.indexOf('-test');
+    const networkEndpoint=text.indexOf('/functions/v1/');
     expect(guard,`${file} debe tener gate PROD`).toBeGreaterThan(-1);
-    expect(testEndpoint,`${file} debe conservar endpoint PRE-PROD`).toBeGreaterThan(-1);
-    expect(guard,`${file} debe cortar PROD antes del endpoint -test`).toBeLessThan(testEndpoint);
+    expect(networkEndpoint,`${file} debe conservar endpoint PRE-PROD`).toBeGreaterThan(-1);
+    expect(guard,`${file} debe cortar PROD antes del endpoint PRE-PROD`).toBeLessThan(networkEndpoint);
+    expect(text.slice(networkEndpoint),`${file} debe conservar namespace -test solo tras el gate PROD`).toContain('-test');
   }
 });
 
