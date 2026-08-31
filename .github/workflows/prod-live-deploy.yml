@@ -51,6 +51,7 @@ jobs:
           cp dist-live/index.html dist-live/404.html
           touch dist-live/.nojekyll
           printf '%s\n' "${GITHUB_SHA}" > dist-live/PROD_SOURCE_SHA.txt
+          printf '%s\n' 'app.fenixcapital.es' > dist-live/CNAME
 
           cat > dist-live/package.json <<'JSON'
           {
@@ -84,6 +85,8 @@ jobs:
             "cleanUrls": false
           }
           JSON
+
+          test "$(cat dist-live/CNAME)" = 'app.fenixcapital.es'
 
       - name: Publish canonical PROD snapshot to gh-pages
         env:
