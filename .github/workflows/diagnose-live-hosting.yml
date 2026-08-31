@@ -11,21 +11,30 @@ permissions:
 jobs:
   diagnose:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
-      - name: Test current live and GitHub Pages target
+      - name: Wait for custom-domain TLS and exact PROD SHA
         shell: bash
         run: |
-          set -u
-          stamp="$(date +%s)"
-          echo '=== LIVE DNS ==='
-          dig +short app.fenixcapital.es CNAME || true
-          echo '=== LIVE ASSETS ==='
-          curl -sS --max-time 30 -H 'Cache-Control: no-cache' "https://app.fenixcapital.es/?diag=${stamp}" | grep -Eo '/assets/[^" ]+\.(js|css)' | head -20 || true
-          echo '=== GITHUB PAGES ROOT ==='
-          curl -sSIL --max-time 30 "https://carlosjmunoz78.github.io/fenix-capital-inmo-map/" || true
-          echo '=== GITHUB PAGES PROD SHA ==='
-          curl -sS -D - --max-time 30 "https://carlosjmunoz78.github.io/fenix-capital-inmo-map/PROD_SOURCE_SHA.txt" || true
-          echo
-          echo '=== GITHUB PAGES ASSETS ==='
-          curl -sS --max-time 30 "https://carlosjmunoz78.github.io/fenix-capital-inmo-map/" | grep -Eo '/[^" ]*assets/[^" ]+\.(js|css)' | head -20 || true
+          set -euo pipefail
+          expected='066807d19376f5dac100833e5ba7350688290961'
+          echo "DNS: $(dig +short app.fenixcapital.es CNAME | tail -1)"
+          for i in $(seq 1 24); do
+            echo "Attempt ${i}/24"
+            cert=$(echo | openssl s_client -servername app.fenixcapital.es -connect app.fenixcapital.es:443 2>/dev/null | openssl x509 -noout -subject -ext subjectAltName 2>/dev/null || true)
+            echo "$cert"
+            if echo "$cert" | grep -F 'DNS:app.fenixcapital.es' >/dev/null; then
+              sha=$(curl -fsS --max-time 20 -H 'Cache-Control: no-cache' "https://app.fenixcapital.es/PROD_SOURCE_SHA.txt?diag=$(date +%s)" || true)
+              echo "LIVE_SHA=${sha}"
+              if [ "$sha" = "$expected" ]; then
+                html=$(curl -fsS --max-time 20 -H 'Cache-Control: no-cache' "https://app.fenixcapital.es/?diag=$(date +%s)")
+                echo "$html" | grep -F 'Fénix Capital · CEREBRO OS' >/dev/null
+                echo "$html" | grep -F '/assets/index-pSw9Jh1R.js' >/dev/null
+                echo 'LIVE_PROD_GREEN=true'
+                exit 0
+              fi
+            fi
+            sleep 15
+          done
+          echo 'TLS_OR_LIVE_SHA_NOT_READY=true'
+          exit 1
