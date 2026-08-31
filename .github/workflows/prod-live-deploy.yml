@@ -1,0 +1,105 @@
+name: PROD Live Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: prod-live-deploy
+  cancel-in-progress: true
+
+jobs:
+  build-and-publish-live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      VITE_FENIX_ENV: prod
+      VITE_SUPABASE_URL: https://cluhljgonannaafpmblx.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_yjISKmA5UPfF3d7NitP_DA_j5LGydh0
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies reproducibly
+        run: npm ci
+
+      - name: Build canonical production app
+        run: npx vite build --base=/ --outDir dist-live
+
+      - name: Assert production bundle contains no PRE-PROD backend
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -R -F 'hnqlnvakzaywtafeiybt.supabase.co' dist-live
+          grep -R -F 'cluhljgonannaafpmblx.supabase.co' dist-live >/dev/null
+
+      - name: Prepare static branch consumed by live hosting
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp dist-live/index.html dist-live/404.html
+          touch dist-live/.nojekyll
+          printf '%s\n' "${GITHUB_SHA}" > dist-live/PROD_SOURCE_SHA.txt
+
+          cat > dist-live/package.json <<'JSON'
+          {
+            "name": "fenix-capital-prod-static",
+            "private": true,
+            "version": "1.0.0",
+            "scripts": {
+              "build": "node build-static.cjs"
+            }
+          }
+          JSON
+
+          cat > dist-live/build-static.cjs <<'JS'
+          const fs = require('fs');
+          const path = require('path');
+          const root = process.cwd();
+          const out = path.join(root, 'dist');
+          fs.rmSync(out, { recursive: true, force: true });
+          fs.mkdirSync(out, { recursive: true });
+          const skip = new Set(['dist', '.git', 'node_modules', 'package.json', 'package-lock.json', 'build-static.cjs', 'vercel.json']);
+          for (const name of fs.readdirSync(root)) {
+            if (skip.has(name)) continue;
+            fs.cpSync(path.join(root, name), path.join(out, name), { recursive: true });
+          }
+          JS
+
+          cat > dist-live/vercel.json <<'JSON'
+          {
+            "buildCommand": "npm run build",
+            "outputDirectory": "dist",
+            "cleanUrls": false
+          }
+          JSON
+
+      - name: Publish canonical PROD snapshot to gh-pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/fenix-prod-live
+          mkdir -p /tmp/fenix-prod-live
+          cp -R dist-live/. /tmp/fenix-prod-live/
+          cd /tmp/fenix-prod-live
+          git init
+          git checkout -b gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "deploy: PROD live snapshot ${GITHUB_SHA}"
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git push --force origin gh-pages
