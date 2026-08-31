@@ -1,21 +1,20 @@
 import { createClient } from '@supabase/supabase-js';
 
-const runtimeEnv=(import.meta.env.VITE_FENIX_ENV||'preprod').toLowerCase();
-export const IS_PRODUCTION=runtimeEnv==='production'||runtimeEnv==='prod';
+const runtimeEnv=(import.meta.env.VITE_FENIX_ENV||'').toLowerCase();
+const productionHostname=typeof window!=='undefined'&&window.location.hostname==='app.fenixcapital.es';
+export const IS_PRODUCTION=productionHostname||runtimeEnv==='production'||runtimeEnv==='prod';
 
+const PROD_SUPABASE_URL='https://cluhljgonannaafpmblx.supabase.co';
+const PROD_SUPABASE_PUBLISHABLE_KEY='sb_publishable_yjISKmA5UPfF3d7NitP_DA_j5LGydh0';
 const PREPROD_SUPABASE_URL='https://hnqlnvakzaywtafeiybt.supabase.co';
 const PREPROD_SUPABASE_PUBLISHABLE_KEY='sb_publishable_uvtiidkBBkFRt2K34so27g_JpCbMUZw';
 
 export const SUPABASE_URL=IS_PRODUCTION
-  ? String(import.meta.env.VITE_SUPABASE_URL||'')
+  ? String(import.meta.env.VITE_SUPABASE_URL||PROD_SUPABASE_URL)
   : String(import.meta.env.VITE_SUPABASE_URL||PREPROD_SUPABASE_URL);
 export const SUPABASE_PUBLISHABLE_KEY=IS_PRODUCTION
-  ? String(import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY||'')
+  ? String(import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY||PROD_SUPABASE_PUBLISHABLE_KEY)
   : String(import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY||PREPROD_SUPABASE_PUBLISHABLE_KEY);
-
-if(IS_PRODUCTION&&(!SUPABASE_URL||!SUPABASE_PUBLISHABLE_KEY)){
-  throw new Error('FENIX PROD runtime requires dedicated Supabase URL and publishable key.');
-}
 
 const FUNCTION_SUFFIX=IS_PRODUCTION?'':'-test';
 const functionName=(base:string)=>`${base}${FUNCTION_SUFFIX}`;
