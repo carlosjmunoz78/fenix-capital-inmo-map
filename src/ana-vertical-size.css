@@ -1,0 +1,9 @@
+/* Ana vertical: imagen transparente, sin panel de fondo y sin recorte. */
+.dir-person-wrap{
+  background:transparent!important;
+}
+.dir-person-photo{
+  object-fit:contain!important;
+  object-position:center bottom!important;
+  background:transparent!important;
+}

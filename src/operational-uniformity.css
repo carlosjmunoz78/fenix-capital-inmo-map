@@ -1,0 +1,14 @@
+.ops-legacy-side-hidden{display:none!important}
+.ops-uniform-sidebar-host{grid-column:1;grid-row:1;min-width:0;height:100%;z-index:7800}
+.ops-uniform-sidebar-host>.ops-side{position:sticky;top:0;height:100vh;width:100%;visibility:visible!important;opacity:1!important}
+.ops-uniform-footer-host{display:contents}
+.ops-content>.ops-shared-quick,.ops-uniform-footer-host>.ops-shared-quick{order:1000!important;width:100%;margin-top:28px!important}
+.ops-content>.ana-knowledge-mount{order:1001!important;width:100%;margin-top:14px!important}
+.ops-brand,.dir-brand{min-height:72px!important;display:flex!important;align-items:center!important;gap:10px!important}
+.ops-brand img,.dir-brand-logo{flex:0 0 auto!important}
+.ops-brand strong,.dir-brand strong{white-space:nowrap!important;font-weight:800!important;letter-spacing:.04em!important}
+.ops-root[data-theme='light'] .ops-brand strong,.ops-root[data-theme='light'] .dir-brand strong{color:#111!important}
+.ops-root[data-theme='dark'] .ops-brand strong,.ops-root[data-theme='dark'] .dir-brand strong{color:#fff!important}
+html[data-theme='light'] .ops-brand strong,html[data-theme='light'] .dir-brand strong{color:#111!important}
+html[data-theme='dark'] .ops-brand strong,html[data-theme='dark'] .dir-brand strong{color:#fff!important}
+@media(max-width:760px){.ops-uniform-sidebar-host{display:none!important}}

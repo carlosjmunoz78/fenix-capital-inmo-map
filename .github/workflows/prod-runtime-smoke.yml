@@ -1,0 +1,58 @@
+name: PROD Runtime Smoke
+
+on:
+  push:
+    branches:
+      - prod-preparation
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PROD_URL: https://cluhljgonannaafpmblx.supabase.co
+  PROD_PUBLISHABLE_KEY: sb_publishable_yjISKmA5UPfF3d7NitP_DA_j5LGydh0
+  LEGACY_ANON_JWT: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsdWhsamdvbmFubmFhZnBtYmx4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgwODM4MTIsImV4cCI6MjEwMzY1OTgxMn0.PGSqCe7BGLV4rKBOmhZiLtDAmjQzE7mT1JXVpPCW-f8
+
+jobs:
+  runtime-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Gateway health is PROD and reachable
+        shell: bash
+        run: |
+          set -euo pipefail
+          body="$(curl --fail --silent --show-error --max-time 20 \
+            -H "apikey: ${PROD_PUBLISHABLE_KEY}" \
+            "${PROD_URL}/functions/v1/fenix-app-gateway/health")"
+          echo "$body" | grep -q '"ok":true'
+          echo "$body" | grep -q '"env":"PROD"'
+          echo "$body" | grep -q '"service":"fenix-app-gateway"'
+
+      - name: Gateway fails closed without user identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          status="$(curl --silent --output /tmp/gateway-body --write-out '%{http_code}' --max-time 20 \
+            -H "apikey: ${PROD_PUBLISHABLE_KEY}" \
+            "${PROD_URL}/functions/v1/fenix-app-gateway/session/context")"
+          test "$status" = "401"
+          grep -q 'identity_not_linked' /tmp/gateway-body
+
+      - name: Ana Notion secret is configured without exposing it
+        shell: bash
+        run: |
+          set -euo pipefail
+          status="$(curl --silent --output /tmp/ana-body --write-out '%{http_code}' --max-time 20 \
+            -H "Authorization: Bearer ${LEGACY_ANON_JWT}" \
+            -H "apikey: ${LEGACY_ANON_JWT}" \
+            "${PROD_URL}/functions/v1/fenix-ana-knowledge/recent")"
+          if grep -q 'server_config_missing' /tmp/ana-body || test "$status" = "503"; then
+            echo 'NOTION_TOKEN is not available to fenix-ana-knowledge' >&2
+            exit 1
+          fi
+          # The legacy anon JWT is valid at the platform layer but is not a real user.
+          # Reaching the function handler must therefore fail closed in session resolution.
+          test "$status" = "500"
+          grep -q 'session_context_failed' /tmp/ana-body

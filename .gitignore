@@ -70,7 +70,7 @@ web_modules/
 .env.*
 !.env.example
 
-# parcel-bundler cache (https://parceljs.org/)
+# parcel-bundler cache
 .cache
 .parcel-cache
 
@@ -84,8 +84,6 @@ dist
 
 # Gatsby files
 .cache/
-# Comment in the public line in if your project uses Gatsby and not Next.js
-# https://nextjs.org/blog/next-9-1#public-directory-support
 # public
 
 # vuepress build output
@@ -137,3 +135,9 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Generated legacy CRM migration artifacts — may contain temporary signed URLs or sensitive migration metadata
+legacy-document-files-manifest.json
+legacy-document-transfer-plan.json
+legacy-document-migration-report.json
+legacy-crm-final-delta-manifest.json

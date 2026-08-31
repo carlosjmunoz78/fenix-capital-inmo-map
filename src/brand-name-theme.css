@@ -1,0 +1,14 @@
+/* Regla transversal de marca: el texto FÉNIX CAPITAL junto al logotipo cambia con el tema. */
+.ops-brand strong,
+.dir-brand strong,
+.app-shell .brand strong,
+.auth-brand strong{
+  color:#111!important;
+}
+
+.ops-root[data-theme='dark'] .ops-brand strong,
+.dir-shell[data-dir-theme='dark'] .dir-brand strong,
+html[data-theme='dark'] .app-shell .brand strong,
+html[data-theme='dark'] .auth-brand strong{
+  color:#fff!important;
+}

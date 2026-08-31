@@ -1,0 +1,20 @@
+/* Dirección · cierre de dimensiones maestras desktop.
+   Mantiene responsive tablet/móvil existente; iguala Inicio al shell operativo aprobado. */
+.dir-page-heading p{display:none!important}
+@media (min-width:1101px){
+  .dir-shell{grid-template-columns:238px minmax(0,1fr)!important}
+  .dir-sidebar{padding:20px 16px!important}
+  .dir-brand{height:72px!important;gap:12px!important;padding:0 8px 15px!important}
+  .dir-brand-logo{width:44px!important;height:35px!important;object-fit:contain!important;display:block!important;flex:0 0 auto!important}
+  .dir-brand strong{font-size:14px!important;letter-spacing:.04em!important}
+  .dir-nav{gap:5px!important;padding-top:14px!important;overflow-y:auto!important;min-height:0!important;scrollbar-width:thin}
+  .dir-nav-item{height:43px!important;min-height:43px!important;font-size:13.5px!important;gap:12px!important;padding:0 13px!important}
+  .dir-help-card{padding:15px 13px 13px!important;grid-template-columns:1fr 48px!important;gap:10px!important}
+  .dir-help-card strong{font-size:12.5px!important}
+  .dir-help-card span{font-size:10.5px!important;line-height:1.4!important}
+  .dir-help-card button{height:34px!important;font-size:10.5px!important}
+  .dir-help-avatar{width:46px!important;height:46px!important;border-radius:50%!important;object-fit:cover!important;object-position:center 18%!important}
+  .dir-priority-card{min-height:460px!important}
+  .dir-kpi{height:160px!important;min-height:160px!important;box-sizing:border-box!important}
+  .dir-topbar{height:72px!important}
+}

@@ -1,0 +1,4 @@
+.dir-profile .dir-avatar{font-size:0;color:#d94b18;background:linear-gradient(135deg,#ffd8c7,#fff2ea);border:1px solid #ffc4a8;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.dir-profile .dir-avatar::after{content:'BM';font-size:10px;font-weight:800;line-height:1;color:#d94b18;letter-spacing:.02em}
+.dir-shell[data-dir-theme='dark'] .dir-profile .dir-avatar{background:#3a2a24;border-color:#754530}
+.dir-shell[data-dir-theme='dark'] .dir-profile .dir-avatar::after{color:#ff9b72}

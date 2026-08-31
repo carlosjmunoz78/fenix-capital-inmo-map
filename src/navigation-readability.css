@@ -1,0 +1,63 @@
+/* Cierre transversal de legibilidad del menú y del acceso lateral a Ana.
+   Solo afecta desktop; tablet y móvil conservan sus patrones compactos. */
+@media (min-width:1101px){
+  .ops-root{grid-template-columns:272px minmax(0,1fr)!important}
+  .ops-side{padding-left:18px!important;padding-right:18px!important}
+  .ops-side nav{gap:6px!important;padding-top:17px!important;padding-bottom:17px!important}
+  .ops-side nav button{
+    height:46px!important;
+    min-height:46px!important;
+    padding-left:14px!important;
+    padding-right:14px!important;
+    border-radius:10px!important;
+    font-size:14.5px!important;
+    line-height:1.2!important;
+    letter-spacing:.002em!important;
+  }
+  .ops-brand strong{font-size:15px!important}
+  .ops-ana{
+    min-height:88px!important;
+    margin-top:12px!important;
+    padding:13px 14px!important;
+    gap:12px!important;
+    border-radius:14px!important;
+    box-shadow:0 8px 24px rgba(20,20,24,.06)!important;
+  }
+  .ops-ana img{width:58px!important;height:58px!important;flex:0 0 auto!important}
+  .ops-ana span{gap:3px!important;min-width:0!important}
+  .ops-ana strong{font-size:14px!important;line-height:1.25!important}
+  .ops-ana small{font-size:11.5px!important;line-height:1.35!important}
+
+  .dir-shell{grid-template-columns:272px minmax(0,1fr)!important}
+  .dir-sidebar{padding-left:18px!important;padding-right:18px!important}
+  .dir-nav{gap:5px!important;padding-top:14px!important}
+  .dir-nav-item{
+    height:43px!important;
+    min-height:43px!important;
+    padding-left:13px!important;
+    padding-right:13px!important;
+    border-radius:9px!important;
+    font-size:14px!important;
+    gap:11px!important;
+  }
+  .dir-brand strong{font-size:14px!important}
+  .dir-help-card{
+    min-height:104px!important;
+    padding:14px 13px 12px!important;
+    border-radius:13px!important;
+    grid-template-columns:1fr 46px!important;
+    gap:9px!important;
+    box-shadow:0 8px 24px rgba(20,20,24,.06)!important;
+  }
+  .dir-help-card strong{font-size:13.5px!important;margin-bottom:5px!important}
+  .dir-help-card span{font-size:11.5px!important;line-height:1.4!important}
+  .dir-help-card button{height:34px!important;font-size:11.5px!important;border-radius:8px!important}
+  .dir-help-person .dir-avatar{width:42px!important;height:42px!important;font-size:12px!important}
+}
+
+/* Mientras el guard temporal recompone el menú, React puede insertar durante un frame
+   un botón original adicional. Queda fuera del árbol accesible hasta la reconciliación. */
+[data-master-navigation='true'] > button:not([data-master-route]){display:none!important}
+
+/* En la calculadora el usuario solo necesita cerrar: se elimina el control de minimizar. */
+.calc-actions button[aria-label='Minimizar calculadora']{display:none!important}

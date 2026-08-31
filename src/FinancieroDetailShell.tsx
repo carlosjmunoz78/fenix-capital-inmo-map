@@ -1,0 +1,27 @@
+import {useEffect,useState} from 'react';
+import {useLocation,useNavigate} from 'react-router-dom';
+import {ArrowLeft,Moon,Sun,UserRound} from 'lucide-react';
+import {fetchAppApi,supabase} from './supabase';
+import {normalizeNavigation,type NavItem} from './masterNavigation';
+import OperationalShellFrame from './OperationalShellFrame';
+import './operational.css';
+import './financiero-detail.css';
+
+type Theme='light'|'dark';
+type Row=Record<string,unknown>;
+type Ctx={role?:string};
+type PersonalResponse={items?:Row[]};
+function first(r:Row,keys:string[]){for(const k of keys){const v=r[k];if(typeof v==='string'&&v.trim())return v.trim();if(typeof v==='number')return String(v);}return'';}
+function idOf(r:Row){return first(r,['id','actor_code','worker_id','personal_id','code']);}
+export default function FinancieroDetailShell(){
+ const location=useLocation(),navigate=useNavigate();const match=location.pathname.match(/^\/financieros\/([^/]+)$/);const id=match?decodeURIComponent(match[1]):'';const active=Boolean(id);
+ const[ready,setReady]=useState(false),[logged,setLogged]=useState(false),[theme,setTheme]=useState<Theme>(()=>(sessionStorage.getItem('fenix-theme') as Theme)||'light'),[ctx,setCtx]=useState<Ctx|null>(null),[nav,setNav]=useState<NavItem[]>([]),[row,setRow]=useState<Row|null>(null),[status,setStatus]=useState<number|null>(null);
+ useEffect(()=>{if(!active)return;let alive=true;supabase.auth.getSession().then(({data})=>{if(alive){setLogged(Boolean(data.session));setReady(true)}});const{data:{subscription}}=supabase.auth.onAuthStateChange((_e,s)=>{setLogged(Boolean(s));setReady(true)});return()=>{alive=false;subscription.unsubscribe()};},[active]);
+ useEffect(()=>{if(!active)return;document.documentElement.dataset.theme=theme;sessionStorage.setItem('fenix-theme',theme)},[active,theme]);
+ useEffect(()=>{if(!active||!logged)return;let alive=true;Promise.all([fetchAppApi<Ctx>('/session/context'),fetchAppApi<unknown>('/navigation'),fetchAppApi<PersonalResponse>('/personal')]).then(([c,n,p])=>{if(!alive)return;setCtx(c.status===200?c.data:null);setNav(n.status===200?normalizeNavigation(n.data):[]);setStatus(p.status);const items=p.status===200?(p.data?.items??[]):[];setRow(items.find(x=>idOf(x)===id)||null)});return()=>{alive=false};},[active,logged,id]);
+ if(!active||!ready||!logged)return null;
+ const name=row?first(row,['name','nombre','financiero']):'';const zone=row?first(row,['zona','zona_actuacion','provincia','area']):'';const exp=row?first(row,['expedientes','expedientes_en_curso']):'';const firmas=row?first(row,['firmas_mes','firmas','firmas_del_mes']):'';
+ const role=ctx?.role||'Usuario';
+ const topbar=<header className="ops-top"><button className="find-back" onClick={()=>navigate('/financieros')}><ArrowLeft size={16}/> Volver a Financieros</button><div className="ops-top-actions"><button onClick={()=>setTheme(theme==='light'?'dark':'light')}>{theme==='light'?<Moon size={17}/>:<Sun size={17}/>} {theme==='light'?'Oscuro':'Claro'}</button><div className="ops-profile"><strong>{role}</strong></div></div></header>;
+ return <OperationalShellFrame className="find-root" theme={theme} navigation={nav} activeRoute="/financieros" anaSubtitle="Revisa carga y siguiente paso sin completar datos ausentes." anaRoute="/ana?mode=help&resource=financieros" query="" onQueryChange={()=>{}} searchPlaceholder="" name={role} role="" initials={role.slice(0,2).toUpperCase()} onToggleTheme={()=>setTheme(theme==='light'?'dark':'light')} onLogout={async()=>{await supabase.auth.signOut();}} topbar={topbar} contentClassName="find-content">{status===403&&<div className="ops-message">Tu perfil no tiene acceso a este financiero.</div>}{status!==null&&status!==200&&status!==403&&<div className="ops-message">No se pudo cargar la fuente autorizada de personal.</div>}{status===200&&!row&&<div className="ops-empty"><strong>Perfil no disponible</strong><span>No existe un perfil visible con este identificador dentro de tu ámbito.</span></div>}{status===200&&row&&<><div className="find-title"><small>FICHA DE FINANCIERO</small><h1>{name||'Perfil financiero'}</h1><p>{zone||'Zona no informada por la fuente autorizada'}</p></div><section className="find-kpis"><article><small>EXPEDIENTES</small><strong>{exp||'No disponible'}</strong><span>Valor expuesto por el gateway</span></article><article><small>FIRMAS DEL MES</small><strong>{firmas||'No disponible'}</strong><span>Valor expuesto por el gateway</span></article><article><small>ZONA</small><strong>{zone||'No disponible'}</strong><span>Solo si viene informada</span></article></section><section className="find-card"><UserRound size={22}/><div><small>IDENTIDAD AUTORIZADA</small><h2>{name||'No disponible'}</h2><dl><div><dt>Rol</dt><dd>{first(row,['role','rol'])||'No disponible'}</dd></div><div><dt>Identificador</dt><dd>{idOf(row)||'No disponible'}</dd></div></dl></div></section><section className="find-actions"><button onClick={()=>navigate('/expedientes')}>Revisar expedientes</button><button onClick={()=>navigate('/firmas')}>Revisar firmas</button><button onClick={()=>navigate('/ana?mode=help&resource=financieros')}>Analizar con Ana</button></section><div className="find-note"><strong>Sin inferencias</strong><span>Esta ficha no calcula ratios, objetivos ni rankings si la fuente autorizada no los proporciona.</span></div></>}</OperationalShellFrame>;
+}

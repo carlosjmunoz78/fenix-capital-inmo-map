@@ -1,0 +1,119 @@
+/* FÉNIX · patrón visual maestro de Dirección */
+@media (min-width:1200px){
+  /* Escala: conservar el ancho ya validado y dar solo el alto necesario */
+  .dir-priority-card{min-height:clamp(312px,35vh,346px)!important}
+  .dir-right-top .priorities .dir-empty-state{min-height:clamp(166px,19.5vh,194px)!important}
+  .dir-mid-grid .dir-table-card .dir-empty-state{min-height:clamp(166px,20vh,208px)!important}
+  .dir-quick-grid button{height:clamp(66px,7.2vh,74px)!important}
+
+  /* Jerarquía tipográfica: menú lateral casi igual; topbar y contenido algo mayores */
+  .dir-advanced{font-size:12px!important;font-weight:700}
+  .dir-search input{font-size:12px!important}
+  .dir-theme-toggle{font-size:11px!important}
+  .dir-user-copy strong{font-size:12px!important}
+  .dir-user-copy span{font-size:10px!important}
+  .dir-priority-copy h1{font-size:14px!important;line-height:1.25}
+  .dir-priority-copy>p{font-size:11px!important}
+  .dir-empty-compact strong{font-size:10.5px!important}
+  .dir-empty-compact small{font-size:9.5px!important;line-height:1.35}
+  .dir-alert-button{font-size:10.5px!important}
+  .dir-kpi>span{font-size:8.6px!important;line-height:1.2}
+  .dir-kpi>small{font-size:8.4px!important}
+  .dir-section-head strong{font-size:10.5px!important;letter-spacing:.015em}
+  .dir-section-head button{font-size:9.5px!important}
+  .dir-empty-state>span{font-size:11.5px!important}
+  .dir-empty-state>small{font-size:9.5px!important;line-height:1.4}
+  .dir-empty-state>button{font-size:9.5px!important}
+  .dir-quick h2{font-size:11px!important;letter-spacing:.02em}
+  .dir-quick-grid button{font-size:10.5px!important;font-weight:600}
+
+  /* Ana ayuda: más presencia sin invadir el menú */
+  .dir-help-card{grid-template-columns:minmax(0,1fr) 58px!important;gap:10px!important;padding:14px 12px 12px!important}
+  .dir-help-card strong{font-size:12px!important}
+  .dir-help-card span{font-size:10.5px!important;line-height:1.35}
+  .dir-help-avatar{width:56px!important;height:56px!important;object-fit:cover!important;object-position:center 20%!important;border:2px solid rgba(255,95,0,.18)!important;box-shadow:0 5px 16px rgba(0,0,0,.12)!important}
+  .dir-help-card button{height:32px!important;font-size:10.5px!important;font-weight:700}
+
+  /* Accesos rápidos: una única banda visual y calculadora como acción especial */
+  .dir-quick-grid{grid-template-columns:repeat(6,minmax(0,1fr))!important;align-items:stretch}
+  .dir-quick-grid button{justify-content:center!important;gap:10px!important;padding:0 12px!important;border-radius:11px!important}
+  .dir-quick-grid button svg{width:23px!important;height:23px!important;flex:0 0 auto}
+  .dir-calc-launcher{min-height:46px!important;padding:0 17px!important;border-radius:14px!important;font-size:11.5px!important;font-weight:750!important;box-shadow:0 12px 30px rgba(255,95,0,.20)!important}
+
+  /* Ana vertical: integración más natural en ambos temas */
+  .dir-person-wrap{position:relative!important;overflow:hidden!important}
+  .dir-person-wrap:before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 48% 36%,rgba(255,244,235,.96) 0%,rgba(255,244,235,.42) 38%,rgba(244,239,235,.16) 70%,transparent 100%)}
+  .dir-person-photo{position:relative;z-index:1;filter:drop-shadow(0 10px 18px rgba(0,0,0,.10))!important}
+
+  /* Oscuro Fénix: grafito + matiz cálido, no negro plano */
+  .dir-shell[data-dir-theme='dark']{
+    background:
+      radial-gradient(circle at 82% 12%,rgba(255,95,0,.075),transparent 28%),
+      radial-gradient(circle at 18% 82%,rgba(135,0,100,.045),transparent 30%),
+      linear-gradient(145deg,#171717 0%,#1b1919 44%,#141414 100%)!important;
+  }
+  .dir-shell[data-dir-theme='dark'] .dir-main{background:transparent!important}
+  .dir-shell[data-dir-theme='dark'] .dir-sidebar{
+    background:linear-gradient(180deg,#1c1a1a 0%,#191818 55%,#171717 100%)!important;
+    border-right-color:#3a302d!important;
+    box-shadow:10px 0 30px rgba(0,0,0,.12)
+  }
+  .dir-shell[data-dir-theme='dark'] .dir-topbar{
+    background:linear-gradient(90deg,rgba(31,29,29,.97),rgba(27,26,26,.95))!important;
+    border-bottom-color:#3a302d!important;
+    box-shadow:0 8px 28px rgba(0,0,0,.10)
+  }
+  .dir-shell[data-dir-theme='dark'] .dir-kpi,
+  .dir-shell[data-dir-theme='dark'] .dir-table-card,
+  .dir-shell[data-dir-theme='dark'] .dir-quick-grid button,
+  .dir-shell[data-dir-theme='dark'] .dir-search,
+  .dir-shell[data-dir-theme='dark'] .dir-advanced,
+  .dir-shell[data-dir-theme='dark'] .dir-theme-toggle,
+  .dir-shell[data-dir-theme='dark'] .dir-team-person,
+  .dir-shell[data-dir-theme='dark'] .dir-help-card,
+  .dir-shell[data-dir-theme='dark'] .dir-priority-card{
+    background:linear-gradient(160deg,#242222 0%,#211f1f 62%,#25201e 100%)!important;
+    border-color:#403633!important;
+    box-shadow:0 10px 28px rgba(0,0,0,.11)
+  }
+  .dir-shell[data-dir-theme='dark'] .dir-empty-state,
+  .dir-shell[data-dir-theme='dark'] .dir-empty-compact{
+    background:linear-gradient(160deg,#292626,#242222)!important;
+    border-color:#443833!important
+  }
+  .dir-shell[data-dir-theme='dark'] .dir-person-wrap{
+    background:
+      radial-gradient(circle at 50% 30%,rgba(180,92,50,.20),transparent 35%),
+      linear-gradient(180deg,#2a2422 0%,#211f1f 62%,#1d1c1c 100%)!important
+  }
+  .dir-shell[data-dir-theme='dark'] .dir-person-wrap:before{
+    background:radial-gradient(circle at 48% 36%,rgba(255,154,101,.13) 0%,rgba(148,77,44,.09) 40%,rgba(0,0,0,0) 72%)!important
+  }
+  .dir-shell[data-dir-theme='dark'] .dir-person-photo{
+    filter:drop-shadow(0 13px 24px rgba(0,0,0,.28)) saturate(.96) contrast(1.02)!important
+  }
+  .dir-shell[data-dir-theme='dark'] .dir-help-avatar{
+    border-color:rgba(255,135,80,.42)!important;
+    box-shadow:0 0 0 4px rgba(255,95,0,.07),0 8px 18px rgba(0,0,0,.24)!important
+  }
+  .dir-shell[data-dir-theme='dark'] .dir-nav-item.active{
+    background:linear-gradient(90deg,#4a2a20 0%,#38231e 100%)!important;
+    box-shadow:inset 3px 0 0 #ff6a2b!important
+  }
+  .dir-shell[data-dir-theme='dark'] .dir-quick-grid button:hover,
+  .dir-shell[data-dir-theme='dark'] .dir-kpi:hover,
+  .dir-shell[data-dir-theme='dark'] .dir-team-person:hover{
+    background:linear-gradient(160deg,#302925,#2a2422)!important;
+    border-color:#6a493c!important;
+    transform:translateY(-1px)
+  }
+}
+
+/* Mantener escritorio completo durante más tiempo; tablet solo cuando realmente haga falta */
+@media (min-width:1101px) and (max-width:1199px){
+  .dir-kpis{grid-template-columns:repeat(5,minmax(0,1fr))!important}
+  .dir-mid-grid{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr)!important}
+  .dir-quick-grid{grid-template-columns:repeat(6,minmax(0,1fr))!important}
+  .dir-user-copy{display:block!important}
+  .dir-theme-toggle span{display:inline!important}
+}

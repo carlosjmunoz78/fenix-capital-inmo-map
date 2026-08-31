@@ -1,0 +1,102 @@
+name: PROD Preparation Build
+
+on:
+  push:
+    branches:
+      - prod-preparation
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: prod-preparation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-prod-preparation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Enforce release credential readiness
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          PROD_SUPABASE_URL: ${{ secrets.PROD_SUPABASE_URL }}
+          PROD_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
+        shell: bash
+        run: |
+          failed=0
+          if [ -n "$NOTION_TOKEN" ]; then
+            echo "NOTION_TOKEN_READY=yes"
+          else
+            echo "NOTION_TOKEN_READY=no"
+            failed=1
+          fi
+          if [ -n "$PROD_SUPABASE_URL" ]; then
+            echo "PROD_SUPABASE_URL_READY=yes"
+          else
+            echo "PROD_SUPABASE_URL_READY=no"
+            failed=1
+          fi
+          if [ -n "$PROD_SUPABASE_PUBLISHABLE_KEY" ]; then
+            echo "PROD_SUPABASE_PUBLISHABLE_KEY_READY=yes"
+          else
+            echo "PROD_SUPABASE_PUBLISHABLE_KEY_READY=no"
+            failed=1
+          fi
+          if [ "$failed" -ne 0 ]; then
+            echo "Required release credentials are incomplete."
+            exit 2
+          fi
+
+      - name: Install dependencies reproducibly
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Dependency versions
+        run: npm list --depth=0
+
+      - name: Install Chromium browser
+        run: npx playwright install chromium
+        timeout-minutes: 5
+
+      - name: Build PRE-PROD-compatible code path
+        run: npm run build
+
+      - name: Browser QA
+        env:
+          PLAYWRIGHT_SKIP_BUILD: '1'
+        run: npm run test:e2e
+
+      - name: Validate isolated PROD build path with inert values
+        env:
+          VITE_FENIX_ENV: prod
+          VITE_SUPABASE_URL: https://prod.invalid
+          VITE_SUPABASE_PUBLISHABLE_KEY: prod-build-validation-placeholder
+        run: npm run build
+
+      - name: Upload validation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fenix-prod-preparation-playwright-report
+          path: playwright-report
+          if-no-files-found: ignore
+
+# Validation only. Dummy PROD values prove the production code path builds without
+# reusing PRE-PROD fallbacks. The release credential gate reports presence only;
+# it never prints secret values or contacts external services. Missing required
+# credentials fail closed. No deployment, branch write, backend contact or mutation.

@@ -1,0 +1,28 @@
+/* Patrón maestro transversal: cabecera siempre visible sin pisar el contenido.
+   .ops-main ya es el contenedor con scroll, por lo que sticky mantiene la cabecera
+   visible y conserva el flujo normal de la página. */
+.ops-root>.ops-main{padding-top:0!important;box-sizing:border-box!important;}
+.ops-root>.ops-main>.ops-top{
+  position:sticky!important;
+  top:0!important;
+  left:auto!important;
+  right:auto!important;
+  width:100%!important;
+  box-sizing:border-box!important;
+  z-index:7600!important;
+  flex:0 0 auto!important;
+}
+.ops-root>.ops-main>.ops-content{
+  position:relative!important;
+  z-index:1!important;
+}
+@media (min-width:651px){
+  .ops-root>.ops-main>.ops-top{min-height:72px!important;}
+}
+@media (min-width:651px) and (max-width:900px){
+  .ops-root>.ops-main>.ops-top{min-height:66px!important;}
+}
+@media (max-width:650px){
+  .ops-root>.ops-main>.ops-top{min-height:66px!important;}
+  .ops-root>.ops-main{padding-top:0!important;}
+}

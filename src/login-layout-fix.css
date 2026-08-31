@@ -1,0 +1,114 @@
+/* PRE-PROD · Login landscape correction. Keeps Carlos' Ana PNG untouched. */
+.auth-shell:has(#fenix-user){
+  padding:32px;
+  align-items:center;
+}
+
+.auth-card:has(#fenix-user){
+  width:min(1120px,calc(100vw - 64px));
+  min-height:620px;
+  padding:54px 58px;
+  background-position:4% 100%;
+  background-size:43% auto;
+  border-radius:28px;
+}
+
+.auth-card:has(#fenix-user) > *{
+  width:46%;
+  margin-left:54%;
+  min-width:0;
+}
+
+.auth-card:has(#fenix-user) .auth-brand{
+  margin-left:54%;
+  margin-bottom:24px;
+}
+
+.auth-card:has(#fenix-user) h1{
+  font-size:24px;
+  line-height:1.15;
+  margin-left:54%;
+  color:var(--muted);
+  font-weight:650;
+}
+
+.auth-card:has(#fenix-user) > p{
+  margin-left:54%;
+  margin-top:14px;
+  max-width:none;
+  font-size:0;
+}
+
+.auth-card:has(#fenix-user) > p::before{
+  content:"Soy Ana, tu asistente. ¿Empezamos?";
+  display:block;
+  font-size:34px;
+  line-height:1.12;
+  letter-spacing:-.025em;
+  font-weight:800;
+  color:var(--text);
+  max-width:430px;
+}
+
+.auth-card:has(#fenix-user)::after{
+  content:"ANA · TU ASISTENTE FÉNIX";
+  left:5.5%;
+  bottom:24px;
+  top:auto;
+  width:40%;
+  font-size:10px;
+  letter-spacing:.14em;
+}
+
+.auth-card:has(#fenix-user) .auth-fields{
+  margin-left:54%;
+  margin-top:30px;
+}
+
+.auth-card:has(#fenix-user) .auth-field,
+.auth-card:has(#fenix-user) .remember-row,
+.auth-card:has(#fenix-user) .warning,
+.auth-card:has(#fenix-user) .primary,
+.auth-card:has(#fenix-user) .forgot-link{
+  margin-left:54%;
+  width:46%;
+}
+
+.auth-card:has(#fenix-user) .auth-fields .auth-field{
+  margin-left:0;
+  width:100%;
+}
+
+@media(max-width:900px){
+  .auth-shell:has(#fenix-user){padding:18px}
+  .auth-card:has(#fenix-user){
+    width:100%;
+    min-height:0;
+    margin-top:50px;
+    padding:320px 24px 28px;
+    background-position:50% 8px;
+    background-size:auto 285px;
+    border-radius:22px;
+  }
+  .auth-card:has(#fenix-user) > *,
+  .auth-card:has(#fenix-user) .auth-brand,
+  .auth-card:has(#fenix-user) h1,
+  .auth-card:has(#fenix-user) > p,
+  .auth-card:has(#fenix-user) .auth-fields,
+  .auth-card:has(#fenix-user) .auth-field,
+  .auth-card:has(#fenix-user) .remember-row,
+  .auth-card:has(#fenix-user) .warning,
+  .auth-card:has(#fenix-user) .primary,
+  .auth-card:has(#fenix-user) .forgot-link{
+    width:100%;
+    margin-left:0;
+  }
+  .auth-card:has(#fenix-user)::after{
+    left:24px;
+    top:292px;
+    bottom:auto;
+    width:auto;
+  }
+  .auth-card:has(#fenix-user) h1{font-size:21px}
+  .auth-card:has(#fenix-user) > p::before{font-size:28px;max-width:none}
+}
