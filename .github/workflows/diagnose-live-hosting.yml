@@ -17,6 +17,7 @@ jobs:
         shell: bash
         run: |
           set -u
+          stamp="$(date +%s)"
           echo '=== DNS CNAME ==='
           dig +short app.fenixcapital.es CNAME || true
           echo '=== DNS A ==='
@@ -25,13 +26,15 @@ jobs:
           dig +short app.fenixcapital.es AAAA || true
           echo '=== NS fenixcapital.es ==='
           dig +short fenixcapital.es NS || true
-          echo '=== HTTP HEAD ==='
-          curl -sSIL --max-time 30 https://app.fenixcapital.es/ || true
-          echo '=== LIVE SHA ==='
-          curl -sS -D - --max-time 30 https://app.fenixcapital.es/PROD_SOURCE_SHA.txt || true
+          echo '=== HTTP HEAD CACHE-BUST ==='
+          curl -sSIL --max-time 30 -H 'Cache-Control: no-cache' "https://app.fenixcapital.es/?diag=${stamp}" || true
+          echo '=== LIVE SHA CACHE-BUST ==='
+          curl -sS -D - --max-time 30 -H 'Cache-Control: no-cache' "https://app.fenixcapital.es/PROD_SOURCE_SHA.txt?diag=${stamp}" || true
           echo
-          echo '=== HTML PREFIX ==='
-          curl -sS --max-time 30 https://app.fenixcapital.es/ | head -c 2500 || true
+          echo '=== HTML PREFIX CACHE-BUST ==='
+          curl -sS --max-time 30 -H 'Cache-Control: no-cache' "https://app.fenixcapital.es/?diag=${stamp}" | head -c 3000 || true
           echo
+          echo '=== ASSET REFERENCES ==='
+          curl -sS --max-time 30 -H 'Cache-Control: no-cache' "https://app.fenixcapital.es/?diag=${stamp}" | grep -Eo '/assets/[^" ]+\.(js|css)' | head -20 || true
           echo '=== TLS CERT ==='
           echo | openssl s_client -servername app.fenixcapital.es -connect app.fenixcapital.es:443 2>/dev/null | openssl x509 -noout -subject -issuer -dates -ext subjectAltName || true
