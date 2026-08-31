@@ -19,8 +19,23 @@ env:
 jobs:
   runtime-smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
+      - name: Checkout production source
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies reproducibly
+        run: npm ci
+
+      - name: Compile production frontend
+        run: npm run build
+
       - name: APP domain serves deployed frontend
         shell: bash
         run: |
@@ -57,11 +72,22 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for path in fenix-directory-api/notarias fenix-directory-api/registros-propiedad fenix-economia-api/economia; do
+          for path in fenix-directory-api/notarias fenix-directory-api/registros-propiedad fenix-economia-api/economia fenix-reports-api/reports; do
             status="$(curl --silent --output /tmp/fenix-api-body --write-out '%{http_code}' --max-time 20 \
               -H "apikey: ${PROD_PUBLISHABLE_KEY}" \
               "${PROD_URL}/functions/v1/${path}")"
             test "$status" = "401"
+          done
+
+      - name: Retired migration endpoints remain unavailable
+        shell: bash
+        run: |
+          set -euo pipefail
+          for fn in fenix-directory-sync-once fenix-directory-sync-trigger-once fenix-crm-sync-once fenix-crm-sync-trigger-once fenix-prod-data-sync-once fenix-legacy-doc-migration-once; do
+            status="$(curl --silent --output /tmp/retired-body --write-out '%{http_code}' --max-time 20 \
+              -H "apikey: ${PROD_PUBLISHABLE_KEY}" \
+              "${PROD_URL}/functions/v1/${fn}")"
+            test "$status" = "401" || test "$status" = "410"
           done
 
       - name: Ana API accepts browser CORS preflight
