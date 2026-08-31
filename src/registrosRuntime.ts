@@ -1,6 +1,7 @@
-import {SUPABASE_URL,supabase} from './supabase';
+import {IS_PRODUCTION,SUPABASE_URL,supabase} from './supabase';
 
 export async function fetchRegistrosRuntime<T>(path:string){
+  if(IS_PRODUCTION)return{status:503,data:null as T|null};
   const{data:{session}}=await supabase.auth.getSession();
   if(!session?.access_token)return{status:401,data:null as T|null};
   const r=await fetch(`${SUPABASE_URL}/functions/v1/fenix-registros-runtime-test${path}`,{
