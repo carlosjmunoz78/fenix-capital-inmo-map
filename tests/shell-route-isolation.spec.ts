@@ -7,18 +7,27 @@ async function seed(page:any){
  await page.route('**/functions/v1/fenix-app-gateway-test/**',async(r:any)=>{
   const u=r.request().url();
   if(u.endsWith('/session/context'))return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,context:{actor_code:'FIN-A',role:'Financiero',active:true}})});
-  if(u.endsWith('/navigation'))return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,items:['/inicio','/expedientes','/agenda']})});
+  if(u.endsWith('/navigation'))return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,items:[{label:'Inicio',route:'/inicio'},{label:'Expedientes',route:'/expedientes'},{label:'Agenda',route:'/agenda'}]})});
   return r.fulfill({status:404,contentType:'application/json',body:'{}'});
  });
 }
 
-test('Fénix PRE-PROD · la ficha de expediente no monta también el listado genérico',async({page},testInfo)=>{
+test('Fénix PRE-PROD · ficha expediente monta un solo chrome y conserva recorrido visible',async({page},testInfo)=>{
  if(!testInfo.project.name.includes('desktop'))test.skip();
  await seed(page);
- await page.route('**/functions/v1/fenix-detail-api-test/**',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,expediente:{expediente_code:'EXP-QA-001',cliente_alias:'QA',fase:'Entrada'}})}));
+ await page.route('**/functions/v1/fenix-detail-api-test/**',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,expediente:{expediente_code:'EXP-QA-001',cliente_alias:'QA',fase:'Tasación'}})}));
  await page.goto('/expedientes/EXP-QA-001');
  await expect(page.locator('.detail-exp-root')).toBeVisible();
  await expect(page.getByText('Cartera hipotecaria autorizada para tu perfil.')).toHaveCount(0);
+ await expect(page.locator('.app-shell > .sidebar')).toBeHidden();
+ await expect(page.locator('.app-shell > .main')).toBeHidden();
+ await expect(page.locator('.detail-exp-root .ops-top:visible')).toHaveCount(1);
+ await expect(page.locator('aside.detail-auth-nav:visible')).toHaveCount(1);
+ const journey=page.getByTestId('expediente-journey');
+ await expect(journey).toBeVisible();
+ await expect(journey).toContainText('RECORRIDO DEL EXPEDIENTE');
+ await expect(journey).toContainText('Tasación');
+ await expect(journey).toContainText('ANA ·');
 });
 
 test('Fénix PRE-PROD · una ficha de tarea no monta también Agenda genérica',async({page},testInfo)=>{
