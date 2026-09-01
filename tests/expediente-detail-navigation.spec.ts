@@ -24,9 +24,24 @@ test.describe('Fénix PRE-PROD · ficha expediente con navegación global',()=>{
   await expect(menu.getByRole('button',{name:'Financieros',exact:true})).toHaveCount(0);
   await expect(page.getByRole('heading',{name:'Expediente QA',exact:true})).toBeVisible();
   await expect(page.locator('.ops-top:visible')).toHaveCount(1);
+  await expect(page.locator('#root header:visible')).toHaveCount(1);
+  await expect(page.locator('#root .topbar:visible')).toHaveCount(0);
   await expect(page.locator('aside.ops-side:visible')).toHaveCount(1);
   await expect(page.locator('.ops-uniform-sidebar-host:visible')).toHaveCount(0);
   await expect(page.locator('.app-shell .sidebar:visible')).toHaveCount(0);
+ });
+
+ test('recorrido canónico es visible y la línea genérica queda fuera de pantalla',async({page},testInfo)=>{
+  if(!testInfo.project.name.includes('desktop'))test.skip();
+  await boot(page);
+  await page.goto(`/expedientes/${id}`);
+  const journey=page.getByTestId('expediente-journey');
+  await expect(journey).toBeVisible();
+  await expect(journey.getByText('RECORRIDO DEL EXPEDIENTE',{exact:false})).toBeVisible();
+  await expect(journey.getByTestId('expediente-journey-guidance')).toBeVisible();
+  await expect(journey.locator('.detail-phase-track')).toBeVisible();
+  await expect(page.locator('.detail-exp-root .detail-journey:not(.exp-live-journey-section):visible')).toHaveCount(0);
+  await expect(page.locator('.detail-exp-root .detail-phase-track:visible')).toHaveCount(1);
  });
 
  test('ciclo de vida queda entre Ana y Subir documentos y nunca flota',async({page},testInfo)=>{
