@@ -6,6 +6,8 @@ import './expediente-journey-guard.css';
 
 const PHASES=['Entrada','Documentación','Análisis','Banco','Tasación','Oferta','FEIN','Notaría','Firma','Cierre'];
 const MANUAL_STAGES=['Entrada','Revisión legado','Documentación incompleta','Documentación completa','Análisis','Pre-OK','Banco','Tasación solicitada','Tasación realizada','Pre-OK + Tasación realizada','Oferta','FEIN','Notaría','Firma','Finalizado','Perdido'];
+const FALLBACK_LABEL='RECORRIDO DEL EXPEDIENTE · ESTADO PENDIENTE DE CARGA';
+const FALLBACK_GUIDE='ANA · No marco ninguna fase hasta recibir el dato canónico. Siguiente fase: se calculará únicamente cuando exista estado real.';
 
 type Workspace={ok?:boolean;status?:number;expediente?:{stage?:string;version?:number;proxima_accion?:string|null};lifecycle?:{recorded_stage?:string;effective_stage?:string;stage_inconsistent?:boolean;workflow_closed?:boolean};qa?:{blockers?:unknown[];warnings?:unknown[]};counts?:{documentos?:number;envios_banco?:number;ofertas?:number;tasaciones?:number;firma?:number};};
 function lower(v:unknown){return String(v??'').trim().toLowerCase();}
@@ -24,9 +26,9 @@ export default function ExpedienteJourneyGuard(){
  useEffect(()=>{
   if(!active){setTarget(null);return;}
   let cancelled=false;let tries=0;
-  const locate=()=>{if(cancelled)return;const el=document.querySelector<HTMLElement>('.detail-exp-root .detail-exp-content > .detail-journey');if(el){el.classList.add('exp-live-journey-ready');setTarget(el);return;}tries+=1;if(tries<50)window.setTimeout(locate,100);};
+  const locate=()=>{if(cancelled)return;const el=document.querySelector<HTMLElement>('.detail-exp-root .detail-exp-content > .detail-journey');if(el){el.classList.add('exp-live-journey-ready');el.dataset.testid='expediente-journey';setTarget(el);return;}tries+=1;if(tries<50)window.setTimeout(locate,100);};
   locate();
-  return()=>{cancelled=true;document.querySelector('.exp-live-journey-ready')?.classList.remove('exp-live-journey-ready');setTarget(null);};
+  return()=>{cancelled=true;const el=document.querySelector<HTMLElement>('.exp-live-journey-ready');if(el){el.classList.remove('exp-live-journey-ready');delete el.dataset.testid;}setTarget(null);};
  },[active,pathname]);
 
  async function refresh(){if(!active||!IS_PRODUCTION||!code)return;const r=await fetchAppApi<Workspace>(`/expedientes/${encodeURIComponent(code)}/workspace`);if(r.status===200&&r.data){setWorkspace(r.data);setSelected(String(r.data.lifecycle?.effective_stage||r.data.expediente?.stage||''));}}
@@ -42,7 +44,8 @@ export default function ExpedienteJourneyGuard(){
 
  async function saveManualStage(){const version=Number(workspace?.expediente?.version||0);if(!version||!selected||busy)return;setBusy(true);setMsg('');const r=await changeStage(code,version,selected);setBusy(false);if(r.status===200){setMsg('Estado actualizado y registrado en el histórico.');await refresh();}else if(r.status===409){setMsg('El expediente cambió mientras lo editabas. He recargado el estado actual.');await refresh();}else setMsg('No se pudo cambiar el estado. No se ha aplicado ningún cambio.');}
 
- if(!active||!target||!IS_PRODUCTION)return null;
+ if(!active||!target)return null;
+ if(!IS_PRODUCTION)return createPortal(<div className="exp-journey-guidance" data-testid="expediente-journey-guidance"><strong>{FALLBACK_LABEL}</strong><span>{FALLBACK_GUIDE}</span></div>,target);
  return createPortal(<div className="exp-live-journey" data-testid="expediente-journey-live">
   <div className="detail-section-label">RECORRIDO DEL EXPEDIENTE · ESTADO REAL: {stage||'CARGANDO'}</div>
   <div className="exp-journey-guidance" data-testid="expediente-journey-guidance"><strong>ANA · {stage?`Estamos en ${stage}.`:'Estoy comprobando el estado real.'}</strong><span><b>Qué falta:</b> {missing}</span><span><b>Qué toca ahora:</b> {recommendation}</span>{warnings[0]&&<span><b>Aviso:</b> {warnings[0]}</span>}{workspace?.lifecycle?.stage_inconsistent&&<span><b>Estado automático:</b> el backend calcula {stage} aunque el estado registrado sea {recordedStage}.</span>}</div>
