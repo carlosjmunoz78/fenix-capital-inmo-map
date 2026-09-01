@@ -37,6 +37,8 @@ export default function ExpedienteJourneyGuard(){
       section.setAttribute('aria-hidden','true');
       const label=section.querySelector<HTMLElement>(':scope > .detail-section-label');
       if(label&&label.textContent)label.textContent='';
+      const track=section.querySelector<HTMLElement>(':scope > .detail-phase-track');
+      if(track&&track.childElementCount>0)track.replaceChildren();
      });
     };
     suppressLegacy();
