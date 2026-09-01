@@ -19,12 +19,12 @@ function isCollected(r:EconomyRow){return bool(r,['cobrado','pagado','cobro_conf
 function collectionSignal(r:EconomyRow){return ['cobrado','pagado','cobro_confirmado'].some(k=>Object.prototype.hasOwnProperty.call(r,k))||/(cobrad|pagad)/i.test(status(r))}
 function add(bucket:MoneyBucket,q:Quoted){bucket.grossBaseEur+=q.grossBaseEur;bucket.marginBaseEur+=q.marginBaseEur;bucket.count++}
 function negotiatedGross(r:EconomyRow){return num(r,['honorarios_finales_eur','honorarios_finales','honorarios_negociados_eur','honorarios_negociados','honorarios_base_eur','honorarios_base'])}
-function fromAgency(r:EconomyRow){const explicit=bool(r,['origen_inmobiliaria','procede_inmobiliaria','es_inmobiliaria']);if(explicit!==null)return explicit;const origin=firstText(r,['origen','procedencia','canal','fuente']);if(/inmobiliaria|agencia/i.test(origin))return true;return Boolean(firstText(r,['inmobiliaria_id','inmobiliaria','agencia_id','agencia']))}
+function fromAgency(r:EconomyRow){const explicit=bool(r,['origen_inmobiliaria','procede_inmobiliaria','es_inmobiliaria']);if(explicit!==null)return explicit;const origin=firstText(r,['origen','procedencia','canal','fuente']);if(/inmobiliaria|agencia/i.test(origin))return true;return Boolean(firstText(r,['inmobiliaria_id','inmobiliaria','inmobiliaria_code','agencia_id','agencia']))}
 function mortgageQuote(r:EconomyRow):Quoted|null{
  const amount=num(r,['importe_hipoteca','importe_solicitado','importe_financiacion','capital_hipoteca','importe']);
  const agency=fromAgency(r);const commission=num(r,['comision_inmobiliaria_eur','comision_inmobiliaria','comision_agencia_eur','comision_agencia']);
  const negotiated=negotiatedGross(r);
- if(amount===null){if(negotiated===null)return null;const applied=agency?(commission!==null&&commission>=0?commission:1100):0;return{grossBaseEur:negotiated,marginBaseEur:negotiated-applied}}
+ if(amount===null){const gross=negotiated??3500;const applied=agency?(commission!==null&&commission>=0?commission:1100):0;return{grossBaseEur:gross,marginBaseEur:gross-applied}}
  const q=quoteMortgageEconomics(amount,{fromRealEstateAgency:agency,agencyCommissionEur:commission??undefined,negotiatedFeeEur:negotiated??undefined});return q?{grossBaseEur:q.grossBaseEur,marginBaseEur:q.fenixMarginBaseEur}:null
 }
 function inheritanceClass(r:EconomyRow):InheritanceFeeClass|null{
