@@ -109,6 +109,7 @@ import DirectionAnaUrgentGuard from './DirectionAnaUrgentGuard';
 import AnaKnowledgeBlock from './AnaKnowledgeBlock';
 import AnaKnowledgePlacementGuard from './AnaKnowledgePlacementGuard';
 import OperationalUniformityGuard from './OperationalUniformityGuard';
+import ProductionWriteSafetyGuard from './ProductionWriteSafetyGuard';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -117,6 +118,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <OperationalRouteScrollReset />
       <OperationalUniformityGuard />
       <CreateRouteAuthorizedNav />
+      <ProductionWriteSafetyGuard />
       <ExpedienteFollowupConfirmationGuard />
       <CalculatorLabelGuard />
       <ProfileLauncherGuard />
