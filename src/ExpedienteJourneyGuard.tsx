@@ -6,8 +6,6 @@ import './expediente-journey-guard.css';
 
 const PHASES=['Entrada','Documentación','Análisis','Banco','Tasación','Oferta','FEIN','Notaría','Firma','Cierre'];
 const MANUAL_STAGES=['Entrada','Revisión legado','Documentación incompleta','Documentación completa','Análisis','Pre-OK','Banco','Tasación solicitada','Tasación realizada','Pre-OK + Tasación realizada','Oferta','FEIN','Notaría','Firma','Finalizado','Perdido'];
-const FALLBACK_LABEL='RECORRIDO DEL EXPEDIENTE · ESTADO PENDIENTE DE CARGA';
-const FALLBACK_GUIDE='ANA · No marco ninguna fase hasta recibir el dato canónico. Siguiente fase: se calculará únicamente cuando exista estado real.';
 
 type Workspace={ok?:boolean;status?:number;expediente?:{stage?:string;version?:number;proxima_accion?:string|null};lifecycle?:{recorded_stage?:string;effective_stage?:string;stage_inconsistent?:boolean;workflow_closed?:boolean};qa?:{blockers?:unknown[];warnings?:unknown[]};counts?:{documentos?:number;envios_banco?:number;ofertas?:number;tasaciones?:number;firma?:number};};
 function lower(v:unknown){return String(v??'').trim().toLowerCase();}
@@ -21,17 +19,32 @@ export default function ExpedienteJourneyGuard(){
  const match=pathname.match(/^\/expedientes\/([^/]+)$/);
  const code=match?.[1]?decodeURIComponent(match[1]):'';
  const active=Boolean(match)&&pathname!=='/expedientes/nuevo';
- const[target,setTarget]=useState<HTMLElement|null>(null),[workspace,setWorkspace]=useState<Workspace|null>(null),[busy,setBusy]=useState(false),[msg,setMsg]=useState(''),[selected,setSelected]=useState('');
+ const[host,setHost]=useState<HTMLElement|null>(null),[workspace,setWorkspace]=useState<Workspace|null>(null),[busy,setBusy]=useState(false),[msg,setMsg]=useState(''),[selected,setSelected]=useState('');
 
  useEffect(()=>{
-  if(!active){setTarget(null);return;}
-  let cancelled=false;let tries=0;
-  const locate=()=>{if(cancelled)return;const el=document.querySelector<HTMLElement>('.detail-exp-root .detail-exp-content > .detail-journey');if(el){el.classList.add('exp-live-journey-ready');el.dataset.testid='expediente-journey';setTarget(el);return;}tries+=1;if(tries<50)window.setTimeout(locate,100);};
+  if(!active){setHost(null);return;}
+  let cancelled=false;let tries=0;let timer=0;
+  const locate=()=>{
+   if(cancelled)return;
+   const content=document.querySelector<HTMLElement>('.detail-exp-root .detail-exp-content');
+   const ana=content?.querySelector<HTMLElement>(':scope > .detail-ana-hero');
+   if(content&&ana){
+    let h=content.querySelector<HTMLElement>(':scope > .exp-journey-live-host');
+    if(!h){h=document.createElement('div');h.className='exp-journey-live-host';content.insertBefore(h,ana.nextSibling);}
+    setHost(h);
+    return;
+   }
+   tries+=1;if(tries<80)timer=window.setTimeout(locate,100);
+  };
   locate();
-  return()=>{cancelled=true;const el=document.querySelector<HTMLElement>('.exp-live-journey-ready');if(el){el.classList.remove('exp-live-journey-ready');delete el.dataset.testid;}setTarget(null);};
+  return()=>{cancelled=true;window.clearTimeout(timer);document.querySelector('.exp-journey-live-host')?.remove();setHost(null);};
  },[active,pathname]);
 
- async function refresh(){if(!active||!IS_PRODUCTION||!code)return;const r=await fetchAppApi<Workspace>(`/expedientes/${encodeURIComponent(code)}/workspace`);if(r.status===200&&r.data){setWorkspace(r.data);setSelected(String(r.data.lifecycle?.effective_stage||r.data.expediente?.stage||''));}}
+ async function refresh(){
+  if(!active||!IS_PRODUCTION||!code)return;
+  const r=await fetchAppApi<Workspace>(`/expedientes/${encodeURIComponent(code)}/workspace`);
+  if(r.status===200&&r.data){setWorkspace(r.data);setSelected(String(r.data.lifecycle?.recorded_stage||r.data.expediente?.stage||''));}
+ }
  useEffect(()=>{void refresh();},[active,code]);
 
  const stage=String(workspace?.lifecycle?.effective_stage||workspace?.expediente?.stage||'');
@@ -41,15 +54,13 @@ export default function ExpedienteJourneyGuard(){
  const warnings=(workspace?.qa?.warnings??[]).map(stringifyIssue).filter(Boolean);
  const missing=blockers[0]||(lower(stage).includes('incompleta')?'Falta completar documentación antes de avanzar.':lower(stage).includes('revisión legado')||lower(stage).includes('revision legado')?'Este expediente necesita revisión y normalización de datos heredados.':'No hay un faltante crítico registrado por el backend.');
  const recommendation=nextRecommendation(phaseIndex,stage);
-
  async function saveManualStage(){const version=Number(workspace?.expediente?.version||0);if(!version||!selected||busy)return;setBusy(true);setMsg('');const r=await changeStage(code,version,selected);setBusy(false);if(r.status===200){setMsg('Estado actualizado y registrado en el histórico.');await refresh();}else if(r.status===409){setMsg('El expediente cambió mientras lo editabas. He recargado el estado actual.');await refresh();}else setMsg('No se pudo cambiar el estado. No se ha aplicado ningún cambio.');}
 
- if(!active||!target)return null;
- if(!IS_PRODUCTION)return createPortal(<div className="exp-journey-guidance" data-testid="expediente-journey-guidance" data-fallback-label={FALLBACK_LABEL}><strong>ANA · Estado pendiente de carga</strong><span>{FALLBACK_GUIDE}</span></div>,target);
- return createPortal(<div className="exp-live-journey" data-testid="expediente-journey-live">
-  <div className="detail-section-label">RECORRIDO DEL EXPEDIENTE · ESTADO REAL: {stage||'CARGANDO'}</div>
-  <div className="exp-journey-guidance" data-testid="expediente-journey-guidance"><strong>ANA · {stage?`Estamos en ${stage}.`:'Estoy comprobando el estado real.'}</strong><span><b>Qué falta:</b> {missing}</span><span><b>Qué toca ahora:</b> {recommendation}</span>{warnings[0]&&<span><b>Aviso:</b> {warnings[0]}</span>}{workspace?.lifecycle?.stage_inconsistent&&<span><b>Estado automático:</b> el backend calcula {stage} aunque el estado registrado sea {recordedStage}.</span>}</div>
-  <div className="detail-phase-track" aria-label="Fases del expediente">{PHASES.map((phase,i)=><div key={phase} className={i<phaseIndex?'done':i===phaseIndex?'current':''} aria-current={i===phaseIndex?'step':undefined}><span>{i<phaseIndex?'✓':i+1}</span><small>{phase}</small></div>)}</div>
-  <div className="exp-stage-manual" data-testid="expediente-stage-manual-host"><label>Cambiar estado manualmente<select data-testid="expediente-stage-select" value={selected||recordedStage||stage} onChange={e=>setSelected(e.target.value)}>{selected&&!MANUAL_STAGES.includes(selected)&&<option value={selected}>{selected}</option>}{MANUAL_STAGES.map(st=><option key={st} value={st}>{st}</option>)}</select></label><button type="button" onClick={()=>void saveManualStage()} disabled={busy||!workspace?.expediente?.version}>{busy?'Guardando…':'Guardar cambio'}</button>{msg&&<span role="status">{msg}</span>}</div>
- </div>,target);
+ if(!active||!host)return null;
+ return createPortal(<section className="detail-journey exp-live-journey-section" data-testid="expediente-journey">
+  <div className="detail-section-label">RECORRIDO DEL EXPEDIENTE · {stage?`ESTADO REAL: ${stage}`:'CARGANDO ESTADO REAL'}</div>
+  <div className="exp-journey-guidance" data-testid="expediente-journey-guidance"><strong>ANA · {stage?`Estamos en ${stage}.`:'Estoy comprobando el estado real del expediente.'}</strong><span><b>Qué falta:</b> {stage?missing:'Aún no marco faltantes hasta recibir el workspace canónico.'}</span><span><b>Qué toca ahora:</b> {stage?recommendation:'Se calculará en cuanto llegue el estado real.'}</span>{warnings[0]&&<span><b>Aviso:</b> {warnings[0]}</span>}{workspace?.lifecycle?.stage_inconsistent&&<span><b>Estado automático:</b> el backend calcula {stage} aunque el estado registrado sea {recordedStage}.</span>}</div>
+  <div className="detail-phase-track" aria-label="Fases del expediente">{PHASES.map((phase,i)=><div key={phase} className={stage?(i<phaseIndex?'done':i===phaseIndex?'current':''):''} aria-current={stage&&i===phaseIndex?'step':undefined}><span>{stage&&i<phaseIndex?'✓':i+1}</span><small>{phase}</small></div>)}</div>
+  {IS_PRODUCTION&&<div className="exp-stage-manual" data-testid="expediente-stage-manual-host"><label>Cambiar estado manualmente<select data-testid="expediente-stage-select" value={selected||recordedStage||stage||MANUAL_STAGES[0]} onChange={e=>setSelected(e.target.value)}>{selected&&!MANUAL_STAGES.includes(selected)&&<option value={selected}>{selected}</option>}{MANUAL_STAGES.map(st=><option key={st} value={st}>{st}</option>)}</select></label><button type="button" onClick={()=>void saveManualStage()} disabled={busy||!workspace?.expediente?.version}>{busy?'Guardando…':'Guardar cambio'}</button>{msg&&<span role="status">{msg}</span>}</div>}
+ </section>,host);
 }
