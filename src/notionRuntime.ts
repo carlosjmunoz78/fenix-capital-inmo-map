@@ -41,7 +41,7 @@ export async function fetchNotionRuntime<T>(path:string,init?:RequestInit):Promi
   if(!token)return{status:401,data:null};
   let res:Response;
   try{
-    res=await fetch(`${SUPABASE_URL}/functions/v1/notion-runtime${path}`,{
+    res=await fetch(`${SUPABASE_URL}/functions/v1/fenix-notion-runtime-test${path}`,{
       ...init,
       headers:{
         'content-type':'application/json',
