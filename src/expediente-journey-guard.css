@@ -1,4 +1,6 @@
 .detail-exp-root .detail-journey{margin:18px 0 20px;border:1px solid var(--dx-border);border-radius:18px;background:var(--dx-panel);box-shadow:0 8px 24px rgba(55,31,20,.05)}
+.detail-exp-root .exp-live-journey-ready:has(> .exp-live-journey)> .detail-section-label,.detail-exp-root .exp-live-journey-ready:has(> .exp-live-journey)> .detail-phase-track{display:none!important}
+.detail-exp-root .exp-live-journey{padding:0}
 .detail-exp-root .exp-journey-guidance{margin:0 0 14px;padding:12px;border-radius:12px;background:rgba(255,90,0,.08);color:var(--dx-text);font-size:13px;line-height:1.45;display:grid;gap:5px}
 .detail-exp-root .exp-journey-guidance strong{font-size:14px;font-weight:900}
 .detail-exp-root .exp-journey-guidance span{font-weight:650}
