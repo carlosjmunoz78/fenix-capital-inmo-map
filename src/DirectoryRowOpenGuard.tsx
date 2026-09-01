@@ -1,8 +1,9 @@
 import {useEffect} from 'react';
-import {useLocation} from 'react-router-dom';
+import {useLocation,useNavigate} from 'react-router-dom';
 
 export default function DirectoryRowOpenGuard(){
  const location=useLocation();
+ const navigate=useNavigate();
  useEffect(()=>{
   const isDirectory=location.pathname==='/notarias'||location.pathname==='/registros-propiedad';
   const isBanks=location.pathname==='/bancos';
@@ -36,20 +37,21 @@ export default function DirectoryRowOpenGuard(){
    if(!isBanks)return;
    document.querySelectorAll<HTMLElement>('.bancos-grid article').forEach(card=>{
     if(card.dataset.bankOpenWired==='1')return;
-    const button=[...card.querySelectorAll<HTMLButtonElement>('button')].find(b=>/ver ficha/i.test(b.textContent||''));
-    if(!button)return;
+    const bankName=card.querySelector('h2')?.textContent?.trim()||'';
+    if(!bankName)return;
     card.dataset.bankOpenWired='1';
     card.tabIndex=0;
-    card.setAttribute('role','button');
-    card.setAttribute('aria-label',`Abrir ficha de ${card.querySelector('h2')?.textContent?.trim()||'este banco'}`);
+    card.setAttribute('role','link');
+    card.setAttribute('aria-label',`Abrir ficha de ${bankName}`);
     card.style.cursor='pointer';
+    const go=()=>navigate(`/bancos/${encodeURIComponent(bankName)}`);
     const open=(event:Event)=>{
       const target=event.target as HTMLElement|null;
       if(target?.closest('button,a,input,select,textarea,label'))return;
-      button.click();
+      go();
     };
     const key=(event:KeyboardEvent)=>{
-      if(event.key==='Enter'||event.key===' '){event.preventDefault();button.click();}
+      if(event.key==='Enter'||event.key===' '){event.preventDefault();go();}
     };
     card.addEventListener('click',open);
     card.addEventListener('keydown',key);
@@ -61,6 +63,6 @@ export default function DirectoryRowOpenGuard(){
   const obs=new MutationObserver(wire);
   obs.observe(document.body,{childList:true,subtree:true});
   return()=>{obs.disconnect();cleanups.forEach(fn=>fn())};
- },[location.pathname]);
+ },[location.pathname,navigate]);
  return null;
 }
