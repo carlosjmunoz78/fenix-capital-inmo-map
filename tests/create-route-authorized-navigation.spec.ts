@@ -50,12 +50,15 @@ test.describe('Fénix PRE-PROD · navegación global en altas',()=>{
   }
  });
 
- test('las altas no muestran la cabecera sticky antigua duplicada',async({page},testInfo)=>{
+ test('las altas muestran una sola cabecera compartida igual que Inicio',async({page},testInfo)=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();
   await boot(page,'Direccion',directionNav);
-  for(const route of ['/tareas/nueva','/expedientes/nuevo','/contactos/nuevo','/documentacion/nuevo']){
+  for(const route of ['/tareas/nueva','/expedientes/nuevo','/contactos/nuevo','/documentacion/nuevo','/bancos/nuevo','/herencias/nuevo','/obras-nuevas/nuevo']){
    await page.goto(route);
-   await expect.poll(async()=>page.locator('.ops-root > .ops-main > .ops-top').evaluateAll(els=>els.filter(el=>{const s=getComputedStyle(el as HTMLElement);const r=(el as HTMLElement).getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&r.width>0&&r.height>0}).length),{message:`${route} no debe recuperar la cabecera antigua`}).toBe(0);
+   const headers=page.locator('.ops-root > .ops-main > .ops-top');
+   await expect(headers,route).toHaveCount(1);
+   await expect(headers,route).toBeVisible();
+   await expect(headers.getByPlaceholder('Buscar expediente, cliente, banco, inmobiliaria...'),route).toBeVisible();
   }
  });
 
