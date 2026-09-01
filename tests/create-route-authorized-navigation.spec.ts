@@ -50,6 +50,15 @@ test.describe('Fénix PRE-PROD · navegación global en altas',()=>{
   }
  });
 
+ test('las altas no muestran la cabecera sticky antigua duplicada',async({page},testInfo)=>{
+  if(!testInfo.project.name.includes('desktop'))test.skip();
+  await boot(page,'Direccion',directionNav);
+  for(const route of ['/tareas/nueva','/expedientes/nuevo','/contactos/nuevo','/documentacion/nuevo']){
+   await page.goto(route);
+   await expect.poll(async()=>page.locator('.ops-root > .ops-main > .ops-top').evaluateAll(els=>els.filter(el=>{const s=getComputedStyle(el as HTMLElement);const r=(el as HTMLElement).getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&r.width>0&&r.height>0}).length),{message:`${route} no debe recuperar la cabecera antigua`}).toBe(0);
+  }
+ });
+
  test('Alta de contacto B2B conserva solo menú autorizado de Visitador',async({page},testInfo)=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();
   await boot(page,'Visitador',visitadorNav);
