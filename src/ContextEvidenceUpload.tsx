@@ -101,9 +101,10 @@ export default function ContextEvidenceUpload(){
   const place=()=>{
    const content=document.querySelector<HTMLElement>('.ops-content,.dir-content');
    if(!content)return;
+   const lifecycle=content.querySelector<HTMLElement>(':scope > .exp-life-inline-host');
    const kpis=content.querySelector<HTMLElement>(':scope > .tas-kpis, :scope > .firmas-kpis, :scope > .fin-kpis, :scope > .vis-kpis, :scope > .inmo-kpis, :scope > [class$="-kpis"]');
    const hero=content.querySelector<HTMLElement>(':scope > [class*="-ana-hero"], :scope > .vis-ana, :scope > .ops-ana-card, :scope > .dir-priority-copy');
-   const anchor=kpis??hero;
+   const anchor=lifecycle??kpis??hero;
    if(anchor){if(anchor.nextElementSibling!==host)content.insertBefore(host,anchor.nextElementSibling)}else if(host.parentElement!==content)content.insertBefore(host,content.firstChild);
    if(content.closest('.firmas-root')){host.style.gridColumn='1';host.style.gridRow='4'}else{host.style.gridColumn='';host.style.gridRow=''}
    for(const duplicate of document.querySelectorAll<HTMLElement>('.firma-upload-inline,.doc-upload-inline'))duplicate.style.setProperty('display','none','important');
