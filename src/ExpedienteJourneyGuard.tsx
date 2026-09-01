@@ -30,9 +30,10 @@ export default function ExpedienteJourneyGuard(){
      const nextName=phaseText(next);
      let guide=real.querySelector<HTMLElement>(':scope > .exp-journey-guidance');
      if(!guide){guide=document.createElement('div');guide.className='exp-journey-guidance';const track=real.querySelector(':scope > .detail-phase-track');real.insertBefore(guide,track);}
-     guide.textContent=currentName
+     const desired=currentName
       ? `ANA · Estamos en ${currentName}.${nextName?` Siguiente fase: ${nextName}.`: ' Este es el último tramo del expediente.'}`
       : 'ANA · Estoy comprobando la fase actual del expediente antes de indicarte el siguiente paso.';
+     if(guide.textContent!==desired)guide.textContent=desired;
      return;
     }
     if(fallback)return;
