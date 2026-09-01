@@ -4,7 +4,7 @@ import './expediente-journey-guard.css';
 
 const PHASES=['Entrada','Documentación','Análisis','Banco','Tasación','Oferta','FEIN','Notaría','Firma','Cierre'];
 
-function phaseText(node:Element|null){return node?.querySelector('small')?.textContent?.trim()||'';}
+function phaseText(node:Element|null|undefined){return node?.querySelector('small')?.textContent?.trim()||'';}
 
 export default function ExpedienteJourneyGuard(){
  const {pathname}=useLocation();
