@@ -1,11 +1,11 @@
-.detail-exp-root .detail-journey{margin:18px 0 20px;border:1px solid var(--dx-border);border-radius:18px;background:var(--dx-panel);box-shadow:0 8px 24px rgba(55,31,20,.05)}
-.detail-exp-root .exp-live-journey-ready:has(> .exp-live-journey)> .detail-section-label,.detail-exp-root .exp-live-journey-ready:has(> .exp-live-journey)> .detail-phase-track{display:none!important}
-.detail-exp-root .exp-live-journey{padding:0}
+.detail-exp-root .exp-journey-live-host{width:100%;margin:18px 0 20px}
+.detail-exp-root .detail-journey:not(.exp-live-journey-section){display:none!important;visibility:hidden!important;pointer-events:none!important}
+.detail-exp-root .exp-live-journey-section{margin:0;border:1px solid var(--dx-border);border-radius:18px;background:var(--dx-panel);box-shadow:0 8px 24px rgba(55,31,20,.05);display:block!important;visibility:visible!important;pointer-events:auto!important}
+.detail-exp-root .exp-live-journey-section>.detail-section-label{display:block!important;visibility:visible!important}
+.detail-exp-root .exp-live-journey-section>.detail-phase-track{display:flex!important;visibility:visible!important}
 .detail-exp-root .exp-journey-guidance{margin:0 0 14px;padding:12px;border-radius:12px;background:rgba(255,90,0,.08);color:var(--dx-text);font-size:13px;line-height:1.45;display:grid;gap:5px}
 .detail-exp-root .exp-journey-guidance strong{font-size:14px;font-weight:900}
 .detail-exp-root .exp-journey-guidance span{font-weight:650}
-.detail-exp-root .exp-journey-fallback .detail-phase-track>div{opacity:.72}
-.detail-exp-root .exp-journey-fallback .detail-section-label{color:var(--dx-orange)}
 .detail-exp-root .exp-stage-manual{margin:14px 0 0;padding:12px;border-top:1px solid var(--dx-border);display:flex;align-items:end;gap:10px;flex-wrap:wrap}
 .detail-exp-root .exp-stage-manual label{display:grid;gap:5px;font-size:12px;font-weight:850;color:var(--dx-muted)}
 .detail-exp-root .exp-stage-manual select{min-width:220px;border:1px solid var(--dx-border);border-radius:10px;background:var(--dx-panel);color:var(--dx-text);padding:9px 10px;font:inherit}
