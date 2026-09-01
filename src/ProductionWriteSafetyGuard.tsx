@@ -2,7 +2,6 @@ import {useLocation} from 'react-router-dom';
 import {IS_PRODUCTION} from './supabase';
 
 const blocked:Record<string,{title:string;reason:string}>={
- '/inmobiliarias/nueva':{title:'Alta de inmobiliaria temporalmente protegida',reason:'Esta pantalla todavía conserva una ruta de escritura heredada. La consulta de datos sigue operativa, pero el alta queda bloqueada hasta usar exclusivamente la fuente canónica de producción.'},
  '/notarias/nueva':{title:'Alta de notaría temporalmente protegida',reason:'El directorio productivo actual es de lectura. No se enviarán datos a servicios de prueba desde producción.'},
  '/registros-propiedad/nuevo':{title:'Alta de registro temporalmente protegida',reason:'El directorio productivo actual es de lectura. No se enviarán datos a servicios de prueba desde producción.'},
  '/herencias/nuevo':{title:'Alta de herencia temporalmente protegida',reason:'Producción aún no tiene una fuente canónica específica para este módulo. No se crearán registros ficticios ni se escribirá en PRE-PROD.'},
