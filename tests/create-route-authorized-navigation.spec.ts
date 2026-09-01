@@ -50,6 +50,21 @@ test.describe('Fénix PRE-PROD · navegación global en altas',()=>{
   }
  });
 
+ test('todas las altas conservan el menú oscuro cuando la app está en oscuro',async({page},testInfo)=>{
+  if(!testInfo.project.name.includes('desktop'))test.skip();
+  await page.addInitScript(()=>{sessionStorage.setItem('fenix-theme','dark');localStorage.setItem('fenix-theme','dark');});
+  await boot(page,'Direccion',directionNav);
+  for(const route of ['/expedientes/nuevo','/bancos/nuevo','/contactos/nuevo','/inmobiliarias/nueva','/documentacion/nuevo','/tareas/nueva','/notarias/nueva','/registros-propiedad/nuevo','/herencias/nuevo','/obras-nuevas/nuevo','/visitas/nueva']){
+   await page.goto(route);
+   await expect(page.locator('html'),route).toHaveAttribute('data-theme','dark');
+   const sidebar=page.locator('aside.create-auth-nav.ops-side');
+   await expect(sidebar,route).toBeVisible();
+   const appearance=await sidebar.evaluate(el=>({background:getComputedStyle(el).backgroundColor,color:getComputedStyle(el).color}));
+   expect(appearance.background,route).toBe('rgb(32, 32, 35)');
+   expect(appearance.color,route).toBe('rgb(242, 242, 244)');
+  }
+ });
+
  test('las altas muestran una sola cabecera compartida igual que Inicio',async({page},testInfo)=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();
   await boot(page,'Direccion',directionNav);
