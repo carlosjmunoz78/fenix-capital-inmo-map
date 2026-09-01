@@ -19,6 +19,7 @@ const navigation={items:[
 test.describe('Fénix PRE-PROD · contrato visual Inicio Dirección',()=>{
   test('Inicio conserva patrón maestro, identidad real, escala legible y tema persistente',async({page},testInfo)=>{
     if(!testInfo.project.name.includes('desktop'))test.skip();
+    await page.clock.setFixedTime(new Date('2026-08-24T09:00:00Z'));
     await page.addInitScript(session=>{window.localStorage.setItem('fenix-preprod-auth-v2',JSON.stringify(session));window.localStorage.setItem('fenix-remember-device','true');},fakeSession);
     await page.route('**/functions/v1/fenix-app-gateway-test/**',async route=>{
       const u=route.request().url();
