@@ -29,7 +29,8 @@
   .dir-topbar{height:72px!important;min-height:72px!important}
   .dir-main{min-width:0!important}
 
-  /* Ficha de expediente: eliminar el efecto columna estrecha y usar el lienzo disponible. */
+  /* Ficha de expediente: el menú fijo debe medir exactamente lo que reserva la rejilla. */
+  .detail-auth-nav{width:214px!important}
   .detail-exp-content{box-sizing:border-box!important;width:100%!important;max-width:none!important;margin:0!important;padding:22px clamp(20px,2.2vw,34px) 100px!important}
   .detail-exp-top{padding:0 clamp(18px,2vw,28px)!important;gap:10px!important}
   .detail-ana-hero{grid-template-columns:minmax(190px,225px) minmax(0,1fr)!important;gap:22px!important;min-height:280px!important;padding:20px!important;border-radius:22px!important}
@@ -52,6 +53,7 @@
 /* Portátil común: compactar estructura, no tipografía. */
 @media (min-width:1101px) and (max-width:1450px){
   .ops-root,.dir-shell{grid-template-columns:198px minmax(0,1fr)!important}
+  .detail-auth-nav{width:198px!important}
   .ops-side,.dir-sidebar{padding-left:10px!important;padding-right:10px!important}
   .ops-content{padding-left:18px!important;padding-right:18px!important}
   .detail-exp-content{padding-left:18px!important;padding-right:18px!important}
