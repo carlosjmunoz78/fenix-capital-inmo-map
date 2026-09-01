@@ -45,7 +45,7 @@ export default function ExpedienteJourneyGuard(){
  async function saveManualStage(){const version=Number(workspace?.expediente?.version||0);if(!version||!selected||busy)return;setBusy(true);setMsg('');const r=await changeStage(code,version,selected);setBusy(false);if(r.status===200){setMsg('Estado actualizado y registrado en el histórico.');await refresh();}else if(r.status===409){setMsg('El expediente cambió mientras lo editabas. He recargado el estado actual.');await refresh();}else setMsg('No se pudo cambiar el estado. No se ha aplicado ningún cambio.');}
 
  if(!active||!target)return null;
- if(!IS_PRODUCTION)return createPortal(<div className="exp-journey-guidance" data-testid="expediente-journey-guidance"><strong>{FALLBACK_LABEL}</strong><span>{FALLBACK_GUIDE}</span></div>,target);
+ if(!IS_PRODUCTION)return createPortal(<div className="exp-journey-guidance" data-testid="expediente-journey-guidance" data-fallback-label={FALLBACK_LABEL}><strong>ANA · Estado pendiente de carga</strong><span>{FALLBACK_GUIDE}</span></div>,target);
  return createPortal(<div className="exp-live-journey" data-testid="expediente-journey-live">
   <div className="detail-section-label">RECORRIDO DEL EXPEDIENTE · ESTADO REAL: {stage||'CARGANDO'}</div>
   <div className="exp-journey-guidance" data-testid="expediente-journey-guidance"><strong>ANA · {stage?`Estamos en ${stage}.`:'Estoy comprobando el estado real.'}</strong><span><b>Qué falta:</b> {missing}</span><span><b>Qué toca ahora:</b> {recommendation}</span>{warnings[0]&&<span><b>Aviso:</b> {warnings[0]}</span>}{workspace?.lifecycle?.stage_inconsistent&&<span><b>Estado automático:</b> el backend calcula {stage} aunque el estado registrado sea {recordedStage}.</span>}</div>
