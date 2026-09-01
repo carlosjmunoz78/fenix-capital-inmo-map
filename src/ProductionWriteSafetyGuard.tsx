@@ -2,7 +2,6 @@ import {useLocation} from 'react-router-dom';
 import {IS_PRODUCTION} from './supabase';
 
 const blocked:Record<string,{title:string;reason:string}>={
- '/expedientes/nuevo':{title:'Alta de expediente temporalmente protegida',reason:'El backend productivo todavía no dispone del contrato canónico completo para todos los intervinientes y su documentación. No se creará un expediente parcial.'},
  '/inmobiliarias/nueva':{title:'Alta de inmobiliaria temporalmente protegida',reason:'Esta pantalla todavía conserva una ruta de escritura heredada. La consulta de datos sigue operativa, pero el alta queda bloqueada hasta usar exclusivamente la fuente canónica de producción.'},
  '/notarias/nueva':{title:'Alta de notaría temporalmente protegida',reason:'El directorio productivo actual es de lectura. No se enviarán datos a servicios de prueba desde producción.'},
  '/registros-propiedad/nuevo':{title:'Alta de registro temporalmente protegida',reason:'El directorio productivo actual es de lectura. No se enviarán datos a servicios de prueba desde producción.'},
