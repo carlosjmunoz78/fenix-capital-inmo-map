@@ -1,4 +1,5 @@
 import {useEffect,useMemo,useState} from 'react';
+import {createPortal} from 'react-dom';
 import {useLocation} from 'react-router-dom';
 import {ArchiveRestore,PauseCircle,Power,RotateCcw,X} from 'lucide-react';
 import {fetchNotionRuntime} from './notionRuntime';
@@ -14,8 +15,10 @@ export default function ExpedienteLifecycleGuard(){
   const {pathname}=useLocation();
   const match=pathname.match(/^\/expedientes\/([^/]+)$/);
   const expedienteCode=match?.[1]?decodeURIComponent(match[1]):'';
+  const active=Boolean(expedienteCode&&pathname!=='/expedientes/nuevo');
   const [canonical,setCanonical]=useState(false);
   const [currentState,setCurrentState]=useState<unknown>(null);
+  const [target,setTarget]=useState<Element|null>(null);
   const [mode,setMode]=useState<Mode>(null);
   const [pauseUntil,setPauseUntil]=useState('');
   const [indefinite,setIndefinite]=useState(false);
@@ -23,9 +26,28 @@ export default function ExpedienteLifecycleGuard(){
   const [note,setNote]=useState('');
   const [message,setMessage]=useState('');
 
-  useEffect(()=>{if(!expedienteCode||!isNotionId(expedienteCode))return;let alive=true;(async()=>{const r=await fetchNotionRuntime<any>(`/expedientes/${encodeURIComponent(expedienteCode)}`);if(!alive||r.status!==200)return;const item=r.data?.item||null;setCanonical(r.data?.source==='notion_canonical');setCurrentState(pick(item,['estado','fase','fase_actual','estado_fase']));})();return()=>{alive=false}},[expedienteCode]);
+  useEffect(()=>{if(!expedienteCode||!isNotionId(expedienteCode))return;let alive=true;(async()=>{const r=await fetchNotionRuntime<any>(`/expedientes/${encodeURIComponent(expedienteCode)}`);if(!alive||r.status!==200)return;const item=r.data?.item||null;setCanonical(r.data?.source==='notion_canonical'||r.data?.source==='prod_canonical');setCurrentState(pick(item,['estado','fase','fase_actual','estado_fase','stage']));})();return()=>{alive=false}},[expedienteCode]);
 
-  if(!expedienteCode||pathname==='/expedientes/nuevo')return null;
+  useEffect(()=>{
+    if(!active){setTarget(null);return;}
+    let cancelled=false,frame=0,owned:HTMLElement|null=null;
+    const place=()=>{
+      if(cancelled)return;
+      const evidence=document.querySelector('.context-evidence-inline-host');
+      const content=(evidence?.parentElement??document.querySelector('.ops-content')) as HTMLElement|null;
+      if(content){
+        let host=content.querySelector(':scope > .expediente-lifecycle-host') as HTMLElement|null;
+        if(!host){host=document.createElement('div');host.className='expediente-lifecycle-host';owned=host;}
+        if(evidence&&evidence.parentElement===content){if(evidence.previousElementSibling!==host)content.insertBefore(host,evidence)}else if(host.parentElement!==content){content.appendChild(host)}
+        setTarget(host);return;
+      }
+      frame=requestAnimationFrame(place);
+    };
+    frame=requestAnimationFrame(place);
+    return()=>{cancelled=true;cancelAnimationFrame(frame);owned?.remove();setTarget(null)};
+  },[active,pathname]);
+
+  if(!active||!target)return null;
   const normalized=text(currentState).toLowerCase();
   const isPaused=normalized.includes('paus');
   const isClosed=normalized.includes('baja')||normalized.includes('perdido')||normalized.includes('cerrad');
@@ -39,7 +61,7 @@ export default function ExpedienteLifecycleGuard(){
     setMessage(`Preparado para registrar de forma auditada en backend: ${mode==='pause'?pauseSummary:mode==='close'?`Baja · ${reason}`:'Reactivación'}. No se ejecuta todavía porque el contrato canónico de ciclo de vida aún no existe; no se inventan campos ni estados.`);
   }
 
-  return <section className="exp-life" aria-label="Ciclo de vida del expediente">
+  return createPortal(<section className="exp-life" aria-label="Ciclo de vida del expediente" data-testid="expediente-lifecycle-inline">
     <div className="exp-life-head"><div><span>CICLO DE VIDA</span><strong>Pausar, dar de baja o retomar</strong></div><small>Nunca borra el expediente ni su histórico</small></div>
     <div className="exp-life-actions">
       {!canReactivate&&<button type="button" onClick={()=>setMode('pause')}><PauseCircle size={17}/><span><b>Pausar</b><small>Hasta una fecha o sin fecha</small></span></button>}
@@ -57,5 +79,5 @@ export default function ExpedienteLifecycleGuard(){
         <small className="exp-life-contract">Expediente: {expedienteCode}. La ejecución real queda bloqueada hasta disponer del endpoint canónico auditado de ciclo de vida.</small>
       </div>
     </div>}
-  </section>;
+  </section>,target);
 }
