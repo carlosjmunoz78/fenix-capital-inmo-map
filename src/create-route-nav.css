@@ -49,6 +49,44 @@ html[data-create-nav='1'] .ops-root>.ops-main>.ops-top{
   pointer-events:auto!important;
 }
 
+/*
+ * The authorized create sidebar is mounted next to the themed operational frame,
+ * not inside it. Mirror the canonical .ops-root[data-theme='dark'] sidebar contract
+ * against the document theme so every Nuevo/Nueva route follows dark mode too.
+ */
+html[data-create-nav='1'][data-theme='dark'] .create-auth-nav.ops-side{
+  background:#202023!important;
+  color:#f2f2f4!important;
+  border-right-color:#343438!important;
+}
+html[data-create-nav='1'][data-theme='dark'] .create-auth-nav.ops-side .ops-brand{
+  background:transparent!important;
+  color:#f2f2f4!important;
+  border-bottom-color:#343438!important;
+}
+html[data-create-nav='1'][data-theme='dark'] .create-auth-nav.ops-side .ops-brand strong{
+  color:#f2f2f4!important;
+}
+html[data-create-nav='1'][data-theme='dark'] .create-auth-nav.ops-side nav button{
+  color:#d0d0d4!important;
+}
+html[data-create-nav='1'][data-theme='dark'] .create-auth-nav.ops-side nav button:hover{
+  background:#2b2522!important;
+  color:#ff7a42!important;
+}
+html[data-create-nav='1'][data-theme='dark'] .create-auth-nav.ops-side nav button.active{
+  background:#3a241d!important;
+  color:#ff7a42!important;
+}
+html[data-create-nav='1'][data-theme='dark'] .create-auth-nav.ops-side .ops-ana{
+  background:#202023!important;
+  color:#f2f2f4!important;
+  border-color:#3a3a3f!important;
+}
+html[data-create-nav='1'][data-theme='dark'] .create-auth-nav.ops-side .ops-ana small{
+  color:#a8a8ae!important;
+}
+
 /* The dedicated create screen already exposes its module in the authorized sidebar;
    suppress the old standalone "Volver a ..." strip that appeared above the new form. */
 html[data-create-nav='1'] .ops-content>.secondary-action:first-child{
@@ -68,5 +106,9 @@ html[data-create-nav='1'] .ops-content>.secondary-action:first-child{
     width:auto!important;
     height:58px!important;
     z-index:7900!important;
+  }
+  html[data-create-nav='1'][data-theme='dark'] .create-auth-nav.ops-side{
+    border-right:0!important;
+    border-top:1px solid #343438!important;
   }
 }
