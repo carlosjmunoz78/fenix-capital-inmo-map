@@ -1,7 +1,7 @@
 import {FormEvent,useEffect,useMemo,useState} from 'react';
 import {useLocation,useNavigate} from 'react-router-dom';
 import {Building2,Plus,Save,Trash2,Users,X} from 'lucide-react';
-import {fetchAppApi,fetchB2BActionsApi,SUPABASE_URL,supabase} from './supabase';
+import {fetchAppApi,fetchB2BActionsApi,IS_PRODUCTION,SUPABASE_URL,supabase} from './supabase';
 import {anaVertical} from './assets/visualAssets';
 import type {NavItem} from './masterNavigation';
 import OperationalShellFrame from './OperationalShellFrame';
@@ -20,7 +20,7 @@ const blankStaff=():Staff=>({id:crypto.randomUUID(),nombre:'',apellidos:'',cargo
 const changeAt=(items:string[],index:number,value:string)=>items.map((x,i)=>i===index?value:x);
 
 async function createLegacyInmobiliaria(payload:Record<string,unknown>){const{data:{session}}=await supabase.auth.getSession();if(!session?.access_token)return{status:401,data:null as CreateResponse|null};const r=await fetch(`${SUPABASE_URL}/functions/v1/fenix-notion-actions-test/inmobiliarias/create`,{method:'POST',headers:{'content-type':'application/json',Authorization:`Bearer ${session.access_token}`},body:JSON.stringify(payload)});let data:CreateResponse|null=null;try{data=await r.json()}catch{}return{status:r.status,data};}
-async function createInmobiliaria(role:string|undefined,payload:Record<string,unknown>){if(role==='Visitador')return fetchB2BActionsApi<CreateResponse>('/inmobiliarias/create',{method:'POST',body:JSON.stringify(payload)});return createLegacyInmobiliaria(payload);}
+async function createInmobiliaria(role:string|undefined,payload:Record<string,unknown>){if(IS_PRODUCTION||role==='Visitador')return fetchB2BActionsApi<CreateResponse>('/inmobiliarias/create',{method:'POST',body:JSON.stringify(payload)});return createLegacyInmobiliaria(payload);}
 async function createStaff(inmobiliariaId:string,p:Staff){const telefonos=p.telefonos.map(x=>x.trim()).filter(Boolean),emails=p.emails.map(x=>x.trim()).filter(Boolean);return fetchB2BActionsApi<CreateResponse>('/contactos/create',{method:'POST',body:JSON.stringify({inmobiliaria_id:inmobiliariaId,nombre:p.nombre.trim(),apellidos:p.apellidos.trim(),cargo:p.cargo.trim(),telefono:telefonos[0]||'',email:emails[0]||'',telefonos,emails,contacto_principal:p.principal})});}
 
 export default function InmobiliariaCreateShell(){
