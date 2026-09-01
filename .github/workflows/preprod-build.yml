@@ -22,7 +22,7 @@ concurrency:
 jobs:
   build-and-browser-qa:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -75,7 +75,7 @@ jobs:
       - name: Browser QA
         env:
           PLAYWRIGHT_SKIP_BUILD: '1'
-        run: npm run test:e2e
+        run: npm run test:e2e -- --workers=2
 
       - name: PRE-PROD Ana CORS smoke
         shell: bash
@@ -101,18 +101,26 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          headers="$(mktemp)"
-          status="$(curl --silent --show-error --output /dev/null --dump-header "$headers" --write-out '%{http_code}' --max-time 20 \
-            -X OPTIONS \
-            -H 'Origin: https://app.fenixcapital.es' \
-            -H 'Access-Control-Request-Method: GET' \
-            -H 'Access-Control-Request-Headers: authorization,apikey' \
-            'https://cluhljgonannaafpmblx.supabase.co/functions/v1/fenix-ana-api/capabilities')"
-          test "$status" = "204"
-          grep -qi '^access-control-allow-origin:' "$headers"
-          grep -qi '^access-control-allow-methods:.*OPTIONS' "$headers"
-          grep -qi '^access-control-allow-headers:.*authorization' "$headers"
-          rm -f "$headers"
+          for endpoint in \
+            'fenix-ana-api/capabilities' \
+            'fenix-app-gateway/navigation' \
+            'fenix-directory-api/notarias' \
+            'fenix-directory-api/registros-propiedad' \
+            'fenix-reports-api' \
+            'fenix-economia-api'; do
+            headers="$(mktemp)"
+            status="$(curl --silent --show-error --output /dev/null --dump-header "$headers" --write-out '%{http_code}' --max-time 20 \
+              -X OPTIONS \
+              -H 'Origin: https://app.fenixcapital.es' \
+              -H 'Access-Control-Request-Method: GET' \
+              -H 'Access-Control-Request-Headers: authorization,apikey' \
+              "https://cluhljgonannaafpmblx.supabase.co/functions/v1/${endpoint}")"
+            test "$status" = "204"
+            grep -qi '^access-control-allow-origin:' "$headers"
+            grep -qi '^access-control-allow-methods:.*OPTIONS' "$headers"
+            grep -qi '^access-control-allow-headers:.*authorization' "$headers"
+            rm -f "$headers"
+          done
 
       - name: Upload dist
         uses: actions/upload-artifact@v4
