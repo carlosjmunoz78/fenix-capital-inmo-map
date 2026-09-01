@@ -24,6 +24,7 @@ export default function ExpedienteLifecycleGuard(){
   const [note,setNote]=useState('');
   const [message,setMessage]=useState('');
   const [host,setHost]=useState<HTMLElement|null>(null);
+  const pauseSummary=useMemo(()=>indefinite?'Pausa sin fecha de reactivación':pauseUntil?`Pausa hasta ${pauseUntil}`:'Selecciona una fecha o marca pausa indefinida',[indefinite,pauseUntil]);
 
   useEffect(()=>{if(!expedienteCode||!isNotionId(expedienteCode))return;let alive=true;(async()=>{const r=await fetchNotionRuntime<any>(`/expedientes/${encodeURIComponent(expedienteCode)}`);if(!alive||r.status!==200)return;const item=r.data?.item||null;setCanonical(r.data?.source==='notion_canonical');setCurrentState(pick(item,['estado','fase','fase_actual','estado_fase']));})();return()=>{alive=false}},[expedienteCode]);
   useEffect(()=>{
@@ -47,7 +48,6 @@ export default function ExpedienteLifecycleGuard(){
   const isPaused=normalized.includes('paus');
   const isClosed=normalized.includes('baja')||normalized.includes('perdido')||normalized.includes('cerrad');
   const canReactivate=isPaused||isClosed;
-  const pauseSummary=useMemo(()=>indefinite?'Pausa sin fecha de reactivación':pauseUntil?`Pausa hasta ${pauseUntil}`:'Selecciona una fecha o marca pausa indefinida',[indefinite,pauseUntil]);
   function closeModal(){setMode(null);setMessage('');}
   function prepare(){
     if(!canonical){setMessage('Esta acción solo estará disponible sobre el expediente canónico.');return;}
