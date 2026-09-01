@@ -49,6 +49,7 @@ import ExpedienteCreateAnaGuard from './ExpedienteCreateAnaGuard';
 import TasacionesShell from './TasacionesShell';
 import AgendaShell from './AgendaShell';
 import FirmasShell from './FirmasShell';
+import FirmaCreateShell from './FirmaCreateShell';
 import DocumentacionShell from './DocumentacionShell';
 import DocumentViewerShell from './DocumentViewerShell';
 import ExpedienteDocumentsGuard from './ExpedienteDocumentsGuard';
@@ -177,6 +178,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <TasacionesShell />
       <AgendaShell />
       <FirmasShell />
+      <FirmaCreateShell />
       <DocumentacionShell />
       <DocumentViewerShell />
       <FinancierosShell />
