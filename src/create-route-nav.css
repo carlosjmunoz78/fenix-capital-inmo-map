@@ -38,6 +38,12 @@ html[data-create-nav='1'] .ops-root>.ops-side{
   pointer-events:auto!important;
 }
 
+/* The dedicated create screen already exposes its module in the authorized sidebar;
+   suppress the old standalone "Volver a ..." strip that appeared above the new form. */
+html[data-create-nav='1'] .ops-content>.secondary-action:first-child{
+  display:none!important;
+}
+
 @media(max-width:1000px) and (min-width:651px){
   .create-auth-nav.ops-side{width:96px!important;}
 }
