@@ -1,4 +1,5 @@
 import {useEffect,useMemo,useState} from 'react';
+import {createPortal} from 'react-dom';
 import {useLocation} from 'react-router-dom';
 import {ArchiveRestore,PauseCircle,Power,RotateCcw,X} from 'lucide-react';
 import {fetchNotionRuntime} from './notionRuntime';
@@ -22,10 +23,26 @@ export default function ExpedienteLifecycleGuard(){
   const [reason,setReason]=useState('Cliente no compra');
   const [note,setNote]=useState('');
   const [message,setMessage]=useState('');
+  const [host,setHost]=useState<HTMLElement|null>(null);
 
   useEffect(()=>{if(!expedienteCode||!isNotionId(expedienteCode))return;let alive=true;(async()=>{const r=await fetchNotionRuntime<any>(`/expedientes/${encodeURIComponent(expedienteCode)}`);if(!alive||r.status!==200)return;const item=r.data?.item||null;setCanonical(r.data?.source==='notion_canonical');setCurrentState(pick(item,['estado','fase','fase_actual','estado_fase']));})();return()=>{alive=false}},[expedienteCode]);
+  useEffect(()=>{
+    if(!expedienteCode||pathname==='/expedientes/nuevo'){setHost(null);return;}
+    const mount=()=>{
+      const content=document.querySelector<HTMLElement>('.detail-exp-root .detail-exp-content');
+      const ana=content?.querySelector<HTMLElement>(':scope > .detail-ana-hero');
+      if(!content||!ana)return;
+      let node=content.querySelector<HTMLElement>(':scope > .exp-life-inline-host');
+      if(!node){node=document.createElement('div');node.className='exp-life-inline-host';node.dataset.testid='expediente-lifecycle-inline-host';content.insertBefore(node,ana.nextSibling);}
+      else if(ana.nextSibling!==node)content.insertBefore(node,ana.nextSibling);
+      setHost(current=>current===node?current:node);
+    };
+    mount();
+    const observer=new MutationObserver(mount);observer.observe(document.body,{childList:true,subtree:true});
+    return()=>{observer.disconnect();document.querySelectorAll('.exp-life-inline-host').forEach(x=>x.remove());setHost(null);};
+  },[expedienteCode,pathname]);
 
-  if(!expedienteCode||pathname==='/expedientes/nuevo')return null;
+  if(!expedienteCode||pathname==='/expedientes/nuevo'||!host)return null;
   const normalized=text(currentState).toLowerCase();
   const isPaused=normalized.includes('paus');
   const isClosed=normalized.includes('baja')||normalized.includes('perdido')||normalized.includes('cerrad');
@@ -39,7 +56,7 @@ export default function ExpedienteLifecycleGuard(){
     setMessage(`Preparado para registrar de forma auditada en backend: ${mode==='pause'?pauseSummary:mode==='close'?`Baja · ${reason}`:'Reactivación'}. No se ejecuta todavía porque el contrato canónico de ciclo de vida aún no existe; no se inventan campos ni estados.`);
   }
 
-  return <section className="exp-life" aria-label="Ciclo de vida del expediente">
+  const block=<section className="exp-life" data-testid="expediente-lifecycle-inline" aria-label="Ciclo de vida del expediente">
     <div className="exp-life-head"><div><span>CICLO DE VIDA</span><strong>Pausar, dar de baja o retomar</strong></div><small>Nunca borra el expediente ni su histórico</small></div>
     <div className="exp-life-actions">
       {!canReactivate&&<button type="button" onClick={()=>setMode('pause')}><PauseCircle size={17}/><span><b>Pausar</b><small>Hasta una fecha o sin fecha</small></span></button>}
@@ -58,4 +75,5 @@ export default function ExpedienteLifecycleGuard(){
       </div>
     </div>}
   </section>;
+  return createPortal(block,host);
 }
