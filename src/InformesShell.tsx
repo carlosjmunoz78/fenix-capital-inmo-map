@@ -1,7 +1,7 @@
 import {useEffect,useMemo,useState} from 'react';
 import {useLocation,useNavigate} from 'react-router-dom';
 import {FileText} from 'lucide-react';
-import {fetchAppApi,supabase,SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY} from './supabase';
+import {fetchAppApi,supabase,SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,IS_PRODUCTION} from './supabase';
 import {anaAvatar,anaVertical} from './assets/visualAssets';
 import {directionSidebarNavigation,normalizeNavigation,type NavItem} from './masterNavigation';
 import OperationalShellFrame from './OperationalShellFrame';
@@ -17,7 +17,7 @@ function rowsFrom(data:unknown):Row[]{if(!data||typeof data!=='object')return[];
 function first(row:Row,keys:string[]){for(const k of keys){const v=row[k];if(typeof v==='string'&&v.trim())return v.trim();if(typeof v==='number')return String(v);}return'';}
 function isDirectionContext(ctx:Ctx|null){const role=(ctx?.role||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();return ctx?.actor_code==='DIR-TEST'||role.includes('direccion');}
 function initials(name:string){return name.split(/\s+/).filter(Boolean).slice(0,2).map(p=>p[0]?.toUpperCase()).join('')||'FC';}
-async function fetchReports(){const{data:{session}}=await supabase.auth.getSession();if(!session?.access_token)return{status:401,data:null};try{const r=await fetch(`${SUPABASE_URL}/functions/v1/fenix-reports-api-test/reports`,{headers:{Authorization:`Bearer ${session.access_token}`,apikey:SUPABASE_PUBLISHABLE_KEY}});let data:unknown=null;try{data=await r.json()}catch{data=null}return{status:r.status,data};}catch{return{status:0,data:null};}}
+async function fetchReports(){const{data:{session}}=await supabase.auth.getSession();if(!session?.access_token)return{status:401,data:null};try{const fn=IS_PRODUCTION?'fenix-reports-api':'fenix-reports-api-test';const path=IS_PRODUCTION?'':'/reports';const r=await fetch(`${SUPABASE_URL}/functions/v1/${fn}${path}`,{headers:{Authorization:`Bearer ${session.access_token}`,apikey:SUPABASE_PUBLISHABLE_KEY}});let data:unknown=null;try{data=await r.json()}catch{data=null}return{status:r.status,data};}catch{return{status:0,data:null};}}
 export default function InformesShell(){
  const location=useLocation(),navigate=useNavigate();const active=location.pathname.replace(/\/+$/,'')==='/informes';
  const[ready,setReady]=useState(false),[logged,setLogged]=useState(false),[theme,setTheme]=useState<Theme>(()=>(sessionStorage.getItem('fenix-theme') as Theme)||'light'),[ctx,setCtx]=useState<Ctx|null>(null),[nav,setNav]=useState<NavItem[]>([]),[rows,setRows]=useState<Row[]>([]),[status,setStatus]=useState<number|null>(null),[loading,setLoading]=useState(false),[message,setMessage]=useState(''),[query,setQuery]=useState(''),[correction,setCorrection]=useState('');
