@@ -29,7 +29,7 @@ async function actionApi(resource:Resource,id:string,changes:Record<string,unkno
 
 export default function OperationalRecordDetail(){
  const location=useLocation(),navigate=useNavigate();
- const match=location.pathname.match(/^\/(tareas|documentacion|tasaciones|firmas)\/([^/]+)$/);const key=match?.[1]||'';const id=match?.[2]?decodeURIComponent(match[2]):'';const active=Boolean(match&&id!=='nueva');const def=defs[key];
+ const match=location.pathname.match(/^\/(tareas|documentacion|tasaciones|firmas)\/([^/]+)$/);const key=match?.[1]||'';const id=match?.[2]?decodeURIComponent(match[2]):'';const createAlias=id==='nuevo'||id==='nueva';const active=Boolean(match&&!createAlias);const def=defs[key];
  const[ctx,setCtx]=useState<Ctx|null>(null),[nav,setNav]=useState<NavItem[]>([]),[status,setStatus]=useState<number|null>(null),[data,setData]=useState<any>(null),[loading,setLoading]=useState(false),[msg,setMsg]=useState('');
  const[changes,setChanges]=useState<Record<string,unknown>>({}),[preview,setPreview]=useState(false),[busy,setBusy]=useState(false),[saveMsg,setSaveMsg]=useState('');
  const[assignees,setAssignees]=useState<Assignee[]>([]);
@@ -67,8 +67,7 @@ export default function OperationalRecordDetail(){
       {def.resource==='firmas'&&<><label>Estado<select value={String(changes.estado??'')} onChange={e=>set('estado',e.target.value)}><option value="">Sin cambio</option><option>Pendiente FEIN</option><option>FEIN recibida</option><option>FEIN firmada</option><option>Esperando plazo</option><option>Firma programada</option><option>Firmado</option><option>Incidencia</option></select></label><label>Fecha FEIN<input type="date" value={String(changes.fecha_fein??'')} onChange={e=>set('fecha_fein',e.target.value)}/></label><label>Fecha firma FEIN<input type="date" value={String(changes.fecha_firma_fein??'')} onChange={e=>set('fecha_firma_fein',e.target.value)}/></label><label>Fecha y hora firma<input type="datetime-local" value={String(changes.fecha_hora_firma??'')} onChange={e=>set('fecha_hora_firma',e.target.value)}/></label><label><input type="checkbox" checked={Boolean(changes.fein_explicada)} onChange={e=>set('fein_explicada',e.target.checked)}/> FEIN explicada al cliente</label><label>Incidencia<textarea rows={2} value={String(changes.incidencia??'')} onChange={e=>set('incidencia',e.target.value)}/></label><label>Notas<textarea rows={2} value={String(changes.notas??'')} onChange={e=>set('notas',e.target.value)}/></label></>}
       {preview&&<div className="ops-message"><strong>Vista previa</strong><div>{Object.entries(clean).map(([k,v])=><div key={k}>{pretty(k)}: {val(v)}</div>)}</div><small>Confirma para escribir únicamente estos cambios en Notion.</small></div>}
       <div style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap'}}>{!preview?<button className="primary" disabled={!Object.keys(clean).length} onClick={()=>setPreview(true)}>Revisar antes de guardar</button>:<><button onClick={()=>setPreview(false)}>Volver</button><button className="primary" disabled={busy} onClick={save}><Save size={16}/>{busy?'Guardando…':'Confirmar y guardar'}</button></>}{saveMsg&&<span>{saveMsg}</span>}</div>
-    </div></div>
-   </>}
+    </div></div></>}
   </section></main>
  </div>;
 }
