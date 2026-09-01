@@ -73,7 +73,7 @@ export default function ExpedienteJourneyGuard(){
  },[active,pathname]);
 
  async function refresh(){
-  if(!active||!IS_PRODUCTION||!code)return;
+  if(!active||!code)return;
   const r=await fetchAppApi<Workspace>(`/expedientes/${encodeURIComponent(code)}/workspace`);
   if(r.status===200&&r.data){setWorkspace(r.data);setSelected(String(r.data.lifecycle?.recorded_stage||r.data.expediente?.stage||''));}
  }
