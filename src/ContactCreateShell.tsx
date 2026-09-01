@@ -1,7 +1,7 @@
 import {FormEvent,useEffect,useMemo,useState} from 'react';
 import {useLocation,useNavigate} from 'react-router-dom';
 import {LogOut,Moon,Plus,Save,Sun,UserRound,X} from 'lucide-react';
-import {fetchAppApi,SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,supabase} from './supabase';
+import {fetchAppApi,IS_PRODUCTION,SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,supabase} from './supabase';
 import {anaVertical} from './assets/visualAssets';
 import OperationalShellFrame from './OperationalShellFrame';
 import type {NavItem} from './masterNavigation';
@@ -12,9 +12,9 @@ type Theme='light'|'dark';
 type Ctx={actor_code?:string;role?:string};
 type Assignee={actor_code:string;name:string;role:string};
 type PersonalResponse={items?:Array<{actor_code?:string;name?:string;role?:string}>};
-type CreateResponse={ok?:boolean;id?:string;destino?:string;error?:string;existing_id?:string;entidad_id?:string|null;entidad_tipo?:string|null;entidad_nombre?:string|null};
+type CreateResponse={ok?:boolean;status?:number;id?:string;destino?:string;error?:string;existing_id?:string;entidad_id?:string|null;entidad_tipo?:string|null;entidad_nombre?:string|null};
 type ContactType='cliente_hipoteca_particular'|'cliente_hipoteca_inmobiliaria'|'cliente_deuda_refinanciacion'|'cliente_herencia'|'cliente_obra_nueva'|'trabajador_inmobiliaria'|'trabajador_notaria'|'trabajador_registro'|'contacto_bancario'|'tasador'|'proveedor'|'otro';
-type EntityKind=''|'inmobiliaria'|'notaria'|'registro';
+type EntityKind=''|'inmobiliaria'|'notaria'|'registro'|'banco';
 type EntityOption={id:string;name:string};
 
 const contactCreateNav:NavItem[]=[{label:'← Volver a Contactos',route:'/contactos'}];
@@ -32,22 +32,48 @@ const CONTACT_TYPES:Array<{value:ContactType;label:string;entity:boolean;cargo:b
  {value:'proveedor',label:'Proveedor',entity:true,cargo:true},
  {value:'otro',label:'Otro contacto',entity:true,cargo:true}
 ];
+const PROD_TYPES=new Set<ContactType>(['cliente_hipoteca_particular','cliente_hipoteca_inmobiliaria','cliente_deuda_refinanciacion','cliente_herencia','cliente_obra_nueva','trabajador_inmobiliaria','contacto_bancario']);
 const ENTITY_KINDS:Array<{value:EntityKind;label:string}>=[
  {value:'',label:'Sin vincular por ahora'},
  {value:'inmobiliaria',label:'Inmobiliaria'},
  {value:'notaria',label:'Notaría'},
  {value:'registro',label:'Registro de la Propiedad'}
 ];
+const PROD_ENTITY_KINDS:Array<{value:EntityKind;label:string}>=[
+ {value:'',label:'Sin vincular por ahora'},
+ {value:'inmobiliaria',label:'Inmobiliaria'},
+ {value:'banco',label:'Banco'}
+];
 const changeAt=(items:string[],index:number,value:string)=>items.map((x,i)=>i===index?value:x);
+const text=(value:unknown)=>String(value??'').trim();
 
 async function createContact(payload:Record<string,unknown>){
  const{data:{session}}=await supabase.auth.getSession();if(!session?.access_token)return{status:401,data:null as CreateResponse|null};
- const r=await fetch(`${SUPABASE_URL}/functions/v1/fenix-contactos-unified-test`,{method:'POST',headers:{'content-type':'application/json',apikey:SUPABASE_PUBLISHABLE_KEY,Authorization:`Bearer ${session.access_token}`},body:JSON.stringify(payload)});let data:CreateResponse|null=null;try{data=await r.json()}catch{}return{status:r.status,data};
+ if(!IS_PRODUCTION){
+  const r=await fetch(`${SUPABASE_URL}/functions/v1/fenix-contactos-unified-test`,{method:'POST',headers:{'content-type':'application/json',apikey:SUPABASE_PUBLISHABLE_KEY,Authorization:`Bearer ${session.access_token}`},body:JSON.stringify(payload)});let data:CreateResponse|null=null;try{data=await r.json()}catch{}return{status:r.status,data};
+ }
+ const{data,error}=await supabase.rpc('fenix_prod_contact_create',{
+  p_tipo:text(payload.tipo_contacto),p_nombre:text(payload.nombre),p_apellidos:text(payload.apellidos)||null,
+  p_email:text(payload.email)||null,p_telefono:text(payload.telefono)||null,p_cargo:text(payload.cargo)||null,
+  p_entidad_id:text(payload.entidad_id)||null,p_observaciones:text(payload.observaciones)||null,
+  p_consentimiento_comercial:Boolean(payload.consentimiento_comercial)
+ });
+ if(error)return{status:500,data:{ok:false,error:error.message} as CreateResponse};
+ const response=(data??{}) as CreateResponse;
+ const status=Number(response.status||500);
+ return{status,data:{...response,destino:response.ok?'/contactos':response.destino}};
 }
 async function fetchEntityOptions(kind:EntityKind){
  if(!kind)return{status:200,items:[] as EntityOption[]};
- const{data:{session}}=await supabase.auth.getSession();if(!session?.access_token)return{status:401,items:[] as EntityOption[]};
- const r=await fetch(`${SUPABASE_URL}/functions/v1/fenix-contactos-unified-test?entity_kind=${encodeURIComponent(kind)}`,{headers:{apikey:SUPABASE_PUBLISHABLE_KEY,Authorization:`Bearer ${session.access_token}`}});let data:{items?:EntityOption[]}|null=null;try{data=await r.json()}catch{}return{status:r.status,items:r.ok&&Array.isArray(data?.items)?data!.items!:[]};
+ if(!IS_PRODUCTION){
+  const{data:{session}}=await supabase.auth.getSession();if(!session?.access_token)return{status:401,items:[] as EntityOption[]};
+  const r=await fetch(`${SUPABASE_URL}/functions/v1/fenix-contactos-unified-test?entity_kind=${encodeURIComponent(kind)}`,{headers:{apikey:SUPABASE_PUBLISHABLE_KEY,Authorization:`Bearer ${session.access_token}`}});let data:{items?:EntityOption[]}|null=null;try{data=await r.json()}catch{}return{status:r.status,items:r.ok&&Array.isArray(data?.items)?data!.items!:[]};
+ }
+ const path=kind==='inmobiliaria'?'/inmobiliarias':kind==='banco'?'/bancos':'';
+ if(!path)return{status:422,items:[] as EntityOption[]};
+ const r=await fetchAppApi<{items?:Array<Record<string,unknown>>}>(path);
+ const items=r.status===200?(r.data?.items??[]).flatMap(x=>{const id=text(x.inmobiliaria_code||x.bank_code||x.id||x.code);if(!id)return[];return[{id,name:text(x.nombre||x.name||x.razon_social||x.bank_name)||id}]}):[];
+ return{status:r.status,items};
 }
 
 export default function ContactCreateShell(){
@@ -59,35 +85,40 @@ export default function ContactCreateShell(){
  useEffect(()=>{if(!active)return;document.documentElement.dataset.theme=theme;sessionStorage.setItem('fenix-theme',theme);},[active,theme]);
  useEffect(()=>{if(!active||!logged)return;let alive=true;(async()=>{const c=await fetchAppApi<Ctx>('/session/context');if(!alive)return;const context=c.status===200?c.data:null;setCtx(context);if(context?.role==='Financiero'){setTarget(context.actor_code||'');setAssignees([]);return;}if(context?.role!=='Direccion'){setTarget('');setAssignees([]);return;}const p=await fetchAppApi<PersonalResponse>('/personal');if(!alive)return;setAssignees((p.status===200?p.data?.items??[]:[]).flatMap(x=>x.actor_code?[{actor_code:x.actor_code,name:x.name?.trim()||x.actor_code,role:x.role?.trim()||'Financiero'}]:[]).sort((a,b)=>a.name.localeCompare(b.name,'es')));})();return()=>{alive=false};},[active,logged]);
  useEffect(()=>{if(!active||!logged||!entityKind){setEntityOptions([]);setEntityId('');return;}let alive=true;setEntityLoading(true);fetchEntityOptions(entityKind).then(r=>{if(!alive)return;setEntityOptions(r.items);setEntityLoading(false);});return()=>{alive=false};},[active,logged,entityKind]);
+ const availableTypes=IS_PRODUCTION?CONTACT_TYPES.filter(x=>PROD_TYPES.has(x.value)&&(ctx?.role==='Direccion'||!['trabajador_inmobiliaria','contacto_bancario'].includes(x.value))):CONTACT_TYPES;
+ const entityKinds=IS_PRODUCTION?PROD_ENTITY_KINDS:ENTITY_KINDS;
  const selected=CONTACT_TYPES.find(x=>x.value===tipo)!;
  const selectedEntity=entityOptions.find(x=>x.id===entityId);
  const allowed=ctx?.role==='Direccion'||ctx?.role==='Financiero';
  const fullName=[nombre.trim(),apellidos.trim()].filter(Boolean).join(' ');
  const cleanPhones=telefonos.map(x=>x.trim()).filter(Boolean),cleanEmails=emails.map(x=>x.trim()).filter(Boolean);
  const payload=useMemo(()=>({tipo_contacto:tipo,nombre:nombre.trim(),apellidos:apellidos.trim(),email:cleanEmails[0]||'',telefono:cleanPhones[0]||'',emails:cleanEmails,telefonos:cleanPhones,entidad_relacionada:selectedEntity?.name||entidad.trim(),entidad_tipo:entityKind,entidad_id:entityId,cargo:cargo.trim(),observaciones:observaciones.trim(),id_financiero_operativo:target,consentimiento_comercial:consent}),[tipo,nombre,apellidos,emails,telefonos,selectedEntity,entidad,entityKind,entityId,cargo,observaciones,target,consent]);
- const valid=allowed&&Boolean(tipo)&&nombre.trim().length>=2;
+ const supported=availableTypes.some(x=>x.value===tipo);
+ const requiresEntity=IS_PRODUCTION&&tipo==='trabajador_inmobiliaria';
+ const valid=allowed&&supported&&nombre.trim().length>=2&&(!requiresEntity||Boolean(entityId));
  if(!active||!ready||!logged)return null;
  function edit(){setPreview(false);setMessage('');setResult(null);}
- function changeType(next:ContactType){const cfg=CONTACT_TYPES.find(x=>x.value===next)!;setTipo(next);setEntidad('');setCargo('');setEntityKind(cfg.defaultLink||'');setEntityId('');edit();}
- async function submit(e:FormEvent){e.preventDefault();if(!valid)return;if(!preview){setPreview(true);setMessage('');return;}setBusy(true);setMessage('');const r=await createContact(payload);setBusy(false);setResult(r.data);if(r.status===201&&r.data?.ok){setMessage(r.data.entidad_id?'Contacto creado, clasificado y vinculado a su entidad.':'Contacto creado y clasificado desde el origen.');setPreview(false);}else if(r.status===409&&r.data?.error==='duplicate_contact'){setMessage('Ya existe un contacto con ese email o teléfono. No se ha creado un duplicado.');setPreview(false);}else if(r.status===400&&r.data?.error==='entity_not_found'){setMessage('La entidad seleccionada ya no está disponible. Vuelve a seleccionarla.');setPreview(false);}else if(r.status===403)setMessage('Tu perfil no puede crear contactos.');else setMessage(`No se pudo crear el contacto (${r.data?.error||r.status}).`);}
+ function changeType(next:ContactType){const cfg=CONTACT_TYPES.find(x=>x.value===next)!;setTipo(next);setEntidad('');setCargo('');setEntityKind(IS_PRODUCTION&&next==='contacto_bancario'?'banco':cfg.defaultLink||'');setEntityId('');edit();}
+ async function submit(e:FormEvent){e.preventDefault();if(!valid)return;if(!preview){setPreview(true);setMessage('');return;}setBusy(true);setMessage('');const r=await createContact(payload);setBusy(false);setResult(r.data);if(r.status===201&&r.data?.ok){setMessage(r.data.entidad_id?'Contacto creado, clasificado y vinculado a su entidad.':'Contacto creado y clasificado desde el origen.');setPreview(false);}else if(r.status===409&&r.data?.error==='duplicate_contact'){setMessage('Ya existe un contacto con ese email o teléfono. No se ha creado un duplicado.');setPreview(false);}else if(r.status===400&&['entity_not_found','entity_required'].includes(r.data?.error||'')){setMessage('La entidad seleccionada ya no está disponible o es obligatoria. Vuelve a seleccionarla.');setPreview(false);}else if(r.status===403)setMessage('Tu perfil no puede crear este tipo de contacto.');else if(r.status===422)setMessage('Este tipo de contacto todavía no dispone de alta operativa en producción.');else setMessage(`No se pudo crear el contacto (${r.data?.error||r.status}).`);}
  async function logout(){await supabase.auth.signOut();window.location.href=import.meta.env.BASE_URL;}
  const topbar=<header className="ops-top"><strong>Nuevo contacto</strong><div className="ops-top-actions"><button onClick={()=>setTheme(theme==='light'?'dark':'light')} aria-label="Cambiar tema">{theme==='light'?<Moon size={17}/>:<Sun size={17}/>} {theme==='light'?'Oscuro':'Claro'}</button><div className="ops-profile"><strong>{ctx?.role||'Usuario'}</strong></div><button onClick={logout} aria-label="Cerrar sesión"><LogOut size={17}/></button></div></header>;
  return <OperationalShellFrame className="contact-create-root" theme={theme} navigation={contactCreateNav} activeRoute="/contactos" anaSubtitle="Primero clasificamos el contacto; después pedimos solo lo que corresponde." anaRoute="/ana" query="" onQueryChange={()=>{}} searchPlaceholder="" name={ctx?.role||'Usuario'} role="" initials={(ctx?.role||'U').slice(0,2).toUpperCase()} onToggleTheme={()=>setTheme(theme==='light'?'dark':'light')} onLogout={logout} topbar={topbar}>
-   <div className="ops-title"><div><span className="ops-icon"><UserRound size={20}/></span><div><h1>Nuevo contacto</h1><p>Primero define qué tipo de contacto es y, cuando corresponda, a qué entidad pertenece.</p></div></div><span className="ops-live ok">PRE-PROD</span></div>
+   <div className="ops-title"><div><span className="ops-icon"><UserRound size={20}/></span><div><h1>Nuevo contacto</h1><p>Primero define qué tipo de contacto es y, cuando corresponda, a qué entidad pertenece.</p></div></div><span className="ops-live ok">{IS_PRODUCTION?'OPERATIVO':'PRE-PROD'}</span></div>
    <section className="contact-create-ana-hero"><div className="contact-detail-ana-photo"><img src={anaVertical} alt="Ana"/></div><div className="contact-detail-ana-body"><span>ANA · NUEVO CONTACTO</span><h2>Primero dime quién es y con qué está relacionado</h2><p>Con esa clasificación adapto los datos que pedimos. Puedes añadir todos los teléfonos y correos que realmente utilice el contacto.</p><div className="contact-detail-next"><button type="button" onClick={()=>document.getElementById('tipo-contacto')?.focus()}><b>1</b><strong>Elegir tipo de contacto</strong><small>Clasificar →</small></button><button type="button" onClick={()=>document.getElementById('entidad-tipo')?.focus()}><b>2</b><strong>Vincularlo correctamente</strong><small>Elegir entidad →</small></button><button type="button" onClick={()=>document.querySelector<HTMLFormElement>('form.ops-message')?.scrollIntoView({behavior:'smooth'})}><b>3</b><strong>Siguiente paso</strong><small>Completar y crear →</small></button></div></div></section>
    {!allowed?<div className="ops-message">Tu perfil no puede crear contactos.</div>:<form className="ops-message" onSubmit={submit} style={{display:'grid',gap:12}}>
-     <label>Tipo de contacto<select id="tipo-contacto" value={tipo} onChange={e=>changeType(e.target.value as ContactType)} required>{CONTACT_TYPES.map(x=><option key={x.value} value={x.value}>{x.label}</option>)}</select><small>Esta clasificación se guarda con el contacto y determina qué información adicional tiene sentido pedir.</small></label>
-     <label>Vincular este contacto a<select id="entidad-tipo" value={entityKind} onChange={e=>{setEntityKind(e.target.value as EntityKind);setEntityId('');setEntidad('');edit()}}>{ENTITY_KINDS.map(x=><option key={x.value||'none'} value={x.value}>{x.label}</option>)}</select><small>La vinculación es opcional, pero permite saber inmediatamente de qué inmobiliaria, notaría o Registro depende este contacto.</small></label>
-     {entityKind&&<label>{entityKind==='inmobiliaria'?'Inmobiliaria':entityKind==='notaria'?'Notaría':'Registro de la Propiedad'}<select value={entityId} onChange={e=>{setEntityId(e.target.value);edit()}} disabled={entityLoading}><option value="">{entityLoading?'Cargando entidades…':'Selecciona una entidad'}</option>{entityOptions.map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select><small>{entityOptions.length||entityLoading?'Se guardará el vínculo con la ficha exacta seleccionada.':'No hay entidades disponibles en tu ámbito para vincular.'}</small></label>}
-     {!entityKind&&selected.entity&&<label>{tipo==='cliente_hipoteca_inmobiliaria'?'Entidad de origen':'Empresa / entidad relacionada'}<input value={entidad} onChange={e=>{setEntidad(e.target.value);edit()}} maxLength={200} placeholder={tipo==='contacto_bancario'?'Banco / sucursal':tipo==='tasador'?'Tasadora / empresa':'Nombre de la entidad'}/><small>Si la entidad ya existe como inmobiliaria, notaría o Registro, es mejor vincularla con el selector anterior.</small></label>}
+     <label>Tipo de contacto<select id="tipo-contacto" value={tipo} onChange={e=>changeType(e.target.value as ContactType)} required>{availableTypes.map(x=><option key={x.value} value={x.value}>{x.label}</option>)}</select><small>Esta clasificación se guarda con el contacto y determina qué información adicional tiene sentido pedir.</small></label>
+     <label>Vincular este contacto a<select id="entidad-tipo" value={entityKind} onChange={e=>{setEntityKind(e.target.value as EntityKind);setEntityId('');setEntidad('');edit()}}>{entityKinds.map(x=><option key={x.value||'none'} value={x.value}>{x.label}</option>)}</select><small>La vinculación usa únicamente entidades que la fuente canónica puede conservar.</small></label>
+     {entityKind&&<label>{entityKind==='inmobiliaria'?'Inmobiliaria':entityKind==='notaria'?'Notaría':entityKind==='registro'?'Registro de la Propiedad':'Banco'}<select value={entityId} onChange={e=>{setEntityId(e.target.value);edit()}} disabled={entityLoading}><option value="">{entityLoading?'Cargando entidades…':'Selecciona una entidad'}</option>{entityOptions.map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select><small>{entityOptions.length||entityLoading?'Se guardará el vínculo con la ficha exacta seleccionada.':'No hay entidades disponibles en tu ámbito para vincular.'}</small></label>}
+     {!entityKind&&selected.entity&&<label>{tipo==='cliente_hipoteca_inmobiliaria'?'Entidad de origen':'Empresa / entidad relacionada'}<input value={entidad} onChange={e=>{setEntidad(e.target.value);edit()}} maxLength={200} placeholder={tipo==='contacto_bancario'?'Banco / sucursal':tipo==='tasador'?'Tasadora / empresa':'Nombre de la entidad'}/><small>Cuando exista una entidad canónica, es mejor vincularla con el selector anterior.</small></label>}
      {selected.cargo&&<label>Cargo / función<input value={cargo} onChange={e=>{setCargo(e.target.value);edit()}} maxLength={140} placeholder="Cargo, puesto o función"/></label>}
      <label>Nombre<input value={nombre} onChange={e=>{setNombre(e.target.value);edit()}} maxLength={100} required/></label><label>Apellidos<input value={apellidos} onChange={e=>{setApellidos(e.target.value);edit()}} maxLength={100}/></label>
      <div className="multi-contact-group"><div className="multi-contact-head"><strong>Teléfonos</strong><button type="button" onClick={()=>{setTelefonos(v=>[...v,'']);edit()}}><Plus size={15}/> Añadir teléfono</button></div>{telefonos.map((v,i)=><label key={i}>{i===0?'Teléfono':`Teléfono ${i+1}`}<span className="multi-contact-row"><input value={v} onChange={e=>{setTelefonos(x=>changeAt(x,i,e.target.value));edit()}} maxLength={40} inputMode="tel"/>{telefonos.length>1&&<button type="button" onClick={()=>{setTelefonos(x=>x.filter((_,j)=>j!==i));edit()}}><X size={15}/></button>}</span></label>)}</div>
      <div className="multi-contact-group"><div className="multi-contact-head"><strong>Correos</strong><button type="button" onClick={()=>{setEmails(v=>[...v,'']);edit()}}><Plus size={15}/> Añadir correo</button></div>{emails.map((v,i)=><label key={i}>{i===0?'Email':`Email ${i+1}`}<span className="multi-contact-row"><input value={v} onChange={e=>{setEmails(x=>changeAt(x,i,e.target.value));edit()}} maxLength={200} type="email"/>{emails.length>1&&<button type="button" onClick={()=>{setEmails(x=>x.filter((_,j)=>j!==i));edit()}}><X size={15}/></button>}</span></label>)}</div>
      <label>Observaciones<textarea value={observaciones} onChange={e=>{setObservaciones(e.target.value);edit()}} rows={3} maxLength={1200} placeholder="Cualquier dato útil para entender la relación con este contacto"/></label>
-     {ctx?.role==='Direccion'?<label>Responsable financiero<select value={target} onChange={e=>{setTarget(e.target.value);edit()}}><option value="">Sin asignar por ahora</option>{assignees.map(a=><option key={a.actor_code} value={a.actor_code}>{a.name}</option>)}</select><small>Si no corresponde a un cliente financiero puede quedar sin asignar.</small></label>:<label>Responsable financiero<input aria-label="Responsable financiero" value={target||ctx?.actor_code||''} readOnly/></label>}
+     {!IS_PRODUCTION&&(ctx?.role==='Direccion'?<label>Responsable financiero<select value={target} onChange={e=>{setTarget(e.target.value);edit()}}><option value="">Sin asignar por ahora</option>{assignees.map(a=><option key={a.actor_code} value={a.actor_code}>{a.name}</option>)}</select><small>Si no corresponde a un cliente financiero puede quedar sin asignar.</small></label>:<label>Responsable financiero<input aria-label="Responsable financiero" value={target||ctx?.actor_code||''} readOnly/></label>)}
+     {IS_PRODUCTION&&<div className="ops-message"><small>La asignación financiera no se simula en esta alta: se realiza desde el flujo operativo que disponga de relación canónica.</small></div>}
      <label><input type="checkbox" checked={consent} onChange={e=>{setConsent(e.target.checked);edit()}}/> Consentimiento comercial confirmado</label>
-     {preview&&<div className="ops-message"><strong>Vista previa</strong><div>Tipo: {selected.label}</div><div>Contacto: {fullName}</div>{entityKind&&<div>Vinculado a: {selectedEntity?.name||'Sin entidad seleccionada'}</div>}{!entityKind&&entidad.trim()&&<div>Entidad indicada: {entidad.trim()}</div>}{cargo.trim()&&<div>Cargo / función: {cargo.trim()}</div>}<div>Teléfonos: {cleanPhones.join(' · ')||'No indicados'}</div><div>Correos: {cleanEmails.join(' · ')||'No indicados'}</div><div>Responsable: {assignees.find(a=>a.actor_code===target)?.name||target||'Sin asignar'}</div><div>Estado inicial: Nuevo</div><div>Consentimiento comercial: {consent?'Sí':'No'}</div><small>Confirma para crear este contacto con esta clasificación y vinculación.</small></div>}
+     {preview&&<div className="ops-message"><strong>Vista previa</strong><div>Tipo: {selected.label}</div><div>Contacto: {fullName}</div>{entityKind&&<div>Vinculado a: {selectedEntity?.name||'Sin entidad seleccionada'}</div>}{!entityKind&&entidad.trim()&&<div>Entidad indicada: {entidad.trim()}</div>}{cargo.trim()&&<div>Cargo / función: {cargo.trim()}</div>}<div>Teléfonos: {cleanPhones.join(' · ')||'No indicados'}</div><div>Correos: {cleanEmails.join(' · ')||'No indicados'}</div>{!IS_PRODUCTION&&<div>Responsable: {assignees.find(a=>a.actor_code===target)?.name||target||'Sin asignar'}</div>}<div>Estado inicial: Nuevo</div><div>Consentimiento comercial: {consent?'Sí':'No'}</div><small>Confirma para crear este contacto con esta clasificación y vinculación.</small></div>}
      {message&&<div className="ops-message">{message}</div>}
      {!result?.ok&&result?.error!=='duplicate_contact'&&<div style={{display:'flex',gap:8,flexWrap:'wrap'}}>{preview&&<button type="button" onClick={()=>setPreview(false)}>Volver</button>}<button className="primary" disabled={!valid||busy}><Save size={16}/>{busy?'Creando…':preview?'Confirmar y crear':'Revisar antes de crear'}</button></div>}
      {(result?.ok||result?.error==='duplicate_contact')&&<div style={{display:'flex',gap:8,flexWrap:'wrap'}}><button type="button" onClick={()=>navigate('/contactos')}>Volver a Contactos</button>{result.destino&&<button type="button" className="primary" onClick={()=>navigate(result.destino!)}>{result.ok?'Abrir contacto creado':'Abrir contacto existente'}</button>}</div>}
