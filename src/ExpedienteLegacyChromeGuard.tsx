@@ -2,14 +2,23 @@ import {useEffect} from 'react';
 import {useLocation} from 'react-router-dom';
 
 const DETAIL=/^\/expedientes\/[^/]+$/;
+const STYLE_ID='fenix-expediente-detail-chrome-lock';
 
 export default function ExpedienteLegacyChromeGuard(){
  const {pathname}=useLocation();
  const active=DETAIL.test(pathname)&&pathname!=='/expedientes/nuevo';
  useEffect(()=>{
   if(!active)return;
+  document.documentElement.dataset.expedienteDetail='true';
+  let style=document.getElementById(STYLE_ID) as HTMLStyleElement|null;
+  if(!style){
+   style=document.createElement('style');
+   style.id=STYLE_ID;
+   style.textContent='html[data-expediente-detail="true"] .app-shell > .sidebar,html[data-expediente-detail="true"] .app-shell > .main{display:none!important;visibility:hidden!important;pointer-events:none!important} html[data-expediente-detail="true"] .ops-uniform-sidebar-host{display:none!important}';
+   document.head.appendChild(style);
+  }
   const hide=()=>{
-   document.querySelectorAll<HTMLElement>('.app-shell > .sidebar,.app-shell > .main').forEach(el=>{
+   document.querySelectorAll<HTMLElement>('.app-shell > .sidebar,.app-shell > .main,.ops-uniform-sidebar-host').forEach(el=>{
     el.dataset.expedienteLegacySuppressed='true';
     el.style.setProperty('display','none','important');
     el.style.setProperty('visibility','hidden','important');
@@ -21,6 +30,8 @@ export default function ExpedienteLegacyChromeGuard(){
   observer.observe(document.body,{childList:true,subtree:true});
   return()=>{
    observer.disconnect();
+   delete document.documentElement.dataset.expedienteDetail;
+   document.getElementById(STYLE_ID)?.remove();
    document.querySelectorAll<HTMLElement>('[data-expediente-legacy-suppressed="true"]').forEach(el=>{
     el.style.removeProperty('display');
     el.style.removeProperty('visibility');
