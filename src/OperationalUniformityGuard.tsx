@@ -19,6 +19,19 @@ function activeRoot(pathname:string){
  const root=`/${pathname.split('/').filter(Boolean)[0]||'inicio'}`;
  return root==='/'?'/inicio':root;
 }
+function ownsCreateNavigation(path:string){
+ return path==='/expedientes/nuevo'
+  ||path==='/contactos/nuevo'
+  ||path==='/inmobiliarias/nueva'
+  ||path==='/bancos/nuevo'
+  ||path==='/tareas/nueva'
+  ||path==='/notarias/nueva'
+  ||path==='/registros-propiedad/nuevo'
+  ||path==='/herencias/nuevo'
+  ||path==='/obras-nuevas/nuevo'
+  ||path==='/visitas/nueva'
+  ||/^\/inmobiliarias\/[^/]+\/contactos\/nuevo$/.test(path);
+}
 
 export default function OperationalUniformityGuard(){
  const location=useLocation(),navigate=useNavigate();
@@ -56,9 +69,10 @@ export default function OperationalUniformityGuard(){
    if(!root){setSidebarHost(null);setFooterHost(null);return;}
 
    const isHome=location.pathname.replace(/\/+$/,'')==='/inicio'||root.classList.contains('dir-shell');
+   const createNavOwned=ownsCreateNavigation(location.pathname);
    const directSide=root.querySelector(':scope > .ops-side') as HTMLElement|null;
    let sideHost=root.querySelector(':scope > .ops-uniform-sidebar-host') as HTMLElement|null;
-   if(isHome||directSide){
+   if(isHome||directSide||createNavOwned){
     if(sideHost){sideHost.remove();sideHost=null;}
    }else if(!sideHost){
     sideHost=document.createElement('div');sideHost.className='ops-uniform-sidebar-host';
