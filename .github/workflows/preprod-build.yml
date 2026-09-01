@@ -122,6 +122,32 @@ jobs:
             rm -f "$headers"
           done
 
+      - name: PROD canonical write API CORS smoke
+        if: github.event_name == 'push' && github.ref == 'refs/heads/preprod-app-phase1'
+        shell: bash
+        run: |
+          set -euo pipefail
+          for spec in \
+            'POST|fenix-directory-actions/notarias/create' \
+            'POST|fenix-special-cases-api/herencias' \
+            'PATCH|fenix-task-api/TASK-CORS-PROBE' \
+            'PATCH|fenix-document-actions/DOC-CORS-PROBE'; do
+            method="${spec%%|*}"
+            endpoint="${spec#*|}"
+            headers="$(mktemp)"
+            status="$(curl --silent --show-error --output /dev/null --dump-header "$headers" --write-out '%{http_code}' --max-time 20 \
+              -X OPTIONS \
+              -H 'Origin: https://app.fenixcapital.es' \
+              -H "Access-Control-Request-Method: ${method}" \
+              -H 'Access-Control-Request-Headers: authorization,apikey,content-type' \
+              "https://cluhljgonannaafpmblx.supabase.co/functions/v1/${endpoint}")"
+            test "$status" = "204"
+            grep -qi '^access-control-allow-origin: https://app.fenixcapital.es' "$headers"
+            grep -qi '^access-control-allow-methods:.*OPTIONS' "$headers"
+            grep -qi '^access-control-allow-headers:.*authorization' "$headers"
+            rm -f "$headers"
+          done
+
       - name: Upload dist
         uses: actions/upload-artifact@v4
         with:
