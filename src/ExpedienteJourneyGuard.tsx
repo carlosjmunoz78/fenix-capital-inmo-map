@@ -29,7 +29,13 @@ export default function ExpedienteJourneyGuard(){
      const currentName=phaseText(current);
      const nextName=phaseText(next);
      let guide=real.querySelector<HTMLElement>(':scope > .exp-journey-guidance');
-     if(!guide){guide=document.createElement('div');guide.className='exp-journey-guidance';const track=real.querySelector(':scope > .detail-phase-track');real.insertBefore(guide,track);}
+     if(!guide){
+      guide=document.createElement('div');
+      guide.className='exp-journey-guidance';
+      const track=real.querySelector(':scope > .detail-phase-track');
+      if(track)real.insertBefore(guide,track);
+      else real.prepend(guide);
+     }
      const desired=currentName
       ? `ANA · Estamos en ${currentName}.${nextName?` Siguiente fase: ${nextName}.`: ' Este es el último tramo del expediente.'}`
       : 'ANA · Estoy comprobando la fase actual del expediente antes de indicarte el siguiente paso.';
@@ -41,17 +47,21 @@ export default function ExpedienteJourneyGuard(){
     section.className='detail-journey exp-journey-fallback';
     section.dataset.testid='expediente-journey';
     section.innerHTML=`<div class="detail-section-label">RECORRIDO DEL EXPEDIENTE · ESTADO PENDIENTE DE CARGA</div><div class="exp-journey-guidance">ANA · Estoy cargando el estado real del expediente. No marco ninguna fase hasta recibir el dato canónico.</div><div class="detail-phase-track">${PHASES.map((phase,i)=>`<div><span>${i+1}</span><small>${phase}</small></div>`).join('')}</div>`;
-    const upload=content.querySelector(':scope > .context-evidence-inline-host');
-    const lifecycle=content.querySelector(':scope > .exp-life-inline-host');
-    const ana=content.querySelector(':scope > .detail-ana-hero');
-    const anchor=upload??lifecycle??ana;
+    const upload=content.querySelector<HTMLElement>(':scope > .context-evidence-inline-host');
+    const lifecycle=content.querySelector<HTMLElement>(':scope > .exp-life-inline-host');
+    const ana=content.querySelector<HTMLElement>(':scope > .detail-ana-hero');
+    const anchor:HTMLElement|null=upload||lifecycle||ana||null;
     if(anchor)content.insertBefore(section,anchor.nextSibling);else content.prepend(section);
    });
   };
   sync();
   const observer=new MutationObserver(sync);
   observer.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
-  return()=>{observer.disconnect();document.querySelectorAll('.exp-journey-fallback,.exp-journey-guidance').forEach(node=>{if(node.closest('.exp-journey-fallback'))return;node.remove();});};
+  return()=>{
+   observer.disconnect();
+   document.querySelectorAll('.exp-journey-fallback').forEach(node=>node.remove());
+   document.querySelectorAll('.exp-journey-guidance').forEach(node=>{if(!node.closest('.exp-journey-fallback'))node.remove();});
+  };
  },[active,pathname]);
  return null;
 }
