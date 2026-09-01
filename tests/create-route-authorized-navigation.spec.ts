@@ -34,6 +34,7 @@ test.describe('Fénix PRE-PROD · navegación global en altas',()=>{
    ['/bancos/nuevo','Bancos'],
    ['/tareas/nueva','Agenda'],
    ['/documentacion/nuevo','Documentación'],
+   ['/firmas/nuevo','Firmas'],
    ['/notarias/nueva','Notarías'],
    ['/registros-propiedad/nuevo','Registros de la Propiedad'],
    ['/herencias/nuevo','Herencias'],
@@ -54,7 +55,7 @@ test.describe('Fénix PRE-PROD · navegación global en altas',()=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();
   await page.addInitScript(()=>{sessionStorage.setItem('fenix-theme','dark');localStorage.setItem('fenix-theme','dark');});
   await boot(page,'Direccion',directionNav);
-  for(const route of ['/expedientes/nuevo','/bancos/nuevo','/contactos/nuevo','/inmobiliarias/nueva','/documentacion/nuevo','/tareas/nueva','/notarias/nueva','/registros-propiedad/nuevo','/herencias/nuevo','/obras-nuevas/nuevo','/visitas/nueva']){
+  for(const route of ['/expedientes/nuevo','/bancos/nuevo','/contactos/nuevo','/inmobiliarias/nueva','/documentacion/nuevo','/firmas/nuevo','/tareas/nueva','/notarias/nueva','/registros-propiedad/nuevo','/herencias/nuevo','/obras-nuevas/nuevo','/visitas/nueva']){
    await page.goto(route);
    await expect(page.locator('html'),route).toHaveAttribute('data-theme','dark');
    const sidebar=page.locator('aside.create-auth-nav.ops-side');
@@ -68,13 +69,25 @@ test.describe('Fénix PRE-PROD · navegación global en altas',()=>{
  test('las altas muestran una sola cabecera compartida igual que Inicio',async({page},testInfo)=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();
   await boot(page,'Direccion',directionNav);
-  for(const route of ['/tareas/nueva','/expedientes/nuevo','/contactos/nuevo','/documentacion/nuevo','/bancos/nuevo','/herencias/nuevo','/obras-nuevas/nuevo']){
+  for(const route of ['/tareas/nueva','/expedientes/nuevo','/contactos/nuevo','/documentacion/nuevo','/firmas/nuevo','/bancos/nuevo','/herencias/nuevo','/obras-nuevas/nuevo']){
    await page.goto(route);
    const headers=page.locator('.ops-root > .ops-main > .ops-top');
    await expect(headers,route).toHaveCount(1);
    await expect(headers,route).toBeVisible();
    await expect(headers.getByPlaceholder('Buscar expediente, cliente, banco, inmobiliaria...'),route).toBeVisible();
   }
+ });
+
+ test('Nueva firma usa el bloque superior canónico de Ana y no la carcasa genérica',async({page},testInfo)=>{
+  if(!testInfo.project.name.includes('desktop'))test.skip();
+  await boot(page,'Direccion',directionNav);
+  await page.goto('/firmas/nuevo');
+  await expect(page.getByRole('heading',{name:'Nueva firma',exact:true})).toBeVisible();
+  const ana=page.getByTestId('firma-create-ana-canonical');
+  await expect(ana).toBeVisible();
+  await expect(ana.getByText('ANA · NUEVA FIRMA',{exact:true})).toBeVisible();
+  await expect(ana.locator('.inmo-next > button')).toHaveCount(3);
+  await expect(page.locator('.app-shell')).toBeHidden();
  });
 
  test('Alta de contacto B2B conserva solo menú autorizado de Visitador',async({page},testInfo)=>{
