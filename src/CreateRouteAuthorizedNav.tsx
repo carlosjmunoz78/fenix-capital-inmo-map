@@ -14,6 +14,7 @@ function routeGroup(path:string){
  if(path==='/bancos/nuevo')return'/bancos';
  if(path==='/tareas/nueva')return'/agenda';
  if(path==='/documentacion/nuevo')return'/documentacion';
+ if(path==='/firmas/nuevo')return'/firmas';
  if(path==='/notarias/nueva')return'/notarias';
  if(path==='/registros-propiedad/nuevo')return'/registros-propiedad';
  if(path==='/herencias/nuevo')return'/herencias';
