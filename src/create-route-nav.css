@@ -21,6 +21,25 @@ html[data-create-nav='1'] .ops-root>.ops-side{
   pointer-events:none!important;
 }
 
+/*
+ * Las pantallas de alta ya tienen su título principal dentro de .ops-content.
+ * La antigua barra superior sticky repetía el mismo título y reaparecía al subir
+ * el scroll, creando el efecto de cabecera duplicada. En cualquier ruta de alta
+ * dejamos una única cabecera: el título de la pantalla, no el chrome antiguo.
+ */
+html[data-create-nav='1'] .ops-root>.ops-main>.ops-top,
+html[data-create-nav='1'] .ops-root .ops-main>.ops-top{
+  display:none!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
+html[data-create-nav='1'] .ops-root>.ops-main{
+  padding-top:0!important;
+}
+html[data-create-nav='1'] .ops-root>.ops-main>.ops-content{
+  padding-top:22px!important;
+}
+
 /* Use the same OperationalSidebar component and the same premium shell geometry.
    Do not restyle it as a legacy sidebar: this is only the authorized create-route
    instance that replaces the hidden local sidebar. */
@@ -57,5 +76,8 @@ html[data-create-nav='1'] .ops-content>.secondary-action:first-child{
     width:auto!important;
     height:58px!important;
     z-index:7900!important;
+  }
+  html[data-create-nav='1'] .ops-root>.ops-main>.ops-content{
+    padding-top:16px!important;
   }
 }
