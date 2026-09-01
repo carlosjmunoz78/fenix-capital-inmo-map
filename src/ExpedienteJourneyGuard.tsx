@@ -25,34 +25,55 @@ export default function ExpedienteJourneyGuard(){
 
  useEffect(()=>{
   if(!active){setHost(null);return;}
-  let cancelled=false;let tries=0;let timer=0;let observer:MutationObserver|null=null;
-  const locate=()=>{
+  let cancelled=false;
+  let contentObserver:MutationObserver|null=null;
+  const suppressLegacy=(content:HTMLElement)=>{
+   content.querySelectorAll<HTMLElement>(':scope > .detail-journey:not(.exp-live-journey-section)').forEach(section=>{
+    if(section.dataset.legacyJourneySuppressed==='true')return;
+    section.dataset.legacyJourneySuppressed='true';
+    section.setAttribute('aria-hidden','true');
+   });
+  };
+  const ensure=()=>{
    if(cancelled)return;
    const content=document.querySelector<HTMLElement>('.detail-exp-root .detail-exp-content');
    const ana=content?.querySelector<HTMLElement>(':scope > .detail-ana-hero');
-   if(content&&ana){
-    const suppressLegacy=()=>{
-     content.querySelectorAll<HTMLElement>(':scope > .detail-journey:not(.exp-live-journey-section)').forEach(section=>{
-      section.dataset.legacyJourneySuppressed='true';
-      section.setAttribute('aria-hidden','true');
-      const label=section.querySelector<HTMLElement>(':scope > .detail-section-label');
-      if(label&&label.textContent)label.textContent='';
-      const track=section.querySelector<HTMLElement>(':scope > .detail-phase-track');
-      if(track&&track.childElementCount>0)track.replaceChildren();
-     });
-    };
-    suppressLegacy();
-    observer=new MutationObserver(suppressLegacy);
-    observer.observe(content,{childList:true,subtree:true,characterData:true});
-    let h=content.querySelector<HTMLElement>(':scope > .exp-journey-live-host');
-    if(!h){h=document.createElement('div');h.className='exp-journey-live-host';content.insertBefore(h,ana.nextSibling);}
-    setHost(h);
-    return;
+   if(!content||!ana)return;
+   suppressLegacy(content);
+   let h=content.querySelector<HTMLElement>(':scope > .exp-journey-live-host');
+   if(!h){
+    h=document.createElement('div');
+    h.className='exp-journey-live-host';
+    content.insertBefore(h,ana.nextSibling);
    }
-   tries+=1;if(tries<80)timer=window.setTimeout(locate,100);
+   setHost(current=>current===h?current:h);
+   if(!contentObserver){
+    contentObserver=new MutationObserver(()=>{
+     const live=document.querySelector<HTMLElement>('.detail-exp-root .detail-exp-content');
+     if(!live)return;
+     suppressLegacy(live);
+     const liveAna=live.querySelector<HTMLElement>(':scope > .detail-ana-hero');
+     let liveHost=live.querySelector<HTMLElement>(':scope > .exp-journey-live-host');
+     if(liveAna&&!liveHost){
+      liveHost=document.createElement('div');
+      liveHost.className='exp-journey-live-host';
+      live.insertBefore(liveHost,liveAna.nextSibling);
+     }
+     if(liveHost)setHost(current=>current===liveHost?current:liveHost);
+    });
+    contentObserver.observe(content,{childList:true});
+   }
   };
-  locate();
-  return()=>{cancelled=true;window.clearTimeout(timer);observer?.disconnect();document.querySelector('.exp-journey-live-host')?.remove();setHost(null);};
+  ensure();
+  const rootObserver=new MutationObserver(ensure);
+  rootObserver.observe(document.getElementById('root')??document.body,{childList:true,subtree:true});
+  return()=>{
+   cancelled=true;
+   rootObserver.disconnect();
+   contentObserver?.disconnect();
+   document.querySelectorAll('.exp-journey-live-host').forEach(x=>x.remove());
+   setHost(null);
+  };
  },[active,pathname]);
 
  async function refresh(){
