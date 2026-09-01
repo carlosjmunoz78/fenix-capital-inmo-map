@@ -13,7 +13,7 @@ async function boot(page:any,navigationStatus=200){
 }
 
 test.describe('Fénix PRE-PROD · ficha expediente con navegación global',()=>{
- test('Financiero ve exactamente su menú autorizado y no Comunicaciones',async({page},testInfo)=>{
+ test('Financiero ve exactamente su menú autorizado y un único chrome operacional',async({page},testInfo)=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();
   await boot(page);
   await page.goto(`/expedientes/${id}`);
@@ -23,6 +23,33 @@ test.describe('Fénix PRE-PROD · ficha expediente con navegación global',()=>{
   await expect(menu.getByRole('button',{name:'Comunicaciones',exact:true})).toHaveCount(0);
   await expect(menu.getByRole('button',{name:'Financieros',exact:true})).toHaveCount(0);
   await expect(page.getByRole('heading',{name:'Expediente QA',exact:true})).toBeVisible();
+  await expect(page.locator('.ops-top:visible')).toHaveCount(1);
+  await expect(page.locator('aside.ops-side:visible')).toHaveCount(1);
+  await expect(page.locator('.ops-uniform-sidebar-host:visible')).toHaveCount(0);
+  await expect(page.locator('.app-shell .sidebar:visible')).toHaveCount(0);
+ });
+
+ test('ciclo de vida queda entre Ana y Subir documentos y nunca flota',async({page},testInfo)=>{
+  if(!testInfo.project.name.includes('desktop'))test.skip();
+  await boot(page);
+  await page.goto(`/expedientes/${id}`);
+  const ana=page.locator('.detail-exp-content > .detail-ana-hero');
+  const lifecycle=page.getByTestId('expediente-lifecycle-inline');
+  const upload=page.locator('.detail-exp-content > .context-evidence-inline-host');
+  await expect(ana).toBeVisible();
+  await expect(lifecycle).toBeVisible();
+  await expect(upload).toBeVisible();
+  const position=await lifecycle.evaluate(el=>getComputedStyle(el).position);
+  expect(position).not.toBe('fixed');
+  const order=await page.locator('.detail-exp-content').evaluate(content=>{
+    const children=[...content.children];
+    return {ana:children.findIndex(x=>x.classList.contains('detail-ana-hero')),life:children.findIndex(x=>x.classList.contains('exp-life-inline-host')),upload:children.findIndex(x=>x.classList.contains('context-evidence-inline-host'))};
+  });
+  expect(order.ana).toBeGreaterThanOrEqual(0);
+  expect(order.life).toBe(order.ana+1);
+  expect(order.upload).toBe(order.life+1);
+  await expect(lifecycle.getByRole('button',{name:/Pausar/})).toBeVisible();
+  await expect(lifecycle.getByRole('button',{name:/Dar de baja/})).toBeVisible();
  });
 
  test('fallo de navigation deja únicamente Inicio en la ficha',async({page},testInfo)=>{
