@@ -51,6 +51,7 @@ import AgendaShell from './AgendaShell';
 import FirmasShell from './FirmasShell';
 import FirmaCreateShell from './FirmaCreateShell';
 import DocumentacionShell from './DocumentacionShell';
+import DocumentCreateShell from './DocumentCreateShell';
 import DocumentViewerShell from './DocumentViewerShell';
 import ExpedienteDocumentsGuard from './ExpedienteDocumentsGuard';
 import ContextEvidenceUpload from './ContextEvidenceUpload';
@@ -180,6 +181,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <FirmasShell />
       <FirmaCreateShell />
       <DocumentacionShell />
+      <DocumentCreateShell />
       <DocumentViewerShell />
       <FinancierosShell />
       <FinancieroDetailShell />
