@@ -27,19 +27,15 @@ export default function ExpedienteJourneyGuard(){
   if(!active){setHost(null);return;}
   let cancelled=false;
   let contentObserver:MutationObserver|null=null;
-  const suppressLegacy=(content:HTMLElement)=>{
-   content.querySelectorAll<HTMLElement>(':scope > .detail-journey:not(.exp-live-journey-section)').forEach(section=>{
-    if(section.dataset.legacyJourneySuppressed==='true')return;
-    section.dataset.legacyJourneySuppressed='true';
-    section.setAttribute('aria-hidden','true');
-   });
+  const removeLegacyJourney=(content:HTMLElement)=>{
+   content.querySelectorAll<HTMLElement>(':scope > .detail-journey:not(.exp-live-journey-section)').forEach(section=>section.remove());
   };
   const ensure=()=>{
    if(cancelled)return;
    const content=document.querySelector<HTMLElement>('.detail-exp-root .detail-exp-content');
    const ana=content?.querySelector<HTMLElement>(':scope > .detail-ana-hero');
    if(!content||!ana)return;
-   suppressLegacy(content);
+   removeLegacyJourney(content);
    let h=content.querySelector<HTMLElement>(':scope > .exp-journey-live-host');
    if(!h){
     h=document.createElement('div');
@@ -51,7 +47,7 @@ export default function ExpedienteJourneyGuard(){
     contentObserver=new MutationObserver(()=>{
      const live=document.querySelector<HTMLElement>('.detail-exp-root .detail-exp-content');
      if(!live)return;
-     suppressLegacy(live);
+     removeLegacyJourney(live);
      const liveAna=live.querySelector<HTMLElement>(':scope > .detail-ana-hero');
      let liveHost=live.querySelector<HTMLElement>(':scope > .exp-journey-live-host');
      if(liveAna&&!liveHost){
