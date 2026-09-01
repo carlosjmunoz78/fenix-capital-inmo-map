@@ -9,13 +9,16 @@ async function boot(page:any,role:'Direccion'|'Visitador',items:any[],navigation
  await page.addInitScript(session=>{localStorage.setItem('fenix-preprod-auth',JSON.stringify(session));localStorage.setItem('fenix-remember-device','true');},fakeSession);
  await page.route('**/functions/v1/fenix-app-gateway-test/**',async r=>{const u=r.request().url();if(u.endsWith('/session/context'))return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({actor_code:role==='Direccion'?'DIR-TEST':'VIS-A',role})});if(u.endsWith('/navigation'))return r.fulfill({status:navigationStatus,contentType:'application/json',body:navigationStatus===200?JSON.stringify({items}):JSON.stringify({error:'navigation_unavailable'})});if(u.endsWith('/personal'))return r.fulfill({status:200,contentType:'application/json',body:'{"items":[]}'});if(u.endsWith('/visitadores'))return r.fulfill({status:200,contentType:'application/json',body:'{"items":[]}'});return r.fulfill({status:404,body:'{}'});});
 }
+function visibleSidebar(page:any){return page.locator('aside.ops-side:visible');}
+function visibleMenu(page:any){return visibleSidebar(page).first().locator('nav');}
 
 test.describe('Fénix PRE-PROD · navegación global en altas',()=>{
  test('Nuevo expediente conserva el menú global de Dirección',async({page},testInfo)=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();
   await boot(page,'Direccion',directionNav);
   await page.goto('/expedientes/nuevo');
-  const menu=page.locator('aside.create-auth-nav nav');
+  await expect(visibleSidebar(page)).toHaveCount(1);
+  const menu=visibleMenu(page);
   await expect(menu.getByRole('button',{name:'Expedientes',exact:true})).toBeVisible();
   await expect(menu.getByRole('button',{name:'Bancos',exact:true})).toBeVisible();
   await expect(menu.getByRole('button',{name:'Inmobiliarias',exact:true})).toBeVisible();
@@ -24,7 +27,7 @@ test.describe('Fénix PRE-PROD · navegación global en altas',()=>{
   await expect(page.getByRole('heading',{name:'Nuevo expediente',exact:true})).toBeVisible();
  });
 
- test('todas las altas conocidas usan el mismo menú autorizado y activan su módulo padre',async({page},testInfo)=>{
+ test('todas las altas conocidas tienen exactamente un menú visible y activan su módulo padre',async({page},testInfo)=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();
   await boot(page,'Direccion',directionNav);
   const routes:Array<[string,string]>=[
@@ -42,7 +45,8 @@ test.describe('Fénix PRE-PROD · navegación global en altas',()=>{
   ];
   for(const [route,label] of routes){
    await page.goto(route);
-   const menu=page.locator('aside.create-auth-nav nav');
+   await expect(visibleSidebar(page),`${route} debe mostrar un único menú lateral`).toHaveCount(1);
+   const menu=visibleMenu(page);
    await expect(menu.getByRole('button',{name:'Inicio',exact:true}),route).toBeVisible();
    await expect(menu.getByRole('button',{name:label,exact:true}),route).toBeVisible();
    await expect(menu.getByRole('button',{name:label,exact:true}),route).toHaveClass(/active/);
@@ -50,11 +54,20 @@ test.describe('Fénix PRE-PROD · navegación global en altas',()=>{
   }
  });
 
+ test('Nueva tarea tiene una sola cabecera visible',async({page},testInfo)=>{
+  if(!testInfo.project.name.includes('desktop'))test.skip();
+  await boot(page,'Direccion',directionNav);
+  await page.goto('/tareas/nueva');
+  await expect(page.locator('.ops-root:visible > .ops-main > .ops-top:visible')).toHaveCount(1);
+  await expect(visibleSidebar(page)).toHaveCount(1);
+ });
+
  test('Alta de contacto B2B conserva solo menú autorizado de Visitador',async({page},testInfo)=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();
   await boot(page,'Visitador',visitadorNav);
   await page.goto(`/inmobiliarias/${inmoId}/contactos/nuevo`);
-  const menu=page.locator('aside.create-auth-nav nav');
+  await expect(visibleSidebar(page)).toHaveCount(1);
+  const menu=visibleMenu(page);
   await expect(menu.getByRole('button',{name:'Inmobiliarias',exact:true})).toBeVisible();
   await expect(menu.getByRole('button',{name:'Visitas',exact:true})).toBeVisible();
   await expect(menu.getByRole('button',{name:'Bancos',exact:true})).toHaveCount(0);
@@ -62,11 +75,12 @@ test.describe('Fénix PRE-PROD · navegación global en altas',()=>{
   await expect(menu.getByRole('button',{name:'Inmobiliarias',exact:true})).toHaveClass(/active/);
  });
 
- test('si navigation falla en una alta el overlay queda solo con Inicio',async({page},testInfo)=>{
+ test('si navigation falla en una alta el menú queda solo con Inicio',async({page},testInfo)=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();
   await boot(page,'Direccion',directionNav,500);
   await page.goto('/contactos/nuevo');
-  const menu=page.locator('aside.create-auth-nav nav');
+  await expect(visibleSidebar(page)).toHaveCount(1);
+  const menu=visibleMenu(page);
   await expect(menu.getByRole('button',{name:'Inicio',exact:true})).toBeVisible();
   await expect(menu.getByRole('button',{name:'Contactos',exact:true})).toHaveCount(0);
   await expect(menu.getByRole('button',{name:'Comunicaciones',exact:true})).toHaveCount(0);
