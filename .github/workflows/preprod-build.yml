@@ -1,6 +1,6 @@
 name: PRE-PROD App Build
 
-# PRE-PROD: QA on PR/push. GitHub Pages branch snapshot is prepared from the validated PRE-PROD branch without touching main.
+# PRE-PROD: QA on PR/push. The validated operational snapshot for app.fenixcapital.es is built against PROD runtime without merging main.
 on:
   push:
     branches:
@@ -96,6 +96,24 @@ jobs:
             rm -f "$headers"
           done
 
+      - name: PROD operational CORS smoke
+        if: github.event_name == 'push' && github.ref == 'refs/heads/preprod-app-phase1'
+        shell: bash
+        run: |
+          set -euo pipefail
+          headers="$(mktemp)"
+          status="$(curl --silent --show-error --output /dev/null --dump-header "$headers" --write-out '%{http_code}' --max-time 20 \
+            -X OPTIONS \
+            -H 'Origin: https://app.fenixcapital.es' \
+            -H 'Access-Control-Request-Method: GET' \
+            -H 'Access-Control-Request-Headers: authorization,apikey' \
+            'https://cluhljgonannaafpmblx.supabase.co/functions/v1/fenix-ana-api/capabilities')"
+          test "$status" = "204"
+          grep -qi '^access-control-allow-origin:' "$headers"
+          grep -qi '^access-control-allow-methods:.*OPTIONS' "$headers"
+          grep -qi '^access-control-allow-headers:.*authorization' "$headers"
+          rm -f "$headers"
+
       - name: Upload dist
         uses: actions/upload-artifact@v4
         with:
@@ -111,20 +129,23 @@ jobs:
           path: playwright-report
           if-no-files-found: ignore
 
-      - name: Build GitHub Pages PRE-PROD
-        if: (github.event_name == 'push' && github.ref == 'refs/heads/preprod-app-phase1') || (github.event_name == 'pull_request' && github.head_ref == 'preprod-app-phase1')
+      - name: Build operational app for custom domain
+        if: github.event_name == 'push' && github.ref == 'refs/heads/preprod-app-phase1'
+        env:
+          VITE_FENIX_ENV: prod
+          VITE_SUPABASE_URL: https://cluhljgonannaafpmblx.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_yjISKmA5UPfF3d7NitP_DA_j5LGydh0
         run: |
-          # The operational entry point is the custom domain root.
+          # app.fenixcapital.es is the operational entry point and must use the dedicated PROD backend.
           npx vite build --base=/ --outDir dist-pages
           cp dist-pages/index.html dist-pages/404.html
           printf '%s\n' 'app.fenixcapital.es' > dist-pages/CNAME
           touch dist-pages/.nojekyll
 
-          # Vercel may consume gh-pages as a static snapshot and invoke `npm run build`.
-          # Keep the branch deployable without rebuilding the application source.
+          # Keep gh-pages deployable as a static snapshot if another host consumes this branch.
           cat > dist-pages/package.json <<'JSON'
           {
-            "name": "fenix-capital-preprod-static",
+            "name": "fenix-capital-operational-static",
             "private": true,
             "version": "1.0.0",
             "scripts": {
@@ -157,7 +178,7 @@ jobs:
           }
           JSON
 
-      - name: Publish validated PRE-PROD snapshot to gh-pages
+      - name: Publish validated operational snapshot to gh-pages
         if: github.event_name == 'push' && github.ref == 'refs/heads/preprod-app-phase1'
         env:
           GH_TOKEN: ${{ github.token }}
@@ -171,6 +192,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
-          git commit -m "deploy: PRE-PROD Pages snapshot ${GITHUB_SHA}"
+          git commit -m "deploy: operational snapshot ${GITHUB_SHA}"
           git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           git push --force origin gh-pages
