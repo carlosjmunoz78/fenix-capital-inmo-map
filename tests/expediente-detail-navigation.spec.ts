@@ -7,7 +7,7 @@ async function boot(page:any,navigationStatus=200){
  await page.addInitScript(session=>{localStorage.setItem('fenix-preprod-auth',JSON.stringify(session));localStorage.setItem('fenix-remember-device','true');},fakeSession);
  const nav=[{label:'Inicio',route:'/inicio'},{label:'Expedientes',route:'/expedientes'},{label:'Bancos',route:'/bancos'},{label:'Contactos',route:'/contactos'},{label:'Inmobiliarias',route:'/inmobiliarias'},{label:'Documentación',route:'/documentacion'},{label:'Firmas',route:'/firmas'},{label:'Tasaciones',route:'/tasaciones'},{label:'Agenda',route:'/agenda'}];
  await page.route('**/functions/v1/fenix-app-gateway-test/**',async r=>{const u=r.request().url();if(u.endsWith('/session/context'))return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({actor_code:'FIN-A',role:'Financiero'})});if(u.endsWith('/navigation'))return r.fulfill({status:navigationStatus,contentType:'application/json',body:navigationStatus===200?JSON.stringify({items:nav}):JSON.stringify({error:'navigation_unavailable'})});return r.fulfill({status:404,body:'{}'});});
- await page.route(`**/functions/v1/fenix-notion-runtime-test/expedientes/${id}`,r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({source:'notion_canonical',item:{id,expediente:'Expediente QA',cliente:'Cliente QA',fase:'Estudio'}})}));
+ await page.route(`**/functions/v1/fenix-notion-runtime-test/expedientes/${id}`,async r=>{await new Promise(resolve=>setTimeout(resolve,180));return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({source:'notion_canonical',item:{id,expediente:'Expediente QA',cliente:'Cliente QA',fase:'Estudio'}})});});
  await page.route(`**/functions/v1/fenix-notion-runtime-test/expedientes/${id}/compradores`,r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[],count:0,titulares:0,avalistas:0})}));
  await page.route(`**/functions/v1/fenix-expediente-assistant-test/expedientes/${id}/advice`,r=>r.fulfill({status:403,contentType:'application/json',body:'{}'}));
 }
@@ -26,12 +26,13 @@ test.describe('Fénix PRE-PROD · ficha expediente con navegación global',()=>{
   await expect(page.locator('.ops-top:visible')).toHaveCount(1);
   await expect(page.locator('#root header:visible')).toHaveCount(1);
   await expect(page.locator('#root .topbar:visible')).toHaveCount(0);
+  await expect(page.locator('.app-shell:visible')).toHaveCount(0);
   await expect(page.locator('aside.ops-side:visible')).toHaveCount(1);
   await expect(page.locator('.ops-uniform-sidebar-host:visible')).toHaveCount(0);
   await expect(page.locator('.app-shell .sidebar:visible')).toHaveCount(0);
  });
 
- test('recorrido canónico es visible y la línea genérica queda fuera de pantalla',async({page},testInfo)=>{
+ test('recorrido canónico sobrevive a la carga real de la ficha',async({page},testInfo)=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();
   await boot(page);
   await page.goto(`/expedientes/${id}`);
@@ -39,6 +40,10 @@ test.describe('Fénix PRE-PROD · ficha expediente con navegación global',()=>{
   await expect(journey).toBeVisible();
   await expect(journey.getByText('RECORRIDO DEL EXPEDIENTE',{exact:false})).toBeVisible();
   await expect(journey.getByTestId('expediente-journey-guidance')).toBeVisible();
+  await expect(journey.locator('.detail-phase-track')).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Expediente QA',exact:true})).toBeVisible();
+  await page.waitForTimeout(350);
+  await expect(journey).toBeVisible();
   await expect(journey.locator('.detail-phase-track')).toBeVisible();
   await expect(page.locator('.detail-exp-root .detail-journey:not(.exp-live-journey-section):visible')).toHaveCount(0);
   await expect(page.locator('.detail-exp-root .detail-phase-track:visible')).toHaveCount(1);
