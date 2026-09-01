@@ -1,0 +1,4 @@
+.detail-exp-root .detail-journey{margin:18px 0 20px;border:1px solid var(--dx-border);border-radius:18px;background:var(--dx-panel);box-shadow:0 8px 24px rgba(55,31,20,.05)}
+.detail-exp-root .exp-journey-guidance{margin:0 0 14px;padding:10px 12px;border-radius:12px;background:rgba(255,90,0,.08);color:var(--dx-text);font-weight:800;font-size:13px;line-height:1.4}
+.detail-exp-root .exp-journey-fallback .detail-phase-track>div{opacity:.72}
+.detail-exp-root .exp-journey-fallback .detail-section-label{color:var(--dx-orange)}
