@@ -10,9 +10,11 @@ test('PROD lee la ficha individual por el gateway canónico',()=>{
 test('la ficha suprime chrome legacy sin depender de :has y mantiene recorrido obligatorio',()=>{
  const chrome=fs.readFileSync(path.resolve('src/ExpedienteLegacyChromeGuard.tsx'),'utf8');
  const journey=fs.readFileSync(path.resolve('src/ExpedienteJourneyGuard.tsx'),'utf8');
- expect(chrome).toContain(".app-shell > .sidebar,.app-shell > .main");
+ expect(chrome).toContain('html[data-expediente-detail="true"] .app-shell{display:none!important');
+ expect(chrome).toContain("document.querySelectorAll<HTMLElement>('.app-shell,");
  expect(chrome).toContain("display','none','important");
  expect(journey).toContain("RECORRIDO DEL EXPEDIENTE · ESTADO PENDIENTE DE CARGA");
  expect(journey).toContain("No marco ninguna fase hasta recibir el dato canónico");
  expect(journey).toContain("Siguiente fase:");
+ expect(journey).toContain("section.remove()");
 });
