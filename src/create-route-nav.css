@@ -22,22 +22,14 @@ html[data-create-nav='1'] .ops-root>.ops-side{
 }
 
 /*
- * Las pantallas de alta ya tienen su título principal dentro de .ops-content.
- * La antigua barra superior sticky repetía el mismo título y reaparecía al subir
- * el scroll, creando el efecto de cabecera duplicada. En cualquier ruta de alta
- * dejamos una única cabecera: el título de la pantalla, no el chrome antiguo.
+ * Las rutas de alta conservan exactamente la cabecera operacional compartida de Inicio.
+ * El aislamiento del chrome legacy se hace sobre .app-shell; nunca ocultamos .ops-top,
+ * porque esa es la cabecera válida del OperationalShellFrame.
  */
-html[data-create-nav='1'] .ops-root>.ops-main>.ops-top,
-html[data-create-nav='1'] .ops-root .ops-main>.ops-top{
-  display:none!important;
-  visibility:hidden!important;
-  pointer-events:none!important;
-}
-html[data-create-nav='1'] .ops-root>.ops-main{
-  padding-top:0!important;
-}
-html[data-create-nav='1'] .ops-root>.ops-main>.ops-content{
-  padding-top:22px!important;
+html[data-create-nav='1'] .ops-root>.ops-main>.ops-top{
+  display:flex!important;
+  visibility:visible!important;
+  pointer-events:auto!important;
 }
 
 /* Use the same OperationalSidebar component and the same premium shell geometry.
@@ -76,8 +68,5 @@ html[data-create-nav='1'] .ops-content>.secondary-action:first-child{
     width:auto!important;
     height:58px!important;
     z-index:7900!important;
-  }
-  html[data-create-nav='1'] .ops-root>.ops-main>.ops-content{
-    padding-top:16px!important;
   }
 }
