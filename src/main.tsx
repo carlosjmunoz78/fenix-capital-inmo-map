@@ -90,7 +90,7 @@ import VisitasShell from './VisitasShell';
 import CommunicationsShell from './CommunicationsShell';
 import DetailShellGate from './DetailShellGate';
 import TaskCreateShell from './TaskCreateShell';
-import OperationalRecordDetail from './OperationalRecordDetail';
+import OperationalRecordDetailGate from './OperationalRecordDetailGate';
 import CalculatorLabelGuard from './CalculatorLabelGuard';
 import ProfileLauncherGuard from './ProfileLauncherGuard';
 import OperationalAdvancedSearchGuard from './OperationalAdvancedSearchGuard';
@@ -200,7 +200,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <CommunicationsShell />
       <DetailShellGate />
       <TaskCreateShell />
-      <OperationalRecordDetail />
+      <OperationalRecordDetailGate />
     </BrowserRouter>
   </React.StrictMode>
 );
