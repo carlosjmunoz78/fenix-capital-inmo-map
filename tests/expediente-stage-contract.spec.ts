@@ -5,8 +5,8 @@ test('expediente detail suppresses legacy and uniform overlay chrome',()=>{
  const legacy=fs.readFileSync('src/ExpedienteLegacyChromeGuard.tsx','utf8');
  const uniform=fs.readFileSync('src/OperationalUniformityGuard.tsx','utf8');
  expect(legacy).toContain('data-expediente-detail');
- expect(legacy).toContain('.app-shell > .sidebar');
- expect(legacy).toContain('.app-shell > .main');
+ expect(legacy).toContain('html[data-expediente-detail="true"] .app-shell{display:none!important');
+ expect(legacy).toContain("document.querySelectorAll<HTMLElement>('.app-shell,");
  expect(uniform).toContain('if(expedienteDetail)return null');
 });
 
@@ -20,6 +20,7 @@ test('expediente journey reads live workspace and supports audited manual stage'
  expect(journey).toContain('fenix-expediente-stage');
  expect(journey).toContain('expected_version');
  expect(journey).toContain('Cambiar estado manualmente');
+ expect(journey).toContain('section.remove()');
 });
 
 test('manual stage backend is authenticated, versioned and audited',()=>{
