@@ -1,6 +1,6 @@
 import {cloneElement,isValidElement,useEffect,useRef,useState,type ReactElement,type ReactNode} from 'react';
 import {BarChart3,Building2,CalendarDays,FileText,FolderOpen,Menu,UserRound,X} from 'lucide-react';
-import {useNavigate} from 'react-router-dom';
+import {useLocation,useNavigate} from 'react-router-dom';
 import type {NavItem} from './masterNavigation';
 import OperationalSidebar from './OperationalSidebar';
 import OperationalTopbar from './OperationalTopbar';
@@ -52,6 +52,7 @@ type Props={
 
 export default function OperationalShellFrame({className='',theme,navigation,activeRoute,anaSubtitle,anaRoute,sidebarVariant='default',query,onQueryChange,searchPlaceholder,searchActionLabel,onSearchAction,name,role,avatarUrl='',initials,onToggleTheme,onLogout,topbar,mainClassName='',contentClassName='',legacyDirectionTheme=false,children}:Props){
  const navigate=useNavigate();
+ const location=useLocation();
  const[effectiveTheme,setEffectiveTheme]=useState<Theme>(()=>storedTheme(theme));
  const[mobileNavOpen,setMobileNavOpen]=useState(false);
  const menuButtonRef=useRef<HTMLButtonElement>(null);
@@ -74,9 +75,13 @@ export default function OperationalShellFrame({className='',theme,navigation,act
  },[mobileNavOpen]);
  function toggleTheme(){setEffectiveTheme(current=>current==='light'?'dark':'light');}
  function closeMobileNav(){setMobileNavOpen(false);requestAnimationFrame(()=>menuButtonRef.current?.focus());}
- const renderedTopbar=topbar&&isValidElement(topbar)
-  ?cloneElement(topbar as ReactElement<any>,{theme:effectiveTheme,onToggleTheme:toggleTheme})
-  :topbar??<OperationalTopbar theme={effectiveTheme} onToggleTheme={toggleTheme} query={query} onQueryChange={onQueryChange} placeholder={searchPlaceholder} searchActionLabel={searchActionLabel} onSearchAction={onSearchAction} name={name} role={role} avatarUrl={avatarUrl} initials={initials} onLogout={onLogout}/>;
+ const isCreateRoute=/(?:\/nuevo|\/nueva)$/.test(location.pathname);
+ const sharedTopbar=<OperationalTopbar theme={effectiveTheme} onToggleTheme={toggleTheme} query={query} onQueryChange={onQueryChange} placeholder={searchPlaceholder||'Buscar expediente, cliente, banco, inmobiliaria...'} searchActionLabel={searchActionLabel} onSearchAction={onSearchAction} name={name} role={role} avatarUrl={avatarUrl} initials={initials} onLogout={onLogout}/>;
+ const renderedTopbar=isCreateRoute
+  ?sharedTopbar
+  :topbar&&isValidElement(topbar)
+    ?cloneElement(topbar as ReactElement<any>,{theme:effectiveTheme,onToggleTheme:toggleTheme})
+    :topbar??sharedTopbar;
  const rootClass=`ops-root ${sidebarVariant==='direction'?'ops-direction-frame ':''}${className}`.trim();
  const authorized=new Set(navigation.map(item=>item.route));
  const can=(route:string)=>route==='/inicio'||authorized.has(route)||authorized.has(`/${route.split('/')[1]}`);
