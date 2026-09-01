@@ -113,6 +113,7 @@ import AnaKnowledgePlacementGuard from './AnaKnowledgePlacementGuard';
 import OperationalUniformityGuard from './OperationalUniformityGuard';
 import ProductionWriteSafetyGuard from './ProductionWriteSafetyGuard';
 import ExpedienteLegacyChromeGuard from './ExpedienteLegacyChromeGuard';
+import ExpedienteJourneyGuard from './ExpedienteJourneyGuard';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -123,6 +124,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <CreateRouteAuthorizedNav />
       <ProductionWriteSafetyGuard />
       <ExpedienteLegacyChromeGuard />
+      <ExpedienteJourneyGuard />
       <ExpedienteFollowupConfirmationGuard />
       <CalculatorLabelGuard />
       <ProfileLauncherGuard />
