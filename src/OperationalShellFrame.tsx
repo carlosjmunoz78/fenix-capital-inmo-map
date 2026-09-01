@@ -8,6 +8,7 @@ import OperationalTopbar from './OperationalTopbar';
 type Theme='light'|'dark';
 const THEME_KEY='fenix-theme';
 const LEGACY_GLOBAL_THEME_KEY='fenix-global-theme';
+const CANONICAL_SEARCH_PLACEHOLDER='Buscar expediente, cliente, banco, inmobiliaria...';
 
 function storedTheme(fallback:Theme):Theme{
  const local=localStorage.getItem(THEME_KEY);
@@ -76,7 +77,8 @@ export default function OperationalShellFrame({className='',theme,navigation,act
  function toggleTheme(){setEffectiveTheme(current=>current==='light'?'dark':'light');}
  function closeMobileNav(){setMobileNavOpen(false);requestAnimationFrame(()=>menuButtonRef.current?.focus());}
  const isCreateRoute=/(?:\/nuevo|\/nueva)$/.test(location.pathname);
- const sharedTopbar=<OperationalTopbar theme={effectiveTheme} onToggleTheme={toggleTheme} query={query} onQueryChange={onQueryChange} placeholder={searchPlaceholder||'Buscar expediente, cliente, banco, inmobiliaria...'} searchActionLabel={searchActionLabel} onSearchAction={onSearchAction} name={name} role={role} avatarUrl={avatarUrl} initials={initials} onLogout={onLogout}/>;
+ const effectiveSearchPlaceholder=isCreateRoute?CANONICAL_SEARCH_PLACEHOLDER:(searchPlaceholder||CANONICAL_SEARCH_PLACEHOLDER);
+ const sharedTopbar=<OperationalTopbar theme={effectiveTheme} onToggleTheme={toggleTheme} query={query} onQueryChange={onQueryChange} placeholder={effectiveSearchPlaceholder} searchActionLabel={searchActionLabel} onSearchAction={onSearchAction} name={name} role={role} avatarUrl={avatarUrl} initials={initials} onLogout={onLogout}/>;
  const renderedTopbar=isCreateRoute
   ?sharedTopbar
   :topbar&&isValidElement(topbar)
