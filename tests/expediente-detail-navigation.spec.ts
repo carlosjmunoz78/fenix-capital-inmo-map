@@ -32,7 +32,7 @@ test.describe('Fénix PRE-PROD · ficha expediente con navegación global',()=>{
   await expect(page.locator('.app-shell .sidebar:visible')).toHaveCount(0);
  });
 
- test('recorrido canónico sobrevive a la carga real de la ficha',async({page},testInfo)=>{
+ test('recorrido canónico sobrevive a la carga real de la ficha y es el único nodo',async({page},testInfo)=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();
   await boot(page);
   await page.goto(`/expedientes/${id}`);
@@ -45,8 +45,8 @@ test.describe('Fénix PRE-PROD · ficha expediente con navegación global',()=>{
   await page.waitForTimeout(350);
   await expect(journey).toBeVisible();
   await expect(journey.locator('.detail-phase-track')).toBeVisible();
-  await expect(page.locator('.detail-exp-root .detail-journey:not(.exp-live-journey-section):visible')).toHaveCount(0);
-  await expect(page.locator('.detail-exp-root .detail-phase-track:visible')).toHaveCount(1);
+  await expect(page.locator('.detail-exp-root .detail-journey')).toHaveCount(1);
+  await expect(page.locator('.detail-exp-root .detail-phase-track')).toHaveCount(1);
  });
 
  test('ciclo de vida queda entre Ana y Subir documentos y nunca flota',async({page},testInfo)=>{
