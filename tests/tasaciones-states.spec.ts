@@ -50,7 +50,7 @@ test.describe('Fénix PRE-PROD · estados Tasaciones dedicado',()=>{
   await seed(page);await gateway(page);
   await page.route('**/functions/v1/fenix-notion-runtime-test/tasaciones',r=>r.abort('failed'));
   await page.goto('/tasaciones');
-  await expect(page.getByTestId('tas-error')).toContainText('No se pudo conectar con la fuente canónica de Tasaciones.');
+  await expect(page.getByTestId('tas-error')).toContainText('No se pudo leer la fuente canónica de Tasaciones.');
   await expect(page.getByTestId('tas-loading')).toHaveCount(0);
   await expect(page.locator('.tas-table')).toHaveCount(0);
  });
