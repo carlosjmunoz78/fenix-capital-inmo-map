@@ -4,8 +4,8 @@ export async function fetchNotariasRuntime<T>(path='',init?:RequestInit):Promise
   const {data:{session}}=await supabase.auth.getSession();
   const token=session?.access_token;
   if(!token)return{status:401,data:null};
+  const method=String(init?.method||'GET').toUpperCase();
   if(IS_PRODUCTION){
-    const method=String(init?.method||'GET').toUpperCase();
     if(method!=='GET')return{status:503,data:null};
     const target=path||'/notarias';
     const normalized=target.startsWith('/notarias')?target:`/notarias${target}`;
@@ -21,7 +21,7 @@ export async function fetchNotariasRuntime<T>(path='',init?:RequestInit):Promise
   }
   let res:Response;
   try{
-    res=await fetch(`${SUPABASE_URL}/functions/v1/notarias-api${path}`,{
+    res=await fetch(`${SUPABASE_URL}/functions/v1/fenix-notarias-runtime-test${path}`,{
       ...init,
       headers:{'content-type':'application/json',...(init?.headers||{}),Authorization:`Bearer ${token}`,apikey:SUPABASE_PUBLISHABLE_KEY}
     });
