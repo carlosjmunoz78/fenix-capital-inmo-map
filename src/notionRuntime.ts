@@ -29,6 +29,7 @@ async function fetchProductionRead<T>(path:string,init?:RequestInit):Promise<{st
     const r=await fetchAppApi<T>('/contactos');
     return{status:r.status,data:r.status===200?filterContactResponse(r.data,'inmobiliarias'):r.data};
   }
+  if(/^\/expedientes\/[^/]+$/.test(pathname))return fetchAppApi<T>(pathname);
   const passthrough=['/expedientes','/firmas','/inmobiliarias','/bancos','/tasaciones','/contactos','/tareas','/documentos'];
   if(passthrough.includes(pathname))return fetchAppApi<T>(`${pathname}${url.search}`);
   return{status:503,data:null};
