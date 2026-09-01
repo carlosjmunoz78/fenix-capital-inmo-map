@@ -31,8 +31,8 @@
 
   /* Ficha de expediente: menú deliberadamente más estrecho y hueco reservado idéntico.
      Al ser un nav fixed, esta pareja de reglas evita físicamente cualquier solape. */
-  .detail-exp-root{grid-template-columns:176px minmax(0,1fr)!important}
-  .detail-auth-nav{width:176px!important;padding-left:8px!important;padding-right:8px!important}
+  .detail-exp-root{grid-template-columns:156px minmax(0,1fr)!important}
+  .detail-auth-nav{width:156px!important;padding-left:8px!important;padding-right:8px!important}
   .detail-auth-nav nav button{padding-left:8px!important;padding-right:8px!important;font-size:12px!important}
   .detail-exp-main{grid-column:2!important;min-width:0!important}
   .detail-exp-content{box-sizing:border-box!important;width:100%!important;max-width:none!important;margin:0!important;padding:22px clamp(20px,2.2vw,34px) 100px!important}
@@ -57,8 +57,8 @@
 /* Portátil común: compactar estructura, no tipografía. */
 @media (min-width:901px) and (max-width:1450px){
   .ops-root,.dir-shell{grid-template-columns:198px minmax(0,1fr)!important}
-  .detail-exp-root{grid-template-columns:168px minmax(0,1fr)!important}
-  .detail-auth-nav{width:168px!important}
+  .detail-exp-root{grid-template-columns:148px minmax(0,1fr)!important}
+  .detail-auth-nav{width:148px!important}
   .ops-side,.dir-sidebar{padding-left:10px!important;padding-right:10px!important}
   .ops-content{padding-left:18px!important;padding-right:18px!important}
   .detail-exp-content{padding-left:18px!important;padding-right:18px!important}
