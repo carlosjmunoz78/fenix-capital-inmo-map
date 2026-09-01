@@ -6,6 +6,8 @@ import './expediente-journey-guard.css';
 
 const PHASES=['Entrada','Documentación','Análisis','Banco','Tasación','Oferta','FEIN','Notaría','Firma','Cierre'];
 const MANUAL_STAGES=['Entrada','Revisión legado','Documentación incompleta','Documentación completa','Análisis','Pre-OK','Banco','Tasación solicitada','Tasación realizada','Pre-OK + Tasación realizada','Oferta','FEIN','Notaría','Firma','Finalizado','Perdido'];
+const FALLBACK_LABEL='RECORRIDO DEL EXPEDIENTE · ESTADO PENDIENTE DE CARGA';
+const FALLBACK_GUIDE='No marco ninguna fase hasta recibir el dato canónico. Siguiente fase: se calculará cuando exista estado real.';
 
 type Workspace={ok?:boolean;status?:number;expediente?:{stage?:string;version?:number;proxima_accion?:string|null};lifecycle?:{recorded_stage?:string;effective_stage?:string;stage_inconsistent?:boolean;workflow_closed?:boolean};qa?:{blockers?:unknown[];warnings?:unknown[]};counts?:{documentos?:number;envios_banco?:number;ofertas?:number;tasaciones?:number;firma?:number};};
 function lower(v:unknown){return String(v??'').trim().toLowerCase();}
@@ -23,12 +25,23 @@ export default function ExpedienteJourneyGuard(){
 
  useEffect(()=>{
   if(!active){setHost(null);return;}
-  let cancelled=false;let tries=0;let timer=0;
+  let cancelled=false;let tries=0;let timer=0;let observer:MutationObserver|null=null;
   const locate=()=>{
    if(cancelled)return;
    const content=document.querySelector<HTMLElement>('.detail-exp-root .detail-exp-content');
    const ana=content?.querySelector<HTMLElement>(':scope > .detail-ana-hero');
    if(content&&ana){
+    const suppressLegacy=()=>{
+     content.querySelectorAll<HTMLElement>(':scope > .detail-journey:not(.exp-live-journey-section)').forEach(section=>{
+      section.dataset.legacyJourneySuppressed='true';
+      section.setAttribute('aria-hidden','true');
+      const label=section.querySelector<HTMLElement>(':scope > .detail-section-label');
+      if(label&&label.textContent)label.textContent='';
+     });
+    };
+    suppressLegacy();
+    observer=new MutationObserver(suppressLegacy);
+    observer.observe(content,{childList:true,subtree:true,characterData:true});
     let h=content.querySelector<HTMLElement>(':scope > .exp-journey-live-host');
     if(!h){h=document.createElement('div');h.className='exp-journey-live-host';content.insertBefore(h,ana.nextSibling);}
     setHost(h);
@@ -37,7 +50,7 @@ export default function ExpedienteJourneyGuard(){
    tries+=1;if(tries<80)timer=window.setTimeout(locate,100);
   };
   locate();
-  return()=>{cancelled=true;window.clearTimeout(timer);document.querySelector('.exp-journey-live-host')?.remove();setHost(null);};
+  return()=>{cancelled=true;window.clearTimeout(timer);observer?.disconnect();document.querySelector('.exp-journey-live-host')?.remove();setHost(null);};
  },[active,pathname]);
 
  async function refresh(){
@@ -58,8 +71,8 @@ export default function ExpedienteJourneyGuard(){
 
  if(!active||!host)return null;
  return createPortal(<section className="detail-journey exp-live-journey-section" data-testid="expediente-journey">
-  <div className="detail-section-label">RECORRIDO DEL EXPEDIENTE · {stage?`ESTADO REAL: ${stage}`:'CARGANDO ESTADO REAL'}</div>
-  <div className="exp-journey-guidance" data-testid="expediente-journey-guidance"><strong>ANA · {stage?`Estamos en ${stage}.`:'Estoy comprobando el estado real del expediente.'}</strong><span><b>Qué falta:</b> {stage?missing:'Aún no marco faltantes hasta recibir el workspace canónico.'}</span><span><b>Qué toca ahora:</b> {stage?recommendation:'Se calculará en cuanto llegue el estado real.'}</span>{warnings[0]&&<span><b>Aviso:</b> {warnings[0]}</span>}{workspace?.lifecycle?.stage_inconsistent&&<span><b>Estado automático:</b> el backend calcula {stage} aunque el estado registrado sea {recordedStage}.</span>}</div>
+  <div className="detail-section-label">{stage?`RECORRIDO DEL EXPEDIENTE · ESTADO REAL: ${stage}`:FALLBACK_LABEL}</div>
+  <div className="exp-journey-guidance" data-testid="expediente-journey-guidance"><strong>ANA · {stage?`Estamos en ${stage}.`:'Estoy comprobando el estado real del expediente.'}</strong>{stage?<><span><b>Qué falta:</b> {missing}</span><span><b>Qué toca ahora:</b> {recommendation}</span></>:<span>{FALLBACK_GUIDE}</span>}{warnings[0]&&<span><b>Aviso:</b> {warnings[0]}</span>}{workspace?.lifecycle?.stage_inconsistent&&<span><b>Estado automático:</b> el backend calcula {stage} aunque el estado registrado sea {recordedStage}.</span>}</div>
   <div className="detail-phase-track" aria-label="Fases del expediente">{PHASES.map((phase,i)=><div key={phase} className={stage?(i<phaseIndex?'done':i===phaseIndex?'current':''):''} aria-current={stage&&i===phaseIndex?'step':undefined}><span>{stage&&i<phaseIndex?'✓':i+1}</span><small>{phase}</small></div>)}</div>
   {IS_PRODUCTION&&<div className="exp-stage-manual" data-testid="expediente-stage-manual-host"><label>Cambiar estado manualmente<select data-testid="expediente-stage-select" value={selected||recordedStage||stage||MANUAL_STAGES[0]} onChange={e=>setSelected(e.target.value)}>{selected&&!MANUAL_STAGES.includes(selected)&&<option value={selected}>{selected}</option>}{MANUAL_STAGES.map(st=><option key={st} value={st}>{st}</option>)}</select></label><button type="button" onClick={()=>void saveManualStage()} disabled={busy||!workspace?.expediente?.version}>{busy?'Guardando…':'Guardar cambio'}</button>{msg&&<span role="status">{msg}</span>}</div>}
  </section>,host);
