@@ -15,6 +15,7 @@ export default function ExpedienteLegacyChromeGuard(){
    style=document.createElement('style');
    style.id=STYLE_ID;
    style.textContent=`
+html[data-expediente-detail="true"] .app-shell > .sidebar,html[data-expediente-detail="true"] .app-shell > .main{display:none!important;visibility:hidden!important;pointer-events:none!important}
 html[data-expediente-detail="true"] .app-shell > :not(.calc-launcher):not(.calc-panel){display:none!important;visibility:hidden!important;pointer-events:none!important}
 html[data-expediente-detail="true"] .ops-uniform-sidebar-host{display:none!important;visibility:hidden!important;pointer-events:none!important}
 html[data-expediente-detail="true"] .ops-root:not(.detail-exp-root){display:none!important;visibility:hidden!important;pointer-events:none!important}
@@ -23,7 +24,7 @@ html[data-expediente-detail="true"] .detail-exp-root .ops-top:not(.detail-exp-to
    document.head.appendChild(style);
   }
   const hide=()=>{
-   document.querySelectorAll<HTMLElement>('.app-shell > :not(.calc-launcher):not(.calc-panel),.ops-uniform-sidebar-host,.ops-root:not(.detail-exp-root),.detail-exp-root .ops-top:not(.detail-exp-top)').forEach(el=>{
+   document.querySelectorAll<HTMLElement>('.app-shell > .sidebar,.app-shell > .main,.app-shell > :not(.calc-launcher):not(.calc-panel),.ops-uniform-sidebar-host,.ops-root:not(.detail-exp-root),.detail-exp-root .ops-top:not(.detail-exp-top)').forEach(el=>{
     el.dataset.expedienteLegacySuppressed='true';
     el.style.setProperty('display','none','important');
     el.style.setProperty('visibility','hidden','important');
