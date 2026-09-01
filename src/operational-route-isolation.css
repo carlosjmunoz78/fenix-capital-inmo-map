@@ -5,33 +5,40 @@
  * visible y utilizable como excepción explícita.
  */
 html:has(.ops-root),
-body:has(.ops-root){
+body:has(.ops-root),
+html[data-operational-chrome='1'],
+html[data-operational-chrome='1'] body{
   height:100%!important;
   overflow:hidden!important;
 }
 
-#root:has(.ops-root){
+#root:has(.ops-root),
+html[data-operational-chrome='1'] #root{
   height:100vh!important;
   overflow:hidden!important;
 }
 
 /*
  * El shell legacy puede quedar montado como hermano o dentro de una capa intermedia.
- * La guardia es deliberadamente global para que ninguna variante de composición
- * pueda recuperar interacción por accidente.
+ * La guardia por data-operational-chrome es determinista por ruta y evita depender
+ * de que :has() detecte a tiempo la pantalla operativa durante el montaje.
  */
-body:has(.ops-root) .app-shell{
+body:has(.ops-root) .app-shell,
+html[data-operational-chrome='1'] .app-shell{
   visibility:hidden!important;
   pointer-events:none!important;
 }
 
-body:has(.ops-root) .app-shell *{
+body:has(.ops-root) .app-shell *,
+html[data-operational-chrome='1'] .app-shell *{
   pointer-events:none!important;
 }
 
 /* Oculta el chrome legacy aunque cambie su profundidad en el DOM. */
 body:has(.ops-root) .app-shell .sidebar,
-body:has(.ops-root) .app-shell .main{
+body:has(.ops-root) .app-shell .main,
+html[data-operational-chrome='1'] .app-shell .sidebar,
+html[data-operational-chrome='1'] .app-shell .main{
   display:none!important;
   visibility:hidden!important;
   pointer-events:none!important;
@@ -41,7 +48,11 @@ body:has(.ops-root) .app-shell .main{
 body:has(.ops-root) .app-shell > .calc-panel,
 body:has(.ops-root) .app-shell > .calc-launcher,
 body:has(.ops-root) .app-shell > .calc-panel *,
-body:has(.ops-root) .app-shell > .calc-launcher *{
+body:has(.ops-root) .app-shell > .calc-launcher *,
+html[data-operational-chrome='1'] .app-shell > .calc-panel,
+html[data-operational-chrome='1'] .app-shell > .calc-launcher,
+html[data-operational-chrome='1'] .app-shell > .calc-panel *,
+html[data-operational-chrome='1'] .app-shell > .calc-launcher *{
   visibility:visible!important;
   pointer-events:auto!important;
 }
