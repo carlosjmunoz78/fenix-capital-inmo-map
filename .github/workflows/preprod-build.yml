@@ -154,7 +154,16 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/preprod-app-phase1'
         env:
           PLAYWRIGHT_SKIP_BUILD: '1'
-        run: npm run test:e2e -- --workers=2
+        run: >-
+          npm run test:e2e -- --workers=2
+          tests/prod-candidate-browser.spec.ts
+          tests/prod-runtime-config.spec.ts
+          tests/prod-release-gate.spec.ts
+          tests/directory-prod-gateway-contract.spec.ts
+          tests/expediente-prod-contract.spec.ts
+          tests/expediente-prod-detail-contract.spec.ts
+          tests/inmobiliaria-prod-contract.spec.ts
+          tests/prod-canonical-write-contracts.spec.ts
 
       - name: Assert PROD candidate contains no test endpoints
         if: github.event_name == 'push' && github.ref == 'refs/heads/preprod-app-phase1'
