@@ -12,14 +12,15 @@ import './contact-detail.css';
 type Theme='light'|'dark';
 type Ctx={actor_code?:string;role?:string};
 type Row=Record<string,unknown>;
-function isNotionId(v:string){return /^[0-9a-f]{32}$/i.test(v.replaceAll('-',''));}
+function canonicalId(v:string){return v.replace(/^notion\|/i,'');}
+function isNotionId(v:string){return /^[0-9a-f]{32}$/i.test(canonicalId(v).replaceAll('-',''));}
 function text(row:Row|undefined,keys:string[]){if(!row)return'';for(const k of keys){const v=row[k];if(typeof v==='string'&&v.trim())return v.trim();}return'';}
 function value(row:Row|undefined,keys:string[]){if(!row)return null;for(const k of keys){const v=row[k];if(v!==undefined&&v!==null&&v!=='')return v;}return null;}
 const fallbackNav:NavItem[]=[{label:'Inicio',route:'/inicio'}];
 
 export default function ContactDetailShell(){
  const location=useLocation(),navigate=useNavigate();
- const match=location.pathname.match(/^\/contactos\/([^/]+)$/);const id=match?.[1]?decodeURIComponent(match[1]):'';const active=Boolean(match&&isNotionId(id));
+ const match=location.pathname.match(/^\/contactos\/([^/]+)$/);const routeId=match?.[1]?decodeURIComponent(match[1]):'';const id=canonicalId(routeId);const active=Boolean(match&&isNotionId(routeId));
  const[sessionReady,setSessionReady]=useState(false),[logged,setLogged]=useState(false),[ctx,setCtx]=useState<Ctx|null>(null),[nav,setNav]=useState<NavItem[]>([]),[theme,setTheme]=useState<Theme>(()=>(sessionStorage.getItem('fenix-theme') as Theme)||'light');
  const[status,setStatus]=useState<number|null>(null),[row,setRow]=useState<Row|null>(null),[message,setMessage]=useState(''),[loading,setLoading]=useState(false),[correction,setCorrection]=useState(''),[reason,setReason]=useState('');
  useEffect(()=>{if(!active)return;let alive=true;supabase.auth.getSession().then(({data})=>{if(alive){setLogged(Boolean(data.session));setSessionReady(true)}});const{data:{subscription}}=supabase.auth.onAuthStateChange((_e,s)=>{setLogged(Boolean(s));setSessionReady(true)});return()=>{alive=false;subscription.unsubscribe()};},[active]);
