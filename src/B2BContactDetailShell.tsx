@@ -11,7 +11,7 @@ type Theme='light'|'dark';
 type Ctx={actor_code?:string;role?:string};
 type Contact={id:string;nombre:string;apellidos:string;contacto:string;cargo:string;email:string;telefono:string;activo:boolean;inmobiliaria_id:string|null};
 type Envelope={ok?:boolean;status?:number;item?:Contact;inmobiliaria?:{id:string;nombre:string;localidad:string};error?:string};
-function isNotionId(v:string){return /^[0-9a-f]{32}$/i.test(v.replaceAll('-',''));}
+function isNotionId(v:string){const raw=v.replace(/^notion\|/i,'');return /^[0-9a-f]{32}$/i.test(raw.replaceAll('-',''));}
 const fallbackNav:NavItem[]=[{label:'Inicio',route:'/inicio'}];
 
 export default function B2BContactDetailShell(){
