@@ -2,7 +2,7 @@
 .contactos-root{--ct-orange:#ff5a00;--ct-border:rgba(91,68,58,.17);--ct-panel:#fff;--ct-soft:#fffaf7;--ct-muted:#756a64;--ct-text:#1a1513}
 .contactos-root[data-theme="dark"]{--ct-border:rgba(255,126,61,.22);--ct-panel:#17110f;--ct-soft:#211410;--ct-muted:#bdafa7;--ct-text:#fff9f5}
 .contactos-root .ops-main{background:var(--ct-soft);color:var(--ct-text)}
-.contactos-content{max-width:1180px;margin:0 auto;width:100%;padding:28px}
+.contactos-content{max-width:1400px;margin:0 auto;width:100%;padding:28px}
 .contactos-ana-hero{display:grid;grid-template-columns:165px 1fr;gap:26px;border:1px solid rgba(255,90,0,.23);border-radius:24px;background:linear-gradient(135deg,var(--ct-panel),rgba(255,90,0,.035));padding:20px;box-shadow:0 12px 34px rgba(55,31,20,.05)}
 .contactos-ana-photo img{display:block;width:100%;height:245px;object-fit:cover;border-radius:20px;background:#ddd}
 .contactos-ana-hero span,.contactos-title small,.contactos-filter-head small,.contactos-kpis small{font-size:11px;font-weight:900;letter-spacing:.11em;color:var(--ct-orange)}
