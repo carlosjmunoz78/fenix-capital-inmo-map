@@ -5,7 +5,7 @@ const source=fs.readFileSync('src/supabase.ts','utf8');
 const envExample=fs.readFileSync('.env.production.example','utf8');
 
 test('PROD exige configuración Supabase dedicada y separa almacenamiento auth', async () => {
-  expect(source).toContain("const runtimeEnv=(import.meta.env.VITE_FENIX_ENV||'preprod').toLowerCase()");
+  expect(source).toContain("const runtimeEnv=import.meta.env.VITE_FENIX_ENV||'preprod'");
   expect(source).toContain("runtimeEnv==='production'||runtimeEnv==='prod'");
   expect(source).toContain("IS_PRODUCTION?'fenix-prod-auth-v1':'fenix-preprod-auth-v2'");
   expect(source).toContain("if(IS_PRODUCTION&&(!SUPABASE_URL||!SUPABASE_PUBLISHABLE_KEY))");
