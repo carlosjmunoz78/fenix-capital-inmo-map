@@ -1,0 +1,129 @@
+name: Promote validated artifact to PROD
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: 'Validated PRE-PROD commit SHA (40 hex chars)'
+        required: true
+        type: string
+      run_id:
+        description: 'Successful PRE-PROD App Build run ID that produced the artifact'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  actions: read
+
+env:
+  PROD_URL: https://app.fenixcapital.es
+
+concurrency:
+  group: fenix-prod-promotion
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: production
+      url: https://app.fenixcapital.es
+    steps:
+      - name: Validate requested source and successful PRE-PROD run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_SHA: ${{ inputs.source_sha }}
+          RUN_ID: ${{ inputs.run_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$RUN_ID" =~ ^[0-9]+$ ]]
+          run_json="$(curl --fail --silent --show-error \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H 'Accept: application/vnd.github+json' \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}")"
+          test "$(jq -r '.conclusion' <<<"$run_json")" = 'success'
+          test "$(jq -r '.head_sha' <<<"$run_json")" = "$SOURCE_SHA"
+          test "$(jq -r '.head_branch' <<<"$run_json")" = 'preprod-app-phase1'
+          test "$(jq -r '.event' <<<"$run_json")" = 'push'
+
+      - name: Download exact immutable candidate
+        uses: actions/download-artifact@v4
+        with:
+          name: fenix-prod-candidate-${{ inputs.source_sha }}
+          path: candidate
+          run-id: ${{ inputs.run_id }}
+          github-token: ${{ github.token }}
+
+      - name: Verify immutable candidate
+        env:
+          SOURCE_SHA: ${{ inputs.source_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd candidate
+          sha256sum -c fenix-prod-candidate.tgz.sha256
+          test "$(tr -d '\r\n' < PROD_CANDIDATE_SHA)" = "$SOURCE_SHA"
+          grep -qx "source_sha=${SOURCE_SHA}" PROD_CANDIDATE_METADATA.txt
+          mkdir ../candidate-dist
+          tar -xzf fenix-prod-candidate.tgz -C ../candidate-dist
+          test -f ../candidate-dist/index.html
+          test -f ../candidate-dist/404.html
+          test "$(cat ../candidate-dist/CNAME)" = 'app.fenixcapital.es'
+          if grep -RInE --include='*.js' --include='*.html' --include='*.css' 'functions/v1/[A-Za-z0-9_-]+-test([/?"'"'`]|$)' ../candidate-dist; then
+            echo 'TEST endpoint leaked into candidate; refusing promotion' >&2
+            exit 1
+          fi
+
+      - name: Checkout current operational snapshot
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          fetch-depth: 0
+          path: live
+
+      - name: Promote same artifact without rebuilding
+        env:
+          SOURCE_SHA: ${{ inputs.source_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd live
+          previous_sha="$(git rev-parse HEAD)"
+          find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -a ../candidate-dist/. .
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'Candidate bytes already match the operational branch; nothing to publish.'
+            new_sha="$previous_sha"
+          else
+            git commit -m "deploy(prod): promote ${SOURCE_SHA} [previous:${previous_sha}]"
+            git push origin HEAD:gh-pages
+            new_sha="$(git rev-parse HEAD)"
+          fi
+          {
+            echo "### PROD promotion"
+            echo "- source PRE-PROD SHA: \`${SOURCE_SHA}\`"
+            echo "- previous gh-pages SHA: \`${previous_sha}\`"
+            echo "- current gh-pages SHA: \`${new_sha}\`"
+            echo '- build during promotion: **NO**'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Post-deploy read-only smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3 4 5 6; do
+            status="$(curl --silent --show-error --output /tmp/prod-index --write-out '%{http_code}' --max-time 20 "${PROD_URL}/")" || status=000
+            if [ "$status" = '200' ] && grep -qi '<!doctype html' /tmp/prod-index; then
+              exit 0
+            fi
+            sleep 10
+          done
+          echo 'Operational site did not pass post-deploy smoke in time' >&2
+          exit 1
