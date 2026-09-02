@@ -19,7 +19,7 @@ html[data-expediente-detail="true"] .app-shell{display:none!important;visibility
 html[data-expediente-detail="true"] .ops-uniform-sidebar-host{display:none!important;visibility:hidden!important;pointer-events:none!important}
 html[data-expediente-detail="true"] .ops-root:not(.detail-exp-root){display:none!important;visibility:hidden!important;pointer-events:none!important}
 html[data-expediente-detail="true"] #root header:not(.detail-exp-top),html[data-expediente-detail="true"] #root .ops-top:not(.detail-exp-top),html[data-expediente-detail="true"] #root .topbar:not(.detail-exp-top){display:none!important;visibility:hidden!important;pointer-events:none!important}
-html[data-expediente-detail="true"] .detail-exp-root{display:block!important;visibility:visible!important;pointer-events:auto!important}
+html[data-expediente-detail="true"] .detail-exp-root{display:grid!important;visibility:visible!important;pointer-events:auto!important}
 html[data-expediente-detail="true"] .detail-exp-root .detail-exp-top{display:flex!important;visibility:visible!important;pointer-events:auto!important}
 `;
    document.head.appendChild(style);
@@ -33,7 +33,7 @@ html[data-expediente-detail="true"] .detail-exp-root .detail-exp-top{display:fle
    });
    const root=document.querySelector<HTMLElement>('.detail-exp-root');
    if(root){
-    root.style.setProperty('display','block','important');
+    root.style.setProperty('display','grid','important');
     root.style.setProperty('visibility','visible','important');
     root.style.setProperty('pointer-events','auto','important');
    }
