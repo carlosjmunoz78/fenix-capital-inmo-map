@@ -154,6 +154,7 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/preprod-app-phase1'
         env:
           PLAYWRIGHT_SKIP_BUILD: '1'
+          FENIX_QA_PROD_CANDIDATE: '1'
         run: >-
           npm run test:e2e -- --workers=2
           tests/prod-candidate-browser.spec.ts
