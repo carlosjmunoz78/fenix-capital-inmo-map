@@ -161,7 +161,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if grep -RInE --include='*.js' --include='*.html' --include='*.css' 'functions/v1/[A-Za-z0-9_-]+-test([/?"'"'`]|$)' dist; then
+          if grep -RInE --include='*.js' --include='*.html' --include='*.css' 'functions/v1/[A-Za-z0-9_-]+-test' dist; then
             echo 'TEST endpoint leaked into PROD candidate' >&2
             exit 1
           fi
