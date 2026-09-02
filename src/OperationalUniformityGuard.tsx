@@ -5,6 +5,7 @@ import {useLocation,useNavigate} from 'react-router-dom';
 import {fetchAppApi} from './supabase';
 import {normalizeNavigation,type NavItem} from './masterNavigation';
 import OperationalSidebar from './OperationalSidebar';
+import UniversalTaskActionStrip from './UniversalTaskActionStrip';
 import './operational-uniformity.css';
 
 type Ctx={role?:string};
@@ -31,6 +32,12 @@ function ownsCreateNavigation(path:string){
   ||path==='/obras-nuevas/nuevo'
   ||path==='/visitas/nueva'
   ||/^\/inmobiliarias\/[^/]+\/contactos\/nuevo$/.test(path);
+}
+function labelUniversalTaskChannels(){
+ document.querySelectorAll('.task-action-channels button').forEach(button=>{
+  const label=button.textContent?.trim();
+  if(label&&!button.getAttribute('aria-label'))button.setAttribute('aria-label',`Seleccionar ${label} como tipo de acción`);
+ });
 }
 
 export default function OperationalUniformityGuard(){
@@ -89,13 +96,15 @@ export default function OperationalUniformityGuard(){
    }
    if((existing||location.pathname.replace(/\/+$/,'')==='/inicio')&&fhost){fhost.remove();fhost=null;}
    setFooterHost(current=>current===fhost?current:fhost);
+   labelUniversalTaskChannels();
   };
   place();
-  const observer=new MutationObserver(place);observer.observe(document.body,{childList:true,subtree:true});
+  const observer=new MutationObserver(()=>{place();labelUniversalTaskChannels();});observer.observe(document.body,{childList:true,subtree:true});
   return()=>{observer.disconnect();document.querySelectorAll('.ops-uniform-sidebar-host,.ops-uniform-footer-host').forEach(x=>x.remove());};
  },[location.pathname]);
 
  return <>
+  <UniversalTaskActionStrip/>
   {sidebarHost&&createPortal(<OperationalSidebar navigation={navigation} activeRoute={activeRoute}/>,sidebarHost)}
   {footerHost&&quickLinks.length>0&&createPortal(<section className="dir-quick ops-shared-quick" aria-label="Accesos rápidos"><h2>ACCESOS RÁPIDOS</h2><div className="dir-quick-grid">{quickLinks.map(({route,label,Icon})=><button key={route} type="button" onClick={()=>navigate(route)}><Icon/>{label}</button>)}</div></section>,footerHost)}
  </>;

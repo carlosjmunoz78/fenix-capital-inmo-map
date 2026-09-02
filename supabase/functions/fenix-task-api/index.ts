@@ -15,8 +15,23 @@ Deno.serve(async(req:Request)=>{
  const {data:u,error:ue}=await auth.auth.getUser(h.slice(7));if(ue||!u.user)return out(req,{ok:false,status:401,error:'unauthorized'},401);
  const {data:ctx,error:ce}=await svc.rpc('fenix_prod_actor_context_by_auth_server',{p_auth_user_id:u.user.id});if(ce||!ctx?.ok)return out(req,{ok:false,status:401,error:'identity_not_linked'},401);
  const b:any=await json(req);
- const due=b.fecha_limite?new Date(String(b.fecha_limite)).toISOString():null;
- const {data:r,error}=await svc.rpc('fenix_prod_task_create_server',{p_actor_code:ctx.actor_code,p_tarea:String(b.tarea||''),p_target_actor_code:String(b.id_trabajador_operativo||ctx.actor_code||''),p_criticidad:b.criticidad||null,p_fecha_limite:due,p_idempotency_key:req.headers.get('idempotency-key')||b.idempotency_key||null});
+ let due:string|null=null;
+ if(b.fecha_limite){const parsed=new Date(String(b.fecha_limite));if(Number.isNaN(parsed.getTime()))return out(req,{ok:false,status:400,error:'invalid_due_date'},400);due=parsed.toISOString();}
+ const {data:r,error}=await svc.rpc('fenix_prod_task_create_server',{
+  p_actor_code:ctx.actor_code,
+  p_tarea:String(b.tarea||''),
+  p_target_actor_code:String(b.id_trabajador_operativo||ctx.actor_code||''),
+  p_criticidad:b.criticidad||null,
+  p_fecha_limite:due,
+  p_idempotency_key:req.headers.get('idempotency-key')||b.idempotency_key||null,
+  p_origin_type:b.origin_type||null,
+  p_origin_code:b.origin_code||null,
+  p_action_channel:b.action_channel||null,
+  p_happened:b.happened||null,
+  p_planned_action:b.planned_action||null,
+  p_ana_draft:b.ana_draft||null,
+  p_user_correction:b.user_correction||null
+ });
  if(error){console.error(error);return out(req,{ok:false,status:500,error:'task_create_failed'},500)}
  return out(req,r,Number(r?.status)||200);
 });
