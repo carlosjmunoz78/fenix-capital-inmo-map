@@ -27,6 +27,11 @@ const nav = {
   ]
 };
 
+// This browser smoke is meaningful only against the already-built PROD bundle.
+// Keeping it out of the PRE-PROD browser pass prevents a false failure caused by
+// the intentionally different auth namespace and `-test` function routing.
+test.skip(process.env.FENIX_QA_PROD_CANDIDATE !== '1', 'Runs only against the exact PROD candidate bundle');
+
 test('exact PROD candidate boots with PROD auth namespace and canonical function routes', async ({ page }) => {
   const functionRequests: string[] = [];
   page.on('request', request => {
