@@ -33,6 +33,12 @@ function ownsCreateNavigation(path:string){
   ||path==='/visitas/nueva'
   ||/^\/inmobiliarias\/[^/]+\/contactos\/nuevo$/.test(path);
 }
+function labelUniversalTaskChannels(){
+ document.querySelectorAll('.task-action-channels button').forEach(button=>{
+  const label=button.textContent?.trim();
+  if(label&&!button.getAttribute('aria-label'))button.setAttribute('aria-label',`Seleccionar ${label} como tipo de acción`);
+ });
+}
 
 export default function OperationalUniformityGuard(){
  const location=useLocation(),navigate=useNavigate();
@@ -90,9 +96,10 @@ export default function OperationalUniformityGuard(){
    }
    if((existing||location.pathname.replace(/\/+$/,'')==='/inicio')&&fhost){fhost.remove();fhost=null;}
    setFooterHost(current=>current===fhost?current:fhost);
+   labelUniversalTaskChannels();
   };
   place();
-  const observer=new MutationObserver(place);observer.observe(document.body,{childList:true,subtree:true});
+  const observer=new MutationObserver(()=>{place();labelUniversalTaskChannels();});observer.observe(document.body,{childList:true,subtree:true});
   return()=>{observer.disconnect();document.querySelectorAll('.ops-uniform-sidebar-host,.ops-uniform-footer-host').forEach(x=>x.remove());};
  },[location.pathname]);
 
