@@ -12,7 +12,7 @@ import './inmobiliaria-detail.css';
 type Theme='light'|'dark';
 type Ctx={actor_code?:string;role?:string};
 type Row=Record<string,unknown>;
-function isNotionId(v:string){return /^[0-9a-f]{32}$/i.test(v.replaceAll('-',''));}
+function isNotionId(v:string){const raw=v.replace(/^notion\|/i,'');return /^[0-9a-f]{32}$/i.test(raw.replaceAll('-',''));}
 function text(row:Row|undefined,keys:string[]){if(!row)return'';for(const k of keys){const v=row[k];if(typeof v==='string'&&v.trim())return v.trim();}return'';}
 function value(row:Row|undefined,keys:string[]){if(!row)return null;for(const k of keys){const v=row[k];if(v!==undefined&&v!==null&&v!=='')return v;}return null;}
 const fallbackNav:NavItem[]=[{label:'Inicio',route:'/inicio'}];
