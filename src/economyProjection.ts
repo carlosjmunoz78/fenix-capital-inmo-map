@@ -1,4 +1,4 @@
-import {quoteInheritanceFee,quoteMortgageEconomics,quoteNewBuildFee,type InheritanceFeeClass} from './fenixCommercialKnowledge';
+import {FENIX_COMMERCIAL_KNOWLEDGE,quoteInheritanceFee,quoteMortgageEconomics,quoteNewBuildFee,type InheritanceFeeClass} from './fenixCommercialKnowledge';
 
 export type EconomyRow=Record<string,unknown>;
 export type MoneyBucket={grossBaseEur:number;marginBaseEur:number,count:number};
@@ -24,7 +24,11 @@ function mortgageQuote(r:EconomyRow):Quoted|null{
  const amount=num(r,['importe_hipoteca','importe_solicitado','importe_financiacion','capital_hipoteca','importe']);
  const agency=fromAgency(r);const commission=num(r,['comision_inmobiliaria_eur','comision_inmobiliaria','comision_agencia_eur','comision_agencia']);
  const negotiated=negotiatedGross(r);
- if(amount===null){if(negotiated===null)return null;const applied=agency?(commission!==null&&commission>=0?commission:1100):0;return{grossBaseEur:negotiated,marginBaseEur:negotiated-applied}}
+ if(amount===null){
+  const gross=negotiated??FENIX_COMMERCIAL_KNOWLEDGE.mortgage.belowThresholdFeeEur;
+  const applied=agency?(commission!==null&&commission>=0?commission:FENIX_COMMERCIAL_KNOWLEDGE.mortgage.realEstateAgencyDefaultCommissionEur):0;
+  return{grossBaseEur:gross,marginBaseEur:gross-applied};
+ }
  const q=quoteMortgageEconomics(amount,{fromRealEstateAgency:agency,agencyCommissionEur:commission??undefined,negotiatedFeeEur:negotiated??undefined});return q?{grossBaseEur:q.grossBaseEur,marginBaseEur:q.fenixMarginBaseEur}:null
 }
 function inheritanceClass(r:EconomyRow):InheritanceFeeClass|null{
