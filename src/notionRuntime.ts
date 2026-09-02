@@ -7,6 +7,27 @@ function asEnvelope(data:unknown):Envelope|null{
   return data&&typeof data==='object'?data as Envelope:null;
 }
 function rowObject(value:unknown):Row|null{return value&&typeof value==='object'&&!Array.isArray(value)?value as Row:null;}
+function firstId(row:Row,...keys:string[]){for(const key of keys){const value=row[key];if(typeof value==='string'&&value.trim())return value.trim();if(typeof value==='number'&&Number.isFinite(value))return String(value);}return undefined;}
+function normalizeContactRow(row:Row):Row{
+  return {
+    ...row,
+    id:firstId(row,'id','contact_id','contacto_id','contact_key','contacto_code','codigo','código','code')??row.id,
+    nombre:row.nombre??row.nombre_alias??row.cliente??row.contacto,
+    cliente:row.cliente??row.nombre_alias??row.nombre,
+    contacto:row.contacto??row.nombre_alias??row.nombre
+  };
+}
+function normalizeInmobiliariaRow(row:Row):Row{
+  const code=typeof row.inmobiliaria_code==='string'?row.inmobiliaria_code:'';
+  const locality=code.includes('|')?code.split('|').slice(1).join('|').replaceAll('-',' '):'';
+  return {
+    ...row,
+    id:firstId(row,'id','inmobiliaria_id','inmobiliaria_code','codigo','código','code')??row.id,
+    nombre:row.nombre??row.nombre_alias??row.nombre_comercial,
+    inmobiliaria:row.inmobiliaria??row.nombre_alias??row.nombre??row.nombre_comercial,
+    localidad:row.localidad??row.municipio??locality
+  };
+}
 
 function normalizeProdRows(path:string,data:unknown):unknown{
   const envelope=asEnvelope(data);
@@ -31,17 +52,13 @@ function normalizeProdRows(path:string,data:unknown):unknown{
   }
 
   if(path==='/inmobiliarias'&&Array.isArray(envelope.items)){
-    return {...envelope,items:envelope.items.map(row=>{
-      const code=typeof row.inmobiliaria_code==='string'?row.inmobiliaria_code:'';
-      const locality=code.includes('|')?code.split('|').slice(1).join('|').replaceAll('-',' '):'';
-      return {...row,id:row.id??row.inmobiliaria_code,nombre:row.nombre??row.nombre_alias,inmobiliaria:row.inmobiliaria??row.nombre_alias,localidad:row.localidad??row.municipio??locality};
-    })};
+    return {...envelope,items:envelope.items.map(normalizeInmobiliariaRow)};
   }
 
   if(/^\/inmobiliarias\/[^/]+$/.test(path)){
     const raw=rowObject(envelope.inmobiliaria);
     if(!raw)return data;
-    const item={...raw,id:raw.id??raw.inmobiliaria_code,nombre:raw.nombre??raw.nombre_alias,inmobiliaria:raw.inmobiliaria??raw.nombre_alias};
+    const item=normalizeInmobiliariaRow(raw);
     return {...envelope,item};
   }
 
@@ -69,7 +86,7 @@ async function fetchProdCompatibility<T>(path:string):Promise<{status:number;dat
     if(result.status!==200||!result.data)return {status:result.status,data:result.data as T|null};
     const envelope=asEnvelope(result.data);
     const contacto=rowObject(envelope?.contacto);
-    return contacto?{status:200,data:{...result.data,item:contacto} as T}:{status:404,data:null};
+    return contacto?{status:200,data:{...result.data,item:normalizeContactRow(contacto)} as T}:{status:404,data:null};
   }
 
   if(documentDetail){
@@ -90,7 +107,7 @@ async function fetchProdCompatibility<T>(path:string):Promise<{status:number;dat
   if(contactMode){
     const envelope=asEnvelope(result.data);
     if(!envelope||!Array.isArray(envelope.items))return {status:200,data:result.data as T};
-    const items=envelope.items.filter(row=>row.tipo===contactMode);
+    const items=envelope.items.filter(row=>row.tipo===contactMode).map(normalizeContactRow);
     return {status:200,data:{...envelope,items,kpis:{total:items.length}} as T};
   }
 
