@@ -14,8 +14,12 @@ test('smart quick viewer stays modal, contextual and non-destructive',async()=>{
  expect(viewer).toContain('Completitud · inferencia');
  expect(viewer).toContain('Requiere validación humana antes de cualquier corrección.');
  expect(viewer).toContain('Relaciones');
- expect(viewer).toContain('Acciones seguras');
- expect(viewer).toContain('Abrir original');
+ expect(viewer).toContain('Archivo original');
+ expect(viewer).toContain('Abrir archivo en otra pestaña');
+ expect(viewer).toContain('Descargar archivo');
+ expect(viewer).toContain('data-testid="document-open-original"');
+ expect(viewer).toContain('data-testid="document-download-original"');
+ expect(viewer).toContain('download target="_blank"');
  expect(viewer).toContain("u.protocol==='https:'||u.protocol==='http:'");
  expect(viewer).toContain("event.key==='Escape'");
  expect(viewer).not.toMatch(/authenticatedEdgeFetch\([^)]*['\"]fenix-[^'\"]*(?<!-test)['\"]/);
