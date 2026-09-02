@@ -20,13 +20,13 @@ test('listado Expedientes aprovecha el ancho a zoom 100% sin overflow ni texto m
   const c=content.getBoundingClientRect(),m=main.getBoundingClientRect();
   const selectors=['.inmo-ana-hero','.ops-title','.inmo-kpis','.inmo-insights','.exp-filter-card','.ops-table-card'];
   const clipped=selectors.some(sel=>Array.from(document.querySelectorAll(sel)).some(node=>{const r=(node as HTMLElement).getBoundingClientRect();return r.right>html.clientWidth+1||r.left<-1;}));
-  const fontSizes=Array.from(document.querySelectorAll('.inmo-content button,.inmo-content input,.inmo-content select,.inmo-content td,.inmo-content th,.inmo-content p,.inmo-content span')).filter(el=>{const r=(el as HTMLElement).getBoundingClientRect();return r.width>0&&r.height>0;}).map(el=>parseFloat(getComputedStyle(el).fontSize)).filter(Number.isFinite);
-  return {overflow:html.scrollWidth-html.clientWidth,ratio:c.width/m.width,leftGap:c.left-m.left,rightGap:m.right-c.right,clipped,minFont:Math.min(...fontSizes)};
+  const entries=Array.from(document.querySelectorAll('.inmo-content button,.inmo-content input,.inmo-content select,.inmo-content td,.inmo-content th,.inmo-content p,.inmo-content span')).filter(el=>{const r=(el as HTMLElement).getBoundingClientRect();return r.width>0&&r.height>0;}).map(el=>({size:parseFloat(getComputedStyle(el).fontSize),tag:el.tagName.toLowerCase(),cls:typeof (el as HTMLElement).className==='string'?(el as HTMLElement).className:'',text:(el.textContent||'').trim().replace(/\s+/g,' ').slice(0,90)})).filter(x=>Number.isFinite(x.size)).sort((a,b)=>a.size-b.size);
+  return {overflow:html.scrollWidth-html.clientWidth,ratio:c.width/m.width,leftGap:c.left-m.left,rightGap:m.right-c.right,clipped,minFont:entries[0]?.size??999,smallest:entries.slice(0,8)};
  });
  expect(metrics).not.toBeNull();
  expect(metrics!.overflow).toBeLessThanOrEqual(1);
  expect(metrics!.ratio).toBeGreaterThanOrEqual(.92);
  expect(Math.abs(metrics!.leftGap-metrics!.rightGap)).toBeLessThanOrEqual(4);
  expect(metrics!.clipped).toBe(false);
- expect(metrics!.minFont).toBeGreaterThanOrEqual(10);
+ expect(metrics!.minFont,JSON.stringify(metrics!.smallest)).toBeGreaterThanOrEqual(10);
 });
