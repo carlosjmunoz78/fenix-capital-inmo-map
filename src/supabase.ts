@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 
-const runtimeEnv=(import.meta.env.VITE_FENIX_ENV||'preprod').toLowerCase();
+const runtimeEnv=import.meta.env.VITE_FENIX_ENV||'preprod';
 export const IS_PRODUCTION=runtimeEnv==='production'||runtimeEnv==='prod';
 
 const PREPROD_SUPABASE_URL='https://hnqlnvakzaywtafeiybt.supabase.co';
