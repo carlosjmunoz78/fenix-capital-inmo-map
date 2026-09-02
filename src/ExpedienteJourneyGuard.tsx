@@ -7,7 +7,7 @@ import './expediente-journey-guard.css';
 const PHASES=['Entrada','Documentación','Análisis','Banco','Tasación','Oferta','FEIN','Notaría','Firma','Cierre'];
 const MANUAL_STAGES=['Entrada','Revisión legado','Documentación incompleta','Documentación completa','Análisis','Estudio','Viabilidad','Pre-OK','Banco','Tasación solicitada','Tasación realizada','Pre-OK + Tasación realizada','Oferta','FEIN','Notaría','Firma','Finalizado','Perdido'];
 const FALLBACK_LABEL='RECORRIDO DEL EXPEDIENTE · ESTADO PENDIENTE DE CARGA';
-const FALLBACK_GUIDE='No marco ninguna fase hasta recibir un estado real reconocible. Ana no debe asumir Entrada por defecto.';
+const FALLBACK_GUIDE='No marco ninguna fase hasta recibir el dato canónico o una evidencia real reconocible. Siguiente fase: se calculará solo cuando exista estado real; Ana no asume Entrada por defecto.';
 
 type Workspace={ok?:boolean;status?:number;expediente?:{stage?:string;version?:number;proxima_accion?:string|null};lifecycle?:{recorded_stage?:string;effective_stage?:string;stage_inconsistent?:boolean;workflow_closed?:boolean};qa?:{blockers?:unknown[];warnings?:unknown[]};counts?:{documentos?:number;envios_banco?:number;ofertas?:number;tasaciones?:number;firma?:number};};
 function lower(v:unknown){return String(v??'').trim().toLowerCase();}
