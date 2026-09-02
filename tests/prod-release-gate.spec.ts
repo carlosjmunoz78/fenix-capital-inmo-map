@@ -23,7 +23,7 @@ test('workflow PRE-PROD no incorpora promoción automática a main o PROD',()=>{
 
 test('PRE-PROD conserva separación técnica del backend de producción',()=>{
   const supabase=fs.readFileSync(path.resolve('src/supabase.ts'),'utf8');
-  expect(supabase).toContain("const runtimeEnv=(import.meta.env.VITE_FENIX_ENV||'preprod').toLowerCase()");
+  expect(supabase).toContain("const runtimeEnv=import.meta.env.VITE_FENIX_ENV||'preprod'");
   expect(supabase).toContain("const FUNCTION_SUFFIX=IS_PRODUCTION?'':'-test'");
   expect(supabase).toContain("const AUTH_STORAGE_KEY=IS_PRODUCTION?'fenix-prod-auth-v1':'fenix-preprod-auth-v2'");
   expect(supabase).toContain("? String(import.meta.env.VITE_SUPABASE_URL||'')");
