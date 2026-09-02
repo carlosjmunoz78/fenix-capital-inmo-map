@@ -1,6 +1,7 @@
 name: PRE-PROD App Build
 
-# PRE-PROD: QA on PR/push. The validated operational snapshot for app.fenixcapital.es is built against PROD runtime without merging main.
+# PRE-PROD validates code and produces an immutable PROD candidate artifact.
+# It MUST NOT publish or move the operational gh-pages branch.
 on:
   push:
     branches:
@@ -11,9 +12,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
-  pages: write
-  id-token: write
+  contents: read
 
 concurrency:
   group: preprod-app-browser-qa-${{ github.ref }}
@@ -22,7 +21,7 @@ concurrency:
 jobs:
   build-and-browser-qa:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 35
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -34,30 +33,10 @@ jobs:
           cache: npm
 
       - name: Install dependencies reproducibly
-        run: |
-          if [ -f package-lock.json ]; then
-            npm ci
-          else
-            npm install
-          fi
+        run: npm ci
 
       - name: Dependency versions
         run: npm list --depth=0
-
-      - name: Persist generated lockfile in PRE-PROD branch
-        if: github.event_name == 'push' && github.ref == 'refs/heads/preprod-app-phase1'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add package-lock.json
-          if git diff --cached --quiet; then
-            echo "package-lock.json already versioned and unchanged"
-          else
-            git commit -m "build(preprod): version validated package lock"
-            git push origin HEAD:preprod-app-phase1
-          fi
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4
@@ -69,10 +48,10 @@ jobs:
         run: npx playwright install chromium
         timeout-minutes: 5
 
-      - name: Build
+      - name: Build PRE-PROD
         run: npm run build
 
-      - name: Browser QA
+      - name: Browser QA PRE-PROD
         env:
           PLAYWRIGHT_SKIP_BUILD: '1'
         run: npm run test:e2e -- --workers=2
@@ -148,84 +127,78 @@ jobs:
             rm -f "$headers"
           done
 
-      - name: Upload dist
+      - name: Upload PRE-PROD dist
         uses: actions/upload-artifact@v4
         with:
-          name: fenix-preprod-dist
+          name: fenix-preprod-dist-${{ github.sha }}
           path: dist
           if-no-files-found: error
+          retention-days: 14
 
-      - name: Upload Playwright report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: fenix-preprod-playwright-report
-          path: playwright-report
-          if-no-files-found: ignore
-
-      - name: Build operational app for custom domain
+      - name: Build immutable PROD candidate
         if: github.event_name == 'push' && github.ref == 'refs/heads/preprod-app-phase1'
         env:
           VITE_FENIX_ENV: prod
           VITE_SUPABASE_URL: https://cluhljgonannaafpmblx.supabase.co
           VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_yjISKmA5UPfF3d7NitP_DA_j5LGydh0
+        shell: bash
         run: |
-          # app.fenixcapital.es is the operational entry point and must use the dedicated PROD backend.
-          npx vite build --base=/ --outDir dist-pages
-          cp dist-pages/index.html dist-pages/404.html
-          printf '%s\n' 'app.fenixcapital.es' > dist-pages/CNAME
-          touch dist-pages/.nojekyll
+          set -euo pipefail
+          rm -rf dist
+          npm run build
+          cp dist/index.html dist/404.html
+          printf '%s\n' 'app.fenixcapital.es' > dist/CNAME
+          touch dist/.nojekyll
 
-          # Keep gh-pages deployable as a static snapshot if another host consumes this branch.
-          cat > dist-pages/package.json <<'JSON'
-          {
-            "name": "fenix-capital-operational-static",
-            "private": true,
-            "version": "1.0.0",
-            "scripts": {
-              "build": "node build-static.cjs"
-            }
-          }
-          JSON
-
-          cat > dist-pages/build-static.cjs <<'JS'
-          const fs = require('fs');
-          const path = require('path');
-
-          const root = process.cwd();
-          const out = path.join(root, 'dist');
-          fs.rmSync(out, { recursive: true, force: true });
-          fs.mkdirSync(out, { recursive: true });
-
-          const skip = new Set(['dist', '.git', 'node_modules', 'package.json', 'package-lock.json', 'build-static.cjs', 'vercel.json']);
-          for (const name of fs.readdirSync(root)) {
-            if (skip.has(name)) continue;
-            fs.cpSync(path.join(root, name), path.join(out, name), { recursive: true });
-          }
-          JS
-
-          cat > dist-pages/vercel.json <<'JSON'
-          {
-            "buildCommand": "npm run build",
-            "outputDirectory": "dist",
-            "cleanUrls": false
-          }
-          JSON
-
-      - name: Publish validated operational snapshot to gh-pages
+      - name: Browser QA exact PROD candidate
         if: github.event_name == 'push' && github.ref == 'refs/heads/preprod-app-phase1'
         env:
-          GH_TOKEN: ${{ github.token }}
+          PLAYWRIGHT_SKIP_BUILD: '1'
+        run: npm run test:e2e -- --workers=2
+
+      - name: Assert PROD candidate contains no test endpoints
+        if: github.event_name == 'push' && github.ref == 'refs/heads/preprod-app-phase1'
+        shell: bash
         run: |
-          rm -rf /tmp/fenix-gh-pages
-          mkdir -p /tmp/fenix-gh-pages
-          cp -R dist-pages/. /tmp/fenix-gh-pages/
-          cd /tmp/fenix-gh-pages
-          git init
-          git checkout -b gh-pages
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -m "deploy: operational snapshot ${GITHUB_SHA}"
-          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
-          git push --force origin gh-pages
+          set -euo pipefail
+          if grep -RInE --include='*.js' --include='*.html' --include='*.css' 'functions/v1/[A-Za-z0-9_-]+-test' dist; then
+            echo 'TEST endpoint leaked into PROD candidate' >&2
+            exit 1
+          fi
+
+      - name: Seal immutable PROD candidate
+        if: github.event_name == 'push' && github.ref == 'refs/heads/preprod-app-phase1'
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf '%s\n' "${GITHUB_SHA}" > PROD_CANDIDATE_SHA
+          tar --sort=name --mtime='UTC 1970-01-01' --owner=0 --group=0 --numeric-owner -czf fenix-prod-candidate.tgz -C dist .
+          sha256sum fenix-prod-candidate.tgz > fenix-prod-candidate.tgz.sha256
+          cat > PROD_CANDIDATE_METADATA.txt <<EOF
+          source_sha=${GITHUB_SHA}
+          workflow_run_id=${GITHUB_RUN_ID}
+          workflow_run_attempt=${GITHUB_RUN_ATTEMPT}
+          artifact=fenix-prod-candidate.tgz
+          EOF
+
+      - name: Upload immutable PROD candidate
+        if: github.event_name == 'push' && github.ref == 'refs/heads/preprod-app-phase1'
+        uses: actions/upload-artifact@v4
+        with:
+          name: fenix-prod-candidate-${{ github.sha }}
+          path: |
+            fenix-prod-candidate.tgz
+            fenix-prod-candidate.tgz.sha256
+            PROD_CANDIDATE_SHA
+            PROD_CANDIDATE_METADATA.txt
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fenix-preprod-playwright-report-${{ github.sha }}
+          path: playwright-report
+          if-no-files-found: ignore
+          retention-days: 14
