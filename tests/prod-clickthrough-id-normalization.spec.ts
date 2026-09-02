@@ -8,13 +8,14 @@ const inmobiliarias=fs.readFileSync(path.join(process.cwd(),'src/InmobiliariasSh
 
 test('production contact rows expose a stable id for detail clickthrough',()=>{
   expect(runtime).toContain("firstId(row,'id','contact_id','contacto_id','contact_key','contacto_code','codigo','código','code')");
-  expect(runtime).toContain('.filter(row=>row.tipo===contactMode).map(normalizeContactRow)');
-  expect(contactos).toContain("navigate(destino)");
-  expect(contactos).toContain("/contactos/${encodeURIComponent(id)}");
+  expect(runtime).toContain('envelope.items.filter(row=>row.tipo===contactMode)');
+  expect(runtime).toContain('filtered.map(normalizeContactRow)');
+  expect(contactos).toContain('navigate(destino)');
+  expect(contactos).toContain('/contactos/${encodeURIComponent(id)}');
 });
 
 test('production inmobiliaria rows expose a stable id for detail clickthrough',()=>{
   expect(runtime).toContain("firstId(row,'id','inmobiliaria_id','inmobiliaria_code','codigo','código','code')");
   expect(runtime).toContain('items:envelope.items.map(normalizeInmobiliariaRow)');
-  expect(inmobiliarias).toContain("navigate(`/inmobiliarias/${encodeURIComponent(id)}`)");
+  expect(inmobiliarias).toContain('navigate(`/inmobiliarias/${encodeURIComponent(id)}`)');
 });
