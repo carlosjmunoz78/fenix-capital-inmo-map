@@ -4,7 +4,7 @@
 .detail-exp-top{display:grid;grid-template-columns:auto minmax(260px,1fr) auto auto;gap:12px;align-items:center;padding:16px 28px;border-bottom:1px solid var(--dx-border);background:var(--dx-panel)}
 .detail-exp-top .detail-filter{border:1px solid rgba(255,90,0,.35);color:var(--dx-orange);font-weight:800;background:transparent;padding:11px 15px;border-radius:12px}
 .detail-search{border:1px solid var(--dx-border);border-radius:12px;padding:12px 16px;color:var(--dx-muted);background:var(--dx-panel)}
-.detail-exp-content{padding:28px;max-width:1180px;margin:0 auto;width:100%}
+.detail-exp-content{padding:28px;max-width:1400px;margin:0 auto;width:100%}
 .detail-ana-hero{display:grid;grid-template-columns:minmax(220px,260px) 1fr;gap:30px;min-height:330px;border:1px solid rgba(255,90,0,.24);border-radius:28px;padding:26px;background:linear-gradient(135deg,var(--dx-panel),rgba(255,90,0,.045));box-shadow:0 16px 42px rgba(55,31,20,.07);align-items:stretch}
 .detail-ana-hero>img{width:100%;height:100%;min-height:310px;max-height:360px;object-fit:cover;border-radius:22px;background:#ddd}
 .detail-ana-copy{align-self:center;padding:4px 0}
