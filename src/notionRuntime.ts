@@ -17,6 +17,10 @@ function normalizeContactRow(row:Row):Row{
     contacto:row.contacto??row.nombre_alias??row.nombre
   };
 }
+function isBankContact(row:Row){
+  const explicit=[row.tipo,row.categoria,row['categoría'],row.relacion,row['relación'],row.perfil].filter(v=>typeof v==='string').join(' ');
+  return /banc/i.test(explicit)||['banco','entidad','bank'].some(key=>typeof row[key]==='string'&&String(row[key]).trim());
+}
 function normalizeInmobiliariaRow(row:Row):Row{
   const code=typeof row.inmobiliaria_code==='string'?row.inmobiliaria_code:'';
   const locality=code.includes('|')?code.split('|').slice(1).join('|').replaceAll('-',' '):'';
@@ -77,16 +81,20 @@ function normalizeProdRows(path:string,data:unknown):unknown{
 
 async function fetchProdCompatibility<T>(path:string):Promise<{status:number;data:T|null}>{
   const contactMode=path==='/clientes'?'Cliente':path==='/contactos-inmobiliaria'?'Contacto inmobiliaria':null;
+  const bankContactMode=path==='/contactos-bancarios';
   const contactDetail=path.match(/^\/(clientes|contactos-inmobiliaria)\/([^/]+)$/);
+  const bankContactDetail=path.match(/^\/contactos-bancarios\/([^/]+)$/);
   const documentDetail=path.match(/^\/documentos\/([^/]+)$/);
 
-  if(contactDetail){
-    const id=decodeURIComponent(contactDetail[2]);
+  if(contactDetail||bankContactDetail){
+    const id=decodeURIComponent(contactDetail?contactDetail[2]:bankContactDetail![1]);
     const result=await fetchAppApi<Record<string,unknown>>(`/contactos/${encodeURIComponent(id)}`);
     if(result.status!==200||!result.data)return {status:result.status,data:result.data as T|null};
     const envelope=asEnvelope(result.data);
     const contacto=rowObject(envelope?.contacto);
-    return contacto?{status:200,data:{...result.data,item:normalizeContactRow(contacto)} as T}:{status:404,data:null};
+    if(!contacto)return {status:404,data:null};
+    const item=normalizeContactRow(contacto);
+    return {status:200,data:{...result.data,item} as T};
   }
 
   if(documentDetail){
@@ -100,14 +108,15 @@ async function fetchProdCompatibility<T>(path:string):Promise<{status:number;dat
     return {status:200,data:{...detail.data,item:{...document,...(signedUrl?{url:signedUrl}: {})}} as T};
   }
 
-  const gatewayPath=contactMode?'/contactos':path;
+  const gatewayPath=contactMode||bankContactMode?'/contactos':path;
   const result=await fetchAppApi<unknown>(gatewayPath);
   if(result.status!==200||!result.data)return {status:result.status,data:result.data as T|null};
 
-  if(contactMode){
+  if(contactMode||bankContactMode){
     const envelope=asEnvelope(result.data);
     if(!envelope||!Array.isArray(envelope.items))return {status:200,data:result.data as T};
-    const items=envelope.items.filter(row=>row.tipo===contactMode).map(normalizeContactRow);
+    const filtered=bankContactMode?envelope.items.filter(isBankContact):envelope.items.filter(row=>row.tipo===contactMode);
+    const items=filtered.map(normalizeContactRow);
     return {status:200,data:{...envelope,items,kpis:{total:items.length}} as T};
   }
 
