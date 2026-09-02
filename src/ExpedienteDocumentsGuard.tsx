@@ -22,6 +22,11 @@ function relationContains(value:unknown,target:string):boolean{
  }
  return false;
 }
+function belongsToExpediente(row:Row,target:string){
+ if(relationContains(row.expediente_id,target))return true;
+ const scopeType=typeof row.scope_type==='string'?row.scope_type.trim().toLowerCase():'';
+ return scopeType==='expediente'&&relationContains(row.scope_code,target);
+}
 function rowsFrom(data:unknown):Row[]{if(!data||typeof data!=='object')return[];const d=data as RuntimeResponse;return Array.isArray(d.items)?d.items:[];}
 function text(row:Row,keys:string[]){for(const key of keys){const v=row[key];if(typeof v==='string'&&v.trim())return v.trim();}return'';}
 function idOf(row:Row){return text(row,['document_id','id','documento_id','document_code','code']);}
@@ -47,7 +52,7 @@ export default function ExpedienteDocumentsGuard(){
   document.addEventListener('click',onClick,true);
   return()=>{observer.disconnect();document.removeEventListener('click',onClick,true);document.querySelector('.exp-docs-host')?.remove();};
  },[active,code]);
- useEffect(()=>{if(!active)return;let alive=true;(async()=>{setLoading(true);setStatus(null);setRows([]);try{const r=await fetchNotionRuntime<unknown>('/documentos');if(!alive)return;setStatus(r.status);if(r.status===200)setRows(rowsFrom(r.data).filter(row=>relationContains(row.expediente_id,code)));}catch{if(alive)setStatus(0);}finally{if(alive)setLoading(false);}})();return()=>{alive=false};},[active,code]);
+ useEffect(()=>{if(!active)return;let alive=true;(async()=>{setLoading(true);setStatus(null);setRows([]);try{const r=await fetchNotionRuntime<unknown>('/documentos');if(!alive)return;setStatus(r.status);if(r.status===200)setRows(rowsFrom(r.data).filter(row=>belongsToExpediente(row,code)));}catch{if(alive)setStatus(0);}finally{if(alive)setLoading(false);}})();return()=>{alive=false};},[active,code]);
  const visible=useMemo(()=>rows.filter(r=>Boolean(idOf(r))),[rows]);
  if(!active||!host)return null;
  const returnTo=location.pathname+location.search;
