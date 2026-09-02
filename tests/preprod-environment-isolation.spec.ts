@@ -36,12 +36,14 @@ test('cliente y almacenamiento de sesión mantienen aislamiento PRE-PROD/PROD',(
   expect(text).toContain("throw new Error('FENIX PROD runtime requires dedicated Supabase URL and publishable key.')");
 });
 
-test('workflow PRE-PROD solo publica desde preprod-app-phase1 y no escribe main',()=>{
+test('workflow PRE-PROD valida y sella candidato sin publicar ni escribir ramas',()=>{
   const text=fs.readFileSync(path.resolve('.github/workflows/preprod-build.yml'),'utf8');
   expect(text).toContain('name: PRE-PROD App Build');
   expect(text).toContain('- preprod-app-phase1');
   expect(text).toContain("github.ref == 'refs/heads/preprod-app-phase1'");
-  expect(text).toContain('git push origin HEAD:preprod-app-phase1');
-  expect(text).not.toMatch(/git push[^\n]*\bmain\b/);
-  expect(text).not.toMatch(/git push[^\n]*HEAD:main/);
+  expect(text).toContain('fenix-prod-candidate-${{ github.sha }}');
+  expect(text).toContain('Browser QA exact PROD candidate');
+  expect(text).toContain('Assert PROD candidate contains no test endpoints');
+  expect(text).not.toMatch(/git push/);
+  expect(text).not.toContain('Publish validated operational snapshot to gh-pages');
 });
