@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 
 const fakeSession={
- access_token:'eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwicm9sZSI6ImF1dGhlbnRpY2F0ZWQiLCJzdWIiOiJhYWFhYWFhYS1hYWFhLTRhYWEtOGFhYS1hYWFhYWFhYWFhYWEiLCJlbWFpbCI6ImRpcmVjY2lvbkBmZW5peC50ZXN0IiwiZXhwIjoxOTk5OTk5OTk5fQ.',
+ access_token:'eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJhdWQiOiJub25lIiwidHlwIjoiSldUIn0.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwicm9sZSI6ImF1dGhlbnRpY2F0ZWQiLCJzdWIiOiJhYWFhYWFhYS1hYWFhLTRhYWEtOGFhYS1hYWFhYWFhYWFhYWEiLCJlbWFpbCI6ImRpcmVjY2lvbkBmZW5peC50ZXN0IiwiZXhwIjoxOTk5OTk5OTk5fQ.',
  token_type:'bearer',expires_in:3600,expires_at:1999999999,refresh_token:'qa-contactos-100pct-not-real',
  user:{id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',aud:'authenticated',role:'authenticated',email:'direccion@fenix.test',app_metadata:{},user_metadata:{},created_at:'2026-08-19T00:00:00.000Z'}
 };
@@ -15,7 +15,7 @@ test('Contactos aprovecha el ancho a zoom 100% sin overflow horizontal ni texto 
  await page.route('**/functions/v1/fenix-notion-runtime-test/clientes',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:rows})}));
  await page.goto('/contactos');
  await expect(page.getByRole('heading',{name:'Contactos'})).toBeVisible();
- const metrics=await page.evaluate(()=>{const html=document.documentElement;const main=document.querySelector('.contactos-root .ops-main') as HTMLElement|null;const content=document.querySelector('.contactos-content') as HTMLElement|null;if(!main||!content)return null;const mr=main.getBoundingClientRect(),cr=content.getBoundingClientRect();const styles=[...document.querySelectorAll('.contactos-root button,.contactos-root input,.contactos-root select,.contactos-root td,.contactos-root p,.contactos-root span')].map(n=>parseFloat(getComputedStyle(n).fontSize)).filter(Number.isFinite);return{overflow:html.scrollWidth-html.clientWidth,ratio:cr.width/mr.width,leftGap:cr.left-mr.left,rightGap:mr.right-cr.right,minFont:Math.min(...styles)}});
+ const metrics=await page.evaluate(()=>{const html=document.documentElement;const main=document.querySelector('.contactos-root .ops-main') as HTMLElement|null;const content=document.querySelector('.contactos-content') as HTMLElement|null;if(!main||!content)return null;const mr=main.getBoundingClientRect(),cr=content.getBoundingClientRect();const styles=[...document.querySelectorAll('.contactos-root button,.contactos-root input,.contactos-root select,.contactos-root td,.contactos-root p,.contactos-root span')].filter(n=>{const r=(n as HTMLElement).getBoundingClientRect(),s=getComputedStyle(n);return r.width>0&&r.height>0&&s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0}).map(n=>parseFloat(getComputedStyle(n).fontSize)).filter(Number.isFinite);return{overflow:html.scrollWidth-html.clientWidth,ratio:cr.width/mr.width,leftGap:cr.left-mr.left,rightGap:mr.right-cr.right,minFont:Math.min(...styles)}});
  expect(metrics).not.toBeNull();
  expect(metrics!.overflow).toBeLessThanOrEqual(1);
  expect(metrics!.ratio).toBeGreaterThanOrEqual(.92);
