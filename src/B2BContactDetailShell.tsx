@@ -11,11 +11,12 @@ type Theme='light'|'dark';
 type Ctx={actor_code?:string;role?:string};
 type Contact={id:string;nombre:string;apellidos:string;contacto:string;cargo:string;email:string;telefono:string;activo:boolean;inmobiliaria_id:string|null};
 type Envelope={ok?:boolean;status?:number;item?:Contact;inmobiliaria?:{id:string;nombre:string;localidad:string};error?:string};
-function isNotionId(v:string){const raw=v.replace(/^notion\|/i,'');return /^[0-9a-f]{32}$/i.test(raw.replaceAll('-',''));}
+function canonicalId(v:string){return v.replace(/^notion\|/i,'');}
+function isNotionId(v:string){return /^[0-9a-f]{32}$/i.test(canonicalId(v).replaceAll('-',''));}
 const fallbackNav:NavItem[]=[{label:'Inicio',route:'/inicio'}];
 
 export default function B2BContactDetailShell(){
- const location=useLocation(),navigate=useNavigate();const match=location.pathname.match(/^\/contactos-b2b\/([^/]+)$/);const id=match?.[1]?decodeURIComponent(match[1]):'';const active=Boolean(match&&isNotionId(id));
+ const location=useLocation(),navigate=useNavigate();const match=location.pathname.match(/^\/contactos-b2b\/([^/]+)$/);const routeId=match?.[1]?decodeURIComponent(match[1]):'';const id=canonicalId(routeId);const active=Boolean(match&&isNotionId(routeId));
  const[ready,setReady]=useState(false),[logged,setLogged]=useState(false),[ctx,setCtx]=useState<Ctx|null>(null),[nav,setNav]=useState<NavItem[]>([]),[theme,setTheme]=useState<Theme>(()=>(sessionStorage.getItem('fenix-theme') as Theme)||'light');
  const[status,setStatus]=useState<number|null>(null),[data,setData]=useState<Envelope|null>(null),[nombre,setNombre]=useState(''),[apellidos,setApellidos]=useState(''),[cargo,setCargo]=useState(''),[email,setEmail]=useState(''),[telefono,setTelefono]=useState(''),[preview,setPreview]=useState(false),[busy,setBusy]=useState(false),[message,setMessage]=useState('');
  useEffect(()=>{if(!active)return;let alive=true;supabase.auth.getSession().then(({data})=>{if(alive){setLogged(Boolean(data.session));setReady(true)}});const{data:{subscription}}=supabase.auth.onAuthStateChange((_e,s)=>{setLogged(Boolean(s));setReady(true)});return()=>{alive=false;subscription.unsubscribe()};},[active]);
