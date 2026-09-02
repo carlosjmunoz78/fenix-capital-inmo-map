@@ -73,7 +73,7 @@ jobs:
           test -f ../candidate-dist/index.html
           test -f ../candidate-dist/404.html
           test "$(cat ../candidate-dist/CNAME)" = 'app.fenixcapital.es'
-          if grep -RInE --include='*.js' --include='*.html' --include='*.css' 'functions/v1/[A-Za-z0-9_-]+-test([/?"'"'`]|$)' ../candidate-dist; then
+          if grep -RInE --include='*.js' --include='*.html' --include='*.css' 'functions/v1/[A-Za-z0-9_-]+-test' ../candidate-dist; then
             echo 'TEST endpoint leaked into candidate; refusing promotion' >&2
             exit 1
           fi
