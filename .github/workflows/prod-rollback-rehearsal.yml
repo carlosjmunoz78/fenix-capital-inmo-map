@@ -1,0 +1,71 @@
+name: PROD Rollback Rehearsal
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_sha:
+        description: 'Commit SHA to rehearse as rollback candidate (no deploy)'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  rehearse-rollback:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      VITE_FENIX_ENV: prod
+      VITE_SUPABASE_URL: https://cluhljgonannaafpmblx.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_yjISKmA5UPfF3d7NitP_DA_j5LGydh0
+    steps:
+      - name: Checkout rollback candidate
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.target_sha }}
+          fetch-depth: 1
+
+      - name: Verify exact candidate SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${{ inputs.target_sha }}"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies reproducibly
+        run: npm ci
+
+      - name: Build candidate with PROD configuration
+        run: npx vite build --base=/ --outDir dist-rollback-rehearsal
+
+      - name: Assert candidate is PROD-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -R -F 'hnqlnvakzaywtafeiybt.supabase.co' dist-rollback-rehearsal
+          grep -R -F 'cluhljgonannaafpmblx.supabase.co' dist-rollback-rehearsal >/dev/null
+
+      - name: Prepare rollback snapshot without publishing
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp dist-rollback-rehearsal/index.html dist-rollback-rehearsal/404.html
+          touch dist-rollback-rehearsal/.nojekyll
+          printf '%s\n' "${{ inputs.target_sha }}" > dist-rollback-rehearsal/ROLLBACK_CANDIDATE_SHA.txt
+          printf '%s\n' 'app.fenixcapital.es' > dist-rollback-rehearsal/CNAME
+          test "$(cat dist-rollback-rehearsal/CNAME)" = 'app.fenixcapital.es'
+          test "$(cat dist-rollback-rehearsal/ROLLBACK_CANDIDATE_SHA.txt)" = "${{ inputs.target_sha }}"
+
+      - name: Upload rehearsal artifact only
+        uses: actions/upload-artifact@v4
+        with:
+          name: fenix-prod-rollback-rehearsal-${{ inputs.target_sha }}
+          path: dist-rollback-rehearsal
+          if-no-files-found: error
+          retention-days: 7
