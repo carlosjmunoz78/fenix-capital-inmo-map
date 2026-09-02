@@ -73,6 +73,7 @@ import SpecialCaseIntervenientContactGuard from './SpecialCaseIntervenientContac
 import TaskDetailExperienceGuard from './TaskDetailExperienceGuard';
 import AnaGovernance from './AnaGovernance';
 import AnaUniversalGuard from './AnaUniversalGuard';
+import AnaOperationalPreparationGuard from './AnaOperationalPreparationGuard';
 import AnaInboxAccessGuard from './AnaInboxAccessGuard';
 import AnaKnowledgeReviewGuard from './AnaKnowledgeReviewGuard';
 import AnaTopCorrectionGuard from './AnaTopCorrectionGuard';
@@ -136,6 +137,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <AnaKnowledgeBlock />
       <AnaKnowledgePlacementGuard />
       <AnaUniversalGuard />
+      <AnaOperationalPreparationGuard />
       <AnaInboxAccessGuard />
       <AnaKnowledgeReviewGuard />
       <AnaTopCorrectionGuard />
