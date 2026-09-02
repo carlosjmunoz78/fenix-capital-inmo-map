@@ -1,67 +1,40 @@
 /* FÉNIX · auditoría visual desktop 2026-09-02
    Objetivo: aprovechar el ancho a zoom 100% sin reducir legibilidad ni ocultar contenido. */
 @media (min-width:1101px){
-  /* Shell operativo: menos estructura, misma lectura. */
   .ops-root{grid-template-columns:214px minmax(0,1fr)!important}
   .ops-side{padding:16px 12px!important}
   .ops-brand{height:58px!important;padding:0 7px 12px!important}
   .ops-side nav{gap:3px!important;padding:11px 0!important}
   .ops-side nav button{height:38px!important;min-height:38px!important;padding:0 10px!important;font-size:13px!important}
   .ops-ana,.ops-root .ops-ana-modern{margin-top:7px!important;padding:9px 9px!important}
-  .ops-root>.ops-main>.ops-top,.detail-exp-root .detail-exp-top{min-height:72px!important;height:72px!important}
+  .ops-root>.ops-main>.ops-top,.detail-exp-root .detail-exp-top{min-height:64px!important;height:64px!important}
   .ops-root>.ops-main>.ops-top{padding:0 20px!important;gap:14px!important}
   .ops-content{box-sizing:border-box!important;width:100%!important;max-width:none!important;margin:0!important;padding:22px clamp(18px,2vw,30px) 620px!important}
-  .ops-title{gap:18px!important;margin-bottom:18px!important}
-  .ops-icon{width:48px!important;height:48px!important}
-  .ops-title h1{font-size:29px!important}
-  .ops-ana-card{padding:16px 18px!important;min-height:92px!important;margin-bottom:18px!important}
-  .ops-message,.ops-empty{padding:24px!important;margin-top:16px!important}
-  .ops-table-card{margin-top:18px!important}
-  .ops-table-head{height:56px!important;padding:0 16px!important}
-  .ops-table-card th,.ops-table-card td{padding:13px 15px!important}
+  .ops-title{gap:18px!important;margin-bottom:18px!important}.ops-icon{width:48px!important;height:48px!important}.ops-title h1{font-size:29px!important}
+  .ops-ana-card{padding:16px 18px!important;min-height:92px!important;margin-bottom:18px!important}.ops-message,.ops-empty{padding:24px!important;margin-top:16px!important}.ops-table-card{margin-top:18px!important}.ops-table-head{height:56px!important;padding:0 16px!important}.ops-table-card th,.ops-table-card td{padding:13px 15px!important}
+  .dir-shell{grid-template-columns:214px minmax(0,1fr)!important}.dir-sidebar{padding:16px 12px!important}.dir-brand{height:64px!important;padding:0 7px 12px!important}.dir-nav{gap:3px!important;padding-top:10px!important}.dir-nav-item{height:39px!important;min-height:39px!important;padding:0 11px!important;font-size:13px!important}.dir-topbar{height:72px!important;min-height:72px!important}.dir-main{min-width:0!important}
 
-  /* Dirección: mismo ancho útil que el resto de la app. */
-  .dir-shell{grid-template-columns:214px minmax(0,1fr)!important}
-  .dir-sidebar{padding:16px 12px!important}
-  .dir-brand{height:64px!important;padding:0 7px 12px!important}
-  .dir-nav{gap:3px!important;padding-top:10px!important}
-  .dir-nav-item{height:39px!important;min-height:39px!important;padding:0 11px!important;font-size:13px!important}
-  .dir-topbar{height:72px!important;min-height:72px!important}
-  .dir-main{min-width:0!important}
-
-  /* Ficha de expediente: menú deliberadamente más estrecho y hueco reservado idéntico.
-     Al ser un nav fixed, esta pareja de reglas evita físicamente cualquier solape. */
-  .detail-exp-root{grid-template-columns:156px minmax(0,1fr)!important}
-  .detail-auth-nav{width:156px!important;padding-left:8px!important;padding-right:8px!important}
-  .detail-auth-nav nav button{padding-left:8px!important;padding-right:8px!important;font-size:12px!important}
-  .detail-exp-main{grid-column:2!important;min-width:0!important}
-  .detail-exp-content{box-sizing:border-box!important;width:100%!important;max-width:none!important;margin:0!important;padding:22px clamp(20px,2.2vw,34px) 100px!important}
-  .detail-exp-top{padding:0 clamp(18px,2vw,28px)!important;gap:10px!important}
-  .detail-ana-hero{grid-template-columns:minmax(190px,225px) minmax(0,1fr)!important;gap:22px!important;min-height:280px!important;padding:20px!important;border-radius:22px!important}
-  .detail-ana-hero>img{min-height:255px!important;max-height:310px!important;border-radius:18px!important}
-  .detail-ana-copy h2{font-size:33px!important}
-  .detail-master-title{padding:2px 0 16px!important}
-  .detail-master-title h1{font-size:38px!important}
-  .detail-journey{padding:15px 12px 12px!important}
-  .detail-summary-grid{gap:14px!important}
-  .detail-summary-card{padding:18px!important;border-radius:18px!important}
-  .detail-kv{gap:0 14px!important;margin-top:10px!important}
-  .detail-kv>div{padding:10px 0!important}
-  .detail-next-action{margin-top:14px!important;padding:16px!important;border-radius:18px!important}
-  .detail-tabs{margin:8px 0 13px!important}
-
-  /* Casos especiales herencia/obra nueva comparten el mismo aprovechamiento de ancho. */
+  /* Ficha expediente: 132px de menú real; contenido aislado en su propia columna. */
+  .detail-exp-root{grid-template-columns:132px minmax(0,1fr)!important;overflow:hidden!important}
+  .detail-auth-nav{width:132px!important;max-width:132px!important;min-width:0!important;padding-left:6px!important;padding-right:6px!important}
+  .detail-auth-nav nav button{padding-left:6px!important;padding-right:6px!important;font-size:11px!important}
+  .detail-exp-main{grid-column:2!important;min-width:0!important;width:auto!important;max-width:none!important;overflow-x:hidden!important}
+  .detail-exp-content{box-sizing:border-box!important;width:100%!important;max-width:none!important;margin:0!important;padding:16px clamp(14px,1.5vw,24px) 90px!important;overflow-x:hidden!important}
+  .detail-exp-top{padding:0 clamp(14px,1.5vw,22px)!important;gap:8px!important}
+  .detail-search{padding:9px 12px!important}.detail-exp-top .detail-filter{padding:9px 11px!important}
+  .detail-ana-hero{grid-template-columns:150px minmax(0,1fr)!important;gap:16px!important;min-height:210px!important;padding:14px!important;border-radius:18px!important}
+  .detail-ana-hero>img{min-height:190px!important;height:190px!important;max-height:190px!important;border-radius:14px!important}
+  .detail-next-list{gap:6px!important;margin-top:12px!important}.detail-next-list button{padding:8px 10px!important}.detail-upload{margin-top:10px!important}
+  .detail-back{margin:14px 0 6px!important}.detail-master-title{padding:2px 0 12px!important}.detail-master-title h1{font-size:32px!important;margin:4px 0 6px!important}
+  .detail-journey{padding:12px 10px 10px!important}.detail-section-label{margin-bottom:10px!important}.detail-phase-track{min-width:700px!important}.detail-phase-track span{width:27px!important;height:27px!important}.detail-phase-track:before{top:13px!important}
+  .detail-summary-grid{gap:10px!important}.detail-summary-card{padding:13px!important;border-radius:15px!important}.detail-summary-card h2,.detail-next-action h2{font-size:22px!important}.detail-kv{gap:0 10px!important;margin-top:7px!important}.detail-kv>div{padding:7px 0!important}.detail-tabs{margin:6px 0 10px!important}.detail-tabs button{padding:10px 9px 8px!important}
+  .detail-next-action{margin-top:10px!important;padding:13px!important;border-radius:15px!important}.detail-prepared{margin-top:10px!important;padding:10px!important}.detail-action-row{margin:10px 0!important}
   .special-case-detail .ops-content,.special-detail-root .ops-content{max-width:none!important;width:100%!important;margin:0!important}
 }
-
-/* Portátil común: compactar estructura, no tipografía. */
 @media (min-width:901px) and (max-width:1450px){
   .ops-root,.dir-shell{grid-template-columns:198px minmax(0,1fr)!important}
-  .detail-exp-root{grid-template-columns:148px minmax(0,1fr)!important}
-  .detail-auth-nav{width:148px!important}
-  .ops-side,.dir-sidebar{padding-left:10px!important;padding-right:10px!important}
-  .ops-content{padding-left:18px!important;padding-right:18px!important}
-  .detail-exp-content{padding-left:18px!important;padding-right:18px!important}
-  .detail-ana-hero{grid-template-columns:190px minmax(0,1fr)!important;gap:18px!important}
-  .detail-summary-card{padding:16px!important}
+  .detail-exp-root{grid-template-columns:124px minmax(0,1fr)!important;overflow:hidden!important}
+  .detail-auth-nav{width:124px!important;max-width:124px!important}
+  .ops-side,.dir-sidebar{padding-left:10px!important;padding-right:10px!important}.ops-content{padding-left:18px!important;padding-right:18px!important}
+  .detail-exp-content{padding-left:12px!important;padding-right:12px!important}.detail-ana-hero{grid-template-columns:132px minmax(0,1fr)!important;gap:12px!important}.detail-ana-hero>img{min-height:172px!important;height:172px!important;max-height:172px!important}.detail-summary-card{padding:12px!important}
 }
