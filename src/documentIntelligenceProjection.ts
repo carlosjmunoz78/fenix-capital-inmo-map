@@ -27,9 +27,12 @@ const aliases:Record<string,string>={
  finca_registral:'finca',numero_finca_registral:'numero_finca',titularidad:'titulares',titular:'titular',
  importe_tasacion:'valor_tasacion',valoracion:'valor_tasacion',valor_hipotecario_tasacion:'valor_hipotecario',
  metros_utiles:'superficie_util',m2_utiles:'superficie_util',metros_construidos:'superficie_construida',m2_construidos:'superficie_construida',
- observacion_tasador:'observaciones_tasador',anotaciones_tasador:'observaciones_tasador',salvedad:'salvedades',
- capital:'importe_prestamo',importe_financiado:'importe_prestamo',duracion:'plazo',duracion_meses:'plazo_meses',
+ observacion_tasador:'observaciones_tasador',anotaciones_tasador:'observaciones_tasador',observaciones_salvedades:'observaciones_tasador',salvedad:'salvedades',
+ capital:'importe_prestamo',importe_financiado:'importe_prestamo',duracion:'plazo',duracion_meses:'plazo',plazo_meses:'plazo',
  tipo_interes:'tin',tipo_de_interes:'tin',vinculacion:'vinculaciones',productos_vinculados:'vinculaciones',
+ entidad_fein:'entidad',entidad_prestamista:'entidad',prestatario:'prestatarios',prestatario_nombre:'prestatarios',
+ nss_naf:'nss',naf:'nss',numero_seguridad_social:'nss',total_dias_cotizados:'total_dias',numero_periodos:'periodos_trabajados',
+ financiacion:'porcentaje_financiacion',porcentaje_financiado:'porcentaje_financiacion',bonificacion:'bonificaciones',
  compania_seguro:'aseguradora',entidad_aseguradora:'aseguradora',prima_anual:'prima',tipo_poliza:'tipo_seguro',
  nombre_notario:'notario',numero_protocolo:'protocolo',fecha_otorgamiento:'fecha',
  capital_pendiente:'saldo_pendiente',principal_pendiente:'saldo_pendiente',
@@ -51,12 +54,14 @@ function canonicalizeFields(fields:Record<string,unknown>){
 
 export function projectDocumentIntelligence(row:IntelligenceRow|null){
  if(!row)return null;
- const payload=parsePayload(row);if(!payload)return row;
- const projected:IntelligenceRow={...row,...canonicalizeFields(payload.fields||{})};
+ const payload=parsePayload(row);
+ const base=canonicalizeFields(row);
+ if(!payload)return {...row,...base};
+ const projected:IntelligenceRow={...row,...base,...canonicalizeFields(payload.fields||{})};
  const declared=typeof payload.declared_document_type==='string'?payload.declared_document_type.trim():'';
  const detected=typeof payload.detected_document_type==='string'?payload.detected_document_type.trim():'';
  const current=firstString(row,['tipo_canónico','tipo_canonico','tipo','categoria','categoría']);
- if((!current||/^documento$/i.test(current))&&(declared||detected))projected['tipo_canónico']=declared||detected;
+ if((!current||/^documento$/i.test(current))&&(declared||detected))projected['tipo_canónico']=detected||declared;
  if(typeof payload.summary==='string'&&payload.summary.trim())projected.resumen_documento=payload.summary.trim();
  if(payload.confidence!==undefined&&payload.confidence!==null)projected.confianza_extraccion=payload.confidence;
  if(typeof payload.processed_at==='string')projected.fecha_lectura_inteligente=payload.processed_at;
