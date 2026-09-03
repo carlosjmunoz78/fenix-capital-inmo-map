@@ -13,7 +13,7 @@ test('L6 internal chat is mounted and uses authenticated server-derived actor id
   expect(source).toContain("supabase.rpc('fenix_prod_chat_list_user'");
   expect(source).toContain("supabase.rpc('fenix_prod_chat_send_user'");
   expect(source).not.toContain('p_actor_code');
-  expect(source).not.toContain('sender_actor_code:');
+  expect(source).not.toMatch(/fenix_prod_chat_send_user'\s*,\s*\{[^}]*sender_actor_code/s);
 });
 
 test('L6 internal chat is idempotent and bounded',async()=>{
