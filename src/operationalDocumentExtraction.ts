@@ -11,7 +11,14 @@ function parseMoney(raw:string){const m=raw.match(/(?:€|EUR)?\s*(-?\d{1,3}(?:[
 function moneyNear(text:string,labels:string[]){const w=nearby(text,labels);return w?parseMoney(w):null;}
 function parsePercent(raw:string){const m=raw.match(/(-?\d{1,3}(?:[.,]\d{1,4})?)\s*%/);if(!m)return null;const n=Number(m[1].replace(',','.'));return Number.isFinite(n)?n:null;}
 function percentNear(text:string,labels:string[]){const w=nearby(text,labels,160);return w?parsePercent(w):null;}
-function parseDate(raw:string){const m=raw.match(/\b(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{2,4})\b/);if(m){const y=m[3].length===2?`20${m[3]}`:m[3];return`${y}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;}const months='enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|noviembre|diciembre';const w=raw.match(new RegExp(`\\b(\\d{1,2})\\s+de\\s+(${months})\\s+de\\s+(20\\d{2})\\b`,'i'));if(!w)return'';const mm:{[k:string]:string}={enero:'01',febrero:'02',marzo:'03',abril:'04',mayo:'05',junio:'06',julio:'07',agosto:'08',septiembre:'09',setiembre:'09',octubre:'10',noviembre:'11',diciembre:'12'};return`${w[3]}-${mm[w[2].toLowerCase()]}-${w[1].padStart(2,'0')}`;}
+function parseDate(raw:string){
+ const numeric=/\b(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{2,4})\b/.exec(raw);
+ const months='enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|noviembre|diciembre';
+ const words=new RegExp(`\\b(\\d{1,2})\\s+de\\s+(${months})\\s+de\\s+(20\\d{2})\\b`,'i').exec(raw);
+ if(!numeric&&!words)return'';
+ if(words&&(!numeric||(words.index??Infinity)<(numeric.index??Infinity))){const mm:{[k:string]:string}={enero:'01',febrero:'02',marzo:'03',abril:'04',mayo:'05',junio:'06',julio:'07',agosto:'08',septiembre:'09',setiembre:'09',octubre:'10',noviembre:'11',diciembre:'12'};return`${words[3]}-${mm[words[2].toLowerCase()]}-${words[1].padStart(2,'0')}`;}
+ const y=numeric![3].length===2?`20${numeric![3]}`:numeric![3];return`${y}-${numeric![2].padStart(2,'0')}-${numeric![1].padStart(2,'0')}`;
+}
 function dateNear(text:string,labels:string[]){const w=nearby(text,labels,180);return w?parseDate(w):'';}
 function first(text:string,patterns:RegExp[],max=500){for(const p of patterns){const m=text.match(p);if(m?.[1])return clean(m[1],max);}return'';}
 
@@ -58,7 +65,8 @@ function enrichFein(text:string,f:ExtractedFields){
  set(f,'plazo',looseValue(text,['PLAZO DEL PR[ÉE]STAMO','DURACI[ÓO]N DEL PR[ÉE]STAMO','PLAZO'],180));
  const cuotasRaw=first(text,[/(?:N[ÚU]MERO DE CUOTAS|CUOTAS)\D{0,20}(\d{1,4})/i]);
  if(cuotasRaw)setExplicit(f,'numero_cuotas',Number(cuotasRaw));
- set(f,'vinculaciones',looseValue(text,['PRODUCTOS VINCULADOS','VINCULACIONES','BONIFICACIONES'],1000));
+ const vinculaciones=looseValue(text,['PRODUCTOS VINCULADOS','VINCULACIONES','BONIFICACIONES'],1000);
+ if(vinculaciones)setExplicit(f,'vinculaciones',vinculaciones);
  set(f,'bonificaciones',looseValue(text,['BONIFICACIONES'],800));
  set(f,'comisiones',looseValue(text,['COMISIONES'],1000));
  set(f,'gastos',looseValue(text,['GASTOS'],1000));
@@ -89,7 +97,8 @@ function enrichOther(type:string,text:string,f:ExtractedFields){
   set(f,'valor_hipotecario',moneyNear(text,['VALOR HIPOTECARIO']));
   set(f,'finalidad',looseValue(text,['FINALIDAD DE LA TASACI[ÓO]N','FINALIDAD'],400));
   set(f,'condicionantes',looseValue(text,['CONDICIONANTES','CONDICIONES'],900));
-  set(f,'observaciones',looseValue(text,['OBSERVACIONES DEL TASADOR','OBSERVACIONES'],900));
+  const observaciones=looseValue(text,['OBSERVACIONES DEL TASADOR','OBSERVACIONES'],900);
+  if(observaciones){setExplicit(f,'observaciones_tasador',observaciones);setExplicit(f,'observaciones',observaciones);}
   set(f,'salvedades',looseValue(text,['SALVEDADES','ADVERTENCIAS'],900));
  }
  if(type==='Seguro bancario'){set(f,'aseguradora',looseValue(text,['ENTIDAD ASEGURADORA','ASEGURADORA','COMPAÑ[IÍ]A'],300));set(f,'tomador',looseValue(text,['TOMADOR'],300));set(f,'asegurado',looseValue(text,['ASEGURADO'],300));set(f,'prima',moneyNear(text,['PRIMA ANUAL','PRIMA MENSUAL','PRIMA']));set(f,'coberturas',looseValue(text,['COBERTURAS','GARANT[ÍI]AS'],1000));}
