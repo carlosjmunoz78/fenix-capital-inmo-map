@@ -1,9 +1,11 @@
+export type DocumentFieldValue=string|number|boolean|string[]|Record<string,string|number|boolean|null>|Array<Record<string,string|number|boolean|null>>;
 export type ExtractedDocument={
-  documentType:'DNI/NIE'|'Documento personal'|'Documento';
+  documentType:'DNI/NIE'|'Nómina'|'Contrato laboral'|'Vida laboral'|'Préstamo / deuda'|'CIRBE'|'Movimientos bancarios'|'IRPF / autónomos'|'Nota simple'|'Arras'|'Tarjeta de visita'|'Documento personal'|'Documento';
   rawText:string;
   confidence:number|null;
-  fields:{nombre?:string;apellidos?:string;documento_identidad?:string;fecha_nacimiento?:string};
+  fields:Record<string,DocumentFieldValue>;
   summary:string;
+  warnings:string[];
 };
 
 declare global{interface Window{Tesseract?:any;pdfjsLib?:any}}
@@ -11,62 +13,37 @@ declare global{interface Window{Tesseract?:any;pdfjsLib?:any}}
 const TESSERACT_SCRIPT='https://cdn.jsdelivr.net/npm/tesseract.js@6.0.1/dist/tesseract.min.js';
 const PDF_SCRIPT='https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js';
 const PDF_WORKER='https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
-
-function loadScript(id:string,src:string){
-  return new Promise<void>((resolve,reject)=>{
-    if(document.getElementById(id)){resolve();return;}
-    const s=document.createElement('script');s.id=id;s.src=src;s.async=true;s.crossOrigin='anonymous';
-    s.onload=()=>resolve();s.onerror=()=>reject(new Error(`No se pudo cargar ${id}`));document.head.appendChild(s);
-  });
-}
+function loadScript(id:string,src:string){return new Promise<void>((resolve,reject)=>{if(document.getElementById(id)){resolve();return;}const s=document.createElement('script');s.id=id;s.src=src;s.async=true;s.crossOrigin='anonymous';s.onload=()=>resolve();s.onerror=()=>reject(new Error(`No se pudo cargar ${id}`));document.head.appendChild(s);});}
 async function ensureTesseract(){if(!window.Tesseract)await loadScript('fenix-tesseract-runtime',TESSERACT_SCRIPT);if(!window.Tesseract)throw new Error('OCR no disponible');return window.Tesseract;}
 async function ensurePdf(){if(!window.pdfjsLib)await loadScript('fenix-pdfjs-runtime',PDF_SCRIPT);if(!window.pdfjsLib)throw new Error('Lector PDF no disponible');window.pdfjsLib.GlobalWorkerOptions.workerSrc=PDF_WORKER;return window.pdfjsLib;}
 async function recognize(source:Blob|HTMLCanvasElement){const T=await ensureTesseract();const r=await T.recognize(source,'spa');return{text:String(r?.data?.text||''),confidence:Number.isFinite(Number(r?.data?.confidence))?Number(r.data.confidence):null};}
+export async function ocrFile(file:File,onProgress?:(text:string)=>void):Promise<{text:string;confidence:number|null}>{const mime=(file.type||'').toLowerCase();if(mime==='application/pdf'||file.name.toLowerCase().endsWith('.pdf')){onProgress?.('Abriendo PDF…');const pdfjs=await ensurePdf();const data=new Uint8Array(await file.arrayBuffer());const pdf=await pdfjs.getDocument({data}).promise;const pages=Math.min(Number(pdf.numPages||0),12);let full='';const scores:number[]=[];for(let i=1;i<=pages;i++){onProgress?.(`Leyendo página ${i} de ${pages}…`);const page=await pdf.getPage(i);const viewport=page.getViewport({scale:1.8});const canvas=document.createElement('canvas');canvas.width=Math.ceil(viewport.width);canvas.height=Math.ceil(viewport.height);const ctx=canvas.getContext('2d');if(!ctx)throw new Error('No se pudo preparar la página');await page.render({canvasContext:ctx,viewport}).promise;const r=await recognize(canvas);full+=`${r.text}\n`;if(r.confidence!==null)scores.push(r.confidence);}return{text:full.trim(),confidence:scores.length?scores.reduce((a,b)=>a+b,0)/scores.length:null};}if(mime.startsWith('image/')||/\.(png|jpe?g|webp)$/i.test(file.name)){onProgress?.('Leyendo imagen…');return recognize(file);}throw new Error('Para lectura inteligente usa una foto JPG/PNG/WEBP o un PDF.');}
 
-export async function ocrFile(file:File,onProgress?:(text:string)=>void):Promise<{text:string;confidence:number|null}>{
-  const mime=(file.type||'').toLowerCase();
-  if(mime==='application/pdf'||file.name.toLowerCase().endsWith('.pdf')){
-    onProgress?.('Abriendo PDF…');const pdfjs=await ensurePdf();const data=new Uint8Array(await file.arrayBuffer());const pdf=await pdfjs.getDocument({data}).promise;
-    const pages=Math.min(Number(pdf.numPages||0),6);let full='';const scores:number[]=[];
-    for(let i=1;i<=pages;i++){
-      onProgress?.(`Leyendo página ${i} de ${pages}…`);const page=await pdf.getPage(i);const viewport=page.getViewport({scale:1.8});
-      const canvas=document.createElement('canvas');canvas.width=Math.ceil(viewport.width);canvas.height=Math.ceil(viewport.height);
-      const ctx=canvas.getContext('2d');if(!ctx)throw new Error('No se pudo preparar la página');await page.render({canvasContext:ctx,viewport}).promise;
-      const r=await recognize(canvas);full+=`${r.text}\n`;if(r.confidence!==null)scores.push(r.confidence);
-    }
-    return{text:full.trim(),confidence:scores.length?scores.reduce((a,b)=>a+b,0)/scores.length:null};
-  }
-  if(mime.startsWith('image/')||/\.(png|jpe?g|webp)$/i.test(file.name)){onProgress?.('Leyendo imagen…');return recognize(file);}
-  throw new Error('Para lectura inteligente usa una foto JPG/PNG/WEBP o un PDF.');
-}
+function clean(v:string){return v.replace(/\u00a0/g,' ').replace(/[|]/g,'I').replace(/\s+/g,' ').trim();}
+function lines(raw:string){return raw.split(/\r?\n/).map(clean).filter(Boolean);}
+function euro(v:string){const m=v.match(/(-?\d{1,3}(?:[.\s]\d{3})*(?:,\d{1,2})|-?\d+(?:[.,]\d{1,2})?)\s*€?/);if(!m)return'';const n=m[1].replace(/[.\s](?=\d{3}(?:\D|$))/g,'').replace(',','.');return Number.isFinite(Number(n))?String(Number(n)):'';}
+function near(ls:string[],labels:RegExp[],max=3){for(let i=0;i<ls.length;i++)for(const rx of labels){if(!rx.test(ls[i]))continue;const inline=clean(ls[i].replace(rx,''));if(inline)return inline;for(let j=i+1;j<Math.min(ls.length,i+1+max);j++){if(ls[j])return ls[j];}}return'';}
+function isoDate(v:string){const m=v.match(/\b(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})\b/);return m?`${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`:'';}
+function personCase(v:string){return clean(v).toLocaleLowerCase('es').replace(/(^|[\s'-])([a-záéíóúüñ])/g,(_,a,b)=>a+b.toLocaleUpperCase('es'));}
+function emailOf(t:string){return(t.match(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i)||[])[0]||'';}
+function phoneOf(t:string){return(t.match(/(?:\+34\s*)?(?:[6789]\d{2}[\s.-]?\d{3}[\s.-]?\d{3})\b/)||[])[0]?.replace(/[\s.-]/g,'')||'';}
+function ibanOf(t:string){return(t.toUpperCase().match(/\bES\d{2}(?:\s?\d{4}){5}\b/)||[])[0]?.replace(/\s/g,'')||'';}
+function firstMoneyNear(ls:string[],labels:RegExp[]){const v=near(ls,labels,2);return euro(v);}
+function genericIdentity(t:string,ls:string[],fields:Record<string,DocumentFieldValue>){const upper=t.toLocaleUpperCase('es');const id=(upper.match(/\b(?:\d{8}[A-Z]|[XYZ]\d{7}[A-Z])\b/)||[])[0]||'';const full=near(ls,[/^(?:TITULAR|TRABAJADOR(?:A)?|CONTRIBUYENTE|PRESTATARIO|NOMBRE(?: Y APELLIDOS)?|APELLIDOS Y NOMBRE)\s*[:/-]?\s*/i]);if(id)fields.documento_identidad=id;if(full&&full.length<160)fields.titular=personCase(full);}
 
-const LABEL_NOISE=/^(apellidos?|surname|nombre|name|sexo|sex|nacionalidad|nationality|nacimiento|date of birth|validez|valid|documento|document|dni|nie|id|firma|signature|españa|espana|reino de españa|reino de espana)$/i;
-function cleanup(v:string){return v.replace(/[|]/g,'I').replace(/\s+/g,' ').replace(/^[^A-ZÁÉÍÓÚÜÑ0-9]+|[^A-ZÁÉÍÓÚÜÑ0-9'-]+$/gi,'').trim();}
-function personCase(v:string){return cleanup(v).toLocaleLowerCase('es').replace(/(^|[\s'-])([a-záéíóúüñ])/g,(_,a,b)=>a+b.toLocaleUpperCase('es'));}
-function linesOf(raw:string){return raw.split(/\r?\n/).map(cleanup).filter(Boolean);}
-function valueNear(lines:string[],labels:RegExp[]){
-  for(let i=0;i<lines.length;i++)for(const label of labels){
-    if(!label.test(lines[i]))continue;
-    const inline=cleanup(lines[i].replace(label,''));if(inline.length>=2&&!LABEL_NOISE.test(inline))return inline;
-    for(let j=i+1;j<Math.min(lines.length,i+4);j++){const c=cleanup(lines[j]);if(c.length>=2&&!LABEL_NOISE.test(c)&&!/^(ESP|IDESP|ESPANA|ESPAÑA)$/i.test(c))return c;}
-  }
-  return'';
-}
-function isoDate(v:string){const m=v.match(/\b(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})\b/);if(!m)return'';return`${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;}
+function detectType(t:string):ExtractedDocument['documentType']{const u=t.toLocaleUpperCase('es');if(/DOCUMENTO NACIONAL DE IDENTIDAD|\bDNI\b|\bNIE\b|IDENTITY CARD/.test(u))return'DNI/NIE';if(/RECIBO DE SALARIOS|N[ÓO]MINA|DEVENGOS|L[IÍ]QUIDO A PERCIBIR/.test(u))return'Nómina';if(/CONTRATO DE TRABAJO|CONTRATO LABORAL|TIPO DE CONTRATO/.test(u))return'Contrato laboral';if(/INFORME DE VIDA LABORAL|VIDA LABORAL|SITUACIONES DE ALTA/.test(u))return'Vida laboral';if(/CIRBE|CENTRAL DE INFORMACI[ÓO]N DE RIESGOS/.test(u))return'CIRBE';if(/NOTA SIMPLE|REGISTRO DE LA PROPIEDAD|FINCA REGISTRAL|C[ÓO]DIGO REGISTRAL [ÚU]NICO/.test(u))return'Nota simple';if(/CONTRATO DE ARRAS|ARRAS PENITENCIALES|ARRAS CONFIRMATORIAS/.test(u))return'Arras';if(/MODELO 100|IRPF|IMPUESTO SOBRE LA RENTA|MODELO 130|MODELO 131/.test(u))return'IRPF / autónomos';if(/CUOTA.*PR[ÉE]STAMO|RECIBO.*PR[ÉE]STAMO|CAPITAL PENDIENTE|SALDO PENDIENTE|PR[ÉE]STAMO HIPOTECARIO|PR[ÉE]STAMO PERSONAL/.test(u))return'Préstamo / deuda';if(/EXTRACTO|MOVIMIENTOS|SALDO ANTERIOR|SALDO CONTABLE|IBAN/.test(u))return'Movimientos bancarios';if(emailOf(t)&&phoneOf(t)&&t.length<1800)return'Tarjeta de visita';return'Documento';}
 
-export function extractDocumentData(rawText:string,confidence:number|null=null):ExtractedDocument{
-  const normalized=rawText.normalize('NFKC').replace(/\u00a0/g,' ');const upper=normalized.toLocaleUpperCase('es');const lines=linesOf(normalized);
-  const id=(upper.match(/\b(?:\d{8}[A-Z]|[XYZ]\d{7}[A-Z])\b/)||[])[0]||'';
-  let apellidos=valueNear(lines,[/^(?:APELLIDOS?|SURNAME)\s*[:/-]?\s*/i]);
-  let nombre=valueNear(lines,[/^(?:NOMBRE|NAME)\s*[:/-]?\s*/i]);
-  const birthLabel=valueNear(lines,[/^(?:NACIMIENTO|FECHA DE NACIMIENTO|DATE OF BIRTH)\s*[:/-]?\s*/i]);
-  let fecha=isoDate(birthLabel);
-  if(!fecha){const around=normalized.match(/(?:NACIMIENTO|DATE OF BIRTH)[^\d]{0,30}(\d{1,2}[.\/-]\d{1,2}[.\/-]\d{4})/i);fecha=around?isoDate(around[1]):'';}
-  apellidos=apellidos?personCase(apellidos):'';nombre=nombre?personCase(nombre):'';
-  const dniLike=Boolean(id)||/DOCUMENTO NACIONAL DE IDENTIDAD|DNI|NIE|IDENTITY CARD/i.test(normalized);
-  const fields:ExtractedDocument['fields']={};if(nombre)fields.nombre=nombre;if(apellidos)fields.apellidos=apellidos;if(id)fields.documento_identidad=id;if(fecha)fields.fecha_nacimiento=fecha;
-  const parts=[nombre||apellidos?[nombre,apellidos].filter(Boolean).join(' '):'',id?`documento ${id}`:'',fecha?`nacimiento ${fecha}`:''].filter(Boolean);
-  const documentType=dniLike?'DNI/NIE':(nombre||apellidos||fecha?'Documento personal':'Documento');
-  const summary=parts.length?`${documentType}: ${parts.join(' · ')}.`:`${documentType}: se ha leído el archivo, pero no hay datos personales suficientemente claros para autorrellenar.`;
-  return{documentType,rawText:normalized.trim(),confidence,fields,summary};
-}
+export function extractDocumentData(rawText:string,confidence:number|null=null,declaredType=''):ExtractedDocument{const normalized=rawText.normalize('NFKC').replace(/\u00a0/g,' ');const ls=lines(normalized);let documentType=detectType(normalized);const d=declaredType.toLocaleLowerCase('es');if(documentType==='Documento'){if(/n[oó]mina/.test(d))documentType='Nómina';else if(/vida laboral/.test(d))documentType='Vida laboral';else if(/contrato/.test(d))documentType='Contrato laboral';else if(/pr[eé]stamo|deuda/.test(d))documentType='Préstamo / deuda';else if(/cirbe/.test(d))documentType='CIRBE';else if(/movimiento|extracto/.test(d))documentType='Movimientos bancarios';else if(/irpf|aut[oó]nom/.test(d))documentType='IRPF / autónomos';else if(/nota simple/.test(d))documentType='Nota simple';else if(/arras/.test(d))documentType='Arras';else if(/tarjeta/.test(d))documentType='Tarjeta de visita';else if(/dni|nie/.test(d))documentType='DNI/NIE';}
+ const fields:Record<string,DocumentFieldValue>={},warnings:string[]=[];genericIdentity(normalized,ls,fields);
+ if(documentType==='DNI/NIE'){const upper=normalized.toLocaleUpperCase('es');const id=(upper.match(/\b(?:\d{8}[A-Z]|[XYZ]\d{7}[A-Z])\b/)||[])[0]||'';const ap=near(ls,[/^(?:APELLIDOS?|SURNAME)\s*[:/-]?\s*/i]);const no=near(ls,[/^(?:NOMBRE|NAME)\s*[:/-]?\s*/i]);const birth=near(ls,[/^(?:NACIMIENTO|FECHA DE NACIMIENTO|DATE OF BIRTH)\s*[:/-]?\s*/i]);if(id)fields.documento_identidad=id;if(no)fields.nombre=personCase(no);if(ap)fields.apellidos=personCase(ap);const dt=isoDate(birth)||(normalized.match(/(?:NACIMIENTO|DATE OF BIRTH)[^\d]{0,30}(\d{1,2}[.\/-]\d{1,2}[.\/-]\d{4})/i)?.[1]||'');if(dt)fields.fecha_nacimiento=dt.includes('-')?dt:isoDate(dt);}
+ if(documentType==='Nómina'){const empresa=near(ls,[/^(?:EMPRESA|RAZ[ÓO]N SOCIAL|EMPLEADOR|PAGADOR)\s*[:/-]?\s*/i]);const neto=firstMoneyNear(ls,[/^(?:L[IÍ]QUIDO A PERCIBIR|NETO A PERCIBIR|TOTAL A PERCIBIR|L[IÍ]QUIDO TOTAL)\s*[:/-]?\s*/i]);const bruto=firstMoneyNear(ls,[/^(?:TOTAL DEVENGADO|TOTAL DEVENGOS|BRUTO)\s*[:/-]?\s*/i]);const periodo=near(ls,[/^(?:PER[IÍ]ODO DE LIQUIDACI[ÓO]N|PER[IÍ]ODO|MES)\s*[:/-]?\s*/i]);const antig=near(ls,[/^(?:ANTIG[ÜU]EDAD|FECHA DE ALTA)\s*[:/-]?\s*/i]);if(empresa)fields.empresa_pagador=empresa;if(neto)fields.neto_nomina=Number(neto);if(bruto)fields.bruto_nomina=Number(bruto);if(periodo)fields.periodo_nomina=periodo;if(antig)fields.antiguedad_visible=antig;const emb=ls.filter(x=>/EMBARGO|RETENCI[ÓO]N JUDICIAL|ANTICIPO|PR[ÉE]STAMO EMPRESA/i.test(x)).slice(0,8);if(emb.length)fields.descuentos_extraordinarios=emb;}
+ if(documentType==='Contrato laboral'){const empresa=near(ls,[/^(?:EMPRESA|EMPLEADOR|RAZ[ÓO]N SOCIAL)\s*[:/-]?\s*/i]);const tipo=near(ls,[/^(?:TIPO DE CONTRATO|MODALIDAD|CONTRATO)\s*[:/-]?\s*/i]);const inicio=near(ls,[/^(?:FECHA DE INICIO|INICIO|FECHA DE ALTA)\s*[:/-]?\s*/i]);const puesto=near(ls,[/^(?:PUESTO|CATEGOR[IÍ]A PROFESIONAL|OCUPACI[ÓO]N)\s*[:/-]?\s*/i]);if(empresa)fields.empresa=empresa;if(tipo)fields.tipo_contrato=tipo;const di=isoDate(inicio);if(di)fields.fecha_inicio=di;if(puesto)fields.puesto=puesto;}
+ if(documentType==='Vida laboral'){const total=near(ls,[/^(?:TOTAL D[IÍ]AS|D[IÍ]AS EN ALTA|TOTAL DE D[IÍ]AS)\s*[:/-]?\s*/i]);if(total){const n=total.match(/\d+/)?.[0];if(n)fields.dias_alta=Number(n);}const periods=ls.filter(x=>/\b\d{1,2}[./-]\d{1,2}[./-]\d{4}\b/.test(x)).slice(0,30);if(periods.length)fields.periodos_visibles=periods;}
+ if(documentType==='Préstamo / deuda'){const entidad=near(ls,[/^(?:ENTIDAD|PRESTAMISTA|ACREEDOR|BANCO)\s*[:/-]?\s*/i]);const cuota=firstMoneyNear(ls,[/^(?:CUOTA|RECIBO|IMPORTE CUOTA|CUOTA MENSUAL)\s*[:/-]?\s*/i]);const pendiente=firstMoneyNear(ls,[/^(?:CAPITAL PENDIENTE|SALDO PENDIENTE|DEUDA PENDIENTE)\s*[:/-]?\s*/i]);const referencia=near(ls,[/^(?:N[ÚU]MERO DE PR[ÉE]STAMO|CONTRATO|REFERENCIA)\s*[:/-]?\s*/i]);if(entidad)fields.entidad_acreedora=entidad;if(cuota)fields.cuota=Number(cuota);if(pendiente)fields.capital_pendiente=Number(pendiente);if(referencia)fields.referencia_prestamo=referencia;}
+ if(documentType==='CIRBE'){const risks=ls.filter(x=>/(DISPUESTO|RIESGO|L[IÍ]MITE|ENTIDAD|PR[ÉE]STAMO|CR[ÉE]DITO)/i.test(x)&&/\d/.test(x)).slice(0,40);if(risks.length)fields.riesgos_explicitos=risks;warnings.push('CIRBE: los riesgos extraídos son observaciones documentales; no se convierten automáticamente en deuda computable.');}
+ if(documentType==='Movimientos bancarios'){const iban=ibanOf(normalized);if(iban)fields.iban=iban;const linesMoney=ls.filter(x=>/\d+[.,]\d{2}/.test(x)).slice(0,80);if(linesMoney.length)fields.movimientos_visibles=linesMoney;warnings.push('Movimientos: no se infiere una deuda o ingreso recurrente sin etiqueta o contraste posterior.');}
+ if(documentType==='IRPF / autónomos'){const ejercicio=(normalized.match(/(?:EJERCICIO|PER[IÍ]ODO)\s*[:/-]?\s*(20\d{2})/i)||[])[1]||'';if(ejercicio)fields.ejercicio=ejercicio;const rend=firstMoneyNear(ls,[/^(?:RENDIMIENTO NETO|RENDIMIENTOS NETOS|BASE IMPONIBLE GENERAL|BASE LIQUIDABLE GENERAL)\s*[:/-]?\s*/i]);if(rend)fields.importe_renta_explicito=Number(rend);warnings.push('IRPF/autónomos: se extraen magnitudes expresas; no se emite interpretación fiscal automática.');}
+ if(documentType==='Nota simple'){const finca=near(ls,[/^(?:FINCA(?: REGISTRAL)?|N[ÚU]MERO DE FINCA|CRU|IDUFIR)\s*[:/-]?\s*/i]);const titular=near(ls,[/^(?:TITULAR(?:IDAD)?|TITULARES?)\s*[:/-]?\s*/i]);const cargas=ls.filter(x=>/HIPOTECA|EMBARGO|CARGA|AFECCI[ÓO]N|SERVIDUMBRE/i.test(x)).slice(0,30);if(finca)fields.finca_registral=finca;if(titular)fields.titularidad_visible=titular;if(cargas.length)fields.cargas_visibles=cargas;warnings.push('Nota simple: se muestran cargas textuales; no se emite conclusión jurídica automática.');}
+ if(documentType==='Arras'){const precio=firstMoneyNear(ls,[/^(?:PRECIO(?: DE COMPRAVENTA)?|PRECIO TOTAL)\s*[:/-]?\s*/i]);const senal=firstMoneyNear(ls,[/^(?:ARRAS|SEÑAL|SENAL|ENTREGA A CUENTA|IMPORTE ENTREGADO)\s*[:/-]?\s*/i]);const fecha=near(ls,[/^(?:FECHA L[IÍ]MITE|PLAZO|FECHA DE FIRMA)\s*[:/-]?\s*/i]);if(precio)fields.precio_compraventa=Number(precio);if(senal)fields.importe_arras=Number(senal);if(fecha)fields.plazo_visible=fecha;}
+ if(documentType==='Tarjeta de visita'){const mail=emailOf(normalized),phone=phoneOf(normalized),web=(normalized.match(/\b(?:https?:\/\/)?(?:www\.)?[a-z0-9.-]+\.(?:es|com|net|org)\b/i)||[])[0]||'';const candidates=ls.filter(x=>!x.includes('@')&&!/\d{6,}/.test(x)&&x.length<90);if(candidates[0])fields.nombre_contacto=personCase(candidates[0]);if(candidates[1])fields.empresa_o_cargo=candidates[1];if(mail)fields.email=mail;if(phone)fields.telefono=phone;if(web)fields.web=web;}
+ const entries=Object.entries(fields).filter(([,v])=>v!==''&&v!==null&&(!Array.isArray(v)||v.length));const compact=entries.slice(0,6).map(([k,v])=>`${k.replace(/_/g,' ')}: ${Array.isArray(v)?v.slice(0,2).join(' | '):String(v)}`);const summary=compact.length?`${documentType}: ${compact.join(' · ')}.`:`${documentType}: se ha leído el archivo, pero no hay datos suficientemente claros para autorrellenar.`;if(confidence!==null&&confidence<55)warnings.push('OCR de baja confianza: revisar visualmente antes de confirmar.');return{documentType,rawText:normalized.trim(),confidence,fields,summary,warnings};}
