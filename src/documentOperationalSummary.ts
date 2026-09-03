@@ -12,7 +12,7 @@ function parseCerebroNotes(row:SummaryRow){
 }
 function typeOf(row:SummaryRow){return first(row,['tipo_canónico','tipo_canonico','tipo','categoria','categoría','document_type','detected_document_type']).toLocaleLowerCase('es');}
 function generic(row:SummaryRow){
- const hidden=new Set(['id','synthetic','fuente','destino','url','archivo_url','url_archivo','file_url','source_url','original_url','pdf','url_pdf','documento_url','enlace','link','archivo','notas','Notas','notes']);
+ const hidden=new Set(['id','synthetic','fuente','destino','url','archivo_url','url_archivo','file_url','source_url','original_url','pdf','url_pdf','documento_url','enlace','link','archivo','notas','Notas','notes','tipo_canónico','tipo_canonico','tipo','categoria','categoría','document_type','detected_document_type','estado','status']);
  const entries=Object.entries(row).filter(([k,v])=>!hidden.has(k)&&v!==null&&v!==undefined&&String(v).trim()!=='').slice(0,8);
  if(!entries.length)return'Documento registrado sin datos suficientes para elaborar un resumen operativo. No se han inferido datos ausentes.';
  return entries.map(([k,v])=>`${k.replaceAll('_',' ')}: ${String(v)}`).join(' · ')+'.';
