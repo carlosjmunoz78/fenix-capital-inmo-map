@@ -2,11 +2,12 @@ import {test,expect} from '@playwright/test';
 import fs from 'node:fs';
 
 const guard=fs.readFileSync('src/UniversalDocumentIntelligenceGuardV2.tsx','utf8');
+const guardRoutes=guard.replace(/\\/g,'');
 const evidence=fs.readFileSync('supabase/functions/fenix-evidence-api/index.ts','utf8');
 const intelligence=fs.readFileSync('supabase/functions/fenix-document-intelligence/index.ts','utf8');
 
 test('franja documental universal cubre todas las fichas operativas pedidas',()=>{
- for(const route of ['/contactos/','/expedientes/','/firmas/','/inmobiliarias/','/tasaciones/','/tareas/','/documentacion/','/bancos/','/notarias/','/registros-propiedad/','/herencias/','/obras-nuevas/'])expect(guard).toContain(route);
+ for(const route of ['/contactos/','/expedientes/','/firmas/','/inmobiliarias/','/tasaciones/','/tareas/','/documentacion/','/bancos/','/notarias/','/registros-propiedad/','/herencias/','/obras-nuevas/'])expect(guardRoutes).toContain(route);
  expect(guard).toContain('Ana · leer documento y rellenar datos');
  expect(guard).toContain('Subir documentos');
 });
