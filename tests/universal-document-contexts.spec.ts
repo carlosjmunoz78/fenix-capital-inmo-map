@@ -7,9 +7,10 @@ const evidence=fs.readFileSync('supabase/functions/fenix-evidence-api/index.ts',
 const intelligence=fs.readFileSync('supabase/functions/fenix-document-intelligence/index.ts','utf8');
 
 test('franja documental universal cubre todas las fichas operativas pedidas',()=>{
- for(const route of ['/contactos/','/expedientes/','/firmas/','/inmobiliarias/','/tasaciones/','/tareas/','/documentacion/','/bancos/','/notarias/','/registros-propiedad/','/herencias/','/obras-nuevas/'])expect(guardRoutes).toContain(route);
+ for(const route of ['/contactos/','/contactos-b2b/','/expedientes/','/firmas/','/inmobiliarias/','/tasaciones/','/tareas/','/documentacion/','/bancos/','/notarias/','/registros-propiedad/','/herencias/','/obras-nuevas/'])expect(guardRoutes).toContain(route);
  expect(guard).toContain('Ana · leer documento y rellenar datos');
  expect(guard).toContain('Subir documentos');
+ expect(guard).toContain('extractDocumentData(o.text,o.confidence,typeHint)');
 });
 
 test('Ana bloquea clasificación ambigua, duplicado y conflicto antes de consolidar',()=>{
@@ -21,7 +22,7 @@ test('Ana bloquea clasificación ambigua, duplicado y conflicto antes de consoli
 });
 
 test('backend de evidencia acepta y valida todos los contextos nuevos',()=>{
- for(const origin of ['banco','notaria','registro','herencia','obra_nueva'])expect(evidence).toMatch(new RegExp(`${origin}:\\{id:`));
+ for(const origin of ['contacto_b2b','banco','notaria','registro','herencia','obra_nueva'])expect(evidence).toMatch(new RegExp(`${origin}:\\{id:`));
  expect(evidence).toContain("d12b4b24-a434-4d2d-994a-59cc6e060ae4");
  expect(evidence).toContain("053afd8f-0809-4d24-8006-1afd265e03a9");
  expect(evidence).toContain("b9e47ee9-582b-4b5f-9db2-f93c0085c6bd");
@@ -32,7 +33,7 @@ test('backend de evidencia acepta y valida todos los contextos nuevos',()=>{
 });
 
 test('inteligencia guarda lectura genérica en CEREBRO sin forzar campos maestros incorrectos',()=>{
- for(const origin of ['banco','notaria','registro','herencia','obra_nueva'])expect(intelligence).toContain(origin);
+ for(const origin of ['contacto_b2b','banco','notaria','registro','herencia','obra_nueva'])expect(intelligence).toContain(origin);
  expect(intelligence).toContain('[CEREBRO · LECTURA DOCUMENTAL]');
  expect(intelligence).toContain('canonical_updates:0');
 });

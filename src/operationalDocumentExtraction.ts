@@ -10,12 +10,24 @@ function dateValue(text:string,labels:string[]){const raw=lineValue(text,labels)
 function set(f:ExtractedFields,key:string,value:unknown){if(value!==null&&value!==undefined&&value!==''&&f[key]===undefined)f[key]=value as string|number|boolean;}
 function percentValue(text:string,labels:string[]){for(const label of labels){const raw=lineValue(text,[label]);const m=raw.match(/(-?\d{1,3}(?:[.,]\d{1,4})?)\s*%/);if(m){const n=Number(m[1].replace(',','.'));if(Number.isFinite(n))return n;}}return null;}
 
+const DECLARED_SEED:Record<string,string>={
+ 'dni':'DOCUMENTO NACIONAL DE IDENTIDAD','nie':'NIE IDENTITY CARD','dni/nie':'DOCUMENTO NACIONAL DE IDENTIDAD',
+ 'nómina':'RECIBO DE SALARIOS NÓMINA','nomina':'RECIBO DE SALARIOS NÓMINA','préstamo / deuda':'RECIBO PRÉSTAMO CUOTA CAPITAL PENDIENTE','prestamo / deuda':'RECIBO PRÉSTAMO CUOTA CAPITAL PENDIENTE',
+ 'vida laboral':'INFORME DE VIDA LABORAL','irpf':'IMPUESTO SOBRE LA RENTA IRPF','cirbe':'CENTRAL DE INFORMACIÓN DE RIESGOS CIRBE',
+ 'movimientos bancarios':'EXTRACTO MOVIMIENTOS CUENTA','nota simple':'NOTA SIMPLE REGISTRO DE LA PROPIEDAD','tarjeta de visita':'TARJETA DE VISITA',
+ 'contrato / arras':'CONTRATO DE ARRAS','contrato':'CONTRATO DE ARRAS','arras':'CONTRATO DE ARRAS','oferta bancaria':'OFERTA HIPOTECA',
+ 'fein / fiae':'FEIN FICHA EUROPEA DE INFORMACIÓN NORMALIZADA','fein':'FEIN FICHA EUROPEA DE INFORMACIÓN NORMALIZADA','fiae':'FEIN FICHA EUROPEA DE INFORMACIÓN NORMALIZADA',
+ 'seguro bancario':'PÓLIZA SEGURO COBERTURAS','tasación':'INFORME DE TASACIÓN VALOR DE TASACIÓN','tasacion':'INFORME DE TASACIÓN VALOR DE TASACIÓN',
+ 'documento notarial / registral':'ESCRITURA NOTARÍA PROTOCOLO','factura / recibo':'FACTURA TOTAL A PAGAR'
+};
+function declarationSeed(declaredType:string){return DECLARED_SEED[declaredType.trim().toLocaleLowerCase('es')]||'';}
+
 function enrich(type:string,text:string,f:ExtractedFields){
  if(type==='Vida laboral'){
   set(f,'fecha_informe',dateValue(text,['FECHA DEL INFORME','FECHA DE EMISI[ÓO]N']));set(f,'regimen',lineValue(text,['R[ÉE]GIMEN','R[ÉE]GIMEN ACTUAL']));set(f,'empresa_actual',lineValue(text,['EMPRESA ACTUAL','RAZ[ÓO]N SOCIAL ACTUAL','EMPRESA']));set(f,'fecha_alta_actual',dateValue(text,['FECHA DE ALTA ACTUAL','FECHA DE ALTA']));set(f,'antiguedad',lineValue(text,['ANTIG[ÜU]EDAD']));set(f,'periodos_trabajados',lineValue(text,['PER[IÍ]ODOS TRABAJADOS','SITUACIONES DE ALTA'],700));set(f,'empresas_anteriores',lineValue(text,['EMPRESAS ANTERIORES'],700));set(f,'incidencias',lineValue(text,['INCIDENCIAS','OBSERVACIONES','SOLAPAMIENTOS'],700));
  }
  if(type==='Tasación'){
-  set(f,'tasadora',lineValue(text,['SOCIEDAD DE TASACI[ÓO]N','TASADORA','ENTIDAD TASADORA']));set(f,'tasador',lineValue(text,['TASADOR','T[ÉE]CNICO TASADOR','T[ÉE]CNICO']));set(f,'fecha_tasacion',dateValue(text,['FECHA DE TASACI[ÓO]N','FECHA DEL INFORME','FECHA']));set(f,'direccion',lineValue(text,['DIRECCI[ÓO]N DEL INMUEBLE','DIRECCI[ÓO]N','EMPLAZAMIENTO']));set(f,'referencia_catastral',lineValue(text,['REFERENCIA CATASTRAL']));set(f,'finalidad',lineValue(text,['FINALIDAD DE LA TASACI[ÓO]N','FINALIDAD']));set(f,'superficie_util',numberValue(text,['SUPERFICIE [ÚU]TIL','SUP\. [ÚU]TIL']));set(f,'superficie_construida',numberValue(text,['SUPERFICIE CONSTRUIDA','SUP\. CONSTRUIDA']));set(f,'superficie_parcela',numberValue(text,['SUPERFICIE DE PARCELA','PARCELA']));set(f,'uso',lineValue(text,['USO','DESTINO']));set(f,'estado_conservacion',lineValue(text,['ESTADO DE CONSERVACI[ÓO]N','CONSERVACI[ÓO]N']));set(f,'valor_tasacion',numberValue(text,['VALOR DE TASACI[ÓO]N','VALOR TASACI[ÓO]N']));set(f,'valor_hipotecario',numberValue(text,['VALOR HIPOTECARIO']));set(f,'comparables',lineValue(text,['COMPARABLES','TESTIGOS'],900));set(f,'condicionantes',lineValue(text,['CONDICIONANTES','CONDICIONES'],900));set(f,'advertencias',lineValue(text,['ADVERTENCIAS','ADVERTENCIA'],900));set(f,'observaciones_tasador',lineValue(text,['OBSERVACIONES DEL TASADOR','OBSERVACIONES'],900));set(f,'salvedades',lineValue(text,['SALVEDADES','EXCEPCIONES'],900));set(f,'documentacion_pendiente',lineValue(text,['DOCUMENTACI[ÓO]N PENDIENTE','DOCUMENTOS PENDIENTES'],700));set(f,'vigencia',lineValue(text,['VIGENCIA','CADUCIDAD']));
+  set(f,'tasadora',lineValue(text,['SOCIEDAD DE TASACI[ÓO]N','TASADORA','ENTIDAD TASADORA']));set(f,'tasador',lineValue(text,['TASADOR','T[ÉE]CNICO TASADOR','T[ÉE]CNICO']));set(f,'fecha_tasacion',dateValue(text,['FECHA DE TASACI[ÓO]N','FECHA DEL INFORME','FECHA']));set(f,'direccion',lineValue(text,['DIRECCI[ÓO]N DEL INMUEBLE','DIRECCI[ÓO]N','EMPLAZAMIENTO']));set(f,'referencia_catastral',lineValue(text,['REFERENCIA CATASTRAL']));set(f,'finalidad',lineValue(text,['FINALIDAD DE LA TASACI[ÓO]N','FINALIDAD']));set(f,'superficie_util',numberValue(text,['SUPERFICIE [ÚU]TIL','SUP\\. [ÚU]TIL']));set(f,'superficie_construida',numberValue(text,['SUPERFICIE CONSTRUIDA','SUP\\. CONSTRUIDA']));set(f,'superficie_parcela',numberValue(text,['SUPERFICIE DE PARCELA','PARCELA']));set(f,'uso',lineValue(text,['USO','DESTINO']));set(f,'estado_conservacion',lineValue(text,['ESTADO DE CONSERVACI[ÓO]N','CONSERVACI[ÓO]N']));set(f,'valor_tasacion',numberValue(text,['VALOR DE TASACI[ÓO]N','VALOR TASACI[ÓO]N']));set(f,'valor_hipotecario',numberValue(text,['VALOR HIPOTECARIO']));set(f,'comparables',lineValue(text,['COMPARABLES','TESTIGOS'],900));set(f,'condicionantes',lineValue(text,['CONDICIONANTES','CONDICIONES'],900));set(f,'advertencias',lineValue(text,['ADVERTENCIAS','ADVERTENCIA'],900));set(f,'observaciones_tasador',lineValue(text,['OBSERVACIONES DEL TASADOR','OBSERVACIONES'],900));set(f,'salvedades',lineValue(text,['SALVEDADES','EXCEPCIONES'],900));set(f,'documentacion_pendiente',lineValue(text,['DOCUMENTACI[ÓO]N PENDIENTE','DOCUMENTOS PENDIENTES'],700));set(f,'vigencia',lineValue(text,['VIGENCIA','CADUCIDAD']));
  }
  if(type==='Nota simple'){
   set(f,'numero_finca',lineValue(text,['N[ÚU]MERO DE FINCA','FINCA REGISTRAL','FINCA']));set(f,'cru',lineValue(text,['CRU','IDUFIR']));set(f,'descripcion_finca',lineValue(text,['DESCRIPCI[ÓO]N DE LA FINCA','DESCRIPCI[ÓO]N'],900));set(f,'superficie',numberValue(text,['SUPERFICIE','CABIDA']));set(f,'titulares',lineValue(text,['TITULAR(?:ES)?','TITULARIDAD'],700));set(f,'porcentaje_titularidad',lineValue(text,['PORCENTAJE DE TITULARIDAD','CUOTA DE TITULARIDAD']));set(f,'titulo_adquisicion',lineValue(text,['T[ÍI]TULO DE ADQUISICI[ÓO]N','T[ÍI]TULO'],700));set(f,'hipotecas',lineValue(text,['HIPOTECAS','HIPOTECA'],900));set(f,'embargos',lineValue(text,['EMBARGOS','EMBARGO'],900));set(f,'limitaciones',lineValue(text,['LIMITACIONES'],900));set(f,'servidumbres',lineValue(text,['SERVIDUMBRES','SERVIDUMBRE'],900));set(f,'anotaciones',lineValue(text,['ANOTACIONES PREVENTIVAS','ANOTACIONES'],900));set(f,'fecha_expedicion',dateValue(text,['FECHA DE EXPEDICI[ÓO]N','FECHA']));
@@ -31,11 +43,16 @@ function enrich(type:string,text:string,f:ExtractedFields){
  }
 }
 
-export function extractDocumentData(rawText:string,confidence:number|null=null):ExtractedDocument{
+export function extractDocumentData(rawText:string,confidence:number|null=null,declaredType=''):ExtractedDocument{
  const upper=rawText.toLocaleUpperCase('es');
  const highPriority=/FEIN|FICHA EUROPEA DE INFORMACI[ÓO]N NORMALIZADA|OFERTA.*HIPOTEC|OFERTA VINCULANTE|CONDICIONES.*HIPOTEC|PROPUESTA.*FINANCIACI|P[ÓO]LIZA|PRIMA.*SEGURO|ASEGURAD[OA]|COBERTURAS/.test(upper);
  const normalized=highPriority?rawText.replace(/N[ÓO]MINA/gi,'VINCULACIÓN LABORAL'):rawText;
- const result=extractBase(normalized,confidence);
+ let result=extractBase(normalized,confidence);
+ const seed=declarationSeed(declaredType);
+ if(seed&&['Documento','Documento personal'].includes(result.documentType)){
+  result=extractBase(`${seed}\n${normalized}`,confidence);
+  result.rawText=rawText;
+ }
  if(result.documentType==='Oferta bancaria'||result.documentType==='FEIN / FIAE'){
   const tin=explicitPercent(rawText,'TIN'),tae=explicitPercent(rawText,'TAE');if(tin!==null&&result.fields.tin===undefined)result.fields.tin=tin;if(tae!==null&&result.fields.tae===undefined)result.fields.tae=tae;
  }
