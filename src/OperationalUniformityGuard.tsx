@@ -10,6 +10,7 @@ import './operational-uniformity.css';
 
 type Ctx={role?:string};
 const fallbackNav:NavItem[]=[{label:'Inicio',route:'/inicio'}];
+const VISUAL_DEDUP_CLASS='ops-detail-visual-duplicate';
 
 function visible(el:Element){
  const r=(el as HTMLElement).getBoundingClientRect();
@@ -38,6 +39,31 @@ function labelUniversalTaskChannels(){
   const label=button.textContent?.trim();
   if(label&&!button.getAttribute('aria-label'))button.setAttribute('aria-label',`Seleccionar ${label} como tipo de acción`);
  });
+}
+function normalizeText(value:string){return value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();}
+function isAnaCorrection(el:Element){
+ if(el.classList.contains('ana-top-correction')||el.classList.contains('profile-correct'))return true;
+ const heading=el.querySelector(':scope > h3, :scope > div > h3, :scope > div > small');
+ const text=normalizeText(heading?.textContent||'');
+ return (text.includes('en que me equivoco')||text.includes('corregir a ana'))&&Boolean(el.querySelector('textarea'));
+}
+function dedupeDetailVisuals(path:string,root:HTMLElement){
+ root.querySelectorAll(`.${VISUAL_DEDUP_CLASS}`).forEach(el=>el.classList.remove(VISUAL_DEDUP_CLASS));
+ if(/^\/contactos\/[^/]+$/.test(path)){
+  const content=root.querySelector('.ops-content');
+  const title=content?.querySelector(':scope > .contact-detail-title');
+  const ana=content?.querySelector(':scope > .contact-detail-ana');
+  if(content&&title&&ana&&title.nextElementSibling!==ana)content.insertBefore(title,ana);
+  const headers=[...root.querySelectorAll('.ops-main > .ops-top')].filter(visible);
+  headers.slice(1).forEach(el=>el.classList.add(VISUAL_DEDUP_CLASS));
+ }
+ if(path==='/perfil'||/^\/notarias\/[^/]+$/.test(path)||/^\/registros-propiedad\/[^/]+$/.test(path)){
+  const candidates=[...root.querySelectorAll('article,section')].filter(isAnaCorrection).filter(el=>!el.closest(`.${VISUAL_DEDUP_CLASS}`));
+  if(candidates.length>1){
+   const preferred=path==='/perfil'?(candidates.find(el=>el.classList.contains('profile-correct'))||candidates[0]):candidates[0];
+   candidates.forEach(el=>{if(el!==preferred)el.classList.add(VISUAL_DEDUP_CLASS)});
+  }
+ }
 }
 
 export default function OperationalUniformityGuard(){
@@ -97,13 +123,15 @@ export default function OperationalUniformityGuard(){
    if((existing||location.pathname.replace(/\/+$/,'')==='/inicio')&&fhost){fhost.remove();fhost=null;}
    setFooterHost(current=>current===fhost?current:fhost);
    labelUniversalTaskChannels();
+   dedupeDetailVisuals(location.pathname,root);
   };
   place();
   const observer=new MutationObserver(()=>{place();labelUniversalTaskChannels();});observer.observe(document.body,{childList:true,subtree:true});
-  return()=>{observer.disconnect();document.querySelectorAll('.ops-uniform-sidebar-host,.ops-uniform-footer-host').forEach(x=>x.remove());};
+  return()=>{observer.disconnect();document.querySelectorAll('.ops-uniform-sidebar-host,.ops-uniform-footer-host').forEach(x=>x.remove());document.querySelectorAll(`.${VISUAL_DEDUP_CLASS}`).forEach(x=>x.classList.remove(VISUAL_DEDUP_CLASS));};
  },[location.pathname]);
 
  return <>
+  <style>{`.${VISUAL_DEDUP_CLASS}{display:none!important}`}</style>
   <UniversalTaskActionStrip/>
   {sidebarHost&&createPortal(<OperationalSidebar navigation={navigation} activeRoute={activeRoute}/>,sidebarHost)}
   {footerHost&&quickLinks.length>0&&createPortal(<section className="dir-quick ops-shared-quick" aria-label="Accesos rápidos"><h2>ACCESOS RÁPIDOS</h2><div className="dir-quick-grid">{quickLinks.map(({route,label,Icon})=><button key={route} type="button" onClick={()=>navigate(route)}><Icon/>{label}</button>)}</div></section>,footerHost)}
