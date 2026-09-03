@@ -1,1 +1,1 @@
-export {default} from './UniversalDocumentIntelligenceGuard';
+export {default} from './UniversalDocumentIntelligenceGuardV2';
