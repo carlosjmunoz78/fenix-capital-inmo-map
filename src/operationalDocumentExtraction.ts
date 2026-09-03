@@ -40,5 +40,8 @@ export function extractDocumentData(rawText:string,confidence:number|null=null):
   const tin=explicitPercent(rawText,'TIN'),tae=explicitPercent(rawText,'TAE');if(tin!==null&&result.fields.tin===undefined)result.fields.tin=tin;if(tae!==null&&result.fields.tae===undefined)result.fields.tae=tae;
  }
  enrich(result.documentType,rawText,result.fields);
+ if(result.documentType==='Oferta bancaria'||result.documentType==='FEIN / FIAE'){
+  const rawVinculaciones=lineValue(rawText,['PRODUCTOS VINCULADOS','VINCULACIONES','BONIFICACIONES'],900);if(rawVinculaciones)result.fields.vinculaciones=rawVinculaciones;
+ }
  return result;
 }
