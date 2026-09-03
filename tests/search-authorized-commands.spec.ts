@@ -20,6 +20,6 @@ test('L8 help exposes only commands already present in authorized navigation', a
 
 test('L8 keeps normal universal search backend authorized', async()=>{
   expect(source).toContain("fetchAppApi<unknown>(`/search?q=${encodeURIComponent(q)}`)");
-  expect(source).toContain('No se amplían permisos desde la interfaz.');
+  expect(source).toContain('Un comando nunca amplía permisos ni abre una ruta que tu sesión no tenga publicada.');
   expect(source).not.toContain('window.location.assign(q)');
 });
