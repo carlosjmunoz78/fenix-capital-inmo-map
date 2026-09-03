@@ -1,17 +1,18 @@
 import {expect,test} from '@playwright/test';
 import fs from 'node:fs';
 
-test('historical recovery panel relocates into the visible document side panel',async()=>{
-  const source=fs.readFileSync('src/HistoricalDocumentRecoveryPlacementFix.tsx','utf8');
-  expect(source).toContain("document.querySelector<HTMLElement>('.doc-view-side')");
-  expect(source).toContain("document.querySelector<HTMLElement>('.historical-document-recovery-host')");
-  expect(source).toContain('host.parentElement!==side');
-  expect(source).toContain('side.insertBefore(host,side.firstChild)');
-  expect(source).toContain('new MutationObserver(place)');
+test('historical recovery control renders above the real document modal',async()=>{
+  const source=fs.readFileSync('src/HistoricalDocumentRecoveryFixedGuard.tsx','utf8');
+  expect(source).toContain("location.pathname.match(/^\\/documentos\\/([^/]+)$/)");
+  expect(source).toContain('data-testid="historical-document-recovery-fixed"');
+  expect(source).toContain('z-index:6900');
+  expect(source).toContain('createPortal');
+  expect(source).toContain('document.body');
 });
 
-test('placement fix is mounted with the document intelligence guards',async()=>{
+test('fixed recovery guard is mounted with the document intelligence guards',async()=>{
   const source=fs.readFileSync('src/IntelligentDocumentIngestionGuard.tsx','utf8');
-  expect(source).toContain("import HistoricalDocumentRecoveryPlacementFix from './HistoricalDocumentRecoveryPlacementFix'");
-  expect(source).toContain('<HistoricalDocumentRecoveryPlacementFix />');
+  expect(source).toContain("import HistoricalDocumentRecoveryFixedGuard from './HistoricalDocumentRecoveryFixedGuard'");
+  expect(source).toContain('<HistoricalDocumentRecoveryFixedGuard />');
+  expect(source).not.toContain('HistoricalDocumentRecoveryPlacementFix');
 });
