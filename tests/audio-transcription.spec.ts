@@ -24,8 +24,10 @@ test('L5 audio transcription has permission and unsupported-browser fallbacks', 
   expect(source).toContain('Dictado automático no disponible en este navegador.');
 });
 
-test('L5 audio transcription is globally mounted', async () => {
+test('L5 audio transcription is globally mounted without reopening main routing', async () => {
   const main = read('src/main.tsx');
-  expect(main).toContain("import AudioTranscriptionGuard from './AudioTranscriptionGuard';");
-  expect(main).toContain('<AudioTranscriptionGuard />');
+  const wrapper = read('src/IntelligentDocumentIngestionGuard.tsx');
+  expect(main).toContain('<IntelligentDocumentIngestionGuard />');
+  expect(wrapper).toContain("import AudioTranscriptionGuard from './AudioTranscriptionGuard';");
+  expect(wrapper).toContain('<AudioTranscriptionGuard />');
 });
