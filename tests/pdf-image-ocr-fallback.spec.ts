@@ -2,13 +2,16 @@ import {test,expect} from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const session={access_token:'eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwicm9sZSI6ImF1dGhlbnRpY2F0ZWQiLCJzdWIiOiJhYWFhYWFhYS1hYWFhLTRhYWEtOGFhYS1hYWFhYWFhYWFhYWEiLCJlbWFpbCI6ImRpcmVjY2lvbkBmZW5peC50ZXN0IiwiZXhwIjoxOTk5OTk5OTk5fQ.',token_type:'bearer',expires_in:3600,expires_at:1999999999,refresh_token:'qa-pdf-image-not-real',user:{id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',aud:'authenticated',role:'authenticated',email:'direccion@fenix.test',app_metadata:{},user_metadata:{},created_at:'2026-08-19T00:00:00.000Z'}};
+const session={access_token:'qa-test-token',token_type:'bearer',expires_in:3600,expires_at:1999999999,refresh_token:'qa-refresh',user:{id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',aud:'authenticated',role:'authenticated',email:'direccion@fenix.test',app_metadata:{},user_metadata:{},created_at:'2026-08-19T00:00:00.000Z'}};
 
-test('PDF convertido desde imagen conserva fallback OCR por página',()=>{
+test('PDF usa todas las páginas y valida la capa de texto antes de omitir OCR',()=>{
  const src=fs.readFileSync(path.join(process.cwd(),'src/browserDocumentOcr.ts'),'utf8');
  expect(src).toContain("mime==='application/pdf'");
- expect(src).toContain('page.getTextContent()');
- expect(src).toContain('embedded.length>80');
+ expect(src).toContain('const pages=Number(pdf.numPages||0)');
+ expect(src).not.toContain('Math.min(Number(pdf.numPages||0),12)');
+ expect(src).toContain('embeddedTextFromContent');
+ expect(src).toContain('usableEmbeddedText');
+ expect(src).not.toContain('embedded.length>80');
  expect(src).toContain("page.getViewport({scale:1.8})");
  expect(src).toContain('page.render({canvasContext:ctx,viewport})');
  expect(src).toContain('await recognize(canvas)');
