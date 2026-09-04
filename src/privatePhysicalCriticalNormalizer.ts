@@ -27,7 +27,7 @@ function normalizeDebt(text:string,f:ExtractedFields){
  const entity=inlineOrNext(text,/\b(?:ENTIDAD(?:\s+ACREEDORA)?|ACREEDOR|BANCO|PRESTAMISTA|FINANCIERA)\s*[:\-–—]?/i,180)||knownEntity(text);if(entity){set(f,'entidad',entity);set(f,'acreedor',entity);}
  const balance=moneyNear(text,[/CAPITAL\s+PENDIENTE/i,/SALDO\s+PENDIENTE/i,/PRINCIPAL\s+PENDIENTE/i,/DEUDA\s+PENDIENTE/i,/CAPITAL\s+VIVO/i,/SALDO\s+DEUDOR/i,/SALDO\s+ACTUAL/i,/CAPITAL\s+(?:A\s+FECHA|PENDIENTE\s+DE\s+AMORTIZAR)/i,/IMPORTE\s+(?:ADEUDADO|PENDIENTE)/i,/DEUDA\s+VIVA/i,/\bSALDO\b/i,/\bCAPITAL\b/i],5);if(balance!==null){set(f,'capital_pendiente',balance);set(f,'saldo_pendiente',balance);}
  const cuota=moneyNear(text,[/\bCUOTA(?:\s+MENSUAL)?\b/i,/IMPORTE\s+(?:DEL\s+)?RECIBO/i,/MENSUALIDAD/i,/PR[ÓO]XIMA\s+CUOTA/i,/RECIBO/i],4);if(cuota!==null)set(f,'cuota',cuota);
- const tin=(text.match(/\b(?:TIN|TIPO DE INTER[EÉ]S NOMINAL)\b[^%\n]{0,80}(\d{1,2}(?:[.,]\d{1,4})?)\s*%/i)||[])[1];if(tin)set(f,'tin',Number(tin.replace(',','.')));
+ const tin=(text.match(/\b(?:TIN|TIPO DE INTER[EÉ]S NOMINAL)\b\s*[:\-–—]?\s*(\d{1,2}(?:[.,]\d{1,4})?)\s*%/i)||[])[1];if(tin)set(f,'tin',Number(tin.replace(',','.')));
  const periodicidad=inlineOrNext(text,/\bPERIODICIDAD\s*[:\-–—]?/i,80);if(periodicidad)set(f,'periodicidad',periodicidad);
  const venc=inlineOrNext(text,/\b(?:VENCIMIENTO|FECHA\s+FIN|FECHA\s+DE\s+VENCIMIENTO)\s*[:\-–—]?/i,100);if(venc)set(f,'vencimiento',venc);
  const titular=inlineOrNext(text,/\b(?:TITULAR|CLIENTE|PRESTATARIO)\s*[:\-–—]?/i,220);if(titular)set(f,'titular',titular);
