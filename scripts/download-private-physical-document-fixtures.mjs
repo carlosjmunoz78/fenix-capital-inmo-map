@@ -24,6 +24,7 @@ const targets=[
  {page:'37581b1a756d81d2ac17da857349f56f',name:'NOTA_SIMPLE.pdf',out:'nota-simple-roncero.pdf'},
  {page:'37581b1a756d81d2ac17da857349f56f',name:'RECIBO_PRESTAMO__PERSONAL_1.pdf',out:'prestamo-personal.pdf'},
  {page:'37581b1a756d8186ae20e107323996f3',name:'CERTIFICADO_DEUDA_PENDIENTE.pdf',out:'certificado-deuda.pdf'},
+ {page:'37581b1a756d81d2ac17da857349f56f',name:'DNI_MARI_Y_FRANCISCO.pdf',out:'dni-mari-francisco.pdf'},
 ];
 
 const cache=new Map();
