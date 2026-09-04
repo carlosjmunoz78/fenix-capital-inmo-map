@@ -1,3 +1,5 @@
+import {buildFieldValidation} from './documentFieldValidation';
+
 export type IntelligenceRow=Record<string,unknown>;
 
 type IntelligencePayload={
@@ -6,6 +8,10 @@ type IntelligencePayload={
   summary?:unknown;
   fields?:Record<string,unknown>;
   confidence?:unknown;
+  field_confidence?:Record<string,unknown>;
+  evidence?:Record<string,unknown>;
+  field_status?:Record<string,unknown>;
+  conflicts?:unknown;
   processed_at?:unknown;
 };
 
@@ -52,12 +58,20 @@ function canonicalizeFields(fields:Record<string,unknown>){
  return out;
 }
 
+function canonicalizeMeta(meta:Record<string,unknown>|undefined){if(!meta)return undefined;const out:Record<string,unknown>={};for(const [rawKey,value] of Object.entries(meta)){const normalized=cleanKey(rawKey);const canonical=aliases[normalized]||normalized;if(out[canonical]===undefined)out[canonical]=value;}return out;}
+
 export function projectDocumentIntelligence(row:IntelligenceRow|null){
  if(!row)return null;
  const payload=parsePayload(row);
  const base=canonicalizeFields(row);
- if(!payload)return {...row,...base};
- const projected:IntelligenceRow={...row,...base,...canonicalizeFields(payload.fields||{})};
+ if(!payload){
+  const projected={...row,...base} as IntelligenceRow;
+  const {quality,summary}=buildFieldValidation({fields:base,globalConfidence:row.confianza_extraccion,source:'document_row'});
+  projected.field_quality=quality;projected.validation_summary=summary;projected.estado_validacion_documental=summary.status;
+  return projected;
+ }
+ const canonicalFields=canonicalizeFields(payload.fields||{});
+ const projected:IntelligenceRow={...row,...base,...canonicalFields};
  const declared=typeof payload.declared_document_type==='string'?payload.declared_document_type.trim():'';
  const detected=typeof payload.detected_document_type==='string'?payload.detected_document_type.trim():'';
  const current=firstString(row,['tipo_canónico','tipo_canonico','tipo','categoria','categoría']);
@@ -65,5 +79,7 @@ export function projectDocumentIntelligence(row:IntelligenceRow|null){
  if(typeof payload.summary==='string'&&payload.summary.trim())projected.resumen_documento=payload.summary.trim();
  if(payload.confidence!==undefined&&payload.confidence!==null)projected.confianza_extraccion=payload.confidence;
  if(typeof payload.processed_at==='string')projected.fecha_lectura_inteligente=payload.processed_at;
+ const {quality,summary}=buildFieldValidation({fields:canonicalFields,globalConfidence:payload.confidence,fieldConfidence:canonicalizeMeta(payload.field_confidence),evidence:canonicalizeMeta(payload.evidence),fieldStatus:canonicalizeMeta(payload.field_status),conflicts:payload.conflicts,source:'document_intelligence'});
+ projected.field_quality=quality;projected.validation_summary=summary;projected.estado_validacion_documental=summary.status;
  return projected;
 }
