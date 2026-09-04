@@ -1,0 +1,51 @@
+name: Private Physical Document Gate
+
+on:
+  push:
+    branches:
+      - qa/private-physical-docs-gate-20260904
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  private-physical-docs:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      REAL_PRIVATE_DOC_DIR: /tmp/fenix-private-docs
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies reproducibly
+        run: npm ci
+
+      - name: Ensure PDF text reader
+        run: |
+          if ! command -v pdftotext >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y poppler-utils
+          fi
+          pdftotext -v 2>&1 | head -n 1
+
+      - name: Download allowlisted real private PDFs read-only
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+        run: |
+          test -n "$NOTION_TOKEN" || { echo 'PRIVATE_PHYSICAL_GATE_RED=notion_secret_missing'; exit 1; }
+          node scripts/download-private-physical-document-fixtures.mjs
+
+      - name: Run physical Nota Simple and debt gate
+        run: npx playwright test tests/private-physical-document-gate.spec.ts --project=desktop-chromium
+
+      - name: Remove private fixtures
+        if: always()
+        run: rm -rf "$REAL_PRIVATE_DOC_DIR"
