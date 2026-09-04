@@ -11,7 +11,7 @@ test('historical documents with empty master fields reread the existing original
   expect(source).toContain('ocrFile(file');
   expect(source).toContain('extractDocumentData(o.text,o.confidence,hint)');
   expect(source).toContain('setRecoveredPreview');
-  expect(source).toContain('El original no se modifica ni se duplica');
+  expect(source).toContain('sin modificar ni duplicar el archivo');
 });
 
 test('automatic reread stays preview-only and never performs canonical writes',()=>{
