@@ -47,6 +47,14 @@ const aliases:Record<string,string>={
  estado_obra:'estado_ejecucion',porcentaje_ejecutado:'estado_ejecucion',coste_restante:'coste_pendiente'
 };
 
+function bindDerivedVisibleFields(out:Record<string,unknown>){
+ const nombre=typeof out.nombre==='string'?out.nombre.trim():'';
+ const apellidos=typeof out.apellidos==='string'?out.apellidos.trim():'';
+ if(!out.nombre_completo&&nombre&&apellidos)out.nombre_completo=`${nombre} ${apellidos}`.replace(/\s+/g,' ').trim();
+ if(!out.titular&&out.nombre_completo)out.titular=out.nombre_completo;
+ return out;
+}
+
 function canonicalizeFields(fields:Record<string,unknown>){
  const out:Record<string,unknown>={};
  for(const [rawKey,value] of Object.entries(fields||{})){
@@ -55,7 +63,7 @@ function canonicalizeFields(fields:Record<string,unknown>){
   if(out[canonical]===undefined)out[canonical]=value;
   if(out[normalized]===undefined)out[normalized]=value;
  }
- return out;
+ return bindDerivedVisibleFields(out);
 }
 
 function canonicalizeMeta(meta:Record<string,unknown>|undefined){if(!meta)return undefined;const out:Record<string,unknown>={};for(const [rawKey,value] of Object.entries(meta)){const normalized=cleanKey(rawKey);const canonical=aliases[normalized]||normalized;if(out[canonical]===undefined)out[canonical]=value;}return out;}
