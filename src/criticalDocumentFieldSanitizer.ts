@@ -1,6 +1,6 @@
 import type {ExtractedDocument,ExtractedFields} from './browserDocumentOcr';
 
-const clean=(v:string,max=260)=>v.replace(/[ \t]+/g,' ').replace(/^[:\-–—\s]+/,'').trim().slice(0,max);
+const clean=(v:string,max=260)=>v.replace(/[ \t]+/g,' ').replace(/^[:–—\s]+/,'').trim().slice(0,max);
 const lines=(text:string)=>text.replace(/\r/g,'\n').split(/\n+/).map(x=>clean(x,1200)).filter(Boolean);
 
 function valueAfterExactLabel(text:string,labels:string[],max=260){const ls=lines(text);for(let i=0;i<ls.length;i++){for(const label of labels){const exact=new RegExp(`^(?:${label})\\s*[:\\-–—]?\\s*$`,'i');const inline=new RegExp(`^(?:${label})\\s*[:\\-–—]\\s*(.{1,${max}})$`,'i');const m=ls[i].match(inline);if(m?.[1])return clean(m[1],max);if(exact.test(ls[i])&&ls[i+1])return clean(ls[i+1],max);}}return'';}
