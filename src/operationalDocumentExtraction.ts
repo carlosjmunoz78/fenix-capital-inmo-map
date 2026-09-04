@@ -1,4 +1,4 @@
-import {extractDocumentData as extractBase,type DocumentFamily,type ExtractedDocument,type ExtractedFields} from './browserDocumentOcr';
+import {extractDocumentData as extractBase,type ExtractedDocument,type ExtractedFields} from './browserDocumentOcr';
 
 function set(f:ExtractedFields,key:string,value:unknown){if(value!==null&&value!==undefined&&value!==''&&f[key]===undefined)f[key]=value as string|number|boolean;}
 function setExplicit(f:ExtractedFields,key:string,value:unknown){if(value!==null&&value!==undefined&&value!=='')f[key]=value as string|number|boolean;}
@@ -37,7 +37,6 @@ const DECLARED_SEED:Record<string,string>={
  'documento notarial / registral':'ESCRITURA NOTARÍA PROTOCOLO','factura / recibo':'FACTURA TOTAL A PAGAR'
 };
 function declarationSeed(v:string){return DECLARED_SEED[v.trim().toLocaleLowerCase('es')]||'';}
-function seedFamily(v:string):DocumentFamily|null{const seed=declarationSeed(v);if(!seed)return null;return extractBase(seed,null).documentType;}
 
 function enrichVidaLaboral(text:string,f:ExtractedFields){
  const titular=safePerson(labelledValue(text,['NOMBRE Y APELLIDOS','NOMBRE COMPLETO','TRABAJADOR(?:A)?','INTERESADO(?:A)?'],220)||looseValue(text,['NOMBRE Y APELLIDOS','NOMBRE COMPLETO'],220)||first(text,[/(?:D\.?\s*\/?\s*D(?:ÑA|NA|ª)\.?|DON|DOÑA)\s*[:\-]?\s*([A-ZÁÉÍÓÚÜÑ][A-ZÁÉÍÓÚÜÑa-záéíóúüñ' -]{5,120})/i]));
@@ -55,18 +54,18 @@ function enrichVidaLaboral(text:string,f:ExtractedFields){
  set(f,'incidencias',matchingLines(text,/incidencia|solapamiento|pluriactividad|pluriempleo/i,8));
 }
 function enrichFein(text:string,f:ExtractedFields){
- set(f,'titulares',looseValue(text,['NOMBRE DEL PRESTATARIO','PRESTATARIO(?:S)?','TITULAR(?:ES)?','CLIENTE(?:S)?','SOLICITANTE(?:S)?'],500));
- set(f,'entidad',looseValue(text,['ENTIDAD PRESTAMISTA','PRESTAMISTA','ENTIDAD','BANCO'],260));
- set(f,'producto',looseValue(text,['PRODUCTO','MODALIDAD','TIPO DE PR[ÉE]STAMO','TIPO DE HIPOTECA'],300));
+ set(f,'titulares',labelledValue(text,['NOMBRE DEL PRESTATARIO','PRESTATARIO(?:S)?','TITULAR(?:ES)?','CLIENTE(?:S)?','SOLICITANTE(?:S)?'],500)||looseValue(text,['NOMBRE DEL PRESTATARIO','PRESTATARIO(?:S)?','TITULAR(?:ES)?','CLIENTE(?:S)?','SOLICITANTE(?:S)?'],500));
+ set(f,'entidad',labelledValue(text,['ENTIDAD PRESTAMISTA','PRESTAMISTA','ENTIDAD','BANCO'],260)||looseValue(text,['ENTIDAD PRESTAMISTA','PRESTAMISTA','ENTIDAD','BANCO'],260));
+ set(f,'producto',labelledValue(text,['PRODUCTO','MODALIDAD','TIPO DE PR[ÉE]STAMO','TIPO DE HIPOTECA'],300)||looseValue(text,['PRODUCTO','MODALIDAD','TIPO DE PR[ÉE]STAMO','TIPO DE HIPOTECA'],300));
  set(f,'importe_prestamo',moneyNear(text,['IMPORTE DEL PR[ÉE]STAMO','IMPORTE PR[ÉE]STAMO','CAPITAL','IMPORTE FINANCIADO']));
  set(f,'precio_compra',moneyNear(text,['PRECIO DE COMPRA','PRECIO COMPRAVENTA','VALOR DE COMPRAVENTA']));
  set(f,'valor_tasacion',moneyNear(text,['VALOR DE TASACI[ÓO]N','TASACI[ÓO]N CONSIDERADA']));
  set(f,'porcentaje_financiacion',percentNear(text,['PORCENTAJE DE FINANCIACI[ÓO]N','FINANCIACI[ÓO]N','LTV']));
- set(f,'tin',percentNear(text,['TIPO DE INTER[EÉ]S NOMINAL','TIN']));set(f,'tae',percentNear(text,['TASA ANUAL EQUIVALENTE','TAE']));set(f,'cuota',moneyNear(text,['CUOTA MENSUAL','CUOTA']));set(f,'diferencial',percentNear(text,['DIFERENCIAL']));set(f,'indice',looseValue(text,['[ÍI]NDICE DE REFERENCIA','[ÍI]NDICE'],180));set(f,'plazo',looseValue(text,['PLAZO DEL PR[ÉE]STAMO','DURACI[ÓO]N DEL PR[ÉE]STAMO','PLAZO'],180));
+ set(f,'tin',percentNear(text,['TIPO DE INTER[EÉ]S NOMINAL','TIN']));set(f,'tae',percentNear(text,['TASA ANUAL EQUIVALENTE','TAE']));set(f,'cuota',moneyNear(text,['CUOTA MENSUAL','CUOTA']));set(f,'diferencial',percentNear(text,['DIFERENCIAL']));set(f,'indice',labelledValue(text,['[ÍI]NDICE DE REFERENCIA','[ÍI]NDICE'],180)||looseValue(text,['[ÍI]NDICE DE REFERENCIA','[ÍI]NDICE'],180));set(f,'plazo',labelledValue(text,['PLAZO DEL PR[ÉE]STAMO','DURACI[ÓO]N DEL PR[ÉE]STAMO','PLAZO'],180)||looseValue(text,['PLAZO DEL PR[ÉE]STAMO','DURACI[ÓO]N DEL PR[ÉE]STAMO','PLAZO'],180));
  const cuotasRaw=first(text,[/(?:N[ÚU]MERO DE CUOTAS|CUOTAS)\D{0,20}(\d{1,4})/i]);if(cuotasRaw)setExplicit(f,'numero_cuotas',Number(cuotasRaw));
- const vinculaciones=looseValue(text,['PRODUCTOS VINCULADOS','VINCULACIONES','BONIFICACIONES'],1000);if(vinculaciones)setExplicit(f,'vinculaciones',vinculaciones);
- set(f,'bonificaciones',looseValue(text,['BONIFICACIONES'],800));set(f,'comisiones',looseValue(text,['COMISIONES'],1000));set(f,'gastos',looseValue(text,['GASTOS'],1000));set(f,'impago',looseValue(text,['CONSECUENCIAS DE IMPAGO','IMPAGO'],1200));set(f,'amortizacion_anticipada',looseValue(text,['AMORTIZACI[ÓO]N ANTICIPADA','REEMBOLSO ANTICIPADO'],1200));set(f,'sistema_amortizacion',looseValue(text,['SISTEMA DE AMORTIZACI[ÓO]N','AMORTIZACI[ÓO]N'],300));
- const emissionDate=dateNear(text,['FECHA DE EMISI[ÓO]N DE LA FEIN','FECHA DE EMISI[ÓO]N','FECHA DE ENTREGA']);if(emissionDate)setExplicit(f,'fecha_emision',emissionDate);set(f,'vigencia',looseValue(text,['V[ÁA]LIDA HASTA','VIGENCIA','VALIDEZ'],260));
+ const vinculaciones=labelledValue(text,['PRODUCTOS VINCULADOS','VINCULACIONES','BONIFICACIONES'],1000)||looseValue(text,['PRODUCTOS VINCULADOS','VINCULACIONES','BONIFICACIONES'],1000);if(vinculaciones)setExplicit(f,'vinculaciones',vinculaciones);
+ set(f,'bonificaciones',labelledValue(text,['BONIFICACIONES'],800)||looseValue(text,['BONIFICACIONES'],800));set(f,'comisiones',labelledValue(text,['COMISIONES'],1000)||looseValue(text,['COMISIONES'],1000));set(f,'gastos',labelledValue(text,['GASTOS'],1000)||looseValue(text,['GASTOS'],1000));set(f,'impago',labelledValue(text,['CONSECUENCIAS DE IMPAGO','IMPAGO'],1200)||looseValue(text,['CONSECUENCIAS DE IMPAGO','IMPAGO'],1200));set(f,'amortizacion_anticipada',labelledValue(text,['AMORTIZACI[ÓO]N ANTICIPADA','REEMBOLSO ANTICIPADO'],1200)||looseValue(text,['AMORTIZACI[ÓO]N ANTICIPADA','REEMBOLSO ANTICIPADO'],1200));set(f,'sistema_amortizacion',labelledValue(text,['SISTEMA DE AMORTIZACI[ÓO]N','AMORTIZACI[ÓO]N'],300)||looseValue(text,['SISTEMA DE AMORTIZACI[ÓO]N','AMORTIZACI[ÓO]N'],300));
+ const emissionDate=dateNear(text,['FECHA DE EMISI[ÓO]N DE LA FEIN','FECHA DE EMISI[ÓO]N','FECHA DE ENTREGA']);if(emissionDate)setExplicit(f,'fecha_emision',emissionDate);set(f,'vigencia',labelledValue(text,['V[ÁA]LIDA HASTA','VIGENCIA','VALIDEZ'],260)||looseValue(text,['V[ÁA]LIDA HASTA','VIGENCIA','VALIDEZ'],260));
 }
 function enrichOther(type:string,text:string,f:ExtractedFields){
  if(type==='Nómina'){setExplicit(f,'titular',safePerson(labelledValue(text,['TRABAJADOR(?:A)?','EMPLEADO(?:A)?','NOMBRE Y APELLIDOS','NOMBRE'],260)||String(f.titular||'')));set(f,'empresa',labelledValue(text,['EMPRESA','RAZ[ÓO]N SOCIAL','PAGADOR'],300)||looseValue(text,['EMPRESA','RAZ[ÓO]N SOCIAL','PAGADOR'],300));set(f,'empresa_pagador',f.empresa);set(f,'cif_empresa',first(text,[/(?:CIF|NIF)\s*(?:EMPRESA)?\s*[:\-]?\s*([A-Z0-9][A-Z0-9-]{7,14})/i]));set(f,'periodo',labelledValue(text,['PER[IÍ]ODO','MES'],180)||looseValue(text,['PER[IÍ]ODO','MES'],180));set(f,'antiguedad',labelledValue(text,['ANTIG[ÜU]EDAD'],160)||dateNear(text,['FECHA DE ALTA']));set(f,'categoria_profesional',labelledValue(text,['CATEGOR[IÍ]A(?: PROFESIONAL)?','GRUPO PROFESIONAL'],220));set(f,'salario_base',moneyNear(text,['SALARIO BASE']));set(f,'complementos',moneyNear(text,['COMPLEMENTOS','COMPLEMENTO']));set(f,'pagas_extra',moneyNear(text,['PAGAS? EXTRA','PAGA EXTRA','PRORRATA']));set(f,'neto',moneyNear(text,['L[IÍ]QUIDO A PERCIBIR','TOTAL L[IÍ]QUIDO','NETO']));set(f,'bruto',moneyNear(text,['TOTAL DEVENGADO','TOTAL DEVENGOS','BRUTO']));set(f,'base_cotizacion',moneyNear(text,['BASE DE COTIZACI[ÓO]N','BASE COTIZACI[ÓO]N','BASE CC']));set(f,'irpf',percentNear(text,['RETENCI[ÓO]N IRPF','IRPF']));set(f,'deducciones',moneyNear(text,['TOTAL DEDUCCIONES','DEDUCCIONES']));const emb=matchingLines(text,/embargo|retenci[oó]n judicial|anticipo/i,6);if(emb)setExplicit(f,'embargos',emb);}
@@ -81,17 +80,24 @@ function enrichOther(type:string,text:string,f:ExtractedFields){
  if(type==='Documento notarial / registral'){set(f,'notario',looseValue(text,['NOTARIO(?:/A)?','ANTE M[IÍ]','NOTAR[IÍ]A'],300));set(f,'protocolo',looseValue(text,['N[ÚU]MERO DE PROTOCOLO','PROTOCOLO'],180));set(f,'fecha',dateNear(text,['FECHA DE OTORGAMIENTO','OTORGADA EL','FECHA']));set(f,'otorgantes',looseValue(text,['OTORGANTES','COMPARECIENTES'],1000));set(f,'inmueble',looseValue(text,['INMUEBLE','FINCA','VIVIENDA'],800));set(f,'precio',moneyNear(text,['PRECIO','VALOR DECLARADO','VALOR']));set(f,'cargas',looseValue(text,['CARGAS','GRAV[ÁA]MENES'],1000));}
 }
 
+function strongDocumentType(upper:string){
+ if(/\bFEIN\b|FICHA EUROPEA DE INFORMACI[ÓO]N NORMALIZADA/.test(upper))return'FEIN / FIAE';
+ if(/OFERTA\s+(?:VINCULANTE\s+)?HIPOTEC|PROPUESTA\s+(?:DE\s+)?FINANCIACI[ÓO]N|CONDICIONES\s+(?:DE\s+)?HIPOTECA/.test(upper))return'Oferta bancaria';
+ if(/IMPUESTO SOBRE LA RENTA|DECLARACI[ÓO]N DE LA RENTA|MODELO\s+100/.test(upper))return'IRPF';
+ return'';
+}
+
 export function extractDocumentData(rawText:string,confidence:number|null=null,declaredType=''):ExtractedDocument{
  const upper=rawText.toLocaleUpperCase('es');
  const highPriority=/FEIN|FICHA EUROPEA DE INFORMACI[ÓO]N NORMALIZADA|OFERTA.*HIPOTEC|OFERTA VINCULANTE|CONDICIONES.*HIPOTEC|PROPUESTA.*FINANCIACI|P[ÓO]LIZA|PRIMA.*SEGURO|ASEGURAD[OA]|COBERTURAS/.test(upper);
  const normalized=highPriority?rawText.replace(/N[ÓO]MINA/gi,'VINCULACIÓN LABORAL'):rawText;
  let result=extractBase(normalized,confidence);
- if(/IMPUESTO SOBRE LA RENTA|DECLARACI[ÓO]N DE LA RENTA|MODELO\s+100/.test(upper)&&result.documentType==='Seguro bancario')result={...result,documentType:'IRPF',fields:{}};
- const forced=seedFamily(declaredType);if(forced&&forced!==result.documentType)result={...result,documentType:forced,fields:{}};
+ const strong=strongDocumentType(upper);if(strong&&result.documentType!==strong)result={...result,documentType:strong as ExtractedDocument['documentType'],fields:{}};
  const seed=declarationSeed(declaredType);if(seed&&['Documento','Documento personal'].includes(result.documentType)){result=extractBase(`${seed}\n${normalized}`,confidence);result.rawText=rawText;}
  if(result.documentType==='Vida laboral')enrichVidaLaboral(rawText,result.fields);
  else if(result.documentType==='Oferta bancaria'||result.documentType==='FEIN / FIAE')enrichFein(rawText,result.fields);
  else enrichOther(result.documentType,rawText,result.fields);
- result.summary='';
+ result.rawText=rawText;
+ if(Object.keys(result.fields).length)result.summary='';
  return result;
 }
