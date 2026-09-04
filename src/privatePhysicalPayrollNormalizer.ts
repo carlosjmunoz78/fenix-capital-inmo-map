@@ -7,9 +7,8 @@ function parseMoney(raw:string){
  return Number.isFinite(n)?n:null;
 }
 
-function grossFromExplicitTotal(text:string){
+function moneyFromExplicitLabel(text:string,label:RegExp){
  const lines=text.replace(/\r/g,'\n').split(/\n+/).map(x=>x.trim()).filter(Boolean);
- const label=/TOTAL[\s:·._\-–—]*DEVENGAD[OA]S?|TOTAL[\s:·._\-–—]*DEVENGOS|\bBRUTO\b/i;
  for(let i=0;i<lines.length;i++){
   const m=label.exec(lines[i]);
   if(!m)continue;
@@ -28,8 +27,12 @@ export function normalizePrivatePhysicalPayroll(result:ExtractedDocument,rawText
  if(!payroll)return result;
  const fields:ExtractedFields={...result.fields};
  if(fields.bruto===undefined||fields.bruto===null||fields.bruto===''){
-  const gross=grossFromExplicitTotal(rawText);
+  const gross=moneyFromExplicitLabel(rawText,/TOTAL[\s:·._\-–—]*DEVENGAD[OA]S?|TOTAL[\s:·._\-–—]*DEVENGOS|\bBRUTO\b/i);
   if(gross!==null)fields.bruto=gross;
+ }
+ if(fields.neto===undefined||fields.neto===null||fields.neto===''){
+  const net=moneyFromExplicitLabel(rawText,/L[IÍ]QUIDO[\s:·._\-–—]*A[\s:·._\-–—]*PERCIBIR|TOTAL[\s:·._\-–—]*L[IÍ]QUIDO|\bNETO\b/i);
+  if(net!==null)fields.neto=net;
  }
  return{...result,fields};
 }
