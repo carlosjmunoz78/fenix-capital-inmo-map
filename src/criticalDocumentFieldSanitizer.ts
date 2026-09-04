@@ -32,6 +32,9 @@ function moneyOnLine(text:string,label:RegExp){for(const line of lines(text)){co
 function moneyAfterLabelLine(text:string,label:RegExp){const ls=lines(text);for(let i=0;i<ls.length;i++){if(!label.test(ls[i]))continue;const tail=ls[i].replace(label,'');const decimals=[...tail.matchAll(/-?\d{1,3}(?:[.\s]\d{3})*,\d{1,2}|-?\d+,\d{1,2}/g)];if(decimals.length){const n=parseMoney(decimals[0][0]);if(n!==null)return n;}if(ls[i+1]){const next=parseMoney(ls[i+1]);if(next!==null)return next;}}return null;}
 function relevantLines(text:string,rx:RegExp,limit=12){return lines(text).filter(x=>rx.test(x)).slice(0,limit).join(' | ');}
 function maskedIban(text:string){const m=text.match(/\b(ES\d{2}(?:\s*\d{4}){5})\b/i);if(!m)return'';const raw=m[1].replace(/\s/g,'');return`ES** **** **** **** **** ${raw.slice(-4)}`;}
+function sasPerceptorBlock(text:string){const m=text.match(/Nombre:\s*\n\s*NIF\/NIE:\s*\n\s*NAF:\s*\n\s*([^\n]+)\n\s*([0-9XYZ][0-9A-Z]{7,12})\s*\n\s*([0-9/]{8,20})/i);return m?{name:clean(m[1],180),nif:clean(m[2],40),naf:clean(m[3],40)}:null;}
+function sasCompanyBlock(text:string){const m=text.match(/Centro n[oó]mina:\s*\n\s*CIF:\s*\n\s*Cod\.\s*Cta\.\s*Cotizaci[oó]n:\s*\n\s*([^\n]+)\n\s*([A-Z]\d{7,9}[A-Z0-9]?)\s*\n\s*([0-9/]{6,20})/i);return m?{center:clean(m[1],120),cif:clean(m[2],40),ccc:clean(m[3],40)}:null;}
+function sasCategory(text:string){const ls=lines(text);const start=ls.findIndex(x=>/^Categor[ií]a\/puesto de desempe[ñn]o:\s*$/i.test(x));if(start<0)return'';for(let i=start+1;i<Math.min(ls.length,start+12);i++){const line=ls[i];if(/^\d{4,6}\s+-.*\([^)]{4,}\)/.test(line))return clean(line.replace(/\s+Grupo tarifa:.*$/i,''),320);}return'';}
 
 function sanitizeVida(text:string,f:ExtractedFields){
  for(const k of ['titular','fecha_informe','situacion_actual','regimen','empresa_actual','fecha_alta_actual','antiguedad','total_dias','empresas_anteriores','periodos_trabajados','incidencias'])delete f[k];
@@ -48,13 +51,15 @@ function sanitizeVida(text:string,f:ExtractedFields){
 
 function sanitizeNomina(text:string,f:ExtractedFields){
  for(const k of ['titular','trabajador','empresa','empresa_pagador','cif_empresa','periodo','mes','antiguedad','categoria_profesional','salario_base','complementos','pagas_extra','prorrata','bruto','total_devengado','base_cotizacion','irpf','deducciones','neto','liquido','embargos','anticipos'])delete f[k];
- const titular=safePerson(directLabeledLine(text,['TRABAJADOR(?:A)?','EMPLEADO(?:A)?','NOMBRE Y APELLIDOS','NOMBRE'],260)||valueAfterExactLabel(text,['TRABAJADOR(?:A)?','EMPLEADO(?:A)?','NOMBRE Y APELLIDOS','NOMBRE'],260));if(titular){f.titular=titular;f.trabajador=titular;}
- const nif=directLabeledLine(text,['NIF\/NIE','NIF','NIE'],80)||valueAfterExactLabel(text,['NIF\/NIE','NIF','NIE'],80);if(nif)f.nif_nie=nif;
- const cif=directLabeledLine(text,['CIF'],80)||valueAfterExactLabel(text,['CIF'],80);if(cif){f.cif=cif;f.cif_empresa=cif;}
+ const sasPerson=sasPerceptorBlock(text);
+ const titular=safePerson(sasPerson?.name||directLabeledLine(text,['TRABAJADOR(?:A)?','EMPLEADO(?:A)?','NOMBRE Y APELLIDOS','NOMBRE'],260)||valueAfterExactLabel(text,['TRABAJADOR(?:A)?','EMPLEADO(?:A)?','NOMBRE Y APELLIDOS','NOMBRE'],260));if(titular){f.titular=titular;f.trabajador=titular;}
+ const nif=sasPerson?.nif||directLabeledLine(text,['NIF\/NIE','NIF','NIE'],80)||valueAfterExactLabel(text,['NIF\/NIE','NIF','NIE'],80);if(nif)f.nif_nie=nif;
+ const sasCompany=sasCompanyBlock(text);
+ const cif=sasCompany?.cif||directLabeledLine(text,['CIF'],80)||valueAfterExactLabel(text,['CIF'],80);if(cif&&/^[A-Z]\d{7,9}[A-Z0-9]?$/i.test(cif)){f.cif=cif;f.cif_empresa=cif;}
  const explicitCompany=directLabeledLine(text,['RAZ[ÓO]N SOCIAL','EMPRESA','PAGADOR'],300)||valueAfterExactLabel(text,['RAZ[ÓO]N SOCIAL','EMPRESA','PAGADOR'],300);let empresa=safeCompany(explicitCompany);if(!empresa&&/Servicio Andaluz de Salud|Servicio Andaluz de la Salud|servicioandaluzdesalud/i.test(text))empresa='Servicio Andaluz de Salud';if(empresa){f.empresa=empresa;f.empresa_pagador=empresa;}
  const emission=valueAfterExactLabel(text,['FECHA EMISI[ÓO]N'],60);if(emission)f.mes=emission;
  const periodoRaw=valueAfterExactLabel(text,['PERIODO LIQUIDACI[ÓO]N'],120);const periodo=periodoRaw||strictDateRange(text);if(periodo)f.periodo=periodo;
- const category=valueAfterExactLabel(text,['CATEGOR[IÍ]A\/PUESTO DE DESEMPE[ÑN]O','CATEGOR[IÍ]A','PUESTO'],320);if(category)f.categoria_profesional=category;
+ const category=sasCategory(text)||valueAfterExactLabel(text,['CATEGOR[IÍ]A\/PUESTO DE DESEMPE[ÑN]O','CATEGOR[IÍ]A','PUESTO'],320);if(category)f.categoria_profesional=category;
  const sueldo=moneyOnLine(text,/^(?:\d+\s+)?SUELDO\b/i)??strictMoney(text,['SALARIO BASE']);if(sueldo!==null)f.salario_base=sueldo;
  const bruto=strictMoney(text,['TOTAL DEVENGOS','TOTAL DEVENGADO']);if(bruto!==null){f.bruto=bruto;f.total_devengado=bruto;}
  const base=moneyOnLine(text,/^(?:\d+\s+)?CONTINGENCIAS COMUNES\b/i)??strictMoney(text,['BASE DE COTIZACI[ÓO]N']);if(base!==null)f.base_cotizacion=base;
