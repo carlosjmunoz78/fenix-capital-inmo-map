@@ -1,7 +1,7 @@
 import type {ExtractedDocument,ExtractedFields} from './browserDocumentOcr';
 
 function parseMoney(raw:string){
- const m=raw.match(/(?:€|EUR)?\s*(-?\d{1,3}(?:[.\s]\d{3})*(?:,\d{2})|-?\d+(?:[.,]\d{2}))\s*(?:€|EUR)?/i);
+ const m=raw.match(/(?:€|EUR)?\s*(-?\d{1,3}(?:[.\s]\d{3})*(?:,\d{1,2})|-?\d+(?:[.,]\d{1,2})?)\s*(?:€|EUR)?/i);
  if(!m)return null;
  const n=Number(m[1].replace(/\s/g,'').replace(/\.(?=\d{3}(?:\D|$))/g,'').replace(',','.'));
  return Number.isFinite(n)?n:null;
@@ -9,7 +9,7 @@ function parseMoney(raw:string){
 
 function grossFromExplicitTotal(text:string){
  const lines=text.replace(/\r/g,'\n').split(/\n+/).map(x=>x.trim()).filter(Boolean);
- const label=/TOTAL\s+DEVENGAD[OA]S?|TOTAL\s+DEVENGOS|\bBRUTO\b/i;
+ const label=/TOTAL[\s:·._\-–—]*DEVENGAD[OA]S?|TOTAL[\s:·._\-–—]*DEVENGOS|\bBRUTO\b/i;
  for(let i=0;i<lines.length;i++){
   const m=label.exec(lines[i]);
   if(!m)continue;
