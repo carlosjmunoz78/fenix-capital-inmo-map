@@ -31,7 +31,7 @@ function mrzName(text:string){
  const upper=text.toLocaleUpperCase('es');
  for(const raw of upper.split(/\n+/)){
   const line=raw.replace(/\s+/g,'').trim();
-  const m=line.match(/^([A-ZÁÉÍÓÚÜÑ<]{2,})<<([A-ZÁÉÍÓÚÜÑ<]{2,})/);
+  const m=line.match(/([A-ZÁÉÍÓÚÜÑ]{2,}(?:<[A-ZÁÉÍÓÚÜÑ]{2,})*)<<([A-ZÁÉÍÓÚÜÑ]{2,}(?:<[A-ZÁÉÍÓÚÜÑ]{2,})*)/);
   if(!m)continue;
   const surnames=cleanPersonPart(m[1]);
   const names=cleanPersonPart(m[2]);
