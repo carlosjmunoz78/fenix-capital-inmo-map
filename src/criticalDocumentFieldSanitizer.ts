@@ -3,35 +3,43 @@ import type {ExtractedDocument,ExtractedFields} from './browserDocumentOcr';
 const clean=(v:string,max=260)=>v.replace(/[ \t]+/g,' ').replace(/^[:–—\s]+/,'').trim().slice(0,max);
 const lines=(text:string)=>text.replace(/\r/g,'\n').split(/\n+/).map(x=>clean(x,1200)).filter(Boolean);
 
-function valueAfterExactLabel(text:string,labels:string[],max=260){const ls=lines(text);for(let i=0;i<ls.length;i++){for(const label of labels){const exact=new RegExp(`^(?:${label})\\s*[:\\-–—]?\\s*$`,'i');const inline=new RegExp(`^(?:${label})\\s*[:\\-–—]\\s*(.{1,${max}})$`,'i');const m=ls[i].match(inline);if(m?.[1])return clean(m[1],max);if(exact.test(ls[i])&&ls[i+1])return clean(ls[i+1],max);}}return'';}
-function directLabeledLine(text:string,labels:string[],max=260){const ls=text.replace(/\r/g,'\n').split(/\n+/);for(const raw of ls){for(const label of labels){const m=raw.match(new RegExp(`^\\s*(?:${label})\\s*[:\\-–—]\\s*(.+?)\\s*$`,'i'));if(m?.[1])return clean(m[1],max);}}return'';}
+function valueAfterExactLabel(text:string,labels:string[],max=260){
+ const ls=lines(text);
+ for(let i=0;i<ls.length;i++)for(const label of labels){
+  const exact=new RegExp(`^(?:${label})\\s*[:\\-–—]?\\s*$`,'i');
+  const inline=new RegExp(`^(?:${label})\\s*[:\\-–—]\\s*(.{1,${max}})$`,'i');
+  const m=ls[i].match(inline);if(m?.[1])return clean(m[1],max);
+  if(exact.test(ls[i])&&ls[i+1])return clean(ls[i+1],max);
+ }
+ return'';
+}
+function directLabeledLine(text:string,labels:string[],max=260){
+ const ls=text.replace(/\r/g,'\n').split(/\n+/);
+ for(const raw of ls)for(const label of labels){const m=raw.match(new RegExp(`^\\s*(?:${label})\\s*[:\\-–—]\\s*(.+?)\\s*$`,'i'));if(m?.[1])return clean(m[1],max);}
+ return'';
+}
 function first(text:string,patterns:RegExp[],max=400){for(const pattern of patterns){const m=text.match(pattern);if(m?.[1])return clean(m[1],max);}return'';}
 function safePerson(v:string){const s=clean(v,160);if(!s||s.length<5||s.length>140)return'';if(/r[eé]gimen|seguridad social|trabajadores|sistema|prestaci[oó]n|protecci[oó]n de datos|fecha de efecto|cuenta propia|aut[oó]nomos|cotizaci[oó]n|modelo\s+\d+|base\s+de\s+cotizaci[oó]n|empresa|pagador|iban/i.test(s))return'';const words=s.split(/\s+/);return words.length>=2&&words.length<=8?s:'';}
 function safeCompany(v:string){const s=clean(v,220);if(!s||s.length<2)return'';if(/modelo\s+\d+|base\s+(?:de\s+)?cotizaci[oó]n|grupo\s+de\s+cotizaci[oó]n|periodo|devengos|deducciones|trabajador|empleado/i.test(s))return'';return s;}
 function personAfterHonorific(text:string){const ls=lines(text);for(let i=0;i<ls.length;i++){if(/^(?:D\.?\s*\/?\s*D(?:ÑA|NA|ª)\.?|DON|DOÑA)\s*[:\-–—]?\s*$/i.test(ls[i])&&ls[i+1]){const p=safePerson(ls[i+1].replace(/\s*,.*$/,''));if(p)return p;}const m=ls[i].match(/^(?:D\.?\s*\/?\s*D(?:ÑA|NA|ª)\.?|DON|DOÑA)\s*[:\-–—]?\s+(.+)$/i);if(m?.[1]){const p=safePerson(m[1].replace(/\s*,.*$/,''));if(p)return p;}}return'';}
+
 const MONTHS:Record<string,string>={enero:'01',febrero:'02',marzo:'03',abril:'04',mayo:'05',junio:'06',julio:'07',agosto:'08',septiembre:'09',setiembre:'09',octubre:'10',noviembre:'11',diciembre:'12'};
 function parseDate(raw:string){const m=raw.match(/\b(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{2,4})\b/);if(m){const y=m[3].length===2?`20${m[3]}`:m[3];return`${y}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;}const w=raw.match(new RegExp(`\\b(\\d{1,2})\\s+de\\s+(${Object.keys(MONTHS).join('|')})\\s+de\\s+(20\\d{2})\\b`,'i'));return w?`${w[3]}-${MONTHS[w[2].toLowerCase()]}-${w[1].padStart(2,'0')}`:'';}
 function strictDateRange(text:string){const labelled=valueAfterExactLabel(text,['PER[IÍ]ODO','PERIODO LIQUIDACI[ÓO]N','DESDE'],220);const source=labelled||text;const dates=[...source.matchAll(/\b\d{1,2}[.\/-]\d{1,2}[.\/-]\d{2,4}\b/g)].map(m=>parseDate(m[0])).filter(Boolean);const unique=[...new Set(dates)];return unique.length>=2?`${unique[0]} - ${unique[1]}`:'';}
 function parseMoney(raw:string){const m=raw.match(/(?:€|EUR)?\s*(-?\d{1,3}(?:[.\s]\d{3})*(?:,\d{1,2})|-?\d+(?:[.,]\d{1,2})?)\s*(?:€|EUR)?/i);if(!m)return null;const n=Number(m[1].replace(/\s/g,'').replace(/\.(?=\d{3}(?:\D|$))/g,'').replace(',','.'));return Number.isFinite(n)?n:null;}
-function strictMoney(text:string,labels:string[]){const ls=lines(text);for(let i=0;i<ls.length;i++){for(const label of labels){const inline=new RegExp(`^(?:${label})\\s*[:\-–—]?\\s*(.+)$`,'i');const exact=new RegExp(`^(?:${label})\\s*[:\-–—]?\\s*$`,'i');const m=ls[i].match(inline);if(m?.[1]){const n=parseMoney(m[1]);if(n!==null)return n;}if(exact.test(ls[i])&&ls[i+1]&&!/^[A-ZÁÉÍÓÚÜÑ][A-ZÁÉÍÓÚÜÑ ]{3,}:?$/i.test(ls[i+1])){const n=parseMoney(ls[i+1]);if(n!==null)return n;}}}return null;}
-function moneyOnLine(text: string, label:RegExp){for(const line of lines(text)){const m=line.match(label);if(!m)continue;const tail=line.slice((m.index||0)+m[0].length);const n=parseMoney(tail);if(n!==null)return n;}return null;}
-function moneyAfterLabelLine(text:string,label:RegExp){for(const line of lines(text)){if(!label.test(line))continue;const decimals=[...line.matchAll(/-?\d{1,3}(?:[.\s]\d{3})*,\d{1,2}|-?\d+,\d{1,2}/g)];if(decimals.length){const n=parseMoney(decimals[0][0]);if(n!==null)return n;}}return null;}
+function strictMoney(text:string,labels:string[]){const ls=lines(text);for(let i=0;i<ls.length;i++)for(const label of labels){const inline=new RegExp(`^(?:${label})\\s*[:\-–—]?\\s*(.+)$`,'i');const exact=new RegExp(`^(?:${label})\\s*[:\-–—]?\\s*$`,'i');const m=ls[i].match(inline);if(m?.[1]){const n=parseMoney(m[1]);if(n!==null)return n;}if(exact.test(ls[i])&&ls[i+1]&&!/^[A-ZÁÉÍÓÚÜÑ][A-ZÁÉÍÓÚÜÑ ]{3,}:?$/i.test(ls[i+1])){const n=parseMoney(ls[i+1]);if(n!==null)return n;}}return null;}
+function moneyOnLine(text:string,label:RegExp){for(const line of lines(text)){const m=line.match(label);if(!m)continue;const n=parseMoney(line.slice((m.index||0)+m[0].length));if(n!==null)return n;}return null;}
+function moneyAfterLabelLine(text:string,label:RegExp){const ls=lines(text);for(let i=0;i<ls.length;i++){if(!label.test(ls[i]))continue;const same=parseMoney(ls[i].replace(label,''));if(same!==null)return same;if(ls[i+1]){const next=parseMoney(ls[i+1]);if(next!==null)return next;}}return null;}
 function relevantLines(text:string,rx:RegExp,limit=12){return lines(text).filter(x=>rx.test(x)).slice(0,limit).join(' | ');}
-function maskedIban(text:string){const compact=text.replace(/\s/g,'');const m=compact.match(/\b(ES\d{22})\b/i);if(!m)return'';return`ES** **** **** **** **** ${m[1].slice(-4)}`;}
+function maskedIban(text:string){const m=text.match(/\b(ES\d{2}(?:\s*\d{4}){5})\b/i);if(!m)return'';const raw=m[1].replace(/\s/g,'');return`ES** **** **** **** **** ${raw.slice(-4)}`;}
 
 function sanitizeVida(text:string,f:ExtractedFields){
- delete f.titular; delete f.fecha_informe; delete f.situacion_actual; delete f.regimen; delete f.empresa_actual; delete f.fecha_alta_actual; delete f.antiguedad; delete f.total_dias; delete f.empresas_anteriores; delete f.periodos_trabajados; delete f.incidencias;
- const titular=safePerson(
-  directLabeledLine(text,['NOMBRE Y APELLIDOS','NOMBRE COMPLETO','TRABAJADOR(?:A)?','INTERESADO(?:A)?'],220)
-  ||valueAfterExactLabel(text,['NOMBRE Y APELLIDOS','NOMBRE COMPLETO','TRABAJADOR(?:A)?','INTERESADO(?:A)?'],220)
-  ||first(text,[/NOMBRE Y APELLIDOS\s+N[º°]?\s*SEGURIDAD SOCIAL[^\n]*\n\s*([A-ZÁÉÍÓÚÜÑ][A-ZÁÉÍÓÚÜÑ ,.'-]{5,120}?)\s+\d{8,}/i,/(?:resulta que\s+D\/?D[ªA]?|resulta que\s+D\.\/Dª)\s*\n?\s*([A-ZÁÉÍÓÚÜÑ][A-ZÁÉÍÓÚÜÑ ,.'-]{5,120}?)\s*,\s*nacido/i],160)
-  ||personAfterHonorific(text));
- if(titular)f.titular=titular;
+ for(const k of ['titular','fecha_informe','situacion_actual','regimen','empresa_actual','fecha_alta_actual','antiguedad','total_dias','empresas_anteriores','periodos_trabajados','incidencias'])delete f[k];
+ const titular=safePerson(directLabeledLine(text,['NOMBRE Y APELLIDOS','NOMBRE COMPLETO','TRABAJADOR(?:A)?','INTERESADO(?:A)?'],220)||valueAfterExactLabel(text,['NOMBRE Y APELLIDOS','NOMBRE COMPLETO','TRABAJADOR(?:A)?','INTERESADO(?:A)?'],220)||first(text,[/NOMBRE Y APELLIDOS\s+N[º°]?\s*SEGURIDAD SOCIAL[^\n]*\n\s*([A-ZÁÉÍÓÚÜÑ][A-ZÁÉÍÓÚÜÑ ,.'-]{5,120}?)\s+\d{8,}/i,/(?:resulta que\s+D\/?D[ªA]?|resulta que\s+D\.\/Dª)\s*\n?\s*([A-ZÁÉÍÓÚÜÑ][A-ZÁÉÍÓÚÜÑ ,.'-]{5,120}?)\s*,\s*nacido/i],160)||personAfterHonorific(text));if(titular)f.titular=titular;
  const nss=first(text,[/(?:N[ÚU]MERO\s+(?:DE\s+)?LA?\s*SEGURIDAD\s+SOCIAL|N[º°]\s*SEGURIDAD\s+SOCIAL)\s*[:\-]?\s*([0-9][0-9\s\/-]{7,22})/i]);if(nss)f.nss=nss;
  const dni=first(text,[/(?:D\.N\.I\.|DNI|NIE)\s*[:\-]?\s*([0-9XYZ][0-9A-Z. -]{6,14})/i]);if(dni)f.dni_nie=dni;
  const reportDate=parseDate(first(text,[/al d[ií]a\s+([^,\n]{6,50})/i,/Fecha:\s*([^\n]{6,30})/i],80));if(reportDate)f.fecha_informe=reportDate;
- const current=text.match(/GENERAL\s+\d+\s+(SERVICIO ANDALUZ DE LA SALUD|SERVICIO ANDALUZ DE SALUD)\s+(\d{2}[.\/-]\d{2}[.\/-]\d{4})\s+\d{2}[.\/-]\d{2}[.\/-]\d{4}\s+---/i);
- if(current){f.situacion_actual='Alta';f.regimen='GENERAL';f.empresa_actual=clean(current[1],220);f.fecha_alta_actual=parseDate(current[2]);f.antiguedad=f.fecha_alta_actual;}
+ const current=text.match(/GENERAL\s+\d+\s+(SERVICIO ANDALUZ DE LA SALUD|SERVICIO ANDALUZ DE SALUD)\s+(\d{2}[.\/-]\d{2}[.\/-]\d{4})\s+\d{2}[.\/-]\d{2}[.\/-]\d{4}\s+---/i);if(current){f.situacion_actual='Alta';f.regimen='GENERAL';f.empresa_actual=clean(current[1],220);f.fecha_alta_actual=parseDate(current[2]);f.antiguedad=f.fecha_alta_actual;}
  const effective=first(text,[/total de d[ií]as efectivamente computables[\s\S]{0,180}?(\d{1,3}(?:\.\d{3})*)\s+d[ií]as/i]);const total=effective||first(text,[/ha figurado en situaci[oó]n de alta[\s\S]{0,180}?(\d{1,3}(?:\.\d{3})*)\s+d[ií]as/i]);if(total)f.total_dias=Number(total.replace(/\./g,''));
  const periods=relevantLines(text,/^(?:GENERAL|AUT[ÓO]NOMOS?|AGRARIO|MAR)\b.*\b\d{2}[.\/-]\d{2}[.\/-]\d{4}\b/i,20);if(periods)f.periodos_trabajados=periods;
  const companies=[...new Set(lines(text).filter(x=>/SERVICIO ANDALUZ|INSTITUT CATALA|ASISTENCIA LOS ANGELES|ATLAS SERVICIOS|RANDSTAD|TELEPIZZA|COMERCIAL PIEDRA|BAI PROMOCION/i.test(x)).map(x=>x.replace(/^.*?\b(?:\d{8,12}|-----------)\b\s*/,'').replace(/\s+\d{2}[.\/-].*$/,'').trim()).filter(Boolean))].slice(0,12);if(companies.length)f.empresas_anteriores=companies.join(' | ');
@@ -95,4 +103,13 @@ function sanitizeMovimientos(text:string,f:ExtractedFields){
 function looksLikeNomina(text:string){return /recibo\s+(?:individual\s+justificativo\s+del\s+pago\s+de\s+salarios|de\s+salarios)|justificante\s+de\s+n[oó]mina|n[oó]mina|l[ií]quido\s+a\s+percibir|total\s+devengado|devengos/i.test(text);}
 function looksLikeVida(text:string){return /informe\s+de\s+vida\s+laboral|vida\s+laboral|n[uú]mero\s+(?:de\s+)?(?:la\s+)?seguridad\s+social/i.test(text);}
 
-export function sanitizeCriticalDocumentFields(result:ExtractedDocument,rawText:string=result.rawText):ExtractedDocument{const fields:{[k:string]:string|number|boolean}={...result.fields};if(result.documentType==='Movimientos bancarios')sanitizeMovimientos(rawText,fields);else if(result.documentType==='IRPF')sanitizeIrpf(rawText,fields);else if(result.documentType==='Vida laboral')sanitizeVida(rawText,fields);else if(result.documentType==='Nómina')sanitizeNomina(rawText,fields);else if(looksLikeVida(rawText))sanitizeVida(rawText,fields);else if(looksLikeNomina(rawText))sanitizeNomina(rawText,fields);return{...result,fields};}
+export function sanitizeCriticalDocumentFields(result:ExtractedDocument,rawText:string=result.rawText):ExtractedDocument{
+ const fields:{[k:string]:string|number|boolean}={...result.fields};
+ if(result.documentType==='Movimientos bancarios')sanitizeMovimientos(rawText,fields);
+ else if(result.documentType==='IRPF')sanitizeIrpf(rawText,fields);
+ else if(result.documentType==='Vida laboral')sanitizeVida(rawText,fields);
+ else if(result.documentType==='Nómina')sanitizeNomina(rawText,fields);
+ else if(looksLikeVida(rawText))sanitizeVida(rawText,fields);
+ else if(looksLikeNomina(rawText))sanitizeNomina(rawText,fields);
+ return{...result,fields};
+}
