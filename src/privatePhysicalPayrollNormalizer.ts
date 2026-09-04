@@ -31,7 +31,7 @@ export function normalizePrivatePhysicalPayroll(result:ExtractedDocument,rawText
   if(gross!==null)fields.bruto=gross;
  }
  if(fields.neto===undefined||fields.neto===null||fields.neto===''){
-  const net=moneyFromExplicitLabel(rawText,/L[IÍ]QUIDO[\s:·._\-–—]*A[\s:·._\-–—]*PERCIBIR|TOTAL[\s:·._\-–—]*L[IÍ]QUIDO|\bNETO\b/i);
+  const net=moneyFromExplicitLabel(rawText,/L[IÍ]QUIDO[\s:·._\-–—]*A[\s:·._\-–—]*PERCIBIR|TOTAL[\s:·._\-–—]*L[IÍ]QUIDO|\bL[IÍ]QUIDO\b|\bNETO\b/i);
   if(net!==null)fields.neto=net;
  }
  return{...result,fields};
