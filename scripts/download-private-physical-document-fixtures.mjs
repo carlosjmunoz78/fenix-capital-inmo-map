@@ -26,7 +26,7 @@ const targets=[
  {page:'37581b1a756d8186ae20e107323996f3',name:'CERTIFICADO_DEUDA_PENDIENTE.pdf',out:'certificado-deuda.pdf'},
  {page:'37581b1a756d81d2ac17da857349f56f',name:'DNI_MARI_Y_FRANCISCO.pdf',out:'dni-mari-francisco.pdf'},
  {page:'37581b1a756d81d78520eb8d7d615ced',name:'Nmina_NCS_11579_Ene_2026.pdf',out:'nomina-real.pdf'},
- {page:'37581b1a756d81c38996db1eca19cb93',name:'23.-Vida_Laboral.pdf',out:'vida-laboral-real.pdf'},
+ {page:'37581b1a756d81c38996db1eca19cb93',name:'250508_vida_laboral.pdf',out:'vida-laboral-real.pdf'},
 ];
 
 const cache=new Map();
