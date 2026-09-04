@@ -34,6 +34,7 @@ function relevantLines(text:string,rx:RegExp,limit=12){return lines(text).filter
 function maskedIban(text:string){const m=text.match(/\b(ES\d{2}(?:\s*\d{4}){5})\b/i);if(!m)return'';const raw=m[1].replace(/\s/g,'');return`ES** **** **** **** **** ${raw.slice(-4)}`;}
 function sasPerceptorBlock(text:string){const m=text.match(/Nombre:\s*\n\s*NIF\/NIE:\s*\n\s*NAF:\s*\n\s*([^\n]+)\n\s*([0-9XYZ][0-9A-Z]{7,12})\s*\n\s*([0-9/]{8,20})/i);return m?{name:clean(m[1],180),nif:clean(m[2],40),naf:clean(m[3],40)}:null;}
 function sasCompanyBlock(text:string){const m=text.match(/Centro n[oó]mina:\s*\n\s*CIF:\s*\n\s*Cod\.\s*Cta\.\s*Cotizaci[oó]n:\s*\n\s*([^\n]+)\n\s*([A-Z]\d{7,9}[A-Z0-9]?)\s*\n\s*([0-9/]{6,20})/i);return m?{center:clean(m[1],120),cif:clean(m[2],40),ccc:clean(m[3],40)}:null;}
+function sasCategory(text:string){const ls=lines(text);const start=ls.findIndex(x=>/^Categor[ií]a\/puesto de desempe[ñn]o:\s*$/i.test(x));if(start<0)return'';for(let i=start+1;i<Math.min(ls.length,start+12);i++){const line=ls[i];if(/^\d{4,6}\s+-.*\([^)]{4,}\)/.test(line))return clean(line.replace(/\s+Grupo tarifa:.*$/i,''),320);}return'';}
 
 function sanitizeVida(text:string,f:ExtractedFields){
  for(const k of ['titular','fecha_informe','situacion_actual','regimen','empresa_actual','fecha_alta_actual','antiguedad','total_dias','empresas_anteriores','periodos_trabajados','incidencias'])delete f[k];
@@ -58,7 +59,7 @@ function sanitizeNomina(text:string,f:ExtractedFields){
  const explicitCompany=directLabeledLine(text,['RAZ[ÓO]N SOCIAL','EMPRESA','PAGADOR'],300)||valueAfterExactLabel(text,['RAZ[ÓO]N SOCIAL','EMPRESA','PAGADOR'],300);let empresa=safeCompany(explicitCompany);if(!empresa&&/Servicio Andaluz de Salud|Servicio Andaluz de la Salud|servicioandaluzdesalud/i.test(text))empresa='Servicio Andaluz de Salud';if(empresa){f.empresa=empresa;f.empresa_pagador=empresa;}
  const emission=valueAfterExactLabel(text,['FECHA EMISI[ÓO]N'],60);if(emission)f.mes=emission;
  const periodoRaw=valueAfterExactLabel(text,['PERIODO LIQUIDACI[ÓO]N'],120);const periodo=periodoRaw||strictDateRange(text);if(periodo)f.periodo=periodo;
- const category=valueAfterExactLabel(text,['CATEGOR[IÍ]A\/PUESTO DE DESEMPE[ÑN]O','CATEGOR[IÍ]A','PUESTO'],320);if(category)f.categoria_profesional=category;
+ const category=sasCategory(text)||valueAfterExactLabel(text,['CATEGOR[IÍ]A\/PUESTO DE DESEMPE[ÑN]O','CATEGOR[IÍ]A','PUESTO'],320);if(category)f.categoria_profesional=category;
  const sueldo=moneyOnLine(text,/^(?:\d+\s+)?SUELDO\b/i)??strictMoney(text,['SALARIO BASE']);if(sueldo!==null)f.salario_base=sueldo;
  const bruto=strictMoney(text,['TOTAL DEVENGOS','TOTAL DEVENGADO']);if(bruto!==null){f.bruto=bruto;f.total_devengado=bruto;}
  const base=moneyOnLine(text,/^(?:\d+\s+)?CONTINGENCIAS COMUNES\b/i)??strictMoney(text,['BASE DE COTIZACI[ÓO]N']);if(base!==null)f.base_cotizacion=base;
