@@ -2,11 +2,13 @@ import {extractDocumentData as extractCore} from './operationalDocumentExtractio
 import type {ExtractedDocument} from './browserDocumentOcr';
 import {autofillMasterSchemaFields} from './documentMasterSchemaAutofill';
 import {normalizePhysicalFein} from './feinPhysicalNormalizer';
+import {normalizePrivatePhysicalCritical} from './privatePhysicalCriticalNormalizer';
 
 export function extractDocumentData(rawText:string,confidence:number|null=null,declaredType=''):ExtractedDocument{
- const result=extractCore(rawText,confidence,declaredType);
- const typeHint=declaredType||result.documentType;
- const normalizedFields=result.documentType==='FEIN / FIAE'||/\bFEIN\b|FICHA EUROPEA DE INFORMACI[ÓO]N NORMALIZADA/i.test(rawText)?normalizePhysicalFein(rawText,result.fields):result.fields;
+ const core=extractCore(rawText,confidence,declaredType);
+ const critical=normalizePrivatePhysicalCritical(core,rawText,declaredType);
+ const typeHint=declaredType||critical.documentType;
+ const normalizedFields=critical.documentType==='FEIN / FIAE'||/\bFEIN\b|FICHA EUROPEA DE INFORMACI[ÓO]N NORMALIZADA/i.test(rawText)?normalizePhysicalFein(rawText,critical.fields):critical.fields;
  const fields=autofillMasterSchemaFields(rawText,normalizedFields,typeHint);
- return {...result,fields};
+ return {...critical,fields};
 }
