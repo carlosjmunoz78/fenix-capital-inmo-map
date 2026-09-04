@@ -1,0 +1,29 @@
+import type {ExtractedDocument,ExtractedFields} from './browserDocumentOcr';
+
+function cleanName(raw:string){
+ const value=raw.replace(/\s+/g,' ').replace(/^[:\-–—\s]+|[:\-–—\s]+$/g,'').trim();
+ if(value.length<5||value.length>140)return'';
+ if(/SEGURIDAD SOCIAL|R[ÉE]GIMEN|TRABAJADORES|INFORME|TESORER[IÍ]A|SECRETAR[IÍ]A/i.test(value))return'';
+ const words=value.split(/\s+/).filter(Boolean);
+ return words.length>=2&&words.length<=8?value:'';
+}
+
+function holderFromExplicitPhrase(text:string){
+ const patterns=[
+  /(?:D\.?\s*\/?\s*D(?:ÑA|NA|ª)\.?|DON|DOÑA)\s*[:\-]?\s*([A-ZÁÉÍÓÚÜÑ][A-ZÁÉÍÓÚÜÑa-záéíóúüñ'\-]*(?:\s+[A-ZÁÉÍÓÚÜÑ][A-ZÁÉÍÓÚÜÑa-záéíóúüñ'\-]*){1,7})\s+(?=CON\s+(?:N[ÚU]MERO|N[º°.]|NSS|NAF)|N[ÚU]MERO\s+(?:DE\s+)?SEGURIDAD)/i,
+  /(?:A\s+NOMBRE\s+DE|NOMBRE\s+Y\s+APELLIDOS)\s*[:\-]?\s*([A-ZÁÉÍÓÚÜÑ][A-ZÁÉÍÓÚÜÑa-záéíóúüñ'\-]*(?:\s+[A-ZÁÉÍÓÚÜÑ][A-ZÁÉÍÓÚÜÑa-záéíóúüñ'\-]*){1,7})(?=\s+(?:NSS|NAF|N[ÚU]MERO\s+(?:DE\s+)?SEGURIDAD|DNI|NIF|$))/i,
+ ];
+ for(const pattern of patterns){const match=text.match(pattern);if(match?.[1]){const name=cleanName(match[1]);if(name)return name;}}
+ return'';
+}
+
+export function normalizePrivatePhysicalVidaLaboral(result:ExtractedDocument,rawText:string,declaredType=''):ExtractedDocument{
+ const isVida=result.documentType==='Vida laboral'||/VIDA\s+LABORAL/i.test(declaredType)||/INFORME(?:\s+DE)?\s+VIDA\s+LABORAL/i.test(rawText);
+ if(!isVida)return result;
+ const fields:ExtractedFields={...result.fields};
+ if(!String(fields.titular||'').trim()){
+  const titular=holderFromExplicitPhrase(rawText);
+  if(titular)fields.titular=titular;
+ }
+ return{...result,documentType:'Vida laboral',fields};
+}
