@@ -47,11 +47,20 @@ const aliases:Record<string,string>={
  estado_obra:'estado_ejecucion',porcentaje_ejecutado:'estado_ejecucion',coste_restante:'coste_pendiente'
 };
 
+function parseIsoDate(v:unknown){if(typeof v!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(v.trim()))return null;const d=new Date(`${v.trim()}T00:00:00Z`);return Number.isFinite(d.getTime())?d:null;}
+function yearsBetween(from:unknown,to:unknown){const a=parseIsoDate(from),b=parseIsoDate(to);if(!a||!b||b<a)return null;const days=(b.getTime()-a.getTime())/86400000;return Math.round((days/365.25)*10)/10;}
+function formatYears(v:number){return `${v.toLocaleString('es-ES',{minimumFractionDigits:1,maximumFractionDigits:1})} años`;}
 function bindDerivedVisibleFields(out:Record<string,unknown>){
  const nombre=typeof out.nombre==='string'?out.nombre.trim():'';
  const apellidos=typeof out.apellidos==='string'?out.apellidos.trim():'';
  if(!out.nombre_completo&&nombre&&apellidos)out.nombre_completo=`${nombre} ${apellidos}`.replace(/\s+/g,' ').trim();
  if(!out.titular&&out.nombre_completo)out.titular=out.nombre_completo;
+ const totalDias=Number(out.total_dias);
+ if(!out.anos_cotizados&&Number.isFinite(totalDias)&&totalDias>0)out.anos_cotizados=formatYears(Math.round((totalDias/365.25)*10)/10);
+ const antiguedad=yearsBetween(out.fecha_alta_actual,out.fecha_informe);
+ if(!out.antiguedad_actual_anos&&antiguedad!==null)out.antiguedad_actual_anos=formatYears(antiguedad);
+ if(!out.anos_seguidos_actuales&&antiguedad!==null)out.anos_seguidos_actuales=formatYears(antiguedad);
+ if(!out.ultimos_trabajos&&out.periodos_trabajados)out.ultimos_trabajos=out.periodos_trabajados;
  return out;
 }
 
@@ -73,13 +82,13 @@ export function projectDocumentIntelligence(row:IntelligenceRow|null){
  const payload=parsePayload(row);
  const base=canonicalizeFields(row);
  if(!payload){
-  const projected={...row,...base} as IntelligenceRow;
+  const projected=bindDerivedVisibleFields({...row,...base}) as IntelligenceRow;
   const {quality,summary}=buildFieldValidation({fields:base,globalConfidence:row.confianza_extraccion,source:'document_row'});
   projected.field_quality=quality;projected.validation_summary=summary;projected.estado_validacion_documental=summary.status;
   return projected;
  }
  const canonicalFields=canonicalizeFields(payload.fields||{});
- const projected:IntelligenceRow={...row,...base,...canonicalFields};
+ const projected:IntelligenceRow=bindDerivedVisibleFields({...row,...base,...canonicalFields});
  const declared=typeof payload.declared_document_type==='string'?payload.declared_document_type.trim():'';
  const detected=typeof payload.detected_document_type==='string'?payload.detected_document_type.trim():'';
  const current=firstString(row,['tipo_canónico','tipo_canonico','tipo','categoria','categoría']);
