@@ -1,6 +1,7 @@
 import type {ExtractedDocument,ExtractedFields} from './browserDocumentOcr';
 
 const clean=(v:string,max=1600)=>v.replace(/[ \t]+/g,' ').replace(/^[:\-–—\s]+/,'').trim().slice(0,max);
+const normalizeDate=(v:string)=>{const s=clean(v,100);const iso=s.match(/\b(\d{4})-(\d{2})-(\d{2})\b/);if(iso)return`${iso[1]}-${iso[2]}-${iso[3]}`;const dmy=s.match(/\b(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{4})\b/);if(!dmy)return s;const day=Number(dmy[1]),month=Number(dmy[2]),year=Number(dmy[3]);if(month<1||month>12||day<1||day>31)return s;return`${String(year).padStart(4,'0')}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;};
 const ls=(text:string)=>text.replace(/\r/g,'\n').split(/\n+/).map(x=>clean(x,1800)).filter(Boolean);
 function set(f:ExtractedFields,k:string,v:unknown){if(v!==undefined&&v!==null&&String(v).trim()!=='')f[k]=v as string|number|boolean;}
 function section(text:string,start:RegExp,stops:RegExp[],max=1800){const lines=ls(text);const i=lines.findIndex(x=>start.test(x));if(i<0)return'';const out:string[]=[];const hit=lines[i].match(start);const tail=hit?clean(lines[i].slice((hit.index||0)+hit[0].length),600):'';if(tail)out.push(tail);for(let j=i+1;j<lines.length;j++){if(stops.some(s=>s.test(lines[j])))break;out.push(lines[j]);if(out.join(' | ').length>=max)break;}return clean(out.join(' | '),max);}
@@ -29,7 +30,7 @@ function normalizeDebt(text:string,f:ExtractedFields){
  const cuota=moneyNear(text,[/\bCUOTA(?:\s+MENSUAL)?\b/i,/IMPORTE\s+(?:DEL\s+)?RECIBO/i,/MENSUALIDAD/i,/PR[ÓO]XIMA\s+CUOTA/i,/RECIBO/i],4);if(cuota!==null)set(f,'cuota',cuota);
  const tin=(text.match(/\b(?:TIN|TIPO DE INTER[EÉ]S NOMINAL)\b\s*[:\-–—]?\s*(\d{1,2}(?:[.,]\d{1,4})?)\s*%/i)||[])[1];if(tin)set(f,'tin',Number(tin.replace(',','.')));
  const periodicidad=inlineOrNext(text,/\bPERIODICIDAD\s*[:\-–—]?/i,80);if(periodicidad)set(f,'periodicidad',periodicidad);
- const venc=inlineOrNext(text,/\b(?:VENCIMIENTO|FECHA\s+FIN|FECHA\s+DE\s+VENCIMIENTO)\s*[:\-–—]?/i,100);if(venc)set(f,'vencimiento',venc);
+ const venc=inlineOrNext(text,/\b(?:VENCIMIENTO|FECHA\s+FIN|FECHA\s+DE\s+VENCIMIENTO)\s*[:\-–—]?/i,100);if(venc)set(f,'vencimiento',normalizeDate(venc));
  const titular=inlineOrNext(text,/\b(?:TITULAR|CLIENTE|PRESTATARIO)\s*[:\-–—]?/i,220);if(titular)set(f,'titular',titular);
 }
 
