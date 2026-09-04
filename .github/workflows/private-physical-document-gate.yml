@@ -12,7 +12,7 @@ permissions:
 jobs:
   private-physical-docs:
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 20
     env:
       REAL_PRIVATE_DOC_DIR: /tmp/fenix-private-docs
     steps:
@@ -28,13 +28,14 @@ jobs:
       - name: Install dependencies reproducibly
         run: npm ci
 
-      - name: Ensure PDF text reader
+      - name: Ensure PDF and Spanish OCR readers
         run: |
-          if ! command -v pdftotext >/dev/null 2>&1; then
+          if ! command -v pdftotext >/dev/null 2>&1 || ! command -v tesseract >/dev/null 2>&1 || ! tesseract --list-langs 2>/dev/null | grep -qx spa; then
             sudo apt-get update
-            sudo apt-get install -y poppler-utils
+            sudo apt-get install -y poppler-utils tesseract-ocr tesseract-ocr-spa
           fi
           pdftotext -v 2>&1 | head -n 1
+          tesseract --version | head -n 1
 
       - name: Download allowlisted real private PDFs read-only
         env:
