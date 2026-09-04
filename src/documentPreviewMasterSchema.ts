@@ -17,5 +17,16 @@ export function getDocumentPreviewSchema(row:PreviewRow|null):PreviewSchema|null
  const labels=new Set(schema.fields.map(x=>x.label));
  return {...schema,fields:[...schema.fields,...vidaOperational.filter(x=>!labels.has(x.label))]};
 }
-export function readPreviewValue(row:PreviewRow,field:PreviewField){for(const key of field.keys){const v=row[key];if(v!==undefined&&v!==null&&String(v).trim()!=='')return v;}return null;}
+export function readPreviewValue(row:PreviewRow,field:PreviewField){
+ if(field.label==='Empresa / CIF'){
+  const empresa=row.empresa??row.empresa_pagador;
+  const cif=row.cif_empresa??row.cif;
+  const e=empresa!==undefined&&empresa!==null?String(empresa).trim():'';
+  const c=cif!==undefined&&cif!==null?String(cif).trim():'';
+  if(e&&c)return`${e} · ${c}`;
+  if(e)return e;
+  if(c)return c;
+ }
+ for(const key of field.keys){const v=row[key];if(v!==undefined&&v!==null&&String(v).trim()!=='')return v;}return null;
+}
 export function getDocumentPreviewFields(row:PreviewRow|null){if(!row)return[] as {label:string;value:unknown;expected:boolean}[];const schema=getDocumentPreviewSchema(row);if(schema)return schema.fields.map(field=>({label:field.label,value:readPreviewValue(row,field),expected:true}));return getCoreFields(row);}
