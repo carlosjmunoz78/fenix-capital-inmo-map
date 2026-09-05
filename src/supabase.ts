@@ -104,6 +104,11 @@ async function authenticatedEdgeFetch<T>(baseFunctionName:string,path:string,ini
   return{status:response.status,data:raw as T|null};
 }
 
+export async function fetchEnvironmentApi<T>(baseFunctionName:string,path:string,init?:RequestInit,options?:{productionAvailable?:boolean}):Promise<{status:number;data:T|null}>{
+  if(IS_PRODUCTION&&options?.productionAvailable===false)return{status:503,data:null};
+  return authenticatedEdgeFetch<T>(baseFunctionName,path,init);
+}
+
 export async function fetchAnaApi<T>(path:string,init?:RequestInit):Promise<{status:number;data:T|null}>{
   return authenticatedEdgeFetch<T>('fenix-ana-api',path,init);
 }
