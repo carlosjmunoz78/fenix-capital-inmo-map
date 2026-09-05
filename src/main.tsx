@@ -115,6 +115,7 @@ import OperationalUniformityGuard from './OperationalUniformityGuard';
 import ProductionWriteSafetyGuard from './ProductionWriteSafetyGuard';
 import ExpedienteLegacyChromeGuard from './ExpedienteLegacyChromeGuard';
 import ExpedienteJourneyGuard from './ExpedienteJourneyGuard';
+import GlobalDictationGuard from './GlobalDictationGuard';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -149,6 +150,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <AnaKnowledgeReviewGuard />
       <AnaTopCorrectionGuard />
       <ContextEvidenceUpload />
+      <GlobalDictationGuard />
       <ExpedienteDocumentsGuard />
       <ExpedienteAnaRuntimeGuard />
       <ExpedienteBelenFinancialGuard />
