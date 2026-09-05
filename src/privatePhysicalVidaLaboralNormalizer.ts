@@ -39,6 +39,21 @@ function holderFromExplicitPhrase(text:string){
  return'';
 }
 
+function regimeFromExplicitEvidence(text:string){
+ const window=(text.match(/R[ÉE]GIMEN[\s\S]{0,260}/i)||[])[0]||'';
+ const match=window.match(/\b(GENERAL|AUT[ÓO]NOMOS?|RETA|AGRARIO|MAR|EMPLEADOS?\s+DE\s+HOGAR)\b/i);
+ return match?.[1]?.replace(/\s+/g,' ').trim()||'';
+}
+
+function totalDaysFromExplicitEvidence(text:string){
+ const patterns=[
+  /(?:TOTAL(?:\s+DE)?\s+D[IÍ]AS|D[IÍ]AS\s+(?:EN\s+)?ALTA|D[IÍ]AS\s+COTIZADOS?|D[IÍ]AS\s+EFECTIVAMENTE\s+COTIZADOS?)[^0-9]{0,90}(\d{1,6})/i,
+  /(?:HA\s+ESTADO\s+DE\s+ALTA|FIGURA\s+EN\s+SITUACI[ÓO]N\s+DE\s+ALTA)[^0-9]{0,100}(\d{1,6})\s+D[IÍ]AS/i,
+ ];
+ for(const pattern of patterns){const match=text.match(pattern);if(match?.[1]){const n=Number(match[1]);if(Number.isInteger(n)&&n>0&&n<100000)return n;}}
+ return null;
+}
+
 export function normalizePrivatePhysicalVidaLaboral(result:ExtractedDocument,rawText:string,declaredType=''):ExtractedDocument{
  const isVida=result.documentType==='Vida laboral'||/VIDA\s+LABORAL/i.test(declaredType)||/INFORME(?:\s+DE)?\s+VIDA\s+LABORAL/i.test(rawText);
  if(!isVida)return result;
@@ -46,6 +61,14 @@ export function normalizePrivatePhysicalVidaLaboral(result:ExtractedDocument,raw
  if(!String(fields.titular||'').trim()){
   const titular=holderFromExplicitPhrase(rawText);
   if(titular)fields.titular=titular;
+ }
+ if(!String(fields.regimen||'').trim()){
+  const regimen=regimeFromExplicitEvidence(rawText);
+  if(regimen)fields.regimen=regimen;
+ }
+ if(fields.total_dias===undefined||fields.total_dias===null||fields.total_dias===''){
+  const totalDays=totalDaysFromExplicitEvidence(rawText);
+  if(totalDays!==null)fields.total_dias=totalDays;
  }
  return{...result,documentType:'Vida laboral',fields};
 }
