@@ -3,7 +3,7 @@ name: Private Physical Document Gate
 on:
   push:
     branches:
-      - qa/private-identity-docs-gate-20260905
+      - qa/private-vida-laboral-doc-gate-20260905
   workflow_dispatch:
 
 permissions:
@@ -44,7 +44,7 @@ jobs:
           test -n "$NOTION_TOKEN" || { echo 'PRIVATE_PHYSICAL_GATE_RED=notion_secret_missing'; exit 1; }
           node scripts/download-private-physical-document-fixtures.mjs
 
-      - name: Run physical Nota Simple, debt and identity gate
+      - name: Run private physical document gate
         run: npx playwright test tests/private-physical-document-gate.spec.ts --project=desktop-chromium
 
       - name: Remove private fixtures
