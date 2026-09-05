@@ -1,7 +1,7 @@
 import {FormEvent,useEffect,useMemo,useState} from 'react';
 import {useLocation,useNavigate} from 'react-router-dom';
 import {LogOut,Moon,Plus,Save,Sun,UserRound,X} from 'lucide-react';
-import {fetchAppApi,IS_PRODUCTION,SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,supabase} from './supabase';
+import {fetchAppApi,fetchEnvironmentApi,IS_PRODUCTION,supabase} from './supabase';
 import {anaVertical} from './assets/visualAssets';
 import OperationalShellFrame from './OperationalShellFrame';
 import type {NavItem} from './masterNavigation';
@@ -50,7 +50,7 @@ const text=(value:unknown)=>String(value??'').trim();
 async function createContact(payload:Record<string,unknown>){
  const{data:{session}}=await supabase.auth.getSession();if(!session?.access_token)return{status:401,data:null as CreateResponse|null};
  if(!IS_PRODUCTION){
-  const r=await fetch(`${SUPABASE_URL}/functions/v1/fenix-contactos-unified-test`,{method:'POST',headers:{'content-type':'application/json',apikey:SUPABASE_PUBLISHABLE_KEY,Authorization:`Bearer ${session.access_token}`},body:JSON.stringify(payload)});let data:CreateResponse|null=null;try{data=await r.json()}catch{}return{status:r.status,data};
+  return fetchEnvironmentApi<CreateResponse>('fenix-contactos-unified','',{method:'POST',body:JSON.stringify(payload)});
  }
  const{data,error}=await supabase.rpc('fenix_prod_contact_create',{
   p_tipo:text(payload.tipo_contacto),p_nombre:text(payload.nombre),p_apellidos:text(payload.apellidos)||null,
@@ -66,8 +66,8 @@ async function createContact(payload:Record<string,unknown>){
 async function fetchEntityOptions(kind:EntityKind){
  if(!kind)return{status:200,items:[] as EntityOption[]};
  if(!IS_PRODUCTION){
-  const{data:{session}}=await supabase.auth.getSession();if(!session?.access_token)return{status:401,items:[] as EntityOption[]};
-  const r=await fetch(`${SUPABASE_URL}/functions/v1/fenix-contactos-unified-test?entity_kind=${encodeURIComponent(kind)}`,{headers:{apikey:SUPABASE_PUBLISHABLE_KEY,Authorization:`Bearer ${session.access_token}`}});let data:{items?:EntityOption[]}|null=null;try{data=await r.json()}catch{}return{status:r.status,items:r.ok&&Array.isArray(data?.items)?data!.items!:[]};
+  const r=await fetchEnvironmentApi<{items?:EntityOption[]}>('fenix-contactos-unified',`?entity_kind=${encodeURIComponent(kind)}`);
+  return{status:r.status,items:r.status===200&&Array.isArray(r.data?.items)?r.data!.items!:[]};
  }
  const path=kind==='inmobiliaria'?'/inmobiliarias':kind==='banco'?'/bancos':'';
  if(!path)return{status:422,items:[] as EntityOption[]};
