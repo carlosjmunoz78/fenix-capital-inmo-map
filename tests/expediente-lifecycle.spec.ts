@@ -16,11 +16,19 @@ test('la ficha ofrece pausa, baja reversible y reactivación sin borrado',()=>{
   expect(lifecycle).toContain('Nunca borra el expediente ni su histórico');
 });
 
-test('el cambio sensible queda en preview hasta existir contrato canónico auditado',()=>{
+test('dar de baja usa la función canónica PROD con versión y confirmación',()=>{
   const lifecycle=fs.readFileSync(path.resolve('src/ExpedienteLifecycleGuard.tsx'),'utf8');
-  expect(lifecycle).toContain('Preparar cambio');
-  expect(lifecycle).toContain('No se ejecuta todavía porque el contrato canónico de ciclo de vida aún no existe');
-  expect(lifecycle).toContain('La ejecución real queda bloqueada hasta disponer del endpoint canónico auditado de ciclo de vida');
+  expect(lifecycle).toContain("fetchEnvironmentApi<StageResponse>('fenix-expediente-stage'");
+  expect(lifecycle).toContain("stage=mode==='close'?'Baja':'Pausado'");
+  expect(lifecycle).toContain('expected_version:version');
+  expect(lifecycle).toContain('Confirmar cambio');
+  expect(lifecycle).toContain('El expediente cambió mientras lo tenías abierto');
   expect(lifecycle).not.toMatch(/action:\s*['"](?:delete|archive)['"]/i);
-  expect(lifecycle).not.toMatch(/fetch\([^\n]+method:\s*['"](?:POST|PATCH|DELETE)['"]/i);
+  expect(lifecycle).not.toMatch(/method:\s*['"]DELETE['"]/i);
+});
+
+test('reactivación no inventa el estado anterior',()=>{
+  const lifecycle=fs.readFileSync(path.resolve('src/ExpedienteLifecycleGuard.tsx'),'utf8');
+  expect(lifecycle).toContain('La reactivación queda pendiente de recuperar de forma canónica el estado anterior');
+  expect(lifecycle).toContain('no inventar uno');
 });
