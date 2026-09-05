@@ -1,21 +1,18 @@
 import {expect,test} from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
-
 const viewer=fs.readFileSync(path.join(process.cwd(),'src/DocumentViewerShell.tsx'),'utf8');
 const gate=fs.readFileSync(path.join(process.cwd(),'src/OperationalRecordDetailGate.tsx'),'utf8');
 const library=fs.readFileSync(path.join(process.cwd(),'src/DocumentacionShell.tsx'),'utf8');
-
-test('smart quick viewer stays modal, contextual and non-destructive',async()=>{
- expect(viewer).toContain('VISTA RÁPIDA INTELIGENTE');
+test('smart quick viewer stays modal, contextual, financial and non-destructive',async()=>{
+ expect(viewer).toContain('VISTA PREVIA FINANCIERA');
  expect(viewer).toContain('role="dialog"');
  expect(viewer).toContain('aria-modal="true"');
  expect(viewer).toContain('position:fixed;inset:0');
- expect(viewer).toContain('height:min(88vh,980px)');
- expect(viewer).toContain('Datos exactos del documento');
- expect(viewer).toContain('Completitud · inferencia');
- expect(viewer).toContain('Requiere validación humana antes de cualquier corrección.');
- expect(viewer).toContain('Relaciones');
+ expect(viewer).toContain('height:min(90vh,1000px)');
+ expect(viewer).toContain('Datos que necesita el financiero');
+ expect(viewer).toContain('No consta en este documento');
+ expect(viewer).toContain('Control de calidad');
  expect(viewer).toContain('Acciones seguras');
  expect(viewer).toContain('Abrir original');
  expect(viewer).toContain('^\\/documentacion\\/([^/]+)$');
