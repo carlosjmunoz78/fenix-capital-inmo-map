@@ -49,6 +49,8 @@ jobs:
         timeout-minutes: 5
 
       - name: Build PRE-PROD
+        env:
+          VITE_FUNCTION_SUFFIX: '-test'
         run: npm run build
 
       - name: Browser QA PRE-PROD
