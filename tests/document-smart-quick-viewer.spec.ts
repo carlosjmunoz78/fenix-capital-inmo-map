@@ -16,7 +16,8 @@ test('smart quick viewer stays modal, contextual and non-destructive',async()=>{
  expect(viewer).toContain('Relaciones');
  expect(viewer).toContain('Acciones seguras');
  expect(viewer).toContain('Abrir original');
- expect(viewer).toContain('(?:documentos|documentacion)');
+ expect(viewer).toContain('^\\/documentacion\\/([^/]+)$');
+ expect(viewer).not.toContain('(?:documentos|documentacion)');
  expect(viewer).toContain("u.protocol==='https:'||u.protocol==='http:'");
  expect(viewer).toContain("event.key==='Escape'");
  expect(viewer).not.toMatch(/authenticatedEdgeFetch\([^)]*['\"]fenix-[^'\"]*(?<!-test)['\"]/);
