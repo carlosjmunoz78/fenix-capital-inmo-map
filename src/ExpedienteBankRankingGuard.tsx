@@ -2,13 +2,13 @@ import {useEffect,useState} from 'react';
 import {createPortal} from 'react-dom';
 import {useLocation,useNavigate} from 'react-router-dom';
 import {Landmark,ShieldCheck,ArrowRight} from 'lucide-react';
-import {SUPABASE_URL,supabase} from './supabase';
+import {fetchEnvironmentApi} from './supabase';
 
 type Rank={bank_id:string;bank:string;score:number;reasons:string[];risks:string[];confidence?:number|null;last_review?:string|null;requires_belen?:boolean};
 type StrategyStep={order:number;bank_id:string;bank:string;score:number;label:string;why:string[];verify_before:string[];move_to_next_when?:string|null;stop_and_escalate?:string|null;requires_belen?:boolean};
 type Envelope={ok?:boolean;status?:number;ranking?:Rank[];strategy?:StrategyStep[];strategy_status?:string;policy?:string;requires_belen_gate?:boolean};
 function isNotionId(v:string){return /^[0-9a-f]{32}$/i.test(v.replaceAll('-',''));}
-async function getRanking(id:string){const{data:{session}}=await supabase.auth.getSession();if(!session?.access_token)return{status:401,data:null as Envelope|null};try{const r=await fetch(`${SUPABASE_URL}/functions/v1/fenix-bank-ranking-test/expedientes/${encodeURIComponent(id)}/ranking`,{headers:{Authorization:`Bearer ${session.access_token}`}});let data:Envelope|null=null;try{data=await r.json()}catch{}return{status:r.status,data}}catch{return{status:0,data:null as Envelope|null}}}
+async function getRanking(id:string){return fetchEnvironmentApi<Envelope>('fenix-bank-ranking',`/expedientes/${encodeURIComponent(id)}/ranking`,undefined,{productionAvailable:false});}
 export default function ExpedienteBankRankingGuard(){
  const location=useLocation(),navigate=useNavigate();const match=location.pathname.match(/^\/expedientes\/([^/]+)$/),id=match?.[1]?decodeURIComponent(match[1]):'';const active=Boolean(match&&isNotionId(id));
  const[target,setTarget]=useState<Element|null>(null),[data,setData]=useState<Envelope|null>(null);
