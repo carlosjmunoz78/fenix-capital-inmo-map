@@ -26,7 +26,8 @@ const PROTECTED_PAGE_IDS = new Set([
   "37581b1a756d8020a712f057c39460cf"
 ]);
 
-const LEGACY_CRM_DATA_SOURCE_IDS = new Set([
+const LEGACY_CRM_PARENT_IDS = new Set([
+  // Data-source IDs (new Notion API shape)
   "37581b1a756d8145ae8c000b661e45e0",
   "37581b1a756d81619fab000bcb980eb2",
   "37581b1a756d8164927b000b18504dbb",
@@ -35,7 +36,17 @@ const LEGACY_CRM_DATA_SOURCE_IDS = new Set([
   "37581b1a756d81dfa57c000b16d5b977",
   "37581b1a756d81e89fc4000b42370927",
   "2cb4f1fb258a46ee80c118adcc68ead9",
-  "df381b1a756d8392bd6b07ebb1bf06cc"
+  "df381b1a756d8392bd6b07ebb1bf06cc",
+  // Database IDs (Notion-Version 2022-06-28 parent shape)
+  "37581b1a756d8068ad7fd5a656ac2015",
+  "37581b1a756d800f8592cf2c23cc5c3d",
+  "37581b1a756d8097956bc1aef866710b",
+  "37581b1a756d80509266fafa125396ac",
+  "37581b1a756d803091eff46ac1a522d7",
+  "37581b1a756d805b9fa3cd3206a4106f",
+  "37581b1a756d80fa91a3d011e85fcf4d",
+  "8cbb6aca69f44431b36797facabfae78",
+  "37981b1a756d80428275e9fed5e281a9"
 ]);
 
 function normalize(input: string): string {
@@ -88,7 +99,7 @@ Deno.serve(async (req: Request) => {
         destructive_default: "dry-run",
         protected_pages: PROTECTED_PAGE_IDS.size,
         legacy_crm_write_guard: true,
-        legacy_crm_data_sources: LEGACY_CRM_DATA_SOURCE_IDS.size
+        legacy_crm_parent_ids: LEGACY_CRM_PARENT_IDS.size
       });
     }
 
@@ -109,8 +120,8 @@ Deno.serve(async (req: Request) => {
       const current = await notion(`/pages/${dashed(id)}`);
       if (!current.ok) return reply({ error: "page_preflight_failed", page_id: dashed(id), upstream_status: current.status }, current.status);
       const pid = parentId(current.body);
-      if (pid && LEGACY_CRM_DATA_SOURCE_IDS.has(pid)) {
-        return reply({ error: "legacy_crm_read_only", page_id: dashed(id), parent_data_source_id: dashed(pid) }, 403);
+      if (pid && LEGACY_CRM_PARENT_IDS.has(pid)) {
+        return reply({ error: "legacy_crm_read_only", page_id: dashed(id), parent_id: dashed(pid) }, 403);
       }
 
       const action = route === "archive-page" ? "archive" : "restore";
