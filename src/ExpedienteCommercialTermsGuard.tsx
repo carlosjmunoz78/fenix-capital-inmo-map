@@ -1,7 +1,7 @@
 import {useEffect,useMemo,useState} from 'react';
 import {createPortal} from 'react-dom';
 import {useLocation} from 'react-router-dom';
-import {SUPABASE_URL,supabase} from './supabase';
+import {fetchAppApi,fetchEnvironmentApi} from './supabase';
 import {fetchNotionRuntime} from './notionRuntime';
 import {FENIX_COMMERCIAL_KNOWLEDGE,quoteMortgageFee} from './fenixCommercialKnowledge';
 import './commercial-terms.css';
@@ -13,8 +13,8 @@ function b(row:AnyRow,keys:string[]){for(const k of keys){const v=row[k];if(type
 function fromAgency(row:AnyRow){const explicit=b(row,['origen_inmobiliaria','procede_inmobiliaria','es_inmobiliaria']);if(explicit!==null)return explicit;const origin=t(row,['origen','procedencia','canal','fuente']);if(/inmobiliaria|agencia/i.test(origin))return true;return Boolean(t(row,['inmobiliaria_id','inmobiliaria','agencia_id','agencia']))}
 function notionId(v:string){return /^[0-9a-f]{32}$/i.test(v.replaceAll('-',''))}
 function eurBase(value:number){const rounded=Math.round(value);return String(rounded).replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
-async function contextRole(){const {data:{session}}=await supabase.auth.getSession();if(!session?.access_token)return'';const r=await fetch(`${SUPABASE_URL}/functions/v1/fenix-app-gateway-test/session/context`,{headers:{Authorization:`Bearer ${session.access_token}`}});let data:any=null;try{data=await r.json()}catch{}return String(data?.role||data?.context?.role||'')}
-async function saveTerms(id:string,changes:Record<string,unknown>){const {data:{session}}=await supabase.auth.getSession();if(!session?.access_token)return{status:401,data:null as any};const r=await fetch(`${SUPABASE_URL}/functions/v1/fenix-notion-actions-test/expedientes/${encodeURIComponent(id)}/action`,{method:'POST',headers:{'content-type':'application/json',Authorization:`Bearer ${session.access_token}`},body:JSON.stringify({action:'update',changes})});let data:any=null;try{data=await r.json()}catch{}return{status:r.status,data}}
+async function contextRole(){const r=await fetchAppApi<any>('/session/context');return String(r.data?.role||r.data?.context?.role||'')}
+async function saveTerms(id:string,changes:Record<string,unknown>){return fetchEnvironmentApi<any>('fenix-notion-actions',`/expedientes/${encodeURIComponent(id)}/action`,{method:'POST',body:JSON.stringify({action:'update',changes})},{productionAvailable:false})}
 
 export default function ExpedienteCommercialTermsGuard(){
  const location=useLocation();
