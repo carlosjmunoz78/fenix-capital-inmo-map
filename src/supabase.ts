@@ -17,7 +17,10 @@ if(IS_PRODUCTION&&(!SUPABASE_URL||!SUPABASE_PUBLISHABLE_KEY)){
   throw new Error('FENIX PROD runtime requires dedicated Supabase URL and publishable key.');
 }
 
-const FUNCTION_SUFFIX=IS_PRODUCTION?'':'-test';
+const FUNCTION_SUFFIX=IS_PRODUCTION?'':String(import.meta.env.VITE_FUNCTION_SUFFIX||'');
+if(!IS_PRODUCTION&&!FUNCTION_SUFFIX){
+  throw new Error('FENIX PRE-PROD runtime requires an explicit edge-function suffix.');
+}
 const functionName=(base:string)=>`${base}${FUNCTION_SUFFIX}`;
 const AUTH_STORAGE_KEY=IS_PRODUCTION?'fenix-prod-auth-v1':'fenix-preprod-auth-v2';
 const LEGACY_AUTH_STORAGE_KEY='fenix-preprod-auth';
