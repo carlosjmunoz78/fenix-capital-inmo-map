@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Building2, CalendarDays, FileCheck2, FileText, FolderOpen, Home, Landmark, LogOut, Moon, Search, Sun, UserRound, Users } from 'lucide-react';
-import { fetchAppApi, supabase, SUPABASE_URL } from './supabase';
+import { fetchAppApi, fetchEnvironmentApi, IS_PRODUCTION, supabase } from './supabase';
 import { fetchNotionRuntime } from './notionRuntime';
 import { fenixLogo, anaAvatar, anaVertical } from './assets/visualAssets';
 import './operational.css';
@@ -45,7 +45,7 @@ function prettyValue(v:unknown){if(v===null||v===undefined||v==='')return'—';i
 function compareUnknown(a:unknown,b:unknown){if(typeof a==='number'&&typeof b==='number')return a-b;if(typeof a==='boolean'&&typeof b==='boolean')return Number(a)-Number(b);const sa=prettyValue(a),sb=prettyValue(b);if(/^\d{4}-\d{2}-\d{2}/.test(sa)&&/^\d{4}-\d{2}-\d{2}/.test(sb)){const da=Date.parse(sa),db=Date.parse(sb);if(Number.isFinite(da)&&Number.isFinite(db))return da-db;}return sa.localeCompare(sb,'es',{sensitivity:'base',numeric:true});}
 function firstString(row:AnyRow,keys:string[]){for(const k of keys){const v=row[k];if(typeof v==='string'&&v.trim())return v.trim();}return'';}
 function detailRoute(key:string,row:AnyRow){if(key==='/expedientes'){const code=firstString(row,['expediente_code','code','codigo','id']);return code?`/expedientes/${encodeURIComponent(code)}`:'';}if(key==='/inmobiliarias'){const code=firstString(row,['inmobiliaria_code','code','codigo','id']);return code?`/inmobiliarias/${encodeURIComponent(code)}`:'';}if(key==='/contactos'){const id=firstString(row,['id','contact_id','contacto_id','contact_key']);return id?`/contactos/${encodeURIComponent(id)}`:'';}if(key==='/agenda'||key==='/tareas'){const id=firstString(row,['id','tarea_id','tarea_code']);return id?`/tareas/${encodeURIComponent(id)}`:'';}if(key==='/documentacion'){const id=firstString(row,['id','documento_id','document_code']);return id?`/documentacion/${encodeURIComponent(id)}`:'';}if(key==='/tasaciones'){const id=firstString(row,['id','tasacion_id','appraisal_code']);return id?`/tasaciones/${encodeURIComponent(id)}`:'';}if(key==='/firmas'){const id=firstString(row,['id','firma_id','firma_code']);return id?`/firmas/${encodeURIComponent(id)}`:'';}if(key==='/buscar'){const destino=firstString(row,['destino','route','ruta']);if(destino.startsWith('/expedientes/')||destino.startsWith('/contactos/')||destino.startsWith('/inmobiliarias/'))return destino;}return'';}
-async function fetchReports(){const{data:{session}}=await supabase.auth.getSession();if(!session?.access_token)return{status:401,data:null};const r=await fetch(`${SUPABASE_URL}/functions/v1/fenix-reports-api-test/reports`,{headers:{Authorization:`Bearer ${session.access_token}`}});let data:unknown=null;try{data=await r.json()}catch{data=null}return{status:r.status,data};}
+async function fetchReports(){const path=IS_PRODUCTION?'':'/reports';return fetchEnvironmentApi<unknown>('fenix-reports-api',path);}
 
 export default function OperationalShellV2(){
  const location=useLocation(),navigate=useNavigate(),key=pathKey(location.pathname),module=(['/contactos','/inmobiliarias','/tasaciones','/agenda','/firmas','/documentacion','/financieros'].includes(key)?undefined:modules[key]) as ModuleDef;
