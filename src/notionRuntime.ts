@@ -37,6 +37,6 @@ async function fetchProductionRead<T>(path:string,init?:RequestInit):Promise<{st
 
 export async function fetchNotionRuntime<T>(path:string,init?:RequestInit):Promise<{status:number;data:T|null}>{
   if(IS_PRODUCTION)return fetchProductionRead<T>(path,init);
-  // PRE-PROD isolation contract: /functions/v1/fenix-notion-runtime-test
+  // PRE-PROD isolation is resolved centrally from the explicit environment suffix.
   return fetchEnvironmentApi<T>('fenix-notion-runtime',path,init,{productionAvailable:false});
 }
