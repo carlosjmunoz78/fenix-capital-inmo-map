@@ -1,7 +1,7 @@
 import {useEffect,useState} from 'react';
 import {useLocation,useNavigate} from 'react-router-dom';
 import {ArrowLeft,Landmark,Plus,X} from 'lucide-react';
-import {fetchAppApi,IS_PRODUCTION,SUPABASE_PUBLISHABLE_KEY,SUPABASE_URL,supabase} from './supabase';
+import {fetchAppApi,fetchEnvironmentApi,IS_PRODUCTION,supabase} from './supabase';
 import {normalizeNavigation,type NavItem} from './masterNavigation';
 import OperationalShellFrame from './OperationalShellFrame';
 import {anaVertical} from './assets/visualAssets';
@@ -27,17 +27,13 @@ export default function BankCreateShell(){
   if(!canCreate||!nombre.trim())return;
   if(!preview){setPreview(true);setMessage('');return}
   setBusy(true);setMessage('');setResult(null);
-  const {data:{session}}=await supabase.auth.getSession();
-  if(!session?.access_token){setBusy(false);setMessage('No hay sesión autorizada para crear el banco.');setPreview(false);return}
-  let response:Response;
-  const endpoint=IS_PRODUCTION?'fenix-bank-api':'fenix-bank-actions-test';
-  try{response=await fetch(`${SUPABASE_URL}/functions/v1/${endpoint}`,{method:'POST',headers:{'content-type':'application/json',apikey:SUPABASE_PUBLISHABLE_KEY,Authorization:`Bearer ${session.access_token}`},body:JSON.stringify({nombre:nombre.trim(),direccion:direccion.trim(),localidad:localidad.trim(),provincia:provincia.trim(),perfil:perfil.trim(),financiacion_100:yn(cien),doble_garantia:yn(doble),telefonos:telefonos.map(x=>x.trim()).filter(Boolean),emails:emails.map(x=>x.trim()).filter(Boolean),observaciones:observaciones.trim()})})}catch{setBusy(false);setMessage('No se pudo conectar con el alta canónica de Bancos.');setPreview(false);return}
-  let data:CreateBankResponse|null=null;try{data=await response.json()}catch{}
-  setBusy(false);setResult(data);setPreview(false);
-  if(response.status===201&&data?.ok){setMessage(`Banco creado en la fuente canónica de ${IS_PRODUCTION?'producción':'PRE-PROD'}.`);return}
-  if(response.status===409&&data?.existing_bank_code){setMessage('Ese banco ya existe. No se ha creado un duplicado.');return}
+  const endpoint=IS_PRODUCTION?'fenix-bank-api':'fenix-bank-actions';
+  const response=await fetchEnvironmentApi<CreateBankResponse>(endpoint,'',{method:'POST',body:JSON.stringify({nombre:nombre.trim(),direccion:direccion.trim(),localidad:localidad.trim(),provincia:provincia.trim(),perfil:perfil.trim(),financiacion_100:yn(cien),doble_garantia:yn(doble),telefonos:telefonos.map(x=>x.trim()).filter(Boolean),emails:emails.map(x=>x.trim()).filter(Boolean),observaciones:observaciones.trim()})});
+  setBusy(false);setResult(response.data);setPreview(false);
+  if(response.status===201&&response.data?.ok){setMessage(`Banco creado en la fuente canónica de ${IS_PRODUCTION?'producción':'PRE-PROD'}.`);return}
+  if(response.status===409&&response.data?.existing_bank_code){setMessage('Ese banco ya existe. No se ha creado un duplicado.');return}
   if(response.status===403){setMessage('Tu perfil no puede crear bancos.');return}
-  setMessage(`No se pudo crear el banco (${data?.error||response.status}).`)
+  setMessage(`No se pudo crear el banco (${response.data?.error||response.status}).`)
  }
  return <OperationalShellFrame theme={theme} navigation={nav.length?nav:fallbackNav} activeRoute="/bancos" query={globalQuery} onQueryChange={setGlobalQuery} searchPlaceholder="Buscar en toda la app..." searchActionLabel="Buscar" onSearchAction={globalSearch} name={ctx?.role||'Usuario'} role="" initials={(ctx?.role||'U').slice(0,2).toUpperCase()} onToggleTheme={()=>setTheme(theme==='light'?'dark':'light')} onLogout={logout}>
   <button className="secondary-action" onClick={()=>navigate('/bancos')}><ArrowLeft size={15}/> Volver a Bancos</button>
