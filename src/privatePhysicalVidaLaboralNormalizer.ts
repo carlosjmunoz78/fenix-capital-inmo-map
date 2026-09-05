@@ -39,18 +39,36 @@ function holderFromExplicitPhrase(text:string){
  return'';
 }
 
-function regimeFromExplicitEvidence(text:string){
+function datedWorkRows(text:string){
+ const date=/\b\d{1,2}[.\/-]\d{1,2}[.\/-]\d{2,4}\b/g;
+ return text.replace(/\r/g,'\n').split(/\n+/)
+  .map(x=>x.replace(/\s+/g,' ').trim())
+  .filter(Boolean)
+  .filter(line=>!/(FECHA\s+DE\s+ALTA|FECHA\s+DE\s+BAJA|FECHA\s+DE\s+EFECTO)/i.test(line))
+  .filter(line=>(line.match(date)||[]).length>=2)
+  .slice(0,12);
+}
+
+function regimeFromExplicitEvidence(text:string,rows:string[]){
  const window=(text.match(/R[ÉE]GIMEN[\s\S]{0,260}/i)||[])[0]||'';
- const match=window.match(/\b(GENERAL|AUT[ÓO]NOMOS?|RETA|AGRARIO|MAR|EMPLEADOS?\s+DE\s+HOGAR)\b/i);
- return match?.[1]?.replace(/\s+/g,' ').trim()||'';
+ const named=window.match(/\b(GENERAL|AUT[ÓO]NOMOS?|RETA|AGRARIO|MAR|EMPLEADOS?\s+DE\s+HOGAR)\b/i);
+ if(named?.[1])return named[1].replace(/\s+/g,' ').trim();
+ const codes:string[]=[];
+ for(const row of rows){
+  const prefix=row.split(/\b\d{1,2}[.\/-]\d{1,2}[.\/-]\d{2,4}\b/)[0]||'';
+  const match=prefix.match(/^\D*(\d{3,4})\b/);
+  if(match?.[1]&&!codes.includes(match[1]))codes.push(match[1]);
+ }
+ return codes.slice(0,4).join(', ');
 }
 
 function totalDaysFromExplicitEvidence(text:string){
+ const number='(\\d{1,3}(?:[.\\s]\\d{3})+|\\d{1,6})';
  const patterns=[
-  /(?:TOTAL(?:\s+DE)?\s+D[IÍ]AS|D[IÍ]AS\s+(?:EN\s+)?ALTA|D[IÍ]AS\s+COTIZADOS?|D[IÍ]AS\s+EFECTIVAMENTE\s+COTIZADOS?)[^0-9]{0,90}(\d{1,6})/i,
-  /(?:HA\s+ESTADO\s+DE\s+ALTA|FIGURA\s+EN\s+SITUACI[ÓO]N\s+DE\s+ALTA)[^0-9]{0,100}(\d{1,6})\s+D[IÍ]AS/i,
+  new RegExp(`(?:TOTAL(?:\\s+DE)?\\s+D[IÍ]AS|D[IÍ]AS\\s+(?:EN\\s+)?ALTA|D[IÍ]AS\\s+COTIZADOS?|D[IÍ]AS\\s+EFECTIVAMENTE\\s+COTIZADOS?)[^0-9]{0,90}${number}`,'i'),
+  new RegExp(`(?:HA\\s+ESTADO\\s+DE\\s+ALTA|FIGURA\\s+EN\\s+SITUACI[ÓO]N\\s+DE\\s+ALTA)[^0-9]{0,100}${number}\\s+D[IÍ]AS`,'i'),
  ];
- for(const pattern of patterns){const match=text.match(pattern);if(match?.[1]){const n=Number(match[1]);if(Number.isInteger(n)&&n>0&&n<100000)return n;}}
+ for(const pattern of patterns){const match=text.match(pattern);if(match?.[1]){const n=Number(match[1].replace(/[.\s]/g,''));if(Number.isInteger(n)&&n>0&&n<100000)return n;}}
  return null;
 }
 
@@ -62,8 +80,12 @@ export function normalizePrivatePhysicalVidaLaboral(result:ExtractedDocument,raw
   const titular=holderFromExplicitPhrase(rawText);
   if(titular)fields.titular=titular;
  }
+ const rows=datedWorkRows(rawText);
+ if(!String(fields.periodos_trabajados||'').trim()&&rows.length){
+  fields.periodos_trabajados=rows.join(' | ').slice(0,1800);
+ }
  if(!String(fields.regimen||'').trim()){
-  const regimen=regimeFromExplicitEvidence(rawText);
+  const regimen=regimeFromExplicitEvidence(rawText,rows);
   if(regimen)fields.regimen=regimen;
  }
  if(fields.total_dias===undefined||fields.total_dias===null||fields.total_dias===''){
