@@ -1,4 +1,4 @@
-import { IS_PRODUCTION, SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL, fetchAppApi, supabase } from './supabase';
+import { IS_PRODUCTION, fetchAppApi, fetchEnvironmentApi } from './supabase';
 
 function filterContactResponse<T>(data:T|null,mode:'clientes'|'inmobiliarias'):T|null{
   if(!data||typeof data!=='object')return data;
@@ -37,22 +37,5 @@ async function fetchProductionRead<T>(path:string,init?:RequestInit):Promise<{st
 
 export async function fetchNotionRuntime<T>(path:string,init?:RequestInit):Promise<{status:number;data:T|null}>{
   if(IS_PRODUCTION)return fetchProductionRead<T>(path,init);
-  const {data:{session}}=await supabase.auth.getSession();
-  const token=session?.access_token;
-  if(!token)return{status:401,data:null};
-  let res:Response;
-  try{
-    res=await fetch(`${SUPABASE_URL}/functions/v1/fenix-notion-runtime-test${path}`,{
-      ...init,
-      headers:{
-        'content-type':'application/json',
-        ...(init?.headers||{}),
-        Authorization:`Bearer ${token}`,
-        apikey:SUPABASE_PUBLISHABLE_KEY
-      }
-    });
-  }catch{return{status:0,data:null}}
-  let data:unknown=null;
-  try{data=await res.json()}catch{data=null}
-  return{status:res.status,data:data as T|null};
+  return fetchEnvironmentApi<T>('fenix-notion-runtime',path,init,{productionAvailable:false});
 }
