@@ -1,7 +1,7 @@
 import {FormEvent,useEffect,useMemo,useState} from 'react';
 import {useLocation,useNavigate} from 'react-router-dom';
 import {Mail,MessageCircle,Phone,ShieldCheck,Send,CheckCircle2,XCircle} from 'lucide-react';
-import {fetchAppApi,SUPABASE_URL,supabase} from './supabase';
+import {fetchAppApi,fetchEnvironmentApi,supabase} from './supabase';
 import {normalizeNavigation,type NavItem} from './masterNavigation';
 import OperationalShellFrame from './OperationalShellFrame';
 import {anaVertical} from './assets/visualAssets';
@@ -15,8 +15,8 @@ type Ctx={role?:string;context?:{role?:string}};
 type Advice={action?:string|null;why?:string;client?:{name?:string|null;email?:string|null;phone?:string|null};channels?:{llamada?:{objetivo?:string;guion?:string;preguntas?:string[];resultado_esperado?:string}|null;whatsapp?:{texto?:string}|null;email?:{asunto?:string;cuerpo?:string}|null}};
 type PendingAction={kind:'authorize'|'simulate';item:AnyRow}|null;
 const fallbackNav:NavItem[]=[{label:'Inicio',route:'/inicio'}];
-async function commApi(path:string,init?:RequestInit){try{const {data:{session}}=await supabase.auth.getSession();if(!session?.access_token)return {status:401,data:null as any};const r=await fetch(`${SUPABASE_URL}/functions/v1/fenix-communications-gateway-test${path}`,{...init,headers:{'content-type':'application/json',...(init?.headers||{}),Authorization:`Bearer ${session.access_token}`}});let data:any=null;try{data=await r.json()}catch{}return {status:r.status,data};}catch{return{status:0,data:null as any}}}
-async function adviceApi(expedienteId:string){try{const{data:{session}}=await supabase.auth.getSession();if(!session?.access_token)return{status:401,data:null as Advice|null};const r=await fetch(`${SUPABASE_URL}/functions/v1/fenix-expediente-assistant-test/expedientes/${encodeURIComponent(expedienteId)}/advice`,{headers:{Authorization:`Bearer ${session.access_token}`}});let data:Advice|null=null;try{data=await r.json()}catch{}return{status:r.status,data}}catch{return{status:0,data:null as Advice|null}}}
+async function commApi(path:string,init?:RequestInit){return fetchEnvironmentApi<any>('fenix-communications-gateway',path,init,{productionAvailable:false});}
+async function adviceApi(expedienteId:string){return fetchEnvironmentApi<Advice>('fenix-expediente-assistant',`/expedientes/${encodeURIComponent(expedienteId)}/advice`,undefined,{productionAvailable:false});}
 
 export default function CommunicationsShell(){
  const location=useLocation(),navigate=useNavigate();const active=location.pathname.replace(/\/+$/,'')==='/comunicaciones'||location.pathname.replace(/\/+$/,'')==='/comunicaciones/nueva';const params=useMemo(()=>new URLSearchParams(location.search),[location.search]);
