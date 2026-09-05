@@ -36,10 +36,11 @@ function relationFields(row:Row|null){if(!row)return[] as string[];return Object
 
 export default function DocumentViewerShell(){
  const location=useLocation(),navigate=useNavigate();
- const match=location.pathname.match(/^\/documentacion\/([^/]+)$/);const id=match?.[1]?decodeURIComponent(match[1]):'';const active=Boolean(match);
+ const params=useMemo(()=>new URLSearchParams(location.search),[location.search]);
+ const match=location.pathname.match(/^\/documentacion\/([^/]+)$/);const id=match?.[1]?decodeURIComponent(match[1]):'';const active=Boolean(match)&&params.get('preview')==='1';
  const[status,setStatus]=useState<number|null>(null),[item,setItem]=useState<Row|null>(null),[loading,setLoading]=useState(false);
  useEffect(()=>{if(!active)return;let alive=true;(async()=>{setLoading(true);setStatus(null);setItem(null);try{const r=await fetchNotionRuntime<any>(`/documentos/${encodeURIComponent(id)}`);if(!alive)return;setStatus(r.status);setItem(r.status===200?(r.data?.item??null):null);}catch{if(alive)setStatus(0);}finally{if(alive)setLoading(false);}})();return()=>{alive=false};},[active,id]);
- const returnTo=useMemo(()=>new URLSearchParams(location.search).get('returnTo')||'/documentacion',[location.search]);
+ const returnTo=useMemo(()=>params.get('returnTo')||'/documentacion',[params]);
  useEffect(()=>{if(!active)return;const old=document.body.style.overflow;document.body.style.overflow='hidden';const onKey=(event:KeyboardEvent)=>{if(event.key==='Escape')navigate(returnTo)};window.addEventListener('keydown',onKey);return()=>{document.body.style.overflow=old;window.removeEventListener('keydown',onKey)};},[active,navigate,returnTo]);
  if(!active)return null;
  const title=text(item,['title','documento','nombre','titulo','título'])||'Documento';
