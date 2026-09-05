@@ -28,8 +28,8 @@ export default function GlobalDictationGuard(){
  const recognition=useRef<RecognitionLike|null>(null);
  const supported=useMemo(()=>typeof window!=='undefined'&&Boolean(window.SpeechRecognition||window.webkitSpeechRecognition),[]);
  useEffect(()=>{
-  let raf=0;const scan=()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{const next:Array<Target>=[];document.querySelectorAll('input,textarea').forEach((el,i)=>{if(!writable(el))return;const rect=visibleRect(el);if(!rect)return;const key=el.id||el.getAttribute('name')||el.getAttribute('aria-label')||`${el.tagName}-${i}`;next.push({el,key,rect});});setTargets(next);});};
-  scan();const observer=new MutationObserver(scan);observer.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['disabled','readonly','style','class']});window.addEventListener('resize',scan);window.addEventListener('scroll',scan,true);const timer=window.setInterval(scan,1500);
+  let raf=0;const scan=()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{const next:Array<Target>=[];document.querySelectorAll('input,textarea').forEach((el,i)=>{if(!writable(el))return;const rect=visibleRect(el);if(!rect)return;const base=el.id||el.getAttribute('name')||el.getAttribute('aria-label')||el.tagName;next.push({el,key:`${base}-${i}`,rect});});setTargets(next);});};
+  scan();const observer=new MutationObserver(scan);observer.observe(document.body,{subtree:true,childList:true});window.addEventListener('resize',scan);window.addEventListener('scroll',scan,true);const timer=window.setInterval(scan,1200);
   return()=>{observer.disconnect();window.removeEventListener('resize',scan);window.removeEventListener('scroll',scan,true);clearInterval(timer);cancelAnimationFrame(raf);recognition.current?.stop();};
  },[]);
  function start(target:Target){
