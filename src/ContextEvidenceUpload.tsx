@@ -6,12 +6,14 @@ import {IS_PRODUCTION,SUPABASE_PUBLISHABLE_KEY,SUPABASE_URL,supabase} from './su
 
 const BUCKET=IS_PRODUCTION?'fenix-prod-documents':'fenix-preprod-documents-test';
 const FUNCTION=IS_PRODUCTION?'fenix-evidence-api':'fenix-evidence-universal-test';
+const EXTRACT_FUNCTION='fenix-document-extract-test';
 const PROD_SUPPORTED_ORIGINS=new Set(['expediente','contacto','firma']);
 const PROD_ALLOWED_MIME=new Set([
  'application/pdf','image/png','image/jpeg','image/webp','text/plain','application/msword',
  'application/vnd.openxmlformats-officedocument.wordprocessingml.document','application/vnd.ms-excel',
  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 ]);
+const EXTRACTABLE_MIME=new Set(['application/pdf','image/png','image/jpeg','image/webp']);
 const PROD_ACCEPT='.pdf,.png,.jpg,.jpeg,.webp,.txt,.doc,.docx,.xls,.xlsx';
 const AUDIO_EXTENSIONS=['.mp3','.m4a','.wav','.webm','.ogg','.oga','.opus','.aac','.flac'];
 const MIME_BY_EXT:Record<string,string>={
@@ -25,6 +27,7 @@ const MIME_BY_EXT:Record<string,string>={
 type OriginCtx={type:string;code:string;label:string;staging:boolean};
 type Prepare={ok?:boolean;upload_id?:string;storage_path?:string;token?:string;max_bytes?:number};
 type Complete={ok?:boolean;reused?:boolean;document_page_id?:string};
+type Extract={ok?:boolean;status?:number;extraction?:{fields?:Record<string,unknown>};applied?:{error?:string;conflicts?:unknown[]}};
 type Queue={originType:string;label:string;files:File[]};
 
 function routeContext(pathname:string):OriginCtx|null{
@@ -63,20 +66,16 @@ function mimeOf(file:File){
  return'application/octet-stream';
 }
 
-async function evidenceFetch<T>(path:string,init?:RequestInit):Promise<{status:number;data:T|null}>{
+async function authFetch<T>(url:string,init?:RequestInit):Promise<{status:number;data:T|null}>{
  const{data:{session}}=await supabase.auth.getSession();
  if(!session?.access_token)return{status:401,data:null};
  let response:Response;
- try{
-  response=await fetch(`${SUPABASE_URL}/functions/v1/${FUNCTION}${path}`,{
-   ...init,
-   headers:{'content-type':'application/json',apikey:SUPABASE_PUBLISHABLE_KEY,Authorization:`Bearer ${session.access_token}`}
-  });
- }catch{return{status:0,data:null};}
- let data:T|null=null;
- try{data=await response.json()}catch{}
+ try{response=await fetch(url,{...init,headers:{'content-type':'application/json',apikey:SUPABASE_PUBLISHABLE_KEY,Authorization:`Bearer ${session.access_token}`}})}catch{return{status:0,data:null};}
+ let data:T|null=null;try{data=await response.json()}catch{}
  return{status:response.status,data};
 }
+async function evidenceFetch<T>(path:string,init?:RequestInit){return authFetch<T>(`${SUPABASE_URL}/functions/v1/${FUNCTION}${path}`,init)}
+async function extractFetch<T>(body:unknown){return authFetch<T>(`${SUPABASE_URL}/functions/v1/${EXTRACT_FUNCTION}`,{method:'POST',body:JSON.stringify(body)})}
 
 export default function ContextEvidenceUpload(){
  const location=useLocation(),navigate=useNavigate();
@@ -96,11 +95,9 @@ export default function ContextEvidenceUpload(){
  useEffect(()=>{if(legacyOpen)setOpen(true)},[legacyOpen]);
  useEffect(()=>{
   if(!context){setInlineHost(null);return;}
-  const host=document.createElement('div');
-  host.className='context-evidence-inline-host';
+  const host=document.createElement('div');host.className='context-evidence-inline-host';
   const place=()=>{
-   const content=document.querySelector<HTMLElement>('.ops-content,.dir-content');
-   if(!content)return;
+   const content=document.querySelector<HTMLElement>('.ops-content,.dir-content');if(!content)return;
    const lifecycle=content.querySelector<HTMLElement>(':scope > .exp-life-inline-host');
    const kpis=content.querySelector<HTMLElement>(':scope > .tas-kpis, :scope > .firmas-kpis, :scope > .fin-kpis, :scope > .vis-kpis, :scope > .inmo-kpis, :scope > [class$="-kpis"]');
    const hero=content.querySelector<HTMLElement>(':scope > [class*="-ana-hero"], :scope > .vis-ana, :scope > .ops-ana-card, :scope > .dir-priority-copy');
@@ -109,19 +106,12 @@ export default function ContextEvidenceUpload(){
    if(content.closest('.firmas-root')){host.style.gridColumn='1';host.style.gridRow='4'}else{host.style.gridColumn='';host.style.gridRow=''}
    for(const duplicate of document.querySelectorAll<HTMLElement>('.firma-upload-inline,.doc-upload-inline'))duplicate.style.setProperty('display','none','important');
   };
-  place();
-  setInlineHost(host);
-  const observer=new MutationObserver(place);
-  observer.observe(document.body,{childList:true,subtree:true});
+  place();setInlineHost(host);const observer=new MutationObserver(place);observer.observe(document.body,{childList:true,subtree:true});
   return()=>{observer.disconnect();host.remove();setInlineHost(null)};
  },[location.pathname,Boolean(context)]);
  useEffect(()=>{
   if(!queue||!context||context.staging||!context.code||queue.originType!==context.type||busy||autoUploading.current)return;
-  autoUploading.current=true;
-  const files=queue.files;
-  setQueue(null);
-  setOpen(true);
-  setMsg(`Vinculando ${files.length} archivo${files.length===1?'':'s'} a ${context.label}…`);
+  autoUploading.current=true;const files=queue.files;setQueue(null);setOpen(true);setMsg(`Vinculando ${files.length} archivo${files.length===1?'':'s'} a ${context.label}…`);
   void uploadFiles(files,context).finally(()=>{autoUploading.current=false});
  },[location.pathname,context?.type,context?.code,context?.staging,queue,busy]);
 
@@ -130,8 +120,7 @@ export default function ContextEvidenceUpload(){
 
  async function uploadFiles(files:File[],target:OriginCtx){
   if(!target.code)return;
-  setBusy(true);
-  let saved=0,reused=0,failed=0,oversize=0,blocked=0;
+  setBusy(true);let saved=0,reused=0,failed=0,oversize=0,blocked=0,extracted=0,needsReview=0;
   for(const file of files){
    const mime=mimeOf(file),audio=isAudio(file);
    if(IS_PRODUCTION&&(audio||!PROD_ALLOWED_MIME.has(mime))){blocked++;continue;}
@@ -141,11 +130,20 @@ export default function ContextEvidenceUpload(){
    const uploaded=await supabase.storage.from(BUCKET).uploadToSignedUrl(prepared.data.storage_path,prepared.data.token,file,{contentType:mime});
    if(uploaded.error){failed++;continue;}
    const done=await evidenceFetch<Complete>('/complete',{method:'POST',body:JSON.stringify({upload_id:prepared.data.upload_id,title:file.name})});
-   if(done.status===200&&done.data?.ok){if(done.data.reused)reused++;else saved++;}else failed++;
+   if(done.status!==200||!done.data?.ok){failed++;continue;}
+   if(done.data.reused)reused++;else saved++;
+   if(!IS_PRODUCTION&&EXTRACTABLE_MIME.has(mime)){
+    setMsg(`Documento guardado. Leyendo visualmente ${file.name} y colocando los datos…`);
+    const x=await extractFetch<Extract>({upload_id:prepared.data.upload_id,document_page_id:done.data.document_page_id??''});
+    if(x.status===200&&x.data?.ok)extracted++;
+    else if(x.status===409){needsReview++;}
+    else failed++;
+   }
   }
-  setBusy(false);
-  const bits:string[]=[];
+  setBusy(false);const bits:string[]=[];
   if(saved)bits.push(`${saved} guardado${saved===1?'':'s'} y enlazado${saved===1?'':'s'}`);
+  if(extracted)bits.push(`${extracted} leído${extracted===1?'':'s'} y aplicado${extracted===1?'':'s'} automáticamente`);
+  if(needsReview)bits.push(`${needsReview} requiere confirmación por conflicto de datos`);
   if(reused)bits.push(`${reused} ya existía${reused===1?'':'n'}`);
   if(oversize)bits.push(`${oversize} supera${oversize===1?'':'n'} 12 MB`);
   if(blocked)bits.push(`${blocked} pendiente${blocked===1?'':'s'} de habilitación segura en producción`);
@@ -154,33 +152,21 @@ export default function ContextEvidenceUpload(){
  }
 
  async function choose(e:ChangeEvent<HTMLInputElement>){
-  const files=[...(e.target.files??[])];
-  e.target.value='';
-  if(!files.length)return;
+  const files=[...(e.target.files??[])];e.target.value='';if(!files.length)return;
   if(activeContext.staging){
-   const allowed=IS_PRODUCTION?files.filter(file=>!isAudio(file)&&PROD_ALLOWED_MIME.has(mimeOf(file))):files;
-   const blocked=files.length-allowed.length;
+   const allowed=IS_PRODUCTION?files.filter(file=>!isAudio(file)&&PROD_ALLOWED_MIME.has(mimeOf(file))):files;const blocked=files.length-allowed.length;
    if(!allowed.length){setMsg(blocked?'Audio o formato pendiente de habilitación segura en producción.':'No se seleccionaron archivos.');return;}
    setQueue({originType:activeContext.type,label:activeContext.label,files:allowed});
-   setMsg(`${allowed.length} archivo${allowed.length===1?'':'s'} preparado${allowed.length===1?'':'s'}. Se vinculará${allowed.length===1?'':'n'} automáticamente cuando exista y se abra la ficha.${blocked?` ${blocked} archivo${blocked===1?'':'s'} no se cargará${blocked===1?'':'n'} hasta habilitar su tratamiento seguro en producción.`:''}`);
-   return;
+   setMsg(`${allowed.length} archivo${allowed.length===1?'':'s'} preparado${allowed.length===1?'':'s'}. Se vinculará${allowed.length===1?'':'n'} automáticamente cuando exista y se abra la ficha.${blocked?` ${blocked} archivo${blocked===1?'':'s'} no se cargará${blocked===1?'':'n'} hasta habilitar su tratamiento seguro en producción.`:''}`);return;
   }
   await uploadFiles(files,activeContext);
  }
- function close(){
-  setOpen(false);
-  if(legacyOpen){
-   const q=new URLSearchParams(location.search);
-   q.delete('upload');
-   const suffix=q.toString();
-   navigate(location.pathname+(suffix?'?'+suffix:''),{replace:true});
-  }
- }
+ function close(){setOpen(false);if(legacyOpen){const q=new URLSearchParams(location.search);q.delete('upload');const suffix=q.toString();navigate(location.pathname+(suffix?'?'+suffix:''),{replace:true});}}
  const staged=queue?.originType===activeContext.type?queue.files.length:0;
  const label=activeContext.staging?`Preparar archivos para ${activeContext.label}`:`Subir archivos a ${activeContext.label}`;
  const launcher=<button type="button" data-testid="context-evidence-open" onClick={()=>setOpen(true)} style={{width:'100%',border:'1px solid #f4741f',borderRadius:12,padding:'12px 16px',display:'inline-flex',alignItems:'center',justifyContent:'center',gap:8,background:'#f4741f',color:'#fff',fontWeight:800,boxShadow:'none',cursor:'pointer'}}><FileUp size={17}/>{staged?`${staged} archivo${staged===1?'':'s'} preparado${staged===1?'':'s'}`:IS_PRODUCTION?'Subir documentos':'Subir documentos / audio'}</button>;
  return <>
   {inlineHost&&createPortal(launcher,inlineHost)}
-  {open&&<div role="presentation" style={{position:'fixed',inset:0,zIndex:9999,background:'rgba(20,16,24,.42)',display:'grid',placeItems:'center',padding:18}}><section className="ops-message" style={{display:'grid',gap:14,border:'2px solid #870064',width:'min(620px,100%)',maxHeight:'88vh',overflow:'auto',background:'var(--panel,#fff)',boxShadow:'0 24px 70px rgba(0,0,0,.28)'}} aria-label="Subir archivos contextuales"><div style={{display:'flex',justifyContent:'space-between',gap:12,alignItems:'flex-start'}}><div><strong style={{fontSize:18}}>{label}</strong><p style={{margin:'5px 0 0'}}>{IS_PRODUCTION?'Admite documentos validados para producción. El original se conserva sin ejecutarlo ni transformarlo y queda enlazado al contexto correcto.':'Admite cualquier tipo de archivo, incluido audio. El original se conserva sin ejecutarlo ni transformarlo y queda enlazado al contexto correcto.'}</p></div><button type="button" onClick={close} aria-label="Cerrar"><X size={16}/></button></div>{activeContext.staging&&<div style={{padding:11,borderRadius:12,background:'rgba(135,0,100,.07)'}}><strong>La ficha aún no existe.</strong><div>Selecciona ahora los archivos y los mantendré preparados en esta sesión. Al crear y abrir la ficha se asociarán automáticamente.</div></div>}<label className="primary" style={{display:'inline-flex',alignItems:'center',justifyContent:'center',gap:8,cursor:busy?'wait':'pointer',padding:12,borderRadius:12}}>{!IS_PRODUCTION&&/audio/i.test(msg)?<FileAudio size={18}/>:<FileUp size={18}/>} {busy?'Subiendo y enlazando…':activeContext.staging?'Elegir archivos':IS_PRODUCTION?'Elegir documentos':'Elegir archivos o audios'}<input type="file" multiple accept={IS_PRODUCTION?PROD_ACCEPT:undefined} onChange={e=>void choose(e)} disabled={busy} style={{display:'none'}}/></label>{staged>0&&<small>{staged} archivo{staged===1?'':'s'} pendiente{staged===1?'':'s'} de que exista la ficha.</small>}{msg&&<strong>{msg}</strong>}<small>{IS_PRODUCTION?'Tamaño máximo actual por archivo: 12 MB. Audio y contextos sin contrato productivo permanecen bloqueados hasta disponer de tratamiento seguro validado.':'Tamaño máximo actual por archivo: 12 MB. Los audios se conservan como evidencia original y quedan marcados como audio pendiente de tratamiento posterior.'}</small></section></div>}
+  {open&&<div role="presentation" style={{position:'fixed',inset:0,zIndex:9999,background:'rgba(20,16,24,.42)',display:'grid',placeItems:'center',padding:18}}><section className="ops-message" style={{display:'grid',gap:14,border:'2px solid #870064',width:'min(620px,100%)',maxHeight:'88vh',overflow:'auto',background:'var(--panel,#fff)',boxShadow:'0 24px 70px rgba(0,0,0,.28)'}} aria-label="Subir archivos contextuales"><div style={{display:'flex',justifyContent:'space-between',gap:12,alignItems:'flex-start'}}><div><strong style={{fontSize:18}}>{label}</strong><p style={{margin:'5px 0 0'}}>{IS_PRODUCTION?'Admite documentos validados para producción. El original se conserva sin ejecutarlo ni transformarlo y queda enlazado al contexto correcto.':'Admite PDF aunque contenga solo una imagen, además de imágenes y audio. En PDF/imagen intento leer los datos y colocarlos automáticamente en la ficha.'}</p></div><button type="button" onClick={close} aria-label="Cerrar"><X size={16}/></button></div>{activeContext.staging&&<div style={{padding:11,borderRadius:12,background:'rgba(135,0,100,.07)'}}><strong>La ficha aún no existe.</strong><div>Selecciona ahora los archivos y los mantendré preparados en esta sesión. Al crear y abrir la ficha se asociarán automáticamente.</div></div>}<label className="primary" style={{display:'inline-flex',alignItems:'center',justifyContent:'center',gap:8,cursor:busy?'wait':'pointer',padding:12,borderRadius:12}}>{!IS_PRODUCTION&&/audio/i.test(msg)?<FileAudio size={18}/>:<FileUp size={18}/>} {busy?'Procesando documento…':activeContext.staging?'Elegir archivos':IS_PRODUCTION?'Elegir documentos':'Elegir archivos o audios'}<input type="file" multiple accept={IS_PRODUCTION?PROD_ACCEPT:undefined} onChange={e=>void choose(e)} disabled={busy} style={{display:'none'}}/></label>{staged>0&&<small>{staged} archivo{staged===1?'':'s'} pendiente{staged===1?'':'s'} de que exista la ficha.</small>}{msg&&<strong>{msg}</strong>}<small>{IS_PRODUCTION?'Tamaño máximo actual por archivo: 12 MB. Audio y contextos sin contrato productivo permanecen bloqueados hasta disponer de tratamiento seguro validado.':'Tamaño máximo actual por archivo: 12 MB. Los PDF escaneados o exportados desde Canva se procesan visualmente aunque no tengan texto embebido.'}</small></section></div>}
  </>;
 }
