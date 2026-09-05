@@ -2,14 +2,19 @@ import {test,expect} from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
 
-test('PRE-PROD aplica siempre sufijo -test a funciones Edge',()=>{
+test('PRE-PROD aplica sufijo Edge solo mediante configuración explícita',()=>{
   const text=fs.readFileSync(path.resolve('src/supabase.ts'),'utf8');
+  const workflow=fs.readFileSync(path.resolve('.github/workflows/preprod-build.yml'),'utf8');
   expect(text).toContain("const runtimeEnv=import.meta.env.VITE_FENIX_ENV||'preprod'");
-  expect(text).toContain("const FUNCTION_SUFFIX=IS_PRODUCTION?'':'-test'");
+  expect(text).toContain("const FUNCTION_SUFFIX=IS_PRODUCTION?'':String(import.meta.env.VITE_FUNCTION_SUFFIX||'')");
+  expect(text).toContain("if(!IS_PRODUCTION&&!FUNCTION_SUFFIX)");
+  expect(text).toContain("throw new Error('FENIX PRE-PROD runtime requires an explicit edge-function suffix.')");
   expect(text).toContain('const functionName=(base:string)=>`${base}${FUNCTION_SUFFIX}`');
   expect(text).toContain('functionName(baseFunctionName)');
   expect(text).toContain("authenticatedEdgeFetch<T>('fenix-app-gateway'");
+  expect(text).not.toContain("const FUNCTION_SUFFIX=IS_PRODUCTION?'':'-test'");
   expect(text).not.toMatch(/functions\/v1\/fenix-[a-z0-9-]+(?:[/'"`])/i);
+  expect(workflow).toContain("VITE_FUNCTION_SUFFIX: '-test'");
 });
 
 test('runtimes PRE-PROD explícitos fallan cerrados en PROD antes de tocar endpoints -test',()=>{
