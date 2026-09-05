@@ -1,7 +1,7 @@
 import {useEffect,useState} from 'react';
 import {createPortal} from 'react-dom';
 import {useLocation,useNavigate} from 'react-router-dom';
-import {fetchAppApi,supabase,SUPABASE_URL} from './supabase';
+import {fetchAppApi,fetchDirectionKpisApi} from './supabase';
 import './direction-executive-overview.css';
 
 type BankRank={id:string;banco:string;firmadas_mes:number;previstas_mes:number};
@@ -12,12 +12,8 @@ type PersonalResponse={items?:Person[]};
 
 function monthNow(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;}
 async function fetchOverview(){
- const{data:{session}}=await supabase.auth.getSession();
- if(!session?.access_token)return{status:401,data:null as Payload|null};
  const q=new URLSearchParams({key:'executive-overview',month:monthNow()});
- const r=await fetch(`${SUPABASE_URL}/functions/v1/fenix-direction-kpis-test?${q.toString()}`,{headers:{Authorization:`Bearer ${session.access_token}`}});
- let data:Payload|null=null;try{data=await r.json()}catch{data=null}
- return{status:r.status,data};
+ return fetchDirectionKpisApi<Payload>(`?${q.toString()}`);
 }
 function num(v:unknown){return typeof v==='number'&&Number.isFinite(v)?v:0;}
 function personId(p:Person){for(const k of ['id','actor_code','worker_id','personal_id','code'] as const){const v=p[k];if(typeof v==='string'&&v.trim())return v.trim();}return'';}
