@@ -3,8 +3,13 @@ import fs from 'node:fs';
 
 test('casos especiales usan API PROD y nunca runtime TEST en producción',()=>{
  const src=fs.readFileSync('src/specialCasesRuntime.ts','utf8');
- expect(src).toContain("IS_PRODUCTION?'fenix-special-cases-api':'fenix-special-cases-runtime-test'");
- expect(src).toContain("if(IS_PRODUCTION)return authenticatedFetch<T>(`${SUPABASE_URL}/functions/v1/fenix-special-cases-api${path}`)");
+ expect(src).toContain("if(IS_PRODUCTION)return fetchEnvironmentApi<T>('fenix-special-cases-api',path)");
+ expect(src).toContain("const api=IS_PRODUCTION?'fenix-special-cases-api':'fenix-special-cases-runtime'");
+ expect(src).toContain("fetchEnvironmentApi<any>('fenix-special-cases-runtime',path,undefined,{productionAvailable:false})");
+ expect(src).not.toContain('fenix-special-cases-runtime-test');
+ expect(src).not.toContain('/functions/v1/');
+ const resolver=fs.readFileSync('src/supabase.ts','utf8');
+ expect(resolver).toContain("const FUNCTION_SUFFIX=IS_PRODUCTION?'':String(import.meta.env.VITE_FUNCTION_SUFFIX||'')");
  const api=fs.readFileSync('supabase/functions/fenix-special-cases-api/index.ts','utf8');
  expect(api).toContain('fenix_prod_special_case_create_with_people_server');
  expect(api).toContain('fenix_prod_special_case_update_server');
