@@ -2,10 +2,19 @@ name: PRE-PROD App Build
 
 # PRE-PROD validates code and produces an immutable PROD candidate artifact.
 # It MUST NOT publish or move the operational gh-pages branch.
+# Cost guard: non-runtime documentation/migration-only commits must not burn
+# Supabase Edge Function invocations by launching the browser suite.
 on:
   push:
     branches:
       - preprod-app-phase1
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - 'supabase/migrations/**'
+      - 'audit/**'
+      - 'evidence/**'
+      - 'artifacts/**'
   pull_request:
     branches:
       - main
