@@ -1,7 +1,7 @@
 import {FormEvent,useEffect,useMemo,useState} from 'react';
 import {useLocation,useNavigate} from 'react-router-dom';
 import {CalendarDays,LogOut,Moon,Save,Sun} from 'lucide-react';
-import {fetchAppApi,IS_PRODUCTION,SUPABASE_PUBLISHABLE_KEY,SUPABASE_URL,supabase} from './supabase';
+import {fetchAppApi,fetchEnvironmentApi,IS_PRODUCTION,supabase} from './supabase';
 import {anaVertical} from './assets/visualAssets';
 import OperationalShellFrame from './OperationalShellFrame';
 import type {NavItem} from './masterNavigation';
@@ -18,12 +18,9 @@ type CreateResponse={ok?:boolean;id?:string;destino?:string;error?:string};
 const taskCreateNav:NavItem[]=[{label:'← Volver a Agenda',route:'/agenda'}];
 
 async function createTask(payload:Record<string,unknown>){
- const{data:{session}}=await supabase.auth.getSession();
- if(!session?.access_token)return{status:401,data:null as CreateResponse|null};
- const endpoint=IS_PRODUCTION?'fenix-task-api':'fenix-notion-actions-test/tareas/create';
- const r=await fetch(`${SUPABASE_URL}/functions/v1/${endpoint}`,{method:'POST',headers:{'content-type':'application/json',apikey:SUPABASE_PUBLISHABLE_KEY,Authorization:`Bearer ${session.access_token}`},body:JSON.stringify(payload)});
- let data:CreateResponse|null=null;try{data=await r.json()}catch{}
- return{status:r.status,data};
+ const fn=IS_PRODUCTION?'fenix-task-api':'fenix-notion-actions';
+ const path=IS_PRODUCTION?'':'/tareas/create';
+ return fetchEnvironmentApi<CreateResponse>(fn,path,{method:'POST',body:JSON.stringify(payload)});
 }
 
 export default function TaskCreateShell(){
@@ -42,23 +39,7 @@ export default function TaskCreateShell(){
  async function submit(e:FormEvent){e.preventDefault();if(!valid)return;if(!preview){setPreview(true);setMessage('');return;}setBusy(true);setMessage('');const r=await createTask(payload);setBusy(false);if(r.status===201&&r.data?.ok){setCreated(r.data);setMessage('Tarea creada en la fuente canónica y auditada.');setPreview(false);}else if(r.status===403)setMessage('Tu perfil no puede crear esta tarea con ese responsable.');else setMessage(`No se pudo crear la tarea (${r.data?.error||r.status}).`);}
  async function logout(){await supabase.auth.signOut();window.location.href=import.meta.env.BASE_URL;}
  const topbar=<header className="ops-top"><strong>Nueva tarea</strong><div className="ops-top-actions"><button onClick={()=>setTheme(theme==='light'?'dark':'light')} aria-label="Cambiar tema">{theme==='light'?<Moon size={17}/>:<Sun size={17}/>} {theme==='light'?'Oscuro':'Claro'}</button><div className="ops-profile"><strong>{ctx?.role||'Usuario'}</strong></div><button onClick={logout} aria-label="Cerrar sesión"><LogOut size={17}/></button></div></header>;
- return <OperationalShellFrame
-  className="task-create-root"
-  theme={theme}
-  navigation={taskCreateNav}
-  activeRoute="/agenda"
-  anaSubtitle="Primero revisamos; después creamos."
-  anaRoute="/ana"
-  query=""
-  onQueryChange={()=>{}}
-  searchPlaceholder=""
-  name={ctx?.role||'Usuario'}
-  role=""
-  initials={(ctx?.role||'U').slice(0,2).toUpperCase()}
-  onToggleTheme={()=>setTheme(theme==='light'?'dark':'light')}
-  onLogout={logout}
-  topbar={topbar}
- >
+ return <OperationalShellFrame className="task-create-root" theme={theme} navigation={taskCreateNav} activeRoute="/agenda" anaSubtitle="Primero revisamos; después creamos." anaRoute="/ana" query="" onQueryChange={()=>{}} searchPlaceholder="" name={ctx?.role||'Usuario'} role="" initials={(ctx?.role||'U').slice(0,2).toUpperCase()} onToggleTheme={()=>setTheme(theme==='light'?'dark':'light')} onLogout={logout} topbar={topbar}>
    <div className="ops-title"><div><span className="ops-icon"><CalendarDays size={20}/></span><div><h1>Nueva tarea</h1><p>Alta canónica con responsable explícito y confirmación previa.</p></div></div><span className="ops-live ok">{IS_PRODUCTION?'OPERATIVO':'PRE-PROD'}</span></div>
    <section className="inmo-ana-hero"><div className="inmo-ana-photo"><img src={anaVertical} alt="Ana"/></div><div className="inmo-ana-body"><span>ANA · NUEVA TAREA</span><h2>Vamos a crearla con responsable y siguiente paso claros</h2><p>No asigno personas por intuición. Primero definimos la tarea, el responsable autorizado, la prioridad y la fecha; después revisas exactamente lo que se va a crear.</p><div className="inmo-next"><button type="button" onClick={()=>document.querySelector<HTMLInputElement>('input[placeholder="Describe la tarea"]')?.focus()}><b>1</b><strong>Completar tarea</strong><small>Ir a datos →</small></button><button type="button" onClick={()=>navigate('/ana?mode=help&resource=tarea&intent=nueva')}><b>2</b><strong>Ayúdame</strong><small>Preparar con Ana →</small></button><button type="button" onClick={()=>document.querySelector<HTMLFormElement>('form.ops-message')?.scrollIntoView({behavior:'smooth'})}><b>3</b><strong>Lo hago yo</strong><small>Continuar abajo ↓</small></button></div></div></section>
    <form className="ops-message" onSubmit={submit} style={{display:'grid',gap:12}}>
