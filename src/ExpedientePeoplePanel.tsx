@@ -2,7 +2,7 @@ import {useEffect,useMemo,useState} from 'react';
 import {ChevronDown,ChevronUp,FileUp,Plus,Save,UserRound} from 'lucide-react';
 import {useNavigate} from 'react-router-dom';
 import {fetchNotionRuntime} from './notionRuntime';
-import {SUPABASE_URL,supabase} from './supabase';
+import {fetchEnvironmentApi} from './supabase';
 import './expediente-people.css';
 
 type Person={id:string;comprador?:string|null;nombre?:string|null;apellidos?:string|null;dni_nie?:string|null;fecha_nacimiento?:string|null;edad?:number|null;nacionalidad?:string|null;residencia?:string|null;estado_civil?:string|null;regimen_matrimonial?:string|null;hijos?:number|null;situacion_laboral?:string|null;empresa_organismo?:string|null;antiguedad_laboral?:string|null;sueldo_neto_mensual?:number|null;numero_pagas?:number|null;otros_ingresos_mensuales?:number|null;deudas_mensuales?:number|null;tarjetas_otras_cuotas?:number|null;pension_paga?:number|null;pension_recibe?:number|null;ahorro_disponible?:number|null;origen_fondos?:string|null;aportado_operacion?:number|null;fondos_donados?:boolean|null;documentacion_completa?:boolean|null;documentos?:string[]|null;revision_belen?:string|null;rol_operacion?:string|null;orden_expediente?:number|null;datos_revisados_financiero?:boolean|null};
@@ -19,7 +19,7 @@ const SELECTS={
 } as const;
 function show(v:any){if(v===null||v===undefined||v==='')return 'Pendiente';if(typeof v==='boolean')return v?'Sí':'No';return String(v)}
 function euros(v:any){return typeof v==='number'?money.format(v):'Pendiente'}
-async function authedPost<T>(path:string,body:unknown){const{data:{session}}=await supabase.auth.getSession();if(!session?.access_token)return{status:401,data:null as T|null};const r=await fetch(`${SUPABASE_URL}/functions/v1/fenix-comprador-action-test${path}`,{method:'POST',headers:{'content-type':'application/json',Authorization:`Bearer ${session.access_token}`},body:JSON.stringify(body)});let data:any=null;try{data=await r.json()}catch{}return{status:r.status,data:data as T|null}}
+async function authedPost<T>(path:string,body:unknown){return fetchEnvironmentApi<T>('fenix-comprador-action',path,{method:'POST',body:JSON.stringify(body)},{productionAvailable:false});}
 async function updatePerson(id:string,changes:Record<string,unknown>){return authedPost<any>(`/compradores/${encodeURIComponent(id)}/action`,{changes})}
 async function createPerson(expedienteId:string,payload:Record<string,unknown>){return authedPost<CreateResponse>(`/expedientes/${encodeURIComponent(expedienteId)}/compradores`,payload)}
 
