@@ -30,6 +30,7 @@ async function fetchProductionRead<T>(path:string,init?:RequestInit):Promise<{st
     return{status:r.status,data:r.status===200?filterContactResponse(r.data,'inmobiliarias'):r.data};
   }
   if(/^\/expedientes\/[^/]+$/.test(pathname))return fetchAppApi<T>(pathname);
+  if(/^\/documentos\/[^/]+(?:\/(?:view|versions))?$/.test(pathname))return fetchAppApi<T>(`${pathname}${url.search}`);
   const passthrough=['/expedientes','/firmas','/inmobiliarias','/bancos','/tasaciones','/contactos','/tareas','/documentos'];
   if(passthrough.includes(pathname))return fetchAppApi<T>(`${pathname}${url.search}`);
   return{status:503,data:null};
@@ -37,6 +38,5 @@ async function fetchProductionRead<T>(path:string,init?:RequestInit):Promise<{st
 
 export async function fetchNotionRuntime<T>(path:string,init?:RequestInit):Promise<{status:number;data:T|null}>{
   if(IS_PRODUCTION)return fetchProductionRead<T>(path,init);
-  // PRE-PROD isolation is resolved centrally from the explicit environment suffix.
   return fetchEnvironmentApi<T>('fenix-notion-runtime',path,init,{productionAvailable:false});
 }
