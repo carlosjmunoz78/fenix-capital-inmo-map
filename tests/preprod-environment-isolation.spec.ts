@@ -17,18 +17,22 @@ test('PRE-PROD aplica sufijo Edge solo mediante configuración explícita',()=>{
   expect(workflow).toContain("VITE_FUNCTION_SUFFIX: '-test'");
 });
 
-test('runtimes PRE-PROD explícitos fallan cerrados en PROD antes de tocar endpoints -test',()=>{
+test('runtimes PRE-PROD explícitos usan el resolver central y fallan cerrados en PROD',()=>{
   const files=['src/notionRuntime.ts','src/notariasRuntime.ts','src/registrosRuntime.ts','src/specialCasesRuntime.ts','src/DirectionKpiDrilldownGuard.tsx'];
   for(const file of files){
     const text=fs.readFileSync(path.resolve(file),'utf8');
     expect(text,`${file} debe importar IS_PRODUCTION`).toContain('IS_PRODUCTION');
-    const guard=text.indexOf('if(IS_PRODUCTION)');
-    const networkEndpoint=text.indexOf('/functions/v1/');
-    expect(guard,`${file} debe tener gate PROD`).toBeGreaterThan(-1);
-    expect(networkEndpoint,`${file} debe conservar endpoint PRE-PROD`).toBeGreaterThan(-1);
-    expect(guard,`${file} debe cortar PROD antes del endpoint PRE-PROD`).toBeLessThan(networkEndpoint);
-    expect(text.slice(networkEndpoint),`${file} debe conservar namespace -test solo tras el gate PROD`).toContain('-test');
+    expect(text,`${file} debe usar el resolver central`).toContain('fetchEnvironmentApi');
+    expect(text,`${file} no debe incrustar rutas Edge directas`).not.toContain('/functions/v1/');
+    expect(text,`${file} no debe incrustar sufijos TEST`).not.toMatch(/fenix-[a-z0-9-]+-test/i);
   }
+  for(const file of ['src/notionRuntime.ts','src/notariasRuntime.ts','src/registrosRuntime.ts','src/DirectionKpiDrilldownGuard.tsx']){
+    const text=fs.readFileSync(path.resolve(file),'utf8');
+    expect(text,`${file} debe declarar runtime sin contrato PROD`).toContain('productionAvailable:false');
+  }
+  const special=fs.readFileSync(path.resolve('src/specialCasesRuntime.ts'),'utf8');
+  expect(special).toContain("if(IS_PRODUCTION)return fetchEnvironmentApi<T>('fenix-special-cases-api',path)");
+  expect(special).toContain("fetchEnvironmentApi<any>('fenix-special-cases-runtime',path,undefined,{productionAvailable:false})");
 });
 
 test('cliente y almacenamiento de sesión mantienen aislamiento PRE-PROD/PROD',()=>{
