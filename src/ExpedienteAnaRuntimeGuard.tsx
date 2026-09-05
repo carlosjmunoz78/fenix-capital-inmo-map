@@ -2,7 +2,7 @@ import {useEffect,useMemo,useState} from 'react';
 import {createPortal} from 'react-dom';
 import {useLocation,useNavigate} from 'react-router-dom';
 import {Phone,Mail,MessageCircle,ShieldCheck,Users,Brain,CheckCircle2,Plus,FileUp,Pencil} from 'lucide-react';
-import {SUPABASE_URL,supabase,fetchMemoryApi} from './supabase';
+import {fetchEnvironmentApi,fetchMemoryApi} from './supabase';
 import {anaAvatar} from './assets/visualAssets';
 import {applyAnaRelationalStyle} from './anaCommunicationStyle';
 import './expediente-ana-runtime.css';
@@ -32,10 +32,7 @@ type PeopleChangedDetail={expedienteId?:string;personId?:string;kind?:'updated'|
 
 function isNotionId(v:string){return /^[0-9a-f]{32}$/i.test(v.replaceAll('-',''));}
 async function edgeJson<T>(path:string,init?:RequestInit){
- const{data:{session}}=await supabase.auth.getSession();
- if(!session?.access_token)return{status:401,data:null as T|null};
- let r:Response;try{r=await fetch(`${SUPABASE_URL}/functions/v1/fenix-expediente-assistant-test${path}`,{...init,headers:{'content-type':'application/json',...(init?.headers||{}),Authorization:`Bearer ${session.access_token}`,apikey:'sb_publishable_uvtiidkBBkFRt2K34so27g_JpCbMUZw'}})}catch{return{status:0,data:null as T|null}};
- let data:T|null=null;try{data=await r.json()}catch{}return{status:r.status,data};
+ return fetchEnvironmentApi<T>('fenix-expediente-assistant',path,init,{productionAvailable:false});
 }
 async function fetchAdvice(id:string){return edgeJson<Advice>(`/expedientes/${encodeURIComponent(id)}/advice`);}
 function styledAdvice(a:Advice|null){return a?applyAnaRelationalStyle({...a,name:a.client?.name}):null;}
