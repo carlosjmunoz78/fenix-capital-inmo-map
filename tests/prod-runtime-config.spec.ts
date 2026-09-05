@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import fs from 'node:fs';
 
 const source=fs.readFileSync('src/supabase.ts','utf8');
+const directionSource=fs.readFileSync('src/DirectionExecutiveOverviewGuard.tsx','utf8');
 const envExample=fs.readFileSync('.env.production.example','utf8');
 
 test('PROD exige configuración Supabase dedicada y separa almacenamiento auth', async () => {
@@ -16,7 +17,10 @@ test('PRE-PROD conserva funciones -test y PROD usa nombres sin sufijo', async ()
   expect(source).toContain("const FUNCTION_SUFFIX=IS_PRODUCTION?'':'-test'");
   expect(source).toContain("authenticatedEdgeFetch<T>('fenix-app-gateway'");
   expect(source).toContain("authenticatedEdgeFetch<T>('fenix-ana-api'");
+  expect(source).toContain("authenticatedEdgeFetch<T>('fenix-direction-kpis'");
   expect(source).not.toContain("authenticatedEdgeFetch<T>('fenix-ana-api-test'");
+  expect(directionSource).toContain('fetchDirectionKpisApi');
+  expect(directionSource).not.toContain('fenix-direction-kpis-test');
 });
 
 test('PROD no admite fallback de actor QA heredado', async () => {
