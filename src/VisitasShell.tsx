@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { CalendarDays, LogOut, Moon, Sun } from 'lucide-react';
-import { fetchAppApi, supabase, SUPABASE_URL } from './supabase';
+import { fetchAppApi, fetchEnvironmentApi, supabase } from './supabase';
 import { anaAvatar } from './assets/visualAssets';
 import OperationalShellFrame from './OperationalShellFrame';
 import { normalizeNavigation, type NavItem } from './masterNavigation';
@@ -14,14 +14,7 @@ type PendingDone=Row|null;
 const fallbackNav:NavItem[]=[{label:'Inicio',route:'/inicio'}];
 
 async function api(path:string,init?:RequestInit){
-  const {data:{session}}=await supabase.auth.getSession();
-  if(!session?.access_token)return {status:401,data:null};
-  const r=await fetch(`${SUPABASE_URL}/functions/v1/fenix-visitas-api-test${path}`,{
-    ...init,
-    headers:{'content-type':'application/json',Authorization:`Bearer ${session.access_token}`,...(init?.headers||{})}
-  });
-  let data:any=null;try{data=await r.json()}catch{data=null}
-  return {status:r.status,data};
+  return fetchEnvironmentApi<any>('fenix-visitas-api',path,init,{productionAvailable:false});
 }
 
 export default function VisitasShell(){
