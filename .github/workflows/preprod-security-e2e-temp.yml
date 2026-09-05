@@ -1,0 +1,26 @@
+name: PRE-PROD Security E2E TEMP
+
+on:
+  push:
+    branches:
+      - preprod-app-phase1
+    paths:
+      - 'supabase/functions/fenix-document-intelligence/**'
+      - '.github/workflows/preprod-security-e2e-temp.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  edge01-security-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Run EDGE-01 security E2E once
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/fenix-doc-intelligence-security-e2e-once'
+          curl --fail --silent --show-error --max-time 90 "$url" > result.json
+          cat result.json
+          jq -e '.ok == true and .cleanup.ok == true' result.json >/dev/null
