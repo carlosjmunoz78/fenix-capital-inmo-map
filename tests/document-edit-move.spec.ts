@@ -9,7 +9,7 @@ test('documento permite editar y cambiar expediente con confirmación',()=>{
  expect(viewer).toContain('Guardar cambios');
  expect(viewer).toContain('new_expediente_code');
  expect(viewer).toContain('window.confirm');
- expect(viewer).toContain('El original nunca se sustituye');
+ expect(viewer).toContain('El original se conserva y el cambio queda auditado');
  expect(viewer).toContain('expected_version');
 });
 
