@@ -3,6 +3,7 @@ import {createPortal} from 'react-dom';
 import {FileAudio,FileUp,X} from 'lucide-react';
 import {useLocation,useNavigate} from 'react-router-dom';
 import {IS_PRODUCTION,SUPABASE_PUBLISHABLE_KEY,SUPABASE_URL,supabase} from './supabase';
+import ExtractedDocumentPreview from './ExtractedDocumentPreview';
 
 const BUCKET=IS_PRODUCTION?'fenix-prod-documents':'fenix-preprod-documents-test';
 const FUNCTION=IS_PRODUCTION?'fenix-evidence-api':'fenix-evidence-universal-test';
@@ -27,9 +28,12 @@ const MIME_BY_EXT:Record<string,string>={
 type OriginCtx={type:string;code:string;label:string;staging:boolean};
 type Prepare={ok?:boolean;upload_id?:string;storage_path?:string;token?:string;max_bytes?:number};
 type Complete={ok?:boolean;reused?:boolean;document_page_id?:string};
-type Extract={ok?:boolean;status?:number;extraction?:{fields?:Record<string,unknown>};applied?:{error?:string;conflicts?:unknown[]}};
-type LegacyBatch={ok?:boolean;attempted?:number;results?:Array<{ok?:boolean;review_required?:boolean;error?:string}>};
+type Extraction={document_type?:string;person?:string;confidence?:number;summary?:string;fields?:Record<string,unknown>};
+type Extract={ok?:boolean;status?:number;review_required?:boolean;extraction?:Extraction;applied?:{error?:string;conflicts?:unknown[]};canonical_fields?:unknown};
+type LegacyResult={ok?:boolean;review_required?:boolean;error?:string;extraction?:Extraction;applied?:{conflicts?:unknown[]};origin_code?:string};
+type LegacyBatch={ok?:boolean;attempted?:number;results?:LegacyResult[]};
 type Queue={originType:string;label:string;files:File[]};
+type Preview={filename:string;extraction:Extraction;reviewRequired:boolean;conflicts:unknown[]};
 
 function routeContext(pathname:string):OriginCtx|null{
  const path=pathname.replace(/\/+$/,'')||'/';
@@ -90,7 +94,7 @@ export default function ContextEvidenceUpload(){
  const rawContext=explicit??routeContext(location.pathname);
  const context=IS_PRODUCTION&&rawContext&&!PROD_SUPPORTED_ORIGINS.has(rawContext.type)?null:rawContext;
  const legacyOpen=location.pathname==='/documentacion'&&params.get('upload')==='1'&&Boolean(explicit)&&Boolean(context);
- const[open,setOpen]=useState(false),[busy,setBusy]=useState(false),[msg,setMsg]=useState(''),[queue,setQueue]=useState<Queue|null>(null),[inlineHost,setInlineHost]=useState<HTMLElement|null>(null);
+ const[open,setOpen]=useState(false),[busy,setBusy]=useState(false),[msg,setMsg]=useState(''),[queue,setQueue]=useState<Queue|null>(null),[inlineHost,setInlineHost]=useState<HTMLElement|null>(null),[preview,setPreview]=useState<Preview|null>(null);
  const autoUploading=useRef(false);
 
  useEffect(()=>{if(legacyOpen)setOpen(true)},[legacyOpen]);
@@ -119,6 +123,11 @@ export default function ContextEvidenceUpload(){
  if(!context)return null;
  const activeContext:OriginCtx=context;
 
+ function showPreview(filename:string,data:Extract|null,status:number){
+  if(!data?.extraction?.fields||!Object.keys(data.extraction.fields).length)return;
+  setPreview({filename,extraction:data.extraction,reviewRequired:status===409||Boolean(data.review_required),conflicts:Array.isArray(data.applied?.conflicts)?data.applied!.conflicts!:[]});
+ }
+
  async function uploadFiles(files:File[],target:OriginCtx){
   if(!target.code)return;
   setBusy(true);let saved=0,reused=0,failed=0,oversize=0,blocked=0,extracted=0,needsReview=0;
@@ -136,8 +145,8 @@ export default function ContextEvidenceUpload(){
    if(EXTRACTABLE_MIME.has(mime)){
     setMsg(`Documento guardado. Leyendo visualmente ${file.name} y colocando los datos…`);
     const x=await extractFetch<Extract>({upload_id:prepared.data.upload_id,document_page_id:done.data.document_page_id??''});
-    if(x.status===200&&x.data?.ok)extracted++;
-    else if(x.status===409){needsReview++;}
+    if(x.status===200&&x.data?.ok){extracted++;showPreview(file.name,x.data,x.status);}
+    else if(x.status===409){needsReview++;showPreview(file.name,x.data,x.status);}
     else failed++;
    }
   }
@@ -155,14 +164,18 @@ export default function ContextEvidenceUpload(){
  async function reprocessLegacy(){
   if(!IS_PRODUCTION||busy)return;
   if(!window.confirm('Se releerán los PDF antiguos ya guardados, sin borrar originales ni sobrescribir datos existentes. ¿Continuar?'))return;
-  setBusy(true);let processed=0,reviews=0,errors=0;
+  setBusy(true);let processed=0,reviews=0,errors=0;let lastPreview:Preview|null=null;
   for(let i=0;i<60;i++){
    setMsg(`Reprocesando PDF antiguos… ${processed} revisados hasta ahora.`);
    const r=await extractFetch<LegacyBatch>({mode:'legacy_batch',limit:2});
    if(r.status!==200||!r.data?.ok){errors++;break;}
    const attempted=r.data.attempted??0;if(!attempted)break;processed+=attempted;
-   for(const item of r.data.results??[]){if(item.review_required)reviews++;else if(!item.ok)errors++;}
+   for(const item of r.data.results??[]){
+    if(item.review_required)reviews++;else if(!item.ok)errors++;
+    if(item.extraction?.fields&&Object.keys(item.extraction.fields).length)lastPreview={filename:item.origin_code?`PDF antiguo · ${item.origin_code}`:'PDF antiguo',extraction:item.extraction,reviewRequired:Boolean(item.review_required),conflicts:Array.isArray(item.applied?.conflicts)?item.applied!.conflicts!:[]};
+   }
   }
+  if(lastPreview)setPreview(lastPreview);
   setBusy(false);const parts=[`${processed} PDF antiguos reprocesados`];if(reviews)parts.push(`${reviews} requieren revisión por conflicto`);if(errors)parts.push(`${errors} con error`);setMsg(parts.join(' · '));
  }
 
@@ -183,5 +196,6 @@ export default function ContextEvidenceUpload(){
  return <>
   {inlineHost&&createPortal(launcher,inlineHost)}
   {open&&<div role="presentation" style={{position:'fixed',inset:0,zIndex:9999,background:'rgba(20,16,24,.42)',display:'grid',placeItems:'center',padding:18}}><section className="ops-message" style={{display:'grid',gap:14,border:'2px solid #870064',width:'min(620px,100%)',maxHeight:'88vh',overflow:'auto',background:'var(--panel,#fff)',boxShadow:'0 24px 70px rgba(0,0,0,.28)'}} aria-label="Subir archivos contextuales"><div style={{display:'flex',justifyContent:'space-between',gap:12,alignItems:'flex-start'}}><div><strong style={{fontSize:18}}>{label}</strong><p style={{margin:'5px 0 0'}}>{IS_PRODUCTION?'Admite PDF aunque sea una imagen exportada desde Canva. El original se conserva y los datos detectados se colocan automáticamente sin sobrescribir valores existentes.':'Admite PDF aunque contenga solo una imagen, además de imágenes y audio. En PDF/imagen intento leer los datos y colocarlos automáticamente en la ficha.'}</p></div><button type="button" onClick={close} aria-label="Cerrar"><X size={16}/></button></div>{activeContext.staging&&<div style={{padding:11,borderRadius:12,background:'rgba(135,0,100,.07)'}}><strong>La ficha aún no existe.</strong><div>Selecciona ahora los archivos y los mantendré preparados en esta sesión. Al crear y abrir la ficha se asociarán automáticamente.</div></div>}<label className="primary" style={{display:'inline-flex',alignItems:'center',justifyContent:'center',gap:8,cursor:busy?'wait':'pointer',padding:12,borderRadius:12}}>{!IS_PRODUCTION&&/audio/i.test(msg)?<FileAudio size={18}/>:<FileUp size={18}/>} {busy?'Procesando documento…':activeContext.staging?'Elegir archivos':IS_PRODUCTION?'Elegir documentos':'Elegir archivos o audios'}<input type="file" multiple accept={IS_PRODUCTION?PROD_ACCEPT:undefined} onChange={e=>void choose(e)} disabled={busy} style={{display:'none'}}/></label>{IS_PRODUCTION&&<button type="button" onClick={()=>void reprocessLegacy()} disabled={busy} style={{padding:11,borderRadius:12,fontWeight:800}}>Reprocesar PDF antiguos</button>}{staged>0&&<small>{staged} archivo{staged===1?'':'s'} pendiente{staged===1?'':'s'} de que exista la ficha.</small>}{msg&&<strong>{msg}</strong>}<small>{IS_PRODUCTION?'Tamaño máximo actual por archivo: 12 MB. Los PDF escaneados o exportados desde Canva se leen visualmente; los antiguos pueden reprocesarse sin volver a subirlos. Audio y contextos sin contrato productivo permanecen bloqueados.':'Tamaño máximo actual por archivo: 12 MB. Los PDF escaneados o exportados desde Canva se procesan visualmente aunque no tengan texto embebido.'}</small></section></div>}
+  {preview&&<ExtractedDocumentPreview filename={preview.filename} extraction={preview.extraction} reviewRequired={preview.reviewRequired} conflicts={preview.conflicts} onClose={()=>setPreview(null)} onRefresh={()=>window.location.reload()}/>} 
  </>;
 }
