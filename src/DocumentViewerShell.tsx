@@ -36,7 +36,7 @@ function relationFields(row:Row|null){if(!row)return[] as string[];return Object
 
 export default function DocumentViewerShell(){
  const location=useLocation(),navigate=useNavigate();
- const match=location.pathname.match(/^\/(?:documentos|documentacion)\/([^/]+)$/);const id=match?.[1]?decodeURIComponent(match[1]):'';const active=Boolean(match);
+ const match=location.pathname.match(/^\/documentacion\/([^/]+)$/);const id=match?.[1]?decodeURIComponent(match[1]):'';const active=Boolean(match);
  const[status,setStatus]=useState<number|null>(null),[item,setItem]=useState<Row|null>(null),[loading,setLoading]=useState(false);
  useEffect(()=>{if(!active)return;let alive=true;(async()=>{setLoading(true);setStatus(null);setItem(null);try{const r=await fetchNotionRuntime<any>(`/documentos/${encodeURIComponent(id)}`);if(!alive)return;setStatus(r.status);setItem(r.status===200?(r.data?.item??null):null);}catch{if(alive)setStatus(0);}finally{if(alive)setLoading(false);}})();return()=>{alive=false};},[active,id]);
  const returnTo=useMemo(()=>new URLSearchParams(location.search).get('returnTo')||'/documentacion',[location.search]);
