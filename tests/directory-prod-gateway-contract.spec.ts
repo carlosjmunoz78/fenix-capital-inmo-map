@@ -11,10 +11,13 @@ test('el gateway productivo de directorio valida identidad y escribe solo median
   expect(src).not.toContain('fenix-directory-actions-test');
 });
 
-test('notarias y registros usan gateway PROD y ya no están bloqueados',()=>{
+test('notarias y registros usan resolver central y gateway PROD sin bloqueo',()=>{
   const shell=fs.readFileSync('src/DirectoryCreateShell.tsx','utf8');
+  const runtime=fs.readFileSync('src/supabase.ts','utf8');
   const guard=fs.readFileSync('src/ProductionWriteSafetyGuard.tsx','utf8');
-  expect(shell).toContain("IS_PRODUCTION?'fenix-directory-actions':'fenix-directory-actions-test'");
+  expect(shell).toContain("fetchEnvironmentApi<any>('fenix-directory-actions'");
+  expect(shell).not.toContain('fenix-directory-actions-test');
+  expect(runtime).toContain("const FUNCTION_SUFFIX=IS_PRODUCTION?'':String(import.meta.env.VITE_FUNCTION_SUFFIX||'')");
   expect(guard).not.toContain("'/notarias/nueva'");
   expect(guard).not.toContain("'/registros-propiedad/nuevo'");
 });
