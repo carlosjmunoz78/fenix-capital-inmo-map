@@ -3,6 +3,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const viewer=fs.readFileSync(path.join(process.cwd(),'src/DocumentViewerShell.tsx'),'utf8');
+const gate=fs.readFileSync(path.join(process.cwd(),'src/OperationalRecordDetailGate.tsx'),'utf8');
+const library=fs.readFileSync(path.join(process.cwd(),'src/DocumentacionShell.tsx'),'utf8');
 
 test('smart quick viewer stays modal, contextual and non-destructive',async()=>{
  expect(viewer).toContain('VISTA RÁPIDA INTELIGENTE');
@@ -17,6 +19,9 @@ test('smart quick viewer stays modal, contextual and non-destructive',async()=>{
  expect(viewer).toContain('Acciones seguras');
  expect(viewer).toContain('Abrir original');
  expect(viewer).toContain('^\\/documentacion\\/([^/]+)$');
+ expect(viewer).toContain("params.get('preview')==='1'");
+ expect(library).toContain('?preview=1&returnTo=');
+ expect(gate).toContain("match?.[1]==='documentacion'&&new URLSearchParams(search).get('preview')==='1'");
  expect(viewer).not.toContain('(?:documentos|documentacion)');
  expect(viewer).toContain("u.protocol==='https:'||u.protocol==='http:'");
  expect(viewer).toContain("event.key==='Escape'");
