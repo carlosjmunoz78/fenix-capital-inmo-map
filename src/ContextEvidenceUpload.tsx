@@ -6,7 +6,7 @@ import {IS_PRODUCTION,SUPABASE_PUBLISHABLE_KEY,SUPABASE_URL,supabase} from './su
 
 const BUCKET=IS_PRODUCTION?'fenix-prod-documents':'fenix-preprod-documents-test';
 const FUNCTION=IS_PRODUCTION?'fenix-evidence-api':'fenix-evidence-universal-test';
-const EXTRACT_FUNCTION='fenix-document-extract-test';
+const EXTRACT_FUNCTION=IS_PRODUCTION?'fenix-document-extract':'fenix-document-extract-test';
 const PROD_SUPPORTED_ORIGINS=new Set(['expediente','contacto','firma']);
 const PROD_ALLOWED_MIME=new Set([
  'application/pdf','image/png','image/jpeg','image/webp','text/plain','application/msword',
@@ -28,6 +28,7 @@ type OriginCtx={type:string;code:string;label:string;staging:boolean};
 type Prepare={ok?:boolean;upload_id?:string;storage_path?:string;token?:string;max_bytes?:number};
 type Complete={ok?:boolean;reused?:boolean;document_page_id?:string};
 type Extract={ok?:boolean;status?:number;extraction?:{fields?:Record<string,unknown>};applied?:{error?:string;conflicts?:unknown[]}};
+type LegacyBatch={ok?:boolean;attempted?:number;results?:Array<{ok?:boolean;review_required?:boolean;error?:string}>};
 type Queue={originType:string;label:string;files:File[]};
 
 function routeContext(pathname:string):OriginCtx|null{
@@ -132,7 +133,7 @@ export default function ContextEvidenceUpload(){
    const done=await evidenceFetch<Complete>('/complete',{method:'POST',body:JSON.stringify({upload_id:prepared.data.upload_id,title:file.name})});
    if(done.status!==200||!done.data?.ok){failed++;continue;}
    if(done.data.reused)reused++;else saved++;
-   if(!IS_PRODUCTION&&EXTRACTABLE_MIME.has(mime)){
+   if(EXTRACTABLE_MIME.has(mime)){
     setMsg(`Documento guardado. Leyendo visualmente ${file.name} y colocando los datos…`);
     const x=await extractFetch<Extract>({upload_id:prepared.data.upload_id,document_page_id:done.data.document_page_id??''});
     if(x.status===200&&x.data?.ok)extracted++;
@@ -151,6 +152,20 @@ export default function ContextEvidenceUpload(){
   setMsg(bits.length?bits.join(' · '):'No se seleccionaron archivos.');
  }
 
+ async function reprocessLegacy(){
+  if(!IS_PRODUCTION||busy)return;
+  if(!window.confirm('Se releerán los PDF antiguos ya guardados, sin borrar originales ni sobrescribir datos existentes. ¿Continuar?'))return;
+  setBusy(true);let processed=0,reviews=0,errors=0;
+  for(let i=0;i<60;i++){
+   setMsg(`Reprocesando PDF antiguos… ${processed} revisados hasta ahora.`);
+   const r=await extractFetch<LegacyBatch>({mode:'legacy_batch',limit:2});
+   if(r.status!==200||!r.data?.ok){errors++;break;}
+   const attempted=r.data.attempted??0;if(!attempted)break;processed+=attempted;
+   for(const item of r.data.results??[]){if(item.review_required)reviews++;else if(!item.ok)errors++;}
+  }
+  setBusy(false);const parts=[`${processed} PDF antiguos reprocesados`];if(reviews)parts.push(`${reviews} requieren revisión por conflicto`);if(errors)parts.push(`${errors} con error`);setMsg(parts.join(' · '));
+ }
+
  async function choose(e:ChangeEvent<HTMLInputElement>){
   const files=[...(e.target.files??[])];e.target.value='';if(!files.length)return;
   if(activeContext.staging){
@@ -167,6 +182,6 @@ export default function ContextEvidenceUpload(){
  const launcher=<button type="button" data-testid="context-evidence-open" onClick={()=>setOpen(true)} style={{width:'100%',border:'1px solid #f4741f',borderRadius:12,padding:'12px 16px',display:'inline-flex',alignItems:'center',justifyContent:'center',gap:8,background:'#f4741f',color:'#fff',fontWeight:800,boxShadow:'none',cursor:'pointer'}}><FileUp size={17}/>{staged?`${staged} archivo${staged===1?'':'s'} preparado${staged===1?'':'s'}`:IS_PRODUCTION?'Subir documentos':'Subir documentos / audio'}</button>;
  return <>
   {inlineHost&&createPortal(launcher,inlineHost)}
-  {open&&<div role="presentation" style={{position:'fixed',inset:0,zIndex:9999,background:'rgba(20,16,24,.42)',display:'grid',placeItems:'center',padding:18}}><section className="ops-message" style={{display:'grid',gap:14,border:'2px solid #870064',width:'min(620px,100%)',maxHeight:'88vh',overflow:'auto',background:'var(--panel,#fff)',boxShadow:'0 24px 70px rgba(0,0,0,.28)'}} aria-label="Subir archivos contextuales"><div style={{display:'flex',justifyContent:'space-between',gap:12,alignItems:'flex-start'}}><div><strong style={{fontSize:18}}>{label}</strong><p style={{margin:'5px 0 0'}}>{IS_PRODUCTION?'Admite documentos validados para producción. El original se conserva sin ejecutarlo ni transformarlo y queda enlazado al contexto correcto.':'Admite PDF aunque contenga solo una imagen, además de imágenes y audio. En PDF/imagen intento leer los datos y colocarlos automáticamente en la ficha.'}</p></div><button type="button" onClick={close} aria-label="Cerrar"><X size={16}/></button></div>{activeContext.staging&&<div style={{padding:11,borderRadius:12,background:'rgba(135,0,100,.07)'}}><strong>La ficha aún no existe.</strong><div>Selecciona ahora los archivos y los mantendré preparados en esta sesión. Al crear y abrir la ficha se asociarán automáticamente.</div></div>}<label className="primary" style={{display:'inline-flex',alignItems:'center',justifyContent:'center',gap:8,cursor:busy?'wait':'pointer',padding:12,borderRadius:12}}>{!IS_PRODUCTION&&/audio/i.test(msg)?<FileAudio size={18}/>:<FileUp size={18}/>} {busy?'Procesando documento…':activeContext.staging?'Elegir archivos':IS_PRODUCTION?'Elegir documentos':'Elegir archivos o audios'}<input type="file" multiple accept={IS_PRODUCTION?PROD_ACCEPT:undefined} onChange={e=>void choose(e)} disabled={busy} style={{display:'none'}}/></label>{staged>0&&<small>{staged} archivo{staged===1?'':'s'} pendiente{staged===1?'':'s'} de que exista la ficha.</small>}{msg&&<strong>{msg}</strong>}<small>{IS_PRODUCTION?'Tamaño máximo actual por archivo: 12 MB. Audio y contextos sin contrato productivo permanecen bloqueados hasta disponer de tratamiento seguro validado.':'Tamaño máximo actual por archivo: 12 MB. Los PDF escaneados o exportados desde Canva se procesan visualmente aunque no tengan texto embebido.'}</small></section></div>}
+  {open&&<div role="presentation" style={{position:'fixed',inset:0,zIndex:9999,background:'rgba(20,16,24,.42)',display:'grid',placeItems:'center',padding:18}}><section className="ops-message" style={{display:'grid',gap:14,border:'2px solid #870064',width:'min(620px,100%)',maxHeight:'88vh',overflow:'auto',background:'var(--panel,#fff)',boxShadow:'0 24px 70px rgba(0,0,0,.28)'}} aria-label="Subir archivos contextuales"><div style={{display:'flex',justifyContent:'space-between',gap:12,alignItems:'flex-start'}}><div><strong style={{fontSize:18}}>{label}</strong><p style={{margin:'5px 0 0'}}>{IS_PRODUCTION?'Admite PDF aunque sea una imagen exportada desde Canva. El original se conserva y los datos detectados se colocan automáticamente sin sobrescribir valores existentes.':'Admite PDF aunque contenga solo una imagen, además de imágenes y audio. En PDF/imagen intento leer los datos y colocarlos automáticamente en la ficha.'}</p></div><button type="button" onClick={close} aria-label="Cerrar"><X size={16}/></button></div>{activeContext.staging&&<div style={{padding:11,borderRadius:12,background:'rgba(135,0,100,.07)'}}><strong>La ficha aún no existe.</strong><div>Selecciona ahora los archivos y los mantendré preparados en esta sesión. Al crear y abrir la ficha se asociarán automáticamente.</div></div>}<label className="primary" style={{display:'inline-flex',alignItems:'center',justifyContent:'center',gap:8,cursor:busy?'wait':'pointer',padding:12,borderRadius:12}}>{!IS_PRODUCTION&&/audio/i.test(msg)?<FileAudio size={18}/>:<FileUp size={18}/>} {busy?'Procesando documento…':activeContext.staging?'Elegir archivos':IS_PRODUCTION?'Elegir documentos':'Elegir archivos o audios'}<input type="file" multiple accept={IS_PRODUCTION?PROD_ACCEPT:undefined} onChange={e=>void choose(e)} disabled={busy} style={{display:'none'}}/></label>{IS_PRODUCTION&&<button type="button" onClick={()=>void reprocessLegacy()} disabled={busy} style={{padding:11,borderRadius:12,fontWeight:800}}>Reprocesar PDF antiguos</button>}{staged>0&&<small>{staged} archivo{staged===1?'':'s'} pendiente{staged===1?'':'s'} de que exista la ficha.</small>}{msg&&<strong>{msg}</strong>}<small>{IS_PRODUCTION?'Tamaño máximo actual por archivo: 12 MB. Los PDF escaneados o exportados desde Canva se leen visualmente; los antiguos pueden reprocesarse sin volver a subirlos.':'Tamaño máximo actual por archivo: 12 MB. Los PDF escaneados o exportados desde Canva se procesan visualmente aunque no tengan texto embebido.'}</small></section></div>}
  </>;
 }
