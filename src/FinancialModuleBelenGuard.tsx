@@ -2,7 +2,7 @@ import {useEffect,useState} from 'react';
 import {createPortal} from 'react-dom';
 import {useLocation} from 'react-router-dom';
 import {Brain} from 'lucide-react';
-import {SUPABASE_URL,supabase} from './supabase';
+import {fetchEnvironmentApi} from './supabase';
 import './financial-module-belen.css';
 
 type Rule={id:string;category:string;text:string};
@@ -15,8 +15,8 @@ const modules:Record<string,ModuleConfig>={
 };
 
 async function loadContext(context:string){
- const{data:{session}}=await supabase.auth.getSession();if(!session?.access_token)return null;
- try{const r=await fetch(`${SUPABASE_URL}/functions/v1/fenix-belen-financial-context-test/context`,{method:'POST',headers:{'content-type':'application/json',Authorization:`Bearer ${session.access_token}`},body:JSON.stringify({action:context,phase:context,people:[]})});if(!r.ok)return null;return await r.json() as Envelope}catch{return null}
+ const r=await fetchEnvironmentApi<Envelope>('fenix-belen-financial-context','/context',{method:'POST',body:JSON.stringify({action:context,phase:context,people:[]})},{productionAvailable:false});
+ return r.status===200?r.data:null;
 }
 
 export default function FinancialModuleBelenGuard(){
