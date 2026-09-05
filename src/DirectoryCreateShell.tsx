@@ -1,7 +1,7 @@
 import {FormEvent,useEffect,useState} from 'react';
 import {useLocation,useNavigate} from 'react-router-dom';
 import {Building2,Plus,Save,Trash2,Users,X} from 'lucide-react';
-import {fetchAppApi,IS_PRODUCTION,SUPABASE_URL,supabase} from './supabase';
+import {fetchAppApi,fetchEnvironmentApi,supabase} from './supabase';
 import {anaVertical} from './assets/visualAssets';
 import type {NavItem} from './masterNavigation';
 import OperationalShellFrame from './OperationalShellFrame';
@@ -14,7 +14,7 @@ type Def={route:'/notarias/nueva'|'/registros-propiedad/nuevo';back:string;label
 const defs:Def[]=[{route:'/notarias/nueva',back:'/notarias',label:'Nueva notaría',singular:'notaría',kind:'notaria'},{route:'/registros-propiedad/nuevo',back:'/registros-propiedad',label:'Nuevo registro de la propiedad',singular:'registro de la propiedad',kind:'registro'}];
 const blank=():Staff=>({id:crypto.randomUUID(),nombre:'',apellidos:'',cargo:'',telefonos:[''],emails:[''],observaciones:''});
 const changeAt=(items:string[],index:number,value:string)=>items.map((x,i)=>i===index?value:x);
-async function createDirectory(path:string,payload:any){const{data:{session}}=await supabase.auth.getSession();if(!session?.access_token)return{status:401,data:null as any};const api=IS_PRODUCTION?'fenix-directory-actions':'fenix-directory-actions-test';const r=await fetch(`${SUPABASE_URL}/functions/v1/${api}/${path}`,{method:'POST',headers:{'content-type':'application/json',Authorization:`Bearer ${session.access_token}`},body:JSON.stringify(payload)});let data:any=null;try{data=await r.json()}catch{}return{status:r.status,data};}
+async function createDirectory(path:string,payload:any){return fetchEnvironmentApi<any>('fenix-directory-actions',`/${path}`,{method:'POST',body:JSON.stringify(payload)});}
 export default function DirectoryCreateShell(){const location=useLocation(),navigate=useNavigate(),found=defs.find(d=>d.route===location.pathname);const active=Boolean(found);const[ready,setReady]=useState(false),[logged,setLogged]=useState(false),[ctx,setCtx]=useState<Ctx|null>(null),[theme,setTheme]=useState<Theme>(()=>(sessionStorage.getItem('fenix-theme') as Theme)||'light'),[query,setQuery]=useState('');const[nombre,setNombre]=useState(''),[provincia,setProvincia]=useState('Córdoba'),[localidad,setLocalidad]=useState(''),[direccion,setDireccion]=useState(''),[cp,setCp]=useState(''),[telefonos,setTelefonos]=useState<string[]>(['']),[emails,setEmails]=useState<string[]>(['']),[horario,setHorario]=useState(''),[municipios,setMunicipios]=useState(''),[staff,setStaff]=useState<Staff[]>([blank()]),[preview,setPreview]=useState(false),[busy,setBusy]=useState(false),[message,setMessage]=useState(''),[result,setResult]=useState<any>(null);
  useEffect(()=>{if(!active)return;let alive=true;supabase.auth.getSession().then(({data})=>{if(alive){setLogged(Boolean(data.session));setReady(true)}});const{data:{subscription}}=supabase.auth.onAuthStateChange((_e,s)=>{setLogged(Boolean(s));setReady(true)});return()=>{alive=false;subscription.unsubscribe()};},[active]);
  useEffect(()=>{if(!active||!logged)return;let alive=true;fetchAppApi<Ctx>('/session/context').then(r=>{if(alive)setCtx(r.status===200?r.data:null)});return()=>{alive=false}},[active,logged]);
