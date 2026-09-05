@@ -1,7 +1,7 @@
 import {useEffect,useMemo,useState} from 'react';
 import {useLocation,useNavigate} from 'react-router-dom';
 import {MessageCircle,Save} from 'lucide-react';
-import {SUPABASE_URL,supabase} from './supabase';
+import {fetchEnvironmentApi,supabase} from './supabase';
 import {fetchNotionRuntime} from './notionRuntime';
 import {anaAvatar} from './assets/visualAssets';
 import ExpedientePeoplePanel from './ExpedientePeoplePanel';
@@ -10,8 +10,8 @@ import './operational.css';
 import './detail-expediente.css';
 
 type AnyRow=Record<string,any>;
-async function legacyDetailApi(code:string){const {data:{session}}=await supabase.auth.getSession();if(!session?.access_token)return {status:401,data:null as any};const r=await fetch(`${SUPABASE_URL}/functions/v1/fenix-detail-api-test/expedientes/${encodeURIComponent(code)}`,{headers:{Authorization:`Bearer ${session.access_token}`}});let data:any=null;try{data=await r.json()}catch{}return {status:r.status,data};}
-async function notionActionApi(id:string,changes:Record<string,unknown>){const {data:{session}}=await supabase.auth.getSession();if(!session?.access_token)return {status:401,data:null as any};const r=await fetch(`${SUPABASE_URL}/functions/v1/fenix-notion-actions-test/expedientes/${encodeURIComponent(id)}/action`,{method:'POST',headers:{'content-type':'application/json',Authorization:`Bearer ${session.access_token}`},body:JSON.stringify({action:'update',changes})});let data:any=null;try{data=await r.json()}catch{}return {status:r.status,data};}
+async function legacyDetailApi(code:string){return fetchEnvironmentApi<any>('fenix-detail-api',`/expedientes/${encodeURIComponent(code)}`,undefined,{productionAvailable:false});}
+async function notionActionApi(id:string,changes:Record<string,unknown>){return fetchEnvironmentApi<any>('fenix-notion-actions',`/expedientes/${encodeURIComponent(id)}/action`,{method:'POST',body:JSON.stringify({action:'update',changes})},{productionAvailable:false});}
 function isNotionId(v:string){return /^[0-9a-f]{32}$/i.test(v.replaceAll('-',''));}
 async function detailApi(code:string){if(isNotionId(code)){const r=await fetchNotionRuntime<any>(`/expedientes/${encodeURIComponent(code)}`);if(r.status!==404)return r;}return legacyDetailApi(code);}
 function val(v:any){if(v===null||v===undefined||v==='')return '—';if(typeof v==='boolean')return v?'Sí':'No';if(Array.isArray(v))return v.length?v.map(x=>typeof x==='object'?(x.name||x.id||JSON.stringify(x)):String(x)).join(', '):'—';if(typeof v==='object')return JSON.stringify(v);return String(v)}
