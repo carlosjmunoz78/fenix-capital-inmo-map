@@ -4,10 +4,10 @@ import {useLocation,useNavigate} from 'react-router-dom';
 import {supabase} from './supabase';
 
 type Scope={type:string;code:string};
-const HIDDEN=['/','/perfil','/ana','/comunicaciones','/comunicaciones/nueva'];
+const HIDDEN=['/','/comunicaciones','/comunicaciones/nueva'];
 function scopeFromPath(path:string):Scope{
  const p=path.split('/').filter(Boolean),root=p[0]||'general',raw=p[1]||'';const code=['nuevo','nueva','new'].includes(raw.toLowerCase())?'':raw;
- const map:Record<string,string>={expedientes:'expediente',contactos:'contacto','contactos-b2b':'contacto_b2b',inmobiliarias:'inmobiliaria',tareas:'tarea',agenda:'tarea',visitas:'visita',bancos:'banco',tasaciones:'tasacion',firmas:'firma',documentacion:'documento',documentos:'documento',notarias:'notaria','registros-propiedad':'registro_propiedad',economia:'economia',inicio:'general'};
+ const map:Record<string,string>={expedientes:'expediente',contactos:'contacto','contactos-b2b':'contacto_b2b',inmobiliarias:'inmobiliaria',tareas:'tarea',agenda:'tarea',visitas:'visita',bancos:'banco',tasaciones:'tasacion',firmas:'firma',documentacion:'documento',documentos:'documento',notarias:'notaria','registros-propiedad':'registro_propiedad',economia:'economia',inicio:'general',perfil:'perfil',ana:'ana'};
  return{type:map[root]||root,code};
 }
 function inferChannel(text:string){return /\bwhats?app\b/i.test(text)?'WhatsApp':/\b(email|correo)\b/i.test(text)?'Email':'Email';}
