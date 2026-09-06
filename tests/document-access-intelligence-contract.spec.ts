@@ -17,10 +17,13 @@ test('document access keeps existing RBAC and exposes the upload needed to trigg
   expect(migration).toContain('revoke all on function public.fenix_prod_document_access_server(text,text) from public,anon,authenticated');
 });
 
-test('viewer automatically invokes the extractor when an authorized document has no persisted extraction',()=>{
+test('viewer never spends AI on open and resolves a fresh upload only after an explicit analysis action',()=>{
   expect(viewer).toContain("r.data?.upload_id");
-  expect(viewer).toContain("IS_PRODUCTION&&auto&&!intelligence?.extraction&&up");
-  expect(viewer).toContain('void analyze(up)');
+  expect(viewer).not.toContain("IS_PRODUCTION&&auto&&!intelligence?.extraction&&up");
+  expect(viewer).not.toContain('void analyze(up)');
+  expect(viewer).toContain("const current=await fetchNotionRuntime<any>(`/documentos/${encodeURIComponent(id)}`)");
+  expect(viewer).toContain("const fresh=typeof current.data?.upload_id==='string'?current.data.upload_id:''");
   expect(viewer).toContain("fetchEnvironmentApi<any>('fenix-document-extract'");
   expect(viewer).toContain('body:JSON.stringify({upload_id:up})');
+  expect(viewer).toContain('Abrir el documento no consume IA.');
 });
