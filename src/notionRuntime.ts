@@ -1,6 +1,6 @@
 import { IS_PRODUCTION, fetchAppApi, fetchEnvironmentApi } from './supabase';
 
-function filterContactResponse<T>(data:T|null,mode:'clientes'|'inmobiliarias'):T|null{
+function filterContactResponse<T>(data:T|null,mode:'clientes'|'inmobiliarias'|'bancos'):T|null{
   if(!data||typeof data!=='object')return data;
   const raw=data as Record<string,unknown>;
   if(!Array.isArray(raw.items))return data;
@@ -9,9 +9,9 @@ function filterContactResponse<T>(data:T|null,mode:'clientes'|'inmobiliarias'):T
     const row=item as Record<string,unknown>;
     const tipo=String(row.tipo||'').toLowerCase();
     const fuente=String(row.fuente||'').toLowerCase();
-    return mode==='clientes'
-      ? tipo==='cliente'||fuente==='clientes'
-      : tipo==='inmobiliaria'||fuente==='inmobiliarias';
+    if(mode==='clientes')return tipo==='cliente'||fuente==='clientes';
+    if(mode==='inmobiliarias')return tipo.includes('inmobiliaria')||fuente.includes('contactos inmobiliaria');
+    return tipo.includes('bancario')||fuente.includes('contactos bancarios');
   });
   return {...raw,items} as T;
 }
@@ -28,6 +28,10 @@ async function fetchProductionRead<T>(path:string,init?:RequestInit):Promise<{st
   if(pathname==='/contactos-inmobiliaria'){
     const r=await fetchAppApi<T>('/contactos');
     return{status:r.status,data:r.status===200?filterContactResponse(r.data,'inmobiliarias'):r.data};
+  }
+  if(pathname==='/contactos-bancarios'){
+    const r=await fetchAppApi<T>('/contactos');
+    return{status:r.status,data:r.status===200?filterContactResponse(r.data,'bancos'):r.data};
   }
   if(/^\/expedientes\/[^/]+$/.test(pathname))return fetchAppApi<T>(pathname);
   if(/^\/documentos\/[^/]+(?:\/(?:view|versions))?$/.test(pathname))return fetchAppApi<T>(`${pathname}${url.search}`);
