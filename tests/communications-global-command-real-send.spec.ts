@@ -1,10 +1,10 @@
 import {test,expect} from '@playwright/test';
 import fs from 'node:fs';
 
-test('Ana exposes a communication command from the global app shell and preserves context',()=>{
+test('Ana routes communications from the universal voice hub and preserves context',()=>{
  const src=fs.readFileSync('src/GlobalCommunicationCommandGuard.tsx','utf8');
- expect(src).toContain('Ana · comunicar');
- expect(src).toContain('Orden de comunicación para Ana');
+ expect(src).toContain('Hablar con Ana');
+ expect(src).toContain('Tarea');
  expect(src).toContain("navigate(`/comunicaciones/nueva?");
  expect(src).toContain("scope_type");
  expect(src).toContain("scope_code");
