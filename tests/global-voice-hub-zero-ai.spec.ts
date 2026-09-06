@@ -15,7 +15,17 @@ test('micro universal ofrece cuatro acciones y Hablar con Ana consulta CEREBRO s
  expect(hub).toContain("fetchAppApi<unknown>(`/search?q=${encodeURIComponent(value)}`)");
  expect(hub).toContain('sin API generativa');
  expect(hub).toContain('No voy a inventarla');
- expect(hub).toContain('background:#ff5f00');
+});
+
+test('micro universal mantiene contraste legible en modo claro y oscuro sin panel blanco brillante',()=>{
+ expect(hub).toContain('--voice-accent:#c97845');
+ expect(hub).toContain('--voice-panel:#f3dfcf');
+ expect(hub).toContain('--voice-text:#17120f');
+ expect(hub).toContain("html[data-theme='dark'] .fenix-voice-hub");
+ expect(hub).toContain('--voice-panel:#1d1815');
+ expect(hub).toContain('--voice-text:#f7f2ee');
+ expect(hub).toContain("html[data-theme='dark'] .fenix-voice-main{color:#fff");
+ expect(hub).toContain('.fenix-voice-main{width:50px;height:50px');
 });
 
 test('tarea dictada se precarga y comunicaciones siguen usando Brevo/WhatsApp con revisión previa',()=>{
