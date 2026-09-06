@@ -5,7 +5,8 @@ test('communications PROD uses direct provider APIs without Make in the send pat
   const src=fs.readFileSync('supabase/functions/fenix-communications-gateway-prod/index.ts','utf8');
   expect(src).toContain('https://api.brevo.com/v3/smtp/email');
   expect(src).toContain('https://graph.facebook.com/v23.0/');
-  expect(src).toContain("mode==='REAL'");
+  expect(src).toContain("if(mode!=='REAL')");
+  expect(src).toContain("mode==='SIMULATED'");
   expect(src).toContain('fenix_prod_communications_send_claim_server');
   expect(src).toContain('fenix_prod_communications_send_finalize_server');
   expect(src).not.toContain('make.com');
