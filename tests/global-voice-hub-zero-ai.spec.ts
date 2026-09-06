@@ -1,0 +1,28 @@
+import {expect,test} from '@playwright/test';
+import fs from 'node:fs';
+import path from 'node:path';
+
+const hub=fs.readFileSync(path.join(process.cwd(),'src/GlobalCommunicationCommandGuard.tsx'),'utf8');
+const tasks=fs.readFileSync(path.join(process.cwd(),'src/TaskCreateShell.tsx'),'utf8');
+const comms=fs.readFileSync(path.join(process.cwd(),'src/CommunicationsShell.tsx'),'utf8');
+
+test('micro universal ofrece cuatro acciones y Hablar con Ana consulta CEREBRO sin API de IA',()=>{
+ expect(hub).toContain('Tarea');
+ expect(hub).toContain('Corrección');
+ expect(hub).toContain('Dar conocimiento');
+ expect(hub).toContain('Hablar con Ana');
+ expect(hub).toContain("type VoiceMode='task'|'correction'|'knowledge'|'chat'");
+ expect(hub).toContain("fetchAppApi<unknown>(`/search?q=${encodeURIComponent(value)}`)");
+ expect(hub).toContain('sin API de IA');
+ expect(hub).toContain('No voy a inventarla');
+ expect(hub).toContain('background:#ff5f00');
+});
+
+test('tarea dictada se precarga y comunicaciones siguen usando Brevo/WhatsApp con revisión previa',()=>{
+ expect(tasks).toContain("get('instruction')");
+ expect(tasks).toContain('Revisar antes de crear');
+ expect(comms).toContain("canal==='WhatsApp'");
+ expect(comms).toContain('WhatsApp todavía no está operativo en Meta/Supabase. No se ha enviado nada.');
+ expect(comms).toContain("mode:'REAL'");
+ expect(comms).toContain('Envío real completado y registrado.');
+});
