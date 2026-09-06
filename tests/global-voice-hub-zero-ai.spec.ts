@@ -13,7 +13,7 @@ test('micro universal ofrece cuatro acciones y Hablar con Ana consulta CEREBRO s
  expect(hub).toContain('Hablar con Ana');
  expect(hub).toContain("type VoiceMode='task'|'correction'|'knowledge'|'chat'");
  expect(hub).toContain("fetchAppApi<unknown>(`/search?q=${encodeURIComponent(value)}`)");
- expect(hub).toContain('sin API de IA');
+ expect(hub).toContain('sin API generativa');
  expect(hub).toContain('No voy a inventarla');
  expect(hub).toContain('background:#ff5f00');
 });
