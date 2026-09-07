@@ -35,7 +35,7 @@ test('la migración restaura el estado anterior desde el histórico y no inventa
   expect(migration).toContain("if v_stage='__REACTIVATE__'");
   expect(migration).toContain('fenix_prod.expediente_stage_history');
   expect(migration).toContain('select h.from_stage into v_restore');
-  expect(migration).toContain("v_source:='manual'");
+  expect(migration).toContain("v_source text:='manual'");
   expect(migration).toContain("v_source:='reactivate'");
   expect(migration).toContain('reactivation_history_missing');
 });
