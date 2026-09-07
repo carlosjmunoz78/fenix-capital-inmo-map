@@ -1,0 +1,111 @@
+{
+  "contract_version": "0.1.0",
+  "audited_at": "2026-09-07",
+  "principle": "frontend_to_runtime_dependencies_must_be_explicit_and_environment_scoped",
+  "app_source_sha": "317a3e457993b4a0da2b84f4f51bcd28b3daba36",
+  "closures": [
+    {
+      "id": "direction-live-dashboard",
+      "frontend": ["src/DirectionDashboard.tsx", "src/useDirectionLiveData.ts", "src/notionRuntime.ts"],
+      "environment": "PROD",
+      "path": ["useDirectionLiveData", "fetchNotionRuntime", "fetchProductionRead", "fetchAppApi", "fenix-app-gateway"],
+      "status": "VERIFIED_SOURCE_AND_LIVE_EDGE",
+      "notes": "Direction live counts/priorities use the production app gateway through notionRuntime; they do not require fenix-direction-kpis in PROD."
+    },
+    {
+      "id": "direction-kpi-drilldown",
+      "frontend": ["src/DirectionKpiDrilldownGuard.tsx"],
+      "environment": "PREPROD",
+      "path": ["fetchEnvironmentApi", "fenix-direction-kpis-test", "Supabase Auth", "preprod_test_session_context", "Notion data sources"],
+      "status": "VERIFIED_SOURCE_AND_LIVE_EDGE",
+      "live_edge": {"slug": "fenix-direction-kpis-test", "version": 6, "environment": "PREPROD_TEST"},
+      "prod_policy": "FAIL_CLOSED_503",
+      "notes": "Source explicitly returns 503 in PROD; the KPI drilldown contract is PREPROD-only until a dedicated PROD contract is separately deployed and validated."
+    },
+    {
+      "id": "special-cases",
+      "frontend": ["src/specialCasesRuntime.ts"],
+      "environment": "PROD",
+      "path": ["fenix-special-cases-api", "fenix_prod_special_case_*_server", "fenix_prod.special_cases", "fenix_prod.special_case_people"],
+      "status": "VERIFIED_LIVE",
+      "security_boundary": "authenticated_edge_plus_service_role_rpc_with_role_owner_checks"
+    },
+    {
+      "id": "expediente-stage",
+      "frontend": ["src/ExpedienteJourneyGuard.tsx"],
+      "environment": "PROD",
+      "path": ["fenix-expediente-stage", "fenix_prod_exp_stage_server", "fenix_prod.expedientes", "fenix_prod.expediente_stage_history"],
+      "status": "VERIFIED_LIVE",
+      "security_boundary": "authenticated_edge_plus_rpc_role_owner_version_checks"
+    },
+    {
+      "id": "ana-corrections",
+      "frontend_contract": "src/supabase.ts::fetchAnaApi",
+      "environment": "PROD",
+      "path": ["fenix-ana-api", "fenix_prod_session_context", "fenix_prod_ana_*_server", "Notion learning/task datasets"],
+      "status": "VERIFIED_LIVE_SOURCE"
+    },
+    {
+      "id": "ana-knowledge",
+      "frontend_contract": "src/supabase.ts::fetchAnaKnowledgeApi",
+      "environment": "PROD",
+      "path": ["fenix-ana-knowledge", "fenix_prod_session_context", "Notion knowledge/task datasets"],
+      "status": "VERIFIED_LIVE_SOURCE",
+      "human_gate": "domain_authority_and_review_before_canonical_promotion"
+    },
+    {
+      "id": "ana-canonical",
+      "frontend_contract": "src/supabase.ts::fetchAnaCanonicalApi",
+      "environment": "PROD",
+      "path": ["fenix-ana-canonical", "fenix_prod_session_context", "Notion canonical learning dataset"],
+      "status": "VERIFIED_LIVE_SOURCE",
+      "mode": "READ_ONLY_RULES"
+    },
+    {
+      "id": "memory",
+      "frontend_contract": "src/supabase.ts::fetchMemoryApi",
+      "environment": "PROD",
+      "path": ["fenix-memory-api", "fenix_prod_session_context", "Notion memory/activity datasets"],
+      "status": "VERIFIED_LIVE_SOURCE"
+    },
+    {
+      "id": "b2b-actions",
+      "frontend_contract": "src/supabase.ts::fetchB2BActions",
+      "environment": "PROD",
+      "path": ["fenix-b2b-actions", "fenix_prod_session_context", "Notion B2B datasets"],
+      "status": "VERIFIED_LIVE_SOURCE",
+      "security_boundary": "Direccion_or_Visitador_scope_owner_zone_checks"
+    },
+    {
+      "id": "evidence",
+      "frontend_contract": "src/supabase.ts::fetchEvidenceApi",
+      "environment": "PROD",
+      "path": ["fenix-evidence-api", "fenix_prod_session_context", "fenix_prod_evidence_*_server", "Supabase Storage fenix-prod-documents", "Notion evidence datasets"],
+      "status": "VERIFIED_LIVE_SOURCE"
+    }
+  ],
+  "classified_drift": [
+    {
+      "id": "DRIFT-DIRECTION-KPIS-001",
+      "observation": "src/supabase.ts declares a base helper for fenix-direction-kpis while PROD has no function with that slug",
+      "classification": "EXPECTED_ENVIRONMENT_SPLIT_NOT_PROD_BREAK",
+      "evidence": [
+        "DirectionKpiDrilldownGuard explicitly refuses PROD with 503",
+        "PREPROD has ACTIVE fenix-direction-kpis-test v6",
+        "Direction live dashboard uses fetchNotionRuntime -> fetchAppApi -> fenix-app-gateway in PROD"
+      ],
+      "action": "PRESERVE_CURRENT_BEHAVIOR",
+      "prod_deploy_authorized": false
+    }
+  ],
+  "open_items": [
+    "enumerate_remaining_active_frontend_edge_helpers_and classify each environment path",
+    "extract complete live fenix-app-gateway RPC/table closure",
+    "representative PREPROD validation for RLS-001"
+  ],
+  "prohibitions": [
+    "do_not_deploy_missing_prod_edge_when_source_marks_feature_preprod_only",
+    "do_not_treat_environment_specific_function_suffix_as_runtime_drift",
+    "do_not_promote_dependency_closure_to_complete_until_all_active_frontend_paths_are classified"
+  ]
+}
