@@ -4,10 +4,11 @@ import unittest
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 CLOSURE = ROOT / "governance" / "runtime-closure.json"
+GATEWAY = ROOT / "governance" / "gateway-rpc-inventory.json"
 
 
-def load():
-    return json.loads(CLOSURE.read_text(encoding="utf-8"))
+def load(path=CLOSURE):
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
 class RuntimeClosureTests(unittest.TestCase):
@@ -38,6 +39,19 @@ class RuntimeClosureTests(unittest.TestCase):
         self.assertEqual(live["environment"], "PROD")
         self.assertIn("fenix-app-gateway", live["path"])
         self.assertNotIn("fenix-direction-kpis", live["path"])
+
+    def test_gateway_rpc_inventory_is_unique_complete_and_read_only_audited(self):
+        data = load(GATEWAY)
+        rpcs = data["rpc_names"]
+        self.assertEqual(data["expected_rpc_count"], 51)
+        self.assertEqual(len(rpcs), 51)
+        self.assertEqual(len(rpcs), len(set(rpcs)))
+        self.assertTrue(data["all_expected_rpcs_exist_live"])
+        self.assertFalse(data["mutation_performed"])
+        self.assertIn("fenix-prod-documents", data["storage"])
+        self.assertIn("actors", data["literal_fenix_prod_object_refs_observed"])
+        self.assertIn("expedientes", data["literal_fenix_prod_object_refs_observed"])
+        self.assertIn("documentos", data["literal_fenix_prod_object_refs_observed"])
 
     def test_no_record_authorizes_prod_deployment(self):
         data = load()
