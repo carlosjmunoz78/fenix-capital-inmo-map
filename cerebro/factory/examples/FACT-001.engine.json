@@ -6,7 +6,7 @@
   "company_id": null,
   "environment": "PREPROD",
   "version": "0.1.0",
-  "contract_version": "0.1.0",
+  "contract_version": "0.2.0",
   "status": "CONFIRMED_OPERATIONAL",
   "objective": "Generar, validar y registrar scaffolds estandarizados de motores CEREBRO sin duplicar runtime ni introducir coste adicional por defecto.",
   "owner": "CEREBRO",
@@ -22,6 +22,7 @@
   "jobs": [],
   "tests": ["manifest_validation", "registry_consistency", "duplicate_engine_id_detection", "plan_is_read_only", "create_generates_scaffold", "create_is_idempotent", "changed_definition_refuses_overwrite", "company_scope_guard"],
   "evaluation": ["schema_completeness", "zero_cost_path_present", "rollback_declared", "ci_green_on_head"],
+  "tribunal": ["promotion-policy.json", "ci_green", "old_vs_new", "preprod_evidence"],
   "observability": ["cli_exit_code", "validation_result", "generated_files", "registry_diff", "github_actions_run"],
   "retry_timeout": {"max_attempts": 1, "blind_retry": false},
   "cost_budget": {"additional_monthly_eur_target": 0},
@@ -32,12 +33,12 @@
   "dependents": [],
   "autonomy_level": "HUMAN_BY_EXCEPTION",
   "zero_cost_execution_plan": ["git", "python_stdlib", "github_actions_existing_minutes"],
-  "human_exception_codes": ["HIGH_RISK", "POLICY_CONFLICT", "SECURITY_INCIDENT", "MONEY_LIMIT", "IRREVERSIBLE_PROD_RISK"],
+  "human_exception_codes": ["HIGH_RISK", "POLICY_CONFLICT", "SECURITY_INCIDENT", "MONEY_LIMIT"],
+  "system_blocker_codes": ["IRREVERSIBLE_PROD_RISK"],
   "evidence": [
     "isolated_branch:cerebro/fact-001-factory-v0",
-    "head_sha:9b5e16b2a7341406ae575297936a36351145f99b",
-    "github_actions_run:34127853158",
-    "github_actions_conclusion:success",
+    "head_sha:updated_by_current_branch",
+    "ci:dedicated factory validation",
     "prod_mutation:none"
   ]
 }
