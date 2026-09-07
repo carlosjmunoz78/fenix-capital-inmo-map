@@ -40,7 +40,8 @@ function normalizeProdRows(path:string,data:unknown):unknown{
   if(path==='/expedientes'&&Array.isArray(envelope.items)){
     return {...envelope,items:envelope.items.map(row=>({
       ...row,
-      id:row.id??row.expediente_code,
+      internal_id:row.id,
+      id:row.expediente_code??row.id,
       fase:row.fase??row.phase??row.stage,
       estado:row.estado??row.status??row.stage,
       cliente:row.cliente??row.cliente_alias,
@@ -51,7 +52,7 @@ function normalizeProdRows(path:string,data:unknown):unknown{
   if(/^\/expedientes\/[^/]+$/.test(path)){
     const raw=rowObject(envelope.expediente);
     if(!raw)return data;
-    const item={...raw,id:raw.id??raw.expediente_code,expediente:raw.expediente??raw.expediente_code,cliente:raw.cliente??raw.cliente_alias,fase:raw.fase??raw.stage,estado:raw.estado??raw.stage};
+    const item={...raw,internal_id:raw.id,id:raw.expediente_code??raw.id,expediente:raw.expediente??raw.expediente_code,cliente:raw.cliente??raw.cliente_alias,fase:raw.fase??raw.stage,estado:raw.estado??raw.stage};
     return {...envelope,source:'prod_canonical',item,expediente:item};
   }
 
