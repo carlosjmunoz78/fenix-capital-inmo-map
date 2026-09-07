@@ -62,10 +62,15 @@ export default function ExpedienteLifecycleGuard(){
     if(!expedienteCode||pathname==='/expedientes/nuevo'){setHost(null);return;}
     const mount=()=>{
       const content=document.querySelector<HTMLElement>('.detail-exp-root .detail-exp-content')||document.querySelector<HTMLElement>('.ops-content');
+      const evidence=content?.querySelector<HTMLElement>(':scope > .context-evidence-inline-host');
       const ana=content?.querySelector<HTMLElement>(':scope > .detail-ana-hero');
       if(!content)return;
       let node=content.querySelector<HTMLElement>(':scope > .exp-life-inline-host');
-      if(!node){node=document.createElement('div');node.className='exp-life-inline-host';node.dataset.testid='expediente-lifecycle-inline-host';if(ana)content.insertBefore(node,ana);else content.appendChild(node);}
+      if(!node){
+        node=document.createElement('div');node.className='exp-life-inline-host';node.dataset.testid='expediente-lifecycle-inline-host';
+        const host=node;
+        if(evidence)content.insertBefore(host,evidence);else if(ana)content.insertBefore(node,ana);else content.appendChild(node);
+      }
       setHost(current=>current===node?current:node);
     };
     mount();const observer=new MutationObserver(mount);observer.observe(document.body,{childList:true,subtree:true});
