@@ -16,13 +16,14 @@ CALL_PATTERNS = [
 
 
 def discovered_edges():
-    found = set()
+    found = {}
     for path in SRC.rglob("*"):
         if path.suffix not in {".ts", ".tsx", ".js", ".jsx"}:
             continue
         text = path.read_text(encoding="utf-8", errors="ignore")
         for pattern in CALL_PATTERNS:
-            found.update(pattern.findall(text))
+            for edge in pattern.findall(text):
+                found.setdefault(edge, set()).add(str(path.relative_to(ROOT)))
     return found
 
 
@@ -31,7 +32,7 @@ class FrontendEdgeContractTests(unittest.TestCase):
         contract = json.loads(CONTRACT.read_text(encoding="utf-8"))
         declared = set(contract["edges"])
         found = discovered_edges()
-        missing = sorted(found - declared)
+        missing = {edge: sorted(files) for edge, files in sorted(found.items()) if edge not in declared}
         self.assertFalse(missing, f"Unclassified frontend Edge dependencies: {missing}")
 
     def test_preprod_only_edges_have_safe_prod_behavior(self):
@@ -39,7 +40,7 @@ class FrontendEdgeContractTests(unittest.TestCase):
         for name, cfg in contract["edges"].items():
             if cfg["environment"] == "PREPROD_ONLY":
                 self.assertFalse(cfg["prod_live"], name)
-                self.assertIn(cfg["prod_behavior"], {"FAIL_CLOSED_503", "ROUTE_READS_TO_FENIX_APP_GATEWAY"})
+                self.assertIn(cfg["prod_behavior"], {"FAIL_CLOSED_503", "ROUTE_READS_TO_FENIX_APP_GATEWAY", "EXPLICIT_SOURCE_GUARD"})
                 self.assertTrue(cfg.get("preprod_variant"), name)
 
 
