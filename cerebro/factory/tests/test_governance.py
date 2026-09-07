@@ -6,6 +6,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 DEP = ROOT / "governance" / "dependency-registry.json"
 HEX = ROOT / "governance" / "human-exception-policy.json"
 POL = ROOT / "governance" / "promotion-policy.json"
+RUNTIME = ROOT / "contracts" / "runtime-contracts.json"
 
 EXPECTED_BASE_HUMAN = {
     "LEGAL_REQUIRED",
@@ -21,6 +22,7 @@ EXPECTED_PROMOTION_GATES = {
     "contracts", "permissions", "tests", "evaluation", "tribunal", "observability",
     "rollback", "backup", "rebuild", "cost_measured", "policy", "preprod"
 }
+EXPECTED_DIMENSIONS = {"company_id", "engine_id", "environment", "version"}
 
 
 def load(path):
@@ -61,6 +63,27 @@ class GovernanceTests(unittest.TestCase):
         self.assertTrue(data["rollback_test_required"])
         self.assertIn("no_direct_lab_to_prod", data["prohibitions"])
         self.assertIn("no_direct_training_to_prod", data["prohibitions"])
+
+    def test_runtime_contract_has_multiempresa_dimensions(self):
+        data = load(RUNTIME)
+        self.assertEqual(set(data["required_dimensions"]), EXPECTED_DIMENSIONS)
+        for key in ("event_envelope", "job_envelope", "audit_record", "observability_signal"):
+            self.assertTrue(EXPECTED_DIMENSIONS.issubset(set(data[key]["required"])))
+
+    def test_runtime_contract_is_safe_by_default(self):
+        data = load(RUNTIME)
+        self.assertTrue(data["audit_record"]["append_only"])
+        self.assertTrue(data["audit_record"]["secrets_forbidden"])
+        self.assertIn("HUMAN_REQUIRED", data["job_envelope"]["statuses"])
+        self.assertIn("SECURITY", data["observability_signal"]["signal_types"])
+        self.assertIn("CRITICAL", data["observability_signal"]["severities"])
+        self.assertIn("no_unbounded_retry", data["prohibitions"])
+        self.assertIn("no_cross_company_execution_without_explicit_scope", data["prohibitions"])
+
+    def test_runtime_human_codes_cover_policy(self):
+        runtime = load(RUNTIME)
+        policy = load(HEX)
+        self.assertEqual(set(runtime["human_exception"]["allowed_codes"]), set(policy["allowed_codes"]))
 
 
 if __name__ == "__main__":
