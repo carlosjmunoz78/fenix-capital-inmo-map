@@ -1,0 +1,47 @@
+{
+  "validation_id": "CORE-SEO-PROD-RUNTIME-2026-09-07",
+  "environment": "PROD_READ_ONLY",
+  "site": "https://fenixcapital.es",
+  "transport": "Make WordPress API moderna -> WordPress Abilities API",
+  "mutation_performed": false,
+  "core_guard": {
+    "ability": "fenix-core-guard/health",
+    "status_http": 200,
+    "plugin_version": "1.0.0-rc9-prod2",
+    "mode": "observer",
+    "score": 100,
+    "environment_type": "production",
+    "build_channel": "production",
+    "operational_writes_allowed": false,
+    "safe_default": true,
+    "tables_ready": true,
+    "pending_jobs": 0,
+    "cron_jobs_present": true,
+    "cron_maintenance_present": true,
+    "homepage_smoke": {
+      "http_2xx": true,
+      "body_present": true,
+      "single_h1": true
+    },
+    "interpretation": "Current PROD runtime is healthy in Observer/fail-closed mode. The legacy cerebro-status ok=false is caused by staging-only assertions (staging_host=false and staging cleanup flag false) and is not evidence of a PROD outage. The dedicated health ability is authoritative for PROD health and returns score 100."
+  },
+  "seo_cerebro": {
+    "ability": "fenix-seo-cerebro/status",
+    "status_http": 200,
+    "ok": true,
+    "version": "0.4.1",
+    "host": "fenixcapital.es",
+    "release_endpoint": "https://staging.fenixcapital.es/wp-json/fenix-seo-cerebro/v1/release",
+    "last_run": null,
+    "learning_count": 0,
+    "interpretation": "Live PROD status is now directly verified. Runtime/plugin health is confirmed, but the learning loop is not yet evidenced as having completed a production learning run. No loop-once/canary mutation was executed."
+  },
+  "wordpress_plugins_live": {
+    "core_guard": "active 1.0.0-rc9-prod2",
+    "seo_cerebro_bridge": "active 0.4.1",
+    "seo_rest_bridge": "active 1.0.0",
+    "cerebro_leads": "active 1.3.2"
+  },
+  "cost_additional_eur": 0,
+  "rollback": "Not applicable: read-only audit."
+}
