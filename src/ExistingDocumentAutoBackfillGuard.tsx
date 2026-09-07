@@ -27,6 +27,15 @@ function statusBox(message:string,kind:'working'|'ok'|'error'='working'){
  if(kind==='ok')window.setTimeout(()=>box?.remove(),1800);
 }
 
+async function authenticatedHeaders(){
+ for(let attempt=0;attempt<10;attempt++){
+  const {data:{session}}=await supabase.auth.getSession();
+  if(session?.access_token)return{Authorization:`Bearer ${session.access_token}`,apikey:SUPABASE_PUBLISHABLE_KEY,'content-type':'application/json'};
+  await sleep(250+attempt*100);
+ }
+ return null;
+}
+
 export default function ExistingDocumentAutoBackfillGuard(){
  const location=useLocation();
  const running=useRef('');
@@ -35,19 +44,18 @@ export default function ExistingDocumentAutoBackfillGuard(){
   if(!IS_PRODUCTION)return;
   const raw=rawExpediente(location.pathname);
   if(!raw||running.current===raw)return;
-  running.current=raw;
   let cancelled=false;
 
   const run=async()=>{
    try{
-    const {data:{session}}=await supabase.auth.getSession();
-    const token=session?.access_token;if(!token)return;
-    const headers={Authorization:`Bearer ${token}`,apikey:SUPABASE_PUBLISHABLE_KEY,'content-type':'application/json'};
+    const headers=await authenticatedHeaders();
+    if(cancelled||!headers)return;
     const detail=await fetch(`${SUPABASE_URL}/functions/v1/fenix-app-gateway/expedientes/${encodeURIComponent(raw)}`,{method:'GET',headers});
     const detailData=await detail.json().catch(()=>null) as Record<string,unknown>|null;
     const row=(detailData?.expediente&&typeof detailData.expediente==='object'?detailData.expediente:detailData?.item&&typeof detailData.item==='object'?detailData.item:null) as Record<string,unknown>|null;
     const expCode=String(row?.expediente_code??row?.expediente??raw).trim();
-    if(!detail.ok||!expCode)return;
+    if(cancelled||!detail.ok||!expCode)return;
+    running.current=raw;
 
     let totalProcessed=0,totalSucceeded=0,lastSkipped=0;
     for(let pass=0;pass<8&&!cancelled;pass++){
@@ -55,6 +63,7 @@ export default function ExistingDocumentAutoBackfillGuard(){
      const data=await response.json().catch(()=>null) as BackfillResponse|null;
      if(!response.ok||data?.ok!==true){
       if(response.status>=500||response.status===429){await sleep(900*(pass+1));continue;}
+      running.current='';
       return;
      }
      const processed=Number(data.processed)||0,succeeded=Number(data.succeeded)||0,failed=Number(data.failed)||0,remaining=Number(data.remaining)||0;
@@ -71,8 +80,11 @@ export default function ExistingDocumentAutoBackfillGuard(){
      statusBox(`${totalSucceeded} documento${totalSucceeded===1?'':'s'} leído${totalSucceeded===1?'':'s'} y colocado${totalSucceeded===1?'':'s'} automáticamente.`,'ok');
      await sleep(650);
      if(!cancelled)window.location.reload();
-    }else statusBox(`Documentos automáticos: ${totalSucceeded}/${totalProcessed} correctos${lastSkipped?` · ${lastSkipped} por revisar`:''}.`,'error');
-   }catch{}
+    }else{
+     running.current='';
+     statusBox(`Documentos automáticos: ${totalSucceeded}/${totalProcessed} correctos${lastSkipped?` · ${lastSkipped} por revisar`:''}.`,'error');
+    }
+   }catch{running.current='';}
   };
   void run();
   return()=>{cancelled=true;};
