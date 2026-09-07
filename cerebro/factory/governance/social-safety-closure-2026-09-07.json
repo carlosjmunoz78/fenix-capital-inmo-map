@@ -1,0 +1,27 @@
+{
+  "validation_id": "SOCIAL-SAFETY-2026-09-07",
+  "repository": "carlosjmunoz78/fenix-capital-cerebro-social",
+  "base_sha": "11c23ad008fdfa0c65a18e8c45bcab6aa2995c42",
+  "merge_sha": "3151776db273840a61ea2a128c3e1e5a79b68020",
+  "merged_pr": 1,
+  "risk_closed": "Mutating Buffer legacy/one-shot workflows no longer execute automatically on push.",
+  "controls": {
+    "mutating_workflows_manual_only": true,
+    "manual_trigger": "workflow_dispatch",
+    "read_only_preflight_preserved": true,
+    "read_only_verification_preserved": true,
+    "deterministic_guard_installed": true,
+    "guard_run_pr": "PASS",
+    "guard_run_main_after_merge": "PASS",
+    "buffer_mutation_run_on_merge_sha": false
+  },
+  "post_merge_evidence": {
+    "head_sha": "3151776db273840a61ea2a128c3e1e5a79b68020",
+    "workflow_runs_for_head": 1,
+    "only_workflow": "CEREBRO Social Safety Gate",
+    "result": "PASS"
+  },
+  "cost_additional_eur": 0,
+  "rollback": "Revert merge 3151776db273840a61ea2a128c3e1e5a79b68020.",
+  "classification": "CONFIRMED_SAFETY_CONTROL_OPERATIONAL"
+}
