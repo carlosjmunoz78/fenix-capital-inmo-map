@@ -9,6 +9,16 @@ test('existing expediente documents are backfilled automatically without a rerea
  expect(guard).toContain("/^\\/expedientes\\/([^/?#]+)\\/?$/i");
 });
 
+test('backfill waits for authenticated session hydration before marking expediente as running',()=>{
+ const guard=fs.readFileSync('src/ExistingDocumentAutoBackfillGuard.tsx','utf8');
+ expect(guard).toContain('async function authenticatedHeaders()');
+ expect(guard).toContain('for(let attempt=0;attempt<10;attempt++)');
+ expect(guard).toContain("if(cancelled||!headers)return;");
+ const marker=guard.indexOf('running.current=raw;');
+ const auth=guard.indexOf('const headers=await authenticatedHeaders();');
+ expect(marker).toBeGreaterThan(auth);
+});
+
 test('backfill is authenticated, scoped and delegates only native routes to auto ingest',()=>{
  const edge=fs.readFileSync('supabase/functions/fenix-document-existing-backfill/index.ts','utf8');
  expect(edge).toContain("startsWith('bearer ')");
