@@ -1,0 +1,70 @@
+{
+  "evidence_version": "1.0.0",
+  "generated_at": "2026-09-08",
+  "company_id": "fenix-capital",
+  "environment": "NON_PROD",
+  "classification": "PAGES_PREVIEW_RECONCILIATION_PASS",
+  "cost_additional_eur": 0,
+  "transport": {
+    "provider": "Make",
+    "scenario_id": 9773361,
+    "connection_name": "Fénix Capital · Cloudflare · Web y SEO",
+    "usage_mode": "surgical_on_demand_only",
+    "polling": false,
+    "scenario_deactivated_after_verification": true
+  },
+  "project": {
+    "name": "fenix-capital-inmo-map",
+    "production_branch": "main"
+  },
+  "snapshot_before": {
+    "preview_deployment_setting": "all",
+    "production_deployments_enabled": true,
+    "build_command": "npx @cloudflare/next-on-pages@latest",
+    "destination_dir": ".vercel/output/static"
+  },
+  "change_applied": {
+    "method": "PATCH",
+    "scope": "source.config.preview_deployment_setting only",
+    "request_shape": {
+      "source": {
+        "type": "github",
+        "config": {
+          "preview_deployment_setting": "none"
+        }
+      }
+    },
+    "http_status": 200
+  },
+  "verification_after": {
+    "http_status": 200,
+    "preview_deployment_setting": "none",
+    "production_branch": "main",
+    "production_deployments_enabled": true,
+    "build_config_unchanged": true,
+    "no_prod_deploy_executed_by_reconciliation": true
+  },
+  "old_vs_new": {
+    "old_preview_deployment_setting": "all",
+    "new_preview_deployment_setting": "none",
+    "production_behavior_changed": false,
+    "legacy_build_config_changed": false
+  },
+  "rollback": {
+    "method": "PATCH",
+    "request_shape": {
+      "source": {
+        "type": "github",
+        "config": {
+          "preview_deployment_setting": "all"
+        }
+      }
+    },
+    "expected_effect": "restore preview deployments without changing production branch/deployments"
+  },
+  "notes": [
+    "The previous HTTP 400 was caused by sending the request body as an object through the Make universal module. Sending the same minimal JSON as a serialized JSON body returned HTTP 200.",
+    "Existing legacy Next.js build configuration remains intentionally untouched because preview deployment triggering is now disabled and changing build settings could affect main/production.",
+    "No secret values are stored in this evidence."
+  ]
+}
