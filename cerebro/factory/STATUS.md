@@ -2,7 +2,8 @@
 
 ## HECHO / VERDE · FACTORY Y PREPROD
 - FACT-001 · Fábrica de Motores CEREBRO V0 integrada en `preprod-app-phase1` mediante PR #106.
-- Merge PREPROD: `b092f43058d3303c80b9a5783c56ba7b023399c9`.
+- FACT merge PREPROD: `b092f43058d3303c80b9a5783c56ba7b023399c9`.
+- Post-FACT governance/evidence PR #109 integrado en PREPROD: `7da1eacd5ffedc08733b01fb817f2f2004a8f2fd`.
 - GOV-001 · Engine Registry V0.
 - POL-001 · Promotion Policy V0 con PROD deny-by-default.
 - HEX-001 · Human Exception Policy V0 con los 8 códigos canónicos.
@@ -13,7 +14,10 @@
 - Tribunal V0 · determinista y DENY por defecto.
 - Shared runtime contracts · `company_id`, `engine_id`, `environment`, `version`.
 - Registry/manifests/factory/governance tests: verdes.
-- Pipeline PREPROD nativo tras merge: build, browser QA, CORS, candidato PROD inmutable, browser QA del candidato, leak guard y sellado de artefacto: verdes.
+- Pipeline nativo post-merge `PRE-PROD App Build` run `34155355925`: SUCCESS completo sobre HEAD `7da1eacd5ffedc08733b01fb817f2f2004a8f2fd`.
+- Gates del pipeline: install reproducible, build PREPROD, Browser QA PREPROD, CORS PREPROD, CORS PROD read-only/canonical, build candidato PROD inmutable, Browser QA exacto candidato, leak guard `*-test`, sellado y artifacts: SUCCESS.
+- El paso de leak diagnostics fue SKIPPED porque el leak guard no detectó fuga; no representa fallo.
+- No se ejecutó deploy PROD ni DDL PROD.
 - Coste adicional: 0 €.
 - Backup/rollback/rebuild: Git history + revert + schema/registry/factory/contracts versionados.
 
@@ -27,24 +31,22 @@
 - CORE-001 · quality gate del HEAD actual de `staging` ejecutado de forma aislada: PASS.
 - SEO-001 · contratos y paquete SEO CEREBRO incluidos en el mismo quality gate: PASS.
 - Pasaron contratos RC9, operaciones/Notion, cache/CSS, plugin updater, runtime gate, Elementor roundtrip, full-page/canonical/batch/Google, SEO CEREBRO, builds deterministas y smokes de paquetes.
-- El PR de auditoría fue cerrado sin merge porque solo servía para disparar evidencia.
 - WordPress live confirma Core Guard `1.0.0-rc9-prod2`, SEO CEREBRO Bridge `0.4.1`, SEO REST Bridge `1.0.0` y CEREBRO Leads `1.3.2` activos.
 - Evidencia: `governance/core-seo-staging-validation-2026-09-07.json` y `governance/wordpress-live-plugin-inventory-2026-09-07.json`.
 
 ## HECHO / VERDE · CRM Y DOCUMENTOS A NIVEL DE CONTRATO LIVE
 - CRM-001 · boundary live confirmado para tablas críticas: RLS enabled, owner postgres, sin grants directos `anon`/`authenticated`; RPC de contactos, expedientes y tareas verificados como `SECURITY DEFINER`.
 - DOC-001 · `documentos`, versiones, orígenes, uploads, intelligence y change-history: RLS enabled y sin grants directos `anon`/`authenticated`; RPC document/evidence verificados live como `SECURITY DEFINER`.
-- La suite PREPROD completa de App complementa estos boundaries con browser QA.
+- La suite PREPROD completa de App complementa estos boundaries con Browser QA.
 - Esto confirma contratos/rutas de seguridad, no autoriza consolidar funciones ni afirma que todos los escenarios de negocio PROD hayan sido ejercitados.
 - Evidencia: `governance/crm-doc-live-contract-audit-2026-09-07.json`.
 
 ## HECHO / VERDE · SEGURIDAD AUTOMATIZACIONES SOCIALES
 - Riesgo histórico de workflows Buffer mutantes disparados automáticamente por `push`: cerrado.
-- Los workflows mutantes/one-shot legacy pasan a `workflow_dispatch` manual.
-- Preflight y verificadores read-only se preservan.
-- Se añadió un gate determinista que impide reintroducir mutaciones Buffer automáticas por `push`/`schedule`.
-- PR social #1 integrado en `main`: `3151776db273840a61ea2a128c3e1e5a79b68020`.
-- Para ese merge solo se ejecutó `CEREBRO Social Safety Gate`; resultado PASS; no se ejecutó ninguna mutación Buffer.
+- Workflows mutantes/one-shot legacy: `workflow_dispatch` manual.
+- Preflight y verificadores read-only preservados.
+- Gate determinista instalado contra reintroducción de mutaciones Buffer por `push`/`schedule`.
+- PR social #1 integrado en `main`: `3151776db273840a61ea2a128c3e1e5a79b68020`; safety gate PASS y sin mutación Buffer en el merge.
 - Evidencia: `governance/social-safety-closure-2026-09-07.json`.
 
 ## EXISTENTE / REGISTRADO
@@ -52,12 +54,13 @@
 - WEB-001 · WordPress live y stack crítico activo; no recreado.
 - 17 manifests del Registry preservan la taxonomía de evidencia y no elevan un runtime por mera documentación.
 - Edge/RPC inventory, one-shot inventory y fronteras de solapamiento documentadas.
+- PR #108 cerrado sin merge como supersedido por #109 para evitar duplicación y SHA drift.
 
 ## PARCIAL / NO GREENWASH
-- DEP-001 · el finding RLS y los principales callers/RPC están cerrados; la clausura semántica Edge → RPC → tabla de absolutamente todo el runtime sigue siendo incremental.
-- CORE-001 PROD · plugin live activo y staging/source/package verdes, pero el health runtime global no se eleva a verde hasta revalidar el histórico `global ok=false` (`staging_host` / `test_cleanup`).
-- SEO-001 PROD · plugin live activo y staging/source/package verdes, pero el learning runtime no se eleva hasta revalidar `last_run`/`learning_count`; no se pagará por GSC.
-- CRM-001 · boundary live confirmado; la aceptación integral de todos los escenarios de negocio permanece distinta de la certificación contractual.
+- DEP-001 · finding RLS y principales callers/RPC cerrados; la clausura semántica Edge → RPC → tabla de absolutamente todo el runtime sigue siendo incremental.
+- CORE-001 PROD · plugin live activo y staging/source/package verdes; falta revalidar health live histórico `global ok=false` (`staging_host` / `test_cleanup`).
+- SEO-001 PROD · plugin live activo y staging/source/package verdes; falta revalidar `last_run`/`learning_count`; no se pagará por GSC.
+- CRM-001 · boundary live confirmado; aceptación integral de todos los escenarios de negocio permanece distinta de certificación contractual.
 - DOC-001 · boundary live confirmado; cualquier consolidación gateway/document-actions continúa prohibida sin OLD vs NEW.
 - TRN-001 · documentación lo clasifica operativo; falta verificación directa del runtime transversal.
 - LAB-TRD · evidencia PAPER/SHADOW documentada; falta acceso directo a VM/runtime para elevar evidencia independiente.
@@ -74,10 +77,12 @@ La prueba representativa PREPROD está verde, pero **no autoriza DDL PROD**. La 
 - Bank, directory, Ana, documents/evidence y expediente-stage tienen fronteras asignadas; ninguna consolidación está autorizada sin PREPROD + OLD vs NEW.
 
 ## POR AUDITAR / EXCEPCIONES NO AUTÓNOMAS
+- Issue canónico de bloqueos externos: #115 `GOV · External blockers before autonomous PROD green`.
 - `preprod-app-phase1`, social `main`, Core Guard `main` y `staging` están auditadas como `protected=false`; el conector actual no ofrece escritura administrativa segura de branch protection.
 - Core Guard: `staging` está 252 commits por delante de `main`; no se sincroniza a ciegas. `production` es una línea de despliegue distinta y tampoco se sobrescribe para igualar ramas.
 - Checks externos Cloudflare siguen fallando de forma independiente al pipeline GitHub nativo verde; no existe control-plane Cloudflare conectado para una corrección reversible.
 - Core/SEO live health, TRN y LAB-TRD requieren una fuente runtime directa no disponible en el tool surface actual.
+- WPVibe Free está temporalmente bloqueado por fair-use; no se contratará plan de pago para cerrar estado.
 - La cola exacta y sus códigos canónicos está en `governance/human-exception-queue-2026-09-07.json`; la canonicalidad en `governance/repository-canonicality-live-2026-09-07.json`.
 
 ## REGLA DE PROMOCIÓN
