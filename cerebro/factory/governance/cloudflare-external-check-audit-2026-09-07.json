@@ -1,0 +1,45 @@
+{
+  "audit_id": "CLOUDFLARE-EXTERNAL-CHECKS-2026-09-07",
+  "scope": "GitHub external Cloudflare checks only",
+  "mutation_performed": false,
+  "baseline": {
+    "sha": "317a3e457993b4a0da2b84f4f51bcd28b3daba36",
+    "native_preprod_build": "SUCCESS",
+    "external_checks": [
+      {"name": "Cloudflare Pages", "conclusion": "failure"},
+      {"name": "Workers Builds: fenix-capital-inmo-map", "conclusion": "failure"},
+      {"name": "Workers Builds: fenix-capital-inmo-maps", "conclusion": "failure"}
+    ]
+  },
+  "current_preprod_before_this_audit": {
+    "sha": "183eddd92be4bdc5b5ed430dcf107d9480e573fd",
+    "native_preprod_build": "SUCCESS",
+    "external_checks": [
+      {"name": "Cloudflare Pages", "conclusion": "failure"},
+      {"name": "Workers Builds: fenix-capital-inmo-map", "conclusion": "failure"},
+      {"name": "Workers Builds: fenix-capital-inmo-maps", "conclusion": "failure"}
+    ]
+  },
+  "repository_observation": {
+    "app_type": "Vite/TypeScript app",
+    "package_name": "fenix-capital-preprod-app",
+    "build_command": "tsc --noEmit && vite build",
+    "wrangler_config_found_in_root": false
+  },
+  "finding": {
+    "classification": "INHERITED_EXTERNAL_CONFIGURATION_FAILURE",
+    "regression_introduced_by_factory_or_governance": false,
+    "topology": "The same repository is externally bound to one Cloudflare Pages project plus two Worker service names that differ only by singular/plural: fenix-capital-inmo-map and fenix-capital-inmo-maps.",
+    "root_cause_confirmed": false,
+    "reason_root_cause_not_confirmed": "GitHub exposes check names and Cloudflare dashboard targets but not the Cloudflare project/build configuration or logs required to establish ownership/configuration causality. No eligible Cloudflare control-plane connector is currently available."
+  },
+  "safe_resolution": [
+    "Do not change application code to chase an external failure that predates Factory.",
+    "Obtain Cloudflare control-plane access or equivalent read-only configuration evidence.",
+    "Identify the canonical Pages/Workers target and whether the singular/plural Worker bindings are both intended.",
+    "Reconcile only in a reversible non-PROD path, then compare OLD vs NEW before changing any production binding."
+  ],
+  "baseline_protection": ["APP", "CRM", "WEB", "SOCIAL"],
+  "cost_additional_eur": 0,
+  "rollback": "Not applicable: read-only audit/evidence only."
+}
