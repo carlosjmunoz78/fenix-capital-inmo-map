@@ -1,5 +1,5 @@
 {
-  "queue_version": "1.1.0",
+  "queue_version": "1.2.0",
   "generated_at": "2026-09-07",
   "principle": "Only items that cannot be safely closed by the current autonomous tool surface remain here. No item authorizes bypassing promotion gates.",
   "canonical_human_required_codes": [
@@ -18,6 +18,14 @@
     "prod_promotion_remains_denied_while_any_applicable_gate_is_open": true,
     "green_interpretation": "Structural/PREPROD scope may be green with explicit canonical HUMAN_REQUIRED exceptions; PROD autonomy is not green until its own gates are satisfied."
   },
+  "closed_since_1_1_0": [
+    {
+      "id": "HEX-CORE-PROD-RUNTIME",
+      "closed_as": "CONFIRMED_OPERATIONAL_PROD_OBSERVER",
+      "evidence_file": "governance/core-seo-prod-runtime-validation-2026-09-07.json",
+      "reason": "Direct zero-cost PROD WordPress Abilities read returned Core Guard health score 100, Observer mode, production build channel, all tables ready, operational writes locked, safe_default=true, pending_jobs=0 and homepage smoke green. The legacy cerebro-status ok=false is explained by staging-only checks and is not a PROD outage."
+    }
+  ],
   "items": [
     {
       "id": "HEX-GOV-BRANCH-PROTECTION",
@@ -36,24 +44,13 @@
       "prod_promotion_blocking": true
     },
     {
-      "id": "HEX-CORE-PROD-RUNTIME",
-      "code": "HIGH_RISK",
-      "scope": "Fenix Core Guard PROD",
-      "evidence": "Plugin is live and active; staging/package/runtime gates are green. Notion contains direct PREPROD health/readiness/smoke/rollback evidence, including a health score 100 in observer mode after rollback. This does not prove current PROD health.",
-      "blocker": "No zero-cost direct PROD Core Guard health ability is available in the current connector surface. WPVibe read path is temporarily rate-limited.",
-      "required_resolution": "Re-read current PROD health/readiness/smoke through a zero-cost runtime path before any production promotion/reconciliation.",
-      "autonomous_action_remaining": "deferred_zero_cost_revalidation",
-      "unit_blocking": false,
-      "prod_promotion_blocking": true
-    },
-    {
       "id": "HEX-SEO-PROD-LEARNING",
       "code": "LOW_CONFIDENCE",
-      "scope": "Fenix SEO CEREBRO Bridge PROD",
-      "evidence": "Plugin is live and active; staging quality gate is green. The Make scenario FÉNIX · PRE-PROD · CEREBRO SEO · Google bridge · V1 is active and has a successful automatic runtime execution on 2026-09-07. Previous WordPress PROD bridge evidence had last_run=null and learning_count=0.",
-      "blocker": "Current loop still lacks a direct zero-cost read of the live WordPress PROD bridge learning option/status.",
-      "required_resolution": "Read live WordPress PROD bridge status and a completed learning/run record before elevating PROD learning to confirmed operational.",
-      "autonomous_action_remaining": "deferred_zero_cost_revalidation",
+      "scope": "Fenix SEO CEREBRO Bridge PROD learning loop",
+      "evidence": "Direct zero-cost WordPress Abilities read on 2026-09-07 returned HTTP 200, ok=true, version=0.4.1, host=fenixcapital.es, last_run=null and learning_count=0. The PREPROD Google bridge also has a successful automatic execution on 2026-09-07.",
+      "blocker": "The bridge runtime itself is confirmed healthy, but no completed PROD learning cycle is evidenced. Running loop-once/canary would be a production mutation and is not authorized without a PREPROD/OLD-vs-NEW gate.",
+      "required_resolution": "Complete and verify a controlled PREPROD learning cycle first; only then consider an idempotent, reversible PROD canary/loop run under promotion policy.",
+      "autonomous_action_remaining": "prepare_preprod_learning_gate_only",
       "unit_blocking": false,
       "prod_promotion_blocking": true
     },
@@ -71,7 +68,7 @@
       "id": "HEX-LAB-TRD-RUNTIME",
       "code": "HIGH_RISK",
       "scope": "LAB-TRD",
-      "evidence": "Notion master evidence identifies the isolated GCP project fenix-trading-lab and VM cerebro-trading-lab, with Shadow/Paper services documented active and REAL_AUTHORIZED=false. The Tribunal remains BLOCK_REAL. No direct GCP Compute connector is available in the current tool surface.",
+      "evidence": "Documentary evidence identifies isolated GCP project fenix-trading-lab and VM cerebro-trading-lab, with Shadow/Paper active, REAL_AUTHORIZED=false and Tribunal BLOCK_REAL. Plugin discovery found no eligible Cloud/GCP Compute control-plane connector for direct VM verification.",
       "required_resolution": "Verify isolated VM health, PAPER/SHADOW execution, credentials separation and no real-execution promotion through direct GCP/runtime access before any status elevation.",
       "autonomous_action_remaining": "blocked_missing_isolated_runtime_connector",
       "unit_blocking": false,
@@ -81,8 +78,8 @@
       "id": "HEX-CLOUDFLARE-EXTERNAL-CHECKS",
       "code": "HIGH_RISK",
       "scope": "App external Cloudflare GitHub checks",
-      "evidence": "Cloudflare checks fail independently while GitHub native PREPROD and candidate pipelines pass; the same external failure existed on the baseline before Factory changes.",
-      "blocker": "No Cloudflare configuration/ownership connector is available and changing external deployment configuration without rollback evidence is unsafe.",
+      "evidence": "Cloudflare checks fail independently while GitHub native PREPROD and candidate pipelines pass; the same external failure existed on the baseline before Factory changes. Plugin discovery found no eligible Cloudflare control-plane connector.",
+      "blocker": "Changing external deployment configuration without direct ownership/config evidence and rollback is unsafe.",
       "required_resolution": "Audit Cloudflare project ownership/build config and reconcile only through a reversible non-PROD path.",
       "autonomous_action_remaining": "blocked_missing_external_control_plane",
       "unit_blocking": false,
