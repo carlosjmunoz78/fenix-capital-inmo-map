@@ -1,0 +1,32 @@
+{
+  "audit_id": "REPOSITORY-CANONICALITY-LIVE-2026-09-07",
+  "repositories": {
+    "fenix-capital-inmo-map": {
+      "preprod_canonical_ref": "preprod-app-phase1",
+      "preprod_fact_merge_sha": "b092f43058d3303c80b9a5783c56ba7b023399c9",
+      "note": "FACT-001 is integrated in PREPROD; PROD promotion remains separate."
+    },
+    "fenix-capital-cerebro-social": {
+      "main_sha_after_safety_merge": "3151776db273840a61ea2a128c3e1e5a79b68020",
+      "safety_gate": "PASS"
+    },
+    "fenix-core-guard": {
+      "main_sha": "09c9256dab33c0f7038792647779e2f83ddabafd",
+      "staging_sha": "89738cb502ae22fd851abb3310edfca9e4d936cf",
+      "production_sha": "e51e627dd963bfd16e41b99ae790b40ff9bd1217",
+      "main_vs_staging": {"staging_ahead_by": 252, "staging_behind_by": 0},
+      "production_vs_staging": {"staging_ahead_by": 5, "staging_behind_by": 0},
+      "main_protected": false,
+      "staging_protected": false,
+      "risk": "Branch names are not interchangeable canonical sources. Staging contains the newest validated PREPROD line; production represents the deployed release line; main is materially stale and must not be treated as canonical without an explicit reconciliation plan."
+    }
+  },
+  "policy": [
+    "Do not fast-forward or merge staging to main merely to make branch counts match.",
+    "Do not promote staging to production without production gates, backup, OLD vs NEW, runtime smoke and rollback.",
+    "Do not delete legacy branches until dependency and release provenance are preserved."
+  ],
+  "administrative_gap": "Critical branch protection is not enabled/evidenced and current connector permissions do not expose a safe branch-protection write path.",
+  "classification": "HIGH_RISK_GOVERNANCE_GAP_DOCUMENTED",
+  "cost_additional_eur": 0
+}
