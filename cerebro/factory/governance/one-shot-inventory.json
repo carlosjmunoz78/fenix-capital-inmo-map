@@ -1,0 +1,21 @@
+{
+  "inventory_version":"0.1.0",
+  "environment":"PROD_READ_ONLY_AUDIT",
+  "classification":"ACTIVE_TOMBSTONE_410",
+  "retirement_policy":"KEEP_UNTIL_CALLER_LOGS_AND_ROLLBACK_PROVE_SAFE_DELETION",
+  "functions":[
+    {"slug":"fenix-directory-sync-once","version":12,"verify_jwt":true,"runtime_result":410,"error":"migration_endpoint_retired"},
+    {"slug":"fenix-directory-sync-trigger-once","version":10,"verify_jwt":true,"runtime_result":410,"error":"migration_endpoint_retired"},
+    {"slug":"fenix-crm-sync-once","version":10,"verify_jwt":true,"runtime_result":410,"error":"migration_endpoint_retired"},
+    {"slug":"fenix-crm-sync-trigger-once","version":10,"verify_jwt":true,"runtime_result":410,"error":"migration_endpoint_retired"},
+    {"slug":"fenix-prod-data-sync-once","version":12,"verify_jwt":true,"runtime_result":410,"error":"migration_endpoint_retired"},
+    {"slug":"fenix-legacy-doc-migration-once","version":12,"verify_jwt":true,"runtime_result":410,"error":"migration_endpoint_retired"},
+    {"slug":"fenix-brevo-inventory-once","version":9,"verify_jwt":false,"runtime_result":410,"error":"retired"},
+    {"slug":"fenix-brevo-probe-once","version":6,"verify_jwt":false,"runtime_result":410,"error":"retired"}
+  ],
+  "decision":{
+    "delete_now":false,
+    "reason":"active endpoints are inert tombstones; deletion could break unknown callers while providing little operational benefit",
+    "next_gate":"collect caller/access evidence then compare keep-vs-delete and prove rollback"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "registry_version": "0.4.0",
+  "environment": "PREPROD",
+  "engines": [
+    {"engine_id":"FACT-001","manifest":"../examples/FACT-001.engine.json","status":"CONFIRMED_OPERATIONAL","source_of_truth":"git+ci_verified","environment":"PREPROD","company_id":null,"version":"0.1.0"},
+    {"engine_id":"GOV-001","manifest":"../examples/GOV-001.engine.json","status":"CONFIRMED_OPERATIONAL","source_of_truth":"git+ci_verified","environment":"PREPROD","company_id":null,"version":"0.1.0"},
+    {"engine_id":"DEP-001","manifest":"../examples/DEP-001.engine.json","status":"DOCUMENTED_PARTIAL","source_of_truth":"git+live_audit","environment":"PREPROD","company_id":null,"version":"0.1.0"},
+    {"engine_id":"POL-001","manifest":"../examples/POL-001.engine.json","status":"CONFIRMED_OPERATIONAL","source_of_truth":"git+ci_verified","environment":"PREPROD","company_id":null,"version":"0.1.0"},
+    {"engine_id":"HEX-001","manifest":"../examples/HEX-001.engine.json","status":"CONFIRMED_OPERATIONAL","source_of_truth":"git+ci_verified","environment":"PREPROD","company_id":null,"version":"0.1.0"},
+    {"engine_id":"EVT-001","manifest":"../examples/EVT-001.engine.json","status":"CONFIRMED_OPERATIONAL","source_of_truth":"git+ci_verified","environment":"PREPROD","company_id":null,"version":"0.1.0"},
+    {"engine_id":"JOB-001","manifest":"../examples/JOB-001.engine.json","status":"CONFIRMED_OPERATIONAL","source_of_truth":"git+ci_verified","environment":"PREPROD","company_id":null,"version":"0.1.0"},
+    {"engine_id":"AUD-001","manifest":"../examples/AUD-001.engine.json","status":"CONFIRMED_OPERATIONAL","source_of_truth":"git+ci_verified","environment":"PREPROD","company_id":null,"version":"0.1.0"},
+    {"engine_id":"OBSERV-001","manifest":"../examples/OBSERV-001.engine.json","status":"CONFIRMED_OPERATIONAL","source_of_truth":"git+ci_verified","environment":"PREPROD","company_id":null,"version":"0.1.0"},
+    {"engine_id":"APP-001","manifest":"../examples/APP-001.engine.json","status":"CONFIRMED_OPERATIONAL","source_of_truth":"git+live_audit","environment":"PREPROD","company_id":"fenix-capital","version":"317a3e457993b4a0da2b84f4f51bcd28b3daba36"},
+    {"engine_id":"CORE-001","manifest":"../examples/CORE-001.engine.json","status":"DOCUMENTED_PARTIAL","source_of_truth":"live_wordpress_audit","environment":"PROD","company_id":"fenix-capital","version":"1.0.0-rc9-prod2"},
+    {"engine_id":"WEB-001","manifest":"../examples/WEB-001.engine.json","status":"CONFIRMED_OPERATIONAL","source_of_truth":"live_web+wordpress_audit","environment":"PROD","company_id":"fenix-capital","version":"live-2026-09-07"},
+    {"engine_id":"SEO-001","manifest":"../examples/SEO-001.engine.json","status":"DOCUMENTED_PARTIAL","source_of_truth":"live_wordpress+notion_audit","environment":"PROD","company_id":"fenix-capital","version":"bridge-0.4.1"},
+    {"engine_id":"CRM-001","manifest":"../examples/CRM-001.engine.json","status":"DOCUMENTED_PARTIAL","source_of_truth":"master+live_supabase_app_audit","environment":"PROD","company_id":"fenix-capital","version":"live-audit-2026-09-07"},
+    {"engine_id":"DOC-001","manifest":"../examples/DOC-001.engine.json","status":"DOCUMENTED_PARTIAL","source_of_truth":"live_edge+current_source_audit","environment":"PROD","company_id":"fenix-capital","version":"live-audit-2026-09-07"},
+    {"engine_id":"TRN-001","manifest":"../examples/TRN-001.engine.json","status":"DOCUMENTED_PARTIAL","source_of_truth":"master+notion_evidence","environment":"LAB","company_id":"fenix-capital","version":"documented-2026-09-07"},
+    {"engine_id":"LAB-TRD","manifest":"../examples/LAB-TRD.engine.json","status":"DOCUMENTED_PARTIAL","source_of_truth":"notion_recent_evidence","environment":"LAB","company_id":"fenix-capital","version":"documented-2026-09-04"}
+  ]
+}

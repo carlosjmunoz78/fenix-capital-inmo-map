@@ -1,0 +1,32 @@
+{
+  "gate_version": "0.1.0",
+  "base": {
+    "branch": "preprod-app-phase1",
+    "sha": "317a3e457993b4a0da2b84f4f51bcd28b3daba36"
+  },
+  "candidate": {
+    "branch": "cerebro/fact-001-factory-v0",
+    "sha_before_evidence_commit": "ad75beca9bb1580f8199f740ee51782a793c23b2"
+  },
+  "comparison": {
+    "git_status": "ahead",
+    "behind_by": 0,
+    "existing_app_runtime_files_modified": 0,
+    "existing_supabase_runtime_files_modified": 0,
+    "existing_wordpress_runtime_files_modified": 0,
+    "existing_trading_runtime_files_modified": 0,
+    "existing_files_deleted": 0,
+    "changes_are_additive": true,
+    "added_paths": [
+      ".github/workflows/fact-001-factory-v0.yml",
+      "cerebro/factory/**"
+    ]
+  },
+  "behavioral_conclusion": "FACT-001 candidate does not replace or edit existing App, Supabase runtime, WordPress or Trading source. Runtime behavior of the existing app is therefore not changed by the candidate source diff; PREPROD build/browser QA remains the integration gate when merged to PREPROD.",
+  "rollback": {
+    "pre_merge": "delete isolated branch / close draft PR",
+    "post_preprod_merge": "revert merge commit; factory paths are additive"
+  },
+  "prod_promotion_authorized": false,
+  "evidence_source": "GitHub compare base..candidate"
+}

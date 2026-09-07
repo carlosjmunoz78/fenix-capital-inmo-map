@@ -1,0 +1,30 @@
+name: FACT-001 Factory V0
+
+on:
+  push:
+    branches:
+      - 'cerebro/**'
+    paths:
+      - 'cerebro/factory/**'
+      - '.github/workflows/fact-001-factory-v0.yml'
+  pull_request:
+    paths:
+      - 'cerebro/factory/**'
+      - '.github/workflows/fact-001-factory-v0.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate registry and manifests
+        run: python cerebro/factory/scripts/validate_manifest.py
+      - name: Run factory unit tests
+        run: python -m unittest discover -s cerebro/factory/tests -p 'test_*.py' -v

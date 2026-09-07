@@ -1,0 +1,35 @@
+{
+  "map_version": "0.1.0",
+  "environment": "PREPROD_AUDIT",
+  "nodes": [
+    {"id":"APP-001","type":"engine"},
+    {"id":"fenix-app-gateway","type":"edge_function"},
+    {"id":"fenix_prod","type":"database_schema"},
+    {"id":"fenix-prod-documents","type":"storage"},
+    {"id":"Notion","type":"knowledge_source"},
+    {"id":"WordPress","type":"web"},
+    {"id":"fenix-web-lead","type":"edge_function"},
+    {"id":"fenix-communications-gateway","type":"edge_function"},
+    {"id":"Brevo","type":"transport"},
+    {"id":"Meta WhatsApp","type":"transport"}
+  ],
+  "edges": [
+    {"from":"APP-001","to":"fenix-app-gateway","kind":"calls"},
+    {"from":"fenix-app-gateway","to":"fenix_prod","kind":"rpc/read-write"},
+    {"from":"fenix-app-gateway","to":"fenix-prod-documents","kind":"signed_url/upload"},
+    {"from":"APP-001","to":"Notion","kind":"legacy/canonical mapping dependency"},
+    {"from":"WordPress","to":"fenix-web-lead","kind":"lead_ingest"},
+    {"from":"fenix-web-lead","to":"fenix_prod","kind":"rpc:web_lead_ingest"},
+    {"from":"APP-001","to":"fenix-communications-gateway","kind":"authorized communications"},
+    {"from":"fenix-communications-gateway","to":"fenix_prod","kind":"communications RPCs"},
+    {"from":"fenix-communications-gateway","to":"Brevo","kind":"email transport"},
+    {"from":"fenix-communications-gateway","to":"Meta WhatsApp","kind":"whatsapp transport"}
+  ],
+  "known_risks": [
+    "special_cases RLS disabled in PROD",
+    "special_case_people RLS disabled in PROD",
+    "expediente_stage_history RLS disabled in PROD",
+    "overlapping endpoint responsibilities require caller inventory before consolidation"
+  ],
+  "rule": "No dependency is removed or consolidated until all callers are inventoried and PREPROD equivalence plus rollback are proven."
+}

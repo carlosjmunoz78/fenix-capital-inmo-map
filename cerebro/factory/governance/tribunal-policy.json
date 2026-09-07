@@ -1,0 +1,41 @@
+{
+  "policy_version": "0.1.0",
+  "environment": "PREPROD",
+  "default_verdict": "DENY",
+  "allowed_verdicts": ["PASS", "DENY", "HUMAN_REQUIRED"],
+  "required_evidence": [
+    "contracts",
+    "permissions",
+    "tests",
+    "evaluation",
+    "observability",
+    "rollback",
+    "backup",
+    "rebuild",
+    "cost_measured",
+    "policy",
+    "preprod",
+    "old_vs_new"
+  ],
+  "pass_rule": "PASS_ONLY_IF_ALL_REQUIRED_EVIDENCE_GREEN_AND_NO_UNRESOLVED_HIGH_RISK",
+  "human_required_codes": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "system_blocker_behavior": "DENY_OR_BLOCKED_NOT_HUMAN_REQUIRED",
+  "semantic_judge_required": false,
+  "deterministic_first": true,
+  "prohibitions": [
+    "no_self_approval_without_evidence",
+    "no_documentation_only_pass_for_runtime_claims",
+    "no_direct_lab_to_prod",
+    "no_direct_training_to_prod",
+    "no_pass_with_unresolved_high_risk_security_finding"
+  ]
+}

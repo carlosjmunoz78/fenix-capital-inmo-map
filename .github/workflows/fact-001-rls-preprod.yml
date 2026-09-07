@@ -1,0 +1,83 @@
+name: FACT-001 RLS PREPROD
+
+on:
+  push:
+    branches:
+      - cerebro/fact-001-factory-v0
+    paths:
+      - 'cerebro/factory/preprod/**'
+      - '.github/workflows/fact-001-rls-preprod.yml'
+  pull_request:
+    paths:
+      - 'cerebro/factory/preprod/**'
+      - '.github/workflows/fact-001-rls-preprod.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  rls-old-vs-new:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: fenix_preprod_rls
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
+    env:
+      PGHOST: localhost
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: fenix_preprod_rls
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build representative audited security boundary
+        run: psql -v ON_ERROR_STOP=1 -f cerebro/factory/preprod/rls-001-representative-fixture.sql
+
+      - name: OLD behavior snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(psql -Atqc "select relrowsecurity from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='fenix_prod' and c.relname='special_cases'")" = "f"
+          test "$(psql -Atqc "set role service_role; select fenix_prod.fenix_prod_special_case_list_server()")" = "1"
+          test "$(psql -Atqc "set role service_role; select fenix_prod.fenix_prod_special_case_people_count_server()")" = "1"
+          test "$(psql -Atqc "set role service_role; select fenix_prod.fenix_prod_exp_stage_count_server()")" = "1"
+          ! psql -v ON_ERROR_STOP=1 -qc "set role anon; select * from fenix_prod.special_cases" >/dev/null 2>&1
+          ! psql -v ON_ERROR_STOP=1 -qc "set role authenticated; select * from fenix_prod.special_cases" >/dev/null 2>&1
+
+      - name: Apply NEW candidate
+        run: psql -v ON_ERROR_STOP=1 -f cerebro/factory/preprod/rls-001-enable-only.sql
+
+      - name: NEW behavior and invariants
+        shell: bash
+        run: |
+          set -euo pipefail
+          for t in special_cases special_case_people expediente_stage_history; do
+            test "$(psql -Atqc "select relrowsecurity from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='fenix_prod' and c.relname='${t}'")" = "t"
+          done
+          test "$(psql -Atqc "set role service_role; select fenix_prod.fenix_prod_special_case_list_server()")" = "1"
+          test "$(psql -Atqc "set role service_role; select fenix_prod.fenix_prod_special_case_people_count_server()")" = "1"
+          test "$(psql -Atqc "set role service_role; select fenix_prod.fenix_prod_exp_stage_count_server()")" = "1"
+          ! psql -v ON_ERROR_STOP=1 -qc "set role anon; select * from fenix_prod.special_cases" >/dev/null 2>&1
+          ! psql -v ON_ERROR_STOP=1 -qc "set role authenticated; select * from fenix_prod.special_cases" >/dev/null 2>&1
+          test "$(psql -Atqc "select count(*) from fenix_prod.special_cases")" = "1"
+          test "$(psql -Atqc "select count(*) from fenix_prod.special_case_people")" = "1"
+          test "$(psql -Atqc "select count(*) from fenix_prod.expediente_stage_history")" = "1"
+
+      - name: Assert candidate remains enable-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          file='cerebro/factory/preprod/rls-001-enable-only.sql'
+          test "$(grep -Eic '^alter table fenix_prod\.(special_cases|special_case_people|expediente_stage_history) enable row level security;' "$file")" = "3"
+          ! grep -Eqi '\b(drop|delete|truncate|insert|update|grant|revoke|create policy|force row level security)\b' "$file"

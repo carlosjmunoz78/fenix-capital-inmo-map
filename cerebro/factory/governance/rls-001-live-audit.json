@@ -1,0 +1,61 @@
+{
+  "finding_id": "RLS-001",
+  "environment": "PROD",
+  "audit_mode": "READ_ONLY",
+  "audited_at": "2026-09-07",
+  "project_ref": "cluhljgonannaafpmblx",
+  "tables": {
+    "special_cases": {
+      "rls_enabled": false,
+      "owner": "postgres",
+      "anon_grants": [],
+      "authenticated_grants": [],
+      "service_role_grants": [],
+      "expected_access": "SECURITY_DEFINER RPC via authenticated Edge using service_role"
+    },
+    "special_case_people": {
+      "rls_enabled": false,
+      "owner": "postgres",
+      "anon_grants": [],
+      "authenticated_grants": [],
+      "service_role_grants": [],
+      "expected_access": "SECURITY_DEFINER RPC via authenticated Edge using service_role"
+    },
+    "expediente_stage_history": {
+      "rls_enabled": false,
+      "owner": "postgres",
+      "anon_grants": [],
+      "authenticated_grants": [],
+      "service_role_grants": ["SELECT", "INSERT"],
+      "expected_access": "fenix_prod_exp_stage_server via service_role"
+    }
+  },
+  "roles": {
+    "postgres": {"bypassrls": true},
+    "service_role": {"bypassrls": true},
+    "anon": {"bypassrls": false},
+    "authenticated": {"bypassrls": false}
+  },
+  "rpc_execute_grants": {
+    "fenix_prod_special_case_list_server": ["postgres", "service_role"],
+    "fenix_prod_special_case_get_server": ["postgres", "service_role"],
+    "fenix_prod_special_case_create_with_people_server": ["postgres", "service_role"],
+    "fenix_prod_special_case_update_server": ["postgres", "service_role"],
+    "fenix_prod_exp_stage_server": ["postgres", "service_role"]
+  },
+  "rpc_security": {
+    "fenix_prod_special_case_list_server": "SECURITY_DEFINER",
+    "fenix_prod_special_case_get_server": "SECURITY_DEFINER",
+    "fenix_prod_special_case_create_with_people_server": "SECURITY_DEFINER",
+    "fenix_prod_special_case_update_server": "SECURITY_DEFINER",
+    "fenix_prod_exp_stage_server": "SECURITY_DEFINER"
+  },
+  "policies": [],
+  "assessment": {
+    "direct_anon_or_authenticated_exposure_evidenced": false,
+    "defense_in_depth_gap_present": true,
+    "current_control_path": "grants + authenticated Edge + service_role + SECURITY_DEFINER RPC role/ownership checks",
+    "prod_change_authorized": false,
+    "next_safe_step": "validate RLS enable-only candidate in a representative PREPROD database before any PROD consideration"
+  }
+}

@@ -1,0 +1,54 @@
+engine_id: ENGINE-XXX
+name: Nombre del motor
+layer: L0
+company_scope: GLOBAL_OR_SCOPED
+company_id: null
+environment: PREPROD
+version: 0.1.0
+contract_version: 0.1.0
+status: DEFINED_NOT_BUILT
+objective: Describir objetivo operativo del motor.
+owner: null
+inputs: []
+outputs: []
+knowledge_sources: []
+data_contracts: []
+api_contract: []
+permissions: []
+policies:
+  - deterministic_before_AI
+  - zero_new_cost_by_default
+  - cross_company_access_is_denied_by_default
+  - training_or_lab_never_promotes_directly_to_PROD
+events_in: []
+events_out: []
+jobs: []
+tests: []
+evaluation: []
+observability: []
+retry_timeout: {}
+cost_budget:
+  additional_monthly_eur_target: 0
+backup:
+  strategy: TO_DEFINE
+rollback:
+  strategy: TO_DEFINE
+rebuild:
+  strategy: TO_DEFINE
+dependencies: []
+dependents: []
+autonomy_level: HUMAN_BY_EXCEPTION
+zero_cost_execution_plan:
+  - existing_stack
+  - deterministic_code
+  - open_source_local
+human_exception_codes:
+  - LEGAL_REQUIRED
+  - SIGNATURE_REQUIRED
+  - LOW_CONFIDENCE
+  - HIGH_RISK
+  - POLICY_CONFLICT
+  - SECURITY_INCIDENT
+  - MONEY_LIMIT
+  - CUSTOMER_HUMAN_REQUEST
+evidence: []

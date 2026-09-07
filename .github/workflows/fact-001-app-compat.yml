@@ -1,0 +1,56 @@
+name: FACT-001 App Compatibility
+
+on:
+  push:
+    branches:
+      - cerebro/fact-001-factory-v0
+    paths:
+      - 'cerebro/factory/**'
+      - '.github/workflows/fact-001-*.yml'
+  pull_request:
+    branches:
+      - preprod-app-phase1
+    paths:
+      - 'cerebro/factory/**'
+      - '.github/workflows/fact-001-*.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fact-001-app-compat-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  app-compat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install dependencies reproducibly
+        run: npm ci
+      - name: Install Chromium browser
+        run: npx playwright install chromium
+        timeout-minutes: 5
+      - name: Build PREPROD unchanged app
+        env:
+          VITE_FUNCTION_SUFFIX: '-test'
+        run: npm run build
+      - name: Browser QA PREPROD unchanged app
+        env:
+          PLAYWRIGHT_SKIP_BUILD: '1'
+        run: npm run test:e2e -- --workers=2
+      - name: Assert Factory remains additive
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -d cerebro/factory
+          test -f cerebro/factory/governance/old-vs-new-fact-001.json
+          python cerebro/factory/scripts/validate_manifest.py
+
