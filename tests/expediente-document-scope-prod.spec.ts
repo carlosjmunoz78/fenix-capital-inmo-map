@@ -17,6 +17,22 @@ test('expediente upload launcher mounts inside the production detail shell',()=>
  expect(guard).toContain('launcher.click()');
 });
 
+test('legacy expediente routes resolve to canonical code before upload',()=>{
+ const uploader=fs.readFileSync('src/ContextEvidenceUpload.tsx','utf8');
+ expect(uploader).toContain("legacy-expediente-destination-map.json");
+ expect(uploader).toContain('resolveCanonicalExpedienteCode');
+ expect(uploader).toContain("dedupe.replace(/^exp-legado-/i,'')");
+ expect(uploader).toContain("def.type==='expediente'?resolveCanonicalExpedienteCode(rawId):rawId");
+ expect(uploader).toContain("code:resolveCanonicalExpedienteCode(expediente)");
+});
+
+test('PDF remains accepted even when Android exposes octet-stream',()=>{
+ const uploader=fs.readFileSync('src/ContextEvidenceUpload.tsx','utf8');
+ expect(uploader).toContain("direct!=='application/octet-stream'");
+ expect(uploader).toContain("'.pdf':'application/pdf'");
+ expect(uploader).toContain("'application/pdf'");
+});
+
 test('expediente document click preserves exact document viewer contract',()=>{
  const guard=fs.readFileSync('src/ExpedienteDocumentsGuard.tsx','utf8');
  const viewer=fs.readFileSync('src/DocumentViewerShell.tsx','utf8');
