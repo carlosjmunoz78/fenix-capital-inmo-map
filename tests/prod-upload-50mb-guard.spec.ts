@@ -18,3 +18,14 @@ test('PROD normalizes PDF MIME by filename before app validation',()=>{
   expect(guard).toContain("document.addEventListener('change'");
   expect(guard).toContain('input.files=transfer.files');
 });
+
+test('PROD resolves an internal expediente UUID to canonical expediente_code before evidence prepare',()=>{
+  const guard=fs.readFileSync('src/prod-upload-limit-guard.ts','utf8');
+  const runtime=fs.readFileSync('src/notionRuntime.ts','utf8');
+  expect(guard).toContain('canonicalizeEvidencePrepare');
+  expect(guard).toContain("originType!=='expediente'||!UUID_RE.test(originCode)");
+  expect(guard).toContain('/functions/v1/fenix-app-gateway/expedientes/');
+  expect(guard).toContain('payload.origin_code=canonical');
+  expect(runtime).toContain('id:row.expediente_code??row.id');
+  expect(runtime).toContain('id:raw.expediente_code??raw.id');
+});

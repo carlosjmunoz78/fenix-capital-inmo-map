@@ -1,9 +1,35 @@
 const PROD_MAX_BYTES=50*1024*1024;
 const isProd=typeof window!=='undefined'&&window.location.hostname==='app.fenixcapital.es';
+const UUID_RE=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 if(isProd){
   const originalFetch=window.fetch.bind(window);
-  window.fetch=async (...args:Parameters<typeof fetch>)=>{
+
+  async function canonicalizeEvidencePrepare(args:Parameters<typeof fetch>):Promise<Parameters<typeof fetch>>{
+    try{
+      const input=args[0];
+      const init=args[1];
+      const url=typeof input==='string'?input:input instanceof URL?input.toString():input.url;
+      if(!url.includes('/functions/v1/fenix-evidence-api/prepare')||!init?.body||typeof init.body!=='string')return args;
+      const payload=JSON.parse(init.body) as Record<string,unknown>;
+      const originType=String(payload.origin_type??'');
+      const originCode=String(payload.origin_code??'');
+      if(originType!=='expediente'||!UUID_RE.test(originCode))return args;
+
+      const gatewayUrl=url.replace('/functions/v1/fenix-evidence-api/prepare',`/functions/v1/fenix-app-gateway/expedientes/${encodeURIComponent(originCode)}`);
+      const lookup=await originalFetch(gatewayUrl,{method:'GET',headers:init.headers});
+      if(!lookup.ok)return args;
+      const data=await lookup.json().catch(()=>null) as Record<string,unknown>|null;
+      const expediente=(data?.expediente&&typeof data.expediente==='object'?data.expediente:data?.item&&typeof data.item==='object'?data.item:null) as Record<string,unknown>|null;
+      const canonical=String(expediente?.expediente_code??expediente?.expediente??'').trim();
+      if(!canonical||canonical===originCode)return args;
+      payload.origin_code=canonical;
+      return [input,{...init,body:JSON.stringify(payload)}];
+    }catch{return args;}
+  }
+
+  window.fetch=async (...rawArgs:Parameters<typeof fetch>)=>{
+    const args=await canonicalizeEvidencePrepare(rawArgs);
     const response=await originalFetch(...args);
     try{
       const input=args[0];
