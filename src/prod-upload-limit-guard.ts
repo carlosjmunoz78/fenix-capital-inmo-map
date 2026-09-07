@@ -55,8 +55,22 @@ if(isProd){
     }catch{return args;}
   }
 
+  function routeNativeAutoIngest(args:Parameters<typeof fetch>):Parameters<typeof fetch>{
+    try{
+      const input=args[0],init=args[1];
+      const url=typeof input==='string'?input:input instanceof URL?input.toString():input.url;
+      if(!url.includes('/functions/v1/fenix-document-reread')||!init?.body||typeof init.body!=='string')return args;
+      const payload=JSON.parse(init.body) as Record<string,unknown>;
+      const hasNativeRoute=Boolean(String(payload.document_family??'').trim()&&String(payload.declared_document_type??'').trim()&&String(payload.declared_person??'').trim());
+      if(!hasNativeRoute)return args;
+      const nextUrl=url.replace('/functions/v1/fenix-document-reread','/functions/v1/fenix-document-auto-ingest');
+      return [typeof input==='string'?nextUrl:input instanceof URL?new URL(nextUrl):new Request(nextUrl,input),init];
+    }catch{return args;}
+  }
+
   window.fetch=async (...rawArgs:Parameters<typeof fetch>)=>{
-    const args=await canonicalizeEvidencePrepare(rawArgs);
+    const canonicalArgs=await canonicalizeEvidencePrepare(rawArgs);
+    const args=routeNativeAutoIngest(canonicalArgs);
     const response=await originalFetch(...args);
     try{
       const input=args[0];
