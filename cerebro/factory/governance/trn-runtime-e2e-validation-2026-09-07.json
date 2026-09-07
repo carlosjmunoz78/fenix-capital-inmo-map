@@ -1,0 +1,68 @@
+{
+  "validation_id": "TRN-RUNTIME-E2E-2026-09-07",
+  "environment": "TEST",
+  "scenario": {
+    "id": 9555725,
+    "name": "FÉNIX · CORE · Cerebro · Señal a Idea, Embudo, Evaluación y Laboratorio · V2.2",
+    "status": "active",
+    "trigger": "on-demand",
+    "description_contract": "TEST protegido; sin publicación PROD"
+  },
+  "schema_preflight": {
+    "notion_data_sources_read": [
+      "d22b2a80-c6de-4fe7-9f9a-3c31c82d8cb3",
+      "7142d1ba-c9ab-4390-8100-24b6446d72b8",
+      "b4b315c8-3eee-4906-91af-b37958c0581d",
+      "3896f5ff-43e1-4d64-ba0c-9d9edd8972e4"
+    ],
+    "compatible_test_values_confirmed": {
+      "source": "Make TEST",
+      "buyer_persona": "General",
+      "funnel_phase": "Descubrimiento",
+      "primary_channel": "Blog/Web",
+      "recommended_format": "Blog",
+      "secondary_format": "Derivado",
+      "priority": "Media"
+    }
+  },
+  "e2e_execution": {
+    "execution_id": "6660393c384b4c79b61a01d02e39d1e1",
+    "status": "success",
+    "duration_ms": 2601,
+    "operations": 6,
+    "modules": {
+      "dedupe_check": "success",
+      "idea_create": "success",
+      "matrix_create": "success",
+      "evaluation_create": "success",
+      "laboratory_create": "success",
+      "dedupe_record_create": "success"
+    },
+    "signal_id": "CEREBRO-TRN-SMOKE-20260907-2148",
+    "laboratory_page_id": "3d481b1a-756d-81b1-bf03-ecefb9d1c2e0",
+    "laboratory_id": "LAB-9",
+    "safety_fields": {
+      "environment": "TEST",
+      "decision": "Pendiente",
+      "state": "Sin empezar",
+      "ok_carlos": false,
+      "calendar_eligible": false,
+      "promoted_to_pattern": false,
+      "risk": "Bajo"
+    }
+  },
+  "idempotency_execution": {
+    "execution_id": "359d076b93644540be2680fcf9910064",
+    "status": "success",
+    "operations": 1,
+    "observed_modules": ["StartSubscenario", "ExistRecord"],
+    "result": "duplicate signal blocked before Notion writes"
+  },
+  "classification": {
+    "TRN-001": "CONFIRMED_OPERATIONAL_TEST_RUNTIME",
+    "prod_promotion_authorized": false
+  },
+  "production_mutation": false,
+  "cost_additional_eur": 0,
+  "rollback": "No PROD state changed. The smoke artifacts are explicitly TEST-labelled evidence records; runtime remains on-demand and fail-closed for publication."
+}
