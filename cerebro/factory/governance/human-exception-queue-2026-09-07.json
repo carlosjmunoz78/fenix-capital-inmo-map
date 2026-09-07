@@ -1,5 +1,5 @@
 {
-  "queue_version": "1.4.0",
+  "queue_version": "1.5.0",
   "generated_at": "2026-09-07",
   "principle": "Only items that cannot be safely closed by the current autonomous tool surface remain here. No item authorizes bypassing promotion gates.",
   "canonical_human_required_codes": [
@@ -49,10 +49,10 @@
       "id": "HEX-SEO-PROD-LEARNING",
       "code": "LOW_CONFIDENCE",
       "scope": "Fenix SEO CEREBRO Bridge PROD learning loop",
-      "evidence": "Direct WordPress read returned ok=true, version=0.4.1, last_run=null and learning_count=0. Only fenixcapital.es is connected through WPWriter; existing Make WordPress TEST/PREPROD transports also resolve through the PROD WordPress connection. No representative isolated WordPress PREPROD runtime is currently attached.",
-      "blocker": "Running loop-once/canary now would mutate PROD before a representative PREPROD learning/rollback gate exists.",
-      "required_resolution": "Attach a genuine isolated PREPROD/staging WordPress runtime; run snapshot → learning cycle → verify → rollback → OLD vs NEW; only then consider a reversible PROD canary.",
-      "autonomous_action_remaining": "blocked_missing_representative_wordpress_preprod",
+      "evidence": "Genuine isolated WordPress staging at staging.fenixcapital.es was verified live. Direct `fenix-seo-cerebro/canary` execution returned ok=true / seo_cerebro_canary_passed with injected missing_image_alt, snapshot_id=47, fixed_verified and patched=true; the plugin cleanup contract restores runtime gate/mode and deletes temporary canary artifacts. Evidence: governance/seo-staging-canary-validation-2026-09-07.json. PROD bridge was previously healthy but last_run=null / learning_count=0.",
+      "blocker": "The representative PREPROD learning/remediation gate is now green. A completed PROD learning cycle is still not evidenced, and triggering `loop-once` on PROD is a production mutation that remains subject to promotion policy and deny-by-default governance.",
+      "required_resolution": "Review PREPROD canary evidence against promotion policy; only after all applicable PROD promotion gates are closed may an idempotent/reversible PROD learning run be considered. Do not bypass branch-protection/external high-risk gates.",
+      "autonomous_action_remaining": "none_safe_until_prod_promotion_gates_close",
       "tracking_issue": 125,
       "unit_blocking": false,
       "prod_promotion_blocking": true
