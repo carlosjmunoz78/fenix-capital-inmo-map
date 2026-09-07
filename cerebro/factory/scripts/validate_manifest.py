@@ -15,11 +15,14 @@ REQUIRED = {
 }
 VALID_ENV = {"LOCAL", "LAB", "DEV", "PREPROD", "PROD"}
 VALID_SCOPE = {"GLOBAL_ONLY", "GLOBAL_OR_SCOPED", "COMPANY_SCOPED"}
-VALID_STATUS = {"CONFIRMED_OPERATIONAL", "DOCUMENTED_PARTIAL", "DEFINED_NOT_BUILT", "PROPOSED", "UNKNOWN_REQUIRES_AUDIT", "PRIORITY_0"}
+VALID_STATUS = {"CONFIRMED_OPERATIONAL", "DOCUMENTED_PARTIAL", "DEFINED_NOT_BUILT", "PROPOSED", "UNKNOWN_REQUIRES_AUDIT"}
 VALID_HUMAN = {
     "LEGAL_REQUIRED", "SIGNATURE_REQUIRED", "LOW_CONFIDENCE", "HIGH_RISK", "POLICY_CONFLICT",
-    "SECURITY_INCIDENT", "MONEY_LIMIT", "CUSTOMER_HUMAN_REQUEST", "MISSING_CREDENTIAL",
-    "EXPIRED_OR_REVOKED_CREDENTIAL", "MFA_REQUIRED", "PERMISSION_REQUIRED", "IRREVERSIBLE_PROD_RISK"
+    "SECURITY_INCIDENT", "MONEY_LIMIT", "CUSTOMER_HUMAN_REQUEST"
+}
+VALID_BLOCKERS = {
+    "MISSING_CREDENTIAL", "EXPIRED_OR_REVOKED_CREDENTIAL", "MFA_REQUIRED",
+    "PERMISSION_REQUIRED", "IRREVERSIBLE_PROD_RISK"
 }
 
 
@@ -44,9 +47,16 @@ def validate_manifest(data, path):
     budget = data.get("cost_budget", {})
     if budget.get("additional_monthly_eur_target") != 0:
         errors.append("V0 requires additional_monthly_eur_target=0")
-    unknown_human = sorted(set(data.get("human_exception_codes", [])) - VALID_HUMAN)
+    human = data.get("human_exception_codes", [])
+    if len(human) != len(set(human)):
+        errors.append("duplicate human exception codes")
+    unknown_human = sorted(set(human) - VALID_HUMAN)
     if unknown_human:
-        errors.append(f"unknown human exception codes: {', '.join(unknown_human)}")
+        errors.append(f"noncanonical human exception codes: {', '.join(unknown_human)}")
+    blockers = data.get("system_blocker_codes", [])
+    unknown_blockers = sorted(set(blockers) - VALID_BLOCKERS)
+    if unknown_blockers:
+        errors.append(f"unknown system blocker codes: {', '.join(unknown_blockers)}")
     for field in ("backup", "rollback", "rebuild"):
         if not isinstance(data.get(field), dict) or not data.get(field):
             errors.append(f"{field} must be declared")
