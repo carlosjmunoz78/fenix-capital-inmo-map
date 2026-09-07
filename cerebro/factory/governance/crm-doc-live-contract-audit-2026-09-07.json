@@ -1,0 +1,64 @@
+{
+  "audit_id": "CRM-DOC-LIVE-CONTRACT-2026-09-07",
+  "environment": "PROD_READ_ONLY_PLUS_PREPROD_APP_QA",
+  "production_mutation": false,
+  "crm": {
+    "tables_audited": {
+      "clientes": {"rls_enabled": true, "anon_grants": [], "authenticated_grants": []},
+      "expedientes": {"rls_enabled": true, "anon_grants": [], "authenticated_grants": []},
+      "inmobiliarias": {"rls_enabled": true, "anon_grants": [], "authenticated_grants": []},
+      "tareas": {"rls_enabled": true, "anon_grants": [], "authenticated_grants": []},
+      "comunicaciones": {"rls_enabled": true, "anon_grants": [], "authenticated_grants": []}
+    },
+    "security_definer_rpcs_verified_live": [
+      "fenix_prod_contact_create",
+      "fenix_prod_contact_get_server",
+      "fenix_prod_contacts_server",
+      "fenix_prod_exp_create",
+      "fenix_prod_exp_list_server",
+      "fenix_prod_exp_stage_server",
+      "fenix_prod_exp_update",
+      "fenix_prod_exp_update_server",
+      "fenix_prod_expediente_actions_server",
+      "fenix_prod_expediente_consistency_server",
+      "fenix_prod_expediente_workspace_server",
+      "fenix_prod_get_expediente_server",
+      "fenix_prod_reassign_task_server",
+      "fenix_prod_task_create_server",
+      "fenix_prod_task_get_server",
+      "fenix_prod_task_update_server"
+    ],
+    "classification": "CONFIRMED_LIVE_CONTRACT_BOUNDARY"
+  },
+  "documents": {
+    "tables_audited": {
+      "document_change_history": {"rls_enabled": true, "anon_grants": [], "authenticated_grants": []},
+      "document_intelligence_runs": {"rls_enabled": true, "anon_grants": [], "authenticated_grants": []},
+      "document_origin_links": {"rls_enabled": true, "anon_grants": [], "authenticated_grants": []},
+      "document_upload_sessions": {"rls_enabled": true, "anon_grants": [], "authenticated_grants": []},
+      "document_versions": {"rls_enabled": true, "anon_grants": [], "authenticated_grants": []},
+      "documentos": {"rls_enabled": true, "anon_grants": [], "authenticated_grants": []}
+    },
+    "security_definer_rpcs_verified_live": [
+      "fenix_prod_document_access_server",
+      "fenix_prod_document_edit_server",
+      "fenix_prod_document_extract_legacy_candidates_server",
+      "fenix_prod_document_extract_legacy_status_server",
+      "fenix_prod_document_extract_resolve_server",
+      "fenix_prod_document_extract_run_update_server",
+      "fenix_prod_document_extract_run_upsert_server",
+      "fenix_prod_document_get_server",
+      "fenix_prod_document_intelligence_fields_server",
+      "fenix_prod_document_list_server",
+      "fenix_prod_document_update_server",
+      "fenix_prod_document_versions_server",
+      "fenix_prod_document_view_path_server",
+      "fenix_prod_evidence_finalize_server",
+      "fenix_prod_evidence_prepare_server",
+      "fenix_prod_evidence_scope_server"
+    ],
+    "classification": "CONFIRMED_LIVE_CONTRACT_BOUNDARY"
+  },
+  "scope_limit": "This audit proves live schema/RLS/grant/RPC boundaries and complements the full PREPROD browser suite. It does not authorize Edge consolidation or claim every business scenario was exercised against PROD.",
+  "cost_additional_eur": 0
+}

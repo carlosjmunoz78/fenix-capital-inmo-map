@@ -1,0 +1,31 @@
+{
+  "audit_id": "WORDPRESS-LIVE-PLUGIN-INVENTORY-2026-09-07",
+  "site": "https://fenixcapital.es",
+  "source": "WPWriter connector live read",
+  "installed_plugins": 27,
+  "active_plugins": 25,
+  "critical_plugins": {
+    "Fenix CEREBRO Leads": {"version": "1.3.2", "active": true},
+    "Fenix Core Guard": {"version": "1.0.0-rc9-prod2", "active": true},
+    "Fenix SEO CEREBRO Bridge": {"version": "0.4.1", "active": true},
+    "Fenix SEO REST Bridge": {"version": "1.0.0", "active": true},
+    "Elementor": {"version": "4.2.4", "active": true},
+    "Elementor Pro": {"version": "4.2.2", "active": true},
+    "Advanced Custom Fields": {"version": "6.8.9", "active": true},
+    "Make Connector": {"version": "1.6.6", "active": true},
+    "WP Mail SMTP": {"version": "4.9.0", "active": true},
+    "Yoast SEO": {"version": "28.4", "active": true}
+  },
+  "inactive_cache_plugins": {
+    "LiteSpeed Cache": "7.9.1",
+    "WP Rocket": "3.20.3"
+  },
+  "classification": {
+    "CORE-001": "CONFIRMED_LIVE_PLUGIN_ACTIVE",
+    "SEO-001": "CONFIRMED_LIVE_PLUGIN_ACTIVE",
+    "WEB-001": "CONFIRMED_LIVE_WORDPRESS_STACK_PRESENT"
+  },
+  "scope_limit": "Plugin installation and activation are live-verified. This does not prove Core Guard health=green, SEO learning execution, or every WordPress runtime invariant.",
+  "mutation": false,
+  "cost_additional_eur": 0
+}

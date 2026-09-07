@@ -1,0 +1,65 @@
+{
+  "queue_version": "1.0.0",
+  "generated_at": "2026-09-07",
+  "principle": "Only items that cannot be safely closed by the current autonomous tool surface remain here. No item authorizes bypassing promotion gates.",
+  "items": [
+    {
+      "id": "HEX-GOV-BRANCH-PROTECTION",
+      "code": "HIGH_RISK",
+      "scope": [
+        "fenix-capital-inmo-map/preprod-app-phase1",
+        "fenix-capital-cerebro-social/main",
+        "fenix-core-guard/main",
+        "fenix-core-guard/staging"
+      ],
+      "evidence": "All four audited branches report protected=false.",
+      "blocker": "Current GitHub connector exposes branch-protection reads but no safe administration write action.",
+      "required_resolution": "Enable required review/status-check protection using an administrative path, preserving emergency rollback and deployment workflows.",
+      "autonomous_action_remaining": "none_safe"
+    },
+    {
+      "id": "HEX-CORE-PROD-RUNTIME",
+      "code": "HIGH_RISK",
+      "scope": "Fenix Core Guard PROD",
+      "evidence": "Plugin is live and active; staging package/runtime gate is green, but the historical live health observation included global ok=false for staging_host/test_cleanup.",
+      "blocker": "No zero-cost live Core Guard health ability is available in the current connector surface; WPVibe reached its free daily cap.",
+      "required_resolution": "Re-read live /health or equivalent when a zero-cost connector path is available; only then consider production promotion/reconciliation.",
+      "autonomous_action_remaining": "deferred_zero_cost_revalidation"
+    },
+    {
+      "id": "HEX-SEO-PROD-LEARNING",
+      "code": "LOW_CONFIDENCE",
+      "scope": "Fenix SEO CEREBRO Bridge PROD",
+      "evidence": "Plugin is live and active and staging quality gate is green; previous runtime evidence had last_run=null and learning_count=0.",
+      "blocker": "No direct live bridge-status ability is available through the zero-cost connectors used in this loop.",
+      "required_resolution": "Read live bridge status and a completed learning/run record before elevating the learning loop to confirmed operational.",
+      "autonomous_action_remaining": "deferred_zero_cost_revalidation"
+    },
+    {
+      "id": "HEX-TRN-RUNTIME",
+      "code": "LOW_CONFIDENCE",
+      "scope": "TRN-001",
+      "evidence": "Recent documentary evidence exists, but no direct transversal Training runtime endpoint/worker was available to this loop.",
+      "required_resolution": "Attach/read a direct Training runtime health/evaluation source and verify promotion/rollback state.",
+      "autonomous_action_remaining": "blocked_missing_runtime_connector"
+    },
+    {
+      "id": "HEX-LAB-TRD-RUNTIME",
+      "code": "HIGH_RISK",
+      "scope": "LAB-TRD",
+      "evidence": "PAPER/SHADOW documentary evidence exists, but no direct isolated VM/runtime connector was available.",
+      "required_resolution": "Verify isolated VM health, PAPER/SHADOW execution, credentials separation and no real-execution promotion before any status elevation.",
+      "autonomous_action_remaining": "blocked_missing_isolated_runtime_connector"
+    },
+    {
+      "id": "HEX-CLOUDFLARE-EXTERNAL-CHECKS",
+      "code": "HIGH_RISK",
+      "scope": "App external Cloudflare GitHub checks",
+      "evidence": "Cloudflare checks fail independently while GitHub native PREPROD and candidate pipelines pass.",
+      "blocker": "No Cloudflare configuration/ownership connector is available and changing external deployment configuration without rollback evidence is unsafe.",
+      "required_resolution": "Audit Cloudflare project ownership/build config and reconcile only through a reversible non-PROD path.",
+      "autonomous_action_remaining": "blocked_missing_external_control_plane"
+    }
+  ],
+  "cost_additional_eur": 0
+}

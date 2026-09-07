@@ -1,0 +1,58 @@
+{
+  "closure_version": "0.4.0",
+  "environment": "PREPROD",
+  "base_preprod_sha": "b092f43058d3303c80b9a5783c56ba7b023399c9",
+  "factory_pr_106": {
+    "merged": true,
+    "merge_sha": "b092f43058d3303c80b9a5783c56ba7b023399c9",
+    "production_authorized": false
+  },
+  "preprod_native_pipeline": {
+    "job_id": 101800826470,
+    "status": "PASS",
+    "gates": [
+      "npm ci",
+      "PREPROD build",
+      "browser QA PREPROD",
+      "PREPROD Ana CORS smoke",
+      "PROD operational CORS smoke read-only",
+      "PROD canonical write API CORS OPTIONS smoke",
+      "immutable PROD candidate build",
+      "browser QA exact PROD candidate",
+      "no -test endpoint leakage",
+      "immutable candidate seal and artifact"
+    ],
+    "prod_deploy_executed": false
+  },
+  "rls_001": {
+    "prod_state": "RLS_DISABLED_UNCHANGED",
+    "direct_anon_authenticated_exposure_evidenced": false,
+    "representative_preprod_validation": "PASS",
+    "evidence": "rls-001-preprod-representative-validation.json",
+    "candidate": "../preprod/rls-001-enable-only.sql",
+    "production_mutation_allowed_by_this_record": false,
+    "remaining_gate": "Explicit production security promotion decision with rollback and runtime smoke; not implied by PREPROD pass."
+  },
+  "dependency_audit": {
+    "frontend_literal_edge_contract": "PASS",
+    "gateway_rpc_inventory": "PASS",
+    "selected_edge_rpc_existence_live_read_only": {
+      "fenix-ana-api": "PASS",
+      "fenix-bank-api": "PASS",
+      "fenix-communications-gateway": "PASS",
+      "fenix-directory-actions": "PASS",
+      "fenix-directory-api": "PASS",
+      "fenix-expediente-stage": "PASS",
+      "fenix-special-cases-api": "PASS",
+      "fenix-reports-api": "PASS",
+      "fenix-task-api": "PASS"
+    },
+    "one_shots": "CLASSIFIED_INERT_410_TOMBSTONES",
+    "overlap_boundaries": "ASSIGNED_NO_CONSOLIDATION_AUTHORIZED"
+  },
+  "external_checks": {
+    "cloudflare_github_app": "INHERITED_FAILURE_NOT_FACTORY_GATE",
+    "reason": "Cloudflare checks fail independently while GitHub native PREPROD build/browser/candidate pipeline passes. No Cloudflare configuration mutation is authorized without deployment ownership and rollback evidence."
+  },
+  "classification": "STRUCTURAL_PREPROD_GREEN_WITH_PROD_GATES_PRESERVED"
+}
