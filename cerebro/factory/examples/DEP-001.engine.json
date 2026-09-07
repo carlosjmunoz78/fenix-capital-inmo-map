@@ -6,7 +6,7 @@
   "company_id":null,
   "environment":"PREPROD",
   "version":"0.1.0",
-  "contract_version":"0.1.0",
+  "contract_version":"0.2.0",
   "status":"DOCUMENTED_PARTIAL",
   "objective":"Mantener un grafo máquina-legible de motores, funciones, RPC, tablas, storage, transports y callers para prevenir duplicación y roturas.",
   "owner":"CEREBRO",
@@ -22,6 +22,7 @@
   "jobs":[],
   "tests":["edge_nodes_exist","duplicate_node_detection","security_flags_preserved"],
   "evaluation":["caller_coverage","owner_coverage","overlap_resolution_coverage"],
+  "tribunal":["promotion_policy","security_findings_preserved","old_vs_new"],
   "observability":["git_history","open_audit_items"],
   "retry_timeout":{"max_attempts":1},
   "cost_budget":{"additional_monthly_eur_target":0},
@@ -32,6 +33,7 @@
   "dependents":["POL-001","FACT-001","future_consolidation_work"],
   "autonomy_level":"HUMAN_BY_EXCEPTION",
   "zero_cost_execution_plan":["read_only_connectors","git","python_stdlib"],
-  "human_exception_codes":["LOW_CONFIDENCE","HIGH_RISK","POLICY_CONFLICT","SECURITY_INCIDENT","PERMISSION_REQUIRED","IRREVERSIBLE_PROD_RISK"],
+  "human_exception_codes":["LOW_CONFIDENCE","HIGH_RISK","POLICY_CONFLICT","SECURITY_INCIDENT"],
+  "system_blocker_codes":["PERMISSION_REQUIRED","IRREVERSIBLE_PROD_RISK"],
   "evidence":["governance/dependency-registry.json","known RLS-disabled tables recorded"]
 }
