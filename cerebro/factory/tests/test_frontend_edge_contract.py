@@ -14,6 +14,14 @@ CALL_PATTERNS = [
     re.compile(r"/functions/v1/([a-z0-9][a-z0-9-]+)"),
 ]
 
+SAFE_PREPROD_ONLY_PROD_BEHAVIORS = {
+    "FAIL_CLOSED_503",
+    "ROUTE_READS_TO_FENIX_APP_GATEWAY",
+    "ROUTE_READS_TO_FENIX_DIRECTORY_API",
+    "ROUTE_READS_TO_FENIX_SPECIAL_CASES_API",
+    "EXPLICIT_SOURCE_GUARD",
+}
+
 
 def discovered_edges():
     found = {}
@@ -40,7 +48,7 @@ class FrontendEdgeContractTests(unittest.TestCase):
         for name, cfg in contract["edges"].items():
             if cfg["environment"] == "PREPROD_ONLY":
                 self.assertFalse(cfg["prod_live"], name)
-                self.assertIn(cfg["prod_behavior"], {"FAIL_CLOSED_503", "ROUTE_READS_TO_FENIX_APP_GATEWAY", "EXPLICIT_SOURCE_GUARD"})
+                self.assertIn(cfg["prod_behavior"], SAFE_PREPROD_ONLY_PROD_BEHAVIORS, name)
                 self.assertTrue(cfg.get("preprod_variant"), name)
 
 
