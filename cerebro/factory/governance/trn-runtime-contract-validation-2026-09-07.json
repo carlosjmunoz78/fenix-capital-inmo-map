@@ -1,0 +1,27 @@
+{
+  "evidence_version": "1.0.0",
+  "captured_at": "2026-09-07",
+  "environment": "TEST/PREPROD",
+  "engine_id": "TRN-001",
+  "scenario": {
+    "id": 9557594,
+    "name": "FÉNIX · TEST · Auditoría contratos Embudo y Evaluación · V1",
+    "trigger": "on-demand",
+    "mutations": false,
+    "module_methods": ["GET", "GET"],
+    "targets": [
+      "/v1/data_sources/7142d1ba-c9ab-4390-8100-24b6446d72b8",
+      "/v1/data_sources/b4b315c8-3eee-4906-91af-b37958c0581d"
+    ],
+    "execution_id": "3202169bcbe9423880dfd3e00a69297a",
+    "execution_status": "success",
+    "restored_state": "inactive"
+  },
+  "validated_contracts": [
+    "Matriz Embudo · Buyer Persona x Fase",
+    "Cerebro Estratégico · Decisiones"
+  ],
+  "conclusion": "Direct zero-cost Make runtime contract read succeeded without writes. This elevates the contract/runtime boundary for TRN-001, but does not by itself certify the entire transversal Training worker estate.",
+  "prod_authorized": false,
+  "cost_additional_eur": 0
+}
