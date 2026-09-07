@@ -1,0 +1,21 @@
+{
+  "contract_version": "0.1.0",
+  "app_source_sha": "317a3e457993b4a0da2b84f4f51bcd28b3daba36",
+  "principle": "every_literal_frontend_edge_dependency_must_have_an_environment_contract",
+  "edges": {
+    "fenix-app-gateway": {"environment": "PROD_AND_PREPROD_SUFFIXED", "prod_live": true, "prod_version": 16},
+    "fenix-ana-api": {"environment": "PROD_AND_PREPROD_SUFFIXED", "prod_live": true, "preprod_variant": "fenix-ana-api-test"},
+    "fenix-ana-knowledge": {"environment": "PROD_AND_PREPROD_SUFFIXED", "prod_live": true, "preprod_variant": "fenix-ana-knowledge-test"},
+    "fenix-ana-canonical": {"environment": "PROD_AND_PREPROD_SUFFIXED", "prod_live": true, "preprod_variant": "fenix-ana-canonical-test"},
+    "fenix-evidence-api": {"environment": "PROD_AND_PREPROD_SUFFIXED", "prod_live": true, "preprod_variant": "fenix-evidence-api-test"},
+    "fenix-memory-api": {"environment": "PROD_AND_PREPROD_SUFFIXED", "prod_live": true, "preprod_variant": "fenix-memory-api-test"},
+    "fenix-b2b-actions": {"environment": "PROD_AND_PREPROD_SUFFIXED", "prod_live": true, "preprod_variant": "fenix-b2b-actions-test"},
+    "fenix-direction-kpis": {"environment": "PREPROD_ONLY", "prod_live": false, "preprod_variant": "fenix-direction-kpis-test", "prod_behavior": "FAIL_CLOSED_503"},
+    "fenix-notion-runtime": {"environment": "PREPROD_ONLY", "prod_live": false, "preprod_variant": "fenix-notion-runtime-test", "prod_behavior": "ROUTE_READS_TO_FENIX_APP_GATEWAY"}
+  },
+  "rules": [
+    "unclassified_literal_edge_dependency_fails_ci",
+    "preprod_only_edges_must_not_be_auto_deployed_to_prod",
+    "environment_suffixes_are_contractual_not_duplication"
+  ]
+}
