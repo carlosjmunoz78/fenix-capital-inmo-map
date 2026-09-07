@@ -54,6 +54,7 @@ import DocumentViewerShell from './DocumentViewerShell';
 import ExpedienteDocumentsGuard from './ExpedienteDocumentsGuard';
 import ContextEvidenceUpload from './ContextEvidenceUpload';
 import IntelligentDocumentIngestionGuard from './IntelligentDocumentIngestionGuard';
+import ExistingDocumentAutoBackfillGuard from './ExistingDocumentAutoBackfillGuard';
 import FinancierosShell from './FinancierosShell';
 import FinancieroDetailShell from './FinancieroDetailShell';
 import VisitadoresShell from './VisitadoresShell';
@@ -145,6 +146,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <AnaTopCorrectionGuard />
       <ContextEvidenceUpload />
       <IntelligentDocumentIngestionGuard />
+      <ExistingDocumentAutoBackfillGuard />
       <ExpedienteDocumentsGuard />
       <ExpedienteAnaRuntimeGuard />
       <ExpedienteBelenFinancialGuard />
