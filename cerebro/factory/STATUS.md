@@ -5,6 +5,10 @@
 - GOV-001 · Engine Registry V0.
 - POL-001 · Promotion Policy V0.
 - HEX-001 · Human Exception Policy V0.
+- EVT-001 · contrato canónico de eventos multiempresa.
+- JOB-001 · contrato canónico de jobs, estados y reintentos limitados.
+- AUD-001 · contrato canónico append-only de auditoría, sin secretos.
+- OBSERV-001 · contrato canónico de health/log/trace/coste/seguridad.
 - APP-001 · registrado como motor existente; no recreado.
 - WEB-001 · registrado desde evidencia web/WordPress viva; no recreado.
 
@@ -31,13 +35,18 @@ No se habilita RLS automáticamente. Evidencia de fuente actual confirma:
 - PROD: no modificado por este trabajo.
 - Coste adicional: 0 €.
 - Factory CLI: create + plan + idempotencia + collision guard.
-- Registry v0.3.0: 13 motores registrados/wrapped, sin recrear runtimes existentes.
+- Registry v0.4.0: 17 motores registrados/wrapped, sin recrear runtimes existentes.
+- Shared contracts: `runtime-contracts.json` con dimensiones `company_id`, `engine_id`, `environment`, `version` para eventos, jobs, auditoría y observabilidad.
 - Governance: dependency registry + promotion policy + human exception policy.
-- Tests: manifest/registry/factory/governance.
-- CI del HEAD `007cd28e797438547d827cc72d20934931078217`: validator y unit tests completados con SUCCESS.
+- Tests: manifest/registry/factory/governance + runtime multiempresa/safety.
+- HEAD funcional: `c793fefcd452fe2b6c61c935ec68d33d7811cc54`.
+- CI Factory sobre ese HEAD: dos checks `validate` completados con SUCCESS tras corregir la divergencia de códigos de excepción humana.
 - Backup: Git history.
 - Rollback: revert commits / eliminar rama aislada antes de merge.
-- Rebuild: schema + Registry + Factory CLI + governance JSON versionado.
+- Rebuild: schema + Registry + Factory CLI + governance/contracts JSON versionados.
+
+## LOOP: incidente detectado y corregido
+Al ampliar tests de runtime, CI falló porque `runtime-contracts.json` utilizaba `MISSING_OR_EXPIRED_CREDENTIAL` mientras la política canónica HEX-001 separa `MISSING_CREDENTIAL` y `EXPIRED_OR_REVOKED_CREDENTIAL`. El loop no ocultó el fallo: se alineó el contrato con la política canónica y el HEAD volvió a verde.
 
 ## GATES todavía abiertos antes de merge/promoción
 1. Auditar grants y definiciones live de RPCs para `special_cases` y `special_case_people`.
