@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fenixcapital.es/cerebro/schemas/engine-manifest.schema.json",
+  "title": "CEREBRO Engine Manifest V0",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "engine_id", "name", "layer", "company_scope", "company_id", "environment", "version",
+    "status", "objective", "inputs", "outputs", "data_contracts", "permissions", "policies",
+    "events_in", "events_out", "tests", "evaluation", "observability", "cost_budget",
+    "backup", "rollback", "rebuild", "dependencies", "autonomy_level", "human_exception_codes"
+  ],
+  "properties": {
+    "engine_id": {"type": "string", "minLength": 2},
+    "name": {"type": "string", "minLength": 2},
+    "layer": {"type": "string", "pattern": "^L[0-9]+$"},
+    "company_scope": {"enum": ["GLOBAL_ONLY", "GLOBAL_OR_SCOPED", "COMPANY_SCOPED"]},
+    "company_id": {"type": ["string", "null"]},
+    "environment": {"enum": ["LOCAL", "LAB", "DEV", "PREPROD", "PROD"]},
+    "version": {"type": "string", "minLength": 1},
+    "contract_version": {"type": "string", "default": "0.1.0"},
+    "status": {"enum": ["CONFIRMED_OPERATIONAL", "DOCUMENTED_PARTIAL", "DEFINED_NOT_BUILT", "PROPOSED", "UNKNOWN_REQUIRES_AUDIT", "PRIORITY_0"]},
+    "objective": {"type": "string", "minLength": 1},
+    "owner": {"type": ["string", "null"]},
+    "inputs": {"type": "array"},
+    "outputs": {"type": "array"},
+    "knowledge_sources": {"type": "array", "default": []},
+    "data_contracts": {"type": "array"},
+    "api_contract": {"type": "array", "default": []},
+    "permissions": {"type": "array"},
+    "policies": {"type": "array"},
+    "events_in": {"type": "array"},
+    "events_out": {"type": "array"},
+    "jobs": {"type": "array", "default": []},
+    "tests": {"type": "array"},
+    "evaluation": {"type": "array"},
+    "observability": {"type": "array"},
+    "retry_timeout": {"type": "object", "default": {}},
+    "cost_budget": {
+      "type": "object",
+      "required": ["additional_monthly_eur_target"],
+      "properties": {"additional_monthly_eur_target": {"type": "number", "minimum": 0}}
+    },
+    "backup": {"type": "object"},
+    "rollback": {"type": "object"},
+    "rebuild": {"type": "object"},
+    "dependencies": {"type": "array"},
+    "dependents": {"type": "array", "default": []},
+    "autonomy_level": {"type": "string", "minLength": 1},
+    "zero_cost_execution_plan": {"type": "array", "default": []},
+    "human_exception_codes": {
+      "type": "array",
+      "items": {"enum": ["LEGAL_REQUIRED", "SIGNATURE_REQUIRED", "LOW_CONFIDENCE", "HIGH_RISK", "POLICY_CONFLICT", "SECURITY_INCIDENT", "MONEY_LIMIT", "CUSTOMER_HUMAN_REQUEST", "MISSING_CREDENTIAL", "EXPIRED_OR_REVOKED_CREDENTIAL", "MFA_REQUIRED", "PERMISSION_REQUIRED", "IRREVERSIBLE_PROD_RISK"]}
+    },
+    "evidence": {"type": "array", "default": []}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"company_scope": {"const": "COMPANY_SCOPED"}}},
+      "then": {"properties": {"company_id": {"type": "string", "minLength": 1}}}
+    }
+  ]
+}
