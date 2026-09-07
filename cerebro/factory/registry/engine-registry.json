@@ -1,10 +1,46 @@
 {
-  "registry_version": "0.1.0",
+  "registry_version": "0.2.0",
   "environment": "PREPROD",
   "engines": [
     {
       "engine_id": "FACT-001",
       "manifest": "../examples/FACT-001.engine.json",
+      "status": "CONFIRMED_OPERATIONAL",
+      "source_of_truth": "git+ci_verified",
+      "environment": "PREPROD",
+      "company_id": null,
+      "version": "0.1.0"
+    },
+    {
+      "engine_id": "GOV-001",
+      "manifest": "../examples/GOV-001.engine.json",
+      "status": "CONFIRMED_OPERATIONAL",
+      "source_of_truth": "git+ci_verified",
+      "environment": "PREPROD",
+      "company_id": null,
+      "version": "0.1.0"
+    },
+    {
+      "engine_id": "DEP-001",
+      "manifest": "../examples/DEP-001.engine.json",
+      "status": "DOCUMENTED_PARTIAL",
+      "source_of_truth": "git+live_audit",
+      "environment": "PREPROD",
+      "company_id": null,
+      "version": "0.1.0"
+    },
+    {
+      "engine_id": "POL-001",
+      "manifest": "../examples/POL-001.engine.json",
+      "status": "CONFIRMED_OPERATIONAL",
+      "source_of_truth": "git+ci_verified",
+      "environment": "PREPROD",
+      "company_id": null,
+      "version": "0.1.0"
+    },
+    {
+      "engine_id": "HEX-001",
+      "manifest": "../examples/HEX-001.engine.json",
       "status": "CONFIRMED_OPERATIONAL",
       "source_of_truth": "git+ci_verified",
       "environment": "PREPROD",
@@ -18,7 +54,7 @@
       "source_of_truth": "git+live_audit",
       "environment": "PREPROD",
       "company_id": "fenix-capital",
-      "version": "0.1.0"
+      "version": "317a3e457993b4a0da2b84f4f51bcd28b3daba36"
     }
   ]
 }
