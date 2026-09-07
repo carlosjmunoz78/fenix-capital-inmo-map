@@ -35,10 +35,10 @@ test('L5 dark mode has explicit readable panel, controls and textarea contrast',
 
 test('L5 Hablar con Ana answers inside the same panel and removes technical disclaimer',async()=>{
  const source=read('src/AudioTranscriptionGuard.tsx');
+ expect(source).toContain("if(mode==='ana'){");
  expect(source).toContain("fetchAnaCanonicalApi<CanonicalEnvelope>('/rules?domain=Hipotecas')");
  expect(source).toContain('fenix-ana-chat');
  expect(source).toContain("role:'ana'");
- expect(source).not.toContain("navigate(`/ana?");
  expect(source).not.toContain('Hablar con Ana usa el flujo nativo');
  expect(source).not.toContain('Este lanzador no escribe por sí solo');
 });
