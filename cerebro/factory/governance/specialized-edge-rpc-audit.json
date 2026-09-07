@@ -1,0 +1,20 @@
+{
+  "audit_version": "0.1.0",
+  "environment": "PROD_READ_ONLY_AUDIT",
+  "audited_at": "2026-09-07",
+  "edges": {
+    "fenix-ana-api": {"expected_rpc_count": 5, "live_rpc_count": 5, "all_exist": true},
+    "fenix-bank-api": {"expected_rpc_count": 2, "live_rpc_count": 2, "all_exist": true},
+    "fenix-communications-gateway": {"expected_rpc_count": 7, "live_rpc_count": 7, "all_exist": true},
+    "fenix-directory-actions": {"expected_rpc_count": 2, "live_rpc_count": 2, "all_exist": true},
+    "fenix-directory-api": {"expected_rpc_count": 6, "live_rpc_count": 6, "all_exist": true},
+    "fenix-expediente-stage": {"expected_rpc_count": 2, "live_rpc_count": 2, "all_exist": true},
+    "fenix-special-cases-api": {"expected_rpc_count": 5, "live_rpc_count": 5, "all_exist": true}
+  },
+  "method": "live Edge source inspection plus read-only pg_proc existence verification",
+  "mutation_performed": false,
+  "limitations": [
+    "this file verifies named RPC presence, not every nested SQL/table dependency",
+    "Notion-backed or Storage-backed Edges require their external/storage contracts separately"
+  ]
+}
