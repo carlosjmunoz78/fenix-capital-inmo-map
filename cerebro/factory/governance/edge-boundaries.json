@@ -1,0 +1,44 @@
+{
+  "contract_version":"0.1.0",
+  "environment":"PROD_READ_ONLY_AUDIT",
+  "principle":"preserve_existing_and_assign_canonical_responsibility_before_consolidation",
+  "boundaries":[
+    {
+      "group":"bank",
+      "canonical_read_orchestration":"fenix-app-gateway",
+      "specialized_write":"fenix-bank-api",
+      "evidence":"gateway exposes bank list/detail/candidates/send flow; bank-api is POST-only and calls fenix_prod_bank_create_server",
+      "consolidate_now":false
+    },
+    {
+      "group":"directory",
+      "canonical_read":"fenix-directory-api",
+      "canonical_write":"fenix-directory-actions",
+      "evidence":"directory-api is GET-only for notarias/registros/personal; directory-actions is POST-only creation restricted by backend identity/role",
+      "consolidate_now":false
+    },
+    {
+      "group":"ana",
+      "operational_corrections":"fenix-ana-api",
+      "canonical_rules_reader":"fenix-ana-canonical",
+      "evidence":"ana-api manages capabilities/corrections/decisions and Notion synchronization; ana-canonical is GET /rules canonical-only reader",
+      "consolidate_now":false
+    },
+    {
+      "group":"documents_and_evidence",
+      "document_crud_and_upload":"fenix-app-gateway + fenix-document-actions",
+      "contextual_evidence":"fenix-evidence-api",
+      "evidence":"evidence-api validates origin scope, prepares/completes evidence uploads, preserves SHA/deduplication and Notion evidence linkage; document-actions provides individual GET/PATCH while gateway owns list/versions/view/upload",
+      "consolidate_now":false,
+      "remaining_question":"formalize whether individual document GET/PATCH should remain specialized or move behind gateway after OLD_vs_NEW"
+    },
+    {
+      "group":"expediente_stage",
+      "general_workspace":"fenix-app-gateway",
+      "stage_mutation":"fenix-expediente-stage",
+      "evidence":"stage endpoint is authenticated POST-only wrapper over fenix_prod_exp_stage_server with optimistic version and audit history",
+      "consolidate_now":false
+    }
+  ],
+  "rule":"overlap_is_not_duplication_when_contracts_are_disjoint_or_specialized; no deletion without callers, OLD_vs_NEW, rollback and PREPROD"
+}
