@@ -6,7 +6,7 @@
   "company_id":null,
   "environment":"PREPROD",
   "version":"0.1.0",
-  "contract_version":"0.1.0",
+  "contract_version":"0.2.0",
   "status":"CONFIRMED_OPERATIONAL",
   "objective":"Mantener un registro canónico, versionado y no duplicado de motores CEREBRO.",
   "owner":"CEREBRO",
@@ -22,6 +22,7 @@
   "jobs":[],
   "tests":["registry_unique_ids","registry_manifest_exists","registry_status_matches_manifest"],
   "evaluation":["registry_consistency"],
+  "tribunal":["promotion_policy","ci_validation"],
   "observability":["git_history","ci_validation"],
   "retry_timeout":{"max_attempts":1},
   "cost_budget":{"additional_monthly_eur_target":0},
@@ -32,6 +33,7 @@
   "dependents":["all_registered_engines"],
   "autonomy_level":"HUMAN_BY_EXCEPTION",
   "zero_cost_execution_plan":["git","python_stdlib","github_actions_existing_minutes"],
-  "human_exception_codes":["POLICY_CONFLICT","HIGH_RISK","SECURITY_INCIDENT","IRREVERSIBLE_PROD_RISK"],
+  "human_exception_codes":["POLICY_CONFLICT","HIGH_RISK","SECURITY_INCIDENT"],
+  "system_blocker_codes":["IRREVERSIBLE_PROD_RISK"],
   "evidence":["registry:engine-registry.json","ci:factory validation"]
 }
