@@ -19,7 +19,7 @@
     "environment": {"enum": ["LOCAL", "LAB", "DEV", "PREPROD", "PROD"]},
     "version": {"type": "string", "minLength": 1},
     "contract_version": {"type": "string", "default": "0.1.0"},
-    "status": {"enum": ["CONFIRMED_OPERATIONAL", "DOCUMENTED_PARTIAL", "DEFINED_NOT_BUILT", "PROPOSED", "UNKNOWN_REQUIRES_AUDIT", "PRIORITY_0"]},
+    "status": {"enum": ["CONFIRMED_OPERATIONAL", "DOCUMENTED_PARTIAL", "DEFINED_NOT_BUILT", "PROPOSED", "UNKNOWN_REQUIRES_AUDIT"]},
     "objective": {"type": "string", "minLength": 1},
     "owner": {"type": ["string", "null"]},
     "inputs": {"type": "array"},
@@ -50,7 +50,14 @@
     "zero_cost_execution_plan": {"type": "array", "default": []},
     "human_exception_codes": {
       "type": "array",
-      "items": {"enum": ["LEGAL_REQUIRED", "SIGNATURE_REQUIRED", "LOW_CONFIDENCE", "HIGH_RISK", "POLICY_CONFLICT", "SECURITY_INCIDENT", "MONEY_LIMIT", "CUSTOMER_HUMAN_REQUEST", "MISSING_CREDENTIAL", "EXPIRED_OR_REVOKED_CREDENTIAL", "MFA_REQUIRED", "PERMISSION_REQUIRED", "IRREVERSIBLE_PROD_RISK"]}
+      "uniqueItems": true,
+      "items": {"enum": ["LEGAL_REQUIRED", "SIGNATURE_REQUIRED", "LOW_CONFIDENCE", "HIGH_RISK", "POLICY_CONFLICT", "SECURITY_INCIDENT", "MONEY_LIMIT", "CUSTOMER_HUMAN_REQUEST"]}
+    },
+    "system_blocker_codes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"enum": ["MISSING_CREDENTIAL", "EXPIRED_OR_REVOKED_CREDENTIAL", "MFA_REQUIRED", "PERMISSION_REQUIRED", "IRREVERSIBLE_PROD_RISK"]},
+      "default": []
     },
     "evidence": {"type": "array", "default": []}
   },
