@@ -29,7 +29,8 @@ test('PROD blocks audio and unvalidated MIME before prepare or upload',()=>{
   expect(prepare).toBeGreaterThan(guard);
   expect(storage).toBeGreaterThan(prepare);
   expect(text).toContain("accept={IS_PRODUCTION?PROD_ACCEPT:undefined}");
-  expect(text).toContain('Audio y contextos sin contrato productivo permanecen bloqueados');
+  expect(text).toContain("const PROD_ALLOWED_MIME=new Set([");
+  expect(text).toContain("'application/pdf'");
 });
 
 test('PRE-PROD retains universal audio evidence path',()=>{
