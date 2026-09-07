@@ -5,14 +5,20 @@
     {
       "engine_id": "FACT-001",
       "manifest": "../examples/FACT-001.engine.json",
-      "status": "DEFINED_NOT_BUILT",
-      "source_of_truth": "git"
+      "status": "CONFIRMED_OPERATIONAL",
+      "source_of_truth": "git+ci_verified",
+      "environment": "PREPROD",
+      "company_id": null,
+      "version": "0.1.0"
     },
     {
       "engine_id": "APP-001",
       "manifest": "../examples/APP-001.engine.json",
       "status": "CONFIRMED_OPERATIONAL",
-      "source_of_truth": "git+live_audit"
+      "source_of_truth": "git+live_audit",
+      "environment": "PREPROD",
+      "company_id": "fenix-capital",
+      "version": "0.1.0"
     }
   ]
 }
