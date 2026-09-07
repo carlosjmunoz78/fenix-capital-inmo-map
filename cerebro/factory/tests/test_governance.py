@@ -43,7 +43,10 @@ class GovernanceTests(unittest.TestCase):
         data = load(DEP)
         flagged = {n["id"] for n in data["nodes"] if n.get("security_flag") == "RLS_DISABLED"}
         self.assertEqual(flagged, {"special_cases", "special_case_people", "expediente_stage_history"})
-        self.assertIn("do_not_enable_RLS_without_policy_and_caller_tests", data["prohibitions"])
+        self.assertIn(
+            "do_not_enable_RLS_in_prod_without_representative_preprod_tests_old_vs_new_and_rollback",
+            data["prohibitions"],
+        )
 
     def test_human_exception_policy_is_closed_and_complete(self):
         data = load(HEX)
