@@ -1,0 +1,54 @@
+{
+  "contract_version": "0.1.0",
+  "environment": "PREPROD",
+  "principles": [
+    "multiempresa_first",
+    "human_by_exception",
+    "zero_additional_cost",
+    "no_prod_mutation_from_factory",
+    "shared_runtime_without_shared_secrets"
+  ],
+  "required_dimensions": ["company_id", "engine_id", "environment", "version"],
+  "event_envelope": {
+    "required": ["event_id", "event_type", "occurred_at", "company_id", "engine_id", "environment", "version", "correlation_id", "payload"],
+    "idempotency": "event_id_unique",
+    "payload": "json_object"
+  },
+  "job_envelope": {
+    "required": ["job_id", "job_type", "company_id", "engine_id", "environment", "version", "created_at", "attempt", "max_attempts", "status", "payload"],
+    "statuses": ["QUEUED", "RUNNING", "SUCCEEDED", "FAILED", "HUMAN_REQUIRED", "CANCELLED"],
+    "retry": "bounded_exponential_or_engine_policy"
+  },
+  "audit_record": {
+    "required": ["audit_id", "occurred_at", "company_id", "engine_id", "environment", "version", "action", "result", "correlation_id", "evidence"],
+    "append_only": true,
+    "secrets_forbidden": true
+  },
+  "observability_signal": {
+    "required": ["signal_id", "occurred_at", "company_id", "engine_id", "environment", "version", "signal_type", "severity", "correlation_id", "data"],
+    "signal_types": ["METRIC", "LOG", "TRACE", "HEALTH", "COST", "SECURITY"],
+    "severities": ["DEBUG", "INFO", "WARN", "ERROR", "CRITICAL"]
+  },
+  "human_exception": {
+    "allowed_codes": [
+      "LEGAL_REQUIRED",
+      "SIGNATURE_REQUIRED",
+      "LOW_CONFIDENCE",
+      "HIGH_RISK",
+      "POLICY_CONFLICT",
+      "SECURITY_INCIDENT",
+      "MONEY_LIMIT",
+      "CUSTOMER_HUMAN_REQUEST",
+      "MISSING_OR_EXPIRED_CREDENTIAL",
+      "MFA_REQUIRED",
+      "PERMISSION_REQUIRED",
+      "IRREVERSIBLE_PROD_RISK"
+    ]
+  },
+  "prohibitions": [
+    "no_secret_material_in_events_jobs_audit_or_observability",
+    "no_unbounded_retry",
+    "no_cross_company_execution_without_explicit_scope",
+    "no_direct_prod_promotion_without_promotion_policy"
+  ]
+}
