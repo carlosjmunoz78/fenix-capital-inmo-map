@@ -42,6 +42,8 @@ export default function TaskLifecycleGuard(){
  useEffect(()=>{
   if(!active){setHost(null);return}
   const place=()=>{
+   const direct=document.querySelector<HTMLElement>('.task-detail-root .task-life-anchor');
+   if(direct){setHost(current=>current===direct?current:direct);return;}
    const roots=[...document.querySelectorAll<HTMLElement>('.ops-root')].filter(el=>{const r=el.getBoundingClientRect();return r.width>0&&r.height>0});
    const root=roots.at(-1);const content=root?.querySelector<HTMLElement>('.ops-content');const card=content?.querySelector<HTMLElement>('.ops-table-card');if(!content||!card)return;
    let h=content.querySelector<HTMLElement>(':scope > .task-life-host');if(!h){h=document.createElement('div');h.className='task-life-host';card.after(h)}
@@ -71,14 +73,14 @@ export default function TaskLifecycleGuard(){
   setMessage(`No se pudo dar de baja la tarea (${r.data?.error||r.status}). No se ha aplicado ningún cambio.`)
  }
  return createPortal(<section data-testid="task-lifecycle" style={{marginTop:14,border:'1px solid var(--border)',borderRadius:16,padding:16,background:'var(--card)',display:'grid',gap:12}}>
-  <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:12}}><div><small style={{fontWeight:800}}>CICLO DE VIDA DE LA TAREA</small><h3 style={{margin:'4px 0 0'}}>Dar de baja una tarea sin borrarla</h3></div>{cancelled?<strong>Cancelada</strong>:<button type="button" onClick={start} style={{display:'inline-flex',alignItems:'center',gap:7}}><Power size={17}/> Dar de baja tarea</button>}</div>
-  <small>La tarea sale de pendientes, conserva su registro y deja de contar como activa.</small>
+  <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:12,flexWrap:'wrap'}}><div><small style={{fontWeight:800}}>CICLO DE VIDA DE LA TAREA</small><h3 style={{margin:'4px 0 0'}}>Acciones de la tarea</h3></div>{cancelled?<strong>Cancelada</strong>:<button type="button" onClick={start} style={{display:'inline-flex',alignItems:'center',gap:7}}><Power size={17}/> Dar de baja tarea</button>}</div>
+  <small>Dar de baja saca la tarea de pendientes, conserva su registro y deja de contar como activa.</small>
   {open&&<div role="dialog" aria-modal="true" aria-label="Dar de baja tarea" style={{border:'1px solid var(--border)',borderRadius:14,padding:14,display:'grid',gap:10}}>
    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}><strong>Dar de baja tarea</strong><button type="button" onClick={close} aria-label="Cerrar"><X size={18}/></button></div>
    <label>Motivo<select value={reason} onChange={e=>{setReason(e.target.value);setPrepared(false)}}>{REASONS.map(x=><option key={x}>{x}</option>)}</select></label>
    <label>Observación opcional<textarea rows={3} value={note} onChange={e=>{setNote(e.target.value);setPrepared(false)}} placeholder="Ej.: ya se llamó al cliente y esta tarea quedó antigua"/></label>
    {message&&<div role="status" className="ops-message">{message}</div>}
-   <div style={{display:'flex',justifyContent:'flex-end',gap:8}}><button type="button" onClick={close}>Cancelar</button>{!prepared?<button type="button" className="primary" onClick={prepare}>Preparar baja</button>:<button type="button" className="primary" disabled={busy} onClick={()=>void confirm()}>{busy?'Guardando…':'Confirmar baja'}</button>}</div>
+   <div style={{display:'flex',justifyContent:'flex-end',gap:8,flexWrap:'wrap'}}><button type="button" onClick={close}>Cancelar</button>{!prepared?<button type="button" className="primary" onClick={prepare}>Preparar baja</button>:<button type="button" className="primary" disabled={busy} onClick={()=>void confirm()}>{busy?'Guardando…':'Confirmar baja'}</button>}</div>
    <small>Tarea: {routeId}{taskCode!==routeId?` · canónica: ${taskCode}`:''} · versión {version??(IS_PRODUCTION?'sin validar':'PRE-PROD')} · {IS_PRODUCTION?'PROD con escritura auditada':'PRE-PROD sin escritura PROD'}.</small>
   </div>}
  </section>,host)
