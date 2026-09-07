@@ -24,6 +24,23 @@ if(isProd){
     return response;
   };
 
+  document.addEventListener('change',event=>{
+    const input=event.target;
+    if(!(input instanceof HTMLInputElement)||input.type!=='file'||!input.files?.length)return;
+    const normalized=[...input.files].map(file=>{
+      const isPdf=/\.pdf$/i.test(file.name);
+      if(!isPdf||file.type==='application/pdf')return file;
+      return new File([file],file.name,{type:'application/pdf',lastModified:file.lastModified});
+    });
+    const changed=normalized.some((file,index)=>file!==input.files?.item(index));
+    if(!changed)return;
+    try{
+      const transfer=new DataTransfer();
+      normalized.forEach(file=>transfer.items.add(file));
+      input.files=transfer.files;
+    }catch{}
+  },true);
+
   const rewriteLimitCopy=(root:ParentNode=document)=>{
     const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
     let node:Node|null;
