@@ -1,0 +1,18 @@
+{
+  "registry_version": "0.1.0",
+  "environment": "PREPROD",
+  "engines": [
+    {
+      "engine_id": "FACT-001",
+      "manifest": "../examples/FACT-001.engine.json",
+      "status": "DEFINED_NOT_BUILT",
+      "source_of_truth": "git"
+    },
+    {
+      "engine_id": "APP-001",
+      "manifest": "../examples/APP-001.engine.json",
+      "status": "CONFIRMED_OPERATIONAL",
+      "source_of_truth": "git+live_audit"
+    }
+  ]
+}
