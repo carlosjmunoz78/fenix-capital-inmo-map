@@ -28,7 +28,15 @@
 - SEO-001 · contratos y paquete SEO CEREBRO incluidos en el mismo quality gate: PASS.
 - Pasaron contratos RC9, operaciones/Notion, cache/CSS, plugin updater, runtime gate, Elementor roundtrip, full-page/canonical/batch/Google, SEO CEREBRO, builds deterministas y smokes de paquetes.
 - El PR de auditoría fue cerrado sin merge porque solo servía para disparar evidencia.
-- Evidencia: `governance/core-seo-staging-validation-2026-09-07.json`.
+- WordPress live confirma Core Guard `1.0.0-rc9-prod2`, SEO CEREBRO Bridge `0.4.1`, SEO REST Bridge `1.0.0` y CEREBRO Leads `1.3.2` activos.
+- Evidencia: `governance/core-seo-staging-validation-2026-09-07.json` y `governance/wordpress-live-plugin-inventory-2026-09-07.json`.
+
+## HECHO / VERDE · CRM Y DOCUMENTOS A NIVEL DE CONTRATO LIVE
+- CRM-001 · boundary live confirmado para tablas críticas: RLS enabled, owner postgres, sin grants directos `anon`/`authenticated`; RPC de contactos, expedientes y tareas verificados como `SECURITY DEFINER`.
+- DOC-001 · `documentos`, versiones, orígenes, uploads, intelligence y change-history: RLS enabled y sin grants directos `anon`/`authenticated`; RPC document/evidence verificados live como `SECURITY DEFINER`.
+- La suite PREPROD completa de App complementa estos boundaries con browser QA.
+- Esto confirma contratos/rutas de seguridad, no autoriza consolidar funciones ni afirma que todos los escenarios de negocio PROD hayan sido ejercitados.
+- Evidencia: `governance/crm-doc-live-contract-audit-2026-09-07.json`.
 
 ## HECHO / VERDE · SEGURIDAD AUTOMATIZACIONES SOCIALES
 - Riesgo histórico de workflows Buffer mutantes disparados automáticamente por `push`: cerrado.
@@ -41,16 +49,16 @@
 
 ## EXISTENTE / REGISTRADO
 - APP-001 · existente y envuelto, no recreado.
-- WEB-001 · existente y envuelto, no recreado.
+- WEB-001 · WordPress live y stack crítico activo; no recreado.
 - 17 manifests del Registry preservan la taxonomía de evidencia y no elevan un runtime por mera documentación.
 - Edge/RPC inventory, one-shot inventory y fronteras de solapamiento documentadas.
 
 ## PARCIAL / NO GREENWASH
 - DEP-001 · el finding RLS y los principales callers/RPC están cerrados; la clausura semántica Edge → RPC → tabla de absolutamente todo el runtime sigue siendo incremental.
-- CORE-001 PROD · staging/source/package están verdes, pero el runtime WordPress PROD no se declara verde hasta cerrar o revalidar el histórico `global ok=false` (`staging_host` / `test_cleanup`).
-- SEO-001 PROD · staging/source/package están verdes, pero el runtime live previo tenía `last_run=null` y `learning_count=0`; no se pagará por GSC para forzar estado.
-- CRM-001 · contratos App/Supabase vivos; falta una aceptación integral específica del runtime CRM en este loop.
-- DOC-001 · contratos/funciones vivos; cualquier consolidación gateway/document-actions exige OLD vs NEW.
+- CORE-001 PROD · plugin live activo y staging/source/package verdes, pero el health runtime global no se eleva a verde hasta revalidar el histórico `global ok=false` (`staging_host` / `test_cleanup`).
+- SEO-001 PROD · plugin live activo y staging/source/package verdes, pero el learning runtime no se eleva hasta revalidar `last_run`/`learning_count`; no se pagará por GSC.
+- CRM-001 · boundary live confirmado; la aceptación integral de todos los escenarios de negocio permanece distinta de la certificación contractual.
+- DOC-001 · boundary live confirmado; cualquier consolidación gateway/document-actions continúa prohibida sin OLD vs NEW.
 - TRN-001 · documentación lo clasifica operativo; falta verificación directa del runtime transversal.
 - LAB-TRD · evidencia PAPER/SHADOW documentada; falta acceso directo a VM/runtime para elevar evidencia independiente.
 
@@ -65,10 +73,12 @@ La prueba representativa PREPROD está verde, pero **no autoriza DDL PROD**. La 
 - Ocho Edge `*-once` siguen ACTIVE pero fueron clasificados como tombstones HTTP 410; no se eliminan sin caller inventory y rollback.
 - Bank, directory, Ana, documents/evidence y expediente-stage tienen fronteras asignadas; ninguna consolidación está autorizada sin PREPROD + OLD vs NEW.
 
-## POR AUDITAR / BLOQUEOS EXTERNOS
-- Branch protection de ramas críticas sigue sin evidencia de protección administrativa.
-- Checks externos de Cloudflare en el repo App siguen fallando de forma independiente al pipeline GitHub nativo verde; no se modifica Cloudflare sin ownership/configuración/rollback demostrables.
-- Runtime WordPress PROD de Core/SEO, CRM integral y VM Trading/Training requieren evidencia directa adicional antes de `CONFIRMED_OPERATIONAL` global.
+## POR AUDITAR / EXCEPCIONES NO AUTÓNOMAS
+- `preprod-app-phase1`, social `main`, Core Guard `main` y `staging` están auditadas como `protected=false`; el conector actual no ofrece escritura administrativa segura de branch protection.
+- Core Guard: `staging` está 252 commits por delante de `main`; no se sincroniza a ciegas. `production` es una línea de despliegue distinta y tampoco se sobrescribe para igualar ramas.
+- Checks externos Cloudflare siguen fallando de forma independiente al pipeline GitHub nativo verde; no existe control-plane Cloudflare conectado para una corrección reversible.
+- Core/SEO live health, TRN y LAB-TRD requieren una fuente runtime directa no disponible en el tool surface actual.
+- La cola exacta y sus códigos canónicos está en `governance/human-exception-queue-2026-09-07.json`; la canonicalidad en `governance/repository-canonicality-live-2026-09-07.json`.
 
 ## REGLA DE PROMOCIÓN
-PREPROD estructural de FACT-001 está verde. PROD continúa DENY por defecto mientras falte cualquier gate aplicable. Ningún estado se eleva por conveniencia: solo por evidencia reproducible, observabilidad y rollback.
+El alcance estructural/autónomamente ejecutable de FACT-001 y PREPROD está verde. PROD continúa DENY por defecto mientras falte cualquier gate aplicable. Ningún estado se eleva por conveniencia: solo por evidencia reproducible, observabilidad y rollback.
