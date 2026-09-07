@@ -16,12 +16,13 @@ test('PROD expediente exposes persistent intervinientes controls',()=>{
 
 test('PROD people API uses authenticated canonical server functions and supports lists',()=>{
  const edge=fs.readFileSync('supabase/functions/fenix-expediente-people/index.ts','utf8');
+ expect(edge).toContain('auth.auth.getUser');
+ expect(edge).toContain('fenix_prod_actor_context_by_auth_server');
  expect(edge).toContain('fenix_prod_exp_people_server');
  expect(edge).toContain('fenix_prod_exp_person_create_server');
  expect(edge).toContain('fenix_prod_exp_person_update_server');
  expect(edge).toContain('fenix_prod_contact_get_server');
  expect(edge).toContain('fenix_prod_contact_list_assign_server');
- expect(edge).toContain("verify");
  expect(edge).toContain("Access-Control-Allow-Methods':'GET,POST,OPTIONS'");
 });
 
