@@ -12,7 +12,6 @@ test('L5 universal microphone stays native and isolated from canonical writes',a
  expect(source).toContain('recognition.interimResults=true');
  expect(source).toContain('navigator.clipboard.writeText');
  expect(source).toContain("domain:'financiacion'");
- expect(source).toContain("navigate(`/ana?");
  expect(source).not.toContain('fetchAppApi');
  expect(source).not.toContain('supabase.from');
 });
@@ -25,6 +24,23 @@ test('L5 launcher is icon-only and restores the four approved actions',async()=>
  expect(source).not.toContain('<span>Dictar</span>');
  expect(css).toContain('background:#ff5a1f');
  expect(css).toContain('.fenix-audio-actions');
+});
+
+test('L5 dark mode has explicit readable panel, controls and textarea contrast',async()=>{
+ const css=read('src/audio-transcription.css');
+ expect(css).toContain("html[data-theme='dark'] .fenix-audio-panel{background:#1f2023;color:#f5f5f7");
+ expect(css).toContain("html[data-theme='dark'] .fenix-audio-actions>button{background:#292b2f;color:#f5f5f7");
+ expect(css).toContain("html[data-theme='dark'] .fenix-audio-panel textarea{background:#292b2f;color:#f7f7f8");
+});
+
+test('L5 Hablar con Ana answers inside the same panel and removes technical disclaimer',async()=>{
+ const source=read('src/AudioTranscriptionGuard.tsx');
+ expect(source).toContain("fetchAnaCanonicalApi<CanonicalEnvelope>('/rules?domain=Hipotecas')");
+ expect(source).toContain('fenix-ana-chat');
+ expect(source).toContain("role:'ana'");
+ expect(source).not.toContain("navigate(`/ana?");
+ expect(source).not.toContain('Hablar con Ana usa el flujo nativo');
+ expect(source).not.toContain('Este lanzador no escribe por sí solo');
 });
 
 test('L5 audio transcription has permission and unsupported-browser fallbacks',async()=>{
