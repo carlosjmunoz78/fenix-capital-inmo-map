@@ -1,5 +1,5 @@
 {
-  "policy_version":"0.1.0",
+  "policy_version":"0.2.0",
   "environment":"PREPROD",
   "default_mode":"AUTONOMOUS_UNLESS_EXCEPTION",
   "allowed_codes":[
@@ -10,12 +10,7 @@
     "POLICY_CONFLICT",
     "SECURITY_INCIDENT",
     "MONEY_LIMIT",
-    "CUSTOMER_HUMAN_REQUEST",
-    "MISSING_CREDENTIAL",
-    "EXPIRED_OR_REVOKED_CREDENTIAL",
-    "MFA_REQUIRED",
-    "PERMISSION_REQUIRED",
-    "IRREVERSIBLE_PROD_RISK"
+    "CUSTOMER_HUMAN_REQUEST"
   ],
   "rules":[
     {"code":"LEGAL_REQUIRED","action":"HUMAN_REQUIRED","retry":false},
@@ -25,16 +20,20 @@
     {"code":"POLICY_CONFLICT","action":"HUMAN_REQUIRED","retry":false},
     {"code":"SECURITY_INCIDENT","action":"HUMAN_REQUIRED","retry":false},
     {"code":"MONEY_LIMIT","action":"HUMAN_REQUIRED","retry":false},
-    {"code":"CUSTOMER_HUMAN_REQUEST","action":"HUMAN_REQUIRED","retry":false},
-    {"code":"MISSING_CREDENTIAL","action":"HUMAN_REQUIRED","retry":true},
-    {"code":"EXPIRED_OR_REVOKED_CREDENTIAL","action":"HUMAN_REQUIRED","retry":true},
-    {"code":"MFA_REQUIRED","action":"HUMAN_REQUIRED","retry":true},
-    {"code":"PERMISSION_REQUIRED","action":"HUMAN_REQUIRED","retry":true},
-    {"code":"IRREVERSIBLE_PROD_RISK","action":"HUMAN_REQUIRED","retry":false}
+    {"code":"CUSTOMER_HUMAN_REQUEST","action":"HUMAN_REQUIRED","retry":false}
   ],
+  "system_blockers":[
+    "MISSING_CREDENTIAL",
+    "EXPIRED_OR_REVOKED_CREDENTIAL",
+    "MFA_REQUIRED",
+    "PERMISSION_REQUIRED",
+    "IRREVERSIBLE_PROD_RISK"
+  ],
+  "system_blocker_semantics":"BLOCK_EXECUTION_WITHOUT_RECLASSIFYING_AS_HUMAN_REQUIRED; map to an allowed human exception only when the real business reason matches one of the canonical eight",
   "invariants":[
     "ordinary_safe_work_does_not_require_human_approval",
-    "prod_irreversible_actions_require_explicit_gate",
-    "no_exception_code_may_be_invented_at_runtime"
+    "prod_irreversible_actions_are_blocked_by_promotion_policy",
+    "no_exception_code_may_be_invented_at_runtime",
+    "HUMAN_REQUIRED_uses_only_the_canonical_eight_codes"
   ]
 }
