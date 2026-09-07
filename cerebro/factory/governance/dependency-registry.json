@@ -1,0 +1,51 @@
+{
+  "registry_version": "0.1.0",
+  "environment": "PREPROD",
+  "status": "DOCUMENTED_PARTIAL",
+  "principle": "register_existing_before_creating_new",
+  "nodes": [
+    {"id":"APP-001","type":"engine","owner":"Fenix Capital"},
+    {"id":"fenix-app-gateway","type":"edge_function","verified_live":true,"version":"16"},
+    {"id":"fenix-communications-gateway","type":"edge_function","verified_live":true,"version":"8"},
+    {"id":"fenix-web-lead","type":"edge_function","verified_live":true,"version":"2"},
+    {"id":"fenix_prod","type":"supabase_schema","verified_live":true},
+    {"id":"Supabase Auth","type":"service","verified_live":true},
+    {"id":"Supabase Storage","type":"service","verified_live":true},
+    {"id":"Brevo","type":"external_transport","verified_live":true},
+    {"id":"Meta WhatsApp","type":"external_transport","verified_live":true},
+    {"id":"WordPress Leads","type":"wordpress_plugin","verified_live":true},
+    {"id":"special_cases","type":"table","security_flag":"RLS_DISABLED"},
+    {"id":"special_case_people","type":"table","security_flag":"RLS_DISABLED"},
+    {"id":"expediente_stage_history","type":"table","security_flag":"RLS_DISABLED"}
+  ],
+  "edges": [
+    {"from":"APP-001","to":"Supabase Auth","relation":"authenticates_via"},
+    {"from":"APP-001","to":"fenix-app-gateway","relation":"calls"},
+    {"from":"fenix-app-gateway","to":"fenix_prod","relation":"rpc_and_data_access"},
+    {"from":"fenix-app-gateway","to":"Supabase Storage","relation":"signed_document_access"},
+    {"from":"fenix-communications-gateway","to":"fenix_prod","relation":"rpc_and_state"},
+    {"from":"fenix-communications-gateway","to":"Brevo","relation":"email_transport"},
+    {"from":"fenix-communications-gateway","to":"Meta WhatsApp","relation":"whatsapp_transport"},
+    {"from":"WordPress Leads","to":"fenix-web-lead","relation":"lead_ingest"},
+    {"from":"fenix-web-lead","to":"fenix_prod","relation":"rpc_fenix_prod_web_lead_ingest_server"}
+  ],
+  "known_overlap_groups": [
+    ["fenix-app-gateway","document-actions","fenix-evidence-api"],
+    ["fenix-app-gateway","fenix-bank-api"],
+    ["fenix-app-gateway","fenix-directory-api","fenix-directory-actions"],
+    ["fenix-app-gateway","fenix-expediente-stage"],
+    ["fenix-app-gateway","fenix-ana-api","fenix-ana-canonical"]
+  ],
+  "open_audit_items": [
+    "map_all_callers_for_special_cases",
+    "map_all_callers_for_special_case_people",
+    "map_all_callers_for_expediente_stage_history",
+    "resolve_owner_for_each_overlap_group",
+    "classify_active_one_shot_functions_before_any_retirement"
+  ],
+  "prohibitions": [
+    "do_not_enable_RLS_without_policy_and_caller_tests",
+    "do_not_delete_or_consolidate_overlap_functions_without_old_vs_new",
+    "do_not_retire_one_shot_functions_without_caller_inventory_and_rollback"
+  ]
+}
