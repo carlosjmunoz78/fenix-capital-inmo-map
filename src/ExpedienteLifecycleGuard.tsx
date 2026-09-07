@@ -11,6 +11,7 @@ type ExpRow={expediente_code?:string;stage?:string;version?:number};
 type StageResponse={ok?:boolean;status?:number;error?:string;stage?:string;version?:number;current_version?:number;current_stage?:string};
 type LegacyMapEntry={dedupe_key?:string;destination_page_id?:string};
 const CLOSE_REASONS=['Cliente no compra','Cliente desiste','Operación aplazada','No viable','Perdido frente a competencia','Duplicado / error','Otro'];
+const REACTIVATE_SENTINEL='__REACTIVATE__';
 function text(v:unknown){if(Array.isArray(v))return v.map(String).join(', ');return String(v??'');}
 function norm(v:string){return v.replaceAll('-','').trim().toLowerCase()}
 function resolveCanonicalCode(routeCode:string){
@@ -88,19 +89,36 @@ export default function ExpedienteLifecycleGuard(){
     if(!canonical||version===null){setMessage('No se ha podido validar el expediente canónico asociado. No se ejecutará ningún cambio.');return;}
     if(mode==='pause'&&!indefinite&&!pauseUntil){setMessage('Indica hasta cuándo se pausa o marca pausa indefinida.');return;}
     if(mode==='close'&&!reason){setMessage('Selecciona un motivo de baja.');return;}
-    if(mode==='reactivate'){setMessage('La reactivación queda pendiente de recuperar de forma canónica el estado anterior. No se inventará un estado de retorno.');setPrepared(false);return;}
     setPrepared(true);
+    if(mode==='reactivate'){
+      setMessage('Vista previa lista: se restaurará el último estado activo real registrado en el histórico del expediente. Confirma para reabrirlo y seguir trabajando.');
+      return;
+    }
     setMessage(`Vista previa lista: ${mode==='pause'?pauseSummary:`Dar de baja · ${reason}`}. Confirma para ejecutar el cambio auditado.`);
   }
   async function confirm(){
-    if(!prepared||saving||version===null||!mode||mode==='reactivate')return;
+    if(!prepared||saving||version===null||!mode)return;
     if(!IS_PRODUCTION){setMessage('PRE-PROD: comprobación preparada sin escribir en producción.');return;}
-    setSaving(true);setMessage('Guardando cambio auditado…');
-    const stage=mode==='close'?'Baja':'Pausado';
+    setSaving(true);setMessage(mode==='reactivate'?'Reabriendo expediente y recuperando su estado anterior…':'Guardando cambio auditado…');
+    const stage=mode==='close'?'Baja':mode==='reactivate'?REACTIVATE_SENTINEL:'Pausado';
     const r=await stageApi({expediente_code:canonicalCode,expected_version:version,stage});
-    if(r.status===200&&r.data?.ok){setCurrentState(r.data.stage??stage);setVersion(Number(r.data.version??version+1));setPrepared(false);setMessage(mode==='close'?`Expediente dado de baja correctamente. Motivo: ${reason}${note.trim()?` · ${note.trim()}`:''}`:`Expediente pausado correctamente${indefinite?' sin fecha':pauseUntil?` hasta ${pauseUntil}`:''}.`);setSaving(false);return;}
-    if(r.status===409){setVersion(Number(r.data?.current_version??version));setCurrentState(r.data?.current_stage??currentState);setPrepared(false);setMessage('El expediente cambió mientras lo tenías abierto. He actualizado su versión; revisa y vuelve a confirmar.');}
+    if(r.status===200&&r.data?.ok){
+      const nextStage=r.data.stage??(mode==='reactivate'?currentState:stage);
+      setCurrentState(nextStage);
+      setVersion(Number(r.data.version??version+1));
+      setPrepared(false);
+      setMessage(mode==='close'?`Expediente dado de baja correctamente. Motivo: ${reason}${note.trim()?` · ${note.trim()}`:''}`:mode==='reactivate'?`Expediente reabierto correctamente. Estado recuperado: ${text(nextStage)}. Ya puedes seguir trabajando y añadir o editar intervinientes.`:`Expediente pausado correctamente${indefinite?' sin fecha':pauseUntil?` hasta ${pauseUntil}`:''}.`);
+      setSaving(false);
+      return;
+    }
+    if(r.status===409){
+      setVersion(Number(r.data?.current_version??version));
+      setCurrentState(r.data?.current_stage??currentState);
+      setPrepared(false);
+      setMessage(r.data?.error==='reactivation_history_missing'?'No existe un estado anterior fiable en el histórico. No se ha modificado el expediente.':'El expediente cambió mientras lo tenías abierto. He actualizado su versión; revisa y vuelve a confirmar.');
+    }
     else if(r.status===403)setMessage('Tu perfil no tiene permiso para ejecutar este cambio.');
+    else if(r.status===401)setMessage('Tu sesión ha caducado. Vuelve a iniciar sesión y prueba de nuevo.');
     else setMessage('No se pudo ejecutar el cambio. El expediente no se ha modificado.');
     setSaving(false);
   }
@@ -110,15 +128,15 @@ export default function ExpedienteLifecycleGuard(){
     <div className="exp-life-actions">
       {!canReactivate&&<button type="button" onClick={()=>open('pause')}><PauseCircle size={17}/><span><b>Pausar</b><small>Hasta una fecha o sin fecha</small></span></button>}
       {!isClosed&&<button type="button" onClick={()=>open('close')}><Power size={17}/><span><b>Dar de baja</b><small>Sale del pipeline, conserva todo</small></span></button>}
-      {canReactivate&&<button type="button" className="primary-life" onClick={()=>open('reactivate')}><RotateCcw size={17}/><span><b>Reactivar expediente</b><small>Recupera el circuito anterior</small></span></button>}
+      {canReactivate&&<button type="button" className="primary-life" data-testid="reactivate-expediente" onClick={()=>open('reactivate')}><RotateCcw size={17}/><span><b>Reabrir expediente</b><small>Recupera el estado anterior y permite seguir trabajando</small></span></button>}
     </div>
-    {mode&&<div className="exp-life-modal" role="dialog" aria-modal="true" aria-label={mode==='pause'?'Pausar expediente':mode==='close'?'Dar de baja expediente':'Reactivar expediente'}><div className="exp-life-card">
-      <div className="exp-life-modal-head"><div><span>ACCIÓN CON CONFIRMACIÓN</span><h3>{mode==='pause'?'Pausar expediente':mode==='close'?'Dar de baja expediente':'Reactivar expediente'}</h3></div><button type="button" aria-label="Cerrar" onClick={closeModal}><X size={18}/></button></div>
+    {mode&&<div className="exp-life-modal" role="dialog" aria-modal="true" aria-label={mode==='pause'?'Pausar expediente':mode==='close'?'Dar de baja expediente':'Reabrir expediente'}><div className="exp-life-card">
+      <div className="exp-life-modal-head"><div><span>ACCIÓN CON CONFIRMACIÓN</span><h3>{mode==='pause'?'Pausar expediente':mode==='close'?'Dar de baja expediente':'Reabrir expediente'}</h3></div><button type="button" aria-label="Cerrar" onClick={closeModal}><X size={18}/></button></div>
       {mode==='pause'&&<div className="exp-life-form"><p>El expediente queda fuera del pipeline activo durante la pausa, pero conserva todos sus datos.</p><label>Reactivar a partir de<input type="date" value={pauseUntil} disabled={indefinite} onChange={e=>{setPauseUntil(e.target.value);setPrepared(false)}}/></label><label className="exp-life-check"><input type="checkbox" checked={indefinite} onChange={e=>{setIndefinite(e.target.checked);setPrepared(false)}}/> Pausa indefinida</label><div className="exp-life-preview"><b>Vista previa</b><span>{pauseSummary}</span></div></div>}
       {mode==='close'&&<div className="exp-life-form"><p>Dar de baja no elimina nada. El expediente deja de contar como activo y conserva su histórico.</p><label>Motivo<select value={reason} onChange={e=>{setReason(e.target.value);setPrepared(false)}}>{CLOSE_REASONS.map(x=><option key={x}>{x}</option>)}</select></label><label>Observación opcional<textarea rows={3} value={note} onChange={e=>{setNote(e.target.value);setPrepared(false)}} placeholder="Contexto útil para una futura reactivación"/></label></div>}
-      {mode==='reactivate'&&<div className="exp-life-form"><p>La reactivación debe restaurar el estado previo real, no inventar uno.</p><div className="exp-life-preview"><ArchiveRestore size={18}/><span>Se habilitará cuando el backend pueda recuperar de forma auditada el estado anterior.</span></div></div>}
+      {mode==='reactivate'&&<div className="exp-life-form"><p>El expediente volverá exactamente al último estado activo que consta en su histórico. No se inventa ningún estado nuevo.</p><div className="exp-life-preview"><ArchiveRestore size={18}/><span>Al confirmar podrás volver a abrir la ficha, editarla, añadir personas, documentación y continuar la operación normalmente.</span></div></div>}
       {message&&<div className="exp-life-message">{message}</div>}
-      <div className="exp-life-confirm"><button type="button" onClick={closeModal}>Cancelar</button>{!prepared?<button type="button" className="primary-life" onClick={prepare}>Preparar cambio</button>:<button type="button" className="primary-life" disabled={saving} onClick={confirm}>{saving?'Guardando…':'Confirmar cambio'}</button>}</div>
+      <div className="exp-life-confirm"><button type="button" onClick={closeModal}>Cancelar</button>{!prepared?<button type="button" className="primary-life" onClick={prepare}>Preparar cambio</button>:<button type="button" className="primary-life" data-testid="confirm-reactivate-expediente" disabled={saving} onClick={confirm}>{saving?'Guardando…':'Confirmar cambio'}</button>}</div>
       <small className="exp-life-contract">Expediente abierto: {expedienteCode}{canonicalCode!==expedienteCode?` · canónico: ${canonicalCode}`:''} · versión {version??'sin validar'} · {IS_PRODUCTION?'PROD con escritura auditada':'PRE-PROD sin escritura PROD'}.</small>
     </div></div>}
   </section>,host);
