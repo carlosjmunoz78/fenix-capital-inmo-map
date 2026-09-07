@@ -1,0 +1,50 @@
+{
+  "validation_id": "RLS-001-PREPROD-REPRESENTATIVE-2026-09-07",
+  "environment": "PREPROD",
+  "project_id": "hnqlnvakzaywtafeiybt",
+  "production_mutation": false,
+  "cost_additional_eur": 0,
+  "purpose": "Validate the RLS-001 enable-only mechanics using representative isolated tables, grants, SECURITY DEFINER RPC boundaries and Supabase roles without touching PROD.",
+  "setup": {
+    "schema": "cerebro_rls001_validation",
+    "tables": [
+      "special_cases",
+      "special_case_people",
+      "expediente_stage_history"
+    ],
+    "roles_verified": {
+      "anon_bypassrls": false,
+      "authenticated_bypassrls": false,
+      "service_role_bypassrls": true,
+      "postgres_bypassrls": true
+    },
+    "representative_controls": [
+      "no anon table grants",
+      "no authenticated table grants",
+      "SECURITY DEFINER server functions",
+      "RPC execute limited to service_role",
+      "RLS enabled on all three representative tables",
+      "service_role read path remained functional",
+      "service_role SECURITY DEFINER write path remained functional"
+    ]
+  },
+  "results": {
+    "rls_enabled_all_three": true,
+    "anon_table_grants": 0,
+    "authenticated_table_grants": 0,
+    "anon_direct_select_blocked": true,
+    "authenticated_direct_select_blocked": true,
+    "service_role_rpc_read": "PASS",
+    "service_role_history_read": "PASS",
+    "service_role_security_definer_insert": "PASS",
+    "cleanup": "PASS"
+  },
+  "cleanup": {
+    "schema_dropped": true,
+    "persistent_runtime_objects_left": false,
+    "note": "Two PREPROD migration-history entries remain as auditable setup/cleanup evidence; the representative schema itself was removed."
+  },
+  "scope_limit": "This proves representative permission/RLS mechanics, not full production data-behavior equivalence. PROD still requires an explicit promotion decision and rollback gate before enabling RLS.",
+  "classification": "PREPROD_GATE_PASS_REPRESENTATIVE",
+  "next": "Keep PROD unchanged; use this evidence together with live grant/RPC audit and production rollback plan if/when SEC/RLS promotion is authorized."
+}
