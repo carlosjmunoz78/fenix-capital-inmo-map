@@ -1,4 +1,4 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from 'npm:@supabase/supabase-js@2.57.4';
 
 const ALLOWED=new Set(['https://app.fenixcapital.es']);let svc:any=null;
 function keyFromJson(raw:string){try{const x=JSON.parse(raw||'{}');return String(x?.default??Object.values(x??{})[0]??'')}catch{return ''}}
