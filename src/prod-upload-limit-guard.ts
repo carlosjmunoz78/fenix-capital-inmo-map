@@ -5,6 +5,35 @@ const UUID_RE=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a
 if(isProd){
   const originalFetch=window.fetch.bind(window);
 
+  async function canonicalFromGateway(url:string,headers:HeadersInit|undefined,originCode:string){
+    const detailUrl=url.replace('/functions/v1/fenix-evidence-api/prepare',`/functions/v1/fenix-app-gateway/expedientes/${encodeURIComponent(originCode)}`);
+    const detail=await originalFetch(detailUrl,{method:'GET',headers});
+    if(detail.ok){
+      const data=await detail.json().catch(()=>null) as Record<string,unknown>|null;
+      const expediente=(data?.expediente&&typeof data.expediente==='object'?data.expediente:data?.item&&typeof data.item==='object'?data.item:null) as Record<string,unknown>|null;
+      const canonical=String(expediente?.expediente_code??expediente?.expediente??'').trim();
+      if(canonical&&canonical!==originCode)return canonical;
+    }
+
+    const listUrl=url.replace('/functions/v1/fenix-evidence-api/prepare','/functions/v1/fenix-app-gateway/expedientes');
+    const list=await originalFetch(listUrl,{method:'GET',headers});
+    if(!list.ok)return '';
+    const data=await list.json().catch(()=>null) as Record<string,unknown>|null;
+    const items=Array.isArray(data?.items)?data.items:[];
+    const wanted=originCode.replaceAll('-','').toLowerCase();
+    for(const raw of items){
+      if(!raw||typeof raw!=='object')continue;
+      const row=raw as Record<string,unknown>;
+      const candidates=[row.id,row.internal_id,row.expediente_code,row.expediente]
+        .filter(value=>typeof value==='string')
+        .map(value=>String(value).replaceAll('-','').toLowerCase());
+      if(!candidates.includes(wanted))continue;
+      const canonical=String(row.expediente_code??row.expediente??'').trim();
+      if(canonical)return canonical;
+    }
+    return '';
+  }
+
   async function canonicalizeEvidencePrepare(args:Parameters<typeof fetch>):Promise<Parameters<typeof fetch>>{
     try{
       const input=args[0];
@@ -14,14 +43,10 @@ if(isProd){
       const payload=JSON.parse(init.body) as Record<string,unknown>;
       const originType=String(payload.origin_type??'');
       const originCode=String(payload.origin_code??'');
-      if(originType!=='expediente'||!UUID_RE.test(originCode))return args;
+      if(originType!=='expediente'||originCode.startsWith('exp-legado-'))return args;
+      if(!UUID_RE.test(originCode)&&originCode.length<20)return args;
 
-      const gatewayUrl=url.replace('/functions/v1/fenix-evidence-api/prepare',`/functions/v1/fenix-app-gateway/expedientes/${encodeURIComponent(originCode)}`);
-      const lookup=await originalFetch(gatewayUrl,{method:'GET',headers:init.headers});
-      if(!lookup.ok)return args;
-      const data=await lookup.json().catch(()=>null) as Record<string,unknown>|null;
-      const expediente=(data?.expediente&&typeof data.expediente==='object'?data.expediente:data?.item&&typeof data.item==='object'?data.item:null) as Record<string,unknown>|null;
-      const canonical=String(expediente?.expediente_code??expediente?.expediente??'').trim();
+      const canonical=await canonicalFromGateway(url,init.headers,originCode);
       if(!canonical||canonical===originCode)return args;
       payload.origin_code=canonical;
       return [input,{...init,body:JSON.stringify(payload)}];
