@@ -1,74 +1,71 @@
 # CEREBRO Structural Bootstrap · Estado V0
 
-## VERDE / CONFIRMED_OPERATIONAL en PREPROD aislado
-- FACT-001 · Fábrica de Motores CEREBRO V0: generator determinista, plan, create, idempotencia y collision guard.
+## VERDE / CONFIRMED_OPERATIONAL EN PREPROD
+- FACT-001 · Fábrica de Motores CEREBRO V0 integrada en `preprod-app-phase1`.
 - GOV-001 · Engine Registry V0.
 - POL-001 · Promotion Policy V0 con PROD deny-by-default.
-- HEX-001 · Human Exception Policy V0: `HUMAN_REQUIRED` queda cerrado exactamente a los 8 códigos canónicos; credenciales/MFA/permisos/riesgo irreversible se modelan como blockers, no como excepciones humanas inventadas.
+- HEX-001 · `HUMAN_REQUIRED` cerrado exactamente a los 8 códigos canónicos; blockers técnicos separados.
 - EVT-001 · contrato canónico de eventos multiempresa.
-- JOB-001 · contrato canónico de jobs, estados, `BLOCKED` y reintentos limitados.
-- AUD-001 · contrato canónico append-only de auditoría, sin secretos.
-- OBSERV-001 · contrato canónico de health/log/trace/coste/seguridad.
-- Tribunal V0 · determinista, DENY por defecto, PASS solo con toda la evidencia obligatoria verde.
-- APP-001 · registrado como motor existente; no recreado.
-- WEB-001 · registrado desde evidencia web/WordPress viva; no recreado.
+- JOB-001 · contrato canónico de jobs, `BLOCKED` y reintentos limitados.
+- AUD-001 · contrato append-only de auditoría sin secretos.
+- OBSERV-001 · contrato de health/log/trace/coste/seguridad.
+- Tribunal V0 · determinista, DENY por defecto.
+- APP-001 · PREPROD `b092f43058d3303c80b9a5783c56ba7b023399c9` validado.
+- WEB-001 · runtime web/WordPress previamente verificado vivo; no recreado.
 
-## VERDE · GATES DE FACTORY/PREPROD
-- Registry/manifests: CI verde.
-- Factory unit tests: CI verde.
-- App compatibility: build PREPROD + browser QA + comprobación de cambios aditivos ejecutados en rama aislada; ningún fichero de runtime App se modifica por FACT-001.
-- RLS-001 OLD vs NEW: validación representativa en PostgreSQL 16 efímero, sin datos PROD, con owner/roles/grants/RPC SECURITY DEFINER equivalentes al boundary auditado; OLD y NEW conservan acceso RPC autorizado, mantienen anon/authenticated sin acceso directo y preservan datos.
-- Candidato RLS: test exige exactamente 3 `ENABLE ROW LEVEL SECURITY` y prohíbe DROP/DELETE/TRUNCATE/INSERT/UPDATE/GRANT/REVOKE/POLICY/FORCE RLS.
-- Coste adicional: 0 €.
+## HECHO · INTEGRACIÓN FACT-001
+- PR #106 se integró por squash únicamente en `preprod-app-phase1`.
+- SHA PREPROD integrado: `b092f43058d3303c80b9a5783c56ba7b023399c9`.
+- PRE-PROD App Build run `34140388557`: SUCCESS.
+- Build PREPROD: SUCCESS.
+- Browser QA PREPROD: SUCCESS.
+- PREPROD Ana CORS smoke: SUCCESS.
+- PROD operational CORS smoke de solo comprobación: SUCCESS.
+- PROD canonical write API CORS smoke de solo comprobación: SUCCESS.
+- Build de candidato PROD inmutable: SUCCESS; **no promovido**.
+- Browser QA exacto sobre candidato PROD: SUCCESS.
+- Assertion de ausencia de endpoints `*-test` en candidato PROD: SUCCESS.
+- Artifact PREPROD dist: `fenix-preprod-dist-b092f43058d3303c80b9a5783c56ba7b023399c9`.
+- Artifact candidato PROD: `fenix-prod-candidate-b092f43058d3303c80b9a5783c56ba7b023399c9`.
+- Artifact Playwright: `fenix-preprod-playwright-report-b092f43058d3303c80b9a5783c56ba7b023399c9`.
+- Coste adicional introducido por FACT-001: 0 €.
+
+## VERDE · GATES FACTORY
+- Registry/manifests y Factory unit tests: CI verde.
+- App compatibility aislada antes del merge: verde.
+- RLS-001 OLD vs NEW representativo en PostgreSQL 16 efímero: verde.
+- Candidato RLS enable-only: exactamente 3 `ENABLE ROW LEVEL SECURITY`; tests prohíben DROP/DELETE/TRUNCATE/INSERT/UPDATE/GRANT/REVOKE/POLICY/FORCE RLS.
 - Backup: Git history.
-- Rollback: revert commits / rama aislada antes de integración.
-- Rebuild: schema + Registry + Factory CLI + governance/contracts versionados.
+- Rollback de Factory: PR/revert PREPROD; ningún cambio PROD realizado.
+- Rebuild: schema + Registry + Factory CLI + contratos/governance versionados.
 
 ## PARCIAL / NO GREENWASH
-- DEP-001 · Dependency Registry: callers frontend literales clasificados, RLS caller/grant/RPC closure cerrada para el finding y RPC live existence verificada para los principales Edge actuales. La clausura semántica Edge → RPC → tabla de absolutamente todo el runtime continúa incrementalmente.
-- CORE-001 · plugin vivo pero global `ok=false`; requiere cerrar `staging_host` / `test_cleanup` antes de marcarlo verde.
-- SEO-001 · bridge vivo/ok, pero `last_run=null`, `learning_count=0`; el conector GSC de pago/trial no se renovará por defecto.
-- CRM-001 · contratos App/Supabase vivos; aceptación integral específica del runtime CRM no se ha re-ejecutado en este loop.
-- DOC-001 · funciones y contratos vivos; la frontera está documentada, pero cualquier consolidación gateway/document-actions sigue requiriendo OLD vs NEW.
-- TRN-001 · evidencia documental reciente; runtime transversal no verificado directamente.
-- LAB-TRD · evidencia PAPER/SHADOW reciente; VM no verificada directamente en este loop.
+- DEP-001 · todos los callers Edge literales del frontend están clasificados por entorno; el cierre semántico completo Edge → RPC → tabla continúa incrementalmente.
+- CORE-001 · plugin vivo pero última evidencia global `ok=false`; pendientes `staging_host` / `test_cleanup`.
+- SEO-001 · bridge vivo/ok, pero última evidencia `last_run=null`, `learning_count=0`; no se pagará un conector solo para cerrar estado.
+- CRM-001 · contratos App/Supabase vivos; aceptación integral específica pendiente de evidencia ejecutable.
+- DOC-001 · funciones y contratos vivos; consolidación no autorizada sin OLD vs NEW.
+- TRN-001 · evidencia documental; runtime transversal no verificado directamente.
+- LAB-TRD · evidencia PAPER/SHADOW; VM no verificada directamente.
 
-## RLS-001 · HIGH controlado, PROD sin modificar
-Las tablas `fenix_prod.special_cases`, `fenix_prod.special_case_people` y `fenix_prod.expediente_stage_history` continúan con RLS desactivado en PROD.
+## RLS-001 · HIGH CONTROLADO, PROD SIN MODIFICAR
+`fenix_prod.special_cases`, `fenix_prod.special_case_people` y `fenix_prod.expediente_stage_history` continúan con RLS desactivado en PROD.
 
-Auditoría live solo lectura confirmó:
-- no existen grants de tabla para `anon` ni `authenticated` en las tres tablas;
-- las tablas son propiedad de `postgres`;
-- los RPC relevantes son `SECURITY DEFINER` y su EXECUTE auditado está limitado a `postgres`/`service_role`;
-- `postgres` y `service_role` disponen de `BYPASSRLS`;
-- no se evidenció exposición directa `anon/authenticated`.
+Auditoría read-only confirmó ausencia de grants directos `anon`/`authenticated`, ownership `postgres`, RPC relevantes `SECURITY DEFINER`, acceso backend por `service_role` y ausencia de evidencia de exposición directa. La prueba representativa enable-only está verde, pero **no autoriza DDL PROD**. Snapshot/backup, estructura completa representativa, callers reales y rollback probado siguen siendo gates obligatorios.
 
-La prueba PREPROD representativa del cambio enable-only está verde, pero eso **no autoriza** aplicar RLS a PROD. Antes de cualquier DDL PROD siguen siendo obligatorios snapshot/backup, comparación sobre estructura completa, prueba de callers reales y rollback.
+## ONE-SHOTS Y OVERLAPS
+- Ocho `*-once` siguen ACTIVE pero auditados como tombstones HTTP 410; no se eliminan sin caller inventory + rollback.
+- bank: Gateway lectura/orquestación; `fenix-bank-api` creación especializada.
+- directory: `fenix-directory-api` lectura; `fenix-directory-actions` escritura.
+- Ana: `fenix-ana-api` acciones/correcciones; `fenix-ana-canonical` lectura canónica.
+- documents/evidence: Gateway + document-actions gobiernan documento; evidence-api gobierna evidencia contextual.
+- expediente stage: Gateway workspace; `fenix-expediente-stage` mutación auditada/versionada.
 
-## ONE-SHOTS · CLASIFICADOS
-Ocho Edge Functions `*-once` continúan ACTIVE, pero la auditoría de código live las clasificó como tombstones HTTP 410. No se eliminan solo para reducir ruido: retirada requiere caller inventory y rollback.
+## LOOP ACTUAL
+Rama `cerebro/dep-001-runtime-closure-v0`: actualizar evidencia post-merge, eliminar drift de SHA y continuar DEP-001 sin tocar PROD.
 
-## OVERLAPS · FRONTERAS ASIGNADAS SIN CONSOLIDAR
-- bank: Gateway = lectura/orquestación; `fenix-bank-api` = creación especializada POST.
-- directory: `fenix-directory-api` = lectura; `fenix-directory-actions` = creación/escritura.
-- Ana: `fenix-ana-api` = correcciones/decisiones/sync; `fenix-ana-canonical` = lector canónico.
-- documents/evidence: Gateway + document-actions = documento; `fenix-evidence-api` = evidencia contextual/deduplicación/origen.
-- expediente stage: Gateway = workspace general; `fenix-expediente-stage` = mutación auditada/versionada.
-
-No se elimina ni fusiona ninguna función sin PREPROD + OLD vs NEW + rollback.
-
-## ESTADO DE INTEGRACIÓN
-- Rama: `cerebro/fact-001-factory-v0`.
-- PR #106 contra `preprod-app-phase1`.
-- Cambios Factory: aditivos; PROD no recibe DDL, deploys, RLS ni deletes.
-- Registry: 17 motores existentes/nuevos wrapped sin recrear runtimes.
-- Shared contracts: `company_id`, `engine_id`, `environment`, `version` obligatorios en envelopes canónicos.
-- Governance: dependency registry, promotion policy, tribunal, human exception policy, RLS audit/candidate, one-shot inventory y frontend Edge contract.
-
-## GATE DE PROMOCIÓN
-FACT-001 puede integrarse en `preprod-app-phase1` cuando el HEAD final tenga verdes sus checks propios y App compatibility. Esa integración es PREPROD, no autorización de PROD.
-
-PROD continúa DENY por defecto mientras cualquier gate de producción aplicable no esté demostrado, especialmente findings HIGH, pruebas completas del runtime y promoción gradual.
+## GATE PROD
+PROD permanece `DENY` por defecto. La existencia de un candidato PROD verde no equivale a autorización de promoción. Findings HIGH y motores parciales siguen bloqueando promoción autónoma.
 
 ## Regla de estado
-No se marca un motor como `CONFIRMED_OPERATIONAL` solo porque exista código o documentación. Se exige evidencia del runtime correspondiente y gates aplicables. Los estados parciales anteriores son deliberados.
+Solo se usa `CONFIRMED_OPERATIONAL` con evidencia runtime/CI aplicable. Código o documentación por sí solos no elevan un motor a verde.
