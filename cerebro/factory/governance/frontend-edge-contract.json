@@ -1,6 +1,8 @@
 {
-  "contract_version": "0.2.0",
-  "app_source_sha": "317a3e457993b4a0da2b84f4f51bcd28b3daba36",
+  "contract_version": "0.3.0",
+  "app_source_sha": "b092f43058d3303c80b9a5783c56ba7b023399c9",
+  "runtime_files_unchanged_from_sha": "317a3e457993b4a0da2b84f4f51bcd28b3daba36",
+  "preprod_validation_run": 34140388557,
   "principle": "every_literal_frontend_edge_dependency_must_have_an_environment_contract",
   "edges": {
     "fenix-app-gateway": {"environment": "PROD_AND_PREPROD_SUFFIXED", "prod_live": true, "prod_version": 16},
@@ -10,7 +12,6 @@
     "fenix-evidence-api": {"environment": "PROD_AND_PREPROD_SUFFIXED", "prod_live": true, "preprod_variant": "fenix-evidence-api-test"},
     "fenix-memory-api": {"environment": "PROD_AND_PREPROD_SUFFIXED", "prod_live": true, "preprod_variant": "fenix-memory-api-test"},
     "fenix-b2b-actions": {"environment": "PROD_AND_PREPROD_SUFFIXED", "prod_live": true, "preprod_variant": "fenix-b2b-actions-test"},
-
     "fenix-direction-kpis": {"environment": "PREPROD_ONLY", "prod_live": false, "preprod_variant": "fenix-direction-kpis-test", "prod_behavior": "FAIL_CLOSED_503", "evidence": "DirectionKpiDrilldownGuard productionAvailable=false"},
     "fenix-bank-ranking": {"environment": "PREPROD_ONLY", "prod_live": false, "preprod_variant": "fenix-bank-ranking-test", "prod_behavior": "FAIL_CLOSED_503", "evidence": "ExpedienteBankRankingGuard productionAvailable=false"},
     "fenix-belen-financial-context": {"environment": "PREPROD_ONLY", "prod_live": false, "preprod_variant": "fenix-belen-financial-context-test", "prod_behavior": "FAIL_CLOSED_503", "evidence": "FinancialModuleBelenGuard productionAvailable=false"},
@@ -27,18 +28,15 @@
     "fenix-special-cases-runtime": {"environment": "PREPROD_ONLY", "prod_live": false, "preprod_variant": "fenix-special-cases-runtime-test", "prod_behavior": "ROUTE_READS_TO_FENIX_SPECIAL_CASES_API", "evidence": "specialCasesRuntime branches on IS_PRODUCTION"},
     "fenix-visitas-api": {"environment": "PREPROD_ONLY", "prod_live": false, "preprod_variant": "fenix-visitas-api-test", "prod_behavior": "FAIL_CLOSED_503", "evidence": "VisitasShell productionAvailable=false"},
     "fenix-reports-api-test": {"environment": "PREPROD_ONLY", "prod_live": false, "preprod_variant": "fenix-reports-api-test", "prod_behavior": "EXPLICIT_SOURCE_GUARD"},
-
     "fenix-communications-gateway": {"environment": "PROD_AND_PREPROD_SUFFIXED", "prod_live": true, "prod_version": 8, "preprod_variant": "fenix-communications-gateway-test", "evidence": "CommunicationsShell productionAvailable=true"},
     "fenix-directory-actions": {"environment": "PROD_AND_PREPROD_SUFFIXED", "prod_live": true, "prod_version": 8, "preprod_variant": "fenix-directory-actions-test", "evidence": "DirectoryCreateShell uses environment suffix contract"},
     "fenix-document-extract": {"environment": "PROD_AND_PREPROD_SUFFIXED", "prod_live": true, "prod_version": 11, "preprod_variant": "fenix-document-extract-test", "evidence": "DocumentViewerShell uses environment suffix contract"},
     "fenix-reports-api": {"environment": "PROD_AND_PREPROD_SUFFIXED", "prod_live": true, "prod_version": 8, "preprod_variant": "fenix-reports-api-test", "evidence": "InformesShell uses common base name with environment suffix"},
-
     "fenix-directory-api": {"environment": "PROD_ONLY_SOURCE_BRANCH", "prod_live": true, "prod_version": 9, "prod_behavior": "READ_ONLY_DIRECTORY", "evidence": "notariasRuntime/registrosRuntime use it only inside IS_PRODUCTION branch"},
     "fenix-document-actions": {"environment": "PROD_ONLY_SOURCE_GUARD", "prod_live": true, "prod_version": 9, "prod_behavior": "VERSIONED_DOCUMENT_EDIT", "evidence": "DocumentViewerShell enables editing only in PROD"},
     "fenix-expediente-stage": {"environment": "PROD_ONLY_SOURCE_GUARD", "prod_live": true, "prod_version": 8, "prod_behavior": "AUDITED_VERSIONED_STAGE_MUTATION", "evidence": "ExpedienteJourneyGuard renders manual stage mutation only under IS_PRODUCTION"},
     "fenix-special-cases-api": {"environment": "PROD_ONLY_SOURCE_BRANCH", "prod_live": true, "prod_version": 8, "prod_behavior": "SPECIAL_CASES_CANONICAL_API", "evidence": "specialCasesRuntime branches to this only in PROD"},
     "fenix-task-api": {"environment": "PROD_ONLY_SOURCE_GUARD", "prod_live": true, "prod_version": 11, "prod_behavior": "VERSIONED_TASK_LIFECYCLE", "evidence": "TaskLifecycleGuard calls API only in PROD; PREPROD does not write PROD"},
-
     "fenix-notion-runtime": {"environment": "PREPROD_ONLY", "prod_live": false, "preprod_variant": "fenix-notion-runtime-test", "prod_behavior": "ROUTE_READS_TO_FENIX_APP_GATEWAY"}
   },
   "rules": [
