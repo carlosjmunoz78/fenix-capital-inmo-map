@@ -3,18 +3,28 @@ import {createPortal} from 'react-dom';
 import {useLocation} from 'react-router-dom';
 import {ArchiveRestore,PauseCircle,Power,RotateCcw,X} from 'lucide-react';
 import {fetchAppApi,fetchEnvironmentApi,IS_PRODUCTION} from './supabase';
+import legacyMap from '../data/legacy-expediente-destination-map.json';
 import './expediente-lifecycle.css';
 
 type Mode='pause'|'close'|'reactivate'|null;
 type ExpRow={expediente_code?:string;stage?:string;version?:number};
 type StageResponse={ok?:boolean;status?:number;error?:string;stage?:string;version?:number;current_version?:number;current_stage?:string};
+type LegacyMapEntry={dedupe_key?:string;destination_page_id?:string};
 const CLOSE_REASONS=['Cliente no compra','Cliente desiste','Operación aplazada','No viable','Perdido frente a competencia','Duplicado / error','Otro'];
 function text(v:unknown){if(Array.isArray(v))return v.map(String).join(', ');return String(v??'');}
+function norm(v:string){return v.replaceAll('-','').trim().toLowerCase()}
+function resolveCanonicalCode(routeCode:string){
+ const entries=((legacyMap as {expedientes?:LegacyMapEntry[]}).expedientes??[]);
+ const wanted=norm(routeCode);
+ const hit=entries.find(x=>norm(String(x.destination_page_id??''))===wanted||norm(String(x.dedupe_key??''))===wanted);
+ return String(hit?.dedupe_key||routeCode);
+}
 
 export default function ExpedienteLifecycleGuard(){
   const {pathname}=useLocation();
   const match=pathname.match(/^\/expedientes\/([^/]+)$/);
   const expedienteCode=match?.[1]?decodeURIComponent(match[1]):'';
+  const canonicalCode=useMemo(()=>resolveCanonicalCode(expedienteCode),[expedienteCode]);
   const [canonical,setCanonical]=useState(false);
   const [currentState,setCurrentState]=useState<unknown>(null);
   const [version,setVersion]=useState<number|null>(null);
@@ -30,15 +40,15 @@ export default function ExpedienteLifecycleGuard(){
   const pauseSummary=useMemo(()=>indefinite?'Pausa sin fecha de reactivación':pauseUntil?`Pausa hasta ${pauseUntil}`:'Selecciona una fecha o marca pausa indefinida',[indefinite,pauseUntil]);
 
   async function load(){
-    if(!expedienteCode)return;
-    const r=await fetchAppApi<any>(`/expedientes/${encodeURIComponent(expedienteCode)}`);
-    if(r.status!==200){setCanonical(false);return;}
+    if(!canonicalCode)return;
+    const r=await fetchAppApi<any>(`/expedientes/${encodeURIComponent(canonicalCode)}`);
+    if(r.status!==200){setCanonical(false);setVersion(null);return;}
     const item=(r.data?.expediente??r.data?.item??null) as ExpRow|null;
     setCanonical(Boolean(item));
     setCurrentState(item?.stage??null);
     setVersion(Number.isFinite(Number(item?.version))?Number(item?.version):null);
   }
-  useEffect(()=>{let alive=true;(async()=>{if(!expedienteCode)return;await load();if(!alive)return;})();return()=>{alive=false}},[expedienteCode]);
+  useEffect(()=>{let alive=true;(async()=>{if(!canonicalCode)return;await load();if(!alive)return;})();return()=>{alive=false}},[canonicalCode]);
   useEffect(()=>{
     if(!expedienteCode||pathname==='/expedientes/nuevo'){setHost(null);return;}
     const mount=()=>{
@@ -62,7 +72,7 @@ export default function ExpedienteLifecycleGuard(){
   function open(next:Mode){setMode(next);setMessage('');setPrepared(false);}
   function closeModal(){setMode(null);setMessage('');setPrepared(false);setSaving(false);}
   function prepare(){
-    if(!canonical||version===null){setMessage('No se ha podido validar la versión canónica del expediente. No se ejecutará ningún cambio.');return;}
+    if(!canonical||version===null){setMessage('No se ha podido validar el expediente canónico asociado. No se ejecutará ningún cambio.');return;}
     if(mode==='pause'&&!indefinite&&!pauseUntil){setMessage('Indica hasta cuándo se pausa o marca pausa indefinida.');return;}
     if(mode==='close'&&!reason){setMessage('Selecciona un motivo de baja.');return;}
     if(mode==='reactivate'){
@@ -76,7 +86,7 @@ export default function ExpedienteLifecycleGuard(){
     if(!IS_PRODUCTION){setMessage('PRE-PROD: comprobación preparada sin escribir en producción.');return;}
     setSaving(true);setMessage('Guardando cambio auditado…');
     const stage=mode==='close'?'Baja':'Pausado';
-    const r=await fetchEnvironmentApi<StageResponse>('fenix-expediente-stage','',{method:'POST',body:JSON.stringify({expediente_code:expedienteCode,expected_version:version,stage})});
+    const r=await fetchEnvironmentApi<StageResponse>('fenix-expediente-stage','',{method:'POST',body:JSON.stringify({expediente_code:canonicalCode,expected_version:version,stage})});
     if(r.status===200&&r.data?.ok){
       setCurrentState(r.data.stage??stage);setVersion(Number(r.data.version??version+1));setPrepared(false);
       setMessage(mode==='close'?`Expediente dado de baja correctamente. Motivo: ${reason}${note.trim()?` · ${note.trim()}`:''}`:`Expediente pausado correctamente${indefinite?' sin fecha':pauseUntil?` hasta ${pauseUntil}`:''}.`);
@@ -103,7 +113,7 @@ export default function ExpedienteLifecycleGuard(){
         {mode==='reactivate'&&<div className="exp-life-form"><p>La reactivación debe restaurar el estado previo real, no inventar uno.</p><div className="exp-life-preview"><ArchiveRestore size={18}/><span>Se habilitará cuando el backend pueda recuperar de forma auditada el estado anterior.</span></div></div>}
         {message&&<div className="exp-life-message">{message}</div>}
         <div className="exp-life-confirm"><button type="button" onClick={closeModal}>Cancelar</button>{!prepared?<button type="button" className="primary-life" onClick={prepare}>Preparar cambio</button>:<button type="button" className="primary-life" disabled={saving} onClick={confirm}>{saving?'Guardando…':'Confirmar cambio'}</button>}</div>
-        <small className="exp-life-contract">Expediente: {expedienteCode} · versión {version??'sin validar'} · {IS_PRODUCTION?'PROD con escritura auditada':'PRE-PROD sin escritura PROD'}.</small>
+        <small className="exp-life-contract">Expediente abierto: {expedienteCode}{canonicalCode!==expedienteCode?` · canónico: ${canonicalCode}`:''} · versión {version??'sin validar'} · {IS_PRODUCTION?'PROD con escritura auditada':'PRE-PROD sin escritura PROD'}.</small>
       </div>
     </div>}
   </section>;
