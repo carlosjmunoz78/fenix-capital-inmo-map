@@ -1,0 +1,69 @@
+{
+  "evidence_version": "1.0.0",
+  "generated_at": "2026-09-08",
+  "company_id": "fenix-capital",
+  "environment": "NON_PROD",
+  "classification": "PARTIAL_CONTROL_PLANE_RECONCILIATION_PASS",
+  "cost_additional_eur": 0,
+  "make_credit_policy": {
+    "monthly_budget": 10000,
+    "usage_mode": "surgical_on_demand_only",
+    "polling": false
+  },
+  "cloudflare_account_id": "e39a57e1ac42650ca5a6d5307cf0ac8e",
+  "control_plane": {
+    "transport": "Make Cloudflare connection",
+    "connection_name": "Fénix Capital · Cloudflare · Web y SEO",
+    "read_access_confirmed": true,
+    "account_api_status": 200
+  },
+  "inventory_before": {
+    "pages_project": {
+      "name": "fenix-capital-inmo-map",
+      "production_branch": "main",
+      "preview_deployment_setting": "all",
+      "build_command": "npx @cloudflare/next-on-pages@latest",
+      "destination_dir": ".vercel/output/static",
+      "latest_preview_on_preprod": "failure"
+    },
+    "workers": [
+      {
+        "name": "fenix-capital-inmo-map",
+        "tag": "0a56d2edc4944449b9c8eb9940bc23f6",
+        "preview_trigger_uuid": "b5801e75-37a8-4ef1-8131-8c277e384fa0",
+        "production_trigger_uuid": "2988ca8a-7141-4301-8bff-ee0e441d86a9"
+      },
+      {
+        "name": "fenix-capital-inmo-maps",
+        "tag": "9bdd55fdb5ac4279996886a477142813",
+        "preview_trigger_uuid": "54f36269-ca36-4089-8861-366c306bdfdb",
+        "production_trigger_uuid": "4fbafb71-fcdf-4243-b72d-c7a97f3922df"
+      }
+    ]
+  },
+  "change_applied": {
+    "scope": "NON_PROD_ONLY",
+    "workers_preview_triggers_deleted": [
+      "b5801e75-37a8-4ef1-8131-8c277e384fa0",
+      "54f36269-ca36-4089-8861-366c306bdfdb"
+    ],
+    "production_triggers_unchanged": true,
+    "pages_project_unchanged": true,
+    "prod_deploy_executed": false
+  },
+  "verification_after": {
+    "fenix-capital-inmo-map_triggers": ["2988ca8a-7141-4301-8bff-ee0e441d86a9"],
+    "fenix-capital-inmo-maps_triggers": ["4fbafb71-fcdf-4243-b72d-c7a97f3922df"],
+    "preview_worker_triggers_remaining": 0,
+    "production_worker_triggers_remaining": 2
+  },
+  "rollback": {
+    "type": "recreate deleted preview triggers from snapshot",
+    "snapshot_fields_preserved": ["build_token_uuid", "trigger_name", "build_command", "deploy_command", "root_directory", "branch_includes", "branch_excludes", "path_includes", "path_excludes", "build_caching_enabled", "repo_connection"],
+    "note": "No production trigger was changed or deleted."
+  },
+  "open_item": {
+    "pages_preview": "Cloudflare Pages preview remains active and misconfigured for this Vite app; API PATCH attempts returned HTTP 400 and no Pages mutation was applied.",
+    "next_safe_action": "Resolve Pages preview configuration or disable preview via a verified request shape before declaring Cloudflare fully green."
+  }
+}
