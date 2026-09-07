@@ -5,7 +5,7 @@
   "company_scope": "COMPANY_SCOPED",
   "company_id": "fenix-capital",
   "environment": "PREPROD",
-  "version": "317a3e457993b4a0da2b84f4f51bcd28b3daba36",
+  "version": "b092f43058d3303c80b9a5783c56ba7b023399c9",
   "contract_version": "3",
   "status": "CONFIRMED_OPERATIONAL",
   "objective": "Operar la App interna Fénix Capital preservando RBAC, contratos y acceso al core transaccional.",
@@ -20,9 +20,17 @@
   "events_in": [],
   "events_out": [],
   "jobs": [],
-  "tests": ["PRE-PROD App Build@317a3e457993b4a0da2b84f4f51bcd28b3daba36=success"],
+  "tests": [
+    "PRE-PROD App Build@b092f43058d3303c80b9a5783c56ba7b023399c9=success",
+    "Browser QA PRE-PROD=success",
+    "PRE-PROD Ana CORS smoke=success",
+    "PROD operational CORS smoke=success",
+    "PROD canonical write API CORS smoke=success",
+    "Browser QA exact PROD candidate=success",
+    "PROD candidate test-endpoint leak assertion=success"
+  ],
   "evaluation": ["route_guards", "identity_guards", "detail_guards"],
-  "observability": ["GitHub Actions", "Supabase Edge Functions"],
+  "observability": ["GitHub Actions run 34140388557", "Supabase Edge Functions"],
   "retry_timeout": {},
   "cost_budget": {"additional_monthly_eur_target": 0},
   "backup": {"strategy": "existing_git_backup_branches_and_history"},
@@ -33,5 +41,13 @@
   "autonomy_level": "HUMAN_BY_EXCEPTION",
   "zero_cost_execution_plan": ["reuse_existing_app", "reuse_supabase", "reuse_github_actions"],
   "human_exception_codes": ["LEGAL_REQUIRED", "SIGNATURE_REQUIRED", "LOW_CONFIDENCE", "HIGH_RISK", "POLICY_CONFLICT", "SECURITY_INCIDENT", "MONEY_LIMIT", "CUSTOMER_HUMAN_REQUEST"],
-  "evidence": ["branch:preprod-app-phase1", "sha:317a3e457993b4a0da2b84f4f51bcd28b3daba36", "ci:PRE-PROD App Build success"]
+  "system_blocker_codes": ["MISSING_CREDENTIAL", "EXPIRED_OR_REVOKED_CREDENTIAL", "MFA_REQUIRED", "PERMISSION_REQUIRED", "IRREVERSIBLE_PROD_RISK"],
+  "evidence": [
+    "branch:preprod-app-phase1",
+    "sha:b092f43058d3303c80b9a5783c56ba7b023399c9",
+    "workflow_run:34140388557=success",
+    "artifact:fenix-preprod-dist-b092f43058d3303c80b9a5783c56ba7b023399c9",
+    "artifact:fenix-prod-candidate-b092f43058d3303c80b9a5783c56ba7b023399c9",
+    "runtime_source_files_unchanged_by_FACTORY=true"
+  ]
 }
