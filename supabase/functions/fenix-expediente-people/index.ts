@@ -1,5 +1,4 @@
-import { createClient } from 'npm:@supabase/supabase-js@2.57.4';
-
+import {createClient} from 'npm:@supabase/supabase-js@2.57.4';
 const ALLOWED=new Set(['https://app.fenixcapital.es']);let svc:any=null;
 function keyFromJson(raw:string){try{const x=JSON.parse(raw||'{}');return String(x?.default??Object.values(x??{})[0]??'')}catch{return ''}}
 function config(){const URL=Deno.env.get('SUPABASE_URL')??'',ANON=Deno.env.get('SUPABASE_ANON_KEY')||keyFromJson(Deno.env.get('SUPABASE_PUBLISHABLE_KEYS')??''),SERVICE=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')||keyFromJson(Deno.env.get('SUPABASE_SECRET_KEYS')??'');return{URL,ANON,SERVICE}}
@@ -12,6 +11,10 @@ async function jsonBody(req:Request){try{return await req.json()}catch{return {}
 Deno.serve(async(req:Request)=>{if(req.method==='OPTIONS')return new Response(null,{status:204,headers:cors(req)});let a;try{a=await actor(req)}catch(e){console.error(e);return out(req,{ok:false,status:500,error:'identity_resolution_failed'},500)}if(!a)return out(req,{ok:false,status:401,error:'identity_not_linked'},401);const u=new URL(req.url);try{
  if(req.method==='GET'&&u.searchParams.get('expediente')){const r=await rpc('fenix_prod_exp_people_server',{p_actor_code:a,p_exp_code:u.searchParams.get('expediente')});return out(req,r,Number(r?.status)||200)}
  if(req.method==='GET'&&u.searchParams.get('contact')){const id=u.searchParams.get('contact');const r=await rpc('fenix_prod_contact_get_server',{p_actor_code:a,p_id:id});if(!r?.ok)return out(req,r,Number(r?.status)||200);const lists=await rpc('fenix_prod_contact_lists_server',{p_actor_code:a,p_client_code:id});return out(req,{...r,lists:lists?.items||[]},200)}
- if(req.method==='POST'){const b=await jsonBody(req);if(b.action==='create'){const r=await rpc('fenix_prod_exp_person_create_server',{p_actor_code:a,p_exp_code:b.expediente_code,p_payload:b.payload||{}});return out(req,r,Number(r?.status)||200)}if(b.action==='update'){const r=await rpc('fenix_prod_exp_person_update_server',{p_actor_code:a,p_client_code:b.client_code,p_changes:b.changes||{}});return out(req,r,Number(r?.status)||200)}if(b.action==='list_assign'){const r=await rpc('fenix_prod_contact_list_assign_server',{p_actor_code:a,p_client_code:b.client_code,p_list_name:b.list_name,p_selected:Boolean(b.selected)});return out(req,r,Number(r?.status)||200)}}
+ if(req.method==='POST'){const b=await jsonBody(req);
+  if(b.action==='create'){const r=await rpc('fenix_prod_exp_person_create_server',{p_actor_code:a,p_exp_code:b.expediente_code,p_payload:b.payload||{}});return out(req,r,Number(r?.status)||200)}
+  if(b.action==='update'){const r=await rpc('fenix_prod_exp_person_update_server',{p_actor_code:a,p_client_code:b.client_code,p_exp_code:b.expediente_code??null,p_changes:b.changes||{}});return out(req,r,Number(r?.status)||200)}
+  if(b.action==='list_assign'){const r=await rpc('fenix_prod_contact_list_assign_server',{p_actor_code:a,p_client_code:b.client_code,p_list_name:b.list_name,p_selected:Boolean(b.selected)});return out(req,r,Number(r?.status)||200)}
+ }
  return out(req,{ok:false,status:404,error:'route_not_found'},404)
 }catch(e){console.error(e);return out(req,{ok:false,status:500,error:'server_error'},500)}});
