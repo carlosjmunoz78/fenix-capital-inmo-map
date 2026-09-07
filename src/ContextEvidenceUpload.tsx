@@ -99,7 +99,7 @@ export default function ContextEvidenceUpload(){
   const host=document.createElement('div');
   host.className='context-evidence-inline-host';
   const place=()=>{
-   const content=document.querySelector<HTMLElement>('.ops-content,.dir-content');
+   const content=document.querySelector<HTMLElement>('.ops-content,.dir-content,.detail-exp-content');
    if(!content)return;
    const kpis=content.querySelector<HTMLElement>(':scope > .tas-kpis, :scope > .firmas-kpis, :scope > .fin-kpis, :scope > .vis-kpis, :scope > .inmo-kpis, :scope > [class$="-kpis"]');
    const hero=content.querySelector<HTMLElement>(':scope > [class*="-ana-hero"], :scope > .vis-ana, :scope > .ops-ana-card, :scope > .dir-priority-copy');
