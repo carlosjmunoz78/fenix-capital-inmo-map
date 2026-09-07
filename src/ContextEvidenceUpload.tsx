@@ -186,7 +186,11 @@ export default function ContextEvidenceUpload(){
    setMsg(`${allowed.length} archivo${allowed.length===1?'':'s'} preparado${allowed.length===1?'':'s'}. Se vinculará${allowed.length===1?'':'n'} automáticamente cuando exista y se abra la ficha.${blocked?` ${blocked} archivo${blocked===1?'':'s'} no admitido${blocked===1?'':'s'} en producción.`:''}`);
    return;
   }
-  const allowed=IS_PRODUCTION?files.filter(file=>!isAudio(file)&&PROD_ALLOWED_MIME.has(mimeOf(file))):files;
+  if(!IS_PRODUCTION){
+   await uploadFiles(files,activeContext);
+   return;
+  }
+  const allowed=files.filter(file=>!isAudio(file)&&PROD_ALLOWED_MIME.has(mimeOf(file)));
   const blocked=files.length-allowed.length;
   setSelectedFiles(allowed);
   if(!allowed.length){setMsg(blocked?'Formato no admitido en producción.':'No se seleccionaron archivos.');return;}
