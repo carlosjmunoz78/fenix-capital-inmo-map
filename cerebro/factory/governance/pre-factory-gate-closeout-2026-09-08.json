@@ -1,0 +1,55 @@
+{
+  "evidence_version": "1.0.0",
+  "generated_at": "2026-09-08",
+  "scope": "CEREBRO OS pre-factory massive generation gate",
+  "preprod_head": "2e008d674228921c0e0ef709cc9929051ed74a1f",
+  "baseline_preserved": ["APP", "CRM", "WEB", "SOCIAL", "SUPABASE_CRITICAL"],
+  "cost_additional_eur": 0,
+  "cloudflare": {
+    "tracking_issue": 127,
+    "state": "CLOSED_VERIFIED_GREEN",
+    "workers_evidence": "cloudflare-control-plane-reconciliation-2026-09-08.json",
+    "pages_evidence": "cloudflare-pages-reconciliation-2026-09-08.json",
+    "pr_workers": 131,
+    "pr_pages": 132,
+    "post_merge_preprod_runs": [3333, 3334],
+    "post_merge_preprod_conclusion": "success",
+    "production_deploy_initiated": false,
+    "main_preserved": true
+  },
+  "external_human_exceptions": [
+    {
+      "id": "HEX-GOV-BRANCH-PROTECTION",
+      "code": "HIGH_RISK",
+      "tracking_issue": 124,
+      "autonomous_action_remaining": "none_safe_without_admin_authorization",
+      "exact_human_action": "Authorize a GitHub connection in Make with repository branch-protection/ruleset administration permission; CEREBRO then snapshots, applies minimum protection, tests and records rollback."
+    },
+    {
+      "id": "HEX-LAB-TRD-RUNTIME",
+      "code": "HIGH_RISK",
+      "tracking_issue": 126,
+      "autonomous_action_remaining": "none_safe_without_current_compute_or_health_read_path",
+      "exact_human_action": "Authorize/provide read-only GCP Compute/VM health access or an existing non-mutating health/log endpoint. REAL trading remains blocked."
+    },
+    {
+      "id": "HEX-CLOUDFLARE-SECRET-ROTATION",
+      "code": "SECURITY_INCIDENT",
+      "tracking_issue": 133,
+      "autonomous_action_remaining": "blocked_on_consumer_ownership_before_prod_secret_rotation",
+      "exact_human_action": "Confirm ownership/consumers or authorize coordinated rotation after consumer inventory; never copy the secret value into documentation."
+    }
+  ],
+  "trading_real": {
+    "authorized": false,
+    "policy": "BLOCK_REAL",
+    "verification_must_not_use_real_money": true
+  },
+  "factory_massive_generation": {
+    "structural_preprod_gate": "READY",
+    "reason": "Cloudflare gate is verified green; branch protection and Trading runtime are formalized external HUMAN_REQUIRED with no safe autonomous path; security incident is isolated from structural Factory work and remains PROD-sensitive.",
+    "prod_autonomy": "DENY",
+    "next": "Use FACT-001 to generate/register first multi-company family and CEREBRO Gateway/Console scaffolds without deploying PROD."
+  },
+  "secrets_in_evidence": false
+}

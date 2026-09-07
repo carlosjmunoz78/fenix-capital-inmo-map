@@ -1,6 +1,6 @@
 {
-  "queue_version": "1.6.0",
-  "generated_at": "2026-09-07",
+  "queue_version": "1.7.0",
+  "generated_at": "2026-09-08",
   "principle": "Only items that cannot be safely closed by the current autonomous tool surface remain here. No item authorizes bypassing promotion gates.",
   "canonical_human_required_codes": [
     "LEGAL_REQUIRED",
@@ -36,6 +36,15 @@
       "closed_as": "CONFIRMED_OPERATIONAL_PROD_EMPTY_CYCLE",
       "evidence_file": "governance/seo-prod-empty-cycle-validation-2026-09-07.json",
       "reason": "Representative genuine WordPress staging remediation canary passed first; then PROD loop-once(limit=1) executed successfully against zero alerts and direct status confirmed non-null last_run. No page/content remediation, plugin update, DDL or publication occurred. Autonomous PROD content writes remain governed separately by promotion policy."
+    },
+    {
+      "id": "HEX-CLOUDFLARE-EXTERNAL-CHECKS",
+      "closed_as": "CONFIRMED_NONPROD_CONTROL_PLANE_RECONCILIATION",
+      "evidence_files": [
+        "governance/cloudflare-control-plane-reconciliation-2026-09-08.json",
+        "governance/cloudflare-pages-reconciliation-2026-09-08.json"
+      ],
+      "reason": "Workers NON-PROD preview triggers were removed after snapshot while main triggers were preserved; Pages preview_deployment_setting changed from all to none with production_branch=main and production_deployments_enabled=true preserved. PRs #131/#132 passed Factory/App Compatibility and post-merge PRE-PROD App Build runs #3333/#3334 succeeded. Issue #127 closed."
     }
   ],
   "items": [
@@ -43,10 +52,10 @@
       "id": "HEX-GOV-BRANCH-PROTECTION",
       "code": "HIGH_RISK",
       "scope": ["fenix-capital-inmo-map/preprod-app-phase1", "fenix-capital-cerebro-social/main", "fenix-core-guard/main", "fenix-core-guard/staging"],
-      "evidence": "Critical audited branches remain unprotected; fenix-capital-inmo-map repository rulesets are empty.",
-      "blocker": "Current GitHub connector exposes branch/ruleset reads but no branch-protection/ruleset administration write action.",
-      "required_resolution": "Enable required review/status-check protection using an administrative path while preserving emergency rollback/deployment workflows.",
-      "autonomous_action_remaining": "none_safe",
+      "evidence": "Live fenix-capital-inmo-map repository rulesets remain empty. Managed GitHub integration cannot read/write branch protection administration. Make has a GitHub arbitrary REST module but no authorized GitHub connection.",
+      "blocker": "External GitHub administrative authorization is required before CEREBRO can snapshot or mutate protection safely.",
+      "required_resolution": "Authorize a GitHub connection in Make with sufficient branch-protection/ruleset permission; then CEREBRO performs snapshot → minimum protection → PR/status-check test → rollback proof.",
+      "autonomous_action_remaining": "none_safe_without_admin_authorization",
       "tracking_issue": 124,
       "unit_blocking": false,
       "prod_promotion_blocking": true
@@ -55,25 +64,31 @@
       "id": "HEX-LAB-TRD-RUNTIME",
       "code": "HIGH_RISK",
       "scope": "LAB-TRD",
-      "evidence": "P38 documentary evidence records isolated GCP project fenix-trading-lab/VM cerebro-trading-lab, Shadow/Paper active, exact Paper endpoint, REAL_AUTHORIZED=false and Tribunal BLOCK_REAL. No accessible GitHub repo, Make Trading scenario, Google Drive runtime artifact or GCP Compute connector provides current direct VM evidence.",
-      "required_resolution": "Read current VM/control-plane health, PAPER/SHADOW cycles, credential/resource separation and absence of real execution capability. REAL remains blocked regardless.",
-      "autonomous_action_remaining": "blocked_missing_isolated_runtime_connector",
+      "evidence": "P38 documentary evidence records isolated GCP project fenix-trading-lab/VM cerebro-trading-lab, Shadow/Paper and REAL_AUTHORIZED=false/BLOCK_REAL. GitHub, Drive, plugin discovery and Make app discovery provide no current direct Compute/VM health path; Notion remains historical evidence only.",
+      "blocker": "No current read-only GCP Compute/VM or equivalent non-mutating health endpoint/log is accessible from the current tool surface.",
+      "required_resolution": "Authorize/provide a read-only Compute/VM health path or existing non-mutating health/log endpoint and verify systemd health, recent PAPER/SHADOW cycles, isolation and REAL blocked. Never execute real capital for evidence.",
+      "autonomous_action_remaining": "none_safe_without_current_compute_or_health_read_path",
       "tracking_issue": 126,
       "unit_blocking": false,
       "prod_promotion_blocking": true
     },
     {
-      "id": "HEX-CLOUDFLARE-EXTERNAL-CHECKS",
-      "code": "HIGH_RISK",
-      "scope": "App external Cloudflare GitHub checks",
-      "evidence": "Inherited failures exist for Cloudflare Pages plus Workers bindings fenix-capital-inmo-map and fenix-capital-inmo-maps while native PREPROD/candidate CI passes. No wrangler config or plural worker reference exists in repo and no Cloudflare control-plane connector is available.",
-      "blocker": "Changing external deployment configuration without project ownership/config evidence and rollback is unsafe.",
-      "required_resolution": "Inventory Cloudflare projects/bindings, snapshot settings, reconcile obsolete duplicate binding in NON-PROD first, verify OLD vs NEW, then reconcile GitHub integration.",
-      "autonomous_action_remaining": "blocked_missing_external_control_plane",
-      "tracking_issue": 127,
+      "id": "HEX-CLOUDFLARE-SECRET-ROTATION",
+      "code": "SECURITY_INCIDENT",
+      "scope": "Cloudflare Pages sensitive environment configuration",
+      "evidence": "Read-only Pages control-plane response exposed a sensitive environment variable configured as plain_text. Value intentionally omitted. Accessible repository search found no reference to the key and no current Pages/next-on-pages config, so active consumer ownership is unresolved.",
+      "blocker": "Blind rotation could break unknown production/legacy consumers; the secret value must not be copied into governance evidence.",
+      "required_resolution": "Identify/confirm consumers and ownership, rotate through an authorized secret store with PREPROD/canary where applicable, verify OLD vs NEW, revoke the old value, and convert provider-side storage to secret/encrypted type if supported.",
+      "autonomous_action_remaining": "blocked_on_consumer_ownership_before_prod_secret_rotation",
+      "tracking_issue": 133,
       "unit_blocking": false,
       "prod_promotion_blocking": true
     }
   ],
+  "pre_factory_structural_gate": {
+    "state": "READY",
+    "evidence_file": "governance/pre-factory-gate-closeout-2026-09-08.json",
+    "rule": "FACT-001 may continue generating inert PREPROD scaffolds; no open item permits PROD autonomy or destructive mutation."
+  },
   "cost_additional_eur": 0
 }
