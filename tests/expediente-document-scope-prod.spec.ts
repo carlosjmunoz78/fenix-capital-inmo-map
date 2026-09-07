@@ -33,14 +33,16 @@ test('PDF filename wins over Android MIME before PROD validation',()=>{
  expect(uploader.indexOf("if(lower.endsWith('.pdf'))return'application/pdf'")).toBeLessThan(uploader.indexOf("if(direct&&direct!=='application/octet-stream')return direct"));
 });
 
-test('existing expediente requires explicit select then send and reports success',()=>{
+test('existing expediente auto-processes the selected batch without a send step',()=>{
  const uploader=fs.readFileSync('src/ContextEvidenceUpload.tsx','utf8');
  expect(uploader).toContain('setSelectedFiles(allowed)');
  expect(uploader).toContain('data-testid="context-evidence-selected"');
- expect(uploader).toContain('data-testid="context-evidence-send"');
- expect(uploader).toContain("Pulsa Enviar para subir");
- expect(uploader).toContain('enviado${saved===1?\'\':\'s\'} y subido${saved===1?\'\':\'s\'} correctamente');
- expect(uploader).toContain('fenix:document-uploaded');
+ expect(uploader).not.toContain('data-testid="context-evidence-send"');
+ expect(uploader).not.toContain('Pulsa Enviar para subir');
+ expect(uploader).toContain('await uploadFiles(allowed,activeContext)');
+ expect(uploader).toContain('fenix:document-processed');
+ expect(uploader).toContain('fenix:document-batch-finished');
+ expect(uploader).toContain('window.location.reload(),700');
  expect(uploader).toContain('const PROD_MAX_MB=50');
  expect(uploader).not.toContain("supera${oversize===1?'':'n'} 12 MB");
 });
