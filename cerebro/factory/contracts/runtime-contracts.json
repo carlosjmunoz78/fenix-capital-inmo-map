@@ -1,5 +1,5 @@
 {
-  "contract_version": "0.1.0",
+  "contract_version": "0.2.0",
   "environment": "PREPROD",
   "principles": [
     "multiempresa_first",
@@ -16,7 +16,7 @@
   },
   "job_envelope": {
     "required": ["job_id", "job_type", "company_id", "engine_id", "environment", "version", "created_at", "attempt", "max_attempts", "status", "payload"],
-    "statuses": ["QUEUED", "RUNNING", "SUCCEEDED", "FAILED", "HUMAN_REQUIRED", "CANCELLED"],
+    "statuses": ["QUEUED", "RUNNING", "SUCCEEDED", "FAILED", "HUMAN_REQUIRED", "BLOCKED", "CANCELLED"],
     "retry": "bounded_exponential_or_engine_policy"
   },
   "audit_record": {
@@ -38,18 +38,24 @@
       "POLICY_CONFLICT",
       "SECURITY_INCIDENT",
       "MONEY_LIMIT",
-      "CUSTOMER_HUMAN_REQUEST",
+      "CUSTOMER_HUMAN_REQUEST"
+    ]
+  },
+  "system_blocker": {
+    "allowed_codes": [
       "MISSING_CREDENTIAL",
       "EXPIRED_OR_REVOKED_CREDENTIAL",
       "MFA_REQUIRED",
       "PERMISSION_REQUIRED",
       "IRREVERSIBLE_PROD_RISK"
-    ]
+    ],
+    "job_status": "BLOCKED"
   },
   "prohibitions": [
     "no_secret_material_in_events_jobs_audit_or_observability",
     "no_unbounded_retry",
     "no_cross_company_execution_without_explicit_scope",
-    "no_direct_prod_promotion_without_promotion_policy"
+    "no_direct_prod_promotion_without_promotion_policy",
+    "no_noncanonical_HUMAN_REQUIRED_code"
   ]
 }
