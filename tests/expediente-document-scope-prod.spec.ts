@@ -26,11 +26,23 @@ test('legacy expediente routes resolve to canonical code before upload',()=>{
  expect(uploader).toContain("code:resolveCanonicalExpedienteCode(expediente)");
 });
 
-test('PDF remains accepted even when Android exposes octet-stream',()=>{
+test('PDF filename wins over Android MIME before PROD validation',()=>{
  const uploader=fs.readFileSync('src/ContextEvidenceUpload.tsx','utf8');
- expect(uploader).toContain("direct!=='application/octet-stream'");
- expect(uploader).toContain("'.pdf':'application/pdf'");
- expect(uploader).toContain("'application/pdf'");
+ expect(uploader).toContain("if(lower.endsWith('.pdf'))return'application/pdf'");
+ expect(uploader).toContain("PROD_ALLOWED_MIME.has(mime)");
+ expect(uploader.indexOf("if(lower.endsWith('.pdf'))return'application/pdf'")).toBeLessThan(uploader.indexOf("if(direct&&direct!=='application/octet-stream')return direct"));
+});
+
+test('existing expediente requires explicit select then send and reports success',()=>{
+ const uploader=fs.readFileSync('src/ContextEvidenceUpload.tsx','utf8');
+ expect(uploader).toContain('setSelectedFiles(allowed)');
+ expect(uploader).toContain('data-testid="context-evidence-selected"');
+ expect(uploader).toContain('data-testid="context-evidence-send"');
+ expect(uploader).toContain("Pulsa Enviar para subir");
+ expect(uploader).toContain('enviado${saved===1?\'\':\'s\'} y subido${saved===1?\'\':\'s\'} correctamente');
+ expect(uploader).toContain('fenix:document-uploaded');
+ expect(uploader).toContain('const PROD_MAX_MB=50');
+ expect(uploader).not.toContain("supera${oversize===1?'':'n'} 12 MB");
 });
 
 test('expediente document click preserves exact document viewer contract',()=>{
