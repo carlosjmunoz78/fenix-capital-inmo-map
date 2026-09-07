@@ -1,5 +1,5 @@
 {
-  "queue_version": "1.2.0",
+  "queue_version": "1.3.0",
   "generated_at": "2026-09-07",
   "principle": "Only items that cannot be safely closed by the current autonomous tool surface remain here. No item authorizes bypassing promotion gates.",
   "canonical_human_required_codes": [
@@ -24,6 +24,12 @@
       "closed_as": "CONFIRMED_OPERATIONAL_PROD_OBSERVER",
       "evidence_file": "governance/core-seo-prod-runtime-validation-2026-09-07.json",
       "reason": "Direct zero-cost PROD WordPress Abilities read returned Core Guard health score 100, Observer mode, production build channel, all tables ready, operational writes locked, safe_default=true, pending_jobs=0 and homepage smoke green. The legacy cerebro-status ok=false is explained by staging-only checks and is not a PROD outage."
+    },
+    {
+      "id": "HEX-TRN-RUNTIME",
+      "closed_as": "CONFIRMED_OPERATIONAL_TEST_RUNTIME",
+      "evidence_file": "governance/trn-runtime-e2e-validation-2026-09-07.json",
+      "reason": "Direct Make E2E smoke executed the active on-demand TEST worker successfully through dedupe → Idea → Matriz → Evaluación → Laboratorio → dedupe record. A second execution with the same signal_id completed with only the dedupe check, proving duplicate suppression before further writes. Produced laboratory evidence is explicitly Entorno=TEST, OK Carlos=false, Apto calendario=false and Promovido a patrón=false; no PROD publication or mutation occurred."
     }
   ],
   "items": [
@@ -36,8 +42,8 @@
         "fenix-core-guard/main",
         "fenix-core-guard/staging"
       ],
-      "evidence": "All four audited branches report protected=false.",
-      "blocker": "Current GitHub connector exposes branch-protection reads but no safe administration write action.",
+      "evidence": "Critical audited branches remain unprotected; fenix-capital-inmo-map repository rulesets are also empty.",
+      "blocker": "Current GitHub connector exposes branch/ruleset reads but no administration write action for branch protection.",
       "required_resolution": "Enable required review/status-check protection using an administrative path, preserving emergency rollback and deployment workflows.",
       "autonomous_action_remaining": "none_safe",
       "unit_blocking": false,
@@ -55,20 +61,10 @@
       "prod_promotion_blocking": true
     },
     {
-      "id": "HEX-TRN-RUNTIME",
-      "code": "LOW_CONFIDENCE",
-      "scope": "TRN-001 transversal runtime",
-      "evidence": "A direct zero-cost Make runtime contract audit was executed successfully on 2026-09-07: scenario 9557594 performed two GET-only Notion data-source reads, returned Embudo/Evaluación schemas, and was restored to inactive. Evidence file: governance/trn-runtime-contract-validation-2026-09-07.json. This verifies a real runtime boundary but not the entire Training worker estate.",
-      "required_resolution": "Attach/read a direct Training worker/health/evaluation source for the remaining transversal runtime and verify promotion/rollback state.",
-      "autonomous_action_remaining": "blocked_missing_full_runtime_connector",
-      "unit_blocking": false,
-      "prod_promotion_blocking": true
-    },
-    {
       "id": "HEX-LAB-TRD-RUNTIME",
       "code": "HIGH_RISK",
       "scope": "LAB-TRD",
-      "evidence": "Documentary evidence identifies isolated GCP project fenix-trading-lab and VM cerebro-trading-lab, with Shadow/Paper active, REAL_AUTHORIZED=false and Tribunal BLOCK_REAL. Plugin discovery found no eligible Cloud/GCP Compute control-plane connector for direct VM verification.",
+      "evidence": "Documentary evidence identifies isolated GCP project fenix-trading-lab and VM cerebro-trading-lab, with Shadow/Paper active, REAL_AUTHORIZED=false and Tribunal BLOCK_REAL. Plugin discovery found no eligible Cloud/GCP Compute control-plane connector; the only BigQuery connector found is disabled by admin and is not a Compute runtime path.",
       "required_resolution": "Verify isolated VM health, PAPER/SHADOW execution, credentials separation and no real-execution promotion through direct GCP/runtime access before any status elevation.",
       "autonomous_action_remaining": "blocked_missing_isolated_runtime_connector",
       "unit_blocking": false,
@@ -78,7 +74,7 @@
       "id": "HEX-CLOUDFLARE-EXTERNAL-CHECKS",
       "code": "HIGH_RISK",
       "scope": "App external Cloudflare GitHub checks",
-      "evidence": "Cloudflare checks fail independently while GitHub native PREPROD and candidate pipelines pass; the same external failure existed on the baseline before Factory changes. Plugin discovery found no eligible Cloudflare control-plane connector.",
+      "evidence": "Cloudflare Pages plus Workers checks for both fenix-capital-inmo-map and fenix-capital-inmo-maps fail independently while native PREPROD/candidate pipelines pass; the same external failure existed on baseline SHA 317a3e. Repository code search found no wrangler configuration or references to the plural worker binding, and plugin discovery found no eligible Cloudflare control-plane connector.",
       "blocker": "Changing external deployment configuration without direct ownership/config evidence and rollback is unsafe.",
       "required_resolution": "Audit Cloudflare project ownership/build config and reconcile only through a reversible non-PROD path.",
       "autonomous_action_remaining": "blocked_missing_external_control_plane",
