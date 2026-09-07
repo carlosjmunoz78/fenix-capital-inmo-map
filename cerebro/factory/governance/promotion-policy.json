@@ -1,0 +1,29 @@
+{
+  "policy_version":"0.1.0",
+  "environment":"PREPROD",
+  "required_gates":[
+    "contracts",
+    "permissions",
+    "tests",
+    "evaluation",
+    "tribunal",
+    "observability",
+    "rollback",
+    "backup",
+    "rebuild",
+    "cost_measured",
+    "policy",
+    "preprod"
+  ],
+  "promotion_rule":"ALL_REQUIRED_GATES_GREEN",
+  "prod_default":"DENY",
+  "old_vs_new_required":true,
+  "gradual_promotion_required":true,
+  "rollback_test_required":true,
+  "prohibitions":[
+    "no_direct_lab_to_prod",
+    "no_direct_training_to_prod",
+    "no_prod_promotion_with_unknown_dependencies",
+    "no_prod_promotion_with_unresolved_high_risk_security_findings"
+  ]
+}
