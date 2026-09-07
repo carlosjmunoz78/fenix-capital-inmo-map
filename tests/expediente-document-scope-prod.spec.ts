@@ -9,6 +9,14 @@ test('expediente documents accept canonical PROD scope_type/scope_code',()=>{
  expect(src).toContain('relationContains(row.expediente_id,target)');
 });
 
+test('expediente upload launcher mounts inside the production detail shell',()=>{
+ const uploader=fs.readFileSync('src/ContextEvidenceUpload.tsx','utf8');
+ const guard=fs.readFileSync('src/ExpedienteDocumentsGuard.tsx','utf8');
+ expect(uploader).toContain(".ops-content,.dir-content,.detail-exp-content");
+ expect(guard).toContain('[data-testid="context-evidence-open"]');
+ expect(guard).toContain('launcher.click()');
+});
+
 test('expediente document click preserves exact document viewer contract',()=>{
  const guard=fs.readFileSync('src/ExpedienteDocumentsGuard.tsx','utf8');
  const viewer=fs.readFileSync('src/DocumentViewerShell.tsx','utf8');
