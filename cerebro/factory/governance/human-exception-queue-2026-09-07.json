@@ -1,5 +1,5 @@
 {
-  "queue_version": "1.3.0",
+  "queue_version": "1.4.0",
   "generated_at": "2026-09-07",
   "principle": "Only items that cannot be safely closed by the current autonomous tool surface remain here. No item authorizes bypassing promotion gates.",
   "canonical_human_required_codes": [
@@ -23,29 +23,25 @@
       "id": "HEX-CORE-PROD-RUNTIME",
       "closed_as": "CONFIRMED_OPERATIONAL_PROD_OBSERVER",
       "evidence_file": "governance/core-seo-prod-runtime-validation-2026-09-07.json",
-      "reason": "Direct zero-cost PROD WordPress Abilities read returned Core Guard health score 100, Observer mode, production build channel, all tables ready, operational writes locked, safe_default=true, pending_jobs=0 and homepage smoke green. The legacy cerebro-status ok=false is explained by staging-only checks and is not a PROD outage."
+      "reason": "Direct zero-cost PROD WordPress Abilities read returned Core Guard health score 100, Observer mode, production build channel, all tables ready, operational writes locked, safe_default=true, pending_jobs=0 and homepage smoke green."
     },
     {
       "id": "HEX-TRN-RUNTIME",
       "closed_as": "CONFIRMED_OPERATIONAL_TEST_RUNTIME",
       "evidence_file": "governance/trn-runtime-e2e-validation-2026-09-07.json",
-      "reason": "Direct Make E2E smoke executed the active on-demand TEST worker successfully through dedupe → Idea → Matriz → Evaluación → Laboratorio → dedupe record. A second execution with the same signal_id completed with only the dedupe check, proving duplicate suppression before further writes. Produced laboratory evidence is explicitly Entorno=TEST, OK Carlos=false, Apto calendario=false and Promovido a patrón=false; no PROD publication or mutation occurred."
+      "reason": "Direct Make TEST E2E executed dedupe → Idea → Matriz → Evaluación → Laboratorio → dedupe record successfully; replay with identical signal_id stopped at dedupe before further writes. No PROD publication or mutation."
     }
   ],
   "items": [
     {
       "id": "HEX-GOV-BRANCH-PROTECTION",
       "code": "HIGH_RISK",
-      "scope": [
-        "fenix-capital-inmo-map/preprod-app-phase1",
-        "fenix-capital-cerebro-social/main",
-        "fenix-core-guard/main",
-        "fenix-core-guard/staging"
-      ],
-      "evidence": "Critical audited branches remain unprotected; fenix-capital-inmo-map repository rulesets are also empty.",
-      "blocker": "Current GitHub connector exposes branch/ruleset reads but no administration write action for branch protection.",
-      "required_resolution": "Enable required review/status-check protection using an administrative path, preserving emergency rollback and deployment workflows.",
+      "scope": ["fenix-capital-inmo-map/preprod-app-phase1", "fenix-capital-cerebro-social/main", "fenix-core-guard/main", "fenix-core-guard/staging"],
+      "evidence": "Critical audited branches remain unprotected; fenix-capital-inmo-map repository rulesets are empty.",
+      "blocker": "Current GitHub connector exposes branch/ruleset reads but no branch-protection/ruleset administration write action.",
+      "required_resolution": "Enable required review/status-check protection using an administrative path while preserving emergency rollback/deployment workflows.",
       "autonomous_action_remaining": "none_safe",
+      "tracking_issue": 124,
       "unit_blocking": false,
       "prod_promotion_blocking": true
     },
@@ -53,10 +49,11 @@
       "id": "HEX-SEO-PROD-LEARNING",
       "code": "LOW_CONFIDENCE",
       "scope": "Fenix SEO CEREBRO Bridge PROD learning loop",
-      "evidence": "Direct zero-cost WordPress Abilities read on 2026-09-07 returned HTTP 200, ok=true, version=0.4.1, host=fenixcapital.es, last_run=null and learning_count=0. The PREPROD Google bridge also has a successful automatic execution on 2026-09-07.",
-      "blocker": "The bridge runtime itself is confirmed healthy, but no completed PROD learning cycle is evidenced. Running loop-once/canary would be a production mutation and is not authorized without a PREPROD/OLD-vs-NEW gate.",
-      "required_resolution": "Complete and verify a controlled PREPROD learning cycle first; only then consider an idempotent, reversible PROD canary/loop run under promotion policy.",
-      "autonomous_action_remaining": "prepare_preprod_learning_gate_only",
+      "evidence": "Direct WordPress read returned ok=true, version=0.4.1, last_run=null and learning_count=0. Only fenixcapital.es is connected through WPWriter; existing Make WordPress TEST/PREPROD transports also resolve through the PROD WordPress connection. No representative isolated WordPress PREPROD runtime is currently attached.",
+      "blocker": "Running loop-once/canary now would mutate PROD before a representative PREPROD learning/rollback gate exists.",
+      "required_resolution": "Attach a genuine isolated PREPROD/staging WordPress runtime; run snapshot → learning cycle → verify → rollback → OLD vs NEW; only then consider a reversible PROD canary.",
+      "autonomous_action_remaining": "blocked_missing_representative_wordpress_preprod",
+      "tracking_issue": 125,
       "unit_blocking": false,
       "prod_promotion_blocking": true
     },
@@ -64,9 +61,10 @@
       "id": "HEX-LAB-TRD-RUNTIME",
       "code": "HIGH_RISK",
       "scope": "LAB-TRD",
-      "evidence": "Documentary evidence identifies isolated GCP project fenix-trading-lab and VM cerebro-trading-lab, with Shadow/Paper active, REAL_AUTHORIZED=false and Tribunal BLOCK_REAL. Plugin discovery found no eligible Cloud/GCP Compute control-plane connector; the only BigQuery connector found is disabled by admin and is not a Compute runtime path.",
-      "required_resolution": "Verify isolated VM health, PAPER/SHADOW execution, credentials separation and no real-execution promotion through direct GCP/runtime access before any status elevation.",
+      "evidence": "P38 documentary evidence records isolated GCP project fenix-trading-lab/VM cerebro-trading-lab, Shadow/Paper active, exact Paper endpoint, REAL_AUTHORIZED=false and Tribunal BLOCK_REAL. No accessible GitHub repo, Make Trading scenario, Google Drive runtime artifact or GCP Compute connector provides current direct VM evidence.",
+      "required_resolution": "Read current VM/control-plane health, PAPER/SHADOW cycles, credential/resource separation and absence of real execution capability. REAL remains blocked regardless.",
       "autonomous_action_remaining": "blocked_missing_isolated_runtime_connector",
+      "tracking_issue": 126,
       "unit_blocking": false,
       "prod_promotion_blocking": true
     },
@@ -74,10 +72,11 @@
       "id": "HEX-CLOUDFLARE-EXTERNAL-CHECKS",
       "code": "HIGH_RISK",
       "scope": "App external Cloudflare GitHub checks",
-      "evidence": "Cloudflare Pages plus Workers checks for both fenix-capital-inmo-map and fenix-capital-inmo-maps fail independently while native PREPROD/candidate pipelines pass; the same external failure existed on baseline SHA 317a3e. Repository code search found no wrangler configuration or references to the plural worker binding, and plugin discovery found no eligible Cloudflare control-plane connector.",
-      "blocker": "Changing external deployment configuration without direct ownership/config evidence and rollback is unsafe.",
-      "required_resolution": "Audit Cloudflare project ownership/build config and reconcile only through a reversible non-PROD path.",
+      "evidence": "Inherited failures exist for Cloudflare Pages plus Workers bindings fenix-capital-inmo-map and fenix-capital-inmo-maps while native PREPROD/candidate CI passes. No wrangler config or plural worker reference exists in repo and no Cloudflare control-plane connector is available.",
+      "blocker": "Changing external deployment configuration without project ownership/config evidence and rollback is unsafe.",
+      "required_resolution": "Inventory Cloudflare projects/bindings, snapshot settings, reconcile obsolete duplicate binding in NON-PROD first, verify OLD vs NEW, then reconcile GitHub integration.",
       "autonomous_action_remaining": "blocked_missing_external_control_plane",
+      "tracking_issue": 127,
       "unit_blocking": false,
       "prod_promotion_blocking": true
     }
