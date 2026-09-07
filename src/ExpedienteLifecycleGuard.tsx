@@ -65,7 +65,7 @@ export default function ExpedienteLifecycleGuard(){
       const ana=content?.querySelector<HTMLElement>(':scope > .detail-ana-hero');
       if(!content)return;
       let node=content.querySelector<HTMLElement>(':scope > .exp-life-inline-host');
-      if(!node){node=document.createElement('div');node.className='exp-life-inline-host';node.dataset.testid='expediente-lifecycle-inline-host';if(ana)content.insertBefore(node,ana.nextSibling);else content.appendChild(node);}
+      if(!node){node=document.createElement('div');node.className='exp-life-inline-host';node.dataset.testid='expediente-lifecycle-inline-host';if(ana)content.insertBefore(node,ana);else content.appendChild(node);}
       setHost(current=>current===node?current:node);
     };
     mount();const observer=new MutationObserver(mount);observer.observe(document.body,{childList:true,subtree:true});
