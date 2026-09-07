@@ -31,3 +31,14 @@ test('PROD resolves expediente identifiers to canonical expediente_code before e
   expect(runtime).toContain('id:row.expediente_code??row.id');
   expect(runtime).toContain('id:raw.expediente_code??raw.id');
 });
+
+test('PROD reread original calls governed document AI and refreshes the persisted ficha',()=>{
+  const guard=fs.readFileSync('src/prod-upload-limit-guard.ts','utf8');
+  expect(guard).toContain("from './supabase'");
+  expect(guard).toContain('function rereadCurrentDocument');
+  expect(guard).toContain('/functions/v1/fenix-document-reread');
+  expect(guard).toContain('documentRow?.upload_id??detailData?.upload_id');
+  expect(guard).toContain("/releer\\s+original/i");
+  expect(guard).toContain("button.textContent='Releer original existente'");
+  expect(guard).toContain('window.location.reload()');
+});
