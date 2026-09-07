@@ -1,6 +1,6 @@
 import {ChangeEvent,useEffect,useMemo,useRef,useState} from 'react';
 import {createPortal} from 'react-dom';
-import {FileAudio,FileUp,X} from 'lucide-react';
+import {FileAudio,FileUp,Send,X} from 'lucide-react';
 import {useLocation,useNavigate} from 'react-router-dom';
 import {IS_PRODUCTION,SUPABASE_PUBLISHABLE_KEY,SUPABASE_URL,supabase} from './supabase';
 import legacyMap from '../data/legacy-expediente-destination-map.json';
@@ -14,6 +14,7 @@ const PROD_ALLOWED_MIME=new Set([
  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 ]);
 const PROD_ACCEPT='.pdf,.png,.jpg,.jpeg,.webp,.txt,.doc,.docx,.xls,.xlsx';
+const PROD_MAX_MB=50;
 const AUDIO_EXTENSIONS=['.mp3','.m4a','.wav','.webm','.ogg','.oga','.opus','.aac','.flac'];
 const MIME_BY_EXT:Record<string,string>={
  '.pdf':'application/pdf','.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.gif':'image/gif','.webp':'image/webp','.svg':'image/svg+xml',
@@ -72,6 +73,7 @@ function isAudio(file:File){
 function mimeOf(file:File){
  const direct=(file.type||'').trim().toLowerCase();
  const lower=file.name.toLowerCase();
+ if(lower.endsWith('.pdf'))return'application/pdf';
  if(direct&&direct!=='application/octet-stream')return direct;
  for(const[ext,mime]of Object.entries(MIME_BY_EXT))if(lower.endsWith(ext))return mime;
  return direct||'application/octet-stream';
@@ -104,7 +106,7 @@ export default function ContextEvidenceUpload(){
  const rawContext=explicit??routeContext(location.pathname);
  const context=IS_PRODUCTION&&rawContext&&!PROD_SUPPORTED_ORIGINS.has(rawContext.type)?null:rawContext;
  const legacyOpen=location.pathname==='/documentacion'&&params.get('upload')==='1'&&Boolean(explicit)&&Boolean(context);
- const[open,setOpen]=useState(false),[busy,setBusy]=useState(false),[msg,setMsg]=useState(''),[queue,setQueue]=useState<Queue|null>(null),[inlineHost,setInlineHost]=useState<HTMLElement|null>(null);
+ const[open,setOpen]=useState(false),[busy,setBusy]=useState(false),[msg,setMsg]=useState(''),[queue,setQueue]=useState<Queue|null>(null),[inlineHost,setInlineHost]=useState<HTMLElement|null>(null),[selectedFiles,setSelectedFiles]=useState<File[]>([]);
  const autoUploading=useRef(false);
 
  useEffect(()=>{if(legacyOpen)setOpen(true)},[legacyOpen]);
@@ -142,14 +144,15 @@ export default function ContextEvidenceUpload(){
  const activeContext:OriginCtx=context;
 
  async function uploadFiles(files:File[],target:OriginCtx){
-  if(!target.code)return;
+  if(!target.code)return false;
   setBusy(true);
+  setMsg(`Enviando ${files.length} documento${files.length===1?'':'s'}…`);
   let saved=0,reused=0,failed=0,oversize=0,blocked=0,lastFailure='';
   for(const file of files){
    const mime=mimeOf(file),audio=isAudio(file);
    if(IS_PRODUCTION&&(audio||!PROD_ALLOWED_MIME.has(mime))){blocked++;continue;}
    const prepared=await evidenceFetch<Prepare>('/prepare',{method:'POST',body:JSON.stringify({origin_type:target.type,origin_code:target.code,evidence_kind:audio?'audio_conversacion':'documento',filename:file.name,mime_type:mime})});
-   if(prepared.status!==200||!prepared.data?.upload_id||!prepared.data.storage_path||!prepared.data.token){failed++;lastFailure=prepared.status===403?'No tienes permiso para adjuntar documentación a este expediente.':prepared.status===404?'No se ha podido localizar el expediente canónico para vincular el documento.':'No se pudo preparar la subida del documento.';continue;}
+   if(prepared.status!==200||!prepared.data?.upload_id||!prepared.data.storage_path||!prepared.data.token){failed++;lastFailure=prepared.status===401?'Tu sesión ha caducado. Vuelve a iniciar sesión y prueba de nuevo.':prepared.status===403?'No tienes permiso para adjuntar documentación a este expediente.':prepared.status===404?'No se ha podido localizar el expediente canónico para vincular el documento.':'No se pudo preparar la subida del documento.';continue;}
    if(prepared.data.max_bytes&&file.size>prepared.data.max_bytes){oversize++;continue;}
    const uploaded=await supabase.storage.from(BUCKET).uploadToSignedUrl(prepared.data.storage_path,prepared.data.token,file,{contentType:mime});
    if(uploaded.error){failed++;lastFailure='No se pudo transferir el archivo al almacenamiento.';continue;}
@@ -158,12 +161,17 @@ export default function ContextEvidenceUpload(){
   }
   setBusy(false);
   const bits:string[]=[];
-  if(saved)bits.push(`${saved} guardado${saved===1?'':'s'} y enlazado${saved===1?'':'s'}`);
-  if(reused)bits.push(`${reused} ya existía${reused===1?'':'n'}`);
-  if(oversize)bits.push(`${oversize} supera${oversize===1?'':'n'} 12 MB`);
+  if(saved)bits.push(`${saved} enviado${saved===1?'':'s'} y subido${saved===1?'':'s'} correctamente`);
+  if(reused)bits.push(`${reused} ya existía${reused===1?'':'n'} y queda vinculado${reused===1?'':'s'}`);
+  if(oversize)bits.push(`${oversize} supera${oversize===1?'':'n'} ${PROD_MAX_MB} MB`);
   if(blocked)bits.push(`${blocked} formato${blocked===1?'':'s'} no admitido${blocked===1?'':'s'} en producción`);
   if(failed)bits.push(lastFailure||`${failed} con error`);
+  const ok=(saved+reused)>0&&failed===0&&oversize===0&&blocked===0;
   setMsg(bits.length?bits.join(' · '):'No se seleccionaron archivos.');
+  if(ok){
+   window.dispatchEvent(new CustomEvent('fenix:document-uploaded',{detail:{originType:target.type,originCode:target.code,files:files.map(file=>file.name)}}));
+  }
+  return ok;
  }
 
  async function choose(e:ChangeEvent<HTMLInputElement>){
@@ -178,10 +186,21 @@ export default function ContextEvidenceUpload(){
    setMsg(`${allowed.length} archivo${allowed.length===1?'':'s'} preparado${allowed.length===1?'':'s'}. Se vinculará${allowed.length===1?'':'n'} automáticamente cuando exista y se abra la ficha.${blocked?` ${blocked} archivo${blocked===1?'':'s'} no admitido${blocked===1?'':'s'} en producción.`:''}`);
    return;
   }
-  await uploadFiles(files,activeContext);
+  const allowed=IS_PRODUCTION?files.filter(file=>!isAudio(file)&&PROD_ALLOWED_MIME.has(mimeOf(file))):files;
+  const blocked=files.length-allowed.length;
+  setSelectedFiles(allowed);
+  if(!allowed.length){setMsg(blocked?'Formato no admitido en producción.':'No se seleccionaron archivos.');return;}
+  setMsg(`${allowed.length} documento${allowed.length===1?' seleccionado':'s seleccionados'}. Pulsa Enviar para subir${allowed.length===1?'lo':'los'} al expediente.`);
+ }
+ async function sendSelected(){
+  if(!selectedFiles.length||busy)return;
+  const ok=await uploadFiles(selectedFiles,activeContext);
+  if(ok)setSelectedFiles([]);
  }
  function close(){
+  if(busy)return;
   setOpen(false);
+  setSelectedFiles([]);
   if(legacyOpen){
    const q=new URLSearchParams(location.search);
    q.delete('upload');
@@ -194,6 +213,6 @@ export default function ContextEvidenceUpload(){
  const launcher=<button type="button" data-testid="context-evidence-open" onClick={()=>setOpen(true)} style={{width:'100%',border:'1px solid #f4741f',borderRadius:12,padding:'12px 16px',display:'inline-flex',alignItems:'center',justifyContent:'center',gap:8,background:'#f4741f',color:'#fff',fontWeight:800,boxShadow:'none',cursor:'pointer'}}><FileUp size={17}/>{staged?`${staged} archivo${staged===1?'':'s'} preparado${staged===1?'':'s'}`:IS_PRODUCTION?'Subir documentos':'Subir documentos / audio'}</button>;
  return <>
   {inlineHost&&createPortal(launcher,inlineHost)}
-  {open&&<div role="presentation" style={{position:'fixed',inset:0,zIndex:9999,background:'rgba(20,16,24,.42)',display:'grid',placeItems:'center',padding:18}}><section className="ops-message" style={{display:'grid',gap:14,border:'2px solid #870064',width:'min(620px,100%)',maxHeight:'88vh',overflow:'auto',background:'var(--panel,#fff)',boxShadow:'0 24px 70px rgba(0,0,0,.28)'}} aria-label="Subir archivos contextuales"><div style={{display:'flex',justifyContent:'space-between',gap:12,alignItems:'flex-start'}}><div><strong style={{fontSize:18}}>{label}</strong><p style={{margin:'5px 0 0'}}>{IS_PRODUCTION?'Selecciona el documento. El original se conserva y queda vinculado a este expediente.':'Admite cualquier tipo de archivo, incluido audio. El original se conserva sin ejecutarlo ni transformarlo y queda enlazado al contexto correcto.'}</p></div><button type="button" onClick={close} aria-label="Cerrar"><X size={16}/></button></div>{activeContext.staging&&<div style={{padding:11,borderRadius:12,background:'rgba(135,0,100,.07)'}}><strong>La ficha aún no existe.</strong><div>Selecciona ahora los archivos y los mantendré preparados en esta sesión. Al crear y abrir la ficha se asociarán automáticamente.</div></div>}<label className="primary" style={{display:'inline-flex',alignItems:'center',justifyContent:'center',gap:8,cursor:busy?'wait':'pointer',padding:12,borderRadius:12}}>{!IS_PRODUCTION&&/audio/i.test(msg)?<FileAudio size={18}/>:<FileUp size={18}/>} {busy?'Subiendo y enlazando…':activeContext.staging?'Elegir archivos':IS_PRODUCTION?'Elegir documentos':'Elegir archivos o audios'}<input type="file" multiple accept={IS_PRODUCTION?PROD_ACCEPT:undefined} onChange={e=>void choose(e)} disabled={busy} style={{display:'none'}}/></label>{staged>0&&<small>{staged} archivo{staged===1?'':'s'} pendiente{staged===1?'':'s'} de que exista la ficha.</small>}{msg&&<strong>{msg}</strong>}<small>{IS_PRODUCTION?'Tamaño máximo actual por archivo: 12 MB.':'Tamaño máximo actual por archivo: 12 MB. Los audios se conservan como evidencia original y quedan marcados como audio pendiente de tratamiento posterior.'}</small></section></div>}
+  {open&&<div role="presentation" style={{position:'fixed',inset:0,zIndex:9999,background:'rgba(20,16,24,.42)',display:'grid',placeItems:'center',padding:18}}><section className="ops-message" style={{display:'grid',gap:14,border:'2px solid #870064',width:'min(620px,100%)',maxHeight:'88vh',overflow:'auto',background:'var(--panel,#fff)',boxShadow:'0 24px 70px rgba(0,0,0,.28)'}} aria-label="Subir archivos contextuales"><div style={{display:'flex',justifyContent:'space-between',gap:12,alignItems:'flex-start'}}><div><strong style={{fontSize:18}}>{label}</strong><p style={{margin:'5px 0 0'}}>{IS_PRODUCTION?'Selecciona el documento, comprueba el nombre y pulsa Enviar. El original se conserva y queda vinculado a este expediente.':'Admite cualquier tipo de archivo, incluido audio. El original se conserva sin ejecutarlo ni transformarlo y queda enlazado al contexto correcto.'}</p></div><button type="button" onClick={close} aria-label="Cerrar" disabled={busy}><X size={16}/></button></div>{activeContext.staging&&<div style={{padding:11,borderRadius:12,background:'rgba(135,0,100,.07)'}}><strong>La ficha aún no existe.</strong><div>Selecciona ahora los archivos y los mantendré preparados en esta sesión. Al crear y abrir la ficha se asociarán automáticamente.</div></div>}<label className="primary" style={{display:'inline-flex',alignItems:'center',justifyContent:'center',gap:8,cursor:busy?'wait':'pointer',padding:12,borderRadius:12}}>{!IS_PRODUCTION&&/audio/i.test(msg)?<FileAudio size={18}/>:<FileUp size={18}/>} {busy?'Subiendo…':activeContext.staging?'Elegir archivos':IS_PRODUCTION?'Seleccionar documento':'Elegir archivos o audios'}<input type="file" multiple accept={IS_PRODUCTION?PROD_ACCEPT:undefined} onChange={e=>void choose(e)} disabled={busy} style={{display:'none'}}/></label>{selectedFiles.length>0&&<div data-testid="context-evidence-selected" style={{display:'grid',gap:10,padding:12,borderRadius:12,border:'1px solid rgba(135,0,100,.22)'}}><div style={{display:'grid',gap:4}}>{selectedFiles.map(file=><span key={`${file.name}-${file.size}`}><strong>{file.name}</strong> · {(file.size/1024/1024).toFixed(1)} MB</span>)}</div><button type="button" data-testid="context-evidence-send" className="primary" onClick={()=>void sendSelected()} disabled={busy} style={{display:'inline-flex',alignItems:'center',justifyContent:'center',gap:8,padding:12,borderRadius:12,cursor:busy?'wait':'pointer'}}><Send size={17}/>{busy?'Enviando y subiendo…':'Enviar'}</button></div>}{staged>0&&<small>{staged} archivo{staged===1?'':'s'} pendiente{staged===1?'':'s'} de que exista la ficha.</small>}{msg&&<strong data-testid="context-evidence-status">{msg}</strong>}<small>{IS_PRODUCTION?`Tamaño máximo actual por archivo: ${PROD_MAX_MB} MB.`:'Tamaño máximo actual por archivo: 12 MB. Los audios se conservan como evidencia original y quedan marcados como audio pendiente de tratamiento posterior.'}</small></section></div>}
  </>;
 }
