@@ -17,32 +17,35 @@ test('RUNTIME-001 V0 is shared, zero-cost and forbids prod writes', () => {
   assert.equal(RUNTIME_V0_CONTRACT.cross_company_access, 'deny');
 });
 
-test('EVT-001 idempotency is scoped per company and tenant isolated', () => {
+test('EVT-001 idempotency is scoped by full context and tenant isolated', () => {
   const bus = new EventBus();
   const first = bus.publish({ type: 'LEAD_CREATED', payload: { lead_id: 1 }, context, idempotency_key: 'same-key' });
   const duplicate = bus.publish({ type: 'LEAD_CREATED', payload: { lead_id: 1 }, context, idempotency_key: 'same-key' });
   const otherTenant = bus.publish({ type: 'LEAD_CREATED', payload: { lead_id: 2 }, context: { ...context, company_id: 'other-company' }, idempotency_key: 'same-key' });
+  const otherEngine = bus.publish({ type: 'LEAD_CREATED', payload: { lead_id: 3 }, context: { ...context, engine_id: 'CRM-001' }, idempotency_key: 'same-key' });
   assert.equal(first.accepted, true);
   assert.equal(duplicate.duplicate, true);
   assert.equal(otherTenant.accepted, true);
-  assert.equal(bus.listForCompany('fenix-capital').length, 1);
+  assert.equal(otherEngine.accepted, true);
+  assert.equal(bus.listForContext(context).length, 1);
   assert.equal(bus.listForCompany('other-company').length, 1);
 });
 
-test('JOB-001 supports priority, retries, tenant-scoped idempotency and isolation', () => {
+test('JOB-001 supports priority, retries, context-scoped idempotency and isolation', () => {
   const q = new JobQueue();
   q.enqueue({ name: 'low', context, priority: 100, idempotency_key: 'a' });
   q.enqueue({ name: 'high', context, priority: 1, max_attempts: 2, idempotency_key: 'same-key' });
   assert.equal(q.enqueue({ name: 'high', context, priority: 1, idempotency_key: 'same-key' }).duplicate, true);
   assert.equal(q.enqueue({ name: 'high', context: { ...context, company_id: 'other-company' }, priority: 1, idempotency_key: 'same-key' }).accepted, true);
-  const claimed = q.claim('fenix-capital');
+  assert.equal(q.enqueue({ name: 'high', context: { ...context, engine_id: 'CRM-001' }, priority: 1, idempotency_key: 'same-key' }).accepted, true);
+  const claimed = q.claimContext(context);
   assert.equal(claimed.name, 'high');
-  const retried = q.fail(claimed.job_id, 'fenix-capital', 'temporary');
+  const retried = q.failContext(claimed.job_id, context, 'temporary');
   assert.equal(retried.status, 'QUEUED');
-  const claimedAgain = q.claim('fenix-capital');
-  const failed = q.fail(claimedAgain.job_id, 'fenix-capital', 'permanent');
+  const claimedAgain = q.claimContext(context);
+  const failed = q.failContext(claimedAgain.job_id, context, 'permanent');
   assert.equal(failed.status, 'FAILED');
-  const otherClaim = q.claim('other-company');
+  const otherClaim = q.claimContext({ ...context, company_id: 'other-company' });
   assert.equal(otherClaim.context.company_id, 'other-company');
 });
 
@@ -54,12 +57,22 @@ test('FINOPS-001 defaults to zero additional spend and emits MONEY_LIMIT', () =>
   assert.equal(denied.human_required, 'MONEY_LIMIT');
 });
 
+test('FINOPS-001 rejects non-finite budgets and costs without poisoning state', () => {
+  assert.throws(() => new FinOpsGate({ additional_cost_budget_eur: NaN }), /finite non-negative/);
+  assert.throws(() => new FinOpsGate({ additional_cost_budget_eur: Infinity }), /finite non-negative/);
+  const gate = new FinOpsGate();
+  assert.throws(() => gate.authorize(NaN), /finite non-negative/);
+  assert.throws(() => gate.authorize(Infinity), /finite non-negative/);
+  assert.equal(gate.authorize(0).allowed, true);
+  assert.equal(gate.authorize(0.01).allowed, false);
+});
+
 test('SharedRuntime executes registered engines without giving them prod writes', async () => {
   const runtime = new SharedRuntime();
   runtime.registerEngine({
     engine_id: 'APP-001', version: '0.1.0',
-    handler: ({ context: ctx, events }) => {
-      events.publish({ type: 'APP_READ_AUDITED', context: ctx, payload: { ok: true } });
+    handler: ({ events }) => {
+      events.publish({ type: 'APP_READ_AUDITED', payload: { ok: true } });
       return { ok: true };
     }
   });
@@ -67,7 +80,31 @@ test('SharedRuntime executes registered engines without giving them prod writes'
   const result = await runtime.execute({ company_id: 'fenix-capital', engine_id: 'APP-001', version: '0.1.0', command: 'health.read', cost_eur: 0 });
   assert.equal(result.status, 'OK');
   assert.equal(runtime.audit.length, 1);
-  assert.equal(runtime.events.listForCompany('fenix-capital').length, 1);
+  assert.equal(runtime.events.listForContext(context).length, 1);
+});
+
+test('SharedRuntime handler receives tenant-bound facades only', async () => {
+  const runtime = new SharedRuntime();
+  runtime.registerEngine({
+    engine_id: 'APP-001', version: '0.1.0',
+    handler: ({ events, jobs }) => {
+      assert.equal(typeof events.listForCompany, 'undefined');
+      assert.equal(typeof jobs.claimContext, 'undefined');
+      events.publish({ type: 'SAFE_EVENT', payload: { company_id: 'other-company' }, context: { ...context, company_id: 'other-company' } });
+      jobs.enqueue({ name: 'safe-job', payload: { company_id: 'other-company' }, context: { ...context, company_id: 'other-company' } });
+      return { events: events.list(), job: jobs.claim() };
+    }
+  });
+  const result = await runtime.execute({ company_id: 'fenix-capital', engine_id: 'APP-001', version: '0.1.0', command: 'facade' });
+  assert.equal(result.result.events.length, 1);
+  assert.equal(result.result.events[0].context.company_id, 'fenix-capital');
+  assert.equal(result.result.job.context.company_id, 'fenix-capital');
+  assert.equal(runtime.events.listForCompany('other-company').length, 0);
+  assert.equal(runtime.jobs.claimContext({ ...context, company_id: 'other-company' }), null);
+});
+
+test('RUNTIME-001 V0 refuses PROD environment entirely', () => {
+  assert.throws(() => new SharedRuntime({ environment: 'PROD' }), /cannot run with PROD context/);
 });
 
 test('SharedRuntime propagates canonical HUMAN_REQUIRED and audits it', async () => {
