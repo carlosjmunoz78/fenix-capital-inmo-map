@@ -1,0 +1,141 @@
+{
+  "api_contract": [
+    "cerebro.runtime.local_presence.LocalPresenceAudit.audit",
+    "cerebro.runtime.local_presence.LocalPresenceAudit.health"
+  ],
+  "autonomy_level": "PREPROD_DETERMINISTIC_READ_ONLY_LOCAL_AUDIT",
+  "backup": {
+    "strategy": "git+versioned-manifest+reproducible-input-evidence",
+    "verified": true
+  },
+  "company_id": null,
+  "company_scope": "GLOBAL_OR_SCOPED",
+  "contract_version": "0.2.0",
+  "cost_budget": {
+    "additional_monthly_eur_target": 0
+  },
+  "data_contracts": [
+    "local-presence-v0.json",
+    "LocalPresenceResult(company_id,findings,reviews,evidence_sha256)"
+  ],
+  "dependencies": [
+    "BMD-001",
+    "SCAN-001",
+    "SEO-001"
+  ],
+  "dependents": [],
+  "engine_id": "LOCALP-001",
+  "environment": "PREPROD",
+  "evaluation": [
+    "deterministic LOCALP unit suite",
+    "Factory manifest validation",
+    "App Compatibility"
+  ],
+  "events_in": [
+    "DIGITAL_FOOTPRINT_SCANNED",
+    "BUSINESS_MODEL_PROFILE_READY",
+    "LOCAL_PUBLIC_EVIDENCE_AVAILABLE"
+  ],
+  "events_out": [
+    "LOCAL_PRESENCE_AUDIT_READY"
+  ],
+  "evidence": [
+    "cerebro/runtime/tests/test_local_presence.py",
+    "cerebro/runtime/contracts/local-presence-v0.json"
+  ],
+  "factory": {
+    "generator": "FACT-001",
+    "generator_version": "0.4.0",
+    "immutable_scaffold": "cerebro/factory/generated/LOCALP-001/engine.manifest.json"
+  },
+  "human_exception_codes": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "inputs": [
+    "company_id",
+    "BMD-001 profile",
+    "SCAN-001 evidence",
+    "declared business NAP/categories/services/coverage",
+    "optional dated public local evidence",
+    "evidence_at"
+  ],
+  "jobs": [],
+  "knowledge_sources": [
+    "BMD-001 business model",
+    "SCAN-001 public footprint",
+    "SEO-001 canonical SEO boundary",
+    "declared business facts",
+    "dated public local evidence"
+  ],
+  "layer": "L8",
+  "name": "Local Presence / Google Business Engine",
+  "objective": "Audit local presence, NAP, categories, services, reviews and geographic coverage per company without mutating Google Business Profile or production.",
+  "observability": [
+    "health mode/google_business_api/remote_write/external_cost_eur/prod_enabled",
+    "finding counts by category/severity"
+  ],
+  "outputs": [
+    "deterministic NAP/category/service/geography findings",
+    "review evidence state",
+    "dated evidence sha256",
+    "read_only result"
+  ],
+  "owner": "CEREBRO Platform",
+  "permissions": [
+    "consume normalized public/declarative evidence",
+    "no credentials",
+    "no Google Business API mutation",
+    "no remote writes",
+    "no PROD execution"
+  ],
+  "policies": [
+    "deterministic_before_AI",
+    "zero_new_cost_by_default",
+    "preserve_existing_contracts",
+    "public_evidence_only",
+    "no_fabricated_reviews_or_ratings",
+    "cross_company_deny",
+    "secret_material_rejected",
+    "prod_deny_by_default"
+  ],
+  "rebuild": {
+    "strategy": "manifest+git+shared-runtime+replay-input-evidence",
+    "verified": true
+  },
+  "retry_timeout": {
+    "declared": true,
+    "retries": 0,
+    "timeout_ms": 1000
+  },
+  "rollback": {
+    "strategy": "FACT-001 versioned Registry pointer rollback to immutable 0.1.0 scaffold",
+    "verified": true
+  },
+  "status": "CONFIRMED_OPERATIONAL",
+  "system_blocker_codes": [
+    "MISSING_CREDENTIAL",
+    "EXPIRED_OR_REVOKED_CREDENTIAL",
+    "MFA_REQUIRED",
+    "PERMISSION_REQUIRED",
+    "IRREVERSIBLE_PROD_RISK"
+  ],
+  "tests": [
+    "cerebro/runtime/tests/test_local_presence.py"
+  ],
+  "tribunal": [
+    "PREPROD deterministic read-only local audit only; no Google Business mutation; PROD promotion DENY"
+  ],
+  "version": "0.2.0",
+  "zero_cost_execution_plan": [
+    "existing_stack",
+    "python_stdlib",
+    "deterministic_evidence_analysis"
+  ]
+}

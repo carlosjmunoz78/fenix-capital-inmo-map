@@ -1,5 +1,14 @@
 # FACT-001 Changelog
 
+## 0.4.9 · 2026-09-08
+- Implementado `LOCALP-001` V0.2 en runtime compartido PREPROD como auditoría local determinista y read-only.
+- Consume `BMD-001`, `SCAN-001`, hechos declarados y evidencia pública local fechada; `SEO-001` se preserva como frontera SEO/local canónica.
+- Audita NAP, categorías, servicios, cobertura geográfica y estado de evidencia de reviews; rating/review_count quedan desconocidos si no existe evidencia pública válida.
+- No accede ni muta Google Business Profile, no usa credenciales, no escribe remotamente y no requiere IA de pago.
+- FACT-001 promovió `LOCALP-001` 0.1.0 → 0.2.0 preservando scaffold inmutable; Engine Registry avanza 0.17.0 → 0.18.0.
+- Dependency map avanza a 0.8.0; LOCALP desbloquea dependencias de COMPET/SEOBOOT sin declarar esos motores operativos.
+- Backup/rebuild por Git+manifest+replay de evidencia; rollback por puntero versionado FACT-001. Coste adicional 0 €. PROD autonomy `DENY`.
+
 ## 0.4.8 · 2026-09-08
 - Implementado `KW-001` V0.2 en runtime compartido PREPROD como Keyword Discovery determinista y evidence-only.
 - Consume `BMD-001`, `WAUD-001`, semillas declaradas y geografía explícita; `SEO-001` se preserva como frontera SEO canónica.
