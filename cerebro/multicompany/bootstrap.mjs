@@ -24,6 +24,9 @@ function intrinsicViewBuffer(value) {
 
 function rejectSharedMemory(value, seen = new WeakSet()) {
   if (value === null || (typeof value !== 'object' && typeof value !== 'function')) return;
+  if (typeof WebAssembly !== 'undefined' && typeof WebAssembly.Memory === 'function' && value instanceof WebAssembly.Memory) {
+    throw new TypeError('WebAssembly.Memory is not supported by Phase 4 V0');
+  }
   if (typeof SharedArrayBuffer !== 'undefined' && value instanceof SharedArrayBuffer) {
     throw new TypeError('SharedArrayBuffer is not supported by Phase 4 V0');
   }
