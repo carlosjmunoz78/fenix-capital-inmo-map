@@ -8,14 +8,61 @@ const REGISTRY = JSON.parse(fs.readFileSync(REGISTRY_PATH, 'utf8'));
 
 const ENGINE_IDS = new Set(REGISTRY.engines.map(e => e.engine_id));
 const HUMAN_REQUIRED_REASONS = new Set(REGISTRY.human_required_reasons);
+const TYPED_ARRAY_BUFFER_GETTER = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(Uint8Array.prototype), 'buffer')?.get;
+const DATA_VIEW_BUFFER_GETTER = Object.getOwnPropertyDescriptor(DataView.prototype, 'buffer')?.get;
 
 function requiredString(value, label) {
   if (typeof value !== 'string' || value.trim() === '') throw new TypeError(`${label} must be a non-empty string`);
   return value;
 }
 
+function intrinsicViewBuffer(value) {
+  const getter = value instanceof DataView ? DATA_VIEW_BUFFER_GETTER : TYPED_ARRAY_BUFFER_GETTER;
+  if (typeof getter !== 'function') throw new TypeError('unsupported ArrayBuffer view');
+  return getter.call(value);
+}
+
+function rejectSharedMemory(value, seen = new WeakSet()) {
+  if (value === null || (typeof value !== 'object' && typeof value !== 'function')) return;
+  if (typeof SharedArrayBuffer !== 'undefined' && value instanceof SharedArrayBuffer) {
+    throw new TypeError('SharedArrayBuffer is not supported by Phase 4 V0');
+  }
+  if (ArrayBuffer.isView(value)) {
+    const ownBuffer = Object.getOwnPropertyDescriptor(value, 'buffer');
+    if (ownBuffer?.get || ownBuffer?.set) throw new TypeError('accessor properties are not supported by Phase 4 V0');
+    const buffer = intrinsicViewBuffer(value);
+    if (typeof SharedArrayBuffer !== 'undefined' && buffer instanceof SharedArrayBuffer) {
+      throw new TypeError('SharedArrayBuffer-backed views are not supported by Phase 4 V0');
+    }
+    return;
+  }
+  if (value instanceof ArrayBuffer) return;
+  if (seen.has(value)) return;
+  seen.add(value);
+  if (value instanceof Map) {
+    Map.prototype.forEach.call(value, (v, k) => {
+      rejectSharedMemory(k, seen);
+      rejectSharedMemory(v, seen);
+    });
+    return;
+  }
+  if (value instanceof Set) {
+    Set.prototype.forEach.call(value, v => rejectSharedMemory(v, seen));
+    return;
+  }
+  for (const key of Reflect.ownKeys(value)) {
+    const descriptor = Object.getOwnPropertyDescriptor(value, key);
+    if (!descriptor) continue;
+    if (descriptor.get || descriptor.set) throw new TypeError('accessor properties are not supported by Phase 4 V0');
+    rejectSharedMemory(descriptor.value, seen);
+  }
+}
+
 function clone(value) {
-  return structuredClone(value);
+  rejectSharedMemory(value);
+  const cloned = structuredClone(value);
+  rejectSharedMemory(cloned);
+  return cloned;
 }
 
 function assertPreprod(environment) {
@@ -56,6 +103,7 @@ export class MultiCompanyBootstrap {
   registerCompany({ company_id, profile = {} }) {
     const context = companyContext({ company_id, environment: this.environment, version: this.version });
     if (this.#companies.has(context.company_id)) return { accepted: false, duplicate: true, company: this.inspectCompany(context.company_id) };
+    const safeProfile = clone(profile);
     const engines = Object.fromEntries(REGISTRY.engines.map(engine => [engine.engine_id, {
       engine_id: engine.engine_id,
       state: engine.engine_id === 'COMP-REG-001' ? 'READY' : 'BLOCKED',
@@ -65,7 +113,7 @@ export class MultiCompanyBootstrap {
     }]));
     const company = {
       context: { ...context },
-      profile: clone(profile),
+      profile: safeProfile,
       state: 'REGISTERED_PREPROD',
       prod_execution_enabled: false,
       supabase_writes: false,
@@ -96,15 +144,18 @@ export class MultiCompanyBootstrap {
     if (!ENGINE_IDS.has(eid)) throw new Error('unknown Phase 4 engine');
     const node = company.engines[eid];
     if (!['READY', 'RUNNING'].includes(node.state)) throw new Error(`engine ${eid} is not ready`);
+
     if (status === 'HUMAN_REQUIRED') {
       if (!HUMAN_REQUIRED_REASONS.has(reason)) throw new Error('invalid HUMAN_REQUIRED reason');
+      const safeEvidence = clone(evidence);
       node.state = 'HUMAN_REQUIRED';
       node.human_required = reason;
-      node.evidence = clone(evidence);
+      node.evidence = safeEvidence;
     } else if (status === 'SUCCESS') {
+      const safeEvidence = clone(evidence);
       node.state = 'GREEN';
       node.human_required = null;
-      node.evidence = clone(evidence);
+      node.evidence = safeEvidence;
     } else {
       throw new Error('status must be SUCCESS or HUMAN_REQUIRED');
     }
