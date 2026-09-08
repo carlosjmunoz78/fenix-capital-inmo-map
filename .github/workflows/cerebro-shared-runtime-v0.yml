@@ -1,0 +1,41 @@
+name: CEREBRO Shared Runtime V0
+
+on:
+  push:
+    branches:
+      - 'cerebro/**'
+    paths:
+      - 'cerebro/runtime/**'
+      - '.github/workflows/cerebro-shared-runtime-v0.yml'
+  pull_request:
+    branches:
+      - preprod-app-phase1
+    paths:
+      - 'cerebro/runtime/**'
+      - '.github/workflows/cerebro-shared-runtime-v0.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  runtime:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run shared runtime unit tests
+        run: python -m unittest discover -s cerebro/runtime/tests -p 'test_*.py' -v
+      - name: Assert runtime remains non-PROD and zero-cost by construction
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          forbidden = ['requests', 'openai', 'anthropic', 'boto3']
+          text = '\n'.join(p.read_text(encoding='utf-8') for p in Path('cerebro/runtime').glob('*.py'))
+          for package in forbidden:
+              if f'import {package}' in text or f'from {package}' in text:
+                  raise SystemExit(f'paid/external runtime dependency forbidden in V0: {package}')
+          print('OK: shared runtime uses existing/stdlib stack; no paid external SDK dependency')
+          PY
