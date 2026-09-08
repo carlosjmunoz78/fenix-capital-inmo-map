@@ -144,8 +144,13 @@ export class CerebroGatewayV0 {
       const result = await handler({ context: operationContext, payload: input });
       const safeResult = safeClone(result);
       this.#validateHumanRequired(safeResult);
-      session.history.push({ kind: 'COMMAND', command: name, context: operationContext, result: safeResult });
-      this.#audit.push({ type: 'COMMAND_EXECUTED', session_id, command: name, context: operationContext, result: safeResult });
+      if (safeResult?.status === 'HUMAN_REQUIRED') {
+        session.history.push({ kind: 'HUMAN_REQUIRED', source: 'COMMAND', command: name, context: operationContext, result: safeResult });
+        this.#audit.push({ type: 'HUMAN_REQUIRED', source: 'COMMAND', session_id, command: name, context: operationContext, result: safeResult });
+      } else {
+        session.history.push({ kind: 'COMMAND', command: name, context: operationContext, result: safeResult });
+        this.#audit.push({ type: 'COMMAND_EXECUTED', session_id, command: name, context: operationContext, result: safeResult });
+      }
       return safeClone(safeResult);
     } catch (error) {
       const failure = { status: 'ERROR', error: safeErrorText(error) };
@@ -165,8 +170,13 @@ export class CerebroGatewayV0 {
       const result = await this.#chatAdapter({ context: operationContext, message: text });
       const safeResult = safeClone(result);
       this.#validateHumanRequired(safeResult);
-      session.history.push({ kind: 'CHAT', message: text, context: operationContext, result: safeResult });
-      this.#audit.push({ type: 'CHAT_MEDIATED', session_id, context: operationContext, result: safeResult });
+      if (safeResult?.status === 'HUMAN_REQUIRED') {
+        session.history.push({ kind: 'HUMAN_REQUIRED', source: 'CHAT', message: text, context: operationContext, result: safeResult });
+        this.#audit.push({ type: 'HUMAN_REQUIRED', source: 'CHAT', session_id, context: operationContext, result: safeResult });
+      } else {
+        session.history.push({ kind: 'CHAT', message: text, context: operationContext, result: safeResult });
+        this.#audit.push({ type: 'CHAT_MEDIATED', session_id, context: operationContext, result: safeResult });
+      }
       return safeClone(safeResult);
     } catch (error) {
       const failure = { status: 'ERROR', error: safeErrorText(error) };
