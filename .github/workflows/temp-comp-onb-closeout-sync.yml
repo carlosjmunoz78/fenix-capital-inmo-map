@@ -1,0 +1,87 @@
+name: TEMP COMP-ONB Closeout Sync
+
+on:
+  push:
+    branches:
+      - cerebro/comp-onb-001-closeout
+    paths:
+      - '.github/workflows/temp-comp-onb-closeout-sync.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: cerebro/comp-onb-001-closeout
+          fetch-depth: 0
+      - name: Synchronize canonical status and closeout evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, pathlib
+          p = pathlib.Path('cerebro/factory/STATUS.md')
+          s = p.read_text(encoding='utf-8')
+          replacements = {
+            "- PR #143 integró `CTX-001`, `CHAT-001`, `CMD-001`, `ACTGW-001` y `CONSOLE-001` V0.2 tras Factory + App Compatibility verdes; `PRE-PROD App Build` #3343 terminó SUCCESS completo.\n- HEAD PREPROD confirmado tras Console Chain V0: `7d1601b89ea741a84243a96c9e38a43b3fca779d`.":
+            "- PR #143 integró `CTX-001`, `CHAT-001`, `CMD-001`, `ACTGW-001` y `CONSOLE-001` V0.2 tras Factory + App Compatibility verdes; `PRE-PROD App Build` #3343 terminó SUCCESS completo.\n- PR #145 integró `COMP-ONB-001` V0.2 tras Factory + App Compatibility verdes; `PRE-PROD App Build` #3344 terminó SUCCESS completo.\n- HEAD PREPROD confirmado tras Company Onboarding V0: `6cec93ae84dc9a557c0cea044bdc2b2bc273f9da`.",
+            "- Engine Registry actual: `0.12.0`.": "- Engine Registry actual: `0.13.0`.",
+            "- De los 29 motores Wave 1, `COMP-REG-001`, `TENANT-001`, `CTX-001`, `CHAT-001`, `CMD-001`, `ACTGW-001` y `CONSOLE-001` ya tienen implementación V0.2 validada en PREPROD.\n- Los restantes 22 motores Wave 1 conservan su scaffold `0.1.0` como `DEFINED_NOT_BUILT` hasta implementación/promoción individual.":
+            "- De los 29 motores Wave 1, `COMP-REG-001`, `TENANT-001`, `COMP-ONB-001`, `CTX-001`, `CHAT-001`, `CMD-001`, `ACTGW-001` y `CONSOLE-001` ya tienen implementación V0.2 validada en PREPROD.\n- Los restantes 21 motores Wave 1 conservan su scaffold `0.1.0` como `DEFINED_NOT_BUILT` hasta implementación/promoción individual.",
+            "- Wave 1: **MATERIALIZADA Y VALIDADA EN PREPROD**; 7 motores de fundamento/Console tienen V0.2 operativa PREPROD y 22 permanecen `DEFINED_NOT_BUILT`.":
+            "- Wave 1: **MATERIALIZADA Y VALIDADA EN PREPROD**; 8 motores tienen V0.2 operativa PREPROD y 21 permanecen `DEFINED_NOT_BUILT`.",
+            "- **TENANT-001:** `CONFIRMED_OPERATIONAL_PREPROD` V0.2.\n- **CTX/CHAT/CMD/ACTGW/CONSOLE V0:**":
+            "- **TENANT-001:** `CONFIRMED_OPERATIONAL_PREPROD` V0.2.\n- **COMP-ONB-001:** `CONFIRMED_OPERATIONAL_PREPROD` V0.2; orquestación determinista, sin autoejecución downstream y PROD DENY.\n- **CTX/CHAT/CMD/ACTGW/CONSOLE V0:**",
+            "- **Engine Registry:** `0.12.0`, 46 IDs, sin duplicados conocidos.": "- **Engine Registry:** `0.13.0`, 46 IDs, sin duplicados conocidos.",
+            "- **App compatibility:** `CONFIRMED_OPERATIONAL_PREPROD`; post-merge #3343 SUCCESS sobre `7d1601b89ea741a84243a96c9e38a43b3fca779d`.":
+            "- **App compatibility:** `CONFIRMED_OPERATIONAL_PREPROD`; post-merge #3344 SUCCESS sobre `6cec93ae84dc9a557c0cea044bdc2b2bc273f9da`.",
+            "- **Siguiente acción estructural planificada:** continuar el onboarding multiempresa por dependencia, comenzando por `COMP-ONB-001`, sin crear servidores por empresa ni tocar PROD.":
+            "- **Siguiente acción estructural planificada:** implementar `SCAN-001` en PREPROD como scanner de huella digital read-only, determinista/injectable, sin pago, sin crear infraestructura ni tocar PROD."
+          }
+          for old, new in replacements.items():
+              if old not in s:
+                  raise SystemExit(f'missing expected STATUS fragment: {old[:80]}')
+              s = s.replace(old, new)
+          marker = "## HECHO / VERDE · CEREBRO CONSOLE CHAIN V0 PREPROD"
+          section = """## HECHO / VERDE · COMPANY ONBOARDING V0 PREPROD\n- `COMP-ONB-001` V0.2: `CONFIRMED_OPERATIONAL` en PREPROD como orquestador determinista de estado, evidencia y gates.\n- Usa `COMP-REG-001` para identidad/lifecycle y `TENANT-001` para aislamiento multiempresa deny-by-default.\n- Pipeline ordenado: `SCAN → KW → WAUD → SEOBOOT → COMPET → MKT-002 → SOCAUD → LOCALP → MKTBOOT → BMD → PROC → KBOOT → CRMBOOT → APPBOOT → AUTBOOT → TRNBOOT → ENGACT → COMP-HLT → COMP-BKP → COMP-DEP`.\n- No auto-ejecuta downstream ni interpreta scaffolds `DEFINED_NOT_BUILT` como capacidad operativa.\n- Cada paso exige evidencia; bloqueo únicamente con códigos HUMAN_REQUIRED canónicos o blockers de sistema declarados; resume exige evidencia de resolución.\n- `PREPROD_PIPELINE_COMPLETE` no cambia la empresa a `ACTIVE`, no despliega y mantiene PROD `DENY`.\n- FACT-001 preservó el scaffold 0.1.0 y promovió el Registry a 0.2.0; Registry global `0.13.0`.\n- PR #145: Factory V0 #325 SUCCESS + App Compatibility #85 SUCCESS. Post-merge PREPROD #3344 / run `34218267270`: SUCCESS completo.\n- Coste adicional 0 €; sin Supabase PROD, WordPress, Cloudflare, Trading REAL ni servidor nuevo.\n- Evidencia: `governance/comp-onb-v0-closeout-2026-09-08.json`.\n\n"""
+          if section.strip() not in s:
+              if marker not in s:
+                  raise SystemExit('console marker missing')
+              s = s.replace(marker, section + marker)
+          p.write_text(s, encoding='utf-8')
+
+          evidence = {
+            "date": "2026-09-08",
+            "engine_id": "COMP-ONB-001",
+            "version": "0.2.0",
+            "status": "CONFIRMED_OPERATIONAL_PREPROD",
+            "pr": 145,
+            "pr_head_sha": "51f91cf47351033f0347440f6440101166637ac4",
+            "merge_sha": "6cec93ae84dc9a557c0cea044bdc2b2bc273f9da",
+            "required_checks": {
+              "FACT-001 Factory V0": {"run_id": 34217972071, "run_number": 325, "conclusion": "SUCCESS"},
+              "FACT-001 App Compatibility": {"run_id": 34217972169, "run_number": 85, "conclusion": "SUCCESS"}
+            },
+            "post_merge_preprod": {"run_id": 34218267270, "run_number": 3344, "conclusion": "SUCCESS"},
+            "registry_version": "0.13.0",
+            "wave1_implemented": 8,
+            "wave1_defined_not_built": 21,
+            "downstream_auto_execute": False,
+            "additional_cost_eur": 0,
+            "prod_autonomy": "DENY",
+            "prod_mutation": False,
+            "next_engine": "SCAN-001"
+          }
+          q = pathlib.Path('cerebro/factory/governance/comp-onb-v0-closeout-2026-09-08.json')
+          q.write_text(json.dumps(evidence, indent=2, sort_keys=True) + '\n', encoding='utf-8')
+          PY
+          git config user.name 'CEREBRO Governance'
+          git config user.email 'cerebro-governance@users.noreply.github.com'
+          git add cerebro/factory/STATUS.md cerebro/factory/governance/comp-onb-v0-closeout-2026-09-08.json
+          git commit -m 'GOV-001 · close out COMP-ONB-001 V0.2 green evidence'
+          git push origin HEAD:cerebro/comp-onb-001-closeout
