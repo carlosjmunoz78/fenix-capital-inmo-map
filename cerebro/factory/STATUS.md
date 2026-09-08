@@ -14,7 +14,8 @@
 - PR #131 y PR #132 son governance/evidence-only y se integraron únicamente tras Factory + App Compatibility verdes.
 - PR #135 integró FACT-001 V0.3 con generación atómica por familias tras Factory + App Compatibility verdes; `PRE-PROD App Build` #3336 terminó SUCCESS.
 - PR #136 materializó Wave 1 tras Factory + App Compatibility verdes; `PRE-PROD App Build` #3337 terminó SUCCESS.
-- HEAD PREPROD tras Wave 1 materializada: `de054e8003aae5e9e2e52e6a8a097cf6eb80d7a9`.
+- PR #137 cerró governance/evidencia de Wave 1 + vía Cloudflare WordPress tras Factory + App Compatibility verdes; `PRE-PROD App Build` #3338 terminó SUCCESS.
+- HEAD PREPROD tras cierre de los cuatro objetivos: `a9fc0df64893bd2be043a805175e2c71969f4573`.
 - Build PREPROD, Browser QA, CORS, candidato PROD inmutable, QA exacto, leak guard, sellado y artifacts continúan verdes.
 - No deploy PROD ni DDL PROD.
 
@@ -81,6 +82,14 @@ Cola canónica: `governance/human-exception-queue-2026-09-07.json`.
 - Incidente #133: **SECURITY_INCIDENT formalizado; caller de Pages aún no resuelto; no bloquea scaffolding inerte PREPROD**.
 - Wave 1: **MATERIALIZADA Y VALIDADA EN PREPROD**, pero todos sus motores nuevos continúan `DEFINED_NOT_BUILT`.
 - Esto NO concede autonomía PROD.
+
+## CIERRE DE LOS CUATRO OBJETIVOS · VERDE ESTRUCTURAL/PREPROD
+1. PR #135 + post-merge #3336: **SUCCESS**.
+2. Materialización Wave 1 + PR #136 + post-merge #3337: **SUCCESS**.
+3. Validación de inventario/idempotencia/App Compatibility: **SUCCESS**.
+4. Auditoría/canonización de vía Cloudflare WordPress + PR #137 + post-merge #3338: **SUCCESS**.
+- Evidencia de cierre: `governance/four-objectives-closeout-2026-09-08.json`.
+- Interpretación: los cuatro objetivos solicitados están verdes en alcance estructural/PREPROD. Las excepciones externas #124/#126/#133 siguen abiertas y mantienen PROD autonomy en `DENY`; no se falsean como resueltas.
 
 ## CIERRE ACTUAL
 - **Factory/Governance/PREPROD:** `CONFIRMED_OPERATIONAL`.
