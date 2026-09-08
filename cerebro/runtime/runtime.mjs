@@ -5,6 +5,7 @@ const HUMAN_REQUIRED_REASONS = new Set([
   'LEGAL_REQUIRED','SIGNATURE_REQUIRED','LOW_CONFIDENCE','HIGH_RISK',
   'POLICY_CONFLICT','SECURITY_INCIDENT','MONEY_LIMIT','CUSTOMER_HUMAN_REQUEST'
 ]);
+const MONEY_SCALE = 1_000_000;
 
 function assertContext(ctx) {
   for (const key of ['company_id','engine_id','environment','version']) {
@@ -16,12 +17,46 @@ function sameContext(a, b) {
   return a.company_id === b.company_id && a.engine_id === b.engine_id && a.environment === b.environment && a.version === b.version;
 }
 
+function rejectSharedMemory(value, seen = new WeakSet()) {
+  if (value === null || (typeof value !== 'object' && typeof value !== 'function')) return;
+  if (typeof SharedArrayBuffer !== 'undefined' && value instanceof SharedArrayBuffer) throw new TypeError('SharedArrayBuffer is not supported');
+  if (ArrayBuffer.isView(value) && typeof SharedArrayBuffer !== 'undefined' && value.buffer instanceof SharedArrayBuffer) throw new TypeError('SharedArrayBuffer-backed views are not supported');
+  if (seen.has(value)) return;
+  seen.add(value);
+  if (value instanceof Map) {
+    for (const [k, v] of value) { rejectSharedMemory(k, seen); rejectSharedMemory(v, seen); }
+    return;
+  }
+  if (value instanceof Set) {
+    for (const v of value) rejectSharedMemory(v, seen);
+    return;
+  }
+  for (const key of Reflect.ownKeys(value)) rejectSharedMemory(value[key], seen);
+}
+
+function safeClone(value) {
+  rejectSharedMemory(value);
+  return structuredClone(value);
+}
+
 function stableId(prefix, value) {
+  rejectSharedMemory(value);
   return `${prefix}_${crypto.createHash('sha256').update(serialize(value)).digest('hex').slice(0, 24)}`;
 }
 
 function contextKey(context, key) {
-  return `${context.company_id}::${context.engine_id}::${context.environment}::${context.version}::${key}`;
+  return stableId('scope', [context.company_id, context.engine_id, context.environment, context.version, key]);
+}
+
+function moneyToUnits(value, label) {
+  if (!Number.isFinite(value) || value < 0) throw new Error(`${label} must be a finite non-negative number`);
+  const scaled = Math.round(value * MONEY_SCALE);
+  if (!Number.isSafeInteger(scaled)) throw new Error(`${label} exceeds safe monetary range`);
+  return BigInt(scaled);
+}
+
+function unitsToMoney(value) {
+  return Number(value) / MONEY_SCALE;
 }
 
 export class EventBus {
@@ -30,7 +65,7 @@ export class EventBus {
   publish({ type, payload = {}, context, idempotency_key }) {
     assertContext(context);
     if (!type) throw new Error('event type required');
-    const safePayload = structuredClone(payload);
+    const safePayload = safeClone(payload);
     const key = idempotency_key ?? stableId('evt', { type, payload: safePayload, context });
     const scoped = contextKey(context, key);
     if (this.inbox.has(scoped)) return { accepted: false, duplicate: true, idempotency_key: key };
@@ -38,14 +73,14 @@ export class EventBus {
       event_id: stableId('event', { scoped, type, context }), type, payload: safePayload,
       context: { ...context }, idempotency_key: key, status: 'PENDING'
     };
-    const exposed = structuredClone(event);
+    const exposed = safeClone(event);
     this.inbox.add(scoped);
     this.outbox.push(event);
     return { accepted: true, duplicate: false, event: exposed };
   }
 
-  listForCompany(company_id) { return this.outbox.filter(e => e.context.company_id === company_id).map(e => structuredClone(e)); }
-  listForContext(context) { assertContext(context); return this.outbox.filter(e => sameContext(e.context, context)).map(e => structuredClone(e)); }
+  listForCompany(company_id) { return this.outbox.filter(e => e.context.company_id === company_id).map(e => safeClone(e)); }
+  listForContext(context) { assertContext(context); return this.outbox.filter(e => sameContext(e.context, context)).map(e => safeClone(e)); }
 }
 
 export class JobQueue {
@@ -54,7 +89,7 @@ export class JobQueue {
   enqueue({ name, context, payload = {}, priority = 100, max_attempts = 3, timeout_ms = 30000, idempotency_key }) {
     assertContext(context);
     if (!name) throw new Error('job name required');
-    const safePayload = structuredClone(payload);
+    const safePayload = safeClone(payload);
     const key = idempotency_key ?? stableId('job', { name, payload: safePayload, context });
     const scoped = contextKey(context, key);
     if (this.keys.has(scoped)) return { accepted: false, duplicate: true, idempotency_key: key };
@@ -62,7 +97,7 @@ export class JobQueue {
       job_id: stableId('jobid', { scoped, name, context }), name, context: { ...context }, payload: safePayload,
       priority, max_attempts, timeout_ms, attempts: 0, status: 'QUEUED', idempotency_key: key, result: null, error: null
     };
-    const exposed = structuredClone(job);
+    const exposed = safeClone(job);
     this.keys.add(scoped);
     this.jobs.push(job);
     return { accepted: true, duplicate: false, job: exposed };
@@ -70,21 +105,21 @@ export class JobQueue {
 
   claim(company_id) {
     const candidates = this.jobs.filter(j => j.context.company_id === company_id && j.status === 'QUEUED').sort((a,b) => a.priority - b.priority || a.job_id.localeCompare(b.job_id));
-    const job = candidates[0]; if (!job) return null; job.status = 'RUNNING'; job.attempts += 1; return structuredClone(job);
+    const job = candidates[0]; if (!job) return null; job.status = 'RUNNING'; job.attempts += 1; return safeClone(job);
   }
 
   claimContext(context) {
     assertContext(context);
     const candidates = this.jobs.filter(j => sameContext(j.context, context) && j.status === 'QUEUED').sort((a,b) => a.priority - b.priority || a.job_id.localeCompare(b.job_id));
-    const job = candidates[0]; if (!job) return null; job.status = 'RUNNING'; job.attempts += 1; return structuredClone(job);
+    const job = candidates[0]; if (!job) return null; job.status = 'RUNNING'; job.attempts += 1; return safeClone(job);
   }
 
   complete(job_id, company_id, result) {
     const job = this.jobs.find(j => j.job_id === job_id && j.context.company_id === company_id);
     if (!job) throw new Error('job not found for company');
     if (job.status !== 'RUNNING') throw new Error('job not running');
-    const safeResult = structuredClone(result);
-    job.result = safeResult; job.error = null; job.status = 'SUCCEEDED'; return structuredClone(job);
+    const safeResult = safeClone(result);
+    job.result = safeResult; job.error = null; job.status = 'SUCCEEDED'; return safeClone(job);
   }
 
   completeContext(job_id, context, result) {
@@ -92,15 +127,15 @@ export class JobQueue {
     const job = this.jobs.find(j => j.job_id === job_id && sameContext(j.context, context));
     if (!job) throw new Error('job not found for context');
     if (job.status !== 'RUNNING') throw new Error('job not running');
-    const safeResult = structuredClone(result);
-    job.result = safeResult; job.error = null; job.status = 'SUCCEEDED'; return structuredClone(job);
+    const safeResult = safeClone(result);
+    job.result = safeResult; job.error = null; job.status = 'SUCCEEDED'; return safeClone(job);
   }
 
   fail(job_id, company_id, error) {
     const job = this.jobs.find(j => j.job_id === job_id && j.context.company_id === company_id);
     if (!job) throw new Error('job not found for company');
     if (job.status !== 'RUNNING') throw new Error('job not running');
-    job.error = String(error); job.status = job.attempts < job.max_attempts ? 'QUEUED' : 'FAILED'; return structuredClone(job);
+    job.error = String(error); job.status = job.attempts < job.max_attempts ? 'QUEUED' : 'FAILED'; return safeClone(job);
   }
 
   failContext(job_id, context, error) {
@@ -108,7 +143,7 @@ export class JobQueue {
     const job = this.jobs.find(j => j.job_id === job_id && sameContext(j.context, context));
     if (!job) throw new Error('job not found for context');
     if (job.status !== 'RUNNING') throw new Error('job not running');
-    job.error = String(error); job.status = job.attempts < job.max_attempts ? 'QUEUED' : 'FAILED'; return structuredClone(job);
+    job.error = String(error); job.status = job.attempts < job.max_attempts ? 'QUEUED' : 'FAILED'; return safeClone(job);
   }
 }
 
@@ -126,31 +161,48 @@ function bindJobs(queue, context) {
 }
 
 export class FinOpsGate {
+  #budgetUnits;
+  #spentUnits = 0n;
+
   constructor({ additional_cost_budget_eur = 0 } = {}) {
-    if (!Number.isFinite(additional_cost_budget_eur) || additional_cost_budget_eur < 0) throw new Error('budget must be a finite non-negative number');
-    this.budget = additional_cost_budget_eur; this.spent = 0;
+    this.#budgetUnits = moneyToUnits(additional_cost_budget_eur, 'budget');
   }
+
+  get budget() { return unitsToMoney(this.#budgetUnits); }
+  get spent() { return unitsToMoney(this.#spentUnits); }
+
   authorize(additional_cost_eur) {
-    if (!Number.isFinite(additional_cost_eur) || additional_cost_eur < 0) throw new Error('cost must be a finite non-negative number');
-    if (this.spent + additional_cost_eur > this.budget) return { allowed: false, human_required: 'MONEY_LIMIT', remaining_eur: this.budget - this.spent };
-    this.spent += additional_cost_eur; return { allowed: true, remaining_eur: this.budget - this.spent };
+    const costUnits = moneyToUnits(additional_cost_eur, 'cost');
+    if (this.#spentUnits + costUnits > this.#budgetUnits) {
+      return { allowed: false, human_required: 'MONEY_LIMIT', remaining_eur: unitsToMoney(this.#budgetUnits - this.#spentUnits) };
+    }
+    this.#spentUnits += costUnits;
+    return { allowed: true, remaining_eur: unitsToMoney(this.#budgetUnits - this.#spentUnits) };
   }
 }
 
 export class SharedRuntime {
+  #environment;
+
   constructor({ environment = 'PREPROD', additional_cost_budget_eur = 0 } = {}) {
     if (environment === 'PROD') throw new Error('RUNTIME-001 V0 cannot run with PROD context');
-    this.environment = environment; this.events = new EventBus(); this.jobs = new JobQueue(); this.finops = new FinOpsGate({ additional_cost_budget_eur }); this.handlers = new Map(); this.audit = [];
+    this.#environment = environment;
+    this.events = new EventBus(); this.jobs = new JobQueue(); this.finops = new FinOpsGate({ additional_cost_budget_eur }); this.handlers = new Map(); this.audit = [];
   }
+
+  get environment() { return this.#environment; }
+
   registerEngine({ engine_id, version, handler, prod_writes = false }) {
     if (!engine_id || !version || typeof handler !== 'function') throw new Error('invalid engine registration');
     if (prod_writes) throw new Error('RUNTIME-001 V0 forbids PROD writes');
     this.handlers.set(engine_id, { version, handler, prod_writes: false });
   }
+
   async execute({ company_id, engine_id, version, command, payload = {}, cost_eur = 0 }) {
-    const context = { company_id, engine_id, environment: this.environment, version }; assertContext(context);
+    if (this.#environment === 'PROD') throw new Error('RUNTIME-001 V0 cannot execute with PROD context');
+    const context = { company_id, engine_id, environment: this.#environment, version }; assertContext(context);
     const reg = this.handlers.get(engine_id); if (!reg || reg.version !== version) throw new Error('engine not registered for requested version');
-    const safePayload = structuredClone(payload);
+    const safePayload = safeClone(payload);
     const auditBase = { context: { ...context }, command, cost_eur }; const cost = this.finops.authorize(cost_eur);
     if (!cost.allowed) { this.audit.push({ ...auditBase, outcome: 'HUMAN_REQUIRED', reason: cost.human_required }); return { status: 'HUMAN_REQUIRED', reason: cost.human_required, context }; }
     try {
