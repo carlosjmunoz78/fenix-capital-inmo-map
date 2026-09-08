@@ -1,0 +1,31 @@
+{
+  "date": "2026-09-08",
+  "engine_id": "COMP-ONB-001",
+  "version": "0.2.0",
+  "branch": "cerebro/comp-onb-001-runtime-v0",
+  "base": "preprod-app-phase1",
+  "state": "READY_FOR_PR_CI",
+  "factory_scaffold": "PRESERVED_IMMUTABLE_0.1.0",
+  "registry_version": "0.13.0",
+  "runtime": "shared_python",
+  "environment": "PREPROD",
+  "additional_cost_eur": 0,
+  "supabase_prod_mutation": false,
+  "wordpress_mutation": false,
+  "cloudflare_mutation": false,
+  "trading_real_mutation": false,
+  "prod_autonomy": "DENY",
+  "downstream_auto_execute": false,
+  "local_promotion_evidence": {
+    "temp_workflow_run": 34217431735,
+    "unit_tests": "SUCCESS",
+    "fact_version_apply": "SUCCESS",
+    "family_contract": "SUCCESS",
+    "registry_bump_run": 34217770708,
+    "registry_bump": "SUCCESS"
+  },
+  "temporary_artifacts_removed": true,
+  "required_pr_checks": ["FACT-001 Factory V0", "FACT-001 App Compatibility"],
+  "merge_policy": "merge only on fixed head after both checks terminal SUCCESS",
+  "post_merge_gate": "exact PRE-PROD App Build on merge SHA must be terminal SUCCESS"
+}
