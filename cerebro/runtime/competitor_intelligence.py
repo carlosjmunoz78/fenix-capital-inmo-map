@@ -52,7 +52,6 @@ class CompetitorIntelligence:
         self,
         *,
         company_id: str,
-        business_model_profile: dict[str, Any],
         keyword_discovery: dict[str, Any],
         digital_footprint: dict[str, Any],
         website_audit: dict[str, Any],
@@ -65,7 +64,6 @@ class CompetitorIntelligence:
             raise ValueError("company_id and evidence_at are required")
         evidence = public_competitor_evidence or []
         inputs = {
-            "BMD-001": business_model_profile,
             "KW-001": keyword_discovery,
             "SCAN-001": digital_footprint,
             "WAUD-001": website_audit,
@@ -77,16 +75,18 @@ class CompetitorIntelligence:
             self._company_guard(company_id, value, label)
         self._ensure_no_secrets(evidence)
 
-        bmodel = business_model_profile.get("business_model", {}) if isinstance(business_model_profile.get("business_model"), dict) else {}
-        own_services = self._norm_set(bmodel.get("services") or bmodel.get("products") or [])
-        own_geo = self._norm_set(bmodel.get("geographies") or bmodel.get("geography") or [])
-        own_channels = self._norm_set(bmodel.get("channels") or [])
         own_keywords: set[str] = set()
         for row in keyword_discovery.get("opportunities", []) if isinstance(keyword_discovery.get("opportunities"), list) else []:
             if isinstance(row, dict):
                 term = self._norm(row.get("keyword") or row.get("term"))
                 if term:
                     own_keywords.add(term)
+        own_channels = {
+            self._norm(p.get("platform"))
+            for p in social_audit.get("profiles", []) if isinstance(p, dict) and self._norm(p.get("platform"))
+        }
+        own_geographies = self._norm_set(local_presence.get("geographies") or local_presence.get("coverage") or [])
+        own_services = self._norm_set(local_presence.get("services") or [])
 
         profiles_by_key: dict[str, dict[str, Any]] = {}
         for i, item in enumerate(evidence):
@@ -100,15 +100,11 @@ class CompetitorIntelligence:
             key = domain or self._norm(name)
             if not key:
                 continue
-            services = self._norm_set(item.get("services") or [])
-            geographies = self._norm_set(item.get("geographies") or [])
-            channels = self._norm_set(item.get("channels") or [])
-            keywords = self._norm_set(item.get("keywords") or [])
             overlaps = {
-                "services": sorted(own_services & services),
-                "geographies": sorted(own_geo & geographies),
-                "channels": sorted(own_channels & channels),
-                "keywords": sorted(own_keywords & keywords),
+                "services": sorted(own_services & self._norm_set(item.get("services") or [])),
+                "geographies": sorted(own_geographies & self._norm_set(item.get("geographies") or [])),
+                "channels": sorted(own_channels & self._norm_set(item.get("channels") or [])),
+                "keywords": sorted(own_keywords & self._norm_set(item.get("keywords") or [])),
             }
             overlap_count = sum(len(v) for v in overlaps.values())
             profile = {
@@ -140,22 +136,13 @@ class CompetitorIntelligence:
         missing = [] if profiles else ["explicit_public_competitor_evidence"]
         human_required = "LOW_CONFIDENCE" if missing else None
         assert human_required is None or human_required in _HUMAN_REQUIRED_CODES
-
-        gap_matrix = [
-            {
-                "competitor": p.get("domain") or p.get("name"),
-                "observed_overlap_axes": sorted([axis for axis, values in p["overlap"].items() if values]),
-                "unobserved_axes": sorted([axis for axis, values in p["overlap"].items() if not values]),
-                "policy": "absence_of_evidence_is_not_market_gap",
-            }
-            for p in profiles
-        ]
-        material = json.dumps({
-            "company_id": company_id,
-            "evidence_at": evidence_at,
-            "profiles": profiles,
-            "gap_matrix": gap_matrix,
-        }, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        gap_matrix = [{
+            "competitor": p.get("domain") or p.get("name"),
+            "observed_overlap_axes": sorted([axis for axis, values in p["overlap"].items() if values]),
+            "unobserved_axes": sorted([axis for axis, values in p["overlap"].items() if not values]),
+            "policy": "absence_of_evidence_is_not_market_gap",
+        } for p in profiles]
+        material = json.dumps({"company_id": company_id, "evidence_at": evidence_at, "profiles": profiles, "gap_matrix": gap_matrix}, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
         return {
             "company_id": company_id,
             "engine_id": "COMPET-001",
