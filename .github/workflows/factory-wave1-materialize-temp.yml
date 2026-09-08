@@ -1,0 +1,79 @@
+name: FACT-001 Wave1 Materialize TEMP
+
+on:
+  push:
+    branches:
+      - cerebro/factory-wave1-materialize
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    if: ${{ !contains(github.event.head_commit.message, '[materialized]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: cerebro/factory-wave1-materialize
+          fetch-depth: 0
+      - name: Configure git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - name: Preflight canonical Wave 1
+        run: |
+          python cerebro/factory/scripts/factory.py family \
+            --file cerebro/factory/families/wave1-multicompany-console-v0.json \
+            --require-known-dependencies \
+            --plan
+      - name: Materialize canonical Wave 1
+        run: |
+          python cerebro/factory/scripts/factory.py family \
+            --file cerebro/factory/families/wave1-multicompany-console-v0.json \
+            --require-known-dependencies
+      - name: Bump Registry version and assert exact inventory
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('cerebro/factory/registry/engine-registry.json')
+          data = json.loads(p.read_text())
+          ids = [e['engine_id'] for e in data['engines']]
+          assert len(ids) == 46, len(ids)
+          assert len(ids) == len(set(ids)), 'duplicate engine ids'
+          expected = set(json.loads(Path('cerebro/factory/families/wave1-multicompany-console-v0.json').read_text())['engines'][i]['engine_id'] for i in range(29))
+          assert expected.issubset(ids)
+          for e in data['engines']:
+              if e['engine_id'] in expected:
+                  assert e['status'] == 'DEFINED_NOT_BUILT'
+                  assert e['environment'] == 'PREPROD'
+                  assert e['source_of_truth'] == 'git'
+          data['registry_version'] = '0.5.0'
+          p.write_text(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True) + '\n')
+          PY
+          python cerebro/factory/scripts/factory.py status
+      - name: Assert exact scaffold count and inert promotion state
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          spec = json.loads(Path('cerebro/factory/families/wave1-multicompany-console-v0.json').read_text())
+          for item in spec['engines']:
+              root = Path('cerebro/factory/generated') / item['engine_id']
+              files = [p for p in root.rglob('*') if p.is_file()]
+              assert len(files) == 18, (item['engine_id'], len(files))
+              manifest = json.loads((root / 'engine.manifest.json').read_text())
+              assert manifest['status'] == 'DEFINED_NOT_BUILT'
+              assert manifest['autonomy_level'] == 'NONE_UNTIL_GATES_PASS'
+              assert manifest['environment'] == 'PREPROD'
+              assert manifest['cost_budget']['additional_monthly_eur_target'] == 0
+              assert manifest['factory']['generator_version'] == '0.3.0'
+          PY
+      - name: Commit materialized family
+        run: |
+          git add cerebro/factory/generated cerebro/factory/registry/engine-registry.json
+          git diff --cached --quiet && exit 0
+          git commit -m "FACT · materialize Wave 1 engine family [materialized]"
+          git push origin HEAD:cerebro/factory-wave1-materialize
