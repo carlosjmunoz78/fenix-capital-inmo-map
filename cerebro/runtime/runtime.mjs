@@ -15,6 +15,10 @@ function stableId(prefix, value) {
   return `${prefix}_${crypto.createHash('sha256').update(JSON.stringify(value)).digest('hex').slice(0, 24)}`;
 }
 
+function tenantKey(company_id, key) {
+  return `${company_id}::${key}`;
+}
+
 export class EventBus {
   constructor() {
     this.outbox = [];
@@ -25,10 +29,11 @@ export class EventBus {
     assertContext(context);
     if (!type) throw new Error('event type required');
     const key = idempotency_key ?? stableId('evt', { type, payload, context });
-    if (this.inbox.has(key)) return { accepted: false, duplicate: true, idempotency_key: key };
-    this.inbox.add(key);
+    const scoped = tenantKey(context.company_id, key);
+    if (this.inbox.has(scoped)) return { accepted: false, duplicate: true, idempotency_key: key };
+    this.inbox.add(scoped);
     const event = {
-      event_id: stableId('event', { key, type, context }),
+      event_id: stableId('event', { scoped, type, context }),
       type,
       payload,
       context: { ...context },
@@ -54,10 +59,11 @@ export class JobQueue {
     assertContext(context);
     if (!name) throw new Error('job name required');
     const key = idempotency_key ?? stableId('job', { name, payload, context });
-    if (this.keys.has(key)) return { accepted: false, duplicate: true, idempotency_key: key };
-    this.keys.add(key);
+    const scoped = tenantKey(context.company_id, key);
+    if (this.keys.has(scoped)) return { accepted: false, duplicate: true, idempotency_key: key };
+    this.keys.add(scoped);
     const job = {
-      job_id: stableId('jobid', { key, name, context }),
+      job_id: stableId('jobid', { scoped, name, context }),
       name,
       context: { ...context },
       payload,
@@ -141,13 +147,18 @@ export class SharedRuntime {
     assertContext(context);
     const reg = this.handlers.get(engine_id);
     if (!reg || reg.version !== version) throw new Error('engine not registered for requested version');
-    const cost = this.finops.authorize(cost_eur);
-    if (!cost.allowed) return { status: 'HUMAN_REQUIRED', reason: cost.human_required, context };
     const auditBase = { context: { ...context }, command, cost_eur };
+    const cost = this.finops.authorize(cost_eur);
+    if (!cost.allowed) {
+      this.audit.push({ ...auditBase, outcome: 'HUMAN_REQUIRED', reason: cost.human_required });
+      return { status: 'HUMAN_REQUIRED', reason: cost.human_required, context };
+    }
     try {
       const result = await reg.handler({ context, command, payload, events: this.events, jobs: this.jobs });
-      if (result?.status === 'HUMAN_REQUIRED' && !HUMAN_REQUIRED_REASONS.has(result.reason)) {
-        throw new Error(`invalid HUMAN_REQUIRED reason: ${result.reason}`);
+      if (result?.status === 'HUMAN_REQUIRED') {
+        if (!HUMAN_REQUIRED_REASONS.has(result.reason)) throw new Error(`invalid HUMAN_REQUIRED reason: ${result.reason}`);
+        this.audit.push({ ...auditBase, outcome: 'HUMAN_REQUIRED', reason: result.reason });
+        return { status: 'HUMAN_REQUIRED', reason: result.reason, context, result };
       }
       this.audit.push({ ...auditBase, outcome: 'SUCCESS' });
       return { status: 'OK', context, result };
