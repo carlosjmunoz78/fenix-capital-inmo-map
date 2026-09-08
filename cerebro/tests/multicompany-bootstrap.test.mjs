@@ -15,6 +15,8 @@ test('Phase 4 registry covers exactly the 17 canonical multi-company bootstrap e
   assert.equal(registry.policy.cross_company_access, 'deny');
   assert.equal(registry.policy.supabase_writes, false);
   assert.equal(registry.additional_cost_target_eur, 0);
+  const activation = registry.engines.find(e => e.engine_id === 'ENGACT-001');
+  assert.ok(activation.depends_on.includes('TENANT-001'));
 });
 
 test('Phase 4 V0 is PREPROD-only and never claims PROD promotion', () => {
@@ -106,6 +108,30 @@ test('HUMAN_REQUIRED accepts only canonical reasons and blocks that node', () =>
   assert.equal(state.engines['COMP-REG-001'].state, 'HUMAN_REQUIRED');
   assert.equal(state.engines['COMP-REG-001'].human_required, 'LEGAL_REQUIRED');
   assert.deepEqual(bootstrap.nextReady('company-a'), []);
+});
+
+test('ENGACT-001 stays blocked until TENANT-001 is GREEN', () => {
+  const bootstrap = new MultiCompanyBootstrap();
+  bootstrap.registerCompany({ company_id: 'company-a' });
+
+  for (let guard = 0; guard < 100; guard++) {
+    const ready = bootstrap.nextReady('company-a').filter(id => id !== 'TENANT-001' && id !== 'ENGACT-001');
+    if (ready.length === 0) break;
+    for (const engine_id of ready) {
+      bootstrap.startEngine({ company_id: 'company-a', engine_id });
+      bootstrap.markEngineResult({ company_id: 'company-a', engine_id, status: 'SUCCESS', evidence: [`green:${engine_id}`] });
+    }
+  }
+
+  let state = bootstrap.inspectCompany('company-a');
+  assert.equal(state.engines['TENANT-001'].state, 'READY');
+  assert.equal(state.engines['ENGACT-001'].state, 'BLOCKED');
+  assert.ok(!bootstrap.nextReady('company-a').includes('ENGACT-001'));
+
+  bootstrap.startEngine({ company_id: 'company-a', engine_id: 'TENANT-001' });
+  bootstrap.markEngineResult({ company_id: 'company-a', engine_id: 'TENANT-001', status: 'SUCCESS', evidence: ['tenant-boundary-green'] });
+  state = bootstrap.inspectCompany('company-a');
+  assert.equal(state.engines['ENGACT-001'].state, 'READY');
 });
 
 test('even when all Phase 4 nodes are green, V0 refuses autonomous PROD promotion', () => {
