@@ -20,16 +20,20 @@ function sameContext(a, b) {
 function rejectUnsupported(value, seen = new WeakSet()) {
   if (value === null || (typeof value !== 'object' && typeof value !== 'function')) return;
   if (typeof SharedArrayBuffer !== 'undefined' && value instanceof SharedArrayBuffer) throw new TypeError('SharedArrayBuffer is not supported');
-  if (ArrayBuffer.isView(value) && typeof SharedArrayBuffer !== 'undefined' && value.buffer instanceof SharedArrayBuffer) throw new TypeError('SharedArrayBuffer-backed views are not supported');
+  if (ArrayBuffer.isView(value)) {
+    if (typeof SharedArrayBuffer !== 'undefined' && value.buffer instanceof SharedArrayBuffer) throw new TypeError('SharedArrayBuffer-backed views are not supported');
+    return;
+  }
+  if (value instanceof ArrayBuffer) return;
   if (typeof Blob !== 'undefined' && value instanceof Blob) throw new TypeError('Blob is not supported by RUNTIME-001 V0');
   if (seen.has(value)) return;
   seen.add(value);
   if (value instanceof Map) {
-    for (const [k, v] of value) { rejectUnsupported(k, seen); rejectUnsupported(v, seen); }
+    Map.prototype.forEach.call(value, (v, k) => { rejectUnsupported(k, seen); rejectUnsupported(v, seen); });
     return;
   }
   if (value instanceof Set) {
-    for (const v of value) rejectUnsupported(v, seen);
+    Set.prototype.forEach.call(value, v => rejectUnsupported(v, seen));
     return;
   }
   for (const key of Reflect.ownKeys(value)) {
@@ -59,7 +63,10 @@ function contextKey(context, key) {
 function moneyToUnits(value, label) {
   if (!Number.isFinite(value) || value < 0) throw new Error(`${label} must be a finite non-negative number`);
   const raw = value * MONEY_SCALE;
-  const scaled = label === 'cost' && value > 0 ? Math.ceil(raw) : Math.floor(raw);
+  const nearest = Math.round(raw);
+  const tolerance = Number.EPSILON * Math.max(1, Math.abs(raw)) * 8;
+  const effectivelyInteger = Math.abs(raw - nearest) <= tolerance;
+  const scaled = effectivelyInteger ? nearest : (label === 'cost' && value > 0 ? Math.ceil(raw) : Math.floor(raw));
   if (!Number.isSafeInteger(scaled)) throw new Error(`${label} exceeds safe monetary range`);
   return BigInt(scaled);
 }
