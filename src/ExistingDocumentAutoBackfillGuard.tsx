@@ -46,6 +46,7 @@ export default function ExistingDocumentAutoBackfillGuard(){
   if(!raw||running.current===raw)return;
   let cancelled=false;
   let starting=false;
+  let retryAfterCurrent=false;
 
   const run=async()=>{
    if(cancelled||starting||running.current===raw)return;
@@ -88,17 +89,25 @@ export default function ExistingDocumentAutoBackfillGuard(){
      statusBox(`Documentos automáticos: ${totalSucceeded}/${totalProcessed} correctos${lastSkipped?` · ${lastSkipped} por revisar`:''}.`,'error');
     }
    }catch{running.current='';}
-   finally{starting=false;}
+   finally{
+    starting=false;
+    if(retryAfterCurrent&&!cancelled&&running.current!==raw){
+     retryAfterCurrent=false;
+     void run();
+    }else retryAfterCurrent=false;
+   }
   };
 
   void run();
   const {data:{subscription}}=supabase.auth.onAuthStateChange((_event,session)=>{
    if(cancelled||!session?.access_token||running.current===raw)return;
+   if(starting){retryAfterCurrent=true;return;}
    void run();
   });
 
   return()=>{
    cancelled=true;
+   retryAfterCurrent=false;
    subscription.unsubscribe();
   };
  },[location.pathname]);
