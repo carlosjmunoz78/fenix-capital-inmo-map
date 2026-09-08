@@ -1,0 +1,50 @@
+name: TEMP COMP-ONB-001 Promotion
+
+on:
+  push:
+    branches:
+      - cerebro/comp-onb-001-runtime-v0
+    paths:
+      - '.github/workflows/temp-comp-onb-promote.yml'
+      - 'cerebro/factory/candidates/COMP-ONB-001-0.2.0.json'
+      - 'cerebro/runtime/company_onboarding.py'
+      - 'cerebro/runtime/tests/test_company_onboarding.py'
+      - 'cerebro/runtime/contracts/company-onboarding-v0.json'
+
+permissions:
+  contents: write
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: cerebro/comp-onb-001-runtime-v0
+          fetch-depth: 0
+      - name: Unit tests
+        run: python -m unittest cerebro.runtime.tests.test_company_onboarding -v
+      - name: FACT-001 version apply
+        run: >-
+          python cerebro/factory/scripts/version_engine.py apply
+          --engine-id COMP-ONB-001
+          --manifest-file cerebro/factory/candidates/COMP-ONB-001-0.2.0.json
+      - name: Validate immutable scaffold and family contract
+        run: >-
+          python -m unittest
+          cerebro.factory.tests.test_family_wave1
+          -v
+      - name: Commit version pointer atomically
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'CEREBRO Factory'
+          git config user.email 'cerebro-factory@users.noreply.github.com'
+          git add cerebro/factory/registry/engine-registry.json cerebro/factory/versions/COMP-ONB-001/0.2.0/engine.manifest.json
+          if git diff --cached --quiet; then
+            echo 'NO_CHANGE'
+            exit 0
+          fi
+          git commit -m 'FACT-001 · promote COMP-ONB-001 to 0.2.0 [skip-onb-promote]'
+          git push origin HEAD:cerebro/comp-onb-001-runtime-v0
