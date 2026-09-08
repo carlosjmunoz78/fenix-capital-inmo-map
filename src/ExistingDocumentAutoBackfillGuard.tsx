@@ -45,8 +45,11 @@ export default function ExistingDocumentAutoBackfillGuard(){
   const raw=rawExpediente(location.pathname);
   if(!raw||running.current===raw)return;
   let cancelled=false;
+  let starting=false;
 
   const run=async()=>{
+   if(cancelled||starting||running.current===raw)return;
+   starting=true;
    try{
     const headers=await authenticatedHeaders();
     if(cancelled||!headers)return;
@@ -85,9 +88,19 @@ export default function ExistingDocumentAutoBackfillGuard(){
      statusBox(`Documentos automáticos: ${totalSucceeded}/${totalProcessed} correctos${lastSkipped?` · ${lastSkipped} por revisar`:''}.`,'error');
     }
    }catch{running.current='';}
+   finally{starting=false;}
   };
+
   void run();
-  return()=>{cancelled=true;};
+  const {data:{subscription}}=supabase.auth.onAuthStateChange((_event,session)=>{
+   if(cancelled||!session?.access_token||running.current===raw)return;
+   void run();
+  });
+
+  return()=>{
+   cancelled=true;
+   subscription.unsubscribe();
+  };
  },[location.pathname]);
 
  return null;
