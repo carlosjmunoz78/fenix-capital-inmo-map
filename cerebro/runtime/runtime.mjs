@@ -42,13 +42,13 @@ export class EventBus {
     const event = {
       event_id: stableId('event', { scoped, type, context }),
       type,
-      payload,
+      payload: structuredClone(payload),
       context: { ...context },
       idempotency_key: key,
       status: 'PENDING'
     };
     this.outbox.push(event);
-    return { accepted: true, duplicate: false, event };
+    return { accepted: true, duplicate: false, event: structuredClone(event) };
   }
 
   listForCompany(company_id) {
@@ -78,7 +78,7 @@ export class JobQueue {
       job_id: stableId('jobid', { scoped, name, context }),
       name,
       context: { ...context },
-      payload,
+      payload: structuredClone(payload),
       priority,
       max_attempts,
       timeout_ms,
@@ -89,7 +89,7 @@ export class JobQueue {
       error: null
     };
     this.jobs.push(job);
-    return { accepted: true, duplicate: false, job };
+    return { accepted: true, duplicate: false, job: structuredClone(job) };
   }
 
   claim(company_id) {
@@ -120,7 +120,7 @@ export class JobQueue {
     if (!job) throw new Error('job not found for company');
     if (job.status !== 'RUNNING') throw new Error('job not running');
     job.status = 'SUCCEEDED';
-    job.result = result;
+    job.result = structuredClone(result);
     return structuredClone(job);
   }
 
@@ -130,7 +130,7 @@ export class JobQueue {
     if (!job) throw new Error('job not found for context');
     if (job.status !== 'RUNNING') throw new Error('job not running');
     job.status = 'SUCCEEDED';
-    job.result = result;
+    job.result = structuredClone(result);
     return structuredClone(job);
   }
 
@@ -220,7 +220,7 @@ export class SharedRuntime {
       const result = await reg.handler({
         context: Object.freeze({ ...context }),
         command,
-        payload,
+        payload: structuredClone(payload),
         events: bindEvents(this.events, context),
         jobs: bindJobs(this.jobs, context)
       });
