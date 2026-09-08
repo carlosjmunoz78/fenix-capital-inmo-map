@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   promote:
-    if: github.event.head_commit.message == 'TENANT · add temporary version promotion runner'
+    if: github.event.head_commit.message == 'TENANT · retry promotion after version-aware Wave1 test'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
