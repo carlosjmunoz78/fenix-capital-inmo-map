@@ -71,6 +71,28 @@ test('company profile and evidence reject SharedArrayBuffer-backed data', () => 
   assert.equal(bootstrap.inspectCompany('company-a').engines['COMP-REG-001'].state, 'RUNNING');
 });
 
+test('WebAssembly.Memory is rejected before persistence, including shared memory containers', () => {
+  if (typeof WebAssembly === 'undefined' || typeof WebAssembly.Memory !== 'function') return;
+  const bootstrap = new MultiCompanyBootstrap();
+  const regularMemory = new WebAssembly.Memory({ initial: 1 });
+  assert.throws(
+    () => bootstrap.registerCompany({ company_id: 'company-wasm', profile: { memory: regularMemory } }),
+    /WebAssembly\.Memory/
+  );
+  assert.deepEqual(bootstrap.listCompanies(), []);
+
+  if (typeof SharedArrayBuffer !== 'undefined') {
+    const sharedMemory = new WebAssembly.Memory({ initial: 1, maximum: 1, shared: true });
+    bootstrap.registerCompany({ company_id: 'company-a' });
+    bootstrap.startEngine({ company_id: 'company-a', engine_id: 'COMP-REG-001' });
+    assert.throws(
+      () => bootstrap.markEngineResult({ company_id: 'company-a', engine_id: 'COMP-REG-001', status: 'SUCCESS', evidence: [sharedMemory] }),
+      /WebAssembly\.Memory/
+    );
+    assert.equal(bootstrap.inspectCompany('company-a').engines['COMP-REG-001'].state, 'RUNNING');
+  }
+});
+
 test('failed evidence cloning is atomic and does not mark engine GREEN', () => {
   const bootstrap = new MultiCompanyBootstrap();
   bootstrap.registerCompany({ company_id: 'company-a' });
