@@ -1,5 +1,14 @@
 # FACT-001 Changelog
 
+## 0.4.10 · 2026-09-08
+- Implementado `SOCAUD-001` V0.2 en runtime compartido PREPROD como auditoría social determinista y pública/read-only.
+- Consume `AUD-001`, `BMD-001`, `SCAN-001` y evidencia social pública fechada; no usa login, credenciales ni APIs privadas.
+- Audita perfiles observados, formatos, cobertura y cadencia únicamente con timestamps suficientes; seguidores y otras señales sólo se aceptan si están explícitamente presentes en evidencia pública.
+- No publica, no envía mensajes, no escribe remotamente y no fabrica alcance, engagement, audiencia, seguidores ni cadencia.
+- FACT-001 promovió `SOCAUD-001` 0.1.0 → 0.2.0 preservando scaffold inmutable; Engine Registry avanza 0.18.0 → 0.19.0.
+- Dependency map avanza a 0.9.0; con SOCAUD + LOCALP + KW + WAUD + SCAN se desbloquea el contrato de `COMPET-001`.
+- Backup/rebuild por Git+manifest+replay de evidencia; rollback por puntero versionado FACT-001. Coste adicional 0 €. PROD autonomy `DENY`.
+
 ## 0.4.9 · 2026-09-08
 - Implementado `LOCALP-001` V0.2 en runtime compartido PREPROD como auditoría local determinista y read-only.
 - Consume `BMD-001`, `SCAN-001`, hechos declarados y evidencia pública local fechada; `SEO-001` se preserva como frontera SEO/local canónica.
