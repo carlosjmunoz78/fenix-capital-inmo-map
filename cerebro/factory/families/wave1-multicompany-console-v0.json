@@ -1,0 +1,231 @@
+{
+  "family_id": "WAVE1-MULTICOMPANY-CONSOLE-V0",
+  "version": "0.1.0",
+  "purpose": "First dependency-ordered Factory wave for company onboarding plus early CEREBRO Gateway/Console. Scaffolds only; no PROD activation.",
+  "source": "FENIX_CEREBRO_MASTER_ENGINE_SPEC_V2 + pre-factory closeout 2026-09-08",
+  "defaults": {
+    "company_scope": "GLOBAL_OR_SCOPED",
+    "environment": "PREPROD",
+    "owner": "CEREBRO Platform"
+  },
+  "stages": [
+    "company_foundation",
+    "discovery_and_audit",
+    "market_and_knowledge",
+    "channel_bootstrap",
+    "internal_system_bootstrap",
+    "supervision_backup_deployment",
+    "gateway_console_v0"
+  ],
+  "engines": [
+    {
+      "engine_id": "COMP-REG-001",
+      "name": "Company Registry Engine",
+      "layer": "L8",
+      "objective": "Register each company once with canonical identity, scope, ownership, brands, domains, geography, accesses and lifecycle state.",
+      "dependencies": ["CORE-001", "POL-001", "AUD-001"]
+    },
+    {
+      "engine_id": "COMP-ONB-001",
+      "name": "Company Onboarding Orchestrator",
+      "layer": "L8",
+      "objective": "Orchestrate the end-to-end new-company pipeline by events and gates without duplicating runtimes or bypassing HUMAN_REQUIRED.",
+      "dependencies": ["COMP-REG-001", "POL-001", "HEX-001", "AUD-001", "EVT-001", "JOB-001"]
+    },
+    {
+      "engine_id": "SCAN-001",
+      "name": "Digital Footprint Scanner",
+      "layer": "L8",
+      "objective": "Discover web, subdomains, technologies, indexation, public social/local profiles, content and public brand signals with dated evidence.",
+      "dependencies": ["COMP-REG-001", "WEB-001", "AUD-001"]
+    },
+    {
+      "engine_id": "BMD-001",
+      "name": "Business Model Discovery Engine",
+      "layer": "L8",
+      "objective": "Discover services, products, customers, value proposition, geography, channels, objectives and critical restrictions for a company.",
+      "dependencies": ["COMP-REG-001", "SCAN-001"]
+    },
+    {
+      "engine_id": "PROC-001",
+      "name": "Process Discovery Engine",
+      "layer": "L8",
+      "objective": "Map lead-to-sale-to-operation-to-postsale processes, owners, systems, documents, handoffs and blockers before bootstrapping internal systems.",
+      "dependencies": ["COMP-REG-001", "BMD-001"]
+    },
+    {
+      "engine_id": "WAUD-001",
+      "name": "Website Audit Engine por Empresa",
+      "layer": "L8",
+      "objective": "Audit technical SEO, architecture, content, conversion, forms, tracking and website gaps per company without mutating production.",
+      "dependencies": ["SCAN-001", "BMD-001", "WEB-001", "SEO-001"]
+    },
+    {
+      "engine_id": "KW-001",
+      "name": "Keyword Discovery Engine por Empresa",
+      "layer": "L8",
+      "objective": "Build keyword seeds, intent, clusters, local opportunities, competition signals, target URLs and priorities per company.",
+      "dependencies": ["BMD-001", "WAUD-001", "SEO-001"]
+    },
+    {
+      "engine_id": "SOCAUD-001",
+      "name": "Social Media Audit Engine",
+      "layer": "L8",
+      "objective": "Audit public social profiles, formats, cadence, audience signals, content coverage and gaps without publishing.",
+      "dependencies": ["SCAN-001", "BMD-001", "AUD-001"]
+    },
+    {
+      "engine_id": "LOCALP-001",
+      "name": "Local Presence / Google Business Engine",
+      "layer": "L8",
+      "objective": "Audit local presence, NAP, categories, services, reviews and geographic coverage; mutations require explicit access and policy gates.",
+      "dependencies": ["SCAN-001", "BMD-001", "SEO-001"]
+    },
+    {
+      "engine_id": "COMPET-001",
+      "name": "Competitor Intelligence Engine",
+      "layer": "L3",
+      "objective": "Map and compare relevant competitors across search, web, local presence, social, positioning and observable offers using evidence and dates.",
+      "dependencies": ["SCAN-001", "WAUD-001", "KW-001", "SOCAUD-001", "LOCALP-001"]
+    },
+    {
+      "engine_id": "MKT-002",
+      "name": "Market Intelligence Engine",
+      "layer": "L7",
+      "objective": "Synthesize market demand, competitor evidence, segments, opportunities, risks and trends into dated, explainable company intelligence.",
+      "dependencies": ["BMD-001", "KW-001", "COMPET-001"]
+    },
+    {
+      "engine_id": "KBOOT-001",
+      "name": "Company Knowledge Bootstrap Engine",
+      "layer": "L8",
+      "objective": "Create the initial company knowledge package with source, date, confidence, scope and rules from validated discovery evidence.",
+      "dependencies": ["BMD-001", "PROC-001", "SCAN-001", "WAUD-001", "KW-001", "SOCAUD-001", "LOCALP-001", "COMPET-001", "MKT-002"]
+    },
+    {
+      "engine_id": "SEOBOOT-001",
+      "name": "SEO Bootstrap Engine",
+      "layer": "L8",
+      "objective": "Generate keyword-to-URL mapping, architecture, technical/content/local backlog, measurement and publishing gates for SEO-001.",
+      "dependencies": ["KBOOT-001", "KW-001", "WAUD-001", "LOCALP-001", "COMPET-001", "SEO-001"]
+    },
+    {
+      "engine_id": "SOCBOOT-001",
+      "name": "Social Bootstrap Engine",
+      "layer": "L8",
+      "objective": "Generate social pillars, tone, profile requirements, formats, calendar, assets and metrics; publishing remains permission-gated.",
+      "dependencies": ["KBOOT-001", "SOCAUD-001", "COMPET-001"]
+    },
+    {
+      "engine_id": "MKTBOOT-001",
+      "name": "Marketing Bootstrap Engine",
+      "layer": "L8",
+      "objective": "Generate a zero-budget-default funnel, buyer-persona hypotheses, acquisition plan and tracking from company, market, SEO and social knowledge.",
+      "dependencies": ["KBOOT-001", "SEOBOOT-001", "SOCBOOT-001", "MKT-002"]
+    },
+    {
+      "engine_id": "ENGACT-001",
+      "name": "Company Engine Activation Matrix",
+      "layer": "L8",
+      "objective": "Decide which engines are required, optional or not applicable for each company using sector, channels, regulation, size and risk.",
+      "dependencies": ["COMP-REG-001", "BMD-001", "PROC-001", "KBOOT-001", "POL-001"]
+    },
+    {
+      "engine_id": "TENANT-001",
+      "name": "Multi-Tenant Isolation Engine",
+      "layer": "L8",
+      "objective": "Enforce company isolation by default across engine context, data, knowledge, permissions, secrets and metrics without creating per-company forks.",
+      "dependencies": ["COMP-REG-001", "POL-001", "AUD-001"]
+    },
+    {
+      "engine_id": "CRMBOOT-001",
+      "name": "CRM Bootstrap Engine",
+      "layer": "L8",
+      "objective": "Generate CRM pipeline, entities, states, dedupe, tasks, permissions and integration contracts without modifying the existing CRM until validated.",
+      "dependencies": ["KBOOT-001", "ENGACT-001", "TENANT-001", "CRM-001"]
+    },
+    {
+      "engine_id": "APPBOOT-001",
+      "name": "App Bootstrap Engine",
+      "layer": "L8",
+      "objective": "Generate company App configuration, modules, roles, navigation, endpoint contracts and feature flags in PREPROD without degrading the existing App.",
+      "dependencies": ["KBOOT-001", "ENGACT-001", "TENANT-001", "CRMBOOT-001", "APP-001"]
+    },
+    {
+      "engine_id": "AUTBOOT-001",
+      "name": "Automation Bootstrap Engine",
+      "layer": "L8",
+      "objective": "Generate event/job/communication/tracking/reporting automation templates in PREPROD with idempotency and zero-polling preference.",
+      "dependencies": ["KBOOT-001", "ENGACT-001", "TENANT-001", "EVT-001", "JOB-001", "POL-001"]
+    },
+    {
+      "engine_id": "TRNBOOT-001",
+      "name": "Company Training Bootstrap",
+      "layer": "L8",
+      "objective": "Generate company-scoped vocabulary, cases, rules, datasets and evaluation hooks in LAB/PREPROD without any direct promotion to PROD.",
+      "dependencies": ["KBOOT-001", "ENGACT-001", "TENANT-001", "TRN-001"]
+    },
+    {
+      "engine_id": "COMP-HLT-001",
+      "name": "Company Supervisor Instance",
+      "layer": "L8",
+      "objective": "Define company-scoped health, SLA, errors, cost and engine-status supervision using shared observability rather than a dedicated server.",
+      "dependencies": ["ENGACT-001", "TENANT-001", "OBSERV-001", "AUD-001"]
+    },
+    {
+      "engine_id": "COMP-BKP-001",
+      "name": "Company Backup/Rebuild Pack",
+      "layer": "L8",
+      "objective": "Define an exportable, restorable company package covering configuration, registry bindings, knowledge references and rebuild instructions.",
+      "dependencies": ["COMP-REG-001", "TENANT-001", "COMP-HLT-001"]
+    },
+    {
+      "engine_id": "COMP-DEP-001",
+      "name": "Company Deployment Engine",
+      "layer": "L8",
+      "objective": "Coordinate PREPROD-to-PROD company activation only after isolation, tests, rollback, backup, policy and observability gates pass.",
+      "dependencies": ["APPBOOT-001", "CRMBOOT-001", "AUTBOOT-001", "TRNBOOT-001", "COMP-HLT-001", "COMP-BKP-001", "POL-001", "AUD-001"]
+    },
+    {
+      "engine_id": "CHAT-001",
+      "name": "Conversational Gateway",
+      "layer": "L9",
+      "objective": "Expose a provider-neutral conversational gateway for CEREBRO queries and commands; never bind Console directly to one AI model.",
+      "dependencies": ["COMP-REG-001", "POL-001", "HEX-001", "AUD-001"]
+    },
+    {
+      "engine_id": "CTX-001",
+      "name": "Context Loader",
+      "layer": "L9",
+      "objective": "Load authenticated company and entity context with deny-by-default cross-company isolation.",
+      "dependencies": ["COMP-REG-001", "TENANT-001", "AUD-001"]
+    },
+    {
+      "engine_id": "CMD-001",
+      "name": "Command Router",
+      "layer": "L9",
+      "objective": "Classify incoming requests and route them to queries, orchestrators or engines without executing sensitive actions directly.",
+      "dependencies": ["CHAT-001", "CTX-001", "POL-001"]
+    },
+    {
+      "engine_id": "ACTGW-001",
+      "name": "Action Execution Gateway",
+      "layer": "L9",
+      "objective": "Execute authorized actions only after policy, permission and idempotency checks; otherwise emit a canonical HUMAN_REQUIRED exception.",
+      "dependencies": ["CMD-001", "POL-001", "HEX-001", "AUD-001", "EVT-001", "JOB-001"]
+    },
+    {
+      "engine_id": "CONSOLE-001",
+      "name": "CEREBRO Console V0",
+      "layer": "L9",
+      "objective": "Provide the minimal direct CEREBRO interface: company/context selector, chat, result, basic engine status, history and audit through the Gateway.",
+      "dependencies": ["CHAT-001", "CTX-001", "CMD-001", "ACTGW-001", "COMP-REG-001"]
+    }
+  ],
+  "promotion": {
+    "generated_state": "DEFINED_NOT_BUILT",
+    "prod_autonomy": "DENY",
+    "activation": "separate gated workflow only",
+    "cost_additional_eur": 0
+  }
+}
