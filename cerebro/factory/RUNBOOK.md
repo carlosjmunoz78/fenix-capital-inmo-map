@@ -252,3 +252,18 @@ Reglas:
 7. el siguiente desbloqueo estructural relevante es `COMPET-001`, que aún depende también de `SOCAUD-001`.
 
 Backup/rebuild: Git + manifest versionado + replay de evidencia. Rollback: `version_engine.py rollback --engine-id LOCALP-001 --to-version 0.1.0` tras `--plan`, OLD vs NEW y gates.
+
+
+## SOCAUD-001 · operación PREPROD determinista pública/read-only
+`SOCAUD-001` V0.2 audita presencia social únicamente desde evidencia pública y declarativa.
+
+Reglas:
+1. requiere `company_id`, perfil `BMD-001`, huella `SCAN-001` y `evidence_at`;
+2. evidencia social pública es opcional y nunca autoriza login, publicación, mensajería ni escritura;
+3. cadencia sólo se calcula con al menos dos publicaciones públicas fechadas; audiencia/seguidores nunca se estiman;
+4. cruce multiempresa y material sensible se rechazan deny-by-default;
+5. `environment=PROD` está bloqueado; no existen credenciales ni private API path en V0;
+6. coste adicional 0 €, Python stdlib, sin IA obligatoria ni servidor nuevo;
+7. `COMPET-001` puede construirse después de este gate porque sus dependencias públicas quedan cubiertas.
+
+Backup/rebuild: Git + manifest versionado + replay de evidencia. Rollback: `version_engine.py rollback --engine-id SOCAUD-001 --to-version 0.1.0` tras `--plan`, OLD vs NEW y gates.
