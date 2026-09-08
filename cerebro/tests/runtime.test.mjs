@@ -31,6 +31,16 @@ test('EVT-001 idempotency is scoped by full context and tenant isolated', () => 
   assert.equal(bus.listForCompany('other-company').length, 1);
 });
 
+test('EVT/JOB automatic keys distinguish structured-clone values that JSON loses', () => {
+  const bus = new EventBus();
+  assert.equal(bus.publish({ type: 'MAP', payload: new Map([['x', 1]]), context }).accepted, true);
+  assert.equal(bus.publish({ type: 'MAP', payload: new Map([['x', 2]]), context }).accepted, true);
+  assert.equal(bus.listForContext(context).length, 2);
+  const q = new JobQueue();
+  assert.equal(q.enqueue({ name: 'map-job', payload: new Map([['x', 1]]), context }).accepted, true);
+  assert.equal(q.enqueue({ name: 'map-job', payload: new Map([['x', 2]]), context }).accepted, true);
+});
+
 test('EVT-001 never exposes mutable internal event state', () => {
   const bus = new EventBus();
   const published = bus.publish({ type: 'SAFE', payload: { nested: { value: 1 } }, context, idempotency_key: 'mutable-event' });
@@ -61,6 +71,19 @@ test('JOB-001 supports priority, retries, context-scoped idempotency and isolati
   assert.equal(failed.status, 'FAILED');
   const otherClaim = q.claimContext({ ...context, company_id: 'other-company' });
   assert.equal(otherClaim.context.company_id, 'other-company');
+});
+
+test('JOB-001 clears prior retry error on eventual success', () => {
+  const q = new JobQueue();
+  const enqueued = q.enqueue({ name: 'retry-success', context, max_attempts: 2, idempotency_key: 'retry-success' });
+  const first = q.claimContext(context);
+  const retried = q.failContext(first.job_id, context, 'temporary');
+  assert.equal(retried.status, 'QUEUED');
+  assert.equal(retried.error, 'temporary');
+  const second = q.claimContext(context);
+  const completed = q.completeContext(second.job_id, context, { ok: true });
+  assert.equal(completed.status, 'SUCCEEDED');
+  assert.equal(completed.error, null);
 });
 
 test('JOB-001 never exposes mutable internal queued state', () => {
@@ -100,18 +123,22 @@ test('FINOPS-001 rejects non-finite budgets and costs without poisoning state', 
 
 test('SharedRuntime executes registered engines without giving them prod writes', async () => {
   const runtime = new SharedRuntime();
-  runtime.registerEngine({
-    engine_id: 'APP-001', version: '0.1.0',
-    handler: ({ events }) => {
-      events.publish({ type: 'APP_READ_AUDITED', payload: { ok: true } });
-      return { ok: true };
-    }
-  });
+  runtime.registerEngine({ engine_id: 'APP-001', version: '0.1.0', handler: ({ events }) => { events.publish({ type: 'APP_READ_AUDITED', payload: { ok: true } }); return { ok: true }; } });
   assert.throws(() => runtime.registerEngine({ engine_id: 'BAD-001', version: '0.1.0', handler: () => ({}), prod_writes: true }), /forbids PROD writes/);
   const result = await runtime.execute({ company_id: 'fenix-capital', engine_id: 'APP-001', version: '0.1.0', command: 'health.read', cost_eur: 0 });
   assert.equal(result.status, 'OK');
   assert.equal(runtime.audit.length, 1);
   assert.equal(runtime.events.listForContext(context).length, 1);
+});
+
+test('SharedRuntime validates payload before consuming FinOps budget', async () => {
+  const runtime = new SharedRuntime({ additional_cost_budget_eur: 1 });
+  runtime.registerEngine({ engine_id: 'APP-001', version: '0.1.0', handler: () => ({ ok: true }) });
+  await assert.rejects(() => runtime.execute({ company_id: 'fenix-capital', engine_id: 'APP-001', version: '0.1.0', command: 'bad', payload: { fn: () => {} }, cost_eur: 1 }));
+  assert.equal(runtime.finops.spent, 0);
+  const retry = await runtime.execute({ company_id: 'fenix-capital', engine_id: 'APP-001', version: '0.1.0', command: 'good', payload: { ok: true }, cost_eur: 1 });
+  assert.equal(retry.status, 'OK');
+  assert.equal(runtime.finops.spent, 1);
 });
 
 test('SharedRuntime handler receives tenant-bound facades only', async () => {
