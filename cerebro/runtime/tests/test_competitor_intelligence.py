@@ -8,24 +8,22 @@ from cerebro.runtime.competitor_intelligence import CompetitorIntelligence
 class CompetitorIntelligenceTests(unittest.TestCase):
     def setUp(self) -> None:
         self.engine = CompetitorIntelligence(environment='PREPROD')
-        self.base = {
-            'company_id': 'co-1',
-            'business_model': {
-                'services': ['mortgage brokerage', 'financial advice'],
-                'geographies': ['madrid'],
-                'channels': ['instagram', 'web'],
-            },
-        }
         self.kw = {'company_id': 'co-1', 'opportunities': [{'keyword': 'mortgage madrid'}]}
         self.scan = {'company_id': 'co-1'}
         self.waud = {'company_id': 'co-1'}
-        self.local = {'company_id': 'co-1'}
-        self.social = {'company_id': 'co-1'}
+        self.local = {
+            'company_id': 'co-1',
+            'geographies': ['Madrid'],
+            'services': ['mortgage brokerage', 'financial advice'],
+        }
+        self.social = {
+            'company_id': 'co-1',
+            'profiles': [{'platform': 'Instagram'}],
+        }
 
     def run_engine(self, evidence):
         return self.engine.analyze(
             company_id='co-1',
-            business_model_profile=self.base,
             keyword_discovery=self.kw,
             digital_footprint=self.scan,
             website_audit=self.waud,
@@ -88,7 +86,7 @@ class CompetitorIntelligenceTests(unittest.TestCase):
         bad['company_id'] = 'co-2'
         with self.assertRaisesRegex(PermissionError, 'POLICY_CONFLICT'):
             self.engine.analyze(
-                company_id='co-1', business_model_profile=self.base, keyword_discovery=bad,
+                company_id='co-1', keyword_discovery=bad,
                 digital_footprint=self.scan, website_audit=self.waud, local_presence=self.local,
                 social_audit=self.social, public_competitor_evidence=[], evidence_at='2026-09-08T16:00:00Z')
 
