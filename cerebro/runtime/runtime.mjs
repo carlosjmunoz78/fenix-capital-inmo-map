@@ -7,6 +7,7 @@ const HUMAN_REQUIRED_REASONS = new Set([
 ]);
 const MONEY_SCALE = 1_000_000;
 const MONEY_MAX_TOLERATED_ULP_UNITS = 0.05;
+const MONEY_NOISE_ULP_LIMIT_UNITS = 0.001;
 const TYPED_ARRAY_BUFFER_GETTER = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(Uint8Array.prototype), 'buffer')?.get;
 const DATA_VIEW_BUFFER_GETTER = Object.getOwnPropertyDescriptor(DataView.prototype, 'buffer')?.get;
 const FLOAT64_BITS = new DataView(new ArrayBuffer(8));
@@ -29,6 +30,7 @@ function intrinsicViewBuffer(value) {
 
 function rejectUnsupported(value, seen = new WeakSet()) {
   if (value === null || (typeof value !== 'object' && typeof value !== 'function')) return;
+  if (typeof CryptoKey !== 'undefined' && value instanceof CryptoKey) throw new TypeError('CryptoKey is not supported by RUNTIME-001 V0');
   if (typeof SharedArrayBuffer !== 'undefined' && value instanceof SharedArrayBuffer) throw new TypeError('SharedArrayBuffer is not supported');
   if (ArrayBuffer.isView(value)) {
     const ownBuffer = Object.getOwnPropertyDescriptor(value, 'buffer');
@@ -95,8 +97,17 @@ function moneyToUnits(value, label) {
   const rawUlp = ulp(raw);
   if (rawUlp > MONEY_MAX_TOLERATED_ULP_UNITS) throw new Error(`${label} exceeds reliable monetary precision range`);
   const nearest = Math.round(raw);
-  const effectivelyInteger = Math.abs(raw - nearest) <= rawUlp;
-  const scaled = effectivelyInteger ? nearest : (label === 'cost' && value > 0 ? Math.ceil(raw) : Math.floor(raw));
+  const delta = Math.abs(raw - nearest);
+  let scaled;
+  if (delta === 0) {
+    scaled = nearest;
+  } else if (rawUlp <= MONEY_NOISE_ULP_LIMIT_UNITS && delta <= rawUlp) {
+    // Only absorb an ULP when the floating resolution is still much finer than one micro-euro.
+    scaled = nearest;
+  } else {
+    // At coarser magnitudes intent is ambiguous: never round a representable overage down.
+    scaled = label === 'cost' && value > 0 ? Math.ceil(raw) : Math.floor(raw);
+  }
   if (!Number.isSafeInteger(scaled)) throw new Error(`${label} exceeds safe monetary range`);
   return BigInt(scaled);
 }
