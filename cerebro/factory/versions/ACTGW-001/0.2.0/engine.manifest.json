@@ -1,0 +1,129 @@
+{
+  "api_contract": [
+    "cerebro.runtime.action_gateway.ActionExecutionGateway.register_handler",
+    "cerebro.runtime.action_gateway.ActionExecutionGateway.execute",
+    "cerebro.runtime.action_gateway.ActionExecutionGateway.health"
+  ],
+  "autonomy_level": "PREPROD_READ_ONLY_EXECUTION",
+  "backup": {
+    "strategy": "stateless-runtime+git",
+    "verified": true
+  },
+  "company_id": null,
+  "company_scope": "GLOBAL_OR_SCOPED",
+  "contract_version": "0.2.0",
+  "cost_budget": {
+    "additional_monthly_eur_target": 0
+  },
+  "data_contracts": [
+    "HandlerSpec(engine_id,operation,effect,handler)",
+    "ActionResult(request_id,company_id,target_engine_id,operation,status,output,audit)"
+  ],
+  "dependencies": [
+    "AUD-001",
+    "CMD-001",
+    "EVT-001",
+    "HEX-001",
+    "JOB-001",
+    "POL-001"
+  ],
+  "dependents": [],
+  "engine_id": "ACTGW-001",
+  "environment": "PREPROD",
+  "evaluation": [
+    "registered read-only allow",
+    "unknown handler deny",
+    "mutation idempotency + HIGH_RISK deny",
+    "company mismatch deny"
+  ],
+  "events_in": [],
+  "events_out": [
+    "audit decision envelope"
+  ],
+  "evidence": [
+    "cerebro/runtime/tests/test_action_gateway.py"
+  ],
+  "factory": {
+    "generator": "FACT-001",
+    "generator_version": "0.4.0",
+    "immutable_scaffold": "cerebro/factory/generated/ACTGW-001/engine.manifest.json"
+  },
+  "human_exception_codes": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "inputs": [
+    "CommandPlan",
+    "LoadedContext",
+    "idempotency_key?"
+  ],
+  "jobs": [],
+  "knowledge_sources": [],
+  "layer": "L9",
+  "name": "Action Execution Gateway",
+  "objective": "Execute authorized actions only after policy, permission and idempotency checks; otherwise emit a canonical HUMAN_REQUIRED exception.",
+  "observability": [
+    "per-call audit decision",
+    "health registered_handlers/read_only_execution/mutation_execution/model_binding/credential_storage/external_cost_eur/prod_enabled"
+  ],
+  "outputs": [
+    "ActionResult",
+    "HUMAN_REQUIRED"
+  ],
+  "owner": "CEREBRO Platform",
+  "permissions": [
+    "invoke explicitly registered PREPROD read-only handlers",
+    "no credential storage",
+    "mutation DENY",
+    "PROD DENY"
+  ],
+  "policies": [
+    "deterministic_before_AI",
+    "zero_new_cost_by_default",
+    "preserve_existing_contracts",
+    "deny_by_default",
+    "explicit_handler_registration",
+    "company_scope_must_match",
+    "mutation_requires_idempotency",
+    "mutation_high_risk_v0"
+  ],
+  "rebuild": {
+    "strategy": "manifest+git+shared-runtime",
+    "verified": true
+  },
+  "retry_timeout": {
+    "declared": true,
+    "retries": 0,
+    "timeout_ms": 1000
+  },
+  "rollback": {
+    "strategy": "FACT-001 versioned Registry pointer rollback to immutable 0.1.0 scaffold",
+    "verified": true
+  },
+  "status": "CONFIRMED_OPERATIONAL",
+  "system_blocker_codes": [
+    "MISSING_CREDENTIAL",
+    "EXPIRED_OR_REVOKED_CREDENTIAL",
+    "MFA_REQUIRED",
+    "PERMISSION_REQUIRED",
+    "IRREVERSIBLE_PROD_RISK"
+  ],
+  "tests": [
+    "cerebro/runtime/tests/test_action_gateway.py"
+  ],
+  "tribunal": [
+    "PREPROD registered read-only handlers only; mutations HIGH_RISK; PROD promotion DENY"
+  ],
+  "version": "0.2.0",
+  "zero_cost_execution_plan": [
+    "existing_stack",
+    "deterministic_code",
+    "open_source_local"
+  ]
+}
