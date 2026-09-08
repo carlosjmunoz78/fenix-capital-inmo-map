@@ -31,6 +31,17 @@ test('EVT-001 idempotency is scoped by full context and tenant isolated', () => 
   assert.equal(bus.listForCompany('other-company').length, 1);
 });
 
+test('EVT/JOB context scoping cannot collide through delimiter-like field values', () => {
+  const bus = new EventBus();
+  const a = { company_id: 'a::b', engine_id: 'c', environment: 'd', version: 'e' };
+  const b = { company_id: 'a', engine_id: 'b', environment: 'c', version: 'd' };
+  assert.equal(bus.publish({ type: 'X', context: a, idempotency_key: 'f' }).accepted, true);
+  assert.equal(bus.publish({ type: 'X', context: b, idempotency_key: 'e::f' }).accepted, true);
+  const q = new JobQueue();
+  assert.equal(q.enqueue({ name: 'X', context: a, idempotency_key: 'f' }).accepted, true);
+  assert.equal(q.enqueue({ name: 'X', context: b, idempotency_key: 'e::f' }).accepted, true);
+});
+
 test('EVT/JOB automatic keys distinguish structured-clone values that JSON loses', () => {
   const bus = new EventBus();
   assert.equal(bus.publish({ type: 'MAP', payload: new Map([['x', 1]]), context }).accepted, true);
@@ -39,6 +50,19 @@ test('EVT/JOB automatic keys distinguish structured-clone values that JSON loses
   const q = new JobQueue();
   assert.equal(q.enqueue({ name: 'map-job', payload: new Map([['x', 1]]), context }).accepted, true);
   assert.equal(q.enqueue({ name: 'map-job', payload: new Map([['x', 2]]), context }).accepted, true);
+});
+
+test('EVT/JOB reject shared-memory payloads uniformly before persistence', () => {
+  if (typeof SharedArrayBuffer === 'undefined') return;
+  const sab = new SharedArrayBuffer(8);
+  const bus = new EventBus();
+  assert.throws(() => bus.publish({ type: 'SAB', payload: sab, context }), /SharedArrayBuffer/);
+  assert.throws(() => bus.publish({ type: 'SAB', payload: sab, context, idempotency_key: 'explicit' }), /SharedArrayBuffer/);
+  assert.equal(bus.listForContext(context).length, 0);
+  const q = new JobQueue();
+  assert.throws(() => q.enqueue({ name: 'sab', payload: sab, context }), /SharedArrayBuffer/);
+  assert.throws(() => q.enqueue({ name: 'sab', payload: new Uint8Array(sab), context, idempotency_key: 'explicit' }), /SharedArrayBuffer/);
+  assert.equal(q.claimContext(context), null);
 });
 
 test('EVT-001 never exposes mutable internal event state', () => {
@@ -75,7 +99,7 @@ test('JOB-001 supports priority, retries, context-scoped idempotency and isolati
 
 test('JOB-001 clears prior retry error on eventual success', () => {
   const q = new JobQueue();
-  const enqueued = q.enqueue({ name: 'retry-success', context, max_attempts: 2, idempotency_key: 'retry-success' });
+  q.enqueue({ name: 'retry-success', context, max_attempts: 2, idempotency_key: 'retry-success' });
   const first = q.claimContext(context);
   const retried = q.failContext(first.job_id, context, 'temporary');
   assert.equal(retried.status, 'QUEUED');
@@ -111,6 +135,15 @@ test('FINOPS-001 defaults to zero additional spend and emits MONEY_LIMIT', () =>
   assert.equal(denied.human_required, 'MONEY_LIMIT');
 });
 
+test('FINOPS-001 compares decimal EUR in integer micro-units', () => {
+  const gate = new FinOpsGate({ additional_cost_budget_eur: 0.3 });
+  assert.equal(gate.authorize(0.1).allowed, true);
+  const second = gate.authorize(0.2);
+  assert.equal(second.allowed, true);
+  assert.equal(second.remaining_eur, 0);
+  assert.equal(gate.spent, 0.3);
+});
+
 test('FINOPS-001 rejects non-finite budgets and costs without poisoning state', () => {
   assert.throws(() => new FinOpsGate({ additional_cost_budget_eur: NaN }), /finite non-negative/);
   assert.throws(() => new FinOpsGate({ additional_cost_budget_eur: Infinity }), /finite non-negative/);
@@ -139,6 +172,15 @@ test('SharedRuntime validates payload before consuming FinOps budget', async () 
   const retry = await runtime.execute({ company_id: 'fenix-capital', engine_id: 'APP-001', version: '0.1.0', command: 'good', payload: { ok: true }, cost_eur: 1 });
   assert.equal(retry.status, 'OK');
   assert.equal(runtime.finops.spent, 1);
+});
+
+test('SharedRuntime environment cannot be mutated to PROD after construction', async () => {
+  const runtime = new SharedRuntime();
+  assert.throws(() => { runtime.environment = 'PROD'; }, TypeError);
+  assert.equal(runtime.environment, 'PREPROD');
+  runtime.registerEngine({ engine_id: 'APP-001', version: '0.1.0', handler: ({ context: ctx }) => ({ environment: ctx.environment }) });
+  const result = await runtime.execute({ company_id: 'fenix-capital', engine_id: 'APP-001', version: '0.1.0', command: 'env' });
+  assert.equal(result.result.environment, 'PREPROD');
 });
 
 test('SharedRuntime handler receives tenant-bound facades only', async () => {
