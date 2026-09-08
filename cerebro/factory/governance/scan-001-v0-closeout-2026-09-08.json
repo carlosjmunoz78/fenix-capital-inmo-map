@@ -1,0 +1,37 @@
+{
+  "additional_cost_eur": 0,
+  "date": "2026-09-08",
+  "dependency_map_version": "0.4.0",
+  "engine_id": "SCAN-001",
+  "internet_required_for_ci": false,
+  "merge_sha": "6928e0e72434f5e354b420e7327b62fcc245691f",
+  "next_engine_by_dependency": "BMD-001",
+  "post_merge_preprod": {
+    "conclusion": "SUCCESS",
+    "run_id": 34225431530,
+    "run_number": 3346
+  },
+  "pr": 147,
+  "pr_head_sha": "824d00b4de1caec8d430f74854ece5aa7ff05af0",
+  "prod_autonomy": "DENY",
+  "prod_mutation": false,
+  "read_only": true,
+  "registry_version": "0.14.0",
+  "required_checks": {
+    "FACT-001 App Compatibility": {
+      "conclusion": "SUCCESS",
+      "run_id": 34225069563,
+      "run_number": 87
+    },
+    "FACT-001 Factory V0": {
+      "conclusion": "SUCCESS",
+      "run_id": 34225069226,
+      "run_number": 330
+    }
+  },
+  "sequence_discrepancy": "COMP-ONB textual sequence places KW/WAUD before BMD, while Factory dependencies require BMD before WAUD/KW; preserve both and follow dependency graph until reconciled.",
+  "status": "CONFIRMED_OPERATIONAL_PREPROD_READ_ONLY",
+  "version": "0.2.0",
+  "wave1_defined_not_built": 20,
+  "wave1_implemented": 9
+}
