@@ -1,62 +1,275 @@
 {
-  "map_version": "0.3.0",
+  "map_version": "0.4.0",
   "environment": "PREPROD_AUDIT",
   "nodes": [
-    {"id":"APP-001","type":"engine"},
-    {"id":"fenix-app-gateway","type":"edge_function"},
-    {"id":"fenix_prod","type":"database_schema"},
-    {"id":"fenix-prod-documents","type":"storage"},
-    {"id":"Notion","type":"knowledge_source"},
-    {"id":"WordPress","type":"web"},
-    {"id":"fenix-web-lead","type":"edge_function"},
-    {"id":"fenix-communications-gateway","type":"edge_function"},
-    {"id":"Brevo","type":"transport"},
-    {"id":"Meta WhatsApp","type":"transport"},
-    {"id":"COMP-REG-001","type":"engine"},
-    {"id":"TENANT-001","type":"engine"},
-    {"id":"COMP-ONB-001","type":"engine"},
-    {"id":"CTX-001","type":"engine"},
-    {"id":"CHAT-001","type":"engine"},
-    {"id":"CMD-001","type":"engine"},
-    {"id":"ACTGW-001","type":"engine"},
-    {"id":"CONSOLE-001","type":"engine"},
-    {"id":"POL-001","type":"engine"},
-    {"id":"AUD-001","type":"engine"},
-    {"id":"HEX-001","type":"engine"},
-    {"id":"EVT-001","type":"engine"},
-    {"id":"JOB-001","type":"engine"}
+    {
+      "id": "APP-001",
+      "type": "engine"
+    },
+    {
+      "id": "fenix-app-gateway",
+      "type": "edge_function"
+    },
+    {
+      "id": "fenix_prod",
+      "type": "database_schema"
+    },
+    {
+      "id": "fenix-prod-documents",
+      "type": "storage"
+    },
+    {
+      "id": "Notion",
+      "type": "knowledge_source"
+    },
+    {
+      "id": "WordPress",
+      "type": "web"
+    },
+    {
+      "id": "fenix-web-lead",
+      "type": "edge_function"
+    },
+    {
+      "id": "fenix-communications-gateway",
+      "type": "edge_function"
+    },
+    {
+      "id": "Brevo",
+      "type": "transport"
+    },
+    {
+      "id": "Meta WhatsApp",
+      "type": "transport"
+    },
+    {
+      "id": "COMP-REG-001",
+      "type": "engine"
+    },
+    {
+      "id": "TENANT-001",
+      "type": "engine"
+    },
+    {
+      "id": "COMP-ONB-001",
+      "type": "engine"
+    },
+    {
+      "id": "CTX-001",
+      "type": "engine"
+    },
+    {
+      "id": "CHAT-001",
+      "type": "engine"
+    },
+    {
+      "id": "CMD-001",
+      "type": "engine"
+    },
+    {
+      "id": "ACTGW-001",
+      "type": "engine"
+    },
+    {
+      "id": "CONSOLE-001",
+      "type": "engine"
+    },
+    {
+      "id": "POL-001",
+      "type": "engine"
+    },
+    {
+      "id": "AUD-001",
+      "type": "engine"
+    },
+    {
+      "id": "HEX-001",
+      "type": "engine"
+    },
+    {
+      "id": "EVT-001",
+      "type": "engine"
+    },
+    {
+      "id": "JOB-001",
+      "type": "engine"
+    },
+    {
+      "id": "SCAN-001",
+      "type": "engine"
+    }
   ],
   "edges": [
-    {"from":"APP-001","to":"fenix-app-gateway","kind":"calls"},
-    {"from":"fenix-app-gateway","to":"fenix_prod","kind":"rpc/read-write"},
-    {"from":"fenix-app-gateway","to":"fenix-prod-documents","kind":"signed_url/upload"},
-    {"from":"APP-001","to":"Notion","kind":"legacy/canonical mapping dependency"},
-    {"from":"WordPress","to":"fenix-web-lead","kind":"lead_ingest"},
-    {"from":"fenix-web-lead","to":"fenix_prod","kind":"rpc:web_lead_ingest"},
-    {"from":"APP-001","to":"fenix-communications-gateway","kind":"authorized communications"},
-    {"from":"fenix-communications-gateway","to":"fenix_prod","kind":"communications RPCs"},
-    {"from":"fenix-communications-gateway","to":"Brevo","kind":"email transport"},
-    {"from":"fenix-communications-gateway","to":"Meta WhatsApp","kind":"whatsapp transport"},
-    {"from":"TENANT-001","to":"COMP-REG-001","kind":"canonical company identity"},
-    {"from":"TENANT-001","to":"POL-001","kind":"deny-by-default policy"},
-    {"from":"COMP-ONB-001","to":"COMP-REG-001","kind":"company lifecycle REGISTERED->ONBOARDING"},
-    {"from":"COMP-ONB-001","to":"TENANT-001","kind":"company isolation gate"},
-    {"from":"COMP-ONB-001","to":"POL-001","kind":"promotion and execution policy"},
-    {"from":"COMP-ONB-001","to":"AUD-001","kind":"ordered evidence audit"},
-    {"from":"COMP-ONB-001","to":"HEX-001","kind":"canonical HUMAN_REQUIRED codes"},
-    {"from":"COMP-ONB-001","to":"EVT-001","kind":"onboarding state events contract"},
-    {"from":"COMP-ONB-001","to":"JOB-001","kind":"future downstream job contract; no V0 auto-execution"},
-    {"from":"CTX-001","to":"TENANT-001","kind":"authorized tenant context"},
-    {"from":"CTX-001","to":"COMP-REG-001","kind":"company metadata load"},
-    {"from":"CMD-001","to":"CHAT-001","kind":"message envelope input"},
-    {"from":"CMD-001","to":"CTX-001","kind":"context equality gate"},
-    {"from":"ACTGW-001","to":"CMD-001","kind":"authorized command plan input"},
-    {"from":"ACTGW-001","to":"POL-001","kind":"execution policy gate"},
-    {"from":"ACTGW-001","to":"AUD-001","kind":"execution audit contract"},
-    {"from":"CONSOLE-001","to":"CTX-001","kind":"context selection"},
-    {"from":"CONSOLE-001","to":"CHAT-001","kind":"chat envelope"},
-    {"from":"CONSOLE-001","to":"CMD-001","kind":"command planning"},
-    {"from":"CONSOLE-001","to":"ACTGW-001","kind":"explicit action execution"}
+    {
+      "from": "APP-001",
+      "to": "fenix-app-gateway",
+      "kind": "calls"
+    },
+    {
+      "from": "fenix-app-gateway",
+      "to": "fenix_prod",
+      "kind": "rpc/read-write"
+    },
+    {
+      "from": "fenix-app-gateway",
+      "to": "fenix-prod-documents",
+      "kind": "signed_url/upload"
+    },
+    {
+      "from": "APP-001",
+      "to": "Notion",
+      "kind": "legacy/canonical mapping dependency"
+    },
+    {
+      "from": "WordPress",
+      "to": "fenix-web-lead",
+      "kind": "lead_ingest"
+    },
+    {
+      "from": "fenix-web-lead",
+      "to": "fenix_prod",
+      "kind": "rpc:web_lead_ingest"
+    },
+    {
+      "from": "APP-001",
+      "to": "fenix-communications-gateway",
+      "kind": "authorized communications"
+    },
+    {
+      "from": "fenix-communications-gateway",
+      "to": "fenix_prod",
+      "kind": "communications RPCs"
+    },
+    {
+      "from": "fenix-communications-gateway",
+      "to": "Brevo",
+      "kind": "email transport"
+    },
+    {
+      "from": "fenix-communications-gateway",
+      "to": "Meta WhatsApp",
+      "kind": "whatsapp transport"
+    },
+    {
+      "from": "TENANT-001",
+      "to": "COMP-REG-001",
+      "kind": "canonical company identity"
+    },
+    {
+      "from": "TENANT-001",
+      "to": "POL-001",
+      "kind": "deny-by-default policy"
+    },
+    {
+      "from": "COMP-ONB-001",
+      "to": "COMP-REG-001",
+      "kind": "company lifecycle REGISTERED->ONBOARDING"
+    },
+    {
+      "from": "COMP-ONB-001",
+      "to": "TENANT-001",
+      "kind": "company isolation gate"
+    },
+    {
+      "from": "COMP-ONB-001",
+      "to": "POL-001",
+      "kind": "promotion and execution policy"
+    },
+    {
+      "from": "COMP-ONB-001",
+      "to": "AUD-001",
+      "kind": "ordered evidence audit"
+    },
+    {
+      "from": "COMP-ONB-001",
+      "to": "HEX-001",
+      "kind": "canonical HUMAN_REQUIRED codes"
+    },
+    {
+      "from": "COMP-ONB-001",
+      "to": "EVT-001",
+      "kind": "onboarding state events contract"
+    },
+    {
+      "from": "COMP-ONB-001",
+      "to": "JOB-001",
+      "kind": "future downstream job contract; no V0 auto-execution"
+    },
+    {
+      "from": "CTX-001",
+      "to": "TENANT-001",
+      "kind": "authorized tenant context"
+    },
+    {
+      "from": "CTX-001",
+      "to": "COMP-REG-001",
+      "kind": "company metadata load"
+    },
+    {
+      "from": "CMD-001",
+      "to": "CHAT-001",
+      "kind": "message envelope input"
+    },
+    {
+      "from": "CMD-001",
+      "to": "CTX-001",
+      "kind": "context equality gate"
+    },
+    {
+      "from": "ACTGW-001",
+      "to": "CMD-001",
+      "kind": "authorized command plan input"
+    },
+    {
+      "from": "ACTGW-001",
+      "to": "POL-001",
+      "kind": "execution policy gate"
+    },
+    {
+      "from": "ACTGW-001",
+      "to": "AUD-001",
+      "kind": "execution audit contract"
+    },
+    {
+      "from": "CONSOLE-001",
+      "to": "CTX-001",
+      "kind": "context selection"
+    },
+    {
+      "from": "CONSOLE-001",
+      "to": "CHAT-001",
+      "kind": "chat envelope"
+    },
+    {
+      "from": "CONSOLE-001",
+      "to": "CMD-001",
+      "kind": "command planning"
+    },
+    {
+      "from": "CONSOLE-001",
+      "to": "ACTGW-001",
+      "kind": "explicit action execution"
+    },
+    {
+      "from": "SCAN-001",
+      "to": "COMP-REG-001",
+      "kind": "company domain metadata"
+    },
+    {
+      "from": "SCAN-001",
+      "to": "WEB-001",
+      "kind": "canonical web boundary; no replacement"
+    },
+    {
+      "from": "SCAN-001",
+      "to": "AUD-001",
+      "kind": "dated evidence contract"
+    },
+    {
+      "from": "COMP-ONB-001",
+      "to": "SCAN-001",
+      "kind": "first onboarding discovery step; explicit orchestration only"
+    }
   ],
   "known_risks": [
     "special_cases RLS disabled in PROD",
@@ -66,7 +279,8 @@
     "Console Chain V0 is PREPROD-only and does not authorize PROD writes",
     "ACTGW-001 V0 denies mutating handlers by default",
     "COMP-ONB-001 V0 orchestrates state only and must not interpret downstream scaffolds as executable engines",
-    "COMP-ONB-001 PREPROD pipeline completion does not activate a company or grant PROD autonomy"
+    "COMP-ONB-001 PREPROD pipeline completion does not activate a company or grant PROD autonomy",
+    "SCAN-001 V0 is public HTTP read-only and must not become an aggressive enumerator, credentialed scanner or remote writer"
   ],
   "rule": "No dependency is removed or consolidated until all callers are inventoried and PREPROD equivalence plus rollback are proven."
 }
