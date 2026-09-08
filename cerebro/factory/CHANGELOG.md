@@ -1,5 +1,14 @@
 # FACT-001 Changelog
 
+## 0.4.8 · 2026-09-08
+- Implementado `KW-001` V0.2 en runtime compartido PREPROD como Keyword Discovery determinista y evidence-only.
+- Consume `BMD-001`, `WAUD-001`, semillas declaradas y geografía explícita; `SEO-001` se preserva como frontera SEO canónica.
+- Genera oportunidades, intent, clusters y prioridad reproducible; volumen, CPC, dificultad y ranking permanecen `unknown_without_authorized_source` en ausencia de fuente autorizada.
+- Rechaza cruces de `company_id`, material sensible y ejecución PROD; no realiza escritura remota ni requiere IA de pago.
+- FACT-001 promovió `KW-001` 0.1.0 → 0.2.0 preservando scaffold inmutable; Engine Registry avanza 0.16.0 → 0.17.0.
+- Dependency map avanza a 0.7.0; `SCAN → BMD → WAUD → KW` queda ahora implementado en PREPROD por el grafo Factory.
+- Backup/rebuild por Git+manifest+replay de evidencia; rollback por puntero versionado FACT-001. Coste adicional 0 €. PROD autonomy `DENY`.
+
 ## 0.4.7 · 2026-09-08
 - Implementado `WAUD-001` V0.2 en runtime compartido PREPROD como Website Audit determinista y read-only.
 - Reutiliza `WEB-001` como frontera web canónica, `SCAN-001` como evidencia pública, `BMD-001` como contexto de negocio y `SEO-001` como frontera SEO; no duplica crawler ni muta WordPress/Cloudflare/SEO.
