@@ -1,5 +1,15 @@
 # FACT-001 Changelog
 
+## 0.4.6 · 2026-09-08
+- Implementado `BMD-001` V0.2 en runtime compartido PREPROD como Business Model Discovery determinista basado en evidencia.
+- Consume identidad/geografía canónica de `COMP-REG-001`, evidencia pública de `SCAN-001` y hechos empresariales explícitamente declarados.
+- V0 no inventa servicios, productos, clientes, canales, propuesta de valor ni restricciones ausentes; cuando faltan dimensiones críticas devuelve `LOW_CONFIDENCE`.
+- Rechaza cruce de `company_id`, material sensible y cualquier intento de ejecución PROD; no requiere IA de pago ni infraestructura nueva.
+- FACT-001 promovió `BMD-001` 0.1.0 → 0.2.0 preservando scaffold inmutable; Engine Registry avanza 0.14.0 → 0.15.0.
+- Dependency map avanza a 0.5.0 y declara `COMP-ONB → BMD`, `BMD → COMP-REG/SCAN`.
+- Se conserva/documenta la discrepancia de orden: el texto de onboarding pone KW/WAUD antes de BMD, pero el grafo Factory exige BMD antes de WAUD/KW; ejecución sigue el grafo hasta reconciliación explícita.
+- Backup/rebuild por Git+manifest+evidencia reproducible; rollback por puntero versionado FACT-001. Coste adicional 0 €. PROD autonomy `DENY`.
+
 ## 0.4.5 · 2026-09-08
 - Implementado `SCAN-001` V0.2 en runtime compartido PREPROD como Digital Footprint Scanner determinista y read-only.
 - Inventario previo no encontró crawler/scanner equivalente en el repo; `WEB-001` se conserva como frontera web canónica y SCAN no lo sustituye.
