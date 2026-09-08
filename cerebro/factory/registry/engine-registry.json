@@ -78,10 +78,21 @@
       "company_id": null,
       "engine_id": "CMD-001",
       "environment": "PREPROD",
-      "manifest": "../generated/CMD-001/engine.manifest.json",
-      "source_of_truth": "git",
-      "status": "DEFINED_NOT_BUILT",
-      "version": "0.1.0"
+      "factory_scaffold": "../generated/CMD-001/engine.manifest.json",
+      "manifest": "../versions/CMD-001/0.2.0/engine.manifest.json",
+      "source_of_truth": "git+versioned_update",
+      "status": "CONFIRMED_OPERATIONAL",
+      "version": "0.2.0",
+      "version_history": [
+        {
+          "company_id": null,
+          "environment": "PREPROD",
+          "manifest": "../generated/CMD-001/engine.manifest.json",
+          "source_of_truth": "git",
+          "status": "DEFINED_NOT_BUILT",
+          "version": "0.1.0"
+        }
+      ]
     },
     {
       "company_id": null,
@@ -460,5 +471,5 @@
     }
   ],
   "environment": "PREPROD",
-  "registry_version": "0.9.0"
+  "registry_version": "0.10.0"
 }
