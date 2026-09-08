@@ -187,10 +187,21 @@
       "company_id": null,
       "engine_id": "COMPET-001",
       "environment": "PREPROD",
-      "manifest": "../generated/COMPET-001/engine.manifest.json",
-      "source_of_truth": "git",
-      "status": "DEFINED_NOT_BUILT",
-      "version": "0.1.0"
+      "factory_scaffold": "../generated/COMPET-001/engine.manifest.json",
+      "manifest": "../versions/COMPET-001/0.2.0/engine.manifest.json",
+      "source_of_truth": "git+versioned_update",
+      "status": "CONFIRMED_OPERATIONAL",
+      "version": "0.2.0",
+      "version_history": [
+        {
+          "company_id": null,
+          "environment": "PREPROD",
+          "manifest": "../generated/COMPET-001/engine.manifest.json",
+          "source_of_truth": "git",
+          "status": "DEFINED_NOT_BUILT",
+          "version": "0.1.0"
+        }
+      ]
     },
     {
       "company_id": null,
@@ -570,5 +581,5 @@
     }
   ],
   "environment": "PREPROD",
-  "registry_version": "0.19.0"
+  "registry_version": "0.20.0"
 }
