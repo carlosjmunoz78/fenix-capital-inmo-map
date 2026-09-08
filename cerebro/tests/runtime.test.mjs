@@ -31,6 +31,20 @@ test('EVT-001 idempotency is scoped by full context and tenant isolated', () => 
   assert.equal(bus.listForCompany('other-company').length, 1);
 });
 
+test('EVT-001 never exposes mutable internal event state', () => {
+  const bus = new EventBus();
+  const published = bus.publish({ type: 'SAFE', payload: { nested: { value: 1 } }, context, idempotency_key: 'mutable-event' });
+  published.event.context.company_id = 'other-company';
+  published.event.payload.nested.value = 999;
+  published.event.status = 'CORRUPTED';
+  const stored = bus.listForContext(context);
+  assert.equal(stored.length, 1);
+  assert.equal(stored[0].context.company_id, 'fenix-capital');
+  assert.equal(stored[0].payload.nested.value, 1);
+  assert.equal(stored[0].status, 'PENDING');
+  assert.equal(bus.listForCompany('other-company').length, 0);
+});
+
 test('JOB-001 supports priority, retries, context-scoped idempotency and isolation', () => {
   const q = new JobQueue();
   q.enqueue({ name: 'low', context, priority: 100, idempotency_key: 'a' });
@@ -47,6 +61,23 @@ test('JOB-001 supports priority, retries, context-scoped idempotency and isolati
   assert.equal(failed.status, 'FAILED');
   const otherClaim = q.claimContext({ ...context, company_id: 'other-company' });
   assert.equal(otherClaim.context.company_id, 'other-company');
+});
+
+test('JOB-001 never exposes mutable internal queued state', () => {
+  const q = new JobQueue();
+  const enqueued = q.enqueue({ name: 'immutable-return', context, payload: { nested: { value: 1 } }, priority: 5, max_attempts: 2, idempotency_key: 'mutable-job' });
+  enqueued.job.context.company_id = 'other-company';
+  enqueued.job.payload.nested.value = 999;
+  enqueued.job.status = 'SUCCEEDED';
+  enqueued.job.attempts = 99;
+  enqueued.job.max_attempts = 99;
+  assert.equal(q.claimContext({ ...context, company_id: 'other-company' }), null);
+  const claimed = q.claimContext(context);
+  assert.equal(claimed.context.company_id, 'fenix-capital');
+  assert.equal(claimed.payload.nested.value, 1);
+  assert.equal(claimed.status, 'RUNNING');
+  assert.equal(claimed.attempts, 1);
+  assert.equal(claimed.max_attempts, 2);
 });
 
 test('FINOPS-001 defaults to zero additional spend and emits MONEY_LIMIT', () => {
@@ -90,8 +121,11 @@ test('SharedRuntime handler receives tenant-bound facades only', async () => {
     handler: ({ events, jobs }) => {
       assert.equal(typeof events.listForCompany, 'undefined');
       assert.equal(typeof jobs.claimContext, 'undefined');
-      events.publish({ type: 'SAFE_EVENT', payload: { company_id: 'other-company' }, context: { ...context, company_id: 'other-company' } });
-      jobs.enqueue({ name: 'safe-job', payload: { company_id: 'other-company' }, context: { ...context, company_id: 'other-company' } });
+      const eventReturn = events.publish({ type: 'SAFE_EVENT', payload: { company_id: 'other-company' }, context: { ...context, company_id: 'other-company' } });
+      const jobReturn = jobs.enqueue({ name: 'safe-job', payload: { company_id: 'other-company' }, context: { ...context, company_id: 'other-company' } });
+      eventReturn.event.context.company_id = 'other-company';
+      jobReturn.job.context.company_id = 'other-company';
+      jobReturn.job.status = 'SUCCEEDED';
       return { events: events.list(), job: jobs.claim() };
     }
   });
@@ -99,6 +133,7 @@ test('SharedRuntime handler receives tenant-bound facades only', async () => {
   assert.equal(result.result.events.length, 1);
   assert.equal(result.result.events[0].context.company_id, 'fenix-capital');
   assert.equal(result.result.job.context.company_id, 'fenix-capital');
+  assert.equal(result.result.job.status, 'RUNNING');
   assert.equal(runtime.events.listForCompany('other-company').length, 0);
   assert.equal(runtime.jobs.claimContext({ ...context, company_id: 'other-company' }), null);
 });
