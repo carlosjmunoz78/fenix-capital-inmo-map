@@ -11,6 +11,13 @@ function assertContext(ctx) {
   }
 }
 
+function sameContext(a, b) {
+  return a.company_id === b.company_id &&
+    a.engine_id === b.engine_id &&
+    a.environment === b.environment &&
+    a.version === b.version;
+}
+
 function stableId(prefix, value) {
   return `${prefix}_${crypto.createHash('sha256').update(JSON.stringify(value)).digest('hex').slice(0, 24)}`;
 }
@@ -46,6 +53,11 @@ export class EventBus {
 
   listForCompany(company_id) {
     return this.outbox.filter(e => e.context.company_id === company_id).map(e => structuredClone(e));
+  }
+
+  listForContext(context) {
+    assertContext(context);
+    return this.outbox.filter(e => sameContext(e.context, context)).map(e => structuredClone(e));
   }
 }
 
@@ -91,9 +103,31 @@ export class JobQueue {
     return structuredClone(job);
   }
 
+  claimContext(context) {
+    assertContext(context);
+    const candidates = this.jobs
+      .filter(j => sameContext(j.context, context) && j.status === 'QUEUED')
+      .sort((a,b) => a.priority - b.priority || a.job_id.localeCompare(b.job_id));
+    const job = candidates[0];
+    if (!job) return null;
+    job.status = 'RUNNING';
+    job.attempts += 1;
+    return structuredClone(job);
+  }
+
   complete(job_id, company_id, result) {
     const job = this.jobs.find(j => j.job_id === job_id && j.context.company_id === company_id);
     if (!job) throw new Error('job not found for company');
+    if (job.status !== 'RUNNING') throw new Error('job not running');
+    job.status = 'SUCCEEDED';
+    job.result = result;
+    return structuredClone(job);
+  }
+
+  completeContext(job_id, context, result) {
+    assertContext(context);
+    const job = this.jobs.find(j => j.job_id === job_id && sameContext(j.context, context));
+    if (!job) throw new Error('job not found for context');
     if (job.status !== 'RUNNING') throw new Error('job not running');
     job.status = 'SUCCEEDED';
     job.result = result;
@@ -108,13 +142,22 @@ export class JobQueue {
     job.status = job.attempts < job.max_attempts ? 'QUEUED' : 'FAILED';
     return structuredClone(job);
   }
+
+  failContext(job_id, context, error) {
+    assertContext(context);
+    const job = this.jobs.find(j => j.job_id === job_id && sameContext(j.context, context));
+    if (!job) throw new Error('job not found for context');
+    if (job.status !== 'RUNNING') throw new Error('job not running');
+    job.error = String(error);
+    job.status = job.attempts < job.max_attempts ? 'QUEUED' : 'FAILED';
+    return structuredClone(job);
+  }
 }
 
 function bindEvents(bus, context) {
   return Object.freeze({
     publish: ({ type, payload = {}, idempotency_key }) => bus.publish({ type, payload, context, idempotency_key }),
-    list: () => bus.listForCompany(context.company_id)
-      .filter(e => e.context.engine_id === context.engine_id && e.context.environment === context.environment && e.context.version === context.version)
+    list: () => bus.listForContext(context)
   });
 }
 
@@ -122,17 +165,9 @@ function bindJobs(queue, context) {
   return Object.freeze({
     enqueue: ({ name, payload = {}, priority = 100, max_attempts = 3, timeout_ms = 30000, idempotency_key }) =>
       queue.enqueue({ name, context, payload, priority, max_attempts, timeout_ms, idempotency_key }),
-    claim: () => {
-      const job = queue.claim(context.company_id);
-      if (!job) return null;
-      if (job.context.engine_id !== context.engine_id || job.context.environment !== context.environment || job.context.version !== context.version) {
-        job.status = 'QUEUED';
-        throw new Error('cross-context job claim blocked');
-      }
-      return job;
-    },
-    complete: (job_id, result) => queue.complete(job_id, context.company_id, result),
-    fail: (job_id, error) => queue.fail(job_id, context.company_id, error)
+    claim: () => queue.claimContext(context),
+    complete: (job_id, result) => queue.completeContext(job_id, context, result),
+    fail: (job_id, error) => queue.failContext(job_id, context, error)
   });
 }
 
