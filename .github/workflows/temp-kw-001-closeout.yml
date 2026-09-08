@@ -1,0 +1,34 @@
+name: TEMP KW-001 Closeout
+
+on:
+  push:
+    branches:
+      - cerebro/kw-001-closeout
+    paths:
+      - '.github/workflows/temp-kw-001-closeout.yml'
+      - 'cerebro/factory/scripts/temp_kw_closeout.py'
+
+permissions:
+  contents: write
+
+jobs:
+  closeout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: cerebro/kw-001-closeout
+          fetch-depth: 0
+      - name: Synchronize canonical status and evidence
+        run: python cerebro/factory/scripts/temp_kw_closeout.py
+      - name: Commit closeout
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'CEREBRO Governance'
+          git config user.email 'cerebro-governance@users.noreply.github.com'
+          git add cerebro/factory/STATUS.md cerebro/factory/governance/kw-001-v0-closeout-2026-09-08.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'GOV-001 · close out KW-001 V0.2 green evidence'
+          git push origin HEAD:cerebro/kw-001-closeout
