@@ -1,5 +1,16 @@
 # FACT-001 Changelog
 
+## 0.4.2 · 2026-09-08
+- Añadido `scripts/version_engine.py` como workflow determinista de actualización versionada para motores ya materializados.
+- El scaffold original `generated/<engine_id>/...` queda inmutable; las evoluciones se escriben en `versions/<engine_id>/<version>/engine.manifest.json`.
+- Engine Registry puede mover su puntero a una versión superior sin alterar el scaffold de FACT-001, preservando la idempotencia `family/create → NO_CHANGE`.
+- `apply --plan` no escribe; `apply` exige versión semver superior, coste adicional objetivo 0 €, backup/rollback/rebuild declarados y entorno no-PROD.
+- `rollback` mueve el Registry a una versión/scaffold existente sin borrar versiones posteriores; conserva historial de punteros para auditoría.
+- V0.4 rechaza candidatos `PROD`: la promoción PROD continúa gobernada por contratos, tribunal, PREPROD, política y HUMAN_REQUIRED aplicables.
+- Tests cubren no-write, preservación byte-a-byte del scaffold, actualización Registry, idempotencia Factory post-versionado, rollback, monotonicidad de versión y rechazo PROD.
+- `FACT-001 Factory V0` de PR #139 validó Registry/manifests y todos los unit tests en verde; App Compatibility se vuelve a exigir antes de merge.
+- Coste adicional: 0 €. Sin deploy, DDL, permisos, secretos ni infraestructura externa.
+
 ## 0.4.1 · 2026-09-08
 - Cerrado el loop de los cuatro objetivos estructurales/PREPROD con evidencia post-merge completa.
 - `PRE-PROD App Build` #3338 terminó SUCCESS tras PR #137: Build PREPROD, Browser QA, CORS smokes, candidato PROD inmutable, QA exacto, leak assertion, sellado y artifacts verdes.
