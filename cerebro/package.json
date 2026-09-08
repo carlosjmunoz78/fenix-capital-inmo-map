@@ -1,0 +1,11 @@
+{
+  "name": "cerebro-engine-factory-v0",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "validate": "node factory.mjs validate",
+    "generate": "node factory.mjs generate",
+    "test": "node --test tests/*.test.mjs"
+  }
+}
