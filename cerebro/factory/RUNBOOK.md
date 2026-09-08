@@ -192,3 +192,18 @@ Reglas:
 7. PROD permanece DENY; una futura ampliación de alcance requiere contrato, rate limits, evaluación, tribunal y rollback propios.
 
 Backup/rebuild: Git + manifest versionado + contrato/tests. Rollback: `version_engine.py rollback --engine-id SCAN-001 --to-version 0.1.0` tras `--plan` y OLD vs NEW.
+
+
+## BMD-001 · operación PREPROD determinista
+`BMD-001` V0.2 ensambla un perfil de modelo de negocio desde evidencia canónica/pública/declarada y nunca completa huecos por inferencia silenciosa.
+
+Reglas:
+1. requiere `company_id`, evidencia `SCAN-001`, hechos declarados y `evidence_at`;
+2. identidad/geografía provienen de `COMP-REG-001`; señales públicas provienen de `SCAN-001`;
+3. servicios/productos/clientes/value proposition/geografía/canales/objetivos/restricciones sólo se emiten si hay evidencia correspondiente;
+4. si faltan dimensiones críticas, devuelve `LOW_CONFIDENCE` con lista explícita de campos faltantes;
+5. rechazo deny-by-default para cruce multiempresa, secretos/material sensible y `environment=PROD`;
+6. coste adicional 0 €, Python stdlib, sin IA obligatoria ni nuevo servidor;
+7. la secuencia operativa sigue dependencias Factory: `SCAN → BMD → WAUD → KW` mientras la discrepancia textual de COMP-ONB permanezca sin reconciliar.
+
+Backup/rebuild: Git + manifest versionado + replay de evidencia. Rollback: `version_engine.py rollback --engine-id BMD-001 --to-version 0.1.0` tras `--plan`, OLD vs NEW y gates.

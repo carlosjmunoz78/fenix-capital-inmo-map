@@ -1,5 +1,5 @@
 {
-  "map_version": "0.4.0",
+  "map_version": "0.5.0",
   "environment": "PREPROD_AUDIT",
   "nodes": [
     {
@@ -96,6 +96,10 @@
     },
     {
       "id": "SCAN-001",
+      "type": "engine"
+    },
+    {
+      "id": "BMD-001",
       "type": "engine"
     }
   ],
@@ -269,6 +273,21 @@
       "from": "COMP-ONB-001",
       "to": "SCAN-001",
       "kind": "first onboarding discovery step; explicit orchestration only"
+    },
+    {
+      "from": "BMD-001",
+      "to": "COMP-REG-001",
+      "kind": "canonical company identity/geography"
+    },
+    {
+      "from": "BMD-001",
+      "to": "SCAN-001",
+      "kind": "public footprint evidence"
+    },
+    {
+      "from": "COMP-ONB-001",
+      "to": "BMD-001",
+      "kind": "dependency-valid discovery step; explicit orchestration only"
     }
   ],
   "known_risks": [
@@ -280,7 +299,8 @@
     "ACTGW-001 V0 denies mutating handlers by default",
     "COMP-ONB-001 V0 orchestrates state only and must not interpret downstream scaffolds as executable engines",
     "COMP-ONB-001 PREPROD pipeline completion does not activate a company or grant PROD autonomy",
-    "SCAN-001 V0 is public HTTP read-only and must not become an aggressive enumerator, credentialed scanner or remote writer"
+    "SCAN-001 V0 is public HTTP read-only and must not become an aggressive enumerator, credentialed scanner or remote writer",
+    "BMD-001 V0 must not invent missing business facts; LOW_CONFIDENCE is required when critical dimensions lack evidence"
   ],
   "rule": "No dependency is removed or consolidated until all callers are inventoried and PREPROD equivalence plus rollback are proven."
 }
