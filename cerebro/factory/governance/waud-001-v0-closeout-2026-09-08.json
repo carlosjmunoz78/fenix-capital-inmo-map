@@ -1,0 +1,35 @@
+{
+  "additional_cost_eur": 0,
+  "date": "2026-09-08",
+  "dependency_map_version": "0.6.0",
+  "engine_id": "WAUD-001",
+  "merge_sha": "1793c70110e8c68b6b14dd30f7dc3929fe65bcee",
+  "next_engine_by_dependency": "KW-001",
+  "post_merge_preprod": {
+    "conclusion": "SUCCESS",
+    "run_id": 34236072077,
+    "run_number": 3350
+  },
+  "pr": 151,
+  "pr_head_sha": "d9bfedd765f29d79f2d69cfda8ec9dc6ebe51582",
+  "prod_autonomy": "DENY",
+  "prod_mutation": false,
+  "registry_version": "0.16.0",
+  "remote_write": false,
+  "required_checks": {
+    "FACT-001 App Compatibility": {
+      "conclusion": "SUCCESS",
+      "run_id": 34235596036,
+      "run_number": 91
+    },
+    "FACT-001 Factory V0": {
+      "conclusion": "SUCCESS",
+      "run_id": 34235596173,
+      "run_number": 348
+    }
+  },
+  "status": "CONFIRMED_OPERATIONAL_PREPROD_READ_ONLY",
+  "version": "0.2.0",
+  "wave1_defined_not_built": 18,
+  "wave1_implemented": 11
+}
