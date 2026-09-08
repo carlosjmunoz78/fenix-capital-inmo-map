@@ -1,0 +1,5 @@
+{
+  "default": "DENY",
+  "engine_id": "COMP-BKP-001",
+  "permissions": []
+}

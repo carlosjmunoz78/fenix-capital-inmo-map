@@ -1,0 +1,5 @@
+{
+  "engine_id": "ACTGW-001",
+  "environment": "PREPROD",
+  "secrets": "EXTERNAL_ONLY"
+}

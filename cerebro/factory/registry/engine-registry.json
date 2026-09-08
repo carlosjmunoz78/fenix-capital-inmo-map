@@ -1,23 +1,420 @@
 {
-  "registry_version": "0.4.0",
-  "environment": "PREPROD",
   "engines": [
-    {"engine_id":"FACT-001","manifest":"../examples/FACT-001.engine.json","status":"CONFIRMED_OPERATIONAL","source_of_truth":"git+ci_verified","environment":"PREPROD","company_id":null,"version":"0.1.0"},
-    {"engine_id":"GOV-001","manifest":"../examples/GOV-001.engine.json","status":"CONFIRMED_OPERATIONAL","source_of_truth":"git+ci_verified","environment":"PREPROD","company_id":null,"version":"0.1.0"},
-    {"engine_id":"DEP-001","manifest":"../examples/DEP-001.engine.json","status":"DOCUMENTED_PARTIAL","source_of_truth":"git+live_audit","environment":"PREPROD","company_id":null,"version":"0.1.0"},
-    {"engine_id":"POL-001","manifest":"../examples/POL-001.engine.json","status":"CONFIRMED_OPERATIONAL","source_of_truth":"git+ci_verified","environment":"PREPROD","company_id":null,"version":"0.1.0"},
-    {"engine_id":"HEX-001","manifest":"../examples/HEX-001.engine.json","status":"CONFIRMED_OPERATIONAL","source_of_truth":"git+ci_verified","environment":"PREPROD","company_id":null,"version":"0.1.0"},
-    {"engine_id":"EVT-001","manifest":"../examples/EVT-001.engine.json","status":"CONFIRMED_OPERATIONAL","source_of_truth":"git+ci_verified","environment":"PREPROD","company_id":null,"version":"0.1.0"},
-    {"engine_id":"JOB-001","manifest":"../examples/JOB-001.engine.json","status":"CONFIRMED_OPERATIONAL","source_of_truth":"git+ci_verified","environment":"PREPROD","company_id":null,"version":"0.1.0"},
-    {"engine_id":"AUD-001","manifest":"../examples/AUD-001.engine.json","status":"CONFIRMED_OPERATIONAL","source_of_truth":"git+ci_verified","environment":"PREPROD","company_id":null,"version":"0.1.0"},
-    {"engine_id":"OBSERV-001","manifest":"../examples/OBSERV-001.engine.json","status":"CONFIRMED_OPERATIONAL","source_of_truth":"git+ci_verified","environment":"PREPROD","company_id":null,"version":"0.1.0"},
-    {"engine_id":"APP-001","manifest":"../examples/APP-001.engine.json","status":"CONFIRMED_OPERATIONAL","source_of_truth":"git+live_audit","environment":"PREPROD","company_id":"fenix-capital","version":"317a3e457993b4a0da2b84f4f51bcd28b3daba36"},
-    {"engine_id":"CORE-001","manifest":"../examples/CORE-001.engine.json","status":"DOCUMENTED_PARTIAL","source_of_truth":"live_wordpress_audit","environment":"PROD","company_id":"fenix-capital","version":"1.0.0-rc9-prod2"},
-    {"engine_id":"WEB-001","manifest":"../examples/WEB-001.engine.json","status":"CONFIRMED_OPERATIONAL","source_of_truth":"live_web+wordpress_audit","environment":"PROD","company_id":"fenix-capital","version":"live-2026-09-07"},
-    {"engine_id":"SEO-001","manifest":"../examples/SEO-001.engine.json","status":"DOCUMENTED_PARTIAL","source_of_truth":"live_wordpress+notion_audit","environment":"PROD","company_id":"fenix-capital","version":"bridge-0.4.1"},
-    {"engine_id":"CRM-001","manifest":"../examples/CRM-001.engine.json","status":"DOCUMENTED_PARTIAL","source_of_truth":"master+live_supabase_app_audit","environment":"PROD","company_id":"fenix-capital","version":"live-audit-2026-09-07"},
-    {"engine_id":"DOC-001","manifest":"../examples/DOC-001.engine.json","status":"DOCUMENTED_PARTIAL","source_of_truth":"live_edge+current_source_audit","environment":"PROD","company_id":"fenix-capital","version":"live-audit-2026-09-07"},
-    {"engine_id":"TRN-001","manifest":"../examples/TRN-001.engine.json","status":"DOCUMENTED_PARTIAL","source_of_truth":"master+notion_evidence","environment":"LAB","company_id":"fenix-capital","version":"documented-2026-09-07"},
-    {"engine_id":"LAB-TRD","manifest":"../examples/LAB-TRD.engine.json","status":"DOCUMENTED_PARTIAL","source_of_truth":"notion_recent_evidence","environment":"LAB","company_id":"fenix-capital","version":"documented-2026-09-04"}
-  ]
+    {
+      "company_id": null,
+      "engine_id": "ACTGW-001",
+      "environment": "PREPROD",
+      "manifest": "../generated/ACTGW-001/engine.manifest.json",
+      "source_of_truth": "git",
+      "status": "DEFINED_NOT_BUILT",
+      "version": "0.1.0"
+    },
+    {
+      "company_id": "fenix-capital",
+      "engine_id": "APP-001",
+      "environment": "PREPROD",
+      "manifest": "../examples/APP-001.engine.json",
+      "source_of_truth": "git+live_audit",
+      "status": "CONFIRMED_OPERATIONAL",
+      "version": "317a3e457993b4a0da2b84f4f51bcd28b3daba36"
+    },
+    {
+      "company_id": null,
+      "engine_id": "APPBOOT-001",
+      "environment": "PREPROD",
+      "manifest": "../generated/APPBOOT-001/engine.manifest.json",
+      "source_of_truth": "git",
+      "status": "DEFINED_NOT_BUILT",
+      "version": "0.1.0"
+    },
+    {
+      "company_id": null,
+      "engine_id": "AUD-001",
+      "environment": "PREPROD",
+      "manifest": "../examples/AUD-001.engine.json",
+      "source_of_truth": "git+ci_verified",
+      "status": "CONFIRMED_OPERATIONAL",
+      "version": "0.1.0"
+    },
+    {
+      "company_id": null,
+      "engine_id": "AUTBOOT-001",
+      "environment": "PREPROD",
+      "manifest": "../generated/AUTBOOT-001/engine.manifest.json",
+      "source_of_truth": "git",
+      "status": "DEFINED_NOT_BUILT",
+      "version": "0.1.0"
+    },
+    {
+      "company_id": null,
+      "engine_id": "BMD-001",
+      "environment": "PREPROD",
+      "manifest": "../generated/BMD-001/engine.manifest.json",
+      "source_of_truth": "git",
+      "status": "DEFINED_NOT_BUILT",
+      "version": "0.1.0"
+    },
+    {
+      "company_id": null,
+      "engine_id": "CHAT-001",
+      "environment": "PREPROD",
+      "manifest": "../generated/CHAT-001/engine.manifest.json",
+      "source_of_truth": "git",
+      "status": "DEFINED_NOT_BUILT",
+      "version": "0.1.0"
+    },
+    {
+      "company_id": null,
+      "engine_id": "CMD-001",
+      "environment": "PREPROD",
+      "manifest": "../generated/CMD-001/engine.manifest.json",
+      "source_of_truth": "git",
+      "status": "DEFINED_NOT_BUILT",
+      "version": "0.1.0"
+    },
+    {
+      "company_id": null,
+      "engine_id": "COMP-BKP-001",
+      "environment": "PREPROD",
+      "manifest": "../generated/COMP-BKP-001/engine.manifest.json",
+      "source_of_truth": "git",
+      "status": "DEFINED_NOT_BUILT",
+      "version": "0.1.0"
+    },
+    {
+      "company_id": null,
+      "engine_id": "COMP-DEP-001",
+      "environment": "PREPROD",
+      "manifest": "../generated/COMP-DEP-001/engine.manifest.json",
+      "source_of_truth": "git",
+      "status": "DEFINED_NOT_BUILT",
+      "version": "0.1.0"
+    },
+    {
+      "company_id": null,
+      "engine_id": "COMP-HLT-001",
+      "environment": "PREPROD",
+      "manifest": "../generated/COMP-HLT-001/engine.manifest.json",
+      "source_of_truth": "git",
+      "status": "DEFINED_NOT_BUILT",
+      "version": "0.1.0"
+    },
+    {
+      "company_id": null,
+      "engine_id": "COMP-ONB-001",
+      "environment": "PREPROD",
+      "manifest": "../generated/COMP-ONB-001/engine.manifest.json",
+      "source_of_truth": "git",
+      "status": "DEFINED_NOT_BUILT",
+      "version": "0.1.0"
+    },
+    {
+      "company_id": null,
+      "engine_id": "COMP-REG-001",
+      "environment": "PREPROD",
+      "manifest": "../generated/COMP-REG-001/engine.manifest.json",
+      "source_of_truth": "git",
+      "status": "DEFINED_NOT_BUILT",
+      "version": "0.1.0"
+    },
+    {
+      "company_id": null,
+      "engine_id": "COMPET-001",
+      "environment": "PREPROD",
+      "manifest": "../generated/COMPET-001/engine.manifest.json",
+      "source_of_truth": "git",
+      "status": "DEFINED_NOT_BUILT",
+      "version": "0.1.0"
+    },
+    {
+      "company_id": null,
+      "engine_id": "CONSOLE-001",
+      "environment": "PREPROD",
+      "manifest": "../generated/CONSOLE-001/engine.manifest.json",
+      "source_of_truth": "git",
+      "status": "DEFINED_NOT_BUILT",
+      "version": "0.1.0"
+    },
+    {
+      "company_id": "fenix-capital",
+      "engine_id": "CORE-001",
+      "environment": "PROD",
+      "manifest": "../examples/CORE-001.engine.json",
+      "source_of_truth": "live_wordpress_audit",
+      "status": "DOCUMENTED_PARTIAL",
+      "version": "1.0.0-rc9-prod2"
+    },
+    {
+      "company_id": "fenix-capital",
+      "engine_id": "CRM-001",
+      "environment": "PROD",
+      "manifest": "../examples/CRM-001.engine.json",
+      "source_of_truth": "master+live_supabase_app_audit",
+      "status": "DOCUMENTED_PARTIAL",
+      "version": "live-audit-2026-09-07"
+    },
+    {
+      "company_id": null,
+      "engine_id": "CRMBOOT-001",
+      "environment": "PREPROD",
+      "manifest": "../generated/CRMBOOT-001/engine.manifest.json",
+      "source_of_truth": "git",
+      "status": "DEFINED_NOT_BUILT",
+      "version": "0.1.0"
+    },
+    {
+      "company_id": null,
+      "engine_id": "CTX-001",
+      "environment": "PREPROD",
+      "manifest": "../generated/CTX-001/engine.manifest.json",
+      "source_of_truth": "git",
+      "status": "DEFINED_NOT_BUILT",
+      "version": "0.1.0"
+    },
+    {
+      "company_id": null,
+      "engine_id": "DEP-001",
+      "environment": "PREPROD",
+      "manifest": "../examples/DEP-001.engine.json",
+      "source_of_truth": "git+live_audit",
+      "status": "DOCUMENTED_PARTIAL",
+      "version": "0.1.0"
+    },
+    {
+      "company_id": "fenix-capital",
+      "engine_id": "DOC-001",
+      "environment": "PROD",
+      "manifest": "../examples/DOC-001.engine.json",
+      "source_of_truth": "live_edge+current_source_audit",
+      "status": "DOCUMENTED_PARTIAL",
+      "version": "live-audit-2026-09-07"
+    },
+    {
+      "company_id": null,
+      "engine_id": "ENGACT-001",
+      "environment": "PREPROD",
+      "manifest": "../generated/ENGACT-001/engine.manifest.json",
+      "source_of_truth": "git",
+      "status": "DEFINED_NOT_BUILT",
+      "version": "0.1.0"
+    },
+    {
+      "company_id": null,
+      "engine_id": "EVT-001",
+      "environment": "PREPROD",
+      "manifest": "../examples/EVT-001.engine.json",
+      "source_of_truth": "git+ci_verified",
+      "status": "CONFIRMED_OPERATIONAL",
+      "version": "0.1.0"
+    },
+    {
+      "company_id": null,
+      "engine_id": "FACT-001",
+      "environment": "PREPROD",
+      "manifest": "../examples/FACT-001.engine.json",
+      "source_of_truth": "git+ci_verified",
+      "status": "CONFIRMED_OPERATIONAL",
+      "version": "0.1.0"
+    },
+    {
+      "company_id": null,
+      "engine_id": "GOV-001",
+      "environment": "PREPROD",
+      "manifest": "../examples/GOV-001.engine.json",
+      "source_of_truth": "git+ci_verified",
+      "status": "CONFIRMED_OPERATIONAL",
+      "version": "0.1.0"
+    },
+    {
+      "company_id": null,
+      "engine_id": "HEX-001",
+      "environment": "PREPROD",
+      "manifest": "../examples/HEX-001.engine.json",
+      "source_of_truth": "git+ci_verified",
+      "status": "CONFIRMED_OPERATIONAL",
+      "version": "0.1.0"
+    },
+    {
+      "company_id": null,
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "manifest": "../examples/JOB-001.engine.json",
+      "source_of_truth": "git+ci_verified",
+      "status": "CONFIRMED_OPERATIONAL",
+      "version": "0.1.0"
+    },
+    {
+      "company_id": null,
+      "engine_id": "KBOOT-001",
+      "environment": "PREPROD",
+      "manifest": "../generated/KBOOT-001/engine.manifest.json",
+      "source_of_truth": "git",
+      "status": "DEFINED_NOT_BUILT",
+      "version": "0.1.0"
+    },
+    {
+      "company_id": null,
+      "engine_id": "KW-001",
+      "environment": "PREPROD",
+      "manifest": "../generated/KW-001/engine.manifest.json",
+      "source_of_truth": "git",
+      "status": "DEFINED_NOT_BUILT",
+      "version": "0.1.0"
+    },
+    {
+      "company_id": "fenix-capital",
+      "engine_id": "LAB-TRD",
+      "environment": "LAB",
+      "manifest": "../examples/LAB-TRD.engine.json",
+      "source_of_truth": "notion_recent_evidence",
+      "status": "DOCUMENTED_PARTIAL",
+      "version": "documented-2026-09-04"
+    },
+    {
+      "company_id": null,
+      "engine_id": "LOCALP-001",
+      "environment": "PREPROD",
+      "manifest": "../generated/LOCALP-001/engine.manifest.json",
+      "source_of_truth": "git",
+      "status": "DEFINED_NOT_BUILT",
+      "version": "0.1.0"
+    },
+    {
+      "company_id": null,
+      "engine_id": "MKT-002",
+      "environment": "PREPROD",
+      "manifest": "../generated/MKT-002/engine.manifest.json",
+      "source_of_truth": "git",
+      "status": "DEFINED_NOT_BUILT",
+      "version": "0.1.0"
+    },
+    {
+      "company_id": null,
+      "engine_id": "MKTBOOT-001",
+      "environment": "PREPROD",
+      "manifest": "../generated/MKTBOOT-001/engine.manifest.json",
+      "source_of_truth": "git",
+      "status": "DEFINED_NOT_BUILT",
+      "version": "0.1.0"
+    },
+    {
+      "company_id": null,
+      "engine_id": "OBSERV-001",
+      "environment": "PREPROD",
+      "manifest": "../examples/OBSERV-001.engine.json",
+      "source_of_truth": "git+ci_verified",
+      "status": "CONFIRMED_OPERATIONAL",
+      "version": "0.1.0"
+    },
+    {
+      "company_id": null,
+      "engine_id": "POL-001",
+      "environment": "PREPROD",
+      "manifest": "../examples/POL-001.engine.json",
+      "source_of_truth": "git+ci_verified",
+      "status": "CONFIRMED_OPERATIONAL",
+      "version": "0.1.0"
+    },
+    {
+      "company_id": null,
+      "engine_id": "PROC-001",
+      "environment": "PREPROD",
+      "manifest": "../generated/PROC-001/engine.manifest.json",
+      "source_of_truth": "git",
+      "status": "DEFINED_NOT_BUILT",
+      "version": "0.1.0"
+    },
+    {
+      "company_id": null,
+      "engine_id": "SCAN-001",
+      "environment": "PREPROD",
+      "manifest": "../generated/SCAN-001/engine.manifest.json",
+      "source_of_truth": "git",
+      "status": "DEFINED_NOT_BUILT",
+      "version": "0.1.0"
+    },
+    {
+      "company_id": "fenix-capital",
+      "engine_id": "SEO-001",
+      "environment": "PROD",
+      "manifest": "../examples/SEO-001.engine.json",
+      "source_of_truth": "live_wordpress+notion_audit",
+      "status": "DOCUMENTED_PARTIAL",
+      "version": "bridge-0.4.1"
+    },
+    {
+      "company_id": null,
+      "engine_id": "SEOBOOT-001",
+      "environment": "PREPROD",
+      "manifest": "../generated/SEOBOOT-001/engine.manifest.json",
+      "source_of_truth": "git",
+      "status": "DEFINED_NOT_BUILT",
+      "version": "0.1.0"
+    },
+    {
+      "company_id": null,
+      "engine_id": "SOCAUD-001",
+      "environment": "PREPROD",
+      "manifest": "../generated/SOCAUD-001/engine.manifest.json",
+      "source_of_truth": "git",
+      "status": "DEFINED_NOT_BUILT",
+      "version": "0.1.0"
+    },
+    {
+      "company_id": null,
+      "engine_id": "SOCBOOT-001",
+      "environment": "PREPROD",
+      "manifest": "../generated/SOCBOOT-001/engine.manifest.json",
+      "source_of_truth": "git",
+      "status": "DEFINED_NOT_BUILT",
+      "version": "0.1.0"
+    },
+    {
+      "company_id": null,
+      "engine_id": "TENANT-001",
+      "environment": "PREPROD",
+      "manifest": "../generated/TENANT-001/engine.manifest.json",
+      "source_of_truth": "git",
+      "status": "DEFINED_NOT_BUILT",
+      "version": "0.1.0"
+    },
+    {
+      "company_id": "fenix-capital",
+      "engine_id": "TRN-001",
+      "environment": "LAB",
+      "manifest": "../examples/TRN-001.engine.json",
+      "source_of_truth": "master+notion_evidence",
+      "status": "DOCUMENTED_PARTIAL",
+      "version": "documented-2026-09-07"
+    },
+    {
+      "company_id": null,
+      "engine_id": "TRNBOOT-001",
+      "environment": "PREPROD",
+      "manifest": "../generated/TRNBOOT-001/engine.manifest.json",
+      "source_of_truth": "git",
+      "status": "DEFINED_NOT_BUILT",
+      "version": "0.1.0"
+    },
+    {
+      "company_id": null,
+      "engine_id": "WAUD-001",
+      "environment": "PREPROD",
+      "manifest": "../generated/WAUD-001/engine.manifest.json",
+      "source_of_truth": "git",
+      "status": "DEFINED_NOT_BUILT",
+      "version": "0.1.0"
+    },
+    {
+      "company_id": "fenix-capital",
+      "engine_id": "WEB-001",
+      "environment": "PROD",
+      "manifest": "../examples/WEB-001.engine.json",
+      "source_of_truth": "live_web+wordpress_audit",
+      "status": "CONFIRMED_OPERATIONAL",
+      "version": "live-2026-09-07"
+    }
+  ],
+  "environment": "PREPROD",
+  "registry_version": "0.5.0"
 }

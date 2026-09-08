@@ -1,0 +1,5 @@
+{
+  "default": "DENY",
+  "engine_id": "APPBOOT-001",
+  "permissions": []
+}

@@ -1,0 +1,5 @@
+{
+  "default": "DENY",
+  "engine_id": "PROC-001",
+  "permissions": []
+}

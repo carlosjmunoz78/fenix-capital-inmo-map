@@ -1,0 +1,5 @@
+{
+  "default": "DENY",
+  "engine_id": "SCAN-001",
+  "permissions": []
+}
