@@ -17,7 +17,8 @@
 - PR #137 cerró governance/evidencia de Wave 1 + vía Cloudflare WordPress tras Factory + App Compatibility verdes; `PRE-PROD App Build` #3338 terminó SUCCESS.
 - PR #141 integró `TENANT-001` V0.2 tras Factory + App Compatibility verdes; `PRE-PROD App Build` #3342 terminó SUCCESS.
 - PR #143 integró `CTX-001`, `CHAT-001`, `CMD-001`, `ACTGW-001` y `CONSOLE-001` V0.2 tras Factory + App Compatibility verdes; `PRE-PROD App Build` #3343 terminó SUCCESS completo.
-- HEAD PREPROD confirmado tras Console Chain V0: `7d1601b89ea741a84243a96c9e38a43b3fca779d`.
+- PR #145 integró `COMP-ONB-001` V0.2 tras Factory + App Compatibility verdes; `PRE-PROD App Build` #3344 terminó SUCCESS completo.
+- HEAD PREPROD confirmado tras Company Onboarding V0: `6cec93ae84dc9a557c0cea044bdc2b2bc273f9da`.
 - Build PREPROD, Browser QA, CORS, candidato PROD inmutable, QA exacto, leak guard, sellado y artifacts continúan verdes.
 - No deploy PROD ni DDL PROD.
 
@@ -36,6 +37,18 @@
 - Ambos conservan scaffold Factory inmutable, versión activa separada en `versions/`, backup/rollback/rebuild declarados y coste adicional 0 €.
 - `TENANT-001` no concede autonomía PROD.
 
+## HECHO / VERDE · COMPANY ONBOARDING V0 PREPROD
+- `COMP-ONB-001` V0.2: `CONFIRMED_OPERATIONAL` en PREPROD como orquestador determinista de estado, evidencia y gates.
+- Usa `COMP-REG-001` para identidad/lifecycle y `TENANT-001` para aislamiento multiempresa deny-by-default.
+- Pipeline ordenado: `SCAN → KW → WAUD → SEOBOOT → COMPET → MKT-002 → SOCAUD → LOCALP → MKTBOOT → BMD → PROC → KBOOT → CRMBOOT → APPBOOT → AUTBOOT → TRNBOOT → ENGACT → COMP-HLT → COMP-BKP → COMP-DEP`.
+- No auto-ejecuta downstream ni interpreta scaffolds `DEFINED_NOT_BUILT` como capacidad operativa.
+- Cada paso exige evidencia; bloqueo únicamente con códigos HUMAN_REQUIRED canónicos o blockers de sistema declarados; resume exige evidencia de resolución.
+- `PREPROD_PIPELINE_COMPLETE` no cambia la empresa a `ACTIVE`, no despliega y mantiene PROD `DENY`.
+- FACT-001 preservó el scaffold 0.1.0 y promovió el Registry a 0.2.0; Registry global `0.13.0`.
+- PR #145: Factory V0 #325 SUCCESS + App Compatibility #85 SUCCESS. Post-merge PREPROD #3344 / run `34218267270`: SUCCESS completo.
+- Coste adicional 0 €; sin Supabase PROD, WordPress, Cloudflare, Trading REAL ni servidor nuevo.
+- Evidencia: `governance/comp-onb-v0-closeout-2026-09-08.json`.
+
 ## HECHO / VERDE · CEREBRO CONSOLE CHAIN V0 PREPROD
 - `CTX-001` V0.2: carga contexto autorizado desde `COMP-REG-001` a través de `TENANT-001`.
 - `CHAT-001` V0.2: envelope conversacional provider-neutral; no contiene binding directo a OpenAI ni a otro modelo.
@@ -43,7 +56,7 @@
 - `ACTGW-001` V0.2: ejecuta únicamente handlers PREPROD explícitamente registrados/autorizados; handlers mutantes permanecen DENY/HIGH_RISK en V0.
 - `CONSOLE-001` V0.2: interfaz de servicio sobre selector de empresa/contexto, chat, planificación de comandos, ejecución explícita vía Gateway, historial y auditoría.
 - Enviar un mensaje no ejecuta una acción automáticamente; Console habla con Gateway y no directamente con un modelo.
-- Engine Registry actual: `0.12.0`.
+- Engine Registry actual: `0.13.0`.
 - Dependencias canónicas: `COMP-REG → TENANT → CTX`; `CHAT + CTX → CMD`; `CMD + POL + AUD → ACTGW`; `CTX + CHAT + CMD + ACTGW → CONSOLE`.
 - Factory/runtime unit tests por promoción: SUCCESS. PR #143: Factory + App Compatibility SUCCESS. Post-merge PREPROD #3343: SUCCESS completo.
 - Backup: Git + manifests versionados + scaffolds inmutables. Rollback: FACT-001 `version_engine.py` + OLD vs NEW + gates. Rebuild: Git + Registry + shared runtime, sin servidor por empresa.
@@ -51,8 +64,8 @@
 - Autonomía: `PREPROD_DETERMINISTIC_LIMITED`; PROD: `DENY`.
 
 ## PARCIAL / DEFINIDO · RESTO DE WAVE 1
-- De los 29 motores Wave 1, `COMP-REG-001`, `TENANT-001`, `CTX-001`, `CHAT-001`, `CMD-001`, `ACTGW-001` y `CONSOLE-001` ya tienen implementación V0.2 validada en PREPROD.
-- Los restantes 22 motores Wave 1 conservan su scaffold `0.1.0` como `DEFINED_NOT_BUILT` hasta implementación/promoción individual.
+- De los 29 motores Wave 1, `COMP-REG-001`, `TENANT-001`, `COMP-ONB-001`, `CTX-001`, `CHAT-001`, `CMD-001`, `ACTGW-001` y `CONSOLE-001` ya tienen implementación V0.2 validada en PREPROD.
+- Los restantes 21 motores Wave 1 conservan su scaffold `0.1.0` como `DEFINED_NOT_BUILT` hasta implementación/promoción individual.
 - Ningún motor restante se declara operativo sólo por estar materializado.
 
 ## HECHO / VERDE · CLOUDFLARE NON-PROD RECONCILIATION
@@ -107,7 +120,7 @@ Cola canónica: `governance/human-exception-queue-2026-09-07.json`.
 - Branch protection #124: **HUMAN_REQUIRED externo formalizado; sin acción autónoma segura restante sin autorización admin**.
 - Trading #126: **HUMAN_REQUIRED externo formalizado; sin health vivo falsificado y REAL bloqueado**.
 - Incidente #133: **SECURITY_INCIDENT formalizado; caller de Pages aún no resuelto; no autoriza rotación ciega**.
-- Wave 1: **MATERIALIZADA Y VALIDADA EN PREPROD**; 7 motores de fundamento/Console tienen V0.2 operativa PREPROD y 22 permanecen `DEFINED_NOT_BUILT`.
+- Wave 1: **MATERIALIZADA Y VALIDADA EN PREPROD**; 8 motores tienen V0.2 operativa PREPROD y 21 permanecen `DEFINED_NOT_BUILT`.
 - Esto NO concede autonomía PROD.
 
 ## CIERRE DE LOS CUATRO OBJETIVOS · VERDE ESTRUCTURAL/PREPROD
@@ -123,9 +136,10 @@ Cola canónica: `governance/human-exception-queue-2026-09-07.json`.
 - **Wave 1 materialización:** `CONFIRMED_MATERIALIZED_PREPROD`.
 - **COMP-REG-001:** `CONFIRMED_OPERATIONAL_PREPROD` V0.2.
 - **TENANT-001:** `CONFIRMED_OPERATIONAL_PREPROD` V0.2.
+- **COMP-ONB-001:** `CONFIRMED_OPERATIONAL_PREPROD` V0.2; orquestación determinista, sin autoejecución downstream y PROD DENY.
 - **CTX/CHAT/CMD/ACTGW/CONSOLE V0:** `CONFIRMED_OPERATIONAL_PREPROD_LIMITED` V0.2.
-- **Engine Registry:** `0.12.0`, 46 IDs, sin duplicados conocidos.
-- **App compatibility:** `CONFIRMED_OPERATIONAL_PREPROD`; post-merge #3343 SUCCESS sobre `7d1601b89ea741a84243a96c9e38a43b3fca779d`.
+- **Engine Registry:** `0.13.0`, 46 IDs, sin duplicados conocidos.
+- **App compatibility:** `CONFIRMED_OPERATIONAL_PREPROD`; post-merge #3344 SUCCESS sobre `6cec93ae84dc9a557c0cea044bdc2b2bc273f9da`.
 - **Cloudflare NON-PROD:** `CONFIRMED_RECONCILED`.
 - **Cloudflare web zero-cost path:** `CONFIRMED_EXISTING_READ_ONLY_AUDIT`; PROD Cloudflare adapter actualmente no configurado/disponible en Core Guard.
 - **Core PROD Observer:** `CONFIRMED_OPERATIONAL_PROD_OBSERVER`.
@@ -135,4 +149,4 @@ Cola canónica: `governance/human-exception-queue-2026-09-07.json`.
 - **App/CRM/Web/Social baseline:** preservado.
 - **Coste adicional:** 0 €.
 - **PROD autonomy total:** `DENY` mientras los gates aplicables, incluyendo #124, #126 y #133, sigan abiertos.
-- **Siguiente acción estructural planificada:** continuar el onboarding multiempresa por dependencia, comenzando por `COMP-ONB-001`, sin crear servidores por empresa ni tocar PROD.
+- **Siguiente acción estructural planificada:** implementar `SCAN-001` en PREPROD como scanner de huella digital read-only, determinista/injectable, sin pago, sin crear infraestructura ni tocar PROD.
