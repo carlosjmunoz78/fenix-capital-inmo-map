@@ -19,7 +19,8 @@
 - PR #143 integró `CTX-001`, `CHAT-001`, `CMD-001`, `ACTGW-001` y `CONSOLE-001` V0.2 tras Factory + App Compatibility verdes; `PRE-PROD App Build` #3343 terminó SUCCESS completo.
 - PR #145 integró `COMP-ONB-001` V0.2 tras Factory + App Compatibility verdes; `PRE-PROD App Build` #3344 terminó SUCCESS completo.
 - PR #147 integró `SCAN-001` V0.2 tras Factory + App Compatibility verdes; `PRE-PROD App Build` #3346 terminó SUCCESS completo.
-- HEAD PREPROD confirmado tras Digital Footprint Scanner V0: `6928e0e72434f5e354b420e7327b62fcc245691f`.
+- PR #149 integró `BMD-001` V0.2 tras Factory + App Compatibility verdes; `PRE-PROD App Build` #3348 terminó SUCCESS completo.
+- HEAD PREPROD confirmado tras Business Model Discovery V0: `a00e72e87ca2063673919b6d88cf74fefbf4c93c`.
 - Build PREPROD, Browser QA, CORS, candidato PROD inmutable, QA exacto, leak guard, sellado y artifacts continúan verdes.
 - No deploy PROD ni DDL PROD.
 
@@ -61,6 +62,17 @@
 - Autonomía: `PREPROD_READ_ONLY_SCANNER`; PROD: `DENY`.
 - Evidencia: `governance/scan-001-v0-closeout-2026-09-08.json`.
 
+## HECHO / VERDE · BUSINESS MODEL DISCOVERY V0 PREPROD
+- `BMD-001` V0.2: `CONFIRMED_OPERATIONAL` en PREPROD como ensamblador determinista de modelo de negocio basado en evidencia.
+- Consume identidad/geografía de `COMP-REG-001`, huella pública de `SCAN-001` y hechos explícitamente declarados.
+- No inventa servicios, productos, clientes, canales, propuesta de valor, objetivos o restricciones; ante huecos críticos devuelve `LOW_CONFIDENCE` con campos faltantes.
+- Rechaza cruce de `company_id`, material sensible y cualquier ejecución PROD; coste adicional 0 € y sin IA obligatoria.
+- FACT-001 preservó scaffold 0.1.0 y promovió `BMD-001` a 0.2.0; Registry global `0.15.0`; dependency map `0.5.0`.
+- PR #149: Factory V0 #337 SUCCESS + App Compatibility #89 SUCCESS. Post-merge PREPROD #3348 / run `34228839031`: SUCCESS completo.
+- La discrepancia textual `SCAN → KW → WAUD ... BMD` frente al grafo Factory se mantiene documentada; ejecución sigue `SCAN → BMD → WAUD → KW` hasta reconciliación explícita.
+- Autonomía: `PREPROD_DETERMINISTIC_DISCOVERY_ONLY`; PROD: `DENY`.
+- Evidencia: `governance/bmd-001-v0-closeout-2026-09-08.json`.
+
 ## HECHO / VERDE · CEREBRO CONSOLE CHAIN V0 PREPROD
 - `CTX-001` V0.2: carga contexto autorizado desde `COMP-REG-001` a través de `TENANT-001`.
 - `CHAT-001` V0.2: envelope conversacional provider-neutral; no contiene binding directo a OpenAI ni a otro modelo.
@@ -68,7 +80,7 @@
 - `ACTGW-001` V0.2: ejecuta únicamente handlers PREPROD explícitamente registrados/autorizados; handlers mutantes permanecen DENY/HIGH_RISK en V0.
 - `CONSOLE-001` V0.2: interfaz de servicio sobre selector de empresa/contexto, chat, planificación de comandos, ejecución explícita vía Gateway, historial y auditoría.
 - Enviar un mensaje no ejecuta una acción automáticamente; Console habla con Gateway y no directamente con un modelo.
-- Engine Registry actual: `0.14.0`.
+- Engine Registry actual: `0.15.0`.
 - Dependencias canónicas: `COMP-REG → TENANT → CTX`; `CHAT + CTX → CMD`; `CMD + POL + AUD → ACTGW`; `CTX + CHAT + CMD + ACTGW → CONSOLE`.
 - Factory/runtime unit tests por promoción: SUCCESS. PR #143: Factory + App Compatibility SUCCESS. Post-merge PREPROD #3343: SUCCESS completo.
 - Backup: Git + manifests versionados + scaffolds inmutables. Rollback: FACT-001 `version_engine.py` + OLD vs NEW + gates. Rebuild: Git + Registry + shared runtime, sin servidor por empresa.
@@ -76,8 +88,8 @@
 - Autonomía: `PREPROD_DETERMINISTIC_LIMITED`; PROD: `DENY`.
 
 ## PARCIAL / DEFINIDO · RESTO DE WAVE 1
-- De los 29 motores Wave 1, `COMP-REG-001`, `TENANT-001`, `COMP-ONB-001`, `SCAN-001`, `CTX-001`, `CHAT-001`, `CMD-001`, `ACTGW-001` y `CONSOLE-001` ya tienen implementación V0.2 validada en PREPROD.
-- Los restantes 20 motores Wave 1 conservan su scaffold `0.1.0` como `DEFINED_NOT_BUILT` hasta implementación/promoción individual.
+- De los 29 motores Wave 1, `COMP-REG-001`, `TENANT-001`, `COMP-ONB-001`, `SCAN-001`, `BMD-001`, `CTX-001`, `CHAT-001`, `CMD-001`, `ACTGW-001` y `CONSOLE-001` ya tienen implementación V0.2 validada en PREPROD.
+- Los restantes 19 motores Wave 1 conservan su scaffold `0.1.0` como `DEFINED_NOT_BUILT` hasta implementación/promoción individual.
 - Ningún motor restante se declara operativo sólo por estar materializado.
 
 ## HECHO / VERDE · CLOUDFLARE NON-PROD RECONCILIATION
@@ -132,7 +144,7 @@ Cola canónica: `governance/human-exception-queue-2026-09-07.json`.
 - Branch protection #124: **HUMAN_REQUIRED externo formalizado; sin acción autónoma segura restante sin autorización admin**.
 - Trading #126: **HUMAN_REQUIRED externo formalizado; sin health vivo falsificado y REAL bloqueado**.
 - Incidente #133: **SECURITY_INCIDENT formalizado; caller de Pages aún no resuelto; no autoriza rotación ciega**.
-- Wave 1: **MATERIALIZADA Y VALIDADA EN PREPROD**; 9 motores tienen V0.2 operativa PREPROD y 20 permanecen `DEFINED_NOT_BUILT`.
+- Wave 1: **MATERIALIZADA Y VALIDADA EN PREPROD**; 10 motores tienen V0.2 operativa PREPROD y 19 permanecen `DEFINED_NOT_BUILT`.
 - Esto NO concede autonomía PROD.
 
 ## CIERRE DE LOS CUATRO OBJETIVOS · VERDE ESTRUCTURAL/PREPROD
@@ -150,9 +162,10 @@ Cola canónica: `governance/human-exception-queue-2026-09-07.json`.
 - **TENANT-001:** `CONFIRMED_OPERATIONAL_PREPROD` V0.2.
 - **COMP-ONB-001:** `CONFIRMED_OPERATIONAL_PREPROD` V0.2; orquestación determinista, sin autoejecución downstream y PROD DENY.
 - **SCAN-001:** `CONFIRMED_OPERATIONAL_PREPROD_READ_ONLY` V0.2; señales públicas HTTP, evidencia fechada SHA-256, sin escritura remota y PROD DENY.
+- **BMD-001:** `CONFIRMED_OPERATIONAL_PREPROD` V0.2; ensamblaje determinista de modelo de negocio con `LOW_CONFIDENCE` ante evidencia insuficiente y PROD DENY.
 - **CTX/CHAT/CMD/ACTGW/CONSOLE V0:** `CONFIRMED_OPERATIONAL_PREPROD_LIMITED` V0.2.
-- **Engine Registry:** `0.14.0`, 46 IDs, sin duplicados conocidos.
-- **App compatibility:** `CONFIRMED_OPERATIONAL_PREPROD`; post-merge #3346 SUCCESS sobre `6928e0e72434f5e354b420e7327b62fcc245691f`.
+- **Engine Registry:** `0.15.0`, 46 IDs, sin duplicados conocidos.
+- **App compatibility:** `CONFIRMED_OPERATIONAL_PREPROD`; post-merge #3348 SUCCESS sobre `a00e72e87ca2063673919b6d88cf74fefbf4c93c`.
 - **Cloudflare NON-PROD:** `CONFIRMED_RECONCILED`.
 - **Cloudflare web zero-cost path:** `CONFIRMED_EXISTING_READ_ONLY_AUDIT`; PROD Cloudflare adapter actualmente no configurado/disponible en Core Guard.
 - **Core PROD Observer:** `CONFIRMED_OPERATIONAL_PROD_OBSERVER`.
@@ -162,4 +175,4 @@ Cola canónica: `governance/human-exception-queue-2026-09-07.json`.
 - **App/CRM/Web/Social baseline:** preservado.
 - **Coste adicional:** 0 €.
 - **PROD autonomy total:** `DENY` mientras los gates aplicables, incluyendo #124, #126 y #133, sigan abiertos.
-- **Siguiente acción estructural planificada:** implementar `BMD-001` en PREPROD por dependencia real (`COMP-REG-001 + SCAN-001`) antes de `WAUD-001/KW-001`; documentar sin romper la discrepancia entre secuencia textual de onboarding y grafo Factory.
+- **Siguiente acción estructural planificada:** implementar `WAUD-001` en PREPROD sobre `BMD-001 + SCAN-001 + WEB-001`; después `KW-001`, siguiendo el grafo Factory hasta reconciliar la secuencia textual de onboarding.
