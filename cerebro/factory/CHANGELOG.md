@@ -1,5 +1,13 @@
 # FACT-001 Changelog
 
+## 0.4.1 · 2026-09-08
+- Cerrado el loop de los cuatro objetivos estructurales/PREPROD con evidencia post-merge completa.
+- `PRE-PROD App Build` #3338 terminó SUCCESS tras PR #137: Build PREPROD, Browser QA, CORS smokes, candidato PROD inmutable, QA exacto, leak assertion, sellado y artifacts verdes.
+- Los cuatro objetivos quedan clasificados verdes en alcance estructural/PREPROD; esto no cambia el estado de autonomía PROD.
+- #124 Branch Protection, #126 LAB-TRD runtime y #133 Cloudflare Pages secret rotation continúan como HUMAN_REQUIRED/SECURITY_INCIDENT externos y mantienen PROD autonomy en `DENY`.
+- Añadida evidencia `governance/four-objectives-closeout-2026-09-08.json`.
+- No deploy PROD, no DDL PROD, no rotación de secretos, no purge y coste adicional 0 €.
+
 ## 0.4.0 · 2026-09-08
 - PR #135 integrado tras `FACT-001 Factory V0` + `FACT-001 App Compatibility` verdes; `PRE-PROD App Build` post-merge #3336 terminó SUCCESS.
 - Materializada `WAVE1-MULTICOMPANY-CONSOLE-V0` mediante la propia FACT-001 en rama aislada.
