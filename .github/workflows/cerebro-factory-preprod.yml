@@ -1,0 +1,33 @@
+name: CEREBRO Factory PREPROD
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/**'
+      - '.github/workflows/cerebro-factory-preprod.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  factory-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate canonical engine registry
+        working-directory: cerebro
+        run: npm run validate
+      - name: Test FACT-001 and GOV-001 contracts
+        working-directory: cerebro
+        run: npm test
+      - name: Generate all engine skeletons
+        working-directory: cerebro
+        run: npm run generate -- --out /tmp/cerebro-generated
+      - name: Assert 177 generated engines and no repo mutation
+        run: |
+          node -e "const x=require('/tmp/cerebro-generated/skeleton-index.json'); if(x.engine_count!==177) process.exit(1);"
+          git diff --exit-code
