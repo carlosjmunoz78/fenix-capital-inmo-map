@@ -6,7 +6,9 @@ const HUMAN_REQUIRED_REASONS = new Set([
   'POLICY_CONFLICT','SECURITY_INCIDENT','MONEY_LIMIT','CUSTOMER_HUMAN_REQUEST'
 ]);
 const MONEY_SCALE = 1_000_000;
-const MONEY_NOISE_TOLERANCE_UNITS = 1e-7;
+const MONEY_NOISE_TOLERANCE_CAP_UNITS = 0.01;
+const TYPED_ARRAY_BUFFER_GETTER = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(Uint8Array.prototype), 'buffer')?.get;
+const DATA_VIEW_BUFFER_GETTER = Object.getOwnPropertyDescriptor(DataView.prototype, 'buffer')?.get;
 
 function assertContext(ctx) {
   for (const key of ['company_id','engine_id','environment','version']) {
@@ -18,13 +20,19 @@ function sameContext(a, b) {
   return a.company_id === b.company_id && a.engine_id === b.engine_id && a.environment === b.environment && a.version === b.version;
 }
 
+function intrinsicViewBuffer(value) {
+  const getter = value instanceof DataView ? DATA_VIEW_BUFFER_GETTER : TYPED_ARRAY_BUFFER_GETTER;
+  if (typeof getter !== 'function') throw new TypeError('unsupported ArrayBuffer view');
+  return getter.call(value);
+}
+
 function rejectUnsupported(value, seen = new WeakSet()) {
   if (value === null || (typeof value !== 'object' && typeof value !== 'function')) return;
   if (typeof SharedArrayBuffer !== 'undefined' && value instanceof SharedArrayBuffer) throw new TypeError('SharedArrayBuffer is not supported');
   if (ArrayBuffer.isView(value)) {
     const ownBuffer = Object.getOwnPropertyDescriptor(value, 'buffer');
     if (ownBuffer?.get || ownBuffer?.set) throw new TypeError('accessor properties are not supported by RUNTIME-001 V0');
-    const buffer = value.buffer;
+    const buffer = intrinsicViewBuffer(value);
     if (typeof SharedArrayBuffer !== 'undefined' && buffer instanceof SharedArrayBuffer) throw new TypeError('SharedArrayBuffer-backed views are not supported');
     return;
   }
@@ -68,7 +76,9 @@ function moneyToUnits(value, label) {
   if (!Number.isFinite(value) || value < 0) throw new Error(`${label} must be a finite non-negative number`);
   const raw = value * MONEY_SCALE;
   const nearest = Math.round(raw);
-  const effectivelyInteger = Math.abs(raw - nearest) <= MONEY_NOISE_TOLERANCE_UNITS;
+  const magnitudeNoise = Number.EPSILON * Math.max(1, Math.abs(raw)) * 8;
+  const tolerance = Math.min(MONEY_NOISE_TOLERANCE_CAP_UNITS, magnitudeNoise);
+  const effectivelyInteger = Math.abs(raw - nearest) <= tolerance;
   const scaled = effectivelyInteger ? nearest : (label === 'cost' && value > 0 ? Math.ceil(raw) : Math.floor(raw));
   if (!Number.isSafeInteger(scaled)) throw new Error(`${label} exceeds safe monetary range`);
   return BigInt(scaled);
