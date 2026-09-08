@@ -1,5 +1,18 @@
 # FACT-001 Changelog
 
+## 0.4.0 · 2026-09-08
+- PR #135 integrado tras `FACT-001 Factory V0` + `FACT-001 App Compatibility` verdes; `PRE-PROD App Build` post-merge #3336 terminó SUCCESS.
+- Materializada `WAVE1-MULTICOMPANY-CONSOLE-V0` mediante la propia FACT-001 en rama aislada.
+- Engine Registry actualizado `0.4.0 → 0.5.0`: `17 → 46` motores, 29 nuevos, 0 IDs duplicados.
+- Cada motor Wave 1 contiene 18 archivos estándar y permanece `DEFINED_NOT_BUILT`, `PREPROD`, `NONE_UNTIL_GATES_PASS`, coste objetivo 0 € y PROD `DENY`.
+- Test canónico post-materialización actualizado para exigir idempotencia `NO_CHANGE`, inventario exacto de 46 motores y estado inerte.
+- PR #136 pasó Factory + App Compatibility y se integró; `PRE-PROD App Build` post-merge #3337 terminó SUCCESS con build, Browser QA, CORS, candidato PROD inmutable, QA exacto, leak guard, sellado y artifacts verdes. Sin deploy PROD.
+- `CHAT-001`, `CTX-001`, `CMD-001`, `ACTGW-001` y `CONSOLE-001` quedan materializados sólo como scaffolds; no se declaran operativos y Console no se conecta directamente a un modelo.
+- Auditoría WordPress/Core Guard en solo lectura confirmó que la vía canónica de caché Cloudflare es Fénix Core Guard → API directa Cloudflare, sin Make como dependencia operativa y con coste adicional 0 €.
+- Core Guard PROD permanece `observer`, health 100, writes operativos cerrados y Cloudflare actualmente `available=false`; no se ejecutó purge ni mutación.
+- #133 actualizado: el secreto `plain_text` de Cloudflare Pages no está demostrado como credencial/consumer de Core Guard; caller/ownership de Pages sigue por resolver antes de cualquier rotación.
+- Añadida evidencia `governance/cloudflare-wordpress-plugin-audit-2026-09-08.json`.
+
 ## 0.3.0 · 2026-09-08
 - FACT-001 incorpora generación atómica por familias mediante `factory.py family`.
 - Añadida prevalidación completa antes de escribir: IDs duplicados, conflictos con Registry/scaffolds existentes y dependencias conocidas opcionales.
@@ -37,6 +50,6 @@
 - Abierto PR draft contra PREPROD; no autorizado para merge/promoción a PROD.
 
 ## Reglas de continuidad
-- No fusionar hasta que CI esté verde y se cierre el caller inventory crítico.
+- No fusionar hasta que CI esté verde y se cierre el caller inventory crítico aplicable al cambio.
 - No modificar contratos, RLS, Edge Functions o comportamiento PROD desde esta rama.
 - Toda ampliación debe actualizar Registry, dependency map y este changelog.

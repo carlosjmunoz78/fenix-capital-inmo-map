@@ -1,0 +1,49 @@
+{
+  "date": "2026-09-08",
+  "scope": "fenixcapital.es WordPress / Fénix Core Guard Cloudflare path",
+  "audit_mode": "READ_ONLY",
+  "site": "https://fenixcapital.es",
+  "plugin": {
+    "name": "Fénix Core Guard",
+    "version": "1.0.0-rc9-prod2",
+    "mode": "observer",
+    "health_score": 100,
+    "companions_loaded": [
+      "fenix-core-guard-cache-orchestrator.php",
+      "fenix-core-guard-integrations.php",
+      "fenix-core-guard-integrations-bridge.php"
+    ]
+  },
+  "canonical_cloudflare_path": {
+    "runtime": "WordPress Fénix Core Guard direct Cloudflare API",
+    "make_is_operational_dependency": false,
+    "make_role": "exceptional diagnostic/reconciliation only",
+    "additional_cost_eur": 0,
+    "cache_layers": ["elementor", "wordpress", "hostinger", "cloudflare", "warmup", "verify"],
+    "purge_strategy": "URL-first; hostname/global only when explicitly classified",
+    "credential_names_only": [
+      "FENIX_GUARD_CLOUDFLARE_API_TOKEN",
+      "FENIX_GUARD_CLOUDFLARE_ZONE_ID",
+      "FENIX_GUARD_CLOUDFLARE_ENVIRONMENT_ID"
+    ],
+    "secret_values_recorded": false
+  },
+  "live_prod_health": {
+    "environment_type": "production",
+    "operations_gate": false,
+    "operational_writes_allowed": false,
+    "safe_default": true,
+    "cloudflare_available": false,
+    "cloudflare_credentials_source": "wp-config constants"
+  },
+  "security_incident_133": {
+    "state": "OPEN",
+    "code": "SECURITY_INCIDENT",
+    "pages_plain_text_secret_proven_core_guard_consumer": false,
+    "caller_ownership": "UNRESOLVED",
+    "safe_next_action": "Identify the Cloudflare Pages secret owner/caller separately before any coordinated rotation; do not mutate WordPress or Cloudflare PROD blindly."
+  },
+  "mutations_performed": [],
+  "cache_purge_executed": false,
+  "prod_changed": false
+}
