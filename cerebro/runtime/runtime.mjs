@@ -6,9 +6,10 @@ const HUMAN_REQUIRED_REASONS = new Set([
   'POLICY_CONFLICT','SECURITY_INCIDENT','MONEY_LIMIT','CUSTOMER_HUMAN_REQUEST'
 ]);
 const MONEY_SCALE = 1_000_000;
-const MONEY_NOISE_TOLERANCE_CAP_UNITS = 0.01;
+const MONEY_MAX_TOLERATED_ULP_UNITS = 0.05;
 const TYPED_ARRAY_BUFFER_GETTER = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(Uint8Array.prototype), 'buffer')?.get;
 const DATA_VIEW_BUFFER_GETTER = Object.getOwnPropertyDescriptor(DataView.prototype, 'buffer')?.get;
+const FLOAT64_BITS = new DataView(new ArrayBuffer(8));
 
 function assertContext(ctx) {
   for (const key of ['company_id','engine_id','environment','version']) {
@@ -72,13 +73,29 @@ function contextKey(context, key) {
   return stableId('scope', [context.company_id, context.engine_id, context.environment, context.version, key]);
 }
 
+function normalizeIdempotencyKey(explicit, generated) {
+  if (explicit === undefined) return generated();
+  if (typeof explicit !== 'string' || explicit.length === 0) throw new TypeError('idempotency_key must be a non-empty string');
+  return explicit;
+}
+
+function ulp(value) {
+  if (!Number.isFinite(value)) return Infinity;
+  if (Object.is(value, -0)) value = 0;
+  FLOAT64_BITS.setFloat64(0, value, false);
+  let bits = FLOAT64_BITS.getBigUint64(0, false);
+  bits = value >= 0 ? bits + 1n : bits - 1n;
+  FLOAT64_BITS.setBigUint64(0, bits, false);
+  return Math.abs(FLOAT64_BITS.getFloat64(0, false) - value);
+}
+
 function moneyToUnits(value, label) {
   if (!Number.isFinite(value) || value < 0) throw new Error(`${label} must be a finite non-negative number`);
   const raw = value * MONEY_SCALE;
+  const rawUlp = ulp(raw);
+  if (rawUlp > MONEY_MAX_TOLERATED_ULP_UNITS) throw new Error(`${label} exceeds reliable monetary precision range`);
   const nearest = Math.round(raw);
-  const magnitudeNoise = Number.EPSILON * Math.max(1, Math.abs(raw)) * 8;
-  const tolerance = Math.min(MONEY_NOISE_TOLERANCE_CAP_UNITS, magnitudeNoise);
-  const effectivelyInteger = Math.abs(raw - nearest) <= tolerance;
+  const effectivelyInteger = Math.abs(raw - nearest) <= rawUlp;
   const scaled = effectivelyInteger ? nearest : (label === 'cost' && value > 0 ? Math.ceil(raw) : Math.floor(raw));
   if (!Number.isSafeInteger(scaled)) throw new Error(`${label} exceeds safe monetary range`);
   return BigInt(scaled);
@@ -95,7 +112,7 @@ export class EventBus {
     assertContext(context);
     if (!type) throw new Error('event type required');
     const safePayload = safeClone(payload);
-    const key = idempotency_key ?? stableId('evt', { type, payload: safePayload, context });
+    const key = normalizeIdempotencyKey(idempotency_key, () => stableId('evt', { type, payload: safePayload, context }));
     const scoped = contextKey(context, key);
     if (this.inbox.has(scoped)) return { accepted: false, duplicate: true, idempotency_key: key };
     const event = {
@@ -119,7 +136,7 @@ export class JobQueue {
     assertContext(context);
     if (!name) throw new Error('job name required');
     const safePayload = safeClone(payload);
-    const key = idempotency_key ?? stableId('job', { name, payload: safePayload, context });
+    const key = normalizeIdempotencyKey(idempotency_key, () => stableId('job', { name, payload: safePayload, context }));
     const scoped = contextKey(context, key);
     if (this.keys.has(scoped)) return { accepted: false, duplicate: true, idempotency_key: key };
     const job = {
