@@ -1,5 +1,5 @@
 {
-  "map_version": "0.2.0",
+  "map_version": "0.3.0",
   "environment": "PREPROD_AUDIT",
   "nodes": [
     {"id":"APP-001","type":"engine"},
@@ -14,13 +14,17 @@
     {"id":"Meta WhatsApp","type":"transport"},
     {"id":"COMP-REG-001","type":"engine"},
     {"id":"TENANT-001","type":"engine"},
+    {"id":"COMP-ONB-001","type":"engine"},
     {"id":"CTX-001","type":"engine"},
     {"id":"CHAT-001","type":"engine"},
     {"id":"CMD-001","type":"engine"},
     {"id":"ACTGW-001","type":"engine"},
     {"id":"CONSOLE-001","type":"engine"},
     {"id":"POL-001","type":"engine"},
-    {"id":"AUD-001","type":"engine"}
+    {"id":"AUD-001","type":"engine"},
+    {"id":"HEX-001","type":"engine"},
+    {"id":"EVT-001","type":"engine"},
+    {"id":"JOB-001","type":"engine"}
   ],
   "edges": [
     {"from":"APP-001","to":"fenix-app-gateway","kind":"calls"},
@@ -35,6 +39,13 @@
     {"from":"fenix-communications-gateway","to":"Meta WhatsApp","kind":"whatsapp transport"},
     {"from":"TENANT-001","to":"COMP-REG-001","kind":"canonical company identity"},
     {"from":"TENANT-001","to":"POL-001","kind":"deny-by-default policy"},
+    {"from":"COMP-ONB-001","to":"COMP-REG-001","kind":"company lifecycle REGISTERED->ONBOARDING"},
+    {"from":"COMP-ONB-001","to":"TENANT-001","kind":"company isolation gate"},
+    {"from":"COMP-ONB-001","to":"POL-001","kind":"promotion and execution policy"},
+    {"from":"COMP-ONB-001","to":"AUD-001","kind":"ordered evidence audit"},
+    {"from":"COMP-ONB-001","to":"HEX-001","kind":"canonical HUMAN_REQUIRED codes"},
+    {"from":"COMP-ONB-001","to":"EVT-001","kind":"onboarding state events contract"},
+    {"from":"COMP-ONB-001","to":"JOB-001","kind":"future downstream job contract; no V0 auto-execution"},
     {"from":"CTX-001","to":"TENANT-001","kind":"authorized tenant context"},
     {"from":"CTX-001","to":"COMP-REG-001","kind":"company metadata load"},
     {"from":"CMD-001","to":"CHAT-001","kind":"message envelope input"},
@@ -53,7 +64,9 @@
     "expediente_stage_history RLS disabled in PROD",
     "overlapping endpoint responsibilities require caller inventory before consolidation",
     "Console Chain V0 is PREPROD-only and does not authorize PROD writes",
-    "ACTGW-001 V0 denies mutating handlers by default"
+    "ACTGW-001 V0 denies mutating handlers by default",
+    "COMP-ONB-001 V0 orchestrates state only and must not interpret downstream scaffolds as executable engines",
+    "COMP-ONB-001 PREPROD pipeline completion does not activate a company or grant PROD autonomy"
   ],
   "rule": "No dependency is removed or consolidated until all callers are inventoried and PREPROD equivalence plus rollback are proven."
 }
