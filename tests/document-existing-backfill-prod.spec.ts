@@ -19,6 +19,16 @@ test('backfill waits for authenticated session hydration before marking expedien
  expect(marker).toBeGreaterThan(auth);
 });
 
+test('backfill retries when authentication completes after initial hydration polling',()=>{
+ const guard=fs.readFileSync('src/ExistingDocumentAutoBackfillGuard.tsx','utf8');
+ expect(guard).toContain('supabase.auth.onAuthStateChange');
+ expect(guard).toContain("if(cancelled||!session?.access_token||running.current===raw)return;");
+ expect(guard).toContain('void run();');
+ expect(guard).toContain('subscription.unsubscribe();');
+ expect(guard).toContain('if(cancelled||starting||running.current===raw)return;');
+ expect(guard).toContain('finally{starting=false;}');
+});
+
 test('backfill is authenticated, scoped and delegates only native routes to auto ingest',()=>{
  const edge=fs.readFileSync('supabase/functions/fenix-document-existing-backfill/index.ts','utf8');
  expect(edge).toContain("startsWith('bearer ')");
