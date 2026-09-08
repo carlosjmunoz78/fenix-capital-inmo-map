@@ -1,0 +1,11 @@
+{
+  "contract": "business-model-discovery-v0",
+  "engine_id": "BMD-001",
+  "environment": "PREPROD",
+  "version": "0.2.0",
+  "input": ["company_id", "SCAN-001 evidence", "declared_facts", "evidence_at"],
+  "dimensions": ["services", "products", "customer_segments", "value_propositions", "geographies", "channels", "objectives", "restrictions"],
+  "source_policy": "DECLARED_OR_REGISTRY_OR_PUBLIC_SCAN_ONLY",
+  "low_confidence_threshold": 0.75,
+  "rules": ["no_claim_invention", "cross_company_deny", "secret_material_rejected", "zero_additional_cost", "prod_deny"]
+}
