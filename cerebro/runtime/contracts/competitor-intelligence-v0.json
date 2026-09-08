@@ -1,0 +1,34 @@
+{
+  "contract_id": "competitor-intelligence-v0",
+  "engine_id": "COMPET-001",
+  "version": "0.2.0",
+  "environment": "PREPROD",
+  "read_only": true,
+  "required": [
+    "company_id",
+    "BMD-001",
+    "KW-001",
+    "SCAN-001",
+    "WAUD-001",
+    "LOCALP-001",
+    "SOCAUD-001",
+    "evidence_at"
+  ],
+  "optional": ["dated public competitor evidence"],
+  "outputs": [
+    "structured competitor profiles",
+    "evidence-backed overlap matrix",
+    "evidence_sha256",
+    "human_required_code"
+  ],
+  "policies": {
+    "competitor_identity": "explicit_public_evidence_only",
+    "unsupported_market_metrics": "unknown_without_public_evidence",
+    "absence_of_evidence": "not_a_market_gap",
+    "cross_company": "DENY",
+    "secret_material": "DENY",
+    "remote_write": "DENY",
+    "prod": "DENY"
+  },
+  "additional_cost_eur": 0
+}
