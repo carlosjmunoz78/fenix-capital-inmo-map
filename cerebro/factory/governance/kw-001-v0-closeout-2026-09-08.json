@@ -1,0 +1,34 @@
+{
+  "additional_cost_eur": 0,
+  "date": "2026-09-08",
+  "dependency_map_version": "0.7.0",
+  "engine_id": "KW-001",
+  "fabricated_metrics": false,
+  "merge_sha": "3536800fe26272ed296f1b5dcf65de4df625d832",
+  "post_merge_preprod": {
+    "conclusion": "SUCCESS",
+    "run_id": 34242434630,
+    "run_number": 3352
+  },
+  "pr": 153,
+  "pr_head_sha": "4cebdb2c7871f0616d704b9cc62b657f63994dac",
+  "prod_autonomy": "DENY",
+  "prod_mutation": false,
+  "registry_version": "0.17.0",
+  "required_checks": {
+    "FACT-001 App Compatibility": {
+      "conclusion": "SUCCESS",
+      "run_id": 34237983610,
+      "run_number": 93
+    },
+    "FACT-001 Factory V0": {
+      "conclusion": "SUCCESS",
+      "run_id": 34237983708,
+      "run_number": 359
+    }
+  },
+  "status": "CONFIRMED_OPERATIONAL_PREPROD_EVIDENCE_ONLY",
+  "version": "0.2.0",
+  "wave1_defined_not_built": 17,
+  "wave1_implemented": 12
+}
