@@ -17,30 +17,38 @@ function sameContext(a, b) {
   return a.company_id === b.company_id && a.engine_id === b.engine_id && a.environment === b.environment && a.version === b.version;
 }
 
-function rejectSharedMemory(value, seen = new WeakSet()) {
+function rejectUnsupported(value, seen = new WeakSet()) {
   if (value === null || (typeof value !== 'object' && typeof value !== 'function')) return;
   if (typeof SharedArrayBuffer !== 'undefined' && value instanceof SharedArrayBuffer) throw new TypeError('SharedArrayBuffer is not supported');
   if (ArrayBuffer.isView(value) && typeof SharedArrayBuffer !== 'undefined' && value.buffer instanceof SharedArrayBuffer) throw new TypeError('SharedArrayBuffer-backed views are not supported');
+  if (typeof Blob !== 'undefined' && value instanceof Blob) throw new TypeError('Blob is not supported by RUNTIME-001 V0');
   if (seen.has(value)) return;
   seen.add(value);
   if (value instanceof Map) {
-    for (const [k, v] of value) { rejectSharedMemory(k, seen); rejectSharedMemory(v, seen); }
+    for (const [k, v] of value) { rejectUnsupported(k, seen); rejectUnsupported(v, seen); }
     return;
   }
   if (value instanceof Set) {
-    for (const v of value) rejectSharedMemory(v, seen);
+    for (const v of value) rejectUnsupported(v, seen);
     return;
   }
-  for (const key of Reflect.ownKeys(value)) rejectSharedMemory(value[key], seen);
+  for (const key of Reflect.ownKeys(value)) {
+    const descriptor = Object.getOwnPropertyDescriptor(value, key);
+    if (!descriptor) continue;
+    if (descriptor.get || descriptor.set) throw new TypeError('accessor properties are not supported by RUNTIME-001 V0');
+    rejectUnsupported(descriptor.value, seen);
+  }
 }
 
 function safeClone(value) {
-  rejectSharedMemory(value);
-  return structuredClone(value);
+  rejectUnsupported(value);
+  const cloned = structuredClone(value);
+  rejectUnsupported(cloned);
+  return cloned;
 }
 
 function stableId(prefix, value) {
-  rejectSharedMemory(value);
+  rejectUnsupported(value);
   return `${prefix}_${crypto.createHash('sha256').update(serialize(value)).digest('hex').slice(0, 24)}`;
 }
 
@@ -50,7 +58,8 @@ function contextKey(context, key) {
 
 function moneyToUnits(value, label) {
   if (!Number.isFinite(value) || value < 0) throw new Error(`${label} must be a finite non-negative number`);
-  const scaled = Math.round(value * MONEY_SCALE);
+  const raw = value * MONEY_SCALE;
+  const scaled = label === 'cost' && value > 0 ? Math.ceil(raw) : Math.floor(raw);
   if (!Number.isSafeInteger(scaled)) throw new Error(`${label} exceeds safe monetary range`);
   return BigInt(scaled);
 }
@@ -206,7 +215,8 @@ export class SharedRuntime {
     const auditBase = { context: { ...context }, command, cost_eur }; const cost = this.finops.authorize(cost_eur);
     if (!cost.allowed) { this.audit.push({ ...auditBase, outcome: 'HUMAN_REQUIRED', reason: cost.human_required }); return { status: 'HUMAN_REQUIRED', reason: cost.human_required, context }; }
     try {
-      const result = await reg.handler({ context: Object.freeze({ ...context }), command, payload: safePayload, events: bindEvents(this.events, context), jobs: bindJobs(this.jobs, context) });
+      const rawResult = await reg.handler({ context: Object.freeze({ ...context }), command, payload: safePayload, events: bindEvents(this.events, context), jobs: bindJobs(this.jobs, context) });
+      const result = safeClone(rawResult);
       if (result?.status === 'HUMAN_REQUIRED') {
         if (!HUMAN_REQUIRED_REASONS.has(result.reason)) throw new Error(`invalid HUMAN_REQUIRED reason: ${result.reason}`);
         this.audit.push({ ...auditBase, outcome: 'HUMAN_REQUIRED', reason: result.reason }); return { status: 'HUMAN_REQUIRED', reason: result.reason, context, result };
