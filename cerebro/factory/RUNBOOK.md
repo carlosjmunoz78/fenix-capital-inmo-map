@@ -16,6 +16,27 @@
 8. Ejecutar validador y tests.
 9. No conectar a PROD hasta superar contrato, dependencia, backup, PREPROD, evaluación, rollback y promoción gradual.
 
+## Alta de una familia · FACT-001 V0.3
+Especificación canónica JSON: `families/<family>.json`.
+
+Preflight sin escritura:
+`python cerebro/factory/scripts/factory.py family --file cerebro/factory/families/wave1-multicompany-console-v0.json --plan --require-known-dependencies`
+
+Generación local/aditiva:
+`python cerebro/factory/scripts/factory.py family --file cerebro/factory/families/wave1-multicompany-console-v0.json --require-known-dependencies`
+
+Reglas del modo `family`:
+- valida todos los `engine_id` antes de escribir;
+- rechaza IDs duplicados dentro de la familia;
+- puede exigir que toda dependencia esté en la propia familia o en Engine Registry;
+- preflight de conflictos para toda la familia antes de escribir el primer scaffold;
+- si existe un motor con definición no idéntica, devuelve `CONFLICT` y no crea los motores nuevos del lote;
+- una segunda ejecución idéntica es `NO_CHANGE`;
+- escribe únicamente `generated/<engine_id>/...` y Engine Registry; no despliega, no llama a PROD y no cambia permisos/infraestructura;
+- cada motor nace `DEFINED_NOT_BUILT`, `NONE_UNTIL_GATES_PASS`, coste adicional objetivo 0 € y promoción PROD `DENY` por defecto.
+
+Wave 1 canónica: `WAVE1-MULTICOMPANY-CONSOLE-V0`, 29 motores planificados. Incluye onboarding multiempresa, discovery/audit, competencia/market intelligence, knowledge, SEO/social/marketing bootstrap, CRM/App/Automation/Training bootstrap, tenant isolation, supervisor/backup/deployment y Gateway/Console V0. Motores existentes como APP-001, CRM-001, SEO-001, WEB-001, TRN-001, POL-001, HEX-001, EVT-001, JOB-001, AUD-001 y OBSERV-001 se referencian como dependencias y **no se duplican**.
+
 ## Gate estructural previo a fabricación por familias · 08/09/2026
 - Cloudflare NON-PROD está reconciliado y #127 cerrado con evidencia, OLD vs NEW y rollback.
 - FACT-001 puede generar y registrar scaffolds **inertes en PREPROD** por familias/dependencias. Generar un scaffold no equivale a activar un motor ni a conceder autonomía.
