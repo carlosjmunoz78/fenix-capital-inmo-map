@@ -1,0 +1,35 @@
+name: TEMP LOCALP-001 Sync
+
+on:
+  push:
+    branches:
+      - cerebro/localp-001-runtime-v0
+    paths:
+      - '.github/workflows/temp-localp-001-sync.yml'
+      - 'cerebro/factory/scripts/temp_localp_sync.py'
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: cerebro/localp-001-runtime-v0
+          fetch-depth: 0
+      - name: Synchronize governance
+        run: python cerebro/factory/scripts/temp_localp_sync.py
+      - name: Remove temporary promotion artifacts and commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f cerebro/factory/candidates/LOCALP-001-0.2.0.json .github/workflows/temp-localp-001-promote.yml
+          git config user.name 'CEREBRO Governance'
+          git config user.email 'cerebro-governance@users.noreply.github.com'
+          git add -A
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'GOV-001 · synchronize LOCALP-001 V0.2 contracts and runbook'
+          git push origin HEAD:cerebro/localp-001-runtime-v0
