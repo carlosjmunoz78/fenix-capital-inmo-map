@@ -22,9 +22,18 @@ function parseArgs(argv) {
 }
 
 function readRegistry(file) {
-  const registry = JSON.parse(fs.readFileSync(file, 'utf8'));
-  if (!Array.isArray(registry.engines)) throw new Error('registry.engines must be an array');
-  return registry;
+  const raw = JSON.parse(fs.readFileSync(file, 'utf8'));
+  if (!Array.isArray(raw.engine_ids)) throw new Error('registry.engine_ids must be an array');
+  const defaults = raw.defaults ?? {};
+  return {
+    ...raw,
+    engines: raw.engine_ids.map(engine_id => ({
+      engine_id,
+      name: engine_id,
+      ...defaults,
+      ...(raw.overrides?.[engine_id] ?? {})
+    }))
+  };
 }
 
 function validateRegistry(registry) {
@@ -53,7 +62,7 @@ function filesFor(engine) {
   const ctx = context(engine);
   const base = { ...ctx, generated_by: 'FACT-001', schema_version: '1.0.0' };
   return {
-    'manifest.json': json({ ...base, name: engine.name, layer: engine.layer, company_scope: engine.company_scope, evidence_state: engine.evidence_state, source_status: engine.source_status, lifecycle: 'SCAFFOLD', autonomous_prod: false }),
+    'manifest.json': json({ ...base, name: engine.name, layer: engine.layer ?? null, company_scope: engine.company_scope, evidence_state: engine.evidence_state, source_status: engine.source_status ?? 'UNKNOWN_REQUIRES_AUDIT', lifecycle: 'SCAFFOLD', autonomous_prod: false }),
     'config.json': json({ ...base, enabled: false, deterministic_first: true, zero_new_cost_default: true }),
     'contracts/data-contract.json': json({ ...base, inputs: [], outputs: [], invariants: REQUIRED_CONTEXT }),
     'permissions.json': json({ ...base, default: 'deny', grants: [], cross_company_access: 'deny' }),
