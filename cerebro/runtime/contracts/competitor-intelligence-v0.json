@@ -6,7 +6,6 @@
   "read_only": true,
   "required": [
     "company_id",
-    "BMD-001",
     "KW-001",
     "SCAN-001",
     "WAUD-001",
