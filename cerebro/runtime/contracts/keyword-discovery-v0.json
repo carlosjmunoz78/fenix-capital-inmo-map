@@ -1,0 +1,15 @@
+{
+  "contract_version": "0.2.0",
+  "engine_id": "KW-001",
+  "environment": "PREPROD",
+  "inputs": ["company_id", "BMD-001 profile", "WAUD-001 result", "declared_seed_terms", "locations", "evidence_at"],
+  "outputs": ["keyword opportunities", "intent", "clusters", "priority", "source_refs", "evidence_sha256", "external_metrics status"],
+  "invariants": [
+    "company_id must match upstream evidence",
+    "external search metrics are never fabricated",
+    "secret-like material is rejected",
+    "remote writes are forbidden",
+    "PROD execution is denied",
+    "LOW_CONFIDENCE is returned when no evidence-backed seed exists"
+  ]
+}
