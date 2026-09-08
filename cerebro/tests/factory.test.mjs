@@ -13,18 +13,23 @@ function run(out) {
   return execFileSync(process.execPath, [cli, 'generate', '--registry', registry, '--out', out], { encoding: 'utf8' });
 }
 
-test('registry contains exactly 177 unique canonical engine ids', () => {
+test('registry seed contains exactly 177 unique canonical engine ids', () => {
   const data = JSON.parse(fs.readFileSync(registry, 'utf8'));
-  assert.equal(data.engines.length, 177);
+  assert.equal(data.engine_ids.length, 177);
   assert.equal(data.count, 177);
-  assert.equal(new Set(data.engines.map(e => e.engine_id)).size, 177);
+  assert.equal(new Set(data.engine_ids).size, 177);
 });
 
-test('every registry entry carries multi-company/version/environment fields', () => {
+test('registry defaults carry multi-company/version/environment fields', () => {
   const data = JSON.parse(fs.readFileSync(registry, 'utf8'));
-  for (const e of data.engines) {
-    for (const key of ['engine_id','version','environment','company_scope','evidence_state']) assert.ok(e[key], `${e.engine_id} missing ${key}`);
-  }
+  for (const key of ['version','environment','company_scope','evidence_state']) assert.ok(data.defaults[key], `missing default ${key}`);
+});
+
+test('factory validates expanded registry successfully', () => {
+  const output = execFileSync(process.execPath, [cli, 'validate', '--registry', registry], { encoding: 'utf8' });
+  const result = JSON.parse(output);
+  assert.equal(result.engines, 177);
+  assert.equal(result.unique_ids, 177);
 });
 
 test('factory generates all 177 skeletons with complete V0 file set', () => {
