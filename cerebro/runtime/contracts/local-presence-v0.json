@@ -1,0 +1,30 @@
+{
+  "contract_version": "0.2.0",
+  "engine_id": "LOCALP-001",
+  "environment": "PREPROD",
+  "inputs": [
+    "company_id",
+    "BMD-001 business_model_profile",
+    "SCAN-001 scan_result",
+    "declared_business",
+    "optional public_local_evidence",
+    "evidence_at"
+  ],
+  "outputs": [
+    "NAP findings",
+    "category/service coverage findings",
+    "geographic coverage findings",
+    "review evidence state",
+    "evidence_sha256"
+  ],
+  "policies": [
+    "deterministic_before_AI",
+    "public_evidence_only",
+    "no_google_business_mutation",
+    "no_fabricated_reviews_or_ratings",
+    "cross_company_deny",
+    "secret_material_rejected",
+    "prod_deny_by_default",
+    "zero_new_cost_by_default"
+  ]
+}
