@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0.0",
+  "phase": "PHASE_5_CEREBRO_CONSOLE_V0",
+  "environment": "PREPROD",
+  "additional_cost_target_eur": 0,
+  "prod_execution_enabled": false,
+  "direct_model_access": false,
+  "required_context": ["company_id", "engine_id", "environment", "version"],
+  "human_required_reasons": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "engines": [
+    {"engine_id":"CONSOLE-001","name":"CEREBRO Console","depends_on":["ACTGW-001"],"mode":"DETERMINISTIC_REFERENCE"},
+    {"engine_id":"CHAT-001","name":"CEREBRO Chat","depends_on":["CTX-001","ACTGW-001"],"mode":"GATEWAY_MEDIATED_REFERENCE"},
+    {"engine_id":"CTX-001","name":"Context Selector","depends_on":[],"mode":"DETERMINISTIC_REFERENCE"},
+    {"engine_id":"CMD-001","name":"Command Executor","depends_on":["CTX-001","ACTGW-001"],"mode":"DETERMINISTIC_REFERENCE"},
+    {"engine_id":"ACTGW-001","name":"CEREBRO Action Gateway","depends_on":["CTX-001"],"mode":"DETERMINISTIC_REFERENCE"}
+  ],
+  "policy": {
+    "gateway_required": true,
+    "direct_model_access": false,
+    "cross_company_access": "deny",
+    "supabase_writes": false,
+    "live_writes": false,
+    "autonomous_prod": false,
+    "trading_access": false,
+    "promotion_requires_preprod_green": true
+  }
+}
