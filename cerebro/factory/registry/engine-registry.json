@@ -384,10 +384,21 @@
       "company_id": null,
       "engine_id": "TENANT-001",
       "environment": "PREPROD",
-      "manifest": "../generated/TENANT-001/engine.manifest.json",
-      "source_of_truth": "git",
-      "status": "DEFINED_NOT_BUILT",
-      "version": "0.1.0"
+      "factory_scaffold": "../generated/TENANT-001/engine.manifest.json",
+      "manifest": "../versions/TENANT-001/0.2.0/engine.manifest.json",
+      "source_of_truth": "git+versioned_update",
+      "status": "CONFIRMED_OPERATIONAL",
+      "version": "0.2.0",
+      "version_history": [
+        {
+          "company_id": null,
+          "environment": "PREPROD",
+          "manifest": "../generated/TENANT-001/engine.manifest.json",
+          "source_of_truth": "git",
+          "status": "DEFINED_NOT_BUILT",
+          "version": "0.1.0"
+        }
+      ]
     },
     {
       "company_id": "fenix-capital",
@@ -427,5 +438,5 @@
     }
   ],
   "environment": "PREPROD",
-  "registry_version": "0.6.0"
+  "registry_version": "0.7.0"
 }

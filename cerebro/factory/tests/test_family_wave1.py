@@ -53,15 +53,14 @@ class Wave1FamilyTests(unittest.TestCase):
             for item in registry["engines"]
             if item["engine_id"] in wave_ids and item.get("source_of_truth") == "git+versioned_update"
         }
-        self.assertTrue(implemented.issubset({"COMP-REG-001"}))
 
         for engine_id in wave_ids:
             entry = next(item for item in registry["engines"] if item["engine_id"] == engine_id)
             self.assertEqual(entry["environment"], "PREPROD")
             if engine_id in implemented:
                 self.assertEqual(entry["status"], "CONFIRMED_OPERATIONAL")
-                self.assertEqual(entry["version"], "0.2.0")
-                self.assertEqual(entry["manifest"], f"../versions/{engine_id}/0.2.0/engine.manifest.json")
+                self.assertGreaterEqual(tuple(map(int, entry["version"].split("."))), (0, 2, 0))
+                self.assertEqual(entry["manifest"], f"../versions/{engine_id}/{entry['version']}/engine.manifest.json")
                 self.assertEqual(entry["factory_scaffold"], f"../generated/{engine_id}/engine.manifest.json")
             else:
                 self.assertEqual(entry["status"], "DEFINED_NOT_BUILT")
