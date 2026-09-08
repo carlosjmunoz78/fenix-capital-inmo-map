@@ -22,7 +22,8 @@
 - PR #149 integró `BMD-001` V0.2 tras Factory + App Compatibility verdes; `PRE-PROD App Build` #3348 terminó SUCCESS completo.
 - PR #151 integró `WAUD-001` V0.2 tras Factory + App Compatibility verdes; `PRE-PROD App Build` #3350 terminó SUCCESS completo.
 - PR #153 integró `KW-001` V0.2 tras Factory + App Compatibility verdes; `PRE-PROD App Build` #3352 terminó SUCCESS completo.
-- HEAD PREPROD confirmado tras Keyword Discovery V0: `3536800fe26272ed296f1b5dcf65de4df625d832`.
+- PR #155 integró `LOCALP-001` V0.2 tras Factory + App Compatibility verdes; `PRE-PROD App Build` #3354 terminó SUCCESS completo.
+- HEAD PREPROD confirmado tras Local Presence Audit V0: `80fb98397df556bff033be0b15a8892e55189384`.
 - Build PREPROD, Browser QA, CORS, candidato PROD inmutable, QA exacto, leak guard, sellado y artifacts continúan verdes.
 - No deploy PROD ni DDL PROD.
 
@@ -96,6 +97,18 @@
 - Autonomía: `PREPROD_DETERMINISTIC_EVIDENCE_ONLY`; PROD: `DENY`.
 - Evidencia: `governance/kw-001-v0-closeout-2026-09-08.json`.
 
+## HECHO / VERDE · LOCAL PRESENCE AUDIT V0 PREPROD
+- `LOCALP-001` V0.2: `CONFIRMED_OPERATIONAL` en PREPROD como auditoría local determinista/read-only.
+- Consume `BMD-001`, `SCAN-001`, hechos declarados y evidencia pública local fechada; `SEO-001` permanece como frontera SEO/local canónica.
+- Audita NAP, categorías, servicios, cobertura geográfica y estado de evidencia de reviews.
+- Rating/review_count nunca se fabrican: quedan `unknown_without_public_evidence` salvo evidencia pública explícita y fechada.
+- No usa Google Business API, no pide credenciales, no muta Google Business Profile ni realiza escritura remota.
+- Rechaza cruce de `company_id`, material sensible y ejecución PROD; coste adicional 0 € y sin IA obligatoria.
+- FACT-001 preservó scaffold 0.1.0 y promovió `LOCALP-001` a 0.2.0; Registry global `0.18.0`; dependency map `0.8.0`.
+- PR #155: Factory V0 #369 SUCCESS + App Compatibility #95 SUCCESS. Post-merge PREPROD #3354 / run `34245996516`: SUCCESS completo.
+- Autonomía: `PREPROD_DETERMINISTIC_READ_ONLY_LOCAL_AUDIT`; PROD: `DENY`.
+- Evidencia: `governance/localp-001-v0-closeout-2026-09-08.json`.
+
 ## HECHO / VERDE · CEREBRO CONSOLE CHAIN V0 PREPROD
 - `CTX-001` V0.2: carga contexto autorizado desde `COMP-REG-001` a través de `TENANT-001`.
 - `CHAT-001` V0.2: envelope conversacional provider-neutral; no contiene binding directo a OpenAI ni a otro modelo.
@@ -103,7 +116,7 @@
 - `ACTGW-001` V0.2: ejecuta únicamente handlers PREPROD explícitamente registrados/autorizados; handlers mutantes permanecen DENY/HIGH_RISK en V0.
 - `CONSOLE-001` V0.2: interfaz de servicio sobre selector de empresa/contexto, chat, planificación de comandos, ejecución explícita vía Gateway, historial y auditoría.
 - Enviar un mensaje no ejecuta una acción automáticamente; Console habla con Gateway y no directamente con un modelo.
-- Engine Registry actual: `0.17.0`.
+- Engine Registry actual: `0.18.0`.
 - Dependencias canónicas: `COMP-REG → TENANT → CTX`; `CHAT + CTX → CMD`; `CMD + POL + AUD → ACTGW`; `CTX + CHAT + CMD + ACTGW → CONSOLE`.
 - Factory/runtime unit tests por promoción: SUCCESS. PR #143: Factory + App Compatibility SUCCESS. Post-merge PREPROD #3343: SUCCESS completo.
 - Backup: Git + manifests versionados + scaffolds inmutables. Rollback: FACT-001 `version_engine.py` + OLD vs NEW + gates. Rebuild: Git + Registry + shared runtime, sin servidor por empresa.
@@ -111,8 +124,8 @@
 - Autonomía: `PREPROD_DETERMINISTIC_LIMITED`; PROD: `DENY`.
 
 ## PARCIAL / DEFINIDO · RESTO DE WAVE 1
-- De los 29 motores Wave 1, `COMP-REG-001`, `TENANT-001`, `COMP-ONB-001`, `SCAN-001`, `BMD-001`, `WAUD-001`, `KW-001`, `CTX-001`, `CHAT-001`, `CMD-001`, `ACTGW-001` y `CONSOLE-001` ya tienen implementación V0.2 validada en PREPROD.
-- Los restantes 17 motores Wave 1 conservan su scaffold `0.1.0` como `DEFINED_NOT_BUILT` hasta implementación/promoción individual.
+- De los 29 motores Wave 1, `COMP-REG-001`, `TENANT-001`, `COMP-ONB-001`, `SCAN-001`, `BMD-001`, `WAUD-001`, `KW-001`, `LOCALP-001`, `CTX-001`, `CHAT-001`, `CMD-001`, `ACTGW-001` y `CONSOLE-001` ya tienen implementación V0.2 validada en PREPROD.
+- Los restantes 16 motores Wave 1 conservan su scaffold `0.1.0` como `DEFINED_NOT_BUILT` hasta implementación/promoción individual.
 - Ningún motor restante se declara operativo sólo por estar materializado.
 
 ## HECHO / VERDE · CLOUDFLARE NON-PROD RECONCILIATION
@@ -167,7 +180,7 @@ Cola canónica: `governance/human-exception-queue-2026-09-07.json`.
 - Branch protection #124: **HUMAN_REQUIRED externo formalizado; sin acción autónoma segura restante sin autorización admin**.
 - Trading #126: **HUMAN_REQUIRED externo formalizado; sin health vivo falsificado y REAL bloqueado**.
 - Incidente #133: **SECURITY_INCIDENT formalizado; caller de Pages aún no resuelto; no autoriza rotación ciega**.
-- Wave 1: **MATERIALIZADA Y VALIDADA EN PREPROD**; 12 motores tienen V0.2 operativa PREPROD y 17 permanecen `DEFINED_NOT_BUILT`.
+- Wave 1: **MATERIALIZADA Y VALIDADA EN PREPROD**; 13 motores tienen V0.2 operativa PREPROD y 16 permanecen `DEFINED_NOT_BUILT`.
 - Esto NO concede autonomía PROD.
 
 ## CIERRE DE LOS CUATRO OBJETIVOS · VERDE ESTRUCTURAL/PREPROD
@@ -188,9 +201,10 @@ Cola canónica: `governance/human-exception-queue-2026-09-07.json`.
 - **BMD-001:** `CONFIRMED_OPERATIONAL_PREPROD` V0.2; ensamblaje determinista de modelo de negocio con `LOW_CONFIDENCE` ante evidencia insuficiente y PROD DENY.
 - **WAUD-001:** `CONFIRMED_OPERATIONAL_PREPROD_READ_ONLY` V0.2; auditoría determinista de snapshots web sin mutación remota y PROD DENY.
 - **KW-001:** `CONFIRMED_OPERATIONAL_PREPROD_EVIDENCE_ONLY` V0.2; oportunidades/intents/clusters deterministas sin fabricar métricas externas y PROD DENY.
+- **LOCALP-001:** `CONFIRMED_OPERATIONAL_PREPROD_READ_ONLY` V0.2; auditoría determinista de presencia local sin mutación de Google Business Profile y PROD DENY.
 - **CTX/CHAT/CMD/ACTGW/CONSOLE V0:** `CONFIRMED_OPERATIONAL_PREPROD_LIMITED` V0.2.
-- **Engine Registry:** `0.17.0`, 46 IDs, sin duplicados conocidos.
-- **App compatibility:** `CONFIRMED_OPERATIONAL_PREPROD`; post-merge #3352 SUCCESS sobre `3536800fe26272ed296f1b5dcf65de4df625d832`.
+- **Engine Registry:** `0.18.0`, 46 IDs, sin duplicados conocidos.
+- **App compatibility:** `CONFIRMED_OPERATIONAL_PREPROD`; post-merge #3354 SUCCESS sobre `80fb98397df556bff033be0b15a8892e55189384`.
 - **Cloudflare NON-PROD:** `CONFIRMED_RECONCILED`.
 - **Cloudflare web zero-cost path:** `CONFIRMED_EXISTING_READ_ONLY_AUDIT`; PROD Cloudflare adapter actualmente no configurado/disponible en Core Guard.
 - **Core PROD Observer:** `CONFIRMED_OPERATIONAL_PROD_OBSERVER`.

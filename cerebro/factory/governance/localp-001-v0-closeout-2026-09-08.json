@@ -1,0 +1,35 @@
+{
+  "additional_cost_eur": 0,
+  "date": "2026-09-08",
+  "dependency_map_version": "0.8.0",
+  "engine_id": "LOCALP-001",
+  "fabricated_review_metrics": false,
+  "google_business_mutation": false,
+  "merge_sha": "80fb98397df556bff033be0b15a8892e55189384",
+  "post_merge_preprod": {
+    "conclusion": "SUCCESS",
+    "run_id": 34245996516,
+    "run_number": 3354
+  },
+  "pr": 155,
+  "pr_head_sha": "a809ccda5e9ec777f448b396a751d97fcd7665a5",
+  "prod_autonomy": "DENY",
+  "prod_mutation": false,
+  "registry_version": "0.18.0",
+  "required_checks": {
+    "FACT-001 App Compatibility": {
+      "conclusion": "SUCCESS",
+      "run_id": 34244815247,
+      "run_number": 95
+    },
+    "FACT-001 Factory V0": {
+      "conclusion": "SUCCESS",
+      "run_id": 34244815245,
+      "run_number": 369
+    }
+  },
+  "status": "CONFIRMED_OPERATIONAL_PREPROD_READ_ONLY",
+  "version": "0.2.0",
+  "wave1_defined_not_built": 16,
+  "wave1_implemented": 13
+}
