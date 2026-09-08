@@ -1,5 +1,5 @@
 {
-  "queue_version": "1.7.0",
+  "queue_version": "1.8.0",
   "generated_at": "2026-09-08",
   "principle": "Only items that cannot be safely closed by the current autonomous tool surface remain here. No item authorizes bypassing promotion gates.",
   "canonical_human_required_codes": [
@@ -54,7 +54,7 @@
       "scope": ["fenix-capital-inmo-map/preprod-app-phase1", "fenix-capital-cerebro-social/main", "fenix-core-guard/main", "fenix-core-guard/staging"],
       "evidence": "Live fenix-capital-inmo-map repository rulesets remain empty. Managed GitHub integration cannot read/write branch protection administration. Make has a GitHub arbitrary REST module but no authorized GitHub connection.",
       "blocker": "External GitHub administrative authorization is required before CEREBRO can snapshot or mutate protection safely.",
-      "required_resolution": "Authorize a GitHub connection in Make with sufficient branch-protection/ruleset permission; then CEREBRO performs snapshot → minimum protection → PR/status-check test → rollback proof.",
+      "required_resolution": "Authorize a GitHub administration path with sufficient branch-protection/ruleset permission; then CEREBRO performs snapshot → minimum protection → PR/status-check test → rollback proof.",
       "autonomous_action_remaining": "none_safe_without_admin_authorization",
       "tracking_issue": 124,
       "unit_blocking": false,
@@ -76,10 +76,10 @@
       "id": "HEX-CLOUDFLARE-SECRET-ROTATION",
       "code": "SECURITY_INCIDENT",
       "scope": "Cloudflare Pages sensitive environment configuration",
-      "evidence": "Read-only Pages control-plane response exposed a sensitive environment variable configured as plain_text. Value intentionally omitted. Accessible repository search found no reference to the key and no current Pages/next-on-pages config, so active consumer ownership is unresolved.",
-      "blocker": "Blind rotation could break unknown production/legacy consumers; the secret value must not be copied into governance evidence.",
-      "required_resolution": "Identify/confirm consumers and ownership, rotate through an authorized secret store with PREPROD/canary where applicable, verify OLD vs NEW, revoke the old value, and convert provider-side storage to secret/encrypted type if supported.",
-      "autonomous_action_remaining": "blocked_on_consumer_ownership_before_prod_secret_rotation",
+      "evidence": "Read-only Pages control-plane response exposed a sensitive environment variable configured as plain_text; value intentionally omitted. Live WordPress/Core Guard audit confirms the canonical fenixcapital.es Cloudflare cache path is Fénix Core Guard direct API at zero additional cost. Core Guard PROD is observer, operational_writes_allowed=false, and its Cloudflare layer is currently unavailable with credentials expected from wp-config constants. Therefore the Pages secret is not proven to be a Core Guard credential or consumer. See governance/cloudflare-wordpress-plugin-audit-2026-09-08.json.",
+      "blocker": "The specific Cloudflare Pages secret caller/ownership remains unresolved. Blind rotation could break unknown production/legacy consumers; the secret value must not be copied into governance evidence.",
+      "required_resolution": "Identify/confirm the Cloudflare Pages secret consumers and ownership separately, rotate through an authorized secret store with PREPROD/canary where applicable, verify OLD vs NEW, revoke the old value, and convert provider-side storage to secret/encrypted type if supported.",
+      "autonomous_action_remaining": "blocked_on_pages_secret_consumer_ownership_before_prod_rotation",
       "tracking_issue": 133,
       "unit_blocking": false,
       "prod_promotion_blocking": true
@@ -89,6 +89,14 @@
     "state": "READY",
     "evidence_file": "governance/pre-factory-gate-closeout-2026-09-08.json",
     "rule": "FACT-001 may continue generating inert PREPROD scaffolds; no open item permits PROD autonomy or destructive mutation."
+  },
+  "wave1_structural_state": {
+    "state": "MATERIALIZED_PREPROD",
+    "registry_version": "0.5.0",
+    "engine_count": 46,
+    "wave1_new_engines": 29,
+    "wave1_runtime_state": "DEFINED_NOT_BUILT",
+    "evidence_file": "governance/wave1-materialization-2026-09-08.json"
   },
   "cost_additional_eur": 0
 }
