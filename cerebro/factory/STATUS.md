@@ -23,7 +23,8 @@
 - PR #151 integró `WAUD-001` V0.2 tras Factory + App Compatibility verdes; `PRE-PROD App Build` #3350 terminó SUCCESS completo.
 - PR #153 integró `KW-001` V0.2 tras Factory + App Compatibility verdes; `PRE-PROD App Build` #3352 terminó SUCCESS completo.
 - PR #155 integró `LOCALP-001` V0.2 tras Factory + App Compatibility verdes; `PRE-PROD App Build` #3354 terminó SUCCESS completo.
-- HEAD PREPROD confirmado tras Local Presence Audit V0: `80fb98397df556bff033be0b15a8892e55189384`.
+- PR #157 integró `SOCAUD-001` V0.2 tras Factory + App Compatibility verdes; `PRE-PROD App Build` #3356 terminó SUCCESS completo.
+- HEAD PREPROD confirmado tras Social Media Audit V0: `bbc825c0743654270306e544d74dd498c907c787`.
 - Build PREPROD, Browser QA, CORS, candidato PROD inmutable, QA exacto, leak guard, sellado y artifacts continúan verdes.
 - No deploy PROD ni DDL PROD.
 
@@ -109,6 +110,18 @@
 - Autonomía: `PREPROD_DETERMINISTIC_READ_ONLY_LOCAL_AUDIT`; PROD: `DENY`.
 - Evidencia: `governance/localp-001-v0-closeout-2026-09-08.json`.
 
+## HECHO / VERDE · SOCIAL MEDIA AUDIT V0 PREPROD
+- `SOCAUD-001` V0.2: `CONFIRMED_OPERATIONAL` en PREPROD como auditoría social determinista pública/read-only.
+- Consume `AUD-001`, `BMD-001`, `SCAN-001` y evidencia social pública fechada; no usa login, credenciales ni APIs privadas.
+- Audita perfiles observados, formatos, cobertura y cadencia sólo cuando existen timestamps suficientes.
+- Followers, audiencia, alcance, engagement y demografía nunca se estiman; sólo se aceptan como evidencia pública explícita y fechada.
+- No publica, no envía mensajes y no realiza escritura remota.
+- Rechaza cruce de `company_id`, material sensible y ejecución PROD; coste adicional 0 € y sin IA obligatoria.
+- FACT-001 preservó scaffold 0.1.0 y promovió `SOCAUD-001` a 0.2.0; Registry global `0.19.0`; dependency map `0.9.0`.
+- PR #157: Factory V0 #379 SUCCESS + App Compatibility #97 SUCCESS. Post-merge PREPROD #3356 / run `34250578133`: SUCCESS completo.
+- Autonomía: `PREPROD_DETERMINISTIC_PUBLIC_READ_ONLY_SOCIAL_AUDIT`; PROD: `DENY`.
+- Evidencia: `governance/socaud-001-v0-closeout-2026-09-08.json`.
+
 ## HECHO / VERDE · CEREBRO CONSOLE CHAIN V0 PREPROD
 - `CTX-001` V0.2: carga contexto autorizado desde `COMP-REG-001` a través de `TENANT-001`.
 - `CHAT-001` V0.2: envelope conversacional provider-neutral; no contiene binding directo a OpenAI ni a otro modelo.
@@ -116,7 +129,7 @@
 - `ACTGW-001` V0.2: ejecuta únicamente handlers PREPROD explícitamente registrados/autorizados; handlers mutantes permanecen DENY/HIGH_RISK en V0.
 - `CONSOLE-001` V0.2: interfaz de servicio sobre selector de empresa/contexto, chat, planificación de comandos, ejecución explícita vía Gateway, historial y auditoría.
 - Enviar un mensaje no ejecuta una acción automáticamente; Console habla con Gateway y no directamente con un modelo.
-- Engine Registry actual: `0.18.0`.
+- Engine Registry actual: `0.19.0`.
 - Dependencias canónicas: `COMP-REG → TENANT → CTX`; `CHAT + CTX → CMD`; `CMD + POL + AUD → ACTGW`; `CTX + CHAT + CMD + ACTGW → CONSOLE`.
 - Factory/runtime unit tests por promoción: SUCCESS. PR #143: Factory + App Compatibility SUCCESS. Post-merge PREPROD #3343: SUCCESS completo.
 - Backup: Git + manifests versionados + scaffolds inmutables. Rollback: FACT-001 `version_engine.py` + OLD vs NEW + gates. Rebuild: Git + Registry + shared runtime, sin servidor por empresa.
@@ -124,8 +137,8 @@
 - Autonomía: `PREPROD_DETERMINISTIC_LIMITED`; PROD: `DENY`.
 
 ## PARCIAL / DEFINIDO · RESTO DE WAVE 1
-- De los 29 motores Wave 1, `COMP-REG-001`, `TENANT-001`, `COMP-ONB-001`, `SCAN-001`, `BMD-001`, `WAUD-001`, `KW-001`, `LOCALP-001`, `CTX-001`, `CHAT-001`, `CMD-001`, `ACTGW-001` y `CONSOLE-001` ya tienen implementación V0.2 validada en PREPROD.
-- Los restantes 16 motores Wave 1 conservan su scaffold `0.1.0` como `DEFINED_NOT_BUILT` hasta implementación/promoción individual.
+- De los 29 motores Wave 1, `COMP-REG-001`, `TENANT-001`, `COMP-ONB-001`, `SCAN-001`, `BMD-001`, `WAUD-001`, `KW-001`, `LOCALP-001`, `SOCAUD-001`, `CTX-001`, `CHAT-001`, `CMD-001`, `ACTGW-001` y `CONSOLE-001` ya tienen implementación V0.2 validada en PREPROD.
+- Los restantes 15 motores Wave 1 conservan su scaffold `0.1.0` como `DEFINED_NOT_BUILT` hasta implementación/promoción individual.
 - Ningún motor restante se declara operativo sólo por estar materializado.
 
 ## HECHO / VERDE · CLOUDFLARE NON-PROD RECONCILIATION
