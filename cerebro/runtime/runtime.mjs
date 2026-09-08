@@ -60,6 +60,10 @@ function rejectUnsupported(value, seen = new WeakSet()) {
     Set.prototype.forEach.call(value, v => rejectUnsupported(v, seen));
     return;
   }
+  const proto = Object.getPrototypeOf(value);
+  if (!Array.isArray(value) && proto !== Object.prototype && proto !== null) {
+    throw new TypeError('unsupported object type for RUNTIME-001 V0 deterministic payload grammar');
+  }
   for (const key of Reflect.ownKeys(value)) {
     const descriptor = Object.getOwnPropertyDescriptor(value, key);
     if (!descriptor) continue;
