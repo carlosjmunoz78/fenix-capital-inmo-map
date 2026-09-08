@@ -92,16 +92,22 @@ function companyContext({ company_id, environment = 'PREPROD', version = '0.1.0'
 
 export class MultiCompanyBootstrap {
   #companies = new Map();
+  #environment;
+  #version;
 
   constructor({ environment = 'PREPROD', version = '0.1.0' } = {}) {
     validateRegistry();
     assertPreprod(environment);
-    this.environment = environment;
-    this.version = requiredString(version, 'version');
+    this.#environment = environment;
+    this.#version = requiredString(version, 'version');
   }
 
+  get environment() { return this.#environment; }
+  get version() { return this.#version; }
+
   registerCompany({ company_id, profile = {} }) {
-    const context = companyContext({ company_id, environment: this.environment, version: this.version });
+    assertPreprod(this.#environment);
+    const context = companyContext({ company_id, environment: this.#environment, version: this.#version });
     if (this.#companies.has(context.company_id)) return { accepted: false, duplicate: true, company: this.inspectCompany(context.company_id) };
     const safeProfile = clone(profile);
     const engines = Object.fromEntries(REGISTRY.engines.map(engine => [engine.engine_id, {
@@ -126,6 +132,7 @@ export class MultiCompanyBootstrap {
   }
 
   inspectCompany(company_id) {
+    assertPreprod(this.#environment);
     const id = requiredString(company_id, 'company_id');
     const company = this.#companies.get(id);
     if (!company) throw new Error('company not registered');
@@ -133,10 +140,12 @@ export class MultiCompanyBootstrap {
   }
 
   listCompanies() {
+    assertPreprod(this.#environment);
     return [...this.#companies.keys()].sort();
   }
 
   markEngineResult({ company_id, engine_id, status, evidence = [], reason = null }) {
+    assertPreprod(this.#environment);
     const id = requiredString(company_id, 'company_id');
     const eid = requiredString(engine_id, 'engine_id');
     const company = this.#companies.get(id);
@@ -164,6 +173,7 @@ export class MultiCompanyBootstrap {
   }
 
   startEngine({ company_id, engine_id }) {
+    assertPreprod(this.#environment);
     const id = requiredString(company_id, 'company_id');
     const eid = requiredString(engine_id, 'engine_id');
     const company = this.#companies.get(id);
@@ -176,6 +186,7 @@ export class MultiCompanyBootstrap {
   }
 
   nextReady(company_id) {
+    assertPreprod(this.#environment);
     const company = this.inspectCompany(company_id);
     return REGISTRY.engines
       .filter(engine => company.engines[engine.engine_id].state === 'READY')
@@ -184,12 +195,14 @@ export class MultiCompanyBootstrap {
   }
 
   canPromote(company_id) {
+    assertPreprod(this.#environment);
     const company = this.inspectCompany(company_id);
     const allGreen = REGISTRY.engines.every(engine => company.engines[engine.engine_id].state === 'GREEN');
     return { allowed: false, reason: allGreen ? 'PROD_PROMOTION_NOT_IMPLEMENTED_V0' : 'PHASE4_NOT_ALL_GREEN', all_green: allGreen };
   }
 
   #refresh(company_id) {
+    assertPreprod(this.#environment);
     const company = this.#companies.get(company_id);
     for (const engine of REGISTRY.engines) {
       const node = company.engines[engine.engine_id];
