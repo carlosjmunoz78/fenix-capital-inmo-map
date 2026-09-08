@@ -6,6 +6,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REGISTRY = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../registry/console-v0.json'), 'utf8'));
 const ENGINE_IDS = new Set(REGISTRY.engines.map(e => e.engine_id));
 const HUMAN_REQUIRED = new Set(REGISTRY.human_required_reasons);
+const TYPED_ARRAY_BUFFER_GETTER = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(Uint8Array.prototype), 'buffer')?.get;
+const DATA_VIEW_BUFFER_GETTER = Object.getOwnPropertyDescriptor(DataView.prototype, 'buffer')?.get;
 
 function requiredString(value, label) {
   if (typeof value !== 'string' || value.trim() === '') throw new TypeError(`${label} must be a non-empty string`);
@@ -16,10 +18,49 @@ function assertPreprod(value) {
   if (value !== 'PREPROD') throw new Error('Console V0 requires PREPROD');
 }
 
+function intrinsicViewBuffer(value) {
+  const getter = value instanceof DataView ? DATA_VIEW_BUFFER_GETTER : TYPED_ARRAY_BUFFER_GETTER;
+  if (typeof getter !== 'function') throw new TypeError('unsupported ArrayBuffer view');
+  return getter.call(value);
+}
+
+function rejectUnsafeCloneValue(value, seen = new WeakSet()) {
+  if (value === null || (typeof value !== 'object' && typeof value !== 'function')) return;
+  if (typeof WebAssembly !== 'undefined' && typeof WebAssembly.Memory === 'function' && value instanceof WebAssembly.Memory) {
+    throw new TypeError('WebAssembly.Memory not supported');
+  }
+  if (typeof SharedArrayBuffer !== 'undefined' && value instanceof SharedArrayBuffer) {
+    throw new TypeError('shared memory not supported');
+  }
+  if (ArrayBuffer.isView(value)) {
+    const buffer = intrinsicViewBuffer(value);
+    if (typeof SharedArrayBuffer !== 'undefined' && buffer instanceof SharedArrayBuffer) throw new TypeError('shared memory view not supported');
+    return;
+  }
+  if (value instanceof ArrayBuffer) return;
+  if (seen.has(value)) return;
+  seen.add(value);
+  if (value instanceof Map) {
+    Map.prototype.forEach.call(value, (v, k) => { rejectUnsafeCloneValue(k, seen); rejectUnsafeCloneValue(v, seen); });
+    return;
+  }
+  if (value instanceof Set) {
+    Set.prototype.forEach.call(value, v => rejectUnsafeCloneValue(v, seen));
+    return;
+  }
+  for (const key of Reflect.ownKeys(value)) {
+    const descriptor = Object.getOwnPropertyDescriptor(value, key);
+    if (!descriptor) continue;
+    if (descriptor.get || descriptor.set) throw new TypeError('accessor properties not supported');
+    rejectUnsafeCloneValue(descriptor.value, seen);
+  }
+}
+
 function safeClone(value) {
-  if (typeof SharedArrayBuffer !== 'undefined' && value instanceof SharedArrayBuffer) throw new TypeError('shared memory not supported');
-  if (typeof WebAssembly !== 'undefined' && typeof WebAssembly.Memory === 'function' && value instanceof WebAssembly.Memory) throw new TypeError('WebAssembly.Memory not supported');
-  return structuredClone(value);
+  rejectUnsafeCloneValue(value);
+  const cloned = structuredClone(value);
+  rejectUnsafeCloneValue(cloned);
+  return cloned;
 }
 
 function canonicalContext({ company_id, engine_id = 'CONSOLE-001', environment = 'PREPROD', version = '0.1.0' }) {
