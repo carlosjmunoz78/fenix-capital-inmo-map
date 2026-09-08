@@ -7,7 +7,8 @@ const context = { company_id: 'fenix-capital', engine_id: 'APP-001', environment
 test('EVT/JOB reject exotic structured-clone objects uniformly', () => {
   if (typeof WebAssembly === 'undefined') return;
   const moduleA = new WebAssembly.Module(new Uint8Array([0,97,115,109,1,0,0,0]));
-  const moduleB = new WebAssembly.Module(new Uint8Array([0,97,115,109,1,0,0,0,0,0,0,0]));
+  // Same valid WASM header plus a valid custom section named "x".
+  const moduleB = new WebAssembly.Module(new Uint8Array([0,97,115,109,1,0,0,0,0,2,1,120]));
   const bus = new EventBus();
   assert.throws(() => bus.publish({ type: 'WASM', payload: moduleA, context }), /unsupported object type/);
   assert.throws(() => bus.publish({ type: 'WASM', payload: moduleB, context, idempotency_key: 'explicit' }), /unsupported object type/);
