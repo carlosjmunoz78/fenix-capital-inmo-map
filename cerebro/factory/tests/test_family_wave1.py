@@ -38,20 +38,36 @@ class Wave1FamilyTests(unittest.TestCase):
         self.assertEqual(spec["promotion"]["prod_autonomy"], "DENY")
         self.assertEqual(spec["promotion"]["cost_additional_eur"], 0)
 
-    def test_wave1_registry_and_scaffolds_are_exact_and_inert(self):
+    def test_wave1_registry_and_scaffolds_preserve_materialization_contract(self):
         spec = json.loads(FAMILY.read_text(encoding="utf-8"))
         registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
         wave_ids = {item["engine_id"] for item in spec["engines"]}
         registry_ids = [item["engine_id"] for item in registry["engines"]]
-        self.assertEqual(registry["registry_version"], "0.5.0")
+        self.assertGreaterEqual(tuple(map(int, registry["registry_version"].split("."))), (0, 5, 0))
         self.assertEqual(len(registry_ids), 46)
         self.assertEqual(len(registry_ids), len(set(registry_ids)))
         self.assertTrue(wave_ids.issubset(registry_ids))
+
+        implemented = {
+            item["engine_id"]
+            for item in registry["engines"]
+            if item["engine_id"] in wave_ids and item.get("source_of_truth") == "git+versioned_update"
+        }
+        self.assertTrue(implemented.issubset({"COMP-REG-001"}))
+
         for engine_id in wave_ids:
             entry = next(item for item in registry["engines"] if item["engine_id"] == engine_id)
-            self.assertEqual(entry["status"], "DEFINED_NOT_BUILT")
             self.assertEqual(entry["environment"], "PREPROD")
-            self.assertEqual(entry["source_of_truth"], "git")
+            if engine_id in implemented:
+                self.assertEqual(entry["status"], "CONFIRMED_OPERATIONAL")
+                self.assertEqual(entry["version"], "0.2.0")
+                self.assertEqual(entry["manifest"], f"../versions/{engine_id}/0.2.0/engine.manifest.json")
+                self.assertEqual(entry["factory_scaffold"], f"../generated/{engine_id}/engine.manifest.json")
+            else:
+                self.assertEqual(entry["status"], "DEFINED_NOT_BUILT")
+                self.assertEqual(entry["source_of_truth"], "git")
+                self.assertEqual(entry["version"], "0.1.0")
+
             root = GENERATED / engine_id
             files = [p for p in root.rglob("*") if p.is_file()]
             self.assertEqual(len(files), 18, msg=engine_id)

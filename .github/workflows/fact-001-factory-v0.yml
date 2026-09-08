@@ -6,10 +6,12 @@ on:
       - 'cerebro/**'
     paths:
       - 'cerebro/factory/**'
+      - 'cerebro/runtime/**'
       - '.github/workflows/fact-001-factory-v0.yml'
   pull_request:
     paths:
       - 'cerebro/factory/**'
+      - 'cerebro/runtime/**'
       - '.github/workflows/fact-001-factory-v0.yml'
 
 permissions:
@@ -28,3 +30,5 @@ jobs:
         run: python cerebro/factory/scripts/validate_manifest.py
       - name: Run factory unit tests
         run: python -m unittest discover -s cerebro/factory/tests -p 'test_*.py' -v
+      - name: Run shared runtime unit tests
+        run: python -m unittest discover -s cerebro/runtime/tests -p 'test_*.py' -v

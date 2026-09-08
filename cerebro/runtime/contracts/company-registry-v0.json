@@ -1,0 +1,58 @@
+{
+  "contract_id": "COMP-REG-001/company-record/v0",
+  "contract_version": "0.2.0",
+  "engine_id": "COMP-REG-001",
+  "environment": "PREPROD",
+  "purpose": "Canonical multi-company identity metadata. Never stores credentials or secret material.",
+  "required": [
+    "company_id",
+    "legal_name",
+    "display_name",
+    "owner",
+    "brands",
+    "domains",
+    "geographies",
+    "access_refs",
+    "lifecycle_state",
+    "environment",
+    "record_version",
+    "metadata"
+  ],
+  "fields": {
+    "company_id": "lower-case stable slug; unique registry key",
+    "legal_name": "canonical legal/company name",
+    "display_name": "human-facing company name",
+    "owner": "logical owner/team label; not a credential",
+    "brands": "ordered unique brand names",
+    "domains": "ordered unique lowercase DNS hostnames without scheme",
+    "geographies": "ordered unique geography labels",
+    "access_refs": "logical references to existing access/integrations; no secrets",
+    "lifecycle_state": "REGISTERED|ONBOARDING|ACTIVE|SUSPENDED|ARCHIVED",
+    "environment": "LOCAL|LAB|DEV|PREPROD; V0 rejects PROD",
+    "record_version": "monotonic integer per company record",
+    "metadata": "non-secret structured metadata"
+  },
+  "secret_policy": {
+    "storage": "FORBIDDEN",
+    "forbidden_key_fragments": [
+      "secret",
+      "password",
+      "passwd",
+      "token",
+      "api_key",
+      "apikey",
+      "credential",
+      "private_key"
+    ],
+    "human_exception_on_attempt": "SECURITY_INCIDENT"
+  },
+  "duplicate_policy": {
+    "identical_replay": "NO_CHANGE",
+    "same_company_id_different_data": "POLICY_CONFLICT"
+  },
+  "persistence": {
+    "v0": "atomic_json_file",
+    "supabase_required": false,
+    "additional_monthly_eur_target": 0
+  }
+}

@@ -6,12 +6,14 @@ on:
       - cerebro/fact-001-factory-v0
     paths:
       - 'cerebro/factory/**'
+      - 'cerebro/runtime/**'
       - '.github/workflows/fact-001-*.yml'
   pull_request:
     branches:
       - preprod-app-phase1
     paths:
       - 'cerebro/factory/**'
+      - 'cerebro/runtime/**'
       - '.github/workflows/fact-001-*.yml'
 
 permissions:
@@ -51,6 +53,7 @@ jobs:
         run: |
           set -euo pipefail
           test -d cerebro/factory
+          test -d cerebro/runtime
           test -f cerebro/factory/governance/old-vs-new-fact-001.json
           python cerebro/factory/scripts/validate_manifest.py
 

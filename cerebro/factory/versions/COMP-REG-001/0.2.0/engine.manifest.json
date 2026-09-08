@@ -1,0 +1,136 @@
+{
+  "api_contract": [],
+  "autonomy_level": "PREPROD_DETERMINISTIC_ONLY",
+  "backup": {
+    "strategy": "atomic-json-snapshot+sha256",
+    "verified": true
+  },
+  "company_id": null,
+  "company_scope": "GLOBAL_OR_SCOPED",
+  "contract_version": "0.2.0",
+  "cost_budget": {
+    "additional_monthly_eur_target": 0
+  },
+  "data_contracts": [
+    "cerebro/runtime/contracts/company-registry-v0.json"
+  ],
+  "dependencies": [
+    "AUD-001",
+    "CORE-001",
+    "POL-001"
+  ],
+  "dependents": [
+    "BMD-001",
+    "CHAT-001",
+    "COMP-BKP-001",
+    "COMP-ONB-001",
+    "ENGACT-001",
+    "PROC-001",
+    "SCAN-001",
+    "TENANT-001"
+  ],
+  "engine_id": "COMP-REG-001",
+  "environment": "PREPROD",
+  "evaluation": [
+    "cerebro/runtime/docs/COMP-REG-001.md"
+  ],
+  "events_in": [
+    "COMPANY_REGISTER_REQUESTED",
+    "COMPANY_LIFECYCLE_CHANGE_REQUESTED"
+  ],
+  "events_out": [
+    "COMPANY_REGISTERED",
+    "COMPANY_LIFECYCLE_CHANGED"
+  ],
+  "evidence": [
+    "cerebro/runtime/tests/test_company_registry.py",
+    "cerebro/runtime/contracts/company-registry-v0.json",
+    "cerebro/runtime/docs/COMP-REG-001.md"
+  ],
+  "factory": {
+    "generator": "FACT-001",
+    "generator_version": "0.4.2",
+    "immutable_scaffold": "cerebro/factory/generated/COMP-REG-001/engine.manifest.json",
+    "versioned_update": true
+  },
+  "human_exception_codes": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "inputs": [
+    "company_registration_request",
+    "company_lifecycle_transition_request"
+  ],
+  "jobs": [],
+  "knowledge_sources": [
+    "git",
+    "preprod_atomic_company_registry"
+  ],
+  "layer": "L8",
+  "name": "Company Registry Engine",
+  "objective": "Register each company once with canonical identity, scope, ownership, brands, domains, geography, accesses and lifecycle state.",
+  "observability": [
+    "cerebro/runtime/docs/COMP-REG-001.md"
+  ],
+  "outputs": [
+    "canonical_company_record",
+    "company_registry_health",
+    "company_registry_audit_event"
+  ],
+  "owner": "CEREBRO Platform",
+  "permissions": [
+    "local_preprod_read",
+    "local_preprod_atomic_write",
+    "secret_storage_denied",
+    "prod_denied"
+  ],
+  "policies": [
+    "deterministic_before_AI",
+    "zero_new_cost_by_default",
+    "preserve_existing_contracts",
+    "company_id_unique",
+    "secret_storage_forbidden",
+    "lifecycle_transition_allowlist",
+    "prod_denied"
+  ],
+  "rebuild": {
+    "strategy": "git+versioned-manifest+python-standard-library",
+    "verified": true
+  },
+  "retry_timeout": {
+    "declared": true,
+    "max_attempts": 1,
+    "timeout_seconds": 5
+  },
+  "rollback": {
+    "strategy": "registry-version-pointer+checksum-verified-data-restore",
+    "verified": true
+  },
+  "status": "CONFIRMED_OPERATIONAL",
+  "system_blocker_codes": [
+    "MISSING_CREDENTIAL",
+    "EXPIRED_OR_REVOKED_CREDENTIAL",
+    "MFA_REQUIRED",
+    "PERMISSION_REQUIRED",
+    "IRREVERSIBLE_PROD_RISK"
+  ],
+  "tests": [
+    "cerebro/runtime/tests/test_company_registry.py"
+  ],
+  "tribunal": [
+    "cerebro/runtime/docs/COMP-REG-001.md"
+  ],
+  "version": "0.2.0",
+  "zero_cost_execution_plan": [
+    "python_standard_library",
+    "atomic_local_json",
+    "shared_runtime",
+    "no_supabase_required"
+  ]
+}
