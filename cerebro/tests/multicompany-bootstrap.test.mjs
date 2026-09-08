@@ -39,6 +39,37 @@ test('company registration is isolated and idempotent per company', () => {
   assert.equal(bootstrap.inspectCompany('company-b').profile.name, 'B');
 });
 
+test('company profile and evidence reject SharedArrayBuffer-backed data', () => {
+  if (typeof SharedArrayBuffer === 'undefined') return;
+  const bootstrap = new MultiCompanyBootstrap();
+  const shared = new Uint8Array(new SharedArrayBuffer(8));
+  assert.throws(
+    () => bootstrap.registerCompany({ company_id: 'company-shared', profile: { bytes: shared } }),
+    /SharedArrayBuffer/
+  );
+  assert.deepEqual(bootstrap.listCompanies(), []);
+
+  bootstrap.registerCompany({ company_id: 'company-a' });
+  bootstrap.startEngine({ company_id: 'company-a', engine_id: 'COMP-REG-001' });
+  assert.throws(
+    () => bootstrap.markEngineResult({ company_id: 'company-a', engine_id: 'COMP-REG-001', status: 'SUCCESS', evidence: [shared] }),
+    /SharedArrayBuffer/
+  );
+  assert.equal(bootstrap.inspectCompany('company-a').engines['COMP-REG-001'].state, 'RUNNING');
+});
+
+test('failed evidence cloning is atomic and does not mark engine GREEN', () => {
+  const bootstrap = new MultiCompanyBootstrap();
+  bootstrap.registerCompany({ company_id: 'company-a' });
+  bootstrap.startEngine({ company_id: 'company-a', engine_id: 'COMP-REG-001' });
+  assert.throws(
+    () => bootstrap.markEngineResult({ company_id: 'company-a', engine_id: 'COMP-REG-001', status: 'SUCCESS', evidence: [() => 'not cloneable'] })
+  );
+  const state = bootstrap.inspectCompany('company-a');
+  assert.equal(state.engines['COMP-REG-001'].state, 'RUNNING');
+  assert.deepEqual(state.engines['COMP-REG-001'].evidence, []);
+});
+
 test('dependencies unlock deterministically without cross-company leakage', () => {
   const bootstrap = new MultiCompanyBootstrap();
   bootstrap.registerCompany({ company_id: 'company-a' });
