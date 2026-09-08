@@ -6,6 +6,7 @@ const HUMAN_REQUIRED_REASONS = new Set([
   'POLICY_CONFLICT','SECURITY_INCIDENT','MONEY_LIMIT','CUSTOMER_HUMAN_REQUEST'
 ]);
 const MONEY_SCALE = 1_000_000;
+const MONEY_NOISE_TOLERANCE_UNITS = 1e-7;
 
 function assertContext(ctx) {
   for (const key of ['company_id','engine_id','environment','version']) {
@@ -21,7 +22,10 @@ function rejectUnsupported(value, seen = new WeakSet()) {
   if (value === null || (typeof value !== 'object' && typeof value !== 'function')) return;
   if (typeof SharedArrayBuffer !== 'undefined' && value instanceof SharedArrayBuffer) throw new TypeError('SharedArrayBuffer is not supported');
   if (ArrayBuffer.isView(value)) {
-    if (typeof SharedArrayBuffer !== 'undefined' && value.buffer instanceof SharedArrayBuffer) throw new TypeError('SharedArrayBuffer-backed views are not supported');
+    const ownBuffer = Object.getOwnPropertyDescriptor(value, 'buffer');
+    if (ownBuffer?.get || ownBuffer?.set) throw new TypeError('accessor properties are not supported by RUNTIME-001 V0');
+    const buffer = value.buffer;
+    if (typeof SharedArrayBuffer !== 'undefined' && buffer instanceof SharedArrayBuffer) throw new TypeError('SharedArrayBuffer-backed views are not supported');
     return;
   }
   if (value instanceof ArrayBuffer) return;
@@ -64,8 +68,7 @@ function moneyToUnits(value, label) {
   if (!Number.isFinite(value) || value < 0) throw new Error(`${label} must be a finite non-negative number`);
   const raw = value * MONEY_SCALE;
   const nearest = Math.round(raw);
-  const tolerance = Number.EPSILON * Math.max(1, Math.abs(raw)) * 8;
-  const effectivelyInteger = Math.abs(raw - nearest) <= tolerance;
+  const effectivelyInteger = Math.abs(raw - nearest) <= MONEY_NOISE_TOLERANCE_UNITS;
   const scaled = effectivelyInteger ? nearest : (label === 'cost' && value > 0 ? Math.ceil(raw) : Math.floor(raw));
   if (!Number.isSafeInteger(scaled)) throw new Error(`${label} exceeds safe monetary range`);
   return BigInt(scaled);
