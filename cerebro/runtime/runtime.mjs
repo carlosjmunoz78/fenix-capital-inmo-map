@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import { serialize } from 'node:v8';
 
 const HUMAN_REQUIRED_REASONS = new Set([
   'LEGAL_REQUIRED','SIGNATURE_REQUIRED','LOW_CONFIDENCE','HIGH_RISK',
@@ -16,7 +17,7 @@ function sameContext(a, b) {
 }
 
 function stableId(prefix, value) {
-  return `${prefix}_${crypto.createHash('sha256').update(JSON.stringify(value)).digest('hex').slice(0, 24)}`;
+  return `${prefix}_${crypto.createHash('sha256').update(serialize(value)).digest('hex').slice(0, 24)}`;
 }
 
 function contextKey(context, key) {
@@ -29,10 +30,10 @@ export class EventBus {
   publish({ type, payload = {}, context, idempotency_key }) {
     assertContext(context);
     if (!type) throw new Error('event type required');
-    const key = idempotency_key ?? stableId('evt', { type, payload, context });
+    const safePayload = structuredClone(payload);
+    const key = idempotency_key ?? stableId('evt', { type, payload: safePayload, context });
     const scoped = contextKey(context, key);
     if (this.inbox.has(scoped)) return { accepted: false, duplicate: true, idempotency_key: key };
-    const safePayload = structuredClone(payload);
     const event = {
       event_id: stableId('event', { scoped, type, context }), type, payload: safePayload,
       context: { ...context }, idempotency_key: key, status: 'PENDING'
@@ -53,10 +54,10 @@ export class JobQueue {
   enqueue({ name, context, payload = {}, priority = 100, max_attempts = 3, timeout_ms = 30000, idempotency_key }) {
     assertContext(context);
     if (!name) throw new Error('job name required');
-    const key = idempotency_key ?? stableId('job', { name, payload, context });
+    const safePayload = structuredClone(payload);
+    const key = idempotency_key ?? stableId('job', { name, payload: safePayload, context });
     const scoped = contextKey(context, key);
     if (this.keys.has(scoped)) return { accepted: false, duplicate: true, idempotency_key: key };
-    const safePayload = structuredClone(payload);
     const job = {
       job_id: stableId('jobid', { scoped, name, context }), name, context: { ...context }, payload: safePayload,
       priority, max_attempts, timeout_ms, attempts: 0, status: 'QUEUED', idempotency_key: key, result: null, error: null
@@ -83,7 +84,7 @@ export class JobQueue {
     if (!job) throw new Error('job not found for company');
     if (job.status !== 'RUNNING') throw new Error('job not running');
     const safeResult = structuredClone(result);
-    job.result = safeResult; job.status = 'SUCCEEDED'; return structuredClone(job);
+    job.result = safeResult; job.error = null; job.status = 'SUCCEEDED'; return structuredClone(job);
   }
 
   completeContext(job_id, context, result) {
@@ -92,7 +93,7 @@ export class JobQueue {
     if (!job) throw new Error('job not found for context');
     if (job.status !== 'RUNNING') throw new Error('job not running');
     const safeResult = structuredClone(result);
-    job.result = safeResult; job.status = 'SUCCEEDED'; return structuredClone(job);
+    job.result = safeResult; job.error = null; job.status = 'SUCCEEDED'; return structuredClone(job);
   }
 
   fail(job_id, company_id, error) {
@@ -149,10 +150,10 @@ export class SharedRuntime {
   async execute({ company_id, engine_id, version, command, payload = {}, cost_eur = 0 }) {
     const context = { company_id, engine_id, environment: this.environment, version }; assertContext(context);
     const reg = this.handlers.get(engine_id); if (!reg || reg.version !== version) throw new Error('engine not registered for requested version');
+    const safePayload = structuredClone(payload);
     const auditBase = { context: { ...context }, command, cost_eur }; const cost = this.finops.authorize(cost_eur);
     if (!cost.allowed) { this.audit.push({ ...auditBase, outcome: 'HUMAN_REQUIRED', reason: cost.human_required }); return { status: 'HUMAN_REQUIRED', reason: cost.human_required, context }; }
     try {
-      const safePayload = structuredClone(payload);
       const result = await reg.handler({ context: Object.freeze({ ...context }), command, payload: safePayload, events: bindEvents(this.events, context), jobs: bindJobs(this.jobs, context) });
       if (result?.status === 'HUMAN_REQUIRED') {
         if (!HUMAN_REQUIRED_REASONS.has(result.reason)) throw new Error(`invalid HUMAN_REQUIRED reason: ${result.reason}`);
