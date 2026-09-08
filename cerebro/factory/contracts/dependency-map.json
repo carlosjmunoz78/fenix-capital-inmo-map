@@ -1,5 +1,5 @@
 {
-  "map_version": "0.9.0",
+  "map_version": "0.10.0",
   "environment": "PREPROD_AUDIT",
   "nodes": [
     {
@@ -116,6 +116,10 @@
     },
     {
       "id": "SOCAUD-001",
+      "type": "engine"
+    },
+    {
+      "id": "COMPET-001",
       "type": "engine"
     }
   ],
@@ -389,6 +393,36 @@
       "from": "COMP-ONB-001",
       "to": "SOCAUD-001",
       "kind": "dependency-valid social audit step; explicit orchestration only"
+    },
+    {
+      "from": "COMPET-001",
+      "to": "KW-001",
+      "kind": "keyword opportunity evidence"
+    },
+    {
+      "from": "COMPET-001",
+      "to": "LOCALP-001",
+      "kind": "local presence evidence"
+    },
+    {
+      "from": "COMPET-001",
+      "to": "SCAN-001",
+      "kind": "public digital footprint evidence"
+    },
+    {
+      "from": "COMPET-001",
+      "to": "SOCAUD-001",
+      "kind": "public social audit evidence"
+    },
+    {
+      "from": "COMPET-001",
+      "to": "WAUD-001",
+      "kind": "website audit evidence"
+    },
+    {
+      "from": "COMP-ONB-001",
+      "to": "COMPET-001",
+      "kind": "dependency-valid competitor intelligence step; explicit orchestration only"
     }
   ],
   "known_risks": [
@@ -405,7 +439,8 @@
     "WAUD-001 V0 is deterministic read-only snapshot analysis and must not mutate remote websites, tracking, forms or SEO configuration",
     "KW-001 V0 must never fabricate search volume, CPC, ranking or keyword difficulty when no authorized external source is present",
     "LOCALP-001 V0 must not mutate Google Business Profile or fabricate ratings/review counts without dated public evidence",
-    "SOCAUD-001 V0 must not login, publish, message, use private social APIs or fabricate audience metrics without public dated evidence"
+    "SOCAUD-001 V0 must not login, publish, message, use private social APIs or fabricate audience metrics without public dated evidence",
+    "COMPET-001 V0 must not fabricate competitor identity or unsupported market metrics; missing explicit public competitor evidence requires LOW_CONFIDENCE"
   ],
   "rule": "No dependency is removed or consolidated until all callers are inventoried and PREPROD equivalence plus rollback are proven."
 }
