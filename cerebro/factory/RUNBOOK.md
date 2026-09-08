@@ -237,3 +237,18 @@ Reglas:
 7. la futura incorporación de Search Console/SEO tools exige contrato separado y no debe alterar este baseline determinista.
 
 Backup/rebuild: Git + manifest versionado + replay de evidencia. Rollback: `version_engine.py rollback --engine-id KW-001 --to-version 0.1.0` tras `--plan`, OLD vs NEW y gates.
+
+
+## LOCALP-001 · operación PREPROD determinista read-only
+`LOCALP-001` V0.2 audita presencia local únicamente desde hechos declarados y evidencia pública fechada.
+
+Reglas:
+1. requiere `company_id`, perfil `BMD-001`, evidencia `SCAN-001`, hechos NAP/categorías/servicios/cobertura declarados y `evidence_at`;
+2. evidencia pública local es opcional y nunca autoriza escrituras;
+3. rating/review_count sólo se registran si están explícitamente presentes y tipados en evidencia pública; en caso contrario quedan `unknown_without_public_evidence`;
+4. cruce multiempresa y material sensible se rechazan deny-by-default;
+5. `environment=PROD` está bloqueado; V0 no usa Google Business API ni credenciales;
+6. coste adicional 0 €, Python stdlib, sin IA obligatoria ni servidor nuevo;
+7. el siguiente desbloqueo estructural relevante es `COMPET-001`, que aún depende también de `SOCAUD-001`.
+
+Backup/rebuild: Git + manifest versionado + replay de evidencia. Rollback: `version_engine.py rollback --engine-id LOCALP-001 --to-version 0.1.0` tras `--plan`, OLD vs NEW y gates.
