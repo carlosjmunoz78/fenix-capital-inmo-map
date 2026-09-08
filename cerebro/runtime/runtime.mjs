@@ -15,8 +15,8 @@ function stableId(prefix, value) {
   return `${prefix}_${crypto.createHash('sha256').update(JSON.stringify(value)).digest('hex').slice(0, 24)}`;
 }
 
-function tenantKey(company_id, key) {
-  return `${company_id}::${key}`;
+function contextKey(context, key) {
+  return `${context.company_id}::${context.engine_id}::${context.environment}::${context.version}::${key}`;
 }
 
 export class EventBus {
@@ -29,7 +29,7 @@ export class EventBus {
     assertContext(context);
     if (!type) throw new Error('event type required');
     const key = idempotency_key ?? stableId('evt', { type, payload, context });
-    const scoped = tenantKey(context.company_id, key);
+    const scoped = contextKey(context, key);
     if (this.inbox.has(scoped)) return { accepted: false, duplicate: true, idempotency_key: key };
     this.inbox.add(scoped);
     const event = {
@@ -59,7 +59,7 @@ export class JobQueue {
     assertContext(context);
     if (!name) throw new Error('job name required');
     const key = idempotency_key ?? stableId('job', { name, payload, context });
-    const scoped = tenantKey(context.company_id, key);
+    const scoped = contextKey(context, key);
     if (this.keys.has(scoped)) return { accepted: false, duplicate: true, idempotency_key: key };
     this.keys.add(scoped);
     const job = {
@@ -110,14 +110,41 @@ export class JobQueue {
   }
 }
 
+function bindEvents(bus, context) {
+  return Object.freeze({
+    publish: ({ type, payload = {}, idempotency_key }) => bus.publish({ type, payload, context, idempotency_key }),
+    list: () => bus.listForCompany(context.company_id)
+      .filter(e => e.context.engine_id === context.engine_id && e.context.environment === context.environment && e.context.version === context.version)
+  });
+}
+
+function bindJobs(queue, context) {
+  return Object.freeze({
+    enqueue: ({ name, payload = {}, priority = 100, max_attempts = 3, timeout_ms = 30000, idempotency_key }) =>
+      queue.enqueue({ name, context, payload, priority, max_attempts, timeout_ms, idempotency_key }),
+    claim: () => {
+      const job = queue.claim(context.company_id);
+      if (!job) return null;
+      if (job.context.engine_id !== context.engine_id || job.context.environment !== context.environment || job.context.version !== context.version) {
+        job.status = 'QUEUED';
+        throw new Error('cross-context job claim blocked');
+      }
+      return job;
+    },
+    complete: (job_id, result) => queue.complete(job_id, context.company_id, result),
+    fail: (job_id, error) => queue.fail(job_id, context.company_id, error)
+  });
+}
+
 export class FinOpsGate {
   constructor({ additional_cost_budget_eur = 0 } = {}) {
+    if (!Number.isFinite(additional_cost_budget_eur) || additional_cost_budget_eur < 0) throw new Error('budget must be a finite non-negative number');
     this.budget = additional_cost_budget_eur;
     this.spent = 0;
   }
 
   authorize(additional_cost_eur) {
-    if (additional_cost_eur < 0) throw new Error('cost cannot be negative');
+    if (!Number.isFinite(additional_cost_eur) || additional_cost_eur < 0) throw new Error('cost must be a finite non-negative number');
     if (this.spent + additional_cost_eur > this.budget) {
       return { allowed: false, human_required: 'MONEY_LIMIT', remaining_eur: this.budget - this.spent };
     }
@@ -128,6 +155,7 @@ export class FinOpsGate {
 
 export class SharedRuntime {
   constructor({ environment = 'PREPROD', additional_cost_budget_eur = 0 } = {}) {
+    if (environment === 'PROD') throw new Error('RUNTIME-001 V0 cannot run with PROD context');
     this.environment = environment;
     this.events = new EventBus();
     this.jobs = new JobQueue();
@@ -154,7 +182,13 @@ export class SharedRuntime {
       return { status: 'HUMAN_REQUIRED', reason: cost.human_required, context };
     }
     try {
-      const result = await reg.handler({ context, command, payload, events: this.events, jobs: this.jobs });
+      const result = await reg.handler({
+        context: Object.freeze({ ...context }),
+        command,
+        payload,
+        events: bindEvents(this.events, context),
+        jobs: bindJobs(this.jobs, context)
+      });
       if (result?.status === 'HUMAN_REQUIRED') {
         if (!HUMAN_REQUIRED_REASONS.has(result.reason)) throw new Error(`invalid HUMAN_REQUIRED reason: ${result.reason}`);
         this.audit.push({ ...auditBase, outcome: 'HUMAN_REQUIRED', reason: result.reason });
