@@ -1,5 +1,15 @@
 # FACT-001 Changelog
 
+## 0.4.11 · 2026-09-08
+- Implementado `COMPET-001` V0.2 en runtime compartido PREPROD como inteligencia competitiva determinista y public-evidence-only.
+- Consume exactamente las dependencias canónicas `KW-001`, `LOCALP-001`, `SCAN-001`, `SOCAUD-001` y `WAUD-001`; no se añade `BMD-001` fuera del contrato vigente.
+- V0 no descubre ni inventa competidores por inferencia: requiere evidencia pública explícita; si falta, devuelve `LOW_CONFIDENCE`.
+- Market share, revenue, headcount, traffic, ad spend, search rank, followers y review metrics quedan `unknown_without_public_evidence` salvo evidencia pública explícita válida.
+- Rechaza cruce de `company_id`, material sensible y ejecución PROD; no usa login, credenciales, APIs privadas ni escritura remota.
+- FACT-001 promueve `COMPET-001` 0.1.0 → 0.2.0 preservando scaffold inmutable; Engine Registry avanza 0.19.0 → 0.20.0.
+- Dependency map avanza a 0.10.0 y registra `COMPET → KW/LOCALP/SCAN/SOCAUD/WAUD` más la relación de onboarding explícita.
+- Backup/rebuild por Git+manifest+replay de evidencia; rollback por puntero versionado FACT-001. Coste adicional 0 €. PROD autonomy `DENY`.
+
 ## 0.4.10 · 2026-09-08
 - Implementado `SOCAUD-001` V0.2 en runtime compartido PREPROD como auditoría social determinista y pública/read-only.
 - Consume `AUD-001`, `BMD-001`, `SCAN-001` y evidencia social pública fechada; no usa login, credenciales ni APIs privadas.

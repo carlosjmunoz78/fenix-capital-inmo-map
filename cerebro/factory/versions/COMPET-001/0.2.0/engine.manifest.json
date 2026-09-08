@@ -1,0 +1,153 @@
+{
+  "api_contract": [
+    "cerebro.runtime.competitor_intelligence.CompetitorIntelligence.analyze",
+    "cerebro.runtime.competitor_intelligence.CompetitorIntelligence.health"
+  ],
+  "autonomy_level": "PREPROD_DETERMINISTIC_PUBLIC_READ_ONLY_COMPETITOR_INTELLIGENCE",
+  "backup": {
+    "strategy": "git+versioned-manifest+reproducible-public-evidence",
+    "verified": true
+  },
+  "company_id": null,
+  "company_scope": "GLOBAL_OR_SCOPED",
+  "contract_version": "0.2.0",
+  "cost_budget": {
+    "additional_monthly_eur_target": 0
+  },
+  "data_contracts": [
+    "competitor-intelligence-v0.json",
+    "CompetitorIntelligenceResult(company_id,profiles,gap_matrix,evidence_sha256)"
+  ],
+  "dependencies": [
+    "KW-001",
+    "LOCALP-001",
+    "SCAN-001",
+    "SOCAUD-001",
+    "WAUD-001"
+  ],
+  "dependents": [],
+  "engine_id": "COMPET-001",
+  "environment": "PREPROD",
+  "evaluation": [
+    "deterministic COMPET unit suite",
+    "Factory manifest validation",
+    "App Compatibility"
+  ],
+  "events_in": [
+    "KEYWORD_DISCOVERY_READY",
+    "LOCAL_PRESENCE_READY",
+    "DIGITAL_FOOTPRINT_SCANNED",
+    "SOCIAL_MEDIA_AUDIT_READY",
+    "WEBSITE_AUDIT_READY",
+    "PUBLIC_COMPETITOR_EVIDENCE_AVAILABLE"
+  ],
+  "events_out": [
+    "COMPETITOR_INTELLIGENCE_READY"
+  ],
+  "evidence": [
+    "cerebro/runtime/tests/test_competitor_intelligence.py",
+    "cerebro/runtime/contracts/competitor-intelligence-v0.json"
+  ],
+  "factory": {
+    "generator": "FACT-001",
+    "generator_version": "0.4.0",
+    "immutable_scaffold": "cerebro/factory/generated/COMPET-001/engine.manifest.json"
+  },
+  "human_exception_codes": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "inputs": [
+    "company_id",
+    "KW-001 keyword evidence",
+    "LOCALP-001 local presence evidence",
+    "SCAN-001 public footprint",
+    "SOCAUD-001 public social audit",
+    "WAUD-001 website audit",
+    "optional dated public competitor evidence",
+    "evidence_at"
+  ],
+  "jobs": [],
+  "knowledge_sources": [
+    "KW-001",
+    "LOCALP-001",
+    "SCAN-001",
+    "SOCAUD-001",
+    "WAUD-001",
+    "dated public competitor evidence"
+  ],
+  "layer": "L3",
+  "name": "Competitor Intelligence Engine",
+  "objective": "Map and compare relevant competitors across search, web, local presence, social, positioning and observable offers using dated public evidence without fabricating unsupported market metrics.",
+  "observability": [
+    "health mode/login_required/remote_write/external_cost_eur/prod_enabled",
+    "competitor profile count",
+    "human_required_code",
+    "missing evidence count"
+  ],
+  "outputs": [
+    "structured evidence-backed competitor profiles",
+    "deterministic overlap/gap matrix",
+    "unknown state for unsupported market metrics",
+    "dated evidence sha256"
+  ],
+  "owner": "CEREBRO Platform",
+  "permissions": [
+    "consume normalized public/declarative evidence",
+    "no credentials",
+    "no login or private competitor APIs",
+    "no scraping bypass",
+    "no remote writes",
+    "no PROD execution"
+  ],
+  "policies": [
+    "deterministic_before_AI",
+    "zero_new_cost_by_default",
+    "preserve_existing_contracts",
+    "public_evidence_only",
+    "no_fabricated_market_metrics",
+    "absence_of_evidence_is_not_market_gap",
+    "cross_company_deny",
+    "secret_material_rejected",
+    "prod_deny_by_default"
+  ],
+  "rebuild": {
+    "strategy": "manifest+git+shared-runtime+replay-public-evidence",
+    "verified": true
+  },
+  "retry_timeout": {
+    "declared": true,
+    "retries": 0,
+    "timeout_ms": 1000
+  },
+  "rollback": {
+    "strategy": "FACT-001 versioned Registry pointer rollback to immutable 0.1.0 scaffold",
+    "verified": true
+  },
+  "status": "CONFIRMED_OPERATIONAL",
+  "system_blocker_codes": [
+    "MISSING_CREDENTIAL",
+    "EXPIRED_OR_REVOKED_CREDENTIAL",
+    "MFA_REQUIRED",
+    "PERMISSION_REQUIRED",
+    "IRREVERSIBLE_PROD_RISK"
+  ],
+  "tests": [
+    "cerebro/runtime/tests/test_competitor_intelligence.py"
+  ],
+  "tribunal": [
+    "PREPROD deterministic public read-only competitor intelligence only; unsupported market metrics remain unknown; PROD promotion DENY"
+  ],
+  "version": "0.2.0",
+  "zero_cost_execution_plan": [
+    "existing_stack",
+    "python_stdlib",
+    "deterministic_public_evidence_analysis"
+  ]
+}
