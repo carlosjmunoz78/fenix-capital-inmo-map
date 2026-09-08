@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   promote:
-    if: github.event.head_commit.message == 'ACTGW · run isolated version promotion'
+    if: github.event.head_commit.message == 'CONSOLE · run isolated version promotion'
     runs-on: ubuntu-latest
     timeout-minutes: 6
     steps:
@@ -23,18 +23,18 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Promote ACTGW-001 through FACT-001 V0.4
+      - name: Promote CONSOLE-001 through FACT-001 V0.4
         shell: bash
         run: |
           set -euo pipefail
-          test ! -e cerebro/factory/versions/ACTGW-001/0.2.0/engine.manifest.json
-          python cerebro/factory/scripts/version_engine.py apply --engine-id ACTGW-001 --manifest-file cerebro/factory/candidates/ACTGW-001-0.2.0.json
+          test ! -e cerebro/factory/versions/CONSOLE-001/0.2.0/engine.manifest.json
+          python cerebro/factory/scripts/version_engine.py apply --engine-id CONSOLE-001 --manifest-file cerebro/factory/candidates/CONSOLE-001-0.2.0.json
           python - <<'PY'
           import json, pathlib
           p=pathlib.Path('cerebro/factory/registry/engine-registry.json')
           d=json.loads(p.read_text(encoding='utf-8'))
-          if d.get('registry_version') != '0.10.0': raise SystemExit(f"unexpected Registry {d.get('registry_version')}")
-          d['registry_version']='0.11.0'
+          if d.get('registry_version') != '0.11.0': raise SystemExit(f"unexpected Registry {d.get('registry_version')}")
+          d['registry_version']='0.12.0'
           p.write_text(json.dumps(d,ensure_ascii=False,indent=2,sort_keys=True)+'\n',encoding='utf-8')
           PY
       - name: Validate Factory and shared runtime
@@ -42,12 +42,12 @@ jobs:
           python cerebro/factory/scripts/validate_manifest.py
           python -m unittest discover -s cerebro/factory/tests -p 'test_*.py' -v
           python -m unittest discover -s cerebro/runtime/tests -p 'test_*.py' -v
-      - name: Commit exact ACTGW promotion
+      - name: Commit exact CONSOLE promotion
         shell: bash
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add cerebro/factory/registry/engine-registry.json cerebro/factory/versions/ACTGW-001/0.2.0/engine.manifest.json
-          git commit -m 'ACTGW · promote version 0.2.0 [versioned]'
+          git add cerebro/factory/registry/engine-registry.json cerebro/factory/versions/CONSOLE-001/0.2.0/engine.manifest.json
+          git commit -m 'CONSOLE · promote version 0.2.0 [versioned]'
           git push origin HEAD:cerebro/console-chain-v0
