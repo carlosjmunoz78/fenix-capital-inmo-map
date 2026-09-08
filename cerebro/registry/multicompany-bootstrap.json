@@ -32,7 +32,7 @@
     {"engine_id":"APPBOOT-001","name":"App Bootstrap","stage":13,"depends_on":["KBOOT-001","CRMBOOT-001"],"mode":"CONTRACT_ONLY"},
     {"engine_id":"AUTBOOT-001","name":"Automation Bootstrap","stage":14,"depends_on":["CRMBOOT-001","APPBOOT-001"],"mode":"CONTRACT_ONLY"},
     {"engine_id":"TRNBOOT-001","name":"Training Bootstrap","stage":15,"depends_on":["KBOOT-001","AUTBOOT-001"],"mode":"CONTRACT_ONLY"},
-    {"engine_id":"ENGACT-001","name":"Engine Activation","stage":16,"depends_on":["SEOBOOT-001","SOCBOOT-001","MKTBOOT-001","CRMBOOT-001","APPBOOT-001","AUTBOOT-001","TRNBOOT-001"],"mode":"DETERMINISTIC_REFERENCE"},
+    {"engine_id":"ENGACT-001","name":"Engine Activation","stage":16,"depends_on":["TENANT-001","SEOBOOT-001","SOCBOOT-001","MKTBOOT-001","CRMBOOT-001","APPBOOT-001","AUTBOOT-001","TRNBOOT-001"],"mode":"DETERMINISTIC_REFERENCE"},
     {"engine_id":"TENANT-001","name":"Tenant Boundary Guard","stage":0,"depends_on":["COMP-REG-001"],"mode":"DETERMINISTIC_REFERENCE"}
   ],
   "policy": {
