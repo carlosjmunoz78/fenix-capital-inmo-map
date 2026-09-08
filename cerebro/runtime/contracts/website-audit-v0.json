@@ -1,0 +1,9 @@
+{
+  "contract_id": "website-audit-v0",
+  "engine_id": "WAUD-001",
+  "version": "0.2.0",
+  "environment": "PREPROD",
+  "inputs": ["company_id", "SCAN-001 evidence", "BMD-001 profile", "public page snapshots", "evidence_at"],
+  "outputs": ["findings", "summary", "evidence_sha256", "read_only"],
+  "invariants": ["no remote fetch", "no remote write", "cross-company deny", "sensitive material reject", "PROD deny", "cost 0"]
+}

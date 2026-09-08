@@ -207,3 +207,18 @@ Reglas:
 7. la secuencia operativa sigue dependencias Factory: `SCAN → BMD → WAUD → KW` mientras la discrepancia textual de COMP-ONB permanezca sin reconciliar.
 
 Backup/rebuild: Git + manifest versionado + replay de evidencia. Rollback: `version_engine.py rollback --engine-id BMD-001 --to-version 0.1.0` tras `--plan`, OLD vs NEW y gates.
+
+
+## WAUD-001 · operación PREPROD determinista read-only
+`WAUD-001` V0.2 analiza snapshots públicos normalizados y produce hallazgos reproducibles sin escribir en la web ni sustituir `WEB-001`/`SEO-001`.
+
+Reglas:
+1. requiere `company_id`, evidencia `SCAN-001`, perfil `BMD-001`, snapshot público normalizado y `evidence_at`;
+2. sólo analiza contenido recibido; V0 no hace login, crawling agresivo, purge, cambio SEO, tracking ni formularios;
+3. hallazgos cubren HTTP, metadatos, canonical, H1, idioma, viewport, formularios, tracking e imágenes;
+4. cruce multiempresa y material sensible se rechazan deny-by-default;
+5. `environment=PROD` está bloqueado; toda mutación remota permanece fuera del contrato;
+6. coste adicional 0 €, Python stdlib, sin IA obligatoria ni servidor nuevo;
+7. siguiente dependencia por grafo Factory tras WAUD es `KW-001`.
+
+Backup/rebuild: Git + manifest versionado + replay de snapshots/evidencia. Rollback: `version_engine.py rollback --engine-id WAUD-001 --to-version 0.1.0` tras `--plan`, OLD vs NEW y gates.

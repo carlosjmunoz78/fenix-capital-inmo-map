@@ -1,5 +1,14 @@
 # FACT-001 Changelog
 
+## 0.4.7 · 2026-09-08
+- Implementado `WAUD-001` V0.2 en runtime compartido PREPROD como Website Audit determinista y read-only.
+- Reutiliza `WEB-001` como frontera web canónica, `SCAN-001` como evidencia pública, `BMD-001` como contexto de negocio y `SEO-001` como frontera SEO; no duplica crawler ni muta WordPress/Cloudflare/SEO.
+- Evalúa señales técnicas y de conversión sobre snapshots normalizados: HTTP, title, meta description, canonical, H1, lang, viewport, formularios, tracking e imágenes.
+- Rechaza cruces de `company_id`, material sensible y ejecución PROD; no usa credenciales, no realiza login y no escribe remotamente.
+- FACT-001 promovió `WAUD-001` 0.1.0 → 0.2.0 preservando scaffold inmutable; Engine Registry avanza 0.15.0 → 0.16.0.
+- Dependency map avanza a 0.6.0; la ejecución de onboarding sigue el grafo Factory `SCAN → BMD → WAUD → KW` hasta reconciliación explícita de la secuencia textual.
+- Backup/rebuild por Git+manifest+replay de snapshots; rollback por puntero versionado FACT-001. Coste adicional 0 €. PROD autonomy `DENY`.
+
 ## 0.4.6 · 2026-09-08
 - Implementado `BMD-001` V0.2 en runtime compartido PREPROD como Business Model Discovery determinista basado en evidencia.
 - Consume identidad/geografía canónica de `COMP-REG-001`, evidencia pública de `SCAN-001` y hechos empresariales explícitamente declarados.
