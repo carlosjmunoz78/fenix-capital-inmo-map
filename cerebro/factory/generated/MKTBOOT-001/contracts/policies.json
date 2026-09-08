@@ -1,0 +1,8 @@
+{
+  "engine_id": "MKTBOOT-001",
+  "policies": [
+    "deterministic_before_AI",
+    "zero_new_cost_by_default",
+    "preserve_existing_contracts"
+  ]
+}

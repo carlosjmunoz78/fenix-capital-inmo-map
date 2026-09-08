@@ -1,0 +1,5 @@
+{
+  "default": "DENY",
+  "engine_id": "TENANT-001",
+  "permissions": []
+}

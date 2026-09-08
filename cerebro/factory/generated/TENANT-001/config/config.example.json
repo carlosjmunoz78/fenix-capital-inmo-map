@@ -1,0 +1,5 @@
+{
+  "engine_id": "TENANT-001",
+  "environment": "PREPROD",
+  "secrets": "EXTERNAL_ONLY"
+}

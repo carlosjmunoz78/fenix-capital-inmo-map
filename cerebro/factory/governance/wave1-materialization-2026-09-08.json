@@ -1,0 +1,23 @@
+{
+  "date": "2026-09-08",
+  "family_id": "WAVE1-MULTICOMPANY-CONSOLE-V0",
+  "baseline_commit": "e2941c4f143857fcee117ae5119d336243ea2845",
+  "materialization_commit": "c4fcfe7707a6e1c68ba8c4562bcdf6bb2dcccdc5",
+  "factory_generator": "FACT-001",
+  "generator_version": "0.3.0",
+  "existing_registry_engines_before": 17,
+  "generated_engines": 29,
+  "registry_engines_after": 46,
+  "registry_version_after": "0.5.0",
+  "duplicate_engine_ids": 0,
+  "files_per_generated_engine": 18,
+  "generated_state": "DEFINED_NOT_BUILT",
+  "autonomy_level": "NONE_UNTIL_GATES_PASS",
+  "environment": "PREPROD",
+  "deployment": "NONE",
+  "prod_autonomy": "DENY",
+  "additional_monthly_eur_target": 0,
+  "temporary_materialization_workflow_removed_before_pr": true,
+  "prod_mutation": false,
+  "notes": "Materialized by the canonical Factory family command in an isolated branch. Existing 17 registry entries were preserved; new engines are inert scaffolds only."
+}

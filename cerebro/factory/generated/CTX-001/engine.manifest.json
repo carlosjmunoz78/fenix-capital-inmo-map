@@ -1,0 +1,91 @@
+{
+  "api_contract": [],
+  "autonomy_level": "NONE_UNTIL_GATES_PASS",
+  "backup": {
+    "strategy": "declare-before-preprod",
+    "verified": false
+  },
+  "company_id": null,
+  "company_scope": "GLOBAL_OR_SCOPED",
+  "contract_version": "0.2.0",
+  "cost_budget": {
+    "additional_monthly_eur_target": 0
+  },
+  "data_contracts": [],
+  "dependencies": [
+    "AUD-001",
+    "COMP-REG-001",
+    "TENANT-001"
+  ],
+  "dependents": [],
+  "engine_id": "CTX-001",
+  "environment": "PREPROD",
+  "evaluation": [
+    "eval/README.md"
+  ],
+  "events_in": [],
+  "events_out": [],
+  "evidence": [],
+  "factory": {
+    "generator": "FACT-001",
+    "generator_version": "0.3.0"
+  },
+  "human_exception_codes": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "inputs": [],
+  "jobs": [],
+  "knowledge_sources": [],
+  "layer": "L9",
+  "name": "Context Loader",
+  "objective": "Load authenticated company and entity context with deny-by-default cross-company isolation.",
+  "observability": [
+    "observability/README.md"
+  ],
+  "outputs": [],
+  "owner": "CEREBRO Platform",
+  "permissions": [],
+  "policies": [
+    "deterministic_before_AI",
+    "zero_new_cost_by_default",
+    "preserve_existing_contracts"
+  ],
+  "rebuild": {
+    "strategy": "manifest+git",
+    "verified": false
+  },
+  "retry_timeout": {
+    "declared": false
+  },
+  "rollback": {
+    "strategy": "declare-before-preprod",
+    "verified": false
+  },
+  "status": "DEFINED_NOT_BUILT",
+  "system_blocker_codes": [
+    "MISSING_CREDENTIAL",
+    "EXPIRED_OR_REVOKED_CREDENTIAL",
+    "MFA_REQUIRED",
+    "PERMISSION_REQUIRED",
+    "IRREVERSIBLE_PROD_RISK"
+  ],
+  "tests": [
+    "tests/test_contract.py"
+  ],
+  "tribunal": [
+    "tribunal/README.md"
+  ],
+  "version": "0.1.0",
+  "zero_cost_execution_plan": [
+    "existing_stack",
+    "deterministic_code",
+    "open_source_local"
+  ]
+}

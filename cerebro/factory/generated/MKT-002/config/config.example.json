@@ -1,0 +1,5 @@
+{
+  "engine_id": "MKT-002",
+  "environment": "PREPROD",
+  "secrets": "EXTERNAL_ONLY"
+}
