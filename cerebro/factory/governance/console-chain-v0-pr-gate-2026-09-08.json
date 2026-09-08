@@ -1,14 +1,13 @@
 {
   "date":"2026-09-08",
   "branch":"cerebro/console-chain-v0",
-  "expected_head_sha":"b49e49f7923e79441640beb138cc9e75691b88d1",
   "base":"preprod-app-phase1",
   "pre_pr_state":"READY_FOR_CI",
   "temporary_workflow_present":false,
   "candidate_directory_present":false,
   "registry_version":"0.12.0",
   "required_pr_checks":["FACT-001 Factory V0","FACT-001 App Compatibility"],
-  "merge_policy":"merge only if both terminal SUCCESS and expected head unchanged",
+  "merge_policy":"open PR on a fixed head; merge only if both checks are terminal SUCCESS and the PR head has not moved",
   "post_merge_gate":"exact PRE-PROD App Build on merge SHA must be terminal SUCCESS",
   "prod_deploy":"DENY"
 }
