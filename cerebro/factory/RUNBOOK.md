@@ -222,3 +222,18 @@ Reglas:
 7. siguiente dependencia por grafo Factory tras WAUD es `KW-001`.
 
 Backup/rebuild: Git + manifest versionado + replay de snapshots/evidencia. Rollback: `version_engine.py rollback --engine-id WAUD-001 --to-version 0.1.0` tras `--plan`, OLD vs NEW y gates.
+
+
+## KW-001 · operación PREPROD determinista evidence-only
+`KW-001` V0.2 genera oportunidades de palabra clave únicamente desde evidencia BMD/WAUD y semillas/geografía declaradas.
+
+Reglas:
+1. requiere `company_id`, perfil `BMD-001`, resultado `WAUD-001` y `evidence_at`;
+2. semillas declaradas y ubicaciones explícitas pueden ampliar combinaciones sin convertirlas en métricas externas;
+3. volumen, CPC, dificultad y ranking nunca se estiman silenciosamente: quedan `unknown_without_authorized_source`;
+4. cruce multiempresa y material sensible se rechazan deny-by-default;
+5. `environment=PROD` está bloqueado y no existe escritura remota;
+6. coste adicional 0 €, Python stdlib, sin IA obligatoria ni servidor nuevo;
+7. la futura incorporación de Search Console/SEO tools exige contrato separado y no debe alterar este baseline determinista.
+
+Backup/rebuild: Git + manifest versionado + replay de evidencia. Rollback: `version_engine.py rollback --engine-id KW-001 --to-version 0.1.0` tras `--plan`, OLD vs NEW y gates.
