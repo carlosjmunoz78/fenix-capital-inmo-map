@@ -1,0 +1,32 @@
+{
+  "contract_id": "SOCAUD-001-social-media-audit-v0",
+  "version": "0.2.0",
+  "environment": "PREPROD",
+  "company_scope": "company_id_required_cross_company_deny",
+  "inputs": {
+    "company_id": "string|required",
+    "business_model_profile": "BMD-001 evidence|required",
+    "digital_footprint": "SCAN-001 evidence|required",
+    "public_social_evidence": "array|optional|public dated evidence only",
+    "evidence_at": "string|required"
+  },
+  "outputs": {
+    "profiles": "observed public profile summaries only",
+    "findings": "deterministic coverage/format/cadence findings",
+    "audience_metrics_policy": "public_evidence_only_no_estimation",
+    "evidence_sha256": "reproducible evidence digest",
+    "human_required_code": "null|LOW_CONFIDENCE"
+  },
+  "invariants": [
+    "no login or private API access",
+    "no publishing or messaging",
+    "no fabricated followers, reach, engagement, cadence or audience demographics",
+    "cadence requires at least two dated public posts",
+    "secret-like material is rejected as SECURITY_INCIDENT",
+    "cross-company evidence is rejected as POLICY_CONFLICT",
+    "PROD execution is denied",
+    "additional cost target is 0 EUR"
+  ],
+  "remote_write": false,
+  "prod_enabled": false
+}
