@@ -1,0 +1,54 @@
+{
+  "date": "2026-09-08",
+  "environment": "PREPROD",
+  "scope": "CEREBRO Console Chain V0",
+  "registry_version": "0.12.0",
+  "engines": [
+    {"engine_id":"CTX-001","version":"0.2.0","status":"CONFIRMED_OPERATIONAL","role":"load authorized company context from COMP-REG-001 through TENANT-001"},
+    {"engine_id":"CHAT-001","version":"0.2.0","status":"CONFIRMED_OPERATIONAL","role":"provider-neutral chat envelope; no direct model binding"},
+    {"engine_id":"CMD-001","version":"0.2.0","status":"CONFIRMED_OPERATIONAL","role":"deterministic command planning; no execution"},
+    {"engine_id":"ACTGW-001","version":"0.2.0","status":"CONFIRMED_OPERATIONAL","role":"explicit PREPROD handler execution gateway; mutating handlers denied by default"},
+    {"engine_id":"CONSOLE-001","version":"0.2.0","status":"CONFIRMED_OPERATIONAL","role":"service interface over CTX/CHAT/CMD/ACTGW with history and audit"}
+  ],
+  "dependency_chain": [
+    "COMP-REG-001 -> TENANT-001 -> CTX-001",
+    "CHAT-001 + CTX-001 -> CMD-001",
+    "CMD-001 + POL-001 + AUD-001 -> ACTGW-001",
+    "CTX-001 + CHAT-001 + CMD-001 + ACTGW-001 -> CONSOLE-001"
+  ],
+  "tests": {
+    "FACT-001_manifest_validation": "SUCCESS",
+    "FACT-001_unit_tests": "SUCCESS",
+    "shared_runtime_unit_tests": "SUCCESS",
+    "per_engine_version_promotion_runs": "SUCCESS"
+  },
+  "backup": {
+    "strategy": "git+versioned manifests+immutable Factory scaffolds",
+    "verified": true
+  },
+  "rollback": {
+    "strategy": "FACT-001 version_engine Registry pointer rollback to prior immutable/versioned manifest followed by Factory/runtime/App Compatibility validation",
+    "verified": true
+  },
+  "rebuild": {
+    "strategy": "git manifests+shared runtime+FACT-001; no per-company server required",
+    "verified": true
+  },
+  "autonomy": {
+    "PREPROD": "DETERMINISTIC_LIMITED",
+    "PROD": "DENY",
+    "direct_model_binding": false,
+    "automatic_action_on_message": false,
+    "mutating_action_handlers": "DENY_IN_V0"
+  },
+  "cost": {"additional_monthly_eur_target": 0},
+  "baseline_preservation": {
+    "app_fenix": "UNCHANGED",
+    "crm": "UNCHANGED",
+    "supabase_prod": "UNCHANGED",
+    "wordpress": "UNCHANGED",
+    "trading_real": "BLOCK_REAL"
+  },
+  "open_external_exceptions": [124,126,133],
+  "prod_autonomy": "DENY"
+}

@@ -1,5 +1,15 @@
 # FACT-001 Changelog
 
+## 0.4.3 · 2026-09-08
+- Implementada la cadena CEREBRO Console V0 en PREPROD mediante evolución versionada FACT-001, preservando scaffolds inmutables y sin tocar PROD.
+- `CTX-001`, `CHAT-001`, `CMD-001`, `ACTGW-001` y `CONSOLE-001` pasan de scaffold `0.1.0 / DEFINED_NOT_BUILT` a versión `0.2.0 / CONFIRMED_OPERATIONAL` en PREPROD.
+- Engine Registry avanza `0.7.0 → 0.12.0` manteniendo `version_history` y `factory_scaffold` por motor.
+- `CTX-001` usa COMP-REG-001 + TENANT-001 para contexto multiempresa autorizado; `CHAT-001` es provider-neutral y no llama a modelos; `CMD-001` sólo genera planes; `ACTGW-001` ejecuta únicamente handlers PREPROD explícitamente registrados y mantiene mutaciones en DENY; `CONSOLE-001` orquesta selector/contexto/chat/comando/acción/historial/auditoría.
+- Mapa de dependencias ampliado con la cadena `COMP-REG → TENANT → CTX`, `CHAT+CTX → CMD`, `CMD+POL+AUD → ACTGW`, `CTX+CHAT+CMD+ACTGW → CONSOLE`.
+- Candidates y workflow temporal de promoción retirados antes de PR; coste adicional objetivo 0 €.
+- Evidencia añadida en `governance/console-chain-v0-closeout-2026-09-08.json`, incluyendo backup, rollback, rebuild y autonomía.
+- PROD autonomy permanece `DENY`; #124, #126 y #133 no se falsean como resueltos.
+
 ## 0.4.2 · 2026-09-08
 - Añadido `scripts/version_engine.py` como workflow determinista de actualización versionada para motores ya materializados.
 - El scaffold original `generated/<engine_id>/...` queda inmutable; las evoluciones se escriben en `versions/<engine_id>/<version>/engine.manifest.json`.

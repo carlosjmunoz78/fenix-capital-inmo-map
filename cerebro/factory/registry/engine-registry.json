@@ -4,10 +4,21 @@
       "company_id": null,
       "engine_id": "ACTGW-001",
       "environment": "PREPROD",
-      "manifest": "../generated/ACTGW-001/engine.manifest.json",
-      "source_of_truth": "git",
-      "status": "DEFINED_NOT_BUILT",
-      "version": "0.1.0"
+      "factory_scaffold": "../generated/ACTGW-001/engine.manifest.json",
+      "manifest": "../versions/ACTGW-001/0.2.0/engine.manifest.json",
+      "source_of_truth": "git+versioned_update",
+      "status": "CONFIRMED_OPERATIONAL",
+      "version": "0.2.0",
+      "version_history": [
+        {
+          "company_id": null,
+          "environment": "PREPROD",
+          "manifest": "../generated/ACTGW-001/engine.manifest.json",
+          "source_of_truth": "git",
+          "status": "DEFINED_NOT_BUILT",
+          "version": "0.1.0"
+        }
+      ]
     },
     {
       "company_id": "fenix-capital",
@@ -58,19 +69,41 @@
       "company_id": null,
       "engine_id": "CHAT-001",
       "environment": "PREPROD",
-      "manifest": "../generated/CHAT-001/engine.manifest.json",
-      "source_of_truth": "git",
-      "status": "DEFINED_NOT_BUILT",
-      "version": "0.1.0"
+      "factory_scaffold": "../generated/CHAT-001/engine.manifest.json",
+      "manifest": "../versions/CHAT-001/0.2.0/engine.manifest.json",
+      "source_of_truth": "git+versioned_update",
+      "status": "CONFIRMED_OPERATIONAL",
+      "version": "0.2.0",
+      "version_history": [
+        {
+          "company_id": null,
+          "environment": "PREPROD",
+          "manifest": "../generated/CHAT-001/engine.manifest.json",
+          "source_of_truth": "git",
+          "status": "DEFINED_NOT_BUILT",
+          "version": "0.1.0"
+        }
+      ]
     },
     {
       "company_id": null,
       "engine_id": "CMD-001",
       "environment": "PREPROD",
-      "manifest": "../generated/CMD-001/engine.manifest.json",
-      "source_of_truth": "git",
-      "status": "DEFINED_NOT_BUILT",
-      "version": "0.1.0"
+      "factory_scaffold": "../generated/CMD-001/engine.manifest.json",
+      "manifest": "../versions/CMD-001/0.2.0/engine.manifest.json",
+      "source_of_truth": "git+versioned_update",
+      "status": "CONFIRMED_OPERATIONAL",
+      "version": "0.2.0",
+      "version_history": [
+        {
+          "company_id": null,
+          "environment": "PREPROD",
+          "manifest": "../generated/CMD-001/engine.manifest.json",
+          "source_of_truth": "git",
+          "status": "DEFINED_NOT_BUILT",
+          "version": "0.1.0"
+        }
+      ]
     },
     {
       "company_id": null,
@@ -141,10 +174,21 @@
       "company_id": null,
       "engine_id": "CONSOLE-001",
       "environment": "PREPROD",
-      "manifest": "../generated/CONSOLE-001/engine.manifest.json",
-      "source_of_truth": "git",
-      "status": "DEFINED_NOT_BUILT",
-      "version": "0.1.0"
+      "factory_scaffold": "../generated/CONSOLE-001/engine.manifest.json",
+      "manifest": "../versions/CONSOLE-001/0.2.0/engine.manifest.json",
+      "source_of_truth": "git+versioned_update",
+      "status": "CONFIRMED_OPERATIONAL",
+      "version": "0.2.0",
+      "version_history": [
+        {
+          "company_id": null,
+          "environment": "PREPROD",
+          "manifest": "../generated/CONSOLE-001/engine.manifest.json",
+          "source_of_truth": "git",
+          "status": "DEFINED_NOT_BUILT",
+          "version": "0.1.0"
+        }
+      ]
     },
     {
       "company_id": "fenix-capital",
@@ -177,10 +221,21 @@
       "company_id": null,
       "engine_id": "CTX-001",
       "environment": "PREPROD",
-      "manifest": "../generated/CTX-001/engine.manifest.json",
-      "source_of_truth": "git",
-      "status": "DEFINED_NOT_BUILT",
-      "version": "0.1.0"
+      "factory_scaffold": "../generated/CTX-001/engine.manifest.json",
+      "manifest": "../versions/CTX-001/0.2.0/engine.manifest.json",
+      "source_of_truth": "git+versioned_update",
+      "status": "CONFIRMED_OPERATIONAL",
+      "version": "0.2.0",
+      "version_history": [
+        {
+          "company_id": null,
+          "environment": "PREPROD",
+          "manifest": "../generated/CTX-001/engine.manifest.json",
+          "source_of_truth": "git",
+          "status": "DEFINED_NOT_BUILT",
+          "version": "0.1.0"
+        }
+      ]
     },
     {
       "company_id": null,
@@ -438,5 +493,5 @@
     }
   ],
   "environment": "PREPROD",
-  "registry_version": "0.7.0"
+  "registry_version": "0.12.0"
 }
