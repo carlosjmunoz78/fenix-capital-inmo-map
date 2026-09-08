@@ -1,0 +1,62 @@
+{
+  "contract_version": "0.2.0",
+  "engine_id": "COMP-ONB-001",
+  "environment": "PREPROD",
+  "version": "0.2.0",
+  "company_scope": "GLOBAL_OR_SCOPED",
+  "runtime": "shared",
+  "cost_additional_eur": 0,
+  "prod_autonomy": "DENY",
+  "downstream_auto_execute": false,
+  "dependencies": ["COMP-REG-001", "TENANT-001", "AUD-001", "POL-001", "HEX-001", "EVT-001", "JOB-001"],
+  "pipeline": [
+    "SCAN-001",
+    "KW-001",
+    "WAUD-001",
+    "SEOBOOT-001",
+    "COMPET-001",
+    "MKT-002",
+    "SOCAUD-001",
+    "LOCALP-001",
+    "MKTBOOT-001",
+    "BMD-001",
+    "PROC-001",
+    "KBOOT-001",
+    "CRMBOOT-001",
+    "APPBOOT-001",
+    "AUTBOOT-001",
+    "TRNBOOT-001",
+    "ENGACT-001",
+    "COMP-HLT-001",
+    "COMP-BKP-001",
+    "COMP-DEP-001"
+  ],
+  "human_required_codes": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "system_blocker_codes": [
+    "MISSING_CREDENTIAL",
+    "EXPIRED_OR_REVOKED_CREDENTIAL",
+    "MFA_REQUIRED",
+    "PERMISSION_REQUIRED",
+    "IRREVERSIBLE_PROD_RISK"
+  ],
+  "states": ["RUNNING", "HUMAN_REQUIRED", "SYSTEM_BLOCKER", "PREPROD_PIPELINE_COMPLETE", "CANCELLED"],
+  "step_states": ["PENDING", "READY", "BLOCKED", "COMPLETED"],
+  "guarantees": [
+    "authenticated_company_id must equal target_company_id",
+    "new onboarding transitions Company Registry REGISTERED to ONBOARDING",
+    "step completion is strictly ordered and requires evidence_ref",
+    "no downstream engine is auto-executed",
+    "pipeline completion does not transition company to ACTIVE",
+    "PROD remains disabled",
+    "scaffolds are never interpreted as operational evidence"
+  ]
+}

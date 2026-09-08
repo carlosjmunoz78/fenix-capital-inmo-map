@@ -1,5 +1,17 @@
 # FACT-001 Changelog
 
+## 0.4.4 · 2026-09-08
+- Implementado `COMP-ONB-001` V0.2 en runtime compartido PREPROD como orquestador determinista de onboarding multiempresa.
+- El motor usa `COMP-REG-001` como identidad/lifecycle y `TENANT-001` como aislamiento deny-by-default; no crea servidores, bases o credenciales por empresa.
+- Pipeline V0 ordenado: `SCAN → KW → WAUD → SEOBOOT → COMPET → MKT-002 → SOCAUD → LOCALP → MKTBOOT → BMD → PROC → KBOOT → CRMBOOT → APPBOOT → AUTBOOT → TRNBOOT → ENGACT → COMP-HLT → COMP-BKP → COMP-DEP`.
+- V0 no auto-ejecuta motores downstream ni interpreta scaffolds como capacidad operativa; sólo coordina readiness, evidencia, bloqueos y progreso.
+- Cada paso exige evidencia explícita, bloquea con los 8 códigos HUMAN_REQUIRED canónicos o blockers de sistema declarados y requiere evidencia de resolución para reanudar.
+- Finalizar el pipeline deja estado `PREPROD_PIPELINE_COMPLETE`; no cambia automáticamente la empresa a `ACTIVE` y no concede autonomía PROD.
+- FACT-001 `version_engine.py` promovió el puntero Registry de `COMP-ONB-001` 0.1.0 → 0.2.0 preservando byte-a-byte el scaffold Factory; unit tests + contrato de familia pasaron SUCCESS.
+- Añadidos contrato runtime, tests, documentación, backup snapshot SHA-256, rollback versionado y rebuild; dependency map avanza a 0.3.0.
+- Workflow/candidate temporales de promoción retirados antes de PR. Coste adicional objetivo 0 €. No Supabase PROD, WordPress, Cloudflare ni Trading REAL.
+- PROD autonomy permanece `DENY`; #124, #126 y #133 siguen siendo excepciones externas abiertas.
+
 ## 0.4.3 · 2026-09-08
 - Implementada la cadena CEREBRO Console V0 en PREPROD mediante evolución versionada FACT-001, preservando scaffolds inmutables y sin tocar PROD.
 - `CTX-001`, `CHAT-001`, `CMD-001`, `ACTGW-001` y `CONSOLE-001` pasan de scaffold `0.1.0 / DEFINED_NOT_BUILT` a versión `0.2.0 / CONFIRMED_OPERATIONAL` en PREPROD.
