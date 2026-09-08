@@ -139,3 +139,23 @@ Antes de añadir infraestructura:
 - Si CI/compatibilidad falla: no merge; corregir o cerrar PR.
 - Si un merge governance-only rompe PREPROD, revertir el commit/PR exacto y verificar el pipeline sobre el SHA restaurado.
 - Ningún scaffold generado es requisito para que App/CRM/Web/Social actuales sigan funcionando; deben permanecer aditivos hasta promoción explícita.
+
+## CEREBRO Console Chain V0 · operación PREPROD
+Cadena canónica: `COMP-REG-001 → TENANT-001 → CTX-001`; `CHAT-001 + CTX-001 → CMD-001`; `CMD-001 + POL-001 + AUD-001 → ACTGW-001`; `CTX-001 + CHAT-001 + CMD-001 + ACTGW-001 → CONSOLE-001`.
+
+Reglas operativas V0:
+1. seleccionar `company_id` y cargar contexto mediante `CTX-001`; cualquier cruce multiempresa se deniega por TENANT-001;
+2. `CHAT-001` sólo normaliza/envelopa la conversación y **no llama directamente a ningún modelo**;
+3. `CMD-001` genera un plan determinista y **no ejecuta**;
+4. `ACTGW-001` sólo ejecuta handlers PREPROD explícitamente registrados/autorizados; handlers mutantes permanecen DENY/HIGH_RISK en V0;
+5. `CONSOLE-001` no dispara acciones sólo por enviar un mensaje: la ejecución requiere acción explícita vía Gateway;
+6. todo estado debe conservar `company_id`, `engine_id`, `environment`, `version` y evidencia auditable;
+7. coste adicional objetivo 0 € y runtime compartido; no crear servidores por empresa.
+
+Backup/rebuild/rollback:
+- backup: Git + manifests versionados + scaffold Factory inmutable;
+- rebuild: checkout Git + shared runtime + Registry/manifests; no depende de un SaaS o modelo concreto;
+- rollback: `version_engine.py rollback --plan` → OLD vs NEW → aplicar → `validate_manifest.py` + Factory tests + runtime tests + App Compatibility;
+- PROD continúa `DENY` hasta promoción independiente por motor y cierre de gates aplicables.
+
+Evidencia: `governance/console-chain-v0-closeout-2026-09-08.json`.
