@@ -1,5 +1,17 @@
 # FACT-001 Changelog
 
+## 0.3.0 · 2026-09-08
+- FACT-001 incorpora generación atómica por familias mediante `factory.py family`.
+- Añadida prevalidación completa antes de escribir: IDs duplicados, conflictos con Registry/scaffolds existentes y dependencias conocidas opcionales.
+- Añadida idempotencia de familia: segunda ejecución idéntica devuelve `NO_CHANGE`.
+- Añadida política de conflicto all-or-nothing: si una definición existente no coincide, ningún motor nuevo del lote se escribe.
+- El generador sigue siendo filesystem-only y no despliega, no llama a PROD, no cambia permisos ni crea infraestructura.
+- Cada scaffold generado conserva estado `DEFINED_NOT_BUILT`, autonomía `NONE_UNTIL_GATES_PASS`, coste adicional objetivo 0 € y tribunal/promotion DENY por defecto.
+- Definida `WAVE1-MULTICOMPANY-CONSOLE-V0` con 29 motores nuevos, ordenados por dependencias, sin duplicar APP/CRM/SEO/WEB/TRN/Policy/Human Exception/Event/Job/Audit/Observability ya registrados.
+- La Wave 1 cubre Company Registry/Onboarding, discovery de negocio/procesos/huella digital, Web/Keyword/Social/Local audit, Competitor + Market Intelligence, Knowledge/SEO/Social/Marketing bootstrap, CRM/App/Automation/Training bootstrap, Engine Activation/Tenant Isolation, Company Supervisor/Backup/Deployment y Gateway/Console V0.
+- Añadidos tests de plan sin escritura, generación/registro, dependencias, idempotencia, conflicto atómico, duplicados y preflight canónico de la Wave 1.
+- No se concede autonomía PROD ni se muta App/CRM/Web/Social/Supabase/Trading.
+
 ## 0.2.0 · 2026-09-08
 - Verificado y fusionado PR #131 únicamente tras `FACT-001 Factory V0` + `FACT-001 App Compatibility` verdes; el `PRE-PROD App Build` post-merge #3333 terminó SUCCESS.
 - Reconciliado Cloudflare Workers NON-PROD preservando exclusivamente los triggers `main` y documentando rollback.
