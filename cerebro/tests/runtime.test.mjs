@@ -127,6 +127,14 @@ test('JOB-001 never exposes mutable internal queued state', () => {
   assert.equal(claimed.max_attempts, 2);
 });
 
+test('JOB-001 validates persisted metadata as immutable scalar values', () => {
+  const q = new JobQueue();
+  assert.throws(() => q.enqueue({ name: { mutable: true }, context }), /job name must be a non-empty string/);
+  assert.throws(() => q.enqueue({ name: 'x', context: { ...context, company_id: { mutable: true } } }), /context.company_id must be a non-empty string/);
+  assert.throws(() => q.enqueue({ name: 'x', context, priority: {} }), /priority must be a safe integer/);
+  assert.equal(q.claimContext(context), null);
+});
+
 test('FINOPS-001 defaults to zero additional spend and emits MONEY_LIMIT', () => {
   const gate = new FinOpsGate();
   assert.equal(gate.authorize(0).allowed, true);
@@ -161,7 +169,8 @@ test('SharedRuntime executes registered engines without giving them prod writes'
   const result = await runtime.execute({ company_id: 'fenix-capital', engine_id: 'APP-001', version: '0.1.0', command: 'health.read', cost_eur: 0 });
   assert.equal(result.status, 'OK');
   assert.equal(runtime.audit.length, 1);
-  assert.equal(runtime.events.listForContext(context).length, 1);
+  assert.equal(typeof runtime.events, 'undefined');
+  assert.equal(typeof runtime.jobs, 'undefined');
 });
 
 test('SharedRuntime validates payload before consuming FinOps budget', async () => {
@@ -203,8 +212,8 @@ test('SharedRuntime handler receives tenant-bound facades only', async () => {
   assert.equal(result.result.events[0].context.company_id, 'fenix-capital');
   assert.equal(result.result.job.context.company_id, 'fenix-capital');
   assert.equal(result.result.job.status, 'RUNNING');
-  assert.equal(runtime.events.listForCompany('other-company').length, 0);
-  assert.equal(runtime.jobs.claimContext({ ...context, company_id: 'other-company' }), null);
+  assert.equal(typeof runtime.events, 'undefined');
+  assert.equal(typeof runtime.jobs, 'undefined');
 });
 
 test('RUNTIME-001 V0 refuses PROD environment entirely', () => {
