@@ -63,6 +63,10 @@ function safeClone(value) {
   return cloned;
 }
 
+function safeErrorText(error) {
+  try { return String(error); } catch { return '[unstringifiable error]'; }
+}
+
 function canonicalContext({ company_id, engine_id = 'CONSOLE-001', environment = 'PREPROD', version = '0.1.0' }) {
   assertPreprod(environment);
   const eid = requiredString(engine_id, 'engine_id');
@@ -96,7 +100,9 @@ export class CerebroGatewayV0 {
     assertPreprod(this.#environment);
     const sid = requiredString(session_id, 'session_id');
     if (this.#sessions.has(sid)) throw new Error('session already exists');
-    const ctx = canonicalContext({ company_id, environment: this.#environment, version: this.#version, ...context });
+    if (context === null || typeof context !== 'object' || Array.isArray(context)) throw new TypeError('context must be an object');
+    const engine_id = context.engine_id ?? 'CONSOLE-001';
+    const ctx = canonicalContext({ company_id, engine_id, environment: this.#environment, version: this.#version });
     const session = { session_id: sid, context: ctx, history: [] };
     this.#sessions.set(sid, session);
     this.#audit.push({ type: 'SESSION_CREATED', session_id: sid, context: ctx });
@@ -132,13 +138,21 @@ export class CerebroGatewayV0 {
     const name = requiredString(command, 'command');
     const handler = this.#commands.get(name);
     if (!handler) return this.#humanRequired(session, 'LOW_CONFIDENCE', `unknown command:${name}`);
-    const input = safeClone(payload);
-    const result = await handler({ context: session.context, payload: input });
-    const safeResult = safeClone(result);
-    this.#validateHumanRequired(safeResult);
-    session.history.push({ kind: 'COMMAND', command: name, result: safeResult });
-    this.#audit.push({ type: 'COMMAND_EXECUTED', session_id, command: name, context: session.context, result: safeResult });
-    return safeClone(safeResult);
+    const operationContext = Object.freeze({ ...session.context });
+    try {
+      const input = safeClone(payload);
+      const result = await handler({ context: operationContext, payload: input });
+      const safeResult = safeClone(result);
+      this.#validateHumanRequired(safeResult);
+      session.history.push({ kind: 'COMMAND', command: name, context: operationContext, result: safeResult });
+      this.#audit.push({ type: 'COMMAND_EXECUTED', session_id, command: name, context: operationContext, result: safeResult });
+      return safeClone(safeResult);
+    } catch (error) {
+      const failure = { status: 'ERROR', error: safeErrorText(error) };
+      session.history.push({ kind: 'COMMAND_ERROR', command: name, context: operationContext, result: failure });
+      this.#audit.push({ type: 'COMMAND_ERROR', session_id, command: name, context: operationContext, result: failure });
+      throw error;
+    }
   }
 
   async chat({ session_id, message }) {
@@ -146,12 +160,20 @@ export class CerebroGatewayV0 {
     const session = this.#getSession(session_id);
     const text = requiredString(message, 'message');
     if (!this.#chatAdapter) return this.#humanRequired(session, 'LOW_CONFIDENCE', 'chat adapter unavailable');
-    const result = await this.#chatAdapter({ context: session.context, message: text });
-    const safeResult = safeClone(result);
-    this.#validateHumanRequired(safeResult);
-    session.history.push({ kind: 'CHAT', message: text, result: safeResult });
-    this.#audit.push({ type: 'CHAT_MEDIATED', session_id, context: session.context, result: safeResult });
-    return safeClone(safeResult);
+    const operationContext = Object.freeze({ ...session.context });
+    try {
+      const result = await this.#chatAdapter({ context: operationContext, message: text });
+      const safeResult = safeClone(result);
+      this.#validateHumanRequired(safeResult);
+      session.history.push({ kind: 'CHAT', message: text, context: operationContext, result: safeResult });
+      this.#audit.push({ type: 'CHAT_MEDIATED', session_id, context: operationContext, result: safeResult });
+      return safeClone(safeResult);
+    } catch (error) {
+      const failure = { status: 'ERROR', error: safeErrorText(error) };
+      session.history.push({ kind: 'CHAT_ERROR', message: text, context: operationContext, result: failure });
+      this.#audit.push({ type: 'CHAT_ERROR', session_id, context: operationContext, result: failure });
+      throw error;
+    }
   }
 
   inspectSession(session_id) {
@@ -160,6 +182,11 @@ export class CerebroGatewayV0 {
 
   auditLog() {
     return safeClone(this.#audit);
+  }
+
+  queryEngines() {
+    assertPreprod(this.#environment);
+    return safeClone(REGISTRY.engines);
   }
 
   contract() {
@@ -191,9 +218,10 @@ export class CerebroGatewayV0 {
 
   #humanRequired(session, reason, detail) {
     if (!HUMAN_REQUIRED.has(reason)) throw new Error('invalid HUMAN_REQUIRED reason');
+    const operationContext = Object.freeze({ ...session.context });
     const result = { status: 'HUMAN_REQUIRED', reason, detail };
-    session.history.push({ kind: 'HUMAN_REQUIRED', result });
-    this.#audit.push({ type: 'HUMAN_REQUIRED', session_id: session.session_id, context: session.context, result });
+    session.history.push({ kind: 'HUMAN_REQUIRED', context: operationContext, result });
+    this.#audit.push({ type: 'HUMAN_REQUIRED', session_id: session.session_id, context: operationContext, result });
     return safeClone(result);
   }
 }
