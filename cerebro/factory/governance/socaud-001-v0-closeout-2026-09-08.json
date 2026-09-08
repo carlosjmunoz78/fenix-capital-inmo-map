@@ -1,0 +1,36 @@
+{
+  "additional_cost_eur": 0,
+  "date": "2026-09-08",
+  "dependency_map_version": "0.9.0",
+  "engine_id": "SOCAUD-001",
+  "fabricated_audience_metrics": false,
+  "merge_sha": "bbc825c0743654270306e544d74dd498c907c787",
+  "post_merge_preprod": {
+    "conclusion": "SUCCESS",
+    "run_id": 34250578133,
+    "run_number": 3356
+  },
+  "pr": 157,
+  "pr_head_sha": "d16e8ce1130b183567486b370296846b8f2a6b11",
+  "private_social_api": false,
+  "prod_autonomy": "DENY",
+  "prod_mutation": false,
+  "registry_version": "0.19.0",
+  "remote_write": false,
+  "required_checks": {
+    "FACT-001 App Compatibility": {
+      "conclusion": "SUCCESS",
+      "run_id": 34248596446,
+      "run_number": 97
+    },
+    "FACT-001 Factory V0": {
+      "conclusion": "SUCCESS",
+      "run_id": 34248596542,
+      "run_number": 379
+    }
+  },
+  "status": "CONFIRMED_OPERATIONAL_PREPROD_PUBLIC_READ_ONLY",
+  "version": "0.2.0",
+  "wave1_defined_not_built": 15,
+  "wave1_implemented": 14
+}
