@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   promote:
-    if: github.event.head_commit.message == 'TENANT · retry promotion after version-aware Wave1 test'
+    if: github.event.head_commit.message == 'TENANT · reconcile Registry after concurrent version commit'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -23,22 +23,67 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Apply TENANT-001 version through FACT-001 V0.4
+      - name: Reconcile TENANT Registry pointer safely
+        shell: bash
         run: |
-          python cerebro/factory/scripts/version_engine.py apply \
-            --engine-id TENANT-001 \
-            --manifest-file cerebro/factory/candidates/TENANT-001-0.2.0.json
+          set -euo pipefail
+          python - <<'PY'
+          import json, pathlib
+          registry_path = pathlib.Path('cerebro/factory/registry/engine-registry.json')
+          target_path = pathlib.Path('cerebro/factory/versions/TENANT-001/0.2.0/engine.manifest.json')
+          registry = json.loads(registry_path.read_text(encoding='utf-8'))
+          target = json.loads(target_path.read_text(encoding='utf-8'))
+          matches = [e for e in registry['engines'] if e.get('engine_id') == 'TENANT-001']
+          if len(matches) != 1:
+              raise SystemExit(f'expected one TENANT-001 Registry entry, got {len(matches)}')
+          entry = matches[0]
+          if entry.get('version') != '0.1.0' or entry.get('manifest') != '../generated/TENANT-001/engine.manifest.json':
+              raise SystemExit(f'OLD TENANT Registry state changed; refusing reconcile: {entry}')
+          if target.get('engine_id') != 'TENANT-001' or target.get('version') != '0.2.0':
+              raise SystemExit('target identity/version mismatch')
+          if target.get('environment') != 'PREPROD' or target.get('status') != 'CONFIRMED_OPERATIONAL':
+              raise SystemExit('target PREPROD/status mismatch')
+          if target.get('cost_budget', {}).get('additional_monthly_eur_target') != 0:
+              raise SystemExit('target cost gate mismatch')
+          previous = {
+              'manifest': entry.get('manifest'),
+              'status': entry.get('status'),
+              'version': entry.get('version'),
+              'environment': entry.get('environment'),
+              'company_id': entry.get('company_id'),
+              'source_of_truth': entry.get('source_of_truth'),
+          }
+          history = entry.setdefault('version_history', [])
+          if previous not in history:
+              history.append(previous)
+          entry.update({
+              'manifest': '../versions/TENANT-001/0.2.0/engine.manifest.json',
+              'status': 'CONFIRMED_OPERATIONAL',
+              'source_of_truth': 'git+versioned_update',
+              'environment': 'PREPROD',
+              'company_id': None,
+              'version': '0.2.0',
+              'factory_scaffold': '../generated/TENANT-001/engine.manifest.json',
+          })
+          if registry.get('registry_version') == '0.6.0':
+              registry['registry_version'] = '0.7.0'
+          elif registry.get('registry_version') != '0.7.0':
+              raise SystemExit(f"unexpected registry_version {registry.get('registry_version')}")
+          registry_path.write_text(json.dumps(registry, ensure_ascii=False, indent=2, sort_keys=True) + '\n', encoding='utf-8')
+          PY
       - name: Validate Factory and shared runtime
         run: |
           python cerebro/factory/scripts/validate_manifest.py
           python -m unittest discover -s cerebro/factory/tests -p 'test_*.py' -v
           python -m unittest discover -s cerebro/runtime/tests -p 'test_*.py' -v
-      - name: Commit version and Registry only
+      - name: Commit Registry reconcile
         shell: bash
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add cerebro/factory/registry/engine-registry.json cerebro/factory/versions/TENANT-001/0.2.0/engine.manifest.json
-          git commit -m 'TENANT · promote version 0.2.0 [versioned]'
+          git add cerebro/factory/registry/engine-registry.json
+          test "$(git diff --cached --name-only)" = "cerebro/factory/registry/engine-registry.json"
+          git commit -m 'TENANT · promote Registry to version 0.2.0 [versioned]'
+          git pull --rebase origin cerebro/tenant-001-runtime-v0
           git push origin HEAD:cerebro/tenant-001-runtime-v0
