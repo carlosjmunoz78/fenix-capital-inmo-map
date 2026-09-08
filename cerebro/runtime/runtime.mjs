@@ -98,6 +98,16 @@ function assertInteger(value, label, { min = 0, max = Number.MAX_SAFE_INTEGER } 
   return value;
 }
 
+function safeErrorText(value) {
+  try {
+    return String(value);
+  } catch {}
+  try {
+    return Object.prototype.toString.call(value);
+  } catch {}
+  return '[unstringifiable thrown value]';
+}
+
 function ulp(value) {
   if (!Number.isFinite(value)) return Infinity;
   if (Object.is(value, -0)) value = 0;
@@ -174,7 +184,14 @@ export class JobQueue {
     const safeMaxAttempts = assertInteger(max_attempts, 'max_attempts', { min: 1, max: 1000 });
     const safeTimeout = assertInteger(timeout_ms, 'timeout_ms', { min: 1, max: 86_400_000 });
     const safePayload = safeClone(payload);
-    const key = normalizeIdempotencyKey(idempotency_key, () => stableId('job', { name: safeName, payload: safePayload, context: safeCtx }));
+    const key = normalizeIdempotencyKey(idempotency_key, () => stableId('job', {
+      name: safeName,
+      payload: safePayload,
+      context: safeCtx,
+      priority: safePriority,
+      max_attempts: safeMaxAttempts,
+      timeout_ms: safeTimeout
+    }));
     const scoped = contextKey(safeCtx, key);
     if (this.#keys.has(scoped)) return { accepted: false, duplicate: true, idempotency_key: key };
     const job = {
@@ -239,7 +256,7 @@ export class JobQueue {
     const job = this.#jobs.find(j => j.job_id === safeJobId && j.context.company_id === safeCompany);
     if (!job) throw new Error('job not found for company');
     if (job.status !== 'RUNNING') throw new Error('job not running');
-    const safeError = String(error);
+    const safeError = safeErrorText(error);
     const nextStatus = job.attempts < job.max_attempts ? 'QUEUED' : 'FAILED';
     const exposed = safeClone({ ...job, error: safeError, status: nextStatus });
     job.error = safeError; job.status = nextStatus;
@@ -252,7 +269,7 @@ export class JobQueue {
     const job = this.#jobs.find(j => j.job_id === safeJobId && sameContext(j.context, safeCtx));
     if (!job) throw new Error('job not found for context');
     if (job.status !== 'RUNNING') throw new Error('job not running');
-    const safeError = String(error);
+    const safeError = safeErrorText(error);
     const nextStatus = job.attempts < job.max_attempts ? 'QUEUED' : 'FAILED';
     const exposed = safeClone({ ...job, error: safeError, status: nextStatus });
     job.error = safeError; job.status = nextStatus;
@@ -345,7 +362,7 @@ export class SharedRuntime {
       this.#audit.push({ ...auditBase, outcome: 'SUCCESS' });
       return { status: 'OK', context: { ...context }, result };
     } catch (error) {
-      this.#audit.push({ ...auditBase, outcome: 'ERROR', error: String(error) });
+      this.#audit.push({ ...auditBase, outcome: 'ERROR', error: safeErrorText(error) });
       throw error;
     }
   }
