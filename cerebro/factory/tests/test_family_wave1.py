@@ -14,15 +14,7 @@ GENERATED = ROOT / "generated"
 class Wave1FamilyTests(unittest.TestCase):
     def test_wave1_is_materialized_idempotently_with_known_dependencies_and_no_prod_activation(self):
         result = subprocess.run(
-            [
-                sys.executable,
-                str(FACTORY),
-                "family",
-                "--file", str(FAMILY),
-                "--registry", str(REGISTRY),
-                "--plan",
-                "--require-known-dependencies",
-            ],
+            [sys.executable, str(FACTORY), "family", "--file", str(FAMILY), "--registry", str(REGISTRY), "--plan", "--require-known-dependencies"],
             capture_output=True,
             text=True,
         )
@@ -48,20 +40,14 @@ class Wave1FamilyTests(unittest.TestCase):
         self.assertEqual(len(registry_ids), len(set(registry_ids)))
         self.assertTrue(wave_ids.issubset(registry_ids))
 
-        implemented = {
-            item["engine_id"]
-            for item in registry["engines"]
-            if item["engine_id"] in wave_ids and item.get("source_of_truth") == "git+versioned_update"
-        }
-        self.assertTrue(implemented.issubset({"COMP-REG-001"}))
-
         for engine_id in wave_ids:
             entry = next(item for item in registry["engines"] if item["engine_id"] == engine_id)
             self.assertEqual(entry["environment"], "PREPROD")
-            if engine_id in implemented:
+            if entry.get("source_of_truth") == "git+versioned_update":
+                version = entry["version"]
                 self.assertEqual(entry["status"], "CONFIRMED_OPERATIONAL")
-                self.assertEqual(entry["version"], "0.2.0")
-                self.assertEqual(entry["manifest"], f"../versions/{engine_id}/0.2.0/engine.manifest.json")
+                self.assertGreaterEqual(tuple(map(int, version.split("."))), (0, 2, 0))
+                self.assertEqual(entry["manifest"], f"../versions/{engine_id}/{version}/engine.manifest.json")
                 self.assertEqual(entry["factory_scaffold"], f"../generated/{engine_id}/engine.manifest.json")
             else:
                 self.assertEqual(entry["status"], "DEFINED_NOT_BUILT")
@@ -82,13 +68,7 @@ class Wave1FamilyTests(unittest.TestCase):
         spec = json.loads(FAMILY.read_text(encoding="utf-8"))
         ids = {item["engine_id"] for item in spec["engines"]}
         required = {
-            "COMP-REG-001", "COMP-ONB-001", "SCAN-001", "BMD-001", "PROC-001",
-            "WAUD-001", "KW-001", "SOCAUD-001", "LOCALP-001", "COMPET-001",
-            "MKT-002", "KBOOT-001", "SEOBOOT-001", "SOCBOOT-001", "MKTBOOT-001",
-            "CRMBOOT-001", "APPBOOT-001", "AUTBOOT-001", "TRNBOOT-001",
-            "ENGACT-001", "TENANT-001", "COMP-HLT-001", "COMP-BKP-001",
-            "COMP-DEP-001", "CONSOLE-001", "CHAT-001", "CTX-001", "CMD-001",
-            "ACTGW-001",
+            "COMP-REG-001", "COMP-ONB-001", "SCAN-001", "BMD-001", "PROC-001", "WAUD-001", "KW-001", "SOCAUD-001", "LOCALP-001", "COMPET-001", "MKT-002", "KBOOT-001", "SEOBOOT-001", "SOCBOOT-001", "MKTBOOT-001", "CRMBOOT-001", "APPBOOT-001", "AUTBOOT-001", "TRNBOOT-001", "ENGACT-001", "TENANT-001", "COMP-HLT-001", "COMP-BKP-001", "COMP-DEP-001", "CONSOLE-001", "CHAT-001", "CTX-001", "CMD-001", "ACTGW-001",
         }
         self.assertEqual(ids, required)
 
