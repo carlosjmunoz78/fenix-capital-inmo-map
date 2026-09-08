@@ -26,6 +26,17 @@ test('Phase 4 V0 is PREPROD-only and never claims PROD promotion', () => {
   assert.equal(PHASE4_CONTRACT.prod_execution_enabled, false);
 });
 
+test('Phase 4 environment and version are immutable after construction', () => {
+  const bootstrap = new MultiCompanyBootstrap({ environment: 'PREPROD', version: '0.1.0' });
+  assert.throws(() => { bootstrap.environment = 'PROD'; }, TypeError);
+  assert.throws(() => { bootstrap.version = '9.9.9'; }, TypeError);
+  assert.equal(bootstrap.environment, 'PREPROD');
+  assert.equal(bootstrap.version, '0.1.0');
+  const company = bootstrap.registerCompany({ company_id: 'company-a' }).company;
+  assert.equal(company.context.environment, 'PREPROD');
+  assert.equal(company.context.version, '0.1.0');
+});
+
 test('company registration is isolated and idempotent per company', () => {
   const bootstrap = new MultiCompanyBootstrap();
   const a = bootstrap.registerCompany({ company_id: 'company-a', profile: { name: 'A' } });
