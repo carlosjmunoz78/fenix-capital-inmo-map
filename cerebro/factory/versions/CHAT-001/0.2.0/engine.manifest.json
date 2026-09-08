@@ -1,0 +1,118 @@
+{
+  "api_contract": [
+    "cerebro.runtime.chat_gateway.ConversationalGateway.prepare",
+    "cerebro.runtime.chat_gateway.ConversationalGateway.health"
+  ],
+  "autonomy_level": "PREPROD_ENVELOPE_ONLY",
+  "backup": {
+    "strategy": "stateless-runtime+git",
+    "verified": true
+  },
+  "company_id": null,
+  "company_scope": "GLOBAL_OR_SCOPED",
+  "contract_version": "0.2.0",
+  "cost_budget": {
+    "additional_monthly_eur_target": 0
+  },
+  "data_contracts": [
+    "ConversationEnvelope(request_id,company_id,text,context_ref,engine_id,version,environment)"
+  ],
+  "dependencies": [
+    "AUD-001",
+    "COMP-REG-001",
+    "HEX-001",
+    "POL-001"
+  ],
+  "dependents": [],
+  "engine_id": "CHAT-001",
+  "environment": "PREPROD",
+  "evaluation": [
+    "deterministic envelope",
+    "company scope",
+    "no model/provider binding",
+    "no action execution"
+  ],
+  "events_in": [],
+  "events_out": [],
+  "evidence": [
+    "cerebro/runtime/tests/test_chat_gateway.py"
+  ],
+  "factory": {
+    "generator": "FACT-001",
+    "generator_version": "0.4.0",
+    "immutable_scaffold": "cerebro/factory/generated/CHAT-001/engine.manifest.json"
+  },
+  "human_exception_codes": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "inputs": [
+    "company_id",
+    "text",
+    "context_ref?"
+  ],
+  "jobs": [],
+  "knowledge_sources": [],
+  "layer": "L9",
+  "name": "Conversational Gateway",
+  "objective": "Expose a provider-neutral conversational gateway for CEREBRO queries and commands; never bind Console directly to one AI model.",
+  "observability": [
+    "health provider_binding/model_binding/action_execution/external_cost_eur/prod_enabled"
+  ],
+  "outputs": [
+    "ConversationEnvelope"
+  ],
+  "owner": "CEREBRO Platform",
+  "permissions": [
+    "accept conversation input",
+    "no model invocation",
+    "no action execution",
+    "no PROD execution"
+  ],
+  "policies": [
+    "deterministic_before_AI",
+    "zero_new_cost_by_default",
+    "preserve_existing_contracts",
+    "provider_neutral",
+    "console_never_direct_to_model"
+  ],
+  "rebuild": {
+    "strategy": "manifest+git+shared-runtime",
+    "verified": true
+  },
+  "retry_timeout": {
+    "declared": true,
+    "retries": 0,
+    "timeout_ms": 1000
+  },
+  "rollback": {
+    "strategy": "FACT-001 versioned Registry pointer rollback to immutable 0.1.0 scaffold",
+    "verified": true
+  },
+  "status": "CONFIRMED_OPERATIONAL",
+  "system_blocker_codes": [
+    "MISSING_CREDENTIAL",
+    "EXPIRED_OR_REVOKED_CREDENTIAL",
+    "MFA_REQUIRED",
+    "PERMISSION_REQUIRED",
+    "IRREVERSIBLE_PROD_RISK"
+  ],
+  "tests": [
+    "cerebro/runtime/tests/test_chat_gateway.py"
+  ],
+  "tribunal": [
+    "PREPROD envelope only; no model/action; PROD promotion DENY"
+  ],
+  "version": "0.2.0",
+  "zero_cost_execution_plan": [
+    "existing_stack",
+    "deterministic_code",
+    "open_source_local"
+  ]
+}
