@@ -504,5 +504,5 @@
     }
   ],
   "environment": "PREPROD",
-  "registry_version": "0.12.0"
+  "registry_version": "0.13.0"
 }
