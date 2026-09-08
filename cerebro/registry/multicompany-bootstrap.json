@@ -1,0 +1,47 @@
+{
+  "schema_version": "1.0.0",
+  "phase": "PHASE_4_MULTI_COMPANY_BOOTSTRAP",
+  "environment": "PREPROD",
+  "additional_cost_target_eur": 0,
+  "prod_execution_enabled": false,
+  "default_state": "DEFINED_NOT_LIVE",
+  "required_context": ["company_id", "engine_id", "environment", "version"],
+  "human_required_reasons": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "engines": [
+    {"engine_id":"COMP-REG-001","name":"Company Registry","stage":1,"depends_on":[],"mode":"DETERMINISTIC_REFERENCE"},
+    {"engine_id":"COMP-ONB-001","name":"Company Onboarding","stage":2,"depends_on":["COMP-REG-001"],"mode":"DETERMINISTIC_REFERENCE"},
+    {"engine_id":"SCAN-001","name":"Digital Footprint Scanner","stage":3,"depends_on":["COMP-ONB-001"],"mode":"CONTRACT_ONLY"},
+    {"engine_id":"KW-001","name":"Keyword Research","stage":4,"depends_on":["SCAN-001"],"mode":"CONTRACT_ONLY"},
+    {"engine_id":"WAUD-001","name":"Web Audit","stage":5,"depends_on":["SCAN-001"],"mode":"CONTRACT_ONLY"},
+    {"engine_id":"SOCAUD-001","name":"Social Media Audit","stage":6,"depends_on":["SCAN-001"],"mode":"CONTRACT_ONLY"},
+    {"engine_id":"LOCALP-001","name":"Local Presence Audit","stage":7,"depends_on":["SCAN-001"],"mode":"CONTRACT_ONLY"},
+    {"engine_id":"KBOOT-001","name":"Knowledge Bootstrap","stage":8,"depends_on":["KW-001","WAUD-001","SOCAUD-001","LOCALP-001"],"mode":"DETERMINISTIC_REFERENCE"},
+    {"engine_id":"SEOBOOT-001","name":"SEO Bootstrap","stage":9,"depends_on":["KW-001","WAUD-001"],"mode":"CONTRACT_ONLY"},
+    {"engine_id":"SOCBOOT-001","name":"Social Bootstrap","stage":10,"depends_on":["SOCAUD-001"],"mode":"CONTRACT_ONLY"},
+    {"engine_id":"MKTBOOT-001","name":"Marketing Bootstrap","stage":11,"depends_on":["KBOOT-001","SEOBOOT-001","SOCBOOT-001"],"mode":"CONTRACT_ONLY"},
+    {"engine_id":"CRMBOOT-001","name":"CRM Bootstrap","stage":12,"depends_on":["KBOOT-001"],"mode":"CONTRACT_ONLY"},
+    {"engine_id":"APPBOOT-001","name":"App Bootstrap","stage":13,"depends_on":["KBOOT-001","CRMBOOT-001"],"mode":"CONTRACT_ONLY"},
+    {"engine_id":"AUTBOOT-001","name":"Automation Bootstrap","stage":14,"depends_on":["CRMBOOT-001","APPBOOT-001"],"mode":"CONTRACT_ONLY"},
+    {"engine_id":"TRNBOOT-001","name":"Training Bootstrap","stage":15,"depends_on":["KBOOT-001","AUTBOOT-001"],"mode":"CONTRACT_ONLY"},
+    {"engine_id":"ENGACT-001","name":"Engine Activation","stage":16,"depends_on":["SEOBOOT-001","SOCBOOT-001","MKTBOOT-001","CRMBOOT-001","APPBOOT-001","AUTBOOT-001","TRNBOOT-001"],"mode":"DETERMINISTIC_REFERENCE"},
+    {"engine_id":"TENANT-001","name":"Tenant Boundary Guard","stage":0,"depends_on":["COMP-REG-001"],"mode":"DETERMINISTIC_REFERENCE"}
+  ],
+  "policy": {
+    "cross_company_access": "deny",
+    "live_writes": false,
+    "supabase_writes": false,
+    "autonomous_prod": false,
+    "trading_access": false,
+    "ai_required": false,
+    "promotion_requires_preprod_green": true
+  }
+}
