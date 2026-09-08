@@ -1,0 +1,52 @@
+name: TEMP WAUD-001 Promotion
+
+on:
+  push:
+    branches:
+      - cerebro/waud-001-runtime-v0
+    paths:
+      - '.github/workflows/temp-waud-001-promote.yml'
+      - 'cerebro/factory/candidates/WAUD-001-0.2.0.json'
+      - 'cerebro/runtime/website_audit.py'
+      - 'cerebro/runtime/tests/test_website_audit.py'
+      - 'cerebro/runtime/contracts/website-audit-v0.json'
+
+permissions:
+  contents: write
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: cerebro/waud-001-runtime-v0
+          fetch-depth: 0
+      - name: Unit tests
+        run: python -m unittest cerebro.runtime.tests.test_website_audit -v
+      - name: FACT-001 version apply
+        run: >-
+          python cerebro/factory/scripts/version_engine.py apply
+          --engine-id WAUD-001
+          --manifest-file cerebro/factory/candidates/WAUD-001-0.2.0.json
+      - name: Validate immutable scaffold and family contract
+        run: python -m unittest cerebro.factory.tests.test_family_wave1 -v
+      - name: Advance Registry version and commit pointer
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, pathlib
+          p=pathlib.Path('cerebro/factory/registry/engine-registry.json')
+          d=json.loads(p.read_text())
+          if d.get('registry_version') not in {'0.15.0','0.16.0'}:
+              raise SystemExit(f"unexpected registry_version={d.get('registry_version')}")
+          d['registry_version']='0.16.0'
+          p.write_text(json.dumps(d,ensure_ascii=False,indent=2,sort_keys=True)+'\n')
+          PY
+          git config user.name 'CEREBRO Factory'
+          git config user.email 'cerebro-factory@users.noreply.github.com'
+          git add cerebro/factory/registry/engine-registry.json cerebro/factory/versions/WAUD-001/0.2.0/engine.manifest.json
+          git commit -m 'FACT-001 · promote WAUD-001 to 0.2.0 [skip-waud-promote]'
+          git push origin HEAD:cerebro/waud-001-runtime-v0
