@@ -1,0 +1,120 @@
+{
+  "api_contract": [
+    "cerebro.runtime.context_loader.ContextLoader.load",
+    "cerebro.runtime.context_loader.ContextLoader.health"
+  ],
+  "autonomy_level": "PREPROD_CONTEXT_READ_ONLY",
+  "backup": {
+    "strategy": "stateless-runtime+COMP-REG-backup",
+    "verified": true
+  },
+  "company_id": null,
+  "company_scope": "GLOBAL_OR_SCOPED",
+  "contract_version": "0.2.0",
+  "cost_budget": {
+    "additional_monthly_eur_target": 0
+  },
+  "data_contracts": [
+    "LoadedContext(company_id,engine_id,environment,version,company,subject)"
+  ],
+  "dependencies": [
+    "AUD-001",
+    "COMP-REG-001",
+    "TENANT-001"
+  ],
+  "dependents": [],
+  "engine_id": "CTX-001",
+  "environment": "PREPROD",
+  "evaluation": [
+    "same-company context load",
+    "cross-company deny",
+    "subject validation",
+    "no model binding"
+  ],
+  "events_in": [],
+  "events_out": [],
+  "evidence": [
+    "cerebro/runtime/tests/test_context_loader.py"
+  ],
+  "factory": {
+    "generator": "FACT-001",
+    "generator_version": "0.4.0",
+    "immutable_scaffold": "cerebro/factory/generated/CTX-001/engine.manifest.json"
+  },
+  "human_exception_codes": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "inputs": [
+    "authenticated_company_id",
+    "target_company_id",
+    "subject_kind?",
+    "subject_id?"
+  ],
+  "jobs": [],
+  "knowledge_sources": [
+    "COMP-REG-001 canonical company identity"
+  ],
+  "layer": "L9",
+  "name": "Context Loader",
+  "objective": "Load authenticated company and entity context with deny-by-default cross-company isolation.",
+  "observability": [
+    "health identity_source/isolation_source/model_binding/external_cost_eur/prod_enabled"
+  ],
+  "outputs": [
+    "LoadedContext"
+  ],
+  "owner": "CEREBRO Platform",
+  "permissions": [
+    "read company metadata after TENANT authorization",
+    "no credential read",
+    "no action execution",
+    "no PROD execution"
+  ],
+  "policies": [
+    "deterministic_before_AI",
+    "zero_new_cost_by_default",
+    "preserve_existing_contracts",
+    "tenant_authorization_required",
+    "read_only_context"
+  ],
+  "rebuild": {
+    "strategy": "manifest+git+shared-runtime",
+    "verified": true
+  },
+  "retry_timeout": {
+    "declared": true,
+    "retries": 0,
+    "timeout_ms": 1000
+  },
+  "rollback": {
+    "strategy": "FACT-001 versioned Registry pointer rollback to immutable 0.1.0 scaffold",
+    "verified": true
+  },
+  "status": "CONFIRMED_OPERATIONAL",
+  "system_blocker_codes": [
+    "MISSING_CREDENTIAL",
+    "EXPIRED_OR_REVOKED_CREDENTIAL",
+    "MFA_REQUIRED",
+    "PERMISSION_REQUIRED",
+    "IRREVERSIBLE_PROD_RISK"
+  ],
+  "tests": [
+    "cerebro/runtime/tests/test_context_loader.py"
+  ],
+  "tribunal": [
+    "PREPROD read-only context only; PROD promotion DENY"
+  ],
+  "version": "0.2.0",
+  "zero_cost_execution_plan": [
+    "existing_stack",
+    "deterministic_code",
+    "open_source_local"
+  ]
+}
