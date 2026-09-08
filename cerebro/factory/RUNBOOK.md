@@ -45,6 +45,41 @@ Estado post-materialización:
 - Evidencia: `governance/wave1-materialization-2026-09-08.json`.
 - La materialización no equivale a implementación ni a autonomía.
 
+## Evolución versionada de un motor · FACT-001 V0.4
+No editar ni sobrescribir `generated/<engine_id>/...` para implementar un motor materializado. Ese árbol es el scaffold inmutable producido por Factory y debe seguir reproduciendo `NO_CHANGE`.
+
+Preflight de una nueva versión:
+`python cerebro/factory/scripts/version_engine.py apply --engine-id COMP-REG-001 --manifest-file /ruta/candidate.json --plan`
+
+Aplicación local/Git-only:
+`python cerebro/factory/scripts/version_engine.py apply --engine-id COMP-REG-001 --manifest-file /ruta/candidate.json`
+
+Rollback de Registry a una versión ya existente:
+`python cerebro/factory/scripts/version_engine.py rollback --engine-id COMP-REG-001 --to-version 0.1.0 --plan`
+
+`python cerebro/factory/scripts/version_engine.py rollback --engine-id COMP-REG-001 --to-version 0.1.0`
+
+Reglas V0.4:
+- el scaffold generado se preserva byte-a-byte;
+- una evolución vive en `versions/<engine_id>/<version>/engine.manifest.json`;
+- `apply` exige semver estrictamente superior a la versión activa en Registry;
+- candidato y Registry deben conservar el mismo `engine_id`;
+- coste adicional objetivo debe seguir siendo 0 €;
+- backup, rollback y rebuild deben estar declarados;
+- V0.4 rechaza `environment=PROD` de forma determinista;
+- el Registry mueve su puntero a la versión aplicada y mantiene `version_history` para auditoría;
+- rollback cambia el puntero, no borra la versión posterior;
+- después de versionar, el `factory.py create/family` original debe continuar devolviendo `NO_CHANGE` para el scaffold base;
+- una versión marcada `CONFIRMED_OPERATIONAL` sólo se integra al branch canónico después de tests/evaluación/PREPROD verdes; escribir el manifest en una rama no equivale a promoción.
+
+Rollback del versionador:
+1. comprobar que el target existe en `generated/` o `versions/`;
+2. ejecutar primero `rollback --plan`;
+3. comprobar OLD vs NEW del puntero Registry;
+4. aplicar rollback;
+5. ejecutar `validate_manifest.py`, unit tests y App Compatibility;
+6. no borrar la versión que se abandona hasta que exista política de retención específica.
+
 ## Gate estructural previo a fabricación por familias · 08/09/2026
 - Cloudflare NON-PROD está reconciliado y #127 cerrado con evidencia, OLD vs NEW y rollback.
 - FACT-001 puede generar y registrar scaffolds **inertes en PREPROD** por familias/dependencias. Generar un scaffold no equivale a activar un motor ni a conceder autonomía.
