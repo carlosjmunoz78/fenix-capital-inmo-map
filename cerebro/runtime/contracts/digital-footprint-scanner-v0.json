@@ -1,0 +1,9 @@
+{
+  "contract": "digital-footprint-scanner-v0",
+  "engine_id": "SCAN-001",
+  "environment": "PREPROD",
+  "version": "0.2.0",
+  "input": ["company_id", "domain", "evidence_at", "injected_fetcher"],
+  "output": ["root", "indexation", "technologies", "social_profiles", "internal_links", "external_links", "evidence_sha256"],
+  "rules": ["public_http_only", "read_only", "no_remote_mutation", "no_credentials", "no_polling", "dated_evidence", "zero_additional_cost", "prod_deny"]
+}
