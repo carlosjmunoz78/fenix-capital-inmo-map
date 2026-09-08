@@ -159,3 +159,21 @@ Backup/rebuild/rollback:
 - PROD continúa `DENY` hasta promoción independiente por motor y cierre de gates aplicables.
 
 Evidencia: `governance/console-chain-v0-closeout-2026-09-08.json`.
+
+## COMP-ONB-001 · operación PREPROD
+`COMP-ONB-001` V0.2 es un orquestador de **estado, evidencia y gates**, no un ejecutor implícito de los 20 motores downstream.
+
+Secuencia canónica V0:
+`SCAN → KW → WAUD → SEOBOOT → COMPET → MKT-002 → SOCAUD → LOCALP → MKTBOOT → BMD → PROC → KBOOT → CRMBOOT → APPBOOT → AUTBOOT → TRNBOOT → ENGACT → COMP-HLT → COMP-BKP → COMP-DEP`.
+
+Reglas:
+1. la empresa debe existir en `COMP-REG-001` y cada operación pasa por `TENANT-001`;
+2. `start` es idempotente y sólo acepta lifecycle `REGISTERED`/`ONBOARDING`; al iniciar cambia `REGISTERED → ONBOARDING`;
+3. sólo el paso actual puede marcarse `COMPLETED` y siempre requiere `evidence_ref`;
+4. `block_step` sólo acepta los 8 códigos HUMAN_REQUIRED canónicos o blockers de sistema declarados;
+5. `resume` exige `resolution_ref`; no existe bypass silencioso;
+6. `PREPROD_PIPELINE_COMPLETE` no cambia la empresa a `ACTIVE`, no ejecuta deploy y mantiene `PROD=DENY`;
+7. un scaffold `DEFINED_NOT_BUILT` nunca se trata como motor ejecutable por el orquestador;
+8. coste adicional objetivo 0 €, sin Supabase, polling, Make o IA obligatoria.
+
+Backup: snapshot atómico del store + SHA-256. Rollback: FACT-001 `version_engine.py` al scaffold 0.1.0/versión anterior. Rebuild: Git + Registry + runtime compartido + restore del snapshot.
