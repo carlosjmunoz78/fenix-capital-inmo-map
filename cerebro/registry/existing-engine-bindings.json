@@ -1,0 +1,62 @@
+{
+  "schema_version": "1.0.0",
+  "mode": "WRAP_EXISTING_DO_NOT_REPLACE",
+  "prod_execution_enabled": false,
+  "default_binding_state": "CONTRACT_ONLY_REQUIRES_LIVE_AUDIT",
+  "engines": [
+    {
+      "engine_id": "CORE-001",
+      "binding_state": "CONTRACT_ONLY_REQUIRES_LIVE_AUDIT",
+      "evidence_refs": ["src/App.tsx", ".github/workflows/prod-runtime-smoke.yml"],
+      "notes": "Existing app/runtime behavior is preserved; no claim that a formal CEREBRO Core exists yet."
+    },
+    {
+      "engine_id": "SUP-001",
+      "binding_state": "CONTRACT_ONLY_REQUIRES_LIVE_AUDIT",
+      "evidence_refs": ["src/AnaGovernance.tsx", "src/AnaOperationalPreparationGuard.tsx"],
+      "notes": "Governance/supervision-like behavior exists in app code; adapter remains disabled until contract audit."
+    },
+    {
+      "engine_id": "TRN-001",
+      "binding_state": "CONTRACT_ONLY_REQUIRES_LIVE_AUDIT",
+      "evidence_refs": ["src/AnaKnowledgeBlock.tsx", "src/AnaKnowledgeReviewGuard.tsx", "docs/CEREBRO_COMMERCIAL_KNOWLEDGE.md"],
+      "notes": "Knowledge/training surfaces are evidence candidates only."
+    },
+    {
+      "engine_id": "APP-001",
+      "binding_state": "DISCOVERED_READ_ONLY",
+      "evidence_refs": ["src/App.tsx", "tests", ".github/workflows/preprod-build.yml", ".github/workflows/prod-runtime-smoke.yml"],
+      "notes": "Live App is protected by existing PREPROD/PROD gates; binding adds no writes."
+    },
+    {
+      "engine_id": "CRM-001",
+      "binding_state": "CONTRACT_ONLY_REQUIRES_LIVE_AUDIT",
+      "evidence_refs": ["src", "supabase"],
+      "notes": "CRM behaviors coexist with App; source-of-truth and boundaries must be audited before activation."
+    },
+    {
+      "engine_id": "DOC-001",
+      "binding_state": "DISCOVERED_READ_ONLY",
+      "evidence_refs": ["docs/DOCUMENT_CLASSIFICATION_POLICY_20260903.md", "data/legacy-expediente-destination-map.json", ".github/workflows/private-physical-document-gate.yml"],
+      "notes": "Document workflows are preserved and wrapped only by metadata."
+    },
+    {
+      "engine_id": "SEO-001",
+      "binding_state": "CONTRACT_ONLY_REQUIRES_LIVE_AUDIT",
+      "evidence_refs": [],
+      "notes": "No live SEO implementation is asserted from this repository."
+    },
+    {
+      "engine_id": "WEB-001",
+      "binding_state": "CONTRACT_ONLY_REQUIRES_LIVE_AUDIT",
+      "evidence_refs": [],
+      "notes": "WordPress/web implementation must be audited in its own system/repository before activation."
+    },
+    {
+      "engine_id": "LAB-TRD",
+      "binding_state": "ISOLATED_REQUIRES_SEPARATE_AUDIT",
+      "evidence_refs": [],
+      "notes": "Trading remains explicitly isolated from App/CRM/CEREBRO PROD and gets no credentials or execution path here."
+    }
+  ]
+}

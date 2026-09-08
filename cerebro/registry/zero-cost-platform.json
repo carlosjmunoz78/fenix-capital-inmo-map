@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0.0",
+  "environment": "PREPROD",
+  "additional_cost_target_eur": 0,
+  "prod_promotion": false,
+  "engines": {
+    "RUNTIME-001": {
+      "state": "IMPLEMENTED_REFERENCE",
+      "implementation": "shared Node worker/runtime package",
+      "prod_writes": false
+    },
+    "EVT-001": {
+      "state": "IMPLEMENTED_REFERENCE",
+      "implementation": "deterministic outbox/inbox semantics; PostgreSQL is target persistence before PROD",
+      "broker_required": false
+    },
+    "JOB-001": {
+      "state": "IMPLEMENTED_REFERENCE",
+      "implementation": "priority/retry/idempotency queue semantics; PostgreSQL worker is target persistence before PROD"
+    },
+    "DBOFF-001": {
+      "state": "CONTRACT_DEFINED",
+      "rule": "Supabase remains transactional App/CRM/Auth core; heavy research/jobs/logs/training may be offloaded outside Supabase"
+    },
+    "STOROFF-001": {
+      "state": "CONTRACT_DEFINED",
+      "rule": "generated artifacts and heavy outputs must support filesystem/object storage outside transactional core"
+    },
+    "FREE-001": {
+      "state": "CONTRACT_DEFINED",
+      "preference_order": ["deterministic", "open-source/local", "already-contracted", "free-tier", "self-hosted", "cheap-external", "paid-with-ROI"]
+    },
+    "FINOPS-001": {
+      "state": "IMPLEMENTED_REFERENCE",
+      "default_budget_eur": 0,
+      "over_budget_action": "HUMAN_REQUIRED:MONEY_LIMIT"
+    },
+    "AIBUD-001": {
+      "state": "CONTRACT_DEFINED",
+      "rule": "paid AI is optional and must pass the same budget gate; deterministic execution is preferred"
+    }
+  }
+}
