@@ -1,0 +1,60 @@
+name: TENANT-001 Promotion TEMP FINAL
+
+on:
+  push:
+    branches:
+      - cerebro/tenant-001-runtime-v0-final
+    paths:
+      - '.github/workflows/tenant-001-promote-temp-final.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  promote:
+    if: github.event.head_commit.message == 'TENANT · run single clean version promotion'
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: cerebro/tenant-001-runtime-v0-final
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Apply TENANT version through FACT-001 V0.4
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e cerebro/factory/versions/TENANT-001/0.2.0/engine.manifest.json
+          python cerebro/factory/scripts/version_engine.py apply \
+            --engine-id TENANT-001 \
+            --manifest-file cerebro/factory/candidates/TENANT-001-0.2.0.json
+          python - <<'PY'
+          import json, pathlib
+          path = pathlib.Path('cerebro/factory/registry/engine-registry.json')
+          data = json.loads(path.read_text(encoding='utf-8'))
+          if data.get('registry_version') != '0.6.0':
+              raise SystemExit(f"unexpected Registry version: {data.get('registry_version')}")
+          data['registry_version'] = '0.7.0'
+          path.write_text(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True) + '\n', encoding='utf-8')
+          PY
+      - name: Validate Factory and shared runtime
+        run: |
+          set -euo pipefail
+          python cerebro/factory/scripts/validate_manifest.py
+          python -m unittest discover -s cerebro/factory/tests -p 'test_*.py' -v
+          python -m unittest discover -s cerebro/runtime/tests -p 'test_*.py' -v
+      - name: Commit exact promotion output
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add cerebro/factory/registry/engine-registry.json cerebro/factory/versions/TENANT-001/0.2.0/engine.manifest.json
+          expected=$(printf '%s\n' 'cerebro/factory/registry/engine-registry.json' 'cerebro/factory/versions/TENANT-001/0.2.0/engine.manifest.json' | sort)
+          actual=$(git diff --cached --name-only | sort)
+          test "$actual" = "$expected"
+          git commit -m 'TENANT · promote version 0.2.0 [versioned]'
+          git push origin HEAD:cerebro/tenant-001-runtime-v0-final
