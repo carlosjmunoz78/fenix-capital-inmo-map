@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   promote-registry:
-    if: github.event.head_commit.message == 'COMP-REG · add temporary registry promotion runner'
+    if: github.event.head_commit.message == 'COMP-REG · retry registry promotion after version-aware Wave1 test'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
