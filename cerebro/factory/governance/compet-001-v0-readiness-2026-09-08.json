@@ -1,0 +1,38 @@
+{
+  "engine_id": "COMPET-001",
+  "version": "0.2.0",
+  "environment": "PREPROD",
+  "state": "DOCUMENTED_PARTIAL",
+  "scope": "deterministic public-evidence-only competitor intelligence",
+  "canonical_dependencies": [
+    "KW-001",
+    "LOCALP-001",
+    "SCAN-001",
+    "SOCAUD-001",
+    "WAUD-001"
+  ],
+  "evidence": {
+    "runtime": "cerebro/runtime/competitor_intelligence.py",
+    "tests": "cerebro/runtime/tests/test_competitor_intelligence.py",
+    "contract": "cerebro/runtime/contracts/competitor-intelligence-v0.json",
+    "versioned_manifest": "cerebro/factory/versions/COMPET-001/0.2.0/engine.manifest.json",
+    "immutable_scaffold": "cerebro/factory/generated/COMPET-001/engine.manifest.json"
+  },
+  "safety": {
+    "remote_write": false,
+    "prod_enabled": false,
+    "credentials_required": false,
+    "private_api_required": false,
+    "unsupported_market_metrics": "unknown_without_public_evidence",
+    "missing_competitor_evidence": "LOW_CONFIDENCE",
+    "additional_cost_eur": 0
+  },
+  "promotion_gates_pending": [
+    "unit_tests",
+    "Factory CI",
+    "App Compatibility CI",
+    "Engine Registry pointer promotion",
+    "post-merge PREPROD"
+  ],
+  "prod_autonomy": "DENY"
+}
