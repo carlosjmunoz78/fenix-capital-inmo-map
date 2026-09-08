@@ -35,21 +35,52 @@ Reglas del modo `family`:
 - escribe únicamente `generated/<engine_id>/...` y Engine Registry; no despliega, no llama a PROD y no cambia permisos/infraestructura;
 - cada motor nace `DEFINED_NOT_BUILT`, `NONE_UNTIL_GATES_PASS`, coste adicional objetivo 0 € y promoción PROD `DENY` por defecto.
 
-Wave 1 canónica: `WAVE1-MULTICOMPANY-CONSOLE-V0`, 29 motores planificados. Incluye onboarding multiempresa, discovery/audit, competencia/market intelligence, knowledge, SEO/social/marketing bootstrap, CRM/App/Automation/Training bootstrap, tenant isolation, supervisor/backup/deployment y Gateway/Console V0. Motores existentes como APP-001, CRM-001, SEO-001, WEB-001, TRN-001, POL-001, HEX-001, EVT-001, JOB-001, AUD-001 y OBSERV-001 se referencian como dependencias y **no se duplican**.
+Wave 1 canónica: `WAVE1-MULTICOMPANY-CONSOLE-V0`, 29 motores materializados en PREPROD. Incluye onboarding multiempresa, discovery/audit, competencia/market intelligence, knowledge, SEO/social/marketing bootstrap, CRM/App/Automation/Training bootstrap, tenant isolation, supervisor/backup/deployment y Gateway/Console V0. Motores existentes como APP-001, CRM-001, SEO-001, WEB-001, TRN-001, POL-001, HEX-001, EVT-001, JOB-001, AUD-001 y OBSERV-001 se referencian como dependencias y **no se duplican**.
+
+Estado post-materialización:
+- Engine Registry `0.5.0`: 46 motores = 17 existentes + 29 Wave 1.
+- Duplicados: 0.
+- Cada Wave 1: 18 archivos, `DEFINED_NOT_BUILT`, `PREPROD`, `NONE_UNTIL_GATES_PASS`.
+- Replan idéntico: `NO_CHANGE` para los 29 motores.
+- Evidencia: `governance/wave1-materialization-2026-09-08.json`.
+- La materialización no equivale a implementación ni a autonomía.
 
 ## Gate estructural previo a fabricación por familias · 08/09/2026
 - Cloudflare NON-PROD está reconciliado y #127 cerrado con evidencia, OLD vs NEW y rollback.
 - FACT-001 puede generar y registrar scaffolds **inertes en PREPROD** por familias/dependencias. Generar un scaffold no equivale a activar un motor ni a conceder autonomía.
-- #124 Branch Protection continúa `HIGH_RISK`: no modificar reglas sin snapshot. Acción externa mínima: autorizar GitHub admin REST en Make; después aplicar snapshot → protección mínima → prueba → rollback.
+- #124 Branch Protection continúa `HIGH_RISK`: no modificar reglas sin snapshot. Acción externa mínima: autorizar una vía GitHub admin; después aplicar snapshot → protección mínima → prueba → rollback.
 - #126 Trading LAB continúa `HIGH_RISK`: no usar documentación histórica como health actual y nunca ejecutar capital real como prueba. Acción externa mínima: acceso read-only Compute/VM o endpoint/log de health ya existente. `REAL_AUTHORIZED=false` / `BLOCK_REAL` permanece.
 - #133 Cloudflare secret rotation es `SECURITY_INCIDENT`: no copiar valores sensibles y no rotar a ciegas hasta conocer consumidores/ownership. La incidencia bloquea mutaciones PROD sensibles, no scaffolding inerte PREPROD.
 - Mientras cualquiera de esos gates aplicables siga abierto, la autonomía PROD global permanece `DENY`.
+
+## Cloudflare · vía canónica de la web a coste 0 €
+La vía operativa normal para caché Cloudflare de `fenixcapital.es` es **Fénix Core Guard → API directa de Cloudflare**. Make no es una dependencia operativa de este flujo.
+
+Auditoría live read-only confirmada:
+- plugin `Fénix Core Guard 1.0.0-rc9-prod2`;
+- companions `cache-orchestrator`, `integrations` e `integrations-bridge` cargados;
+- capas: Elementor → WordPress → Hostinger → Cloudflare → warmup → verify;
+- purge URL-first; global/hostname sólo cuando el plan se clasifica global;
+- lock de concurrencia y gates antes de operar;
+- UI propia `Tools → Fénix Guard · Cloudflare` para credenciales/test en entornos permitidos;
+- el token no se vuelve a mostrar después de guardarlo;
+- prueba de token separada del purge;
+- coste adicional objetivo: 0 €.
+
+Estado PROD actual: `observer`, health 100, `operations_gate=false`, `operational_writes_allowed=false`, Cloudflare `available=false`; no activar ni inyectar credenciales en PROD sólo para dejarlo “verde”.
+
+Orden operativo Cloudflare:
+1. Fénix Core Guard / plugin propio;
+2. API directa existente;
+3. herramientas locales/open-source existentes;
+4. Make únicamente como diagnóstico/reconciliación excepcional y temporal si no existe otra vía segura.
 
 ## Cloudflare · reconciliación y rollback
 - Workers: snapshot antes de tocar triggers; NON-PROD puede retirarse sólo si `main` queda intacto y se vuelve a leer el control-plane. Rollback: recrear exclusivamente el trigger NON-PROD desde el snapshot.
 - Pages: cambio validado `preview_deployment_setting: all → none`; `production_branch=main` y `production_deployments_enabled=true` deben permanecer inalterados. Rollback: PATCH mínimo `none → all`.
 - No corregir la configuración build legacy de Pages sólo por limpieza: cualquier cambio que pueda afectar `main` requiere ownership/callers, snapshot, PREPROD y rollback propios.
-- Make scenario 9773361 se usa sólo on-demand y se desactiva al terminar; no polling.
+- La intervención Make TEMP 9773361 de reconciliación fue excepcional, on-demand y quedó desactivada; no polling y no convertirla en runtime canónico.
+- El secreto Pages de #133 no está demostrado como credencial de Core Guard. Identificar caller/ownership antes de rotación.
 
 ## Prevención de duplicados
 - `engine_id` es único en Registry.
