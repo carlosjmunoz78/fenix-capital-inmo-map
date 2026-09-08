@@ -26,7 +26,15 @@ test('backfill retries when authentication completes after initial hydration pol
  expect(guard).toContain('void run();');
  expect(guard).toContain('subscription.unsubscribe();');
  expect(guard).toContain('if(cancelled||starting||running.current===raw)return;');
- expect(guard).toContain('finally{starting=false;}');
+});
+
+test('auth event arriving during active polling is queued and replayed after current run',()=>{
+ const guard=fs.readFileSync('src/ExistingDocumentAutoBackfillGuard.tsx','utf8');
+ expect(guard).toContain('let retryAfterCurrent=false;');
+ expect(guard).toContain('if(starting){retryAfterCurrent=true;return;}');
+ expect(guard).toContain('if(retryAfterCurrent&&!cancelled&&running.current!==raw)');
+ expect(guard).toContain('starting=false;');
+ expect(guard).toContain('retryAfterCurrent=false;');
 });
 
 test('backfill is authenticated, scoped and delegates only native routes to auto ingest',()=>{
