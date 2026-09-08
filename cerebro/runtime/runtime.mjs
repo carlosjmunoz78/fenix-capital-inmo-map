@@ -309,27 +309,6 @@ export class SharedRuntime {
   get finops() { return Object.freeze({ budget: this.#finops.budget, spent: this.#finops.spent }); }
   get audit() { return this.#audit.map(entry => safeClone(entry)); }
 
-  inspectContext(context) {
-    const safeCtx = safeContext(context);
-    return Object.freeze({ events: this.#events.listForContext(safeCtx), next_job: this.#jobs.claimContext(safeCtx) });
-  }
-
-  inspectEvents(context) {
-    return this.#events.listForContext(safeContext(context));
-  }
-
-  claimJob(context) {
-    return this.#jobs.claimContext(safeContext(context));
-  }
-
-  completeJob(job_id, context, result) {
-    return this.#jobs.completeContext(job_id, safeContext(context), result);
-  }
-
-  failJob(job_id, context, error) {
-    return this.#jobs.failContext(job_id, safeContext(context), error);
-  }
-
   registerEngine({ engine_id, version, handler, prod_writes = false }) {
     const safeEngineId = assertNonEmptyString(engine_id, 'engine_id');
     const safeVersion = assertNonEmptyString(version, 'version');
