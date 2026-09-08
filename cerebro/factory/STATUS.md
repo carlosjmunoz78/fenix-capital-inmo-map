@@ -15,18 +15,45 @@
 - PR #135 integró FACT-001 V0.3 con generación atómica por familias tras Factory + App Compatibility verdes; `PRE-PROD App Build` #3336 terminó SUCCESS.
 - PR #136 materializó Wave 1 tras Factory + App Compatibility verdes; `PRE-PROD App Build` #3337 terminó SUCCESS.
 - PR #137 cerró governance/evidencia de Wave 1 + vía Cloudflare WordPress tras Factory + App Compatibility verdes; `PRE-PROD App Build` #3338 terminó SUCCESS.
-- HEAD PREPROD tras cierre de los cuatro objetivos: `a9fc0df64893bd2be043a805175e2c71969f4573`.
+- PR #141 integró `TENANT-001` V0.2 tras Factory + App Compatibility verdes; `PRE-PROD App Build` #3342 terminó SUCCESS.
+- PR #143 integró `CTX-001`, `CHAT-001`, `CMD-001`, `ACTGW-001` y `CONSOLE-001` V0.2 tras Factory + App Compatibility verdes; `PRE-PROD App Build` #3343 terminó SUCCESS completo.
+- HEAD PREPROD confirmado tras Console Chain V0: `7d1601b89ea741a84243a96c9e38a43b3fca779d`.
 - Build PREPROD, Browser QA, CORS, candidato PROD inmutable, QA exacto, leak guard, sellado y artifacts continúan verdes.
 - No deploy PROD ni DDL PROD.
 
-## HECHO / VERDE · FACTORY WAVE 1 MULTIEMPRESA + GATEWAY/CONSOLE V0
+## HECHO / VERDE · FACTORY WAVE 1 MULTIEMPRESA
 - `WAVE1-MULTICOMPANY-CONSOLE-V0` está materializada mediante FACT-001, no a mano.
-- Engine Registry: `17 → 46` motores; `29` nuevos; IDs duplicados: `0`; Registry `0.5.0`.
-- Cada motor nuevo contiene exactamente 18 archivos estándar de scaffold y mantiene `DEFINED_NOT_BUILT`, `PREPROD`, `NONE_UNTIL_GATES_PASS`, coste objetivo 0 € y PROD `DENY`.
+- Engine Registry materializó `17 → 46` motores; `29` nuevos; IDs duplicados: `0`.
+- Cada motor nació con exactamente 18 archivos estándar de scaffold, `DEFINED_NOT_BUILT`, `PREPROD`, `NONE_UNTIL_GATES_PASS`, coste objetivo 0 € y PROD `DENY`.
 - La segunda planificación idéntica devuelve `NO_CHANGE`: generación idempotente verificada.
 - Incluye Company Registry/Onboarding, discovery/audit, competencia/market intelligence, Knowledge/SEO/Social/Marketing bootstrap, CRM/App/Automation/Training bootstrap, Tenant/Activation/Supervisor/Backup/Deployment y `CHAT-001`, `CTX-001`, `CMD-001`, `ACTGW-001`, `CONSOLE-001`.
-- Gateway/Console V0 están **DEFINIDOS, no operativos**: no hay despliegue, no hay modelo IA fijado y Console debe hablar con Gateway, no directamente con un modelo.
-- Evidencia: `governance/wave1-materialization-2026-09-08.json`.
+- Evidencia de materialización: `governance/wave1-materialization-2026-09-08.json`.
+- La materialización no equivale a implementación ni a autonomía: el scaffold `0.1.0` permanece inmutable aunque un motor evolucione a una versión operativa PREPROD.
+
+## HECHO / VERDE · FOUNDATIONS MULTIEMPRESA IMPLEMENTADAS EN PREPROD
+- `COMP-REG-001` V0.2: `CONFIRMED_OPERATIONAL` en PREPROD como registro canónico determinista de empresas.
+- `TENANT-001` V0.2: `CONFIRMED_OPERATIONAL` en PREPROD con aislamiento multiempresa deny-by-default, runtime compartido y cruce de `company_id` denegado.
+- Ambos conservan scaffold Factory inmutable, versión activa separada en `versions/`, backup/rollback/rebuild declarados y coste adicional 0 €.
+- `TENANT-001` no concede autonomía PROD.
+
+## HECHO / VERDE · CEREBRO CONSOLE CHAIN V0 PREPROD
+- `CTX-001` V0.2: carga contexto autorizado desde `COMP-REG-001` a través de `TENANT-001`.
+- `CHAT-001` V0.2: envelope conversacional provider-neutral; no contiene binding directo a OpenAI ni a otro modelo.
+- `CMD-001` V0.2: genera `CommandPlan` determinista; no ejecuta acciones.
+- `ACTGW-001` V0.2: ejecuta únicamente handlers PREPROD explícitamente registrados/autorizados; handlers mutantes permanecen DENY/HIGH_RISK en V0.
+- `CONSOLE-001` V0.2: interfaz de servicio sobre selector de empresa/contexto, chat, planificación de comandos, ejecución explícita vía Gateway, historial y auditoría.
+- Enviar un mensaje no ejecuta una acción automáticamente; Console habla con Gateway y no directamente con un modelo.
+- Engine Registry actual: `0.12.0`.
+- Dependencias canónicas: `COMP-REG → TENANT → CTX`; `CHAT + CTX → CMD`; `CMD + POL + AUD → ACTGW`; `CTX + CHAT + CMD + ACTGW → CONSOLE`.
+- Factory/runtime unit tests por promoción: SUCCESS. PR #143: Factory + App Compatibility SUCCESS. Post-merge PREPROD #3343: SUCCESS completo.
+- Backup: Git + manifests versionados + scaffolds inmutables. Rollback: FACT-001 `version_engine.py` + OLD vs NEW + gates. Rebuild: Git + Registry + shared runtime, sin servidor por empresa.
+- Evidencia: `governance/console-chain-v0-closeout-2026-09-08.json`.
+- Autonomía: `PREPROD_DETERMINISTIC_LIMITED`; PROD: `DENY`.
+
+## PARCIAL / DEFINIDO · RESTO DE WAVE 1
+- De los 29 motores Wave 1, `COMP-REG-001`, `TENANT-001`, `CTX-001`, `CHAT-001`, `CMD-001`, `ACTGW-001` y `CONSOLE-001` ya tienen implementación V0.2 validada en PREPROD.
+- Los restantes 22 motores Wave 1 conservan su scaffold `0.1.0` como `DEFINED_NOT_BUILT` hasta implementación/promoción individual.
+- Ningún motor restante se declara operativo sólo por estar materializado.
 
 ## HECHO / VERDE · CLOUDFLARE NON-PROD RECONCILIATION
 - Issue #127 cerrado con evidencia reproducible.
@@ -71,16 +98,16 @@
 ## HUMAN_REQUIRED · EXCEPCIONES EXTERNAS / PROD
 Cola canónica: `governance/human-exception-queue-2026-09-07.json`.
 
-1. `HIGH_RISK` · **Branch protection** (#124): rulesets live vacíos; el conector GitHub administrado no expone admin de protection. Make dispone de REST GitHub, pero falta una conexión GitHub autorizada. Acción humana mínima: autorizar esa conexión; después CEREBRO retoma snapshot → protección mínima → test → rollback.
+1. `HIGH_RISK` · **Branch protection** (#124): rulesets live continúan vacíos y la lectura de branch protection sigue devolviendo HTTP 403 al conector administrado. No existe capacidad admin en la superficie actual. Acción humana mínima: autorizar una vía con permisos de administración de branch protection/rulesets; después CEREBRO retoma snapshot → protección mínima → test → rollback. No se modifican reglas sin snapshot.
 2. `HIGH_RISK` · **LAB-TRD runtime directo** (#126): aislamiento y PAPER/SHADOW están documentados, pero no existe lectura actual accesible de VM/Compute. Acción humana mínima: autorizar/proporcionar lectura Compute/VM o health/log no mutante. `REAL_AUTHORIZED=false` / `BLOCK_REAL` permanece.
-3. `SECURITY_INCIDENT` · **Cloudflare Pages secret rotation** (#133): una variable sensible apareció configurada como `plain_text` en control-plane. La auditoría live confirma que Core Guard tiene su propia vía directa Cloudflare y actualmente la capa Cloudflare está no disponible en PROD; por tanto el secreto Pages **no está demostrado** como credencial/consumer de Core Guard. Ownership/caller de Pages sigue sin resolver y no se rota a ciegas.
+3. `SECURITY_INCIDENT` · **Cloudflare Pages secret rotation** (#133): una variable sensible apareció configurada como `plain_text` en control-plane. Core Guard tiene su propia vía directa Cloudflare; el secreto Pages no está demostrado como credencial/consumer de Core Guard. Ownership/caller sigue sin resolver y no se rota a ciegas. Nunca registrar el valor del secreto.
 
 ## GATE PRE-FACTORY / POST-WAVE1
 - Cloudflare #127: **CERRADO / VERDE**.
-- Branch protection #124: **HUMAN_REQUIRED externo formalizado; sin acción autónoma segura restante sin autorización**.
+- Branch protection #124: **HUMAN_REQUIRED externo formalizado; sin acción autónoma segura restante sin autorización admin**.
 - Trading #126: **HUMAN_REQUIRED externo formalizado; sin health vivo falsificado y REAL bloqueado**.
-- Incidente #133: **SECURITY_INCIDENT formalizado; caller de Pages aún no resuelto; no bloquea scaffolding inerte PREPROD**.
-- Wave 1: **MATERIALIZADA Y VALIDADA EN PREPROD**, pero todos sus motores nuevos continúan `DEFINED_NOT_BUILT`.
+- Incidente #133: **SECURITY_INCIDENT formalizado; caller de Pages aún no resuelto; no autoriza rotación ciega**.
+- Wave 1: **MATERIALIZADA Y VALIDADA EN PREPROD**; 7 motores de fundamento/Console tienen V0.2 operativa PREPROD y 22 permanecen `DEFINED_NOT_BUILT`.
 - Esto NO concede autonomía PROD.
 
 ## CIERRE DE LOS CUATRO OBJETIVOS · VERDE ESTRUCTURAL/PREPROD
@@ -94,8 +121,11 @@ Cola canónica: `governance/human-exception-queue-2026-09-07.json`.
 ## CIERRE ACTUAL
 - **Factory/Governance/PREPROD:** `CONFIRMED_OPERATIONAL`.
 - **Wave 1 materialización:** `CONFIRMED_MATERIALIZED_PREPROD`.
-- **Gateway/Console V0:** `DEFINED_NOT_BUILT`.
-- **App compatibility:** `CONFIRMED_OPERATIONAL_PREPROD`.
+- **COMP-REG-001:** `CONFIRMED_OPERATIONAL_PREPROD` V0.2.
+- **TENANT-001:** `CONFIRMED_OPERATIONAL_PREPROD` V0.2.
+- **CTX/CHAT/CMD/ACTGW/CONSOLE V0:** `CONFIRMED_OPERATIONAL_PREPROD_LIMITED` V0.2.
+- **Engine Registry:** `0.12.0`, 46 IDs, sin duplicados conocidos.
+- **App compatibility:** `CONFIRMED_OPERATIONAL_PREPROD`; post-merge #3343 SUCCESS sobre `7d1601b89ea741a84243a96c9e38a43b3fca779d`.
 - **Cloudflare NON-PROD:** `CONFIRMED_RECONCILED`.
 - **Cloudflare web zero-cost path:** `CONFIRMED_EXISTING_READ_ONLY_AUDIT`; PROD Cloudflare adapter actualmente no configurado/disponible en Core Guard.
 - **Core PROD Observer:** `CONFIRMED_OPERATIONAL_PROD_OBSERVER`.
@@ -104,5 +134,5 @@ Cola canónica: `governance/human-exception-queue-2026-09-07.json`.
 - **TRN TEST runtime:** `CONFIRMED_OPERATIONAL_TEST_RUNTIME`.
 - **App/CRM/Web/Social baseline:** preservado.
 - **Coste adicional:** 0 €.
-- **PROD autonomy total:** `DENY` mientras #124, #126 y #133 sigan aplicando.
-- **Siguiente acción estructural:** implementar por capas los primeros motores Wave 1 empezando por contratos/aislamiento/Company Registry y Gateway V0 en PREPROD, sin crear servidores aislados ni tocar PROD.
+- **PROD autonomy total:** `DENY` mientras los gates aplicables, incluyendo #124, #126 y #133, sigan abiertos.
+- **Siguiente acción estructural planificada:** continuar el onboarding multiempresa por dependencia, comenzando por `COMP-ONB-001`, sin crear servidores por empresa ni tocar PROD.
