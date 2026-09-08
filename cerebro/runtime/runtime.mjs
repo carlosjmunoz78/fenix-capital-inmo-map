@@ -321,7 +321,7 @@ export class SharedRuntime {
 
   constructor({ environment = 'PREPROD', additional_cost_budget_eur = 0 } = {}) {
     const safeEnvironment = assertNonEmptyString(environment, 'environment');
-    if (safeEnvironment === 'PROD') throw new Error('RUNTIME-001 V0 cannot run with PROD context');
+    if (safeEnvironment !== 'PREPROD') throw new Error('RUNTIME-001 V0 requires PREPROD environment');
     this.#environment = safeEnvironment;
     this.#finops = new FinOpsGate({ additional_cost_budget_eur });
   }
@@ -339,7 +339,7 @@ export class SharedRuntime {
   }
 
   async execute({ company_id, engine_id, version, command, payload = {}, cost_eur = 0 }) {
-    if (this.#environment === 'PROD') throw new Error('RUNTIME-001 V0 cannot execute with PROD context');
+    if (this.#environment !== 'PREPROD') throw new Error('RUNTIME-001 V0 requires PREPROD environment');
     const context = safeContext({ company_id, engine_id, environment: this.#environment, version });
     const safeCommand = assertNonEmptyString(command, 'command');
     const reg = this.#handlers.get(context.engine_id);
