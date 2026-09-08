@@ -177,3 +177,18 @@ Reglas:
 8. coste adicional objetivo 0 €, sin Supabase, polling, Make o IA obligatoria.
 
 Backup: snapshot atómico del store + SHA-256. Rollback: FACT-001 `version_engine.py` al scaffold 0.1.0/versión anterior. Rebuild: Git + Registry + runtime compartido + restore del snapshot.
+
+
+## SCAN-001 · operación PREPROD read-only
+`SCAN-001` V0.2 recopila únicamente señales HTTP públicas mediante un fetcher inyectado y no reemplaza `WEB-001`.
+
+Reglas:
+1. requiere `company_id`, dominio público válido y `evidence_at` explícito;
+2. consulta root, `robots.txt` y `sitemap.xml` sin polling/reintentos automáticos;
+3. extrae título/canonical signal, tecnologías heurísticas y perfiles sociales enlazados;
+4. cada resultado incluye SHA-256 de evidencia y `external_cost_eur=0`;
+5. no usa credenciales, no inicia sesión, no enumera agresivamente subdominios, no muta WordPress/Cloudflare ni ejecuta JavaScript remoto;
+6. tests deben usar fetcher inyectado/local para que CI sea reproducible y no dependa de Internet;
+7. PROD permanece DENY; una futura ampliación de alcance requiere contrato, rate limits, evaluación, tribunal y rollback propios.
+
+Backup/rebuild: Git + manifest versionado + contrato/tests. Rollback: `version_engine.py rollback --engine-id SCAN-001 --to-version 0.1.0` tras `--plan` y OLD vs NEW.

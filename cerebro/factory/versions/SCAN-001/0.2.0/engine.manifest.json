@@ -1,0 +1,139 @@
+{
+  "api_contract": [
+    "cerebro.runtime.digital_footprint_scanner.DigitalFootprintScanner.scan",
+    "cerebro.runtime.digital_footprint_scanner.DigitalFootprintScanner.health"
+  ],
+  "autonomy_level": "PREPROD_READ_ONLY_SCANNER",
+  "backup": {
+    "strategy": "git+versioned-manifest+evidence-output",
+    "verified": true
+  },
+  "company_id": null,
+  "company_scope": "GLOBAL_OR_SCOPED",
+  "contract_version": "0.2.0",
+  "cost_budget": {
+    "additional_monthly_eur_target": 0
+  },
+  "data_contracts": [
+    "digital-footprint-scanner-v0.json",
+    "ScanEvidence(company_id,domain,evidence_at,evidence_sha256)"
+  ],
+  "dependencies": [
+    "AUD-001",
+    "COMP-REG-001",
+    "WEB-001"
+  ],
+  "dependents": [],
+  "engine_id": "SCAN-001",
+  "environment": "PREPROD",
+  "evaluation": [
+    "deterministic scanner unit suite",
+    "Factory manifest validation",
+    "App Compatibility"
+  ],
+  "events_in": [
+    "COMPANY_ONBOARDING_SCAN_REQUESTED"
+  ],
+  "events_out": [
+    "DIGITAL_FOOTPRINT_SCANNED",
+    "DIGITAL_FOOTPRINT_SCAN_PARTIAL"
+  ],
+  "evidence": [
+    "cerebro/runtime/tests/test_digital_footprint_scanner.py",
+    "cerebro/runtime/contracts/digital-footprint-scanner-v0.json"
+  ],
+  "factory": {
+    "generator": "FACT-001",
+    "generator_version": "0.4.0",
+    "immutable_scaffold": "cerebro/factory/generated/SCAN-001/engine.manifest.json"
+  },
+  "human_exception_codes": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "inputs": [
+    "company_id",
+    "domain",
+    "evidence_at",
+    "injected_fetcher"
+  ],
+  "jobs": [],
+  "knowledge_sources": [
+    "COMP-REG-001 company domains",
+    "WEB-001 canonical web boundary",
+    "public HTTP responses"
+  ],
+  "layer": "L8",
+  "name": "Digital Footprint Scanner",
+  "objective": "Discover dated public web/indexation/technology/social signals without replacing WEB-001, mutating remote systems or requiring paid services.",
+  "observability": [
+    "health mode/network/external_cost_eur/prod_enabled",
+    "evidence_sha256 per scan"
+  ],
+  "outputs": [
+    "root status/title/canonical signal",
+    "robots/sitemap availability",
+    "technology signals",
+    "public social profile links",
+    "internal/external links",
+    "dated evidence hash"
+  ],
+  "owner": "CEREBRO Platform",
+  "permissions": [
+    "read public HTTP only",
+    "read company domain metadata",
+    "no credentials",
+    "no remote writes",
+    "no PROD execution"
+  ],
+  "policies": [
+    "deterministic_before_AI",
+    "zero_new_cost_by_default",
+    "preserve_existing_contracts",
+    "public_http_only",
+    "read_only",
+    "no_polling",
+    "no_aggressive_enumeration",
+    "dated_evidence_required",
+    "prod_deny_by_default"
+  ],
+  "rebuild": {
+    "strategy": "manifest+git+shared-runtime",
+    "verified": true
+  },
+  "retry_timeout": {
+    "declared": true,
+    "retries": 0,
+    "timeout_ms": 5000
+  },
+  "rollback": {
+    "strategy": "FACT-001 versioned Registry pointer rollback to immutable 0.1.0 scaffold",
+    "verified": true
+  },
+  "status": "CONFIRMED_OPERATIONAL",
+  "system_blocker_codes": [
+    "MISSING_CREDENTIAL",
+    "EXPIRED_OR_REVOKED_CREDENTIAL",
+    "MFA_REQUIRED",
+    "PERMISSION_REQUIRED",
+    "IRREVERSIBLE_PROD_RISK"
+  ],
+  "tests": [
+    "cerebro/runtime/tests/test_digital_footprint_scanner.py"
+  ],
+  "tribunal": [
+    "PREPROD public read-only evidence collection only; PROD promotion DENY"
+  ],
+  "version": "0.2.0",
+  "zero_cost_execution_plan": [
+    "existing_stack",
+    "python_stdlib",
+    "injected_http_fetcher"
+  ]
+}

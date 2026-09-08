@@ -1,5 +1,16 @@
 # FACT-001 Changelog
 
+## 0.4.5 · 2026-09-08
+- Implementado `SCAN-001` V0.2 en runtime compartido PREPROD como Digital Footprint Scanner determinista y read-only.
+- Inventario previo no encontró crawler/scanner equivalente en el repo; `WEB-001` se conserva como frontera web canónica y SCAN no lo sustituye.
+- V0 inspecciona root HTML, `robots.txt`, `sitemap.xml`, señales tecnológicas y perfiles sociales públicos enlazados mediante fetcher inyectado.
+- CI no depende de Internet: tests usan fetcher local falso; no polling, credenciales, brute force, enumeración agresiva ni escritura remota.
+- Cada salida conserva `company_id`, dominio, timestamp de evidencia y SHA-256; coste adicional objetivo 0 €.
+- FACT-001 promovió `SCAN-001` 0.1.0 → 0.2.0 preservando scaffold inmutable; Engine Registry avanza 0.13.0 → 0.14.0.
+- Dependency map avanza a 0.4.0 y declara `COMP-ONB → SCAN`, `SCAN → COMP-REG/WEB/AUD`.
+- Backup/rebuild por Git+manifest+contrato; rollback por puntero versionado FACT-001. PROD autonomy `DENY`.
+- Candidate y workflow temporal de promoción se retiran antes de PR. Sin Supabase PROD, WordPress, Cloudflare ni Trading REAL.
+
 ## 0.4.4 · 2026-09-08
 - Implementado `COMP-ONB-001` V0.2 en runtime compartido PREPROD como orquestador determinista de onboarding multiempresa.
 - El motor usa `COMP-REG-001` como identidad/lifecycle y `TENANT-001` como aislamiento deny-by-default; no crea servidores, bases o credenciales por empresa.
