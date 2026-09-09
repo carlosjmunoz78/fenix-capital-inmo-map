@@ -20,10 +20,11 @@ test('legacy routing uses exact document DNI only as deterministic participant f
  expect(code).toContain('personFor(name,people)||personByExistingDni(run,people)||(people.length===1?people[0]:null)');
 });
 
-test('legacy routing still refuses ambiguous multi-person documents',()=>{
+test('legacy routing refuses ambiguity and never reprocesses an already applied document',()=>{
  const code=source();
  expect(code).toContain("error:'ambiguous_person'");
  expect(code).toContain("error:'unrecognized_filename'");
- expect(code).toContain("run?.status==='applied'&&native");
+ expect(code).toContain("if(run?.status==='applied')continue;");
+ expect(code).not.toContain("run?.status==='applied'&&native");
  expect(code).toContain("TARGET='fenix-document-auto-ingest'");
 });
