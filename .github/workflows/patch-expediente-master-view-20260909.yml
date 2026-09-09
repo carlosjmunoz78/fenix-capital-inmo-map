@@ -1,0 +1,53 @@
+name: Patch expediente master view 20260909
+
+on:
+  push:
+    branches: [preprod-app-phase1]
+    paths:
+      - '.github/workflows/patch-expediente-master-view-20260909.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: preprod-app-phase1
+      - name: Patch DetailShell surgically
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('src/DetailShell.tsx')
+          s=p.read_text()
+          replacements=[
+            ("import ExpedientePeoplePanel from './ExpedientePeoplePanel';\n", "import ExpedientePeoplePanel from './ExpedientePeoplePanel';\nimport ExpedienteDocumentsPanel from './ExpedienteDocumentsPanel';\n"),
+            ("async function detailApi(code:string){if(isNotionId(code)){const r=await fetchNotionRuntime<any>(`/expedientes/${encodeURIComponent(code)}`);if(r.status!==404)return r;}return legacyDetailApi(code);}", "async function detailApi(code:string){return fetchNotionRuntime<any>(`/expedientes/${encodeURIComponent(code)}`);}"),
+            ("  <main className=\"ops-main detail-exp-main\"><header className=\"ops-top detail-exp-top\"><button className=\"detail-filter\" onClick={()=>navigate('/expedientes')}>Filtros avanzados</button><div className=\"detail-search\">Buscar expediente, cliente o tarea…</div><button className=\"primary\" onClick={()=>navigate('/expedientes')}>Buscar</button><strong>Expediente</strong></header>\n", "  <main className=\"ops-main detail-exp-main\">\n"),
+            ("<div className=\"detail-master-title\"><span>FICHA MAESTRA</span><h1>{displayName}</h1><p>{canonical?'Fuente canónica Notion · acceso filtrado por tu rol.':'Ficha PRE-PROD autorizada por rol.'}</p></div>", "<div className=\"detail-master-title\"><span>FICHA MAESTRA</span><h1>{displayName}</h1><p>{canonical?'Fuente canónica Notion · acceso filtrado por tu rol.':'Ficha operativa autorizada por tu rol.'}</p></div>"),
+            ("    {canonical&&isNotionId(code)&&<ExpedientePeoplePanel expedienteId={code}/>} \n", "    <ExpedientePeoplePanel expedienteId={code}/>\n    <ExpedienteDocumentsPanel expedienteId={code}/>\n")
+          ]
+          for old,new in replacements:
+              n=s.count(old)
+              if n!=1:
+                  raise SystemExit(f'expected exactly one match, got {n}: {old[:100]}')
+              s=s.replace(old,new,1)
+          if 'Ficha PRE-PROD autorizada por rol.' in s:
+              raise SystemExit('stale PRE-PROD label remains')
+          if 'className="ops-top detail-exp-top"' in s:
+              raise SystemExit('duplicate local detail topbar remains')
+          p.write_text(s)
+          PY
+      - name: Commit repair
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/DetailShell.tsx
+          git diff --cached --check
+          git commit -m 'fix: restore complete expediente master data in PROD'
+          git push origin HEAD:preprod-app-phase1
