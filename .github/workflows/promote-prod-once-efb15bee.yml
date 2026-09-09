@@ -13,25 +13,33 @@ jobs:
   promote:
     runs-on: ubuntu-latest
     steps:
-      - name: Validate source SHA
-        run: |
-          set -euo pipefail
-          test "efb15bee38dcf045fb58c787237416a08070f52d" = "efb15bee38dcf045fb58c787237416a08070f52d"
       - name: Download exact immutable candidate artifact
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           gh run download 34382958285 --repo "$GITHUB_REPOSITORY" --name "fenix-prod-candidate-efb15bee38dcf045fb58c787237416a08070f52d" --dir candidate
-      - name: Validate candidate metadata and no TEST endpoints
+      - name: Validate and extract exact immutable candidate
         run: |
           set -euo pipefail
-          test -f candidate/PROD_SOURCE_SHA.txt
-          test "$(tr -d '\r\n' < candidate/PROD_SOURCE_SHA.txt)" = "efb15bee38dcf045fb58c787237416a08070f52d"
-          if grep -R -n -E 'hnqlnvakzaywtafeiybt|PREPROD|preprod' candidate/dist 2>/dev/null; then
-            echo 'Forbidden PREPROD marker found in immutable PROD candidate'
+          test -f candidate/PROD_CANDIDATE_SHA
+          test -f candidate/PROD_CANDIDATE_METADATA.txt
+          test -f candidate/fenix-prod-candidate.tgz
+          test -f candidate/fenix-prod-candidate.tgz.sha256
+          test "$(tr -d '\r\n' < candidate/PROD_CANDIDATE_SHA)" = "efb15bee38dcf045fb58c787237416a08070f52d"
+          grep -Fxq 'source_sha=efb15bee38dcf045fb58c787237416a08070f52d' candidate/PROD_CANDIDATE_METADATA.txt
+          grep -Fxq 'workflow_run_id=34382958285' candidate/PROD_CANDIDATE_METADATA.txt
+          (cd candidate && sha256sum -c fenix-prod-candidate.tgz.sha256)
+          mkdir -p candidate/dist
+          tar -xzf candidate/fenix-prod-candidate.tgz -C candidate/dist
+          leaks="$(grep -RInE --include='*.js' --include='*.html' --include='*.css' 'functions/v1/[A-Za-z0-9_-]+-test' candidate/dist || true)"
+          if [ -n "$leaks" ]; then
+            printf '%s\n' "$leaks"
+            echo 'TEST endpoint leaked into exact immutable PROD candidate' >&2
             exit 1
           fi
+          test -f candidate/dist/index.html
+          test -f candidate/dist/CNAME
       - name: Checkout gh-pages
         uses: actions/checkout@v4
         with:
