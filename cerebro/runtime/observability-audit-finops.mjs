@@ -267,6 +267,8 @@ export class AuditLedgerV0 extends BaseLedger {
     const safeCorrelation = nonEmpty(correlation_id, 'correlation_id');
     const safeActor = nonEmpty(actor, 'actor');
     const safeAction = nonEmpty(action, 'action');
+    if (reason !== null && typeof reason !== 'string') throw new TypeError('reason must be null or string');
+    const safeReason = reason;
     const sequence = ledgerRecordCount(this) + 1;
     const previous = ledgerLastRecord(this);
     const previous_hash = previous?.record_hash ?? null;
@@ -281,7 +283,7 @@ export class AuditLedgerV0 extends BaseLedger {
       target: safeClone(target, 'target'),
       before: safeClone(before, 'before'),
       after: safeClone(after, 'after'),
-      reason: reason === null ? null : String(reason),
+      reason: safeReason,
       result: nonEmpty(result, 'result'),
       sequence,
       previous_hash
@@ -357,6 +359,7 @@ export const OPERATIONAL_LEDGERS_V0_CONTRACT = Object.freeze({
   accepted_payload_grammar: 'finite-json-like-primitives+arrays+plain-data-objects-no-accessors-no-cycles',
   audit_integrity: 'sha256-hash-chain-not-authenticated-tamper-proofing',
   audit_when: 'canonical-iso8601-utc-instant-hash-covered',
+  audit_reason: 'strict-string-or-null-no-coercion',
   correlation_id_required: true,
   cost_precision: 'micro-eur-safe-integer-with-ulp-aware-scaled-tolerance-and-number-resolution-bound',
   micro_rounding_tolerance_cap: MAX_MICRO_ROUNDING_TOLERANCE,
