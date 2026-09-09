@@ -34,5 +34,32 @@
       },
       "autonomous_cerebro": false
     }
+  },
+  "governance_v0": {
+    "merge_sha": "c523da8f11dbf1a2618982aeeb5940670317bb6e",
+    "prod": {
+      "live_deploy": { "run_id": 34330670776, "conclusion": "success", "head_sha": "c523da8f11dbf1a2618982aeeb5940670317bb6e" },
+      "runtime_smoke": { "run_id": 34330670550, "conclusion": "success", "head_sha": "c523da8f11dbf1a2618982aeeb5940670317bb6e" }
+    },
+    "scope_status": "STRUCTURAL_REFERENCE_GREEN",
+    "engines": ["POL-001", "HEX-001"],
+    "autonomous_prod": false
+  },
+  "persistent_evt_job_v0": {
+    "reviewed_head_sha": "16484fdf50760afbd98e1d85824ed352dd3a5585",
+    "merge_sha": "26fb9c75b9a7361afccccdc111761ad10aac5fa4",
+    "preprod": {
+      "factory": { "run_id": 34337677363, "conclusion": "success", "head_sha": "16484fdf50760afbd98e1d85824ed352dd3a5585" },
+      "app": { "run_id": 34337677429, "conclusion": "success", "head_sha": "16484fdf50760afbd98e1d85824ed352dd3a5585" },
+      "tribunal": { "conclusion": "clean_no_p1_p2", "head_sha": "16484fdf50760afbd98e1d85824ed352dd3a5585" }
+    },
+    "prod": {
+      "live_deploy": { "run_id": 34340279918, "conclusion": "success", "head_sha": "26fb9c75b9a7361afccccdc111761ad10aac5fa4" },
+      "runtime_smoke": { "run_id": 34340279922, "conclusion": "success", "head_sha": "26fb9c75b9a7361afccccdc111761ad10aac5fa4" }
+    },
+    "scope_status": "STRUCTURAL_REFERENCE_GREEN",
+    "persistence_scope": "LOCAL_SELF_HOSTED_PREPROD_SINGLE_WRITER_REFERENCE",
+    "supabase_required": false,
+    "autonomous_prod": false
   }
 }

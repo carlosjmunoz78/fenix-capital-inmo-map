@@ -6,10 +6,10 @@ Este árbol se mantiene separado del runtime funcional de App Fénix y no sustit
 
 - **FACT-001 / GOV-001 — HECHO · estructural/reference green.** Factory V0 y registro canónico de 177 motores validados; 177 scaffolds reproducibles, sin afirmar que los 177 motores estén operativos.
 - **Phase 2 — HECHO wrapper + auditoría read-only V0 / estados live diferenciados.** Los nueve bindings siguen conservadores. El ledger `evidence/phase2-existing-bindings-audit.json` confirma `APP-001` como `CONFIRMED_OPERATIONAL` por deploy/smoke exact-SHA del App existente; `CORE-001`, `SUP-001`, `TRN-001` y `DOC-001` quedan `DOCUMENTED_PARTIAL`; `CRM-001`, `SEO-001`, `WEB-001` y `LAB-TRD` permanecen `UNKNOWN_REQUIRES_AUDIT`. Ningún estado habilita autonomía CEREBRO PROD.
-- **Phase 3 — HECHO V0 reference / DEFINIDO según motor.** `RUNTIME-001`, `EVT-001`, `JOB-001` y `FINOPS-001` tienen referencia ejecutable PREPROD; `DBOFF-001`, `STOROFF-001`, `FREE-001` y `AIBUD-001` permanecen definidos como contratos V0, no operativos autónomos.
+- **Phase 3 — HECHO V0 reference / DEFINIDO según motor.** `RUNTIME-001` y `FINOPS-001` tienen referencia ejecutable PREPROD. `EVT-001` y `JOB-001` tienen además persistencia local/self-hosted PREPROD V0 con replay determinista, idempotencia tras restart, recuperación durable de claims abandonados y aislamiento multiempresa; siguen siendo adapters paralelos single-writer, no motores autónomos PROD. `DBOFF-001`, `STOROFF-001`, `FREE-001` y `AIBUD-001` permanecen definidos como contratos V0, no operativos autónomos.
 - **Phase 4 — HECHO · estructural/reference green.** Bootstrap multiempresa de 17 motores con aislamiento por tenant, PREPROD-only, HUMAN_REQUIRED canónico y promoción PROD autónoma deshabilitada.
 - **Phase 5 — HECHO · estructural/reference green.** `CONSOLE-001`, `CHAT-001`, `CTX-001`, `CMD-001` y `ACTGW-001` implementados como Console/Gateway V0: selector de empresa/contexto, sesiones, historial, auditoría, consulta de motores, chat y órdenes mediados por Gateway, nunca acceso directo a un modelo.
-- **Governance V0 — IMPLEMENTADO EN RAMA / PENDIENTE DE GATE.** `POL-001` y `HEX-001` disponen de referencia determinista PREPROD-only: reglas versionadas ALLOW/DENY/REVIEW, fail-closed, escalado exacto HUMAN_REQUIRED, aislamiento por empresa, priorización y asignación de excepciones humanas. No se considera green ni promovido hasta CI/revisión/merge exact-head.
+- **Governance V0 — HECHO · estructural/reference green.** `POL-001` y `HEX-001` disponen de referencia determinista PREPROD-only: reglas versionadas ALLOW/DENY/REVIEW, fail-closed, escalado exacto HUMAN_REQUIRED, aislamiento por empresa, priorización y asignación de excepciones humanas. `autonomous_prod=false` permanece sin cambios.
 
 ## Evidencia vigente
 
@@ -18,6 +18,8 @@ La evidencia estructurada por alcance está en `docs/EVIDENCE.json`; el audit re
 - Phase 5 evidence anchor: merge `c2eb030e2e8ed0ab45ca58775a7183e359e3d2e9`; PROD Live Deploy `34292739019` y PROD Runtime Smoke `34292739031`, success sobre ese SHA.
 - Documentation closure anchor: merge `6bf6af92c1106884da87fb9a659f807093d47e0a`; PROD Live Deploy `34293941974` y PROD Runtime Smoke `34293942069`, success sobre ese SHA.
 - Phase 2 live-audit anchor: merge `4705f6821bde7bff47d156ae2a9ce60b09dee781`; PROD Live Deploy `34313457110` y PROD Runtime Smoke `34313457061`, success sobre ese SHA.
+- Governance V0 anchor: merge `c523da8f11dbf1a2618982aeeb5940670317bb6e`; PROD Live Deploy `34330670776` y PROD Runtime Smoke `34330670550`, success sobre ese SHA.
+- Persistent EVT/JOB V0 anchor: reviewed HEAD `16484fdf50760afbd98e1d85824ed352dd3a5585`; PREPROD Factory `34337677363` y App `34337677429` success; merge `26fb9c75b9a7361afccccdc111761ad10aac5fa4`; PROD Live Deploy `34340279918` y PROD Runtime Smoke `34340279922`, success sobre ese SHA.
 
 Esta evidencia valida los alcances expresamente citados. **No demuestra que todos los motores CEREBRO sean operativos o autónomos en PROD.**
 
