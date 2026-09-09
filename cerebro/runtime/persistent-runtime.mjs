@@ -6,6 +6,7 @@ import { EventBus, JobQueue } from './runtime.mjs';
 
 const SCHEMA_VERSION = 1;
 const PREPROD = 'PREPROD';
+const RESTART_RECOVERY_ERROR = 'PROCESS_RESTART_RECOVERY';
 
 function nonEmpty(value, label) {
   if (typeof value !== 'string' || value.length === 0) throw new TypeError(`${label} must be a non-empty string`);
@@ -37,17 +38,19 @@ function fsyncDirectory(directory) {
 
 function ensureDirectoryEntriesDurable(directory) {
   const target = path.resolve(directory);
-  const missing = [];
+  fs.mkdirSync(target, { recursive: true });
+  const root = path.parse(target).root;
+  const chain = [];
   let current = target;
-  while (!fs.existsSync(current)) {
-    missing.push(current);
+  while (true) {
+    chain.push(current);
+    if (current === root) break;
     const parent = path.dirname(current);
-    if (parent === current) throw new Error(`cannot resolve existing ancestor for journal directory: ${target}`);
+    if (parent === current) break;
     current = parent;
   }
-  fs.mkdirSync(target, { recursive: true });
-  missing.reverse();
-  for (const created of missing) fsyncDirectory(path.dirname(created));
+  chain.reverse();
+  for (const entry of chain) fsyncDirectory(entry);
 }
 
 function decodeEnvelope(bytes, kind) {
@@ -130,6 +133,7 @@ function replayEvents(operations) {
 
 function replayJobs(operations) {
   const queue = new JobQueue();
+  const states = new Map();
   let last = null;
   for (const op of operations) {
     if (!op || typeof op.op !== 'string') throw new Error('invalid JOB-001 journal operation');
@@ -137,21 +141,39 @@ function replayJobs(operations) {
       last = queue.enqueue(op.input);
       if (!last.accepted) throw new Error('JOB-001 journal contains a duplicate accepted enqueue');
       assertPersistedPreprod(last.job.context, 'JOB-001 job');
-    } else if (op.op === 'claim') last = queue.claim(op.company_id);
-    else if (op.op === 'claimContext') {
+      states.set(last.job.job_id, last.job);
+    } else if (op.op === 'claim') {
+      last = queue.claim(op.company_id);
+      if (last) states.set(last.job_id, last);
+    } else if (op.op === 'claimContext') {
       assertPersistedPreprod(op.context, 'JOB-001 claimContext operation');
       last = queue.claimContext(op.context);
-    } else if (op.op === 'complete') last = queue.complete(op.job_id, op.company_id, op.result);
-    else if (op.op === 'completeContext') {
+      if (last) states.set(last.job_id, last);
+    } else if (op.op === 'complete') {
+      last = queue.complete(op.job_id, op.company_id, op.result);
+      states.set(last.job_id, last);
+    } else if (op.op === 'completeContext') {
       assertPersistedPreprod(op.context, 'JOB-001 completeContext operation');
       last = queue.completeContext(op.job_id, op.context, op.result);
-    } else if (op.op === 'fail') last = queue.fail(op.job_id, op.company_id, op.error);
-    else if (op.op === 'failContext') {
+      states.set(last.job_id, last);
+    } else if (op.op === 'fail') {
+      last = queue.fail(op.job_id, op.company_id, op.error);
+      states.set(last.job_id, last);
+    } else if (op.op === 'failContext') {
       assertPersistedPreprod(op.context, 'JOB-001 failContext operation');
       last = queue.failContext(op.job_id, op.context, op.error);
+      states.set(last.job_id, last);
     } else throw new Error(`unsupported JOB-001 journal operation: ${op.op}`);
   }
-  return { queue, last };
+  return { queue, last, states };
+}
+
+function restartRecoveryOperations(operations) {
+  const { states } = replayJobs(operations);
+  return [...states.values()]
+    .filter(job => job.status === 'RUNNING')
+    .sort((a,b) => a.job_id.localeCompare(b.job_id))
+    .map(job => durableSnapshot({ op:'fail', job_id:job.job_id, company_id:job.context.company_id, error:RESTART_RECOVERY_ERROR }));
 }
 
 export class PersistentEventBus {
@@ -195,6 +217,13 @@ export class PersistentJobQueue {
     if (environment !== PREPROD) throw new Error('JOB-001 persistent V0 accepts exact PREPROD only');
     this.#journal = new AtomicV8Journal({ file_path, kind: 'JOB-001' });
     this.#operations = this.#journal.load();
+    const recoveries = restartRecoveryOperations(this.#operations);
+    if (recoveries.length) {
+      const recovered = [...this.#operations, ...recoveries];
+      replayJobs(recovered);
+      this.#journal.commit(recovered);
+      this.#operations = recovered;
+    }
     this.#queue = replayJobs(this.#operations).queue;
   }
 
@@ -271,7 +300,8 @@ export const PERSISTENT_RUNTIME_V0_CONTRACT = Object.freeze({
   autonomous_prod: false,
   prod_writes: false,
   single_writer_reference: true,
-  crash_consistency: 'durable-parent-entries+temp-write+fsync+atomic-rename+directory-fsync',
+  crash_consistency: 'ancestor-chain-fsync+temp-write+fsync+atomic-rename+directory-fsync',
+  restart_recovery: 'durable-running-to-retry-or-failed',
   integrity: 'sha256-envelope',
   ambiguous_durability: 'poison-until-reopen',
   rebuild: 'deterministic-operation-replay'
