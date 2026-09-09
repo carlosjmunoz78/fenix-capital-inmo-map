@@ -14,6 +14,7 @@ test('persistent runtime contract is PREPROD-only, local and zero-additional-cos
   assert.equal(PERSISTENT_RUNTIME_V0_CONTRACT.supabase_required,false);
   assert.equal(PERSISTENT_RUNTIME_V0_CONTRACT.autonomous_prod,false);
   assert.equal(PERSISTENT_RUNTIME_V0_CONTRACT.ambiguous_durability,'poison-until-reopen');
+  assert.match(PERSISTENT_RUNTIME_V0_CONTRACT.crash_consistency,/durable-parent-entries/);
   assert.deepEqual(PERSISTENT_RUNTIME_V0_CONTRACT.engines,['EVT-001','JOB-001']);
   assert.throws(()=>createPersistentRuntimeIO({directory:tmp(),environment:'PROD'}),/PREPROD/);
 });
@@ -27,6 +28,42 @@ test('EVT/JOB reject PROD-labeled operation context before persistence',()=>{
   const jobs=new PersistentJobQueue({file_path:path.join(dir,'jobs.v8journal')});
   assert.throws(()=>jobs.enqueue({name:'X',context:{...ctx('co-a','JOB-001'),environment:'PROD'},idempotency_key:'prod-job'}),/exact PREPROD context/);
   assert.equal(jobs.operation_count,0);
+});
+
+test('first commit fsyncs parent directory entries for newly-created nested journal directory',()=>{
+  const base=tmp();
+  const nested=path.join(base,'level-a','level-b');
+  const file=path.join(nested,'events.v8journal');
+  const originalOpen=fs.openSync;
+  const originalClose=fs.closeSync;
+  const originalFsync=fs.fsyncSync;
+  const opened=new Map();
+  const synced=[];
+  try {
+    fs.openSync=(target,...args)=>{
+      const fd=originalOpen(target,...args);
+      opened.set(fd,typeof target==='string'?path.resolve(target):String(target));
+      return fd;
+    };
+    fs.fsyncSync=(fd)=>{
+      synced.push(opened.get(fd));
+      return originalFsync(fd);
+    };
+    fs.closeSync=(fd)=>{
+      opened.delete(fd);
+      return originalClose(fd);
+    };
+    const bus=new PersistentEventBus({file_path:file});
+    assert.equal(bus.publish({type:'FIRST',context:ctx(),idempotency_key:'first'}).accepted,true);
+  } finally {
+    fs.openSync=originalOpen;
+    fs.closeSync=originalClose;
+    fs.fsyncSync=originalFsync;
+  }
+  assert.equal(fs.existsSync(file),true);
+  assert.ok(synced.includes(path.resolve(base)),'base parent directory must be fsynced');
+  assert.ok(synced.includes(path.resolve(base,'level-a')),'new intermediate parent must be fsynced');
+  assert.ok(synced.includes(path.resolve(nested)),'leaf journal directory must be fsynced after rename');
 });
 
 test('EVT-001 survives process-style restart and preserves idempotency',()=>{
@@ -63,16 +100,22 @@ test('EVT-001 snapshots accepted input so caller mutation cannot rewrite history
 test('post-rename directory fsync failure poisons writer until reopen without deleting installed history',()=>{
   const file=path.join(tmp(),'events.v8journal');
   const bus=new PersistentEventBus({file_path:file});
+  const originalRename=fs.renameSync;
   const originalFsync=fs.fsyncSync;
-  let calls=0;
+  let renamed=false;
   try {
+    fs.renameSync=(from,to)=>{
+      const result=originalRename(from,to);
+      renamed=true;
+      return result;
+    };
     fs.fsyncSync=(fd)=>{
-      calls+=1;
-      if(calls===2) throw new Error('simulated directory fsync failure');
+      if(renamed) throw new Error('simulated post-rename directory fsync failure');
       return originalFsync(fd);
     };
     assert.throws(()=>bus.publish({type:'FIRST',context:ctx(),idempotency_key:'first'}),/durability is ambiguous.*reopen required/);
   } finally {
+    fs.renameSync=originalRename;
     fs.fsyncSync=originalFsync;
   }
   assert.throws(()=>bus.publish({type:'SECOND',context:ctx(),idempotency_key:'second'}),/journal is poisoned.*reopen required/);
@@ -120,7 +163,7 @@ test('JOB-001 snapshots enqueue and completion data against caller mutation',()=
   const file=path.join(tmp(),'jobs.v8journal');
   const input={name:'sync-crm',context:ctx('co-a','JOB-001'),payload:{customer_id:'c1'},idempotency_key:'job-stable'};
   let jobs=new PersistentJobQueue({file_path:file});
-  const enqueued=jobs.enqueue(input);
+  jobs.enqueue(input);
   input.payload.customer_id='mutated';
   input.context.company_id='co-b';
   const claimed=jobs.claim('co-a');
@@ -133,6 +176,21 @@ test('JOB-001 snapshots enqueue and completion data against caller mutation',()=
   const duplicate=jobs.enqueue({name:'sync-crm',context:ctx('co-a','JOB-001'),payload:{customer_id:'different'},idempotency_key:'job-stable'});
   assert.equal(duplicate.accepted,false);
   assert.equal(jobs.claim('co-b'),null);
+});
+
+test('JOB-001 validates snapshotted claimContext so changing accessors cannot persist PROD context',()=>{
+  const file=path.join(tmp(),'jobs.v8journal');
+  let jobs=new PersistentJobQueue({file_path:file});
+  jobs.enqueue({name:'safe',context:ctx('co-a','JOB-001'),idempotency_key:'safe'});
+  let reads=0;
+  const changing={company_id:'co-a',engine_id:'JOB-001',version:'0.1.0'};
+  Object.defineProperty(changing,'environment',{enumerable:true,get(){reads+=1;return reads<=2?'PREPROD':'PROD';}});
+  assert.throws(()=>jobs.claimContext(changing),/exact PREPROD context/);
+  assert.equal(jobs.operation_count,1);
+  jobs=new PersistentJobQueue({file_path:file});
+  const claimed=jobs.claimContext(ctx('co-a','JOB-001'));
+  assert.equal(claimed.status,'RUNNING');
+  assert.equal(claimed.context.environment,'PREPROD');
 });
 
 test('JOB-001 company and full-context claims remain isolated after persistence',()=>{
