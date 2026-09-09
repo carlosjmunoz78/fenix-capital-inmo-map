@@ -6,19 +6,19 @@
 
 ## Existing-system preservation boundary
 
-CEREBRO code under `cerebro/` wraps and references existing systems; it does not replace their runtime contracts. Existing-system bindings are read-only/contract-only until live evidence proves more.
+CEREBRO code under `cerebro/` wraps and references existing systems; it does not replace their runtime contracts. Evidence status is tracked separately from binding existence in `evidence/phase2-existing-bindings-audit.json`.
 
-## Phase 2 bindings
+## Phase 2 bindings + current evidence state
 
-- `CORE-001` → existing core contracts, live state POR AUDITAR.
-- `SUP-001` → supervisor contracts, live state POR AUDITAR.
-- `TRN-001` → training contracts, live state POR AUDITAR.
-- `APP-001` → App Fénix contracts, preserve existing behavior.
-- `CRM-001` → CRM contracts, preserve existing behavior.
-- `DOC-001` → document contracts, preserve existing behavior.
-- `SEO-001` → SEO contracts, preserve existing behavior.
-- `WEB-001` → web contracts, preserve existing behavior.
-- `LAB-TRD` → Trading LAB, explicitly isolated from App/CRM/CEREBRO PROD credentials and execution.
+- `CORE-001` → existing core/app contracts → `DOCUMENTED_PARTIAL`; no formal live CEREBRO Core claim.
+- `SUP-001` → governance/supervision source surfaces → `DOCUMENTED_PARTIAL`; dedicated live supervisor audit still required.
+- `TRN-001` → knowledge/training source surfaces → `DOCUMENTED_PARTIAL`; no autonomous training-engine claim.
+- `APP-001` → existing App Fénix contracts → `CONFIRMED_OPERATIONAL` for the existing App surface only, via exact-SHA PROD deploy/smoke on `6bf6af92c1106884da87fb9a659f807093d47e0a`; this is not CEREBRO autonomy.
+- `CRM-001` → CRM/Supabase boundary → `UNKNOWN_REQUIRES_AUDIT`.
+- `DOC-001` → document contracts and previously green document/backfill scope → `DOCUMENTED_PARTIAL`; full DOC engine not proven.
+- `SEO-001` → SEO contract target → `UNKNOWN_REQUIRES_AUDIT`.
+- `WEB-001` → WordPress/web contract target → `UNKNOWN_REQUIRES_AUDIT` and must be audited in its own system/repository.
+- `LAB-TRD` → Trading LAB → `UNKNOWN_REQUIRES_AUDIT`, explicitly isolated from App/CRM/CEREBRO PROD credentials and execution.
 
 ## Phase 3
 
@@ -44,4 +44,4 @@ Commands and chat are Gateway-mediated; direct model access is forbidden by cont
 
 ## Shared safety dependencies
 
-Every promoted engine must retain: contracts, permissions, tests, evaluation, tribunal, observability, backup, rollback, rebuild, measured cost, policy and PREPROD evidence. Green scaffold/reference status is not equivalent to autonomous production readiness.
+Every promoted engine must retain: contracts, permissions, tests, evaluation, tribunal, observability, backup, rollback, rebuild, measured cost, policy and PREPROD evidence. Green scaffold/reference or read-only audit status is not equivalent to autonomous production readiness.

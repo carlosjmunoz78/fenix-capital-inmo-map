@@ -1,23 +1,25 @@
 # CEREBRO OS · CURRENT STATE
 
-Evidence anchor: main `c2eb030e2e8ed0ab45ca58775a7183e359e3d2e9` after Phase 5 merge. Structured evidence: `docs/EVIDENCE.json`.
+Evidence anchors are scoped to the change they prove; they are not intended to mirror every later documentation-only `main` SHA. Structured Phase 5 evidence: `docs/EVIDENCE.json`. Phase 2 binding audit: `evidence/phase2-existing-bindings-audit.json`.
 
 ## HECHO
 
 - FACT-001 Engine Factory V0: structural/reference green.
 - GOV-001 Engine Registry V0: 177/177 canonical engine IDs registered; scaffold generation deterministic and reproducible.
+- Phase 2 existing-engine wrapper registry: structural/read-only binding layer green.
+- Phase 2 read-only evidence audit V0: complete for all nine bindings without activation or writes.
+- `APP-001`: `CONFIRMED_OPERATIONAL` for the existing App surface only, based on exact-SHA successful PROD deploy/runtime smoke for `6bf6af92c1106884da87fb9a659f807093d47e0a` (`34293941974`, `34293942069`). This does not imply autonomous CEREBRO execution.
 - Phase 4 multi-company bootstrap V0: structural/reference green for 17 canonical engines.
 - Phase 5 Console/Gateway V0: structural/reference green for `CONSOLE-001`, `CHAT-001`, `CTX-001`, `CMD-001`, `ACTGW-001`.
-- Phase 5 exact-SHA production safety evidence: PROD Live Deploy `34292739019` success and PROD Runtime Smoke `34292739031` success on `c2eb030e2e8ed0ab45ca58775a7183e359e3d2e9`.
 
 ## EXISTENTE
 
-- App Fénix and its current production pipeline/contracts remain existing systems and were preserved by these additive CEREBRO changes.
-- CEREBRO V0 code is additive and isolated under `cerebro/`; this statement is about preservation of the repository boundary, not live operational proof for every external integration.
+- App Fénix and its current production pipeline/contracts are existing systems and were preserved by these additive CEREBRO changes.
+- CEREBRO V0 code is additive and isolated under `cerebro/`; preservation does not imply live proof for every external integration.
 
 ## PARCIAL
 
-- Phase 2 existing-engine bindings are structural wrappers/read-only contracts for `CORE-001`, `SUP-001`, `TRN-001`, `APP-001`, `CRM-001`, `DOC-001`, `SEO-001`, `WEB-001`, `LAB-TRD`. Live operational status of each bound system remains to be verified independently.
+- `CORE-001`, `SUP-001`, `TRN-001`, `DOC-001`: `DOCUMENTED_PARTIAL`; source/document/scope evidence exists but does not prove a complete live CEREBRO engine.
 - Phase 3 `RUNTIME-001`, `EVT-001`, `JOB-001`, `FINOPS-001` have executable V0 reference implementations, not autonomous PROD engines.
 
 ## DEFINIDO
@@ -27,8 +29,8 @@ Evidence anchor: main `c2eb030e2e8ed0ab45ca58775a7183e359e3d2e9` after Phase 5 m
 
 ## POR AUDITAR
 
-- Live evidence for Phase 2 existing-engine bindings, including current CRM, Supabase, Notion, WordPress, SEO, Training, web and supervisor/core relationships as applicable.
-- `LAB-TRD` remains isolated and requires its own separate audit; this documentation does not claim live Trading integration with CEREBRO PROD.
+- `CRM-001`, `SEO-001`, `WEB-001`: `UNKNOWN_REQUIRES_AUDIT`; no stronger live claim is supported by this repository audit.
+- `LAB-TRD`: `UNKNOWN_REQUIRES_AUDIT`, explicitly isolated and requiring a separate audit; no Trading integration with CEREBRO PROD is claimed.
 - Real production autonomy per engine.
 - Persistent job/event infrastructure beyond the V0 reference implementation.
 - Promotion gates for each individual engine before autonomous PROD.
@@ -40,4 +42,4 @@ Evidence anchor: main `c2eb030e2e8ed0ab45ca58775a7183e359e3d2e9` after Phase 5 m
 - HUMAN_REQUIRED_SET: `["LEGAL_REQUIRED","SIGNATURE_REQUIRED","LOW_CONFIDENCE","HIGH_RISK","POLICY_CONFLICT","SECURITY_INCIDENT","MONEY_LIMIT","CUSTOMER_HUMAN_REQUEST"]`.
 - Trading remains isolated.
 - Additional cost target remains 0 €.
-- No engine becomes autonomous PROD solely because its scaffold/reference implementation is green.
+- No engine becomes autonomous PROD solely because its scaffold/reference implementation or read-only evidence audit is green.

@@ -1,5 +1,21 @@
 # CEREBRO OS · CHANGELOG
 
+## 2026-09-09 · Phase 2 read-only evidence audit V0
+
+- Audited all nine existing-engine bindings without activation, writes or new cost.
+- `APP-001` moved at evidence level to `CONFIRMED_OPERATIONAL` for the existing App surface only, based on exact-SHA PROD Live Deploy `34293941974` and PROD Runtime Smoke `34293942069` on `6bf6af92c1106884da87fb9a659f807093d47e0a`.
+- `CORE-001`, `SUP-001`, `TRN-001`, `DOC-001` remain `DOCUMENTED_PARTIAL`.
+- `CRM-001`, `SEO-001`, `WEB-001`, `LAB-TRD` remain `UNKNOWN_REQUIRES_AUDIT`; Trading stays isolated and requires separate audit.
+- Added machine-validated evidence ledger and tests preventing partial/source-only evidence from being mislabeled as live confirmation.
+- No binding was enabled for autonomous PROD execution.
+
+## 2026-09-09 · Documentation closure
+
+- PR #165 merged as `6bf6af92c1106884da87fb9a659f807093d47e0a`.
+- Canonical state, dependency map, runbook, evidence, changelog, backup/rebuild and autonomy documentation aligned with Phase 4/5 evidence.
+- Added explicit emergency rollback procedure tied to `docs/PROD_ROLLBACK_RUNBOOK.md`.
+- PROD Live Deploy `34293941974` and PROD Runtime Smoke `34293942069` success on exact merge SHA.
+
 ## 2026-09-09 · Phase 5 Console/Gateway V0
 
 - PR #164 merged as `c2eb030e2e8ed0ab45ca58775a7183e359e3d2e9`.
@@ -29,4 +45,4 @@
 
 ## Status semantics
 
-A merge/deploy entry records structural/reference evidence for that scope. It must not be read as proof that every named engine is operational or autonomous in production.
+A merge/deploy entry records evidence only for its stated scope. `CONFIRMED_OPERATIONAL` for an existing surface does not grant autonomous CEREBRO PROD status.

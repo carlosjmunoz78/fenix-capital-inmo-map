@@ -1,0 +1,102 @@
+{
+  "schema_version": "1.0.0",
+  "audit_mode": "READ_ONLY_NO_ACTIVATION",
+  "audited_from_main_sha": "6bf6af92c1106884da87fb9a659f807093d47e0a",
+  "prod_execution_enabled": false,
+  "autonomous_prod": false,
+  "additional_cost_target_eur": 0,
+  "allowed_evidence_states": [
+    "CONFIRMED_OPERATIONAL",
+    "DOCUMENTED_PARTIAL",
+    "DEFINED_NOT_BUILT",
+    "PROPOSED",
+    "UNKNOWN_REQUIRES_AUDIT"
+  ],
+  "engines": [
+    {
+      "engine_id": "CORE-001",
+      "evidence_state": "DOCUMENTED_PARTIAL",
+      "live_claim": false,
+      "evidence": [
+        { "type": "source", "ref": "src/App.tsx", "result": "exists" },
+        { "type": "workflow_contract", "ref": ".github/workflows/prod-runtime-smoke.yml", "result": "exists" }
+      ],
+      "rationale": "App/runtime behavior and production guards exist, but there is no evidence that a formal CEREBRO Core engine is live."
+    },
+    {
+      "engine_id": "SUP-001",
+      "evidence_state": "DOCUMENTED_PARTIAL",
+      "live_claim": false,
+      "evidence": [
+        { "type": "source", "ref": "src/AnaGovernance.tsx", "result": "exists" },
+        { "type": "source", "ref": "src/AnaOperationalPreparationGuard.tsx", "result": "binding_reference_requires_independent_live_verification" }
+      ],
+      "rationale": "Governance/supervision surfaces are present in source, but no exact live supervisor-engine smoke was collected in this audit."
+    },
+    {
+      "engine_id": "TRN-001",
+      "evidence_state": "DOCUMENTED_PARTIAL",
+      "live_claim": false,
+      "evidence": [
+        { "type": "source", "ref": "src/AnaKnowledgeBlock.tsx", "result": "exists" },
+        { "type": "source", "ref": "src/AnaKnowledgeReviewGuard.tsx", "result": "binding_reference_requires_independent_live_verification" },
+        { "type": "document", "ref": "docs/CEREBRO_COMMERCIAL_KNOWLEDGE.md", "result": "binding_reference" }
+      ],
+      "rationale": "Knowledge/training surfaces exist, but this is not evidence that TRN-001 is an operational autonomous training engine."
+    },
+    {
+      "engine_id": "APP-001",
+      "evidence_state": "CONFIRMED_OPERATIONAL",
+      "live_claim": true,
+      "evidence": [
+        { "type": "source", "ref": "src/App.tsx", "result": "exists" },
+        { "type": "live_exact_sha", "workflow": "PROD Live Deploy", "run_id": 34293941974, "head_sha": "6bf6af92c1106884da87fb9a659f807093d47e0a", "conclusion": "success" },
+        { "type": "live_exact_sha", "workflow": "PROD Runtime Smoke", "run_id": 34293942069, "head_sha": "6bf6af92c1106884da87fb9a659f807093d47e0a", "conclusion": "success" }
+      ],
+      "rationale": "The existing App is live and exact-SHA deploy/runtime smoke are green. This confirms the existing App surface, not autonomous CEREBRO execution."
+    },
+    {
+      "engine_id": "CRM-001",
+      "evidence_state": "UNKNOWN_REQUIRES_AUDIT",
+      "live_claim": false,
+      "evidence": [
+        { "type": "binding_reference", "ref": "src", "result": "broad_scope_not_sufficient" },
+        { "type": "binding_reference", "ref": "supabase", "result": "source_of_truth_boundaries_not_audited" }
+      ],
+      "rationale": "CRM source-of-truth, Supabase boundaries and live behavior require a dedicated read-only audit before any stronger claim."
+    },
+    {
+      "engine_id": "DOC-001",
+      "evidence_state": "DOCUMENTED_PARTIAL",
+      "live_claim": false,
+      "evidence": [
+        { "type": "document", "ref": "docs/DOCUMENT_CLASSIFICATION_POLICY_20260903.md", "result": "binding_reference" },
+        { "type": "data_contract", "ref": "data/legacy-expediente-destination-map.json", "result": "binding_reference" },
+        { "type": "production_scope", "ref": "PR#160/intervinientes-existing-document-backfill", "result": "green_scope_not_full_engine" }
+      ],
+      "rationale": "A specific document/backfill production scope is green, but that does not prove the full DOC-001 engine operational."
+    },
+    {
+      "engine_id": "SEO-001",
+      "evidence_state": "UNKNOWN_REQUIRES_AUDIT",
+      "live_claim": false,
+      "evidence": [],
+      "rationale": "No live SEO implementation is asserted from this repository."
+    },
+    {
+      "engine_id": "WEB-001",
+      "evidence_state": "UNKNOWN_REQUIRES_AUDIT",
+      "live_claim": false,
+      "evidence": [],
+      "rationale": "WordPress/web implementation must be audited in its own system/repository."
+    },
+    {
+      "engine_id": "LAB-TRD",
+      "evidence_state": "UNKNOWN_REQUIRES_AUDIT",
+      "live_claim": false,
+      "isolated": true,
+      "evidence": [],
+      "rationale": "Trading remains isolated and requires a separate audit; no credentials or execution path are inferred."
+    }
+  ]
+}
