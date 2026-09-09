@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "phase_5": {
+    "reviewed_head_sha": "2180258a3ae91697d6bd988361996afa62032f72",
+    "merge_sha": "c2eb030e2e8ed0ab45ca58775a7183e359e3d2e9",
+    "preprod": {
+      "factory": { "run_id": 34292418628, "conclusion": "success", "head_sha": "2180258a3ae91697d6bd988361996afa62032f72" },
+      "app": { "run_id": 34292418604, "conclusion": "success", "head_sha": "2180258a3ae91697d6bd988361996afa62032f72" },
+      "tribunal": { "conclusion": "clean_no_major_issues", "head_sha": "2180258a3ae91697d6bd988361996afa62032f72" }
+    },
+    "prod": {
+      "live_deploy": { "run_id": 34292739019, "conclusion": "success", "head_sha": "c2eb030e2e8ed0ab45ca58775a7183e359e3d2e9" },
+      "runtime_smoke": { "run_id": 34292739031, "conclusion": "success", "head_sha": "c2eb030e2e8ed0ab45ca58775a7183e359e3d2e9" }
+    },
+    "scope_status": "STRUCTURAL_REFERENCE_GREEN",
+    "autonomous_prod": false
+  }
+}

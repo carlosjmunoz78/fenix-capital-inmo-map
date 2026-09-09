@@ -1,10 +1,27 @@
-# CEREBRO OS · Engine Factory + Shared Runtime V0
+# CEREBRO OS · Engine Factory, Runtime, Multiempresa y Console V0
 
-Estado de evidencia: **PREPROD_CANDIDATE** hasta que CI confirme este branch. Este árbol se mantiene separado del runtime funcional de App Fénix: no cambia Supabase, contratos actuales ni rutas PROD.
+Estado documental: **ACTUALIZADO A MAIN `c2eb030e2e8ed0ab45ca58775a7183e359e3d2e9`**. Este árbol sigue separado del runtime funcional de App Fénix y no sustituye App, CRM, Supabase, Notion, WordPress, SEO, Training ni Trading.
+
+## Estado por fase
+
+- **FACT-001 / GOV-001 — HECHO · estructural/reference green.** Factory V0 y registro canónico de 177 motores validados; 177 scaffolds reproducibles, sin afirmar que los 177 motores estén operativos.
+- **Phase 2 — HECHO estructural / POR AUDITAR live.** Bindings conservadores para `CORE-001`, `SUP-001`, `TRN-001`, `APP-001`, `CRM-001`, `DOC-001`, `SEO-001`, `WEB-001` y `LAB-TRD`; read-only/contract-only y sin convertir evidencia histórica en evidencia viva.
+- **Phase 3 — HECHO V0 reference / DEFINIDO según motor.** `RUNTIME-001`, `EVT-001`, `JOB-001` y `FINOPS-001` tienen referencia ejecutable PREPROD; `DBOFF-001`, `STOROFF-001`, `FREE-001` y `AIBUD-001` permanecen definidos como contratos V0, no operativos autónomos.
+- **Phase 4 — HECHO · estructural/reference green.** Bootstrap multiempresa de 17 motores con aislamiento por tenant, PREPROD-only, HUMAN_REQUIRED canónico y promoción PROD autónoma deshabilitada.
+- **Phase 5 — HECHO · estructural/reference green.** `CONSOLE-001`, `CHAT-001`, `CTX-001`, `CMD-001` y `ACTGW-001` implementados como Console/Gateway V0: selector de empresa/contexto, sesiones, historial, auditoría, consulta de motores, chat y órdenes mediados por Gateway, nunca acceso directo a un modelo.
+
+## Evidencia vigente
+
+Main actual tras Phase 5: `c2eb030e2e8ed0ab45ca58775a7183e359e3d2e9`. La asociación máquina-verificable de cada run, resultado y SHA está en `docs/EVIDENCE.json`.
+
+- PR #163 Phase 4: PREPROD Factory/App green; merge `cd04fa8ccdbbb5c4945258d579e6bfb8efe1ea01`; PROD Live Deploy y PROD Runtime Smoke green sobre ese SHA.
+- PR #164 Phase 5: HEAD revisado `2180258a3ae91697d6bd988361996afa62032f72`; PREPROD Factory/App green; Codex sin issues mayores; merge `c2eb030e2e8ed0ab45ca58775a7183e359e3d2e9`; PROD Live Deploy run `34292739019` y PROD Runtime Smoke run `34292739031`, ambos success sobre el SHA exacto.
+
+Esta evidencia valida que los cambios estructurales/reference no rompieron los gates existentes. **No demuestra que todos los motores CEREBRO sean operativos o autónomos en PROD.**
 
 ## Factory-first
 
-FACT-001 valida el registro canónico y genera de forma determinista el scaffold estructural de los 177 motores definidos en el Master V2, sin afirmar que estén operativos.
+FACT-001 valida el registro canónico y genera de forma determinista el scaffold estructural de los 177 motores definidos en el Master V2.
 
 ```bash
 cd cerebro
@@ -15,33 +32,22 @@ npm run generate -- --out ./.cerebro-generated
 
 Cada scaffold contiene `company_id`, `engine_id`, `environment` y `version`, además de manifest, config, contratos, permisos, políticas, eventos, jobs, handlers, tests, evaluación, tribunal, observabilidad, FinOps, backup, rollback, rebuild, training hooks y documentación.
 
-## Phase 2 · Connect existing engines without replacing them
+## Seguridad y no regresión
 
-`registry/existing-engine-bindings.json` registra los nueve objetivos canónicos de conexión: `CORE-001`, `SUP-001`, `TRN-001`, `APP-001`, `CRM-001`, `DOC-001`, `SEO-001`, `WEB-001` y `LAB-TRD`.
-
-Los bindings son deliberadamente **read-only/contract-only** y `prod_execution_enabled=false`. Un binding no convierte automáticamente evidencia histórica en evidencia operativa. Trading conserva aislamiento explícito.
-
-## Phase 3 · Shared runtime / zero-cost platform
-
-`runtime/runtime.mjs` implementa una referencia ejecutable para:
-
-- `RUNTIME-001`: runtime compartido, sin procesos por motor y sin escrituras PROD.
-- `EVT-001`: semántica outbox/inbox, idempotencia y aislamiento por `company_id`.
-- `JOB-001`: prioridad, timeout declarado, retry, idempotencia y resultado.
-- `FINOPS-001`: presupuesto adicional 0 € por defecto; exceso => `HUMAN_REQUIRED:MONEY_LIMIT`.
-
-`registry/zero-cost-platform.json` define además los contratos V0 de `DBOFF-001`, `STOROFF-001`, `FREE-001` y `AIBUD-001`. PostgreSQL/worker persistente sigue siendo el target antes de cualquier promoción autónoma PROD; la implementación actual es referencia determinista y testeable en PREPROD.
-
-## Seguridad de migración
-
-- No escribe en Supabase.
+- No escribe en Supabase desde estos V0 de CEREBRO.
 - No reemplaza App/CRM/WordPress/Notion/SEO/Training/Trading.
-- No habilita motores autónomos en PROD.
-- Permisos y acceso cross-company se mantienen `deny` por defecto.
-- `prod_writes=false` en RUNTIME-001 V0.
-- `enabled=false` y `autonomous_prod=false` en scaffolds.
-- El estado histórico del Master se conserva como `source_status`; la evidencia viva no auditada queda en `UNKNOWN_REQUIRES_AUDIT`.
+- Trading mantiene aislamiento explícito.
+- Acceso cross-company: deny por defecto.
+- PREPROD-only en Runtime/Multiempresa/Console V0.
+- `prod_execution_enabled=false`, `autonomous_prod=false` y sin promoción PROD autónoma.
+- Console conecta conceptualmente al CEREBRO Gateway; chat y comandos no acceden directamente a un modelo.
+- HUMAN_REQUIRED limitado a las razones canónicas del proyecto.
+- Coste adicional objetivo: 0 €.
 
 ## Rebuild
 
-Los 177 scaffolds se reconstruyen desde `registry/engine-registry.seed.json` + `factory.mjs`. RUNTIME/EVT/JOB son código declarativo bajo `runtime/`, sin dependencia de servicios de pago. La salida generada de Factory es desechable y reproducible.
+Los 177 scaffolds se reconstruyen desde `registry/engine-registry.seed.json` + `factory.mjs`. Runtime, Multiempresa y Console son código declarativo bajo `runtime/`, `multicompany/` y `console/`, sin dependencia obligatoria de servicios de pago. La salida generada de Factory es desechable y reproducible.
+
+## Documentación operativa
+
+Ver `docs/CURRENT_STATE.md`, `docs/EVIDENCE.json`, `docs/DEPENDENCY_MAP.md`, `docs/RUNBOOK.md`, `docs/CHANGELOG.md` y `docs/AUTONOMY_BACKUP_REBUILD.md` para estado de evidencia, dependencias, gates, rollback/rebuild y autonomía.
