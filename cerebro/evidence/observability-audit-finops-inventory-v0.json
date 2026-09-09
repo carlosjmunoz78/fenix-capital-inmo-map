@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "audit_type": "READ_ONLY_INVENTORY",
+  "source_main_sha": "d57d07344dbc093d953995d5fa0df45ecc2ab187",
+  "environment": "PREPROD",
+  "additional_cost_target_eur": 0,
+  "autonomous_prod": false,
+  "engines": {
+    "OBSERV-001": {
+      "name": "Motor de Observabilidad",
+      "master_status": "PARCIAL",
+      "evidence_state": "DOCUMENTED_PARTIAL",
+      "existing": [
+        "Factory scaffolds include observability artifacts",
+        "repository/GitHub Actions provide CI execution evidence",
+        "runtime and console expose in-memory operational state/audit surfaces"
+      ],
+      "gaps": [
+        "No normalized durable logs/metrics/traces store was found under cerebro/",
+        "No correlation_id contract across flows was found",
+        "No consolidated health panel or retention policy implementation was found"
+      ]
+    },
+    "AUD-001": {
+      "name": "Audit / Trazabilidad Inmutable",
+      "master_status": "PARCIAL",
+      "evidence_state": "DOCUMENTED_PARTIAL",
+      "existing": [
+        "SharedRuntime maintains an in-memory audit list",
+        "CerebroGatewayV0 maintains an in-memory audit list",
+        "Git history and Actions provide repository-level change/run traceability"
+      ],
+      "gaps": [
+        "No durable append-only CEREBRO audit store was found",
+        "No canonical who/what/when/before/after/reason/engine/result record was found",
+        "No retention/backup/rebuild contract for audit state was found"
+      ]
+    },
+    "FINOPS-001": {
+      "name": "Cost / FinOps Engine",
+      "master_status": "PLANIFICADO",
+      "evidence_state": "DOCUMENTED_PARTIAL",
+      "existing": [
+        "FinOpsGate exists in RUNTIME-001 reference",
+        "Additional-cost budget defaults to 0 EUR",
+        "Budget overflow escalates with canonical MONEY_LIMIT"
+      ],
+      "gaps": [
+        "No durable cost_events ledger was found",
+        "No cost aggregation by company/engine/environment/version/task/provider was found",
+        "No savings/alert/budget reporting surface was found"
+      ]
+    }
+  },
+  "preservation": {
+    "app_fenix_feature_code_touched": false,
+    "shared_runtime_replaced": false,
+    "supabase_heavy_logs_added": false,
+    "new_paid_service_added": false,
+    "trading_boundary_changed": false
+  },
+  "next_safe_scope": "Add parallel PREPROD local/self-hosted observability + audit + cost ledger reference, then compare against existing in-memory surfaces before any wiring."
+}
