@@ -68,10 +68,21 @@ function ruleOf(rule){
   if(own(s,'max_amount_eur_cents'))safeInt(r.max_amount_eur_cents,'rule.max_amount_eur_cents');
   return deepFreeze(r);
 }
+function policyRef(rule){return JSON.stringify([rule.rule_id,rule.version]);}
 function requestOf(req){const s=clonePlain(req,'$request');const hasConfidence=own(s,'confidence_bp'),hasAmount=own(s,'amount_eur_cents'),hasSource=own(s,'source');const r={action:nonEmpty(s.action,'action'),confidence_bp:hasConfidence?s.confidence_bp:null,amount_eur_cents:hasAmount?s.amount_eur_cents:null,legal_required:booleanField(s,'legal_required'),signature_required:booleanField(s,'signature_required'),high_risk:booleanField(s,'high_risk'),security_incident:booleanField(s,'security_incident'),customer_human_request:booleanField(s,'customer_human_request'),source:hasSource?s.source:'UNSPECIFIED'};if(r.confidence_bp!==null)safeInt(r.confidence_bp,'confidence_bp',0,10_000);if(r.amount_eur_cents!==null)safeInt(r.amount_eur_cents,'amount_eur_cents');nonEmpty(r.source,'source');return deepFreeze(r);}
 function human(reason,context,request,policy=null){if(!HUMAN_REQUIRED_SET.has(reason))throw new Error('non-canonical HUMAN_REQUIRED reason');return deepFreeze({status:'HUMAN_REQUIRED',reason,context,action:request.action,policy});}
 function match(rule,ctx,req){return rule.enabled&&rule.environment===ctx.environment&&(rule.company_id==='*'||rule.company_id===ctx.company_id)&&(rule.engine_id==='*'||rule.engine_id===ctx.engine_id)&&(rule.action==='*'||rule.action===req.action);}
 function specificity(rule){return Number(rule.company_id!=='*')+Number(rule.engine_id!=='*')+Number(rule.action!=='*');}
+function directHumanReason(req){
+  const reasons=[];
+  if(req.security_incident)reasons.push('SECURITY_INCIDENT');
+  if(req.legal_required)reasons.push('LEGAL_REQUIRED');
+  if(req.signature_required)reasons.push('SIGNATURE_REQUIRED');
+  if(req.high_risk)reasons.push('HIGH_RISK');
+  if(req.customer_human_request)reasons.push('CUSTOMER_HUMAN_REQUEST');
+  reasons.sort((a,b)=>PRIORITY_BY_REASON[b]-PRIORITY_BY_REASON[a]||a.localeCompare(b));
+  return reasons[0]??null;
+}
 
 export class PolicyEngine{
   #rules;#environment;#version;#audit=[];
@@ -81,11 +92,11 @@ export class PolicyEngine{
     const environment=own(opts,'environment')?opts.environment:'PREPROD',version=own(opts,'version')?opts.version:'0.1.0',rawRules=own(opts,'rules')?opts.rules:[];
     preprod(environment);this.#environment=environment;this.#version=nonEmpty(version,'version');
     const safeRules=clonePlain(rawRules,'$rules');if(!Array.isArray(safeRules))throw new TypeError('rules must be an array');
-    const rs=Array.prototype.map.call(safeRules,ruleOf),ids=new Set();for(const r of rs){const k=`${r.rule_id}@${r.version}`;if(ids.has(k))throw new Error(`duplicate policy rule version: ${k}`);ids.add(k);}this.#rules=Object.freeze(rs);
+    const rs=Array.prototype.map.call(safeRules,ruleOf),ids=new Set();for(const r of rs){const k=policyRef(r);if(ids.has(k))throw new Error(`duplicate policy rule version: ${k}`);ids.add(k);}this.#rules=Object.freeze(rs);
   }
   get environment(){return this.#environment;} get version(){return this.#version;}
-  evaluate(contextInput,requestInput){const ctx=contextOf(contextInput);if(ctx.environment!==this.#environment)throw new Error('context environment does not match policy engine');const req=requestOf(requestInput);let result;
-    if(req.security_incident)result=human('SECURITY_INCIDENT',ctx,req);else if(req.legal_required)result=human('LEGAL_REQUIRED',ctx,req);else if(req.signature_required)result=human('SIGNATURE_REQUIRED',ctx,req);else if(req.customer_human_request)result=human('CUSTOMER_HUMAN_REQUEST',ctx,req);else if(req.high_risk)result=human('HIGH_RISK',ctx,req);else{const ms=this.#rules.filter(r=>match(r,ctx,req));if(!ms.length)result=deepFreeze({status:'DENY',reason:'NO_MATCHING_POLICY',context:ctx,action:req.action,policy:null});else{const maxS=Math.max(...ms.map(specificity)),specific=ms.filter(r=>specificity(r)===maxS),maxP=Math.max(...specific.map(r=>r.priority)),top=specific.filter(r=>r.priority===maxP);if(top.length!==1)result=human('POLICY_CONFLICT',ctx,req,top.map(r=>`${r.rule_id}@${r.version}`).sort());else{const selected=top[0],policy=`${selected.rule_id}@${selected.version}`;if(selected.min_confidence_bp>0&&req.confidence_bp===null)result=human('LOW_CONFIDENCE',ctx,req,policy);else if(selected.max_amount_eur_cents!==null&&req.amount_eur_cents===null)result=human('LOW_CONFIDENCE',ctx,req,policy);else if(req.confidence_bp!==null&&req.confidence_bp<selected.min_confidence_bp)result=human('LOW_CONFIDENCE',ctx,req,policy);else if(selected.max_amount_eur_cents!==null&&req.amount_eur_cents>selected.max_amount_eur_cents)result=human('MONEY_LIMIT',ctx,req,policy);else if(selected.effect==='REVIEW')result=human('POLICY_CONFLICT',ctx,req,policy);else result=deepFreeze({status:selected.effect,reason:`POLICY_${selected.effect}`,context:ctx,action:req.action,policy});}}}
+  evaluate(contextInput,requestInput){const ctx=contextOf(contextInput);if(ctx.environment!==this.#environment)throw new Error('context environment does not match policy engine');const req=requestOf(requestInput);let result;const direct=directHumanReason(req);
+    if(direct)result=human(direct,ctx,req);else{const ms=this.#rules.filter(r=>match(r,ctx,req));if(!ms.length)result=deepFreeze({status:'DENY',reason:'NO_MATCHING_POLICY',context:ctx,action:req.action,policy:null});else{const maxS=Math.max(...ms.map(specificity)),specific=ms.filter(r=>specificity(r)===maxS),maxP=Math.max(...specific.map(r=>r.priority)),top=specific.filter(r=>r.priority===maxP);if(top.length!==1)result=human('POLICY_CONFLICT',ctx,req,top.map(policyRef).sort());else{const selected=top[0],policy=policyRef(selected);if(selected.min_confidence_bp>0&&req.confidence_bp===null)result=human('LOW_CONFIDENCE',ctx,req,policy);else if(selected.max_amount_eur_cents!==null&&req.amount_eur_cents===null)result=human('LOW_CONFIDENCE',ctx,req,policy);else if(req.confidence_bp!==null&&req.confidence_bp<selected.min_confidence_bp)result=human('LOW_CONFIDENCE',ctx,req,policy);else if(selected.max_amount_eur_cents!==null&&req.amount_eur_cents>selected.max_amount_eur_cents)result=human('MONEY_LIMIT',ctx,req,policy);else if(selected.effect==='REVIEW')result=human('POLICY_CONFLICT',ctx,req,policy);else result=deepFreeze({status:selected.effect,reason:`POLICY_${selected.effect}`,context:ctx,action:req.action,policy});}}}
     this.#audit.push(deepFreeze({type:'POLICY_EVALUATED',context:ctx,action:req.action,status:result.status,reason:result.reason,policy:result.policy??null}));return clonePlain(result);}
   auditLog(options={}){const opts=clonePlain(options,'$audit');if(!opts||typeof opts!=='object'||Array.isArray(opts))throw new TypeError('audit options must be a plain object');const requester=opts.requester_company_id,company=companyAccess(requester,own(opts,'company_id')?opts.company_id:requester);return this.#audit.filter(e=>e.context.company_id===company).map(clonePlain);}
 }
