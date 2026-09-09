@@ -10,15 +10,26 @@ const BLOCKED_STAGES=new Set(['firmado','cerrado','cierre','finalizado','baja','
 const normalize=(value:unknown)=>String(value??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toLowerCase();
 const allowedRole=(role:unknown)=>['direccion','financiero'].includes(normalize(role));
 const allowedStage=(stage:unknown)=>!BLOCKED_STAGES.has(normalize(stage));
+const looksCanonicalExpediente=(value:string)=>/^exp-/i.test(value.trim());
 const sleep=(ms:number)=>new Promise(resolve=>window.setTimeout(resolve,ms));
 
 async function waitForAuthenticatedSession(cancelled:()=>boolean){
  for(let attempt=0;attempt<12&&!cancelled();attempt++){
   const {data:{session}}=await supabase.auth.getSession();
-  if(session?.access_token)return true;
+  if(session?.access_token)return session;
   await sleep(250);
  }
- return false;
+ return null;
+}
+
+function sessionRole(session:Awaited<ReturnType<typeof supabase.auth.getSession>>['data']['session']){
+ const metadata=session?.user?.user_metadata as Record<string,unknown>|undefined;
+ const direct=metadata?.role;
+ if(typeof direct==='string'&&direct.trim())return direct;
+ const actor=typeof metadata?.actor_code==='string'?metadata.actor_code:'';
+ if(actor==='CARLOS-ADMIN'||actor==='DIR-TEST')return 'Dirección';
+ if(actor.startsWith('FIN-'))return 'Financiero';
+ return '';
 }
 
 export default function ExpedienteExistingBackfillGuard({expedienteCode}:{expedienteCode:string}){
@@ -30,19 +41,28 @@ export default function ExpedienteExistingBackfillGuard({expedienteCode}:{expedi
    if(cancelled||inFlight)return;
    inFlight=true;
    try{
-    if(!await waitForAuthenticatedSession(()=>cancelled))return;
-    const [ctx,detail]=await Promise.all([
-     fetchAppApi<SessionContext>('/session/context'),
-     fetchAppApi<Detail>(`/expedientes/${encodeURIComponent(expedienteCode)}`)
-    ]);
-    if(cancelled||ctx.status!==200||detail.status!==200||!allowedRole(ctx.data?.role))return;
-    const row=(detail.data?.expediente&&typeof detail.data.expediente==='object'?detail.data.expediente:detail.data?.item&&typeof detail.data.item==='object'?detail.data.item:detail.data) as Record<string,unknown>|null;
-    const canonicalCode=String(row?.expediente_code??row?.expediente??expedienteCode).trim();
+    const session=await waitForAuthenticatedSession(()=>cancelled);
+    if(cancelled||!session)return;
+
+    const ctx=await fetchAppApi<SessionContext>('/session/context');
+    const effectiveRole=ctx.status===200?ctx.data?.role:sessionRole(session);
+    if(!allowedRole(effectiveRole))return;
+
+    let canonicalCode=expedienteCode.trim();
+    let row:Record<string,unknown>|null=null;
+    if(!looksCanonicalExpediente(canonicalCode)){
+     const detail=await fetchAppApi<Detail>(`/expedientes/${encodeURIComponent(expedienteCode)}`);
+     if(cancelled||detail.status!==200)return;
+     row=(detail.data?.expediente&&typeof detail.data.expediente==='object'?detail.data.expediente:detail.data?.item&&typeof detail.data.item==='object'?detail.data.item:detail.data) as Record<string,unknown>|null;
+     canonicalCode=String(row?.expediente_code??row?.expediente??'').trim();
+    }
     if(!canonicalCode)return;
+
     const workspace=await fetchAppApi<Workspace>(`/expedientes/${encodeURIComponent(canonicalCode)}/workspace`);
     if(cancelled||workspace.status!==200)return;
     const stage=workspace.data?.lifecycle?.effective_stage||workspace.data?.lifecycle?.recorded_stage||workspace.data?.expediente?.stage||row?.stage;
     if(!allowedStage(stage))return;
+
     let previousRemaining=Number.POSITIVE_INFINITY;
     for(let batch=0;batch<16&&!cancelled;batch++){
      const result=await fetchEnvironmentApi<BackfillResult>('fenix-document-existing-backfill','',{
