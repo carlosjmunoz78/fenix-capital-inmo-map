@@ -23,7 +23,8 @@ test('contract preserves PREPROD, App/web, Supabase, Trading and autonomy bounda
   assert.equal(OPERATIONAL_LEDGERS_V0_CONTRACT.internal_mutable_state, 'module-private-weakmap-with-non-exported-commit-path');
   assert.equal(OPERATIONAL_LEDGERS_V0_CONTRACT.accepted_payload_grammar, 'finite-json-like-primitives+arrays+plain-data-objects-no-accessors-no-cycles');
   assert.equal(OPERATIONAL_LEDGERS_V0_CONTRACT.audit_when, 'canonical-iso8601-utc-instant-hash-covered');
-  assert.equal(OPERATIONAL_LEDGERS_V0_CONTRACT.cost_precision, 'micro-eur-safe-integer-with-number-resolution-bound');
+  assert.equal(OPERATIONAL_LEDGERS_V0_CONTRACT.cost_precision, 'micro-eur-safe-integer-with-ulp-aware-scaled-tolerance-and-number-resolution-bound');
+  assert.equal(OPERATIONAL_LEDGERS_V0_CONTRACT.micro_rounding_tolerance_cap, 0.125);
   assert.equal(OPERATIONAL_LEDGERS_V0_CONTRACT.aggregate_cost_precision, 'reject-number-aggregate-if-micro-eur-roundtrip-is-not-exact');
   assert.ok(OPERATIONAL_LEDGERS_V0_CONTRACT.max_reliable_cost_eur < 9_000_000_000);
 });
@@ -66,12 +67,14 @@ test('finops persists exact micro-euro events and aggregates by company engine a
   a.record({ context:ctx, correlation_id:'corr-c1', task_id:'task-1', provider:'LOCAL', cost_eur:0 });
   a.record({ context:ctx, correlation_id:'corr-c2', task_id:'task-2', provider:'API-X', cost_eur:0.125001 });
   a.record({ context:{...ctx, engine_id:'WEB-001'}, correlation_id:'corr-c3', task_id:'task-3', provider:'API-X', cost_eur:0.25 });
+  const ordinary = a.record({ context:ctx, correlation_id:'corr-c4', task_id:'task-4', provider:'LOCAL', cost_eur:17000.51 });
+  assert.equal(ordinary.cost_eur_micros, 17_000_510_000);
   const b = new CostLedgerV0({ file_path:file });
-  assert.deepEqual(b.aggregate({company_id:'fenix', engine_id:'SEO-001'}), { company_id:'fenix', engine_id:'SEO-001', provider:null, events:2, cost_eur:0.125001, cost_eur_micros:125001 });
+  assert.deepEqual(b.aggregate({company_id:'fenix', engine_id:'SEO-001', provider:'API-X'}), { company_id:'fenix', engine_id:'SEO-001', provider:'API-X', events:1, cost_eur:0.125001, cost_eur_micros:125001 });
   assert.deepEqual(b.aggregate({company_id:'fenix', provider:'API-X'}), { company_id:'fenix', engine_id:null, provider:'API-X', events:2, cost_eur:0.375001, cost_eur_micros:375001 });
   assert.throws(() => a.record({ context:ctx, correlation_id:'bad', task_id:'bad', cost_eur:0.0000001 }), /micro-euro/);
   assert.throws(() => a.record({ context:ctx, correlation_id:'too-large', task_id:'too-large', cost_eur:9_000_000_000.000001 }), /reliable micro-euro Number precision/);
-  assert.equal(a.operation_count, 3);
+  assert.equal(a.operation_count, 4);
 });
 
 test('finops aggregate rejects a Number result that cannot round-trip exact micro-euros', () => {
