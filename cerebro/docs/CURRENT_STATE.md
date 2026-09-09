@@ -17,7 +17,7 @@ Evidence anchor: main `c2eb030e2e8ed0ab45ca58775a7183e359e3d2e9` after Phase 5 m
 
 ## PARCIAL
 
-- Phase 2 bindings are structural wrappers/read-only contracts for `CORE-001`, `SUP-001`, `TRN-001`, `APP-001`, `CRM-001`, `DOC-001`, `SEO-001`, `WEB-001`, `LAB-TRD`. Live operational status of each bound system remains to be verified independently.
+- Phase 2 existing-engine bindings are structural wrappers/read-only contracts for `CORE-001`, `SUP-001`, `TRN-001`, `APP-001`, `CRM-001`, `DOC-001`, `SEO-001`, `WEB-001`, `LAB-TRD`. Live operational status of each bound system remains to be verified independently.
 - Phase 3 `RUNTIME-001`, `EVT-001`, `JOB-001`, `FINOPS-001` have executable V0 reference implementations, not autonomous PROD engines.
 
 ## DEFINIDO
@@ -37,7 +37,7 @@ Evidence anchor: main `c2eb030e2e8ed0ab45ca58775a7183e359e3d2e9` after Phase 5 m
 
 - `company_id`, `engine_id`, `environment`, `version` remain canonical context.
 - Cross-company access defaults to deny.
-- HUMAN_REQUIRED reasons: `LEGAL_REQUIRED`, `SIGNATURE_REQUIRED`, `LOW_CONFIDENCE`, `HIGH_RISK`, `POLICY_CONFLICT`, `SECURITY_INCIDENT`, `MONEY_LIMIT`, `CUSTOMER_HUMAN_REQUEST`.
+- HUMAN_REQUIRED_SET: `["LEGAL_REQUIRED","SIGNATURE_REQUIRED","LOW_CONFIDENCE","HIGH_RISK","POLICY_CONFLICT","SECURITY_INCIDENT","MONEY_LIMIT","CUSTOMER_HUMAN_REQUEST"]`.
 - Trading remains isolated.
 - Additional cost target remains 0 €.
 - No engine becomes autonomous PROD solely because its scaffold/reference implementation is green.
