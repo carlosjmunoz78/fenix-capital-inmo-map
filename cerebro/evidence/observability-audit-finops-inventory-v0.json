@@ -13,7 +13,7 @@
       "existing": [
         "Factory scaffolds include observability artifacts",
         "repository/GitHub Actions provide CI execution evidence",
-        "runtime and console expose in-memory operational state/audit surfaces"
+        "runtime, console and governance expose in-memory operational/audit surfaces"
       ],
       "gaps": [
         "No normalized durable logs/metrics/traces store was found under cerebro/",
@@ -28,6 +28,7 @@
       "existing": [
         "SharedRuntime maintains an in-memory audit list",
         "CerebroGatewayV0 maintains an in-memory audit list",
+        "PolicyEngine maintains a tenant-scoped in-memory evaluation audit surface exposed through auditLog()",
         "Git history and Actions provide repository-level change/run traceability"
       ],
       "gaps": [
