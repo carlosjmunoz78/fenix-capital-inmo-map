@@ -17,13 +17,14 @@ function normalized(v:unknown){return String(v??'').trim().toLocaleLowerCase('es
 function aliasIsSingleParticipant(alias:string,people:Person[]){const n=normalized(alias);return people.length>1&&people.some(p=>[personName(p),fullPersonName(p),p.comprador].some(v=>v&&normalized(v)===n));}
 function friendlyFromPeople(people:Person[]){return joinNames(people);}
 function applyVisibleTitle(h1:HTMLElement|null,visibleName:string,code:string){if(!h1||!visibleName)return;if(h1.textContent!==visibleName)h1.textContent=visibleName;if(h1.dataset.expedienteCode!==code)h1.dataset.expedienteCode=code;}
+function isMeaningfulCanonicalTitle(value:string,code:string){const n=normalized(value);return Boolean(n)&&n!=='expediente'&&n!==normalized(code);}
 
 export default function ExpedienteRenameGuard(){
  const {pathname}=useLocation();
  const match=pathname.match(/^\/expedientes\/([^/]+)$/);
  const code=match?.[1]?decodeURIComponent(match[1]):'';
  const[host,setHost]=useState<HTMLElement|null>(null),[canonicalTitle,setCanonicalTitle]=useState(''),[people,setPeople]=useState<Person[]>([]),[customName,setCustomName]=useState(''),[editing,setEditing]=useState(false),[name,setName]=useState(''),[busy,setBusy]=useState(false),[message,setMessage]=useState('');
- const visibleName=useMemo(()=>customName||friendlyFromPeople(people)||canonicalTitle||code,[customName,people,canonicalTitle,code]);
+ const visibleName=useMemo(()=>customName||friendlyFromPeople(people)||canonicalTitle,[customName,people,canonicalTitle]);
 
  async function loadPeople(){
   if(!code||!IS_PRODUCTION)return;
@@ -34,18 +35,18 @@ export default function ExpedienteRenameGuard(){
    setCustomName(current=>aliasIsSingleParticipant(current,rows)?'':current);
   }
  }
- useEffect(()=>{void loadPeople();},[code]);
+ useEffect(()=>{if(IS_PRODUCTION)void loadPeople();},[code]);
  useEffect(()=>{const onPeople=(event:Event)=>{const d=(event as CustomEvent<{expedienteId?:string}>).detail;if(IS_PRODUCTION&&(!d?.expedienteId||String(d.expedienteId)===String(code)))void loadPeople();};window.addEventListener('fenix-expediente-people-changed',onPeople);return()=>window.removeEventListener('fenix-expediente-people-changed',onPeople);},[code]);
 
  useEffect(()=>{
-  if(!code||pathname==='/expedientes/nuevo'){setHost(null);return;}
+  if(!IS_PRODUCTION||!code||pathname==='/expedientes/nuevo'){setHost(null);return;}
   const mount=()=>{
    const title=document.querySelector<HTMLElement>('.detail-exp-root .detail-master-title');
    if(!title)return;
    const h1=title.querySelector<HTMLElement>('h1');
    const current=String(h1?.textContent||'').trim();
-   if(current&&current!==visibleName)setCanonicalTitle(prev=>prev||current);
-   applyVisibleTitle(h1,visibleName,code);
+   if(isMeaningfulCanonicalTitle(current,code)&&current!==visibleName)setCanonicalTitle(current);
+   if(visibleName)applyVisibleTitle(h1,visibleName,code);
    let node=title.querySelector<HTMLElement>(':scope > .exp-rename-host');
    if(!node){node=document.createElement('div');node.className='exp-rename-host';title.appendChild(node);}
    setHost(prev=>prev===node?prev:node);
@@ -55,10 +56,10 @@ export default function ExpedienteRenameGuard(){
   observer.observe(document.body,{childList:true,subtree:true});
   return()=>{observer.disconnect();document.querySelectorAll('.exp-rename-host').forEach(x=>x.remove());setHost(null);};
  },[code,pathname,visibleName]);
- useEffect(()=>{applyVisibleTitle(document.querySelector<HTMLElement>('.detail-exp-root .detail-master-title h1'),visibleName,code);},[visibleName,code]);
+ useEffect(()=>{if(IS_PRODUCTION)applyVisibleTitle(document.querySelector<HTMLElement>('.detail-exp-root .detail-master-title h1'),visibleName,code);},[visibleName,code]);
 
- if(!code||pathname==='/expedientes/nuevo'||!host)return null;
- async function beginEdit(){setBusy(true);setMessage('');const detail=await fetchNotionRuntime<any>(`/expedientes/${encodeURIComponent(code)}`);setBusy(false);const row=(detail.data?.expediente??detail.data?.item??null) as ExpRow|null;if(detail.status===200&&row){const alias=String(row.cliente_alias||'').trim();const safeAlias=alias&&normalized(alias)!==normalized(code)&&!aliasIsSingleParticipant(alias,people)?alias:'';if(safeAlias)setCustomName(safeAlias);setName(safeAlias||visibleName);setEditing(true);}else setMessage('No se pudo preparar la edición del nombre.');}
+ if(!IS_PRODUCTION||!code||pathname==='/expedientes/nuevo'||!host)return null;
+ async function beginEdit(){setBusy(true);setMessage('');const detail=await fetchNotionRuntime<any>(`/expedientes/${encodeURIComponent(code)}`);setBusy(false);const row=(detail.data?.expediente??detail.data?.item??null) as ExpRow|null;if(detail.status===200&&row){const alias=String(row.cliente_alias||'').trim();const safeAlias=alias&&normalized(alias)!==normalized(code)&&!aliasIsSingleParticipant(alias,people)?alias:'';if(safeAlias)setCustomName(safeAlias);setName(safeAlias||visibleName||canonicalTitle);setEditing(true);}else setMessage('No se pudo preparar la edición del nombre.');}
  async function save(){
   const next=name.trim();if(next.length<2){setMessage('El nombre debe tener al menos 2 caracteres.');return;}
   setBusy(true);setMessage('');
