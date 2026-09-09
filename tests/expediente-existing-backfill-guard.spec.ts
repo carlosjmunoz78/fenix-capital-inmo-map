@@ -27,3 +27,14 @@ test('backfill guard resolves canonical expediente before authenticated bounded 
  expect(code).toContain('batch<16');
  expect(code).toContain('remaining>=previousRemaining');
 });
+
+test('backfill guard waits for a late authenticated session and reruns on auth readiness',()=>{
+ const code=guard();
+ expect(code).toContain('waitForAuthenticatedSession');
+ expect(code).toContain('attempt<12');
+ expect(code).toContain('session?.access_token');
+ expect(code).toContain('supabase.auth.onAuthStateChange');
+ expect(code).toContain("event==='INITIAL_SESSION'||event==='SIGNED_IN'||event==='TOKEN_REFRESHED'");
+ expect(code).toContain('subscription.unsubscribe()');
+ expect(code).toContain('if(cancelled||inFlight)return');
+});
