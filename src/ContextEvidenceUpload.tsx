@@ -8,7 +8,7 @@ import ExtractedDocumentPreview from './ExtractedDocumentPreview';
 const BUCKET=IS_PRODUCTION?'fenix-prod-documents':'fenix-preprod-documents-test';
 const FUNCTION=IS_PRODUCTION?'fenix-evidence-api':'fenix-evidence-universal-test';
 const EXTRACT_FUNCTION=IS_PRODUCTION?'fenix-document-extract':'fenix-document-extract-test';
-const PROD_SUPPORTED_ORIGINS=new Set(['expediente','contacto','firma']);
+const PROD_SUPPORTED_ORIGINS=new Set(['expediente','comprador','contacto','firma']);
 const PROD_ALLOWED_MIME=new Set([
  'application/pdf','image/png','image/jpeg','image/webp','text/plain','application/msword',
  'application/vnd.openxmlformats-officedocument.wordprocessingml.document','application/vnd.ms-excel',
