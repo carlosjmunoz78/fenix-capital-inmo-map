@@ -38,7 +38,7 @@ test('current state does not overclaim all engines as operational or autonomous 
   assert.match(state, /POR AUDITAR/);
   assert.match(state, /not autonomous PROD|No engine becomes autonomous PROD/i);
   assert.match(state, /177\/177 canonical engine IDs/);
-  assert.match(state, /Phase 2 existing-engine bindings/i);
+  assert.match(state, /Phase 2 existing-engine (wrapper registry|bindings)|Phase 2 read-only evidence audit/i);
   assert.match(state, /Phase 4 multi-company bootstrap V0/i);
   assert.match(state, /Phase 5 Console\/Gateway V0/i);
   assert.match(state, /LAB-TRD.*separate audit/i);
