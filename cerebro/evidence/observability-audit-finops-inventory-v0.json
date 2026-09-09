@@ -39,7 +39,7 @@
     },
     "FINOPS-001": {
       "name": "Cost / FinOps Engine",
-      "master_status": "PLANIFICADO",
+      "master_status": "PARCIAL",
       "evidence_state": "DOCUMENTED_PARTIAL",
       "existing": [
         "FinOpsGate exists in RUNTIME-001 reference",
