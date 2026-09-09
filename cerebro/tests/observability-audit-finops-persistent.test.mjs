@@ -20,7 +20,8 @@ test('contract preserves PREPROD, App/web, Supabase, Trading and autonomy bounda
   assert.equal(OPERATIONAL_LEDGERS_V0_CONTRACT.prod_writes, false);
   assert.equal(OPERATIONAL_LEDGERS_V0_CONTRACT.autonomous_prod, false);
   assert.equal(OPERATIONAL_LEDGERS_V0_CONTRACT.single_writer_reference, true);
-  assert.equal(OPERATIONAL_LEDGERS_V0_CONTRACT.internal_mutable_state, 'private-with-capability-guarded-writes');
+  assert.equal(OPERATIONAL_LEDGERS_V0_CONTRACT.internal_mutable_state, 'module-private-weakmap-with-non-exported-commit-path');
+  assert.equal(OPERATIONAL_LEDGERS_V0_CONTRACT.accepted_payload_grammar, 'finite-json-like-primitives+arrays+plain-objects-no-cycles');
   assert.equal(OPERATIONAL_LEDGERS_V0_CONTRACT.audit_when, 'canonical-iso8601-utc-instant-hash-covered');
 });
 
@@ -96,18 +97,33 @@ test('caller mutation after accepted records cannot rewrite persisted history', 
   assert.equal(reopened.finops.list()[0].metadata.provider_note, 'initial');
 });
 
-test('public shadow properties and direct-write attempts cannot replace or bypass private ledger state', () => {
+test('public shadow or wrapper methods cannot reach the module-private commit path', () => {
   const root = tempRoot(); const file = path.join(root, 'audit-private.v8');
   const ledger = new AuditLedgerV0({ file_path:file });
   ledger.append({ context:ctx, correlation_id:'p1', occurred_at:'2026-09-09T11:03:00.000Z', actor:'system', action:'FIRST', result:'OK' });
+  let captured = false;
   ledger.records = [];
   ledger.journal = { commit(){ throw new Error('must never run'); } };
   ledger.validator = () => true;
-  assert.throws(() => ledger._commit({ kind:'AUD-001' }, Symbol('fake')), /direct ledger writes are forbidden/);
+  ledger._commit = (...args) => { captured = args.length > 0; throw new Error('shadow _commit must never run'); };
   ledger.append({ context:ctx, correlation_id:'p2', occurred_at:'2026-09-09T11:03:01.000Z', actor:'system', action:'SECOND', result:'OK' });
+  assert.equal(captured, false);
   assert.equal(ledger.operation_count, 2);
   const reopened = new AuditLedgerV0({ file_path:file });
   assert.equal(reopened.operation_count, 2);
   assert.equal(reopened.list()[0].action, 'FIRST');
   assert.equal(reopened.list()[1].action, 'SECOND');
+});
+
+test('ledger payload grammar rejects silently degrading V8 platform objects before persistence', () => {
+  const root = tempRoot();
+  const ledgers = createOperationalLedgersV0({ root_dir:root });
+  assert.throws(() => ledgers.observability.record({ context:ctx, correlation_id:'u1', message:'bad-url', data:{ url:new URL('https://example.com') } }), /plain objects and arrays/);
+  assert.throws(() => ledgers.audit.append({ context:ctx, correlation_id:'u2', occurred_at:'2026-09-09T11:04:00.000Z', actor:'system', action:'BAD', before:{ when:new Date() }, result:'DENIED' }), /plain objects and arrays/);
+  assert.throws(() => ledgers.finops.record({ context:ctx, correlation_id:'u3', task_id:'bad', metadata:{ map:new Map([['x',1]]) } }), /plain objects and arrays/);
+  const circular = {}; circular.self = circular;
+  assert.throws(() => ledgers.observability.record({ context:ctx, correlation_id:'u4', message:'cycle', data:circular }), /circular/);
+  assert.equal(ledgers.observability.operation_count, 0);
+  assert.equal(ledgers.audit.operation_count, 0);
+  assert.equal(ledgers.finops.operation_count, 0);
 });
