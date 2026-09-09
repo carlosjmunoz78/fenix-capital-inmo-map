@@ -96,6 +96,7 @@ export default function ContextEvidenceUpload(){
  const legacyOpen=location.pathname==='/documentacion'&&params.get('upload')==='1'&&Boolean(explicit)&&Boolean(context);
  const[open,setOpen]=useState(false),[busy,setBusy]=useState(false),[msg,setMsg]=useState(''),[queue,setQueue]=useState<Queue|null>(null),[inlineHost,setInlineHost]=useState<HTMLElement|null>(null),[preview,setPreview]=useState<Preview|null>(null);
  const autoUploading=useRef(false);
+ const autoLegacyStarted=useRef(false);
 
  useEffect(()=>{if(legacyOpen)setOpen(true)},[legacyOpen]);
  useEffect(()=>{
@@ -119,6 +120,12 @@ export default function ContextEvidenceUpload(){
   autoUploading.current=true;const files=queue.files;setQueue(null);setOpen(true);setMsg(`Vinculando ${files.length} archivo${files.length===1?'':'s'} a ${context.label}…`);
   void uploadFiles(files,context).finally(()=>{autoUploading.current=false});
  },[location.pathname,context?.type,context?.code,context?.staging,queue,busy]);
+ useEffect(()=>{
+  if(!IS_PRODUCTION||autoLegacyStarted.current||!/^\/expedientes\/(?!nuevo(?:\/|$))/.test(location.pathname))return;
+  if(sessionStorage.getItem('fenix-active-legacy-backfill-v1')==='done')return;
+  autoLegacyStarted.current=true;
+  void autoReprocessActiveLegacy().finally(()=>{autoLegacyStarted.current=false});
+ },[location.pathname]);
 
  if(!context)return null;
  const activeContext:OriginCtx=context;
@@ -159,6 +166,18 @@ export default function ContextEvidenceUpload(){
   if(blocked)bits.push(`${blocked} pendiente${blocked===1?'':'s'} de habilitación segura en producción`);
   if(failed)bits.push(`${failed} con error`);
   setMsg(bits.length?bits.join(' · '):'No se seleccionaron archivos.');
+ }
+
+ async function autoReprocessActiveLegacy(){
+  if(!IS_PRODUCTION)return;let processed=0;
+  for(let i=0;i<60;i++){
+   const r=await extractFetch<LegacyBatch>({mode:'legacy_batch',limit:2});
+   if(r.status===403||r.status===401)return;
+   if(r.status!==200||!r.data?.ok)return;
+   const attempted=r.data.attempted??0;if(!attempted){sessionStorage.setItem('fenix-active-legacy-backfill-v1','done');break;}
+   processed+=attempted;
+  }
+  if(processed)window.dispatchEvent(new CustomEvent('fenix-active-legacy-backfill-complete',{detail:{processed}}));
  }
 
  async function reprocessLegacy(){
