@@ -2,7 +2,7 @@ name: One-shot promote validated 899839d
 
 on:
   push:
-    branches: [main]
+    branches: [prod-promo-899839d]
     paths:
       - '.github/workflows/one-shot-promote-899839d.yml'
 
