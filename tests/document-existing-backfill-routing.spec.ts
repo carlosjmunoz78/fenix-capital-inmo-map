@@ -28,3 +28,11 @@ test('legacy routing refuses ambiguity and never reprocesses an already applied 
  expect(code).not.toContain("run?.status==='applied'&&native");
  expect(code).toContain("TARGET='fenix-document-auto-ingest'");
 });
+
+test('backfill trusts canonical expediente linkage instead of legacy upload origin',()=>{
+ const code=source();
+ expect(code).toContain(".eq('expediente_id',exp.data.id)");
+ expect(code).toContain("if(!s)continue;");
+ expect(code).not.toContain("String(s.origin_type)!=='expediente'");
+ expect(code).not.toContain("String(s.origin_code)!==expCode");
+});
