@@ -4,6 +4,7 @@ import { AtomicV8Journal } from './persistent-runtime.mjs';
 
 const PREPROD = 'PREPROD';
 const MICRO_EUR = 1_000_000;
+const MAX_MICRO_EUR_EXACT_EUR = Math.floor((1 / Number.EPSILON) / MICRO_EUR);
 const LEVELS = new Set(['DEBUG','INFO','WARN','ERROR','CRITICAL']);
 const LEDGER_STATE = new WeakMap();
 
@@ -24,17 +25,22 @@ function assertLedgerValue(value, label = 'value', seen = new Set()) {
   if (seen.has(value)) throw new TypeError(`${label} must not contain circular references`);
   seen.add(value);
   try {
-    if (Array.isArray(value)) {
-      for (let i = 0; i < value.length; i += 1) assertLedgerValue(value[i], `${label}[${i}]`, seen);
-      return;
-    }
+    const isArray = Array.isArray(value);
     const proto = Object.getPrototypeOf(value);
-    if (proto !== Object.prototype && proto !== null) {
+    if (!isArray && proto !== Object.prototype && proto !== null) {
       throw new TypeError(`${label} must contain only plain objects and arrays`);
     }
-    for (const key of Object.keys(value)) assertLedgerValue(value[key], `${label}.${key}`, seen);
-    for (const symbol of Object.getOwnPropertySymbols(value)) {
-      if (Object.prototype.propertyIsEnumerable.call(value, symbol)) throw new TypeError(`${label} must not contain enumerable symbol keys`);
+    const descriptors = Object.getOwnPropertyDescriptors(value);
+    for (const key of Reflect.ownKeys(descriptors)) {
+      const descriptor = descriptors[key];
+      if ('get' in descriptor || 'set' in descriptor) throw new TypeError(`${label} must not contain accessor properties`);
+      if (typeof key === 'symbol') {
+        if (descriptor.enumerable) throw new TypeError(`${label} must not contain enumerable symbol keys`);
+        continue;
+      }
+      if (isArray && key === 'length') continue;
+      if (!descriptor.enumerable) continue;
+      assertLedgerValue(descriptor.value, `${label}.${key}`, seen);
     }
   } finally {
     seen.delete(value);
@@ -82,6 +88,7 @@ function nowInstant() { return new Date().toISOString(); }
 
 function eurToMicros(value) {
   if (!Number.isFinite(value) || value < 0) throw new TypeError('cost_eur must be a finite non-negative number');
+  if (value > MAX_MICRO_EUR_EXACT_EUR) throw new RangeError(`cost_eur exceeds reliable micro-euro Number precision (${MAX_MICRO_EUR_EXACT_EUR} EUR max)`);
   const scaled = value * MICRO_EUR;
   const rounded = Math.round(scaled);
   if (!Number.isSafeInteger(rounded) || Math.abs(scaled - rounded) > 1e-7) {
@@ -333,11 +340,12 @@ export const OPERATIONAL_LEDGERS_V0_CONTRACT = Object.freeze({
   persistence: 'local-atomic-v8-journal-reference',
   append_only_logical_records: true,
   internal_mutable_state: 'module-private-weakmap-with-non-exported-commit-path',
-  accepted_payload_grammar: 'finite-json-like-primitives+arrays+plain-objects-no-cycles',
+  accepted_payload_grammar: 'finite-json-like-primitives+arrays+plain-data-objects-no-accessors-no-cycles',
   audit_integrity: 'sha256-hash-chain-not-authenticated-tamper-proofing',
   audit_when: 'canonical-iso8601-utc-instant-hash-covered',
   correlation_id_required: true,
-  cost_precision: 'micro-eur-safe-integer',
+  cost_precision: 'micro-eur-safe-integer-with-number-resolution-bound',
+  max_reliable_cost_eur: MAX_MICRO_EUR_EXACT_EUR,
   supabase_required: false,
   additional_cost_target_eur: 0,
   shared_runtime_replaced: false,
