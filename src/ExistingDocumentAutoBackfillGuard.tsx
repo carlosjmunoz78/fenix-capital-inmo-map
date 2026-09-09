@@ -5,6 +5,7 @@ import {IS_PRODUCTION,SUPABASE_PUBLISHABLE_KEY,SUPABASE_URL,supabase} from './su
 type BackfillResponse={ok?:boolean;processed?:number;succeeded?:number;failed?:number;remaining?:number;skipped?:Array<{file?:string;error?:string}>;items?:Array<{file?:string;ok?:boolean;error?:string}>;error?:string};
 
 const sleep=(ms:number)=>new Promise(resolve=>window.setTimeout(resolve,ms));
+const canonicalExpediente=(value:string)=>/^exp(?:-|_)/i.test(value);
 
 function rawExpediente(pathname:string){
  const match=pathname.match(/^\/expedientes\/([^/?#]+)(?:\/|$)/i);
@@ -27,8 +28,8 @@ function statusBox(message:string,kind:'working'|'ok'|'error'='working'){
  if(kind==='ok')window.setTimeout(()=>box?.remove(),1800);
 }
 
-async function authenticatedHeaders(){
- for(let attempt=0;attempt<10;attempt++){
+async function authenticatedHeaders(cancelled:()=>boolean){
+ for(let attempt=0;attempt<12&&!cancelled();attempt++){
   const {data:{session}}=await supabase.auth.getSession();
   if(session?.access_token)return{Authorization:`Bearer ${session.access_token}`,apikey:SUPABASE_PUBLISHABLE_KEY,'content-type':'application/json'};
   await sleep(250+attempt*100);
@@ -36,79 +37,109 @@ async function authenticatedHeaders(){
  return null;
 }
 
+async function resolveExpedienteCode(raw:string,headers:Record<string,string>){
+ if(canonicalExpediente(raw))return raw;
+ const detail=await fetch(`${SUPABASE_URL}/functions/v1/fenix-app-gateway/expedientes/${encodeURIComponent(raw)}`,{method:'GET',headers});
+ const detailData=await detail.json().catch(()=>null) as Record<string,unknown>|null;
+ const row=(detailData?.expediente&&typeof detailData.expediente==='object'?detailData.expediente:detailData?.item&&typeof detailData.item==='object'?detailData.item:null) as Record<string,unknown>|null;
+ if(!detail.ok)return '';
+ return String(row?.expediente_code??row?.expediente??'').trim();
+}
+
 export default function ExistingDocumentAutoBackfillGuard(){
  const location=useLocation();
- const running=useRef('');
+ const completed=useRef('');
 
  useEffect(()=>{
   if(!IS_PRODUCTION)return;
   const raw=rawExpediente(location.pathname);
-  if(!raw||running.current===raw)return;
+  if(!raw||completed.current===raw)return;
   let cancelled=false;
   let starting=false;
-  let retryAfterCurrent=false;
+  let retryTimer:number|undefined;
+  let attempts=0;
+  const maxAttempts=8;
+
+  const scheduleRetry=(delay=1800)=>{
+   if(cancelled||completed.current===raw||attempts>=maxAttempts||retryTimer!==undefined)return;
+   retryTimer=window.setTimeout(()=>{retryTimer=undefined;void run();},delay);
+  };
 
   const run=async()=>{
-   if(cancelled||starting||running.current===raw)return;
+   if(cancelled||starting||completed.current===raw||attempts>=maxAttempts)return;
    starting=true;
+   attempts+=1;
    try{
-    const headers=await authenticatedHeaders();
-    if(cancelled||!headers)return;
-    const detail=await fetch(`${SUPABASE_URL}/functions/v1/fenix-app-gateway/expedientes/${encodeURIComponent(raw)}`,{method:'GET',headers});
-    const detailData=await detail.json().catch(()=>null) as Record<string,unknown>|null;
-    const row=(detailData?.expediente&&typeof detailData.expediente==='object'?detailData.expediente:detailData?.item&&typeof detailData.item==='object'?detailData.item:null) as Record<string,unknown>|null;
-    const expCode=String(row?.expediente_code??row?.expediente??raw).trim();
-    if(cancelled||!detail.ok||!expCode)return;
-    running.current=raw;
+    const headers=await authenticatedHeaders(()=>cancelled);
+    if(cancelled||!headers){scheduleRetry();return;}
+    const expCode=await resolveExpedienteCode(raw,headers);
+    if(cancelled||!expCode){scheduleRetry();return;}
 
-    let totalProcessed=0,totalSucceeded=0,lastSkipped=0;
+    let totalProcessed=0,totalSucceeded=0,lastSkipped=0,lastFailed=0,lastRemaining=0;
     for(let pass=0;pass<8&&!cancelled;pass++){
      const response=await fetch(`${SUPABASE_URL}/functions/v1/fenix-document-existing-backfill`,{method:'POST',headers,body:JSON.stringify({expediente_code:expCode})});
      const data=await response.json().catch(()=>null) as BackfillResponse|null;
      if(!response.ok||data?.ok!==true){
       if(response.status>=500||response.status===429){await sleep(900*(pass+1));continue;}
-      running.current='';
+      scheduleRetry();
       return;
      }
      const processed=Number(data.processed)||0,succeeded=Number(data.succeeded)||0,failed=Number(data.failed)||0,remaining=Number(data.remaining)||0;
      lastSkipped=Array.isArray(data.skipped)?data.skipped.length:0;
-     totalProcessed+=processed;totalSucceeded+=succeeded;
+     lastFailed=failed;
+     lastRemaining=remaining;
+     totalProcessed+=processed;
+     totalSucceeded+=succeeded;
      if(processed>0)statusBox(`Organizando y leyendo documentos automáticamente · ${totalSucceeded}/${totalProcessed} correctos…`);
      if(remaining<=0&&failed<=0)break;
      if(processed===0&&remaining<=0)break;
      await sleep(failed>0?1200:350);
     }
-    if(cancelled||totalProcessed===0)return;
+
+    if(cancelled)return;
+    if(totalProcessed===0){
+     if(lastRemaining===0&&lastFailed===0&&lastSkipped===0)completed.current=raw;
+     else scheduleRetry();
+     return;
+    }
+
     window.dispatchEvent(new CustomEvent('fenix:document-backfill-finished',{detail:{expedienteCode:expCode,processed:totalProcessed,succeeded:totalSucceeded,skipped:lastSkipped}}));
-    if(totalSucceeded===totalProcessed&&lastSkipped===0){
+    if(totalSucceeded===totalProcessed&&lastFailed===0&&lastSkipped===0){
+     completed.current=raw;
      statusBox(`${totalSucceeded} documento${totalSucceeded===1?'':'s'} leído${totalSucceeded===1?'':'s'} y colocado${totalSucceeded===1?'':'s'} automáticamente.`,'ok');
      await sleep(650);
      if(!cancelled)window.location.reload();
     }else{
-     running.current='';
      statusBox(`Documentos automáticos: ${totalSucceeded}/${totalProcessed} correctos${lastSkipped?` · ${lastSkipped} por revisar`:''}.`,'error');
+     scheduleRetry(2200);
     }
-   }catch{running.current='';}
-   finally{
+   }catch{
+    scheduleRetry();
+   }finally{
     starting=false;
-    if(retryAfterCurrent&&!cancelled&&running.current!==raw){
-     retryAfterCurrent=false;
-     void run();
-    }else retryAfterCurrent=false;
    }
   };
 
   void run();
+  const trigger=()=>{
+   if(cancelled||completed.current===raw)return;
+   attempts=0;
+   void run();
+  };
   const {data:{subscription}}=supabase.auth.onAuthStateChange((_event,session)=>{
-   if(cancelled||!session?.access_token||running.current===raw)return;
-   if(starting){retryAfterCurrent=true;return;}
+   if(cancelled||!session?.access_token||completed.current===raw)return;
+   attempts=0;
    void run();
   });
+  window.addEventListener('focus',trigger);
+  document.addEventListener('visibilitychange',trigger);
 
   return()=>{
    cancelled=true;
-   retryAfterCurrent=false;
+   if(retryTimer!==undefined)window.clearTimeout(retryTimer);
    subscription.unsubscribe();
+   window.removeEventListener('focus',trigger);
+   document.removeEventListener('visibilitychange',trigger);
   };
  },[location.pathname]);
 
