@@ -21,8 +21,10 @@ test('contract preserves PREPROD, App/web, Supabase, Trading and autonomy bounda
   assert.equal(OPERATIONAL_LEDGERS_V0_CONTRACT.autonomous_prod, false);
   assert.equal(OPERATIONAL_LEDGERS_V0_CONTRACT.single_writer_reference, true);
   assert.equal(OPERATIONAL_LEDGERS_V0_CONTRACT.internal_mutable_state, 'module-private-weakmap-with-non-exported-commit-path');
-  assert.equal(OPERATIONAL_LEDGERS_V0_CONTRACT.accepted_payload_grammar, 'finite-json-like-primitives+arrays+plain-objects-no-cycles');
+  assert.equal(OPERATIONAL_LEDGERS_V0_CONTRACT.accepted_payload_grammar, 'finite-json-like-primitives+arrays+plain-data-objects-no-accessors-no-cycles');
   assert.equal(OPERATIONAL_LEDGERS_V0_CONTRACT.audit_when, 'canonical-iso8601-utc-instant-hash-covered');
+  assert.equal(OPERATIONAL_LEDGERS_V0_CONTRACT.cost_precision, 'micro-eur-safe-integer-with-number-resolution-bound');
+  assert.ok(OPERATIONAL_LEDGERS_V0_CONTRACT.max_reliable_cost_eur < 9_000_000_000);
 });
 
 test('observability persists correlation-scoped records across restart with tenant isolation', () => {
@@ -67,6 +69,8 @@ test('finops persists exact micro-euro events and aggregates by company engine a
   assert.deepEqual(b.aggregate({company_id:'fenix', engine_id:'SEO-001'}), { company_id:'fenix', engine_id:'SEO-001', provider:null, events:2, cost_eur:0.125001, cost_eur_micros:125001 });
   assert.deepEqual(b.aggregate({company_id:'fenix', provider:'API-X'}), { company_id:'fenix', engine_id:null, provider:'API-X', events:2, cost_eur:0.375001, cost_eur_micros:375001 });
   assert.throws(() => a.record({ context:ctx, correlation_id:'bad', task_id:'bad', cost_eur:0.0000001 }), /micro-euro/);
+  assert.throws(() => a.record({ context:ctx, correlation_id:'too-large', task_id:'too-large', cost_eur:9_000_000_000.000001 }), /reliable micro-euro Number precision/);
+  assert.equal(a.operation_count, 3);
 });
 
 test('all ledgers reject PROD context before persistence', () => {
@@ -115,7 +119,7 @@ test('public shadow or wrapper methods cannot reach the module-private commit pa
   assert.equal(reopened.list()[1].action, 'SECOND');
 });
 
-test('ledger payload grammar rejects silently degrading V8 platform objects before persistence', () => {
+test('ledger payload grammar rejects platform objects, accessors and cycles before persistence', () => {
   const root = tempRoot();
   const ledgers = createOperationalLedgersV0({ root_dir:root });
   assert.throws(() => ledgers.observability.record({ context:ctx, correlation_id:'u1', message:'bad-url', data:{ url:new URL('https://example.com') } }), /plain objects and arrays/);
@@ -123,6 +127,11 @@ test('ledger payload grammar rejects silently degrading V8 platform objects befo
   assert.throws(() => ledgers.finops.record({ context:ctx, correlation_id:'u3', task_id:'bad', metadata:{ map:new Map([['x',1]]) } }), /plain objects and arrays/);
   const circular = {}; circular.self = circular;
   assert.throws(() => ledgers.observability.record({ context:ctx, correlation_id:'u4', message:'cycle', data:circular }), /circular/);
+  let getterCalls = 0;
+  const accessorPayload = {};
+  Object.defineProperty(accessorPayload, 'changing', { enumerable:true, get() { getterCalls += 1; return getterCalls === 1 ? 1 : new URL('https://example.com'); } });
+  assert.throws(() => ledgers.observability.record({ context:ctx, correlation_id:'u5', message:'accessor', data:accessorPayload }), /accessor properties/);
+  assert.equal(getterCalls, 0);
   assert.equal(ledgers.observability.operation_count, 0);
   assert.equal(ledgers.audit.operation_count, 0);
   assert.equal(ledgers.finops.operation_count, 0);
