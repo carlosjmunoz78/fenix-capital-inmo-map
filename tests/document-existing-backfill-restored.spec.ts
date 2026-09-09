@@ -15,8 +15,11 @@ test('backfill remains PROD-only, authenticated and retries late auth safely',()
  expect(guard).toContain('supabase.auth.getSession()');
  expect(guard).toContain('session?.access_token');
  expect(guard).toContain('supabase.auth.onAuthStateChange');
- expect(guard).toContain('if(cancelled||starting||running.current===raw)return;');
- expect(guard).toContain('if(starting){retryAfterCurrent=true;return;}');
+ expect(guard).toContain('if(cancelled||starting||completed.current===raw||attempts>=maxAttempts)return;');
+ expect(guard).toContain('const maxAttempts=8');
+ expect(guard).toContain('scheduleRetry');
+ expect(guard).toContain("window.addEventListener('focus',trigger)");
+ expect(guard).toContain("document.addEventListener('visibilitychange',trigger)");
  expect(guard).toContain('subscription.unsubscribe();');
  expect(guard).toContain('/functions/v1/fenix-document-existing-backfill');
 });
