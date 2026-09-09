@@ -73,12 +73,14 @@ jobs:
           set -euo pipefail
           for origin in 'https://carlosjmunoz78.github.io' 'https://app.fenixcapital.es'; do
             headers="$(mktemp)"
-            status="$(curl --silent --show-error --output /dev/null --dump-header "$headers" --write-out '%{http_code}' --max-time 20 \
+            status="$(curl --silent --show-error --retry 2 --retry-all-errors --retry-delay 1 --output /dev/null --dump-header "$headers" --write-out '%{http_code}' --max-time 20 \
               -X OPTIONS \
               -H "Origin: ${origin}" \
               -H 'Access-Control-Request-Method: GET' \
               -H 'Access-Control-Request-Headers: authorization,apikey' \
               'https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/fenix-ana-api-test/capabilities')"
+            echo "PREPROD_ANA_CORS origin=${origin} status=${status}"
+            cat "$headers"
             test "$status" = "204"
             grep -qi '^access-control-allow-origin:' "$headers"
             grep -qi '^access-control-allow-methods:.*OPTIONS' "$headers"
