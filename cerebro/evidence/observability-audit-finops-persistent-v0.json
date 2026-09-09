@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "status": "IMPLEMENTED_PARALLEL_REFERENCE",
+  "environment": "PREPROD",
+  "engines": ["OBSERV-001", "AUD-001", "FINOPS-001"],
+  "implementation": "cerebro/runtime/observability-audit-finops.mjs",
+  "tests": "cerebro/tests/observability-audit-finops-persistent.test.mjs",
+  "persistence": "local atomic V8 journals using existing AtomicV8Journal",
+  "boundaries": {
+    "app_or_web_touched": false,
+    "shared_runtime_replaced": false,
+    "supabase_required": false,
+    "trading_access": false,
+    "prod_writes": false,
+    "autonomous_prod": false,
+    "single_writer_reference": true,
+    "additional_cost_target_eur": 0
+  },
+  "capabilities": {
+    "OBSERV-001": ["durable correlation_id records", "tenant/context queries", "restart persistence"],
+    "AUD-001": ["canonical append-only logical records", "SHA-256 hash chain integrity", "restart verification", "company-scoped query"],
+    "FINOPS-001": ["durable cost events", "micro-euro safe integer precision", "aggregation by company/engine/provider"]
+  },
+  "migration": "NONE. Parallel adapter only until OLD-vs-NEW comparison and explicit promotion gates."
+}
