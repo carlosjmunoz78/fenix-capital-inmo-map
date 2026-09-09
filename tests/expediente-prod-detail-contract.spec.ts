@@ -2,9 +2,12 @@ import {test,expect} from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
 
-test('PROD lee la ficha individual por el gateway canónico',()=>{
+test('PROD lee la ficha individual desde workspace canónico con fallback seguro',()=>{
  const runtime=fs.readFileSync(path.resolve('src/notionRuntime.ts'),'utf8');
- expect(runtime).toContain("if(/^\\/expedientes\\/[^/]+$/.test(pathname))return fetchAppApi<T>(pathname)");
+ expect(runtime).toContain("const workspace=await fetchAppApi<any>(`/expedientes/${encodeURIComponent(code)}/workspace`)");
+ expect(runtime).toContain('titulares:counts.titulares??exp.titulares??null');
+ expect(runtime).toContain('inmobiliaria:inmo?.nombre_alias??inmo?.nombre??exp.inmobiliaria_code??null');
+ expect(runtime).toContain('return fetchAppApi<T>(pathname);');
 });
 
 test('la ficha mantiene chrome global visible y conserva recorrido obligatorio',()=>{
