@@ -18,10 +18,12 @@ test('backfill guard is production-only, role-gated and refuses terminal expedie
  expect(code).toContain('if(!allowedStage(stage))return');
 });
 
-test('backfill guard uses authenticated environment fetch and bounded progress loop',()=>{
+test('backfill guard resolves canonical expediente before authenticated bounded retry',()=>{
  const code=guard();
+ expect(code).toContain("fetchAppApi<Detail>(`/expedientes/${encodeURIComponent(expedienteCode)}`)");
+ expect(code).toContain("const canonicalCode=String(row?.expediente_code??row?.expediente??expedienteCode).trim()");
  expect(code).toContain("fetchEnvironmentApi<BackfillResult>('fenix-document-existing-backfill',''");
- expect(code).toContain("body:JSON.stringify({expediente_code:expedienteCode})");
+ expect(code).toContain("body:JSON.stringify({expediente_code:canonicalCode})");
  expect(code).toContain('batch<16');
  expect(code).toContain('remaining>=previousRemaining');
 });
