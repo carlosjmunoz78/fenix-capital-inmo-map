@@ -1,7 +1,7 @@
 import {useEffect,useMemo,useState} from 'react';
 import {createPortal} from 'react-dom';
 import {useLocation,useNavigate} from 'react-router-dom';
-import {FileText,FolderOpen} from 'lucide-react';
+import {FileText} from 'lucide-react';
 import {IS_PRODUCTION,fetchAppApi} from './supabase';
 import ExpedientePeoplePanel from './ExpedientePeoplePanel';
 
@@ -18,7 +18,7 @@ export default function ExpedienteProdMasterRecoveryGuard(){
  const {pathname}=useLocation(),navigate=useNavigate();
  const m=pathname.match(/^\/expedientes\/([^/]+)$/);const code=m?.[1]?decodeURIComponent(m[1]):'';const active=IS_PRODUCTION&&Boolean(code)&&code!=='nuevo';
  const[host,setHost]=useState<HTMLElement|null>(null),[exp,setExp]=useState<Row|null>(null),[docs,setDocs]=useState<Row[]>([]),[status,setStatus]=useState<number|null>(null);
- useEffect(()=>{if(!active){setHost(null);return}const mount=()=>{const root=document.querySelector<HTMLElement>('.detail-exp-content');if(!root)return;let node=root.querySelector<HTMLElement>(':scope > .prod-master-recovery-host');if(!node){node=document.createElement('section');node.className='prod-master-recovery-host';const title=root.querySelector(':scope > .detail-master-title');title?.insertAdjacentElement('afterend',node);if(!title)root.prepend(node)}setHost(node);document.querySelectorAll<HTMLElement>('.detail-exp-root .ops-message').forEach(el=>{if((el.textContent||'').includes('No se pudo cargar la ficha'))el.dataset.prodRecoveryHidden='true'})};mount();const o=new MutationObserver(mount);o.observe(document.body,{childList:true,subtree:true});return()=>{o.disconnect();document.querySelector('.prod-master-recovery-host')?.remove();document.querySelectorAll<HTMLElement>('[data-prod-recovery-hidden="true"]').forEach(el=>delete el.dataset.prodRecoveryHidden)}},[active,code]);
+ useEffect(()=>{if(!active){setHost(null);return}const mount=()=>{const root=document.querySelector<HTMLElement>('.detail-exp-content');if(!root)return;let node=root.querySelector<HTMLElement>(':scope > .prod-master-recovery-host');if(!node){node=document.createElement('section');node.className='prod-master-recovery-host';const title=root.querySelector(':scope > .detail-master-title');title?.insertAdjacentElement('afterend',node);if(!title)root.prepend(node)}setHost(node);const titleCopy=root.querySelector<HTMLElement>(':scope > .detail-master-title p');if(titleCopy)titleCopy.textContent='Ficha operativa PROD · vista completa del expediente.';document.querySelectorAll<HTMLElement>('.detail-exp-root .ops-message').forEach(el=>{if((el.textContent||'').includes('No se pudo cargar la ficha'))el.dataset.prodRecoveryHidden='true'})};mount();const o=new MutationObserver(mount);o.observe(document.body,{childList:true,subtree:true});return()=>{o.disconnect();document.querySelector('.prod-master-recovery-host')?.remove();document.querySelectorAll<HTMLElement>('[data-prod-recovery-hidden="true"]').forEach(el=>delete el.dataset.prodRecoveryHidden)}},[active,code]);
  useEffect(()=>{if(!active)return;let alive=true;(async()=>{const [d,dl]=await Promise.all([fetchAppApi<any>(`/expedientes/${encodeURIComponent(code)}`),fetchAppApi<DocsResponse>('/documentos')]);if(!alive)return;setStatus(d.status);setExp(d.status===200?(d.data?.expediente??null):null);setDocs(dl.status===200?(dl.data?.items??[]).filter(r=>matchDoc(r,code)):[])})();return()=>{alive=false}},[active,code]);
  const name=useMemo(()=>String(exp?.cliente_alias||exp?.expediente_code||code||'Expediente'),[exp,code]);
  if(!active||!host)return null;
