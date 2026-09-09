@@ -44,3 +44,17 @@ test('higher direct safety reason still outranks money and lower-priority reason
   const result=p.evaluate(ctx(),{action:'x',confidence_bp:8000,amount_eur_cents:101,high_risk:true,customer_human_request:true});
   assert.equal(result.reason,'HIGH_RISK');
 });
+
+test('tied authoritative rules apply their gates before POLICY_CONFLICT routing',()=>{
+  const p=new PolicyEngine({rules:[
+    rule({rule_id:'A',max_amount_eur_cents:100}),
+    rule({rule_id:'B',max_amount_eur_cents:100})
+  ]});
+  const result=p.evaluate(ctx(),{action:'x',amount_eur_cents:101});
+  assert.equal(result.status,'HUMAN_REQUIRED');
+  assert.equal(result.reason,'MONEY_LIMIT');
+  const h=new HumanExceptionEngine();
+  const item=h.ingest(result,{requester_company_id:'co-a'});
+  assert.equal(item.priority,70);
+  assert.equal(item.assigned_role,'FINANCE');
+});
