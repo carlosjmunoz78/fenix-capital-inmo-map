@@ -59,13 +59,14 @@ test('tied authoritative rules apply their gates before POLICY_CONFLICT routing'
   assert.equal(item.assigned_role,'FINANCE');
 });
 
-test('HEX deduplicates retries of one event but keeps independent events separate',()=>{
+test('HEX deduplicates retries by stable event identity even if result changes',()=>{
   const h=new HumanExceptionEngine();
-  const result={status:'HUMAN_REQUIRED',reason:'MONEY_LIMIT',context:ctx(),action:'transfer',policy:'p1'};
-  const first=h.ingest(result,{requester_company_id:'co-a',event_id:'transfer-001'});
-  const retry=h.ingest(result,{requester_company_id:'co-a',event_id:'transfer-001'});
-  const second=h.ingest(result,{requester_company_id:'co-a',event_id:'transfer-002'});
+  const first=h.ingest({status:'HUMAN_REQUIRED',reason:'LOW_CONFIDENCE',context:ctx(),action:'transfer',policy:'p1'},{requester_company_id:'co-a',event_id:'transfer-001'});
+  const retry=h.ingest({status:'HUMAN_REQUIRED',reason:'MONEY_LIMIT',context:ctx(),action:'transfer-updated',policy:'p2'},{requester_company_id:'co-a',event_id:'transfer-001'});
+  const second=h.ingest({status:'HUMAN_REQUIRED',reason:'MONEY_LIMIT',context:ctx(),action:'transfer',policy:'p2'},{requester_company_id:'co-a',event_id:'transfer-002'});
   assert.equal(first.exception_id,retry.exception_id);
+  assert.equal(retry.reason,'LOW_CONFIDENCE');
+  assert.equal(retry.policy,'p1');
   assert.notEqual(first.exception_id,second.exception_id);
   assert.equal(h.list({requester_company_id:'co-a'}).length,2);
   assert.deepEqual(new Set(h.list({requester_company_id:'co-a'}).map(x=>x.event_id)),new Set(['transfer-001','transfer-002']));
