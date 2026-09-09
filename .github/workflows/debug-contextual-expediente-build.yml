@@ -1,0 +1,38 @@
+name: Debug contextual expediente build
+on:
+  push:
+    branches: [preprod-app-phase1]
+    paths:
+      - '.github/workflows/debug-contextual-expediente-build.yml'
+      - 'src/ExpedienteContextShell.tsx'
+      - 'src/ExpedienteTabInterceptor.tsx'
+      - 'src/DetailShellGate.tsx'
+      - 'src/ExpedienteDocumentsPanel.tsx'
+      - 'src/expediente-context-shell.css'
+      - 'src/expediente-documents.css'
+jobs:
+  build-log:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Capture build
+        shell: bash
+        run: |
+          set +e
+          npm run build > build.log 2>&1
+          code=$?
+          echo "$code" > build.exit
+          exit 0
+      - uses: actions/upload-artifact@v4
+        with:
+          name: contextual-expediente-build-log
+          path: |
+            build.log
+            build.exit
+      - name: Preserve failure
+        run: test "$(cat build.exit)" = "0"
