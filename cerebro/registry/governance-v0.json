@@ -1,0 +1,48 @@
+{
+  "schema_version": "1.0.0",
+  "phase": "GOVERNANCE_POLICY_HUMAN_EXCEPTION_V0",
+  "environment": "PREPROD",
+  "additional_cost_target_eur": 0,
+  "prod_execution_enabled": false,
+  "autonomous_prod": false,
+  "supabase_writes": false,
+  "external_actions": false,
+  "engines": [
+    {
+      "engine_id": "POL-001",
+      "name": "Motor de Políticas y Gobierno",
+      "layer": "L0",
+      "implementation_state": "REFERENCE_V0",
+      "mode": "DETERMINISTIC_POLICY_EVALUATOR",
+      "company_scope": "GLOBAL_OR_SCOPED"
+    },
+    {
+      "engine_id": "HEX-001",
+      "name": "Human Exception Engine",
+      "layer": "L0",
+      "implementation_state": "REFERENCE_V0",
+      "mode": "DETERMINISTIC_EXCEPTION_ROUTER",
+      "company_scope": "GLOBAL_OR_SCOPED"
+    }
+  ],
+  "required_context": ["company_id", "engine_id", "environment", "version"],
+  "policy_effects": ["ALLOW", "DENY", "REVIEW"],
+  "human_required_reasons": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "canonical_rules": {
+    "deterministic_before_ai": true,
+    "all_sensitive_actions_pass_policy_engine": true,
+    "cross_company_access": "DENY",
+    "training_or_lab_direct_prod_promotion": "DENY",
+    "default_external_action": "DENY",
+    "default_additional_cost_eur": 0
+  }
+}
