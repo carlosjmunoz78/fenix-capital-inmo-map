@@ -17,17 +17,24 @@ function safeErrorText(value) {
   return '[unstringifiable thrown value]';
 }
 
-function checksum(operations) {
-  return crypto.createHash('sha256').update(serialize(operations)).digest('hex');
+function digest(bytes) {
+  return crypto.createHash('sha256').update(bytes).digest('hex');
 }
 
-function validateEnvelope(envelope, kind) {
+function decodeEnvelope(bytes, kind) {
+  let envelope;
+  try { envelope = deserialize(bytes); }
+  catch (error) { throw new Error(`persistent runtime state cannot be decoded: ${safeErrorText(error)}`); }
   if (!envelope || typeof envelope !== 'object') throw new Error('persistent runtime state envelope is invalid');
   if (envelope.schema_version !== SCHEMA_VERSION) throw new Error('persistent runtime state schema version is unsupported');
   if (envelope.kind !== kind) throw new Error(`persistent runtime state kind mismatch: expected ${kind}`);
-  if (!Array.isArray(envelope.operations)) throw new Error('persistent runtime state operations must be an array');
-  if (envelope.checksum !== checksum(envelope.operations)) throw new Error('persistent runtime state checksum mismatch');
-  return envelope.operations;
+  if (!Buffer.isBuffer(envelope.payload)) throw new Error('persistent runtime state payload is invalid');
+  if (envelope.checksum !== digest(envelope.payload)) throw new Error('persistent runtime state checksum mismatch');
+  let operations;
+  try { operations = deserialize(envelope.payload); }
+  catch (error) { throw new Error(`persistent runtime operations cannot be decoded: ${safeErrorText(error)}`); }
+  if (!Array.isArray(operations)) throw new Error('persistent runtime state operations must be an array');
+  return operations;
 }
 
 export class AtomicV8Journal {
@@ -44,19 +51,15 @@ export class AtomicV8Journal {
 
   load() {
     if (!fs.existsSync(this.#filePath)) return [];
-    const bytes = fs.readFileSync(this.#filePath);
-    let envelope;
-    try { envelope = deserialize(bytes); }
-    catch (error) { throw new Error(`persistent runtime state cannot be decoded: ${safeErrorText(error)}`); }
-    return validateEnvelope(envelope, this.#kind);
+    return decodeEnvelope(fs.readFileSync(this.#filePath), this.#kind);
   }
 
   commit(operations) {
     if (!Array.isArray(operations)) throw new TypeError('operations must be an array');
     const dir = path.dirname(this.#filePath);
     fs.mkdirSync(dir, { recursive: true });
-    const envelope = { schema_version: SCHEMA_VERSION, kind: this.#kind, operations, checksum: checksum(operations) };
-    const bytes = serialize(envelope);
+    const payload = serialize(operations);
+    const bytes = serialize({ schema_version: SCHEMA_VERSION, kind: this.#kind, payload, checksum: digest(payload) });
     const temp = `${this.#filePath}.tmp-${process.pid}-${crypto.randomBytes(6).toString('hex')}`;
     let fd;
     try {
