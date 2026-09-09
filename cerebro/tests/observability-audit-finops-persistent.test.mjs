@@ -20,6 +20,8 @@ test('contract preserves PREPROD, App/web, Supabase, Trading and autonomy bounda
   assert.equal(OPERATIONAL_LEDGERS_V0_CONTRACT.prod_writes, false);
   assert.equal(OPERATIONAL_LEDGERS_V0_CONTRACT.autonomous_prod, false);
   assert.equal(OPERATIONAL_LEDGERS_V0_CONTRACT.single_writer_reference, true);
+  assert.equal(OPERATIONAL_LEDGERS_V0_CONTRACT.internal_mutable_state, 'private-with-capability-guarded-writes');
+  assert.equal(OPERATIONAL_LEDGERS_V0_CONTRACT.audit_when, 'canonical-iso8601-utc-instant-hash-covered');
 });
 
 test('observability persists correlation-scoped records across restart with tenant isolation', () => {
@@ -33,17 +35,21 @@ test('observability persists correlation-scoped records across restart with tena
   assert.equal(b.listForCorrelation('other','corr-1').length, 1);
 });
 
-test('audit persists canonical append-only hash chain and detects journal-level mutation on reopen', () => {
+test('audit persists canonical append-only hash chain including when and detects journal-level mutation on reopen', () => {
   const root = tempRoot(); const file = path.join(root, 'audit.v8');
   const a = new AuditLedgerV0({ file_path:file });
-  const first = a.append({ context:ctx, correlation_id:'corr-a', actor:'system', action:'EVALUATE', target:{id:'x'}, before:null, after:{ok:true}, reason:'policy', result:'ALLOWED' });
-  const second = a.append({ context:ctx, correlation_id:'corr-a', actor:'system', action:'WRITE', target:{id:'x'}, before:{ok:true}, after:{ok:false}, result:'DENIED' });
+  const first = a.append({ context:ctx, correlation_id:'corr-a', occurred_at:'2026-09-09T11:00:00.000Z', actor:'system', action:'EVALUATE', target:{id:'x'}, before:null, after:{ok:true}, reason:'policy', result:'ALLOWED' });
+  const second = a.append({ context:ctx, correlation_id:'corr-a', occurred_at:'2026-09-09T11:00:01.000Z', actor:'system', action:'WRITE', target:{id:'x'}, before:{ok:true}, after:{ok:false}, result:'DENIED' });
+  assert.equal(first.occurred_at, '2026-09-09T11:00:00.000Z');
+  assert.equal(second.occurred_at, '2026-09-09T11:00:01.000Z');
   assert.equal(first.previous_hash, null);
   assert.equal(second.previous_hash, first.record_hash);
   assert.deepEqual(a.verify(), { valid:true, records:2, last_hash:second.record_hash });
   const b = new AuditLedgerV0({ file_path:file });
   assert.equal(b.verify().records, 2);
   assert.equal(b.listForCompany('fenix').length, 2);
+  assert.equal(b.list()[0].occurred_at, first.occurred_at);
+  assert.throws(() => a.append({ context:ctx, correlation_id:'bad-time', occurred_at:'not-a-time', actor:'system', action:'X', result:'DENIED' }), /ISO-8601/);
   const bytes = fs.readFileSync(file);
   bytes[Math.floor(bytes.length / 2)] ^= 0x01;
   fs.writeFileSync(file, bytes);
@@ -81,11 +87,27 @@ test('caller mutation after accepted records cannot rewrite persisted history', 
   const before = { amount:1 };
   const metadata = { provider_note:'initial' };
   ledgers.observability.record({ context:ctx, correlation_id:'m1', message:'m', data });
-  ledgers.audit.append({ context:ctx, correlation_id:'m2', actor:'system', action:'A', before, result:'OK' });
+  ledgers.audit.append({ context:ctx, correlation_id:'m2', occurred_at:'2026-09-09T11:02:00.000Z', actor:'system', action:'A', before, result:'OK' });
   ledgers.finops.record({ context:ctx, correlation_id:'m3', task_id:'t', cost_eur:0, metadata });
   data.nested.value = 999; before.amount = 999; metadata.provider_note = 'mutated';
   const reopened = createOperationalLedgersV0({ root_dir:root });
   assert.equal(reopened.observability.list()[0].data.nested.value, 1);
   assert.equal(reopened.audit.list()[0].before.amount, 1);
   assert.equal(reopened.finops.list()[0].metadata.provider_note, 'initial');
+});
+
+test('public shadow properties and direct-write attempts cannot replace or bypass private ledger state', () => {
+  const root = tempRoot(); const file = path.join(root, 'audit-private.v8');
+  const ledger = new AuditLedgerV0({ file_path:file });
+  ledger.append({ context:ctx, correlation_id:'p1', occurred_at:'2026-09-09T11:03:00.000Z', actor:'system', action:'FIRST', result:'OK' });
+  ledger.records = [];
+  ledger.journal = { commit(){ throw new Error('must never run'); } };
+  ledger.validator = () => true;
+  assert.throws(() => ledger._commit({ kind:'AUD-001' }, Symbol('fake')), /direct ledger writes are forbidden/);
+  ledger.append({ context:ctx, correlation_id:'p2', occurred_at:'2026-09-09T11:03:01.000Z', actor:'system', action:'SECOND', result:'OK' });
+  assert.equal(ledger.operation_count, 2);
+  const reopened = new AuditLedgerV0({ file_path:file });
+  assert.equal(reopened.operation_count, 2);
+  assert.equal(reopened.list()[0].action, 'FIRST');
+  assert.equal(reopened.list()[1].action, 'SECOND');
 });
