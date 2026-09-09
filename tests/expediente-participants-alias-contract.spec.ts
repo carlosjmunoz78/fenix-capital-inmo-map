@@ -14,12 +14,14 @@ test('expediente usa nombre visible de todos los participantes y conserva el cod
   expect(rename).toContain('h1.dataset.expedienteCode=code');
   expect(rename).toContain('cliente_alias');
   expect(rename).toContain('Cambiar nombre visible');
+  expect(rename).toContain('IS_PRODUCTION||isNotionId(code)');
 });
 
-test('ficha de expediente hidrata todos los campos de cada comprador',async()=>{
+test('ficha de expediente hidrata todos los campos de cada comprador en preprod y prod',async()=>{
   const runtime=source('src/notionRuntime.ts');
   const people=source('supabase/functions/fenix-expediente-people-test/index.ts');
   expect(runtime).toContain("fetchEnvironmentApi<T>('fenix-expediente-people'");
+  expect(runtime).toContain("?expediente=${encodeURIComponent(decodeURIComponent(people[1]))}");
   expect(runtime).not.toContain("fetchEnvironmentApi<T>('fenix-expediente-people-test'");
   for(const field of ['fecha_nacimiento','nacionalidad','estado_civil','situacion_laboral','empresa_organismo','sueldo_neto_mensual','deudas_mensuales','ahorro_disponible'])expect(people).toContain(field);
   expect(people).toContain('relation:{contains:expedienteId}');
