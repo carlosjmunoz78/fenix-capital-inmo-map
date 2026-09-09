@@ -12,7 +12,7 @@ Estado documental: **ACTUALIZADO A MAIN `c2eb030e2e8ed0ab45ca58775a7183e359e3d2e
 
 ## Evidencia vigente
 
-Main actual tras Phase 5: `c2eb030e2e8ed0ab45ca58775a7183e359e3d2e9`.
+Main actual tras Phase 5: `c2eb030e2e8ed0ab45ca58775a7183e359e3d2e9`. La asociación máquina-verificable de cada run, resultado y SHA está en `docs/EVIDENCE.json`.
 
 - PR #163 Phase 4: PREPROD Factory/App green; merge `cd04fa8ccdbbb5c4945258d579e6bfb8efe1ea01`; PROD Live Deploy y PROD Runtime Smoke green sobre ese SHA.
 - PR #164 Phase 5: HEAD revisado `2180258a3ae91697d6bd988361996afa62032f72`; PREPROD Factory/App green; Codex sin issues mayores; merge `c2eb030e2e8ed0ab45ca58775a7183e359e3d2e9`; PROD Live Deploy run `34292739019` y PROD Runtime Smoke run `34292739031`, ambos success sobre el SHA exacto.
@@ -50,4 +50,4 @@ Los 177 scaffolds se reconstruyen desde `registry/engine-registry.seed.json` + `
 
 ## Documentación operativa
 
-Ver `docs/CURRENT_STATE.md`, `docs/DEPENDENCY_MAP.md`, `docs/RUNBOOK.md`, `docs/CHANGELOG.md` y `docs/AUTONOMY_BACKUP_REBUILD.md` para estado de evidencia, dependencias, gates, rollback/rebuild y autonomía.
+Ver `docs/CURRENT_STATE.md`, `docs/EVIDENCE.json`, `docs/DEPENDENCY_MAP.md`, `docs/RUNBOOK.md`, `docs/CHANGELOG.md` y `docs/AUTONOMY_BACKUP_REBUILD.md` para estado de evidencia, dependencias, gates, rollback/rebuild y autonomía.
