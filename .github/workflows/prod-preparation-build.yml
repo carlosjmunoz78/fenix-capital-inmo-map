@@ -74,6 +74,8 @@ jobs:
         timeout-minutes: 5
 
       - name: Build PRE-PROD-compatible code path
+        env:
+          VITE_FUNCTION_SUFFIX: '-test'
         run: npm run build
 
       - name: Browser QA
@@ -97,7 +99,10 @@ jobs:
           if-no-files-found: ignore
 
 # Validation only. Dummy PROD values prove the production code path builds without
-# reusing PRE-PROD fallbacks. The release credential gate reports presence only;
-# it never prints secret values or contacts external services. Runtime Notion reachability
-# is covered separately by the PROD runtime smoke through the deployed Ana handler.
+# reusing PRE-PROD fallbacks. The PRE-PROD compatibility build explicitly uses the
+# same -test function suffix as the canonical PRE-PROD workflow so browser QA is
+# validating the intended isolated runtime rather than accidentally probing PROD.
+# The release credential gate reports presence only; it never prints secret values
+# or contacts external services. Runtime Notion reachability is covered separately
+# by the PROD runtime smoke through the deployed Ana handler.
 # No deployment, branch write, backend contact or mutation occurs here.
