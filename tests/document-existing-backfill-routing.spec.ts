@@ -7,7 +7,8 @@ test('existing backfill keeps authenticated user context and server-only service
  const code=source();
  expect(code).toContain("auth.toLowerCase().startsWith('bearer ')");
  expect(code).toContain("user.rpc('fenix_prod_session_context')");
- expect(code).toContain("['Direccion','Financiero'].includes(role)");
+ expect(code).toContain("function normalizeRole");
+ expect(code).toContain("['direccion','financiero'].includes(role)");
  expect(code).toContain("Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')");
  expect(code).not.toMatch(/verify_jwt\s*:\s*false/i);
 });
