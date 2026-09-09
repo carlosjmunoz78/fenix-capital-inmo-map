@@ -7,7 +7,7 @@ type BackfillResponse={ok?:boolean;processed?:number;succeeded?:number;failed?:n
 const sleep=(ms:number)=>new Promise(resolve=>window.setTimeout(resolve,ms));
 
 function rawExpediente(pathname:string){
- const match=pathname.match(/^\/expedientes\/([^/?#]+)\/?$/i);
+ const match=pathname.match(/^\/expedientes\/([^/?#]+)(?:\/|$)/i);
  if(!match?.[1])return '';
  const value=decodeURIComponent(match[1]);
  return ['nuevo','nueva'].includes(value.toLowerCase())?'':value;
