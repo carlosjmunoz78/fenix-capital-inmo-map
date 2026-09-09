@@ -19,7 +19,8 @@ test('expediente usa nombre visible de todos los participantes y conserva el cod
 test('ficha de expediente hidrata todos los campos de cada comprador',async()=>{
   const runtime=source('src/notionRuntime.ts');
   const people=source('supabase/functions/fenix-expediente-people-test/index.ts');
-  expect(runtime).toContain("fetchEnvironmentApi<T>('fenix-expediente-people-test'");
+  expect(runtime).toContain("fetchEnvironmentApi<T>('fenix-expediente-people'");
+  expect(runtime).not.toContain("fetchEnvironmentApi<T>('fenix-expediente-people-test'");
   for(const field of ['fecha_nacimiento','nacionalidad','estado_civil','situacion_laboral','empresa_organismo','sueldo_neto_mensual','deudas_mensuales','ahorro_disponible'])expect(people).toContain(field);
   expect(people).toContain('relation:{contains:expedienteId}');
 });
