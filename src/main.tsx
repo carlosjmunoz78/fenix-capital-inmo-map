@@ -54,7 +54,6 @@ import FirmaCreateShell from './FirmaCreateShell';
 import DocumentacionShell from './DocumentacionShell';
 import DocumentCreateShell from './DocumentCreateShell';
 import DocumentViewerShell from './DocumentViewerShell';
-import ExpedienteDocumentsGuard from './ExpedienteDocumentsGuard';
 import ContextEvidenceUpload from './ContextEvidenceUpload';
 import FinancierosShell from './FinancierosShell';
 import FinancieroDetailShell from './FinancieroDetailShell';
@@ -153,7 +152,6 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <ContextEvidenceUpload />
       <GlobalDictationGuard />
       <GlobalCommunicationCommandGuard />
-      <ExpedienteDocumentsGuard />
       <ExpedienteAnaRuntimeGuard />
       <ExpedienteBelenFinancialGuard />
       <ExpedienteBankRankingGuard />
