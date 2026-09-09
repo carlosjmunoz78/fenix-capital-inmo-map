@@ -19,15 +19,14 @@ type Ranking={ok?:boolean;ranking?:Rank[];strategy_status?:string;requires_belen
 
 type TaskRow=Record<string,unknown>;
 function rowsFrom(data:unknown):TaskRow[]{if(!data||typeof data!=='object')return[];const x=data as Record<string,unknown>;return Array.isArray(x.items)?x.items as TaskRow[]:[];}
-function sval(v:unknown){return v===null||v===undefined||v===''?'—':String(v)}
 function nameOf(row:AnyRow|undefined){return String(row?.cliente_alias||row?.cliente||row?.nombre_cliente||row?.nombre||row?.expediente||'Expediente')}
 function taskId(r:TaskRow){return String(r.id||r.tarea_id||r.tarea_code||r.code||'')}
 function taskTitle(r:TaskRow){return String(r.tarea||r.titulo||r['título']||r.nombre||r.title||'Tarea sin título visible')}
 function taskState(r:TaskRow){return String(r.estado||r.status||'Sin estado')}
 function taskDue(r:TaskRow){return String(r.fecha_limite||r['fecha_límite']||r.vencimiento||r.fecha||r.due_date||'Sin fecha')}
-function sameCode(v:unknown,code:string){
+function sameCode(v:unknown,code:string):boolean{
  if(typeof v==='string')return v===code||decodeURIComponent(v)===code;
- if(Array.isArray(v))return v.some(x=>sameCode((x as any)?.id??x,code));
+ if(Array.isArray(v))return v.some((x:unknown):boolean=>sameCode((x as any)?.id??x,code));
  if(v&&typeof v==='object'){const x=v as Record<string,unknown>;return sameCode(x.id,code)||sameCode(x.code,code)||sameCode(x.expediente_code,code);}
  return false;
 }
