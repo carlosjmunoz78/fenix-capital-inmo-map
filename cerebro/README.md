@@ -1,23 +1,24 @@
 # CEREBRO OS · Engine Factory, Runtime, Multiempresa y Console V0
 
-Estado documental: **ACTUALIZADO A MAIN `c2eb030e2e8ed0ab45ca58775a7183e359e3d2e9`**. Este árbol sigue separado del runtime funcional de App Fénix y no sustituye App, CRM, Supabase, Notion, WordPress, SEO, Training ni Trading.
+Este árbol se mantiene separado del runtime funcional de App Fénix y no sustituye App, CRM, Supabase, Notion, WordPress, SEO, Training ni Trading. Los SHA indicados son **anchors de evidencia por alcance**, no un campo mutable de “main actual”.
 
 ## Estado por fase
 
 - **FACT-001 / GOV-001 — HECHO · estructural/reference green.** Factory V0 y registro canónico de 177 motores validados; 177 scaffolds reproducibles, sin afirmar que los 177 motores estén operativos.
-- **Phase 2 — HECHO estructural / POR AUDITAR live.** Bindings conservadores para `CORE-001`, `SUP-001`, `TRN-001`, `APP-001`, `CRM-001`, `DOC-001`, `SEO-001`, `WEB-001` y `LAB-TRD`; read-only/contract-only y sin convertir evidencia histórica en evidencia viva.
+- **Phase 2 — HECHO wrapper + auditoría read-only V0 / estados live diferenciados.** Los nueve bindings siguen conservadores. El ledger `evidence/phase2-existing-bindings-audit.json` confirma `APP-001` como `CONFIRMED_OPERATIONAL` por deploy/smoke exact-SHA del App existente; `CORE-001`, `SUP-001`, `TRN-001` y `DOC-001` quedan `DOCUMENTED_PARTIAL`; `CRM-001`, `SEO-001`, `WEB-001` y `LAB-TRD` permanecen `UNKNOWN_REQUIRES_AUDIT`. Ningún estado habilita autonomía CEREBRO PROD.
 - **Phase 3 — HECHO V0 reference / DEFINIDO según motor.** `RUNTIME-001`, `EVT-001`, `JOB-001` y `FINOPS-001` tienen referencia ejecutable PREPROD; `DBOFF-001`, `STOROFF-001`, `FREE-001` y `AIBUD-001` permanecen definidos como contratos V0, no operativos autónomos.
 - **Phase 4 — HECHO · estructural/reference green.** Bootstrap multiempresa de 17 motores con aislamiento por tenant, PREPROD-only, HUMAN_REQUIRED canónico y promoción PROD autónoma deshabilitada.
 - **Phase 5 — HECHO · estructural/reference green.** `CONSOLE-001`, `CHAT-001`, `CTX-001`, `CMD-001` y `ACTGW-001` implementados como Console/Gateway V0: selector de empresa/contexto, sesiones, historial, auditoría, consulta de motores, chat y órdenes mediados por Gateway, nunca acceso directo a un modelo.
 
 ## Evidencia vigente
 
-Main actual tras Phase 5: `c2eb030e2e8ed0ab45ca58775a7183e359e3d2e9`. La asociación máquina-verificable de cada run, resultado y SHA está en `docs/EVIDENCE.json`.
+La evidencia estructurada por alcance está en `docs/EVIDENCE.json`; el audit read-only de bindings existentes está en `evidence/phase2-existing-bindings-audit.json`.
 
-- PR #163 Phase 4: PREPROD Factory/App green; merge `cd04fa8ccdbbb5c4945258d579e6bfb8efe1ea01`; PROD Live Deploy y PROD Runtime Smoke green sobre ese SHA.
-- PR #164 Phase 5: HEAD revisado `2180258a3ae91697d6bd988361996afa62032f72`; PREPROD Factory/App green; Codex sin issues mayores; merge `c2eb030e2e8ed0ab45ca58775a7183e359e3d2e9`; PROD Live Deploy run `34292739019` y PROD Runtime Smoke run `34292739031`, ambos success sobre el SHA exacto.
+- Phase 5 evidence anchor: merge `c2eb030e2e8ed0ab45ca58775a7183e359e3d2e9`; PROD Live Deploy `34292739019` y PROD Runtime Smoke `34292739031`, success sobre ese SHA.
+- Documentation closure anchor: merge `6bf6af92c1106884da87fb9a659f807093d47e0a`; PROD Live Deploy `34293941974` y PROD Runtime Smoke `34293942069`, success sobre ese SHA.
+- Phase 2 App live evidence uses the same exact `6bf6af92c1106884da87fb9a659f807093d47e0a` deploy/smoke pair to confirm only the existing App surface.
 
-Esta evidencia valida que los cambios estructurales/reference no rompieron los gates existentes. **No demuestra que todos los motores CEREBRO sean operativos o autónomos en PROD.**
+Esta evidencia valida los alcances expresamente citados. **No demuestra que todos los motores CEREBRO sean operativos o autónomos en PROD.**
 
 ## Factory-first
 
