@@ -14,6 +14,7 @@ test('OBSERV/AUD/FINOPS inventory is read-only PREPROD evidence and does not ove
   assert.equal(inventory.autonomous_prod, false);
   assert.deepEqual(Object.keys(inventory.engines).sort(), ['AUD-001', 'FINOPS-001', 'OBSERV-001']);
   for (const engine of Object.values(inventory.engines)) {
+    assert.equal(engine.master_status, 'PARCIAL');
     assert.equal(engine.evidence_state, 'DOCUMENTED_PARTIAL');
     assert.ok(engine.existing.length > 0);
     assert.ok(engine.gaps.length > 0);
@@ -26,6 +27,11 @@ test('AUD-001 inventory includes existing runtime, console and governance audit 
   assert.match(existing, /CerebroGatewayV0/);
   assert.match(existing, /PolicyEngine/);
   assert.match(existing, /auditLog\(\)/);
+});
+
+test('FINOPS-001 inventory preserves executable reference as canonical partial state', () => {
+  assert.equal(inventory.engines['FINOPS-001'].master_status, 'PARCIAL');
+  assert.match(inventory.engines['FINOPS-001'].existing.join('\n'), /FinOpsGate/);
 });
 
 test('inventory preserves App, SharedRuntime, Supabase cost boundary and Trading isolation', () => {
