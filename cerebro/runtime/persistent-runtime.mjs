@@ -36,20 +36,18 @@ function fsyncDirectory(directory) {
 }
 
 function ensureDirectoryEntriesDurable(directory) {
-  fs.mkdirSync(directory, { recursive: true });
-  const root = path.parse(directory).root;
-  const parents = [];
-  let current = path.resolve(directory);
-  while (current !== root) {
+  const target = path.resolve(directory);
+  const missing = [];
+  let current = target;
+  while (!fs.existsSync(current)) {
+    missing.push(current);
     const parent = path.dirname(current);
-    if (parent === current) break;
-    parents.push(parent);
+    if (parent === current) throw new Error(`cannot resolve existing ancestor for journal directory: ${target}`);
     current = parent;
   }
-  parents.reverse();
-  for (const parent of parents) {
-    if (parent !== root) fsyncDirectory(parent);
-  }
+  fs.mkdirSync(target, { recursive: true });
+  missing.reverse();
+  for (const created of missing) fsyncDirectory(path.dirname(created));
 }
 
 function decodeEnvelope(bytes, kind) {
