@@ -7,12 +7,14 @@ test('PROD lee la ficha individual por el gateway canónico',()=>{
  expect(runtime).toContain("if(/^\\/expedientes\\/[^/]+$/.test(pathname))return fetchAppApi<T>(pathname)");
 });
 
-test('la ficha suprime chrome legacy sin depender de :has y mantiene recorrido obligatorio',()=>{
+test('la ficha mantiene chrome global visible y conserva recorrido obligatorio',()=>{
  const chrome=fs.readFileSync(path.resolve('src/ExpedienteLegacyChromeGuard.tsx'),'utf8');
+ const uniform=fs.readFileSync(path.resolve('src/OperationalUniformityGuard.tsx'),'utf8');
  const journey=fs.readFileSync(path.resolve('src/ExpedienteJourneyGuard.tsx'),'utf8');
- expect(chrome).toContain('html[data-expediente-detail="true"] .app-shell{display:none!important');
- expect(chrome).toContain("document.querySelectorAll<HTMLElement>('.app-shell,");
- expect(chrome).toContain("display','none','important");
+ expect(chrome).toContain("import ExpedienteRenameGuard from './ExpedienteRenameGuard'");
+ expect(chrome).toContain('return <ExpedienteRenameGuard/>');
+ expect(chrome).not.toContain('display:none!important');
+ expect(uniform).not.toContain('if(expedienteDetail)return null');
  expect(journey).toContain("RECORRIDO DEL EXPEDIENTE · ESTADO PENDIENTE DE CARGA");
  expect(journey).toContain("No marco ninguna fase hasta recibir el dato canónico");
  expect(journey).toContain("Siguiente fase:");
