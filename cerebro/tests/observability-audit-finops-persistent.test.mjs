@@ -23,6 +23,7 @@ test('contract preserves PREPROD, App/web, Supabase, Trading and autonomy bounda
   assert.equal(OPERATIONAL_LEDGERS_V0_CONTRACT.internal_mutable_state, 'module-private-weakmap-with-non-exported-commit-path');
   assert.equal(OPERATIONAL_LEDGERS_V0_CONTRACT.accepted_payload_grammar, 'finite-json-like-primitives+arrays+plain-data-objects-no-accessors-no-cycles');
   assert.equal(OPERATIONAL_LEDGERS_V0_CONTRACT.audit_when, 'canonical-iso8601-utc-instant-hash-covered');
+  assert.equal(OPERATIONAL_LEDGERS_V0_CONTRACT.audit_reason, 'strict-string-or-null-no-coercion');
   assert.equal(OPERATIONAL_LEDGERS_V0_CONTRACT.cost_precision, 'micro-eur-safe-integer-with-ulp-aware-scaled-tolerance-and-number-resolution-bound');
   assert.equal(OPERATIONAL_LEDGERS_V0_CONTRACT.micro_rounding_tolerance_cap, 0.125);
   assert.equal(OPERATIONAL_LEDGERS_V0_CONTRACT.aggregate_cost_precision, 'reject-number-aggregate-if-micro-eur-roundtrip-is-not-exact');
@@ -59,6 +60,18 @@ test('audit persists canonical append-only hash chain including when and detects
   bytes[Math.floor(bytes.length / 2)] ^= 0x01;
   fs.writeFileSync(file, bytes);
   assert.throws(() => new AuditLedgerV0({ file_path:file }), /checksum|decode|audit/i);
+});
+
+test('audit rejects non-textual reason without coercion or caller code execution', () => {
+  const root = tempRoot(); const file = path.join(root, 'audit-reason.v8');
+  const ledger = new AuditLedgerV0({ file_path:file });
+  let toStringCalls = 0;
+  const reason = { code:'POLICY', toString() { toStringCalls += 1; return 'POLICY'; } };
+  assert.throws(() => ledger.append({ context:ctx, correlation_id:'reason-bad', occurred_at:'2026-09-09T11:01:00.000Z', actor:'system', action:'DENY', reason, result:'DENIED' }), /reason must be null or string/);
+  assert.equal(toStringCalls, 0);
+  assert.equal(ledger.operation_count, 0);
+  const accepted = ledger.append({ context:ctx, correlation_id:'reason-ok', occurred_at:'2026-09-09T11:01:01.000Z', actor:'system', action:'DENY', reason:'POLICY_CONFLICT', result:'DENIED' });
+  assert.equal(accepted.reason, 'POLICY_CONFLICT');
 });
 
 test('finops persists exact micro-euro events and aggregates by company engine and provider', () => {
