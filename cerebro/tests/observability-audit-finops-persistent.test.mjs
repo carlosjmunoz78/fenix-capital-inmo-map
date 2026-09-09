@@ -24,6 +24,7 @@ test('contract preserves PREPROD, App/web, Supabase, Trading and autonomy bounda
   assert.equal(OPERATIONAL_LEDGERS_V0_CONTRACT.accepted_payload_grammar, 'finite-json-like-primitives+arrays+plain-data-objects-no-accessors-no-cycles');
   assert.equal(OPERATIONAL_LEDGERS_V0_CONTRACT.audit_when, 'canonical-iso8601-utc-instant-hash-covered');
   assert.equal(OPERATIONAL_LEDGERS_V0_CONTRACT.cost_precision, 'micro-eur-safe-integer-with-number-resolution-bound');
+  assert.equal(OPERATIONAL_LEDGERS_V0_CONTRACT.aggregate_cost_precision, 'reject-number-aggregate-if-micro-eur-roundtrip-is-not-exact');
   assert.ok(OPERATIONAL_LEDGERS_V0_CONTRACT.max_reliable_cost_eur < 9_000_000_000);
 });
 
@@ -71,6 +72,18 @@ test('finops persists exact micro-euro events and aggregates by company engine a
   assert.throws(() => a.record({ context:ctx, correlation_id:'bad', task_id:'bad', cost_eur:0.0000001 }), /micro-euro/);
   assert.throws(() => a.record({ context:ctx, correlation_id:'too-large', task_id:'too-large', cost_eur:9_000_000_000.000001 }), /reliable micro-euro Number precision/);
   assert.equal(a.operation_count, 3);
+});
+
+test('finops aggregate rejects a Number result that cannot round-trip exact micro-euros', () => {
+  const root = tempRoot(); const file = path.join(root, 'finops-aggregate-bound.v8');
+  const ledger = new CostLedgerV0({ file_path:file });
+  ledger.record({ context:ctx, correlation_id:'large-1', task_id:'large-1', cost_eur:4_503_599_626 });
+  ledger.record({ context:ctx, correlation_id:'large-2', task_id:'large-2', cost_eur:4_503_599_626.000001 });
+  assert.equal(ledger.operation_count, 2);
+  assert.throws(() => ledger.aggregate({ company_id:'fenix' }), /aggregated cost exceeds reliable micro-euro Number precision/);
+  const reopened = new CostLedgerV0({ file_path:file });
+  assert.equal(reopened.operation_count, 2);
+  assert.throws(() => reopened.aggregate({ company_id:'fenix' }), /aggregated cost exceeds reliable micro-euro Number precision/);
 });
 
 test('all ledgers reject PROD context before persistence', () => {
