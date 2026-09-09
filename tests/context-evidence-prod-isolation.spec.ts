@@ -15,7 +15,7 @@ test('contextual evidence selects isolated resources per environment',()=>{
 
 test('PROD fail-closes origins without an evidence contract',()=>{
   const text=source();
-  expect(text).toContain("const PROD_SUPPORTED_ORIGINS=new Set(['expediente','contacto','firma'])");
+  expect(text).toContain("const PROD_SUPPORTED_ORIGINS=new Set(['expediente','comprador','contacto','firma'])");
   expect(text).toContain("const context=IS_PRODUCTION&&rawContext&&!PROD_SUPPORTED_ORIGINS.has(rawContext.type)?null:rawContext");
   expect(text).toContain('if(!context)return null');
 });
