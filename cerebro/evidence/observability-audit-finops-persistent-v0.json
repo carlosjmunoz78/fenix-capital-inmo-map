@@ -19,10 +19,10 @@
   "capabilities": {
     "OBSERV-001": ["durable correlation_id records", "tenant/context queries", "restart persistence", "validated sequence and stable record ids", "strict finite JSON-like data grammar with accessor rejection"],
     "AUD-001": ["canonical append-only logical records", "module-private WeakMap state with non-exported commit path", "strict finite JSON-like evidence grammar with accessor rejection", "canonical occurred_at instant covered by record hash", "SHA-256 hash chain integrity", "restart verification", "company-scoped query"],
-    "FINOPS-001": ["durable cost events", "micro-euro safe integer precision with Number-resolution upper bound", "validated sequence and stable event ids", "strict finite JSON-like metadata grammar with accessor rejection", "aggregation by company/engine/provider with exact micro-euro Number round-trip guard"]
+    "FINOPS-001": ["durable cost events", "micro-euro safe integer precision with ULP-aware scaled tolerance and Number-resolution upper bound", "validated sequence and stable event ids", "strict finite JSON-like metadata grammar with accessor rejection", "aggregation by company/engine/provider with exact micro-euro Number round-trip guard"]
   },
   "integrity_limit": "SHA-256 chain is corruption/inconsistency detection, not authenticated tamper-proofing.",
   "payload_limit": "Platform objects, accessor properties and cycles are rejected instead of being executed or silently degraded by V8 serialization.",
-  "cost_limit": "Numeric EUR inputs above the reliable micro-euro resolution bound are rejected before scaling. Aggregates that cannot round-trip exactly from integer micro-euros to Number EUR are also rejected; V0 does not claim arbitrary-size decimal money support.",
+  "cost_limit": "Numeric EUR inputs above the reliable micro-euro resolution bound are rejected before scaling. Binary floating-point noise around an integer micro-euro is tolerated using a magnitude/ULP-aware bound capped at 0.125 micro-euro; aggregates that cannot round-trip exactly from integer micro-euros to Number EUR are rejected. V0 does not claim arbitrary-size decimal money support.",
   "migration": "NONE. Parallel adapter only until OLD-vs-NEW comparison and explicit promotion gates."
 }
