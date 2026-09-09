@@ -3,11 +3,16 @@ import {useLocation} from 'react-router-dom';
 import {IS_PRODUCTION,SUPABASE_PUBLISHABLE_KEY,SUPABASE_URL,supabase} from './supabase';
 
 type BackfillResponse={ok?:boolean;processed?:number;succeeded?:number;failed?:number;remaining?:number;skipped?:Array<{file?:string;error?:string}>;items?:Array<{file?:string;ok?:boolean;error?:string}>;error?:string};
+type ExpedienteListResponse={ok?:boolean;items?:Array<{expediente_code?:string;stage?:string}>};
 
 const sleep=(ms:number)=>new Promise(resolve=>window.setTimeout(resolve,ms));
 const canonicalExpediente=(value:string)=>/^exp(?:-|_)/i.test(value);
+const ROOT_SWEEP='__all_active_expedientes__';
+const TERMINAL_STAGES=new Set(['firmado','cerrado','cierre','finalizado','baja','perdido','pausado']);
+const normalize=(value:unknown)=>String(value??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toLowerCase();
 
 function rawExpediente(pathname:string){
+ if(/^\/expedientes\/?$/i.test(pathname))return ROOT_SWEEP;
  const match=pathname.match(/^\/expedientes\/([^/?#]+)(?:\/|$)/i);
  if(!match?.[1])return '';
  const value=decodeURIComponent(match[1]);
@@ -37,13 +42,23 @@ async function authenticatedHeaders(cancelled:()=>boolean){
  return null;
 }
 
-async function resolveExpedienteCode(raw:string,headers:Record<string,string>){
- if(canonicalExpediente(raw))return raw;
+async function resolveExpedienteCodes(raw:string,headers:Record<string,string>){
+ if(raw===ROOT_SWEEP){
+  const response=await fetch(`${SUPABASE_URL}/functions/v1/fenix-app-gateway/expedientes`,{method:'GET',headers});
+  const data=await response.json().catch(()=>null) as ExpedienteListResponse|null;
+  if(!response.ok||data?.ok!==true||!Array.isArray(data.items))return [];
+  return [...new Set(data.items
+   .filter(item=>!TERMINAL_STAGES.has(normalize(item?.stage)))
+   .map(item=>String(item?.expediente_code??'').trim())
+   .filter(code=>canonicalExpediente(code)))];
+ }
+ if(canonicalExpediente(raw))return [raw];
  const detail=await fetch(`${SUPABASE_URL}/functions/v1/fenix-app-gateway/expedientes/${encodeURIComponent(raw)}`,{method:'GET',headers});
  const detailData=await detail.json().catch(()=>null) as Record<string,unknown>|null;
  const row=(detailData?.expediente&&typeof detailData.expediente==='object'?detailData.expediente:detailData?.item&&typeof detailData.item==='object'?detailData.item:null) as Record<string,unknown>|null;
- if(!detail.ok)return '';
- return String(row?.expediente_code??row?.expediente??'').trim();
+ if(!detail.ok)return [];
+ const code=String(row?.expediente_code??row?.expediente??'').trim();
+ return canonicalExpediente(code)?[code]:[];
 }
 
 export default function ExistingDocumentAutoBackfillGuard(){
@@ -72,45 +87,51 @@ export default function ExistingDocumentAutoBackfillGuard(){
    try{
     const headers=await authenticatedHeaders(()=>cancelled);
     if(cancelled||!headers){scheduleRetry();return;}
-    const expCode=await resolveExpedienteCode(raw,headers);
-    if(cancelled||!expCode){scheduleRetry();return;}
+    const expCodes=await resolveExpedienteCodes(raw,headers);
+    if(cancelled||!expCodes.length){scheduleRetry();return;}
 
-    let totalProcessed=0,totalSucceeded=0,lastSkipped=0,lastFailed=0,lastRemaining=0;
-    for(let pass=0;pass<8&&!cancelled;pass++){
-     const response=await fetch(`${SUPABASE_URL}/functions/v1/fenix-document-existing-backfill`,{method:'POST',headers,body:JSON.stringify({expediente_code:expCode})});
-     const data=await response.json().catch(()=>null) as BackfillResponse|null;
-     if(!response.ok||data?.ok!==true){
-      if(response.status>=500||response.status===429){await sleep(900*(pass+1));continue;}
-      scheduleRetry();
-      return;
+    let totalProcessed=0,totalSucceeded=0,totalSkipped=0,totalFailed=0,totalRemaining=0;
+    for(const expCode of expCodes){
+     if(cancelled)break;
+     let previousRemaining=Number.POSITIVE_INFINITY;
+     for(let pass=0;pass<8&&!cancelled;pass++){
+      const response=await fetch(`${SUPABASE_URL}/functions/v1/fenix-document-existing-backfill`,{method:'POST',headers,body:JSON.stringify({expediente_code:expCode})});
+      const data=await response.json().catch(()=>null) as BackfillResponse|null;
+      if(!response.ok||data?.ok!==true){
+       if(response.status>=500||response.status===429){await sleep(900*(pass+1));continue;}
+       totalFailed+=1;
+       break;
+      }
+      const processed=Number(data.processed)||0,succeeded=Number(data.succeeded)||0,failed=Number(data.failed)||0,remaining=Number(data.remaining)||0;
+      const skipped=Array.isArray(data.skipped)?data.skipped.length:0;
+      totalProcessed+=processed;
+      totalSucceeded+=succeeded;
+      totalFailed+=failed;
+      totalSkipped+=skipped;
+      totalRemaining+=remaining;
+      if(processed>0)statusBox(`Organizando y leyendo documentos automáticamente · ${totalSucceeded}/${totalProcessed} correctos…`);
+      if(remaining<=0&&failed<=0)break;
+      if(processed===0||remaining>=previousRemaining)break;
+      previousRemaining=remaining;
+      await sleep(failed>0?1200:350);
      }
-     const processed=Number(data.processed)||0,succeeded=Number(data.succeeded)||0,failed=Number(data.failed)||0,remaining=Number(data.remaining)||0;
-     lastSkipped=Array.isArray(data.skipped)?data.skipped.length:0;
-     lastFailed=failed;
-     lastRemaining=remaining;
-     totalProcessed+=processed;
-     totalSucceeded+=succeeded;
-     if(processed>0)statusBox(`Organizando y leyendo documentos automáticamente · ${totalSucceeded}/${totalProcessed} correctos…`);
-     if(remaining<=0&&failed<=0)break;
-     if(processed===0&&remaining<=0)break;
-     await sleep(failed>0?1200:350);
     }
 
     if(cancelled)return;
     if(totalProcessed===0){
-     if(lastRemaining===0&&lastFailed===0&&lastSkipped===0)completed.current=raw;
+     if(totalRemaining===0&&totalFailed===0&&totalSkipped===0)completed.current=raw;
      else scheduleRetry();
      return;
     }
 
-    window.dispatchEvent(new CustomEvent('fenix:document-backfill-finished',{detail:{expedienteCode:expCode,processed:totalProcessed,succeeded:totalSucceeded,skipped:lastSkipped}}));
-    if(totalSucceeded===totalProcessed&&lastFailed===0&&lastSkipped===0){
+    window.dispatchEvent(new CustomEvent('fenix:document-backfill-finished',{detail:{expedienteCode:raw===ROOT_SWEEP?'all-active':expCodes[0],processed:totalProcessed,succeeded:totalSucceeded,skipped:totalSkipped}}));
+    if(totalSucceeded===totalProcessed&&totalFailed===0&&totalSkipped===0){
      completed.current=raw;
      statusBox(`${totalSucceeded} documento${totalSucceeded===1?'':'s'} leído${totalSucceeded===1?'':'s'} y colocado${totalSucceeded===1?'':'s'} automáticamente.`,'ok');
      await sleep(650);
      if(!cancelled)window.location.reload();
     }else{
-     statusBox(`Documentos automáticos: ${totalSucceeded}/${totalProcessed} correctos${lastSkipped?` · ${lastSkipped} por revisar`:''}.`,'error');
+     statusBox(`Documentos automáticos: ${totalSucceeded}/${totalProcessed} correctos${totalSkipped?` · ${totalSkipped} por revisar`:''}.`,'error');
      scheduleRetry(2200);
     }
    }catch{
