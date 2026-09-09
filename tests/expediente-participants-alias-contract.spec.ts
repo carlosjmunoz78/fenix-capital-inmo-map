@@ -10,11 +10,11 @@ test('expediente usa nombre visible de todos los participantes y conserva el cod
   expect(chrome).toContain("import ExpedienteRenameGuard from './ExpedienteRenameGuard'");
   expect(chrome).toContain('return <ExpedienteRenameGuard/>');
   expect(rename).toContain('joinNames(people)');
-  expect(rename).toContain('h1.textContent=visibleName');
-  expect(rename).toContain('h1.dataset.expedienteCode=code');
+  expect(rename).toContain('applyVisibleTitle');
+  expect(rename).toContain('dataset.expedienteCode');
   expect(rename).toContain('cliente_alias');
   expect(rename).toContain('Cambiar nombre visible');
-  expect(rename).toContain('IS_PRODUCTION||isNotionId(code)');
+  expect(rename).toContain('if(!code||!IS_PRODUCTION)return');
 });
 
 test('ficha de expediente hidrata todos los campos de cada comprador en preprod y prod',async()=>{
