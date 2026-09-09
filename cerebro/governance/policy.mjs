@@ -16,19 +16,36 @@ function companyAccess(requester,target){const r=nonEmpty(requester,'requester_c
 function clonePlain(v,p='$'){
   if(v===null||['string','boolean'].includes(typeof v))return v;
   if(typeof v==='number'){if(!Number.isFinite(v))throw new TypeError(`${p} contains non-finite number`);return v;}
-  if(Array.isArray(v))return v.map((x,i)=>clonePlain(x,`${p}[${i}]`));
+  if(Array.isArray(v)){
+    const descriptors=Object.getOwnPropertyDescriptors(v),length=descriptors.length?.value;
+    if(!Number.isSafeInteger(length)||length<0)throw new TypeError(`${p} has invalid array length`);
+    const out=new Array(length);
+    for(const key of Reflect.ownKeys(descriptors)){
+      if(key==='length')continue;
+      if(typeof key!=='string'||!/^(0|[1-9]\d*)$/.test(key))throw new TypeError(`${p} arrays may contain indexed plain data only`);
+      const d=descriptors[key];
+      if('get'in d||'set'in d)throw new TypeError(`${p}[${key}] accessor properties are forbidden`);
+      const index=Number(key);
+      if(index>=length)throw new TypeError(`${p}[${key}] exceeds array length`);
+      Object.defineProperty(out,key,{value:clonePlain(d.value,`${p}[${key}]`),enumerable:true,writable:true,configurable:true});
+    }
+    return out;
+  }
   if(typeof v!=='object'||Object.getPrototypeOf(v)!==Object.prototype)throw new TypeError(`${p} must contain plain data only`);
   const out={};
-  for(const [k,d] of Object.entries(Object.getOwnPropertyDescriptors(v))){
-    if('get' in d||'set' in d)throw new TypeError(`${p}.${k} accessor properties are forbidden`);
-    Object.defineProperty(out,k,{value:clonePlain(d.value,`${p}.${k}`),enumerable:true,writable:true,configurable:true});
+  for(const key of Reflect.ownKeys(Object.getOwnPropertyDescriptors(v))){
+    if(typeof key!=='string')throw new TypeError(`${p} symbol properties are forbidden`);
+    const d=Object.getOwnPropertyDescriptor(v,key);
+    if('get'in d||'set'in d)throw new TypeError(`${p}.${key} accessor properties are forbidden`);
+    Object.defineProperty(out,key,{value:clonePlain(d.value,`${p}.${key}`),enumerable:true,writable:true,configurable:true});
   }
   return out;
 }
 function deepFreeze(v){if(!v||typeof v!=='object'||Object.isFrozen(v))return v;Object.freeze(v);for(const x of Object.values(v))deepFreeze(x);return v;}
 function contextOf(input){const c=clonePlain(input,'$context');if(!c||typeof c!=='object'||Array.isArray(c))throw new TypeError('context is required');const x={company_id:nonEmpty(c.company_id,'company_id'),engine_id:nonEmpty(c.engine_id,'engine_id'),environment:nonEmpty(c.environment,'environment'),version:nonEmpty(c.version,'version')};preprod(x.environment);return deepFreeze(x);}
-function ruleOf(rule){const s=clonePlain(rule,'$rule');const r={rule_id:nonEmpty(s.rule_id,'rule_id'),version:nonEmpty(s.version,'rule.version'),environment:s.environment??'PREPROD',company_id:s.company_id??'*',engine_id:s.engine_id??'*',action:s.action??'*',effect:s.effect,priority:s.priority??0,min_confidence_bp:s.min_confidence_bp??0,max_amount_eur_cents:s.max_amount_eur_cents??null,enabled:s.enabled!==false};preprod(r.environment);nonEmpty(r.company_id,'rule.company_id');nonEmpty(r.engine_id,'rule.engine_id');nonEmpty(r.action,'rule.action');if(!POLICY_EFFECTS.has(r.effect))throw new TypeError('rule.effect must be ALLOW, DENY or REVIEW');safeInt(r.priority,'rule.priority',0,1_000_000);safeInt(r.min_confidence_bp,'rule.min_confidence_bp',0,10_000);if(r.max_amount_eur_cents!==null)safeInt(r.max_amount_eur_cents,'rule.max_amount_eur_cents');return deepFreeze(r);}
 function booleanField(s,key){if(!Object.prototype.hasOwnProperty.call(s,key))return false;if(typeof s[key]!=='boolean')throw new TypeError(`${key} must be boolean when provided`);return s[key];}
+function enabledField(s){if(!Object.prototype.hasOwnProperty.call(s,'enabled'))return true;if(typeof s.enabled!=='boolean')throw new TypeError('rule.enabled must be boolean when provided');return s.enabled;}
+function ruleOf(rule){const s=clonePlain(rule,'$rule');const r={rule_id:nonEmpty(s.rule_id,'rule_id'),version:nonEmpty(s.version,'rule.version'),environment:s.environment??'PREPROD',company_id:s.company_id??'*',engine_id:s.engine_id??'*',action:s.action??'*',effect:s.effect,priority:s.priority??0,min_confidence_bp:s.min_confidence_bp??0,max_amount_eur_cents:s.max_amount_eur_cents??null,enabled:enabledField(s)};preprod(r.environment);nonEmpty(r.company_id,'rule.company_id');nonEmpty(r.engine_id,'rule.engine_id');nonEmpty(r.action,'rule.action');if(!POLICY_EFFECTS.has(r.effect))throw new TypeError('rule.effect must be ALLOW, DENY or REVIEW');safeInt(r.priority,'rule.priority',0,1_000_000);safeInt(r.min_confidence_bp,'rule.min_confidence_bp',0,10_000);if(r.max_amount_eur_cents!==null)safeInt(r.max_amount_eur_cents,'rule.max_amount_eur_cents');return deepFreeze(r);}
 function requestOf(req){const s=clonePlain(req,'$request');const hasConfidence=Object.prototype.hasOwnProperty.call(s,'confidence_bp'),hasAmount=Object.prototype.hasOwnProperty.call(s,'amount_eur_cents');const r={action:nonEmpty(s.action,'action'),confidence_bp:hasConfidence?s.confidence_bp:null,amount_eur_cents:hasAmount?s.amount_eur_cents:null,legal_required:booleanField(s,'legal_required'),signature_required:booleanField(s,'signature_required'),high_risk:booleanField(s,'high_risk'),security_incident:booleanField(s,'security_incident'),customer_human_request:booleanField(s,'customer_human_request'),source:s.source??'UNSPECIFIED'};if(r.confidence_bp!==null)safeInt(r.confidence_bp,'confidence_bp',0,10_000);if(r.amount_eur_cents!==null)safeInt(r.amount_eur_cents,'amount_eur_cents');nonEmpty(r.source,'source');return deepFreeze(r);}
 function human(reason,context,request,policy=null){if(!HUMAN_REQUIRED_SET.has(reason))throw new Error('non-canonical HUMAN_REQUIRED reason');return deepFreeze({status:'HUMAN_REQUIRED',reason,context,action:request.action,policy});}
 function match(rule,ctx,req){return rule.enabled&&rule.environment===ctx.environment&&(rule.company_id==='*'||rule.company_id===ctx.company_id)&&(rule.engine_id==='*'||rule.engine_id===ctx.engine_id)&&(rule.action==='*'||rule.action===req.action);}
