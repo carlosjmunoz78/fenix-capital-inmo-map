@@ -39,6 +39,7 @@ const out=(req:Request,d:unknown,s=200)=>new Response(JSON.stringify(d),{status:
 function clean(v:unknown,max=220){return typeof v==='string'?v.trim().slice(0,max):''}
 function words(v:string){return v.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\.[^.]+$/,'').replace(/[^a-z0-9ñ]+/g,' ').trim()}
 function dni(v:unknown){return clean(v,32).toUpperCase().replace(/[^A-Z0-9]/g,'')}
+function normalizeRole(v:unknown){return clean(v,80).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()}
 function aliases(p:Person){const full=words(`${p.nombre??''} ${p.apellidos??''}`),display=words(p.comprador??''),first=words(p.nombre??'').split(' ')[0]??'';return [...new Set([full,display,first].filter(x=>x.length>=2))].sort((a,b)=>b.length-a.length)}
 function personFor(name:string,people:Person[]){const n=` ${words(name)} `;const ranked=people.map(person=>({person,score:Math.max(0,...aliases(person).filter(alias=>n.includes(` ${alias} `)).map(alias=>alias.length))})).filter(x=>x.score>0).sort((a,b)=>b.score-a.score);return ranked.length&&(!ranked[1]||ranked[0].score>ranked[1].score)?ranked[0].person:null}
 function personByExistingDni(run:any,people:Person[]){const documentDni=dni(run?.extraction?.fields?.documento_identidad||run?.extraction?.canonical_fields?.document_dni);if(!documentDni)return null;const matches=people.filter(p=>dni(p.dni_nie)===documentDni);return matches.length===1?matches[0]:null}
@@ -53,7 +54,7 @@ Deno.serve(async(req:Request)=>{try{
  const user=createClient(U,A,{global:{headers:{Authorization:auth}},auth:{persistSession:false,autoRefreshToken:false}});
  const svc=createClient(U,S,{auth:{persistSession:false,autoRefreshToken:false}});
  const ctxRes=await user.rpc('fenix_prod_session_context');if(ctxRes.error||!ctxRes.data?.actor_code)return out(req,{ok:false,error:'identity_not_linked'},403);
- const actor=String(ctxRes.data.actor_code),role=String(ctxRes.data.role||'');if(!['Direccion','Financiero'].includes(role))return out(req,{ok:false,error:'forbidden'},403);
+ const actor=String(ctxRes.data.actor_code),role=normalizeRole(ctxRes.data.role||'');if(!['direccion','financiero'].includes(role))return out(req,{ok:false,error:'forbidden'},403);
  const body=await req.json().catch(()=>null);const expCode=clean(body?.expediente_code,120);if(!expCode)return out(req,{ok:false,error:'expediente_code_required'},400);
  const peopleRes=await svc.rpc('fenix_prod_exp_people_server',{p_actor_code:actor,p_exp_code:expCode});if(peopleRes.error||!peopleRes.data?.ok)return out(req,{ok:false,error:'expediente_people_failed'},500);
  const people=(Array.isArray(peopleRes.data.items)?peopleRes.data.items:[]) as Person[];if(!people.length)return out(req,{ok:false,error:'expediente_people_required'},409);
