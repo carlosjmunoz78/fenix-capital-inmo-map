@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "phase_5": {
     "reviewed_head_sha": "2180258a3ae91697d6bd988361996afa62032f72",
     "merge_sha": "c2eb030e2e8ed0ab45ca58775a7183e359e3d2e9",
@@ -14,5 +14,25 @@
     },
     "scope_status": "STRUCTURAL_REFERENCE_GREEN",
     "autonomous_prod": false
+  },
+  "documentation_closure": {
+    "merge_sha": "6bf6af92c1106884da87fb9a659f807093d47e0a",
+    "prod": {
+      "live_deploy": { "run_id": 34293941974, "conclusion": "success", "head_sha": "6bf6af92c1106884da87fb9a659f807093d47e0a" },
+      "runtime_smoke": { "run_id": 34293942069, "conclusion": "success", "head_sha": "6bf6af92c1106884da87fb9a659f807093d47e0a" }
+    }
+  },
+  "phase_2_read_only_audit": {
+    "audit_source_sha": "6bf6af92c1106884da87fb9a659f807093d47e0a",
+    "ledger": "../evidence/phase2-existing-bindings-audit.json",
+    "app_001": {
+      "evidence_state": "CONFIRMED_OPERATIONAL",
+      "scope": "EXISTING_APP_SURFACE_ONLY",
+      "prod": {
+        "live_deploy": { "run_id": 34293941974, "conclusion": "success", "head_sha": "6bf6af92c1106884da87fb9a659f807093d47e0a" },
+        "runtime_smoke": { "run_id": 34293942069, "conclusion": "success", "head_sha": "6bf6af92c1106884da87fb9a659f807093d47e0a" }
+      },
+      "autonomous_cerebro": false
+    }
   }
 }
