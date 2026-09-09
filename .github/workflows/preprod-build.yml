@@ -66,6 +66,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          failed=0
           for origin in 'https://carlosjmunoz78.github.io' 'https://app.fenixcapital.es'; do
             headers="$(mktemp)"
             body="$(mktemp)"
@@ -77,16 +78,23 @@ jobs:
               'https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/fenix-ana-api-test/capabilities')"
             echo "PREPROD_ANA_CORS origin=${origin} status=${status}"
             cat "$headers"
-            echo 'PREPROD_ANA_CORS_BODY_BEGIN'
-            cat "$body"
-            echo
-            echo 'PREPROD_ANA_CORS_BODY_END'
-            test "$status" = "204"
-            grep -qi '^access-control-allow-origin:' "$headers"
-            grep -qi '^access-control-allow-methods:.*OPTIONS' "$headers"
-            grep -qi '^access-control-allow-headers:.*authorization' "$headers"
+            echo 'PREPROD_ANA_CORS_BODY_BEGIN'; cat "$body"; echo; echo 'PREPROD_ANA_CORS_BODY_END'
+            if test "$status" != "204" || ! grep -qi '^access-control-allow-origin:' "$headers" || ! grep -qi '^access-control-allow-methods:.*OPTIONS' "$headers" || ! grep -qi '^access-control-allow-headers:.*authorization' "$headers"; then failed=1; fi
             rm -f "$headers" "$body"
           done
+          prod_headers="$(mktemp)"
+          prod_body="$(mktemp)"
+          prod_status="$(curl --silent --show-error --retry 2 --retry-all-errors --retry-delay 1 --output "$prod_body" --dump-header "$prod_headers" --write-out '%{http_code}' --max-time 20 \
+            -X OPTIONS \
+            -H 'Origin: https://app.fenixcapital.es' \
+            -H 'Access-Control-Request-Method: GET' \
+            -H 'Access-Control-Request-Headers: authorization,apikey' \
+            'https://cluhljgonannaafpmblx.supabase.co/functions/v1/fenix-app-gateway/navigation')"
+          echo "PROD_REACHABILITY_PROBE status=${prod_status}"
+          cat "$prod_headers"
+          echo 'PROD_REACHABILITY_BODY_BEGIN'; cat "$prod_body"; echo; echo 'PROD_REACHABILITY_BODY_END'
+          rm -f "$prod_headers" "$prod_body"
+          test "$failed" = "0"
 
       - name: Browser QA PRE-PROD
         env:
