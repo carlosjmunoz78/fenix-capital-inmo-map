@@ -25,7 +25,6 @@ export default function OperationalUniformityGuard(){
  const[nav,setNav]=useState<NavItem[]>([]);
  const[sidebarHost,setSidebarHost]=useState<HTMLElement|null>(null);
  const[footerHost,setFooterHost]=useState<HTMLElement|null>(null);
- const expedienteDetail=/^\/expedientes\/[^/]+$/.test(location.pathname)&&location.pathname!=='/expedientes/nuevo';
 
  useEffect(()=>{
   let alive=true;
@@ -51,10 +50,6 @@ export default function OperationalUniformityGuard(){
 
  useEffect(()=>{
   setSidebarHost(null);setFooterHost(null);
-  if(expedienteDetail){
-   document.querySelectorAll('.ops-uniform-sidebar-host,.ops-uniform-footer-host').forEach(x=>x.remove());
-   return;
-  }
   const place=()=>{
    const roots=[...document.querySelectorAll('.ops-root')].filter(visible);
    const root=roots.at(-1) as HTMLElement|undefined;
@@ -84,9 +79,8 @@ export default function OperationalUniformityGuard(){
   place();
   const observer=new MutationObserver(place);observer.observe(document.body,{childList:true,subtree:true});
   return()=>{observer.disconnect();document.querySelectorAll('.ops-uniform-sidebar-host,.ops-uniform-footer-host').forEach(x=>x.remove());};
- },[location.pathname,expedienteDetail]);
+ },[location.pathname]);
 
- if(expedienteDetail)return null;
  return <>
   {sidebarHost&&createPortal(<OperationalSidebar navigation={navigation} activeRoute={activeRoute}/>,sidebarHost)}
   {footerHost&&quickLinks.length>0&&createPortal(<section className="dir-quick ops-shared-quick" aria-label="Accesos rápidos"><h2>ACCESOS RÁPIDOS</h2><div className="dir-quick-grid">{quickLinks.map(({route,label,Icon})=><button key={route} type="button" onClick={()=>navigate(route)}><Icon/>{label}</button>)}</div></section>,footerHost)}
