@@ -69,6 +69,15 @@ function match(rule,ctx,req){return rule.enabled&&rule.environment===ctx.environ
 function specificity(rule){return Number(rule.company_id!=='*')+Number(rule.engine_id!=='*')+Number(rule.action!=='*');}
 function highestReason(reasons){const unique=[...new Set(reasons)];unique.sort((a,b)=>PRIORITY_BY_REASON[b]-PRIORITY_BY_REASON[a]||a.localeCompare(b));return unique[0]??null;}
 function directHumanReasons(req){const reasons=[];if(req.security_incident)reasons.push('SECURITY_INCIDENT');if(req.legal_required)reasons.push('LEGAL_REQUIRED');if(req.signature_required)reasons.push('SIGNATURE_REQUIRED');if(req.high_risk)reasons.push('HIGH_RISK');if(req.customer_human_request)reasons.push('CUSTOMER_HUMAN_REQUEST');return reasons;}
+function policyHumanReasons(rule,req){
+  const reasons=[];
+  if(rule.min_confidence_bp>0&&req.confidence_bp===null)reasons.push('LOW_CONFIDENCE');
+  if(rule.max_amount_eur_cents!==null&&req.amount_eur_cents===null)reasons.push('LOW_CONFIDENCE');
+  if(req.confidence_bp!==null&&req.confidence_bp<rule.min_confidence_bp)reasons.push('LOW_CONFIDENCE');
+  if(rule.max_amount_eur_cents!==null&&req.amount_eur_cents>rule.max_amount_eur_cents)reasons.push('MONEY_LIMIT');
+  if(rule.effect==='REVIEW')reasons.push('POLICY_CONFLICT');
+  return reasons;
+}
 
 export class PolicyEngine{
   #rules;#environment;#version;#audit=[];
@@ -86,15 +95,12 @@ export class PolicyEngine{
     if(!ms.length){const direct=highestReason(directReasons);result=direct?human(direct,ctx,req):deepFreeze({status:'DENY',reason:'NO_MATCHING_POLICY',context:ctx,action:req.action,policy:null});}
     else{
       const maxS=Math.max(...ms.map(specificity)),specific=ms.filter(r=>specificity(r)===maxS),maxP=Math.max(...specific.map(r=>r.priority)),top=specific.filter(r=>r.priority===maxP);
-      if(top.length!==1){const reason=highestReason([...directReasons,'POLICY_CONFLICT']);result=human(reason,ctx,req,top.map(policyRef).sort());}
+      if(top.length!==1){
+        const tiedReasons=[];for(const rule of top)tiedReasons.push(...policyHumanReasons(rule,req));
+        const reason=highestReason([...directReasons,...tiedReasons,'POLICY_CONFLICT']);result=human(reason,ctx,req,top.map(policyRef).sort());
+      }
       else{
-        const selected=top[0],policy=policyRef(selected),reasons=[...directReasons];
-        if(selected.min_confidence_bp>0&&req.confidence_bp===null)reasons.push('LOW_CONFIDENCE');
-        if(selected.max_amount_eur_cents!==null&&req.amount_eur_cents===null)reasons.push('LOW_CONFIDENCE');
-        if(req.confidence_bp!==null&&req.confidence_bp<selected.min_confidence_bp)reasons.push('LOW_CONFIDENCE');
-        if(selected.max_amount_eur_cents!==null&&req.amount_eur_cents>selected.max_amount_eur_cents)reasons.push('MONEY_LIMIT');
-        if(selected.effect==='REVIEW')reasons.push('POLICY_CONFLICT');
-        const reason=highestReason(reasons);
+        const selected=top[0],policy=policyRef(selected),reason=highestReason([...directReasons,...policyHumanReasons(selected,req)]);
         result=reason?human(reason,ctx,req,policy):deepFreeze({status:selected.effect,reason:`POLICY_${selected.effect}`,context:ctx,action:req.action,policy});
       }
     }
