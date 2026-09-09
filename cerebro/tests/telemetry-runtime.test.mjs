@@ -51,7 +51,7 @@ test('OBSERV-001 persists, requires correlation_id and keeps tenant isolation af
     context: ctxA,
     correlation_id: 'corr-changed',
     occurred_at: '2026-09-09T11:01:00.000Z',
-    signal: 'ERROR',
+    signal: 'TRACE',
     severity: 'ERROR',
     name: 'changed-but-same-idempotency',
     idempotency_key: 'obs-1'
