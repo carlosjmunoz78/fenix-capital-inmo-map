@@ -1,0 +1,68 @@
+name: Promote PROD once efb15bee
+
+on:
+  push:
+    branches:
+      - prod-preparation
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  promote:
+    if: github.event.head_commit.message == 'chore(prod): promote efb15bee exact artifact once'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate source SHA
+        run: |
+          set -euo pipefail
+          test "efb15bee38dcf045fb58c787237416a08070f52d" = "efb15bee38dcf045fb58c787237416a08070f52d"
+      - name: Download exact immutable candidate artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh run download 34382958285 --repo "$GITHUB_REPOSITORY" --name "fenix-prod-candidate-efb15bee38dcf045fb58c787237416a08070f52d" --dir candidate
+      - name: Validate candidate metadata and no TEST endpoints
+        run: |
+          set -euo pipefail
+          test -f candidate/PROD_SOURCE_SHA.txt
+          test "$(tr -d '\r\n' < candidate/PROD_SOURCE_SHA.txt)" = "efb15bee38dcf045fb58c787237416a08070f52d"
+          if grep -R -n -E 'hnqlnvakzaywtafeiybt|PREPROD|preprod' candidate/dist 2>/dev/null; then
+            echo 'Forbidden PREPROD marker found in immutable PROD candidate'
+            exit 1
+          fi
+      - name: Checkout gh-pages
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: site
+      - name: Promote exact artifact without rebuild
+        run: |
+          set -euo pipefail
+          find site -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
+          cp -a candidate/dist/. site/
+          printf '%s\n' 'efb15bee38dcf045fb58c787237416a08070f52d' > site/PROD_SOURCE_SHA.txt
+          cd site
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'No deployment changes required'
+          else
+            git commit -m 'deploy(prod): efb15bee exact immutable candidate'
+            git push origin gh-pages
+          fi
+      - name: Post-deploy read-only smoke
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 18); do
+            body="$(curl -fsS --max-time 20 https://app.fenixcapital.es/PROD_SOURCE_SHA.txt || true)"
+            if [ "$(printf '%s' "$body" | tr -d '\r\n')" = 'efb15bee38dcf045fb58c787237416a08070f52d' ]; then
+              exit 0
+            fi
+            sleep 10
+          done
+          echo 'PROD_SOURCE_SHA marker did not converge to expected SHA'
+          exit 1
