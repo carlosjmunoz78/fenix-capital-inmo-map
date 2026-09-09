@@ -14,7 +14,8 @@ test('persistent runtime contract is PREPROD-only, local and zero-additional-cos
   assert.equal(PERSISTENT_RUNTIME_V0_CONTRACT.supabase_required,false);
   assert.equal(PERSISTENT_RUNTIME_V0_CONTRACT.autonomous_prod,false);
   assert.equal(PERSISTENT_RUNTIME_V0_CONTRACT.ambiguous_durability,'poison-until-reopen');
-  assert.match(PERSISTENT_RUNTIME_V0_CONTRACT.crash_consistency,/durable-parent-entries/);
+  assert.equal(PERSISTENT_RUNTIME_V0_CONTRACT.restart_recovery,'durable-running-to-retry-or-failed');
+  assert.match(PERSISTENT_RUNTIME_V0_CONTRACT.crash_consistency,/ancestor-chain-fsync/);
   assert.deepEqual(PERSISTENT_RUNTIME_V0_CONTRACT.engines,['EVT-001','JOB-001']);
   assert.throws(()=>createPersistentRuntimeIO({directory:tmp(),environment:'PROD'}),/PREPROD/);
 });
@@ -30,10 +31,11 @@ test('EVT/JOB reject PROD-labeled operation context before persistence',()=>{
   assert.equal(jobs.operation_count,0);
 });
 
-test('first commit fsyncs parent directory entries for newly-created nested journal directory',()=>{
+test('first commit fsyncs ancestor chain for nested journal directory',()=>{
   const base=tmp();
   const nested=path.join(base,'level-a','level-b');
   const file=path.join(nested,'events.v8journal');
+  const root=path.parse(path.resolve(file)).root;
   const originalOpen=fs.openSync;
   const originalClose=fs.closeSync;
   const originalFsync=fs.fsyncSync;
@@ -61,38 +63,35 @@ test('first commit fsyncs parent directory entries for newly-created nested jour
     fs.fsyncSync=originalFsync;
   }
   assert.equal(fs.existsSync(file),true);
-  assert.ok(synced.includes(path.resolve(base)),'base parent directory must be fsynced');
-  assert.ok(synced.includes(path.resolve(base,'level-a')),'new intermediate parent must be fsynced');
-  assert.ok(synced.includes(path.resolve(nested)),'leaf journal directory must be fsynced after rename');
+  assert.ok(synced.includes(root),'filesystem root must be fsynced');
+  assert.ok(synced.includes(path.resolve(base)),'base ancestor must be fsynced');
+  assert.ok(synced.includes(path.resolve(base,'level-a')),'intermediate ancestor must be fsynced');
+  assert.ok(synced.includes(path.resolve(nested)),'leaf journal directory must be fsynced');
 });
 
-test('parent durability includes filesystem root when it owns a newly-created top-level entry',()=>{
+test('failed ancestor fsync is retried on the next commit attempt',()=>{
   const base=tmp();
-  const file=path.join(base,'root-child','events.v8journal');
-  const root=path.parse(path.resolve(file)).root;
-  const originalExists=fs.existsSync;
+  const nested=path.join(base,'retry-a','retry-b');
+  const file=path.join(nested,'events.v8journal');
   const originalOpen=fs.openSync;
   const originalClose=fs.closeSync;
   const originalFsync=fs.fsyncSync;
   const opened=new Map();
-  const synced=[];
-  let simulateTopLevelMissing=true;
+  const basePath=path.resolve(base);
+  let baseSyncAttempts=0;
+  let failed=false;
   try {
-    fs.existsSync=(target)=>{
-      const resolved=typeof target==='string'?path.resolve(target):target;
-      if(simulateTopLevelMissing && typeof resolved==='string' && resolved!==root && resolved.startsWith(root)) {
-        const relative=path.relative(root,resolved);
-        if(relative && relative.split(path.sep).length<=4) return false;
-      }
-      return originalExists(target);
-    };
     fs.openSync=(target,...args)=>{
       const fd=originalOpen(target,...args);
       opened.set(fd,typeof target==='string'?path.resolve(target):String(target));
       return fd;
     };
     fs.fsyncSync=(fd)=>{
-      synced.push(opened.get(fd));
+      const target=opened.get(fd);
+      if(target===basePath){
+        baseSyncAttempts+=1;
+        if(!failed){failed=true;throw new Error('simulated ancestor fsync failure');}
+      }
       return originalFsync(fd);
     };
     fs.closeSync=(fd)=>{
@@ -100,15 +99,16 @@ test('parent durability includes filesystem root when it owns a newly-created to
       return originalClose(fd);
     };
     const bus=new PersistentEventBus({file_path:file});
-    assert.equal(bus.publish({type:'ROOT_CASE',context:ctx(),idempotency_key:'root-case'}).accepted,true);
-    simulateTopLevelMissing=false;
+    assert.throws(()=>bus.publish({type:'FIRST',context:ctx(),idempotency_key:'first'}),/simulated ancestor fsync failure/);
+    assert.equal(bus.operation_count,0);
+    assert.equal(bus.publish({type:'FIRST',context:ctx(),idempotency_key:'first'}).accepted,true);
   } finally {
-    fs.existsSync=originalExists;
     fs.openSync=originalOpen;
     fs.closeSync=originalClose;
     fs.fsyncSync=originalFsync;
   }
-  assert.ok(synced.includes(root),'filesystem root must be fsynced when it owns a newly-created top-level child');
+  assert.ok(baseSyncAttempts>=2,'ancestor fsync obligation must be retried after failure');
+  assert.equal(new PersistentEventBus({file_path:file}).listForCompany('co-a').length,1);
 });
 
 test('EVT-001 survives process-style restart and preserves idempotency',()=>{
@@ -202,6 +202,34 @@ test('JOB-001 survives restart through queued, running, retry and success states
   const duplicate=jobs.enqueue({name:'sync-crm',context:ctx('co-a','JOB-001'),payload:{customer_id:'changed'},max_attempts:99,idempotency_key:'job-1'});
   assert.equal(duplicate.accepted,false);
   assert.equal(duplicate.duplicate,true);
+});
+
+test('JOB-001 requeues a durable RUNNING claim on process-style reopen instead of stranding it',()=>{
+  const file=path.join(tmp(),'jobs.v8journal');
+  let jobs=new PersistentJobQueue({file_path:file});
+  jobs.enqueue({name:'recover-me',context:ctx('co-a','JOB-001'),max_attempts:3,idempotency_key:'recover-1'});
+  const firstClaim=jobs.claim('co-a');
+  assert.equal(firstClaim.status,'RUNNING');
+  assert.equal(firstClaim.attempts,1);
+  jobs=new PersistentJobQueue({file_path:file});
+  const recovered=jobs.claim('co-a');
+  assert.equal(recovered.status,'RUNNING');
+  assert.equal(recovered.attempts,2);
+  const done=jobs.complete(recovered.job_id,'co-a',{ok:true});
+  assert.equal(done.status,'SUCCEEDED');
+  jobs=new PersistentJobQueue({file_path:file});
+  assert.equal(jobs.claim('co-a'),null);
+});
+
+test('JOB-001 restart recovery closes exhausted claims as FAILED instead of leaving RUNNING forever',()=>{
+  const file=path.join(tmp(),'jobs.v8journal');
+  let jobs=new PersistentJobQueue({file_path:file});
+  jobs.enqueue({name:'one-shot',context:ctx('co-a','JOB-001'),max_attempts:1,idempotency_key:'recover-exhausted'});
+  assert.equal(jobs.claim('co-a').attempts,1);
+  jobs=new PersistentJobQueue({file_path:file});
+  assert.equal(jobs.claim('co-a'),null);
+  const duplicate=jobs.enqueue({name:'one-shot',context:ctx('co-a','JOB-001'),max_attempts:1,idempotency_key:'recover-exhausted'});
+  assert.equal(duplicate.accepted,false);
 });
 
 test('JOB-001 snapshots enqueue and completion data against caller mutation',()=>{
