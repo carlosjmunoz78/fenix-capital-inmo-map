@@ -30,6 +30,28 @@ function assertPersistedPreprod(context, label) {
   if (!context || context.environment !== PREPROD) throw new Error(`${label} must use exact PREPROD context`);
 }
 
+function fsyncDirectory(directory) {
+  const fd = fs.openSync(directory, 'r');
+  try { fs.fsyncSync(fd); } finally { fs.closeSync(fd); }
+}
+
+function ensureDirectoryEntriesDurable(directory) {
+  fs.mkdirSync(directory, { recursive: true });
+  const root = path.parse(directory).root;
+  const parents = [];
+  let current = path.resolve(directory);
+  while (current !== root) {
+    const parent = path.dirname(current);
+    if (parent === current) break;
+    parents.push(parent);
+    current = parent;
+  }
+  parents.reverse();
+  for (const parent of parents) {
+    if (parent !== root) fsyncDirectory(parent);
+  }
+}
+
 function decodeEnvelope(bytes, kind) {
   let envelope;
   try { envelope = deserialize(bytes); }
@@ -69,7 +91,7 @@ export class AtomicV8Journal {
     if (this.#poisoned) throw new Error('persistent runtime journal is poisoned; reopen required');
     if (!Array.isArray(operations)) throw new TypeError('operations must be an array');
     const dir = path.dirname(this.#filePath);
-    fs.mkdirSync(dir, { recursive: true });
+    ensureDirectoryEntriesDurable(dir);
     const payload = serialize(operations);
     const bytes = serialize({ schema_version: SCHEMA_VERSION, kind: this.#kind, payload, checksum: digest(payload) });
     const temp = `${this.#filePath}.tmp-${process.pid}-${crypto.randomBytes(6).toString('hex')}`;
@@ -82,8 +104,7 @@ export class AtomicV8Journal {
       fs.closeSync(fd); fd = undefined;
       fs.renameSync(temp, this.#filePath);
       renamed = true;
-      const dirFd = fs.openSync(dir, 'r');
-      try { fs.fsyncSync(dirFd); } finally { fs.closeSync(dirFd); }
+      fsyncDirectory(dir);
     } catch (error) {
       if (renamed) {
         this.#poisoned = true;
@@ -119,12 +140,18 @@ function replayJobs(operations) {
       if (!last.accepted) throw new Error('JOB-001 journal contains a duplicate accepted enqueue');
       assertPersistedPreprod(last.job.context, 'JOB-001 job');
     } else if (op.op === 'claim') last = queue.claim(op.company_id);
-    else if (op.op === 'claimContext') last = queue.claimContext(op.context);
-    else if (op.op === 'complete') last = queue.complete(op.job_id, op.company_id, op.result);
-    else if (op.op === 'completeContext') last = queue.completeContext(op.job_id, op.context, op.result);
-    else if (op.op === 'fail') last = queue.fail(op.job_id, op.company_id, op.error);
-    else if (op.op === 'failContext') last = queue.failContext(op.job_id, op.context, op.error);
-    else throw new Error(`unsupported JOB-001 journal operation: ${op.op}`);
+    else if (op.op === 'claimContext') {
+      assertPersistedPreprod(op.context, 'JOB-001 claimContext operation');
+      last = queue.claimContext(op.context);
+    } else if (op.op === 'complete') last = queue.complete(op.job_id, op.company_id, op.result);
+    else if (op.op === 'completeContext') {
+      assertPersistedPreprod(op.context, 'JOB-001 completeContext operation');
+      last = queue.completeContext(op.job_id, op.context, op.result);
+    } else if (op.op === 'fail') last = queue.fail(op.job_id, op.company_id, op.error);
+    else if (op.op === 'failContext') {
+      assertPersistedPreprod(op.context, 'JOB-001 failContext operation');
+      last = queue.failContext(op.job_id, op.context, op.error);
+    } else throw new Error(`unsupported JOB-001 journal operation: ${op.op}`);
   }
   return { queue, last };
 }
@@ -246,7 +273,7 @@ export const PERSISTENT_RUNTIME_V0_CONTRACT = Object.freeze({
   autonomous_prod: false,
   prod_writes: false,
   single_writer_reference: true,
-  crash_consistency: 'temp-write+fsync+atomic-rename+directory-fsync',
+  crash_consistency: 'durable-parent-entries+temp-write+fsync+atomic-rename+directory-fsync',
   integrity: 'sha256-envelope',
   ambiguous_durability: 'poison-until-reopen',
   rebuild: 'deterministic-operation-replay'
