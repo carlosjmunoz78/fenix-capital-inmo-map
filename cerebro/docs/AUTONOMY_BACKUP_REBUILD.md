@@ -19,15 +19,7 @@ No CEREBRO engine may be interpreted as autonomous PROD solely from scaffold, un
 
 ## Human-by-exception boundary
 
-Allowed escalation reasons only:
-- LEGAL_REQUIRED
-- SIGNATURE_REQUIRED
-- LOW_CONFIDENCE
-- HIGH_RISK
-- POLICY_CONFLICT
-- SECURITY_INCIDENT
-- MONEY_LIMIT
-- CUSTOMER_HUMAN_REQUEST
+HUMAN_REQUIRED_SET: `["LEGAL_REQUIRED","SIGNATURE_REQUIRED","LOW_CONFIDENCE","HIGH_RISK","POLICY_CONFLICT","SECURITY_INCIDENT","MONEY_LIMIT","CUSTOMER_HUMAN_REQUEST"]`.
 
 ## Backup model V0
 
@@ -40,7 +32,8 @@ Allowed escalation reasons only:
 
 - Before merge, exact branch HEAD is preserved in Git history and PREPROD evidence is tied to that SHA.
 - After merge, exact merge SHA is captured and production safety workflows are verified.
-- If a regression appears, prefer narrow revert/hotfix over destructive rebuild or replacement of existing systems.
+- If production deploy/smoke fails after exposure, execute the canonical repository rollback in `docs/PROD_ROLLBACK_RUNBOOK.md`: rehearse last known-good, revert offending commit(s) on a branch without rewriting history, merge through PREPROD, then require exact-SHA PROD deploy/smoke green.
+- Prefer narrow revert/hotfix over destructive rebuild or replacement of existing systems.
 
 ## Rebuild model
 
