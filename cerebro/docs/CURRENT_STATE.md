@@ -37,7 +37,7 @@ Evidence anchors are scoped to the change they prove; they are not intended to m
 - Real production autonomy per engine.
 - `EVT-001`/`JOB-001` migration/wiring into `SharedRuntime` and scaling beyond the single-writer V0 reference.
 - Promotion gates for each individual engine before autonomous PROD.
-- Legacy `.github/workflows/one-shot-promote-899839d.yml`: historical exact-candidate promotion workflow. It fails on unrelated later pushes and is not a required CEREBRO gate; do not modify or remove without inventory, dependency map, backup, contract, tests and rollback evidence.
+- Legacy `.github/workflows/one-shot-promote-899839d.yml`: historical exact-candidate promotion workflow. Its `paths` filter means it is triggered only when that workflow file itself changes; if triggered without the original promotion commit message, its promote job is skipped. It is not a required CEREBRO gate; do not modify or remove without inventory, dependency map, backup, contract, tests and rollback evidence.
 
 ## Non-negotiable boundaries
 
