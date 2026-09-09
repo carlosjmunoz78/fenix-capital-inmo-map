@@ -13,8 +13,20 @@ test('persistent runtime contract is PREPROD-only, local and zero-additional-cos
   assert.equal(PERSISTENT_RUNTIME_V0_CONTRACT.additional_cost_target_eur,0);
   assert.equal(PERSISTENT_RUNTIME_V0_CONTRACT.supabase_required,false);
   assert.equal(PERSISTENT_RUNTIME_V0_CONTRACT.autonomous_prod,false);
+  assert.equal(PERSISTENT_RUNTIME_V0_CONTRACT.ambiguous_durability,'poison-until-reopen');
   assert.deepEqual(PERSISTENT_RUNTIME_V0_CONTRACT.engines,['EVT-001','JOB-001']);
   assert.throws(()=>createPersistentRuntimeIO({directory:tmp(),environment:'PROD'}),/PREPROD/);
+});
+
+test('EVT/JOB reject PROD-labeled operation context before persistence',()=>{
+  const dir=tmp();
+  const prodEvent={type:'X',context:{...ctx(),environment:'PROD'},idempotency_key:'prod-event'};
+  const bus=new PersistentEventBus({file_path:path.join(dir,'events.v8journal')});
+  assert.throws(()=>bus.publish(prodEvent),/exact PREPROD context/);
+  assert.equal(bus.operation_count,0);
+  const jobs=new PersistentJobQueue({file_path:path.join(dir,'jobs.v8journal')});
+  assert.throws(()=>jobs.enqueue({name:'X',context:{...ctx('co-a','JOB-001'),environment:'PROD'},idempotency_key:'prod-job'}),/exact PREPROD context/);
+  assert.equal(jobs.operation_count,0);
 });
 
 test('EVT-001 survives process-style restart and preserves idempotency',()=>{
@@ -46,6 +58,29 @@ test('EVT-001 snapshots accepted input so caller mutation cannot rewrite history
   assert.equal(events[0].payload.id,1);
   assert.equal(events[0].idempotency_key,'evt-stable');
   assert.equal(bus.listForCompany('co-b').length,0);
+});
+
+test('post-rename directory fsync failure poisons writer until reopen without deleting installed history',()=>{
+  const file=path.join(tmp(),'events.v8journal');
+  const bus=new PersistentEventBus({file_path:file});
+  const originalFsync=fs.fsyncSync;
+  let calls=0;
+  try {
+    fs.fsyncSync=(fd)=>{
+      calls+=1;
+      if(calls===2) throw new Error('simulated directory fsync failure');
+      return originalFsync(fd);
+    };
+    assert.throws(()=>bus.publish({type:'FIRST',context:ctx(),idempotency_key:'first'}),/durability is ambiguous.*reopen required/);
+  } finally {
+    fs.fsyncSync=originalFsync;
+  }
+  assert.throws(()=>bus.publish({type:'SECOND',context:ctx(),idempotency_key:'second'}),/journal is poisoned.*reopen required/);
+  const reopened=new PersistentEventBus({file_path:file});
+  const events=reopened.listForCompany('co-a');
+  assert.equal(events.length,1);
+  assert.equal(events[0].type,'FIRST');
+  assert.equal(reopened.publish({type:'SECOND',context:ctx(),idempotency_key:'second'}).accepted,true);
 });
 
 test('EVT-001 keeps tenants isolated after restart',()=>{
