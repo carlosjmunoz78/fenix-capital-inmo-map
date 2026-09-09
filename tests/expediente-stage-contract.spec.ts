@@ -1,13 +1,15 @@
 import {test,expect} from '@playwright/test';
 import fs from 'node:fs';
 
-test('expediente detail suppresses legacy and uniform overlay chrome',()=>{
+test('expediente detail keeps global operational chrome visible',()=>{
  const legacy=fs.readFileSync('src/ExpedienteLegacyChromeGuard.tsx','utf8');
  const uniform=fs.readFileSync('src/OperationalUniformityGuard.tsx','utf8');
- expect(legacy).toContain('data-expediente-detail');
- expect(legacy).toContain('html[data-expediente-detail="true"] .app-shell{display:none!important');
- expect(legacy).toContain("document.querySelectorAll<HTMLElement>('.app-shell,");
- expect(uniform).toContain('if(expedienteDetail)return null');
+ expect(legacy).toContain("import ExpedienteRenameGuard from './ExpedienteRenameGuard'");
+ expect(legacy).toContain('return <ExpedienteRenameGuard/>');
+ expect(legacy).not.toContain('display:none!important');
+ expect(legacy).not.toContain('data-expediente-detail');
+ expect(uniform).not.toContain('if(expedienteDetail)return null');
+ expect(uniform).not.toContain("document.querySelectorAll('.ops-uniform-sidebar-host,.ops-uniform-footer-host').forEach(x=>x.remove());\n   return;");
 });
 
 test('expediente journey reads live workspace and supports audited manual stage',()=>{
