@@ -31,6 +31,23 @@ test('EVT-001 survives process-style restart and preserves idempotency',()=>{
   assert.equal(bus.listForCompany('co-a').length,1);
 });
 
+test('EVT-001 snapshots accepted input so caller mutation cannot rewrite history',()=>{
+  const file=path.join(tmp(),'events.v8journal');
+  const input={type:'CUSTOMER_UPDATED',payload:{id:1},context:ctx(),idempotency_key:'evt-stable'};
+  let bus=new PersistentEventBus({file_path:file});
+  assert.equal(bus.publish(input).accepted,true);
+  input.payload.id=999;
+  input.context.company_id='co-b';
+  input.idempotency_key='evt-mutated';
+  bus.publish({type:'SECOND',context:ctx(),idempotency_key:'evt-2'});
+  bus=new PersistentEventBus({file_path:file});
+  const events=bus.listForCompany('co-a');
+  assert.equal(events.length,2);
+  assert.equal(events[0].payload.id,1);
+  assert.equal(events[0].idempotency_key,'evt-stable');
+  assert.equal(bus.listForCompany('co-b').length,0);
+});
+
 test('EVT-001 keeps tenants isolated after restart',()=>{
   const file=path.join(tmp(),'events.v8journal');
   let bus=new PersistentEventBus({file_path:file});
@@ -62,6 +79,25 @@ test('JOB-001 survives restart through queued, running, retry and success states
   const duplicate=jobs.enqueue({name:'sync-crm',context:ctx('co-a','JOB-001'),payload:{customer_id:'changed'},max_attempts:99,idempotency_key:'job-1'});
   assert.equal(duplicate.accepted,false);
   assert.equal(duplicate.duplicate,true);
+});
+
+test('JOB-001 snapshots enqueue and completion data against caller mutation',()=>{
+  const file=path.join(tmp(),'jobs.v8journal');
+  const input={name:'sync-crm',context:ctx('co-a','JOB-001'),payload:{customer_id:'c1'},idempotency_key:'job-stable'};
+  let jobs=new PersistentJobQueue({file_path:file});
+  const enqueued=jobs.enqueue(input);
+  input.payload.customer_id='mutated';
+  input.context.company_id='co-b';
+  const claimed=jobs.claim('co-a');
+  const result={ok:true,nested:{count:1}};
+  jobs.complete(claimed.job_id,'co-a',result);
+  result.ok=false;
+  result.nested.count=999;
+  jobs=new PersistentJobQueue({file_path:file});
+  assert.equal(jobs.claim('co-a'),null);
+  const duplicate=jobs.enqueue({name:'sync-crm',context:ctx('co-a','JOB-001'),payload:{customer_id:'different'},idempotency_key:'job-stable'});
+  assert.equal(duplicate.accepted,false);
+  assert.equal(jobs.claim('co-b'),null);
 });
 
 test('JOB-001 company and full-context claims remain isolated after persistence',()=>{
