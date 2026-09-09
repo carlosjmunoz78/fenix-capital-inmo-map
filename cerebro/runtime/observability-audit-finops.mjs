@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import { types as utilTypes } from 'node:util';
 import { serialize, deserialize } from 'node:v8';
 import { AtomicV8Journal } from './persistent-runtime.mjs';
 
@@ -14,6 +15,26 @@ function nonEmpty(value, label) {
   return value;
 }
 
+function dataProperties(value, label = 'input') {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) throw new TypeError(`${label} must be a plain object`);
+  if (utilTypes.isProxy(value)) throw new TypeError(`${label} must not be a Proxy`);
+  const proto = Object.getPrototypeOf(value);
+  if (proto !== Object.prototype && proto !== null) throw new TypeError(`${label} must be a plain object`);
+  const descriptors = Object.getOwnPropertyDescriptors(value);
+  const out = Object.create(null);
+  for (const key of Reflect.ownKeys(descriptors)) {
+    const descriptor = descriptors[key];
+    if ('get' in descriptor || 'set' in descriptor) throw new TypeError(`${label} must not contain accessor properties`);
+    if (typeof key === 'symbol') {
+      if (descriptor.enumerable) throw new TypeError(`${label} must not contain enumerable symbol keys`);
+      continue;
+    }
+    if (!descriptor.enumerable) continue;
+    out[key] = descriptor.value;
+  }
+  return out;
+}
+
 function assertLedgerValue(value, label = 'value', seen = new Set()) {
   if (value === null) return;
   const type = typeof value;
@@ -23,6 +44,7 @@ function assertLedgerValue(value, label = 'value', seen = new Set()) {
     return;
   }
   if (type !== 'object') throw new TypeError(`${label} contains an unsupported value type: ${type}`);
+  if (utilTypes.isProxy(value)) throw new TypeError(`${label} must not contain Proxy values`);
   if (seen.has(value)) throw new TypeError(`${label} must not contain circular references`);
   seen.add(value);
   try {
@@ -54,12 +76,12 @@ function safeClone(value, label = 'value') {
 }
 
 function context(value, label = 'context') {
-  if (!value || typeof value !== 'object') throw new TypeError(`${label} must be an object`);
+  const fields = dataProperties(value, label);
   const out = {
-    company_id: nonEmpty(value.company_id, `${label}.company_id`),
-    engine_id: nonEmpty(value.engine_id, `${label}.engine_id`),
-    environment: nonEmpty(value.environment, `${label}.environment`),
-    version: nonEmpty(value.version, `${label}.version`)
+    company_id: nonEmpty(fields.company_id, `${label}.company_id`),
+    engine_id: nonEmpty(fields.engine_id, `${label}.engine_id`),
+    environment: nonEmpty(fields.environment, `${label}.environment`),
+    version: nonEmpty(fields.version, `${label}.version`)
   };
   if (out.environment !== PREPROD) throw new Error(`${label} must use exact PREPROD`);
   return Object.freeze(out);
@@ -223,15 +245,19 @@ class BaseLedger {
 }
 
 export class ObservabilityLedgerV0 extends BaseLedger {
-  constructor(options) { super({ ...options, kind: 'OBSERV-001', validator: validateObs }); }
+  constructor(options) {
+    const args = dataProperties(options, 'options');
+    super({ file_path: args.file_path, environment: args.environment ?? PREPROD, kind: 'OBSERV-001', validator: validateObs });
+  }
 
-  record({ context: ctx, correlation_id, level = 'INFO', message, data = {} }) {
-    const safeCtx = context(ctx);
-    const safeLevel = nonEmpty(level, 'level');
+  record(input) {
+    const args = dataProperties(input, 'input');
+    const safeCtx = context(args.context);
+    const safeLevel = nonEmpty(args.level === undefined ? 'INFO' : args.level, 'level');
     if (!LEVELS.has(safeLevel)) throw new Error('invalid observability level');
-    const safeCorrelation = nonEmpty(correlation_id, 'correlation_id');
-    const safeMessage = nonEmpty(message, 'message');
-    const safeData = safeClone(data, 'data');
+    const safeCorrelation = nonEmpty(args.correlation_id, 'correlation_id');
+    const safeMessage = nonEmpty(args.message, 'message');
+    const safeData = safeClone(args.data === undefined ? {} : args.data, 'data');
     const sequence = ledgerRecordCount(this) + 1;
     const record = {
       kind: 'OBSERV-001',
@@ -259,16 +285,20 @@ export class ObservabilityLedgerV0 extends BaseLedger {
 }
 
 export class AuditLedgerV0 extends BaseLedger {
-  constructor(options) { super({ ...options, kind: 'AUD-001', validator: validateAudit }); }
+  constructor(options) {
+    const args = dataProperties(options, 'options');
+    super({ file_path: args.file_path, environment: args.environment ?? PREPROD, kind: 'AUD-001', validator: validateAudit });
+  }
 
-  append({ context: ctx, correlation_id, occurred_at = nowInstant(), actor, action, target = null, before = null, after = null, reason = null, result }) {
-    const safeCtx = context(ctx);
-    const safeOccurredAt = isoInstant(occurred_at);
-    const safeCorrelation = nonEmpty(correlation_id, 'correlation_id');
-    const safeActor = nonEmpty(actor, 'actor');
-    const safeAction = nonEmpty(action, 'action');
+  append(input) {
+    const args = dataProperties(input, 'input');
+    const safeCtx = context(args.context);
+    const safeOccurredAt = isoInstant(args.occurred_at === undefined ? nowInstant() : args.occurred_at);
+    const safeCorrelation = nonEmpty(args.correlation_id, 'correlation_id');
+    const safeActor = nonEmpty(args.actor, 'actor');
+    const safeAction = nonEmpty(args.action, 'action');
+    const reason = args.reason === undefined ? null : args.reason;
     if (reason !== null && typeof reason !== 'string') throw new TypeError('reason must be null or string');
-    const safeReason = reason;
     const sequence = ledgerRecordCount(this) + 1;
     const previous = ledgerLastRecord(this);
     const previous_hash = previous?.record_hash ?? null;
@@ -280,11 +310,11 @@ export class AuditLedgerV0 extends BaseLedger {
       occurred_at: safeOccurredAt,
       actor: safeActor,
       action: safeAction,
-      target: safeClone(target, 'target'),
-      before: safeClone(before, 'before'),
-      after: safeClone(after, 'after'),
-      reason: safeReason,
-      result: nonEmpty(result, 'result'),
+      target: safeClone(args.target === undefined ? null : args.target, 'target'),
+      before: safeClone(args.before === undefined ? null : args.before, 'before'),
+      after: safeClone(args.after === undefined ? null : args.after, 'after'),
+      reason,
+      result: nonEmpty(args.result, 'result'),
       sequence,
       previous_hash
     };
@@ -305,14 +335,18 @@ export class AuditLedgerV0 extends BaseLedger {
 }
 
 export class CostLedgerV0 extends BaseLedger {
-  constructor(options) { super({ ...options, kind: 'FINOPS-001', validator: validateCost }); }
+  constructor(options) {
+    const args = dataProperties(options, 'options');
+    super({ file_path: args.file_path, environment: args.environment ?? PREPROD, kind: 'FINOPS-001', validator: validateCost });
+  }
 
-  record({ context: ctx, correlation_id, task_id, provider = 'LOCAL', cost_eur = 0, metadata = {} }) {
-    const safeCtx = context(ctx);
-    const safeCorrelation = nonEmpty(correlation_id, 'correlation_id');
-    const safeTaskId = nonEmpty(task_id, 'task_id');
-    const safeProvider = nonEmpty(provider, 'provider');
-    const micros = eurToMicros(cost_eur);
+  record(input) {
+    const args = dataProperties(input, 'input');
+    const safeCtx = context(args.context);
+    const safeCorrelation = nonEmpty(args.correlation_id, 'correlation_id');
+    const safeTaskId = nonEmpty(args.task_id, 'task_id');
+    const safeProvider = nonEmpty(args.provider === undefined ? 'LOCAL' : args.provider, 'provider');
+    const micros = eurToMicros(args.cost_eur === undefined ? 0 : args.cost_eur);
     const sequence = ledgerRecordCount(this) + 1;
     const record = {
       kind: 'FINOPS-001',
@@ -322,16 +356,17 @@ export class CostLedgerV0 extends BaseLedger {
       task_id: safeTaskId,
       provider: safeProvider,
       cost_eur_micros: micros,
-      metadata: safeClone(metadata, 'metadata'),
+      metadata: safeClone(args.metadata === undefined ? {} : args.metadata, 'metadata'),
       sequence
     };
     return ledgerCommit(this, record);
   }
 
-  aggregate({ company_id, engine_id = null, provider = null } = {}) {
-    const company = nonEmpty(company_id, 'company_id');
-    const safeEngine = engine_id === null ? null : nonEmpty(engine_id, 'engine_id');
-    const safeProvider = provider === null ? null : nonEmpty(provider, 'provider');
+  aggregate(input = {}) {
+    const args = dataProperties(input, 'input');
+    const company = nonEmpty(args.company_id, 'company_id');
+    const safeEngine = args.engine_id === undefined || args.engine_id === null ? null : nonEmpty(args.engine_id, 'engine_id');
+    const safeProvider = args.provider === undefined || args.provider === null ? null : nonEmpty(args.provider, 'provider');
     let records = ledgerRecordsSnapshot(this).filter(r => r.context.company_id === company);
     if (safeEngine !== null) records = records.filter(r => r.context.engine_id === safeEngine);
     if (safeProvider !== null) records = records.filter(r => r.provider === safeProvider);
@@ -341,8 +376,10 @@ export class CostLedgerV0 extends BaseLedger {
   }
 }
 
-export function createOperationalLedgersV0({ root_dir, environment = PREPROD }) {
-  const root = nonEmpty(root_dir, 'root_dir').replace(/\/$/, '');
+export function createOperationalLedgersV0(input) {
+  const args = dataProperties(input, 'input');
+  const root = nonEmpty(args.root_dir, 'root_dir').replace(/\/$/, '');
+  const environment = args.environment === undefined ? PREPROD : args.environment;
   return Object.freeze({
     observability: new ObservabilityLedgerV0({ file_path: `${root}/observability.v8`, environment }),
     audit: new AuditLedgerV0({ file_path: `${root}/audit.v8`, environment }),
@@ -356,7 +393,8 @@ export const OPERATIONAL_LEDGERS_V0_CONTRACT = Object.freeze({
   persistence: 'local-atomic-v8-journal-reference',
   append_only_logical_records: true,
   internal_mutable_state: 'module-private-weakmap-with-non-exported-commit-path',
-  accepted_payload_grammar: 'finite-json-like-primitives+arrays+plain-data-objects-no-accessors-no-cycles',
+  accepted_payload_grammar: 'finite-json-like-primitives+arrays+plain-data-objects-no-accessors-no-proxies-no-cycles',
+  public_input_envelopes: 'descriptor-validated-plain-objects-before-field-read',
   audit_integrity: 'sha256-hash-chain-not-authenticated-tamper-proofing',
   audit_when: 'canonical-iso8601-utc-instant-hash-covered',
   audit_reason: 'strict-string-or-null-no-coercion',
