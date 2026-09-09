@@ -1,5 +1,6 @@
 import {useLayoutEffect} from 'react';
 import {useLocation} from 'react-router-dom';
+import ExpedienteRenameGuard from './ExpedienteRenameGuard';
 
 const DETAIL=/^\/expedientes\/[^/]+$/;
 const STYLE_ID='fenix-expediente-detail-chrome-lock';
@@ -67,5 +68,5 @@ html[data-expediente-detail="true"] .detail-exp-root .detail-exp-top{display:fle
    canonical?.style.removeProperty('pointer-events');
   };
  },[active,pathname]);
- return null;
+ return <ExpedienteRenameGuard/>;
 }
