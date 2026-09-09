@@ -20,6 +20,14 @@ test('OBSERV/AUD/FINOPS inventory is read-only PREPROD evidence and does not ove
   }
 });
 
+test('AUD-001 inventory includes existing runtime, console and governance audit surfaces', () => {
+  const existing = inventory.engines['AUD-001'].existing.join('\n');
+  assert.match(existing, /SharedRuntime/);
+  assert.match(existing, /CerebroGatewayV0/);
+  assert.match(existing, /PolicyEngine/);
+  assert.match(existing, /auditLog\(\)/);
+});
+
 test('inventory preserves App, SharedRuntime, Supabase cost boundary and Trading isolation', () => {
   assert.deepEqual(inventory.preservation, {
     app_fenix_feature_code_touched: false,
