@@ -117,7 +117,8 @@ export class PersistentEventBus {
   }
 
   publish(input) {
-    const probe = this.#bus.publish(input);
+    const probeBus = replayEvents(this.#operations).bus;
+    const probe = probeBus.publish(input);
     if (!probe.accepted) return probe;
     const candidate = [...this.#operations, { op: 'publish', input }];
     const replayed = replayEvents(candidate);
@@ -155,19 +156,22 @@ export class PersistentJobQueue {
   }
 
   enqueue(input) {
-    const probe = this.#queue.enqueue(input);
+    const probeQueue = replayJobs(this.#operations).queue;
+    const probe = probeQueue.enqueue(input);
     if (!probe.accepted) return probe;
     return this.#apply({ op: 'enqueue', input });
   }
 
   claim(company_id) {
-    const probe = this.#queue.claim(company_id);
+    const probeQueue = replayJobs(this.#operations).queue;
+    const probe = probeQueue.claim(company_id);
     if (!probe) return null;
     return this.#apply({ op: 'claim', company_id });
   }
 
   claimContext(context) {
-    const probe = this.#queue.claimContext(context);
+    const probeQueue = replayJobs(this.#operations).queue;
+    const probe = probeQueue.claimContext(context);
     if (!probe) return null;
     return this.#apply({ op: 'claimContext', context });
   }
