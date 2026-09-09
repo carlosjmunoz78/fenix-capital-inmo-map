@@ -2,6 +2,7 @@ import {useEffect,useMemo,useState} from 'react';
 import {FileText} from 'lucide-react';
 import {useLocation,useNavigate} from 'react-router-dom';
 import {fetchNotionRuntime} from './notionRuntime';
+import './expediente-documents.css';
 
 type Row=Record<string,any>;
 type Response={items?:Row[]};
