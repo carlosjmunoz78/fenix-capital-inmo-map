@@ -21,6 +21,10 @@ function digest(bytes) {
   return crypto.createHash('sha256').update(bytes).digest('hex');
 }
 
+function durableSnapshot(value) {
+  return deserialize(serialize(value));
+}
+
 function decodeEnvelope(bytes, kind) {
   let envelope;
   try { envelope = deserialize(bytes); }
@@ -123,7 +127,8 @@ export class PersistentEventBus {
     const probeBus = replayEvents(this.#operations).bus;
     const probe = probeBus.publish(input);
     if (!probe.accepted) return probe;
-    const candidate = [...this.#operations, { op: 'publish', input }];
+    const operation = durableSnapshot({ op: 'publish', input });
+    const candidate = [...this.#operations, operation];
     const replayed = replayEvents(candidate);
     this.#journal.commit(candidate);
     this.#operations = candidate;
@@ -150,7 +155,9 @@ export class PersistentJobQueue {
   }
 
   #apply(operation) {
-    const candidate = [...this.#operations, operation];
+    replayJobs([...this.#operations, operation]);
+    const snapshot = durableSnapshot(operation);
+    const candidate = [...this.#operations, snapshot];
     const replayed = replayJobs(candidate);
     this.#journal.commit(candidate);
     this.#operations = candidate;
