@@ -3,12 +3,22 @@ import {test,expect} from '@playwright/test';
 
 const source=()=>fs.readFileSync('src/ExistingDocumentAutoBackfillGuard.tsx','utf8');
 
-test('global backfill guard accepts any expediente subroute and skips gateway for canonical codes',()=>{
+test('global backfill guard accepts expediente root and subroutes, skipping detail lookup for canonical codes',()=>{
  const code=source();
+ expect(code).toContain("if(/^\\/expedientes\\/?$/i.test(pathname))return ROOT_SWEEP");
  expect(code).toContain("pathname.match(/^\\/expedientes\\/([^/?#]+)(?:\\/|$)/i)");
  expect(code).toContain("const canonicalExpediente=(value:string)=>/^exp(?:-|_)/i.test(value)");
- expect(code).toContain('if(canonicalExpediente(raw))return raw');
+ expect(code).toContain("if(canonicalExpediente(raw))return [raw]");
  expect(code).toContain("fenix-app-gateway/expedientes/${encodeURIComponent(raw)}");
+});
+
+test('expedientes root sweep uses authenticated canonical list and excludes terminal stages before backfill',()=>{
+ const code=source();
+ expect(code).toContain("const ROOT_SWEEP='__all_active_expedientes__'");
+ expect(code).toContain("const TERMINAL_STAGES=new Set(['firmado','cerrado','cierre','finalizado','baja','perdido','pausado'])");
+ expect(code).toContain("/functions/v1/fenix-app-gateway/expedientes");
+ expect(code).toContain(".filter(item=>!TERMINAL_STAGES.has(normalize(item?.stage)))");
+ expect(code).toContain(".filter(code=>canonicalExpediente(code))");
 });
 
 test('global backfill guard waits for auth and retries boundedly instead of latching a zero-result attempt',()=>{
