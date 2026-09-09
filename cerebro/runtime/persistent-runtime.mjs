@@ -5,6 +5,7 @@ import { serialize, deserialize } from 'node:v8';
 import { EventBus, JobQueue } from './runtime.mjs';
 
 const SCHEMA_VERSION = 1;
+const PREPROD = 'PREPROD';
 
 function nonEmpty(value, label) {
   if (typeof value !== 'string' || value.length === 0) throw new TypeError(`${label} must be a non-empty string`);
@@ -23,6 +24,10 @@ function digest(bytes) {
 
 function durableSnapshot(value) {
   return deserialize(serialize(value));
+}
+
+function assertPersistedPreprod(context, label) {
+  if (!context || context.environment !== PREPROD) throw new Error(`${label} must use exact PREPROD context`);
 }
 
 function decodeEnvelope(bytes, kind) {
@@ -44,6 +49,7 @@ function decodeEnvelope(bytes, kind) {
 export class AtomicV8Journal {
   #filePath;
   #kind;
+  #poisoned = false;
 
   constructor({ file_path, kind }) {
     this.#filePath = path.resolve(nonEmpty(file_path, 'file_path'));
@@ -52,6 +58,7 @@ export class AtomicV8Journal {
 
   get file_path() { return this.#filePath; }
   get kind() { return this.#kind; }
+  get poisoned() { return this.#poisoned; }
 
   load() {
     if (!fs.existsSync(this.#filePath)) return [];
@@ -59,6 +66,7 @@ export class AtomicV8Journal {
   }
 
   commit(operations) {
+    if (this.#poisoned) throw new Error('persistent runtime journal is poisoned; reopen required');
     if (!Array.isArray(operations)) throw new TypeError('operations must be an array');
     const dir = path.dirname(this.#filePath);
     fs.mkdirSync(dir, { recursive: true });
@@ -66,14 +74,22 @@ export class AtomicV8Journal {
     const bytes = serialize({ schema_version: SCHEMA_VERSION, kind: this.#kind, payload, checksum: digest(payload) });
     const temp = `${this.#filePath}.tmp-${process.pid}-${crypto.randomBytes(6).toString('hex')}`;
     let fd;
+    let renamed = false;
     try {
       fd = fs.openSync(temp, 'wx', 0o600);
       fs.writeFileSync(fd, bytes);
       fs.fsyncSync(fd);
       fs.closeSync(fd); fd = undefined;
       fs.renameSync(temp, this.#filePath);
+      renamed = true;
       const dirFd = fs.openSync(dir, 'r');
       try { fs.fsyncSync(dirFd); } finally { fs.closeSync(dirFd); }
+    } catch (error) {
+      if (renamed) {
+        this.#poisoned = true;
+        throw new Error(`persistent runtime journal durability is ambiguous after rename; reopen required: ${safeErrorText(error)}`);
+      }
+      throw error;
     } finally {
       if (fd !== undefined) { try { fs.closeSync(fd); } catch {} }
       if (fs.existsSync(temp)) { try { fs.unlinkSync(temp); } catch {} }
@@ -88,6 +104,7 @@ function replayEvents(operations) {
     if (!op || op.op !== 'publish') throw new Error('invalid EVT-001 journal operation');
     last = bus.publish(op.input);
     if (!last.accepted) throw new Error('EVT-001 journal contains a duplicate accepted publish');
+    assertPersistedPreprod(last.event.context, 'EVT-001 event');
   }
   return { bus, last };
 }
@@ -100,6 +117,7 @@ function replayJobs(operations) {
     if (op.op === 'enqueue') {
       last = queue.enqueue(op.input);
       if (!last.accepted) throw new Error('JOB-001 journal contains a duplicate accepted enqueue');
+      assertPersistedPreprod(last.job.context, 'JOB-001 job');
     } else if (op.op === 'claim') last = queue.claim(op.company_id);
     else if (op.op === 'claimContext') last = queue.claimContext(op.context);
     else if (op.op === 'complete') last = queue.complete(op.job_id, op.company_id, op.result);
@@ -116,8 +134,8 @@ export class PersistentEventBus {
   #operations;
   #bus;
 
-  constructor({ file_path, environment = 'PREPROD' }) {
-    if (environment !== 'PREPROD') throw new Error('EVT-001 persistent V0 accepts exact PREPROD only');
+  constructor({ file_path, environment = PREPROD }) {
+    if (environment !== PREPROD) throw new Error('EVT-001 persistent V0 accepts exact PREPROD only');
     this.#journal = new AtomicV8Journal({ file_path, kind: 'EVT-001' });
     this.#operations = this.#journal.load();
     this.#bus = replayEvents(this.#operations).bus;
@@ -127,6 +145,7 @@ export class PersistentEventBus {
     const probeBus = replayEvents(this.#operations).bus;
     const probe = probeBus.publish(input);
     if (!probe.accepted) return probe;
+    assertPersistedPreprod(probe.event.context, 'EVT-001 event');
     const operation = durableSnapshot({ op: 'publish', input });
     const candidate = [...this.#operations, operation];
     const replayed = replayEvents(candidate);
@@ -147,8 +166,8 @@ export class PersistentJobQueue {
   #operations;
   #queue;
 
-  constructor({ file_path, environment = 'PREPROD' }) {
-    if (environment !== 'PREPROD') throw new Error('JOB-001 persistent V0 accepts exact PREPROD only');
+  constructor({ file_path, environment = PREPROD }) {
+    if (environment !== PREPROD) throw new Error('JOB-001 persistent V0 accepts exact PREPROD only');
     this.#journal = new AtomicV8Journal({ file_path, kind: 'JOB-001' });
     this.#operations = this.#journal.load();
     this.#queue = replayJobs(this.#operations).queue;
@@ -169,6 +188,7 @@ export class PersistentJobQueue {
     const probeQueue = replayJobs(this.#operations).queue;
     const probe = probeQueue.enqueue(input);
     if (!probe.accepted) return probe;
+    assertPersistedPreprod(probe.job.context, 'JOB-001 job');
     return this.#apply({ op: 'enqueue', input });
   }
 
@@ -176,6 +196,7 @@ export class PersistentJobQueue {
     const probeQueue = replayJobs(this.#operations).queue;
     const probe = probeQueue.claim(company_id);
     if (!probe) return null;
+    assertPersistedPreprod(probe.context, 'JOB-001 claim');
     return this.#apply({ op: 'claim', company_id });
   }
 
@@ -183,6 +204,7 @@ export class PersistentJobQueue {
     const probeQueue = replayJobs(this.#operations).queue;
     const probe = probeQueue.claimContext(context);
     if (!probe) return null;
+    assertPersistedPreprod(probe.context, 'JOB-001 claim');
     return this.#apply({ op: 'claimContext', context });
   }
 
@@ -206,8 +228,8 @@ export class PersistentJobQueue {
   get operation_count() { return this.#operations.length; }
 }
 
-export function createPersistentRuntimeIO({ directory, environment = 'PREPROD' }) {
-  if (environment !== 'PREPROD') throw new Error('persistent runtime V0 accepts exact PREPROD only');
+export function createPersistentRuntimeIO({ directory, environment = PREPROD }) {
+  if (environment !== PREPROD) throw new Error('persistent runtime V0 accepts exact PREPROD only');
   const root = path.resolve(nonEmpty(directory, 'directory'));
   return Object.freeze({
     events: new PersistentEventBus({ file_path: path.join(root, 'evt-001.v8journal'), environment }),
@@ -216,7 +238,7 @@ export function createPersistentRuntimeIO({ directory, environment = 'PREPROD' }
 }
 
 export const PERSISTENT_RUNTIME_V0_CONTRACT = Object.freeze({
-  environment: 'PREPROD',
+  environment: PREPROD,
   engines: ['EVT-001','JOB-001'],
   persistence: 'local-atomic-v8-journal-reference',
   additional_cost_target_eur: 0,
@@ -226,5 +248,6 @@ export const PERSISTENT_RUNTIME_V0_CONTRACT = Object.freeze({
   single_writer_reference: true,
   crash_consistency: 'temp-write+fsync+atomic-rename+directory-fsync',
   integrity: 'sha256-envelope',
+  ambiguous_durability: 'poison-until-reopen',
   rebuild: 'deterministic-operation-replay'
 });
