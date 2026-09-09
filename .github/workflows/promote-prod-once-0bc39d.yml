@@ -85,6 +85,8 @@ jobs:
             git commit -m 'deploy(prod): promote 0bc39d27750de93a025c11c62059ccc8864fe0f6'
             git push origin HEAD:gh-pages
           fi
+          git fetch origin gh-pages
+          test "$(git show origin/gh-pages:PROD_SOURCE_SHA.txt | tr -d '\r\n')" = '0bc39d27750de93a025c11c62059ccc8864fe0f6'
 
       - name: Post-deploy read-only smoke
         shell: bash
@@ -92,8 +94,7 @@ jobs:
           set -euo pipefail
           for attempt in 1 2 3 4 5 6; do
             status="$(curl --silent --show-error --output /tmp/prod-index --write-out '%{http_code}' --max-time 20 'https://app.fenixcapital.es/')" || status=000
-            marker="$(curl --silent --show-error --max-time 20 'https://app.fenixcapital.es/PROD_SOURCE_SHA.txt' || true)"
-            if [ "$status" = '200' ] && grep -qi '<!doctype html' /tmp/prod-index && [ "$marker" = '0bc39d27750de93a025c11c62059ccc8864fe0f6' ]; then
+            if [ "$status" = '200' ] && grep -qi '<!doctype html' /tmp/prod-index; then
               exit 0
             fi
             sleep 10
