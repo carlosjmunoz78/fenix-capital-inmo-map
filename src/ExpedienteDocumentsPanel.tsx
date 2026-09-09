@@ -39,6 +39,6 @@ export default function ExpedienteDocumentsPanel({expedienteId}:{expedienteId:st
   {status===403&&<div className="ops-message">Tu perfil no puede consultar la documentación de este expediente.</div>}
   {!loading&&status!==403&&status!==200&&<div className="ops-message">No se pudo cargar la documentación vinculada.</div>}
   {!loading&&status===200&&docs.length===0&&<div className="exp-documents-empty">Este expediente no tiene documentación vinculada visible.</div>}
-  {docs.length>0&&<div className="exp-documents-grid">{docs.map(row=>{const id=docId(row);return <button type="button" className="exp-document-card" key={id} onClick={()=>navigate(`/documentos/${encodeURIComponent(id)}?returnTo=${encodeURIComponent(pathname)}`)}><FileText size={18}/><small>{show(row.tipo)}</small><strong>{show(row.title||row.documento)}</strong><span>{show(row.estado)} · Abrir documento →</span></button>})}</div>}
+  {docs.length>0&&<div className="exp-documents-grid">{docs.map(row=>{const id=docId(row);const analysis=String(row.analysis_state||'').trim();return <button type="button" className="exp-document-card" key={id} onClick={()=>navigate(`/documentos/${encodeURIComponent(id)}?returnTo=${encodeURIComponent(pathname)}`)}><FileText size={18}/><small>{show(row.tipo)}</small><strong>{show(row.title||row.documento)}</strong><span>{show(row.estado)}{analysis?` · ${analysis}`:''} · Abrir documento →</span></button>})}</div>}
  </section>;
 }
