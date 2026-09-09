@@ -34,7 +34,7 @@ test('highest canonical HUMAN_REQUIRED reason wins across direct and policy gate
   assert.equal(result.reason,'MONEY_LIMIT');
 
   const h=new HumanExceptionEngine();
-  const item=h.ingest(result,{requester_company_id:'co-a'});
+  const item=h.ingest(result,{requester_company_id:'co-a',event_id:'evt-money-1'});
   assert.equal(item.priority,70);
   assert.equal(item.assigned_role,'FINANCE');
 });
@@ -54,7 +54,25 @@ test('tied authoritative rules apply their gates before POLICY_CONFLICT routing'
   assert.equal(result.status,'HUMAN_REQUIRED');
   assert.equal(result.reason,'MONEY_LIMIT');
   const h=new HumanExceptionEngine();
-  const item=h.ingest(result,{requester_company_id:'co-a'});
+  const item=h.ingest(result,{requester_company_id:'co-a',event_id:'evt-tie-1'});
   assert.equal(item.priority,70);
   assert.equal(item.assigned_role,'FINANCE');
+});
+
+test('HEX deduplicates retries of one event but keeps independent events separate',()=>{
+  const h=new HumanExceptionEngine();
+  const result={status:'HUMAN_REQUIRED',reason:'MONEY_LIMIT',context:ctx(),action:'transfer',policy:'p1'};
+  const first=h.ingest(result,{requester_company_id:'co-a',event_id:'transfer-001'});
+  const retry=h.ingest(result,{requester_company_id:'co-a',event_id:'transfer-001'});
+  const second=h.ingest(result,{requester_company_id:'co-a',event_id:'transfer-002'});
+  assert.equal(first.exception_id,retry.exception_id);
+  assert.notEqual(first.exception_id,second.exception_id);
+  assert.equal(h.list({requester_company_id:'co-a'}).length,2);
+  assert.deepEqual(new Set(h.list({requester_company_id:'co-a'}).map(x=>x.event_id)),new Set(['transfer-001','transfer-002']));
+});
+
+test('HEX rejects ingestion without a stable event identity',()=>{
+  const h=new HumanExceptionEngine();
+  const result={status:'HUMAN_REQUIRED',reason:'HIGH_RISK',context:ctx(),action:'x',policy:null};
+  assert.throws(()=>h.ingest(result,{requester_company_id:'co-a'}),/event_id/);
 });
