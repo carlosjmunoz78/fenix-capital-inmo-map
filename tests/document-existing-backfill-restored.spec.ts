@@ -21,6 +21,12 @@ test('backfill remains PROD-only, authenticated and retries late auth safely',()
  expect(guard).toContain('/functions/v1/fenix-document-existing-backfill');
 });
 
+test('backfill recognizes both expediente root and nested expediente tabs',()=>{
+ const guard=fs.readFileSync('src/ExistingDocumentAutoBackfillGuard.tsx','utf8');
+ expect(guard).toContain("pathname.match(/^\\/expedientes\\/([^/?#]+)(?:\\/|$)/i)");
+ expect(guard).not.toContain("([^/?#]+)\\/?$/i");
+});
+
 test('backfill never supplies privileged browser credentials or weakens auth',()=>{
  const guard=fs.readFileSync('src/ExistingDocumentAutoBackfillGuard.tsx','utf8');
  expect(guard).not.toMatch(/service[_-]?role/i);
