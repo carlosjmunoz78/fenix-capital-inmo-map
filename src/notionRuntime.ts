@@ -44,7 +44,7 @@ export async function fetchNotionRuntime<T>(path:string,init?:RequestInit):Promi
   if(IS_PRODUCTION)return fetchProductionRead<T>(path,init);
   const pathname=new URL(path,'https://fenix.local').pathname;
   if(/^\/expedientes\/[0-9a-fA-F-]{32,36}\/compradores$/.test(pathname)){
-    return fetchEnvironmentApi<T>('fenix-expediente-people-test',pathname,init,{productionAvailable:false});
+    return fetchEnvironmentApi<T>('fenix-expediente-people',pathname,init,{productionAvailable:false});
   }
   return fetchEnvironmentApi<T>('fenix-notion-runtime',path,init,{productionAvailable:false});
 }
