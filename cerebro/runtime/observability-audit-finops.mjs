@@ -97,7 +97,14 @@ function eurToMicros(value) {
   return rounded;
 }
 
-function microsToEur(value) { return value / MICRO_EUR; }
+function microsToEur(value) {
+  ensureInteger(value, 'cost_eur_micros');
+  const eur = value / MICRO_EUR;
+  if (eur > MAX_MICRO_EUR_EXACT_EUR || !Number.isSafeInteger(Math.round(eur * MICRO_EUR)) || Math.round(eur * MICRO_EUR) !== value) {
+    throw new RangeError('aggregated cost exceeds reliable micro-euro Number precision');
+  }
+  return eur;
+}
 
 function loadRecords(journal, validator) {
   const records = journal.load();
@@ -345,6 +352,7 @@ export const OPERATIONAL_LEDGERS_V0_CONTRACT = Object.freeze({
   audit_when: 'canonical-iso8601-utc-instant-hash-covered',
   correlation_id_required: true,
   cost_precision: 'micro-eur-safe-integer-with-number-resolution-bound',
+  aggregate_cost_precision: 'reject-number-aggregate-if-micro-eur-roundtrip-is-not-exact',
   max_reliable_cost_eur: MAX_MICRO_EUR_EXACT_EUR,
   supabase_required: false,
   additional_cost_target_eur: 0,
