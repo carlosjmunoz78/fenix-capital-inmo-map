@@ -1,5 +1,25 @@
 # CEREBRO OS · CHANGELOG
 
+## 2026-09-09 · Persistent EVT-001 / JOB-001 V0
+
+- PR #168 merged as `26fb9c75b9a7361afccccdc111761ad10aac5fa4` after exact-head review of `16484fdf50760afbd98e1d85824ed352dd3a5585`.
+- Added local/self-hosted PREPROD persistence for `EVT-001` and `JOB-001` as parallel single-writer adapters; existing in-memory EventBus/JobQueue remain preserved.
+- Added exact persisted payload checksum, atomic temp-write/fsync/rename/directory-fsync, ancestor-directory fsync, deterministic replay, restart idempotency and corruption/kind fail-closed handling.
+- Hardened caller-input snapshots, exact PREPROD operation boundaries, ambiguous post-rename durability poisoning and tenant/context isolation.
+- Added durable restart recovery for jobs abandoned in `RUNNING`: retry to `QUEUED` when attempts remain, otherwise terminal `FAILED`.
+- PREPROD Factory `34337677363` and App Build `34337677429` success on exact reviewed head.
+- Codex exact-head review closed with no remaining P1/P2 suggestions.
+- PROD Live Deploy `34340279918` and PROD Runtime Smoke `34340279922` success on exact merge SHA.
+- `autonomous_prod=false`, `prod_writes=false`, no Supabase dependency and no new paid service.
+
+## 2026-09-09 · Governance V0
+
+- PR #167 merged as `c523da8f11dbf1a2618982aeeb5940670317bb6e`.
+- `POL-001` and `HEX-001` structural/reference V0 completed with deterministic PREPROD-only policy evaluation and canonical HUMAN_REQUIRED exception routing.
+- Hardened fail-closed policy inputs, isolation, priority/tie semantics, stable exception event identity and replay/idempotency behavior through iterative exact-head review.
+- PROD Live Deploy `34330670776` and PROD Runtime Smoke `34330670550` success on exact merge SHA.
+- No autonomous PROD promotion was enabled.
+
 ## 2026-09-09 · Phase 2 read-only evidence audit V0
 
 - Audited all nine existing-engine bindings without activation, writes or new cost.
