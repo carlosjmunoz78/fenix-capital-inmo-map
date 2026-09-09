@@ -5,6 +5,7 @@ import { AtomicV8Journal } from './persistent-runtime.mjs';
 const PREPROD = 'PREPROD';
 const MICRO_EUR = 1_000_000;
 const MAX_MICRO_EUR_EXACT_EUR = Math.floor((1 / Number.EPSILON) / MICRO_EUR);
+const MAX_MICRO_ROUNDING_TOLERANCE = 0.125;
 const LEVELS = new Set(['DEBUG','INFO','WARN','ERROR','CRITICAL']);
 const LEDGER_STATE = new WeakMap();
 
@@ -86,12 +87,18 @@ function isoInstant(value, label = 'occurred_at') {
 
 function nowInstant() { return new Date().toISOString(); }
 
+function scaledMicroTolerance(scaled) {
+  const ulpAware = Math.abs(scaled) * Number.EPSILON * 2;
+  return Math.min(MAX_MICRO_ROUNDING_TOLERANCE, Math.max(Number.EPSILON, ulpAware));
+}
+
 function eurToMicros(value) {
   if (!Number.isFinite(value) || value < 0) throw new TypeError('cost_eur must be a finite non-negative number');
   if (value > MAX_MICRO_EUR_EXACT_EUR) throw new RangeError(`cost_eur exceeds reliable micro-euro Number precision (${MAX_MICRO_EUR_EXACT_EUR} EUR max)`);
   const scaled = value * MICRO_EUR;
   const rounded = Math.round(scaled);
-  if (!Number.isSafeInteger(rounded) || Math.abs(scaled - rounded) > 1e-7) {
+  const tolerance = scaledMicroTolerance(scaled);
+  if (!Number.isSafeInteger(rounded) || Math.abs(scaled - rounded) > tolerance) {
     throw new TypeError('cost_eur must be representable exactly at micro-euro precision');
   }
   return rounded;
@@ -351,7 +358,8 @@ export const OPERATIONAL_LEDGERS_V0_CONTRACT = Object.freeze({
   audit_integrity: 'sha256-hash-chain-not-authenticated-tamper-proofing',
   audit_when: 'canonical-iso8601-utc-instant-hash-covered',
   correlation_id_required: true,
-  cost_precision: 'micro-eur-safe-integer-with-number-resolution-bound',
+  cost_precision: 'micro-eur-safe-integer-with-ulp-aware-scaled-tolerance-and-number-resolution-bound',
+  micro_rounding_tolerance_cap: MAX_MICRO_ROUNDING_TOLERANCE,
   aggregate_cost_precision: 'reject-number-aggregate-if-micro-eur-roundtrip-is-not-exact',
   max_reliable_cost_eur: MAX_MICRO_EUR_EXACT_EUR,
   supabase_required: false,
