@@ -37,7 +37,29 @@ async function fetchProductionRead<T>(path:string,init?:RequestInit):Promise<{st
   if(people){
     return fetchEnvironmentApi<T>('fenix-expediente-people',`/?expediente=${encodeURIComponent(decodeURIComponent(people[1]))}`,init);
   }
-  if(/^\/expedientes\/[^/]+$/.test(pathname))return fetchAppApi<T>(pathname);
+  const detail=pathname.match(/^\/expedientes\/([^/]+)$/);
+  if(detail){
+    const code=decodeURIComponent(detail[1]);
+    const workspace=await fetchAppApi<any>(`/expedientes/${encodeURIComponent(code)}/workspace`);
+    if(workspace.status===200&&workspace.data?.expediente){
+      const w=workspace.data;
+      const exp=w.expediente||{};
+      const inmo=w.inmobiliaria||null;
+      const counts=w.counts||{};
+      const enriched={
+        ...exp,
+        titulares:counts.titulares??exp.titulares??null,
+        avalistas:counts.avalistas??exp.avalistas??null,
+        documentos:counts.documentos??0,
+        inmobiliaria:inmo?.nombre_alias??inmo?.nombre??exp.inmobiliaria_code??null,
+        inmobiliaria_nombre:inmo?.nombre_alias??inmo?.nombre??null,
+        inmobiliaria_code:inmo?.inmobiliaria_code??exp.inmobiliaria_code??null,
+        workspace:w,
+      };
+      return {status:200,data:{ok:true,status:200,expediente:enriched,workspace:w} as T};
+    }
+    return fetchAppApi<T>(pathname);
+  }
   if(/^\/documentos\/[^/]+(?:\/(?:view|versions))?$/.test(pathname))return fetchAppApi<T>(`${pathname}${url.search}`);
   const passthrough=['/expedientes','/firmas','/inmobiliarias','/bancos','/tasaciones','/contactos','/tareas','/documentos'];
   if(passthrough.includes(pathname))return fetchAppApi<T>(`${pathname}${url.search}`);
