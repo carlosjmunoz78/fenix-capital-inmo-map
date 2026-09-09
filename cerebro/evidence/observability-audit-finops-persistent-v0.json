@@ -17,9 +17,10 @@
     "additional_cost_target_eur": 0
   },
   "capabilities": {
-    "OBSERV-001": ["durable correlation_id records", "tenant/context queries", "restart persistence"],
-    "AUD-001": ["canonical append-only logical records", "SHA-256 hash chain integrity", "restart verification", "company-scoped query"],
-    "FINOPS-001": ["durable cost events", "micro-euro safe integer precision", "aggregation by company/engine/provider"]
+    "OBSERV-001": ["durable correlation_id records", "tenant/context queries", "restart persistence", "validated sequence and stable record ids"],
+    "AUD-001": ["canonical append-only logical records", "private mutable state with capability-guarded writes", "canonical occurred_at instant covered by record hash", "SHA-256 hash chain integrity", "restart verification", "company-scoped query"],
+    "FINOPS-001": ["durable cost events", "micro-euro safe integer precision", "validated sequence and stable event ids", "aggregation by company/engine/provider"]
   },
+  "integrity_limit": "SHA-256 chain is corruption/inconsistency detection, not authenticated tamper-proofing.",
   "migration": "NONE. Parallel adapter only until OLD-vs-NEW comparison and explicit promotion gates."
 }
