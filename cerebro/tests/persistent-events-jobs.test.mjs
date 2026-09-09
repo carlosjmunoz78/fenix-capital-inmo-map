@@ -66,6 +66,51 @@ test('first commit fsyncs parent directory entries for newly-created nested jour
   assert.ok(synced.includes(path.resolve(nested)),'leaf journal directory must be fsynced after rename');
 });
 
+test('parent durability includes filesystem root when it owns a newly-created top-level entry',()=>{
+  const base=tmp();
+  const file=path.join(base,'root-child','events.v8journal');
+  const root=path.parse(path.resolve(file)).root;
+  const originalExists=fs.existsSync;
+  const originalOpen=fs.openSync;
+  const originalClose=fs.closeSync;
+  const originalFsync=fs.fsyncSync;
+  const opened=new Map();
+  const synced=[];
+  let simulateTopLevelMissing=true;
+  try {
+    fs.existsSync=(target)=>{
+      const resolved=typeof target==='string'?path.resolve(target):target;
+      if(simulateTopLevelMissing && typeof resolved==='string' && resolved!==root && resolved.startsWith(root)) {
+        const relative=path.relative(root,resolved);
+        if(relative && relative.split(path.sep).length<=4) return false;
+      }
+      return originalExists(target);
+    };
+    fs.openSync=(target,...args)=>{
+      const fd=originalOpen(target,...args);
+      opened.set(fd,typeof target==='string'?path.resolve(target):String(target));
+      return fd;
+    };
+    fs.fsyncSync=(fd)=>{
+      synced.push(opened.get(fd));
+      return originalFsync(fd);
+    };
+    fs.closeSync=(fd)=>{
+      opened.delete(fd);
+      return originalClose(fd);
+    };
+    const bus=new PersistentEventBus({file_path:file});
+    assert.equal(bus.publish({type:'ROOT_CASE',context:ctx(),idempotency_key:'root-case'}).accepted,true);
+    simulateTopLevelMissing=false;
+  } finally {
+    fs.existsSync=originalExists;
+    fs.openSync=originalOpen;
+    fs.closeSync=originalClose;
+    fs.fsyncSync=originalFsync;
+  }
+  assert.ok(synced.includes(root),'filesystem root must be fsynced when it owns a newly-created top-level child');
+});
+
 test('EVT-001 survives process-style restart and preserves idempotency',()=>{
   const dir=tmp(),file=path.join(dir,'events.v8journal');
   let bus=new PersistentEventBus({file_path:file});
