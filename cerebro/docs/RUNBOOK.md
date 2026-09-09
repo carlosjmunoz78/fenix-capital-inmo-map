@@ -23,7 +23,21 @@ After merge to `main`:
 - capture the merge SHA;
 - require `PROD Live Deploy` success on that exact SHA;
 - require `PROD Runtime Smoke` success on that exact SHA;
-- if either is red, do not claim green: create a narrow hotfix and repeat the loop.
+- if either is red, **do not claim green and execute rollback immediately when a failed deploy/smoke may have exposed a bad production snapshot**.
+
+Canonical rollback procedure: repository-level `docs/PROD_ROLLBACK_RUNBOOK.md`.
+
+Emergency sequence:
+1. Identify the last known-good `main` SHA and the offending merge/commit.
+2. Run `PROD Rollback Rehearsal` against the known-good SHA and require green.
+3. Create a rollback branch from current `main`.
+4. Revert only the offending commit(s); never reset or rewrite `main` history and never hand-edit/force-push `gh-pages`.
+5. Open a rollback PR and require PREPROD build, Browser QA and smoke green.
+6. Merge the rollback PR.
+7. Require `PROD Live Deploy` success on the new revert SHA.
+8. Require `PROD Runtime Smoke` success and exact deployed SHA on that same revert SHA.
+9. Verify the reported user-visible production failure is gone.
+10. Diagnose/fix forward on a separate branch through the normal PREPROD → review → merge → PROD → smoke sequence.
 
 ## Runtime boundaries
 
@@ -35,7 +49,7 @@ After merge to `main`:
 
 ## HUMAN_REQUIRED
 
-Only: `LEGAL_REQUIRED`, `SIGNATURE_REQUIRED`, `LOW_CONFIDENCE`, `HIGH_RISK`, `POLICY_CONFLICT`, `SECURITY_INCIDENT`, `MONEY_LIMIT`, `CUSTOMER_HUMAN_REQUEST`.
+Reasons: `LEGAL_REQUIRED`, `SIGNATURE_REQUIRED`, `LOW_CONFIDENCE`, `HIGH_RISK`, `POLICY_CONFLICT`, `SECURITY_INCIDENT`, `MONEY_LIMIT`, `CUSTOMER_HUMAN_REQUEST`.
 
 ## Failure handling
 
