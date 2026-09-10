@@ -97,6 +97,7 @@ import DetailShellGate from './DetailShellGate';
 import TaskCreateShell from './TaskCreateShell';
 import OperationalRecordDetailGate from './OperationalRecordDetailGate';
 import CalculatorLabelGuard from './CalculatorLabelGuard';
+import CalculatorProEnhancement from './CalculatorProEnhancement';
 import ProfileLauncherGuard from './ProfileLauncherGuard';
 import OperationalAdvancedSearchGuard from './OperationalAdvancedSearchGuard';
 import DirectionIdentityGuard from './DirectionIdentityGuard';
@@ -134,6 +135,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <ExpedienteJourneyGuard />
       <ExpedienteFollowupConfirmationGuard />
       <CalculatorLabelGuard />
+      <CalculatorProEnhancement />
       <ProfileLauncherGuard />
       <OperationalAdvancedSearchGuard />
       <DirectionIdentityGuard />
