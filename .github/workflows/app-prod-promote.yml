@@ -1,17 +1,6 @@
 name: APP PROD Promote
 
 on:
-  push:
-    branches:
-      - prod-preparation
-    paths:
-      - 'src/**'
-      - 'tests/**'
-      - 'public/**'
-      - 'package.json'
-      - 'package-lock.json'
-      - 'index.html'
-      - '.github/workflows/app-prod-promote.yml'
   workflow_dispatch:
 
 permissions:
