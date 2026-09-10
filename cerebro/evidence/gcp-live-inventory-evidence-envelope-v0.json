@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.10.0",
+  "schema_version": "1.11.0",
   "status": "DEFINED_NOT_BUILT",
   "scope": "GCP_LIVE_INVENTORY_EVIDENCE_ENVELOPE",
   "environment": "SCAFFOLD",
@@ -42,6 +42,10 @@
     "duplicate_pairs_forbidden": true,
     "non_success_pairs_must_still_be_recorded": true,
     "allowed_coverage_result_status": ["SUCCESS","PERMISSION_DENIED","API_UNAVAILABLE","EMPTY","ERROR"],
+    "coverage_result_status_is_aggregate_of_command_results": true,
+    "coverage_status_precedence": ["ERROR","PERMISSION_DENIED","API_UNAVAILABLE","EMPTY","SUCCESS"],
+    "coverage_success_requires_all_command_results_success": true,
+    "coverage_result_status_must_equal_highest_precedence_present_command_result_status": true,
     "resource_ref_value": "__DOMAIN__",
     "catalog_binding_required": true,
     "catalog_ref": "gcp-readonly-command-catalog-v0.json",
