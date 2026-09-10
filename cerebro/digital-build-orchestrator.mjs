@@ -1,3 +1,4 @@
+import { types as utilTypes } from 'node:util';
 import { loadDigitalBuildCatalog, selectTemplate, validateDigitalBuildCatalog } from './digital-build-capability-catalog.mjs';
 
 const REQUIRED_CONTEXT = ['company_id', 'engine_id', 'environment', 'version'];
@@ -22,22 +23,64 @@ const PRIORITY_BY_REASON = Object.freeze({
   LOW_CONFIDENCE: 40,
 });
 
-function ownDataObject(value, label) {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error(`${label} must be an object`);
-  if (Object.getPrototypeOf(value) !== Object.prototype) throw new Error(`${label} must be a plain object`);
-  const descriptors = Object.getOwnPropertyDescriptors(value);
-  const out = {};
-  for (const key of Reflect.ownKeys(descriptors)) {
-    if (typeof key !== 'string') throw new Error(`${label} symbol properties are forbidden`);
-    const descriptor = descriptors[key];
-    if (!('value' in descriptor)) throw new Error(`${label}.${key} must be a data property`);
-    Object.defineProperty(out, key, {
-      value: descriptor.value,
-      enumerable: true,
-      writable: true,
-      configurable: true,
-    });
+function safePlainClone(value, label, stack = new WeakSet()) {
+  if (value === null || typeof value === 'string' || typeof value === 'boolean') return value;
+  if (typeof value === 'number') {
+    if (!Number.isFinite(value)) throw new Error(`${label} contains a non-finite number`);
+    return value;
   }
+  if (typeof value !== 'object') throw new Error(`${label} must contain plain data only`);
+  if (utilTypes.isProxy(value)) throw new Error(`${label} proxy objects are forbidden`);
+  if (stack.has(value)) throw new Error(`${label} cyclic data is forbidden`);
+  stack.add(value);
+  try {
+    if (Array.isArray(value)) {
+      if (Object.getPrototypeOf(value) !== Array.prototype) throw new Error(`${label} must contain plain data only`);
+      const descriptors = Object.getOwnPropertyDescriptors(value);
+      const lengthDescriptor = descriptors.length;
+      const length = lengthDescriptor?.value;
+      if (!Number.isSafeInteger(length) || length < 0) throw new Error(`${label} has invalid array length`);
+      const out = new Array(length);
+      for (const key of Reflect.ownKeys(descriptors)) {
+        if (key === 'length') continue;
+        if (typeof key !== 'string' || !/^(0|[1-9]\d*)$/.test(key)) throw new Error(`${label} arrays may contain indexed plain data only`);
+        const descriptor = descriptors[key];
+        if (!('value' in descriptor)) throw new Error(`${label}[${key}] must be a data property`);
+        const index = Number(key);
+        if (index >= length) throw new Error(`${label}[${key}] exceeds array length`);
+        Object.defineProperty(out, key, {
+          value: safePlainClone(descriptor.value, `${label}[${key}]`, stack),
+          enumerable: true,
+          writable: true,
+          configurable: true,
+        });
+      }
+      return out;
+    }
+
+    if (Object.getPrototypeOf(value) !== Object.prototype) throw new Error(`${label} must be a plain object`);
+    const descriptors = Object.getOwnPropertyDescriptors(value);
+    const out = {};
+    for (const key of Reflect.ownKeys(descriptors)) {
+      if (typeof key !== 'string') throw new Error(`${label} symbol properties are forbidden`);
+      const descriptor = descriptors[key];
+      if (!('value' in descriptor)) throw new Error(`${label}.${key} must be a data property`);
+      Object.defineProperty(out, key, {
+        value: safePlainClone(descriptor.value, `${label}.${key}`, stack),
+        enumerable: true,
+        writable: true,
+        configurable: true,
+      });
+    }
+    return out;
+  } finally {
+    stack.delete(value);
+  }
+}
+
+function ownDataObject(value, label) {
+  const out = safePlainClone(value, label);
+  if (!out || typeof out !== 'object' || Array.isArray(out)) throw new Error(`${label} must be an object`);
   return out;
 }
 
@@ -84,6 +127,8 @@ function humanRequired({ reason, requestId, context, capabilityId }) {
 }
 
 export function planDigitalBuild(requestInput, { catalog = loadDigitalBuildCatalog() } = {}) {
+  // Sanitize the entire request recursively before any catalog validation or consumption.
+  // This guarantees nested accessors/proxies cannot execute caller code or mutate a supplied catalog.
   const request = ownDataObject(requestInput, 'request');
   validateDigitalBuildCatalog({ catalog });
 
