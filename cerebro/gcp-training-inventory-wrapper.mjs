@@ -8,9 +8,10 @@ const ALLOWED_PROJECT_IDS = Object.freeze([
 ]);
 
 const INVENTORY_DOMAINS = Object.freeze([
-  'services',
+  'projects',
+  'enabled_apis',
   'cloud_run',
-  'functions',
+  'cloud_functions',
   'compute',
   'jobs',
   'scheduler',
@@ -18,14 +19,14 @@ const INVENTORY_DOMAINS = Object.freeze([
   'storage',
   'databases',
   'artifact_registry',
-  'iam',
+  'service_accounts_and_iam',
   'secret_references',
   'networking',
   'logging_monitoring',
   'billing_cost',
   'regions',
   'deployments',
-  'consumers',
+  'resource_consumers',
 ]);
 
 const INPUT_KEYS = new Set(['company_id', 'environment', 'version', 'project_id']);
@@ -92,7 +93,7 @@ export function buildGcpTrainingInventoryPlan(inputValue) {
       'EXISTING_API',
       'AUTHORIZED_MCP_OR_CONNECTOR',
       'GCLOUD_OR_SCRIPT',
-      'FACT001_NEW_CONNECTOR_ONLY_IF_GAP_PROVEN',
+      'FACTORY_NEW_CONNECTOR_ONLY_IF_GAP_PROVEN',
     ]),
   });
 }
