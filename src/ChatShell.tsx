@@ -1,0 +1,33 @@
+import {FormEvent,useEffect,useMemo,useState} from 'react';
+import {MessageCircle,RefreshCw,Send} from 'lucide-react';
+import {useLocation} from 'react-router-dom';
+import {supabase,fetchAppApi} from './supabase';
+import {normalizeNavigation,type NavItem} from './masterNavigation';
+import OperationalShellFrame from './OperationalShellFrame';
+import './operational.css';
+
+type Theme='light'|'dark';
+type Msg={message_code?:string;sender_actor_code?:string;sender_name?:string;body?:string;created_at?:string};
+type ChatPayload={ok?:boolean;status?:number;channel?:string;items?:Msg[];error?:string};
+type Ctx={actor_code?:string;role?:string;display_name?:string;context?:{actor_code?:string;role?:string;display_name?:string}};
+const fallbackNav:NavItem[]=[{label:'Inicio',route:'/inicio'}];
+
+export default function ChatShell(){
+ const location=useLocation();const active=location.pathname.replace(/\/+$/,'')==='/chat';
+ const[logged,setLogged]=useState(false),[ready,setReady]=useState(false),[nav,setNav]=useState<NavItem[]>([]),[ctx,setCtx]=useState<Ctx|null>(null),[items,setItems]=useState<Msg[]>([]),[body,setBody]=useState(''),[busy,setBusy]=useState(false),[msg,setMsg]=useState(''),[query,setQuery]=useState('');
+ const[theme,setTheme]=useState<Theme>(()=>(localStorage.getItem('fenix-theme') as Theme)||'light');
+ useEffect(()=>{let alive=true;supabase.auth.getSession().then(({data})=>{if(alive){setLogged(Boolean(data.session));setReady(true)}});const{data:{subscription}}=supabase.auth.onAuthStateChange((_e,s)=>{setLogged(Boolean(s));setReady(true)});return()=>{alive=false;subscription.unsubscribe()};},[]);
+ async function load(){if(!active||!logged)return;setBusy(true);setMsg('');try{const[c,n,r]=await Promise.all([fetchAppApi<Ctx>('/session/context'),fetchAppApi<unknown>('/navigation'),supabase.rpc('fenix_prod_chat_list_user',{p_limit:200})]);setCtx(c.status===200?c.data:null);setNav(n.status===200?normalizeNavigation(n.data):[]);if(r.error){setMsg('No se pudo cargar el chat interno.');setItems([]);return;}const data=r.data as ChatPayload;setItems(data?.ok&&Array.isArray(data.items)?data.items:[]);if(!data?.ok)setMsg(data?.status===403?'Tu identidad no está vinculada al chat interno.':'No se pudo cargar el chat interno.');}finally{setBusy(false)}}
+ useEffect(()=>{if(active&&logged)void load()},[active,logged]);
+ useEffect(()=>{if(!active)return;document.documentElement.dataset.theme=theme;localStorage.setItem('fenix-theme',theme);sessionStorage.setItem('fenix-theme',theme)},[active,theme]);
+ async function send(e:FormEvent){e.preventDefault();const text=body.trim();if(!text||busy)return;setBusy(true);setMsg('');const key=`chat-ui-${Date.now()}-${crypto.randomUUID()}`;const r=await supabase.rpc('fenix_prod_chat_send_user',{p_body:text,p_idempotency_key:key});if(r.error||!(r.data as ChatPayload)?.ok){setMsg('No se pudo enviar el mensaje. No se ha duplicado ningún envío.');setBusy(false);return;}setBody('');await load();setBusy(false);}
+ async function logout(){await supabase.auth.signOut();window.location.href=import.meta.env.BASE_URL;}
+ const context=ctx?.context??ctx??{};const role=String(context.role??'Usuario'),name=String(context.display_name??context.actor_code??role);const filtered=useMemo(()=>{const q=query.trim().toLowerCase();return q?items.filter(x=>`${x.sender_name??''} ${x.sender_actor_code??''} ${x.body??''}`.toLowerCase().includes(q)):items},[items,query]);
+ if(!active||!ready||!logged)return null;const effectiveNav=nav.length?nav:fallbackNav;
+ return <OperationalShellFrame className="chat-root" theme={theme} navigation={effectiveNav} activeRoute="/chat" anaSubtitle="Chat interno del equipo." anaRoute="/ana" query={query} onQueryChange={setQuery} searchPlaceholder="Buscar en el chat..." name={name} role={role} initials={name.slice(0,2).toUpperCase()} onToggleTheme={()=>setTheme(theme==='light'?'dark':'light')} onLogout={logout} contentClassName="chat-content">
+  <style>{`.chat-content{display:grid;gap:16px}.chat-hero,.chat-panel{border:1px solid var(--border,#e5e5e8);background:var(--panel,#fff);border-radius:16px;padding:18px}.chat-hero{display:flex;align-items:center;justify-content:space-between;gap:14px}.chat-hero h2{margin:3px 0}.chat-feed{display:grid;gap:10px;max-height:55vh;overflow:auto;padding:4px}.chat-message{border:1px solid var(--border,#e5e5e8);border-radius:13px;padding:11px 13px;background:var(--surface,#fff)}.chat-meta{font-size:11px;color:var(--muted,#666);display:flex;justify-content:space-between;gap:12px}.chat-body{white-space:pre-wrap;margin-top:5px}.chat-compose{display:grid;grid-template-columns:1fr auto;gap:10px}.chat-compose textarea{min-height:72px;resize:vertical;padding:11px;border-radius:12px;border:1px solid var(--border,#ddd);background:var(--surface,#fff);color:var(--text,#222)}.chat-compose button,.chat-refresh{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 14px;border-radius:11px;border:0;background:#870064;color:#fff;font-weight:800;cursor:pointer}.chat-empty{text-align:center;padding:32px;color:var(--muted,#666)}@media(max-width:650px){.chat-compose{grid-template-columns:1fr}.chat-hero{align-items:flex-start;flex-direction:column}}`}</style>
+  <section className="chat-hero"><div><span className="eyebrow">EQUIPO</span><h2>Chat interno</h2><p>Mensajes internos vinculados a usuarios autenticados. No se admite suplantar otro actor.</p></div><button type="button" className="chat-refresh" onClick={()=>void load()} disabled={busy}><RefreshCw size={16}/>{busy?'Actualizando…':'Actualizar'}</button></section>
+  <section className="chat-panel" aria-label="Mensajes del equipo"><div className="chat-feed">{filtered.length?filtered.map((x,i)=><article className="chat-message" key={x.message_code??`${x.created_at}-${i}`}><div className="chat-meta"><strong>{x.sender_name||x.sender_actor_code||'Equipo'}</strong><span>{x.created_at?new Date(x.created_at).toLocaleString('es-ES'):''}</span></div><div className="chat-body">{x.body}</div></article>):<div className="chat-empty"><MessageCircle size={28}/><p>{query?'No hay mensajes que coincidan con la búsqueda.':'Todavía no hay mensajes en el chat.'}</p></div>}</div></section>
+  <form className="chat-panel chat-compose" onSubmit={send}><textarea aria-label="Mensaje para el equipo" placeholder="Escribe un mensaje para el equipo..." value={body} onChange={e=>setBody(e.target.value)} disabled={busy}/><button type="submit" disabled={busy||!body.trim()}><Send size={17}/>{busy?'Enviando…':'Enviar'}</button>{msg&&<strong style={{gridColumn:'1 / -1',fontSize:12}}>{msg}</strong>}</form>
+ </OperationalShellFrame>;
+}
