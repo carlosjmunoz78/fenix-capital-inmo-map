@@ -17,6 +17,7 @@ const DOMAINS = ['projects','enabled_apis','cloud_run','cloud_functions','comput
 const RESULT_STATUS = ['SUCCESS','PERMISSION_DENIED','API_UNAVAILABLE','EMPTY','ERROR'];
 const CATALOG_BLOB_SHA='3437a1938643dd9bab03c3b8dff9f9047a07767d';
 const REQUIRED_COMMAND_RESULT_FIELDS = ['command_run_ref','catalog_blob_sha','command_template_id_or_ref','result_status','captured_at','principal_ref','evidence_ref','resolved_parameters','returned_resource_refs'];
+const SOURCE_MATCH_FIELDS=['project_id','domain','command_run_ref','command_template_id_or_ref','evidence_ref','principal_ref','catalog_blob_sha'];
 function gitBlobSha(text){const bytes=Buffer.from(text,'utf8'); return crypto.createHash('sha1').update(Buffer.from(`blob ${bytes.length}\0`)).update(bytes).digest('hex');}
 function derivedIds(domain){const row=catalog.domain_commands.find((x)=>x.domain===domain); return row.commands.map((_,i)=>`GCP-READONLY-CATALOG@${CATALOG_BLOB_SHA}:${domain}:${i}`);}
 
@@ -39,15 +40,33 @@ test('catalog identity is pinned to immutable checked-in git blob',()=>{
 });
 
 test('every required template and expansion preserves exact returned resource set',()=>{
-  const c=cfg.coverage_contract; assert.equal(c.command_results_required_per_coverage_record,true); assert.equal(c.one_command_result_per_required_template,true); assert.equal(c.one_command_result_per_expansion,true); assert.equal(c.missing_required_template_result_forbidden,true); assert.deepEqual(c.command_result_required_fields,REQUIRED_COMMAND_RESULT_FIELDS); assert.deepEqual(c.command_result_status_values,RESULT_STATUS); assert.equal(c.resolved_parameters_must_include_project_id,true); assert.equal(c.resolved_project_id_must_equal_coverage_project_id,true); assert.equal(c.returned_resource_refs_required_for_every_command_result,true); assert.equal(c.returned_resource_refs_must_be_canonical_unique,true); assert.equal(c.non_success_command_result_requires_empty_returned_resource_refs,true);
+  const c=cfg.coverage_contract; assert.equal(c.command_results_required_per_coverage_record,true); assert.equal(c.one_command_result_per_required_template,true); assert.equal(c.one_command_result_per_expansion,true); assert.equal(c.missing_required_template_result_forbidden,true); assert.deepEqual(c.command_result_required_fields,REQUIRED_COMMAND_RESULT_FIELDS); assert.deepEqual(c.command_result_status_values,RESULT_STATUS); assert.equal(c.resolved_parameters_must_include_project_id,true); assert.equal(c.resolved_project_id_must_equal_coverage_project_id,true); assert.equal(c.returned_resource_refs_required_for_every_command_result,true); assert.equal(c.returned_resource_refs_must_be_canonical_unique,true); assert.equal(c.non_success_command_result_requires_empty_returned_resource_refs,true); assert.equal(c.command_run_ref_must_be_globally_unique_across_envelope,true);
 });
 
 test('scheduler location expansion is explicit one-to-one and fail-closed',()=>{
   const c=cfg.coverage_contract; assert.equal(c.scheduler_location_discovery_result_required,true); assert.equal(c.scheduler_expansion_parameter,'LOCATION'); assert.equal(c.scheduler_each_discovered_location_requires_exactly_one_jobs_result,true); assert.equal(c.scheduler_each_jobs_result_must_include_location_equal_to_discovered_value,true); assert.equal(c.scheduler_zero_jobs_results_allowed_when_no_locations_discovered,true); assert.equal(c.scheduler_failed_or_empty_discovery_requires_zero_jobs_expansions,true); assert.equal(c.scheduler_duplicate_or_missing_location_result_forbidden,true); assert.deepEqual(derivedIds('scheduler'),[`GCP-READONLY-CATALOG@${CATALOG_BLOB_SHA}:scheduler:0`,`GCP-READONLY-CATALOG@${CATALOG_BLOB_SHA}:scheduler:1`]);
 });
 
-test('RESOURCE is linked to exact command run and exact returned resource set',()=>{
-  const c=cfg.capture_contract; assert.deepEqual(c.resource_record_additional_required_fields,['command_run_ref']); assert.equal(c.resource_command_run_ref_must_match_source_command_result,true); assert.equal(c.resource_ref_must_be_listed_in_source_command_result_returned_resource_refs,true); assert.equal(c.resource_records_must_exactly_match_returned_resource_refs_per_command_run,true);
+test('same resource may have multiple provenance observations but one consistent classification',()=>{
+  const r=cfg.record_model,c=cfg.capture_contract;
+  assert.deepEqual(r.resource_observation_uniqueness_key,['project_id','resource_ref','command_run_ref']);
+  assert.equal(r.same_resource_may_have_multiple_provenance_records,true);
+  assert.deepEqual(r.classification_identity_key,['project_id','resource_ref']);
+  assert.equal(r.classification_must_be_consistent_across_provenance_records,true);
+  assert.equal(r.contradictory_classification_for_same_resource_forbidden,true);
+  assert.equal(c.multiple_provenance_records_for_same_resource_allowed,true);
+  assert.equal(c.one_provenance_record_per_returned_resource_per_command_run,true);
+  assert.equal(c.resource_classification_must_be_consistent_across_all_provenance_records,true);
+});
+
+test('RESOURCE provenance matches one globally unique SUCCESS run by complete tuple',()=>{
+  const c=cfg.capture_contract;
+  assert.deepEqual(c.resource_record_additional_required_fields,['command_run_ref']);
+  assert.equal(c.resource_command_run_ref_must_match_source_command_result,true);
+  assert.deepEqual(c.resource_source_match_fields,SOURCE_MATCH_FIELDS);
+  assert.equal(c.resource_source_result_status_must_be_success,true);
+  assert.equal(c.resource_ref_must_be_listed_in_source_command_result_returned_resource_refs,true);
+  assert.equal(c.resource_records_must_exactly_match_returned_resource_refs_per_command_run,true);
 });
 
 test('capture remains fail-closed and Trading isolated',()=>{
