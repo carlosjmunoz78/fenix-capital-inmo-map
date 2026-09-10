@@ -1,3 +1,5 @@
+import { types as utilTypes } from 'node:util';
+
 const ALLOWED_PROJECT_IDS = Object.freeze([
   'fenix-trading-lab',
   'fenix-capital-455809',
@@ -26,10 +28,31 @@ const INVENTORY_DOMAINS = Object.freeze([
   'consumers',
 ]);
 
-function assertPlainObject(value, label) {
-  if (!value || typeof value !== 'object' || Array.isArray(value) || Object.getPrototypeOf(value) !== Object.prototype) {
+const INPUT_KEYS = new Set(['company_id', 'environment', 'version', 'project_id']);
+
+function safeInputSnapshot(value, label) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
     throw new Error(`${label} must be a plain object`);
   }
+  if (utilTypes.isProxy(value)) throw new Error(`${label} proxy objects are forbidden`);
+  if (Object.getPrototypeOf(value) !== Object.prototype) throw new Error(`${label} must be a plain object`);
+
+  const descriptors = Object.getOwnPropertyDescriptors(value);
+  const out = {};
+  for (const key of Reflect.ownKeys(descriptors)) {
+    if (typeof key !== 'string') throw new Error(`${label} symbol properties are forbidden`);
+    if (!INPUT_KEYS.has(key)) throw new Error(`unexpected ${label} field ${key}`);
+    const descriptor = descriptors[key];
+    if (!('value' in descriptor)) throw new Error(`${label}.${key} must be a data property`);
+    if (typeof descriptor.value !== 'string') throw new Error(`${label}.${key} must be a string`);
+    Object.defineProperty(out, key, {
+      value: descriptor.value,
+      enumerable: true,
+      writable: true,
+      configurable: true,
+    });
+  }
+  return out;
 }
 
 function nonEmptyString(value, label) {
@@ -37,8 +60,8 @@ function nonEmptyString(value, label) {
   return value;
 }
 
-export function buildGcpTrainingInventoryPlan(input) {
-  assertPlainObject(input, 'input');
+export function buildGcpTrainingInventoryPlan(inputValue) {
+  const input = safeInputSnapshot(inputValue, 'input');
   const companyId = nonEmptyString(input.company_id, 'company_id');
   const environment = nonEmptyString(input.environment, 'environment');
   const version = nonEmptyString(input.version, 'version');
