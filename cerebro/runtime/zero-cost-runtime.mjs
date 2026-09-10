@@ -1,3 +1,4 @@
+import { types } from 'node:util';
 import { AtomicV8Journal } from './persistent-runtime.mjs';
 
 const PREPROD = 'PREPROD';
@@ -22,8 +23,12 @@ function nonEmpty(value, label) {
 }
 
 function plain(value, label) {
-  if (!value || typeof value !== 'object' || Array.isArray(value) || Object.getPrototypeOf(value) !== Object.prototype) {
-    throw new TypeError(`${label} must be a plain object`);
+  if (!value || typeof value !== 'object') throw new TypeError(`${label} must be a plain object`);
+  if (types.isProxy(value)) throw new TypeError(`${label} must not be a Proxy`);
+  if (Array.isArray(value) || Object.getPrototypeOf(value) !== Object.prototype) throw new TypeError(`${label} must be a plain object`);
+  const descriptors = Object.getOwnPropertyDescriptors(value);
+  for (const descriptor of Object.values(descriptors)) {
+    if (descriptor.get || descriptor.set) throw new TypeError(`${label} must not contain accessors`);
   }
   return value;
 }
@@ -59,11 +64,13 @@ function normalizeCapability(input) {
   const health = value.health ?? 'AVAILABLE';
   if (!['AVAILABLE','DEGRADED','UNAVAILABLE'].includes(health)) throw new Error('unsupported capability health');
   const capabilities = Array.isArray(value.capabilities) ? value.capabilities.map((x, i) => nonEmpty(x, `capabilities[${i}]`)) : [];
+  const environment = value.environment === undefined ? PREPROD : nonEmpty(value.environment, 'environment');
+  if (environment !== PREPROD) throw new Error('LOCAL-001 V0 accepts exact PREPROD only');
   return Object.freeze({
     capability_id: nonEmpty(value.capability_id, 'capability_id'),
     company_id: value.company_id === 'GLOBAL' ? 'GLOBAL' : nonEmpty(value.company_id, 'company_id'),
     engine_id: nonEmpty(value.engine_id, 'engine_id'),
-    environment: value.environment === undefined ? PREPROD : nonEmpty(value.environment, 'environment'),
+    environment,
     version: nonEmpty(value.version ?? '0.1.0', 'version'),
     kind: nonEmpty(value.kind ?? 'local', 'kind'),
     priority: Number.isSafeInteger(value.priority) ? value.priority : 100,
@@ -179,14 +186,21 @@ export class LocalOffloadStore {
     return null;
   }
 
-  backup() { return clone(this.#operations); }
+  backup(context) {
+    const ctx = contextOf(context);
+    return clone(this.#operations.filter(op => sameScope(op.context, ctx)));
+  }
 
-  restore(snapshot) {
+  restore({ context, snapshot }) {
+    const ctx = contextOf(context);
     if (!Array.isArray(snapshot)) throw new TypeError('snapshot must be an array');
-    const candidate = snapshot.map(op => validateOperation(op, this.#kind));
+    const scoped = snapshot.map(op => validateOperation(op, this.#kind));
+    if (scoped.some(op => !sameScope(op.context, ctx))) throw new Error('snapshot contains cross-scope operations');
+    const retained = this.#operations.filter(op => !sameScope(op.context, ctx));
+    const candidate = [...retained, ...scoped];
     this.#journal.commit(candidate);
     this.#operations = candidate;
-    return this.#operations.length;
+    return scoped.length;
   }
 
   get operation_count() { return this.#operations.length; }
@@ -217,10 +231,11 @@ export class BudgetModelRouterV0 {
 }
 
 export function createZeroCostRuntimeV0({ capabilities = [], broker } = {}) {
+  const selectedBroker = broker ?? new FreeFirstBroker();
   return Object.freeze({
     local: new LocalCapabilityRegistry(capabilities),
-    broker: broker ?? new FreeFirstBroker(),
-    router: new BudgetModelRouterV0({ broker: broker ?? new FreeFirstBroker() }),
+    broker: selectedBroker,
+    router: new BudgetModelRouterV0({ broker: selectedBroker }),
     contract: Object.freeze({
       environment: PREPROD,
       additional_cost_target_eur: 0,
