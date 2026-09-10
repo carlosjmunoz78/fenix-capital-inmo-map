@@ -1,7 +1,7 @@
 import {useEffect,useMemo,useState} from 'react';
 import {useLocation,useNavigate} from 'react-router-dom';
 import {FileText} from 'lucide-react';
-import {fetchAppApi,fetchEnvironmentApi,supabase,IS_PRODUCTION} from './supabase';
+import {fetchAppApi,fetchEnvironmentApi,supabase} from './supabase';
 import {anaAvatar,anaVertical} from './assets/visualAssets';
 import {directionSidebarNavigation,normalizeNavigation,type NavItem} from './masterNavigation';
 import OperationalShellFrame from './OperationalShellFrame';
@@ -17,7 +17,7 @@ function rowsFrom(data:unknown):Row[]{if(!data||typeof data!=='object')return[];
 function first(row:Row,keys:string[]){for(const k of keys){const v=row[k];if(typeof v==='string'&&v.trim())return v.trim();if(typeof v==='number')return String(v);}return'';}
 function isDirectionContext(ctx:Ctx|null){const role=(ctx?.role||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();return ctx?.actor_code==='DIR-TEST'||role.includes('direccion');}
 function initials(name:string){return name.split(/\s+/).filter(Boolean).slice(0,2).map(p=>p[0]?.toUpperCase()).join('')||'FC';}
-async function fetchReports(){const path=IS_PRODUCTION?'':'/reports';return fetchEnvironmentApi<unknown>('fenix-reports-api',path);}
+async function fetchReports(){return fetchEnvironmentApi<unknown>('fenix-reports-api','');}
 export default function InformesShell(){
  const location=useLocation(),navigate=useNavigate();const active=location.pathname.replace(/\/+$/,'')==='/informes';
  const[ready,setReady]=useState(false),[logged,setLogged]=useState(false),[theme,setTheme]=useState<Theme>(()=>(sessionStorage.getItem('fenix-theme') as Theme)||'light'),[ctx,setCtx]=useState<Ctx|null>(null),[nav,setNav]=useState<NavItem[]>([]),[rows,setRows]=useState<Row[]>([]),[status,setStatus]=useState<number|null>(null),[loading,setLoading]=useState(false),[message,setMessage]=useState(''),[query,setQuery]=useState(''),[correction,setCorrection]=useState('');
@@ -35,7 +35,7 @@ export default function InformesShell(){
  async function logout(){await supabase.auth.signOut();window.location.href=import.meta.env.BASE_URL;}
  const body=<>
   <section className="informes-ana-hero"><div className="informes-ana-photo"><img src={anaVertical} alt="Ana"/></div><div className="informes-ana-body"><span>ANA · EN ESTA PANTALLA</span><h2>Te ayudo a interpretar los informes</h2><p>Revisa únicamente los documentos disponibles en tu ámbito autorizado. Si algo no encaja, indícamelo antes de tomarlo como válido.</p></div><div className="informes-correct"><span>CORREGIR A ANA</span><h3>¿En qué me equivoco?</h3><textarea rows={4} value={correction} onChange={e=>setCorrection(e.target.value)} placeholder="Escribe aquí qué debería corregir, matizar o revisar..."/><button type="button" disabled={!correction.trim()} onClick={sendCorrection}>Preparar corrección</button></div></section>
-  <div className="informes-title"><div><small>INFORMACIÓN Y SEGUIMIENTO</small><h1>Informes</h1><p>{loading?'Cargando informes autorizados…':status===200?'Selecciona un informe disponible. Solo se muestran documentos recibidos desde la fuente autorizada.':'Lectura según permisos.'}</p></div><span className={status===200&&!loading?'ops-live ok':'ops-live'}>{loading?'Cargando…':status===200?'Datos autorizados':'PRE-PROD'}</span></div>
+  <div className="informes-title"><div><small>INFORMACIÓN Y SEGUIMIENTO</small><h1>Informes</h1><p>{loading?'Cargando informes autorizados…':status===200?'Selecciona un informe disponible. Solo se muestran documentos recibidos desde la fuente autorizada.':'Lectura según permisos.'}</p></div><span className={status===200&&!loading?'ops-live ok':'ops-live'}>{loading?'Cargando…':status===200?'Datos autorizados':status===403?'Sin acceso':'Sin conexión'}</span></div>
   <section className="informes-kpis"><article><FileText/><small>TOTAL INFORMES</small><strong>{status===200&&!loading?visible.length:'—'}</strong><span>Disponibles en tu ámbito</span></article><article><FileText/><small>CATEGORÍAS</small><strong>{status===200&&!loading?grouped.length:'—'}</strong><span>Derivadas de los registros visibles</span></article><article><FileText/><small>ÚLTIMA FECHA INFORMADA</small><strong className="informes-date">{status===200&&!loading?latest:'—'}</strong><span>Sin completar fechas ausentes</span></article></section>
   {loading&&<div className="ops-empty" data-testid="informes-loading"><strong>Cargando…</strong><span>Consultando la fuente autorizada de Informes.</span></div>}
   {!loading&&message&&<div className="ops-message" data-testid={status===403?'informes-forbidden':'informes-error'}>{message}</div>}
