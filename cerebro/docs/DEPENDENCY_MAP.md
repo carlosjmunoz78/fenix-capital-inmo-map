@@ -4,6 +4,8 @@
 
 `FACT-001 → GOV-001 → shared contracts/runtime → Phase 2 bindings → Phase 3 zero-cost platform → Phase 4 multi-company bootstrap → Phase 5 Console/Gateway → Governance V0 → persistent EVT/JOB reference`
 
+FACT-001 is the structural source of generated engine scaffolds. Its V0 E2E contract now validates all 177 canonical registry entries and all 18 generated scaffold components per engine, and accepts only exact `SCAFFOLD` registry environment. This does not activate those engines or bypass their later PREPROD/promotion dependencies.
+
 ## Existing-system preservation boundary
 
 CEREBRO code under `cerebro/` wraps and references existing systems; it does not replace their runtime contracts. Evidence status is tracked separately from binding existence in `evidence/phase2-existing-bindings-audit.json`.
@@ -51,5 +53,7 @@ Commands and chat are Gateway-mediated; direct model access is forbidden by cont
 ## Shared safety dependencies
 
 Every promoted engine must retain: contracts, permissions, tests, evaluation, tribunal, observability, backup, rollback, rebuild, measured cost, policy and PREPROD evidence. Green scaffold/reference or read-only audit status is not equivalent to autonomous production readiness.
+
+FACT-001 only emits/validates the structural declarations for these gates. Engine-specific evaluation, tribunal, tested backup/rollback and promotion evidence remain dependencies that must turn green separately before any engine can leave `SCAFFOLD`/reference state.
 
 Before wiring persistent `EVT-001`/`JOB-001` into `SharedRuntime`, require explicit OLD-vs-NEW comparison, rollback path, dependency review and multi-process/shared-worker safety design. The current persistent adapters remain parallel by design.
