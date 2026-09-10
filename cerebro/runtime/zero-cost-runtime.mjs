@@ -101,6 +101,17 @@ function assertNonNegativeCost(value, label = 'cost_eur') {
   return value;
 }
 
+function optionalCost(value, label = 'cost_eur') {
+  return value === undefined ? 0 : assertNonNegativeCost(value, label);
+}
+
+function assertNoTradingAccess(value, label) {
+  if (value === undefined) return false;
+  if (typeof value !== 'boolean') throw new TypeError(`${label} must be boolean`);
+  if (value) throw new Error('Trading access is forbidden in zero-cost runtime V0');
+  return false;
+}
+
 function capabilityOrder(a, b) {
   return Number(a.company_id === 'GLOBAL') - Number(b.company_id === 'GLOBAL')
     || Number(a.engine_id === 'GLOBAL') - Number(b.engine_id === 'GLOBAL')
@@ -111,7 +122,7 @@ function capabilityOrder(a, b) {
 
 function normalizeCapability(input) {
   const value = plain(input, 'capability');
-  if (value.trading_access === true) throw new Error('Trading access is forbidden in zero-cost runtime V0');
+  assertNoTradingAccess(value.trading_access, 'capability.trading_access');
   const health = value.health ?? 'AVAILABLE';
   if (!['AVAILABLE','DEGRADED','UNAVAILABLE'].includes(health)) throw new Error('unsupported capability health');
   const capabilities = Array.isArray(value.capabilities) ? value.capabilities.map((x, i) => nonEmpty(x, `capabilities[${i}]`)) : [];
@@ -126,7 +137,7 @@ function normalizeCapability(input) {
     kind: nonEmpty(value.kind ?? 'local', 'kind'),
     priority: Number.isSafeInteger(value.priority) ? value.priority : 100,
     health,
-    cost_eur: assertNonNegativeCost(value.cost_eur ?? 0),
+    cost_eur: optionalCost(value.cost_eur, 'capability.cost_eur'),
     capabilities,
     limits: clone(value.limits ?? {})
   });
@@ -176,7 +187,7 @@ function normalizeOption(input) {
   const value = plain(input, 'option');
   const route_type = nonEmpty(value.route_type, 'option.route_type');
   if (!FREE_RANK.has(route_type)) throw new Error(`unsupported route_type: ${route_type}`);
-  if (value.trading_access === true) throw new Error('Trading access is forbidden in zero-cost runtime V0');
+  assertNoTradingAccess(value.trading_access, 'option.trading_access');
   const confidence = value.confidence === undefined ? 1 : value.confidence;
   if (!Number.isFinite(confidence) || confidence < 0 || confidence > 1) throw new TypeError('option.confidence must be a finite number between 0 and 1');
   return Object.freeze({
@@ -184,7 +195,7 @@ function normalizeOption(input) {
     route_type,
     available: strictOptionalBoolean(value.available, 'option.available', true),
     equivalent: strictOptionalBoolean(value.equivalent, 'option.equivalent', true),
-    cost_eur: assertNonNegativeCost(value.cost_eur ?? 0),
+    cost_eur: optionalCost(value.cost_eur, 'option.cost_eur'),
     confidence,
     provider: value.provider ?? null,
     metadata: clone(value.metadata ?? {})
@@ -229,12 +240,13 @@ function denseArrayValues(input, label) {
 }
 
 export class LocalOffloadStore {
-  #journal; #kind; #operations;
+  #journal; #kind; #operations; #preparedRestores;
   constructor({ file_path, kind, environment }) {
     const env = environment === undefined ? PREPROD : environment;
     if (env !== PREPROD) throw new Error('offload store V0 accepts exact PREPROD only');
     this.#kind = nonEmpty(kind, 'kind');
     if (!['DBOFF-001','STOROFF-001','AIBUD-001'].includes(this.#kind)) throw new Error('unsupported offload kind');
+    this.#preparedRestores = new WeakMap();
     this.#journal = new AtomicV8Journal({ file_path:nonEmpty(file_path, 'file_path'), kind:this.#kind });
     const loaded = this.#journal.load();
     if (!Array.isArray(loaded)) throw new Error('offload journal payload must be an array');
@@ -270,13 +282,21 @@ export class LocalOffloadStore {
     const scoped = denseArrayValues(snapshot, 'snapshot').map(op => validateOperation(op, this.#kind));
     if (scoped.some(op => !sameScope(op.context, ctx))) throw new Error('snapshot contains cross-scope operations');
     const retained = this.#operations.filter(op => !sameScope(op.context, ctx));
-    return Object.freeze({ scoped:clone(scoped), candidate:clone([...retained, ...scoped]) });
+    const internal = Object.freeze({ scoped:clone(scoped), candidate:clone([...retained, ...scoped]) });
+    const token = Object.freeze({ kind:this.#kind });
+    this.#preparedRestores.set(token, internal);
+    return token;
   }
   commitPrepared(prepared) {
-    if (!prepared || !Array.isArray(prepared.candidate) || !Array.isArray(prepared.scoped)) throw new TypeError('prepared restore is invalid');
-    this.#journal.commit(prepared.candidate);
-    this.#operations = clone(prepared.candidate);
-    return prepared.scoped.length;
+    if (!prepared || typeof prepared !== 'object' || types.isProxy(prepared)) throw new TypeError('prepared restore is invalid');
+    const internal = this.#preparedRestores.get(prepared);
+    if (!internal) throw new TypeError('prepared restore is invalid or was not issued by this store');
+    this.#preparedRestores.delete(prepared);
+    const candidate = denseArrayValues(internal.candidate, 'prepared candidate').map(op => validateOperation(op, this.#kind));
+    const scoped = denseArrayValues(internal.scoped, 'prepared scoped').map(op => validateOperation(op, this.#kind));
+    this.#journal.commit(candidate);
+    this.#operations = clone(candidate);
+    return scoped.length;
   }
   recoverRestore({ context, snapshot }) {
     this.#reload();
