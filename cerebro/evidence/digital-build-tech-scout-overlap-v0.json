@@ -100,10 +100,10 @@
     },
     {
       "capability": "multimedia_text_image_photo_design_video_audio_voice_avatar_presentations",
-      "primary_engines": ["MKT-001", "FACT-001"],
+      "primary_engines": ["MKT-001", "FACT-001", "VOICE-001"],
       "supporting_engines": ["INT-001", "VEN-001", "POL-001", "SEC-001"],
       "coverage": "PARTIAL",
-      "gap": "The addendum defines reusable multimedia pipelines, but the 177-engine master does not require one new engine identity for each media type; these should initially be modeled as versioned capabilities/tools governed by existing marketing/factory/integration/vendor engines.",
+      "gap": "VOICE-001 is now explicitly included as the most direct canonical overlap for audio/voice, without upgrading its implementation state. The addendum defines broader reusable multimedia pipelines, but the 177-engine master does not require one new engine identity for each media type; image/photo/design/video/avatar/presentation capabilities should initially be modeled as versioned capabilities/tools governed by existing marketing/factory/integration/vendor engines unless future gap evidence proves a new logical engine is necessary.",
       "action": "MODEL_AS_VERSIONED_CAPABILITIES_NOT_NEW_ENGINES",
       "new_engine_id_required": false
     },
