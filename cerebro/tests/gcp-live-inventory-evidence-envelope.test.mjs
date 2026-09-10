@@ -42,14 +42,16 @@ test('allowlist and inventory domains are exact', () => {
   assert.deepEqual(cfg.required_inventory_domains, DOMAINS);
 });
 
-test('coverage and resource records are explicitly separated', () => {
+test('coverage and resource records are explicitly separated and resources are unique across domains', () => {
   const m = cfg.record_model;
   assert.deepEqual(m.record_kind_values, ['COVERAGE','RESOURCE']);
   assert.equal(m.coverage_records_collection, 'coverage_records');
   assert.equal(m.resource_records_collection, 'resource_records');
   assert.equal(m.collections_must_be_separate, true);
   assert.deepEqual(m.coverage_uniqueness_key, ['project_id','domain']);
-  assert.deepEqual(m.resource_uniqueness_key, ['project_id','domain','resource_ref']);
+  assert.deepEqual(m.resource_uniqueness_key, ['project_id','resource_ref']);
+  assert.equal(m.resource_identity_must_be_unique_across_domains, true);
+  assert.equal(m.contradictory_classification_for_same_resource_forbidden, true);
 });
 
 test('coverage contract requires all 76 unique project-domain pairs, including gaps', () => {
@@ -87,7 +89,7 @@ test('capture contract preserves canonical context, source provenance and stable
   assert.equal(c.resource_records_must_not_count_toward_76_pair_coverage, true);
 });
 
-test('resource records may repeat project-domain but remain unique by resource_ref', () => {
+test('resource records may repeat project-domain only when resource identity differs, and the same resource cannot move domains', () => {
   const records = [
     { record_kind:'RESOURCE', project_id:'fenix-trading-lab', domain:'compute', resource_ref:'projects/fenix-trading-lab/zones/europe-west1-b/instances/training-a', classification_status:'TRAINING' },
     { record_kind:'RESOURCE', project_id:'fenix-trading-lab', domain:'compute', resource_ref:'projects/fenix-trading-lab/zones/europe-west1-b/instances/trading-a', classification_status:'TRADING' },
@@ -95,12 +97,14 @@ test('resource records may repeat project-domain but remain unique by resource_r
   assert.equal(records[0].project_id, records[1].project_id);
   assert.equal(records[0].domain, records[1].domain);
   assert.notEqual(records[0].resource_ref, records[1].resource_ref);
-  assert.ok(records.every((r) => r.record_kind === 'RESOURCE'));
 
-  const coveragePairs = new Set([{record_kind:'COVERAGE', project_id:'fenix-trading-lab', domain:'compute', resource_ref:'__DOMAIN__'}]
-    .filter((r) => r.record_kind === 'COVERAGE')
-    .map((r) => `${r.project_id}::${r.domain}`));
-  assert.equal(coveragePairs.size, 1);
+  const sameResourceAcrossDomains = [
+    { project_id:'fenix-trading-lab', domain:'compute', resource_ref:'projects/fenix-trading-lab/global/resources/shared-a', classification_status:'TRAINING' },
+    { project_id:'fenix-trading-lab', domain:'resource_consumers', resource_ref:'projects/fenix-trading-lab/global/resources/shared-a', classification_status:'TRADING' },
+  ];
+  const identityKeys = sameResourceAcrossDomains.map((r) => `${r.project_id}::${r.resource_ref}`);
+  assert.equal(new Set(identityKeys).size, 1);
+  assert.notEqual(sameResourceAcrossDomains[0].classification_status, sameResourceAcrossDomains[1].classification_status);
 });
 
 test('capture is fail-closed for secrets, permission gaps, API enablement and mutations', () => {
@@ -116,7 +120,6 @@ test('capture is fail-closed for secrets, permission gaps, API enablement and mu
 test('resource classification supports distinct Training and Trading resources in the same domain', () => {
   const c = cfg.capture_contract;
   assert.deepEqual(c.classification_status_values, ['UNCLASSIFIED','TRAINING','TRADING','APP_CRM','SHARED_REQUIRES_REVIEW','OTHER']);
-
   const g = cfg.fenix_trading_lab_guard;
   assert.equal(g.resource_ownership_status, 'UNKNOWN_REQUIRES_AUDIT');
   assert.equal(g.classification_required_per_resource, true);
