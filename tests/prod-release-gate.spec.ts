@@ -7,8 +7,9 @@ test('gate PROD exige promoción explícita y entorno separado',()=>{
   expect(gate).toContain('Ninguna versión pasa a PROD por automatismo');
   expect(gate).toContain('orden explícita');
   expect(gate).toContain('configuración PROD, dominio/hosting, backend, secretos y almacenamiento');
-  expect(gate).toContain('No tocar `main`, PROD, WordPress ni Supabase PROD');
-  expect(gate).toContain('No fusionar PR #2 sin orden explícita');
+  expect(gate).toContain('No tocar `main`, WordPress ni ejecutar cambios destructivos en Supabase PROD');
+  expect(gate).toContain('No promover con CI rojo ni debilitar pruebas');
+  expect(gate).toContain('CRM antiguo intacto como respaldo');
 });
 
 test('workflow APP PRE-PROD retirado y gate activo usa candidato PROD aislado',()=>{
