@@ -62,6 +62,7 @@ import VisitadoresShell from './VisitadoresShell';
 import VisitadorDetailShell from './VisitadorDetailShell';
 import EconomiaShell from './EconomiaShell';
 import InformesShell from './InformesShell';
+import InformesDailyActivityGuard from './InformesDailyActivityGuard';
 import SearchShell from './SearchShell';
 import NotificationsShell from './NotificationsShell';
 import NotariasShell from './NotariasShell';
@@ -201,6 +202,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <VisitadorDetailShell />
       <EconomiaShell />
       <InformesShell />
+      <InformesDailyActivityGuard />
       <SearchShell />
       <NotificationsShell />
       <NotariasShell />
