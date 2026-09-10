@@ -1,4 +1,5 @@
 import { types } from 'node:util';
+import { serialize, deserialize } from 'node:v8';
 import { AtomicV8Journal } from './persistent-runtime.mjs';
 
 const PREPROD = 'PREPROD';
@@ -46,7 +47,10 @@ function contextOf(value) {
   });
 }
 
-function clone(value) { return structuredClone(value); }
+function clone(value) {
+  try { return deserialize(serialize(value)); }
+  catch (error) { throw new TypeError(`value must be durably cloneable without shared memory: ${String(error)}`); }
+}
 
 function sameScope(a, b) {
   return a.company_id === b.company_id && a.engine_id === b.engine_id && a.environment === b.environment && a.version === b.version;
@@ -55,6 +59,14 @@ function sameScope(a, b) {
 function assertNonNegativeCost(value, label = 'cost_eur') {
   if (!Number.isFinite(value) || value < 0) throw new TypeError(`${label} must be a finite non-negative number`);
   return value;
+}
+
+function capabilityOrder(a, b) {
+  return Number(a.company_id === 'GLOBAL') - Number(b.company_id === 'GLOBAL')
+    || Number(a.engine_id === 'GLOBAL') - Number(b.engine_id === 'GLOBAL')
+    || Number(a.version === 'GLOBAL') - Number(b.version === 'GLOBAL')
+    || a.priority - b.priority
+    || a.capability_id.localeCompare(b.capability_id);
 }
 
 function normalizeCapability(input) {
@@ -93,7 +105,7 @@ export class LocalCapabilityRegistry {
       .filter(item => item.company_id === 'GLOBAL' || item.company_id === ctx.company_id)
       .filter(item => item.engine_id === ctx.engine_id || item.engine_id === 'GLOBAL')
       .filter(item => item.version === 'GLOBAL' || item.version === ctx.version)
-      .sort((a, b) => Number(a.version === 'GLOBAL') - Number(b.version === 'GLOBAL') || a.priority - b.priority || a.capability_id.localeCompare(b.capability_id))
+      .sort(capabilityOrder)
       .map(clone);
   }
   select({ context, requires = [] }) {
@@ -108,7 +120,7 @@ export class LocalCapabilityRegistry {
       .filter(item => item.health === 'AVAILABLE')
       .filter(item => item.cost_eur === 0)
       .filter(item => required.every(cap => item.capabilities.includes(cap)))
-      .sort((a, b) => Number(a.version === 'GLOBAL') - Number(b.version === 'GLOBAL') || a.priority - b.priority || a.capability_id.localeCompare(b.capability_id));
+      .sort(capabilityOrder);
     if (!candidates[0]) return Object.freeze({ status:'UNAVAILABLE', selected:null, reason:'NO_ZERO_COST_LOCAL_CAPABILITY' });
     return Object.freeze({ status:'AVAILABLE', selected:clone(candidates[0]), reason:'ZERO_COST_LOCAL_CAPABILITY' });
   }
@@ -170,6 +182,12 @@ export class LocalOffloadStore {
     if (!Array.isArray(loaded)) throw new Error('offload journal payload must be an array');
     this.#operations = loaded.map(op => validateOperation(op, this.#kind));
   }
+  #reload() {
+    this.#journal = new AtomicV8Journal({ file_path:this.#journal.file_path, kind:this.#kind });
+    const loaded = this.#journal.load();
+    if (!Array.isArray(loaded)) throw new Error('offload journal payload must be an array');
+    this.#operations = loaded.map(op => validateOperation(op, this.#kind));
+  }
   put({ context, key, value }) {
     const op = validateOperation({ op:'put', context, key, value }, this.#kind);
     const candidate = [...this.#operations, clone(op)];
@@ -202,6 +220,10 @@ export class LocalOffloadStore {
     this.#journal.commit(prepared.candidate);
     this.#operations = clone(prepared.candidate);
     return prepared.scoped.length;
+  }
+  recoverRestore({ context, snapshot }) {
+    this.#reload();
+    return this.restore({ context, snapshot });
   }
   restore({ context, snapshot }) { return this.commitPrepared(this.prepareRestore({ context, snapshot })); }
   get operation_count() { return this.#operations.length; }
