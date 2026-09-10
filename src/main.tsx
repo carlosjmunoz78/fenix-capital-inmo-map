@@ -90,6 +90,7 @@ import ExpedienteKnowledgeGuard from './ExpedienteKnowledgeGuard';
 import ExpedienteCommercialTermsGuard from './ExpedienteCommercialTermsGuard';
 import VisitasShell from './VisitasShell';
 import CommunicationsShell from './CommunicationsShell';
+import ChatShell from './ChatShell';
 import DetailShellGate from './DetailShellGate';
 import TaskCreateShell from './TaskCreateShell';
 import OperationalRecordDetailGate from './OperationalRecordDetailGate';
@@ -211,6 +212,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <AnaGovernance />
       <VisitasShell />
       <CommunicationsShell />
+      <ChatShell />
       <DetailShellGate />
       <TaskCreateShell />
       <OperationalRecordDetailGate />
