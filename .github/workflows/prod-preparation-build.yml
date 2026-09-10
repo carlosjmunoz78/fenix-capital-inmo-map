@@ -64,7 +64,7 @@ jobs:
           VITE_FENIX_ENV: prod
           VITE_SUPABASE_URL: https://prod.invalid
           VITE_SUPABASE_PUBLISHABLE_KEY: prod-build-validation-placeholder
-        run: npx playwright test tests/prod-candidate-browser.spec.ts tests/prod-release-gate.spec.ts tests/prod-runtime-config.spec.ts tests/prod-canonical-write-contracts.spec.ts tests/bancos-prod-bank-code-regression.spec.ts tests/bank-contacts-prod-runtime.spec.ts
+        run: npx playwright test tests/prod-candidate-browser.spec.ts tests/prod-release-gate.spec.ts tests/prod-runtime-config.spec.ts tests/prod-canonical-write-contracts.spec.ts tests/bancos-prod-bank-code-regression.spec.ts tests/bank-contacts-prod-runtime.spec.ts tests/prod-no-active-preprod-dependency.spec.ts tests/profile-user-admin-contract.spec.ts
 
       - name: Upload validation report
         if: always()
