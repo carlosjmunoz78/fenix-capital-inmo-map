@@ -47,7 +47,36 @@ function contextOf(value) {
   });
 }
 
+function assertNoSharedMemory(value, seen = new Set()) {
+  if (value === null || (typeof value !== 'object' && typeof value !== 'function')) return;
+  if (seen.has(value)) return;
+  seen.add(value);
+  if (types.isProxy(value)) throw new TypeError('value must not contain Proxy objects');
+  if (types.isSharedArrayBuffer(value)) throw new TypeError('SharedArrayBuffer is forbidden in durable zero-cost state');
+  if (ArrayBuffer.isView(value)) {
+    if (types.isSharedArrayBuffer(value.buffer)) throw new TypeError('SharedArrayBuffer-backed views are forbidden in durable zero-cost state');
+    return;
+  }
+  if (types.isMap(value)) {
+    Map.prototype.forEach.call(value, (mapValue, mapKey) => {
+      assertNoSharedMemory(mapKey, seen);
+      assertNoSharedMemory(mapValue, seen);
+    });
+    return;
+  }
+  if (types.isSet(value)) {
+    Set.prototype.forEach.call(value, setValue => assertNoSharedMemory(setValue, seen));
+    return;
+  }
+  const descriptors = Object.getOwnPropertyDescriptors(value);
+  for (const descriptor of Object.values(descriptors)) {
+    if (descriptor.get || descriptor.set) throw new TypeError('value must not contain accessors');
+    if ('value' in descriptor) assertNoSharedMemory(descriptor.value, seen);
+  }
+}
+
 function clone(value) {
+  assertNoSharedMemory(value);
   try { return deserialize(serialize(value)); }
   catch (error) { throw new TypeError(`value must be durably cloneable without shared memory: ${String(error)}`); }
 }
