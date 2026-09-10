@@ -1,0 +1,64 @@
+{
+  "evidence_id": "CEREBRO-FACT001-E2E-CLOSURE-V0",
+  "date": "2026-09-10",
+  "status": "DOCUMENTED_PARTIAL",
+  "scope": {
+    "engine_id": "FACT-001",
+    "canonical_engine_count": 177,
+    "environment": "PREPROD",
+    "company_scope": "MULTI_COMPANY"
+  },
+  "basis": {
+    "factory": "cerebro/factory.mjs",
+    "registry": "cerebro/registry/engine-registry.seed.json",
+    "existing_contract_tests": "cerebro/tests/factory.test.mjs",
+    "e2e_closure_test": "cerebro/tests/factory-e2e-closure.test.mjs"
+  },
+  "required_scaffold": {
+    "file_count": 18,
+    "components": [
+      "manifest",
+      "config",
+      "data_contracts",
+      "permissions",
+      "policies",
+      "events",
+      "jobs",
+      "api",
+      "tests",
+      "evaluation",
+      "tribunal",
+      "observability",
+      "finops_costs",
+      "backup",
+      "rollback",
+      "rebuild",
+      "training_hooks",
+      "documentation"
+    ]
+  },
+  "safety_gates": {
+    "required_context": ["company_id", "engine_id", "environment", "version"],
+    "deny_by_default": true,
+    "cross_company_access": "deny",
+    "generated_enabled_default": false,
+    "autonomous_prod": false,
+    "tribunal_required_for_prod": true,
+    "additional_cost_target_eur": 0,
+    "deterministic_first": true,
+    "gateway_only_api": true,
+    "trading_scope_added": false
+  },
+  "closure_rule": "Do not mark FACT-001 E2E green until this branch has successful exact-head CEREBRO Factory PREPROD, successful App PREPROD non-regression when available at zero additional cost, an exact-head Codex review with zero open P1/P2, and all 177 generated scaffolds satisfy the semantic E2E contract.",
+  "gates": {
+    "factory_ci": "PENDING_EXACT_HEAD",
+    "app_non_regression": "PENDING_EXACT_HEAD",
+    "codex_review": "PENDING_EXACT_HEAD",
+    "p1_p2_open": "UNKNOWN_PENDING_REVIEW"
+  },
+  "notes": [
+    "This verifies the Factory V0 structural generation contract, not operational autonomy of the 177 generated engines.",
+    "Backup and rollback are deliberately generated as not yet tested for each new engine; promotion remains forbidden until their engine-specific gates pass.",
+    "No merge to main or PROD deployment is part of this closure."
+  ]
+}
