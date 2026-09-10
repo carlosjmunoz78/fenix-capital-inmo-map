@@ -60,3 +60,14 @@ test('Contactos PROD conserva todos los teléfonos y correos y abre la ficha cre
   expect(detail).toContain("textList(row||undefined,['telefonos']");
   expect(detail).toContain("textList(row||undefined,['emails']");
 });
+
+test('Contacto bancario PROD usa el detalle canónico y B2B no muestra PRE-PROD en producción',()=>{
+  const runtime=fs.readFileSync(path.resolve('src/notionRuntime.ts'),'utf8');
+  const b2bDetail=fs.readFileSync(path.resolve('src/B2BContactDetailShell.tsx'),'utf8');
+  const b2bCreate=fs.readFileSync(path.resolve('src/B2BContactCreateShell.tsx'),'utf8');
+  expect(runtime).toContain("pathname.match(/^\\/contactos-bancarios\\/([^/]+)$/)");
+  expect(runtime).toContain("fetchAppApi<T>(`/contactos/${encodeURIComponent(id)}`)");
+  expect(b2bDetail).toContain("IS_PRODUCTION?'OPERATIVO':'PRE-PROD'");
+  expect(b2bCreate).toContain("IS_PRODUCTION?'OPERATIVO':'PRE-PROD'");
+  expect(b2bDetail).toContain('b2b-contact-loading');
+});
