@@ -20,8 +20,10 @@ const DOMAINS = [
 ];
 
 const REQUIRED_CAPTURE_FIELDS = [
-  'capture_id','captured_at','company_id','engine_id','environment','version','project_id','domain','command_template_id_or_ref','principal_ref','result_status','evidence_ref','raw_payload_stored','secret_payload_present','classification_status'
+  'capture_id','captured_at','company_id','engine_id','environment','version','project_id','domain','command_template_id_or_ref','principal_ref','result_status','evidence_ref','raw_payload_stored','secret_payload_present','resource_ref','classification_status'
 ];
+
+const RESULT_STATUS = ['SUCCESS','PERMISSION_DENIED','API_UNAVAILABLE','EMPTY','ERROR'];
 
 test('live inventory envelope is SCAFFOLD read-only capture and zero-cost', () => {
   assert.equal(cfg.status, 'DEFINED_NOT_BUILT');
@@ -40,12 +42,33 @@ test('allowlist and inventory domains are exact', () => {
   assert.deepEqual(cfg.required_inventory_domains, DOMAINS);
 });
 
-test('capture contract preserves canonical context and source provenance', () => {
+test('coverage contract requires all 76 unique project-domain pairs, including gaps', () => {
+  const c = cfg.coverage_contract;
+  assert.equal(c.project_count, PROJECTS.length);
+  assert.equal(c.domain_count, DOMAINS.length);
+  assert.equal(c.required_project_domain_pairs, PROJECTS.length * DOMAINS.length);
+  assert.equal(c.required_project_domain_pairs, 76);
+  assert.equal(c.exactly_one_domain_coverage_record_per_pair, true);
+  assert.equal(c.accept_envelope_only_when_all_pairs_present, true);
+  assert.equal(c.missing_pairs_forbidden, true);
+  assert.equal(c.duplicate_pairs_forbidden, true);
+  assert.equal(c.non_success_pairs_must_still_be_recorded, true);
+  assert.deepEqual(c.allowed_coverage_result_status, RESULT_STATUS);
+
+  const expectedPairs = new Set(PROJECTS.flatMap((project) => DOMAINS.map((domain) => `${project}::${domain}`)));
+  assert.equal(expectedPairs.size, 76);
+});
+
+test('capture contract preserves canonical context, source provenance and stable resource identity', () => {
   const c = cfg.capture_contract;
   assert.deepEqual(c.required_fields_per_capture, REQUIRED_CAPTURE_FIELDS);
   assert.equal(c.capture_must_reference_source_command, true);
   assert.equal(c.capture_must_be_timestamped, true);
   assert.equal(c.principal_ref_only, true);
+  assert.equal(c.resource_ref_required_for_each_resource_record, true);
+  assert.equal(c.one_classification_record_per_returned_resource, true);
+  assert.equal(c.domain_only_record_resource_ref_sentinel, '__DOMAIN__');
+  assert.equal(c.domain_sentinel_must_not_be_treated_as_real_resource, true);
 });
 
 test('capture is fail-closed for secrets, permission gaps, API enablement and mutations', () => {
@@ -55,12 +78,21 @@ test('capture is fail-closed for secrets, permission gaps, API enablement and mu
   assert.equal(c.permission_gaps_must_be_recorded_not_bypassed, true);
   assert.equal(c.api_enablement_forbidden, true);
   assert.equal(c.mutation_forbidden, true);
-  assert.deepEqual(c.result_status_values, ['SUCCESS','PERMISSION_DENIED','API_UNAVAILABLE','EMPTY','ERROR']);
+  assert.deepEqual(c.result_status_values, RESULT_STATUS);
 });
 
-test('resource classification includes Training and Trading separation states', () => {
+test('resource classification supports distinct Training and Trading resources in the same domain', () => {
   const c = cfg.capture_contract;
   assert.deepEqual(c.classification_status_values, ['UNCLASSIFIED','TRAINING','TRADING','APP_CRM','SHARED_REQUIRES_REVIEW','OTHER']);
+
+  const example = [
+    { project_id: 'fenix-trading-lab', domain: 'compute', resource_ref: 'projects/fenix-trading-lab/zones/europe-west1-b/instances/training-a', classification_status: 'TRAINING' },
+    { project_id: 'fenix-trading-lab', domain: 'compute', resource_ref: 'projects/fenix-trading-lab/zones/europe-west1-b/instances/trading-a', classification_status: 'TRADING' },
+  ];
+  assert.notEqual(example[0].resource_ref, example[1].resource_ref);
+  assert.equal(example[0].classification_status, 'TRAINING');
+  assert.equal(example[1].classification_status, 'TRADING');
+
   const g = cfg.fenix_trading_lab_guard;
   assert.equal(g.resource_ownership_status, 'UNKNOWN_REQUIRES_AUDIT');
   assert.equal(g.classification_required_per_resource, true);
