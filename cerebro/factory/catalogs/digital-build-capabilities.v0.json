@@ -1,0 +1,93 @@
+{
+  "catalog_id": "FACT-001-DIGITAL-BUILD-CAPABILITY-CATALOG-V0",
+  "version": "0.1.0",
+  "owner_engine_id": "FACT-001",
+  "environment": "SCAFFOLD",
+  "required_context": ["company_id", "engine_id", "environment", "version"],
+  "additional_cost_target_eur": 0,
+  "autonomous_prod": false,
+  "prod_writes": false,
+  "trading_access": false,
+  "capabilities": [
+    {
+      "capability_id": "cap:web-build",
+      "version": "0.1.0",
+      "status": "SCAFFOLD",
+      "engine_bindings": ["WEB-001", "FACT-001", "ARCH-001", "SEO-001", "SEC-001"],
+      "templates": [{"template_id":"tpl:web-static-safe-v0","version":"0.1.0","priority":10,"enabled":false,"autonomous_prod":false,"prod_writes":false,"trading_access":false,"additional_cost_target_eur":0}],
+      "skills": [{"skill_id":"skill:web-stack-select-v0","version":"0.1.0","execution":"DETERMINISTIC_FIRST"}]
+    },
+    {
+      "capability_id": "cap:wordpress-build",
+      "version": "0.1.0",
+      "status": "DEFINED_NOT_BUILT",
+      "engine_bindings": ["WEB-001", "FACT-001", "MIG-001", "SEO-001"],
+      "templates": [{"template_id":"tpl:wordpress-wrapper-safe-v0","version":"0.1.0","priority":10,"enabled":false,"autonomous_prod":false,"prod_writes":false,"trading_access":false,"additional_cost_target_eur":0}],
+      "skills": [{"skill_id":"skill:wordpress-capability-plan-v0","version":"0.1.0","execution":"DETERMINISTIC_FIRST"}]
+    },
+    {
+      "capability_id": "cap:ecommerce-build",
+      "version": "0.1.0",
+      "status": "DEFINED_NOT_BUILT",
+      "engine_bindings": ["WEB-001", "FACT-001", "INT-001", "MIG-001", "POL-001"],
+      "templates": [{"template_id":"tpl:ecommerce-wrapper-safe-v0","version":"0.1.0","priority":10,"enabled":false,"autonomous_prod":false,"prod_writes":false,"trading_access":false,"additional_cost_target_eur":0}],
+      "skills": [{"skill_id":"skill:ecommerce-stack-select-v0","version":"0.1.0","execution":"DETERMINISTIC_FIRST"}]
+    },
+    {
+      "capability_id": "cap:app-pwa-mobile-desktop",
+      "version": "0.1.0",
+      "status": "SCAFFOLD",
+      "engine_bindings": ["APP-001", "APPBOOT-001", "FACT-001", "ARCH-001", "MIG-001"],
+      "templates": [{"template_id":"tpl:app-pwa-safe-v0","version":"0.1.0","priority":10,"enabled":false,"autonomous_prod":false,"prod_writes":false,"trading_access":false,"additional_cost_target_eur":0}],
+      "skills": [{"skill_id":"skill:app-target-select-v0","version":"0.1.0","execution":"DETERMINISTIC_FIRST"}]
+    },
+    {
+      "capability_id": "cap:plugin-theme-module-component",
+      "version": "0.1.0",
+      "status": "SCAFFOLD",
+      "engine_bindings": ["FACT-001", "WEB-001", "APPBOOT-001", "INT-001", "SEC-001"],
+      "templates": [{"template_id":"tpl:component-extension-safe-v0","version":"0.1.0","priority":10,"enabled":false,"autonomous_prod":false,"prod_writes":false,"trading_access":false,"additional_cost_target_eur":0}],
+      "skills": [{"skill_id":"skill:extension-contract-plan-v0","version":"0.1.0","execution":"DETERMINISTIC_FIRST"}]
+    },
+    {
+      "capability_id": "cap:integration-api-webhook-worker-job",
+      "version": "0.1.0",
+      "status": "SCAFFOLD",
+      "engine_bindings": ["INT-001", "API-001", "EVT-001", "JOB-001", "FACT-001", "SEC-001"],
+      "templates": [{"template_id":"tpl:integration-worker-safe-v0","version":"0.1.0","priority":10,"enabled":false,"autonomous_prod":false,"prod_writes":false,"trading_access":false,"additional_cost_target_eur":0}],
+      "skills": [{"skill_id":"skill:integration-contract-plan-v0","version":"0.1.0","execution":"DETERMINISTIC_FIRST"}]
+    },
+    {
+      "capability_id": "cap:automation-build",
+      "version": "0.1.0",
+      "status": "SCAFFOLD",
+      "engine_bindings": ["AUTBOOT-001", "JOB-001", "EVT-001", "FACT-001", "POL-001", "HEX-001"],
+      "templates": [{"template_id":"tpl:automation-safe-v0","version":"0.1.0","priority":10,"enabled":false,"autonomous_prod":false,"prod_writes":false,"trading_access":false,"additional_cost_target_eur":0}],
+      "skills": [{"skill_id":"skill:automation-route-plan-v0","version":"0.1.0","execution":"DETERMINISTIC_FIRST"}]
+    },
+    {
+      "capability_id": "cap:content-multimedia",
+      "version": "0.1.0",
+      "status": "DEFINED_NOT_BUILT",
+      "engine_bindings": ["MKT-001", "FACT-001", "VOICE-001", "INT-001", "VEN-001", "SEC-001"],
+      "templates": [{"template_id":"tpl:content-multimedia-safe-v0","version":"0.1.0","priority":10,"enabled":false,"autonomous_prod":false,"prod_writes":false,"trading_access":false,"additional_cost_target_eur":0}],
+      "skills": [{"skill_id":"skill:media-capability-route-v0","version":"0.1.0","execution":"DETERMINISTIC_FIRST"}]
+    },
+    {
+      "capability_id": "cap:deployment-resilience",
+      "version": "0.1.0",
+      "status": "DEFINED_NOT_BUILT",
+      "engine_bindings": ["COMP-DEP-001", "MIG-001", "FF-001", "CAN-001", "DR-001", "RBLD-001", "BCP-001", "COMP-BKP-001"],
+      "templates": [{"template_id":"tpl:deployment-resilience-safe-v0","version":"0.1.0","priority":10,"enabled":false,"autonomous_prod":false,"prod_writes":false,"trading_access":false,"additional_cost_target_eur":0}],
+      "skills": [{"skill_id":"skill:deployment-plan-v0","version":"0.1.0","execution":"DETERMINISTIC_FIRST"}]
+    },
+    {
+      "capability_id": "cap:technology-scout",
+      "version": "0.1.0",
+      "status": "DEFINED_NOT_BUILT",
+      "engine_bindings": ["INN-001", "OPP-001", "VEN-001", "VREP-001", "INT-001", "OBS-001", "RSH-001", "DEC-001", "FINOPS-001", "SEC-001", "ADR-001"],
+      "templates": [{"template_id":"tpl:technology-scout-safe-v0","version":"0.1.0","priority":10,"enabled":false,"autonomous_prod":false,"prod_writes":false,"trading_access":false,"additional_cost_target_eur":0}],
+      "skills": [{"skill_id":"skill:technology-scout-compare-v0","version":"0.1.0","execution":"DETERMINISTIC_FIRST"}]
+    }
+  ]
+}
