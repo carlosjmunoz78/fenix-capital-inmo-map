@@ -74,6 +74,20 @@ test('LOCAL-001 fails closed for degraded/paid/non-PREPROD or Proxy capability',
   assert.equal(trapCalls, 0);
 });
 
+test('LOCAL-001 rejects null cost and non-boolean trading_access fail-closed', () => {
+  assert.throws(() => new LocalCapabilityRegistry([
+    { capability_id:'null-cost', company_id:'fenix', engine_id:'SEO-001', version:'0.1.0', cost_eur:null }
+  ]), /finite non-negative number/);
+  for (const trading_access of ['true', 1, null]) {
+    assert.throws(() => new LocalCapabilityRegistry([
+      { capability_id:'bad-trading', company_id:'fenix', engine_id:'SEO-001', version:'0.1.0', trading_access }
+    ]), /boolean/);
+  }
+  assert.doesNotThrow(() => new LocalCapabilityRegistry([
+    { capability_id:'safe', company_id:'fenix', engine_id:'SEO-001', version:'0.1.0', trading_access:false }
+  ]));
+});
+
 test('FREE-001 gives zero-cost precedence across route categories', () => {
   const result = new FreeFirstBroker().resolve({ context, options:[
     { option_id:'early-paid', route_type:'local_model', cost_eur:0.01, equivalent:true },
@@ -87,6 +101,20 @@ test('FREE-001 requires a real boolean for money approval', () => {
   assert.throws(() => new FreeFirstBroker().resolve({ context, options:[
     { option_id:'paid', route_type:'paid_provider', cost_eur:0.01, equivalent:true }
   ], money_limit_approved:'false' }), /boolean/);
+});
+
+test('FREE-001 rejects null option cost and non-boolean trading_access fail-closed', () => {
+  assert.throws(() => new FreeFirstBroker().resolve({ context, options:[
+    { option_id:'unknown-cost', route_type:'existing_provider', cost_eur:null, equivalent:true }
+  ]}), /finite non-negative number/);
+  for (const trading_access of ['true', 1, null]) {
+    assert.throws(() => new FreeFirstBroker().resolve({ context, options:[
+      { option_id:'bad-trading', route_type:'deterministic', cost_eur:0, equivalent:true, trading_access }
+    ]}), /boolean/);
+  }
+  assert.doesNotThrow(() => new FreeFirstBroker().resolve({ context, options:[
+    { option_id:'safe', route_type:'deterministic', cost_eur:0, equivalent:true, trading_access:false }
+  ]}));
 });
 
 test('FREE-001 returns MONEY_LIMIT for paid-only route without approval', () => {
@@ -131,6 +159,20 @@ test('DBOFF-001 persists, reopens, isolates company and restores only requested 
   const reopened = new LocalOffloadStore({ file_path:file, kind:'DBOFF-001' });
   assert.deepEqual(reopened.get({ context, key:'k' }), {n:1});
   assert.deepEqual(reopened.get({ context:other, key:'foreign' }), {keep:true});
+});
+
+test('DBOFF-001 commitPrepared accepts only opaque single-use tokens issued by same store', () => {
+  const file = tmp('prepared.v8');
+  const store = new LocalOffloadStore({ file_path:file, kind:'DBOFF-001' });
+  store.put({ context, key:'k', value:{n:1} });
+  assert.throws(() => store.commitPrepared({ candidate:[], scoped:[] }), /invalid|issued/);
+  assert.deepEqual(store.get({ context, key:'k' }), {n:1});
+  const prepared = store.prepareRestore({ context, snapshot:store.backup(context) });
+  assert.equal(store.commitPrepared(prepared), 1);
+  assert.throws(() => store.commitPrepared(prepared), /invalid|issued/);
+  const otherStore = new LocalOffloadStore({ file_path:tmp('other-prepared.v8'), kind:'DBOFF-001' });
+  const otherPrepared = otherStore.prepareRestore({ context, snapshot:[] });
+  assert.throws(() => store.commitPrepared(otherPrepared), /invalid|issued/);
 });
 
 test('DBOFF-001 rejects SharedArrayBuffer and shared views before persistence', () => {
