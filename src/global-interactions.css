@@ -30,6 +30,14 @@ a[href]:focus-visible,
   outline-offset:2px;
 }
 button:disabled,[aria-disabled='true']{cursor:not-allowed}
+
+/* Keep the universal voice control and the mortgage calculator as two independent,
+   reachable floating controls. Calculator stays at the far right; voice sits to its left. */
+.fenix-voice-hub{right:88px!important;bottom:24px!important}
+@media(max-width:760px){
+  .fenix-voice-hub{right:76px!important;bottom:14px!important}
+}
+
 @media (prefers-reduced-motion:reduce){
   button:not(:disabled),a[href],[role='button']:not([aria-disabled='true']),[tabindex='0'][data-clickable='true']{transition:none!important;transform:none!important}
 }
