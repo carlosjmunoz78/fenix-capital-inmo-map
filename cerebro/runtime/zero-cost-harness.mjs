@@ -16,17 +16,25 @@ function contextOf(value) {
   return { company_id:value.company_id, engine_id:value.engine_id, environment:value.environment, version:value.version };
 }
 
-export class ZeroCostRuntimeHarnessV0 {
-  #decisions = [];
+function sameContext(a, b) {
+  return a.company_id === b.company_id && a.engine_id === b.engine_id && a.environment === b.environment && a.version === b.version;
+}
 
-  constructor({ capabilities = [], db_file_path, storage_file_path, environment } = {}) {
+export class ZeroCostRuntimeHarnessV0 {
+  #decisionStore;
+
+  constructor({ capabilities = [], db_file_path, storage_file_path, decision_file_path, environment } = {}) {
     const env = environment === undefined ? PREPROD : environment;
     if (env !== PREPROD) throw new Error('zero-cost harness V0 accepts exact PREPROD only');
+    if (typeof db_file_path !== 'string' || db_file_path.length === 0) throw new TypeError('db_file_path must be a non-empty string');
+    if (typeof storage_file_path !== 'string' || storage_file_path.length === 0) throw new TypeError('storage_file_path must be a non-empty string');
+    const decisionsPath = decision_file_path ?? `${db_file_path}.decisions`;
     this.local = new LocalCapabilityRegistry(capabilities);
     this.broker = new FreeFirstBroker();
     this.router = new BudgetModelRouterV0({ broker:this.broker });
     this.dboff = new LocalOffloadStore({ file_path:db_file_path, kind:'DBOFF-001', environment:env });
     this.storoff = new LocalOffloadStore({ file_path:storage_file_path, kind:'STOROFF-001', environment:env });
+    this.#decisionStore = new LocalOffloadStore({ file_path:decisionsPath, kind:'AIBUD-001', environment:env });
     this.contract = Object.freeze({
       engine_ids:['LOCAL-001','FREE-001','DBOFF-001','STOROFF-001','AIBUD-001','ROUTE-001'],
       environment:PREPROD,
@@ -49,8 +57,9 @@ export class ZeroCostRuntimeHarnessV0 {
       provider:result.selected?.provider ?? null,
       reason:result.reason
     });
-    this.#decisions.push(decision);
-    return { ...result, decision:{ ...decision } };
+    const key = `decision:${String(this.#decisionStore.operation_count).padStart(12, '0')}`;
+    this.#decisionStore.put({ context, key, value:decision });
+    return { ...result, decision:{ ...decision, context:{...decision.context} } };
   }
 
   health(context) {
@@ -62,6 +71,7 @@ export class ZeroCostRuntimeHarnessV0 {
       storoff:'AVAILABLE',
       broker:'AVAILABLE',
       router:'AVAILABLE',
+      decisions:'AVAILABLE',
       additional_cost_target_eur:0,
       supabase_preprod_required:false
     });
@@ -69,7 +79,11 @@ export class ZeroCostRuntimeHarnessV0 {
 
   decisions(context) {
     const ctx = contextOf(context);
-    return this.#decisions.filter(item => item.context.company_id === ctx.company_id && item.context.engine_id === ctx.engine_id && item.context.environment === ctx.environment && item.context.version === ctx.version).map(item => ({ ...item, context:{ ...item.context } }));
+    return this.#decisionStore.backup(ctx)
+      .filter(op => typeof op.key === 'string' && op.key.startsWith('decision:'))
+      .map(op => op.value)
+      .filter(item => item?.context && sameContext(item.context, ctx))
+      .map(item => ({ ...item, context:{ ...item.context } }));
   }
 
   backup(context) {
@@ -77,16 +91,41 @@ export class ZeroCostRuntimeHarnessV0 {
     return Object.freeze({
       context:ctx,
       dboff:this.dboff.backup(ctx),
-      storoff:this.storoff.backup(ctx)
+      storoff:this.storoff.backup(ctx),
+      decisions:this.#decisionStore.backup(ctx)
     });
   }
 
   restore({ context, backup }) {
     const ctx = contextOf(context);
     if (!backup || typeof backup !== 'object') throw new TypeError('backup must be an object');
-    if (!backup.context || JSON.stringify(contextOf(backup.context)) !== JSON.stringify(ctx)) throw new Error('backup context mismatch');
-    const dboff = this.dboff.restore({ context:ctx, snapshot:backup.dboff });
-    const storoff = this.storoff.restore({ context:ctx, snapshot:backup.storoff });
-    return Object.freeze({ dboff_operations:dboff, storoff_operations:storoff });
+    if (!backup.context || !sameContext(contextOf(backup.context), ctx)) throw new Error('backup context mismatch');
+
+    const previous = {
+      dboff:this.dboff.backup(ctx),
+      storoff:this.storoff.backup(ctx),
+      decisions:this.#decisionStore.backup(ctx)
+    };
+    const prepared = {
+      dboff:this.dboff.prepareRestore({ context:ctx, snapshot:backup.dboff }),
+      storoff:this.storoff.prepareRestore({ context:ctx, snapshot:backup.storoff }),
+      decisions:this.#decisionStore.prepareRestore({ context:ctx, snapshot:backup.decisions ?? [] })
+    };
+
+    let dboffCommitted = false;
+    let storoffCommitted = false;
+    try {
+      const dboff = this.dboff.commitPrepared(prepared.dboff); dboffCommitted = true;
+      const storoff = this.storoff.commitPrepared(prepared.storoff); storoffCommitted = true;
+      const decisions = this.#decisionStore.commitPrepared(prepared.decisions);
+      return Object.freeze({ dboff_operations:dboff, storoff_operations:storoff, decision_operations:decisions });
+    } catch (error) {
+      const rollbackErrors = [];
+      try { if (storoffCommitted) this.storoff.restore({ context:ctx, snapshot:previous.storoff }); } catch (e) { rollbackErrors.push(e); }
+      try { if (dboffCommitted) this.dboff.restore({ context:ctx, snapshot:previous.dboff }); } catch (e) { rollbackErrors.push(e); }
+      try { this.#decisionStore.restore({ context:ctx, snapshot:previous.decisions }); } catch (e) { rollbackErrors.push(e); }
+      if (rollbackErrors.length > 0) throw new AggregateError([error, ...rollbackErrors], 'coordinated restore failed and rollback was incomplete');
+      throw error;
+    }
   }
 }
