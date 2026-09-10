@@ -1,12 +1,12 @@
 import {expect,test} from '@playwright/test';
 import fs from 'node:fs';
 
-test('casos especiales usan API PROD y nunca runtime TEST en producción',()=>{
+test('casos especiales usan únicamente API PROD',()=>{
  const src=fs.readFileSync('src/specialCasesRuntime.ts','utf8');
- expect(src).toContain("if(IS_PRODUCTION)return fetchEnvironmentApi<T>('fenix-special-cases-api',path)");
- expect(src).toContain("const api=IS_PRODUCTION?'fenix-special-cases-api':'fenix-special-cases-runtime'");
- expect(src).toContain("fetchEnvironmentApi<any>('fenix-special-cases-runtime',path,undefined,{productionAvailable:false})");
- expect(src).not.toContain('fenix-special-cases-runtime-test');
+ expect(src).toContain("return fetchEnvironmentApi<T>('fenix-special-cases-api',path)");
+ expect(src).not.toContain('fenix-special-cases-runtime');
+ expect(src).not.toContain('specialCasesDemo');
+ expect(src).not.toContain('IS_PRODUCTION');
  expect(src).not.toContain('/functions/v1/');
  const resolver=fs.readFileSync('src/supabase.ts','utf8');
  expect(resolver).toContain('export const IS_PRODUCTION=true;');
