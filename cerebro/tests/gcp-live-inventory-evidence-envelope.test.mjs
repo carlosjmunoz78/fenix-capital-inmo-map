@@ -40,8 +40,8 @@ test('every required template and expansion must have its own command result',()
   const coverageProject='fenix-inmobiliaria'; const result={resolved_parameters:{PROJECT_ID:'fenix-trading-lab'}}; assert.notEqual(result.resolved_parameters.PROJECT_ID,coverageProject);
 });
 
-test('scheduler location expansion is explicit one-to-one and allows zero after failed/empty discovery',()=>{
-  const c=cfg.coverage_contract; assert.equal(c.scheduler_location_discovery_result_required,true); assert.equal(c.scheduler_expansion_parameter,'LOCATION'); assert.equal(c.scheduler_each_discovered_location_requires_exactly_one_jobs_result,true); assert.equal(c.scheduler_zero_jobs_results_allowed_when_no_locations_discovered,true); assert.equal(c.scheduler_failed_or_empty_discovery_requires_zero_jobs_expansions,true); assert.equal(c.scheduler_duplicate_or_missing_location_result_forbidden,true); assert.deepEqual(derivedIds('scheduler'),['GCP-READONLY-CATALOG:scheduler:0','GCP-READONLY-CATALOG:scheduler:1']);
+test('scheduler location expansion is explicit one-to-one and fail-closed',()=>{
+  const c=cfg.coverage_contract; assert.equal(c.scheduler_location_discovery_result_required,true); assert.equal(c.scheduler_expansion_parameter,'LOCATION'); assert.equal(c.scheduler_each_discovered_location_requires_exactly_one_jobs_result,true); assert.equal(c.scheduler_each_jobs_result_must_include_location_equal_to_discovered_value,true); assert.equal(c.scheduler_zero_jobs_results_allowed_when_no_locations_discovered,true); assert.equal(c.scheduler_failed_or_empty_discovery_requires_zero_jobs_expansions,true); assert.equal(c.scheduler_duplicate_or_missing_location_result_forbidden,true); assert.deepEqual(derivedIds('scheduler'),['GCP-READONLY-CATALOG:scheduler:0','GCP-READONLY-CATALOG:scheduler:1']);
 });
 
 test('capture remains fail-closed and Trading isolated',()=>{
