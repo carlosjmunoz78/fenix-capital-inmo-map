@@ -119,6 +119,7 @@ function highestReason(reasons) {
 
 function humanRequired({ reason, requestId, context, capabilityId }) {
   return deepFreeze({
+    status: 'HUMAN_REQUIRED',
     outcome: 'HUMAN_REQUIRED',
     reason,
     request_id: requestId,
@@ -200,7 +201,8 @@ export function planDigitalBuild(requestInput, optionsInput = {}) {
 
 export function assertCanonicalHumanRequired(resultInput) {
   const result = ownDataObject(resultInput, 'result');
-  if (result.outcome !== 'HUMAN_REQUIRED') throw new Error('result is not HUMAN_REQUIRED');
+  if (result.status !== 'HUMAN_REQUIRED') throw new Error('result status is not HUMAN_REQUIRED');
+  if (result.outcome !== 'HUMAN_REQUIRED') throw new Error('result outcome is not HUMAN_REQUIRED');
   if (!HUMAN_REQUIRED.has(result.reason)) throw new Error('noncanonical HUMAN_REQUIRED reason');
   return true;
 }
