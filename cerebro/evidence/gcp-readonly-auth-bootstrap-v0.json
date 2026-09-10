@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "status": "DEFINED_NOT_BUILT",
   "scope": "GCP_READ_ONLY_AUTH_BOOTSTRAP",
   "environment": "SCAFFOLD",
@@ -28,15 +28,23 @@
   },
   "auth_route_priority": [
     "EXISTING_AUTHENTICATED_GCLOUD_CONTEXT",
-    "EXISTING_GOOGLE_APPLICATION_DEFAULT_CREDENTIALS",
-    "AUTHORIZED_WORKLOAD_IDENTITY_OR_FEDERATION",
-    "AUTHORIZED_CREDENTIAL_REF_FROM_BROKER",
+    "AUTHORIZED_WORKLOAD_IDENTITY_OR_FEDERATION_WITH_GCLOUD_CONTEXT",
+    "AUTHORIZED_CREDENTIAL_REF_FROM_BROKER_WITH_GCLOUD_CONTEXT",
     "FACT_001_NEW_CONNECTOR_ONLY_IF_GAP_PROVEN"
   ],
+  "auth_route_constraints": {
+    "google_application_default_credentials_only_supported_without_executor": false,
+    "reason": "V0 preflight is implemented exclusively with gcloud commands; standalone ADC is not advertised until an ADC-capable executor exists"
+  },
+  "preflight_policy": {
+    "command_prefix": "gcloud",
+    "allowed_read_verbs": ["list", "describe", "get-iam-policy"],
+    "fail_closed_on_unknown_verb": true
+  },
   "preflight_checks": [
     {
       "id": "PF-001",
-      "purpose": "confirm an authenticated principal exists without printing tokens or secret material",
+      "purpose": "confirm an authenticated gcloud principal exists without printing tokens or secret material",
       "command": "gcloud auth list --filter=status:ACTIVE --format=json(account,status)",
       "expected_effect": "READ_ONLY_LOCAL_AUTH_METADATA"
     },
