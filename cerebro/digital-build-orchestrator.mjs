@@ -22,6 +22,7 @@ const PRIORITY_BY_REASON = Object.freeze({
   CUSTOMER_HUMAN_REQUEST: 50,
   LOW_CONFIDENCE: 40,
 });
+const FORBIDDEN_TRADING_ENGINE_IDS = new Set(['LAB-TRD']);
 const own = (obj, key) => Object.prototype.hasOwnProperty.call(obj, key);
 
 function safePlainClone(value, label, stack = new WeakSet()) {
@@ -148,6 +149,11 @@ export function planDigitalBuild(requestInput, optionsInput = {}) {
 
   const capability = catalog.capabilities.find((item) => item.capability_id === capabilityId);
   if (!capability) throw new Error(`unknown capability ${capabilityId}`);
+  for (const engineId of capability.engine_bindings) {
+    if (FORBIDDEN_TRADING_ENGINE_IDS.has(engineId)) {
+      throw new Error(`Trading engine binding ${engineId} is forbidden in Digital Build plans`);
+    }
+  }
 
   const reasons = [];
   if (requiresProdWrite || autonomousProd) reasons.push('HIGH_RISK');
