@@ -2,7 +2,6 @@ import {useEffect,useMemo,useState} from 'react';
 import {useLocation,useNavigate} from 'react-router-dom';
 import {ArrowLeft,LogOut,Moon,Search,Sun} from 'lucide-react';
 import {fetchAppApi,supabase} from './supabase';
-import {fetchNotionRuntime} from './notionRuntime';
 import {anaVertical} from './assets/visualAssets';
 import {normalizeNavigation,type NavItem} from './masterNavigation';
 import OperationalShellFrame from './OperationalShellFrame';
@@ -25,7 +24,7 @@ export default function ContactDetailShell(){
  useEffect(()=>{if(!active)return;let alive=true;supabase.auth.getSession().then(({data})=>{if(alive){setLogged(Boolean(data.session));setSessionReady(true)}});const{data:{subscription}}=supabase.auth.onAuthStateChange((_e,s)=>{setLogged(Boolean(s));setSessionReady(true)});return()=>{alive=false;subscription.unsubscribe()};},[active]);
  useEffect(()=>{if(!active)return;document.documentElement.dataset.theme=theme;sessionStorage.setItem('fenix-theme',theme);},[active,theme]);
  useEffect(()=>{if(!active||!logged)return;Promise.all([fetchAppApi<Ctx>('/session/context'),fetchAppApi<unknown>('/navigation')]).then(([c,n])=>{setCtx(c.status===200?c.data:null);setNav(n.status===200?normalizeNavigation(n.data):[]);});},[active,logged]);
- useEffect(()=>{if(!active||!logged)return;let alive=true;(async()=>{setLoading(true);setMessage('');const r=await fetchNotionRuntime<any>(`/clientes/${encodeURIComponent(id)}`);if(!alive)return;setStatus(r.status);setRow(r.status===200?(r.data?.contacto||r.data?.item||null):null);if(r.status===403)setMessage('Tu perfil no puede abrir este contacto.');else if(r.status===404)setMessage('No se ha encontrado el contacto.');else if(r.status!==200)setMessage('No se pudo cargar el contacto canónico.');setLoading(false);})();return()=>{alive=false}},[active,logged,id]);
+ useEffect(()=>{if(!active||!logged)return;let alive=true;(async()=>{setLoading(true);setMessage('');const r=await fetchAppApi<any>(`/contactos/${encodeURIComponent(id)}`);if(!alive)return;setStatus(r.status);setRow(r.status===200?(r.data?.contacto||r.data?.item||null):null);if(r.status===403)setMessage('Tu perfil no puede abrir este contacto.');else if(r.status===404)setMessage('No se ha encontrado el contacto.');else if(r.status!==200)setMessage('No se pudo cargar el contacto canónico.');setLoading(false);})();return()=>{alive=false}},[active,logged,id]);
  const effectiveNav=nav.length?nav:fallbackNav;
  const name=text(row||undefined,['cliente','nombre','nombre_alias','contacto','title'])||'Contacto';
  const state=text(row||undefined,['estado','estado_comercial','estado_relacion'])||'No disponible';
