@@ -26,17 +26,19 @@ const HUMAN = [
   'CUSTOMER_HUMAN_REQUEST',
 ];
 
-const FORBIDDEN = [
-  'auth print-access-token',
-  'auth print-identity-token',
-  'secrets versions access',
-  'service-accounts keys create',
-  'add-iam-policy-binding',
-  'remove-iam-policy-binding',
-  'services enable',
-  'projects update',
-  'projects delete',
+const AUTH_ROUTES = [
+  'EXISTING_AUTHENTICATED_GCLOUD_CONTEXT',
+  'AUTHORIZED_WORKLOAD_IDENTITY_OR_FEDERATION_WITH_GCLOUD_CONTEXT',
+  'AUTHORIZED_CREDENTIAL_REF_FROM_BROKER_WITH_GCLOUD_CONTEXT',
+  'FACT_001_NEW_CONNECTOR_ONLY_IF_GAP_PROVEN',
 ];
+
+const ALLOWED_READ_VERBS = new Set(['list', 'describe', 'get-iam-policy']);
+
+function readVerb(command) {
+  const tokens = command.trim().split(/\s+/);
+  return tokens.find((token) => ALLOWED_READ_VERBS.has(token)) ?? null;
+}
 
 test('auth bootstrap remains SCAFFOLD PLAN_ONLY and zero-cost', () => {
   assert.equal(cfg.status, 'DEFINED_NOT_BUILT');
@@ -68,15 +70,39 @@ test('credential handling never stores or prints secret values', () => {
   assert.equal(cfg.execution_gate.forbid_secret_payload_access, true);
 });
 
-test('all preflight commands are non-mutating and do not print tokens', () => {
-  assert.ok(Array.isArray(cfg.preflight_checks) && cfg.preflight_checks.length >= 3);
+test('only implemented auth routes are advertised; standalone ADC is fail-closed', () => {
+  assert.deepEqual(cfg.auth_route_priority, AUTH_ROUTES);
+  assert.equal(cfg.auth_route_priority.includes('EXISTING_GOOGLE_APPLICATION_DEFAULT_CREDENTIALS'), false);
+  assert.equal(cfg.auth_route_constraints.google_application_default_credentials_only_supported_without_executor, false);
+  assert.match(cfg.auth_route_constraints.reason, /standalone ADC is not advertised/i);
+});
+
+test('all preflight commands are restricted to canonical read-only verbs', () => {
+  assert.deepEqual(cfg.preflight_policy.allowed_read_verbs, ['list','describe','get-iam-policy']);
+  assert.equal(cfg.preflight_policy.command_prefix, 'gcloud');
+  assert.equal(cfg.preflight_policy.fail_closed_on_unknown_verb, true);
+  assert.ok(Array.isArray(cfg.preflight_checks) && cfg.preflight_checks.length === 3);
+
   for (const check of cfg.preflight_checks) {
     assert.match(check.command, /^gcloud\s/);
-    for (const forbidden of FORBIDDEN) {
-      assert.ok(!check.command.includes(forbidden), `forbidden operation in ${check.id}: ${forbidden}`);
+    const verb = readVerb(check.command);
+    assert.ok(verb, `unknown or non-read-only verb in ${check.id}: ${check.command}`);
+
+    const tokens = check.command.trim().split(/\s+/);
+    const knownMutationTokens = [
+      'create','update','delete','deploy','set-iam-policy','add-iam-policy-binding',
+      'remove-iam-policy-binding','enable','disable','start','stop','restart','patch','write'
+    ];
+    for (const forbidden of knownMutationTokens) {
+      assert.equal(tokens.includes(forbidden), false, `forbidden mutating verb ${forbidden} in ${check.id}`);
     }
   }
-  assert.ok(cfg.preflight_checks.some((check) => check.command.includes('${PROJECT_ID}')));
+
+  assert.deepEqual(cfg.preflight_checks.map((check) => check.command), [
+    'gcloud auth list --filter=status:ACTIVE --format=json(account,status)',
+    'gcloud projects describe ${PROJECT_ID} --format=json(projectId,name,projectNumber,lifecycleState)',
+    'gcloud projects get-iam-policy ${PROJECT_ID} --format=json',
+  ]);
 });
 
 test('mutation gates are fail-closed before any authenticated discovery', () => {
