@@ -4,6 +4,8 @@ import {calculateMortgage} from './calculator';
 
 type MortgageType='fixed'|'mixed'|'variable';
 type Base={principal:number;rate:number;years:number;purchasePrice?:number;income?:number;other?:number};
+type Position={left:number;top:number};
+const POSITION_KEY='fenix-calculator-position';
 function num(v:string|undefined){const n=Number(v);return Number.isFinite(n)?n:0;}
 function readBase():Base|null{
  const labels=Array.from(document.querySelectorAll<HTMLLabelElement>('.calc-grid label'));
@@ -11,6 +13,9 @@ function readBase():Base|null{
  const values=labels.map(l=>l.querySelector<HTMLInputElement>('input')?.value||'');
  return {principal:num(values[0]),rate:num(values[1]),years:num(values[2]),purchasePrice:values[3]?num(values[3]):undefined,income:values[4]?num(values[4]):undefined,other:values[5]?num(values[5]):undefined};
 }
+function readPosition():Position|null{try{const raw=localStorage.getItem(POSITION_KEY);if(!raw)return null;const parsed=JSON.parse(raw) as Partial<Position>;return Number.isFinite(parsed.left)&&Number.isFinite(parsed.top)?{left:Number(parsed.left),top:Number(parsed.top)}:null}catch{return null}}
+function clampPosition(panel:HTMLElement,pos:Position):Position{const rect=panel.getBoundingClientRect(),maxLeft=Math.max(0,window.innerWidth-rect.width),maxTop=Math.max(0,window.innerHeight-rect.height);return{left:Math.min(maxLeft,Math.max(0,pos.left)),top:Math.min(maxTop,Math.max(0,pos.top))}}
+function applyPosition(panel:HTMLElement,pos:Position){panel.style.position='fixed';panel.style.left=`${pos.left}px`;panel.style.top=`${pos.top}px`;panel.style.right='auto';panel.style.bottom='auto';}
 const eur=(n:number|null)=>n===null?'—':`${n.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})} €`;
 
 export default function CalculatorProEnhancement(){
@@ -21,6 +26,27 @@ export default function CalculatorProEnhancement(){
   const sync=()=>{const next=document.querySelector<HTMLElement>('.calc-body');setHost(next);setBase(readBase());if(body!==next){body?.removeEventListener('input',sync);body=next;body?.addEventListener('input',sync)}};
   sync();const obs=new MutationObserver(sync);obs.observe(document.body,{childList:true,subtree:true});
   return()=>{obs.disconnect();body?.removeEventListener('input',sync)};
+ },[]);
+ useEffect(()=>{
+  let panel:HTMLElement|null=null,header:HTMLElement|null=null;let cleanupDrag:(()=>void)|null=null;
+  const attach=()=>{
+   const nextPanel=document.querySelector<HTMLElement>('.calc-panel');const nextHeader=nextPanel?.querySelector<HTMLElement>('header')??null;
+   if(nextPanel===panel&&nextHeader===header)return;
+   cleanupDrag?.();panel=nextPanel;header=nextHeader;if(!panel||!header)return;
+   const saved=readPosition();if(saved)applyPosition(panel,clampPosition(panel,saved));
+   header.style.cursor='move';
+   const onPointerDown=(event:PointerEvent)=>{
+    if(event.button!==0||(event.target as HTMLElement).closest('button,input,select,textarea,a'))return;
+    const rect=panel!.getBoundingClientRect(),dx=event.clientX-rect.left,dy=event.clientY-rect.top;
+    const onMove=(move:PointerEvent)=>{const pos=clampPosition(panel!,{left:move.clientX-dx,top:move.clientY-dy});applyPosition(panel!,pos);};
+    const onUp=()=>{const rectNow=panel!.getBoundingClientRect();localStorage.setItem(POSITION_KEY,JSON.stringify({left:rectNow.left,top:rectNow.top}));window.removeEventListener('pointermove',onMove);window.removeEventListener('pointerup',onUp);};
+    window.addEventListener('pointermove',onMove);window.addEventListener('pointerup',onUp,{once:true});
+   };
+   const onResize=()=>{const savedNow=readPosition();if(savedNow&&panel)applyPosition(panel,clampPosition(panel,savedNow));};
+   header.addEventListener('pointerdown',onPointerDown);window.addEventListener('resize',onResize);
+   cleanupDrag=()=>{header?.removeEventListener('pointerdown',onPointerDown);window.removeEventListener('resize',onResize);};
+  };
+  attach();const observer=new MutationObserver(attach);observer.observe(document.body,{childList:true,subtree:true});return()=>{observer.disconnect();cleanupDrag?.();};
  },[]);
  const result=useMemo(()=>{if(!base||base.principal<=0||base.years<=0)return null;try{return calculateMortgage({principal:base.principal,annualRate:base.rate,years:base.years,purchasePrice:base.purchasePrice,purchaseCosts:costs===''?undefined:Number(costs),availableSavings:savings===''?undefined:Number(savings),netIncome:base.income,otherPayments:base.other,targetEffortPct:target,mortgageType})}catch{return null}},[base,costs,savings,target,mortgageType]);
  const scenarios=useMemo(()=>{if(!base||mortgageType!=='fixed')return[];return [-.5,0,.5].map(delta=>{const rate=Math.max(0,base.rate+delta);try{return {label:delta<0?'TIN −0,50 pp':delta>0?'TIN +0,50 pp':'Escenario actual',rate,res:calculateMortgage({principal:base.principal,annualRate:rate,years:base.years,purchasePrice:base.purchasePrice,purchaseCosts:costs===''?undefined:Number(costs),availableSavings:savings===''?undefined:Number(savings),netIncome:base.income,otherPayments:base.other,targetEffortPct:target,mortgageType:'fixed'})}}catch{return null}}).filter(Boolean) as Array<{label:string;rate:number;res:ReturnType<typeof calculateMortgage>}>},[base,target,costs,savings,mortgageType]);
