@@ -168,3 +168,34 @@ test('inherited accessors and custom prototypes are rejected before any inherite
   assert.throws(() => planDigitalBuild(request({ context: unsafeContext })), /plain object/);
   assert.equal(executed, false);
 });
+
+test('nested context accessors are rejected recursively before catalog validation or mutation', () => {
+  let executed = false;
+  const metadata = {};
+  Object.defineProperty(metadata, 'unsafe', {
+    enumerable: true,
+    get() {
+      executed = true;
+      return 'LAB-TRD';
+    },
+  });
+  const source = request({
+    context: {
+      ...request().context,
+      metadata,
+    },
+  });
+  const suppliedCatalog = { marker: 'unchanged' };
+  Object.defineProperty(metadata, 'mutate_catalog', {
+    enumerable: true,
+    get() {
+      executed = true;
+      suppliedCatalog.marker = 'mutated';
+      return true;
+    },
+  });
+
+  assert.throws(() => planDigitalBuild(source, { catalog: suppliedCatalog }), /data property/);
+  assert.equal(executed, false);
+  assert.equal(suppliedCatalog.marker, 'unchanged');
+});
