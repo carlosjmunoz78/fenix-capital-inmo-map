@@ -1,0 +1,77 @@
+{
+  "schema_version": "1.0.0",
+  "status": "DEFINED_NOT_BUILT",
+  "scope": "GCP_READ_ONLY_DISCOVERY_COMMAND_CATALOG",
+  "environment": "SCAFFOLD",
+  "engine_id": "INT-001",
+  "execution_mode": "PLAN_ONLY",
+  "additional_cost_target_eur": 0,
+  "prod_writes": false,
+  "autonomous_prod": false,
+  "trading_access": false,
+  "known_project_ids": [
+    "fenix-trading-lab",
+    "fenix-capital-455809",
+    "fenix-inmobiliaria",
+    "fenix-capital-make-web-y-seo"
+  ],
+  "required_inventory_domains": [
+    "projects",
+    "enabled_apis",
+    "cloud_run",
+    "cloud_functions",
+    "compute",
+    "jobs",
+    "scheduler",
+    "pubsub",
+    "storage",
+    "databases",
+    "artifact_registry",
+    "service_accounts_and_iam",
+    "secret_references",
+    "networking",
+    "logging_monitoring",
+    "billing_cost",
+    "regions",
+    "deployments",
+    "resource_consumers"
+  ],
+  "command_policy": {
+    "mode": "READ_ONLY_FIRST",
+    "generator_only": true,
+    "execute_commands": false,
+    "requires_authenticated_gcloud_or_authorized_connector": true,
+    "secrets_policy": "REFERENCES_ONLY",
+    "least_privilege": true,
+    "forbidden_mutating_verbs": [
+      "create",
+      "update",
+      "delete",
+      "deploy",
+      "set",
+      "add-iam-policy-binding",
+      "remove-iam-policy-binding",
+      "enable",
+      "disable",
+      "start",
+      "stop",
+      "restart",
+      "patch",
+      "write"
+    ]
+  },
+  "training_guard": {
+    "training_project_id": "fenix-trading-lab",
+    "resource_ownership_status": "UNKNOWN_REQUIRES_AUDIT",
+    "separate_training_from_trading_before_any_write": true,
+    "trading_mutation_forbidden": true
+  },
+  "discovery_strategy": [
+    "PROJECT_METADATA",
+    "ENABLED_SERVICES",
+    "ASSET_INVENTORY_IF_AVAILABLE",
+    "SERVICE_SPECIFIC_READ_ONLY_LIST_DESCRIBE",
+    "DEPENDENCY_CLASSIFICATION",
+    "EVIDENCE_CAPTURE"
+  ]
+}
