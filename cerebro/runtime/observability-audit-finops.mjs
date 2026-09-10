@@ -15,6 +15,12 @@ function nonEmpty(value, label) {
   return value;
 }
 
+function isArrayIndexKey(key) {
+  if (typeof key !== 'string' || key === '') return false;
+  const numeric = Number(key);
+  return Number.isInteger(numeric) && numeric >= 0 && numeric <= 4_294_967_294 && String(numeric) === key;
+}
+
 function dataProperties(value, label = 'input') {
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new TypeError(`${label} must be a plain object`);
   if (utilTypes.isProxy(value)) throw new TypeError(`${label} must not be a Proxy`);
@@ -62,6 +68,9 @@ function assertLedgerValue(value, label = 'value', seen = new Set()) {
         continue;
       }
       if (isArray && key === 'length') continue;
+      if (isArray && isArrayIndexKey(key) && !descriptor.enumerable) {
+        throw new TypeError(`${label} must not contain non-enumerable array indices`);
+      }
       if (!descriptor.enumerable) continue;
       assertLedgerValue(descriptor.value, `${label}.${key}`, seen);
     }
@@ -247,7 +256,7 @@ class BaseLedger {
 export class ObservabilityLedgerV0 extends BaseLedger {
   constructor(options) {
     const args = dataProperties(options, 'options');
-    super({ file_path: args.file_path, environment: args.environment ?? PREPROD, kind: 'OBSERV-001', validator: validateObs });
+    super({ file_path: args.file_path, environment: args.environment === undefined ? PREPROD : args.environment, kind: 'OBSERV-001', validator: validateObs });
   }
 
   record(input) {
@@ -287,7 +296,7 @@ export class ObservabilityLedgerV0 extends BaseLedger {
 export class AuditLedgerV0 extends BaseLedger {
   constructor(options) {
     const args = dataProperties(options, 'options');
-    super({ file_path: args.file_path, environment: args.environment ?? PREPROD, kind: 'AUD-001', validator: validateAudit });
+    super({ file_path: args.file_path, environment: args.environment === undefined ? PREPROD : args.environment, kind: 'AUD-001', validator: validateAudit });
   }
 
   append(input) {
@@ -337,7 +346,7 @@ export class AuditLedgerV0 extends BaseLedger {
 export class CostLedgerV0 extends BaseLedger {
   constructor(options) {
     const args = dataProperties(options, 'options');
-    super({ file_path: args.file_path, environment: args.environment ?? PREPROD, kind: 'FINOPS-001', validator: validateCost });
+    super({ file_path: args.file_path, environment: args.environment === undefined ? PREPROD : args.environment, kind: 'FINOPS-001', validator: validateCost });
   }
 
   record(input) {
@@ -393,7 +402,7 @@ export const OPERATIONAL_LEDGERS_V0_CONTRACT = Object.freeze({
   persistence: 'local-atomic-v8-journal-reference',
   append_only_logical_records: true,
   internal_mutable_state: 'module-private-weakmap-with-non-exported-commit-path',
-  accepted_payload_grammar: 'finite-json-like-primitives+arrays+plain-data-objects-no-accessors-no-proxies-no-cycles',
+  accepted_payload_grammar: 'finite-json-like-primitives+arrays+plain-data-objects-no-accessors-no-proxies-no-cycles-no-nonenumerable-array-indices',
   public_input_envelopes: 'descriptor-validated-plain-objects-before-field-read',
   audit_integrity: 'sha256-hash-chain-not-authenticated-tamper-proofing',
   audit_when: 'canonical-iso8601-utc-instant-hash-covered',
