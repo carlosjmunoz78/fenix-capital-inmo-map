@@ -9,6 +9,17 @@ const base = {
   project_id: 'fenix-trading-lab',
 };
 
+const CANONICAL_DOMAINS = [
+  'projects','enabled_apis','cloud_run','cloud_functions','compute','jobs','scheduler','pubsub','storage','databases','artifact_registry','service_accounts_and_iam','secret_references','networking','logging_monitoring','billing_cost','regions','deployments','resource_consumers'
+];
+
+const CANONICAL_PRECEDENCE = [
+  'EXISTING_API',
+  'AUTHORIZED_MCP_OR_CONNECTOR',
+  'GCLOUD_OR_SCRIPT',
+  'FACTORY_NEW_CONNECTOR_ONLY_IF_GAP_PROVEN',
+];
+
 test('registers exactly the four known GCP project ids', () => {
   assert.deepEqual(allowedGcpProjectIds(), [
     'fenix-trading-lab',
@@ -67,15 +78,8 @@ test('rejects accessors, proxies and extra fields before reading caller-controll
   );
 });
 
-test('inventory plan includes all required discovery domains and integration precedence', () => {
+test('inventory plan matches canonical access-contract domains and precedence exactly', () => {
   const plan = buildGcpTrainingInventoryPlan(base);
-  for (const domain of ['services','cloud_run','functions','compute','jobs','scheduler','pubsub','storage','databases','artifact_registry','iam','secret_references','networking','logging_monitoring','billing_cost','regions','deployments','consumers']) {
-    assert.ok(plan.inventory_domains.includes(domain), `missing inventory domain ${domain}`);
-  }
-  assert.deepEqual(plan.integration_precedence, [
-    'EXISTING_API',
-    'AUTHORIZED_MCP_OR_CONNECTOR',
-    'GCLOUD_OR_SCRIPT',
-    'FACT001_NEW_CONNECTOR_ONLY_IF_GAP_PROVEN',
-  ]);
+  assert.deepEqual(plan.inventory_domains, CANONICAL_DOMAINS);
+  assert.deepEqual(plan.integration_precedence, CANONICAL_PRECEDENCE);
 });
