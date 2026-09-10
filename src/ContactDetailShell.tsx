@@ -12,21 +12,19 @@ import './contact-detail.css';
 type Theme='light'|'dark';
 type Ctx={actor_code?:string;role?:string};
 type Row=Record<string,unknown>;
-function canonicalId(v:string){return v.replace(/^notion\|/i,'');}
-function isNotionId(v:string){return /^[0-9a-f]{32}$/i.test(canonicalId(v).replaceAll('-',''));}
 function text(row:Row|undefined,keys:string[]){if(!row)return'';for(const k of keys){const v=row[k];if(typeof v==='string'&&v.trim())return v.trim();}return'';}
 function value(row:Row|undefined,keys:string[]){if(!row)return null;for(const k of keys){const v=row[k];if(v!==undefined&&v!==null&&v!=='')return v;}return null;}
 const fallbackNav:NavItem[]=[{label:'Inicio',route:'/inicio'}];
 
 export default function ContactDetailShell(){
  const location=useLocation(),navigate=useNavigate();
- const match=location.pathname.match(/^\/contactos\/([^/]+)$/);const routeId=match?.[1]?decodeURIComponent(match[1]):'';const id=canonicalId(routeId);const active=Boolean(match&&isNotionId(routeId));
+ const match=location.pathname.match(/^\/contactos\/([^/]+)$/);const id=match?.[1]?decodeURIComponent(match[1]):'';const active=Boolean(match&&id&&id!=='nuevo');
  const[sessionReady,setSessionReady]=useState(false),[logged,setLogged]=useState(false),[ctx,setCtx]=useState<Ctx|null>(null),[nav,setNav]=useState<NavItem[]>([]),[theme,setTheme]=useState<Theme>(()=>(sessionStorage.getItem('fenix-theme') as Theme)||'light');
  const[status,setStatus]=useState<number|null>(null),[row,setRow]=useState<Row|null>(null),[message,setMessage]=useState(''),[loading,setLoading]=useState(false),[correction,setCorrection]=useState(''),[reason,setReason]=useState('');
  useEffect(()=>{if(!active)return;let alive=true;supabase.auth.getSession().then(({data})=>{if(alive){setLogged(Boolean(data.session));setSessionReady(true)}});const{data:{subscription}}=supabase.auth.onAuthStateChange((_e,s)=>{setLogged(Boolean(s));setSessionReady(true)});return()=>{alive=false;subscription.unsubscribe()};},[active]);
  useEffect(()=>{if(!active)return;document.documentElement.dataset.theme=theme;sessionStorage.setItem('fenix-theme',theme);},[active,theme]);
  useEffect(()=>{if(!active||!logged)return;Promise.all([fetchAppApi<Ctx>('/session/context'),fetchAppApi<unknown>('/navigation')]).then(([c,n])=>{setCtx(c.status===200?c.data:null);setNav(n.status===200?normalizeNavigation(n.data):[]);});},[active,logged]);
- useEffect(()=>{if(!active||!logged)return;let alive=true;(async()=>{setLoading(true);setMessage('');const r=await fetchNotionRuntime<any>(`/clientes/${encodeURIComponent(id)}`);if(!alive)return;setStatus(r.status);setRow(r.status===200?(r.data?.item||null):null);if(r.status===403)setMessage('Tu perfil no puede abrir este contacto.');else if(r.status===404)setMessage('No se ha encontrado el contacto.');else if(r.status!==200)setMessage('No se pudo cargar el contacto canónico.');setLoading(false);})();return()=>{alive=false}},[active,logged,id]);
+ useEffect(()=>{if(!active||!logged)return;let alive=true;(async()=>{setLoading(true);setMessage('');const r=await fetchNotionRuntime<any>(`/clientes/${encodeURIComponent(id)}`);if(!alive)return;setStatus(r.status);setRow(r.status===200?(r.data?.contacto||r.data?.item||null):null);if(r.status===403)setMessage('Tu perfil no puede abrir este contacto.');else if(r.status===404)setMessage('No se ha encontrado el contacto.');else if(r.status!==200)setMessage('No se pudo cargar el contacto canónico.');setLoading(false);})();return()=>{alive=false}},[active,logged,id]);
  const effectiveNav=nav.length?nav:fallbackNav;
  const name=text(row||undefined,['cliente','nombre','nombre_alias','contacto','title'])||'Contacto';
  const state=text(row||undefined,['estado','estado_comercial','estado_relacion'])||'No disponible';
