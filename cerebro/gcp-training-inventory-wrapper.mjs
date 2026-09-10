@@ -1,0 +1,103 @@
+import { types as utilTypes } from 'node:util';
+
+const ALLOWED_PROJECT_IDS = Object.freeze([
+  'fenix-trading-lab',
+  'fenix-capital-455809',
+  'fenix-inmobiliaria',
+  'fenix-capital-make-web-y-seo',
+]);
+
+const INVENTORY_DOMAINS = Object.freeze([
+  'projects',
+  'enabled_apis',
+  'cloud_run',
+  'cloud_functions',
+  'compute',
+  'jobs',
+  'scheduler',
+  'pubsub',
+  'storage',
+  'databases',
+  'artifact_registry',
+  'service_accounts_and_iam',
+  'secret_references',
+  'networking',
+  'logging_monitoring',
+  'billing_cost',
+  'regions',
+  'deployments',
+  'resource_consumers',
+]);
+
+const INPUT_KEYS = new Set(['company_id', 'environment', 'version', 'project_id']);
+
+function safeInputSnapshot(value, label) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error(`${label} must be a plain object`);
+  }
+  if (utilTypes.isProxy(value)) throw new Error(`${label} proxy objects are forbidden`);
+  if (Object.getPrototypeOf(value) !== Object.prototype) throw new Error(`${label} must be a plain object`);
+
+  const descriptors = Object.getOwnPropertyDescriptors(value);
+  const out = {};
+  for (const key of Reflect.ownKeys(descriptors)) {
+    if (typeof key !== 'string') throw new Error(`${label} symbol properties are forbidden`);
+    if (!INPUT_KEYS.has(key)) throw new Error(`unexpected ${label} field ${key}`);
+    const descriptor = descriptors[key];
+    if (!('value' in descriptor)) throw new Error(`${label}.${key} must be a data property`);
+    if (typeof descriptor.value !== 'string') throw new Error(`${label}.${key} must be a string`);
+    Object.defineProperty(out, key, {
+      value: descriptor.value,
+      enumerable: true,
+      writable: true,
+      configurable: true,
+    });
+  }
+  return out;
+}
+
+function nonEmptyString(value, label) {
+  if (typeof value !== 'string' || value.trim() === '') throw new Error(`${label} must be a non-empty string`);
+  return value;
+}
+
+export function buildGcpTrainingInventoryPlan(inputValue) {
+  const input = safeInputSnapshot(inputValue, 'input');
+  const companyId = nonEmptyString(input.company_id, 'company_id');
+  const environment = nonEmptyString(input.environment, 'environment');
+  const version = nonEmptyString(input.version, 'version');
+  const projectId = nonEmptyString(input.project_id, 'project_id');
+
+  if (environment !== 'SCAFFOLD') throw new Error('GCP inventory V0 accepts exact SCAFFOLD only');
+  if (!ALLOWED_PROJECT_IDS.includes(projectId)) throw new Error(`unregistered GCP project_id ${projectId}`);
+
+  return Object.freeze({
+    status: 'PLAN_READY',
+    company_id: companyId,
+    engine_id: 'INT-001',
+    environment,
+    version,
+    project_id: projectId,
+    mode: 'READ_ONLY_FIRST',
+    execution_mode: 'PLAN_ONLY',
+    executed: false,
+    prod_writes: false,
+    trading_access: false,
+    additional_cost_target_eur: 0,
+    secrets_policy: 'REFERENCES_ONLY',
+    least_privilege_required: true,
+    training_trading_separation_required_before_write: projectId === 'fenix-trading-lab',
+    live_inventory_status: 'UNKNOWN_REQUIRES_AUDIT',
+    inventory_domains: INVENTORY_DOMAINS,
+    integration_precedence: Object.freeze([
+      'EXISTING_API',
+      'AUTHORIZED_MCP_OR_CONNECTOR',
+      'GCLOUD_OR_SCRIPT',
+      'FACTORY_NEW_CONNECTOR_ONLY_IF_GAP_PROVEN',
+    ]),
+  });
+}
+
+export function allowedGcpProjectIds() {
+  return [...ALLOWED_PROJECT_IDS];
+}
