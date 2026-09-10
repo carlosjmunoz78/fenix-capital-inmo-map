@@ -51,3 +51,10 @@ test('supplied skills cannot smuggle Trading engine bindings through extra field
   capability.skills[0].engine_bindings = ['LAB-TRD'];
   assert.throws(() => planDigitalBuild(request(), { catalog }), /unexpected skill field engine_bindings/);
 });
+
+test('supplied template priority must be a finite numeric scalar', () => {
+  const catalog = loadDigitalBuildCatalog();
+  const capability = catalog.capabilities.find((item) => item.capability_id === 'cap:web-build');
+  capability.templates[0].priority = { engine_id: 'LAB-TRD', prod_writes: true };
+  assert.throws(() => planDigitalBuild(request(), { catalog }), /template\.priority must be a finite number/);
+});
