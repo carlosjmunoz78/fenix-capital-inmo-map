@@ -21,6 +21,14 @@ function request(overrides = {}) {
   };
 }
 
+function assertGatewayHumanRequired(result, reason) {
+  assert.equal(result.status, 'HUMAN_REQUIRED');
+  assert.equal(result.outcome, 'HUMAN_REQUIRED');
+  assert.equal(result.reason, reason);
+  assert.equal(result.executed, false);
+  assert.equal(assertCanonicalHumanRequired(result), true);
+}
+
 test('orchestrator creates deterministic plan-only output over canonical capability bindings', () => {
   const first = planDigitalBuild(request());
   const second = planDigitalBuild(request());
@@ -45,30 +53,19 @@ test('orchestrator never accepts PREPROD or PROD as build-planning environment i
   }
 });
 
-test('positive additional cost fails closed to canonical MONEY_LIMIT', () => {
+test('positive additional cost fails closed to canonical Gateway-compatible MONEY_LIMIT', () => {
   const result = planDigitalBuild(request({ estimated_additional_cost_eur: 0.01 }));
-  assert.equal(result.outcome, 'HUMAN_REQUIRED');
-  assert.equal(result.reason, 'MONEY_LIMIT');
-  assert.equal(result.executed, false);
-  assert.equal(assertCanonicalHumanRequired(result), true);
+  assertGatewayHumanRequired(result, 'MONEY_LIMIT');
 });
 
-test('PROD write or autonomous PROD request fails closed to HIGH_RISK', () => {
+test('PROD write or autonomous PROD request fails closed to Gateway-compatible HIGH_RISK', () => {
   for (const patch of [{ requires_prod_write: true }, { autonomous_prod: true }]) {
-    const result = planDigitalBuild(request(patch));
-    assert.equal(result.outcome, 'HUMAN_REQUIRED');
-    assert.equal(result.reason, 'HIGH_RISK');
-    assert.equal(result.executed, false);
-    assert.equal(assertCanonicalHumanRequired(result), true);
+    assertGatewayHumanRequired(planDigitalBuild(request(patch)), 'HIGH_RISK');
   }
 });
 
-test('Trading access is isolated and routes to POLICY_CONFLICT without execution', () => {
-  const result = planDigitalBuild(request({ trading_access: true }));
-  assert.equal(result.outcome, 'HUMAN_REQUIRED');
-  assert.equal(result.reason, 'POLICY_CONFLICT');
-  assert.equal(result.executed, false);
-  assert.equal(assertCanonicalHumanRequired(result), true);
+test('Trading access is isolated and routes to Gateway-compatible POLICY_CONFLICT without execution', () => {
+  assertGatewayHumanRequired(planDigitalBuild(request({ trading_access: true })), 'POLICY_CONFLICT');
 });
 
 test('combined escalation flags select canonical highest-priority reason independent of branch order', () => {
@@ -78,13 +75,17 @@ test('combined escalation flags select canonical highest-priority reason indepen
     autonomous_prod: true,
     estimated_additional_cost_eur: 5,
   }));
-  assert.equal(all.reason, 'HIGH_RISK');
+  assertGatewayHumanRequired(all, 'HIGH_RISK');
 
   const moneyAndTrading = planDigitalBuild(request({
     trading_access: true,
     estimated_additional_cost_eur: 5,
   }));
-  assert.equal(moneyAndTrading.reason, 'MONEY_LIMIT');
+  assertGatewayHumanRequired(moneyAndTrading, 'MONEY_LIMIT');
+});
+
+test('canonical HUMAN_REQUIRED assertion rejects missing Gateway status even when legacy outcome is present', () => {
+  assert.throws(() => assertCanonicalHumanRequired({ outcome: 'HUMAN_REQUIRED', reason: 'MONEY_LIMIT' }), /status/);
 });
 
 test('orchestrator rejects unsafe scalar coercions and unknown capabilities', () => {
@@ -119,6 +120,7 @@ test('returned plan and HUMAN_REQUIRED snapshots are deeply frozen', () => {
   const human = planDigitalBuild(request({ requires_prod_write: true }));
   assert.equal(Object.isFrozen(human), true);
   assert.equal(Object.isFrozen(human.context), true);
+  assert.equal(human.status, 'HUMAN_REQUIRED');
   assert.throws(() => { human.context.environment = 'PROD'; }, TypeError);
 });
 
