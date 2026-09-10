@@ -3,7 +3,7 @@ name: APP PROD Promote
 on:
   push:
     branches:
-      - preprod-app-phase1
+      - prod-preparation
     paths:
       - 'src/**'
       - 'tests/**'
@@ -30,10 +30,10 @@ jobs:
       VITE_SUPABASE_URL: https://cluhljgonannaafpmblx.supabase.co
       VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_yjISKmA5UPfF3d7NitP_DA_j5LGydh0
     steps:
-      - name: Checkout canonical APP branch
+      - name: Checkout canonical PROD candidate branch
         uses: actions/checkout@v4
         with:
-          ref: preprod-app-phase1
+          ref: prod-preparation
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -78,6 +78,7 @@ jobs:
           tests/expediente-prod-detail-contract.spec.ts
           tests/inmobiliaria-prod-contract.spec.ts
           tests/prod-canonical-write-contracts.spec.ts
+          tests/prod-no-active-preprod-dependency.spec.ts
 
       - name: PROD API reachability gate
         shell: bash
