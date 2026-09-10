@@ -4,6 +4,8 @@ import { AtomicV8Journal } from './persistent-runtime.mjs';
 
 const PREPROD = 'PREPROD';
 const MIN_CONFIDENCE = 0.5;
+const TYPED_ARRAY_BUFFER_GETTER = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(Uint8Array.prototype), 'buffer').get;
+const DATA_VIEW_BUFFER_GETTER = Object.getOwnPropertyDescriptor(DataView.prototype, 'buffer').get;
 const FREE_RANK = new Map([
   ['deterministic', 0],
   ['local_model', 1],
@@ -47,6 +49,14 @@ function contextOf(value) {
   });
 }
 
+function intrinsicViewBuffer(value) {
+  const own = Object.getOwnPropertyDescriptor(value, 'buffer');
+  if (own?.get || own?.set) throw new TypeError('view.buffer accessors are forbidden in durable zero-cost state');
+  if (types.isTypedArray(value)) return TYPED_ARRAY_BUFFER_GETTER.call(value);
+  if (types.isDataView(value)) return DATA_VIEW_BUFFER_GETTER.call(value);
+  return null;
+}
+
 function assertNoSharedMemory(value, seen = new Set()) {
   if (value === null || (typeof value !== 'object' && typeof value !== 'function')) return;
   if (seen.has(value)) return;
@@ -54,7 +64,8 @@ function assertNoSharedMemory(value, seen = new Set()) {
   if (types.isProxy(value)) throw new TypeError('value must not contain Proxy objects');
   if (types.isSharedArrayBuffer(value)) throw new TypeError('SharedArrayBuffer is forbidden in durable zero-cost state');
   if (ArrayBuffer.isView(value)) {
-    if (types.isSharedArrayBuffer(value.buffer)) throw new TypeError('SharedArrayBuffer-backed views are forbidden in durable zero-cost state');
+    const backing = intrinsicViewBuffer(value);
+    if (types.isSharedArrayBuffer(backing)) throw new TypeError('SharedArrayBuffer-backed views are forbidden in durable zero-cost state');
     return;
   }
   if (types.isMap(value)) {
@@ -155,6 +166,12 @@ export class LocalCapabilityRegistry {
   }
 }
 
+function strictOptionalBoolean(value, label, fallback) {
+  if (value === undefined) return fallback;
+  if (typeof value !== 'boolean') throw new TypeError(`${label} must be boolean`);
+  return value;
+}
+
 function normalizeOption(input) {
   const value = plain(input, 'option');
   const route_type = nonEmpty(value.route_type, 'option.route_type');
@@ -165,8 +182,8 @@ function normalizeOption(input) {
   return Object.freeze({
     option_id: nonEmpty(value.option_id, 'option.option_id'),
     route_type,
-    available: value.available !== false,
-    equivalent: value.equivalent !== false,
+    available: strictOptionalBoolean(value.available, 'option.available', true),
+    equivalent: strictOptionalBoolean(value.equivalent, 'option.equivalent', true),
     cost_eur: assertNonNegativeCost(value.cost_eur ?? 0),
     confidence,
     provider: value.provider ?? null,
@@ -199,6 +216,18 @@ function validateOperation(op, kind) {
   return Object.freeze({ op:'put', context:{...ctx}, key:nonEmpty(op.key, 'key'), value:clone(op.value) });
 }
 
+function denseArrayValues(input, label) {
+  if (!Array.isArray(input)) throw new TypeError(`${label} must be an array`);
+  const descriptors = Object.getOwnPropertyDescriptors(input);
+  const values = [];
+  for (let i = 0; i < input.length; i += 1) {
+    const descriptor = descriptors[String(i)];
+    if (!descriptor || descriptor.get || descriptor.set || !('value' in descriptor)) throw new TypeError(`${label} must be dense data-only array`);
+    values.push(descriptor.value);
+  }
+  return values;
+}
+
 export class LocalOffloadStore {
   #journal; #kind; #operations;
   constructor({ file_path, kind, environment }) {
@@ -209,13 +238,13 @@ export class LocalOffloadStore {
     this.#journal = new AtomicV8Journal({ file_path:nonEmpty(file_path, 'file_path'), kind:this.#kind });
     const loaded = this.#journal.load();
     if (!Array.isArray(loaded)) throw new Error('offload journal payload must be an array');
-    this.#operations = loaded.map(op => validateOperation(op, this.#kind));
+    this.#operations = denseArrayValues(loaded, 'offload journal payload').map(op => validateOperation(op, this.#kind));
   }
   #reload() {
     this.#journal = new AtomicV8Journal({ file_path:this.#journal.file_path, kind:this.#kind });
     const loaded = this.#journal.load();
     if (!Array.isArray(loaded)) throw new Error('offload journal payload must be an array');
-    this.#operations = loaded.map(op => validateOperation(op, this.#kind));
+    this.#operations = denseArrayValues(loaded, 'offload journal payload').map(op => validateOperation(op, this.#kind));
   }
   put({ context, key, value }) {
     const op = validateOperation({ op:'put', context, key, value }, this.#kind);
@@ -238,8 +267,7 @@ export class LocalOffloadStore {
   }
   prepareRestore({ context, snapshot }) {
     const ctx = contextOf(context);
-    if (!Array.isArray(snapshot)) throw new TypeError('snapshot must be an array');
-    const scoped = snapshot.map(op => validateOperation(op, this.#kind));
+    const scoped = denseArrayValues(snapshot, 'snapshot').map(op => validateOperation(op, this.#kind));
     if (scoped.some(op => !sameScope(op.context, ctx))) throw new Error('snapshot contains cross-scope operations');
     const retained = this.#operations.filter(op => !sameScope(op.context, ctx));
     return Object.freeze({ scoped:clone(scoped), candidate:clone([...retained, ...scoped]) });
