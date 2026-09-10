@@ -17,6 +17,18 @@ function assertPlainObject(value, label) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error(`${label} must be an object`);
 }
 
+function canonicalEngineIds(registry) {
+  assertPlainObject(registry, 'registry');
+  if (!Array.isArray(registry.engine_ids)) throw new Error('registry engine_ids required');
+  if (registry.count !== 177 || registry.engine_ids.length !== 177) throw new Error('canonical registry must contain exactly 177 engine IDs');
+  for (const engineId of registry.engine_ids) {
+    if (typeof engineId !== 'string' || engineId.length === 0) throw new Error('registry engine_ids must be non-empty strings');
+  }
+  const ids = new Set(registry.engine_ids);
+  if (ids.size !== 177) throw new Error('canonical registry must contain 177 unique engine IDs');
+  return ids;
+}
+
 export function loadDigitalBuildCatalog(file = DEFAULT_CATALOG) {
   return readJson(file);
 }
@@ -34,11 +46,7 @@ export function validateDigitalBuildCatalog({ catalog = loadDigitalBuildCatalog(
   }
   if (!Array.isArray(catalog.capabilities) || catalog.capabilities.length === 0) throw new Error('catalog capabilities required');
 
-  const registryEntries = Array.isArray(registry) ? registry : registry.engines;
-  if (!Array.isArray(registryEntries)) throw new Error('registry engines required');
-  const canonicalIds = new Set(registryEntries.map((entry) => entry.engine_id));
-  if (canonicalIds.size !== 177) throw new Error('canonical registry must contain 177 unique engine IDs');
-
+  const canonicalIds = canonicalEngineIds(registry);
   const capabilityIds = new Set();
   const templateIds = new Set();
   const skillIds = new Set();
