@@ -116,6 +116,7 @@ import ProductionWriteSafetyGuard from './ProductionWriteSafetyGuard';
 import ExpedienteLegacyChromeGuard from './ExpedienteLegacyChromeGuard';
 import ExpedienteJourneyGuard from './ExpedienteJourneyGuard';
 import GlobalDictationGuard from './GlobalDictationGuard';
+import LocalAudioTranscriptionGuard from './LocalAudioTranscriptionGuard';
 import GlobalCommunicationCommandGuard from './GlobalCommunicationCommandGuard';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -153,6 +154,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <ContextEvidenceUpload />
       <ExistingDocumentAutoBackfillGuard />
       <GlobalDictationGuard />
+      <LocalAudioTranscriptionGuard />
       <GlobalCommunicationCommandGuard />
       <ExpedienteAnaRuntimeGuard />
       <ExpedienteBelenFinancialGuard />
