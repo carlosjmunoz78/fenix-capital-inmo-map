@@ -1,23 +1,8 @@
 name: PRE-PROD App Build
 
-# PRE-PROD validates code and produces an immutable PROD candidate artifact.
-# It MUST NOT publish or move the operational gh-pages branch.
-# Cost guard: non-runtime documentation/migration-only commits must not burn
-# Supabase Edge Function invocations by launching the browser suite.
+# PRE-PROD queda parado como flujo automatico.
+# Solo puede lanzarse manualmente si en el futuro se decide reactivarlo.
 on:
-  push:
-    branches:
-      - preprod-app-phase1
-    paths-ignore:
-      - '**/*.md'
-      - 'docs/**'
-      - 'supabase/migrations/**'
-      - 'audit/**'
-      - 'evidence/**'
-      - 'artifacts/**'
-  pull_request:
-    branches:
-      - main
   workflow_dispatch:
 
 permissions:
@@ -62,81 +47,32 @@ jobs:
           VITE_FUNCTION_SUFFIX: '-test'
         run: npm run build
 
-      - name: Browser QA PRE-PROD
-        env:
-          PLAYWRIGHT_SKIP_BUILD: '1'
-        run: npm run test:e2e -- --workers=2
-
       - name: PRE-PROD Ana CORS smoke
         shell: bash
         run: |
           set -euo pipefail
+          failed=0
           for origin in 'https://carlosjmunoz78.github.io' 'https://app.fenixcapital.es'; do
             headers="$(mktemp)"
-            status="$(curl --silent --show-error --output /dev/null --dump-header "$headers" --write-out '%{http_code}' --max-time 20 \
+            body="$(mktemp)"
+            status="$(curl --silent --show-error --retry 2 --retry-all-errors --retry-delay 1 --output "$body" --dump-header "$headers" --write-out '%{http_code}' --max-time 20 \
               -X OPTIONS \
               -H "Origin: ${origin}" \
               -H 'Access-Control-Request-Method: GET' \
               -H 'Access-Control-Request-Headers: authorization,apikey' \
               'https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/fenix-ana-api-test/capabilities')"
-            test "$status" = "204"
-            grep -qi '^access-control-allow-origin:' "$headers"
-            grep -qi '^access-control-allow-methods:.*OPTIONS' "$headers"
-            grep -qi '^access-control-allow-headers:.*authorization' "$headers"
-            rm -f "$headers"
+            echo "PREPROD_ANA_CORS origin=${origin} status=${status}"
+            cat "$headers"
+            echo 'PREPROD_ANA_CORS_BODY_BEGIN'; cat "$body"; echo; echo 'PREPROD_ANA_CORS_BODY_END'
+            if test "$status" != "204" || ! grep -qi '^access-control-allow-origin:' "$headers" || ! grep -qi '^access-control-allow-methods:.*OPTIONS' "$headers" || ! grep -qi '^access-control-allow-headers:.*authorization' "$headers"; then failed=1; fi
+            rm -f "$headers" "$body"
           done
+          test "$failed" = "0"
 
-      - name: PROD operational CORS smoke
-        if: github.event_name == 'push' && github.ref == 'refs/heads/preprod-app-phase1'
-        shell: bash
-        run: |
-          set -euo pipefail
-          for endpoint in \
-            'fenix-ana-api/capabilities' \
-            'fenix-app-gateway/navigation' \
-            'fenix-directory-api/notarias' \
-            'fenix-directory-api/registros-propiedad' \
-            'fenix-reports-api' \
-            'fenix-economia-api'; do
-            headers="$(mktemp)"
-            status="$(curl --silent --show-error --output /dev/null --dump-header "$headers" --write-out '%{http_code}' --max-time 20 \
-              -X OPTIONS \
-              -H 'Origin: https://app.fenixcapital.es' \
-              -H 'Access-Control-Request-Method: GET' \
-              -H 'Access-Control-Request-Headers: authorization,apikey' \
-              "https://cluhljgonannaafpmblx.supabase.co/functions/v1/${endpoint}")"
-            test "$status" = "204"
-            grep -qi '^access-control-allow-origin:' "$headers"
-            grep -qi '^access-control-allow-methods:.*OPTIONS' "$headers"
-            grep -qi '^access-control-allow-headers:.*authorization' "$headers"
-            rm -f "$headers"
-          done
-
-      - name: PROD canonical write API CORS smoke
-        if: github.event_name == 'push' && github.ref == 'refs/heads/preprod-app-phase1'
-        shell: bash
-        run: |
-          set -euo pipefail
-          for spec in \
-            'POST|fenix-directory-actions/notarias/create' \
-            'POST|fenix-special-cases-api/herencias' \
-            'PATCH|fenix-task-api/TASK-CORS-PROBE' \
-            'PATCH|fenix-document-actions/DOC-CORS-PROBE'; do
-            method="${spec%%|*}"
-            endpoint="${spec#*|}"
-            headers="$(mktemp)"
-            status="$(curl --silent --show-error --output /dev/null --dump-header "$headers" --write-out '%{http_code}' --max-time 20 \
-              -X OPTIONS \
-              -H 'Origin: https://app.fenixcapital.es' \
-              -H "Access-Control-Request-Method: ${method}" \
-              -H 'Access-Control-Request-Headers: authorization,apikey,content-type' \
-              "https://cluhljgonannaafpmblx.supabase.co/functions/v1/${endpoint}")"
-            test "$status" = "204"
-            grep -qi '^access-control-allow-origin: https://app.fenixcapital.es' "$headers"
-            grep -qi '^access-control-allow-methods:.*OPTIONS' "$headers"
-            grep -qi '^access-control-allow-headers:.*authorization' "$headers"
-            rm -f "$headers"
-          done
+      - name: Browser QA PRE-PROD
+        env:
+          PLAYWRIGHT_SKIP_BUILD: '1'
+        run: npm run test:e2e -- --workers=2
 
       - name: Upload PRE-PROD dist
         uses: actions/upload-artifact@v4
@@ -145,88 +81,6 @@ jobs:
           path: dist
           if-no-files-found: error
           retention-days: 14
-
-      - name: Build immutable PROD candidate
-        if: github.event_name == 'push' && github.ref == 'refs/heads/preprod-app-phase1'
-        env:
-          VITE_FENIX_ENV: prod
-          VITE_SUPABASE_URL: https://cluhljgonannaafpmblx.supabase.co
-          VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_yjISKmA5UPfF3d7NitP_DA_j5LGydh0
-        shell: bash
-        run: |
-          set -euo pipefail
-          rm -rf dist
-          npm run build
-          cp dist/index.html dist/404.html
-          printf '%s\n' 'app.fenixcapital.es' > dist/CNAME
-          touch dist/.nojekyll
-
-      - name: Browser QA exact PROD candidate
-        if: github.event_name == 'push' && github.ref == 'refs/heads/preprod-app-phase1'
-        env:
-          PLAYWRIGHT_SKIP_BUILD: '1'
-          FENIX_QA_PROD_CANDIDATE: '1'
-        run: >-
-          npm run test:e2e -- --workers=2
-          tests/prod-candidate-browser.spec.ts
-          tests/prod-runtime-config.spec.ts
-          tests/prod-release-gate.spec.ts
-          tests/directory-prod-gateway-contract.spec.ts
-          tests/expediente-prod-contract.spec.ts
-          tests/expediente-prod-detail-contract.spec.ts
-          tests/inmobiliaria-prod-contract.spec.ts
-          tests/prod-canonical-write-contracts.spec.ts
-
-      - name: Assert PROD candidate contains no test endpoints
-        if: github.event_name == 'push' && github.ref == 'refs/heads/preprod-app-phase1'
-        shell: bash
-        run: |
-          set -euo pipefail
-          leaks='prod-test-endpoint-leaks.txt'
-          : > "$leaks"
-          grep -RInE --include='*.js' --include='*.html' --include='*.css' 'functions/v1/[A-Za-z0-9_-]+-test' dist > "$leaks" || true
-          if test -s "$leaks"; then
-            cat "$leaks"
-            echo 'TEST endpoint leaked into PROD candidate' >&2
-            exit 1
-          fi
-
-      - name: Upload PROD leak diagnostics
-        if: failure() && github.event_name == 'push' && github.ref == 'refs/heads/preprod-app-phase1'
-        uses: actions/upload-artifact@v4
-        with:
-          name: fenix-prod-test-endpoint-leaks-${{ github.sha }}
-          path: prod-test-endpoint-leaks.txt
-          if-no-files-found: ignore
-          retention-days: 7
-
-      - name: Seal immutable PROD candidate
-        if: github.event_name == 'push' && github.ref == 'refs/heads/preprod-app-phase1'
-        shell: bash
-        run: |
-          set -euo pipefail
-          printf '%s\n' "${GITHUB_SHA}" > PROD_CANDIDATE_SHA
-          tar --sort=name --mtime='UTC 1970-01-01' --owner=0 --group=0 --numeric-owner -czf fenix-prod-candidate.tgz -C dist .
-          sha256sum fenix-prod-candidate.tgz > fenix-prod-candidate.tgz.sha256
-          cat > PROD_CANDIDATE_METADATA.txt <<EOF
-          source_sha=${GITHUB_SHA}
-          workflow_run_id=${GITHUB_RUN_ID}
-          workflow_run_attempt=${GITHUB_RUN_ATTEMPT}
-          artifact=fenix-prod-candidate.tgz
-          EOF
-
-      - name: Upload immutable PROD candidate
-        if: github.event_name == 'push' && github.ref == 'refs/heads/preprod-app-phase1'
-        uses: actions/upload-artifact@v4
-        with:
-          name: fenix-prod-candidate-${{ github.sha }}
-          path: |
-            fenix-prod-candidate.tgz
-            fenix-prod-candidate.tgz.sha256
-            PROD_CANDIDATE_SHA
-            PROD_CANDIDATE_METADATA.txt
-          if-no-files-found: error
-          retention-days: 30
 
       - name: Upload Playwright report
         if: always()

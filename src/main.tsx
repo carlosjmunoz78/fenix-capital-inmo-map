@@ -26,6 +26,7 @@ import './direction-ana-half.css';
 import './login-layout-fix.css';
 import './global-interactions.css';
 import './desktop-visual-density.css';
+import './document-viewer-final.css';
 import App from './App';
 import RoleHomeShell from './RoleHomeShell';
 import ProfileShell from './ProfileShell';
@@ -55,12 +56,14 @@ import DocumentacionShell from './DocumentacionShell';
 import DocumentCreateShell from './DocumentCreateShell';
 import DocumentViewerShell from './DocumentViewerShell';
 import ContextEvidenceUpload from './ContextEvidenceUpload';
+import ExistingDocumentAutoBackfillGuard from './ExistingDocumentAutoBackfillGuard';
 import FinancierosShell from './FinancierosShell';
 import FinancieroDetailShell from './FinancieroDetailShell';
 import VisitadoresShell from './VisitadoresShell';
 import VisitadorDetailShell from './VisitadorDetailShell';
 import EconomiaShell from './EconomiaShell';
 import InformesShell from './InformesShell';
+import InformesDailyActivityGuard from './InformesDailyActivityGuard';
 import SearchShell from './SearchShell';
 import NotificationsShell from './NotificationsShell';
 import NotariasShell from './NotariasShell';
@@ -89,10 +92,12 @@ import ExpedienteKnowledgeGuard from './ExpedienteKnowledgeGuard';
 import ExpedienteCommercialTermsGuard from './ExpedienteCommercialTermsGuard';
 import VisitasShell from './VisitasShell';
 import CommunicationsShell from './CommunicationsShell';
+import ChatShell from './ChatShell';
 import DetailShellGate from './DetailShellGate';
 import TaskCreateShell from './TaskCreateShell';
 import OperationalRecordDetailGate from './OperationalRecordDetailGate';
 import CalculatorLabelGuard from './CalculatorLabelGuard';
+import CalculatorProEnhancement from './CalculatorProEnhancement';
 import ProfileLauncherGuard from './ProfileLauncherGuard';
 import OperationalAdvancedSearchGuard from './OperationalAdvancedSearchGuard';
 import DirectionIdentityGuard from './DirectionIdentityGuard';
@@ -115,6 +120,7 @@ import ProductionWriteSafetyGuard from './ProductionWriteSafetyGuard';
 import ExpedienteLegacyChromeGuard from './ExpedienteLegacyChromeGuard';
 import ExpedienteJourneyGuard from './ExpedienteJourneyGuard';
 import GlobalDictationGuard from './GlobalDictationGuard';
+import LocalAudioTranscriptionGuard from './LocalAudioTranscriptionGuard';
 import GlobalCommunicationCommandGuard from './GlobalCommunicationCommandGuard';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -129,6 +135,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <ExpedienteJourneyGuard />
       <ExpedienteFollowupConfirmationGuard />
       <CalculatorLabelGuard />
+      <CalculatorProEnhancement />
       <ProfileLauncherGuard />
       <OperationalAdvancedSearchGuard />
       <DirectionIdentityGuard />
@@ -150,7 +157,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <AnaKnowledgeReviewGuard />
       <AnaTopCorrectionGuard />
       <ContextEvidenceUpload />
+      <ExistingDocumentAutoBackfillGuard />
       <GlobalDictationGuard />
+      <LocalAudioTranscriptionGuard />
       <GlobalCommunicationCommandGuard />
       <ExpedienteAnaRuntimeGuard />
       <ExpedienteBelenFinancialGuard />
@@ -196,6 +205,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <VisitadorDetailShell />
       <EconomiaShell />
       <InformesShell />
+      <InformesDailyActivityGuard />
       <SearchShell />
       <NotificationsShell />
       <NotariasShell />
@@ -207,6 +217,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <AnaGovernance />
       <VisitasShell />
       <CommunicationsShell />
+      <ChatShell />
       <DetailShellGate />
       <TaskCreateShell />
       <OperationalRecordDetailGate />

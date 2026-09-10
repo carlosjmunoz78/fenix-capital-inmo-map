@@ -2,7 +2,14 @@ import {useEffect} from 'react';
 
 function normalize(root:ParentNode=document){
   root.querySelectorAll<HTMLElement>('[aria-label="Calculadora Hipotecaria PRO"]').forEach(el=>el.setAttribute('aria-label','Calculadora Hipotecaria'));
-  root.querySelectorAll<HTMLElement>('.calc-launcher,.calc-panel>header>div:first-child>strong').forEach(el=>{
+  root.querySelectorAll<HTMLElement>('.calc-launcher,.dir-calc-launcher').forEach(el=>{
+    if(el.getAttribute('aria-label')!=='Calculadora')el.setAttribute('aria-label','Calculadora');
+    if(el.getAttribute('title')!=='Calculadora')el.setAttribute('title','Calculadora');
+    for(const node of Array.from(el.childNodes)){
+      if(node.nodeType===Node.TEXT_NODE)node.remove();
+    }
+  });
+  root.querySelectorAll<HTMLElement>('.calc-panel>header>div:first-child>strong').forEach(el=>{
     for(const node of Array.from(el.childNodes)){
       if(node.nodeType===Node.TEXT_NODE&&node.textContent?.includes('PRO'))node.textContent=node.textContent.replace(/\s*PRO\b/g,'');
     }
@@ -18,9 +25,8 @@ export default function CalculatorLabelGuard(){
           if(node instanceof HTMLElement)normalize(node);
         }
       }
-      normalize();
     });
-    observer.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['aria-label']});
+    observer.observe(document.body,{childList:true,subtree:true});
     return()=>observer.disconnect();
   },[]);
   return null;

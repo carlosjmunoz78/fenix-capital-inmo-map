@@ -2,7 +2,7 @@ import { ChangeEvent, useEffect, useMemo, useState } from 'react';
 import { ChevronDown, ChevronUp, FileUp, MessageSquareWarning, Sparkles } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { anaAvatar } from './assets/visualAssets';
-import { fetchAnaApi, fetchAnaCanonicalApi, fetchEvidenceApi, fetchMemoryApi, supabase } from './supabase';
+import { fetchAnaApi, fetchAnaCanonicalApi, fetchEvidenceApi, fetchMemoryApi, IS_PRODUCTION, supabase } from './supabase';
 import './ana-universal.css';
 
 type Caps={
@@ -19,7 +19,7 @@ type CanonicalRule={id:string;domain:string;rule:string;source:string;confidence
 type CanonicalEnvelope={ok?:boolean;items?:CanonicalRule[];domain?:string;canonical_only?:boolean};
 
 const hiddenRoots=['/','/perfil','/ana'];
-const BUCKET='fenix-preprod-documents-test';
+const BUCKET=IS_PRODUCTION?'fenix-prod-documents':'fenix-preprod-documents-test';
 
 function scopeFromPath(path:string):Scope{
   const parts=path.split('/').filter(Boolean),root=parts[0]||'inicio',rawId=parts[1]||'';
@@ -133,7 +133,7 @@ export default function AnaUniversalGuard(){
         <div className="ana-evidence-actions"><button disabled={uploading||!evidenceText.trim()} onClick={()=>void saveText('texto_conversacion')}>Guardar conversación</button><button disabled={uploading||!evidenceText.trim()} onClick={()=>void saveText('comentario')}>Guardar comentario</button></div>
         {evidenceMessage&&<small className="ana-evidence-result">{evidenceMessage}</small>}
       </div>}
-      <small className="ana-evidence-hint">Texto y documentos quedan ligados al contexto. Las conversaciones/comentarios de texto quedan disponibles como memoria relacional. Audio: se conserva como evidencia, sin transcripción automática en esta fase.</small>
+      <small className="ana-evidence-hint">Texto y documentos quedan ligados al contexto. Las conversaciones/comentarios de texto quedan disponibles como memoria relacional. El audio se conserva como evidencia; la herramienta Audio → texto permite transcribirlo localmente en las fichas compatibles.</small>
     </div>}
   </aside>;
 }
