@@ -1,0 +1,102 @@
+{
+  "schema_version": "1.1.1",
+  "status": "DEFINED_NOT_BUILT",
+  "scope": "GCP_READ_ONLY_AUTH_BOOTSTRAP",
+  "environment": "SCAFFOLD",
+  "engine_id": "INT-001",
+  "execution_mode": "PLAN_ONLY",
+  "additional_cost_target_eur": 0,
+  "prod_writes": false,
+  "autonomous_prod": false,
+  "trading_access": false,
+  "required_context": ["company_id", "engine_id", "environment", "version"],
+  "known_project_ids": [
+    "fenix-trading-lab",
+    "fenix-capital-455809",
+    "fenix-inmobiliaria",
+    "fenix-capital-make-web-y-seo"
+  ],
+  "credential_policy": {
+    "plaintext_secret_values_allowed": false,
+    "secrets_in_repo": false,
+    "secrets_in_logs": false,
+    "secrets_in_prompts": false,
+    "transport": "CREDENTIAL_REFERENCE_OR_EXISTING_AUTH_CONTEXT_ONLY",
+    "least_privilege": true,
+    "read_only_first": true,
+    "credential_ref_fields": ["credential_ref_id", "provider", "principal_ref", "scope_ref", "expires_at"]
+  },
+  "auth_route_priority": [
+    "EXISTING_AUTHENTICATED_GCLOUD_CONTEXT",
+    "AUTHORIZED_WORKLOAD_IDENTITY_OR_FEDERATION_WITH_GCLOUD_CONTEXT",
+    "AUTHORIZED_CREDENTIAL_REF_FROM_BROKER_WITH_GCLOUD_CONTEXT",
+    "FACT_001_NEW_CONNECTOR_ONLY_IF_GAP_PROVEN"
+  ],
+  "auth_route_constraints": {
+    "google_application_default_credentials_only_supported_without_executor": false,
+    "reason": "V0 preflight is implemented exclusively with gcloud commands; standalone ADC is not advertised until an ADC-capable executor exists"
+  },
+  "preflight_policy": {
+    "command_prefix": "gcloud",
+    "allowed_read_verbs": ["list", "describe", "get-iam-policy"],
+    "fail_closed_on_unknown_verb": true,
+    "shell_safe_format_arguments_required": true
+  },
+  "preflight_checks": [
+    {
+      "id": "PF-001",
+      "purpose": "confirm an authenticated gcloud principal exists without printing tokens or secret material",
+      "command": "gcloud auth list --filter=status:ACTIVE '--format=json(account,status)'",
+      "expected_effect": "READ_ONLY_LOCAL_AUTH_METADATA"
+    },
+    {
+      "id": "PF-002",
+      "purpose": "confirm the authenticated principal can describe the target project",
+      "command": "gcloud projects describe ${PROJECT_ID} '--format=json(projectId,name,projectNumber,lifecycleState)'",
+      "expected_effect": "READ_ONLY_PROJECT_METADATA"
+    },
+    {
+      "id": "PF-003",
+      "purpose": "capture effective project IAM policy for dependency and least-privilege audit",
+      "command": "gcloud projects get-iam-policy ${PROJECT_ID} --format=json",
+      "expected_effect": "READ_ONLY_IAM_METADATA"
+    }
+  ],
+  "execution_gate": {
+    "execute_preflight": false,
+    "requires_explicit_authorized_auth_context": true,
+    "requires_project_allowlist_match": true,
+    "forbid_token_printing": true,
+    "forbid_secret_payload_access": true,
+    "forbid_credential_creation": true,
+    "forbid_role_or_iam_mutation": true,
+    "forbid_api_enablement": true,
+    "forbid_project_mutation": true
+  },
+  "training_guard": {
+    "training_project_id": "fenix-trading-lab",
+    "resource_ownership_status": "UNKNOWN_REQUIRES_AUDIT",
+    "read_only_metadata_audit_allowed": true,
+    "separate_training_from_trading_before_any_write": true,
+    "trading_mutation_forbidden": true
+  },
+  "handoff_when_auth_available": [
+    "RUN_AUTH_PREFLIGHT_READ_ONLY",
+    "VERIFY_ALL_FOUR_PROJECTS_VISIBLE_OR_RECORD_PERMISSION_GAPS",
+    "RUN_19_DOMAIN_DISCOVERY_PLAN_FROM_GCP_READONLY_COMMAND_CATALOG_V0",
+    "CLASSIFY_RESOURCE_OWNERSHIP_TRAINING_TRADING_OTHER",
+    "CAPTURE_DEPENDENCY_MAP",
+    "CAPTURE_SNAPSHOT_BACKUP_PLAN_BEFORE_ANY_CHANGE",
+    "REPRODUCE_CURRENT_TRAINING_FAILURES_BEFORE_FIX"
+  ],
+  "human_required": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ]
+}
