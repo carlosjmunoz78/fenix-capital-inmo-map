@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.1.0",
+  "schema_version": "1.2.0",
   "status": "DEFINED_NOT_BUILT",
   "scope": "GCP_READ_ONLY_DISCOVERY_COMMAND_CATALOG",
   "environment": "SCAFFOLD",
@@ -43,7 +43,7 @@
     "requires_authenticated_gcloud_or_authorized_connector": true,
     "secrets_policy": "REFERENCES_ONLY",
     "least_privilege": true,
-    "parameter_token": "${PROJECT_ID}",
+    "parameter_tokens": ["${PROJECT_ID}", "${LOCATION}"],
     "allowed_read_verbs": ["describe", "list", "search-all-resources", "get-iam-policy"],
     "forbidden_mutating_verbs": [
       "create",
@@ -69,7 +69,7 @@
     {"domain":"cloud_functions","commands":["gcloud functions list --project=${PROJECT_ID} --format=json"]},
     {"domain":"compute","commands":["gcloud compute instances list --project=${PROJECT_ID} --format=json"]},
     {"domain":"jobs","commands":["gcloud run jobs list --project=${PROJECT_ID} --format=json"]},
-    {"domain":"scheduler","commands":["gcloud scheduler jobs list --project=${PROJECT_ID} --format=json"]},
+    {"domain":"scheduler","commands":["gcloud scheduler locations list --project=${PROJECT_ID} --format=json","gcloud scheduler jobs list --project=${PROJECT_ID} --location=${LOCATION} --format=json"],"expansion_policy":"derive LOCATION values only from the read-only locations list for the same PROJECT_ID, then emit one jobs list command per returned location; never use ambient gcloud scheduler/location defaults"},
     {"domain":"pubsub","commands":["gcloud pubsub topics list --project=${PROJECT_ID} --format=json","gcloud pubsub subscriptions list --project=${PROJECT_ID} --format=json"]},
     {"domain":"storage","commands":["gcloud storage buckets list --project=${PROJECT_ID} --format=json"]},
     {"domain":"databases","commands":["gcloud sql instances list --project=${PROJECT_ID} --format=json","gcloud firestore databases list --project=${PROJECT_ID} --format=json"]},
