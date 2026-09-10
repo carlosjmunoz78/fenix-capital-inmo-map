@@ -5,14 +5,19 @@
   "scope": {
     "engine_id": "FACT-001",
     "canonical_engine_count": 177,
-    "environment": "PREPROD",
+    "ci_environment": "PREPROD",
+    "generated_engine_environment": "SCAFFOLD",
     "company_scope": "MULTI_COMPANY"
   },
   "basis": {
     "factory": "cerebro/factory.mjs",
     "registry": "cerebro/registry/engine-registry.seed.json",
     "existing_contract_tests": "cerebro/tests/factory.test.mjs",
-    "e2e_closure_test": "cerebro/tests/factory-e2e-closure.test.mjs"
+    "e2e_closure_test": "cerebro/tests/factory-e2e-closure.test.mjs",
+    "current_state": "cerebro/docs/CURRENT_STATE.md",
+    "dependency_map": "cerebro/docs/DEPENDENCY_MAP.md",
+    "autonomy_backup_rebuild": "cerebro/docs/AUTONOMY_BACKUP_REBUILD.md",
+    "changelog": "cerebro/docs/CHANGELOG.md"
   },
   "required_scaffold": {
     "file_count": 18,
@@ -39,6 +44,8 @@
   },
   "safety_gates": {
     "required_context": ["company_id", "engine_id", "environment", "version"],
+    "registry_environment_exact": "SCAFFOLD",
+    "reject_registry_environments": ["PREPROD", "PROD"],
     "deny_by_default": true,
     "cross_company_access": "deny",
     "generated_enabled_default": false,
@@ -49,12 +56,45 @@
     "gateway_only_api": true,
     "trading_scope_added": false
   },
-  "closure_rule": "Do not mark FACT-001 E2E green until this branch has successful exact-head CEREBRO Factory PREPROD, successful App PREPROD non-regression when available at zero additional cost, an exact-head Codex review with zero open P1/P2, and all 177 generated scaffolds satisfy the semantic E2E contract.",
+  "latest_verified_code_ancestor": {
+    "head_sha": "dd68098752b9a3429e18ba9bf13548f5543ba337",
+    "factory_workflow": {
+      "run_id": 34475720602,
+      "run_number": 169,
+      "status": "completed",
+      "conclusion": "success"
+    },
+    "cerebro_test_result": {
+      "tests": 196,
+      "failures": 0,
+      "semantic_fact001_e2e": "success",
+      "canonical_engine_validation": "177/177",
+      "generated_engine_count": 177
+    },
+    "codex_review": {
+      "result": "NO_MAJOR_ISSUES",
+      "p1_p2_open": 0
+    }
+  },
+  "app_preservation": {
+    "changed_app_web_files": 0,
+    "parent_baseline_head": "e49a5539810079667b578df96d25322beeba2bf7",
+    "parent_app_preprod_run_number": 3622,
+    "parent_app_preprod_result": "success",
+    "note": "PR #174 is stacked on the already-green #173 head and changes only CEREBRO factory/tests/evidence/docs. The App workflow does not currently trigger for this stacked non-main base, so no exact-head App run is claimed."
+  },
+  "exact_head_binding": {
+    "source": "pull_request.head.sha",
+    "required_relation": "Final CEREBRO Factory PREPROD workflow head_sha and final Codex review MUST cover the final PR head before technical closure.",
+    "self_reference_policy": "Committed evidence records the latest verified code ancestor. The final documentation/evidence HEAD is proven by external GitHub Actions and Codex records, avoiding an impossible self-referential SHA update loop."
+  },
+  "closure_rule": "FACT-001 V0 structural E2E is technically green only when the final PR HEAD has successful CEREBRO Factory PREPROD, an exact-head Codex review with zero open P1/P2, the 177 generated scaffolds satisfy the semantic E2E contract, and no App/web/Trading/PROD scope expansion is present. This does not promote or activate generated engines.",
   "gates": {
-    "factory_ci": "PENDING_EXACT_HEAD",
-    "app_non_regression": "PENDING_EXACT_HEAD",
-    "codex_review": "PENDING_EXACT_HEAD",
-    "p1_p2_open": "UNKNOWN_PENDING_REVIEW"
+    "latest_verified_code_ancestor_factory_ci": "SUCCESS",
+    "latest_verified_code_ancestor_codex_review": "SUCCESS_NO_P1_P2",
+    "latest_verified_code_ancestor_p1_p2_open": 0,
+    "final_documentation_head_factory_ci": "PENDING_EXTERNAL_EXACT_HEAD",
+    "final_documentation_head_codex_review": "PENDING_EXTERNAL_EXACT_HEAD"
   },
   "notes": [
     "This verifies the Factory V0 structural generation contract, not operational autonomy of the 177 generated engines.",
