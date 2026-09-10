@@ -11,9 +11,11 @@ test('gate PROD exige promoción explícita y entorno separado',()=>{
   expect(gate).toContain('No fusionar PR #2 sin orden explícita');
 });
 
-test('workflow PRE-PROD no incorpora promoción automática a main o PROD',()=>{
+test('workflow PRE-PROD permanece parado y solo admite lanzamiento manual',()=>{
   const workflow=fs.readFileSync(path.resolve('.github/workflows/preprod-build.yml'),'utf8');
-  expect(workflow).toContain("github.ref == 'refs/heads/preprod-app-phase1'");
+  expect(workflow).toContain('workflow_dispatch:');
+  expect(workflow).not.toMatch(/^\s+push:\s*$/m);
+  expect(workflow).not.toMatch(/^\s+pull_request:\s*$/m);
   expect(workflow).not.toMatch(/git push[^\n]*HEAD:main/);
   expect(workflow).not.toMatch(/git push[^\n]*\bmain\b/);
   expect(workflow).not.toMatch(/\benvironment\s*:\s*(?:prod|production)\b/i);
