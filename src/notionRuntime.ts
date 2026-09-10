@@ -1,4 +1,4 @@
-import { IS_PRODUCTION, fetchAppApi, fetchEnvironmentApi } from './supabase';
+import { fetchAppApi, fetchEnvironmentApi } from './supabase';
 
 function filterContactResponse<T>(data:T|null,mode:'clientes'|'inmobiliarias'|'bancos'):T|null{
   if(!data||typeof data!=='object')return data;
@@ -82,6 +82,5 @@ async function fetchProductionRead<T>(path:string,init?:RequestInit):Promise<{st
 }
 
 export async function fetchNotionRuntime<T>(path:string,init?:RequestInit):Promise<{status:number;data:T|null}>{
-  if(IS_PRODUCTION)return fetchProductionRead<T>(path,init);
-  return fetchEnvironmentApi<T>('fenix-notion-runtime',path,init,{productionAvailable:false});
+  return fetchProductionRead<T>(path,init);
 }
