@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.7.0",
+  "schema_version": "1.7.1",
   "status": "DEFINED_NOT_BUILT",
   "scope": "GCP_LIVE_INVENTORY_EVIDENCE_ENVELOPE",
   "environment": "SCAFFOLD",
@@ -62,6 +62,7 @@
     "scheduler_location_discovery_result_required": true,
     "scheduler_expansion_parameter": "LOCATION",
     "scheduler_each_discovered_location_requires_exactly_one_jobs_result": true,
+    "scheduler_each_jobs_result_must_include_location_equal_to_discovered_value": true,
     "scheduler_zero_jobs_results_allowed_when_no_locations_discovered": true,
     "scheduler_failed_or_empty_discovery_requires_zero_jobs_expansions": true,
     "scheduler_duplicate_or_missing_location_result_forbidden": true
