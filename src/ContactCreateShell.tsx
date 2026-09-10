@@ -52,16 +52,18 @@ async function createContact(payload:Record<string,unknown>){
  if(!IS_PRODUCTION){
   return fetchEnvironmentApi<CreateResponse>('fenix-contactos-unified','',{method:'POST',body:JSON.stringify(payload)});
  }
- const{data,error}=await supabase.rpc('fenix_prod_contact_create',{
+ const{data,error}=await supabase.rpc('fenix_prod_contact_create_v2',{
   p_tipo:text(payload.tipo_contacto),p_nombre:text(payload.nombre),p_apellidos:text(payload.apellidos)||null,
-  p_email:text(payload.email)||null,p_telefono:text(payload.telefono)||null,p_cargo:text(payload.cargo)||null,
-  p_entidad_id:text(payload.entidad_id)||null,p_observaciones:text(payload.observaciones)||null,
+  p_email:text(payload.email)||null,p_telefono:text(payload.telefono)||null,
+  p_emails:Array.isArray(payload.emails)?payload.emails:[],p_telefonos:Array.isArray(payload.telefonos)?payload.telefonos:[],
+  p_cargo:text(payload.cargo)||null,p_entidad_id:text(payload.entidad_id)||null,p_observaciones:text(payload.observaciones)||null,
   p_consentimiento_comercial:Boolean(payload.consentimiento_comercial)
  });
  if(error)return{status:500,data:{ok:false,error:error.message} as CreateResponse};
  const response=(data??{}) as CreateResponse;
  const status=Number(response.status||500);
- return{status,data:{...response,destino:response.ok?'/contactos':response.destino}};
+ const destino=response.ok&&response.id?`/contactos/${encodeURIComponent(response.id)}`:response.destino;
+ return{status,data:{...response,destino}};
 }
 async function fetchEntityOptions(kind:EntityKind){
  if(!kind)return{status:200,items:[] as EntityOption[]};
@@ -99,7 +101,7 @@ export default function ContactCreateShell(){
  if(!active||!ready||!logged)return null;
  function edit(){setPreview(false);setMessage('');setResult(null);}
  function changeType(next:ContactType){const cfg=CONTACT_TYPES.find(x=>x.value===next)!;setTipo(next);setEntidad('');setCargo('');setEntityKind(IS_PRODUCTION&&next==='contacto_bancario'?'banco':cfg.defaultLink||'');setEntityId('');edit();}
- async function submit(e:FormEvent){e.preventDefault();if(!valid)return;if(!preview){setPreview(true);setMessage('');return;}setBusy(true);setMessage('');const r=await createContact(payload);setBusy(false);setResult(r.data);if(r.status===201&&r.data?.ok){setMessage(r.data.entidad_id?'Contacto creado, clasificado y vinculado a su entidad.':'Contacto creado y clasificado desde el origen.');setPreview(false);}else if(r.status===409&&r.data?.error==='duplicate_contact'){setMessage('Ya existe un contacto con ese email o teléfono. No se ha creado un duplicado.');setPreview(false);}else if(r.status===400&&['entity_not_found','entity_required'].includes(r.data?.error||'')){setMessage('La entidad seleccionada ya no está disponible o es obligatoria. Vuelve a seleccionarla.');setPreview(false);}else if(r.status===403)setMessage('Tu perfil no puede crear este tipo de contacto.');else if(r.status===422)setMessage('Este tipo de contacto todavía no dispone de alta operativa en producción.');else setMessage(`No se pudo crear el contacto (${r.data?.error||r.status}).`);}
+ async function submit(e:FormEvent){e.preventDefault();if(!valid)return;if(!preview){setPreview(true);setMessage('');return;}setBusy(true);setMessage('');const r=await createContact(payload);setBusy(false);setResult(r.data);if(r.status===201&&r.data?.ok){setMessage(r.data.entidad_id?'Contacto creado, clasificado y vinculado a su entidad.':'Contacto creado y clasificado desde el origen.');setPreview(false);}else if(r.status===409&&r.data?.error==='duplicate_contact'){setMessage('Ya existe un contacto con alguno de esos correos o teléfonos. No se ha creado un duplicado.');setPreview(false);}else if(r.status===400&&['entity_not_found','entity_required'].includes(r.data?.error||'')){setMessage('La entidad seleccionada ya no está disponible o es obligatoria. Vuelve a seleccionarla.');setPreview(false);}else if(r.status===403)setMessage('Tu perfil no puede crear este tipo de contacto.');else if(r.status===422)setMessage('Este tipo de contacto todavía no dispone de alta operativa en producción.');else setMessage(`No se pudo crear el contacto (${r.data?.error||r.status}).`);}
  async function logout(){await supabase.auth.signOut();window.location.href=import.meta.env.BASE_URL;}
  const topbar=<header className="ops-top"><strong>Nuevo contacto</strong><div className="ops-top-actions"><button onClick={()=>setTheme(theme==='light'?'dark':'light')} aria-label="Cambiar tema">{theme==='light'?<Moon size={17}/>:<Sun size={17}/>} {theme==='light'?'Oscuro':'Claro'}</button><div className="ops-profile"><strong>{ctx?.role||'Usuario'}</strong></div><button onClick={logout} aria-label="Cerrar sesión"><LogOut size={17}/></button></div></header>;
  return <OperationalShellFrame className="contact-create-root" theme={theme} navigation={contactCreateNav} activeRoute="/contactos" anaSubtitle="Primero clasificamos el contacto; después pedimos solo lo que corresponde." anaRoute="/ana" query="" onQueryChange={()=>{}} searchPlaceholder="" name={ctx?.role||'Usuario'} role="" initials={(ctx?.role||'U').slice(0,2).toUpperCase()} onToggleTheme={()=>setTheme(theme==='light'?'dark':'light')} onLogout={logout} topbar={topbar}>
