@@ -138,6 +138,9 @@ export function planDigitalBuild(requestInput, optionsInput = {}) {
 
   const context = ownDataObject(request.context, 'request.context');
   for (const key of REQUIRED_CONTEXT) nonEmptyString(context[key], `request.context.${key}`);
+  if (FORBIDDEN_TRADING_ENGINE_IDS.has(context.engine_id)) {
+    throw new Error(`Trading context engine ${context.engine_id} is forbidden in Digital Build plans`);
+  }
   if (context.environment !== 'SCAFFOLD') throw new Error('digital build V0 accepts exact SCAFFOLD only');
 
   const capabilityId = nonEmptyString(request.capability_id, 'request.capability_id');
