@@ -8,8 +8,8 @@ import { loadDigitalBuildCatalog, selectTemplate, validateDigitalBuildCatalog } 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const CEREBRO = path.resolve(HERE, '..');
 const registry = JSON.parse(fs.readFileSync(path.join(CEREBRO, 'registry', 'engine-registry.seed.json'), 'utf8'));
-const registryEntries = Array.isArray(registry) ? registry : registry.engines;
-const canonicalIds = new Set(registryEntries.map((entry) => entry.engine_id));
+assert.ok(Array.isArray(registry.engine_ids));
+const canonicalIds = new Set(registry.engine_ids);
 
 const EXPECTED_CAPABILITIES = [
   'cap:web-build',
@@ -26,6 +26,8 @@ const EXPECTED_CAPABILITIES = [
 
 test('FACT-001 digital-build catalog validates against exactly 177 canonical engine IDs', () => {
   const result = validateDigitalBuildCatalog();
+  assert.equal(registry.count, 177);
+  assert.equal(registry.engine_ids.length, 177);
   assert.equal(result.canonical_engine_ids, 177);
   assert.equal(result.capabilities, EXPECTED_CAPABILITIES.length);
   assert.equal(result.templates, EXPECTED_CAPABILITIES.length);
@@ -104,4 +106,15 @@ test('validator rejects PROD, autonomous, paid or noncanonical catalog mutations
   const invented = structuredClone(base);
   invented.capabilities[0].engine_bindings.push('DIGITAL-BUILD-NEW-999');
   assert.throws(() => validateDigitalBuildCatalog({ catalog: invented, registry }), /noncanonical engine binding/);
+});
+
+test('validator rejects malformed or inconsistent canonical registry snapshots', () => {
+  const catalog = loadDigitalBuildCatalog();
+  const wrongCount = structuredClone(registry);
+  wrongCount.count = 176;
+  assert.throws(() => validateDigitalBuildCatalog({ catalog, registry: wrongCount }), /exactly 177/);
+
+  const duplicate = structuredClone(registry);
+  duplicate.engine_ids[176] = duplicate.engine_ids[175];
+  assert.throws(() => validateDigitalBuildCatalog({ catalog, registry: duplicate }), /177 unique/);
 });
