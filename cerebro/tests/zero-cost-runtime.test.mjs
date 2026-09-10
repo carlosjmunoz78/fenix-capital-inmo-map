@@ -30,12 +30,17 @@ test('LOCAL-001 selects deterministic zero-cost available capability and isolate
   assert.equal(registry.list(other).some(x => x.capability_id === 'a'), false);
 });
 
-test('LOCAL-001 fails closed when only degraded/unavailable or paid local capability exists', () => {
+test('LOCAL-001 fails closed for degraded/paid/non-PREPROD or Proxy capability', () => {
   const registry = new LocalCapabilityRegistry([
     { capability_id:'d', company_id:'fenix', engine_id:'SEO-001', version:'0.1.0', health:'DEGRADED', cost_eur:0, capabilities:['extract'] },
     { capability_id:'p', company_id:'fenix', engine_id:'SEO-001', version:'0.1.0', health:'AVAILABLE', cost_eur:2, capabilities:['extract'] }
   ]);
   assert.equal(registry.select({ context, requires:['extract'] }).status, 'UNAVAILABLE');
+  assert.throws(() => new LocalCapabilityRegistry([{ capability_id:'x', company_id:'fenix', engine_id:'SEO-001', version:'0.1.0', environment:'PROD' }]));
+  let trapCalls = 0;
+  const proxied = new Proxy({}, { getPrototypeOf(){ trapCalls += 1; return Object.prototype; } });
+  assert.throws(() => new LocalCapabilityRegistry([proxied]));
+  assert.equal(trapCalls, 0);
 });
 
 test('FREE-001 never selects paid when an equivalent free route exists', () => {
@@ -56,18 +61,23 @@ test('FREE-001 returns MONEY_LIMIT for paid-only route without approval', () => 
   assert.equal(result.human_reason, 'MONEY_LIMIT');
 });
 
-test('DBOFF-001 persists, reopens, isolates company and restores backup', () => {
+test('DBOFF-001 persists, reopens, isolates company and restores only requested scope', () => {
   const file = tmp('dboff.v8');
   const store = new LocalOffloadStore({ file_path:file, kind:'DBOFF-001' });
   store.put({ context, key:'k', value:{n:1} });
-  const backup = store.backup();
+  store.put({ context:other, key:'foreign', value:{keep:true} });
+  const backup = store.backup(context);
+  assert.equal(backup.every(op => op.context.company_id === 'fenix'), true);
   store.put({ context, key:'k', value:{n:2} });
   assert.deepEqual(store.get({ context, key:'k' }), {n:2});
   assert.equal(store.get({ context:other, key:'k' }), null);
-  store.restore(backup);
+  store.restore({ context, snapshot:backup });
   assert.deepEqual(store.get({ context, key:'k' }), {n:1});
+  assert.deepEqual(store.get({ context:other, key:'foreign' }), {keep:true});
+  assert.throws(() => store.restore({ context, snapshot:store.backup(other) }), /cross-scope/);
   const reopened = new LocalOffloadStore({ file_path:file, kind:'DBOFF-001' });
   assert.deepEqual(reopened.get({ context, key:'k' }), {n:1});
+  assert.deepEqual(reopened.get({ context:other, key:'foreign' }), {keep:true});
 });
 
 test('STOROFF-001 corruption fails closed', () => {
@@ -87,6 +97,8 @@ test('AIBUD-001 + ROUTE-001 use deterministic/free routes and fail closed on ris
   assert.equal(free.route_type, 'local_model');
   assert.equal(router.route({ context, options:[], low_confidence:true }).human_reason, 'LOW_CONFIDENCE');
   assert.equal(router.route({ context, options:[], high_risk:true }).human_reason, 'HIGH_RISK');
+  assert.equal(router.route({ context, options:[], policy_conflict:true }).human_reason, 'POLICY_CONFLICT');
+  assert.equal(router.route({ context, options:[], security_incident:true }).human_reason, 'SECURITY_INCIDENT');
 });
 
 test('Wave1 contract is PREPROD-only, zero-cost target, no Supabase PREPROD requirement or Trading', () => {
