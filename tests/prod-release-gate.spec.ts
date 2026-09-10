@@ -11,11 +11,14 @@ test('gate PROD exige promoción explícita y entorno separado',()=>{
   expect(gate).toContain('No fusionar PR #2 sin orden explícita');
 });
 
-test('workflow PRE-PROD permanece parado y solo admite lanzamiento manual',()=>{
-  const workflow=fs.readFileSync(path.resolve('.github/workflows/preprod-build.yml'),'utf8');
-  expect(workflow).toContain('workflow_dispatch:');
-  expect(workflow).not.toMatch(/^\s+push:\s*$/m);
-  expect(workflow).not.toMatch(/^\s+pull_request:\s*$/m);
+test('workflow APP PRE-PROD retirado y gate activo usa candidato PROD aislado',()=>{
+  expect(fs.existsSync(path.resolve('.github/workflows/preprod-build.yml'))).toBe(false);
+  const workflow=fs.readFileSync(path.resolve('.github/workflows/prod-preparation-build.yml'),'utf8');
+  expect(workflow).toContain('Build isolated PROD candidate');
+  expect(workflow).toContain('PROD candidate browser QA');
+  expect(workflow).toContain('VITE_FENIX_ENV: prod');
+  expect(workflow).not.toContain('Browser QA PRE-PROD');
+  expect(workflow).not.toContain("VITE_FUNCTION_SUFFIX: '-test'");
   expect(workflow).not.toMatch(/git push[^\n]*HEAD:main/);
   expect(workflow).not.toMatch(/git push[^\n]*\bmain\b/);
 });
