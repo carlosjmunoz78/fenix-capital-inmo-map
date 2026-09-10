@@ -81,6 +81,7 @@ test('all preflight commands are restricted to canonical read-only verbs', () =>
   assert.deepEqual(cfg.preflight_policy.allowed_read_verbs, ['list','describe','get-iam-policy']);
   assert.equal(cfg.preflight_policy.command_prefix, 'gcloud');
   assert.equal(cfg.preflight_policy.fail_closed_on_unknown_verb, true);
+  assert.equal(cfg.preflight_policy.shell_safe_format_arguments_required, true);
   assert.ok(Array.isArray(cfg.preflight_checks) && cfg.preflight_checks.length === 3);
 
   for (const check of cfg.preflight_checks) {
@@ -99,10 +100,18 @@ test('all preflight commands are restricted to canonical read-only verbs', () =>
   }
 
   assert.deepEqual(cfg.preflight_checks.map((check) => check.command), [
-    'gcloud auth list --filter=status:ACTIVE --format=json(account,status)',
-    'gcloud projects describe ${PROJECT_ID} --format=json(projectId,name,projectNumber,lifecycleState)',
+    "gcloud auth list --filter=status:ACTIVE '--format=json(account,status)'",
+    "gcloud projects describe ${PROJECT_ID} '--format=json(projectId,name,projectNumber,lifecycleState)'",
     'gcloud projects get-iam-policy ${PROJECT_ID} --format=json',
   ]);
+});
+
+test('format projections containing parentheses are shell-quoted', () => {
+  const [pf1, pf2] = cfg.preflight_checks;
+  for (const check of [pf1, pf2]) {
+    assert.match(check.command, /'--format=json\([^']+\)'$/);
+    assert.equal(/--format=json\([^)]*\)(?:\s|$)/.test(check.command.replace(/'--format=json\([^']+\)'/, '')), false);
+  }
 });
 
 test('mutation gates are fail-closed before any authenticated discovery', () => {
