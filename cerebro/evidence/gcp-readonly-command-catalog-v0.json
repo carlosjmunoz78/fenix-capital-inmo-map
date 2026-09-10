@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "status": "DEFINED_NOT_BUILT",
   "scope": "GCP_READ_ONLY_DISCOVERY_COMMAND_CATALOG",
   "environment": "SCAFFOLD",
@@ -43,6 +43,8 @@
     "requires_authenticated_gcloud_or_authorized_connector": true,
     "secrets_policy": "REFERENCES_ONLY",
     "least_privilege": true,
+    "parameter_token": "${PROJECT_ID}",
+    "allowed_read_verbs": ["describe", "list", "search-all-resources", "get-iam-policy"],
     "forbidden_mutating_verbs": [
       "create",
       "update",
@@ -60,6 +62,27 @@
       "write"
     ]
   },
+  "domain_commands": [
+    {"domain":"projects","commands":["gcloud projects describe ${PROJECT_ID} --format=json"]},
+    {"domain":"enabled_apis","commands":["gcloud services list --enabled --project=${PROJECT_ID} --format=json"]},
+    {"domain":"cloud_run","commands":["gcloud run services list --project=${PROJECT_ID} --platform=managed --format=json"]},
+    {"domain":"cloud_functions","commands":["gcloud functions list --project=${PROJECT_ID} --format=json"]},
+    {"domain":"compute","commands":["gcloud compute instances list --project=${PROJECT_ID} --format=json"]},
+    {"domain":"jobs","commands":["gcloud run jobs list --project=${PROJECT_ID} --format=json"]},
+    {"domain":"scheduler","commands":["gcloud scheduler jobs list --project=${PROJECT_ID} --format=json"]},
+    {"domain":"pubsub","commands":["gcloud pubsub topics list --project=${PROJECT_ID} --format=json","gcloud pubsub subscriptions list --project=${PROJECT_ID} --format=json"]},
+    {"domain":"storage","commands":["gcloud storage buckets list --project=${PROJECT_ID} --format=json"]},
+    {"domain":"databases","commands":["gcloud sql instances list --project=${PROJECT_ID} --format=json","gcloud firestore databases list --project=${PROJECT_ID} --format=json"]},
+    {"domain":"artifact_registry","commands":["gcloud artifacts repositories list --project=${PROJECT_ID} --format=json"]},
+    {"domain":"service_accounts_and_iam","commands":["gcloud iam service-accounts list --project=${PROJECT_ID} --format=json","gcloud projects get-iam-policy ${PROJECT_ID} --format=json"]},
+    {"domain":"secret_references","commands":["gcloud secrets list --project=${PROJECT_ID} --format=json"],"safety_note":"metadata only; never access secret payloads or versions"},
+    {"domain":"networking","commands":["gcloud compute networks list --project=${PROJECT_ID} --format=json","gcloud compute firewall-rules list --project=${PROJECT_ID} --format=json"]},
+    {"domain":"logging_monitoring","commands":["gcloud logging sinks list --project=${PROJECT_ID} --format=json","gcloud monitoring policies list --project=${PROJECT_ID} --format=json"]},
+    {"domain":"billing_cost","commands":["gcloud billing projects describe ${PROJECT_ID} --format=json"],"safety_note":"billing linkage only; cost amounts require an already-authorized billing export/API and must not be invented"},
+    {"domain":"regions","commands":["gcloud compute regions list --project=${PROJECT_ID} --format=json"]},
+    {"domain":"deployments","commands":["gcloud deployment-manager deployments list --project=${PROJECT_ID} --format=json"],"safety_note":"optional legacy surface; service-specific deployment state remains captured by its own read-only domain commands"},
+    {"domain":"resource_consumers","commands":["gcloud asset search-all-resources --scope=projects/${PROJECT_ID} --format=json"],"safety_note":"use only if Cloud Asset Inventory access already exists; do not enable APIs from this catalog"}
+  ],
   "training_guard": {
     "training_project_id": "fenix-trading-lab",
     "resource_ownership_status": "UNKNOWN_REQUIRES_AUDIT",
