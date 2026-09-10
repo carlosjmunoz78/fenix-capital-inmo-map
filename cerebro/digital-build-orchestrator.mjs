@@ -5,6 +5,7 @@ import { loadDigitalBuildCatalog, selectTemplate, validateDigitalBuildCatalog } 
 const require = createRequire(import.meta.url);
 const REGISTRY = require('./registry/engine-registry.seed.json');
 const REQUIRED_CONTEXT = ['company_id', 'engine_id', 'environment', 'version'];
+const CONTEXT_KEYS = new Set(REQUIRED_CONTEXT);
 const HUMAN_REQUIRED = new Set([
   'LEGAL_REQUIRED',
   'SIGNATURE_REQUIRED',
@@ -164,6 +165,7 @@ export function planDigitalBuild(requestInput, optionsInput = {}) {
   validateDigitalBuildCatalog({ catalog });
 
   const context = ownDataObject(request.context, 'request.context');
+  assertExactKeys(context, CONTEXT_KEYS, 'context');
   for (const key of REQUIRED_CONTEXT) nonEmptyString(context[key], `request.context.${key}`);
   if (FORBIDDEN_TRADING_ENGINE_IDS.has(context.engine_id)) {
     throw new Error(`Trading context engine ${context.engine_id} is forbidden in Digital Build plans`);
