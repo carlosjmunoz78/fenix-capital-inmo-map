@@ -26,17 +26,24 @@
     "plan": "cerebro/docs/zero-cost-runtime-wave1-plan.md"
   },
   "gates": {
-    "verified_code_head": "45fcb4b06ea844fc366ceb6411c17a51e6d44047",
-    "factory_workflow": {
-      "run_id": 34461906690,
-      "run_number": 150,
-      "status": "completed",
-      "conclusion": "success"
+    "exact_head_binding": {
+      "source": "pull_request.head.sha",
+      "required_relation": "CEREBRO Factory PREPROD workflow head_sha MUST equal pull_request.head.sha before technical closure",
+      "self_reference_policy": "This committed evidence records the latest verified code ancestor. Final exact-head proof is the GitHub Actions run and Codex review attached to the final PR HEAD, avoiding an impossible self-referential commit SHA."
+    },
+    "latest_verified_code_ancestor": {
+      "head_sha": "c2ce6ce18c19e44604eefdd1437c89c5aa30bcbd",
+      "factory_workflow": {
+        "run_id": 34463921240,
+        "run_number": 157,
+        "status": "completed",
+        "conclusion": "success"
+      }
     },
     "app_workflow": "NON_REQUIRED_FOR_CEREBRO_ONLY_CHANGE_UNLESS_ZERO_COST_AVAILABLE",
-    "codex_review": "PENDING_AFTER_P2_FIXES",
-    "p1_p2_open": 7,
-    "evidence_note": "This evidence commit is a documentation-only descendant of verified_code_head. Re-run CI and Codex on the resulting PR HEAD before final closure."
+    "codex_review": "PENDING_FINAL_EXACT_HEAD",
+    "p1_p2_open_at_evidence_commit": 4,
+    "closure_rule": "Do not mark Wave 1 technically green until the evidence commit itself has successful exact-head Factory CI and an exact-head Codex review with zero open P1/P2."
   },
   "autonomy": {
     "level": "REFERENCE_V0",
@@ -45,10 +52,11 @@
     "old_vs_new_completed": false
   },
   "changelog": [
-    "Introduced deterministic LOCAL-001 capability selection with version isolation.",
-    "Introduced FREE-001 free-first broker with zero-cost precedence and strict budget approval.",
-    "Introduced local DBOFF-001/STOROFF-001 offload stores with scoped backup/restore and coordinated rollback path.",
-    "Introduced deterministic AIBUD-001/ROUTE-001 model routing with option-confidence and HUMAN_REQUIRED gates.",
+    "Introduced deterministic LOCAL-001 selection with exact company, engine and version precedence before GLOBAL fallbacks.",
+    "Introduced FREE-001 free-first broker with zero-cost precedence, confidence filtering and strict budget approval.",
+    "Introduced local DBOFF-001/STOROFF-001 offload stores with scoped backup/restore and recovery after ambiguous journal durability.",
+    "Rejects SharedArrayBuffer and shared-memory views before durable persistence.",
+    "Introduced deterministic AIBUD-001/ROUTE-001 routing with HUMAN_REQUIRED gates.",
     "Persisted route/cost decision evidence across rebuilds.",
     "Introduced isolated integration harness with zero-cost/no-Supabase-PREPROD contract."
   ]
