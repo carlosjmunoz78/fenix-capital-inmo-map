@@ -30,14 +30,25 @@ test('LOCAL-001 selects deterministic zero-cost available capability and isolate
   assert.equal(registry.list(other).some(x => x.capability_id === 'a'), false);
 });
 
-test('LOCAL-001 respects version and only allows explicit GLOBAL version fallback', () => {
+test('LOCAL-001 respects version and prefers exact version before GLOBAL fallback', () => {
   const registry = new LocalCapabilityRegistry([
     { capability_id:'old', company_id:'fenix', engine_id:'SEO-001', version:'0.0.9', cost_eur:0, capabilities:['extract'] },
-    { capability_id:'global', company_id:'fenix', engine_id:'SEO-001', version:'GLOBAL', priority:20, cost_eur:0, capabilities:['extract'] },
-    { capability_id:'current', company_id:'fenix', engine_id:'SEO-001', version:'0.1.0', priority:10, cost_eur:0, capabilities:['extract'] }
+    { capability_id:'global', company_id:'fenix', engine_id:'SEO-001', version:'GLOBAL', priority:1, cost_eur:0, capabilities:['extract'] },
+    { capability_id:'current', company_id:'fenix', engine_id:'SEO-001', version:'0.1.0', priority:50, cost_eur:0, capabilities:['extract'] }
   ]);
   assert.equal(registry.select({ context, requires:['extract'] }).selected.capability_id, 'current');
   assert.equal(registry.list(context).some(x => x.capability_id === 'old'), false);
+  assert.equal(registry.list(context)[0].capability_id, 'current');
+});
+
+test('LOCAL-001 list is scoped by engine_id with explicit GLOBAL fallback only', () => {
+  const registry = new LocalCapabilityRegistry([
+    { capability_id:'seo', company_id:'fenix', engine_id:'SEO-001', version:'0.1.0', cost_eur:0 },
+    { capability_id:'crm', company_id:'fenix', engine_id:'CRM-001', version:'0.1.0', cost_eur:0 },
+    { capability_id:'global-engine', company_id:'fenix', engine_id:'GLOBAL', version:'0.1.0', cost_eur:0 }
+  ]);
+  const ids = registry.list(context).map(x => x.capability_id);
+  assert.deepEqual(ids.sort(), ['global-engine','seo']);
 });
 
 test('LOCAL-001 fails closed for degraded/paid/non-PREPROD or Proxy capability', () => {
@@ -76,7 +87,16 @@ test('FREE-001 returns MONEY_LIMIT for paid-only route without approval', () => 
   assert.equal(result.human_reason, 'MONEY_LIMIT');
 });
 
-test('FREE-001 routes low option confidence to HUMAN_REQUIRED', () => {
+test('FREE-001 skips low-confidence option when a confident equivalent route exists', () => {
+  const result = new FreeFirstBroker().resolve({ context, options:[
+    { option_id:'uncertain-det', route_type:'deterministic', cost_eur:0, equivalent:true, confidence:0 },
+    { option_id:'trusted-local', route_type:'local_model', cost_eur:0, equivalent:true, confidence:1 }
+  ]});
+  assert.equal(result.route_type, 'local_model');
+  assert.equal(result.selected.option_id, 'trusted-local');
+});
+
+test('FREE-001 routes to LOW_CONFIDENCE only when no confident equivalent remains', () => {
   const result = new FreeFirstBroker().resolve({ context, options:[
     { option_id:'uncertain', route_type:'deterministic', cost_eur:0, equivalent:true, confidence:0 }
   ]});
