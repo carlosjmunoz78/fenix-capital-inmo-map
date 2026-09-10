@@ -43,6 +43,11 @@ async function fetchProductionRead<T>(path:string,init?:RequestInit):Promise<{st
     const id=decodeURIComponent(bankContactDetail[1]);
     return fetchAppApi<T>(`/contactos/${encodeURIComponent(id)}`);
   }
+  const inmoDetail=pathname.match(/^\/inmobiliarias\/([^/]+)$/);
+  if(inmoDetail){
+    const id=decodeURIComponent(inmoDetail[1]);
+    return fetchAppApi<T>(`/inmobiliarias/${encodeURIComponent(id)}`);
+  }
   const people=pathname.match(/^\/expedientes\/([^/]+)\/compradores$/);
   if(people){
     return fetchEnvironmentApi<T>('fenix-expediente-people',`/?expediente=${encodeURIComponent(decodeURIComponent(people[1]))}`,init);
