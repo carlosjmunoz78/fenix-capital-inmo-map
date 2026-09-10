@@ -1,7 +1,7 @@
 import {useEffect,useState} from 'react';
 import {useLocation,useNavigate} from 'react-router-dom';
 import {ArrowLeft,Landmark,Plus,X} from 'lucide-react';
-import {fetchAppApi,fetchEnvironmentApi,IS_PRODUCTION,supabase} from './supabase';
+import {fetchAppApi,fetchEnvironmentApi,supabase} from './supabase';
 import {normalizeNavigation,type NavItem} from './masterNavigation';
 import OperationalShellFrame from './OperationalShellFrame';
 import {anaVertical} from './assets/visualAssets';
@@ -27,17 +27,16 @@ export default function BankCreateShell(){
   if(!canCreate||!nombre.trim())return;
   if(!preview){setPreview(true);setMessage('');return}
   setBusy(true);setMessage('');setResult(null);
-  const endpoint=IS_PRODUCTION?'fenix-bank-api':'fenix-bank-actions';
-  const response=await fetchEnvironmentApi<CreateBankResponse>(endpoint,'',{method:'POST',body:JSON.stringify({nombre:nombre.trim(),direccion:direccion.trim(),localidad:localidad.trim(),provincia:provincia.trim(),perfil:perfil.trim(),financiacion_100:yn(cien),doble_garantia:yn(doble),telefonos:telefonos.map(x=>x.trim()).filter(Boolean),emails:emails.map(x=>x.trim()).filter(Boolean),observaciones:observaciones.trim()})});
+  const response=await fetchEnvironmentApi<CreateBankResponse>('fenix-bank-api','',{method:'POST',body:JSON.stringify({nombre:nombre.trim(),direccion:direccion.trim(),localidad:localidad.trim(),provincia:provincia.trim(),perfil:perfil.trim(),financiacion_100:yn(cien),doble_garantia:yn(doble),telefonos:telefonos.map(x=>x.trim()).filter(Boolean),emails:emails.map(x=>x.trim()).filter(Boolean),observaciones:observaciones.trim()})});
   setBusy(false);setResult(response.data);setPreview(false);
-  if(response.status===201&&response.data?.ok){setMessage(`Banco creado en la fuente canónica de ${IS_PRODUCTION?'producción':'PRE-PROD'}.`);return}
+  if(response.status===201&&response.data?.ok){setMessage('Banco creado en la fuente canónica de producción.');return}
   if(response.status===409&&response.data?.existing_bank_code){setMessage('Ese banco ya existe. No se ha creado un duplicado.');return}
   if(response.status===403){setMessage('Tu perfil no puede crear bancos.');return}
   setMessage(`No se pudo crear el banco (${response.data?.error||response.status}).`)
  }
  return <OperationalShellFrame theme={theme} navigation={nav.length?nav:fallbackNav} activeRoute="/bancos" query={globalQuery} onQueryChange={setGlobalQuery} searchPlaceholder="Buscar en toda la app..." searchActionLabel="Buscar" onSearchAction={globalSearch} name={ctx?.role||'Usuario'} role="" initials={(ctx?.role||'U').slice(0,2).toUpperCase()} onToggleTheme={()=>setTheme(theme==='light'?'dark':'light')} onLogout={logout}>
   <button className="secondary-action" onClick={()=>navigate('/bancos')}><ArrowLeft size={15}/> Volver a Bancos</button>
-  <div className="ops-title"><div><span className="ops-icon"><Landmark size={20}/></span><div><h1>Nuevo banco</h1><p>Alta controlada de entidad, contacto y criterios principales.</p></div></div><span className="ops-live ok">{IS_PRODUCTION?'OPERATIVO':'PRE-PROD'}</span></div>
+  <div className="ops-title"><div><span className="ops-icon"><Landmark size={20}/></span><div><h1>Nuevo banco</h1><p>Alta controlada de entidad, contacto y criterios principales.</p></div></div><span className="ops-live ok">OPERATIVO</span></div>
   <section className="inmo-ana-hero"><div className="inmo-ana-photo"><img src={anaVertical} alt="Ana"/></div><div className="inmo-ana-body"><span>ANA · NUEVO BANCO</span><h2>Registramos solo información conocida y revisada</h2><p>La ficha se crea únicamente después de revisar y confirmar. Los datos no informados permanecen vacíos; Ana no completa condiciones bancarias por suposición.</p><div className="inmo-next"><button onClick={()=>document.getElementById('nueva-ficha-banco')?.scrollIntoView({behavior:'smooth'})}><b>1</b><strong>Completar ficha</strong><small>Ir a datos →</small></button><button onClick={()=>navigate('/bancos/contactos')}><b>2</b><strong>Revisar contactos</strong><small>Abrir contactos →</small></button><button onClick={prepareWithAna}><b>3</b><strong>Ayúdame con Ana</strong><small>Analizar la ficha →</small></button></div></div></section>
   {!canCreate&&<div className="ops-message">Tu perfil puede consultar Bancos, pero no crear nuevas entidades.</div>}
   {canCreate&&<section id="nueva-ficha-banco" className="ops-table-card" style={{padding:20,display:'grid',gap:12}}>
