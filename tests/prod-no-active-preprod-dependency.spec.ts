@@ -17,8 +17,10 @@ test('release validation workflows no longer depend on PRE-PROD credentials or e
   const smoke=read('.github/workflows/prod-runtime-smoke.yml');
   const joined=`${candidate}\n${smoke}`;
   expect(joined).not.toMatch(/APP_PREPROD|PREPROD_SUPABASE|preprod-app-phase1/i);
-  expect(candidate).toContain('VITE_SUPABASE_URL');
-  expect(candidate).toContain('APP_PROD_E2E_EMAIL');
+  expect(candidate).toContain('PROD_SUPABASE_URL');
+  expect(candidate).toContain('PROD_SUPABASE_PUBLISHABLE_KEY');
+  expect(candidate).toContain('NOTION_TOKEN');
+  expect(candidate).toContain('https://prod.invalid');
 });
 
 test('document editing PRE-PROD branch is compile-time unreachable in production runtime',()=>{
