@@ -32,10 +32,10 @@
       "self_reference_policy": "This committed evidence records the latest verified code ancestor. Final exact-head proof is the GitHub Actions run and Codex review attached to the final PR HEAD, avoiding an impossible self-referential commit SHA."
     },
     "latest_verified_code_ancestor": {
-      "head_sha": "c2ce6ce18c19e44604eefdd1437c89c5aa30bcbd",
+      "head_sha": "13f492295146f79a0598159e47b6154600b6b325",
       "factory_workflow": {
-        "run_id": 34463921240,
-        "run_number": 157,
+        "run_id": 34464815752,
+        "run_number": 160,
         "status": "completed",
         "conclusion": "success"
       }
@@ -53,9 +53,10 @@
   },
   "changelog": [
     "Introduced deterministic LOCAL-001 selection with exact company, engine and version precedence before GLOBAL fallbacks.",
-    "Introduced FREE-001 free-first broker with zero-cost precedence, confidence filtering and strict budget approval.",
-    "Introduced local DBOFF-001/STOROFF-001 offload stores with scoped backup/restore and recovery after ambiguous journal durability.",
-    "Rejects SharedArrayBuffer and shared-memory views before durable persistence.",
+    "Introduced FREE-001 free-first broker with zero-cost precedence, confidence filtering and strict boolean execution flags.",
+    "Introduced local DBOFF-001/STOROFF-001 offload stores with dense-snapshot validation, scoped backup/restore and recovery after ambiguous journal durability.",
+    "Rejects SharedArrayBuffer and shared-memory views using intrinsic backing-buffer inspection before durable persistence.",
+    "Requires distinct DBOFF/STOROFF/AIBUD journal paths to preserve rebuild integrity.",
     "Introduced deterministic AIBUD-001/ROUTE-001 routing with HUMAN_REQUIRED gates.",
     "Persisted route/cost decision evidence across rebuilds.",
     "Introduced isolated integration harness with zero-cost/no-Supabase-PREPROD contract."
