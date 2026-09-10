@@ -54,7 +54,7 @@ test('command policy is fail-closed and never executes mutations', () => {
   assert.equal(p.requires_authenticated_gcloud_or_authorized_connector, true);
   assert.equal(p.secrets_policy, 'REFERENCES_ONLY');
   assert.equal(p.least_privilege, true);
-  assert.equal(p.parameter_token, '${PROJECT_ID}');
+  assert.deepEqual(p.parameter_tokens, ['${PROJECT_ID}','${LOCATION}']);
   assert.deepEqual(p.allowed_read_verbs, ['describe','list','search-all-resources','get-iam-policy']);
   assert.deepEqual(p.forbidden_mutating_verbs, MUTATING);
 });
@@ -74,6 +74,18 @@ test('every canonical inventory domain has explicit parameterized read-only comm
       }
     }
   }
+});
+
+test('scheduler inventory enumerates project locations and never relies on ambient location defaults', () => {
+  const scheduler = catalog.domain_commands.find((entry) => entry.domain === 'scheduler');
+  assert.ok(scheduler);
+  assert.deepEqual(scheduler.commands, [
+    'gcloud scheduler locations list --project=${PROJECT_ID} --format=json',
+    'gcloud scheduler jobs list --project=${PROJECT_ID} --location=${LOCATION} --format=json',
+  ]);
+  assert.match(scheduler.expansion_policy, /same PROJECT_ID/i);
+  assert.match(scheduler.expansion_policy, /one jobs list command per returned location/i);
+  assert.match(scheduler.expansion_policy, /never use ambient gcloud scheduler\/location defaults/i);
 });
 
 test('secret discovery is metadata-only and never reads secret payload versions', () => {
