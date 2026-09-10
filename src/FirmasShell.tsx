@@ -2,7 +2,6 @@ import {useEffect,useMemo,useState} from 'react';
 import {useLocation,useNavigate} from 'react-router-dom';
 import {CalendarClock,CheckCircle2,ExternalLink,FileText,MapPin,Landmark} from 'lucide-react';
 import {fetchAppApi,supabase} from './supabase';
-import {fetchNotionRuntime} from './notionRuntime';
 import {normalizeNavigation,type NavItem} from './masterNavigation';
 import OperationalShellFrame from './OperationalShellFrame';
 import {anaVertical} from './assets/visualAssets';
@@ -41,7 +40,7 @@ export default function FirmasShell(){
  useEffect(()=>{if(!active)return;let alive=true;supabase.auth.getSession().then(({data})=>{if(alive){setLogged(Boolean(data.session));setSessionReady(true)}});const{data:{subscription}}=supabase.auth.onAuthStateChange((_e,s)=>{setLogged(Boolean(s));setSessionReady(true)});return()=>{alive=false;subscription.unsubscribe()};},[active]);
  useEffect(()=>{if(!active)return;document.documentElement.dataset.theme=theme;sessionStorage.setItem('fenix-theme',theme);},[active,theme]);
  useEffect(()=>{if(!active||!logged)return;Promise.all([fetchAppApi<Ctx>('/session/context'),fetchAppApi<unknown>('/navigation')]).then(([c,n])=>{setCtx(c.status===200?c.data:null);setNav(n.status===200?normalizeNavigation(n.data):[]);});},[active,logged]);
- useEffect(()=>{if(!active||!logged)return;let alive=true;(async()=>{setLoading(true);setMessage('');setStatus(null);setRows([]);try{const r=await fetchNotionRuntime<unknown>('/firmas');if(!alive)return;setStatus(r.status);setRows(r.status===200?rowsFrom(r.data):[]);if(r.status===403)setMessage('Tu perfil no tiene acceso a este módulo o registro.');else if(r.status!==200)setMessage('No se pudo leer la información actualizada de Firmas.');}catch{if(!alive)return;setStatus(0);setRows([]);setMessage('No se pudo conectar con Firmas.');}finally{if(alive)setLoading(false);}})();return()=>{alive=false}},[active,logged]);
+ useEffect(()=>{if(!active||!logged)return;let alive=true;(async()=>{setLoading(true);setMessage('');setStatus(null);setRows([]);try{const r=await fetchAppApi<unknown>('/firmas');if(!alive)return;setStatus(r.status);setRows(r.status===200?rowsFrom(r.data):[]);if(r.status===403)setMessage('Tu perfil no tiene acceso a este módulo o registro.');else if(r.status!==200)setMessage('No se pudo leer la información actualizada de Firmas.');}catch{if(!alive)return;setStatus(0);setRows([]);setMessage('No se pudo conectar con Firmas.');}finally{if(alive)setLoading(false);}})();return()=>{alive=false}},[active,logged]);
  const effectiveNav=nav.length?nav:fallbackNav,states=useMemo(()=>Array.from(new Set(rows.map(stateOf).filter(Boolean))).sort(compareText),[rows]);
  const visible=useMemo(()=>{const out=rows.filter(r=>(!state||stateOf(r)===state)&&(focus==='todas'||(focus==='proximas'&&scheduled(r))||(focus==='pendientes'&&!signed(r))||(focus==='firmadas'&&signed(r))));return[...out].sort((a,b)=>sortKey==='cliente'?compareText(clientOf(a),clientOf(b)):sortKey==='banco'?compareText(bankOf(a),bankOf(b)):dateNum(dateOf(a))-dateNum(dateOf(b)));},[rows,state,focus,sortKey]);
  const signedCount=useMemo(()=>rows.filter(signed).length,[rows]),scheduledCount=useMemo(()=>rows.filter(scheduled).length,[rows]),docsLinked=useMemo(()=>rows.reduce((n,r)=>n+docsOf(r).reduce((x,d)=>x+d.urls.length,0),0),[rows]);
