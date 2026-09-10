@@ -15,11 +15,13 @@ const catalog = JSON.parse(catalogText);
 const PROJECTS = ['fenix-trading-lab','fenix-capital-455809','fenix-inmobiliaria','fenix-capital-make-web-y-seo'];
 const DOMAINS = ['projects','enabled_apis','cloud_run','cloud_functions','compute','jobs','scheduler','pubsub','storage','databases','artifact_registry','service_accounts_and_iam','secret_references','networking','logging_monitoring','billing_cost','regions','deployments','resource_consumers'];
 const RESULT_STATUS = ['SUCCESS','PERMISSION_DENIED','API_UNAVAILABLE','EMPTY','ERROR'];
+const COVERAGE_STATUS_PRECEDENCE = ['ERROR','PERMISSION_DENIED','API_UNAVAILABLE','EMPTY','SUCCESS'];
 const CATALOG_BLOB_SHA='3437a1938643dd9bab03c3b8dff9f9047a07767d';
 const REQUIRED_COMMAND_RESULT_FIELDS = ['command_run_ref','catalog_blob_sha','command_template_id_or_ref','result_status','captured_at','principal_ref','evidence_ref','resolved_parameters','returned_resource_refs'];
 const SOURCE_MATCH_FIELDS=['project_id','domain','command_run_ref','command_template_id_or_ref','evidence_ref','principal_ref','catalog_blob_sha'];
 function gitBlobSha(text){const bytes=Buffer.from(text,'utf8'); return crypto.createHash('sha1').update(Buffer.from(`blob ${bytes.length}\0`)).update(bytes).digest('hex');}
 function derivedIds(domain){const row=catalog.domain_commands.find((x)=>x.domain===domain); return row.commands.map((_,i)=>`GCP-READONLY-CATALOG@${CATALOG_BLOB_SHA}:${domain}:${i}`);}
+function aggregateCoverageStatus(statuses){return COVERAGE_STATUS_PRECEDENCE.find((s)=>statuses.includes(s));}
 
 test('scaffold/read-only/zero-cost and exact allowlists',()=>{
   assert.equal(cfg.status,'DEFINED_NOT_BUILT'); assert.equal(cfg.environment,'SCAFFOLD'); assert.equal(cfg.engine_id,'INT-001'); assert.equal(cfg.execution_mode,'READ_ONLY_CAPTURE_ONLY'); assert.equal(cfg.additional_cost_target_eur,0); assert.equal(cfg.prod_writes,false); assert.equal(cfg.autonomous_prod,false); assert.equal(cfg.trading_access,false); assert.deepEqual(cfg.project_allowlist,PROJECTS); assert.deepEqual(cfg.required_inventory_domains,DOMAINS);
@@ -32,6 +34,19 @@ test('all capture records inherit one exact scaffold context',()=>{
 test('coverage is exactly 4x19 and RESOURCE does not count toward it',()=>{
   const c=cfg.coverage_contract; assert.equal(c.required_project_domain_pairs,76); assert.equal(c.exactly_one_domain_coverage_record_per_pair,true); assert.equal(c.missing_pairs_forbidden,true); assert.equal(c.duplicate_pairs_forbidden,true); assert.equal(c.resource_ref_value,'__DOMAIN__'); assert.equal(cfg.capture_contract.resource_records_must_not_count_toward_76_pair_coverage,true);
   const pairs=PROJECTS.flatMap((p)=>DOMAINS.map((d)=>`${p}::${d}`)); assert.equal(pairs.length,76); assert.equal(new Set(pairs).size,76);
+});
+
+test('coverage status is deterministic and cannot hide command gaps',()=>{
+  const c=cfg.coverage_contract;
+  assert.equal(c.coverage_result_status_is_aggregate_of_command_results,true);
+  assert.deepEqual(c.coverage_status_precedence,COVERAGE_STATUS_PRECEDENCE);
+  assert.equal(c.coverage_success_requires_all_command_results_success,true);
+  assert.equal(c.coverage_result_status_must_equal_highest_precedence_present_command_result_status,true);
+  assert.equal(aggregateCoverageStatus(['SUCCESS','SUCCESS']),'SUCCESS');
+  assert.equal(aggregateCoverageStatus(['SUCCESS','EMPTY']),'EMPTY');
+  assert.equal(aggregateCoverageStatus(['SUCCESS','API_UNAVAILABLE']),'API_UNAVAILABLE');
+  assert.equal(aggregateCoverageStatus(['SUCCESS','PERMISSION_DENIED']),'PERMISSION_DENIED');
+  assert.equal(aggregateCoverageStatus(['SUCCESS','PERMISSION_DENIED','ERROR']),'ERROR');
 });
 
 test('catalog identity is pinned to immutable checked-in git blob',()=>{
