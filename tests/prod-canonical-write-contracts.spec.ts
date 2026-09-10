@@ -26,7 +26,11 @@ test('detalle operativo PROD usa contratos canónicos por recurso',()=>{
  expect(src).toContain("/firmas/${encodeURIComponent(id)}/schedule");
  expect(src).toContain("/firmas/${encodeURIComponent(id)}/confirm");
  expect(src).toContain("/firmas/${encodeURIComponent(id)}/close");
- expect(src).toContain("IS_PRODUCTION?await saveProd():await preprodAction");
+ expect(src).toContain('const r=await saveProd()');
+ expect(src).not.toContain('preprodAction');
+ expect(src).not.toContain('fetchNotionRuntime');
+ expect(src).not.toContain('fenix-notion-actions-test');
+ expect(src).not.toContain('IS_PRODUCTION');
 });
 
 test('APIs productivas versionadas autentican JWT y permiten preflight',()=>{
