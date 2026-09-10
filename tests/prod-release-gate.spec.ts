@@ -67,3 +67,15 @@ test('Firmas PROD mantiene histórico canónico y acciones reales en el detalle'
   expect(detail).toContain('`/firmas/${encodeURIComponent(id)}/confirm`');
   expect(detail).toContain('`/firmas/${encodeURIComponent(id)}/close`');
 });
+
+test('Informes PROD expone actividad diaria auditada y preserva aislamiento por rol',()=>{
+  const ui=fs.readFileSync(path.resolve('src/InformesDailyActivityGuard.tsx'),'utf8');
+  const migration=fs.readFileSync(path.resolve('supabase/migrations/20260910150425_daily_activity_reports_audit_v2.sql'),'utf8');
+  expect(ui).toContain('Dirección ve la actividad consolidada de empresa');
+  expect(ui).toContain('Financiero y Visitador reciben únicamente su ámbito autorizado');
+  expect(ui).toContain('daily-activity-reports');
+  expect(migration).toContain("r not in ('Direccion','Financiero','Visitador')");
+  expect(migration).toContain("case when r='Direccion' then 'company' else 'actor' end");
+  expect(migration).toContain('activity_refresh_report_trigger_v1');
+  expect(migration).toContain("time zone 'Europe/Madrid'");
+});
