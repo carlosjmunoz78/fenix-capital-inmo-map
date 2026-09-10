@@ -4,7 +4,7 @@ Evidence anchors are scoped to the change they prove; they are not intended to m
 
 ## HECHO
 
-- FACT-001 Engine Factory V0: structural/reference green.
+- FACT-001 Engine Factory V0: structural/reference green. The E2E closure branch now verifies all 177 canonical scaffolds semantically across the complete 18-piece Factory contract, enforces exact `SCAFFOLD` environment fail-closed, deterministic/reproducible output, deny-by-default, canonical HUMAN_REQUIRED, zero-additional-cost defaults and autonomous PROD disabled. This is Factory capability evidence, not evidence that the 177 generated engines are operational.
 - GOV-001 Engine Registry V0: 177/177 canonical engine IDs registered; scaffold generation deterministic and reproducible.
 - Phase 2 existing-engine wrapper registry: structural/read-only binding layer green.
 - Phase 2 read-only evidence audit V0: complete for all nine bindings without activation or writes.
@@ -42,6 +42,7 @@ Evidence anchors are scoped to the change they prove; they are not intended to m
 ## Non-negotiable boundaries
 
 - `company_id`, `engine_id`, `environment`, `version` remain canonical context.
+- Factory V0 generated engine environment is exactly `SCAFFOLD`; `PREPROD` and `PROD` labels are rejected at Factory registry validation.
 - Cross-company access defaults to deny.
 - HUMAN_REQUIRED_SET: `["LEGAL_REQUIRED","SIGNATURE_REQUIRED","LOW_CONFIDENCE","HIGH_RISK","POLICY_CONFLICT","SECURITY_INCIDENT","MONEY_LIMIT","CUSTOMER_HUMAN_REQUEST"]`.
 - Trading remains isolated.

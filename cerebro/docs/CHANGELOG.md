@@ -1,5 +1,16 @@
 # CEREBRO OS · CHANGELOG
 
+## 2026-09-10 · FACT-001 E2E structural closure
+
+- Added semantic end-to-end validation for all 177 canonical Factory scaffolds and all 18 generated components per engine.
+- Verified canonical context fields, deny-by-default permissions, cross-company deny, HUMAN_REQUIRED policy set, Gateway-only API, evaluation/tribunal states, observability, FinOps zero-cost default, backup/rollback/rebuild declarations, training hooks and non-autonomous documentation.
+- Hardened `validateRegistry()` so FACT-001 V0 accepts only exact `SCAFFOLD` engine environments; `PREPROD` and `PROD`-labelled registry inputs fail closed before generation.
+- Added negative regressions for `PROD` and `PREPROD` registry environments and full-output reproducibility across clean directories.
+- Initial exact-head Codex review found one P2 (environment self-validation); it was corrected and the review thread resolved.
+- Exact code head `dd68098752b9a3429e18ba9bf13548f5543ba337`: CEREBRO Factory PREPROD #169 success and Codex exact-head review reported no major issues.
+- This closure proves Factory V0 structural generation capability only; it does not mark the 177 generated engines operational or autonomous PROD.
+- No App/web/Trading/PROD change and no merge to `main` is part of this closure.
+
 ## 2026-09-09 · Persistent EVT-001 / JOB-001 V0
 
 - PR #168 merged as `26fb9c75b9a7361afccccdc111761ad10aac5fa4` after exact-head review of `16484fdf50760afbd98e1d85824ed352dd3a5585`.
