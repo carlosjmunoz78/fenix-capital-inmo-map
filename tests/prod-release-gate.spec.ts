@@ -79,3 +79,20 @@ test('Informes PROD expone actividad diaria auditada y preserva aislamiento por 
   expect(migration).toContain('activity_refresh_report_trigger_v1');
   expect(migration).toContain("time zone 'Europe/Madrid'");
 });
+
+test('Calculadora avanzada expone fondos propios capacidad y escenarios sin predecir tipos futuros',()=>{
+  const ui=fs.readFileSync(path.resolve('src/CalculatorProEnhancement.tsx'),'utf8');
+  const engine=fs.readFileSync(path.resolve('src/calculator.ts'),'utf8');
+  const main=fs.readFileSync(path.resolve('src/main.tsx'),'utf8');
+  expect(main).toContain('<CalculatorProEnhancement />');
+  expect(ui).toContain('calculator-pro-advanced');
+  expect(ui).toContain('Gastos compra €');
+  expect(ui).toContain('Ahorro disponible €');
+  expect(ui).toContain('Esfuerzo objetivo %');
+  expect(ui).toContain('Fondos propios necesarios');
+  expect(ui).toContain('Principal máximo objetivo');
+  expect(ui).toContain('Comparador de sensibilidad');
+  expect(ui).toContain('Los escenarios no predicen tipos futuros');
+  expect(engine).toContain("projectionStatus: 'calculated' | 'assumptions_required'");
+  expect(engine).toContain("if (type !== 'fixed')");
+});
