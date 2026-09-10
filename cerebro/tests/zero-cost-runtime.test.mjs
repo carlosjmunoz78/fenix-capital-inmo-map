@@ -51,6 +51,16 @@ test('LOCAL-001 list is scoped by engine_id with explicit GLOBAL fallback only',
   assert.deepEqual(ids.sort(), ['global-engine','seo']);
 });
 
+test('LOCAL-001 prefers exact company and engine before GLOBAL fallbacks', () => {
+  const registry = new LocalCapabilityRegistry([
+    { capability_id:'global-company', company_id:'GLOBAL', engine_id:'SEO-001', version:'0.1.0', priority:1, cost_eur:0, capabilities:['extract'] },
+    { capability_id:'global-engine', company_id:'fenix', engine_id:'GLOBAL', version:'0.1.0', priority:1, cost_eur:0, capabilities:['extract'] },
+    { capability_id:'exact', company_id:'fenix', engine_id:'SEO-001', version:'0.1.0', priority:999, cost_eur:0, capabilities:['extract'] }
+  ]);
+  assert.equal(registry.select({ context, requires:['extract'] }).selected.capability_id, 'exact');
+  assert.equal(registry.list(context)[0].capability_id, 'exact');
+});
+
 test('LOCAL-001 fails closed for degraded/paid/non-PREPROD or Proxy capability', () => {
   const registry = new LocalCapabilityRegistry([
     { capability_id:'d', company_id:'fenix', engine_id:'SEO-001', version:'0.1.0', health:'DEGRADED', cost_eur:0, capabilities:['extract'] },
@@ -121,6 +131,14 @@ test('DBOFF-001 persists, reopens, isolates company and restores only requested 
   const reopened = new LocalOffloadStore({ file_path:file, kind:'DBOFF-001' });
   assert.deepEqual(reopened.get({ context, key:'k' }), {n:1});
   assert.deepEqual(reopened.get({ context:other, key:'foreign' }), {keep:true});
+});
+
+test('DBOFF-001 rejects SharedArrayBuffer and shared views before persistence', () => {
+  const store = new LocalOffloadStore({ file_path:tmp('shared.v8'), kind:'DBOFF-001' });
+  const shared = new SharedArrayBuffer(8);
+  assert.throws(() => store.put({ context, key:'sab', value:{shared} }), /durably cloneable|SharedArrayBuffer/);
+  assert.throws(() => store.put({ context, key:'view', value:{view:new Uint8Array(shared)} }), /durably cloneable|SharedArrayBuffer/);
+  assert.equal(store.operation_count, 0);
 });
 
 test('STOROFF-001 corruption fails closed', () => {
