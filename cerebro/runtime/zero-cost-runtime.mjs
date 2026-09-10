@@ -240,13 +240,14 @@ function denseArrayValues(input, label) {
 }
 
 export class LocalOffloadStore {
-  #journal; #kind; #operations; #preparedRestores;
+  #journal; #kind; #operations; #preparedRestores; #revision;
   constructor({ file_path, kind, environment }) {
     const env = environment === undefined ? PREPROD : environment;
     if (env !== PREPROD) throw new Error('offload store V0 accepts exact PREPROD only');
     this.#kind = nonEmpty(kind, 'kind');
     if (!['DBOFF-001','STOROFF-001','AIBUD-001'].includes(this.#kind)) throw new Error('unsupported offload kind');
     this.#preparedRestores = new WeakMap();
+    this.#revision = 0;
     this.#journal = new AtomicV8Journal({ file_path:nonEmpty(file_path, 'file_path'), kind:this.#kind });
     const loaded = this.#journal.load();
     if (!Array.isArray(loaded)) throw new Error('offload journal payload must be an array');
@@ -257,12 +258,14 @@ export class LocalOffloadStore {
     const loaded = this.#journal.load();
     if (!Array.isArray(loaded)) throw new Error('offload journal payload must be an array');
     this.#operations = denseArrayValues(loaded, 'offload journal payload').map(op => validateOperation(op, this.#kind));
+    this.#revision += 1;
   }
   put({ context, key, value }) {
     const op = validateOperation({ op:'put', context, key, value }, this.#kind);
     const candidate = [...this.#operations, clone(op)];
     this.#journal.commit(candidate);
     this.#operations = candidate;
+    this.#revision += 1;
     return clone(op.value);
   }
   get({ context, key }) {
@@ -282,7 +285,7 @@ export class LocalOffloadStore {
     const scoped = denseArrayValues(snapshot, 'snapshot').map(op => validateOperation(op, this.#kind));
     if (scoped.some(op => !sameScope(op.context, ctx))) throw new Error('snapshot contains cross-scope operations');
     const retained = this.#operations.filter(op => !sameScope(op.context, ctx));
-    const internal = Object.freeze({ scoped:clone(scoped), candidate:clone([...retained, ...scoped]) });
+    const internal = Object.freeze({ scoped:clone(scoped), candidate:clone([...retained, ...scoped]), revision:this.#revision });
     const token = Object.freeze({ kind:this.#kind });
     this.#preparedRestores.set(token, internal);
     return token;
@@ -292,10 +295,12 @@ export class LocalOffloadStore {
     const internal = this.#preparedRestores.get(prepared);
     if (!internal) throw new TypeError('prepared restore is invalid or was not issued by this store');
     this.#preparedRestores.delete(prepared);
+    if (internal.revision !== this.#revision) throw new Error('prepared restore is stale because store state changed');
     const candidate = denseArrayValues(internal.candidate, 'prepared candidate').map(op => validateOperation(op, this.#kind));
     const scoped = denseArrayValues(internal.scoped, 'prepared scoped').map(op => validateOperation(op, this.#kind));
     this.#journal.commit(candidate);
     this.#operations = clone(candidate);
+    this.#revision += 1;
     return scoped.length;
   }
   recoverRestore({ context, snapshot }) {
