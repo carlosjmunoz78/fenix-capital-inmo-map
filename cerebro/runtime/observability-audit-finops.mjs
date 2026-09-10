@@ -402,7 +402,7 @@ export const OPERATIONAL_LEDGERS_V0_CONTRACT = Object.freeze({
   persistence: 'local-atomic-v8-journal-reference',
   append_only_logical_records: true,
   internal_mutable_state: 'module-private-weakmap-with-non-exported-commit-path',
-  accepted_payload_grammar: 'finite-json-like-primitives+arrays+plain-data-objects-no-accessors-no-proxies-no-cycles-no-nonenumerable-array-indices',
+  accepted_payload_grammar: 'finite-json-like-primitives+arrays+plain-data-objects-no-accessors-no-proxies-no-cycles',
   public_input_envelopes: 'descriptor-validated-plain-objects-before-field-read',
   audit_integrity: 'sha256-hash-chain-not-authenticated-tamper-proofing',
   audit_when: 'canonical-iso8601-utc-instant-hash-covered',
