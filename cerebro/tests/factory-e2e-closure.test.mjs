@@ -39,9 +39,9 @@ const JSON_FILES = [
   'training-hooks.json'
 ];
 
-function generate() {
+function generate(registry = registryFile) {
   const out = fs.mkdtempSync(path.join(os.tmpdir(), 'cerebro-fact001-e2e-'));
-  execFileSync(process.execPath, [cli, 'generate', '--registry', registryFile, '--out', out], { encoding: 'utf8' });
+  execFileSync(process.execPath, [cli, 'generate', '--registry', registry, '--out', out], { encoding: 'utf8' });
   return out;
 }
 
@@ -52,7 +52,8 @@ function readJson(base, rel) {
 function assertContext(doc, engine) {
   assert.equal(doc.company_id, null);
   assert.equal(doc.engine_id, engine.engine_id);
-  assert.equal(doc.environment, engine.environment);
+  assert.equal(engine.environment, 'SCAFFOLD');
+  assert.equal(doc.environment, 'SCAFFOLD');
   assert.equal(doc.version, engine.version);
   assert.equal(doc.generated_by, 'FACT-001');
   assert.equal(doc.schema_version, '1.0.0');
@@ -74,6 +75,7 @@ test('FACT-001 end-to-end scaffold contract is complete and safe for all 177 can
       ...registry.defaults,
       ...(registry.overrides?.[engineId] ?? {})
     };
+    assert.equal(engine.environment, 'SCAFFOLD', `${engineId}: factory registry must stay SCAFFOLD`);
     const base = path.join(out, 'engines', engineId);
     const indexed = index.engines.find(item => item.engine_id === engineId);
     assert.ok(indexed, `${engineId}: missing skeleton-index entry`);
@@ -163,6 +165,25 @@ test('FACT-001 end-to-end scaffold contract is complete and safe for all 177 can
     const readme = fs.readFileSync(path.join(base, 'README.md'), 'utf8');
     assert.match(readme, new RegExp(engineId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
     assert.match(readme, /structural scaffold, not evidence of operational autonomy/i);
+  }
+});
+
+test('FACT-001 rejects any registry that attempts to generate PROD or PREPROD-labelled scaffolds', () => {
+  const source = JSON.parse(fs.readFileSync(registryFile, 'utf8'));
+  for (const forbiddenEnvironment of ['PROD', 'PREPROD']) {
+    const mutated = structuredClone(source);
+    mutated.defaults.environment = forbiddenEnvironment;
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cerebro-fact001-registry-'));
+    const file = path.join(dir, 'registry.json');
+    fs.writeFileSync(file, JSON.stringify(mutated), 'utf8');
+    assert.throws(
+      () => execFileSync(process.execPath, [cli, 'validate', '--registry', file], { encoding: 'utf8', stdio: 'pipe' }),
+      /FACT-001 V0 registry environment must be SCAFFOLD/
+    );
+    assert.throws(
+      () => generate(file),
+      /FACT-001 V0 registry environment must be SCAFFOLD/
+    );
   }
 });
 
