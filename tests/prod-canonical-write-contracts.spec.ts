@@ -9,7 +9,9 @@ test('casos especiales usan API PROD y nunca runtime TEST en producción',()=>{
  expect(src).not.toContain('fenix-special-cases-runtime-test');
  expect(src).not.toContain('/functions/v1/');
  const resolver=fs.readFileSync('src/supabase.ts','utf8');
- expect(resolver).toContain("const FUNCTION_SUFFIX=IS_PRODUCTION?'':String(import.meta.env.VITE_FUNCTION_SUFFIX||'')");
+ expect(resolver).toContain('export const IS_PRODUCTION=true;');
+ expect(resolver).not.toContain('VITE_FUNCTION_SUFFIX');
+ expect(resolver).not.toContain('fenix-preprod-auth');
  const api=fs.readFileSync('supabase/functions/fenix-special-cases-api/index.ts','utf8');
  expect(api).toContain('fenix_prod_special_case_create_with_people_server');
  expect(api).toContain('fenix_prod_special_case_update_server');
