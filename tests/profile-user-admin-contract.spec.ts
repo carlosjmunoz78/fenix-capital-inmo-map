@@ -13,6 +13,14 @@ test('profile supports self password change and direction-scoped team administra
  expect(profile).toContain('<option value="Visitador">Visitador</option>');
 });
 
+test('Belen Direccion Financiera is recognized as Direction and receives team controls',()=>{
+ const profile=read('src/ProfileShell.tsx');
+ expect(profile).toContain("role==='direccion financiera'");
+ expect(profile).toContain('isDirectionRole(nextCtx?.role)');
+ expect(profile).toContain('const isDirection=isDirectionRole(ctx?.role)');
+ expect(profile).not.toContain("if(nextCtx?.role==='Direccion'||nextCtx?.role==='Dirección')");
+});
+
 test('user-admin edge keeps service role server-side and restricts director creation to Carlos admin',()=>{
  const edge=read('supabase/functions/fenix-user-admin/index.ts');
  expect(edge).toContain("ctx.role!=='Direccion'");
