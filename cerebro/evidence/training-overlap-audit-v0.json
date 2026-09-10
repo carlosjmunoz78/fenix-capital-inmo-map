@@ -1,0 +1,67 @@
+{
+  "schema_version": "1.1.0",
+  "status": "DOCUMENTED_PARTIAL",
+  "scope": "TRAINING_FIRST",
+  "environment": "SCAFFOLD",
+  "additional_cost_target_eur": 0,
+  "autonomous_prod": false,
+  "prod_writes": false,
+  "trading_access": false,
+  "canonical_engine_count": 177,
+  "training_engine_ids": [
+    "KNW-001",
+    "LRN-001",
+    "TRN-001",
+    "EVA-001",
+    "JDG-001",
+    "TRNBOOT-001"
+  ],
+  "principle": "CONSERVAR -> ENTENDER -> ENVOLVER -> PROBAR -> MEJORAR -> MIGRAR",
+  "objective": "Audit existing Training capabilities first, preserve all existing Training behavior, map dependencies/contracts, and establish a safe Google Cloud control path before any implementation or migration.",
+  "known_cloud_projects": [
+    "fenix-trading-lab",
+    "fenix-capital-455809",
+    "fenix-inmobiliaria",
+    "fenix-capital-make-web-y-seo"
+  ],
+  "training_cloud_location": {
+    "project_id": "fenix-trading-lab",
+    "evidence_status": "USER_CONFIRMED_REQUIRES_LIVE_AUDIT",
+    "resource_inventory_status": "UNKNOWN_REQUIRES_AUDIT",
+    "trading_resource_boundary_required": true
+  },
+  "access_control_gate": {
+    "status": "PLANNED",
+    "read_only_first": true,
+    "preferred_order": [
+      "existing Google Cloud API access",
+      "authorized MCP/connector",
+      "gcloud/script with least privilege",
+      "new connector via FACT-001 only if a real gap remains"
+    ],
+    "secrets_in_repo": false,
+    "least_privilege_required": true,
+    "credential_broker_or_reference_required": true
+  },
+  "gates": {
+    "inventory": "PLANNED",
+    "dependency_map": "PLANNED",
+    "backup_snapshot": "PLANNED",
+    "current_contract_capture": "PLANNED",
+    "behavioral_tests": "PLANNED",
+    "parallel_implementation": "PLANNED",
+    "preprod_or_zero_cost_equivalent": "PLANNED",
+    "old_vs_new": "PLANNED",
+    "rollback_tested": "PLANNED",
+    "gradual_promotion": "PLANNED"
+  },
+  "constraints": [
+    "No new engine_id before overlap audit",
+    "No modification of existing Training data or workflows in this audit",
+    "No App/CRM/PROD mutation",
+    "No Trading execution, credentials or critical-resource mutation",
+    "Training resources co-located in fenix-trading-lab must be separated from Trading resources before any write",
+    "No secrets in repository/logs/prompts",
+    "Multi-company context must preserve company_id, engine_id, environment, version"
+  ]
+}
