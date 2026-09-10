@@ -91,7 +91,9 @@ export class LocalCapabilityRegistry {
     return this.#items
       .filter(item => item.environment === PREPROD)
       .filter(item => item.company_id === 'GLOBAL' || item.company_id === ctx.company_id)
+      .filter(item => item.engine_id === ctx.engine_id || item.engine_id === 'GLOBAL')
       .filter(item => item.version === 'GLOBAL' || item.version === ctx.version)
+      .sort((a, b) => Number(a.version === 'GLOBAL') - Number(b.version === 'GLOBAL') || a.priority - b.priority || a.capability_id.localeCompare(b.capability_id))
       .map(clone);
   }
   select({ context, requires = [] }) {
@@ -106,7 +108,7 @@ export class LocalCapabilityRegistry {
       .filter(item => item.health === 'AVAILABLE')
       .filter(item => item.cost_eur === 0)
       .filter(item => required.every(cap => item.capabilities.includes(cap)))
-      .sort((a, b) => a.priority - b.priority || a.capability_id.localeCompare(b.capability_id));
+      .sort((a, b) => Number(a.version === 'GLOBAL') - Number(b.version === 'GLOBAL') || a.priority - b.priority || a.capability_id.localeCompare(b.capability_id));
     if (!candidates[0]) return Object.freeze({ status:'UNAVAILABLE', selected:null, reason:'NO_ZERO_COST_LOCAL_CAPABILITY' });
     return Object.freeze({ status:'AVAILABLE', selected:clone(candidates[0]), reason:'ZERO_COST_LOCAL_CAPABILITY' });
   }
@@ -136,11 +138,12 @@ export class FreeFirstBroker {
     contextOf(context);
     if (typeof money_limit_approved !== 'boolean') throw new TypeError('money_limit_approved must be boolean');
     if (!Array.isArray(options)) throw new TypeError('options must be an array');
-    const candidates = options.map(normalizeOption).filter(option => option.available && option.equivalent);
+    const eligible = options.map(normalizeOption).filter(option => option.available && option.equivalent);
+    if (!eligible.length) return Object.freeze({ route_type:'HUMAN_REQUIRED', human_reason:'LOW_CONFIDENCE', selected:null, reason:'NO_VALID_ROUTE' });
+    const candidates = eligible.filter(option => option.confidence >= MIN_CONFIDENCE);
+    if (!candidates.length) return Object.freeze({ route_type:'HUMAN_REQUIRED', human_reason:'LOW_CONFIDENCE', selected:null, reason:'NO_CONFIDENT_ROUTE' });
     candidates.sort((a, b) => Number(a.cost_eur > 0) - Number(b.cost_eur > 0) || FREE_RANK.get(a.route_type) - FREE_RANK.get(b.route_type) || a.cost_eur - b.cost_eur || a.option_id.localeCompare(b.option_id));
     const selected = candidates[0];
-    if (!selected) return Object.freeze({ route_type:'HUMAN_REQUIRED', human_reason:'LOW_CONFIDENCE', selected:null, reason:'NO_VALID_ROUTE' });
-    if (selected.confidence < MIN_CONFIDENCE) return Object.freeze({ route_type:'HUMAN_REQUIRED', human_reason:'LOW_CONFIDENCE', selected:null, reason:'SELECTED_ROUTE_LOW_CONFIDENCE' });
     if (selected.route_type === 'paid_provider' || selected.cost_eur > 0) {
       if (!money_limit_approved) return Object.freeze({ route_type:'HUMAN_REQUIRED', human_reason:'MONEY_LIMIT', selected:null, reason:'PAID_ROUTE_REQUIRES_APPROVAL' });
     }
