@@ -1,6 +1,6 @@
 import {FormEvent,useEffect,useMemo,useState} from 'react';
 import {MessageCircle,RefreshCw,Send} from 'lucide-react';
-import {useLocation} from 'react-router-dom';
+import {useLocation,useNavigate} from 'react-router-dom';
 import {supabase,fetchAppApi} from './supabase';
 import {normalizeNavigation,type NavItem} from './masterNavigation';
 import OperationalShellFrame from './OperationalShellFrame';
@@ -13,7 +13,7 @@ type Ctx={actor_code?:string;role?:string;display_name?:string;context?:{actor_c
 const fallbackNav:NavItem[]=[{label:'Inicio',route:'/inicio'}];
 
 export default function ChatShell(){
- const location=useLocation();const active=location.pathname.replace(/\/+$/,'')==='/chat';
+ const location=useLocation(),navigate=useNavigate();const active=location.pathname.replace(/\/+$/,'')==='/chat';
  const[logged,setLogged]=useState(false),[ready,setReady]=useState(false),[nav,setNav]=useState<NavItem[]>([]),[ctx,setCtx]=useState<Ctx|null>(null),[items,setItems]=useState<Msg[]>([]),[body,setBody]=useState(''),[busy,setBusy]=useState(false),[msg,setMsg]=useState(''),[query,setQuery]=useState('');
  const[theme,setTheme]=useState<Theme>(()=>(localStorage.getItem('fenix-theme') as Theme)||'light');
  useEffect(()=>{let alive=true;supabase.auth.getSession().then(({data})=>{if(alive){setLogged(Boolean(data.session));setReady(true)}});const{data:{subscription}}=supabase.auth.onAuthStateChange((_e,s)=>{setLogged(Boolean(s));setReady(true)});return()=>{alive=false;subscription.unsubscribe()};},[]);
@@ -23,7 +23,9 @@ export default function ChatShell(){
  async function send(e:FormEvent){e.preventDefault();const text=body.trim();if(!text||busy)return;setBusy(true);setMsg('');const key=`chat-ui-${Date.now()}-${crypto.randomUUID()}`;const r=await supabase.rpc('fenix_prod_chat_send_user',{p_body:text,p_idempotency_key:key});if(r.error||!(r.data as ChatPayload)?.ok){setMsg('No se pudo enviar el mensaje. No se ha duplicado ningún envío.');setBusy(false);return;}setBody('');await load();setBusy(false);}
  async function logout(){await supabase.auth.signOut();window.location.href=import.meta.env.BASE_URL;}
  const context=ctx?.context??ctx??{};const role=String(context.role??'Usuario'),name=String(context.display_name??context.actor_code??role);const filtered=useMemo(()=>{const q=query.trim().toLowerCase();return q?items.filter(x=>`${x.sender_name??''} ${x.sender_actor_code??''} ${x.body??''}`.toLowerCase().includes(q)):items},[items,query]);
- if(!active||!ready||!logged)return null;const effectiveNav=nav.length?nav:fallbackNav;
+ if(!ready||!logged)return null;
+ if(!active)return <button type="button" className="fenix-chat-launcher" aria-label="Abrir chat de equipo" title="Chat de equipo" onClick={()=>navigate('/chat')}><MessageCircle size={20}/><style>{`.fenix-chat-launcher{position:fixed;right:18px;bottom:18px;z-index:9050;width:46px;height:46px;border-radius:14px;border:1px solid #870064;background:#870064;color:#fff;display:grid;place-items:center;padding:0;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.18)}.fenix-chat-launcher:hover,.fenix-chat-launcher:focus-visible{filter:brightness(1.08)}@media(max-width:650px){.fenix-chat-launcher{right:18px;bottom:18px}}`}</style></button>;
+ const effectiveNav=nav.length?nav:fallbackNav;
  return <OperationalShellFrame className="chat-root" theme={theme} navigation={effectiveNav} activeRoute="/chat" anaSubtitle="Chat interno del equipo." anaRoute="/ana" query={query} onQueryChange={setQuery} searchPlaceholder="Buscar en el chat..." name={name} role={role} initials={name.slice(0,2).toUpperCase()} onToggleTheme={()=>setTheme(theme==='light'?'dark':'light')} onLogout={logout} contentClassName="chat-content">
   <style>{`.chat-content{display:grid;gap:16px}.chat-hero,.chat-panel{border:1px solid var(--border,#e5e5e8);background:var(--panel,#fff);border-radius:16px;padding:18px}.chat-hero{display:flex;align-items:center;justify-content:space-between;gap:14px}.chat-hero h2{margin:3px 0}.chat-feed{display:grid;gap:10px;max-height:55vh;overflow:auto;padding:4px}.chat-message{border:1px solid var(--border,#e5e5e8);border-radius:13px;padding:11px 13px;background:var(--surface,#fff)}.chat-meta{font-size:11px;color:var(--muted,#666);display:flex;justify-content:space-between;gap:12px}.chat-body{white-space:pre-wrap;margin-top:5px}.chat-compose{display:grid;grid-template-columns:1fr auto;gap:10px}.chat-compose textarea{min-height:72px;resize:vertical;padding:11px;border-radius:12px;border:1px solid var(--border,#ddd);background:var(--surface,#fff);color:var(--text,#222)}.chat-compose button,.chat-refresh{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 14px;border-radius:11px;border:0;background:#870064;color:#fff;font-weight:800;cursor:pointer}.chat-empty{text-align:center;padding:32px;color:var(--muted,#666)}@media(max-width:650px){.chat-compose{grid-template-columns:1fr}.chat-hero{align-items:flex-start;flex-direction:column}}`}</style>
   <section className="chat-hero"><div><span className="eyebrow">EQUIPO</span><h2>Chat interno</h2><p>Mensajes internos vinculados a usuarios autenticados. No se admite suplantar otro actor.</p></div><button type="button" className="chat-refresh" onClick={()=>void load()} disabled={busy}><RefreshCw size={16}/>{busy?'Actualizando…':'Actualizar'}</button></section>
