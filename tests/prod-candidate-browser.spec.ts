@@ -51,7 +51,7 @@ test('exact PROD candidate keeps mobile navigation and calculator usable', async
   await page.setViewportSize({ width: 390, height: 844 });
   await primeProd(page);
   await page.goto('/expedientes');
-  await expect(page.getByRole('heading', { name: 'Expedientes' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Expedientes', exact: true })).toBeVisible();
   const menu=page.getByRole('button',{name:'Abrir menú'});
   await expect(menu).toBeVisible();
   await menu.click();
