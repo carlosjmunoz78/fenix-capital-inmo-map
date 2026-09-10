@@ -22,6 +22,7 @@ const PRIORITY_BY_REASON = Object.freeze({
   CUSTOMER_HUMAN_REQUEST: 50,
   LOW_CONFIDENCE: 40,
 });
+const own = (obj, key) => Object.prototype.hasOwnProperty.call(obj, key);
 
 function safePlainClone(value, label, stack = new WeakSet()) {
   if (value === null || typeof value === 'string' || typeof value === 'boolean') return value;
@@ -126,10 +127,12 @@ function humanRequired({ reason, requestId, context, capabilityId }) {
   });
 }
 
-export function planDigitalBuild(requestInput, { catalog = loadDigitalBuildCatalog() } = {}) {
-  // Sanitize the entire request recursively before any catalog validation or consumption.
-  // This guarantees nested accessors/proxies cannot execute caller code or mutate a supplied catalog.
+export function planDigitalBuild(requestInput, optionsInput = {}) {
+  // Sanitize every caller-controlled input before any validation or catalog consumption.
+  // This prevents nested accessors/proxies from executing code or returning time-varying values.
   const request = ownDataObject(requestInput, 'request');
+  const options = ownDataObject(optionsInput, 'options');
+  const catalog = own(options, 'catalog') ? ownDataObject(options.catalog, 'catalog') : ownDataObject(loadDigitalBuildCatalog(), 'catalog');
   validateDigitalBuildCatalog({ catalog });
 
   const context = ownDataObject(request.context, 'request.context');
