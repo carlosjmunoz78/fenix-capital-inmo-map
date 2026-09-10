@@ -34,8 +34,12 @@ jobs:
           set -euo pipefail
           current="$(git rev-parse HEAD)"
           message="$(git log -1 --pretty=%s)"
-          if [[ "$message" != deploy\(prod\):\ promote\ * ]]; then
-            echo "Current gh-pages commit was not created by protected promotion; refusing blind rollback." >&2
+          if [[ "$message" != deploy:\ APP\ PROD\ * ]]; then
+            echo "Current gh-pages commit was not created by canonical APP PROD promotion; refusing blind rollback." >&2
+            exit 1
+          fi
+          if ! git rev-parse HEAD^ >/dev/null 2>&1; then
+            echo 'Current deployment has no preserved parent; refusing destructive rollback.' >&2
             exit 1
           fi
           target="$(git rev-parse HEAD^)"
@@ -49,7 +53,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git push --force origin "${TARGET_SHA}:refs/heads/gh-pages"
+          git push --force-with-lease origin "${TARGET_SHA}:refs/heads/gh-pages"
           {
             echo '### PROD rollback'
             echo "- from: \`${{ steps.resolve.outputs.current }}\`"
