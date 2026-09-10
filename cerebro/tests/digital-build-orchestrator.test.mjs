@@ -70,6 +70,22 @@ test('Trading access is isolated and routes to POLICY_CONFLICT without execution
   assert.equal(assertCanonicalHumanRequired(result), true);
 });
 
+test('combined escalation flags select canonical highest-priority reason independent of branch order', () => {
+  const all = planDigitalBuild(request({
+    trading_access: true,
+    requires_prod_write: true,
+    autonomous_prod: true,
+    estimated_additional_cost_eur: 5,
+  }));
+  assert.equal(all.reason, 'HIGH_RISK');
+
+  const moneyAndTrading = planDigitalBuild(request({
+    trading_access: true,
+    estimated_additional_cost_eur: 5,
+  }));
+  assert.equal(moneyAndTrading.reason, 'MONEY_LIMIT');
+});
+
 test('orchestrator rejects unsafe scalar coercions and unknown capabilities', () => {
   assert.throws(() => planDigitalBuild(request({ estimated_additional_cost_eur: '0' })), /finite non-negative/);
   assert.throws(() => planDigitalBuild(request({ trading_access: 0 })), /boolean/);
@@ -86,6 +102,25 @@ test('request context and returned plan are isolated from caller mutation', () =
   assert.equal(plan.capability_id, 'cap:web-build');
 });
 
+test('returned plan and HUMAN_REQUIRED snapshots are deeply frozen', () => {
+  const plan = planDigitalBuild(request());
+  assert.equal(Object.isFrozen(plan), true);
+  assert.equal(Object.isFrozen(plan.context), true);
+  assert.equal(Object.isFrozen(plan.engine_bindings), true);
+  assert.equal(Object.isFrozen(plan.template), true);
+  assert.equal(Object.isFrozen(plan.skills), true);
+  assert.equal(Object.isFrozen(plan.skills[0]), true);
+  assert.equal(Object.isFrozen(plan.gates), true);
+  assert.throws(() => { plan.context.environment = 'PROD'; }, TypeError);
+  assert.throws(() => { plan.template.enabled = true; }, TypeError);
+  assert.throws(() => { plan.engine_bindings.push('LAB-TRD'); }, TypeError);
+
+  const human = planDigitalBuild(request({ requires_prod_write: true }));
+  assert.equal(Object.isFrozen(human), true);
+  assert.equal(Object.isFrozen(human.context), true);
+  assert.throws(() => { human.context.environment = 'PROD'; }, TypeError);
+});
+
 test('accessor fields are rejected before planning', () => {
   let executed = false;
   const source = request();
@@ -97,5 +132,34 @@ test('accessor fields are rejected before planning', () => {
     },
   });
   assert.throws(() => planDigitalBuild(source), /data property/);
+  assert.equal(executed, false);
+});
+
+test('inherited accessors and custom prototypes are rejected before any inherited getter executes', () => {
+  let executed = false;
+  const proto = {};
+  Object.defineProperty(proto, 'trading_access', {
+    get() {
+      executed = true;
+      return true;
+    },
+  });
+  const source = Object.create(proto);
+  Object.assign(source, request());
+  delete source.trading_access;
+  assert.throws(() => planDigitalBuild(source), /plain object/);
+  assert.equal(executed, false);
+
+  const contextProto = {};
+  Object.defineProperty(contextProto, 'environment', {
+    get() {
+      executed = true;
+      return 'PROD';
+    },
+  });
+  const unsafeContext = Object.create(contextProto);
+  Object.assign(unsafeContext, request().context);
+  delete unsafeContext.environment;
+  assert.throws(() => planDigitalBuild(request({ context: unsafeContext })), /plain object/);
   assert.equal(executed, false);
 });
