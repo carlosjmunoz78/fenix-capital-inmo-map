@@ -80,19 +80,50 @@ test('Informes PROD expone actividad diaria auditada y preserva aislamiento por 
   expect(migration).toContain("time zone 'Europe/Madrid'");
 });
 
-test('Calculadora avanzada expone fondos propios capacidad y escenarios sin predecir tipos futuros',()=>{
+test('Calculadora avanzada expone capacidad modalidad y escenarios sin predecir tipos futuros',()=>{
   const ui=fs.readFileSync(path.resolve('src/CalculatorProEnhancement.tsx'),'utf8');
   const engine=fs.readFileSync(path.resolve('src/calculator.ts'),'utf8');
   const main=fs.readFileSync(path.resolve('src/main.tsx'),'utf8');
   expect(main).toContain('<CalculatorProEnhancement />');
   expect(ui).toContain('calculator-pro-advanced');
+  expect(ui).toContain('Modalidad hipotecaria');
+  expect(ui).toContain('<option value="mixed">Mixta</option>');
+  expect(ui).toContain('<option value="variable">Variable</option>');
   expect(ui).toContain('Gastos compra €');
   expect(ui).toContain('Ahorro disponible €');
   expect(ui).toContain('Esfuerzo objetivo %');
   expect(ui).toContain('Fondos propios necesarios');
   expect(ui).toContain('Principal máximo objetivo');
-  expect(ui).toContain('Comparador de sensibilidad');
+  expect(ui).toContain('Comparador de escenarios');
   expect(ui).toContain('Los escenarios no predicen tipos futuros');
+  expect(ui).toContain('calculator-pro-assumptions');
   expect(engine).toContain("projectionStatus: 'calculated' | 'assumptions_required'");
   expect(engine).toContain("if (type !== 'fixed')");
+});
+
+test('Controles flotantes respetan orden micrófono calculadora chat e iconos sin texto',()=>{
+  const css=fs.readFileSync(path.resolve('src/calculator-no-pro.css'),'utf8');
+  const labels=fs.readFileSync(path.resolve('src/CalculatorLabelGuard.tsx'),'utf8');
+  const chat=fs.readFileSync(path.resolve('src/ChatShell.tsx'),'utf8');
+  expect(css).toContain('bottom:130px!important');
+  expect(css).toContain('bottom:74px!important');
+  expect(chat).toContain('bottom:18px');
+  expect(css).toContain('width:46px!important');
+  expect(chat).toContain('width:46px;height:46px');
+  expect(labels).toContain('if(node.nodeType===Node.TEXT_NODE)node.remove()');
+  expect(chat).toContain('aria-label="Abrir chat de equipo"');
+});
+
+test('Chat de equipo permite imagen documento y audio con storage privado e identidad autenticada',()=>{
+  const chat=fs.readFileSync(path.resolve('src/ChatShell.tsx'),'utf8');
+  const migration=fs.readFileSync(path.resolve('supabase/migrations/20260910151705_team_chat_attachments_v1.sql'),'utf8');
+  expect(chat).toContain("const BUCKET='fenix-prod-chat'");
+  expect(chat).toContain('Adjuntar imagen, documento o audio');
+  expect(chat).toContain("supabase.rpc('fenix_prod_chat_attachment_add_user'");
+  expect(chat).toContain('createSignedUrl(a.storage_path,300)');
+  expect(chat).toContain('supabase.storage.from(BUCKET).remove([storagePath])');
+  expect(migration).toContain("public,false,20971520");
+  expect(migration).toContain("(storage.foldername(name))[1]=auth.uid()::text");
+  expect(migration).toContain('message_not_owned');
+  expect(migration).toContain('fenix_prod_chat_attachment_add_user');
 });
