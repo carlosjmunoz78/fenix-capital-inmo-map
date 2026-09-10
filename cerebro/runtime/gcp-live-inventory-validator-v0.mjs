@@ -1,0 +1,215 @@
+const PROJECTS = Object.freeze([
+  'fenix-trading-lab',
+  'fenix-capital-455809',
+  'fenix-inmobiliaria',
+  'fenix-capital-make-web-y-seo',
+]);
+
+const DOMAINS = Object.freeze([
+  'projects','enabled_apis','cloud_run','cloud_functions','compute','jobs','scheduler','pubsub','storage','databases','artifact_registry','service_accounts_and_iam','secret_references','networking','logging_monitoring','billing_cost','regions','deployments','resource_consumers'
+]);
+
+const RESULT_STATUS = new Set(['SUCCESS','PERMISSION_DENIED','API_UNAVAILABLE','EMPTY','ERROR']);
+const CLASSIFICATION_STATUS = new Set(['UNCLASSIFIED','TRAINING','TRADING','APP_CRM','SHARED_REQUIRES_REVIEW','OTHER']);
+const PROJECT_SET = new Set(PROJECTS);
+const DOMAIN_SET = new Set(DOMAINS);
+const DOMAIN_SENTINEL = '__DOMAIN__';
+const BASE_FIELDS = Object.freeze([
+  'capture_id','record_kind','captured_at','company_id','engine_id','environment','version','project_id','domain',
+  'command_template_id_or_ref','principal_ref','result_status','evidence_ref','raw_payload_stored',
+  'secret_payload_present','resource_ref','classification_status',
+]);
+const COVERAGE_FIELDS = Object.freeze([...BASE_FIELDS, 'command_results']);
+const RESOURCE_FIELDS = BASE_FIELDS;
+const COMMAND_RESULT_FIELDS = Object.freeze([
+  'command_run_ref','command_template_id_or_ref','result_status','captured_at','principal_ref','evidence_ref',
+]);
+const ENVELOPE_FIELDS = Object.freeze(['coverage_records','resource_records']);
+
+function assertJsonString(value) {
+  if (typeof value !== 'string' || value.length === 0) throw new TypeError('envelope must be a non-empty JSON string');
+}
+
+function rejectDuplicateJsonObjectKeys(text) {
+  const stack = [];
+  let i = 0;
+  while (i < text.length) {
+    const ch = text[i];
+    if (/\s/.test(ch)) { i += 1; continue; }
+    if (ch === '"') {
+      const start = i;
+      i += 1;
+      let escaped = false;
+      while (i < text.length) {
+        const c = text[i];
+        if (escaped) { escaped = false; i += 1; continue; }
+        if (c === '\\') { escaped = true; i += 1; continue; }
+        if (c === '"') break;
+        i += 1;
+      }
+      if (i >= text.length) return;
+      const token = text.slice(start, i + 1);
+      const top = stack[stack.length - 1];
+      if (top?.type === 'object' && top.expectKey) {
+        let key;
+        try { key = JSON.parse(token); } catch { return; }
+        if (top.keys.has(key)) throw new Error(`duplicate JSON object key: ${key}`);
+        top.keys.add(key);
+        top.expectKey = false;
+      }
+      i += 1;
+      continue;
+    }
+    if (ch === '{') { stack.push({ type: 'object', keys: new Set(), expectKey: true }); i += 1; continue; }
+    if (ch === '[') { stack.push({ type: 'array' }); i += 1; continue; }
+    if (ch === '}' || ch === ']') { stack.pop(); i += 1; continue; }
+    if (ch === ',') {
+      const top = stack[stack.length - 1];
+      if (top?.type === 'object') top.expectKey = true;
+      i += 1;
+      continue;
+    }
+    i += 1;
+  }
+}
+
+function parseEnvelopeJson(inputJson) {
+  assertJsonString(inputJson);
+  rejectDuplicateJsonObjectKeys(inputJson);
+  let parsed;
+  try { parsed = JSON.parse(inputJson); }
+  catch { throw new TypeError('envelope must be valid JSON'); }
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) throw new TypeError('envelope JSON root must be an object');
+  assertExactKeys(parsed, ENVELOPE_FIELDS, 'envelope');
+  if (!Array.isArray(parsed.coverage_records)) throw new TypeError('coverage_records must be an array');
+  if (!Array.isArray(parsed.resource_records)) throw new TypeError('resource_records must be an array');
+  return parsed;
+}
+
+function assertExactKeys(value, expectedFields, label) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) throw new TypeError(`${label} must be an object`);
+  const keys = Object.keys(value).sort();
+  const expected = [...expectedFields].sort();
+  if (keys.length !== expected.length || keys.some((key, index) => key !== expected[index])) {
+    throw new Error(`${label} fields must match the canonical contract exactly`);
+  }
+}
+
+function assertCanonicalString(value, label) {
+  if (typeof value !== 'string' || value.length === 0 || value !== value.trim() || /[\u0000-\u001F\u007F]/.test(value)) {
+    throw new TypeError(`${label} must be a canonical non-empty string without edge whitespace or control characters`);
+  }
+}
+
+function assertTimestamp(value, label) {
+  assertCanonicalString(value, label);
+  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?Z$/.test(value) || Number.isNaN(Date.parse(value))) {
+    throw new TypeError(`${label} must be an ISO-8601 UTC timestamp`);
+  }
+}
+
+function assertPrincipalRef(value, label) {
+  assertCanonicalString(value, label);
+  if (!/^(?:principal|credential-ref|workload-identity):\/\/[A-Za-z0-9._~:/@+-]+$/.test(value)) {
+    throw new TypeError(`${label} must be a canonical principal/credential reference, not serialized credential material`);
+  }
+}
+
+function assertEvidenceRef(value, label) {
+  assertCanonicalString(value, label);
+  if (!/^evidence:\/\/[A-Za-z0-9._~:/@+-]+$/.test(value)) throw new TypeError(`${label} must be a canonical evidence:// reference`);
+}
+
+function assertCommandRef(value, domain, label) {
+  assertCanonicalString(value, label);
+  const exact = `GCP-READONLY-CATALOG:${domain}`;
+  if (value !== exact) throw new TypeError(`${label} must reference the canonical read-only catalog entry ${exact}`);
+}
+
+function pairKey(projectId, domain) { return `${projectId}::${domain}`; }
+function resourceKey(projectId, resourceRef) { return `${projectId}::${resourceRef}`; }
+
+function validateCommon(record, label, recordKind, expectedFields) {
+  assertExactKeys(record, expectedFields, label);
+  assertCanonicalString(record.capture_id, `${label}.capture_id`);
+  if (record.record_kind !== recordKind) throw new Error(`${label}.record_kind must be ${recordKind}`);
+  assertTimestamp(record.captured_at, `${label}.captured_at`);
+  assertCanonicalString(record.company_id, `${label}.company_id`);
+  if (record.engine_id !== 'INT-001') throw new Error(`${label}.engine_id must be INT-001`);
+  if (record.environment !== 'SCAFFOLD') throw new Error(`${label}.environment must be SCAFFOLD`);
+  assertCanonicalString(record.version, `${label}.version`);
+  assertCanonicalString(record.project_id, `${label}.project_id`);
+  assertCanonicalString(record.domain, `${label}.domain`);
+  if (!PROJECT_SET.has(record.project_id)) throw new RangeError(`${label}.project_id not allowlisted: ${record.project_id}`);
+  if (!DOMAIN_SET.has(record.domain)) throw new RangeError(`${label}.domain not canonical: ${record.domain}`);
+  assertCommandRef(record.command_template_id_or_ref, record.domain, `${label}.command_template_id_or_ref`);
+  assertPrincipalRef(record.principal_ref, `${label}.principal_ref`);
+  assertEvidenceRef(record.evidence_ref, `${label}.evidence_ref`);
+  if (!RESULT_STATUS.has(record.result_status)) throw new RangeError(`${label}.result_status invalid: ${record.result_status}`);
+  if (!CLASSIFICATION_STATUS.has(record.classification_status)) throw new RangeError(`${label}.classification_status invalid: ${record.classification_status}`);
+  if (record.raw_payload_stored !== false) throw new Error(`${label}.raw_payload_stored must be false`);
+  if (record.secret_payload_present !== false) throw new Error(`${label}.secret_payload_present must be false`);
+  assertCanonicalString(record.resource_ref, `${label}.resource_ref`);
+}
+
+function validateCommandResults(record, label) {
+  if (!Array.isArray(record.command_results) || record.command_results.length === 0) throw new Error(`${label}.command_results must contain every executed command or expansion`);
+  const seen = new Set();
+  for (const [index, result] of record.command_results.entries()) {
+    const rlabel = `${label}.command_results[${index}]`;
+    assertExactKeys(result, COMMAND_RESULT_FIELDS, rlabel);
+    assertCanonicalString(result.command_run_ref, `${rlabel}.command_run_ref`);
+    if (seen.has(result.command_run_ref)) throw new Error(`${label}.command_run_ref must be unique: ${result.command_run_ref}`);
+    seen.add(result.command_run_ref);
+    assertCommandRef(result.command_template_id_or_ref, record.domain, `${rlabel}.command_template_id_or_ref`);
+    if (!RESULT_STATUS.has(result.result_status)) throw new RangeError(`${rlabel}.result_status invalid: ${result.result_status}`);
+    assertTimestamp(result.captured_at, `${rlabel}.captured_at`);
+    assertPrincipalRef(result.principal_ref, `${rlabel}.principal_ref`);
+    assertEvidenceRef(result.evidence_ref, `${rlabel}.evidence_ref`);
+  }
+}
+
+export function expectedCoveragePairs() {
+  return PROJECTS.flatMap((project_id) => DOMAINS.map((domain) => ({ project_id, domain })));
+}
+
+export function validateGcpInventoryEnvelope(inputJson) {
+  const input = parseEnvelopeJson(inputJson);
+  const seenCaptureIds = new Set();
+  const coveragePairs = new Set();
+
+  for (const [index, record] of input.coverage_records.entries()) {
+    const label = `coverage_records[${index}]`;
+    validateCommon(record, label, 'COVERAGE', COVERAGE_FIELDS);
+    validateCommandResults(record, label);
+    if (record.resource_ref !== DOMAIN_SENTINEL) throw new Error(`${label}.resource_ref must be ${DOMAIN_SENTINEL}`);
+    if (record.classification_status !== 'UNCLASSIFIED') throw new Error(`${label}.classification_status must be UNCLASSIFIED`);
+    if (seenCaptureIds.has(record.capture_id)) throw new Error(`duplicate capture_id: ${record.capture_id}`);
+    seenCaptureIds.add(record.capture_id);
+    const key = pairKey(record.project_id, record.domain);
+    if (coveragePairs.has(key)) throw new Error(`duplicate coverage pair: ${key}`);
+    coveragePairs.add(key);
+  }
+
+  const expected = expectedCoveragePairs().map(({ project_id, domain }) => pairKey(project_id, domain));
+  const missing = expected.filter((key) => !coveragePairs.has(key));
+  if (input.coverage_records.length !== 76 || coveragePairs.size !== 76 || missing.length > 0) {
+    throw new Error(`incomplete project-domain coverage: expected 76 unique COVERAGE records; missing=${missing.join(',')}`);
+  }
+
+  const resourceIdentities = new Set();
+  for (const [index, record] of input.resource_records.entries()) {
+    const label = `resource_records[${index}]`;
+    validateCommon(record, label, 'RESOURCE', RESOURCE_FIELDS);
+    if (record.resource_ref === DOMAIN_SENTINEL) throw new Error(`${label} cannot use the domain sentinel as a real resource`);
+    if (seenCaptureIds.has(record.capture_id)) throw new Error(`duplicate capture_id: ${record.capture_id}`);
+    seenCaptureIds.add(record.capture_id);
+    const key = resourceKey(record.project_id, record.resource_ref);
+    if (resourceIdentities.has(key)) throw new Error(`duplicate resource identity across domains: ${key}`);
+    resourceIdentities.add(key);
+  }
+
+  return Object.freeze({valid:true, project_count:4, domain_count:19, coverage_pairs:coveragePairs.size, resource_records:resourceIdentities.size, execution_mode:'READ_ONLY_CAPTURE_ONLY', prod_writes:false, autonomous_prod:false, trading_mutation_forbidden:true});
+}
+
+export const GCP_INVENTORY_VALIDATOR_CONSTANTS = Object.freeze({PROJECTS, DOMAINS, DOMAIN_SENTINEL, BASE_FIELDS, COVERAGE_FIELDS, RESOURCE_FIELDS, COMMAND_RESULT_FIELDS, ENVELOPE_FIELDS});
