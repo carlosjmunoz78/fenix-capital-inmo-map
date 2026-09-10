@@ -40,7 +40,7 @@
       "primary_engines": ["WEB-001", "FACT-001"],
       "supporting_engines": ["ARCH-001", "SEO-001", "SEC-001", "DEP-001"],
       "coverage": "PARTIAL",
-      "gap": "Existing web/WordPress capability does not yet evidence a technology-neutral builder/catalog with deterministic template selection and common security/SEO/accessibility/performance gates.",
+      "gap": "WEB-001 is treated here only as a canonical contract target pending its own implementation audit; this repository does not yet evidence a technology-neutral builder/catalog with deterministic template selection and common security/SEO/accessibility/performance gates.",
       "action": "WRAP_WEB001_AND_EXTEND_FACT001",
       "new_engine_id_required": false
     },
@@ -49,8 +49,8 @@
       "primary_engines": ["WEB-001"],
       "supporting_engines": ["FACT-001", "ARCH-001", "SEO-001", "MIG-001"],
       "coverage": "PARTIAL",
-      "gap": "WordPress exists, but stack choice must become evidence-driven rather than defaulting to Elementor/WordPress and must retain migration/rollback contracts.",
-      "action": "EXTEND_WEB001_CAPABILITY",
+      "gap": "WEB-001 is a canonical contract target whose implementation remains UNKNOWN_REQUIRES_AUDIT in this repository. Any future WordPress/Gutenberg/Elementor/headless stack choice must be evidence-driven and retain migration/rollback contracts; no operational WordPress capability is asserted here.",
+      "action": "EXTEND_WEB001_CAPABILITY_AFTER_AUDIT",
       "new_engine_id_required": false
     },
     {
@@ -82,11 +82,11 @@
     },
     {
       "capability": "deployment_migration_dns_cdn_ssl_feature_flags_canary_backup_rollback_rebuild",
-      "primary_engines": ["COMP-DEP-001", "MIG-001", "FF-001", "CAN-001"],
+      "primary_engines": ["COMP-DEP-001", "MIG-001", "FF-001", "CAN-001", "DR-001", "RBLD-001", "BCP-001", "COMP-BKP-001"],
       "supporting_engines": ["WEB-001", "APPBOOT-001", "DEP-001", "OBSERV-001", "SEC-001"],
       "coverage": "PARTIAL",
-      "gap": "Individual deployment/migration/flag/canary concepts exist, but the addendum requires a common digital-asset deployment contract including hosting/DNS/CDN/SSL/backups and tested rollback/rebuild.",
-      "action": "COMPOSE_EXISTING_DEPLOYMENT_ENGINES",
+      "gap": "Canonical deployment, migration, feature-flag, canary, disaster-recovery, rebuild, business-continuity and company-backup engines cover the logical contract surface, but their implementation states are not upgraded by this audit and a common digital-asset deployment contract for hosting/DNS/CDN/SSL/backups with tested rollback/rebuild remains incomplete.",
+      "action": "COMPOSE_AND_AUDIT_EXISTING_DEPLOYMENT_RESILIENCE_ENGINES",
       "new_engine_id_required": false
     },
     {
