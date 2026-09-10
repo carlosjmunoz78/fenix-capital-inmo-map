@@ -26,6 +26,18 @@ test('context engine_id must be one of the 177 canonical registry IDs', () => {
   assert.throws(() => planDigitalBuild(request({ context })), /noncanonical context engine NEW-999/);
 });
 
+test('context accepts only canonical company_id engine_id environment version fields', () => {
+  for (const [key, value] of [
+    ['engine_bindings', ['LAB-TRD']],
+    ['trading_access', true],
+    ['prod_writes', true],
+    ['autonomous_prod', true],
+  ]) {
+    const context = { ...request().context, [key]: value };
+    assert.throws(() => planDigitalBuild(request({ context })), new RegExp(`unexpected context field ${key}`));
+  }
+});
+
 test('supplied templates cannot smuggle Trading engine directives through extra fields', () => {
   const catalog = loadDigitalBuildCatalog();
   const capability = catalog.capabilities.find((item) => item.capability_id === 'cap:web-build');
