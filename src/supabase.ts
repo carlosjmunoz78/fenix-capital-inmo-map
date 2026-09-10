@@ -1,53 +1,22 @@
 import { createClient } from '@supabase/supabase-js';
 
-const runtimeEnv=import.meta.env.VITE_FENIX_ENV||'preprod';
-export const IS_PRODUCTION=runtimeEnv==='production'||runtimeEnv==='prod';
+export const IS_PRODUCTION=true;
 
-const PREPROD_SUPABASE_URL='https://hnqlnvakzaywtafeiybt.supabase.co';
-const PREPROD_SUPABASE_PUBLISHABLE_KEY='sb_publishable_uvtiidkBBkFRt2K34so27g_JpCbMUZw';
+export const SUPABASE_URL=String(import.meta.env.VITE_SUPABASE_URL||'');
+export const SUPABASE_PUBLISHABLE_KEY=String(import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY||'');
 
-export const SUPABASE_URL=IS_PRODUCTION
-  ? String(import.meta.env.VITE_SUPABASE_URL||'')
-  : String(import.meta.env.VITE_SUPABASE_URL||PREPROD_SUPABASE_URL);
-export const SUPABASE_PUBLISHABLE_KEY=IS_PRODUCTION
-  ? String(import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY||'')
-  : String(import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY||PREPROD_SUPABASE_PUBLISHABLE_KEY);
-
-if(IS_PRODUCTION&&(!SUPABASE_URL||!SUPABASE_PUBLISHABLE_KEY)){
+if(!SUPABASE_URL||!SUPABASE_PUBLISHABLE_KEY){
   throw new Error('FENIX PROD runtime requires dedicated Supabase URL and publishable key.');
 }
 
-const FUNCTION_SUFFIX=IS_PRODUCTION?'':String(import.meta.env.VITE_FUNCTION_SUFFIX||'');
-if(!IS_PRODUCTION&&!FUNCTION_SUFFIX){
-  throw new Error('FENIX PRE-PROD runtime requires an explicit edge-function suffix.');
-}
-const functionName=(base:string)=>`${base}${FUNCTION_SUFFIX}`;
-const AUTH_STORAGE_KEY=IS_PRODUCTION?'fenix-prod-auth-v1':'fenix-preprod-auth-v2';
-const LEGACY_AUTH_STORAGE_KEY='fenix-preprod-auth';
-const authStorage={
-  getItem(key:string){
-    const current=window.localStorage.getItem(key);
-    if(current!==null)return current;
-    if(IS_PRODUCTION||key!==AUTH_STORAGE_KEY)return null;
-    const legacy=window.localStorage.getItem(LEGACY_AUTH_STORAGE_KEY);
-    if(!legacy)return null;
-    try{
-      const parsed=JSON.parse(legacy) as {user?:{email?:string};refresh_token?:string};
-      const isQaSession=parsed.user?.email?.endsWith('@fenix.test')||parsed.refresh_token?.startsWith('qa-refresh-');
-      return isQaSession?legacy:null;
-    }catch{return null;}
-  },
-  setItem(key:string,value:string){window.localStorage.setItem(key,value)},
-  removeItem(key:string){window.localStorage.removeItem(key)}
-};
+const AUTH_STORAGE_KEY='fenix-prod-auth-v1';
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
-    storageKey: AUTH_STORAGE_KEY,
-    storage: authStorage
+    storageKey: AUTH_STORAGE_KEY
   }
 });
 
@@ -75,14 +44,10 @@ function safeNavigationFallback(){return{items:[{route:'/inicio',label:'Inicio'}
 
 function authenticatedContextFallback(session:Awaited<ReturnType<typeof supabase.auth.getSession>>['data']['session']){
  const metadata=session?.user?.user_metadata as Record<string,unknown>|undefined;
- const actorCode=typeof metadata?.actor_code==='string'
-   ?metadata.actor_code
-   :!IS_PRODUCTION&&typeof metadata?.fenix_test_actor==='string'
-     ?metadata.fenix_test_actor
-     :'';
+ const actorCode=typeof metadata?.actor_code==='string'?metadata.actor_code:'';
  if(!actorCode)return null;
  const explicitRole=typeof metadata?.role==='string'?metadata.role:'';
- const role=explicitRole||((actorCode==='DIR-TEST'||actorCode==='CARLOS-ADMIN')?'Dirección':actorCode.startsWith('FIN-')?'Financiero':actorCode.startsWith('VIS-')?'Visitador':'Usuario');
+ const role=explicitRole||((actorCode==='CARLOS-ADMIN')?'Dirección':actorCode.startsWith('FIN-')?'Financiero':actorCode.startsWith('VIS-')?'Visitador':'Usuario');
  return{actor_code:actorCode,role,context_source:'authenticated-user-metadata'};
 }
 
@@ -92,7 +57,7 @@ async function authenticatedEdgeFetch<T>(baseFunctionName:string,path:string,ini
   if(!token)return{status:401,data:null};
   let response:Response;
   try{
-    response=await fetch(`${SUPABASE_URL}/functions/v1/${functionName(baseFunctionName)}${path}`,{
+    response=await fetch(`${SUPABASE_URL}/functions/v1/${baseFunctionName}${path}`,{
       ...init,
       headers:{
         'content-type':'application/json',
@@ -108,7 +73,7 @@ async function authenticatedEdgeFetch<T>(baseFunctionName:string,path:string,ini
 }
 
 export async function fetchEnvironmentApi<T>(baseFunctionName:string,path:string,init?:RequestInit,options?:{productionAvailable?:boolean}):Promise<{status:number;data:T|null}>{
-  if(IS_PRODUCTION&&options?.productionAvailable===false)return{status:503,data:null};
+  if(options?.productionAvailable===false)return{status:503,data:null};
   return authenticatedEdgeFetch<T>(baseFunctionName,path,init);
 }
 
