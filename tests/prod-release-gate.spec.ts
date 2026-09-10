@@ -38,3 +38,14 @@ test('PRE-PROD conserva separación técnica del backend de producción',()=>{
   expect(supabase).toContain('if(IS_PRODUCTION||key!==AUTH_STORAGE_KEY)return null');
   expect(supabase).not.toMatch(/functions\/v1\/fenix-[a-z0-9-]+(?:[/'"`])/i);
 });
+
+test('Contactos PROD abre fichas con identificadores canónicos y usa el gateway',()=>{
+  const detail=fs.readFileSync(path.resolve('src/ContactDetailShell.tsx'),'utf8');
+  const runtime=fs.readFileSync(path.resolve('src/notionRuntime.ts'),'utf8');
+  expect(detail).toContain("const active=Boolean(match&&id&&id!=='nuevo')");
+  expect(detail).not.toContain('isNotionId');
+  expect(detail).not.toContain("replace(/^notion\\|/i,'')");
+  expect(detail).toContain("r.data?.contacto||r.data?.item||null");
+  expect(runtime).toContain("pathname.match(/^\\/clientes\\/([^/]+)$/)");
+  expect(runtime).toContain("fetchAppApi<T>(`/contactos/${encodeURIComponent(id)}`)");
+});
