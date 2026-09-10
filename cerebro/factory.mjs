@@ -46,6 +46,7 @@ function validateRegistry(registry) {
     for (const key of ['engine_id','name','version','environment','company_scope','evidence_state']) {
       if (engine[key] == null || engine[key] === '') errors.push(`${engine.engine_id || '<unknown>'}: missing ${key}`);
     }
+    if (engine.environment !== 'SCAFFOLD') errors.push(`${engine.engine_id || '<unknown>'}: FACT-001 V0 registry environment must be SCAFFOLD`);
   }
   if (registry.count !== registry.engines.length) errors.push(`count mismatch: declared ${registry.count}, actual ${registry.engines.length}`);
   if (errors.length) throw new Error(errors.join('\n'));
