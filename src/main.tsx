@@ -26,6 +26,7 @@ import './direction-ana-half.css';
 import './login-layout-fix.css';
 import './global-interactions.css';
 import './desktop-visual-density.css';
+import './document-viewer-final.css';
 import App from './App';
 import RoleHomeShell from './RoleHomeShell';
 import ProfileShell from './ProfileShell';
