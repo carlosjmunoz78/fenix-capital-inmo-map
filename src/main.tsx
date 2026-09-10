@@ -1,4 +1,3 @@
-// PRE-PROD CI retrigger marker; no runtime behavior change.
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
@@ -122,6 +121,10 @@ import ExpedienteJourneyGuard from './ExpedienteJourneyGuard';
 import GlobalDictationGuard from './GlobalDictationGuard';
 import LocalAudioTranscriptionGuard from './LocalAudioTranscriptionGuard';
 import GlobalCommunicationCommandGuard from './GlobalCommunicationCommandGuard';
+
+// Remove the retired PRE-PROD auth cache before any screen resolves profile state.
+// This is a one-way compatibility cleanup only; PROD auth remains Supabase-managed.
+try{localStorage.removeItem('fenix-preprod-auth')}catch{}
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
