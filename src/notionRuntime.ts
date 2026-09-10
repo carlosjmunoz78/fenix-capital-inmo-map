@@ -25,6 +25,11 @@ async function fetchProductionRead<T>(path:string,init?:RequestInit):Promise<{st
     const r=await fetchAppApi<T>('/contactos');
     return{status:r.status,data:r.status===200?filterContactResponse(r.data,'clientes'):r.data};
   }
+  const contactDetail=pathname.match(/^\/clientes\/([^/]+)$/);
+  if(contactDetail){
+    const id=decodeURIComponent(contactDetail[1]);
+    return fetchAppApi<T>(`/contactos/${encodeURIComponent(id)}`);
+  }
   if(pathname==='/contactos-inmobiliaria'){
     const r=await fetchAppApi<T>('/contactos');
     return{status:r.status,data:r.status===200?filterContactResponse(r.data,'inmobiliarias'):r.data};
