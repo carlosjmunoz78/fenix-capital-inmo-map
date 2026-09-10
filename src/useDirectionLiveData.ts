@@ -24,7 +24,8 @@ function taskDone(r:Row){return bool(r,['completada','completado','done'])||/com
 function expState(r:Row){return text(r,['estado','fase','phase','stage','status']);}
 function expRisk(r:Row){return text(r,['riesgo','risk','nivel_riesgo','semaforo','semáforo']);}
 function expCode(r:Row){return text(r,['expediente_code','code','codigo','id']);}
-export function isOpenDirectionExpediente(r:Row){const s=expState(r);return !/firmad|posventa|perdid|cerrad|anulad|cancelad|pasado|desistid/i.test(s);}
+export function isClosedDirectionExpediente(r:Row){const s=expState(r);return /baja|finaliz|cerrad|cierre|firmad|posventa|perdid|anulad|cancelad|desistid|pasado/i.test(s);}
+export function isOpenDirectionExpediente(r:Row){return !isClosedDirectionExpediente(r);}
 export function isExplicitRiskDirectionExpediente(r:Row){const risk=expRisk(r);return /alto|cr[ií]tic|riesgo|bloquead|atenci[oó]n|urgente/i.test(risk)&&isOpenDirectionExpediente(r);}
 function firmaId(r:Row){return text(r,['id','firma_id','firma_code','code']);}
 function firmaExp(r:Row){return text(r,['expediente_code','expediente','operacion','operación']);}
