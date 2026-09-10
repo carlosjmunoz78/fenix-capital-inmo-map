@@ -145,8 +145,11 @@ test('inherited accessors and custom prototypes are rejected before any inherite
     },
   });
   const source = Object.create(proto);
-  Object.assign(source, request());
-  delete source.trading_access;
+  const safe = request();
+  for (const [key, value] of Object.entries(safe)) {
+    if (key === 'trading_access') continue;
+    Object.defineProperty(source, key, { value, enumerable: true, writable: true, configurable: true });
+  }
   assert.throws(() => planDigitalBuild(source), /plain object/);
   assert.equal(executed, false);
 
@@ -158,8 +161,10 @@ test('inherited accessors and custom prototypes are rejected before any inherite
     },
   });
   const unsafeContext = Object.create(contextProto);
-  Object.assign(unsafeContext, request().context);
-  delete unsafeContext.environment;
+  for (const [key, value] of Object.entries(request().context)) {
+    if (key === 'environment') continue;
+    Object.defineProperty(unsafeContext, key, { value, enumerable: true, writable: true, configurable: true });
+  }
   assert.throws(() => planDigitalBuild(request({ context: unsafeContext })), /plain object/);
   assert.equal(executed, false);
 });
