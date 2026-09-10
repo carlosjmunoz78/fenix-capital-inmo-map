@@ -1,0 +1,77 @@
+{
+  "artifact_id": "CEREBRO-ADDENDUM-AUTONOMY-IDENTITIES-INTAKE-V1",
+  "date": "2026-09-10",
+  "source_status": "DEFINED",
+  "implementation_status": "DEFINED_NOT_BUILT",
+  "current_loop_unchanged": true,
+  "canonical_requirements": [
+    "IDENTITY_REGISTRY",
+    "ACCOUNT_REGISTRY",
+    "CREDENTIAL_BROKER_VAULT",
+    "CONNECTOR_MCP_REGISTRY",
+    "CONNECTOR_MCP_SCRIPT_FACTORY",
+    "BROWSER_COMPUTER_USE_RUNTIME",
+    "ACCOUNT_LIFECYCLE",
+    "MULTI_ACCOUNT_ORCHESTRATOR",
+    "SESSION_DISCOVERY",
+    "VERIFICATION_AUTOCORRECTION"
+  ],
+  "required_scope_keys": [
+    "company_id",
+    "identity_id",
+    "account_id",
+    "engine_id_or_capability_id",
+    "environment",
+    "version"
+  ],
+  "tool_route_priority": [
+    "OFFICIAL_API_OR_EXISTING_CONNECTOR",
+    "AUTHORIZED_EXISTING_MCP",
+    "OWN_API_OR_WEBHOOK_AUTOMATION",
+    "SCRIPT_CLI_OPEN_SOURCE",
+    "AUTHORIZED_BROWSER_OR_COMPUTER_USE",
+    "FACT_001_NEW_CONNECTOR_ONLY_AFTER_DOCUMENTED_GAP"
+  ],
+  "security_invariants": {
+    "plaintext_secrets_in_general_records": false,
+    "secrets_in_prompts_logs_repo_notion_general_tables": false,
+    "rbac_abac_minimum_privilege": true,
+    "kill_switch_required": true,
+    "revocation_required": true,
+    "environment_isolation_required": true,
+    "trading_lab_isolated": true,
+    "captcha_mfa_antiabuse_evasion": false
+  },
+  "human_required": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "v0_rollout": {
+    "initial_real_accounts": "3-4",
+    "structural_capacity_without_redesign": 10,
+    "progressive_promotion": true
+  },
+  "v0_acceptance": [
+    "3-4 authorized accounts onboarded without identity or secret mixing",
+    "login method and session state identified",
+    "credentials consumed through broker/vault references",
+    "at least one API/MCP route in LAB",
+    "at least one controlled browser/computer-use route in LAB",
+    "missing connector generatable by FACT-001 and testable",
+    "authorized multi-account task executable and verifiable",
+    "expired session routes to renewal/fallback/canonical HUMAN_REQUIRED",
+    "10 accounts supported structurally without redesign",
+    "kill switch, audit and revocation present",
+    "no unapproved spend, fake-account networks, spam or control evasion"
+  ],
+  "next_action": "AUDIT_OVERLAP_AGAINST_177_BEFORE_ANY_NEW_ENGINE_ID",
+  "prod_writes": false,
+  "autonomous_prod": false,
+  "additional_cost_target_eur": 0
+}
