@@ -38,6 +38,35 @@ test('rejects unknown GCP projects and non-SCAFFOLD environments', () => {
   assert.throws(() => buildGcpTrainingInventoryPlan({ ...base, environment: 'PROD' }), /exact SCAFFOLD only/);
 });
 
+test('rejects accessors, proxies and extra fields before reading caller-controlled values', () => {
+  let getterRuns = 0;
+  const withGetter = { ...base };
+  Object.defineProperty(withGetter, 'project_id', {
+    enumerable: true,
+    get() {
+      getterRuns += 1;
+      return getterRuns === 1 ? 'fenix-trading-lab' : 'fenix-capital-455809';
+    },
+  });
+  assert.throws(() => buildGcpTrainingInventoryPlan(withGetter), /must be a data property/);
+  assert.equal(getterRuns, 0);
+
+  let trapRuns = 0;
+  const proxy = new Proxy({ ...base }, {
+    getPrototypeOf() {
+      trapRuns += 1;
+      return Object.prototype;
+    },
+  });
+  assert.throws(() => buildGcpTrainingInventoryPlan(proxy), /proxy objects are forbidden/);
+  assert.equal(trapRuns, 0);
+
+  assert.throws(
+    () => buildGcpTrainingInventoryPlan({ ...base, prod_writes: 'true' }),
+    /unexpected input field prod_writes/,
+  );
+});
+
 test('inventory plan includes all required discovery domains and integration precedence', () => {
   const plan = buildGcpTrainingInventoryPlan(base);
   for (const domain of ['services','cloud_run','functions','compute','jobs','scheduler','pubsub','storage','databases','artifact_registry','iam','secret_references','networking','logging_monitoring','billing_cost','regions','deployments','consumers']) {
