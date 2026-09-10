@@ -23,6 +23,17 @@ test('release validation workflows no longer depend on PRE-PROD credentials or e
   expect(candidate).toContain('https://prod.invalid');
 });
 
+test('canonical APP promotion comes only from prod-preparation and preserves rollback history',()=>{
+  const promote=read('.github/workflows/app-prod-promote.yml');
+  expect(promote).toContain('- prod-preparation');
+  expect(promote).toContain('ref: prod-preparation');
+  expect(promote).not.toContain('preprod-app-phase1');
+  expect(promote).toContain('preserving history');
+  expect(promote).toContain('git clone --branch gh-pages --single-branch');
+  expect(promote).not.toContain('git push --force origin gh-pages');
+  expect(fs.existsSync('.github/workflows/promote-prod.yml')).toBe(false);
+});
+
 test('document editing PRE-PROD branch is compile-time unreachable in production runtime',()=>{
   const viewer=read('src/DocumentViewerShell.tsx');
   const supabase=read('src/supabase.ts');
