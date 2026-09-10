@@ -49,3 +49,14 @@ test('Contactos PROD abre fichas con identificadores canónicos y usa el gateway
   expect(runtime).toContain("pathname.match(/^\\/clientes\\/([^/]+)$/)");
   expect(runtime).toContain("fetchAppApi<T>(`/contactos/${encodeURIComponent(id)}`)");
 });
+
+test('Contactos PROD conserva todos los teléfonos y correos y abre la ficha creada',()=>{
+  const create=fs.readFileSync(path.resolve('src/ContactCreateShell.tsx'),'utf8');
+  const detail=fs.readFileSync(path.resolve('src/ContactDetailShell.tsx'),'utf8');
+  expect(create).toContain("supabase.rpc('fenix_prod_contact_create_v2'");
+  expect(create).toContain('p_emails:Array.isArray(payload.emails)?payload.emails:[]');
+  expect(create).toContain('p_telefonos:Array.isArray(payload.telefonos)?payload.telefonos:[]');
+  expect(create).toContain('`/contactos/${encodeURIComponent(response.id)}`');
+  expect(detail).toContain("textList(row||undefined,['telefonos']");
+  expect(detail).toContain("textList(row||undefined,['emails']");
+});
