@@ -1,6 +1,9 @@
+import { createRequire } from 'node:module';
 import { types as utilTypes } from 'node:util';
 import { loadDigitalBuildCatalog, selectTemplate, validateDigitalBuildCatalog } from './digital-build-capability-catalog.mjs';
 
+const require = createRequire(import.meta.url);
+const REGISTRY = require('./registry/engine-registry.seed.json');
 const REQUIRED_CONTEXT = ['company_id', 'engine_id', 'environment', 'version'];
 const HUMAN_REQUIRED = new Set([
   'LEGAL_REQUIRED',
@@ -23,7 +26,24 @@ const PRIORITY_BY_REASON = Object.freeze({
   LOW_CONFIDENCE: 40,
 });
 const FORBIDDEN_TRADING_ENGINE_IDS = new Set(['LAB-TRD']);
+const TEMPLATE_KEYS = new Set([
+  'template_id',
+  'version',
+  'priority',
+  'enabled',
+  'autonomous_prod',
+  'prod_writes',
+  'trading_access',
+  'additional_cost_target_eur',
+]);
+const SKILL_KEYS = new Set(['skill_id', 'version', 'execution']);
 const own = (obj, key) => Object.prototype.hasOwnProperty.call(obj, key);
+
+if (!REGISTRY || REGISTRY.count !== 177 || !Array.isArray(REGISTRY.engine_ids) || REGISTRY.engine_ids.length !== 177) {
+  throw new Error('canonical engine registry must contain exactly 177 engine IDs');
+}
+const CANONICAL_ENGINE_IDS = new Set(REGISTRY.engine_ids);
+if (CANONICAL_ENGINE_IDS.size !== 177) throw new Error('canonical engine registry must contain 177 unique engine IDs');
 
 function safePlainClone(value, label, stack = new WeakSet()) {
   if (value === null || typeof value === 'string' || typeof value === 'boolean') return value;
@@ -117,6 +137,12 @@ function highestReason(reasons) {
     .sort((a, b) => PRIORITY_BY_REASON[b] - PRIORITY_BY_REASON[a] || a.localeCompare(b))[0] ?? null;
 }
 
+function assertExactKeys(value, allowed, label) {
+  for (const key of Object.keys(value)) {
+    if (!allowed.has(key)) throw new Error(`unexpected ${label} field ${key}`);
+  }
+}
+
 function humanRequired({ reason, requestId, context, capabilityId }) {
   return deepFreeze({
     status: 'HUMAN_REQUIRED',
@@ -142,6 +168,9 @@ export function planDigitalBuild(requestInput, optionsInput = {}) {
   if (FORBIDDEN_TRADING_ENGINE_IDS.has(context.engine_id)) {
     throw new Error(`Trading context engine ${context.engine_id} is forbidden in Digital Build plans`);
   }
+  if (!CANONICAL_ENGINE_IDS.has(context.engine_id)) {
+    throw new Error(`noncanonical context engine ${context.engine_id}`);
+  }
   if (context.environment !== 'SCAFFOLD') throw new Error('digital build V0 accepts exact SCAFFOLD only');
 
   const capabilityId = nonEmptyString(request.capability_id, 'request.capability_id');
@@ -158,6 +187,8 @@ export function planDigitalBuild(requestInput, optionsInput = {}) {
       throw new Error(`Trading engine binding ${engineId} is forbidden in Digital Build plans`);
     }
   }
+  for (const template of capability.templates) assertExactKeys(template, TEMPLATE_KEYS, 'template');
+  for (const skill of capability.skills) assertExactKeys(skill, SKILL_KEYS, 'skill');
 
   const reasons = [];
   if (requiresProdWrite || autonomousProd) reasons.push('HIGH_RISK');
