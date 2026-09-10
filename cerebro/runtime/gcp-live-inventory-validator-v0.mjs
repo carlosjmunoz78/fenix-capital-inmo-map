@@ -121,7 +121,7 @@ export function validateGcpInventoryEnvelope(text){
   for(const [i,r] of input.resource_records.entries()){
     const label=`resource_records[${i}]`; validateCommon(r,label,'RESOURCE',RESOURCE_FIELDS); assertTemplateRef(r.command_template_id_or_ref,r.domain,`${label}.command_template_id_or_ref`); if(r.resource_ref===DOMAIN_SENTINEL) throw new Error(`${label} cannot use domain sentinel`); if(seenCaptureIds.has(r.capture_id)) throw new Error(`duplicate capture_id: ${r.capture_id}`); seenCaptureIds.add(r.capture_id);
     const sourceResults=coverageByPair.get(pairKey(r.project_id,r.domain))?.get(r.command_template_id_or_ref)||[];
-    if(!sourceResults.some((x)=>x.evidence_ref===r.evidence_ref)) throw new Error(`${label} must reference an exact source command result from the matching coverage record`);
+    if(!sourceResults.some((x)=>x.evidence_ref===r.evidence_ref&&x.result_status==='SUCCESS')) throw new Error(`${label} must reference an exact SUCCESS source command result from the matching coverage record`);
     const k=resourceKey(r.project_id,r.resource_ref); if(resourceIds.has(k)) throw new Error(`duplicate resource identity across domains: ${k}`); resourceIds.add(k);
   }
   return Object.freeze({valid:true,project_count:4,domain_count:19,coverage_pairs:76,resource_records:resourceIds.size,execution_mode:'READ_ONLY_CAPTURE_ONLY',prod_writes:false,autonomous_prod:false,trading_mutation_forbidden:true});
