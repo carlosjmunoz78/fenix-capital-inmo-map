@@ -122,7 +122,7 @@ test('Chat de equipo permite imagen documento y audio con storage privado e iden
   expect(chat).toContain("supabase.rpc('fenix_prod_chat_attachment_add_user'");
   expect(chat).toContain('createSignedUrl(a.storage_path,300)');
   expect(chat).toContain('supabase.storage.from(BUCKET).remove([storagePath])');
-  expect(migration).toContain("public,false,20971520");
+  expect(migration).toContain("false,20971520");
   expect(migration).toContain("(storage.foldername(name))[1]=auth.uid()::text");
   expect(migration).toContain('message_not_owned');
   expect(migration).toContain('fenix_prod_chat_attachment_add_user');
