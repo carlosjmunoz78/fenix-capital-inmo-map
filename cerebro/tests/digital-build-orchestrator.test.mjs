@@ -226,6 +226,11 @@ test('plain supplied catalogs cannot bind Digital Build capabilities to Trading 
   assert.throws(() => planDigitalBuild(request(), { catalog }), /Trading engine binding LAB-TRD is forbidden/);
 });
 
+test('request context cannot target Trading engines while claiming Trading isolation', () => {
+  const context = { ...request().context, engine_id: 'LAB-TRD' };
+  assert.throws(() => planDigitalBuild(request({ context })), /Trading context engine LAB-TRD is forbidden/);
+});
+
 test('options accessors are rejected before catalog extraction', () => {
   let executed = false;
   const options = {};
