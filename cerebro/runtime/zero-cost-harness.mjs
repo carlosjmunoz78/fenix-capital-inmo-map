@@ -112,18 +112,21 @@ export class ZeroCostRuntimeHarnessV0 {
       decisions:this.#decisionStore.prepareRestore({ context:ctx, snapshot:backup.decisions ?? [] })
     };
 
-    let dboffCommitted = false;
-    let storoffCommitted = false;
     try {
-      const dboff = this.dboff.commitPrepared(prepared.dboff); dboffCommitted = true;
-      const storoff = this.storoff.commitPrepared(prepared.storoff); storoffCommitted = true;
+      const dboff = this.dboff.commitPrepared(prepared.dboff);
+      const storoff = this.storoff.commitPrepared(prepared.storoff);
       const decisions = this.#decisionStore.commitPrepared(prepared.decisions);
       return Object.freeze({ dboff_operations:dboff, storoff_operations:storoff, decision_operations:decisions });
     } catch (error) {
       const rollbackErrors = [];
-      try { if (storoffCommitted) this.storoff.restore({ context:ctx, snapshot:previous.storoff }); } catch (e) { rollbackErrors.push(e); }
-      try { if (dboffCommitted) this.dboff.restore({ context:ctx, snapshot:previous.dboff }); } catch (e) { rollbackErrors.push(e); }
-      try { this.#decisionStore.restore({ context:ctx, snapshot:previous.decisions }); } catch (e) { rollbackErrors.push(e); }
+      for (const [store, snapshot] of [
+        [this.#decisionStore, previous.decisions],
+        [this.storoff, previous.storoff],
+        [this.dboff, previous.dboff]
+      ]) {
+        try { store.recoverRestore({ context:ctx, snapshot }); }
+        catch (rollbackError) { rollbackErrors.push(rollbackError); }
+      }
       if (rollbackErrors.length > 0) throw new AggregateError([error, ...rollbackErrors], 'coordinated restore failed and rollback was incomplete');
       throw error;
     }
