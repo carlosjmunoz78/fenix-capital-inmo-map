@@ -175,6 +175,18 @@ test('DBOFF-001 commitPrepared accepts only opaque single-use tokens issued by s
   assert.throws(() => store.commitPrepared(otherPrepared), /invalid|issued/);
 });
 
+test('DBOFF-001 rejects stale prepared token after another scope writes and preserves durable data', () => {
+  const file = tmp('stale-prepared.v8');
+  const store = new LocalOffloadStore({ file_path:file, kind:'DBOFF-001' });
+  store.put({ context, key:'a', value:{n:1} });
+  const prepared = store.prepareRestore({ context, snapshot:store.backup(context) });
+  store.put({ context:other, key:'b', value:{keep:true} });
+  assert.throws(() => store.commitPrepared(prepared), /stale|changed/);
+  assert.deepEqual(store.get({ context:other, key:'b' }), {keep:true});
+  const reopened = new LocalOffloadStore({ file_path:file, kind:'DBOFF-001' });
+  assert.deepEqual(reopened.get({ context:other, key:'b' }), {keep:true});
+});
+
 test('DBOFF-001 rejects SharedArrayBuffer and shared views before persistence', () => {
   const store = new LocalOffloadStore({ file_path:tmp('shared.v8'), kind:'DBOFF-001' });
   const shared = new SharedArrayBuffer(8);
