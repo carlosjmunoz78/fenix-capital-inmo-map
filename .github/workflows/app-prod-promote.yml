@@ -103,23 +103,28 @@ jobs:
             test "$status" = '204'
           done
 
-      - name: Publish exact validated APP snapshot
+      - name: Publish exact validated APP snapshot preserving history
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           rm -rf /tmp/fenix-app-live
-          mkdir -p /tmp/fenix-app-live
-          cp -R dist/. /tmp/fenix-app-live/
+          git clone --branch gh-pages --single-branch \
+            "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
+            /tmp/fenix-app-live
           cd /tmp/fenix-app-live
-          git init
-          git checkout -b gh-pages
+          previous_sha="$(git rev-parse HEAD)"
+          find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -R "${GITHUB_WORKSPACE}/dist/." .
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -A
-          git commit -m "deploy: APP PROD ${GITHUB_SHA}"
-          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
-          git push --force origin gh-pages
+          if git diff --cached --quiet; then
+            echo 'Validated candidate bytes already match PROD.'
+          else
+            git commit -m "deploy: APP PROD ${GITHUB_SHA} [previous:${previous_sha}]"
+            git push origin HEAD:gh-pages
+          fi
 
       - name: Verify published source marker
         run: |
