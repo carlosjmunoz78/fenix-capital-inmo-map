@@ -23,6 +23,14 @@ const MUTATING = [
   'create','update','delete','deploy','set','add-iam-policy-binding','remove-iam-policy-binding','enable','disable','start','stop','restart','patch','write'
 ];
 
+const READ_VERBS = new Set(['describe','list','search-all-resources','get-iam-policy']);
+
+function commandVerb(command) {
+  const tokens = command.trim().split(/\s+/);
+  const positional = tokens.filter((token) => !token.startsWith('-') && token !== 'gcloud' && !token.startsWith('${'));
+  return positional.findLast((token) => READ_VERBS.has(token));
+}
+
 test('GCP discovery catalog is exact SCAFFOLD PLAN_ONLY and zero-cost', () => {
   assert.equal(catalog.environment, 'SCAFFOLD');
   assert.equal(catalog.engine_id, 'INT-001');
@@ -46,7 +54,41 @@ test('command policy is fail-closed and never executes mutations', () => {
   assert.equal(p.requires_authenticated_gcloud_or_authorized_connector, true);
   assert.equal(p.secrets_policy, 'REFERENCES_ONLY');
   assert.equal(p.least_privilege, true);
+  assert.equal(p.parameter_token, '${PROJECT_ID}');
+  assert.deepEqual(p.allowed_read_verbs, ['describe','list','search-all-resources','get-iam-policy']);
   assert.deepEqual(p.forbidden_mutating_verbs, MUTATING);
+});
+
+test('every canonical inventory domain has explicit parameterized read-only command templates', () => {
+  assert.equal(catalog.domain_commands.length, DOMAINS.length);
+  assert.deepEqual(catalog.domain_commands.map((entry) => entry.domain), DOMAINS);
+  for (const entry of catalog.domain_commands) {
+    assert.ok(Array.isArray(entry.commands) && entry.commands.length > 0, `missing commands for ${entry.domain}`);
+    for (const command of entry.commands) {
+      assert.match(command, /^gcloud\s/);
+      assert.match(command, /\$\{PROJECT_ID\}/);
+      assert.ok(commandVerb(command), `command for ${entry.domain} lacks an allowed read verb: ${command}`);
+      const tokens = command.trim().split(/\s+/);
+      for (const forbidden of MUTATING) {
+        assert.ok(!tokens.includes(forbidden), `forbidden mutating verb ${forbidden} in ${entry.domain}`);
+      }
+    }
+  }
+});
+
+test('secret discovery is metadata-only and never reads secret payload versions', () => {
+  const secretDomain = catalog.domain_commands.find((entry) => entry.domain === 'secret_references');
+  assert.ok(secretDomain);
+  assert.deepEqual(secretDomain.commands, ['gcloud secrets list --project=${PROJECT_ID} --format=json']);
+  assert.match(secretDomain.safety_note, /metadata only/i);
+  assert.ok(secretDomain.commands.every((command) => !command.includes('versions access')));
+});
+
+test('billing and asset discovery fail closed when richer read access is unavailable', () => {
+  const billing = catalog.domain_commands.find((entry) => entry.domain === 'billing_cost');
+  const consumers = catalog.domain_commands.find((entry) => entry.domain === 'resource_consumers');
+  assert.match(billing.safety_note, /must not be invented/i);
+  assert.match(consumers.safety_note, /do not enable APIs/i);
 });
 
 test('fenix-trading-lab remains unclassified and Trading mutation is forbidden', () => {
