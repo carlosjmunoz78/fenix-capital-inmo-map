@@ -1,0 +1,48 @@
+{
+  "evidence_id": "CEREBRO-ZERO-COST-RUNTIME-WAVE1-V0",
+  "date": "2026-09-10",
+  "status": "DOCUMENTED_PARTIAL",
+  "scope": {
+    "engine_ids": ["LOCAL-001", "FREE-001", "DBOFF-001", "STOROFF-001", "AIBUD-001", "ROUTE-001"],
+    "environment": "PREPROD",
+    "company_scope": "MULTI_COMPANY"
+  },
+  "constraints": {
+    "additional_cost_target_eur": 0,
+    "supabase_preprod_required": false,
+    "supabase_heavy_state": false,
+    "prod_writes": false,
+    "autonomous_prod": false,
+    "trading_access": false
+  },
+  "implementation": {
+    "runtime": "cerebro/runtime/zero-cost-runtime.mjs",
+    "harness": "cerebro/runtime/zero-cost-harness.mjs",
+    "tests": [
+      "cerebro/tests/zero-cost-runtime.test.mjs",
+      "cerebro/tests/zero-cost-harness.test.mjs"
+    ],
+    "runbook": "cerebro/docs/zero-cost-runtime-wave1-runbook.md",
+    "plan": "cerebro/docs/zero-cost-runtime-wave1-plan.md"
+  },
+  "gates": {
+    "exact_head": null,
+    "factory_workflow": "PENDING",
+    "app_workflow": "NON_REQUIRED_FOR_CEREBRO_ONLY_CHANGE_UNLESS_ZERO_COST_AVAILABLE",
+    "codex_review": "PENDING",
+    "p1_p2_open": null
+  },
+  "autonomy": {
+    "level": "REFERENCE_V0",
+    "prod_autonomy": false,
+    "wiring_to_existing_consumers": false,
+    "old_vs_new_completed": false
+  },
+  "changelog": [
+    "Introduced deterministic LOCAL-001 capability selection.",
+    "Introduced FREE-001 free-first broker.",
+    "Introduced local DBOFF-001/STOROFF-001 offload stores with scoped backup/restore.",
+    "Introduced deterministic AIBUD-001/ROUTE-001 model routing with HUMAN_REQUIRED gates.",
+    "Introduced isolated integration harness with zero-cost/no-Supabase-PREPROD contract."
+  ]
+}
