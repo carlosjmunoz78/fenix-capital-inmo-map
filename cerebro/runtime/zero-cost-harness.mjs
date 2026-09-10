@@ -1,3 +1,4 @@
+import path from 'node:path';
 import {
   LocalCapabilityRegistry,
   FreeFirstBroker,
@@ -28,12 +29,15 @@ export class ZeroCostRuntimeHarnessV0 {
     if (env !== PREPROD) throw new Error('zero-cost harness V0 accepts exact PREPROD only');
     if (typeof db_file_path !== 'string' || db_file_path.length === 0) throw new TypeError('db_file_path must be a non-empty string');
     if (typeof storage_file_path !== 'string' || storage_file_path.length === 0) throw new TypeError('storage_file_path must be a non-empty string');
-    const decisionsPath = decision_file_path ?? `${db_file_path}.decisions`;
+    const dbPath = path.resolve(db_file_path);
+    const storagePath = path.resolve(storage_file_path);
+    const decisionsPath = path.resolve(decision_file_path ?? `${db_file_path}.decisions`);
+    if (new Set([dbPath, storagePath, decisionsPath]).size !== 3) throw new Error('db, storage and decision journal paths must be distinct');
     this.local = new LocalCapabilityRegistry(capabilities);
     this.broker = new FreeFirstBroker();
     this.router = new BudgetModelRouterV0({ broker:this.broker });
-    this.dboff = new LocalOffloadStore({ file_path:db_file_path, kind:'DBOFF-001', environment:env });
-    this.storoff = new LocalOffloadStore({ file_path:storage_file_path, kind:'STOROFF-001', environment:env });
+    this.dboff = new LocalOffloadStore({ file_path:dbPath, kind:'DBOFF-001', environment:env });
+    this.storoff = new LocalOffloadStore({ file_path:storagePath, kind:'STOROFF-001', environment:env });
     this.#decisionStore = new LocalOffloadStore({ file_path:decisionsPath, kind:'AIBUD-001', environment:env });
     this.contract = Object.freeze({
       engine_ids:['LOCAL-001','FREE-001','DBOFF-001','STOROFF-001','AIBUD-001','ROUTE-001'],
