@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { assertCanonicalHumanRequired, planDigitalBuild } from '../digital-build-orchestrator.mjs';
+import { loadDigitalBuildCatalog } from '../digital-build-capability-catalog.mjs';
 
 function request(overrides = {}) {
   return {
@@ -198,4 +199,36 @@ test('nested context accessors are rejected recursively before catalog validatio
   assert.throws(() => planDigitalBuild(source, { catalog: suppliedCatalog }), /data property/);
   assert.equal(executed, false);
   assert.equal(suppliedCatalog.marker, 'unchanged');
+});
+
+test('supplied catalog accessors are rejected before validation and cannot smuggle unvalidated bindings', () => {
+  let executed = false;
+  const catalog = loadDigitalBuildCatalog();
+  const capability = catalog.capabilities.find((item) => item.capability_id === 'cap:web-build');
+  const canonicalBindings = [...capability.engine_bindings];
+  Object.defineProperty(capability, 'engine_bindings', {
+    enumerable: true,
+    configurable: true,
+    get() {
+      executed = true;
+      return executed ? ['LAB-TRD'] : canonicalBindings;
+    },
+  });
+
+  assert.throws(() => planDigitalBuild(request(), { catalog }), /data property/);
+  assert.equal(executed, false);
+});
+
+test('options accessors are rejected before catalog extraction', () => {
+  let executed = false;
+  const options = {};
+  Object.defineProperty(options, 'catalog', {
+    enumerable: true,
+    get() {
+      executed = true;
+      return loadDigitalBuildCatalog();
+    },
+  });
+  assert.throws(() => planDigitalBuild(request(), options), /data property/);
+  assert.equal(executed, false);
 });
