@@ -27,8 +27,16 @@ Deno.serve(async(req:Request)=>{
   const b:any=await json(req);
   let due:string|null=null;
   if(b.fecha_objetivo||b.fecha_limite){const parsed=new Date(String(b.fecha_objetivo||b.fecha_limite));if(Number.isNaN(parsed.getTime()))return out(req,{ok:false,status:400,error:'invalid_due_date'},400);due=parsed.toISOString();}
-  const expected=b.expected_version===null||b.expected_version===undefined?null:Number(b.expected_version);
+  let expected=b.expected_version===null||b.expected_version===undefined?null:Number(b.expected_version);
   if(expected!==null&&!Number.isInteger(expected))return out(req,{ok:false,status:400,error:'invalid_expected_version'},400);
+  if(b.id_trabajador_operativo){
+   const {data:rr,error:re}=await svc.rpc('fenix_prod_reassign_task_server',{p_actor_code:ctx.actor_code,p_task_code:taskCode,p_new_actor_code:String(b.id_trabajador_operativo),p_expected_version:expected});
+   if(re){console.error(re);return out(req,{ok:false,status:500,error:'task_reassign_failed'},500)}
+   if(Number(rr?.status)!==200)return out(req,rr,Number(rr?.status)||400);
+   expected=Number(rr?.task?.version??rr?.version??(expected!==null?expected+1:0))||null;
+  }
+  const hasUpdate=['estado','criticidad','fecha_objetivo','fecha_limite','completada'].some(k=>Object.prototype.hasOwnProperty.call(b,k));
+  if(!hasUpdate)return out(req,{ok:true,status:200,version:expected,task_code:taskCode},200);
   const {data:r,error}=await svc.rpc('fenix_prod_task_update_server',{
    p_actor_code:ctx.actor_code,
    p_task_code:taskCode,
