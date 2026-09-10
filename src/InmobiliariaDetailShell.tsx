@@ -1,8 +1,7 @@
 import {useEffect,useMemo,useState} from 'react';
 import {useLocation,useNavigate} from 'react-router-dom';
 import {ArrowLeft,Save} from 'lucide-react';
-import {fetchAppApi,IS_PRODUCTION,supabase} from './supabase';
-import {fetchNotionRuntime} from './notionRuntime';
+import {fetchAppApi,supabase} from './supabase';
 import {anaVertical} from './assets/visualAssets';
 import {normalizeNavigation,type NavItem} from './masterNavigation';
 import OperationalShellFrame from './OperationalShellFrame';
@@ -17,7 +16,6 @@ function text(row:Row|undefined,keys:string[]){if(!row)return'';for(const k of k
 function value(row:Row|undefined,keys:string[]){if(!row)return null;for(const k of keys){const v=row[k];if(v!==undefined&&v!==null&&v!=='')return v;}return null;}
 const fallbackNav:NavItem[]=[{label:'Inicio',route:'/inicio'}];
 async function actionApi(code:string,expectedVersion:number,changes:Record<string,unknown>){
- if(!IS_PRODUCTION)return{status:503,data:{ok:false,error:'prod_only_followup'}};
  const{data,error}=await supabase.rpc('fenix_prod_inmo_followup_update_v1',{
   p_inmobiliaria_code:code,p_expected_version:expectedVersion,
   p_notas:typeof changes.notas==='string'?changes.notas:null,
@@ -35,7 +33,7 @@ export default function InmobiliariaDetailShell(){
  useEffect(()=>{if(!active)return;let alive=true;supabase.auth.getSession().then(({data})=>{if(alive){setLogged(Boolean(data.session));setSessionReady(true)}});const{data:{subscription}}=supabase.auth.onAuthStateChange((_e,s)=>{setLogged(Boolean(s));setSessionReady(true)});return()=>{alive=false;subscription.unsubscribe()};},[active]);
  useEffect(()=>{if(!active)return;document.documentElement.dataset.theme=theme;sessionStorage.setItem('fenix-theme',theme);},[active,theme]);
  useEffect(()=>{if(!active||!logged)return;Promise.all([fetchAppApi<Ctx>('/session/context'),fetchAppApi<unknown>('/navigation')]).then(([c,n])=>{setCtx(c.status===200?c.data:null);setNav(n.status===200?normalizeNavigation(n.data):[]);});},[active,logged]);
- async function load(){setLoading(true);setMessage('');const r=await fetchNotionRuntime<any>(`/inmobiliarias/${encodeURIComponent(code)}`);setStatus(r.status);setRow(r.status===200?(r.data?.item||r.data?.inmobiliaria||null):null);if(r.status===403)setMessage('Tu perfil no puede abrir esta inmobiliaria.');else if(r.status===404)setMessage('No se ha encontrado la inmobiliaria.');else if(r.status!==200)setMessage('No se pudo cargar la inmobiliaria canónica.');setLoading(false);}
+ async function load(){setLoading(true);setMessage('');const r=await fetchAppApi<any>(`/inmobiliarias/${encodeURIComponent(code)}`);setStatus(r.status);setRow(r.status===200?(r.data?.item||r.data?.inmobiliaria||null):null);if(r.status===403)setMessage('Tu perfil no puede abrir esta inmobiliaria.');else if(r.status===404)setMessage('No se ha encontrado la inmobiliaria.');else if(r.status!==200)setMessage('No se pudo cargar la inmobiliaria canónica.');setLoading(false);}
  useEffect(()=>{if(!active||!logged)return;void load();},[active,logged,code]);
  const effectiveNav=nav.length?nav:fallbackNav;
  const name=text(row||undefined,['inmobiliaria','nombre','nombre_alias','nombre_comercial','title'])||'Inmobiliaria';
@@ -66,7 +64,7 @@ export default function InmobiliariaDetailShell(){
      <nav className="inmo-detail-tabs">{tabs.map((t,i)=><button key={t} className={i===0?'active':''} onClick={()=>i===0?undefined:navigate(i===1?`/expedientes?inmobiliaria=${encodeURIComponent(code)}`:i===2?`/contactos?inmobiliaria=${encodeURIComponent(code)}`:i===3?'#inmo-followup':'/visitas')}>{t}</button>)}</nav>
      <section className="inmo-detail-grid"><article className="inmo-detail-card" id="inmo-relationship"><span>RELACIÓN B2B</span><h2>{name}</h2><div className="inmo-detail-fields"><div><small>Localidad</small><strong>{locality}</strong></div><div><small>Zona</small><strong>{zone}</strong></div><div><small>Estado</small><strong>{state}</strong></div><div><small>Responsable</small><strong>{responsible}</strong></div><div><small>Teléfono</small><strong>{phone}</strong></div><div><small>Correo</small><strong>{email}</strong></div></div></article>
       <article className="inmo-detail-card"><span>SIGUIENTE PASO</span><h2>{next||'Definir próximo contacto B2B'}</h2><p>{next?'La siguiente acción procede de la fuente canónica.':'No existe un próximo contacto registrado. Ana no completará el dato por suposición.'}</p><div className="inmo-detail-actions"><button className="primary" onClick={()=>navigate(`/ana?mode=do&resource=inmobiliaria&inmobiliaria_id=${encodeURIComponent(code)}&channel=whatsapp`)}>Preparar WhatsApp</button><button onClick={()=>navigate(`/ana?mode=do&resource=inmobiliaria&inmobiliaria_id=${encodeURIComponent(code)}&channel=email`)}>Preparar correo</button><button onClick={()=>navigate(`/agenda?inmobiliaria=${encodeURIComponent(code)}`)}>Crear tarea</button></div></article></section>
-     <section className="inmo-followup-card" id="inmo-followup"><div className="inmo-followup-head"><div><span>SEGUIMIENTO CONTEXTUAL</span><h2>Actualizar relación B2B</h2></div><small>Escritura con gate de cartera/zona · {IS_PRODUCTION?'PROD':'PRE-PROD'}</small></div><label>Notas<textarea rows={3} value={notes} onChange={e=>{setNotes(e.target.value);setPreview(false)}} placeholder="Contexto operativo sin duplicar datos..."/></label><label>Próximo contacto B2B<input type="date" value={nextContact} onChange={e=>{setNextContact(e.target.value);setPreview(false)}}/></label>{preview&&<div className="inmo-preview"><strong>Vista previa antes de guardar</strong><span>Notas: {notes.trim()||'Sin cambios'}</span><span>Próximo contacto: {nextContact||'Sin cambios'}</span></div>}<div className="inmo-followup-actions"><button className="primary" disabled={saving||(!notes.trim()&&!nextContact)} onClick={save}><Save size={16}/>{saving?'Guardando…':preview?'Confirmar y guardar':'Revisar cambios'}</button>{saveMsg&&<span>{saveMsg}</span>}</div></section>
+     <section className="inmo-followup-card" id="inmo-followup"><div className="inmo-followup-head"><div><span>SEGUIMIENTO CONTEXTUAL</span><h2>Actualizar relación B2B</h2></div><small>Escritura con gate de cartera/zona · PROD</small></div><label>Notas<textarea rows={3} value={notes} onChange={e=>{setNotes(e.target.value);setPreview(false)}} placeholder="Contexto operativo sin duplicar datos..."/></label><label>Próximo contacto B2B<input type="date" value={nextContact} onChange={e=>{setNextContact(e.target.value);setPreview(false)}}/></label>{preview&&<div className="inmo-preview"><strong>Vista previa antes de guardar</strong><span>Notas: {notes.trim()||'Sin cambios'}</span><span>Próximo contacto: {nextContact||'Sin cambios'}</span></div>}<div className="inmo-followup-actions"><button className="primary" disabled={saving||(!notes.trim()&&!nextContact)} onClick={save}><Save size={16}/>{saving?'Guardando…':preview?'Confirmar y guardar':'Revisar cambios'}</button>{saveMsg&&<span>{saveMsg}</span>}</div></section>
     </>}
  </OperationalShellFrame>;
 }
