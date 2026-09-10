@@ -2,7 +2,7 @@ import { ChangeEvent, useEffect, useMemo, useState } from 'react';
 import { ChevronDown, ChevronUp, FileUp, MessageSquareWarning, Sparkles } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { anaAvatar } from './assets/visualAssets';
-import { fetchAnaApi, fetchAnaCanonicalApi, fetchEvidenceApi, fetchMemoryApi, IS_PRODUCTION, supabase } from './supabase';
+import { fetchAnaApi, fetchAnaCanonicalApi, fetchEvidenceApi, fetchMemoryApi, supabase } from './supabase';
 import './ana-universal.css';
 
 type Caps={
@@ -19,7 +19,7 @@ type CanonicalRule={id:string;domain:string;rule:string;source:string;confidence
 type CanonicalEnvelope={ok?:boolean;items?:CanonicalRule[];domain?:string;canonical_only?:boolean};
 
 const hiddenRoots=['/','/perfil','/ana'];
-const BUCKET=IS_PRODUCTION?'fenix-prod-documents':'fenix-preprod-documents-test';
+const BUCKET='fenix-prod-documents';
 
 function scopeFromPath(path:string):Scope{
   const parts=path.split('/').filter(Boolean),root=parts[0]||'inicio',rawId=parts[1]||'';
