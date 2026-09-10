@@ -56,3 +56,14 @@ test('Tasaciones PROD expone histórico, informe y validación Dirección con pr
   expect(guard).toContain('tasacion-validation-preview');
   expect(gate).toContain("match?.[1]==='tasaciones'&&<TasacionLifecycleGuard/>");
 });
+
+test('Firmas PROD mantiene histórico canónico y acciones reales en el detalle',()=>{
+  const guard=fs.readFileSync(path.resolve('src/FirmaLifecycleGuard.tsx'),'utf8');
+  const gate=fs.readFileSync(path.resolve('src/OperationalRecordDetailGate.tsx'),'utf8');
+  const detail=fs.readFileSync(path.resolve('src/OperationalRecordDetail.tsx'),'utf8');
+  expect(guard).toContain('`/firmas/${encodeURIComponent(id)}/history`');
+  expect(gate).toContain("match?.[1]==='firmas'&&<FirmaLifecycleGuard/>");
+  expect(detail).toContain('`/firmas/${encodeURIComponent(id)}/schedule`');
+  expect(detail).toContain('`/firmas/${encodeURIComponent(id)}/confirm`');
+  expect(detail).toContain('`/firmas/${encodeURIComponent(id)}/close`');
+});
