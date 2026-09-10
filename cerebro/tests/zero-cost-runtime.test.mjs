@@ -30,6 +30,16 @@ test('LOCAL-001 selects deterministic zero-cost available capability and isolate
   assert.equal(registry.list(other).some(x => x.capability_id === 'a'), false);
 });
 
+test('LOCAL-001 respects version and only allows explicit GLOBAL version fallback', () => {
+  const registry = new LocalCapabilityRegistry([
+    { capability_id:'old', company_id:'fenix', engine_id:'SEO-001', version:'0.0.9', cost_eur:0, capabilities:['extract'] },
+    { capability_id:'global', company_id:'fenix', engine_id:'SEO-001', version:'GLOBAL', priority:20, cost_eur:0, capabilities:['extract'] },
+    { capability_id:'current', company_id:'fenix', engine_id:'SEO-001', version:'0.1.0', priority:10, cost_eur:0, capabilities:['extract'] }
+  ]);
+  assert.equal(registry.select({ context, requires:['extract'] }).selected.capability_id, 'current');
+  assert.equal(registry.list(context).some(x => x.capability_id === 'old'), false);
+});
+
 test('LOCAL-001 fails closed for degraded/paid/non-PREPROD or Proxy capability', () => {
   const registry = new LocalCapabilityRegistry([
     { capability_id:'d', company_id:'fenix', engine_id:'SEO-001', version:'0.1.0', health:'DEGRADED', cost_eur:0, capabilities:['extract'] },
@@ -43,14 +53,19 @@ test('LOCAL-001 fails closed for degraded/paid/non-PREPROD or Proxy capability',
   assert.equal(trapCalls, 0);
 });
 
-test('FREE-001 never selects paid when an equivalent free route exists', () => {
-  const broker = new FreeFirstBroker();
-  const result = broker.resolve({ context, options:[
-    { option_id:'paid', route_type:'paid_provider', cost_eur:0.01, equivalent:true },
-    { option_id:'free', route_type:'free_tier', cost_eur:0, equivalent:true }
+test('FREE-001 gives zero-cost precedence across route categories', () => {
+  const result = new FreeFirstBroker().resolve({ context, options:[
+    { option_id:'early-paid', route_type:'local_model', cost_eur:0.01, equivalent:true },
+    { option_id:'later-free', route_type:'free_tier', cost_eur:0, equivalent:true }
   ]});
   assert.equal(result.route_type, 'free_tier');
-  assert.equal(result.selected.option_id, 'free');
+  assert.equal(result.selected.option_id, 'later-free');
+});
+
+test('FREE-001 requires a real boolean for money approval', () => {
+  assert.throws(() => new FreeFirstBroker().resolve({ context, options:[
+    { option_id:'paid', route_type:'paid_provider', cost_eur:0.01, equivalent:true }
+  ], money_limit_approved:'false' }), /boolean/);
 });
 
 test('FREE-001 returns MONEY_LIMIT for paid-only route without approval', () => {
@@ -59,6 +74,14 @@ test('FREE-001 returns MONEY_LIMIT for paid-only route without approval', () => 
   ]});
   assert.equal(result.route_type, 'HUMAN_REQUIRED');
   assert.equal(result.human_reason, 'MONEY_LIMIT');
+});
+
+test('FREE-001 routes low option confidence to HUMAN_REQUIRED', () => {
+  const result = new FreeFirstBroker().resolve({ context, options:[
+    { option_id:'uncertain', route_type:'deterministic', cost_eur:0, equivalent:true, confidence:0 }
+  ]});
+  assert.equal(result.route_type, 'HUMAN_REQUIRED');
+  assert.equal(result.human_reason, 'LOW_CONFIDENCE');
 });
 
 test('DBOFF-001 persists, reopens, isolates company and restores only requested scope', () => {
@@ -99,6 +122,7 @@ test('AIBUD-001 + ROUTE-001 use deterministic/free routes and fail closed on ris
   assert.equal(router.route({ context, options:[], high_risk:true }).human_reason, 'HIGH_RISK');
   assert.equal(router.route({ context, options:[], policy_conflict:true }).human_reason, 'POLICY_CONFLICT');
   assert.equal(router.route({ context, options:[], security_incident:true }).human_reason, 'SECURITY_INCIDENT');
+  assert.throws(() => router.route({ context, options:[], high_risk:'false' }), /boolean/);
 });
 
 test('Wave1 contract is PREPROD-only, zero-cost target, no Supabase PREPROD requirement or Trading', () => {
