@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.1.0",
+  "schema_version": "1.2.0",
   "status": "DEFINED_NOT_BUILT",
   "scope": "GCP_LIVE_INVENTORY_EVIDENCE_ENVELOPE",
   "environment": "SCAFFOLD",
@@ -19,20 +19,30 @@
   "required_inventory_domains": [
     "projects","enabled_apis","cloud_run","cloud_functions","compute","jobs","scheduler","pubsub","storage","databases","artifact_registry","service_accounts_and_iam","secret_references","networking","logging_monitoring","billing_cost","regions","deployments","resource_consumers"
   ],
+  "record_model": {
+    "record_kind_values": ["COVERAGE","RESOURCE"],
+    "coverage_records_collection": "coverage_records",
+    "resource_records_collection": "resource_records",
+    "collections_must_be_separate": true,
+    "coverage_uniqueness_key": ["project_id","domain"],
+    "resource_uniqueness_key": ["project_id","domain","resource_ref"]
+  },
   "coverage_contract": {
     "project_count": 4,
     "domain_count": 19,
     "required_project_domain_pairs": 76,
+    "record_kind": "COVERAGE",
     "exactly_one_domain_coverage_record_per_pair": true,
     "accept_envelope_only_when_all_pairs_present": true,
     "missing_pairs_forbidden": true,
     "duplicate_pairs_forbidden": true,
     "non_success_pairs_must_still_be_recorded": true,
-    "allowed_coverage_result_status": ["SUCCESS","PERMISSION_DENIED","API_UNAVAILABLE","EMPTY","ERROR"]
+    "allowed_coverage_result_status": ["SUCCESS","PERMISSION_DENIED","API_UNAVAILABLE","EMPTY","ERROR"],
+    "resource_ref_value": "__DOMAIN__"
   },
   "capture_contract": {
     "required_fields_per_capture": [
-      "capture_id","captured_at","company_id","engine_id","environment","version","project_id","domain","command_template_id_or_ref","principal_ref","result_status","evidence_ref","raw_payload_stored","secret_payload_present","resource_ref","classification_status"
+      "capture_id","record_kind","captured_at","company_id","engine_id","environment","version","project_id","domain","command_template_id_or_ref","principal_ref","result_status","evidence_ref","raw_payload_stored","secret_payload_present","resource_ref","classification_status"
     ],
     "result_status_values": ["SUCCESS","PERMISSION_DENIED","API_UNAVAILABLE","EMPTY","ERROR"],
     "classification_status_values": ["UNCLASSIFIED","TRAINING","TRADING","APP_CRM","SHARED_REQUIRES_REVIEW","OTHER"],
@@ -44,10 +54,12 @@
     "mutation_forbidden": true,
     "capture_must_reference_source_command": true,
     "capture_must_be_timestamped": true,
+    "resource_record_kind": "RESOURCE",
     "resource_ref_required_for_each_resource_record": true,
     "one_classification_record_per_returned_resource": true,
     "domain_only_record_resource_ref_sentinel": "__DOMAIN__",
-    "domain_sentinel_must_not_be_treated_as_real_resource": true
+    "domain_sentinel_must_not_be_treated_as_real_resource": true,
+    "resource_records_must_not_count_toward_76_pair_coverage": true
   },
   "fenix_trading_lab_guard": {
     "resource_ownership_status": "UNKNOWN_REQUIRES_AUDIT",
