@@ -73,8 +73,10 @@ jobs:
           tests/prod-candidate-browser.spec.ts
           tests/prod-runtime-config.spec.ts
           tests/prod-release-gate.spec.ts
+          tests/directory-prod-gateway-contract.spec.ts
           tests/expediente-prod-contract.spec.ts
           tests/expediente-prod-detail-contract.spec.ts
+          tests/inmobiliaria-prod-contract.spec.ts
           tests/prod-canonical-write-contracts.spec.ts
 
       - name: PROD API reachability gate
@@ -82,7 +84,12 @@ jobs:
         run: |
           set -euo pipefail
           for endpoint in \
+            'fenix-ana-api/capabilities' \
             'fenix-app-gateway/navigation' \
+            'fenix-directory-api/notarias' \
+            'fenix-directory-api/registros-propiedad' \
+            'fenix-reports-api' \
+            'fenix-economia-api' \
             'fenix-expediente-people' \
             'fenix-document-existing-backfill' \
             'fenix-document-auto-ingest'; do
