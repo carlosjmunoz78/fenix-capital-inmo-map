@@ -14,6 +14,7 @@ type Ctx={actor_code?:string;role?:string};
 type Row=Record<string,unknown>;
 function text(row:Row|undefined,keys:string[]){if(!row)return'';for(const k of keys){const v=row[k];if(typeof v==='string'&&v.trim())return v.trim();}return'';}
 function value(row:Row|undefined,keys:string[]){if(!row)return null;for(const k of keys){const v=row[k];if(v!==undefined&&v!==null&&v!=='')return v;}return null;}
+function textList(row:Row|undefined,keys:string[],fallbackKeys:string[]){if(!row)return[];for(const k of keys){const v=row[k];if(Array.isArray(v)){const out=v.map(x=>String(x??'').trim()).filter(Boolean);if(out.length)return out;}}const fallback=text(row,fallbackKeys);return fallback?[fallback]:[];}
 const fallbackNav:NavItem[]=[{label:'Inicio',route:'/inicio'}];
 
 export default function ContactDetailShell(){
@@ -31,8 +32,10 @@ export default function ContactDetailShell(){
  const type=text(row||undefined,['tipo','titular','perfil'])||'No disponible';
  const relation=text(row||undefined,['relacion','relación','tipo_relacion','tipo_relación'])||'No disponible';
  const responsible=text(row||undefined,['responsable','financiero','financiero_nombre','id_financiero_operativo'])||'Sin asignación visible';
- const phone=text(row||undefined,['telefono','teléfono','movil','móvil'])||'No disponible';
- const email=text(row||undefined,['email','correo'])||'No disponible';
+ const phones=textList(row||undefined,['telefonos'],['telefono','teléfono','movil','móvil']);
+ const emails=textList(row||undefined,['emails'],['email','correo']);
+ const phone=phones.join(' · ')||'No disponible';
+ const email=emails.join(' · ')||'No disponible';
  const last=text(row||undefined,['ultimo_contacto','último_contacto'])||'No disponible';
  const next=text(row||undefined,['proxima_accion','próxima_acción','seguimiento'])||'';
  const expRaw=value(row||undefined,['expedientes','expediente']);
@@ -54,7 +57,7 @@ export default function ContactDetailShell(){
     {status===200&&row&&<>
      <section className="contact-detail-kpis"><article><small>SITUACIÓN</small><strong>{state}</strong></article><article><small>EXPEDIENTE VINCULADO</small><strong>{linkedCount}</strong><span>{Array.isArray(expRaw)?'Relaciones visibles en la fuente canónica':'Sin conteo fiable disponible'}</span></article><article><small>ÚLTIMO CONTACTO</small><strong>{last}</strong><span>{last==='No disponible'?'Sin actividad conectada visible':'Dato canónico disponible'}</span></article></section>
      <nav className="contact-detail-tabs">{tabs.map((t,i)=><button key={t} className={i===0?'active':''} onClick={()=>i===0?undefined:navigate(i===1?'/expedientes':i===2?`/ana?mode=do&resource=contacto&contact_id=${encodeURIComponent(id)}`:i===3?`/agenda?contacto=${encodeURIComponent(id)}`:'/contactos')}>{t}</button>)}</nav>
-     <section className="contact-detail-grid"><article className="contact-detail-card" id="contact-identity"><span>IDENTIDAD Y RELACIÓN</span><h2>{name}</h2><div className="contact-detail-fields"><div><small>Tipo</small><strong>{type}</strong></div><div><small>Relación</small><strong>{relation}</strong></div><div><small>Estado</small><strong>{state}</strong></div><div><small>Responsable</small><strong>{responsible}</strong></div><div><small>Teléfono</small><strong>{phone}</strong></div><div><small>Correo</small><strong>{email}</strong></div></div></article>
+     <section className="contact-detail-grid"><article className="contact-detail-card" id="contact-identity"><span>IDENTIDAD Y RELACIÓN</span><h2>{name}</h2><div className="contact-detail-fields"><div><small>Tipo</small><strong>{type}</strong></div><div><small>Relación</small><strong>{relation}</strong></div><div><small>Estado</small><strong>{state}</strong></div><div><small>Responsable</small><strong>{responsible}</strong></div><div><small>Teléfonos</small><strong>{phone}</strong></div><div><small>Correos</small><strong>{email}</strong></div></div></article>
       <article className="contact-detail-card contact-next-card" id="contact-next-step"><span>SIGUIENTE PASO</span><h2>{next||'Seguimiento claro y cercano'}</h2><p>{next?'La siguiente acción procede del contacto canónico.':'No existe una próxima acción registrada. Ana no completará el dato por suposición.'}</p><div className="contact-detail-actions"><button className="primary" onClick={()=>navigate(`/ana?mode=do&resource=contacto&contact_id=${encodeURIComponent(id)}&channel=whatsapp`)}>Preparar WhatsApp</button><button onClick={()=>navigate(`/ana?mode=do&resource=contacto&contact_id=${encodeURIComponent(id)}&channel=email`)}>Preparar correo</button><button onClick={()=>navigate(`/agenda?contacto=${encodeURIComponent(id)}`)}>Crear tarea</button></div></article>
      </section>
     </>}
