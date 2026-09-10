@@ -46,8 +46,12 @@ test('Tasaciones PROD acepta el contrato canónico y no presenta Notion como fue
   const list=fs.readFileSync(path.resolve('src/TasacionesShell.tsx'),'utf8');
   expect(list).toContain('Array.isArray(d.tasaciones)');
   expect(list).toContain("text(r,['tasacion_code'");
-  expect(list).toContain("IS_PRODUCTION?'Fuente canónica Fénix':'Fuente canónica Notion'");
-  expect(list).toContain("IS_PRODUCTION?'Sin conexión':'PRE-PROD'");
+  expect(list).toContain("fetchAppApi<unknown>('/tasaciones')");
+  expect(list).toContain('Fuente canónica Fénix');
+  expect(list).not.toContain('fetchNotionRuntime');
+  expect(list).not.toContain('IS_PRODUCTION');
+  expect(list).not.toContain('PRE-PROD');
+  expect(list).not.toContain('Fuente canónica Notion');
 });
 
 test('Tasaciones PROD expone histórico, informe y validación Dirección con preview',()=>{
