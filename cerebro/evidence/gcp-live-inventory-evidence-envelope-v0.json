@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.2.0",
+  "schema_version": "1.3.0",
   "status": "DEFINED_NOT_BUILT",
   "scope": "GCP_LIVE_INVENTORY_EVIDENCE_ENVELOPE",
   "environment": "SCAFFOLD",
@@ -25,7 +25,9 @@
     "resource_records_collection": "resource_records",
     "collections_must_be_separate": true,
     "coverage_uniqueness_key": ["project_id","domain"],
-    "resource_uniqueness_key": ["project_id","domain","resource_ref"]
+    "resource_uniqueness_key": ["project_id","resource_ref"],
+    "resource_identity_must_be_unique_across_domains": true,
+    "contradictory_classification_for_same_resource_forbidden": true
   },
   "coverage_contract": {
     "project_count": 4,
