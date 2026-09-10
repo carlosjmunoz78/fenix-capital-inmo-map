@@ -219,6 +219,13 @@ test('supplied catalog accessors are rejected before validation and cannot smugg
   assert.equal(executed, false);
 });
 
+test('plain supplied catalogs cannot bind Digital Build capabilities to Trading engines', () => {
+  const catalog = loadDigitalBuildCatalog();
+  const capability = catalog.capabilities.find((item) => item.capability_id === 'cap:web-build');
+  capability.engine_bindings = ['LAB-TRD'];
+  assert.throws(() => planDigitalBuild(request(), { catalog }), /Trading engine binding LAB-TRD is forbidden/);
+});
+
 test('options accessors are rejected before catalog extraction', () => {
   let executed = false;
   const options = {};
