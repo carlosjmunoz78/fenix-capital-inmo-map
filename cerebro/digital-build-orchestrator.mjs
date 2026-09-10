@@ -117,6 +117,11 @@ function boolean(value, label) {
   return value;
 }
 
+function finiteNumber(value, label) {
+  if (typeof value !== 'number' || !Number.isFinite(value)) throw new Error(`${label} must be a finite number`);
+  return value;
+}
+
 function finiteNonNegative(value, label) {
   if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) throw new Error(`${label} must be a finite non-negative number`);
   return value;
@@ -189,7 +194,10 @@ export function planDigitalBuild(requestInput, optionsInput = {}) {
       throw new Error(`Trading engine binding ${engineId} is forbidden in Digital Build plans`);
     }
   }
-  for (const template of capability.templates) assertExactKeys(template, TEMPLATE_KEYS, 'template');
+  for (const template of capability.templates) {
+    assertExactKeys(template, TEMPLATE_KEYS, 'template');
+    finiteNumber(template.priority, 'template.priority');
+  }
   for (const skill of capability.skills) assertExactKeys(skill, SKILL_KEYS, 'skill');
 
   const reasons = [];
