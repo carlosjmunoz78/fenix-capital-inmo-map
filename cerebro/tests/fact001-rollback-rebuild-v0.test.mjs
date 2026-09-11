@@ -1,0 +1,4 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {verifyRollbackRebuildV0} from '../factory/rollback-rebuild-v0.mjs';
+const base={context:{company_id:'fenix',engine_id:'FACT-001',environment:'SCAFFOLD',version:'0.1.0'},backup_ref:'backup:1',rollback_ref:'rollback:1',rebuild_ref:'rebuild:1',snapshot_ref:'snapshot:1',restore_test_passed:true,rollback_test_passed:true,rebuild_test_passed:true};
+test('FACT-001 resilience passes only after restore rollback rebuild tests',()=>{const r=verifyRollbackRebuildV0(base);assert.equal(r.status,'RESILIENCE_READY');assert.equal(r.ready,true);assert.equal(r.prod_writes,false)});
+test('FACT-001 resilience blocks missing tests',()=>{assert.equal(verifyRollbackRebuildV0({...base,restore_test_passed:false}).status,'BLOCKED');assert.equal(verifyRollbackRebuildV0({...base,rollback_test_passed:false}).status,'BLOCKED');assert.equal(verifyRollbackRebuildV0({...base,rebuild_test_passed:false}).status,'BLOCKED')});
