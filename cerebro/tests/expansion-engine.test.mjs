@@ -1,0 +1,5 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {evaluateExpansion} from '../strategy/expansion-engine.mjs';
+const context={company_id:'fenix',engine_id:'EXPAND-001',environment:'PREPROD',version:'0.1.0'};const cities=[{city:'Cordoba',demand:80,competition:40,partners:70,banks:75,seo:80,cost:30,capacity:85},{city:'Jaen',demand:65,competition:35,partners:50,banks:60,seo:55,cost:20,capacity:70}];
+test('ranks cities deterministically',()=>{const r=evaluateExpansion({context,cities,confidence:.9});assert.equal(r.status,'EXPANSION_PLAN_READY');assert.equal(r.ranking[0].city,'Cordoba');assert.equal(r.decision_execute,false)});
+test('requires confidence',()=>{assert.equal(evaluateExpansion({context,cities,confidence:.5}).reason,'LOW_CONFIDENCE')});
+test('blocks PROD and Trading',()=>{assert.equal(evaluateExpansion({context:{...context,environment:'PROD'},cities,confidence:.9}).reason,'HIGH_RISK');assert.equal(evaluateExpansion({context,cities,confidence:.9,trading:true}).reason,'POLICY_CONFLICT')});
