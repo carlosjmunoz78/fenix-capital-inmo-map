@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'cerebro/factory/fact-closure-harness.mjs'
+      - 'cerebro/factory/fact-self-test.mjs'
       - 'cerebro/tests/fact-closure-harness.test.mjs'
       - '.github/workflows/cerebro-fact001-closure-preprod.yml'
 
@@ -18,3 +19,5 @@ jobs:
           node-version: '22'
       - name: FACT-001 closure harness tests
         run: node --test cerebro/tests/fact-closure-harness.test.mjs
+      - name: FACT-001 self-test and rebuild equivalence
+        run: node cerebro/factory/fact-self-test.mjs
