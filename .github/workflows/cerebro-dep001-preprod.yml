@@ -1,0 +1,17 @@
+name: CEREBRO DEP-001 PREPROD
+on:
+  pull_request:
+    branches: ['cerebro-api001-api-governance-v0-20260911']
+    paths:
+      - 'cerebro/platform/dependency-governance-engine.mjs'
+      - 'cerebro/tests/dependency-governance-engine.test.mjs'
+      - '.github/workflows/cerebro-dep001-preprod.yml'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test cerebro/tests/dependency-governance-engine.test.mjs
