@@ -2,28 +2,28 @@ import {test,expect} from '@playwright/test';
 import {readFileSync} from 'node:fs';
 
 test('Carlos and Belen have the exact staff creation matrix and creator-scoped password changes',()=>{
- const api=readFileSync('supabase/functions/fenix-staff-admin/index.ts','utf8');
+ const api=readFileSync('supabase/functions/fenix-user-admin/index.ts','utf8');
  const panel=readFileSync('src/StaffAdminPanel.tsx','utf8');
  const migration=readFileSync('supabase/migrations/20260911101500_prod_staff_provenance_and_audit.sql','utf8');
- expect(api).toContain("actor==='CARLOS-ADMIN'?new Set(['Director','Financiero','Visitador']):new Set(['Financiero','Visitador'])");
- expect(api).toContain("!['CARLOS-ADMIN','BELEN-DIR'].includes(String(ctx.actor_code))");
- expect(api).toContain("if(!allowedRoles(me.actor).has(requested))");
- expect(api).toContain("target.created_by_auth_user_id!==me.user.id");
+ expect(api).toContain("if(ctx.role!=='Direccion')");
+ expect(api).toContain("if(role==='Direccion'&&ctx.actor_code!=='CARLOS-ADMIN')");
+ expect(api).toContain("['Direccion','Financiero','Visitador'].includes(role)");
+ expect(api).toContain("fenix_prod_user_admin_register_server");
+ expect(api).toContain("fenix_prod_user_admin_target_server");
  expect(api).toContain('auth.admin.createUser');
  expect(api).toContain('auth.admin.updateUserById');
- expect(api).toContain("from('activity_log').insert");
- expect(api).toContain("await audit(me,'INSERT',code");
- expect(api).toContain("await audit(me,'UPDATE',String(target.actor_code),{password_changed:true})");
- expect(api).not.toContain('audit_events');
+ expect(api).toContain('fenix_prod_user_admin_audit_reset_server');
+ expect(api).not.toContain('metadata:{password');
  expect(api).not.toContain('changed_fields:{password');
  expect(migration).toContain('created_by_auth_user_id uuid');
- expect(migration).not.toContain('audit_events');
  expect(panel).toContain("actor==='CARLOS-ADMIN'?['Director','Financiero','Visitador']:actor==='BELEN-DIR'?['Financiero','Visitador']:[]");
+ expect(panel).toContain("role==='Director'?'Direccion':role");
  expect(panel).toContain('Solo puedes cambiar la contraseña de una persona creada por ti.');
 });
 
-test('Director maps to existing canonical Direccion role without granting Belen the right to create one',()=>{
- const api=readFileSync('supabase/functions/fenix-staff-admin/index.ts','utf8');
- expect(api).toContain("Director:{role:'Direccion',profile_kind:'Director'}");
- expect(api).toContain("actor==='CARLOS-ADMIN'?new Set(['Director','Financiero','Visitador']):new Set(['Financiero','Visitador'])");
+test('Director maps to canonical Direccion role and Belen is blocked from creating it',()=>{
+ const api=readFileSync('supabase/functions/fenix-user-admin/index.ts','utf8');
+ const panel=readFileSync('src/StaffAdminPanel.tsx','utf8');
+ expect(panel).toContain("role==='Director'?'Direccion':role");
+ expect(api).toContain("if(role==='Direccion'&&ctx.actor_code!=='CARLOS-ADMIN')");
 });
