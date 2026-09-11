@@ -1,0 +1,14 @@
+name: CEREBRO HR-001 PREPROD
+on:
+  pull_request:
+    branches:
+      - cerebro-3rd001-third-party-coordination-v0-20260911
+jobs:
+  hr001-preprod:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test cerebro/tests/hr-core-engine.test.mjs
