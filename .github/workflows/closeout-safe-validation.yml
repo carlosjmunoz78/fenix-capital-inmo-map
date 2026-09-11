@@ -5,6 +5,7 @@ on:
     branches:
       - work/app-closeout-2026-09-11
       - work/floating-controls-polish-2026-09-11
+      - work/app-final-polish-loop-2026-09-11
   workflow_dispatch:
 
 permissions:
