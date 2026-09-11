@@ -51,5 +51,11 @@ jobs:
         run: npx playwright test tests/team-mini-chat-operational.spec.ts
       - name: RBAC security and audit contract
         run: npx playwright test tests/closeout-security-rbac-contract.spec.ts
+      - name: PRE-PROD environment isolation contract
+        run: npx playwright test tests/preprod-environment-isolation.spec.ts
+      - name: PROD runtime configuration contract
+        run: npx playwright test tests/prod-runtime-config.spec.ts
+      - name: PROD release gate contract
+        run: npx playwright test tests/prod-release-gate.spec.ts
 
 # Safe closeout validation only: no deployment, no Supabase/Notion mutations and no live browser QA.
