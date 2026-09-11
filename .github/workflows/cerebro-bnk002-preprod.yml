@@ -1,0 +1,16 @@
+name: CEREBRO BNK-002 PREPROD
+on:
+  pull_request:
+    paths:
+      - 'cerebro/banking/bank-ranking-engine.mjs'
+      - 'cerebro/tests/bank-ranking-engine.test.mjs'
+      - '.github/workflows/cerebro-bnk002-preprod.yml'
+jobs:
+  bnk002-preprod:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test cerebro/tests/bank-ranking-engine.test.mjs
