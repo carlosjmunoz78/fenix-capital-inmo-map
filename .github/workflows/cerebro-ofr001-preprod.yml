@@ -1,0 +1,16 @@
+name: CEREBRO OFR-001 PREPROD
+on:
+  pull_request:
+    paths:
+      - 'cerebro/banking/offer-comparator-engine.mjs'
+      - 'cerebro/tests/offer-comparator-engine.test.mjs'
+      - '.github/workflows/cerebro-ofr001-preprod.yml'
+jobs:
+  ofr001-preprod:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test cerebro/tests/offer-comparator-engine.test.mjs
