@@ -48,10 +48,17 @@ test('user-admin edge keeps service role server-side and restricts director crea
  expect(edge).not.toContain('VITE_SUPABASE_SERVICE_ROLE');
 });
 
-test('daily reports expose exact local times and role-scoped wording',()=>{
+test('daily reports expose exact local times, authorized filters and PDF export',()=>{
  const reports=read('src/InformesDailyActivityGuard.tsx');
  expect(reports).toContain('local_datetime');
  expect(reports).toContain('Europe/Madrid');
  expect(reports).toContain('Financiero y Visitador reciben exclusivamente su propia actividad diaria.');
  expect(reports).toContain("fetchEnvironmentApi<unknown>('fenix-reports-api','')");
+ expect(reports).toContain('data-testid="daily-activity-filters"');
+ expect(reports).toContain('actorFilter');
+ expect(reports).toContain('actionFilter');
+ expect(reports).toContain('entityFilter');
+ expect(reports).toContain('function exportPdf()');
+ expect(reports).toContain('Guardar PDF');
+ expect(reports).toContain('exportación del informe auditado visible y autorizado.');
 });
