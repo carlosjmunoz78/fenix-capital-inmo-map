@@ -1,0 +1,13 @@
+name: CEREBRO VCON-001 PREPROD
+on:
+  pull_request:
+    branches: [cerebro-vrep001-vendor-replacement-v0-20260911]
+jobs:
+  vcon001-preprod:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test cerebro/tests/vendor-contract-engine.test.mjs
