@@ -1,0 +1,6 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {evaluateExperiment} from '../strategy/experiment-engine.mjs';
+const context={company_id:'fenix',engine_id:'EXP-001',environment:'PREPROD',version:'0.1.0'};
+test('plans a controlled experiment',()=>{const r=evaluateExperiment({context,hypothesis:'A improves conversion',metric:'conversion_rate',control:[1],treatment:[2],confidence:.9});assert.equal(r.status,'EXPERIMENT_PLAN_READY');assert.equal(r.experiment_execute,false)});
+test('blocks missing control or treatment',()=>{assert.equal(evaluateExperiment({context,hypothesis:'x',metric:'m',control:[],treatment:[1],confidence:.9}).status,'BLOCKED')});
+test('fails closed on low confidence and cost',()=>{assert.equal(evaluateExperiment({context,hypothesis:'x',metric:'m',control:[1],treatment:[2],confidence:.5}).reason,'LOW_CONFIDENCE');assert.equal(evaluateExperiment({context,hypothesis:'x',metric:'m',control:[1],treatment:[2],confidence:.9,budget_eur:1}).reason,'MONEY_LIMIT')});
+test('blocks PROD and Trading',()=>{assert.equal(evaluateExperiment({context:{...context,environment:'PROD'},hypothesis:'x',metric:'m',control:[1],treatment:[2],confidence:.9}).reason,'HIGH_RISK');assert.equal(evaluateExperiment({context,hypothesis:'x',metric:'m',control:[1],treatment:[2],confidence:.9,trading:true}).reason,'POLICY_CONFLICT')});
