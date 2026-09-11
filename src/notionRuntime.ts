@@ -50,7 +50,13 @@ async function fetchProductionRead<T>(path:string,init?:RequestInit):Promise<{st
   }
   const people=pathname.match(/^\/expedientes\/([^/]+)\/compradores$/);
   if(people){
-    return fetchEnvironmentApi<T>('fenix-expediente-people',`/?expediente=${encodeURIComponent(decodeURIComponent(people[1]))}`,init);
+    const code=decodeURIComponent(people[1]);
+    const workspace=await fetchAppApi<any>(`/expedientes/${encodeURIComponent(code)}/workspace`);
+    const canonicalPeople=workspace.data?.personas;
+    if(workspace.status===200&&canonicalPeople&&typeof canonicalPeople==='object'){
+      return {status:200,data:canonicalPeople as T};
+    }
+    return fetchEnvironmentApi<T>('fenix-expediente-people',`/?expediente=${encodeURIComponent(code)}`,init);
   }
   const detail=pathname.match(/^\/expedientes\/([^/]+)$/);
   if(detail){
