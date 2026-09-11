@@ -1,0 +1,14 @@
+name: CEREBRO LAB-AUT PREPROD
+on:
+  pull_request:
+    branches:
+      - cerebro-labai-ai-lab-v0-20260911
+jobs:
+  labaut-preprod:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test cerebro/tests/automation-lab.test.mjs
