@@ -1,0 +1,17 @@
+name: CEREBRO COH-001 PREPROD
+on:
+  pull_request:
+    branches: ['cerebro-aml001-screening-v0-20260911']
+    paths:
+      - 'cerebro/operations/expediente-coherence-engine.mjs'
+      - 'cerebro/tests/expediente-coherence-engine.test.mjs'
+      - '.github/workflows/cerebro-coh001-preprod.yml'
+jobs:
+  coh001-preprod:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test cerebro/tests/expediente-coherence-engine.test.mjs
