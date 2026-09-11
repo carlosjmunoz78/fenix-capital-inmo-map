@@ -1,0 +1,17 @@
+{
+  "catalog_id": "FACT-001-PREDICTIVE-INTELLIGENCE-V0",
+  "version": "0.1.0",
+  "owner_engine_id": "FRC-001",
+  "capability_id": "EARLY_SIGNAL",
+  "environment": "SCAFFOLD",
+  "execution_mode": "PLAN_ONLY",
+  "required_context": ["company_id", "engine_id", "environment", "version"],
+  "additional_cost_target_eur": 0,
+  "prod_writes": false,
+  "autonomous_prod": false,
+  "trading_access": false,
+  "engine_bindings": ["FRC-001", "OPP-001", "STR-001", "DEC-001", "OBS-001", "RSH-001", "FINOPS-001"],
+  "signal_inputs": ["signal_id", "observed_at", "source_ref", "confidence", "impact", "urgency", "reversibility", "cost_eur"],
+  "thresholds": {"watch": 50, "act": 75, "min_confidence": 0.6},
+  "human_required": {"low_confidence": "LOW_CONFIDENCE", "paid_cost": "MONEY_LIMIT", "prod_write": "HIGH_RISK", "trading_access": "POLICY_CONFLICT"}
+}
