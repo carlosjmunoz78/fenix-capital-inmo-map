@@ -23,6 +23,12 @@ test('release validation workflows no longer depend on PRE-PROD credentials or e
   expect(candidate).toContain('https://prod.invalid');
 });
 
+test('retired APP patch and debug workflows cannot write to legacy PRE-PROD branch from the canonical candidate',()=>{
+  expect(fs.existsSync('.github/workflows/debug-contextual-expediente-build.yml')).toBe(false);
+  expect(fs.existsSync('.github/workflows/patch-comprador-evidence-20260909.yml')).toBe(false);
+  expect(fs.existsSync('.github/workflows/patch-expediente-master-view-20260909.yml')).toBe(false);
+});
+
 test('canonical APP promotion is manual-only, validates prod-preparation and preserves rollback history',()=>{
   const promote=read('.github/workflows/app-prod-promote.yml');
   expect(promote).toContain('workflow_dispatch:');
