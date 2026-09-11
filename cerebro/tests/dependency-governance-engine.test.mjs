@@ -1,0 +1,9 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {assessDependency} from '../platform/dependency-governance-engine.mjs';
+const base={context:{company_id:'fenix',engine_id:'DEP-001',environment:'PREPROD',version:'0.1.0'},authorized:true,confidence:.95,source_refs:['master'],dependency:{from_engine:'API-001',to_engine:'DATA-001',type:'READ',critical:false,rollback_defined:true}};
+test('valid canonical dependency',()=>{const r=assessDependency(base);assert.equal(r.status,'DEPENDENCY_VALID');assert.equal(r.canonical_engines_verified,true)});
+test('critical without rollback blocked',()=>assert.equal(assessDependency({...base,dependency:{...base.dependency,critical:true,rollback_defined:false}}).reason,'HIGH_RISK'));
+test('cross-company denied and malformed booleans fail closed',()=>{assert.equal(assessDependency({...base,dependency:{...base.dependency,cross_company:true}}).reason,'POLICY_CONFLICT');assert.throws(()=>assessDependency({...base,dependency:{...base.dependency,cross_company:'true'}}),/BOOLEAN_REQUIRED/)});
+test('noncanonical engine and unknown type rejected',()=>{assert.throws(()=>assessDependency({...base,dependency:{...base.dependency,to_engine:'FAKE-999'}}),/NONCANONICAL_ENGINE/);assert.throws(()=>assessDependency({...base,dependency:{...base.dependency,type:'MAGIC'}}),/INVALID_DEPENDENCY_TYPE/)});
+test('prod and accessor-backed dependency rejected',()=>{assert.throws(()=>assessDependency({...base,context:{...base.context,environment:'PROD'}}),/UNSAFE_CONTEXT/);let touched=false;const dep={from_engine:'API-001',to_engine:'DATA-001',critical:false,rollback_defined:true};Object.defineProperty(dep,'type',{enumerable:true,get(){touched=true;return 'READ'}});assert.throws(()=>assessDependency({...base,dependency:dep}),/ACCESSOR_FORBIDDEN/);assert.equal(touched,false)});
