@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import argparse, datetime as dt, json, os, pathlib, shlex, subprocess, sys, tarfile
+import argparse, datetime as dt, json, pathlib, shlex, shutil, subprocess, sys, tarfile
 
 PROJECTS=[
     'fenix-trading-lab',
@@ -44,13 +44,31 @@ COMMANDS={
 }
 
 FORBIDDEN=(' create ',' update ',' delete ',' deploy ',' set ',' add-iam-policy-binding ',' remove-iam-policy-binding ',' enable ',' disable ',' start ',' stop ',' restart ',' patch ',' write ')
+COMMAND_TIMEOUT_SECONDS=90
 
 
-def run(cmd):
+def run(cmd, label='command'):
     padded=' '+cmd+' '
     if any(token in padded for token in FORBIDDEN):
         raise RuntimeError(f'forbidden mutating verb in command: {cmd}')
-    proc=subprocess.run(shlex.split(cmd), text=True, capture_output=True)
+    print(f'[RUN] {label}: {cmd}', flush=True)
+    try:
+        proc=subprocess.run(
+            shlex.split(cmd),
+            text=True,
+            capture_output=True,
+            timeout=COMMAND_TIMEOUT_SECONDS,
+        )
+    except subprocess.TimeoutExpired as exc:
+        stderr=(exc.stderr or '') if isinstance(exc.stderr,str) else ''
+        print(f'[TIMEOUT] {label} after {COMMAND_TIMEOUT_SECONDS}s', flush=True)
+        return {
+            'command':cmd,
+            'returncode':124,
+            'status':'ERROR',
+            'stdout':None,
+            'stderr':f'timeout after {COMMAND_TIMEOUT_SECONDS}s; {stderr}'[:12000],
+        }
     stdout=proc.stdout.strip(); stderr=proc.stderr.strip()
     if proc.returncode==0:
         try: data=json.loads(stdout or '[]')
@@ -65,12 +83,13 @@ def run(cmd):
         else:
             status='ERROR'
         data=None
+    print(f'[DONE] {label}: {status}', flush=True)
     return {'command':cmd,'returncode':proc.returncode,'status':status,'stdout':data,'stderr':stderr[:12000]}
 
 
 def scheduler(project):
     discover=f'gcloud scheduler locations list --project={project} --format=json'
-    d=run(discover)
+    d=run(discover, f'{project}/scheduler/locations')
     results=[d]
     if d['status']=='SUCCESS' and isinstance(d['stdout'],list):
         locations=[]
@@ -82,7 +101,10 @@ def scheduler(project):
                 elif name.startswith(f'projects/{project}/locations/') and name.count('/')==3:
                     locations.append(name.rsplit('/',1)[1])
         for loc in sorted(set(locations)):
-            results.append(run(f'gcloud scheduler jobs list --project={project} --location={loc} --format=json'))
+            results.append(run(
+                f'gcloud scheduler jobs list --project={project} --location={loc} --format=json',
+                f'{project}/scheduler/{loc}',
+            ))
     return results
 
 
@@ -92,26 +114,42 @@ def main():
     args=ap.parse_args()
     if not args.execute_read_only:
         print('Refusing to execute without --execute-read-only', file=sys.stderr); return 2
-    if subprocess.run(['bash','-lc','command -v gcloud >/dev/null 2>&1']).returncode!=0:
+    if shutil.which('gcloud') is None:
         print('gcloud not found', file=sys.stderr); return 3
-    account=subprocess.run(['gcloud','auth','list','--filter=status:ACTIVE','--format=value(account)'],text=True,capture_output=True).stdout.strip()
+    print('[PREFLIGHT] gcloud found', flush=True)
+    try:
+        auth=subprocess.run(
+            ['gcloud','auth','list','--filter=status:ACTIVE','--format=value(account)'],
+            text=True,
+            capture_output=True,
+            timeout=30,
+        )
+    except subprocess.TimeoutExpired:
+        print('Timed out checking active gcloud account', file=sys.stderr); return 4
+    account=auth.stdout.strip()
     if not account:
         print('No active gcloud account', file=sys.stderr); return 4
+    print(f'[PREFLIGHT] active account: {account}', flush=True)
     stamp=dt.datetime.now(dt.timezone.utc).strftime('%Y%m%dT%H%M%SZ')
     root=pathlib.Path.home()/f'cerebro-gcp-readonly-{stamp}'
     root.mkdir(parents=True,exist_ok=False)
-    summary={'schema_version':'0.1.0','mode':'READ_ONLY_CAPTURE_ONLY','captured_at':stamp,'active_account':account,'projects':{},'trading_mutation_forbidden':True,'secret_payload_accessed':False}
+    summary={'schema_version':'0.1.1','mode':'READ_ONLY_CAPTURE_ONLY','captured_at':stamp,'active_account':account,'projects':{},'trading_mutation_forbidden':True,'secret_payload_accessed':False}
     for project in PROJECTS:
+        print(f'\n[PROJECT] {project}', flush=True)
         pdata={}
         for domain,cmds in COMMANDS.items():
-            pdata[domain]=[run(c.format(project=project)) for c in cmds]
+            results=[]
+            for idx,c in enumerate(cmds, start=1):
+                results.append(run(c.format(project=project), f'{project}/{domain}/{idx}'))
+            pdata[domain]=results
         pdata['scheduler']=scheduler(project)
         summary['projects'][project]=pdata
         (root/f'{project}.json').write_text(json.dumps(pdata,ensure_ascii=False,indent=2),encoding='utf-8')
+        print(f'[PROJECT DONE] {project}', flush=True)
     (root/'summary.json').write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding='utf-8')
     archive=pathlib.Path.home()/f'{root.name}.tar.gz'
     with tarfile.open(archive,'w:gz') as tf: tf.add(root,arcname=root.name)
-    print(str(archive))
+    print(f'\n[COMPLETE] {archive}', flush=True)
     return 0
 
 if __name__=='__main__':
