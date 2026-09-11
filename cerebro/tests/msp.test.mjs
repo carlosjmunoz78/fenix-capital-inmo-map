@@ -1,0 +1,23 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import {auditEngine,completeEngine,applyEngineSpecificCompletion,assessEngineClosure,nextClosureActions,MSP_COMPONENTS} from '../factory/msp.mjs';
+
+const context={company_id:'fenix',engine_id:'VOICE-001',environment:'PREPROD',version:'0.1.0'};
+
+function tmp(){return fs.mkdtempSync(path.join(os.tmpdir(),'cerebro-msp-'));}
+function safeJson(component){return JSON.stringify({company_id:'fenix',engine_id:'VOICE-001',environment:'PREPROD',version:'0.1.0',component,autonomous_prod:false,prod_promotion:false},null,2);}
+
+test('MSP audits and scaffolds only missing artifacts without overclaiming closure',()=>{const root=tmp();fs.writeFileSync(path.join(root,'manifest.json'),'existing','utf8');const before=auditEngine(root,context);assert.equal(before.status,'PARTIAL');assert.ok(before.missing.includes('health_checks'));const r=completeEngine(root,context);assert.equal(r.status,'STRUCTURAL_SCAFFOLD_COMPLETE');assert.ok(r.placeholders.length>0);assert.ok(!r.created.includes('manifest'));assert.equal(fs.readFileSync(path.join(root,'manifest.json'),'utf8'),'existing');for(const rel of Object.values(MSP_COMPONENTS))assert.equal(fs.existsSync(path.join(root,rel)),true);});
+
+test('MSP is idempotent and never promotes PROD',()=>{const root=tmp();completeEngine(root,context);const again=completeEngine(root,context);assert.equal(again.created.length,0);assert.equal(again.prod_promotion,false);assert.throws(()=>auditEngine(root,{...context,environment:'PROD'}));});
+
+test('MSP replaces only its placeholders with engine-specific safe artifacts',()=>{const root=tmp();completeEngine(root,context);const first=auditEngine(root,context);assert.ok(first.placeholders.includes('config'));const r=applyEngineSpecificCompletion(root,context,{config:safeJson('config'),contracts:safeJson('contracts')});assert.ok(r.updated.includes('config'));assert.ok(!r.placeholders.includes('config'));assert.throws(()=>applyEngineSpecificCompletion(root,context,{config:safeJson('config')}),/will not be overwritten/);assert.throws(()=>applyEngineSpecificCompletion(root,context,{jobs:JSON.stringify({engine_id:'VOICE-001',autonomous_prod:true})}),/PROD autonomy/);});
+
+test('MSP closure remains blocked until placeholders tests docs registry and exact head are green',()=>{const root=tmp();completeEngine(root,context);let r=assessEngineClosure(root,context,{engine_test:{status:'SUCCESS',head_sha:'abc',run_id:1},factory_test:{status:'SUCCESS',head_sha:'abc',run_id:2},docs_synced:true,registry_synced:true});assert.equal(r.status,'CLOSURE_BLOCKED');assert.ok(r.blockers.includes('ENGINE_SPECIFIC_PLACEHOLDERS'));const artifacts={};for(const component of auditEngine(root,context).placeholders)artifacts[component]=component==='dependency_map'?`# VOICE-001 Dependency Map\n\n- dependencies: COM-001, ACTGW-001\n- App/CRM/Trading writes: forbidden\n`:safeJson(component);applyEngineSpecificCompletion(root,context,artifacts);r=assessEngineClosure(root,context,{engine_test:{status:'SUCCESS',head_sha:'abc',run_id:1},factory_test:{status:'SUCCESS',head_sha:'def',run_id:2},docs_synced:true,registry_synced:true});assert.ok(r.blockers.includes('EXACT_HEAD_MISMATCH'));r=assessEngineClosure(root,context,{engine_test:{status:'SUCCESS',head_sha:'abc',run_id:1},factory_test:{status:'SUCCESS',head_sha:'abc',run_id:2},docs_synced:true,registry_synced:true});assert.equal(r.status,'PREPROD_GREEN');assert.equal(r.live_evidence,false);assert.equal(r.prod_autonomy,false);});
+
+test('MSP emits deterministic next closure actions instead of self-promoting',()=>{const root=tmp();completeEngine(root,context);const r=nextClosureActions(root,context,{});assert.equal(r.status,'CLOSURE_BLOCKED');assert.ok(r.actions.includes('COMPLETE_ENGINE_SPECIFIC_ARTIFACTS'));assert.ok(r.actions.includes('RUN_OR_FIX_ENGINE_TESTS'));assert.ok(r.actions.includes('RUN_OR_FIX_FACTORY_TESTS'));assert.ok(r.actions.includes('SYNC_ENGINE_REGISTRY'));assert.equal(r.prod_promotion,false);});
+
+test('MSP rejects accessor-backed or inherited context fail-closed',()=>{const root=tmp();const inherited=Object.create({company_id:'fenix'});Object.assign(inherited,{engine_id:'VOICE-001',environment:'PREPROD',version:'0.1.0'});assert.throws(()=>auditEngine(root,inherited),/plain object/);const accessor={engine_id:'VOICE-001',environment:'PREPROD',version:'0.1.0'};Object.defineProperty(accessor,'company_id',{enumerable:true,get(){return 'fenix'}});assert.throws(()=>auditEngine(root,accessor),/accessors forbidden/);});
