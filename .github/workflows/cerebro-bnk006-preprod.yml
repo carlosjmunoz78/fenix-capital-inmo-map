@@ -1,0 +1,16 @@
+name: CEREBRO BNK-006 PREPROD
+on:
+  pull_request:
+    paths:
+      - 'cerebro/banking/bank-negotiation-engine.mjs'
+      - 'cerebro/tests/bank-negotiation-engine.test.mjs'
+      - '.github/workflows/cerebro-bnk006-preprod.yml'
+jobs:
+  bnk006-preprod:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test cerebro/tests/bank-negotiation-engine.test.mjs
