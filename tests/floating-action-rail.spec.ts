@@ -8,8 +8,10 @@ test.describe('Fénix · rail flotante de acciones',()=>{
  test('mantiene Micro → Calculadora → Chat, iconos sin texto visible y separación uniforme',()=>{
   const css=read('src/calculator-no-pro.css');
   const chat=read('src/ChatShell.tsx');
+  const voice=read('src/GlobalCommunicationCommandGuard.tsx');
   expect(css).toContain('bottom:130px!important');
-  expect(css).toContain("content:'🎤'");
+  expect(css).toContain('.fenix-voice-main{width:46px!important;height:46px!important');
+  expect(voice).toContain('aria-label="Abrir acciones por voz"');
   expect(css).toContain('bottom:74px!important');
   expect(css).toContain('.calc-launcher::after{content:none!important}');
   expect(chat).toContain('className="fenix-chat-launcher"');
