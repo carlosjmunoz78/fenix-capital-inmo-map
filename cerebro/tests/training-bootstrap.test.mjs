@@ -1,0 +1,5 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {planTrainingBootstrap} from '../bootstrap/training-bootstrap.mjs';
+const base={context:{company_id:'fenix',engine_id:'TRNBOOT-001',environment:'SCAFFOLD',version:'0.1.0'},authorized:true,estimated_additional_cost_eur:0,requires_prod_write:false};
+test('TRNBOOT plan is zero-cost and isolated from Trading',()=>{const r=planTrainingBootstrap(base);assert.equal(r.status,'PLAN_READY');assert.equal(r.isolated_from_trading,true);assert.equal(r.prod_writes,false);assert.equal(r.additional_cost_target_eur,0)});
+test('TRNBOOT blocks cost',()=>{assert.equal(planTrainingBootstrap({...base,estimated_additional_cost_eur:1}).reason,'MONEY_LIMIT')});
+test('TRNBOOT blocks prod write',()=>{assert.equal(planTrainingBootstrap({...base,requires_prod_write:true}).reason,'HIGH_RISK')});
