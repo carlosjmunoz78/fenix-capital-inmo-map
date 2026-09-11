@@ -8,6 +8,7 @@ on:
       - work/app-final-polish-loop-2026-09-11
       - work/app-profile-chat-polish-2026-09-11
       - work/ana-general-knowledge-2026-09-11
+      - work/expediente-participants-regression-2026-09-11
   workflow_dispatch:
 
 permissions:
@@ -43,6 +44,8 @@ jobs:
         run: npx playwright test tests/ana-general-knowledge-contract.spec.ts
       - name: Role-scoped reports contract
         run: npx playwright test tests/role-scoped-reports-contract.spec.ts
+      - name: Expediente multi-participant regression contract
+        run: npx playwright test tests/expediente-multiparticipant-regression.spec.ts tests/expediente-participants-alias-contract.spec.ts
       - name: Floating action rail contract
         run: npx playwright test tests/floating-action-rail.spec.ts
       - name: Floating stack regression contract
