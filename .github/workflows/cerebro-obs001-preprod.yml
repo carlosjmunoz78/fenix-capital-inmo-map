@@ -1,0 +1,21 @@
+name: CEREBRO OBS-001 PREPROD
+on:
+  pull_request:
+    branches:
+      - cerebro-upd001-knowledge-update-v0-20260911
+    paths:
+      - 'cerebro/knowledge/observation-runtime.mjs'
+      - 'cerebro/tests/obs001-observation-runtime.test.mjs'
+      - '.github/workflows/cerebro-obs001-preprod.yml'
+permissions:
+  contents: read
+jobs:
+  obs-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test OBS-001 contract
+        run: node --test cerebro/tests/obs001-observation-runtime.test.mjs
