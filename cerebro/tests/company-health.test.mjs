@@ -1,0 +1,7 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {planCompanyHealth} from '../company/company-health.mjs';
+const base={context:{company_id:'fenix',engine_id:'COMP-HLT-001',environment:'SCAFFOLD',version:'0.1.0'},authorized:true,requires_prod_write:false,estimated_additional_cost_eur:0};
+test('COMP-HLT creates read-only zero-cost health plan',()=>{const r=planCompanyHealth(base);assert.equal(r.status,'PLAN_READY');assert.equal(r.mode,'READ_ONLY_HEALTH_PLAN');assert.equal(r.checks.includes('backup_freshness'),true);assert.equal(r.prod_writes,false)});
+test('COMP-HLT requires authorization',()=>{assert.equal(planCompanyHealth({...base,authorized:false}).reason,'POLICY_CONFLICT')});
+test('COMP-HLT blocks production writes',()=>{assert.equal(planCompanyHealth({...base,requires_prod_write:true}).reason,'HIGH_RISK');assert.throws(()=>planCompanyHealth({...base,requires_prod_write:'true'}),/must be boolean/)});
+test('COMP-HLT enforces zero-cost gate and strict cost type',()=>{assert.equal(planCompanyHealth({...base,estimated_additional_cost_eur:1}).reason,'MONEY_LIMIT');for(const v of ['',null,false,-1,Infinity])assert.throws(()=>planCompanyHealth({...base,estimated_additional_cost_eur:v}),/finite non-negative number/)});
+test('COMP-HLT rejects accessor-backed context',()=>{const context={company_id:'fenix',engine_id:'COMP-HLT-001',version:'0.1.0'};Object.defineProperty(context,'environment',{enumerable:true,get(){return 'SCAFFOLD'}});assert.throws(()=>planCompanyHealth({...base,context}),/stable data property/)});
