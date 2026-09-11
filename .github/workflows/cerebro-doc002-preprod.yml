@@ -1,0 +1,17 @@
+name: CEREBRO DOC-002 PREPROD
+on:
+  pull_request:
+    branches: ['cerebro-doc001-document-wrapper-v0-20260911']
+    paths:
+      - 'cerebro/documents/document-pending-engine.mjs'
+      - 'cerebro/tests/document-pending-engine.test.mjs'
+      - '.github/workflows/cerebro-doc002-preprod.yml'
+jobs:
+  doc002-preprod:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test cerebro/tests/document-pending-engine.test.mjs
