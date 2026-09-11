@@ -38,7 +38,8 @@ test('perfil completo es editable y persiste en fuente canónica sin permitir ed
  expect(migration).toContain('actor_profiles_username_ci_uidx');
  expect(migration).toContain('auth_user_id=auth.uid()');
  expect(migration).toContain('update fenix_prod.actors set display_name=new_name');
- expect(migration).toContain("'profile.updated'");
+ expect(migration).toContain("'profile_update'");
+ expect(migration).toContain('insert into fenix_prod.activity_log');
  expect(migration).toContain('alter table fenix_prod.actor_profiles enable row level security');
  expect(migration).toContain('revoke all on fenix_prod.actor_profiles from public,anon,authenticated');
  expect(source).not.toContain('aria-label="Rol"');
