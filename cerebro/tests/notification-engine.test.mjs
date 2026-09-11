@@ -1,0 +1,5 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {planNotifications} from '../communications/notification-engine.mjs';
+const context={company_id:'fenix',engine_id:'NOTIF-001',environment:'PREPROD',version:'0.1.0'};const base={context,authorized:true,requires_prod_write:false,notifications:[{id:'n1',priority:90,topic:'security'},{id:'n2',priority:40,topic:'digest'}]};
+test('NOTIF-001 separates urgent and digest',()=>{const r=planNotifications(base);assert.equal(r.status,'NOTIFICATION_PLAN_READY');assert.equal(r.urgent[0].id,'n1');assert.equal(r.digest[0].id,'n2');assert.equal(r.anti_saturation,true);});
+test('NOTIF-001 gates writes and auth',()=>{assert.equal(planNotifications({...base,requires_prod_write:true}).reason,'HIGH_RISK');assert.equal(planNotifications({...base,authorized:false}).reason,'POLICY_CONFLICT');});
+test('NOTIF-001 rejects invalid priority',()=>{assert.throws(()=>planNotifications({...base,notifications:[{id:'x',priority:101,topic:'x'}]}));});
