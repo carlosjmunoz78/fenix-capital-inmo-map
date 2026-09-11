@@ -28,6 +28,36 @@ test('password changes never persist or audit raw credentials',()=>{
  }
 });
 
+test('editable profile remains self-scoped and does not make role or permissions editable',()=>{
+ const sql=read('supabase/migrations/20260911102000_actor_profiles_editable.sql');
+ const ui=read('src/ProfileShell.tsx');
+ expect(sql).toContain('auth_user_id=auth.uid()');
+ expect(sql).toContain('where actor_code=me');
+ expect(sql).toContain('revoke all on fenix_prod.actor_profiles from public,anon,authenticated');
+ expect(sql).toContain('alter table fenix_prod.actor_profiles enable row level security');
+ expect(sql).toContain("'profile.updated'");
+ expect(ui).not.toContain('aria-label="Rol"');
+ expect(ui).not.toContain("field('role'");
+ expect(ui).toContain("supabase.rpc('fenix_prod_profile_update_user'");
+});
+
+test('private and group chat is membership-scoped on every list send and attachment path',()=>{
+ const sql=read('supabase/migrations/20260911100500_chat_conversations_v2.sql');
+ const fix=read('supabase/migrations/20260911100600_chat_conversations_v2_list_fix.sql');
+ const ui=read('src/ChatShell.tsx');
+ expect(sql).toContain('chat_conversation_members');
+ expect(sql).toContain('conversation_code=p_conversation_code and actor_code=me');
+ expect(sql).toContain("return jsonb_build_object('ok',false,'status',403,'error','forbidden')");
+ expect(sql).toContain('sender_actor_code=me');
+ expect(sql).toContain('message_not_owned');
+ expect(sql).toContain("bucket_id='fenix-prod-chat'");
+ expect(sql).toContain('cm.actor_code=me.actor_code');
+ expect(fix).toContain('self.actor_code=me');
+ expect(ui).not.toContain('service_role');
+ expect(ui).toContain("supabase.rpc('fenix_prod_chat_list_v2_user'");
+ expect(ui).toContain("supabase.rpc('fenix_prod_chat_send_v2_user'");
+});
+
 test('reports keep scope on the backend: Direccion company, Financiero and Visitador actor-only',()=>{
  const sql=read('supabase/migrations/20260911112000_role_scoped_daily_weekly_reports.sql');
  const ui=read('src/InformesShell.tsx');
