@@ -1,0 +1,5 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {assessDocumentFraudRisk} from '../documents/document-antifraud-engine.mjs';
+const context={company_id:'fenix',engine_id:'DOC-004',environment:'PREPROD',version:'0.1.0'};const base={context,authorized:true,requires_prod_write:false,confidence:0.9,signals:['metadata_mismatch']};
+test('DOC-004 scores low risk without declaring fraud',()=>{const r=assessDocumentFraudRisk(base);assert.equal(r.status,'DOCUMENT_FRAUD_RISK_READY');assert.equal(r.fraud_conclusion,false);assert.equal(r.decision,'PASS_LOW_RISK');});
+test('DOC-004 escalates high risk to human',()=>{const r=assessDocumentFraudRisk({...base,signals:['visual_tamper_signal','identity_mismatch']});assert.equal(r.reason,'HIGH_RISK');assert.equal(r.decision,'MANUAL_REVIEW_REQUIRED');});
+test('DOC-004 gates writes, auth and confidence',()=>{assert.equal(assessDocumentFraudRisk({...base,requires_prod_write:true}).reason,'HIGH_RISK');assert.equal(assessDocumentFraudRisk({...base,authorized:false}).reason,'POLICY_CONFLICT');assert.equal(assessDocumentFraudRisk({...base,confidence:0.2}).reason,'LOW_CONFIDENCE');});

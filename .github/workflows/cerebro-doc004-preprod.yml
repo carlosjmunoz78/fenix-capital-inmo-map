@@ -1,0 +1,17 @@
+name: CEREBRO DOC-004 PREPROD
+on:
+  pull_request:
+    branches: ['cerebro-doc003-document-quality-v0-20260911']
+    paths:
+      - 'cerebro/documents/document-antifraud-engine.mjs'
+      - 'cerebro/tests/document-antifraud-engine.test.mjs'
+      - '.github/workflows/cerebro-doc004-preprod.yml'
+jobs:
+  doc004-preprod:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test cerebro/tests/document-antifraud-engine.test.mjs
