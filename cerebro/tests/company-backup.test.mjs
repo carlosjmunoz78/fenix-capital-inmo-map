@@ -1,0 +1,7 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {planCompanyBackup} from '../company/company-backup.mjs';
+const base={context:{company_id:'fenix',engine_id:'COMP-BKP-001',environment:'SCAFFOLD',version:'0.1.0'},authorized:true,requires_prod_write:false,autonomous_prod:false,trading_access:false,cross_company_access:false,estimated_additional_cost_eur:0};
+test('COMP-BKP creates zero-cost backup/rebuild plan',()=>{const r=planCompanyBackup(base);assert.equal(r.status,'PLAN_READY');assert.equal(r.restore_test_required,true);assert.equal(r.backup_scope.includes('restore_manifest'),true);assert.equal(r.prod_writes,false)});
+test('COMP-BKP blocks cost',()=>{assert.equal(planCompanyBackup({...base,estimated_additional_cost_eur:1}).reason,'MONEY_LIMIT')});
+test('COMP-BKP blocks PROD/autonomy as HIGH_RISK',()=>{assert.equal(planCompanyBackup({...base,requires_prod_write:true}).reason,'HIGH_RISK');assert.equal(planCompanyBackup({...base,autonomous_prod:true}).reason,'HIGH_RISK')});
+test('COMP-BKP blocks Trading and cross-company access',()=>{assert.equal(planCompanyBackup({...base,trading_access:true}).reason,'POLICY_CONFLICT');assert.equal(planCompanyBackup({...base,cross_company_access:true}).reason,'POLICY_CONFLICT')});
+test('COMP-BKP rejects malformed flags and cost',()=>{assert.throws(()=>planCompanyBackup({...base,trading_access:'true'}),/must be boolean/);for(const v of ['',null,false,-1,Infinity])assert.throws(()=>planCompanyBackup({...base,estimated_additional_cost_eur:v}),/finite non-negative number/)});
