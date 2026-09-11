@@ -1,0 +1,12 @@
+name: CEREBRO TRNBOOT-001 PREPROD
+on:
+  pull_request:
+    branches: [cerebro-automation-bootstrap-v0-20260911]
+jobs:
+  trnboot001-preprod:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 22}
+      - run: node --test cerebro/tests/training-bootstrap.test.mjs
