@@ -31,13 +31,18 @@ test('PRE-PROD recibe sufijo explícito y PROD usa nombres sin sufijo', async ()
   expect(directionSource).not.toContain('fenix-direction-kpis-test');
 });
 
-test('PRE-PROD y promoción PROD requieren lanzamiento manual explícito', async () => {
-  for(const workflow of [preprodWorkflow,prodWorkflow]){
-    expect(workflow).toContain('workflow_dispatch:');
-    expect(workflow).not.toMatch(/^\s+push:\s*$/m);
-    expect(workflow).not.toMatch(/^\s+pull_request:\s*$/m);
-  }
+test('PRE-PROD permanece manual y PROD promueve automáticamente la rama canónica con gates', async () => {
+  expect(preprodWorkflow).toContain('workflow_dispatch:');
+  expect(preprodWorkflow).not.toMatch(/^\s+push:\s*$/m);
+  expect(preprodWorkflow).not.toMatch(/^\s+pull_request:\s*$/m);
+  expect(prodWorkflow).toContain('workflow_dispatch:');
+  expect(prodWorkflow).toMatch(/^\s+push:\s*$/m);
+  expect(prodWorkflow).toContain('- preprod-app-phase1');
+  expect(prodWorkflow).not.toMatch(/^\s+pull_request:\s*$/m);
+  expect(prodWorkflow).toContain('Browser QA exact PROD candidate');
+  expect(prodWorkflow).toContain('PROD API reachability gate');
   expect(prodWorkflow).toContain('Publish exact validated APP snapshot');
+  expect(prodWorkflow).toContain('Verify published source marker');
 });
 
 test('PROD no admite fallback de actor QA heredado', async () => {
