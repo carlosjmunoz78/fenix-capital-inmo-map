@@ -1,0 +1,27 @@
+{
+  "catalog_id": "COMP-ONB-001-V0",
+  "version": "0.1.0",
+  "owner_engine_id": "COMP-ONB-001",
+  "environment": "SCAFFOLD",
+  "execution_mode": "PLAN_ONLY",
+  "required_context": ["company_id", "engine_id", "environment", "version"],
+  "states": ["DISCOVERED", "REGISTERED", "AUTHORIZED", "SCANNING", "PROFILED", "DIGITAL_FOUNDATION_READY", "SEO_SOCIAL_READY", "CRM_READY", "APP_READY", "AUTOMATIONS_READY", "TRAINING_READY", "PREPROD_READY", "PRODUCTION", "OPTIMIZING"],
+  "phase_engine_bindings": {
+    "REGISTERED": ["COMP-REG-001"],
+    "SCANNING": ["SCAN-001"],
+    "PROFILED": ["BMD-001", "PROC-001", "KBOOT-001"],
+    "DIGITAL_FOUNDATION_READY": ["WAUD-001", "KW-001", "LOCALP-001"],
+    "SEO_SOCIAL_READY": ["SEOBOOT-001", "SOCBOOT-001", "MKTBOOT-001"],
+    "CRM_READY": ["CRMBOOT-001"],
+    "APP_READY": ["APPBOOT-001"],
+    "AUTOMATIONS_READY": ["AUTBOOT-001"],
+    "TRAINING_READY": ["TRNBOOT-001"],
+    "PREPROD_READY": ["ENGACT-001", "TENANT-001", "COMP-BKP-001"],
+    "PRODUCTION": ["COMP-DEP-001", "COMP-HLT-001"]
+  },
+  "additional_cost_target_eur": 0,
+  "prod_writes": false,
+  "autonomous_prod": false,
+  "trading_access": false,
+  "human_required": {"missing_authorization": "POLICY_CONFLICT", "prod_promotion": "HIGH_RISK", "money_limit": "MONEY_LIMIT", "low_confidence": "LOW_CONFIDENCE"}
+}
