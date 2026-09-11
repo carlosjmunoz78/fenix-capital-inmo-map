@@ -1,0 +1,5 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {evaluatePromotionGateV0,FACT001_PROMOTION_REQUIRED_GATES} from '../factory/promotion-gate-v0.mjs';
+const gates=Object.fromEntries(FACT001_PROMOTION_REQUIRED_GATES.map(k=>[k,true]));const base={context:{company_id:'fenix',engine_id:'FACT-001',environment:'SCAFFOLD',version:'0.1.0'},target_environment:'PREPROD',gates,estimated_additional_cost_eur:0,autonomy_approved:false};
+test('FACT-001 promotion gate passes only with all gates',()=>{const r=evaluatePromotionGateV0(base);assert.equal(r.status,'PROMOTION_READY');assert.equal(r.promote,true);assert.equal(r.gradual_promotion_required,true)});
+test('FACT-001 blocks missing gate',()=>{const bad={...gates,tribunal:false};const r=evaluatePromotionGateV0({...base,gates:bad});assert.equal(r.status,'BLOCKED');assert.deepEqual(r.missing_gates,['tribunal'])});
+test('FACT-001 PROD requires autonomy approval and zero extra cost',()=>{assert.equal(evaluatePromotionGateV0({...base,target_environment:'PROD'}).reason,'HIGH_RISK');assert.equal(evaluatePromotionGateV0({...base,estimated_additional_cost_eur:1}).reason,'MONEY_LIMIT')});
