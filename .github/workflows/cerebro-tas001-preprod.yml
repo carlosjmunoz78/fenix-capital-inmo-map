@@ -1,0 +1,16 @@
+name: CEREBRO TAS-001 PREPROD
+on:
+  pull_request:
+    paths:
+      - 'cerebro/property/prevaluation-engine.mjs'
+      - 'cerebro/tests/prevaluation-engine.test.mjs'
+      - '.github/workflows/cerebro-tas001-preprod.yml'
+jobs:
+  tas001-preprod:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test cerebro/tests/prevaluation-engine.test.mjs
