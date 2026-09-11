@@ -1,0 +1,14 @@
+name: CEREBRO HR-006 PREPROD
+on:
+  pull_request:
+    branches:
+      - cerebro-hr005-performance-coaching-v0-20260911
+jobs:
+  hr006-preprod:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test cerebro/tests/workforce-routing-engine.test.mjs
