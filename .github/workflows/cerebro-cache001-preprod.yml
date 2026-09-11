@@ -1,0 +1,21 @@
+name: CEREBRO CACHE-001 PREPROD
+on:
+  pull_request:
+    branches:
+      - cerebro-rag001-retrieval-v0-20260911
+    paths:
+      - 'cerebro/knowledge/cache-runtime.mjs'
+      - 'cerebro/tests/cache001-runtime.test.mjs'
+      - '.github/workflows/cerebro-cache001-preprod.yml'
+permissions:
+  contents: read
+jobs:
+  cache-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test CACHE-001 contract
+        run: node --test cerebro/tests/cache001-runtime.test.mjs
