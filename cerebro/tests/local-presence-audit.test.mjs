@@ -1,0 +1,7 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {planLocalPresenceAudit} from '../local/local-presence-audit.mjs';
+const context={company_id:'fenix',engine_id:'LOCALP-001',environment:'SCAFFOLD',version:'0.1.0'};
+test('LOCALP-001 builds zero-cost local audit plan',()=>{const r=planLocalPresenceAudit({context,authorized:true,business_name:'Fénix Capital',service_area:'Córdoba, Spain',estimated_additional_cost_eur:0});assert.equal(r.status,'PLAN_READY');assert.equal(r.mode,'READ_ONLY_PUBLIC_AUDIT');assert.equal(r.executed,false);assert.equal(r.additional_cost_target_eur,0);assert.ok(r.checks.includes('nap_consistency'));});
+test('LOCALP-001 blocks unauthorized/cost/prod',()=>{assert.equal(planLocalPresenceAudit({context,authorized:false,business_name:'X',service_area:'Y'}).reason,'POLICY_CONFLICT');assert.equal(planLocalPresenceAudit({context,authorized:true,business_name:'X',service_area:'Y',estimated_additional_cost_eur:1}).reason,'MONEY_LIMIT');assert.equal(planLocalPresenceAudit({context,authorized:true,business_name:'X',service_area:'Y',requires_prod_write:true}).reason,'HIGH_RISK');});
+test('LOCALP-001 fails closed',()=>{assert.throws(()=>planLocalPresenceAudit({context,authorized:true,business_name:'',service_area:'Y'}));assert.throws(()=>planLocalPresenceAudit({context:{...context,engine_id:'SOCAUD-001'},authorized:true,business_name:'X',service_area:'Y'}));});
