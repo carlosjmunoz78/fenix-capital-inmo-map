@@ -1,0 +1,12 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {ProvenanceLedgerV0,PRV001_CONTRACT} from '../knowledge/provenance-runtime.mjs';
+const c={company_id:'fenix',engine_id:'PRV-001',environment:'PREPROD',version:'0.1.0'};
+const o={...c,company_id:'other'};
+const input=(x={})=>({context:c,provenance_id:'p1',source_type:'NOTION',source_uri:'notion:1',observed_at:'2026-09-11T11:00:00Z',validated_by:'system',confidence:0.9,subject_ref:'KNW:k1',metadata:{domain:'mortgage'},...x});
+test('contract stays safe',()=>{assert.equal(PRV001_CONTRACT.append_only,true);assert.equal(PRV001_CONTRACT.prod_write,false);assert.equal(PRV001_CONTRACT.trading_access,false);assert.equal(PRV001_CONTRACT.additional_cost_target_eur,0);});
+test('append and verify provenance',()=>{const l=new ProvenanceLedgerV0();const a=l.append(input());assert.equal(a.status,'GREEN');assert.match(a.row.evidence_hash,/^[a-f0-9]{64}$/);assert.deepEqual(l.verify({context:c,provenance_id:'p1'}),{status:'GREEN',reason:null,verified:true});});
+test('same provenance is idempotent',()=>{const l=new ProvenanceLedgerV0();l.append(input());assert.equal(l.append(input()).decision,'PROVENANCE_IDEMPOTENT');});
+test('immutable conflict fails closed',()=>{const l=new ProvenanceLedgerV0();l.append(input());const r=l.append(input({source_uri:'git:other'}));assert.deepEqual([r.status,r.reason],['HUMAN_REQUIRED','POLICY_CONFLICT']);});
+test('cross-company read/write denied',()=>{const l=new ProvenanceLedgerV0();l.append(input());const r=l.get({context:o,provenance_id:'p1'});assert.deepEqual([r.status,r.reason],['HUMAN_REQUIRED','POLICY_CONFLICT']);assert.equal(l.append(input({context:o})).reason,'POLICY_CONFLICT');});
+test('confidence and PROD fail closed',()=>{const l=new ProvenanceLedgerV0();assert.throws(()=>l.append(input({confidence:2})),/0\.\.1/);assert.throws(()=>l.get({context:{...c,environment:'PROD'},provenance_id:'p1'}),/LAB\/PREPROD/);});
