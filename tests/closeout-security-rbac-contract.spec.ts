@@ -35,7 +35,8 @@ test('editable profile remains self-scoped and does not make role or permissions
  expect(sql).toContain('where actor_code=me');
  expect(sql).toContain('revoke all on fenix_prod.actor_profiles from public,anon,authenticated');
  expect(sql).toContain('alter table fenix_prod.actor_profiles enable row level security');
- expect(sql).toContain("'profile.updated'");
+ expect(sql).toContain("'profile_update'");
+ expect(sql).toContain('insert into fenix_prod.activity_log');
  expect(ui).not.toContain('aria-label="Rol"');
  expect(ui).not.toContain("field('role'");
  expect(ui).toContain("supabase.rpc('fenix_prod_profile_update_user'");
