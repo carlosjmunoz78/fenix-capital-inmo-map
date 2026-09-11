@@ -32,6 +32,6 @@ jobs:
       - name: TypeScript and Vite build
         run: npm run build
       - name: Contract tests without backend traffic
-        run: npx playwright test tests/password-recovery-contract.spec.ts tests/profile-own-password-contract.spec.ts tests/staff-admin-contract.spec.ts tests/role-scoped-reports-contract.spec.ts
+        run: npx playwright test tests/password-recovery-contract.spec.ts tests/profile-own-password-contract.spec.ts tests/staff-admin-contract.spec.ts tests/role-scoped-reports-contract.spec.ts tests/floating-action-rail.spec.ts tests/floating-stack-regression.spec.ts tests/global-audio-launcher.spec.ts tests/global-dictation.spec.ts tests/global-voice-hub-zero-ai.spec.ts tests/ana-mini-chat-canonical-rules.spec.ts tests/team-mini-chat-operational.spec.ts
 
 # Safe closeout validation only: no deployment, no Supabase/Notion mutations and no live browser QA.
