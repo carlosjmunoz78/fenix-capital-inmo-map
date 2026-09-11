@@ -1,0 +1,22 @@
+name: CEREBRO DBOFF PREPROD
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/storage/dboff-local.mjs'
+      - 'cerebro/tests/dboff-local.test.mjs'
+      - '.github/workflows/cerebro-dboff-preprod.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  dboff-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Test DBOFF-001 local offload
+        run: node --test cerebro/tests/dboff-local.test.mjs
