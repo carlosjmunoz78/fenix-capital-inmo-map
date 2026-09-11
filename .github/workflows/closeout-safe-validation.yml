@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: closeout-safe-${{ github.ref }}
+  group: closeout-safe-${{ github.sha }}
   cancel-in-progress: true
 
 jobs:
