@@ -1,0 +1,17 @@
+name: CEREBRO KYC-001 PREPROD
+on:
+  pull_request:
+    branches: ['cerebro-doc004-document-antifraud-v0-20260911']
+    paths:
+      - 'cerebro/compliance/kyc-engine.mjs'
+      - 'cerebro/tests/kyc-engine.test.mjs'
+      - '.github/workflows/cerebro-kyc001-preprod.yml'
+jobs:
+  kyc001-preprod:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test cerebro/tests/kyc-engine.test.mjs
