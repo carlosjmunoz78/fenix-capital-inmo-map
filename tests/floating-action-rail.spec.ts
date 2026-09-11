@@ -15,7 +15,9 @@ test.describe('Fénix · rail flotante de acciones',()=>{
   expect(chat).toContain('className="fenix-chat-launcher"');
   expect(chat).toContain('bottom:18px');
   expect(chat).toContain('aria-label="Abrir chat de equipo"');
-  expect(chat).toContain("navigate('/chat')");
+  expect(chat).toContain('onClick={()=>setMiniOpen(v=>!v)}');
+  expect(chat).toContain('aria-label="Expandir chat"');
+  expect(chat).toContain("setMiniOpen(false);navigate('/chat')");
  });
  test('los tres controles comparten eje y tamaño de 46px',()=>{
   const css=read('src/calculator-no-pro.css');
