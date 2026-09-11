@@ -1,0 +1,16 @@
+name: CEREBRO NOT-001 PREPROD
+on:
+  pull_request:
+    paths:
+      - 'cerebro/notarial/notarial-readiness-engine.mjs'
+      - 'cerebro/tests/notarial-readiness-engine.test.mjs'
+      - '.github/workflows/cerebro-not001-preprod.yml'
+jobs:
+  not001-preprod:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test cerebro/tests/notarial-readiness-engine.test.mjs
