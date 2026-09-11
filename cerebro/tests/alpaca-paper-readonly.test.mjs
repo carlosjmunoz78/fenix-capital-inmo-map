@@ -38,8 +38,16 @@ test('account read uses only Paper GET and sanitizes output',async()=>{
 test('positions clock and orders are read-only allowlisted',async()=>{
   const file=secretFile();
   const seen=[];
-  const fetchImpl=async(u,o)=>{seen.push([u,o.method]);if(u.includes('/positions'))return {ok:true,status:200,json:async()=>([{symbol:'AAPL',qty:'1',side:'long'}])};if(u.includes('/clock'))return {ok:true,status:200,json:async()=>({is_open:true})};return {ok:true,status:200,json:async()=>([{symbol:'MSFT',side:'buy',type:'market',status:'filled',qty:'1'}])};
-  for(const resource of ['positions','clock','orders']){const r=await readAlpacaPaper(resource,{file,fetchImpl});assert.equal(r.status,'GREEN');}
+  const fetchImpl=async(u,o)=>{
+    seen.push([u,o.method]);
+    if(u.includes('/positions'))return {ok:true,status:200,json:async()=>([{symbol:'AAPL',qty:'1',side:'long'}])};
+    if(u.includes('/clock'))return {ok:true,status:200,json:async()=>({is_open:true})};
+    return {ok:true,status:200,json:async()=>([{symbol:'MSFT',side:'buy',type:'market',status:'filled',qty:'1'}])};
+  };
+  for(const resource of ['positions','clock','orders']){
+    const r=await readAlpacaPaper(resource,{file,fetchImpl});
+    assert.equal(r.status,'GREEN');
+  }
   assert.equal(seen.every(([,m])=>m==='GET'),true);
 });
 
