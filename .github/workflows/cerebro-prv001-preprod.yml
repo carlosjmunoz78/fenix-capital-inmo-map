@@ -1,0 +1,21 @@
+name: CEREBRO PRV-001 PREPROD
+on:
+  pull_request:
+    branches:
+      - cerebro-knw001-knowledge-runtime-v0-20260911
+    paths:
+      - 'cerebro/knowledge/provenance-runtime.mjs'
+      - 'cerebro/tests/prv001-provenance-runtime.test.mjs'
+      - '.github/workflows/cerebro-prv001-preprod.yml'
+permissions:
+  contents: read
+jobs:
+  prv-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test PRV-001 contract
+        run: node --test cerebro/tests/prv001-provenance-runtime.test.mjs
