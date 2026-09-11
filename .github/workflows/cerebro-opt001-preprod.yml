@@ -1,0 +1,17 @@
+name: CEREBRO OPT-001 PREPROD
+on:
+  pull_request:
+    branches: ['cerebro-dep001-dependency-governance-v0-20260911']
+    paths:
+      - 'cerebro/platform/resource-optimization-engine.mjs'
+      - 'cerebro/tests/resource-optimization-engine.test.mjs'
+      - '.github/workflows/cerebro-opt001-preprod.yml'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test cerebro/tests/resource-optimization-engine.test.mjs
