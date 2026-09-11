@@ -1,0 +1,37 @@
+name: Closeout Safe Validation
+
+on:
+  push:
+    branches:
+      - work/app-closeout-2026-09-11
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: closeout-safe-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      VITE_FUNCTION_SUFFIX: '-test'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: TypeScript and Vite build
+        run: npm run build
+      - name: Contract tests without backend traffic
+        run: npx playwright test tests/password-recovery-contract.spec.ts tests/profile-own-password-contract.spec.ts
+
+# Safe closeout validation only: no deployment, no Supabase/Notion mutations and no live browser QA.
