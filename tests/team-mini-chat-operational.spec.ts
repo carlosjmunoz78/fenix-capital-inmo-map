@@ -20,11 +20,30 @@ test('mini chat has explicit high-contrast dark theme instead of inheriting whit
  expect(css).toContain("html[data-theme='dark'] .fenix-mini-team-chat textarea::placeholder{color:#aeb5bf!important");
 });
 
+test('chat lets the user choose a person or create a group with backend-authoritative membership',()=>{
+ const src=readFileSync('src/ChatShell.tsx','utf8');
+ const migration=readFileSync('supabase/migrations/20260911100500_chat_conversations_v2.sql','utf8');
+ expect(src).toContain("supabase.rpc('fenix_prod_chat_people_user'");
+ expect(src).toContain("supabase.rpc('fenix_prod_chat_conversations_user'");
+ expect(src).toContain("supabase.rpc('fenix_prod_chat_conversation_create_user'");
+ expect(src).toContain('Elige una persona para chat directo o varias para crear un grupo.');
+ expect(src).toContain('aria-label="Nombre del grupo"');
+ expect(src).toContain('aria-label="Elegir conversación"');
+ expect(migration).toContain("kind text not null check(kind in ('direct','group'))");
+ expect(migration).toContain('chat_conversation_members');
+ expect(migration).toContain('actor_code=me');
+ expect(migration).toContain("return jsonb_build_object('ok',false,'status',403,'error','forbidden')");
+ expect(migration).toContain('fenix_prod_chat_list_v2_user');
+ expect(migration).toContain('fenix_prod_chat_send_v2_user');
+});
+
 test('mini and full chat share text attachment dictation and recorded-audio send path',()=>{
  const src=readFileSync('src/ChatShell.tsx','utf8');
  expect(src).toContain('onSubmit={send}');
  expect(src).toContain("supabase.rpc('fenix_prod_chat_send_user'");
+ expect(src).toContain("supabase.rpc('fenix_prod_chat_send_v2_user'");
  expect(src).toContain("supabase.rpc('fenix_prod_chat_attachment_add_user'");
+ expect(src).toContain("supabase.rpc('fenix_prod_chat_attachment_add_v2_user'");
  expect(src).toContain('miniFileInput');
  expect(src).toContain('toggleDictation');
  expect(src).toContain('window.SpeechRecognition||window.webkitSpeechRecognition');
