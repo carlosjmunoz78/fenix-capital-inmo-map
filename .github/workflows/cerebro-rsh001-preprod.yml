@@ -1,0 +1,22 @@
+name: CEREBRO RSH-001 PREPROD
+on:
+  pull_request:
+    branches:
+      - cerebro-prv001-provenance-v0-20260911
+    paths:
+      - 'cerebro/knowledge/research-runtime.mjs'
+      - 'cerebro/tests/rsh001-research-runtime.test.mjs'
+      - '.github/workflows/cerebro-rsh001-preprod.yml'
+permissions:
+  contents: read
+jobs:
+  rsh-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test RSH-001 contract
+        run: node --test cerebro/tests/rsh001-research-runtime.test.mjs
