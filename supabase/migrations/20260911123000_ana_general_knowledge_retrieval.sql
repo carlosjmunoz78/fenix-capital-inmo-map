@@ -6,7 +6,7 @@ alter table fenix_prod.ana_knowledge_cards
 
 create index if not exists ana_knowledge_cards_search_idx
   on fenix_prod.ana_knowledge_cards
-  using gin (to_tsvector('spanish', coalesce(title,'') || ' ' || coalesce(answer,'') || ' ' || array_to_string(tags,' ')));
+  using gin (to_tsvector('spanish'::regconfig, coalesce(title,'') || ' ' || coalesce(answer,'')));
 
 insert into fenix_prod.ana_knowledge_cards(knowledge_code,title,answer,status,tags,domain)
 values
