@@ -9,6 +9,7 @@ on:
       - work/app-profile-chat-polish-2026-09-11
       - work/ana-general-knowledge-2026-09-11
       - work/expediente-participants-regression-2026-09-11
+      - work/expediente-people-visible-fix-2026-09-11
   workflow_dispatch:
 
 permissions:
