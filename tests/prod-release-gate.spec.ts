@@ -8,7 +8,7 @@ test('gate PROD permite promoción continua solo con gates verdes',()=>{
   expect(gate).toContain('rojo → se diagnostica, corrige, relanza y vuelve a validar');
   expect(gate).toContain('sin pedir una nueva autorización manual a Carlos');
   expect(gate).toContain('No publicar con un gate rojo');
-  expect(gate).toContain('configuración PROD, dominio/hosting, backend, secretos y almacenamiento');
+  expect(gate).toContain('Configuración PROD, dominio/hosting, backend, secretos y almacenamiento');
 });
 
 test('workflow PRE-PROD permanece parado y PROD promueve desde la rama canónica con gates',()=>{
