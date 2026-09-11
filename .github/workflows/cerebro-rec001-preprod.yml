@@ -1,0 +1,16 @@
+name: CEREBRO REC-001 PREPROD
+on:
+  pull_request:
+    paths:
+      - 'cerebro/banking/final-recommendation-engine.mjs'
+      - 'cerebro/tests/final-recommendation-engine.test.mjs'
+      - '.github/workflows/cerebro-rec001-preprod.yml'
+jobs:
+  rec001-preprod:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test cerebro/tests/final-recommendation-engine.test.mjs
