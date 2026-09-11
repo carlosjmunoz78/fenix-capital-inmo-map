@@ -20,11 +20,21 @@ async function identity(req:Request){
   if(error||!data.user)return null;
   const {data:ctx,error:ctxError}=await svc.rpc('fenix_prod_actor_context_by_auth_server',{p_auth_user_id:data.user.id});
   if(ctxError||!ctx?.ok||!['CARLOS-ADMIN','BELEN-DIR'].includes(String(ctx.actor_code)))return null;
-  return{svc,user:data.user,actor:String(ctx.actor_code)};
+  return{svc,user:data.user,actor:String(ctx.actor_code),role:String(ctx.role||'Direccion')};
 }
 function allowedRoles(actor:string){return actor==='CARLOS-ADMIN'?new Set(['Director','Financiero','Visitador']):new Set(['Financiero','Visitador']);}
-async function audit(me:any,eventType:string,subjectCode:string|null,metadata:Record<string,unknown>={}){
-  await me.svc.schema('fenix_prod').from('audit_events').insert({actor_code:me.actor,actor_auth_user_id:me.user.id,event_type:eventType,scope:'company',subject_type:'staff_account',subject_code:subjectCode,metadata});
+async function audit(me:any,action:'INSERT'|'UPDATE',subjectCode:string|null,changedFields:Record<string,unknown>={}){
+  await me.svc.schema('fenix_prod').from('activity_log').insert({
+    actor_code:me.actor,
+    actor_role:me.role,
+    entity_type:'staff_account',
+    entity_code:subjectCode,
+    action,
+    changed_fields:changedFields,
+    source:'fenix-staff-admin',
+    source_ref:subjectCode,
+    occurred_at:new Date().toISOString(),
+  });
 }
 
 Deno.serve(async(req:Request)=>{
@@ -55,7 +65,7 @@ Deno.serve(async(req:Request)=>{
     const code=actorCode(requested);
     const {error:actorError}=await me.svc.schema('fenix_prod').from('actors').insert({actor_code:code,auth_user_id:created.user.id,role:mapped.role,profile_kind:mapped.profile_kind,display_name:fullName,active:true,created_by_auth_user_id:me.user.id,created_by_actor_code:me.actor});
     if(actorError){await me.svc.auth.admin.deleteUser(created.user.id);return out(req,{ok:false,status:500,error:'identity_link_failed'},500);}
-    await audit(me,'staff.account.created',code,{created_role:mapped.profile_kind});
+    await audit(me,'INSERT',code,{created_role:mapped.profile_kind,created_by:me.actor});
     return out(req,{ok:true,status:201,actor_code:code,user_id:created.user.id,role:mapped.profile_kind},201);
   }
 
@@ -69,7 +79,7 @@ Deno.serve(async(req:Request)=>{
     if(target.created_by_auth_user_id!==me.user.id)return out(req,{ok:false,status:403,error:'not_creator'},403);
     const {error:updateError}=await me.svc.auth.admin.updateUserById(targetId,{password});
     if(updateError)return out(req,{ok:false,status:500,error:'password_update_failed'},500);
-    await audit(me,'staff.password.changed',String(target.actor_code),{});
+    await audit(me,'UPDATE',String(target.actor_code),{password_changed:true});
     return out(req,{ok:true,status:200,actor_code:target.actor_code});
   }
 
