@@ -1,0 +1,21 @@
+name: CEREBRO RAG-001 PREPROD
+on:
+  pull_request:
+    branches:
+      - cerebro-obs001-observation-engine-v0-20260911
+    paths:
+      - 'cerebro/knowledge/rag-runtime.mjs'
+      - 'cerebro/tests/rag001-runtime.test.mjs'
+      - '.github/workflows/cerebro-rag001-preprod.yml'
+permissions:
+  contents: read
+jobs:
+  rag-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test RAG-001 contract
+        run: node --test cerebro/tests/rag001-runtime.test.mjs
