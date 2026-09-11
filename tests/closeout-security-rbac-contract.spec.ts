@@ -3,13 +3,18 @@ import {readFileSync} from 'node:fs';
 
 const read=(p:string)=>readFileSync(p,'utf8');
 
-test('staff administration is server-authoritative and creator-scoped',()=>{
+test('staff administration is server-authoritative, limited to Carlos and Belen, and creator-scoped',()=>{
  const api=read('supabase/functions/fenix-user-admin/index.ts');
+ const sql=read('supabase/migrations/20260911101500_prod_staff_provenance_and_audit.sql');
  const ui=read('src/StaffAdminPanel.tsx');
- expect(api).toContain("if(ctx.role!=='Direccion')");
+ expect(api).toContain("const ADMIN_ACTORS=new Set(['CARLOS-ADMIN','BELEN-DIR'])");
+ expect(api).toContain("ctx.role!=='Direccion'||!ADMIN_ACTORS.has");
  expect(api).toContain("if(role==='Direccion'&&ctx.actor_code!=='CARLOS-ADMIN')");
  expect(api).toContain('fenix_prod_user_admin_target_server');
  expect(api).toContain('fenix_prod_user_admin_register_server');
+ expect(sql).toContain("p_actor_code not in ('CARLOS-ADMIN','BELEN-DIR')");
+ expect(sql).toContain('created_by_actor_code=p_actor_code');
+ expect(sql).toContain('t.created_by_actor_code is distinct from p_actor_code');
  expect(ui).toContain("actor==='CARLOS-ADMIN'?['Director','Financiero','Visitador']:actor==='BELEN-DIR'?['Financiero','Visitador']:[]");
  expect(ui).not.toContain('auth.admin.createUser');
  expect(ui).not.toContain('auth.admin.updateUserById');
@@ -35,8 +40,7 @@ test('editable profile remains self-scoped and does not make role or permissions
  expect(sql).toContain('where actor_code=me');
  expect(sql).toContain('revoke all on fenix_prod.actor_profiles from public,anon,authenticated');
  expect(sql).toContain('alter table fenix_prod.actor_profiles enable row level security');
- expect(sql).toContain("'profile_update'");
- expect(sql).toContain('insert into fenix_prod.activity_log');
+ expect(sql).toContain("'profile.updated'");
  expect(ui).not.toContain('aria-label="Rol"');
  expect(ui).not.toContain("field('role'");
  expect(ui).toContain("supabase.rpc('fenix_prod_profile_update_user'");
