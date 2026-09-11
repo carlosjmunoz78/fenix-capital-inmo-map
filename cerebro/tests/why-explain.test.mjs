@@ -1,0 +1,6 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {explainDecision} from '../console/why-explain.mjs';
+const context={company_id:'fenix',engine_id:'WHY-001',environment:'PREPROD',version:'0.1.0'};
+test('WHY-001 explains deterministically without model',()=>{const r=explainDecision({context,request_id:'r1',decision:'ALLOW',evidence_ref:'ev1',reasons:['policy pass','zero cost']});assert.equal(r.status,'EXPLAINED');assert.equal(r.model_required,false);assert.deepEqual(r.why,['policy pass','zero cost']);assert.equal(Object.isFrozen(r.why),true)});
+test('WHY-001 blocks secret payload',()=>{const r=explainDecision({context,request_id:'r1',decision:'ALLOW',evidence_ref:'ev1',secret_payload:true});assert.equal(r.status,'HUMAN_REQUIRED');assert.equal(r.reason,'SECURITY_INCIDENT')});
+test('WHY-001 rejects non-string reason without coercion',()=>{assert.throws(()=>explainDecision({context,request_id:'r1',decision:'ALLOW',evidence_ref:'ev1',reasons:[{}]}),/reasons\[0\] required/)});
+test('WHY-001 blocks non-PREPROD environment',()=>{const r=explainDecision({context:{...context,environment:'PROD'},request_id:'r1',decision:'ALLOW',evidence_ref:'ev1'});assert.equal(r.status,'HUMAN_REQUIRED');assert.equal(r.reason,'HIGH_RISK')});
