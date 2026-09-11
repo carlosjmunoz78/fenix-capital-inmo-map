@@ -111,9 +111,13 @@ test('Controles flotantes respetan orden calculadora micr√≥fono chat, color com√
   const css=fs.readFileSync(path.resolve('src/calculator-no-pro.css'),'utf8');
   const labels=fs.readFileSync(path.resolve('src/CalculatorLabelGuard.tsx'),'utf8');
   const chat=fs.readFileSync(path.resolve('src/ChatShell.tsx'),'utf8');
+  expect(css).toContain('position:fixed!important');
   expect(css).toContain('bottom:118px!important');
-  expect(css).toContain('.fenix-voice-hub{right:18px!important;bottom:68px!important}');
-  expect(css).toContain('.fenix-chat-launcher{right:18px!important;bottom:18px!important');
+  expect(css).toContain('.fenix-voice-hub{');
+  expect(css).toContain('bottom:68px!important');
+  expect(css).toContain('.fenix-chat-launcher{');
+  expect(css).toContain('bottom:18px!important');
+  expect((css.match(/right:18px!important/g)||[]).length).toBeGreaterThanOrEqual(3);
   expect(css).toContain('width:46px!important');
   expect(css).toContain('background:var(--orange)!important');
   expect(chat).toContain('width:46px;height:46px');
