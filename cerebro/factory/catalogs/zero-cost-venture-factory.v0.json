@@ -1,0 +1,16 @@
+{
+  "catalog_id": "FACT-001-ZERO-COST-VENTURE-FACTORY-V0",
+  "version": "0.1.0",
+  "owner_engine_id": "VENT-001",
+  "environment": "SCAFFOLD",
+  "execution_mode": "PLAN_ONLY",
+  "required_context": ["company_id", "engine_id", "environment", "version"],
+  "additional_cost_target_eur": 0,
+  "prod_writes": false,
+  "autonomous_prod": false,
+  "trading_access": false,
+  "engine_bindings": ["OPP-001", "VENT-001", "INN-001", "EXP-001", "MKT-002", "FRC-001", "STR-001", "BMD-001", "FREE-001"],
+  "stages": ["DISCOVER", "DEMAND_VALIDATE", "MVP_PLAN", "MEASURE", "SCALE_ITERATE_KILL"],
+  "score_weights": {"demand": 35, "margin": 20, "speed_to_validate": 15, "zero_cost_fit": 20, "reversibility": 10},
+  "human_required": {"paid_ads_or_stock_or_capex": "MONEY_LIMIT", "legal_issue": "LEGAL_REQUIRED", "low_confidence": "LOW_CONFIDENCE", "prod_write": "HIGH_RISK"}
+}
