@@ -1,0 +1,6 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {assessDocumentQuality} from '../documents/document-quality-engine.mjs';
+const context={company_id:'fenix',engine_id:'DOC-003',environment:'PREPROD',version:'0.1.0'};const base={context,authorized:true,requires_prod_write:false,confidence:0.9,readability:0.7,completeness:0.7,orientation:0.8,contrast:0.6};
+test('DOC-003 recovers before resend when possible',()=>{const r=assessDocumentQuality(base);assert.equal(r.action,'LOCAL_RECOVERY_THEN_RECHECK');assert.equal(r.local_recovery_first,true);assert.equal(r.request_resend,false);});
+test('DOC-003 accepts strong documents',()=>{const r=assessDocumentQuality({...base,readability:0.9,completeness:0.9,orientation:0.9,contrast:0.9});assert.equal(r.action,'ACCEPT');});
+test('DOC-003 requests resend only when unrecoverable',()=>{const r=assessDocumentQuality({...base,readability:0.2,completeness:0.3,orientation:0.4,contrast:0.2});assert.equal(r.action,'REQUEST_RESEND');assert.equal(r.request_resend,true);});
+test('DOC-003 gates risk/auth/confidence',()=>{assert.equal(assessDocumentQuality({...base,requires_prod_write:true}).reason,'HIGH_RISK');assert.equal(assessDocumentQuality({...base,authorized:false}).reason,'POLICY_CONFLICT');assert.equal(assessDocumentQuality({...base,confidence:0.2}).reason,'LOW_CONFIDENCE');});
