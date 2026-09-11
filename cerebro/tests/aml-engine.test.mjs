@@ -1,0 +1,5 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {screenAml} from '../compliance/aml-engine.mjs';
+const context={company_id:'fenix',engine_id:'AML-001',environment:'PREPROD',version:'0.1.0'};const base={context,authorized:true,requires_prod_write:false,confidence:0.9,source_refs:['kyc:1'],pep:false,sanctions_match:false,unusual_source_of_funds:false,high_risk_geography:false};
+test('AML-001 returns low-risk screening without legal decision',()=>{const r=screenAml(base);assert.equal(r.status,'AML_SCREENING_READY');assert.equal(r.final_legal_decision,false);assert.equal(r.decision,'LOW_RISK_SCREEN');});
+test('AML-001 escalates sanctions and elevated risk',()=>{assert.equal(screenAml({...base,sanctions_match:true}).reason,'LEGAL_REQUIRED');assert.equal(screenAml({...base,pep:true,unusual_source_of_funds:true}).reason,'HIGH_RISK');});
+test('AML-001 gates writes/auth/confidence',()=>{assert.equal(screenAml({...base,requires_prod_write:true}).reason,'HIGH_RISK');assert.equal(screenAml({...base,authorized:false}).reason,'POLICY_CONFLICT');assert.equal(screenAml({...base,confidence:0.2}).reason,'LOW_CONFIDENCE');});

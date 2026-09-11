@@ -1,0 +1,17 @@
+name: CEREBRO AML-001 PREPROD
+on:
+  pull_request:
+    branches: ['cerebro-kyc001-identification-v0-20260911']
+    paths:
+      - 'cerebro/compliance/aml-engine.mjs'
+      - 'cerebro/tests/aml-engine.test.mjs'
+      - '.github/workflows/cerebro-aml001-preprod.yml'
+jobs:
+  aml001-preprod:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test cerebro/tests/aml-engine.test.mjs
