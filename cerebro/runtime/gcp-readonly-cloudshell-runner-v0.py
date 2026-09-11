@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import argparse, datetime as dt, json, pathlib, shlex, shutil, subprocess, sys, tarfile
+import argparse, datetime as dt, json, os, pathlib, shlex, shutil, subprocess, sys, tarfile
 
 PROJECTS=[
     'fenix-trading-lab',
@@ -44,7 +44,13 @@ COMMANDS={
 }
 
 FORBIDDEN=(' create ',' update ',' delete ',' deploy ',' set ',' add-iam-policy-binding ',' remove-iam-policy-binding ',' enable ',' disable ',' start ',' stop ',' restart ',' patch ',' write ')
-COMMAND_TIMEOUT_SECONDS=90
+COMMAND_TIMEOUT_SECONDS=45
+
+
+def gcloud_env():
+    env=os.environ.copy()
+    env['CLOUDSDK_CORE_DISABLE_PROMPTS']='1'
+    return env
 
 
 def run(cmd, label='command'):
@@ -58,6 +64,7 @@ def run(cmd, label='command'):
             text=True,
             capture_output=True,
             timeout=COMMAND_TIMEOUT_SECONDS,
+            env=gcloud_env(),
         )
     except subprocess.TimeoutExpired as exc:
         stderr=(exc.stderr or '') if isinstance(exc.stderr,str) else ''
@@ -76,10 +83,16 @@ def run(cmd, label='command'):
         status='EMPTY' if data in ([],{},'') else 'SUCCESS'
     else:
         low=stderr.lower()
-        if 'permission' in low or 'forbidden' in low or 'not have permission' in low:
-            status='PERMISSION_DENIED'
-        elif 'api' in low and ('disabled' in low or 'not enabled' in low or 'has not been used' in low):
+        service_disabled=(
+            'service_disabled' in low
+            or 'has not been used in project' in low
+            or 'api has not been used' in low
+            or ('api' in low and ('disabled' in low or 'not enabled' in low))
+        )
+        if service_disabled:
             status='API_UNAVAILABLE'
+        elif 'permission_denied' in low or 'not have permission' in low or 'permission' in low or 'forbidden' in low:
+            status='PERMISSION_DENIED'
         else:
             status='ERROR'
         data=None
@@ -123,6 +136,7 @@ def main():
             text=True,
             capture_output=True,
             timeout=30,
+            env=gcloud_env(),
         )
     except subprocess.TimeoutExpired:
         print('Timed out checking active gcloud account', file=sys.stderr); return 4
@@ -133,7 +147,7 @@ def main():
     stamp=dt.datetime.now(dt.timezone.utc).strftime('%Y%m%dT%H%M%SZ')
     root=pathlib.Path.home()/f'cerebro-gcp-readonly-{stamp}'
     root.mkdir(parents=True,exist_ok=False)
-    summary={'schema_version':'0.1.1','mode':'READ_ONLY_CAPTURE_ONLY','captured_at':stamp,'active_account':account,'projects':{},'trading_mutation_forbidden':True,'secret_payload_accessed':False}
+    summary={'schema_version':'0.1.2','mode':'READ_ONLY_CAPTURE_ONLY','captured_at':stamp,'active_account':account,'projects':{},'trading_mutation_forbidden':True,'secret_payload_accessed':False}
     for project in PROJECTS:
         print(f'\n[PROJECT] {project}', flush=True)
         pdata={}
