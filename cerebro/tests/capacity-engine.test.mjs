@@ -1,0 +1,5 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {evaluateCapacity} from '../strategy/capacity-engine.mjs';
+const context={company_id:'fenix',engine_id:'CAPA-001',environment:'PREPROD',version:'0.1.0'};
+test('CAPA-001 plans capacity deterministically',()=>{const r=evaluateCapacity({context,authorized:true,forecast_demand:120,current_capacity:100});assert.equal(r.status,'CAPACITY_PLAN');assert.equal(r.action,'ADD_CAPACITY_PLAN');assert.equal(r.execute_staffing,false)});
+test('CAPA-001 suggests consolidation on low utilization',()=>{const r=evaluateCapacity({context,authorized:true,forecast_demand:20,current_capacity:100});assert.equal(r.action,'CONSOLIDATE_OR_REALLOCATE')});
+test('CAPA-001 blocks added cost and PROD',()=>{assert.equal(evaluateCapacity({context,authorized:true,forecast_demand:120,current_capacity:100,additional_cost_eur:1}).reason,'MONEY_LIMIT');assert.equal(evaluateCapacity({context:{...context,environment:'PROD'},authorized:true,forecast_demand:1,current_capacity:1}).reason,'HIGH_RISK')});
