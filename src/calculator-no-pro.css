@@ -1,12 +1,13 @@
-.calc-launcher{font-size:0!important;background:var(--orange)!important;color:#fff!important;padding:0!important;border:1px solid var(--orange)!important;border-radius:14px!important;display:grid!important;place-items:center!important;gap:0!important;width:46px!important;height:46px!important;min-width:46px!important;min-height:46px!important;right:18px!important;bottom:118px!important;box-shadow:0 8px 24px rgba(0,0,0,.18)!important}
-.calc-launcher.dir-calc-launcher{font-size:0!important;padding:0!important;width:46px!important;height:46px!important;min-width:46px!important;min-height:46px!important;right:18px!important;bottom:118px!important}
+.calc-launcher,.calc-launcher.dir-calc-launcher,.fenix-voice-hub,.fenix-chat-launcher{position:fixed!important;right:18px!important;left:auto!important;margin:0!important;transform:none!important}
+.calc-launcher{font-size:0!important;background:var(--orange)!important;color:#fff!important;padding:0!important;border:1px solid var(--orange)!important;border-radius:14px!important;display:grid!important;place-items:center!important;gap:0!important;width:46px!important;height:46px!important;min-width:46px!important;min-height:46px!important;bottom:118px!important;box-shadow:0 8px 24px rgba(0,0,0,.18)!important;z-index:9072!important}
+.calc-launcher.dir-calc-launcher{font-size:0!important;padding:0!important;width:46px!important;height:46px!important;min-width:46px!important;min-height:46px!important;bottom:118px!important;z-index:9072!important}
 .calc-launcher:hover,.calc-launcher:focus-visible{background:var(--orange)!important}
 .calc-launcher::after{content:none!important}
-.fenix-voice-hub{right:18px!important;bottom:68px!important}
+.fenix-voice-hub{bottom:68px!important;width:46px!important;height:46px!important;z-index:9071!important}
 .fenix-voice-main{width:46px!important;height:46px!important;border-radius:14px!important;padding:0!important;background:var(--orange)!important;border:1px solid var(--orange)!important;color:#fff!important;box-shadow:0 8px 24px rgba(0,0,0,.18)!important}
-.fenix-chat-launcher{right:18px!important;bottom:18px!important;width:46px!important;height:46px!important;border-radius:14px!important;background:var(--orange)!important;border-color:var(--orange)!important;color:#fff!important;box-shadow:0 8px 24px rgba(0,0,0,.18)!important}
+.fenix-chat-launcher{bottom:18px!important;width:46px!important;height:46px!important;border-radius:14px!important;background:var(--orange)!important;border-color:var(--orange)!important;color:#fff!important;box-shadow:0 8px 24px rgba(0,0,0,.18)!important;z-index:9070!important}
 .calc-panel{background:var(--panel)!important;color:var(--text)!important;border-color:var(--border)!important}
 .calc-panel>header{background:var(--panel)!important;border-color:var(--border)!important}
 .calc-panel>header>div:first-child>strong{font-size:0}
 .calc-panel>header>div:first-child>strong::after{content:'Calculadora Hipotecaria';font-size:14px;font-weight:800;line-height:1.2}
-@media(max-width:650px){.calc-launcher,.calc-launcher.dir-calc-launcher{right:18px!important;bottom:118px!important}.fenix-voice-hub{right:18px!important;bottom:68px!important}.fenix-chat-launcher{right:18px!important;bottom:18px!important}}
+@media(max-width:650px){.calc-launcher,.calc-launcher.dir-calc-launcher,.fenix-voice-hub,.fenix-chat-launcher{right:12px!important}.calc-launcher,.calc-launcher.dir-calc-launcher{bottom:112px!important}.fenix-voice-hub{bottom:62px!important}.fenix-chat-launcher{bottom:12px!important}}
