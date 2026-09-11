@@ -1,0 +1,25 @@
+name: CEREBRO UPD-001 PREPROD
+
+on:
+  pull_request:
+    branches:
+      - cerebro-rsh001-research-engine-v0-20260911
+    paths:
+      - 'cerebro/knowledge/knowledge-update-runtime.mjs'
+      - 'cerebro/tests/upd001-knowledge-update-runtime.test.mjs'
+      - '.github/workflows/cerebro-upd001-preprod.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  upd-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test UPD-001 contract
+        run: node --test cerebro/tests/upd001-knowledge-update-runtime.test.mjs
