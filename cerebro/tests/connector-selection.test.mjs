@@ -1,0 +1,5 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {selectConnector} from '../connectors/connector-selection.mjs';
+test('prefers free API over browser',()=>{const r=selectConnector({available_routes:[{type:'BROWSER',authorized:true,status:'ACTIVE',connector_id:'b1'},{type:'API',authorized:true,status:'ACTIVE',connector_id:'a1'}]});assert.equal(r.route,'API');assert.equal(r.connector_id,'a1')});
+test('falls back to SCRIPT before browser',()=>{const r=selectConnector({available_routes:[{type:'BROWSER',authorized:true,status:'ACTIVE',connector_id:'b1'},{type:'SCRIPT',authorized:true,status:'ACTIVE',connector_id:'s1'}]});assert.equal(r.route,'SCRIPT')});
+test('requires money limit when only paid active route exists',()=>{const r=selectConnector({available_routes:[{type:'API',authorized:true,status:'ACTIVE',connector_id:'a1',estimated_additional_cost_eur:1}]});assert.equal(r.reason,'MONEY_LIMIT')});
+test('requests factory build when no route exists',()=>{const r=selectConnector({available_routes:[]});assert.equal(r.factory_build_required,true)});
