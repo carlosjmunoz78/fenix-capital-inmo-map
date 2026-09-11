@@ -1,0 +1,16 @@
+name: CEREBRO BNK-003 PREPROD
+on:
+  pull_request:
+    paths:
+      - 'cerebro/banking/bank-routing-engine.mjs'
+      - 'cerebro/tests/bank-routing-engine.test.mjs'
+      - '.github/workflows/cerebro-bnk003-preprod.yml'
+jobs:
+  bnk003-preprod:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test cerebro/tests/bank-routing-engine.test.mjs
