@@ -6,6 +6,7 @@ on:
       - work/app-closeout-2026-09-11
       - work/floating-controls-polish-2026-09-11
       - work/app-final-polish-loop-2026-09-11
+      - work/app-profile-chat-polish-2026-09-11
   workflow_dispatch:
 
 permissions:
@@ -35,6 +36,8 @@ jobs:
         run: npm run build
       - name: Profile and staff contracts
         run: npx playwright test tests/password-recovery-contract.spec.ts tests/profile-own-password-contract.spec.ts tests/staff-admin-contract.spec.ts
+      - name: Final runtime polish contracts
+        run: npx playwright test tests/runtime-polish-loop.spec.ts
       - name: Role-scoped reports contract
         run: npx playwright test tests/role-scoped-reports-contract.spec.ts
       - name: Floating action rail contract
