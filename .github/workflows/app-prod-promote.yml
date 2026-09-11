@@ -1,7 +1,21 @@
 name: APP PROD Promote
 
-# PROD nunca se publica por un push accidental. La promoción requiere lanzamiento manual explícito.
+# PROD se promueve automáticamente desde la rama canónica cuando el candidato ha quedado verde.
+# También puede lanzarse manualmente para una revalidación controlada.
 on:
+  push:
+    branches:
+      - preprod-app-phase1
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'public/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'index.html'
+      - '.github/workflows/app-prod-promote.yml'
+      - 'supabase/functions/**'
+      - 'supabase/migrations/**'
   workflow_dispatch:
 
 permissions:
