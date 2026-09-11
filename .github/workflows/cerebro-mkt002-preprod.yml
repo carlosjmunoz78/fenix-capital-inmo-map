@@ -1,0 +1,17 @@
+name: CEREBRO MKT-002 PREPROD
+on:
+  pull_request:
+    branches: ['cerebro-exp001-experiment-engine-v0-20260911']
+    paths:
+      - 'cerebro/strategy/market-intelligence-engine.mjs'
+      - 'cerebro/tests/market-intelligence-engine.test.mjs'
+      - '.github/workflows/cerebro-mkt002-preprod.yml'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test cerebro/tests/market-intelligence-engine.test.mjs
