@@ -107,14 +107,15 @@ test('Calculadora avanzada expone capacidad modalidad y escenarios sin predecir 
   expect(engine).toContain("if (type !== 'fixed')");
 });
 
-test('Controles flotantes respetan orden micrófono calculadora chat e iconos sin texto',()=>{
+test('Controles flotantes respetan orden calculadora micrófono chat, color común e iconos sin texto',()=>{
   const css=fs.readFileSync(path.resolve('src/calculator-no-pro.css'),'utf8');
   const labels=fs.readFileSync(path.resolve('src/CalculatorLabelGuard.tsx'),'utf8');
   const chat=fs.readFileSync(path.resolve('src/ChatShell.tsx'),'utf8');
-  expect(css).toContain('bottom:130px!important');
-  expect(css).toContain('bottom:74px!important');
-  expect(chat).toContain('bottom:18px');
+  expect(css).toContain('bottom:118px!important');
+  expect(css).toContain('.fenix-voice-hub{right:18px!important;bottom:68px!important}');
+  expect(css).toContain('.fenix-chat-launcher{right:18px!important;bottom:18px!important');
   expect(css).toContain('width:46px!important');
+  expect(css).toContain('background:var(--orange)!important');
   expect(chat).toContain('width:46px;height:46px');
   expect(labels).toContain('if(node.nodeType===Node.TEXT_NODE)node.remove()');
   expect(chat).toContain('aria-label="Abrir chat de equipo"');
