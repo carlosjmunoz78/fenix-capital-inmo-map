@@ -1,0 +1,12 @@
+name: CEREBRO CONS-001 PREPROD
+on:
+  pull_request:
+    branches: [cerebro-dpo001-data-protection-v0-20260911]
+jobs:
+  cons001-preprod:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 22}
+      - run: node --test cerebro/tests/consent-signature-engine.test.mjs
