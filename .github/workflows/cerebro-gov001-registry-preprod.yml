@@ -1,0 +1,21 @@
+name: CEREBRO GOV-001 REGISTRY PREPROD
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'cerebro/factory.mjs'
+      - 'cerebro/registry/engine-registry.seed.json'
+      - 'cerebro/tests/factory.test.mjs'
+      - '.github/workflows/cerebro-gov001-registry-preprod.yml'
+jobs:
+  gov001-registry:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - working-directory: cerebro
+        run: npm run validate
+      - working-directory: cerebro
+        run: node --test tests/factory.test.mjs

@@ -9,9 +9,11 @@ const root = path.resolve(new URL('..', import.meta.url).pathname);
 const cli = path.join(root, 'factory.mjs');
 const registry = path.join(root, 'registry', 'engine-registry.seed.json');
 
-function run(out) {
-  return execFileSync(process.execPath, [cli, 'generate', '--registry', registry, '--out', out], { encoding: 'utf8' });
+function run(out, registryFile=registry) {
+  return execFileSync(process.execPath, [cli, 'generate', '--registry', registryFile, '--out', out], { encoding: 'utf8' });
 }
+function tempRegistry(mutator){const data=JSON.parse(fs.readFileSync(registry,'utf8'));mutator(data);const dir=fs.mkdtempSync(path.join(os.tmpdir(),'cerebro-registry-'));const file=path.join(dir,'registry.json');fs.writeFileSync(file,JSON.stringify(data),'utf8');return file;}
+function assertValidateFails(file,pattern){assert.throws(()=>execFileSync(process.execPath,[cli,'validate','--registry',file],{encoding:'utf8',stdio:'pipe'}),pattern);}
 
 test('registry seed contains exactly 177 unique canonical engine ids', () => {
   const data = JSON.parse(fs.readFileSync(registry, 'utf8'));
@@ -20,9 +22,11 @@ test('registry seed contains exactly 177 unique canonical engine ids', () => {
   assert.equal(new Set(data.engine_ids).size, 177);
 });
 
-test('registry defaults carry multi-company/version/environment fields', () => {
+test('registry defaults carry safe multi-company/version/scaffold fields', () => {
   const data = JSON.parse(fs.readFileSync(registry, 'utf8'));
   for (const key of ['version','environment','company_scope','evidence_state']) assert.ok(data.defaults[key], `missing default ${key}`);
+  assert.equal(data.defaults.environment,'SCAFFOLD');
+  assert.equal(data.defaults.evidence_state,'UNKNOWN_REQUIRES_AUDIT');
 });
 
 test('factory validates expanded registry successfully', () => {
@@ -30,6 +34,20 @@ test('factory validates expanded registry successfully', () => {
   const result = JSON.parse(output);
   assert.equal(result.engines, 177);
   assert.equal(result.unique_ids, 177);
+  assert.equal(result.canonical_count,177);
+  assert.equal(result.safe_scaffold,true);
+});
+
+test('GOV-001 rejects count drift duplicates and noncanonical override ids',()=>{
+  assertValidateFails(tempRegistry(x=>{x.engine_ids.pop();x.count=176}),/exactly 177 ids/);
+  assertValidateFails(tempRegistry(x=>{x.engine_ids[1]=x.engine_ids[0]}),/unique/);
+  assertValidateFails(tempRegistry(x=>{x.overrides['FAKE-999']={name:'fake'}}),/noncanonical engine_id/);
+});
+
+test('GOV-001 rejects PREPROD or PROD seed environments and unsafe autonomy flags',()=>{
+  assertValidateFails(tempRegistry(x=>{x.defaults.environment='PREPROD'}),/must be SCAFFOLD/);
+  assertValidateFails(tempRegistry(x=>{x.overrides['FACT-001']={...(x.overrides['FACT-001']??{}),environment:'PROD'}}),/must be SCAFFOLD/);
+  assertValidateFails(tempRegistry(x=>{x.overrides['FACT-001']={...(x.overrides['FACT-001']??{}),autonomous_prod:true}}),/unsafe override autonomous_prod=true/);
 });
 
 test('factory generates all 177 skeletons with complete V0 file set', () => {

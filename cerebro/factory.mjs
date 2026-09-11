@@ -3,7 +3,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 
+const CANONICAL_COUNT = 177;
 const REQUIRED_CONTEXT = ['company_id', 'engine_id', 'environment', 'version'];
+const HUMAN_REQUIRED = ['LEGAL_REQUIRED','SIGNATURE_REQUIRED','LOW_CONFIDENCE','HIGH_RISK','POLICY_CONFLICT','SECURITY_INCIDENT','MONEY_LIMIT','CUSTOMER_HUMAN_REQUEST'];
 const TEMPLATE_FILES = [
   'manifest.json','config.json','contracts/data-contract.json','permissions.json','policy.json',
   'events.json','jobs.json','api/handlers.json','tests/contract.test.json','evaluation.json',
@@ -21,10 +23,46 @@ function parseArgs(argv) {
   return args;
 }
 
-function readRegistry(file) {
-  const raw = JSON.parse(fs.readFileSync(file, 'utf8'));
+function plainObject(value, label) {
+  if (!value || typeof value !== 'object' || Array.isArray(value) || Object.getPrototypeOf(value) !== Object.prototype) throw new Error(`${label} must be a plain object`);
+  return value;
+}
+
+function nonEmptyString(value, label) {
+  if (typeof value !== 'string' || !value.trim()) throw new Error(`${label} must be a non-empty string`);
+  return value.trim();
+}
+
+function validateSafeSeed(raw) {
+  plainObject(raw, 'registry');
   if (!Array.isArray(raw.engine_ids)) throw new Error('registry.engine_ids must be an array');
-  const defaults = raw.defaults ?? {};
+  if (raw.engine_ids.length !== CANONICAL_COUNT) throw new Error(`registry.engine_ids must contain exactly ${CANONICAL_COUNT} ids`);
+  if (raw.count !== CANONICAL_COUNT) throw new Error(`registry.count must equal ${CANONICAL_COUNT}`);
+  if (new Set(raw.engine_ids).size !== CANONICAL_COUNT) throw new Error('registry.engine_ids must be unique');
+  for (const [index,id] of raw.engine_ids.entries()) {
+    nonEmptyString(id, `registry.engine_ids[${index}]`);
+    if (!/^[A-Z0-9]+(?:-[A-Z0-9]+)*$/.test(id)) throw new Error(`invalid engine_id format: ${id}`);
+  }
+  const defaults = plainObject(raw.defaults, 'registry.defaults');
+  nonEmptyString(defaults.version, 'registry.defaults.version');
+  if (defaults.environment !== 'SCAFFOLD') throw new Error('FACT-001 V0 registry environment must be SCAFFOLD');
+  if (!['GLOBAL_OR_SCOPED','MULTI_COMPANY','GLOBAL'].includes(defaults.company_scope)) throw new Error('invalid registry.defaults.company_scope');
+  if (defaults.evidence_state !== 'UNKNOWN_REQUIRES_AUDIT') throw new Error('registry.defaults.evidence_state must be UNKNOWN_REQUIRES_AUDIT');
+  if (defaults.source_status !== 'UNKNOWN_REQUIRES_AUDIT') throw new Error('registry.defaults.source_status must be UNKNOWN_REQUIRES_AUDIT');
+  const overrides = raw.overrides == null ? {} : plainObject(raw.overrides, 'registry.overrides');
+  const ids = new Set(raw.engine_ids);
+  for (const [engineId, override] of Object.entries(overrides)) {
+    if (!ids.has(engineId)) throw new Error(`override for noncanonical engine_id: ${engineId}`);
+    plainObject(override, `registry.overrides.${engineId}`);
+    if ('environment' in override && override.environment !== 'SCAFFOLD') throw new Error(`${engineId}: FACT-001 V0 registry environment must be SCAFFOLD`);
+    for (const unsafe of ['autonomous_prod','prod_promotion','prod_writes','enabled']) if (override[unsafe] === true) throw new Error(`${engineId}: unsafe override ${unsafe}=true`);
+  }
+  return raw;
+}
+
+function readRegistry(file) {
+  const raw = validateSafeSeed(JSON.parse(fs.readFileSync(file, 'utf8')));
+  const defaults = raw.defaults;
   return {
     ...raw,
     engines: raw.engine_ids.map(engine_id => ({
@@ -46,10 +84,15 @@ function validateRegistry(registry) {
     for (const key of ['engine_id','name','version','environment','company_scope','evidence_state']) {
       if (engine[key] == null || engine[key] === '') errors.push(`${engine.engine_id || '<unknown>'}: missing ${key}`);
     }
+    if (engine.environment !== 'SCAFFOLD') errors.push(`${engine.engine_id}: FACT-001 V0 registry environment must be SCAFFOLD`);
+    if (engine.evidence_state !== 'UNKNOWN_REQUIRES_AUDIT') errors.push(`${engine.engine_id}: evidence_state must remain UNKNOWN_REQUIRES_AUDIT in seed`);
+    for (const unsafe of ['autonomous_prod','prod_promotion','prod_writes','enabled']) if (engine[unsafe] === true) errors.push(`${engine.engine_id}: unsafe ${unsafe}=true`);
   }
   if (registry.count !== registry.engines.length) errors.push(`count mismatch: declared ${registry.count}, actual ${registry.engines.length}`);
+  if (registry.engines.length !== CANONICAL_COUNT) errors.push(`canonical count mismatch: ${registry.engines.length}`);
+  if (ids.size !== CANONICAL_COUNT) errors.push(`canonical unique id mismatch: ${ids.size}`);
   if (errors.length) throw new Error(errors.join('\n'));
-  return { engines: registry.engines.length, unique_ids: ids.size };
+  return { engines: registry.engines.length, unique_ids: ids.size, canonical_count: CANONICAL_COUNT, safe_scaffold: true };
 }
 
 function context(engine) {
@@ -66,7 +109,7 @@ function filesFor(engine) {
     'config.json': json({ ...base, enabled: false, deterministic_first: true, zero_new_cost_default: true }),
     'contracts/data-contract.json': json({ ...base, inputs: [], outputs: [], invariants: REQUIRED_CONTEXT }),
     'permissions.json': json({ ...base, default: 'deny', grants: [], cross_company_access: 'deny' }),
-    'policy.json': json({ ...base, human_required_reasons: ['LEGAL_REQUIRED','SIGNATURE_REQUIRED','LOW_CONFIDENCE','HIGH_RISK','POLICY_CONFLICT','SECURITY_INCIDENT','MONEY_LIMIT','CUSTOMER_HUMAN_REQUEST'] }),
+    'policy.json': json({ ...base, human_required_reasons: HUMAN_REQUIRED }),
     'events.json': json({ ...base, consumes: [], produces: [] }),
     'jobs.json': json({ ...base, jobs: [], shared_runtime: true }),
     'api/handlers.json': json({ ...base, handlers: [], gateway_only: true }),
