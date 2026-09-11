@@ -1,0 +1,6 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {evaluateExpedienteCoherence} from '../operations/expediente-coherence-engine.mjs';
+const context={company_id:'fenix',engine_id:'COH-001',environment:'PREPROD',version:'0.1.0'};const base={context,authorized:true,requires_prod_write:false,confidence:0.9,checks:[{field:'dni_vs_name',consistent:true,severity:5},{field:'income_vs_payroll',consistent:true,severity:3}]};
+test('COH-001 reports coherent expediente',()=>{const r=evaluateExpedienteCoherence(base);assert.equal(r.status,'COHERENCE_CHECK_READY');assert.equal(r.coherent,true);assert.equal(r.decision,'COHERENT');});
+test('COH-001 returns plan for noncritical inconsistency',()=>{const r=evaluateExpedienteCoherence({...base,checks:[{field:'address',consistent:false,severity:2}]});assert.equal(r.decision,'RESOLVE_INCONSISTENCIES');assert.equal(r.coherent,false);});
+test('COH-001 escalates high severity mismatch',()=>{const r=evaluateExpedienteCoherence({...base,checks:[{field:'identity',consistent:false,severity:5}]});assert.equal(r.reason,'HIGH_RISK');});
+test('COH-001 gates auth/confidence',()=>{assert.equal(evaluateExpedienteCoherence({...base,authorized:false}).reason,'POLICY_CONFLICT');assert.equal(evaluateExpedienteCoherence({...base,confidence:0.2}).reason,'LOW_CONFIDENCE');});
