@@ -11,6 +11,15 @@ test('floating chat opens an operational mini window instead of forcing full-scr
  expect(src).toContain('items.slice(-10)');
 });
 
+test('mini chat has explicit high-contrast dark theme instead of inheriting white surfaces',()=>{
+ const css=readFileSync('src/calculator-no-pro.css','utf8');
+ expect(css).toContain("html[data-theme='dark'] .fenix-mini-team-chat{background:#17191d!important;color:#f5f7fa!important");
+ expect(css).toContain("html[data-theme='dark'] .fenix-mini-team-feed{background:#111318!important}");
+ expect(css).toContain("html[data-theme='dark'] .fenix-mini-team-feed article{background:#20242a!important");
+ expect(css).toContain("html[data-theme='dark'] .fenix-mini-team-chat textarea{background:#101216!important");
+ expect(css).toContain("html[data-theme='dark'] .fenix-mini-team-chat textarea::placeholder{color:#aeb5bf!important");
+});
+
 test('mini and full chat share text attachment dictation and recorded-audio send path',()=>{
  const src=readFileSync('src/ChatShell.tsx','utf8');
  expect(src).toContain('onSubmit={send}');
