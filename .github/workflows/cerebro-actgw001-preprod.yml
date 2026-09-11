@@ -10,4 +10,4 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: node --test cerebro/tests/action-gateway-v0.test.mjs
+      - run: node --test cerebro/tests/action-gateway-v0.test.mjs cerebro/tests/console-action-gateway.integration.test.mjs
