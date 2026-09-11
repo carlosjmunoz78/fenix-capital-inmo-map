@@ -1,0 +1,5 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {assessMortgageViability} from '../finance/mortgage-viability-engine.mjs';
+const context={company_id:'fenix',engine_id:'VIA-001',environment:'PREPROD',version:'0.1.0'};const base={context,authorized:true,requires_prod_write:false,confidence:0.9,net_monthly_income:3000,monthly_debt:300,requested_payment:700};
+test('VIA-001 returns preliminary fit without credit decision',()=>{const r=assessMortgageViability(base);assert.equal(r.status,'MORTGAGE_VIABILITY_READY');assert.equal(r.decision,'PRELIMINARY_FIT');assert.equal(r.credit_decision,false);assert.equal(r.lender_commitment,false);});
+test('VIA-001 flags borderline ratio',()=>{const r=assessMortgageViability({...base,requested_payment:850});assert.equal(r.decision,'BORDERLINE_REVIEW');});
+test('VIA-001 escalates high ratio and gates controls',()=>{assert.equal(assessMortgageViability({...base,requested_payment:1200}).reason,'HIGH_RISK');assert.equal(assessMortgageViability({...base,authorized:false}).reason,'POLICY_CONFLICT');assert.equal(assessMortgageViability({...base,confidence:0.2}).reason,'LOW_CONFIDENCE');});
