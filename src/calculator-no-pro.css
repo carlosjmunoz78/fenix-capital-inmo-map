@@ -10,4 +10,16 @@
 .calc-panel>header{background:var(--panel)!important;border-color:var(--border)!important}
 .calc-panel>header>div:first-child>strong{font-size:0}
 .calc-panel>header>div:first-child>strong::after{content:'Calculadora Hipotecaria';font-size:14px;font-weight:800;line-height:1.2}
+html[data-theme='dark'] .fenix-mini-team-chat{background:#17191d!important;color:#f5f7fa!important;border-color:#3b4048!important;box-shadow:0 18px 52px rgba(0,0,0,.55)!important}
+html[data-theme='dark'] .fenix-mini-team-chat>header{background:#1d2025!important;border-bottom-color:#3b4048!important;color:#fff!important}
+html[data-theme='dark'] .fenix-mini-team-chat>header small,html[data-theme='dark'] .fenix-mini-empty,html[data-theme='dark'] .fenix-mini-msg{color:#c9ced6!important}
+html[data-theme='dark'] .fenix-mini-team-feed{background:#111318!important}
+html[data-theme='dark'] .fenix-mini-team-feed article{background:#20242a!important;border-color:#3b4048!important;color:#f5f7fa!important}
+html[data-theme='dark'] .fenix-mini-team-feed article>strong{color:#ffb078!important}
+html[data-theme='dark'] .fenix-mini-team-feed article>p{color:#f5f7fa!important}
+html[data-theme='dark'] .fenix-mini-team-feed article>div button,html[data-theme='dark'] .fenix-mini-tools button{background:#262a31!important;border-color:#4a505a!important;color:#f5f7fa!important}
+html[data-theme='dark'] .fenix-mini-team-chat>form{background:#1b1e23!important;border-top-color:#3b4048!important}
+html[data-theme='dark'] .fenix-mini-team-chat textarea{background:#101216!important;border-color:#4a505a!important;color:#fff!important;caret-color:#fff!important}
+html[data-theme='dark'] .fenix-mini-team-chat textarea::placeholder{color:#aeb5bf!important;opacity:1!important}
+html[data-theme='dark'] .fenix-mini-pending{background:#252930!important;color:#f5f7fa!important;border-color:#4a505a!important}
 @media(max-width:650px){.calc-launcher,.calc-launcher.dir-calc-launcher{right:12px!important;bottom:112px!important}.fenix-voice-hub{right:12px!important;bottom:62px!important}.fenix-chat-launcher{right:12px!important;bottom:12px!important}}
