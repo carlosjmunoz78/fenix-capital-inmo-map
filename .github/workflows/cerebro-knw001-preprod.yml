@@ -1,0 +1,21 @@
+name: CEREBRO KNW-001 PREPROD
+on:
+  pull_request:
+    branches:
+      - cerebro-zero-cost-runtime-wave1-20260910
+    paths:
+      - 'cerebro/knowledge/**'
+      - 'cerebro/tests/knw001-knowledge-runtime.test.mjs'
+      - '.github/workflows/cerebro-knw001-preprod.yml'
+permissions:
+  contents: read
+jobs:
+  knw-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test KNW-001 contract
+        run: node --test cerebro/tests/knw001-knowledge-runtime.test.mjs
