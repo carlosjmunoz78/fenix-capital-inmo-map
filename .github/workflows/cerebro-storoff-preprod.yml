@@ -1,0 +1,22 @@
+name: CEREBRO STOROFF PREPROD
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/storage/storoff-local.mjs'
+      - 'cerebro/tests/storoff-local.test.mjs'
+      - '.github/workflows/cerebro-storoff-preprod.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  storoff-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Test STOROFF-001 local offload
+        run: node --test cerebro/tests/storoff-local.test.mjs
