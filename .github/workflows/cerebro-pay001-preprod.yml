@@ -1,0 +1,16 @@
+name: CEREBRO PAY-001 PREPROD
+on:
+  pull_request:
+    paths:
+      - 'cerebro/notarial/payment-reconciliation-engine.mjs'
+      - 'cerebro/tests/payment-reconciliation-engine.test.mjs'
+      - '.github/workflows/cerebro-pay001-preprod.yml'
+jobs:
+  pay001-preprod:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test cerebro/tests/payment-reconciliation-engine.test.mjs
