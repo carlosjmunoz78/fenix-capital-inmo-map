@@ -1,0 +1,9 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {planMarketing,scoreExperiment} from '../marketing/marketing-engine.mjs';
+const context={company_id:'fenix',engine_id:'MKT-001',environment:'PREPROD',version:'0.1.0'};
+const base={context,authorized:true,requires_prod_write:false,estimated_additional_cost_eur:0,evidence_refs:['evidence://mktboot'],channels:['organic','email'],objectives:['qualified_demand']};
+test('MKT-001 creates deterministic zero-cost plan',()=>{const r=planMarketing(base);assert.equal(r.status,'MARKETING_PLAN_READY');assert.equal(r.paid_activation,false);assert.equal(r.prod_writes,false);assert.deepEqual(r.channels,['organic','email']);});
+test('MKT-001 fail-closes missing evidence',()=>{assert.equal(planMarketing({...base,evidence_refs:[]}).reason,'LOW_CONFIDENCE');});
+test('MKT-001 applies canonical risk priority',()=>{const r=planMarketing({...base,authorized:false,requires_prod_write:true,estimated_additional_cost_eur:5});assert.equal(r.reason,'HIGH_RISK');});
+test('MKT-001 rejects malformed gates',()=>{assert.throws(()=>planMarketing({...base,requires_prod_write:'true'}));assert.throws(()=>planMarketing({...base,estimated_additional_cost_eur:''}));});
+test('MKT-001 prevents inherited authorization',()=>{const i=Object.create({authorized:true});Object.assign(i,{context,evidence_refs:['e'],objectives:['o']});assert.equal(planMarketing(i).reason,'POLICY_CONFLICT');});
+test('MKT-001 experiment scoring is deterministic and zero-cost-first',()=>{const r=scoreExperiment({confidence:.8,impact:8,effort:2,cost_eur:0});assert.equal(r.status,'SCORED');assert.equal(r.score,3.2);assert.equal(scoreExperiment({confidence:.8,impact:8,effort:2,cost_eur:1}).reason,'MONEY_LIMIT');assert.equal(scoreExperiment({confidence:.4,impact:8,effort:2,cost_eur:0}).reason,'LOW_CONFIDENCE');});
