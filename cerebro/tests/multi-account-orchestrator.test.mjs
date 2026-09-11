@@ -1,0 +1,6 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {planMultiAccountExecution} from '../identity/multi-account-orchestrator.mjs';
+const account=n=>({account_id:`acc-${n}`,identity_id:`id-${n}`,company_id:'fenix',connector_id:'conn-1'});const base={context:{company_id:'fenix',environment:'LAB',version:'0.1.0'},request_id:'r1',accounts:[account(1),account(2),account(3),account(4)],authorized:true,estimated_additional_cost_eur:0};
+test('plans 3-4 authorized accounts without mixing identities',()=>{const r=planMultiAccountExecution(base);assert.equal(r.status,'MULTI_ACCOUNT_PLAN_READY');assert.equal(r.account_count,4);assert.equal(r.isolate_identity,true)});
+test('supports 10 accounts structurally',()=>{const r=planMultiAccountExecution({...base,accounts:Array.from({length:10},(_,i)=>account(i+1))});assert.equal(r.account_count,10)});
+test('blocks more than 10 in V0',()=>{assert.equal(planMultiAccountExecution({...base,accounts:Array.from({length:11},(_,i)=>account(i+1))}).max_supported_accounts,10)});
+test('blocks cross-company account',()=>{assert.equal(planMultiAccountExecution({...base,accounts:[account(1),{...account(2),company_id:'other'}]}).reason,'POLICY_CONFLICT')});
