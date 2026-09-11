@@ -1,0 +1,32 @@
+name: CEREBRO FACT-001 Closure PREPROD
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/factory/fact-closure-harness.mjs'
+      - 'cerebro/factory/fact-self-test.mjs'
+      - 'cerebro/factory/engine-state-registry.mjs'
+      - 'cerebro/factory/factory-doc-sync.mjs'
+      - 'cerebro/tests/fact-closure-harness.test.mjs'
+      - 'cerebro/tests/engine-state-registry.test.mjs'
+      - 'cerebro/tests/factory-doc-sync.test.mjs'
+      - 'cerebro/docs/factory-pr-chain-manifest.json'
+      - '.github/workflows/cerebro-fact001-closure-preprod.yml'
+
+jobs:
+  fact-closure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: FACT-001 closure harness tests
+        run: node --test cerebro/tests/fact-closure-harness.test.mjs
+      - name: FACT-001 canonical engine state registry tests
+        run: node --test cerebro/tests/engine-state-registry.test.mjs
+      - name: FACT-001 documentation sync generator tests
+        run: node --test cerebro/tests/factory-doc-sync.test.mjs
+      - name: FACT-001 self-test and rebuild equivalence
+        run: node cerebro/factory/fact-self-test.mjs
