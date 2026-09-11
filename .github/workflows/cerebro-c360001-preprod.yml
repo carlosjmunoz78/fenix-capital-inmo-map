@@ -1,0 +1,17 @@
+name: CEREBRO C360-001 PREPROD
+on:
+  pull_request:
+    branches: ['cerebro-voice001-call-engine-v0-20260911']
+    paths:
+      - 'cerebro/customer/customer360-engine.mjs'
+      - 'cerebro/tests/customer360-engine.test.mjs'
+      - '.github/workflows/cerebro-c360001-preprod.yml'
+jobs:
+  c360001-preprod:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test cerebro/tests/customer360-engine.test.mjs
