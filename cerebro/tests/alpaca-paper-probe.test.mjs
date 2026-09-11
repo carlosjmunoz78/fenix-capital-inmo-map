@@ -5,10 +5,13 @@ import os from 'node:os';
 import path from 'node:path';
 import {loadAlpacaPaperSecrets,probeAlpacaPaper} from '../training/alpaca-paper-probe.mjs';
 
+const TEST_KEY='TESTKEY_ABC123';
+const TEST_SECRET='TESTSECRET_XYZ789';
+
 function secretFile(base='https://paper-api.alpaca.markets'){
   const dir=fs.mkdtempSync(path.join(os.tmpdir(),'alpaca-paper-'));
   const file=path.join(dir,'alpaca-paper.env');
-  fs.writeFileSync(file,`ALPACA_PAPER_API_KEY=K\nALPACA_PAPER_API_SECRET=S\nALPACA_PAPER_BASE_URL=${base}\n`,{mode:0o600});
+  fs.writeFileSync(file,`ALPACA_PAPER_API_KEY=${TEST_KEY}\nALPACA_PAPER_API_SECRET=${TEST_SECRET}\nALPACA_PAPER_BASE_URL=${base}\n`,{mode:0o600});
   fs.chmodSync(file,0o600);
   return file;
 }
@@ -17,7 +20,7 @@ test('loads only private Paper secrets',()=>{
   const file=secretFile();
   const s=loadAlpacaPaperSecrets(file);
   assert.equal(s.baseUrl,'https://paper-api.alpaca.markets');
-  assert.equal(s.apiKey,'K');
+  assert.equal(s.apiKey,TEST_KEY);
 });
 
 test('blocks live endpoint',()=>{
@@ -41,13 +44,14 @@ test('probes Paper account and returns sanitized green evidence',async()=>{
   };
   const r=await probeAlpacaPaper({file,fetchImpl});
   assert.equal(calledUrl,'https://paper-api.alpaca.markets/v2/account');
-  assert.equal(headers['APCA-API-KEY-ID'],'K');
-  assert.equal(headers['APCA-API-SECRET-KEY'],'S');
+  assert.equal(headers['APCA-API-KEY-ID'],TEST_KEY);
+  assert.equal(headers['APCA-API-SECRET-KEY'],TEST_SECRET);
   assert.equal(r.status,'GREEN');
   assert.equal(r.live_endpoint_blocked,true);
   assert.equal(r.credential_payload_logged,false);
-  assert.equal(JSON.stringify(r).includes('K'),false);
-  assert.equal(JSON.stringify(r).includes('S'),false);
+  const serialized=JSON.stringify(r);
+  assert.equal(serialized.includes(TEST_KEY),false);
+  assert.equal(serialized.includes(TEST_SECRET),false);
 });
 
 test('fails closed on non-200',async()=>{
