@@ -21,6 +21,23 @@ test('Belen Direccion Financiera is recognized as Direction and receives team co
  expect(profile).not.toContain("if(nextCtx?.role==='Direccion'||nextCtx?.role==='Dirección')");
 });
 
+test('profile self edit changes only canonical own display name and zone',()=>{
+ const profile=read('src/ProfileShell.tsx');
+ const edge=read('supabase/functions/fenix-profile-api/index.ts');
+ const migration=read('supabase/migrations/20260911053000_prod_self_profile_edit.sql');
+ expect(profile).toContain("fetchEnvironmentApi<ProfileResponse>('fenix-profile-api','')");
+ expect(profile).toContain("method:'PATCH'");
+ expect(profile).toContain('El rol y los permisos no se pueden modificar desde el perfil.');
+ expect(edge).toContain("fenix_prod_actor_context_by_auth_server");
+ expect(edge).toContain("fenix_prod_profile_update_server");
+ expect(edge).not.toContain("body.role");
+ expect(edge).not.toContain("body.actor_code");
+ expect(migration).toContain("update fenix_prod.actors set display_name=v_name,zone_code=v_zone");
+ expect(migration).toContain("'profile.updated'");
+ expect(migration).toContain('revoke all on function public.fenix_prod_profile_update_server');
+ expect(migration).not.toContain('role=');
+});
+
 test('user-admin edge keeps service role server-side and restricts director creation to Carlos admin',()=>{
  const edge=read('supabase/functions/fenix-user-admin/index.ts');
  expect(edge).toContain("ctx.role!=='Direccion'");
