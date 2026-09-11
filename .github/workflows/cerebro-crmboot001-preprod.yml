@@ -1,0 +1,14 @@
+name: CEREBRO CRMBOOT-001 PREPROD
+on:
+  pull_request:
+    branches:
+      - cerebro-marketing-bootstrap-v0-20260911
+jobs:
+  crmboot001-preprod:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test cerebro/tests/crm-bootstrap.test.mjs
