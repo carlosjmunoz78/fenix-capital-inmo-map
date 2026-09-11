@@ -1,0 +1,17 @@
+name: CEREBRO DOC-003 PREPROD
+on:
+  pull_request:
+    branches: ['cerebro-doc002-document-pending-v0-20260911']
+    paths:
+      - 'cerebro/documents/document-quality-engine.mjs'
+      - 'cerebro/tests/document-quality-engine.test.mjs'
+      - '.github/workflows/cerebro-doc003-preprod.yml'
+jobs:
+  doc003-preprod:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test cerebro/tests/document-quality-engine.test.mjs
