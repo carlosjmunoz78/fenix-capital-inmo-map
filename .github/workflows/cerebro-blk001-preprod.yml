@@ -1,0 +1,14 @@
+name: CEREBRO BLK-001 PREPROD
+on:
+  pull_request:
+    branches:
+      - cerebro-sla001-sla-engine-v0-20260911
+jobs:
+  blk001-preprod:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test cerebro/tests/blocker-engine.test.mjs
