@@ -32,6 +32,10 @@ async function primeProd(page:any){
   await page.route('**/auth/v1/logout**', (route:any) => route.fulfill({ status: 204, body: '' }));
 }
 
+function canonicalCalculator(page:any){
+  return page.getByLabel('Acciones flotantes').getByRole('button',{name:'Calculadora'});
+}
+
 test('exact PROD candidate boots with PROD auth namespace and canonical function routes', async ({ page }) => {
   const functionRequests: string[] = [];
   page.on('request', request => { const url=request.url(); if(url.includes('/functions/v1/')) functionRequests.push(url); });
@@ -39,7 +43,7 @@ test('exact PROD candidate boots with PROD auth namespace and canonical function
   await page.goto('/');
   await expect(page).toHaveURL(/\/inicio$/);
   await expect(page.locator('.role-home')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Calculadora' })).toBeVisible();
+  await expect(canonicalCalculator(page)).toBeVisible();
   await expect(page.locator('.role-home .ops-profile strong')).toHaveText('Financiero');
   expect(functionRequests.some(url => url.includes('/functions/v1/fenix-app-gateway/'))).toBeTruthy();
   expect(functionRequests.every(url => !/\/functions\/v1\/[A-Za-z0-9_-]+-test(?:\/|$)/.test(url))).toBeTruthy();
@@ -59,7 +63,7 @@ test('exact PROD candidate keeps mobile navigation and calculator usable', async
   await expect(page.getByRole('button',{name:'Cerrar menú'}).first()).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(page.getByRole('dialog',{name:'Navegación principal'})).toHaveCount(0);
-  const calculator=page.getByRole('button',{name:'Calculadora'});
+  const calculator=canonicalCalculator(page);
   await expect(calculator).toBeVisible();
   await calculator.click();
   await expect(page.getByRole('region',{name:'Calculadora Hipotecaria'})).toBeVisible();
