@@ -4,7 +4,8 @@ import fs from 'node:fs';
 const source=fs.readFileSync('src/supabase.ts','utf8');
 const directionSource=fs.readFileSync('src/DirectionExecutiveOverviewGuard.tsx','utf8');
 const envExample=fs.readFileSync('.env.production.example','utf8');
-const workflow=fs.readFileSync('.github/workflows/preprod-build.yml','utf8');
+const preprodWorkflow=fs.readFileSync('.github/workflows/preprod-build.yml','utf8');
+const prodWorkflow=fs.readFileSync('.github/workflows/app-prod-promote.yml','utf8');
 
 test('PROD exige configuración Supabase dedicada y separa almacenamiento auth', async () => {
   expect(source).toContain("const runtimeEnv=import.meta.env.VITE_FENIX_ENV||'preprod'");
@@ -19,15 +20,29 @@ test('PRE-PROD recibe sufijo explícito y PROD usa nombres sin sufijo', async ()
   expect(source).toContain("if(!IS_PRODUCTION&&!FUNCTION_SUFFIX)");
   expect(source).toContain("throw new Error('FENIX PRE-PROD runtime requires an explicit edge-function suffix.')");
   expect(source).not.toContain("const FUNCTION_SUFFIX=IS_PRODUCTION?'':'-test'");
-  expect(workflow).toContain("VITE_FUNCTION_SUFFIX: '-test'");
-  const prodBuild=workflow.slice(workflow.indexOf('- name: Build immutable PROD candidate'),workflow.indexOf('- name: Browser QA exact PROD candidate'));
-  expect(prodBuild).not.toContain('VITE_FUNCTION_SUFFIX');
+  expect(preprodWorkflow).toContain("VITE_FUNCTION_SUFFIX: '-test'");
+  expect(prodWorkflow).toContain('VITE_FENIX_ENV: prod');
+  expect(prodWorkflow).not.toContain('VITE_FUNCTION_SUFFIX:');
   expect(source).toContain("authenticatedEdgeFetch<T>('fenix-app-gateway'");
   expect(source).toContain("authenticatedEdgeFetch<T>('fenix-ana-api'");
   expect(source).toContain("authenticatedEdgeFetch<T>('fenix-direction-kpis'");
   expect(source).not.toContain("authenticatedEdgeFetch<T>('fenix-ana-api-test'");
   expect(directionSource).toContain('fetchDirectionKpisApi');
   expect(directionSource).not.toContain('fenix-direction-kpis-test');
+});
+
+test('PRE-PROD permanece manual y PROD promueve automáticamente la rama canónica con gates', async () => {
+  expect(preprodWorkflow).toContain('workflow_dispatch:');
+  expect(preprodWorkflow).not.toMatch(/^\s+push:\s*$/m);
+  expect(preprodWorkflow).not.toMatch(/^\s+pull_request:\s*$/m);
+  expect(prodWorkflow).toContain('workflow_dispatch:');
+  expect(prodWorkflow).toMatch(/^\s+push:\s*$/m);
+  expect(prodWorkflow).toContain('- preprod-app-phase1');
+  expect(prodWorkflow).not.toMatch(/^\s+pull_request:\s*$/m);
+  expect(prodWorkflow).toContain('Browser QA exact PROD candidate');
+  expect(prodWorkflow).toContain('PROD API reachability gate');
+  expect(prodWorkflow).toContain('Publish exact validated APP snapshot');
+  expect(prodWorkflow).toContain('Verify published source marker');
 });
 
 test('PROD no admite fallback de actor QA heredado', async () => {

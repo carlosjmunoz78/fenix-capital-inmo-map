@@ -1,5 +1,7 @@
 name: APP PROD Promote
 
+# PROD se promueve automáticamente desde la rama canónica cuando el candidato ha quedado verde.
+# También puede lanzarse manualmente para una revalidación controlada.
 on:
   push:
     branches:
@@ -12,6 +14,8 @@ on:
       - 'package-lock.json'
       - 'index.html'
       - '.github/workflows/app-prod-promote.yml'
+      - 'supabase/functions/**'
+      - 'supabase/migrations/**'
   workflow_dispatch:
 
 permissions:

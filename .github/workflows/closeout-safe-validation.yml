@@ -1,0 +1,61 @@
+name: Closeout Safe Validation
+
+on:
+  push:
+    branches:
+      - work/app-closeout-2026-09-11
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: closeout-safe-${{ github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      VITE_FUNCTION_SUFFIX: '-test'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: TypeScript and Vite build
+        run: npm run build
+      - name: Profile and staff contracts
+        run: npx playwright test tests/password-recovery-contract.spec.ts tests/profile-own-password-contract.spec.ts tests/staff-admin-contract.spec.ts
+      - name: Role-scoped reports contract
+        run: npx playwright test tests/role-scoped-reports-contract.spec.ts
+      - name: Floating action rail contract
+        run: npx playwright test tests/floating-action-rail.spec.ts
+      - name: Floating stack regression contract
+        run: npx playwright test tests/floating-stack-regression.spec.ts
+      - name: Global audio launcher contract
+        run: npx playwright test tests/global-audio-launcher.spec.ts
+      - name: Global dictation contract
+        run: npx playwright test tests/global-dictation.spec.ts
+      - name: Global voice hub contract
+        run: npx playwright test tests/global-voice-hub-zero-ai.spec.ts
+      - name: Ana mini chat canonical contract
+        run: npx playwright test tests/ana-mini-chat-canonical-rules.spec.ts
+      - name: Operational mini chat contract
+        run: npx playwright test tests/team-mini-chat-operational.spec.ts
+      - name: RBAC security and audit contract
+        run: npx playwright test tests/closeout-security-rbac-contract.spec.ts
+      - name: PRE-PROD environment isolation contract
+        run: npx playwright test tests/preprod-environment-isolation.spec.ts
+      - name: PROD runtime configuration contract
+        run: npx playwright test tests/prod-runtime-config.spec.ts
+      - name: PROD release gate contract
+        run: npx playwright test tests/prod-release-gate.spec.ts
+
+# Safe closeout validation only: no deployment, no Supabase/Notion mutations and no live browser QA.
