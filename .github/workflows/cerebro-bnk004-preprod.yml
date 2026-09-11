@@ -1,0 +1,16 @@
+name: CEREBRO BNK-004 PREPROD
+on:
+  pull_request:
+    paths:
+      - 'cerebro/banking/bank-presentation-engine.mjs'
+      - 'cerebro/tests/bank-presentation-engine.test.mjs'
+      - '.github/workflows/cerebro-bnk004-preprod.yml'
+jobs:
+  bnk004-preprod:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test cerebro/tests/bank-presentation-engine.test.mjs
