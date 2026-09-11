@@ -25,11 +25,13 @@ test('report screen displays server-authorized daily and weekly activity without
  expect(ui).not.toContain('scope_actor_code=');
 });
 
-test('staff account administration contributes safe events to the same report stream',()=>{
- const api=readFileSync('supabase/functions/fenix-staff-admin/index.ts','utf8');
- expect(api).toContain("from('activity_log').insert");
- expect(api).toContain("entity_type:'staff_account'");
- expect(api).toContain("changed_fields:changedFields");
- expect(api).toContain('{password_changed:true}');
+test('staff account administration uses canonical audited backend without exposing passwords',()=>{
+ const api=readFileSync('supabase/functions/fenix-user-admin/index.ts','utf8');
+ expect(api).toContain('fenix_prod_user_admin_register_server');
+ expect(api).toContain('fenix_prod_user_admin_target_server');
+ expect(api).toContain('fenix_prod_user_admin_audit_reset_server');
+ expect(api).toContain('auth.admin.createUser');
+ expect(api).toContain('auth.admin.updateUserById');
  expect(api).not.toContain('changed_fields:{password:');
+ expect(api).not.toContain('metadata:{password');
 });
