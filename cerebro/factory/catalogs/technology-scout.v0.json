@@ -1,0 +1,40 @@
+{
+  "catalog_id": "FACT-001-TECHNOLOGY-SCOUT-V0",
+  "version": "0.1.0",
+  "owner_engine_id": "FACT-001",
+  "capability_id": "cap:technology-scout",
+  "environment": "SCAFFOLD",
+  "required_context": ["company_id", "engine_id", "environment", "version"],
+  "execution_mode": "PLAN_ONLY",
+  "additional_cost_target_eur": 0,
+  "prod_writes": false,
+  "autonomous_prod": false,
+  "trading_access": false,
+  "engine_bindings": ["INN-001", "OPP-001", "VEN-001", "VREP-001", "INT-001", "OBS-001", "RSH-001", "DEC-001", "FINOPS-001", "SEC-001", "ADR-001"],
+  "required_evidence": ["source_ref", "observed_at", "version_ref", "license_ref", "cost_eur_month", "security_notes", "integration_notes"],
+  "score_weights": {
+    "fit": 30,
+    "zero_cost": 20,
+    "maintainability": 15,
+    "security": 15,
+    "interoperability": 10,
+    "reversibility": 10
+  },
+  "gates": [
+    "CONSERVAR",
+    "ENTENDER",
+    "ENVOLVER",
+    "PROBAR",
+    "MEJORAR",
+    "MIGRAR",
+    "PREPROD_BEFORE_PROMOTION",
+    "ROLLBACK_REQUIRED_BEFORE_PROMOTION"
+  ],
+  "human_required": {
+    "paid_cost": "MONEY_LIMIT",
+    "prod_write": "HIGH_RISK",
+    "trading_access": "POLICY_CONFLICT",
+    "low_confidence": "LOW_CONFIDENCE",
+    "security_incident": "SECURITY_INCIDENT"
+  }
+}
