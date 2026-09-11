@@ -49,5 +49,7 @@ jobs:
         run: npx playwright test tests/ana-mini-chat-canonical-rules.spec.ts
       - name: Operational mini chat contract
         run: npx playwright test tests/team-mini-chat-operational.spec.ts
+      - name: RBAC security and audit contract
+        run: npx playwright test tests/closeout-security-rbac-contract.spec.ts
 
 # Safe closeout validation only: no deployment, no Supabase/Notion mutations and no live browser QA.
