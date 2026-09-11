@@ -1,0 +1,16 @@
+{
+  "catalog_id": "COMP-REG-001-V0",
+  "version": "0.1.0",
+  "owner_engine_id": "COMP-REG-001",
+  "environment": "SCAFFOLD",
+  "execution_mode": "PLAN_ONLY",
+  "required_context": ["company_id", "engine_id", "environment", "version"],
+  "record_required_fields": ["company_id", "name", "brands", "domains", "sector", "country", "owner_ref", "permissions_ref", "environments", "stack_refs", "status", "active_engine_ids"],
+  "cross_company_access_default": "DENY",
+  "additional_cost_target_eur": 0,
+  "prod_writes": false,
+  "autonomous_prod": false,
+  "trading_access": false,
+  "source_of_truth_policy": "ONE_CANONICAL_REGISTRY",
+  "human_required": {"cross_company_conflict": "POLICY_CONFLICT", "low_confidence": "LOW_CONFIDENCE", "prod_write": "HIGH_RISK"}
+}
