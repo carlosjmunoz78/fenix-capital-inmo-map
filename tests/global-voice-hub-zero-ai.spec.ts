@@ -12,9 +12,27 @@ test('micro universal ofrece cuatro acciones y Hablar con Ana consulta CEREBRO s
  expect(hub).toContain('Dar conocimiento');
  expect(hub).toContain('Hablar con Ana');
  expect(hub).toContain("type VoiceMode='task'|'correction'|'knowledge'|'chat'");
- expect(hub).toContain("fetchAppApi<unknown>(`/search?q=${encodeURIComponent(value)}`)");
+ expect(hub).toContain('async function searchCerebro(question:string,domain:string)');
+ expect(hub).toContain("fetchAppApi<unknown>(`/search?q=${encodeURIComponent(q)}`)");
  expect(hub).toContain('sin API generativa');
  expect(hub).toContain('No voy a inventarla');
+});
+
+test('Ana enruta preguntas hipotecarias por el contenido y amplía búsquedas antes de rendirse',()=>{
+ expect(hub).toContain('function domainForQuestion(question:string,scope:Scope)');
+ expect(hub).toContain("return'Hipotecas'");
+ expect(hub).toContain('funcionario hipoteca 100 documentacion');
+ expect(hub).toContain('searchQueries(question,domain)');
+ expect(hub).toContain('const evidence=await searchCerebro(value,domain)');
+ expect(hub).toContain('Esto es lo que consta en CEREBRO para tu consulta:');
+});
+
+test('fallo del micrófono queda como aviso de voz y no contamina la respuesta de Ana',()=>{
+ expect(hub).toContain('[voiceWarning,setVoiceWarning]=useState');
+ expect(hub).toContain("setVoiceWarning('El dictado por voz se ha detenido.");
+ expect(hub).toContain('className="fenix-voice-warning"');
+ expect(hub).not.toContain("setMessage('No se pudo usar el micrófono");
+ expect(hub).toContain("async function askAna(value:string){setAsking(true);setVoiceWarning('')");
 });
 
 test('micro universal mantiene contraste legible en modo claro y oscuro sin panel blanco brillante',()=>{
