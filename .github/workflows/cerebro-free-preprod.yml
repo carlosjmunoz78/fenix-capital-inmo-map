@@ -1,0 +1,22 @@
+name: CEREBRO FREE PREPROD
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/runtime/free-resource-broker.mjs'
+      - 'cerebro/tests/free-resource-broker.test.mjs'
+      - '.github/workflows/cerebro-free-preprod.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  free-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Test FREE-001 zero-cost resource broker
+        run: node --test cerebro/tests/free-resource-broker.test.mjs
