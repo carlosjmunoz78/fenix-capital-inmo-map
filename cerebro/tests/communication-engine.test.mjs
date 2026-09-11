@@ -1,0 +1,6 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {planCommunication} from '../communications/communication-engine.mjs';
+const context={company_id:'fenix',engine_id:'COM-001',environment:'PREPROD',version:'0.1.0'};const base={context,authorized:true,requires_prod_write:false,consent_confirmed:true,confidence:.9,available_channels:['EMAIL','WHATSAPP'],purpose:'sales_followup',tone:'professional',template_ref:'tpl://sales/1',local_hour:11};
+test('COM-001 selects email-first zero-cost channel',()=>{const r=planCommunication(base);assert.equal(r.status,'COMMUNICATION_PLAN_READY');assert.equal(r.channel,'EMAIL');assert.equal(r.executed,false);assert.equal(r.delivery_tracking_required,true);});
+test('COM-001 defers quiet hours',()=>{const r=planCommunication({...base,local_hour:22});assert.equal(r.status,'DEFERRED');assert.equal(r.reason,'QUIET_HOURS');});
+test('COM-001 requires consent and confidence',()=>{assert.equal(planCommunication({...base,consent_confirmed:false}).reason,'POLICY_CONFLICT');assert.equal(planCommunication({...base,confidence:.3}).reason,'LOW_CONFIDENCE');});
+test('COM-001 blocks PROD writes and malformed booleans',()=>{assert.equal(planCommunication({...base,requires_prod_write:true}).reason,'HIGH_RISK');assert.throws(()=>planCommunication({...base,requires_prod_write:'true'}));});
