@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "engine_id": "FACT-001",
+  "status": "DOCUMENTED_PARTIAL",
+  "purpose": "Canonical dependency/evidence map for FACT-001 closure without merging or activating PROD.",
+  "chain": [
+    {"pr":174,"role":"FACT-001 E2E structural closure","required":true},
+    {"pr":237,"role":"FACT-001 observability and cost evidence","required":true},
+    {"pr":238,"role":"FACT-001 gradual promotion standard","required":true},
+    {"pr":265,"role":"DEP/ARCH/DEBT governance","required":true},
+    {"pr":285,"role":"FACT-001 closure harness and self-test","required":true}
+  ],
+  "promotion": {
+    "auto_merge": false,
+    "prod_write": false,
+    "autonomous_prod": false,
+    "required_before_prod": ["contracts","permissions","tests","evaluation","tribunal","observability","rollback","backup","rebuild","cost","policy","PREPROD"]
+  },
+  "notes": "This manifest consolidates dependencies/evidence only. It does not claim merged status or production activation."
+}
