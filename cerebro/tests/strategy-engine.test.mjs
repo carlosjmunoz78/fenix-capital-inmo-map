@@ -1,0 +1,6 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {evaluateStrategy} from '../strategy/strategy-engine.mjs';
+const context={company_id:'fenix',engine_id:'STR-001',environment:'PREPROD',version:'0.1.0'};
+const scenarios=[{scenario_id:'A',roi_score:80,risk_score:20,cash_score:70,capacity_score:75},{scenario_id:'B',roi_score:70,risk_score:10,cash_score:65,capacity_score:80}];
+test('STR-001 ranks scenarios deterministically',()=>{const r=evaluateStrategy({context,authorized:true,confidence:.9,scenarios});assert.equal(r.status,'STRATEGY_PLAN');assert.equal(r.recommended_scenario,'A');assert.equal(r.major_strategy_decision_execute,false);assert.equal(r.additional_cost_eur,0)});
+test('STR-001 escalates low confidence and high risk',()=>{assert.equal(evaluateStrategy({context,authorized:true,confidence:.4,scenarios}).reason,'LOW_CONFIDENCE');const risky=[{scenario_id:'R',roi_score:95,risk_score:90,cash_score:95,capacity_score:95}];assert.equal(evaluateStrategy({context,authorized:true,confidence:.9,scenarios:risky}).reason,'HIGH_RISK')});
+test('STR-001 blocks PROD and unauthorized use',()=>{assert.equal(evaluateStrategy({context:{...context,environment:'PROD'},authorized:true,confidence:.9,scenarios}).reason,'HIGH_RISK');assert.equal(evaluateStrategy({context,authorized:false,confidence:.9,scenarios}).reason,'POLICY_CONFLICT')});
