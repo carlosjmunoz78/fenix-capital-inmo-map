@@ -5,7 +5,10 @@ on:
     paths:
       - 'cerebro/factory/fact-closure-harness.mjs'
       - 'cerebro/factory/fact-self-test.mjs'
+      - 'cerebro/factory/engine-state-registry.mjs'
       - 'cerebro/tests/fact-closure-harness.test.mjs'
+      - 'cerebro/tests/engine-state-registry.test.mjs'
+      - 'cerebro/docs/factory-pr-chain-manifest.json'
       - '.github/workflows/cerebro-fact001-closure-preprod.yml'
 
 jobs:
@@ -19,5 +22,7 @@ jobs:
           node-version: '22'
       - name: FACT-001 closure harness tests
         run: node --test cerebro/tests/fact-closure-harness.test.mjs
+      - name: FACT-001 canonical engine state registry tests
+        run: node --test cerebro/tests/engine-state-registry.test.mjs
       - name: FACT-001 self-test and rebuild equivalence
         run: node cerebro/factory/fact-self-test.mjs
