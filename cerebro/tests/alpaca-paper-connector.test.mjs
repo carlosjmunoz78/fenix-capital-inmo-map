@@ -1,0 +1,8 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {planAlpacaPaperConnection,buildPaperAuthHeaders,validatePaperAccountResponse} from '../training/alpaca-paper-connector.mjs';
+const context={company_id:'fenix',engine_id:'TRN-001',environment:'LAB',version:'0.1.0'};
+const refs={key_ref:'secret-ref://trading/alpaca/paper/key',secret_ref:'secret-ref://trading/alpaca/paper/secret'};
+test('paper connector is LAB/PREPROD only and blocks live',()=>{const r=planAlpacaPaperConnection({context,...refs});assert.equal(r.status,'READY');assert.equal(r.base_url,'https://paper-api.alpaca.markets');assert.equal(r.live_endpoint_blocked,true);assert.equal(planAlpacaPaperConnection({context,...refs,base_url:'https://api.alpaca.markets'}).reason,'HIGH_RISK')});
+test('requires secret references rather than payloads',()=>{assert.equal(planAlpacaPaperConnection({context,key_ref:'abc',secret_ref:'def'}).reason,'SECURITY_INCIDENT')});
+test('builds Alpaca auth headers only at runtime',()=>{const h=buildPaperAuthHeaders({apiKey:'k',apiSecret:'s'});assert.equal(h['APCA-API-KEY-ID'],'k');assert.equal(h['APCA-API-SECRET-KEY'],'s')});
+test('validates paper account response without exposing credentials',()=>{const r=validatePaperAccountResponse({status:'ACTIVE',trading_blocked:false});assert.equal(r.status,'VERIFIED');assert.equal(r.paper_only,true)});
+test('blocks PROD and paid path',()=>{assert.equal(planAlpacaPaperConnection({context:{...context,environment:'PROD'},...refs}).reason,'HIGH_RISK');assert.equal(planAlpacaPaperConnection({context,...refs,additional_cost_eur:1}).reason,'MONEY_LIMIT')});
