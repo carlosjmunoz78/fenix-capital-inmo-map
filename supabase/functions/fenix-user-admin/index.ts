@@ -1,5 +1,6 @@
 import {createClient} from 'https://esm.sh/@supabase/supabase-js@2';
 const ALLOWED=new Set(['https://app.fenixcapital.es']);
+const ADMIN_ACTORS=new Set(['CARLOS-ADMIN','BELEN-DIR']);
 function key(raw:string){try{const x=JSON.parse(raw||'{}');return String((x as any)?.default??Object.values(x??{})[0]??'')}catch{return''}}
 function cfg(){const URL=Deno.env.get('SUPABASE_URL')||'',ANON=Deno.env.get('SUPABASE_ANON_KEY')||key(Deno.env.get('SUPABASE_PUBLISHABLE_KEYS')||''),SERVICE=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')||key(Deno.env.get('SUPABASE_SECRET_KEYS')||'');return{URL,ANON,SERVICE}}
 function cors(req:Request){const o=req.headers.get('origin')||'';return{'Access-Control-Allow-Origin':ALLOWED.has(o)?o:'https://app.fenixcapital.es','Access-Control-Allow-Headers':'authorization,apikey,content-type','Access-Control-Allow-Methods':'GET,POST,OPTIONS','Vary':'Origin','x-fenix-env':'PROD'}}
@@ -13,7 +14,7 @@ Deno.serve(async req=>{
  const auth=createClient(c.URL,c.ANON,{auth:{persistSession:false,autoRefreshToken:false}}),svc=createClient(c.URL,c.SERVICE,{auth:{persistSession:false,autoRefreshToken:false}});
  const{data:u,error:ue}=await auth.auth.getUser(h.slice(7));if(ue||!u.user)return out(req,{ok:false,error:'unauthorized'},401);
  const{data:ctx,error:ce}=await svc.rpc('fenix_prod_actor_context_by_auth_server',{p_auth_user_id:u.user.id});if(ce||!ctx?.ok)return out(req,{ok:false,error:'identity_not_linked'},401);
- if(ctx.role!=='Direccion')return out(req,{ok:false,error:'forbidden'},403);
+ if(ctx.role!=='Direccion'||!ADMIN_ACTORS.has(String(ctx.actor_code||'')))return out(req,{ok:false,error:'forbidden'},403);
  if(req.method==='GET'){
   const{data,error}=await svc.rpc('fenix_prod_user_admin_list_server',{p_actor_code:ctx.actor_code});
   if(error)return out(req,{ok:false,error:'list_failed'},500);return out(req,data,Number(data?.status)||200);
