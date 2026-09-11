@@ -2,22 +2,28 @@ import {test,expect} from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
 
-test('gate PROD exige promoción explícita y entorno separado',()=>{
+test('gate PROD permite promoción continua solo con gates verdes',()=>{
   const gate=fs.readFileSync(path.resolve('docs/PROD_RELEASE_GATE.md'),'utf8');
-  expect(gate).toContain('Ninguna versión pasa a PROD por automatismo');
-  expect(gate).toContain('orden explícita');
+  expect(gate).toContain('verde → se continúa hasta PROD');
+  expect(gate).toContain('rojo → se diagnostica, corrige, relanza y vuelve a validar');
+  expect(gate).toContain('sin pedir una nueva autorización manual a Carlos');
+  expect(gate).toContain('No publicar con un gate rojo');
   expect(gate).toContain('configuración PROD, dominio/hosting, backend, secretos y almacenamiento');
-  expect(gate).toContain('No tocar `main`, PROD, WordPress ni Supabase PROD');
-  expect(gate).toContain('No fusionar PR #2 sin orden explícita');
 });
 
-test('workflow PRE-PROD permanece parado y solo admite lanzamiento manual',()=>{
-  const workflow=fs.readFileSync(path.resolve('.github/workflows/preprod-build.yml'),'utf8');
-  expect(workflow).toContain('workflow_dispatch:');
-  expect(workflow).not.toMatch(/^\s+push:\s*$/m);
-  expect(workflow).not.toMatch(/^\s+pull_request:\s*$/m);
-  expect(workflow).not.toMatch(/git push[^\n]*HEAD:main/);
-  expect(workflow).not.toMatch(/git push[^\n]*\bmain\b/);
+test('workflow PRE-PROD permanece parado y PROD promueve desde la rama canónica con gates',()=>{
+  const preprod=fs.readFileSync(path.resolve('.github/workflows/preprod-build.yml'),'utf8');
+  const prod=fs.readFileSync(path.resolve('.github/workflows/app-prod-promote.yml'),'utf8');
+  expect(preprod).toContain('workflow_dispatch:');
+  expect(preprod).not.toMatch(/^\s+push:\s*$/m);
+  expect(preprod).not.toMatch(/^\s+pull_request:\s*$/m);
+  expect(prod).toMatch(/^\s+push:\s*$/m);
+  expect(prod).toContain('- preprod-app-phase1');
+  expect(prod).toContain('Browser QA exact PROD candidate');
+  expect(prod).toContain('PROD API reachability gate');
+  expect(prod).toContain('Publish exact validated APP snapshot');
+  expect(prod).toContain('Verify published source marker');
+  expect(prod).not.toMatch(/git push[^\n]*HEAD:main/);
 });
 
 test('Contactos PROD abre fichas con identificadores canónicos y usa el gateway',()=>{
