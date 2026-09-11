@@ -1,0 +1,5 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {evaluateMarketingLab} from '../labs/marketing-lab.mjs';
+const context={company_id:'fenix',engine_id:'LAB-MKT',environment:'LAB',version:'0.1.0'};
+test('LAB-MKT validates zero-cost creative test without spend',()=>{const r=evaluateMarketingLab({context,candidate:{confidence:.9,estimated_cost_eur:0,test_type:'CREATIVE',microbudget_eur:0}});assert.equal(r.status,'LAB_CANDIDATE_VALIDATED');assert.equal(r.spend_execute,false);assert.equal(r.marketing_write,false)});
+test('LAB-MKT gates paid and invalid tests',()=>{assert.equal(evaluateMarketingLab({context,candidate:{confidence:.9,estimated_cost_eur:0,test_type:'CREATIVE',microbudget_eur:1}}).reason,'MONEY_LIMIT');assert.equal(evaluateMarketingLab({context,candidate:{confidence:.9,test_type:'UNKNOWN',microbudget_eur:0}}).reason,'POLICY_CONFLICT')});
+test('LAB-MKT gates low confidence',()=>{assert.equal(evaluateMarketingLab({context,candidate:{confidence:.4,test_type:'COPY',microbudget_eur:0}}).reason,'LOW_CONFIDENCE')});
