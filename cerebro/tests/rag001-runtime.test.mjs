@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {retrieveEvidence,buildGroundedAnswerPlan,RAG001_CONTRACT} from '../knowledge/rag-runtime.mjs';
+const c={company_id:'fenix',engine_id:'RAG-001',environment:'PREPROD',version:'0.1.0'};
+const docs=[{company_id:'fenix',document_id:'d1',source_ref:'PRV:p1',text:'hipoteca fija tipo interes vivienda'},{company_id:'fenix',document_id:'d2',source_ref:'PRV:p2',text:'vivienda hipoteca variable euribor'},{company_id:'other',document_id:'d3',source_ref:'PRV:p3',text:'hipoteca secreta otra empresa'}];
+test('contract stays safe',()=>{assert.equal(RAG001_CONTRACT.company_isolation,true);assert.equal(RAG001_CONTRACT.prod_write,false);assert.equal(RAG001_CONTRACT.trading_access,false);assert.equal(RAG001_CONTRACT.knowledge_promotion,false);});
+test('retrieval is deterministic and company-scoped',()=>{const r=retrieveEvidence({context:c,query:'hipoteca vivienda',documents:docs});assert.equal(r.status,'GREEN');assert.equal(r.results.length,2);assert.equal(r.results.some(x=>x.document_id==='d3'),false);assert.match(r.results[0].evidence_hash,/^[a-f0-9]{64}$/);});
+test('grounded answer plan carries citations and never promotes knowledge',()=>{const r=retrieveEvidence({context:c,query:'hipoteca vivienda',documents:docs});const p=buildGroundedAnswerPlan({context:c,query:'hipoteca vivienda',retrieval:r});assert.equal(p.status,'GROUNDING_READY');assert.equal(p.citations.length,2);assert.equal(p.knowledge_promotion,false);assert.equal(p.executed,false);});
+test('no evidence fails closed',()=>{const r=retrieveEvidence({context:c,query:'astronomia',documents:docs});assert.equal(r.reason,'LOW_CONFIDENCE');});
+test('PROD fails closed',()=>{assert.throws(()=>retrieveEvidence({context:{...c,environment:'PROD'},query:'x',documents:docs}),/LAB\/PREPROD/);});
