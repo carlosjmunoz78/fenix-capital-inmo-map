@@ -1,0 +1,5 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {evaluateSeoLab} from '../labs/seo-lab.mjs';
+const context={company_id:'fenix',engine_id:'LAB-SEO',environment:'LAB',version:'0.1.0'};
+test('LAB-SEO validates zero-cost experiment without PROD promotion',()=>{const r=evaluateSeoLab({context,candidate:{confidence:.9,estimated_cost_eur:0,experiment:'TITLE'}});assert.equal(r.status,'LAB_CANDIDATE_VALIDATED');assert.equal(r.promote_to_prod,false);assert.equal(r.seo_write,false)});
+test('LAB-SEO gates paid, risky and invalid experiments',()=>{assert.equal(evaluateSeoLab({context,candidate:{confidence:.9,estimated_cost_eur:1,experiment:'TITLE'}}).reason,'MONEY_LIMIT');assert.equal(evaluateSeoLab({context,candidate:{confidence:.9,high_risk:true,experiment:'TITLE'}}).reason,'HIGH_RISK');assert.equal(evaluateSeoLab({context,candidate:{confidence:.9,experiment:'UNKNOWN'}}).reason,'POLICY_CONFLICT')});
+test('LAB-SEO requires LAB environment',()=>{assert.equal(evaluateSeoLab({context:{...context,environment:'PREPROD'},candidate:{confidence:.9,experiment:'TITLE'}}).reason,'POLICY_CONFLICT')});
