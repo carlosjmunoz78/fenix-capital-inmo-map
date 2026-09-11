@@ -32,6 +32,6 @@ jobs:
       - name: TypeScript and Vite build
         run: npm run build
       - name: Contract tests without backend traffic
-        run: npx playwright test tests/password-recovery-contract.spec.ts tests/profile-own-password-contract.spec.ts
+        run: npx playwright test tests/password-recovery-contract.spec.ts tests/profile-own-password-contract.spec.ts tests/staff-admin-contract.spec.ts
 
 # Safe closeout validation only: no deployment, no Supabase/Notion mutations and no live browser QA.
