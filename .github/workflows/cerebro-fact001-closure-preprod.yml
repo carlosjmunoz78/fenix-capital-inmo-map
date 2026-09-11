@@ -1,0 +1,20 @@
+name: CEREBRO FACT-001 Closure PREPROD
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/factory/fact-closure-harness.mjs'
+      - 'cerebro/tests/fact-closure-harness.test.mjs'
+      - '.github/workflows/cerebro-fact001-closure-preprod.yml'
+
+jobs:
+  fact-closure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: FACT-001 closure harness tests
+        run: node --test cerebro/tests/fact-closure-harness.test.mjs
