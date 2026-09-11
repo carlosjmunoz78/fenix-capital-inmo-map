@@ -1,0 +1,5 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {evaluateInnovation} from '../strategy/innovation-engine.mjs';
+const context={company_id:'fenix',engine_id:'INN-001',environment:'PREPROD',version:'0.1.0'};
+test('INN-001 ranks proposals deterministically without execution',()=>{const r=evaluateInnovation({context,confidence:.9,ideas:[{id:'b',impact:5,effort:3,risk:2,evidence_refs:['e1']},{id:'a',impact:4,effort:1,risk:1,evidence_refs:['e2']}]});assert.equal(r.status,'PROPOSALS_READY');assert.equal(r.proposal_execute,false);assert.deepEqual(r.ranked.map(x=>x.id),['a','b'])});
+test('INN-001 gates low confidence and high risk',()=>{assert.equal(evaluateInnovation({context,confidence:.5,ideas:[]}).reason,'LOW_CONFIDENCE');assert.equal(evaluateInnovation({context,confidence:.9,ideas:[{id:'x',impact:5,effort:1,risk:5}]}).reason,'HIGH_RISK')});
+test('INN-001 rejects PROD',()=>{assert.equal(evaluateInnovation({context:{...context,environment:'PROD'},confidence:.9,ideas:[]}).reason,'HIGH_RISK')});
