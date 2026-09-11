@@ -6,8 +6,10 @@ on:
       - 'cerebro/factory/fact-closure-harness.mjs'
       - 'cerebro/factory/fact-self-test.mjs'
       - 'cerebro/factory/engine-state-registry.mjs'
+      - 'cerebro/factory/factory-doc-sync.mjs'
       - 'cerebro/tests/fact-closure-harness.test.mjs'
       - 'cerebro/tests/engine-state-registry.test.mjs'
+      - 'cerebro/tests/factory-doc-sync.test.mjs'
       - 'cerebro/docs/factory-pr-chain-manifest.json'
       - '.github/workflows/cerebro-fact001-closure-preprod.yml'
 
@@ -24,5 +26,7 @@ jobs:
         run: node --test cerebro/tests/fact-closure-harness.test.mjs
       - name: FACT-001 canonical engine state registry tests
         run: node --test cerebro/tests/engine-state-registry.test.mjs
+      - name: FACT-001 documentation sync generator tests
+        run: node --test cerebro/tests/factory-doc-sync.test.mjs
       - name: FACT-001 self-test and rebuild equivalence
         run: node cerebro/factory/fact-self-test.mjs
