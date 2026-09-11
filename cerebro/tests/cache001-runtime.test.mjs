@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {KnowledgeCacheV0,validateCacheInputSafety,CACHE001_CONTRACT} from '../knowledge/cache-runtime.mjs';
+const c={company_id:'fenix',engine_id:'CACHE-001',environment:'PREPROD',version:'0.1.0'};
+const other={...c,company_id:'other'};
+test('contract stays safe',()=>{assert.equal(CACHE001_CONTRACT.company_isolation,true);assert.equal(CACHE001_CONTRACT.prod_write,false);assert.equal(CACHE001_CONTRACT.trading_access,false);assert.equal(CACHE001_CONTRACT.secrets_forbidden,true);assert.equal(CACHE001_CONTRACT.additional_cost_target_eur,0);});
+test('cache hit is company isolated and carries evidence',()=>{const k=new KnowledgeCacheV0();const p=k.put({context:c,key:'q1',value:{answer:'x'},source_refs:['PRV:p1'],ttl_seconds:60,now_ms:1000});assert.equal(p.status,'GREEN');assert.match(p.evidence_hash,/^[a-f0-9]{64}$/);assert.equal(k.get({context:c,key:'q1',now_ms:2000}).status,'HIT');assert.equal(k.get({context:other,key:'q1',now_ms:2000}).status,'MISS');});
+test('ttl expires deterministically',()=>{const k=new KnowledgeCacheV0();k.put({context:c,key:'q1',value:'x',source_refs:['p1'],ttl_seconds:1,now_ms:1000});assert.equal(k.get({context:c,key:'q1',now_ms:2000}).status,'EXPIRED');});
+test('invalidate is explicit',()=>{const k=new KnowledgeCacheV0();k.put({context:c,key:'q1',value:'x',source_refs:['p1'],now_ms:1000});assert.equal(k.invalidate({context:c,key:'q1'}).decision,'CACHE_INVALIDATED');assert.equal(k.get({context:c,key:'q1',now_ms:1001}).status,'MISS');});
+test('secrets and PROD fail closed',()=>{assert.equal(validateCacheInputSafety({contains_secret:true}).reason,'SECURITY_INCIDENT');const k=new KnowledgeCacheV0();assert.throws(()=>k.put({context:{...c,environment:'PROD'},key:'x',value:'y',source_refs:['p']}),/LAB\/PREPROD/);});
