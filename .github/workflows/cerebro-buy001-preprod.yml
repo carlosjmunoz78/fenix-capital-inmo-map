@@ -1,0 +1,13 @@
+name: CEREBRO BUY-001 PREPROD
+on:
+  pull_request:
+    branches: [cerebro-ven001-vendor-engine-v0-20260911]
+jobs:
+  buy001-preprod:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test cerebro/tests/procurement-engine.test.mjs
