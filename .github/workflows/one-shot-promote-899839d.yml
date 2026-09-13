@@ -1,10 +1,10 @@
 name: One-shot promote validated 899839d
 
+# CEREBRO policy: final PROD promotion is human-gated. Preserve this historical
+# one-shot workflow for audit/manual recovery, but never auto-run it from the
+# migration branch while Gateway parity and rollback remain open.
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/one-shot-promote-899839d.yml'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -21,7 +21,7 @@ env:
 
 jobs:
   promote:
-    if: github.event.head_commit.message == 'ops: one-shot promote 899839d'
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment:
