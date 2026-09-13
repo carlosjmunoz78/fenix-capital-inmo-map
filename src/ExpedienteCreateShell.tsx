@@ -2,6 +2,7 @@ import {FormEvent,useEffect,useMemo,useState} from 'react';
 import {useLocation,useNavigate} from 'react-router-dom';
 import {FileUp,FolderPlus,LogOut,Moon,Plus,Save,Sun,Trash2,UserRound} from 'lucide-react';
 import {fetchAppApi,IS_PRODUCTION,SUPABASE_URL,supabase} from './supabase';
+import {gatewayRpc} from './appRpcCompat';
 import {anaAvatar} from './assets/visualAssets';
 import OperationalShellFrame from './OperationalShellFrame';
 import type {NavItem} from './masterNavigation';
@@ -31,7 +32,7 @@ async function token(){const{data:{session}}=await supabase.auth.getSession();re
 async function postJson<T>(url:string,body:unknown){const access=await token();if(!access)return{status:401,data:null as T|null};const r=await fetch(url,{method:'POST',headers:{'content-type':'application/json',Authorization:`Bearer ${access}`},body:JSON.stringify(body)});let data:T|null=null;try{data=await r.json()}catch{}return{status:r.status,data}}
 async function sha256(file:File){const data=await file.arrayBuffer();const hash=await crypto.subtle.digest('SHA-256',data);return Array.from(new Uint8Array(hash)).map(b=>b.toString(16).padStart(2,'0')).join('')}
 async function createExpediente(payload:Record<string,any>){
- if(IS_PRODUCTION){const {data,error}=await supabase.rpc('fenix_prod_exp_create',{p_cliente_nombre:payload.nombre,p_cliente_apellidos:payload.apellidos||null,p_cliente_email:payload.email||null,p_cliente_telefono:payload.telefono||null,p_localidad:payload.localidad||null,p_precio_vivienda:payload.precio_vivienda,p_importe_solicitado:payload.importe_solicitado,p_owner_actor_code:payload.id_financiero_operativo||null,p_inmobiliaria_code:payload.inmobiliaria_code||null,p_payload_operacion:payload.payload_operacion||{},p_consentimiento_comercial:Boolean(payload.consentimiento_comercial)});const d=(data||{error:error?.message}) as CreateResponse;return{status:error?500:Number((data as any)?.status||201),data:d};}
+ if(IS_PRODUCTION){const {data,error}=await gatewayRpc<CreateResponse>('fenix_prod_exp_create',{p_cliente_nombre:payload.nombre,p_cliente_apellidos:payload.apellidos||null,p_cliente_email:payload.email||null,p_cliente_telefono:payload.telefono||null,p_localidad:payload.localidad||null,p_precio_vivienda:payload.precio_vivienda,p_importe_solicitado:payload.importe_solicitado,p_owner_actor_code:payload.id_financiero_operativo||null,p_inmobiliaria_code:payload.inmobiliaria_code||null,p_payload_operacion:payload.payload_operacion||{},p_consentimiento_comercial:Boolean(payload.consentimiento_comercial)});const d=(data||{error:error?.message}) as CreateResponse;return{status:error?500:Number((data as any)?.status||201),data:d};}
  return postJson<CreateResponse>(`${SUPABASE_URL}/functions/v1/fenix-notion-actions-test/expedientes/create`,payload)
 }
 async function createBuyer(expedienteId:string,payload:Record<string,unknown>){if(IS_PRODUCTION)return{status:201,data:{ok:true,id:`${expedienteId}-embedded`} as BuyerResponse};return postJson<BuyerResponse>(`${SUPABASE_URL}/functions/v1/fenix-comprador-action-test/expedientes/${encodeURIComponent(expedienteId)}/compradores`,payload)}
