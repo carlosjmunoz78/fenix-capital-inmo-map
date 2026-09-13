@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "captured_at": "2026-09-13",
+  "mode": "READ_ONLY_STATIC_AUDIT",
+  "branch": "cerebro-app-crm-rpc-migration-v0-20260913",
+  "ci_run_id": 34774771295,
+  "ci_conclusion": "success",
+  "build_green": true,
+  "direct_call_count": 10,
+  "unique_rpc_count": 8,
+  "unique_rpcs": [
+    "fenix_prod_chat_list_user",
+    "fenix_prod_chat_send_user",
+    "fenix_prod_contact_create",
+    "fenix_prod_exp_create",
+    "fenix_prod_exp_update",
+    "fenix_prod_notification_mark_user",
+    "fenix_prod_notifications_list_user",
+    "fenix_prod_sign_create"
+  ],
+  "server_wrapper_coverage": {
+    "existing": [
+      "fenix_prod_chat_list_server",
+      "fenix_prod_chat_send_server",
+      "fenix_prod_exp_update_server"
+    ],
+    "missing": [
+      "fenix_prod_contact_create_server",
+      "fenix_prod_exp_create_server",
+      "fenix_prod_notification_mark_server",
+      "fenix_prod_notifications_list_server",
+      "fenix_prod_sign_create_server"
+    ]
+  },
+  "safe_to_revoke_authenticated_execute": false,
+  "prod_modified": false,
+  "main_modified": false,
+  "preprod_reactivated": false
+}

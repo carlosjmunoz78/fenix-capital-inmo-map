@@ -2,6 +2,7 @@ import {FormEvent,useEffect,useMemo,useRef,useState} from 'react';
 import {MessageCircle,Moon,RefreshCw,Send,Sun} from 'lucide-react';
 import {useLocation} from 'react-router-dom';
 import {fetchAppApi,supabase} from './supabase';
+import {gatewayRpc} from './appRpcCompat';
 import {normalizeNavigation,type NavItem} from './masterNavigation';
 import OperationalShellFrame from './OperationalShellFrame';
 import './operational.css';
@@ -42,7 +43,7 @@ export default function ChatShell(){
     if(!active||!logged)return;
     if(!silent)setLoading(true);
     try{
-      const {data,error}=await supabase.rpc('fenix_prod_chat_list_user',{p_limit:100});
+      const {data,error}=await gatewayRpc<ChatPayload>('fenix_prod_chat_list_user',{p_limit:100});
       if(error){setNotice('No se pudo cargar el chat interno.');return;}
       const payload=data as ChatPayload|null;
       if(payload?.status===403){setNotice('Tu perfil no tiene acceso al chat interno.');setMessages([]);return;}
@@ -60,7 +61,7 @@ export default function ChatShell(){
     setSending(true);setNotice('');
     try{
       const idempotency=`chat-${crypto.randomUUID()}`;
-      const {data,error}=await supabase.rpc('fenix_prod_chat_send_user',{p_body:body,p_idempotency_key:idempotency});
+      const {data,error}=await gatewayRpc<ChatPayload>('fenix_prod_chat_send_user',{p_body:body,p_idempotency_key:idempotency});
       if(error){setNotice('No se pudo enviar el mensaje.');return;}
       const payload=data as ChatPayload|null;
       if(payload?.status!==200||!payload.item){setNotice(payload?.status===403?'Tu perfil no puede escribir en este chat.':'No se pudo guardar el mensaje.');return;}

@@ -1,10 +1,9 @@
 name: CEREBRO Factory PREPROD
 
+# CEREBRO policy: App PRE-PROD is currently cancelled.
+# Preserve this contract workflow for explicit manual use only while the
+# PRE-PROD channel remains disabled.
 on:
-  pull_request:
-    paths:
-      - 'cerebro/**'
-      - '.github/workflows/cerebro-factory-preprod.yml'
   workflow_dispatch:
 
 permissions:

@@ -1,13 +1,9 @@
 name: PRE-PROD App Build
 
-# PRE-PROD is isolated from the live production deployment channel.
+# CEREBRO policy: App PRE-PROD is currently cancelled.
+# Preserve the legacy workflow for manual recovery/audit only, but do not
+# auto-run it from pushes or pull requests until PRE-PROD is explicitly reactivated.
 on:
-  push:
-    branches:
-      - preprod-app-phase1
-  pull_request:
-    branches:
-      - main
   workflow_dispatch:
 
 permissions:

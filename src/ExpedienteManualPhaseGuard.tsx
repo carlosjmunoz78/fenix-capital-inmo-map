@@ -4,6 +4,7 @@ import {useLocation} from 'react-router-dom';
 import {FileUp,RotateCcw,Save,ShieldAlert,X} from 'lucide-react';
 import {fetchAppApi,IS_PRODUCTION,SUPABASE_URL,supabase} from './supabase';
 import {fetchNotionRuntime} from './notionRuntime';
+import {gatewayRpc} from './appRpcCompat';
 import './expediente-manual-phase.css';
 
 type Row=Record<string,any>;
@@ -40,7 +41,7 @@ export default function ExpedienteManualPhaseGuard(){
  async function commit(){if(!canEdit||!row||!selected||selected===current||!reason.trim())return;setBusy(true);setMsg('');
   const fresh=await fetchNotionRuntime<any>(`/expedientes/${encodeURIComponent(code)}`);const item=fresh.status===200?detailItem(fresh.data):row;const version=Number(item?.version||row.version||0);const oldNotes=text(item,['notas']);const actor=ctx?.display_name||ctx?.role||'Usuario';const stamp=new Date().toISOString();const audit=`[CAMBIO MANUAL DE FASE] ${current} → ${selected} · Motivo: ${reason.trim()} · Usuario: ${actor} · Fecha: ${stamp}`;const notes=oldNotes?`${oldNotes}\n${audit}`:audit;
   let status=500;let data:any=null;
-  if(IS_PRODUCTION){const r=await supabase.rpc('fenix_prod_exp_update',{p_code:code,p_expected_version:version,p_cliente_alias:null,p_stage:selected,p_inmobiliaria_code:null,p_notas:notes,p_proxima_accion:null});data=r.data;status=r.error?500:Number(r.data?.status||200)}else{const {data:{session}}=await supabase.auth.getSession();if(!session?.access_token){setBusy(false);setMsg('La sesión no permite guardar el cambio.');return}const r=await fetch(`${SUPABASE_URL}/functions/v1/fenix-notion-actions-test/expedientes/${encodeURIComponent(code)}/action`,{method:'POST',headers:{'content-type':'application/json',Authorization:`Bearer ${session.access_token}`},body:JSON.stringify({action:'update',changes:{stage:selected,notas:notes}})});status=r.status;try{data=await r.json()}catch{}}
+  if(IS_PRODUCTION){const r=await gatewayRpc<any>('fenix_prod_exp_update',{p_code:code,p_expected_version:version,p_cliente_alias:null,p_stage:selected,p_inmobiliaria_code:null,p_notas:notes,p_proxima_accion:null});data=r.data;status=r.error?500:Number(r.data?.status||200)}else{const {data:{session}}=await supabase.auth.getSession();if(!session?.access_token){setBusy(false);setMsg('La sesión no permite guardar el cambio.');return}const r=await fetch(`${SUPABASE_URL}/functions/v1/fenix-notion-actions-test/expedientes/${encodeURIComponent(code)}/action`,{method:'POST',headers:{'content-type':'application/json',Authorization:`Bearer ${session.access_token}`},body:JSON.stringify({action:'update',changes:{stage:selected,notas:notes}})});status=r.status;try{data=await r.json()}catch{}}
   setBusy(false);if(status===200&&data?.ok!==false){setMsg('Fase cambiada y motivo registrado.');setConfirm(false);await reloadData();window.setTimeout(()=>window.location.reload(),450)}else if(status===409){setMsg('El expediente cambió mientras lo revisabas. Recarga y vuelve a intentarlo.')}else if(status===403){setMsg('Tu perfil no puede cambiar la fase.')}else setMsg(`No se pudo cambiar la fase (${data?.error||status}).`)
  }
  if(!host)return null;

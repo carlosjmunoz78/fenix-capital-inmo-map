@@ -1,0 +1,50 @@
+name: CEREBRO APP CRM RPC Audit
+
+on:
+  push:
+    branches:
+      - cerebro-app-crm-rpc-migration-v0-20260913
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Require zero direct PROD RPC callers in persisted branch
+        run: node scripts/audit-direct-prod-rpc.mjs --require-zero | tee direct-prod-rpc-persisted.json
+      - name: Fail-closed APP RPC migration readiness audit
+        run: node scripts/audit-app-rpc-migration-readiness.mjs | tee app-rpc-readiness.json
+      - name: Audit guarded CEREBRO profile launcher
+        run: node scripts/audit-cerebro-profile-launcher.mjs | tee cerebro-profile-launcher.json
+      - name: Rehearse APP RPC migration idempotently in runner only
+        run: node scripts/rehearse-app-rpc-gateway-migration.mjs | tee migration-rehearsal.json
+      - name: Require zero direct PROD RPC callers after rehearsal
+        run: node scripts/audit-direct-prod-rpc.mjs --require-zero | tee direct-prod-rpc-after.json
+      - name: Typecheck and build persisted migration branch
+        env:
+          VITE_FENIX_ENV: prod
+          VITE_SUPABASE_URL: https://prod.invalid
+          VITE_SUPABASE_PUBLISHABLE_KEY: prod-build-validation-placeholder
+        run: npm run build
+      - name: Upload RPC migration evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-rpc-migration-readiness
+          path: |
+            direct-prod-rpc-persisted.json
+            app-rpc-readiness.json
+            cerebro-profile-launcher.json
+            migration-rehearsal.json
+            direct-prod-rpc-after.json
+
+# Readiness only: no deployment, DB mutation, Edge deployment, secret output or PROD write.
