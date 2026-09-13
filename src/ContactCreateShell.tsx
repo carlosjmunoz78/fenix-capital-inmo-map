@@ -2,6 +2,7 @@ import {FormEvent,useEffect,useMemo,useState} from 'react';
 import {useLocation,useNavigate} from 'react-router-dom';
 import {LogOut,Moon,Plus,Save,Sun,UserRound,X} from 'lucide-react';
 import {fetchAppApi,IS_PRODUCTION,SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,supabase} from './supabase';
+import {gatewayRpc} from './appRpcCompat';
 import {fetchNotionRuntime} from './notionRuntime';
 import {anaVertical} from './assets/visualAssets';
 import OperationalShellFrame from './OperationalShellFrame';
@@ -27,7 +28,7 @@ const changeAt=(items:string[],index:number,value:string)=>items.map((x,i)=>i===
 function rows(data:any){if(Array.isArray(data?.items))return data.items;if(Array.isArray(data?.notarias))return data.notarias;if(Array.isArray(data?.registros))return data.registros;return[]}
 function optionOf(x:any):EntityOption|null{const id=String(x?.id??x?.inmobiliaria_code??x?.notaria_code??x?.registro_code??'');const name=String(x?.nombre??x?.nombre_alias??x?.inmobiliaria??x?.notaria??x?.registro??id);return id?{id,name}:null}
 async function createContact(payload:Record<string,any>){
- if(IS_PRODUCTION){const {data,error}=await supabase.rpc('fenix_prod_contact_create',{p_tipo:payload.tipo_contacto,p_nombre:payload.nombre,p_apellidos:payload.apellidos||null,p_email:payload.email||null,p_telefono:payload.telefono||null,p_cargo:payload.cargo||null,p_entidad_id:payload.entidad_id||null,p_observaciones:payload.observaciones||null,p_consentimiento_comercial:Boolean(payload.consentimiento_comercial)});const d=(data||{error:error?.message}) as CreateResponse;return{status:error?500:Number((data as any)?.status||201),data:d};}
+ if(IS_PRODUCTION){const {data,error}=await gatewayRpc<CreateResponse>('fenix_prod_contact_create',{p_tipo:payload.tipo_contacto,p_nombre:payload.nombre,p_apellidos:payload.apellidos||null,p_email:payload.email||null,p_telefono:payload.telefono||null,p_cargo:payload.cargo||null,p_entidad_id:payload.entidad_id||null,p_observaciones:payload.observaciones||null,p_consentimiento_comercial:Boolean(payload.consentimiento_comercial)});const d=(data||{error:error?.message}) as CreateResponse;return{status:error?500:Number((data as any)?.status||201),data:d};}
  const{data:{session}}=await supabase.auth.getSession();if(!session?.access_token)return{status:401,data:null as CreateResponse|null};const r=await fetch(`${SUPABASE_URL}/functions/v1/fenix-contactos-unified-test`,{method:'POST',headers:{'content-type':'application/json',apikey:SUPABASE_PUBLISHABLE_KEY,Authorization:`Bearer ${session.access_token}`},body:JSON.stringify(payload)});let data:CreateResponse|null=null;try{data=await r.json()}catch{}return{status:r.status,data};
 }
 async function fetchEntityOptions(kind:EntityKind){
