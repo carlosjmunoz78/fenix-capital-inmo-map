@@ -20,18 +20,28 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - name: Static direct PROD RPC inventory
-        run: node scripts/audit-direct-prod-rpc.mjs | tee direct-prod-rpc-audit.json
-      - name: Typecheck and build
+      - name: Baseline direct PROD RPC inventory
+        run: node scripts/audit-direct-prod-rpc.mjs | tee direct-prod-rpc-before.json
+      - name: Rehearse APP RPC migration in runner only
+        run: node scripts/rehearse-app-rpc-gateway-migration.mjs | tee migration-rehearsal.json
+      - name: Require zero direct PROD RPC callers after rehearsal
+        shell: bash
+        run: |
+          node scripts/audit-direct-prod-rpc.mjs | tee direct-prod-rpc-after.json
+          node -e "const fs=require('fs');const x=JSON.parse(fs.readFileSync('direct-prod-rpc-after.json','utf8'));if(x.direct_call_count!==0)process.exit(2)"
+      - name: Typecheck and build migrated rehearsal
         env:
           VITE_FENIX_ENV: prod
           VITE_SUPABASE_URL: https://prod.invalid
           VITE_SUPABASE_PUBLISHABLE_KEY: prod-build-validation-placeholder
         run: npm run build
-      - name: Upload RPC audit
+      - name: Upload RPC migration evidence
         uses: actions/upload-artifact@v4
         with:
-          name: direct-prod-rpc-audit
-          path: direct-prod-rpc-audit.json
+          name: app-rpc-migration-rehearsal
+          path: |
+            direct-prod-rpc-before.json
+            migration-rehearsal.json
+            direct-prod-rpc-after.json
 
-# Audit only: no deployment, DB mutation, Edge deployment, secret output or PROD write.
+# Runner-only rehearsal: no deployment, DB mutation, Edge deployment, secret output or PROD write.
