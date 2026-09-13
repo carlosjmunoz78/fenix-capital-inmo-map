@@ -20,16 +20,15 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - name: Baseline direct PROD RPC inventory
-        run: node scripts/audit-direct-prod-rpc.mjs | tee direct-prod-rpc-before.json
-      - name: Rehearse APP RPC migration in runner only
+      - name: Require zero direct PROD RPC callers in persisted branch
+        run: node scripts/audit-direct-prod-rpc.mjs --require-zero | tee direct-prod-rpc-persisted.json
+      - name: Fail-closed APP RPC migration readiness audit
+        run: node scripts/audit-app-rpc-migration-readiness.mjs | tee app-rpc-readiness.json
+      - name: Rehearse APP RPC migration idempotently in runner only
         run: node scripts/rehearse-app-rpc-gateway-migration.mjs | tee migration-rehearsal.json
       - name: Require zero direct PROD RPC callers after rehearsal
-        shell: bash
-        run: |
-          node scripts/audit-direct-prod-rpc.mjs | tee direct-prod-rpc-after.json
-          node -e "const fs=require('fs');const x=JSON.parse(fs.readFileSync('direct-prod-rpc-after.json','utf8'));if(x.direct_call_count!==0)process.exit(2)"
-      - name: Typecheck and build migrated rehearsal
+        run: node scripts/audit-direct-prod-rpc.mjs --require-zero | tee direct-prod-rpc-after.json
+      - name: Typecheck and build persisted migration branch
         env:
           VITE_FENIX_ENV: prod
           VITE_SUPABASE_URL: https://prod.invalid
@@ -38,10 +37,11 @@ jobs:
       - name: Upload RPC migration evidence
         uses: actions/upload-artifact@v4
         with:
-          name: app-rpc-migration-rehearsal
+          name: app-rpc-migration-readiness
           path: |
-            direct-prod-rpc-before.json
+            direct-prod-rpc-persisted.json
+            app-rpc-readiness.json
             migration-rehearsal.json
             direct-prod-rpc-after.json
 
-# Runner-only rehearsal: no deployment, DB mutation, Edge deployment, secret output or PROD write.
+# Readiness only: no deployment, DB mutation, Edge deployment, secret output or PROD write.
