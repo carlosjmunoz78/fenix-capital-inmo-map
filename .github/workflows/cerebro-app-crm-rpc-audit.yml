@@ -24,6 +24,8 @@ jobs:
         run: node scripts/audit-direct-prod-rpc.mjs --require-zero | tee direct-prod-rpc-persisted.json
       - name: Fail-closed APP RPC migration readiness audit
         run: node scripts/audit-app-rpc-migration-readiness.mjs | tee app-rpc-readiness.json
+      - name: Audit guarded CEREBRO profile launcher
+        run: node scripts/audit-cerebro-profile-launcher.mjs | tee cerebro-profile-launcher.json
       - name: Rehearse APP RPC migration idempotently in runner only
         run: node scripts/rehearse-app-rpc-gateway-migration.mjs | tee migration-rehearsal.json
       - name: Require zero direct PROD RPC callers after rehearsal
@@ -41,6 +43,7 @@ jobs:
           path: |
             direct-prod-rpc-persisted.json
             app-rpc-readiness.json
+            cerebro-profile-launcher.json
             migration-rehearsal.json
             direct-prod-rpc-after.json
 
