@@ -43,7 +43,7 @@ El builder `scripts/build-fenix-document-extract-candidate.mjs` parte exclusivam
 
 ## Gate
 
-Workflow `34867656937`: COMPLETED / SUCCESS. Contratos A+B+D + snapshot/source pin de extractor + TypeScript/Vite en verde para HEAD `8e0e62a34bf398c818a236d4d9be67c58d5efb05`.
+Workflow `34867721077`: COMPLETED / SUCCESS para HEAD `b21561a377657c965f2e4538a7c53660e00a9eea`. Contratos A+B+D + snapshot/source pin de extractor + TypeScript/Vite en verde.
 
 ## Rollback
 
