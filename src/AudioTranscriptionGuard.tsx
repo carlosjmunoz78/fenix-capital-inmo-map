@@ -24,6 +24,11 @@ function anaReply(question:string,rules:CanonicalRule[]){
  if(!matched.length)return 'No tengo todavía un criterio aprobado suficientemente relacionado con esa consulta. Puedo seguir trabajando con el contexto de financiación, pero prefiero no inventar una respuesta sin base aprobada.';
  return `Según los criterios aprobados de Fénix Capital: ${matched.map(x=>x.rule.rule.trim().replace(/[.\s]+$/,'')).join('. ')}.`;
 }
+function correctionScope(pathname:string){
+ const parts=pathname.split('/').filter(Boolean),root=parts[0]||'',code=parts[1]||'';
+ const map:Record<string,string>={expedientes:'expediente',contactos:'contacto','contactos-b2b':'contacto_b2b',inmobiliarias:'inmobiliaria',tareas:'tarea',agenda:'tarea',visitas:'visita',bancos:'banco',tasaciones:'tasacion',firmas:'firma',documentacion:'documento',documentos:'documento',comunicaciones:'comunicacion',notarias:'notaria','registros-propiedad':'registro_propiedad'};
+ return{type:map[root]||root||'general',code:code&&!['nuevo','nueva','new'].includes(code.toLowerCase())?code:''};
+}
 
 const ACTIONS=[
  {id:'correct' as const,label:'Corregir',hint:'Corregir un dato, criterio o respuesta',icon:Check},
@@ -71,6 +76,12 @@ export default function AudioTranscriptionGuard(){
   const base=new URLSearchParams({source_route:location.pathname,draft:composed,domain:'financiacion'});
   if(mode==='task'){navigate(`/tareas/nueva?${base.toString()}`);return}
   base.set('mode',mode);
+  if(mode==='correct'){
+   const scope=correctionScope(location.pathname);
+   base.set('correction',composed);
+   base.set('scope_type',scope.type);
+   if(scope.code)base.set('scope_code',scope.code);
+  }
   navigate(`/ana?${base.toString()}`);
  }
  if(hidden)return null;
