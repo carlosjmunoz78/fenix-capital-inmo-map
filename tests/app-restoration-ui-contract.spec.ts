@@ -94,12 +94,12 @@ test('direction KPI drilldown hides normal destination content while active and 
  expect(source).toContain(".ops-root[data-kpi-drilldown=\"true\"]");
 });
 
-test('Honorarios drilldown uses deployed economy runtime and not Notion economy route',async()=>{
+test('Honorarios drilldown fails closed until a canonical pending-fees contract exists',async()=>{
  const source=read('src/DirectionKpiDrilldownGuard.tsx');
- expect(source).toContain("import {fetchEconomiaRuntime} from './economiaRuntime'");
- expect(source).toContain('await fetchEconomiaRuntime<unknown>()');
+ expect(source).not.toContain('fetchEconomiaRuntime');
  expect(source).not.toContain("fetchNotionRuntime<unknown>('/economia')");
- expect(source).toContain("if(r.status!==200)return{status:r.status,data:null}");
+ expect(source).toContain("if(key==='honorarios-pendientes')return{status:204,data:null}");
+ expect(source).toContain('No se usan movimientos contables como sustituto');
 });
 
 test('participant GET merges canonical labor profile into existing people response',async()=>{
