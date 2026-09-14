@@ -1,0 +1,72 @@
+name: CEREBRO SECDEF Wrapper Audit
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'supabase/secdef_remaining_*_wrappers_20260914.sql'
+      - 'supabase/fix_chat_send_v2_server_20260914.sql'
+      - '.github/workflows/cerebro-secdef-wrapper-audit.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  audit-secdef-wrappers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Assert wrapper files exist
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f supabase/secdef_remaining_read_wrappers_20260914.sql
+          test -f supabase/secdef_remaining_mutator_wrappers_20260914.sql
+          test -f supabase/fix_chat_send_v2_server_20260914.sql
+
+      - name: Assert additive server-only boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          files=(
+            supabase/secdef_remaining_read_wrappers_20260914.sql
+            supabase/secdef_remaining_mutator_wrappers_20260914.sql
+            supabase/fix_chat_send_v2_server_20260914.sql
+          )
+          for f in "${files[@]}"; do
+            grep -F 'security definer' "$f" >/dev/null
+            grep -F 'grant execute on function' "$f" >/dev/null
+            grep -F 'to service_role' "$f" >/dev/null
+            if grep -Eiq 'revoke .*_(user|v1|v2)\(' "$f"; then
+              echo "Legacy RPC revoke detected in $f"
+              exit 1
+            fi
+          done
+
+      - name: Assert identity and idempotency guards
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -F "identity_not_linked" supabase/secdef_remaining_read_wrappers_20260914.sql >/dev/null
+          grep -F "identity_not_linked" supabase/secdef_remaining_mutator_wrappers_20260914.sql >/dev/null
+          grep -F "on conflict(sender_actor_code,idempotency_key)" supabase/fix_chat_send_v2_server_20260914.sql >/dev/null
+          grep -F "forbidden" supabase/fix_chat_send_v2_server_20260914.sql >/dev/null
+          grep -F "invalid_body" supabase/fix_chat_send_v2_server_20260914.sql >/dev/null
+
+      - name: Assert no direct PROD retirement in this change
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -R -Ei 'revoke .*authenticated.*fenix_prod_.*_(user|v1|v2)' supabase/secdef_remaining_*_wrappers_20260914.sql supabase/fix_chat_send_v2_server_20260914.sql
+
+      - name: Record scope
+        shell: bash
+        run: |
+          printf '%s\n' 'STATIC_AUDIT_ONLY=true'
+          printf '%s\n' 'PROD_APPLY=false'
+          printf '%s\n' 'LEGACY_RETIREMENT=false'
+          printf '%s\n' 'OLD_VS_NEW_REQUIRED=true'
