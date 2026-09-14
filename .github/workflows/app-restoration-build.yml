@@ -3,7 +3,16 @@ name: App Restoration Build Gate
 on:
   push:
     branches:
-      - app-restoration-v0-20260914
+      - app-restoration-reconcile-current-main-20260915
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'scripts/**'
+      - 'supabase/**'
+      - '.github/workflows/app-restoration-build.yml'
   workflow_dispatch:
 
 permissions:
