@@ -1,5 +1,5 @@
 import { ChangeEvent, useEffect, useMemo, useState } from 'react';
-import { ChevronDown, ChevronUp, FileUp, MessageSquareWarning, Sparkles } from 'lucide-react';
+import { ChevronDown, ChevronUp, FileUp, Sparkles } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { anaAvatar } from './assets/visualAssets';
 import { fetchAnaApi, fetchAnaCanonicalApi, fetchEvidenceApi, fetchMemoryApi, supabase } from './supabase';
@@ -18,7 +18,7 @@ type MemoryResult={ok?:boolean;reused?:boolean;no_op?:boolean;activity_page_id?:
 type CanonicalRule={id:string;domain:string;rule:string;source:string;confidence:number;exception:boolean;test:boolean;approved:boolean;state:string;date:string};
 type CanonicalEnvelope={ok?:boolean;items?:CanonicalRule[];domain?:string;canonical_only?:boolean};
 
-const hiddenRoots=['/','/perfil','/ana'];
+const hiddenRoots=['/','/inicio','/perfil','/ana'];
 const BUCKET='fenix-preprod-documents-test';
 
 function scopeFromPath(path:string):Scope{
@@ -72,7 +72,6 @@ export default function AnaUniversalGuard(){
   },[logged,hide,scope.type,scope.code,location.pathname]);
   if(!logged||hide||!caps)return null;
 
-  const correctionUrl=`/ana?scope_type=${encodeURIComponent(scope.type)}${scope.code?`&scope_code=${encodeURIComponent(scope.code)}`:''}`;
   const executeNeedsActionContext=Boolean(caps.ana_execute_requires_action_context);
   const executeEnabled=Boolean(caps.can_ana_execute&&!executeNeedsActionContext);
 
@@ -124,7 +123,6 @@ export default function AnaUniversalGuard(){
       {mode==='manual'&&<p className="ana-inline-note">Modo manual activo. Al terminar, registra qué ocurrió y cualquier contexto útil para la próxima gestión.</p>}
       <div className="ana-secondary-actions">
         <button disabled={!caps.can_upload_evidence||!scopeAllowed} onClick={()=>setEvidenceOpen(v=>!v)} title={!scope.code?'Primero guarda el registro para poder relacionar la evidencia.':!scopeAllowed?'Esta ficha todavía no admite carga de evidencia.':''}><FileUp size={15}/> Subir evidencia</button>
-        <button disabled={!caps.can_correct_ana||!scope.code} onClick={()=>navigate(correctionUrl)} title={!scope.code?'Primero guarda el registro para vincular la corrección a su origen.':''}><MessageSquareWarning size={15}/> Ana se ha equivocado</button>
         <button disabled={!caps.can_view_learning_inbox} onClick={()=>caps.can_view_learning_inbox&&navigate('/ana')} title={caps.learning_inbox_disabled_reason||''}>Correcciones</button>
       </div>
       {evidenceOpen&&scopeAllowed&&<div className="ana-evidence-panel">
