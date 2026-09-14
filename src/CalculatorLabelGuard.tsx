@@ -1,15 +1,39 @@
 import {useEffect} from 'react';
 
+const SIZE='46px';
+const RIGHT='20px';
+const ORANGE='#ff5a1f';
+
+function styleLauncher(el:HTMLElement,bottom:string){
+  el.style.position='fixed';
+  el.style.right=RIGHT;
+  el.style.bottom=bottom;
+  el.style.width=SIZE;
+  el.style.height=SIZE;
+  el.style.minWidth=SIZE;
+  el.style.minHeight=SIZE;
+  el.style.border='0';
+  el.style.borderRadius='50%';
+  el.style.background=ORANGE;
+  el.style.color='#fff';
+  el.style.boxShadow='0 10px 28px rgba(20,27,38,.2)';
+  el.style.padding='0';
+  el.style.display='grid';
+  el.style.placeItems='center';
+  el.style.zIndex='2147482000';
+}
+
 function removeLauncherText(el:HTMLElement){
   for(const node of Array.from(el.childNodes)){
     if(node.nodeType===Node.TEXT_NODE)node.textContent='';
   }
   el.setAttribute('aria-label','Calculadora Hipotecaria');
   el.setAttribute('title','Calculadora');
+  styleLauncher(el,'130px');
 }
 
 function ensureChatLauncher(){
-  const calc=document.querySelector<HTMLElement>('.calc-launcher');
+  const calc=document.querySelector<HTMLElement>('.calc-launcher:not(.fenix-chat-launcher-restored)');
   if(!calc||document.querySelector('.fenix-chat-launcher-restored'))return;
   const link=document.createElement('a');
   link.className='calc-launcher fenix-chat-launcher-restored';
@@ -17,11 +41,9 @@ function ensureChatLauncher(){
   link.setAttribute('aria-label','Abrir chat');
   link.setAttribute('title','Chat');
   link.textContent='💬';
-  link.style.bottom='84px';
   link.style.textDecoration='none';
-  link.style.display='grid';
-  link.style.placeItems='center';
   link.style.fontSize='20px';
+  styleLauncher(link,'22px');
   document.body.appendChild(link);
 }
 
@@ -31,6 +53,7 @@ function normalize(root:ParentNode=document){
     for(const node of Array.from(el.childNodes))if(node.nodeType===Node.TEXT_NODE&&node.textContent?.includes('PRO'))node.textContent=node.textContent.replace(/\s*PRO\b/g,'');
   });
   root.querySelectorAll<HTMLElement>('.calc-launcher:not(.fenix-chat-launcher-restored)').forEach(removeLauncherText);
+  root.querySelectorAll<HTMLElement>('.fenix-chat-launcher-restored').forEach(el=>styleLauncher(el,'22px'));
   ensureChatLauncher();
 }
 
