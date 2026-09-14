@@ -23,3 +23,31 @@ test('participant and document sections stay compact by default',async()=>{
  expect(people).toContain('exp-person-documents');
  expect(people).toMatch(/open|expanded|collapsed|details|summary/);
 });
+
+test('floating controls keep calculator microphone chat vertical order',async()=>{
+ const calc=read('src/CalculatorLabelGuard.tsx');
+ const audio=read('src/audio-transcription.css');
+ expect(calc).toContain("styleLauncher(el,'130px')");
+ expect(audio).toContain('bottom:76px');
+ expect(calc).toContain("styleLauncher(link,'22px')");
+ expect(calc).toContain("const SIZE='46px'");
+ expect(calc).toContain("const ORANGE='#ff5a1f'");
+});
+
+test('bank top three mounts directly in expediente detail and uses live signals',async()=>{
+ const source=read('src/ExpedienteBankRankingProdGuard.tsx');
+ expect(source).toContain("document.querySelector('.detail-next-action')");
+ expect(source).not.toContain("document.querySelector('.exp-ana-runtime-main')");
+ expect(source).toContain('/bancos-candidatos');
+ expect(source).toContain('/envios-banco');
+ expect(source).toContain('/ofertas');
+ expect(source).toContain('slice(0,3)');
+});
+
+test('structured reports can open without a PDF and PDFs remain separate',async()=>{
+ const source=read('src/InformesShell.tsx');
+ expect(source).toContain('expanded');
+ expect(source).toContain('Abrir informe');
+ expect(source).toContain('Abrir PDF');
+ expect(source).toContain('Object.entries(r)');
+});
