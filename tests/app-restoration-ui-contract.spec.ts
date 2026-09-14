@@ -86,3 +86,29 @@ test('bank detail visibly exposes required commercial and operational knowledge'
  const source=read('src/BancoDetailShell.tsx').toLocaleLowerCase('es');
  for(const token of ['hipoteca','financi','vincul','tasador','contact','velocidad','aprob','expediente','hist','valor','not']) expect(source).toContain(token);
 });
+
+test('direction KPI drilldown hides normal destination content while active and cleans marker',async()=>{
+ const source=read('src/DirectionKpiDrilldownGuard.tsx');
+ expect(source).toContain("root.setAttribute('data-kpi-drilldown','true')");
+ expect(source).toContain("root.removeAttribute('data-kpi-drilldown')");
+});
+
+test('Honorarios drilldown uses deployed economy runtime and not Notion economy route',async()=>{
+ const source=read('src/DirectionKpiDrilldownGuard.tsx');
+ expect(source).toContain("import {fetchEconomiaRuntime} from './economiaRuntime'");
+ expect(source).toContain('await fetchEconomiaRuntime<unknown>()');
+ expect(source).not.toContain("fetchNotionRuntime<unknown>('/economia')");
+ expect(source).toContain("if(r.status!==200)return{status:r.status,data:null}");
+});
+
+test('participant GET merges canonical labor profile into existing people response',async()=>{
+ const source=read('supabase/functions/fenix-expediente-people/index.ts');
+ expect(source).toContain("fenix_prod_exp_people_server");
+ expect(source).toContain("fenix_prod_exp_labor_profile_server");
+ expect(source).toContain('mergeLabor(r,labor)');
+ expect(source).toContain('byId.get(String(p?.id??p?.cliente_code??\'\'))');
+ for(const token of ['tipo_contrato','modalidad_contrato','fecha_inicio','fecha_fin','jornada','categoria_profesional','numero_pagas']){
+  const migration=read('supabase/migrations/20260914162500_explicit_participant_labor_profile.sql');
+  expect(migration).toContain(token);
+ }
+});
