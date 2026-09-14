@@ -1,0 +1,60 @@
+name: CEREBRO GOV-001 Hardening Exact-Head Gate
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'cerebro/factory.mjs'
+      - 'cerebro/registry/engine-registry.seed.json'
+      - 'cerebro/tests/factory.test.mjs'
+      - '.github/workflows/cerebro-gov001-hardening-exact-head-gate.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  factory-and-app-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      VITE_FENIX_ENV: prod
+      VITE_SUPABASE_URL: https://cluhljgonannaafpmblx.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_yjISKmA5UPfF3d7NitP_DA_j5LGydh0
+    steps:
+      - name: Checkout exact PR head
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Install dependencies reproducibly
+        run: npm ci
+
+      - name: Validate GOV-001 registry
+        working-directory: cerebro
+        run: npm run validate
+
+      - name: Test FACT-001 and GOV-001 contracts
+        working-directory: cerebro
+        run: npm test
+
+      - name: Generate all 177 engine skeletons outside repo
+        working-directory: cerebro
+        run: npm run generate -- --out /tmp/cerebro-generated
+
+      - name: Assert 177 generated engines and no repository mutation
+        run: |
+          node -e "const x=require('/tmp/cerebro-generated/skeleton-index.json'); if(x.engine_count!==177) process.exit(1);"
+          git diff --exit-code
+
+      - name: Build App against current PROD configuration without deploy
+        run: npm run build
+
+      - name: Assert no PRE-PROD Supabase endpoint leaked into build
+        run: |
+          set -euo pipefail
+          ! grep -R -F 'hnqlnvakzaywtafeiybt.supabase.co' dist
+          grep -R -F 'cluhljgonannaafpmblx.supabase.co' dist >/dev/null
