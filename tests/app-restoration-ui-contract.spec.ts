@@ -53,3 +53,13 @@ test('structured reports can open without a PDF and PDFs remain separate',async(
  expect(source).toContain('Abrir PDF ↗');
  expect(source).toContain('Object.entries(r)');
 });
+
+test('expediente master detail visibly preserves required core financial and operational data',async()=>{
+ const sources=['src/OperationalRecordDetail.tsx','src/ExpedienteBelenFinancialGuard.tsx','src/ExpedienteCommercialTermsGuard.tsx','src/ExpedienteDocumentsGuard.tsx'].map(read).join('\n');
+ for(const token of ['cliente','inmobiliaria','financ','visitador','precio','aport','ratio','ahorro','banco','estado','riesg','próxima','document','hist']) expect(sources.toLocaleLowerCase('es')).toContain(token);
+});
+
+test('bank detail visibly exposes required commercial and operational knowledge',async()=>{
+ const source=read('src/BancoDetailShell.tsx').toLocaleLowerCase('es');
+ for(const token of ['hipoteca','financi','vincul','tasador','contact','velocidad','aprob','expediente','hist','valor','not']) expect(source).toContain(token);
+});
