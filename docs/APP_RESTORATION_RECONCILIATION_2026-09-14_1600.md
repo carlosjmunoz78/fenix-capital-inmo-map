@@ -2,6 +2,8 @@
 
 Objetivo: reconciliar documentación histórica con el estado vivo de la rama y Supabase, sin promover ni desplegar nada por inferencia.
 
+> Estado de promoción: **NO PROMOVIDO**. La rama y sus builds no equivalen a App PROD. App PREPROD continúa desactivada.
+
 ## Estado verificado
 
 ### HECHO · retiro selectivo de RPC legacy
