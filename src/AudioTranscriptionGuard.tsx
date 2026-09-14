@@ -1,5 +1,5 @@
 import {useEffect,useRef,useState} from 'react';
-import {BookOpen,Check,ClipboardList,Copy,MessageCircle,Mic,MicOff,Send,X} from 'lucide-react';
+import {Check,ClipboardList,Copy,MessageCircle,Mic,MicOff,Send,X} from 'lucide-react';
 import {useLocation,useNavigate} from 'react-router-dom';
 import {fetchAnaCanonicalApi} from './supabase';
 import './audio-transcription.css';
@@ -10,7 +10,7 @@ type RecognitionErrorLike={error?:string};
 type RecognitionLike={lang:string;continuous:boolean;interimResults:boolean;onresult:((event:RecognitionEventLike)=>void)|null;onerror:((event:RecognitionErrorLike)=>void)|null;onend:(()=>void)|null;start:()=>void;stop:()=>void;abort:()=>void};
 type RecognitionCtor=new()=>RecognitionLike;
 type SpeechWindow=Window&{SpeechRecognition?:RecognitionCtor;webkitSpeechRecognition?:RecognitionCtor};
-type ActionMode='correct'|'knowledge'|'task'|'ana'|null;
+type ActionMode='correct'|'task'|'ana'|null;
 type CanonicalRule={id:string;rule:string;confidence?:number;approved?:boolean;state?:string};
 type CanonicalEnvelope={ok?:boolean;items?:CanonicalRule[]};
 type ChatMessage={role:'user'|'ana';text:string};
@@ -24,10 +24,14 @@ function anaReply(question:string,rules:CanonicalRule[]){
  if(!matched.length)return 'No tengo todavía un criterio aprobado suficientemente relacionado con esa consulta. Puedo seguir trabajando con el contexto de financiación, pero prefiero no inventar una respuesta sin base aprobada.';
  return `Según los criterios aprobados de Fénix Capital: ${matched.map(x=>x.rule.rule.trim().replace(/[.\s]+$/,'')).join('. ')}.`;
 }
+function correctionScope(pathname:string){
+ const parts=pathname.split('/').filter(Boolean),root=parts[0]||'',code=parts[1]||'';
+ const map:Record<string,string>={expedientes:'expediente',contactos:'contacto','contactos-b2b':'contacto_b2b',inmobiliarias:'inmobiliaria',tareas:'tarea',agenda:'tarea',visitas:'visita',bancos:'banco',tasaciones:'tasacion',firmas:'firma',documentacion:'documento',documentos:'documento',comunicaciones:'comunicacion',notarias:'notaria','registros-propiedad':'registro_propiedad'};
+ return{type:map[root]||root||'general',code:code&&!['nuevo','nueva','new'].includes(code.toLowerCase())?code:''};
+}
 
 const ACTIONS=[
  {id:'correct' as const,label:'Corregir',hint:'Corregir un dato, criterio o respuesta',icon:Check},
- {id:'knowledge' as const,label:'Dar conocimiento',hint:'Añadir conocimiento útil de financiación a CEREBRO',icon:BookOpen},
  {id:'task' as const,label:'Tarea',hint:'Preparar una tarea con este contexto',icon:ClipboardList},
  {id:'ana' as const,label:'Hablar con Ana',hint:'Consultar a Ana con contexto de financiación',icon:MessageCircle}
 ];
@@ -39,6 +43,7 @@ export default function AudioTranscriptionGuard(){
  const[finalText,setFinalText]=useState(''),[interimText,setInterimText]=useState(''),[message,setMessage]=useState(''),[chat,setChat]=useState<ChatMessage[]>([]);
  const supported=Boolean(recognitionConstructor());
  const composed=`${finalText}${interimText?` ${interimText}`:''}`.trim();
+ const hidden=location.pathname==='/'||location.pathname.startsWith('/auth');
  useEffect(()=>()=>{recognitionRef.current?.abort();recognitionRef.current=null},[]);
  useEffect(()=>{recognitionRef.current?.abort();recognitionRef.current=null;setListening(false);setInterimText('');setOpen(false);setMode(null);setChat([])},[location.pathname]);
  function stop(){recognitionRef.current?.stop();setListening(false)}
@@ -54,7 +59,7 @@ export default function AudioTranscriptionGuard(){
  function close(){stop();setOpen(false);setMode(null);setMessage('');setChat([])}
  async function copyText(){if(!composed){setMessage('Aún no hay texto para copiar.');return}try{await navigator.clipboard.writeText(composed);setMessage('Texto copiado.')}catch{setMessage('No se pudo copiar automáticamente.')}}
  async function send(){
-  if(!mode){setMessage('Elige una de las cuatro opciones.');return}
+  if(!mode){setMessage('Elige una de las tres opciones.');return}
   if(!composed){setMessage('Escribe o dicta primero lo que quieres enviar.');return}
   stop();
   if(mode==='ana'){
@@ -67,11 +72,15 @@ export default function AudioTranscriptionGuard(){
    finally{setSending(false)}
    return;
   }
-  const base=new URLSearchParams({source_route:location.pathname,draft:composed,domain:'financiacion'});
+  const scope=correctionScope(location.pathname);
+  const base=new URLSearchParams({source_route:location.pathname,draft:composed,domain:'financiacion',scope_type:scope.type});
+  if(scope.code)base.set('scope_code',scope.code);
   if(mode==='task'){navigate(`/tareas/nueva?${base.toString()}`);return}
   base.set('mode',mode);
+  if(mode==='correct')base.set('correction',composed);
   navigate(`/ana?${base.toString()}`);
  }
+ if(hidden)return null;
  return <div className="fenix-audio-transcription" data-testid="audio-transcription-guard">
   {!open&&<button type="button" className="fenix-audio-launcher" onClick={()=>setOpen(true)} aria-label="Abrir acciones por voz" title="Acciones por voz"><Mic size={21}/></button>}
   {open&&<section className="fenix-audio-panel" aria-label="Acciones por voz y texto">

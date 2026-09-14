@@ -52,6 +52,7 @@ import FirmasShell from './FirmasShell';
 import DocumentacionShell from './DocumentacionShell';
 import DocumentViewerShell from './DocumentViewerShell';
 import ExpedienteDocumentsGuard from './ExpedienteDocumentsGuard';
+import ExpedienteRequiredDataGuard from './ExpedienteRequiredDataGuard';
 import ContextEvidenceUpload from './ContextEvidenceUpload';
 import IntelligentDocumentIngestionGuard from './IntelligentDocumentIngestionGuard';
 import ExistingDocumentAutoBackfillGuard from './ExistingDocumentAutoBackfillGuard';
@@ -111,6 +112,7 @@ import DirectionAnaInsight from './DirectionAnaInsight';
 import DirectionExecutiveOverviewGuard from './DirectionExecutiveOverviewGuard';
 import DirectionAnaUrgentGuard from './DirectionAnaUrgentGuard';
 import AnaKnowledgeBlock from './AnaKnowledgeBlock';
+import AnaChatBlock from './AnaChatBlock';
 import AnaKnowledgePlacementGuard from './AnaKnowledgePlacementGuard';
 import OperationalUniformityGuard from './OperationalUniformityGuard';
 
@@ -138,6 +140,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <DocumentDetailAnaGuard />
       <DirectoryRowOpenGuard />
       <AnaKnowledgeBlock />
+      <AnaChatBlock />
       <AnaKnowledgePlacementGuard />
       <AnaUniversalGuard />
       <AnaOperationalPreparationGuard />
@@ -148,6 +151,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <IntelligentDocumentIngestionGuard />
       <ExistingDocumentAutoBackfillGuard />
       <ExpedienteDocumentsGuard />
+      <ExpedienteRequiredDataGuard />
       <ExpedienteAnaRuntimeGuard />
       <ExpedienteBelenFinancialGuard />
       <ExpedienteBankRankingGuard />

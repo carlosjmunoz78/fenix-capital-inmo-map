@@ -8,8 +8,14 @@ function out(req:Request,body:any,status=200){return new Response(JSON.stringify
 async function rpc(name:string,args:any={}){const s=service();if(!s)throw new Error('server_config_missing');const {data,error}=await s.rpc(name,args);if(error)throw new Error(`${name}: ${error.message}`);return data}
 async function actor(req:Request){const c=config();if(!c.URL||!c.ANON||!service())return null;const h=req.headers.get('authorization')||'';if(!h.startsWith('Bearer '))return null;const auth=createClient(c.URL,c.ANON,{auth:{persistSession:false,autoRefreshToken:false}});const {data,error}=await auth.auth.getUser(h.slice(7));if(error||!data.user)return null;const ctx=await rpc('fenix_prod_actor_context_by_auth_server',{p_auth_user_id:data.user.id});return ctx?.ok?String(ctx.actor_code):null}
 async function jsonBody(req:Request){try{return await req.json()}catch{return {}}}
+function mergeLabor(people:any,labor:any){
+ const items=Array.isArray(people?.items)?people.items:[];
+ const laborItems=Array.isArray(labor?.items)?labor.items:[];
+ const byId=new Map(laborItems.map((x:any)=>[String(x?.id??x?.cliente_code??''),x]));
+ return {...people,items:items.map((p:any)=>({...p,...(byId.get(String(p?.id??p?.cliente_code??''))||{})}))};
+}
 Deno.serve(async(req:Request)=>{if(req.method==='OPTIONS')return new Response(null,{status:204,headers:cors(req)});let a;try{a=await actor(req)}catch(e){console.error(e);return out(req,{ok:false,status:500,error:'identity_resolution_failed'},500)}if(!a)return out(req,{ok:false,status:401,error:'identity_not_linked'},401);const u=new URL(req.url);try{
- if(req.method==='GET'&&u.searchParams.get('expediente')){const r=await rpc('fenix_prod_exp_people_server',{p_actor_code:a,p_exp_code:u.searchParams.get('expediente')});return out(req,r,Number(r?.status)||200)}
+ if(req.method==='GET'&&u.searchParams.get('expediente')){const exp=u.searchParams.get('expediente');const r=await rpc('fenix_prod_exp_people_server',{p_actor_code:a,p_exp_code:exp});if(!r?.ok)return out(req,r,Number(r?.status)||200);const labor=await rpc('fenix_prod_exp_labor_profile_server',{p_actor_code:a,p_exp_code:exp});if(!labor?.ok)return out(req,labor,Number(labor?.status)||500);const merged=mergeLabor(r,labor);return out(req,merged,Number(merged?.status)||200)}
  if(req.method==='GET'&&u.searchParams.get('contact')){const id=u.searchParams.get('contact');const r=await rpc('fenix_prod_contact_get_server',{p_actor_code:a,p_id:id});if(!r?.ok)return out(req,r,Number(r?.status)||200);const lists=await rpc('fenix_prod_contact_lists_server',{p_actor_code:a,p_client_code:id});return out(req,{...r,lists:lists?.items||[]},200)}
  if(req.method==='POST'){const b=await jsonBody(req);
   if(b.action==='create'){const r=await rpc('fenix_prod_exp_person_create_server',{p_actor_code:a,p_exp_code:b.expediente_code,p_payload:b.payload||{}});return out(req,r,Number(r?.status)||200)}

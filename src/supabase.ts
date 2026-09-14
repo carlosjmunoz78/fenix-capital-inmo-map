@@ -132,6 +132,14 @@ export async function fetchB2BActionsApi<T>(path:string,init?:RequestInit):Promi
   return fetchB2BActions<T>(path,init);
 }
 
+export async function fetchProfileApi<T>(path='',init?:RequestInit):Promise<{status:number;data:T|null}>{
+  return authenticatedEdgeFetch<T>('fenix-profile-api',path,init);
+}
+
+export async function fetchUserAdminApi<T>(path='',init?:RequestInit):Promise<{status:number;data:T|null}>{
+  return authenticatedEdgeFetch<T>('fenix-user-admin',path,init);
+}
+
 export async function fetchAppApi<T>(path:string,init?:RequestInit):Promise<{status:number;data:T|null}>{
   const result=await authenticatedEdgeFetch<T>('fenix-app-gateway',path,init);
   if(path==='/navigation'&&(result.status===0||result.status>=500))return{status:200,data:safeNavigationFallback() as T};
