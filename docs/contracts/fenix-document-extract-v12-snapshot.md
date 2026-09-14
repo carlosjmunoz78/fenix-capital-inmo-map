@@ -43,7 +43,7 @@ El builder `scripts/build-fenix-document-extract-candidate.mjs` parte exclusivam
 
 ## Gate
 
-Workflow `34867589613`: SUCCESS. El gate valida snapshot, bundle hash documentado, hash del source versionado, contratos A+B+D y build TypeScript/Vite.
+Workflow `34867656937`: COMPLETED / SUCCESS. Contratos A+B+D + snapshot/source pin de extractor + TypeScript/Vite en verde para HEAD `8e0e62a34bf398c818a236d4d9be67c58d5efb05`.
 
 ## Rollback
 
