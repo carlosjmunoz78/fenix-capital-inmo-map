@@ -41,6 +41,10 @@ Campos que deben quedar admitidos en la proyección canónica del candidato, sin
 
 El builder `scripts/build-fenix-document-extract-candidate.mjs` parte exclusivamente del source versionado, valida su hash, exige anchors únicos y genera solo la ampliación laboral mínima. No despliega nada.
 
+## Gate
+
+Workflow `34867589613`: SUCCESS. El gate valida snapshot, bundle hash documentado, hash del source versionado, contratos A+B+D y build TypeScript/Vite.
+
 ## Rollback
 
 La referencia de rollback inmediata es la función PROD v12 identificada por bundle `ezbr_sha256` `54b2a282be040ceeef3564cc6c7d7653c59b96e25ce3db9e7af27c9634b531d2`, con el source auditado/versionado en esta rama y hash repo `c8ccc623be364dcfc67b8be8f6b5320476909f4c1af77bf2e3339723b8a0b1c9`. No desplegar una variante si no existe forma de volver a esta versión funcional.
