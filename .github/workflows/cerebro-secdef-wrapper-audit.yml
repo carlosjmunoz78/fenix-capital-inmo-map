@@ -9,6 +9,7 @@ on:
       - 'supabase/fix_chat_send_v2_server_20260914.sql'
       - 'supabase/secdef_gateway_route_contract_20260915.json'
       - 'supabase/functions/fenix-app-gateway/index.ts'
+      - 'scripts/cerebro-secdef-canary-auth-e2e.sh'
       - 'docs/SECDEF_GATEWAY_PROMOTION_PLAN_20260915.md'
       - '.github/workflows/cerebro-secdef-wrapper-audit.yml'
 
@@ -32,7 +33,24 @@ jobs:
           test -f supabase/fix_chat_send_v2_server_20260914.sql
           test -f supabase/secdef_gateway_route_contract_20260915.json
           test -f supabase/functions/fenix-app-gateway/index.ts
+          test -f scripts/cerebro-secdef-canary-auth-e2e.sh
           test -f docs/SECDEF_GATEWAY_PROMOTION_PLAN_20260915.md
+          bash -n scripts/cerebro-secdef-canary-auth-e2e.sh
+
+      - name: Assert authenticated parity harness is secret-ref only
+        shell: bash
+        run: |
+          set -euo pipefail
+          f='scripts/cerebro-secdef-canary-auth-e2e.sh'
+          grep -F 'CEREBRO_E2E_USER_JWT' "$f" >/dev/null
+          grep -F 'PROD_PUBLISHABLE_KEY' "$f" >/dev/null
+          grep -F 'fenix-app-gateway-v2-canary' "$f" >/dev/null
+          grep -F 'fenix_prod_profile_get_user' "$f" >/dev/null
+          grep -F 'fenix_prod_profile_socials_get_user' "$f" >/dev/null
+          grep -F 'fenix_prod_chat_people_user' "$f" >/dev/null
+          grep -F 'fenix_prod_chat_conversations_user' "$f" >/dev/null
+          ! grep -Eq 'eyJ[A-Za-z0-9_-]{20,}\.' "$f"
+          ! grep -Eq 'sb_(secret|publishable)_[A-Za-z0-9_-]+' "$f"
 
       - name: Assert additive server-only boundary
         shell: bash
@@ -136,3 +154,4 @@ jobs:
           printf '%s\n' 'OLD_VS_NEW_REQUIRED=true'
           printf '%s\n' 'GATEWAY_ROUTE_CONTRACT_COUNT=15'
           printf '%s\n' 'GATEWAY_IMPLEMENTATION_WIRED=true'
+          printf '%s\n' 'AUTH_PARITY_HARNESS_PREPARED=true'
