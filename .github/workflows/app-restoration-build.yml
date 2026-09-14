@@ -29,5 +29,7 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm ci
+      - name: Participant labor and compact UI contract
+        run: npx playwright test tests/participant-labor-contract.spec.ts --reporter=line
       - name: TypeScript and Vite build
         run: npm run build
