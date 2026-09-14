@@ -10,7 +10,7 @@ const VERSIONED_SOURCE_SHA='c8ccc623be364dcfc67b8be8f6b5320476909f4c1af77bf2e333
 
 test('live v12 extractor snapshot preserves rollback and governance contract',async()=>{
  const snapshot=read('docs/contracts/fenix-document-extract-v12-snapshot.md');
- expect(snapshot).toContain('Version PROD: `12`');
+ expect(snapshot).toContain('Version PROD auditada: `12`');
  expect(snapshot).toContain('`verify_jwt`: `true`');
  expect(snapshot).toContain('Supabase bundle `ezbr_sha256`');
  expect(snapshot).toContain(LIVE_BUNDLE_SHA);
