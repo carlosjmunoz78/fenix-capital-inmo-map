@@ -37,16 +37,22 @@ Objetivo: recuperar y mejorar la funcionalidad perdida tras migración sin rehac
 - EXISTENTE — en PROD usa `fenix-prod-documents`, `fenix-evidence-api` y `fenix-document-intelligence`.
 - EXISTENTE — funciones PROD activas: `fenix-document-intelligence` v12, `fenix-document-extract` v12, `fenix-document-reread` v2, `fenix-document-auto-ingest` v2, `fenix-document-existing-backfill` v7.
 - HECHO BACKEND — `fenix-document-intelligence` ya tiene tratamiento específico `origin_type=comprador`: resuelve expediente, compara campos, abre conflictos y actualiza la ficha del participante mediante `fenix_prod_exp_person_update_server`.
-- PARCIAL UI — la ruta general de expediente conserva el documento y su lectura, pero para proyectar a la ficha personal debe enviar explícitamente `origin_type=comprador` + `client_code`; la navegación de documentación ya transporta `comprador=<id>`, falta reconciliar ese query param con el guard universal.
-- PARCIAL — validar PDF digital, PDF escaneado y PDF con imágenes incrustadas con casos controlados.
-- PARCIAL — demostrar asociación persona-documento y descarga RBAC.
+- HECHO EN RAMA — la ruta `/documentacion?expediente=<exp>&comprador=<client_code>&upload=1` ya conserva `client_code` hasta `UniversalDocumentIntelligenceGuardV2`; el motor usa `origin_type=comprador` y no mezcla el documento con otro participante.
+- HECHO EN RAMA — al llegar desde la ficha de una persona, el modal documental se abre en contexto de esa persona y el guard muestra explícitamente que los datos se consolidarán sobre su ficha.
+- HECHO EN RAMA — normalización semántica para la proyección canónica: `neto/liquido → ingresos_netos_mensuales → sueldo_neto_mensual`, `antiguedad/antiguedad_actual_anos → antiguedad_laboral`, `empresa_actual/empresa_pagador → empresa → empresa_organismo`, además de identidad y ahorro cuando sean equivalentes.
+- HECHO BUILD — commit de contexto documento→persona `6218242631ae438e1eec1266e3ffa87fc28d61fe`, run `34840475869`, `success`.
+- EXISTENTE EXTRACTOR — el esquema maestro ya contempla Contrato de trabajo (`tipo_contrato`, modalidad, fecha inicio/fin, jornada, categoría, periodo de prueba, salario pactado), Vida laboral (empresa actual, fecha alta, antigüedad, periodos, días cotizados) y Nómina (empresa, periodo, antigüedad, categoría, salario base, complementos, bruto, neto, cotización, IRPF, deducciones, embargos/anticipos).
+- GAP CANÓNICO LOCALIZADO — el perfil PROD de `fenix_prod.clientes.profile` hoy tiene claves para sueldo neto, antigüedad laboral, empresa, deudas, ahorro, situación laboral, etc., pero no existe todavía una clave canónica visible para `tipo_contrato`, `modalidad_contrato`, `fecha_inicio/fin`, `jornada`, `categoria_profesional` o `numero_pagas`. No mezclar esos conceptos dentro de `situacion_laboral`; ampliar contrato/perfil de forma explícita antes de proyectarlos.
+- PENDIENTE E2E — validar PDF digital, PDF escaneado y PDF con imágenes incrustadas con casos controlados y confirmar que cada dato termina en la persona correcta.
+- PENDIENTE MODELO — ampliar la ficha canónica para conservar y mostrar todos los hechos laborales/financieros extraídos sin perder semántica ni sobrescribir silenciosamente.
+- PARCIAL — demostrar descarga RBAC del original desde la ficha de la persona.
 - POR AUDITAR — `AnaUniversalGuard` mantiene bucket fijo `fenix-preprod-documents-test`; no tocar hasta reconciliar con Evidence API/Storage PROD.
 
 ## G4 · Inicio / KPI / bancos / tareas
 
 - EXISTENTE — `ExpedienteBankRankingGuard` muestra Top 3 por expediente con score, razones, riesgos y estrategia.
-- ROJO — `DirectionKpiDrilldownGuard` devuelve 503 deliberadamente en PROD porque usa `fenix-direction-kpis-test`; el click existe pero el desglose exacto aún no funciona en PROD.
-- HECHO CANÓNICO — `useDirectionLiveData` ya define `en curso` excluyendo firmado/posventa/perdido/cerrado/anulado/cancelado/pasado/desistido; coincide con la regla de negocio de no firmado/no cerrado.
+- HECHO EN RAMA — `DirectionKpiDrilldownGuard` ya no depende en PROD de `fenix-direction-kpis-test`; reutiliza contratos canónicos de expedientes/firmas y mantiene navegación exacta.
+- HECHO CANÓNICO — `useDirectionLiveData` define `en curso` excluyendo firmado/posventa/perdido/cerrado/anulado/cancelado/pasado/desistido; coincide con la regla de negocio de no firmado/no cerrado.
 - HECHO — `DirectionPriorityActionGuard` intercepta cada prioridad de Inicio y navega a `priority.route`; una tarea con id abre `/tareas/<id>` en lugar de Agenda genérica.
 - PLANIFICADO — KPI Bancos de Inicio = Top 3 dinámico según operaciones reales/resultados, no ranking decorativo.
 - PLANIFICADO — `requiere atención hoy` y navegación exacta para cada registro.
@@ -75,8 +81,8 @@ Objetivo: recuperar y mejorar la funcionalidad perdida tras migración sin rehac
 - PR de restauración: #380, rama `app-restoration-v0-20260914`.
 - HECHO — PR sigue mergeable y aislado de `main`.
 - HECHO — workflow aislado `App Restoration Build Gate`, solo build, sin deploy y sin reactivar App PRE-PROD.
-- HECHO — builds verdes confirmados; último commit funcional de participantes `674d785fd17ab7a23f3ca32d1e6b7739028126b6`, run `34839288399`, `success`.
-- NO PROMOVER AÚN — faltan documento→persona E2E, KPI PROD, Perfil completo, Informes/masivas, QA visual y OLD-vs-NEW.
+- HECHO — builds verdes confirmados hasta el contrato documento→persona; no equivalen todavía a E2E funcional completo.
+- NO PROMOVER AÚN — faltan E2E documento→persona con PDFs reales/controlados, extensión canónica de hechos laborales, Perfil completo, Informes/masivas, QA visual y OLD-vs-NEW.
 - No usar Codex/Work salvo que sea necesario para browser/computer-use amplio o refactor que no pueda verificarse con las herramientas actuales; conservar créditos.
 
 ## Aprendizaje para CEREBRO App Factory
@@ -94,3 +100,5 @@ Todo problema localizado debe convertirse en regla reusable:
 10. Un build verde debe ser automático y aislado de despliegues; restauración y promoción son gates distintos.
 11. Si el backend PROD ya expone create/update con RBAC, la UI debe reconectarse a ese contrato en lugar de conservar acciones `*-test` ocultas tras `!IS_PRODUCTION`.
 12. La navegación hacia documentación de una persona debe conservar el `client_code` hasta el motor de extracción para que los campos terminen en la ficha correcta.
+13. La extracción documental y el modelo canónico son contratos distintos: nunca perder un hecho extraído solo porque aún no exista su campo visible; conservarlo con evidencia y promoverlo al perfil mediante una extensión explícita y versionada.
+14. No reutilizar un campo semánticamente distinto para “hacer caber” datos nuevos (por ejemplo, `tipo_contrato` no debe guardarse como `situacion_laboral`).
