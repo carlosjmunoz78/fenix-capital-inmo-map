@@ -1,6 +1,7 @@
 import {useEffect,useRef} from 'react';
 import {useLocation,useNavigate} from 'react-router-dom';
 import type {DirectionLiveSnapshot} from './useDirectionLiveData';
+import DirectionAttentionTodayGuard from './DirectionAttentionTodayGuard';
 
 export default function DirectionPriorityActionGuard(){
   const location=useLocation();
@@ -33,5 +34,5 @@ export default function DirectionPriorityActionGuard(){
     return()=>document.removeEventListener('click',onClick,true);
   },[location.pathname,navigate]);
 
-  return null;
+  return <DirectionAttentionTodayGuard/>;
 }
