@@ -54,3 +54,23 @@ test('candidate builder is minimal and labor projection scope is explicit',async
  expect(snapshot).toContain('No modificar OCR/clasificación/modelo/proveedor');
  expect(snapshot).toContain('No desplegar una variante si no existe forma de volver a esta versión funcional.');
 });
+
+test('original document rollback and RBAC contract remains enforced inside the promotion gate',async()=>{
+ const ui=read('src/UniversalDocumentIntelligenceGuardV2.tsx');
+ const contract=read('docs/contracts/document-original-rbac-contract.md');
+ const verifier=read('scripts/verify-fenix-document-extract-candidate.mjs');
+ expect(ui).toContain('uploadToSignedUrl');
+ expect(ui).not.toContain('.download(');
+ expect(ui).not.toContain('getPublicUrl');
+ expect(ui).not.toContain('createSignedUrl');
+ expect(contract).toContain('fenix_prod_document_get_server');
+ expect(contract).toContain('fenix_prod_document_extract_resolve_server');
+ expect(contract).toContain('fenix_prod_document_view_path_server');
+ expect(contract).toContain('Dirección');
+ expect(contract).toContain('Financiero propietario');
+ expect(contract).toContain('Financiero ajeno');
+ expect(contract).toContain('DENY');
+ expect(contract).toContain('URL firmada');
+ expect(contract).toContain('corta duración');
+ expect(verifier).toContain('candidate contains changes outside the permitted labor-field additions');
+});
