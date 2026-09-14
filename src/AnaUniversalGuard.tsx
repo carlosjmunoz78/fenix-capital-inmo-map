@@ -1,6 +1,6 @@
 import { ChangeEvent, useEffect, useMemo, useState } from 'react';
 import { ChevronDown, ChevronUp, FileUp, Sparkles } from 'lucide-react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { anaAvatar } from './assets/visualAssets';
 import { fetchAnaApi, fetchAnaCanonicalApi, fetchEvidenceApi, fetchMemoryApi, supabase } from './supabase';
 import './ana-universal.css';
@@ -50,7 +50,7 @@ function nextText(scope:Scope){
 }
 
 export default function AnaUniversalGuard(){
-  const location=useLocation(),navigate=useNavigate();
+  const location=useLocation();
   const scope=useMemo(()=>scopeFromPath(location.pathname),[location.pathname]);
   const domain=useMemo(()=>domainForScope(scope),[scope.type]);
   const [logged,setLogged]=useState(false),[caps,setCaps]=useState<Caps|null>(null),[open,setOpen]=useState(false),[mode,setMode]=useState<'help'|'manual'|null>(null);
@@ -123,7 +123,6 @@ export default function AnaUniversalGuard(){
       {mode==='manual'&&<p className="ana-inline-note">Modo manual activo. Al terminar, registra qué ocurrió y cualquier contexto útil para la próxima gestión.</p>}
       <div className="ana-secondary-actions">
         <button disabled={!caps.can_upload_evidence||!scopeAllowed} onClick={()=>setEvidenceOpen(v=>!v)} title={!scope.code?'Primero guarda el registro para poder relacionar la evidencia.':!scopeAllowed?'Esta ficha todavía no admite carga de evidencia.':''}><FileUp size={15}/> Subir evidencia</button>
-        <button disabled={!caps.can_view_learning_inbox} onClick={()=>caps.can_view_learning_inbox&&navigate('/ana')} title={caps.learning_inbox_disabled_reason||''}>Correcciones</button>
       </div>
       {evidenceOpen&&scopeAllowed&&<div className="ana-evidence-panel">
         <label className="ana-file-button">Documento o audio<input type="file" accept=".pdf,.png,.jpg,.jpeg,.txt,.mp3,.m4a,.wav,.webm,audio/*" onChange={e=>void uploadSelected(e)} disabled={uploading}/></label>
