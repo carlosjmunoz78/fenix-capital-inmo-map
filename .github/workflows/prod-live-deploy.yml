@@ -21,6 +21,7 @@ jobs:
       VITE_FENIX_ENV: prod
       VITE_SUPABASE_URL: https://cluhljgonannaafpmblx.supabase.co
       VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_yjISKmA5UPfF3d7NitP_DA_j5LGydh0
+      VITE_CEREBRO_CONSOLE_URL: https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-gateway-v0/
     steps:
       - name: Checkout main
         uses: actions/checkout@v4
@@ -43,6 +44,7 @@ jobs:
           set -euo pipefail
           ! grep -R -F 'hnqlnvakzaywtafeiybt.supabase.co' dist-live
           grep -R -F 'cluhljgonannaafpmblx.supabase.co' dist-live >/dev/null
+          grep -R -F 'cerebro-console-gateway-v0' dist-live >/dev/null
 
       - name: Prepare static branch consumed by live hosting
         shell: bash
