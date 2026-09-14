@@ -8,6 +8,7 @@ on:
       - 'supabase/secdef_remaining_*_wrappers_20260914.sql'
       - 'supabase/fix_chat_send_v2_server_20260914.sql'
       - 'supabase/secdef_gateway_route_contract_20260915.json'
+      - 'supabase/functions/fenix-app-gateway/index.ts'
       - '.github/workflows/cerebro-secdef-wrapper-audit.yml'
 
 permissions:
@@ -16,7 +17,7 @@ permissions:
 jobs:
   audit-secdef-wrappers:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,6 +30,7 @@ jobs:
           test -f supabase/secdef_remaining_mutator_wrappers_20260914.sql
           test -f supabase/fix_chat_send_v2_server_20260914.sql
           test -f supabase/secdef_gateway_route_contract_20260915.json
+          test -f supabase/functions/fenix-app-gateway/index.ts
 
       - name: Assert additive server-only boundary
         shell: bash
@@ -96,6 +98,27 @@ jobs:
             jq -e --arg wrapper "$wrapper" '.routes | any(.wrapper == $wrapper)' "$f" >/dev/null
           done
 
+      - name: Assert Gateway implements every prepared wrapper
+        shell: bash
+        run: |
+          set -euo pipefail
+          contract='supabase/secdef_gateway_route_contract_20260915.json'
+          gateway='supabase/functions/fenix-app-gateway/index.ts'
+          while IFS= read -r wrapper; do
+            grep -F "'$wrapper'" "$gateway" >/dev/null || {
+              echo "Gateway implementation missing wrapper: $wrapper"
+              exit 1
+            }
+          done < <(jq -r '.routes[].wrapper' "$contract")
+          test "$(grep -o "'/v2/" "$gateway" | wc -l | tr -d ' ')" -ge 12
+
+      - name: Build repository
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci
+          npm run build
+
       - name: Assert no direct PROD retirement in this change
         shell: bash
         run: |
@@ -110,3 +133,4 @@ jobs:
           printf '%s\n' 'LEGACY_RETIREMENT=false'
           printf '%s\n' 'OLD_VS_NEW_REQUIRED=true'
           printf '%s\n' 'GATEWAY_ROUTE_CONTRACT_COUNT=15'
+          printf '%s\n' 'GATEWAY_IMPLEMENTATION_WIRED=true'
