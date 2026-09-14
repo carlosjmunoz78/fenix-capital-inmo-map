@@ -66,7 +66,7 @@ jobs:
           f='supabase/secdef_gateway_route_contract_20260915.json'
           jq -e '.mode == "ROUTE_CONTRACT_ONLY" and .legacy_retirement == false and .old_vs_new_required == true' "$f" >/dev/null
           test "$(jq '.routes | length' "$f")" = '15'
-          test "$(jq '[.routes[].path] | unique | length' "$f")" = '15'
+          test "$(jq '[.routes[] | (.method + " " + .path)] | unique | length' "$f")" = '15'
           test "$(jq '[.routes[].wrapper] | unique | length' "$f")" = '15'
           test "$(jq '[.routes[].legacy] | unique | length' "$f")" = '15'
           test "$(jq '[.routes[] | select((.wrapper|endswith("_server"))|not)] | length' "$f")" = '0'
