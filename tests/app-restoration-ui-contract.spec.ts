@@ -18,6 +18,24 @@ test('floating controls keep calculator microphone chat vertical order',async()=
  expect(routes).toContain("'/chat'");
 });
 
+test('global voice actions do not expose knowledge and keep scoped correction/task context',async()=>{
+ const voice=read('src/AudioTranscriptionGuard.tsx');
+ expect(voice).not.toContain("id:'knowledge'");
+ expect(voice).not.toContain("label:'Dar conocimiento'");
+ expect(voice).toContain("scope_type:scope.type");
+ expect(voice).toContain("base.set('scope_code',scope.code)");
+ expect(voice).toContain("base.set('correction',composed)");
+});
+
+test('knowledge is available only on Ana screen and global correction shortcut is removed',async()=>{
+ const knowledge=read('src/AnaKnowledgeBlock.tsx');
+ const contextual=read('src/AnaUniversalGuard.tsx');
+ expect(knowledge).toContain("if(location.pathname!=='/ana')return");
+ expect(knowledge).toContain("if(location.pathname!=='/ana'||!mount)return null");
+ expect(knowledge).toContain('DAR CONOCIMIENTO A ANA');
+ expect(contextual).not.toContain('>Correcciones</button>');
+});
+
 test('bank top three mounts directly in expediente detail and uses live signals',async()=>{
  const source=read('src/ExpedienteBankRankingProdGuard.tsx');
  expect(source).toContain("document.querySelector('.detail-next-action')");
