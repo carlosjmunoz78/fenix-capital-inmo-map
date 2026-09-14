@@ -1,5 +1,5 @@
 import {useEffect,useRef,useState} from 'react';
-import {BookOpen,Check,ClipboardList,Copy,MessageCircle,Mic,MicOff,Send,X} from 'lucide-react';
+import {Check,ClipboardList,Copy,MessageCircle,Mic,MicOff,Send,X} from 'lucide-react';
 import {useLocation,useNavigate} from 'react-router-dom';
 import {fetchAnaCanonicalApi} from './supabase';
 import './audio-transcription.css';
@@ -10,7 +10,7 @@ type RecognitionErrorLike={error?:string};
 type RecognitionLike={lang:string;continuous:boolean;interimResults:boolean;onresult:((event:RecognitionEventLike)=>void)|null;onerror:((event:RecognitionErrorLike)=>void)|null;onend:(()=>void)|null;start:()=>void;stop:()=>void;abort:()=>void};
 type RecognitionCtor=new()=>RecognitionLike;
 type SpeechWindow=Window&{SpeechRecognition?:RecognitionCtor;webkitSpeechRecognition?:RecognitionCtor};
-type ActionMode='correct'|'knowledge'|'task'|'ana'|null;
+type ActionMode='correct'|'task'|'ana'|null;
 type CanonicalRule={id:string;rule:string;confidence?:number;approved?:boolean;state?:string};
 type CanonicalEnvelope={ok?:boolean;items?:CanonicalRule[]};
 type ChatMessage={role:'user'|'ana';text:string};
@@ -32,7 +32,6 @@ function correctionScope(pathname:string){
 
 const ACTIONS=[
  {id:'correct' as const,label:'Corregir',hint:'Corregir un dato, criterio o respuesta',icon:Check},
- {id:'knowledge' as const,label:'Dar conocimiento',hint:'Añadir conocimiento útil de financiación a CEREBRO',icon:BookOpen},
  {id:'task' as const,label:'Tarea',hint:'Preparar una tarea con este contexto',icon:ClipboardList},
  {id:'ana' as const,label:'Hablar con Ana',hint:'Consultar a Ana con contexto de financiación',icon:MessageCircle}
 ];
@@ -60,7 +59,7 @@ export default function AudioTranscriptionGuard(){
  function close(){stop();setOpen(false);setMode(null);setMessage('');setChat([])}
  async function copyText(){if(!composed){setMessage('Aún no hay texto para copiar.');return}try{await navigator.clipboard.writeText(composed);setMessage('Texto copiado.')}catch{setMessage('No se pudo copiar automáticamente.')}}
  async function send(){
-  if(!mode){setMessage('Elige una de las cuatro opciones.');return}
+  if(!mode){setMessage('Elige una de las tres opciones.');return}
   if(!composed){setMessage('Escribe o dicta primero lo que quieres enviar.');return}
   stop();
   if(mode==='ana'){
@@ -73,15 +72,12 @@ export default function AudioTranscriptionGuard(){
    finally{setSending(false)}
    return;
   }
-  const base=new URLSearchParams({source_route:location.pathname,draft:composed,domain:'financiacion'});
+  const scope=correctionScope(location.pathname);
+  const base=new URLSearchParams({source_route:location.pathname,draft:composed,domain:'financiacion',scope_type:scope.type});
+  if(scope.code)base.set('scope_code',scope.code);
   if(mode==='task'){navigate(`/tareas/nueva?${base.toString()}`);return}
   base.set('mode',mode);
-  if(mode==='correct'){
-   const scope=correctionScope(location.pathname);
-   base.set('correction',composed);
-   base.set('scope_type',scope.type);
-   if(scope.code)base.set('scope_code',scope.code);
-  }
+  if(mode==='correct')base.set('correction',composed);
   navigate(`/ana?${base.toString()}`);
  }
  if(hidden)return null;
