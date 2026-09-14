@@ -36,6 +36,26 @@ test('knowledge is available only on Ana screen and global correction shortcut i
  expect(contextual).not.toContain('>Correcciones</button>');
 });
 
+test('Ana screen includes a real persistent conversation composer and stream',async()=>{
+ const chat=read('src/AnaChatBlock.tsx');
+ const main=read('src/main.tsx');
+ expect(chat).toContain("location.pathname==='/ana'");
+ expect(chat).toContain("fenix_prod_chat_list_user");
+ expect(chat).toContain("fenix_prod_chat_send_user");
+ expect(chat).toContain('CONVERSACIÓN CON ANA');
+ expect(main).toContain("import AnaChatBlock from './AnaChatBlock'");
+ expect(main).toContain('<AnaChatBlock />');
+});
+
+test('executive bank ranking fails closed without an explicit canonical score',async()=>{
+ const source=read('src/DirectionExecutiveOverviewGuard.tsx');
+ expect(source).toContain('explicitRankingScore');
+ expect(source).toContain("ranking_score");
+ expect(source).toContain("return{status:items.length?200:204,items}");
+ expect(source).toContain('Ranking pendiente de señal canónica');
+ expect(source).not.toContain('40-Math.min(index,10)');
+});
+
 test('bank top three mounts directly in expediente detail and uses live signals',async()=>{
  const source=read('src/ExpedienteBankRankingProdGuard.tsx');
  expect(source).toContain("document.querySelector('.detail-next-action')");
