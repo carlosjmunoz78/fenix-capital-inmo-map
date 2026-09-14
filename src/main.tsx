@@ -111,6 +111,7 @@ import DirectionAnaInsight from './DirectionAnaInsight';
 import DirectionExecutiveOverviewGuard from './DirectionExecutiveOverviewGuard';
 import DirectionAnaUrgentGuard from './DirectionAnaUrgentGuard';
 import AnaKnowledgeBlock from './AnaKnowledgeBlock';
+import AnaChatBlock from './AnaChatBlock';
 import AnaKnowledgePlacementGuard from './AnaKnowledgePlacementGuard';
 import OperationalUniformityGuard from './OperationalUniformityGuard';
 
@@ -138,6 +139,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <DocumentDetailAnaGuard />
       <DirectoryRowOpenGuard />
       <AnaKnowledgeBlock />
+      <AnaChatBlock />
       <AnaKnowledgePlacementGuard />
       <AnaUniversalGuard />
       <AnaOperationalPreparationGuard />
