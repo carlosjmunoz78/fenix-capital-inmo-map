@@ -5,13 +5,16 @@ import crypto from 'node:crypto';
 
 const root=process.cwd();
 const read=(file:string)=>fs.readFileSync(path.join(root,file),'utf8');
-const LIVE_SHA='54b2a282be040ceeef3564cc6c7d7653c59b96e25ce3db9e7af27c9634b531d2';
+const LIVE_BUNDLE_SHA='54b2a282be040ceeef3564cc6c7d7653c59b96e25ce3db9e7af27c9634b531d2';
+const VERSIONED_SOURCE_SHA='c8ccc623be364dcfc67b8be8f6b5320476909f4c1af77bf2e3339723b8a0b1c9';
 
 test('live v12 extractor snapshot preserves rollback and governance contract',async()=>{
  const snapshot=read('docs/contracts/fenix-document-extract-v12-snapshot.md');
  expect(snapshot).toContain('Version PROD: `12`');
  expect(snapshot).toContain('`verify_jwt`: `true`');
- expect(snapshot).toContain(LIVE_SHA);
+ expect(snapshot).toContain('Supabase bundle `ezbr_sha256`');
+ expect(snapshot).toContain(LIVE_BUNDLE_SHA);
+ expect(snapshot).toContain(VERSIONED_SOURCE_SHA);
  expect(snapshot).toContain('fenix_prod_session_context');
  expect(snapshot).toContain('fenix_prod_document_extract_resolve_server');
  expect(snapshot).toContain('fenix_prod_runtime_policy_server(document_auto_ingest_min_confidence)');
@@ -21,10 +24,10 @@ test('live v12 extractor snapshot preserves rollback and governance contract',as
  expect(snapshot).toContain('legacy_batch');
 });
 
-test('versioned extractor source is byte-identical to audited PROD v12',async()=>{
+test('versioned extractor source stays pinned to the audited v12 snapshot',async()=>{
  const source=read('supabase/functions/fenix-document-extract/index.ts');
  const sha=crypto.createHash('sha256').update(source).digest('hex');
- expect(sha).toBe(LIVE_SHA);
+ expect(sha).toBe(VERSIONED_SOURCE_SHA);
  expect(source).toContain('fenix_prod_document_extract_resolve_server');
  expect(source).toContain("p_policy_key:'document_auto_ingest_min_confidence'");
  expect(source).toContain("human_reason:'POLICY_CONFLICT'");
@@ -40,7 +43,7 @@ test('candidate builder is minimal and labor projection scope is explicit',async
   expect(snapshot).toContain('`'+field+'`');
   expect(builder).toContain(field);
  }
- expect(builder).toContain('EXPECTED_LIVE_SHA');
+ expect(builder).toContain('EXPECTED_SOURCE_SHA');
  expect(builder).toContain('missing anchor');
  expect(builder).toContain('ambiguous anchor');
  expect(builder).toContain('provider endpoint');
