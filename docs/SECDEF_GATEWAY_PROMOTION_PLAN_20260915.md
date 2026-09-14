@@ -1,6 +1,6 @@
 # CEREBRO · SECDEF Gateway promotion plan · 2026-09-15
 
-Status: **PREPARED / NOT PROMOTED**
+Status: **CANARY LIVE / PRIMARY NOT PROMOTED**
 
 ## Scope
 
@@ -11,12 +11,15 @@ No legacy capability is retired by this change.
 ## Live evidence
 
 - Supabase PROD project status: `ACTIVE_HEALTHY`.
-- Deployed `fenix-app-gateway`: `ACTIVE`, version `17` at audit time.
-- Deployed Gateway v17 does **not** contain the new `/v2/...` routes.
+- Primary deployed `fenix-app-gateway`: `ACTIVE`, version `17` at audit time.
+- Primary Gateway v17 does **not** contain the new `/v2/...` routes.
 - Current canonical main Gateway source blob before this branch change: `015b196f2b5d9daf2a37be7a6cccc46d6e569ce1`.
 - 15 prepared `*_server` wrappers exist live in PROD.
 - All 15 grant `EXECUTE` to `service_role` and deny `authenticated` and `anon` EXECUTE.
 - Legacy user/direct functions remain available to authenticated callers. This is the OLD rollback path and must stay available until parity is green.
+- Isolated Edge Function `fenix-app-gateway-v2-canary` is deployed as ACTIVE v1. It does not replace the primary Gateway.
+- Canary `/health` returns HTTP 200 with PROD configuration available.
+- Canary protected routes fail closed without a user session: `/v2/profile` returned HTTP 401 `identity_not_linked`.
 
 ## Branch evidence
 
@@ -24,9 +27,7 @@ PR: `#382`
 
 Prepared Gateway implementation commit: `505de3eab621af306fc7eef731948788f3f1c094`.
 
-CI hardening head at evidence time: `f6e5abeab8f024903c8fcc07d2920d6c09dcda9c`.
-
-GitHub Actions run `34905887748` completed SUCCESS with:
+Exact-head CI on `ddf8eb62aca4000d1988e18c8f3a354b3b4b76f8` completed SUCCESS with:
 
 - wrapper files present;
 - additive server-only boundary preserved;
@@ -43,29 +44,44 @@ Canonical contract: `supabase/secdef_gateway_route_contract_20260915.json`.
 
 The contract defines 15 method/path/wrapper/legacy mappings and requires `old_vs_new_required=true` and `legacy_retirement=false` until promotion gates are completed.
 
+## Read-only parity evidence
+
+Using a single transaction-local auth context for an existing linked actor, OLD user functions were compared with NEW server wrappers without returning customer data.
+
+Exact equality and matching payload hashes were confirmed for:
+
+- profile full: **GREEN**;
+- profile socials: **GREEN**;
+- chat people: **GREEN**;
+- chat conversations: **GREEN**.
+
+No linked actor currently had a chat conversation available for a meaningful `chat_list_v2` payload comparison, so that case remains **POR AUDITAR** rather than being falsely marked green.
+
+This SQL-level parity is supporting evidence only. Supabase Auth documentation confirms that real Edge Function identity resolution must use the user's session JWT in the `Authorization` header and `auth.getUser(token)`. Therefore authenticated HTTP parity remains mandatory before primary promotion or legacy retirement.
+
 ## Promotion gates
 
-A PROD deployment is blocked until all of the following are explicitly satisfied:
+Primary PROD promotion remains blocked until all of the following are satisfied:
 
 1. exact-head CI remains green;
-2. explicit human authorization to promote the Gateway;
-3. deploy new Gateway version without revoking any legacy EXECUTE;
-4. authenticated HTTP smoke for identity resolution and all read-only v2 routes;
-5. controlled OLD-vs-NEW parity for read paths;
-6. controlled mutation E2E using isolated/reversible test records only;
-7. rollback rehearsal to Gateway v17/main source plus legacy RPC path;
-8. only then consider one-by-one legacy EXECUTE retirement;
-9. security advisor and regression after each retirement batch.
+2. canary remains healthy and fail-closed;
+3. authenticated HTTP smoke using a real user session JWT;
+4. authenticated OLD-vs-NEW parity for the read routes;
+5. controlled mutation E2E using isolated/reversible test records only;
+6. rollback rehearsal to Gateway v17/main source plus legacy RPC path;
+7. only then consider one-by-one legacy EXECUTE retirement;
+8. security advisor and regression after each retirement batch.
 
 ## Rollback
 
-Rollback target before promotion:
+Rollback target before primary promotion:
 
-- Edge Function: `fenix-app-gateway` version `17` (live audit baseline).
+- Edge Function: primary `fenix-app-gateway` version `17`.
 - Repository source baseline: main Gateway blob `015b196f2b5d9daf2a37be7a6cccc46d6e569ce1`.
 - Legacy RPC EXECUTE remains preserved during the entire parity phase.
+- Canary is isolated and can be ignored/removed without changing the primary App path.
 
-If any HTTP/E2E/parity check fails after promotion, restore the baseline Gateway and leave legacy EXECUTE untouched.
+If any HTTP/E2E/parity check fails after primary promotion, restore the baseline Gateway and leave legacy EXECUTE untouched.
 
 ## Current classification
 
@@ -73,11 +89,16 @@ If any HTTP/E2E/parity check fails after promotion, restore the baseline Gateway
 - WRAPPER_PERMISSIONS: **GREEN**
 - GATEWAY_V2_BRANCH_IMPLEMENTATION: **HECHO**
 - GATEWAY_BRANCH_CI: **GREEN**
-- PROD_GATEWAY_DEPLOYMENT: **NOT DONE**
+- GATEWAY_V2_CANARY: **HECHO / LIVE / ACTIVE v1**
+- CANARY_HEALTH: **GREEN**
+- CANARY_FAIL_CLOSED: **GREEN**
+- SQL_READ_PARITY_4_CORE_PATHS: **GREEN**
+- PRIMARY_PROD_GATEWAY_PROMOTION: **NOT DONE**
 - AUTHENTICATED_HTTP_E2E: **POR AUDITAR**
-- OLD_VS_NEW_PARITY: **POR AUDITAR**
+- AUTHENTICATED_HTTP_OLD_VS_NEW: **POR AUDITAR**
+- MUTATION_E2E: **POR AUDITAR**
 - ROLLBACK_LIVE_REHEARSAL: **POR AUDITAR**
 - LEGACY_RETIREMENT: **BLOCKED**
 - SAFE_TO_MERGE: **NO_TODAVIA**
-- SAFE_TO_DEPLOY_PROD: **NO_TODAVIA**
+- SAFE_TO_PROMOTE_PRIMARY: **NO_TODAVIA**
 - SAFE_TO_RETIRE_LEGACY: **NO**
