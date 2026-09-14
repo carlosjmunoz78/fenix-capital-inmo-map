@@ -4,10 +4,11 @@ import ExpedienteLifecycleGuard from './ExpedienteLifecycleGuard';
 import ExpedienteManualPhaseGuard from './ExpedienteManualPhaseGuard';
 import ExpedienteRenameGuard from './ExpedienteRenameGuard';
 import ExpedientePeopleProdGuard from './ExpedientePeopleProdGuard';
+import ExpedienteAliasDisplayGuard from './ExpedienteAliasDisplayGuard';
 
 export default function DetailShellGate(){
  const {pathname}=useLocation();
  const isExpedienteDetail=/^\/expedientes\/[^/]+$/.test(pathname)&&pathname!=='/expedientes/nuevo';
  if(!isExpedienteDetail)return null;
- return <><DetailShell/><ExpedienteRenameGuard/><ExpedientePeopleProdGuard/><ExpedienteLifecycleGuard/><ExpedienteManualPhaseGuard/></>;
+ return <><DetailShell/><ExpedienteAliasDisplayGuard/><ExpedienteRenameGuard/><ExpedientePeopleProdGuard/><ExpedienteLifecycleGuard/><ExpedienteManualPhaseGuard/></>;
 }
