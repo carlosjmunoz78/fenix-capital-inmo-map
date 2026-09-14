@@ -16,6 +16,12 @@ export default function CerebroConsoleShell(){
  const [health,setHealth]=useState<CerebroConsoleHealth|null>(null);
 
  useEffect(()=>{
+  if(location.pathname!=='/cerebro')return;
+  document.documentElement.dataset.cerebroConsole='1';
+  return()=>{delete document.documentElement.dataset.cerebroConsole};
+ },[location.pathname]);
+
+ useEffect(()=>{
   let cancelled=false;
   if(location.pathname!=='/cerebro'||!configured){setGatewayState('closed');setHealth(null);return}
   setGatewayState('checking');
