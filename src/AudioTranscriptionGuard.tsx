@@ -39,6 +39,7 @@ export default function AudioTranscriptionGuard(){
  const[finalText,setFinalText]=useState(''),[interimText,setInterimText]=useState(''),[message,setMessage]=useState(''),[chat,setChat]=useState<ChatMessage[]>([]);
  const supported=Boolean(recognitionConstructor());
  const composed=`${finalText}${interimText?` ${interimText}`:''}`.trim();
+ const hidden=location.pathname==='/'||location.pathname.startsWith('/auth');
  useEffect(()=>()=>{recognitionRef.current?.abort();recognitionRef.current=null},[]);
  useEffect(()=>{recognitionRef.current?.abort();recognitionRef.current=null;setListening(false);setInterimText('');setOpen(false);setMode(null);setChat([])},[location.pathname]);
  function stop(){recognitionRef.current?.stop();setListening(false)}
@@ -72,6 +73,7 @@ export default function AudioTranscriptionGuard(){
   base.set('mode',mode);
   navigate(`/ana?${base.toString()}`);
  }
+ if(hidden)return null;
  return <div className="fenix-audio-transcription" data-testid="audio-transcription-guard">
   {!open&&<button type="button" className="fenix-audio-launcher" onClick={()=>setOpen(true)} aria-label="Abrir acciones por voz" title="Acciones por voz"><Mic size={21}/></button>}
   {open&&<section className="fenix-audio-panel" aria-label="Acciones por voz y texto">
