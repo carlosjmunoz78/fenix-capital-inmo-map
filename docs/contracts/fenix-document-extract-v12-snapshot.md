@@ -1,11 +1,11 @@
 # fenix-document-extract PROD v12 — snapshot contract
 
-Estado: PARCIAL / POR PROMOCIONAR
+Estado: HECHO EN RAMA / NO PROMOCIONADO A PROD
 
-Fuente auditada directamente en Supabase PROD del proyecto `cluhljgonannaafpmblx`.
+Fuente auditada directamente en Supabase PROD del proyecto `cluhljgonannaafpmblx` y versionada en `supabase/functions/fenix-document-extract/index.ts`.
 
 - Function: `fenix-document-extract`
-- Version PROD: `12`
+- Version PROD auditada: `12`
 - `verify_jwt`: `true`
 - Supabase bundle `ezbr_sha256`: `54b2a282be040ceeef3564cc6c7d7653c59b96e25ce3db9e7af27c9634b531d2`
 - Hash SHA-256 del source versionado en repo: `c8ccc623be364dcfc67b8be8f6b5320476909f4c1af77bf2e3339723b8a0b1c9`
@@ -39,7 +39,7 @@ Campos que deben quedar admitidos en la proyección canónica del candidato, sin
 - `categoria_profesional`
 - `numero_pagas`
 
-Antes de promocionar cualquier nueva versión de `fenix-document-extract`, el source candidato debe compararse contra este snapshot y mantener todos los contratos anteriores.
+El builder `scripts/build-fenix-document-extract-candidate.mjs` parte exclusivamente del source versionado, valida su hash, exige anchors únicos y genera solo la ampliación laboral mínima. No despliega nada.
 
 ## Rollback
 
