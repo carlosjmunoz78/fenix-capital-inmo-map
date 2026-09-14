@@ -21,7 +21,14 @@ function normalizeParticipantFacts(input:ExtractedFields){
   ['antiguedad_laboral',['antiguedad_laboral','antiguedad_actual_anos','antiguedad']],
   ['empresa',['empresa','empresa_actual','empresa_pagador']],
   ['documento_identidad',['documento_identidad','dni_nie','numero_documento']],
-  ['ahorros',['ahorros','ahorro_disponible']]
+  ['ahorros',['ahorros','ahorro_disponible']],
+  ['tipo_contrato',['tipo_contrato','tipo_de_contrato']],
+  ['modalidad_contrato',['modalidad_contrato','modalidad','modalidad_de_contrato']],
+  ['fecha_inicio_contrato',['fecha_inicio_contrato','fecha_inicio_laboral','fecha_alta_actual']],
+  ['fecha_fin_contrato',['fecha_fin_contrato','fecha_fin_laboral','fecha_vencimiento_contrato']],
+  ['jornada',['jornada','tipo_jornada','jornada_laboral']],
+  ['categoria_profesional',['categoria_profesional','categoria','grupo_profesional']],
+  ['numero_pagas',['numero_pagas','pagas_anuales']]
  ];
  for(const[target,sources]of aliases){if(present(fields[target]))continue;const value=first(fields,...sources);if(present(value))fields[target]=value as string|number|boolean;}
  return fields;
