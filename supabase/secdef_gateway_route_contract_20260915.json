@@ -1,0 +1,25 @@
+{
+  "contract_version": 1,
+  "date": "2026-09-15",
+  "environment": "PROD",
+  "mode": "ROUTE_CONTRACT_ONLY",
+  "legacy_retirement": false,
+  "old_vs_new_required": true,
+  "routes": [
+    {"method":"POST","path":"/v2/ana/knowledge/answer","wrapper":"fenix_prod_ana_knowledge_answer_server","legacy":"fenix_prod_ana_knowledge_answer_user","inputs":{"body":["question"]}},
+    {"method":"GET","path":"/v2/chat/conversations","wrapper":"fenix_prod_chat_conversations_server","legacy":"fenix_prod_chat_conversations_user","inputs":{}},
+    {"method":"GET","path":"/v2/chat/conversations/{conversation_code}/messages","wrapper":"fenix_prod_chat_list_v2_server","legacy":"fenix_prod_chat_list_v2_user","inputs":{"path":["conversation_code"],"query":["limit"]}},
+    {"method":"GET","path":"/v2/chat/people","wrapper":"fenix_prod_chat_people_server","legacy":"fenix_prod_chat_people_user","inputs":{}},
+    {"method":"GET","path":"/v2/profile","wrapper":"fenix_prod_profile_get_full_server","legacy":"fenix_prod_profile_get_user","inputs":{}},
+    {"method":"GET","path":"/v2/profile/socials","wrapper":"fenix_prod_profile_socials_get_server","legacy":"fenix_prod_profile_socials_get_user","inputs":{}},
+    {"method":"POST","path":"/v2/chat/attachments","wrapper":"fenix_prod_chat_attachment_add_server","legacy":"fenix_prod_chat_attachment_add_user","inputs":{"body":["message_code","storage_path","filename","mime_type","size_bytes"]}},
+    {"method":"POST","path":"/v2/chat/attachments-v2","wrapper":"fenix_prod_chat_attachment_add_v2_server","legacy":"fenix_prod_chat_attachment_add_v2_user","inputs":{"body":["message_code","storage_path","filename","mime_type","size_bytes"]}},
+    {"method":"POST","path":"/v2/chat/conversations","wrapper":"fenix_prod_chat_conversation_create_server","legacy":"fenix_prod_chat_conversation_create_user","inputs":{"body":["member_actor_codes","title"]}},
+    {"method":"POST","path":"/v2/chat/groups","wrapper":"fenix_prod_chat_group_create_server","legacy":"fenix_prod_chat_group_create_user","inputs":{"body":["member_actor_codes","title"]}},
+    {"method":"POST","path":"/v2/chat/messages","wrapper":"fenix_prod_chat_send_v2_server","legacy":"fenix_prod_chat_send_v2_user","inputs":{"body":["conversation_code","body","idempotency_key"]}},
+    {"method":"POST","path":"/v2/contactos","wrapper":"fenix_prod_contact_create_v2_server","legacy":"fenix_prod_contact_create_v2","inputs":{"body":["tipo","nombre","apellidos","email","telefono","emails","telefonos","cargo","entidad_id","observaciones","consentimiento_comercial"]}},
+    {"method":"PATCH","path":"/v2/inmobiliarias/{inmobiliaria_code}/followup","wrapper":"fenix_prod_inmo_followup_update_v1_server","legacy":"fenix_prod_inmo_followup_update_v1","inputs":{"path":["inmobiliaria_code"],"body":["expected_version","notas","proximo_contacto"]}},
+    {"method":"PATCH","path":"/v2/profile/socials","wrapper":"fenix_prod_profile_socials_update_server","legacy":"fenix_prod_profile_socials_update_user","inputs":{"body":["socials"]}},
+    {"method":"PATCH","path":"/v2/profile","wrapper":"fenix_prod_profile_update_full_server","legacy":"fenix_prod_profile_update_user","inputs":{"body":["profile"]}}
+  ]
+}
