@@ -90,7 +90,8 @@ test('bank detail visibly exposes required commercial and operational knowledge'
 test('direction KPI drilldown hides normal destination content while active and cleans marker',async()=>{
  const source=read('src/DirectionKpiDrilldownGuard.tsx');
  expect(source).toContain("root.setAttribute('data-kpi-drilldown','true')");
- expect(source).toContain("root.removeAttribute('data-kpi-drilldown')");
+ expect(source).toContain("x.removeAttribute('data-kpi-drilldown')");
+ expect(source).toContain(".ops-root[data-kpi-drilldown=\"true\"]");
 });
 
 test('Honorarios drilldown uses deployed economy runtime and not Notion economy route',async()=>{
