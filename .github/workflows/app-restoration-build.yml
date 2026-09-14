@@ -1,0 +1,33 @@
+name: App Restoration Build Gate
+
+on:
+  push:
+    branches:
+      - app-restoration-v0-20260914
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: app-restoration-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      VITE_FENIX_ENV: prod
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: TypeScript and Vite build
+        run: npm run build
