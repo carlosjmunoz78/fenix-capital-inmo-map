@@ -7,6 +7,7 @@ on:
     paths:
       - 'supabase/secdef_remaining_*_wrappers_20260914.sql'
       - 'supabase/fix_chat_send_v2_server_20260914.sql'
+      - 'supabase/secdef_gateway_route_contract_20260915.json'
       - '.github/workflows/cerebro-secdef-wrapper-audit.yml'
 
 permissions:
@@ -27,6 +28,7 @@ jobs:
           test -f supabase/secdef_remaining_read_wrappers_20260914.sql
           test -f supabase/secdef_remaining_mutator_wrappers_20260914.sql
           test -f supabase/fix_chat_send_v2_server_20260914.sql
+          test -f supabase/secdef_gateway_route_contract_20260915.json
 
       - name: Assert additive server-only boundary
         shell: bash
@@ -57,6 +59,43 @@ jobs:
           grep -F "forbidden" supabase/fix_chat_send_v2_server_20260914.sql >/dev/null
           grep -F "invalid_body" supabase/fix_chat_send_v2_server_20260914.sql >/dev/null
 
+      - name: Validate Gateway route contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          f='supabase/secdef_gateway_route_contract_20260915.json'
+          jq -e '.mode == "ROUTE_CONTRACT_ONLY" and .legacy_retirement == false and .old_vs_new_required == true' "$f" >/dev/null
+          test "$(jq '.routes | length' "$f")" = '15'
+          test "$(jq '[.routes[].path] | unique | length' "$f")" = '15'
+          test "$(jq '[.routes[].wrapper] | unique | length' "$f")" = '15'
+          test "$(jq '[.routes[].legacy] | unique | length' "$f")" = '15'
+          test "$(jq '[.routes[] | select((.wrapper|endswith("_server"))|not)] | length' "$f")" = '0'
+          test "$(jq '[.routes[] | select(.method != "GET" and .method != "POST" and .method != "PATCH")] | length' "$f")" = '0'
+
+      - name: Assert route contract covers every prepared wrapper
+        shell: bash
+        run: |
+          set -euo pipefail
+          f='supabase/secdef_gateway_route_contract_20260915.json'
+          for wrapper in \
+            fenix_prod_ana_knowledge_answer_server \
+            fenix_prod_chat_conversations_server \
+            fenix_prod_chat_list_v2_server \
+            fenix_prod_chat_people_server \
+            fenix_prod_profile_get_full_server \
+            fenix_prod_profile_socials_get_server \
+            fenix_prod_chat_attachment_add_server \
+            fenix_prod_chat_attachment_add_v2_server \
+            fenix_prod_chat_conversation_create_server \
+            fenix_prod_chat_group_create_server \
+            fenix_prod_chat_send_v2_server \
+            fenix_prod_contact_create_v2_server \
+            fenix_prod_inmo_followup_update_v1_server \
+            fenix_prod_profile_socials_update_server \
+            fenix_prod_profile_update_full_server; do
+            jq -e --arg wrapper "$wrapper" '.routes | any(.wrapper == $wrapper)' "$f" >/dev/null
+          done
+
       - name: Assert no direct PROD retirement in this change
         shell: bash
         run: |
@@ -70,3 +109,4 @@ jobs:
           printf '%s\n' 'PROD_APPLY=false'
           printf '%s\n' 'LEGACY_RETIREMENT=false'
           printf '%s\n' 'OLD_VS_NEW_REQUIRED=true'
+          printf '%s\n' 'GATEWAY_ROUTE_CONTRACT_COUNT=15'
