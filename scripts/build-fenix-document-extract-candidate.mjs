@@ -6,7 +6,7 @@ const root=process.cwd();
 const sourcePath=path.join(root,'supabase/functions/fenix-document-extract/index.ts');
 const outputPath=path.join(root,'supabase/functions/fenix-document-extract-candidate/index.ts');
 const source=fs.readFileSync(sourcePath,'utf8');
-const EXPECTED_LIVE_SHA='54b2a282be040ceeef3564cc6c7d7653c59b96e25ce3db9e7af27c9634b531d2';
+const EXPECTED_SOURCE_SHA='c8ccc623be364dcfc67b8be8f6b5320476909f4c1af77bf2e3339723b8a0b1c9';
 
 const replaceOnce=(input,from,to,label)=>{
   const first=input.indexOf(from);
@@ -16,7 +16,7 @@ const replaceOnce=(input,from,to,label)=>{
 };
 
 const baselineSha=crypto.createHash('sha256').update(source).digest('hex');
-if(baselineSha!==EXPECTED_LIVE_SHA)throw new Error(`baseline drift: expected ${EXPECTED_LIVE_SHA}, got ${baselineSha}`);
+if(baselineSha!==EXPECTED_SOURCE_SHA)throw new Error(`baseline drift: expected ${EXPECTED_SOURCE_SHA}, got ${baselineSha}`);
 
 let candidate=source;
 candidate=replaceOnce(candidate,
