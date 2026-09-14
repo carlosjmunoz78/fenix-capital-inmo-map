@@ -11,26 +11,23 @@ type PersonalResponse={items?:Person[]};
 
 function rowsFrom(data:unknown):Row[]{if(!data||typeof data!=='object')return[];const d=data as Record<string,unknown>;for(const k of ['items','bancos','results'])if(Array.isArray(d[k]))return d[k] as Row[];return[];}
 function first(r:Row,keys:string[]){for(const k of keys){const v=r[k];if(typeof v==='string'&&v.trim())return v.trim();if(typeof v==='number'&&Number.isFinite(v))return String(v)}return'';}
-function yes(r:Row,keys:string[]){return keys.some(k=>r[k]===true||/^(si|sí|yes|true)$/i.test(String(r[k]??'')));}
-function rankBank(r:Row,index:number):BankRank|null{
+function finiteNumber(v:unknown){if(typeof v==='number'&&Number.isFinite(v))return v;if(typeof v==='string'&&v.trim()){const n=Number(v);if(Number.isFinite(n))return n;}return null;}
+function explicitRankingScore(r:Row){for(const k of ['ranking_score','performance_score','score','puntuacion','approval_score','conversion_score']){const n=finiteNumber(r[k]);if(n!==null)return n;}return null;}
+function rankBank(r:Row):BankRank|null{
  const id=first(r,['bank_code','banco_code','id','code','codigo']);
  const banco=first(r,['nombre','name','banco','entidad']);
- if(!id||!banco)return null;
- const cien=yes(r,['admite_100','financiacion_100','cien_por_cien']);
- const doble=yes(r,['doble_garantia','admite_doble_garantia']);
- const activo=r.activo!==false;
- if(!activo)return null;
- let score=40-Math.min(index,10);const reasons:string[]=[];
- if(cien){score+=30;reasons.push('Financiación al 100% declarada.');}
- if(doble){score+=25;reasons.push('Doble garantía declarada.');}
- if(!cien&&!doble)reasons.push('Banco activo; sin capacidades especiales declaradas.');
+ const score=explicitRankingScore(r);
+ if(!id||!banco||r.activo===false||score===null)return null;
+ const reasons:string[]=[];
+ const reason=first(r,['ranking_reason','performance_reason','motivo_ranking','reason']);
+ if(reason)reasons.push(reason);else reasons.push('Puntuación recibida desde una señal canónica de ranking/rendimiento.');
  return{id,banco,score,reasons};
 }
 async function fetchBankRanking(){
  const r=await fetchAppApi<unknown>('/bancos');
  if(r.status!==200)return{status:r.status,items:[] as BankRank[]};
  const items=rowsFrom(r.data).map(rankBank).filter((x):x is BankRank=>Boolean(x)).sort((a,b)=>b.score-a.score||a.banco.localeCompare(b.banco,'es')).slice(0,3);
- return{status:200,items};
+ return{status:items.length?200:204,items};
 }
 function num(v:unknown){return typeof v==='number'&&Number.isFinite(v)?v:0;}
 function personId(p:Person){for(const k of ['id','actor_code','worker_id','personal_id','code'] as const){const v=p[k];if(typeof v==='string'&&v.trim())return v.trim();}return'';}
@@ -62,7 +59,7 @@ export default function DirectionExecutiveOverviewGuard(){
  const maxTeam=Math.max(1,...team.map(x=>num(x.firmas_mes)+num(x.expedientes)));
  const bankView=bankTarget?createPortal(<div className="dir-exec-panel dir-exec-bank" data-testid="direction-bank-ranking">
   <div className="dir-exec-title"><div><small>BANCOS</small><strong>Top 3 bancos</strong></div><button onClick={()=>navigate('/bancos')}>Ver todos</button></div>
-  {status===null?<div className="dir-exec-empty">Preparando ranking…</div>:status!==200?<div className="dir-exec-empty">Ranking no disponible ahora.</div>:banks.length===0?<div className="dir-exec-empty"><strong>Sin bancos visibles</strong><span>La fuente autorizada no devuelve bancos utilizables.</span></div>:<div className="dir-exec-bars">{banks.map((r,i)=><button key={r.id} className={`dir-exec-row rank-${i+1}`} onClick={()=>navigate(`/bancos/${encodeURIComponent(r.id)}`)}><b className="dir-rank-medal">{i+1}</b><span className="dir-exec-copy"><strong>{r.banco}</strong><small>{r.reasons.join(' ')}</small><i><u style={{width:pct(r.score,maxBank)}}/></i></span><em>Ficha ›</em></button>)}</div>}
+  {status===null?<div className="dir-exec-empty">Preparando ranking…</div>:status===204?<div className="dir-exec-empty"><strong>Ranking pendiente de señal canónica</strong><span>Mostraremos el Top 3 cuando exista una puntuación real de rendimiento; no se ordena por catálogo ni por capacidades declaradas.</span></div>:status!==200?<div className="dir-exec-empty">Ranking no disponible ahora.</div>:<div className="dir-exec-bars">{banks.map((r,i)=><button key={r.id} className={`dir-exec-row rank-${i+1}`} onClick={()=>navigate(`/bancos/${encodeURIComponent(r.id)}`)}><b className="dir-rank-medal">{i+1}</b><span className="dir-exec-copy"><strong>{r.banco}</strong><small>{r.reasons.join(' ')}</small><i><u style={{width:pct(r.score,maxBank)}}/></i></span><em>Ficha ›</em></button>)}</div>}
  </div>,bankTarget):null;
  const teamView=teamTarget?createPortal(<div className="dir-exec-panel dir-exec-team" data-testid="direction-financial-team">
   <div className="dir-exec-title"><div><small>EQUIPO FINANCIERO</small><strong>Actividad</strong></div><button onClick={()=>navigate('/financieros')}>Ver equipo</button></div>
