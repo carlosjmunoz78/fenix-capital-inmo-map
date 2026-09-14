@@ -9,6 +9,7 @@ on:
       - 'supabase/fix_chat_send_v2_server_20260914.sql'
       - 'supabase/secdef_gateway_route_contract_20260915.json'
       - 'supabase/functions/fenix-app-gateway/index.ts'
+      - 'docs/SECDEF_GATEWAY_PROMOTION_PLAN_20260915.md'
       - '.github/workflows/cerebro-secdef-wrapper-audit.yml'
 
 permissions:
@@ -31,6 +32,7 @@ jobs:
           test -f supabase/fix_chat_send_v2_server_20260914.sql
           test -f supabase/secdef_gateway_route_contract_20260915.json
           test -f supabase/functions/fenix-app-gateway/index.ts
+          test -f docs/SECDEF_GATEWAY_PROMOTION_PLAN_20260915.md
 
       - name: Assert additive server-only boundary
         shell: bash
