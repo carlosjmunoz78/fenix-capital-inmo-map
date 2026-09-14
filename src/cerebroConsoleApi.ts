@@ -1,4 +1,4 @@
-import {supabase} from './supabase';
+import {SUPABASE_PUBLISHABLE_KEY,supabase} from './supabase';
 import {cerebroConsoleEndpoint} from './cerebroConsoleAccess';
 
 export type CerebroConsoleHealth={
@@ -21,7 +21,11 @@ export async function fetchCerebroConsole<T>(path:string):Promise<{status:number
   try{
     const response=await fetch(endpoint,{
       method:'GET',
-      headers:{Authorization:`Bearer ${token}`,'content-type':'application/json'},
+      headers:{
+        Authorization:`Bearer ${token}`,
+        apikey:SUPABASE_PUBLISHABLE_KEY,
+        'content-type':'application/json'
+      },
       cache:'no-store'
     });
     let data:T|null=null;
