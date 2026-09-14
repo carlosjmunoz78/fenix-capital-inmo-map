@@ -1,0 +1,71 @@
+name: CEREBRO PROD Rollback c7a15c Rehearsal
+
+on:
+  push:
+    branches:
+      - cerebro-prod-rollback-rehearsal-c7a15c-20260914
+
+permissions:
+  contents: read
+
+jobs:
+  rehearse-previous-prod:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      TARGET_SHA: c7a15cff9a387f1f142c8eeb06fd83a799e85a61
+      PROD_URL: https://cluhljgonannaafpmblx.supabase.co
+      PREPROD_URL: https://hnqlnvakzaywtafeiybt.supabase.co
+      VITE_FENIX_ENV: prod
+      VITE_SUPABASE_URL: https://cluhljgonannaafpmblx.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_yjISKmA5UPfF3d7NitP_DA_j5LGydh0
+    steps:
+      - name: Checkout exact previous PROD source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          fetch-depth: 1
+
+      - name: Verify exact rollback candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$TARGET_SHA"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies reproducibly
+        run: npm ci
+
+      - name: Build previous PROD source with current canonical PROD binding
+        run: npx vite build --base=/ --outDir dist-rollback-c7a15c
+
+      - name: Assert rollback candidate is PROD-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -R --fixed-strings "$PROD_URL" dist-rollback-c7a15c >/dev/null
+          ! grep -R --fixed-strings "$PREPROD_URL" dist-rollback-c7a15c
+
+      - name: Prepare rollback artifact without publishing
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp dist-rollback-c7a15c/index.html dist-rollback-c7a15c/404.html
+          touch dist-rollback-c7a15c/.nojekyll
+          printf '%s\n' "$TARGET_SHA" > dist-rollback-c7a15c/ROLLBACK_CANDIDATE_SHA.txt
+          printf '%s\n' 'app.fenixcapital.es' > dist-rollback-c7a15c/CNAME
+          test "$(cat dist-rollback-c7a15c/ROLLBACK_CANDIDATE_SHA.txt)" = "$TARGET_SHA"
+          test "$(cat dist-rollback-c7a15c/CNAME)" = 'app.fenixcapital.es'
+
+      - name: Upload rehearsal artifact only
+        uses: actions/upload-artifact@v4
+        with:
+          name: fenix-prod-rollback-c7a15c-rehearsal
+          path: dist-rollback-c7a15c
+          if-no-files-found: error
+          retention-days: 7
