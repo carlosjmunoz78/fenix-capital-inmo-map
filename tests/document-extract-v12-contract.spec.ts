@@ -34,6 +34,7 @@ test('versioned extractor source stays pinned to the audited v12 snapshot',async
  expect(source).toContain("human_reason:'LOW_CONFIDENCE'");
  expect(source).toContain('body.mode==="legacy_status"');
  expect(source).toContain('body.mode==="legacy_batch"');
+ expect(source).toContain('"tipo_contrato"');
 });
 
 test('candidate builder is minimal and labor projection scope is explicit',async()=>{
@@ -41,6 +42,8 @@ test('candidate builder is minimal and labor projection scope is explicit',async
  const builder=read('scripts/build-fenix-document-extract-candidate.mjs');
  for(const field of ['tipo_contrato','modalidad_contrato','fecha_inicio_contrato','fecha_fin_contrato','jornada','categoria_profesional','numero_pagas']){
   expect(snapshot).toContain('`'+field+'`');
+ }
+ for(const field of ['modalidad_contrato','fecha_inicio_contrato','fecha_fin_contrato','jornada','categoria_profesional','numero_pagas']){
   expect(builder).toContain(field);
  }
  expect(builder).toContain('EXPECTED_SOURCE_SHA');
