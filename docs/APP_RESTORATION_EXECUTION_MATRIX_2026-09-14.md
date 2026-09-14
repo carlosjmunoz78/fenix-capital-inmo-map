@@ -16,17 +16,18 @@ Objetivo: recuperar y mejorar la funcionalidad perdida tras migración sin rehac
 - HECHO EN RAMA — `AnaUniversalGuard` no aparece en Inicio.
 - HECHO EN RAMA — retirada acción contextual redundante `Ana se ha equivocado`; la corrección queda en el micro.
 - ROJO — todavía existen formularios de corrección duplicados en algunas pantallas (por ejemplo Informes); retirar solo después de comprobar que el micro global cubre el contexto necesario.
-- PLANIFICADO — calculadora icon-only + lanzador Chat icon-only encima; preservar rutas/funciones existentes.
+- HECHO EN RAMA — calculadora flotante icon-only y lanzador Chat icon-only encima, reutilizando el guard global existente sin cambiar el motor de cálculo.
 
 ## G2 · Expediente humano / participantes
 
 - EXISTENTE — `ExpedienteRenameGuard` permite editar alias en PROD con `fenix_prod_exp_update`.
-- ROJO LOCALIZADO — `DetailShell` prioriza `expediente/expediente_code` antes del alias visible en el título; cambiar presentación sin tocar identificador técnico.
+- HECHO EN RAMA — `ExpedienteAliasDisplayGuard` prioriza el alias humano visible sobre el identificador técnico largo en la cabecera del expediente.
 - EXISTENTE — `ExpedientePeoplePanel` ya implementa fichas desplegables, edición, alta, datos financieros y documentación.
-- ROJO LOCALIZADO — esa UI solo se monta fuera de PROD y sus writes apuntan a `fenix-comprador-action-test`.
+- ROJO LOCALIZADO — esa UI histórica solo se monta fuera de PROD y sus writes apuntan a `fenix-comprador-action-test`.
 - HECHO / BACKEND PROD ENCONTRADO — Edge Function `fenix-expediente-people` v2, verify_jwt=true, con GET por expediente y POST create/update, usando wrappers `fenix_prod_exp_people_server`, `fenix_prod_exp_person_create_server` y `fenix_prod_exp_person_update_server`.
 - HECHO / CONTRATO VERIFICADO — los wrappers PROD devuelven el mismo núcleo de datos esperado por `ExpedientePeoplePanel`, aplican RBAC Direccion/Financiero y relación exacta expediente-persona.
-- SIGUIENTE — adaptar la UI existente al endpoint PROD; no crear un segundo modelo ni un segundo panel.
+- HECHO EN RAMA — `ExpedientePeopleProdGuard` está montado en `DetailShellGate` y recupera las fichas desplegables en PROD en modo lectura antes de abrir escritura.
+- SIGUIENTE — paridad de escritura create/update contra el contrato PROD existente; no crear un segundo modelo ni un segundo panel.
 - PARCIAL — roles actuales no cubren todos los confirmados. Ampliar conservando legacy: Titular/Comprador, Avalista, Coprestatario, Vendedor, Propietario, Representante, Otro.
 
 ## G3 · Documentos / OCR / proyección
@@ -52,10 +53,11 @@ Objetivo: recuperar y mejorar la funcionalidad perdida tras migración sin rehac
 
 - ROJO UI — `ProfileShell` actual es esencialmente de lectura y expone pocas redes.
 - EXISTENTE BACKEND — `fenix-profile-api` v1 GET/PATCH, verify_jwt=true; actualmente PATCH solo `display_name` y `zone_code`.
+- EXISTENTE BACKEND — wrappers server-only ya disponibles para leer/actualizar redes sociales (`profile_socials_get_server`, `profile_socials_update_server`) y para actualización ampliada de perfil.
 - EXISTENTE BACKEND ADMIN — `fenix-user-admin` v2 permite listado, alta de usuario y `reset_password` seguro para actores administrativos autorizados. No expone contraseña existente.
 - PARCIAL — contrato actual no cubre todavía todas las redes, objetivos y edición completa solicitada.
 - REGLA CONFIRMADA — Belén gestiona lo suyo; Carlos gestiona lo suyo y administrativamente lo de Belén, incluida establecer nueva contraseña/roles autorizados. Nunca mostrar contraseña existente.
-- SIGUIENTE — ampliar contrato de perfil preservando los wrappers server-only ya creados (`profile_socials_update_server` y `profile_update_full_server`) y hacer UI sobre contrato, no persistencia paralela.
+- SIGUIENTE — ampliar contrato de perfil preservando wrappers server-only y hacer UI sobre contrato, no persistencia paralela.
 
 ## G6 · Informes / acciones masivas
 
@@ -69,9 +71,12 @@ Objetivo: recuperar y mejorar la funcionalidad perdida tras migración sin rehac
 ## G7 · QA / promoción
 
 - PR de restauración: #380, rama `app-restoration-v0-20260914`.
-- No mergear aún: no hay evidencia de workflow CI para el head actual.
-- Gates: TypeScript/build verde, tests contractuales, OLD-vs-NEW, historias E2E, QA visual, rollback probado.
-- No usar Codex/Work salvo que sea necesario para build/runtime/computer-use amplio y el beneficio justifique los pocos créditos disponibles.
+- HECHO — PR sigue mergeable y aislado de `main`.
+- HECHO — workflow aislado `App Restoration Build Gate`, solo build, sin deploy y sin reactivar App PRE-PROD.
+- HECHO — run `34838928134` sobre head `3c43462cf2aa3462276218243236f51c37e2e7e6`: `success`.
+- NO PROMOVER AÚN — faltan contratos funcionales de escritura/UX y QA E2E; el build verde no implica paridad funcional completa.
+- Gates restantes: tests contractuales, OLD-vs-NEW, historias E2E, QA visual, rollback probado.
+- No usar Codex/Work salvo que sea necesario para browser/computer-use amplio o refactor que no pueda verificarse con las herramientas actuales; conservar créditos.
 
 ## Aprendizaje para CEREBRO App Factory
 
@@ -85,3 +90,4 @@ Todo problema localizado debe convertirse en regla reusable:
 7. Un control global probado elimina duplicados contextuales; no duplicar acciones por pantalla.
 8. Los informes deben renderizar datos estructurados aunque no haya archivo PDF.
 9. Todo cambio de restauración necesita evidencia, rollback y una historia E2E representativa.
+10. Un build verde debe ser automático y aislado de despliegues; restauración y promoción son gates distintos.
