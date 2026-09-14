@@ -18,8 +18,14 @@ jobs:
     env:
       VITE_FENIX_ENV: prod
       VITE_SUPABASE_URL: https://cluhljgonannaafpmblx.supabase.co
-      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_yjISKmA5UPfF3d7NitP_DA_j5LGydh0
+      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
     steps:
+      - name: Assert required secret references are available
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${VITE_SUPABASE_PUBLISHABLE_KEY}"
+
       - name: Checkout rollback candidate
         uses: actions/checkout@v4
         with:
