@@ -29,6 +29,10 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm ci
+      - name: Materialize and verify document extractor candidate
+        run: |
+          node scripts/build-fenix-document-extract-candidate.mjs --write
+          node scripts/verify-fenix-document-extract-candidate.mjs
       - name: Group A + B + D restoration contracts
         run: npx playwright test tests/participant-labor-contract.spec.ts tests/app-restoration-ui-contract.spec.ts tests/document-person-projection-contract.spec.ts tests/document-extract-v12-contract.spec.ts --reporter=line
       - name: TypeScript and Vite build
