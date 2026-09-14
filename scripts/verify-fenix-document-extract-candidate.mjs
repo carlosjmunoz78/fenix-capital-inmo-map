@@ -48,7 +48,7 @@ const stripDeclarations=(source,decls)=>{
 };
 const baselineRest=stripDeclarations(baseline,[numberDecl.b,fieldDecl.b,canonicalDecl.b]);
 const candidateRest=stripDeclarations(candidate,[numberDecl.c,fieldDecl.c,canonicalDecl.c]);
-if(candidateRest!==baselineRest) throw new Error('candidate contains changes outside NUMBER_FIELDS/FIELD_KEYS/CANONICAL_KEYS');
+if(candidateRest!==baselineRest) throw new Error('candidate contains changes outside the permitted labor-field additions');
 
 const preserved=[
   'https://api.openai.com/v1/responses',
