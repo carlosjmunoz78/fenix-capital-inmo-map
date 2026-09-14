@@ -1,23 +1,36 @@
 import {useEffect,useState} from 'react';
 import {createPortal} from 'react-dom';
 import {useLocation,useNavigate} from 'react-router-dom';
-import {fetchAppApi,supabase,SUPABASE_URL} from './supabase';
+import {fetchAppApi} from './supabase';
 import './direction-executive-overview.css';
 
-type BankRank={id:string;banco:string;firmadas_mes:number;previstas_mes:number};
-type BankCatalog={id:string;banco:string;activo?:boolean};
-type Payload={ok?:boolean;bank_ranking?:BankRank[];bank_catalog?:BankCatalog[];bank_sample?:{firmadas_con_banco?:number;previstas_con_banco?:number};error?:string};
+type Row=Record<string,unknown>;
+type BankRank={id:string;banco:string;score:number;reasons:string[]};
 type Person={id?:string;actor_code?:string;worker_id?:string;personal_id?:string;code?:string;name?:string;role?:string;expedientes?:number;firmas_mes?:number};
 type PersonalResponse={items?:Person[]};
 
-function monthNow(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;}
-async function fetchOverview(){
- const{data:{session}}=await supabase.auth.getSession();
- if(!session?.access_token)return{status:401,data:null as Payload|null};
- const q=new URLSearchParams({key:'executive-overview',month:monthNow()});
- const r=await fetch(`${SUPABASE_URL}/functions/v1/fenix-direction-kpis-test?${q.toString()}`,{headers:{Authorization:`Bearer ${session.access_token}`}});
- let data:Payload|null=null;try{data=await r.json()}catch{data=null}
- return{status:r.status,data};
+function rowsFrom(data:unknown):Row[]{if(!data||typeof data!=='object')return[];const d=data as Record<string,unknown>;for(const k of ['items','bancos','results'])if(Array.isArray(d[k]))return d[k] as Row[];return[];}
+function first(r:Row,keys:string[]){for(const k of keys){const v=r[k];if(typeof v==='string'&&v.trim())return v.trim();if(typeof v==='number'&&Number.isFinite(v))return String(v)}return'';}
+function yes(r:Row,keys:string[]){return keys.some(k=>r[k]===true||/^(si|sí|yes|true)$/i.test(String(r[k]??'')));}
+function rankBank(r:Row,index:number):BankRank|null{
+ const id=first(r,['bank_code','banco_code','id','code','codigo']);
+ const banco=first(r,['nombre','name','banco','entidad']);
+ if(!id||!banco)return null;
+ const cien=yes(r,['admite_100','financiacion_100','cien_por_cien']);
+ const doble=yes(r,['doble_garantia','admite_doble_garantia']);
+ const activo=r.activo!==false;
+ if(!activo)return null;
+ let score=40-Math.min(index,10);const reasons:string[]=[];
+ if(cien){score+=30;reasons.push('Financiación al 100% declarada.');}
+ if(doble){score+=25;reasons.push('Doble garantía declarada.');}
+ if(!cien&&!doble)reasons.push('Banco activo; sin capacidades especiales declaradas.');
+ return{id,banco,score,reasons};
+}
+async function fetchBankRanking(){
+ const r=await fetchAppApi<unknown>('/bancos');
+ if(r.status!==200)return{status:r.status,items:[] as BankRank[]};
+ const items=rowsFrom(r.data).map(rankBank).filter((x):x is BankRank=>Boolean(x)).sort((a,b)=>b.score-a.score||a.banco.localeCompare(b.banco,'es')).slice(0,3);
+ return{status:200,items};
 }
 function num(v:unknown){return typeof v==='number'&&Number.isFinite(v)?v:0;}
 function personId(p:Person){for(const k of ['id','actor_code','worker_id','personal_id','code'] as const){const v=p[k];if(typeof v==='string'&&v.trim())return v.trim();}return'';}
@@ -30,7 +43,7 @@ export default function DirectionExecutiveOverviewGuard(){
  const[teamTarget,setTeamTarget]=useState<HTMLElement|null>(null);
  const[status,setStatus]=useState<number|null>(null);
  const[teamStatus,setTeamStatus]=useState<number|null>(null);
- const[data,setData]=useState<Payload|null>(null);
+ const[banks,setBanks]=useState<BankRank[]>([]);
  const[people,setPeople]=useState<Person[]>([]);
  useEffect(()=>{
   if(location.pathname!=='/inicio'){setBankTarget(null);setTeamTarget(null);return;}
@@ -40,20 +53,16 @@ export default function DirectionExecutiveOverviewGuard(){
  },[location.pathname]);
  useEffect(()=>{
   if(location.pathname!=='/inicio')return;
-  let alive=true;setStatus(null);setTeamStatus(null);setData(null);setPeople([]);
-  Promise.all([fetchOverview(),fetchAppApi<PersonalResponse>('/personal')]).then(([r,p])=>{if(!alive)return;setStatus(r.status);setData(r.data);setTeamStatus(p.status);setPeople(p.status===200&&Array.isArray(p.data?.items)?p.data.items:[]);}).catch(()=>{if(alive){setStatus(0);setTeamStatus(0);setData(null);setPeople([])}});
+  let alive=true;setStatus(null);setTeamStatus(null);setBanks([]);setPeople([]);
+  Promise.all([fetchBankRanking(),fetchAppApi<PersonalResponse>('/personal')]).then(([r,p])=>{if(!alive)return;setStatus(r.status);setBanks(r.items);setTeamStatus(p.status);setPeople(p.status===200&&Array.isArray(p.data?.items)?p.data.items:[]);}).catch(()=>{if(alive){setStatus(0);setTeamStatus(0);setBanks([]);setPeople([])}});
   return()=>{alive=false};
  },[location.pathname]);
- const banks=(data?.bank_ranking??[]).slice(0,3);
- const catalog=(data?.bank_catalog??[]).filter(x=>x.id&&x.banco).slice(0,3);
- const showPreview=status===200&&banks.length<3&&catalog.length>=3;
- const podium=showPreview?catalog.map((b,i)=>({...b,firmadas_mes:0,previstas_mes:0,preview:true,place:i+1})):banks.map((b,i)=>({...b,preview:false,place:i+1}));
  const team=[...people].sort((a,b)=>num(b.firmas_mes)-num(a.firmas_mes)||num(b.expedientes)-num(a.expedientes)||personName(a).localeCompare(personName(b),'es')).slice(0,5);
- const maxBank=Math.max(1,...banks.map(x=>x.firmadas_mes+x.previstas_mes));
+ const maxBank=Math.max(1,...banks.map(x=>x.score));
  const maxTeam=Math.max(1,...team.map(x=>num(x.firmas_mes)+num(x.expedientes)));
  const bankView=bankTarget?createPortal(<div className="dir-exec-panel dir-exec-bank" data-testid="direction-bank-ranking">
   <div className="dir-exec-title"><div><small>BANCOS</small><strong>Top 3 bancos</strong></div><button onClick={()=>navigate('/bancos')}>Ver todos</button></div>
-  {status===null?<div className="dir-exec-empty">Preparando ranking…</div>:status!==200?<div className="dir-exec-empty">Ranking no disponible ahora.</div>:podium.length===0?<div className="dir-exec-empty"><strong>Sin actividad suficiente este mes</strong><span>El ranking aparecerá cuando haya operaciones suficientes para ordenarlo.</span></div>:<div className={`dir-exec-bars${showPreview?' is-preview':''}`}>{podium.map(r=><button key={r.id} className={`dir-exec-row rank-${r.place}`} onClick={()=>navigate(`/bancos/${encodeURIComponent(r.id)}`)}><b className="dir-rank-medal">{r.place}</b><span className="dir-exec-copy"><strong>{r.banco}</strong>{r.preview?<small>Pendiente de actividad del mes</small>:<small>{r.firmadas_mes} firmadas · {r.previstas_mes} previstas</small>}{!r.preview&&<i><u style={{width:pct(r.firmadas_mes+r.previstas_mes,maxBank)}}/></i>}</span><em>Ficha ›</em></button>)}</div>}
+  {status===null?<div className="dir-exec-empty">Preparando ranking…</div>:status!==200?<div className="dir-exec-empty">Ranking no disponible ahora.</div>:banks.length===0?<div className="dir-exec-empty"><strong>Sin bancos visibles</strong><span>La fuente autorizada no devuelve bancos utilizables.</span></div>:<div className="dir-exec-bars">{banks.map((r,i)=><button key={r.id} className={`dir-exec-row rank-${i+1}`} onClick={()=>navigate(`/bancos/${encodeURIComponent(r.id)}`)}><b className="dir-rank-medal">{i+1}</b><span className="dir-exec-copy"><strong>{r.banco}</strong><small>{r.reasons.join(' ')}</small><i><u style={{width:pct(r.score,maxBank)}}/></i></span><em>Ficha ›</em></button>)}</div>}
  </div>,bankTarget):null;
  const teamView=teamTarget?createPortal(<div className="dir-exec-panel dir-exec-team" data-testid="direction-financial-team">
   <div className="dir-exec-title"><div><small>EQUIPO FINANCIERO</small><strong>Actividad</strong></div><button onClick={()=>navigate('/financieros')}>Ver equipo</button></div>
