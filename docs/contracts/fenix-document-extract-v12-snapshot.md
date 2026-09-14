@@ -7,7 +7,8 @@ Fuente auditada directamente en Supabase PROD del proyecto `cluhljgonannaafpmblx
 - Function: `fenix-document-extract`
 - Version PROD: `12`
 - `verify_jwt`: `true`
-- PROD source SHA-256: `54b2a282be040ceeef3564cc6c7d7653c59b96e25ce3db9e7af27c9634b531d2`
+- Supabase bundle `ezbr_sha256`: `54b2a282be040ceeef3564cc6c7d7653c59b96e25ce3db9e7af27c9634b531d2`
+- Hash SHA-256 del source versionado en repo: `c8ccc623be364dcfc67b8be8f6b5320476909f4c1af77bf2e3339723b8a0b1c9`
 - Bucket leído por backend: `fenix-prod-documents`
 - Apply target: `fenix-document-intelligence`
 - MIME soportados: PDF, PNG, JPEG, WEBP
@@ -42,4 +43,4 @@ Antes de promocionar cualquier nueva versión de `fenix-document-extract`, el so
 
 ## Rollback
 
-La referencia de rollback inmediata es PROD v12 con SHA-256 `54b2a282be040ceeef3564cc6c7d7653c59b96e25ce3db9e7af27c9634b531d2`. No desplegar una variante si no existe forma de volver a esta versión funcional.
+La referencia de rollback inmediata es la función PROD v12 identificada por bundle `ezbr_sha256` `54b2a282be040ceeef3564cc6c7d7653c59b96e25ce3db9e7af27c9634b531d2`, con el source auditado/versionado en esta rama y hash repo `c8ccc623be364dcfc67b8be8f6b5320476909f4c1af77bf2e3339723b8a0b1c9`. No desplegar una variante si no existe forma de volver a esta versión funcional.
