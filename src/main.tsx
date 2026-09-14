@@ -79,6 +79,7 @@ import AnaOperationalPreparationGuard from './AnaOperationalPreparationGuard';
 import AnaInboxAccessGuard from './AnaInboxAccessGuard';
 import AnaKnowledgeReviewGuard from './AnaKnowledgeReviewGuard';
 import AnaTopCorrectionGuard from './AnaTopCorrectionGuard';
+import AudioTranscriptionGuard from './AudioTranscriptionGuard';
 import DirectionHomeAnaCorrection from './DirectionHomeAnaCorrection';
 import DocumentDetailAnaGuard from './DocumentDetailAnaGuard';
 import DirectoryRowOpenGuard from './DirectoryRowOpenGuard';
@@ -139,6 +140,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <DirectoryRowOpenGuard />
       <AnaKnowledgeBlock />
       <AnaKnowledgePlacementGuard />
+      <AudioTranscriptionGuard />
       <AnaUniversalGuard />
       <AnaOperationalPreparationGuard />
       <AnaInboxAccessGuard />
