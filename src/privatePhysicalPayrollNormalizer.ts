@@ -31,7 +31,7 @@ function annualMoney(text:string){
 
 export function normalizePrivatePhysicalPayroll(result:ExtractedDocument,rawText:string,declaredType=''):ExtractedDocument{
  const payroll=/N[ÓO]MINA|RECIBO DE SALARIOS/i.test(declaredType)||result.documentType==='Nómina';
- const contract=/CONTRATO.*TRABAJO|CONTRATO LABORAL/i.test(declaredType)||result.documentType==='Contrato de trabajo';
+ const contract=/CONTRATO.*TRABAJO|CONTRATO LABORAL/i.test(declaredType);
  if(!payroll&&!contract)return result;
  const fields:ExtractedFields={...result.fields};
  if(payroll&& (fields.bruto===undefined||fields.bruto===null||fields.bruto==='')){
