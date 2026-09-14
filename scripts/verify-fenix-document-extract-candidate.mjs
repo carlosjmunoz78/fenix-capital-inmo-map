@@ -12,17 +12,43 @@ const EXPECTED_SOURCE_SHA='c8ccc623be364dcfc67b8be8f6b5320476909f4c1af77bf2e3339
 const baselineSha=crypto.createHash('sha256').update(baseline).digest('hex');
 if(baselineSha!==EXPECTED_SOURCE_SHA) throw new Error(`baseline drift: expected ${EXPECTED_SOURCE_SHA}, got ${baselineSha}`);
 
-const requiredAdditions=[
-  'modalidad_contrato',
-  'numero_pagas',
-  'fecha_inicio_contrato',
-  'fecha_fin_contrato',
-  'jornada',
-  'categoria_profesional'
-];
-for(const token of requiredAdditions){
-  if(!candidate.includes(token)) throw new Error(`candidate missing required labor token: ${token}`);
-}
+const declaration=(source,name)=>{
+  const startToken=`const ${name}=`;
+  const start=source.indexOf(startToken);
+  if(start<0)throw new Error(`missing declaration: ${name}`);
+  const end=source.indexOf(';',start);
+  if(end<0)throw new Error(`unterminated declaration: ${name}`);
+  return {start,end:end+1,text:source.slice(start,end+1)};
+};
+const values=(text)=>[...text.matchAll(/\"([^\"]+)\"/g)].map(m=>m[1]);
+const compareDeclaration=(name,allowedAdditions)=>{
+  const b=declaration(baseline,name);
+  const c=declaration(candidate,name);
+  const bv=values(b.text);
+  const cv=values(c.text);
+  const stripped=cv.filter(v=>!allowedAdditions.includes(v));
+  if(JSON.stringify(stripped)!==JSON.stringify(bv)) throw new Error(`${name} changed outside allowed additions`);
+  for(const token of allowedAdditions){
+    const before=bv.filter(v=>v===token).length;
+    const after=cv.filter(v=>v===token).length;
+    if(after!==before+1) throw new Error(`${name} expected exactly one added ${token}`);
+  }
+  return {b,c};
+};
+
+const numberDecl=compareDeclaration('NUMBER_FIELDS',['numero_pagas']);
+const fieldDecl=compareDeclaration('FIELD_KEYS',['modalidad_contrato','numero_pagas']);
+const canonicalDecl=compareDeclaration('CANONICAL_KEYS',['modalidad_contrato','fecha_inicio_contrato','fecha_fin_contrato','jornada','categoria_profesional','numero_pagas']);
+
+const stripDeclarations=(source,decls)=>{
+  const ordered=[...decls].sort((a,b)=>b.start-a.start);
+  let out=source;
+  for(const d of ordered) out=out.slice(0,d.start)+`<${d.text.slice(6,d.text.indexOf('='))}:DECLARATION>`+out.slice(d.end);
+  return out;
+};
+const baselineRest=stripDeclarations(baseline,[numberDecl.b,fieldDecl.b,canonicalDecl.b]);
+const candidateRest=stripDeclarations(candidate,[numberDecl.c,fieldDecl.c,canonicalDecl.c]);
+if(candidateRest!==baselineRest) throw new Error('candidate contains changes outside NUMBER_FIELDS/FIELD_KEYS/CANONICAL_KEYS');
 
 const preserved=[
   'https://api.openai.com/v1/responses',
@@ -38,22 +64,5 @@ for(const token of preserved){
   if(!baseline.includes(token) || !candidate.includes(token)) throw new Error(`preservation failure: ${token}`);
 }
 
-const normalize=(s)=>s.replace(/\s+/g,'');
-const b=normalize(baseline);
-const c=normalize(candidate);
-const allowedFragments=[
-  ',"numero_pagas"',
-  ',"modalidad_contrato"',
-  ',"fecha_inicio_contrato"',
-  ',"fecha_fin_contrato"',
-  ',"jornada"',
-  ',"categoria_profesional"'
-];
-let reduced=c;
-for(const fragment of allowedFragments){
-  reduced=reduced.split(fragment).join('');
-}
-if(reduced!==b) throw new Error('candidate contains changes outside the permitted labor-field additions');
-
 const candidateSha=crypto.createHash('sha256').update(candidate).digest('hex');
-console.log(JSON.stringify({ok:true,baseline_sha256:baselineSha,candidate_sha256:candidateSha,allowed_additions:requiredAdditions}));
+console.log(JSON.stringify({ok:true,baseline_sha256:baselineSha,candidate_sha256:candidateSha,allowed_changes:{NUMBER_FIELDS:['numero_pagas'],FIELD_KEYS:['modalidad_contrato','numero_pagas'],CANONICAL_KEYS:['modalidad_contrato','fecha_inicio_contrato','fecha_fin_contrato','jornada','categoria_profesional','numero_pagas']}}));
