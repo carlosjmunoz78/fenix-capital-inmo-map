@@ -53,7 +53,8 @@ test.describe('Fénix PRE-PROD · contrato visual Expedientes',()=>{
   await expect(table.locator('tbody tr').first()).toContainText('2026-08-24');
   const shot=await page.screenshot({fullPage:true});
   await testInfo.attach('expedientes-qa-1600',{body:shot,contentType:'image/png'});
-  await page.getByText('Expediente QA 1').click();
+  const firstRow=table.locator('tbody tr').filter({hasText:'Expediente QA 1'}).first();
+  await firstRow.getByRole('button',{name:'Abrir expediente 11111111-1111-4111-8111-111111111111'}).click();
   await expect(page).toHaveURL(/\/expedientes\/11111111-1111-4111-8111-111111111111$/);
  });
 });
