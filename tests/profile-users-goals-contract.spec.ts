@@ -47,3 +47,22 @@ test('profile UI exposes personal progress, improvement guidance, user creation 
  expect(src).toContain("action:'reset_password'");
  expect(src).toContain("action:'set_goal'");
 });
+
+test('active-work contract is canonical across expedientes search tasks profile goals and economy',async()=>{
+ const migration=read('supabase/migrations/20260915162500_active_work_ordering_economy.sql');
+ expect(migration).toContain('fenix_prod_expediente_is_active');
+ for(const terminal of ["'cerrado'","'cierre'","'finalizado'","'firmado'","'baja'","'perdido'","'pausado'"])expect(migration).toContain(terminal);
+ expect(migration).toContain("lower(coalesce(f.estado,''))='firmado'");
+ expect(migration).toContain('create or replace function public.fenix_prod_exp_list_server');
+ expect(migration).toContain('create or replace function public.fenix_prod_search_server');
+ expect(migration).toContain('create or replace function public.fenix_prod_get_tareas_server');
+ expect(migration).toContain('fenix_prod_task_order_bucket');
+ expect(migration).toContain("when 'esperando tercero' then 1");
+ expect(migration).toContain("when 'completada' then 2");
+ expect(migration).toContain("when 'cancelada' then 3");
+ expect(migration).toContain('create or replace function public.fenix_prod_profile_goals_get_server');
+ expect(migration).toContain('expediente(s) activos para el objetivo mensual');
+ expect(migration).toContain('create or replace function public.fenix_prod_economia_server');
+ expect(migration).toContain("'pipeline_activo'");
+ expect(migration).toContain("'importe_solicitado'");
+});
