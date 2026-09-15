@@ -18,19 +18,19 @@ export default defineConfig({
   webServer: {
     command: webServerCommand,
     url: 'http://127.0.0.1:4173',
-    reuseExistingServer: false,
+    reuseExistingServer: process.env.PLAYWRIGHT_EXTERNAL_SERVER==='1',
     timeout: 120_000
   },
   projects: [
     { name: 'desktop-chromium', use: { ...devices['Desktop Chrome'] } },
     {
       name: 'tablet-chromium',
-      testMatch: ['**/ui.spec.ts','**/direction-context-fallback.spec.ts'],
+      testMatch: ['**/ui.spec.ts','**/direction-context-fallback.spec.ts','**/app-real-five-flows.spec.ts'],
       use: { viewport: { width: 820, height: 1180 } }
     },
     {
       name: 'mobile-chromium',
-      testMatch: ['**/ui.spec.ts','**/direction-context-fallback.spec.ts','**/operational-mobile-shell.spec.ts'],
+      testMatch: ['**/ui.spec.ts','**/direction-context-fallback.spec.ts','**/operational-mobile-shell.spec.ts','**/app-real-five-flows.spec.ts'],
       use: { ...devices['Pixel 7'] }
     }
   ]

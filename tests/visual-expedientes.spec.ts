@@ -6,22 +6,23 @@ const fakeSession={
  user:{id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',aud:'authenticated',role:'authenticated',email:'direccion@fenix.test',app_metadata:{},user_metadata:{},created_at:'2026-08-19T00:00:00.000Z'}
 };
 const rows=[
- {id:'11111111-1111-4111-8111-111111111111',expediente:'Expediente QA 1',fase:'Estudio',cliente:'Cliente QA 1',proxima_accion:'2026-08-24',estado:'Activo'},
- {id:'22222222-2222-4222-8222-222222222222',expediente:'Expediente QA 2',fase:'Banco',cliente:'Cliente QA 2',proxima_accion:'2026-08-25',estado:'Activo'}
+ {id:'11111111-1111-4111-8111-111111111111',expediente_code:'11111111-1111-4111-8111-111111111111',expediente:'Expediente QA 1',fase:'Estudio',cliente:'Cliente QA 1',proxima_accion:'2026-08-24',estado:'Activo'},
+ {id:'22222222-2222-4222-8222-222222222222',expediente_code:'22222222-2222-4222-8222-222222222222',expediente:'Expediente QA 2',fase:'Banco',cliente:'Cliente QA 2',proxima_accion:'2026-08-25',estado:'Activo'}
 ];
+const canonical=rows.map((r,i)=>({expediente_code:r.expediente_code,cliente_alias:r.cliente,stage:r.fase,owner_actor_code:'DIR-TEST',version:i+1}));
 
 test.describe('Fénix PRE-PROD · contrato visual Expedientes',()=>{
  test('Expedientes mantiene Ana, estadísticas, gráficos, datos canónicos, scroll acotado, sticky y ordenación por cabecera',async({page},testInfo)=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();
   await page.setViewportSize({width:1600,height:900});
   await page.addInitScript(session=>{window.localStorage.setItem('fenix-preprod-auth',JSON.stringify(session));window.localStorage.setItem('fenix-remember-device','true');},fakeSession);
-  await page.route('**/functions/v1/fenix-app-gateway-test/**',async r=>{const u=r.request().url();if(u.endsWith('/session/context'))return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({actor_code:'DIR-TEST',role:'Direccion'})});if(u.endsWith('/navigation'))return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[{label:'Inicio',route:'/inicio'},{label:'Expedientes',route:'/expedientes'},{label:'Bancos',route:'/bancos'},{label:'Contactos',route:'/contactos'},{label:'Inmobiliarias',route:'/inmobiliarias'},{label:'Tasaciones',route:'/tasaciones'},{label:'Firmas',route:'/firmas'},{label:'Documentación',route:'/documentacion'},{label:'Agenda',route:'/agenda'}]})});return r.fulfill({status:404,body:'{}'});});
+  await page.route('**/functions/v1/fenix-app-gateway-test/**',async r=>{const u=r.request().url();if(u.endsWith('/session/context'))return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({actor_code:'DIR-TEST',role:'Direccion'})});if(u.endsWith('/navigation'))return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[{label:'Inicio',route:'/inicio'},{label:'Expedientes',route:'/expedientes'},{label:'Bancos',route:'/bancos'},{label:'Contactos',route:'/contactos'},{label:'Inmobiliarias',route:'/inmobiliarias'},{label:'Tasaciones',route:'/tasaciones'},{label:'Firmas',route:'/firmas'},{label:'Documentación',route:'/documentacion'},{label:'Agenda',route:'/agenda'}]})});if(u.endsWith('/expedientes'))return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:canonical})});return r.fulfill({status:404,body:'{}'});});
   await page.route('**/functions/v1/fenix-notion-runtime-test/expedientes',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:rows})}));
   await page.goto('/expedientes');
   await expect(page.locator('[data-testid="expedientes-ana-hero"]')).toBeVisible();
   await expect(page.getByText('ANA · EXPEDIENTES',{exact:true})).toBeVisible();
   await expect(page.getByRole('heading',{name:'Expedientes',exact:true})).toBeVisible();
-  await expect(page.getByText('Fuente canónica Notion')).toBeVisible();
+  await expect(page.getByText('Vista enriquecida + contrato transaccional PROD verificado',{exact:true})).toBeVisible();
   await expect(page.locator('[data-testid="expedientes-live"]')).toBeVisible();
   await expect(page.getByText('DISTRIBUCIÓN POR FASE',{exact:true})).toBeVisible();
   await expect(page.locator('.exp-filter-card')).toBeVisible();
@@ -36,23 +37,24 @@ test.describe('Fénix PRE-PROD · contrato visual Expedientes',()=>{
   const scroll=table.locator('xpath=..');
   expect(await scroll.evaluate(el=>getComputedStyle(el).overflowY)).toBe('auto');
   expect(await scroll.evaluate(el=>getComputedStyle(el).maxHeight)).not.toBe('none');
-  const firstHeader=table.locator('thead th').first();
+  const firstHeader=table.locator('thead th').nth(1);
   const firstHeaderButton=firstHeader.locator('button');
   expect(await firstHeader.evaluate(el=>getComputedStyle(el).position)).toBe('sticky');
   await expect(firstHeaderButton).toBeVisible();
   await firstHeaderButton.click();
   await expect(firstHeader).toHaveAttribute('aria-sort','ascending');
-  await expect(table.locator('tbody tr').first().locator('td').first()).toContainText('Expediente QA 1');
+  await expect(table.locator('tbody tr').first()).toContainText('Expediente QA 1');
   await firstHeaderButton.click();
   await expect(firstHeader).toHaveAttribute('aria-sort','descending');
-  await expect(table.locator('tbody tr').first().locator('td').first()).toContainText('Expediente QA 2');
-  const dateHeader=table.locator('thead th').nth(3);
+  await expect(table.locator('tbody tr').first()).toContainText('Expediente QA 2');
+  const dateHeader=table.locator('thead th').filter({hasText:/Proxima Accion/i}).first();
   await dateHeader.locator('button').click();
   await expect(dateHeader).toHaveAttribute('aria-sort','ascending');
-  await expect(table.locator('tbody tr').first().locator('td').nth(3)).toContainText('2026-08-24');
+  await expect(table.locator('tbody tr').first()).toContainText('2026-08-24');
   const shot=await page.screenshot({fullPage:true});
   await testInfo.attach('expedientes-qa-1600',{body:shot,contentType:'image/png'});
-  await page.getByText('Expediente QA 1').click();
+  const firstRow=table.locator('tbody tr').filter({hasText:'Expediente QA 1'}).first();
+  await firstRow.getByRole('button',{name:'Abrir →'}).click();
   await expect(page).toHaveURL(/\/expedientes\/11111111-1111-4111-8111-111111111111$/);
  });
 });

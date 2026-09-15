@@ -43,10 +43,12 @@ test.describe('Fénix PRE-PROD · contrato visual Inicio Dirección',()=>{
     await expect(page.locator('.dir-priority-copy h1')).toContainText('Belén');
     await expect(page.locator('.dir-user-copy strong')).toHaveText('Belén Muñoz');
     await expect(page.getByText('Dirección',{exact:true})).toHaveCount(0);
-    await expect(page.getByRole('button',{name:/Hablar con Ana/})).toBeVisible();
+    await expect(page.getByRole('button',{name:/Hablar con Ana/})).toHaveCount(0);
     await expect(page.locator('.dir-person-photo')).toBeVisible();
-    await expect(page.locator('.dir-help-avatar')).toBeVisible();
-    await expect(page.getByText('Revisar expediente prioritario',{exact:true})).toBeVisible();
+    await expect(page.locator('.dir-help-avatar')).toHaveCount(0);
+    const attention=page.getByTestId('direction-attention-today');
+    await expect(attention).toBeVisible();
+    await expect(attention.getByText('Revisar expediente prioritario',{exact:true})).toBeVisible();
     const kpis=page.locator('.dir-kpis');
     await expect(kpis.getByRole('button',{name:/EXPEDIENTES\s+EN CURSO/i}).locator('strong')).toHaveText('2');
     await expect(kpis.getByRole('button',{name:/FIRMAS\s+PREVISTAS ESTE MES/i}).locator('strong')).toHaveText('1');

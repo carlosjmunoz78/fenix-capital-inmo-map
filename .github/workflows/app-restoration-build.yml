@@ -1,0 +1,88 @@
+name: App Restoration Build Gate
+
+on:
+  push:
+    branches:
+      - app-restoration-reconcile-current-main-20260915
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'scripts/**'
+      - 'supabase/**'
+      - '.github/workflows/app-restoration-build.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: app-restoration-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      VITE_FENIX_ENV: prod
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Materialize and verify document extractor candidate
+        run: |
+          node scripts/build-fenix-document-extract-candidate.mjs --write
+          node scripts/verify-fenix-document-extract-candidate.mjs
+      - name: Audit backend rollback snapshots
+        run: node scripts/audit-app-restoration-backend-rollback.mjs
+      - name: Group A + B + D restoration contracts
+        run: npx playwright test tests/participant-labor-contract.spec.ts tests/app-restoration-ui-contract.spec.ts tests/document-person-projection-contract.spec.ts tests/document-person-e2e-contract.spec.ts tests/document-extract-v12-contract.spec.ts --reporter=line
+      - name: Prepare isolated visual test runtime
+        run: node scripts/prepare-prod-visual-test-runtime.mjs
+      - name: Probe isolated visual auth/runtime
+        env:
+          VITE_FENIX_ENV: test
+          VITE_SUPABASE_URL: http://127.0.0.1:54321
+          VITE_SUPABASE_PUBLISHABLE_KEY: visual-ci-not-a-real-key
+        run: npx playwright test tests/visual-runtime-auth-probe.spec.ts --reporter=line
+      - name: Affected-screen visual contracts
+        # These fixtures execute only against the isolated -test namespace.
+        # Unmocked backend calls fail locally and cannot reach live PROD.
+        env:
+          VITE_FENIX_ENV: test
+          VITE_SUPABASE_URL: http://127.0.0.1:54321
+          VITE_SUPABASE_PUBLISHABLE_KEY: visual-ci-not-a-real-key
+        run: npx playwright test tests/visual-agenda.spec.ts tests/visual-banco-detail.spec.ts tests/visual-direction.spec.ts tests/visual-expediente-detail.spec.ts tests/visual-expedientes.spec.ts tests/visual-informes.spec.ts tests/visual-profile.spec.ts tests/fixed-shell-layout.spec.ts tests/navigation-responsive-widths.spec.ts --reporter=line
+      - name: Real-app five-flow regression on isolated PROD-shaped runtime
+        env:
+          VITE_FENIX_ENV: prod
+          VITE_SUPABASE_URL: http://127.0.0.1:54321
+          VITE_SUPABASE_PUBLISHABLE_KEY: real-app-five-flows-not-a-real-key
+        run: npx playwright test tests/app-real-five-flows.spec.ts --reporter=line
+      - name: TypeScript and Vite build
+        run: npm run build
+      - name: Archive backend promotion and rollback bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-restoration-backend-${{ github.sha }}
+          retention-days: 7
+          if-no-files-found: error
+          path: |
+            supabase/functions/fenix-document-extract-candidate/index.ts
+            supabase/functions/fenix-document-intelligence/index.ts
+            supabase/functions/fenix-expediente-people/index.ts
+            supabase/rollback/fenix-document-intelligence-v12/index.ts
+            supabase/rollback/fenix-expediente-people-v2/index.ts
+            supabase/migrations/20260914162500_explicit_participant_labor_profile.sql
+            docs/APP_RESTORATION_BACKEND_LIVE_COMPARISON_2026-09-15.md

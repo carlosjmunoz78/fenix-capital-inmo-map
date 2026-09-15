@@ -10,7 +10,7 @@ type RecognitionErrorLike={error?:string};
 type RecognitionLike={lang:string;continuous:boolean;interimResults:boolean;onresult:((event:RecognitionEventLike)=>void)|null;onerror:((event:RecognitionErrorLike)=>void)|null;onend:(()=>void)|null;start:()=>void;stop:()=>void;abort:()=>void};
 type RecognitionCtor=new()=>RecognitionLike;
 type SpeechWindow=Window&{SpeechRecognition?:RecognitionCtor;webkitSpeechRecognition?:RecognitionCtor};
-type ActionMode='correct'|'knowledge'|'task'|'ana'|null;
+type ActionMode='ana'|'knowledge'|'correct'|'task'|null;
 type CanonicalRule={id:string;rule:string;confidence?:number;approved?:boolean;state?:string};
 type CanonicalEnvelope={ok?:boolean;items?:CanonicalRule[]};
 type ChatMessage={role:'user'|'ana';text:string};
@@ -24,12 +24,17 @@ function anaReply(question:string,rules:CanonicalRule[]){
  if(!matched.length)return 'No tengo todavía un criterio aprobado suficientemente relacionado con esa consulta. Puedo seguir trabajando con el contexto de financiación, pero prefiero no inventar una respuesta sin base aprobada.';
  return `Según los criterios aprobados de Fénix Capital: ${matched.map(x=>x.rule.rule.trim().replace(/[.\s]+$/,'')).join('. ')}.`;
 }
+function correctionScope(pathname:string){
+ const parts=pathname.split('/').filter(Boolean),root=parts[0]||'',code=parts[1]||'';
+ const map:Record<string,string>={expedientes:'expediente',contactos:'contacto','contactos-b2b':'contacto_b2b',inmobiliarias:'inmobiliaria',tareas:'tarea',agenda:'tarea',visitas:'visita',bancos:'banco',tasaciones:'tasacion',firmas:'firma',documentacion:'documento',documentos:'documento',comunicaciones:'comunicacion',notarias:'notaria','registros-propiedad':'registro_propiedad'};
+ return{type:map[root]||root||'general',code:code&&!['nuevo','nueva','new'].includes(code.toLowerCase())?code:''};
+}
 
 const ACTIONS=[
- {id:'correct' as const,label:'Corregir',hint:'Corregir un dato, criterio o respuesta',icon:Check},
- {id:'knowledge' as const,label:'Dar conocimiento',hint:'Añadir conocimiento útil de financiación a CEREBRO',icon:BookOpen},
- {id:'task' as const,label:'Tarea',hint:'Preparar una tarea con este contexto',icon:ClipboardList},
- {id:'ana' as const,label:'Hablar con Ana',hint:'Consultar a Ana con contexto de financiación',icon:MessageCircle}
+ {id:'ana' as const,label:'Hablar con Ana',hint:'Consultar a Ana con contexto de financiación',icon:MessageCircle},
+ {id:'knowledge' as const,label:'Dar conocimiento',hint:'Añadir conocimiento para revisión y aprendizaje',icon:BookOpen},
+ {id:'correct' as const,label:'Corregir a Ana',hint:'Corregir un dato, criterio o respuesta',icon:Check},
+ {id:'task' as const,label:'Tarea',hint:'Preparar una tarea con este contexto',icon:ClipboardList}
 ];
 
 export default function AudioTranscriptionGuard(){
@@ -39,6 +44,7 @@ export default function AudioTranscriptionGuard(){
  const[finalText,setFinalText]=useState(''),[interimText,setInterimText]=useState(''),[message,setMessage]=useState(''),[chat,setChat]=useState<ChatMessage[]>([]);
  const supported=Boolean(recognitionConstructor());
  const composed=`${finalText}${interimText?` ${interimText}`:''}`.trim();
+ const hidden=location.pathname==='/'||location.pathname.startsWith('/auth');
  useEffect(()=>()=>{recognitionRef.current?.abort();recognitionRef.current=null},[]);
  useEffect(()=>{recognitionRef.current?.abort();recognitionRef.current=null;setListening(false);setInterimText('');setOpen(false);setMode(null);setChat([])},[location.pathname]);
  function stop(){recognitionRef.current?.stop();setListening(false)}
@@ -67,11 +73,16 @@ export default function AudioTranscriptionGuard(){
    finally{setSending(false)}
    return;
   }
-  const base=new URLSearchParams({source_route:location.pathname,draft:composed,domain:'financiacion'});
+  const scope=correctionScope(location.pathname);
+  const base=new URLSearchParams({source_route:location.pathname,draft:composed,domain:'financiacion',scope_type:scope.type});
+  if(scope.code)base.set('scope_code',scope.code);
   if(mode==='task'){navigate(`/tareas/nueva?${base.toString()}`);return}
   base.set('mode',mode);
+  if(mode==='correct')base.set('correction',composed);
+  if(mode==='knowledge')base.set('knowledge',composed);
   navigate(`/ana?${base.toString()}`);
  }
+ if(hidden)return null;
  return <div className="fenix-audio-transcription" data-testid="audio-transcription-guard">
   {!open&&<button type="button" className="fenix-audio-launcher" onClick={()=>setOpen(true)} aria-label="Abrir acciones por voz" title="Acciones por voz"><Mic size={21}/></button>}
   {open&&<section className="fenix-audio-panel" aria-label="Acciones por voz y texto">

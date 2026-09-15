@@ -3,7 +3,7 @@ import {useLocation,useNavigate} from 'react-router-dom';
 import {supabase} from './supabase';
 import CerebroConsoleShell from './CerebroConsoleShell';
 
-const ALWAYS_ALLOWED=new Set(['/','/inicio','/perfil','/ana','/cerebro']);
+const ALWAYS_ALLOWED=new Set(['/','/inicio','/perfil','/ana','/cerebro','/chat']);
 const KNOWN_ROOTS=['/expedientes','/contactos','/contactos-b2b','/inmobiliarias','/tasaciones','/agenda','/tareas','/firmas','/documentacion','/documentos','/financieros','/visitadores','/economia','/informes','/buscar','/bancos','/notificaciones','/notarias','/registros-propiedad','/obras-nuevas','/herencias','/visitas','/comunicaciones'];
 
 function normalizePath(value:string){
