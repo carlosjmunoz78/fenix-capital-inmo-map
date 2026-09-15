@@ -28,6 +28,7 @@ import './global-interactions.css';
 import App from './App';
 import RoleHomeShell from './RoleHomeShell';
 import ProfileShell from './ProfileShell';
+import ProfileAccountControls from './ProfileAccountControls';
 import OperationalShellGate from './OperationalShellGate';
 import BancosShell from './BancosShell';
 import BankCreateShell from './BankCreateShell';
@@ -167,6 +168,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <App />
       <RoleHomeShell />
       <ProfileShell />
+      <ProfileAccountControls />
       <OperationalShellGate />
       <BancosShell />
       <BankCreateShell />
