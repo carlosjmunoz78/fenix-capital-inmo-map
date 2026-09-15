@@ -37,7 +37,7 @@ test.describe('Fénix PRE-PROD · contrato visual Expedientes',()=>{
   const scroll=table.locator('xpath=..');
   expect(await scroll.evaluate(el=>getComputedStyle(el).overflowY)).toBe('auto');
   expect(await scroll.evaluate(el=>getComputedStyle(el).maxHeight)).not.toBe('none');
-  const firstHeader=table.locator('thead th').first();
+  const firstHeader=table.locator('thead th').nth(1);
   const firstHeaderButton=firstHeader.locator('button');
   expect(await firstHeader.evaluate(el=>getComputedStyle(el).position)).toBe('sticky');
   await expect(firstHeaderButton).toBeVisible();
