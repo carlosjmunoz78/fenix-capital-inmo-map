@@ -27,6 +27,17 @@ test('global voice actions expose the four required Ana modes with scoped contex
  expect(voice).toContain("base.set('knowledge',composed)");
 });
 
+test('bulk selection does not open expediente or task rows accidentally',async()=>{
+ const exp=read('src/ExpedientesSharedShell.tsx');
+ expect(exp).toContain('<th>ABRIR</th>');
+ expect(exp).toContain('Abrir →');
+ expect(exp).not.toContain('return <tr key={code||String(index)} onClick=');
+ const agenda=read('src/AgendaShell.tsx');
+ expect(agenda).toContain('onDoubleClick={stop}');
+ expect(agenda).toContain('onChange={()=>id&&toggle(id)}');
+ expect(agenda).not.toContain("<tr key={id||i} className={id?'ops-clickable-row':''} onClick=");
+});
+
 test('Ana screen keeps persistent knowledge and conversation while global shortcuts cover ordinary use',async()=>{
  const knowledge=read('src/AnaKnowledgeBlock.tsx');
  const contextual=read('src/AnaUniversalGuard.tsx');
@@ -38,11 +49,14 @@ test('Ana screen keeps persistent knowledge and conversation while global shortc
 
 test('Ana screen includes a real persistent conversation composer and stream',async()=>{
  const chat=read('src/AnaChatBlock.tsx');
+ const governance=read('src/AnaGovernance.tsx');
  const main=read('src/main.tsx');
  expect(chat).toContain("location.pathname==='/ana'");
  expect(chat).toContain("fenix_prod_chat_list_user");
  expect(chat).toContain("fenix_prod_chat_send_user");
  expect(chat).toContain('CONVERSACIÓN CON ANA');
+ expect(governance).toContain('document.documentElement.dataset.theme=theme');
+ expect(governance).toContain('data-theme={theme}');
  expect(main).toContain("import AnaChatBlock from './AnaChatBlock'");
  expect(main).toContain('<AnaChatBlock />');
 });
