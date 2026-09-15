@@ -27,8 +27,8 @@ function removeLauncherText(el:HTMLElement){
   for(const node of Array.from(el.childNodes)){
     if(node.nodeType===Node.TEXT_NODE)node.textContent='';
   }
-  el.setAttribute('aria-label','Calculadora Hipotecaria');
-  el.setAttribute('title','Calculadora');
+  if(el.getAttribute('aria-label')!=='Calculadora Hipotecaria')el.setAttribute('aria-label','Calculadora Hipotecaria');
+  if(el.getAttribute('title')!=='Calculadora')el.setAttribute('title','Calculadora');
   styleLauncher(el,'130px');
 }
 
@@ -48,7 +48,9 @@ function ensureChatLauncher(){
 }
 
 function normalize(root:ParentNode=document){
-  root.querySelectorAll<HTMLElement>('[aria-label="Calculadora Hipotecaria PRO"]').forEach(el=>el.setAttribute('aria-label','Calculadora Hipotecaria'));
+  root.querySelectorAll<HTMLElement>('[aria-label="Calculadora Hipotecaria PRO"]').forEach(el=>{
+    if(el.getAttribute('aria-label')!=='Calculadora Hipotecaria')el.setAttribute('aria-label','Calculadora Hipotecaria');
+  });
   root.querySelectorAll<HTMLElement>('.calc-panel>header>div:first-child>strong').forEach(el=>{
     for(const node of Array.from(el.childNodes))if(node.nodeType===Node.TEXT_NODE&&node.textContent?.includes('PRO'))node.textContent=node.textContent.replace(/\s*PRO\b/g,'');
   });
