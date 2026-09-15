@@ -24,11 +24,11 @@ test('participant and document sections stay compact by default',async()=>{
  expect(people).toMatch(/open|expanded|collapsed|details|summary/);
 });
 
-test('floating controls keep calculator microphone chat vertical order',async()=>{
+test('floating controls keep microphone calculator chat vertical order',async()=>{
  const calc=read('src/CalculatorLabelGuard.tsx');
  const audio=read('src/audio-transcription.css');
- expect(calc).toContain("styleLauncher(el,'130px')");
- expect(audio).toContain('bottom:76px');
+ expect(audio).toContain('bottom:130px');
+ expect(calc).toContain("styleLauncher(el,'76px')");
  expect(calc).toContain("styleLauncher(link,'22px')");
  expect(calc).toContain("const SIZE='46px'");
  expect(calc).toContain("const ORANGE='#ff5a1f'");
