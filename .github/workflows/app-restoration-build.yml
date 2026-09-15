@@ -46,6 +46,8 @@ jobs:
         run: node scripts/audit-app-restoration-backend-rollback.mjs
       - name: Group A + B + D restoration contracts
         run: npx playwright test tests/participant-labor-contract.spec.ts tests/app-restoration-ui-contract.spec.ts tests/document-person-projection-contract.spec.ts tests/document-person-e2e-contract.spec.ts tests/document-extract-v12-contract.spec.ts --reporter=line
+      - name: Affected-screen visual contracts
+        run: npx playwright test tests/visual-agenda.spec.ts tests/visual-banco-detail.spec.ts tests/visual-direction.spec.ts tests/visual-expediente-detail.spec.ts tests/visual-expedientes.spec.ts tests/visual-informes.spec.ts tests/visual-profile.spec.ts tests/fixed-shell-layout.spec.ts tests/navigation-responsive-widths.spec.ts --reporter=line
       - name: TypeScript and Vite build
         run: npm run build
       - name: Archive backend promotion and rollback bundle
