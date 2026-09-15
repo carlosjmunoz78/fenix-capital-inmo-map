@@ -32,9 +32,9 @@ test.describe('Fénix PRE-PROD · contrato visual Inicio Dirección',()=>{
       if(u.endsWith('/session/context'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({actor_code:'DIR-TEST',role:'Direccion'})});
       if(u.endsWith('/navigation'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(navigation)});
       if(u.endsWith('/personal'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[],pending_profiles:5})});
+      if(u.endsWith('/expedientes'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,status:200,items:[{expediente_code:'e1',stage:'En curso',riesgo:'Alto',is_active:true},{expediente_code:'e2',stage:'Tasación',riesgo:'Bajo',is_active:true},{expediente_code:'e3',stage:'Firmado',is_active:false}]})});
       return route.fulfill({status:404,contentType:'application/json',body:'{}'});
     });
-    await page.route('**/functions/v1/fenix-notion-runtime-test/expedientes',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({source:'notion_canonical',items:[{id:'e1',estado:'En curso',riesgo:'Alto'},{id:'e2',fase:'Tasación',riesgo:'Bajo'},{id:'e3',estado:'Firmado'}]})}));
     await page.route('**/functions/v1/fenix-notion-runtime-test/firmas',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({source:'notion_canonical',items:[{id:'f1',estado:'Programada',fecha_hora_firma:currentMonthIso(25,10)},{id:'f2',estado:'Firmada',fecha_hora_firma:currentMonthIso(20,12)}]})}));
     await page.route('**/functions/v1/fenix-notion-runtime-test/tareas',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({source:'notion_canonical',items:[{id:'t1',tarea:'Revisar expediente prioritario',estado:'Pendiente',fecha_limite:currentMonthIso(22).slice(0,10),completada:false},{id:'t2',tarea:'Tarea ya cerrada',estado:'Completada',fecha_limite:currentMonthIso(21).slice(0,10),completada:true}]})}));
     await page.goto('/inicio');
