@@ -15,15 +15,20 @@ test('PROD operational detail writes never fall through to Notion test runtime',
  expect(router).toContain("if(resource==='firmas')return unsupported('signature_detail_write_requires_explicit_lifecycle_mapping')");
 });
 
-test('task PROD lifecycle maps status, complete, reopen and responsible through canonical task actions',async()=>{
+test('task PROD lifecycle only executes the physically mapped canonical gateway action',async()=>{
  const router=read('src/operationalRecordActions.ts');
  const taskRuntime=read('src/taskActionsRuntime.ts');
+ const gateway=read('supabase/functions/fenix-app-gateway/index.ts');
  expect(router).toContain("action:'reassign'");
  expect(router).toContain("action:'state'");
  expect(router).toContain("action:changes[key]===true?'complete':'reopen'");
  expect(router).toContain('expected_version:version');
- expect(taskRuntime).toContain('/functions/v1/fenix-task-actions');
+ expect(taskRuntime).toContain("input.action!=='reassign'");
+ expect(taskRuntime).toContain("/tareas/${encodeURIComponent(item.task_code)}/reassign");
+ expect(taskRuntime).not.toContain('/functions/v1/fenix-task-actions');
  expect(taskRuntime).not.toContain('fenix-notion-actions-test');
+ expect(gateway).toContain("s[0]==='tareas'&&s[1]&&s[2]==='reassign'");
+ expect(gateway).toContain("fenix_prod_reassign_task_server");
 });
 
 test('appraisal PROD status uses gateway canonical route and unmapped fields fail closed',async()=>{
