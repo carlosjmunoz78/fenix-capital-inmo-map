@@ -1,4 +1,5 @@
 import {useEffect,useMemo,useState} from 'react';
+import {fetchAppApi} from './supabase';
 import {fetchNotionRuntime} from './notionRuntime';
 
 type Row=Record<string,unknown>;
@@ -24,7 +25,7 @@ function taskDone(r:Row){return bool(r,['completada','completado','done'])||/com
 function expState(r:Row){return text(r,['estado','fase','phase','stage','status']);}
 function expRisk(r:Row){return text(r,['riesgo','risk','nivel_riesgo','semaforo','semáforo']);}
 function expCode(r:Row){return text(r,['expediente_code','code','codigo','id']);}
-export function isOpenDirectionExpediente(r:Row){const s=expState(r);return !/firmad|posventa|perdid|cerrad|anulad|cancelad|pasado|desistid/i.test(s);}
+export function isOpenDirectionExpediente(r:Row){const s=expState(r);return !/firmad|posventa|perdid|cerrad|anulad|cancelad|pasado|desistid|finalizad|baja|pausad/i.test(s);}
 export function isExplicitRiskDirectionExpediente(r:Row){const risk=expRisk(r);return /alto|cr[ií]tic|riesgo|bloquead|atenci[oó]n|urgente/i.test(risk)&&isOpenDirectionExpediente(r);}
 function firmaId(r:Row){return text(r,['id','firma_id','firma_code','code']);}
 function firmaExp(r:Row){return text(r,['expediente_code','expediente','operacion','operación']);}
@@ -65,7 +66,7 @@ export function useDirectionLiveData(){
  const[tasks,setTasks]=useState<LoadState>({status:null,rows:[]});
  useEffect(()=>{let alive=true;(async()=>{
   const[e,f,t]=await Promise.all([
-   fetchNotionRuntime<unknown>('/expedientes').catch(()=>({status:0,data:null})),
+   fetchAppApi<unknown>('/expedientes').catch(()=>({status:0,data:null})),
    fetchNotionRuntime<unknown>('/firmas').catch(()=>({status:0,data:null})),
    fetchNotionRuntime<unknown>('/tareas').catch(()=>({status:0,data:null}))
   ]);
