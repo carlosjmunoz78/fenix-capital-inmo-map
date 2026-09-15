@@ -52,6 +52,25 @@ test('mini chat and full chat preserve the same active conversation',async()=>{
  expect(full).toContain("localStorage.setItem(ACTIVE_CHAT_KEY,activeCode)");
 });
 
+test('mini chat can record and send an audio note on the active V2 conversation',async()=>{
+ const mini=read('src/CalculatorLabelGuard.tsx');
+ expect(mini).toContain("navigator.mediaDevices.getUserMedia({audio:true})");
+ expect(mini).toContain("new MediaRecorder");
+ expect(mini).toContain("fenix_prod_chat_attachment_add_v2_user");
+ expect(mini).toContain("supabase.storage.from(CHAT_BUCKET).upload");
+ expect(mini).toContain("p_body:'🎤 Nota de audio'");
+ expect(mini).toContain("aria-label={recording?'Parar y enviar audio':'Grabar audio'}");
+});
+
+test('mini chat provides browser dictation into the text composer with no paid dependency',async()=>{
+ const mini=read('src/CalculatorLabelGuard.tsx');
+ expect(mini).toContain('SpeechRecognition||w.webkitSpeechRecognition');
+ expect(mini).toContain("recognition.lang='es-ES'");
+ expect(mini).toContain('recognition.interimResults=true');
+ expect(mini).toContain('setDraft(');
+ expect(mini).toContain("aria-label={dictating?'Parar dictado':'Dictar mensaje'}");
+});
+
 test('legacy chat RPCs remain preserved outside the advanced V2 screen during parallel migration',async()=>{
  const ana=read('src/AnaChatBlock.tsx');
  expect(ana).toContain('fenix_prod_chat_list_user');
