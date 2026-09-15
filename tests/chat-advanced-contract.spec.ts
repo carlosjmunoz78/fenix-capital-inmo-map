@@ -81,7 +81,7 @@ test('legacy team chat is migrated into a persistent V2 conversation without del
  expect(migration).toContain("AND conversation_code IS NULL");
  expect(migration).toContain("INSERT INTO fenix_prod.chat_conversation_members");
  expect(migration).toContain("ON CONFLICT DO NOTHING");
- expect(migration).toContain("conversation_code,body,idempotency_key,channel_code,conversation_code").not;
+ expect(migration).toContain("VALUES(\n      p_actor_code,v_body,v_key,'EQUIPO','CONV-EQUIPO-FENIX'");
  expect(migration).not.toContain('DELETE FROM fenix_prod.chat_messages');
 });
 
