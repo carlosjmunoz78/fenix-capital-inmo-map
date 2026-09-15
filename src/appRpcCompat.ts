@@ -11,6 +11,20 @@ export async function gatewayRpc<T=any>(name:string,args:Record<string,any>={}):
       path=`/chat?limit=${encodeURIComponent(String(args.p_limit??100))}`;break;
     case 'fenix_prod_chat_send_user':
       path='/chat';init={method:'POST',body:body({body:args.p_body,idempotency_key:args.p_idempotency_key})};break;
+    case 'fenix_prod_chat_conversations_user':
+      path='/chat/conversations';break;
+    case 'fenix_prod_chat_people_user':
+      path='/chat/people';break;
+    case 'fenix_prod_chat_conversation_create_user':
+      path='/chat/conversations';init={method:'POST',body:body({member_actor_codes:args.p_member_actor_codes,title:args.p_title??null})};break;
+    case 'fenix_prod_chat_group_create_user':
+      path='/chat/groups';init={method:'POST',body:body({member_actor_codes:args.p_member_actor_codes,title:args.p_title})};break;
+    case 'fenix_prod_chat_list_v2_user':
+      path=`/chat/conversations/${encodeURIComponent(String(args.p_conversation_code||''))}/messages?limit=${encodeURIComponent(String(args.p_limit??100))}`;break;
+    case 'fenix_prod_chat_send_v2_user':
+      path=`/chat/conversations/${encodeURIComponent(String(args.p_conversation_code||''))}/messages`;init={method:'POST',body:body({body:args.p_body,idempotency_key:args.p_idempotency_key})};break;
+    case 'fenix_prod_chat_attachment_add_v2_user':
+      path=`/chat/messages/${encodeURIComponent(String(args.p_message_code||''))}/attachments`;init={method:'POST',body:body({storage_path:args.p_storage_path,filename:args.p_filename,mime_type:args.p_mime_type,size_bytes:args.p_size_bytes})};break;
     case 'fenix_prod_contact_create':
       path='/contactos';init={method:'POST',body:body({tipo:args.p_tipo,nombre:args.p_nombre,apellidos:args.p_apellidos,email:args.p_email,telefono:args.p_telefono,cargo:args.p_cargo,entidad_id:args.p_entidad_id,observaciones:args.p_observaciones,consentimiento_comercial:args.p_consentimiento_comercial})};break;
     case 'fenix_prod_exp_create':
