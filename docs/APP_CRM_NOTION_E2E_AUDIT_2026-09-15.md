@@ -88,7 +88,7 @@ with whole-batch prevalidation, role checks, owner checks, `expected_version` co
 The active `fenix-task-actions` v1 is physically deployed with JWT verification and calls `fenix_prod_task_bulk_action_server`. This function is evidence of the backend contract, but the App does not need to call it directly.
 
 ### E. Canonical Gateway/App task lifecycle closure on branch
-Branch HEAD now routes the App task lifecycle through the canonical Gateway boundary:
+Branch HEAD routes the App task lifecycle through the canonical Gateway boundary:
 
 `App operational action → taskActionsRuntime → POST /tareas/actions → fenix_prod_task_bulk_action_server`
 
@@ -100,6 +100,8 @@ GitHub Actions run `34956720546` completed `SUCCESS` for branch HEAD `b931db11c3
 - canonical App/CRM/Notion routing contract tests PASS;
 - TypeScript + Vite build PASS;
 - no-PROD-mutation safety gate PASS.
+
+The documentation-followup run `34956908400` also completed `SUCCESS`, proving the same contract/build/no-PROD-mutation gate after the final audit documentation update.
 
 This is branch evidence only. The new Gateway route has **not** been deployed to PROD by this closure.
 
@@ -117,6 +119,21 @@ Still not demonstrated for this generic task lifecycle path:
 
 Those mechanisms are therefore **not** claimed as HECHO. They are only required if a future explicit cross-system synchronization contract needs them. Generic operational Notion mirroring remains disabled/fail-closed.
 
+## Final branch delta and rollback boundary
+The closure branch is exactly **12 commits ahead** of the canonical restoration branch `app-restoration-reconcile-current-main-20260915` and **0 commits behind** it. The closure-specific delta is limited to:
+
+- `.github/workflows/app-crm-notion-sync-closure.yml`
+- `docs/APP_CRM_NOTION_E2E_AUDIT_2026-09-15.md`
+- `src/OperationalRecordDetail.tsx`
+- `src/operationalRecordActions.ts`
+- `src/taskActionsRuntime.ts`
+- `supabase/functions/fenix-app-gateway/index.ts`
+- `tests/app-crm-notion-sync-closure.spec.ts`
+
+Rollback boundary is therefore explicit: the restoration branch HEAD `8c6934d4362c0f1877ee5d45ded6cb92b6026e09` is the pre-closure baseline. No PROD rollback is required because this closure branch has not been deployed.
+
+Against `main`, the closure branch is 46 commits ahead and 0 behind because it includes the previously isolated restoration work plus these 12 closure commits. It must **not** be treated as a tiny standalone patch against `main` without preserving the restoration/promotion sequence.
+
 ## Updated status matrix
 | Capability | Status | Evidence / reason |
 |---|---|---|
@@ -124,7 +141,7 @@ Those mechanisms are therefore **not** claimed as HECHO. They are only required 
 | App → canonical Gateway reads | HECHO | PROD compatibility path uses canonical App Gateway |
 | Expediente create/update → Gateway | HECHO | Gateway routes + server RPCs |
 | Task lifecycle backend contract | HECHO | live `fenix_prod_task_bulk_action_server` + `fenix-task-actions` |
-| Task lifecycle through canonical Gateway/App | HECHO EN RAMA | branch route `/tareas/actions`, App runtime mapping and CI run `34956720546` green; no PROD deploy |
+| Task lifecycle through canonical Gateway/App | HECHO EN RAMA | branch route `/tareas/actions`, App runtime mapping and CI green; no PROD deploy |
 | Expediente bulk stage backend contract | HECHO | live `fenix_prod_exp_bulk_action_server` + `fenix-expediente-actions` |
 | Generic document/signature detail writes | PARCIAL / FAIL_CLOSED | explicit lifecycle mapping still required |
 | Specialized PROD Notion transports | HECHO | Ana knowledge/corrections + document intelligence physically demonstrated |
@@ -138,15 +155,23 @@ Those mechanisms are therefore **not** claimed as HECHO. They are only required 
 ## Promotion rule
 `SAFE_TO_MERGE=NO` remains unchanged for PR #385 until its own final restoration/promotion gates are explicitly closed.
 
-For this App/CRM/Notion closure branch, the transactional target is now:
+For this App/CRM/Notion closure branch, the transactional target is now frozen as:
 
 1. App ↔ canonical Gateway ↔ Supabase for CRM state.
 2. Notion as specialized knowledge/document/governance and retained legacy provenance where already used.
 3. Explicit, entity-scoped synchronization only where a business contract requires it, with canonical ID mapping, idempotency, retry/backoff, pending/dead-letter state, reconciliation and rollback.
 
-## Next executable steps
-1. Keep the branch implementation isolated; do not deploy the new Gateway task route to PROD during this audit closure.
-2. Close the resilience decision explicitly: generic Notion operational mirroring stays disabled; no zero-cost outbox is introduced until an entity-scoped business contract requires it.
-3. Verify branch-vs-main delta and rollback path for the closure branch.
-4. Re-check the latest closure CI after this documentation commit.
-5. Once App↔CRM transactional closure evidence is frozen, return to responsive/mobile and the final PR #385 promotion checklist without changing `SAFE_TO_MERGE=NO` prematurely.
+## Macroblock closure
+- A · Transport audit: HECHO.
+- B · Source of truth + IDs: HECHO.
+- C · Operation coverage: HECHO EN RAMA.
+- D · Resilience/audit: HECHO for App↔CRM transactional scope; cross-system outbox/retry intentionally not claimed.
+- E · Generic Notion bridge: NO APLICA / DESACTIVADO by evidence; no generic mirror should be built without an explicit business contract.
+- F · CI, documentation and rollback boundary: HECHO.
+
+`MACROBLOQUES_TOTAL=6`
+`HECHOS=6`
+`RESTANTES=0`
+`BLOQUEADO=0`
+
+This closes the App↔CRM transactional synchronization audit/branch work without altering PROD or `main`. The next independent workstream is the PR #385 restoration promotion checklist and responsive/mobile closure; that work must preserve this evidence and must not reinterpret Notion as transactional source of truth.
