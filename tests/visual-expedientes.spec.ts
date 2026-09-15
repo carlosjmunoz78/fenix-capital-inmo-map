@@ -47,7 +47,7 @@ test.describe('Fénix PRE-PROD · contrato visual Expedientes',()=>{
   await firstHeaderButton.click();
   await expect(firstHeader).toHaveAttribute('aria-sort','descending');
   await expect(table.locator('tbody tr').first()).toContainText('Expediente QA 2');
-  const dateHeader=table.locator('thead th').filter({hasText:/Próxima Acción/i}).first();
+  const dateHeader=table.locator('thead th').filter({hasText:/Proxima Accion/i}).first();
   await dateHeader.locator('button').click();
   await expect(dateHeader).toHaveAttribute('aria-sort','ascending');
   await expect(table.locator('tbody tr').first()).toContainText('2026-08-24');
