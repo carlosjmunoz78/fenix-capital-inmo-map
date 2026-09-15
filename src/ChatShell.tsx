@@ -1,5 +1,5 @@
 import {FormEvent,useEffect,useMemo,useRef,useState} from 'react';
-import {MessageCircle,Moon,RefreshCw,Send,Sun} from 'lucide-react';
+import {MessageCircle,RefreshCw,Send} from 'lucide-react';
 import {useLocation} from 'react-router-dom';
 import {fetchAppApi,supabase} from './supabase';
 import {gatewayRpc} from './appRpcCompat';
@@ -24,19 +24,25 @@ function timeLabel(value:string){
   const d=new Date(value);if(Number.isNaN(d.getTime()))return'';
   return new Intl.DateTimeFormat('es-ES',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}).format(d);
 }
+function storedTheme():Theme{
+  const local=localStorage.getItem('fenix-theme');
+  if(local==='light'||local==='dark')return local;
+  const session=sessionStorage.getItem('fenix-theme');
+  return session==='dark'?'dark':'light';
+}
 
 export default function ChatShell(){
   const location=useLocation();
   const active=location.pathname==='/chat';
   const [ready,setReady]=useState(false),[logged,setLogged]=useState(false);
-  const [theme,setTheme]=useState<Theme>(()=>(sessionStorage.getItem('fenix-theme') as Theme)||'light');
+  const [theme,setTheme]=useState<Theme>(()=>storedTheme());
   const [ctx,setCtx]=useState<Ctx|null>(null),[nav,setNav]=useState<NavItem[]>([]);
   const [messages,setMessages]=useState<ChatMessage[]>([]),[draft,setDraft]=useState('');
   const [loading,setLoading]=useState(false),[sending,setSending]=useState(false),[notice,setNotice]=useState('');
   const endRef=useRef<HTMLDivElement|null>(null);
 
   useEffect(()=>{if(!active)return;let alive=true;supabase.auth.getSession().then(({data})=>{if(alive){setLogged(Boolean(data.session));setReady(true)}});const{data:{subscription}}=supabase.auth.onAuthStateChange((_e,s)=>{if(alive){setLogged(Boolean(s));setReady(true)}});return()=>{alive=false;subscription.unsubscribe()};},[active]);
-  useEffect(()=>{if(!active)return;document.documentElement.dataset.theme=theme;sessionStorage.setItem('fenix-theme',theme)},[active,theme]);
+  useEffect(()=>{if(!active)return;document.documentElement.dataset.theme=theme;localStorage.setItem('fenix-theme',theme);sessionStorage.setItem('fenix-theme',theme)},[active,theme]);
   useEffect(()=>{if(!active||!logged)return;let alive=true;(async()=>{try{const[c,n]=await Promise.all([fetchAppApi<Ctx>('/session/context'),fetchAppApi<unknown>('/navigation')]);if(!alive)return;setCtx(c.status===200?c.data:null);setNav(n.status===200?normalizeNavigation(n.data):[]);}catch{if(alive){setCtx(null);setNav([])}}})();return()=>{alive=false};},[active,logged]);
 
   async function load(silent=false){
@@ -75,11 +81,9 @@ export default function ChatShell(){
   const count=useMemo(()=>messages.length,[messages.length]);
   if(!active||!ready||!logged)return null;
 
-  const topbar=<header className="ops-top"><div className="ops-profile"><strong>Chat interno CEREBRO</strong></div><div className="ops-top-actions"><button onClick={()=>setTheme(theme==='light'?'dark':'light')} aria-label="Cambiar tema">{theme==='light'?<Moon size={17}/>:<Sun size={17}/>} {theme==='light'?'Oscuro':'Claro'}</button><div className="ops-profile"><strong>{role}</strong></div></div></header>;
-
-  return <OperationalShellFrame className="chat-root" theme={theme} navigation={effectiveNav} activeRoute="/chat" anaSubtitle="Conversación interna del equipo Fénix." anaRoute="/ana" query="" onQueryChange={()=>{}} searchPlaceholder="" name={role} role="" initials={role.slice(0,2).toUpperCase()} onToggleTheme={()=>setTheme(theme==='light'?'dark':'light')} onLogout={async()=>{await supabase.auth.signOut();window.location.href=import.meta.env.BASE_URL}} topbar={topbar} contentClassName="chat-content">
+  return <OperationalShellFrame className="chat-root" theme={theme} navigation={effectiveNav} activeRoute="/chat" anaSubtitle="Conversación interna del equipo Fénix." anaRoute="/ana" query="" onQueryChange={()=>{}} searchPlaceholder="Buscar en Fénix" name={role} role="" initials={role.slice(0,2).toUpperCase()} onToggleTheme={()=>setTheme(theme==='light'?'dark':'light')} onLogout={async()=>{await supabase.auth.signOut();window.location.href=import.meta.env.BASE_URL}} contentClassName="chat-content">
     <section className="chat-heading">
-      <div><small>COMUNICACIÓN INTERNA</small><h1>Chat CEREBRO</h1><p>Canal persistente del equipo. Los mensajes quedan asociados al usuario autenticado y no modifican expedientes ni tareas.</p></div>
+      <div><small>COMUNICACIÓN INTERNA</small><h1>Chat interno</h1><p>Conversación del equipo Fénix. Puedes abrirla también desde el botón flotante sin abandonar la pantalla en la que estés trabajando.</p></div>
       <button type="button" onClick={()=>void load()} disabled={loading}><RefreshCw size={17}/>{loading?'Actualizando…':'Actualizar'}</button>
     </section>
 
