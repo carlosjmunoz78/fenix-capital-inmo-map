@@ -71,6 +71,20 @@ test('mini chat provides browser dictation into the text composer with no paid d
  expect(mini).toContain("aria-label={dictating?'Parar dictado':'Dictar mensaje'}");
 });
 
+test('legacy team chat is migrated into a persistent V2 conversation without deleting history',async()=>{
+ const migration=read('supabase/migrations/20260915154500_chat_history_persistence.sql');
+ expect(migration).toContain("'CONV-EQUIPO-FENIX'");
+ expect(migration).toContain("'Equipo Fénix'");
+ expect(migration).toContain("UPDATE fenix_prod.chat_messages");
+ expect(migration).toContain("SET conversation_code='CONV-EQUIPO-FENIX'");
+ expect(migration).toContain("WHERE channel_code='EQUIPO'");
+ expect(migration).toContain("AND conversation_code IS NULL");
+ expect(migration).toContain("INSERT INTO fenix_prod.chat_conversation_members");
+ expect(migration).toContain("ON CONFLICT DO NOTHING");
+ expect(migration).toContain("conversation_code,body,idempotency_key,channel_code,conversation_code").not;
+ expect(migration).not.toContain('DELETE FROM fenix_prod.chat_messages');
+});
+
 test('legacy chat RPCs remain preserved outside the advanced V2 screen during parallel migration',async()=>{
  const ana=read('src/AnaChatBlock.tsx');
  expect(ana).toContain('fenix_prod_chat_list_user');
