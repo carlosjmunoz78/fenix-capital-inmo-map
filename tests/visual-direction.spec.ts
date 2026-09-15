@@ -3,7 +3,7 @@ import {test,expect} from '@playwright/test';
 const fakeSession={
   access_token:'eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwicm9sZSI6ImF1dGhlbnRpY2F0ZWQiLCJzdWIiOiJhYWFhYWFhYS1hYWFhLTRhYWEtOGFhYS1hYWFhYWFhYWFhYWEiLCJlbWFpbCI6ImRpcmVjY2lvbkBmZW5peC50ZXN0IiwiZXhwIjoxOTk5OTk5OTk5fQ.',
   token_type:'bearer',expires_in:3600,expires_at:1999999999,refresh_token:'qa-direction-not-real',
-  user:{id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',aud:'authenticated',role:'authenticated',email:'direccion@fenix.test',app_metadata:{},user_metadata:{full_name:'Belén Muñoz'},created_at:'2026-08-19T00:00:00.000Z'}
+  user:{id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',aud:'authenticated',role:'authenticated',email:'direccion@fenix.test',app_metadata:{},user_metadata:{full_name:'Belén Muñoz',actor_code:'DIR-TEST',role:'Direccion'},created_at:'2026-08-19T00:00:00.000Z'}
 };
 
 const navigation={items:[
@@ -26,7 +26,13 @@ function currentMonthIso(day:number,hour=10){
 test.describe('Fénix PRE-PROD · contrato visual Inicio Dirección',()=>{
   test('Inicio conserva patrón maestro, identidad real, escala legible y tema persistente',async({page},testInfo)=>{
     if(!testInfo.project.name.includes('desktop'))test.skip();
-    await page.addInitScript(session=>{window.localStorage.setItem('fenix-preprod-auth-v2',JSON.stringify(session));window.localStorage.setItem('fenix-remember-device','true');},fakeSession);
+    await page.addInitScript(session=>{
+      const raw=JSON.stringify(session);
+      window.localStorage.setItem('fenix-preprod-auth-v2',raw);
+      window.localStorage.setItem('fenix-preprod-auth',raw);
+      window.localStorage.setItem('fenix-remember-device','true');
+      window.sessionStorage.setItem('fenix-session-active','1');
+    },fakeSession);
     await page.route('**/functions/v1/fenix-app-gateway-test/**',async route=>{
       const u=route.request().url();
       if(u.endsWith('/session/context'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({actor_code:'DIR-TEST',role:'Direccion'})});
