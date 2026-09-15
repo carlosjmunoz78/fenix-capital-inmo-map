@@ -47,7 +47,7 @@ jobs:
       - name: Audit backend rollback snapshots
         run: node scripts/audit-app-restoration-backend-rollback.mjs
       - name: Group A + B + D restoration contracts
-        run: npx playwright test tests/participant-labor-contract.spec.ts tests/app-restoration-ui-contract.spec.ts tests/chat-advanced-contract.spec.ts tests/document-person-projection-contract.spec.ts tests/document-person-e2e-contract.spec.ts tests/document-extract-v12-contract.spec.ts --reporter=line
+        run: npx playwright test tests/participant-labor-contract.spec.ts tests/app-restoration-ui-contract.spec.ts tests/chat-advanced-contract.spec.ts tests/profile-users-goals-contract.spec.ts tests/document-person-projection-contract.spec.ts tests/document-person-e2e-contract.spec.ts tests/document-extract-v12-contract.spec.ts --reporter=line
       - name: Prepare isolated visual test runtime
         run: node scripts/prepare-prod-visual-test-runtime.mjs
       - name: Probe isolated visual auth/runtime
@@ -57,8 +57,6 @@ jobs:
           VITE_SUPABASE_PUBLISHABLE_KEY: visual-ci-not-a-real-key
         run: npx playwright test tests/visual-runtime-auth-probe.spec.ts --reporter=line
       - name: Affected-screen visual contracts
-        # These fixtures execute only against the isolated -test namespace.
-        # Unmocked backend calls fail locally and cannot reach live PROD.
         env:
           VITE_FENIX_ENV: test
           VITE_SUPABASE_URL: http://127.0.0.1:54321
@@ -82,7 +80,10 @@ jobs:
             supabase/functions/fenix-document-extract-candidate/index.ts
             supabase/functions/fenix-document-intelligence/index.ts
             supabase/functions/fenix-expediente-people/index.ts
+            supabase/functions/fenix-profile-api/index.ts
+            supabase/functions/fenix-user-admin/index.ts
             supabase/rollback/fenix-document-intelligence-v12/index.ts
             supabase/rollback/fenix-expediente-people-v2/index.ts
             supabase/migrations/20260914162500_explicit_participant_labor_profile.sql
+            supabase/migrations/20260915161000_profile_users_goals.sql
             docs/APP_RESTORATION_BACKEND_LIVE_COMPARISON_2026-09-15.md
