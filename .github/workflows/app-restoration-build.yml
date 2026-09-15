@@ -48,3 +48,17 @@ jobs:
         run: npx playwright test tests/participant-labor-contract.spec.ts tests/app-restoration-ui-contract.spec.ts tests/document-person-projection-contract.spec.ts tests/document-person-e2e-contract.spec.ts tests/document-extract-v12-contract.spec.ts --reporter=line
       - name: TypeScript and Vite build
         run: npm run build
+      - name: Archive backend promotion and rollback bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-restoration-backend-${{ github.sha }}
+          retention-days: 7
+          if-no-files-found: error
+          path: |
+            supabase/functions/fenix-document-extract-candidate/index.ts
+            supabase/functions/fenix-document-intelligence/index.ts
+            supabase/functions/fenix-expediente-people/index.ts
+            supabase/rollback/fenix-document-intelligence-v12/index.ts
+            supabase/rollback/fenix-expediente-people-v2/index.ts
+            supabase/migrations/20260914162500_explicit_participant_labor_profile.sql
+            docs/APP_RESTORATION_BACKEND_LIVE_COMPARISON_2026-09-15.md
