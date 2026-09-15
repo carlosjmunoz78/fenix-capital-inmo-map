@@ -1,9 +1,12 @@
 import {test,expect} from '@playwright/test';
 
+// Reuse the exact session shape already proven by visual-runtime-auth-probe.
+// Direction identity is supplied by the canonical /session/context contract below,
+// so this test does not couple auth persistence to role metadata.
 const fakeSession={
-  access_token:'eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwicm9sZSI6ImF1dGhlbnRpY2F0ZWQiLCJzdWIiOiJhYWFhYWFhYS1hYWFhLTRhYWEtOGFhYS1hYWFhYWFhYWFhYWEiLCJlbWFpbCI6ImRpcmVjY2lvbkBmZW5peC50ZXN0IiwiZXhwIjoxOTk5OTk5OTk5fQ.c2ln',
-  token_type:'bearer',expires_in:3600,expires_at:1999999999,refresh_token:'qa-direction-not-real',
-  user:{id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',aud:'authenticated',role:'authenticated',email:'direccion@fenix.test',app_metadata:{},user_metadata:{full_name:'Belén Muñoz',actor_code:'DIR-TEST',role:'Direccion'},created_at:'2026-08-19T00:00:00.000Z'}
+  access_token:'eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwicm9sZSI6ImF1dGhlbnRpY2F0ZWQiLCJzdWIiOiJjY2NjY2NjYy1jY2NjLTRjY2MtOGNjYy1jY2NjY2NjY2NjY2MiLCJlbWFpbCI6InByb2JlQGZlbml4LnRlc3QiLCJleHAiOjE5OTk5OTk5OTl9.c2ln',
+  token_type:'bearer',expires_in:3600,expires_at:1999999999,refresh_token:'qa-probe-not-real',
+  user:{id:'cccccccc-cccc-4ccc-8ccc-cccccccccccc',aud:'authenticated',role:'authenticated',email:'probe@fenix.test',app_metadata:{},user_metadata:{full_name:'Belén Muñoz'},created_at:'2026-09-15T00:00:00.000Z'}
 };
 
 const navigation={items:[
@@ -31,8 +34,6 @@ test.describe('Fénix PRE-PROD · contrato visual Inicio Dirección',()=>{
       window.localStorage.setItem('fenix-remember-device','true');
       window.sessionStorage.setItem('fenix-session-active','1');
     },fakeSession);
-    // Use the same deterministic auth boundary as the passing isolated runtime probe.
-    // This visual contract validates the Direction workspace, not GoTrue networking.
     await page.route('http://127.0.0.1:54321/auth/v1/**',async route=>{
       const u=route.request().url();
       if(u.includes('/user'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(fakeSession.user)});
