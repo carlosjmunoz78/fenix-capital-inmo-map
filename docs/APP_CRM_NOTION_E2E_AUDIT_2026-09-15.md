@@ -8,13 +8,13 @@ No `main` mutation, no PROD deployment, no database/customer-data mutation, no l
 - PROD operational detail no longer falls through to `fenix-notion-actions-test`.
 - PROD reads use the canonical App Gateway compatibility layer.
 - Expediente create/update are gateway-backed.
-- Task reassign is gateway-backed through `/tareas/{task_code}/reassign` → `fenix_prod_reassign_task_server`.
-- At the original checkpoint, task `state`, `complete` and `reopen` were deliberately `FAIL_CLOSED` because no physical canonical backend contract had yet been demonstrated to this branch.
+- Task lifecycle `complete`, `reopen`, `state` and `reassign` is now branch-wired through canonical `/tareas/actions` → `fenix_prod_task_bulk_action_server`.
+- The older single-task `/tareas/{task_code}/reassign` → `fenix_prod_reassign_task_server` route is preserved for compatibility.
 - Document-detail and signature-detail generic mutations remain `FAIL_CLOSED` unless mapped to an explicit lifecycle contract.
 - Appraisal status uses the canonical Gateway status route; unmapped appraisal mutations fail closed.
 
 ## Physical backend evidence
-`supabase/functions/fenix-app-gateway/index.ts` is the canonical server-side boundary currently visible in this repository. It exposes server RPC-backed routes for expediente create/list/get/update/workspace, task read/reassign, documents, banking, appraisals, signatures and additional operational resources.
+`supabase/functions/fenix-app-gateway/index.ts` is the canonical server-side boundary currently visible in this repository. It exposes server RPC-backed routes for expediente create/list/get/update/workspace, task read/lifecycle actions, documents, banking, appraisals, signatures and additional operational resources.
 
 The repository snapshot used by the original checkpoint did **not** contain a production Notion transport implementation identifiable by `api.notion.com`, `NOTION_TOKEN`, or `fenix-notion-bridge` code search. Subsequent read-only inspection of the live Supabase project demonstrates specialized Notion transports outside that repo snapshot; this correction is recorded below.
 
@@ -71,7 +71,7 @@ The corresponding Supabase row, located from the retained Notion source page ID,
 
 This mismatch is direct evidence that imported Notion task provenance must not be interpreted as a live bidirectional mirror. No automatic reconciliation write was performed during this audit.
 
-### D. Task and expediente action contracts now exist physically
+### D. Task and expediente action contracts physically demonstrated
 Live PROD contains migrations `app_task_bulk_actions_v0` and `app_expediente_bulk_actions_v0` and deployed Edge Functions `fenix-task-actions` and `fenix-expediente-actions`.
 
 `fenix_prod_task_bulk_action_server` physically supports:
@@ -85,9 +85,37 @@ with whole-batch prevalidation, role checks, owner checks, `expected_version` co
 
 `fenix_prod_exp_bulk_action_server` physically supports `stage` only, also with batch prevalidation, role/owner checks, `expected_version`, stage validation, history, notes and version increments.
 
-This means the original task `state/complete/reopen = FAIL_CLOSED because backend contract absent` statement is now stale relative to live PROD. However, the canonical `fenix-app-gateway` v17 still exposes only task read + single-task `reassign`; it does **not** expose the newer task bulk action contract. The `fenix-app-gateway-v2-canary` v1 is active but currently contains unrelated v2 routes and also does not expose these task/expediente bulk actions.
+The active `fenix-task-actions` v1 is physically deployed with JWT verification and calls `fenix_prod_task_bulk_action_server`. This function is evidence of the backend contract, but the App does not need to call it directly.
 
-Promotion implication: do **not** make the frontend call `fenix-task-actions` directly. Preserve the architecture and expose any accepted action through the canonical Gateway compatibility boundary first, branch-safe, then test.
+### E. Canonical Gateway/App task lifecycle closure on branch
+Branch HEAD now routes the App task lifecycle through the canonical Gateway boundary:
+
+`App operational action → taskActionsRuntime → POST /tareas/actions → fenix_prod_task_bulk_action_server`
+
+The Gateway preserves the older single-task reassign route for compatibility while adding the generic task lifecycle route. `taskActionsRuntime` remains single-item/fail-closed at the App boundary and forwards `task_code`, `expected_version`, action-specific fields and optional comment to the Gateway.
+
+GitHub Actions run `34956720546` completed `SUCCESS` for branch HEAD `b931db11c3b2a1ce6e6ff7a0094a8f587154ce44`. The job proves:
+
+- `npm ci` PASS;
+- canonical App/CRM/Notion routing contract tests PASS;
+- TypeScript + Vite build PASS;
+- no-PROD-mutation safety gate PASS.
+
+This is branch evidence only. The new Gateway route has **not** been deployed to PROD by this closure.
+
+### F. Resilience / audit evidence
+The live `fenix_prod_task_bulk_action_server` prevalidates the entire batch before any mutation and rejects stale `expected_version` values with `409 version_conflict`. That optimistic concurrency contract also prevents an identical retry with the same expected version from silently applying the same mutation twice.
+
+Each accepted task action writes an audit record to `fenix_prod.task_action_notes` with task code, actor, action kind, optional comment and timestamp. The canonical task code is unique in `fenix_prod.tareas`; `task_action_notes` is indexed by `(tarea_code, created_at DESC)`.
+
+Still not demonstrated for this generic task lifecycle path:
+
+- explicit idempotency-key persistence independent of `expected_version`;
+- automatic retry/backoff;
+- durable outbox/DLQ;
+- cross-system `pending_sync` reconciliation with Notion.
+
+Those mechanisms are therefore **not** claimed as HECHO. They are only required if a future explicit cross-system synchronization contract needs them. Generic operational Notion mirroring remains disabled/fail-closed.
 
 ## Updated status matrix
 | Capability | Status | Evidence / reason |
@@ -95,30 +123,30 @@ Promotion implication: do **not** make the frontend call `fenix-task-actions` di
 | App desktop restoration | HECHO | PR #385 CI: functional, probe, visual, build and rollback bundle green |
 | App → canonical Gateway reads | HECHO | PROD compatibility path uses canonical App Gateway |
 | Expediente create/update → Gateway | HECHO | Gateway routes + server RPCs |
-| Task reassign → Gateway | HECHO | physical Gateway route + `fenix_prod_reassign_task_server` |
-| Task state/complete/reopen backend contract | HECHO | live `fenix_prod_task_bulk_action_server` + `fenix-task-actions` |
-| Task state/complete/reopen through canonical Gateway/App | PARCIAL / FAIL_CLOSED | backend exists, Gateway/App wiring not yet proven |
+| Task lifecycle backend contract | HECHO | live `fenix_prod_task_bulk_action_server` + `fenix-task-actions` |
+| Task lifecycle through canonical Gateway/App | HECHO EN RAMA | branch route `/tareas/actions`, App runtime mapping and CI run `34956720546` green; no PROD deploy |
 | Expediente bulk stage backend contract | HECHO | live `fenix_prod_exp_bulk_action_server` + `fenix-expediente-actions` |
 | Generic document/signature detail writes | PARCIAL / FAIL_CLOSED | explicit lifecycle mapping still required |
 | Specialized PROD Notion transports | HECHO | Ana knowledge/corrections + document intelligence physically demonstrated |
-| Generic Gateway/Supabase → Notion operational mirror | NO DEMOSTRADO | no generic transport contract; task drift physically observed |
+| Generic Gateway/Supabase → Notion operational mirror | NO DEMOSTRADO / DESACTIVADO | no generic transport contract; task drift physically observed |
 | Canonical operational source of truth | HECHO | Supabase codes/versions and server contracts govern App state |
-| Idempotent Notion reconciliation | PARCIAL | dedup keys exist in specialized flows; durable outbox/retry/DLQ/reconciliation not demonstrated |
-| End-to-end App ↔ CRM ↔ Notion as one bidirectional state system | NO DEMOSTRADO | systems have different roles; direct state equivalence is contradicted by physical task drift |
+| Task action atomicity/concurrency/audit | HECHO | full prevalidation + expected_version + task_action_notes |
+| Generic cross-system retry/outbox/reconciliation | PARCIAL / NO REQUERIDO PARA EL CIERRE TRANSACCIONAL | not demonstrated; only needed for explicit future synchronization contracts |
+| End-to-end App ↔ CRM transactional closure | HECHO EN RAMA | canonical Gateway/Supabase path contract-tested and build-green |
+| End-to-end App ↔ CRM ↔ Notion as one bidirectional state system | NO DEMOSTRADO Y NO ES EL OBJETIVO | systems have different roles; direct state equivalence is contradicted by physical task drift |
 
 ## Promotion rule
-`SAFE_TO_MERGE=NO` for any claim of full App↔CRM↔Notion bidirectional closure.
+`SAFE_TO_MERGE=NO` remains unchanged for PR #385 until its own final restoration/promotion gates are explicitly closed.
 
-The target should instead be split explicitly:
+For this App/CRM/Notion closure branch, the transactional target is now:
 
-1. App ↔ canonical Gateway ↔ Supabase for transactional CRM state.
+1. App ↔ canonical Gateway ↔ Supabase for CRM state.
 2. Notion as specialized knowledge/document/governance and retained legacy provenance where already used.
 3. Explicit, entity-scoped synchronization only where a business contract requires it, with canonical ID mapping, idempotency, retry/backoff, pending/dead-letter state, reconciliation and rollback.
 
 ## Next executable steps
-1. Wrap the already-existing task bulk action contract behind the canonical App Gateway in a branch-safe implementation; do not send frontend traffic directly to `fenix-task-actions`.
-2. Update App compatibility code so `complete`, `reopen`, `state` remain fail-closed unless the canonical Gateway route is available and contract-tested.
-3. Add contract tests for role permissions, `expected_version`, batch atomic prevalidation, invalid states, reassign target-role checks and error propagation.
-4. Keep generic operational Notion mirroring disabled; treat the demonstrated task drift as a reconciliation test fixture, not as permission to overwrite either side.
-5. Design a zero-additional-cost durable reconciliation/outbox layer only for specialized flows that actually require cross-system synchronization; do not deploy it to PROD before backup, PREPROD, OLD-vs-NEW tests and rollback are proven.
-6. Re-run CI/contract probes and update this checkpoint before changing `SAFE_TO_MERGE`.
+1. Keep the branch implementation isolated; do not deploy the new Gateway task route to PROD during this audit closure.
+2. Close the resilience decision explicitly: generic Notion operational mirroring stays disabled; no zero-cost outbox is introduced until an entity-scoped business contract requires it.
+3. Verify branch-vs-main delta and rollback path for the closure branch.
+4. Re-check the latest closure CI after this documentation commit.
+5. Once App↔CRM transactional closure evidence is frozen, return to responsive/mobile and the final PR #385 promotion checklist without changing `SAFE_TO_MERGE=NO` prematurely.
