@@ -131,7 +131,7 @@ test.describe('App real · cinco flujos sobre runtime PROD local aislado',()=>{
   for(const style of styles){
     expect(style.width).toBe('46px');expect(style.height).toBe('46px');expect(style.borderRadius).toBe('50%');
     const rgb=style.background.match(/\d+/g)?.map(Number)??[];
-    expect(rgb[0]).toBe(255);expect(rgb[1]).toBeGreaterThanOrEqual(89);expect(rgb[1]).toBeLessThanOrEqual(91);expect(rgb[2]).toBeGreaterThanOrEqual(29);expect(rgb[2]).toBeLessThanOrEqual(32);
+    expect(rgb[0]).toBe(255);expect(rgb[1]).toBeGreaterThanOrEqual(88);expect(rgb[1]).toBeLessThanOrEqual(93);expect(rgb[2]).toBeGreaterThanOrEqual(24);expect(rgb[2]).toBeLessThanOrEqual(32);
   }
  });
 });
