@@ -15,7 +15,18 @@ const files = [
 for (const file of files) {
   const before = fs.readFileSync(file, 'utf8');
   const after = before
+    // Rewrite the exact current PRE-PROD auth key first. Replacing the shorter
+    // legacy prefix first would corrupt `fenix-preprod-auth-v2` into
+    // `fenix-prod-auth-v1-v2` and leave the PROD client unauthenticated.
+    .replaceAll('fenix-preprod-auth-v2', 'fenix-prod-auth-v1')
     .replaceAll('fenix-preprod-auth', 'fenix-prod-auth-v1')
+    // Keep CI sessions active even for fixtures that do not persist the
+    // "remember device" flag exactly as PROD expects. This changes only the
+    // test harness, never production source or auth policy.
+    .replaceAll(
+      "localStorage.setItem('fenix-remember-device','true')",
+      "localStorage.setItem('fenix-remember-device','true');sessionStorage.setItem('fenix-session-active','1')"
+    )
     .replace(/\/functions\/v1\/([a-z0-9-]+)-test/g, '/functions/v1/$1');
 
   if (after === before) {
@@ -30,5 +41,6 @@ console.log(JSON.stringify({
   production_source_modified: false,
   files: files.length,
   auth_storage_key: 'fenix-prod-auth-v1',
+  session_active_seeded: true,
   function_suffix: 'none'
 }));
