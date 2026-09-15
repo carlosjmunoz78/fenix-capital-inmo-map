@@ -26,8 +26,11 @@ test('isolated visual runtime recognizes persisted QA session and mounts workspa
   });
   await page.route('**/functions/v1/fenix-notion-runtime-test/**',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[]})}));
 
-  await page.goto('/expedientes');
-  await page.waitForTimeout(1500);
+  // Diagnose application bootstrap, not third-party/resource load completion.
+  // DOMContentLoaded is sufficient for the React mount and avoids masking the
+  // real cause behind an unrelated long-lived request during synthetic CI.
+  await page.goto('/expedientes',{waitUntil:'domcontentloaded',timeout:10_000});
+  await page.waitForTimeout(1000);
 
   const diag=await page.evaluate(()=>({
     href:location.href,
