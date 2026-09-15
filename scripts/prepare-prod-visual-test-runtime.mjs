@@ -14,17 +14,20 @@ const files = [
 
 for (const file of files) {
   const before = fs.readFileSync(file, 'utf8');
-  const after = before
-    // Visual CI runs in the isolated test namespace. Normalize both current
-    // and legacy fixture keys to the exact storage key expected by the client.
-    .replaceAll('fenix-prod-auth-v1', 'fenix-preprod-auth-v2')
-    .replaceAll('fenix-preprod-auth', 'fenix-preprod-auth-v2')
-    // Keep the synthetic browser session explicitly active. This is CI-only
-    // fixture state and does not alter production authentication policy.
-    .replaceAll(
+  let after = before
+    .replaceAll("'fenix-prod-auth-v1'", "'fenix-preprod-auth-v2'")
+    .replaceAll('"fenix-prod-auth-v1"', '"fenix-preprod-auth-v2"')
+    .replaceAll("'fenix-preprod-auth'", "'fenix-preprod-auth-v2'")
+    .replaceAll('"fenix-preprod-auth"', '"fenix-preprod-auth-v2"');
+
+  const activeSingle = "sessionStorage.setItem('fenix-session-active','1')";
+  const activeDouble = 'sessionStorage.setItem("fenix-session-active","1")';
+  if (!after.includes(activeSingle) && !after.includes(activeDouble)) {
+    after = after.replace(
       "localStorage.setItem('fenix-remember-device','true')",
-      "localStorage.setItem('fenix-remember-device','true');sessionStorage.setItem('fenix-session-active','1')"
+      "localStorage.setItem('fenix-remember-device','true');" + activeSingle
     );
+  }
 
   fs.writeFileSync(file, after);
 }
@@ -36,5 +39,6 @@ console.log(JSON.stringify({
   files: files.length,
   auth_storage_key: 'fenix-preprod-auth-v2',
   session_active_seeded: true,
+  idempotent: true,
   function_suffix: '-test'
 }));
