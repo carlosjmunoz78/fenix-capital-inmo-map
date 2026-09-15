@@ -29,7 +29,7 @@ test('floating controls keep microphone calculator chat vertical order',async()=
  const audio=read('src/audio-transcription.css');
  expect(audio).toContain('bottom:130px');
  expect(calc).toContain("styleLauncher(el,'76px')");
- expect(calc).toContain("styleLauncher(link,'22px')");
+ expect(calc).toContain("styleLauncher(button,'22px')");
  expect(calc).toContain("const SIZE='46px'");
  expect(calc).toContain("const ORANGE='#ff5a1f'");
 });
