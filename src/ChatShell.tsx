@@ -1,5 +1,5 @@
 import {FormEvent,useEffect,useMemo,useRef,useState} from 'react';
-import {MessageCircle,RefreshCw,Send} from 'lucide-react';
+import {FileText,Image,MessageCircle,Mic,Paperclip,Plus,RefreshCw,Send,Users,X} from 'lucide-react';
 import {useLocation} from 'react-router-dom';
 import {fetchAppApi,supabase} from './supabase';
 import {gatewayRpc} from './appRpcCompat';
@@ -10,96 +10,66 @@ import './chat-shell.css';
 
 type Theme='light'|'dark';
 type Ctx={actor_code?:string;role?:string};
-type ChatMessage={message_code:string;sender_actor_code:string;sender_name:string;sender_role:string;body:string;created_at:string};
-type ChatPayload={ok?:boolean;status?:number;channel?:string;items?:ChatMessage[];item?:ChatMessage;error?:string};
+type Person={actor_code:string;display_name:string;role:string};
+type Attachment={attachment_code:string;filename:string;mime_type:string;size_bytes:number;storage_path:string;created_at:string};
+type ChatMessage={message_code:string;sender_actor_code:string;sender_name:string;sender_role:string;body:string;created_at:string;attachments?:Attachment[]};
+type Conversation={conversation_code:string;kind:'direct'|'group';title:string;members:Person[];last_at?:string|null;last_message?:string|null;created_at:string};
+type Payload<T=unknown>={ok?:boolean;status?:number;items?:T[];item?:T;conversation_code?:string;kind?:string;error?:string};
 
 const fallbackNav:NavItem[]=[{label:'Inicio',route:'/inicio'}];
-function cleanMessages(raw:unknown):ChatMessage[]{
-  if(!raw||typeof raw!=='object')return[];
-  const items=(raw as ChatPayload).items;
-  if(!Array.isArray(items))return[];
-  return items.filter((m):m is ChatMessage=>Boolean(m&&typeof m.message_code==='string'&&typeof m.body==='string'));
-}
-function timeLabel(value:string){
-  const d=new Date(value);if(Number.isNaN(d.getTime()))return'';
-  return new Intl.DateTimeFormat('es-ES',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}).format(d);
-}
-function storedTheme():Theme{
-  const local=localStorage.getItem('fenix-theme');
-  if(local==='light'||local==='dark')return local;
-  const session=sessionStorage.getItem('fenix-theme');
-  return session==='dark'?'dark':'light';
+const ACTIVE_CHAT_KEY='fenix-active-chat-conversation';
+const CHAT_BUCKET='fenix-prod-chat';
+const ACCEPT='image/jpeg,image/png,image/webp,image/gif,application/pdf,text/plain,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,audio/mpeg,audio/mp4,audio/wav,audio/webm,audio/ogg,audio/opus,audio/aac,audio/flac';
+
+function timeLabel(value?:string|null){if(!value)return'';const d=new Date(value);if(Number.isNaN(d.getTime()))return'';return new Intl.DateTimeFormat('es-ES',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}).format(d)}
+function storedTheme():Theme{const local=localStorage.getItem('fenix-theme');if(local==='light'||local==='dark')return local;return sessionStorage.getItem('fenix-theme')==='dark'?'dark':'light'}
+function safeName(name:string){return name.normalize('NFKD').replace(/[^A-Za-z0-9._-]/g,'_').slice(-120)||'archivo'}
+function bytesLabel(n:number){if(n<1024)return`${n} B`;if(n<1048576)return`${(n/1024).toFixed(1)} KB`;return`${(n/1048576).toFixed(1)} MB`}
+
+function AttachmentLink({a}:{a:Attachment}){
+ const[url,setUrl]=useState('');
+ useEffect(()=>{let alive=true;supabase.storage.from(CHAT_BUCKET).createSignedUrl(a.storage_path,300).then(({data})=>{if(alive)setUrl(data?.signedUrl||'')});return()=>{alive=false}},[a.storage_path]);
+ const icon=a.mime_type.startsWith('image/')?<Image size={14}/>:a.mime_type.startsWith('audio/')?<Mic size={14}/>:<FileText size={14}/>;
+ return <a className="chat-attachment" href={url||undefined} target="_blank" rel="noreferrer" aria-disabled={!url}>{icon}<span><strong>{a.filename}</strong><small>{bytesLabel(a.size_bytes)}</small></span></a>;
 }
 
 export default function ChatShell(){
-  const location=useLocation();
-  const active=location.pathname==='/chat';
-  const [ready,setReady]=useState(false),[logged,setLogged]=useState(false);
-  const [theme,setTheme]=useState<Theme>(()=>storedTheme());
-  const [ctx,setCtx]=useState<Ctx|null>(null),[nav,setNav]=useState<NavItem[]>([]);
-  const [messages,setMessages]=useState<ChatMessage[]>([]),[draft,setDraft]=useState('');
-  const [loading,setLoading]=useState(false),[sending,setSending]=useState(false),[notice,setNotice]=useState('');
-  const endRef=useRef<HTMLDivElement|null>(null);
+ const location=useLocation(),active=location.pathname==='/chat';
+ const[ready,setReady]=useState(false),[logged,setLogged]=useState(false),[theme,setTheme]=useState<Theme>(()=>storedTheme());
+ const[ctx,setCtx]=useState<Ctx|null>(null),[nav,setNav]=useState<NavItem[]>([]),[people,setPeople]=useState<Person[]>([]),[conversations,setConversations]=useState<Conversation[]>([]),[activeCode,setActiveCode]=useState('');
+ const[messages,setMessages]=useState<ChatMessage[]>([]),[draft,setDraft]=useState(''),[files,setFiles]=useState<File[]>([]),[loading,setLoading]=useState(false),[sending,setSending]=useState(false),[notice,setNotice]=useState('');
+ const[composerOpen,setComposerOpen]=useState(false),[selectedPeople,setSelectedPeople]=useState<string[]>([]),[groupTitle,setGroupTitle]=useState('');
+ const[recording,setRecording]=useState(false);const recorderRef=useRef<MediaRecorder|null>(null),chunksRef=useRef<Blob[]>([]),endRef=useRef<HTMLDivElement|null>(null),fileRef=useRef<HTMLInputElement|null>(null);
 
-  useEffect(()=>{if(!active)return;let alive=true;supabase.auth.getSession().then(({data})=>{if(alive){setLogged(Boolean(data.session));setReady(true)}});const{data:{subscription}}=supabase.auth.onAuthStateChange((_e,s)=>{if(alive){setLogged(Boolean(s));setReady(true)}});return()=>{alive=false;subscription.unsubscribe()};},[active]);
-  useEffect(()=>{if(!active)return;document.documentElement.dataset.theme=theme;localStorage.setItem('fenix-theme',theme);sessionStorage.setItem('fenix-theme',theme)},[active,theme]);
-  useEffect(()=>{if(!active||!logged)return;let alive=true;(async()=>{try{const[c,n]=await Promise.all([fetchAppApi<Ctx>('/session/context'),fetchAppApi<unknown>('/navigation')]);if(!alive)return;setCtx(c.status===200?c.data:null);setNav(n.status===200?normalizeNavigation(n.data):[]);}catch{if(alive){setCtx(null);setNav([])}}})();return()=>{alive=false};},[active,logged]);
+ useEffect(()=>{if(!active)return;let alive=true;supabase.auth.getSession().then(({data})=>{if(alive){setLogged(Boolean(data.session));setReady(true)}});const{data:{subscription}}=supabase.auth.onAuthStateChange((_e,s)=>{if(alive){setLogged(Boolean(s));setReady(true)}});return()=>{alive=false;subscription.unsubscribe()}},[active]);
+ useEffect(()=>{if(!active)return;document.documentElement.dataset.theme=theme;localStorage.setItem('fenix-theme',theme);sessionStorage.setItem('fenix-theme',theme)},[active,theme]);
+ useEffect(()=>{if(!active||!logged)return;let alive=true;(async()=>{const[c,n]=await Promise.all([fetchAppApi<Ctx>('/session/context'),fetchAppApi<unknown>('/navigation')]);if(!alive)return;setCtx(c.status===200?c.data:null);setNav(n.status===200?normalizeNavigation(n.data):[])})();return()=>{alive=false}},[active,logged]);
 
-  async function load(silent=false){
-    if(!active||!logged)return;
-    if(!silent)setLoading(true);
-    try{
-      const {data,error}=await gatewayRpc<ChatPayload>('fenix_prod_chat_list_user',{p_limit:100});
-      if(error){setNotice('No se pudo cargar el chat interno.');return;}
-      const payload=data as ChatPayload|null;
-      if(payload?.status===403){setNotice('Tu perfil no tiene acceso al chat interno.');setMessages([]);return;}
-      setMessages(cleanMessages(payload));setNotice('');
-    }catch{setNotice('No se pudo conectar con el chat interno.');}
-    finally{if(!silent)setLoading(false);}
-  }
+ async function loadDirectory(){const[cs,ps]=await Promise.all([gatewayRpc<Payload<Conversation>>('fenix_prod_chat_conversations_user'),gatewayRpc<Payload<Person>>('fenix_prod_chat_people_user')]);if(cs.error||ps.error){setNotice('El Gateway de chat avanzado todavía no está disponible.');return}const convs=Array.isArray(cs.data?.items)?cs.data!.items!:[],persons=Array.isArray(ps.data?.items)?ps.data!.items!:[];setConversations(convs);setPeople(persons);const remembered=localStorage.getItem(ACTIVE_CHAT_KEY)||'';const next=(remembered&&convs.some(c=>c.conversation_code===remembered)?remembered:convs[0]?.conversation_code)||'';setActiveCode(next);if(next)localStorage.setItem(ACTIVE_CHAT_KEY,next)}
+ async function loadMessages(code=activeCode,silent=false){if(!code){setMessages([]);return}if(!silent)setLoading(true);try{const{data,error}=await gatewayRpc<Payload<ChatMessage>>('fenix_prod_chat_list_v2_user',{p_conversation_code:code,p_limit:150});if(error){setNotice('No se pudo cargar la conversación.');return}setMessages(Array.isArray(data?.items)?data!.items!:[]);setNotice('')}finally{if(!silent)setLoading(false)}}
+ useEffect(()=>{if(!active||!logged)return;void loadDirectory()},[active,logged]);
+ useEffect(()=>{if(!activeCode)return;localStorage.setItem(ACTIVE_CHAT_KEY,activeCode);void loadMessages(activeCode)},[activeCode]);
+ useEffect(()=>{if(!active||!logged||!activeCode)return;const t=window.setInterval(()=>{void loadDirectory();void loadMessages(activeCode,true)},15000);return()=>window.clearInterval(t)},[active,logged,activeCode]);
+ useEffect(()=>{if(messages.length)endRef.current?.scrollIntoView({behavior:'smooth',block:'end'})},[messages.length,activeCode]);
 
-  useEffect(()=>{if(!active||!logged)return;void load();const timer=window.setInterval(()=>void load(true),15000);return()=>window.clearInterval(timer);},[active,logged]);
-  useEffect(()=>{if(messages.length)endRef.current?.scrollIntoView({behavior:'smooth',block:'end'});},[messages.length]);
+ async function createConversation(){if(!selectedPeople.length)return;const isGroup=selectedPeople.length>1;const rpcName=isGroup?'fenix_prod_chat_group_create_user':'fenix_prod_chat_conversation_create_user';const{data,error}=await gatewayRpc<Payload>(rpcName,{p_member_actor_codes:selectedPeople,p_title:isGroup?groupTitle:null});if(error||!data?.conversation_code){setNotice('No se pudo crear la conversación.');return}setComposerOpen(false);setSelectedPeople([]);setGroupTitle('');await loadDirectory();setActiveCode(data.conversation_code)}
 
-  async function submit(e:FormEvent){
-    e.preventDefault();const body=draft.trim();if(!body||sending)return;
-    if(body.length>4000){setNotice('El mensaje supera el máximo de 4.000 caracteres.');return;}
-    setSending(true);setNotice('');
-    try{
-      const idempotency=`chat-${crypto.randomUUID()}`;
-      const {data,error}=await gatewayRpc<ChatPayload>('fenix_prod_chat_send_user',{p_body:body,p_idempotency_key:idempotency});
-      if(error){setNotice('No se pudo enviar el mensaje.');return;}
-      const payload=data as ChatPayload|null;
-      if(payload?.status!==200||!payload.item){setNotice(payload?.status===403?'Tu perfil no puede escribir en este chat.':'No se pudo guardar el mensaje.');return;}
-      setDraft('');await load(true);
-    }catch{setNotice('No se pudo enviar el mensaje.');}
-    finally{setSending(false);}
-  }
+ async function uploadAttachment(file:File,messageCode:string){const{data:{session}}=await supabase.auth.getSession();const uid=session?.user.id;if(!uid)throw new Error('no_session');if(file.size<=0||file.size>20*1024*1024)throw new Error('invalid_size');const path=`${uid}/${activeCode}/${messageCode}/${crypto.randomUUID()}-${safeName(file.name)}`;const up=await supabase.storage.from(CHAT_BUCKET).upload(path,file,{contentType:file.type||'application/octet-stream',upsert:false});if(up.error)throw up.error;const reg=await gatewayRpc<Payload>('fenix_prod_chat_attachment_add_v2_user',{p_message_code:messageCode,p_storage_path:path,p_filename:file.name,p_mime_type:file.type,p_size_bytes:file.size});if(reg.error||reg.data?.status!==201){await supabase.storage.from(CHAT_BUCKET).remove([path]);throw new Error('attachment_register_failed')}}
 
-  const role=ctx?.role||'Usuario',actor=ctx?.actor_code||'';
-  const effectiveNav=nav.length?nav:fallbackNav;
-  const count=useMemo(()=>messages.length,[messages.length]);
-  if(!active||!ready||!logged)return null;
+ async function submit(e:FormEvent){e.preventDefault();if(!activeCode||sending)return;const body=draft.trim();if(!body&&!files.length)return;if(body.length>5000){setNotice('El mensaje supera el máximo de 5.000 caracteres.');return}setSending(true);setNotice('');try{const text=body||`📎 ${files.map(f=>f.name).join(', ')}`;const{data,error}=await gatewayRpc<Payload<ChatMessage>>('fenix_prod_chat_send_v2_user',{p_conversation_code:activeCode,p_body:text,p_idempotency_key:`chat-${crypto.randomUUID()}`});const message=data?.item;if(error||!message?.message_code)throw new Error('send_failed');for(const file of files)await uploadAttachment(file,message.message_code);setDraft('');setFiles([]);await loadMessages(activeCode,true);await loadDirectory()}catch{setNotice('No se pudo enviar el mensaje o alguno de sus archivos.')}finally{setSending(false)}}
 
-  return <OperationalShellFrame className="chat-root" theme={theme} navigation={effectiveNav} activeRoute="/chat" anaSubtitle="Conversación interna del equipo Fénix." anaRoute="/ana" query="" onQueryChange={()=>{}} searchPlaceholder="Buscar en Fénix" name={role} role="" initials={role.slice(0,2).toUpperCase()} onToggleTheme={()=>setTheme(theme==='light'?'dark':'light')} onLogout={async()=>{await supabase.auth.signOut();window.location.href=import.meta.env.BASE_URL}} contentClassName="chat-content">
-    <section className="chat-heading">
-      <div><small>COMUNICACIÓN INTERNA</small><h1>Chat interno</h1><p>Conversación del equipo Fénix. Puedes abrirla también desde el botón flotante sin abandonar la pantalla en la que estés trabajando.</p></div>
-      <button type="button" onClick={()=>void load()} disabled={loading}><RefreshCw size={17}/>{loading?'Actualizando…':'Actualizar'}</button>
-    </section>
+ async function toggleRecording(){if(recording){recorderRef.current?.stop();return}try{const stream=await navigator.mediaDevices.getUserMedia({audio:true});const recorder=new MediaRecorder(stream,{mimeType:MediaRecorder.isTypeSupported('audio/webm')?'audio/webm':undefined});chunksRef.current=[];recorder.ondataavailable=e=>{if(e.data.size)chunksRef.current.push(e.data)};recorder.onstop=()=>{const blob=new Blob(chunksRef.current,{type:recorder.mimeType||'audio/webm'});const file=new File([blob],`audio-${Date.now()}.webm`,{type:blob.type||'audio/webm'});setFiles(v=>[...v,file]);stream.getTracks().forEach(t=>t.stop());setRecording(false)};recorderRef.current=recorder;recorder.start();setRecording(true)}catch{setNotice('No se pudo acceder al micrófono.')}}
 
-    <section className="chat-card" aria-label="Chat interno del equipo">
-      <header><div><MessageCircle size={20}/><span><strong>Equipo Fénix</strong><small>{count} mensajes cargados</small></span></div><span className="chat-live-dot">Actualización cada 15 s</span></header>
-      <div className="chat-stream" data-testid="chat-stream">
-        {loading&&messages.length===0&&<div className="ops-message">Cargando conversación…</div>}
-        {!loading&&messages.length===0&&!notice&&<div className="ops-empty"><strong>Aún no hay mensajes</strong><span>Escribe el primero para abrir el canal interno.</span></div>}
-        {messages.map(m=>{const mine=Boolean(actor&&m.sender_actor_code===actor);return <article key={m.message_code} className={mine?'chat-message mine':'chat-message'} data-testid="chat-message"><div className="chat-meta"><strong>{mine?'Tú':m.sender_name||m.sender_actor_code}</strong><span>{m.sender_role}</span><time>{timeLabel(m.created_at)}</time></div><p>{m.body}</p></article>})}
-        <div ref={endRef}/>
-      </div>
-      {notice&&<div className="chat-notice" role="status">{notice}</div>}
-      <form className="chat-compose" onSubmit={submit}>
-        <textarea aria-label="Mensaje interno" value={draft} onChange={e=>setDraft(e.target.value)} maxLength={4000} placeholder="Escribe un mensaje para el equipo…"/>
-        <div><small>{draft.length}/4000</small><button type="submit" disabled={!draft.trim()||sending}><Send size={17}/>{sending?'Enviando…':'Enviar'}</button></div>
-      </form>
-    </section>
-  </OperationalShellFrame>;
+ const current=conversations.find(c=>c.conversation_code===activeCode)||null,actor=ctx?.actor_code||'',role=ctx?.role||'Usuario',effectiveNav=nav.length?nav:fallbackNav;
+ const selectedNames=useMemo(()=>people.filter(p=>selectedPeople.includes(p.actor_code)).map(p=>p.display_name),[people,selectedPeople]);
+ if(!active||!ready||!logged)return null;
+
+ return <OperationalShellFrame className="chat-root" theme={theme} navigation={effectiveNav} activeRoute="/chat" anaSubtitle="Conversación interna del equipo Fénix." anaRoute="/ana" query="" onQueryChange={()=>{}} searchPlaceholder="Buscar en Fénix" name={role} role="" initials={role.slice(0,2).toUpperCase()} onToggleTheme={()=>setTheme(theme==='light'?'dark':'light')} onLogout={async()=>{await supabase.auth.signOut();window.location.href=import.meta.env.BASE_URL}} contentClassName="chat-content">
+  <section className="chat-heading"><div><small>COMUNICACIÓN INTERNA</small><h1>Chat interno</h1><p>Conversaciones directas y grupos sobre un único motor persistente. El mini chat y esta pantalla compartirán la conversación activa.</p></div><div className="chat-heading-actions"><button type="button" onClick={()=>setComposerOpen(true)}><Plus size={17}/>Nueva conversación</button><button type="button" onClick={()=>{void loadDirectory();void loadMessages()}} disabled={loading}><RefreshCw size={17}/>Actualizar</button></div></section>
+  <section className="chat-layout">
+   <aside className="chat-conversations"><header><strong>Conversaciones</strong><span>{conversations.length}</span></header>{conversations.map(c=><button type="button" key={c.conversation_code} className={c.conversation_code===activeCode?'active':''} onClick={()=>setActiveCode(c.conversation_code)}><span className="chat-conv-icon">{c.kind==='group'?<Users size={16}/>:<MessageCircle size={16}/>}</span><span><strong>{c.title}</strong><small>{c.last_message||`${c.members?.length||0} participantes`}</small></span><time>{timeLabel(c.last_at)}</time></button>)}{!conversations.length&&<div className="ops-empty"><strong>Sin conversaciones</strong><span>Crea una directa o un grupo.</span></div>}</aside>
+   <section className="chat-card" aria-label="Chat interno del equipo"><header><div><MessageCircle size={20}/><span><strong>{current?.title||'Selecciona una conversación'}</strong><small>{current?`${current.members?.length||0} participantes · ${current.kind==='group'?'Grupo':'Directo'}`:'—'}</small></span></div><span className="chat-live-dot">Actualización cada 15 s</span></header><div className="chat-stream" data-testid="chat-stream">{loading&&<div className="ops-message">Cargando conversación…</div>}{!loading&&activeCode&&!messages.length&&!notice&&<div className="ops-empty"><strong>Aún no hay mensajes</strong><span>Escribe el primero.</span></div>}{messages.map(m=>{const mine=Boolean(actor&&m.sender_actor_code===actor);return <article key={m.message_code} className={mine?'chat-message mine':'chat-message'}><div className="chat-meta"><strong>{mine?'Tú':m.sender_name||m.sender_actor_code}</strong><span>{m.sender_role}</span><time>{timeLabel(m.created_at)}</time></div><p>{m.body}</p>{Boolean(m.attachments?.length)&&<div className="chat-attachments">{m.attachments!.map(a=><AttachmentLink key={a.attachment_code} a={a}/>)}</div>}</article>})}<div ref={endRef}/></div>{notice&&<div className="chat-notice" role="status">{notice}</div>}<form className="chat-compose" onSubmit={submit}><textarea aria-label="Mensaje interno" value={draft} onChange={e=>setDraft(e.target.value)} maxLength={5000} placeholder={activeCode?'Escribe un mensaje…':'Selecciona una conversación'}/>{files.length>0&&<div className="chat-pending-files">{files.map((f,i)=><span key={`${f.name}-${i}`}><Paperclip size={13}/>{f.name}<button type="button" aria-label={`Quitar ${f.name}`} onClick={()=>setFiles(v=>v.filter((_,x)=>x!==i))}><X size={12}/></button></span>)}</div>}<div><div className="chat-compose-tools"><input ref={fileRef} type="file" multiple hidden accept={ACCEPT} onChange={e=>setFiles(v=>[...v,...Array.from(e.target.files||[])])}/><button type="button" className="secondary" onClick={()=>fileRef.current?.click()} disabled={!activeCode}><Paperclip size={16}/>Adjuntar</button><button type="button" className={recording?'recording secondary':'secondary'} onClick={()=>void toggleRecording()} disabled={!activeCode}><Mic size={16}/>{recording?'Parar audio':'Audio'}</button></div><button type="submit" disabled={!activeCode||sending||(!draft.trim()&&!files.length)}><Send size={17}/>{sending?'Enviando…':'Enviar'}</button></div></form></section>
+  </section>
+  {composerOpen&&<div className="chat-modal-backdrop" role="presentation"><section className="chat-modal" role="dialog" aria-modal="true" aria-label="Nueva conversación"><header><div><strong>Nueva conversación</strong><small>Selecciona una o varias personas.</small></div><button type="button" onClick={()=>setComposerOpen(false)} aria-label="Cerrar"><X size={18}/></button></header><div className="chat-people-list">{people.map(p=><label key={p.actor_code}><input type="checkbox" checked={selectedPeople.includes(p.actor_code)} onChange={()=>setSelectedPeople(v=>v.includes(p.actor_code)?v.filter(x=>x!==p.actor_code):[...v,p.actor_code])}/><span><strong>{p.display_name}</strong><small>{p.role}</small></span></label>)}</div>{selectedPeople.length>1&&<input value={groupTitle} onChange={e=>setGroupTitle(e.target.value)} maxLength={120} placeholder="Nombre del grupo"/>}<footer><span>{selectedNames.length?selectedNames.join(', '):'Nadie seleccionado'}</span><button type="button" disabled={!selectedPeople.length} onClick={()=>void createConversation()}>{selectedPeople.length>1?'Crear grupo':'Abrir conversación'}</button></footer></section></div>}
+ </OperationalShellFrame>;
 }
