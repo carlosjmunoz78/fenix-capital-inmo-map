@@ -29,7 +29,7 @@ function removeLauncherText(el:HTMLElement){
   }
   if(el.getAttribute('aria-label')!=='Calculadora Hipotecaria')el.setAttribute('aria-label','Calculadora Hipotecaria');
   if(el.getAttribute('title')!=='Calculadora')el.setAttribute('title','Calculadora');
-  styleLauncher(el,'130px');
+  styleLauncher(el,'76px');
 }
 
 function ensureChatLauncher(){
@@ -38,8 +38,8 @@ function ensureChatLauncher(){
   const link=document.createElement('a');
   link.className='calc-launcher fenix-chat-launcher-restored';
   link.href=`${import.meta.env.BASE_URL}chat`;
-  link.setAttribute('aria-label','Abrir chat');
-  link.setAttribute('title','Chat');
+  link.setAttribute('aria-label','Abrir chat de grupo');
+  link.setAttribute('title','Chat de grupo');
   link.textContent='💬';
   link.style.textDecoration='none';
   link.style.fontSize='20px';
