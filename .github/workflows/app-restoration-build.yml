@@ -48,13 +48,12 @@ jobs:
         run: node scripts/audit-app-restoration-backend-rollback.mjs
       - name: Group A + B + D restoration contracts
         run: npx playwright test tests/participant-labor-contract.spec.ts tests/app-restoration-ui-contract.spec.ts tests/document-person-projection-contract.spec.ts tests/document-person-e2e-contract.spec.ts tests/document-extract-v12-contract.spec.ts --reporter=line
-      - name: Prepare visual harness for current PROD runtime contract
-        run: node scripts/prepare-prod-visual-test-runtime.mjs
       - name: Affected-screen visual contracts
-        # Visual fixtures exercise PROD naming/auth semantics, but all unmocked
-        # backend calls must fail locally instead of touching live PROD. Specific
-        # Playwright routes still intercept the endpoints each test authorizes.
+        # These fixtures were authored for the isolated -test function namespace.
+        # Running them in synthetic CI validates restored UI behavior without
+        # resurrecting App PREPROD and without any request reaching live PROD.
         env:
+          VITE_FENIX_ENV: test
           VITE_SUPABASE_URL: http://127.0.0.1:54321
           VITE_SUPABASE_PUBLISHABLE_KEY: visual-ci-not-a-real-key
         run: npx playwright test tests/visual-agenda.spec.ts tests/visual-banco-detail.spec.ts tests/visual-direction.spec.ts tests/visual-expediente-detail.spec.ts tests/visual-expedientes.spec.ts tests/visual-informes.spec.ts tests/visual-profile.spec.ts tests/fixed-shell-layout.spec.ts tests/navigation-responsive-widths.spec.ts --reporter=line
