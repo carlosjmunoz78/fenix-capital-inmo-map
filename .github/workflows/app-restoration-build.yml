@@ -80,6 +80,8 @@ jobs:
             supabase/functions/fenix-document-extract-candidate/index.ts
             supabase/functions/fenix-document-intelligence/index.ts
             supabase/functions/fenix-expediente-people/index.ts
+            supabase/functions/fenix-profile-api/index.ts
+            supabase/functions/fenix-user-admin/index.ts
             supabase/rollback/fenix-document-intelligence-v12/index.ts
             supabase/rollback/fenix-expediente-people-v2/index.ts
             supabase/migrations/20260914162500_explicit_participant_labor_profile.sql
