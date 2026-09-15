@@ -15,7 +15,7 @@ test('PROD operational detail writes never fall through to Notion test runtime',
  expect(router).toContain("if(resource==='firmas')return unsupported('signature_detail_write_requires_explicit_lifecycle_mapping')");
 });
 
-test('task PROD lifecycle only executes the physically mapped canonical gateway action',async()=>{
+test('task PROD lifecycle executes canonical complete reopen state and reassign through gateway',async()=>{
  const router=read('src/operationalRecordActions.ts');
  const taskRuntime=read('src/taskActionsRuntime.ts');
  const gateway=read('supabase/functions/fenix-app-gateway/index.ts');
@@ -23,12 +23,17 @@ test('task PROD lifecycle only executes the physically mapped canonical gateway 
  expect(router).toContain("action:'state'");
  expect(router).toContain("action:changes[key]===true?'complete':'reopen'");
  expect(router).toContain('expected_version:version');
- expect(taskRuntime).toContain("input.action!=='reassign'");
- expect(taskRuntime).toContain("/tareas/${encodeURIComponent(item.task_code)}/reassign");
+ expect(taskRuntime).toContain("fetchAppApi<TaskBulkResponse>('/tareas/actions'");
+ expect(taskRuntime).toContain("if(input.action==='state'");
+ expect(taskRuntime).toContain("if(input.action==='reassign'");
  expect(taskRuntime).not.toContain('/functions/v1/fenix-task-actions');
  expect(taskRuntime).not.toContain('fenix-notion-actions-test');
- expect(gateway).toContain("s[0]==='tareas'&&s[1]&&s[2]==='reassign'");
- expect(gateway).toContain("fenix_prod_reassign_task_server");
+ expect(gateway).toContain("p==='/tareas/actions'&&req.method==='POST'");
+ expect(gateway).toContain("fenix_prod_task_bulk_action_server");
+ expect(gateway).toContain('p_items:Array.isArray(b.items)?b.items:[]');
+ expect(gateway).toContain('p_action:b.action');
+ expect(gateway).toContain("p_target_state:typeof b.target_state==='string'?b.target_state:null");
+ expect(gateway).toContain("p_new_actor_code:typeof b.new_actor_code==='string'?b.new_actor_code:null");
 });
 
 test('appraisal PROD status uses gateway canonical route and unmapped fields fail closed',async()=>{
