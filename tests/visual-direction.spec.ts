@@ -33,6 +33,12 @@ test.describe('Fénix PRE-PROD · contrato visual Inicio Dirección',()=>{
       window.localStorage.setItem('fenix-remember-device','true');
       window.sessionStorage.setItem('fenix-session-active','1');
     },fakeSession);
+    await page.route('http://127.0.0.1:54321/auth/v1/**',async route=>{
+      const u=route.request().url();
+      if(u.includes('/user'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(fakeSession.user)});
+      if(u.includes('/token'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(fakeSession)});
+      return route.fulfill({status:200,contentType:'application/json',body:'{}'});
+    });
     await page.route('**/functions/v1/fenix-app-gateway-test/**',async route=>{
       const u=route.request().url();
       if(u.endsWith('/session/context'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({actor_code:'DIR-TEST',role:'Direccion'})});
