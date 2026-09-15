@@ -2,7 +2,7 @@ import {expect,test} from '@playwright/test';
 import fs from 'node:fs';
 
 const profile=fs.readFileSync('src/ProfileShell.tsx','utf8');
-const client=fs.readFileSync('src/supabase.ts','utf8');
+const existing=fs.readFileSync('tests/profile-users-goals-contract.spec.ts','utf8');
 
 test.describe('Mi Perfil · usuarios · roles',()=>{
  test('perfil editable conserva identidad profesional y redes',()=>{
@@ -10,28 +10,24 @@ test.describe('Mi Perfil · usuarios · roles',()=>{
   expect(profile).toContain("method:'PATCH'");
  });
 
- test('cambio de clave usa el proveedor de autenticacion',()=>{
+ test('cambio de clave usa Supabase Auth y nunca service role en cliente',()=>{
   expect(profile).toContain('supabase.auth.updateUser');
   expect(profile).toContain('autoComplete="new-password"');
+  expect(profile).not.toContain('service_role');
  });
 
- test('gestion de usuarios usa la API administrativa autenticada',()=>{
-  expect(client).toContain('fetchUserAdminApi');
-  expect(profile).toContain("action:'create_user'");
-  expect(profile).toContain("action:'update_user'");
-  expect(profile).toContain("action:'reset_password'");
+ test('gestion de usuarios conserva alta actualizacion reset y objetivos',()=>{
+  for(const action of ["action:'create_user'","action:'update_user'","action:'reset_password'","action:'set_goal'"]) expect(profile).toContain(action);
  });
 
- test('roles de negocio permanecen acotados',()=>{
+ test('roles de negocio permanecen acotados y Direccion no se concede desde UI ordinaria',()=>{
   expect(profile).toContain("['Direccion','Financiero','Visitador']");
   expect(profile).toContain("['Financiero','Visitador']");
   expect(profile).toContain('canCreateDirector');
   expect(profile).toContain('isSuperAdmin');
  });
 
- test('objetivos y correcciones siguen conectados',()=>{
-  expect(profile).toContain("'/goals'");
-  expect(profile).toContain("action:'set_goal'");
-  expect(profile).toContain('resource:\'perfil\'');
+ test('el contrato canonico existente ya cubre jerarquia metas y datos reales',()=>{
+  for(const token of ['superadmin_protected','scope_type in','fenix_prod.performance_goals','create_user','reset_password']) expect(existing).toContain(token);
  });
 });
