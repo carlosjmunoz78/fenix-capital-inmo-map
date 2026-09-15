@@ -1,0 +1,42 @@
+name: App CRM Notion Sync Closure
+
+on:
+  push:
+    branches:
+      - app-crm-notion-sync-closure-20260915
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: app-crm-notion-sync-closure-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contract-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      VITE_FENIX_ENV: prod
+      VITE_SUPABASE_URL: https://prod.invalid
+      VITE_SUPABASE_PUBLISHABLE_KEY: prod-build-validation-placeholder
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Canonical App CRM Notion routing contracts
+        run: npx playwright test tests/app-crm-notion-sync-closure.spec.ts --reporter=line
+      - name: TypeScript and Vite build
+        run: npm run build
+      - name: Preserve no-PROD-mutation rule
+        run: |
+          test "${{ github.ref_name }}" = "app-crm-notion-sync-closure-20260915"
+          echo "readiness_only=true"
+          echo "prod_mutation=false"
+          echo "main_mutation=false"
+
+# Readiness-only gate: no deploy, no DB write, no customer-data mutation.
