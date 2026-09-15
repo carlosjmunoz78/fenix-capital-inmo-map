@@ -54,7 +54,7 @@ test.describe('Fénix PRE-PROD · contrato visual Expedientes',()=>{
   const shot=await page.screenshot({fullPage:true});
   await testInfo.attach('expedientes-qa-1600',{body:shot,contentType:'image/png'});
   const firstRow=table.locator('tbody tr').filter({hasText:'Expediente QA 1'}).first();
-  await firstRow.getByRole('button',{name:'Abrir expediente 11111111-1111-4111-8111-111111111111'}).click();
+  await firstRow.getByRole('button',{name:'Abrir →'}).click();
   await expect(page).toHaveURL(/\/expedientes\/11111111-1111-4111-8111-111111111111$/);
  });
 });
