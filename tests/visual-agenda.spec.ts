@@ -53,7 +53,7 @@ test.describe('Fénix PRE-PROD · contrato visual Agenda',()=>{
   await expect(table.locator('tbody tr').first().getByText('Seguimiento inmobiliaria',{exact:true})).toBeVisible();
   await root.getByLabel('Seleccionar Llamar a cliente').check();
   await expect(root.getByText('1 tareas seleccionadas',{exact:true})).toBeVisible();
-  await expect(root.getByText('La selección no modifica datos.',{exact:true})).toBeVisible();
+  await expect(root.getByRole('button',{name:'Previsualizar cambios',exact:true})).toBeVisible();
   await expect(root.getByText('Fuente canónica PROD',{exact:true})).toBeVisible();
   await expect(root.getByText(/\bPRO\b/)).toHaveCount(0);
   const shot=await root.screenshot();
