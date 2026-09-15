@@ -56,7 +56,18 @@ test.describe('Fénix PRE-PROD · contrato visual Inicio Dirección',()=>{
    if(u.endsWith('/expedientes'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,status:200,items:[{expediente_code:'e1',stage:'En curso',riesgo:'Alto',is_active:true},{expediente_code:'e2',stage:'Tasación',riesgo:'Bajo',is_active:true},{expediente_code:'e3',stage:'Firmado',is_active:false}]})});
    if(u.endsWith('/firmas'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,status:200,items:[{id:'f1',estado:'Programada',fecha_hora_firma:currentMonthIso(25,10)},{id:'f2',estado:'Firmada',fecha_hora_firma:currentMonthIso(20,12)}]})});
    if(u.endsWith('/tareas'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,status:200,items:[{id:'t1',tarea:'Revisar expediente prioritario',estado:'Pendiente',fecha_limite:currentMonthIso(22).slice(0,10),completada:false},{id:'t2',tarea:'Tarea ya cerrada',estado:'Completada',fecha_limite:currentMonthIso(21).slice(0,10),completada:true},{id:'t3',tarea:'Tarea cancelada',estado:'Cancelada',fecha_limite:currentMonthIso(21).slice(0,10),completada:false}]})});
+   if(u.endsWith('/bancos'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,status:200,items:[]})});
    return route.fulfill({status:404,contentType:'application/json',body:'{}'});
+  });
+  await page.route('**/functions/v1/fenix-notion-runtime-test/**',async route=>{
+   const u=route.request().url();
+   if(u.endsWith('/tareas'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[]})});
+   return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[]})});
+  });
+  await page.route('**/functions/v1/fenix-ana-api-test/**',async route=>{
+   const u=route.request().url();
+   if(u.endsWith('/capabilities'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,items:[],capabilities:[]})});
+   return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true})});
   });
 
   await page.goto('/inicio',{waitUntil:'domcontentloaded',timeout:5000});
