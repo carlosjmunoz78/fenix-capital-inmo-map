@@ -34,7 +34,7 @@ function styleLauncher(el:HTMLElement,bottom:string){
   el.style.minHeight=SIZE;
   el.style.border='0';
   el.style.borderRadius='50%';
-  el.style.background=ORANGE;
+  el.style.setProperty('background',ORANGE,'important');
   el.style.color='#fff';
   el.style.boxShadow='0 10px 28px rgba(20,27,38,.2)';
   el.style.padding='0';
