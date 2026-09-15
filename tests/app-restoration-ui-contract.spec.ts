@@ -5,12 +5,12 @@ import path from 'node:path';
 const root=process.cwd();
 const read=(file:string)=>fs.readFileSync(path.join(root,file),'utf8');
 
-test('floating controls keep calculator microphone chat vertical order',async()=>{
+test('floating controls keep microphone calculator chat vertical order',async()=>{
  const calc=read('src/CalculatorLabelGuard.tsx');
  const audio=read('src/audio-transcription.css');
  const routes=read('src/RouteAccessGuard.tsx');
- expect(calc).toContain("styleLauncher(el,'130px')");
- expect(audio).toContain('bottom:76px');
+ expect(audio).toContain('bottom:130px');
+ expect(calc).toContain("styleLauncher(el,'76px')");
  expect(calc).toContain("styleLauncher(link,'22px')");
  expect(calc).toContain("link.textContent='💬'");
  expect(calc).toContain("const SIZE='46px'");
@@ -18,16 +18,16 @@ test('floating controls keep calculator microphone chat vertical order',async()=
  expect(routes).toContain("'/chat'");
 });
 
-test('global voice actions do not expose knowledge and keep scoped correction/task context',async()=>{
+test('global voice actions expose the four required Ana modes with scoped context',async()=>{
  const voice=read('src/AudioTranscriptionGuard.tsx');
- expect(voice).not.toContain("id:'knowledge'");
- expect(voice).not.toContain("label:'Dar conocimiento'");
+ for(const token of ["id:'ana'","label:'Hablar con Ana'","id:'knowledge'","label:'Dar conocimiento'","id:'correct'","label:'Corregir a Ana'","id:'task'","label:'Tarea'"])expect(voice).toContain(token);
  expect(voice).toContain("scope_type:scope.type");
  expect(voice).toContain("base.set('scope_code',scope.code)");
  expect(voice).toContain("base.set('correction',composed)");
+ expect(voice).toContain("base.set('knowledge',composed)");
 });
 
-test('knowledge is available only on Ana screen and global correction shortcut is removed',async()=>{
+test('Ana screen keeps persistent knowledge and conversation while global shortcuts cover ordinary use',async()=>{
  const knowledge=read('src/AnaKnowledgeBlock.tsx');
  const contextual=read('src/AnaUniversalGuard.tsx');
  expect(knowledge).toContain("if(location.pathname!=='/ana')return");
@@ -74,9 +74,17 @@ test('structured reports can open without a PDF and PDFs remain separate',async(
  expect(source).toContain('Object.entries(r)');
 });
 
-test('expediente master detail visibly preserves required core financial and operational data',async()=>{
+test('expediente master detail visibly preserves required data and mounts PROD participants plus document accordions',async()=>{
  const source=read('src/ExpedienteRequiredDataGuard.tsx').toLocaleLowerCase('es');
  for(const token of ['cliente','origen','inmobiliaria','financ','visitador','precio','financiación','aport','ratio','ahorro','banco','estado','riesg','próxima','document','hist']) expect(source).toContain(token);
+ const raw=read('src/ExpedienteRequiredDataGuard.tsx');
+ expect(raw).toContain("import ExpedientePeopleProdGuard from './ExpedientePeopleProdGuard'");
+ expect(raw).toContain("import ExpedientePeopleAccordionGuard from './ExpedientePeopleAccordionGuard'");
+ expect(raw).toContain('<ExpedientePeopleProdGuard/>');
+ expect(raw).toContain('<ExpedientePeopleAccordionGuard/>');
+ const prodPeople=read('src/ExpedientePeopleProdGuard.tsx');
+ expect(prodPeople).toContain("const roles=['Titular comprador','Avalista','Coprestatario','Vendedor','Propietario','Representante','Otro']");
+ expect(prodPeople).toContain('exp-person-documents');
  const main=read('src/main.tsx');
  expect(main).toContain("import ExpedienteRequiredDataGuard from './ExpedienteRequiredDataGuard'");
  expect(main).toContain('<ExpedienteRequiredDataGuard />');
