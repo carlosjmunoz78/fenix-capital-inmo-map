@@ -21,9 +21,15 @@ function styleLauncher(el:HTMLElement,bottom:string){
   el.style.display='grid';
   el.style.placeItems='center';
   el.style.zIndex='2147482000';
+  el.style.transform='';
+  const desired=Number.parseFloat(bottom);
+  const actual=window.innerHeight-el.getBoundingClientRect().bottom;
+  const correction=desired-actual;
+  if(Number.isFinite(correction)&&Math.abs(correction)>.5)el.style.transform=`translateY(${-correction}px)`;
 }
 
 function removeLauncherText(el:HTMLElement){
+  el.classList.add('fenix-calculator-launcher-restored');
   for(const node of Array.from(el.childNodes)){
     if(node.nodeType===Node.TEXT_NODE)node.textContent='';
   }
@@ -36,15 +42,15 @@ function ensureChatLauncher(){
   const calc=document.querySelector<HTMLElement>('.calc-launcher:not(.fenix-chat-launcher-restored)');
   if(!calc||document.querySelector('.fenix-chat-launcher-restored'))return;
   const link=document.createElement('a');
-  link.className='calc-launcher fenix-chat-launcher-restored';
+  link.className='fenix-chat-launcher-restored';
   link.href=`${import.meta.env.BASE_URL}chat`;
   link.setAttribute('aria-label','Abrir chat de grupo');
   link.setAttribute('title','Chat de grupo');
   link.textContent='💬';
   link.style.textDecoration='none';
   link.style.fontSize='20px';
-  styleLauncher(link,'22px');
   document.body.appendChild(link);
+  styleLauncher(link,'22px');
 }
 
 function normalize(root:ParentNode=document){

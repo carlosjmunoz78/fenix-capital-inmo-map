@@ -7,6 +7,7 @@ function setExpanded(header:HTMLElement,body:HTMLElement,expanded:boolean){
   header.setAttribute('aria-expanded',expanded?'true':'false');
   header.style.cursor='pointer';
   body.hidden=!expanded;
+  body.style.display=expanded?'':'none';
   let marker=header.querySelector<HTMLElement>(':scope > .exp-accordion-marker');
   if(!marker){
     marker=document.createElement('span');
@@ -51,6 +52,7 @@ function wireDocuments(section:HTMLElement){
   header.setAttribute('aria-expanded','false');
   header.style.cursor='pointer';
   list.hidden=true;
+  list.style.display='none';
   const marker=document.createElement('span');
   marker.className='exp-doc-accordion-marker';
   marker.setAttribute('aria-hidden','true');
@@ -64,6 +66,7 @@ function wireDocuments(section:HTMLElement){
     const expanded=header.getAttribute('aria-expanded')!=='true';
     header.setAttribute('aria-expanded',expanded?'true':'false');
     list.hidden=!expanded;
+    list.style.display=expanded?'':'none';
     marker.textContent=expanded?'▴':'▾';
   };
   header.addEventListener('click',toggle);

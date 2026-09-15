@@ -26,7 +26,7 @@ test('live v12 extractor snapshot preserves rollback and governance contract',as
 
 test('versioned extractor source stays pinned to the audited v12 snapshot',async()=>{
  const source=read('supabase/functions/fenix-document-extract/index.ts');
- const sha=crypto.createHash('sha256').update(source).digest('hex');
+ const sha=crypto.createHash('sha256').update(source.replace(/\r\n/g,'\n')).digest('hex');
  expect(sha).toBe(VERSIONED_SOURCE_SHA);
  expect(source).toContain('fenix_prod_document_extract_resolve_server');
  expect(source).toContain("p_policy_key:'document_auto_ingest_min_confidence'");
