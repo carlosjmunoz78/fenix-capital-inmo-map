@@ -26,6 +26,10 @@ function currentMonthIso(day:number,hour=10){
 test.describe('Fénix PRE-PROD · contrato visual Inicio Dirección',()=>{
   test('Inicio conserva patrón maestro, identidad real, escala legible y tema persistente',async({page},testInfo)=>{
     if(!testInfo.project.name.includes('desktop'))test.skip();
+    const pageErrors:string[]=[];
+    const failedRequests:string[]=[];
+    page.on('pageerror',error=>pageErrors.push(String(error?.message||error)));
+    page.on('requestfailed',request=>failedRequests.push(`${request.method()} ${request.url()} :: ${request.failure()?.errorText||'failed'}`));
     await page.addInitScript(session=>{
       const raw=JSON.stringify(session);
       window.localStorage.setItem('fenix-preprod-auth-v2',raw);
@@ -49,7 +53,17 @@ test.describe('Fénix PRE-PROD · contrato visual Inicio Dirección',()=>{
       if(u.endsWith('/tareas'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,status:200,items:[{id:'t1',tarea:'Revisar expediente prioritario',estado:'Pendiente',fecha_limite:currentMonthIso(22).slice(0,10),completada:false},{id:'t2',tarea:'Tarea ya cerrada',estado:'Completada',fecha_limite:currentMonthIso(21).slice(0,10),completada:true},{id:'t3',tarea:'Tarea cancelada',estado:'Cancelada',fecha_limite:currentMonthIso(21).slice(0,10),completada:false}]})});
       return route.fulfill({status:404,contentType:'application/json',body:'{}'});
     });
-    await page.goto('/inicio');
+    await page.goto('/inicio',{waitUntil:'domcontentloaded',timeout:5000});
+    await expect.poll(async()=>({
+      dir:await page.locator('.dir-shell').count(),
+      transition:await page.locator('.fenix-transition').count(),
+      auth:await page.locator('.auth-shell').count(),
+      app:await page.locator('.app-shell').count(),
+      roleHome:await page.locator('.role-home').count(),
+      errors:[...pageErrors],
+      failed:[...failedRequests]
+    }),{timeout:7000,message:'Direction mount diagnostics'}).toMatchObject({dir:1,transition:0,auth:0});
+    expect(pageErrors,`browser errors: ${pageErrors.join(' | ')}`).toEqual([]);
     await expect(page.locator('.dir-shell')).toBeVisible();
     await expect(page.getByRole('button',{name:'Inicio Fénix Capital'})).toBeVisible();
     await expect(page.locator('.dir-priority-copy h1')).toContainText('Belén');
