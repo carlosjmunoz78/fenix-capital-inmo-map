@@ -91,7 +91,7 @@ export default function ExpedienteAnaRuntimeGuard(){
    article.scrollIntoView({behavior:'smooth',block:'center'});
   };
   const toggle=article.querySelector('.exp-person-toggle') as HTMLButtonElement|null;
-  if(toggle&&!article.querySelector('.exp-person-body')){toggle.click();window.setTimeout(openEditor,80)}else openEditor();
+  if(toggle&&toggle.getAttribute('aria-expanded')!=='true'){toggle.click();window.setTimeout(openEditor,80)}else openEditor();
  }
  function goMissingDocs(){
   const first=people?.items?.find(person=>person.docs_complete===false||person.docs_complete==null);

@@ -6,8 +6,8 @@ const ORANGE='#ff5a1f';
 
 function styleLauncher(el:HTMLElement,bottom:string){
   el.style.position='fixed';
-  el.style.right=RIGHT;
-  el.style.bottom=bottom;
+  el.style.setProperty('right',RIGHT,'important');
+  el.style.setProperty('bottom',bottom,'important');
   el.style.width=SIZE;
   el.style.height=SIZE;
   el.style.minWidth=SIZE;
@@ -21,11 +21,7 @@ function styleLauncher(el:HTMLElement,bottom:string){
   el.style.display='grid';
   el.style.placeItems='center';
   el.style.zIndex='2147482000';
-  el.style.transform='';
-  const desired=Number.parseFloat(bottom);
-  const actual=window.innerHeight-el.getBoundingClientRect().bottom;
-  const correction=desired-actual;
-  if(Number.isFinite(correction)&&Math.abs(correction)>.5)el.style.transform=`translateY(${-correction}px)`;
+  el.style.setProperty('transform','none','important');
 }
 
 function removeLauncherText(el:HTMLElement){
