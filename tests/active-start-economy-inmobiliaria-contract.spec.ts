@@ -28,9 +28,11 @@ test('Economia shows backend pipeline activo separately from materialized moveme
  expect(src).toContain('Firmados, cerrados y bajas');
 });
 
-test('expediente keeps one existing inmobiliaria relation and writes through canonical update contract',async()=>{
+test('expediente exposes one explicit inmobiliaria relation and writes through canonical update contract',async()=>{
  const src=read('src/DetailShell.tsx');
- expect(src).toContain('Inmobiliaria<select');
+ expect(src).toContain('expediente-inmobiliaria-assignment');
+ expect(src).toContain('Inmobiliaria asociada');
+ expect(src).toContain('Asignar · cambiar · quitar');
  expect(src).toContain('p_inmobiliaria_code:changes.inmo');
  expect(src).toContain("<option value=\"\">Sin inmobiliaria</option>");
  expect(src).toContain('inmobiliaria_code');
