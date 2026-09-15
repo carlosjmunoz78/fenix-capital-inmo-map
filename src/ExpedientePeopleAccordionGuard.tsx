@@ -27,6 +27,7 @@ function wirePerson(article:HTMLElement){
   const header=article.querySelector<HTMLElement>(':scope > .exp-person-toggle');
   const body=article.querySelector<HTMLElement>(':scope > .exp-person-body');
   if(!header||!body)return;
+  if(header instanceof HTMLButtonElement)return;
   article.dataset.accordionWired='1';
   setExpanded(header,body,false);
   const toggle=()=>setExpanded(header,body,header.getAttribute('aria-expanded')!=='true');
