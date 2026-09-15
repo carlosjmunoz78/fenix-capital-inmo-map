@@ -2,7 +2,8 @@ import {useEffect,useMemo,useState} from 'react';
 import {createPortal} from 'react-dom';
 import {FileText,FileUp,Plus,Save,UserRound,X} from 'lucide-react';
 import {useLocation,useNavigate} from 'react-router-dom';
-import {IS_PRODUCTION,SUPABASE_URL,supabase} from './supabase';
+import {fetchAppApi,IS_PRODUCTION} from './supabase';
+import {createExpedientePerson,getExpedientePeople,updateExpedientePerson} from './expedientePeopleContract';
 
 type ParticipantDocument={title?:string|null;document_code?:string|null;analysis_state?:string|null;evidence_relation?:string|null};
 type Person={id:string;comprador?:string|null;nombre?:string|null;apellidos?:string|null;dni_nie?:string|null;fecha_nacimiento?:string|null;edad?:number|null;nacionalidad?:string|null;residencia?:string|null;estado_civil?:string|null;regimen_matrimonial?:string|null;hijos?:number|null;situacion_laboral?:string|null;empresa_organismo?:string|null;antiguedad_laboral?:string|null;tipo_contrato?:string|null;modalidad_contrato?:string|null;fecha_inicio?:string|null;fecha_fin?:string|null;jornada?:string|null;categoria_profesional?:string|null;sueldo_neto_mensual?:number|null;numero_pagas?:number|null;otros_ingresos_mensuales?:number|null;deudas_mensuales?:number|null;tarjetas_otras_cuotas?:number|null;pension_paga?:number|null;pension_recibe?:number|null;ahorro_disponible?:number|null;origen_fondos?:string|null;aportado_operacion?:number|null;documentacion_completa?:boolean|null;documentos?:ParticipantDocument[]|null;revision_belen?:string|null;rol_operacion?:string|null;orden_expediente?:number|null;datos_revisados_financiero?:boolean|null};
@@ -12,11 +13,9 @@ const roles=['Titular comprador','Avalista','Coprestatario','Vendedor','Propieta
 function show(v:unknown){if(v===null||v===undefined||v==='')return'Pendiente';if(typeof v==='boolean')return v?'Sí':'No';return String(v)}
 function euros(v:unknown){return typeof v==='number'&&Number.isFinite(v)?money.format(v):'Pendiente'}
 function label(p:Person,i:number){return [p.nombre,p.apellidos].filter(Boolean).join(' ')||p.comprador||`Persona ${i+1}`}
-async function request(method:'GET'|'POST',url:string,body?:unknown){const{data:{session}}=await supabase.auth.getSession();if(!session?.access_token)return{status:401,data:null as Payload|null};try{const r=await fetch(url,{method,headers:{Authorization:`Bearer ${session.access_token}`,'content-type':'application/json'},body:body===undefined?undefined:JSON.stringify(body)});let data:Payload|null=null;try{data=await r.json()}catch{}return{status:r.status,data}}catch{return{status:0,data:null as Payload|null}}}
-function api(){return `${SUPABASE_URL}/functions/v1/fenix-expediente-people`;}
-async function loadPeople(expediente:string){return request('GET',`${api()}?expediente=${encodeURIComponent(expediente)}`)}
-async function createPerson(expediente:string,payload:Record<string,unknown>){return request('POST',api(),{action:'create',expediente_code:expediente,payload})}
-async function updatePerson(expediente:string,id:string,changes:Record<string,unknown>){return request('POST',api(),{action:'update',expediente_code:expediente,client_code:id,changes})}
+export async function loadPeople(expediente:string){return getExpedientePeople<Payload>(fetchAppApi,expediente)}
+export async function createPerson(expediente:string,payload:Record<string,unknown>){return createExpedientePerson<Payload>(fetchAppApi,expediente,payload)}
+export async function updatePerson(expediente:string,id:string,changes:Record<string,unknown>){return updateExpedientePerson<Payload>(fetchAppApi,expediente,id,changes)}
 
 export default function ExpedientePeopleProdGuard(){
  const {pathname}=useLocation(),navigate=useNavigate();const match=pathname.match(/^\/expedientes\/([^/]+)$/);const code=match?.[1]?decodeURIComponent(match[1]):'';const active=IS_PRODUCTION&&Boolean(match&&code&&code!=='nuevo');

@@ -63,7 +63,7 @@ test.describe('App real · cinco flujos sobre runtime PROD local aislado',()=>{
   test.skip(!testInfo.project.name.includes('desktop'));
   await seed(page);await gateway(page);
   let payload:any=null;
-  await page.route('**/functions/v1/fenix-task-actions',async route=>{payload=route.request().postDataJSON();return json(route,{ok:true,count:6});});
+  await page.route('**/functions/v1/fenix-app-gateway/tareas/actions',async route=>{payload=route.request().postDataJSON();return json(route,{ok:true,count:6});});
   await page.goto('/agenda');
   for(let index=0;index<4;index++)await page.getByLabel(`Seleccionar Tarea real ${index+1}`).check();
   await expect(page).toHaveURL(/\/agenda$/);await expect(page.getByText('4 tareas seleccionadas')).toBeVisible();
@@ -85,7 +85,7 @@ test.describe('App real · cinco flujos sobre runtime PROD local aislado',()=>{
   await seed(page);await gateway(page,async(route,url)=>{
    if(url.endsWith('/expedientes/EXP-001')){await json(route,{expediente:detail});return true}return false;
   });
-  await page.route('**/functions/v1/fenix-expediente-people?expediente=EXP-001',route=>json(route,{ok:true,count:2,titulares:1,avalistas:1,items:[
+  await page.route('**/functions/v1/fenix-app-gateway/expedientes/EXP-001/people',route=>json(route,{ok:true,count:2,titulares:1,avalistas:1,items:[
    {id:'CLI-001',nombre:'Laura',apellidos:'García',rol_operacion:'Titular comprador',dni_nie:'11111111A',situacion_laboral:'Indefinida',documentacion_completa:true,documentos:[{title:'DNI Laura',document_code:'DOC-001',analysis_state:'Validado'}]},
    {id:'CLI-002',nombre:'Mario',apellidos:'López',rol_operacion:'Avalista',dni_nie:'22222222B',situacion_laboral:'Autónomo',documentacion_completa:false,documentos:[{title:'IRPF Mario',document_code:'DOC-002',analysis_state:'Pendiente'}]}
   ]}));
