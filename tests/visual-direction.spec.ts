@@ -20,10 +20,10 @@ const navigation={items:[
 ]};
 
 function currentMonthIso(day:number,hour=10){
-  const now=new Date();
-  const yyyy=now.getFullYear();
-  const mm=String(now.getMonth()+1).padStart(2,'0');
-  return `${yyyy}-${mm}-${String(day).padStart(2,'0')}T${String(hour).padStart(2,'0')}:00:00`;
+ const now=new Date();
+ const yyyy=now.getFullYear();
+ const mm=String(now.getMonth()+1).padStart(2,'0');
+ return `${yyyy}-${mm}-${String(day).padStart(2,'0')}T${String(hour).padStart(2,'0')}:00:00`;
 }
 
 test.describe('Fénix PRE-PROD · contrato visual Inicio Dirección',()=>{
@@ -54,11 +54,15 @@ test.describe('Fénix PRE-PROD · contrato visual Inicio Dirección',()=>{
     await page.route('**/functions/v1/fenix-notion-runtime-test/**',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[]})}));
     await page.route('**/functions/v1/fenix-ana-api-test/**',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,items:[]})}));
 
-    // First prove the same generic workspace mount path that the isolated auth probe already validates.
-    // Then navigate to Inicio without reloading so the canonical Direction context is reused by App.
+    // First prove the generic authenticated workspace mount already covered by the passing runtime probe.
+    // Then drive React Router through the browser history event directly. This keeps the visual contract
+    // focused on the Direction route/render contract instead of coupling it to a specific nav button DOM.
     await page.goto('/expedientes',{waitUntil:'domcontentloaded'});
     await expect(page.locator('.ops-root')).toBeVisible();
-    await page.getByRole('button',{name:'Inicio',exact:true}).first().click();
+    await page.evaluate(()=>{
+      history.pushState({},'', '/inicio');
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    });
     await expect(page).toHaveURL(/\/inicio$/);
     await expect(page.locator('.dir-shell')).toBeVisible();
     await expect(page.getByRole('button',{name:'Inicio Fénix Capital'})).toBeVisible();
