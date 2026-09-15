@@ -3,6 +3,8 @@ import {createPortal} from 'react-dom';
 import {useLocation} from 'react-router-dom';
 import {ClipboardList} from 'lucide-react';
 import {fetchNotionRuntime} from './notionRuntime';
+import ExpedientePeopleProdGuard from './ExpedientePeopleProdGuard';
+import ExpedientePeopleAccordionGuard from './ExpedientePeopleAccordionGuard';
 
 type Row=Record<string,unknown>;
 function first(row:Row|undefined,keys:string[]){if(!row)return'';for(const k of keys){const v=row[k];if(typeof v==='string'&&v.trim())return v.trim();if(typeof v==='number'&&Number.isFinite(v))return String(v);if(Array.isArray(v)&&v.length)return v.map(x=>typeof x==='object'?JSON.stringify(x):String(x)).join(', ');}return'';}
@@ -33,5 +35,9 @@ export default function ExpedienteRequiredDataGuard(){
  ['Documentación',show(first(row,['documentacion','estado_documentacion','documentos']))],
  ['Historial',show(first(row,['historial','historico','history']))]
  ]:[];
- return createPortal(<section className="exp-ana-memory" data-testid="expediente-required-data" style={{marginTop:14}}><div className="exp-ana-memory-head"><ClipboardList size={16}/><strong>Datos completos del expediente</strong></div>{status===null?<p>Cargando datos…</p>:status!==200||!row?<p>No se pudieron cargar los datos canónicos del expediente.</p>:<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))',gap:10}}>{fields.map(([label,value])=><article key={label} style={{border:'1px solid var(--border,#e5e7eb)',borderRadius:12,padding:'10px 12px'}}><small>{label}</small><p style={{margin:'4px 0 0'}}><strong>{value}</strong></p></article>)}</div>}</section>,host)
+ return <>
+  {createPortal(<section className="exp-ana-memory" data-testid="expediente-required-data" style={{marginTop:14}}><div className="exp-ana-memory-head"><ClipboardList size={16}/><strong>Datos completos del expediente</strong></div>{status===null?<p>Cargando datos…</p>:status!==200||!row?<p>No se pudieron cargar los datos canónicos del expediente.</p>:<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))',gap:10}}>{fields.map(([label,value])=><article key={label} style={{border:'1px solid var(--border,#e5e7eb)',borderRadius:12,padding:'10px 12px'}}><small>{label}</small><p style={{margin:'4px 0 0'}}><strong>{value}</strong></p></article>)}</div>}</section>,host)}
+  <ExpedientePeopleProdGuard/>
+  <ExpedientePeopleAccordionGuard/>
+ </>
 }
