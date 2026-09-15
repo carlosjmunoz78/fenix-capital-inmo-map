@@ -28,8 +28,10 @@ test.describe('Fénix PRE-PROD · contrato visual Inicio Dirección',()=>{
     if(!testInfo.project.name.includes('desktop'))test.skip();
     const pageErrors:string[]=[];
     const failedRequests:string[]=[];
+    const apiRequests:string[]=[];
     page.on('pageerror',error=>pageErrors.push(String(error?.message||error)));
     page.on('requestfailed',request=>failedRequests.push(`${request.method()} ${request.url()} :: ${request.failure()?.errorText||'failed'}`));
+    page.on('request',request=>{if(request.url().includes('/functions/v1/')||request.url().includes('/auth/v1/'))apiRequests.push(`${request.method()} ${request.url()}`)});
     await page.addInitScript(session=>{
       const raw=JSON.stringify(session);
       window.localStorage.setItem('fenix-preprod-auth-v2',raw);
@@ -54,15 +56,19 @@ test.describe('Fénix PRE-PROD · contrato visual Inicio Dirección',()=>{
       return route.fulfill({status:404,contentType:'application/json',body:'{}'});
     });
     await page.goto('/inicio',{waitUntil:'domcontentloaded',timeout:5000});
-    await expect.poll(async()=>({
+    await page.waitForTimeout(2500);
+    const mountState={
+      url:page.url(),
       dir:await page.locator('.dir-shell').count(),
       transition:await page.locator('.fenix-transition').count(),
       auth:await page.locator('.auth-shell').count(),
       app:await page.locator('.app-shell').count(),
       roleHome:await page.locator('.role-home').count(),
-      errors:[...pageErrors],
-      failed:[...failedRequests]
-    }),{timeout:7000,message:'Direction mount diagnostics'}).toMatchObject({dir:1,transition:0,auth:0});
+      rootText:(await page.locator('#root').innerText().catch(()=>'' )).slice(0,500),
+      storage:await page.evaluate(()=>({current:localStorage.getItem('fenix-preprod-auth-v2')!==null,legacy:localStorage.getItem('fenix-preprod-auth')!==null,remember:localStorage.getItem('fenix-remember-device'),active:sessionStorage.getItem('fenix-session-active')})),
+      errors:[...pageErrors],failed:[...failedRequests],requests:[...apiRequests]
+    };
+    if(mountState.dir!==1||mountState.transition!==0||mountState.auth!==0)throw new Error(`Direction mount state ${JSON.stringify(mountState)}`);
     expect(pageErrors,`browser errors: ${pageErrors.join(' | ')}`).toEqual([]);
     await expect(page.locator('.dir-shell')).toBeVisible();
     await expect(page.getByRole('button',{name:'Inicio Fénix Capital'})).toBeVisible();
