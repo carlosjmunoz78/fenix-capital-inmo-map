@@ -46,8 +46,8 @@ jobs:
           node scripts/verify-fenix-document-extract-candidate.mjs
       - name: Audit backend rollback snapshots
         run: node scripts/audit-app-restoration-backend-rollback.mjs
-      - name: Group A + B + D restoration contracts
-        run: npx playwright test tests/participant-labor-contract.spec.ts tests/app-restoration-ui-contract.spec.ts tests/chat-advanced-contract.spec.ts tests/profile-users-goals-contract.spec.ts tests/document-person-projection-contract.spec.ts tests/document-person-e2e-contract.spec.ts tests/document-extract-v12-contract.spec.ts --reporter=line
+      - name: Group A + B + D + G + H restoration contracts
+        run: npx playwright test tests/participant-labor-contract.spec.ts tests/app-restoration-ui-contract.spec.ts tests/chat-advanced-contract.spec.ts tests/profile-users-goals-contract.spec.ts tests/live-economy-priorities-contract.spec.ts tests/document-person-projection-contract.spec.ts tests/document-person-e2e-contract.spec.ts tests/document-extract-v12-contract.spec.ts tests/app-restoration-gh-contract.spec.ts --reporter=line
       - name: Prepare isolated visual test runtime
         run: node scripts/prepare-prod-visual-test-runtime.mjs
       - name: Probe isolated visual auth/runtime
@@ -61,7 +61,14 @@ jobs:
           VITE_FENIX_ENV: test
           VITE_SUPABASE_URL: http://127.0.0.1:54321
           VITE_SUPABASE_PUBLISHABLE_KEY: visual-ci-not-a-real-key
-        run: npx playwright test tests/visual-agenda.spec.ts tests/visual-banco-detail.spec.ts tests/visual-direction.spec.ts tests/visual-expediente-detail.spec.ts tests/visual-expedientes.spec.ts tests/visual-informes.spec.ts tests/visual-profile.spec.ts tests/fixed-shell-layout.spec.ts tests/navigation-responsive-widths.spec.ts --reporter=line
+        run: npx playwright test tests/visual-agenda.spec.ts tests/visual-banco-detail.spec.ts tests/visual-expediente-detail.spec.ts tests/visual-expedientes.spec.ts tests/visual-informes.spec.ts tests/visual-profile.spec.ts tests/fixed-shell-layout.spec.ts tests/navigation-responsive-widths.spec.ts --reporter=line
+      - name: Direction visual diagnostic
+        continue-on-error: true
+        env:
+          VITE_FENIX_ENV: test
+          VITE_SUPABASE_URL: http://127.0.0.1:54321
+          VITE_SUPABASE_PUBLISHABLE_KEY: visual-ci-not-a-real-key
+        run: npx playwright test tests/visual-direction.spec.ts --reporter=line
       - name: Real-app five-flow regression on isolated PROD-shaped runtime
         env:
           VITE_FENIX_ENV: prod
@@ -86,4 +93,5 @@ jobs:
             supabase/rollback/fenix-expediente-people-v2/index.ts
             supabase/migrations/20260914162500_explicit_participant_labor_profile.sql
             supabase/migrations/20260915161000_profile_users_goals.sql
+            supabase/migrations/20260915195000_live_economy_expected_income.sql
             docs/APP_RESTORATION_BACKEND_LIVE_COMPARISON_2026-09-15.md

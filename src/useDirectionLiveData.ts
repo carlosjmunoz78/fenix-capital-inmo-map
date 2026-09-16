@@ -1,6 +1,5 @@
 import {useEffect,useMemo,useState} from 'react';
 import {fetchAppApi} from './supabase';
-import {fetchNotionRuntime} from './notionRuntime';
 
 type Row=Record<string,unknown>;
 type LoadState={status:number|null;rows:Row[]};
@@ -21,7 +20,7 @@ function taskId(r:Row){return text(r,['id','tarea_id','tarea_code','code']);}
 function taskTitle(r:Row){return text(r,['tarea','titulo','título','nombre','title']);}
 function taskState(r:Row){return text(r,['estado','status'])||'Pendiente';}
 function taskDueRaw(r:Row){return text(r,['fecha_limite','fecha_límite','vencimiento','fecha','due_date']);}
-function taskDone(r:Row){return bool(r,['completada','completado','done'])||/complet|cerrad|hecha/i.test(taskState(r));}
+function taskDone(r:Row){return bool(r,['completada','completado','done'])||/complet|terminad|cerrad|hecha|cancelad|baja/i.test(taskState(r));}
 function expState(r:Row){return text(r,['estado','fase','phase','stage','status']);}
 function expRisk(r:Row){return text(r,['riesgo','risk','nivel_riesgo','semaforo','semáforo']);}
 function expCode(r:Row){return text(r,['expediente_code','code','codigo','id']);}
@@ -43,7 +42,8 @@ function taskPriority(r:Row):DirectionPriority{
  const title=visibleTitle||`Revisar ${scoped}`;
  const dueTime=rawDue?new Date(rawDue.replace(' ','T')).getTime():Number.NaN;
  const overdue=rawDue&&!Number.isNaN(dueTime)&&dueTime<Date.now();
- const reason=rawDue?`${overdue?'Vencida':'Pendiente'} · ${dateLabel(rawDue)} · ${state}`:`${state}. La fuente no expone una fecha límite.`;
+ const waiting=/esperando tercero|aplazad/i.test(state);
+ const reason=rawDue?`${overdue?'Vencida':waiting?'En espera':'Pendiente'} · ${dateLabel(rawDue)} · ${state}`:`${state}. La fuente no expone una fecha límite.`;
  return{id:taskId(r),title,reason,due:dateLabel(rawDue),state,route:taskRoute(r),action:'Abrir tarea',severity:overdue?'high':'normal'};
 }
 function firmaBlockingReasons(r:Row){const flags:[string,string][]=[['documentacion_preparada','documentación'],['banco_confirmado','confirmación del banco'],['cliente_confirmado','confirmación del cliente'],['forma_pago_preparada','forma de pago'],['acta_transparencia','acta de transparencia']];return flags.filter(([k])=>Object.prototype.hasOwnProperty.call(r,k)&&r[k]===false).map(([,label])=>label);}
@@ -64,17 +64,26 @@ export function useDirectionLiveData(){
  const[exp,setExp]=useState<LoadState>({status:null,rows:[]});
  const[fir,setFir]=useState<LoadState>({status:null,rows:[]});
  const[tasks,setTasks]=useState<LoadState>({status:null,rows:[]});
- useEffect(()=>{let alive=true;(async()=>{
-  const[e,f,t]=await Promise.all([
-   fetchAppApi<unknown>('/expedientes').catch(()=>({status:0,data:null})),
-   fetchNotionRuntime<unknown>('/firmas').catch(()=>({status:0,data:null})),
-   fetchNotionRuntime<unknown>('/tareas').catch(()=>({status:0,data:null}))
-  ]);
-  if(!alive)return;
-  setExp({status:e.status,rows:e.status===200?rowsFrom(e.data):[]});
-  setFir({status:f.status,rows:f.status===200?rowsFrom(f.data):[]});
-  setTasks({status:t.status,rows:t.status===200?rowsFrom(t.data):[]});
- })();return()=>{alive=false};},[]);
+ useEffect(()=>{
+  let alive=true,timer:number|undefined;
+  const load=async()=>{
+   const[e,f,t]=await Promise.all([
+    fetchAppApi<unknown>('/expedientes').catch(()=>({status:0,data:null})),
+    fetchAppApi<unknown>('/firmas').catch(()=>({status:0,data:null})),
+    fetchAppApi<unknown>('/tareas').catch(()=>({status:0,data:null}))
+   ]);
+   if(!alive)return;
+   setExp({status:e.status,rows:e.status===200?rowsFrom(e.data):[]});
+   setFir({status:f.status,rows:f.status===200?rowsFrom(f.data):[]});
+   setTasks({status:t.status,rows:t.status===200?rowsFrom(t.data):[]});
+  };
+  void load();
+  timer=window.setInterval(()=>{if(document.visibilityState==='visible')void load()},10000);
+  const refresh=()=>void load();
+  window.addEventListener('focus',refresh);
+  window.addEventListener('fenix-operational-data-changed',refresh as EventListener);
+  return()=>{alive=false;if(timer)window.clearInterval(timer);window.removeEventListener('focus',refresh);window.removeEventListener('fenix-operational-data-changed',refresh as EventListener)};
+ },[]);
  useEffect(()=>{
   const detail:DirectionLiveStatus={expedientes:exp.status,firmas:fir.status,tareas:tasks.status};
   window.dispatchEvent(new CustomEvent<DirectionLiveStatus>('fenix-direction-live-status',{detail}));
@@ -89,14 +98,13 @@ export function useDirectionLiveData(){
   const signedMes=fir.rows.filter(r=>isSignedDirectionFirma(r)&&Boolean(firmaDate(r))&&isThisMonthDirectionDate(firmaDate(r))).length;
   const signaturePriorities=fir.rows.filter(isPlannedThisMonthDirectionFirma).map(firmaPriority);
   const riskPriorities=riskRows.map(riskPriority);
-  const taskPriorities=tasks.rows.filter(r=>!taskDone(r)).map(taskPriority).sort((a,b)=>{const rank={critical:0,high:1,normal:2};const d=rank[a.severity]-rank[b.severity];return d||a.due.localeCompare(b.due,'es');});
+  const taskPriorities=tasks.rows.filter(r=>!taskDone(r)).map(taskPriority).sort((a,b)=>{const wait=(s:string)=>/esperando tercero|aplazad/i.test(s)?1:0;const w=wait(a.state)-wait(b.state);if(w)return w;const rank={critical:0,high:1,normal:2};const d=rank[a.severity]-rank[b.severity];return d||a.due.localeCompare(b.due,'es');});
   const reserved=new Set(riskRows.map(expCode).filter(Boolean));
   const openExpPriorities=openRows.filter(r=>!reserved.has(expCode(r))).map(openExpPriority);
   const candidates=[...signaturePriorities,...riskPriorities,...taskPriorities,...openExpPriorities];
   const seen=new Set<string>();
   const priorities:DirectionPriority[]=[];
-  const rank={critical:0,high:1,normal:2};
-  for(const p of candidates.sort((a,b)=>rank[a.severity]-rank[b.severity])){
+  for(const p of candidates){
    const key=`${p.route}|${p.title}`;
    if(seen.has(key))continue;
    seen.add(key);priorities.push(p);
