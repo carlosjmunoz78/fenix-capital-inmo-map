@@ -54,12 +54,16 @@ test.describe('Fénix PRE-PROD · contrato visual Inicio Dirección',()=>{
     await page.route('**/functions/v1/fenix-notion-runtime-test/**',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[]})}));
     await page.route('**/functions/v1/fenix-ana-api-test/**',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,items:[]})}));
 
-    // Prove the persisted authenticated workspace first. Once that runtime is established,
-    // reload Inicio as a normal browser navigation while preserving local/session storage and mocks.
-    // This avoids synthetic history events, which the preview runtime has shown to be unreliable.
+    // First prove the persisted authenticated workspace. Then change the SPA route without
+    // reloading the document, so the already-proven auth/context runtime remains intact.
+    // We intentionally do not assert Playwright page.url(): this preview runner has shown an
+    // unreliable empty URL while window.history transitions still drive the app correctly.
     await page.goto('/expedientes',{waitUntil:'domcontentloaded'});
     await expect(page.locator('.ops-root')).toBeVisible();
-    await page.goto('http://127.0.0.1:4173/inicio',{waitUntil:'domcontentloaded'});
+    await page.evaluate(()=>{
+      window.history.pushState({},'', '/inicio');
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    });
     await expect(page.locator('.dir-shell')).toBeVisible();
     await expect(page.getByRole('button',{name:'Inicio Fénix Capital'})).toBeVisible();
     await expect(page.locator('.dir-priority-copy h1')).toContainText('Belén');
