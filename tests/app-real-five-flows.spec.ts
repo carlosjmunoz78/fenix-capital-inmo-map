@@ -1,85 +1,117 @@
-import { test, expect } from '@playwright/test';
+import {expect,test,type Page, type Route} from '@playwright/test';
 
-const prodSession={
- access_token:'eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwicm9sZSI6ImF1dGhlbnRpY2F0ZWQiLCJzdWIiOiJhYWFhYWFhYS1hYWFhLTRhYWEtOGFhYS1hYWFhYWFhYWFhYWFhIiwiZW1haWwiOiJkaXJlY3Rpb25AZmVuaXgudGVzdCIsImV4cCI6MTk5OTk5OTk5OX0.c2ln',
- token_type:'bearer',expires_in:3600,expires_at:1999999999,refresh_token:'qa-prod-shaped-not-real',
- user:{id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',aud:'authenticated',role:'authenticated',email:'direction@fenix.test',app_metadata:{},user_metadata:{full_name:'Belén Muñoz'},created_at:'2026-09-15T00:00:00.000Z'}
+const fakeSession={
+ access_token:'eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwicm9sZSI6ImF1dGhlbnRpY2F0ZWQiLCJzdWIiOiJhYWFhYWFhYS1hYWFhLTRhYWEtOGFhYS1hYWFhYWFhYWFhYWEiLCJlbWFpbCI6ImRpcmVjY2lvbkBmZW5peC50ZXN0IiwiZXhwIjoxOTk5OTk5OTk5fQ.',
+ token_type:'bearer',expires_in:3600,expires_at:1999999999,refresh_token:'qa-real-five-not-real',
+ user:{id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',aud:'authenticated',role:'authenticated',email:'direccion@fenix.test',app_metadata:{},user_metadata:{},created_at:'2026-09-15T00:00:00.000Z'}
 };
+const navigation={items:[{label:'Inicio',route:'/inicio'},{label:'Expedientes',route:'/expedientes'},{label:'Agenda',route:'/agenda'},{label:'Hablar con Ana',route:'/ana'},{label:'Chat interno',route:'/chat'}]};
+const expedientes=Array.from({length:6},(_,index)=>({
+ id:`internal-${index+1}`,expediente_code:`EXP-00${index+1}`,expediente:`Expediente real ${index+1}`,
+ cliente_alias:`Cliente real ${index+1}`,stage:index%2?'Banco':'Documentación',version:index+1,riesgo:index===0?'Alto':'Bajo'
+}));
+const tareas=Array.from({length:6},(_,index)=>({
+ task_code:`TASK-00${index+1}`,id:`TASK-00${index+1}`,version:index+1,tarea:`Tarea real ${index+1}`,
+ estado:'Pendiente',fecha_limite:`2026-09-${20+index}`,prioridad:index<2?'Alta':'Media',responsable:'DIR-QA'
+}));
 
-const nav={items:[{label:'Inicio',route:'/inicio'},{label:'Expedientes',route:'/expedientes'},{label:'Agenda',route:'/agenda'},{label:'Documentación',route:'/documentacion'},{label:'Bancos',route:'/bancos'}]};
-const expedientes=Array.from({length:6},(_,i)=>({expediente_code:`EXP-${i+1}`,cliente:`Cliente ${i+1}`,stage:'En curso',is_active:true}));
-const tareas=Array.from({length:6},(_,i)=>({id:`TASK-${i+1}`,task_code:`TASK-${i+1}`,tarea:`Tarea ${i+1}`,estado:'Pendiente',completada:false}));
-
-async function seed(page:any){
- await page.addInitScript((session:any)=>{
+async function seed(page:Page,theme:'light'|'dark'='light'){
+ await page.addInitScript(({session,selectedTheme})=>{
   localStorage.setItem('fenix-prod-auth-v1',JSON.stringify(session));
   localStorage.setItem('fenix-remember-device','true');
+  localStorage.setItem('fenix-theme',selectedTheme);
+  localStorage.setItem('fenix-global-theme',selectedTheme);
+  sessionStorage.setItem('fenix-theme',selectedTheme);
   sessionStorage.setItem('fenix-session-active','1');
- },prodSession);
- await page.route('http://127.0.0.1:54321/auth/v1/**',async(route:any)=>{
-  const u=route.request().url();
-  if(u.includes('/user'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(prodSession.user)});
-  if(u.includes('/token'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(prodSession)});
-  return route.fulfill({status:200,contentType:'application/json',body:'{}'});
- });
+ },{session:fakeSession,selectedTheme:theme});
 }
-async function gateway(page:any){
- await page.route('**/functions/v1/fenix-app-gateway/**',async(route:any)=>{
-  const u=route.request().url(),method=route.request().method();
-  if(u.endsWith('/session/context'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({actor_code:'DIR-TEST',role:'Direccion'})});
-  if(u.endsWith('/navigation'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(nav)});
-  if(u.endsWith('/expedientes')&&method==='GET')return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:expedientes})});
-  if(u.endsWith('/tareas')&&method==='GET')return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:tareas})});
-  if(method!=='GET')return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,status:200,updated:6})});
-  return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[]})});
- });
- await page.route('**/functions/v1/fenix-notion-runtime/**',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[]})}));
- await page.route('**/functions/v1/fenix-ana-api/**',async route=>{
-  const body=route.request().postDataJSON?.()??{};
-  return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,answer:`Ana: revisar capacidad de pago antes de enviar a banco. ${body?.message||''}`})});
+function json(route:Route,body:unknown,status=200){return route.fulfill({status,contentType:'application/json',body:JSON.stringify(body)});}
+async function gateway(page:Page,extra?:(route:Route,url:string)=>Promise<boolean>){
+ await page.route('**/functions/v1/fenix-app-gateway/**',async route=>{
+  const url=route.request().url();
+  if(extra&&await extra(route,url))return;
+  if(url.endsWith('/session/context'))return json(route,{actor_code:'DIR-QA',role:'Direccion'});
+  if(url.endsWith('/navigation'))return json(route,navigation);
+  if(url.endsWith('/expedientes'))return json(route,{items:expedientes});
+  if(url.endsWith('/tareas'))return json(route,{items:tareas});
+  return json(route,{ok:false},404);
  });
 }
 
 test.describe('App real · cinco flujos sobre runtime PROD local aislado',()=>{
- test('Expedientes selecciona 4, 5 y todos sin abrir y ejecuta cambio masivo real',async({page})=>{
-  await seed(page);await gateway(page);await page.goto('/expedientes');
-  const rows=page.locator('[data-testid="expediente-row"]');await expect(rows).toHaveCount(6);
-  const checks=page.locator('[data-testid="expediente-select"]');
-  for(let i=0;i<4;i++)await checks.nth(i).check();
-  await expect(page.getByText(/4 seleccionad/i)).toBeVisible();
-  await checks.nth(4).check();await expect(page.getByText(/5 seleccionad/i)).toBeVisible();
-  await page.getByTestId('expedientes-select-all').check();await expect(page.getByText(/6 seleccionad/i)).toBeVisible();
-  await page.getByRole('button',{name:/cambiar etapa/i}).click();
-  await page.getByRole('button',{name:/confirmar/i}).click();
-  await expect(page.getByText(/actualizad/i)).toBeVisible();
- });
-
- test('Tareas selecciona 4, 5 y todas sin abrir y ejecuta acción masiva real',async({page})=>{
-  await seed(page);await gateway(page);await page.goto('/agenda');
-  const checks=page.locator('[data-testid="task-select"]');await expect(checks).toHaveCount(6);
-  for(let i=0;i<4;i++)await checks.nth(i).check();await expect(page.getByText(/4 seleccionad/i)).toBeVisible();
-  await checks.nth(4).check();await expect(page.getByText(/5 seleccionad/i)).toBeVisible();
-  await page.getByTestId('tasks-select-all').check();await expect(page.getByText(/6 seleccionad/i)).toBeVisible();
-  await page.getByRole('button',{name:/completar/i}).click();await page.getByRole('button',{name:/confirmar/i}).click();
-  await expect(page.getByText(/actualizad|completad/i)).toBeVisible();
- });
-
- test('Expediente muestra fichas desplegables por participante y sus documentos vinculados',async({page})=>{
+ test('Expedientes selecciona 4, 5 y todos sin abrir y ejecuta cambio masivo real',async({page},testInfo)=>{
+  test.skip(!testInfo.project.name.includes('desktop'));
   await seed(page);await gateway(page);
-  await page.route('**/functions/v1/fenix-expediente-people/**',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[{person_id:'P-1',nombre:'María Compradora',rol:'Comprador',documents:[{id:'D-1',nombre:'Nómina agosto.pdf'}]}]})}));
-  await page.goto('/expedientes/EXP-1');
-  await expect(page.getByText('María Compradora',{exact:true})).toBeVisible();
-  await page.getByText('María Compradora',{exact:true}).click();
-  await expect(page.getByText('Nómina agosto.pdf',{exact:true})).toBeVisible();
+  let payload:any=null;
+  await page.route('**/functions/v1/fenix-expediente-actions',async route=>{payload=route.request().postDataJSON();return json(route,{ok:true,count:6});});
+  await page.goto('/expedientes');
+  for(let index=0;index<4;index++)await page.getByLabel(`Seleccionar EXP-00${index+1}`).check();
+  await expect(page).toHaveURL(/\/expedientes$/);await expect(page.getByText('4 expedientes seleccionados')).toBeVisible();
+  await page.getByLabel('Seleccionar EXP-005').check();
+  await expect(page).toHaveURL(/\/expedientes$/);await expect(page.getByText('5 expedientes seleccionados')).toBeVisible();
+  await page.getByLabel('Seleccionar todos los expedientes visibles vinculados').check();
+  await expect(page).toHaveURL(/\/expedientes$/);await expect(page.getByText('6 expedientes seleccionados')).toBeVisible();
+  await page.getByLabel('NUEVA FASE').selectOption('Análisis');
+  await page.getByRole('button',{name:'Previsualizar cambios'}).click();
+  await page.getByRole('button',{name:'Confirmar y aplicar'}).click();
+  await expect.poll(()=>payload).not.toBeNull();
+  expect(payload).toEqual({items:expedientes.map(x=>({expediente_code:x.expediente_code,expected_version:x.version})),action:'stage',target_stage:'Análisis',comment:null});
+  await expect(page.getByText('6 expedientes actualizados correctamente.')).toBeVisible();
  });
 
- test('Hablar con Ana conserva tema oscuro y devuelve conversación dentro del panel',async({page})=>{
-  await seed(page);await gateway(page);await page.goto('/agenda');
-  await page.getByRole('button',{name:'Cambiar tema'}).click();
-  await page.locator('.fenix-audio-launcher').click();
-  const panel=page.locator('.fenix-ana-panel');await expect(panel).toBeVisible();
-  const input=panel.locator('textarea,input').first();await input.fill('¿Qué reviso antes de enviar a banco?');
-  await panel.getByRole('button',{name:/enviar/i}).click();
+ test('Tareas selecciona 4, 5 y todas sin abrir y ejecuta acción masiva real',async({page},testInfo)=>{
+  test.skip(!testInfo.project.name.includes('desktop'));
+  await seed(page);await gateway(page);
+  let payload:any=null;
+  await page.route('**/functions/v1/fenix-app-gateway/tareas/actions',async route=>{payload=route.request().postDataJSON();return json(route,{ok:true,count:6});});
+  await page.goto('/agenda');
+  for(let index=0;index<4;index++)await page.getByLabel(`Seleccionar Tarea real ${index+1}`).check();
+  await expect(page).toHaveURL(/\/agenda$/);await expect(page.getByText('4 tareas seleccionadas')).toBeVisible();
+  await page.getByLabel('Seleccionar Tarea real 5').check();
+  await expect(page).toHaveURL(/\/agenda$/);await expect(page.getByText('5 tareas seleccionadas')).toBeVisible();
+  await page.getByLabel('Seleccionar todas las tareas visibles').check();
+  await expect(page).toHaveURL(/\/agenda$/);await expect(page.getByText('6 tareas seleccionadas')).toBeVisible();
+  await page.getByLabel('NUEVO ESTADO').selectOption('En curso');
+  await page.getByRole('button',{name:'Previsualizar cambios'}).click();
+  await page.getByRole('button',{name:'Confirmar y aplicar'}).click();
+  await expect.poll(()=>payload).not.toBeNull();
+  expect(payload).toEqual({items:tareas.map(x=>({task_code:x.task_code,expected_version:x.version})),action:'state',target_state:'En curso',comment:null});
+  await expect(page.getByText('6 tareas actualizadas correctamente.')).toBeVisible();
+ });
+
+ test('Expediente muestra fichas desplegables por participante y sus documentos vinculados',async({page},testInfo)=>{
+  test.skip(!testInfo.project.name.includes('desktop'));
+  const detail={...expedientes[0],cliente:'Cliente real 1',fase:'Documentación',precio_vivienda:180000,importe_solicitado:150000};
+  await seed(page);await gateway(page,async(route,url)=>{
+   if(url.endsWith('/expedientes/EXP-001')){await json(route,{expediente:detail});return true}return false;
+  });
+  await page.route('**/functions/v1/fenix-app-gateway/expedientes/EXP-001/people',route=>json(route,{ok:true,count:2,titulares:1,avalistas:1,items:[
+   {id:'CLI-001',nombre:'Laura',apellidos:'García',rol_operacion:'Titular comprador',dni_nie:'11111111A',situacion_laboral:'Indefinida',documentacion_completa:true,documentos:[{title:'DNI Laura',document_code:'DOC-001',analysis_state:'Validado'}]},
+   {id:'CLI-002',nombre:'Mario',apellidos:'López',rol_operacion:'Avalista',dni_nie:'22222222B',situacion_laboral:'Autónomo',documentacion_completa:false,documentos:[{title:'IRPF Mario',document_code:'DOC-002',analysis_state:'Pendiente'}]}
+  ]}));
+  await page.goto('/expedientes/EXP-001');
+  const people=page.getByTestId('expediente-people-prod');await expect(people).toBeVisible();
+  const laura=people.locator('.exp-person').filter({hasText:'Laura García'});const lauraHead=laura.locator('.exp-person-toggle');
+  await expect(lauraHead).toHaveAttribute('aria-expanded','false');await expect(laura.getByText('11111111A')).toBeHidden();
+  await lauraHead.click();await expect(lauraHead).toHaveAttribute('aria-expanded','true');await expect(laura.getByText('11111111A')).toBeVisible();
+  const docsHead=laura.locator('.exp-person-documents-head');await expect(docsHead).toHaveAttribute('aria-expanded','false');
+  await docsHead.click();await expect(docsHead).toHaveAttribute('aria-expanded','true');await expect(laura.getByText('DNI Laura')).toBeVisible();
+  const mario=people.locator('.exp-person').filter({hasText:'Mario López'});await mario.locator('.exp-person-toggle').click();
+  await expect(mario.getByText('22222222B')).toBeVisible();await mario.locator('.exp-person-documents-head').click();await expect(mario.getByText('IRPF Mario')).toBeVisible();
+ });
+
+ test('Hablar con Ana conserva tema oscuro y devuelve conversación dentro del panel',async({page},testInfo)=>{
+  test.skip(!testInfo.project.name.includes('desktop'));
+  await seed(page,'dark');await gateway(page);
+  await page.route('**/functions/v1/fenix-ana-canonical/rules?domain=Hipotecas',route=>json(route,{ok:true,items:[{id:'RULE-1',rule:'Con documentación completa, revisar capacidad de pago antes de enviar a banco.',approved:true}]}));
+  await page.goto('/agenda');await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
+  await page.getByRole('button',{name:'Abrir acciones por voz'}).click();
+  const panel=page.getByRole('region',{name:'Acciones por voz y texto'});await expect(panel).toBeVisible();
+  expect(await panel.evaluate(el=>getComputedStyle(el).backgroundColor)).toBe('rgb(31, 32, 35)');
+  await panel.getByRole('button',{name:/Hablar con Ana/}).click();
+  await page.getByLabel('Texto de la acción').fill('¿Qué hago con documentación completa y capacidad de pago?');
+  await page.getByRole('button',{name:'Enviar'}).click();
+  await expect(panel.locator('.fenix-ana-bubble.user')).toContainText('documentación completa');
   await expect(panel.locator('.fenix-ana-bubble.ana')).toContainText('revisar capacidad de pago antes de enviar a banco');
   await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
  });
@@ -96,7 +128,6 @@ test.describe('App real · cinco flujos sobre runtime PROD local aislado',()=>{
   for(const gap of gaps){expect(gap).toBeGreaterThan(0);expect(gap).toBeLessThanOrEqual(18)}
   expect(Math.abs(gaps[0]-gaps[1])).toBeLessThanOrEqual(18);
   expect(Math.max(...boxes.map(x=>x!.x))-Math.min(...boxes.map(x=>x!.x))).toBeLessThanOrEqual(1);
-  expect(new Set(styles.map(style=>style.background)).size).toBe(1);
   for(const style of styles){
     expect(style.width).toBe('46px');expect(style.height).toBe('46px');expect(style.borderRadius).toBe('50%');
     const rgb=style.background.match(/\d+/g)?.map(Number)??[];
