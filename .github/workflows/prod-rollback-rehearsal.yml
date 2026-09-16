@@ -25,6 +25,10 @@ jobs:
         run: |
           set -euo pipefail
           test -n "${VITE_SUPABASE_PUBLISHABLE_KEY}"
+          case "${VITE_SUPABASE_PUBLISHABLE_KEY}" in
+            sb_publishable_*) ;;
+            *) echo 'FAIL_CLOSED: PROD_SUPABASE_PUBLISHABLE_KEY is not a Supabase publishable browser key' >&2; exit 2 ;;
+          esac
 
       - name: Checkout rollback candidate
         uses: actions/checkout@v4
