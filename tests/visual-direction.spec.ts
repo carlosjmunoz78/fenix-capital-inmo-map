@@ -45,7 +45,7 @@ test.describe('Fénix PRE-PROD · contrato visual Inicio Dirección',()=>{
       if(u.endsWith('/session/context'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({actor_code:'DIR-TEST',role:'Direccion'})});
       if(u.endsWith('/navigation'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(navigation)});
       if(u.endsWith('/personal'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[],pending_profiles:5})});
-      if(u.endsWith('/expedientes'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,status:200,items:[{expediente_code:'e1',stage:'En curso',riesgo:'Alto',is_active:true},{expediente_code:'e2',stage:'Tasación',riesgo:'Bajo',is_active:true},{expediente_code:'e3',stage:'Firmado',is_active:false}]})});
+      if(u.endsWith('/expedientes'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,status:200,items:[{expediente_code:'e1',stage:'En curso',riesgo:'Alto',is_active:true},{expediente_code:'e2',stage:'Tasación',riesgo:'Bajo',is_active:true},{expediente_code:'e3',stage:'Firmado',riesgo:'Bajo',is_active:false}]})});
       if(u.endsWith('/firmas'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,status:200,items:[{id:'f1',estado:'Programada',fecha_hora_firma:currentMonthIso(25,10)},{id:'f2',estado:'Firmada',fecha_hora_firma:currentMonthIso(20,12)}]})});
       if(u.endsWith('/tareas'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,status:200,items:[{id:'t1',tarea:'Revisar expediente prioritario',estado:'Pendiente',fecha_limite:currentMonthIso(22).slice(0,10),completada:false},{id:'t2',tarea:'Tarea ya cerrada',estado:'Completada',fecha_limite:currentMonthIso(21).slice(0,10),completada:true},{id:'t3',tarea:'Tarea cancelada',estado:'Cancelada',fecha_limite:currentMonthIso(21).slice(0,10),completada:false}]})});
       if(u.endsWith('/bancos'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[]})});
@@ -54,16 +54,17 @@ test.describe('Fénix PRE-PROD · contrato visual Inicio Dirección',()=>{
     await page.route('**/functions/v1/fenix-notion-runtime-test/**',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[]})}));
     await page.route('**/functions/v1/fenix-ana-api-test/**',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,items:[]})}));
 
-    // First prove the generic authenticated workspace mount already covered by the passing runtime probe.
-    // Then drive React Router through the browser history event directly. This keeps the visual contract
-    // focused on the Direction route/render contract instead of coupling it to a specific nav button DOM.
+    // Prove the authenticated workspace first, then drive the SPA route directly.
+    // Do not use Playwright's page.url() here: this isolated preview runtime has repeatedly
+    // returned an empty string even while the DOM is mounted and interactive. The contract we
+    // care about is the browser pathname + the Direction DOM, not Playwright's URL serializer.
     await page.goto('/expedientes',{waitUntil:'domcontentloaded'});
     await expect(page.locator('.ops-root')).toBeVisible();
     await page.evaluate(()=>{
       history.pushState({},'', '/inicio');
       window.dispatchEvent(new PopStateEvent('popstate'));
     });
-    await expect(page).toHaveURL(/\/inicio$/);
+    await expect.poll(()=>page.evaluate(()=>window.location.pathname)).toBe('/inicio');
     await expect(page.locator('.dir-shell')).toBeVisible();
     await expect(page.getByRole('button',{name:'Inicio Fénix Capital'})).toBeVisible();
     await expect(page.locator('.dir-priority-copy h1')).toContainText('Belén');
