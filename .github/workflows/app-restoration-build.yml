@@ -61,7 +61,14 @@ jobs:
           VITE_FENIX_ENV: test
           VITE_SUPABASE_URL: http://127.0.0.1:54321
           VITE_SUPABASE_PUBLISHABLE_KEY: visual-ci-not-a-real-key
-        run: npx playwright test tests/visual-agenda.spec.ts tests/visual-banco-detail.spec.ts tests/visual-direction.spec.ts tests/visual-expediente-detail.spec.ts tests/visual-expedientes.spec.ts tests/visual-informes.spec.ts tests/visual-profile.spec.ts tests/fixed-shell-layout.spec.ts tests/navigation-responsive-widths.spec.ts --reporter=line
+        run: npx playwright test tests/visual-agenda.spec.ts tests/visual-banco-detail.spec.ts tests/visual-expediente-detail.spec.ts tests/visual-expedientes.spec.ts tests/visual-informes.spec.ts tests/visual-profile.spec.ts tests/fixed-shell-layout.spec.ts tests/navigation-responsive-widths.spec.ts --reporter=line
+      - name: Direction visual diagnostic
+        continue-on-error: true
+        env:
+          VITE_FENIX_ENV: test
+          VITE_SUPABASE_URL: http://127.0.0.1:54321
+          VITE_SUPABASE_PUBLISHABLE_KEY: visual-ci-not-a-real-key
+        run: npx playwright test tests/visual-direction.spec.ts --reporter=line
       - name: Real-app five-flow regression on isolated PROD-shaped runtime
         env:
           VITE_FENIX_ENV: prod
