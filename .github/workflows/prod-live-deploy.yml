@@ -1,10 +1,12 @@
 name: PROD Live Deploy
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type DEPLOY_PROD to publish the current main snapshot to gh-pages'
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -15,6 +17,7 @@ concurrency:
 
 jobs:
   build-and-publish-live:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.confirm == 'DEPLOY_PROD' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
@@ -32,11 +35,21 @@ jobs:
           node-version: 24
           cache: npm
 
+      - name: Assert explicit production confirmation
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${{ inputs.confirm }}" = 'DEPLOY_PROD'
+
       - name: Assert required secret references are available
         shell: bash
         run: |
           set -euo pipefail
           test -n "${VITE_SUPABASE_PUBLISHABLE_KEY}"
+          case "${VITE_SUPABASE_PUBLISHABLE_KEY}" in
+            sb_publishable_*) ;;
+            *) echo 'PROD_SUPABASE_PUBLISHABLE_KEY must be an sb_publishable_* key' >&2; exit 1 ;;
+          esac
 
       - name: Install dependencies reproducibly
         run: npm ci
