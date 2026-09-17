@@ -14,11 +14,11 @@ env:
   APP_URL: https://app.fenixcapital.es
   PROD_URL: https://cluhljgonannaafpmblx.supabase.co
   PREPROD_URL: https://hnqlnvakzaywtafeiybt.supabase.co
-  PROD_PUBLISHABLE_KEY: sb_publishable_yjISKmA5UPfF3d7NitP_DA_j5LGydh0
+  PROD_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
   VITE_FENIX_ENV: production
   VITE_SUPABASE_URL: https://cluhljgonannaafpmblx.supabase.co
-  VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_yjISKmA5UPfF3d7NitP_DA_j5LGydh0
-  LEGACY_ANON_JWT: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsdWhsamdvbmFubmFhZnBtYmx4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgwODM4MTIsImV4cCI6MjEwMzY1OTgxMn0.PGSqCe7BGLV4rKBOmhZiLtDAmjQzE7mT1JXVpPCW-f8
+  VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
+  LEGACY_ANON_JWT: ${{ secrets.PROD_SUPABASE_LEGACY_ANON_JWT }}
 
 jobs:
   runtime-smoke:
@@ -27,6 +27,22 @@ jobs:
     steps:
       - name: Checkout production source
         uses: actions/checkout@v4
+
+      - name: Assert required secret references are available
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${PROD_PUBLISHABLE_KEY}"
+          test -n "${VITE_SUPABASE_PUBLISHABLE_KEY}"
+          test -n "${LEGACY_ANON_JWT}"
+          case "${PROD_PUBLISHABLE_KEY}" in
+            sb_publishable_*) ;;
+            *) echo 'FAIL_CLOSED: PROD_SUPABASE_PUBLISHABLE_KEY is not a Supabase publishable browser key' >&2; exit 2 ;;
+          esac
+          case "${VITE_SUPABASE_PUBLISHABLE_KEY}" in
+            sb_publishable_*) ;;
+            *) echo 'FAIL_CLOSED: VITE_SUPABASE_PUBLISHABLE_KEY is not a Supabase publishable browser key' >&2; exit 2 ;;
+          esac
 
       - name: Setup Node
         uses: actions/setup-node@v4
