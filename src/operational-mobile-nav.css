@@ -6,6 +6,9 @@
   .ops-root>.ops-side{display:none!important}
   .ops-root>.ops-main{height:100dvh!important;min-height:100dvh!important;max-height:100dvh!important;padding-bottom:0!important}
   .ops-root .ops-content{padding-top:62px;padding-bottom:max(28px,env(safe-area-inset-bottom))!important}
+  /* Reserve the fixed menu button footprint so search/profile controls never sit underneath it. */
+  .ops-root>.ops-main>.ops-top{padding-left:max(112px,calc(env(safe-area-inset-left) + 112px))!important}
+  .ops-root>.ops-main>.ops-top .ops-search{min-width:0!important}
 
   .ops-mobile-menu-button{
     display:inline-flex;
@@ -128,6 +131,11 @@
   #root:has(> .ops-root:not(.role-home)) > .app-shell .calc-panel textarea,
   #root:has(> .ops-root:not(.role-home)) > .app-shell .calc-panel a,
   #root:has(> .ops-root:not(.role-home)) > .app-shell .calc-panel label{pointer-events:auto!important}
+}
+
+@media(max-width:430px){
+  .ops-root>.ops-main>.ops-top{grid-template-columns:minmax(0,1fr)!important;row-gap:8px!important}
+  .ops-root>.ops-main>.ops-top .ops-top-actions{justify-self:end}
 }
 
 @media(prefers-reduced-motion:reduce){
