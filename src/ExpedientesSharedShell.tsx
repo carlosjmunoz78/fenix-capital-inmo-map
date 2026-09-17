@@ -22,8 +22,8 @@ type CanonicalExp={expediente_code?:string;cliente_alias?:string;stage?:string;o
 const fallbackNav:NavItem[]=[{label:'Inicio',route:'/inicio'}];
 const allowedStages=['Entrada','Documentación','Documentación incompleta','Documentación completa','Análisis','Tasación','Pre-OK + Tasación realizada','Tasación realizada','Notaría','Cierre','Finalizado','Baja','Pausado','Perdido','Revisión legado'];
 const operationalColumnGroups:{label:string;keys:string[]}[]=[
- {label:'Expediente',keys:['expediente_code','code','codigo','expediente']},
- {label:'Cliente',keys:['cliente_alias','cliente','nombre_cliente','client_name']},
+ {label:'Expediente',keys:['expediente','codigo','code','expediente_code']},
+ {label:'Cliente',keys:['cliente','cliente_alias','nombre_cliente','client_name']},
  {label:'Fase',keys:['fase','phase','stage']},
  {label:'Estado',keys:['estado','status']},
  {label:'Riesgo',keys:['riesgo','risk','nivel_riesgo','semaforo','semáforo']},
