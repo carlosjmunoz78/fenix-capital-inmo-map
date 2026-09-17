@@ -159,7 +159,7 @@ jobs:
           grep -qi '^access-control-allow-methods:.*OPTIONS' "$headers"
           grep -qi '^access-control-allow-headers:.*authorization' "$headers"
 
-      - name: Ana Notion secret is configured without exposing it
+      - name: Ana knowledge is configured and rejects non-user JWT fail closed
         shell: bash
         run: |
           set -euo pipefail
@@ -168,8 +168,8 @@ jobs:
             -H "apikey: ${LEGACY_ANON_JWT}" \
             "${PROD_URL}/functions/v1/fenix-ana-knowledge/recent")"
           if grep -q 'server_config_missing' /tmp/ana-body || test "$status" = "503"; then
-            echo 'NOTION_TOKEN is not available to fenix-ana-knowledge' >&2
+            echo 'fenix-ana-knowledge server configuration is incomplete' >&2
             exit 1
           fi
-          test "$status" = "500"
-          grep -q 'session_context_failed' /tmp/ana-body
+          test "$status" = "401"
+          grep -q '"error":"unauthorized"' /tmp/ana-body
