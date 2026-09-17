@@ -6,6 +6,11 @@ on:
       - prod-preparation
       - main
   workflow_dispatch:
+    inputs:
+      expected_live_sha:
+        description: 'Optional exact live PROD source SHA to verify after an explicitly authorized deployment'
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -74,23 +79,25 @@ jobs:
           grep -qi '<!doctype html' "$body"
           grep -qi 'fenix' "$body"
 
-      - name: APP domain serves this exact main SHA
-        if: github.ref == 'refs/heads/main'
+      - name: APP domain serves explicitly expected deployed SHA
+        if: github.event_name == 'workflow_dispatch' && inputs.expected_live_sha != ''
         shell: bash
+        env:
+          EXPECTED_LIVE_SHA: ${{ inputs.expected_live_sha }}
         run: |
           set -euo pipefail
-          expected="${GITHUB_SHA}"
+          expected="${EXPECTED_LIVE_SHA}"
           live=""
           for attempt in $(seq 1 30); do
             live="$(curl --silent --show-error --location --max-time 20 --header 'Cache-Control: no-cache' "${APP_URL}/PROD_SOURCE_SHA.txt?sha=${expected}&attempt=${attempt}" 2>/dev/null | tr -d '\r\n[:space:]' || true)"
             if [ "$live" = "$expected" ]; then
-              echo "Live domain is serving expected SHA: $expected"
+              echo "Live domain is serving explicitly expected SHA: $expected"
               exit 0
             fi
-            echo "Waiting for live deployment ($attempt/30). Expected=$expected Live=${live:-unavailable}"
+            echo "Waiting for authorized live deployment ($attempt/30). Expected=$expected Live=${live:-unavailable}"
             sleep 10
           done
-          echo "Live domain did not converge to expected SHA. Expected=$expected Last=${live:-unavailable}" >&2
+          echo "Live domain did not converge to explicitly expected SHA. Expected=$expected Last=${live:-unavailable}" >&2
           exit 1
 
       - name: Gateway health is PROD and reachable
