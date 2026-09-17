@@ -1,5 +1,6 @@
 import {useEffect,useMemo,useState} from 'react';
 import {fetchAppApi} from './supabase';
+import {isTerminalTaskState} from './taskState';
 
 type Row=Record<string,unknown>;
 type LoadState={status:number|null;rows:Row[]};
@@ -20,7 +21,7 @@ function taskId(r:Row){return text(r,['id','tarea_id','tarea_code','code']);}
 function taskTitle(r:Row){return text(r,['tarea','titulo','título','nombre','title']);}
 function taskState(r:Row){return text(r,['estado','status'])||'Pendiente';}
 function taskDueRaw(r:Row){return text(r,['fecha_limite','fecha_límite','vencimiento','fecha','due_date']);}
-function taskDone(r:Row){return bool(r,['completada','completado','done'])||/complet|terminad|cerrad|hecha|cancelad|baja/i.test(taskState(r));}
+function taskDone(r:Row){return bool(r,['completada','completado','done'])||isTerminalTaskState(taskState(r));}
 function expState(r:Row){return text(r,['estado','fase','phase','stage','status']);}
 function expRisk(r:Row){return text(r,['riesgo','risk','nivel_riesgo','semaforo','semáforo']);}
 function expCode(r:Row){return text(r,['expediente_code','code','codigo','id']);}

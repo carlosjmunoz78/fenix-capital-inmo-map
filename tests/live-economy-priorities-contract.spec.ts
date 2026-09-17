@@ -17,11 +17,15 @@ test('economy UI renders active gross commissions and Fenix net from backend con
  expect(src).not.toContain('buildEconomyProjection');
 });
 
-test('Inicio priorities consume canonical gateway and exclude inactive task states',async()=>{
+test('Inicio priorities consume canonical gateway and canonical terminal task states',async()=>{
  const src=read('src/useDirectionLiveData.ts');
+ const states=read('src/taskState.ts');
  expect(src).toContain("fetchAppApi<unknown>('/tareas')");
  expect(src).toContain("fetchAppApi<unknown>('/firmas')");
- expect(src).toContain('cancelad|baja');
+ expect(src).toContain("import {isTerminalTaskState} from './taskState'");
+ expect(src).toContain('isTerminalTaskState(taskState(r))');
+ expect(states).toContain('cancelad|anulad|baja');
+ expect(states).toContain('complet|terminad|cerrad|hecha');
  expect(src).toContain('window.setInterval');
  expect(src).toContain("window.addEventListener('focus'");
 });
