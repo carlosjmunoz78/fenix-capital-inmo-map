@@ -30,10 +30,14 @@ test('Inicio priorities consume canonical gateway and canonical terminal task st
  expect(src).toContain("window.addEventListener('focus'");
 });
 
-test('Inicio honorarios KPI consumes the same live economy expected-income contract',async()=>{
+test('Inicio honorarios KPI consumes the same live economy expected-income contract without observer self-loop',async()=>{
  const src=read('src/DirectionKpiLabelGuard.tsx');
  expect(src).toContain('fetchEconomiaRuntime');
  expect(src).toContain('ingreso_fenix_esperado');
  expect(src).toContain('Ingreso Fénix esperado · cartera activa');
  expect(src).toContain('window.setInterval');
+ expect(src).toContain("note&&note.textContent!==next");
+ expect(src).toContain("value&&value.textContent!==nextValue");
+ expect(src).toContain("note&&note.textContent!==nextNote");
+ expect(src).toContain('new MutationObserver(syncLabels)');
 });
