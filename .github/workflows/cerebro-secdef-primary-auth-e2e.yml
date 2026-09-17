@@ -1,0 +1,73 @@
+name: CEREBRO SECDEF Primary Auth E2E
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/cerebro-secdef-primary-auth-e2e.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  primary-auth-read-parity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PROD_URL: https://cluhljgonannaafpmblx.supabase.co
+      PROD_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
+      CEREBRO_E2E_USER_JWT: ${{ secrets.CEREBRO_E2E_USER_JWT }}
+      PRIMARY_URL: https://cluhljgonannaafpmblx.supabase.co/functions/v1/fenix-app-gateway
+      REST_URL: https://cluhljgonannaafpmblx.supabase.co/rest/v1/rpc
+    steps:
+      - name: Fail closed if authenticated E2E secret refs are unavailable
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${PROD_PUBLISHABLE_KEY}"
+          test -n "${CEREBRO_E2E_USER_JWT}"
+
+      - name: Primary health is green after controlled promotion
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --max-time 30 \
+            -H "apikey: ${PROD_PUBLISHABLE_KEY}" \
+            "${PRIMARY_URL}/health" \
+            | jq -e '.ok == true and .env == "PROD" and .service == "fenix-app-gateway"' >/dev/null
+
+      - name: Primary fails closed without user identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          status="$(curl --silent --show-error --output /tmp/body --write-out '%{http_code}' --max-time 30 \
+            -H "apikey: ${PROD_PUBLISHABLE_KEY}" \
+            "${PRIMARY_URL}/v2/profile")"
+          test "$status" = "401"
+          grep -q 'identity_not_linked' /tmp/body
+
+      - name: Authenticated OLD vs NEW read parity on four core routes
+        shell: bash
+        run: |
+          set -euo pipefail
+          headers=(
+            -H "apikey: ${PROD_PUBLISHABLE_KEY}"
+            -H "Authorization: Bearer ${CEREBRO_E2E_USER_JWT}"
+            -H "Content-Type: application/json"
+          )
+          tmp="$(mktemp -d)"
+          trap 'rm -rf "$tmp"' EXIT
+          canon(){ jq -S -c . "$1"; }
+          compare_pair(){
+            local label="$1" old_fn="$2" new_path="$3"
+            curl --fail --silent --show-error --max-time 30 "${headers[@]}" -X POST "${REST_URL}/${old_fn}" --data '{}' >"$tmp/${label}.old.json"
+            curl --fail --silent --show-error --max-time 30 "${headers[@]}" "${PRIMARY_URL}${new_path}" >"$tmp/${label}.new.json"
+            diff -u <(canon "$tmp/${label}.old.json") <(canon "$tmp/${label}.new.json")
+            echo "PARITY_GREEN ${label}"
+          }
+          compare_pair profile fenix_prod_profile_get_user /v2/profile
+          compare_pair socials fenix_prod_profile_socials_get_user /v2/profile/socials
+          compare_pair people fenix_prod_chat_people_user /v2/chat/people
+          compare_pair conversations fenix_prod_chat_conversations_user /v2/chat/conversations
+          echo 'AUTHENTICATED_PRIMARY_READ_PARITY_GREEN'
