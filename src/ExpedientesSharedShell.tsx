@@ -21,9 +21,17 @@ type CanonicalExp={expediente_code?:string;cliente_alias?:string;stage?:string;o
 
 const fallbackNav:NavItem[]=[{label:'Inicio',route:'/inicio'}];
 const allowedStages=['Entrada','Documentación','Documentación incompleta','Documentación completa','Análisis','Tasación','Pre-OK + Tasación realizada','Tasación realizada','Notaría','Cierre','Finalizado','Baja','Pausado','Perdido','Revisión legado'];
+const operationalColumnGroups=[
+ {label:'Expediente',keys:['expediente_code','code','codigo','expediente']},
+ {label:'Cliente',keys:['cliente_alias','cliente','nombre_cliente','client_name']},
+ {label:'Fase',keys:['fase','phase','stage']},
+ {label:'Estado',keys:['estado','status']},
+ {label:'Riesgo',keys:['riesgo','risk','nivel_riesgo','semaforo','semáforo']},
+ {label:'Siguiente acción',keys:['siguiente_accion','siguiente_acción','proxima_accion','próxima_acción','next_action']}
+] as const;
 function rowsFrom(data:unknown):AnyRow[]{if(!data||typeof data!=='object')return[];const d=data as Record<string,unknown>;for(const key of ['items','expedientes'])if(Array.isArray(d[key]))return d[key] as AnyRow[];return[];}
-function prettyKey(key:string){return key.replaceAll('_',' ').replace(/\b\w/g,m=>m.toUpperCase());}
-function prettyValue(value:unknown){if(value===null||value===undefined||value==='')return'—';if(typeof value==='boolean')return value?'Sí':'No';if(Array.isArray(value))return value.length?value.map(x=>typeof x==='object'?JSON.stringify(x):String(x)).join(', '):'—';if(typeof value==='object')return JSON.stringify(value);return String(value);}
+function prettyKey(key:string){for(const group of operationalColumnGroups)if((group.keys as readonly string[]).includes(key))return group.label;return key.replaceAll('_',' ').replace(/\b\w/g,m=>m.toUpperCase());}
+function prettyValue(value:unknown){if(value===null||value===undefined||value==='')return'—';if(typeof value==='boolean')return value?'Sí':'No';if(typeof value==='string'&&/^\d{4}-\d{2}-\d{2}(?:[T\s].*)?$/.test(value)){const d=new Date(value.replace(' ','T'));if(Number.isFinite(d.getTime()))return new Intl.DateTimeFormat('es-ES',{dateStyle:'medium',timeZone:'Europe/Madrid'}).format(d);}if(Array.isArray(value))return value.length?value.map(x=>typeof x==='object'?'—':String(x)).join(', '):'—';if(typeof value==='object')return'—';return String(value);}
 function compareUnknown(a:unknown,b:unknown){if(typeof a==='number'&&typeof b==='number')return a-b;if(typeof a==='boolean'&&typeof b==='boolean')return Number(a)-Number(b);const sa=prettyValue(a),sb=prettyValue(b);if(/^\d{4}-\d{2}-\d{2}/.test(sa)&&/^\d{4}-\d{2}-\d{2}/.test(sb)){const da=Date.parse(sa),db=Date.parse(sb);if(Number.isFinite(da)&&Number.isFinite(db))return da-db;}return sa.localeCompare(sb,'es',{sensitivity:'base',numeric:true});}
 function firstString(row:AnyRow,keys:string[]){for(const key of keys){const value=row[key];if(typeof value==='string'&&value.trim())return value.trim();}return'';}
 function bool(row:AnyRow,keys:string[]){for(const key of keys)if(row[key]===true)return true;return false;}
@@ -49,7 +57,7 @@ export default function ExpedientesSharedShell(){
  const phases=useMemo(()=>Array.from(new Set(rows.map(r=>firstString(r,['fase','phase'])).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'es')),[rows]);
  const risks=useMemo(()=>Array.from(new Set(rows.map(r=>firstString(r,['riesgo','risk'])).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'es')),[rows]);
  const visibleRows=useMemo(()=>{const filtered=rows.filter(row=>{const rowPhase=firstString(row,['fase','phase']),rowRisk=firstString(row,['riesgo','risk']);const focusOk=focus==='todos'||(focus==='revisar'&&needsReview(row))||(focus==='firma'&&inSigning(row))||(focus==='sin-accion'&&!nextAction(row));return(!phase||rowPhase===phase)&&(!risk||rowRisk===risk)&&focusOk;});if(!sortKey)return filtered;const direction=sortDir==='asc'?1:-1;return[...filtered].sort((a,b)=>{const primary=compareUnknown(a[sortKey],b[sortKey]);if(primary!==0)return primary*direction;return compareUnknown(codeOf(a),codeOf(b))*direction;});},[rows,phase,risk,focus,sortKey,sortDir]);
- const columns=useMemo(()=>{const first=visibleRows[0]||rows[0];if(!first)return[];return Object.keys(first).filter(k=>!['id','synthetic','updated_at','created_at','actualizado','owner_actor_code','fuente','destino'].includes(k)).slice(0,6);},[visibleRows,rows]);
+ const columns=useMemo(()=>operationalColumnGroups.map(group=>group.keys.find(key=>rows.some(row=>Object.prototype.hasOwnProperty.call(row,key)))).filter((key):key is string=>Boolean(key)),[rows]);
  const phaseRank=useMemo(()=>{const m=new Map<string,number>();rows.forEach(r=>{const x=firstString(r,['fase','phase'])||'Sin fase';m.set(x,(m.get(x)||0)+1)});return[...m.entries()].sort((a,b)=>b[1]-a[1]).slice(0,6)},[rows]);
  const maxPhase=useMemo(()=>Math.max(1,...phaseRank.map(([,n])=>n)),[phaseRank]);
  const activeCount=useMemo(()=>rows.filter(r=>/activ|curso|estudio|banco|tasaci|fein|firma/i.test(firstString(r,['estado','status','fase','phase']))).length,[rows]);
@@ -65,7 +73,7 @@ export default function ExpedientesSharedShell(){
  async function logout(){await supabase.auth.signOut();window.location.href=import.meta.env.BASE_URL;}
  function applySort(column:string){if(sortKey===column)setSortDir(v=>v==='asc'?'desc':'asc');else{setSortKey(column);setSortDir('asc');}}
  function ariaSort(column:string){return sortKey===column?(sortDir==='asc'?'ascending':'descending'):undefined;}
- function toggle(code:string){setPreview(false);setSelected(s=>s.includes(code)?s.filter(x=>x!==code):[...s,code]);}
+ function toggle(code:string){setPreview(false);setSelected(s=>s.includes(code)?s.filter(x=>x!==code):[...s,id]);}
  function toggleAllVisible(){setPreview(false);setSelected(s=>allVisibleSelected?s.filter(x=>!selectableVisible.includes(x)):Array.from(new Set([...s,...selectableVisible])));}
  async function executeBulk(){if(!preview||!selectedCanonical.length)return;setSaving(true);setMessage('');const items=selectedCanonical.map(x=>({expediente_code:String(x.expediente_code),expected_version:Number(x.version)}));const r=await runExpedienteBulkStage({items,target_stage:bulkStage,comment:bulkComment.trim()||null});setSaving(false);if(r.status===200&&r.data?.ok){const success=`${r.data.count??items.length} expedientes actualizados correctamente.`;setSelected([]);setPreview(false);setBulkComment('');await reload();setMessage(success);return;}if(r.status===409){setMessage('Algún expediente cambió mientras lo revisabas. Se ha cancelado todo el lote sin aplicar cambios; recarga y vuelve a intentarlo.');return;}setMessage('No se pudo ejecutar la acción masiva. No se da por aplicada.');}
  const role=ctx?.role||'Usuario',sourceOk=status===200&&!loading;
