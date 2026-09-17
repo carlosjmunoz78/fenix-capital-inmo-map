@@ -6,13 +6,13 @@ const fakeSession={
  user:{id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',aud:'authenticated',role:'authenticated',email:'direccion@fenix.test',app_metadata:{},user_metadata:{},created_at:'2026-08-19T00:00:00.000Z'}
 };
 const rows=[
- {id:'11111111-1111-4111-8111-111111111111',expediente_code:'11111111-1111-4111-8111-111111111111',expediente:'Expediente QA 1',fase:'Estudio',cliente:'Cliente QA 1',proxima_accion:'2026-08-24',estado:'Activo'},
- {id:'22222222-2222-4222-8222-222222222222',expediente_code:'22222222-2222-4222-8222-222222222222',expediente:'Expediente QA 2',fase:'Banco',cliente:'Cliente QA 2',proxima_accion:'2026-08-25',estado:'Activo'}
+ {id:'11111111-1111-4111-8111-111111111111',expediente_code:'11111111-1111-4111-8111-111111111111',expediente:'Expediente QA 1',fase:'Estudio',cliente:'Cliente QA 1',proxima_accion:'2026-08-24',estado:'Activo',owner_actor_code:'DIR-TEST',internal_payload:{secret:'no-render'}},
+ {id:'22222222-2222-4222-8222-222222222222',expediente_code:'22222222-2222-4222-8222-222222222222',expediente:'Expediente QA 2',fase:'Banco',cliente:'Cliente QA 2',proxima_accion:'2026-08-25',estado:'Activo',owner_actor_code:'DIR-TEST',internal_payload:{secret:'no-render'}}
 ];
 const canonical=rows.map((r,i)=>({expediente_code:r.expediente_code,cliente_alias:r.cliente,stage:r.fase,owner_actor_code:'DIR-TEST',version:i+1}));
 
 test.describe('Fénix PRE-PROD · contrato visual Expedientes',()=>{
- test('Expedientes mantiene Ana, estadísticas, gráficos, datos canónicos, scroll acotado, sticky y ordenación por cabecera',async({page},testInfo)=>{
+ test('Expedientes mantiene Ana, columnas operativas, fechas localizadas, scroll acotado, sticky y ordenación',async({page},testInfo)=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();
   await page.setViewportSize({width:1600,height:900});
   await page.addInitScript(session=>{window.localStorage.setItem('fenix-preprod-auth',JSON.stringify(session));window.localStorage.setItem('fenix-remember-device','true');},fakeSession);
@@ -34,6 +34,9 @@ test.describe('Fénix PRE-PROD · contrato visual Expedientes',()=>{
   await expect(page.getByText(/\bPRO\b/)).toHaveCount(0);
   const table=page.locator('.ops-sortable-table');
   await expect(table).toBeVisible();
+  await expect(table.getByText('Owner Actor Code',{exact:true})).toHaveCount(0);
+  await expect(table.getByText('Internal Payload',{exact:true})).toHaveCount(0);
+  await expect(table.getByText('Siguiente acción',{exact:true})).toBeVisible();
   const scroll=table.locator('xpath=..');
   expect(await scroll.evaluate(el=>getComputedStyle(el).overflowY)).toBe('auto');
   expect(await scroll.evaluate(el=>getComputedStyle(el).maxHeight)).not.toBe('none');
@@ -47,10 +50,11 @@ test.describe('Fénix PRE-PROD · contrato visual Expedientes',()=>{
   await firstHeaderButton.click();
   await expect(firstHeader).toHaveAttribute('aria-sort','descending');
   await expect(table.locator('tbody tr').first()).toContainText('Expediente QA 2');
-  const dateHeader=table.locator('thead th').filter({hasText:/Proxima Accion/i}).first();
+  const dateHeader=table.locator('thead th').filter({hasText:/Siguiente acción/i}).first();
   await dateHeader.locator('button').click();
   await expect(dateHeader).toHaveAttribute('aria-sort','ascending');
-  await expect(table.locator('tbody tr').first()).toContainText('2026-08-24');
+  await expect(table.locator('tbody tr').first()).toContainText(/24\s+ago\.?\s+2026/i);
+  await expect(table.getByText('2026-08-24',{exact:true})).toHaveCount(0);
   const shot=await page.screenshot({fullPage:true});
   await testInfo.attach('expedientes-qa-1600',{body:shot,contentType:'image/png'});
   const firstRow=table.locator('tbody tr').filter({hasText:'Expediente QA 1'}).first();
