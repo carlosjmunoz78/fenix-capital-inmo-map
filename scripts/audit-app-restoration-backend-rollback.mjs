@@ -22,13 +22,17 @@ requireToken(candidatePeople,'mergeLabor','people candidate');
 
 for(const token of ['fenix_prod_session_context','fenix_prod_runtime_policy_server','fenix_prod_evidence_scope_server',"human_reason:'LOW_CONFIDENCE'", "human_reason:'POLICY_CONFLICT'",'conflicts_require_confirmation']){
   requireToken(liveIntelligence,token,'intelligence rollback');
+}
+for(const token of ['auth.getUser','fenix_prod_actor_context_by_auth_server','fenix_prod_runtime_policy_server','fenix_prod_evidence_scope_server',"human_reason:'LOW_CONFIDENCE'", "human_reason:'POLICY_CONFLICT'",'conflicts_require_confirmation']){
   requireToken(candidateIntelligence,token,'intelligence candidate');
 }
+forbidToken(candidateIntelligence,"rpc('fenix_prod_session_context'","intelligence candidate");
+forbidToken(candidateIntelligence,'rpc("fenix_prod_session_context"','intelligence candidate');
 for(const token of ['modalidad_contrato','fecha_inicio_contrato','fecha_fin_contrato','jornada','categoria_profesional','numero_pagas']) requireToken(candidateIntelligence,token,'intelligence candidate');
 requireToken(candidateIntelligence,'normalizeConfidence','intelligence candidate');
 forbidToken(liveIntelligence,'normalizeConfidence','intelligence rollback');
 
-const expectedExtract='c8ccc623be364dcfc67b8be8f6b5320476909f4c1af77bf2e3339723b8a0b1c9';
+const expectedExtract='2f1bf1e8a0d1272135948e46b07e438ec89b10abf9804af1fde035e93446c063';
 if(sha(liveExtract)!==expectedExtract) throw new Error(`extract baseline drift: ${sha(liveExtract)}`);
 
 console.log(JSON.stringify({
@@ -40,6 +44,7 @@ console.log(JSON.stringify({
   },
   candidate_deltas:{
     people_labor_merge:true,
+    intelligence_server_identity:true,
     intelligence_labor_projection:true,
     intelligence_confidence_normalization:true
   }

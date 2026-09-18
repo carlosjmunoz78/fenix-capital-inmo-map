@@ -8,7 +8,7 @@ const candidatePath=path.join(root,'supabase/functions/fenix-document-extract-ca
 const baseline=fs.readFileSync(baselinePath,'utf8');
 const candidate=fs.readFileSync(candidatePath,'utf8');
 
-const EXPECTED_SOURCE_SHA='c8ccc623be364dcfc67b8be8f6b5320476909f4c1af77bf2e3339723b8a0b1c9';
+const EXPECTED_SOURCE_SHA='2f1bf1e8a0d1272135948e46b07e438ec89b10abf9804af1fde035e93446c063';
 const baselineSha=crypto.createHash('sha256').update(baseline).digest('hex');
 if(baselineSha!==EXPECTED_SOURCE_SHA) throw new Error(`baseline drift: expected ${EXPECTED_SOURCE_SHA}, got ${baselineSha}`);
 

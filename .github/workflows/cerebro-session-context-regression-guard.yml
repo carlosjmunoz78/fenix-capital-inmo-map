@@ -1,0 +1,59 @@
+name: CEREBRO Session Context Regression Guard
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'supabase/functions/**'
+      - '.github/workflows/cerebro-session-context-regression-guard.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'supabase/functions/**'
+      - '.github/workflows/cerebro-session-context-regression-guard.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  session-context-regression-guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Assert no direct legacy session_context callers
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -R -n -E "rpc\(['\"]fenix_prod_session_context['\"]" src supabase/functions; then
+            echo "Direct legacy fenix_prod_session_context caller detected"
+            exit 1
+          fi
+
+      - name: Assert migrated Edge functions use server identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in             supabase/functions/fenix-document-auto-ingest/index.ts             supabase/functions/fenix-document-existing-backfill/index.ts             supabase/functions/fenix-document-extract/index.ts             supabase/functions/fenix-document-intelligence/index.ts             supabase/functions/fenix-evidence-api/index.ts; do
+            grep -F "auth.getUser" "$f" >/dev/null
+            grep -F "fenix_prod_actor_context_by_auth_server" "$f" >/dev/null
+          done
+
+      - name: Assert frontend uses Edge/Gateway boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -F "authenticatedEdgeFetch" src/supabase.ts >/dev/null
+          grep -F "fetchAppApi" src/appRpcCompat.ts >/dev/null
+          ! grep -R -n -E "rest/v1/rpc/fenix_prod_session_context|rpc\(['\"]fenix_prod_session_context['\"]" src
+
+      - name: Build app
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci
+          npm run build

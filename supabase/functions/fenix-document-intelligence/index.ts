@@ -23,8 +23,8 @@ Deno.serve(async(req:Request)=>{try{
  if(req.method==='OPTIONS')return new Response(null,{status:204,headers:headers(req)});
  if(!U||!A||!S)return out(req,{ok:false,error:'server_config_missing'},503);
  const auth=req.headers.get('authorization')??'';if(!auth.toLowerCase().startsWith('bearer '))return out(req,{ok:false,error:'unauthorized'},401);
- const user=createClient(U,A,{global:{headers:{Authorization:auth}},auth:{persistSession:false,autoRefreshToken:false}}),svc=createClient(U,S,{auth:{persistSession:false,autoRefreshToken:false}});
- const c=await user.rpc('fenix_prod_session_context');if(c.error)return out(req,{ok:false,error:'session_context_failed'},500);const ctx:any=c.data;if(!ctx?.actor_code)return out(req,{ok:false,error:'identity_not_linked'},403);
+ const authClient=createClient(U,A,{auth:{persistSession:false,autoRefreshToken:false}}),svc=createClient(U,S,{auth:{persistSession:false,autoRefreshToken:false}});
+ const{data:ud,error:ue}=await authClient.auth.getUser(auth.slice(7));if(ue||!ud.user)return out(req,{ok:false,error:'unauthorized'},401);const{data:ctx,error:ce}=await svc.rpc('fenix_prod_actor_context_by_auth_server',{p_auth_user_id:ud.user.id});if(ce)return out(req,{ok:false,error:'session_context_failed'},500);if(!ctx?.ok||!ctx?.actor_code)return out(req,{ok:false,error:'identity_not_linked'},403);
  if(req.method!=='POST'||route(req)!=='/apply')return out(req,{ok:false,error:'not_found'},404);
  const b=await req.json().catch(()=>null);if(!b)return out(req,{ok:false,error:'invalid_json'},400);
  const ot=str(b.origin_type,40),oc=str(b.origin_code,180),all=fields(b.fields);if(!ORIGINS.has(ot)||!oc)return out(req,{ok:false,error:'invalid_scope'},400);
