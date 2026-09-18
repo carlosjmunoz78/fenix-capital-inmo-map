@@ -1,0 +1,53 @@
+name: CEREBRO Session Context Auth E2E Gate
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'scripts/cerebro-secdef-canary-auth-e2e.sh'
+      - '.github/workflows/cerebro-session-context-auth-e2e.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  authenticated-read-parity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      PROD_URL: https://cluhljgonannaafpmblx.supabase.co
+      PROD_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
+      CEREBRO_E2E_USER_JWT: ${{ secrets.CEREBRO_E2E_USER_JWT }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check secure E2E credential availability
+        id: credential
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${PROD_PUBLISHABLE_KEY}"
+          if [ -z "${CEREBRO_E2E_USER_JWT}" ]; then
+            echo 'AUTH_E2E_TOKEN_AVAILABLE=false'
+            echo 'run_e2e=false' >> "${GITHUB_OUTPUT}"
+          else
+            echo 'AUTH_E2E_TOKEN_AVAILABLE=true'
+            echo 'run_e2e=true' >> "${GITHUB_OUTPUT}"
+          fi
+
+      - name: Run authenticated read-only OLD vs NEW parity
+        if: steps.credential.outputs.run_e2e == 'true'
+        shell: bash
+        run: bash scripts/cerebro-secdef-canary-auth-e2e.sh
+
+      - name: Classify gate
+        shell: bash
+        run: |
+          if [ "${{ steps.credential.outputs.run_e2e }}" = 'true' ]; then
+            echo 'SESSION_CONTEXT_AUTH_HTTP_E2E=EXECUTED'
+          else
+            echo 'SESSION_CONTEXT_AUTH_HTTP_E2E=POR_AUDITAR_MISSING_SECURE_TOKEN'
+          fi
