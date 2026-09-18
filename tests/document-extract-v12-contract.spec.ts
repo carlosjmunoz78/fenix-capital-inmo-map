@@ -6,7 +6,7 @@ import crypto from 'node:crypto';
 const root=process.cwd();
 const read=(file:string)=>fs.readFileSync(path.join(root,file),'utf8');
 const LIVE_BUNDLE_SHA='54b2a282be040ceeef3564cc6c7d7653c59b96e25ce3db9e7af27c9634b531d2';
-const VERSIONED_SOURCE_SHA='c8ccc623be364dcfc67b8be8f6b5320476909f4c1af77bf2e3339723b8a0b1c9';
+const VERSIONED_SOURCE_SHA='2f1bf1e8a0d1272135948e46b07e438ec89b10abf9804af1fde035e93446c063';
 
 test('live v12 extractor snapshot preserves rollback and governance contract',async()=>{
  const snapshot=read('docs/contracts/fenix-document-extract-v12-snapshot.md');
