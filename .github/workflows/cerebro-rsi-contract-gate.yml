@@ -1,0 +1,25 @@
+name: CEREBRO RSI Contract Gate
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/runtime/continuous-improvement-contract.mjs'
+      - 'cerebro/tests/continuous-improvement-contract.test.mjs'
+      - 'cerebro/docs/RSI_CONTINUOUS_IMPROVEMENT_CONTRACT_V0.md'
+      - '.github/workflows/cerebro-rsi-contract-gate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  block-b-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: RSI Block B contract tests
+        run: node --test cerebro/tests/continuous-improvement-contract.test.mjs
