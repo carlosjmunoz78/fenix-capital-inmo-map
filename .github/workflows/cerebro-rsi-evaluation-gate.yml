@@ -1,0 +1,18 @@
+name: CEREBRO RSI Evaluation Gate
+on:
+  pull_request:
+    paths:
+      - 'cerebro/runtime/evaluation-tribunal.mjs'
+      - 'cerebro/tests/evaluation-tribunal.test.mjs'
+      - '.github/workflows/cerebro-rsi-evaluation-gate.yml'
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  block-f-evaluation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 20}
+      - run: node --test cerebro/tests/evaluation-tribunal.test.mjs
