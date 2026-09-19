@@ -1,0 +1,21 @@
+name: CEREBRO RSI Learning Gate
+on:
+  pull_request:
+    paths:
+      - 'cerebro/runtime/learning-pipeline.mjs'
+      - 'cerebro/tests/learning-pipeline.test.mjs'
+      - 'cerebro/docs/RSI_LEARNING_PIPELINE_V0.md'
+      - '.github/workflows/cerebro-rsi-learning-gate.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  block-d-learning:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node --test cerebro/tests/learning-pipeline.test.mjs
