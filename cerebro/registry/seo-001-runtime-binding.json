@@ -1,0 +1,157 @@
+{
+  "schema_version": "1.0.0",
+  "engine_id": "SEO-001",
+  "name": "SEO Engine",
+  "layer": "L3",
+  "objective": "Convertir investigación SEO, contenido, SEO técnico, enlazado interno, GSC/GA4 y refresh en un pipeline medible, auditable y reversible.",
+  "company_scope": "MULTI_COMPANY",
+  "owner": "CEREBRO",
+  "status": "OPERATIVE_GUARDED_PENDING_4_WEEK_VERIFICATION",
+  "version": "0.4.1",
+  "environment": ["PREPROD", "PROD_OBSERVER"],
+  "inputs": [
+    "company_id",
+    "WordPress inventory and rendered HTML",
+    "Google Search Console performance",
+    "GA4 aggregate measurement",
+    "Notion canonical SEO knowledge",
+    "Core Guard alerts and verification results"
+  ],
+  "outputs": [
+    "SEO measurement snapshots",
+    "prioritized findings and plans",
+    "low-risk verified repairs",
+    "rollback evidence",
+    "HUMAN_REQUIRED exceptions",
+    "audit and learning records"
+  ],
+  "knowledge_sources": [
+    "Notion SEO/landings canonical contract",
+    "Notion SEO architecture and anti-cannibalization maps",
+    "WordPress live state",
+    "GSC",
+    "GA4",
+    "Core Guard"
+  ],
+  "data_model": {
+    "runs_table": "public.seo_cerebro_runs_preprod",
+    "changes_table": "public.seo_cerebro_changes_preprod",
+    "required_scope": ["company_id", "engine_id", "environment", "engine_version"]
+  },
+  "rules": [
+    "deterministic_before_AI",
+    "zero_new_cost_by_default",
+    "snapshot_before_write",
+    "verify_live_after_write",
+    "rollback_on_failed_verification",
+    "no_blind_alt_filling",
+    "no_mass_redirect_or_slug_change_without_query_to_url_evidence",
+    "no_financial_or_legal_claim_change_without policy review",
+    "Elementor Pro is not a functional dependency"
+  ],
+  "decisions": {
+    "low_risk_known_fix": "AUTO_WITH_SNAPSHOT_AND_VERIFY",
+    "medium_or_ambiguous": "PROPOSAL_OR_LAB",
+    "high_risk": "HUMAN_REQUIRED",
+    "production_write_default": "DENY"
+  },
+  "actions": [
+    "measure",
+    "audit",
+    "prioritize",
+    "canary",
+    "fix_allowlisted_low_risk",
+    "verify",
+    "rollback",
+    "document",
+    "learn"
+  ],
+  "api_contract": {
+    "measurement_runner": "Supabase Edge Function fenix-seo-cerebro-preprod",
+    "wordpress_engine": "fenix-seo-cerebro WordPress Abilities",
+    "guard": "Fenix Core Guard",
+    "google_fallback": "Make Google OAuth bridge"
+  },
+  "events_in": ["SEO_SCHEDULED_AUDIT", "CORE_GUARD_ALERT", "MANUAL_SEO_AUDIT"],
+  "events_out": ["SEO_MEASURED", "SEO_FINDING", "SEO_FIXED_VERIFIED", "SEO_ROLLED_BACK", "SEO_HUMAN_REQUIRED"],
+  "permissions": {
+    "default": "deny",
+    "prod_writes": "locked_by_default",
+    "preprod_canary": true,
+    "cross_company_access": "deny"
+  },
+  "memory": {
+    "wordpress_learning_log": true,
+    "supabase_measurement_history": true,
+    "notion_operational_evidence": true
+  },
+  "learning": {
+    "enabled": true,
+    "promotion_rule": "No single observation changes canonical policy; promote only after repeated validated evidence."
+  },
+  "tests": [
+    "Core Guard health",
+    "PREPROD readiness",
+    "PREPROD smoke",
+    "SEO E2E canary with injected missing_image_alt",
+    "apply verify rollback evidence",
+    "full published inventory verification batch",
+    "Google readiness batch"
+  ],
+  "evaluation": {
+    "current": "CANARY_PASS_MEASUREMENT_GREEN",
+    "autonomous_verified_gate": "4 consecutive weekly cycles"
+  },
+  "observability": {
+    "wordpress": "Core Guard tables/logs/jobs",
+    "measurement": "seo_cerebro_runs_preprod",
+    "changes": "seo_cerebro_changes_preprod",
+    "notion": "SEO contract evidence",
+    "make": "scenario execution history"
+  },
+  "retry_timeout": {
+    "measurement": "weekly cron + manual replay",
+    "wordpress_jobs": "Core Guard queue/cron",
+    "no_infinite_retry": true
+  },
+  "cost_budget": {
+    "additional_monthly_target_eur": 0,
+    "paid_ai_required": false,
+    "gsc_wizard_required": false
+  },
+  "backup": {
+    "wordpress": "Cowboy MCP/Core Guard checkpoint/snapshot",
+    "config_and_contracts": "GitHub",
+    "measurement": "Supabase PREPROD"
+  },
+  "rollback": {
+    "content": "restore Core Guard snapshot / Cowboy change journal",
+    "code": "version revert",
+    "measurement_runner": "redeploy prior Edge Function version"
+  },
+  "rebuild": {
+    "source": "FACT-001 registry + this binding + WordPress plugin package + Supabase migration history + Make scenario IDs",
+    "tested": "PARTIAL_COMPONENT_LEVEL"
+  },
+  "dependencies": ["WEB-001", "LAB-SEO", "OBSERV-001", "AUD-001", "FINOPS-001"],
+  "autonomy_level": "HIGH_WITH_GUARDRAILS",
+  "zero_cost_execution_plan": [
+    "WordPress/Core Guard already owned",
+    "Supabase existing project/free-existing capacity",
+    "Make existing OAuth connections as fallback",
+    "GSC and GA4 official APIs",
+    "deterministic rules before AI"
+  ],
+  "human_exception_codes": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "evidence_ref": "cerebro/evidence/seo-001-live-audit-20260920.json",
+  "autonomous_prod": false
+}
