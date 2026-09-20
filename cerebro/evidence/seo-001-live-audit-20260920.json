@@ -32,7 +32,7 @@
       "make_google_bridge_scenario_id": 9694039,
       "make_google_bridge_active": true,
       "supabase_runner": "fenix-seo-cerebro-preprod",
-      "supabase_runner_version": 24,
+      "supabase_runner_version": 25,
       "gsc": "GREEN_VIA_EXISTING_OAUTH_FALLBACK",
       "ga4": "GREEN_VIA_EXISTING_OAUTH_FALLBACK",
       "direct_service_account_gsc": "403_INSUFFICIENT_PROPERTY_PERMISSION_NON_BLOCKING",
@@ -336,6 +336,26 @@
       "preprod_copy_drafts_complete": 5,
       "anti_cannibalization_state": "PASS_PRELIMINARY_UNIQUE_ANGLE",
       "publication_state": "BLOCKED_UNTIL_FULL_QA"
-    }
+    },
+    "wave1_jaen": {
+      "territories": 17,
+      "official_context_verified": 17,
+      "drafts_complete": 17,
+      "semantic_pairs_low": 136,
+      "semantic_pairs_medium": 0,
+      "semantic_pairs_high": 0,
+      "images_ready_to_generate": 51
+    },
+    "sevilla_first_batch": {
+      "territories": 5,
+      "official_context_verified": 5,
+      "drafts_complete": 5,
+      "semantic_pairs_low": 10,
+      "semantic_pairs_medium": 0,
+      "semantic_pairs_high": 0,
+      "images_ready_to_generate": 15
+    },
+    "total_drafts_complete": 22,
+    "total_images_ready_to_generate": 66
   }
 }
