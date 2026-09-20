@@ -31,7 +31,7 @@ Preferred order:
 Current canonical GA4 property: `518454210`.
 Legacy/no-use measurement property: `484640617`.
 
-Scheduled PREPROD runner: `fenix-seo-cerebro-preprod` v14.
+Scheduled PREPROD runner: `fenix-seo-cerebro-preprod` v17.
 PREPROD draft executor: `fenix-seo-executor-preprod` v8.
 Existing GSC Make scenario: `9550706`.
 Existing GA4 Make scenario: `9538231`.
@@ -113,3 +113,9 @@ The first fully verified weekly cycle is `2026-09-14 → 2026-09-20`. Current lo
 `seo_cerebro_experiments_preprod` contains controlled experiments with explicit success metrics and safety constraints. Current active experiments: inheritance SERP CTR (no legal/tax claim mutation, no auto-publish), advisor URL ownership (no redirects/canonical changes), and broker synonym disambiguation (no new landing without evidence).
 
 Current backlog disposition after live validation: 2 items DONE without mutation because metadata and rankings were already strong; 7 items are consolidated under LAB experiments. No item is HUMAN_REQUIRED.
+
+## Autonomous experiment evaluator
+
+The weekly runner now evaluates active experiments deterministically against explicit baselines and minimum observation windows. It records observations in `seo_cerebro_experiment_observations_preprod` and never promotes an experiment before the minimum window is reached.
+
+The runner also performs a zero-cost public technical canary over robots.txt, sitemap index, home, Córdoba advisor, mortgage requirements, inheritance and new-build pillar pages. Weekly cycle evidence is written **only** when the trigger is the real scheduled `cron`; manual/test invocations cannot create or backfill weekly autonomy evidence.
