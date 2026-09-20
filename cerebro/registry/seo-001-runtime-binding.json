@@ -47,7 +47,8 @@
     ],
     "backlog_table": "public.seo_cerebro_backlog_preprod",
     "query_page_pairs_field": "public.seo_cerebro_runs_preprod.query_page_pairs",
-    "intent_map_table": "public.seo_cerebro_intent_map_preprod"
+    "intent_map_table": "public.seo_cerebro_intent_map_preprod",
+    "experiment_table": "public.seo_cerebro_experiments_preprod"
   },
   "rules": [
     "deterministic_before_AI",
@@ -78,7 +79,8 @@
     "rollback",
     "document",
     "learn",
-    "resolve_query_to_preferred_url"
+    "resolve_query_to_preferred_url",
+    "manage_controlled_seo_experiments"
   ],
   "api_contract": {
     "measurement_runner": "Supabase Edge Function fenix-seo-cerebro-preprod",
@@ -132,7 +134,7 @@
     "own WordPress MCP read/write/readback for low-risk Yoast metadata"
   ],
   "evaluation": {
-    "current": "CANARY_PASS_MEASUREMENT_GREEN_INTENT_MAP_GREEN_WEEKLY_CYCLE_1_OF_4",
+    "current": "RUNNER_V14_GREEN_CI_GREEN_BACKLOG_MANAGED_WEEKLY_CYCLE_1_OF_4",
     "autonomous_verified_gate": "4 consecutive weekly cycles"
   },
   "observability": {
