@@ -31,7 +31,7 @@ Preferred order:
 Current canonical GA4 property: `518454210`.
 Legacy/no-use measurement property: `484640617`.
 
-Scheduled PREPROD runner: `fenix-seo-cerebro-preprod` v25.
+Scheduled PREPROD runner: `fenix-seo-cerebro-preprod` v26.
 PREPROD draft executor: `fenix-seo-executor-preprod` v8.
 Existing GSC Make scenario: `9550706`.
 Existing GA4 Make scenario: `9538231`.
@@ -162,3 +162,7 @@ Jaén Wave 1: 17/17 complete drafts, 136/136 pairwise semantic checks LOW, 51 im
 ## Wave-1 WordPress materialization
 
 All 37 Wave-1 territorial landings (17 Jaén, 20 Sevilla) now exist physically in WordPress as verified drafts. Each draft has full content, territorial slug, meta description and focus keyword. None is published. `seo001_wave1_materialization_gate_preprod` requires 37 complete copies, 37 semantic passes, 37 verified WordPress drafts and three unique image prompt specs per territory before the next visual/technical stage.
+
+## City Autopilot learning loop
+
+The territorial pipeline now has an explicit city-level state machine. Jaén is the supervised PILOT and Linares is the VALIDATION_CITY. The pilot must complete copy, official local evidence, semantic QA, verified WordPress draft, three unique generated assets and prepublication QA before it can enter READY_FOR_SUPERVISION. Supervisor findings become versioned learning rules. A PASS releases the next city automatically. An hourly internal cron reevaluates city state; no human action is needed while gates are incomplete.
