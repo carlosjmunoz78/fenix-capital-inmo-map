@@ -8,7 +8,10 @@
   "owner": "CEREBRO",
   "status": "OPERATIVE_GUARDED_PENDING_4_WEEK_VERIFICATION",
   "version": "0.4.1",
-  "environment": ["PREPROD", "PROD_OBSERVER"],
+  "environment": [
+    "PREPROD",
+    "PROD_OBSERVER"
+  ],
   "inputs": [
     "company_id",
     "WordPress inventory and rendered HTML",
@@ -36,7 +39,14 @@
   "data_model": {
     "runs_table": "public.seo_cerebro_runs_preprod",
     "changes_table": "public.seo_cerebro_changes_preprod",
-    "required_scope": ["company_id", "engine_id", "environment", "engine_version"]
+    "required_scope": [
+      "company_id",
+      "engine_id",
+      "environment",
+      "engine_version"
+    ],
+    "backlog_table": "public.seo_cerebro_backlog_preprod",
+    "query_page_pairs_field": "public.seo_cerebro_runs_preprod.query_page_pairs"
   },
   "rules": [
     "deterministic_before_AI",
@@ -59,6 +69,8 @@
     "measure",
     "audit",
     "prioritize",
+    "persist_prioritized_backlog",
+    "detect_query_page_overlap",
     "canary",
     "fix_allowlisted_low_risk",
     "verify",
@@ -70,20 +82,35 @@
     "measurement_runner": "Supabase Edge Function fenix-seo-cerebro-preprod",
     "wordpress_engine": "fenix-seo-cerebro WordPress Abilities",
     "guard": "Fenix Core Guard",
-    "google_fallback": "Make Google OAuth bridge"
+    "google_fallback": "Make Google OAuth bridge",
+    "measurement_runner_version": 11,
+    "preprod_executor": "fenix-seo-executor-preprod",
+    "preprod_executor_version": 8
   },
-  "events_in": ["SEO_SCHEDULED_AUDIT", "CORE_GUARD_ALERT", "MANUAL_SEO_AUDIT"],
-  "events_out": ["SEO_MEASURED", "SEO_FINDING", "SEO_FIXED_VERIFIED", "SEO_ROLLED_BACK", "SEO_HUMAN_REQUIRED"],
+  "events_in": [
+    "SEO_SCHEDULED_AUDIT",
+    "CORE_GUARD_ALERT",
+    "MANUAL_SEO_AUDIT"
+  ],
+  "events_out": [
+    "SEO_MEASURED",
+    "SEO_FINDING",
+    "SEO_FIXED_VERIFIED",
+    "SEO_ROLLED_BACK",
+    "SEO_HUMAN_REQUIRED"
+  ],
   "permissions": {
     "default": "deny",
     "prod_writes": "locked_by_default",
     "preprod_canary": true,
-    "cross_company_access": "deny"
+    "cross_company_access": "deny",
+    "unconfigured_company": "fail_closed_409"
   },
   "memory": {
     "wordpress_learning_log": true,
     "supabase_measurement_history": true,
-    "notion_operational_evidence": true
+    "notion_operational_evidence": true,
+    "query_page_history": true
   },
   "learning": {
     "enabled": true,
@@ -96,10 +123,12 @@
     "SEO E2E canary with injected missing_image_alt",
     "apply verify rollback evidence",
     "full published inventory verification batch",
-    "Google readiness batch"
+    "Google readiness batch",
+    "multi-company configured-company pass / unknown-company fail-closed",
+    "query-to-page pair capture and overlap candidate generation"
   ],
   "evaluation": {
-    "current": "CANARY_PASS_MEASUREMENT_GREEN",
+    "current": "CANARY_PASS_MEASUREMENT_GREEN_BACKLOG_GREEN_MULTICOMPANY_FAIL_CLOSED",
     "autonomous_verified_gate": "4 consecutive weekly cycles"
   },
   "observability": {
@@ -107,7 +136,8 @@
     "measurement": "seo_cerebro_runs_preprod",
     "changes": "seo_cerebro_changes_preprod",
     "notion": "SEO contract evidence",
-    "make": "scenario execution history"
+    "make": "scenario execution history",
+    "backlog": "seo_cerebro_backlog_preprod"
   },
   "retry_timeout": {
     "measurement": "weekly cron + manual replay",
@@ -133,7 +163,13 @@
     "source": "FACT-001 registry + this binding + WordPress plugin package + Supabase migration history + Make scenario IDs",
     "tested": "PARTIAL_COMPONENT_LEVEL"
   },
-  "dependencies": ["WEB-001", "LAB-SEO", "OBSERV-001", "AUD-001", "FINOPS-001"],
+  "dependencies": [
+    "WEB-001",
+    "LAB-SEO",
+    "OBSERV-001",
+    "AUD-001",
+    "FINOPS-001"
+  ],
   "autonomy_level": "HIGH_WITH_GUARDRAILS",
   "zero_cost_execution_plan": [
     "WordPress/Core Guard already owned",
@@ -153,5 +189,10 @@
     "CUSTOMER_HUMAN_REQUEST"
   ],
   "evidence_ref": "cerebro/evidence/seo-001-live-audit-20260920.json",
-  "autonomous_prod": false
+  "autonomous_prod": false,
+  "known_limitations": [
+    "Direct GSC service-account property permission is not available; existing Make OAuth fallback is the operational zero-new-cost path.",
+    "Fallback GA4 activeUsers is marked non-canonical; sessions remains usable.",
+    "Legacy Supabase canary is not canonical because its old WordPress application credential is stale; canonical STAGING WordPress canary is green."
+  ]
 }
