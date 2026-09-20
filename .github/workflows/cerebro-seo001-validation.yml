@@ -1,0 +1,35 @@
+name: CEREBRO SEO-001 Validation
+
+on:
+  push:
+    branches:
+      - cerebro/seo-001-live-binding-20260920
+  pull_request:
+    paths:
+      - 'cerebro/**'
+      - '.github/workflows/cerebro-seo001-validation.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate-seo001:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate canonical registry
+        working-directory: cerebro
+        run: npm run validate
+      - name: Run CEREBRO contract tests
+        working-directory: cerebro
+        run: npm test
+      - name: Generate deterministic engine skeletons
+        working-directory: cerebro
+        run: npm run generate -- --out /tmp/cerebro-generated
+      - name: Assert canonical engine count
+        run: node -e "const x=require('/tmp/cerebro-generated/skeleton-index.json'); if(x.engine_count!==177) process.exit(1);"
+      - name: Ensure generator did not mutate repository
+        run: git diff --exit-code

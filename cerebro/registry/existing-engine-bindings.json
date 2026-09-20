@@ -42,9 +42,12 @@
     },
     {
       "engine_id": "SEO-001",
-      "binding_state": "CONTRACT_ONLY_REQUIRES_LIVE_AUDIT",
-      "evidence_refs": [],
-      "notes": "No live SEO implementation is asserted from this repository."
+      "binding_state": "DISCOVERED_READ_ONLY",
+      "evidence_refs": [
+        "cerebro/registry/seo-001-runtime-binding.json",
+        "cerebro/evidence/seo-001-live-audit-20260920.json"
+      ],
+      "notes": "Live SEO-001 runtime is independently verified across WordPress PROD/STAGING, Core Guard, Supabase PREPROD and existing Google OAuth measurement. This registry binding remains fail-closed: it records evidence only and does not enable autonomous PROD writes. AUTONOMOUS_VERIFIED remains pending the canonical four-consecutive-week evidence gate."
     },
     {
       "engine_id": "WEB-001",
