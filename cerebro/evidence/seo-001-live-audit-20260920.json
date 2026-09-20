@@ -32,7 +32,7 @@
       "make_google_bridge_scenario_id": 9694039,
       "make_google_bridge_active": true,
       "supabase_runner": "fenix-seo-cerebro-preprod",
-      "supabase_runner_version": 19,
+      "supabase_runner_version": 23,
       "gsc": "GREEN_VIA_EXISTING_OAUTH_FALLBACK",
       "ga4": "GREEN_VIA_EXISTING_OAUTH_FALLBACK",
       "direct_service_account_gsc": "403_INSUFFICIENT_PROPERTY_PERMISSION_NON_BLOCKING",
@@ -42,7 +42,7 @@
       "supabase_executor_version": 8,
       "query_page_pairs": true,
       "prioritized_backlog": true,
-      "supabase_runner_sha256": "0c5dcaeb7d2cf0bf07a239b052e35985829c630341b9956361aaf7c7110f101d",
+      "supabase_runner_sha256": "027361183e4bdd0f647c84580ec4184610d013c621635c71591feabcfb88aea6",
       "make_bridge_secret_storage": "SUPABASE_VAULT_SERVICE_ROLE_ONLY_RPC",
       "hardcoded_make_webhook": false,
       "intent_map": true,
@@ -230,7 +230,9 @@
       "mortgage_requirements",
       "inheritance",
       "new_build"
-    ]
+    ],
+    "current_state": "OPERATIONAL_GATED",
+    "remaining_gate": "3 future real weekly cycles"
   },
   "crm_funnel_baseline": {
     "scope": "aggregate_read_only_prod",
@@ -274,6 +276,27 @@
     "workflow": "CEREBRO SEO-001 Validation",
     "run_number": 9,
     "conclusion": "success",
-    "head_sha": "6a510fbafe4efcea44a11747b3ed91daa5ec582e"
+    "head_sha": "6a510fbafe4efcea44a11747b3ed91daa5ec582e",
+    "latest_runtime_head_expected": "v23 branch head after documentation updates"
+  },
+  "promotion_layer": {
+    "prepare_function": "seo001_prepare_promotions_preprod",
+    "rollback_function": "seo001_rollback_change_preprod",
+    "tribunal_table": "seo_cerebro_tribunal_preprod",
+    "tribunal_function": "seo001_run_tribunal_preprod",
+    "unsafe_auto_promotion": false
+  },
+  "doctor": {
+    "function": "seo001_run_doctor_preprod",
+    "checks": 7,
+    "latest_pass": 7,
+    "latest_warn": 0,
+    "latest_fail": 0
+  },
+  "backup_rebuild": {
+    "snapshot_function": "seo001_state_snapshot_preprod",
+    "backup_function": "seo001_backup_state_preprod",
+    "baseline_backup": "baseline:v21:2026-09-20",
+    "routine_backup_policy": "cron_only"
   }
 }
