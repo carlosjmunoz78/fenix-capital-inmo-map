@@ -32,7 +32,7 @@
       "make_google_bridge_scenario_id": 9694039,
       "make_google_bridge_active": true,
       "supabase_runner": "fenix-seo-cerebro-preprod",
-      "supabase_runner_version": 14,
+      "supabase_runner_version": 17,
       "gsc": "GREEN_VIA_EXISTING_OAUTH_FALLBACK",
       "ga4": "GREEN_VIA_EXISTING_OAUTH_FALLBACK",
       "direct_service_account_gsc": "403_INSUFFICIENT_PROPERTY_PERMISSION_NON_BLOCKING",
@@ -42,13 +42,14 @@
       "supabase_executor_version": 8,
       "query_page_pairs": true,
       "prioritized_backlog": true,
-      "supabase_runner_sha256": "0df54d1114e9939d1368426c9fc4a774650e9af6dd8efb5fdee5e0d9ba20ab46",
+      "supabase_runner_sha256": "90faa281ec14c0c10b5ea5cb6af49f28fe25530633fc4a5e129f2758965af3b3",
       "make_bridge_secret_storage": "SUPABASE_VAULT_SERVICE_ROLE_ONLY_RPC",
       "hardcoded_make_webhook": false,
       "intent_map": true,
       "intent_map_table": "seo_cerebro_intent_map_preprod",
       "experiment_registry": true,
-      "experiment_table": "seo_cerebro_experiments_preprod"
+      "experiment_table": "seo_cerebro_experiments_preprod",
+      "experiment_observations_table": "seo_cerebro_experiment_observations_preprod"
     }
   },
   "latest_measurement": {
@@ -200,7 +201,17 @@
     "current_claim": "NOT_YET_AUTONOMOUS_VERIFIED_BY_TIME_WINDOW_AND_GOOGLE_READINESS_GATE",
     "reason": "The canonical SEO contract requires four consecutive weekly cycles without routine human correction before AUTONOMOUS_VERIFIED can be claimed.",
     "current_verified_weekly_cycles": 1,
-    "last_verified_cycle_end": "2026-09-20"
+    "last_verified_cycle_end": "2026-09-20",
+    "weekly_cycle_write_policy": "cron_only_no_manual_backfill",
+    "technical_canary": [
+      "robots.txt",
+      "sitemap_index.xml",
+      "home",
+      "advisor_cordoba",
+      "mortgage_requirements",
+      "inheritance",
+      "new_build"
+    ]
   },
   "crm_funnel_baseline": {
     "scope": "aggregate_read_only_prod",
