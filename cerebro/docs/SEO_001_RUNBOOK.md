@@ -31,7 +31,7 @@ Preferred order:
 Current canonical GA4 property: `518454210`.
 Legacy/no-use measurement property: `484640617`.
 
-Scheduled PREPROD runner: `fenix-seo-cerebro-preprod` v23.
+Scheduled PREPROD runner: `fenix-seo-cerebro-preprod` v24.
 PREPROD draft executor: `fenix-seo-executor-preprod` v8.
 Existing GSC Make scenario: `9550706`.
 Existing GA4 Make scenario: `9538231`.
@@ -140,3 +140,13 @@ SEO-001 separates measurement, experiment evaluation, promotion preparation, tri
 - seo001_run_doctor_preprod checks multi-company scope, cycle integrity, measurement freshness, backup presence, tribunal state and unsafe autonomous promotion.
 - seo001_state_snapshot_preprod and seo001_backup_state_preprod provide rebuildable state snapshots. Routine backups are cron-only.
 - Manual v23 validation returned HTTP 200, doctor 7/7 PASS, tribunal 0 FAIL, no manual cycle write and no manual routine-backup write. Autonomy remains correctly gated at 1/4 real weekly cycles.
+
+## Territorial expansion · Jaén + Sevilla
+
+CEREBRO now tracks the complete municipal scope for both provinces: 97 Jaén municipalities and 106 Sevilla municipalities. Each territory has B2C and B2B keyword targets, a planned URL, structural family, differentiation seed and eight prerequisite/job classes. Publication remains fail-closed until keyword research, local-context research, semantic anti-cannibalization and QA are complete.
+
+Wave 1 contains 17 Jaén and 20 Sevilla territories. All 37 have been checked through the own WordPress MCP `page-find`; no exact municipality-title/search matches were returned, but this is treated only as preliminary evidence, not proof of semantic absence. 37 B2C landing specs and 111 unique image prompt specs are registered. Duplicate prompt hashes are prohibited at database level.
+
+B2B strategy reuses the existing `/inmobiliarias/` cluster, calculator, Pre-OK and training assets. Jaén and Sevilla receive province-hub proposals rather than 203 thin B2B municipality pages. Municipality landings may contain a contextual agency section linking to the appropriate province hub only after anti-cannibalization passes.
+
+Current expansion gate is FAIL_CLOSED for publication by design. Doctor includes two additional territorial invariants and is 9/9 PASS.
