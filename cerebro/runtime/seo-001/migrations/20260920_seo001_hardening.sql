@@ -39,3 +39,18 @@ alter table public.seo_cerebro_backlog_preprod enable row level security;
 
 -- 4. Longitudinal autonomy evidence ledger + health view
 -- See live migration `seo001_observability_cycle_ledger_v1`; keep additive/fail-closed semantics during rebuild.
+
+-- 5. Make fallback webhook secret hardening
+-- Runtime uses Supabase Vault through a SECURITY DEFINER RPC restricted to service_role.
+-- The secret value itself is intentionally not present in this repository.
+create or replace function public.preprod_get_seo_make_bridge_config()
+returns jsonb language sql security definer
+set search_path = public, vault, pg_temp
+as $$
+  select jsonb_build_object(
+    'make_bridge_url',
+    (select decrypted_secret from vault.decrypted_secrets where name='SEO_MAKE_BRIDGE_URL' limit 1)
+  );
+$$;
+revoke all on function public.preprod_get_seo_make_bridge_config() from public, anon, authenticated;
+grant execute on function public.preprod_get_seo_make_bridge_config() to service_role;
