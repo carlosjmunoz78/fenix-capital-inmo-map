@@ -158,3 +158,7 @@ Current expansion gate is FAIL_CLOSED for publication by design. Doctor includes
 ## Wave-1 completion
 
 Jaén Wave 1: 17/17 complete drafts, 136/136 pairwise semantic checks LOW, 51 images ready to generate. Sevilla Wave 1: 20/20 complete drafts, 190/190 pairwise semantic checks LOW, 60 images ready to generate. Combined: 37 complete local drafts, 326 LOW semantic pairs, zero MEDIUM/HIGH collisions, 111 unique visual asset specs. Publication remains fail-closed until generated assets and WordPress technical QA are green.
+
+## Wave-1 WordPress materialization
+
+All 37 Wave-1 territorial landings (17 Jaén, 20 Sevilla) now exist physically in WordPress as verified drafts. Each draft has full content, territorial slug, meta description and focus keyword. None is published. `seo001_wave1_materialization_gate_preprod` requires 37 complete copies, 37 semantic passes, 37 verified WordPress drafts and three unique image prompt specs per territory before the next visual/technical stage.
