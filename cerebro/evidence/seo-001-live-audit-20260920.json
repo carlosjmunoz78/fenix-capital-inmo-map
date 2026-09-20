@@ -32,7 +32,7 @@
       "make_google_bridge_scenario_id": 9694039,
       "make_google_bridge_active": true,
       "supabase_runner": "fenix-seo-cerebro-preprod",
-      "supabase_runner_version": 17,
+      "supabase_runner_version": 18,
       "gsc": "GREEN_VIA_EXISTING_OAUTH_FALLBACK",
       "ga4": "GREEN_VIA_EXISTING_OAUTH_FALLBACK",
       "direct_service_account_gsc": "403_INSUFFICIENT_PROPERTY_PERMISSION_NON_BLOCKING",
@@ -42,14 +42,26 @@
       "supabase_executor_version": 8,
       "query_page_pairs": true,
       "prioritized_backlog": true,
-      "supabase_runner_sha256": "90faa281ec14c0c10b5ea5cb6af49f28fe25530633fc4a5e129f2758965af3b3",
+      "supabase_runner_sha256": "9c84f71482f5601315b08e7756d69e812f9a3c38816a84fb6010394bdf82e957",
       "make_bridge_secret_storage": "SUPABASE_VAULT_SERVICE_ROLE_ONLY_RPC",
       "hardcoded_make_webhook": false,
       "intent_map": true,
       "intent_map_table": "seo_cerebro_intent_map_preprod",
       "experiment_registry": true,
       "experiment_table": "seo_cerebro_experiments_preprod",
-      "experiment_observations_table": "seo_cerebro_experiment_observations_preprod"
+      "experiment_observations_table": "seo_cerebro_experiment_observations_preprod",
+      "cron": {
+        "job_id": 2,
+        "schedule": "0 6 * * 1",
+        "active": true,
+        "timeout_milliseconds": 30000
+      },
+      "v18_manual_validation": {
+        "http_status": 200,
+        "timed_out": false,
+        "technical_canary_ok": true,
+        "weekly_cycle_written": false
+      }
     }
   },
   "latest_measurement": {
