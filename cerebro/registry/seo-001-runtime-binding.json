@@ -46,7 +46,8 @@
       "engine_version"
     ],
     "backlog_table": "public.seo_cerebro_backlog_preprod",
-    "query_page_pairs_field": "public.seo_cerebro_runs_preprod.query_page_pairs"
+    "query_page_pairs_field": "public.seo_cerebro_runs_preprod.query_page_pairs",
+    "intent_map_table": "public.seo_cerebro_intent_map_preprod"
   },
   "rules": [
     "deterministic_before_AI",
@@ -76,14 +77,15 @@
     "verify",
     "rollback",
     "document",
-    "learn"
+    "learn",
+    "resolve_query_to_preferred_url"
   ],
   "api_contract": {
     "measurement_runner": "Supabase Edge Function fenix-seo-cerebro-preprod",
     "wordpress_engine": "fenix-seo-cerebro WordPress Abilities",
     "guard": "Fenix Core Guard",
     "google_fallback": "Make Google OAuth bridge",
-    "measurement_runner_version": 12,
+    "measurement_runner_version": 13,
     "preprod_executor": "fenix-seo-executor-preprod",
     "preprod_executor_version": 8
   },
@@ -126,10 +128,11 @@
     "full published inventory verification batch",
     "Google readiness batch",
     "multi-company configured-company pass / unknown-company fail-closed",
-    "query-to-page pair capture and overlap candidate generation"
+    "query-to-page pair capture and overlap candidate generation",
+    "own WordPress MCP read/write/readback for low-risk Yoast metadata"
   ],
   "evaluation": {
-    "current": "CANARY_PASS_MEASUREMENT_GREEN_BACKLOG_GREEN_MULTICOMPANY_FAIL_CLOSED",
+    "current": "CANARY_PASS_MEASUREMENT_GREEN_INTENT_MAP_GREEN_WEEKLY_CYCLE_1_OF_4",
     "autonomous_verified_gate": "4 consecutive weekly cycles"
   },
   "observability": {
