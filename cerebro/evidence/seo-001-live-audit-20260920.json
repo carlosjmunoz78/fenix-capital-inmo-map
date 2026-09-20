@@ -32,12 +32,16 @@
       "make_google_bridge_scenario_id": 9694039,
       "make_google_bridge_active": true,
       "supabase_runner": "fenix-seo-cerebro-preprod",
-      "supabase_runner_version": 8,
+      "supabase_runner_version": 11,
       "gsc": "GREEN_VIA_EXISTING_OAUTH_FALLBACK",
       "ga4": "GREEN_VIA_EXISTING_OAUTH_FALLBACK",
       "direct_service_account_gsc": "403_INSUFFICIENT_PROPERTY_PERMISSION_NON_BLOCKING",
       "ga4_property_canonical": "518454210",
-      "ga4_property_legacy_no_use": "484640617"
+      "ga4_property_legacy_no_use": "484640617",
+      "supabase_executor": "fenix-seo-executor-preprod",
+      "supabase_executor_version": 8,
+      "query_page_pairs": true,
+      "prioritized_backlog": true
     }
   },
   "latest_measurement": {
@@ -52,17 +56,56 @@
     "previous_ctr": 0.002888781896966779,
     "previous_avg_position": 32.58016369764083,
     "ga4_sessions": 82,
-    "ga4_active_users": "NOT_CANONICAL_IN_FALLBACK_DO_NOT_USE_FOR_DECISIONS"
+    "ga4_active_users": "NOT_CANONICAL_IN_FALLBACK_DO_NOT_USE_FOR_DECISIONS",
+    "ga4_active_users_valid": false,
+    "query_page_overlap_candidates": [
+      {
+        "query": "asesor hipotecario en córdoba",
+        "total_impressions": 120
+      },
+      {
+        "query": "broker hipotecario en córdoba",
+        "total_impressions": 94
+      }
+    ],
+    "backlog_items": 9
   },
   "multicompany_contract": {
-    "tables": ["seo_cerebro_runs_preprod", "seo_cerebro_changes_preprod"],
-    "scope_fields": ["company_id", "engine_id", "environment", "engine_version"],
-    "scope_unique_keys": [
-      ["company_id", "engine_id", "environment", "run_key"],
-      ["company_id", "engine_id", "environment", "change_key"]
+    "tables": [
+      "seo_cerebro_runs_preprod",
+      "seo_cerebro_changes_preprod",
+      "seo_cerebro_backlog_preprod"
     ],
-    "migration": "seo001_multicompany_scope_v1",
-    "validated": true
+    "scope_fields": [
+      "company_id",
+      "engine_id",
+      "environment",
+      "engine_version"
+    ],
+    "scope_unique_keys": [
+      [
+        "company_id",
+        "engine_id",
+        "environment",
+        "run_key"
+      ],
+      [
+        "company_id",
+        "engine_id",
+        "environment",
+        "change_key"
+      ]
+    ],
+    "validated": true,
+    "migrations": [
+      "seo001_multicompany_scope_v1",
+      "seo001_query_page_quality_v1",
+      "seo001_prioritized_backlog_v1"
+    ],
+    "unknown_company_fail_closed": {
+      "status_code": 409,
+      "error": "company_not_configured"
+    }
   },
   "rollback_and_backup": {
     "wordpress_checkpoint_id": 9,
@@ -76,20 +119,70 @@
     "published_inventory_count": 158,
     "core_guard_verify_batch_id": "bed2a09b-f52c-43ec-8f48-354044003106",
     "google_readiness_batch_id": "1be92c22-7591-4c60-8012-cc1c35c08547",
-    "verify_batch_last_observed": {"processed": 90, "success": 90, "issues": 0, "failed": 0},
-    "home_lighthouse_mobile": {"performance": 92, "accessibility": 97, "best_practices": 96, "seo": 100},
-    "cordoba_lighthouse_mobile": {"performance": 95, "accessibility": 97, "best_practices": 100, "seo": 100}
+    "verify_batch_last_observed": {
+      "processed": 110,
+      "success": 109,
+      "issues": 1,
+      "failed": 0
+    },
+    "home_lighthouse_mobile": {
+      "performance": 92,
+      "accessibility": 97,
+      "best_practices": 96,
+      "seo": 100
+    },
+    "cordoba_lighthouse_mobile": {
+      "performance": 95,
+      "accessibility": 97,
+      "best_practices": 100,
+      "seo": 100
+    },
+    "issue_classification": "PENDING_EXACT_ITEM_IDENTIFICATION_BATCH_STILL_RUNNING"
   },
   "known_non_blocking_items": [
     "GSC direct service-account route lacks property permission; existing Make OAuth fallback is healthy and zero-new-cost.",
     "GA4 activeUsers from fallback is intentionally not treated as canonical because page-level aggregation can overcount.",
     "Imagify API key is invalid/quota zero; auto_optimize disabled after checkpoint to stop repeated failures.",
     "Elementor Pro is installed but explicitly not used as a functional dependency.",
-    "The rendered empty-alt image on sampled pages is the Meta noscript 1x1 tracking pixel, not editorial media."
+    "The rendered empty-alt image on sampled pages is the Meta noscript 1x1 tracking pixel, not editorial media.",
+    "Legacy Supabase canary function has stale WordPress application credentials and is not the canonical canary path; canonical STAGING WordPress canary remains green."
   ],
   "autonomy_definition": {
     "required_consecutive_weekly_cycles": 4,
     "current_claim": "NOT_YET_AUTONOMOUS_VERIFIED_BY_TIME_WINDOW",
     "reason": "The canonical SEO contract requires four consecutive weekly cycles without routine human correction before AUTONOMOUS_VERIFIED can be claimed."
+  },
+  "crm_funnel_baseline": {
+    "scope": "aggregate_read_only_prod",
+    "real_customers_by_channel": [
+      {
+        "canal_entrada": null,
+        "canal_marketing": null,
+        "count": 63
+      },
+      {
+        "canal_entrada": "Inmobiliaria",
+        "canal_marketing": "Inmobiliaria",
+        "count": 20
+      },
+      {
+        "canal_entrada": "App Fénix",
+        "canal_marketing": "Nuevo expediente",
+        "count": 2
+      },
+      {
+        "canal_entrada": "Web",
+        "canal_marketing": "qa",
+        "count": 1
+      },
+      {
+        "canal_entrada": "Web",
+        "canal_marketing": "chatgpt.com",
+        "count": 1
+      }
+    ],
+    "real_expedientes": 46,
+    "firmas": 0,
+    "caveat": "Current CRM data does not yet support a robust SEO-to-signature attribution claim; do not infer conversions that are not recorded."
   }
 }
