@@ -31,7 +31,7 @@ Preferred order:
 Current canonical GA4 property: `518454210`.
 Legacy/no-use measurement property: `484640617`.
 
-Scheduled PREPROD runner: `fenix-seo-cerebro-preprod` v19.
+Scheduled PREPROD runner: `fenix-seo-cerebro-preprod` v23.
 PREPROD draft executor: `fenix-seo-executor-preprod` v8.
 Existing GSC Make scenario: `9550706`.
 Existing GA4 Make scenario: `9538231`.
@@ -127,3 +127,16 @@ The technical canary fetches critical URLs in parallel to keep the weekly run co
 ## Run freshness
 
 `seo_cerebro_runs_preprod.measured_at` records the latest successful measurement time independently of the idempotent `run_key`. The health view orders by `measured_at`, so repeated validations inside the same 28-day GSC window no longer look stale. Manual v19 validation returned HTTP 200, technical canary GREEN, and did not create weekly autonomy evidence.
+
+## Promotion, rollback, tribunal and doctor
+
+SEO-001 separates measurement, experiment evaluation, promotion preparation, tribunal, doctor and execution.
+
+- seo001_prepare_promotions_preprod only materializes a change after PASS/READY.
+- LOW-risk URL-ownership work may become an auto candidate. Redirects, canonicals, slug changes, mass edits, legal/fiscal semantic edits and architecture changes remain blocked.
+- Every candidate stores before/after state, risk class, policy and rollback state.
+- seo001_rollback_change_preprod marks eligible changes rollback_required and preserves the exact rollback state.
+- seo001_run_tribunal_preprod independently judges experiments; legal/fiscal and architecture-sensitive experiments are proposal-only.
+- seo001_run_doctor_preprod checks multi-company scope, cycle integrity, measurement freshness, backup presence, tribunal state and unsafe autonomous promotion.
+- seo001_state_snapshot_preprod and seo001_backup_state_preprod provide rebuildable state snapshots. Routine backups are cron-only.
+- Manual v23 validation returned HTTP 200, doctor 7/7 PASS, tribunal 0 FAIL, no manual cycle write and no manual routine-backup write. Autonomy remains correctly gated at 1/4 real weekly cycles.
