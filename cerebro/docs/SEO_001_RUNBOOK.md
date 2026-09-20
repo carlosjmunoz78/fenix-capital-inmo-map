@@ -154,3 +154,7 @@ Current expansion gate is FAIL_CLOSED for publication by design. Doctor includes
 ## Territorial semantic QA
 
 `seo001_run_semantic_qa_preprod` performs deterministic pairwise comparison of drafted local landings. It excludes generic brand/service tokens and evaluates H1/meta token overlap plus structural-family and differentiation-angle collisions. Any HIGH result blocks the page; MEDIUM requires rewrite. Current Jaén Wave 1 is 136/136 LOW pairs. Current Sevilla first batch is 10/10 LOW pairs.
+
+## Wave-1 completion
+
+Jaén Wave 1: 17/17 complete drafts, 136/136 pairwise semantic checks LOW, 51 images ready to generate. Sevilla Wave 1: 20/20 complete drafts, 190/190 pairwise semantic checks LOW, 60 images ready to generate. Combined: 37 complete local drafts, 326 LOW semantic pairs, zero MEDIUM/HIGH collisions, 111 unique visual asset specs. Publication remains fail-closed until generated assets and WordPress technical QA are green.
