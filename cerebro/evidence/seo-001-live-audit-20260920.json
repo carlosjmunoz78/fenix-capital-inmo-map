@@ -32,7 +32,7 @@
       "make_google_bridge_scenario_id": 9694039,
       "make_google_bridge_active": true,
       "supabase_runner": "fenix-seo-cerebro-preprod",
-      "supabase_runner_version": 11,
+      "supabase_runner_version": 12,
       "gsc": "GREEN_VIA_EXISTING_OAUTH_FALLBACK",
       "ga4": "GREEN_VIA_EXISTING_OAUTH_FALLBACK",
       "direct_service_account_gsc": "403_INSUFFICIENT_PROPERTY_PERMISSION_NON_BLOCKING",
@@ -41,7 +41,10 @@
       "supabase_executor": "fenix-seo-executor-preprod",
       "supabase_executor_version": 8,
       "query_page_pairs": true,
-      "prioritized_backlog": true
+      "prioritized_backlog": true,
+      "supabase_runner_sha256": "bcd072ab406da775e77b5b7d5b24cfc3161a7226662c602dccd80c94b2ef0624",
+      "make_bridge_secret_storage": "SUPABASE_VAULT_SERVICE_ROLE_ONLY_RPC",
+      "hardcoded_make_webhook": false
     }
   },
   "latest_measurement": {
