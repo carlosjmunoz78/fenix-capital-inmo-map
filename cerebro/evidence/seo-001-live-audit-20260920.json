@@ -32,7 +32,7 @@
       "make_google_bridge_scenario_id": 9694039,
       "make_google_bridge_active": true,
       "supabase_runner": "fenix-seo-cerebro-preprod",
-      "supabase_runner_version": 12,
+      "supabase_runner_version": 13,
       "gsc": "GREEN_VIA_EXISTING_OAUTH_FALLBACK",
       "ga4": "GREEN_VIA_EXISTING_OAUTH_FALLBACK",
       "direct_service_account_gsc": "403_INSUFFICIENT_PROPERTY_PERMISSION_NON_BLOCKING",
@@ -42,9 +42,11 @@
       "supabase_executor_version": 8,
       "query_page_pairs": true,
       "prioritized_backlog": true,
-      "supabase_runner_sha256": "bcd072ab406da775e77b5b7d5b24cfc3161a7226662c602dccd80c94b2ef0624",
+      "supabase_runner_sha256": "df511847523778729677c794ebf104ffa43f307c3d7a8cd0626ff6ae0ed65296",
       "make_bridge_secret_storage": "SUPABASE_VAULT_SERVICE_ROLE_ONLY_RPC",
-      "hardcoded_make_webhook": false
+      "hardcoded_make_webhook": false,
+      "intent_map": true,
+      "intent_map_table": "seo_cerebro_intent_map_preprod"
     }
   },
   "latest_measurement": {
@@ -171,7 +173,16 @@
       "failed": 0
     },
     "technical_audit_ok": true,
-    "google_readiness_state": "queued"
+    "google_readiness_state": "queued",
+    "own_wordpress_mcp_validation": {
+      "privacy_noindex_preserved": true,
+      "obra_nueva_pillar_preserved": true,
+      "focus_keyword_repairs_verified": [
+        1023,
+        1098
+      ],
+      "wpvibe_dependency": false
+    }
   },
   "known_non_blocking_items": [
     "GSC direct service-account route lacks property permission; existing Make OAuth fallback is healthy and zero-new-cost.",
@@ -185,7 +196,9 @@
   "autonomy_definition": {
     "required_consecutive_weekly_cycles": 4,
     "current_claim": "NOT_YET_AUTONOMOUS_VERIFIED_BY_TIME_WINDOW_AND_GOOGLE_READINESS_GATE",
-    "reason": "The canonical SEO contract requires four consecutive weekly cycles without routine human correction before AUTONOMOUS_VERIFIED can be claimed."
+    "reason": "The canonical SEO contract requires four consecutive weekly cycles without routine human correction before AUTONOMOUS_VERIFIED can be claimed.",
+    "current_verified_weekly_cycles": 1,
+    "last_verified_cycle_end": "2026-09-20"
   },
   "crm_funnel_baseline": {
     "scope": "aggregate_read_only_prod",
