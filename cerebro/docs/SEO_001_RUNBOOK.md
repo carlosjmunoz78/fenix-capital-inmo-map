@@ -31,7 +31,7 @@ Preferred order:
 Current canonical GA4 property: `518454210`.
 Legacy/no-use measurement property: `484640617`.
 
-Scheduled PREPROD runner: `fenix-seo-cerebro-preprod` v11.
+Scheduled PREPROD runner: `fenix-seo-cerebro-preprod` v13.
 PREPROD draft executor: `fenix-seo-executor-preprod` v8.
 Existing GSC Make scenario: `9550706`.
 Existing GA4 Make scenario: `9538231`.
@@ -99,3 +99,11 @@ Do not rebuild by replacing the existing WordPress stack.
 
 Only:
 `LEGAL_REQUIRED`, `SIGNATURE_REQUIRED`, `LOW_CONFIDENCE`, `HIGH_RISK`, `POLICY_CONFLICT`, `SECURITY_INCIDENT`, `MONEY_LIMIT`, `CUSTOMER_HUMAN_REQUEST`.
+
+## Intent map
+
+`seo_cerebro_intent_map_preprod` stores scoped query → preferred URL decisions with confidence and decision state. The runner reads it on every cycle and enriches near-page-one and overlap findings. CONFIRMED does not authorize redirects; it only establishes the preferred target for optimization and internal-link planning.
+
+## Weekly autonomy evidence
+
+The first fully verified weekly cycle is `2026-09-14 → 2026-09-20`. Current longitudinal gate: `1/4`. Future weeks must be evidenced independently; they are never backfilled or invented.
