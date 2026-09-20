@@ -31,7 +31,7 @@ Preferred order:
 Current canonical GA4 property: `518454210`.
 Legacy/no-use measurement property: `484640617`.
 
-Scheduled PREPROD runner: `fenix-seo-cerebro-preprod` v18.
+Scheduled PREPROD runner: `fenix-seo-cerebro-preprod` v19.
 PREPROD draft executor: `fenix-seo-executor-preprod` v8.
 Existing GSC Make scenario: `9550706`.
 Existing GA4 Make scenario: `9538231`.
@@ -123,3 +123,7 @@ The runner also performs a zero-cost public technical canary over robots.txt, si
 ## Runtime timing hardening
 
 The technical canary fetches critical URLs in parallel to keep the weekly run comfortably inside the pg_net request window. Cron job 2 remains Monday 06:00 UTC and now calls the runner with `timeout_milliseconds = 30000`, while manual v18 validation completed HTTP 200 without timeout. This changes transport reliability only; it does not relax SEO policy or autonomy gates.
+
+## Run freshness
+
+`seo_cerebro_runs_preprod.measured_at` records the latest successful measurement time independently of the idempotent `run_key`. The health view orders by `measured_at`, so repeated validations inside the same 28-day GSC window no longer look stale. Manual v19 validation returned HTTP 200, technical canary GREEN, and did not create weekly autonomy evidence.
