@@ -140,7 +140,38 @@
       "best_practices": 100,
       "seo": 100
     },
-    "issue_classification": "PENDING_EXACT_ITEM_IDENTIFICATION_BATCH_STILL_RUNNING"
+    "issue_classification": [
+      {
+        "url": "https://fenixcapital.es/declaracion-de-privacidad/",
+        "classification": "INTENTIONAL_LEGAL_NOINDEX_REVIEWED",
+        "blockers": [
+          "canonical_present",
+          "canonical_self",
+          "not_noindex"
+        ],
+        "decision": "NO_AUTOFIX",
+        "rationale": "Legal/privacy surface; noindex is intentional per SEO architecture and should not be auto-indexed."
+      },
+      {
+        "url": "https://fenixcapital.es/category/obra-nueva/",
+        "classification": "INTENTIONAL_CANONICAL_TO_PILLAR_REVIEWED",
+        "blockers": [
+          "canonical_self"
+        ],
+        "canonical": "https://fenixcapital.es/obras-nuevas/",
+        "decision": "NO_AUTOFIX",
+        "rationale": "Category delegates canonical authority to the obra-nueva pillar and should not be self-canonicalized without contrary evidence."
+      }
+    ],
+    "verify_batch_final": {
+      "state": "completed_with_issues",
+      "processed": 158,
+      "success": 156,
+      "issues": 2,
+      "failed": 0
+    },
+    "technical_audit_ok": true,
+    "google_readiness_state": "queued"
   },
   "known_non_blocking_items": [
     "GSC direct service-account route lacks property permission; existing Make OAuth fallback is healthy and zero-new-cost.",
@@ -148,11 +179,12 @@
     "Imagify API key is invalid/quota zero; auto_optimize disabled after checkpoint to stop repeated failures.",
     "Elementor Pro is installed but explicitly not used as a functional dependency.",
     "The rendered empty-alt image on sampled pages is the Meta noscript 1x1 tracking pixel, not editorial media.",
-    "Legacy Supabase canary function has stale WordPress application credentials and is not the canonical canary path; canonical STAGING WordPress canary remains green."
+    "Legacy Supabase canary function has stale WordPress application credentials and is not the canonical canary path; canonical STAGING WordPress canary remains green.",
+    "WPVibe Free daily quota was reached after the 158-URL technical batch completed; no paid upgrade is required. Google-readiness verification resumes after quota reset."
   ],
   "autonomy_definition": {
     "required_consecutive_weekly_cycles": 4,
-    "current_claim": "NOT_YET_AUTONOMOUS_VERIFIED_BY_TIME_WINDOW",
+    "current_claim": "NOT_YET_AUTONOMOUS_VERIFIED_BY_TIME_WINDOW_AND_GOOGLE_READINESS_GATE",
     "reason": "The canonical SEO contract requires four consecutive weekly cycles without routine human correction before AUTONOMOUS_VERIFIED can be claimed."
   },
   "crm_funnel_baseline": {
