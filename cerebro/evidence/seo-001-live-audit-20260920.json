@@ -356,6 +356,30 @@
       "images_ready_to_generate": 15
     },
     "total_drafts_complete": 22,
-    "total_images_ready_to_generate": 66
+    "total_images_ready_to_generate": 66,
+    "wave1_total": {
+      "Jaen": {
+        "territories": 17,
+        "drafts_complete": 17,
+        "semantic_pairs_low": 136,
+        "medium": 0,
+        "high": 0,
+        "images_ready_to_generate": 51
+      },
+      "Sevilla": {
+        "territories": 20,
+        "drafts_complete": 20,
+        "semantic_pairs_low": 190,
+        "medium": 0,
+        "high": 0,
+        "images_ready_to_generate": 60
+      },
+      "total_territories": 37,
+      "total_drafts_complete": 37,
+      "total_semantic_pairs_low": 326,
+      "total_medium": 0,
+      "total_high": 0,
+      "total_images_ready_to_generate": 111
+    }
   }
 }
