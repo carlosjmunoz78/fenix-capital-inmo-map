@@ -32,7 +32,7 @@
       "make_google_bridge_scenario_id": 9694039,
       "make_google_bridge_active": true,
       "supabase_runner": "fenix-seo-cerebro-preprod",
-      "supabase_runner_version": 18,
+      "supabase_runner_version": 19,
       "gsc": "GREEN_VIA_EXISTING_OAUTH_FALLBACK",
       "ga4": "GREEN_VIA_EXISTING_OAUTH_FALLBACK",
       "direct_service_account_gsc": "403_INSUFFICIENT_PROPERTY_PERMISSION_NON_BLOCKING",
@@ -42,7 +42,7 @@
       "supabase_executor_version": 8,
       "query_page_pairs": true,
       "prioritized_backlog": true,
-      "supabase_runner_sha256": "9c84f71482f5601315b08e7756d69e812f9a3c38816a84fb6010394bdf82e957",
+      "supabase_runner_sha256": "0c5dcaeb7d2cf0bf07a239b052e35985829c630341b9956361aaf7c7110f101d",
       "make_bridge_secret_storage": "SUPABASE_VAULT_SERVICE_ROLE_ONLY_RPC",
       "hardcoded_make_webhook": false,
       "intent_map": true,
@@ -57,6 +57,13 @@
         "timeout_milliseconds": 30000
       },
       "v18_manual_validation": {
+        "http_status": 200,
+        "timed_out": false,
+        "technical_canary_ok": true,
+        "weekly_cycle_written": false
+      },
+      "health_freshness_field": "measured_at",
+      "v19_manual_validation": {
         "http_status": 200,
         "timed_out": false,
         "technical_canary_ok": true,
