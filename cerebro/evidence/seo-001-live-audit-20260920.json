@@ -32,7 +32,7 @@
       "make_google_bridge_scenario_id": 9694039,
       "make_google_bridge_active": true,
       "supabase_runner": "fenix-seo-cerebro-preprod",
-      "supabase_runner_version": 23,
+      "supabase_runner_version": 24,
       "gsc": "GREEN_VIA_EXISTING_OAUTH_FALLBACK",
       "ga4": "GREEN_VIA_EXISTING_OAUTH_FALLBACK",
       "direct_service_account_gsc": "403_INSUFFICIENT_PROPERTY_PERMISSION_NON_BLOCKING",
@@ -42,7 +42,7 @@
       "supabase_executor_version": 8,
       "query_page_pairs": true,
       "prioritized_backlog": true,
-      "supabase_runner_sha256": "027361183e4bdd0f647c84580ec4184610d013c621635c71591feabcfb88aea6",
+      "supabase_runner_sha256": "4560c56c12f64f92472a5ac4d745d199709b72637e49f24c3da2f410ddd85457",
       "make_bridge_secret_storage": "SUPABASE_VAULT_SERVICE_ROLE_ONLY_RPC",
       "hardcoded_make_webhook": false,
       "intent_map": true,
@@ -288,8 +288,8 @@
   },
   "doctor": {
     "function": "seo001_run_doctor_preprod",
-    "checks": 7,
-    "latest_pass": 7,
+    "checks": 9,
+    "latest_pass": 9,
     "latest_warn": 0,
     "latest_fail": 0
   },
@@ -298,5 +298,31 @@
     "backup_function": "seo001_backup_state_preprod",
     "baseline_backup": "baseline:v21:2026-09-20",
     "routine_backup_policy": "cron_only"
+  },
+  "territorial_expansion": {
+    "provinces": {
+      "Jaen": 97,
+      "Sevilla": 106,
+      "total": 203
+    },
+    "waves": {
+      "Jaen": {
+        "wave1": 17,
+        "wave2": 14,
+        "wave3": 66
+      },
+      "Sevilla": {
+        "wave1": 20,
+        "wave2": 23,
+        "wave3": 63
+      }
+    },
+    "wave1_pagefind_audited": 37,
+    "landing_specs": 37,
+    "image_prompt_specs": 111,
+    "unique_image_prompt_hashes": 111,
+    "publication_ready": 0,
+    "publication_gate": "FAIL_CLOSED_PENDING_RESEARCH_AND_ANTI_CANNIBALIZATION",
+    "b2b_model": "two province hubs reusing existing inmobiliarias cluster; no municipality B2B doorway farm"
   }
 }
