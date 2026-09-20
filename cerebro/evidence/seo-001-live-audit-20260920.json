@@ -32,7 +32,7 @@
       "make_google_bridge_scenario_id": 9694039,
       "make_google_bridge_active": true,
       "supabase_runner": "fenix-seo-cerebro-preprod",
-      "supabase_runner_version": 13,
+      "supabase_runner_version": 14,
       "gsc": "GREEN_VIA_EXISTING_OAUTH_FALLBACK",
       "ga4": "GREEN_VIA_EXISTING_OAUTH_FALLBACK",
       "direct_service_account_gsc": "403_INSUFFICIENT_PROPERTY_PERMISSION_NON_BLOCKING",
@@ -42,11 +42,13 @@
       "supabase_executor_version": 8,
       "query_page_pairs": true,
       "prioritized_backlog": true,
-      "supabase_runner_sha256": "df511847523778729677c794ebf104ffa43f307c3d7a8cd0626ff6ae0ed65296",
+      "supabase_runner_sha256": "0df54d1114e9939d1368426c9fc4a774650e9af6dd8efb5fdee5e0d9ba20ab46",
       "make_bridge_secret_storage": "SUPABASE_VAULT_SERVICE_ROLE_ONLY_RPC",
       "hardcoded_make_webhook": false,
       "intent_map": true,
-      "intent_map_table": "seo_cerebro_intent_map_preprod"
+      "intent_map_table": "seo_cerebro_intent_map_preprod",
+      "experiment_registry": true,
+      "experiment_table": "seo_cerebro_experiments_preprod"
     }
   },
   "latest_measurement": {
@@ -232,5 +234,16 @@
     "real_expedientes": 46,
     "firmas": 0,
     "caveat": "Current CRM data does not yet support a robust SEO-to-signature attribution claim; do not infer conversions that are not recorded."
+  },
+  "backlog_disposition": {
+    "done_without_mutation": 2,
+    "lab_managed": 7,
+    "human_required": 0
+  },
+  "ci": {
+    "workflow": "CEREBRO SEO-001 Validation",
+    "run_number": 9,
+    "conclusion": "success",
+    "head_sha": "6a510fbafe4efcea44a11747b3ed91daa5ec582e"
   }
 }
