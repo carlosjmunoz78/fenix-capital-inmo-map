@@ -1,0 +1,95 @@
+{
+  "schema_version": "1.0.0",
+  "audit_date": "2026-09-20",
+  "engine_id": "SEO-001",
+  "company_id": "FENIX_CAPITAL",
+  "engine_version": "0.4.1",
+  "evidence_state": "CONFIRMED_OPERATIONAL",
+  "autonomy_state": "OPERATIVE_GUARDED_PENDING_4_WEEK_VERIFICATION",
+  "autonomous_prod": false,
+  "additional_cost_target_eur": 0,
+  "live_surfaces": {
+    "wordpress_prod": {
+      "url": "https://fenixcapital.es",
+      "core_guard_version": "1.0.0-rc9-prod2",
+      "core_guard_health_score": 100,
+      "seo_bridge_version": "0.4.1",
+      "mode": "observer",
+      "operational_writes_allowed": false,
+      "hourly_hook": "fenix_seo_cerebro_hourly"
+    },
+    "wordpress_staging": {
+      "url": "https://staging.fenixcapital.es",
+      "core_guard_health_score": 100,
+      "preprod_readiness": true,
+      "smoke": "PASS",
+      "seo_canary": "fixed_verified",
+      "learning_count_observed": 27
+    },
+    "measurement": {
+      "make_gsc_scenario_id": 9550706,
+      "make_ga4_scenario_id": 9538231,
+      "make_google_bridge_scenario_id": 9694039,
+      "make_google_bridge_active": true,
+      "supabase_runner": "fenix-seo-cerebro-preprod",
+      "supabase_runner_version": 8,
+      "gsc": "GREEN_VIA_EXISTING_OAUTH_FALLBACK",
+      "ga4": "GREEN_VIA_EXISTING_OAUTH_FALLBACK",
+      "direct_service_account_gsc": "403_INSUFFICIENT_PROPERTY_PERMISSION_NON_BLOCKING",
+      "ga4_property_canonical": "518454210",
+      "ga4_property_legacy_no_use": "484640617"
+    }
+  },
+  "latest_measurement": {
+    "window_start": "2026-08-21",
+    "window_end": "2026-09-17",
+    "clicks": 17,
+    "impressions": 4836,
+    "ctr": 0.003515301902398677,
+    "avg_position": 27.011166253101738,
+    "previous_clicks": 12,
+    "previous_impressions": 4154,
+    "previous_ctr": 0.002888781896966779,
+    "previous_avg_position": 32.58016369764083,
+    "ga4_sessions": 82,
+    "ga4_active_users": "NOT_CANONICAL_IN_FALLBACK_DO_NOT_USE_FOR_DECISIONS"
+  },
+  "multicompany_contract": {
+    "tables": ["seo_cerebro_runs_preprod", "seo_cerebro_changes_preprod"],
+    "scope_fields": ["company_id", "engine_id", "environment", "engine_version"],
+    "scope_unique_keys": [
+      ["company_id", "engine_id", "environment", "run_key"],
+      ["company_id", "engine_id", "environment", "change_key"]
+    ],
+    "migration": "seo001_multicompany_scope_v1",
+    "validated": true
+  },
+  "rollback_and_backup": {
+    "wordpress_checkpoint_id": 9,
+    "wordpress_checkpoint_size_bytes": 37132785,
+    "wordpress_checkpoint_tables": 124,
+    "preprod_change_evidence": "3 historical SEO canaries rolled_back_verified",
+    "canary_apply_verified": true,
+    "canary_rollback_verified": true
+  },
+  "technical_audit": {
+    "published_inventory_count": 158,
+    "core_guard_verify_batch_id": "bed2a09b-f52c-43ec-8f48-354044003106",
+    "google_readiness_batch_id": "1be92c22-7591-4c60-8012-cc1c35c08547",
+    "verify_batch_last_observed": {"processed": 90, "success": 90, "issues": 0, "failed": 0},
+    "home_lighthouse_mobile": {"performance": 92, "accessibility": 97, "best_practices": 96, "seo": 100},
+    "cordoba_lighthouse_mobile": {"performance": 95, "accessibility": 97, "best_practices": 100, "seo": 100}
+  },
+  "known_non_blocking_items": [
+    "GSC direct service-account route lacks property permission; existing Make OAuth fallback is healthy and zero-new-cost.",
+    "GA4 activeUsers from fallback is intentionally not treated as canonical because page-level aggregation can overcount.",
+    "Imagify API key is invalid/quota zero; auto_optimize disabled after checkpoint to stop repeated failures.",
+    "Elementor Pro is installed but explicitly not used as a functional dependency.",
+    "The rendered empty-alt image on sampled pages is the Meta noscript 1x1 tracking pixel, not editorial media."
+  ],
+  "autonomy_definition": {
+    "required_consecutive_weekly_cycles": 4,
+    "current_claim": "NOT_YET_AUTONOMOUS_VERIFIED_BY_TIME_WINDOW",
+    "reason": "The canonical SEO contract requires four consecutive weekly cycles without routine human correction before AUTONOMOUS_VERIFIED can be claimed."
+  }
+}
