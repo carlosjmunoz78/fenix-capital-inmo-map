@@ -31,10 +31,13 @@ Preferred order:
 Current canonical GA4 property: `518454210`.
 Legacy/no-use measurement property: `484640617`.
 
-Scheduled PREPROD runner: `fenix-seo-cerebro-preprod`.
+Scheduled PREPROD runner: `fenix-seo-cerebro-preprod` v11.
+PREPROD draft executor: `fenix-seo-executor-preprod` v8.
 Existing GSC Make scenario: `9550706`.
 Existing GA4 Make scenario: `9538231`.
 Existing Google bridge scenario: `9694039`.
+
+The measurement runner persists query→page pairs and an idempotent prioritized backlog in `seo_cerebro_backlog_preprod`. Multi-company routing is fail-closed: configured `FENIX_CAPITAL` runs; unknown companies return 409 until Company Registry supplies their configuration.
 
 ## WordPress repair loop
 
@@ -54,6 +57,7 @@ Required before stronger autonomy claims:
 - Published-inventory technical batch completed with no unresolved blocker.
 - Google readiness batch completed with no unresolved blocker.
 - Four consecutive weekly cycles where routine incidents are detected, handled correctly and documented without human correction.
+- Query→page overlap candidates are proposal-first; never auto-redirect/canonicalize solely because multiple URLs receive impressions.
 
 ## Backup and rollback
 
@@ -89,6 +93,7 @@ Do not rebuild by replacing the existing WordPress stack.
 - Fallback `ga4_active_users` is not canonical and must not drive decisions until a non-overcounting total is exposed.
 - Elementor Pro is installed but is not a functional dependency.
 - Imagify automatic optimization is disabled while its API key/quota are invalid.
+- The legacy Supabase canary endpoint is not canonical because its old WordPress application credential is stale; use the green STAGING WordPress canary/Core Guard path.
 
 ## HUMAN_REQUIRED
 
