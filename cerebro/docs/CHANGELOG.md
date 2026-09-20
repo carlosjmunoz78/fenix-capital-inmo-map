@@ -1,5 +1,15 @@
 # CEREBRO OS · CHANGELOG
 
+## 2026-09-20 · SEO-001 live binding + measurement recovery
+
+- Completed an independent live audit of the existing SEO runtime without replacing WordPress, Core Guard, Notion, Make or Google measurement.
+- Confirmed WordPress PROD/STAGING `fenix-seo-cerebro` v0.4.1, Core Guard safety gates, PREPROD smoke and E2E canary with verified fix/rollback behavior.
+- Recovered the existing zero-new-cost Google OAuth fallback; fresh GSC + GA4 measurement is green again through the already-owned Make connections.
+- Normalized the canonical GA4 property to `518454210`; `484640617` is legacy/no-use for current measurement.
+- Hardened PREPROD SEO measurement storage with canonical scope fields: `company_id`, `engine_id`, `environment`, `engine_version`, plus tenant-safe composite idempotency keys.
+- Added `seo-001-runtime-binding.json`, dated live evidence and contract tests. Binding remains fail-closed for PROD writes.
+- `AUTONOMOUS_VERIFIED` is intentionally not claimed until the existing four-consecutive-week operating gate is proven.
+
 ## 2026-09-09 · Persistent EVT-001 / JOB-001 V0
 
 - PR #168 merged as `26fb9c75b9a7361afccccdc111761ad10aac5fa4` after exact-head review of `16484fdf50760afbd98e1d85824ed352dd3a5585`.
