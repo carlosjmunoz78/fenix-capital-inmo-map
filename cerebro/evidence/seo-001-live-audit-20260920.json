@@ -32,7 +32,7 @@
       "make_google_bridge_scenario_id": 9694039,
       "make_google_bridge_active": true,
       "supabase_runner": "fenix-seo-cerebro-preprod",
-      "supabase_runner_version": 25,
+      "supabase_runner_version": 26,
       "gsc": "GREEN_VIA_EXISTING_OAUTH_FALLBACK",
       "ga4": "GREEN_VIA_EXISTING_OAUTH_FALLBACK",
       "direct_service_account_gsc": "403_INSUFFICIENT_PROPERTY_PERMISSION_NON_BLOCKING",
@@ -391,5 +391,32 @@
       "publication_ready": 0,
       "gate": "PASS"
     }
+  },
+  "city_autopilot": {
+    "pilot": {
+      "province": "Jaén",
+      "municipality": "Jaén",
+      "state": "VISUALS",
+      "supervisor_required": true,
+      "qa": {
+        "pass": 6,
+        "wait": 1,
+        "fail": 0,
+        "waiting_for": "3 generated visual assets"
+      }
+    },
+    "validation_city": {
+      "province": "Jaén",
+      "municipality": "Linares",
+      "state": "QUEUED",
+      "release_condition": "pilot supervisor PASS"
+    },
+    "learning_rules": 7,
+    "hourly_cron": {
+      "job_id": 3,
+      "schedule": "7 * * * *",
+      "active": true
+    },
+    "publication_policy": "supervisor approves pilot once; learned rules apply to later cities; publication remains fail-closed"
   }
 }
