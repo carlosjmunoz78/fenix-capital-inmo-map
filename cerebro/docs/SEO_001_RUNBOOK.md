@@ -31,7 +31,7 @@ Preferred order:
 Current canonical GA4 property: `518454210`.
 Legacy/no-use measurement property: `484640617`.
 
-Scheduled PREPROD runner: `fenix-seo-cerebro-preprod` v24.
+Scheduled PREPROD runner: `fenix-seo-cerebro-preprod` v25.
 PREPROD draft executor: `fenix-seo-executor-preprod` v8.
 Existing GSC Make scenario: `9550706`.
 Existing GA4 Make scenario: `9538231`.
@@ -150,3 +150,7 @@ Wave 1 contains 17 Jaén and 20 Sevilla territories. All 37 have been checked th
 B2B strategy reuses the existing `/inmobiliarias/` cluster, calculator, Pre-OK and training assets. Jaén and Sevilla receive province-hub proposals rather than 203 thin B2B municipality pages. Municipality landings may contain a contextual agency section linking to the appropriate province hub only after anti-cannibalization passes.
 
 Current expansion gate is FAIL_CLOSED for publication by design. Doctor includes two additional territorial invariants and is 9/9 PASS.
+
+## Territorial semantic QA
+
+`seo001_run_semantic_qa_preprod` performs deterministic pairwise comparison of drafted local landings. It excludes generic brand/service tokens and evaluates H1/meta token overlap plus structural-family and differentiation-angle collisions. Any HIGH result blocks the page; MEDIUM requires rewrite. Current Jaén Wave 1 is 136/136 LOW pairs. Current Sevilla first batch is 10/10 LOW pairs.
