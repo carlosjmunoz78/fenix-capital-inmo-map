@@ -380,6 +380,16 @@
       "total_medium": 0,
       "total_high": 0,
       "total_images_ready_to_generate": 111
+    },
+    "wave1_wordpress_materialization": {
+      "scope": 37,
+      "wordpress_verified": 37,
+      "copy_complete": 37,
+      "semantic_pass": 37,
+      "unique_image_specs_per_territory": 3,
+      "images_ready_to_generate": 111,
+      "publication_ready": 0,
+      "gate": "PASS"
     }
   }
 }
