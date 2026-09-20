@@ -48,7 +48,11 @@
     "backlog_table": "public.seo_cerebro_backlog_preprod",
     "query_page_pairs_field": "public.seo_cerebro_runs_preprod.query_page_pairs",
     "intent_map_table": "public.seo_cerebro_intent_map_preprod",
-    "experiment_table": "public.seo_cerebro_experiments_preprod"
+    "experiment_table": "public.seo_cerebro_experiments_preprod",
+    "tribunal_table": "public.seo_cerebro_tribunal_preprod",
+    "backup_table": "public.seo_cerebro_state_backups_preprod",
+    "invariant_checks_table": "public.seo_cerebro_invariant_checks_preprod",
+    "experiment_observations_table": "public.seo_cerebro_experiment_observations_preprod"
   },
   "rules": [
     "deterministic_before_AI",
@@ -80,14 +84,19 @@
     "document",
     "learn",
     "resolve_query_to_preferred_url",
-    "manage_controlled_seo_experiments"
+    "manage_controlled_seo_experiments",
+    "prepare_safe_promotion",
+    "run_tribunal",
+    "run_doctor",
+    "backup_state",
+    "request_rollback"
   ],
   "api_contract": {
     "measurement_runner": "Supabase Edge Function fenix-seo-cerebro-preprod",
     "wordpress_engine": "fenix-seo-cerebro WordPress Abilities",
     "guard": "Fenix Core Guard",
     "google_fallback": "Make Google OAuth bridge",
-    "measurement_runner_version": 13,
+    "measurement_runner_version": 23,
     "preprod_executor": "fenix-seo-executor-preprod",
     "preprod_executor_version": 8
   },
@@ -134,7 +143,7 @@
     "own WordPress MCP read/write/readback for low-risk Yoast metadata"
   ],
   "evaluation": {
-    "current": "RUNNER_V14_GREEN_CI_GREEN_BACKLOG_MANAGED_WEEKLY_CYCLE_1_OF_4",
+    "current": "RUNNER_V23_GREEN_DOCTOR_7_OF_7_GREEN_TRIBUNAL_0_FAIL_BACKUP_GREEN_WEEKLY_CYCLE_1_OF_4",
     "autonomous_verified_gate": "4 consecutive weekly cycles"
   },
   "observability": {
@@ -167,8 +176,8 @@
     "measurement_runner": "redeploy prior Edge Function version"
   },
   "rebuild": {
-    "source": "FACT-001 registry + this binding + WordPress plugin package + Supabase migration history + Make scenario IDs",
-    "tested": "PARTIAL_COMPONENT_LEVEL"
+    "source": "FACT-001 registry + runtime binding + WordPress plugin package + Supabase migration history + Make scenario IDs + SEO state snapshot",
+    "tested": "STATE_SNAPSHOT_AND_COMPONENT_LEVEL"
   },
   "dependencies": [
     "WEB-001",
@@ -177,7 +186,7 @@
     "AUD-001",
     "FINOPS-001"
   ],
-  "autonomy_level": "HIGH_WITH_GUARDRAILS",
+  "autonomy_level": "HIGH_WITH_GUARDRAILS_PENDING_TEMPORAL_GATE",
   "zero_cost_execution_plan": [
     "WordPress/Core Guard already owned",
     "Supabase existing project/free-existing capacity",
