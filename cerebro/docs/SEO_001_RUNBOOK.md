@@ -31,7 +31,7 @@ Preferred order:
 Current canonical GA4 property: `518454210`.
 Legacy/no-use measurement property: `484640617`.
 
-Scheduled PREPROD runner: `fenix-seo-cerebro-preprod` v17.
+Scheduled PREPROD runner: `fenix-seo-cerebro-preprod` v18.
 PREPROD draft executor: `fenix-seo-executor-preprod` v8.
 Existing GSC Make scenario: `9550706`.
 Existing GA4 Make scenario: `9538231`.
@@ -119,3 +119,7 @@ Current backlog disposition after live validation: 2 items DONE without mutation
 The weekly runner now evaluates active experiments deterministically against explicit baselines and minimum observation windows. It records observations in `seo_cerebro_experiment_observations_preprod` and never promotes an experiment before the minimum window is reached.
 
 The runner also performs a zero-cost public technical canary over robots.txt, sitemap index, home, Córdoba advisor, mortgage requirements, inheritance and new-build pillar pages. Weekly cycle evidence is written **only** when the trigger is the real scheduled `cron`; manual/test invocations cannot create or backfill weekly autonomy evidence.
+
+## Runtime timing hardening
+
+The technical canary fetches critical URLs in parallel to keep the weekly run comfortably inside the pg_net request window. Cron job 2 remains Monday 06:00 UTC and now calls the runner with `timeout_milliseconds = 30000`, while manual v18 validation completed HTTP 200 without timeout. This changes transport reliability only; it does not relax SEO policy or autonomy gates.
