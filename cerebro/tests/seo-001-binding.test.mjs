@@ -33,3 +33,15 @@ test('SEO-001 keeps zero-new-cost default and does not require GSC Wizard', () =
   assert.equal(contract.cost_budget.paid_ai_required, false);
   assert.equal(contract.cost_budget.gsc_wizard_required, false);
 });
+
+test('SEO-001 binds prioritized backlog and fail-closed company routing', () => {
+  assert.equal(contract.data_model.backlog_table, 'public.seo_cerebro_backlog_preprod');
+  assert.equal(contract.permissions.unconfigured_company, 'fail_closed_409');
+  assert.ok(contract.actions.includes('persist_prioritized_backlog'));
+  assert.ok(contract.actions.includes('detect_query_page_overlap'));
+});
+
+test('SEO-001 keeps query-to-page overlap review proposal-first by contract', () => {
+  assert.ok(contract.rules.includes('no_mass_redirect_or_slug_change_without_query_to_url_evidence'));
+  assert.equal(contract.decisions.medium_or_ambiguous, 'PROPOSAL_OR_LAB');
+});
