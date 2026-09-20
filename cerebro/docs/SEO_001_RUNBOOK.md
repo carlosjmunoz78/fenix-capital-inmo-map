@@ -31,7 +31,7 @@ Preferred order:
 Current canonical GA4 property: `518454210`.
 Legacy/no-use measurement property: `484640617`.
 
-Scheduled PREPROD runner: `fenix-seo-cerebro-preprod` v13.
+Scheduled PREPROD runner: `fenix-seo-cerebro-preprod` v14.
 PREPROD draft executor: `fenix-seo-executor-preprod` v8.
 Existing GSC Make scenario: `9550706`.
 Existing GA4 Make scenario: `9538231`.
@@ -107,3 +107,9 @@ Only:
 ## Weekly autonomy evidence
 
 The first fully verified weekly cycle is `2026-09-14 → 2026-09-20`. Current longitudinal gate: `1/4`. Future weeks must be evidenced independently; they are never backfilled or invented.
+
+## Experiment registry
+
+`seo_cerebro_experiments_preprod` contains controlled experiments with explicit success metrics and safety constraints. Current active experiments: inheritance SERP CTR (no legal/tax claim mutation, no auto-publish), advisor URL ownership (no redirects/canonical changes), and broker synonym disambiguation (no new landing without evidence).
+
+Current backlog disposition after live validation: 2 items DONE without mutation because metadata and rankings were already strong; 7 items are consolidated under LAB experiments. No item is HUMAN_REQUIRED.
