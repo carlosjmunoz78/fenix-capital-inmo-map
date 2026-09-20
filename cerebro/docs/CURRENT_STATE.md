@@ -33,7 +33,8 @@ Evidence anchors are scoped to the change they prove; they are not intended to m
 
 ## POR AUDITAR
 
-- `CRM-001`, `SEO-001`, `WEB-001`: `UNKNOWN_REQUIRES_AUDIT`; no stronger live claim is supported by this repository audit.
+- `CRM-001`, `WEB-001`: `UNKNOWN_REQUIRES_AUDIT`; no stronger live claim is supported by the current repository audit.
+- `SEO-001`: no longer `UNKNOWN_REQUIRES_AUDIT`; live evidence is captured in `evidence/seo-001-live-audit-20260920.json`. Remaining audit gate is longitudinal autonomy proof, not existence/operability.
 - `LAB-TRD`: `UNKNOWN_REQUIRES_AUDIT`, explicitly isolated and requiring a separate audit; no Trading integration with CEREBRO PROD is claimed.
 - Real production autonomy per engine.
 - `EVT-001`/`JOB-001` migration/wiring into `SharedRuntime` and scaling beyond the single-writer V0 reference.
