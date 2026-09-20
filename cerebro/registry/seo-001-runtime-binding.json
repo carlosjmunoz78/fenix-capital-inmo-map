@@ -58,7 +58,10 @@
     "landing_specs_table": "public.seo_cerebro_landing_specs_preprod",
     "image_assets_table": "public.seo_cerebro_image_assets_preprod",
     "competitor_intel_table": "public.seo_cerebro_competitor_intel_preprod",
-    "b2b_province_plan_table": "public.seo_cerebro_b2b_province_plan_preprod"
+    "b2b_province_plan_table": "public.seo_cerebro_b2b_province_plan_preprod",
+    "city_runs_table": "public.seo_cerebro_city_runs_preprod",
+    "learning_rules_table": "public.seo_cerebro_learning_rules_preprod",
+    "city_qa_table": "public.seo_cerebro_city_qa_preprod"
   },
   "rules": [
     "deterministic_before_AI",
@@ -99,14 +102,17 @@
     "plan_territorial_expansion",
     "enforce_image_uniqueness",
     "gate_local_publication",
-    "plan_b2b_province_hubs"
+    "plan_b2b_province_hubs",
+    "advance_city_autopilot",
+    "city_prepublication_qa",
+    "supervisor_decision_learning_loop"
   ],
   "api_contract": {
     "measurement_runner": "Supabase Edge Function fenix-seo-cerebro-preprod",
     "wordpress_engine": "fenix-seo-cerebro WordPress Abilities",
     "guard": "Fenix Core Guard",
     "google_fallback": "Make Google OAuth bridge",
-    "measurement_runner_version": 24,
+    "measurement_runner_version": 26,
     "preprod_executor": "fenix-seo-executor-preprod",
     "preprod_executor_version": 8
   },
@@ -153,7 +159,7 @@
     "own WordPress MCP read/write/readback for low-risk Yoast metadata"
   ],
   "evaluation": {
-    "current": "RUNNER_V24_GREEN_DOCTOR_9_OF_9_EXPANSION_REGISTERED_PUBLICATION_FAIL_CLOSED_WEEKLY_CYCLE_1_OF_4",
+    "current": "RUNNER_V26_GREEN_WAVE1_37_OF_37_WORDPRESS_VERIFIED_PILOT_JAEN_VISUALS_WAIT_LINARES_QUEUED",
     "autonomous_verified_gate": "4 consecutive weekly cycles"
   },
   "observability": {
