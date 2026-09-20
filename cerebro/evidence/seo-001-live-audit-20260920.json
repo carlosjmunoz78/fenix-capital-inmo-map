@@ -323,6 +323,19 @@
     "unique_image_prompt_hashes": 111,
     "publication_ready": 0,
     "publication_gate": "FAIL_CLOSED_PENDING_RESEARCH_AND_ANTI_CANNIBALIZATION",
-    "b2b_model": "two province hubs reusing existing inmobiliarias cluster; no municipality B2B doorway farm"
+    "b2b_model": "two province hubs reusing existing inmobiliarias cluster; no municipality B2B doorway farm",
+    "wave1_jaen_first_batch": {
+      "municipalities": [
+        "Jaén",
+        "Linares",
+        "Andújar",
+        "Úbeda",
+        "Martos"
+      ],
+      "official_local_context_verified": 5,
+      "preprod_copy_drafts_complete": 5,
+      "anti_cannibalization_state": "PASS_PRELIMINARY_UNIQUE_ANGLE",
+      "publication_state": "BLOCKED_UNTIL_FULL_QA"
+    }
   }
 }
