@@ -83,7 +83,7 @@
     "wordpress_engine": "fenix-seo-cerebro WordPress Abilities",
     "guard": "Fenix Core Guard",
     "google_fallback": "Make Google OAuth bridge",
-    "measurement_runner_version": 11,
+    "measurement_runner_version": 12,
     "preprod_executor": "fenix-seo-executor-preprod",
     "preprod_executor_version": 8
   },
@@ -104,7 +104,8 @@
     "prod_writes": "locked_by_default",
     "preprod_canary": true,
     "cross_company_access": "deny",
-    "unconfigured_company": "fail_closed_409"
+    "unconfigured_company": "fail_closed_409",
+    "measurement_bridge_secret": "vault_service_role_only"
   },
   "memory": {
     "wordpress_learning_log": true,
@@ -152,7 +153,8 @@
   "backup": {
     "wordpress": "Cowboy MCP/Core Guard checkpoint/snapshot",
     "config_and_contracts": "GitHub",
-    "measurement": "Supabase PREPROD"
+    "measurement": "Supabase PREPROD",
+    "measurement_runtime_snapshot": "cerebro/runtime/seo-001/supabase/fenix-seo-cerebro-preprod/index.ts"
   },
   "rollback": {
     "content": "restore Core Guard snapshot / Cowboy change journal",
