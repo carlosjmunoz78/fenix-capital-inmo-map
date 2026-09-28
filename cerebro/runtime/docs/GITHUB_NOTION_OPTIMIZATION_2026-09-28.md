@@ -55,3 +55,41 @@ Capacidades/estructuras confirmadas:
 2. Inventariar schemas reales de las bases de gobierno existentes antes de crear Engine Registry / Human Exception Queue / Company Registry dedicadas.
 3. Diseñar mapa de control plane Notion reutilizando `Gobierno de módulos` cuando cubra el contrato y creando solo gaps reales.
 4. Mantener PR #419 DRAFT hasta cerrar comparación OLD vs NEW y observación FinOps.
+
+
+## Cierre de rojos del bloque GitHub
+
+Head actual verificado tras correcciones: `5437efc028a622d55d2d2ee327e9813478b3fcd2`.
+
+Checks en ese head:
+- `FACT-001 App Compatibility`: SUCCESS.
+- `FACT-001 Factory V0`: SUCCESS.
+- `FACT-001 RLS PREPROD`: SUCCESS.
+
+Correcciones realizadas sin debilitar gates:
+1. `frontend-edge-contract.json` pasó a contrato 0.3.0 y clasifica cuatro dependencias frontend que el gate detectó vivas:
+   - `fenix-document-existing-backfill`: PROD ACTIVE v8 y frontend production-gated.
+   - `fenix-expediente-people`: PROD ACTIVE v2; PREPROD `-test` ACTIVE v1; usado como fallback de workspace canónico.
+   - `fenix-staff-admin`: helper declarado pero sin función viva PREPROD/PROD ni caller literal adicional; queda clasificado como no desplegado, sin autorizar despliegue.
+   - `fenix-user-admin`: PROD ACTIVE v3; no existe variante PREPROD viva.
+2. El siguiente rojo apareció en runtime static tests porque `job001_enabled_jobs.json` habilitaba el job 25 `social-t72-watchdog` aunque su estado heredado era staged/no físico. Se eliminó únicamente el 25 de la lista enabled; permanece definido en el scheduler, no borrado. El gate pasó.
+3. Se creó snapshot previo de schemas Notion en `cerebro/runtime/docs/notion-control-plane-schema-snapshot-2026-09-28.json`.
+
+## Notion control plane · reutilización en vez de duplicación
+
+Se verificó que la base existente `🆘 Soporte y escalados · Fénix Capital` ya cubre ticket, estado, prioridad, responsable, evidencia, idempotencia y escalado. Por tanto se reutiliza como Human Exception Queue visible.
+
+Cambio aditivo aplicado, sin modificar/borrar propiedades ni registros existentes:
+- `Human Exception Code`: solo los 8 códigos canónicos.
+- `Company ID`.
+- `Engine ID`.
+- `Environment`: GLOBAL/LAB/PREPROD/PROD.
+- `Version`.
+
+Rollback: eliminar solo estas cinco propiedades nuevas si falla aceptación; ningún registro existente fue reescrito.
+
+Estado:
+- Human Exception Queue visible: HECHO como extensión estructural de Soporte y escalados.
+- Ingesta automática desde runtime/Supervisor: PLANIFICADA, no declarada operativa todavía.
+- Company Registry dedicado: POR AUDITAR/pendiente de materialización tras confirmar que no existe equivalente.
+- Engine Registry visible: PARCIAL; Git/Factory es source of truth y REGISTRY-AUDIT existe, pero falta mirror/sync nativo sin duplicación manual.
