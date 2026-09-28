@@ -184,3 +184,13 @@
 - Added >=9-block weekly editorial contract and HTML campaign composer.
 - Added official Brevo contacts/campaign adapter and free-tier 300/day wave planner.
 - Kept real sending disabled until credential, sender/domain and audience list IDs are physically verified.
+
+
+## 2026-09-28 · Brevo physical closeout canary
+- Created canonical Brevo folder and lists for PARTICULARES/INMOBILIARIAS.
+- Verified free plan, active sender and authenticated domain.
+- Proved schedule path with campaigns 104/105 and zero sends.
+- Proved rollback for queued marketing campaigns by moving both to suspended.
+- Deleted all synthetic contacts used by the canary.
+- Retired temporary canary function to HTTP 410 with JWT verification.
+- Prepared Fénix CEREBRO Leads 1.3.3 with explicit marketing-consent capture; not promoted to PROD without PREPROD evidence.
