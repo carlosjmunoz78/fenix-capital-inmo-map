@@ -125,3 +125,23 @@ Estado del sub-bloque:
 
 Remediación mínima:
 Compartir/conectar las bases de control plane con la integración existente `Fenix GitHub Migration`, empezando por Engine Registry y Soporte/Human Exception; Company Registry también debe añadirse antes de su futura sincronización. Después repetir canary, reconciliar 46 motores / 3 excepciones y retirar cualquier trigger temporal. No requiere suscripción nueva.
+
+
+## Cierre verificado tras compartir conexiones
+
+Canary real reejecutado sobre el workflow histórico controlado:
+- validate: SUCCESS.
+- sync: SUCCESS.
+- `Fenix GitHub Migration` accede ya a los targets requeridos.
+- Engine Registry mirror reconciliado físicamente: 46 filas.
+- Human Exception Queue visible reconciliada físicamente: 3 filas con `Human Exception Code`.
+- No deletes.
+- No nueva suscripción.
+- Coste adicional objetivo: 0 €.
+- Git sigue siendo source of truth.
+- El trigger temporal de rama de trabajo no está presente en el HEAD actual; apply normal queda restringido a la rama canónica.
+
+Estado final del sub-bloque:
+- `NOTION_EVENT_SYNC_AND_DUPLICATE_POLLING_REDUCTION`: HECHO.
+- GitHub synced databases / connected properties nativas: POR AUDITAR, pero ya no bloquean el mirror event-driven.
+- siguiente bloque: `UNIVERSAL_PLUGIN_FULL`.
