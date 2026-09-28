@@ -21,6 +21,10 @@ class CompanyWordPressConfigTests(unittest.TestCase):
         self.assertEqual({s["audience"] for s in streams}, {"PARTICULARES", "INMOBILIARIAS"})
         self.assertTrue(all(s["cadence"] == "WEEKLY" for s in streams))
         self.assertTrue(all(s["send_enabled"] is False for s in streams))
+        self.assertTrue(all(s["provider"] == "brevo" for s in streams))
+        self.assertEqual(cfg["policies"]["newsletter_provider"], "brevo")
+        self.assertTrue(cfg["policies"]["hostinger_reach_newsletter_forbidden"])
+        self.assertEqual(cfg["policies"]["brevo_free_daily_email_limit"], 300)
 
     def test_unknown_company_fails_closed(self):
         with self.assertRaises(CompanyWordPressConfigError):
