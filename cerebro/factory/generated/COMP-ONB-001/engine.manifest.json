@@ -27,12 +27,8 @@
     "eval/README.md"
   ],
   "events_in": [],
-  "events_out": [
-    "WORDPRESS_UNIVERSAL_PACKAGE_READY"
-  ],
-  "evidence": [
-    "FACT-001 standard artifact WP-UNIVERSAL-MULTIEMPRESA-001 registered for new-company Automation Bootstrap"
-  ],
+  "events_out": [],
+  "evidence": [],
   "factory": {
     "generator": "FACT-001",
     "generator_version": "0.3.0"
@@ -48,23 +44,15 @@
     "CUSTOMER_HUMAN_REQUEST"
   ],
   "inputs": [],
-  "jobs": [
-    "generate_wordpress_universal_package",
-    "generate_wordpress_universal_company_config"
-  ],
-  "knowledge_sources": [
-    "../../artifacts/wordpress/universal-multiempresa-0.2.0.json"
-  ],
+  "jobs": [],
+  "knowledge_sources": [],
   "layer": "L8",
   "name": "Company Onboarding Orchestrator",
   "objective": "Orchestrate the end-to-end new-company pipeline by events and gates without duplicating runtimes or bypassing HUMAN_REQUIRED.",
   "observability": [
     "observability/README.md"
   ],
-  "outputs": [
-    "wordpress_universal_multiempresa_artifact",
-    "wordpress_universal_multiempresa_config"
-  ],
+  "outputs": [],
   "owner": "CEREBRO Platform",
   "permissions": [],
   "policies": [
