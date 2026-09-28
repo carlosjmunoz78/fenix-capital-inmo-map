@@ -37,6 +37,7 @@ $jobs = [
     21 => ['name'=>'seo001-mobile-qa',                        'schedule'=>'12,42 * * * *'],
     22 => ['name'=>'seo001-pilot-plugin-certificate',         'schedule'=>'6,21,36,51 * * * *'],
     23 => ['name'=>'seo001-rollout-control-refresh',          'schedule'=>'7,22,37,52 * * * *'],
+    24 => ['name'=>'seo-gsc-notion-sync',                     'schedule'=>'36 11 * * 3'],
 ];
 
 $baseDir = __DIR__;
