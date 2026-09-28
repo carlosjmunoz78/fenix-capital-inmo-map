@@ -332,3 +332,32 @@ Incidencias corregidas durante el canary:
 3. creación de campaign con listas vacías falla correctamente; por diseño el worker solo adjuntará recipients cuando existan contactos consentidos.
 
 No se ha activado envío a personas reales durante las pruebas.
+
+
+## Canary final Brevo · scheduling + rollback seguro
+Se ejecutó un canary PREPROD real con dos contactos sintéticos, uno por audiencia:
+- alta sintética en listas 17/18;
+- campañas de scheduling canary IDs 104 y 105;
+- ambas aceptaron `scheduledAt=2030-01-15T10:00:00+01:00` y pasaron a `queued`;
+- Brevo no permite DELETE directo mientras la campaña está queued;
+- siguiendo API oficial, ambas se pasaron inmediatamente a `suspended`;
+- estado final verificado: `suspended`;
+- emails enviados: 0;
+- contactos sintéticos eliminados;
+- función temporal de canary retirada a 410 y protegida con verify_jwt=true.
+
+La prueba demuestra físicamente create → recipients/list → schedule → queued → suspend sin envío. El rollback operativo de una programación es `PUT /emailCampaigns/:id/status {"status":"suspended"}`, no DELETE directo mientras está en cola.
+
+## Consentimiento marketing · gap real restante
+Auditoría de Fénix CEREBRO Leads 1.3.2 en PROD:
+- el payload soporta `consent_marketing`;
+- los formularios generales y lead magnets actuales fuerzan `consent_marketing=false` salvo que exista un checkbox identificable;
+- por tanto NO se puede dar por hecho que todo lead consiente newsletter.
+
+Se ha preparado `Fénix CEREBRO Leads 1.3.3` en Git con:
+- checkbox explícito y separado de privacidad;
+- `consent_marketing` capturado solo si el usuario lo marca;
+- detección de campos Elementor marketing/newsletter/comercial;
+- ninguna alta automática a newsletter si no existe consentimiento.
+
+No se promueve a PROD desde este bloque hasta tener PREPROD físico del plugin o transporte equivalente autorizado.
