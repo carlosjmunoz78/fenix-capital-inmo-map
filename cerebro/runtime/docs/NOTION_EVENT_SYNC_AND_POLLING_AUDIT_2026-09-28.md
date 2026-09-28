@@ -96,3 +96,32 @@ Antes de declarar HECHO completo:
 - verificar que ningún registro ajeno fue tocado.
 
 No requiere intervención humana mientras se mantenga el PR DRAFT; el apply ocurrirá de forma natural al promover el cambio canónico.
+
+
+## Evidencia viva adicional · canary real de integración GitHub → Notion
+
+Se ejecutó un canary real desde la rama de trabajo para comprobar la escritura con el secreto existente `NOTION_TOKEN`.
+
+Resultado:
+- El secreto existe y la integración responde.
+- Integración identificada por Notion: `Fenix GitHub Migration`.
+- `Documentación · Fénix Capital` es accesible con esa integración, por lo que token/conectividad son válidos.
+- Los targets de control plane no están compartidos con esa integración y Notion devuelve `404 object_not_found` antes de cualquier escritura:
+  - Engine Registry mirror: `f9051714-19e2-462f-ac2b-c85837a672d9`.
+  - Human Exception Queue / Soporte: `66843d2a-4e67-40f9-93d0-a66ea091d436`.
+  - Gobierno de módulos: `fe5594d3-6e62-4372-8a63-6ac31898bdbc`.
+- El preflight falla cerrado y evita cualquier mutación parcial.
+- No se reutilizan ni alteran bases CRM operativas accesibles para resolver este permiso.
+
+Data sources visibles a `Fenix GitHub Migration` durante el canary: Ofertas bancarias, Envíos a banco, Bancos, Inmobiliarias, Clientes, Expedientes, Documentación y 01_Expedientes_PRO. Se consideran sistemas operativos existentes y quedan fuera de este cambio.
+
+Estado del sub-bloque:
+- EVENT SYNC código/tests/workflow: HECHO.
+- PR dry-run: HECHO y verde.
+- HUMAN_REQUIRED sink runtime: HECHO a nivel de contrato + tests.
+- Apply real GitHub → Notion: BLOQUEADO por permiso de integración en los targets.
+- Código del bloqueo: `PERMISSION_REQUIRED` como system blocker; no se inventa un noveno HUMAN_REQUIRED.
+- GitHub synced database/connected properties físicas: POR AUDITAR.
+
+Remediación mínima:
+Compartir/conectar las bases de control plane con la integración existente `Fenix GitHub Migration`, empezando por Engine Registry y Soporte/Human Exception; Company Registry también debe añadirse antes de su futura sincronización. Después repetir canary, reconciliar 46 motores / 3 excepciones y retirar cualquier trigger temporal. No requiere suscripción nueva.
