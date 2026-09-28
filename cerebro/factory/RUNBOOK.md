@@ -304,3 +304,19 @@ Gates pendientes para autonomía más allá de V0:
 - auth directa del runtime `cerebro-universal/v1` cuando exista transporte autorizado;
 - provider SEND/SCHEDULE de newsletters oficialmente writable;
 - cierre explícito de Core Guard staging si su status permanece `ok=false`.
+
+
+## Newsletter Fénix · Brevo Free
+Proveedor canónico único: Brevo. Hostinger Reach queda PROHIBIDO para newsletter.
+
+Lead consentido -> clasificar PARTICULARES/INMOBILIARIAS -> Brevo upsert -> lista audiencia -> edición semanal CEREBRO >=9 bloques -> campaign API -> quota gate 300/día -> envío/programación -> métricas -> aprendizaje.
+
+Nunca:
+- mezclar particulares e inmobiliarias;
+- añadir contacto sin consentimiento de marketing;
+- reactivar baja/hard bounce;
+- importar base antigua sin re-permiso;
+- comprar plan Brevo automáticamente;
+- usar Hostinger Reach como fallback de newsletter.
+
+Activación PROD requiere: BREVO_API_KEY en secret store, sender/domain autenticados, dos list IDs verificados, test campaign PREPROD/test-list y rollback lógico (pausar/no enviar campaña).
