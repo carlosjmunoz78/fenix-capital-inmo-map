@@ -94,3 +94,44 @@ The legacy cron definition is preserved; no unschedule/delete is required.
 ## Cost conclusion
 
 This migration removes scheduler responsibility from pg_cron but does not by itself eliminate PREPROD database compute. Supabase savings may only be claimed if later evidence proves the PREPROD project can be paused, windowed or downsized without breaking retained data/state dependencies.
+
+
+## LIVE CUT-OVER COMPLETED · 2026-09-28
+
+Physical Hostinger evidence confirmed the master scheduler was running every minute:
+- 10:22 UTC: job 6 reached gateway and was correctly `SKIPPED_DISABLED`.
+- 10:23 UTC: job 7 executed through Hostinger and returned HTTP 200 / `DISPATCH_RESULT`.
+- 10:26 UTC: job 12 executed through Hostinger and returned HTTP 200 / `DISPATCH_RESULT`.
+- duplicate manual execution in the same minute was blocked by `SKIP_ALREADY_DONE`.
+
+The earlier absence in Supabase log queries was an observability timing/query issue, not a Hostinger scheduler failure.
+
+After physical proof, all eight Wave 1 jobs were atomically moved to HOSTINGER_ACTIVE. Current invariant:
+
+| Job | Hostinger control | Legacy pg_cron |
+|---|---|---|
+| 2 | enabled=true | active=false |
+| 6 | enabled=true | active=false |
+| 7 | enabled=true | active=false |
+| 10 | enabled=true | active=false |
+| 12 | enabled=true | active=false |
+| 13 | enabled=true | active=false |
+| 16 | enabled=true | active=false |
+| 21 | enabled=true | active=false |
+
+One controlled execution per job was then validated while legacy was disabled:
+
+- 13: probe DISPATCHED, HTTP transport 200. WordPress Core Guard payload remains observer/`ok:false`, which is application state rather than transport failure.
+- 7: page-quality probe DISPATCHED for Jaén; downstream HTTP 200, canonical/schema checks green; PageSpeed external API returned HTTP 429 and therefore no PageSpeed data.
+- 10: `NO_READY_DOWNLOADABLE` (valid no-op state).
+- 16: DISPATCHED; downstream HTTP 200 with `WAIT_LIVE_FORM`.
+- 21: `ALREADY_VERIFIED` (valid idempotent state).
+- 6: DISPATCHED; downstream HTTP 200 / `NOOP` because no queued email existed, so no email was sent.
+- 12: `ALREADY_BUILT` for Jaén (valid idempotent state).
+- 2: DISPATCHED; downstream HTTP 200 and weekly PREPROD orchestration response returned successfully.
+
+Rollback path was exercised earlier for jobs 7, 12 and 13 and restored legacy correctly. The atomic cut-over function keeps the invariant that one side is active and the other disabled.
+
+Status: **WAVE 1 CUT-OVER GREEN / OBSERVATION ACTIVE**.
+
+Important FinOps constraint: this removes these eight schedules from pg_cron, but does not itself remove the PREPROD database/Edge dependency. Do not claim Supabase compute savings until a separate pause/downsize/windowing gate proves that retained PREPROD dependencies allow it.
