@@ -29,7 +29,9 @@
     "cerebro/runtime/wordpress_universal_gateway.py",
     "cerebro/runtime/contracts/wordpress-universal-staging-v0.json",
     "cerebro/runtime/contracts/wordpress-company-config.schema.json",
-    "cerebro/runtime/config/wordpress/<company_id>.json"
+    "cerebro/runtime/config/wordpress/<company_id>.json",
+    "cerebro/runtime/brevo_newsletter_contract.py",
+    "cerebro/runtime/brevo_newsletter_client.py"
   ],
   "api_contract": [
     "UniversalPluginGateway.decide",
@@ -49,15 +51,26 @@
     "idempotency_required",
     "multiempresa_scope_required",
     "wrap_existing_cerebro_universal_runtime",
-    "do_not_duplicate_physical_wordpress_plugin"
+    "do_not_duplicate_physical_wordpress_plugin",
+    "brevo_only_for_newsletters",
+    "hostinger_reach_forbidden_for_newsletters",
+    "newsletter_marketing_consent_required",
+    "newsletter_minimum_nine_blocks",
+    "brevo_free_tier_daily_quota_guard"
   ],
   "events_in": [
-    "CAPABILITY_REQUESTED"
+    "CAPABILITY_REQUESTED",
+    "LEAD_MARKETING_CONSENT_GRANTED",
+    "WEEKLY_NEWSLETTER_DUE"
   ],
   "events_out": [
     "CAPABILITY_ALLOWED",
     "CAPABILITY_BLOCKED",
-    "PROVIDER_UNAVAILABLE"
+    "PROVIDER_UNAVAILABLE",
+    "BREVO_CONTACT_ENROLLED",
+    "NEWSLETTER_EDITION_READY",
+    "NEWSLETTER_CAMPAIGN_SCHEDULED",
+    "NEWSLETTER_QUOTA_DEFERRED"
   ],
   "jobs": [],
   "tests": [
@@ -66,7 +79,11 @@
     "prod_default_deny",
     "capability_gap_not_invented",
     "provider_unavailable_fail_closed",
-    "preprod_provider_write_read_rollback_canary"
+    "preprod_provider_write_read_rollback_canary",
+    "brevo_only_newsletter_provider",
+    "lead_consent_enrollment",
+    "nine_block_newsletter_contract",
+    "free_tier_300_daily_quota"
   ],
   "evaluation": [
     "provider_coverage",
@@ -116,7 +133,9 @@
     "TENANT-001",
     "POL-001",
     "CORE-001",
-    "WEB-001"
+    "WEB-001",
+    "COM-001",
+    "LAB-MKT"
   ],
   "dependents": [
     "SEO-001"
@@ -155,6 +174,9 @@
     "staging Core Guard rc9 physical runtime present; cerebro/status not fully green because operations_locked=false",
     "PREPROD authenticated provider canary: draft 52300 create/read/trash/restore/final-trash; public HTTP 404; PROD impact none",
     "PREPROD provider publish canary 52300: public HTTP 200 then cleanup trash and public HTTP 404",
-    "company-specific WordPress provider configuration externalized from gateway logic; generic loader no longer encodes Fenix audiences"
+    "company-specific WordPress provider configuration externalized from gateway logic; generic loader no longer encodes Fenix audiences",
+    "Brevo selected as canonical zero-cost newsletter provider; Hostinger Reach explicitly forbidden for newsletter send/draft",
+    "Brevo official API supports contacts/lists, campaign create/update, scheduledAt and sendNow",
+    "Brevo free plan guard modeled at 300 emails/day and 100000 stored contacts"
   ]
-}
+}\n
