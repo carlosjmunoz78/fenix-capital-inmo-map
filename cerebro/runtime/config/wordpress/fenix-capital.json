@@ -74,7 +74,13 @@
       "stored_contact_limit": 100000,
       "automation_contact_limit": 2000
     },
-    "activation_gate": "PREPROD_CONFIG_VERIFIED_SEND_DISABLED_UNTIL_E2E_WEEKLY_ORCHESTRATOR",
-    "folder_id": 16
+    "activation_gate": "PREPROD_VERIFIED_BREVO_ACCOUNT_SENDER_DOMAIN_LISTS",
+    "folder_id": 16,
+    "plan": "free",
+    "last_verified_available_send_credits": 297,
+    "test_campaign_draft_ids": [
+      102,
+      103
+    ]
   }
 }
