@@ -24,18 +24,29 @@ jobs:
           set -euo pipefail
           curl --fail --silent --show-error --location --max-time 20             https://staging.fenixcapital.es/             -o /tmp/staging-home.html
           test -s /tmp/staging-home.html
+          echo "STAGING_HTML_BYTES=$(wc -c < /tmp/staging-home.html)"
 
-      - name: Verify Leads 1.3.3 frontend consent markers
+      - name: Diagnose Leads frontend markers
         shell: bash
         run: |
-          set -euo pipefail
-          grep -Fq 'FenixCerebroLead' /tmp/staging-home.html
-          grep -Fq 'consent_marketing' /tmp/staging-home.html
-          grep -Fq 'Quiero recibir información, novedades, recursos y comunicaciones comerciales de Fénix Capital.' /tmp/staging-home.html
-          grep -Fq "input[name=\"marketing\"]" /tmp/staging-home.html
-          echo 'LEADS_1_3_3_FRONTEND_MARKERS=PASS'
+          set -u
+          m1=$(grep -Fc 'FenixCerebroLead' /tmp/staging-home.html || true)
+          m2=$(grep -Fc 'consent_marketing' /tmp/staging-home.html || true)
+          m3=$(grep -Fc 'Quiero recibir información, novedades, recursos y comunicaciones comerciales de Fénix Capital.' /tmp/staging-home.html || true)
+          m4=$(grep -Fc 'input[name="marketing"]' /tmp/staging-home.html || true)
+          echo "MARKER_FenixCerebroLead=$m1"
+          echo "MARKER_consent_marketing=$m2"
+          echo "MARKER_explicit_marketing_label=$m3"
+          echo "MARKER_marketing_input=$m4"
+          if [ "$m1" -gt 0 ] && [ "$m2" -gt 0 ] && [ "$m3" -gt 0 ] && [ "$m4" -gt 0 ]; then
+            echo 'LEADS_1_3_3_FRONTEND_MARKERS=PASS'
+          else
+            echo 'LEADS_1_3_3_FRONTEND_MARKERS=FAIL'
+            exit 1
+          fi
 
       - name: Verify universal REST discovery remains present
+        if: always()
         shell: bash
         run: |
           set -euo pipefail
