@@ -1,0 +1,53 @@
+{
+  "contract_version": "1.0.0",
+  "company_id": "fenix-capital",
+  "engine_id": "PLUGIN-UNIVERSAL-001",
+  "provider": "brevo",
+  "lead_source": "Fenix CEREBRO Leads -> fenix-web-lead",
+  "consent": {
+    "required_field": "consent_marketing",
+    "required_value": true,
+    "privacy_consent_is_not_marketing_consent": true,
+    "evidence_required": [
+      "consent_source",
+      "consent_at"
+    ],
+    "legacy_contacts": "REPERMISSION_REQUIRED"
+  },
+  "audience_rules": [
+    {
+      "priority": 1,
+      "when": "landing_url contains /inmobiliarias/",
+      "audience": "INMOBILIARIAS",
+      "brevo_list_id": 18
+    },
+    {
+      "priority": 2,
+      "when": "lead_type/inferred business partner is inmobiliaria",
+      "audience": "INMOBILIARIAS",
+      "brevo_list_id": 18
+    },
+    {
+      "priority": 99,
+      "when": "otherwise",
+      "audience": "PARTICULARES",
+      "brevo_list_id": 17
+    }
+  ],
+  "suppress_if": [
+    "unsubscribed",
+    "hard_bounced",
+    "spam_complaint",
+    "consent_marketing_false"
+  ],
+  "live_gap": {
+    "wordpress_plugin_version": "1.3.2",
+    "observed_behavior": "generic browser and Elementor capture currently force consent_marketing=false",
+    "required_candidate_change": "capture a separate explicit marketing checkbox and forward its boolean; never infer from privacy checkbox"
+  },
+  "promotion_policy": {
+    "prod_change_authorized": false,
+    "reason": "candidate must pass PREPROD form/lead E2E before modifying live WordPress lead capture",
+    "landing_factory_must_implement_this_contract": true
+  }
+}
