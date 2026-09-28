@@ -518,7 +518,7 @@
       "environment": "PREPROD",
       "manifest": "../versions/SOCBOOT-001/0.2.0/engine.manifest.json",
       "source_of_truth": "git+versioned_update",
-      "status": "IMPLEMENTED_PREPROD_CANDIDATE",
+      "status": "DOCUMENTED_PARTIAL",
       "version": "0.2.0",
       "factory_scaffold": "../generated/SOCBOOT-001/engine.manifest.json",
       "version_history": [
