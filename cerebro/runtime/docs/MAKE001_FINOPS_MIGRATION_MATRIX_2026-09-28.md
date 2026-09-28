@@ -92,3 +92,32 @@ bounded scheduler.
 7. Downgrade/cancel Make only after actual usage fits the target and rollback is proven.
 
 No scenario in this matrix should be deleted during migration.
+
+
+## Reconciliación universal · cut-over 2026-09-28
+
+Scenario 9527242 `FENIX · CORE · Reconciliación universal · V1.1` is now
+**INACTIVE, NOT DELETED**.
+
+Evidence before deactivation:
+- scheduled every 2 hours;
+- exactly 5 credits per run;
+- four sampled runs across 26→28 Sep produced the same semantic reconciliation
+  output; only run_id/first_seen_at/last_seen_at changed;
+- the four source records themselves were old/stable (router/log/capture/quality
+  last-seen values from July);
+- no external API, AI, publication or Notion mutation exists in the scenario;
+- it reads four Make Data Store records and overwrites one Make Data Store record.
+
+A deterministic replacement contract now exists in:
+- `cerebro/runtime/make_reconciliation_shadow.py`
+- `cerebro/runtime/tests/test_make_reconciliation_shadow.py`
+
+Expected avoided Make consumption: 12 runs/day × 5 credits = **60 credits/day**,
+approximately **1,800 credits per 30 days** while inactive.
+
+Rollback: reactivate Make scenario 9527242. No record, connection, blueprint or history
+was deleted.
+
+Remaining caveat: the Make Data Store is still a legacy state source for other scenarios.
+Do not delete Data Store 171764 until its producers/consumers are fully mapped and migrated.
