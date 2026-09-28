@@ -41,13 +41,22 @@
     "consent_marketing_false"
   ],
   "live_gap": {
-    "wordpress_plugin_version": "1.3.2",
-    "observed_behavior": "generic browser and Elementor capture currently force consent_marketing=false",
-    "required_candidate_change": "capture a separate explicit marketing checkbox and forward its boolean; never infer from privacy checkbox"
+    "wordpress_plugin_version": "1.3.5 candidate uploaded to PREPROD by operator; exact runtime version is not introspected directly",
+    "observed_behavior": "PREPROD form path now preserves explicit consent_marketing=true and writes only to fenix-web-lead-preprod",
+    "preprod_e2e": "PASS: staging -> fenix-web-lead-preprod -> web_leads_preprod persisted explicit consent; synthetic data cleaned",
+    "remaining_gap": "wire the automatic consented-lead -> Brevo enrollment worker; do not infer that the standalone Brevo list canary proves automatic chaining"
   },
   "promotion_policy": {
     "prod_change_authorized": false,
-    "reason": "candidate must pass PREPROD form/lead E2E before modifying live WordPress lead capture",
+    "reason": "PREPROD capture and list-mapping are proven; automatic lead-to-Brevo enrollment remains to be wired and final PROD gate remains required",
     "landing_factory_must_implement_this_contract": true
+  },
+  "preprod_evidence": {
+    "lead_workflow_run_id": 36494055199,
+    "brevo_workflow_run_id": 36494181742,
+    "expected_particulares_list_id": 17,
+    "lead_cleanup_verified": true,
+    "brevo_contact_cleanup_verified": true,
+    "emails_sent": 0
   }
 }
