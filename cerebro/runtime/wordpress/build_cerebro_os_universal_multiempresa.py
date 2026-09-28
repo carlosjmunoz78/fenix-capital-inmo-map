@@ -2,7 +2,7 @@
 from __future__ import annotations
 import argparse, hashlib, json, pathlib, zipfile
 
-ROOT=pathlib.Path(__file__).resolve().parents[2]
+ROOT=pathlib.Path(__file__).resolve().parents[1]
 SOURCE=ROOT/"wordpress"/"plugins"/"cerebro-os-universal-multiempresa-0.2.0.php"
 VERSION="0.2.0"
 MEMBER="cerebro-os-universal-multiempresa/cerebro-os-universal-multiempresa.php"
