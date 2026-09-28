@@ -185,3 +185,28 @@ Clasificación:
 - contrato lógico `PLUGIN-UNIVERSAL-001`: HECHO V0.
 - ejecución autenticada contra endpoints `cerebro-universal`: POR AUDITAR.
 - cualquier mutación física: PREPROD ONLY + snapshot/rollback + auth válida.
+
+
+## Canary autenticado PREPROD · provider WordPress + rollback
+Se usó el conector autenticado de staging para una prueba controlada sobre un objeto nuevo, sin tocar contenido existente:
+
+1. create draft → post 52300, status draft.
+2. read-back → contenido/slug/status correctos.
+3. trash → success, recoverable.
+4. restore → vuelve a draft.
+5. cleanup final → trash recoverable.
+6. comprobación pública → HTTP 404.
+
+Nunca se publicó y no hubo impacto PROD.
+Evidencia versionada:
+`cerebro/factory/governance/plugin-universal-preprod-provider-canary-2026-09-28.json`.
+
+Esto prueba físicamente:
+- autenticación del provider PREPROD;
+- create/read;
+- rollback trash/restore;
+- cleanup;
+- no exposición pública.
+
+Límite explícito:
+esta prueba usa el provider WordPress autenticado y NO demuestra todavía auth/execute directo de los endpoints protegidos `cerebro-universal/v1`.
