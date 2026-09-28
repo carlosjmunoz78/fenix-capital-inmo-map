@@ -23,6 +23,9 @@ class ReachRoute:
 PUBLIC_API_ROUTES = {
     "profiles_list": ReachRoute("GET", f"{BASE_PATH}/profiles", "READ_ONLY", "discover profiles"),
     "profile_domain": ReachRoute("GET", f"{BASE_PATH}/profiles/{{profile_uuid}}/domains", "READ_ONLY", "verify sending domain"),
+    "profile_features": ReachRoute("GET", f"{BASE_PATH}/profiles/{{profile_uuid}}/features", "READ_ONLY", "plan feature access"),
+    "profile_limits": ReachRoute("GET", f"{BASE_PATH}/profiles/{{profile_uuid}}/limits", "READ_ONLY", "remaining email and recipient limits"),
+    "segments_create": ReachRoute("POST", f"{BASE_PATH}/segmentation/segments", "MUTATION", "create audience segment"),
     "templates_list": ReachRoute("GET", f"{BASE_PATH}/profiles/{{profile_uuid}}/templates", "READ_ONLY", "list reusable templates"),
     "template_create": ReachRoute("POST", f"{BASE_PATH}/profiles/{{profile_uuid}}/templates", "MUTATION_DRAFT", "create reusable email template"),
     "campaigns_list": ReachRoute("GET", f"{BASE_PATH}/profiles/{{profile_uuid}}/campaigns", "READ_ONLY", "list campaigns"),
