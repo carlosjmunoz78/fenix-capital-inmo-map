@@ -42,6 +42,17 @@ class UniversalPluginPreprodCanaryTests(unittest.TestCase):
         self.assertEqual(steps["revision_restore"]["restored_content_marker"], "UPDATED-CONTENT")
         self.assertEqual(steps["update_canary_cleanup"]["resulting_status"], "trash")
 
+    def test_seo_link_and_media_read_canaries(self):
+        self.assertTrue(self.data["seo_metadata_canary_verified"])
+        self.assertTrue(self.data["internal_link_canary_verified"])
+        self.assertTrue(self.data["media_read_canary_verified"])
+        self.assertFalse(self.data["media_write_canary_verified"])
+        steps = {s["step"]: s for s in self.data["sequence"]}
+        self.assertTrue(steps["seo_meta_readback"]["meta_description_verified"])
+        self.assertTrue(steps["seo_meta_readback"]["focus_keyword_verified"])
+        self.assertTrue(steps["internal_link_readback"]["internal_link_verified"])
+        self.assertGreater(steps["media_inventory_read"]["image_count"], 0)
+
     def test_zero_additional_cost(self):
         self.assertEqual(self.data["cost_additional_eur"], 0)
 
