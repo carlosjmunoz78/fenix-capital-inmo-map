@@ -7,6 +7,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Iterable
 
+from cerebro.runtime.wordpress_company_config import load_company_wordpress_config
+
 VALID_ENVIRONMENTS = {"LAB", "PREPROD", "PROD"}
 NEWSLETTER_STREAMS = {"PARTICULARES", "INMOBILIARIAS"}
 
@@ -79,14 +81,15 @@ class NewsletterStreamContract:
 
 
 def fenix_company_profile(environment: str = "PREPROD") -> CompanyWebProfile:
+    config = load_company_wordpress_config("fenix-capital")
     profile = CompanyWebProfile(
-        company_id="fenix-capital",
+        company_id=config["company_id"],
         environment=environment,
-        version="0.1.0",
-        primary_domain="fenixcapital.es",
-        public_email="hipotecas@fenixcapital.es",
-        lead_endpoint="/wp-json/fenix-cerebro/v1/lead",
-        wordpress_base_url="https://fenixcapital.es",
+        version=config["version"],
+        primary_domain=config["primary_domain"],
+        public_email=config["public_email"],
+        lead_endpoint=config["lead_endpoint"],
+        wordpress_base_url=config["wordpress_base_url"],
     )
     profile.validate()
     return profile
