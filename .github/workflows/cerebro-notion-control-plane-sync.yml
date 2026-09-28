@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - preprod-app-phase1
-      - work/finops-supabase-offload-wave1-2026-09-28
     paths:
       - 'cerebro/factory/registry/engine-registry.json'
       - 'cerebro/factory/governance/human-exception-queue-2026-09-07.json'
@@ -66,7 +65,5 @@ jobs:
       - name: Event-driven idempotent mirror
         run: python -m cerebro.runtime.notion_control_plane_sync --apply --sync-date "$(date -u +%F)"
 
-# TEMP CANARY: the current work branch is included only to prove the real PREPROD Notion apply path.
-# Remove the work branch trigger immediately after successful reconciliation.
 # Source of truth remains Git. This workflow is event-driven (path changes), not polling.
 # It never deletes Notion rows, never changes PROD runtime, and adds no paid dependency.
