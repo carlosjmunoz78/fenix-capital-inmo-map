@@ -247,3 +247,15 @@ Cola canónica: `governance/human-exception-queue-2026-09-07.json`.
 - Make required: NO.
 - Additional cost target: 0 €.
 - PROD promotion: DENY.
+
+
+## Newsletter dentro de PLUGIN-UNIVERSAL-001
+- Provider: BREVO FREE · DEFINIDO canónicamente.
+- Hostinger Reach newsletter: RETIRADO/PROHIBIDO.
+- Lead consent -> Brevo audience enrollment: HECHO V0.
+- Dos streams semanales: HECHO contrato.
+- Mínimo 9 bloques por edición: HECHO contrato.
+- Quota guard 300 emails/día: HECHO.
+- API contacts/campaign create/update/schedule/send: HECHO adapter.
+- Credencial/sender/domain/list IDs Brevo reales: POR AUDITAR.
+- Envío real: NO ACTIVADO mientras falte evidencia física.
