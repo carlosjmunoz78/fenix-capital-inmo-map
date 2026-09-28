@@ -70,6 +70,58 @@
       "step": "post_cleanup_public_verify",
       "status": "SUCCESS",
       "http_status": 404
+    },
+    {
+      "step": "schedule_restore",
+      "status": "SUCCESS",
+      "object_id": 52300,
+      "resulting_status": "draft"
+    },
+    {
+      "step": "schedule_future",
+      "status": "SUCCESS",
+      "object_id": 52300,
+      "resulting_status": "future",
+      "scheduled_for": "2026-09-29 03:00:00"
+    },
+    {
+      "step": "schedule_cleanup",
+      "status": "SUCCESS",
+      "object_id": 52300,
+      "resulting_status": "trash",
+      "restorable": true
+    },
+    {
+      "step": "update_canary_create",
+      "status": "SUCCESS",
+      "object_id": 52302,
+      "resulting_status": "draft"
+    },
+    {
+      "step": "update_content_1",
+      "status": "SUCCESS",
+      "object_id": 52302,
+      "content_marker": "UPDATED-CONTENT"
+    },
+    {
+      "step": "update_content_2",
+      "status": "SUCCESS",
+      "object_id": 52302,
+      "content_marker": "UPDATED-SECOND"
+    },
+    {
+      "step": "revision_restore",
+      "status": "SUCCESS",
+      "object_id": 52302,
+      "revision_id": 52303,
+      "restored_content_marker": "UPDATED-CONTENT"
+    },
+    {
+      "step": "update_canary_cleanup",
+      "status": "SUCCESS",
+      "object_id": 52302,
+      "resulting_status": "trash",
+      "restorable": true
     }
   ],
   "published": false,
@@ -80,5 +132,7 @@
   "scope_limit": "This proves an authenticated generic WordPress PREPROD provider create/read/publish/public-verify/rollback path. It does not prove authenticated execution of the protected cerebro-universal/v1 endpoints.",
   "published_canary_verified": true,
   "public_publish_http_status": 200,
-  "public_after_cleanup_http_status": 404
+  "public_after_cleanup_http_status": 404,
+  "scheduling_canary_verified": true,
+  "update_revision_rollback_verified": true
 }
