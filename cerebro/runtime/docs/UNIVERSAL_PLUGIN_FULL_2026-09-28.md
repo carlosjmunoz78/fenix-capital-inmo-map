@@ -461,3 +461,27 @@ Clasificación conservadora:
 - promoción PROD: NO AUTORIZADA.
 
 Se mantiene `DOCUMENTED_PARTIAL` hasta cerrar el endpoint PREPROD/E2E de lead consentido y la promoción formal, sin inflar el estado por inferencia.
+
+
+## E2E PREPROD · lead consentido + Brevo · 28-09-2026
+Se cerró el camino físico de captura sin usar PROD:
+- staging -> `fenix-cerebro/v1/lead` -> `fenix-web-lead-preprod`: HTTP 201;
+- lead sintético creado: SÍ;
+- `consent_privacy=true`: persistido;
+- `consent_marketing=true`: persistido;
+- evento: `accepted`;
+- identidad: `identified`;
+- limpieza posterior en PREPROD: leads=0, events=0, tasks=0.
+
+Además se ejecutó un canary independiente Brevo para el contrato de audiencia:
+- audiencia esperada: PARTICULARES;
+- lista esperada: 17;
+- lista observada: 17;
+- creación contacto: 201;
+- lectura: 200;
+- cleanup: 204;
+- emails enviados: 0;
+- contacto sintético eliminado;
+- función temporal retirada a endpoint inerte y con `verify_jwt=true`.
+
+Importante: esto demuestra captura, persistencia del consentimiento y mapping Brevo, pero NO se eleva a automático el enlace lead->Brevo hasta cablear el worker de enrollment. Estado del motor se mantiene `DOCUMENTED_PARTIAL`.
