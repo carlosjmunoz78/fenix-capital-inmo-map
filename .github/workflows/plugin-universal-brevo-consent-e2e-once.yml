@@ -1,0 +1,30 @@
+name: PLUGIN-UNIVERSAL PREPROD Brevo Consent E2E Once
+
+on:
+  push:
+    branches:
+      - work/finops-supabase-offload-wave1-2026-09-28
+    paths:
+      - ".github/workflows/plugin-universal-brevo-consent-e2e-once.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Run synthetic Brevo consent/list canary
+        shell: bash
+        run: |
+          set -euo pipefail
+          status=$(curl --silent --show-error --location --max-time 20             -o /tmp/brevo-e2e.json             -w '%{http_code}'             -X POST             https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/fenix-brevo-consent-e2e-once)
+          echo "HTTP_STATUS=$status"
+          cat /tmp/brevo-e2e.json
+          test "$status" = "200"
+          grep -Fq '"ok":true' /tmp/brevo-e2e.json
+          grep -Fq '"in_expected_list":true' /tmp/brevo-e2e.json
+          grep -Fq '"cleanup_ok":true' /tmp/brevo-e2e.json
+          grep -Fq '"emails_sent":0' /tmp/brevo-e2e.json
+          echo 'BREVO_CONSENT_LIST_E2E=PASS'
