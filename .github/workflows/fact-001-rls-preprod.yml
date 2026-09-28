@@ -15,6 +15,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: fact-001-rls-preprod-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   rls-old-vs-new:
     runs-on: ubuntu-latest
