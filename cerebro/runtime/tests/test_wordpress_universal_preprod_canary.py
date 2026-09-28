@@ -23,9 +23,12 @@ class UniversalPluginPreprodCanaryTests(unittest.TestCase):
         self.assertEqual(steps["restore"]["resulting_status"], "draft")
         self.assertEqual(steps["final_cleanup_to_trash"]["resulting_status"], "trash")
 
-    def test_canary_is_not_public(self):
+    def test_publish_verify_and_cleanup_are_proved(self):
         steps = {s["step"]: s for s in self.data["sequence"]}
-        self.assertEqual(steps["public_visibility_check"]["http_status"], 404)
+        self.assertTrue(self.data["published_canary_verified"])
+        self.assertEqual(steps["public_publish_verify"]["http_status"], 200)
+        self.assertEqual(steps["post_publish_cleanup_to_trash"]["resulting_status"], "trash")
+        self.assertEqual(steps["post_cleanup_public_verify"]["http_status"], 404)
 
     def test_zero_additional_cost(self):
         self.assertEqual(self.data["cost_additional_eur"], 0)
