@@ -20,6 +20,8 @@ HEX_QUEUE = ROOT / "cerebro/factory/governance/human-exception-queue-2026-09-07.
 NOTION_VERSION = "2025-09-03"
 ENGINE_DS = "f9051714-19e2-462f-ac2b-c85837a672d9"
 HEX_DS = "66843d2a-4e67-40f9-93d0-a66ea091d436"
+GOVERNANCE_DS = "fe5594d3-6e62-4372-8a63-6ac31898bdbc"
+KNOWN_SHARED_DOCUMENTATION_DS = "34037d5e-21e8-4221-b020-b0e6e1a5a14f"
 CANONICAL_CODES = {
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -130,6 +132,13 @@ class Notion:
             detail = exc.read().decode("utf-8", errors="replace")
             raise SyncError(f"notion_http_{exc.code}: {detail[:500]}") from exc
 
+    def can_access(self, data_source_id: str) -> tuple[bool, str]:
+        try:
+            self.request(f"/data_sources/{data_source_id}/query", "POST", {"page_size": 1})
+            return True, "OK"
+        except SyncError as exc:
+            return False, str(exc)
+
     def find_one(self, data_source_id: str, property_name: str, property_type: str, value: str) -> dict[str, Any] | None:
         payload = {
             "page_size": 2,
@@ -190,6 +199,19 @@ def run(apply: bool, sync_date: str) -> dict[str, Any]:
         return summary
 
     notion = Notion(os.environ.get("NOTION_TOKEN", ""))
+    access = {}
+    for name, ds in {
+        "engine_mirror": ENGINE_DS,
+        "human_exception": HEX_DS,
+        "governance_existing": GOVERNANCE_DS,
+        "known_shared_documentation": KNOWN_SHARED_DOCUMENTATION_DS,
+    }.items():
+        ok, detail = notion.can_access(ds)
+        access[name] = {"ok": ok, "detail": detail}
+    summary["preflight"] = access
+    if not access["engine_mirror"]["ok"] or not access["human_exception"]["ok"]:
+        raise SyncError("Notion control-plane target is not shared with the GitHub integration")
+
     for row in plan["engines"]:
         outcome = notion.upsert(ENGINE_DS, "Engine ID", "title", row["key"], row["properties"])
         summary[outcome] += 1
