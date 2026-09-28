@@ -194,3 +194,9 @@
 - Deleted all synthetic contacts used by the canary.
 - Retired temporary canary function to HTTP 410 with JWT verification.
 - Prepared Fénix CEREBRO Leads 1.3.3 with explicit marketing-consent capture; not promoted to PROD without PREPROD evidence.
+
+## 2026-09-29 · Universal WordPress multiempresa standard
+- Registered WP-UNIVERSAL-MULTIEMPRESA-001 as a FACT-001 canonical artifact.
+- Added deterministic ZIP rebuild and Factory tests.
+- Wired artifact/config generation into COMP-ONB-001 Automation Bootstrap.
+- PREPROD by default; no automatic PROD installation; zero additional cost.
