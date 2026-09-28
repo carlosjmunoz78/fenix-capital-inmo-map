@@ -414,3 +414,20 @@ Conclusión canónica:
 
 Evidencia:
 `cerebro/factory/governance/plugin-universal-preprod-physical-probe-2026-09-28.json`.
+
+
+## Rebuild reproducible · Leads 1.3.3
+El candidato PREPROD ya dispone de reconstrucción determinista sin servicios de pago:
+- builder: `cerebro/runtime/wordpress/build_fenix_cerebro_leads_package.py`;
+- salida: `fenix-cerebro-leads-1.3.3.zip` + manifest de build;
+- test de estructura instalable: PASS;
+- test de byte-determinism: PASS;
+- workflow: `PLUGIN-UNIVERSAL Leads 1.3.3 Package`;
+- run: `36491572101` · SUCCESS;
+- artifact ID: `11000364474`;
+- source SHA-256: `b97c5926cf2a20f9888f5831bd730382fc8ce97be83b40163d87764e0bacfb04`;
+- package SHA-256: `4a4afcba55731410b7d3d8866b7cef5345013fe8949a9442809ebdc0ac8467fe`;
+- artifact bundle SHA-256: `f3664809a9e764ec61503e23cde766aa6642a7d8c0ff7460acf0082b2431fef2`;
+- `prod_deploy_authorized=false`.
+
+Conclusión: `rebuild.verified=true` para el artefacto candidato. El backup físico previo a instalación en PREPROD sigue pendiente porque 1.3.3 aún no está desplegado allí; no se marca falsamente como verificado.
