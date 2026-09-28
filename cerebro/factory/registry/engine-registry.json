@@ -429,6 +429,15 @@
     },
     {
       "company_id": null,
+      "engine_id": "PLUGIN-UNIVERSAL-001",
+      "environment": "PREPROD",
+      "manifest": "../examples/PLUGIN-UNIVERSAL-001.engine.json",
+      "source_of_truth": "git+live_wordpress_audit",
+      "status": "DOCUMENTED_PARTIAL",
+      "version": "0.1.0"
+    },
+    {
+      "company_id": null,
       "engine_id": "POL-001",
       "environment": "PREPROD",
       "manifest": "../examples/POL-001.engine.json",
@@ -581,5 +590,5 @@
     }
   ],
   "environment": "PREPROD",
-  "registry_version": "0.20.0"
+  "registry_version": "0.21.0"
 }
