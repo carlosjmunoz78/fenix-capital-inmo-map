@@ -7,7 +7,7 @@ import pathlib
 import zipfile
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
-SOURCE = ROOT / "runtime" / "wordpress" / "plugins" / "fenix-cerebro-leads-1.3.4.php"
+SOURCE = ROOT / "runtime" / "wordpress" / "plugins" / "fenix-cerebro-leads-1.3.5.php"
 PLUGIN_DIR = "fenix-cerebro-leads"
 PLUGIN_FILE = "fenix-cerebro-leads.php"
 
@@ -22,8 +22,8 @@ def sha256(path: pathlib.Path) -> str:
 
 def build(out_dir: pathlib.Path) -> dict:
     out_dir.mkdir(parents=True, exist_ok=True)
-    zip_path = out_dir / "fenix-cerebro-leads-1.3.4.zip"
-    manifest_path = out_dir / "fenix-cerebro-leads-1.3.4.build.json"
+    zip_path = out_dir / "fenix-cerebro-leads-1.3.5.zip"
+    manifest_path = out_dir / "fenix-cerebro-leads-1.3.5.build.json"
 
     if not SOURCE.exists():
         raise SystemExit(f"missing source: {SOURCE}")
@@ -43,7 +43,7 @@ def build(out_dir: pathlib.Path) -> dict:
         "company_id": "fenix-capital",
         "environment": "PREPROD",
         "plugin": "Fénix CEREBRO Leads",
-        "version": "1.3.4",
+        "version": "1.3.5",
         "source": str(SOURCE.relative_to(ROOT)),
         "source_sha256": hashlib.sha256(data).hexdigest(),
         "zip_sha256": sha256(zip_path),
