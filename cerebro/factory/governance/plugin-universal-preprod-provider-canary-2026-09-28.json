@@ -122,6 +122,51 @@
       "object_id": 52302,
       "resulting_status": "trash",
       "restorable": true
+    },
+    {
+      "step": "seo_link_canary_create",
+      "status": "SUCCESS",
+      "object_id": 52306,
+      "resulting_status": "draft",
+      "internal_link": "https://staging.fenixcapital.es/"
+    },
+    {
+      "step": "seo_meta_description_write",
+      "status": "SUCCESS",
+      "object_id": 52306
+    },
+    {
+      "step": "seo_focus_keyword_write",
+      "status": "SUCCESS",
+      "object_id": 52306,
+      "focus_keyword": "cerebro universal preprod"
+    },
+    {
+      "step": "seo_meta_readback",
+      "status": "SUCCESS",
+      "object_id": 52306,
+      "meta_description_verified": true,
+      "focus_keyword_verified": true
+    },
+    {
+      "step": "internal_link_readback",
+      "status": "SUCCESS",
+      "object_id": 52306,
+      "internal_link_verified": true
+    },
+    {
+      "step": "seo_link_canary_cleanup",
+      "status": "SUCCESS",
+      "object_id": 52306,
+      "resulting_status": "trash",
+      "restorable": true
+    },
+    {
+      "step": "media_inventory_read",
+      "status": "SUCCESS",
+      "image_count": 537,
+      "sampled": 5,
+      "write_performed": false
     }
   ],
   "published": false,
@@ -134,5 +179,9 @@
   "public_publish_http_status": 200,
   "public_after_cleanup_http_status": 404,
   "scheduling_canary_verified": true,
-  "update_revision_rollback_verified": true
+  "update_revision_rollback_verified": true,
+  "seo_metadata_canary_verified": true,
+  "internal_link_canary_verified": true,
+  "media_read_canary_verified": true,
+  "media_write_canary_verified": false
 }
