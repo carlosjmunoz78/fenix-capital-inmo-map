@@ -147,3 +147,25 @@ polling baseline is ~48 credits/day or ~1,440 credits/30d before useful work.
 
 Target replacement: Notion event/webhook -> CEREBRO deterministic T-72 rule -> scoped
 Notion PATCH, with a bounded timer only for time-window entry when no edit event occurs.
+
+
+## Facebook master · interim schedule reduction 2026-09-28
+
+Scenario 9533690 remains ACTIVE but its schedule was reduced from 86400s (daily) to
+604800s (weekly).
+
+Evidence:
+- sampled runs 08/09, 14/09, 21/09, 25/09 and 28/09 all consumed 12 credits;
+- the semantic result was the same idempotency state: BLOCKED_EXISTING_WINDOWS;
+- recent runs made no Facebook GetPost/GetReactions/ListComments calls;
+- the only recurring side effect was overwriting an informative Make Data Store record;
+- Facebook connection status is currently expiring.
+
+Expected Make usage changes from ~360 credits/30d to ~52 credits/30d, avoiding roughly
+~308 credits/30d while the weekly schedule remains.
+
+Rollback: restore interval 86400s. Scenario, modules, connections, history and Data Store
+remain intact.
+
+Do not deactivate yet: it still acts as a fallback for future new Facebook publication
+analytics until an event-driven CEREBRO replacement has OLD-vs-NEW parity.
