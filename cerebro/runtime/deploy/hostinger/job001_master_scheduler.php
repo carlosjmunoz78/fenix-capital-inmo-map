@@ -17,14 +17,26 @@ const CONNECT_TIMEOUT_SECONDS = 5;
 const TOTAL_TIMEOUT_SECONDS = 40;
 
 $jobs = [
-    2  => ['name'=>'seo001-weekly-orchestrator',   'schedule'=>'0 6 * * 1'],
-    6  => ['name'=>'seo001-growth-email-worker',   'schedule'=>'7,22,37,52 * * * *'],
-    7  => ['name'=>'seo001-page-quality-probe',    'schedule'=>'8,23,38,53 * * * *'],
-    10 => ['name'=>'seo001-downloadable-qa',       'schedule'=>'17,47 * * * *'],
-    12 => ['name'=>'seo001-lead-magnet-builder',   'schedule'=>'11,26,41,56 * * * *'],
-    13 => ['name'=>'seo001-wp-bridge-probe',       'schedule'=>'3,18,33,48 * * * *'],
-    16 => ['name'=>'seo001-conversion-e2e',        'schedule'=>'13,43 * * * *'],
-    21 => ['name'=>'seo001-mobile-qa',             'schedule'=>'12,42 * * * *'],
+    2  => ['name'=>'seo001-weekly-orchestrator',             'schedule'=>'0 6 * * 1'],
+    5  => ['name'=>'seo001-city-autopilot-worker',            'schedule'=>'*/15 * * * *'],
+    6  => ['name'=>'seo001-growth-email-worker',              'schedule'=>'7,22,37,52 * * * *'],
+    7  => ['name'=>'seo001-page-quality-probe',               'schedule'=>'8,23,38,53 * * * *'],
+    8  => ['name'=>'seo001-active-city-quality-reconcile',    'schedule'=>'10,25,40,55 * * * *'],
+    9  => ['name'=>'seo001-wp-action-worker',                 'schedule'=>'*/5 * * * *'],
+    10 => ['name'=>'seo001-downloadable-qa',                  'schedule'=>'17,47 * * * *'],
+    11 => ['name'=>'seo001-active-city-growth-bootstrap',     'schedule'=>'2,17,32,47 * * * *'],
+    12 => ['name'=>'seo001-lead-magnet-builder',              'schedule'=>'11,26,41,56 * * * *'],
+    13 => ['name'=>'seo001-wp-bridge-probe',                  'schedule'=>'3,18,33,48 * * * *'],
+    14 => ['name'=>'seo001-wp-bridge-reconcile',              'schedule'=>'5,20,35,50 * * * *'],
+    15 => ['name'=>'seo001-active-city-baseline',             'schedule'=>'9,39 * * * *'],
+    16 => ['name'=>'seo001-conversion-e2e',                   'schedule'=>'13,43 * * * *'],
+    17 => ['name'=>'seo001-active-city-nurture-e2e',          'schedule'=>'23,53 * * * *'],
+    18 => ['name'=>'seo001-active-city-form-enable',          'schedule'=>'7,22,37,52 * * * *'],
+    19 => ['name'=>'seo001-growth-control-reconcile',         'schedule'=>'1,16,31,46 * * * *'],
+    20 => ['name'=>'seo001-active-city-autonomy-proof',       'schedule'=>'14,44 * * * *'],
+    21 => ['name'=>'seo001-mobile-qa',                        'schedule'=>'12,42 * * * *'],
+    22 => ['name'=>'seo001-pilot-plugin-certificate',         'schedule'=>'6,21,36,51 * * * *'],
+    23 => ['name'=>'seo001-rollout-control-refresh',          'schedule'=>'7,22,37,52 * * * *'],
 ];
 
 $baseDir = __DIR__;
