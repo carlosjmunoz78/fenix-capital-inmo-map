@@ -11,11 +11,12 @@
     "seo": "cowboy",
     "forms": "hostinger_reach",
     "lead_capture": "fenix_cerebro_leads",
-    "newsletter_draft": "hostinger_reach_api",
+    "newsletter_draft": "brevo",
     "cache": "core_guard",
     "backup": "cowboy",
     "rollback": "cowboy",
-    "rebuild": "cerebro_maintenance"
+    "rebuild": "cerebro_maintenance",
+    "newsletter_send": "brevo"
   },
   "audiences": [
     "PARTICULARES",
@@ -26,13 +27,25 @@
       "stream_id": "newsletter_particulares",
       "audience": "PARTICULARES",
       "cadence": "WEEKLY",
-      "send_enabled": false
+      "send_enabled": false,
+      "provider": "brevo",
+      "minimum_blocks": 9,
+      "enrollment": "marketing_consent_only",
+      "delivery_policy": "brevo_free_300_per_day",
+      "audience_list_key": "FENIX_NEWSLETTER_PARTICULARES",
+      "schedule_strategy": "OPTIMIZE_FROM_HISTORY_FALLBACK_TUESDAY"
     },
     {
       "stream_id": "newsletter_inmobiliarias",
       "audience": "INMOBILIARIAS",
       "cadence": "WEEKLY",
-      "send_enabled": false
+      "send_enabled": false,
+      "provider": "brevo",
+      "minimum_blocks": 9,
+      "enrollment": "marketing_consent_only",
+      "delivery_policy": "brevo_free_300_per_day",
+      "audience_list_key": "FENIX_NEWSLETTER_INMOBILIARIAS",
+      "schedule_strategy": "OPTIMIZE_FROM_HISTORY_FALLBACK_THURSDAY"
     }
   ],
   "policies": {
@@ -40,6 +53,10 @@
     "prod_writes_default": "DENY",
     "additional_cost_eur_target": 0,
     "wpvibe_required": false,
-    "make_required": false
+    "make_required": false,
+    "newsletter_provider": "brevo",
+    "hostinger_reach_newsletter_forbidden": true,
+    "brevo_free_daily_email_limit": 300,
+    "brevo_contact_limit": 100000
   }
-}
+}\n
