@@ -259,3 +259,15 @@ Cola canónica: `governance/human-exception-queue-2026-09-07.json`.
 - API contacts/campaign create/update/schedule/send: HECHO adapter.
 - Credencial/sender/domain/list IDs Brevo reales: POR AUDITAR.
 - Envío real: NO ACTIVADO mientras falte evidencia física.
+
+
+## Brevo newsletter final canary
+- Lists 17/18: HECHO físico.
+- Sender/domain/DKIM/DMARC: HECHO físico.
+- Campaign draft IDs 102/103: HECHO físico.
+- Schedule canaries 104/105: HECHO físico.
+- Safe rollback: SUSPENDED / 0 sends.
+- Synthetic contacts: CLEANED.
+- Temporary canary function: RETIRED 410 + verify_jwt.
+- Marketing-consent plugin 1.3.3: HECHO EN GIT / PREPROD FÍSICO PENDIENTE.
+- PROD newsletter auto-enrollment: NO ACTIVADO hasta consentimiento físico probado.
