@@ -26,7 +26,9 @@ function fail(string $code, array $extra = []): never
         'error' => $code,
         'observed_at' => gmdate('c'),
     ], $extra);
-    fwrite(STDOUT, json_encode($payload, JSON_UNESCAPED_SLASHES) . PHP_EOL);
+    $line = json_encode($payload, JSON_UNESCAPED_SLASHES) . PHP_EOL;
+    file_put_contents(__DIR__ . '/job001_wp_bridge_canary.log', $line, FILE_APPEND | LOCK_EX);
+    fwrite(STDOUT, $line);
     exit(1);
 }
 
@@ -77,4 +79,6 @@ $payload = [
     'observed_at' => gmdate('c'),
 ];
 
-fwrite(STDOUT, json_encode($payload, JSON_UNESCAPED_SLASHES) . PHP_EOL);
+$line = json_encode($payload, JSON_UNESCAPED_SLASHES) . PHP_EOL;
+file_put_contents(__DIR__ . '/job001_wp_bridge_canary.log', $line, FILE_APPEND | LOCK_EX);
+fwrite(STDOUT, $line);
