@@ -128,7 +128,7 @@ def fenix_newsletter_streams() -> tuple[NewsletterStreamContract, ...]:
             audience="PARTICULARES",
             cadence="WEEKLY",
             requires_marketing_consent=True,
-            provider=None,
+            provider="hostinger_reach_api",
             enabled=False,
         ),
         NewsletterStreamContract(
@@ -137,7 +137,7 @@ def fenix_newsletter_streams() -> tuple[NewsletterStreamContract, ...]:
             audience="INMOBILIARIAS",
             cadence="WEEKLY",
             requires_marketing_consent=True,
-            provider=None,
+            provider="hostinger_reach_api",
             enabled=False,
         ),
     )
