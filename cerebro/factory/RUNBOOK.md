@@ -267,3 +267,40 @@ Reglas:
 7. `COMPET-001` puede construirse después de este gate porque sus dependencias públicas quedan cubiertas.
 
 Backup/rebuild: Git + manifest versionado + replay de evidencia. Rollback: `version_engine.py rollback --engine-id SOCAUD-001 --to-version 0.1.0` tras `--plan`, OLD vs NEW y gates.
+
+
+## PLUGIN-UNIVERSAL-001 · Universal WordPress capability gateway V0
+Estado: PREPROD, contrato lógico operativo con runtime físico existente en staging todavía parcialmente auditado.
+
+Reglas:
+1. NO desplegar un plugin universal duplicado: staging ya expone `cerebro-universal/v1`.
+2. CEREBRO usa `PLUGIN-UNIVERSAL-001` como gateway/policy layer y envuelve proveedores existentes.
+3. Toda petición conserva `company_id + engine_id + environment + version` e idempotencia.
+4. PROD writes permanecen DENY salvo promoción explícita.
+5. Mutaciones requieren confirmación/gate de política; faltas de provider/auth fallan cerrado.
+6. WPVibe no es dependencia. Make no es dependencia.
+7. Formularios reutilizan Hostinger Reach/Elementor/Fénix Leads según contrato.
+8. Newsletters: preparación de template + campaign draft soportada; SEND/SCHEDULE permanece UNBOUND hasta provider oficial probado.
+9. Provider canary PREPROD probado con objeto nuevo: create → read → publish → HTTP 200 → trash → HTTP 404. Nunca tocar contenido preexistente para la prueba.
+
+Backup:
+- Git + company config versionada + proveedores WordPress existentes;
+- para cambios sobre contenido existente, snapshot/checkpoint antes de mutar.
+
+Rollback:
+- contenido nuevo de canary: trash/restore;
+- gateway: retirar binding/revertir commit;
+- runtime físico WordPress existente permanece intacto.
+
+Rebuild:
+- checkout Git;
+- cargar `runtime/config/wordpress/<company_id>.json`;
+- descubrir proveedores;
+- reconstruir bindings;
+- verificar contrato de rutas staging;
+- ejecutar tests y canary controlado antes de promoción.
+
+Gates pendientes para autonomía más allá de V0:
+- auth directa del runtime `cerebro-universal/v1` cuando exista transporte autorizado;
+- provider SEND/SCHEDULE de newsletters oficialmente writable;
+- cierre explícito de Core Guard staging si su status permanece `ok=false`.
