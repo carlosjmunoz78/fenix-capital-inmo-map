@@ -6,14 +6,18 @@ on:
       - cerebro/fact-001-factory-v0
     paths:
       - 'cerebro/factory/**'
-      - 'cerebro/runtime/**'
+      - 'cerebro/runtime/**/*.py'
+      - 'cerebro/runtime/contracts/**'
+      - 'cerebro/runtime/deploy/**'
       - '.github/workflows/fact-001-*.yml'
   pull_request:
     branches:
       - preprod-app-phase1
     paths:
       - 'cerebro/factory/**'
-      - 'cerebro/runtime/**'
+      - 'cerebro/runtime/**/*.py'
+      - 'cerebro/runtime/contracts/**'
+      - 'cerebro/runtime/deploy/**'
       - '.github/workflows/fact-001-*.yml'
 
 permissions:
