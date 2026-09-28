@@ -163,7 +163,7 @@ def fenix_live_binding_plan() -> tuple[ProviderBinding, ...]:
         ProviderBinding(Capability.LEAD_CAPTURE, "fenix_cerebro_leads", "fenix-cerebro/v1/lead", "EXTERNAL_DELIVERY"),
         ProviderBinding(Capability.FORM_MANAGE, "hostinger_reach", "forms:get+post", "MUTATION"),
         ProviderBinding(Capability.LEAD_MAGNET, "fenix_cerebro_leads", "lead_magnet_gate", "MUTATION"),
-        ProviderBinding(Capability.NEWSLETTER_MANAGE, "hostinger_reach_api", "template:create+campaign:create_draft", "MUTATION"),
+        ProviderBinding(Capability.NEWSLETTER_MANAGE, "brevo", "contacts+lists+emailCampaigns:create_update_schedule", "MUTATION"),\n        ProviderBinding(Capability.NEWSLETTER_SEND, "brevo", "emailCampaigns:sendNow_or_scheduledAt", "EXTERNAL_DELIVERY"),
         ProviderBinding(Capability.CACHE_READ, "cowboy", "wp_cache_get_provider", "READ_ONLY"),
         ProviderBinding(Capability.CACHE_PURGE, "core_guard", "purge-cache-url", "MUTATION"),
         ProviderBinding(Capability.VERIFY, "core_guard", "live-verify-page", "READ_ONLY"),
