@@ -161,3 +161,15 @@
 - No fusionar hasta que CI esté verde y se cierre el caller inventory crítico aplicable al cambio.
 - No modificar contratos, RLS, Edge Functions o comportamiento PROD desde esta rama.
 - Toda ampliación debe actualizar Registry, dependency map y este changelog.
+
+
+## 2026-09-28 · PLUGIN-UNIVERSAL-001
+- Added logical Universal WordPress capability gateway; no duplicate physical plugin.
+- Added Engine Registry entry and moved Registry to 0.21.0 / 47 engines.
+- Added Fénix company WordPress config and generic multiempresa config schema/loader.
+- Added deterministic contracts/tests for forms, newsletters, Hostinger Reach API boundary and existing staging `cerebro-universal/v1` routes.
+- Recorded live provider inventory and existing Core Guard/Leads/Maintenance/SEO bridge capabilities.
+- Proved authenticated PREPROD provider canary: create draft, read, trash, restore, publish, public HTTP 200, cleanup to trash, public HTTP 404.
+- Added dependency-map edges and anti-duplication rule.
+- Kept newsletter SEND/SCHEDULE and direct protected universal REST writes fail-closed where no verified authorized transport exists.
+- No PROD content or configuration was changed.
