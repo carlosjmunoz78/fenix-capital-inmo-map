@@ -6,7 +6,7 @@ import json
 import pathlib
 import zipfile
 
-ROOT = pathlib.Path(__file__).resolve().parents[3]
+ROOT = pathlib.Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "runtime" / "wordpress" / "plugins" / "fenix-cerebro-leads-1.3.3.php"
 PLUGIN_DIR = "fenix-cerebro-leads"
 PLUGIN_FILE = "fenix-cerebro-leads.php"
@@ -44,7 +44,7 @@ def build(out_dir: pathlib.Path) -> dict:
         "environment": "PREPROD",
         "plugin": "Fénix CEREBRO Leads",
         "version": "1.3.3",
-        "source": str(SOURCE.relative_to(ROOT.parent)),
+        "source": str(SOURCE.relative_to(ROOT)),
         "source_sha256": hashlib.sha256(data).hexdigest(),
         "zip_sha256": sha256(zip_path),
         "zip_member": f"{PLUGIN_DIR}/{PLUGIN_FILE}",
