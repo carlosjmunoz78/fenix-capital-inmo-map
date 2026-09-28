@@ -361,3 +361,27 @@ Se ha preparado `Fénix CEREBRO Leads 1.3.3` en Git con:
 - ninguna alta automática a newsletter si no existe consentimiento.
 
 No se promueve a PROD desde este bloque hasta tener PREPROD físico del plugin o transporte equivalente autorizado.
+
+
+## Transporte WordPress PREPROD · revalidación física 28-09-2026 23:57
+El transporte autenticado de `staging.fenixcapital.es` vuelve a responder mediante el conector WordPress alternativo.
+
+Evidencia física nueva:
+- site info autenticado: SUCCESS;
+- URL confirmada: `https://staging.fenixcapital.es`;
+- WordPress observado: 7.1.2;
+- create draft canary: post 52308 · SUCCESS;
+- read-back del mismo objeto: SUCCESS;
+- cleanup a trash recuperable: SUCCESS;
+- estado final verificado: `trash`;
+- publicación: NO;
+- impacto PROD: 0;
+- coste adicional: 0 €.
+
+Evidencia versionada:
+`cerebro/factory/governance/plugin-universal-preprod-transport-canary-2026-09-28.json`.
+
+Conclusión:
+- transporte autenticado PREPROD para create/read/trash recuperable: CONFIRMADO;
+- esto NO demuestra por sí solo que `Fénix CEREBRO Leads 1.3.3` esté instalado/activo;
+- la versión física del plugin y el E2E de consentimiento marketing siguen POR AUDITAR antes de cualquier promoción a PROD o activación de newsletters reales.
