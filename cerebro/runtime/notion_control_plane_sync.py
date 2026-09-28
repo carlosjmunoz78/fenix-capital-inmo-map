@@ -139,6 +139,21 @@ class Notion:
         except SyncError as exc:
             return False, str(exc)
 
+    def accessible_data_sources(self) -> list[dict[str, str]]:
+        result = self.request("/search", "POST", {
+            "page_size": 100,
+            "filter": {"property": "object", "value": "data_source"},
+            "sort": {"direction": "descending", "timestamp": "last_edited_time"},
+        })
+        out: list[dict[str, str]] = []
+        for row in result.get("results") or []:
+            title = ""
+            raw_title = row.get("title") or []
+            if isinstance(raw_title, list):
+                title = "".join(str(x.get("plain_text") or "") for x in raw_title if isinstance(x, dict))
+            out.append({"id": str(row.get("id") or ""), "title": title[:160]})
+        return out
+
     def find_one(self, data_source_id: str, property_name: str, property_type: str, value: str) -> dict[str, Any] | None:
         payload = {
             "page_size": 2,
@@ -210,7 +225,11 @@ def run(apply: bool, sync_date: str) -> dict[str, Any]:
         access[name] = {"ok": ok, "detail": detail}
     summary["preflight"] = access
     if not access["engine_mirror"]["ok"] or not access["human_exception"]["ok"]:
-        raise SyncError("Notion control-plane target is not shared with the GitHub integration: " + json.dumps(access, sort_keys=True))
+        discovery = notion.accessible_data_sources()
+        raise SyncError(
+            "Notion control-plane target is not shared with the GitHub integration: "
+            + json.dumps({"access": access, "accessible_data_sources": discovery}, sort_keys=True)
+        )
 
     for row in plan["engines"]:
         outcome = notion.upsert(ENGINE_DS, "Engine ID", "title", row["key"], row["properties"])
