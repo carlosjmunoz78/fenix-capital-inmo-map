@@ -282,3 +282,37 @@ No hay evidencia viva en Git de:
 - IDs reales de las dos listas.
 
 Estos cuatro puntos son configuración, no rediseño. Hasta verificarlos `send_enabled=false`.
+
+
+## Brevo · cierre físico PREPROD del transporte newsletter
+
+Evidencia viva 28/09/2026:
+- el secreto BREVO_API_KEY ya está configurado en el runtime PREPROD existente; no se expone;
+- webhook Brevo PREPROD: health 200, configured=true;
+- cuenta: Fénix Capital · plan free;
+- remitente activo: hipotecas@fenixcapital.es;
+- dominio fenixcapital.es: verified=true y authenticated=true;
+- DNS Brevo: código TXT, DKIM1, DKIM2 y DMARC verificados;
+- carpeta creada: FENIX_CEREBRO_NEWSLETTERS · id 16;
+- lista PARTICULARES: FENIX_NEWSLETTER_PARTICULARES · id 17;
+- lista INMOBILIARIAS: FENIX_NEWSLETTER_INMOBILIARIAS · id 18;
+- canary de campaign draft: campañas 102 y 103 creadas en Brevo;
+- emails enviados por el bootstrap: 0;
+- contactos sintéticos usados durante pruebas: eliminados;
+- endpoint temporal de bootstrap: retirado y protegido tras la prueba.
+
+Se descubrió además una restricción del plan gratuito: el campo opcional campaign tag es rechazado. El composer canónico se ha corregido para NO enviar tag; no se ha comprado ni solicitado ningún plan.
+
+### Consentimiento real del lead
+La auditoría viva del plugin Fénix CEREBRO Leads 1.3.2 confirma que el payload ya contempla consent_marketing y el backend PROD persiste consentimiento_comercial para altas nuevas. Sin embargo, la captura genérica del navegador y el hook Elementor actual fuerzan consent_marketing=false. Por tanto NO se puede afirmar todavía que todo lead web entra automáticamente en newsletter.
+
+Contrato cerrado:
+- privacidad != consentimiento comercial;
+- solo consent_marketing=true puede entrar en Brevo;
+- /inmobiliarias/ -> lista 18;
+- resto de leads consentidos -> lista 17;
+- bajas, hard bounce y spam complaint quedan suprimidos;
+- contactos legacy exigen re-permiso;
+- la futura Landing Factory debe implementar este contrato, no inventar otro.
+
+Esto evita activar marketing sin consentimiento y preserva PROD hasta pasar E2E de formulario en PREPROD.
