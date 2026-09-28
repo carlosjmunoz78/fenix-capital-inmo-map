@@ -33,7 +33,7 @@ class UniversalWordPressContractsTests(unittest.TestCase):
         self.assertTrue(all(s.cadence == "WEEKLY" for s in streams))
         self.assertTrue(all(s.requires_marketing_consent for s in streams))
         self.assertTrue(all(not s.enabled for s in streams))
-        self.assertTrue(all(s.provider == "hostinger_reach_api" for s in streams))
+        self.assertTrue(all(s.provider == "brevo" for s in streams))
 
     def test_enabled_newsletter_without_provider_fails_closed(self):
         with self.assertRaises(ValueError):
