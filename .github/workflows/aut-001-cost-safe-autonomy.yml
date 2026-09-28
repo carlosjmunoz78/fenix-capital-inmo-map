@@ -1,0 +1,32 @@
+name: AUT-001 Cost Safe Autonomy
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/runtime/autonomy_guard.py'
+      - 'cerebro/runtime/cost_governor.py'
+      - 'cerebro/runtime/contracts/autonomy_cost_policy.v1.json'
+      - 'cerebro/runtime/tests/test_autonomy_guard.py'
+      - 'cerebro/runtime/tests/test_cost_governor.py'
+      - '.github/workflows/aut-001-cost-safe-autonomy.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  guard-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate autonomy + cost guards
+        run: |
+          python -m unittest             cerebro.runtime.tests.test_cost_governor             cerebro.runtime.tests.test_autonomy_guard             -v
+      - name: Validate policy JSON
+        run: python -m json.tool cerebro/runtime/contracts/autonomy_cost_policy.v1.json >/dev/null
+
+# Deterministic only: no browser, no Supabase, no external API and no model call.
