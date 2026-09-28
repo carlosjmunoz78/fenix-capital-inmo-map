@@ -104,3 +104,25 @@ Esto conserva el requisito de dos newsletters semanales sin afirmar envío autó
 - MULTIEMPRESA CONFIG: HECHO V0 en runtime contract; falta migración del plugin live Fénix-specific a config inyectable.
 - Core Guard abilities de contenido/media/city: existentes en código live; exposición canónica completa sigue POR AUDITAR.
 - PREPROD físico WordPress: POR AUDITAR desde este conector; no se usa PROD para demostrar escrituras.
+
+
+## Reach Public API · evidencia oficial externa
+La referencia pública de Hostinger Reach expone actualmente:
+- profiles/domains/limits;
+- contacts/fields/tags;
+- templates;
+- campaigns GET/POST;
+- campaign statistics;
+- automations GET y automation steps GET.
+
+El POST de campaigns crea exclusivamente un DRAFT. La propia documentación indica que targeting y scheduling no forman parte de esa petición y que el draft se termina/envía desde la interfaz Reach.
+
+Por tanto:
+- `NEWSLETTER_MANAGE` se vincula a creación de template + campaign draft.
+- `NEWSLETTER_SEND` se mantiene deliberadamente UNBOUND.
+- `campaign_schedule` / `campaign_send` / mutation de automations se catalogan como `UNSUPPORTED_V0`.
+- no se inventa endpoint, no se hace scraping del dashboard y no se usa correo transaccional como sustituto de marketing.
+- el contrato está codificado en `hostinger_reach_api_contract.py`.
+
+Resultado funcional V0:
+CEREBRO puede preparar de forma determinista las dos newsletters semanales y dejarlas como borradores versionados/listos para la etapa de envío. El envío semanal 100% autónomo permanece POR AUDITAR hasta disponer de una operación oficial de send/schedule o una automatización oficial writable.
