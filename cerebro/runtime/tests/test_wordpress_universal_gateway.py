@@ -18,7 +18,12 @@ class UniversalPluginGatewayTests(unittest.TestCase):
         self.assertIn("BACKUP", inventory)
         self.assertIn("FORM_MANAGE", inventory)
         self.assertEqual(inventory["FORM_MANAGE"]["provider"], "hostinger_reach")
-        self.assertIn("NEWSLETTER_MANAGE", inventory)\n        self.assertEqual(inventory["NEWSLETTER_MANAGE"]["operation"], "template:create+campaign:create_draft")\n        self.assertNotIn("NEWSLETTER_SEND", inventory)
+        self.assertIn("NEWSLETTER_MANAGE", inventory)
+        self.assertEqual(
+            inventory["NEWSLETTER_MANAGE"]["operation"],
+            "template:create+campaign:create_draft",
+        )
+        self.assertNotIn("NEWSLETTER_SEND", inventory)
 
     def test_scope_mismatch_fails_closed(self):
         gateway = build_fenix_preprod_gateway()
