@@ -30,6 +30,18 @@ class UniversalPluginPreprodCanaryTests(unittest.TestCase):
         self.assertEqual(steps["post_publish_cleanup_to_trash"]["resulting_status"], "trash")
         self.assertEqual(steps["post_cleanup_public_verify"]["http_status"], 404)
 
+    def test_schedule_canary_is_cleaned_up(self):
+        self.assertTrue(self.data["scheduling_canary_verified"])
+        steps = {s["step"]: s for s in self.data["sequence"]}
+        self.assertEqual(steps["schedule_future"]["resulting_status"], "future")
+        self.assertEqual(steps["schedule_cleanup"]["resulting_status"], "trash")
+
+    def test_revision_rollback_is_proved(self):
+        self.assertTrue(self.data["update_revision_rollback_verified"])
+        steps = {s["step"]: s for s in self.data["sequence"]}
+        self.assertEqual(steps["revision_restore"]["restored_content_marker"], "UPDATED-CONTENT")
+        self.assertEqual(steps["update_canary_cleanup"]["resulting_status"], "trash")
+
     def test_zero_additional_cost(self):
         self.assertEqual(self.data["cost_additional_eur"], 0)
 
