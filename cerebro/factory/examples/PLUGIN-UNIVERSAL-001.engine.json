@@ -91,7 +91,9 @@
     "free_tier_300_daily_quota",
     "brevo_campaign_draft_preprod_canary",
     "brevo_domain_sender_lists_verified",
-    "lead_marketing_consent_not_inferred_from_privacy"
+    "lead_marketing_consent_not_inferred_from_privacy",
+    "deterministic_plugin_package_rebuild",
+    "plugin_candidate_integrity_hash"
   ],
   "evaluation": [
     "provider_coverage",
@@ -133,8 +135,16 @@
     "evidence": "plugin-universal-preprod-provider-canary-2026-09-28.json"
   },
   "rebuild": {
-    "strategy": "git_checkout_plus_provider_discovery_plus_registry_manifest",
-    "verified": false
+    "strategy": "git_checkout_plus_deterministic_python_builder_plus_provider_discovery_plus_registry_manifest",
+    "verified": true,
+    "evidence": [
+      "cerebro/runtime/wordpress/build_fenix_cerebro_leads_package.py",
+      "cerebro/runtime/tests/test_fenix_cerebro_leads_rebuild.py",
+      "GitHub Actions run 36491572101",
+      "artifact 11000364474",
+      "source_sha256 b97c5926cf2a20f9888f5831bd730382fc8ce97be83b40163d87764e0bacfb04",
+      "package_sha256 4a4afcba55731410b7d3d8866b7cef5345013fe8949a9442809ebdc0ac8467fe"
+    ]
   },
   "dependencies": [
     "ACTGW-001",
@@ -188,6 +198,7 @@
     "Brevo free plan guard modeled at 300 emails/day and 100000 stored contacts",
     "Brevo PREPROD physical bootstrap: active sender hipotecas@fenixcapital.es; fenixcapital.es authenticated; folder 16; lists PARTICULARES=17, INMOBILIARIAS=18",
     "Brevo campaign draft canary created campaigns 102 and 103 with zero sends; temporary bootstrap retired after canary",
-    "current Fenix CEREBRO Leads 1.3.2 forwards consent_marketing but generic browser/Elementor capture currently sets it false; explicit marketing checkbox required before PROD enrollment"
+    "current Fenix CEREBRO Leads 1.3.2 forwards consent_marketing but generic browser/Elementor capture currently sets it false; explicit marketing checkbox required before PROD enrollment",
+    "Leads 1.3.3 deterministic PREPROD candidate artifact built in GitHub Actions run 36491572101; artifact 11000364474; 2 rebuild tests PASS; no PROD deploy authorization"
   ]
 }
