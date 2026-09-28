@@ -92,3 +92,20 @@ Do **not** disable Supabase pg_cron job 13 yet.
 - legacy pg_cron job 13 remains ON during the observation window.
 
 Only after this gate may the project design a no-double-execution cut-over that preserves health evidence and rollback.
+
+
+## Self-logging hardening · 2026-09-28
+
+A backup was created on Hostinger before modifying the live canary:
+
+`/home/u497370767/domains/fenixcapital.es/cerebro/job001_wp_bridge_canary_BACKUP_20260928.php`
+
+The live PHP runner was hardened to append its own JSON evidence to:
+
+`/home/u497370767/domains/fenixcapital.es/cerebro/job001_wp_bridge_canary.log`
+
+This removes reliance on hPanel shell redirection for audit evidence.
+
+Manual post-patch execution at `2026-09-28T10:08:30+00:00` returned `ok:true`, HTTP 200, and the same record was present in the self-managed log. Another self-log record exists at `10:08:02+00:00`.
+
+Self-logging is therefore **CONFIRMED**. Scheduled execution of the sole final `*/15` entry still requires one post-cleanup timestamp that lands on the scheduled cadence before the cron itself is marked fully confirmed.
