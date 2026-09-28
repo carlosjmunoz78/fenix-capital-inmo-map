@@ -61,19 +61,20 @@
   },
   "brevo": {
     "api_key_env": "BREVO_API_KEY",
-    "sender_email": null,
+    "sender_email": "hipotecas@fenixcapital.es",
     "sender_name": "Fénix Capital",
     "reply_to": "hipotecas@fenixcapital.es",
-    "domain_authenticated": null,
+    "domain_authenticated": true,
     "audience_list_ids": {
-      "PARTICULARES": null,
-      "INMOBILIARIAS": null
+      "PARTICULARES": 17,
+      "INMOBILIARIAS": 18
     },
     "free_plan": {
       "daily_email_limit": 300,
       "stored_contact_limit": 100000,
       "automation_contact_limit": 2000
     },
-    "activation_gate": "VERIFY_API_KEY_SENDER_DOMAIN_AND_LIST_IDS"
+    "activation_gate": "PREPROD_CONFIG_VERIFIED_SEND_DISABLED_UNTIL_E2E_WEEKLY_ORCHESTRATOR",
+    "folder_id": 16
   }
 }
