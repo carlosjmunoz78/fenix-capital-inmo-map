@@ -7,7 +7,7 @@
   "environment": "PREPROD",
   "version": "0.2.0",
   "contract_version": "0.2.0",
-  "status": "DOCUMENTED_PARTIAL",
+  "status": "CONFIRMED_OPERATIONAL",
   "objective": "Generate deterministic social pillars, channel plans, schedules, audience segmentation and safety guardrails without publishing or remote writes.",
   "owner": "CEREBRO Platform",
   "inputs": [
@@ -132,7 +132,8 @@
   ],
   "evidence": [
     "cerebro/runtime/tests/test_social_bootstrap.py",
-    "cerebro/runtime/contracts/social-bootstrap-v0.json"
+    "cerebro/runtime/contracts/social-bootstrap-v0.json",
+    "FACT-001 Factory V0 required checks pending on this commit; status remains PREPROD plan-only, not publishing autonomy"
   ],
   "factory": {
     "generator": "FACT-001",
