@@ -431,3 +431,33 @@ El candidato PREPROD ya dispone de reconstrucción determinista sin servicios de
 - `prod_deploy_authorized=false`.
 
 Conclusión: `rebuild.verified=true` para el artefacto candidato. El backup físico previo a instalación en PREPROD sigue pendiente porque 1.3.3 aún no está desplegado allí; no se marca falsamente como verificado.
+
+
+## Cierre post-subida manual PREPROD · 28-09-2026
+Tras la subida manual autorizada por el operador se ejecutó una única verificación corta, evitando pruebas redundantes.
+
+Evidencia física observada en staging:
+- `FenixCerebroLead`: PRESENTE;
+- `consent_marketing`: PRESENTE;
+- checkbox comercial explícito: PRESENTE;
+- namespace `fenix-cerebro/v1`: PRESENTE;
+- `cerebro-universal/v1`: PRESENTE;
+- `cerebro-universal-qa/v1`: PRESENTE;
+- callback local `/wp-json/fenix-cerebro/v1/lead`: VALIDACIÓN LOCAL OPERATIVA;
+- payload vacío: `422 identifier_required`;
+- lead creado: NO;
+- reenvío backend necesario para la prueba: NO;
+- impacto PROD: 0.
+
+La rama contiene además el candidato `Fénix CEREBRO Leads 1.3.4`, cuyo cambio de seguridad hace fail-closed en `staging.fenixcapital.es` cuando no existe un endpoint PREPROD explícito. No se utiliza PROD como banco de pruebas.
+
+Clasificación conservadora:
+- plugin funcional en PREPROD: CONFIRMADO;
+- consentimiento comercial explícito en frontend: CONFIRMADO;
+- versión exacta 1.3.4 por introspección runtime: NO DEMOSTRADA por la sonda actual;
+- backup físico previo a la sustitución manual: NO VERIFICADO;
+- rollback de contenido/proveedor: VERIFICADO;
+- rollback físico del binario tras esta subida concreta: NO REEJECUTADO;
+- promoción PROD: NO AUTORIZADA.
+
+Se mantiene `DOCUMENTED_PARTIAL` hasta cerrar el endpoint PREPROD/E2E de lead consentido y la promoción formal, sin inflar el estado por inferencia.
