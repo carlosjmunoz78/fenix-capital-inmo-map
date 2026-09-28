@@ -48,6 +48,7 @@ class BrevoNewsletterComposerTests(unittest.TestCase):
         self.assertEqual(payload["recipients"]["listIds"], [10])
         self.assertEqual(payload["scheduledAt"], "2026-09-29T10:30:00+02:00")
         self.assertIn("htmlContent", payload)
+        self.assertNotIn("tag", payload)
 
 
 if __name__ == "__main__":
