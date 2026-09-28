@@ -145,6 +145,7 @@ add_action('elementor_pro/forms/new_record', function ($record, $handler) {
         'name' => fenix_cerebro_pick_elementor_field($raw, ['nombre', 'name']),
         'landing_url' => wp_get_referer() ?: home_url('/'),
         'consent_privacy' => true,
+        'consent_marketing' => (bool)fenix_cerebro_pick_elementor_field($raw, ['marketing', 'newsletter', 'comercial', 'novedades']),
     ]);
     if (empty($payload['email']) && empty($payload['phone'])) return;
 
@@ -205,7 +206,7 @@ add_action('wp_enqueue_scripts', function () {
     wrap=document.createElement('div');
     wrap.id='fenix-lead-gate';
     wrap.style.cssText='position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.62);display:flex;align-items:center;justify-content:center;padding:18px';
-    wrap.innerHTML='<div style="width:min(520px,100%);background:#fff;border-radius:16px;padding:26px;box-shadow:0 20px 70px rgba(0,0,0,.35);font-family:inherit;color:#111"><button type="button" data-close style="float:right;border:0;background:transparent;font-size:25px;cursor:pointer">×</button><h2 style="margin:0 32px 8px 0">'+(opts.title||'Déjanos tu correo')+'</h2><p style="margin:0 0 18px">'+(opts.subtitle||'Te enviamos el siguiente paso y, si quieres, te llamamos para revisar tu caso.')+'</p><form><label>Correo electrónico *<input type="email" name="email" required style="width:100%;margin:6px 0 12px;padding:12px"></label><label>Nombre<input type="text" name="name" style="width:100%;margin:6px 0 12px;padding:12px"></label><label>Teléfono<input type="tel" name="phone" style="width:100%;margin:6px 0 12px;padding:12px"></label><label style="display:flex;gap:8px;align-items:flex-start;margin:4px 0 14px"><input type="checkbox" name="privacy" required> <span>He leído la información de privacidad.</span></label><button type="submit" style="width:100%;padding:13px;cursor:pointer">'+(opts.cta||'Continuar')+'</button><div data-msg style="min-height:22px;margin-top:10px;font-size:14px"></div></form></div>';
+    wrap.innerHTML='<div style="width:min(520px,100%);background:#fff;border-radius:16px;padding:26px;box-shadow:0 20px 70px rgba(0,0,0,.35);font-family:inherit;color:#111"><button type="button" data-close style="float:right;border:0;background:transparent;font-size:25px;cursor:pointer">×</button><h2 style="margin:0 32px 8px 0">'+(opts.title||'Déjanos tu correo')+'</h2><p style="margin:0 0 18px">'+(opts.subtitle||'Te enviamos el siguiente paso y, si quieres, te llamamos para revisar tu caso.')+'</p><form><label>Correo electrónico *<input type="email" name="email" required style="width:100%;margin:6px 0 12px;padding:12px"></label><label>Nombre<input type="text" name="name" style="width:100%;margin:6px 0 12px;padding:12px"></label><label>Teléfono<input type="tel" name="phone" style="width:100%;margin:6px 0 12px;padding:12px"></label><label style="display:flex;gap:8px;align-items:flex-start;margin:4px 0 10px"><input type="checkbox" name="privacy" required> <span>He leído la información de privacidad.</span></label><label style="display:flex;gap:8px;align-items:flex-start;margin:4px 0 14px"><input type="checkbox" name="marketing"> <span>Quiero recibir información, novedades, recursos y comunicaciones comerciales de Fénix Capital.</span></label><button type="submit" style="width:100%;padding:13px;cursor:pointer">'+(opts.cta||'Continuar')+'</button><div data-msg style="min-height:22px;margin-top:10px;font-size:14px"></div></form></div>';
     document.body.appendChild(wrap);
     wrap.querySelector('[data-close]').addEventListener('click',()=>wrap.remove());
     wrap.addEventListener('click',e=>{if(e.target===wrap)wrap.remove()});
@@ -224,7 +225,7 @@ add_action('wp_enqueue_scripts', function () {
         utm_medium:params.get('utm_medium')||'',
         utm_campaign:params.get('utm_campaign')||'',
         consent_privacy:true,
-        consent_marketing:false,
+        consent_marketing:checked(form,['input[name="marketing"]']),
         website:''
       };
       msg.textContent='Preparando…';
@@ -321,7 +322,7 @@ add_action('wp_enqueue_scripts', function () {
     if(!email&&!phone)return;
     const name=val(form,['input[name*="name" i]','input[name*="nombre" i]']);
     const params=new URLSearchParams(location.search);
-    const payload={email,phone,name,source:'web',landing_url:location.href,utm_source:params.get('utm_source')||'',utm_medium:params.get('utm_medium')||'',utm_campaign:params.get('utm_campaign')||'',consent_privacy:checked(form,['input[type="checkbox"][name*="priv" i]','input[type="checkbox"][name*="consent" i]']),consent_marketing:false,website:''};
+    const payload={email,phone,name,source:'web',landing_url:location.href,utm_source:params.get('utm_source')||'',utm_medium:params.get('utm_medium')||'',utm_campaign:params.get('utm_campaign')||'',consent_privacy:checked(form,['input[type="checkbox"][name*="priv" i]','input[type="checkbox"][name*="consent" i]']),consent_marketing:checked(form,['input[type="checkbox"][name*="marketing" i]','input[type="checkbox"][name*="newsletter" i]','input[type="checkbox"][name*="comercial" i]']),website:''};
     const idem='browser-'+crypto.randomUUID();
     fetch(cfg.restUrl,{method:'POST',credentials:'same-origin',keepalive:true,headers:{'Content-Type':'application/json','x-fenix-idempotency-key':idem},body:JSON.stringify(payload)}).catch(()=>{});
   },true);
