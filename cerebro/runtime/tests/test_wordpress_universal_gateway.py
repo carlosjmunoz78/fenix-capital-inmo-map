@@ -16,7 +16,8 @@ class UniversalPluginGatewayTests(unittest.TestCase):
         self.assertIn("LEAD_CAPTURE", inventory)
         self.assertIn("CONTENT_PUBLISH", inventory)
         self.assertIn("BACKUP", inventory)
-        self.assertNotIn("FORM_MANAGE", inventory)
+        self.assertIn("FORM_MANAGE", inventory)
+        self.assertEqual(inventory["FORM_MANAGE"]["provider"], "hostinger_reach")
         self.assertNotIn("NEWSLETTER_MANAGE", inventory)
 
     def test_scope_mismatch_fails_closed(self):
