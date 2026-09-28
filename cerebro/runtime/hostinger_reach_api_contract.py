@@ -57,4 +57,5 @@ def can_autonomously_send_campaign() -> bool:
 
 
 def newsletter_preparation_capabilities() -> tuple[str, ...]:
-    return ("template_create", "campaign_create_draft", "campaign_stats")
+    """Newsletter usage is intentionally forbidden; Brevo is canonical."""
+    return ()
