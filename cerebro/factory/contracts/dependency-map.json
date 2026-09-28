@@ -1,5 +1,5 @@
 {
-  "map_version": "0.12.0",
+  "map_version": "0.13.0",
   "environment": "PREPROD_AUDIT",
   "nodes": [
     {
@@ -145,6 +145,10 @@
     {
       "id": "Fenix CEREBRO Maintenance",
       "type": "wordpress_plugin"
+    },
+    {
+      "id": "SOCBOOT-001",
+      "type": "engine"
     }
   ],
   "edges": [
@@ -507,6 +511,31 @@
       "from": "PLUGIN-UNIVERSAL-001",
       "to": "Brevo",
       "kind": "canonical newsletter contacts/lists/campaign scheduling and send provider"
+    },
+    {
+      "from": "SOCBOOT-001",
+      "to": "SOCAUD-001",
+      "kind": "social audit evidence"
+    },
+    {
+      "from": "SOCBOOT-001",
+      "to": "BMD-001",
+      "kind": "business model and audience context"
+    },
+    {
+      "from": "SOCBOOT-001",
+      "to": "COMPET-001",
+      "kind": "optional competitor/content context"
+    },
+    {
+      "from": "SOCBOOT-001",
+      "to": "KBOOT-001",
+      "kind": "optional knowledge bootstrap context"
+    },
+    {
+      "from": "COMP-ONB-001",
+      "to": "SOCBOOT-001",
+      "kind": "social bootstrap step; explicit orchestration only"
     }
   ],
   "known_risks": [
@@ -529,7 +558,8 @@
     "staging cerebro-universal protected endpoints return 401 without auth; do not bypass or copy credentials",
     "Brevo free plan has a daily sending quota; scheduler must split recipients into <=300-email daily waves",
     "marketing consent must be explicit and evidenced before adding a lead to a Brevo newsletter audience",
-    "Hostinger Reach must never be used as newsletter fallback"
+    "Hostinger Reach must never be used as newsletter fallback",
+    "SOCBOOT-001 V0.2 generates plans only; it must not publish, schedule, message or enable PROD without physical channel, idempotency, queue, brand, claims, funnel and rollback evidence."
   ],
   "rule": "No dependency is removed or consolidated until all callers are inventoried and PREPROD equivalence plus rollback are proven."
 }
