@@ -179,4 +179,4 @@
     "Brevo official API supports contacts/lists, campaign create/update, scheduledAt and sendNow",
     "Brevo free plan guard modeled at 300 emails/day and 100000 stored contacts"
   ]
-}\n
+}
