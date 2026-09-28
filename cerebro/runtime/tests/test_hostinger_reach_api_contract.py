@@ -24,10 +24,8 @@ class HostingerReachApiContractTests(unittest.TestCase):
         spec = route("campaigns_list", profile_uuid="profile-1")
         self.assertEqual(spec.path_template, "/api/reach/v1/profiles/profile-1/campaigns")
 
-    def test_newsletter_preparation_does_not_claim_send(self):
-        caps = newsletter_preparation_capabilities()
-        self.assertIn("campaign_create_draft", caps)
-        self.assertNotIn("campaign_send", caps)
+    def test_newsletter_preparation_is_fully_disabled(self):
+        self.assertEqual(newsletter_preparation_capabilities(), ())
 
 
 if __name__ == "__main__":
