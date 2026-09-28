@@ -222,3 +222,63 @@ Sobre el mismo objeto de prueba PREPROD 52300:
 
 La prueba no tocó PROD ni contenido preexistente. El objeto final queda recuperable en trash.
 Esto demuestra físicamente el camino provider autenticado de create → read → publish → public verify → rollback/cleanup en PREPROD.
+
+
+## Corrección canónica · newsletters SOLO BREVO
+Decisión de negocio confirmada: Hostinger Reach NO se usa para newsletters, ni para borrador, ni para scheduling, ni para envío. Puede seguir existiendo para formularios si aporta valor, pero queda fuera del canal newsletter.
+
+Proveedor canónico:
+- Brevo Free.
+- API oficial: contactos/listas + campañas.
+- alta/actualización de contactos: POST /v3/contacts;
+- creación de campaña: POST /v3/emailCampaigns;
+- actualización/programación: PUT /v3/emailCampaigns/:id con scheduledAt;
+- envío inmediato: POST /v3/emailCampaigns/:id/sendNow.
+
+Límites gratuitos modelados:
+- 300 emails/día;
+- hasta 100.000 contactos almacenados;
+- automatizaciones activas limitadas a 2.000 contactos únicos.
+El runtime NO comprará plan superior automáticamente. Cuando una edición supera la capacidad diaria, se divide en waves <=300/día y se difiere el resto sin coste.
+
+### Flujo lead → newsletter
+1. Lead entra por formulario/lead magnet.
+2. Debe existir marketing_consent=true y evidencia de origen/fecha.
+3. Se clasifica audiencia: PARTICULARES o INMOBILIARIAS.
+4. CEREBRO genera idempotency_key por lead+audiencia.
+5. Brevo upsert de contacto con updateEnabled=true.
+6. Se añade exclusivamente a la lista Brevo de esa audiencia.
+7. Baja, hard bounce o falta de consentimiento bloquean el alta.
+8. Contactos antiguos requieren re-permiso; no se importan agresivamente.
+
+### Dos newsletters semanales separadas
+- newsletter_particulares
+- newsletter_inmobiliarias
+
+Nunca se mezclan audiencias. Cada edición exige al menos nueve bloques distintos:
+1. Apertura editorial.
+2. Actualidad.
+3. Guía educativa.
+4. Landing destacada.
+5. Servicio destacado.
+6. Caso práctico anonimizado.
+7. Recurso/descargable/herramienta.
+8. FAQ o mito.
+9. CTA principal.
+
+CEREBRO puede añadir bloques adicionales según actualidad, rendimiento, campañas, SEO, nuevas landings, estacionalidad y aprendizaje. El contenido de inmobiliarias se orienta a operaciones caídas/riesgo, filtro financiero, colaboración, recursos B2B y casos de operación; particulares a hipotecas, actualidad, educación financiera, herramientas, servicios y asesoramiento.
+
+### Contratos nuevos
+- `brevo_newsletter_contract.py`: consentimiento, audiencias, nueve bloques y quota planner.
+- `brevo_newsletter_client.py`: adapter Marketing API sin secretos en código.
+- `brevo_newsletter_composer.py`: HTML y campaign payload.
+- `newsletter_enrollment.py`: evento lead consentido → lista Brevo.
+
+### Gate físico pendiente antes de activar envío real
+No hay evidencia viva en Git de:
+- `BREVO_API_KEY` configurada en runtime;
+- email remitente Brevo validado;
+- autenticación de dominio SPF/DKIM/DMARC en Brevo;
+- IDs reales de las dos listas.
+
+Estos cuatro puntos son configuración, no rediseño. Hasta verificarlos `send_enabled=false`.
