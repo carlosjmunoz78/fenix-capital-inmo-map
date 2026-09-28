@@ -126,3 +126,62 @@ Por tanto:
 
 Resultado funcional V0:
 CEREBRO puede preparar de forma determinista las dos newsletters semanales y dejarlas como borradores versionados/listos para la etapa de envío. El envío semanal 100% autónomo permanece POR AUDITAR hasta disponer de una operación oficial de send/schedule o una automatización oficial writable.
+
+
+## Descubrimiento crítico · runtime universal YA EXISTE en STAGING
+
+Lectura pública del índice REST de `https://staging.fenixcapital.es/wp-json/` demuestra físicamente los namespaces:
+- `cerebro-universal/v1`
+- `cerebro-universal-qa/v1`
+
+Superficie `cerebro-universal/v1` observada:
+- GET `b3/storage-observer`
+- POST `batch/preview`
+- POST `command`
+- GET `command/catalog`
+- POST `queue/submit`
+- GET `queue/status`
+- GET `b3/preflight`
+- GET `status`
+- GET `capabilities`
+- POST `operation`
+
+QA observada:
+- POST `cerebro-universal-qa/v1/create-draft-live-once`
+
+Seguridad observada:
+- el namespace root es discoverable;
+- endpoints protegidos como `status`, `capabilities`, `queue/status` responden 401 sin autenticación;
+- un POST vacío controlado a `create-draft-live-once` respondió 401;
+- no se produjo escritura.
+
+Decisión arquitectónica obligatoria:
+**NO crear ni desplegar un plugin universal duplicado.**
+`PLUGIN-UNIVERSAL-001` en CEREBRO OS se redefine como contrato/gateway/policy layer que ENVUELVE el runtime físico existente de staging y reutiliza proveedores existentes.
+
+Contrato congelado:
+`cerebro/runtime/contracts/wordpress-universal-staging-v0.json`.
+
+## Estado físico PREPROD relacionado
+`fenix-guard/v1/cerebro/status` en staging responde 200 y confirma:
+- Core Guard `1.0.0-rc9`;
+- build channel `preprod`;
+- mode `observer`;
+- tablas listas;
+- jobs sin pendientes;
+- cron jobs + maintenance presentes;
+- smoke HTTP/body/H1 verde;
+- cache orchestrator previo verde.
+
+Pero `ok=false` porque `operations_locked=false`. Por tanto PREPROD existe físicamente pero NO se declara completamente verde.
+
+También:
+- `fenix-cerebro/v1` no está presente en staging (404);
+- `city-autocert-status` no está presente en ese build rc9 (404);
+- health/readiness protegidos responden 401 sin credencial.
+
+Clasificación:
+- runtime universal físico STAGING: EXISTENTE / PARCIAL.
+- contrato lógico `PLUGIN-UNIVERSAL-001`: HECHO V0.
+- ejecución autenticada contra endpoints `cerebro-universal`: POR AUDITAR.
+- cualquier mutación física: PREPROD ONLY + snapshot/rollback + auth válida.
