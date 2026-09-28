@@ -27,8 +27,11 @@ def load_company_wordpress_config(company_id: str) -> dict[str, Any]:
     if data.get("policies", {}).get("prod_writes_default") != "DENY":
         raise CompanyWordPressConfigError("prod writes must default DENY")
     streams = data.get("newsletter_streams") or []
-    if {x.get("audience") for x in streams} != {"PARTICULARES", "INMOBILIARIAS"}:
-        raise CompanyWordPressConfigError("two canonical Fenix audiences required")
+    stream_ids = [str(x.get("stream_id") or "") for x in streams]
+    if any(not value for value in stream_ids) or len(stream_ids) != len(set(stream_ids)):
+        raise CompanyWordPressConfigError("newsletter stream ids must be present and unique")
+    if any(str(x.get("cadence") or "") not in {"WEEKLY", "MONTHLY", "MANUAL"} for x in streams):
+        raise CompanyWordPressConfigError("invalid newsletter cadence")
     if any(x.get("send_enabled") is not False for x in streams):
         raise CompanyWordPressConfigError("newsletter send cannot be enabled before provider promotion")
     return data
