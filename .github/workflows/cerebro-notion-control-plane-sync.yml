@@ -9,6 +9,15 @@ on:
       - 'cerebro/factory/governance/human-exception-queue-2026-09-07.json'
       - 'cerebro/runtime/notion_control_plane_sync.py'
       - '.github/workflows/cerebro-notion-control-plane-sync.yml'
+  pull_request:
+    branches:
+      - preprod-app-phase1
+    paths:
+      - 'cerebro/factory/registry/engine-registry.json'
+      - 'cerebro/factory/governance/human-exception-queue-2026-09-07.json'
+      - 'cerebro/runtime/notion_control_plane_sync.py'
+      - 'cerebro/runtime/tests/test_notion_control_plane_sync.py'
+      - '.github/workflows/cerebro-notion-control-plane-sync.yml'
   workflow_dispatch:
     inputs:
       apply:
