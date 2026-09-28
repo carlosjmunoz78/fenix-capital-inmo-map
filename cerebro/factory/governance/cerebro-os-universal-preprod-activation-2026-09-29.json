@@ -1,0 +1,15 @@
+{
+  "evidence_id": "CEREBRO-OS-UNIVERSAL-PREPROD-ACTIVATION-2026-09-29",
+  "engine_id": "PLUGIN-UNIVERSAL-001",
+  "company_id": "fenix-capital",
+  "environment": "PREPROD",
+  "workflow_run_id": 36495689492,
+  "http_status": 200,
+  "plugin": "CEREBRO OS Universal Gateway",
+  "plugin_version": "0.1.0",
+  "existing_universal_runtime": true,
+  "lead_module": "delegated_to_existing_fenix_leads",
+  "prod_mutations_allowed": false,
+  "cost_additional_eur": 0,
+  "status": "CONFIRMED_OPERATIONAL_PREPROD"
+}
