@@ -12,17 +12,73 @@
     "slug": "cerebro-universal-preprod-canary-2026-09-28"
   },
   "sequence": [
-    {"step": "create_draft", "status": "SUCCESS", "resulting_status": "draft"},
-    {"step": "read_back", "status": "SUCCESS", "resulting_status": "draft"},
-    {"step": "trash", "status": "SUCCESS", "resulting_status": "trash", "restorable": true},
-    {"step": "restore", "status": "SUCCESS", "resulting_status": "draft"},
-    {"step": "final_cleanup_to_trash", "status": "SUCCESS", "resulting_status": "trash", "restorable": true},
-    {"step": "public_visibility_check", "status": "SUCCESS", "http_status": 404}
+    {
+      "step": "create_draft",
+      "status": "SUCCESS",
+      "resulting_status": "draft"
+    },
+    {
+      "step": "read_back",
+      "status": "SUCCESS",
+      "resulting_status": "draft"
+    },
+    {
+      "step": "trash",
+      "status": "SUCCESS",
+      "resulting_status": "trash",
+      "restorable": true
+    },
+    {
+      "step": "restore",
+      "status": "SUCCESS",
+      "resulting_status": "draft"
+    },
+    {
+      "step": "final_cleanup_to_trash",
+      "status": "SUCCESS",
+      "resulting_status": "trash",
+      "restorable": true
+    },
+    {
+      "step": "public_visibility_check",
+      "status": "SUCCESS",
+      "http_status": 404
+    },
+    {
+      "step": "restore_for_publish_test",
+      "status": "SUCCESS",
+      "resulting_status": "draft"
+    },
+    {
+      "step": "publish_canary",
+      "status": "SUCCESS",
+      "resulting_status": "publish",
+      "url": "https://staging.fenixcapital.es/cerebro-universal-preprod-canary-2026-09-28/"
+    },
+    {
+      "step": "public_publish_verify",
+      "status": "SUCCESS",
+      "http_status": 200
+    },
+    {
+      "step": "post_publish_cleanup_to_trash",
+      "status": "SUCCESS",
+      "resulting_status": "trash",
+      "restorable": true
+    },
+    {
+      "step": "post_cleanup_public_verify",
+      "status": "SUCCESS",
+      "http_status": 404
+    }
   ],
   "published": false,
   "prod_impact": false,
   "rollback_proved": true,
   "final_state": "trash_recoverable",
   "cost_additional_eur": 0,
-  "scope_limit": "This proves an authenticated generic WordPress PREPROD provider write/read/rollback path. It does not prove authenticated execution of the protected cerebro-universal/v1 endpoints."
+  "scope_limit": "This proves an authenticated generic WordPress PREPROD provider create/read/publish/public-verify/rollback path. It does not prove authenticated execution of the protected cerebro-universal/v1 endpoints.",
+  "published_canary_verified": true,
+  "public_publish_http_status": 200,
+  "public_after_cleanup_http_status": 404
 }
