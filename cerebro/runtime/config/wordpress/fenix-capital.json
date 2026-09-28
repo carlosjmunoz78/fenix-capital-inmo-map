@@ -1,0 +1,45 @@
+{
+  "company_id": "fenix-capital",
+  "version": "0.1.0",
+  "brand": "Fénix Capital",
+  "primary_domain": "fenixcapital.es",
+  "wordpress_base_url": "https://fenixcapital.es",
+  "public_email": "hipotecas@fenixcapital.es",
+  "lead_endpoint": "/wp-json/fenix-cerebro/v1/lead",
+  "providers": {
+    "content": "cowboy",
+    "seo": "cowboy",
+    "forms": "hostinger_reach",
+    "lead_capture": "fenix_cerebro_leads",
+    "newsletter_draft": "hostinger_reach_api",
+    "cache": "core_guard",
+    "backup": "cowboy",
+    "rollback": "cowboy",
+    "rebuild": "cerebro_maintenance"
+  },
+  "audiences": [
+    "PARTICULARES",
+    "INMOBILIARIAS"
+  ],
+  "newsletter_streams": [
+    {
+      "stream_id": "newsletter_particulares",
+      "audience": "PARTICULARES",
+      "cadence": "WEEKLY",
+      "send_enabled": false
+    },
+    {
+      "stream_id": "newsletter_inmobiliarias",
+      "audience": "INMOBILIARIAS",
+      "cadence": "WEEKLY",
+      "send_enabled": false
+    }
+  ],
+  "policies": {
+    "marketing_consent_required": true,
+    "prod_writes_default": "DENY",
+    "additional_cost_eur_target": 0,
+    "wpvibe_required": false,
+    "make_required": false
+  }
+}
