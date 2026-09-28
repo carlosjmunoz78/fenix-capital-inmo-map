@@ -63,7 +63,8 @@
     "mutation_confirmation",
     "prod_default_deny",
     "capability_gap_not_invented",
-    "provider_unavailable_fail_closed"
+    "provider_unavailable_fail_closed",
+    "preprod_provider_write_read_rollback_canary"
   ],
   "evaluation": [
     "provider_coverage",
@@ -99,8 +100,9 @@
   },
   "rollback": {
     "strategy": "disable_gateway_binding_or_revert_branch; existing providers remain untouched",
-    "verified": false,
-    "prod_impact": false
+    "verified": true,
+    "prod_impact": false,
+    "evidence": "plugin-universal-preprod-provider-canary-2026-09-28.json"
   },
   "rebuild": {
     "strategy": "git_checkout_plus_provider_discovery_plus_registry_manifest",
@@ -147,6 +149,7 @@
     "staging live namespace cerebro-universal/v1 exists with command/queue/status/capabilities/operation routes",
     "staging QA namespace cerebro-universal-qa/v1 exists with create-draft-live-once",
     "unauthenticated protected endpoint and write probe return 401; no write performed",
-    "staging Core Guard rc9 physical runtime present; cerebro/status not fully green because operations_locked=false"
+    "staging Core Guard rc9 physical runtime present; cerebro/status not fully green because operations_locked=false",
+    "PREPROD authenticated provider canary: draft 52300 create/read/trash/restore/final-trash; public HTTP 404; PROD impact none"
   ]
 }
