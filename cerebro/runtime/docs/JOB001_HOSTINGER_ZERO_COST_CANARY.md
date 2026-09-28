@@ -52,17 +52,21 @@ At that minute both a temporary every-minute canary and the provisional 15-minut
 
 ## Final intended Hostinger schedule
 
-Legacy pg_cron job 13 uses minute offsets:
+Legacy pg_cron job 13 currently uses minute offsets:
 
 `3,18,33,48 * * * *`
 
-The final Hostinger shadow schedule should preserve those offsets rather than use `*/15`:
+The current Hostinger hPanel UI for this account only allows the minute set reported during live configuration:
 
-`3,18,33,48 * * * *`
+`2,15,30,48 * * * *`
+
+Therefore the Hostinger shadow runner will use that supported schedule rather than forcing unsupported legacy offsets.
 
 Command:
 
 `/usr/bin/php /home/u497370767/domains/fenixcapital.es/cerebro/job001_wp_bridge_canary_FIXED.php >> /home/u497370767/domains/fenixcapital.es/cerebro/job001_wp_bridge_canary.log 2>&1`
+
+This means OLD-vs-NEW validation must compare each Hostinger run against the nearest corresponding legacy pg_cron run/window, not require identical timestamps. The schedule difference is an accepted platform constraint during shadow validation; behavioral equivalence is based on successful execution, target, HTTP result, payload validity and response fingerprint, not exact minute equality.
 
 Hostinger scheduler timestamps observed during validation are UTC.
 
@@ -82,8 +86,8 @@ Do **not** disable Supabase pg_cron job 13 yet.
 ## Acceptance
 
 - one sole Hostinger canary cron remains;
-- final schedule matches legacy offsets;
-- 96 expected executions in a 24h window;
+- final schedule uses the supported Hostinger offsets `2,15,30,48`;
+- 96 expected executions in a 24h window (four runs per hour);
 - 96 outputs present;
 - 0 execution errors;
 - 96 HTTP 2xx responses;
