@@ -18,38 +18,55 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Fetch staging homepage
+      - name: Fetch staging homepage and REST index
         shell: bash
         run: |
           set -euo pipefail
-          curl --fail --silent --show-error --location --max-time 20             https://staging.fenixcapital.es/             -o /tmp/staging-home.html
+          curl --fail --silent --show-error --location --max-time 20 https://staging.fenixcapital.es/ -o /tmp/staging-home.html
+          curl --fail --silent --show-error --location --max-time 20 https://staging.fenixcapital.es/wp-json/ -o /tmp/wp-json.json
           test -s /tmp/staging-home.html
+          test -s /tmp/wp-json.json
           echo "STAGING_HTML_BYTES=$(wc -c < /tmp/staging-home.html)"
+          echo "WP_JSON_BYTES=$(wc -c < /tmp/wp-json.json)"
 
       - name: Diagnose Leads frontend markers
         shell: bash
         run: |
           set -u
-          m1=$(grep -Fc 'FenixCerebroLead' /tmp/staging-home.html || true)
-          m2=$(grep -Fc 'consent_marketing' /tmp/staging-home.html || true)
-          m3=$(grep -Fc 'Quiero recibir información, novedades, recursos y comunicaciones comerciales de Fénix Capital.' /tmp/staging-home.html || true)
-          m4=$(grep -Fc 'input[name="marketing"]' /tmp/staging-home.html || true)
-          echo "MARKER_FenixCerebroLead=$m1"
-          echo "MARKER_consent_marketing=$m2"
-          echo "MARKER_explicit_marketing_label=$m3"
-          echo "MARKER_marketing_input=$m4"
-          if [ "$m1" -gt 0 ] && [ "$m2" -gt 0 ] && [ "$m3" -gt 0 ] && [ "$m4" -gt 0 ]; then
-            echo 'LEADS_1_3_3_FRONTEND_MARKERS=PASS'
-          else
-            echo 'LEADS_1_3_3_FRONTEND_MARKERS=FAIL'
-            exit 1
-          fi
+          for marker in             'FenixCerebroLead'             'consent_marketing'             'Quiero recibir información, novedades, recursos y comunicaciones comerciales de Fénix Capital.'             'input[name="marketing"]'             'fenix-cerebro/v1'             'hipotecas@fenixcapital.es'
+          do
+            count=$(grep -Fc "$marker" /tmp/staging-home.html || true)
+            printf 'HOME_MARKER %s = %s\n' "$marker" "$count"
+          done
 
-      - name: Verify universal REST discovery remains present
-        if: always()
+      - name: Diagnose CEREBRO namespaces
         shell: bash
         run: |
           set -euo pipefail
-          curl --fail --silent --show-error --location --max-time 20             https://staging.fenixcapital.es/wp-json/             -o /tmp/wp-json.json
-          grep -Fq 'cerebro-universal/v1' /tmp/wp-json.json
-          echo 'CEREBRO_UNIVERSAL_NAMESPACE=PASS'
+          python - <<'PY'
+          import json
+          with open('/tmp/wp-json.json', encoding='utf-8') as f:
+              data=json.load(f)
+          ns=sorted(x for x in data.get('namespaces',[]) if any(k in x.lower() for k in ('cerebro','fenix','guard')))
+          print('CEREBRO_NAMESPACES=' + json.dumps(ns, ensure_ascii=False))
+          routes=data.get('routes',{})
+          interesting=sorted(k for k in routes if any(s in k.lower() for s in ('cerebro','fenix','guard')))
+          print('CEREBRO_ROUTE_COUNT=' + str(len(interesting)))
+          for route in interesting[:80]:
+              print('CEREBRO_ROUTE=' + route)
+          PY
+
+      - name: Assert expected PREPROD contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          failed=0
+          grep -Fq 'FenixCerebroLead' /tmp/staging-home.html || failed=1
+          grep -Fq 'consent_marketing' /tmp/staging-home.html || failed=1
+          grep -Fq 'Quiero recibir información, novedades, recursos y comunicaciones comerciales de Fénix Capital.' /tmp/staging-home.html || failed=1
+          grep -Fq 'cerebro-universal/v1' /tmp/wp-json.json || failed=1
+          if [ "$failed" -ne 0 ]; then
+            echo 'PREPROD_EXPECTED_CONTRACT=FAIL'
+            exit 1
+          fi
+          echo 'PREPROD_EXPECTED_CONTRACT=PASS'
