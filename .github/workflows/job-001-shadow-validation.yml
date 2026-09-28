@@ -1,13 +1,6 @@
 name: JOB-001 Shadow Validation
 
 on:
-  pull_request:
-    paths:
-      - "cerebro/runtime/job_scheduler.py"
-      - "cerebro/runtime/job_shadow_evidence.py"
-      - "cerebro/runtime/tests/test_job_scheduler.py"
-      - "cerebro/runtime/tests/test_job_shadow_evidence.py"
-      - ".github/workflows/job-001-shadow-validation.yml"
   workflow_dispatch:
 
 permissions:
@@ -25,3 +18,7 @@ jobs:
       - name: Run JOB-001 isolated tests
         run: |
           python -m unittest             cerebro.runtime.tests.test_job_scheduler             cerebro.runtime.tests.test_job_shadow_evidence             -v
+
+# FINOPS: manual-only because these checks are either covered by the consolidated
+# FACT/runtime test discovery or reserved for explicit PREPROD/release validation.
+# This avoids rerunning the same suite on every synchronize event of a long-lived PR.
