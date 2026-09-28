@@ -210,7 +210,7 @@ def run(apply: bool, sync_date: str) -> dict[str, Any]:
         access[name] = {"ok": ok, "detail": detail}
     summary["preflight"] = access
     if not access["engine_mirror"]["ok"] or not access["human_exception"]["ok"]:
-        raise SyncError("Notion control-plane target is not shared with the GitHub integration")
+        raise SyncError("Notion control-plane target is not shared with the GitHub integration: " + json.dumps(access, sort_keys=True))
 
     for row in plan["engines"]:
         outcome = notion.upsert(ENGINE_DS, "Engine ID", "title", row["key"], row["properties"])
