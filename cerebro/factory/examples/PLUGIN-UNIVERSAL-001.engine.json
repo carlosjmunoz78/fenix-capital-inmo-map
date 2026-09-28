@@ -26,7 +26,8 @@
     "cowboy_capability_discovery"
   ],
   "data_contracts": [
-    "cerebro/runtime/wordpress_universal_gateway.py"
+    "cerebro/runtime/wordpress_universal_gateway.py",
+    "cerebro/runtime/contracts/wordpress-universal-staging-v0.json"
   ],
   "api_contract": [
     "UniversalPluginGateway.decide",
@@ -44,7 +45,9 @@
     "make_optional_only",
     "zero_new_cost_by_default",
     "idempotency_required",
-    "multiempresa_scope_required"
+    "multiempresa_scope_required",
+    "wrap_existing_cerebro_universal_runtime",
+    "do_not_duplicate_physical_wordpress_plugin"
   ],
   "events_in": [
     "CAPABILITY_REQUESTED"
@@ -140,6 +143,10 @@
     "Fenix SEO CEREBRO Bridge 0.4.1 active",
     "city growth pilot Jaen certified",
     "forms management ability not exposed",
-    "newsletter ability not exposed"
+    "newsletter ability not exposed",
+    "staging live namespace cerebro-universal/v1 exists with command/queue/status/capabilities/operation routes",
+    "staging QA namespace cerebro-universal-qa/v1 exists with create-draft-live-once",
+    "unauthenticated protected endpoint and write probe return 401; no write performed",
+    "staging Core Guard rc9 physical runtime present; cerebro/status not fully green because operations_locked=false"
   ]
 }
