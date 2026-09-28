@@ -6,12 +6,16 @@ on:
       - 'cerebro/**'
     paths:
       - 'cerebro/factory/**'
-      - 'cerebro/runtime/**'
+      - 'cerebro/runtime/**/*.py'
+      - 'cerebro/runtime/contracts/**'
+      - 'cerebro/runtime/deploy/**'
       - '.github/workflows/fact-001-factory-v0.yml'
   pull_request:
     paths:
       - 'cerebro/factory/**'
-      - 'cerebro/runtime/**'
+      - 'cerebro/runtime/**/*.py'
+      - 'cerebro/runtime/contracts/**'
+      - 'cerebro/runtime/deploy/**'
       - '.github/workflows/fact-001-factory-v0.yml'
 
 permissions:
