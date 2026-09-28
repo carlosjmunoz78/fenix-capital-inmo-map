@@ -1,0 +1,67 @@
+{
+  "evidence_id": "BREVO-NEWSLETTER-PREPROD-BOOTSTRAP-2026-09-28",
+  "company_id": "fenix-capital",
+  "environment": "PREPROD",
+  "provider": "brevo",
+  "account": {
+    "company_name": "Fénix Capital",
+    "plan": "free"
+  },
+  "sender": {
+    "email": "hipotecas@fenixcapital.es",
+    "active": true
+  },
+  "domain": {
+    "name": "fenixcapital.es",
+    "verified": true,
+    "authenticated": true,
+    "brevo_code": true,
+    "dkim1": true,
+    "dkim2": true,
+    "dmarc": true
+  },
+  "folder": {
+    "id": 16,
+    "name": "FENIX_CEREBRO_NEWSLETTERS"
+  },
+  "audience_lists": [
+    {
+      "audience": "PARTICULARES",
+      "id": 17,
+      "name": "FENIX_NEWSLETTER_PARTICULARES"
+    },
+    {
+      "audience": "INMOBILIARIAS",
+      "id": 18,
+      "name": "FENIX_NEWSLETTER_INMOBILIARIAS"
+    }
+  ],
+  "campaign_draft_canary": [
+    {
+      "audience": "PARTICULARES",
+      "campaign_id": 102,
+      "status": "DRAFT_CREATED",
+      "sent": false
+    },
+    {
+      "audience": "INMOBILIARIAS",
+      "campaign_id": 103,
+      "status": "DRAFT_CREATED",
+      "sent": false
+    }
+  ],
+  "emails_sent_by_bootstrap": 0,
+  "synthetic_contacts_cleanup": "SUCCESS",
+  "temporary_bootstrap_endpoint": "RETIRED_410_VERIFY_JWT_TRUE",
+  "live_webhook_health": {
+    "ok": true,
+    "configured": true,
+    "mode": "PRE-PROD"
+  },
+  "policy": {
+    "hostinger_reach_newsletter_forbidden": true,
+    "send_enabled": false,
+    "reason": "weekly content/orchestration E2E not yet promoted",
+    "additional_cost_eur": 0
+  }
+}
