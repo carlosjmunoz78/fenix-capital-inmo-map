@@ -385,3 +385,32 @@ Conclusión:
 - transporte autenticado PREPROD para create/read/trash recuperable: CONFIRMADO;
 - esto NO demuestra por sí solo que `Fénix CEREBRO Leads 1.3.3` esté instalado/activo;
 - la versión física del plugin y el E2E de consentimiento marketing siguen POR AUDITAR antes de cualquier promoción a PROD o activación de newsletters reales.
+
+
+## Probe físico de versión/activación Leads · 28-09-2026
+Se ejecutó un probe externo desde GitHub Actions contra PREPROD para no confundir el transporte MCP con la presencia del plugin objetivo.
+
+Resultado físico:
+- homepage staging: HTTP fetch OK, 275932 bytes;
+- índice REST staging: fetch OK, 570039 bytes;
+- `cerebro-universal/v1`: PRESENTE;
+- `cerebro-universal-qa/v1`: PRESENTE;
+- rutas CEREBRO/Fénix/Guard observadas: 95;
+- `FenixCerebroLead` en frontend: 0;
+- `consent_marketing` en frontend: 0;
+- etiqueta explícita de consentimiento comercial 1.3.3: 0;
+- `fenix-cerebro/v1` en namespaces REST: AUSENTE.
+
+Cross-check PROD de solo lectura:
+- Fénix CEREBRO Leads 1.3.2: ACTIVO;
+- no se realizó escritura ni promoción.
+
+Conclusión canónica:
+- runtime universal PREPROD: EXISTENTE;
+- Leads 1.3.3 en Git: HECHO;
+- Leads 1.3.3 en PREPROD: NO DESPLEGADO O NO ACTIVO;
+- no usar PROD como banco de pruebas;
+- siguiente acción: establecer vía autorizada de despliegue de plugin custom en PREPROD, con backup/rollback, desplegar 1.3.3 y ejecutar E2E de consentimiento antes de cualquier promoción.
+
+Evidencia:
+`cerebro/factory/governance/plugin-universal-preprod-physical-probe-2026-09-28.json`.
