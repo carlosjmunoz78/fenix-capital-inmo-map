@@ -169,3 +169,41 @@ remain intact.
 
 Do not deactivate yet: it still acts as a fallback for future new Facebook publication
 analytics until an event-driven CEREBRO replacement has OLD-vs-NEW parity.
+
+
+## Active-scenario count and downgrade constraint
+
+Current live Make inventory returned **24 active scenarios**.
+
+Therefore Make Free is not yet a viable target even if monthly credits fall below 1,000:
+the current baseline previously recorded for Free allows only 2 active scenarios.
+
+Cost and scenario-count migration are separate workstreams.
+
+### Reversible deactivation candidates (not yet changed)
+
+The following active on-demand SEO probes/pilots show only one-off Sep-20/21 usage,
+several with failed legacy payloads, and no repository references were found for their
+scenario IDs:
+
+- 9839477 · WordPress ability registry probe
+- 9839480 · Core Guard cache ability probe
+- 9839504 · Snapshot piloto Jaén
+- 9839517 · Publicar piloto Jaén
+- 9839530 · Purga piloto Jaén
+- 9839532 · Verificar piloto Jaén
+- 9839543 · Comparar Córdoba vs Jaén
+- 9839546 · Normalizar piloto Jaén
+- 9839555 · Ajustar template piloto Jaén
+- 9839622 · Cowboy update-post probe
+
+They remain ACTIVE until dependency review is complete. Their deactivation would be
+reversible and would preserve configuration/history, but no bulk action is authorized
+without the dependency check.
+
+Keep active for now:
+- 9839632 WordPress city executor
+- 9839483 image generation/upload
+- 9839491 visual image QA
+- 9694039 Google bridge fallback
+because current/future SEO automation can still depend on them.
