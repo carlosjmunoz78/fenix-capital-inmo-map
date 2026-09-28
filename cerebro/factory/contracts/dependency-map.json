@@ -1,5 +1,5 @@
 {
-  "map_version": "0.11.0",
+  "map_version": "0.12.0",
   "environment": "PREPROD_AUDIT",
   "nodes": [
     {
@@ -486,7 +486,7 @@
     {
       "from": "PLUGIN-UNIVERSAL-001",
       "to": "Hostinger Reach",
-      "kind": "forms and newsletter draft provider"
+      "kind": "forms/contact-form provider only; newsletter use forbidden"
     },
     {
       "from": "PLUGIN-UNIVERSAL-001",
@@ -502,6 +502,11 @@
       "from": "SEO-001",
       "to": "PLUGIN-UNIVERSAL-001",
       "kind": "safe WordPress execution capability layer"
+    },
+    {
+      "from": "PLUGIN-UNIVERSAL-001",
+      "to": "Brevo",
+      "kind": "canonical newsletter contacts/lists/campaign scheduling and send provider"
     }
   ],
   "known_risks": [
@@ -521,8 +526,10 @@
     "SOCAUD-001 V0 must not login, publish, message, use private social APIs or fabricate audience metrics without public dated evidence",
     "COMPET-001 V0 must not fabricate competitor identity or unsupported market metrics; missing explicit public competitor evidence requires LOW_CONFIDENCE",
     "PLUGIN-UNIVERSAL-001 must wrap the existing cerebro-universal/v1 STAGING runtime rather than deploy a duplicate plugin",
-    "NEWSLETTER_SEND remains unbound until an official authenticated send/schedule provider contract is proven",
-    "staging cerebro-universal protected endpoints return 401 without auth; do not bypass or copy credentials"
+    "staging cerebro-universal protected endpoints return 401 without auth; do not bypass or copy credentials",
+    "Brevo free plan has a daily sending quota; scheduler must split recipients into <=300-email daily waves",
+    "marketing consent must be explicit and evidenced before adding a lead to a Brevo newsletter audience",
+    "Hostinger Reach must never be used as newsletter fallback"
   ],
   "rule": "No dependency is removed or consolidated until all callers are inventoried and PREPROD equivalence plus rollback are proven."
 }
