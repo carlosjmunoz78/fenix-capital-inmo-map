@@ -71,7 +71,8 @@
     "idempotency",
     "rollback_coverage",
     "multiempresa_isolation",
-    "zero_cost_path"
+    "zero_cost_path",
+    "preprod_publish_verify_rollback"
   ],
   "tribunal": [
     "ci_green",
@@ -150,6 +151,7 @@
     "staging QA namespace cerebro-universal-qa/v1 exists with create-draft-live-once",
     "unauthenticated protected endpoint and write probe return 401; no write performed",
     "staging Core Guard rc9 physical runtime present; cerebro/status not fully green because operations_locked=false",
-    "PREPROD authenticated provider canary: draft 52300 create/read/trash/restore/final-trash; public HTTP 404; PROD impact none"
+    "PREPROD authenticated provider canary: draft 52300 create/read/trash/restore/final-trash; public HTTP 404; PROD impact none",
+    "PREPROD provider publish canary 52300: public HTTP 200 then cleanup trash and public HTTP 404"
   ]
 }
