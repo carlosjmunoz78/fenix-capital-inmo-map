@@ -56,5 +56,4 @@ def campaign_payload(
         "recipients": {"listIds": ids},
         "replyTo": reply_to,
         "scheduledAt": scheduled_at,
-        "tag": f"weekly-{edition.audience.lower()}",
     }
