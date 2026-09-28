@@ -135,3 +135,48 @@ Rollback path was exercised earlier for jobs 7, 12 and 13 and restored legacy co
 Status: **WAVE 1 CUT-OVER GREEN / OBSERVATION ACTIVE**.
 
 Important FinOps constraint: this removes these eight schedules from pg_cron, but does not itself remove the PREPROD database/Edge dependency. Do not claim Supabase compute savings until a separate pause/downsize/windowing gate proves that retained PREPROD dependencies allow it.
+
+
+## Wave 2 preparation · remaining 12 PREPROD cron jobs
+
+Prepared 2026-09-28 without disabling any remaining legacy job.
+
+Remaining mappings added to the same control plane:
+
+- 5 · city autopilot · `*/15 * * * *`
+- 8 · page-quality reconcile · `10,25,40,55 * * * *`
+- 9 · WordPress action worker · `*/5 * * * *`
+- 11 · active-city growth bootstrap · `2,17,32,47 * * * *`
+- 14 · WP bridge reconcile · `5,20,35,50 * * * *`
+- 15 · active-city baseline · `9,39 * * * *`
+- 17 · nurture E2E · `23,53 * * * *`
+- 18 · gated-form enable · `7,22,37,52 * * * *`
+- 19 · growth-control reconcile · `1,16,31,46 * * * *`
+- 20 · autonomy proof · `14,44 * * * *`
+- 22 · pilot plugin certificate · `6,21,36,51 * * * *`
+- 23 · rollout-control refresh · `7,22,37,52 * * * *`
+
+The central dispatcher and gateway now allowlist all 20 SEO PREPROD job IDs.
+
+A transaction-scoped execution test was run for all twelve new mappings and rolled back. All twelve returned valid domain states without committing mutations. Representative states included:
+- 5 `LANDING_PIPELINE`
+- 8 `RECONCILED`
+- 9 worker path executed contract and was rolled back
+- 11 `ACTIVE_CITY_BOOTSTRAPPED`
+- 14 `NOT_READY` with transport HTTP 200
+- 15 `ALREADY_VERIFIED`
+- 17/18 `WAIT_CONSENT_LEGAL`
+- 19 `RECONCILED`
+- 20 `WAIT_OTHER_GATES`
+- 22 `ALREADY_CERTIFIED`
+- 23 rollout refresh returned a valid control state
+
+No legacy job 5/8/9/11/14/15/17/18/19/20/22/23 has been disabled yet.
+
+Cut-over risk order:
+1. deterministic/reconcile gates: 8,14,15,17,18,19,20,22,23
+2. idempotent bootstrap: 11
+3. stateful autopilot: 5
+4. WordPress side-effect worker: 9 last
+
+Hostinger must first refresh the master scheduler artifact and local allowlist to the 20-job version. Central control remains fail-closed for these twelve until their atomic cut-over.
