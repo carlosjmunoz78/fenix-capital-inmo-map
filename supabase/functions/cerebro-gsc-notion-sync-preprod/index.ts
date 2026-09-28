@@ -14,21 +14,30 @@ async function token(sa:any){const now=Math.floor(Date.now()/1000),h=b64url(JSON
 async function notion(path:string,init:RequestInit){const r=await fetch("https://api.notion.com/v1"+path,{...init,headers:{Authorization:`Bearer ${N}`,"Notion-Version":NV,"Content-Type":"application/json",...((init.headers??{}) as Record<string,string>)}});const b=await r.json().catch(()=>null);if(!r.ok)throw new Error(`notion_${r.status}_${b?.code??"error"}`);return b}
 Deno.serve(async req=>{try{
  if(req.method!=="POST")return J({ok:false,error:"method_not_allowed"},405);
- const presented=req.headers.get("x-fenix-cron-secret")??"";if(!presented||await sha256Hex(presented)!==SECRET_SHA256)return J({ok:false,error:"unauthorized"},401);
+ const presented=req.headers.get("x-fenix-cron-secret")??""; const bearer=req.headers.get("authorization")??""; const cronOk=!!presented&&await sha256Hex(presented)===SECRET_SHA256; const serviceOk=!!S&&bearer===`Bearer ${S}`; if(!cronOk&&!serviceOk)return J({ok:false,error:"unauthorized"},401);
  if(!U||!S||!N)return J({ok:false,error:"config_missing"},503);
  const body=await req.json().catch(()=>({}));const dryRun=body?.dry_run!==false;
+ const requestedStart=String(body?.start_date??"").trim(),requestedEnd=String(body?.end_date??"").trim();
+ if((requestedStart&&!/^\d{4}-\d{2}-\d{2}$/.test(requestedStart))||(requestedEnd&&!/^\d{4}-\d{2}-\d{2}$/.test(requestedEnd)))return J({ok:false,error:"invalid_date"},400);
  const db=createClient(U,S,{auth:{persistSession:false}});
  const {data:cfg,error}=await db.rpc("preprod_get_seo_google_config");if(error)return J({ok:false,stage:"config",error:error.message},500);
  const raw=cfg?.google_service_account_json,site=cfg?.gsc_site_url;if(!raw||!site)return J({ok:false,stage:"config",error:"missing_google_config"},500);
  const sa=JSON.parse(raw),access=await token(sa);
  const end=new Date();end.setUTCDate(end.getUTCDate()-1);const start=new Date(end);start.setUTCDate(start.getUTCDate()-29);const iso=(d:Date)=>d.toISOString().slice(0,10);
- const g=await fetch(`https://www.googleapis.com/webmasters/v3/sites/${encodeURIComponent(site)}/searchAnalytics/query`,{method:"POST",headers:{Authorization:`Bearer ${access}`,"content-type":"application/json"},body:JSON.stringify({startDate:iso(start),endDate:iso(end),dimensions:["page"],rowLimit:25000,dataState:"final"})});
+ const startDate=requestedStart||iso(start),endDate=requestedEnd||iso(end);
+ const g=await fetch(`https://www.googleapis.com/webmasters/v3/sites/${encodeURIComponent(site)}/searchAnalytics/query`,{method:"POST",headers:{Authorization:`Bearer ${access}`,"content-type":"application/json"},body:JSON.stringify({startDate,endDate,dimensions:["page"],rowLimit:25000,dataState:"final"})});
  const gb=await g.json().catch(()=>({}));if(!g.ok)return J({ok:false,stage:"gsc",status:g.status,error:gb?.error?.message??"gsc_error",service_account_email:sa.client_email,site},200);
+ const inventory:any[]=[];let cursor:string|undefined=undefined;
+ do{
+   const q:any=await notion(`/data_sources/${INVENTORY_DS}/query`,{method:"POST",body:JSON.stringify({page_size:100,...(cursor?{start_cursor:cursor}:{})})});
+   inventory.push(...(q?.results??[]));cursor=q?.has_more?q?.next_cursor:undefined;
+ }while(cursor);
+ const byUrl=new Map<string,any>();
+ for(const page of inventory){const u=String(page?.properties?.["URL"]?.url??"");if(u)byUrl.set(u,page);}
  let matched=0,unmatched=0,changed=0;const samples:any[]=[];
  for(const row of gb.rows??[]){
    const url=String(row?.keys?.[0]??"");if(!url)continue;
-   const q=await notion(`/data_sources/${INVENTORY_DS}/query`,{method:"POST",body:JSON.stringify({page_size:1,filter:{property:"URL",url:{equals:url}}})});
-   const page=q?.results?.[0];if(!page){unmatched++;if(samples.length<10)samples.push({url,state:"UNMATCHED"});continue;}
+   const page=byUrl.get(url);if(!page){unmatched++;if(samples.length<10)samples.push({url,state:"UNMATCHED"});continue;}
    matched++;
    const p=page.properties??{};
    const current={clicks:p["Clics GSC"]?.number??null,impressions:p["Impresiones GSC"]?.number??null,ctr:p["CTR GSC"]?.number??null,position:p["Posición media"]?.number??null};
@@ -42,5 +51,5 @@ Deno.serve(async req=>{try{
    }
    if(samples.length<10)samples.push({url,state:differs?"DIFF":"SAME",current,next});
  }
- return J({ok:true,state:dryRun?"DRY_RUN":"APPLIED",company_id:"FENIX_CAPITAL",engine_id:"SEO-001",environment:"PREPROD",version:"v0",window:{start:iso(start),end:iso(end)},gsc_rows:(gb.rows??[]).length,matched,unmatched,changed,samples});
+ return J({ok:true,state:dryRun?"DRY_RUN":"APPLIED",company_id:"FENIX_CAPITAL",engine_id:"SEO-001",environment:"PREPROD",version:"v0",window:{start:startDate,end:endDate},gsc_rows:(gb.rows??[]).length,inventory_rows:inventory.length,matched,unmatched,changed,samples});
 }catch(e){return J({ok:false,stage:"exception",error:e instanceof Error?e.message:String(e)},500)}});
