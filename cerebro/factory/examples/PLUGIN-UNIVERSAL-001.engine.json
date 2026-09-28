@@ -31,7 +31,12 @@
     "cerebro/runtime/contracts/wordpress-company-config.schema.json",
     "cerebro/runtime/config/wordpress/<company_id>.json",
     "cerebro/runtime/brevo_newsletter_contract.py",
-    "cerebro/runtime/brevo_newsletter_client.py"
+    "cerebro/runtime/brevo_newsletter_client.py",
+    "cerebro/runtime/brevo_newsletter_composer.py",
+    "cerebro/runtime/brevo_weekly_orchestrator.py",
+    "cerebro/runtime/newsletter_editorial_policy.py",
+    "cerebro/runtime/newsletter_enrollment.py",
+    "cerebro/runtime/contracts/fenix-lead-newsletter-enrollment.v1.json"
   ],
   "api_contract": [
     "UniversalPluginGateway.decide",
@@ -83,7 +88,10 @@
     "brevo_only_newsletter_provider",
     "lead_consent_enrollment",
     "nine_block_newsletter_contract",
-    "free_tier_300_daily_quota"
+    "free_tier_300_daily_quota",
+    "brevo_campaign_draft_preprod_canary",
+    "brevo_domain_sender_lists_verified",
+    "lead_marketing_consent_not_inferred_from_privacy"
   ],
   "evaluation": [
     "provider_coverage",
@@ -177,6 +185,9 @@
     "company-specific WordPress provider configuration externalized from gateway logic; generic loader no longer encodes Fenix audiences",
     "Brevo selected as canonical zero-cost newsletter provider; Hostinger Reach explicitly forbidden for newsletter send/draft",
     "Brevo official API supports contacts/lists, campaign create/update, scheduledAt and sendNow",
-    "Brevo free plan guard modeled at 300 emails/day and 100000 stored contacts"
+    "Brevo free plan guard modeled at 300 emails/day and 100000 stored contacts",
+    "Brevo PREPROD physical bootstrap: active sender hipotecas@fenixcapital.es; fenixcapital.es authenticated; folder 16; lists PARTICULARES=17, INMOBILIARIAS=18",
+    "Brevo campaign draft canary created campaigns 102 and 103 with zero sends; temporary bootstrap retired after canary",
+    "current Fenix CEREBRO Leads 1.3.2 forwards consent_marketing but generic browser/Elementor capture currently sets it false; explicit marketing checkbox required before PROD enrollment"
   ]
 }
