@@ -51,7 +51,7 @@ class FormContract:
             raise ValueError("form_key is required")
         if not self.company_id.strip():
             raise ValueError("company_id is required")
-        if "email" not in self.required_fields and "phone" not in self.required_fields:
+        if not ({"email", "phone", "email_or_phone"} & set(self.required_fields)):
             raise ValueError("at least email or phone must be required")
         if not self.consent_privacy_required:
             raise ValueError("privacy consent must remain required")
