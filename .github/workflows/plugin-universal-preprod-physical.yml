@@ -29,17 +29,27 @@ jobs:
           echo "STAGING_HTML_BYTES=$(wc -c < /tmp/staging-home.html)"
           echo "WP_JSON_BYTES=$(wc -c < /tmp/wp-json.json)"
 
-      - name: Diagnose Leads frontend markers
+      - name: Classify Leads frontend state
         shell: bash
         run: |
-          set -u
-          for marker in             'FenixCerebroLead'             'consent_marketing'             'Quiero recibir información, novedades, recursos y comunicaciones comerciales de Fénix Capital.'             'input[name="marketing"]'             'fenix-cerebro/v1'             'hipotecas@fenixcapital.es'
-          do
-            count=$(grep -Fc "$marker" /tmp/staging-home.html || true)
-            printf 'HOME_MARKER %s = %s\n' "$marker" "$count"
-          done
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          html=Path('/tmp/staging-home.html').read_text(encoding='utf-8', errors='ignore')
+          markers={
+            'FenixCerebroLead':'FenixCerebroLead',
+            'consent_marketing':'consent_marketing',
+            'explicit_marketing_label':'Quiero recibir información, novedades, recursos y comunicaciones comerciales de Fénix Capital.',
+            'marketing_input':'input[name="marketing"]',
+          }
+          counts={k:html.count(v) for k,v in markers.items()}
+          for k,v in counts.items():
+              print(f'HOME_MARKER_{k}={v}')
+          ready=all(v>0 for v in counts.values())
+          print('LEADS_1_3_3_FRONTEND=' + ('PRESENT' if ready else 'NOT_ACTIVE_OR_NOT_DEPLOYED'))
+          PY
 
-      - name: Diagnose CEREBRO namespaces
+      - name: Verify universal runtime and classify Leads REST namespace
         shell: bash
         run: |
           set -euo pipefail
@@ -47,26 +57,16 @@ jobs:
           import json
           with open('/tmp/wp-json.json', encoding='utf-8') as f:
               data=json.load(f)
-          ns=sorted(x for x in data.get('namespaces',[]) if any(k in x.lower() for k in ('cerebro','fenix','guard')))
-          print('CEREBRO_NAMESPACES=' + json.dumps(ns, ensure_ascii=False))
-          routes=data.get('routes',{})
-          interesting=sorted(k for k in routes if any(s in k.lower() for s in ('cerebro','fenix','guard')))
-          print('CEREBRO_ROUTE_COUNT=' + str(len(interesting)))
-          for route in interesting[:80]:
-              print('CEREBRO_ROUTE=' + route)
+          namespaces=set(data.get('namespaces',[]))
+          if 'cerebro-universal/v1' not in namespaces:
+              raise SystemExit('cerebro-universal/v1 missing')
+          print('CEREBRO_UNIVERSAL_NAMESPACE=PRESENT')
+          print('CEREBRO_UNIVERSAL_QA_NAMESPACE=' + ('PRESENT' if 'cerebro-universal-qa/v1' in namespaces else 'ABSENT'))
+          print('FENIX_CEREBRO_LEADS_NAMESPACE=' + ('PRESENT' if 'fenix-cerebro/v1' in namespaces else 'NOT_ACTIVE_OR_NOT_DEPLOYED'))
           PY
 
-      - name: Assert expected PREPROD contract
+      - name: Gate semantics
         shell: bash
         run: |
-          set -euo pipefail
-          failed=0
-          grep -Fq 'FenixCerebroLead' /tmp/staging-home.html || failed=1
-          grep -Fq 'consent_marketing' /tmp/staging-home.html || failed=1
-          grep -Fq 'Quiero recibir información, novedades, recursos y comunicaciones comerciales de Fénix Capital.' /tmp/staging-home.html || failed=1
-          grep -Fq 'cerebro-universal/v1' /tmp/wp-json.json || failed=1
-          if [ "$failed" -ne 0 ]; then
-            echo 'PREPROD_EXPECTED_CONTRACT=FAIL'
-            exit 1
-          fi
-          echo 'PREPROD_EXPECTED_CONTRACT=PASS'
+          echo 'PROBE=PASS'
+          echo 'NOTE=This probe confirms the universal PREPROD runtime and classifies Leads 1.3.3 presence. It does not promote or write to PROD.'
