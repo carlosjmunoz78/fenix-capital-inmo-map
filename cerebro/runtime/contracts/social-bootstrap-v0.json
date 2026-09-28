@@ -1,0 +1,32 @@
+{
+  "contract_id": "SOCBOOT-001-social-bootstrap-v0",
+  "version": "0.2.0",
+  "environment": "PREPROD",
+  "company_scope": "company_id_required_cross_company_deny",
+  "inputs": {
+    "company_id": "string|required",
+    "business_model_profile": "BMD-001 evidence|required",
+    "social_audit": "SOCAUD-001 evidence|required",
+    "marketing_context": "object|optional",
+    "evidence_at": "string|required"
+  },
+  "outputs": {
+    "content_pillars": "array|deterministic",
+    "channel_plan": "instagram+facebook+linkedin",
+    "guardrails": "publishing and conversion safety gates",
+    "plan_sha256": "reproducible plan digest"
+  },
+  "invariants": [
+    "no publishing",
+    "no remote writes",
+    "PREPROD only",
+    "particulares and inmobiliarias remain segmented",
+    "explicit marketing consent required before newsletter enrollment",
+    "idempotency and queue reconciliation required before scheduling",
+    "brand QA and claims review required",
+    "verified CTA destination or native handler required",
+    "additional cost target 0 EUR"
+  ],
+  "remote_write": false,
+  "prod_enabled": false
+}
