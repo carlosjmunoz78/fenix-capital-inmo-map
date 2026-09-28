@@ -202,3 +202,20 @@ Final invariant:
 Status: **JOB-001 SEO PREPROD SCHEDULER OFFLOAD = GREEN / 20 OF 20**.
 
 Observation remains required for domain-specific downstream states, but scheduler ownership has moved completely off pg_cron.
+
+
+## FINOPS post-cutover conclusion · PREPROD compute
+
+After the 20/20 scheduler offload, `cron.job where active=true` returned zero rows.
+
+A clean observation window after the browser QA burst ended showed only the parked Browser Bridge gateway invoking PREPROD (5 invocations in roughly 3 minutes). No Ana/Canonical/KPI/Notion hot traffic remained in that clean window.
+
+Important: PREPROD still cannot be paused while SEO-001 remains operational because the Hostinger master scheduler calls the PREPROD CEREBRO gateway, which invokes PREPROD database functions and Edge Functions. Scheduler ownership moved off pg_cron, but execution/state still depends on the PREPROD Supabase project being online.
+
+Therefore:
+- Edge/API overage optimization is immediately useful.
+- GitHub Actions reduction is immediately useful.
+- Full PREPROD compute elimination requires a later execution/state migration, not merely cron migration.
+- No compute saving is claimed yet.
+
+A deterministic multi-company cost governor was added to CEREBRO runtime. Default policy is zero paid AI and zero metered external spend; attempts require an explicit policy allowance and hard daily budget. MONEY_LIMIT is emitted on unauthorized paid spend.
