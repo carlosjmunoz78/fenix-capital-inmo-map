@@ -121,3 +121,29 @@ was deleted.
 
 Remaining caveat: the Make Data Store is still a legacy state source for other scenarios.
 Do not delete Data Store 171764 until its producers/consumers are fully mapped and migrated.
+
+
+## T-72/T-48 watchdog · replacement prepared
+
+The exact decision contract from Make scenario 9705138 is now modeled in:
+- `cerebro/runtime/notion_t72_watchdog.py`
+- `cerebro/runtime/tests/test_notion_t72_watchdog.py`
+
+Parity preserved:
+- publication status must be `Pendiente de publicar`;
+- T-48 must be false;
+- T-72 reminder must be false;
+- schedule relation must exist;
+- scheduled time must be in the future and <=72h;
+- update is idempotent once `Recordatorio T-72 enviado=true`.
+
+The Make scenario remains ACTIVE for now because its replacement transport/write path is
+not yet live. Do not deactivate it until CEREBRO has an authenticated Notion read/write
+path and OLD-vs-NEW evidence.
+
+Current Make behavior burns 2 credits every hour even when no row is eligible. Recent
+executions observed 2 credits/run with no downstream update. At that steady rate the
+polling baseline is ~48 credits/day or ~1,440 credits/30d before useful work.
+
+Target replacement: Notion event/webhook -> CEREBRO deterministic T-72 rule -> scoped
+Notion PATCH, with a bounded timer only for time-window entry when no edit event occurs.
