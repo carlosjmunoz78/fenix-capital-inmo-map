@@ -28,6 +28,7 @@ class HostingerMasterSchedulerStaticTests(unittest.TestCase):
             "14,44 * * * *",
             "12,42 * * * *",
             "6,21,36,51 * * * *",
+            "36 11 * * 3",
         ):
             self.assertIn(expr, text)
 
@@ -37,11 +38,11 @@ class HostingerMasterSchedulerStaticTests(unittest.TestCase):
         self.assertIn("cerebro-job001-gateway-preprod", text)
         self.assertNotIn("SUPABASE_SERVICE_ROLE_KEY", text)
 
-    def test_local_allowlist_covers_all_twenty_preprod_jobs(self):
+    def test_local_allowlist_covers_all_twenty_one_preprod_jobs(self):
         cfg = json.loads((DEPLOY / "job001_enabled_jobs.json").read_text(encoding="utf-8"))
         self.assertEqual(
             cfg["enabled_job_ids"],
-            [2,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
+            [2,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24],
         )
 
 
