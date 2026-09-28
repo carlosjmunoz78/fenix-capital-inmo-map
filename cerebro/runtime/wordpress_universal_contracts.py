@@ -119,8 +119,8 @@ def fenix_form_contracts() -> tuple[FormContract, ...]:
 
 
 def fenix_newsletter_streams() -> tuple[NewsletterStreamContract, ...]:
-    # Provider intentionally unset: current WordPress evidence exposes Reach contact/forms
-    # sync, but no authenticated campaign scheduling/sending API contract for CEREBRO.
+    # Reach public API can prepare templates and draft campaigns. Sending/scheduling
+    # remains disabled until an official writable send/schedule contract is verified.
     streams = (
         NewsletterStreamContract(
             stream_id="newsletter_particulares",
