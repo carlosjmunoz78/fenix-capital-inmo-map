@@ -27,7 +27,9 @@
   ],
   "data_contracts": [
     "cerebro/runtime/wordpress_universal_gateway.py",
-    "cerebro/runtime/contracts/wordpress-universal-staging-v0.json"
+    "cerebro/runtime/contracts/wordpress-universal-staging-v0.json",
+    "cerebro/runtime/contracts/wordpress-company-config.schema.json",
+    "cerebro/runtime/config/wordpress/<company_id>.json"
   ],
   "api_contract": [
     "UniversalPluginGateway.decide",
@@ -152,6 +154,7 @@
     "unauthenticated protected endpoint and write probe return 401; no write performed",
     "staging Core Guard rc9 physical runtime present; cerebro/status not fully green because operations_locked=false",
     "PREPROD authenticated provider canary: draft 52300 create/read/trash/restore/final-trash; public HTTP 404; PROD impact none",
-    "PREPROD provider publish canary 52300: public HTTP 200 then cleanup trash and public HTTP 404"
+    "PREPROD provider publish canary 52300: public HTTP 200 then cleanup trash and public HTTP 404",
+    "company-specific WordPress provider configuration externalized from gateway logic; generic loader no longer encodes Fenix audiences"
   ]
 }
