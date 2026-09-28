@@ -125,14 +125,19 @@
     "additional_monthly_eur_target": 0
   },
   "backup": {
-    "strategy": "git_history_plus_existing_wordpress_checkpoints",
-    "verified": false
+    "strategy": "git_history_plus_versioned_plugin_artifacts_plus_existing_wordpress_checkpoints",
+    "verified": false,
+    "note": "No pre-replacement physical plugin backup was independently verified during the manual staging upload. Git/source/package artifacts exist, but physical restore is not claimed."
   },
   "rollback": {
-    "strategy": "disable_gateway_binding_or_revert_branch; existing providers remain untouched",
+    "strategy": "reinstall prior versioned plugin artifact or disable gateway binding; existing providers remain preserved",
     "verified": true,
     "prod_impact": false,
-    "evidence": "plugin-universal-preprod-provider-canary-2026-09-28.json"
+    "evidence": [
+      "plugin-universal-preprod-provider-canary-2026-09-28.json",
+      "versioned Git history and deterministic package artifacts"
+    ],
+    "note": "Provider/content rollback is physically proven. Physical plugin-binary rollback after the manual 1.3.4 upload has not been re-executed."
   },
   "rebuild": {
     "strategy": "git_checkout_plus_deterministic_python_builder_plus_provider_discovery_plus_registry_manifest",
@@ -199,6 +204,10 @@
     "Brevo PREPROD physical bootstrap: active sender hipotecas@fenixcapital.es; fenixcapital.es authenticated; folder 16; lists PARTICULARES=17, INMOBILIARIAS=18",
     "Brevo campaign draft canary created campaigns 102 and 103 with zero sends; temporary bootstrap retired after canary",
     "current Fenix CEREBRO Leads 1.3.2 forwards consent_marketing but generic browser/Elementor capture currently sets it false; explicit marketing checkbox required before PROD enrollment",
-    "Leads 1.3.3 deterministic PREPROD candidate artifact built in GitHub Actions run 36491572101; artifact 11000364474; 2 rebuild tests PASS; no PROD deploy authorization"
+    "Leads 1.3.3 deterministic PREPROD candidate artifact built in GitHub Actions run 36491572101; artifact 11000364474; 2 rebuild tests PASS; no PROD deploy authorization",
+    "manual PREPROD upload reported by operator on 2026-09-28; post-upload physical probe run 36492408482 rerun SUCCESS",
+    "post-upload PREPROD physical probe: FenixCerebroLead present, consent_marketing present, explicit marketing checkbox present, fenix-cerebro/v1 present",
+    "post-upload local callback validation returned 422 identifier_required for empty payload; no lead created and no backend forwarding required",
+    "Leads 1.3.4 candidate adds fail-closed staging forwarding unless an explicit PREPROD endpoint override is configured"
   ]
 }
