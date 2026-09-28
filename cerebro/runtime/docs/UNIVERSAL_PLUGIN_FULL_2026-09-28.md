@@ -210,3 +210,15 @@ Esto prueba físicamente:
 
 Límite explícito:
 esta prueba usa el provider WordPress autenticado y NO demuestra todavía auth/execute directo de los endpoints protegidos `cerebro-universal/v1`.
+
+
+## Extensión del canary · publish → verify → rollback
+Sobre el mismo objeto de prueba PREPROD 52300:
+- restore a draft: SUCCESS;
+- publish: SUCCESS;
+- URL pública canary: HTTP 200;
+- cleanup inmediato a trash: SUCCESS;
+- URL tras cleanup: HTTP 404.
+
+La prueba no tocó PROD ni contenido preexistente. El objeto final queda recuperable en trash.
+Esto demuestra físicamente el camino provider autenticado de create → read → publish → public verify → rollback/cleanup en PREPROD.
