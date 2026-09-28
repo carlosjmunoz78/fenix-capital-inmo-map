@@ -180,3 +180,25 @@ Cut-over risk order:
 4. WordPress side-effect worker: 9 last
 
 Hostinger must first refresh the master scheduler artifact and local allowlist to the 20-job version. Central control remains fail-closed for these twelve until their atomic cut-over.
+
+
+## Wave 2 LIVE CUT-OVER COMPLETED · 2026-09-28
+
+Physical Hostinger evidence confirmed the 20-job master scheduler and local allowlist were installed:
+- master source listed all 20 legacy schedules;
+- local config listed IDs 2,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23;
+- 10:52 UTC: jobs 18 and 23 reached gateway and were correctly SKIPPED_DISABLED;
+- 10:53 UTC: job 17 reached gateway and returned DISPATCH_RESULT;
+- 10:54 UTC: scheduler heartbeat reported all 20 IDs.
+
+The remaining Wave 2 jobs were then atomically cut over through `cerebro_job001_set_cutover_preprod`.
+
+Final invariant:
+- Hostinger control enabled=true for all 20 jobs.
+- Legacy pg_cron active=false for all 20 jobs.
+- Legacy cron definitions remain present for rollback.
+- No cron definition was deleted.
+
+Status: **JOB-001 SEO PREPROD SCHEDULER OFFLOAD = GREEN / 20 OF 20**.
+
+Observation remains required for domain-specific downstream states, but scheduler ownership has moved completely off pg_cron.
