@@ -34,7 +34,7 @@ PARCIAL AVANZADO. Se reutilizan capacidades existentes; no se crea un segundo pl
 | Rollback | Cowboy undo/checkpoint + Core Guard restore | EXISTENTE |
 | Rebuild/update | CEREBRO Maintenance | EXISTENTE |
 | Form management/creation | No forms tools exposed | GAP |
-| Newsletter creation/scheduling | No newsletter ability exposed | GAP |
+| Newsletter creation/scheduling | Brevo Free | HECHO V0 / activación real gated |
 | Multiempresa config | Current live plugins contain Fénix-specific constants/URLs | GAP |
 | Provider-neutral gateway | Added in CEREBRO runtime | HECHO V0 |
 
@@ -50,7 +50,7 @@ CEREBRO -> modelo IA -> WordPress directo.
 
 ## Gaps para FULL
 1. FORM_MANAGE: contrato neutral para crear/configurar formularios y bind de captación.
-2. NEWSLETTER_MANAGE: dos streams separados (particulares / inmobiliarias), scheduling semanal y evidencia de envío.
+2. NEWSLETTER_MANAGE: Brevo Free, dos streams separados, scheduling semanal, cuota 300/día y evidencia física PREPROD.
 3. MULTIEMPRESA: eliminar hardcodes de Fénix del contrato universal; moverlos a company config.
 4. Exponer/confirmar abilities Core Guard de content/media/city executor en el transporte canónico.
 5. PREPROD físico: staging connector debe responder antes de cualquier escritura.
@@ -76,7 +76,7 @@ Evidencia viva de WordPress:
 
 Decisión:
 - `FORM_MANAGE` deja de ser GAP y se vincula a `hostinger_reach/forms:get+post` detrás de PLUGIN-UNIVERSAL-001.
-- `NEWSLETTER_MANAGE` sigue fail-closed y sin binding operativo hasta disponer de una API/ability autenticada, documentada y testeable para campaign create/schedule/send.
+- `NEWSLETTER_MANAGE` para newsletter ya no usa Reach; Brevo es el único binding canónico.
 - no usar `wp_mail()` como sustituto improvisado para campañas masivas.
 - no almacenar ni copiar el token interno de Reach.
 
@@ -91,7 +91,7 @@ Decisión:
 
 Fénix queda como perfil de compañía y no como comportamiento universal.
 
-Newsletters definidas, aún NO activadas:
+Newsletters definidas con Brevo, activación de envío real condicionada a gates:
 1. `newsletter_particulares` · PARTiculares · WEEKLY.
 2. `newsletter_inmobiliarias` · INMOBILIARIAS · WEEKLY.
 
@@ -100,7 +100,7 @@ Esto conserva el requisito de dos newsletters semanales sin afirmar envío autó
 
 ## Estado actualizado de gaps
 - FORM_MANAGE: HECHO a nivel de provider binding/contrato; escritura real permanece sujeta a PREPROD y autenticación.
-- NEWSLETTER_MANAGE: DEFINIDO / fail-closed; campaign API física aún no demostrada.
+- NEWSLETTER_MANAGE: HECHO V0 con Brevo; campañas de prueba en DRAFT y 0 envíos.
 - MULTIEMPRESA CONFIG: HECHO V0 en runtime contract; falta migración del plugin live Fénix-specific a config inyectable.
 - Core Guard abilities de contenido/media/city: existentes en código live; exposición canónica completa sigue POR AUDITAR.
 - PREPROD físico WordPress: POR AUDITAR desde este conector; no se usa PROD para demostrar escrituras.
@@ -117,15 +117,7 @@ La referencia pública de Hostinger Reach expone actualmente:
 
 El POST de campaigns crea exclusivamente un DRAFT. La propia documentación indica que targeting y scheduling no forman parte de esa petición y que el draft se termina/envía desde la interfaz Reach.
 
-Por tanto:
-- `NEWSLETTER_MANAGE` se vincula a creación de template + campaign draft.
-- `NEWSLETTER_SEND` se mantiene deliberadamente UNBOUND.
-- `campaign_schedule` / `campaign_send` / mutation de automations se catalogan como `UNSUPPORTED_V0`.
-- no se inventa endpoint, no se hace scraping del dashboard y no se usa correo transaccional como sustituto de marketing.
-- el contrato está codificado en `hostinger_reach_api_contract.py`.
-
-Resultado funcional V0:
-CEREBRO puede preparar de forma determinista las dos newsletters semanales y dejarlas como borradores versionados/listos para la etapa de envío. El envío semanal 100% autónomo permanece POR AUDITAR hasta disponer de una operación oficial de send/schedule o una automatización oficial writable.
+Conclusión histórica de Reach: se conserva únicamente como evidencia y provider de formularios. Newsletter queda prohibida sobre Reach. Brevo sustituye completamente ese camino para contactos, campañas, programación y envío.
 
 
 ## Descubrimiento crítico · runtime universal YA EXISTE en STAGING
@@ -316,3 +308,27 @@ Contrato cerrado:
 - la futura Landing Factory debe implementar este contrato, no inventar otro.
 
 Esto evita activar marketing sin consentimiento y preserva PROD hasta pasar E2E de formulario en PREPROD.
+
+
+## Evidencia física Brevo · cierre PREPROD
+Verificación viva 28-09-2026:
+- cuenta Brevo: Fénix Capital;
+- plan: Free;
+- crédito disponible observado: 297 envíos del límite diario en ese momento;
+- sender activo: hipotecas@fenixcapital.es;
+- dominio fenixcapital.es: verified=true y authenticated=true;
+- DKIM CNAME 1 y 2: status=true;
+- DMARC: status=true;
+- carpeta creada: FENIX_CEREBRO_NEWSLETTERS (id 16);
+- lista PARTICULARES: id 17;
+- lista INMOBILIARIAS: id 18;
+- campañas PREPROD observadas en estado draft: IDs 102 y 103;
+- emails enviados durante bootstrap/canary: 0;
+- contactos sintéticos de prueba fueron eliminados tras el canary.
+
+Incidencias corregidas durante el canary:
+1. la operación oficial de añadir contactos existentes a lista requiere /contacts/lists/:listId/contacts/add;
+2. la opción campaign tag no está disponible en este plan, por lo que el composer free-tier la elimina;
+3. creación de campaign con listas vacías falla correctamente; por diseño el worker solo adjuntará recipients cuando existan contactos consentidos.
+
+No se ha activado envío a personas reales durante las pruebas.
