@@ -58,5 +58,22 @@
     "hostinger_reach_newsletter_forbidden": true,
     "brevo_free_daily_email_limit": 300,
     "brevo_contact_limit": 100000
+  },
+  "brevo": {
+    "api_key_env": "BREVO_API_KEY",
+    "sender_email": null,
+    "sender_name": "Fénix Capital",
+    "reply_to": "hipotecas@fenixcapital.es",
+    "domain_authenticated": null,
+    "audience_list_ids": {
+      "PARTICULARES": null,
+      "INMOBILIARIAS": null
+    },
+    "free_plan": {
+      "daily_email_limit": 300,
+      "stored_contact_limit": 100000,
+      "automation_contact_limit": 2000
+    },
+    "activation_gate": "VERIFY_API_KEY_SENDER_DOMAIN_AND_LIST_IDS"
   }
-}\n
+}
