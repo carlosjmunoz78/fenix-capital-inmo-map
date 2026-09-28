@@ -1,5 +1,5 @@
 {
-  "map_version": "0.10.0",
+  "map_version": "0.11.0",
   "environment": "PREPROD_AUDIT",
   "nodes": [
     {
@@ -121,6 +121,30 @@
     {
       "id": "COMPET-001",
       "type": "engine"
+    },
+    {
+      "id": "PLUGIN-UNIVERSAL-001",
+      "type": "engine"
+    },
+    {
+      "id": "cerebro-universal-staging",
+      "type": "wordpress_runtime"
+    },
+    {
+      "id": "Fenix CEREBRO Leads",
+      "type": "wordpress_plugin"
+    },
+    {
+      "id": "Hostinger Reach",
+      "type": "email_marketing_provider"
+    },
+    {
+      "id": "Cowboy MCP",
+      "type": "wordpress_provider"
+    },
+    {
+      "id": "Fenix CEREBRO Maintenance",
+      "type": "wordpress_plugin"
     }
   ],
   "edges": [
@@ -423,6 +447,61 @@
       "from": "COMP-ONB-001",
       "to": "COMPET-001",
       "kind": "dependency-valid competitor intelligence step; explicit orchestration only"
+    },
+    {
+      "from": "PLUGIN-UNIVERSAL-001",
+      "to": "TENANT-001",
+      "kind": "company isolation and scope"
+    },
+    {
+      "from": "PLUGIN-UNIVERSAL-001",
+      "to": "ACTGW-001",
+      "kind": "execution policy gateway"
+    },
+    {
+      "from": "PLUGIN-UNIVERSAL-001",
+      "to": "WEB-001",
+      "kind": "canonical web boundary; no replacement"
+    },
+    {
+      "from": "PLUGIN-UNIVERSAL-001",
+      "to": "CORE-001",
+      "kind": "publish/cache/verify/snapshot provider"
+    },
+    {
+      "from": "PLUGIN-UNIVERSAL-001",
+      "to": "WordPress",
+      "kind": "native content/media boundary"
+    },
+    {
+      "from": "PLUGIN-UNIVERSAL-001",
+      "to": "Cowboy MCP",
+      "kind": "existing WordPress provider adapter"
+    },
+    {
+      "from": "PLUGIN-UNIVERSAL-001",
+      "to": "Fenix CEREBRO Leads",
+      "kind": "existing lead capture and lead magnet provider"
+    },
+    {
+      "from": "PLUGIN-UNIVERSAL-001",
+      "to": "Hostinger Reach",
+      "kind": "forms and newsletter draft provider"
+    },
+    {
+      "from": "PLUGIN-UNIVERSAL-001",
+      "to": "Fenix CEREBRO Maintenance",
+      "kind": "existing rebuild/update provider"
+    },
+    {
+      "from": "PLUGIN-UNIVERSAL-001",
+      "to": "cerebro-universal-staging",
+      "kind": "wrap existing physical PREPROD runtime; do not duplicate"
+    },
+    {
+      "from": "SEO-001",
+      "to": "PLUGIN-UNIVERSAL-001",
+      "kind": "safe WordPress execution capability layer"
     }
   ],
   "known_risks": [
@@ -440,7 +519,10 @@
     "KW-001 V0 must never fabricate search volume, CPC, ranking or keyword difficulty when no authorized external source is present",
     "LOCALP-001 V0 must not mutate Google Business Profile or fabricate ratings/review counts without dated public evidence",
     "SOCAUD-001 V0 must not login, publish, message, use private social APIs or fabricate audience metrics without public dated evidence",
-    "COMPET-001 V0 must not fabricate competitor identity or unsupported market metrics; missing explicit public competitor evidence requires LOW_CONFIDENCE"
+    "COMPET-001 V0 must not fabricate competitor identity or unsupported market metrics; missing explicit public competitor evidence requires LOW_CONFIDENCE",
+    "PLUGIN-UNIVERSAL-001 must wrap the existing cerebro-universal/v1 STAGING runtime rather than deploy a duplicate plugin",
+    "NEWSLETTER_SEND remains unbound until an official authenticated send/schedule provider contract is proven",
+    "staging cerebro-universal protected endpoints return 401 without auth; do not bypass or copy credentials"
   ],
   "rule": "No dependency is removed or consolidated until all callers are inventoried and PREPROD equivalence plus rollback are proven."
 }
