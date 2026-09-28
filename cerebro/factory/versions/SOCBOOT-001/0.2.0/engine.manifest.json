@@ -7,7 +7,7 @@
   "environment": "PREPROD",
   "version": "0.2.0",
   "contract_version": "0.2.0",
-  "status": "IMPLEMENTED_PREPROD_CANDIDATE",
+  "status": "DOCUMENTED_PARTIAL",
   "objective": "Generate deterministic social pillars, channel plans, schedules, audience segmentation and safety guardrails without publishing or remote writes.",
   "owner": "CEREBRO Platform",
   "inputs": [
