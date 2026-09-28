@@ -6,18 +6,12 @@ on:
       - cerebro/fact-001-factory-v0
     paths:
       - 'cerebro/factory/**'
-      - 'cerebro/runtime/**/*.py'
-      - 'cerebro/runtime/contracts/**'
-      - 'cerebro/runtime/deploy/**'
       - '.github/workflows/fact-001-*.yml'
   pull_request:
     branches:
       - preprod-app-phase1
     paths:
       - 'cerebro/factory/**'
-      - 'cerebro/runtime/**/*.py'
-      - 'cerebro/runtime/contracts/**'
-      - 'cerebro/runtime/deploy/**'
       - '.github/workflows/fact-001-*.yml'
 
 permissions:
@@ -56,6 +50,9 @@ jobs:
 
 # FINOPS:
 # Full Playwright browser QA is intentionally NOT run on every FACT/runtime PR.
+# Standalone cerebro/runtime Python/contracts/deploy changes are validated by
+# FACT-001 Factory V0 and specialized/manual release gates; they do not affect
+# the React/Vite app bundle and therefore no longer trigger this Node build.
 # It remains available in the manual PRE-PROD App Build workflow and release gates.
 # This preserves the existing browser suite while preventing repeated live PREPROD
 # Edge Function traffic and GitHub Actions minutes for additive runtime/doc changes.
