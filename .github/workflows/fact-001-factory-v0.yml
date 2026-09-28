@@ -9,6 +9,7 @@ on:
       - 'cerebro/runtime/**/*.py'
       - 'cerebro/runtime/contracts/**'
       - 'cerebro/runtime/deploy/**'
+      - 'cerebro/runtime/wordpress/plugins/**'
       - '.github/workflows/fact-001-factory-v0.yml'
   pull_request:
     paths:
@@ -16,6 +17,7 @@ on:
       - 'cerebro/runtime/**/*.py'
       - 'cerebro/runtime/contracts/**'
       - 'cerebro/runtime/deploy/**'
+      - 'cerebro/runtime/wordpress/plugins/**'
       - '.github/workflows/fact-001-factory-v0.yml'
 
 permissions:
