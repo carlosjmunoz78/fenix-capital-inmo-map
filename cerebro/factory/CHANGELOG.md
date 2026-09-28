@@ -173,3 +173,14 @@
 - Added dependency-map edges and anti-duplication rule.
 - Kept newsletter SEND/SCHEDULE and direct protected universal REST writes fail-closed where no verified authorized transport exists.
 - No PROD content or configuration was changed.
+
+
+## 2026-09-28 · Newsletter provider correction
+- Removed Hostinger Reach from every newsletter binding.
+- Selected Brevo Free as sole newsletter provider.
+- Added explicit prohibition tests against Hostinger Reach newsletter use.
+- Added consenting-lead -> Brevo list enrollment contract.
+- Added two separated weekly streams: PARTICULARES and INMOBILIARIAS.
+- Added >=9-block weekly editorial contract and HTML campaign composer.
+- Added official Brevo contacts/campaign adapter and free-tier 300/day wave planner.
+- Kept real sending disabled until credential, sender/domain and audience list IDs are physically verified.
