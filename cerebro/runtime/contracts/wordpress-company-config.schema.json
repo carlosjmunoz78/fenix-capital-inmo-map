@@ -17,25 +17,98 @@
     "policies"
   ],
   "properties": {
-    "company_id": {"type": "string", "minLength": 1},
-    "version": {"type": "string", "minLength": 1},
-    "brand": {"type": "string", "minLength": 1},
-    "primary_domain": {"type": "string", "minLength": 1},
-    "wordpress_base_url": {"type": "string", "pattern": "^https://"},
-    "public_email": {"type": "string", "minLength": 3},
-    "lead_endpoint": {"type": "string", "minLength": 1},
-    "providers": {"type": "object"},
-    "audiences": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "company_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "brand": {
+      "type": "string",
+      "minLength": 1
+    },
+    "primary_domain": {
+      "type": "string",
+      "minLength": 1
+    },
+    "wordpress_base_url": {
+      "type": "string",
+      "pattern": "^https://"
+    },
+    "public_email": {
+      "type": "string",
+      "minLength": 3
+    },
+    "lead_endpoint": {
+      "type": "string",
+      "minLength": 1
+    },
+    "providers": {
+      "type": "object"
+    },
+    "audiences": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
     "newsletter_streams": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["stream_id", "audience", "cadence", "send_enabled"],
+        "required": [
+          "stream_id",
+          "audience",
+          "cadence",
+          "send_enabled"
+        ],
         "properties": {
-          "stream_id": {"type": "string", "minLength": 1},
-          "audience": {"type": "string", "minLength": 1},
-          "cadence": {"enum": ["WEEKLY", "MONTHLY", "MANUAL"]},
-          "send_enabled": {"const": false}
+          "stream_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audience": {
+            "type": "string",
+            "minLength": 1
+          },
+          "cadence": {
+            "enum": [
+              "WEEKLY",
+              "MONTHLY",
+              "MANUAL"
+            ]
+          },
+          "send_enabled": {
+            "const": false
+          },
+          "provider": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minimum_blocks": {
+            "type": "integer",
+            "minimum": 9
+          },
+          "enrollment": {
+            "enum": [
+              "marketing_consent_only"
+            ]
+          },
+          "delivery_policy": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audience_list_key": {
+            "type": "string",
+            "minLength": 1
+          },
+          "schedule_strategy": {
+            "type": "string",
+            "minLength": 1
+          }
         },
         "additionalProperties": false
       }
@@ -50,11 +123,21 @@
         "make_required"
       ],
       "properties": {
-        "marketing_consent_required": {"const": true},
-        "prod_writes_default": {"const": "DENY"},
-        "additional_cost_eur_target": {"const": 0},
-        "wpvibe_required": {"const": false},
-        "make_required": {"const": false}
+        "marketing_consent_required": {
+          "const": true
+        },
+        "prod_writes_default": {
+          "const": "DENY"
+        },
+        "additional_cost_eur_target": {
+          "const": 0
+        },
+        "wpvibe_required": {
+          "const": false
+        },
+        "make_required": {
+          "const": false
+        }
       }
     }
   }
