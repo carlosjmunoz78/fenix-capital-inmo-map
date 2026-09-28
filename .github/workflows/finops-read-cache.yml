@@ -1,0 +1,38 @@
+name: FINOPS Read Cache Contract
+
+on:
+  pull_request:
+    branches:
+      - preprod-app-phase1
+    paths:
+      - 'src/supabase.ts'
+      - 'tests/finops-read-cache-contract.spec.ts'
+      - '.github/workflows/finops-read-cache.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: finops-read-cache-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      VITE_FUNCTION_SUFFIX: '-test'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: TypeScript + Vite build
+        run: npm run build
+      - name: Static FinOps cache contract
+        run: npx playwright test tests/finops-read-cache-contract.spec.ts --workers=1
+
+# No browser navigation and no live PREPROD API calls are performed by this workflow.
