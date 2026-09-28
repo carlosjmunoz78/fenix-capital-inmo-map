@@ -62,3 +62,45 @@ CEREBRO -> modelo IA -> WordPress directo.
 - WPVibe no se usa.
 - Make no se usa como dependencia.
 - Coste adicional objetivo 0 €.
+
+
+## Auditoría Hostinger Reach · formularios y newsletter
+Evidencia viva de WordPress:
+- plugin `Hostinger Reach 1.8.2` activo.
+- rutas REST presentes: `contact`, `contact-lists`, `forms`, `builder-forms`, `tags`, `integrations`, `overview`, `status`.
+- `forms` soporta GET/POST bajo permiso administrativo; el POST cambia estado `is_active` de formularios existentes.
+- `contact` acepta altas de suscriptores y permite grupo/tags.
+- el plugin declara sincronización con Elementor y otros builders.
+- el readme oficial instalado declara campañas/newsletters y envío, pero la superficie REST de WordPress auditada NO expone crear/programar/enviar campañas.
+- las rutas administrativas devolvieron 401 al acceso anónimo esperado; no se intentó saltar autenticación ni extraer tokens.
+
+Decisión:
+- `FORM_MANAGE` deja de ser GAP y se vincula a `hostinger_reach/forms:get+post` detrás de PLUGIN-UNIVERSAL-001.
+- `NEWSLETTER_MANAGE` sigue fail-closed y sin binding operativo hasta disponer de una API/ability autenticada, documentada y testeable para campaign create/schedule/send.
+- no usar `wp_mail()` como sustituto improvisado para campañas masivas.
+- no almacenar ni copiar el token interno de Reach.
+
+## Contratos multiempresa añadidos
+`cerebro/runtime/wordpress_universal_contracts.py` mueve del gateway a configuración:
+- dominio;
+- email público;
+- endpoint de leads;
+- base WordPress;
+- contratos de formulario;
+- audiencias.
+
+Fénix queda como perfil de compañía y no como comportamiento universal.
+
+Newsletters definidas, aún NO activadas:
+1. `newsletter_particulares` · PARTiculares · WEEKLY.
+2. `newsletter_inmobiliarias` · INMOBILIARIAS · WEEKLY.
+
+Ambas exigen consentimiento de marketing y no pueden marcarse enabled si no existe provider.
+Esto conserva el requisito de dos newsletters semanales sin afirmar envío autónomo antes de tener transporte probado.
+
+## Estado actualizado de gaps
+- FORM_MANAGE: HECHO a nivel de provider binding/contrato; escritura real permanece sujeta a PREPROD y autenticación.
+- NEWSLETTER_MANAGE: DEFINIDO / fail-closed; campaign API física aún no demostrada.
+- MULTIEMPRESA CONFIG: HECHO V0 en runtime contract; falta migración del plugin live Fénix-specific a config inyectable.
+- Core Guard abilities de contenido/media/city: existentes en código live; exposición canónica completa sigue POR AUDITAR.
+- PREPROD físico WordPress: POR AUDITAR desde este conector; no se usa PROD para demostrar escrituras.
