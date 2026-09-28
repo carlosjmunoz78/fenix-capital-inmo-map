@@ -228,3 +228,22 @@ Cola canónica: `governance/human-exception-queue-2026-09-07.json`.
 - **Coste adicional:** 0 €.
 - **PROD autonomy total:** `DENY` mientras los gates aplicables, incluyendo #124, #126 y #133, sigan abiertos.
 - **Siguiente acción estructural planificada:** implementar `KW-001` en PREPROD sobre `BMD-001 + WAUD-001 + SEO-001`, siguiendo el grafo Factory y manteniendo coste adicional 0 €.
+
+
+## PLUGIN-UNIVERSAL-001 · 2026-09-28
+- Estado Registry: `DOCUMENTED_PARTIAL`.
+- Engine Registry: 47 motores; Registry `0.21.0`.
+- Gateway/policy V0: HECHO.
+- Multiempresa config externalizada: HECHO V0.
+- Existing staging runtime `cerebro-universal/v1`: EXISTENTE/PARCIAL y protegido.
+- Capability discovery PROD: HECHO.
+- PREPROD authenticated provider canary create/read/publish/verify/rollback: HECHO.
+- Forms: EXISTENTE mediante Hostinger Reach + providers actuales.
+- Leads/lead magnets: EXISTENTE en Fénix CEREBRO Leads; Fénix-specific.
+- Newsletter template/draft preparation: DEFINIDO/PROVIDER MAPPED.
+- Newsletter SEND/SCHEDULE autónomo: POR AUDITAR / UNBOUND.
+- Direct authenticated execution of protected `cerebro-universal/v1`: POR AUDITAR.
+- WPVibe required: NO.
+- Make required: NO.
+- Additional cost target: 0 €.
+- PROD promotion: DENY.
