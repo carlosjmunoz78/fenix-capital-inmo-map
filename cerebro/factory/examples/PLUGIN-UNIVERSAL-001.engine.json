@@ -93,7 +93,10 @@
     "brevo_domain_sender_lists_verified",
     "lead_marketing_consent_not_inferred_from_privacy",
     "deterministic_plugin_package_rebuild",
-    "plugin_candidate_integrity_hash"
+    "plugin_candidate_integrity_hash",
+    "staging_to_preprod_lead_isolation",
+    "explicit_marketing_consent_persistence",
+    "brevo_particulares_list_mapping_cleanup"
   ],
   "evaluation": [
     "provider_coverage",
@@ -208,6 +211,9 @@
     "manual PREPROD upload reported by operator on 2026-09-28; post-upload physical probe run 36492408482 rerun SUCCESS",
     "post-upload PREPROD physical probe: FenixCerebroLead present, consent_marketing present, explicit marketing checkbox present, fenix-cerebro/v1 present",
     "post-upload local callback validation returned 422 identifier_required for empty payload; no lead created and no backend forwarding required",
-    "Leads 1.3.4 candidate adds fail-closed staging forwarding unless an explicit PREPROD endpoint override is configured"
+    "Leads 1.3.4 candidate adds fail-closed staging forwarding unless an explicit PREPROD endpoint override is configured",
+    "PREPROD lead E2E run 36494055199: staging -> fenix-web-lead-preprod returned 201, explicit privacy+marketing consent persisted, synthetic lead cleaned",
+    "PREPROD Brevo consent/list canary run 36494181742: synthetic contact landed only in PARTICULARES list 17, cleanup 204, emails sent 0",
+    "fenix-web-lead-preprod v3 explicitly allows https://staging.fenixcapital.es; PROD fenix-web-lead untouched"
   ]
 }
