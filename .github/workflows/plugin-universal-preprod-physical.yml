@@ -66,8 +66,19 @@ jobs:
           print('FENIX_CEREBRO_LEADS_NAMESPACE=' + ('PRESENT' if 'fenix-cerebro/v1' in namespaces else 'NOT_ACTIVE_OR_NOT_DEPLOYED'))
           PY
 
+      - name: Verify Leads REST callback without forwarding
+        shell: bash
+        run: |
+          set -euo pipefail
+          status=$(curl --silent --show-error --location --max-time 20             -o /tmp/leads-empty-response.json             -w '%{http_code}'             -H 'Content-Type: application/json'             -H 'x-fenix-idempotency-key: preprod-empty-validation-only'             -d '{}'             https://staging.fenixcapital.es/wp-json/fenix-cerebro/v1/lead)
+          echo "LEADS_EMPTY_VALIDATION_STATUS=$status"
+          cat /tmp/leads-empty-response.json
+          test "$status" = "422"
+          grep -Fq 'identifier_required' /tmp/leads-empty-response.json
+          echo 'LEADS_CALLBACK_VALIDATION_ONLY=PASS'
+
       - name: Gate semantics
         shell: bash
         run: |
           echo 'PROBE=PASS'
-          echo 'NOTE=This probe confirms the universal PREPROD runtime and classifies Leads 1.3.3 presence. It does not promote or write to PROD.'
+          echo 'NOTE=This probe confirms the universal PREPROD runtime, Leads 1.3.3 frontend markers, namespace, and local validation callback. It does not create a lead, forward to backend, promote, or write to PROD.'
