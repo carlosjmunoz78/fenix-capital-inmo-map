@@ -1,13 +1,13 @@
 # JOB-001 · Hostinger zero-cost canary runtime
 
-Status: PREPARED_NOT_INSTALLED
+Status: INSTALLED_SHADOW_VALIDATION
 Date: 2026-09-28
 
 ## Why Hostinger is the preferred first runtime host
 
-Fénix already pays for Business Web Hosting. Hostinger documents cron support for web/cloud hosting, custom commands/scripts, UTC schedules and unlimited cron jobs for Premium and above. Therefore this route introduces **0 EUR additional subscription cost**.
+Fénix already pays for Business Web Hosting, and the current hPanel exposes Cron Jobs and SSH on the existing account. The selected path therefore introduces **0 EUR additional subscription cost**.
 
-Vercel Hobby was audited and rejected as the primary scheduler for Wave 1 because Hobby cron execution is limited to daily cadence; Wave 1 requires 15/30 minute schedules. GitHub Actions is not selected because the account's included Actions minutes are currently exhausted and budgets stop additional usage. Trading LAB is explicitly excluded.
+GitHub Actions is not selected for this validation because the account's included Actions minutes are currently exhausted and hard budgets stop additional usage. Trading LAB is explicitly excluded. No new paid runtime has been introduced.
 
 ## Canary design
 
@@ -20,32 +20,75 @@ Vercel Hobby was audited and rejected as the primary scheduler for Wave 1 becaus
 
 It has no Supabase key, no WordPress write, no email, no publishing and no customer-data access.
 
-This does **not** replace legacy pg_cron job 13. The legacy job remains authoritative until the Hostinger cron path is physically installed, observed and compared.
+This does **not** replace legacy pg_cron job 13. The legacy job remains authoritative until the Hostinger cron path is physically installed, observed, compared and an equivalent evidence/rollback contract exists.
 
-## Intended Hostinger schedule
+## Live physical evidence · 2026-09-28
 
-Run every 15 minutes, matching legacy job 13 minute offsets:
+SSH login to the existing Hostinger account was confirmed.
+
+The real filesystem path was discovered rather than guessed:
+
+`/home/u497370767/domains/fenixcapital.es/cerebro/job001_wp_bridge_canary_FIXED.php`
+
+Manual PHP execution returned a valid JSON result with:
+
+- `ok:true`
+- HTTP `200`
+- environment `PREPROD`
+- mode `READ_ONLY_CANARY`
+- response SHA-256 fingerprint
+
+Redirected manual execution also created:
+
+`/home/u497370767/domains/fenixcapital.es/cerebro/job001_wp_bridge_canary.log`
+
+Hostinger subsequently displayed a fresh successful automatic result at:
+
+`2026-09-28T09:45:04+00:00`
+
+with `ok:true` and HTTP `200`.
+
+At that minute both a temporary every-minute canary and the provisional 15-minute canary were eligible to execute, so that observation proves the scheduler/runtime path but does not yet uniquely attribute the run to the final cron entry.
+
+## Final intended Hostinger schedule
+
+Legacy pg_cron job 13 uses minute offsets:
 
 `3,18,33,48 * * * *`
 
-Hostinger schedules are UTC.
+The final Hostinger shadow schedule should preserve those offsets rather than use `*/15`:
 
-## Physical install gate
+`3,18,33,48 * * * *`
 
-The runner must be placed outside a publicly browsable directory when possible, e.g.:
+Command:
 
-`/home/<account>/cerebro/job001_wp_bridge_canary.php`
+`/usr/bin/php /home/u497370767/domains/fenixcapital.es/cerebro/job001_wp_bridge_canary_FIXED.php >> /home/u497370767/domains/fenixcapital.es/cerebro/job001_wp_bridge_canary.log 2>&1`
 
-Then create a PHP/custom cron in hPanel using the installed PHP binary/path. Exact account path must be obtained from hPanel; do not guess it.
+Hostinger scheduler timestamps observed during validation are UTC.
+
+## Cleanup gate
+
+Delete temporary validation cron entries once scheduler execution is proven:
+
+- any `* * * * *` canary entry;
+- any `/bin/date` probe;
+- any canary entry using the invalid path `/home/u497370767/cerebro/...`.
+
+Keep only the final shadow canary schedule above.
+
+Do **not** alter or disable the existing WordPress cron as part of this gate.
+Do **not** disable Supabase pg_cron job 13 yet.
 
 ## Acceptance
 
-- 96 expected executions in a 24h window.
-- 96 outputs present.
-- 0 execution errors.
-- 96 HTTP 2xx responses.
-- no secrets in script/output.
-- resource usage remains negligible.
-- legacy pg_cron job 13 remains ON during this observation window.
+- one sole Hostinger canary cron remains;
+- final schedule matches legacy offsets;
+- 96 expected executions in a 24h window;
+- 96 outputs present;
+- 0 execution errors;
+- 96 HTTP 2xx responses;
+- no secrets in script/output;
+- resource usage remains negligible;
+- legacy pg_cron job 13 remains ON during the observation window.
 
 Only after this gate may the project design a no-double-execution cut-over that preserves health evidence and rollback.
