@@ -44,7 +44,7 @@ class Wave1FamilyTests(unittest.TestCase):
         wave_ids = {item["engine_id"] for item in spec["engines"]}
         registry_ids = [item["engine_id"] for item in registry["engines"]]
         self.assertGreaterEqual(tuple(map(int, registry["registry_version"].split("."))), (0, 5, 0))
-        self.assertEqual(len(registry_ids), 46)
+        self.assertEqual(len(registry_ids), 47)
         self.assertEqual(len(registry_ids), len(set(registry_ids)))
         self.assertTrue(wave_ids.issubset(registry_ids))
 

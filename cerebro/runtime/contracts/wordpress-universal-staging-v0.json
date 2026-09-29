@@ -1,0 +1,39 @@
+{
+  "contract_version": "0.1.0",
+  "engine_id": "PLUGIN-UNIVERSAL-001",
+  "company_id": "fenix-capital",
+  "environment": "PREPROD",
+  "base_url": "https://staging.fenixcapital.es",
+  "namespace": "cerebro-universal/v1",
+  "source": "live_public_rest_discovery_2026-09-28",
+  "routes": {
+    "b3/storage-observer": ["GET"],
+    "batch/preview": ["POST"],
+    "command": ["POST"],
+    "command/catalog": ["GET"],
+    "queue/submit": ["POST"],
+    "queue/status": ["GET"],
+    "b3/preflight": ["GET"],
+    "status": ["GET"],
+    "capabilities": ["GET"],
+    "operation": ["POST"]
+  },
+  "qa_namespace": "cerebro-universal-qa/v1",
+  "qa_routes": {
+    "create-draft-live-once": ["POST"]
+  },
+  "public_security_observation": {
+    "namespace_root_readable": true,
+    "protected_endpoint_status": 401,
+    "unauthenticated_write_probe_status": 401,
+    "write_performed": false
+  },
+  "policy": {
+    "wrap_existing_runtime": true,
+    "duplicate_plugin_forbidden": true,
+    "prod_mutation_authorized": false,
+    "wpvibe_required": false,
+    "make_required": false,
+    "additional_cost_eur_target": 0
+  }
+}

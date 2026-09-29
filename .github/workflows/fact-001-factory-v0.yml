@@ -6,16 +6,26 @@ on:
       - 'cerebro/**'
     paths:
       - 'cerebro/factory/**'
-      - 'cerebro/runtime/**'
+      - 'cerebro/runtime/**/*.py'
+      - 'cerebro/runtime/contracts/**'
+      - 'cerebro/runtime/deploy/**'
+      - 'cerebro/runtime/wordpress/plugins/**'
       - '.github/workflows/fact-001-factory-v0.yml'
   pull_request:
     paths:
       - 'cerebro/factory/**'
-      - 'cerebro/runtime/**'
+      - 'cerebro/runtime/**/*.py'
+      - 'cerebro/runtime/contracts/**'
+      - 'cerebro/runtime/deploy/**'
+      - 'cerebro/runtime/wordpress/plugins/**'
       - '.github/workflows/fact-001-factory-v0.yml'
 
 permissions:
   contents: read
+
+concurrency:
+  group: fact-001-factory-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   validate:

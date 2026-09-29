@@ -1,0 +1,143 @@
+{
+  "engine_id": "SOCBOOT-001",
+  "name": "Social Bootstrap Engine",
+  "layer": "L8",
+  "company_scope": "GLOBAL_OR_SCOPED",
+  "company_id": null,
+  "environment": "PREPROD",
+  "version": "0.2.0",
+  "contract_version": "0.2.0",
+  "status": "CONFIRMED_OPERATIONAL",
+  "objective": "Generate deterministic social pillars, channel plans, schedules, audience segmentation and safety guardrails without publishing or remote writes.",
+  "owner": "CEREBRO Platform",
+  "inputs": [
+    "company_id",
+    "BMD-001 business model profile",
+    "SOCAUD-001 social audit",
+    "optional marketing context",
+    "evidence_at"
+  ],
+  "outputs": [
+    "content pillars",
+    "Instagram/Facebook/LinkedIn channel plan",
+    "deterministic Europe/Madrid schedule",
+    "conversion/publishing guardrails",
+    "reproducible plan sha256"
+  ],
+  "knowledge_sources": [
+    "BMD-001",
+    "SOCAUD-001",
+    "COMPET-001 optional",
+    "KBOOT-001 optional"
+  ],
+  "data_contracts": [
+    "social-bootstrap-v0.json"
+  ],
+  "api_contract": [
+    "cerebro.runtime.social_bootstrap.SocialBootstrap.plan",
+    "cerebro.runtime.social_bootstrap.SocialBootstrap.health"
+  ],
+  "permissions": [
+    "consume normalized internal evidence",
+    "no credentials",
+    "no publishing",
+    "no remote writes",
+    "no PROD execution"
+  ],
+  "policies": [
+    "deterministic_before_AI",
+    "zero_new_cost_by_default",
+    "preserve_existing_contracts",
+    "cross_company_deny",
+    "particulares_inmobiliarias_segmentation",
+    "explicit_marketing_consent_before_newsletter",
+    "idempotency_before_scheduling",
+    "queue_reconciliation_before_scheduling",
+    "brand_qa_before_publishing",
+    "claims_review_before_publishing",
+    "verified_cta_destination_or_native_handler",
+    "prod_deny_by_default"
+  ],
+  "events_in": [
+    "BUSINESS_MODEL_PROFILE_READY",
+    "SOCIAL_MEDIA_AUDIT_READY"
+  ],
+  "events_out": [
+    "SOCIAL_BOOTSTRAP_PLAN_READY"
+  ],
+  "jobs": [],
+  "tests": [
+    "cerebro/runtime/tests/test_social_bootstrap.py"
+  ],
+  "evaluation": [
+    "deterministic SOCBOOT unit suite",
+    "Factory manifest validation",
+    "App Compatibility"
+  ],
+  "tribunal": [
+    "PREPROD plan-only; publishing and PROD promotion DENY until scheduling/publish/rollback gates are physically proven"
+  ],
+  "observability": [
+    "health mode/publishing_enabled/remote_write/prod_enabled/external_cost_eur",
+    "plan sha256/channel count"
+  ],
+  "retry_timeout": {
+    "declared": true,
+    "retries": 0,
+    "timeout_ms": 1000
+  },
+  "cost_budget": {
+    "additional_monthly_eur_target": 0
+  },
+  "backup": {
+    "strategy": "git+versioned-manifest+reproducible-plan",
+    "verified": true
+  },
+  "rollback": {
+    "strategy": "FACT-001 versioned Registry pointer rollback to immutable 0.1.0 scaffold",
+    "verified": true
+  },
+  "rebuild": {
+    "strategy": "manifest+git+shared-runtime+replay-normalized-evidence",
+    "verified": true
+  },
+  "dependencies": [
+    "COMPET-001",
+    "KBOOT-001",
+    "SOCAUD-001"
+  ],
+  "dependents": [],
+  "autonomy_level": "PREPROD_DETERMINISTIC_SOCIAL_PLAN_ONLY",
+  "zero_cost_execution_plan": [
+    "existing_stack",
+    "python_stdlib",
+    "deterministic_planning"
+  ],
+  "human_exception_codes": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "system_blocker_codes": [
+    "MISSING_CREDENTIAL",
+    "EXPIRED_OR_REVOKED_CREDENTIAL",
+    "MFA_REQUIRED",
+    "PERMISSION_REQUIRED",
+    "IRREVERSIBLE_PROD_RISK"
+  ],
+  "evidence": [
+    "cerebro/runtime/tests/test_social_bootstrap.py",
+    "cerebro/runtime/contracts/social-bootstrap-v0.json",
+    "FACT-001 Factory V0 required checks pending on this commit; status remains PREPROD plan-only, not publishing autonomy"
+  ],
+  "factory": {
+    "generator": "FACT-001",
+    "generator_version": "0.4.0",
+    "immutable_scaffold": "cerebro/factory/generated/SOCBOOT-001/engine.manifest.json"
+  }
+}

@@ -86,6 +86,53 @@ function authenticatedContextFallback(session:Awaited<ReturnType<typeof supabase
  return{actor_code:actorCode,role,context_source:'authenticated-user-metadata'};
 }
 
+type EdgeResult<T>={status:number;data:T|null};
+type EdgeCacheEntry={expiresAt:number;status:number;data:unknown};
+const edgeReadMemoryCache=new Map<string,EdgeCacheEntry>();
+const edgeReadInflight=new Map<string,Promise<EdgeResult<unknown>>>();
+
+function edgeCacheStorageKey(key:string){return `fenix-edge-read-cache:v1:${key}`;}
+
+function readEdgeCache<T>(key:string):EdgeResult<T>|null{
+  const now=Date.now();
+  const memory=edgeReadMemoryCache.get(key);
+  if(memory&&memory.expiresAt>now)return{status:memory.status,data:memory.data as T|null};
+  if(memory)edgeReadMemoryCache.delete(key);
+  try{
+    const raw=window.sessionStorage.getItem(edgeCacheStorageKey(key));
+    if(!raw)return null;
+    const parsed=JSON.parse(raw) as EdgeCacheEntry;
+    if(!parsed||parsed.expiresAt<=now){window.sessionStorage.removeItem(edgeCacheStorageKey(key));return null;}
+    edgeReadMemoryCache.set(key,parsed);
+    return{status:parsed.status,data:parsed.data as T|null};
+  }catch{return null;}
+}
+
+function writeEdgeCache<T>(key:string,ttlMs:number,result:EdgeResult<T>){
+  if(result.status!==200)return;
+  const entry:EdgeCacheEntry={expiresAt:Date.now()+ttlMs,status:result.status,data:result.data};
+  edgeReadMemoryCache.set(key,entry);
+  try{window.sessionStorage.setItem(edgeCacheStorageKey(key),JSON.stringify(entry));}catch{}
+}
+
+async function cachedAuthenticatedEdgeFetch<T>(baseFunctionName:string,path:string,ttlMs:number,init?:RequestInit):Promise<EdgeResult<T>>{
+  const method=String(init?.method||'GET').toUpperCase();
+  if(method!=='GET')return authenticatedEdgeFetch<T>(baseFunctionName,path,init);
+  const {data:{session}}=await supabase.auth.getSession();
+  const userId=session?.user?.id||'anonymous';
+  const key=`${userId}|${functionName(baseFunctionName)}|${path}`;
+  const cached=readEdgeCache<T>(key);
+  if(cached)return cached;
+  const pending=edgeReadInflight.get(key);
+  if(pending)return pending as Promise<EdgeResult<T>>;
+  const request=authenticatedEdgeFetch<T>(baseFunctionName,path,init).then(result=>{
+    writeEdgeCache(key,ttlMs,result);
+    return result;
+  }).finally(()=>edgeReadInflight.delete(key));
+  edgeReadInflight.set(key,request as Promise<EdgeResult<unknown>>);
+  return request;
+}
+
 async function authenticatedEdgeFetch<T>(baseFunctionName:string,path:string,init?:RequestInit):Promise<{status:number;data:T|null}>{
   const {data:{session}}=await supabase.auth.getSession();
   const token=session?.access_token;
@@ -109,10 +156,16 @@ async function authenticatedEdgeFetch<T>(baseFunctionName:string,path:string,ini
 
 export async function fetchEnvironmentApi<T>(baseFunctionName:string,path:string,init?:RequestInit,options?:{productionAvailable?:boolean}):Promise<{status:number;data:T|null}>{
   if(IS_PRODUCTION&&options?.productionAvailable===false)return{status:503,data:null};
+  if(baseFunctionName==='fenix-notion-runtime'&&String(init?.method||'GET').toUpperCase()==='GET'){
+    return cachedAuthenticatedEdgeFetch<T>(baseFunctionName,path,30_000,init);
+  }
   return authenticatedEdgeFetch<T>(baseFunctionName,path,init);
 }
 
 export async function fetchAnaApi<T>(path:string,init?:RequestInit):Promise<{status:number;data:T|null}>{
+  if(path==='/capabilities'&&String(init?.method||'GET').toUpperCase()==='GET'){
+    return cachedAuthenticatedEdgeFetch<T>('fenix-ana-api',path,300_000,init);
+  }
   return authenticatedEdgeFetch<T>('fenix-ana-api',path,init);
 }
 
@@ -121,6 +174,9 @@ export async function fetchAnaKnowledgeApi<T>(path:string,init?:RequestInit):Pro
 }
 
 export async function fetchAnaCanonicalApi<T>(path:string,init?:RequestInit):Promise<{status:number;data:T|null}>{
+  if(path.startsWith('/rules')&&String(init?.method||'GET').toUpperCase()==='GET'){
+    return cachedAuthenticatedEdgeFetch<T>('fenix-ana-canonical',path,300_000,init);
+  }
   return authenticatedEdgeFetch<T>('fenix-ana-canonical',path,init);
 }
 
@@ -141,7 +197,7 @@ export async function fetchB2BActionsApi<T>(path:string,init?:RequestInit):Promi
 }
 
 export async function fetchDirectionKpisApi<T>(path:string,init?:RequestInit):Promise<{status:number;data:T|null}>{
-  return authenticatedEdgeFetch<T>('fenix-direction-kpis',path,init);
+  return cachedAuthenticatedEdgeFetch<T>('fenix-direction-kpis',path,30_000,init);
 }
 
 export async function fetchStaffAdminApi<T>(path:string,init?:RequestInit):Promise<{status:number;data:T|null}>{

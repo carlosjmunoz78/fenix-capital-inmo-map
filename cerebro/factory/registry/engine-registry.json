@@ -429,6 +429,15 @@
     },
     {
       "company_id": null,
+      "engine_id": "PLUGIN-UNIVERSAL-001",
+      "environment": "PREPROD",
+      "manifest": "../examples/PLUGIN-UNIVERSAL-001.engine.json",
+      "source_of_truth": "git+live_wordpress_audit",
+      "status": "DOCUMENTED_PARTIAL",
+      "version": "0.1.0"
+    },
+    {
+      "company_id": null,
       "engine_id": "POL-001",
       "environment": "PREPROD",
       "manifest": "../examples/POL-001.engine.json",
@@ -507,10 +516,21 @@
       "company_id": null,
       "engine_id": "SOCBOOT-001",
       "environment": "PREPROD",
-      "manifest": "../generated/SOCBOOT-001/engine.manifest.json",
-      "source_of_truth": "git",
-      "status": "DEFINED_NOT_BUILT",
-      "version": "0.1.0"
+      "manifest": "../versions/SOCBOOT-001/0.2.0/engine.manifest.json",
+      "source_of_truth": "git+versioned_update",
+      "status": "CONFIRMED_OPERATIONAL",
+      "version": "0.2.0",
+      "factory_scaffold": "../generated/SOCBOOT-001/engine.manifest.json",
+      "version_history": [
+        {
+          "company_id": null,
+          "environment": "PREPROD",
+          "manifest": "../generated/SOCBOOT-001/engine.manifest.json",
+          "source_of_truth": "git",
+          "status": "DEFINED_NOT_BUILT",
+          "version": "0.1.0"
+        }
+      ]
     },
     {
       "company_id": null,
@@ -581,5 +601,5 @@
     }
   ],
   "environment": "PREPROD",
-  "registry_version": "0.20.0"
+  "registry_version": "0.21.0"
 }

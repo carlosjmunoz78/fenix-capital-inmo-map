@@ -1,0 +1,70 @@
+{
+  "generated_at": "2026-09-28",
+  "mode": "READ_ONLY_SCHEMA_SNAPSHOT_BEFORE_ADDITIVE_NOTION_CONTROL_PLANE_CHANGE",
+  "notion": {
+    "governance_modules": {
+      "data_source_id": "fe5594d3-6e62-4372-8a63-6ac31898bdbc",
+      "title": "🧭 Gobierno de módulos · CEREBRO",
+      "existing_properties": [
+        "Autoridad final",
+        "Criterio de validación",
+        "Debe informar",
+        "Dominio",
+        "Empresa",
+        "Estado",
+        "Fase autonomía",
+        "ID módulo",
+        "Límite económico €",
+        "Límites y excepciones",
+        "Módulo",
+        "Notas",
+        "Puede ejecutar solo",
+        "Revisar",
+        "Última validación"
+      ]
+    },
+    "support_escalations": {
+      "data_source_id": "66843d2a-4e67-40f9-93d0-a66ea091d436",
+      "title": "🆘 Soporte y escalados · Fénix Capital",
+      "existing_properties": [
+        "Actualizado",
+        "Artículo KB candidato",
+        "Bloqueante",
+        "Causa raíz",
+        "Clave idempotencia",
+        "Creado",
+        "Descripción",
+        "Es TEST",
+        "Escalado a",
+        "Esperando a",
+        "Estado",
+        "Evidencia",
+        "Fecha límite",
+        "ID ticket",
+        "KB relacionada",
+        "Motivo escalado",
+        "Origen",
+        "Prioridad",
+        "Próxima revisión",
+        "Requiere escalado",
+        "Responsable",
+        "Respuesta / resolución",
+        "Resultado esperado",
+        "Ticket"
+      ]
+    }
+  },
+  "decision": {
+    "reuse_support_as_human_exception_queue": true,
+    "reason": "It already implements tickets/escalations/idempotency/evidence/owner/priority/status and is safer than creating a duplicate queue.",
+    "additive_fields_planned": [
+      "Human Exception Code",
+      "Company ID",
+      "Engine ID",
+      "Environment",
+      "Version"
+    ],
+    "no_existing_property_removed_or_renamed": true,
+    "rollback": "Remove only the five newly added empty properties if acceptance fails; no existing rows are rewritten."
+  }
+}

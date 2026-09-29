@@ -1,0 +1,78 @@
+{
+  "evidence_id": "PLUGIN-UNIVERSAL-BREVO-PREPROD-2026-09-28",
+  "engine_id": "PLUGIN-UNIVERSAL-001",
+  "company_id": "fenix-capital",
+  "environment": "PREPROD",
+  "provider": "Brevo Free",
+  "account": {
+    "company_name": "Fénix Capital",
+    "plan": "free",
+    "observed_send_credits_available": 297
+  },
+  "sender": {
+    "email": "hipotecas@fenixcapital.es",
+    "active": true
+  },
+  "domain": {
+    "name": "fenixcapital.es",
+    "verified": true,
+    "authenticated": true,
+    "brevo_code": true,
+    "dkim1": true,
+    "dkim2": true,
+    "dmarc": true
+  },
+  "folder": {
+    "id": 16,
+    "name": "FENIX_CEREBRO_NEWSLETTERS"
+  },
+  "lists": [
+    {
+      "id": 17,
+      "name": "FENIX_NEWSLETTER_PARTICULARES"
+    },
+    {
+      "id": 18,
+      "name": "FENIX_NEWSLETTER_INMOBILIARIAS"
+    }
+  ],
+  "campaign_drafts": [
+    {
+      "id": 102,
+      "name": "CEREBRO PREPROD Newsletter particulares TEST",
+      "status": "draft"
+    },
+    {
+      "id": 103,
+      "name": "CEREBRO PREPROD Newsletter inmobiliarias TEST",
+      "status": "draft"
+    }
+  ],
+  "canary": {
+    "synthetic_contacts_created": true,
+    "synthetic_contacts_list_membership_verified": true,
+    "synthetic_contacts_deleted_after_test": true,
+    "real_people_emailed": false,
+    "emails_sent": 0,
+    "campaign_create_with_empty_list_expected_failure": "There are no contacts associated with the given recipients info",
+    "free_plan_tag_rejected_and_removed": true
+  },
+  "existing_runtime": {
+    "edge_function": "fenix-brevo-api-preprod",
+    "webhook": "fenix-brevo-webhook-preprod",
+    "webhook_health_configured": true,
+    "historical_contact_e2e_success": true,
+    "historical_email_e2e_success": true
+  },
+  "policy": {
+    "newsletter_provider": "brevo",
+    "hostinger_reach_newsletter_forbidden": true,
+    "marketing_consent_required": true,
+    "daily_email_guard": 300,
+    "no_auto_paid_upgrade": true
+  },
+  "blockers": [
+    "Fenix CEREBRO Leads 1.3.2 live currently hardcodes consent_marketing=false in native/generic captures; 1.3.3 explicit-consent patch is prepared in Git but not yet physically promoted.",
+    "Real weekly send remains disabled until consent capture patch is physically validated and promoted through PREPROD."
+  ]
+}

@@ -228,3 +228,46 @@ Cola canónica: `governance/human-exception-queue-2026-09-07.json`.
 - **Coste adicional:** 0 €.
 - **PROD autonomy total:** `DENY` mientras los gates aplicables, incluyendo #124, #126 y #133, sigan abiertos.
 - **Siguiente acción estructural planificada:** implementar `KW-001` en PREPROD sobre `BMD-001 + WAUD-001 + SEO-001`, siguiendo el grafo Factory y manteniendo coste adicional 0 €.
+
+
+## PLUGIN-UNIVERSAL-001 · 2026-09-28
+- Estado Registry: `DOCUMENTED_PARTIAL`.
+- Engine Registry: 47 motores; Registry `0.21.0`.
+- Gateway/policy V0: HECHO.
+- Multiempresa config externalizada: HECHO V0.
+- Existing staging runtime `cerebro-universal/v1`: EXISTENTE/PARCIAL y protegido.
+- Capability discovery PROD: HECHO.
+- PREPROD authenticated provider canary create/read/publish/verify/rollback: HECHO.
+- Forms: EXISTENTE mediante Hostinger Reach + providers actuales.
+- Leads/lead magnets: EXISTENTE en Fénix CEREBRO Leads; Fénix-specific.
+- Newsletter template/draft preparation: DEFINIDO/PROVIDER MAPPED.
+- Newsletter SEND/SCHEDULE autónomo: POR AUDITAR / UNBOUND.
+- Direct authenticated execution of protected `cerebro-universal/v1`: POR AUDITAR.
+- WPVibe required: NO.
+- Make required: NO.
+- Additional cost target: 0 €.
+- PROD promotion: DENY.
+
+
+## Newsletter dentro de PLUGIN-UNIVERSAL-001
+- Provider: BREVO FREE · DEFINIDO canónicamente.
+- Hostinger Reach newsletter: RETIRADO/PROHIBIDO.
+- Lead consent -> Brevo audience enrollment: HECHO V0.
+- Dos streams semanales: HECHO contrato.
+- Mínimo 9 bloques por edición: HECHO contrato.
+- Quota guard 300 emails/día: HECHO.
+- API contacts/campaign create/update/schedule/send: HECHO adapter.
+- Credencial/sender/domain/list IDs Brevo reales: POR AUDITAR.
+- Envío real: NO ACTIVADO mientras falte evidencia física.
+
+
+## Brevo newsletter final canary
+- Lists 17/18: HECHO físico.
+- Sender/domain/DKIM/DMARC: HECHO físico.
+- Campaign draft IDs 102/103: HECHO físico.
+- Schedule canaries 104/105: HECHO físico.
+- Safe rollback: SUSPENDED / 0 sends.
+- Synthetic contacts: CLEANED.
+- Temporary canary function: RETIRED 410 + verify_jwt.
+- Marketing-consent plugin 1.3.3: HECHO EN GIT / PREPROD FÍSICO PENDIENTE.
+- PROD newsletter auto-enrollment: NO ACTIVADO hasta consentimiento físico probado.

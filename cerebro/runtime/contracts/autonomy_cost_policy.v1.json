@@ -1,0 +1,73 @@
+{
+  "schema_version": "1.0.0",
+  "principle": "ZERO_COST_FIRST_FAIL_CLOSED",
+  "defaults": {
+    "environment": "PREPROD",
+    "state": "PARKED",
+    "max_runs_per_hour": 1,
+    "max_external_calls_per_run": 0,
+    "max_ai_calls_per_run": 0,
+    "require_change_signal": true,
+    "allow_background_polling": false,
+    "idle_poll_seconds": 300,
+    "daily_soft_eur": "0.00",
+    "daily_hard_eur": "0.00",
+    "allow_paid_ai": false,
+    "allow_metered_external": false
+  },
+  "components": {
+    "SUPERVISOR-001": {
+      "state": "SHADOW",
+      "max_runs_per_hour": 1,
+      "require_change_signal": true,
+      "max_external_calls_per_run": 0,
+      "max_ai_calls_per_run": 0
+    },
+    "METALEARN-001": {
+      "state": "PARKED",
+      "max_runs_per_hour": 1,
+      "require_change_signal": true,
+      "max_external_calls_per_run": 0,
+      "max_ai_calls_per_run": 0
+    },
+    "PC-BRIDGE-001": {
+      "state": "PARKED",
+      "max_runs_per_hour": 12,
+      "allow_background_polling": true,
+      "idle_poll_seconds": 300,
+      "max_external_calls_per_run": 0,
+      "max_ai_calls_per_run": 0
+    },
+    "PLUGIN-UNIVERSAL-001": {
+      "state": "PARKED",
+      "max_runs_per_hour": 12,
+      "allow_background_polling": false,
+      "idle_poll_seconds": 300,
+      "max_external_calls_per_run": 0,
+      "max_ai_calls_per_run": 0
+    },
+    "BROWSER-EXTENSION-001": {
+      "state": "PARKED",
+      "max_runs_per_hour": 12,
+      "allow_background_polling": false,
+      "idle_poll_seconds": 300,
+      "max_external_calls_per_run": 0,
+      "max_ai_calls_per_run": 0
+    }
+  },
+  "promotion_gates": [
+    "contracts",
+    "permissions",
+    "tests",
+    "evaluation",
+    "tribunal",
+    "observability",
+    "rollback",
+    "backup",
+    "rebuild",
+    "measured_cost",
+    "policy",
+    "PREPROD"
+  ],
+  "human_required_for_spend": "MONEY_LIMIT"
+}

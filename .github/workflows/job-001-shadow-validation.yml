@@ -1,0 +1,24 @@
+name: JOB-001 Shadow Validation
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  shadow-runtime-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run JOB-001 isolated tests
+        run: |
+          python -m unittest             cerebro.runtime.tests.test_job_scheduler             cerebro.runtime.tests.test_job_shadow_evidence             -v
+
+# FINOPS: manual-only because these checks are either covered by the consolidated
+# FACT/runtime test discovery or reserved for explicit PREPROD/release validation.
+# This avoids rerunning the same suite on every synchronize event of a long-lived PR.
