@@ -1,0 +1,44 @@
+name: CEREBRO Social Buffer Readonly Preflight Once
+
+on:
+  push:
+    branches:
+      - work/finops-supabase-offload-wave1-2026-09-28
+    paths:
+      - ".github/workflows/cerebro-social-buffer-preflight-once.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      BUFFER_API_KEY: ${{ secrets.BUFFER_API_KEY }}
+    steps:
+      - name: Read Buffer org channels and queue
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.request, sys
+          token=os.environ.get("BUFFER_API_KEY","")
+          if not token:
+              print(json.dumps({"ok":False,"error":"BUFFER_API_KEY_MISSING"}))
+              raise SystemExit(2)
+          API="https://api.buffer.com"
+          def gql(q,v=None):
+              req=urllib.request.Request(API,data=json.dumps({"query":q,"variables":v or {}}).encode(),headers={"content-type":"application/json","authorization":"Bearer "+token,"user-agent":"cerebro-social-buffer-preflight/1.0"},method="POST")
+              with urllib.request.urlopen(req,timeout=20) as r: p=json.loads(r.read().decode())
+              if p.get("errors"): raise RuntimeError("BUFFER_GRAPHQL_ERROR:"+json.dumps(p["errors"]))
+              return p["data"]
+          data=gql("query {account {organizations {id name}}}")
+          orgs=(data.get("account") or {}).get("organizations") or []
+          out=[]
+          for org in orgs:
+              oid=org["id"]
+              ch=gql("query C($organizationId: OrganizationId!) {channels(input:{organizationId:$organizationId}) {id name displayName service isQueuePaused}}",{"organizationId":oid}).get("channels") or []
+              posts=gql("query Q($organizationId: OrganizationId!) {posts(first:50,input:{organizationId:$organizationId,filter:{status:[scheduled]}}){edges{node{id channelId dueAt status text}} pageInfo{hasNextPage endCursor}}}",{"organizationId":oid}).get("posts") or {}
+              out.append({"organization_id":oid,"organization_name":org.get("name"),"channels":ch,"scheduled_count":len(posts.get("edges") or []),"queue_has_next":(posts.get("pageInfo") or {}).get("hasNextPage",False)})
+          print(json.dumps({"ok":True,"organizations":out},ensure_ascii=False))
+          PY
