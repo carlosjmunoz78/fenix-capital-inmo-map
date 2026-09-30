@@ -294,6 +294,16 @@ async function chatReply(req:Request,message:string,pendingRaw:unknown,readConte
     return {status:"OK",intent:"contract",executed:false,message:"Contrato móvil V1: lectura sin confirmación dentro de conocimiento autorizado; acciones mediante propuesta exacta + un «sí»; HUMAN_REQUIRED se explica y se resuelve con decisión/enlace cuando exista; acceso directo a modelos y escrituras PROD siguen bloqueados en esta superficie."};
   }
 
+  if (/(simula|simulacion|simulación|sin ejecutar|no ejecutes|ningun cambio real|ningún cambio real)/.test(text) && /seo/.test(text)) {
+    return {
+      status:"SIMULATION",
+      intent:"seo_zone_simulation",
+      executed:false,
+      completed:true,
+      message:"Simulación únicamente: el proceso incluiría investigación y clustering de palabras clave, mapa territorial e intención, arquitectura y contenidos, enlazado interno, SEO local, activos de captación, controles técnicos y QA, monitorización, medición y mejora. No se crea territorio, no se escribe ninguna cola, no se publica nada y no se ejecuta ningún cambio real."
+    };
+  }
+
   const seoZone=text.match(/(?:prepara|activar|activa|inicia|lanza|pon en marcha|haz).*?(?:zona de|seo (?:de|en|para)|en)\s+([a-z0-9 -]{2,60})(?:\s+en\s+seo|\s+para\s+seo|$)/i)
     || text.match(/(?:prepara|activar|activa|inicia|lanza|pon en marcha|haz).*?seo.*?(?:de|en|para)\s+([a-z0-9 -]{2,60})/i);
   if(seoZone){
