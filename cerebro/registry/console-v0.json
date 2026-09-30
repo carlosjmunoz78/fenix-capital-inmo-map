@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.1.0",
+  "schema_version": "1.2.0",
   "phase": "PHASE_5_CEREBRO_CONSOLE_V0",
   "environment": "PREPROD",
   "additional_cost_target_eur": 0,
@@ -98,5 +98,27 @@
       "MISSING_EXTERNAL_PERMISSION_OR_CREDENTIAL",
       "SECURITY_INCIDENT_CONTAINMENT"
     ]
+  },
+  "live_evidence": {
+    "gateway_prod": {
+      "status": "ACTIVE",
+      "version": 3,
+      "service": "cerebro-console-gateway-v0"
+    },
+    "mobile_canary": {
+      "status": "PUBLISHED_CI_VERIFIED",
+      "path": "/cerebro/",
+      "source_sha": "6d6f71ef7a4f9e7d2f57331e73a1ecb51dc11eda"
+    },
+    "knowledge_adapter": {
+      "status": "ACTIVE_READ_ONLY",
+      "source": "NOTION",
+      "authorized_role": "DIRECCION",
+      "writes": false
+    },
+    "action_execution": {
+      "status": "PARTIAL_BINDING_REQUIRED",
+      "prod_execution": false
+    }
   }
 }
