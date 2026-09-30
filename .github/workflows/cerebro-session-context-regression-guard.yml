@@ -6,6 +6,7 @@ on:
     paths:
       - 'src/**'
       - 'supabase/functions/**'
+      - 'supabase/migrations/**'
       - '.github/workflows/cerebro-session-context-regression-guard.yml'
   push:
     branches: [main]
@@ -60,6 +61,11 @@ jobs:
           grep -F 'const scheduleIntent=/\b(proxima|siguiente|cuando|sale|publicacion|programada|programado|dia|hora|texto|copy|contenido|caption|imagen|foto|creativo|media)\b' supabase/functions/cerebro-console-gateway-v0/knowledge.ts >/dev/null
           grep -F 'intent:"seo_zone_simulation"' supabase/functions/cerebro-console-gateway-v0/index.ts >/dev/null
           grep -F 'No se crea territorio, no se escribe ninguna cola, no se publica nada y no se ejecuta ningún cambio real.' supabase/functions/cerebro-console-gateway-v0/index.ts >/dev/null
+          grep -F 'action_type:"EMAIL_SEND"' supabase/functions/cerebro-console-gateway-v0/index.ts >/dev/null
+          grep -F 'fenix-communications-gateway/comunicaciones/prepare' supabase/functions/cerebro-console-gateway-v0/index.ts >/dev/null
+          grep -F '¿Confirmas este envío con «sí»?' supabase/functions/cerebro-console-gateway-v0/index.ts >/dev/null
+          grep -F "'contacto'::text" supabase/migrations/20260930184700_communications_contact_scope_and_send_states_v1.sql >/dev/null
+          grep -F "'Enviando'::text,'Enviada'::text" supabase/migrations/20260930184700_communications_contact_scope_and_send_states_v1.sql >/dev/null
 
       - name: Assert CEREBRO domain answer routing
         shell: bash
