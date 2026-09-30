@@ -1,11 +1,16 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "phase": "PHASE_5_CEREBRO_CONSOLE_V0",
   "environment": "PREPROD",
   "additional_cost_target_eur": 0,
   "prod_execution_enabled": false,
   "direct_model_access": false,
-  "required_context": ["company_id", "engine_id", "environment", "version"],
+  "required_context": [
+    "company_id",
+    "engine_id",
+    "environment",
+    "version"
+  ],
   "human_required_reasons": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -17,11 +22,46 @@
     "CUSTOMER_HUMAN_REQUEST"
   ],
   "engines": [
-    {"engine_id":"CONSOLE-001","name":"CEREBRO Console","depends_on":["ACTGW-001"],"mode":"DETERMINISTIC_REFERENCE"},
-    {"engine_id":"CHAT-001","name":"CEREBRO Chat","depends_on":["CTX-001","ACTGW-001"],"mode":"GATEWAY_MEDIATED_REFERENCE"},
-    {"engine_id":"CTX-001","name":"Context Selector","depends_on":[],"mode":"DETERMINISTIC_REFERENCE"},
-    {"engine_id":"CMD-001","name":"Command Executor","depends_on":["CTX-001","ACTGW-001"],"mode":"DETERMINISTIC_REFERENCE"},
-    {"engine_id":"ACTGW-001","name":"CEREBRO Action Gateway","depends_on":["CTX-001"],"mode":"DETERMINISTIC_REFERENCE"}
+    {
+      "engine_id": "CONSOLE-001",
+      "name": "CEREBRO Console",
+      "depends_on": [
+        "ACTGW-001"
+      ],
+      "mode": "DETERMINISTIC_REFERENCE"
+    },
+    {
+      "engine_id": "CHAT-001",
+      "name": "CEREBRO Chat",
+      "depends_on": [
+        "CTX-001",
+        "ACTGW-001"
+      ],
+      "mode": "GATEWAY_MEDIATED_REFERENCE"
+    },
+    {
+      "engine_id": "CTX-001",
+      "name": "Context Selector",
+      "depends_on": [],
+      "mode": "DETERMINISTIC_REFERENCE"
+    },
+    {
+      "engine_id": "CMD-001",
+      "name": "Command Executor",
+      "depends_on": [
+        "CTX-001",
+        "ACTGW-001"
+      ],
+      "mode": "DETERMINISTIC_REFERENCE"
+    },
+    {
+      "engine_id": "ACTGW-001",
+      "name": "CEREBRO Action Gateway",
+      "depends_on": [
+        "CTX-001"
+      ],
+      "mode": "DETERMINISTIC_REFERENCE"
+    }
   ],
   "policy": {
     "gateway_required": true,
@@ -31,6 +71,32 @@
     "live_writes": false,
     "autonomous_prod": false,
     "trading_access": false,
-    "promotion_requires_preprod_green": true
+    "promotion_requires_preprod_green": true,
+    "owner_exception_decision": true,
+    "single_confirmation_after_exact_proposal": true,
+    "explain_before_owner_decision": true
+  },
+  "human_decision_protocol": {
+    "mode": "OWNER_DECISION_BY_EXCEPTION",
+    "owner_role": "AUTHORIZED_HUMAN",
+    "query_behavior": "READ_WITHIN_AUTHORIZED_KNOWLEDGE_WITHOUT_CONFIRMATION",
+    "action_behavior": "EXACT_ACTION_PROPOSAL_THEN_SINGLE_EXPLICIT_CONFIRMATION",
+    "clarification_behavior": "EXPLAIN_OR_REVISE_WITHOUT_CONSUMING_CONFIRMATION",
+    "changed_scope_behavior": "INVALIDATE_PREVIOUS_PROPOSAL_AND_RECONFIRM",
+    "human_required_behavior": "EXPLAIN_CAUSE_OPTIONS_AND_EXACT_RESOLUTION_STEP",
+    "resolution_examples": {
+      "SIGNATURE_REQUIRED": "RETURN_SIGNING_LINK_AND_RESUME_AFTER_SIGNATURE",
+      "MONEY_LIMIT": "RETURN_AMOUNT_REASON_PAYMENT_OR_APPROVAL_LINK_AND_RESUME_AFTER_APPROVAL",
+      "HIGH_RISK": "EXPLAIN_RISK_CONSEQUENCES_AND_REQUEST_OWNER_DECISION",
+      "POLICY_CONFLICT": "EXPLAIN_CONFLICT_AND_REQUEST_SCOPED_OWNER_DECISION",
+      "LOW_CONFIDENCE": "ASK_ONLY_FOR_MISSING_DECISION_OR_DATA"
+    },
+    "override_scope": "SCOPED_TO_EXACT_ACTION_UNLESS_OWNER_EXPLICITLY_CHANGES_POLICY",
+    "learning": "RECORD_OWNER_EXCEPTION_DECISIONS_AS_PRECEDENTS_FOR_FUTURE_POLICY_PROPOSALS",
+    "non_bypassable": [
+      "LEGAL_REQUIREMENT_ITSELF",
+      "MISSING_EXTERNAL_PERMISSION_OR_CREDENTIAL",
+      "SECURITY_INCIDENT_CONTAINMENT"
+    ]
   }
 }
