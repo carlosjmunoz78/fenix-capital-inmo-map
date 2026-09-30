@@ -480,18 +480,26 @@ async function chatReply(req:Request,message:string,pendingRaw:unknown,readConte
     };
   }
 
-  const socialShareIntent=Boolean(readContext?.kind==="social_schedule"&&/\b(mandasela|mándasela|mandaselo|mándaselo|enviasela|envíasela|enviaselo|envíaselo)\b/i.test(message));
-  if(socialShareIntent){
-    const recipientMatch=message.match(/(?:a|para)\s+([A-ZÁÉÍÓÚÑ][\p{L}.-]+(?:\s+[A-ZÁÉÍÓÚÑ][\p{L}.-]+){0,3})/u);
+  const socialShareCommand=/\b(mandasela|mándasela|mandaselo|mándaselo|enviasela|envíasela|enviaselo|envíaselo)\b/i.test(message);
+  if(socialShareCommand){
+    let socialContext=readContext?.kind==="social_schedule"?readContext:null;
+    if(!socialContext){
+      const recovered:any=await queryCerebroKnowledge(req,"La próxima publicación de Facebook",null);
+      socialContext=recovered?.read_context?.kind==="social_schedule"?recovered.read_context:null;
+    }
+    if(!socialContext){
+      return {status:"ACTION_NEEDS_SCOPE",intent:"social_share_email",executed:false,message:"No tengo una publicación social operativa identificada para compartir. Dime qué publicación quieres enviar o vuelve a pedirme la próxima de Facebook."};
+    }
+    const recipientMatch=message.match(/(?:a|para)\s+([\p{L}.-]+(?:\s+[\p{L}.-]+){0,3})/iu);
     const contactQuery=(recipientMatch?.[1]??"").trim();
     if(!contactQuery){
       return {status:"ACTION_NEEDS_SCOPE",intent:"social_share_email",executed:false,message:"Dime a qué contacto quieres enviar esta publicación. Buscaré sus correos y te dejaré elegir antes de preparar el envío."};
     }
-    const caption=String((readContext as any).caption||"").trim();
-    const when=String(readContext.scheduled_at||"").trim();
-    const media=String(readContext.public_media_url||readContext.media_urls?.[0]||"").trim();
-    const key=String(readContext.content_key||"").trim();
-    const network=String(readContext.network||"Facebook");
+    const caption=String((socialContext as any).caption||"").trim();
+    const when=String(socialContext.scheduled_at||"").trim();
+    const media=String(socialContext.public_media_url||socialContext.media_urls?.[0]||"").trim();
+    const key=String(socialContext.content_key||"").trim();
+    const network=String(socialContext.network||"Facebook");
     const parts=[
       `Próxima publicación de ${network}${key?` · ${key}`:""}`,
       when?`Fecha y hora programadas: ${new Intl.DateTimeFormat("es-ES",{timeZone:"Europe/Madrid",dateStyle:"full",timeStyle:"short"}).format(new Date(when))}`:"",
