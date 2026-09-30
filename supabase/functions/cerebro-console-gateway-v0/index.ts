@@ -194,7 +194,6 @@ async function chatReply(req:Request,message:string,pendingRaw:unknown){
             intent:"action_confirmation",
             executed:true,
             completed:false,
-            action:pending,
             execution_environment:"PREPROD",
             execution_state:activation?.state??remote?.state??"ACTIVATION_ACCEPTED_PREPROD",
             result:remote,
