@@ -68,6 +68,9 @@ jobs:
           grep -F 'intent:"multiempresa_onboarding"' "$K" >/dev/null
           grep -F 'FINANCE_PREANALYSIS_PAGE_ID' "$K" >/dev/null
           grep -F 'SEO_LATEST_AUDIT_PAGE_ID' "$K" >/dev/null
+          grep -F 'CANONICAL_FALLBACK_V1' "$K" >/dev/null
+          grep -F 'DNI/NIE en vigor' "$K" >/dev/null
+          grep -F 'Auditoría de 156 contenidos publicados' "$K" >/dev/null
           grep -F 'const direct=await directDomainAnswer(question,domain);' "$K" >/dev/null
 
       - name: Build app

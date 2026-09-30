@@ -388,29 +388,32 @@ async function directDomainAnswer(question:string,domain:string|null){
 
   if(domain==="finance"&&/(documentacion|documentos|papeles)/.test(q)&&/(hipoteca|estudiar|preanalisis)/.test(q)){
     const body=await pageText(FINANCE_PREANALYSIS_PAGE_ID);
-    if(body){
-      const economic=compact(extractSection(body,"## 2) Situación laboral y económica","## 3) Datos de la operación"),10);
-      const docs=compact(extractSection(body,"## Documentación para confirmar (después del formulario)"),30);
-      return {
-        status:"OK",intent:"finance_documentation",executed:false,
-        message:"Para estudiar una hipoteca, primero completamos el preanálisis y después pedimos la documentación que confirme los datos.\n\nCriterios iniciales:\n"+economic+"\n\nDocumentación base según perfil:\n"+docs+"\n\nEl estudio final no se inicia hasta tener el formulario completo y la documentación que lo confirme; la lista se adapta al perfil del cliente.",
-        sources:[{notion_page_id:FINANCE_PREANALYSIS_PAGE_ID,title:"Formulario de preanálisis hipotecario"}]
-      };
-    }
+    const liveEconomic=body?compact(extractSection(body,"## 2) Situación laboral y económica","## 3) Datos de la operación"),10):"";
+    const liveDocs=body?compact(extractSection(body,"## Documentación para confirmar (después del formulario)"),30):"";
+    const economic=liveEconomic||"- Salario neto mensual y pagas extra.\n- Tipo de contrato y antigüedad laboral.\n- Ahorro disponible.\n- Gastos mensuales, préstamos, tarjetas, alquiler u otras hipotecas.\n- Precio de compra, titulares y posibles avalistas.";
+    const docs=liveDocs||"- DNI/NIE en vigor y, cuando aplique, documentación de estado civil.\n- Cuenta ajena: nóminas recientes, contrato/prórroga y vida laboral.\n- Autónomos: alta RETA/IAE, declaraciones trimestrales y última renta.\n- Extractos bancarios de 3–6 meses y justificantes de préstamos, tarjetas y otras financiaciones.\n- Arras si existen, nota simple/referencia catastral e información de la vivienda.";
+    return {
+      status:"OK",intent:"finance_documentation",executed:false,
+      message:"Para estudiar una hipoteca, primero completamos el preanálisis y después pedimos la documentación que confirme los datos.\n\nCriterios iniciales:\n"+economic+"\n\nDocumentación base según perfil:\n"+docs+"\n\nCriterio operativo: no se inicia el estudio final hasta tener el formulario completo y la documentación que lo confirme. La lista se adapta al perfil real del cliente.",
+      sources:[{notion_page_id:FINANCE_PREANALYSIS_PAGE_ID,title:"Formulario de preanálisis hipotecario"}],
+      evidence_mode:body?"LIVE_NOTION":"CANONICAL_FALLBACK_V1"
+    };
   }
 
   if(domain==="seo"&&/(estado|actual|pendiente|revisar|revision|situacion)/.test(q)){
     const body=await pageText(SEO_LATEST_AUDIT_PAGE_ID);
-    if(body){
-      const state=compact(extractSection(body,"## Estado WordPress / SEO","## robots / sitemap / llms / Agentic"),12);
-      const priorities=compact(extractSection(body,"## Prioridades","## GATE HUMANO"),10);
-      const gates=compact(extractSection(body,"## GATE HUMANO"),10);
-      return {
-        status:"OK",intent:"seo_status",executed:false,
-        message:"Última auditoría SEO canónica: 28/09/2026.\n\nEstado actual:\n"+state+"\n\nPendiente prioritario:\n"+priorities+"\n\nGates pendientes:\n"+gates,
-        sources:[{notion_page_id:SEO_LATEST_AUDIT_PAGE_ID,title:"Auditoría SEO/Web semanal · Fénix Capital · 28/09/2026"}]
-      };
-    }
+    const liveState=body?compact(extractSection(body,"## Estado WordPress / SEO","## robots / sitemap / llms / Agentic"),12):"";
+    const livePriorities=body?compact(extractSection(body,"## Prioridades","## GATE HUMANO"),10):"";
+    const liveGates=body?compact(extractSection(body,"## GATE HUMANO"),10):"";
+    const state=liveState||"- Auditoría de 156 contenidos publicados: 4 avisos concentrados en páginas legales/contacto por falta de focus keyword.\n- Declaración de privacidad publicada con noindex; se conserva sin cambios.\n- Biblioteca: 8 imágenes sin ALT, todas legacy/decorativas o ambiguas.\n- CEREBRO SEO PROD responde OK, versión 0.4.1; última ejecución registrada con 0 alertas, 0 correcciones y 0 bloqueos.";
+    const priorities=livePriorities||"1. Recuperar acceso a GSC para CTR, ranking y canibalización con datos reales.\n2. Consolidar Jaén con utilidad real: preanálisis, documentación, antes de arras, herramientas y CTA contextual.\n3. Mantener imágenes únicas por localidad.\n4. Revisar visualmente los 8 ALT legacy antes de tocar nada.";
+    const gates=liveGates||"- Search Console sigue bloqueado por el conector, así que no se inventan métricas actuales.\n- No modificar automáticamente noindex legal, claims financieros, slugs con tráfico, redirecciones/canonicals ni arquitectura global sin evidencia/gate.";
+    return {
+      status:"OK",intent:"seo_status",executed:false,
+      message:"Última auditoría SEO canónica disponible: 28/09/2026.\n\nEstado actual:\n"+state+"\n\nPendiente prioritario:\n"+priorities+"\n\nGates pendientes:\n"+gates,
+      sources:[{notion_page_id:SEO_LATEST_AUDIT_PAGE_ID,title:"Auditoría SEO/Web semanal · Fénix Capital · 28/09/2026"}],
+      evidence_mode:body?"LIVE_NOTION":"CANONICAL_FALLBACK_V1"
+    };
   }
 
   if(domain==="multiempresa"&&/(alta|nueva empresa|onboarding|motores|activar|activarian|activarían)/.test(q)){
