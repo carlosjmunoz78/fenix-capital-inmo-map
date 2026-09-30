@@ -2,7 +2,7 @@ import {useEffect,useState,type FormEvent} from 'react';
 import {useLocation,useNavigate} from 'react-router-dom';
 import {BrainCircuit,ChevronLeft,Send,ShieldCheck} from 'lucide-react';
 import {cerebroConsoleLinkEnabled} from './cerebroConsoleAccess';
-import {fetchAppApi} from './supabase';
+import {fetchAppApi,supabase} from './supabase';
 import {fetchCerebroConsoleHealth,postCerebroConsoleChat,type CerebroConsoleHealth,type CerebroPendingAction,type CerebroReadContext} from './cerebroConsoleApi';
 import './cerebro-console.css';
 
@@ -28,13 +28,19 @@ export default function CerebroConsoleShell(){
  useEffect(()=>{
   let cancelled=false;
   if(!isCerebroPath){setOwnerAccess('checking');return}
-  fetchAppApi<SessionContext>('/session/context').then(({status,data})=>{
+  const check=async()=>{
+   const {data:{session}}=await supabase.auth.getSession();
+   if(cancelled)return;
+   if(!session){setOwnerAccess('checking');return}
+   const {status,data}=await fetchAppApi<SessionContext>('/session/context');
    if(cancelled)return;
    const allowed=Boolean(status===200&&data?.actor_code==='CARLOS-ADMIN');
    setOwnerAccess(allowed?'allowed':'denied');
    if(!allowed)navigate('/inicio',{replace:true});
-  });
-  return()=>{cancelled=true};
+  };
+  void check();
+  const {data:{subscription}}=supabase.auth.onAuthStateChange(()=>{void check()});
+  return()=>{cancelled=true;subscription.unsubscribe()};
  },[isCerebroPath,navigate]);
 
  useEffect(()=>{
