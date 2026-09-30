@@ -58,6 +58,18 @@ jobs:
           grep -F "blockChildrenText" supabase/functions/cerebro-console-gateway-v0/knowledge.ts >/dev/null
           grep -F "Word boundaries prevent unrelated words" supabase/functions/cerebro-console-gateway-v0/knowledge.ts >/dev/null
 
+      - name: Assert CEREBRO domain answer routing
+        shell: bash
+        run: |
+          set -euo pipefail
+          K=supabase/functions/cerebro-console-gateway-v0/knowledge.ts
+          grep -F 'intent:"finance_documentation"' "$K" >/dev/null
+          grep -F 'intent:"seo_status"' "$K" >/dev/null
+          grep -F 'intent:"multiempresa_onboarding"' "$K" >/dev/null
+          grep -F 'FINANCE_PREANALYSIS_PAGE_ID' "$K" >/dev/null
+          grep -F 'SEO_LATEST_AUDIT_PAGE_ID' "$K" >/dev/null
+          grep -F 'const direct=await directDomainAnswer(question,domain);' "$K" >/dev/null
+
       - name: Build app
         shell: bash
         run: |
