@@ -1,4 +1,4 @@
-import {FormEvent,useEffect,useState} from 'react';
+import {useEffect,useState,type FormEvent} from 'react';
 import {useLocation,useNavigate} from 'react-router-dom';
 import {BrainCircuit,ChevronLeft,Send,ShieldCheck} from 'lucide-react';
 import {cerebroConsoleLinkEnabled} from './cerebroConsoleAccess';
