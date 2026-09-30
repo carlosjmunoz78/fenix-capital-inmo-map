@@ -480,7 +480,7 @@ async function chatReply(req:Request,message:string,pendingRaw:unknown,readConte
   }
 
   const emailMatch=message.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
-  const emailIntent=/\b(email|correo)\b/i.test(message)&&/\b(envia|envía|enviar|manda|mandar|prepara|preparar)\b/i.test(message);
+  const emailIntent=/\b(email|correo)\b/i.test(message)&&/\b(envia|envía|envies|envíes|enviar|manda|mandar|mandes|prepara|preparar)\b/i.test(message);
   if(emailIntent){
     const quoted=[...message.matchAll(/[«“"]([^»”"]+)[»”"]/g)].map(m=>m[1].trim());
     const subjectMatch=message.match(/asunto\s*(?:[:=-]|es)?\s*[«“"]([^»”"]+)[»”"]/i);
@@ -488,7 +488,7 @@ async function chatReply(req:Request,message:string,pendingRaw:unknown,readConte
     const subject=(subjectMatch?.[1]??quoted[0]??(/prueba/i.test(message)?"Prueba de CEREBRO":"Fénix Capital")).trim();
     let bodyText=(bodyMatch?.[1]??quoted[1]??"").trim();
     if(!bodyText){
-      const freeBody=message.match(/(?:que le digas|dile|decirle|texto)\s+(.+)$/i);
+      const freeBody=message.match(/(?:que le digas|que le digan|que le diga|dile|decirle|texto)\s+(.+)$/i);
       bodyText=(freeBody?.[1]??"").trim().replace(/[. ]+$/,"");
     }
     const explicitNameMatch=message.match(/(?:a|para)\s+([A-ZÁÉÍÓÚÑ][\p{L}.-]+(?:\s+[A-ZÁÉÍÓÚÑ][\p{L}.-]+){0,3})/u);
