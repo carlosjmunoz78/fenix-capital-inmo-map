@@ -117,7 +117,7 @@ function notionPropertyText(value:any):string{
 function detectSocialScheduleQuery(question:string,context?:CerebroReadContext|null){
   const q=norm(question);
   const networks=["facebook","instagram","linkedin","tiktok","youtube"];
-  const explicit=networks.find(n=>q.includes(n))||(/(^|\\s)x($|\\s)/.test(q)?"x":undefined);
+  const explicit=networks.find(n=>q.includes(n))||(/(^|[^a-z0-9])x([^a-z0-9]|$)/.test(q)?"x":undefined);
   const scheduleIntent=/(proxima|siguiente|cuando|sale|publicacion|programad|dia|hora|texto|copy|contenido|caption)/.test(q);
   const followup=Boolean(context?.kind==="social_schedule"&&/(dia|hora|cuando|que dia|a que hora|y hora|texto|copy|contenido|caption|que pone)/.test(q));
   const network=explicit||(followup?norm(context?.network??""):null);
