@@ -7,6 +7,9 @@ on:
         description: 'Type DEPLOY_PROD to publish the current main snapshot to gh-pages'
         required: true
         type: string
+  push:
+    branches:
+      - main
 
 permissions:
   contents: write
@@ -17,7 +20,7 @@ concurrency:
 
 jobs:
   build-and-publish-live:
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.confirm == 'DEPLOY_PROD' }}
+    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.confirm == 'DEPLOY_PROD') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[DEPLOY_PROD]')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
