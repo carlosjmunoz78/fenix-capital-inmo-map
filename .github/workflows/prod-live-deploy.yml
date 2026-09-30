@@ -40,9 +40,20 @@ jobs:
 
       - name: Assert explicit production confirmation
         shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          MANUAL_CONFIRM: ${{ inputs.confirm }}
+          HEAD_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
           set -euo pipefail
-          test "${{ inputs.confirm }}" = 'DEPLOY_PROD'
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            test "$MANUAL_CONFIRM" = 'DEPLOY_PROD'
+          elif [ "$EVENT_NAME" = "push" ]; then
+            printf '%s' "$HEAD_MESSAGE" | grep -F '[DEPLOY_PROD]' >/dev/null
+          else
+            echo "Unsupported trigger: $EVENT_NAME" >&2
+            exit 1
+          fi
 
       - name: Assert required secret references are available
         shell: bash
