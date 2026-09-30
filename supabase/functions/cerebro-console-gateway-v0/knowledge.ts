@@ -130,6 +130,7 @@ export type CerebroReadContext={
   scheduled_at?:string;
   public_media_url?:string|null;
   media_urls?:string[];
+  caption?:string;
 };
 
 function notionPropertyText(value:any):string{
@@ -304,6 +305,7 @@ async function queryOperationalSocialSchedule(question:string,context?:CerebroRe
   read_context.scheduled_at=result.item.date||undefined;
   read_context.public_media_url=result.item.public_media_url??null;
   read_context.media_urls=result.item.media_urls??[];
+  read_context.caption=result.item.caption||undefined;
   if(wantsImage){
     const urls=[result.item.public_media_url,...(result.item.media_urls??[])].filter(Boolean);
     const unique=[...new Set(urls)];

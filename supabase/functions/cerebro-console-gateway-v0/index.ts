@@ -339,7 +339,8 @@ async function chatReply(req:Request,message:string,pendingRaw:unknown,readConte
       }else if(emailMatchRaw){
         selected=candidates.find((x:any)=>String(x.email||"").toLowerCase()===String(emailMatchRaw[0]).toLowerCase())??null;
       }else{
-        selected=candidates.find((x:any)=>normalize(String(x.name||""))===text)??null;
+        const choice=text.replace(/^(?:a|para)\s+/,"").trim();
+        selected=candidates.find((x:any)=>normalize(String(x.name||""))===choice)??null;
       }
       if(selected?.email){
         const action=await buildEmailProposal(req,String(selected.email),pending.scope.subject||"Fénix Capital",pending.scope.body||"",String(selected.name||pending.scope.contact_query||selected.email));
@@ -480,13 +481,27 @@ async function chatReply(req:Request,message:string,pendingRaw:unknown,readConte
   }
 
   const emailMatch=message.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
-  const emailIntent=/\b(email|correo)\b/i.test(message)&&/\b(envia|envía|envies|envíes|enviar|manda|mandar|mandes|prepara|preparar)\b/i.test(message);
+  const emailIntent=/\b(email|correo)\b/i.test(message)&&(/\b(envia|envía|envies|envíes|enviar|manda|mandar|mandes|prepara|preparar)\b/i.test(message)||/\b(mandaselo|mándaselo|enviaselo|envíaselo)\b/i.test(message));
   if(emailIntent){
     const quoted=[...message.matchAll(/[«“"]([^»”"]+)[»”"]/g)].map(m=>m[1].trim());
     const subjectMatch=message.match(/asunto\s*(?:[:=-]|es)?\s*[«“"]([^»”"]+)[»”"]/i);
     const bodyMatch=message.match(/(?:texto|cuerpo|mensaje|dile|decirle)\s*[:=-]?\s*[«“"]([^»”"]+)[»”"]/i);
     const subject=(subjectMatch?.[1]??quoted[0]??(/prueba/i.test(message)?"Prueba de CEREBRO":"Fénix Capital")).trim();
     let bodyText=(bodyMatch?.[1]??quoted[1]??"").trim();
+    if(!bodyText&&readContext?.kind==="social_schedule"){
+      const network=String(readContext.network||"Facebook");
+      const caption=String((readContext as any).caption||"").trim();
+      const when=String(readContext.scheduled_at||"").trim();
+      const media=String(readContext.public_media_url||readContext.media_urls?.[0]||"").trim();
+      const key=String(readContext.content_key||"").trim();
+      const parts=[
+        `Próxima publicación de ${network}${key?` · ${key}`:""}`,
+        when?`Fecha y hora programadas: ${new Intl.DateTimeFormat("es-ES",{timeZone:"Europe/Madrid",dateStyle:"full",timeStyle:"short"}).format(new Date(when))}`:"",
+        caption?`Texto exacto:\n${caption}`:"",
+        media?`Imagen: ${media}`:""
+      ].filter(Boolean);
+      bodyText=parts.join("\n\n");
+    }
     if(!bodyText){
       const freeBody=message.match(/(?:que le digas|que le digan|que le diga|dile|decirle|texto)\s+(.+)$/i);
       bodyText=(freeBody?.[1]??"").trim().replace(/[. ]+$/,"");
