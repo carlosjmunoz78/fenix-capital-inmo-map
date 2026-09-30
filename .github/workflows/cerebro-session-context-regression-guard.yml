@@ -51,6 +51,13 @@ jobs:
           grep -F "fetchAppApi" src/appRpcCompat.ts >/dev/null
           ! grep -R -n -E "rest/v1/rpc/fenix_prod_session_context|rpc\(['\"]fenix_prod_session_context['\"]" src
 
+      - name: Assert CEREBRO knowledge routing guards
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -F "blockChildrenText" supabase/functions/cerebro-console-gateway-v0/knowledge.ts >/dev/null
+          grep -F "Word boundaries prevent unrelated words" supabase/functions/cerebro-console-gateway-v0/knowledge.ts >/dev/null
+
       - name: Build app
         shell: bash
         run: |
