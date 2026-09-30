@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { withSupabase } from "jsr:@supabase/server@^1";
-import { queryCerebroKnowledge } from "./knowledge.ts";
+import { queryCerebroKnowledge, type CerebroReadContext } from "./knowledge.ts";
 import nacl from "npm:tweetnacl@1.0.3";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -96,7 +96,7 @@ function b64(bytes:Uint8Array){
   return btoa(s);
 }
 
-async function authorizedDirection(req:Request){
+async function authorizedOwner(req:Request){
   const U=Deno.env.get("SUPABASE_URL")??"";
   const A=Deno.env.get("SUPABASE_ANON_KEY")??"";
   const S=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")??"";
@@ -109,7 +109,8 @@ async function authorizedDirection(req:Request){
   const {data:ctx,error:ce}=await svc.rpc("fenix_prod_actor_context_by_auth_server",{p_auth_user_id:ud.user.id});
   if(ce||!ctx?.ok||!ctx?.actor_code)return {ok:false,actor:"",role:""};
   const role=String(ctx.role??"");
-  return {ok:role.toLowerCase().startsWith("direc"),actor:String(ctx.actor_code),role};
+  const actor=String(ctx.actor_code);
+  return {ok:actor==="CARLOS-ADMIN",actor,role};
 }
 async function proposalToken(payload:string){
   const secret=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")??"";
@@ -167,8 +168,8 @@ async function executeSeo001Preprod(req:Request,action:PendingAction){
 }
 
 async function buildSeoProposal(req:Request,location:string,coverage:"capital_and_province"|"capital_only"="capital_and_province"):Promise<PendingAction>{
-  const authz=await authorizedDirection(req);
-  if(!authz.ok)throw new Error("DIRECTION_REQUIRED");
+  const authz=await authorizedOwner(req);
+  if(!authz.ok)throw new Error("OWNER_REQUIRED");
   const normalizedLocation=location.trim().replace(/\s+/g," ");
   const summary=coverage==="capital_only"
     ? `Activar el proceso SEO canónico para ${normalizedLocation} capital.`
@@ -194,7 +195,7 @@ async function validatePending(req:Request,value:unknown):Promise<PendingAction|
      typeof v.company_id!=="string"||typeof v.summary!=="string"||typeof v.proposal_hash!=="string"||
      typeof v.proposal_issued_at!=="number"||typeof v.proposal_token!=="string"||
      !v.scope||typeof v.scope!=="object"||Array.isArray(v.scope))return null;
-  const authz=await authorizedDirection(req);
+  const authz=await authorizedOwner(req);
   if(!authz.ok)return null;
   const now=Math.floor(Date.now()/1000);
   if(v.proposal_issued_at>now+30||now-v.proposal_issued_at>PROPOSAL_TTL_SECONDS)return null;
@@ -216,8 +217,9 @@ function seoExplanation(action:PendingAction){
   return `El proceso para ${location} (${coverage}) comprende: investigación y clustering de palabras clave; mapa de ciudades/zonas e intención; arquitectura y contenidos; enlazado interno; SEO local; activos de captación cuando correspondan; controles técnicos/QA; publicación solo mediante los gates autorizados; monitorización, medición y mejora. Si algún paso exige firma, pago, riesgo alto, conflicto de política o un permiso que CEREBRO no tenga, te explicaré exactamente qué falta y te llevaré al enlace o decisión necesaria. ¿Quieres que active este proceso?`;
 }
 
-async function chatReply(req:Request,message:string,pendingRaw:unknown){
+async function chatReply(req:Request,message:string,pendingRaw:unknown,readContextRaw:unknown){
   const text=cleanText(message);
+  const readContext=(readContextRaw&&typeof readContextRaw==="object"&&!Array.isArray(readContextRaw))?readContextRaw as CerebroReadContext:null;
   if(!text)return {status:"INVALID",message:"Escribe una consulta.",executed:false};
 
   const pending=await validatePending(req,pendingRaw);
@@ -312,7 +314,7 @@ async function chatReply(req:Request,message:string,pendingRaw:unknown){
     };
   }
 
-  return await queryCerebroKnowledge(req,message);
+  return await queryCerebroKnowledge(req,message,readContext);
 }
 
 export default {
@@ -331,6 +333,8 @@ export default {
     }
 
     const suffix=new URL(req.url).pathname.split("/").filter(Boolean).pop()??"";
+    const owner=await authorizedOwner(req);
+    if(!owner.ok)return json(req,403,{status:"FORBIDDEN",reason:"OWNER_ONLY",message:"CEREBRO Console está reservada al propietario autorizado."});
 
     if(req.method==="POST"&&suffix==="chat"){
       let body:unknown;
@@ -338,13 +342,13 @@ export default {
       const obj=typeof body==="object"&&body!==null?body as Record<string,unknown>:{};
       const message=obj.message;
       if(typeof message!=="string"||message.length>2000)return json(req,400,{status:"INVALID",message:"Mensaje inválido.",executed:false});
-      return json(req,200,await chatReply(req,message,obj.pending_action));
+      return json(req,200,await chatReply(req,message,obj.pending_action,obj.read_context));
     }
 
     if(req.method!=="GET")return json(req,405,{status:"CLOSED",reason:"ROUTE_NOT_AVAILABLE"});
 
     if(suffix==="health")return json(req,200,{
-      status:"ok",service:"cerebro-console-gateway-v0",environment:"LAB",version:"0.5.1-owner-decision-seo001-secure",
+      status:"ok",service:"cerebro-console-gateway-v0",environment:"LAB",version:"0.5.3-owner-only-contextual-ops",
       authenticated_transport:true,direct_model_access:false,prod_execution_enabled:false,live_writes:false,
       chat_available:true,chat_mode:"OWNER_DECISION_BY_EXCEPTION_V1",additional_cost_target_eur:0
     });

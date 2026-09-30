@@ -2,32 +2,56 @@ import {useEffect,useState,type FormEvent} from 'react';
 import {useLocation,useNavigate} from 'react-router-dom';
 import {BrainCircuit,ChevronLeft,Send,ShieldCheck} from 'lucide-react';
 import {cerebroConsoleLinkEnabled} from './cerebroConsoleAccess';
-import {fetchCerebroConsoleHealth,postCerebroConsoleChat,type CerebroConsoleHealth,type CerebroPendingAction} from './cerebroConsoleApi';
+import {fetchAppApi,supabase} from './supabase';
+import {fetchCerebroConsoleHealth,postCerebroConsoleChat,type CerebroConsoleHealth,type CerebroPendingAction,type CerebroReadContext} from './cerebroConsoleApi';
 import './cerebro-console.css';
 
 const CONTEXTS=['GENERAL','EMPRESA','ENGINE','CRM','APP','SEO','MARKETING','TRAINING','AUTOMATION'];
 type GatewayState='closed'|'checking'|'ready'|'error';
 type ChatLine={role:'user'|'cerebro';text:string};
+type OwnerAccess='checking'|'allowed'|'denied';
+type SessionContext={actor_code?:string;role?:string};
 
 export default function CerebroConsoleShell(){
  const location=useLocation(),navigate=useNavigate();
+ const isCerebroPath=location.pathname.replace(/\/+$/,'')==='/cerebro';
  const configured=cerebroConsoleLinkEnabled();
- const [gatewayState,setGatewayState]=useState<GatewayState>(configured?'checking':'closed');
+ const [ownerAccess,setOwnerAccess]=useState<OwnerAccess>('checking');
+ const [gatewayState,setGatewayState]=useState<GatewayState>('closed');
  const [health,setHealth]=useState<CerebroConsoleHealth|null>(null);
  const [message,setMessage]=useState('');
  const [sending,setSending]=useState(false);
  const [lines,setLines]=useState<ChatLine[]>([]);
  const [pendingAction,setPendingAction]=useState<CerebroPendingAction|null>(null);
-
- useEffect(()=>{
-  if(location.pathname!=='/cerebro')return;
-  document.documentElement.dataset.cerebroConsole='1';
-  return()=>{delete document.documentElement.dataset.cerebroConsole};
- },[location.pathname]);
+ const [readContext,setReadContext]=useState<CerebroReadContext|null>(null);
 
  useEffect(()=>{
   let cancelled=false;
-  if(location.pathname!=='/cerebro'||!configured){setGatewayState('closed');setHealth(null);return}
+  if(!isCerebroPath){setOwnerAccess('checking');return}
+  const check=async()=>{
+   const {data:{session}}=await supabase.auth.getSession();
+   if(cancelled)return;
+   if(!session){setOwnerAccess('checking');return}
+   const {status,data}=await fetchAppApi<SessionContext>('/session/context');
+   if(cancelled)return;
+   const allowed=Boolean(status===200&&data?.actor_code==='CARLOS-ADMIN');
+   setOwnerAccess(allowed?'allowed':'denied');
+   if(!allowed)navigate('/inicio',{replace:true});
+  };
+  void check();
+  const {data:{subscription}}=supabase.auth.onAuthStateChange(()=>{void check()});
+  return()=>{cancelled=true;subscription.unsubscribe()};
+ },[isCerebroPath,navigate]);
+
+ useEffect(()=>{
+  if(!isCerebroPath||ownerAccess!=='allowed')return;
+  document.documentElement.dataset.cerebroConsole='1';
+  return()=>{delete document.documentElement.dataset.cerebroConsole};
+ },[isCerebroPath,ownerAccess]);
+
+ useEffect(()=>{
+  let cancelled=false;
+  if(!isCerebroPath||ownerAccess!=='allowed'||!configured){setGatewayState('closed');setHealth(null);return}
   setGatewayState('checking');
   fetchCerebroConsoleHealth().then(({status,data})=>{
    if(cancelled)return;
@@ -36,9 +60,9 @@ export default function CerebroConsoleShell(){
    setGatewayState(safe?'ready':'error');
   });
   return()=>{cancelled=true};
- },[configured,location.pathname]);
+ },[configured,isCerebroPath,ownerAccess]);
 
- if(location.pathname!=='/cerebro')return null;
+ if(!isCerebroPath||ownerAccess!=='allowed')return null;
  const ready=gatewayState==='ready';
  const chatReady=Boolean(ready&&health?.chat_available&&['DETERMINISTIC_READ_ONLY','OWNER_DECISION_BY_EXCEPTION_V1'].includes(health?.chat_mode||''));
  const title=ready?'Transporte autenticado verificado':gatewayState==='checking'?'Verificando CEREBRO Gateway…':'Superficie preparada, conexión cerrada';
@@ -55,8 +79,9 @@ export default function CerebroConsoleShell(){
   setLines(current=>[...current,{role:'user',text}]);
   setMessage('');
   setSending(true);
-  const {status,data}=await postCerebroConsoleChat(text,pendingAction);
+  const {status,data}=await postCerebroConsoleChat(text,pendingAction,readContext);
   const response=status>0&&data?.message?data.message:'No he podido contactar con CEREBRO Gateway.';
+  if(data?.read_context)setReadContext(data.read_context);
   if(data?.status==='CANCELED'||data?.status==='ACTION_ACCEPTED'||(data?.status==='ACTION_CONFIRMED'&&!data?.action))setPendingAction(null);
   else if(data?.action)setPendingAction(data.action);
   setLines(current=>[...current,{role:'cerebro',text:response}]);

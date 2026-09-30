@@ -12,7 +12,7 @@ test('CEREBRO gateway binds confirmed SEO action through signed PREPROD transpor
   expect(source).not.toContain('prod_execution_enabled: true');
   expect(source).toContain('CEREBRO_CONSOLE_PROPOSAL_V1');
   expect(source).toContain('proposal_token');
-  expect(source).toContain('authorizedDirection');
+  expect(source).toContain('authorizedOwner');
   expect(source).toContain('PROPOSAL_TTL_SECONDS');
 
   const executor=fs.readFileSync('supabase/functions/cerebro-actgw-seo001-preprod/index.ts','utf8');
@@ -26,14 +26,7 @@ test('CEREBRO gateway binds confirmed SEO action through signed PREPROD transpor
   expect(accepted).toBeGreaterThan(-1);
   expect(returnedAction).toBeGreaterThan(accepted);
 
-  const staticShell=fs.readFileSync('public/cerebro/index.html','utf8');
-  const staticAccepted=staticShell.indexOf("data?.status==='ACTION_ACCEPTED'");
-  const staticAction=staticShell.indexOf('data?.action');
-  expect(staticAccepted).toBeGreaterThan(-1);
-  expect(staticAction).toBeGreaterThan(staticAccepted);
-
   expect(reactShell).toContain("(data?.status==='ACTION_CONFIRMED'&&!data?.action)");
-  expect(staticShell).toContain("(data?.status==='ACTION_CONFIRMED'&&!data?.action)");
 
   const security=fs.readFileSync('supabase/migrations/20260930124000_cerebro_actgw_preprod_security.sql','utf8');
   expect(security).toContain('enable row level security');

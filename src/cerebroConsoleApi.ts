@@ -26,6 +26,8 @@ export type CerebroPendingAction={
   proposal_token:string;
 };
 
+export type CerebroReadContext={kind:"social_schedule";network:string};
+
 export type CerebroConsoleChatResponse={
   status:string;
   intent?:string;
@@ -34,6 +36,7 @@ export type CerebroConsoleChatResponse={
   reason?:string;
   available?:string[];
   action?:CerebroPendingAction;
+  read_context?:CerebroReadContext;
 };
 
 async function authHeaders(){
@@ -60,7 +63,7 @@ export async function fetchCerebroConsole<T>(path:string):Promise<{status:number
   }catch{return{status:0,data:null}}
 }
 
-export async function postCerebroConsoleChat(message:string,pending_action:CerebroPendingAction|null=null):Promise<{status:number;data:CerebroConsoleChatResponse|null}>{
+export async function postCerebroConsoleChat(message:string,pending_action:CerebroPendingAction|null=null,read_context:CerebroReadContext|null=null):Promise<{status:number;data:CerebroConsoleChatResponse|null}>{
   const endpoint=cerebroConsoleEndpoint('chat');
   if(!endpoint)return{status:0,data:null};
   const headers=await authHeaders();
@@ -69,7 +72,7 @@ export async function postCerebroConsoleChat(message:string,pending_action:Cereb
     const response=await fetch(endpoint,{
       method:'POST',
       headers,
-      body:JSON.stringify({message,pending_action}),
+      body:JSON.stringify({message,pending_action,read_context}),
       cache:'no-store'
     });
     let data:CerebroConsoleChatResponse|null=null;
