@@ -121,9 +121,10 @@ Nunca auto-promocionar una excepción a política permanente sin gate de políti
 
 ## 7. Estado técnico actual
 
-**HECHO:** Console/Gateway autenticados y superficie móvil existente.  
-**PARCIAL:** conversación móvil y clasificación de intents.  
-**DEFINIDO:** propuesta de acción + confirmación única + resolución humana guiada.  
-**POR AUDITAR/IMPLEMENTAR:** binding de conocimiento general y ejecutores reales por motor; enlaces de firma/pago dependen de proveedores y contratos reales.
+**HECHO:** Console/Gateway autenticados; Gateway PROD V3 activo; entrada móvil canaria `/cerebro/` publicada y validada en CI.  
+**HECHO:** adaptador general de conocimiento Notion en modo solo lectura para Dirección, con ranking determinista, fuentes y fail-closed sin evidencia.  
+**HECHO:** propuesta de acción conservada entre mensajes; explicación/revisión no ejecuta; confirmación única ligada a la propuesta vigente.  
+**PARCIAL:** ejecución real de acciones confirmadas. El primer binding auditado es SEO-001 PREPROD; debe reutilizar su cola/autopilot/rollout existente, no crear una vía paralela.  
+**POR AUDITAR/IMPLEMENTAR:** bindings ACTGW→motores restantes y enlaces concretos de firma/pago por proveedor.
 
 No declarar ejecución real de una acción hasta que ACTGW/engine correspondiente tenga binding vivo y evidencia E2E.
