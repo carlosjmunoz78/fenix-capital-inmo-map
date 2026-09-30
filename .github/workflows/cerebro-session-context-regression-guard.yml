@@ -64,6 +64,10 @@ jobs:
           grep -F 'action_type:"EMAIL_SEND"' supabase/functions/cerebro-console-gateway-v0/index.ts >/dev/null
           grep -F 'fenix-communications-gateway/comunicaciones/prepare' supabase/functions/cerebro-console-gateway-v0/index.ts >/dev/null
           grep -F '¿Confirmas este envío con «sí»?' supabase/functions/cerebro-console-gateway-v0/index.ts >/dev/null
+          grep -F 'EMAIL_CONTACT_SELECTION' supabase/functions/cerebro-console-gateway-v0/index.ts >/dev/null
+          grep -F 'fenix_prod_cerebro_contact_search_server' supabase/functions/cerebro-console-gateway-v0/index.ts >/dev/null
+          grep -F 'Elige el número, el nombre exacto o el correo que quieres usar.' supabase/functions/cerebro-console-gateway-v0/index.ts >/dev/null
+          grep -F 'GOOGLE_CONTACTS_VERIFIED' supabase/migrations/20260930190000_cerebro_contact_resolver_v1.sql >/dev/null
           grep -F "'contacto'::text" supabase/migrations/20260930184700_communications_contact_scope_and_send_states_v1.sql >/dev/null
           grep -F "'Enviando'::text,'Enviada'::text" supabase/migrations/20260930184700_communications_contact_scope_and_send_states_v1.sql >/dev/null
 
