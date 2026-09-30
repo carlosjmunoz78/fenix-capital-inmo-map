@@ -10,4 +10,7 @@
 - Distingue aprobación puntual de cambio permanente de política.
 - Registra decisiones humanas como precedentes para aprendizaje y futura automatización.
 - Mantiene requisitos legales, permisos externos y contención de incidentes como condiciones que no pueden fingirse resueltas.
-- Estado: política definida; bindings de conocimiento general y ejecución real siguen sujetos a evidencia viva.
+- Gateway PROD actualizado a V3 con Owner Decision by Exception V1.
+- Adaptador Notion de conocimiento general solo lectura para Dirección, con evidencia/fuentes y fail-closed.
+- Entrada canaria móvil `/cerebro/` publicada desde artefacto probado por CI.
+- Estado: lectura/conversación/propuesta-confirmación HECHO; ejecución de acciones confirmadas PARCIAL y sujeta a bindings E2E por motor.
