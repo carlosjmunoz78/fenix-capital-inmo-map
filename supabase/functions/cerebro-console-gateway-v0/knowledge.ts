@@ -12,6 +12,15 @@ const SIGNING_CONTEXT="CEREBRO_ACTGW_PROD_TO_SEO001_PREPROD_V1";
 const SIGNING_KEY_ID="cerebro-actgw-prod-v1";
 const FINANCE_PREANALYSIS_PAGE_ID="310505c4-12df-47e9-a3fb-f1e07a7baf3f";
 const SEO_LATEST_AUDIT_PAGE_ID="3e981b1a-756d-81b3-9259-eee14327239d";
+const MARKETING_MASTER_PAGE_ID="3b481b1a-756d-81ce-bdd3-d28125e964c7";
+const SOCIAL_ORGANIC_PAGE_ID="3bf81b1a-756d-8183-ad00-d546747ec1c5";
+const BREVO_CANONICAL_PAGE_ID="3bf81b1a-756d-8143-a078-f8bced73b8f5";
+const OWNER_DECISION_PAGE_ID="3eb81b1a-756d-8153-a1ef-f4c13e75519c";
+const DECISION_CENTER_PAGE_ID="3ba81b1a-756d-8118-8a48-eebf163b9f1c";
+const CEREBRO_AUDIT_PAGE_ID="3e681b1a-756d-8104-9733-fefac3619902";
+const FINOPS_PAGE_ID="3e781b1a-756d-8156-9840-fe833e6accc7";
+const TRADING_ISOLATION_PAGE_ID="3d081b1a-756d-81f6-83d1-f9c676f90050";
+const REGISTRY_AUDIT_PAGE_ID="3e781b1a-756d-8117-abb1-d5df7145428d";
 const NH={Authorization:`Bearer ${N}`,"Notion-Version":NV,"Content-Type":"application/json"};
 
 const CANONICAL_PAGES=[
@@ -27,8 +36,27 @@ const DOMAIN_CANONICAL:Record<string,{id:string,title:string}[]>={
     {id:"3be81b1a-756d-81b6-a75f-cb6bbe842766",title:"Base Maestra Belén · Motor financiero CEREBRO"}
   ],
   marketing:[
-    {id:"3b481b1a-756d-81ce-bdd3-d28125e964c7",title:"Motor maestro · Estrategia SEO, contenidos, embudos y redes"},
-    {id:"3bf81b1a-756d-8183-ad00-d546747ec1c5",title:"Redes sociales orgánicas"}
+    {id:MARKETING_MASTER_PAGE_ID,title:"Motor maestro · Estrategia SEO, contenidos, embudos y redes"}
+  ],
+  social:[
+    {id:SOCIAL_ORGANIC_PAGE_ID,title:"Redes sociales orgánicas"},
+    {id:MARKETING_MASTER_PAGE_ID,title:"Motor maestro · Estrategia SEO, contenidos, embudos y redes"}
+  ],
+  newsletter:[
+    {id:BREVO_CANONICAL_PAGE_ID,title:"Brevo · configuración canónica Fénix Capital · PRE-PROD"},
+    {id:CEREBRO_AUDIT_PAGE_ID,title:"AUDITORÍA VIVA · CEREBRO OS"}
+  ],
+  autonomy:[
+    {id:DECISION_CENTER_PAGE_ID,title:"Centro de decisión CEREBRO"},
+    {id:OWNER_DECISION_PAGE_ID,title:"Owner Decision by Exception V1"}
+  ],
+  platform:[
+    {id:CEREBRO_AUDIT_PAGE_ID,title:"AUDITORÍA VIVA · CEREBRO OS"},
+    {id:FINOPS_PAGE_ID,title:"FINOPS-001 · Costes, velocidad, GitHub y cron"}
+  ],
+  trading:[
+    {id:TRADING_ISOLATION_PAGE_ID,title:"P1 · Perímetro técnico aislado · Trading Lab"},
+    {id:REGISTRY_AUDIT_PAGE_ID,title:"REGISTRY-AUDIT · Estado de motores y funcionalidades"}
   ],
   multiempresa:[
     {id:"3e981b1a-756d-8100-9198-c75858d5371c",title:"Company Registry · CEREBRO · Fénix Capital"},
@@ -36,15 +64,20 @@ const DOMAIN_CANONICAL:Record<string,{id:string,title:string}[]>={
   ],
   seo:[
     {id:SEO_LATEST_AUDIT_PAGE_ID,title:"Auditoría SEO/Web semanal · Fénix Capital · 28/09/2026"},
-    {id:"3b481b1a-756d-81ce-bdd3-d28125e964c7",title:"Motor maestro · Estrategia SEO, contenidos, embudos y redes"}
+    {id:MARKETING_MASTER_PAGE_ID,title:"Motor maestro · Estrategia SEO, contenidos, embudos y redes"}
   ]
 };
 
 function detectKnowledgeDomain(question:string){
   const q=norm(question);
   if(/hipoteca|banco|financi|tin|tae|cuota|fein|tasacion|ingresos|endeudamiento/.test(q))return "finance";
-  if(/marketing|redes|facebook|instagram|linkedin|contenido|embudo|campana|campaña|newsletter|brevo|buffer/.test(q))return "marketing";
-  if(/multiempresa|empresa|company|registry|motor|engine|autonomia|autonomía/.test(q))return "multiempresa";
+  if(/newsletter|brevo|campana de email|campaña de email|email marketing/.test(q))return "newsletter";
+  if(/redes sociales|facebook|instagram|linkedin|tiktok|youtube|buffer|publicacion social|publicación social/.test(q))return "social";
+  if(/autonomia|autonomía|confirmacion humana|confirmación humana|human_required|intervencion humana|intervención humana/.test(q))return "autonomy";
+  if(/supabase|core transaccional|runtime|worker compartido|jobs largos|ocr|logs pesados/.test(q))return "platform";
+  if(/trading|trading lab|alpaca|paper trading/.test(q))return "trading";
+  if(/marketing|contenido|embudo|campana|campaña|crecimiento organico|crecimiento orgánico/.test(q))return "marketing";
+  if(/multiempresa|nueva empresa|company|registry|motor|engine/.test(q))return "multiempresa";
   if(/seo|keyword|palabra clave|gsc|search console|landing|indexacion|indexación|canonical/.test(q))return "seo";
   return null;
 }
