@@ -167,6 +167,73 @@ async function executeSeo001Preprod(req:Request,action:PendingAction){
   }
 }
 
+async function executeEmailCommunication(req:Request,action:PendingAction){
+  const U=Deno.env.get("SUPABASE_URL")??"";
+  const A=Deno.env.get("SUPABASE_ANON_KEY")??"";
+  const bearer=req.headers.get("authorization")??"";
+  if(!U||!A||!bearer.toLowerCase().startsWith("bearer "))return {ok:false,error:"COMMUNICATIONS_AUTH_MISSING"};
+  const email=action.scope.recipient_email??"";
+  const subject=action.scope.subject??"";
+  const bodyText=action.scope.body??"";
+  const contactName=action.scope.contact_name??email;
+  if(!email||!subject||!bodyText)return {ok:false,error:"EMAIL_SCOPE_INVALID"};
+  const headers={"content-type":"application/json",authorization:bearer,apikey:A};
+  const prepareKey=`cerebro-email-${action.proposal_hash}-prepare`;
+  const sendKey=`cerebro-email-${action.proposal_hash}-send`;
+  try{
+    const prep=await fetch(`${U}/functions/v1/fenix-communications-gateway/comunicaciones/prepare`,{
+      method:"POST",headers,body:JSON.stringify({
+        scope_type:"contacto",scope_code:contactName,canal:"Email",recipient_alias:email,
+        asunto:subject,cuerpo:bodyText,consentimiento_requerido:false,consentimiento_valido:false,
+        no_contactar:false,idempotency_key:prepareKey
+      }),cache:"no-store"
+    });
+    const prepared=await prep.json().catch(()=>null);
+    const item=prepared?.item;
+    if(!prep.ok||prepared?.ok!==true||!item?.communication_code)return {ok:false,error:"COMMUNICATION_PREPARE_FAILED",http_status:prep.status,detail:prepared};
+    const authRes=await fetch(`${U}/functions/v1/fenix-communications-gateway/comunicaciones/${encodeURIComponent(String(item.communication_code))}/authorize`,{
+      method:"POST",headers,body:JSON.stringify({expectedVersion:Number(item.version),payload_hash:String(item.payload_hash)}),cache:"no-store"
+    });
+    const authorized=await authRes.json().catch(()=>null);
+    const authItem=authorized?.item;
+    if(!authRes.ok||authorized?.ok!==true||!authItem)return {ok:false,error:"COMMUNICATION_AUTHORIZE_FAILED",http_status:authRes.status,detail:authorized};
+    const sendRes=await fetch(`${U}/functions/v1/fenix-communications-gateway/comunicaciones/${encodeURIComponent(String(authItem.communication_code))}/send`,{
+      method:"POST",headers,body:JSON.stringify({
+        expectedVersion:Number(authItem.version),payload_hash:String(authItem.payload_hash),
+        idempotency_key:sendKey,mode:"REAL"
+      }),cache:"no-store"
+    });
+    const sent=await sendRes.json().catch(()=>null);
+    if(!sendRes.ok||sent?.ok!==true)return {ok:false,error:"COMMUNICATION_SEND_FAILED",http_status:sendRes.status,detail:sent};
+    return {ok:true,data:sent};
+  }catch(e){
+    return {ok:false,error:"COMMUNICATIONS_GATEWAY_UNREACHABLE",detail:e instanceof Error?e.message:String(e)};
+  }
+}
+
+async function buildEmailProposal(req:Request,recipientEmail:string,subject:string,bodyText:string,contactName:string):Promise<PendingAction>{
+  const authz=await authorizedOwner(req);
+  if(!authz.ok)throw new Error("OWNER_REQUIRED");
+  const email=recipientEmail.trim().toLowerCase();
+  const name=contactName.trim()||email;
+  const subj=subject.trim();
+  const body=bodyText.trim();
+  const summary=`Enviar un email a ${name} <${email}> con asunto «${subj}» y texto exacto: «${body}».`;
+  const base={
+    action_id:`EMAIL-${Date.now()}`,
+    action_type:"EMAIL_SEND",
+    engine_id:"COMM-001",
+    company_id:"fenix",
+    scope:{recipient_email:email,contact_name:name,subject:subj,body},
+    summary
+  };
+  const proposal_hash=await proposalHash(base);
+  const proposal_issued_at=Math.floor(Date.now()/1000);
+  const proposal_token=await proposalToken(JSON.stringify({proposal_hash,proposal_issued_at,actor:authz.actor}));
+  return {...base,proposal_hash,proposal_issued_at,proposal_token};
+}
+
+
 async function buildSeoProposal(req:Request,location:string,coverage:"capital_and_province"|"capital_only"="capital_and_province"):Promise<PendingAction>{
   const authz=await authorizedOwner(req);
   if(!authz.ok)throw new Error("OWNER_REQUIRED");
@@ -226,6 +293,31 @@ async function chatReply(req:Request,message:string,pendingRaw:unknown,readConte
 
   if(pending){
     if(/^(si|sí|si adelante|adelante|confirmo|activalo|activarlo|hazlo|procede)$/.test(text)){
+      if(pending.action_type==="EMAIL_SEND"&&pending.engine_id==="COMM-001"&&pending.company_id==="fenix"){
+        const run=await executeEmailCommunication(req,pending);
+        if(run.ok){
+          const remote:any=run.data;
+          const item=remote?.item??{};
+          return {
+            status:"ACTION_ACCEPTED",
+            intent:"email_send_confirmation",
+            executed:true,
+            completed:true,
+            execution_environment:"PROD",
+            result:remote,
+            message:`Email enviado a ${pending.scope.contact_name} <${pending.scope.recipient_email}>. Asunto: «${pending.scope.subject}». Evidencia del proveedor registrada${item?.provider_message_id?" con ID de mensaje":""}.`
+          };
+        }
+        return {
+          status:"ACTION_CONFIRMED",
+          intent:"email_send_confirmation",
+          executed:false,
+          action:pending,
+          reason:run.error,
+          detail:run,
+          message:"Has confirmado el envío, pero el gateway de comunicaciones no lo ha aceptado. No voy a fingir que se ha enviado; mantengo la propuesta para poder reintentar."
+        };
+      }
       if(pending.action_type==="SEO_ZONE_ACTIVATION"&&pending.engine_id==="SEO-001"&&pending.company_id==="fenix"){
         const run=await executeSeo001Preprod(req,pending);
         if(run.ok){
@@ -322,6 +414,35 @@ async function chatReply(req:Request,message:string,pendingRaw:unknown,readConte
       message:"La estrategia actual de marketing de Fénix Capital prioriza crecimiento orgánico y reutilización de activos antes de gasto nuevo. Canales prioritarios: SEO, SEO local, contenidos, redes orgánicas, Google Business Profile, B2B con inmobiliarias, CRM/reactivación, referidos y reutilización multicanal. El doble motor comercial es particulares + inmobiliarias, midiendo leads cualificados, expedientes, firmas e ingreso, no métricas de vanidad.",
       sources:[{notion_page_id:"3b481b1a-756d-81ce-bdd3-d28125e964c7",title:"Motor maestro · Estrategia SEO, contenidos, embudos y redes"}],
       evidence_mode:"CANONICAL_INDEX_GUARD_V1"
+    };
+  }
+
+  const emailMatch=message.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
+  const emailIntent=/\b(email|correo)\b/i.test(message)&&/\b(envia|envía|enviar|manda|mandar|prepara|preparar)\b/i.test(message);
+  if(emailIntent){
+    if(!emailMatch){
+      return {
+        status:"ACTION_NEEDS_SCOPE",intent:"email_send",executed:false,
+        message:"Puedo preparar el envío, pero necesito una dirección de email verificada en el propio mensaje antes de crear la propuesta exacta."
+      };
+    }
+    const quoted=[...message.matchAll(/[«“"]([^»”"]+)[»”"]/g)].map(m=>m[1].trim());
+    const subjectMatch=message.match(/asunto\s*(?:[:=-]|es)?\s*[«“"]([^»”"]+)[»”"]/i);
+    const bodyMatch=message.match(/(?:texto|cuerpo|mensaje)\s*[:=-]?\s*[«“"]([^»”"]+)[»”"]/i);
+    const subject=(subjectMatch?.[1]??quoted[0]??"Prueba de CEREBRO").trim();
+    const bodyText=(bodyMatch?.[1]??quoted[1]??"").trim();
+    if(!bodyText){
+      return {
+        status:"ACTION_NEEDS_SCOPE",intent:"email_send",executed:false,
+        message:`He verificado el destinatario ${emailMatch[0]}. Indícame el texto exacto del correo para poder presentarte una propuesta cerrada antes de enviarlo.`
+      };
+    }
+    const nameMatch=message.match(/(?:a|para)\s+([A-ZÁÉÍÓÚÑ][\p{L}.-]+(?:\s+[A-ZÁÉÍÓÚÑ][\p{L}.-]+){0,3})/u);
+    const contactName=(nameMatch?.[1]??emailMatch[0]).replace(/\s+(?:busca|con|en|y)$/i,"").trim();
+    const action=await buildEmailProposal(req,emailMatch[0],subject,bodyText,contactName);
+    return {
+      status:"ACTION_PROPOSAL",intent:"email_send",executed:false,action,
+      message:`Propuesta exacta de envío:\nDestinatario: ${action.scope.contact_name} <${action.scope.recipient_email}>\nAsunto: ${action.scope.subject}\nTexto: ${action.scope.body}\n\nNo he enviado nada. ¿Confirmas este envío con «sí»?`
     };
   }
 
