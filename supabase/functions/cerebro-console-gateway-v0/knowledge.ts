@@ -449,6 +449,60 @@ async function directDomainAnswer(question:string,domain:string|null){
     };
   }
 
+  if(domain==="marketing"&&/(estrategia|actual|canales|prioriz|organico|orgánico|crecimiento)/.test(q)){
+    return {
+      status:"OK",intent:"marketing_strategy",executed:false,
+      message:"La estrategia actual de marketing de Fénix Capital prioriza crecimiento orgánico y reutilización de activos antes de gasto nuevo. Canales prioritarios: SEO, SEO local, contenidos, redes orgánicas, Google Business Profile, B2B con inmobiliarias, CRM/reactivación, referidos y reutilización multicanal. El doble motor comercial es particulares + inmobiliarias, midiendo leads cualificados, expedientes, firmas e ingreso, no métricas de vanidad.",
+      sources:[{notion_page_id:MARKETING_MASTER_PAGE_ID,title:"Motor maestro · Estrategia SEO, contenidos, embudos y redes"}],
+      evidence_mode:"CANONICAL_FALLBACK_V3"
+    };
+  }
+
+  if(domain==="social"&&/(redes|operativas|estado|canales|sociales)/.test(q)){
+    return {
+      status:"OK",intent:"social_status",executed:false,
+      message:"El alcance social verificado actualmente se centra en Facebook, Instagram y LinkedIn estático mediante la capa CEREBRO/Buffer en PREPROD. TikTok, YouTube/Shorts y X no deben considerarse publicación PROD autónoma. Buffer es el transporte social canónico verificado; Substack no está verificado. Para una pieza o fecha concreta CEREBRO debe consultar la cola viva.",
+      sources:[{notion_page_id:SOCIAL_ORGANIC_PAGE_ID,title:"Redes sociales orgánicas"}],
+      evidence_mode:"CANONICAL_FALLBACK_V3"
+    };
+  }
+
+  if(domain==="newsletter"){
+    return {
+      status:"OK",intent:"newsletter_status",executed:false,
+      message:"El sistema canónico de newsletter es Brevo Free. Brevo actúa como transporte, listas/segmentación, automatizaciones y métricas; no es el CRM maestro. Listas verificadas: PARTICULARES id 17 e INMOBILIARIAS id 18. Las campañas 102 y 103 están en borrador y en el último corte verificado constan 0 emails enviados.",
+      sources:[{notion_page_id:BREVO_CANONICAL_PAGE_ID,title:"Brevo · configuración canónica Fénix Capital · PRE-PROD"},{notion_page_id:CEREBRO_AUDIT_PAGE_ID,title:"AUDITORÍA VIVA · CEREBRO OS"}],
+      evidence_mode:"CANONICAL_VERIFIED_2026_09_28"
+    };
+  }
+
+  if(domain==="autonomy"){
+    return {
+      status:"OK",intent:"autonomy_status",executed:false,
+      message:"CEREBRO puede consultar conocimiento y fuentes autorizadas sin confirmación, mantener contexto y preparar análisis o propuestas. Para una acción ordinaria no autónoma presenta el alcance exacto y pide una sola confirmación explícita antes de ejecutar, verificar y auditar. HUMAN_REQUIRED se reserva a LEGAL_REQUIRED, SIGNATURE_REQUIRED, LOW_CONFIDENCE, HIGH_RISK, POLICY_CONFLICT, SECURITY_INCIDENT, MONEY_LIMIT y CUSTOMER_HUMAN_REQUEST.",
+      sources:[{notion_page_id:DECISION_CENTER_PAGE_ID,title:"Centro de decisión CEREBRO"},{notion_page_id:OWNER_DECISION_PAGE_ID,title:"Owner Decision by Exception V1"}],
+      evidence_mode:"CANONICAL_POLICY"
+    };
+  }
+
+  if(domain==="platform"){
+    return {
+      status:"OK",intent:"platform_architecture",executed:false,
+      message:"Supabase se reserva principalmente para el core transaccional de APP/CRM/Auth/RLS/expedientes y estado crítico. El runtime/worker compartido debe absorber jobs, training, OCR, investigación y logs auxiliares. No conviene cargar en Supabase por defecto jobs largos, polling repetitivo, QA pesado, workers, investigación, training, OCR pesado, experimentos, simulación, backups pesados ni logs auxiliares de gran volumen.",
+      sources:[{notion_page_id:CEREBRO_AUDIT_PAGE_ID,title:"AUDITORÍA VIVA · CEREBRO OS"},{notion_page_id:FINOPS_PAGE_ID,title:"FINOPS-001 · Costes, velocidad, GitHub y cron"}],
+      evidence_mode:"CANONICAL_FALLBACK_V3"
+    };
+  }
+
+  if(domain==="trading"){
+    return {
+      status:"OK",intent:"trading_isolation",executed:false,
+      message:"Trading LAB debe permanecer en un perímetro técnico independiente: no comparte runtime, secretos, colas ni recursos críticos con marketing, SEO, redes, CRM, WordPress, App Fénix ni APIs productivas. Sus credenciales son exclusivas del laboratorio. Debe tener límites de recursos, logs, watchdog, circuit breaker y kill switch propios; si existe conflicto de recursos se detiene Trading LAB, nunca producción.",
+      sources:[{notion_page_id:TRADING_ISOLATION_PAGE_ID,title:"P1 · Perímetro técnico aislado · Trading Lab"},{notion_page_id:REGISTRY_AUDIT_PAGE_ID,title:"REGISTRY-AUDIT · Estado de motores y funcionalidades"}],
+      evidence_mode:"CANONICAL_FALLBACK_V3"
+    };
+  }
+
   if(domain==="multiempresa"&&/(alta|nueva empresa|onboarding|motores|activar|activarian|activarían)/.test(q)){
     return {
       status:"OK",intent:"multiempresa_onboarding",executed:false,
