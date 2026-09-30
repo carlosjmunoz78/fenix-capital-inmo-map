@@ -159,7 +159,7 @@ function detectSocialScheduleQuery(question:string,context?:CerebroReadContext|n
   const explicit=networks.find(n=>new RegExp("\\b"+n+"\\b").test(q))||(/(^|[^a-z0-9])x([^a-z0-9]|$)/.test(q)?"x":undefined);
   // Context inheritance must only happen for a genuine social follow-up.
   // Word boundaries prevent unrelated words such as "estudiar" from matching "dia".
-  const scheduleIntent=/\b(proxima|siguiente|cuando|sale|publicacion|post|programada|programado|dia|hora|texto|copy|contenido|caption|imagen|foto|creativo|media)\b|que pone|ensename la imagen|enséñame la imagen/.test(q);
+  const scheduleIntent=/\b(proxima|siguiente|cuando|sale|publicacion|post|programada|programado|dia|hora|texto|copy|contenido|caption|imagen|foto|creativo|media|completa|completo)\b|que pone|ensename la imagen|enséñame la imagen/.test(q);
   const followup=Boolean(context?.kind==="social_schedule"&&(/\b(dia|hora|cuando|texto|copy|contenido|caption|imagen|foto|creativo|media)\b|que dia|a que hora|y hora|que pone|ensename la imagen|enséñame la imagen/.test(q)));
   const network=explicit||(followup?norm(context?.network??""):null);
   return scheduleIntent&&network?network:null;
@@ -289,8 +289,9 @@ async function queryOperationalSocialSchedule(question:string,context?:CerebroRe
   const network=detectSocialScheduleQuery(question,context);
   if(!network)return null;
   const display=displayNetwork(network);
-  const wantsText=/(texto|copy|contenido|caption|que pone|qué pone)/.test(norm(question));
-  const wantsImage=/(imagen|foto|creativo|media|ensename la imagen|enséñame la imagen)/.test(norm(question));
+  const wantsComplete=/(completa|completo|todo|entera|entero)/.test(norm(question));
+  const wantsText=wantsComplete||/(texto|copy|contenido|caption|que pone|qué pone)/.test(norm(question));
+  const wantsImage=wantsComplete||/(imagen|foto|creativo|media|ensename la imagen|enséñame la imagen)/.test(norm(question));
   const preserved=(wantsText||wantsImage)?await socialPublicationByContext(context):null;
   const result=preserved?{ok:true,item:preserved}:await nextSocialPublication(network);
   const read_context:CerebroReadContext={kind:"social_schedule",network:display};
@@ -306,6 +307,23 @@ async function queryOperationalSocialSchedule(question:string,context?:CerebroRe
   read_context.public_media_url=result.item.public_media_url??null;
   read_context.media_urls=result.item.media_urls??[];
   read_context.caption=result.item.caption||undefined;
+  if(wantsComplete){
+    const urls=[result.item.public_media_url,...(result.item.media_urls??[])].filter(Boolean);
+    const unique=[...new Set(urls)];
+    const when=formatMadridDateTime(result.item.date);
+    const lines=[
+      `Próxima publicación de ${display}: ${when}.`,
+      result.item.title?`Pieza: ${result.item.title}.`:"",
+      result.item.caption?`Texto exacto:\n${result.item.caption}`:"",
+      unique[0]?`Imagen: ${unique[0]}`:""
+    ].filter(Boolean);
+    return {
+      status:"OK",intent:"social_schedule_complete",executed:false,read_context,
+      message:lines.join("\n\n"),
+      media:unique.length?{public_media_url:unique[0],media_urls:unique}:undefined,
+      source: result.item.source==="CEREBRO_SOCIAL_QUEUE" ? {system:"CEREBRO Social",data_source:"cerebro_social_queue_preprod",as_of:result.item.as_of} : {system:"Notion",data_source:"Programación Editorial",url:result.item.url}
+    };
+  }
   if(wantsImage){
     const urls=[result.item.public_media_url,...(result.item.media_urls??[])].filter(Boolean);
     const unique=[...new Set(urls)];
