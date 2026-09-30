@@ -57,7 +57,7 @@ export default function CerebroConsoleShell(){
   setSending(true);
   const {status,data}=await postCerebroConsoleChat(text,pendingAction);
   const response=status>0&&data?.message?data.message:'No he podido contactar con CEREBRO Gateway.';
-  if(data?.status==='CANCELED'||data?.status==='ACTION_CONFIRMED'||data?.status==='ACTION_ACCEPTED')setPendingAction(null);
+  if(data?.status==='CANCELED'||data?.status==='ACTION_ACCEPTED'||(data?.status==='ACTION_CONFIRMED'&&!data?.action))setPendingAction(null);
   else if(data?.action)setPendingAction(data.action);
   setLines(current=>[...current,{role:'cerebro',text:response}]);
   setSending(false);

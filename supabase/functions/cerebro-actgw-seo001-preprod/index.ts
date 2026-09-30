@@ -38,14 +38,36 @@ async function getJson(url:string){
   return b;
 }
 
+const PROVINCE_CODE_ALIASES:Record<string,string>={
+  "alava":"01","araba":"01","araba alava":"01",
+  "alicante":"03","alacant":"03","alicante alacant":"03",
+  "illes balears":"07","islas baleares":"07","balears illes":"07",
+  "castellon":"12","castello":"12","castellon castello":"12",
+  "a coruna":"15","coruna a":"15","la coruna":"15",
+  "gipuzkoa":"20","guipuzcoa":"20",
+  "lleida":"25","lerida":"25",
+  "la rioja":"26","rioja la":"26",
+  "navarra":"31","nafarroa":"31","navarra nafarroa":"31",
+  "ourense":"32","orense":"32",
+  "asturias":"33",
+  "las palmas":"35","palmas las":"35",
+  "cantabria":"39",
+  "valencia":"46","valencia valencia":"46",
+  "bizkaia":"48","vizcaya":"48"
+};
 async function provinceCode(province:string){
   const rows=await getJson("https://servicios.ine.es/wstempus/js/ES/VALORES_VARIABLE/115?det=2");
   const target=norm(province);
-  const matches=rows.map((x:any)=>({name:nameOf(x),code:codeOf(x)})).filter((x:any)=>x.name&&x.code&&(
+  const mapped=PROVINCE_CODE_ALIASES[target];
+  const normalized=rows.map((x:any)=>({name:nameOf(x),code:codeOf(x)})).filter((x:any)=>x.name&&x.code);
+  if(mapped){
+    const byCode=normalized.find((x:any)=>x.code.padStart(2,"0").slice(0,2)===mapped);
+    if(byCode)return byCode;
+  }
+  const matches=normalized.filter((x:any)=>(
     norm(x.name)===target ||
     norm(x.name).startsWith(target+" ") ||
-    target.startsWith(norm(x.name)+" ") ||
-    (target==="valencia"&&norm(x.name).startsWith("valencia"))
+    target.startsWith(norm(x.name)+" ")
   ));
   if(matches.length!==1)throw new Error("province_code_not_unique");
   return matches[0];
