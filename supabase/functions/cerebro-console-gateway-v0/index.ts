@@ -96,7 +96,7 @@ function b64(bytes:Uint8Array){
   return btoa(s);
 }
 
-async function authorizedDirection(req:Request){
+async function authorizedOwner(req:Request){
   const U=Deno.env.get("SUPABASE_URL")??"";
   const A=Deno.env.get("SUPABASE_ANON_KEY")??"";
   const S=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")??"";
@@ -109,7 +109,8 @@ async function authorizedDirection(req:Request){
   const {data:ctx,error:ce}=await svc.rpc("fenix_prod_actor_context_by_auth_server",{p_auth_user_id:ud.user.id});
   if(ce||!ctx?.ok||!ctx?.actor_code)return {ok:false,actor:"",role:""};
   const role=String(ctx.role??"");
-  return {ok:role.toLowerCase().startsWith("direc"),actor:String(ctx.actor_code),role};
+  const actor=String(ctx.actor_code);
+  return {ok:actor==="CARLOS-ADMIN",actor,role};
 }
 async function proposalToken(payload:string){
   const secret=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")??"";
@@ -167,8 +168,8 @@ async function executeSeo001Preprod(req:Request,action:PendingAction){
 }
 
 async function buildSeoProposal(req:Request,location:string,coverage:"capital_and_province"|"capital_only"="capital_and_province"):Promise<PendingAction>{
-  const authz=await authorizedDirection(req);
-  if(!authz.ok)throw new Error("DIRECTION_REQUIRED");
+  const authz=await authorizedOwner(req);
+  if(!authz.ok)throw new Error("OWNER_REQUIRED");
   const normalizedLocation=location.trim().replace(/\s+/g," ");
   const summary=coverage==="capital_only"
     ? `Activar el proceso SEO canónico para ${normalizedLocation} capital.`
@@ -194,7 +195,7 @@ async function validatePending(req:Request,value:unknown):Promise<PendingAction|
      typeof v.company_id!=="string"||typeof v.summary!=="string"||typeof v.proposal_hash!=="string"||
      typeof v.proposal_issued_at!=="number"||typeof v.proposal_token!=="string"||
      !v.scope||typeof v.scope!=="object"||Array.isArray(v.scope))return null;
-  const authz=await authorizedDirection(req);
+  const authz=await authorizedOwner(req);
   if(!authz.ok)return null;
   const now=Math.floor(Date.now()/1000);
   if(v.proposal_issued_at>now+30||now-v.proposal_issued_at>PROPOSAL_TTL_SECONDS)return null;
@@ -331,6 +332,8 @@ export default {
     }
 
     const suffix=new URL(req.url).pathname.split("/").filter(Boolean).pop()??"";
+    const owner=await authorizedOwner(req);
+    if(!owner.ok)return json(req,403,{status:"FORBIDDEN",reason:"OWNER_ONLY",message:"CEREBRO Console está reservada al propietario autorizado."});
 
     if(req.method==="POST"&&suffix==="chat"){
       let body:unknown;
@@ -344,7 +347,7 @@ export default {
     if(req.method!=="GET")return json(req,405,{status:"CLOSED",reason:"ROUTE_NOT_AVAILABLE"});
 
     if(suffix==="health")return json(req,200,{
-      status:"ok",service:"cerebro-console-gateway-v0",environment:"LAB",version:"0.5.1-owner-decision-seo001-secure",
+      status:"ok",service:"cerebro-console-gateway-v0",environment:"LAB",version:"0.5.2-owner-only",
       authenticated_transport:true,direct_model_access:false,prod_execution_enabled:false,live_writes:false,
       chat_available:true,chat_mode:"OWNER_DECISION_BY_EXCEPTION_V1",additional_cost_target_eur:0
     });
