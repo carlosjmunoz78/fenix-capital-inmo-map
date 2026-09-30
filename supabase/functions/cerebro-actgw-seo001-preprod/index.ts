@@ -67,6 +67,32 @@ async function municipalitiesFor(province:string,code:string){
   return out;
 }
 
+const CAPITAL_EXCEPTIONS:Record<string,string[]>={
+  "araba alava":["vitoria gasteiz"],
+  "asturias":["oviedo"],
+  "balears illes":["palma"],
+  "bizkaia":["bilbao"],
+  "cantabria":["santander"],
+  "castellon castello":["castello de la plana","castellon de la plana"],
+  "gipuzkoa":["donostia san sebastian","san sebastian"],
+  "navarra":["pamplona iruna","pamplona"],
+  "palmas las":["palmas de gran canaria las","las palmas de gran canaria"],
+  "rioja la":["logrono"]
+};
+function resolveCapital(requestedProvince:string,officialProvince:string,municipalities:any[]){
+  const directTargets=[norm(requestedProvince),norm(officialProvince)];
+  for(const target of directTargets){
+    const direct=municipalities.find(x=>norm(String(x.name??""))===target);
+    if(direct)return direct;
+  }
+  const aliases=CAPITAL_EXCEPTIONS[norm(officialProvince)]??CAPITAL_EXCEPTIONS[norm(requestedProvince)]??[];
+  for(const alias of aliases){
+    const match=municipalities.find(x=>norm(String(x.name??""))===alias);
+    if(match)return match;
+  }
+  return null;
+}
+
 Deno.serve(async(req)=>{
   try{
     if(req.method!=="POST")return J({ok:false,error:"method_not_allowed"},405);
@@ -85,8 +111,7 @@ Deno.serve(async(req)=>{
 
     const p=await provinceCode(province);
     let municipalities=await municipalitiesFor(province,p.code);
-    const capital=province;
-    const capitalMatch=municipalities.find(x=>norm(x.name)===norm(capital)||norm(x.name).startsWith(norm(capital)+"/"));
+    const capitalMatch=resolveCapital(province,p.name,municipalities);
     if(!capitalMatch)throw new Error("capital_not_found_in_ine");
     if(coverage==="capital_only")municipalities=[capitalMatch];
 
@@ -103,6 +128,7 @@ Deno.serve(async(req)=>{
       p_municipalities:municipalities
     });
     if(error)return J({ok:false,error:"activation_rpc_failed",detail:error.message},500);
+    if(!data||data?.ok!==true)return J({ok:false,error:"activation_rejected",detail:data},409);
     return J({ok:true,state:"ACTIVATION_ACCEPTED_PREPROD",province:p.name,province_code:p.code,municipality_count:municipalities.length,activation:data});
   }catch(e){
     return J({ok:false,error:"actgw_seo001_exception",detail:e instanceof Error?e.message:String(e)},500);
