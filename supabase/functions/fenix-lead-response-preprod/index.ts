@@ -5,7 +5,7 @@ import { PDFDocument, StandardFonts, rgb } from "npm:pdf-lib@1.17.1";
 const U=Deno.env.get("SUPABASE_URL")??"";
 const S=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")??"";
 function J(data:unknown,status=200){return Response.json(data,{status,headers:{"cache-control":"no-store","x-fenix-env":"PREPROD"}})}
-function allowedRecipient(email:string){
+function envAllowedRecipient(email:string){
   const raw=Deno.env.get("FENIX_PREPROD_TEST_RECIPIENTS")??"";
   if(!raw||raw.includes("*")) return false;
   const entries=raw.split(",").map(x=>x.trim().toLowerCase()).filter(Boolean);
@@ -60,8 +60,21 @@ Deno.serve(async(req:Request)=>{
   const consentPrivacy=b.consent_privacy===true, consentMarketing=b.consent_marketing===true;
   if(!email||!idem||!["GUIDE","STUDY","NEWSLETTER"].includes(funnel))return J({ok:false,error:"invalid_payload"},422);
   if(!consentPrivacy)return J({ok:false,error:"privacy_consent_required"},422);
-  if(!allowedRecipient(email))return J({ok:false,error:"preprod_recipient_not_allowlisted"},403);
   const db=createClient(U,S,{auth:{persistSession:false}});
+  let recipientAllowed=envAllowedRecipient(email);
+  if(!recipientAllowed){
+    const {data:cert}=await db.from("brevo_integration_runs_preprod")
+      .select("detail")
+      .eq("status","success")
+      .order("created_at",{ascending:false})
+      .limit(20);
+    recipientAllowed=(cert??[]).some((r:any)=>{
+      const d=r?.detail??{};
+      const candidates=[d.to,d.test_email_alias].filter(Boolean).map((x:any)=>String(x).trim().toLowerCase());
+      return candidates.includes(email);
+    });
+  }
+  if(!recipientAllowed)return J({ok:false,error:"preprod_recipient_not_certified"},403);
   const {data:lead}=await db.from("web_leads_preprod").select("id").eq("email",email).maybeSingle();
   if(!lead?.id)return J({ok:false,error:"lead_not_found"},404);
   let subject="",html="",text="",attachment:any[]=[],assetUrl:string|null=null,assetHash:string|null=null,messageKind="";
