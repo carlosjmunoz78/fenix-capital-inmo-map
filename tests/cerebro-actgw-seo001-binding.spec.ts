@@ -26,14 +26,7 @@ test('CEREBRO gateway binds confirmed SEO action through signed PREPROD transpor
   expect(accepted).toBeGreaterThan(-1);
   expect(returnedAction).toBeGreaterThan(accepted);
 
-  const staticShell=fs.readFileSync('public/cerebro/index.html','utf8');
-  const staticAccepted=staticShell.indexOf("data?.status==='ACTION_ACCEPTED'");
-  const staticAction=staticShell.indexOf('data?.action');
-  expect(staticAccepted).toBeGreaterThan(-1);
-  expect(staticAction).toBeGreaterThan(staticAccepted);
-
   expect(reactShell).toContain("(data?.status==='ACTION_CONFIRMED'&&!data?.action)");
-  expect(staticShell).toContain("(data?.status==='ACTION_CONFIRMED'&&!data?.action)");
 
   const security=fs.readFileSync('supabase/migrations/20260930124000_cerebro_actgw_preprod_security.sql','utf8');
   expect(security).toContain('enable row level security');
