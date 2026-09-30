@@ -65,8 +65,9 @@ async function actorContext(req:Request){
   const {data:ctx,error:ce}=await svc.rpc("fenix_prod_actor_context_by_auth_server",{p_auth_user_id:ud.user.id});
   if(ce||!ctx?.ok||!ctx?.actor_code)return {ok:false,status:403,error:"identity_not_linked"} as const;
   const role=String(ctx.role??"");
-  if(!role.toLowerCase().startsWith("direc"))return {ok:false,status:403,error:"direction_knowledge_required"} as const;
-  return {ok:true,status:200,actor_code:String(ctx.actor_code),role} as const;
+  const actorCode=String(ctx.actor_code);
+  if(actorCode!=="CARLOS-ADMIN")return {ok:false,status:403,error:"owner_knowledge_required"} as const;
+  return {ok:true,status:200,actor_code:actorCode,role} as const;
 }
 
 async function notionSearch(query:string){
@@ -135,7 +136,7 @@ function snippet(body:string,questionTokens:string[]){
 
 export async function queryCerebroKnowledge(req:Request,question:string){
   const actor=await actorContext(req);
-  if(!actor.ok)return {status:"HUMAN_REQUIRED",reason:actor.error,executed:false,message:"Esta consulta requiere contexto de Dirección autorizado."};
+  if(!actor.ok)return {status:"HUMAN_REQUIRED",reason:actor.error,executed:false,message:"Esta consulta está reservada al propietario autorizado de CEREBRO."};
 
   if(!N)return {status:"ERROR",reason:"NOTION_TOKEN_MISSING",executed:false,message:"El conector de conocimiento de CEREBRO no está configurado."};
 
