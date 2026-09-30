@@ -14,6 +14,12 @@ test('CEREBRO is served by the authenticated SPA route, not a shadow static page
   expect(gateway).toContain('reason:"OWNER_ONLY"');
   const knowledge=fs.readFileSync('supabase/functions/cerebro-console-gateway-v0/knowledge.ts','utf8');
   expect(knowledge).toContain('actorCode!=="CARLOS-ADMIN"');
+  expect(knowledge).toContain('SOCIAL_SCHEDULE_DATA_SOURCE_ID');
+  expect(knowledge).toContain('Programación Editorial');
+  expect(knowledge).toContain('read_context');
+  const api=fs.readFileSync('src/cerebroConsoleApi.ts','utf8');
+  expect(api).toContain('read_context');
+  expect(shell).toContain('readContext');
   const app=fs.readFileSync('src/App.tsx','utf8');
   expect(app).toContain("supabase.auth.getSession()");
   expect(app).toContain("fenix-session-active");
