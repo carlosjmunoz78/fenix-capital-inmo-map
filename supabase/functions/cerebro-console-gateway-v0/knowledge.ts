@@ -159,7 +159,7 @@ function detectSocialScheduleQuery(question:string,context?:CerebroReadContext|n
   const explicit=networks.find(n=>new RegExp("\\b"+n+"\\b").test(q))||(/(^|[^a-z0-9])x([^a-z0-9]|$)/.test(q)?"x":undefined);
   // Context inheritance must only happen for a genuine social follow-up.
   // Word boundaries prevent unrelated words such as "estudiar" from matching "dia".
-  const scheduleIntent=/\b(proxima|siguiente|cuando|sale|publicacion|programada|programado|dia|hora|texto|copy|contenido|caption|imagen|foto|creativo|media)\b|que pone|ensename la imagen|enséñame la imagen/.test(q);
+  const scheduleIntent=/\b(proxima|siguiente|cuando|sale|publicacion|post|programada|programado|dia|hora|texto|copy|contenido|caption|imagen|foto|creativo|media)\b|que pone|ensename la imagen|enséñame la imagen/.test(q);
   const followup=Boolean(context?.kind==="social_schedule"&&(/\b(dia|hora|cuando|texto|copy|contenido|caption|imagen|foto|creativo|media)\b|que dia|a que hora|y hora|que pone|ensename la imagen|enséñame la imagen/.test(q)));
   const network=explicit||(followup?norm(context?.network??""):null);
   return scheduleIntent&&network?network:null;

@@ -480,6 +480,41 @@ async function chatReply(req:Request,message:string,pendingRaw:unknown,readConte
     };
   }
 
+  const socialShareIntent=Boolean(readContext?.kind==="social_schedule"&&/\b(mandasela|mándasela|mandaselo|mándaselo|enviasela|envíasela|enviaselo|envíaselo)\b/i.test(message));
+  if(socialShareIntent){
+    const recipientMatch=message.match(/(?:a|para)\s+([A-ZÁÉÍÓÚÑ][\p{L}.-]+(?:\s+[A-ZÁÉÍÓÚÑ][\p{L}.-]+){0,3})/u);
+    const contactQuery=(recipientMatch?.[1]??"").trim();
+    if(!contactQuery){
+      return {status:"ACTION_NEEDS_SCOPE",intent:"social_share_email",executed:false,message:"Dime a qué contacto quieres enviar esta publicación. Buscaré sus correos y te dejaré elegir antes de preparar el envío."};
+    }
+    const caption=String((readContext as any).caption||"").trim();
+    const when=String(readContext.scheduled_at||"").trim();
+    const media=String(readContext.public_media_url||readContext.media_urls?.[0]||"").trim();
+    const key=String(readContext.content_key||"").trim();
+    const network=String(readContext.network||"Facebook");
+    const parts=[
+      `Próxima publicación de ${network}${key?` · ${key}`:""}`,
+      when?`Fecha y hora programadas: ${new Intl.DateTimeFormat("es-ES",{timeZone:"Europe/Madrid",dateStyle:"full",timeStyle:"short"}).format(new Date(when))}`:"",
+      caption?`Texto exacto:\n${caption}`:"",
+      media?`Imagen: ${media}`:""
+    ].filter(Boolean);
+    const bodyText=parts.join("\n\n");
+    if(!bodyText){
+      return {status:"ACTION_NEEDS_SCOPE",intent:"social_share_email",executed:false,message:"Tengo la referencia de la publicación, pero no suficiente contenido estructurado para preparar el envío. No voy a inventarlo."};
+    }
+    const resolved=await resolveContacts(req,contactQuery);
+    if(!resolved.ok||resolved.items.length===0){
+      return {status:"ACTION_NEEDS_SCOPE",intent:"email_contact_lookup",executed:false,message:`No he encontrado ningún correo verificado para «${contactQuery}» en las fuentes autorizadas de CEREBRO. No voy a inventarlo.`};
+    }
+    const subject=`Próxima publicación de ${network}`;
+    const selection=await buildEmailContactSelection(req,contactQuery,subject,bodyText,resolved.items);
+    const list=resolved.items.slice(0,10).map((x:any,i:number)=>`${i+1}. ${x.name} <${x.email}>`).join("\n");
+    return {
+      status:"ACTION_PROPOSAL",intent:"email_contact_selection",executed:false,action:selection,
+      message:`He encontrado estos correos para «${contactQuery}»:\n${list}\n\nElige el número, el nombre exacto o el correo. Prepararé el email con el texto, la fecha, la hora y la imagen de la publicación. Todavía no he enviado nada.`
+    };
+  }
+
   const emailMatch=message.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
   const emailIntent=/\b(email|correo)\b/i.test(message)&&(/\b(envia|envía|envies|envíes|enviar|manda|mandar|mandes|prepara|preparar)\b/i.test(message)||/\b(mandaselo|mándaselo|enviaselo|envíaselo)\b/i.test(message));
   if(emailIntent){
