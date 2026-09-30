@@ -10,6 +10,8 @@ const SOCIAL_SCHEDULE_DATA_SOURCE_ID="a03dd9dc-fd5e-4492-a084-c9a03b698884";
 const SOCIAL_LIVE_ENDPOINT="https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-social-schedule-read-preprod";
 const SIGNING_CONTEXT="CEREBRO_ACTGW_PROD_TO_SEO001_PREPROD_V1";
 const SIGNING_KEY_ID="cerebro-actgw-prod-v1";
+const FINANCE_PREANALYSIS_PAGE_ID="310505c4-12df-47e9-a3fb-f1e07a7baf3f";
+const SEO_LATEST_AUDIT_PAGE_ID="3e981b1a-756d-81b3-9259-eee14327239d";
 const NH={Authorization:`Bearer ${N}`,"Notion-Version":NV,"Content-Type":"application/json"};
 
 const CANONICAL_PAGES=[
@@ -20,6 +22,7 @@ const CANONICAL_PAGES=[
 
 const DOMAIN_CANONICAL:Record<string,{id:string,title:string}[]>={
   finance:[
+    {id:FINANCE_PREANALYSIS_PAGE_ID,title:"Formulario de preanálisis hipotecario"},
     {id:"3ba81b1a-756d-817f-9d61-e54e7f270e16",title:"Conocimiento financiero canónico · Fénix Uno"},
     {id:"3be81b1a-756d-81b6-a75f-cb6bbe842766",title:"Base Maestra Belén · Motor financiero CEREBRO"}
   ],
@@ -32,8 +35,8 @@ const DOMAIN_CANONICAL:Record<string,{id:string,title:string}[]>={
     {id:"3be81b1a-756d-81da-ad05-d6ab37855c2f",title:"Base estratégica CEREBRO"}
   ],
   seo:[
-    {id:"3b481b1a-756d-81ce-bdd3-d28125e964c7",title:"Motor maestro · Estrategia SEO, contenidos, embudos y redes"},
-    {id:"3d481b1a-756d-81b2-8d63-fdccf0481401",title:"Auditoría SEO/Web semanal · Fénix Capital"}
+    {id:SEO_LATEST_AUDIT_PAGE_ID,title:"Auditoría SEO/Web semanal · Fénix Capital · 28/09/2026"},
+    {id:"3b481b1a-756d-81ce-bdd3-d28125e964c7",title:"Motor maestro · Estrategia SEO, contenidos, embudos y redes"}
   ]
 };
 
@@ -368,6 +371,58 @@ function snippet(body:string,questionTokens:string[]){
   const end=Math.min(raw.length,start+900);
   return (start>0?"…":"")+raw.slice(start,end)+(end<raw.length?"…":"");
 }
+function extractSection(body:string,start:string,end?:string){
+  const s=body.indexOf(start);
+  if(s<0)return "";
+  const from=s+start.length;
+  const e=end?body.indexOf(end,from):-1;
+  return body.slice(from,e>=0?e:body.length).trim();
+}
+
+function compact(value:string,maxLines:number){
+  return value.split("\n").map(x=>x.trim()).filter(Boolean).slice(0,maxLines).join("\n");
+}
+
+async function directDomainAnswer(question:string,domain:string|null){
+  const q=norm(question);
+
+  if(domain==="finance"&&/(documentacion|documentos|papeles)/.test(q)&&/(hipoteca|estudiar|preanalisis)/.test(q)){
+    const body=await pageText(FINANCE_PREANALYSIS_PAGE_ID);
+    if(body){
+      const economic=compact(extractSection(body,"## 2) Situación laboral y económica","## 3) Datos de la operación"),10);
+      const docs=compact(extractSection(body,"## Documentación para confirmar (después del formulario)"),30);
+      return {
+        status:"OK",intent:"finance_documentation",executed:false,
+        message:"Para estudiar una hipoteca, primero completamos el preanálisis y después pedimos la documentación que confirme los datos.\n\nCriterios iniciales:\n"+economic+"\n\nDocumentación base según perfil:\n"+docs+"\n\nEl estudio final no se inicia hasta tener el formulario completo y la documentación que lo confirme; la lista se adapta al perfil del cliente.",
+        sources:[{notion_page_id:FINANCE_PREANALYSIS_PAGE_ID,title:"Formulario de preanálisis hipotecario"}]
+      };
+    }
+  }
+
+  if(domain==="seo"&&/(estado|actual|pendiente|revisar|revision|situacion)/.test(q)){
+    const body=await pageText(SEO_LATEST_AUDIT_PAGE_ID);
+    if(body){
+      const state=compact(extractSection(body,"## Estado WordPress / SEO","## robots / sitemap / llms / Agentic"),12);
+      const priorities=compact(extractSection(body,"## Prioridades","## GATE HUMANO"),10);
+      const gates=compact(extractSection(body,"## GATE HUMANO"),10);
+      return {
+        status:"OK",intent:"seo_status",executed:false,
+        message:"Última auditoría SEO canónica: 28/09/2026.\n\nEstado actual:\n"+state+"\n\nPendiente prioritario:\n"+priorities+"\n\nGates pendientes:\n"+gates,
+        sources:[{notion_page_id:SEO_LATEST_AUDIT_PAGE_ID,title:"Auditoría SEO/Web semanal · Fénix Capital · 28/09/2026"}]
+      };
+    }
+  }
+
+  if(domain==="multiempresa"&&/(alta|nueva empresa|onboarding|motores|activar|activarian|activarían)/.test(q)){
+    return {
+      status:"OK",intent:"multiempresa_onboarding",executed:false,
+      message:"El onboarding objetivo de una nueva empresa en CEREBRO es: registro → escaneo web → escaneo de palabras clave → SEO → competencia → redes sociales → presencia local → marketing → modelo de negocio → procesos internos → conocimiento → CRM → App → automatizaciones → training → supervisor → producción.\n\nMotores estándar: Company Registry, Business Discovery, Digital Footprint Scanner, Web Audit, Keyword Research, SEO, Local SEO, Social Media Audit, Competitor Intelligence, Market Intelligence, Marketing, Knowledge Bootstrap, CRM Bootstrap, App Bootstrap, Automation Bootstrap, Training Bootstrap, Supervisor y Backup/Rebuild.\n\nCada motor debe llevar company_id, engine_id, environment y version. Producción solo tras contratos, permisos, tests, evaluación, observabilidad, rollback, backup/rebuild, coste medido, política y PREPROD en verde. Coste adicional objetivo: 0 €.",
+      sources:[{notion_page_id:"3e981b1a-756d-8100-9198-c75858d5371c",title:"Company Registry · Fénix Capital"},{system:"CEREBRO",contract:"MULTIEMPRESA_ONBOARDING_V1"}]
+    };
+  }
+  return null;
+}
+
 
 export async function queryCerebroKnowledge(req:Request,question:string,context?:CerebroReadContext|null){
   const actor=await actorContext(req);
@@ -378,11 +433,14 @@ export async function queryCerebroKnowledge(req:Request,question:string,context?
   const operationalSocial=await queryOperationalSocialSchedule(question,context);
   if(operationalSocial)return operationalSocial;
 
+  const domain=detectKnowledgeDomain(question);
+  const direct=await directDomainAnswer(question,domain);
+  if(direct)return direct;
+
   const qTokens=tokens(question);
   if(!qTokens.length)return {status:"LOW_CONFIDENCE",reason:"QUERY_TOO_GENERIC",executed:false,message:"La consulta es demasiado general. Dime el tema concreto que quieres consultar."};
 
   const candidates=new Map<string,{id:string,title:string,page:any}>();
-  const domain=detectKnowledgeDomain(question);
   for(const term of qTokens.slice(0,3)){
     for(const page of await notionSearch(term)){
       if(page?.id)candidates.set(String(page.id),{id:String(page.id),title:titleOf(page),page});
@@ -404,15 +462,17 @@ export async function queryCerebroKnowledge(req:Request,question:string,context?
   }
 
   const canonicalIds=new Set(CANONICAL_PAGES.map(x=>x.id));
+  const domainIds=new Set((domain?DOMAIN_CANONICAL[domain]??[]:[]).map(x=>x.id));
   const ordered=[
+    ...(domain?(DOMAIN_CANONICAL[domain]??[]).map(x=>candidates.get(x.id)).filter(Boolean):[]),
     ...CANONICAL_PAGES.map(x=>candidates.get(x.id)).filter(Boolean),
-    ...[...candidates.values()].filter(x=>!canonicalIds.has(x.id))
-  ].slice(0,10) as {id:string,title:string,page:any}[];
+    ...[...candidates.values()].filter(x=>!canonicalIds.has(x.id)&&!domainIds.has(x.id))
+  ].slice(0,12) as {id:string,title:string,page:any}[];
 
   const ranked:any[]=[];
   for(const item of ordered){
     const body=await pageText(item.id);
-    const score=scoreText(qTokens,item.title,body);
+    const score=scoreText(qTokens,item.title,body)+(domainIds.has(item.id)?12:0);
     if(score>=3)ranked.push({id:item.id,title:item.title,score,snippet:snippet(body,qTokens)});
   }
   ranked.sort((a,b)=>b.score-a.score);
