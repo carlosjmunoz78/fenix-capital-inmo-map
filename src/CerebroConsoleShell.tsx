@@ -3,7 +3,7 @@ import {useLocation,useNavigate} from 'react-router-dom';
 import {BrainCircuit,ChevronLeft,Send,ShieldCheck} from 'lucide-react';
 import {cerebroConsoleLinkEnabled} from './cerebroConsoleAccess';
 import {fetchAppApi} from './supabase';
-import {fetchCerebroConsoleHealth,postCerebroConsoleChat,type CerebroConsoleHealth,type CerebroPendingAction} from './cerebroConsoleApi';
+import {fetchCerebroConsoleHealth,postCerebroConsoleChat,type CerebroConsoleHealth,type CerebroPendingAction,type CerebroReadContext} from './cerebroConsoleApi';
 import './cerebro-console.css';
 
 const CONTEXTS=['GENERAL','EMPRESA','ENGINE','CRM','APP','SEO','MARKETING','TRAINING','AUTOMATION'];
@@ -23,6 +23,7 @@ export default function CerebroConsoleShell(){
  const [sending,setSending]=useState(false);
  const [lines,setLines]=useState<ChatLine[]>([]);
  const [pendingAction,setPendingAction]=useState<CerebroPendingAction|null>(null);
+ const [readContext,setReadContext]=useState<CerebroReadContext|null>(null);
 
  useEffect(()=>{
   let cancelled=false;
@@ -72,8 +73,9 @@ export default function CerebroConsoleShell(){
   setLines(current=>[...current,{role:'user',text}]);
   setMessage('');
   setSending(true);
-  const {status,data}=await postCerebroConsoleChat(text,pendingAction);
+  const {status,data}=await postCerebroConsoleChat(text,pendingAction,readContext);
   const response=status>0&&data?.message?data.message:'No he podido contactar con CEREBRO Gateway.';
+  if(data?.read_context)setReadContext(data.read_context);
   if(data?.status==='CANCELED'||data?.status==='ACTION_ACCEPTED'||(data?.status==='ACTION_CONFIRMED'&&!data?.action))setPendingAction(null);
   else if(data?.action)setPendingAction(data.action);
   setLines(current=>[...current,{role:'cerebro',text:response}]);
