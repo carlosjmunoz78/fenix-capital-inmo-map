@@ -117,9 +117,11 @@ function notionPropertyText(value:any):string{
 function detectSocialScheduleQuery(question:string,context?:CerebroReadContext|null){
   const q=norm(question);
   const networks=["facebook","instagram","linkedin","tiktok","youtube"];
-  const explicit=networks.find(n=>q.includes(n))||(/(^|[^a-z0-9])x([^a-z0-9]|$)/.test(q)?"x":undefined);
-  const scheduleIntent=/(proxima|siguiente|cuando|sale|publicacion|programad|dia|hora|texto|copy|contenido|caption)/.test(q);
-  const followup=Boolean(context?.kind==="social_schedule"&&/(dia|hora|cuando|que dia|a que hora|y hora|texto|copy|contenido|caption|que pone)/.test(q));
+  const explicit=networks.find(n=>new RegExp("\\b"+n+"\\b").test(q))||(/(^|[^a-z0-9])x([^a-z0-9]|$)/.test(q)?"x":undefined);
+  // Context inheritance must only happen for a genuine social follow-up.
+  // Word boundaries prevent unrelated words such as "estudiar" from matching "dia".
+  const scheduleIntent=/\\b(proxima|siguiente|cuando|sale|publicacion|programada|programado|dia|hora|texto|copy|contenido|caption)\\b|que pone/.test(q);
+  const followup=Boolean(context?.kind==="social_schedule"&&(/\\b(dia|hora|cuando|texto|copy|contenido|caption)\\b|que dia|a que hora|y hora|que pone/.test(q)));
   const network=explicit||(followup?norm(context?.network??""):null);
   return scheduleIntent&&network?network:null;
 }
@@ -311,11 +313,11 @@ async function notionPage(id:string){
   return await r.json().catch(()=>null);
 }
 
-async function pageText(id:string){
-  if(!N)return "";
+async function blockChildrenText(id:string,depth=0,remaining=12000):Promise<string>{
+  if(!N||remaining<=0||depth>2)return "";
   let cursor:string|undefined;
   const parts:string[]=[];
-  for(let pageNo=0;pageNo<1;pageNo++){
+  for(let pageNo=0;pageNo<2;pageNo++){
     const qs=new URLSearchParams({page_size:"100"});
     if(cursor)qs.set("start_cursor",cursor);
     const r=await fetch(`https://api.notion.com/v1/blocks/${id}/children?${qs}`,{headers:NH});
@@ -324,12 +326,22 @@ async function pageText(id:string){
     for(const block of b.results){
       const s=richText(block);
       if(s)parts.push(s);
-      if(parts.join("\n").length>12000)break;
+      const used=parts.join("\n").length;
+      if(used>=remaining)break;
+      if(depth<2&&(block?.has_children===true||block?.type==="child_page")){
+        const nested=await blockChildrenText(String(block.id),depth+1,remaining-used);
+        if(nested)parts.push(nested);
+      }
+      if(parts.join("\n").length>=remaining)break;
     }
-    if(parts.join("\n").length>12000||!b.has_more||!b.next_cursor)break;
+    if(parts.join("\n").length>=remaining||!b.has_more||!b.next_cursor)break;
     cursor=String(b.next_cursor);
   }
-  return parts.join("\n").slice(0,12000);
+  return parts.join("\n").slice(0,remaining);
+}
+
+async function pageText(id:string){
+  return await blockChildrenText(id,0,12000);
 }
 
 function scoreText(questionTokens:string[],title:string,body:string){
