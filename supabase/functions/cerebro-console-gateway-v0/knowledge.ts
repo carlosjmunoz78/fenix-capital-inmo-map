@@ -128,6 +128,8 @@ export type CerebroReadContext={
   content_key?:string;
   external_post_id?:string|null;
   scheduled_at?:string;
+  public_media_url?:string|null;
+  media_urls?:string[];
 };
 
 function notionPropertyText(value:any):string{
@@ -156,8 +158,8 @@ function detectSocialScheduleQuery(question:string,context?:CerebroReadContext|n
   const explicit=networks.find(n=>new RegExp("\\b"+n+"\\b").test(q))||(/(^|[^a-z0-9])x([^a-z0-9]|$)/.test(q)?"x":undefined);
   // Context inheritance must only happen for a genuine social follow-up.
   // Word boundaries prevent unrelated words such as "estudiar" from matching "dia".
-  const scheduleIntent=/\b(proxima|siguiente|cuando|sale|publicacion|programada|programado|dia|hora|texto|copy|contenido|caption)\b|que pone/.test(q);
-  const followup=Boolean(context?.kind==="social_schedule"&&(/\b(dia|hora|cuando|texto|copy|contenido|caption)\b|que dia|a que hora|y hora|que pone/.test(q)));
+  const scheduleIntent=/\b(proxima|siguiente|cuando|sale|publicacion|programada|programado|dia|hora|texto|copy|contenido|caption|imagen|foto|creativo|media)\b|que pone|ensename la imagen|enséñame la imagen/.test(q);
+  const followup=Boolean(context?.kind==="social_schedule"&&(/\b(dia|hora|cuando|texto|copy|contenido|caption|imagen|foto|creativo|media)\b|que dia|a que hora|y hora|que pone|ensename la imagen|enséñame la imagen/.test(q)));
   const network=explicit||(followup?norm(context?.network??""):null);
   return scheduleIntent&&network?network:null;
 }
@@ -224,6 +226,8 @@ async function nextSocialPublication(network:string){
         verified_at:item?.last_verified_at?String(item.last_verified_at):null,
         provider_error:item?.last_provider_error?String(item.last_provider_error):null,
         caption:String(item?.caption??""),
+        public_media_url:item?.public_media_url?String(item.public_media_url):null,
+        media_urls:Array.isArray(item?.media_urls)?item.media_urls.map((x:any)=>String(x)).filter(Boolean):[],
         as_of:live.as_of
       }} as const;
     }
@@ -274,7 +278,10 @@ async function socialPublicationByContext(context?:CerebroReadContext|null){
     state:String(item?.state??""),external_post_id:item?.external_post_id?String(item.external_post_id):null,
     verified_at:item?.last_verified_at?String(item.last_verified_at):null,
     provider_error:item?.last_provider_error?String(item.last_provider_error):null,
-    caption:String(item?.caption??""),as_of:live.as_of
+    caption:String(item?.caption??""),
+    public_media_url:item?.public_media_url?String(item.public_media_url):null,
+    media_urls:Array.isArray(item?.media_urls)?item.media_urls.map((x:any)=>String(x)).filter(Boolean):[],
+    as_of:live.as_of
   };
 }
 async function queryOperationalSocialSchedule(question:string,context?:CerebroReadContext|null){
@@ -282,7 +289,8 @@ async function queryOperationalSocialSchedule(question:string,context?:CerebroRe
   if(!network)return null;
   const display=displayNetwork(network);
   const wantsText=/(texto|copy|contenido|caption|que pone|qué pone)/.test(norm(question));
-  const preserved=wantsText?await socialPublicationByContext(context):null;
+  const wantsImage=/(imagen|foto|creativo|media|ensename la imagen|enséñame la imagen)/.test(norm(question));
+  const preserved=(wantsText||wantsImage)?await socialPublicationByContext(context):null;
   const result=preserved?{ok:true,item:preserved}:await nextSocialPublication(network);
   const read_context:CerebroReadContext={kind:"social_schedule",network:display};
   if(!result.ok){
@@ -294,6 +302,25 @@ async function queryOperationalSocialSchedule(question:string,context?:CerebroRe
   read_context.content_key=result.item.title||undefined;
   read_context.external_post_id=result.item.external_post_id??null;
   read_context.scheduled_at=result.item.date||undefined;
+  read_context.public_media_url=result.item.public_media_url??null;
+  read_context.media_urls=result.item.media_urls??[];
+  if(wantsImage){
+    const urls=[result.item.public_media_url,...(result.item.media_urls??[])].filter(Boolean);
+    const unique=[...new Set(urls)];
+    if(result.item.source==="CEREBRO_SOCIAL_QUEUE"&&unique.length){
+      return {
+        status:"OK",intent:"social_schedule_media",executed:false,read_context,
+        message:"La imagen asociada a esta publicación es: "+unique[0],
+        media:{public_media_url:unique[0],media_urls:unique},
+        source:{system:"CEREBRO Social",data_source:"cerebro_social_queue_preprod",as_of:result.item.as_of}
+      };
+    }
+    return {
+      status:"OK",intent:"social_schedule_media",executed:false,read_context,
+      message:"Tengo identificada la publicación, pero la fuente operativa no devuelve una imagen pública asociada. No voy a inventarla.",
+      source: result.item.source==="CEREBRO_SOCIAL_QUEUE" ? {system:"CEREBRO Social",data_source:"cerebro_social_queue_preprod",as_of:result.item.as_of} : {system:"Notion",data_source:"Programación Editorial",url:result.item.url}
+    };
+  }
   if(wantsText){
     if(result.item.source==="CEREBRO_SOCIAL_QUEUE"&&result.item.caption){
       return {
