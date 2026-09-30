@@ -2,6 +2,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { withSupabase } from "jsr:@supabase/server@^1";
 import { queryCerebroKnowledge } from "./knowledge.ts";
 import nacl from "npm:tweetnacl@1.0.3";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const ALLOWED_ORIGINS = new Set([
   "https://app.fenixcapital.es",
@@ -39,6 +40,8 @@ type PendingAction = {
   scope: Record<string,string>;
   summary: string;
   proposal_hash: string;
+  proposal_issued_at: number;
+  proposal_token: string;
 };
 
 function cors(origin: string | null): Record<string, string> {
@@ -68,7 +71,7 @@ async function sha256(value:string){
   return [...new Uint8Array(bytes)].map(b=>b.toString(16).padStart(2,"0")).join("");
 }
 
-async function proposalHash(action:Omit<PendingAction,"proposal_hash">){
+async function proposalHash(action:Omit<PendingAction,"proposal_hash"|"proposal_issued_at"|"proposal_token">){
   return sha256(JSON.stringify({
     action_type:action.action_type,
     engine_id:action.engine_id,
@@ -79,6 +82,8 @@ async function proposalHash(action:Omit<PendingAction,"proposal_hash">){
 }
 
 const SEO001_PREPROD_EXECUTOR="https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-actgw-seo001-preprod";
+const PROPOSAL_CONTEXT="CEREBRO_CONSOLE_PROPOSAL_V1";
+const PROPOSAL_TTL_SECONDS=1800;
 const ACTGW_SIGNING_CONTEXT="CEREBRO_ACTGW_PROD_TO_SEO001_PREPROD_V1";
 const ACTGW_KEY_ID="cerebro-actgw-prod-v1";
 
@@ -89,6 +94,29 @@ function b64(bytes:Uint8Array){
   let s="";
   for(const b of bytes)s+=String.fromCharCode(b);
   return btoa(s);
+}
+
+async function authorizedDirection(req:Request){
+  const U=Deno.env.get("SUPABASE_URL")??"";
+  const A=Deno.env.get("SUPABASE_ANON_KEY")??"";
+  const S=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")??"";
+  const bearer=req.headers.get("authorization")??"";
+  if(!U||!A||!S||!bearer.toLowerCase().startsWith("bearer "))return {ok:false,actor:"",role:""};
+  const auth=createClient(U,A,{auth:{persistSession:false,autoRefreshToken:false}});
+  const svc=createClient(U,S,{auth:{persistSession:false,autoRefreshToken:false}});
+  const {data:ud,error:ue}=await auth.auth.getUser(bearer.slice(7));
+  if(ue||!ud.user)return {ok:false,actor:"",role:""};
+  const {data:ctx,error:ce}=await svc.rpc("fenix_prod_actor_context_by_auth_server",{p_auth_user_id:ud.user.id});
+  if(ce||!ctx?.ok||!ctx?.actor_code)return {ok:false,actor:"",role:""};
+  const role=String(ctx.role??"");
+  return {ok:role.toLowerCase().startsWith("direc"),actor:String(ctx.actor_code),role};
+}
+async function proposalToken(payload:string){
+  const secret=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")??"";
+  if(!secret)return "";
+  const key=await crypto.subtle.importKey("raw",new TextEncoder().encode(secret+"|"+PROPOSAL_CONTEXT),{name:"HMAC",hash:"SHA-256"},false,["sign"]);
+  const sig=new Uint8Array(await crypto.subtle.sign("HMAC",key,new TextEncoder().encode(payload)));
+  return b64(sig).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
 }
 function jwtSubject(req:Request){
   const bearer=req.headers.get("authorization")??"";
@@ -138,7 +166,9 @@ async function executeSeo001Preprod(req:Request,action:PendingAction){
   }
 }
 
-async function buildSeoProposal(location:string,coverage:"capital_and_province"|"capital_only"="capital_and_province"):Promise<PendingAction>{
+async function buildSeoProposal(req:Request,location:string,coverage:"capital_and_province"|"capital_only"="capital_and_province"):Promise<PendingAction>{
+  const authz=await authorizedDirection(req);
+  if(!authz.ok)throw new Error("DIRECTION_REQUIRED");
   const normalizedLocation=location.trim().replace(/\s+/g," ");
   const summary=coverage==="capital_only"
     ? `Activar el proceso SEO canónico para ${normalizedLocation} capital.`
@@ -151,15 +181,23 @@ async function buildSeoProposal(location:string,coverage:"capital_and_province"|
     scope:{location:normalizedLocation,coverage},
     summary
   };
-  return {...base,proposal_hash:await proposalHash(base)};
+  const proposal_hash=await proposalHash(base);
+  const proposal_issued_at=Math.floor(Date.now()/1000);
+  const proposal_token=await proposalToken(JSON.stringify({proposal_hash,proposal_issued_at,actor:authz.actor}));
+  return {...base,proposal_hash,proposal_issued_at,proposal_token};
 }
 
-async function validatePending(value:unknown):Promise<PendingAction|null>{
+async function validatePending(req:Request,value:unknown):Promise<PendingAction|null>{
   if(!value||typeof value!=="object"||Array.isArray(value))return null;
   const v=value as Record<string,unknown>;
   if(typeof v.action_id!=="string"||typeof v.action_type!=="string"||typeof v.engine_id!=="string"||
      typeof v.company_id!=="string"||typeof v.summary!=="string"||typeof v.proposal_hash!=="string"||
+     typeof v.proposal_issued_at!=="number"||typeof v.proposal_token!=="string"||
      !v.scope||typeof v.scope!=="object"||Array.isArray(v.scope))return null;
+  const authz=await authorizedDirection(req);
+  if(!authz.ok)return null;
+  const now=Math.floor(Date.now()/1000);
+  if(v.proposal_issued_at>now+30||now-v.proposal_issued_at>PROPOSAL_TTL_SECONDS)return null;
   const scope:Record<string,string>={};
   for(const [k,val] of Object.entries(v.scope as Record<string,unknown>)){
     if(typeof val!=="string")return null;
@@ -167,7 +205,9 @@ async function validatePending(value:unknown):Promise<PendingAction|null>{
   }
   const candidate={action_id:v.action_id,action_type:v.action_type,engine_id:v.engine_id,company_id:v.company_id,scope,summary:v.summary};
   if(await proposalHash(candidate)!==v.proposal_hash)return null;
-  return {...candidate,proposal_hash:v.proposal_hash};
+  const expected=await proposalToken(JSON.stringify({proposal_hash:v.proposal_hash,proposal_issued_at:v.proposal_issued_at,actor:authz.actor}));
+  if(!expected||expected!==v.proposal_token)return null;
+  return {...candidate,proposal_hash:v.proposal_hash,proposal_issued_at:v.proposal_issued_at,proposal_token:v.proposal_token};
 }
 
 function seoExplanation(action:PendingAction){
@@ -180,7 +220,7 @@ async function chatReply(req:Request,message:string,pendingRaw:unknown){
   const text=cleanText(message);
   if(!text)return {status:"INVALID",message:"Escribe una consulta.",executed:false};
 
-  const pending=await validatePending(pendingRaw);
+  const pending=await validatePending(req,pendingRaw);
 
   if(pending){
     if(/^(si|sí|si adelante|adelante|confirmo|activalo|activarlo|hazlo|procede)$/.test(text)){
@@ -226,7 +266,7 @@ async function chatReply(req:Request,message:string,pendingRaw:unknown){
       return {status:"ACTION_EXPLANATION",intent:"action_explanation",executed:false,action:pending,message:pending.action_type==="SEO_ZONE_ACTIVATION"?seoExplanation(pending):`${pending.summary} ¿Quieres que active este proceso?`};
     }
     if(pending.action_type==="SEO_ZONE_ACTIVATION" && /(solo .*capital|solo capital|no provincia)/.test(text)){
-      const revised=await buildSeoProposal(pending.scope.location||"Valencia","capital_only");
+      const revised=await buildSeoProposal(req,pending.scope.location||"Valencia","capital_only");
       return {status:"ACTION_PROPOSAL",intent:"action_revision",executed:false,action:revised,message:`Entendido. Nuevo alcance: ${revised.summary} ¿Quieres que active exactamente este proceso?`};
     }
     // Any other content is treated as clarification/revision, never implicit confirmation.
@@ -258,7 +298,7 @@ async function chatReply(req:Request,message:string,pendingRaw:unknown){
     const raw=seoZone[1].replace(/\s+(?:en|para)\s+seo.*$/i,"").trim();
     const location=raw.split(/\s+y\s+provincia/)[0].trim();
     const coverage=/(solo .*capital|solo capital|no provincia)/.test(text)?"capital_only":"capital_and_province";
-    const action=await buildSeoProposal(location||"Valencia",coverage);
+    const action=await buildSeoProposal(req,location||"Valencia",coverage);
     return {status:"ACTION_PROPOSAL",intent:"seo_zone_activation",executed:false,action,message:`${action.summary} ¿Quieres que active exactamente este proceso?`};
   }
 
@@ -304,7 +344,7 @@ export default {
     if(req.method!=="GET")return json(req,405,{status:"CLOSED",reason:"ROUTE_NOT_AVAILABLE"});
 
     if(suffix==="health")return json(req,200,{
-      status:"ok",service:"cerebro-console-gateway-v0",environment:"LAB",version:"0.5.0-owner-decision-seo001",
+      status:"ok",service:"cerebro-console-gateway-v0",environment:"LAB",version:"0.5.1-owner-decision-seo001-secure",
       authenticated_transport:true,direct_model_access:false,prod_execution_enabled:false,live_writes:false,
       chat_available:true,chat_mode:"OWNER_DECISION_BY_EXCEPTION_V1",additional_cost_target_eur:0
     });
