@@ -502,8 +502,9 @@ async function chatReply(req:Request,message:string,pendingRaw:unknown,readConte
     if(!socialContext){
       return {status:"ACTION_NEEDS_SCOPE",intent:"social_share_email",executed:false,message:"No tengo una publicación social operativa identificada para compartir. Dime qué publicación quieres enviar o vuelve a pedirme la próxima de Facebook."};
     }
-    const recipientMatch=message.match(/(?:a|para)\s+([\p{L}.-]+(?:\s+[\p{L}.-]+){0,3})/iu);
-    const contactQuery=(recipientMatch?.[1]??"").trim();
+    const recipientMatch=message.match(/(?:a|para)\s+(?!correo\b|email\b)([\p{L}.-]+(?:\s+[\p{L}.-]+){0,3})/iu)
+      || message.match(/(?:por\s+(?:correo|email)\s+)?(?:a|para)\s+([\p{L}.-]+(?:\s+[\p{L}.-]+){0,3})/iu);
+    const contactQuery=(recipientMatch?.[1]??"").trim().replace(/^(?:correo|email)\s+/i,"");
     if(!contactQuery){
       return {status:"ACTION_NEEDS_SCOPE",intent:"social_share_email",executed:false,message:"Dime a qué contacto quieres enviar esta publicación. Buscaré sus correos y te dejaré elegir antes de preparar el envío."};
     }
