@@ -50,26 +50,28 @@ function chatReply(message: string) {
   const text = normalize(message);
   if (!text) return { status:"INVALID", message:"Escribe una consulta.", executed:false };
 
-  if (/\b(hola|ayuda|help|que puedes hacer)\b/.test(text)) {
+  const clean = text.replace(/[?!.]+$/g, "").trim();
+
+  if (/^(hola|ayuda|help|que puedes hacer)$/.test(clean)) {
     return {
       status:"OK", intent:"help", executed:false,
       message:"Estoy conectado en modo móvil seguro y solo lectura. Puedes preguntarme «estado», «motores» o «contrato». Las órdenes con cambios siguen bloqueadas hasta superar sus gates."
     };
   }
-  if (/\b(estado|salud|health|conectado|conexion)\b/.test(text)) {
+  if (/^(estado|estado de cerebro|salud|health|conexion|estas conectado|esta conectado|cerebro esta conectado)$/.test(clean)) {
     return {
       status:"OK", intent:"health", executed:false,
       message:"CEREBRO Gateway está disponible por transporte autenticado. Este canal móvil está en LAB, sin escrituras PROD y sin acceso directo a modelos."
     };
   }
-  if (/\b(motores|engines|motor)\b/.test(text)) {
+  if (/^(motores|motor|engines|lista de motores|que motores hay)$/.test(clean)) {
     return {
       status:"OK", intent:"engines", executed:false,
       message:`Motores de Console V0 disponibles en el contrato: ${ENGINES.map(item=>item.engine_id).join(", ")}.`,
       available:ENGINES.map(item=>item.engine_id)
     };
   }
-  if (/\b(contrato|seguridad|policy|politica|permisos)\b/.test(text)) {
+  if (/^(contrato|seguridad|policy|politica|permisos|contrato de seguridad|politica de seguridad)$/.test(clean)) {
     return {
       status:"OK", intent:"contract", executed:false,
       message:"Contrato móvil V0: Gateway obligatorio, acceso directo a modelos bloqueado, escrituras y ejecución PROD desactivadas, coste adicional objetivo 0 €."
