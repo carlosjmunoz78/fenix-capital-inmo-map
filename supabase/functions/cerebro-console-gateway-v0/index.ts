@@ -480,7 +480,19 @@ async function chatReply(req:Request,message:string,pendingRaw:unknown,readConte
     };
   }
 
-  const socialShareCommand=/\b(mandasela|mándasela|mandaselo|mándaselo|enviasela|envíasela|enviaselo|envíaselo)\b/i.test(message);
+  const contactLookupMatch=text.match(/^(?:busca|buscar|encuentra|dime|localiza).*?(?:correo|email).*?(?:de|para)\s+([a-z0-9 .'-]{2,80})$/i)
+    || text.match(/^(?:correo|email).*?(?:de|para)\s+([a-z0-9 .'-]{2,80})$/i);
+  if(contactLookupMatch){
+    const contactQuery=contactLookupMatch[1].trim();
+    const resolved=await resolveContacts(req,contactQuery);
+    if(!resolved.ok||resolved.items.length===0){
+      return {status:"OK",intent:"email_contact_lookup",executed:false,message:`No he encontrado ningún correo verificado para «${contactQuery}» en las fuentes autorizadas de CEREBRO. No voy a inventarlo.`};
+    }
+    const list=resolved.items.slice(0,10).map((x:any,i:number)=>`${i+1}. ${x.name} <${x.email}>`).join("\n");
+    return {status:"OK",intent:"email_contact_lookup",executed:false,message:`He encontrado estos correos para «${contactQuery}»:\n${list}`};
+  }
+
+  const socialShareCommand=/\b(mandasela|mandaselo|enviasela|enviaselo)\b/.test(text);
   if(socialShareCommand){
     let socialContext=readContext?.kind==="social_schedule"?readContext:null;
     if(!socialContext){
