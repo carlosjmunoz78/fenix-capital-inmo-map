@@ -58,7 +58,7 @@ function normalize(value: string): string {
 }
 
 function cleanText(value:string){
-  return normalize(value).replace(/[?!.]+$/g, "").trim();
+  return normalize(value).replace(/^[¿¡?!.]+/g, "").replace(/[?!.]+$/g, "").trim();
 }
 
 async function sha256(value:string){
