@@ -1,6 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { withSupabase } from "jsr:@supabase/server@^1";
 import { queryCerebroKnowledge } from "./knowledge.ts";
+import nacl from "npm:tweetnacl@1.0.3";
 
 const ALLOWED_ORIGINS = new Set([
   "https://app.fenixcapital.es",
@@ -77,6 +78,66 @@ async function proposalHash(action:Omit<PendingAction,"proposal_hash">){
   }));
 }
 
+const SEO001_PREPROD_EXECUTOR="https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-actgw-seo001-preprod";
+const ACTGW_SIGNING_CONTEXT="CEREBRO_ACTGW_PROD_TO_SEO001_PREPROD_V1";
+const ACTGW_KEY_ID="cerebro-actgw-prod-v1";
+
+async function sha256Bytes(value:string){
+  return new Uint8Array(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(value)));
+}
+function b64(bytes:Uint8Array){
+  let s="";
+  for(const b of bytes)s+=String.fromCharCode(b);
+  return btoa(s);
+}
+function jwtSubject(req:Request){
+  const bearer=req.headers.get("authorization")??"";
+  const token=bearer.toLowerCase().startsWith("bearer ")?bearer.slice(7):"";
+  try{
+    const part=token.split(".")[1];
+    if(!part)return "authenticated-owner";
+    const normalized=part.replace(/-/g,"+").replace(/_/g,"/");
+    const padded=normalized+"=".repeat((4-normalized.length%4)%4);
+    const payload=JSON.parse(atob(padded));
+    return String(payload?.sub??payload?.email??"authenticated-owner").slice(0,120);
+  }catch{return "authenticated-owner";}
+}
+async function executeSeo001Preprod(req:Request,action:PendingAction){
+  const serviceRole=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")??"";
+  if(!serviceRole)return {ok:false,error:"SIGNER_CONFIG_MISSING"};
+  const seed=await sha256Bytes(serviceRole+"|"+ACTGW_SIGNING_CONTEXT);
+  const kp=nacl.sign.keyPair.fromSeed(seed);
+  const body=JSON.stringify({
+    action_type:action.action_type,
+    engine_id:action.engine_id,
+    company_id:action.company_id,
+    scope:action.scope,
+    summary:action.summary,
+    proposal_hash:action.proposal_hash,
+    requested_by:jwtSubject(req)
+  });
+  const timestamp=Math.floor(Date.now()/1000).toString();
+  const signature=nacl.sign.detached(new TextEncoder().encode(timestamp+"."+body),kp.secretKey);
+  try{
+    const res=await fetch(SEO001_PREPROD_EXECUTOR,{
+      method:"POST",
+      headers:{
+        "content-type":"application/json",
+        "x-cerebro-actgw-key-id":ACTGW_KEY_ID,
+        "x-cerebro-actgw-timestamp":timestamp,
+        "x-cerebro-actgw-signature-ed25519":b64(signature)
+      },
+      body,
+      redirect:"manual"
+    });
+    const data=await res.json().catch(()=>null);
+    if(!res.ok||data?.ok!==true)return {ok:false,error:"SEO001_PREPROD_REJECTED",http_status:res.status,detail:data};
+    return {ok:true,data};
+  }catch(e){
+    return {ok:false,error:"SEO001_PREPROD_UNREACHABLE",detail:e instanceof Error?e.message:String(e)};
+  }
+}
+
 async function buildSeoProposal(location:string,coverage:"capital_and_province"|"capital_only"="capital_and_province"):Promise<PendingAction>{
   const normalizedLocation=location.trim().replace(/\s+/g," ");
   const summary=coverage==="capital_only"
@@ -123,13 +184,40 @@ async function chatReply(req:Request,message:string,pendingRaw:unknown){
 
   if(pending){
     if(/^(si|sí|si adelante|adelante|confirmo|activalo|activarlo|hazlo|procede)$/.test(text)){
+      if(pending.action_type==="SEO_ZONE_ACTIVATION"&&pending.engine_id==="SEO-001"&&pending.company_id==="fenix"){
+        const run=await executeSeo001Preprod(req,pending);
+        if(run.ok){
+          const remote:any=run.data;
+          const activation=remote?.activation??{};
+          return {
+            status:"ACTION_ACCEPTED",
+            intent:"action_confirmation",
+            executed:true,
+            completed:false,
+            action:pending,
+            execution_environment:"PREPROD",
+            execution_state:activation?.state??remote?.state??"ACTIVATION_ACCEPTED_PREPROD",
+            result:remote,
+            message:`Confirmado y registrado en SEO-001 PREPROD: ${pending.summary} CEREBRO ha creado/reutilizado el territorio y su cola de investigación con la fuente oficial de municipios, sin publicar nada en PROD. El proceso continúa por los workers y gates existentes de SEO-001; la publicación seguirá bloqueada hasta superar QA, rollout y CITY COMPLETE V2.`
+          };
+        }
+        return {
+          status:"ACTION_CONFIRMED",
+          intent:"action_confirmation",
+          executed:false,
+          action:pending,
+          reason:run.error,
+          detail:run,
+          message:`La propuesta está confirmada, pero el binding SEO-001 PREPROD no ha aceptado la ejecución. No voy a fingir éxito. Mantengo la propuesta exacta para reintentar cuando el transporte vuelva a estar disponible.`
+        };
+      }
       return {
         status:"ACTION_CONFIRMED",
         intent:"action_confirmation",
         executed:false,
         action:pending,
         reason:"EXECUTOR_NOT_BOUND",
-        message:`Confirmado: ${pending.summary} La confirmación ya es válida para esta propuesta exacta. El ejecutor real todavía no está enlazado a esta Console V0, así que no voy a fingir que se ha ejecutado. El siguiente gate técnico es conectar ACTGW/SEO-001 y reanudar desde esta acción confirmada.`
+        message:`Confirmado: ${pending.summary} Esta propuesta no tiene todavía un ejecutor real enlazado; no voy a fingir que se ha ejecutado.`
       };
     }
     if(/^(no|cancelar|cancela|dejalo|déjalo)$/.test(text)){
@@ -217,7 +305,7 @@ export default {
     if(req.method!=="GET")return json(req,405,{status:"CLOSED",reason:"ROUTE_NOT_AVAILABLE"});
 
     if(suffix==="health")return json(req,200,{
-      status:"ok",service:"cerebro-console-gateway-v0",environment:"LAB",version:"0.4.0-owner-decision-knowledge",
+      status:"ok",service:"cerebro-console-gateway-v0",environment:"LAB",version:"0.5.0-owner-decision-seo001",
       authenticated_transport:true,direct_model_access:false,prod_execution_enabled:false,live_writes:false,
       chat_available:true,chat_mode:"OWNER_DECISION_BY_EXCEPTION_V1",additional_cost_target_eur:0
     });
