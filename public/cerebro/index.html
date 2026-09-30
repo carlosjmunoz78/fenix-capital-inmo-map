@@ -122,8 +122,8 @@ async function sendMessage(text){
       cache:'no-store'
     });
     const data=await r.json().catch(()=>null);
-    if(data?.action)pendingAction=data.action;
-    else if(data?.status==='CANCELED'||data?.status==='ACTION_CONFIRMED')pendingAction=null;
+    if(data?.status==='CANCELED'||data?.status==='ACTION_CONFIRMED'||data?.status==='ACTION_ACCEPTED')pendingAction=null;
+    else if(data?.action)pendingAction=data.action;
     add('bot',data?.message||('Respuesta no disponible · HTTP '+r.status));
   }catch{
     add('bot','No he podido contactar con CEREBRO Gateway.');
