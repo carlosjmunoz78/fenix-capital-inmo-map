@@ -34,7 +34,7 @@ Deno.serve(async(req)=>{
     const db=createClient(U,S,{auth:{persistSession:false,autoRefreshToken:false}});
     const now=new Date().toISOString();
     const {data,error}=await db.from("cerebro_social_queue_preprod")
-      .select("channel,content_key,scheduled_at,state,external_post_id,provider_channel_id,last_verified_at,last_provider_error")
+      .select("channel,content_key,scheduled_at,state,external_post_id,provider_channel_id,last_verified_at,last_provider_error,caption,public_media_url,media_urls")
       .eq("company_id","fenix-capital").eq("environment","PREPROD")
       .gte("scheduled_at",now).in("state",["READY_PROVIDER","SCHEDULED"])
       .order("scheduled_at",{ascending:true}).limit(100);
