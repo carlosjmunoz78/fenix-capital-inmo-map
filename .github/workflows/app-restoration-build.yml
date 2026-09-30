@@ -75,6 +75,12 @@ jobs:
           VITE_SUPABASE_URL: http://127.0.0.1:54321
           VITE_SUPABASE_PUBLISHABLE_KEY: real-app-five-flows-not-a-real-key
         run: npx playwright test tests/app-real-five-flows.spec.ts --reporter=line
+      - name: CEREBRO mobile static Console contract
+        env:
+          VITE_FENIX_ENV: prod
+          VITE_SUPABASE_URL: https://cluhljgonannaafpmblx.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_yjISKmA5UPfF3d7NitP_DA_j5LGydh0
+        run: npx playwright test tests/cerebro-mobile-static-entry.spec.ts --project=desktop-chromium --reporter=line
       - name: TypeScript and Vite build
         run: npm run build
       - name: Archive backend promotion and rollback bundle
