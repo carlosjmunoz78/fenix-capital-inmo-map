@@ -10,6 +10,8 @@ const SOCIAL_SCHEDULE_DATA_SOURCE_ID="a03dd9dc-fd5e-4492-a084-c9a03b698884";
 const SOCIAL_LIVE_ENDPOINT="https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-social-schedule-read-preprod";
 const SIGNING_CONTEXT="CEREBRO_ACTGW_PROD_TO_SEO001_PREPROD_V1";
 const SIGNING_KEY_ID="cerebro-actgw-prod-v1";
+const FINANCE_PREANALYSIS_PAGE_ID="310505c4-12df-47e9-a3fb-f1e07a7baf3f";
+const SEO_LATEST_AUDIT_PAGE_ID="3e981b1a-756d-81b3-9259-eee14327239d";
 const NH={Authorization:`Bearer ${N}`,"Notion-Version":NV,"Content-Type":"application/json"};
 
 const CANONICAL_PAGES=[
@@ -20,6 +22,7 @@ const CANONICAL_PAGES=[
 
 const DOMAIN_CANONICAL:Record<string,{id:string,title:string}[]>={
   finance:[
+    {id:FINANCE_PREANALYSIS_PAGE_ID,title:"Formulario de preanálisis hipotecario"},
     {id:"3ba81b1a-756d-817f-9d61-e54e7f270e16",title:"Conocimiento financiero canónico · Fénix Uno"},
     {id:"3be81b1a-756d-81b6-a75f-cb6bbe842766",title:"Base Maestra Belén · Motor financiero CEREBRO"}
   ],
@@ -32,8 +35,8 @@ const DOMAIN_CANONICAL:Record<string,{id:string,title:string}[]>={
     {id:"3be81b1a-756d-81da-ad05-d6ab37855c2f",title:"Base estratégica CEREBRO"}
   ],
   seo:[
-    {id:"3b481b1a-756d-81ce-bdd3-d28125e964c7",title:"Motor maestro · Estrategia SEO, contenidos, embudos y redes"},
-    {id:"3d481b1a-756d-81b2-8d63-fdccf0481401",title:"Auditoría SEO/Web semanal · Fénix Capital"}
+    {id:SEO_LATEST_AUDIT_PAGE_ID,title:"Auditoría SEO/Web semanal · Fénix Capital · 28/09/2026"},
+    {id:"3b481b1a-756d-81ce-bdd3-d28125e964c7",title:"Motor maestro · Estrategia SEO, contenidos, embudos y redes"}
   ]
 };
 
