@@ -8,3 +8,8 @@ html[data-cerebro-console='1'] .ana-universal{display:none!important}
 .cerebro-chat-form{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end;margin:12px 0 0}.cerebro-chat-form textarea{resize:none;min-height:78px}.cerebro-chat-form button{margin:0}
 .cerebro-audit-note{display:grid;gap:6px;margin:20px 0 24px;padding:16px;border-radius:12px;background:rgba(127,127,127,.06)}.cerebro-audit-note span{font-size:13px;color:var(--muted,#6b7280)}
 @media(max-width:720px){.cerebro-console{padding:18px 14px 28px}.cerebro-header{grid-template-columns:1fr auto}.cerebro-header>div{grid-column:1/-1;grid-row:1;text-align:left}.cerebro-header h1{justify-content:flex-start;font-size:28px}.cerebro-back{grid-column:1;grid-row:2}.cerebro-lab{grid-column:2;grid-row:2}.cerebro-fields{grid-template-columns:1fr}.cerebro-panel{padding:20px}.cerebro-panel h2{font-size:23px}.cerebro-chat-log{min-height:220px;max-height:50vh}.cerebro-chat-line{max-width:94%}.cerebro-chat-form{grid-template-columns:1fr}.cerebro-chat-form button{width:100%;justify-content:center}}
+
+.cerebro-chat-line a{color:inherit;text-decoration:underline;text-underline-offset:2px;overflow-wrap:anywhere}
+.cerebro-media-link{display:grid;gap:8px;margin-top:8px;text-decoration:none!important}
+.cerebro-media-preview{display:block;max-width:100%;width:auto;max-height:360px;border-radius:12px;border:1px solid rgba(127,127,127,.18);object-fit:contain;background:rgba(127,127,127,.04)}
+.cerebro-media-link>span{font-size:12px;font-weight:700;text-decoration:underline}
