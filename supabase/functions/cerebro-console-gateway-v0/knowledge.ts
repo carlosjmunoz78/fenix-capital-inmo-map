@@ -371,6 +371,58 @@ function snippet(body:string,questionTokens:string[]){
   const end=Math.min(raw.length,start+900);
   return (start>0?"…":"")+raw.slice(start,end)+(end<raw.length?"…":"");
 }
+function extractSection(body:string,start:string,end?:string){
+  const s=body.indexOf(start);
+  if(s<0)return "";
+  const from=s+start.length;
+  const e=end?body.indexOf(end,from):-1;
+  return body.slice(from,e>=0?e:body.length).trim();
+}
+
+function compact(value:string,maxLines:number){
+  return value.split("\n").map(x=>x.trim()).filter(Boolean).slice(0,maxLines).join("\n");
+}
+
+async function directDomainAnswer(question:string,domain:string|null){
+  const q=norm(question);
+
+  if(domain==="finance"&&/(documentacion|documentos|papeles)/.test(q)&&/(hipoteca|estudiar|preanalisis)/.test(q)){
+    const body=await pageText(FINANCE_PREANALYSIS_PAGE_ID);
+    if(body){
+      const economic=compact(extractSection(body,"## 2) Situación laboral y económica","## 3) Datos de la operación"),10);
+      const docs=compact(extractSection(body,"## Documentación para confirmar (después del formulario)"),30);
+      return {
+        status:"OK",intent:"finance_documentation",executed:false,
+        message:"Para estudiar una hipoteca, primero completamos el preanálisis y después pedimos la documentación que confirme los datos.\n\nCriterios iniciales:\n"+economic+"\n\nDocumentación base según perfil:\n"+docs+"\n\nEl estudio final no se inicia hasta tener el formulario completo y la documentación que lo confirme; la lista se adapta al perfil del cliente.",
+        sources:[{notion_page_id:FINANCE_PREANALYSIS_PAGE_ID,title:"Formulario de preanálisis hipotecario"}]
+      };
+    }
+  }
+
+  if(domain==="seo"&&/(estado|actual|pendiente|revisar|revision|situacion)/.test(q)){
+    const body=await pageText(SEO_LATEST_AUDIT_PAGE_ID);
+    if(body){
+      const state=compact(extractSection(body,"## Estado WordPress / SEO","## robots / sitemap / llms / Agentic"),12);
+      const priorities=compact(extractSection(body,"## Prioridades","## GATE HUMANO"),10);
+      const gates=compact(extractSection(body,"## GATE HUMANO"),10);
+      return {
+        status:"OK",intent:"seo_status",executed:false,
+        message:"Última auditoría SEO canónica: 28/09/2026.\n\nEstado actual:\n"+state+"\n\nPendiente prioritario:\n"+priorities+"\n\nGates pendientes:\n"+gates,
+        sources:[{notion_page_id:SEO_LATEST_AUDIT_PAGE_ID,title:"Auditoría SEO/Web semanal · Fénix Capital · 28/09/2026"}]
+      };
+    }
+  }
+
+  if(domain==="multiempresa"&&/(alta|nueva empresa|onboarding|motores|activar|activarian|activarían)/.test(q)){
+    return {
+      status:"OK",intent:"multiempresa_onboarding",executed:false,
+      message:"El onboarding objetivo de una nueva empresa en CEREBRO es: registro → escaneo web → escaneo de palabras clave → SEO → competencia → redes sociales → presencia local → marketing → modelo de negocio → procesos internos → conocimiento → CRM → App → automatizaciones → training → supervisor → producción.\n\nMotores estándar: Company Registry, Business Discovery, Digital Footprint Scanner, Web Audit, Keyword Research, SEO, Local SEO, Social Media Audit, Competitor Intelligence, Market Intelligence, Marketing, Knowledge Bootstrap, CRM Bootstrap, App Bootstrap, Automation Bootstrap, Training Bootstrap, Supervisor y Backup/Rebuild.\n\nCada motor debe llevar company_id, engine_id, environment y version. Producción solo tras contratos, permisos, tests, evaluación, observabilidad, rollback, backup/rebuild, coste medido, política y PREPROD en verde. Coste adicional objetivo: 0 €.",
+      sources:[{notion_page_id:"3e981b1a-756d-8100-9198-c75858d5371c",title:"Company Registry · Fénix Capital"},{system:"CEREBRO",contract:"MULTIEMPRESA_ONBOARDING_V1"}]
+    };
+  }
+  return null;
+}
+
 
 export async function queryCerebroKnowledge(req:Request,question:string,context?:CerebroReadContext|null){
   const actor=await actorContext(req);
