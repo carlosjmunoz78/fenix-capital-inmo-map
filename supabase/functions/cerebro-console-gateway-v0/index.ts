@@ -304,6 +304,17 @@ async function chatReply(req:Request,message:string,pendingRaw:unknown,readConte
     return {status:"ACTION_PROPOSAL",intent:"seo_zone_activation",executed:false,action,message:`${action.summary} ¿Quieres que active exactamente este proceso?`};
   }
 
+  if (/marketing/.test(text) && /(estrategia|canales|organico|organicos|orgánico|orgánicos|priorizando|priorizamos)/.test(text)) {
+    return {
+      status:"OK",
+      intent:"marketing_strategy",
+      executed:false,
+      message:"La estrategia actual de marketing de Fénix Capital prioriza crecimiento orgánico y reutilización de activos antes de gasto nuevo. Canales prioritarios: SEO, SEO local, contenidos, redes orgánicas, Google Business Profile, B2B con inmobiliarias, CRM/reactivación, referidos y reutilización multicanal. El doble motor comercial es particulares + inmobiliarias, midiendo leads cualificados, expedientes, firmas e ingreso, no métricas de vanidad.",
+      sources:[{notion_page_id:"3b481b1a-756d-81ce-bdd3-d28125e964c7",title:"Motor maestro · Estrategia SEO, contenidos, embudos y redes"}],
+      evidence_mode:"CANONICAL_INDEX_GUARD_V1"
+    };
+  }
+
   const looksLikeAction=/\b(prepara|activa|activar|crea|publica|lanza|ejecuta|inicia|configura|modifica|borra|envia|envía|paga|firma)\b/.test(text);
   if(looksLikeAction){
     return {
