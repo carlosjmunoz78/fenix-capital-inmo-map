@@ -211,6 +211,41 @@ async function executeEmailCommunication(req:Request,action:PendingAction){
   }
 }
 
+async function resolveContacts(req:Request,query:string){
+  const U=Deno.env.get("SUPABASE_URL")??"";
+  const S=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")??"";
+  if(!U||!S)return {ok:false,items:[] as any[]};
+  const authz=await authorizedOwner(req);
+  if(!authz.ok)return {ok:false,items:[] as any[]};
+  const svc=createClient(U,S,{auth:{persistSession:false,autoRefreshToken:false}});
+  const {data,error}=await svc.rpc("fenix_prod_cerebro_contact_search_server",{p_actor_code:authz.actor,p_query:query});
+  if(error||!data?.ok)return {ok:false,items:[] as any[]};
+  return {ok:true,items:Array.isArray(data.items)?data.items:[]};
+}
+
+async function buildEmailContactSelection(req:Request,contactQuery:string,subject:string,bodyText:string,candidates:any[]):Promise<PendingAction>{
+  const authz=await authorizedOwner(req);
+  if(!authz.ok)throw new Error("OWNER_REQUIRED");
+  const compact=candidates.slice(0,10).map((x:any)=>({name:String(x.name??""),email:String(x.email??""),source:String(x.source??"")}));
+  const base={
+    action_id:`EMAIL-CONTACT-${Date.now()}`,
+    action_type:"EMAIL_CONTACT_SELECTION",
+    engine_id:"COMM-001",
+    company_id:"fenix",
+    scope:{
+      contact_query:contactQuery.trim(),
+      subject:subject.trim(),
+      body:bodyText.trim(),
+      candidates_json:JSON.stringify(compact)
+    },
+    summary:`Elegir el correo de ${contactQuery.trim()} antes de preparar el envío.`
+  };
+  const proposal_hash=await proposalHash(base);
+  const proposal_issued_at=Math.floor(Date.now()/1000);
+  const proposal_token=await proposalToken(JSON.stringify({proposal_hash,proposal_issued_at,actor:authz.actor}));
+  return {...base,proposal_hash,proposal_issued_at,proposal_token};
+}
+
 async function buildEmailProposal(req:Request,recipientEmail:string,subject:string,bodyText:string,contactName:string):Promise<PendingAction>{
   const authz=await authorizedOwner(req);
   if(!authz.ok)throw new Error("OWNER_REQUIRED");
@@ -292,6 +327,33 @@ async function chatReply(req:Request,message:string,pendingRaw:unknown,readConte
   const pending=await validatePending(req,pendingRaw);
 
   if(pending){
+    if(pending.action_type==="EMAIL_CONTACT_SELECTION"){
+      let candidates:any[]=[];
+      try{candidates=JSON.parse(pending.scope.candidates_json||"[]");}catch{}
+      const numberMatch=text.match(/^(?:opcion\s*)?(\d{1,2})$/);
+      const emailMatchRaw=message.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
+      let selected:any=null;
+      if(numberMatch){
+        const idx=Number(numberMatch[1])-1;
+        if(idx>=0&&idx<candidates.length)selected=candidates[idx];
+      }else if(emailMatchRaw){
+        selected=candidates.find((x:any)=>String(x.email||"").toLowerCase()===String(emailMatchRaw[0]).toLowerCase())??null;
+      }else{
+        selected=candidates.find((x:any)=>normalize(String(x.name||""))===text)??null;
+      }
+      if(selected?.email){
+        const action=await buildEmailProposal(req,String(selected.email),pending.scope.subject||"Fénix Capital",pending.scope.body||"",String(selected.name||pending.scope.contact_query||selected.email));
+        return {
+          status:"ACTION_PROPOSAL",intent:"email_send",executed:false,action,
+          message:`Perfecto. Propuesta exacta de envío:\nDestinatario: ${action.scope.contact_name} <${action.scope.recipient_email}>\nAsunto: ${action.scope.subject}\nTexto: ${action.scope.body}\n\nNo he enviado nada. ¿Confirmas este envío con «sí»?`
+        };
+      }
+      const list=candidates.map((x:any,i:number)=>`${i+1}. ${x.name} <${x.email}>`).join("\n");
+      return {
+        status:"ACTION_CLARIFICATION_REQUIRED",intent:"email_contact_selection",executed:false,action:pending,
+        message:`Estos son los correos encontrados para «${pending.scope.contact_query}»:\n${list}\n\nElige el número, el nombre exacto o el correo que quieres usar.`
+      };
+    }
     if(/^(si|sí|si adelante|adelante|confirmo|activalo|activarlo|hazlo|procede)$/.test(text)){
       if(pending.action_type==="EMAIL_SEND"&&pending.engine_id==="COMM-001"&&pending.company_id==="fenix"){
         const run=await executeEmailCommunication(req,pending);
@@ -420,29 +482,41 @@ async function chatReply(req:Request,message:string,pendingRaw:unknown,readConte
   const emailMatch=message.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
   const emailIntent=/\b(email|correo)\b/i.test(message)&&/\b(envia|envía|enviar|manda|mandar|prepara|preparar)\b/i.test(message);
   if(emailIntent){
-    if(!emailMatch){
-      return {
-        status:"ACTION_NEEDS_SCOPE",intent:"email_send",executed:false,
-        message:"Puedo preparar el envío, pero necesito una dirección de email verificada en el propio mensaje antes de crear la propuesta exacta."
-      };
-    }
     const quoted=[...message.matchAll(/[«“"]([^»”"]+)[»”"]/g)].map(m=>m[1].trim());
     const subjectMatch=message.match(/asunto\s*(?:[:=-]|es)?\s*[«“"]([^»”"]+)[»”"]/i);
-    const bodyMatch=message.match(/(?:texto|cuerpo|mensaje)\s*[:=-]?\s*[«“"]([^»”"]+)[»”"]/i);
-    const subject=(subjectMatch?.[1]??quoted[0]??"Prueba de CEREBRO").trim();
-    const bodyText=(bodyMatch?.[1]??quoted[1]??"").trim();
+    const bodyMatch=message.match(/(?:texto|cuerpo|mensaje|dile|decirle)\s*[:=-]?\s*[«“"]([^»”"]+)[»”"]/i);
+    const subject=(subjectMatch?.[1]??quoted[0]??(/prueba/i.test(message)?"Prueba de CEREBRO":"Fénix Capital")).trim();
+    let bodyText=(bodyMatch?.[1]??quoted[1]??"").trim();
     if(!bodyText){
-      return {
-        status:"ACTION_NEEDS_SCOPE",intent:"email_send",executed:false,
-        message:`He verificado el destinatario ${emailMatch[0]}. Indícame el texto exacto del correo para poder presentarte una propuesta cerrada antes de enviarlo.`
-      };
+      const freeBody=message.match(/(?:que le digas|dile|decirle|texto)\s+(.+)$/i);
+      bodyText=(freeBody?.[1]??"").trim().replace(/[. ]+$/,"");
     }
-    const nameMatch=message.match(/(?:a|para)\s+([A-ZÁÉÍÓÚÑ][\p{L}.-]+(?:\s+[A-ZÁÉÍÓÚÑ][\p{L}.-]+){0,3})/u);
-    const contactName=(nameMatch?.[1]??emailMatch[0]).replace(/\s+(?:busca|con|en|y)$/i,"").trim();
-    const action=await buildEmailProposal(req,emailMatch[0],subject,bodyText,contactName);
+    const explicitNameMatch=message.match(/(?:a|para)\s+([A-ZÁÉÍÓÚÑ][\p{L}.-]+(?:\s+[A-ZÁÉÍÓÚÑ][\p{L}.-]+){0,3})/u);
+    const contactQuery=(explicitNameMatch?.[1]??"").replace(/\s+(?:busca|con|en|y)$/i,"").trim();
+
+    if(emailMatch){
+      if(!bodyText){
+        return {status:"ACTION_NEEDS_SCOPE",intent:"email_send",executed:false,message:`He verificado el destinatario ${emailMatch[0]}. Indícame el texto exacto del correo para poder presentarte una propuesta cerrada antes de enviarlo.`};
+      }
+      const action=await buildEmailProposal(req,emailMatch[0],subject,bodyText,contactQuery||emailMatch[0]);
+      return {status:"ACTION_PROPOSAL",intent:"email_send",executed:false,action,message:`Propuesta exacta de envío:\nDestinatario: ${action.scope.contact_name} <${action.scope.recipient_email}>\nAsunto: ${action.scope.subject}\nTexto: ${action.scope.body}\n\nNo he enviado nada. ¿Confirmas este envío con «sí»?`};
+    }
+
+    if(!contactQuery){
+      return {status:"ACTION_NEEDS_SCOPE",intent:"email_contact_lookup",executed:false,message:"Dime el nombre del contacto al que quieres escribir. Buscaré los correos disponibles y te los enseñaré para que elijas."};
+    }
+    const resolved=await resolveContacts(req,contactQuery);
+    if(!resolved.ok||resolved.items.length===0){
+      return {status:"ACTION_NEEDS_SCOPE",intent:"email_contact_lookup",executed:false,message:`No he encontrado ningún correo verificado para «${contactQuery}» en las fuentes autorizadas de CEREBRO. No voy a inventarlo.`};
+    }
+    if(!bodyText){
+      return {status:"ACTION_NEEDS_SCOPE",intent:"email_send",executed:false,message:`He encontrado ${resolved.items.length} correo(s) para «${contactQuery}», pero necesito el texto exacto que quieres enviar antes de crear la propuesta.`};
+    }
+    const selection=await buildEmailContactSelection(req,contactQuery,subject,bodyText,resolved.items);
+    const list=resolved.items.slice(0,10).map((x:any,i:number)=>`${i+1}. ${x.name} <${x.email}>`).join("\n");
     return {
-      status:"ACTION_PROPOSAL",intent:"email_send",executed:false,action,
-      message:`Propuesta exacta de envío:\nDestinatario: ${action.scope.contact_name} <${action.scope.recipient_email}>\nAsunto: ${action.scope.subject}\nTexto: ${action.scope.body}\n\nNo he enviado nada. ¿Confirmas este envío con «sí»?`
+      status:"ACTION_PROPOSAL",intent:"email_contact_selection",executed:false,action:selection,
+      message:`He encontrado estos correos para «${contactQuery}»:\n${list}\n\nElige el número, el nombre exacto o el correo que quieres usar. Todavía no he enviado nada.`
     };
   }
 
