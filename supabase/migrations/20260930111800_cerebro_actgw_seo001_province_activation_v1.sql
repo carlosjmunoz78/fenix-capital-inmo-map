@@ -51,7 +51,7 @@ declare
   territory_count int:=0;
   job_count int:=0;
   capital_run_created boolean:=false;
-  job_type text;
+  v_job_type text;
 begin
   if p_company_id<>'FENIX_CAPITAL' or p_engine_id<>'SEO-001' or p_environment<>'PREPROD' then
     return jsonb_build_object('ok',false,'error','identity_not_allowed');
@@ -118,7 +118,7 @@ begin
     on conflict(company_id,engine_id,environment,province,municipality) do nothing;
     if found then territory_count:=territory_count+1; end if;
 
-    foreach job_type in array array[
+    foreach v_job_type in array array[
       'AUDIT_EXISTING_URL','KEYWORD_RESEARCH','LOCAL_CONTEXT_RESEARCH','ANTI_CANNIBALIZATION',
       'DRAFT_LOCAL_LANDING','IMAGE_MANIFEST','B2B_REAL_ESTATE_PLAN','QA_PREPUBLISH'
     ]
@@ -126,7 +126,7 @@ begin
       insert into public.seo_cerebro_expansion_jobs_preprod(
         company_id,engine_id,environment,province,municipality,job_type,priority,status,payload,result,updated_at
       ) values (
-        p_company_id,p_engine_id,p_environment,p_province,muni,job_type,priority_no,'QUEUED',
+        p_company_id,p_engine_id,p_environment,p_province,muni,v_job_type,priority_no,'QUEUED',
         jsonb_build_object('source_action_request_id',req.id,'proposal_hash',p_proposal_hash,'coverage',p_coverage,
           'official_municipality_code',nullif(code,'')),
         '{}'::jsonb,now()
