@@ -2,7 +2,7 @@ import {useEffect,useState,type FormEvent} from 'react';
 import {useLocation,useNavigate} from 'react-router-dom';
 import {BrainCircuit,ChevronLeft,Send,ShieldCheck} from 'lucide-react';
 import {cerebroConsoleLinkEnabled} from './cerebroConsoleAccess';
-import {fetchCerebroConsoleHealth,postCerebroConsoleChat,type CerebroConsoleHealth} from './cerebroConsoleApi';
+import {fetchCerebroConsoleHealth,postCerebroConsoleChat,type CerebroConsoleHealth,type CerebroPendingAction} from './cerebroConsoleApi';
 import './cerebro-console.css';
 
 const CONTEXTS=['GENERAL','EMPRESA','ENGINE','CRM','APP','SEO','MARKETING','TRAINING','AUTOMATION'];
@@ -17,6 +17,7 @@ export default function CerebroConsoleShell(){
  const [message,setMessage]=useState('');
  const [sending,setSending]=useState(false);
  const [lines,setLines]=useState<ChatLine[]>([]);
+ const [pendingAction,setPendingAction]=useState<CerebroPendingAction|null>(null);
 
  useEffect(()=>{
   if(location.pathname!=='/cerebro')return;
@@ -39,10 +40,10 @@ export default function CerebroConsoleShell(){
 
  if(location.pathname!=='/cerebro')return null;
  const ready=gatewayState==='ready';
- const chatReady=Boolean(ready&&health?.chat_available&&health?.chat_mode==='DETERMINISTIC_READ_ONLY');
+ const chatReady=Boolean(ready&&health?.chat_available&&['DETERMINISTIC_READ_ONLY','OWNER_DECISION_BY_EXCEPTION_V1'].includes(health?.chat_mode||''));
  const title=ready?'Transporte autenticado verificado':gatewayState==='checking'?'Verificando CEREBRO Gateway…':'Superficie preparada, conexión cerrada';
  const detail=chatReady
-  ?'CEREBRO móvil está disponible en modo determinista y solo lectura. Puedes preguntar por estado, motores, contrato o ayuda. No ejecuta escrituras ni accede directamente a ningún modelo.'
+  ?'CEREBRO móvil aplica decisión humana por excepción: puedes consultar sin activar cambios y las acciones requieren una propuesta exacta seguida de tu confirmación explícita.'
   :ready
    ?`CEREBRO Gateway responde por HTTPS autenticado (${health?.environment||'LAB'} · ${health?.version||'V0'}). Las escrituras continúan cerradas hasta superar sus gates.`
    :'Esta pantalla reserva la interfaz propia de CEREBRO dentro de Fénix. La comunicación permanece cerrada hasta disponer de una URL HTTPS desplegada y autenticada delante de CEREBRO Gateway.';
@@ -54,8 +55,10 @@ export default function CerebroConsoleShell(){
   setLines(current=>[...current,{role:'user',text}]);
   setMessage('');
   setSending(true);
-  const {status,data}=await postCerebroConsoleChat(text);
+  const {status,data}=await postCerebroConsoleChat(text,pendingAction);
   const response=status>0&&data?.message?data.message:'No he podido contactar con CEREBRO Gateway.';
+  if(data?.action)setPendingAction(data.action);
+  else if(data?.status==='CANCELED'||data?.status==='ACTION_CONFIRMED')setPendingAction(null);
   setLines(current=>[...current,{role:'cerebro',text:response}]);
   setSending(false);
  }
@@ -67,13 +70,13 @@ export default function CerebroConsoleShell(){
    <p>{detail}</p>
    <div className="cerebro-fields"><label>Empresa<select disabled><option>Fénix · sesión autenticada</option></select></label><label>Contexto<select disabled>{CONTEXTS.map(item=><option key={item}>{item}</option>)}</select></label></div>
    <div className="cerebro-chat-log" aria-live="polite">
-    {lines.length===0?<div className="cerebro-chat-empty">Escribe «estado», «motores», «contrato» o «ayuda».</div>:lines.map((line,index)=><div key={index} className={`cerebro-chat-line cerebro-chat-${line.role}`}><strong>{line.role==='user'?'Tú':'CEREBRO'}</strong><span>{line.text}</span></div>)}
+    {lines.length===0?<div className="cerebro-chat-empty">Pregunta lo que necesites o pide una acción. CEREBRO separará lectura de ejecución.</div>:lines.map((line,index)=><div key={index} className={`cerebro-chat-line cerebro-chat-${line.role}`}><strong>{line.role==='user'?'Tú':'CEREBRO'}</strong><span>{line.text}</span></div>)}
    </div>
    <form className="cerebro-chat-form" onSubmit={submit}>
     <textarea value={message} onChange={event=>setMessage(event.target.value)} disabled={!chatReady||sending} rows={3} placeholder={chatReady?'Escribe a CEREBRO…':'Chat disponible cuando el Gateway confirme el modo seguro.'}/>
     <button type="submit" disabled={!chatReady||sending||!message.trim()}><Send size={17}/>{sending?'Enviando…':'Enviar'}</button>
    </form>
-   <div className="cerebro-audit-note"><strong>Seguridad V0</strong><span>Modo determinista y solo lectura. Sin escrituras, sin acceso directo a modelos y sin acciones PROD. Las conversaciones de esta pantalla aún no se declaran persistentes.</span></div>
+   <div className="cerebro-audit-note"><strong>Decisión humana por excepción</strong><span>Las consultas no requieren confirmación. Una acción requiere propuesta exacta + un «sí». Preguntar o pedir explicación no ejecuta nada. Los ejecutores reales siguen sujetos a sus gates y a evidencia viva.</span></div>
    <button onClick={()=>navigate('/perfil')}>Volver a mi perfil</button>
   </section>
  </main>;
