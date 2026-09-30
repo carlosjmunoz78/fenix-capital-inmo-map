@@ -5,6 +5,7 @@ const A=Deno.env.get("SUPABASE_ANON_KEY")??"";
 const S=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")??"";
 const N=Deno.env.get("NOTION_TOKEN")??"";
 const NV="2025-09-03";
+const SOCIAL_SCHEDULE_DATA_SOURCE_ID="a03dd9dc-fd5e-4492-a084-c9a03b698884";
 const NH={Authorization:`Bearer ${N}`,"Notion-Version":NV,"Content-Type":"application/json"};
 
 const CANONICAL_PAGES=[
@@ -52,6 +53,109 @@ function titleOf(page:any){
     }
   }
   return "Página CEREBRO";
+}
+export type CerebroReadContext={
+  kind:"social_schedule";
+  network:string;
+};
+
+function notionPropertyText(value:any):string{
+  if(!value||typeof value!=="object")return "";
+  if(value.type==="title"&&Array.isArray(value.title))return value.title.map((x:any)=>String(x?.plain_text??"")).join("").trim();
+  if(value.type==="rich_text"&&Array.isArray(value.rich_text))return value.rich_text.map((x:any)=>String(x?.plain_text??"")).join("").trim();
+  if(value.type==="select")return String(value.select?.name??"").trim();
+  if(value.type==="status")return String(value.status?.name??"").trim();
+  if(value.type==="formula"){
+    const f=value.formula;
+    if(f?.type==="string")return String(f.string??"").trim();
+    if(f?.type==="number")return String(f.number??"").trim();
+    if(f?.type==="boolean")return String(f.boolean??"").trim();
+  }
+  if(value.type==="rollup"){
+    const r=value.rollup;
+    if(r?.type==="array"&&Array.isArray(r.array))return r.array.map(notionPropertyText).filter(Boolean).join(", ");
+    if(r?.type==="number")return String(r.number??"").trim();
+  }
+  return "";
+}
+
+function detectSocialScheduleQuery(question:string,context?:CerebroReadContext|null){
+  const q=norm(question);
+  const networks=["facebook","instagram","linkedin","tiktok","youtube","x"];
+  const explicit=networks.find(n=>q.includes(n));
+  const scheduleIntent=/(proxima|siguiente|cuando|sale|publicacion|programad|dia|hora)/.test(q);
+  const followup=Boolean(context?.kind==="social_schedule"&&/(dia|hora|cuando|que dia|a que hora|y hora)/.test(q));
+  const network=explicit||(followup?norm(context?.network??""):null);
+  return scheduleIntent&&network?network:null;
+}
+
+function displayNetwork(value:string){
+  const key=norm(value);
+  if(key==="facebook")return "Facebook";
+  if(key==="instagram")return "Instagram";
+  if(key==="linkedin")return "LinkedIn";
+  if(key==="tiktok")return "TikTok";
+  if(key==="youtube")return "YouTube";
+  if(key==="x")return "X";
+  return value;
+}
+
+function formatMadridDateTime(iso:string){
+  const d=new Date(iso);
+  if(Number.isNaN(d.getTime()))return iso;
+  const parts=new Intl.DateTimeFormat("es-ES",{timeZone:"Europe/Madrid",weekday:"long",day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit",hour12:false}).formatToParts(d);
+  const get=(type:string)=>parts.find(p=>p.type===type)?.value??"";
+  return get("weekday")+" "+get("day")+"/"+get("month")+"/"+get("year")+" a las "+get("hour")+":"+get("minute");
+}
+
+async function nextSocialPublication(network:string){
+  if(!N)return {ok:false,error:"NOTION_TOKEN_MISSING"} as const;
+  const r=await fetch("https://api.notion.com/v1/data_sources/"+SOCIAL_SCHEDULE_DATA_SOURCE_ID+"/query",{
+    method:"POST",
+    headers:NH,
+    body:JSON.stringify({
+      filter:{and:[
+        {property:"Estado programación",status:{equals:"Programada"}},
+        {property:"Tipo registro",select:{equals:"Operativo"}},
+        {property:"Fecha/hora programada",date:{on_or_after:new Date().toISOString()}}
+      ]},
+      sorts:[{property:"Fecha/hora programada",direction:"ascending"}],
+      page_size:50
+    })
+  });
+  const body=await r.json().catch(()=>null);
+  if(!r.ok||!Array.isArray(body?.results))return {ok:false,error:"SOCIAL_SCHEDULE_QUERY_FAILED",http_status:r.status} as const;
+  const target=norm(network);
+  for(const page of body.results){
+    const props=page?.properties??{};
+    const title=notionPropertyText(props["Programación"]);
+    const red=notionPropertyText(props["Red"]);
+    const hayNetwork=norm(red).includes(target)||norm(title).includes(target);
+    if(!hayNetwork)continue;
+    const date=String(props["Fecha/hora programada"]?.date?.start??"");
+    if(!date)continue;
+    return {ok:true,item:{title,network:displayNetwork(network),date,url:String(page?.url??"")}} as const;
+  }
+  return {ok:true,item:null} as const;
+}
+
+async function queryOperationalSocialSchedule(question:string,context?:CerebroReadContext|null){
+  const network=detectSocialScheduleQuery(question,context);
+  if(!network)return null;
+  const display=displayNetwork(network);
+  const result=await nextSocialPublication(network);
+  const read_context:CerebroReadContext={kind:"social_schedule",network:display};
+  if(!result.ok){
+    return {status:"ERROR",intent:"social_schedule",executed:false,read_context,reason:result.error,message:"No he podido consultar ahora mismo la Programación Editorial operativa de "+display+". No voy a sustituirla por una búsqueda general de Notion."};
+  }
+  if(!result.item){
+    return {status:"OK",intent:"social_schedule",executed:false,read_context,message:"Ahora mismo no hay ninguna publicación operativa de "+display+" programada a partir de este momento en Programación Editorial."};
+  }
+  return {
+    status:"OK",intent:"social_schedule",executed:false,read_context,
+    message:"La próxima publicación operativa de "+display+" está programada para "+formatMadridDateTime(result.item.date)+(result.item.title?". Pieza: "+result.item.title+".":""),
+    source:{system:"Notion",data_source:"Programación Editorial",url:result.item.url}
+  };
 }
 
 async function actorContext(req:Request){
@@ -134,11 +238,14 @@ function snippet(body:string,questionTokens:string[]){
   return (start>0?"…":"")+raw.slice(start,end)+(end<raw.length?"…":"");
 }
 
-export async function queryCerebroKnowledge(req:Request,question:string){
+export async function queryCerebroKnowledge(req:Request,question:string,context?:CerebroReadContext|null){
   const actor=await actorContext(req);
   if(!actor.ok)return {status:"HUMAN_REQUIRED",reason:actor.error,executed:false,message:"Esta consulta está reservada al propietario autorizado de CEREBRO."};
 
   if(!N)return {status:"ERROR",reason:"NOTION_TOKEN_MISSING",executed:false,message:"El conector de conocimiento de CEREBRO no está configurado."};
+
+  const operationalSocial=await queryOperationalSocialSchedule(question,context);
+  if(operationalSocial)return operationalSocial;
 
   const qTokens=tokens(question);
   if(!qTokens.length)return {status:"LOW_CONFIDENCE",reason:"QUERY_TOO_GENERIC",executed:false,message:"La consulta es demasiado general. Dime el tema concreto que quieres consultar."};
@@ -166,7 +273,7 @@ export async function queryCerebroKnowledge(req:Request,question:string){
   for(const item of ordered){
     const body=await pageText(item.id);
     const score=scoreText(qTokens,item.title,body);
-    if(score>0)ranked.push({id:item.id,title:item.title,score,snippet:snippet(body,qTokens)});
+    if(score>=3)ranked.push({id:item.id,title:item.title,score,snippet:snippet(body,qTokens)});
   }
   ranked.sort((a,b)=>b.score-a.score);
   const top=ranked.slice(0,3);
