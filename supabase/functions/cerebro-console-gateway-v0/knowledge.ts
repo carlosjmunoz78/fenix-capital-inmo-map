@@ -433,11 +433,14 @@ export async function queryCerebroKnowledge(req:Request,question:string,context?
   const operationalSocial=await queryOperationalSocialSchedule(question,context);
   if(operationalSocial)return operationalSocial;
 
+  const domain=detectKnowledgeDomain(question);
+  const direct=await directDomainAnswer(question,domain);
+  if(direct)return direct;
+
   const qTokens=tokens(question);
   if(!qTokens.length)return {status:"LOW_CONFIDENCE",reason:"QUERY_TOO_GENERIC",executed:false,message:"La consulta es demasiado general. Dime el tema concreto que quieres consultar."};
 
   const candidates=new Map<string,{id:string,title:string,page:any}>();
-  const domain=detectKnowledgeDomain(question);
   for(const term of qTokens.slice(0,3)){
     for(const page of await notionSearch(term)){
       if(page?.id)candidates.set(String(page.id),{id:String(page.id),title:titleOf(page),page});
@@ -459,15 +462,17 @@ export async function queryCerebroKnowledge(req:Request,question:string,context?
   }
 
   const canonicalIds=new Set(CANONICAL_PAGES.map(x=>x.id));
+  const domainIds=new Set((domain?DOMAIN_CANONICAL[domain]??[]:[]).map(x=>x.id));
   const ordered=[
+    ...(domain?(DOMAIN_CANONICAL[domain]??[]).map(x=>candidates.get(x.id)).filter(Boolean):[]),
     ...CANONICAL_PAGES.map(x=>candidates.get(x.id)).filter(Boolean),
-    ...[...candidates.values()].filter(x=>!canonicalIds.has(x.id))
-  ].slice(0,10) as {id:string,title:string,page:any}[];
+    ...[...candidates.values()].filter(x=>!canonicalIds.has(x.id)&&!domainIds.has(x.id))
+  ].slice(0,12) as {id:string,title:string,page:any}[];
 
   const ranked:any[]=[];
   for(const item of ordered){
     const body=await pageText(item.id);
-    const score=scoreText(qTokens,item.title,body);
+    const score=scoreText(qTokens,item.title,body)+(domainIds.has(item.id)?12:0);
     if(score>=3)ranked.push({id:item.id,title:item.title,score,snippet:snippet(body,qTokens)});
   }
   ranked.sort((a,b)=>b.score-a.score);
