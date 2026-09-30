@@ -57,6 +57,9 @@ jobs:
           set -euo pipefail
           grep -F "blockChildrenText" supabase/functions/cerebro-console-gateway-v0/knowledge.ts >/dev/null
           grep -F "Word boundaries prevent unrelated words" supabase/functions/cerebro-console-gateway-v0/knowledge.ts >/dev/null
+          grep -F 'const scheduleIntent=/\b(proxima|siguiente|cuando|sale|publicacion|programada|programado|dia|hora|texto|copy|contenido|caption)\b|que pone/' supabase/functions/cerebro-console-gateway-v0/knowledge.ts >/dev/null
+          grep -F 'intent:"seo_zone_simulation"' supabase/functions/cerebro-console-gateway-v0/index.ts >/dev/null
+          grep -F 'No se crea territorio, no se escribe ninguna cola, no se publica nada y no se ejecuta ningún cambio real.' supabase/functions/cerebro-console-gateway-v0/index.ts >/dev/null
 
       - name: Assert CEREBRO domain answer routing
         shell: bash
