@@ -37,4 +37,10 @@ test('CEREBRO is served by the authenticated SPA route, not a shadow static page
   const app=fs.readFileSync('src/App.tsx','utf8');
   expect(app).toContain("supabase.auth.getSession()");
   expect(app).toContain("fenix-session-active");
+  expect(app).toContain("{label:'CEREBRO',route:'/cerebro',resource:'CEREBRO'}");
+  const appGateway=fs.readFileSync('supabase/functions/fenix-app-gateway/index.ts','utf8');
+  expect(appGateway).toContain("a==='CARLOS-ADMIN'");
+  expect(appGateway).toContain("label:'CEREBRO',route:'/cerebro',resource:'CEREBRO'");
+  const profile=fs.readFileSync('src/ProfileShell.tsx','utf8');
+  expect(profile).toContain("label:'CEREBRO',route:'/cerebro'");
 });

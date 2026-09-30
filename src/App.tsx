@@ -164,7 +164,8 @@ export default function App(){
   const menuItems: NavItem[] = (nav?.items || [])
     .filter((x): x is {label:string;route:string;resource?:string} => Boolean(x.label && x.route))
     .map(x=>({label:x.label,route:x.route,resource:x.resource}));
-  const effectiveMenu = menuItems.length ? menuItems : fallbackMenu;
+  const ownerMenu = ctx?.actor_code==='CARLOS-ADMIN' && !menuItems.some(item=>item.route==='/cerebro') ? [...menuItems,{label:'CEREBRO',route:'/cerebro',resource:'CEREBRO'}] : menuItems;
+  const effectiveMenu = ownerMenu.length ? ownerMenu : (ctx?.actor_code==='CARLOS-ADMIN'?[...fallbackMenu,{label:'CEREBRO',route:'/cerebro',resource:'CEREBRO'}]:fallbackMenu);
   const activeItem = effectiveMenu.find(item => location.pathname===item.route || (item.route!=='/inicio' && location.pathname.startsWith(`${item.route}/`))) || effectiveMenu[0];
   const roleLabel=ctx?.role || 'Usuario';
   const avatarLabel=roleLabel.slice(0,2).toUpperCase();

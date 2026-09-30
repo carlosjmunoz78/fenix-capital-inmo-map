@@ -14,7 +14,14 @@ function seg(path:string){return path.split('/').filter(Boolean)}
 function routePath(req:Request){const raw=new URL(req.url).pathname;return raw.replace(/^\/(?:functions\/v1\/)?fenix-app-gateway/,'')||'/'}
 Deno.serve(async(req:Request)=>{if(req.method==='OPTIONS')return new Response(null,{status:204,headers:cors(req)});const u=new URL(req.url),p=routePath(req);if(p==='/health'){const c=config();return out(req,{ok:true,status:200,env:'PROD',service:'fenix-app-gateway',contract_version:4,config:{url:Boolean(c.URL),publishable:Boolean(c.ANON),secret:Boolean(c.SERVICE)}})}const c=config();if(!c.URL||!c.ANON||!c.SERVICE||!service())return out(req,{ok:false,status:503,error:'server_config_missing'},503);let me;try{me=await identity(req)}catch(e){console.error('identity',e);return out(req,{ok:false,status:500,error:'identity_resolution_failed'},500)}if(!me)return out(req,{ok:false,status:401,error:'identity_not_linked'},401);const a=me.actor,s=seg(p),b=req.method==='GET'?{}:await body(req),ss=service();try{
 if(p==='/session/context'&&req.method==='GET')return result(req,await rpc('fenix_prod_session_context_server',{p_actor_code:a}));
-if(p==='/navigation'&&req.method==='GET')return out(req,{ok:true,status:200,items:await rpc('fenix_prod_navigation_server',{p_actor_code:a})});
+if(p==='/navigation'&&req.method==='GET'){
+  const items=await rpc('fenix_prod_navigation_server',{p_actor_code:a});
+  const nav=Array.isArray(items)?items:[];
+  if(a==='CARLOS-ADMIN'&&!nav.some((x:any)=>String(x?.route??x)==='/cerebro')){
+    nav.push({label:'CEREBRO',route:'/cerebro',resource:'CEREBRO'});
+  }
+  return out(req,{ok:true,status:200,items:nav});
+}
 if(p==='/expedientes'&&req.method==='POST')return result(req,await rpc('fenix_prod_exp_create_server',{p_actor_code:a,p_cliente_nombre:b.cliente_nombre,p_cliente_apellidos:b.cliente_apellidos||null,p_cliente_email:b.cliente_email||null,p_cliente_telefono:b.cliente_telefono||null,p_localidad:b.localidad||null,p_precio_vivienda:b.precio_vivienda??null,p_importe_solicitado:b.importe_solicitado??null,p_owner_actor_code:b.owner_actor_code||null,p_inmobiliaria_code:b.inmobiliaria_code||null,p_payload_operacion:b.payload_operacion||{},p_consentimiento_comercial:Boolean(b.consentimiento_comercial)}));
 if(p==='/expedientes'&&req.method==='GET')return result(req,await rpc('fenix_prod_exp_list_server',{p_actor_code:a}));
 if(s[0]==='expedientes'&&s[1]&&s[2]==='workspace'&&req.method==='GET')return result(req,await rpc('fenix_prod_expediente_workspace_server',{p_actor_code:a,p_exp_code:s[1]}));
