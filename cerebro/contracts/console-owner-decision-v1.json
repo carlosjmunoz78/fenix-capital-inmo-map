@@ -1,0 +1,71 @@
+{
+  "schema_version": "1.0.0",
+  "contract_id": "CONSOLE-OWNER-DECISION-V1",
+  "applies_to": [
+    "CONSOLE-001",
+    "CHAT-001",
+    "CTX-001",
+    "CMD-001",
+    "ACTGW-001"
+  ],
+  "query": {
+    "confirmation_required": false,
+    "side_effects": false,
+    "knowledge_scope": "AUTHORIZED_CONTEXT_ONLY",
+    "missing_source_behavior": "DECLARE_GAP_NEVER_INVENT"
+  },
+  "action": {
+    "states": [
+      "ACTION_REQUEST",
+      "ACTION_PROPOSAL",
+      "CLARIFY_OR_REVISE",
+      "CONFIRMED",
+      "POLICY_CHECK",
+      "EXECUTE",
+      "VERIFY",
+      "AUDIT",
+      "RESULT"
+    ],
+    "confirmation_count": 1,
+    "confirmation_semantics": "EXPLICIT_YES_TO_CURRENT_EXACT_PROPOSAL",
+    "scope_change_invalidates_confirmation": true,
+    "questions_do_not_execute": true,
+    "idempotency_required_before_execution": true
+  },
+  "human_required": {
+    "semantics": "RESOLUTION_POINT_NOT_TERMINAL_BLOCK",
+    "reasons": [
+      "LEGAL_REQUIRED",
+      "SIGNATURE_REQUIRED",
+      "LOW_CONFIDENCE",
+      "HIGH_RISK",
+      "POLICY_CONFLICT",
+      "SECURITY_INCIDENT",
+      "MONEY_LIMIT",
+      "CUSTOMER_HUMAN_REQUEST"
+    ],
+    "response_requires": [
+      "reason",
+      "impact",
+      "options",
+      "minimum_human_step",
+      "resume_condition"
+    ],
+    "deep_link_when_available": true,
+    "resume_after_verified_resolution": true
+  },
+  "owner_authority": {
+    "scoped_exception_decision": true,
+    "permanent_policy_change_requires_explicit_policy_change": true,
+    "cannot_fake_or_bypass": [
+      "LEGAL_REQUIREMENT_ITSELF",
+      "MISSING_EXTERNAL_PERMISSION_OR_CREDENTIAL",
+      "SECURITY_INCIDENT_CONTAINMENT"
+    ]
+  },
+  "learning": {
+    "record_precedent": true,
+    "propose_automation_from_repeated_precedents": true,
+    "auto_promote_policy": false
+  }
+}
