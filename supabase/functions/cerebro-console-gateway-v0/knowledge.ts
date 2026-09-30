@@ -91,7 +91,7 @@ async function pageText(id:string){
   if(!N)return "";
   let cursor:string|undefined;
   const parts:string[]=[];
-  for(let pageNo=0;pageNo<2;pageNo++){
+  for(let pageNo=0;pageNo<1;pageNo++){
     const qs=new URLSearchParams({page_size:"100"});
     if(cursor)qs.set("start_cursor",cursor);
     const r=await fetch(`https://api.notion.com/v1/blocks/${id}/children?${qs}`,{headers:NH});
@@ -155,8 +155,14 @@ export async function queryCerebroKnowledge(req:Request,question:string){
     }
   }
 
+  const canonicalIds=new Set(CANONICAL_PAGES.map(x=>x.id));
+  const ordered=[
+    ...CANONICAL_PAGES.map(x=>candidates.get(x.id)).filter(Boolean),
+    ...[...candidates.values()].filter(x=>!canonicalIds.has(x.id))
+  ].slice(0,10) as {id:string,title:string,page:any}[];
+
   const ranked:any[]=[];
-  for(const item of [...candidates.values()].slice(0,14)){
+  for(const item of ordered){
     const body=await pageText(item.id);
     const score=scoreText(qTokens,item.title,body);
     if(score>0)ranked.push({id:item.id,title:item.title,score,snippet:snippet(body,qTokens)});
