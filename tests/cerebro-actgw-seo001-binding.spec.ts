@@ -12,7 +12,7 @@ test('CEREBRO gateway binds confirmed SEO action through signed PREPROD transpor
   expect(source).not.toContain('prod_execution_enabled: true');
   expect(source).toContain('CEREBRO_CONSOLE_PROPOSAL_V1');
   expect(source).toContain('proposal_token');
-  expect(source).toContain('authorizedDirection');
+  expect(source).toContain('authorizedOwner');
   expect(source).toContain('PROPOSAL_TTL_SECONDS');
 
   const executor=fs.readFileSync('supabase/functions/cerebro-actgw-seo001-preprod/index.ts','utf8');
