@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { withSupabase } from "jsr:@supabase/server@^1";
-import { queryCerebroKnowledge } from "./knowledge.ts";
+import { queryCerebroKnowledge, type CerebroReadContext } from "./knowledge.ts";
 import nacl from "npm:tweetnacl@1.0.3";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -217,8 +217,9 @@ function seoExplanation(action:PendingAction){
   return `El proceso para ${location} (${coverage}) comprende: investigación y clustering de palabras clave; mapa de ciudades/zonas e intención; arquitectura y contenidos; enlazado interno; SEO local; activos de captación cuando correspondan; controles técnicos/QA; publicación solo mediante los gates autorizados; monitorización, medición y mejora. Si algún paso exige firma, pago, riesgo alto, conflicto de política o un permiso que CEREBRO no tenga, te explicaré exactamente qué falta y te llevaré al enlace o decisión necesaria. ¿Quieres que active este proceso?`;
 }
 
-async function chatReply(req:Request,message:string,pendingRaw:unknown){
+async function chatReply(req:Request,message:string,pendingRaw:unknown,readContextRaw:unknown){
   const text=cleanText(message);
+  const readContext=(readContextRaw&&typeof readContextRaw==="object"&&!Array.isArray(readContextRaw))?readContextRaw as CerebroReadContext:null;
   if(!text)return {status:"INVALID",message:"Escribe una consulta.",executed:false};
 
   const pending=await validatePending(req,pendingRaw);
@@ -313,7 +314,7 @@ async function chatReply(req:Request,message:string,pendingRaw:unknown){
     };
   }
 
-  return await queryCerebroKnowledge(req,message);
+  return await queryCerebroKnowledge(req,message,readContext);
 }
 
 export default {
@@ -341,13 +342,13 @@ export default {
       const obj=typeof body==="object"&&body!==null?body as Record<string,unknown>:{};
       const message=obj.message;
       if(typeof message!=="string"||message.length>2000)return json(req,400,{status:"INVALID",message:"Mensaje inválido.",executed:false});
-      return json(req,200,await chatReply(req,message,obj.pending_action));
+      return json(req,200,await chatReply(req,message,obj.pending_action,obj.read_context));
     }
 
     if(req.method!=="GET")return json(req,405,{status:"CLOSED",reason:"ROUTE_NOT_AVAILABLE"});
 
     if(suffix==="health")return json(req,200,{
-      status:"ok",service:"cerebro-console-gateway-v0",environment:"LAB",version:"0.5.2-owner-only",
+      status:"ok",service:"cerebro-console-gateway-v0",environment:"LAB",version:"0.5.3-owner-only-contextual-ops",
       authenticated_transport:true,direct_model_access:false,prod_execution_enabled:false,live_writes:false,
       chat_available:true,chat_mode:"OWNER_DECISION_BY_EXCEPTION_V1",additional_cost_target_eur:0
     });
