@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import nacl from "npm:tweetnacl@1.0.3";
 
 const U=Deno.env.get("SUPABASE_URL")??"";
 const A=Deno.env.get("SUPABASE_ANON_KEY")??"";
@@ -6,6 +7,9 @@ const S=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")??"";
 const N=Deno.env.get("NOTION_TOKEN")??"";
 const NV="2025-09-03";
 const SOCIAL_SCHEDULE_DATA_SOURCE_ID="a03dd9dc-fd5e-4492-a084-c9a03b698884";
+const SOCIAL_LIVE_ENDPOINT="https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-social-schedule-read-preprod";
+const SIGNING_CONTEXT="CEREBRO_ACTGW_PROD_TO_SEO001_PREPROD_V1";
+const SIGNING_KEY_ID="cerebro-actgw-prod-v1";
 const NH={Authorization:`Bearer ${N}`,"Notion-Version":NV,"Content-Type":"application/json"};
 
 const CANONICAL_PAGES=[
@@ -13,6 +17,34 @@ const CANONICAL_PAGES=[
   {id:"3ba81b1a-756d-8118-8a48-eebf163b9f1c",title:"Centro de decisión CEREBRO"},
   {id:"3eb81b1a-756d-8153-a1ef-f4c13e75519c",title:"Owner Decision by Exception V1"}
 ];
+
+const DOMAIN_CANONICAL:Record<string,{id:string,title:string}[]>={
+  finance:[
+    {id:"3ba81b1a-756d-817f-9d61-e54e7f270e16",title:"Conocimiento financiero canónico · Fénix Uno"},
+    {id:"3be81b1a-756d-81b6-a75f-cb6bbe842766",title:"Base Maestra Belén · Motor financiero CEREBRO"}
+  ],
+  marketing:[
+    {id:"3b481b1a-756d-81ce-bdd3-d28125e964c7",title:"Motor maestro · Estrategia SEO, contenidos, embudos y redes"},
+    {id:"3bf81b1a-756d-8183-ad00-d546747ec1c5",title:"Redes sociales orgánicas"}
+  ],
+  multiempresa:[
+    {id:"3e981b1a-756d-8100-9198-c75858d5371c",title:"Company Registry · CEREBRO · Fénix Capital"},
+    {id:"3be81b1a-756d-81da-ad05-d6ab37855c2f",title:"Base estratégica CEREBRO"}
+  ],
+  seo:[
+    {id:"3b481b1a-756d-81ce-bdd3-d28125e964c7",title:"Motor maestro · Estrategia SEO, contenidos, embudos y redes"},
+    {id:"3d481b1a-756d-81b2-8d63-fdccf0481401",title:"Auditoría SEO/Web semanal · Fénix Capital"}
+  ]
+};
+
+function detectKnowledgeDomain(question:string){
+  const q=norm(question);
+  if(/hipoteca|banco|financi|tin|tae|cuota|fein|tasacion|ingresos|endeudamiento/.test(q))return "finance";
+  if(/marketing|redes|facebook|instagram|linkedin|contenido|embudo|campana|campaña|newsletter|brevo|buffer/.test(q))return "marketing";
+  if(/multiempresa|empresa|company|registry|motor|engine|autonomia|autonomía/.test(q))return "multiempresa";
+  if(/seo|keyword|palabra clave|gsc|search console|landing|indexacion|indexación|canonical/.test(q))return "seo";
+  return null;
+}
 
 const STOP=new Set([
   "que","qué","como","cómo","cual","cuál","cuales","cuáles","dime","sabes","saber","sobre","del","de","la","el","los","las",
@@ -108,7 +140,52 @@ function formatMadridDateTime(iso:string){
   return get("weekday")+" "+get("day")+"/"+get("month")+"/"+get("year")+" a las "+get("hour")+":"+get("minute");
 }
 
+async function sha256Bytes(value:string){
+  return new Uint8Array(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(value)));
+}
+function bytesToB64(bytes:Uint8Array){
+  let s=""; for(const b of bytes)s+=String.fromCharCode(b); return btoa(s);
+}
+async function liveSocialSchedule(){
+  const serviceRole=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")??"";
+  if(!serviceRole)return {ok:false,error:"LIVE_SOCIAL_SIGNER_MISSING"} as const;
+  const seed=await sha256Bytes(serviceRole+"|"+SIGNING_CONTEXT);
+  const kp=nacl.sign.keyPair.fromSeed(seed);
+  const timestamp=Math.floor(Date.now()/1000).toString();
+  const sig=nacl.sign.detached(new TextEncoder().encode(timestamp+".SOCIAL_READ"),kp.secretKey);
+  try{
+    const r=await fetch(SOCIAL_LIVE_ENDPOINT,{headers:{
+      "x-cerebro-actgw-key-id":SIGNING_KEY_ID,
+      "x-cerebro-actgw-timestamp":timestamp,
+      "x-cerebro-actgw-signature-ed25519":bytesToB64(sig)
+    },cache:"no-store"});
+    const body=await r.json().catch(()=>null);
+    if(!r.ok||body?.ok!==true||!Array.isArray(body?.items))return {ok:false,error:"LIVE_SOCIAL_READ_FAILED",detail:body} as const;
+    return {ok:true,as_of:String(body.as_of??""),items:body.items as any[]} as const;
+  }catch(e){return {ok:false,error:"LIVE_SOCIAL_UNREACHABLE",detail:e instanceof Error?e.message:String(e)} as const;}
+}
 async function nextSocialPublication(network:string){
+  const live=await liveSocialSchedule();
+  if(live.ok){
+    const target=norm(network);
+    const candidates=live.items.filter((x:any)=>norm(String(x?.channel??""))===target);
+    if(candidates.length){
+      const item=candidates[0];
+      return {ok:true,item:{
+        title:String(item?.content_key??""),
+        network:displayNetwork(network),
+        date:String(item?.scheduled_at??""),
+        url:"",
+        source:"CEREBRO_SOCIAL_QUEUE",
+        state:String(item?.state??""),
+        external_post_id:item?.external_post_id?String(item.external_post_id):null,
+        verified_at:item?.last_verified_at?String(item.last_verified_at):null,
+        provider_error:item?.last_provider_error?String(item.last_provider_error):null,
+        as_of:live.as_of
+      }} as const;
+    }
+    return {ok:true,item:null,live_empty:true,as_of:live.as_of} as const;
+  }
   if(!N)return {ok:false,error:"NOTION_TOKEN_MISSING"} as const;
   const r=await fetch("https://api.notion.com/v1/data_sources/"+SOCIAL_SCHEDULE_DATA_SOURCE_ID+"/query",{
     method:"POST",
@@ -134,7 +211,7 @@ async function nextSocialPublication(network:string){
     if(!hayNetwork)continue;
     const date=String(props["Fecha/hora programada"]?.date?.start??"");
     if(!date)continue;
-    return {ok:true,item:{title,network:displayNetwork(network),date,url:String(page?.url??"")}} as const;
+    return {ok:true,item:{title,network:displayNetwork(network),date,url:String(page?.url??""),source:"NOTION_PROGRAMACION_EDITORIAL",state:"Programada",external_post_id:null,verified_at:null,provider_error:null,as_of:""}} as const;
   }
   return {ok:true,item:null} as const;
 }
@@ -153,8 +230,8 @@ async function queryOperationalSocialSchedule(question:string,context?:CerebroRe
   }
   return {
     status:"OK",intent:"social_schedule",executed:false,read_context,
-    message:"La próxima publicación operativa de "+display+" está programada para "+formatMadridDateTime(result.item.date)+(result.item.title?". Pieza: "+result.item.title+".":""),
-    source:{system:"Notion",data_source:"Programación Editorial",url:result.item.url}
+    message:"La próxima publicación operativa de "+display+" está programada para "+formatMadridDateTime(result.item.date)+(result.item.title?". Pieza: "+result.item.title+".":"")+(result.item.source==="CEREBRO_SOCIAL_QUEUE"?" Fuente operativa: cola CEREBRO/Buffer. Estado: "+result.item.state+(result.item.external_post_id?" · Buffer ID "+result.item.external_post_id:"")+".":" Fuente documental: Programación Editorial."),
+    source: result.item.source==="CEREBRO_SOCIAL_QUEUE" ? {system:"CEREBRO Social",data_source:"cerebro_social_queue_preprod",as_of:result.item.as_of} : {system:"Notion",data_source:"Programación Editorial",url:result.item.url}
   };
 }
 
@@ -251,6 +328,7 @@ export async function queryCerebroKnowledge(req:Request,question:string,context?
   if(!qTokens.length)return {status:"LOW_CONFIDENCE",reason:"QUERY_TOO_GENERIC",executed:false,message:"La consulta es demasiado general. Dime el tema concreto que quieres consultar."};
 
   const candidates=new Map<string,{id:string,title:string,page:any}>();
+  const domain=detectKnowledgeDomain(question);
   for(const term of qTokens.slice(0,3)){
     for(const page of await notionSearch(term)){
       if(page?.id)candidates.set(String(page.id),{id:String(page.id),title:titleOf(page),page});
@@ -260,6 +338,14 @@ export async function queryCerebroKnowledge(req:Request,question:string,context?
     if(!candidates.has(item.id)){
       const p=await notionPage(item.id);
       if(p)candidates.set(item.id,{id:item.id,title:titleOf(p)||item.title,page:p});
+    }
+  }
+  if(domain){
+    for(const item of DOMAIN_CANONICAL[domain]??[]){
+      if(!candidates.has(item.id)){
+        const p=await notionPage(item.id);
+        if(p)candidates.set(item.id,{id:item.id,title:titleOf(p)||item.title,page:p});
+      }
     }
   }
 
