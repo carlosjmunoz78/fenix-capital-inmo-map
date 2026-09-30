@@ -57,6 +57,9 @@ if(s[0]==='inmobiliarias'&&s[1]&&req.method==='PATCH')return result(req,await rp
 if(s[0]==='inmobiliarias'&&s[1]&&req.method==='GET')return result(req,await rpc('fenix_prod_inmo_get_server',{p_actor_code:a,p_code:s[1]}));
 if(p==='/contactos'&&req.method==='GET')return result(req,await rpc('fenix_prod_contacts_server',{p_actor_code:a}));
 if(s[0]==='contactos'&&s[1]&&req.method==='GET')return result(req,await rpc('fenix_prod_contact_get_server',{p_actor_code:a,p_id:s[1]}));
+if(p==='/web-leads'&&req.method==='GET')return result(req,await rpc('fenix_prod_web_leads_list_server',{p_actor_code:a}));
+if(s[0]==='web-leads'&&s[1]&&s[2]==='timeline'&&req.method==='GET')return result(req,await rpc('fenix_prod_web_lead_timeline_server',{p_actor_code:a,p_cliente_code:s[1]}));
+if(s[0]==='web-leads'&&s[1]&&s[2]==='actions'&&req.method==='POST')return result(req,await rpc('fenix_prod_web_lead_action_server',{p_actor_code:a,p_cliente_code:s[1],p_action_kind:b.action_kind,p_comment:b.comment||null,p_happened:b.happened||null,p_planned_action:b.planned_action||null,p_next_at:b.next_at||null}));
 if(p==='/visitadores'&&req.method==='GET')return result(req,await rpc('fenix_prod_visitadores_server',{p_actor_code:a}));
 if(p==='/personal'&&req.method==='GET')return result(req,await rpc('fenix_prod_personal_server',{p_actor_code:a}));
 if(p==='/ana/correcciones'&&req.method==='GET')return result(req,await rpc('fenix_prod_ana_corrections_list_server',{p_actor_code:a}));
