@@ -70,7 +70,9 @@ jobs:
           grep -F 'mándaselo|enviaselo|envíaselo' supabase/functions/cerebro-console-gateway-v0/index.ts >/dev/null
           grep -F 'Próxima publicación de' supabase/functions/cerebro-console-gateway-v0/index.ts >/dev/null
           grep -F 'read_context.caption=result.item.caption' supabase/functions/cerebro-console-gateway-v0/knowledge.ts >/dev/null
-          grep -F 'socialShareCommand' supabase/functions/cerebro-console-gateway-v0/index.ts >/dev/null
+          grep -F 'const socialShareCommand=/\b(mandasela|mandaselo|enviasela|enviaselo)\b/.test(text);' supabase/functions/cerebro-console-gateway-v0/index.ts >/dev/null
+          grep -F 'contactLookupMatch' supabase/functions/cerebro-console-gateway-v0/index.ts >/dev/null
+          grep -F 'intent:"social_schedule_complete"' supabase/functions/cerebro-console-gateway-v0/knowledge.ts >/dev/null
           grep -F 'La próxima publicación de Facebook' supabase/functions/cerebro-console-gateway-v0/index.ts >/dev/null
           grep -F 'const recipientMatch=message.match(/(?:a|para)' supabase/functions/cerebro-console-gateway-v0/index.ts >/dev/null
           grep -F 'Prepararé el email con el texto, la fecha, la hora y la imagen de la publicación.' supabase/functions/cerebro-console-gateway-v0/index.ts >/dev/null
