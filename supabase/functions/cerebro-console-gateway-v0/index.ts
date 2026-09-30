@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { withSupabase } from "jsr:@supabase/server@^1";
+import { queryCerebroKnowledge } from "./knowledge.ts";
 
 const ALLOWED_ORIGINS = new Set([
   "https://app.fenixcapital.es",
@@ -114,7 +115,7 @@ function seoExplanation(action:PendingAction){
   return `El proceso para ${location} (${coverage}) comprende: investigación y clustering de palabras clave; mapa de ciudades/zonas e intención; arquitectura y contenidos; enlazado interno; SEO local; activos de captación cuando correspondan; controles técnicos/QA; publicación solo mediante los gates autorizados; monitorización, medición y mejora. Si algún paso exige firma, pago, riesgo alto, conflicto de política o un permiso que CEREBRO no tenga, te explicaré exactamente qué falta y te llevaré al enlace o decisión necesaria. ¿Quieres que active este proceso?`;
 }
 
-async function chatReply(message:string,pendingRaw:unknown){
+async function chatReply(req:Request,message:string,pendingRaw:unknown){
   const text=cleanText(message);
   if(!text)return {status:"INVALID",message:"Escribe una consulta.",executed:false};
 
@@ -184,13 +185,7 @@ async function chatReply(message:string,pendingRaw:unknown){
     };
   }
 
-  return {
-    status:"KNOWLEDGE_ROUTE_REQUIRED",
-    intent:"query",
-    executed:false,
-    reason:"KNOWLEDGE_ADAPTER_NOT_BOUND",
-    message:"Esto es una consulta de lectura y no necesita confirmación. La política ya permite responder con cualquier conocimiento autorizado de CEREBRO, pero el adaptador general de conocimiento aún no está enlazado a esta Console V0. No voy a inventar la respuesta."
-  };
+  return await queryCerebroKnowledge(req,message);
 }
 
 export default {
@@ -216,13 +211,13 @@ export default {
       const obj=typeof body==="object"&&body!==null?body as Record<string,unknown>:{};
       const message=obj.message;
       if(typeof message!=="string"||message.length>2000)return json(req,400,{status:"INVALID",message:"Mensaje inválido.",executed:false});
-      return json(req,200,await chatReply(message,obj.pending_action));
+      return json(req,200,await chatReply(req,message,obj.pending_action));
     }
 
     if(req.method!=="GET")return json(req,405,{status:"CLOSED",reason:"ROUTE_NOT_AVAILABLE"});
 
     if(suffix==="health")return json(req,200,{
-      status:"ok",service:"cerebro-console-gateway-v0",environment:"LAB",version:"0.3.0-owner-decision",
+      status:"ok",service:"cerebro-console-gateway-v0",environment:"LAB",version:"0.4.0-owner-decision-knowledge",
       authenticated_transport:true,direct_model_access:false,prod_execution_enabled:false,live_writes:false,
       chat_available:true,chat_mode:"OWNER_DECISION_BY_EXCEPTION_V1",additional_cost_target_eur:0
     });
