@@ -502,8 +502,7 @@ async function chatReply(req:Request,message:string,pendingRaw:unknown,readConte
     if(!socialContext){
       return {status:"ACTION_NEEDS_SCOPE",intent:"social_share_email",executed:false,message:"No tengo una publicación social operativa identificada para compartir. Dime qué publicación quieres enviar o vuelve a pedirme la próxima de Facebook."};
     }
-    const recipientMatch=message.match(/(?:a|para)\s+(?!correo\b|email\b)([\p{L}.-]+(?:\s+[\p{L}.-]+){0,3})/iu)
-      || message.match(/(?:por\s+(?:correo|email)\s+)?(?:a|para)\s+([\p{L}.-]+(?:\s+[\p{L}.-]+){0,3})/iu);
+    const recipientMatch=message.match(/(?:^|\s)(?:a|para)\s+(.+?)(?=\s+(?:con|y)\s+|$)/iu);
     const contactQuery=(recipientMatch?.[1]??"").trim().replace(/^(?:correo|email)\s+/i,"");
     if(!contactQuery){
       return {status:"ACTION_NEEDS_SCOPE",intent:"social_share_email",executed:false,message:"Dime a qué contacto quieres enviar esta publicación. Buscaré sus correos y te dejaré elegir antes de preparar el envío."};
@@ -534,6 +533,27 @@ async function chatReply(req:Request,message:string,pendingRaw:unknown,readConte
       status:"ACTION_PROPOSAL",intent:"email_contact_selection",executed:false,action:selection,
       message:`He encontrado estos correos para «${contactQuery}»:\n${list}\n\nElige el número, el nombre exacto o el correo. Prepararé el email con el texto, la fecha, la hora y la imagen de la publicación. Todavía no he enviado nada.`
     };
+  }
+
+  if(readContext?.kind==="social_schedule" && /^[\p{L}.-]+(?:\s+[\p{L}.-]+){0,3}$/u.test(message.trim())){
+    const contactQuery=message.trim();
+    const resolved=await resolveContacts(req,contactQuery);
+    if(resolved.ok&&resolved.items.length){
+      const caption=String((readContext as any).caption||"").trim();
+      const when=String(readContext.scheduled_at||"").trim();
+      const media=String(readContext.public_media_url||readContext.media_urls?.[0]||"").trim();
+      const key=String(readContext.content_key||"").trim();
+      const network=String(readContext.network||"Facebook");
+      const parts=[
+        `Próxima publicación de ${network}${key?` · ${key}`:""}`,
+        when?`Fecha y hora programadas: ${new Intl.DateTimeFormat("es-ES",{timeZone:"Europe/Madrid",dateStyle:"full",timeStyle:"short"}).format(new Date(when))}`:"",
+        caption?`Texto exacto:\n${caption}`:"",
+        media?`Imagen: ${media}`:""
+      ].filter(Boolean);
+      const selection=await buildEmailContactSelection(req,contactQuery,`Próxima publicación de ${network}`,parts.join("\n\n"),resolved.items);
+      const list=resolved.items.slice(0,10).map((x:any,i:number)=>`${i+1}. ${x.name} <${x.email}>`).join("\n");
+      return {status:"ACTION_PROPOSAL",intent:"email_contact_selection",executed:false,action:selection,message:`He encontrado estos correos para «${contactQuery}»:\n${list}\n\nElige el número, el nombre exacto o el correo. Todavía no he enviado nada.`};
+    }
   }
 
   const emailMatch=message.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
