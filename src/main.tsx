@@ -93,6 +93,8 @@ import ExpedienteCommercialTermsGuard from './ExpedienteCommercialTermsGuard';
 import VisitasShell from './VisitasShell';
 import CommunicationsShell from './CommunicationsShell';
 import ChatShell from './ChatShell';
+import WebLeadsShell from './WebLeadsShell';
+import WebLeadDetailShell from './WebLeadDetailShell';
 import DetailShellGate from './DetailShellGate';
 import TaskCreateShell from './TaskCreateShell';
 import OperationalRecordDetailGate from './OperationalRecordDetailGate';
@@ -218,6 +220,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <VisitasShell />
       <CommunicationsShell />
       <ChatShell />
+      <WebLeadsShell />
+      <WebLeadDetailShell />
       <DetailShellGate />
       <TaskCreateShell />
       <OperationalRecordDetailGate />
