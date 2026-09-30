@@ -33,6 +33,11 @@ test('mobile static Console reuses session and preserves exact pending action',a
             scope:{location:'Valencia',coverage:'capital_and_province'},summary:'Activar SEO para Valencia y provincia.',proposal_hash:'hash-v1'}
         })});
       }
+      if(String(body.message||'').toLowerCase()==='sí'||String(body.message||'').toLowerCase()==='si'){
+        return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
+          status:'ACTION_ACCEPTED',executed:true,completed:false,message:'Acción registrada en SEO-001 PREPROD.'
+        })});
+      }
       return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
         status:'ACTION_EXPLANATION',executed:false,message:'El proceso incluye keywords, arquitectura, contenidos, SEO local y QA. ¿Quieres que active este proceso?',
         action:body.pending_action
@@ -55,4 +60,13 @@ test('mobile static Console reuses session and preserves exact pending action',a
   await expect(page.locator('#log')).toContainText('keywords, arquitectura, contenidos');
   expect(chatBodies[1].pending_action?.proposal_hash).toBe('hash-v1');
   expect(chatBodies[1].pending_action?.scope?.location).toBe('Valencia');
+
+  await page.locator('#input').fill('Sí');
+  await page.locator('#send').click();
+  await expect(page.locator('#log')).toContainText('Acción registrada en SEO-001 PREPROD');
+  expect(chatBodies[2].pending_action?.proposal_hash).toBe('hash-v1');
+
+  await page.locator('#input').fill('estado');
+  await page.locator('#send').click();
+  expect(chatBodies[3].pending_action).toBeNull();
 });
