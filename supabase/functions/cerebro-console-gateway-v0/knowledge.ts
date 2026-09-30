@@ -89,6 +89,9 @@ function titleOf(page:any){
 export type CerebroReadContext={
   kind:"social_schedule";
   network:string;
+  content_key?:string;
+  external_post_id?:string|null;
+  scheduled_at?:string;
 };
 
 function notionPropertyText(value:any):string{
@@ -113,10 +116,10 @@ function notionPropertyText(value:any):string{
 
 function detectSocialScheduleQuery(question:string,context?:CerebroReadContext|null){
   const q=norm(question);
-  const networks=["facebook","instagram","linkedin","tiktok","youtube","x"];
-  const explicit=networks.find(n=>q.includes(n));
-  const scheduleIntent=/(proxima|siguiente|cuando|sale|publicacion|programad|dia|hora)/.test(q);
-  const followup=Boolean(context?.kind==="social_schedule"&&/(dia|hora|cuando|que dia|a que hora|y hora)/.test(q));
+  const networks=["facebook","instagram","linkedin","tiktok","youtube"];
+  const explicit=networks.find(n=>q.includes(n))||(/(^|[^a-z0-9])x([^a-z0-9]|$)/.test(q)?"x":undefined);
+  const scheduleIntent=/(proxima|siguiente|cuando|sale|publicacion|programad|dia|hora|texto|copy|contenido|caption)/.test(q);
+  const followup=Boolean(context?.kind==="social_schedule"&&/(dia|hora|cuando|que dia|a que hora|y hora|texto|copy|contenido|caption|que pone)/.test(q));
   const network=explicit||(followup?norm(context?.network??""):null);
   return scheduleIntent&&network?network:null;
 }
@@ -168,7 +171,8 @@ async function nextSocialPublication(network:string){
   const live=await liveSocialSchedule();
   if(live.ok){
     const target=norm(network);
-    const candidates=live.items.filter((x:any)=>norm(String(x?.channel??""))===target);
+    const now=Date.now();
+    const candidates=live.items.filter((x:any)=>norm(String(x?.channel??""))===target&&["READY_PROVIDER","SCHEDULED"].includes(String(x?.state??""))&&new Date(String(x?.scheduled_at??"")).getTime()>=now);
     if(candidates.length){
       const item=candidates[0];
       return {ok:true,item:{
@@ -181,6 +185,7 @@ async function nextSocialPublication(network:string){
         external_post_id:item?.external_post_id?String(item.external_post_id):null,
         verified_at:item?.last_verified_at?String(item.last_verified_at):null,
         provider_error:item?.last_provider_error?String(item.last_provider_error):null,
+        caption:String(item?.caption??""),
         as_of:live.as_of
       }} as const;
     }
@@ -216,17 +221,54 @@ async function nextSocialPublication(network:string){
   return {ok:true,item:null} as const;
 }
 
+async function socialPublicationByContext(context?:CerebroReadContext|null){
+  if(!context?.content_key&&!context?.external_post_id)return null;
+  const live=await liveSocialSchedule();
+  if(!live.ok)return null;
+  const item=live.items.find((x:any)=>
+    (context.content_key&&String(x?.content_key??"")===context.content_key)||
+    (context.external_post_id&&String(x?.external_post_id??"")===context.external_post_id)
+  );
+  if(!item)return null;
+  return {
+    title:String(item?.content_key??""),network:displayNetwork(String(item?.channel??context.network)),
+    date:String(item?.scheduled_at??context.scheduled_at??""),url:"",source:"CEREBRO_SOCIAL_QUEUE",
+    state:String(item?.state??""),external_post_id:item?.external_post_id?String(item.external_post_id):null,
+    verified_at:item?.last_verified_at?String(item.last_verified_at):null,
+    provider_error:item?.last_provider_error?String(item.last_provider_error):null,
+    caption:String(item?.caption??""),as_of:live.as_of
+  };
+}
 async function queryOperationalSocialSchedule(question:string,context?:CerebroReadContext|null){
   const network=detectSocialScheduleQuery(question,context);
   if(!network)return null;
   const display=displayNetwork(network);
-  const result=await nextSocialPublication(network);
+  const wantsText=/(texto|copy|contenido|caption|que pone|qué pone)/.test(norm(question));
+  const preserved=wantsText?await socialPublicationByContext(context):null;
+  const result=preserved?{ok:true,item:preserved}:await nextSocialPublication(network);
   const read_context:CerebroReadContext={kind:"social_schedule",network:display};
   if(!result.ok){
     return {status:"ERROR",intent:"social_schedule",executed:false,read_context,reason:result.error,message:"No he podido consultar ahora mismo la Programación Editorial operativa de "+display+". No voy a sustituirla por una búsqueda general de Notion."};
   }
   if(!result.item){
     return {status:"OK",intent:"social_schedule",executed:false,read_context,message:"Ahora mismo no hay ninguna publicación operativa de "+display+" programada a partir de este momento en Programación Editorial."};
+  }
+  read_context.content_key=result.item.title||undefined;
+  read_context.external_post_id=result.item.external_post_id??null;
+  read_context.scheduled_at=result.item.date||undefined;
+  if(wantsText){
+    if(result.item.source==="CEREBRO_SOCIAL_QUEUE"&&result.item.caption){
+      return {
+        status:"OK",intent:"social_schedule_detail",executed:false,read_context,
+        message:result.item.caption,
+        source:{system:"CEREBRO Social",data_source:"cerebro_social_queue_preprod",as_of:result.item.as_of}
+      };
+    }
+    return {
+      status:"OK",intent:"social_schedule_detail",executed:false,read_context,
+      message:"Tengo identificada la publicación, pero la fuente consultada no contiene todavía el texto completo. No voy a inventarlo.",
+      source: result.item.source==="CEREBRO_SOCIAL_QUEUE" ? {system:"CEREBRO Social",data_source:"cerebro_social_queue_preprod",as_of:result.item.as_of} : {system:"Notion",data_source:"Programación Editorial",url:result.item.url}
+    };
   }
   return {
     status:"OK",intent:"social_schedule",executed:false,read_context,

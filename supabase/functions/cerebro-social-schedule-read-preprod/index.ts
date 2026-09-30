@@ -32,11 +32,12 @@ Deno.serve(async(req)=>{
     if(!U||!S)return J({ok:false,error:"server_config_missing"},503);
     if(!await verify(req))return J({ok:false,error:"signature_invalid"},401);
     const db=createClient(U,S,{auth:{persistSession:false,autoRefreshToken:false}});
-    const now=new Date().toISOString();
+    const now=new Date();
+    const recentFloor=new Date(now.getTime()-7*86400000).toISOString();
     const {data,error}=await db.from("cerebro_social_queue_preprod")
-      .select("channel,content_key,scheduled_at,state,external_post_id,provider_channel_id,last_verified_at,last_provider_error")
+      .select("channel,content_key,scheduled_at,state,external_post_id,provider_channel_id,last_verified_at,last_provider_error,caption,public_media_url,media_urls")
       .eq("company_id","fenix-capital").eq("environment","PREPROD")
-      .gte("scheduled_at",now).in("state",["READY_PROVIDER","SCHEDULED"])
+      .gte("scheduled_at",recentFloor).in("state",["READY_PROVIDER","SCHEDULED","PUBLISHED"])
       .order("scheduled_at",{ascending:true}).limit(100);
     if(error)return J({ok:false,error:"queue_read_failed"},500);
     return J({ok:true,source:"cerebro_social_queue_preprod",as_of:new Date().toISOString(),items:data??[]});

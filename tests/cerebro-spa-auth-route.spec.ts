@@ -18,6 +18,12 @@ test('CEREBRO is served by the authenticated SPA route, not a shadow static page
   expect(knowledge).toContain('Programación Editorial');
   expect(knowledge).toContain('cerebro-social-schedule-read-preprod');
   expect(knowledge).toContain('CEREBRO_SOCIAL_QUEUE');
+  expect(knowledge).toContain('texto|copy|contenido|caption|que pone');
+  expect(knowledge).toContain('message:result.item.caption');
+  expect(knowledge).toContain('content_key?:string');
+  expect(knowledge).toContain('(^|[^a-z0-9])x([^a-z0-9]|$)');
+  expect(knowledge).toContain('socialPublicationByContext');
+  expect(knowledge).toContain('caption:String(item?.caption??"")');
   expect(knowledge).toContain('DOMAIN_CANONICAL');
   expect(knowledge).toContain('Conocimiento financiero canónico · Fénix Uno');
   expect(knowledge).toContain('Company Registry · CEREBRO · Fénix Capital');
