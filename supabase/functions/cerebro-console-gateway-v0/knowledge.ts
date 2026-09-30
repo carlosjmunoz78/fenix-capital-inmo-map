@@ -119,7 +119,7 @@ function detectSocialScheduleQuery(question:string,context?:CerebroReadContext|n
   const networks=["facebook","instagram","linkedin","tiktok","youtube"];
   const explicit=networks.find(n=>q.includes(n))||(/(^|\\s)x($|\\s)/.test(q)?"x":undefined);
   const scheduleIntent=/(proxima|siguiente|cuando|sale|publicacion|programad|dia|hora|texto|copy|contenido|caption)/.test(q);
-  const followup=Boolean(context?.kind==="social_schedule"&&/(dia|hora|cuando|que dia|a que hora|y hora)/.test(q));
+  const followup=Boolean(context?.kind==="social_schedule"&&/(dia|hora|cuando|que dia|a que hora|y hora|texto|copy|contenido|caption|que pone)/.test(q));
   const network=explicit||(followup?norm(context?.network??""):null);
   return scheduleIntent&&network?network:null;
 }
