@@ -22,6 +22,8 @@ export type CerebroPendingAction={
   scope:Record<string,string>;
   summary:string;
   proposal_hash:string;
+  proposal_issued_at:number;
+  proposal_token:string;
 };
 
 export type CerebroConsoleChatResponse={
