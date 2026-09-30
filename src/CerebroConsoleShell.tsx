@@ -11,6 +11,7 @@ type ChatLine={role:'user'|'cerebro';text:string};
 
 export default function CerebroConsoleShell(){
  const location=useLocation(),navigate=useNavigate();
+ const isCerebroPath=location.pathname.replace(/\/+$/,'')==='/cerebro';
  const configured=cerebroConsoleLinkEnabled();
  const [gatewayState,setGatewayState]=useState<GatewayState>(configured?'checking':'closed');
  const [health,setHealth]=useState<CerebroConsoleHealth|null>(null);
@@ -20,14 +21,14 @@ export default function CerebroConsoleShell(){
  const [pendingAction,setPendingAction]=useState<CerebroPendingAction|null>(null);
 
  useEffect(()=>{
-  if(location.pathname!=='/cerebro')return;
+  if(!isCerebroPath)return;
   document.documentElement.dataset.cerebroConsole='1';
   return()=>{delete document.documentElement.dataset.cerebroConsole};
- },[location.pathname]);
+ },[isCerebroPath]);
 
  useEffect(()=>{
   let cancelled=false;
-  if(location.pathname!=='/cerebro'||!configured){setGatewayState('closed');setHealth(null);return}
+  if(!isCerebroPath||!configured){setGatewayState('closed');setHealth(null);return}
   setGatewayState('checking');
   fetchCerebroConsoleHealth().then(({status,data})=>{
    if(cancelled)return;
@@ -36,9 +37,9 @@ export default function CerebroConsoleShell(){
    setGatewayState(safe?'ready':'error');
   });
   return()=>{cancelled=true};
- },[configured,location.pathname]);
+ },[configured,isCerebroPath]);
 
- if(location.pathname!=='/cerebro')return null;
+ if(!isCerebroPath)return null;
  const ready=gatewayState==='ready';
  const chatReady=Boolean(ready&&health?.chat_available&&['DETERMINISTIC_READ_ONLY','OWNER_DECISION_BY_EXCEPTION_V1'].includes(health?.chat_mode||''));
  const title=ready?'Transporte autenticado verificado':gatewayState==='checking'?'Verificando CEREBRO Gateway…':'Superficie preparada, conexión cerrada';
