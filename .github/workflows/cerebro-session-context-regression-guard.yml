@@ -70,7 +70,7 @@ jobs:
           grep -F 'mándaselo|enviaselo|envíaselo' supabase/functions/cerebro-console-gateway-v0/index.ts >/dev/null
           grep -F 'Próxima publicación de' supabase/functions/cerebro-console-gateway-v0/index.ts >/dev/null
           grep -F 'read_context.caption=result.item.caption' supabase/functions/cerebro-console-gateway-v0/knowledge.ts >/dev/null
-          grep -F 'publicacion|post|programada' supabase/functions/cerebro-console-gateway-v0/knowledge.ts >/dev/null
+          grep -F '|publicacion|post|programada|' supabase/functions/cerebro-console-gateway-v0/knowledge.ts >/dev/null
           grep -F 'socialShareIntent' supabase/functions/cerebro-console-gateway-v0/index.ts >/dev/null
           grep -F 'Prepararé el email con el texto, la fecha, la hora y la imagen de la publicación.' supabase/functions/cerebro-console-gateway-v0/index.ts >/dev/null
           grep -F 'fenix_prod_cerebro_contact_search_server' supabase/functions/cerebro-console-gateway-v0/index.ts >/dev/null
