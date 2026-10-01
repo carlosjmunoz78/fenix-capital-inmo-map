@@ -106,9 +106,11 @@ jobs:
           grep -F 'speechSynthesis' src/cerebroVoice.ts >/dev/null
           grep -F 'VOICE_CONFIRMATION_CONFIDENCE_MIN=0.85' src/cerebroVoice.ts >/dev/null
           grep -F 'voiceNeedsManualConfirmation' src/CerebroConsoleShell.tsx >/dev/null
-          grep -F 'La transcripción aparecerá antes de enviarse.' src/CerebroConsoleShell.tsx >/dev/null
+          grep -F 'Hablar con CEREBRO' src/CerebroConsoleShell.tsx >/dev/null
+          grep -F 'volverá a escucharte automáticamente' src/CerebroConsoleShell.tsx >/dev/null
+          grep -F 'scheduleListening(300)' src/CerebroConsoleShell.tsx >/dev/null
           grep -F 'Escribe «Sí» manualmente' src/CerebroConsoleShell.tsx >/dev/null
-          grep -F 'Escribe o dicta a CEREBRO' src/CerebroConsoleShell.tsx >/dev/null
+          grep -F "['not-allowed','service-not-allowed','audio-capture']" src/CerebroConsoleShell.tsx >/dev/null
 
       - name: Build app
         shell: bash
