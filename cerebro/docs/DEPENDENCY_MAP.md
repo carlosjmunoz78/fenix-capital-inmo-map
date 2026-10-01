@@ -63,3 +63,15 @@ Before wiring persistent `EVT-001`/`JOB-001` into `SharedRuntime`, require expli
 - Durable learning is explicit only. Session corrections may be applied ephemerally; persistence requires an explicit instruction such as `guárdalo`, `recuérdalo` or `a partir de ahora...`.
 - Existing `fenix-memory-api` is preserved for entity/CRM relationship memory and is not replaced or overloaded by this preference layer.
 - Preference writes are a narrowly scoped exception to the Console reference rule of no operational Supabase writes; they do not authorize business-action writes, permission changes or autonomous PROD execution.
+
+
+## Conversational Learning + Dynamic Prosody V1 · 2026-10-01
+
+- Flujo de memoria: `CONSOLE-001 → ACTGW-001 → RPC server-only → fenix_prod.cerebro_conversation_memory`.
+- Cada recuerdo queda acotado por actor/company y registra `engine_id`, `environment` y `version`; no sustituye la memoria de entidades/CRM ni el conocimiento canónico de Notion.
+- Los turnos relevantes y no sensibles del propietario se observan automáticamente; los duplicados se consolidan mediante hash y `seen_count`.
+- Las consultas explícitas de recuerdo pueden recuperar memoria conversacional de sesiones anteriores. Para estado operativo, las fuentes vivas/canónicas conservan prioridad sobre recuerdos de conversación.
+- Audio y valores sensibles quedan fuera de esta memoria general.
+- La voz mantiene el ritmo base existente y añade prosodia determinista por segmentos mediante `speechSynthesis`: pequeñas variaciones de rate/pitch para preguntas, confirmaciones, listas y mensajes de riesgo.
+- Estas escrituras internas de aprendizaje son una excepción acotada de service-role; no habilitan escrituras de negocio, ampliación de permisos ni autonomía PROD.
+- `fenix-memory-api` existente permanece intacta para memoria relacional/CRM; no se sustituye.
