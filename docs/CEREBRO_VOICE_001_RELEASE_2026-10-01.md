@@ -52,3 +52,24 @@ Do not roll back the already validated Gateway unless independent backend eviden
 10. Verify keyboard remains usable.
 
 Do not mark CONFIRMED_OPERATIONAL until physical acceptance succeeds.
+
+
+## Physical acceptance feedback · improvement pass
+User verified the initial voice loop works in PROD.
+
+Observed UX gaps:
+- Recognition/understanding should be more tolerant of full natural utterances and Fénix/CEREBRO domain vocabulary.
+- While CEREBRO is speaking, the user needs an explicit way to stop the spoken response without ending the whole voice session.
+
+Improvement promoted from PR #456:
+- Up to 3 recognition alternatives per segment.
+- Best-confidence alternative selected per segment.
+- All result segments are concatenated; the frontend no longer risks sending only the final segment.
+- Optional zero-cost contextual speech hints for CEREBRO/Fénix/domain vocabulary when the browser supports SpeechRecognitionPhrase.
+- New visible “Parar respuesta y hablar” control: cancels TTS immediately and resumes listening while keeping the conversation active.
+- Existing low-confidence action-confirmation safety remains unchanged.
+
+Validation:
+- CEREBRO Session Context Regression Guard #117: SUCCESS.
+- App Restoration Build Gate #369: SUCCESS.
+- Rollback source before this improvement deployment: 79e0440e9d5615b4cbd8a6b7a5d2de32bfea3e4e.
