@@ -65,3 +65,12 @@ Evidence anchors are scoped to the change they prove; they are not intended to m
 - La persistencia física `corrección → guárdalo → recarga/nueva sesión → preferencia recuperada` requiere prueba humana real antes de `CONFIRMED_OPERATIONAL`.
 - El carácter textual completo (por ejemplo preferred/avoid address y status-first en toda respuesta) está soportado como preferencia estructurada, pero no debe declararse aplicado universalmente hasta ampliar/verificar cada transformación.
 - La interrupción por palabra hablada «para» mientras TTS está hablando permanece PLANIFICADA; el botón de interrupción sí existe.
+
+
+### PROD deployment closure · 2026-10-01
+- Frontend Exact PROD Source: `7fad08ac3225e89cbf3aa5a732674201dc67a8e6`.
+- PROD Live Deploy #159: SUCCESS.
+- PROD Runtime Smoke #302: SUCCESS.
+- `gh-pages/PROD_SOURCE_SHA.txt` verificado exactamente como `7fad08ac3225e89cbf3aa5a732674201dc67a8e6`.
+- Explicit Learning V1 pasa de promoción pendiente a **PARCIAL desplegado en PROD**.
+- Falta únicamente la aceptación física del flujo persistente entre sesiones para poder elevar ese flujo a `CONFIRMED_OPERATIONAL`.
