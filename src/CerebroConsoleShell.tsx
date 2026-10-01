@@ -4,7 +4,7 @@ import {BrainCircuit,ChevronLeft,Mic,MicOff,Send,ShieldCheck,Square} from 'lucid
 import {cerebroConsoleLinkEnabled} from './cerebroConsoleAccess';
 import {fetchAppApi,supabase} from './supabase';
 import {fetchCerebroConsoleHealth,fetchCerebroConsolePreferences,postCerebroConsoleChat,type CerebroConsoleHealth,type CerebroLearningCandidate,type CerebroPendingAction,type CerebroPreferences,type CerebroReadContext} from './cerebroConsoleApi';
-import {applyVoiceContextHints,createVoiceRecognition,spanishVoices,speechSegments,speechSynthesisSupported,voiceNeedsManualConfirmation,voiceRecognitionSupported,type CerebroSpeechRecognition} from './cerebroVoice';
+import {applyVoiceContextHints,createVoiceRecognition,spanishVoices,speechSegments,speechSynthesisSupported,voiceNeedsManualConfirmation,voiceRecognitionSupported,type CerebroSpeechRecognition,type CerebroSpokenMeta} from './cerebroVoice';
 import './cerebro-console.css';
 
 const CONTEXTS=['GENERAL','EMPRESA','ENGINE','CRM','APP','SEO','MARKETING','TRAINING','AUTOMATION'];
@@ -148,10 +148,10 @@ export default function CerebroConsoleShell(){
   setVoiceError('');
  }
 
- function speakAndResume(text:string,fullDetail=false){
+ function speakAndResume(text:string,fullDetail=false,meta:CerebroSpokenMeta={}){
   if(!voiceSessionRef.current)return;
-  const maxChars=fullDetail?520:(voicePreferencesRef.current.response_length==='concise'?360:520);
-  const segments=speechSegments(text,maxChars,voicePreferencesRef.current,fullDetail?'action':'normal');
+  const maxChars=fullDetail?560:(voicePreferencesRef.current.response_length==='concise'?420:560);
+  const segments=speechSegments(text,maxChars,voicePreferencesRef.current,fullDetail?'action':'normal',meta);
   if(!segments.length){scheduleListening();return}
   stopRecognition();
   if(!voiceSupport.tts){
@@ -237,7 +237,7 @@ export default function CerebroConsoleShell(){
    setLines(current=>[...current,{role:'cerebro',text:response,mediaUrl}]);
    sendingRef.current=false;
    setSending(false);
-   if(voiceSessionRef.current)speakAndResume(response,Boolean(data?.status?.startsWith('ACTION_')));
+   if(voiceSessionRef.current)speakAndResume(response,Boolean(data?.status?.startsWith('ACTION_')),data??{});
   }catch{
    const response='No he podido contactar con CEREBRO Gateway.';
    setLines(current=>[...current,{role:'cerebro',text:response}]);
