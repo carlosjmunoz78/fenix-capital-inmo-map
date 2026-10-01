@@ -89,6 +89,19 @@ function cleanText(value:string){
   return normalize(value).replace(/^[¿¡?!.]+/g, "").replace(/[?!.]+$/g, "").trim();
 }
 
+function closeOwnerGreeting(){
+  const variants=[
+    "Hola, Carlos. ¿Qué tal, guapo? Dime, ¿qué hacemos?",
+    "¡Buenas, Carlos! Aquí estoy, guapo. ¿Qué necesitas?",
+    "Hola, guapo. Dime, Carlos, ¿por dónde empezamos?",
+    "¡Muy buenas, Carlos! ¿Cómo va, guapo? Cuéntame.",
+    "Ey, Carlos. ¿Qué tal, guapo? Estoy aquí. ¿Qué vemos?",
+    "Hola, Carlos, guapo. Dime qué tienes entre manos."
+  ];
+  const slot=Math.floor(Date.now()/15000)%variants.length;
+  return variants[slot];
+}
+
 async function sha256(value:string){
   const bytes=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(value));
   return [...new Uint8Array(bytes)].map(b=>b.toString(16).padStart(2,"0")).join("");
@@ -707,8 +720,11 @@ async function chatReply(req:Request,message:string,pendingRaw:unknown,readConte
     };
   }
 
-  if (/^(hola|ayuda|help|que puedes hacer)$/.test(text)) {
-    return {status:"OK",intent:"help",executed:false,message:"Puedes consultarme información sin activar cambios. Si pides una acción, te propondré el alcance exacto y solo la ejecutaré después de tu «sí». Si aparece una excepción humana, te explicaré el motivo y la forma exacta de resolverla."};
+  if (/^(hola|buenas|buenos dias|buenas tardes|buenas noches|hey|ey)$/.test(text)) {
+    return {status:"OK",intent:"greeting",executed:false,message:closeOwnerGreeting()};
+  }
+  if (/^(ayuda|help|que puedes hacer)$/.test(text)) {
+    return {status:"OK",intent:"help",executed:false,message:"Claro. Puedes preguntarme por lo que sé, pedirme que te lo explique por temas o decirme qué quieres hacer. Si una acción real necesita tu decisión, te enseñaré exactamente el alcance antes de pedirte confirmación."};
   }
   if (/^(estado|estado de cerebro|salud|health|conexion|estas conectado|esta conectado|cerebro esta conectado)$/.test(text)) {
     return {status:"OK",intent:"health",executed:false,message:"CEREBRO Gateway está disponible por transporte autenticado. Este canal móvil sigue en LAB y no tiene escrituras PROD directas."};
@@ -936,7 +952,7 @@ export default {
     if(req.method!=="GET")return json(req,405,{status:"CLOSED",reason:"ROUTE_NOT_AVAILABLE"});
 
     if(suffix==="health")return json(req,200,{
-      status:"ok",service:"cerebro-console-gateway-v0",environment:"LAB",version:"0.7.0-conversational-learning-v1",
+      status:"ok",service:"cerebro-console-gateway-v0",environment:"LAB",version:"0.8.0-human-dialogue-knowledge-v1",
       authenticated_transport:true,direct_model_access:false,prod_execution_enabled:false,live_writes:false,
       chat_available:true,chat_mode:"OWNER_DECISION_BY_EXCEPTION_V1",additional_cost_target_eur:0
     });

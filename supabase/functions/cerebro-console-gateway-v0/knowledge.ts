@@ -21,6 +21,9 @@ const CEREBRO_AUDIT_PAGE_ID="3e681b1a-756d-8104-9733-fefac3619902";
 const FINOPS_PAGE_ID="3e781b1a-756d-8156-9840-fe833e6accc7";
 const TRADING_ISOLATION_PAGE_ID="3d081b1a-756d-81f6-83d1-f9c676f90050";
 const REGISTRY_AUDIT_PAGE_ID="3e781b1a-756d-8117-abb1-d5df7145428d";
+const LEGAL_QUALITY_PAGE_ID="3bf81b1a-756d-81e6-b4d5-eaeb99a8152e";
+const BELEN_MASTER_PAGE_ID="3be81b1a-756d-81b6-a75f-cb6bbe842766";
+const INHERITANCE_MASTER_PAGE_ID="3c781b1a-756d-8178-8950-e2c6b740df68";
 const NH={Authorization:`Bearer ${N}`,"Notion-Version":NV,"Content-Type":"application/json"};
 
 const CANONICAL_PAGES=[
@@ -65,11 +68,17 @@ const DOMAIN_CANONICAL:Record<string,{id:string,title:string}[]>={
   seo:[
     {id:SEO_LATEST_AUDIT_PAGE_ID,title:"Auditoría SEO/Web semanal · Fénix Capital · 28/09/2026"},
     {id:MARKETING_MASTER_PAGE_ID,title:"Motor maestro · Estrategia SEO, contenidos, embudos y redes"}
+  ],
+  legal:[
+    {id:LEGAL_QUALITY_PAGE_ID,title:"Fiscal y legal sensible · Contrato de calidad PRE-PROD"},
+    {id:BELEN_MASTER_PAGE_ID,title:"Base Maestra Belén · Motor financiero CEREBRO"},
+    {id:INHERITANCE_MASTER_PAGE_ID,title:"APP Fénix · Herencias · Ficha maestra guiada por Ana · Especificación PRE-PROD"}
   ]
 };
 
 function detectKnowledgeDomain(question:string){
   const q=norm(question);
+  if(/\b(?:legal(?:es)?|juridic[oa]s?|arras|compraventa|cargas? registrales?|registro de la propiedad|notari[oa]s?|notariales?|herencias?|donaciones?|itp|plusvalia|catastro|embargos?|titularidad|urbanismo|blanqueo|aml)\b/.test(q))return "legal";
   if(/hipoteca|banco|financi|tin|tae|cuota|fein|tasacion|ingresos|endeudamiento/.test(q))return "finance";
   if(/newsletter|brevo|campana de email|campaña de email|email marketing/.test(q))return "newsletter";
   if(/redes sociales|facebook|instagram|linkedin|tiktok|youtube|buffer|publicacion social|publicación social/.test(q))return "social";
@@ -508,8 +517,84 @@ function compact(value:string,maxLines:number){
   return value.split("\n").map(x=>x.trim()).filter(Boolean).slice(0,maxLines).join("\n");
 }
 
+function broadKnowledgeQuestion(question:string){
+  const q=norm(question);
+  return /(que sabes|que conoces|cuanto sabes|en que me puedes ayudar|que puedo preguntarte|que temas controlas|que temas conoces|hazme un esquema|dame un esquema|dame un mapa|todo lo que sabes)/.test(q);
+}
+
+function domainKnowledgeMap(domain:string){
+  const maps:Record<string,{intent:string;message:string}>={
+    finance:{
+      intent:"finance_knowledge_map",
+      message:"Claro. En financiación puedo ayudarte con preanálisis y viabilidad, ingresos y endeudamiento, documentación, perfiles de cliente, estrategia y ranking de bancos, financiación alta, tasación, incidencias, planes B/C/D, FEIN/firma y seguimiento del expediente. También separo lo que es criterio financiero validado de lo que necesita confirmación de banco, Belén o un profesional. ¿Sobre qué parte quieres entrar?"
+    },
+    seo:{
+      intent:"seo_knowledge_map",
+      message:"Claro. En SEO puedo ayudarte con auditoría técnica, palabras clave e intención, arquitectura, landings, contenidos, enlazado interno, SEO local, indexación, Search Console cuando haya datos disponibles, competencia, captación y seguimiento por ciudad. ¿Qué parte quieres revisar?"
+    },
+    marketing:{
+      intent:"marketing_knowledge_map",
+      message:"Claro. En marketing puedo trabajar estrategia, contenidos, embudos, captación orgánica, campañas, CRM/reactivación, referidos, reutilización multicanal, métricas de negocio y coordinación con SEO, redes y newsletter. ¿Por dónde quieres que empecemos?"
+    },
+    social:{
+      intent:"social_knowledge_map",
+      message:"Claro. En redes puedo revisar estrategia, calendario y cola operativa, próximas publicaciones, copy, creatividades, canales disponibles, Buffer, reutilización de contenidos y estado de automatización. ¿Qué quieres mirar exactamente?"
+    },
+    newsletter:{
+      intent:"newsletter_knowledge_map",
+      message:"Claro. En newsletter puedo trabajar las líneas de particulares e inmobiliarias, listas y segmentación en Brevo, campañas, automatizaciones, contenido, métricas y relación con CRM. ¿Qué parte quieres revisar?"
+    },
+    autonomy:{
+      intent:"autonomy_knowledge_map",
+      message:"Claro. Puedo explicarte qué hace CEREBRO solo, qué requiere confirmación, cuándo aparece HUMAN_REQUIRED, cómo se aprende de conversaciones y casos, y cómo se promociona una automatización hasta producción. ¿Qué parte de la autonomía quieres ver?"
+    },
+    platform:{
+      intent:"platform_knowledge_map",
+      message:"Claro. Puedo explicarte la arquitectura de CEREBRO, Gateway, Console, Supabase, runtime y workers, motores compartidos, observabilidad, costes, backups, rollback, PREPROD y promoción a producción. ¿En qué parte quieres entrar?"
+    },
+    trading:{
+      intent:"trading_knowledge_map",
+      message:"Claro. Puedo explicarte el perímetro de Trading LAB, aislamiento de credenciales y recursos, límites, logs, watchdog, circuit breaker, kill switch y reglas para que nunca comprometa producción. ¿Qué parte quieres revisar?"
+    },
+    multiempresa:{
+      intent:"multiempresa_knowledge_map",
+      message:"Claro. Puedo explicarte el alta de una empresa, descubrimiento del negocio, web y keywords, SEO, competencia, redes, marketing, conocimiento, CRM, App, automatizaciones, training, supervisor, backup y paso a producción. ¿Sobre qué fase quieres preguntar?"
+    }
+  };
+  const item=maps[domain];
+  return item?{status:"OK",intent:item.intent,executed:false,message:item.message,evidence_mode:"DOMAIN_KNOWLEDGE_MAP_V1"}:null;
+}
+
+function legalKnowledgeMap(){
+  return {
+    status:"OK",
+    intent:"legal_knowledge_map",
+    executed:false,
+    message:"Pues bastante, pero lo separo por nivel de validación para no mezclar conocimiento operativo con criterio jurídico definitivo. Puedes preguntarme por:\n\n1. Arras y compraventa: plazos, coordinación, documentación, señales de riesgo y qué revisar antes de comprometer dinero.\n2. Titularidad, cargas y Registro de la Propiedad: nota simple, titulares, hipotecas, embargos, cancelaciones y discrepancias registrales.\n3. Registro frente a Catastro: metros, uso, parcela y coherencia documental; el motor de Catastro todavía no está plenamente operativo.\n4. Notaría y firma: preparación previa, FEIN/acta cuando aplique, documentación, coordinación, forma de pago y cierre; la parte notarial sigue parcialmente desarrollada.\n5. Herencias: flujo administrativo, documentación, intervinientes, seguimiento y preparación de firma, separando lo jurídico, fiscal, registral y notarial sensible.\n6. Donaciones y aportaciones familiares: cómo detectar la estructura, titularidades y posibles riesgos; cualquier consecuencia fiscal o jurídica concreta exige fuente vigente y, si corresponde, profesional.\n7. Fiscalidad de operaciones inmobiliarias: ITP, donaciones, herencias y otros impactos relacionados. No convierto porcentajes recordados o ejemplos en reglas universales sin verificar territorio, fecha y fuente oficial.\n8. Riesgos del inmueble: cargas, obra nueva, herencias sin resolver, discrepancias de metros, titularidad y otros bloqueos que pueden afectar compraventa o financiación.\n9. Prevención de blanqueo y compliance: detección de señales y escalado, sin inferir delitos ni automatizar decisiones sensibles.\n\nSi quieres, dime uno de esos temas o cuéntame el caso concreto y entro al detalle.",
+    sources:[
+      {notion_page_id:LEGAL_QUALITY_PAGE_ID,title:"Fiscal y legal sensible · Contrato de calidad PRE-PROD"},
+      {notion_page_id:BELEN_MASTER_PAGE_ID,title:"Base Maestra Belén · Motor financiero CEREBRO"},
+      {notion_page_id:INHERITANCE_MASTER_PAGE_ID,title:"APP Fénix · Herencias · Ficha maestra guiada por Ana · Especificación PRE-PROD"}
+    ],
+    evidence_mode:"CANONICAL_LEGAL_MAP_V1"
+  };
+}
+
+function clarificationMessage(domain:string|null){
+  if(domain==="legal")return "No estoy segura de qué parte legal inmobiliaria quieres tratar. ¿Te refieres a arras/compraventa, cargas y Registro, notaría, herencias, donaciones/fiscalidad o a un caso concreto?";
+  if(domain==="finance")return "No he entendido qué parte financiera quieres revisar. ¿Te refieres a viabilidad, documentación, banco, tasación, FEIN/firma o a un expediente concreto?";
+  if(domain==="seo")return "No he entendido qué parte de SEO quieres revisar. ¿Quieres estado actual, una zona concreta, palabras clave, contenidos, enlazado, SEO local o un problema técnico?";
+  return "No te he entendido del todo. ¿Quieres que te explique un tema, que consulte el conocimiento de Fénix o que prepare una acción concreta?";
+}
+
 async function directDomainAnswer(question:string,domain:string|null){
   const q=norm(question);
+
+  if(domain==="legal"&&broadKnowledgeQuestion(question))return legalKnowledgeMap();
+  if(domain&&domain!=="legal"&&broadKnowledgeQuestion(question)){
+    const map=domainKnowledgeMap(domain);
+    if(map)return map;
+  }
 
   if(domain==="finance"&&/(documentacion|documentos|papeles)/.test(q)&&/(hipoteca|estudiar|preanalisis)/.test(q)){
     const body=await pageText(FINANCE_PREANALYSIS_PAGE_ID);
@@ -626,7 +711,7 @@ export async function queryCerebroKnowledge(req:Request,question:string,context?
   }
 
   const qTokens=tokens(question);
-  if(!qTokens.length)return {status:"LOW_CONFIDENCE",reason:"QUERY_TOO_GENERIC",executed:false,message:"La consulta es demasiado general. Dime el tema concreto que quieres consultar."};
+  if(!qTokens.length)return {status:"LOW_CONFIDENCE",intent:"clarification",reason:"QUERY_TOO_GENERIC",executed:false,message:clarificationMessage(domain)};
 
   const candidates=new Map<string,{id:string,title:string,page:any}>();
   for(const term of qTokens.slice(0,3)){
@@ -667,7 +752,7 @@ export async function queryCerebroKnowledge(req:Request,question:string,context?
   const top=ranked.slice(0,3);
   if(!top.length){
     if(learned.length)return conversationMemoryResponse(learned);
-    return {status:"NO_KNOWLEDGE_MATCH",intent:"knowledge",executed:false,message:"No he encontrado evidencia suficiente en el conocimiento autorizado de CEREBRO para responder con seguridad. No voy a inventarla.",sources:[]};
+    return {status:"LOW_CONFIDENCE",intent:"clarification",executed:false,message:clarificationMessage(domain),sources:[]};
   }
 
   const memoryLines=learned.slice(0,2).map((x:any,i:number)=>`M${i+1}. En conversación: ${String(x.content).trim()}`);
