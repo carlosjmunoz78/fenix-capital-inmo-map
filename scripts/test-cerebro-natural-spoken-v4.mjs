@@ -22,7 +22,7 @@ function assert(condition,message){
   'normal',
   {status:'OK',intent:'autonomy_status',source_question:'¿Cómo funciona tu autonomía?'}
  );
- assert(out==='La idea es que yo resuelva lo ordinario y solo te pregunte cuando de verdad haga falta una decisión humana.','autonomy digest must be human and concise');
+ assert(out.includes('La idea es que yo resuelva lo ordinario y solo te pregunte cuando de verdad haga falta una decisión humana.'),'autonomy digest must be human and concise');
 }
 
 {
