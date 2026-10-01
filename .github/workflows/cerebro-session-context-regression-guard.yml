@@ -110,8 +110,8 @@ jobs:
           grep -F "VOICE_CONFIRMATION_PHRASES=new Set(['si','si adelante','adelante','confirmo','activalo','activarlo','hazlo','procede'])" src/cerebroVoice.ts >/dev/null
           grep -F 'voiceNeedsManualConfirmation' src/CerebroConsoleShell.tsx >/dev/null
           grep -F 'Hablar con CEREBRO' src/CerebroConsoleShell.tsx >/dev/null
-          grep -F 'Puedes decir «para», «stop» o «calla» para interrumpirla y hablar.' src/CerebroConsoleShell.tsx >/dev/null
-          grep -F 'scheduleListening(300)' src/CerebroConsoleShell.tsx >/dev/null
+          grep -F 'Empieza a hablar para interrumpirla; no necesitas esperar ni tocar el botón.' src/CerebroConsoleShell.tsx >/dev/null
+          grep -F 'scheduleListening(180)' src/CerebroConsoleShell.tsx >/dev/null
           grep -F 'transcripción de baja confianza' src/CerebroConsoleShell.tsx >/dev/null
           grep -F "['not-allowed','service-not-allowed','audio-capture']" src/CerebroConsoleShell.tsx >/dev/null
           grep -F 'recognition.maxAlternatives=3' src/CerebroConsoleShell.tsx >/dev/null
@@ -126,6 +126,7 @@ jobs:
           node scripts/verify-cerebro-spoken-summary.mjs
           node scripts/test-cerebro-spoken-summary-v2.mjs
           node scripts/test-cerebro-voice-barge-in.mjs
+          node scripts/test-cerebro-vad-barge-in.mjs
 
       - name: Build app
         shell: bash
