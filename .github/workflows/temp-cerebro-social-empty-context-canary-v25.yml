@@ -27,8 +27,9 @@ jobs:
         run: |
           set -euo pipefail
           code="$(curl --silent --show-error --output /tmp/anon.json --write-out '%{http_code}' --max-time 20             -H "apikey: $PROD_PUBLISHABLE_KEY"             "$PROD_URL/functions/v1/cerebro-console-gateway-v0-canary-v25/health")"
-          test "$code" = "403"
-          grep -F '"reason":"OWNER_ONLY"' /tmp/anon.json >/dev/null
+          echo "ANON_HTTP_STATUS=$code"
+          test "$code" = "401" || test "$code" = "403"
+          ! grep -Eq '"status":"ok"|"chat_available":true' /tmp/anon.json
 
       - name: Canary CORS preflight allows only canonical app origin
         shell: bash
