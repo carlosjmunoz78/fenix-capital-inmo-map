@@ -1,1 +1,24 @@
-import fs from 'node:fs';\n\nconst voice=fs.readFileSync('src/cerebroVoice.ts','utf8');\nconst shell=fs.readFileSync('src/CerebroConsoleShell.tsx','utf8');\n\nfunction must(haystack,needle,label){\n if(!haystack.includes(needle))throw new Error('Missing '+label+': '+needle);\n}\n\nmust(voice,"export function spokenResponseText",'spoken summary transformer');\nmust(voice,".replace(/https?:\\/\\/[^\\s]+/gi,' ')",'URL removal before TTS');\nmust(voice,"Te dejo el enlace por escrito.",'spoken link replacement');\nmust(voice,".replace(/(?:^|\\s)\\d+[.)]\\s+/g,' ')",'numbered-list marker stripping');\nmust(voice,"conciseSpokenUnits(units,maxChars,2)",'normal spoken summary cap');\nmust(voice,"finalQuestion",'action confirmation preservation');\nmust(voice,"mode:CerebroSpokenMode='normal'",'spoken mode contract');\nmust(shell,"fullDetail?'action':'normal'",'action-aware TTS mode');\nmust(shell,"voicePreferencesRef.current.response_length==='concise'?360:520",'short spoken budget');\n\nif(voice.includes(".replace(/https?:\\/\\/[^\\s]+/gi,' enlace disponible en pantalla ')") && !voice.includes('spokenResponseText')){\n throw new Error('Legacy URL-speaking path is still the active TTS path');\n}\n\nconsole.log('GREEN cerebro spoken summary contract');
+import fs from 'node:fs';
+
+const voice=fs.readFileSync('src/cerebroVoice.ts','utf8');
+const shell=fs.readFileSync('src/CerebroConsoleShell.tsx','utf8');
+
+function must(haystack,needle,label){
+ if(!haystack.includes(needle))throw new Error('Missing '+label+': '+needle);
+}
+
+must(voice,"export function spokenResponseText",'spoken summary transformer');
+must(voice,".replace(/https?:\\/\\/[^\\s]+/gi,' ')",'URL removal before TTS');
+must(voice,"Te dejo el enlace por escrito.",'spoken link replacement');
+must(voice,".replace(/(?:^|\\s)\\d+[.)]\\s+/g,' ')",'numbered-list marker stripping');
+must(voice,"conciseSpokenUnits(units,maxChars,2)",'normal spoken summary cap');
+must(voice,"finalQuestion",'action confirmation preservation');
+must(voice,"mode:CerebroSpokenMode='normal'",'spoken mode contract');
+must(shell,"fullDetail?'action':'normal'",'action-aware TTS mode');
+must(shell,"voicePreferencesRef.current.response_length==='concise'?360:520",'short spoken budget');
+
+if(voice.includes(".replace(/https?:\\/\\/[^\\s]+/gi,' enlace disponible en pantalla ')") && !voice.includes('spokenResponseText')){
+ throw new Error('Legacy URL-speaking path is still the active TTS path');
+}
+
+console.log('GREEN cerebro spoken summary contract');
