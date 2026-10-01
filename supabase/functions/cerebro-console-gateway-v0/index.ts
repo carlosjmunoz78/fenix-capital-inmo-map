@@ -33,6 +33,7 @@ const CONTRACT = {
   preference_writes: "EXPLICIT_USER_ONLY",
   durable_learning_mode: "EXPLICIT_PREFERENCES_PLUS_CONVERSATIONAL_MEMORY_V1",
   conversation_memory: "AUTO_BOUNDED_NON_SENSITIVE_USER_TURNS",
+  internal_learning_writes: "SERVICE_ROLE_BOUNDED",
 };
 
 type LearningCandidate = {
