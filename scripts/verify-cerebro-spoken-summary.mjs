@@ -10,7 +10,7 @@ function must(haystack,needle,label){
 must(voice,"export function spokenResponseText",'spoken summary transformer');
 must(voice,".replace(/https?:\\/\\/[^\\s]+/gi,' ')",'URL removal before TTS');
 must(voice,"Te dejo el enlace por escrito.",'spoken link replacement');
-must(voice,".replace(/(?:^|\\s)\\d+[.)]\\s+/g,' ')",'numbered-list marker stripping');
+must(voice,".replace(/^\\s*(?:[-*•▪◦]|\\d+[.)])\\s+/u,'')",'numbered-list marker stripping');
 must(voice,"function genericSummary(raw:string,units:SpokenUnit[],maxChars:number)",'semantic generic summary');
 must(voice,"finalQuestion",'action confirmation preservation');
 must(voice,"mode:CerebroSpokenMode='normal'",'spoken mode contract');
