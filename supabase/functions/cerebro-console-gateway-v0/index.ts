@@ -492,12 +492,22 @@ async function chatReply(req:Request,message:string,pendingRaw:unknown,readConte
     return {status:"OK",intent:"email_contact_lookup",executed:false,message:`He encontrado estos correos para «${contactQuery}»:\n${list}`};
   }
 
+  const socialContextHasPublication=(context:any)=>Boolean(
+    context?.kind==="social_schedule"&&(
+      context.content_key||
+      context.external_post_id||
+      context.scheduled_at||
+      context.caption||
+      context.public_media_url||
+      (Array.isArray(context.media_urls)&&context.media_urls.length)
+    )
+  );
   const socialShareCommand=/\b(mandasela|mandaselo|enviasela|enviaselo)\b/.test(text);
   if(socialShareCommand){
-    let socialContext=readContext?.kind==="social_schedule"?readContext:null;
+    let socialContext=readContext?.kind==="social_schedule"&&socialContextHasPublication(readContext)?readContext:null;
     if(!socialContext){
       const recovered:any=await queryCerebroKnowledge(req,"La próxima publicación de Facebook",null);
-      socialContext=recovered?.read_context?.kind==="social_schedule"?recovered.read_context:null;
+      socialContext=recovered?.read_context?.kind==="social_schedule"&&socialContextHasPublication(recovered.read_context)?recovered.read_context:null;
     }
     if(!socialContext){
       return {status:"ACTION_NEEDS_SCOPE",intent:"social_share_email",executed:false,message:"No tengo una publicación social operativa identificada para compartir. Dime qué publicación quieres enviar o vuelve a pedirme la próxima de Facebook."};
@@ -535,7 +545,7 @@ async function chatReply(req:Request,message:string,pendingRaw:unknown,readConte
     };
   }
 
-  if(readContext?.kind==="social_schedule" && /^[\p{L}.-]+(?:\s+[\p{L}.-]+){0,3}$/u.test(message.trim())){
+  if(readContext?.kind==="social_schedule" && socialContextHasPublication(readContext) && /^[\p{L}.-]+(?:\s+[\p{L}.-]+){0,3}$/u.test(message.trim())){
     const contactQuery=message.trim();
     const resolved=await resolveContacts(req,contactQuery);
     if(resolved.ok&&resolved.items.length){
