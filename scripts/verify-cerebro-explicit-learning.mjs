@@ -17,7 +17,7 @@ must(migration,'revoke all on fenix_prod.cerebro_user_preferences from public, a
 must(migration,'grant execute on function public.fenix_prod_cerebro_preference_upsert_server','service-role upsert');
 must(migration,"source = 'explicit_user_instruction'",'explicit-only provenance');
 must(migration,'supersedes uuid','audit lineage');
-must(gateway,'durable_learning_mode: "EXPLICIT_PREFERENCES_PLUS_CONVERSATIONAL_MEMORY_V1"','explicit preference plus conversational memory contract');
+must(gateway,'durable_learning_mode: "STRUCTURED_CONVERSATIONAL_MEMORY_V2"','explicit preference plus structured conversational memory contract');
 must(gateway,'function parseLearningCandidate','deterministic correction parser');
 must(gateway,'const persistOnly=','explicit save command');
 must(gateway,'const directPersist=','direct persistent instruction');

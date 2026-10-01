@@ -13,7 +13,7 @@ for(const phrase of ['Hola, Carlos','guapo','buenos dias','buenas tardes','buena
  assert(gateway.toLocaleLowerCase('es-ES').includes(phrase.toLocaleLowerCase('es-ES')),'greeting contract missing: '+phrase);
 }
 assert(gateway.includes('intent:"greeting"'),'greeting intent missing');
-assert(gateway.includes('0.8.0-human-dialogue-knowledge-v1'),'gateway version not advanced');
+assert(gateway.includes('0.9.0-conversational-intelligence-v2'),'gateway version not advanced');
 
 for(const phrase of [
  'legal_knowledge_map',

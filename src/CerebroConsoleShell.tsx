@@ -3,7 +3,7 @@ import {useLocation,useNavigate} from 'react-router-dom';
 import {BrainCircuit,ChevronLeft,Mic,MicOff,Send,ShieldCheck,Square} from 'lucide-react';
 import {cerebroConsoleLinkEnabled} from './cerebroConsoleAccess';
 import {fetchAppApi,supabase} from './supabase';
-import {fetchCerebroConsoleHealth,fetchCerebroConsolePreferences,postCerebroConsoleChat,type CerebroConsoleHealth,type CerebroLearningCandidate,type CerebroPendingAction,type CerebroPreferences,type CerebroReadContext} from './cerebroConsoleApi';
+import {fetchCerebroConsoleHealth,fetchCerebroConsolePreferences,postCerebroConsoleChat,type CerebroConsoleHealth,type CerebroConversationTurn,type CerebroLearningCandidate,type CerebroPendingAction,type CerebroPreferences,type CerebroReadContext} from './cerebroConsoleApi';
 import {applyVoiceContextHints,applyVoiceInterruptHints,createVoiceRecognition,preferredSpanishVoice,spanishVoices,speechSegments,speechSynthesisSupported,voiceActivityFrame,voiceActivityThreshold,voiceInterruptRequested,voiceNeedsManualConfirmation,voiceRecognitionSupported,type CerebroSpeechRecognition,type CerebroSpokenMeta} from './cerebroVoice';
 import './cerebro-console.css';
 
@@ -385,7 +385,8 @@ export default function CerebroConsoleShell(){
   setSending(true);
   stopRecognition();
   try{
-   const {status,data}=await postCerebroConsoleChat(clean,pendingActionRef.current,readContextRef.current,learningCandidateRef.current);
+   const conversationContext:CerebroConversationTurn[]=lines.slice(-10).map(line=>({role:line.role,text:line.text.slice(0,1200)}));
+   const {status,data}=await postCerebroConsoleChat(clean,pendingActionRef.current,readContextRef.current,learningCandidateRef.current,conversationContext);
    const response=status>0&&data?.message?data.message:'No he podido contactar con CEREBRO Gateway.';
    if(data?.read_context){
     readContextRef.current=data.read_context;

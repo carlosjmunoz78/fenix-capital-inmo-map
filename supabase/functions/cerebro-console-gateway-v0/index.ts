@@ -31,8 +31,11 @@ const CONTRACT = {
   chat_mode: "OWNER_DECISION_BY_EXCEPTION_V1",
   confirmation_mode: "EXACT_PROPOSAL_SINGLE_EXPLICIT_YES",
   preference_writes: "EXPLICIT_USER_ONLY",
-  durable_learning_mode: "EXPLICIT_PREFERENCES_PLUS_CONVERSATIONAL_MEMORY_V1",
-  conversation_memory: "AUTO_BOUNDED_NON_SENSITIVE_USER_TURNS",
+  durable_learning_mode: "STRUCTURED_CONVERSATIONAL_MEMORY_V2",
+  conversation_memory: "AUTO_BOUNDED_NON_SENSITIVE_STRUCTURED",
+  conversational_context: "LAST_10_BOUNDED_TURNS",
+  follow_up_resolution: "DETERMINISTIC_DOMAIN_AND_NUMBERED_ITEM_V1",
+  contradiction_handling: "EXPLICIT_SUPERSESSION_V1",
   internal_learning_writes: "SERVICE_ROLE_BOUNDED",
 };
 
@@ -87,6 +90,75 @@ function normalize(value: string): string {
 
 function cleanText(value:string){
   return normalize(value).replace(/^[¿¡?!.]+/g, "").replace(/[?!.]+$/g, "").trim();
+}
+
+type ConversationTurn={role:"user"|"cerebro";text:string};
+
+function validateConversationContext(value:unknown):ConversationTurn[]{
+  if(!Array.isArray(value))return [];
+  const out:ConversationTurn[]=[];
+  let total=0;
+  for(const item of value.slice(-10)){
+    if(!item||typeof item!=="object"||Array.isArray(item))continue;
+    const role=String((item as Record<string,unknown>).role??"");
+    const text=String((item as Record<string,unknown>).text??"").trim().slice(0,1200);
+    if((role!=="user"&&role!=="cerebro")||!text)continue;
+    if(total+text.length>8000)break;
+    total+=text.length;
+    out.push({role:role as "user"|"cerebro",text});
+  }
+  return out;
+}
+
+function contextTopic(context:ConversationTurn[]){
+  const recent=context.slice(-8).map(turn=>normalize(turn.text)).join(" ");
+  const domains=[
+    ["legal inmobiliario",/\b(legal|juridic|arras|compraventa|registro de la propiedad|cargas?|notari|herencia|donacion|itp|plusvalia|catastro|embargo|titularidad|urbanismo|blanqueo|aml)\b/],
+    ["financiación hipotecaria",/\b(hipoteca|financi|banco|tin|tae|fein|tasacion|endeudamiento)\b/],
+    ["SEO",/\b(seo|keyword|palabra clave|indexacion|search console|gsc|enlazado|landing)\b/],
+    ["marketing",/\b(marketing|embudo|captacion|campana|campaña|conversion)\b/],
+    ["redes sociales",/\b(redes|facebook|instagram|linkedin|buffer|publicacion social)\b/],
+    ["newsletter",/\b(newsletter|brevo|campana de correo|campaña de correo)\b/],
+    ["arquitectura de CEREBRO",/\b(supabase|gateway|console|runtime|worker|arquitectura|motor)\b/],
+    ["multiempresa",/\b(multiempresa|nueva empresa|onboarding de empresa|company registry)\b/],
+    ["Trading LAB",/\b(trading|watchdog|circuit breaker|kill switch)\b/]
+  ] as const;
+  for(const [label,pattern] of domains)if(pattern.test(recent))return label;
+  return null;
+}
+
+function numberedContextItem(context:ConversationTurn[],number:number){
+  for(const turn of [...context].reverse()){
+    if(turn.role!=="cerebro")continue;
+    const match=turn.text.match(new RegExp("(?:^|\\n)\\s*"+number+"[.)]\\s+([^\\n]+)","i"));
+    if(match?.[1])return match[1].trim();
+  }
+  return "";
+}
+
+function contextualizeMessage(message:string,context:ConversationTurn[]){
+  const raw=message.trim();
+  const text=cleanText(raw);
+  if(!context.length)return {question:raw,applied:false,topic:null as string|null};
+
+  const point=text.match(/^(?:y\s+)?(?:el\s+)?punto\s+(\d{1,2})(?:\s+|$)/);
+  if(point){
+    const item=numberedContextItem(context,Number(point[1]));
+    if(item)return {question:`Sobre «${item}»: ${raw}`,applied:true,topic:item};
+  }
+
+  const topic=contextTopic(context);
+  const explicitDomain=/\b(legal|juridic|hipoteca|financi|seo|marketing|facebook|instagram|linkedin|newsletter|supabase|gateway|trading|multiempresa)\b/.test(text);
+  const followUp=/^(y\b|eso\b|esa\b|ese\b|esto\b|lo anterior\b|la parte\b|sobre eso\b|fiscalmente\b|registralmente\b|notarialmente\b|y si\b|que pasa si\b|como seria\b|como sería\b|explicame ese\b|explícame ese\b)/.test(text);
+  const shortAnswer=text.length<=48&&!/^(hola|buenas|si|sí|no|vale|ok|gracias|procede|continua|continúa)$/.test(text);
+  if(topic&&!explicitDomain&&(followUp||shortAnswer)){
+    return {question:`En el contexto de ${topic}: ${raw}`,applied:true,topic};
+  }
+  return {question:raw,applied:false,topic};
+}
+
+function previousUserTurn(context:ConversationTurn[]){
+  return [...context].reverse().find(turn=>turn.role==="user")?.text.trim()??"";
 }
 
 function closeOwnerGreeting(){
@@ -355,8 +427,10 @@ const MEMORY_SKIP_EXACT=new Set([
 
 function conversationMemoryKind(message:string){
   const text=cleanText(message);
-  if(/(corrige|correccion|corrección|no quiero|prefiero|a partir de ahora)/.test(text))return "CORRECTION";
+  if(/(eso ya no es asi|esto ya no es asi|ya no es asi|corrige|correccion|corrección|hemos cambiado|cambiamos ahora)/.test(text))return "CORRECTION";
+  if(/(prefiero|me gusta que|quiero que me|no quiero que me|a partir de ahora.*(?:habla|dime|llamame|llámame|responde))/i.test(message))return "PREFERENCE";
   if(/(he decidido|hemos decidido|queda decidido|decidimos|vamos a hacer|quiero que hagamos)/.test(text))return "DECISION";
+  if(/(en fenix|en fénix|nuestro proceso|nuestra forma|internamente).*(hacemos|usamos|trabajamos|gestionamos|debe|tiene que)/i.test(message))return "OPERATIONAL_KNOWLEDGE";
   if(/(tenemos|usamos|trabajamos|nuestro|nuestra|son dos|es el|es la|debe ser|tiene que ser)/.test(text))return "FACT";
   return "USER_TURN";
 }
@@ -387,7 +461,35 @@ function shouldObserveConversationMemory(message:string){
   return true;
 }
 
-async function observeConversationMemory(req:Request,message:string){
+function memorySubjectKey(message:string,context:ConversationTurn[]){
+  const topic=contextTopic(context);
+  if(topic)return normalize(topic).replace(/[^a-z0-9]+/g,"_").replace(/^_|_$/g,"").slice(0,160);
+  const stop=new Set(["para","como","esto","esta","este","estas","estos","quiero","tenemos","usamos","nuestro","nuestra","debe","tiene","hacer","ahora","desde","sobre","porque","pero"]);
+  const words=normalize(message).replace(/[^a-z0-9ñ ]/g," ").split(/\s+/).filter(word=>word.length>=4&&!stop.has(word)).slice(0,5);
+  return words.length?words.join("_").slice(0,160):null;
+}
+
+function explicitSupersession(message:string){
+  const text=cleanText(message);
+  return /(eso ya no es asi|esto ya no es asi|ya no es asi|corrige eso|hemos cambiado|cambiamos ahora|sustituye lo anterior)/.test(text);
+}
+
+async function supersedeConversationMemory(req:Request,query:string,replacementId:string){
+  if(!query||!replacementId)return {ok:true,superseded:0};
+  const U=Deno.env.get("SUPABASE_URL")??"";
+  const S=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")??"";
+  if(!U||!S)return {ok:false,error:"MEMORY_CONFIG_MISSING"};
+  const authz=await authorizedOwner(req);
+  if(!authz.ok)return {ok:false,error:"OWNER_REQUIRED"};
+  const svc=createClient(U,S,{auth:{persistSession:false,autoRefreshToken:false}});
+  const {data,error}=await svc.rpc("fenix_prod_cerebro_memory_supersede_server",{
+    p_actor_code:authz.actor,p_company_id:"fenix",p_query:query,p_superseded_by:replacementId
+  });
+  if(error||data?.ok!==true)return {ok:false,error:error?.message??data?.error??"MEMORY_SUPERSEDE_FAILED"};
+  return {ok:true,superseded:Number(data.superseded??0)};
+}
+
+async function observeConversationMemory(req:Request,message:string,context:ConversationTurn[]=[]){
   if(!shouldObserveConversationMemory(message))return {ok:true,stored:false,reason:"SKIPPED"};
   const U=Deno.env.get("SUPABASE_URL")??"";
   const S=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")??"";
@@ -396,19 +498,29 @@ async function observeConversationMemory(req:Request,message:string){
   if(!authz.ok)return {ok:false,stored:false,error:"OWNER_REQUIRED"};
   const svc=createClient(U,S,{auth:{persistSession:false,autoRefreshToken:false}});
   const content=message.trim();
-  const hash=await sha256([authz.actor,"fenix","CONSOLE-001","PROD","v1",content].join("|"));
-  const {data,error}=await svc.rpc("fenix_prod_cerebro_memory_observe_server",{
+  const hash=await sha256([authz.actor,"fenix","CONSOLE-001","PROD","v2",content].join("|"));
+  const {data,error}=await svc.rpc("fenix_prod_cerebro_memory_observe_v2_server",{
     p_actor_code:authz.actor,
     p_company_id:"fenix",
     p_engine_id:"CONSOLE-001",
     p_environment:"PROD",
-    p_version:"v1",
+    p_version:"v2",
     p_memory_kind:conversationMemoryKind(content),
     p_content_text:content,
-    p_content_hash:hash
+    p_content_hash:hash,
+    p_subject_key:memorySubjectKey(content,context)
   });
   if(error||data?.ok!==true)return {ok:false,stored:false,error:error?.message??data?.error??"MEMORY_WRITE_FAILED"};
-  return {ok:true,stored:true,item:data.item};
+  const item=data.item??{};
+  let superseded=0;
+  if(explicitSupersession(content)){
+    const previous=previousUserTurn(context);
+    if(previous){
+      const changed=await supersedeConversationMemory(req,previous,String(item.memory_id??""));
+      if(changed.ok)superseded=Number(changed.superseded??0);
+    }
+  }
+  return {ok:true,stored:true,item,superseded};
 }
 
 async function forgetConversationMemory(req:Request,query:string){
@@ -594,16 +706,18 @@ function seoExplanation(action:PendingAction){
   return `El proceso para ${location} (${coverage}) comprende: investigación y clustering de palabras clave; mapa de ciudades/zonas e intención; arquitectura y contenidos; enlazado interno; SEO local; activos de captación cuando correspondan; controles técnicos/QA; publicación solo mediante los gates autorizados; monitorización, medición y mejora. Si algún paso exige firma, pago, riesgo alto, conflicto de política o un permiso que CEREBRO no tenga, te explicaré exactamente qué falta y te llevaré al enlace o decisión necesaria. ¿Quieres que active este proceso?`;
 }
 
-async function chatReply(req:Request,message:string,pendingRaw:unknown,readContextRaw:unknown,learningRaw:unknown){
+async function chatReply(req:Request,message:string,pendingRaw:unknown,readContextRaw:unknown,learningRaw:unknown,conversationRaw:unknown){
   const text=cleanText(message);
   const readContext=(readContextRaw&&typeof readContextRaw==="object"&&!Array.isArray(readContextRaw))?readContextRaw as CerebroReadContext:null;
+  const conversationContext=validateConversationContext(conversationRaw);
+  const resolved=contextualizeMessage(message,conversationContext);
   if(!text)return {status:"INVALID",message:"Escribe una consulta.",executed:false};
 
   const memoryControl=await maybeHandleConversationMemoryControl(req,message);
   if(memoryControl)return memoryControl;
 
   // Conversational learning is additive and non-blocking: a memory write failure must not break chat.
-  await observeConversationMemory(req,message).catch(()=>({ok:false,stored:false,error:"MEMORY_WRITE_FAILED"}));
+  await observeConversationMemory(req,message,conversationContext).catch(()=>({ok:false,stored:false,error:"MEMORY_WRITE_FAILED"}));
 
   const learning=await maybeHandleLearning(req,message,learningRaw);
   if(learning)return learning;
@@ -918,7 +1032,8 @@ async function chatReply(req:Request,message:string,pendingRaw:unknown,readConte
     };
   }
 
-  return await queryCerebroKnowledge(req,message,readContext);
+  const answer=await queryCerebroKnowledge(req,resolved.question,readContext);
+  return {...answer,context_applied:resolved.applied,resolved_question:resolved.applied?resolved.question:undefined,conversation_topic:resolved.topic};
 }
 
 export default {
@@ -946,13 +1061,13 @@ export default {
       const obj=typeof body==="object"&&body!==null?body as Record<string,unknown>:{};
       const message=obj.message;
       if(typeof message!=="string"||message.length>2000)return json(req,400,{status:"INVALID",message:"Mensaje inválido.",executed:false});
-      return json(req,200,await chatReply(req,message,obj.pending_action,obj.read_context,obj.learning_candidate));
+      return json(req,200,await chatReply(req,message,obj.pending_action,obj.read_context,obj.learning_candidate,obj.conversation_context));
     }
 
     if(req.method!=="GET")return json(req,405,{status:"CLOSED",reason:"ROUTE_NOT_AVAILABLE"});
 
     if(suffix==="health")return json(req,200,{
-      status:"ok",service:"cerebro-console-gateway-v0",environment:"LAB",version:"0.8.0-human-dialogue-knowledge-v1",
+      status:"ok",service:"cerebro-console-gateway-v0",environment:"LAB",version:"0.9.0-conversational-intelligence-v2",
       authenticated_transport:true,direct_model_access:false,prod_execution_enabled:false,live_writes:false,
       chat_available:true,chat_mode:"OWNER_DECISION_BY_EXCEPTION_V1",additional_cost_target_eur:0
     });

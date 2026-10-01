@@ -28,6 +28,11 @@ export type CerebroPendingAction={
 
 export type CerebroReadContext={kind:"social_schedule";network:string;content_key?:string;external_post_id?:string|null;scheduled_at?:string;caption?:string;public_media_url?:string|null;media_urls?:string[]};
 
+export type CerebroConversationTurn={
+  role:'user'|'cerebro';
+  text:string;
+};
+
 export type CerebroLearningCandidate={
   category:'voice_style'|'wording'|'pronunciation'|'response_length'|'interaction_preference'|'workflow_preference'|'business_preference';
   preference_key:string;
@@ -49,6 +54,9 @@ export type CerebroConsoleChatResponse={
   media?:{public_media_url?:string|null;media_urls?:string[]};
   learning_candidate?:CerebroLearningCandidate|null;
   preferences?:CerebroPreferences;
+  context_applied?:boolean;
+  resolved_question?:string;
+  conversation_topic?:string|null;
 };
 
 async function authHeaders(){
@@ -75,7 +83,7 @@ export async function fetchCerebroConsole<T>(path:string):Promise<{status:number
   }catch{return{status:0,data:null}}
 }
 
-export async function postCerebroConsoleChat(message:string,pending_action:CerebroPendingAction|null=null,read_context:CerebroReadContext|null=null,learning_candidate:CerebroLearningCandidate|null=null):Promise<{status:number;data:CerebroConsoleChatResponse|null}>{
+export async function postCerebroConsoleChat(message:string,pending_action:CerebroPendingAction|null=null,read_context:CerebroReadContext|null=null,learning_candidate:CerebroLearningCandidate|null=null,conversation_context:CerebroConversationTurn[]=[]):Promise<{status:number;data:CerebroConsoleChatResponse|null}>{
   const endpoint=cerebroConsoleEndpoint('chat');
   if(!endpoint)return{status:0,data:null};
   const headers=await authHeaders();
@@ -84,7 +92,7 @@ export async function postCerebroConsoleChat(message:string,pending_action:Cereb
     const response=await fetch(endpoint,{
       method:'POST',
       headers,
-      body:JSON.stringify({message,pending_action,read_context,learning_candidate}),
+      body:JSON.stringify({message,pending_action,read_context,learning_candidate,conversation_context}),
       cache:'no-store'
     });
     let data:CerebroConsoleChatResponse|null=null;

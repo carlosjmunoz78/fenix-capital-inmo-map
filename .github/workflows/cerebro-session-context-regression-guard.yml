@@ -134,6 +134,7 @@ jobs:
           node scripts/verify-cerebro-unbounded-voice-session.mjs
           node scripts/test-cerebro-natural-spoken-v4.mjs
           node scripts/test-cerebro-human-dialogue-v5.mjs
+          node scripts/verify-cerebro-conversational-intelligence-v2.mjs
 
       - name: Build app
         shell: bash
