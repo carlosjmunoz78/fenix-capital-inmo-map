@@ -378,6 +378,51 @@ async function actorContext(req:Request){
   return {ok:true,status:200,actor_code:actorCode,role} as const;
 }
 
+function conversationMemoryIntent(question:string){
+  const q=norm(question);
+  return /\b(recuerdas|recuerda|recordar|te dije|te comente|te comenté|hablamos|acordamos|decidimos|conversacion anterior|conversación anterior|otra conversacion|otra conversación)\b/.test(q);
+}
+
+function conversationMemoryQuery(question:string){
+  const noise=new Set(["recuerdas","recuerda","recordar","dije","comente","comenté","hablamos","acordamos","decidimos","conversacion","conversación","anterior","otra","sobre"]);
+  const parts=tokens(question).filter(x=>!noise.has(x));
+  return parts.length?parts.join(" "):question.slice(0,500);
+}
+
+async function queryConversationMemory(actorCode:string,question:string){
+  if(!U||!S)return [] as any[];
+  const svc=createClient(U,S,{auth:{persistSession:false,autoRefreshToken:false}});
+  const {data,error}=await svc.rpc("fenix_prod_cerebro_memory_search_server",{
+    p_actor_code:actorCode,
+    p_company_id:"fenix",
+    p_query:conversationMemoryQuery(question),
+    p_limit:5
+  });
+  if(error||data?.ok!==true||!Array.isArray(data.items))return [] as any[];
+  return data.items.filter((x:any)=>String(x?.content??"").trim()).slice(0,5);
+}
+
+function conversationMemoryResponse(items:any[]){
+  const lines=items.slice(0,4).map((x:any,i:number)=>{
+    const when=String(x?.last_seen_at??"");
+    const date=when?new Intl.DateTimeFormat("es-ES",{timeZone:"Europe/Madrid",dateStyle:"medium"}).format(new Date(when)):"";
+    return `${i+1}. ${String(x.content).trim()}${date?` · ${date}`:""}`;
+  });
+  return {
+    status:"OK",
+    intent:"conversation_memory",
+    executed:false,
+    message:"En tu memoria conversacional de CEREBRO consta esto:\n\n"+lines.join("\n\n"),
+    sources:items.slice(0,4).map((x:any)=>({
+      system:"CEREBRO",
+      source:"CONVERSATION_MEMORY",
+      memory_id:String(x?.memory_id??""),
+      last_seen_at:String(x?.last_seen_at??"")
+    })),
+    evidence_mode:"OWNER_CONVERSATION_MEMORY_V1"
+  };
+}
+
 async function notionSearch(query:string){
   if(!N)return [];
   const r=await fetch("https://api.notion.com/v1/search",{
@@ -565,7 +610,8 @@ export async function queryCerebroKnowledge(req:Request,question:string,context?
   const actor=await actorContext(req);
   if(!actor.ok)return {status:"HUMAN_REQUIRED",reason:actor.error,executed:false,message:"Esta consulta está reservada al propietario autorizado de CEREBRO."};
 
-  if(!N)return {status:"ERROR",reason:"NOTION_TOKEN_MISSING",executed:false,message:"El conector de conocimiento de CEREBRO no está configurado."};
+  const learned=await queryConversationMemory(actor.actor_code,question);
+  if(conversationMemoryIntent(question)&&learned.length)return conversationMemoryResponse(learned);
 
   const operationalSocial=await queryOperationalSocialSchedule(question,context);
   if(operationalSocial)return operationalSocial;
@@ -573,6 +619,11 @@ export async function queryCerebroKnowledge(req:Request,question:string,context?
   const domain=detectKnowledgeDomain(question);
   const direct=await directDomainAnswer(question,domain);
   if(direct)return direct;
+
+  if(!N){
+    if(learned.length)return conversationMemoryResponse(learned);
+    return {status:"ERROR",reason:"NOTION_TOKEN_MISSING",executed:false,message:"El conector documental de CEREBRO no está configurado y no he encontrado memoria conversacional suficiente para responder."};
+  }
 
   const qTokens=tokens(question);
   if(!qTokens.length)return {status:"LOW_CONFIDENCE",reason:"QUERY_TOO_GENERIC",executed:false,message:"La consulta es demasiado general. Dime el tema concreto que quieres consultar."};
@@ -615,15 +666,25 @@ export async function queryCerebroKnowledge(req:Request,question:string,context?
   ranked.sort((a,b)=>b.score-a.score);
   const top=ranked.slice(0,3);
   if(!top.length){
+    if(learned.length)return conversationMemoryResponse(learned);
     return {status:"NO_KNOWLEDGE_MATCH",intent:"knowledge",executed:false,message:"No he encontrado evidencia suficiente en el conocimiento autorizado de CEREBRO para responder con seguridad. No voy a inventarla.",sources:[]};
   }
 
+  const memoryLines=learned.slice(0,2).map((x:any,i:number)=>`M${i+1}. En conversación: ${String(x.content).trim()}`);
   const lines=top.map((x:any,i:number)=>`${i+1}. ${x.title}: ${x.snippet}`);
+  const sections=[
+    memoryLines.length?"Memoria conversacional relevante:\n"+memoryLines.join("\n\n"):"",
+    "Conocimiento documental autorizado:\n"+lines.join("\n\n")
+  ].filter(Boolean);
   return {
     status:"OK",
     intent:"knowledge",
     executed:false,
-    message:`He encontrado esto en el conocimiento autorizado de CEREBRO:\n\n${lines.join("\n\n")}`,
-    sources:top.map((x:any)=>({notion_page_id:x.id,title:x.title,score:x.score}))
+    message:sections.join("\n\n"),
+    sources:[
+      ...learned.slice(0,2).map((x:any)=>({system:"CEREBRO",source:"CONVERSATION_MEMORY",memory_id:String(x?.memory_id??""),last_seen_at:String(x?.last_seen_at??"")})),
+      ...top.map((x:any)=>({notion_page_id:x.id,title:x.title,score:x.score}))
+    ],
+    evidence_mode:learned.length?"MIXED_CONVERSATION_AND_CANONICAL_V1":"CANONICAL_NOTION"
   };
 }
