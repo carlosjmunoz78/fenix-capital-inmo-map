@@ -4,7 +4,7 @@ import {BrainCircuit,ChevronLeft,Mic,MicOff,Send,ShieldCheck,Square} from 'lucid
 import {cerebroConsoleLinkEnabled} from './cerebroConsoleAccess';
 import {fetchAppApi,supabase} from './supabase';
 import {fetchCerebroConsoleHealth,fetchCerebroConsolePreferences,postCerebroConsoleChat,type CerebroConsoleHealth,type CerebroLearningCandidate,type CerebroPendingAction,type CerebroPreferences,type CerebroReadContext} from './cerebroConsoleApi';
-import {applyVoiceContextHints,applyVoiceInterruptHints,createVoiceRecognition,spanishVoices,speechSegments,speechSynthesisSupported,voiceActivityFrame,voiceActivityThreshold,voiceInterruptRequested,voiceNeedsManualConfirmation,voiceRecognitionSupported,type CerebroSpeechRecognition,type CerebroSpokenMeta} from './cerebroVoice';
+import {applyVoiceContextHints,applyVoiceInterruptHints,createVoiceRecognition,preferredSpanishVoice,spanishVoices,speechSegments,speechSynthesisSupported,voiceActivityFrame,voiceActivityThreshold,voiceInterruptRequested,voiceNeedsManualConfirmation,voiceRecognitionSupported,type CerebroSpeechRecognition,type CerebroSpokenMeta} from './cerebroVoice';
 import './cerebro-console.css';
 
 const CONTEXTS=['GENERAL','EMPRESA','ENGINE','CRM','APP','SEO','MARKETING','TRAINING','AUTOMATION'];
@@ -282,7 +282,7 @@ export default function CerebroConsoleShell(){
   }
   window.speechSynthesis.cancel();
   const voices=spanishVoices();
-  const selected=voices.find(voice=>voice.lang.toLowerCase()==='es-es')||voices[0];
+  const selected=preferredSpanishVoice(voices);
   let finished=false;
   const finish=()=>{
    if(finished)return;
@@ -408,7 +408,7 @@ export default function CerebroConsoleShell(){
    setLines(current=>[...current,{role:'cerebro',text:response,mediaUrl}]);
    sendingRef.current=false;
    setSending(false);
-   if(voiceSessionRef.current)speakAndResume(response,Boolean(data?.status?.startsWith('ACTION_')),data??{});
+   if(voiceSessionRef.current)speakAndResume(response,Boolean(data?.status?.startsWith('ACTION_')),{...(data??{}),source_question:clean});
   }catch{
    const response='No he podido contactar con CEREBRO Gateway.';
    setLines(current=>[...current,{role:'cerebro',text:response}]);
