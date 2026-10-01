@@ -60,6 +60,15 @@ Observed:
 
 The temporary test object was configured with `ON COMMIT DROP`; no persistent PREPROD test table was required.
 
+A second PREPROD gate executed the **exact repository migration** inside a transaction after creating only a disposable `fenix_prod.actors` stub required by the foreign key. It validated:
+- first explicit preference upsert;
+- versioned replacement to version 2;
+- list returns exactly one active value;
+- deactivate/forget removes the active preference;
+- complete transaction rollback.
+
+Result: `GREEN_EXACT_MIGRATION_PREPROD_ROLLBACK`.
+
 ## Frontend behavior
 
 Default spoken profile:
