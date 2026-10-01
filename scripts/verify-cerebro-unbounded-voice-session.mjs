@@ -22,7 +22,7 @@ const forbidden=[
  /TURN[_A-Z]*LIMIT/,
  /turnCount/,
  /messageCount\s*[>=]/,
- /lines\.length\s*[>=]/,
+ /lines\.length\s*>?=\s*[1-9][0-9]*/,
  /questions?\s*[>=]\s*3/i
 ];
 for(const pattern of forbidden){
