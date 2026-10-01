@@ -218,3 +218,24 @@ Evidence anchors are scoped to the change they prove; they are not intended to m
 
 ### PARCIAL
 - La naturalidad de V4 necesita aceptación auditiva real; CI demuestra comportamiento, build y publicación, no percepción humana.
+
+
+## Update 2026-10-01 · Human Dialogue + Knowledge Map + Clarification V1
+
+### HECHO
+- El saludo de CEREBRO reconoce al propietario como Carlos y utiliza variantes cercanas, incluyendo «guapo», sin repetir siempre la misma frase.
+- La capa hablada incorpora entradas conversacionales variadas como «Claro», «Mira», «Vale» y «Te cuento» cuando encajan con el contexto; no se fuerzan en errores, bloqueos o avisos críticos.
+- Las preguntas amplias de conocimiento ya no dependen de devolver fragmentos crudos: existe un mapa de conocimiento por dominio para legal, financiación, SEO, marketing, redes, newsletter, autonomía, plataforma, Trading y multiempresa.
+- El mapa Legal/Inmobiliario está anclado a las fuentes canónicas existentes y separa arras/compraventa, Registro/cargas, Catastro, notaría/firma, herencias, donaciones, fiscalidad, riesgo del inmueble y AML/compliance.
+- Ante baja confianza o una pregunta insuficientemente entendida, CEREBRO pide una aclaración concreta en vez de inventar el sentido.
+- Se preservan el VAD de interrupción ya confirmado, la conversación sin límite artificial de turnos, las confirmaciones de acciones y el registro escrito completo.
+- PR #475: CEREBRO Session Context Regression Guard #148 SUCCESS y App Restoration Build Gate #391 SUCCESS.
+- Gateway PROD: ACTIVE V27, artifact SHA256 `cccc3dce290dbf9530f185501341ca837058defcece06a862ee6fd805123e485`.
+- Frontend PROD exacto `fbdbb99e22a821b578874157c86d73789f111e10`: Live Deploy #182 SUCCESS y Runtime Smoke #325 SUCCESS.
+- `gh-pages/PROD_SOURCE_SHA.txt` coincide exactamente con `fbdbb99e22a821b578874157c86d73789f111e10`.
+- Rollback frontend preservado: `c12edfae5f65fdb95c1dbf6b6fcfd921509ca21e`.
+- Coste adicional recurrente: 0 €.
+
+### PARCIAL
+- Falta aceptación física del saludo personalizado, los mapas de conocimiento, la aclaración de preguntas ambiguas y la naturalidad de las nuevas expresiones.
+- La aceptación física previa del barge-in «para» sigue vigente y no se extiende automáticamente a este nuevo bloque conversacional.
