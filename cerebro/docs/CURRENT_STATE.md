@@ -154,3 +154,20 @@ Evidence anchors are scoped to the change they prove; they are not intended to m
 ### PARCIAL
 - El barge-in verbal necesita prueba física en el navegador real porque Web Speech puede variar según navegador/dispositivo y CI no puede demostrar que el micrófono oye al usuario durante TTS.
 - Spoken Digest V3 necesita nueva aceptación auditiva humana; V2 no se considera aceptada por el propietario.
+
+
+## Update 2026-10-01 · Local VAD Barge-in V2
+
+### HECHO
+- La prueba física confirmó que el enfoque anterior basado en `SpeechRecognition` concurrente con TTS no permitía interrumpir verbalmente la voz en el navegador real.
+- Se cambia de estrategia: durante TTS, CEREBRO usa detección local de actividad de voz mediante `getUserMedia` + Web Audio API.
+- Se solicitan `echoCancellation`, `noiseSuppression` y `autoGainControl`, se calcula umbral adaptativo con ruido/eco y se exige actividad sostenida para evitar picos aislados.
+- Ya no hace falta reconocer literalmente «para»: empezar a hablar debe cancelar la locución y devolver CEREBRO a la escucha normal.
+- El recognizer verbal anterior queda únicamente como fallback.
+- PR #469: CEREBRO Session Context Regression Guard #139 SUCCESS y App Restoration Build Gate #385 SUCCESS.
+- PROD exacto `96eb6effb4ab4077ccdc6158858c5158e3be825e`: Live Deploy #174 SUCCESS y Runtime Smoke #317 SUCCESS.
+- Rollback frontend: `d8b89b4f1f541d5d7ebea1ab5fd5cd8446a4bc43`.
+- Coste adicional recurrente: 0 €.
+
+### PARCIAL
+- Falta aceptación física en navegador real. CI confirma contratos, build y publicación, pero no puede certificar que el micrófono físico distinga la voz del usuario frente al audio reproducido.

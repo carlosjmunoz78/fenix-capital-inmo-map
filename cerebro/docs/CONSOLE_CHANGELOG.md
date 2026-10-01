@@ -95,3 +95,15 @@
 - PROD `d8b89b4f1f541d5d7ebea1ab5fd5cd8446a4bc43`: Live Deploy #171 SUCCESS; Runtime Smoke #314 SUCCESS.
 - Coste adicional: 0 €.
 - Aceptación física: PENDIENTE.
+
+
+## 2026-10-01 · Local VAD Barge-in V2
+
+- Se registra como fallido físicamente el enfoque V1 de interrupción por `SpeechRecognition` simultáneo con TTS.
+- Nueva estrategia: VAD local sobre micrófono durante TTS; cualquier voz sostenida del usuario interrumpe la respuesta y reactiva escucha normal.
+- Filtrado con cancelación de eco, supresión de ruido, ganancia automática, umbral adaptativo y frames consecutivos.
+- El botón visible de interrupción se conserva como fallback.
+- PR #469: Guard #139 SUCCESS; Build Gate #385 SUCCESS.
+- PROD `96eb6effb4ab4077ccdc6158858c5158e3be825e`: Live Deploy #174 SUCCESS; Runtime Smoke #317 SUCCESS.
+- Coste adicional: 0 €.
+- Aceptación física: PENDIENTE.

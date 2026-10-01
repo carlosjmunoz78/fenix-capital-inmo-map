@@ -154,3 +154,21 @@ Generated Factory output is disposable; canonical sources are registry seed + fa
 3. Repetir con «stop» y «calla».
 4. Pedir algo que contenga «para Belén» y comprobar que esa frase no activa una interrupción falsa.
 5. Comparar una respuesta normal larga con V2: V3 debe hablar solo la idea principal y dejar el detalle escrito.
+
+
+## Local VAD Barge-in V2 · runbook
+
+- No depender de reconocimiento semántico simultáneo mientras TTS reproduce audio.
+- Mientras CEREBRO habla, abrir VAD local con micrófono y Web Audio API.
+- Calibrar ruido de fondo antes de TTS y eco residual al inicio de la locución.
+- Interrumpir solo tras actividad sostenida por encima del umbral adaptativo; ignorar picos breves.
+- Al detectar voz: cancelar TTS, cerrar VAD y reabrir `SpeechRecognition` normal.
+- Mantener siempre el botón visible como fallback.
+- Rollback frontend: `d8b89b4f1f541d5d7ebea1ab5fd5cd8446a4bc43`.
+
+### Aceptación física
+1. Pedir una respuesta larga.
+2. Mientras habla, empezar a decir «para» o cualquier frase.
+3. Debe callarse sin tocar botones.
+4. Debe volver a escucharte inmediatamente.
+5. Repetir con volumen normal y comprobar que el propio altavoz no provoca cortes falsos.
