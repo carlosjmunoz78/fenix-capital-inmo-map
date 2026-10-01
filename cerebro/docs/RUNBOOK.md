@@ -179,3 +179,13 @@ Generated Factory output is disposable; canonical sources are registry seed + fa
 - Resultado: PASS.
 - Estado del flujo probado: CONFIRMED_OPERATIONAL.
 - Mantener futuras regresiones sobre esta conducta; si vuelve a fallar, tratarlo como regresión de VOICE/VAD y no como nueva funcionalidad.
+
+
+## Conversación de voz sin límite artificial · contrato
+
+- No introducir `MAX_TURNS`, `TURN_LIMIT`, contadores de preguntas ni cierres automáticos por número de mensajes.
+- Mientras la sesión de voz siga activa, cada ciclo debe ser: escuchar → enviar → responder → hablar → volver a escuchar.
+- Un `SpeechRecognition` individual puede finalizar por diseño del navegador; eso no termina la conversación: `onend` debe reabrir escucha automáticamente.
+- Finalizar la conversación solo por orden explícita del usuario o por condición técnica fatal que impida continuar de forma segura, como pérdida real del permiso de micrófono.
+- Mantener el guard `scripts/verify-cerebro-unbounded-voice-session.mjs` en CI para evitar regresiones.
+- Si un navegador corta internamente el reconocimiento después de varios ciclos, tratarlo como incidente técnico/reintento, nunca como límite funcional de tres, cinco o N preguntas.
