@@ -4,7 +4,7 @@ import {BrainCircuit,ChevronLeft,Mic,MicOff,Send,ShieldCheck,Square} from 'lucid
 import {cerebroConsoleLinkEnabled} from './cerebroConsoleAccess';
 import {fetchAppApi,supabase} from './supabase';
 import {fetchCerebroConsoleHealth,fetchCerebroConsolePreferences,postCerebroConsoleChat,type CerebroConsoleHealth,type CerebroLearningCandidate,type CerebroPendingAction,type CerebroPreferences,type CerebroReadContext} from './cerebroConsoleApi';
-import {applyVoiceContextHints,createVoiceRecognition,spanishVoices,speechSynthesisSupported,speechText,voiceNeedsManualConfirmation,voiceRecognitionSupported,voiceSpeechProfile,type CerebroSpeechRecognition} from './cerebroVoice';
+import {applyVoiceContextHints,createVoiceRecognition,spanishVoices,speechSegments,speechSynthesisSupported,voiceNeedsManualConfirmation,voiceRecognitionSupported,type CerebroSpeechRecognition} from './cerebroVoice';
 import './cerebro-console.css';
 
 const CONTEXTS=['GENERAL','EMPRESA','ENGINE','CRM','APP','SEO','MARKETING','TRAINING','AUTOMATION'];
@@ -151,32 +151,39 @@ export default function CerebroConsoleShell(){
  function speakAndResume(text:string,fullDetail=false){
   if(!voiceSessionRef.current)return;
   const maxChars=fullDetail?1600:(voicePreferencesRef.current.response_length==='concise'?700:1200);
-  const spoken=speechText(text,maxChars);
-  if(!spoken){scheduleListening();return}
+  const segments=speechSegments(text,maxChars,voicePreferencesRef.current);
+  if(!segments.length){scheduleListening();return}
   stopRecognition();
   if(!voiceSupport.tts){
    scheduleListening(150);
    return;
   }
   window.speechSynthesis.cancel();
-  const utterance=new SpeechSynthesisUtterance(spoken);
-  const profile=voiceSpeechProfile(voicePreferencesRef.current);
-  utterance.rate=profile.rate;
-  utterance.pitch=profile.pitch;
   const voices=spanishVoices();
   const selected=voices.find(voice=>voice.lang.toLowerCase()==='es-es')||voices[0];
-  if(selected){utterance.voice=selected;utterance.lang=selected.lang}
-  else utterance.lang='es-ES';
   voiceSpeakingRef.current=true;
   setVoiceSpeaking(true);
+  let finished=false;
   const finish=()=>{
+   if(finished)return;
+   finished=true;
    voiceSpeakingRef.current=false;
    setVoiceSpeaking(false);
    scheduleListening(300);
   };
-  utterance.onend=finish;
-  utterance.onerror=finish;
-  window.speechSynthesis.speak(utterance);
+  segments.forEach((segment,index)=>{
+   const utterance=new SpeechSynthesisUtterance(segment.text);
+   utterance.rate=segment.rate;
+   utterance.pitch=segment.pitch;
+   if(selected){utterance.voice=selected;utterance.lang=selected.lang}
+   else utterance.lang='es-ES';
+   if(index===segments.length-1)utterance.onend=finish;
+   utterance.onerror=()=>{
+    window.speechSynthesis.cancel();
+    finish();
+   };
+   window.speechSynthesis.speak(utterance);
+  });
  }
 
  function interruptSpeech(){
