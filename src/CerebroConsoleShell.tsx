@@ -4,7 +4,7 @@ import {BrainCircuit,ChevronLeft,Mic,MicOff,Send,ShieldCheck,Square} from 'lucid
 import {cerebroConsoleLinkEnabled} from './cerebroConsoleAccess';
 import {fetchAppApi,supabase} from './supabase';
 import {fetchCerebroConsoleHealth,fetchCerebroConsolePreferences,postCerebroConsoleChat,type CerebroConsoleHealth,type CerebroLearningCandidate,type CerebroPendingAction,type CerebroPreferences,type CerebroReadContext} from './cerebroConsoleApi';
-import {applyVoiceContextHints,applyVoiceInterruptHints,createVoiceRecognition,spanishVoices,speechSegments,speechSynthesisSupported,voiceInterruptRequested,voiceNeedsManualConfirmation,voiceRecognitionSupported,type CerebroSpeechRecognition,type CerebroSpokenMeta} from './cerebroVoice';
+import {applyVoiceContextHints,applyVoiceInterruptHints,createVoiceRecognition,spanishVoices,speechSegments,speechSynthesisSupported,voiceActivityFrame,voiceActivityThreshold,voiceInterruptRequested,voiceNeedsManualConfirmation,voiceRecognitionSupported,type CerebroSpeechRecognition,type CerebroSpokenMeta} from './cerebroVoice';
 import './cerebro-console.css';
 
 const CONTEXTS=['GENERAL','EMPRESA','ENGINE','CRM','APP','SEO','MARKETING','TRAINING','AUTOMATION'];
@@ -41,6 +41,11 @@ export default function CerebroConsoleShell(){
 
  const recognitionRef=useRef<CerebroSpeechRecognition|null>(null);
  const interruptRecognitionRef=useRef<CerebroSpeechRecognition|null>(null);
+ const bargeInStreamRef=useRef<MediaStream|null>(null);
+ const bargeInAudioContextRef=useRef<AudioContext|null>(null);
+ const bargeInFrameRef=useRef<number|null>(null);
+ const bargeInReadyRef=useRef(false);
+ const bargeInSpeechStartedAtRef=useRef(0);
  const voiceSessionRef=useRef(false);
  const voiceSpeakingRef=useRef(false);
  const sendingRef=useRef(false);
@@ -148,6 +153,91 @@ export default function CerebroConsoleShell(){
   }
  }
 
+ function stopVoiceActivityBargeIn(){
+  bargeInReadyRef.current=false;
+  if(bargeInFrameRef.current!==null){
+   window.cancelAnimationFrame(bargeInFrameRef.current);
+   bargeInFrameRef.current=null;
+  }
+  const context=bargeInAudioContextRef.current;
+  bargeInAudioContextRef.current=null;
+  if(context){void context.close().catch(()=>{})}
+  const stream=bargeInStreamRef.current;
+  bargeInStreamRef.current=null;
+  if(stream)stream.getTracks().forEach(track=>track.stop());
+ }
+
+ async function prepareVoiceActivityBargeIn(){
+  stopVoiceActivityBargeIn();
+  if(!navigator.mediaDevices?.getUserMedia||typeof AudioContext==='undefined')return false;
+  try{
+   const stream=await navigator.mediaDevices.getUserMedia({
+    audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true},
+    video:false
+   });
+   if(!voiceSessionRef.current){
+    stream.getTracks().forEach(track=>track.stop());
+    return false;
+   }
+   const context=new AudioContext({latencyHint:'interactive'});
+   const source=context.createMediaStreamSource(stream);
+   const analyser=context.createAnalyser();
+   analyser.fftSize=512;
+   analyser.smoothingTimeConstant=0.15;
+   source.connect(analyser);
+   bargeInStreamRef.current=stream;
+   bargeInAudioContextRef.current=context;
+   const data=new Float32Array(analyser.fftSize);
+   const noiseSamples:number[]=[];
+   const echoSamples:number[]=[];
+   let consecutive=0;
+   const calibrationStarted=performance.now();
+
+   return await new Promise<boolean>(resolve=>{
+    let resolved=false;
+    const settle=()=>{
+     if(resolved)return;
+     resolved=true;
+     bargeInReadyRef.current=true;
+     resolve(true);
+    };
+    const tick=()=>{
+     if(!voiceSessionRef.current||bargeInAudioContextRef.current!==context)return;
+     analyser.getFloatTimeDomainData(data);
+     let sum=0;
+     for(let index=0;index<data.length;index+=1)sum+=data[index]*data[index];
+     const rms=Math.sqrt(sum/data.length);
+     const now=performance.now();
+     if(!bargeInReadyRef.current){
+      noiseSamples.push(rms);
+      if(now-calibrationStarted>=260)settle();
+     }else if(voiceSpeakingRef.current){
+      const sinceSpeech=now-bargeInSpeechStartedAtRef.current;
+      if(sinceSpeech<520){
+       echoSamples.push(rms);
+      }else{
+       const noiseFloor=noiseSamples.length?noiseSamples.reduce((a,b)=>a+b,0)/noiseSamples.length:0;
+       const echoFloor=echoSamples.length?echoSamples.reduce((a,b)=>a+b,0)/echoSamples.length:0;
+       const threshold=voiceActivityThreshold(noiseFloor,echoFloor);
+       const frame=voiceActivityFrame(rms,threshold,consecutive,6);
+       consecutive=frame.consecutive;
+       if(frame.triggered){
+        interruptSpeech();
+        return;
+       }
+      }
+     }
+     bargeInFrameRef.current=window.requestAnimationFrame(tick);
+    };
+    bargeInFrameRef.current=window.requestAnimationFrame(tick);
+    window.setTimeout(settle,420);
+   });
+  }catch{
+   stopVoiceActivityBargeIn();
+   return false;
+  }
+ }
+
  function scheduleInterruptListening(delay=120){
   clearInterruptRestartTimer();
   if(!voiceSessionRef.current||!voiceSpeakingRef.current||!voiceSupport.stt)return;
@@ -173,6 +263,7 @@ export default function CerebroConsoleShell(){
   clearRestartTimer();
   stopRecognition();
   stopInterruptRecognition();
+  stopVoiceActivityBargeIn();
   if(voiceSupport.tts)window.speechSynthesis.cancel();
   voiceSpeakingRef.current=false;
   setVoiceSpeaking(false);
@@ -192,9 +283,6 @@ export default function CerebroConsoleShell(){
   window.speechSynthesis.cancel();
   const voices=spanishVoices();
   const selected=voices.find(voice=>voice.lang.toLowerCase()==='es-es')||voices[0];
-  voiceSpeakingRef.current=true;
-  setVoiceSpeaking(true);
-  scheduleInterruptListening(180);
   let finished=false;
   const finish=()=>{
    if(finished)return;
@@ -202,27 +290,37 @@ export default function CerebroConsoleShell(){
    voiceSpeakingRef.current=false;
    setVoiceSpeaking(false);
    stopInterruptRecognition();
-   scheduleListening(300);
+   stopVoiceActivityBargeIn();
+   scheduleListening(180);
   };
-  segments.forEach((segment,index)=>{
-   const utterance=new SpeechSynthesisUtterance(segment.text);
-   utterance.rate=segment.rate;
-   utterance.pitch=segment.pitch;
-   if(selected){utterance.voice=selected;utterance.lang=selected.lang}
-   else utterance.lang='es-ES';
-   if(index===segments.length-1)utterance.onend=finish;
-   utterance.onerror=()=>{
-    window.speechSynthesis.cancel();
-    finish();
-   };
-   window.speechSynthesis.speak(utterance);
-  });
+  const beginSpeech=(vadReady:boolean)=>{
+   if(!voiceSessionRef.current)return;
+   voiceSpeakingRef.current=true;
+   setVoiceSpeaking(true);
+   bargeInSpeechStartedAtRef.current=performance.now();
+   if(!vadReady)scheduleInterruptListening(120);
+   segments.forEach((segment,index)=>{
+    const utterance=new SpeechSynthesisUtterance(segment.text);
+    utterance.rate=segment.rate;
+    utterance.pitch=segment.pitch;
+    if(selected){utterance.voice=selected;utterance.lang=selected.lang}
+    else utterance.lang='es-ES';
+    if(index===segments.length-1)utterance.onend=finish;
+    utterance.onerror=()=>{
+     window.speechSynthesis.cancel();
+     finish();
+    };
+    window.speechSynthesis.speak(utterance);
+   });
+  };
+  void prepareVoiceActivityBargeIn().then(beginSpeech);
  }
 
  function interruptSpeech(){
   if(!voiceSpeakingRef.current)return;
   clearRestartTimer();
   stopInterruptRecognition();
+  stopVoiceActivityBargeIn();
   voiceSpeakingRef.current=false;
   setVoiceSpeaking(false);
   if(voiceSupport.tts)window.speechSynthesis.cancel();
@@ -426,7 +524,7 @@ export default function CerebroConsoleShell(){
    :'Esta pantalla reserva la interfaz propia de CEREBRO dentro de Fénix. La comunicación permanece cerrada hasta disponer de una URL HTTPS desplegada y autenticada delante de CEREBRO Gateway.';
 
  const voiceStatus=voiceSpeaking
-  ?'CEREBRO está hablando. Puedes decir «para», «stop» o «calla» para interrumpirla y hablar.'
+  ?'CEREBRO está hablando. Empieza a hablar para interrumpirla; no necesitas esperar ni tocar el botón.'
   :sending
    ?'CEREBRO está procesando tu petición.'
    :voiceListening
