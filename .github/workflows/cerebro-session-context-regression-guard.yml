@@ -125,6 +125,7 @@ jobs:
           node scripts/verify-cerebro-conversational-learning.mjs
           node scripts/verify-cerebro-spoken-summary.mjs
           node scripts/test-cerebro-spoken-summary-v2.mjs
+          node scripts/test-cerebro-voice-barge-in.mjs
 
       - name: Build app
         shell: bash
