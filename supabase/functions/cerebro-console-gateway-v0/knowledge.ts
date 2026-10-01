@@ -78,7 +78,7 @@ const DOMAIN_CANONICAL:Record<string,{id:string,title:string}[]>={
 
 function detectKnowledgeDomain(question:string){
   const q=norm(question);
-  if(/\b(legal|juridico|juridica|arras|compraventa|carga registral|cargas registrales|registro de la propiedad|notaria|notarial|herencia|donacion|itp|plusvalia|catastro|embargo|titularidad|urbanismo|blanqueo|aml)\b/.test(q))return "legal";
+  if(/\b(?:legal(?:es)?|juridic[oa]s?|arras|compraventa|cargas? registrales?|registro de la propiedad|notari[oa]s?|notariales?|herencias?|donaciones?|itp|plusvalia|catastro|embargos?|titularidad|urbanismo|blanqueo|aml)\b/.test(q))return "legal";
   if(/hipoteca|banco|financi|tin|tae|cuota|fein|tasacion|ingresos|endeudamiento/.test(q))return "finance";
   if(/newsletter|brevo|campana de email|campaña de email|email marketing/.test(q))return "newsletter";
   if(/redes sociales|facebook|instagram|linkedin|tiktok|youtube|buffer|publicacion social|publicación social/.test(q))return "social";
