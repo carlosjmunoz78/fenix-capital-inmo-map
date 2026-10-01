@@ -77,6 +77,7 @@ jobs:
           grep -F '(?:^|\s)(?:a|para)\s+(.+?)(?=\s+(?:con|y)\s+|$)' supabase/functions/cerebro-console-gateway-v0/index.ts >/dev/null
           grep -F 'socialContextHasPublication' supabase/functions/cerebro-console-gateway-v0/index.ts >/dev/null
           grep -F 'readContext?.kind==="social_schedule" && socialContextHasPublication(readContext)' supabase/functions/cerebro-console-gateway-v0/index.ts >/dev/null
+          grep -F 'socialContextHasPublication(recovered.read_context)' supabase/functions/cerebro-console-gateway-v0/index.ts >/dev/null
           grep -F 'Prepararé el email con el texto, la fecha, la hora y la imagen de la publicación.' supabase/functions/cerebro-console-gateway-v0/index.ts >/dev/null
           grep -F 'fenix_prod_cerebro_contact_search_server' supabase/functions/cerebro-console-gateway-v0/index.ts >/dev/null
           grep -F 'Elige el número, el nombre exacto o el correo que quieres usar.' supabase/functions/cerebro-console-gateway-v0/index.ts >/dev/null
