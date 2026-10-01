@@ -36,7 +36,7 @@ must(voice,'export function speechSegments','dynamic prosody segmentation');
 must(voice,'rate+=0.035','faster acknowledgement prosody');
 must(voice,'rate-=0.035','slower safety/proposal prosody');
 must(voice,'pitch+=0.045','question intonation');
-must(shell,'speechSegments(text,maxChars,voicePreferencesRef.current)','segmented TTS integration');
+must(shell,'speechSegments(text,maxChars,voicePreferencesRef.current,','segmented TTS integration');
 
 if(/grant\s+execute[\s\S]{0,220}\s+to\s+(authenticated|anon)/i.test(migration)){
  throw new Error('Conversation-memory server RPC must not be granted to authenticated/anon');

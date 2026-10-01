@@ -150,8 +150,8 @@ export default function CerebroConsoleShell(){
 
  function speakAndResume(text:string,fullDetail=false){
   if(!voiceSessionRef.current)return;
-  const maxChars=fullDetail?1600:(voicePreferencesRef.current.response_length==='concise'?700:1200);
-  const segments=speechSegments(text,maxChars,voicePreferencesRef.current);
+  const maxChars=fullDetail?520:(voicePreferencesRef.current.response_length==='concise'?360:520);
+  const segments=speechSegments(text,maxChars,voicePreferencesRef.current,fullDetail?'action':'normal');
   if(!segments.length){scheduleListening();return}
   stopRecognition();
   if(!voiceSupport.tts){
