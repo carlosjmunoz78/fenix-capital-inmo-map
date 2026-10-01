@@ -132,3 +132,13 @@ Frontend:
 - validated source is merged.
 - the final release marker will carry `[DEPLOY_PROD]`.
 - final frontend status remains pending until exact Live Deploy, Runtime Smoke and physical persistence acceptance are recorded.
+
+
+## Frontend PROD closure
+
+- release marker source: `7fad08ac3225e89cbf3aa5a732674201dc67a8e6`.
+- PROD Live Deploy #159: SUCCESS.
+- PROD Runtime Smoke #302: SUCCESS.
+- published `gh-pages/PROD_SOURCE_SHA.txt`: `7fad08ac3225e89cbf3aa5a732674201dc67a8e6`.
+
+Technical deployment is complete. End-to-end durable-learning status remains **PARCIAL** until the user physically verifies `correction -> guárdalo -> reload/new session -> recovered preference`.
