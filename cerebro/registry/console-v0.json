@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.6.0",
+  "schema_version": "1.7.0",
   "phase": "PHASE_5_CEREBRO_CONSOLE_V0",
   "environment": "PREPROD",
   "additional_cost_target_eur": 0,
@@ -79,7 +79,7 @@
     "durable_learning_mode": "EXPLICIT_PREFERENCES_PLUS_CONVERSATIONAL_MEMORY_V1",
     "conversation_memory": "AUTO_BOUNDED_NON_SENSITIVE_USER_TURNS",
     "internal_learning_writes": "SERVICE_ROLE_BOUNDED",
-    "spoken_output_mode": "INTENT_AWARE_SEMANTIC_SUMMARY_V2",
+    "spoken_output_mode": "INTENT_DIGEST_V3",
     "spoken_raw_urls": false
   },
   "human_decision_protocol": {
@@ -115,7 +115,7 @@
     "mobile_canary": {
       "status": "PUBLISHED_CI_VERIFIED",
       "path": "/cerebro/",
-      "source_sha": "f670d65136b8a09630ab5183d23961fea098af24"
+      "source_sha": "d8b89b4f1f541d5d7ebea1ab5fd5cd8446a4bc43"
     },
     "knowledge_adapter": {
       "status": "ACTIVE_READ_ONLY",
@@ -161,7 +161,8 @@
     },
     "spoken_summary": {
       "status": "PROD_DEPLOYED_PHYSICAL_ACCEPTANCE_PENDING",
-      "mode": "INTENT_AWARE_SEMANTIC_SUMMARY_V2",
+      "mode": "INTENT_DIGEST_V3",
+      "previous_v2_owner_feedback": "NO_MATERIAL_IMPROVEMENT",
       "structured_meta": [
         "status",
         "intent",
@@ -173,14 +174,48 @@
       "long_hash_speech": false,
       "numbered_list_marker_speech": false,
       "technical_ci_noise_spoken": false,
+      "generic_prose_target": "ONE_PRIMARY_IDEA_PLUS_WRITTEN_DETAIL",
+      "domain_specific_digests": [
+        "seo",
+        "finance",
+        "marketing",
+        "social",
+        "newsletter",
+        "autonomy",
+        "platform",
+        "trading",
+        "multiempresa"
+      ],
       "action_confirmation_preserved": true,
       "failed_action_warning_preserved": true,
       "behavioral_corpus": "GREEN",
       "additional_cost_target_eur": 0,
-      "frontend_source_sha": "f670d65136b8a09630ab5183d23961fea098af24",
-      "previous_rollback_source_sha": "b64050f0320f31e1685fa028744e73e5920c8655",
-      "prod_live_deploy_run": 168,
-      "prod_runtime_smoke_run": 311,
+      "frontend_source_sha": "d8b89b4f1f541d5d7ebea1ab5fd5cd8446a4bc43",
+      "previous_rollback_source_sha": "f670d65136b8a09630ab5183d23961fea098af24",
+      "prod_live_deploy_run": 171,
+      "prod_runtime_smoke_run": 314,
+      "physical_acceptance": "PENDING"
+    },
+    "voice_barge_in": {
+      "status": "PROD_DEPLOYED_PHYSICAL_ACCEPTANCE_PENDING",
+      "commands": [
+        "para",
+        "para ya",
+        "cerebro para",
+        "stop",
+        "calla",
+        "cállate",
+        "silencio",
+        "basta",
+        "detente"
+      ],
+      "exact_phrase_matching": true,
+      "resumes_normal_listening_after_interrupt": true,
+      "dedicated_recognition_during_tts": true,
+      "browser_native": true,
+      "additional_cost_target_eur": 0,
+      "frontend_source_sha": "d8b89b4f1f541d5d7ebea1ab5fd5cd8446a4bc43",
+      "previous_rollback_source_sha": "f670d65136b8a09630ab5183d23961fea098af24",
       "physical_acceptance": "PENDING"
     }
   }

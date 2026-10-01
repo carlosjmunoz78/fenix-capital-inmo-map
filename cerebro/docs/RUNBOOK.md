@@ -135,3 +135,22 @@ Generated Factory output is disposable; canonical sources are registry seed + fa
 3. Pedir un contacto con varios correos: debe resumir opciones sin leer direcciones completas.
 4. Preparar un correo: debe decir destinatario/asunto, dejar cuerpo escrito y preguntar confirmación.
 5. Provocar una respuesta normal con lista: debe sonar como frase natural, no enumeración mecánica.
+
+
+## Verbal Barge-in V1 + Spoken Digest V3 · runbook
+
+- Mientras CEREBRO habla, mantener un recognizer separado del recognizer conversacional normal.
+- Ese recognizer no envía texto al Gateway: solo puede cancelar TTS cuando la frase normalizada coincide con el vocabulario cerrado de interrupción.
+- No usar matching por substring para «para»; debe evitarse que «para Belén», «para mañana» o «prepara» silencien accidentalmente la respuesta.
+- Tras una interrupción válida: cancelar TTS, cerrar el recognizer de barge-in y reabrir la escucha conversacional.
+- Si el navegador no permite STT concurrente con TTS, conservar siempre el botón visible como fallback; no declarar barge-in físico operativo sin prueba real.
+- Spoken Digest V3 debe hablar una sola idea principal en prosa ordinaria, salvo listas/accciones donde haga falta más contexto.
+- Los fallos, negaciones, riesgos y preguntas de confirmación siguen siendo contenido oral prioritario.
+- Rollback frontend: `f670d65136b8a09630ab5183d23961fea098af24`.
+
+### Aceptación física mínima
+1. Iniciar voz y pedir una respuesta suficientemente larga.
+2. Mientras CEREBRO habla, decir «para». Debe callarse y volver a escuchar sin pulsar ningún botón.
+3. Repetir con «stop» y «calla».
+4. Pedir algo que contenga «para Belén» y comprobar que esa frase no activa una interrupción falsa.
+5. Comparar una respuesta normal larga con V2: V3 debe hablar solo la idea principal y dejar el detalle escrito.

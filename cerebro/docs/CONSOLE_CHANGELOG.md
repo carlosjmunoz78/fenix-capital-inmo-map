@@ -80,3 +80,18 @@
 - PR #465: Guard #131 SUCCESS; Build Gate #379 SUCCESS; merge `20280fa5f3afc83723db19ca0fcd063a364d164f`.
 - PROD `f670d65136b8a09630ab5183d23961fea098af24`: Live Deploy #168 SUCCESS; Runtime Smoke #311 SUCCESS.
 - Coste adicional: 0 €.
+
+
+## 2026-10-01 · Verbal Barge-in V1 + Spoken Digest V3
+
+- V2 no obtiene aceptación física: el propietario reporta que el cambio hablado se percibe igual y que no existe interrupción verbal efectiva.
+- Añadido listener STT dedicado durante TTS para barge-in.
+- «para», «stop», «calla», «cállate», «silencio», «basta», «detente» y variantes acotadas cancelan `speechSynthesis` y devuelven CEREBRO a escucha.
+- Matching exacto reduce falsos positivos con expresiones como «para Belén».
+- El habla genérica pasa de varias frases seleccionadas a una idea principal por defecto.
+- Añadidos digests específicos por intent para SEO, financiación, marketing, social, newsletter, autonomía, plataforma, Trading y multiempresa.
+- Corpus conductual de barge-in y resumen V3 GREEN.
+- PR #467: Guard #134 SUCCESS; Build Gate #381 SUCCESS.
+- PROD `d8b89b4f1f541d5d7ebea1ab5fd5cd8446a4bc43`: Live Deploy #171 SUCCESS; Runtime Smoke #314 SUCCESS.
+- Coste adicional: 0 €.
+- Aceptación física: PENDIENTE.
