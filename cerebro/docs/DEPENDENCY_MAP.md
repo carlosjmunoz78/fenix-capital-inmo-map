@@ -102,3 +102,11 @@ Before wiring persistent `EVT-001`/`JOB-001` into `SharedRuntime`, require expli
 - El listener de interrupción no envía mensajes al Gateway ni puede confirmar acciones.
 - Spoken Digest V3 sigue siendo una vista derivada determinista; no sustituye texto, evidencia, memoria ni contratos de acción.
 - No se añade infraestructura, modelo ni servicio de pago.
+
+
+## Local VAD Barge-in V2 · 2026-10-01
+
+- Flujo de interrupción: `micrófono → getUserMedia → Web Audio analyser → VAD adaptativo → cancel speechSynthesis → SpeechRecognition normal`.
+- El VAD no interpreta contenido, no llama al Gateway y no puede confirmar acciones.
+- La detección es local al navegador y no añade carga a Supabase ni servicios de pago.
+- `SpeechRecognition` concurrente durante TTS queda como fallback, no como mecanismo primario.
