@@ -1,5 +1,6 @@
 export const VOICE_CONFIRMATION_CONFIDENCE_MIN=0.85;
 export const VOICE_CONFIRMATION_PHRASES=new Set(['si','si adelante','adelante','confirmo','activalo','activarlo','hazlo','procede']);
+export const VOICE_INTERRUPT_PHRASES=new Set(['para','para ya','cerebro para','stop','cerebro stop','calla','callate','cállate','silencio','basta','detente','detenete','cerebro calla','cerebro callate','cerebro cállate']);
 export const CEREBRO_VOICE_CONTEXT_HINTS=[
  'CEREBRO','Fénix','Fénix Capital','Fénix Inmobiliaria','Belén','SEO','SEO local',
  'Supabase','Notion','Brevo','Buffer','Facebook','Instagram','LinkedIn',
@@ -66,6 +67,19 @@ export function applyVoiceContextHints(recognition:CerebroSpeechRecognition){
  }catch{return false}
 }
 
+export function applyVoiceInterruptHints(recognition:CerebroSpeechRecognition){
+ if(typeof window==='undefined')return false;
+ const target=voiceWindow();
+ const PhraseCtor=target.SpeechRecognitionPhrase;
+ if(!PhraseCtor||!('phrases' in recognition))return false;
+ try{
+  (recognition as CerebroSpeechRecognition&{phrases:unknown[]}).phrases=[
+   'para','stop','calla','cállate','silencio','basta','detente','CEREBRO para'
+  ].map(phrase=>new PhraseCtor(phrase,10));
+  return true;
+ }catch{return false}
+}
+
 export function speechSynthesisSupported(){
  return typeof window!=='undefined'&&'speechSynthesis' in window&&typeof SpeechSynthesisUtterance!=='undefined';
 }
@@ -84,6 +98,16 @@ export function normalizeVoiceConfirmation(text:string){
   .replace(/[úùüû]/g,'u')
   .replace(/[¿?¡!.,;:]/g,'')
   .replace(/\s+/g,' ');
+}
+
+export function voiceInterruptRequested(text:string){
+ const normalized=normalizeVoiceConfirmation(text);
+ if(VOICE_INTERRUPT_PHRASES.has(normalized))return true;
+ const stripped=normalized
+  .replace(/^(?:oye\s+)?cerebro\s+/,'')
+  .replace(/\s+por favor$/,'')
+  .trim();
+ return VOICE_INTERRUPT_PHRASES.has(stripped);
 }
 
 export function voiceNeedsManualConfirmation(text:string,confidence:number|null,hasPendingAction:boolean){
