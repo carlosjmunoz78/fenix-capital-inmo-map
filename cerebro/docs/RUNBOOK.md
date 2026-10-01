@@ -117,3 +117,21 @@ Generated Factory output is disposable; canonical sources are registry seed + fa
 2. Pedir una respuesta que incluya un enlace y confirmar que no lee el enlace completo; debe indicar que queda escrito.
 3. Pedir una respuesta larga y confirmar que habla un resumen, mientras el texto completo sigue visible.
 4. Probar una acción con confirmación y verificar que la pregunta de confirmación sigue oyéndose claramente.
+
+
+## Spoken Summary V2 · acceptance
+
+- La respuesta escrita sigue siendo el registro completo; la voz es una capa de síntesis.
+- Priorizar intención y estado estructurados sobre simple posición de frases.
+- No verbalizar identificadores técnicos largos, enlaces completos ni correos completos salvo necesidad explícita y segura.
+- Mantener audible cualquier negación, fallo, bloqueo, riesgo o confirmación requerida.
+- Para listas, convertir elementos seleccionados en frase natural («Lo principal es…») y dejar el resto escrito.
+- Para acciones, conservar contexto suficiente para entender qué se propone y mantener la pregunta final de confirmación.
+- Rollback de presentación: `b64050f0320f31e1685fa028744e73e5920c8655`.
+
+### Prueba física V2
+1. Pedir una respuesta técnica larga: no debe recitar SHA/PR/runs.
+2. Pedir próxima publicación social: debe decir red/fecha y remitir texto e imagen a pantalla.
+3. Pedir un contacto con varios correos: debe resumir opciones sin leer direcciones completas.
+4. Preparar un correo: debe decir destinatario/asunto, dejar cuerpo escrito y preguntar confirmación.
+5. Provocar una respuesta normal con lista: debe sonar como frase natural, no enumeración mecánica.
