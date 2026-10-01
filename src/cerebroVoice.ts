@@ -1,5 +1,10 @@
 export const VOICE_CONFIRMATION_CONFIDENCE_MIN=0.85;
 export const VOICE_CONFIRMATION_PHRASES=new Set(['si','si adelante','adelante','confirmo','activalo','activarlo','hazlo','procede']);
+export const CEREBRO_VOICE_CONTEXT_HINTS=[
+ 'CEREBRO','Fénix','Fénix Capital','Fénix Inmobiliaria','Belén','SEO','SEO local',
+ 'Supabase','Notion','Brevo','Buffer','Facebook','Instagram','LinkedIn',
+ 'hipoteca','hipotecas','inmobiliaria','inmobiliarias','expediente','expedientes'
+];
 
 export type CerebroSpeechRecognitionResult={
  transcript:string;
@@ -26,9 +31,11 @@ export type CerebroSpeechRecognition={
 };
 
 type RecognitionCtor=new()=>CerebroSpeechRecognition;
+type SpeechRecognitionPhraseCtor=new(phrase:string,boost?:number)=>unknown;
 type VoiceWindow=Window&typeof globalThis&{
  SpeechRecognition?:RecognitionCtor;
  webkitSpeechRecognition?:RecognitionCtor;
+ SpeechRecognitionPhrase?:SpeechRecognitionPhraseCtor;
 };
 
 function voiceWindow(){
@@ -46,6 +53,17 @@ export function createVoiceRecognition(){
  const target=voiceWindow();
  const Ctor=target.SpeechRecognition||target.webkitSpeechRecognition;
  return Ctor?new Ctor():null;
+}
+
+export function applyVoiceContextHints(recognition:CerebroSpeechRecognition){
+ if(typeof window==='undefined')return false;
+ const target=voiceWindow();
+ const PhraseCtor=target.SpeechRecognitionPhrase;
+ if(!PhraseCtor||!('phrases' in recognition))return false;
+ try{
+  (recognition as CerebroSpeechRecognition&{phrases:unknown[]}).phrases=CEREBRO_VOICE_CONTEXT_HINTS.map(phrase=>new PhraseCtor(phrase,5));
+  return true;
+ }catch{return false}
 }
 
 export function speechSynthesisSupported(){
