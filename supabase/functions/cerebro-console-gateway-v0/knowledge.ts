@@ -78,7 +78,7 @@ const DOMAIN_CANONICAL:Record<string,{id:string,title:string}[]>={
 
 function detectKnowledgeDomain(question:string){
   const q=norm(question);
-  if(/\b(legal|juridic|arras|compraventa|carga registral|cargas registrales|registro de la propiedad|notari|herencia|donacion|itp|plusvalia|catastro|embargo|titularidad|urbanis|blanqueo|aml)\b/.test(q))return "legal";
+  if(/\b(legal|juridico|juridica|arras|compraventa|carga registral|cargas registrales|registro de la propiedad|notaria|notarial|herencia|donacion|itp|plusvalia|catastro|embargo|titularidad|urbanismo|blanqueo|aml)\b/.test(q))return "legal";
   if(/hipoteca|banco|financi|tin|tae|cuota|fein|tasacion|ingresos|endeudamiento/.test(q))return "finance";
   if(/newsletter|brevo|campana de email|campaña de email|email marketing/.test(q))return "newsletter";
   if(/redes sociales|facebook|instagram|linkedin|tiktok|youtube|buffer|publicacion social|publicación social/.test(q))return "social";
@@ -517,6 +517,54 @@ function compact(value:string,maxLines:number){
   return value.split("\n").map(x=>x.trim()).filter(Boolean).slice(0,maxLines).join("\n");
 }
 
+function broadKnowledgeQuestion(question:string){
+  const q=norm(question);
+  return /(que sabes|que conoces|cuanto sabes|en que me puedes ayudar|que puedo preguntarte|que temas controlas|que temas conoces|hazme un esquema|dame un esquema|dame un mapa|todo lo que sabes)/.test(q);
+}
+
+function domainKnowledgeMap(domain:string){
+  const maps:Record<string,{intent:string;message:string}>={
+    finance:{
+      intent:"finance_knowledge_map",
+      message:"Claro. En financiación puedo ayudarte con preanálisis y viabilidad, ingresos y endeudamiento, documentación, perfiles de cliente, estrategia y ranking de bancos, financiación alta, tasación, incidencias, planes B/C/D, FEIN/firma y seguimiento del expediente. También separo lo que es criterio financiero validado de lo que necesita confirmación de banco, Belén o un profesional. ¿Sobre qué parte quieres entrar?"
+    },
+    seo:{
+      intent:"seo_knowledge_map",
+      message:"Claro. En SEO puedo ayudarte con auditoría técnica, palabras clave e intención, arquitectura, landings, contenidos, enlazado interno, SEO local, indexación, Search Console cuando haya datos disponibles, competencia, captación y seguimiento por ciudad. ¿Qué parte quieres revisar?"
+    },
+    marketing:{
+      intent:"marketing_knowledge_map",
+      message:"Claro. En marketing puedo trabajar estrategia, contenidos, embudos, captación orgánica, campañas, CRM/reactivación, referidos, reutilización multicanal, métricas de negocio y coordinación con SEO, redes y newsletter. ¿Por dónde quieres que empecemos?"
+    },
+    social:{
+      intent:"social_knowledge_map",
+      message:"Claro. En redes puedo revisar estrategia, calendario y cola operativa, próximas publicaciones, copy, creatividades, canales disponibles, Buffer, reutilización de contenidos y estado de automatización. ¿Qué quieres mirar exactamente?"
+    },
+    newsletter:{
+      intent:"newsletter_knowledge_map",
+      message:"Claro. En newsletter puedo trabajar las líneas de particulares e inmobiliarias, listas y segmentación en Brevo, campañas, automatizaciones, contenido, métricas y relación con CRM. ¿Qué parte quieres revisar?"
+    },
+    autonomy:{
+      intent:"autonomy_knowledge_map",
+      message:"Claro. Puedo explicarte qué hace CEREBRO solo, qué requiere confirmación, cuándo aparece HUMAN_REQUIRED, cómo se aprende de conversaciones y casos, y cómo se promociona una automatización hasta producción. ¿Qué parte de la autonomía quieres ver?"
+    },
+    platform:{
+      intent:"platform_knowledge_map",
+      message:"Claro. Puedo explicarte la arquitectura de CEREBRO, Gateway, Console, Supabase, runtime y workers, motores compartidos, observabilidad, costes, backups, rollback, PREPROD y promoción a producción. ¿En qué parte quieres entrar?"
+    },
+    trading:{
+      intent:"trading_knowledge_map",
+      message:"Claro. Puedo explicarte el perímetro de Trading LAB, aislamiento de credenciales y recursos, límites, logs, watchdog, circuit breaker, kill switch y reglas para que nunca comprometa producción. ¿Qué parte quieres revisar?"
+    },
+    multiempresa:{
+      intent:"multiempresa_knowledge_map",
+      message:"Claro. Puedo explicarte el alta de una empresa, descubrimiento del negocio, web y keywords, SEO, competencia, redes, marketing, conocimiento, CRM, App, automatizaciones, training, supervisor, backup y paso a producción. ¿Sobre qué fase quieres preguntar?"
+    }
+  };
+  const item=maps[domain];
+  return item?{status:"OK",intent:item.intent,executed:false,message:item.message,evidence_mode:"DOMAIN_KNOWLEDGE_MAP_V1"}:null;
+}
+
 function legalKnowledgeMap(){
   return {
     status:"OK",
@@ -542,8 +590,10 @@ function clarificationMessage(domain:string|null){
 async function directDomainAnswer(question:string,domain:string|null){
   const q=norm(question);
 
-  if(domain==="legal"&&/(que sabes|qué sabes|que conoces|qué conoces|temas legales|tema legal|legal inmobiliario|juridico inmobiliario|jurídico inmobiliario|en que me puedes ayudar|en qué me puedes ayudar|que puedo preguntarte|qué puedo preguntarte|todo lo que sabes)/.test(q)){
-    return legalKnowledgeMap();
+  if(domain==="legal"&&broadKnowledgeQuestion(question))return legalKnowledgeMap();
+  if(domain&&domain!=="legal"&&broadKnowledgeQuestion(question)){
+    const map=domainKnowledgeMap(domain);
+    if(map)return map;
   }
 
   if(domain==="finance"&&/(documentacion|documentos|papeles)/.test(q)&&/(hipoteca|estudiar|preanalisis)/.test(q)){
