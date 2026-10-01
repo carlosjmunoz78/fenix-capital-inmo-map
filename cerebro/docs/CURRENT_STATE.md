@@ -47,3 +47,21 @@ Evidence anchors are scoped to the change they prove; they are not intended to m
 - Trading remains isolated.
 - Additional cost target remains 0 €.
 - No engine becomes autonomous PROD solely because its scaffold/reference implementation or read-only evidence audit is green.
+
+
+## Update 2026-10-01 · CEREBRO Voice / Explicit Learning
+
+### HECHO
+- VOICE-001 V1.1 se encuentra desplegado en la App previa a este release y tuvo aceptación física básica del usuario.
+- Explicit Learning V1 superó PREPROD con la migración exacta ejecutada dentro de una transacción y rollback completo: `GREEN_EXACT_MIGRATION_PREPROD_ROLLBACK`.
+- PR #457 validado por CEREBRO Session Context Regression Guard #120 y App Restoration Build Gate #371; merge `b3b920bb5af4ce08b1a1a4d0a2925a00169a87f6`.
+- La persistencia PROD `fenix_prod.cerebro_user_preferences` está creada, RLS activo, 0 filas iniciales, acceso SELECT anon/authenticated=false y service_role=true.
+- El nuevo FK de auditoría `supersedes` está cubierto por índice tras PR #458, Guard #122 y Build Gate #372; merge `b29158e32889207ddc509a6b2853465c5413088c`.
+- CEREBRO Gateway PROD V25 está ACTIVE con artefacto `12a0756ea113f8e4ba7c755e57a61704bac86417f553466c9ab6fd321d9d02b2`.
+- Coste adicional recurrente introducido por esta capa: 0 €.
+
+### PARCIAL
+- La promoción frontend de Explicit Learning V1 se dispara mediante el release marcado `[DEPLOY_PROD]`; requiere Live Deploy + Runtime Smoke exactos antes de declararse desplegada.
+- La persistencia física `corrección → guárdalo → recarga/nueva sesión → preferencia recuperada` requiere prueba humana real antes de `CONFIRMED_OPERATIONAL`.
+- El carácter textual completo (por ejemplo preferred/avoid address y status-first en toda respuesta) está soportado como preferencia estructurada, pero no debe declararse aplicado universalmente hasta ampliar/verificar cada transformación.
+- La interrupción por palabra hablada «para» mientras TTS está hablando permanece PLANIFICADA; el botón de interrupción sí existe.

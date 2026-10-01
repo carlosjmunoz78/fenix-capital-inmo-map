@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.2.0",
+  "schema_version": "1.3.0",
   "phase": "PHASE_5_CEREBRO_CONSOLE_V0",
   "environment": "PREPROD",
   "additional_cost_target_eur": 0,
@@ -74,7 +74,9 @@
     "promotion_requires_preprod_green": true,
     "owner_exception_decision": true,
     "single_confirmation_after_exact_proposal": true,
-    "explain_before_owner_decision": true
+    "explain_before_owner_decision": true,
+    "preference_writes": "EXPLICIT_USER_ONLY",
+    "durable_learning_mode": "EXPLICIT_ONLY_V1"
   },
   "human_decision_protocol": {
     "mode": "OWNER_DECISION_BY_EXCEPTION",
@@ -102,8 +104,9 @@
   "live_evidence": {
     "gateway_prod": {
       "status": "ACTIVE",
-      "version": 3,
-      "service": "cerebro-console-gateway-v0"
+      "version": 25,
+      "service": "cerebro-console-gateway-v0",
+      "artifact_sha256": "12a0756ea113f8e4ba7c755e57a61704bac86417f553466c9ab6fd321d9d02b2"
     },
     "mobile_canary": {
       "status": "PUBLISHED_CI_VERIFIED",
@@ -119,6 +122,16 @@
     "action_execution": {
       "status": "PARTIAL_BINDING_REQUIRED",
       "prod_execution": false
+    },
+    "explicit_learning": {
+      "status": "BACKEND_PROD_ACTIVE_FRONTEND_RELEASE_CANDIDATE",
+      "storage": "fenix_prod.cerebro_user_preferences",
+      "write_mode": "EXPLICIT_USER_ONLY",
+      "direct_anon_access": false,
+      "direct_authenticated_access": false,
+      "service_role_only": true,
+      "additional_cost_target_eur": 0,
+      "physical_acceptance": "PENDING"
     }
   }
 }

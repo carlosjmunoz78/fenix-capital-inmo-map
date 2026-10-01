@@ -53,3 +53,13 @@ Commands and chat are Gateway-mediated; direct model access is forbidden by cont
 Every promoted engine must retain: contracts, permissions, tests, evaluation, tribunal, observability, backup, rollback, rebuild, measured cost, policy and PREPROD evidence. Green scaffold/reference or read-only audit status is not equivalent to autonomous production readiness.
 
 Before wiring persistent `EVT-001`/`JOB-001` into `SharedRuntime`, require explicit OLD-vs-NEW comparison, rollback path, dependency review and multi-process/shared-worker safety design. The current persistent adapters remain parallel by design.
+
+
+## VOICE-001 / Explicit Learning V1 · 2026-10-01
+
+- `VOICE-001` remains browser-native for STT/TTS and therefore adds no paid voice service.
+- Persistent interaction preferences follow: `CONSOLE-001 → ACTGW-001 → server-only preference RPC → fenix_prod.cerebro_user_preferences`.
+- The preference store is actor/company scoped, versioned and auditable; anonymous/authenticated direct table/RPC access is denied.
+- Durable learning is explicit only. Session corrections may be applied ephemerally; persistence requires an explicit instruction such as `guárdalo`, `recuérdalo` or `a partir de ahora...`.
+- Existing `fenix-memory-api` is preserved for entity/CRM relationship memory and is not replaced or overloaded by this preference layer.
+- Preference writes are a narrowly scoped exception to the Console reference rule of no operational Supabase writes; they do not authorize business-action writes, permission changes or autonomous PROD execution.
