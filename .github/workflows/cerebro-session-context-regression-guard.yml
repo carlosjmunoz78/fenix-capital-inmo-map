@@ -98,6 +98,18 @@ jobs:
           grep -F 'Auditoría de 156 contenidos publicados' "$K" >/dev/null
           grep -F 'const direct=await directDomainAnswer(question,domain);' "$K" >/dev/null
 
+      - name: Assert CEREBRO zero-cost voice safety
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -F 'webkitSpeechRecognition' src/cerebroVoice.ts >/dev/null
+          grep -F 'speechSynthesis' src/cerebroVoice.ts >/dev/null
+          grep -F 'VOICE_CONFIRMATION_CONFIDENCE_MIN=0.85' src/cerebroVoice.ts >/dev/null
+          grep -F 'voiceNeedsManualConfirmation' src/CerebroConsoleShell.tsx >/dev/null
+          grep -F 'La transcripción aparecerá antes de enviarse.' src/CerebroConsoleShell.tsx >/dev/null
+          grep -F 'Escribe «Sí» manualmente' src/CerebroConsoleShell.tsx >/dev/null
+          grep -F 'Escribe o dicta a CEREBRO' src/CerebroConsoleShell.tsx >/dev/null
+
       - name: Build app
         shell: bash
         run: |
