@@ -150,8 +150,8 @@ const SPOKEN_STATUS_LABELS=new Set([
 
 function naturalJoin(items:string[]){
  if(items.length<=1)return items[0]??'';
- if(items.length===2)return \`\${items[0]} y \${items[1]}\`;
- return \`\${items.slice(0,-1).join(', ')} y \${items[items.length-1]}\`;
+ if(items.length===2)return `${items[0]} y ${items[1]}`;
+ return `${items.slice(0,-1).join(', ')} y ${items[items.length-1]}`;
 }
 
 function cleanSpokenUnit(value:string){
@@ -228,22 +228,22 @@ function contactSelectionSummary(raw:string,meta:CerebroSpokenMeta){
   const parsed=JSON.parse(String(scope.candidates_json||'[]'));
   if(Array.isArray(parsed))count=parsed.length;
  }catch{/* generic wording */}
- const howMany=count>1?\`\${count} opciones\`:count===1?'una opción':'varias opciones';
- return \`He encontrado \${howMany} para \${contact}. Te las dejo por escrito para que elijas.\`;
+ const howMany=count>1?`${count} opciones`:count===1?'una opción':'varias opciones';
+ return `He encontrado ${howMany} para ${contact}. Te las dejo por escrito para que elijas.`;
 }
 
 function emailProposalSummary(meta:CerebroSpokenMeta){
  const scope=meta.action?.scope??{};
  const name=String(scope.contact_name||'el destinatario').trim();
  const subject=String(scope.subject||'').trim();
- const subjectPart=subject?\` con el asunto «\${clipNatural(subject,90)}»\`:'';
- return \`He preparado el correo para \${name}\${subjectPart}. Te dejo el texto completo por escrito para que lo revises. ¿Confirmas el envío?\`;
+ const subjectPart=subject?` con el asunto «${clipNatural(subject,90)}»`:'';
+ return `He preparado el correo para ${name}${subjectPart}. Te dejo el texto completo por escrito para que lo revises. ¿Confirmas el envío?`;
 }
 
 function emailAcceptedSummary(raw:string){
  const name=raw.match(/Email enviado a\s+(.+?)(?:\s*<|\.|$)/i)?.[1]?.trim();
  return name
-  ?\`Hecho. El correo se ha enviado a \${name}. Te dejo la evidencia por escrito.\`
+  ?`Hecho. El correo se ha enviado a ${name}. Te dejo la evidencia por escrito.`
   :'Hecho. El correo se ha enviado correctamente. Te dejo la evidencia por escrito.';
 }
 
@@ -267,9 +267,9 @@ function socialScheduleSummary(meta:CerebroSpokenMeta){
   }
  }
  const key=String(ctx.content_key||'').trim();
- const keyPart=key?\` Es la publicación \${clipNatural(key,80)}.\`:'';
- const whenPart=when?\` está programada para \${when}\`:' está localizada';
- return \`La próxima publicación de \${network}\${whenPart}.\${keyPart} Te dejo el texto, la imagen y el resto de detalles por escrito.\`;
+ const keyPart=key?` Es la publicación ${clipNatural(key,80)}.`:'';
+ const whenPart=when?` está programada para ${when}`:' está localizada';
+ return `La próxima publicación de ${network}${whenPart}.${keyPart} Te dejo el texto, la imagen y el resto de detalles por escrito.`;
 }
 
 function memoryRecallSummary(units:SpokenUnit[]){
@@ -279,7 +279,7 @@ function memoryRecallSummary(units:SpokenUnit[]){
   .filter(Boolean)
   .slice(0,2);
  if(!remembered.length)return 'Sí. Tengo recuerdos relacionados y te los dejo por escrito.';
- return \`Sí. Recuerdo \${naturalJoin(remembered.map(item=>item.replace(/[.]+$/,'')))}.\`;
+ return `Sí. Recuerdo ${naturalJoin(remembered.map(item=>item.replace(/[.]+$/,'')))}.`;
 }
 
 function scoreUnit(unit:SpokenUnit,index:number){
@@ -327,7 +327,7 @@ function genericSummary(raw:string,units:SpokenUnit[],maxChars:number){
   const bulletSet=new Set(bulletStatements);
   const plain=statements.filter(unit=>!bulletSet.has(unit));
   parts.push(...plain.map(unit=>unit.text));
-  parts.push(\`Lo principal es: \${naturalJoin(bulletStatements.map(unit=>unit.text.replace(/[.]+$/,'')))}.\`);
+  parts.push(`Lo principal es: ${naturalJoin(bulletStatements.map(unit=>unit.text.replace(/[.]+$/,'')))}.`);
  }else{
   parts.push(...statements.map(unit=>unit.text));
  }
