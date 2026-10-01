@@ -517,6 +517,16 @@ function compact(value:string,maxLines:number){
   return value.split("\n").map(x=>x.trim()).filter(Boolean).slice(0,maxLines).join("\n");
 }
 
+function currentnessAssessment(question:string){
+  const q=norm(question);
+  const timeSensitive=/\b(hoy|actual|actualmente|vigente|vigencia|porcentaje|tipo de interes|interes actual|tin|tae|itp|impuesto|plusvalia|ley|normativa|plazo legal|banco ofrece|condiciones bancarias)\b/.test(q);
+  if(!timeSensitive)return null;
+  return {
+    status:"REQUIRES_CURRENT_VERIFICATION",
+    message:"Ojo: este punto puede depender de normativa, impuestos o condiciones vigentes. Te doy el conocimiento interno disponible, pero el dato actual exacto debe verificarse contra la fuente oficial o el proveedor correspondiente antes de tomar una decisión."
+  };
+}
+
 function broadKnowledgeQuestion(question:string){
   const q=norm(question);
   return /(que sabes|que conoces|cuanto sabes|en que me puedes ayudar|que puedo preguntarte|que temas controlas|que temas conoces|hazme un esquema|dame un esquema|dame un mapa|todo lo que sabes)/.test(q);
@@ -750,6 +760,7 @@ export async function queryCerebroKnowledge(req:Request,question:string,context?
   }
   ranked.sort((a,b)=>b.score-a.score);
   const top=ranked.slice(0,3);
+  const freshness=currentnessAssessment(question);
   if(!top.length){
     if(learned.length)return conversationMemoryResponse(learned);
     return {status:"LOW_CONFIDENCE",intent:"clarification",executed:false,message:clarificationMessage(domain),sources:[]};
@@ -758,6 +769,7 @@ export async function queryCerebroKnowledge(req:Request,question:string,context?
   const memoryLines=learned.slice(0,2).map((x:any,i:number)=>`M${i+1}. En conversación: ${String(x.content).trim()}`);
   const lines=top.map((x:any,i:number)=>`${i+1}. ${x.title}: ${x.snippet}`);
   const sections=[
+    freshness?.message??"",
     memoryLines.length?"Memoria conversacional relevante:\n"+memoryLines.join("\n\n"):"",
     "Conocimiento documental autorizado:\n"+lines.join("\n\n")
   ].filter(Boolean);
@@ -770,6 +782,7 @@ export async function queryCerebroKnowledge(req:Request,question:string,context?
       ...learned.slice(0,2).map((x:any)=>({system:"CEREBRO",source:"CONVERSATION_MEMORY",memory_id:String(x?.memory_id??""),last_seen_at:String(x?.last_seen_at??"")})),
       ...top.map((x:any)=>({notion_page_id:x.id,title:x.title,score:x.score}))
     ],
-    evidence_mode:learned.length?"MIXED_CONVERSATION_AND_CANONICAL_V1":"CANONICAL_NOTION"
+    evidence_mode:learned.length?"MIXED_CONVERSATION_AND_CANONICAL_V1":"CANONICAL_NOTION",
+    knowledge_freshness:freshness?.status??"INTERNAL_SOURCE_CURRENTNESS_NOT_REQUIRED"
   };
 }
