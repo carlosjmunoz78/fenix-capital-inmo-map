@@ -99,6 +99,10 @@ jobs:
           grep -F 'DNI/NIE en vigor' "$K" >/dev/null
           grep -F 'Auditoría de 156 contenidos publicados' "$K" >/dev/null
           grep -F 'const direct=await directDomainAnswer(question,domain);' "$K" >/dev/null
+          grep -F 'intent:"legal_knowledge_map"' "$K" >/dev/null
+          grep -F 'function broadKnowledgeQuestion' "$K" >/dev/null
+          grep -F 'function clarificationMessage' "$K" >/dev/null
+          grep -F 'LEGAL_QUALITY_PAGE_ID' "$K" >/dev/null
 
       - name: Assert CEREBRO zero-cost voice safety
         shell: bash
@@ -129,6 +133,7 @@ jobs:
           node scripts/test-cerebro-vad-barge-in.mjs
           node scripts/verify-cerebro-unbounded-voice-session.mjs
           node scripts/test-cerebro-natural-spoken-v4.mjs
+          node scripts/test-cerebro-human-dialogue-v5.mjs
 
       - name: Build app
         shell: bash
