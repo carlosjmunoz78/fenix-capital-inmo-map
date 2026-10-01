@@ -103,3 +103,32 @@ Data rollback:
 - destructive removal would require a separate export/snapshot and explicit change.
 
 This follows CONSERVAR -> ENTENDER -> ENVOLVER -> PROBAR -> MEJORAR -> MIGRAR.
+
+
+## PROD promotion evidence
+
+Repository promotion:
+- PR #457 merge: `b3b920bb5af4ce08b1a1a4d0a2925a00169a87f6`.
+- Exact-head CEREBRO Session Context Regression Guard #120: SUCCESS.
+- Exact-head App Restoration Build Gate #371: SUCCESS.
+- Performance hardening PR #458 merge: `b29158e32889207ddc509a6b2853465c5413088c`.
+- PR #458 CEREBRO Session Context Regression Guard #122: SUCCESS.
+- PR #458 App Restoration Build Gate #372: SUCCESS.
+
+PROD database:
+- migration `cerebro_explicit_user_preferences_v1`: SUCCESS.
+- table exists with RLS enabled and zero initial rows.
+- direct SELECT: anon=false, authenticated=false, service_role=true.
+- list RPC execute: anon=false, authenticated=false, service_role=true.
+- read-only list contract for `CARLOS-ADMIN / fenix`: `ok=true, items=[]`.
+- advisor found one new unindexed self-FK (`supersedes`); `cerebro_user_preferences_supersedes_idx` was added through a second migration and the new unindexed-FK finding disappeared.
+
+PROD Gateway:
+- `cerebro-console-gateway-v0` ACTIVE, version 25.
+- `verify_jwt=false` preserved from the prior deployment because the function retains its custom bearer + Supabase user + owner fail-closed authorization boundary.
+- deployed artifact SHA256: `12a0756ea113f8e4ba7c755e57a61704bac86417f553466c9ab6fd321d9d02b2`.
+
+Frontend:
+- validated source is merged.
+- the final release marker will carry `[DEPLOY_PROD]`.
+- final frontend status remains pending until exact Live Deploy, Runtime Smoke and physical persistence acceptance are recorded.
