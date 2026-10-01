@@ -206,3 +206,22 @@ Generated Factory output is disposable; canonical sources are registry seed + fa
 3. Pedir respuestas de SEO, marketing y una consulta genérica y valorar si suenan habladas, no leídas.
 4. Confirmar que «para» sigue interrumpiendo la locución.
 5. Confirmar que el ritmo general no se ha ralentizado.
+
+
+## Human Dialogue + Knowledge Map + Clarification V1 · aceptación
+
+- Un saludo simple debe producir una variante cercana que use el nombre del propietario y pueda incluir «guapo» sin convertirlo en una muletilla en cada respuesta.
+- Las entradas «Claro», «Mira», «Vale» y «Te cuento» deben variar con el contexto y no anteponerse a errores, bloqueos, riesgos o confirmaciones críticas si empeoran la claridad.
+- Una pregunta amplia de un dominio debe devolver primero el mapa de temas disponibles; una pregunta concreta debe entrar directamente en el detalle.
+- Legal/Inmobiliario debe distinguir conocimiento operativo, criterio verificado y materias sensibles pendientes de fuente vigente o validación profesional.
+- Si CEREBRO no entiende suficientemente una pregunta, debe formular una sola aclaración útil y no adivinar.
+- Mantener respuesta escrita completa, VAD de interrupción y conversación de voz sin límite artificial.
+- Rollback frontend: `c12edfae5f65fdb95c1dbf6b6fcfd921509ca21e`.
+
+### Prueba física mínima
+1. Decir «Hola»: debe responder de forma cercana, usando «Carlos» y una variante natural; «guapo» está permitido como trato cercano.
+2. Preguntar «¿Qué sabes de temas legales inmobiliarios?»: debe presentar un mapa de áreas y preguntar por cuál profundizar, no leer fragmentos documentales sin estructura.
+3. Preguntar algo deliberadamente ambiguo, por ejemplo «¿Y aquello de lo otro?»: debe pedir aclaración y no inventar.
+4. Hacer varias preguntas normales: comprobar que las expresiones de entrada varían y no se convierten en una coletilla repetida.
+5. Interrumpir una respuesta diciendo «para»: debe seguir funcionando el VAD ya aceptado.
+6. Continuar la conversación durante más de seis turnos: no debe existir cierre por contador de preguntas.

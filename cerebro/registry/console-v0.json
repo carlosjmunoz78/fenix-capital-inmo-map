@@ -1,5 +1,5 @@
 {
-  "schema_version": "2.0.0",
+  "schema_version": "2.1.0",
   "phase": "PHASE_5_CEREBRO_CONSOLE_V0",
   "environment": "PREPROD",
   "additional_cost_target_eur": 0,
@@ -79,7 +79,7 @@
     "durable_learning_mode": "EXPLICIT_PREFERENCES_PLUS_CONVERSATIONAL_MEMORY_V1",
     "conversation_memory": "AUTO_BOUNDED_NON_SENSITIVE_USER_TURNS",
     "internal_learning_writes": "SERVICE_ROLE_BOUNDED",
-    "spoken_output_mode": "NATURAL_CONVERSATIONAL_V4",
+    "spoken_output_mode": "HUMAN_DIALOGUE_KNOWLEDGE_V1",
     "spoken_raw_urls": false,
     "voice_conversation": {
       "turn_limit": null,
@@ -197,10 +197,10 @@
       "failed_action_warning_preserved": true,
       "behavioral_corpus": "GREEN",
       "additional_cost_target_eur": 0,
-      "frontend_source_sha": "c12edfae5f65fdb95c1dbf6b6fcfd921509ca21e",
-      "previous_rollback_source_sha": "96eb6effb4ab4077ccdc6158858c5158e3be825e",
-      "prod_live_deploy_run": 179,
-      "prod_runtime_smoke_run": 322,
+      "frontend_source_sha": "fbdbb99e22a821b578874157c86d73789f111e10",
+      "previous_rollback_source_sha": "c12edfae5f65fdb95c1dbf6b6fcfd921509ca21e",
+      "prod_live_deploy_run": 182,
+      "prod_runtime_smoke_run": 325,
       "physical_acceptance": "PENDING",
       "source_question_context": true,
       "repetitive_screen_boilerplate_reduced": true,
@@ -229,6 +229,47 @@
       "physical_acceptance": "CONFIRMED_2026-10-01",
       "physical_acceptance_scope": "OWNER_CONFIRMED_TTS_INTERRUPTS_BY_SPEAKING_PARA_WITHOUT_BUTTON",
       "broader_false_positive_matrix": "NOT_PHYSICALLY_EXHAUSTIVE"
+    },
+    "human_dialogue": {
+      "status": "PROD_DEPLOYED_PHYSICAL_ACCEPTANCE_PENDING",
+      "gateway_version": 27,
+      "gateway_artifact_sha256": "cccc3dce290dbf9530f185501341ca837058defcece06a862ee6fd805123e485",
+      "owner_greeting_name": "Carlos",
+      "affectionate_greeting_variants": true,
+      "affectionate_term": "guapo",
+      "natural_lead_ins": [
+        "Claro",
+        "Mira",
+        "Vale",
+        "Te cuento"
+      ],
+      "broad_knowledge_maps": [
+        "legal",
+        "finance",
+        "seo",
+        "marketing",
+        "social",
+        "newsletter",
+        "autonomy",
+        "platform",
+        "trading",
+        "multiempresa"
+      ],
+      "legal_canonical_sources": [
+        "3bf81b1a-756d-81e6-b4d5-eaeb99a8152e",
+        "3be81b1a-756d-81b6-a75f-cb6bbe842766",
+        "3c781b1a-756d-8178-8950-e2c6b740df68"
+      ],
+      "low_confidence_clarification": true,
+      "guess_on_low_confidence": false,
+      "preserves_local_vad_barge_in": true,
+      "preserves_unbounded_voice_turns": true,
+      "additional_cost_target_eur": 0,
+      "frontend_source_sha": "fbdbb99e22a821b578874157c86d73789f111e10",
+      "previous_rollback_source_sha": "c12edfae5f65fdb95c1dbf6b6fcfd921509ca21e",
+      "prod_live_deploy_run": 182,
+      "prod_runtime_smoke_run": 325,
+      "physical_acceptance": "PENDING"
     }
   }
 }

@@ -127,3 +127,19 @@
 - PROD `c12edfae5f65fdb95c1dbf6b6fcfd921509ca21e`: Live Deploy #179 SUCCESS; Runtime Smoke #322 SUCCESS.
 - Coste adicional: 0 €.
 - Aceptación auditiva: PENDIENTE.
+
+
+## 2026-10-01 · Human Dialogue + Knowledge Map + Clarification V1
+
+- Saludos cercanos y variados para el propietario: nombre Carlos + variantes con «guapo».
+- Entradas habladas humanas y contextuales: «Claro», «Mira», «Vale» y «Te cuento», evitando repetir una muletilla fija.
+- Las consultas amplias de conocimiento devuelven un mapa temático y una invitación a profundizar.
+- Primer mapa canónico Legal/Inmobiliario: arras/compraventa, titularidad/cargas/Registro, Catastro, notaría/firma, herencias, donaciones, fiscalidad, riesgo del inmueble y AML/compliance.
+- El mapa legal conserva las fronteras de validación: experiencia operativa ≠ norma jurídica automática; cuestiones sensibles requieren fuente vigente y/o profesional cuando proceda.
+- Las consultas de baja confianza cambian de «no encontrado» a una pregunta de aclaración natural; no se completa el hueco por inferencia.
+- Se preservan VAD, conversación sin cap de turnos, permisos y contrato de confirmación de acciones.
+- PR #475: Guard #148 SUCCESS; Build Gate #391 SUCCESS; merge `fac3ea1141715af2ba9059e5afaf34948fcdb7fa`.
+- Gateway PROD V27: `cccc3dce290dbf9530f185501341ca837058defcece06a862ee6fd805123e485`.
+- PROD frontend `fbdbb99e22a821b578874157c86d73789f111e10`: Live Deploy #182 SUCCESS; Runtime Smoke #325 SUCCESS.
+- Coste adicional: 0 €.
+- Aceptación física conversacional: PENDIENTE.
