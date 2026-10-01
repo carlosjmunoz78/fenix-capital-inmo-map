@@ -107,6 +107,7 @@ jobs:
           grep -F 'webkitSpeechRecognition' src/cerebroVoice.ts >/dev/null
           grep -F 'speechSynthesis' src/cerebroVoice.ts >/dev/null
           grep -F 'VOICE_CONFIRMATION_CONFIDENCE_MIN=0.85' src/cerebroVoice.ts >/dev/null
+          grep -F "VOICE_CONFIRMATION_PHRASES=new Set(['si','si adelante','adelante','confirmo','activalo','activarlo','hazlo','procede'])" src/cerebroVoice.ts >/dev/null
           grep -F 'voiceNeedsManualConfirmation' src/CerebroConsoleShell.tsx >/dev/null
           grep -F 'Hablar con CEREBRO' src/CerebroConsoleShell.tsx >/dev/null
           grep -F 'volverá a escucharte automáticamente' src/CerebroConsoleShell.tsx >/dev/null
