@@ -4,7 +4,7 @@ import {BrainCircuit,ChevronLeft,Mic,MicOff,Send,ShieldCheck,Square} from 'lucid
 import {cerebroConsoleLinkEnabled} from './cerebroConsoleAccess';
 import {fetchAppApi,supabase} from './supabase';
 import {fetchCerebroConsoleHealth,postCerebroConsoleChat,type CerebroConsoleHealth,type CerebroPendingAction,type CerebroReadContext} from './cerebroConsoleApi';
-import {createVoiceRecognition,spanishVoices,speechSynthesisSupported,speechText,voiceNeedsManualConfirmation,voiceRecognitionSupported,type CerebroSpeechRecognition} from './cerebroVoice';
+import {applyVoiceContextHints,createVoiceRecognition,spanishVoices,speechSynthesisSupported,speechText,voiceNeedsManualConfirmation,voiceRecognitionSupported,type CerebroSpeechRecognition} from './cerebroVoice';
 import './cerebro-console.css';
 
 const CONTEXTS=['GENERAL','EMPRESA','ENGINE','CRM','APP','SEO','MARKETING','TRAINING','AUTOMATION'];
@@ -225,6 +225,7 @@ export default function CerebroConsoleShell(){
   recognition.continuous=false;
   recognition.interimResults=false;
   recognition.maxAlternatives=3;
+  applyVoiceContextHints(recognition);
   recognition.onstart=()=>setVoiceListening(true);
   recognition.onresult=event=>{
    const chunks:string[]=[];
