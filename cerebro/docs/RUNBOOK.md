@@ -225,3 +225,22 @@ Generated Factory output is disposable; canonical sources are registry seed + fa
 4. Hacer varias preguntas normales: comprobar que las expresiones de entrada varían y no se convierten en una coletilla repetida.
 5. Interrumpir una respuesta diciendo «para»: debe seguir funcionando el VAD ya aceptado.
 6. Continuar la conversación durante más de seis turnos: no debe existir cierre por contador de preguntas.
+
+
+## Conversational Intelligence V2 · runbook
+
+- El cliente puede enviar solo los últimos 10 turnos y el Gateway debe volver a limitar el total a 8.000 caracteres; nunca confiar en límites del cliente.
+- Resolver follow-ups solo cuando exista un tema reciente identificable o un punto numerado inequívoco. Si no, pedir una aclaración concreta.
+- La memoria estructurada sigue siendo evidencia conversacional, no conocimiento canónico automático.
+- `CANDIDATE` no equivale a `VERIFIED`. Promoción a conocimiento autorizado exige los gates/tribunal correspondientes.
+- `CORRECTION` puede superseder recuerdos anteriores únicamente cuando el usuario expresa una corrección explícita; conservar la relación `superseded_by` y `valid_until`.
+- Para normativa, fiscalidad, tipos de interés, condiciones bancarias u otros datos cambiantes, respetar `REQUIRES_CURRENT_VERIFICATION` antes de una decisión real.
+- Mantener `turn_limit = null`, VAD de interrupción y contratos de confirmación de acciones sin cambios.
+- Rollback frontend: `fbdbb99e22a821b578874157c86d73789f111e10`. La migración es aditiva; rollback de lógica puede dejar columnas V2 inertes sin perder datos.
+
+### Prueba física mínima V2
+1. Preguntar «¿Qué sabes de temas legales inmobiliarios?» y, sin repetir el tema, preguntar «¿y fiscalmente?». Debe mantener el dominio legal.
+2. Tras un mapa numerado, decir «explícame el punto 3». Debe resolver el punto correcto o pedir aclaración si no existe.
+3. Hablar de herencias y después decir «¿y si hay tres hermanos?». Debe mantener el contexto de herencias.
+4. Dar un dato operativo y después corregirlo explícitamente con «eso ya no es así…»; tras nueva sesión, la versión anterior no debe seguir activa como verdad vigente.
+5. Preguntar por un dato legal/fiscal/financiero actual; si depende de vigencia, debe marcar necesidad de verificación actual.
