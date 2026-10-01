@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.8.0",
+  "schema_version": "1.9.0",
   "phase": "PHASE_5_CEREBRO_CONSOLE_V0",
   "environment": "PREPROD",
   "additional_cost_target_eur": 0,
@@ -80,7 +80,14 @@
     "conversation_memory": "AUTO_BOUNDED_NON_SENSITIVE_USER_TURNS",
     "internal_learning_writes": "SERVICE_ROLE_BOUNDED",
     "spoken_output_mode": "INTENT_DIGEST_V3",
-    "spoken_raw_urls": false
+    "spoken_raw_urls": false,
+    "voice_conversation": {
+      "turn_limit": null,
+      "mode": "CONTINUOUS_UNTIL_USER_ENDS_OR_FATAL_MIC_ERROR",
+      "auto_resume_after_response": true,
+      "auto_resume_after_recognition_end": true,
+      "artificial_question_cap": false
+    }
   },
   "human_decision_protocol": {
     "mode": "OWNER_DECISION_BY_EXCEPTION",

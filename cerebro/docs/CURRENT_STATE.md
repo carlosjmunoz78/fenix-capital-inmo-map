@@ -185,3 +185,17 @@ Evidence anchors are scoped to the change they prove; they are not intended to m
 ### PARCIAL
 - No se declara todavía exhaustivamente validada toda la matriz de falsos positivos/otros dispositivos.
 - Spoken Digest V3 sigue pendiente de aceptación auditiva; la confirmación actual corresponde al barge-in, no al resumen hablado.
+
+
+## Update 2026-10-01 · Conversación de voz sin límite artificial
+
+### HECHO
+- Requisito del propietario: una conversación de voz no puede cortarse por número de preguntas, turnos o respuestas.
+- Auditoría del frontend actual: no existe contador de turnos, límite de tres preguntas ni cierre por número de mensajes.
+- Tras cada respuesta hablada CEREBRO vuelve a escucha automáticamente; tras el fin normal de un ciclo de reconocimiento vuelve a abrir escucha.
+- La sesión solo termina por acción explícita del usuario, salida/desmontaje de la pantalla o error fatal real de micrófono/permisos.
+- Se añade guard de regresión `verify-cerebro-unbounded-voice-session.mjs` para impedir introducir límites artificiales en cambios futuros.
+
+### DEFINIDO
+- Contrato: `turn_limit = null` y `artificial_question_cap = false`.
+- «Sin límite» significa sin límite artificial de turnos impuesto por CEREBRO. No se promete disponibilidad infinita frente a cierres del navegador, pérdida de red, expiración de sesión o fallo físico del micrófono.
