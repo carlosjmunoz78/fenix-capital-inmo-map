@@ -35,7 +35,7 @@ function assert(condition,message){
    action:{scope:{contact_query:'Belén',candidates_json:JSON.stringify([{name:'Belén'},{name:'Belén oficina'}])}}
   }
  );
- assert(out==='He encontrado 2 opciones para Belén. Te las dejo por escrito para que elijas.','contact choice summary regression');
+ assert(out==='He encontrado 2 opciones para Belén. Te las dejo en pantalla y eliges cuál quieres usar.','contact choice summary regression');
  assert(!out.includes('@'),'contact emails must stay written');
 }
 
@@ -50,8 +50,8 @@ function assert(condition,message){
    action:{scope:{contact_name:'Belén',subject:'Informe semanal',recipient_email:'belen@example.com',body:'Este es un texto muy largo que no debe leerse entero.'}}
   }
  );
- assert(out.includes('He preparado el correo para Belén'),'must identify recipient naturally');
- assert(out.includes('Te dejo el texto completo por escrito para que lo revises.'),'must keep long body written');
+ assert(out.includes('Vale, tengo preparado el correo para Belén'),'must identify recipient naturally');
+ assert(out.includes('El texto completo está en pantalla para que lo veas.'),'must keep long body written');
  assert(out.endsWith('¿Confirmas el envío?'),'must preserve explicit confirmation');
  assert(!out.includes('belen@example.com'),'must not speak raw email');
 }
@@ -68,7 +68,7 @@ function assert(condition,message){
   }
  );
  assert(out.includes('La próxima publicación de Facebook está programada'),'social schedule must become natural spoken summary');
- assert(out.includes('Te dejo el texto, la imagen y el resto de detalles por escrito.'),'social detail must remain written');
+ assert(out.includes('El texto, la imagen y los detalles quedan en pantalla.'),'social detail must remain written');
  assert(!out.includes('http'),'social URL must never be spoken');
 }
 
@@ -79,7 +79,7 @@ function assert(condition,message){
   'normal',
   {status:'OK',intent:'health'}
  );
- assert(out==='CEREBRO está conectado y disponible. Te dejo el detalle técnico por escrito.','health must be conversational, not log-like');
+ assert(out==='Sí, CEREBRO está conectado y disponible. El detalle técnico lo tienes en pantalla.','health must be conversational, not log-like');
 }
 
 {
@@ -89,7 +89,7 @@ function assert(condition,message){
   'normal',
   {status:'OK',intent:'conversation_memory'}
  );
- assert(out.startsWith('Sí. Recuerdo'),'memory recall must sound conversational');
+ assert(out.startsWith('Sí, me acuerdo:'),'memory recall must sound conversational');
  assert(!/\b1[.)]|\b2[.)]/.test(out),'memory recall must not read numbering');
 }
 
