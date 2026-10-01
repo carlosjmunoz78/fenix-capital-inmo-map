@@ -19,8 +19,16 @@ must(voice,"intent==='email_contact_selection'",'contact-selection spoken intent
 must(voice,"intent==='social_schedule_complete'",'social-schedule spoken intent');
 must(voice,"intent==='conversation_memory'",'memory-recall spoken intent');
 must(voice,"isTechnicalNoise",'technical-noise suppression');
+must(voice,'VOICE_INTERRUPT_PHRASES','verbal interruption vocabulary');
+must(voice,'voiceInterruptRequested','verbal interruption parser');
+must(voice,'applyVoiceInterruptHints','verbal interruption recognition hints');
+must(voice,'function intentDigestSummary','intent-aware spoken digest V3');
 must(shell,"fullDetail?'action':'normal'",'action-aware TTS mode');
 must(shell,'data??{}','structured response metadata passed to TTS');
+must(shell,'startInterruptListening','dedicated barge-in listener');
+must(shell,'scheduleInterruptListening(180)','barge-in listener starts while TTS speaks');
+must(shell,'voiceInterruptRequested(transcript)','spoken stop command cancels TTS');
+must(shell,'stopInterruptRecognition()','barge-in listener cleanup');
 must(shell,"voicePreferencesRef.current.response_length==='concise'?420:560",'spoken summary budget');
 
 if(voice.includes(".replace(/https?:\\/\\/[^\\s]+/gi,' enlace disponible en pantalla ')") && !voice.includes('spokenResponseText')){
