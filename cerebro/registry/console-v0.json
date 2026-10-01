@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.4.0",
+  "schema_version": "1.5.0",
   "phase": "PHASE_5_CEREBRO_CONSOLE_V0",
   "environment": "PREPROD",
   "additional_cost_target_eur": 0,
@@ -78,7 +78,9 @@
     "preference_writes": "EXPLICIT_USER_ONLY",
     "durable_learning_mode": "EXPLICIT_PREFERENCES_PLUS_CONVERSATIONAL_MEMORY_V1",
     "conversation_memory": "AUTO_BOUNDED_NON_SENSITIVE_USER_TURNS",
-    "internal_learning_writes": "SERVICE_ROLE_BOUNDED"
+    "internal_learning_writes": "SERVICE_ROLE_BOUNDED",
+    "spoken_output_mode": "SUMMARY_OVER_FULL_WRITTEN_RESPONSE_V1",
+    "spoken_raw_urls": false
   },
   "human_decision_protocol": {
     "mode": "OWNER_DECISION_BY_EXCEPTION",
@@ -113,7 +115,7 @@
     "mobile_canary": {
       "status": "PUBLISHED_CI_VERIFIED",
       "path": "/cerebro/",
-      "source_sha": "374bd89d7e8ee97a26b3bdcf1bb5249a613489be"
+      "source_sha": "b64050f0320f31e1685fa028744e73e5920c8655"
     },
     "knowledge_adapter": {
       "status": "ACTIVE_READ_ONLY",
@@ -139,7 +141,7 @@
       "prod_runtime_smoke_run": 302
     },
     "conversational_learning": {
-      "status": "PROD_DEPLOYED_PHYSICAL_ACCEPTANCE_PENDING",
+      "status": "PROD_DEPLOYED_RECALL_CONFIRMED_FORGET_PENDING",
       "storage": "fenix_prod.cerebro_conversation_memory",
       "automatic_safe_turn_learning": true,
       "direct_anon_access": false,
@@ -149,10 +151,25 @@
       "assistant_reply_auto_promotion": false,
       "canonical_live_data_priority": true,
       "additional_cost_target_eur": 0,
-      "frontend_source_sha": "374bd89d7e8ee97a26b3bdcf1bb5249a613489be",
+      "frontend_source_sha": "b64050f0320f31e1685fa028744e73e5920c8655",
       "gateway_version": 26,
       "prod_live_deploy_run": 162,
       "prod_runtime_smoke_run": 305,
+      "physical_acceptance": "PARTIAL_RECALL_CONFIRMED",
+      "physical_recall_acceptance": "CONFIRMED_2026-10-01",
+      "physical_forget_acceptance": "PENDING"
+    },
+    "spoken_summary": {
+      "status": "PROD_DEPLOYED_PHYSICAL_ACCEPTANCE_PENDING",
+      "mode": "SUMMARY_OVER_FULL_WRITTEN_RESPONSE_V1",
+      "raw_url_speech": false,
+      "numbered_list_marker_speech": false,
+      "action_confirmation_preserved": true,
+      "additional_cost_target_eur": 0,
+      "frontend_source_sha": "b64050f0320f31e1685fa028744e73e5920c8655",
+      "previous_rollback_source_sha": "374bd89d7e8ee97a26b3bdcf1bb5249a613489be",
+      "prod_live_deploy_run": 165,
+      "prod_runtime_smoke_run": 308,
       "physical_acceptance": "PENDING"
     }
   }

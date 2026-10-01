@@ -95,3 +95,23 @@ Evidence anchors are scoped to the change they prove; they are not intended to m
 - Esta V1 es memoria episódica persistente y recuperable; no equivale a reentrenar los pesos de un modelo ni a convertir automáticamente cada frase en verdad canónica.
 - La consolidación futura de recuerdos repetidos hacia conocimiento canónico exige reglas de contradicción, versionado y tribunal antes de automatizarse.
 - La interrupción mediante la palabra hablada «para» mientras TTS está hablando sigue PLANIFICADA; el control visible de interrupción permanece disponible.
+
+
+## Update 2026-10-01 · Spoken Summary V1
+
+### HECHO
+- El propietario confirmó físicamente que la memoria conversacional recupera el conocimiento aprendido tras el cambio de sesión/recarga en la prueba indicada.
+- Spoken Summary V1 está implementado sin sustituir la respuesta escrita: el detalle completo continúa visible y la voz usa un canal resumido independiente.
+- El TTS no pronuncia enlaces completos; comunica que el enlace queda escrito.
+- Los marcadores de enumeración se suprimen del canal hablado.
+- La confirmación final de acciones se conserva en modo hablado.
+- PR #463: Guard #128 y App Restoration Build Gate #377 SUCCESS; merge `1da8c6523c344257969fe7304ccdac900b0618e3`.
+- Release PROD `b64050f0320f31e1685fa028744e73e5920c8655`: Live Deploy #165 SUCCESS y Runtime Smoke #308 SUCCESS.
+- `gh-pages/PROD_SOURCE_SHA.txt` coincide exactamente con `b64050f0320f31e1685fa028744e73e5920c8655`.
+- Rollback frontend conocido: `374bd89d7e8ee97a26b3bdcf1bb5249a613489be`.
+- Coste adicional recurrente: 0 €.
+
+### PARCIAL
+- Spoken Summary V1 requiere ahora aceptación auditiva humana para confirmar que el resumen se siente natural en el navegador real y no omite contexto útil.
+- El flujo físico de «olvida lo que te dije sobre…» de la memoria conversacional no se considera confirmado hasta probarlo expresamente.
+- La prosodia y el resumen hablado siguen siendo deterministas/browser-native; no se declara TTS neuronal expresivo.

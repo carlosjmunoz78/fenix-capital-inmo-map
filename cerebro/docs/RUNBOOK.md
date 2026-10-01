@@ -99,3 +99,21 @@ Generated Factory output is disposable; canonical sources are registry seed + fa
 4. Ordenar «olvida lo que te dije sobre <tema>».
 5. Repetir la consulta y comprobar que el recuerdo activo ya no se devuelve.
 6. Escuchar una pregunta, una confirmación y una enumeración para validar variación de entonación sin ralentización global.
+
+
+## Spoken Summary V1 · runbook
+
+- Mantener siempre separadas la respuesta escrita completa y la salida hablada resumida.
+- No pronunciar enlaces completos, hashes largos ni marcadores de formato cuando el dato puede quedar visible por escrito.
+- Si existen enlaces, mantenerlos completos en pantalla y decir únicamente «te dejo el enlace por escrito» o equivalente.
+- Eliminar del habla marcadores de lista como `1.`, `2.`, `-` o viñetas; el contenido sí puede resumirse.
+- En respuestas largas, hablar solo las primeras ideas relevantes y avisar de que el detalle completo está escrito.
+- En propuestas de acción, no resumir fuera la decisión crítica: destinatario/alcance relevante y pregunta de confirmación deben seguir siendo comprensibles.
+- Un resumen hablado nunca puede modificar el significado, ampliar permisos ni transformar una no-ejecución en una afirmación de éxito.
+- Rollback de presentación: volver al source frontend anterior `374bd89d7e8ee97a26b3bdcf1bb5249a613489be`; Gateway/memoria no requieren rollback para este cambio frontend-only.
+
+### Aceptación física mínima
+1. Pedir una respuesta con lista numerada y confirmar que no pronuncia «uno punto/dos punto».
+2. Pedir una respuesta que incluya un enlace y confirmar que no lee el enlace completo; debe indicar que queda escrito.
+3. Pedir una respuesta larga y confirmar que habla un resumen, mientras el texto completo sigue visible.
+4. Probar una acción con confirmación y verificar que la pregunta de confirmación sigue oyéndose claramente.
