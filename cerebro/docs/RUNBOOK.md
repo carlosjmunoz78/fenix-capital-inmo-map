@@ -172,3 +172,10 @@ Generated Factory output is disposable; canonical sources are registry seed + fa
 3. Debe callarse sin tocar botones.
 4. Debe volver a escucharte inmediatamente.
 5. Repetir con volumen normal y comprobar que el propio altavoz no provoca cortes falsos.
+
+
+### Evidencia física cerrada · 2026-10-01
+- Prueba ejecutada por el propietario: CEREBRO hablando → usuario dice «para» → CEREBRO se calla sin pulsar botón.
+- Resultado: PASS.
+- Estado del flujo probado: CONFIRMED_OPERATIONAL.
+- Mantener futuras regresiones sobre esta conducta; si vuelve a fallar, tratarlo como regresión de VOICE/VAD y no como nueva funcionalidad.
