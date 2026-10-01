@@ -27,3 +27,14 @@ Physical acceptance after deploy:
 5. verify the saved preference is recovered.
 
 Do not mark the end-to-end persistent-learning flow CONFIRMED_OPERATIONAL until this physical acceptance succeeds.
+
+
+## Deployment result
+
+- PROD Live Deploy #159: SUCCESS.
+- PROD Runtime Smoke #302: SUCCESS.
+- exact frontend source published: `7fad08ac3225e89cbf3aa5a732674201dc67a8e6`.
+- Gateway: V25 ACTIVE.
+- persistent preference storage: PROD ACTIVE, initially empty, direct anon/authenticated access denied.
+
+Status: **PARCIAL / PROD deployed**. Physical persistence acceptance remains outstanding.

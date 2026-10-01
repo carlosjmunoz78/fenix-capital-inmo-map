@@ -111,7 +111,7 @@
     "mobile_canary": {
       "status": "PUBLISHED_CI_VERIFIED",
       "path": "/cerebro/",
-      "source_sha": "6d6f71ef7a4f9e7d2f57331e73a1ecb51dc11eda"
+      "source_sha": "7fad08ac3225e89cbf3aa5a732674201dc67a8e6"
     },
     "knowledge_adapter": {
       "status": "ACTIVE_READ_ONLY",
@@ -124,14 +124,17 @@
       "prod_execution": false
     },
     "explicit_learning": {
-      "status": "BACKEND_PROD_ACTIVE_FRONTEND_RELEASE_CANDIDATE",
+      "status": "PROD_DEPLOYED_PHYSICAL_ACCEPTANCE_PENDING",
       "storage": "fenix_prod.cerebro_user_preferences",
       "write_mode": "EXPLICIT_USER_ONLY",
       "direct_anon_access": false,
       "direct_authenticated_access": false,
       "service_role_only": true,
       "additional_cost_target_eur": 0,
-      "physical_acceptance": "PENDING"
+      "physical_acceptance": "PENDING",
+      "frontend_source_sha": "7fad08ac3225e89cbf3aa5a732674201dc67a8e6",
+      "prod_live_deploy_run": 159,
+      "prod_runtime_smoke_run": 302
     }
   }
 }
