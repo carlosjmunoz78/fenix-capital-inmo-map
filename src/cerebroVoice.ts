@@ -360,8 +360,28 @@ function intentDigestSummary(intent:string,raw:string,units:SpokenUnit[]){
     :'Sí, tengo el texto de la publicación. Lo tienes completo en pantalla.';
   case 'social_schedule':
    return 'Sí, tengo localizada la próxima publicación. Los datos completos están en pantalla.';
+  case 'legal_knowledge_map':
+   return 'Pues bastante. Puedo ayudarte con arras y compraventa, cargas y Registro, Catastro, notaría, herencias, donaciones, fiscalidad y riesgos del inmueble. Dime por dónde quieres entrar.';
+  case 'finance_knowledge_map':
+   return 'Claro. Puedo ayudarte con viabilidad, documentación, bancos, financiación, tasación, incidencias, FEIN y firma. ¿Sobre qué parte quieres preguntar?';
+  case 'seo_knowledge_map':
+   return 'Claro. Puedo ayudarte con auditoría, palabras clave, arquitectura, contenidos, enlazado, SEO local, indexación y seguimiento. ¿Qué quieres revisar?';
+  case 'marketing_knowledge_map':
+   return 'Claro. Puedo ayudarte con estrategia, contenidos, embudos, captación, CRM, referidos y métricas. ¿Por dónde empezamos?';
+  case 'social_knowledge_map':
+   return 'Claro. Puedo revisar estrategia, calendario, publicaciones, copy, creatividades, canales y automatización. ¿Qué quieres mirar?';
+  case 'newsletter_knowledge_map':
+   return 'Claro. Puedo trabajar listas, segmentación, campañas, automatizaciones, contenido y métricas de newsletter. ¿Qué parte quieres ver?';
+  case 'autonomy_knowledge_map':
+   return 'Claro. Puedo explicarte qué hago solo, cuándo necesito confirmación, cómo aprendo y cómo una automatización llega a producción. ¿Qué parte quieres ver?';
+  case 'platform_knowledge_map':
+   return 'Claro. Puedo explicarte Gateway, Console, Supabase, workers, motores, observabilidad, costes, backups, rollback y promoción. ¿En qué parte entramos?';
+  case 'trading_knowledge_map':
+   return 'Claro. Puedo explicarte el aislamiento de Trading LAB, credenciales, límites, watchdog, circuit breaker y kill switch. ¿Qué quieres revisar?';
+  case 'multiempresa_knowledge_map':
+   return 'Claro. Puedo explicarte todo el onboarding de una empresa, desde el registro y análisis hasta CRM, App, automatizaciones, training y producción. ¿Qué fase quieres ver?';
   case 'help':
-   return 'Pregúntame lo que necesites o dime qué quieres que haga. Si hace falta tu decisión para una acción real, te lo pediré justo en ese momento.';
+   return 'Claro. Pregúntame lo que necesites o dime qué quieres que haga. Si una acción real necesita tu decisión, te lo pediré justo en ese momento.';
   default:
    return '';
  }
@@ -389,6 +409,24 @@ function scoreUnit(unit:SpokenUnit,index:number){
  return score;
 }
 
+function conversationalLead(sourceQuestion:string){
+ const q=normalizeVoiceConfirmation(sourceQuestion);
+ if(!q)return '';
+ let sum=0;
+ for(let index=0;index<q.length;index+=1)sum=(sum+q.charCodeAt(index)*(index+1))%997;
+ const options=['Claro.','Mira,','Vale.','Te cuento.'];
+ return options[sum%options.length];
+}
+
+function withConversationalLead(value:string,sourceQuestion=''){
+ const text=value.trim();
+ if(!text)return text;
+ if(/^(si|sí|no|vale|claro|perfecto|hecho|mira|te cuento|pues|hola|buenas|ey|ahora mismo)\b/i.test(text))return text;
+ if(/^(error|no he podido|no puedo|requiere|bloqueado|acción cancelada)/i.test(text))return text;
+ const lead=conversationalLead(sourceQuestion);
+ return lead?lead+' '+text.charAt(0).toLocaleLowerCase('es-ES')+text.slice(1):text;
+}
+
 function conversationalizeSpoken(value:string,sourceQuestion=''){
  let text=value.trim()
   .replace(/^Actualmente\b/i,'Ahora mismo')
@@ -397,8 +435,8 @@ function conversationalizeSpoken(value:string,sourceQuestion=''){
   .replace(/^Cabe indicar que\s+/i,'')
   .replace(/^Es importante señalar que\s+/i,'');
  const question=normalizeVoiceConfirmation(sourceQuestion);
- if(question&&text&&!/^(si|sí|no|vale|claro|perfecto|hecho|mira|ahora mismo)\b/i.test(text)){
-  if(/^(que|qué|cual|cuál|como|cómo|dime|explicame|explícame)\b/.test(question))text='Mira, '+text.charAt(0).toLocaleLowerCase('es-ES')+text.slice(1);
+ if(question&&text&&!/^(si|sí|no|vale|claro|perfecto|hecho|mira|te cuento|pues|ahora mismo)\b/i.test(text)){
+  if(/^(que|qué|cual|cuál|como|cómo|dime|explicame|explícame)\b/.test(question))text=withConversationalLead(text,sourceQuestion);
  }
  return text;
 }
@@ -462,6 +500,8 @@ export function spokenResponseText(text:string,maxChars=440,mode:CerebroSpokenMo
  const intent=String(meta.intent||'').toLowerCase();
  const units=spokenUnits(raw);
 
+ if(intent==='greeting')return raw;
+ if(intent==='clarification')return raw;
  if(intent==='email_contact_selection')return contactSelectionSummary(raw,meta);
  if(intent==='email_send'&&status==='ACTION_PROPOSAL')return emailProposalSummary(meta);
  if(intent==='email_send_confirmation'&&meta.executed===true)return emailAcceptedSummary(raw);
@@ -469,7 +509,7 @@ export function spokenResponseText(text:string,maxChars=440,mode:CerebroSpokenMo
  if(intent==='conversation_memory')return memoryRecallSummary(units);
  if(intent==='health')return 'Sí, CEREBRO está conectado y disponible. El detalle técnico lo tienes en pantalla.';
  const intentDigest=intentDigestSummary(intent,raw,units);
- if(intentDigest)return intentDigest;
+ if(intentDigest)return withConversationalLead(intentDigest,meta.source_question??'');
 
  if(status==='ACTION_CONFIRMED'&&meta.executed===false){
   return genericSummary(raw,units,Math.max(maxChars,520),meta.source_question??'');
