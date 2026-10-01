@@ -116,70 +116,271 @@ export function speechText(text:string,maxChars=700){
 
 export type CerebroSpokenMode='normal'|'action';
 
+export type CerebroSpokenMeta={
+ status?:string;
+ intent?:string;
+ executed?:boolean;
+ action?:{
+  action_type?:string;
+  summary?:string;
+  scope?:Record<string,string>;
+ }|null;
+ read_context?:{
+  kind?:string;
+  network?:string;
+  content_key?:string;
+  scheduled_at?:string;
+  caption?:string;
+  public_media_url?:string|null;
+  media_urls?:string[];
+ }|null;
+};
+
+type SpokenUnit={
+ text:string;
+ bullet:boolean;
+ question:boolean;
+ technical:boolean;
+};
+
+const SPOKEN_STATUS_LABELS=new Set([
+ 'hecho','existente','parcial','definido','planificado','por auditar',
+ 'estado','resultado','evidencia','fuentes','detalle técnico','detalle tecnico'
+]);
+
+function naturalJoin(items:string[]){
+ if(items.length<=1)return items[0]??'';
+ if(items.length===2)return `${items[0]} y ${items[1]}`;
+ return `${items.slice(0,-1).join(', ')} y ${items[items.length-1]}`;
+}
+
 function cleanSpokenUnit(value:string){
  return value
-  .replace(/^\s*(?:[-*•]|\d+[.)])\s+/u,'')
+  .replace(/^\s*(?:[-*•▪◦]|\d+[.)])\s+/u,'')
+  .replace(/^\s*(?:HECHO|EXISTENTE|PARCIAL|DEFINIDO|PLANIFICADO|POR AUDITAR)\s*[:·-]?\s*/iu,'')
+  .replace(/^\s*(?:estado|resultado|evidencia|fuentes?)\s*:\s*/iu,'')
+  .replace(/[<>]/g,' ')
   .replace(/\s+/g,' ')
   .trim();
 }
 
+function isTechnicalNoise(value:string){
+ const text=value.toLocaleLowerCase('es-ES');
+ if(/\b(?:sha|commit|artifact|artefacto|runtime smoke|live deploy|build gate|regression guard|source sha|run #?|pr #?)\b/.test(text))return true;
+ if(/\b[a-f0-9]{24,64}\b/i.test(value))return true;
+ if(/\b(?:turn|file|ref)[a-z0-9_-]{8,}\b/i.test(value))return true;
+ return false;
+}
+
 function spokenUnits(text:string){
- const withoutLinks=text
+ const withoutUnreadables=text
+  .replace(/\x60\x60\x60[\s\S]*?\x60\x60\x60/g,' ')
   .replace(/https?:\/\/[^\s]+/gi,' ')
-  .replace(/[*_`#]/g,'')
-  .replace(/(?:^|\s)\d+[.)]\s+/g,' ')
+  .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi,' ')
+  .replace(/\b[a-f0-9]{32,64}\b/gi,' ')
+  .replace(/[*_\x60#]/g,'')
   .replace(/\r/g,'');
- return withoutLinks
-  .split(/\n+|(?<=[.!?])\s+(?=[A-ZÁÉÍÓÚÑ¿¡])/u)
-  .map(cleanSpokenUnit)
-  .filter(Boolean)
-  .filter(unit=>!/^propuesta exacta de env[ií]o:?$/i.test(unit));
-}
 
-function conciseSpokenUnits(units:string[],maxChars:number,maxUnits:number){
- const chosen:string[]=[];
- let total=0;
- for(const unit of units){
-  const extra=(chosen.length?1:0)+unit.length;
-  if(chosen.length&&total+extra>maxChars)break;
-  chosen.push(unit);
-  total+=extra;
-  if(chosen.length>=maxUnits)break;
+ const rows=withoutUnreadables.split(/\n+/).map(row=>row.trim()).filter(Boolean);
+ const units:SpokenUnit[]=[];
+ for(const row of rows){
+  const bullet=/^(?:[-*•▪◦]|\d+[.)])\s+/u.test(row);
+  const cleanedRow=cleanSpokenUnit(row);
+  if(!cleanedRow)continue;
+  if(SPOKEN_STATUS_LABELS.has(cleanedRow.toLocaleLowerCase('es-ES')))continue;
+  const parts=cleanedRow
+   .split(/(?<=[.!?])\s+(?=[A-ZÁÉÍÓÚÑ¿¡])/u)
+   .map(cleanSpokenUnit)
+   .filter(Boolean);
+  for(const part of parts){
+   if(!part)continue;
+   if(/^propuesta exacta de env[ií]o:?$/i.test(part))continue;
+   const lower=part.toLocaleLowerCase('es-ES');
+   if(SPOKEN_STATUS_LABELS.has(lower))continue;
+   units.push({
+    text:part,
+    bullet,
+    question:/\?$/.test(part),
+    technical:isTechnicalNoise(part)
+   });
+  }
  }
- return chosen;
+ return units;
 }
 
-export function spokenResponseText(text:string,maxChars=420,mode:CerebroSpokenMode='normal'){
+function clipNatural(value:string,max=170){
+ const text=value.trim();
+ if(text.length<=max)return text;
+ const clipped=text.slice(0,max);
+ const boundary=Math.max(clipped.lastIndexOf('. '),clipped.lastIndexOf(', '),clipped.lastIndexOf('; '));
+ return (boundary>=Math.floor(max*0.55)?clipped.slice(0,boundary):clipped).trim().replace(/[,:;.-]+$/,'')+'…';
+}
+
+function quotedTopic(text:string){
+ return text.match(/[«“"]([^»”"]{2,100})[»”"]/u)?.[1]?.trim()??'';
+}
+
+function contactSelectionSummary(raw:string,meta:CerebroSpokenMeta){
+ const scope=meta.action?.scope??{};
+ const contact=String(scope.contact_query||quotedTopic(raw)||'ese contacto').trim();
+ let count=0;
+ try{
+  const parsed=JSON.parse(String(scope.candidates_json||'[]'));
+  if(Array.isArray(parsed))count=parsed.length;
+ }catch{/* generic wording */}
+ const howMany=count>1?`${count} opciones`:count===1?'una opción':'varias opciones';
+ return `He encontrado ${howMany} para ${contact}. Te las dejo por escrito para que elijas.`;
+}
+
+function emailProposalSummary(meta:CerebroSpokenMeta){
+ const scope=meta.action?.scope??{};
+ const name=String(scope.contact_name||'el destinatario').trim();
+ const subject=String(scope.subject||'').trim();
+ const subjectPart=subject?` con el asunto «${clipNatural(subject,90)}»`:'';
+ return `He preparado el correo para ${name}${subjectPart}. Te dejo el texto completo por escrito para que lo revises. ¿Confirmas el envío?`;
+}
+
+function emailAcceptedSummary(raw:string){
+ const name=raw.match(/Email enviado a\s+(.+?)(?:\s*<|\.|$)/i)?.[1]?.trim();
+ return name
+  ?`Hecho. El correo se ha enviado a ${name}. Te dejo la evidencia por escrito.`
+  :'Hecho. El correo se ha enviado correctamente. Te dejo la evidencia por escrito.';
+}
+
+function socialScheduleSummary(meta:CerebroSpokenMeta){
+ const ctx=meta.read_context;
+ if(!ctx)return '';
+ const network=String(ctx.network||'la red social');
+ const rawWhen=String(ctx.scheduled_at||'').trim();
+ let when='';
+ if(rawWhen){
+  const date=new Date(rawWhen);
+  if(!Number.isNaN(date.getTime())){
+   when=new Intl.DateTimeFormat('es-ES',{
+    timeZone:'Europe/Madrid',
+    weekday:'long',
+    day:'numeric',
+    month:'long',
+    hour:'2-digit',
+    minute:'2-digit'
+   }).format(date);
+  }
+ }
+ const key=String(ctx.content_key||'').trim();
+ const keyPart=key?` Es la publicación ${clipNatural(key,80)}.`:'';
+ const whenPart=when?` está programada para ${when}`:' está localizada';
+ return `La próxima publicación de ${network}${whenPart}.${keyPart} Te dejo el texto, la imagen y el resto de detalles por escrito.`;
+}
+
+function memoryRecallSummary(units:SpokenUnit[]){
+ const remembered=units
+  .map(unit=>unit.text.replace(/\s*·\s*\d{1,2}\s+\p{L}+\s+\d{4}\s*$/u,'').trim())
+  .filter(text=>!/^(en tu memoria conversacional|memoria conversacional relevante)/i.test(text))
+  .filter(Boolean)
+  .slice(0,2);
+ if(!remembered.length)return 'Sí. Tengo recuerdos relacionados y te los dejo por escrito.';
+ return `Sí. Recuerdo ${naturalJoin(remembered.map(item=>item.replace(/[.]+$/,'')))}.`;
+}
+
+function scoreUnit(unit:SpokenUnit,index:number){
+ let score=0;
+ if(index===0)score+=3;
+ if(unit.question)score+=8;
+ if(unit.bullet)score+=2;
+ if(/\b(no |no he|error|fall|bloque|pendiente|requiere|necesito|confirm|riesgo|seguridad|firma|pago)\b/i.test(unit.text))score+=6;
+ if(/\b(?:hoy|mañana|lunes|martes|miércoles|miercoles|jueves|viernes|sábado|sabado|domingo|\d{1,2}[:.]\d{2}|\d+\s*€)\b/i.test(unit.text))score+=3;
+ if(isTechnicalNoise(unit.text))score-=8;
+ if(unit.text.length>260)score-=2;
+ return score;
+}
+
+function genericSummary(raw:string,units:SpokenUnit[],maxChars:number){
+ if(!units.length)return '';
+
+ const nonTechnical=units.filter(unit=>!unit.technical);
+ const pool=nonTechnical.length?nonTechnical:units;
+ const ranked=pool
+  .map((unit,index)=>({unit,index,score:scoreUnit(unit,index)}))
+  .sort((a,b)=>b.score-a.score||a.index-b.index);
+
+ const picked:Array<{unit:SpokenUnit;index:number}>=[];
+ let total=0;
+ for(const candidate of ranked){
+  const text=clipNatural(candidate.unit.text,190);
+  if(!text)continue;
+  if(picked.some(item=>normalizeVoiceConfirmation(item.unit.text)===normalizeVoiceConfirmation(text)))continue;
+  const extra=(picked.length?1:0)+text.length;
+  if(picked.length&&total+extra>maxChars)continue;
+  picked.push({unit:{...candidate.unit,text},index:candidate.index});
+  total+=extra;
+  if(picked.length>=3)break;
+ }
+ picked.sort((a,b)=>a.index-b.index);
+ const chosen=picked.map(item=>item.unit);
+
+ const questions=chosen.filter(unit=>unit.question);
+ const statements=chosen.filter(unit=>!unit.question);
+ const bulletStatements=statements.filter(unit=>unit.bullet);
+ const parts:string[]=[];
+
+ if(bulletStatements.length>=2){
+  const bulletSet=new Set(bulletStatements);
+  const plain=statements.filter(unit=>!bulletSet.has(unit));
+  parts.push(...plain.map(unit=>unit.text));
+  parts.push(`Lo principal es: ${naturalJoin(bulletStatements.map(unit=>unit.text.replace(/[.]+$/,'')))}.`);
+ }else{
+  parts.push(...statements.map(unit=>unit.text));
+ }
+
+ for(const question of questions)parts.push(question.text);
+
+ const hasLinks=(raw.match(/https?:\/\/[^\s]+/gi)??[]).length>0;
+ const hasEmails=(raw.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi)??[]).length>0;
+ const omitted=units.length>chosen.length||units.some(unit=>unit.technical);
+ if(hasLinks)parts.push('Te dejo el enlace por escrito.');
+ if(hasEmails)parts.push('Te dejo los correos por escrito.');
+ if(omitted&&!parts.some(part=>/detalle.*por escrito/i.test(part)))parts.push('Te dejo el detalle completo por escrito.');
+
+ return parts.join(' ').replace(/\s+/g,' ').trim();
+}
+
+export function spokenResponseText(text:string,maxChars=440,mode:CerebroSpokenMode='normal',meta:CerebroSpokenMeta={}){
  const raw=text.trim();
  if(!raw)return '';
- const linkMatches=raw.match(/https?:\/\/[^\s]+/gi)??[];
+ const status=String(meta.status||'').toUpperCase();
+ const intent=String(meta.intent||'').toLowerCase();
  const units=spokenUnits(raw);
- if(!units.length){
-  return linkMatches.length
-   ?(linkMatches.length===1?'Te dejo el enlace por escrito.':'Te dejo los enlaces por escrito.')
-   :'';
+
+ if(intent==='email_contact_selection')return contactSelectionSummary(raw,meta);
+ if(intent==='email_send'&&status==='ACTION_PROPOSAL')return emailProposalSummary(meta);
+ if(intent==='email_send_confirmation'&&meta.executed===true)return emailAcceptedSummary(raw);
+ if(intent==='social_schedule_complete'&&meta.read_context)return socialScheduleSummary(meta);
+ if(intent==='conversation_memory')return memoryRecallSummary(units);
+ if(intent==='health')return 'CEREBRO está conectado y disponible. Te dejo el detalle técnico por escrito.';
+
+ if(status==='ACTION_CONFIRMED'&&meta.executed===false){
+  return genericSummary(raw,units,Math.max(maxChars,520));
  }
 
  if(mode==='action'){
-  const finalQuestion=[...units].reverse().find(unit=>/\?$/.test(unit)&&/(confirm|quieres|activo|env[ií]o|activar)/i.test(unit));
-  const core=units
-   .filter(unit=>unit!==finalQuestion)
-   .filter(unit=>!/^(no he enviado nada|todav[ií]a no he enviado nada)/i.test(unit));
-  const chosen=conciseSpokenUnits(core,Math.max(220,maxChars-120),2);
-  const parts=[...chosen];
-  if(linkMatches.length)parts.push(linkMatches.length===1?'Te dejo el enlace por escrito.':'Te dejo los enlaces por escrito.');
-  if(finalQuestion)parts.push(finalQuestion);
-  else if(core.length>chosen.length)parts.push('Te dejo el detalle completo por escrito.');
+  const finalQuestion=[...units].reverse().find(unit=>unit.question&&/(confirm|quieres|activo|env[ií]o|activar|ejecut)/i.test(unit.text));
+  const actionSummary=meta.action?.summary?clipNatural(meta.action.summary,220):'';
+  const parts:string[]=[];
+  if(actionSummary)parts.push(actionSummary);
+  else{
+   const core=units.filter(unit=>unit!==finalQuestion&&!unit.technical);
+   const first=core[0]?.text;
+   if(first)parts.push(clipNatural(first,220));
+  }
+  if((raw.match(/https?:\/\/[^\s]+/gi)??[]).length)parts.push('Te dejo el enlace por escrito.');
+  if(finalQuestion)parts.push(finalQuestion.text);
+  else if(units.length>1)parts.push('Te dejo el detalle completo por escrito.');
   return parts.join(' ').replace(/\s+/g,' ').trim();
  }
 
- const chosen=conciseSpokenUnits(units,maxChars,2);
- const omitted=units.length>chosen.length;
- const parts=[...chosen];
- if(linkMatches.length)parts.push(linkMatches.length===1?'Te dejo el enlace por escrito.':'Te dejo los enlaces por escrito.');
- if(omitted)parts.push('Te dejo el detalle completo por escrito.');
- return parts.join(' ').replace(/\s+/g,' ').trim();
+ return genericSummary(raw,units,maxChars);
 }
+
 export type CerebroSpeechSegment={
  text:string;
  rate:number;
@@ -190,8 +391,8 @@ function clampVoice(value:number,min:number,max:number){
  return Math.min(max,Math.max(min,value));
 }
 
-export function speechSegments(text:string,maxChars=420,preferences:Record<string,string>={},mode:CerebroSpokenMode='normal'):CerebroSpeechSegment[]{
- const spoken=spokenResponseText(text,maxChars,mode);
+export function speechSegments(text:string,maxChars=440,preferences:Record<string,string>={},mode:CerebroSpokenMode='normal',meta:CerebroSpokenMeta={}):CerebroSpeechSegment[]{
+ const spoken=spokenResponseText(text,maxChars,mode,meta);
  if(!spoken)return [];
  const base=voiceSpeechProfile(preferences);
  const parts=(spoken.match(/[^.!?;:]+[.!?;:]?/g)||[spoken])
