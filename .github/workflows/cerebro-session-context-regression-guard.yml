@@ -121,6 +121,7 @@ jobs:
           grep -F 'function interruptSpeech()' src/CerebroConsoleShell.tsx >/dev/null
           grep -F 'Parar respuesta y hablar' src/CerebroConsoleShell.tsx >/dev/null
           node scripts/verify-cerebro-voice-contract.mjs
+          node scripts/verify-cerebro-explicit-learning.mjs
 
       - name: Build app
         shell: bash
