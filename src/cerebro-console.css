@@ -22,3 +22,7 @@ html[data-cerebro-console='1'] .ana-universal{display:none!important}
 .cerebro-voice-status{font-size:12px;color:var(--muted,#6b7280);line-height:1.45;text-align:center}
 .cerebro-voice-error{margin:10px 0 0;padding:11px 12px;border-radius:10px;background:rgba(180,83,9,.10);font-size:13px;line-height:1.45}
 @media(max-width:720px){.cerebro-voice-main{width:100%;min-width:0}}
+
+.cerebro-voice-interrupt{justify-self:center!important;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-width:230px;margin:0!important;font-weight:800;border:1px solid rgba(220,38,38,.28)!important;background:rgba(220,38,38,.08)!important}
+.cerebro-voice-interrupt:hover{background:rgba(220,38,38,.13)!important}
+@media(max-width:720px){.cerebro-voice-interrupt{width:100%;min-width:0}}

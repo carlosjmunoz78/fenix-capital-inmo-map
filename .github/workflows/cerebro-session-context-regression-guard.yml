@@ -114,6 +114,12 @@ jobs:
           grep -F 'scheduleListening(300)' src/CerebroConsoleShell.tsx >/dev/null
           grep -F 'transcripción de baja confianza' src/CerebroConsoleShell.tsx >/dev/null
           grep -F "['not-allowed','service-not-allowed','audio-capture']" src/CerebroConsoleShell.tsx >/dev/null
+          grep -F 'recognition.maxAlternatives=3' src/CerebroConsoleShell.tsx >/dev/null
+          grep -F 'applyVoiceContextHints(recognition)' src/CerebroConsoleShell.tsx >/dev/null
+          grep -F 'CEREBRO_VOICE_CONTEXT_HINTS' src/cerebroVoice.ts >/dev/null
+          grep -F "chunks.join(' ')" src/CerebroConsoleShell.tsx >/dev/null
+          grep -F 'function interruptSpeech()' src/CerebroConsoleShell.tsx >/dev/null
+          grep -F 'Parar respuesta y hablar' src/CerebroConsoleShell.tsx >/dev/null
           node scripts/verify-cerebro-voice-contract.mjs
 
       - name: Build app
