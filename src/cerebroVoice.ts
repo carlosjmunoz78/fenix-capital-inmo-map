@@ -424,7 +424,9 @@ function withConversationalLead(value:string,sourceQuestion=''){
  if(/^(si|sí|no|vale|claro|perfecto|hecho|mira|te cuento|pues|hola|buenas|ey|ahora mismo)\b/i.test(text))return text;
  if(/^(error|no he podido|no puedo|requiere|bloqueado|acción cancelada)/i.test(text))return text;
  const lead=conversationalLead(sourceQuestion);
- return lead?lead+' '+text.charAt(0).toLocaleLowerCase('es-ES')+text.slice(1):text;
+ if(!lead)return text;
+ const spokenText=lead.endsWith(',')?text.charAt(0).toLocaleLowerCase('es-ES')+text.slice(1):text;
+ return lead+' '+spokenText;
 }
 
 function conversationalizeSpoken(value:string,sourceQuestion=''){
