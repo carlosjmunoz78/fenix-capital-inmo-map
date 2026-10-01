@@ -107,3 +107,11 @@
 - PROD `96eb6effb4ab4077ccdc6158858c5158e3be825e`: Live Deploy #174 SUCCESS; Runtime Smoke #317 SUCCESS.
 - Coste adicional: 0 €.
 - Aceptación física: PENDIENTE.
+
+
+## 2026-10-01 · Local VAD Barge-in V2 · aceptación física confirmada
+
+- El propietario confirma que «para» corta la locución de CEREBRO sin usar el botón.
+- Estado del subflujo: CONFIRMED_OPERATIONAL dentro del alcance físico probado.
+- Se mantiene fallback visual y rollback conocido.
+- La aceptación no se extiende todavía a Spoken Digest V3 ni a una matriz exhaustiva de falsos positivos/dispositivos.

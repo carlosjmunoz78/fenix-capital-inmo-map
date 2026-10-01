@@ -197,7 +197,7 @@
       "physical_acceptance": "PENDING"
     },
     "voice_barge_in": {
-      "status": "PROD_DEPLOYED_PHYSICAL_ACCEPTANCE_PENDING",
+      "status": "CONFIRMED_OPERATIONAL",
       "mode": "LOCAL_VAD_V2",
       "trigger": "SUSTAINED_USER_SPEECH_DURING_TTS",
       "implementation": [
@@ -215,7 +215,9 @@
       "prod_live_deploy_run": 174,
       "prod_runtime_smoke_run": 317,
       "additional_cost_target_eur": 0,
-      "physical_acceptance": "PENDING"
+      "physical_acceptance": "CONFIRMED_2026-10-01",
+      "physical_acceptance_scope": "OWNER_CONFIRMED_TTS_INTERRUPTS_BY_SPEAKING_PARA_WITHOUT_BUTTON",
+      "broader_false_positive_matrix": "NOT_PHYSICALLY_EXHAUSTIVE"
     }
   }
 }

@@ -171,3 +171,17 @@ Evidence anchors are scoped to the change they prove; they are not intended to m
 
 ### PARCIAL
 - Falta aceptación física en navegador real. CI confirma contratos, build y publicación, pero no puede certificar que el micrófono físico distinga la voz del usuario frente al audio reproducido.
+
+
+## Update 2026-10-01 · Local VAD Barge-in V2 · aceptación física
+
+### HECHO
+- El propietario confirma físicamente que, mientras CEREBRO habla, decir «para» interrumpe la locución sin pulsar el botón.
+- El subflujo de interrupción de voz VAD V2 queda CONFIRMED_OPERATIONAL para la prueba física ejecutada.
+- Se conserva el botón «Parar respuesta y hablar» como fallback.
+- Evidencia técnica asociada: PROD 96eb6effb4ab4077ccdc6158858c5158e3be825e, Live Deploy #174 y Runtime Smoke #317 en verde.
+- Rollback preservado: d8b89b4f1f541d5d7ebea1ab5fd5cd8446a4bc43.
+
+### PARCIAL
+- No se declara todavía exhaustivamente validada toda la matriz de falsos positivos/otros dispositivos.
+- Spoken Digest V3 sigue pendiente de aceptación auditiva; la confirmación actual corresponde al barge-in, no al resumen hablado.
