@@ -193,13 +193,13 @@ export default function CerebroConsoleShell(){
    setLines(current=>[...current,{role:'cerebro',text:response,mediaUrl}]);
    sendingRef.current=false;
    setSending(false);
-   if(fromVoice&&voiceSessionRef.current)speakAndResume(response);
+   if(voiceSessionRef.current)speakAndResume(response);
   }catch{
    const response='No he podido contactar con CEREBRO Gateway.';
    setLines(current=>[...current,{role:'cerebro',text:response}]);
    sendingRef.current=false;
    setSending(false);
-   if(fromVoice&&voiceSessionRef.current)speakAndResume(response);
+   if(voiceSessionRef.current)speakAndResume(response);
   }
  }
 
@@ -234,6 +234,12 @@ export default function CerebroConsoleShell(){
   recognition.onerror=event=>{
    const reason=String(event.error||'');
    if(reason==='no-speech'||reason==='aborted')return;
+   if(['not-allowed','service-not-allowed','audio-capture'].includes(reason)){
+    voiceSessionRef.current=false;
+    setVoiceSessionActive(false);
+    setVoiceError('No puedo mantener la conversación de voz porque el navegador no tiene acceso al micrófono. Revisa el permiso y vuelve a pulsar «Hablar con CEREBRO».');
+    return;
+   }
    setVoiceError(reason?('Problema de voz: '+reason+'. Reintentaré automáticamente cuando sea posible.'):'No he podido transcribir el audio. Reintentaré automáticamente.');
   };
   recognition.onend=()=>{
