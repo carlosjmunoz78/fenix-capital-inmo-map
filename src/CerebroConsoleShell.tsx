@@ -1,6 +1,6 @@
 import {useEffect,useRef,useState,type FormEvent} from 'react';
 import {useLocation,useNavigate} from 'react-router-dom';
-import {BrainCircuit,ChevronLeft,Mic,MicOff,Send,ShieldCheck} from 'lucide-react';
+import {BrainCircuit,ChevronLeft,Mic,MicOff,Send,ShieldCheck,Square} from 'lucide-react';
 import {cerebroConsoleLinkEnabled} from './cerebroConsoleAccess';
 import {fetchAppApi,supabase} from './supabase';
 import {fetchCerebroConsoleHealth,postCerebroConsoleChat,type CerebroConsoleHealth,type CerebroPendingAction,type CerebroReadContext} from './cerebroConsoleApi';
@@ -158,6 +158,16 @@ export default function CerebroConsoleShell(){
   window.speechSynthesis.speak(utterance);
  }
 
+ function interruptSpeech(){
+  if(!voiceSpeakingRef.current)return;
+  clearRestartTimer();
+  if(voiceSupport.tts)window.speechSynthesis.cancel();
+  voiceSpeakingRef.current=false;
+  setVoiceSpeaking(false);
+  setVoiceError('');
+  scheduleListening(80);
+ }
+
  async function sendText(text:string,voiceConfidence:number|null=null,fromVoice=false){
   const clean=text.trim();
   if(!clean||!chatReady||sendingRef.current)return;
@@ -214,17 +224,31 @@ export default function CerebroConsoleShell(){
   recognition.lang='es-ES';
   recognition.continuous=false;
   recognition.interimResults=false;
-  recognition.maxAlternatives=1;
+  recognition.maxAlternatives=3;
   recognition.onstart=()=>setVoiceListening(true);
   recognition.onresult=event=>{
-   let transcript='';
-   let confidence:number|null=null;
+   const chunks:string[]=[];
+   const segmentConfidences:Array<number|null>=[];
    for(let index=0;index<event.results.length;index+=1){
-    const alternative=event.results[index]?.[0];
-    if(!alternative?.transcript)continue;
-    transcript=alternative.transcript.trim();
-    confidence=typeof alternative.confidence==='number'&&Number.isFinite(alternative.confidence)?alternative.confidence:null;
+    const result=event.results[index];
+    if(!result?.length)continue;
+    let best=result[0];
+    for(let alternativeIndex=1;alternativeIndex<result.length;alternativeIndex+=1){
+     const candidate=result[alternativeIndex];
+     if(!candidate?.transcript)continue;
+     const candidateConfidence=typeof candidate.confidence==='number'&&Number.isFinite(candidate.confidence)?candidate.confidence:-1;
+     const bestConfidence=typeof best?.confidence==='number'&&Number.isFinite(best.confidence)?best.confidence:-1;
+     if(candidateConfidence>bestConfidence)best=candidate;
+    }
+    const piece=best?.transcript?.trim();
+    if(!piece)continue;
+    chunks.push(piece);
+    segmentConfidences.push(typeof best.confidence==='number'&&Number.isFinite(best.confidence)?best.confidence:null);
    }
+   const transcript=chunks.join(' ').replace(/\s+/g,' ').trim();
+   const confidence=segmentConfidences.length>0&&segmentConfidences.every(value=>value!==null)
+    ?Math.min(...segmentConfidences as number[])
+    :null;
    if(transcript){
     setMessage(transcript);
     setVoiceError('');
@@ -317,6 +341,7 @@ export default function CerebroConsoleShell(){
      {voiceSessionActive?<MicOff size={21}/>:<Mic size={21}/>}
      {voiceSessionActive?'Finalizar conversación':'Hablar con CEREBRO'}
     </button>
+    {voiceSpeaking?<button type="button" className="cerebro-voice-interrupt" onClick={interruptSpeech}><Square size={18}/> Parar respuesta y hablar</button>:null}
     <span className="cerebro-voice-status">{voiceStatus}</span>
    </div>
    {voiceError?<div className="cerebro-voice-error" role="alert">{voiceError}</div>:null}
