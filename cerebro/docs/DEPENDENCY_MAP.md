@@ -75,3 +75,13 @@ Before wiring persistent `EVT-001`/`JOB-001` into `SharedRuntime`, require expli
 - La voz mantiene el ritmo base existente y añade prosodia determinista por segmentos mediante `speechSynthesis`: pequeñas variaciones de rate/pitch para preguntas, confirmaciones, listas y mensajes de riesgo.
 - Estas escrituras internas de aprendizaje son una excepción acotada de service-role; no habilitan escrituras de negocio, ampliación de permisos ni autonomía PROD.
 - `fenix-memory-api` existente permanece intacta para memoria relacional/CRM; no se sustituye.
+
+
+## Spoken Summary V1 · 2026-10-01
+
+- Salida escrita y salida hablada quedan separadas: `Gateway response → full written UI response → deterministic spoken summary → prosody segments → browser speechSynthesis`.
+- La respuesta escrita conserva el detalle completo. La voz selecciona una síntesis corta y conversacional.
+- Los enlaces se mantienen visibles/clicables en pantalla, pero se eliminan del TTS y se sustituyen por «te dejo el enlace por escrito».
+- Los marcadores de listas numeradas/viñetas se eliminan del canal hablado para evitar lecturas como «uno punto».
+- Para acciones pendientes, el resumen hablado conserva la pregunta final de confirmación; esta capa no reduce ni amplía permisos.
+- `VOICE-001`, memoria conversacional, ACTGW y contratos de acción existentes se conservan; este cambio es únicamente de presentación hablada.
