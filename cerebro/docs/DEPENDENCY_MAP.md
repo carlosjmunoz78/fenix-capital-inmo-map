@@ -85,3 +85,11 @@ Before wiring persistent `EVT-001`/`JOB-001` into `SharedRuntime`, require expli
 - Los marcadores de listas numeradas/viñetas se eliminan del canal hablado para evitar lecturas como «uno punto».
 - Para acciones pendientes, el resumen hablado conserva la pregunta final de confirmación; esta capa no reduce ni amplía permisos.
 - `VOICE-001`, memoria conversacional, ACTGW y contratos de acción existentes se conservan; este cambio es únicamente de presentación hablada.
+
+
+## Spoken Summary V2 · 2026-10-01
+
+- Flujo: `Gateway structured response → full written response → intent/status aware spoken summarizer → prosody segmentation → browser speechSynthesis`.
+- No se añade un modelo ni una API de voz: la mejora reutiliza metadatos de la respuesta y reglas deterministas.
+- `action` y `read_context` solo informan la presentación hablada; no alteran permisos, confirmaciones ni ejecución.
+- El resumen hablado es una vista derivada. Nunca sustituye el mensaje escrito como evidencia completa.

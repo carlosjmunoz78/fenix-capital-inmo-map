@@ -63,3 +63,20 @@
 - Rollback frontend anterior preservado: `374bd89d7e8ee97a26b3bdcf1bb5249a613489be`.
 - Coste adicional recurrente: 0 €.
 - Estado: despliegue técnico HECHO; aceptación auditiva del resumen hablado PENDIENTE.
+
+
+## 2026-10-01 · Spoken Summary V2
+
+- Evoluciona el canal hablado de recorte V1 a resumen semántico determinista y consciente del tipo de respuesta.
+- Usa metadatos estructurados del Gateway ya existentes para decidir qué merece ser hablado y qué debe permanecer escrito.
+- Selección de contactos: habla cuántas opciones hay y para quién, dejando correos completos en pantalla.
+- Propuesta de correo: habla destinatario y asunto, remite el cuerpo exacto a pantalla y conserva «¿Confirmas el envío?».
+- Resultado de correo: confirma de forma breve el resultado y deja evidencia escrita.
+- Próxima publicación social: verbaliza red y programación; texto, imagen y enlaces permanecen escritos.
+- Memoria conversacional: responde en lenguaje natural en lugar de leer numeración y metadatos.
+- Salud/estado técnico: evita recitar PR, SHA, runs y hashes.
+- Fallos de ejecución: conserva explícitamente la parte negativa/crítica.
+- Corpus de pruebas conductuales GREEN.
+- PR #465: Guard #131 SUCCESS; Build Gate #379 SUCCESS; merge `20280fa5f3afc83723db19ca0fcd063a364d164f`.
+- PROD `f670d65136b8a09630ab5183d23961fea098af24`: Live Deploy #168 SUCCESS; Runtime Smoke #311 SUCCESS.
+- Coste adicional: 0 €.
