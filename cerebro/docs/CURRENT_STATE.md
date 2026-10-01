@@ -199,3 +199,22 @@ Evidence anchors are scoped to the change they prove; they are not intended to m
 ### DEFINIDO
 - Contrato: `turn_limit = null` y `artificial_question_cap = false`.
 - «Sin límite» significa sin límite artificial de turnos impuesto por CEREBRO. No se promete disponibilidad infinita frente a cierres del navegador, pérdida de red, expiración de sesión o fallo físico del micrófono.
+
+
+## Update 2026-10-01 · Natural Spoken Conversation V4
+
+### HECHO
+- La conversación de voz conserva el contrato sin límite artificial de turnos: `turn_limit = null`.
+- La capa hablada recibe también la pregunta del usuario para formular respuestas más conversacionales.
+- Se reduce el patrón repetitivo de «te lo dejo por escrito» en prosa ordinaria; el texto completo sigue visible como registro detallado.
+- Los resúmenes hablados de SEO, financiación, marketing, social, newsletter, autonomía, plataforma, Trading y multiempresa usan formulación más oral y cercana.
+- Se prioriza voz española `es-ES` y, cuando el dispositivo la ofrece, una voz femenina/natural del sistema. No se garantiza una voz idéntica entre dispositivos.
+- El tono `warm_close_caring` añade variación ligera sin reducir el ritmo base elegido.
+- Local VAD barge-in sigue preservado y `CONFIRMED_OPERATIONAL` en la prueba física previa.
+- PR #473: CEREBRO Session Context Regression Guard #144 SUCCESS y App Restoration Build Gate #388 SUCCESS.
+- PROD exacto `c12edfae5f65fdb95c1dbf6b6fcfd921509ca21e`: Live Deploy #179 SUCCESS y Runtime Smoke #322 SUCCESS.
+- Rollback frontend preservado: `96eb6effb4ab4077ccdc6158858c5158e3be825e`.
+- Coste adicional recurrente: 0 €.
+
+### PARCIAL
+- La naturalidad de V4 necesita aceptación auditiva real; CI demuestra comportamiento, build y publicación, no percepción humana.
