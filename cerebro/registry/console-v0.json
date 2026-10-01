@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.3.0",
+  "schema_version": "1.4.0",
   "phase": "PHASE_5_CEREBRO_CONSOLE_V0",
   "environment": "PREPROD",
   "additional_cost_target_eur": 0,
@@ -76,7 +76,9 @@
     "single_confirmation_after_exact_proposal": true,
     "explain_before_owner_decision": true,
     "preference_writes": "EXPLICIT_USER_ONLY",
-    "durable_learning_mode": "EXPLICIT_ONLY_V1"
+    "durable_learning_mode": "EXPLICIT_PREFERENCES_PLUS_CONVERSATIONAL_MEMORY_V1",
+    "conversation_memory": "AUTO_BOUNDED_NON_SENSITIVE_USER_TURNS",
+    "internal_learning_writes": "SERVICE_ROLE_BOUNDED"
   },
   "human_decision_protocol": {
     "mode": "OWNER_DECISION_BY_EXCEPTION",
@@ -104,14 +106,14 @@
   "live_evidence": {
     "gateway_prod": {
       "status": "ACTIVE",
-      "version": 25,
+      "version": 26,
       "service": "cerebro-console-gateway-v0",
-      "artifact_sha256": "12a0756ea113f8e4ba7c755e57a61704bac86417f553466c9ab6fd321d9d02b2"
+      "artifact_sha256": "fa441dba9e32d48a12554117efbf28e5fae3991f4a8add2d9015493dbd4e2c08"
     },
     "mobile_canary": {
       "status": "PUBLISHED_CI_VERIFIED",
       "path": "/cerebro/",
-      "source_sha": "7fad08ac3225e89cbf3aa5a732674201dc67a8e6"
+      "source_sha": "374bd89d7e8ee97a26b3bdcf1bb5249a613489be"
     },
     "knowledge_adapter": {
       "status": "ACTIVE_READ_ONLY",
@@ -135,6 +137,23 @@
       "frontend_source_sha": "7fad08ac3225e89cbf3aa5a732674201dc67a8e6",
       "prod_live_deploy_run": 159,
       "prod_runtime_smoke_run": 302
+    },
+    "conversational_learning": {
+      "status": "PROD_DEPLOYED_PHYSICAL_ACCEPTANCE_PENDING",
+      "storage": "fenix_prod.cerebro_conversation_memory",
+      "automatic_safe_turn_learning": true,
+      "direct_anon_access": false,
+      "direct_authenticated_access": false,
+      "service_role_only": true,
+      "audio_storage": false,
+      "assistant_reply_auto_promotion": false,
+      "canonical_live_data_priority": true,
+      "additional_cost_target_eur": 0,
+      "frontend_source_sha": "374bd89d7e8ee97a26b3bdcf1bb5249a613489be",
+      "gateway_version": 26,
+      "prod_live_deploy_run": 162,
+      "prod_runtime_smoke_run": 305,
+      "physical_acceptance": "PENDING"
     }
   }
 }

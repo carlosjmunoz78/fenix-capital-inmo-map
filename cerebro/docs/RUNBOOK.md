@@ -78,3 +78,24 @@ Generated Factory output is disposable; canonical sources are registry seed + fa
 - Una preferencia nunca amplía permisos ni sustituye HUMAN_REQUIRED, política, seguridad, firma, obligación legal o límite económico.
 - Rollback ordinario: revertir código/Gateway; no borrar la tabla ni el historial de preferencias. Borrado destructivo requiere snapshot/export, evaluación separada y autorización explícita.
 - Tras DDL de preferencias ejecutar advisors de seguridad y rendimiento; corregir avisos nuevos atribuibles al cambio antes de cerrar promoción.
+
+
+## Conversational Learning V1 · runbook
+
+- Considerar automáticamente para memoria cada turno significativo del propietario, pero persistir solo si supera los filtros de sensibilidad y ruido.
+- No guardar audio ni promover respuestas del asistente como conocimiento del propietario por el mero hecho de haber sido generadas.
+- Los valores sensibles deben omitirse de la memoria general y permanecer en sus sistemas específicos cuando proceda.
+- El estado operativo vivo y las fuentes canónicas tienen prioridad sobre recuerdos conversacionales; un recuerdo no puede sobrescribir silenciosamente CRM, Supabase, Notion u otra fuente autoritativa.
+- Consultas de recuerdo no deben escribirse como nuevo conocimiento, para evitar auto-contaminación.
+- Duplicados exactos incrementan `seen_count`; no deben crear filas equivalentes.
+- Para olvido temático usar la ruta de desactivación; conservar la trazabilidad técnica salvo que exista una solicitud explícita de borrado destructivo y su procedimiento legal/técnico correspondiente.
+- Rollback ordinario: revertir frontend/Gateway al source anterior y dejar la tabla aditiva inactiva; no destruir historial durante un rollback técnico.
+- Después de cualquier DDL de memoria ejecutar advisors de seguridad/rendimiento y corregir regresiones nuevas atribuibles al cambio.
+
+### Aceptación física
+1. Introducir un hecho nuevo, inocuo y único en CEREBRO.
+2. Recargar o abrir una nueva sesión.
+3. Preguntar «¿qué te dije sobre <tema>?» y verificar recuperación exacta suficiente.
+4. Ordenar «olvida lo que te dije sobre <tema>».
+5. Repetir la consulta y comprobar que el recuerdo activo ya no se devuelve.
+6. Escuchar una pregunta, una confirmación y una enumeración para validar variación de entonación sin ralentización global.

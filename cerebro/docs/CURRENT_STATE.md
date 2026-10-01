@@ -74,3 +74,24 @@ Evidence anchors are scoped to the change they prove; they are not intended to m
 - `gh-pages/PROD_SOURCE_SHA.txt` verificado exactamente como `7fad08ac3225e89cbf3aa5a732674201dc67a8e6`.
 - Explicit Learning V1 pasa de promoción pendiente a **PARCIAL desplegado en PROD**.
 - Falta únicamente la aceptación física del flujo persistente entre sesiones para poder elevar ese flujo a `CONFIRMED_OPERATIONAL`.
+
+
+## Update 2026-10-01 · Conversational Learning + Dynamic Prosody V1
+
+### HECHO
+- El requisito queda corregido: el ritmo base de VOICE-001 se mantiene; la variación se hace localmente por segmento para aportar entonación y naturalidad.
+- La migración exacta de `cerebro_conversation_memory` superó PREPROD con escritura, deduplicación, búsqueda, olvido y rollback completos: `GREEN_CONVERSATIONAL_MEMORY_EXACT_MIGRATION_ROLLBACK`.
+- PR #461 superó CEREBRO Session Context Regression Guard #123 y App Restoration Build Gate #373; merge `99552a134cb29c0f53cbb2693683354a10d9b4d4`.
+- En PROD existe `fenix_prod.cerebro_conversation_memory` con RLS; acceso directo anon/authenticated denegado y RPCs de memoria reservados a service-role.
+- Los advisors no muestran un nuevo FK sin índice ni una nueva función SECURITY DEFINER expuesta a authenticated atribuible a esta capa.
+- CEREBRO Gateway PROD V26 está ACTIVE con artefacto `fa441dba9e32d48a12554117efbf28e5fae3991f4a8add2d9015493dbd4e2c08`.
+- PROD Live Deploy #162 y Runtime Smoke #305: SUCCESS.
+- `gh-pages/PROD_SOURCE_SHA.txt` verificado exactamente como `374bd89d7e8ee97a26b3bdcf1bb5249a613489be`.
+- Coste adicional recurrente introducido: 0 €.
+
+### PARCIAL
+- La memoria conversacional automática está desplegada técnicamente, pero necesita aceptación física real de `dato nuevo → nueva sesión/recarga → recuerdo correcto` para declararla `CONFIRMED_OPERATIONAL`.
+- La prosodia dinámica está desplegada técnicamente, pero su naturalidad requiere validación auditiva humana.
+- Esta V1 es memoria episódica persistente y recuperable; no equivale a reentrenar los pesos de un modelo ni a convertir automáticamente cada frase en verdad canónica.
+- La consolidación futura de recuerdos repetidos hacia conocimiento canónico exige reglas de contradicción, versionado y tribunal antes de automatizarse.
+- La interrupción mediante la palabra hablada «para» mientras TTS está hablando sigue PLANIFICADA; el control visible de interrupción permanece disponible.

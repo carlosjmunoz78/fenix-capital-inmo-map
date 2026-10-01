@@ -133,3 +133,33 @@ Result:
 - Sensitive-data skip policy: IMPLEMENTED / branch candidate.
 - PROD: NOT YET PROMOTED.
 - Physical acceptance: PENDING.
+
+
+## PROD closure
+
+Repository:
+- PR #461 exact head: `0736678a6c9f428af0cafb28a10679500aa16c2f`.
+- CEREBRO Session Context Regression Guard #123: SUCCESS.
+- App Restoration Build Gate #373: SUCCESS.
+- merge: `99552a134cb29c0f53cbb2693683354a10d9b4d4`.
+
+PROD database:
+- migration `cerebro_conversational_learning_v1`: SUCCESS.
+- table `fenix_prod.cerebro_conversation_memory`: RLS enabled, initial rows 0.
+- table access: anon=false, authenticated=false, service_role=true.
+- observe/search RPC access: anon=false, authenticated=false, service_role=true.
+- performance advisor: no new unindexed FK attributable to this table.
+- security advisor: no new authenticated SECURITY DEFINER exposure attributable to the new memory RPCs.
+
+PROD Gateway:
+- `cerebro-console-gateway-v0` V26 ACTIVE.
+- artifact SHA256: `fa441dba9e32d48a12554117efbf28e5fae3991f4a8add2d9015493dbd4e2c08`.
+
+Frontend:
+- release marker/source: `374bd89d7e8ee97a26b3bdcf1bb5249a613489be`.
+- PROD Live Deploy #162: SUCCESS.
+- PROD Runtime Smoke #305: SUCCESS.
+- published `gh-pages/PROD_SOURCE_SHA.txt`: `374bd89d7e8ee97a26b3bdcf1bb5249a613489be`.
+- previous exact frontend rollback source: `7fad08ac3225e89cbf3aa5a732674201dc67a8e6`.
+
+Status: **PARCIAL / technically deployed in PROD**. Physical cross-session memory recall/forget and subjective prosody acceptance remain pending before `CONFIRMED_OPERATIONAL`.
