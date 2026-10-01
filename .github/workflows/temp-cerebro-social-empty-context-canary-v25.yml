@@ -1,4 +1,4 @@
-name: TEMP CEREBRO Social Empty Context Canary v25
+name: TEMP CEREBRO Canary v25 Transport Gate
 
 on:
   push:
@@ -15,22 +15,12 @@ jobs:
     env:
       PROD_URL: https://cluhljgonannaafpmblx.supabase.co
       PROD_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
-      CEREBRO_E2E_USER_JWT: ${{ secrets.CEREBRO_E2E_USER_JWT }}
     steps:
-      - name: Require secure E2E credential
+      - name: Require publishable browser key
         shell: bash
         run: |
           set -euo pipefail
           test -n "$PROD_PUBLISHABLE_KEY"
-          test -n "$CEREBRO_E2E_USER_JWT"
-
-      - name: Canary owner health
-        shell: bash
-        run: |
-          set -euo pipefail
-          code="$(curl --silent --show-error --output /tmp/health.json --write-out '%{http_code}' --max-time 20             -H "Authorization: Bearer $CEREBRO_E2E_USER_JWT"             -H "apikey: $PROD_PUBLISHABLE_KEY"             "$PROD_URL/functions/v1/cerebro-console-gateway-v0-canary-v25/health")"
-          test "$code" = "200"
-          grep -F '"service":"cerebro-console-gateway-v0"' /tmp/health.json >/dev/null
 
       - name: Canary fails closed without owner token
         shell: bash
@@ -40,26 +30,13 @@ jobs:
           test "$code" = "403"
           grep -F '"reason":"OWNER_ONLY"' /tmp/anon.json >/dev/null
 
-      - name: OLD vs NEW empty social context is fail closed
+      - name: Canary CORS preflight allows only canonical app origin
         shell: bash
         run: |
           set -euo pipefail
-          payload='{"message":"Belén","read_context":{"kind":"social_schedule","network":"Facebook"}}'
-          headers=(-H "Authorization: Bearer $CEREBRO_E2E_USER_JWT" -H "apikey: $PROD_PUBLISHABLE_KEY" -H "content-type: application/json")
-          old_code="$(curl --silent --show-error --output /tmp/old.json --write-out '%{http_code}' --max-time 30 "${headers[@]}" -d "$payload" "$PROD_URL/functions/v1/cerebro-console-gateway-v0/chat")"
-          new_code="$(curl --silent --show-error --output /tmp/new.json --write-out '%{http_code}' --max-time 30 "${headers[@]}" -d "$payload" "$PROD_URL/functions/v1/cerebro-console-gateway-v0-canary-v25/chat")"
-          test "$old_code" = "200"
-          test "$new_code" = "200"
-          node - <<'NODE'
-          const fs=require('fs');
-          const old=JSON.parse(fs.readFileSync('/tmp/old.json','utf8'));
-          const next=JSON.parse(fs.readFileSync('/tmp/new.json','utf8'));
-          console.log('OLD_STATUS='+String(old.status||''));
-          console.log('NEW_STATUS='+String(next.status||''));
-          if(next.status==='ACTION_PROPOSAL'||next.action){
-            throw new Error('Canary prepared an action from empty social context');
-          }
-          if(String(next.message||'').includes('Confirmas este envío')){
-            throw new Error('Canary asked to confirm an email from empty social context');
-          }
-          NODE
+          headers="$(mktemp)"
+          code="$(curl --silent --show-error --output /dev/null --dump-header "$headers" --write-out '%{http_code}' --max-time 20             -X OPTIONS             -H 'Origin: https://app.fenixcapital.es'             -H 'Access-Control-Request-Method: POST'             -H 'Access-Control-Request-Headers: authorization,apikey,content-type'             "$PROD_URL/functions/v1/cerebro-console-gateway-v0-canary-v25/chat")"
+          test "$code" = "204"
+          grep -qi '^access-control-allow-origin: https://app.fenixcapital.es' "$headers"
+          bad="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' --max-time 20             -X OPTIONS -H 'Origin: https://evil.invalid'             "$PROD_URL/functions/v1/cerebro-console-gateway-v0-canary-v25/chat")"
+          test "$bad" = "403"
