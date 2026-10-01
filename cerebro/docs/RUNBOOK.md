@@ -68,3 +68,13 @@ npm run generate -- --out ./.cerebro-generated
 ```
 
 Generated Factory output is disposable; canonical sources are registry seed + factory/runtime/multicompany/console code and their tests.
+
+## Explicit Learning V1 · safe preference changes
+
+- Una corrección conversacional de estilo puede aplicarse solo a la sesión sin escritura durable.
+- Persistencia durable solo con orden explícita del usuario; nunca inferir silenciosamente una preferencia permanente.
+- Toda preferencia durable debe conservar `actor_code`, `company_id`, categoría, key, versión, fuente explícita y lineage `supersedes`.
+- No almacenar audio, transcripciones completas, secretos, credenciales ni datos pesados en `cerebro_user_preferences`.
+- Una preferencia nunca amplía permisos ni sustituye HUMAN_REQUIRED, política, seguridad, firma, obligación legal o límite económico.
+- Rollback ordinario: revertir código/Gateway; no borrar la tabla ni el historial de preferencias. Borrado destructivo requiere snapshot/export, evaluación separada y autorización explícita.
+- Tras DDL de preferencias ejecutar advisors de seguridad y rendimiento; corregir avisos nuevos atribuibles al cambio antes de cerrar promoción.
