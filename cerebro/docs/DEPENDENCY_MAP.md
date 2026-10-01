@@ -110,3 +110,13 @@ Before wiring persistent `EVT-001`/`JOB-001` into `SharedRuntime`, require expli
 - El VAD no interpreta contenido, no llama al Gateway y no puede confirmar acciones.
 - La detección es local al navegador y no añade carga a Supabase ni servicios de pago.
 - `SpeechRecognition` concurrente durante TTS queda como fallback, no como mecanismo primario.
+
+
+## Human Dialogue + Knowledge Map + Clarification V1 · 2026-10-01
+
+- Flujo: `pregunta usuario → Gateway detecta dominio/confianza → respuesta directa, mapa de conocimiento o aclaración → respuesta escrita completa → digest/lead conversacional → speechSynthesis + VAD`.
+- Los mapas amplios de conocimiento son deterministas y están anclados a fuentes canónicas del dominio; no sustituyen la búsqueda detallada cuando la consulta es concreta.
+- Legal/Inmobiliario usa como anclas canónicas la Base Maestra Belén, el contrato Fiscal/Legal sensible y la ficha maestra de Herencias; se mantiene separación entre experiencia operativa y criterio jurídico/fiscal profesional.
+- La capa de aclaración se activa ante baja confianza y no tiene capacidad de ejecutar acciones.
+- Los saludos personalizados y lead-ins son presentación conversacional; no alteran memoria, permisos, identidad ni contrato de acción.
+- No se añade modelo, infraestructura ni suscripción de pago.
