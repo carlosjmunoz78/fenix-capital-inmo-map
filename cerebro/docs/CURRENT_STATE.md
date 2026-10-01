@@ -134,3 +134,23 @@ Evidence anchors are scoped to the change they prove; they are not intended to m
 ### PARCIAL
 - Falta aceptación auditiva humana de Spoken Summary V2 en navegador real antes de marcar este subflujo como `CONFIRMED_OPERATIONAL`.
 - El TTS sigue siendo browser-native y la síntesis semántica es determinista; no se declara voz neuronal expresiva.
+
+
+## Update 2026-10-01 · Verbal Barge-in V1 + Spoken Digest V3
+
+### HECHO
+- Feedback físico del propietario sobre V2: el resumen hablado seguía percibiéndose prácticamente igual y «para / stop / calla» no interrumpían la voz; solo funcionaba el control visible.
+- Se añade un reconocedor dedicado mientras `speechSynthesis` está hablando. Escucha únicamente comandos cortos de interrupción y, al detectarlos, cancela TTS y vuelve a escucha normal.
+- Comandos soportados: «para», «para ya», «CEREBRO para», «stop», «calla», «cállate», «silencio», «basta» y «detente».
+- El matching es exacto/normalizado para no confundir frases de negocio como «para Belén» con una orden de silencio.
+- Spoken Digest V3 reduce el habla ordinaria a una idea principal por defecto y añade resúmenes específicos para SEO, financiación, marketing, social, newsletter, autonomía, plataforma, Trading y multiempresa.
+- La respuesta escrita completa no cambia; permisos, propuestas y confirmaciones permanecen intactos.
+- PR #467: CEREBRO Session Context Regression Guard #134 SUCCESS y App Restoration Build Gate #381 SUCCESS.
+- PROD exacto `d8b89b4f1f541d5d7ebea1ab5fd5cd8446a4bc43`: Live Deploy #171 SUCCESS y Runtime Smoke #314 SUCCESS.
+- `gh-pages/PROD_SOURCE_SHA.txt` coincide exactamente con `d8b89b4f1f541d5d7ebea1ab5fd5cd8446a4bc43`.
+- Rollback frontend: `f670d65136b8a09630ab5183d23961fea098af24`.
+- Coste adicional recurrente: 0 €.
+
+### PARCIAL
+- El barge-in verbal necesita prueba física en el navegador real porque Web Speech puede variar según navegador/dispositivo y CI no puede demostrar que el micrófono oye al usuario durante TTS.
+- Spoken Digest V3 necesita nueva aceptación auditiva humana; V2 no se considera aceptada por el propietario.
