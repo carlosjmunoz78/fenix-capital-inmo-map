@@ -19,11 +19,12 @@ must(migration,'grant execute on function public.fenix_prod_cerebro_memory_obser
 must(migration,'grant execute on function public.fenix_prod_cerebro_memory_search_server','service-role search RPC');
 must(migration,'grant execute on function public.fenix_prod_cerebro_memory_forget_server','service-role forget RPC');
 
-must(gateway,'conversation_memory: "AUTO_BOUNDED_NON_SENSITIVE_USER_TURNS"','auto conversational-learning contract');
+must(gateway,'conversation_memory: "AUTO_BOUNDED_NON_SENSITIVE_STRUCTURED"','auto conversational-learning contract');
 must(gateway,'function memorySensitive','sensitivity filter');
 must(gateway,'function shouldObserveConversationMemory','bounded observation policy');
-must(gateway,'await observeConversationMemory(req,message)','continuous observation');
+must(gateway,'await observeConversationMemory(req,message,conversationContext)','continuous contextual observation');
 must(gateway,'fenix_prod_cerebro_memory_forget_server','forget binding');
+must(gateway,'fenix_prod_cerebro_memory_observe_v2_server','structured memory V2 binding');
 must(gateway,'MEMORY_SKIP_EXACT','noise filter');
 must(gateway,'Recall queries are lookups, not new knowledge','recall self-pollution guard');
 
