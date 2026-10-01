@@ -507,7 +507,7 @@ async function chatReply(req:Request,message:string,pendingRaw:unknown,readConte
     let socialContext=readContext?.kind==="social_schedule"&&socialContextHasPublication(readContext)?readContext:null;
     if(!socialContext){
       const recovered:any=await queryCerebroKnowledge(req,"La próxima publicación de Facebook",null);
-      socialContext=recovered?.read_context?.kind==="social_schedule"?recovered.read_context:null;
+      socialContext=recovered?.read_context?.kind==="social_schedule"&&socialContextHasPublication(recovered.read_context)?recovered.read_context:null;
     }
     if(!socialContext){
       return {status:"ACTION_NEEDS_SCOPE",intent:"social_share_email",executed:false,message:"No tengo una publicación social operativa identificada para compartir. Dime qué publicación quieres enviar o vuelve a pedirme la próxima de Facebook."};
