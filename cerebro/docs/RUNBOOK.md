@@ -189,3 +189,20 @@ Generated Factory output is disposable; canonical sources are registry seed + fa
 - Finalizar la conversación solo por orden explícita del usuario o por condición técnica fatal que impida continuar de forma segura, como pérdida real del permiso de micrófono.
 - Mantener el guard `scripts/verify-cerebro-unbounded-voice-session.mjs` en CI para evitar regresiones.
 - Si un navegador corta internamente el reconocimiento después de varios ciclos, tratarlo como incidente técnico/reintento, nunca como límite funcional de tres, cinco o N preguntas.
+
+
+## Natural Spoken Conversation V4 · aceptación
+
+- No introducir límites artificiales de turnos: la sesión sigue `escuchar → responder → hablar → volver a escuchar` hasta finalización explícita o fallo técnico fatal.
+- Mantener la respuesta escrita completa y usar el canal oral como formulación breve, natural y contextual.
+- Evitar repetir «te lo dejo por escrito/en pantalla» salvo que aporte información útil por enlaces, correos, listas o evidencia técnica.
+- Mantener el ritmo base del usuario; la calidez debe venir de formulación, entonación y pequeñas variaciones de pitch/rate, no de ralentizar globalmente.
+- Preferir voz femenina/natural `es-ES` solo cuando el dispositivo la ofrezca; nunca convertir esto en dependencia de pago.
+- Rollback frontend: `96eb6effb4ab4077ccdc6158858c5158e3be825e`.
+
+### Prueba física mínima V4
+1. Mantener una conversación de al menos 6-10 preguntas seguidas sin reiniciar la sesión.
+2. Comprobar que después de cada respuesta vuelve a escuchar automáticamente.
+3. Pedir respuestas de SEO, marketing y una consulta genérica y valorar si suenan habladas, no leídas.
+4. Confirmar que «para» sigue interrumpiendo la locución.
+5. Confirmar que el ritmo general no se ha ralentizado.
