@@ -115,3 +115,22 @@ Evidence anchors are scoped to the change they prove; they are not intended to m
 - Spoken Summary V1 requiere ahora aceptación auditiva humana para confirmar que el resumen se siente natural en el navegador real y no omite contexto útil.
 - El flujo físico de «olvida lo que te dije sobre…» de la memoria conversacional no se considera confirmado hasta probarlo expresamente.
 - La prosodia y el resumen hablado siguen siendo deterministas/browser-native; no se declara TTS neuronal expresivo.
+
+
+## Update 2026-10-01 · Spoken Summary V2
+
+### HECHO
+- Se sustituye el recorte simple de las primeras frases por selección hablada contextual basada en `status`, `intent`, `action` y `read_context`.
+- Hay tratamiento específico para selección de contactos, propuesta y resultado de correo, próxima publicación social, memoria conversacional y salud de CEREBRO.
+- Listas se convierten en lenguaje conversacional; enlaces, correos, hashes largos y ruido de CI/PR/SHA quedan en pantalla y no se verbalizan literalmente.
+- Los fallos de una acción confirmada conservan el aviso crítico audible y las propuestas mantienen la pregunta de confirmación.
+- Se añadió corpus de comportamiento real del transformador hablado, además de assertions estáticas.
+- PR #465: CEREBRO Session Context Regression Guard #131 SUCCESS y App Restoration Build Gate #379 SUCCESS; merge `20280fa5f3afc83723db19ca0fcd063a364d164f`.
+- PROD exacto `f670d65136b8a09630ab5183d23961fea098af24`: Live Deploy #168 SUCCESS y Runtime Smoke #311 SUCCESS.
+- `gh-pages/PROD_SOURCE_SHA.txt` verificado exactamente como `f670d65136b8a09630ab5183d23961fea098af24`.
+- Rollback frontend preservado: `b64050f0320f31e1685fa028744e73e5920c8655`.
+- Coste adicional recurrente: 0 €.
+
+### PARCIAL
+- Falta aceptación auditiva humana de Spoken Summary V2 en navegador real antes de marcar este subflujo como `CONFIRMED_OPERATIONAL`.
+- El TTS sigue siendo browser-native y la síntesis semántica es determinista; no se declara voz neuronal expresiva.
