@@ -14,3 +14,17 @@
 - Adaptador Notion de conocimiento general solo lectura para Dirección, con evidencia/fuentes y fail-closed.
 - Entrada canaria móvil `/cerebro/` publicada desde artefacto probado por CI.
 - Estado: lectura/conversación/propuesta-confirmación HECHO; ejecución de acciones confirmadas PARCIAL y sujeta a bindings E2E por motor.
+
+
+## 2026-10-01 · VOICE-001 V1.1 + Explicit Learning V1
+
+- VOICE-001 mejorado con hasta tres alternativas de reconocimiento, unión de segmentos y hints contextuales cuando el navegador los soporta.
+- Añadido control visible `Parar respuesta y hablar`; el barge-in puramente verbal diciendo «para» sigue pendiente.
+- Perfil hablado por defecto: cercano, cariñoso, natural y profesional; velocidad 0.96, pitch 1.04 y respuesta hablada concisa.
+- Las correcciones compatibles se aplican en sesión sin escribir memoria durable.
+- `guárdalo`, `recuérdalo` y órdenes equivalentes permiten persistencia explícita y auditable.
+- Nueva tabla `fenix_prod.cerebro_user_preferences`, versionada y actor/company scoped, con acceso directo anon/authenticated denegado.
+- Gateway PROD actualizado a V25 con `EXPLICIT_ONLY_V1`; SHA de artefacto `12a0756ea113f8e4ba7c755e57a61704bac86417f553466c9ab6fd321d9d02b2`.
+- Migración exacta validada en PREPROD con rollback completo antes de PROD.
+- El advisor detectó el FK `supersedes` sin índice; se corrigió con índice dedicado y el aviso nuevo desapareció.
+- Estado: backend y almacenamiento HECHO; frontend validado y en promoción; aceptación física de persistencia entre sesiones PENDIENTE.
