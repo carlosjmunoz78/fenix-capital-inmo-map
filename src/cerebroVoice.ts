@@ -113,3 +113,53 @@ export function speechText(text:string,maxChars=700){
  const end=boundary>=Math.floor(maxChars*0.55)?boundary+1:maxChars;
  return `${clipped.slice(0,end).trim()} Tengo más detalle en pantalla.`;
 }
+
+export type CerebroSpeechSegment={
+ text:string;
+ rate:number;
+ pitch:number;
+};
+
+function clampVoice(value:number,min:number,max:number){
+ return Math.min(max,Math.max(min,value));
+}
+
+export function speechSegments(text:string,maxChars=700,preferences:Record<string,string>={}):CerebroSpeechSegment[]{
+ const spoken=speechText(text,maxChars);
+ if(!spoken)return [];
+ const base=voiceSpeechProfile(preferences);
+ const parts=(spoken.match(/[^.!?;:]+[.!?;:]?/g)||[spoken])
+  .map(part=>part.trim())
+  .filter(Boolean);
+ return parts.map((part,index)=>{
+  const normalized=normalizeVoiceConfirmation(part);
+  let rate=base.rate;
+  let pitch=base.pitch;
+
+  // Keep the user's chosen overall rhythm; vary only locally for natural prosody.
+  if(/^(vale|perfecto|bien|entendido|confirmado|hecho)\b/.test(normalized)&&part.length<140){
+   rate+=0.035;
+   pitch+=0.018;
+  }
+  if(part.endsWith('?')){
+   rate+=0.012;
+   pitch+=0.045;
+  }
+  if(/\b(no voy|no puedo|riesgo|seguridad|confirmas|firma|pago|bloqueado|error|human_required|atencion|atención)\b/.test(normalized)){
+   rate-=0.035;
+   pitch-=0.018;
+  }
+  if(/^\s*(?:\d+[.)]|[-•])/.test(part)||/\b(primero|segundo|tercero|paso \d+)\b/.test(normalized)){
+   rate-=0.015;
+  }
+  if(part.length>180)rate-=0.012;
+  if(index===parts.length-1&&!part.endsWith('?'))pitch-=0.008;
+
+  return{
+   text:part,
+   rate:clampVoice(rate,0.82,1.18),
+   pitch:clampVoice(pitch,0.88,1.16)
+  };
+ });
+}
+

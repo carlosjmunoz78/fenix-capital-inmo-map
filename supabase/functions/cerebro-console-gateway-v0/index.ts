@@ -31,7 +31,9 @@ const CONTRACT = {
   chat_mode: "OWNER_DECISION_BY_EXCEPTION_V1",
   confirmation_mode: "EXACT_PROPOSAL_SINGLE_EXPLICIT_YES",
   preference_writes: "EXPLICIT_USER_ONLY",
-  durable_learning_mode: "EXPLICIT_ONLY_V1",
+  durable_learning_mode: "EXPLICIT_PREFERENCES_PLUS_CONVERSATIONAL_MEMORY_V1",
+  conversation_memory: "AUTO_BOUNDED_NON_SENSITIVE_USER_TURNS",
+  internal_learning_writes: "SERVICE_ROLE_BOUNDED",
 };
 
 type LearningCandidate = {
@@ -333,6 +335,99 @@ async function deactivatePreference(req:Request,key:string){
   return {ok:true,data};
 }
 
+const MEMORY_SKIP_EXACT=new Set([
+  "ok","vale","si","sí","no","procede","continua","continúa","dale","perfecto","gracias",
+  "adelante","confirmo","hazlo","activalo","actívalo","cancelar","cancela"
+]);
+
+function conversationMemoryKind(message:string){
+  const text=cleanText(message);
+  if(/(corrige|correccion|corrección|no quiero|prefiero|a partir de ahora)/.test(text))return "CORRECTION";
+  if(/(he decidido|hemos decidido|queda decidido|decidimos|vamos a hacer|quiero que hagamos)/.test(text))return "DECISION";
+  if(/(tenemos|usamos|trabajamos|nuestro|nuestra|son dos|es el|es la|debe ser|tiene que ser)/.test(text))return "FACT";
+  return "USER_TURN";
+}
+
+function memorySensitive(message:string){
+  const raw=message.trim();
+  const low=normalize(raw);
+  if(/\b(password|contraseña|contrasena|access[_ -]?token|refresh[_ -]?token|service[_ -]?role|api[_ -]?key|secret|secreto|jwt|private[_ -]?key|clave privada)\b/.test(low))return true;
+  if(/\b(?:dni|nie|iban|cuenta bancaria|numero de tarjeta|número de tarjeta|cvv|pin)\b/.test(low))return true;
+  if(/\b(?:diagnostico|diagnóstico|medicacion|medicación|historial medico|historial médico)\b/.test(low))return true;
+  if(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i.test(raw))return true;
+  if(/\bES\d{22}\b/i.test(raw))return true;
+  if(/\b[XYZ]?\d{7,8}[A-Z]\b/i.test(raw))return true;
+  if(/\b(?:\+34[ .-]?)?[6789](?:[ .-]?\d){8}\b/.test(raw))return true;
+  if(/\b(?:\d[ -]?){13,19}\b/.test(raw))return true;
+  if(/eyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}/.test(raw))return true;
+  return false;
+}
+
+function shouldObserveConversationMemory(message:string){
+  const text=message.trim();
+  if(text.length<10||text.length>2000)return false;
+  if(MEMORY_SKIP_EXACT.has(cleanText(text)))return false;
+  if(memorySensitive(text))return false;
+  if(/^(olvida|borra|elimina)\b/i.test(text))return false;
+  // Recall queries are lookups, not new knowledge; do not let the current question pollute its own search.
+  if(/\b(recuerdas|te acuerdas|que te dije|qué te dije|que te comente|qué te comenté|conversacion anterior|conversación anterior)\b/i.test(text))return false;
+  return true;
+}
+
+async function observeConversationMemory(req:Request,message:string){
+  if(!shouldObserveConversationMemory(message))return {ok:true,stored:false,reason:"SKIPPED"};
+  const U=Deno.env.get("SUPABASE_URL")??"";
+  const S=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")??"";
+  if(!U||!S)return {ok:false,stored:false,error:"MEMORY_CONFIG_MISSING"};
+  const authz=await authorizedOwner(req);
+  if(!authz.ok)return {ok:false,stored:false,error:"OWNER_REQUIRED"};
+  const svc=createClient(U,S,{auth:{persistSession:false,autoRefreshToken:false}});
+  const content=message.trim();
+  const hash=await sha256([authz.actor,"fenix","CONSOLE-001","PROD","v1",content].join("|"));
+  const {data,error}=await svc.rpc("fenix_prod_cerebro_memory_observe_server",{
+    p_actor_code:authz.actor,
+    p_company_id:"fenix",
+    p_engine_id:"CONSOLE-001",
+    p_environment:"PROD",
+    p_version:"v1",
+    p_memory_kind:conversationMemoryKind(content),
+    p_content_text:content,
+    p_content_hash:hash
+  });
+  if(error||data?.ok!==true)return {ok:false,stored:false,error:error?.message??data?.error??"MEMORY_WRITE_FAILED"};
+  return {ok:true,stored:true,item:data.item};
+}
+
+async function forgetConversationMemory(req:Request,query:string){
+  const U=Deno.env.get("SUPABASE_URL")??"";
+  const S=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")??"";
+  if(!U||!S)return {ok:false,error:"MEMORY_CONFIG_MISSING"};
+  const authz=await authorizedOwner(req);
+  if(!authz.ok)return {ok:false,error:"OWNER_REQUIRED"};
+  const svc=createClient(U,S,{auth:{persistSession:false,autoRefreshToken:false}});
+  const {data,error}=await svc.rpc("fenix_prod_cerebro_memory_forget_server",{
+    p_actor_code:authz.actor,p_company_id:"fenix",p_query:query
+  });
+  if(error||data?.ok!==true)return {ok:false,error:error?.message??data?.error??"MEMORY_FORGET_FAILED"};
+  return {ok:true,deactivated:Number(data.deactivated??0)};
+}
+
+async function maybeHandleConversationMemoryControl(req:Request,message:string){
+  const match=message.trim().match(/^(?:olvida|borra|elimina)\s+(?:lo que te dije sobre\s+|lo de\s+|mis conversaciones sobre\s+)(.{2,500})$/iu);
+  if(!match)return null;
+  const topic=match[1].trim();
+  const result=await forgetConversationMemory(req,topic);
+  if(!result.ok)return {status:"ERROR",intent:"conversation_memory_forget",executed:false,reason:result.error,message:"No he podido actualizar la memoria conversacional. No voy a fingir que se ha borrado."};
+  return {
+    status:"MEMORY_FORGOTTEN",
+    intent:"conversation_memory_forget",
+    executed:true,
+    message:result.deactivated>0
+      ?`He desactivado ${result.deactivated} recuerdo(s) conversacionales relacionados con «${topic}».`
+      :`No había recuerdos conversacionales activos que coincidieran con «${topic}».`
+  };
+}
+
 async function maybeHandleLearning(req:Request,message:string,learningRaw:unknown){
   const text=cleanText(message);
   const supplied=validateLearningCandidate(learningRaw);
@@ -343,7 +438,7 @@ async function maybeHandleLearning(req:Request,message:string,learningRaw:unknow
 
   if(forget){
     const target=parsed??supplied;
-    if(!target)return {status:"PREFERENCE_NEEDS_SCOPE",intent:"preference_forget",executed:false,message:"Dime qué preferencia quieres que deje de recordar.",learning_candidate:supplied};
+    if(!target)return null;
     const dropped=await deactivatePreference(req,target.preference_key);
     if(!dropped.ok)return {status:"ERROR",intent:"preference_forget",executed:false,reason:dropped.error,message:"No he podido actualizar esa preferencia. No voy a fingir que la he olvidado.",learning_candidate:supplied};
     const current=await loadPreferences(req);
@@ -490,6 +585,12 @@ async function chatReply(req:Request,message:string,pendingRaw:unknown,readConte
   const text=cleanText(message);
   const readContext=(readContextRaw&&typeof readContextRaw==="object"&&!Array.isArray(readContextRaw))?readContextRaw as CerebroReadContext:null;
   if(!text)return {status:"INVALID",message:"Escribe una consulta.",executed:false};
+
+  const memoryControl=await maybeHandleConversationMemoryControl(req,message);
+  if(memoryControl)return memoryControl;
+
+  // Conversational learning is additive and non-blocking: a memory write failure must not break chat.
+  await observeConversationMemory(req,message).catch(()=>({ok:false,stored:false,error:"MEMORY_WRITE_FAILED"}));
 
   const learning=await maybeHandleLearning(req,message,learningRaw);
   if(learning)return learning;
@@ -835,7 +936,7 @@ export default {
     if(req.method!=="GET")return json(req,405,{status:"CLOSED",reason:"ROUTE_NOT_AVAILABLE"});
 
     if(suffix==="health")return json(req,200,{
-      status:"ok",service:"cerebro-console-gateway-v0",environment:"LAB",version:"0.6.0-explicit-learning-v1",
+      status:"ok",service:"cerebro-console-gateway-v0",environment:"LAB",version:"0.7.0-conversational-learning-v1",
       authenticated_transport:true,direct_model_access:false,prod_execution_enabled:false,live_writes:false,
       chat_available:true,chat_mode:"OWNER_DECISION_BY_EXCEPTION_V1",additional_cost_target_eur:0
     });
