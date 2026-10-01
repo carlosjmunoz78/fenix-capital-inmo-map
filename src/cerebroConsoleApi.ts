@@ -26,7 +26,7 @@ export type CerebroPendingAction={
   proposal_token:string;
 };
 
-export type CerebroReadContext={kind:"social_schedule";network:string;content_key?:string;external_post_id?:string|null;scheduled_at?:string;public_media_url?:string|null;media_urls?:string[]};
+export type CerebroReadContext={kind:"social_schedule";network:string;content_key?:string;external_post_id?:string|null;scheduled_at?:string;caption?:string;public_media_url?:string|null;media_urls?:string[]};
 
 export type CerebroConsoleChatResponse={
   status:string;
