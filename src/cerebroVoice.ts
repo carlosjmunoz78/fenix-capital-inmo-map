@@ -1,5 +1,6 @@
 export const VOICE_CONFIRMATION_CONFIDENCE_MIN=0.85;
 export const VOICE_CONFIRMATION_PHRASES=new Set(['si','si adelante','adelante','confirmo','activalo','activarlo','hazlo','procede']);
+export const VOICE_INTERRUPT_PHRASES=new Set(['para','para ya','cerebro para','stop','cerebro stop','calla','callate','cállate','silencio','basta','detente','detenete','cerebro calla','cerebro callate','cerebro cállate']);
 export const CEREBRO_VOICE_CONTEXT_HINTS=[
  'CEREBRO','Fénix','Fénix Capital','Fénix Inmobiliaria','Belén','SEO','SEO local',
  'Supabase','Notion','Brevo','Buffer','Facebook','Instagram','LinkedIn',
@@ -66,6 +67,19 @@ export function applyVoiceContextHints(recognition:CerebroSpeechRecognition){
  }catch{return false}
 }
 
+export function applyVoiceInterruptHints(recognition:CerebroSpeechRecognition){
+ if(typeof window==='undefined')return false;
+ const target=voiceWindow();
+ const PhraseCtor=target.SpeechRecognitionPhrase;
+ if(!PhraseCtor||!('phrases' in recognition))return false;
+ try{
+  (recognition as CerebroSpeechRecognition&{phrases:unknown[]}).phrases=[
+   'para','stop','calla','cállate','silencio','basta','detente','CEREBRO para'
+  ].map(phrase=>new PhraseCtor(phrase,10));
+  return true;
+ }catch{return false}
+}
+
 export function speechSynthesisSupported(){
  return typeof window!=='undefined'&&'speechSynthesis' in window&&typeof SpeechSynthesisUtterance!=='undefined';
 }
@@ -84,6 +98,16 @@ export function normalizeVoiceConfirmation(text:string){
   .replace(/[úùüû]/g,'u')
   .replace(/[¿?¡!.,;:]/g,'')
   .replace(/\s+/g,' ');
+}
+
+export function voiceInterruptRequested(text:string){
+ const normalized=normalizeVoiceConfirmation(text);
+ if(VOICE_INTERRUPT_PHRASES.has(normalized))return true;
+ const stripped=normalized
+  .replace(/^(?:oye\s+)?cerebro\s+/,'')
+  .replace(/\s+por favor$/,'')
+  .trim();
+ return VOICE_INTERRUPT_PHRASES.has(stripped);
 }
 
 export function voiceNeedsManualConfirmation(text:string,confidence:number|null,hasPendingAction:boolean){
@@ -272,6 +296,47 @@ function socialScheduleSummary(meta:CerebroSpokenMeta){
  return `La próxima publicación de ${network}${whenPart}.${keyPart} Te dejo el texto, la imagen y el resto de detalles por escrito.`;
 }
 
+function intentDigestSummary(intent:string,raw:string,units:SpokenUnit[]){
+ switch(intent){
+  case 'finance_documentation':
+   return 'Para estudiar una hipoteca, primero completamos el preanálisis y después pedimos la documentación que confirme los datos. Te dejo la lista exacta por escrito.';
+  case 'seo_status':{
+   const priority=raw.match(/Pendiente prioritario:\s*(?:\n)?\s*(?:\d+[.)]\s*)?([^\n]+)/i)?.[1]?.trim();
+   return priority
+    ?`En SEO, la prioridad ahora es ${clipNatural(priority,170)}. El resto del estado y los gates te los dejo por escrito.`
+    :'Te he resumido el estado de SEO. Las prioridades y gates exactos quedan por escrito.';
+  }
+  case 'marketing_strategy':
+   return 'Marketing prioriza crecimiento orgánico y reutilizar activos antes de aumentar gasto. Te dejo por escrito los canales y métricas concretas.';
+  case 'social_status':
+   return 'Ahora mismo, el alcance social verificado se centra en Facebook, Instagram y LinkedIn estático mediante CEREBRO y Buffer. Te dejo por escrito los límites del resto de canales.';
+  case 'newsletter_status':
+   return 'La newsletter usa Brevo Free. Las listas principales están separadas entre particulares e inmobiliarias, y las campañas verificadas siguen en borrador. Te dejo los identificadores por escrito.';
+  case 'autonomy_status':
+   return 'CEREBRO puede consultar y preparar propuestas sin molestarte. Cuando una acción necesita decisión, te presenta el alcance exacto y pide una sola confirmación. Las excepciones humanas quedan por escrito.';
+  case 'platform_architecture':
+   return 'Supabase se reserva para el núcleo transaccional. Los trabajos pesados, largos o auxiliares deben ir fuera para no cargarlo. Te dejo el reparto completo por escrito.';
+  case 'trading_isolation':
+   return 'Trading LAB debe seguir completamente aislado de producción, con credenciales, recursos y protecciones propias. Te dejo los controles concretos por escrito.';
+  case 'multiempresa_onboarding':
+   return 'Una empresa nueva pasa desde registro y análisis digital hasta CRM, App, automatizaciones, training y supervisor antes de producción. Te dejo el flujo completo y sus gates por escrito.';
+  case 'social_schedule_media':
+   return /no devuelve una imagen|no contiene/i.test(raw)
+    ?'Tengo localizada la publicación, pero no hay una imagen pública verificada asociada. No voy a inventarla.'
+    :'Sí. Tengo la imagen de esa publicación y te la dejo en pantalla.';
+  case 'social_schedule_detail':
+   return units.length
+    ?`Sí. Tengo el texto de la publicación. Empieza así: ${clipNatural(units[0].text,150)} Te lo dejo completo por escrito.`
+    :'Tengo el texto de la publicación y te lo dejo completo por escrito.';
+  case 'social_schedule':
+   return socialScheduleSummary({read_context:undefined})||'Tengo localizada la próxima publicación. Te dejo los datos completos por escrito.';
+  case 'help':
+   return 'Puedes preguntarme por el negocio o pedirme acciones. Si una acción requiere tu decisión, te mostraré exactamente qué voy a hacer antes de ejecutarla.';
+  default:
+   return '';
+ }
+}
+
 function memoryRecallSummary(units:SpokenUnit[]){
  const remembered=units
   .map(unit=>unit.text.replace(/\s*·\s*\d{1,2}\s+\p{L}+\s+\d{4}\s*$/u,'').trim())
@@ -304,16 +369,18 @@ function genericSummary(raw:string,units:SpokenUnit[],maxChars:number){
   .sort((a,b)=>b.score-a.score||a.index-b.index);
 
  const picked:Array<{unit:SpokenUnit;index:number}>=[];
+ const listLike=pool.filter(unit=>unit.bullet).length>=2;
+ const targetCount=listLike?3:1;
  let total=0;
  for(const candidate of ranked){
-  const text=clipNatural(candidate.unit.text,190);
+  const text=clipNatural(candidate.unit.text,listLike?150:210);
   if(!text)continue;
   if(picked.some(item=>normalizeVoiceConfirmation(item.unit.text)===normalizeVoiceConfirmation(text)))continue;
   const extra=(picked.length?1:0)+text.length;
   if(picked.length&&total+extra>maxChars)continue;
   picked.push({unit:{...candidate.unit,text},index:candidate.index});
   total+=extra;
-  if(picked.length>=3)break;
+  if(picked.length>=targetCount)break;
  }
  picked.sort((a,b)=>a.index-b.index);
  const chosen=picked.map(item=>item.unit);
@@ -357,6 +424,8 @@ export function spokenResponseText(text:string,maxChars=440,mode:CerebroSpokenMo
  if(intent==='social_schedule_complete'&&meta.read_context)return socialScheduleSummary(meta);
  if(intent==='conversation_memory')return memoryRecallSummary(units);
  if(intent==='health')return 'CEREBRO está conectado y disponible. Te dejo el detalle técnico por escrito.';
+ const intentDigest=intentDigestSummary(intent,raw,units);
+ if(intentDigest)return intentDigest;
 
  if(status==='ACTION_CONFIRMED'&&meta.executed===false){
   return genericSummary(raw,units,Math.max(maxChars,520));
