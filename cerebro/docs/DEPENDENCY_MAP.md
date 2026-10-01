@@ -93,3 +93,12 @@ Before wiring persistent `EVT-001`/`JOB-001` into `SharedRuntime`, require expli
 - No se añade un modelo ni una API de voz: la mejora reutiliza metadatos de la respuesta y reglas deterministas.
 - `action` y `read_context` solo informan la presentación hablada; no alteran permisos, confirmaciones ni ejecución.
 - El resumen hablado es una vista derivada. Nunca sustituye el mensaje escrito como evidencia completa.
+
+
+## Verbal Barge-in V1 + Spoken Digest V3 · 2026-10-01
+
+- Flujo normal: `microphone → SpeechRecognition → Gateway → written response → spoken digest → speechSynthesis`.
+- Mientras TTS habla, un listener de voz acotado detecta únicamente órdenes de interrupción; al detectarlas cancela TTS y vuelve a la escucha conversacional normal.
+- El listener de interrupción no envía mensajes al Gateway ni puede confirmar acciones.
+- Spoken Digest V3 sigue siendo una vista derivada determinista; no sustituye texto, evidencia, memoria ni contratos de acción.
+- No se añade infraestructura, modelo ni servicio de pago.
