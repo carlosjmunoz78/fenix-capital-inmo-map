@@ -32,7 +32,7 @@ must(shell,'prepareVoiceActivityBargeIn','local microphone VAD barge-in');
 must(shell,'echoCancellation:true','barge-in echo cancellation');
 must(shell,'noiseSuppression:true','barge-in noise suppression');
 must(shell,'autoGainControl:true','barge-in automatic gain control');
-must(shell,'scheduleInterruptListening(180)','barge-in listener starts while TTS speaks');
+must(shell,'if(!vadReady)scheduleInterruptListening(120)','SpeechRecognition barge-in remains fallback only');
 must(shell,'voiceInterruptRequested(transcript)','spoken stop command cancels TTS');
 must(shell,'stopInterruptRecognition()','barge-in listener cleanup');
 must(shell,"voicePreferencesRef.current.response_length==='concise'?420:560",'spoken summary budget');
