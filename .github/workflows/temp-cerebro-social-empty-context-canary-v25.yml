@@ -37,6 +37,8 @@ jobs:
           set -euo pipefail
           headers="$(mktemp)"
           code="$(curl --silent --show-error --output /dev/null --dump-header "$headers" --write-out '%{http_code}' --max-time 20             -X OPTIONS             -H 'Origin: https://app.fenixcapital.es'             -H 'Access-Control-Request-Method: POST'             -H 'Access-Control-Request-Headers: authorization,apikey,content-type'             "$PROD_URL/functions/v1/cerebro-console-gateway-v0-canary-v25/chat")"
+          echo "CANONICAL_ORIGIN_HTTP_STATUS=$code"
+          grep -i '^access-control-' "$headers" || true
           test "$code" = "204"
           grep -qi '^access-control-allow-origin: https://app.fenixcapital.es' "$headers"
           bad="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' --max-time 20             -X OPTIONS -H 'Origin: https://evil.invalid'             "$PROD_URL/functions/v1/cerebro-console-gateway-v0-canary-v25/chat")"
