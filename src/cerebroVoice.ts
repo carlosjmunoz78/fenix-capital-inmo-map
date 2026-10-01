@@ -89,6 +89,24 @@ export function spanishVoices(){
  return window.speechSynthesis.getVoices().filter(voice=>String(voice.lang||'').toLowerCase().startsWith('es'));
 }
 
+export function preferredSpanishVoice(voices:SpeechSynthesisVoice[]){
+ if(!voices.length)return undefined;
+ const feminineHints=['elvira','helena','laura','lucia','lucía','monica','mónica','paulina','sabina','sofia','sofía','carmen','marisol','paloma'];
+ return [...voices]
+  .map((voice,index)=>{
+   const name=String(voice.name||'').toLocaleLowerCase('es-ES');
+   const lang=String(voice.lang||'').toLocaleLowerCase('es-ES');
+   let score=0;
+   if(lang==='es-es')score+=6;
+   else if(lang.startsWith('es'))score+=2;
+   if(feminineHints.some(hint=>name.includes(hint)))score+=5;
+   if(/natural|premium|enhanced|online/.test(name))score+=2;
+   if(voice.localService)score+=0.25;
+   return{voice,index,score};
+  })
+  .sort((a,b)=>b.score-a.score||a.index-b.index)[0]?.voice;
+}
+
 export function normalizeVoiceConfirmation(text:string){
  return text.trim().toLocaleLowerCase('es-ES')
   .replace(/[áàäâ]/g,'a')
@@ -155,6 +173,7 @@ export type CerebroSpokenMeta={
  status?:string;
  intent?:string;
  executed?:boolean;
+ source_question?:string;
  action?:{
   action_type?:string;
   summary?:string;
@@ -264,7 +283,7 @@ function contactSelectionSummary(raw:string,meta:CerebroSpokenMeta){
   if(Array.isArray(parsed))count=parsed.length;
  }catch{/* generic wording */}
  const howMany=count>1?`${count} opciones`:count===1?'una opción':'varias opciones';
- return `He encontrado ${howMany} para ${contact}. Te las dejo por escrito para que elijas.`;
+ return `He encontrado ${howMany} para ${contact}. Te las dejo en pantalla y eliges cuál quieres usar.`;
 }
 
 function emailProposalSummary(meta:CerebroSpokenMeta){
@@ -272,14 +291,14 @@ function emailProposalSummary(meta:CerebroSpokenMeta){
  const name=String(scope.contact_name||'el destinatario').trim();
  const subject=String(scope.subject||'').trim();
  const subjectPart=subject?` con el asunto «${clipNatural(subject,90)}»`:'';
- return `He preparado el correo para ${name}${subjectPart}. Te dejo el texto completo por escrito para que lo revises. ¿Confirmas el envío?`;
+ return `Vale, tengo preparado el correo para ${name}${subjectPart}. El texto completo está en pantalla para que lo veas. ¿Confirmas el envío?`;
 }
 
 function emailAcceptedSummary(raw:string){
  const name=raw.match(/Email enviado a\s+(.+?)(?:\s*<|\.|$)/i)?.[1]?.trim();
  return name
-  ?`Hecho. El correo se ha enviado a ${name}. Te dejo la evidencia por escrito.`
-  :'Hecho. El correo se ha enviado correctamente. Te dejo la evidencia por escrito.';
+  ?`Hecho, ya está enviado a ${name}. La evidencia queda en pantalla.`
+  :'Hecho, el correo ya está enviado. La evidencia queda en pantalla.';
 }
 
 function socialScheduleSummary(meta:CerebroSpokenMeta){
@@ -304,45 +323,45 @@ function socialScheduleSummary(meta:CerebroSpokenMeta){
  const key=String(ctx.content_key||'').trim();
  const keyPart=key?` Es la publicación ${clipNatural(key,80)}.`:'';
  const whenPart=when?` está programada para ${when}`:' está localizada';
- return `La próxima publicación de ${network}${whenPart}.${keyPart} Te dejo el texto, la imagen y el resto de detalles por escrito.`;
+ return `La próxima publicación de ${network}${whenPart}.${keyPart} El texto, la imagen y los detalles quedan en pantalla.`;
 }
 
 function intentDigestSummary(intent:string,raw:string,units:SpokenUnit[]){
  switch(intent){
   case 'finance_documentation':
-   return 'Para estudiar una hipoteca, primero completamos el preanálisis y después pedimos la documentación que confirme los datos. Te dejo la lista exacta por escrito.';
+   return 'Vale. Para una hipoteca hacemos primero el preanálisis y después pedimos solo la documentación necesaria para comprobar los datos.';
   case 'seo_status':{
    const priority=raw.match(/Pendiente prioritario:\s*(?:\n)?\s*(?:\d+[.)]\s*)?([^\n]+)/i)?.[1]?.trim();
    return priority
-    ?`En SEO, la prioridad ahora es ${clipNatural(priority,170)}. El resto del estado y los gates te los dejo por escrito.`
-    :'Te he resumido el estado de SEO. Las prioridades y gates exactos quedan por escrito.';
+    ?`Mira, en SEO ahora mismo lo más importante es ${clipNatural(priority,165)}. El resto del estado lo tienes en pantalla.`
+    :'Mira, tengo el estado de SEO. Las prioridades y lo que queda pendiente están en pantalla.';
   }
   case 'marketing_strategy':
-   return 'Marketing prioriza crecimiento orgánico y reutilizar activos antes de aumentar gasto. Te dejo por escrito los canales y métricas concretas.';
+   return 'Ahora mismo la prioridad es sacar más partido a lo orgánico y a lo que ya tenemos antes de meter más gasto.';
   case 'social_status':
-   return 'Ahora mismo, el alcance social verificado se centra en Facebook, Instagram y LinkedIn estático mediante CEREBRO y Buffer. Te dejo por escrito los límites del resto de canales.';
+   return 'Ahora mismo tenemos bien cubiertos Facebook, Instagram y LinkedIn estático. El resto todavía tiene límites que no voy a darte por resueltos.';
   case 'newsletter_status':
-   return 'La newsletter usa Brevo Free. Las listas principales están separadas entre particulares e inmobiliarias, y las campañas verificadas siguen en borrador. Te dejo los identificadores por escrito.';
+   return 'Las newsletters están separadas entre particulares e inmobiliarias. Seguimos con Brevo Free y las campañas verificadas todavía están en borrador.';
   case 'autonomy_status':
-   return 'CEREBRO puede consultar y preparar propuestas sin molestarte. Cuando una acción necesita decisión, te presenta el alcance exacto y pide una sola confirmación. Las excepciones humanas quedan por escrito.';
+   return 'La idea es que yo resuelva lo ordinario y solo te pregunte cuando de verdad haga falta una decisión humana.';
   case 'platform_architecture':
-   return 'Supabase se reserva para el núcleo transaccional. Los trabajos pesados, largos o auxiliares deben ir fuera para no cargarlo. Te dejo el reparto completo por escrito.';
+   return 'Supabase se queda para el núcleo transaccional. Los trabajos pesados, largos o auxiliares van fuera para no cargarlo.';
   case 'trading_isolation':
-   return 'Trading LAB debe seguir completamente aislado de producción, con credenciales, recursos y protecciones propias. Te dejo los controles concretos por escrito.';
+   return 'Trading LAB sigue completamente separado de producción, con sus propias credenciales, recursos y protecciones.';
   case 'multiempresa_onboarding':
-   return 'Una empresa nueva pasa desde registro y análisis digital hasta CRM, App, automatizaciones, training y supervisor antes de producción. Te dejo el flujo completo y sus gates por escrito.';
+   return 'Una empresa nueva entra por registro y análisis, pasa por conocimiento, CRM, App, automatizaciones y training, y no llega a producción hasta superar sus controles.';
   case 'social_schedule_media':
    return /no devuelve una imagen|no contiene/i.test(raw)
     ?'Tengo localizada la publicación, pero no hay una imagen pública verificada asociada. No voy a inventarla.'
-    :'Sí. Tengo la imagen de esa publicación y te la dejo en pantalla.';
+    :'Sí, tengo la imagen de esa publicación. Te la dejo en pantalla.';
   case 'social_schedule_detail':
    return units.length
-    ?`Sí. Tengo el texto de la publicación. Empieza así: ${clipNatural(units[0].text,150)} Te lo dejo completo por escrito.`
-    :'Tengo el texto de la publicación y te lo dejo completo por escrito.';
+    ?`Sí, tengo el texto. Empieza así: ${clipNatural(units[0].text,145)}. El resto lo tienes en pantalla.`
+    :'Sí, tengo el texto de la publicación. Lo tienes completo en pantalla.';
   case 'social_schedule':
-   return socialScheduleSummary({read_context:undefined})||'Tengo localizada la próxima publicación. Te dejo los datos completos por escrito.';
+   return 'Sí, tengo localizada la próxima publicación. Los datos completos están en pantalla.';
   case 'help':
-   return 'Puedes preguntarme por el negocio o pedirme acciones. Si una acción requiere tu decisión, te mostraré exactamente qué voy a hacer antes de ejecutarla.';
+   return 'Pregúntame lo que necesites o dime qué quieres que haga. Si hace falta tu decisión para una acción real, te lo pediré justo en ese momento.';
   default:
    return '';
  }
@@ -354,8 +373,8 @@ function memoryRecallSummary(units:SpokenUnit[]){
   .filter(text=>!/^(en tu memoria conversacional|memoria conversacional relevante)/i.test(text))
   .filter(Boolean)
   .slice(0,2);
- if(!remembered.length)return 'Sí. Tengo recuerdos relacionados y te los dejo por escrito.';
- return `Sí. Recuerdo ${naturalJoin(remembered.map(item=>item.replace(/[.]+$/,'')))}.`;
+ if(!remembered.length)return 'Sí, tengo recuerdos relacionados. Te los dejo en pantalla.';
+ return `Sí, me acuerdo: ${naturalJoin(remembered.map(item=>item.replace(/[.]+$/,'')))}.`;
 }
 
 function scoreUnit(unit:SpokenUnit,index:number){
@@ -370,7 +389,21 @@ function scoreUnit(unit:SpokenUnit,index:number){
  return score;
 }
 
-function genericSummary(raw:string,units:SpokenUnit[],maxChars:number){
+function conversationalizeSpoken(value:string,sourceQuestion=''){
+ let text=value.trim()
+  .replace(/^Actualmente\b/i,'Ahora mismo')
+  .replace(/^En la actualidad\b/i,'Ahora mismo')
+  .replace(/^Se informa que\s+/i,'')
+  .replace(/^Cabe indicar que\s+/i,'')
+  .replace(/^Es importante señalar que\s+/i,'');
+ const question=normalizeVoiceConfirmation(sourceQuestion);
+ if(question&&text&&!/^(si|sí|no|vale|claro|perfecto|hecho|mira|ahora mismo)\b/i.test(text)){
+  if(/^(que|qué|cual|cuál|como|cómo|dime|explicame|explícame)\b/.test(question))text='Mira, '+text.charAt(0).toLocaleLowerCase('es-ES')+text.slice(1);
+ }
+ return text;
+}
+
+function genericSummary(raw:string,units:SpokenUnit[],maxChars:number,sourceQuestion=''){
  if(!units.length)return '';
 
  const nonTechnical=units.filter(unit=>!unit.technical);
@@ -384,7 +417,7 @@ function genericSummary(raw:string,units:SpokenUnit[],maxChars:number){
  const targetCount=listLike?3:1;
  let total=0;
  for(const candidate of ranked){
-  const text=clipNatural(candidate.unit.text,listLike?150:210);
+  const text=conversationalizeSpoken(clipNatural(candidate.unit.text,listLike?145:205),sourceQuestion);
   if(!text)continue;
   if(picked.some(item=>normalizeVoiceConfirmation(item.unit.text)===normalizeVoiceConfirmation(text)))continue;
   const extra=(picked.length?1:0)+text.length;
@@ -417,7 +450,7 @@ function genericSummary(raw:string,units:SpokenUnit[],maxChars:number){
  const omitted=units.length>chosen.length||units.some(unit=>unit.technical);
  if(hasLinks)parts.push('Te dejo el enlace por escrito.');
  if(hasEmails)parts.push('Te dejo los correos por escrito.');
- if(omitted&&!parts.some(part=>/detalle.*por escrito/i.test(part)))parts.push('Te dejo el detalle completo por escrito.');
+ if(omitted&&(hasLinks||hasEmails||units.some(unit=>unit.technical)||listLike)&&!parts.some(part=>/(detalle|estado|resto).*?(pantalla|escrito)/i.test(part)))parts.push('El resto lo tienes en pantalla.');
 
  return parts.join(' ').replace(/\s+/g,' ').trim();
 }
@@ -434,12 +467,12 @@ export function spokenResponseText(text:string,maxChars=440,mode:CerebroSpokenMo
  if(intent==='email_send_confirmation'&&meta.executed===true)return emailAcceptedSummary(raw);
  if(intent==='social_schedule_complete'&&meta.read_context)return socialScheduleSummary(meta);
  if(intent==='conversation_memory')return memoryRecallSummary(units);
- if(intent==='health')return 'CEREBRO está conectado y disponible. Te dejo el detalle técnico por escrito.';
+ if(intent==='health')return 'Sí, CEREBRO está conectado y disponible. El detalle técnico lo tienes en pantalla.';
  const intentDigest=intentDigestSummary(intent,raw,units);
  if(intentDigest)return intentDigest;
 
  if(status==='ACTION_CONFIRMED'&&meta.executed===false){
-  return genericSummary(raw,units,Math.max(maxChars,520));
+  return genericSummary(raw,units,Math.max(maxChars,520),meta.source_question??'');
  }
 
  if(mode==='action'){
@@ -458,7 +491,7 @@ export function spokenResponseText(text:string,maxChars=440,mode:CerebroSpokenMo
   return parts.join(' ').replace(/\s+/g,' ').trim();
  }
 
- return genericSummary(raw,units,maxChars);
+ return genericSummary(raw,units,maxChars,meta.source_question??'');
 }
 
 export type CerebroSpeechSegment={
@@ -475,13 +508,14 @@ export function speechSegments(text:string,maxChars=440,preferences:Record<strin
  const spoken=spokenResponseText(text,maxChars,mode,meta);
  if(!spoken)return [];
  const base=voiceSpeechProfile(preferences);
+ const warmTone=String(preferences.tone||'')==='warm_close_caring';
  const parts=(spoken.match(/[^.!?;:]+[.!?;:]?/g)||[spoken])
   .map(part=>part.trim())
   .filter(Boolean);
  return parts.map((part,index)=>{
   const normalized=normalizeVoiceConfirmation(part);
   let rate=base.rate;
-  let pitch=base.pitch;
+  let pitch=base.pitch+(warmTone?0.008:0);
 
   // Keep the user's chosen overall rhythm; vary only locally for natural prosody.
   if(/^(vale|perfecto|bien|entendido|confirmado|hecho)\b/.test(normalized)&&part.length<140){
