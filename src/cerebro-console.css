@@ -14,11 +14,11 @@ html[data-cerebro-console='1'] .ana-universal{display:none!important}
 .cerebro-media-preview{display:block;max-width:100%;width:auto;max-height:360px;border-radius:12px;border:1px solid rgba(127,127,127,.18);object-fit:contain;background:rgba(127,127,127,.04)}
 .cerebro-media-link>span{font-size:12px;font-weight:700;text-decoration:underline}
 
-.cerebro-voice-bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:12px 0 0;padding:12px;border:1px solid rgba(127,127,127,.16);border-radius:14px;background:rgba(127,127,127,.035)}
-.cerebro-voice-bar button{margin:0}
-.cerebro-voice-toggle{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:700}
-.cerebro-voice-toggle input{margin:0}
-.cerebro-voice-bar select{max-width:260px;border:1px solid rgba(127,127,127,.22);border-radius:10px;padding:9px 10px;background:var(--panel,#fff);color:inherit}
-.cerebro-voice-status{flex:1 1 260px;font-size:12px;color:var(--muted,#6b7280);line-height:1.4}
+.cerebro-voice-session{display:grid;justify-items:center;gap:9px;margin:14px 0 0;padding:16px;border:1px solid rgba(127,127,127,.16);border-radius:16px;background:rgba(127,127,127,.035);transition:box-shadow .2s ease,background .2s ease}
+.cerebro-voice-session.is-active{background:rgba(127,127,127,.055)}
+.cerebro-voice-main{justify-self:center!important;min-width:230px;justify-content:center!important;font-weight:800}
+.cerebro-voice-session.is-listening .cerebro-voice-main{box-shadow:0 0 0 4px rgba(34,197,94,.10)}
+.cerebro-voice-session.is-speaking .cerebro-voice-main{box-shadow:0 0 0 4px rgba(59,130,246,.10)}
+.cerebro-voice-status{font-size:12px;color:var(--muted,#6b7280);line-height:1.45;text-align:center}
 .cerebro-voice-error{margin:10px 0 0;padding:11px 12px;border-radius:10px;background:rgba(180,83,9,.10);font-size:13px;line-height:1.45}
-@media(max-width:720px){.cerebro-voice-bar{display:grid;grid-template-columns:1fr}.cerebro-voice-bar button,.cerebro-voice-bar select{width:100%;max-width:none}.cerebro-voice-toggle{min-height:40px}}
+@media(max-width:720px){.cerebro-voice-main{width:100%;min-width:0}}
