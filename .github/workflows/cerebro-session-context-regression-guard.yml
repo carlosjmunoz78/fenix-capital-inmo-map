@@ -127,6 +127,7 @@ jobs:
           node scripts/test-cerebro-spoken-summary-v2.mjs
           node scripts/test-cerebro-voice-barge-in.mjs
           node scripts/test-cerebro-vad-barge-in.mjs
+          node scripts/verify-cerebro-unbounded-voice-session.mjs
 
       - name: Build app
         shell: bash
