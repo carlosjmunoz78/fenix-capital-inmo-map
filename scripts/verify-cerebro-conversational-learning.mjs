@@ -25,6 +25,7 @@ must(gateway,'function shouldObserveConversationMemory','bounded observation pol
 must(gateway,'await observeConversationMemory(req,message)','continuous observation');
 must(gateway,'fenix_prod_cerebro_memory_forget_server','forget binding');
 must(gateway,'MEMORY_SKIP_EXACT','noise filter');
+must(gateway,'Recall queries are lookups, not new knowledge','recall self-pollution guard');
 
 must(knowledge,'function conversationMemoryIntent','explicit recall intent');
 must(knowledge,'fenix_prod_cerebro_memory_search_server','memory search binding');
