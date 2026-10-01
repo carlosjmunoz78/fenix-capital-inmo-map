@@ -47,3 +47,19 @@
 - Frontend PROD exacto: `374bd89d7e8ee97a26b3bdcf1bb5249a613489be`.
 - Coste adicional recurrente: 0 €.
 - Estado: despliegue técnico HECHO; aceptación física de memoria entre sesiones y naturalidad de prosodia PENDIENTE.
+
+
+## 2026-10-01 · Spoken Summary V1
+
+- Aceptación física del propietario: la recuperación de memoria conversacional entre sesiones funciona en la prueba solicitada; el flujo de olvido físico sigue pendiente de prueba.
+- La voz deja de leer literalmente todo lo que CEREBRO escribe: el texto completo permanece en pantalla y el TTS usa una síntesis determinista breve.
+- Los enlaces ya no se pronuncian; CEREBRO dice que deja el enlace por escrito.
+- Se eliminan del habla los prefijos de listas/viñetas para evitar «uno punto», «dos punto», etc.
+- Las respuestas largas hablan solo las primeras unidades relevantes y remiten el detalle completo a pantalla.
+- En acciones, se conserva verbalmente la confirmación final para no degradar la seguridad.
+- PR #463: CEREBRO Session Context Regression Guard #128 SUCCESS y App Restoration Build Gate #377 SUCCESS; merge `1da8c6523c344257969fe7304ccdac900b0618e3`.
+- Release PROD exacto `b64050f0320f31e1685fa028744e73e5920c8655`: Live Deploy #165 SUCCESS y Runtime Smoke #308 SUCCESS.
+- `gh-pages/PROD_SOURCE_SHA.txt` verificado exactamente como `b64050f0320f31e1685fa028744e73e5920c8655`.
+- Rollback frontend anterior preservado: `374bd89d7e8ee97a26b3bdcf1bb5249a613489be`.
+- Coste adicional recurrente: 0 €.
+- Estado: despliegue técnico HECHO; aceptación auditiva del resumen hablado PENDIENTE.
