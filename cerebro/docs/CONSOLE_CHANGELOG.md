@@ -143,3 +143,18 @@
 - PROD frontend `fbdbb99e22a821b578874157c86d73789f111e10`: Live Deploy #182 SUCCESS; Runtime Smoke #325 SUCCESS.
 - Coste adicional: 0 €.
 - Aceptación física conversacional: PENDIENTE.
+
+
+## 2026-10-01 · Conversational Intelligence V2
+
+- Contexto de conversación acotado: últimos 10 turnos / 8.000 caracteres máximos en Gateway.
+- Resolución determinista de follow-ups cortos y referencias a puntos numerados.
+- Memoria estructurada V2 con tipos de hecho, decisión, corrección, preferencia y conocimiento operativo.
+- Trazabilidad de sustituciones mediante `superseded_by`; solo se activa con correcciones explícitas.
+- Señal `REQUIRES_CURRENT_VERIFICATION` para conocimiento sensible al tiempo.
+- PREPROD exact migration rollback GREEN; PROD migration aplicada sin pérdida de las 11 memorias existentes.
+- PR #477: Guard #153 SUCCESS; Build Gate #395 SUCCESS; merge `a628102aeb05de05f8c145a5c94ea8520d2a00ce`.
+- Gateway PROD V28 `4a6cf9ac3065b5ad8ab5283f0df99b8853490e4f6c941026d011e55cc03aa00b`.
+- Frontend PROD `2d157dd4e74c101b25000bb64adf5bac5719a82e`: Live Deploy #185 SUCCESS; Runtime Smoke #328 SUCCESS.
+- Coste adicional: 0 €.
+- Aceptación física multi-turno: PENDIENTE.

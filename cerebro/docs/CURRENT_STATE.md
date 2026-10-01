@@ -239,3 +239,24 @@ Evidence anchors are scoped to the change they prove; they are not intended to m
 ### PARCIAL
 - Falta aceptación física del saludo personalizado, los mapas de conocimiento, la aclaración de preguntas ambiguas y la naturalidad de las nuevas expresiones.
 - La aceptación física previa del barge-in «para» sigue vigente y no se extiende automáticamente a este nuevo bloque conversacional.
+
+
+## Update 2026-10-01 · Conversational Intelligence V2
+
+### HECHO
+- La App envía al Gateway un contexto acotado de los últimos 10 turnos; el servidor impone un máximo de 8.000 caracteres y vuelve a validar roles/contenido.
+- Los seguimientos breves como «¿y fiscalmente?», «el punto 3», «¿y si hay tres hermanos?» o referencias como «eso/esa parte» pueden resolverse contra el tema reciente sin obligar al usuario a repetir el contexto completo.
+- La memoria conversacional V2 distingue `USER_TURN`, `FACT`, `DECISION`, `CORRECTION`, `PREFERENCE` y `OPERATIONAL_KNOWLEDGE`.
+- Se añaden `subject_key`, ventana de validez, estado `EPISODIC/CANDIDATE/VERIFIED` y relación `superseded_by` para conservar trazabilidad.
+- Una corrección explícita como «eso ya no es así» puede desactivar el recuerdo anterior relacionado y enlazarlo con la nueva versión; no se hace supersession silenciosa ante contradicciones ambiguas.
+- Consultas sensibles al tiempo pueden devolver `REQUIRES_CURRENT_VERIFICATION`; conocimiento interno no se presenta como normativa, fiscalidad o condiciones bancarias eternamente vigentes.
+- Migración exacta probada en PREPROD dentro de transacción con stub desechable y rollback: observe V2, supersession y privilegios GREEN.
+- PROD conserva las 11 memorias existentes tras la migración; no se borraron filas previas.
+- Gateway PROD V28 ACTIVE: `4a6cf9ac3065b5ad8ab5283f0df99b8853490e4f6c941026d011e55cc03aa00b`.
+- Frontend PROD exacto `2d157dd4e74c101b25000bb64adf5bac5719a82e`: Live Deploy #185 SUCCESS y Runtime Smoke #328 SUCCESS.
+- PR #477: Guard #153 SUCCESS y App Restoration Build Gate #395 SUCCESS.
+- Coste adicional recurrente: 0 €.
+
+### PARCIAL
+- Falta aceptación física de continuidad real entre turnos y de supersession explícita antes de marcar Conversational Intelligence V2 como `CONFIRMED_OPERATIONAL`.
+- El contexto inmediato es acotado deliberadamente; la continuidad entre sesiones sigue dependiendo de la memoria persistente y sus reglas de recuperación.

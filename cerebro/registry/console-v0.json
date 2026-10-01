@@ -87,6 +87,12 @@
       "auto_resume_after_response": true,
       "auto_resume_after_recognition_end": true,
       "artificial_question_cap": false
+    },
+    "conversation_context": {
+      "max_turns": 10,
+      "max_chars": 8000,
+      "follow_up_resolution": "DETERMINISTIC_DOMAIN_AND_NUMBERED_ITEM_V1",
+      "artificial_turn_limit": null
     }
   },
   "human_decision_protocol": {
@@ -269,6 +275,33 @@
       "previous_rollback_source_sha": "c12edfae5f65fdb95c1dbf6b6fcfd921509ca21e",
       "prod_live_deploy_run": 182,
       "prod_runtime_smoke_run": 325,
+      "physical_acceptance": "PENDING"
+    },
+    "conversational_intelligence_v2": {
+      "status": "PROD_DEPLOYED_PHYSICAL_ACCEPTANCE_PENDING",
+      "gateway_version": 28,
+      "gateway_artifact_sha256": "4a6cf9ac3065b5ad8ab5283f0df99b8853490e4f6c941026d011e55cc03aa00b",
+      "frontend_source_sha": "2d157dd4e74c101b25000bb64adf5bac5719a82e",
+      "previous_rollback_source_sha": "fbdbb99e22a821b578874157c86d73789f111e10",
+      "prod_live_deploy_run": 185,
+      "prod_runtime_smoke_run": 328,
+      "context_window": {
+        "turns": 10,
+        "max_chars": 8000
+      },
+      "structured_memory_kinds": [
+        "USER_TURN",
+        "FACT",
+        "DECISION",
+        "CORRECTION",
+        "PREFERENCE",
+        "OPERATIONAL_KNOWLEDGE"
+      ],
+      "subject_key": true,
+      "explicit_supersession": true,
+      "freshness_gate": "REQUIRES_CURRENT_VERIFICATION",
+      "preprod_exact_migration_rollback": "GREEN",
+      "additional_cost_target_eur": 0,
       "physical_acceptance": "PENDING"
     }
   }

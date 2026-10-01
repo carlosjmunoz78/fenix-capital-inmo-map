@@ -120,3 +120,14 @@ Before wiring persistent `EVT-001`/`JOB-001` into `SharedRuntime`, require expli
 - La capa de aclaración se activa ante baja confianza y no tiene capacidad de ejecutar acciones.
 - Los saludos personalizados y lead-ins son presentación conversacional; no alteran memoria, permisos, identidad ni contrato de acción.
 - No se añade modelo, infraestructura ni suscripción de pago.
+
+
+## Conversational Intelligence V2 · 2026-10-01
+
+- Flujo inmediato: `últimos turnos UI → conversation_context acotado → Gateway validation → contextualizeMessage → knowledge/action routing`.
+- La resolución contextual no amplía permisos ni confirma acciones; solo reconstruye el significado de consultas de lectura/follow-up.
+- Flujo de memoria: `user turn → sensitivity/noise filter → structured classification → observe_v2 RPC → CANDIDATE/EPISODIC`; una corrección explícita puede ejecutar `supersede_server` sobre el recuerdo previo relacionado.
+- Supabase almacena solo esta memoria transaccional ligera; no se usa para audio, jobs pesados ni razonamiento prolongado.
+- `fenix-memory-api` relacional/CRM sigue intacta y separada.
+- Currentness: preguntas sensibles al tiempo pueden quedar marcadas `REQUIRES_CURRENT_VERIFICATION`; la verificación externa/canónica ocurre antes de usar el dato como decisión vigente.
+- No se añade modelo, worker, servidor ni suscripción de pago.
