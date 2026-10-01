@@ -28,6 +28,15 @@ export type CerebroPendingAction={
 
 export type CerebroReadContext={kind:"social_schedule";network:string;content_key?:string;external_post_id?:string|null;scheduled_at?:string;caption?:string;public_media_url?:string|null;media_urls?:string[]};
 
+export type CerebroLearningCandidate={
+  category:'voice_style'|'wording'|'pronunciation'|'response_length'|'interaction_preference'|'workflow_preference'|'business_preference';
+  preference_key:string;
+  value:string;
+  label:string;
+};
+
+export type CerebroPreferences=Record<string,string>;
+
 export type CerebroConsoleChatResponse={
   status:string;
   intent?:string;
@@ -38,6 +47,8 @@ export type CerebroConsoleChatResponse={
   action?:CerebroPendingAction;
   read_context?:CerebroReadContext;
   media?:{public_media_url?:string|null;media_urls?:string[]};
+  learning_candidate?:CerebroLearningCandidate|null;
+  preferences?:CerebroPreferences;
 };
 
 async function authHeaders(){
@@ -64,7 +75,7 @@ export async function fetchCerebroConsole<T>(path:string):Promise<{status:number
   }catch{return{status:0,data:null}}
 }
 
-export async function postCerebroConsoleChat(message:string,pending_action:CerebroPendingAction|null=null,read_context:CerebroReadContext|null=null):Promise<{status:number;data:CerebroConsoleChatResponse|null}>{
+export async function postCerebroConsoleChat(message:string,pending_action:CerebroPendingAction|null=null,read_context:CerebroReadContext|null=null,learning_candidate:CerebroLearningCandidate|null=null):Promise<{status:number;data:CerebroConsoleChatResponse|null}>{
   const endpoint=cerebroConsoleEndpoint('chat');
   if(!endpoint)return{status:0,data:null};
   const headers=await authHeaders();
@@ -73,7 +84,7 @@ export async function postCerebroConsoleChat(message:string,pending_action:Cereb
     const response=await fetch(endpoint,{
       method:'POST',
       headers,
-      body:JSON.stringify({message,pending_action,read_context}),
+      body:JSON.stringify({message,pending_action,read_context,learning_candidate}),
       cache:'no-store'
     });
     let data:CerebroConsoleChatResponse|null=null;
@@ -84,4 +95,8 @@ export async function postCerebroConsoleChat(message:string,pending_action:Cereb
 
 export function fetchCerebroConsoleHealth(){
   return fetchCerebroConsole<CerebroConsoleHealth>('health');
+}
+
+export async function fetchCerebroConsolePreferences():Promise<{status:number;data:{status?:string;preferences?:CerebroPreferences}|null}>{
+  return fetchCerebroConsole<{status?:string;preferences?:CerebroPreferences}>('preferences');
 }

@@ -30,7 +30,28 @@ const CONTRACT = {
   required_context: ["company_id", "engine_id", "environment", "version"],
   chat_mode: "OWNER_DECISION_BY_EXCEPTION_V1",
   confirmation_mode: "EXACT_PROPOSAL_SINGLE_EXPLICIT_YES",
+  preference_writes: "EXPLICIT_USER_ONLY",
+  durable_learning_mode: "EXPLICIT_ONLY_V1",
 };
+
+type LearningCandidate = {
+  category:"voice_style"|"wording"|"pronunciation"|"response_length"|"interaction_preference"|"workflow_preference"|"business_preference";
+  preference_key:string;
+  value:string;
+  label:string;
+};
+
+const DEFAULT_PREFERENCES:Record<string,string>={
+  tone:"warm_close_caring",
+  response_length:"concise",
+  speech_rate:"0.96",
+  speech_pitch:"1.04"
+};
+
+const LEARNING_CATEGORIES=new Set([
+  "voice_style","wording","pronunciation","response_length",
+  "interaction_preference","workflow_preference","business_preference"
+]);
 
 type PendingAction = {
   action_id: string;
@@ -211,6 +232,152 @@ async function executeEmailCommunication(req:Request,action:PendingAction){
   }
 }
 
+function validateLearningCandidate(value:unknown):LearningCandidate|null{
+  if(!value||typeof value!=="object"||Array.isArray(value))return null;
+  const v=value as Record<string,unknown>;
+  const category=String(v.category??"");
+  const preference_key=String(v.preference_key??"");
+  const val=String(v.value??"");
+  const label=String(v.label??"");
+  if(!LEARNING_CATEGORIES.has(category))return null;
+  if(!/^[a-z0-9_]{2,80}$/.test(preference_key))return null;
+  if(!val||val.length>500||!label||label.length>240)return null;
+  return {category:category as LearningCandidate["category"],preference_key,value:val,label};
+}
+
+function parseLearningCandidate(message:string):LearningCandidate|null{
+  const text=cleanText(message);
+  if(/(mas cercana|más cercana|cariñosa|carinosa|mas calida|más cálida|más calida|calida|cálida|mas humana|más humana)/.test(text)){
+    return {category:"voice_style",preference_key:"tone",value:"warm_close_caring",label:"hablar de forma cercana, cariñosa, natural y profesional"};
+  }
+  if(/(menos explicaciones|mas breve|más breve|respuestas? mas cortas|respuestas? más cortas|ve al grano|mas directa|más directa)/.test(text)){
+    return {category:"response_length",preference_key:"response_length",value:"concise",label:"dar respuestas habladas breves y directas por defecto"};
+  }
+  if(/(mas despacio|más despacio|habla despacio|no (me )?hables? tan rapido|no (me )?hables? tan rápido|baja .*velocidad)/.test(text)){
+    return {category:"voice_style",preference_key:"speech_rate",value:"0.90",label:"hablar un poco más despacio"};
+  }
+  if(/(mas rapido|más rápido|más rapida|más rápida|habla rapido|habla rápido|sube .*velocidad)/.test(text)){
+    return {category:"voice_style",preference_key:"speech_rate",value:"1.05",label:"hablar un poco más rápido"};
+  }
+  if(/(mas profesional|más profesional|menos cariñosa|menos carinosa|tono mas serio|tono más serio)/.test(text)){
+    return {category:"voice_style",preference_key:"tone",value:"professional_warm",label:"usar un tono profesional, cálido y menos cariñoso"};
+  }
+  const preferred=message.match(/(?:llamame|llámame|quiero que me llames)\s+([\p{L} .'-]{1,40})/iu);
+  if(preferred){
+    const value=preferred[1].trim().replace(/[.?!]+$/,"");
+    if(value)return {category:"wording",preference_key:"preferred_address",value,label:`llamarte «${value}»`};
+  }
+  const avoid=message.match(/(?:no me llames|deja de llamarme)\s+([\p{L} .'-]{1,40})/iu);
+  if(avoid){
+    const value=avoid[1].trim().replace(/[.?!]+$/,"");
+    if(value)return {category:"wording",preference_key:"avoid_address",value,label:`no llamarte «${value}»`};
+  }
+  if(/(primero.*verde.*rojo|verde o rojo primero|rojo o verde primero)/.test(text)){
+    return {category:"interaction_preference",preference_key:"status_first",value:"true",label:"dar primero el estado verde/rojo antes del detalle"};
+  }
+  return null;
+}
+
+function preferencesMap(items:any[]){
+  const result:Record<string,string>={...DEFAULT_PREFERENCES};
+  for(const item of items){
+    const key=String(item?.preference_key??"");
+    const value=String(item?.value??"");
+    if(/^[a-z0-9_]{2,80}$/.test(key)&&value&&value.length<=500)result[key]=value;
+  }
+  return result;
+}
+
+async function loadPreferences(req:Request){
+  const U=Deno.env.get("SUPABASE_URL")??"";
+  const S=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")??"";
+  if(!U||!S)return {ok:false,preferences:{...DEFAULT_PREFERENCES},items:[] as any[]};
+  const authz=await authorizedOwner(req);
+  if(!authz.ok)return {ok:false,preferences:{...DEFAULT_PREFERENCES},items:[] as any[]};
+  const svc=createClient(U,S,{auth:{persistSession:false,autoRefreshToken:false}});
+  const {data,error}=await svc.rpc("fenix_prod_cerebro_preferences_list_server",{p_actor_code:authz.actor,p_company_id:"fenix"});
+  const items=!error&&data?.ok&&Array.isArray(data.items)?data.items:[];
+  return {ok:!error&&data?.ok===true,preferences:preferencesMap(items),items};
+}
+
+async function savePreference(req:Request,candidate:LearningCandidate){
+  const U=Deno.env.get("SUPABASE_URL")??"";
+  const S=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")??"";
+  if(!U||!S)return {ok:false,error:"PREFERENCE_CONFIG_MISSING"};
+  const authz=await authorizedOwner(req);
+  if(!authz.ok)return {ok:false,error:"OWNER_REQUIRED"};
+  const svc=createClient(U,S,{auth:{persistSession:false,autoRefreshToken:false}});
+  const {data,error}=await svc.rpc("fenix_prod_cerebro_preference_upsert_server",{
+    p_actor_code:authz.actor,
+    p_company_id:"fenix",
+    p_scope:"USER",
+    p_category:candidate.category,
+    p_preference_key:candidate.preference_key,
+    p_value_text:candidate.value
+  });
+  if(error||data?.ok!==true)return {ok:false,error:error?.message??data?.error??"PREFERENCE_WRITE_FAILED"};
+  return {ok:true,data};
+}
+
+async function deactivatePreference(req:Request,key:string){
+  const U=Deno.env.get("SUPABASE_URL")??"";
+  const S=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")??"";
+  if(!U||!S)return {ok:false,error:"PREFERENCE_CONFIG_MISSING"};
+  const authz=await authorizedOwner(req);
+  if(!authz.ok)return {ok:false,error:"OWNER_REQUIRED"};
+  const svc=createClient(U,S,{auth:{persistSession:false,autoRefreshToken:false}});
+  const {data,error}=await svc.rpc("fenix_prod_cerebro_preference_deactivate_server",{
+    p_actor_code:authz.actor,p_company_id:"fenix",p_scope:"USER",p_preference_key:key
+  });
+  if(error||data?.ok!==true)return {ok:false,error:error?.message??data?.error??"PREFERENCE_DEACTIVATE_FAILED"};
+  return {ok:true,data};
+}
+
+async function maybeHandleLearning(req:Request,message:string,learningRaw:unknown){
+  const text=cleanText(message);
+  const supplied=validateLearningCandidate(learningRaw);
+  const parsed=parseLearningCandidate(message);
+  const persistOnly=/^(guardalo|guárdalo|recuerdalo|recuérdalo|recuerda eso|recuerda esto|guarda eso|guarda esto|que quede guardado)$/.test(text);
+  const directPersist=/(a partir de ahora|recuerda que|guarda que|quiero que recuerdes|quiero que lo guardes)/.test(text);
+  const forget=/(^olvida|^borra|^elimina|^quita|ya no quiero que)/.test(text);
+
+  if(forget){
+    const target=parsed??supplied;
+    if(!target)return {status:"PREFERENCE_NEEDS_SCOPE",intent:"preference_forget",executed:false,message:"Dime qué preferencia quieres que deje de recordar.",learning_candidate:supplied};
+    const dropped=await deactivatePreference(req,target.preference_key);
+    if(!dropped.ok)return {status:"ERROR",intent:"preference_forget",executed:false,reason:dropped.error,message:"No he podido actualizar esa preferencia. No voy a fingir que la he olvidado.",learning_candidate:supplied};
+    const current=await loadPreferences(req);
+    return {status:"PREFERENCE_FORGOTTEN",intent:"preference_forget",executed:true,message:`Vale. He dejado de guardar la preferencia de ${target.label}.`,learning_candidate:null,preferences:current.preferences};
+  }
+
+  if(persistOnly){
+    if(!supplied)return {status:"PREFERENCE_NEEDS_SCOPE",intent:"preference_save",executed:false,message:"No tengo una corrección concreta pendiente para guardar. Dímela y la aplico.",learning_candidate:null};
+    const saved=await savePreference(req,supplied);
+    if(!saved.ok)return {status:"ERROR",intent:"preference_save",executed:false,reason:saved.error,message:"He aplicado la corrección en esta conversación, pero no he podido guardarla para futuras conversaciones.",learning_candidate:supplied};
+    const current=await loadPreferences(req);
+    return {status:"PREFERENCE_SAVED",intent:"preference_save",executed:true,message:"Vale, guardado. Lo mantendré en las próximas conversaciones.",learning_candidate:null,preferences:current.preferences};
+  }
+
+  if(parsed){
+    if(directPersist){
+      const saved=await savePreference(req,parsed);
+      if(!saved.ok)return {status:"ERROR",intent:"preference_save",executed:false,reason:saved.error,message:"He entendido la corrección, pero no he podido guardarla todavía.",learning_candidate:parsed};
+      const current=await loadPreferences(req);
+      return {status:"PREFERENCE_SAVED",intent:"preference_save",executed:true,message:`Vale, guardado: ${parsed.label}.`,learning_candidate:null,preferences:current.preferences};
+    }
+    const current=await loadPreferences(req);
+    return {
+      status:"PREFERENCE_APPLIED_SESSION",
+      intent:"preference_correction",
+      executed:false,
+      message:`Vale, lo aplico desde ahora: ${parsed.label}. Si quieres que quede para próximas conversaciones, dime «guárdalo».`,
+      learning_candidate:parsed,
+      preferences:{...current.preferences,[parsed.preference_key]:parsed.value}
+    };
+  }
+  return null;
+}
+
 async function resolveContacts(req:Request,query:string){
   const U=Deno.env.get("SUPABASE_URL")??"";
   const S=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")??"";
@@ -319,10 +486,13 @@ function seoExplanation(action:PendingAction){
   return `El proceso para ${location} (${coverage}) comprende: investigación y clustering de palabras clave; mapa de ciudades/zonas e intención; arquitectura y contenidos; enlazado interno; SEO local; activos de captación cuando correspondan; controles técnicos/QA; publicación solo mediante los gates autorizados; monitorización, medición y mejora. Si algún paso exige firma, pago, riesgo alto, conflicto de política o un permiso que CEREBRO no tenga, te explicaré exactamente qué falta y te llevaré al enlace o decisión necesaria. ¿Quieres que active este proceso?`;
 }
 
-async function chatReply(req:Request,message:string,pendingRaw:unknown,readContextRaw:unknown){
+async function chatReply(req:Request,message:string,pendingRaw:unknown,readContextRaw:unknown,learningRaw:unknown){
   const text=cleanText(message);
   const readContext=(readContextRaw&&typeof readContextRaw==="object"&&!Array.isArray(readContextRaw))?readContextRaw as CerebroReadContext:null;
   if(!text)return {status:"INVALID",message:"Escribe una consulta.",executed:false};
+
+  const learning=await maybeHandleLearning(req,message,learningRaw);
+  if(learning)return learning;
 
   const pending=await validatePending(req,pendingRaw);
 
@@ -659,19 +829,24 @@ export default {
       const obj=typeof body==="object"&&body!==null?body as Record<string,unknown>:{};
       const message=obj.message;
       if(typeof message!=="string"||message.length>2000)return json(req,400,{status:"INVALID",message:"Mensaje inválido.",executed:false});
-      return json(req,200,await chatReply(req,message,obj.pending_action,obj.read_context));
+      return json(req,200,await chatReply(req,message,obj.pending_action,obj.read_context,obj.learning_candidate));
     }
 
     if(req.method!=="GET")return json(req,405,{status:"CLOSED",reason:"ROUTE_NOT_AVAILABLE"});
 
     if(suffix==="health")return json(req,200,{
-      status:"ok",service:"cerebro-console-gateway-v0",environment:"LAB",version:"0.5.3-owner-only-contextual-ops",
+      status:"ok",service:"cerebro-console-gateway-v0",environment:"LAB",version:"0.6.0-explicit-learning-v1",
       authenticated_transport:true,direct_model_access:false,prod_execution_enabled:false,live_writes:false,
       chat_available:true,chat_mode:"OWNER_DECISION_BY_EXCEPTION_V1",additional_cost_target_eur:0
     });
     if(suffix==="contract")return json(req,200,CONTRACT);
     if(suffix==="engines")return json(req,200,{engines:ENGINES});
+    if(suffix==="preferences"){
+      const current=await loadPreferences(req);
+      if(!current.ok)return json(req,503,{status:"ERROR",reason:"PREFERENCES_UNAVAILABLE",preferences:current.preferences});
+      return json(req,200,{status:"OK",preferences:current.preferences});
+    }
 
-    return json(req,404,{status:"CLOSED",reason:"ROUTE_NOT_AVAILABLE",available:["health","contract","engines","chat"]});
+    return json(req,404,{status:"CLOSED",reason:"ROUTE_NOT_AVAILABLE",available:["health","contract","engines","preferences","chat"]});
   }),
 };

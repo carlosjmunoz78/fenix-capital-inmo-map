@@ -92,10 +92,24 @@ export function voiceNeedsManualConfirmation(text:string,confidence:number|null,
  return confidence===null||!Number.isFinite(confidence)||confidence<VOICE_CONFIRMATION_CONFIDENCE_MIN;
 }
 
-export function speechText(text:string){
+export function voiceSpeechProfile(preferences:Record<string,string>={}){
+ const rawRate=Number(preferences.speech_rate??0.96);
+ const rawPitch=Number(preferences.speech_pitch??1.04);
+ return{
+  rate:Number.isFinite(rawRate)?Math.min(1.3,Math.max(0.75,rawRate)):0.96,
+  pitch:Number.isFinite(rawPitch)?Math.min(1.25,Math.max(0.8,rawPitch)):1.04
+ };
+}
+
+export function speechText(text:string,maxChars=700){
  const clean=text
   .replace(/https?:\/\/[^\s]+/gi,' enlace disponible en pantalla ')
   .replace(/\s+/g,' ')
   .trim();
- return clean.length>1600?`${clean.slice(0,1597)}…`:clean;
+ if(clean.length<=maxChars)return clean;
+ const clipped=clean.slice(0,maxChars);
+ const boundaries=[clipped.lastIndexOf('. '),clipped.lastIndexOf('? '),clipped.lastIndexOf('! '),clipped.lastIndexOf('; ')];
+ const boundary=Math.max(...boundaries);
+ const end=boundary>=Math.floor(maxChars*0.55)?boundary+1:maxChars;
+ return `${clipped.slice(0,end).trim()} Tengo más detalle en pantalla.`;
 }

@@ -3,11 +3,12 @@ import {useLocation,useNavigate} from 'react-router-dom';
 import {BrainCircuit,ChevronLeft,Mic,MicOff,Send,ShieldCheck,Square} from 'lucide-react';
 import {cerebroConsoleLinkEnabled} from './cerebroConsoleAccess';
 import {fetchAppApi,supabase} from './supabase';
-import {fetchCerebroConsoleHealth,postCerebroConsoleChat,type CerebroConsoleHealth,type CerebroPendingAction,type CerebroReadContext} from './cerebroConsoleApi';
-import {applyVoiceContextHints,createVoiceRecognition,spanishVoices,speechSynthesisSupported,speechText,voiceNeedsManualConfirmation,voiceRecognitionSupported,type CerebroSpeechRecognition} from './cerebroVoice';
+import {fetchCerebroConsoleHealth,fetchCerebroConsolePreferences,postCerebroConsoleChat,type CerebroConsoleHealth,type CerebroLearningCandidate,type CerebroPendingAction,type CerebroPreferences,type CerebroReadContext} from './cerebroConsoleApi';
+import {applyVoiceContextHints,createVoiceRecognition,spanishVoices,speechSynthesisSupported,speechText,voiceNeedsManualConfirmation,voiceRecognitionSupported,voiceSpeechProfile,type CerebroSpeechRecognition} from './cerebroVoice';
 import './cerebro-console.css';
 
 const CONTEXTS=['GENERAL','EMPRESA','ENGINE','CRM','APP','SEO','MARKETING','TRAINING','AUTOMATION'];
+const DEFAULT_VOICE_PREFERENCES:CerebroPreferences={tone:'warm_close_caring',response_length:'concise',speech_rate:'0.96',speech_pitch:'1.04'};
 type GatewayState='closed'|'checking'|'ready'|'error';
 type ChatLine={role:'user'|'cerebro';text:string;mediaUrl?:string|null};
 type OwnerAccess='checking'|'allowed'|'denied';
@@ -35,6 +36,8 @@ export default function CerebroConsoleShell(){
  const [voiceSpeaking,setVoiceSpeaking]=useState(false);
  const [voiceError,setVoiceError]=useState('');
  const [voiceSupport,setVoiceSupport]=useState({stt:false,tts:false});
+ const [voicePreferences,setVoicePreferences]=useState<CerebroPreferences>(DEFAULT_VOICE_PREFERENCES);
+ const [learningCandidate,setLearningCandidate]=useState<CerebroLearningCandidate|null>(null);
 
  const recognitionRef=useRef<CerebroSpeechRecognition|null>(null);
  const voiceSessionRef=useRef(false);
@@ -42,12 +45,16 @@ export default function CerebroConsoleShell(){
  const sendingRef=useRef(false);
  const pendingActionRef=useRef<CerebroPendingAction|null>(null);
  const readContextRef=useRef<CerebroReadContext|null>(null);
+ const voicePreferencesRef=useRef<CerebroPreferences>(DEFAULT_VOICE_PREFERENCES);
+ const learningCandidateRef=useRef<CerebroLearningCandidate|null>(null);
  const restartTimerRef=useRef<number|null>(null);
  const startListeningRef=useRef<()=>void>(()=>{});
  const sendVoiceTextRef=useRef<(text:string,confidence:number|null)=>void>(()=>{});
 
  useEffect(()=>{pendingActionRef.current=pendingAction},[pendingAction]);
  useEffect(()=>{readContextRef.current=readContext},[readContext]);
+ useEffect(()=>{voicePreferencesRef.current=voicePreferences},[voicePreferences]);
+ useEffect(()=>{learningCandidateRef.current=learningCandidate},[learningCandidate]);
 
  useEffect(()=>{
   let cancelled=false;
@@ -94,6 +101,16 @@ export default function CerebroConsoleShell(){
  const ready=gatewayState==='ready';
  const chatReady=Boolean(ready&&health?.chat_available&&['DETERMINISTIC_READ_ONLY','OWNER_DECISION_BY_EXCEPTION_V1'].includes(health?.chat_mode||''));
 
+ useEffect(()=>{
+  let cancelled=false;
+  if(!chatReady)return;
+  fetchCerebroConsolePreferences().then(({status,data})=>{
+   if(cancelled||status!==200||!data?.preferences)return;
+   setVoicePreferences({...DEFAULT_VOICE_PREFERENCES,...data.preferences});
+  });
+  return()=>{cancelled=true};
+ },[chatReady]);
+
  function clearRestartTimer(){
   if(restartTimerRef.current!==null){
    window.clearTimeout(restartTimerRef.current);
@@ -131,9 +148,10 @@ export default function CerebroConsoleShell(){
   setVoiceError('');
  }
 
- function speakAndResume(text:string){
+ function speakAndResume(text:string,fullDetail=false){
   if(!voiceSessionRef.current)return;
-  const spoken=speechText(text);
+  const maxChars=fullDetail?1600:(voicePreferencesRef.current.response_length==='concise'?700:1200);
+  const spoken=speechText(text,maxChars);
   if(!spoken){scheduleListening();return}
   stopRecognition();
   if(!voiceSupport.tts){
@@ -142,6 +160,9 @@ export default function CerebroConsoleShell(){
   }
   window.speechSynthesis.cancel();
   const utterance=new SpeechSynthesisUtterance(spoken);
+  const profile=voiceSpeechProfile(voicePreferencesRef.current);
+  utterance.rate=profile.rate;
+  utterance.pitch=profile.pitch;
   const voices=spanishVoices();
   const selected=voices.find(voice=>voice.lang.toLowerCase()==='es-es')||voices[0];
   if(selected){utterance.voice=selected;utterance.lang=selected.lang}
@@ -186,11 +207,17 @@ export default function CerebroConsoleShell(){
   setSending(true);
   stopRecognition();
   try{
-   const {status,data}=await postCerebroConsoleChat(clean,pendingActionRef.current,readContextRef.current);
+   const {status,data}=await postCerebroConsoleChat(clean,pendingActionRef.current,readContextRef.current,learningCandidateRef.current);
    const response=status>0&&data?.message?data.message:'No he podido contactar con CEREBRO Gateway.';
    if(data?.read_context){
     readContextRef.current=data.read_context;
     setReadContext(data.read_context);
+   }
+   if(data?.preferences)setVoicePreferences({...DEFAULT_VOICE_PREFERENCES,...data.preferences});
+   if(Object.prototype.hasOwnProperty.call(data??{},'learning_candidate')){
+    const next=data?.learning_candidate??null;
+    learningCandidateRef.current=next;
+    setLearningCandidate(next);
    }
    if(data?.status==='CANCELED'||data?.status==='ACTION_ACCEPTED'||(data?.status==='ACTION_CONFIRMED'&&!data?.action)){
     pendingActionRef.current=null;
@@ -203,7 +230,7 @@ export default function CerebroConsoleShell(){
    setLines(current=>[...current,{role:'cerebro',text:response,mediaUrl}]);
    sendingRef.current=false;
    setSending(false);
-   if(voiceSessionRef.current)speakAndResume(response);
+   if(voiceSessionRef.current)speakAndResume(response,Boolean(data?.status?.startsWith('ACTION_')));
   }catch{
    const response='No he podido contactar con CEREBRO Gateway.';
    setLines(current=>[...current,{role:'cerebro',text:response}]);
