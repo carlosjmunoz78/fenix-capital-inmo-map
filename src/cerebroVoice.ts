@@ -1,4 +1,5 @@
 export const VOICE_CONFIRMATION_CONFIDENCE_MIN=0.85;
+export const VOICE_CONFIRMATION_PHRASES=new Set(['si','si adelante','adelante','confirmo','activalo','activarlo','hazlo','procede']);
 
 export type CerebroSpeechRecognitionResult={
  transcript:string;
@@ -69,7 +70,7 @@ export function normalizeVoiceConfirmation(text:string){
 
 export function voiceNeedsManualConfirmation(text:string,confidence:number|null,hasPendingAction:boolean){
  if(!hasPendingAction)return false;
- if(normalizeVoiceConfirmation(text)!=='si')return false;
+ if(!VOICE_CONFIRMATION_PHRASES.has(normalizeVoiceConfirmation(text)))return false;
  return confidence===null||!Number.isFinite(confidence)||confidence<VOICE_CONFIRMATION_CONFIDENCE_MIN;
 }
 
