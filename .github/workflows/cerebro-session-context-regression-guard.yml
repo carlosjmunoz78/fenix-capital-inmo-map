@@ -111,7 +111,7 @@ jobs:
           grep -F 'voiceNeedsManualConfirmation' src/CerebroConsoleShell.tsx >/dev/null
           grep -F 'Hablar con CEREBRO' src/CerebroConsoleShell.tsx >/dev/null
           grep -F 'Empieza a hablar para interrumpirla; no necesitas esperar ni tocar el botón.' src/CerebroConsoleShell.tsx >/dev/null
-          grep -F 'scheduleListening(300)' src/CerebroConsoleShell.tsx >/dev/null
+          grep -F 'scheduleListening(180)' src/CerebroConsoleShell.tsx >/dev/null
           grep -F 'transcripción de baja confianza' src/CerebroConsoleShell.tsx >/dev/null
           grep -F "['not-allowed','service-not-allowed','audio-capture']" src/CerebroConsoleShell.tsx >/dev/null
           grep -F 'recognition.maxAlternatives=3' src/CerebroConsoleShell.tsx >/dev/null
