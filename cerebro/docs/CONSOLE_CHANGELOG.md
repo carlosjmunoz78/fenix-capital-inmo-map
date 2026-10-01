@@ -115,3 +115,15 @@
 - Estado del subflujo: CONFIRMED_OPERATIONAL dentro del alcance físico probado.
 - Se mantiene fallback visual y rollback conocido.
 - La aceptación no se extiende todavía a Spoken Digest V3 ni a una matriz exhaustiva de falsos positivos/dispositivos.
+
+
+## 2026-10-01 · Natural Spoken Conversation V4
+
+- Se conserva conversación continua sin cap de preguntas/turnos.
+- La salida oral usa contexto de la pregunta actual, frases más cercanas y menos boilerplate de pantalla.
+- Se prioriza voz `es-ES` femenina/natural cuando existe en el dispositivo, manteniendo fallback a cualquier voz española disponible.
+- No se ralentiza el ritmo base; el tono cálido solo modula ligeramente la prosodia.
+- PR #473: Guard #144 SUCCESS; Build Gate #388 SUCCESS.
+- PROD `c12edfae5f65fdb95c1dbf6b6fcfd921509ca21e`: Live Deploy #179 SUCCESS; Runtime Smoke #322 SUCCESS.
+- Coste adicional: 0 €.
+- Aceptación auditiva: PENDIENTE.
