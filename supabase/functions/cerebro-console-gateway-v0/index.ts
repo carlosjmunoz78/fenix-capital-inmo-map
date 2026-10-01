@@ -368,6 +368,8 @@ function shouldObserveConversationMemory(message:string){
   if(MEMORY_SKIP_EXACT.has(cleanText(text)))return false;
   if(memorySensitive(text))return false;
   if(/^(olvida|borra|elimina)\b/i.test(text))return false;
+  // Recall queries are lookups, not new knowledge; do not let the current question pollute its own search.
+  if(/\b(recuerdas|te acuerdas|que te dije|qué te dije|que te comente|qué te comenté|conversacion anterior|conversación anterior)\b/i.test(text))return false;
   return true;
 }
 
