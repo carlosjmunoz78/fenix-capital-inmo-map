@@ -558,7 +558,7 @@ async function maybeHandleLearning(req:Request,message:string,learningRaw:unknow
   const supplied=validateLearningCandidate(learningRaw);
   const parsed=parseLearningCandidate(message);
   const persistOnly=/^(guardalo|guárdalo|recuerdalo|recuérdalo|recuerda eso|recuerda esto|guarda eso|guarda esto|que quede guardado)$/.test(text);
-  const directPersist=/(a partir de ahora|recuerda que|guarda que|quiero que recuerdes|quiero que lo guardes)/.test(text);
+  const directPersist=Boolean(parsed)||/(a partir de ahora|recuerda que|guarda que|quiero que recuerdes|quiero que lo guardes)/.test(text);
   const forget=/(^olvida|^borra|^elimina|^quita|ya no quiero que)/.test(text);
 
   if(forget){
