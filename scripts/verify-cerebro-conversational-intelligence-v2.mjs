@@ -22,6 +22,10 @@ must(gateway,'(?:punto|numero)','point/number vocabulary');
 must(gateway,'recentSocialScheduleNetwork','short social follow-up recovery');
 must(gateway,'fenix_prod_exp_list_server','live expediente list binding');
 must(gateway,'expedientes_active_summary','live active expediente intent');
+must(gateway,'fenix_prod_inmo_list_server','live inmobiliaria directory binding');
+must(gateway,'inmobiliarias_by_locality','live inmobiliaria locality intent');
+must(gateway,'function looksLikeQuestionOrRequest','question-vs-memory classifier');
+must(gateway,'conversationMemoryKind(text)!=="USER_TURN"','raw turn memory rejection');
 must(gateway,'En el contexto de','domain follow-up synthesis');
 must(gateway,'context_applied:resolved.applied','context evidence returned');
 must(gateway,'resolved_question:resolved.applied?resolved.question:undefined','resolved question evidence');
@@ -41,6 +45,9 @@ must(migration,"grant execute on function public.fenix_prod_cerebro_memory_obser
 
 must(knowledge,'function currentnessAssessment','time-sensitive knowledge currentness check');
 must(knowledge,'function broadLegalMapQuestion','generic-vs-specific legal map guard');
+must(knowledge,'function memoryContentLooksLikeQuestion','legacy question-memory filter');
+must(knowledge,'wantsConversationMemory?await queryConversationMemory','memory only on explicit recall');
+must(knowledge,'minLexicalScore=domain?3:8','minimum lexical relevance gate');
 must(knowledge,'genericLegal&&!specific','specific legal topic focus guard');
 must(knowledge,'REQUIRES_CURRENT_VERIFICATION','current verification status');
 must(knowledge,'knowledge_freshness','freshness evidence field');
