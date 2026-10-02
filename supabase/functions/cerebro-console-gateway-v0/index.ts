@@ -127,11 +127,38 @@ function contextTopic(context:ConversationTurn[]){
   return null;
 }
 
+function spokenNumber(value:string){
+  if(/^\d{1,2}$/.test(value))return Number(value);
+  const map:Record<string,number>={
+    uno:1,una:1,primero:1,primer:1,
+    dos:2,segundo:2,
+    tres:3,tercero:3,
+    cuatro:4,cuarto:4,
+    cinco:5,quinto:5,
+    seis:6,sexto:6,
+    siete:7,septimo:7,
+    ocho:8,octavo:8,
+    nueve:9,noveno:9,
+    diez:10,decimo:10
+  };
+  return map[value]??null;
+}
+
 function numberedContextItem(context:ConversationTurn[],number:number){
   for(const turn of [...context].reverse()){
     if(turn.role!=="cerebro")continue;
-    const match=turn.text.match(new RegExp("(?:^|\\n)\\s*"+number+"[.)]\\s+([^\\n]+)","i"));
-    if(match?.[1])return match[1].trim();
+    const match=turn.text.match(new RegExp("(?:^|\\s)"+number+"[.)]\\s+([\\s\\S]*?)(?=(?:\\s+\\d{1,2}[.)]\\s+)|$)","i"));
+    if(match?.[1])return match[1].trim().slice(0,700);
+  }
+  return "";
+}
+
+function recentSocialScheduleNetwork(context:ConversationTurn[]){
+  for(const turn of [...context].reverse()){
+    const normalized=normalize(turn.text);
+    if(!/proxima publicacion|siguiente publicacion/.test(normalized))continue;
+    const network=["linkedin","facebook","instagram","tiktok","youtube"].find(item=>new RegExp("\\b"+item+"\\b").test(normalized));
+    if(network)return network==="linkedin"?"LinkedIn":network[0].toUpperCase()+network.slice(1);
   }
   return "";
 }
@@ -141,16 +168,22 @@ function contextualizeMessage(message:string,context:ConversationTurn[]){
   const text=cleanText(raw);
   if(!context.length)return {question:raw,applied:false,topic:null as string|null};
 
-  const point=text.match(/^(?:y\s+)?(?:el\s+)?punto\s+(\d{1,2})(?:\s+|$)/);
+  const point=text.match(/^(?:(?:hablame|explicame|dime|cuentame)\s+(?:del?\s+)?)?(?:y\s+)?(?:el\s+)?(?:punto|numero)\s+(\d{1,2}|uno|una|primero|primer|dos|segundo|tres|tercero|cuatro|cuarto|cinco|quinto|seis|sexto|siete|septimo|ocho|octavo|nueve|noveno|diez|decimo)(?:\s+|$)/);
   if(point){
-    const item=numberedContextItem(context,Number(point[1]));
+    const number=spokenNumber(point[1]);
+    const item=number===null?"":numberedContextItem(context,number);
     if(item)return {question:`Sobre «${item}»: ${raw}`,applied:true,topic:item};
+  }
+
+  if(/^(dame la|damela|quiero verla|muestramela|ensenamela)$/.test(text)){
+    const network=recentSocialScheduleNetwork(context);
+    if(network)return {question:`Dame la próxima publicación de ${network} completa`,applied:true,topic:"redes sociales"};
   }
 
   const topic=contextTopic(context);
   const explicitDomain=/\b(legal|juridic|hipoteca|financi|seo|marketing|facebook|instagram|linkedin|newsletter|supabase|gateway|trading|multiempresa)\b/.test(text);
-  const followUp=/^(y\b|eso\b|esa\b|ese\b|esto\b|lo anterior\b|la parte\b|sobre eso\b|fiscalmente\b|registralmente\b|notarialmente\b|y si\b|que pasa si\b|como seria\b|como sería\b|explicame ese\b|explícame ese\b)/.test(text);
-  const shortAnswer=text.length<=48&&!/^(hola|buenas|si|sí|no|vale|ok|gracias|procede|continua|continúa)$/.test(text);
+  const followUp=/^(y\b|eso\b|esa\b|ese\b|esto\b|lo anterior\b|la parte\b|sobre eso\b|fiscalmente\b|registralmente\b|notarialmente\b|y si\b|que pasa si\b|como seria\b|explicame ese\b)/.test(text);
+  const shortAnswer=text.length<=48&&!/^(hola|buenas|si|no|vale|ok|gracias|procede|continua)$/.test(text);
   if(topic&&!explicitDomain&&(followUp||shortAnswer)){
     return {question:`En el contexto de ${topic}: ${raw}`,applied:true,topic};
   }
@@ -219,6 +252,24 @@ async function authorizedOwner(req:Request){
   const role=String(ctx.role??"");
   const actor=String(ctx.actor_code);
   return {ok:actor==="CARLOS-ADMIN",actor,role};
+}
+
+async function liveExpedientesSummary(req:Request){
+  const authz=await authorizedOwner(req);
+  const U=Deno.env.get("SUPABASE_URL")??"";
+  const S=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")??"";
+  if(!authz.ok||!U||!S)return {ok:false,error:"OWNER_OR_SERVER_CONFIG_MISSING"} as const;
+  const svc=createClient(U,S,{auth:{persistSession:false,autoRefreshToken:false}});
+  const {data,error}=await svc.rpc("fenix_prod_exp_list_server",{p_actor_code:authz.actor});
+  if(error||data?.ok!==true||!Array.isArray(data.items))return {ok:false,error:"EXPEDIENTES_READ_FAILED"} as const;
+  const active=data.items.filter((item:any)=>item?.is_active===true);
+  const stages=new Map<string,number>();
+  for(const item of active){
+    const stage=String(item?.stage??"Sin etapa");
+    stages.set(stage,(stages.get(stage)??0)+1);
+  }
+  const breakdown=[...stages.entries()].sort((a,b)=>a[0].localeCompare(b[0],"es")).map(([stage,count])=>`${stage}: ${count}`);
+  return {ok:true,total:active.length,breakdown,source_count:data.items.length} as const;
 }
 async function proposalToken(payload:string){
   const secret=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")??"";
@@ -721,6 +772,18 @@ async function chatReply(req:Request,message:string,pendingRaw:unknown,readConte
 
   const learning=await maybeHandleLearning(req,message,learningRaw);
   if(learning)return learning;
+
+  if(/\b(cuantos|numero|total)\b.*\bexpedientes?\b.*\b(activos?|abiertos?|en curso)\b|\bexpedientes?\b.*\b(activos?|abiertos?|en curso)\b/.test(text)){
+    const summary=await liveExpedientesSummary(req);
+    if(!summary.ok)return {status:"ERROR",intent:"expedientes_active_summary",executed:false,reason:summary.error,message:"No he podido leer ahora mismo el estado vivo de los expedientes. No voy a sustituirlo por conocimiento documental."};
+    return {
+      status:"OK",
+      intent:"expedientes_active_summary",
+      executed:false,
+      message:`Ahora mismo hay ${summary.total} expedientes activos en App Fénix.${summary.breakdown.length?" Por etapa: "+summary.breakdown.join(", ")+".":""}`,
+      source:{system:"APP_FENIX_PROD",rpc:"fenix_prod_exp_list_server",active_contract:"fenix_prod_expediente_is_active"}
+    };
+  }
 
   const pending=await validatePending(req,pendingRaw);
 
