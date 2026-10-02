@@ -21,6 +21,7 @@ must(gateway,'durable_learning_mode: "STRUCTURED_CONVERSATIONAL_MEMORY_V2"','exp
 must(gateway,'function parseLearningCandidate','deterministic correction parser');
 must(gateway,'const persistOnly=','explicit save command');
 must(gateway,'const directPersist=','direct persistent instruction');
+must(gateway,'const directPersist=Boolean(parsed)||','parsed explicit preference persists immediately');
 must(gateway,'fenix_prod_cerebro_preference_upsert_server','server-only preference write');
 must(gateway,'fenix_prod_cerebro_preference_deactivate_server','forget semantics');
 must(gateway,'if(suffix==="preferences")','preference read route');
