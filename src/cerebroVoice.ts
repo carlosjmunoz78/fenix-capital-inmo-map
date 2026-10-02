@@ -1,6 +1,7 @@
 export const VOICE_CONFIRMATION_CONFIDENCE_MIN=0.85;
 export const VOICE_CONFIRMATION_PHRASES=new Set(['si','si adelante','adelante','confirmo','activalo','activarlo','hazlo','procede']);
 export const VOICE_INTERRUPT_PHRASES=new Set(['para','para ya','cerebro para','stop','cerebro stop','calla','callate','cállate','silencio','basta','detente','detenete','cerebro calla','cerebro callate','cerebro cállate']);
+export const VOICE_RESUME_PHRASES=new Set(['continua','continúa','sigue','sigue hablando','continua hablando','continúa hablando','puedes continuar','puedes seguir','cerebro continua','cerebro continúa','cerebro sigue']);
 export const CEREBRO_VOICE_CONTEXT_HINTS=[
  'CEREBRO','Fénix','Fénix Capital','Fénix Inmobiliaria','Belén','SEO','SEO local',
  'Supabase','Notion','Brevo','Buffer','Facebook','Instagram','LinkedIn',
@@ -128,6 +129,16 @@ export function voiceInterruptRequested(text:string){
  return VOICE_INTERRUPT_PHRASES.has(stripped);
 }
 
+export function voiceResumeRequested(text:string){
+ const normalized=normalizeVoiceConfirmation(text);
+ if(VOICE_RESUME_PHRASES.has(normalized))return true;
+ const stripped=normalized
+  .replace(/^(?:oye\s+)?cerebro\s+/,'')
+  .replace(/\s+por favor$/,'')
+  .trim();
+ return VOICE_RESUME_PHRASES.has(stripped);
+}
+
 export function voiceActivityThreshold(noiseFloor:number,echoFloor=0){
  const noise=Number.isFinite(noiseFloor)?Math.max(0,noiseFloor):0;
  const echo=Number.isFinite(echoFloor)?Math.max(0,echoFloor):0;
@@ -146,10 +157,10 @@ export function voiceNeedsManualConfirmation(text:string,confidence:number|null,
 }
 
 export function voiceSpeechProfile(preferences:Record<string,string>={}){
- const rawRate=Number(preferences.speech_rate??0.96);
+ const rawRate=Number(preferences.speech_rate??1.08);
  const rawPitch=Number(preferences.speech_pitch??1.04);
  return{
-  rate:Number.isFinite(rawRate)?Math.min(1.3,Math.max(0.75,rawRate)):0.96,
+  rate:Number.isFinite(rawRate)?Math.min(1.3,Math.max(0.75,rawRate)):1.08,
   pitch:Number.isFinite(rawPitch)?Math.min(1.25,Math.max(0.8,rawPitch)):1.04
  };
 }

@@ -30,7 +30,7 @@ must(api,"fetchCerebroConsolePreferences",'preference bootstrap');
 must(shell,'learningCandidateRef.current','session candidate');
 must(shell,'voicePreferencesRef.current','live voice preferences');
 must(shell,'speechSegments(text,maxChars,voicePreferencesRef.current,','prosody segmentation');
-must(voice,'speech_rate??0.96','warm default speed');
+must(voice,'speech_rate??1.08','faster default speed');
 must(voice,'speech_pitch??1.04','warm default pitch');
 
 if(/grant\s+execute[\s\S]{0,180}\s+to\s+(authenticated|anon)/i.test(migration)){

@@ -4,11 +4,11 @@ import {BrainCircuit,ChevronLeft,Mic,MicOff,Send,ShieldCheck,Square} from 'lucid
 import {cerebroConsoleLinkEnabled} from './cerebroConsoleAccess';
 import {fetchAppApi,supabase} from './supabase';
 import {fetchCerebroConsoleHealth,fetchCerebroConsolePreferences,postCerebroConsoleChat,type CerebroConsoleHealth,type CerebroConversationTurn,type CerebroLearningCandidate,type CerebroPendingAction,type CerebroPreferences,type CerebroReadContext} from './cerebroConsoleApi';
-import {applyVoiceContextHints,applyVoiceInterruptHints,createVoiceRecognition,preferredSpanishVoice,spanishVoices,speechSegments,speechSynthesisSupported,voiceActivityFrame,voiceActivityThreshold,voiceInterruptRequested,voiceNeedsManualConfirmation,voiceRecognitionSupported,type CerebroSpeechRecognition,type CerebroSpokenMeta} from './cerebroVoice';
+import {applyVoiceContextHints,applyVoiceInterruptHints,createVoiceRecognition,preferredSpanishVoice,spanishVoices,speechSegments,speechSynthesisSupported,voiceActivityFrame,voiceActivityThreshold,voiceInterruptRequested,voiceResumeRequested,voiceNeedsManualConfirmation,voiceRecognitionSupported,type CerebroSpeechRecognition,type CerebroSpokenMeta} from './cerebroVoice';
 import './cerebro-console.css';
 
 const CONTEXTS=['GENERAL','EMPRESA','ENGINE','CRM','APP','SEO','MARKETING','TRAINING','AUTOMATION'];
-const DEFAULT_VOICE_PREFERENCES:CerebroPreferences={tone:'warm_close_caring',response_length:'concise',speech_rate:'0.96',speech_pitch:'1.04'};
+const DEFAULT_VOICE_PREFERENCES:CerebroPreferences={tone:'warm_close_caring',response_length:'concise',speech_rate:'1.08',speech_pitch:'1.04'};
 type GatewayState='closed'|'checking'|'ready'|'error';
 type ChatLine={role:'user'|'cerebro';text:string;mediaUrl?:string|null};
 type OwnerAccess='checking'|'allowed'|'denied';
@@ -34,6 +34,7 @@ export default function CerebroConsoleShell(){
  const [voiceSessionActive,setVoiceSessionActive]=useState(false);
  const [voiceListening,setVoiceListening]=useState(false);
  const [voiceSpeaking,setVoiceSpeaking]=useState(false);
+ const [voicePaused,setVoicePaused]=useState(false);
  const [voiceError,setVoiceError]=useState('');
  const [voiceSupport,setVoiceSupport]=useState({stt:false,tts:false});
  const [voicePreferences,setVoicePreferences]=useState<CerebroPreferences>(DEFAULT_VOICE_PREFERENCES);
@@ -48,6 +49,7 @@ export default function CerebroConsoleShell(){
  const bargeInSpeechStartedAtRef=useRef(0);
  const voiceSessionRef=useRef(false);
  const voiceSpeakingRef=useRef(false);
+ const voicePausedRef=useRef(false);
  const sendingRef=useRef(false);
  const pendingActionRef=useRef<CerebroPendingAction|null>(null);
  const readContextRef=useRef<CerebroReadContext|null>(null);
@@ -222,7 +224,7 @@ export default function CerebroConsoleShell(){
        const frame=voiceActivityFrame(rms,threshold,consecutive,6);
        consecutive=frame.consecutive;
        if(frame.triggered){
-        interruptSpeech();
+        pauseSpeech();
         return;
        }
       }
@@ -266,7 +268,9 @@ export default function CerebroConsoleShell(){
   stopVoiceActivityBargeIn();
   if(voiceSupport.tts)window.speechSynthesis.cancel();
   voiceSpeakingRef.current=false;
+  voicePausedRef.current=false;
   setVoiceSpeaking(false);
+  setVoicePaused(false);
   setVoiceError('');
  }
 
@@ -281,6 +285,8 @@ export default function CerebroConsoleShell(){
    return;
   }
   window.speechSynthesis.cancel();
+  voicePausedRef.current=false;
+  setVoicePaused(false);
   const voices=spanishVoices();
   const selected=preferredSpanishVoice(voices);
   let finished=false;
@@ -316,16 +322,45 @@ export default function CerebroConsoleShell(){
   void prepareVoiceActivityBargeIn().then(beginSpeech);
  }
 
- function interruptSpeech(){
-  if(!voiceSpeakingRef.current)return;
+ function pauseSpeech(){
+  if(!voiceSpeakingRef.current||voicePausedRef.current)return;
   clearRestartTimer();
   stopInterruptRecognition();
   stopVoiceActivityBargeIn();
+  if(voiceSupport.tts)window.speechSynthesis.pause();
   voiceSpeakingRef.current=false;
+  voicePausedRef.current=true;
   setVoiceSpeaking(false);
-  if(voiceSupport.tts)window.speechSynthesis.cancel();
+  setVoicePaused(true);
   setVoiceError('');
   scheduleListening(80);
+ }
+
+ function resumeSpeech(){
+  if(!voicePausedRef.current||!voiceSessionRef.current)return false;
+  clearRestartTimer();
+  stopRecognition();
+  voicePausedRef.current=false;
+  setVoicePaused(false);
+  voiceSpeakingRef.current=true;
+  setVoiceSpeaking(true);
+  bargeInSpeechStartedAtRef.current=performance.now();
+  if(voiceSupport.tts)window.speechSynthesis.resume();
+  void prepareVoiceActivityBargeIn().then(vadReady=>{
+   if(!vadReady&&voiceSpeakingRef.current&&voiceSessionRef.current)scheduleInterruptListening(120);
+  });
+  return true;
+ }
+
+ function discardPausedSpeech(){
+  if(!voicePausedRef.current)return;
+  if(voiceSupport.tts)window.speechSynthesis.cancel();
+  voicePausedRef.current=false;
+  setVoicePaused(false);
+ }
+
+ function interruptSpeech(){
+  pauseSpeech();
  }
 
  function startInterruptListening(){
@@ -344,7 +379,7 @@ export default function CerebroConsoleShell(){
     for(let alternativeIndex=0;alternativeIndex<result.length;alternativeIndex+=1){
      const transcript=result[alternativeIndex]?.transcript?.trim();
      if(transcript&&voiceInterruptRequested(transcript)){
-      interruptSpeech();
+      pauseSpeech();
       return;
      }
     }
@@ -370,6 +405,15 @@ export default function CerebroConsoleShell(){
  async function sendText(text:string,voiceConfidence:number|null=null,fromVoice=false){
   const clean=text.trim();
   if(!clean||!chatReady||sendingRef.current)return;
+  if(fromVoice&&voicePausedRef.current){
+   if(voiceResumeRequested(clean)){
+    setMessage('');
+    setVoiceError('');
+    resumeSpeech();
+    return;
+   }
+   discardPausedSpeech();
+  }
   if(fromVoice&&voiceNeedsManualConfirmation(clean,voiceConfidence,Boolean(pendingActionRef.current))){
    const warning='No voy a usar una transcripción de baja confianza para confirmar una acción. Di «sí» otra vez con claridad o escríbelo manualmente.';
    setVoiceError(warning);
@@ -513,6 +557,7 @@ export default function CerebroConsoleShell(){
    recognitionRef.current=null;
    if(recognition){try{recognition.abort()}catch{/* no-op */}}
    if(speechSynthesisSupported())window.speechSynthesis.cancel();
+   voicePausedRef.current=false;
   };
  },[]);
 
@@ -525,7 +570,9 @@ export default function CerebroConsoleShell(){
    :'Esta pantalla reserva la interfaz propia de CEREBRO dentro de Fénix. La comunicación permanece cerrada hasta disponer de una URL HTTPS desplegada y autenticada delante de CEREBRO Gateway.';
 
  const voiceStatus=voiceSpeaking
-  ?'CEREBRO está hablando. Empieza a hablar para interrumpirla; no necesitas esperar ni tocar el botón.'
+  ?'CEREBRO está hablando. Di «para» para pausarla y «continúa» para seguir desde el mismo punto.'
+  :voicePaused
+   ?'Respuesta pausada. Di «continúa» para seguir desde donde se quedó, o haz otra pregunta para descartarla.'
   :sending
    ?'CEREBRO está procesando tu petición.'
    :voiceListening
@@ -548,7 +595,7 @@ export default function CerebroConsoleShell(){
      {voiceSessionActive?<MicOff size={21}/>:<Mic size={21}/>}
      {voiceSessionActive?'Finalizar conversación':'Hablar con CEREBRO'}
     </button>
-    {voiceSpeaking?<button type="button" className="cerebro-voice-interrupt" onClick={interruptSpeech}><Square size={18}/> Parar respuesta y hablar</button>:null}
+    {voiceSpeaking?<button type="button" className="cerebro-voice-interrupt" onClick={pauseSpeech}><Square size={18}/> Pausar respuesta</button>:null}
     <span className="cerebro-voice-status">{voiceStatus}</span>
    </div>
    {voiceError?<div className="cerebro-voice-error" role="alert">{voiceError}</div>:null}
