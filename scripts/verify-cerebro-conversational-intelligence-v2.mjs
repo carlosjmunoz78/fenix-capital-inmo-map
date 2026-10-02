@@ -17,6 +17,11 @@ must(gateway,'function validateConversationContext','server-side context validat
 must(gateway,'if(total+text.length>8000)break','server-side context byte budget');
 must(gateway,'function contextualizeMessage','follow-up contextualizer');
 must(gateway,'function numberedContextItem','numbered-point follow-up resolution');
+must(gateway,'function spokenNumber','spoken-number follow-up parser');
+must(gateway,'(?:punto|numero)','point/number vocabulary');
+must(gateway,'recentSocialScheduleNetwork','short social follow-up recovery');
+must(gateway,'fenix_prod_exp_list_server','live expediente list binding');
+must(gateway,'expedientes_active_summary','live active expediente intent');
 must(gateway,'En el contexto de','domain follow-up synthesis');
 must(gateway,'context_applied:resolved.applied','context evidence returned');
 must(gateway,'resolved_question:resolved.applied?resolved.question:undefined','resolved question evidence');
@@ -35,6 +40,8 @@ must(migration,"revoke all on function public.fenix_prod_cerebro_memory_observe_
 must(migration,"grant execute on function public.fenix_prod_cerebro_memory_observe_v2_server",'V2 observe service-role grant');
 
 must(knowledge,'function currentnessAssessment','time-sensitive knowledge currentness check');
+must(knowledge,'function broadLegalMapQuestion','generic-vs-specific legal map guard');
+must(knowledge,'genericLegal&&!specific','specific legal topic focus guard');
 must(knowledge,'REQUIRES_CURRENT_VERIFICATION','current verification status');
 must(knowledge,'knowledge_freshness','freshness evidence field');
 

@@ -31,6 +31,8 @@ for(const phrase of [
  assert(knowledge.includes(phrase),'legal knowledge map missing: '+phrase);
 }
 assert(knowledge.includes('function broadKnowledgeQuestion'),'broad knowledge map classifier missing');
+assert(knowledge.includes('function broadLegalMapQuestion'),'specific legal focus guard missing');
+assert(knowledge.includes('genericLegal&&!specific'),'specific legal topic must not expand to the full legal map');
 assert(knowledge.includes('function clarificationMessage'),'clarification helper missing');
 assert(knowledge.includes('No te he entendido del todo.'),'generic clarification wording missing');
 assert(knowledge.includes('status:"LOW_CONFIDENCE",intent:"clarification"'),'low-confidence clarification contract missing');
