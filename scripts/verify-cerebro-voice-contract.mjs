@@ -2,6 +2,11 @@ import fs from 'node:fs';
 
 const voice=fs.readFileSync('src/cerebroVoice.ts','utf8');
 const gateway=fs.readFileSync('supabase/functions/cerebro-console-gateway-v0/index.ts','utf8');
+const shell=fs.readFileSync('src/CerebroConsoleShell.tsx','utf8');
+
+function must(haystack,needle,label){
+ if(!haystack.includes(needle))throw new Error('Missing '+label+': '+needle);
+}
 
 function normalize(value){
   return value.trim().toLocaleLowerCase('es-ES')
