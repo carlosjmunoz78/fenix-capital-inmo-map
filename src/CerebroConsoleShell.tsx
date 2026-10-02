@@ -50,6 +50,9 @@ export default function CerebroConsoleShell(){
  const voiceSessionRef=useRef(false);
  const voiceSpeakingRef=useRef(false);
  const voicePausedRef=useRef(false);
+ const speechPlanRef=useRef<ReturnType<typeof speechSegments>>([]);
+ const speechCursorRef=useRef({segmentIndex:0,charIndex:0});
+ const speechRunTokenRef=useRef(0);
  const sendingRef=useRef(false);
  const pendingActionRef=useRef<CerebroPendingAction|null>(null);
  const readContextRef=useRef<CerebroReadContext|null>(null);
@@ -221,7 +224,7 @@ export default function CerebroConsoleShell(){
        const noiseFloor=noiseSamples.length?noiseSamples.reduce((a,b)=>a+b,0)/noiseSamples.length:0;
        const echoFloor=echoSamples.length?echoSamples.reduce((a,b)=>a+b,0)/echoSamples.length:0;
        const threshold=voiceActivityThreshold(noiseFloor,echoFloor);
-       const frame=voiceActivityFrame(rms,threshold,consecutive,6);
+       const frame=voiceActivityFrame(rms,threshold,consecutive,8);
        consecutive=frame.consecutive;
        if(frame.triggered){
         pauseSpeech();
@@ -259,6 +262,74 @@ export default function CerebroConsoleShell(){
   setVoiceListening(false);
  }
 
+ function resetSpeechPlan(){
+  speechPlanRef.current=[];
+  speechCursorRef.current={segmentIndex:0,charIndex:0};
+ }
+
+ function finishSpeechPlan(token:number){
+  if(token!==speechRunTokenRef.current||voicePausedRef.current)return;
+  voiceSpeakingRef.current=false;
+  setVoiceSpeaking(false);
+  stopInterruptRecognition();
+  stopVoiceActivityBargeIn();
+  resetSpeechPlan();
+  scheduleListening(180);
+ }
+
+ function playSpeechPlan(startIndex:number,startCharIndex:number){
+  const plan=speechPlanRef.current;
+  if(!voiceSessionRef.current||!voiceSupport.tts||!plan.length)return false;
+  const token=++speechRunTokenRef.current;
+  const selected=preferredSpanishVoice(spanishVoices());
+  const speakSegment=(index:number,charIndex:number)=>{
+   if(token!==speechRunTokenRef.current||voicePausedRef.current||!voiceSessionRef.current)return;
+   if(index>=plan.length){
+    finishSpeechPlan(token);
+    return;
+   }
+   const segment=plan[index];
+   const offset=Math.min(Math.max(0,charIndex),segment.text.length);
+   const remaining=segment.text.slice(offset);
+   if(!remaining.trim()){
+    speechCursorRef.current={segmentIndex:index+1,charIndex:0};
+    speakSegment(index+1,0);
+    return;
+   }
+   speechCursorRef.current={segmentIndex:index,charIndex:offset};
+   const utterance=new SpeechSynthesisUtterance(remaining);
+   utterance.rate=segment.rate;
+   utterance.pitch=segment.pitch;
+   if(selected){utterance.voice=selected;utterance.lang=selected.lang}
+   else utterance.lang='es-ES';
+   utterance.onboundary=event=>{
+    if(token!==speechRunTokenRef.current||voicePausedRef.current)return;
+    const localIndex=typeof event.charIndex==='number'&&Number.isFinite(event.charIndex)?event.charIndex:0;
+    speechCursorRef.current={segmentIndex:index,charIndex:Math.min(segment.text.length,offset+localIndex)};
+   };
+   utterance.onend=()=>{
+    if(token!==speechRunTokenRef.current||voicePausedRef.current)return;
+    speechCursorRef.current={segmentIndex:index+1,charIndex:0};
+    speakSegment(index+1,0);
+   };
+   utterance.onerror=()=>{
+    if(token!==speechRunTokenRef.current||voicePausedRef.current)return;
+    speechCursorRef.current={segmentIndex:index+1,charIndex:0};
+    speakSegment(index+1,0);
+   };
+   window.speechSynthesis.speak(utterance);
+  };
+  void prepareVoiceActivityBargeIn().then(vadReady=>{
+   if(token!==speechRunTokenRef.current||voicePausedRef.current||!voiceSessionRef.current)return;
+   voiceSpeakingRef.current=true;
+   setVoiceSpeaking(true);
+   bargeInSpeechStartedAtRef.current=performance.now();
+   if(!vadReady)scheduleInterruptListening(120);
+   speakSegment(startIndex,startCharIndex);
+  });
+  return true;
+ }
+
  function endVoiceSession(){
   voiceSessionRef.current=false;
   setVoiceSessionActive(false);
@@ -266,7 +337,9 @@ export default function CerebroConsoleShell(){
   stopRecognition();
   stopInterruptRecognition();
   stopVoiceActivityBargeIn();
+  speechRunTokenRef.current+=1;
   if(voiceSupport.tts)window.speechSynthesis.cancel();
+  resetSpeechPlan();
   voiceSpeakingRef.current=false;
   voicePausedRef.current=false;
   setVoiceSpeaking(false);
@@ -284,42 +357,13 @@ export default function CerebroConsoleShell(){
    scheduleListening(150);
    return;
   }
+  speechRunTokenRef.current+=1;
   window.speechSynthesis.cancel();
+  speechPlanRef.current=segments;
+  speechCursorRef.current={segmentIndex:0,charIndex:0};
   voicePausedRef.current=false;
   setVoicePaused(false);
-  const voices=spanishVoices();
-  const selected=preferredSpanishVoice(voices);
-  let finished=false;
-  const finish=()=>{
-   if(finished)return;
-   finished=true;
-   voiceSpeakingRef.current=false;
-   setVoiceSpeaking(false);
-   stopInterruptRecognition();
-   stopVoiceActivityBargeIn();
-   scheduleListening(180);
-  };
-  const beginSpeech=(vadReady:boolean)=>{
-   if(!voiceSessionRef.current)return;
-   voiceSpeakingRef.current=true;
-   setVoiceSpeaking(true);
-   bargeInSpeechStartedAtRef.current=performance.now();
-   if(!vadReady)scheduleInterruptListening(120);
-   segments.forEach((segment,index)=>{
-    const utterance=new SpeechSynthesisUtterance(segment.text);
-    utterance.rate=segment.rate;
-    utterance.pitch=segment.pitch;
-    if(selected){utterance.voice=selected;utterance.lang=selected.lang}
-    else utterance.lang='es-ES';
-    if(index===segments.length-1)utterance.onend=finish;
-    utterance.onerror=()=>{
-     window.speechSynthesis.cancel();
-     finish();
-    };
-    window.speechSynthesis.speak(utterance);
-   });
-  };
-  void prepareVoiceActivityBargeIn().then(beginSpeech);
+  playSpeechPlan(0,0);
  }
 
  function pauseSpeech(){
@@ -327,7 +371,8 @@ export default function CerebroConsoleShell(){
   clearRestartTimer();
   stopInterruptRecognition();
   stopVoiceActivityBargeIn();
-  if(voiceSupport.tts)window.speechSynthesis.pause();
+  speechRunTokenRef.current+=1;
+  if(voiceSupport.tts)window.speechSynthesis.cancel();
   voiceSpeakingRef.current=false;
   voicePausedRef.current=true;
   setVoiceSpeaking(false);
@@ -338,25 +383,29 @@ export default function CerebroConsoleShell(){
 
  function resumeSpeech(){
   if(!voicePausedRef.current||!voiceSessionRef.current)return false;
+  const {segmentIndex,charIndex}=speechCursorRef.current;
+  if(segmentIndex>=speechPlanRef.current.length){
+   discardPausedSpeech();
+   scheduleListening(80);
+   return false;
+  }
   clearRestartTimer();
   stopRecognition();
   voicePausedRef.current=false;
   setVoicePaused(false);
-  voiceSpeakingRef.current=true;
-  setVoiceSpeaking(true);
-  bargeInSpeechStartedAtRef.current=performance.now();
-  if(voiceSupport.tts)window.speechSynthesis.resume();
-  void prepareVoiceActivityBargeIn().then(vadReady=>{
-   if(!vadReady&&voiceSpeakingRef.current&&voiceSessionRef.current)scheduleInterruptListening(120);
-  });
-  return true;
+  setVoiceError('');
+  return playSpeechPlan(segmentIndex,charIndex);
  }
 
  function discardPausedSpeech(){
-  if(!voicePausedRef.current)return;
+  if(!voicePausedRef.current&&!speechPlanRef.current.length)return;
+  speechRunTokenRef.current+=1;
   if(voiceSupport.tts)window.speechSynthesis.cancel();
+  voiceSpeakingRef.current=false;
   voicePausedRef.current=false;
+  setVoiceSpeaking(false);
   setVoicePaused(false);
+  resetSpeechPlan();
  }
 
  function interruptSpeech(){
@@ -556,7 +605,9 @@ export default function CerebroConsoleShell(){
    const recognition=recognitionRef.current;
    recognitionRef.current=null;
    if(recognition){try{recognition.abort()}catch{/* no-op */}}
+   speechRunTokenRef.current+=1;
    if(speechSynthesisSupported())window.speechSynthesis.cancel();
+   resetSpeechPlan();
    voicePausedRef.current=false;
   };
  },[]);

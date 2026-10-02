@@ -32,7 +32,7 @@ must(voice,"case 'legal_knowledge_map':",'legal knowledge map spoken digest');
 must(voice,"intent==='clarification'",'clarification speech preservation');
 must(voice,"intent==='greeting'",'greeting speech preservation');
 must(voice,'source_question?:string','source-question conversational context');
-must(shell,'preferredSpanishVoice(voices)','preferred Spanish voice integration');
+must(shell,'preferredSpanishVoice(spanishVoices())','preferred Spanish voice integration');
 must(shell,'source_question:clean','spoken layer receives the user turn');
 must(shell,"fullDetail?'action':'normal'",'action-aware TTS mode');
 must(shell,'data??{}','structured response metadata passed to TTS');

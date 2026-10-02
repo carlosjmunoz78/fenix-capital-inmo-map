@@ -5,7 +5,7 @@ export const VOICE_RESUME_PHRASES=new Set(['continua','continúa','sigue','sigue
 export const CEREBRO_VOICE_CONTEXT_HINTS=[
  'CEREBRO','Fénix','Fénix Capital','Fénix Inmobiliaria','Belén','SEO','SEO local',
  'Supabase','Notion','Brevo','Buffer','Facebook','Instagram','LinkedIn',
- 'hipoteca','hipotecas','inmobiliaria','inmobiliarias','expediente','expedientes'
+ 'hipoteca','hipotecas','inmobiliaria','inmobiliarias','expediente','expedientes','continúa','continua','sigue'
 ];
 
 export type CerebroSpeechRecognitionResult={
@@ -142,10 +142,10 @@ export function voiceResumeRequested(text:string){
 export function voiceActivityThreshold(noiseFloor:number,echoFloor=0){
  const noise=Number.isFinite(noiseFloor)?Math.max(0,noiseFloor):0;
  const echo=Number.isFinite(echoFloor)?Math.max(0,echoFloor):0;
- return Math.max(0.028,noise*3.2,echo*1.75);
+ return Math.max(0.035,noise*3.8,echo*2.1);
 }
 
-export function voiceActivityFrame(rms:number,threshold:number,consecutive:number,requiredFrames=6){
+export function voiceActivityFrame(rms:number,threshold:number,consecutive:number,requiredFrames=8){
  const next=Number.isFinite(rms)&&rms>=threshold?consecutive+1:Math.max(0,consecutive-1);
  return{consecutive:next,triggered:next>=requiredFrames};
 }

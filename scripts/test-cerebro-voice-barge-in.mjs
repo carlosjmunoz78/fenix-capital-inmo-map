@@ -1,4 +1,4 @@
-import {voiceInterruptRequested,spokenResponseText} from '../src/cerebroVoice.ts';
+import {voiceInterruptRequested,voiceResumeRequested,spokenResponseText} from '../src/cerebroVoice.ts';
 
 function assert(condition,message){
  if(!condition)throw new Error(message);
@@ -10,6 +10,14 @@ for(const phrase of ['para','para ya','CEREBRO para','stop','calla','cállate','
 
 for(const phrase of ['para Belén','esto es para mañana','prepara el correo','compara opciones','paramos luego']){
  assert(!voiceInterruptRequested(phrase),`false verbal interruption: ${phrase}`);
+}
+
+for(const phrase of ['continúa','continua','sigue','puedes continuar','CEREBRO sigue']){
+ assert(voiceResumeRequested(phrase),`resume phrase not recognized: ${phrase}`);
+}
+
+for(const phrase of ['continúa mañana','sigue el expediente','seguimos con SEO después']){
+ assert(!voiceResumeRequested(phrase),`false verbal resume: ${phrase}`);
 }
 
 {
