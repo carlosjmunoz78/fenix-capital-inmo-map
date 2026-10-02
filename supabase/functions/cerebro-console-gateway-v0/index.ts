@@ -175,7 +175,8 @@ function contextualizeMessage(message:string,context:ConversationTurn[]){
     if(item)return {question:`Sobre «${item}»: ${raw}`,applied:true,topic:item};
   }
 
-  if(/^(dame la|damela|quiero verla|muestramela|ensenamela)$/.test(text)){
+  const shortSocialFollowup=/^(dame la|damela|quiero verla|muestramela|ensenamela)$/.test(text);
+  if(shortSocialFollowup){
     const network=recentSocialScheduleNetwork(context);
     if(network)return {question:`Dame la próxima publicación de ${network} completa`,applied:true,topic:"redes sociales"};
   }
