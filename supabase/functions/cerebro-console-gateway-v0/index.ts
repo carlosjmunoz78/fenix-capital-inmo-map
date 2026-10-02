@@ -501,6 +501,7 @@ function conversationMemoryKind(message:string){
   if(/(prefiero|me gusta que|quiero que me|no quiero que me|a partir de ahora.*(?:habla|dime|llamame|llámame|responde))/i.test(message))return "PREFERENCE";
   if(/(he decidido|hemos decidido|queda decidido|decidimos|vamos a hacer|quiero que hagamos)/.test(text))return "DECISION";
   if(/(en fenix|en fénix|nuestro proceso|nuestra forma|internamente).*(hacemos|usamos|trabajamos|gestionamos|debe|tiene que)/i.test(message))return "OPERATIONAL_KNOWLEDGE";
+  if(/^(recuerda que|ten en cuenta que|quiero que recuerdes que)\b/.test(text))return "FACT";
   if(/(tenemos|usamos|trabajamos|nuestro|nuestra|son dos|es el|es la|debe ser|tiene que ser)/.test(text))return "FACT";
   return "USER_TURN";
 }
