@@ -1,11 +1,14 @@
 export const VOICE_CONFIRMATION_CONFIDENCE_MIN=0.85;
+export const VOICE_QUERY_CONFIDENCE_MIN=0.60;
 export const VOICE_CONFIRMATION_PHRASES=new Set(['si','si adelante','adelante','confirmo','activalo','activarlo','hazlo','procede']);
 export const VOICE_INTERRUPT_PHRASES=new Set(['para','para ya','cerebro para','stop','cerebro stop','calla','callate','cállate','silencio','basta','detente','detenete','cerebro calla','cerebro callate','cerebro cállate']);
 export const VOICE_RESUME_PHRASES=new Set(['continua','continúa','sigue','sigue hablando','continua hablando','continúa hablando','puedes continuar','puedes seguir','cerebro continua','cerebro continúa','cerebro sigue']);
 export const CEREBRO_VOICE_CONTEXT_HINTS=[
  'CEREBRO','Fénix','Fénix Capital','Fénix Inmobiliaria','Belén','SEO','SEO local',
  'Supabase','Notion','Brevo','Buffer','Facebook','Instagram','LinkedIn',
- 'hipoteca','hipotecas','inmobiliaria','inmobiliarias','expediente','expedientes','continúa','continua','sigue'
+ 'hipoteca','hipotecas','inmobiliaria','inmobiliarias','expediente','expedientes',
+ 'obra nueva','obras nuevas','asesoría fiscal','asesoria fiscal','fiscalidad','herencias','Lucena',
+ 'continúa','continua','sigue'
 ];
 
 export type CerebroSpeechRecognitionResult={
@@ -154,6 +157,32 @@ export function voiceNeedsManualConfirmation(text:string,confidence:number|null,
  if(!hasPendingAction)return false;
  if(!VOICE_CONFIRMATION_PHRASES.has(normalizeVoiceConfirmation(text)))return false;
  return confidence===null||!Number.isFinite(confidence)||confidence<VOICE_CONFIRMATION_CONFIDENCE_MIN;
+}
+
+export function voiceAlternativeScore(text:string,confidence:number|null){
+ const normalized=normalizeVoiceConfirmation(text);
+ const rawConfidence=confidence!==null&&Number.isFinite(confidence)?Math.max(0,Math.min(1,confidence)):0.5;
+ let score=rawConfidence*100;
+ const strongTerms=[
+  'cerebro','fenix','fénix','hipoteca','hipotecas','inmobiliaria','inmobiliarias','expediente','expedientes',
+  'obra nueva','obras nuevas','asesoria fiscal','fiscalidad','herencias','linkedin','instagram','facebook','lucena'
+ ];
+ for(const term of strongTerms){
+  const normalizedTerm=normalizeVoiceConfirmation(term);
+  if(normalized.includes(normalizedTerm))score+=normalizedTerm.includes(' ')?18:10;
+ }
+ return score;
+}
+
+export function voiceNeedsClarification(text:string,confidence:number|null){
+ const normalized=normalizeVoiceConfirmation(text);
+ if(!normalized)return true;
+ if(VOICE_INTERRUPT_PHRASES.has(normalized)||VOICE_RESUME_PHRASES.has(normalized)||VOICE_CONFIRMATION_PHRASES.has(normalized))return false;
+ const alwaysClear=new Set(['hola','buenas','linkedin','instagram','facebook','hipoteca','hipotecas','herencias','seo']);
+ if(alwaysClear.has(normalized))return false;
+ if(confidence!==null&&Number.isFinite(confidence)&&confidence<VOICE_QUERY_CONFIDENCE_MIN)return true;
+ if(new Set(['nuevas','eso','esa','ese','esto','aquello','arias','aria']).has(normalized))return true;
+ return false;
 }
 
 export function voiceSpeechProfile(preferences:Record<string,string>={}){
