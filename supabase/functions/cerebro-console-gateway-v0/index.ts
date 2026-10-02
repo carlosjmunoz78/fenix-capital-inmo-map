@@ -49,7 +49,7 @@ type LearningCandidate = {
 const DEFAULT_PREFERENCES:Record<string,string>={
   tone:"warm_close_caring",
   response_length:"concise",
-  speech_rate:"0.96",
+  speech_rate:"1.08",
   speech_pitch:"1.04"
 };
 
@@ -344,7 +344,7 @@ function parseLearningCandidate(message:string):LearningCandidate|null{
     return {category:"voice_style",preference_key:"speech_rate",value:"0.90",label:"hablar un poco más despacio"};
   }
   if(/(mas rapido|más rápido|más rapida|más rápida|habla rapido|habla rápido|sube .*velocidad)/.test(text)){
-    return {category:"voice_style",preference_key:"speech_rate",value:"1.05",label:"hablar un poco más rápido"};
+    return {category:"voice_style",preference_key:"speech_rate",value:"1.08",label:"hablar un poco más rápido"};
   }
   if(/(mas profesional|más profesional|menos cariñosa|menos carinosa|tono mas serio|tono más serio)/.test(text)){
     return {category:"voice_style",preference_key:"tone",value:"professional_warm",label:"usar un tono profesional, cálido y menos cariñoso"};
