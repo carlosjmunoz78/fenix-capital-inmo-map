@@ -812,7 +812,7 @@ async function chatReply(req:Request,message:string,pendingRaw:unknown,readConte
     };
   }
 
-  const inmoLocality=text.match(/(?:que\s+)?inmobiliarias?(?:\s+tenemos|\s+hay|\s+conoces)?\s+en\s+([a-záéíóúñ -]{2,60})$/i);
+  const inmoLocality=text.match(/(?:(?:que|estas?|esas?)\s+)?inmobiliarias?(?:\s+tenemos|\s+hay|\s+conoces)?\s+en\s+([a-záéíóúñ -]{2,60})$/i);
   if(inmoLocality){
     const locality=inmoLocality[1].trim();
     const live=await liveInmobiliariasByLocality(req,locality);
