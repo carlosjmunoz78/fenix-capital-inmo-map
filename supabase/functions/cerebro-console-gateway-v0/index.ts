@@ -822,7 +822,8 @@ async function chatReply(req:Request,message:string,pendingRaw:unknown,readConte
     return {status:"OK",intent:"inmobiliarias_by_locality",executed:false,message:`En App Fénix tengo ${live.items.length} inmobiliaria(s) en ${locality}: ${names.join(", ")}.`,source:{system:"APP_FENIX_PROD",rpc:"fenix_prod_inmo_list_server"}};
   }
 
-  if(/^(nuevas|eso|esa|ese|esto|aquello|arias|aria)$/.test(text)){
+  const ambiguousStandalone=/^(nuevas|eso|esa|ese|esto|aquello|arias|aria)$/.test(text);
+  if(ambiguousStandalone){
     return {status:"LOW_CONFIDENCE",intent:"clarification",executed:false,message:`He entendido «${message.trim()}», pero así no tengo suficiente contexto para responder con fiabilidad. Dime un poco más: por ejemplo, «obras nuevas», «nuevas publicaciones» o el tema concreto que quieras consultar.`};
   }
 
