@@ -9,6 +9,7 @@ Evidence anchors are scoped to the change they prove; they are not intended to m
 - Phase 2 existing-engine wrapper registry: structural/read-only binding layer green.
 - Phase 2 read-only evidence audit V0: complete for all nine bindings without activation or writes.
 - `APP-001`: `CONFIRMED_OPERATIONAL` for the existing App surface only, based on exact-SHA successful PROD deploy/runtime smoke for `6bf6af92c1106884da87fb9a659f807093d47e0a` (`34293941974`, `34293942069`). This does not imply autonomous CEREBRO execution.
+- `SEO-001`: live implementation independently audited on 2026-09-20 and recorded as `CONFIRMED_OPERATIONAL` with guarded autonomy. WordPress PROD remains fail-closed for ordinary writes; STAGING canary, measurement, snapshot/verify/rollback and multi-company PREPROD data scope are proven. `AUTONOMOUS_VERIFIED` remains pending the canonical four-consecutive-week operating gate.
 - Phase 4 multi-company bootstrap V0: structural/reference green for 17 canonical engines.
 - Phase 5 Console/Gateway V0: structural/reference green for `CONSOLE-001`, `CHAT-001`, `CTX-001`, `CMD-001`, `ACTGW-001`.
 - Governance V0: `POL-001` and `HEX-001` structural/reference green; merge `c523da8f11dbf1a2618982aeeb5940670317bb6e`, PROD Live Deploy `34330670776` and Runtime Smoke `34330670550` success on exact merge SHA.
@@ -32,7 +33,8 @@ Evidence anchors are scoped to the change they prove; they are not intended to m
 
 ## POR AUDITAR
 
-- `CRM-001`, `SEO-001`, `WEB-001`: `UNKNOWN_REQUIRES_AUDIT`; no stronger live claim is supported by this repository audit.
+- `CRM-001`, `WEB-001`: `UNKNOWN_REQUIRES_AUDIT`; no stronger live claim is supported by the current repository audit.
+- `SEO-001`: no longer `UNKNOWN_REQUIRES_AUDIT`; live evidence is captured in `evidence/seo-001-live-audit-20260920.json`. Remaining audit gate is longitudinal autonomy proof, not existence/operability.
 - `LAB-TRD`: `UNKNOWN_REQUIRES_AUDIT`, explicitly isolated and requiring a separate audit; no Trading integration with CEREBRO PROD is claimed.
 - Real production autonomy per engine.
 - `EVT-001`/`JOB-001` migration/wiring into `SharedRuntime` and scaling beyond the single-writer V0 reference.

@@ -1,0 +1,422 @@
+{
+  "schema_version": "1.0.0",
+  "audit_date": "2026-09-20",
+  "engine_id": "SEO-001",
+  "company_id": "FENIX_CAPITAL",
+  "engine_version": "0.4.1",
+  "evidence_state": "CONFIRMED_OPERATIONAL",
+  "autonomy_state": "OPERATIVE_GUARDED_PENDING_4_WEEK_VERIFICATION",
+  "autonomous_prod": false,
+  "additional_cost_target_eur": 0,
+  "live_surfaces": {
+    "wordpress_prod": {
+      "url": "https://fenixcapital.es",
+      "core_guard_version": "1.0.0-rc9-prod2",
+      "core_guard_health_score": 100,
+      "seo_bridge_version": "0.4.1",
+      "mode": "observer",
+      "operational_writes_allowed": false,
+      "hourly_hook": "fenix_seo_cerebro_hourly"
+    },
+    "wordpress_staging": {
+      "url": "https://staging.fenixcapital.es",
+      "core_guard_health_score": 100,
+      "preprod_readiness": true,
+      "smoke": "PASS",
+      "seo_canary": "fixed_verified",
+      "learning_count_observed": 27
+    },
+    "measurement": {
+      "make_gsc_scenario_id": 9550706,
+      "make_ga4_scenario_id": 9538231,
+      "make_google_bridge_scenario_id": 9694039,
+      "make_google_bridge_active": true,
+      "supabase_runner": "fenix-seo-cerebro-preprod",
+      "supabase_runner_version": 26,
+      "gsc": "GREEN_VIA_EXISTING_OAUTH_FALLBACK",
+      "ga4": "GREEN_VIA_EXISTING_OAUTH_FALLBACK",
+      "direct_service_account_gsc": "403_INSUFFICIENT_PROPERTY_PERMISSION_NON_BLOCKING",
+      "ga4_property_canonical": "518454210",
+      "ga4_property_legacy_no_use": "484640617",
+      "supabase_executor": "fenix-seo-executor-preprod",
+      "supabase_executor_version": 8,
+      "query_page_pairs": true,
+      "prioritized_backlog": true,
+      "supabase_runner_sha256": "4560c56c12f64f92472a5ac4d745d199709b72637e49f24c3da2f410ddd85457",
+      "make_bridge_secret_storage": "SUPABASE_VAULT_SERVICE_ROLE_ONLY_RPC",
+      "hardcoded_make_webhook": false,
+      "intent_map": true,
+      "intent_map_table": "seo_cerebro_intent_map_preprod",
+      "experiment_registry": true,
+      "experiment_table": "seo_cerebro_experiments_preprod",
+      "experiment_observations_table": "seo_cerebro_experiment_observations_preprod",
+      "cron": {
+        "job_id": 2,
+        "schedule": "0 6 * * 1",
+        "active": true,
+        "timeout_milliseconds": 30000
+      },
+      "v18_manual_validation": {
+        "http_status": 200,
+        "timed_out": false,
+        "technical_canary_ok": true,
+        "weekly_cycle_written": false
+      },
+      "health_freshness_field": "measured_at",
+      "v19_manual_validation": {
+        "http_status": 200,
+        "timed_out": false,
+        "technical_canary_ok": true,
+        "weekly_cycle_written": false
+      }
+    }
+  },
+  "latest_measurement": {
+    "window_start": "2026-08-21",
+    "window_end": "2026-09-17",
+    "clicks": 17,
+    "impressions": 4836,
+    "ctr": 0.003515301902398677,
+    "avg_position": 27.011166253101738,
+    "previous_clicks": 12,
+    "previous_impressions": 4154,
+    "previous_ctr": 0.002888781896966779,
+    "previous_avg_position": 32.58016369764083,
+    "ga4_sessions": 82,
+    "ga4_active_users": "NOT_CANONICAL_IN_FALLBACK_DO_NOT_USE_FOR_DECISIONS",
+    "ga4_active_users_valid": false,
+    "query_page_overlap_candidates": [
+      {
+        "query": "asesor hipotecario en córdoba",
+        "total_impressions": 120
+      },
+      {
+        "query": "broker hipotecario en córdoba",
+        "total_impressions": 94
+      }
+    ],
+    "backlog_items": 9
+  },
+  "multicompany_contract": {
+    "tables": [
+      "seo_cerebro_runs_preprod",
+      "seo_cerebro_changes_preprod",
+      "seo_cerebro_backlog_preprod"
+    ],
+    "scope_fields": [
+      "company_id",
+      "engine_id",
+      "environment",
+      "engine_version"
+    ],
+    "scope_unique_keys": [
+      [
+        "company_id",
+        "engine_id",
+        "environment",
+        "run_key"
+      ],
+      [
+        "company_id",
+        "engine_id",
+        "environment",
+        "change_key"
+      ]
+    ],
+    "validated": true,
+    "migrations": [
+      "seo001_multicompany_scope_v1",
+      "seo001_query_page_quality_v1",
+      "seo001_prioritized_backlog_v1"
+    ],
+    "unknown_company_fail_closed": {
+      "status_code": 409,
+      "error": "company_not_configured"
+    }
+  },
+  "rollback_and_backup": {
+    "wordpress_checkpoint_id": 9,
+    "wordpress_checkpoint_size_bytes": 37132785,
+    "wordpress_checkpoint_tables": 124,
+    "preprod_change_evidence": "3 historical SEO canaries rolled_back_verified",
+    "canary_apply_verified": true,
+    "canary_rollback_verified": true
+  },
+  "technical_audit": {
+    "published_inventory_count": 158,
+    "core_guard_verify_batch_id": "bed2a09b-f52c-43ec-8f48-354044003106",
+    "google_readiness_batch_id": "1be92c22-7591-4c60-8012-cc1c35c08547",
+    "verify_batch_last_observed": {
+      "processed": 110,
+      "success": 109,
+      "issues": 1,
+      "failed": 0
+    },
+    "home_lighthouse_mobile": {
+      "performance": 92,
+      "accessibility": 97,
+      "best_practices": 96,
+      "seo": 100
+    },
+    "cordoba_lighthouse_mobile": {
+      "performance": 95,
+      "accessibility": 97,
+      "best_practices": 100,
+      "seo": 100
+    },
+    "issue_classification": [
+      {
+        "url": "https://fenixcapital.es/declaracion-de-privacidad/",
+        "classification": "INTENTIONAL_LEGAL_NOINDEX_REVIEWED",
+        "blockers": [
+          "canonical_present",
+          "canonical_self",
+          "not_noindex"
+        ],
+        "decision": "NO_AUTOFIX",
+        "rationale": "Legal/privacy surface; noindex is intentional per SEO architecture and should not be auto-indexed."
+      },
+      {
+        "url": "https://fenixcapital.es/category/obra-nueva/",
+        "classification": "INTENTIONAL_CANONICAL_TO_PILLAR_REVIEWED",
+        "blockers": [
+          "canonical_self"
+        ],
+        "canonical": "https://fenixcapital.es/obras-nuevas/",
+        "decision": "NO_AUTOFIX",
+        "rationale": "Category delegates canonical authority to the obra-nueva pillar and should not be self-canonicalized without contrary evidence."
+      }
+    ],
+    "verify_batch_final": {
+      "state": "completed_with_issues",
+      "processed": 158,
+      "success": 156,
+      "issues": 2,
+      "failed": 0
+    },
+    "technical_audit_ok": true,
+    "google_readiness_state": "queued",
+    "own_wordpress_mcp_validation": {
+      "privacy_noindex_preserved": true,
+      "obra_nueva_pillar_preserved": true,
+      "focus_keyword_repairs_verified": [
+        1023,
+        1098
+      ],
+      "wpvibe_dependency": false
+    }
+  },
+  "known_non_blocking_items": [
+    "GSC direct service-account route lacks property permission; existing Make OAuth fallback is healthy and zero-new-cost.",
+    "GA4 activeUsers from fallback is intentionally not treated as canonical because page-level aggregation can overcount.",
+    "Imagify API key is invalid/quota zero; auto_optimize disabled after checkpoint to stop repeated failures.",
+    "Elementor Pro is installed but explicitly not used as a functional dependency.",
+    "The rendered empty-alt image on sampled pages is the Meta noscript 1x1 tracking pixel, not editorial media.",
+    "Legacy Supabase canary function has stale WordPress application credentials and is not the canonical canary path; canonical STAGING WordPress canary remains green.",
+    "WPVibe Free daily quota was reached after the 158-URL technical batch completed; no paid upgrade is required. Google-readiness verification resumes after quota reset."
+  ],
+  "autonomy_definition": {
+    "required_consecutive_weekly_cycles": 4,
+    "current_claim": "NOT_YET_AUTONOMOUS_VERIFIED_BY_TIME_WINDOW_AND_GOOGLE_READINESS_GATE",
+    "reason": "The canonical SEO contract requires four consecutive weekly cycles without routine human correction before AUTONOMOUS_VERIFIED can be claimed.",
+    "current_verified_weekly_cycles": 1,
+    "last_verified_cycle_end": "2026-09-20",
+    "weekly_cycle_write_policy": "cron_only_no_manual_backfill",
+    "technical_canary": [
+      "robots.txt",
+      "sitemap_index.xml",
+      "home",
+      "advisor_cordoba",
+      "mortgage_requirements",
+      "inheritance",
+      "new_build"
+    ],
+    "current_state": "OPERATIONAL_GATED",
+    "remaining_gate": "3 future real weekly cycles"
+  },
+  "crm_funnel_baseline": {
+    "scope": "aggregate_read_only_prod",
+    "real_customers_by_channel": [
+      {
+        "canal_entrada": null,
+        "canal_marketing": null,
+        "count": 63
+      },
+      {
+        "canal_entrada": "Inmobiliaria",
+        "canal_marketing": "Inmobiliaria",
+        "count": 20
+      },
+      {
+        "canal_entrada": "App Fénix",
+        "canal_marketing": "Nuevo expediente",
+        "count": 2
+      },
+      {
+        "canal_entrada": "Web",
+        "canal_marketing": "qa",
+        "count": 1
+      },
+      {
+        "canal_entrada": "Web",
+        "canal_marketing": "chatgpt.com",
+        "count": 1
+      }
+    ],
+    "real_expedientes": 46,
+    "firmas": 0,
+    "caveat": "Current CRM data does not yet support a robust SEO-to-signature attribution claim; do not infer conversions that are not recorded."
+  },
+  "backlog_disposition": {
+    "done_without_mutation": 2,
+    "lab_managed": 7,
+    "human_required": 0
+  },
+  "ci": {
+    "workflow": "CEREBRO SEO-001 Validation",
+    "run_number": 9,
+    "conclusion": "success",
+    "head_sha": "6a510fbafe4efcea44a11747b3ed91daa5ec582e",
+    "latest_runtime_head_expected": "v23 branch head after documentation updates"
+  },
+  "promotion_layer": {
+    "prepare_function": "seo001_prepare_promotions_preprod",
+    "rollback_function": "seo001_rollback_change_preprod",
+    "tribunal_table": "seo_cerebro_tribunal_preprod",
+    "tribunal_function": "seo001_run_tribunal_preprod",
+    "unsafe_auto_promotion": false
+  },
+  "doctor": {
+    "function": "seo001_run_doctor_preprod",
+    "checks": 9,
+    "latest_pass": 9,
+    "latest_warn": 0,
+    "latest_fail": 0
+  },
+  "backup_rebuild": {
+    "snapshot_function": "seo001_state_snapshot_preprod",
+    "backup_function": "seo001_backup_state_preprod",
+    "baseline_backup": "baseline:v21:2026-09-20",
+    "routine_backup_policy": "cron_only"
+  },
+  "territorial_expansion": {
+    "provinces": {
+      "Jaen": 97,
+      "Sevilla": 106,
+      "total": 203
+    },
+    "waves": {
+      "Jaen": {
+        "wave1": 17,
+        "wave2": 14,
+        "wave3": 66
+      },
+      "Sevilla": {
+        "wave1": 20,
+        "wave2": 23,
+        "wave3": 63
+      }
+    },
+    "wave1_pagefind_audited": 37,
+    "landing_specs": 37,
+    "image_prompt_specs": 111,
+    "unique_image_prompt_hashes": 111,
+    "publication_ready": 0,
+    "publication_gate": "FAIL_CLOSED_PENDING_RESEARCH_AND_ANTI_CANNIBALIZATION",
+    "b2b_model": "two province hubs reusing existing inmobiliarias cluster; no municipality B2B doorway farm",
+    "wave1_jaen_first_batch": {
+      "municipalities": [
+        "Jaén",
+        "Linares",
+        "Andújar",
+        "Úbeda",
+        "Martos"
+      ],
+      "official_local_context_verified": 5,
+      "preprod_copy_drafts_complete": 5,
+      "anti_cannibalization_state": "PASS_PRELIMINARY_UNIQUE_ANGLE",
+      "publication_state": "BLOCKED_UNTIL_FULL_QA"
+    },
+    "wave1_jaen": {
+      "territories": 17,
+      "official_context_verified": 17,
+      "drafts_complete": 17,
+      "semantic_pairs_low": 136,
+      "semantic_pairs_medium": 0,
+      "semantic_pairs_high": 0,
+      "images_ready_to_generate": 51
+    },
+    "sevilla_first_batch": {
+      "territories": 5,
+      "official_context_verified": 5,
+      "drafts_complete": 5,
+      "semantic_pairs_low": 10,
+      "semantic_pairs_medium": 0,
+      "semantic_pairs_high": 0,
+      "images_ready_to_generate": 15
+    },
+    "total_drafts_complete": 22,
+    "total_images_ready_to_generate": 66,
+    "wave1_total": {
+      "Jaen": {
+        "territories": 17,
+        "drafts_complete": 17,
+        "semantic_pairs_low": 136,
+        "medium": 0,
+        "high": 0,
+        "images_ready_to_generate": 51
+      },
+      "Sevilla": {
+        "territories": 20,
+        "drafts_complete": 20,
+        "semantic_pairs_low": 190,
+        "medium": 0,
+        "high": 0,
+        "images_ready_to_generate": 60
+      },
+      "total_territories": 37,
+      "total_drafts_complete": 37,
+      "total_semantic_pairs_low": 326,
+      "total_medium": 0,
+      "total_high": 0,
+      "total_images_ready_to_generate": 111
+    },
+    "wave1_wordpress_materialization": {
+      "scope": 37,
+      "wordpress_verified": 37,
+      "copy_complete": 37,
+      "semantic_pass": 37,
+      "unique_image_specs_per_territory": 3,
+      "images_ready_to_generate": 111,
+      "publication_ready": 0,
+      "gate": "PASS"
+    }
+  },
+  "city_autopilot": {
+    "pilot": {
+      "province": "Jaén",
+      "municipality": "Jaén",
+      "state": "VISUALS",
+      "supervisor_required": true,
+      "qa": {
+        "pass": 6,
+        "wait": 1,
+        "fail": 0,
+        "waiting_for": "3 generated visual assets"
+      }
+    },
+    "validation_city": {
+      "province": "Jaén",
+      "municipality": "Linares",
+      "state": "QUEUED",
+      "release_condition": "pilot supervisor PASS"
+    },
+    "learning_rules": 7,
+    "hourly_cron": {
+      "job_id": 3,
+      "schedule": "7 * * * *",
+      "active": true
+    },
+    "publication_policy": "supervisor approves pilot once; learned rules apply to later cities; publication remains fail-closed"
+  }
+}

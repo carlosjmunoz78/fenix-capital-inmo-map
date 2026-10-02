@@ -16,7 +16,7 @@ CEREBRO code under `cerebro/` wraps and references existing systems; it does not
 - `APP-001` → existing App Fénix contracts → `CONFIRMED_OPERATIONAL` for the existing App surface only, via exact-SHA PROD deploy/smoke on `6bf6af92c1106884da87fb9a659f807093d47e0a`; this is not CEREBRO autonomy.
 - `CRM-001` → CRM/Supabase boundary → `UNKNOWN_REQUIRES_AUDIT`.
 - `DOC-001` → document contracts and previously green document/backfill scope → `DOCUMENTED_PARTIAL`; full DOC engine not proven.
-- `SEO-001` → SEO contract target → `UNKNOWN_REQUIRES_AUDIT`.
+- `SEO-001` → WordPress `fenix-seo-cerebro` + Core Guard + GSC/GA4 + Supabase PREPROD measurement + Notion knowledge → `CONFIRMED_OPERATIONAL` for the existing guarded runtime. Direct PROD writes remain locked by default; `AUTONOMOUS_VERIFIED` still requires four consecutive weekly cycles.
 - `WEB-001` → WordPress/web contract target → `UNKNOWN_REQUIRES_AUDIT` and must be audited in its own system/repository.
 - `LAB-TRD` → Trading LAB → `UNKNOWN_REQUIRES_AUDIT`, explicitly isolated from App/CRM/CEREBRO PROD credentials and execution.
 

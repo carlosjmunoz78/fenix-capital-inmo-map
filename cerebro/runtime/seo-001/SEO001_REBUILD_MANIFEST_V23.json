@@ -1,0 +1,52 @@
+{
+  "schema_version": "1.0.0",
+  "engine_id": "SEO-001",
+  "company_id": "FENIX_CAPITAL",
+  "environment": "PREPROD",
+  "runtime_version": 23,
+  "canonical_runtime": "cerebro/runtime/seo-001/supabase/fenix-seo-cerebro-preprod/index.ts",
+  "migrations": [
+    "seo001_multicompany_scope_v1",
+    "seo001_query_page_quality_v1",
+    "seo001_prioritized_backlog_v1",
+    "seo001_observability_cycle_ledger_v1",
+    "seo001_make_bridge_secret_vault_v1",
+    "seo001_cycle_google_gate_v2",
+    "seo001_intent_map_v1",
+    "seo001_experiments_v1",
+    "seo001_health_experiments_v3",
+    "seo001_experiment_evaluator_v1",
+    "seo001_run_observability_v2",
+    "seo001_promotion_rollback_policy_v1",
+    "seo001_tribunal_rebuild_supervisor_v1",
+    "seo001_state_backups_v1",
+    "seo001_invariants_doctor_v1"
+  ],
+  "scheduled_job": {
+    "job_id": 2,
+    "schedule": "0 6 * * 1",
+    "timeout_milliseconds": 30000
+  },
+  "state_snapshot_function": "seo001_state_snapshot_preprod",
+  "backup_function": "seo001_backup_state_preprod",
+  "baseline_backup_key": "baseline:v21:2026-09-20",
+  "restore_order": [
+    "apply migrations in recorded order",
+    "deploy runner v23 or later compatible snapshot",
+    "restore Vault/bridge configuration through existing secure RPC",
+    "verify cron job configuration",
+    "run doctor",
+    "run technical canary",
+    "run tribunal",
+    "confirm no manual cycle backfill",
+    "keep production writes locked until longitudinal gate is met"
+  ],
+  "invariants": {
+    "zero_new_cost": true,
+    "wpvibe_dependency": false,
+    "unknown_company_fail_closed": true,
+    "production_writes_default": "DENY",
+    "longitudinal_gate": "4 real weekly verified cycles",
+    "current_verified_cycles": 1
+  }
+}

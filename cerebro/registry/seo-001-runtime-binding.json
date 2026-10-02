@@ -1,0 +1,230 @@
+{
+  "schema_version": "1.0.0",
+  "engine_id": "SEO-001",
+  "name": "SEO Engine",
+  "layer": "L3",
+  "objective": "Convertir investigación SEO, contenido, SEO técnico, enlazado interno, GSC/GA4 y refresh en un pipeline medible, auditable y reversible.",
+  "company_scope": "MULTI_COMPANY",
+  "owner": "CEREBRO",
+  "status": "OPERATIVE_GUARDED_PENDING_4_WEEK_VERIFICATION",
+  "version": "0.4.1",
+  "environment": [
+    "PREPROD",
+    "PROD_OBSERVER"
+  ],
+  "inputs": [
+    "company_id",
+    "WordPress inventory and rendered HTML",
+    "Google Search Console performance",
+    "GA4 aggregate measurement",
+    "Notion canonical SEO knowledge",
+    "Core Guard alerts and verification results"
+  ],
+  "outputs": [
+    "SEO measurement snapshots",
+    "prioritized findings and plans",
+    "low-risk verified repairs",
+    "rollback evidence",
+    "HUMAN_REQUIRED exceptions",
+    "audit and learning records"
+  ],
+  "knowledge_sources": [
+    "Notion SEO/landings canonical contract",
+    "Notion SEO architecture and anti-cannibalization maps",
+    "WordPress live state",
+    "GSC",
+    "GA4",
+    "Core Guard"
+  ],
+  "data_model": {
+    "runs_table": "public.seo_cerebro_runs_preprod",
+    "changes_table": "public.seo_cerebro_changes_preprod",
+    "required_scope": [
+      "company_id",
+      "engine_id",
+      "environment",
+      "engine_version"
+    ],
+    "backlog_table": "public.seo_cerebro_backlog_preprod",
+    "query_page_pairs_field": "public.seo_cerebro_runs_preprod.query_page_pairs",
+    "intent_map_table": "public.seo_cerebro_intent_map_preprod",
+    "experiment_table": "public.seo_cerebro_experiments_preprod",
+    "tribunal_table": "public.seo_cerebro_tribunal_preprod",
+    "backup_table": "public.seo_cerebro_state_backups_preprod",
+    "invariant_checks_table": "public.seo_cerebro_invariant_checks_preprod",
+    "experiment_observations_table": "public.seo_cerebro_experiment_observations_preprod",
+    "territories_table": "public.seo_cerebro_territories_preprod",
+    "expansion_jobs_table": "public.seo_cerebro_expansion_jobs_preprod",
+    "landing_specs_table": "public.seo_cerebro_landing_specs_preprod",
+    "image_assets_table": "public.seo_cerebro_image_assets_preprod",
+    "competitor_intel_table": "public.seo_cerebro_competitor_intel_preprod",
+    "b2b_province_plan_table": "public.seo_cerebro_b2b_province_plan_preprod",
+    "city_runs_table": "public.seo_cerebro_city_runs_preprod",
+    "learning_rules_table": "public.seo_cerebro_learning_rules_preprod",
+    "city_qa_table": "public.seo_cerebro_city_qa_preprod"
+  },
+  "rules": [
+    "deterministic_before_AI",
+    "zero_new_cost_by_default",
+    "snapshot_before_write",
+    "verify_live_after_write",
+    "rollback_on_failed_verification",
+    "no_blind_alt_filling",
+    "no_mass_redirect_or_slug_change_without_query_to_url_evidence",
+    "no_financial_or_legal_claim_change_without policy review",
+    "Elementor Pro is not a functional dependency"
+  ],
+  "decisions": {
+    "low_risk_known_fix": "AUTO_WITH_SNAPSHOT_AND_VERIFY",
+    "medium_or_ambiguous": "PROPOSAL_OR_LAB",
+    "high_risk": "HUMAN_REQUIRED",
+    "production_write_default": "DENY"
+  },
+  "actions": [
+    "measure",
+    "audit",
+    "prioritize",
+    "persist_prioritized_backlog",
+    "detect_query_page_overlap",
+    "canary",
+    "fix_allowlisted_low_risk",
+    "verify",
+    "rollback",
+    "document",
+    "learn",
+    "resolve_query_to_preferred_url",
+    "manage_controlled_seo_experiments",
+    "prepare_safe_promotion",
+    "run_tribunal",
+    "run_doctor",
+    "backup_state",
+    "request_rollback",
+    "plan_territorial_expansion",
+    "enforce_image_uniqueness",
+    "gate_local_publication",
+    "plan_b2b_province_hubs",
+    "advance_city_autopilot",
+    "city_prepublication_qa",
+    "supervisor_decision_learning_loop"
+  ],
+  "api_contract": {
+    "measurement_runner": "Supabase Edge Function fenix-seo-cerebro-preprod",
+    "wordpress_engine": "fenix-seo-cerebro WordPress Abilities",
+    "guard": "Fenix Core Guard",
+    "google_fallback": "Make Google OAuth bridge",
+    "measurement_runner_version": 26,
+    "preprod_executor": "fenix-seo-executor-preprod",
+    "preprod_executor_version": 8
+  },
+  "events_in": [
+    "SEO_SCHEDULED_AUDIT",
+    "CORE_GUARD_ALERT",
+    "MANUAL_SEO_AUDIT"
+  ],
+  "events_out": [
+    "SEO_MEASURED",
+    "SEO_FINDING",
+    "SEO_FIXED_VERIFIED",
+    "SEO_ROLLED_BACK",
+    "SEO_HUMAN_REQUIRED"
+  ],
+  "permissions": {
+    "default": "deny",
+    "prod_writes": "locked_by_default",
+    "preprod_canary": true,
+    "cross_company_access": "deny",
+    "unconfigured_company": "fail_closed_409",
+    "measurement_bridge_secret": "vault_service_role_only"
+  },
+  "memory": {
+    "wordpress_learning_log": true,
+    "supabase_measurement_history": true,
+    "notion_operational_evidence": true,
+    "query_page_history": true
+  },
+  "learning": {
+    "enabled": true,
+    "promotion_rule": "No single observation changes canonical policy; promote only after repeated validated evidence."
+  },
+  "tests": [
+    "Core Guard health",
+    "PREPROD readiness",
+    "PREPROD smoke",
+    "SEO E2E canary with injected missing_image_alt",
+    "apply verify rollback evidence",
+    "full published inventory verification batch",
+    "Google readiness batch",
+    "multi-company configured-company pass / unknown-company fail-closed",
+    "query-to-page pair capture and overlap candidate generation",
+    "own WordPress MCP read/write/readback for low-risk Yoast metadata"
+  ],
+  "evaluation": {
+    "current": "RUNNER_V26_GREEN_WAVE1_37_OF_37_WORDPRESS_VERIFIED_PILOT_JAEN_VISUALS_WAIT_LINARES_QUEUED",
+    "autonomous_verified_gate": "4 consecutive weekly cycles"
+  },
+  "observability": {
+    "wordpress": "Core Guard tables/logs/jobs",
+    "measurement": "seo_cerebro_runs_preprod",
+    "changes": "seo_cerebro_changes_preprod",
+    "notion": "SEO contract evidence",
+    "make": "scenario execution history",
+    "backlog": "seo_cerebro_backlog_preprod"
+  },
+  "retry_timeout": {
+    "measurement": "weekly cron + manual replay",
+    "wordpress_jobs": "Core Guard queue/cron",
+    "no_infinite_retry": true
+  },
+  "cost_budget": {
+    "additional_monthly_target_eur": 0,
+    "paid_ai_required": false,
+    "gsc_wizard_required": false
+  },
+  "backup": {
+    "wordpress": "Cowboy MCP/Core Guard checkpoint/snapshot",
+    "config_and_contracts": "GitHub",
+    "measurement": "Supabase PREPROD",
+    "measurement_runtime_snapshot": "cerebro/runtime/seo-001/supabase/fenix-seo-cerebro-preprod/index.ts"
+  },
+  "rollback": {
+    "content": "restore Core Guard snapshot / Cowboy change journal",
+    "code": "version revert",
+    "measurement_runner": "redeploy prior Edge Function version"
+  },
+  "rebuild": {
+    "source": "FACT-001 registry + runtime binding + WordPress plugin package + Supabase migration history + Make scenario IDs + SEO state snapshot",
+    "tested": "STATE_SNAPSHOT_AND_COMPONENT_LEVEL"
+  },
+  "dependencies": [
+    "WEB-001",
+    "LAB-SEO",
+    "OBSERV-001",
+    "AUD-001",
+    "FINOPS-001"
+  ],
+  "autonomy_level": "HIGH_WITH_GUARDRAILS_PENDING_TEMPORAL_GATE",
+  "zero_cost_execution_plan": [
+    "WordPress/Core Guard already owned",
+    "Supabase existing project/free-existing capacity",
+    "Make existing OAuth connections as fallback",
+    "GSC and GA4 official APIs",
+    "deterministic rules before AI"
+  ],
+  "human_exception_codes": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "evidence_ref": "cerebro/evidence/seo-001-live-audit-20260920.json",
+  "autonomous_prod": false,
+  "known_limitations": [
+    "Direct GSC service-account property permission is not available; existing Make OAuth fallback is the operational zero-new-cost path.",
+    "Fallback GA4 activeUsers is marked non-canonical; sessions remains usable.",
+    "Legacy Supabase canary is not canonical because its old WordPress application credential is stale; canonical STAGING WordPress canary is green."
+  ]
+}
