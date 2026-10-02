@@ -8,13 +8,14 @@ function assert(condition,message){
 const gateway=fs.readFileSync('supabase/functions/cerebro-console-gateway-v0/index.ts','utf8');
 const knowledge=fs.readFileSync('supabase/functions/cerebro-console-gateway-v0/knowledge.ts','utf8');
 
-assert(gateway.includes('function closeOwnerGreeting()'),'owner greeting function missing');
+assert(gateway.includes('function closeOwnerGreeting(context:ConversationTurn[]=[]'), 'owner greeting function missing');
 for(const phrase of ['Hola Carlos','Hola guapo','guapo','buenos dias','buenas tardes','buenas noches']){
  assert(gateway.toLocaleLowerCase('es-ES').includes(phrase.toLocaleLowerCase('es-ES')),'greeting contract missing: '+phrase);
 }
 assert(!gateway.includes('Hola, Carlos'),'owner greeting must not pause after Hola before Carlos');
 assert(!gateway.includes('Hola, guapo'),'owner greeting must not pause after Hola before guapo');
 assert(gateway.includes('intent:"greeting"'),'greeting intent missing');
+assert(gateway.includes('Math.floor(Date.now()/1000)+priorGreetings'),'greeting variation strategy missing');
 assert(gateway.includes('0.9.0-conversational-intelligence-v2'),'gateway version not advanced');
 
 for(const phrase of [
@@ -33,6 +34,9 @@ for(const phrase of [
 assert(knowledge.includes('function broadKnowledgeQuestion'),'broad knowledge map classifier missing');
 assert(knowledge.includes('function broadLegalMapQuestion'),'specific legal focus guard missing');
 assert(knowledge.includes('genericLegal&&!specific'),'specific legal topic must not expand to the full legal map');
+assert(knowledge.includes('asesoria fiscal'),'fiscal-advisory legal routing missing');
+assert(knowledge.includes('obra nueva'),'new-build legal routing missing');
+assert(knowledge.includes('minLexicalScore=domain?3:8'),'knowledge relevance threshold missing');
 assert(knowledge.includes('function clarificationMessage'),'clarification helper missing');
 assert(knowledge.includes('No te he entendido del todo.'),'generic clarification wording missing');
 assert(knowledge.includes('status:"LOW_CONFIDENCE",intent:"clarification"'),'low-confidence clarification contract missing');
