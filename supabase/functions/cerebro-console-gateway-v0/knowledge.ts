@@ -532,6 +532,14 @@ function broadKnowledgeQuestion(question:string){
   return /(que sabes|que conoces|cuanto sabes|en que me puedes ayudar|que puedo preguntarte|que temas controlas|que temas conoces|hazme un esquema|dame un esquema|dame un mapa|todo lo que sabes)/.test(q);
 }
 
+function broadLegalMapQuestion(question:string){
+  const q=norm(question);
+  if(!broadKnowledgeQuestion(question))return false;
+  const genericLegal=/\b(temas? legales?|legal inmobiliari|juridic|derecho inmobiliario|mapa legal)\b/.test(q);
+  const specific=/\b(herencias?|arras|compraventa|registro de la propiedad|cargas? registrales?|catastro|notari|donaciones?|itp|plusvalia|embargos?|titularidad|urbanismo|blanqueo|aml)\b/.test(q);
+  return genericLegal&&!specific;
+}
+
 function domainKnowledgeMap(domain:string){
   const maps:Record<string,{intent:string;message:string}>={
     finance:{
@@ -600,7 +608,7 @@ function clarificationMessage(domain:string|null){
 async function directDomainAnswer(question:string,domain:string|null){
   const q=norm(question);
 
-  if(domain==="legal"&&broadKnowledgeQuestion(question))return legalKnowledgeMap();
+  if(domain==="legal"&&broadLegalMapQuestion(question))return legalKnowledgeMap();
   if(domain&&domain!=="legal"&&broadKnowledgeQuestion(question)){
     const map=domainKnowledgeMap(domain);
     if(map)return map;
