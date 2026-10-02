@@ -37,3 +37,12 @@ if(!voice.includes('VOICE_CONFIRMATION_CONFIDENCE_MIN=0.85')){
 
 console.log('CEREBRO voice confirmation contract parity: GREEN');
 console.log('Accepted confirmations:',[...accepted].join(', '));
+
+must(voice,"VOICE_RESUME_PHRASES",'resume phrases');
+must(voice,"function voiceResumeRequested",'resume parser');
+must(shell,"function pauseSpeech()",'pause speech');
+must(shell,"function resumeSpeech()",'resume speech');
+must(shell,"window.speechSynthesis.pause()",'speech synthesis pause');
+must(shell,"window.speechSynthesis.resume()",'speech synthesis resume');
+must(shell,"voiceResumeRequested(clean)",'resume command routing');
+must(shell,"speech_rate:'1.08'",'faster durable frontend baseline');
