@@ -158,3 +158,16 @@
 - Frontend PROD `2d157dd4e74c101b25000bb64adf5bac5719a82e`: Live Deploy #185 SUCCESS; Runtime Smoke #328 SUCCESS.
 - Coste adicional: 0 €.
 - Aceptación física multi-turno: PENDIENTE.
+
+
+## 2026-10-02 · Voice speed + Pause/Resume V1
+
+- Preferencia de velocidad del propietario elevada a 1.08 y persistida en PROD.
+- La velocidad base de voz se alinea a 1.08 para evitar regreso a un ritmo lento tras recarga.
+- «para» pasa de cancelar la respuesta a pausarla.
+- «continúa» / «sigue» reanuda la locución pendiente desde el mismo punto cuando el motor TTS del navegador lo permite.
+- Una nueva pregunta mientras está pausado descarta el resto de la respuesta anterior y atiende la nueva petición.
+- Se conservan VAD local, fallback visual, permisos y confirmación segura de acciones.
+- PR #480: Guard #160 SUCCESS; Build Gate #400 SUCCESS; merge `9a9b3265f3e6ec1c8b841454d3174ea4e516bdf4`.
+- Coste adicional: 0 €.
+- Aceptación física: PENDIENTE.
