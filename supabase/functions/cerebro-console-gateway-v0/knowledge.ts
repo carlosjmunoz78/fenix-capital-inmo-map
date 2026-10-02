@@ -78,7 +78,7 @@ const DOMAIN_CANONICAL:Record<string,{id:string,title:string}[]>={
 
 function detectKnowledgeDomain(question:string){
   const q=norm(question);
-  if(/\b(?:legal(?:es)?|juridic[oa]s?|arras|compraventa|cargas? registrales?|registro de la propiedad|notari[oa]s?|notariales?|herencias?|donaciones?|itp|plusvalia|catastro|embargos?|titularidad|urbanismo|blanqueo|aml)\b/.test(q))return "legal";
+  if(/\b(?:legal(?:es)?|juridic[oa]s?|arras|compraventa|cargas? registrales?|registro de la propiedad|notari[oa]s?|notariales?|herencias?|donaciones?|itp|plusvalia|catastro|embargos?|titularidad|urbanismo|blanqueo|aml|fiscalidad|fiscal|tributari[oa]s?|asesoria fiscal|asesoría fiscal|obra nueva|obras nuevas)\b/.test(q))return "legal";
   if(/hipoteca|banco|financi|tin|tae|cuota|fein|tasacion|ingresos|endeudamiento/.test(q))return "finance";
   if(/newsletter|brevo|campana de email|campaña de email|email marketing/.test(q))return "newsletter";
   if(/redes sociales|facebook|instagram|linkedin|tiktok|youtube|buffer|publicacion social|publicación social/.test(q))return "social";
@@ -398,6 +398,13 @@ function conversationMemoryQuery(question:string){
   return parts.length?parts.join(" "):question.slice(0,500);
 }
 
+function memoryContentLooksLikeQuestion(value:string){
+  const raw=String(value??"").trim();
+  const q=norm(raw);
+  if(/[?¿]/.test(raw))return true;
+  return /^(que|qué|cual|cuál|cuales|cuáles|como|cómo|cuando|cuándo|donde|dónde|quien|quién|cuanto|cuánto|cuantos|cuántos|dime|hablame|háblame|explicame|explícame|cuentame|cuéntame|busca|encuentra|localiza|ensename|enséñame|muestrame|muéstrame|quiero saber|necesito saber|puedes decirme|sabes de|sabes si)\b/.test(q);
+}
+
 async function queryConversationMemory(actorCode:string,question:string){
   if(!U||!S)return [] as any[];
   const svc=createClient(U,S,{auth:{persistSession:false,autoRefreshToken:false}});
@@ -405,10 +412,12 @@ async function queryConversationMemory(actorCode:string,question:string){
     p_actor_code:actorCode,
     p_company_id:"fenix",
     p_query:conversationMemoryQuery(question),
-    p_limit:5
+    p_limit:8
   });
   if(error||data?.ok!==true||!Array.isArray(data.items))return [] as any[];
-  return data.items.filter((x:any)=>String(x?.content??"").trim()).slice(0,5);
+  return data.items
+    .filter((x:any)=>String(x?.content??"").trim()&&!memoryContentLooksLikeQuestion(String(x?.content??"")))
+    .slice(0,5);
 }
 
 function conversationMemoryResponse(items:any[]){
@@ -536,7 +545,7 @@ function broadLegalMapQuestion(question:string){
   const q=norm(question);
   if(!broadKnowledgeQuestion(question))return false;
   const genericLegal=/\b(temas? legales?|legal inmobiliari|juridic|derecho inmobiliario|mapa legal)\b/.test(q);
-  const specific=/\b(herencias?|arras|compraventa|registro de la propiedad|cargas? registrales?|catastro|notari|donaciones?|itp|plusvalia|embargos?|titularidad|urbanismo|blanqueo|aml)\b/.test(q);
+  const specific=/\b(herencias?|arras|compraventa|registro de la propiedad|cargas? registrales?|catastro|notari|donaciones?|itp|plusvalia|embargos?|titularidad|urbanismo|blanqueo|aml|fiscalidad|fiscal|tributari|asesoria fiscal|obra nueva|obras nuevas)\b/.test(q);
   return genericLegal&&!specific;
 }
 
@@ -713,8 +722,9 @@ export async function queryCerebroKnowledge(req:Request,question:string,context?
   const actor=await actorContext(req);
   if(!actor.ok)return {status:"HUMAN_REQUIRED",reason:actor.error,executed:false,message:"Esta consulta está reservada al propietario autorizado de CEREBRO."};
 
-  const learned=await queryConversationMemory(actor.actor_code,question);
-  if(conversationMemoryIntent(question)&&learned.length)return conversationMemoryResponse(learned);
+  const wantsConversationMemory=conversationMemoryIntent(question);
+  const learned=wantsConversationMemory?await queryConversationMemory(actor.actor_code,question):[];
+  if(wantsConversationMemory&&learned.length)return conversationMemoryResponse(learned);
 
   const operationalSocial=await queryOperationalSocialSchedule(question,context);
   if(operationalSocial)return operationalSocial;
@@ -724,8 +734,7 @@ export async function queryCerebroKnowledge(req:Request,question:string,context?
   if(direct)return direct;
 
   if(!N){
-    if(learned.length)return conversationMemoryResponse(learned);
-    return {status:"ERROR",reason:"NOTION_TOKEN_MISSING",executed:false,message:"El conector documental de CEREBRO no está configurado y no he encontrado memoria conversacional suficiente para responder."};
+    return {status:"ERROR",reason:"NOTION_TOKEN_MISSING",executed:false,message:"El conector documental de CEREBRO no está configurado. No voy a rellenar la respuesta con recuerdos conversacionales o resultados aproximados."};
   }
 
   const qTokens=tokens(question);
@@ -761,16 +770,18 @@ export async function queryCerebroKnowledge(req:Request,question:string,context?
   ].slice(0,12) as {id:string,title:string,page:any}[];
 
   const ranked:any[]=[];
+  const minLexicalScore=domain?3:8;
   for(const item of ordered){
     const body=await pageText(item.id);
-    const score=scoreText(qTokens,item.title,body)+(domainIds.has(item.id)?12:0);
-    if(score>=3)ranked.push({id:item.id,title:item.title,score,snippet:snippet(body,qTokens)});
+    const lexicalScore=scoreText(qTokens,item.title,body);
+    const excerpt=snippet(body,qTokens);
+    const score=lexicalScore+(domainIds.has(item.id)?12:0);
+    if(lexicalScore>=minLexicalScore&&excerpt)ranked.push({id:item.id,title:item.title,score,lexical_score:lexicalScore,snippet:excerpt});
   }
   ranked.sort((a,b)=>b.score-a.score);
   const top=ranked.slice(0,3);
   const freshness=currentnessAssessment(question);
   if(!top.length){
-    if(learned.length)return conversationMemoryResponse(learned);
     return {status:"LOW_CONFIDENCE",intent:"clarification",executed:false,message:clarificationMessage(domain),sources:[]};
   }
 

@@ -27,6 +27,10 @@ must(gateway,'fenix_prod_cerebro_memory_forget_server','forget binding');
 must(gateway,'fenix_prod_cerebro_memory_observe_v2_server','structured memory V2 binding');
 must(gateway,'MEMORY_SKIP_EXACT','noise filter');
 must(gateway,'Recall queries are lookups, not new knowledge','recall self-pollution guard');
+must(gateway,'conversationMemoryKind(text)!=="USER_TURN"','do not store raw conversational turns');
+must(gateway,'function looksLikeQuestionOrRequest','do not store questions as facts');
+must(knowledge,'function memoryContentLooksLikeQuestion','filter historic question pollution');
+must(knowledge,'wantsConversationMemory?await queryConversationMemory','explicit recall-only memory retrieval');
 
 must(knowledge,'function conversationMemoryIntent','explicit recall intent');
 must(knowledge,'fenix_prod_cerebro_memory_search_server','memory search binding');

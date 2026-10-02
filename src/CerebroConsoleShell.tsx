@@ -4,7 +4,7 @@ import {BrainCircuit,ChevronLeft,Mic,MicOff,Send,ShieldCheck,Square} from 'lucid
 import {cerebroConsoleLinkEnabled} from './cerebroConsoleAccess';
 import {fetchAppApi,supabase} from './supabase';
 import {fetchCerebroConsoleHealth,fetchCerebroConsolePreferences,postCerebroConsoleChat,type CerebroConsoleHealth,type CerebroConversationTurn,type CerebroLearningCandidate,type CerebroPendingAction,type CerebroPreferences,type CerebroReadContext} from './cerebroConsoleApi';
-import {applyVoiceContextHints,applyVoiceInterruptHints,createVoiceRecognition,preferredSpanishVoice,spanishVoices,speechSegments,speechSynthesisSupported,voiceActivityFrame,voiceActivityThreshold,voiceInterruptRequested,voiceResumeRequested,voiceNeedsManualConfirmation,voiceRecognitionSupported,type CerebroSpeechRecognition,type CerebroSpokenMeta} from './cerebroVoice';
+import {applyVoiceContextHints,applyVoiceInterruptHints,createVoiceRecognition,preferredSpanishVoice,spanishVoices,speechSegments,speechSynthesisSupported,voiceActivityFrame,voiceActivityThreshold,voiceAlternativeScore,voiceInterruptRequested,voiceNeedsClarification,voiceResumeRequested,voiceNeedsManualConfirmation,voiceRecognitionSupported,type CerebroSpeechRecognition,type CerebroSpokenMeta} from './cerebroVoice';
 import './cerebro-console.css';
 
 const CONTEXTS=['GENERAL','EMPRESA','ENGINE','CRM','APP','SEO','MARKETING','TRAINING','AUTOMATION'];
@@ -461,7 +461,28 @@ export default function CerebroConsoleShell(){
     resumeSpeech();
     return;
    }
+   if(voiceInterruptRequested(clean)){
+    setMessage('');
+    setVoiceError('');
+    return;
+   }
+   if(voiceNeedsClarification(clean,voiceConfidence)){
+    const warning=`He entendido «${clean}», pero no estoy segura de haberlo oído bien. Repítemelo, por favor.`;
+    setMessage('');
+    setVoiceError(warning);
+    setLines(current=>[...current,{role:'cerebro',text:warning}]);
+    speakAndResume(warning);
+    return;
+   }
    discardPausedSpeech();
+  }
+  if(fromVoice&&voiceNeedsClarification(clean,voiceConfidence)){
+   const warning=`He entendido «${clean}», pero no estoy segura de haberlo oído bien. Repítemelo, por favor.`;
+   setMessage('');
+   setVoiceError(warning);
+   setLines(current=>[...current,{role:'cerebro',text:warning}]);
+   speakAndResume(warning);
+   return;
   }
   if(fromVoice&&voiceNeedsManualConfirmation(clean,voiceConfidence,Boolean(pendingActionRef.current))){
    const warning='No voy a usar una transcripción de baja confianza para confirmar una acción. Di «sí» otra vez con claridad o escríbelo manualmente.';
@@ -523,7 +544,7 @@ export default function CerebroConsoleShell(){
   recognition.lang='es-ES';
   recognition.continuous=false;
   recognition.interimResults=false;
-  recognition.maxAlternatives=3;
+  recognition.maxAlternatives=5;
   applyVoiceContextHints(recognition);
   recognition.onstart=()=>setVoiceListening(true);
   recognition.onresult=event=>{
@@ -536,9 +557,9 @@ export default function CerebroConsoleShell(){
     for(let alternativeIndex=1;alternativeIndex<result.length;alternativeIndex+=1){
      const candidate=result[alternativeIndex];
      if(!candidate?.transcript)continue;
-     const candidateConfidence=typeof candidate.confidence==='number'&&Number.isFinite(candidate.confidence)?candidate.confidence:-1;
-     const bestConfidence=typeof best?.confidence==='number'&&Number.isFinite(best.confidence)?best.confidence:-1;
-     if(candidateConfidence>bestConfidence)best=candidate;
+     const candidateConfidence=typeof candidate.confidence==='number'&&Number.isFinite(candidate.confidence)?candidate.confidence:null;
+     const bestConfidence=typeof best?.confidence==='number'&&Number.isFinite(best.confidence)?best.confidence:null;
+     if(voiceAlternativeScore(candidate.transcript,candidateConfidence)>voiceAlternativeScore(best?.transcript??'',bestConfidence))best=candidate;
     }
     const piece=best?.transcript?.trim();
     if(!piece)continue;

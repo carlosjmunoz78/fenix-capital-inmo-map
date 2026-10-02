@@ -195,16 +195,21 @@ function previousUserTurn(context:ConversationTurn[]){
   return [...context].reverse().find(turn=>turn.role==="user")?.text.trim()??"";
 }
 
-function closeOwnerGreeting(){
+function closeOwnerGreeting(context:ConversationTurn[]=[]){
   const variants=[
     "Hola Carlos. ¿Qué tal guapo? Dime, ¿qué hacemos?",
     "¡Buenas Carlos! Aquí estoy guapo. ¿Qué necesitas?",
     "Hola guapo. Dime Carlos, ¿por dónde empezamos?",
     "¡Muy buenas Carlos! ¿Cómo va guapo? Cuéntame.",
     "Ey Carlos. ¿Qué tal guapo? Estoy aquí. ¿Qué vemos?",
-    "Hola Carlos guapo. Dime qué tienes entre manos."
+    "Hola Carlos guapo. Dime qué tienes entre manos.",
+    "Buenas guapo. Cuéntame, ¿qué miramos hoy?",
+    "Hola Carlos. Aquí estoy. ¿Por dónde tiramos?",
+    "Muy buenas guapo. Dime qué necesitas y vamos a ello.",
+    "Ey Carlos. Te escucho. ¿Qué quieres revisar?"
   ];
-  const slot=Math.floor(Date.now()/15000)%variants.length;
+  const priorGreetings=context.filter(turn=>turn.role==="cerebro"&&/(hola carlos|hola guapo|buenas carlos|buenas guapo|ey carlos|muy buenas)/i.test(turn.text)).length;
+  const slot=(Math.floor(Date.now()/1000)+priorGreetings)%variants.length;
   return variants[slot];
 }
 
@@ -271,6 +276,19 @@ async function liveExpedientesSummary(req:Request){
   }
   const breakdown=[...stages.entries()].sort((a,b)=>a[0].localeCompare(b[0],"es")).map(([stage,count])=>`${stage}: ${count}`);
   return {ok:true,total:active.length,breakdown,source_count:data.items.length} as const;
+}
+
+async function liveInmobiliariasByLocality(req:Request,locality:string){
+  const authz=await authorizedOwner(req);
+  const U=Deno.env.get("SUPABASE_URL")??"";
+  const S=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")??"";
+  if(!authz.ok||!U||!S)return {ok:false,error:"OWNER_OR_SERVER_CONFIG_MISSING",items:[]} as const;
+  const svc=createClient(U,S,{auth:{persistSession:false,autoRefreshToken:false}});
+  const {data,error}=await svc.rpc("fenix_prod_inmo_list_server",{p_actor_code:authz.actor});
+  if(error||data?.ok!==true||!Array.isArray(data.items))return {ok:false,error:"INMOBILIARIAS_READ_FAILED",items:[]} as const;
+  const target=normalize(locality);
+  const items=data.items.filter((item:any)=>normalize(String(item?.localidad??""))===target);
+  return {ok:true,items} as const;
 }
 async function proposalToken(payload:string){
   const secret=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")??"";
@@ -483,6 +501,7 @@ function conversationMemoryKind(message:string){
   if(/(prefiero|me gusta que|quiero que me|no quiero que me|a partir de ahora.*(?:habla|dime|llamame|llámame|responde))/i.test(message))return "PREFERENCE";
   if(/(he decidido|hemos decidido|queda decidido|decidimos|vamos a hacer|quiero que hagamos)/.test(text))return "DECISION";
   if(/(en fenix|en fénix|nuestro proceso|nuestra forma|internamente).*(hacemos|usamos|trabajamos|gestionamos|debe|tiene que)/i.test(message))return "OPERATIONAL_KNOWLEDGE";
+  if(/^(recuerda que|ten en cuenta que|quiero que recuerdes que)\b/.test(text))return "FACT";
   if(/(tenemos|usamos|trabajamos|nuestro|nuestra|son dos|es el|es la|debe ser|tiene que ser)/.test(text))return "FACT";
   return "USER_TURN";
 }
@@ -502,6 +521,12 @@ function memorySensitive(message:string){
   return false;
 }
 
+function looksLikeQuestionOrRequest(message:string){
+  const text=cleanText(message);
+  if(/[?¿]/.test(message))return true;
+  return /^(que|qué|cual|cuál|cuales|cuáles|como|cómo|cuando|cuándo|donde|dónde|quien|quién|cuanto|cuánto|cuantos|cuántos|dime|hablame|háblame|explicame|explícame|cuentame|cuéntame|busca|encuentra|localiza|ensename|enséñame|muestrame|muéstrame|quiero saber|necesito saber|puedes decirme|sabes de|sabes si)\b/.test(text);
+}
+
 function shouldObserveConversationMemory(message:string){
   const text=message.trim();
   if(text.length<10||text.length>2000)return false;
@@ -510,7 +535,8 @@ function shouldObserveConversationMemory(message:string){
   if(/^(olvida|borra|elimina)\b/i.test(text))return false;
   // Recall queries are lookups, not new knowledge; do not let the current question pollute its own search.
   if(/\b(recuerdas|te acuerdas|que te dije|qué te dije|que te comente|qué te comenté|conversacion anterior|conversación anterior)\b/i.test(text))return false;
-  return true;
+  if(looksLikeQuestionOrRequest(text))return false;
+  return conversationMemoryKind(text)!=="USER_TURN";
 }
 
 function memorySubjectKey(message:string,context:ConversationTurn[]){
@@ -786,6 +812,26 @@ async function chatReply(req:Request,message:string,pendingRaw:unknown,readConte
     };
   }
 
+  const inmoLocality=text.match(/(?:(?:que|estas?|esas?)\s+)?inmobiliarias?(?:\s+tenemos|\s+hay|\s+conoces)?\s+en\s+([a-záéíóúñ -]{2,60})$/i);
+  if(inmoLocality){
+    const locality=inmoLocality[1].trim();
+    const live=await liveInmobiliariasByLocality(req,locality);
+    if(!live.ok)return {status:"ERROR",intent:"inmobiliarias_by_locality",executed:false,reason:live.error,message:"No he podido consultar ahora mismo el directorio vivo de inmobiliarias. No voy a sustituirlo por resultados documentales aproximados."};
+    if(!live.items.length)return {status:"OK",intent:"inmobiliarias_by_locality",executed:false,message:`No tengo ninguna inmobiliaria activa en App Fénix cuya localidad sea exactamente «${locality}». Si quieres, puedo buscar una variante del nombre o revisar otra zona.`,source:{system:"APP_FENIX_PROD",rpc:"fenix_prod_inmo_list_server"}};
+    const names=live.items.slice(0,20).map((item:any)=>String(item?.nombre_alias??item?.nombre??"").trim()).filter(Boolean);
+    return {status:"OK",intent:"inmobiliarias_by_locality",executed:false,message:`En App Fénix tengo ${live.items.length} inmobiliaria(s) en ${locality}: ${names.join(", ")}.`,source:{system:"APP_FENIX_PROD",rpc:"fenix_prod_inmo_list_server"}};
+  }
+
+  const ambiguousStandalone=/^(nuevas|eso|esa|ese|esto|aquello|arias|aria)$/.test(text);
+  if(ambiguousStandalone){
+    return {status:"LOW_CONFIDENCE",intent:"clarification",executed:false,message:`He entendido «${message.trim()}», pero así no tengo suficiente contexto para responder con fiabilidad. Dime un poco más: por ejemplo, «obras nuevas», «nuevas publicaciones» o el tema concreto que quieras consultar.`};
+  }
+
+  if(/^arias\s+hay\s+en\s+/.test(text)){
+    const locality=message.trim().replace(/^arias\s+hay\s+en\s+/i,"").trim();
+    return {status:"LOW_CONFIDENCE",intent:"clarification",executed:false,message:`No quiero adivinar. He entendido «Arias hay en ${locality}». ¿Preguntas por una persona o empresa llamada Arias, o querías decir «qué inmobiliarias hay en ${locality}»?`};
+  }
+
   const pending=await validatePending(req,pendingRaw);
 
   if(pending){
@@ -899,7 +945,7 @@ async function chatReply(req:Request,message:string,pendingRaw:unknown,readConte
   }
 
   if (/^(hola|buenas|buenos dias|buenas tardes|buenas noches|hey|ey)$/.test(text)) {
-    return {status:"OK",intent:"greeting",executed:false,message:closeOwnerGreeting()};
+    return {status:"OK",intent:"greeting",executed:false,message:closeOwnerGreeting(conversationContext)};
   }
   if (/^(ayuda|help|que puedes hacer)$/.test(text)) {
     return {status:"OK",intent:"help",executed:false,message:"Claro. Puedes preguntarme por lo que sé, pedirme que te lo explique por temas o decirme qué quieres hacer. Si una acción real necesita tu decisión, te enseñaré exactamente el alcance antes de pedirte confirmación."};

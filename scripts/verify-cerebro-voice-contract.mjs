@@ -40,6 +40,15 @@ if(!voice.includes('VOICE_CONFIRMATION_CONFIDENCE_MIN=0.85')){
   throw new Error('Voice confirmation confidence threshold changed unexpectedly');
 }
 
+if(!voice.includes('VOICE_QUERY_CONFIDENCE_MIN=0.60')){
+  throw new Error('Voice query confidence threshold missing or drifted');
+}
+must(voice,'export function voiceAlternativeScore','voice alternative ranking');
+must(voice,'export function voiceNeedsClarification','voice uncertainty clarification');
+must(shell,'voiceAlternativeScore(candidate.transcript','ranked recognition alternatives');
+must(shell,'voiceNeedsClarification(clean,voiceConfidence)','general voice clarification gate');
+must(shell,'recognition.maxAlternatives=5','expanded voice alternatives');
+
 console.log('CEREBRO voice confirmation contract parity: GREEN');
 console.log('Accepted confirmations:',[...accepted].join(', '));
 
