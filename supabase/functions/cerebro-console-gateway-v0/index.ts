@@ -163,12 +163,12 @@ function previousUserTurn(context:ConversationTurn[]){
 
 function closeOwnerGreeting(){
   const variants=[
-    "Hola, Carlos. ¿Qué tal, guapo? Dime, ¿qué hacemos?",
-    "¡Buenas, Carlos! Aquí estoy, guapo. ¿Qué necesitas?",
-    "Hola, guapo. Dime, Carlos, ¿por dónde empezamos?",
-    "¡Muy buenas, Carlos! ¿Cómo va, guapo? Cuéntame.",
-    "Ey, Carlos. ¿Qué tal, guapo? Estoy aquí. ¿Qué vemos?",
-    "Hola, Carlos, guapo. Dime qué tienes entre manos."
+    "Hola Carlos. ¿Qué tal guapo? Dime, ¿qué hacemos?",
+    "¡Buenas Carlos! Aquí estoy guapo. ¿Qué necesitas?",
+    "Hola guapo. Dime Carlos, ¿por dónde empezamos?",
+    "¡Muy buenas Carlos! ¿Cómo va guapo? Cuéntame.",
+    "Ey Carlos. ¿Qué tal guapo? Estoy aquí. ¿Qué vemos?",
+    "Hola Carlos guapo. Dime qué tienes entre manos."
   ];
   const slot=Math.floor(Date.now()/15000)%variants.length;
   return variants[slot];
