@@ -1,0 +1,25 @@
+name: CEREBRO RSI Scheduler Gate
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/runtime/continuous-improvement-scheduler.mjs'
+      - 'cerebro/tests/continuous-improvement-scheduler.test.mjs'
+      - 'cerebro/docs/RSI_SCHEDULER_CONTRACT_V0.md'
+      - '.github/workflows/cerebro-rsi-scheduler-gate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  block-c-scheduler:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: RSI Block C scheduler tests
+        run: node --test cerebro/tests/continuous-improvement-scheduler.test.mjs

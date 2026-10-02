@@ -1,0 +1,15 @@
+name: CEREBRO RSI Multi Company Gate
+on:
+  pull_request:
+    paths: ['cerebro/runtime/multi-company-learning.mjs','cerebro/tests/multi-company-learning.test.mjs','cerebro/docs/RSI_MULTI_COMPANY_LEARNING_V0.md','.github/workflows/cerebro-rsi-multi-company-gate.yml']
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  block-l-multi-company:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 20}
+      - run: node --test cerebro/tests/multi-company-learning.test.mjs
