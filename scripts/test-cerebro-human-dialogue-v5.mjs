@@ -9,9 +9,11 @@ const gateway=fs.readFileSync('supabase/functions/cerebro-console-gateway-v0/ind
 const knowledge=fs.readFileSync('supabase/functions/cerebro-console-gateway-v0/knowledge.ts','utf8');
 
 assert(gateway.includes('function closeOwnerGreeting()'),'owner greeting function missing');
-for(const phrase of ['Hola, Carlos','guapo','buenos dias','buenas tardes','buenas noches']){
+for(const phrase of ['Hola Carlos','Hola guapo','guapo','buenos dias','buenas tardes','buenas noches']){
  assert(gateway.toLocaleLowerCase('es-ES').includes(phrase.toLocaleLowerCase('es-ES')),'greeting contract missing: '+phrase);
 }
+assert(!gateway.includes('Hola, Carlos'),'owner greeting must not pause after Hola before Carlos');
+assert(!gateway.includes('Hola, guapo'),'owner greeting must not pause after Hola before guapo');
 assert(gateway.includes('intent:"greeting"'),'greeting intent missing');
 assert(gateway.includes('0.9.0-conversational-intelligence-v2'),'gateway version not advanced');
 
