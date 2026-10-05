@@ -5,20 +5,20 @@ const SOURCES = Object.freeze([
   {
     source_id: 'lobehub-skills',
     url: 'https://lobehub.com/es/skills?category=all&sort=stars',
-    candidate_path: /^\/[^/]*\/?skills\/[A-Za-z0-9._~!$&'()*+,;=:@%-]+|^\/skills\/[A-Za-z0-9._~!$&'()*+,;=:@%-]+/i,
-    max_candidates: 40
+    candidate_path: /^\/(?:es\/)?skills\/[A-Za-z0-9._~!$&'()*+,;=:@%-]+/i,
+    max_candidates: 12
   },
   {
     source_id: 'mcpservers-agent-skills',
     url: 'https://mcpservers.org/es/agent-skills',
-    candidate_path: /^\/es\/agent-skills\/[A-Za-z0-9._~!$&'()*+,;=:@%/-]+|^\/agent-skills\/[A-Za-z0-9._~!$&'()*+,;=:@%/-]+/i,
-    max_candidates: 40
+    candidate_path: /^\/(?:es\/)?agent-skills\/[A-Za-z0-9._~!$&'()*+,;=:@%/-]+/i,
+    max_candidates: 12
   },
   {
     source_id: 'fragroger-skills',
     url: 'https://skills.fragroger.ai/es',
     candidate_path: /^\/es\/skills\/[A-Za-z0-9._~!$&'()*+,;=:@%/-]+/i,
-    max_candidates: 40
+    max_candidates: 12
   }
 ]);
 
@@ -47,7 +47,7 @@ export function discoverCandidateUrls({html, source}) {
     resolved.hash = '';
     urls.push(resolved.toString());
   }
-  return unique(urls).slice(0, source.max_candidates ?? 40);
+  return unique(urls).slice(0, source.max_candidates ?? 12);
 }
 
 export function extractGithubUpstreams(html) {
@@ -63,7 +63,7 @@ export function extractGithubUpstreams(html) {
   return unique(out);
 }
 
-async function fetchText(url, {timeoutMs = 15000, userAgent = 'CEREBRO-OS-SkillScout/0.1 (+read-only)'} = {}) {
+async function fetchText(url, {timeoutMs = 8000, userAgent = 'CEREBRO-OS-SkillScout/0.1 (+read-only)'} = {}) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
@@ -79,6 +79,28 @@ async function fetchText(url, {timeoutMs = 15000, userAgent = 'CEREBRO-OS-SkillS
   }
 }
 
+async function inspectCandidate(candidateUrl, source, fetcher) {
+  let upstreams = [];
+  let candidateStatus = 'DISCOVERED';
+  let error = null;
+  try {
+    const detailHtml = await fetcher(candidateUrl);
+    upstreams = extractGithubUpstreams(detailHtml);
+    if (upstreams.length) candidateStatus = 'UPSTREAM_HINT_FOUND';
+  } catch (err) {
+    candidateStatus = 'DETAIL_FETCH_FAILED';
+    error = String(err?.message ?? err);
+  }
+  return {
+    candidate_id: `${source.source_id}:${Buffer.from(candidateUrl).toString('base64url').slice(0, 24)}`,
+    source_ref: candidateUrl,
+    upstream_hints: upstreams,
+    status: candidateStatus,
+    error,
+    executed: false
+  };
+}
+
 export async function discoverSource(source, {fetcher = fetchText, observedAt = new Date().toISOString()} = {}) {
   const result = {
     source_id: source.source_id,
@@ -91,26 +113,7 @@ export async function discoverSource(source, {fetcher = fetchText, observedAt = 
   try {
     const indexHtml = await fetcher(source.url);
     const candidateUrls = discoverCandidateUrls({html: indexHtml, source});
-    for (const candidateUrl of candidateUrls) {
-      let upstreams = [];
-      let candidateStatus = 'DISCOVERED';
-      let error = null;
-      try {
-        const detailHtml = await fetcher(candidateUrl);
-        upstreams = extractGithubUpstreams(detailHtml);
-        if (upstreams.length) candidateStatus = 'UPSTREAM_HINT_FOUND';
-      } catch (err) {
-        candidateStatus = 'DETAIL_FETCH_FAILED';
-        error = String(err?.message ?? err);
-      }
-      result.candidates.push({
-        candidate_id: `${source.source_id}:${Buffer.from(candidateUrl).toString('base64url').slice(0, 24)}`,
-        source_ref: candidateUrl,
-        upstream_hints: upstreams,
-        status: candidateStatus,
-        error
-      });
-    }
+    result.candidates = await Promise.all(candidateUrls.map((url) => inspectCandidate(url, source, fetcher)));
   } catch (err) {
     result.status = 'SOURCE_FETCH_FAILED';
     result.error = String(err?.message ?? err);
@@ -119,8 +122,7 @@ export async function discoverSource(source, {fetcher = fetchText, observedAt = 
 }
 
 export async function runOnlineDiscovery({sources = SOURCES, fetcher = fetchText, observedAt = new Date().toISOString()} = {}) {
-  const results = [];
-  for (const source of sources) results.push(await discoverSource(source, {fetcher, observedAt}));
+  const results = await Promise.all(sources.map((source) => discoverSource(source, {fetcher, observedAt})));
   const sourceOk = results.filter((item) => item.status === 'OK').length;
   const candidates = results.reduce((sum, item) => sum + item.candidates.length, 0);
   const upstreamHints = results.reduce((sum, item) => sum + item.candidates.reduce((s, c) => s + c.upstream_hints.length, 0), 0);
