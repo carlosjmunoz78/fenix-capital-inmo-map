@@ -7,11 +7,13 @@ on:
       - 'cerebro/skills/skill-upstream-resolver.mjs'
       - 'cerebro/skills/skill-overlap-analyzer.mjs'
       - 'cerebro/skills/skill-manifest-resolver.mjs'
+      - 'cerebro/skills/skill-candidate-policy.mjs'
       - 'cerebro/skills/internal-capability-signals.v0.json'
       - 'cerebro/tests/skill-source-discovery.test.mjs'
       - 'cerebro/tests/skill-upstream-resolver.test.mjs'
       - 'cerebro/tests/skill-overlap-analyzer.test.mjs'
       - 'cerebro/tests/skill-manifest-resolver.test.mjs'
+      - 'cerebro/tests/skill-candidate-policy.test.mjs'
       - '.github/workflows/cerebro-skill-discovery-scout.yml'
   schedule:
     - cron: '17 4 * * *'
@@ -25,6 +27,7 @@ env:
   CEREBRO_UPSTREAM_OUTPUT: artifacts/cerebro-skill-upstreams.json
   CEREBRO_OVERLAP_OUTPUT: artifacts/cerebro-skill-overlap.json
   CEREBRO_MANIFEST_OUTPUT: artifacts/cerebro-skill-manifests.json
+  CEREBRO_SHORTLIST_OUTPUT: artifacts/cerebro-skill-shortlist.json
   CEREBRO_UPSTREAM_MAX_REPOS: '24'
 
 jobs:
@@ -36,8 +39,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Contract tests for discovery, upstream, overlap and manifest preflight
-        run: node --test cerebro/tests/skill-source-discovery.test.mjs cerebro/tests/skill-upstream-resolver.test.mjs cerebro/tests/skill-overlap-analyzer.test.mjs cerebro/tests/skill-manifest-resolver.test.mjs
+      - name: Contract tests for discovery, upstream, overlap, manifest and candidate policy
+        run: node --test cerebro/tests/skill-source-discovery.test.mjs cerebro/tests/skill-upstream-resolver.test.mjs cerebro/tests/skill-overlap-analyzer.test.mjs cerebro/tests/skill-manifest-resolver.test.mjs cerebro/tests/skill-candidate-policy.test.mjs
       - name: Discover public skill candidates without executing them
         run: node cerebro/skills/skill-source-discovery.mjs --output "$CEREBRO_DISCOVERY_OUTPUT"
       - name: Resolve GitHub repository metadata, license hint and exact head without executing code
@@ -50,6 +53,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: node cerebro/skills/skill-manifest-resolver.mjs --discovery "$CEREBRO_DISCOVERY_OUTPUT" --upstreams "$CEREBRO_UPSTREAM_OUTPUT" --output "$CEREBRO_MANIFEST_OUTPUT"
+      - name: Apply candidate policy and produce non-installing LAB shortlist
+        run: node cerebro/skills/skill-candidate-policy.mjs --discovery "$CEREBRO_DISCOVERY_OUTPUT" --upstreams "$CEREBRO_UPSTREAM_OUTPUT" --overlap "$CEREBRO_OVERLAP_OUTPUT" --manifests "$CEREBRO_MANIFEST_OUTPUT" --output "$CEREBRO_SHORTLIST_OUTPUT"
       - name: Upload read-only discovery evidence
         uses: actions/upload-artifact@v4
         with:
@@ -59,5 +64,6 @@ jobs:
             artifacts/cerebro-skill-upstreams.json
             artifacts/cerebro-skill-overlap.json
             artifacts/cerebro-skill-manifests.json
+            artifacts/cerebro-skill-shortlist.json
           if-no-files-found: error
           retention-days: 14
