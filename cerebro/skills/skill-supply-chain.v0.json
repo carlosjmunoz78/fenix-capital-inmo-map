@@ -59,7 +59,7 @@
     "candidate_id", "name", "source_id", "source_ref", "upstream_ref", "upstream_commit",
     "license_id", "license_compatible", "skill_class", "trust_tier", "version_ref",
     "observed_at", "fit", "security", "maintainability", "interoperability", "reversibility",
-    "cost_eur_month", "network_access", "filesystem_access", "credential_access",
+    "reuse_value", "cost_eur_month", "network_access", "filesystem_access", "credential_access",
     "prod_write", "trading_access", "forbidden_behaviors"
   ],
   "score_weights": {
