@@ -6,7 +6,10 @@ on:
     paths:
       - 'cerebro/factory.mjs'
       - 'cerebro/registry/engine-registry.seed.json'
+      - 'cerebro/registry/brandboot-001.candidate.json'
+      - 'cerebro/evidence/registry-migrations/**'
       - 'cerebro/tests/factory.test.mjs'
+      - 'cerebro/tests/brandboot-candidate.test.mjs'
       - '.github/workflows/cerebro-gov001-hardening-exact-head-gate.yml'
 
 permissions:
@@ -19,7 +22,6 @@ jobs:
     env:
       VITE_FENIX_ENV: prod
       VITE_SUPABASE_URL: https://cluhljgonannaafpmblx.supabase.co
-      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_yjISKmA5UPfF3d7NitP_DA_j5LGydh0
     steps:
       - name: Checkout exact PR head
         uses: actions/checkout@v4
@@ -41,13 +43,13 @@ jobs:
         working-directory: cerebro
         run: npm test
 
-      - name: Generate all 177 engine skeletons outside repo
+      - name: Generate all 178 engine skeletons outside repo
         working-directory: cerebro
         run: npm run generate -- --out /tmp/cerebro-generated
 
-      - name: Assert 177 generated engines and no repository mutation
+      - name: Assert 178 generated engines and no repository mutation
         run: |
-          node -e "const x=require('/tmp/cerebro-generated/skeleton-index.json'); if(x.engine_count!==177) process.exit(1);"
+          node -e "const x=require('/tmp/cerebro-generated/skeleton-index.json'); if(x.engine_count!==178) process.exit(1);"
           git diff --exit-code
 
       - name: Build App against current PROD configuration without deploy
