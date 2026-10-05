@@ -3,27 +3,8 @@ name: CEREBRO Skill Discovery Scout
 on:
   push:
     paths:
-      - 'cerebro/skills/skill-source-discovery.mjs'
-      - 'cerebro/skills/skill-upstream-resolver.mjs'
-      - 'cerebro/skills/skill-overlap-analyzer.mjs'
-      - 'cerebro/skills/skill-manifest-resolver.mjs'
-      - 'cerebro/skills/skill-candidate-policy.mjs'
-      - 'cerebro/skills/skill-bundle-scanner.mjs'
-      - 'cerebro/skills/skill-license-evidence.mjs'
-      - 'cerebro/skills/skill-prelab-admission.mjs'
-      - 'cerebro/skills/skill-wrapper-plan.mjs'
-      - 'cerebro/skills/skill-improvement-events.mjs'
-      - 'cerebro/skills/internal-capability-signals.v0.json'
-      - 'cerebro/tests/skill-source-discovery.test.mjs'
-      - 'cerebro/tests/skill-upstream-resolver.test.mjs'
-      - 'cerebro/tests/skill-overlap-analyzer.test.mjs'
-      - 'cerebro/tests/skill-manifest-resolver.test.mjs'
-      - 'cerebro/tests/skill-candidate-policy.test.mjs'
-      - 'cerebro/tests/skill-bundle-scanner.test.mjs'
-      - 'cerebro/tests/skill-license-evidence.test.mjs'
-      - 'cerebro/tests/skill-prelab-admission.test.mjs'
-      - 'cerebro/tests/skill-wrapper-plan.test.mjs'
-      - 'cerebro/tests/skill-improvement-events.test.mjs'
+      - 'cerebro/skills/**'
+      - 'cerebro/tests/skill-*.test.mjs'
       - '.github/workflows/cerebro-skill-discovery-scout.yml'
   schedule:
     - cron: '17 4 * * *'
@@ -42,6 +23,8 @@ env:
   CEREBRO_LICENSE_OUTPUT: artifacts/cerebro-skill-license-evidence.json
   CEREBRO_PRELAB_OUTPUT: artifacts/cerebro-skill-prelab-p0.json
   CEREBRO_WRAPPER_OUTPUT: artifacts/cerebro-skill-wrapper-plans-p0.json
+  CEREBRO_VALUE_OUTPUT: artifacts/cerebro-skill-value-p0.json
+  CEREBRO_LAB_PLAN_OUTPUT: artifacts/cerebro-skill-lab-eval-plans-p0.json
   CEREBRO_EVENTS_OUTPUT: artifacts/cerebro-skill-improvement-events.json
   CEREBRO_UPSTREAM_MAX_REPOS: '24'
 
@@ -54,8 +37,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Contract tests for discovery, upstream, overlap, manifest, policy, bundle, license, pre-LAB, wrappers and improvement events
-        run: node --test cerebro/tests/skill-source-discovery.test.mjs cerebro/tests/skill-upstream-resolver.test.mjs cerebro/tests/skill-overlap-analyzer.test.mjs cerebro/tests/skill-manifest-resolver.test.mjs cerebro/tests/skill-candidate-policy.test.mjs cerebro/tests/skill-bundle-scanner.test.mjs cerebro/tests/skill-license-evidence.test.mjs cerebro/tests/skill-prelab-admission.test.mjs cerebro/tests/skill-wrapper-plan.test.mjs cerebro/tests/skill-improvement-events.test.mjs
+      - name: Run all Skill Supply Chain tests
+        run: node --test cerebro/tests/skill-*.test.mjs
       - name: Discover public skill candidates without executing them
         run: node cerebro/skills/skill-source-discovery.mjs --output "$CEREBRO_DISCOVERY_OUTPUT"
       - name: Resolve GitHub repository metadata, license hint and exact head without executing code
@@ -82,6 +65,10 @@ jobs:
         run: node cerebro/skills/skill-prelab-admission.mjs --shortlist "$CEREBRO_SHORTLIST_OUTPUT" --bundles "$CEREBRO_BUNDLE_OUTPUT" --licenses "$CEREBRO_LICENSE_OUTPUT" --output "$CEREBRO_PRELAB_OUTPUT"
       - name: Generate disabled CEREBRO wrapper plans for static pre-LAB candidates
         run: node cerebro/skills/skill-wrapper-plan.mjs --prelab "$CEREBRO_PRELAB_OUTPUT" --shortlist "$CEREBRO_SHORTLIST_OUTPUT" --manifests "$CEREBRO_MANIFEST_OUTPUT" --licenses "$CEREBRO_LICENSE_OUTPUT" --output "$CEREBRO_WRAPPER_OUTPUT"
+      - name: Rank static-ready candidates by evidence-based value without popularity
+        run: node cerebro/skills/skill-value-evaluator.mjs --wrappers "$CEREBRO_WRAPPER_OUTPUT" --prelab "$CEREBRO_PRELAB_OUTPUT" --upstreams "$CEREBRO_UPSTREAM_OUTPUT" --overlap "$CEREBRO_OVERLAP_OUTPUT" --licenses "$CEREBRO_LICENSE_OUTPUT" --output "$CEREBRO_VALUE_OUTPUT"
+      - name: Generate top-3 LAB evaluation plans without executing external code
+        run: node cerebro/skills/skill-lab-eval-plan.mjs --value "$CEREBRO_VALUE_OUTPUT" --top-n 3 --output "$CEREBRO_LAB_PLAN_OUTPUT"
       - name: Emit improvement event proposals without publishing to runtime or RSI
         run: node cerebro/skills/skill-improvement-events.mjs --shortlist "$CEREBRO_SHORTLIST_OUTPUT" --prelab "$CEREBRO_PRELAB_OUTPUT" --wrappers "$CEREBRO_WRAPPER_OUTPUT" --output "$CEREBRO_EVENTS_OUTPUT"
       - name: Upload read-only discovery evidence
@@ -98,6 +85,8 @@ jobs:
             artifacts/cerebro-skill-bundles-p0.json
             artifacts/cerebro-skill-prelab-p0.json
             artifacts/cerebro-skill-wrapper-plans-p0.json
+            artifacts/cerebro-skill-value-p0.json
+            artifacts/cerebro-skill-lab-eval-plans-p0.json
             artifacts/cerebro-skill-improvement-events.json
           if-no-files-found: error
           retention-days: 14
