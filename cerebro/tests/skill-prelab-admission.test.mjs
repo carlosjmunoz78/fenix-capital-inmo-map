@@ -21,6 +21,13 @@ test('clean instruction-only P0 candidate becomes static pre-LAB ready but not a
   assert.equal(report.results[0].prod_authorized,false);
 });
 
+test('matching SPDX evidence is accepted even when supplemental NOTICE is unclassified',()=>{
+  const license=baseLicense({detected_families:['Apache-2.0','UNKNOWN'],repo_license_spdx:'Apache-2.0',metadata_matches_detected:true});
+  const shortlist=baseShortlist({repo_license_spdx:'Apache-2.0'});
+  const item=buildPrelabAdmission(shortlist,baseBundle(),license).results[0];
+  assert.equal(item.prelab_state,'STATIC_PRELAB_READY_INSTRUCTION_ONLY');
+});
+
 test('clean code bundle requires isolated sandbox design and is not auto-executed',()=>{
   const report=buildPrelabAdmission(baseShortlist(),baseBundle({code_files_count:3}),baseLicense());
   assert.equal(report.results[0].prelab_state,'STATIC_PRELAB_READY_CODE_BUNDLE');
@@ -51,7 +58,7 @@ test('secret/network runtime flags require permission review',()=>{
 test('license evidence mismatch or absence blocks static admission',()=>{
   const missing=buildPrelabAdmission(baseShortlist(),baseBundle(),{results:[]}).results[0];
   assert.equal(missing.prelab_state,'LICENSE_EVIDENCE_REVIEW_REQUIRED');
-  const mismatch=buildPrelabAdmission(baseShortlist(),baseBundle(),baseLicense({metadata_matches_detected:false})).results[0];
+  const mismatch=buildPrelabAdmission(baseShortlist(),baseBundle(),baseLicense({metadata_matches_detected:false,detected_families:['Apache-2.0']})).results[0];
   assert.equal(mismatch.prelab_state,'LICENSE_EVIDENCE_REVIEW_REQUIRED');
 });
 
