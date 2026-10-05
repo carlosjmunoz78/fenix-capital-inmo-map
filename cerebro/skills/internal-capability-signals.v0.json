@@ -1,0 +1,25 @@
+{
+  "schema_version": "0.1.0",
+  "status": "ROUTING_SIGNALS_ONLY_NOT_IMPLEMENTATION_CLAIMS",
+  "owner_engine_id": "FACT-001",
+  "known_upstreams": [],
+  "domains": [
+    {"domain_id":"agent-ai-orchestration","engine_bindings":["ORCH-001","ROUTE-001","FACT-001","RAG-001","LRN-001","ACTGW-001"],"keywords":["agent","agents","agentic","llm","mcp","prompt","skill","skills","rag","model","models","tool","tools","orchestration","memory"]},
+    {"domain_id":"software-engineering-devops","engine_bindings":["FACT-001","ARCH-001","API-001","DEP-001","MIG-001","QA-001","REG-001","DOCS-001"],"keywords":["code","coding","developer","development","typescript","javascript","python","react","github","git","ci","cd","test","testing","deploy","deployment","docker","api","sdk","cli"]},
+    {"domain_id":"web-wordpress-frontend","engine_bindings":["WEB-001","WAUD-001","APP-001","ARCH-001","QA-001"],"keywords":["wordpress","gutenberg","website","web","frontend","html","css","ui","ux","react","browser","page","pages"]},
+    {"domain_id":"seo-search-content","engine_bindings":["SEO-001","KW-001","WAUD-001","LOCALP-001","SEOBOOT-001","MKT-001"],"keywords":["seo","search","keyword","keywords","schema","serp","content","geo","aeo","indexing","crawl","canonical","sitemap","local seo"]},
+    {"domain_id":"marketing-growth-social","engine_bindings":["MKT-001","MKT-002","MKTBOOT-001","SOCAUD-001","SOCBOOT-001","COM-001","CAP-001"],"keywords":["marketing","growth","copywriting","copy","cro","linkedin","social","campaign","campaigns","ads","conversion","brand","newsletter"]},
+    {"domain_id":"browser-automation-scraping","engine_bindings":["AUTO-001","AUTBOOT-001","QA-001","WEB-001","SCAN-001"],"keywords":["browser","automation","automate","scrape","scraping","crawler","crawling","playwright","selenium","web automation","extract"]},
+    {"domain_id":"data-database-supabase","engine_bindings":["DATA-001","DBOFF-001","STOROFF-001","API-001","CRM-001"],"keywords":["postgres","postgresql","database","sql","supabase","data","storage","query","queries","schema","migration"]},
+    {"domain_id":"documents-office-pdf","engine_bindings":["DOC-001","DOC-003","DOCS-001","DATA-001"],"keywords":["pdf","docx","word","excel","xlsx","spreadsheet","document","documents","slides","presentation","keynote","ocr","epub"]},
+    {"domain_id":"knowledge-research-training","engine_bindings":["RSH-001","KNW-001","TRN-001","TRNBOOT-001","RAG-001","PRV-001"],"keywords":["research","knowledge","notebook","obsidian","science","scientific","training","learn","learning","notes","documentation"]},
+    {"domain_id":"security-identity-privacy","engine_bindings":["SEC-001","SEC-002","IAM-001","DPO-001","CMP-002","RED-001"],"keywords":["security","secure","auth","oauth","iam","secret","secrets","vulnerability","privacy","gdpr","compliance","red team"]},
+    {"domain_id":"observability-quality-resilience","engine_bindings":["OBSERV-001","INC-001","SUP-001","QA-001","REG-001","DR-001","RBLD-001","BCP-001"],"keywords":["observability","monitoring","monitor","sentry","logs","logging","metrics","incident","quality","qa","backup","rollback","recovery","resilience"]},
+    {"domain_id":"sales-crm-customer","engine_bindings":["CRM-001","CRMBOOT-001","LEAD-001","SALE-001","C360-001","CX-001","RET-001"],"keywords":["crm","sales","lead","leads","customer","customers","client","clients","pipeline","retention","support"]},
+    {"domain_id":"finance-accounting-payments","engine_bindings":["FINOPS-001","INV-001","COL-001","TRE-001","ACC-001","PAY-001"],"keywords":["finance","financial","invoice","invoicing","accounting","payment","payments","stripe","billing","budget","cost","cashflow","cash flow"]},
+    {"domain_id":"legal-compliance-contracts","engine_bindings":["LEG-001","CMP-002","DPO-001","CONS-001","VCON-001"],"keywords":["legal","contract","contracts","compliance","privacy","gdpr","consent","regulation","policy","policies"]},
+    {"domain_id":"hr-people-operations","engine_bindings":["HR-001","HR-002","HR-003","HR-004","HR-005","HR-006"],"keywords":["hr","human resources","recruiting","recruitment","onboarding","performance","coaching","workforce","employee","employees"]},
+    {"domain_id":"multimedia-voice-video-design","engine_bindings":["VOICE-001","VOICEUI-001","COM-001","MKT-001"],"keywords":["video","audio","voice","speech","tts","transcription","image","images","design","figma","canva","thumbnail","media"]},
+    {"domain_id":"multi-company-business-bootstrap","engine_bindings":["COMP-REG-001","COMP-ONB-001","BMD-001","PROC-001","KBOOT-001","ENGACT-001","TENANT-001"],"keywords":["business","company","companies","tenant","multi tenant","multitenant","onboarding","process","processes","bootstrap","organization"]}
+  ]
+}
