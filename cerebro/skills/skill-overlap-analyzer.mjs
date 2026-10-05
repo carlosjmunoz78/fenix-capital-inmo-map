@@ -118,6 +118,8 @@ export function analyzeCandidateOverlap(candidate, upstream, index, manifest = n
   if (!upstream?.head_commit) quality_flags.push('HEAD_COMMIT_UNRESOLVED');
   if (!manifest || manifest.status !== 'MANIFEST_RESOLVED_STATIC_ONLY') quality_flags.push('MANIFEST_SEMANTICS_UNAVAILABLE');
 
+  const primaryDomain = domains[0] ?? null;
+
   return {
     candidate_id: candidate.candidate_id,
     source_ref: candidate.source_ref,
@@ -129,7 +131,8 @@ export function analyzeCandidateOverlap(candidate, upstream, index, manifest = n
     overlap_state,
     overlap_confidence_score: Number(topScore.toFixed(2)),
     top_domains: domains.slice(0, 4),
-    suggested_engine_bindings: [...new Set(domains.slice(0, 2).flatMap((item) => item.engine_bindings))],
+    binding_domain_id: primaryDomain?.domain_id ?? null,
+    suggested_engine_bindings: [...new Set(primaryDomain?.engine_bindings ?? [])],
     quality_flags,
     disposition: overlap_state === 'EXACT_KNOWN_UPSTREAM'
       ? 'DEDUP_REUSE_EXISTING'
@@ -153,11 +156,11 @@ export function analyzeDiscoveryOverlap(discoveryReport, upstreamReport, index, 
   const domainCounts = {};
   for (const item of candidates) {
     counts[item.overlap_state] = (counts[item.overlap_state] ?? 0) + 1;
-    const domain = item.top_domains?.[0]?.domain_id;
+    const domain = item.binding_domain_id;
     if (domain) domainCounts[domain] = (domainCounts[domain] ?? 0) + 1;
   }
   return Object.freeze({
-    schema_version: '0.2.0',
+    schema_version: '0.2.1',
     execution_mode: 'ANALYZE_ONLY',
     candidates_total: candidates.length,
     overlap_counts: counts,
