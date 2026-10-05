@@ -4,7 +4,9 @@ on:
   push:
     paths:
       - 'cerebro/skills/skill-source-discovery.mjs'
+      - 'cerebro/skills/skill-upstream-resolver.mjs'
       - 'cerebro/tests/skill-source-discovery.test.mjs'
+      - 'cerebro/tests/skill-upstream-resolver.test.mjs'
       - '.github/workflows/cerebro-skill-discovery-scout.yml'
   schedule:
     - cron: '17 4 * * *'
@@ -15,6 +17,8 @@ permissions:
 
 env:
   CEREBRO_DISCOVERY_OUTPUT: artifacts/cerebro-skill-discovery.json
+  CEREBRO_UPSTREAM_OUTPUT: artifacts/cerebro-skill-upstreams.json
+  CEREBRO_UPSTREAM_MAX_REPOS: '24'
 
 jobs:
   read-only-discovery:
@@ -25,14 +29,20 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Contract tests for source discovery
-        run: node --test cerebro/tests/skill-source-discovery.test.mjs
+      - name: Contract tests for source discovery and upstream resolution
+        run: node --test cerebro/tests/skill-source-discovery.test.mjs cerebro/tests/skill-upstream-resolver.test.mjs
       - name: Discover public skill candidates without executing them
         run: node cerebro/skills/skill-source-discovery.mjs --output "$CEREBRO_DISCOVERY_OUTPUT"
-      - name: Upload discovery evidence only
+      - name: Resolve GitHub repository metadata, license hint and exact head without executing code
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node cerebro/skills/skill-upstream-resolver.mjs --input "$CEREBRO_DISCOVERY_OUTPUT" --output "$CEREBRO_UPSTREAM_OUTPUT" --max-repos "$CEREBRO_UPSTREAM_MAX_REPOS"
+      - name: Upload read-only discovery evidence
         uses: actions/upload-artifact@v4
         with:
           name: cerebro-skill-discovery-${{ github.run_id }}
-          path: artifacts/cerebro-skill-discovery.json
+          path: |
+            artifacts/cerebro-skill-discovery.json
+            artifacts/cerebro-skill-upstreams.json
           if-no-files-found: error
           retention-days: 14
