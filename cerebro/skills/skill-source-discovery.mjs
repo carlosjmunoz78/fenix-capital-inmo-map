@@ -1,17 +1,20 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import {createHash} from 'node:crypto';
 
 const SOURCES = Object.freeze([
   {
     source_id: 'lobehub-skills',
     url: 'https://lobehub.com/es/skills?category=all&sort=stars',
     candidate_path: /^\/(?:es\/)?skills\/[A-Za-z0-9._~!$&'()*+,;=:@%-]+/i,
+    exclude_path: /\/skills\/skill\.md$/i,
     max_candidates: 12
   },
   {
     source_id: 'mcpservers-agent-skills',
     url: 'https://mcpservers.org/es/agent-skills',
     candidate_path: /^\/(?:es\/)?agent-skills\/[A-Za-z0-9._~!$&'()*+,;=:@%/-]+/i,
+    exclude_path: /\/(?:es\/)?agent-skills\/(?:official(?:\/|$)|author\/)/i,
     max_candidates: 12
   },
   {
@@ -24,6 +27,10 @@ const SOURCES = Object.freeze([
 
 function unique(values) {
   return [...new Set(values)];
+}
+
+function stableId(value) {
+  return createHash('sha256').update(value).digest('hex').slice(0, 20);
 }
 
 export function extractHrefs(html) {
@@ -44,10 +51,16 @@ export function discoverCandidateUrls({html, source}) {
     try { resolved = new URL(href, base); } catch { continue; }
     if (resolved.origin !== base.origin) continue;
     if (!source.candidate_path.test(resolved.pathname)) continue;
+    if (source.exclude_path instanceof RegExp && source.exclude_path.test(resolved.pathname)) continue;
     resolved.hash = '';
     urls.push(resolved.toString());
   }
   return unique(urls).slice(0, source.max_candidates ?? 12);
+}
+
+function isPlaceholderRepo(owner, repo) {
+  const key = `${owner}/${repo}`.toLowerCase();
+  return new Set(['owner/repo', 'user/repo', 'org/repo']).has(key);
 }
 
 export function extractGithubUpstreams(html) {
@@ -56,9 +69,10 @@ export function extractGithubUpstreams(html) {
   const re = /https:\/\/github\.com\/([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)(?:[\/#?][^\s"'<>]*)?/gi;
   let match;
   while ((match = re.exec(html)) !== null) {
+    const owner = match[1];
     const repo = match[2].replace(/\.git$/i, '');
-    if (!repo) continue;
-    out.push(`https://github.com/${match[1]}/${repo}`);
+    if (!repo || isPlaceholderRepo(owner, repo)) continue;
+    out.push(`https://github.com/${owner}/${repo}`);
   }
   return unique(out);
 }
@@ -92,7 +106,7 @@ async function inspectCandidate(candidateUrl, source, fetcher) {
     error = String(err?.message ?? err);
   }
   return {
-    candidate_id: `${source.source_id}:${Buffer.from(candidateUrl).toString('base64url').slice(0, 24)}`,
+    candidate_id: `${source.source_id}:${stableId(candidateUrl)}`,
     source_ref: candidateUrl,
     upstream_hints: upstreams,
     status: candidateStatus,
