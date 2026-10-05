@@ -1,0 +1,76 @@
+{
+  "schema_version": "1.0.0",
+  "engine_id": "BRANDBOOT-001",
+  "name": "Brand Bootstrap & Brand Manual Engine",
+  "layer": "L8",
+  "version": "0.1.0",
+  "environment": "LAB",
+  "lifecycle": "CANDIDATE",
+  "company_scope": "MULTI_COMPANY",
+  "evidence_state": "DOCUMENTED_PARTIAL",
+  "source_status": "CANDIDATE_NOT_CANONICAL",
+  "canonical_registry_seed_unchanged": true,
+  "factory_compatibility_target": "FACT-001",
+  "required_context": ["company_id", "engine_id", "environment", "version"],
+  "objective": "Generate a versioned, reusable brand system for a company without making paid AI or paid design SaaS a runtime dependency.",
+  "depends_on": ["COMP-ONB-001", "KBOOT-001"],
+  "optional_context_engines": ["BMD-001", "COMPET-001", "SCAN-001", "MKTBOOT-001"],
+  "inputs": [
+    "company_identity",
+    "business_model",
+    "approved_existing_brand_assets_optional",
+    "positioning_and_audience",
+    "competitive_context_optional",
+    "naming_status"
+  ],
+  "outputs": [
+    "brand_manual",
+    "brand.json",
+    "design-tokens.json",
+    "brand.css",
+    "asset_inventory",
+    "voice_rules",
+    "web_app_social_email_document_presets"
+  ],
+  "zero_cost_execution": {
+    "additional_fixed_cost_eur": 0,
+    "paid_ai_required": false,
+    "paid_design_saas_required": false,
+    "strategy": ["deterministic_rules", "existing_assets", "local_or_open_source", "already_available_fonts_and_tools"]
+  },
+  "permissions": {
+    "default": "deny",
+    "cross_company_access": "deny",
+    "prod_writes": false,
+    "publishing": false
+  },
+  "human_required_reasons": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "promotion_gates": {
+    "canonical_registry_decision_required": true,
+    "factory_scaffold_required": true,
+    "tests_required": true,
+    "evaluation_required": true,
+    "tribunal_required": true,
+    "rollback_rebuild_required": true,
+    "preprod_required": true,
+    "naming_trademark_clearance_required_for_prod": true,
+    "autonomous_prod": false
+  },
+  "current_evidence": {
+    "aion_fixture": "LAB_GREEN_LOCAL",
+    "fenix_fixture": "LAB_GREEN_LOCAL",
+    "multi_company_fixture_count": 2,
+    "paid_ai_calls": 0,
+    "paid_design_saas_calls": 0,
+    "first_use_case": "AION Operator Brand System V1 PREPROD"
+  }
+}
