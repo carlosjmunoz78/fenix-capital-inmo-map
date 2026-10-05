@@ -1,0 +1,38 @@
+name: CEREBRO Skill Discovery Scout
+
+on:
+  push:
+    paths:
+      - 'cerebro/skills/skill-source-discovery.mjs'
+      - 'cerebro/tests/skill-source-discovery.test.mjs'
+      - '.github/workflows/cerebro-skill-discovery-scout.yml'
+  schedule:
+    - cron: '17 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CEREBRO_DISCOVERY_OUTPUT: artifacts/cerebro-skill-discovery.json
+
+jobs:
+  read-only-discovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Contract tests for source discovery
+        run: node --test cerebro/tests/skill-source-discovery.test.mjs
+      - name: Discover public skill candidates without executing them
+        run: node cerebro/skills/skill-source-discovery.mjs --output "$CEREBRO_DISCOVERY_OUTPUT"
+      - name: Upload discovery evidence only
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-skill-discovery-${{ github.run_id }}
+          path: artifacts/cerebro-skill-discovery.json
+          if-no-files-found: error
+          retention-days: 14
