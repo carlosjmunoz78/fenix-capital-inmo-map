@@ -39,6 +39,30 @@ export function selectSkillManifestPath(candidate, repo, treeEntries) {
   return {status: 'SKILL_MD_SELECTED', path: best.path, confidence: best.score, candidates: scored.slice(0, 10)};
 }
 
+function parseFrontmatterField(header, name) {
+  const lines = String(header ?? '').split(/\r?\n/);
+  for (let i = 0; i < lines.length; i += 1) {
+    const match = lines[i].match(new RegExp(`^${name}\\s*:\\s*(.*)$`, 'i'));
+    if (!match) continue;
+    const raw = match[1].trim();
+    if (raw === '>' || raw === '|' || raw === '>-' || raw === '|-' || raw === '>+' || raw === '|+') {
+      const parts = [];
+      for (let j = i + 1; j < lines.length; j += 1) {
+        if (/^\S[^:]*:\s*/.test(lines[j])) break;
+        const continuation = lines[j].match(/^\s+(.+)$/);
+        if (!continuation) {
+          if (parts.length) break;
+          continue;
+        }
+        parts.push(continuation[1].trim());
+      }
+      return parts.join(' ').replace(/\s+/g, ' ').trim() || null;
+    }
+    return raw.replace(/^['"]|['"]$/g, '').trim() || null;
+  }
+  return null;
+}
+
 export function staticManifestScan(content) {
   if (typeof content !== 'string') throw new Error('manifest content must be string');
   const flags = [];
@@ -51,22 +75,20 @@ export function staticManifestScan(content) {
     ['ANTI_DETECT_TERMS', /anti[- ]?detect|fingerprint.{0,30}(?:spoof|evad)/i],
     ['CREDENTIAL_EXTRACTION_TERMS', /(?:extract|dump|steal).{0,40}(?:credential|password|token|secret)/i],
     ['SECRET_ACCESS_MENTION', /(?:process\.env|\$[A-Z][A-Z0-9_]{3,}|secret|api[_ -]?key|access[_ -]?token)/i],
-    ['NETWORK_DOWNLOAD_COMMAND', /\b(?:curl|wget)\s+https?:\/\//i]
+    ['NETWORK_DOWNLOAD_COMMAND', /\b(?:curl|wget)\s+https?:\/\//i],
+    ['ROUTER_PRECEDENCE_CLAIM', /\bprefer\b[^\n.]{0,160}\bover\b[^\n.]{0,100}\b(?:built[- ]?in|existing|other)\b/i],
+    ['INSTRUCTION_OVERRIDE_TERMS', /\bignore\b[^\n.]{0,80}\b(?:previous|prior|system|developer)\b[^\n.]{0,80}\binstruction/i]
   ];
   for (const [flag, regex] of checks) if (regex.test(content)) flags.push(flag);
   const frontmatter = content.match(/^---\s*\n([\s\S]{0,12000}?)\n---\s*(?:\n|$)/);
   const header = frontmatter?.[1] ?? '';
-  const field = (name) => {
-    const match = header.match(new RegExp(`^${name}\\s*:\\s*["']?(.+?)["']?\\s*$`, 'im'));
-    return match?.[1]?.trim() ?? null;
-  };
   return {
     sha256: createHash('sha256').update(content).digest('hex'),
     bytes: Buffer.byteLength(content, 'utf8'),
     lines: content.split(/\r?\n/).length,
     has_frontmatter: Boolean(frontmatter),
-    declared_name: field('name'),
-    declared_description: field('description'),
+    declared_name: parseFrontmatterField(header, 'name'),
+    declared_description: parseFrontmatterField(header, 'description'),
     static_flags: flags,
     executed: false,
     instructions_interpreted: false
@@ -76,7 +98,7 @@ export function staticManifestScan(content) {
 async function githubJson(url, {token = process.env.GITHUB_TOKEN, timeoutMs = 8000, fetchImpl = fetch} = {}) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
-  const headers = {accept: 'application/vnd.github+json', 'x-github-api-version': '2022-11-28', 'user-agent': 'CEREBRO-OS-SkillManifestScout/0.1 (+read-only)'};
+  const headers = {accept: 'application/vnd.github+json', 'x-github-api-version': '2022-11-28', 'user-agent': 'CEREBRO-OS-SkillManifestScout/0.2 (+read-only)'};
   if (token) headers.authorization = `Bearer ${token}`;
   try {
     const response = await fetchImpl(url, {headers, signal: controller.signal, redirect: 'follow'});
@@ -138,16 +160,7 @@ export async function resolveSkillManifests(discoveryReport, upstreamReport, {to
         if (bytes.length > MAX_MANIFEST_BYTES) throw new Error('manifest exceeds static scan size cap');
         const content = bytes.toString('utf8');
         const scan = staticManifestScan(content);
-        results.push({
-          candidate_id: candidate.candidate_id,
-          source_ref: candidate.source_ref,
-          upstream_full_name: repo.full_name,
-          upstream_head_commit: repo.head_commit,
-          manifest_path: selection.path,
-          selection_confidence: selection.confidence,
-          status: 'MANIFEST_RESOLVED_STATIC_ONLY',
-          ...scan
-        });
+        results.push({candidate_id: candidate.candidate_id, source_ref: candidate.source_ref, upstream_full_name: repo.full_name, upstream_head_commit: repo.head_commit, manifest_path: selection.path, selection_confidence: selection.confidence, status: 'MANIFEST_RESOLVED_STATIC_ONLY', ...scan});
       } catch (err) {
         results.push({candidate_id: candidate.candidate_id, source_ref: candidate.source_ref, upstream_full_name: repo.full_name, manifest_path: selection.path, status: 'MANIFEST_FETCH_FAILED', error: String(err?.message ?? err), executed: false});
       }
@@ -155,7 +168,7 @@ export async function resolveSkillManifests(discoveryReport, upstreamReport, {to
   }
   const counts = {};
   for (const item of results) counts[item.status] = (counts[item.status] ?? 0) + 1;
-  return Object.freeze({schema_version: '0.1.0', execution_mode: 'STATIC_READ_ONLY_MANIFEST_SCAN', observed_at: observedAt, candidates_total: results.length, status_counts: counts, code_executed: false, instructions_interpreted: false, results});
+  return Object.freeze({schema_version: '0.2.0', execution_mode: 'STATIC_READ_ONLY_MANIFEST_SCAN', observed_at: observedAt, candidates_total: results.length, status_counts: counts, code_executed: false, instructions_interpreted: false, results});
 }
 
 function argValue(name) { const index = process.argv.indexOf(name); return index >= 0 ? process.argv[index + 1] : null; }
