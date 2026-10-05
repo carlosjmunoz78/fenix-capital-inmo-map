@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  canonicalDedupeResolved,
   collectUpstreamRepos,
   normalizeRepositoryMetadata,
   parseGithubRepoUrl,
@@ -15,17 +16,20 @@ test('parseGithubRepoUrl accepts canonical GitHub repo refs only', () => {
   assert.equal(parseGithubRepoUrl('https://github.com/owner/repo'), null);
 });
 
-test('collectUpstreamRepos deduplicates case-insensitively and obeys cap', () => {
+test('collectUpstreamRepos uses primary hints, deduplicates and preserves candidate attribution', () => {
   const discovery = {results: [{candidates: [
-    {upstream_hints: ['https://github.com/Acme/One', 'https://github.com/acme/one']},
-    {upstream_hints: ['https://github.com/acme/two']}
+    {candidate_id: 'a', source_ref: 'https://directory/a', primary_upstream_hint: 'https://github.com/Acme/One', upstream_hints: ['https://github.com/noise/x']},
+    {candidate_id: 'b', source_ref: 'https://directory/b', primary_upstream_hint: 'https://github.com/acme/one'},
+    {candidate_id: 'c', source_ref: 'https://directory/c', primary_upstream_hint: 'https://github.com/acme/two'}
   ]}]};
   const repos = collectUpstreamRepos(discovery, {maxRepos: 1});
   assert.equal(repos.length, 1);
   assert.equal(repos[0].full_name, 'Acme/One');
+  assert.deepEqual(repos[0].discovery_candidate_ids, ['a', 'b']);
+  assert.deepEqual(repos[0].discovery_source_refs, ['https://directory/a', 'https://directory/b']);
 });
 
-test('normalizeRepositoryMetadata is evidence-only and never executes code', () => {
+test('normalizeRepositoryMetadata is evidence-only and leaves license compatibility unassessed', () => {
   const repo = {
     html_url: 'https://github.com/acme/one', full_name: 'acme/one', name: 'one',
     owner: {login: 'acme'}, default_branch: 'main', archived: false, disabled: false,
@@ -36,13 +40,26 @@ test('normalizeRepositoryMetadata is evidence-only and never executes code', () 
   const commit = {sha: 'abc123', commit: {committer: {date: '2026-10-02T00:00:00Z'}}};
   const result = normalizeRepositoryMetadata(repo, commit);
   assert.equal(result.license_spdx, 'MIT');
+  assert.equal(result.license_compatibility, 'UNASSESSED');
   assert.equal(result.head_commit, 'abc123');
   assert.equal(result.executed, false);
   assert.equal(result.evidence_level, 'REPO_AND_HEAD_RESOLVED');
 });
 
+test('canonicalDedupeResolved merges redirected aliases into one repository', () => {
+  const result = canonicalDedupeResolved([
+    {status: 'RESOLVED', full_name: 'acme/one', input_upstream_ref: 'https://github.com/acme/old-one', discovery_candidate_ids: ['a'], discovery_source_refs: ['x']},
+    {status: 'RESOLVED', full_name: 'acme/one', input_upstream_ref: 'https://github.com/acme/one', discovery_candidate_ids: ['b'], discovery_source_refs: ['y']}
+  ]);
+  assert.equal(result.length, 1);
+  assert.deepEqual(result[0].discovery_candidate_ids, ['a', 'b']);
+  assert.deepEqual(result[0].input_aliases, ['https://github.com/acme/old-one', 'https://github.com/acme/one']);
+});
+
 test('resolveDiscoveryUpstreams resolves metadata and head with mocked GitHub API', async () => {
-  const discovery = {results: [{candidates: [{upstream_hints: ['https://github.com/acme/one']}]}]};
+  const discovery = {results: [{candidates: [{
+    candidate_id: 'a', source_ref: 'https://directory/a', primary_upstream_hint: 'https://github.com/acme/one'
+  }]}]};
   const fetchImpl = async (url) => {
     if (url === 'https://api.github.com/repos/acme/one') {
       return new Response(JSON.stringify({
@@ -62,16 +79,20 @@ test('resolveDiscoveryUpstreams resolves metadata and head with mocked GitHub AP
     maxRepos: 4, token: 'test', fetchImpl, observedAt: '2026-10-06T00:00:00Z', concurrency: 2
   });
   assert.equal(report.execution_mode, 'READ_ONLY_UPSTREAM_RESOLUTION');
-  assert.equal(report.repos_requested, 1);
+  assert.equal(report.input_repos_requested, 1);
+  assert.equal(report.canonical_repos, 1);
   assert.equal(report.repos_resolved, 1);
   assert.equal(report.repos_failed, 0);
   assert.equal(report.code_executed, false);
   assert.equal(report.results[0].head_commit, 'deadbeef');
   assert.equal(report.results[0].license_spdx, 'Apache-2.0');
+  assert.deepEqual(report.results[0].discovery_candidate_ids, ['a']);
 });
 
 test('resolver tolerates unavailable repository as evidence, not execution failure', async () => {
-  const discovery = {results: [{candidates: [{upstream_hints: ['https://github.com/acme/missing']}]}]};
+  const discovery = {results: [{candidates: [{
+    candidate_id: 'x', source_ref: 'https://directory/x', primary_upstream_hint: 'https://github.com/acme/missing'
+  }]}]};
   const fetchImpl = async () => new Response('{}', {status: 404});
   const report = await resolveDiscoveryUpstreams(discovery, {fetchImpl, token: 'test'});
   assert.equal(report.repos_resolved, 0);
