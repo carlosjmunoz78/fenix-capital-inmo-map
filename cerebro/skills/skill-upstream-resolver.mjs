@@ -3,10 +3,6 @@ import path from 'node:path';
 
 const DEFAULT_MAX_REPOS = 24;
 
-function unique(values) {
-  return [...new Set(values)];
-}
-
 export function parseGithubRepoUrl(value) {
   if (typeof value !== 'string') return null;
   let url;
@@ -24,24 +20,27 @@ export function parseGithubRepoUrl(value) {
 export function collectUpstreamRepos(discoveryReport, {maxRepos = DEFAULT_MAX_REPOS} = {}) {
   if (!discoveryReport || typeof discoveryReport !== 'object') throw new Error('discovery report required');
   if (!Number.isInteger(maxRepos) || maxRepos < 1 || maxRepos > 100) throw new Error('maxRepos invalid');
-  const refs = [];
+  const byInputRepo = new Map();
   for (const source of discoveryReport.results ?? []) {
     for (const candidate of source.candidates ?? []) {
-      for (const hint of candidate.upstream_hints ?? []) refs.push(hint);
+      const parsed = parseGithubRepoUrl(candidate.primary_upstream_hint);
+      if (!parsed) continue;
+      const key = parsed.full_name.toLowerCase();
+      const current = byInputRepo.get(key) ?? {
+        ...parsed,
+        discovery_candidate_ids: [],
+        discovery_source_refs: []
+      };
+      if (candidate.candidate_id && !current.discovery_candidate_ids.includes(candidate.candidate_id)) {
+        current.discovery_candidate_ids.push(candidate.candidate_id);
+      }
+      if (candidate.source_ref && !current.discovery_source_refs.includes(candidate.source_ref)) {
+        current.discovery_source_refs.push(candidate.source_ref);
+      }
+      byInputRepo.set(key, current);
     }
   }
-  const repos = [];
-  const seen = new Set();
-  for (const ref of refs) {
-    const parsed = parseGithubRepoUrl(ref);
-    if (!parsed) continue;
-    const key = parsed.full_name.toLowerCase();
-    if (seen.has(key)) continue;
-    seen.add(key);
-    repos.push(parsed);
-    if (repos.length >= maxRepos) break;
-  }
-  return repos;
+  return [...byInputRepo.values()].slice(0, maxRepos);
 }
 
 async function githubJson(url, {token = process.env.GITHUB_TOKEN, timeoutMs = 8000, fetchImpl = fetch} = {}) {
@@ -50,7 +49,7 @@ async function githubJson(url, {token = process.env.GITHUB_TOKEN, timeoutMs = 80
   const headers = {
     accept: 'application/vnd.github+json',
     'x-github-api-version': '2022-11-28',
-    'user-agent': 'CEREBRO-OS-SkillScout/0.1 (+read-only)'
+    'user-agent': 'CEREBRO-OS-SkillScout/0.2 (+read-only)'
   };
   if (token) headers.authorization = `Bearer ${token}`;
   try {
@@ -80,6 +79,7 @@ export function normalizeRepositoryMetadata(repo, commit = null) {
     head_commit_date: commit?.commit?.committer?.date ?? commit?.commit?.author?.date ?? null,
     license_spdx: license?.spdx_id ?? null,
     license_name: license?.name ?? null,
+    license_compatibility: 'UNASSESSED',
     archived: repo.archived === true,
     disabled: repo.disabled === true,
     fork: repo.fork === true,
@@ -111,6 +111,9 @@ export async function resolveGithubRepo(parsed, options = {}) {
     }
     return {
       status: 'RESOLVED',
+      input_upstream_ref: parsed.html_url,
+      discovery_candidate_ids: [...(parsed.discovery_candidate_ids ?? [])],
+      discovery_source_refs: [...(parsed.discovery_source_refs ?? [])],
       ...normalizeRepositoryMetadata(repo, commit),
       commit_error,
       error: null
@@ -118,12 +121,43 @@ export async function resolveGithubRepo(parsed, options = {}) {
   } catch (err) {
     return {
       status: err?.status === 404 ? 'NOT_FOUND' : 'RESOLUTION_FAILED',
+      input_upstream_ref: parsed.html_url,
       upstream_ref: parsed.html_url,
       full_name: parsed.full_name,
+      discovery_candidate_ids: [...(parsed.discovery_candidate_ids ?? [])],
+      discovery_source_refs: [...(parsed.discovery_source_refs ?? [])],
       executed: false,
       error: String(err?.message ?? err)
     };
   }
+}
+
+function mergeUnique(target, values) {
+  for (const value of values ?? []) if (value && !target.includes(value)) target.push(value);
+}
+
+export function canonicalDedupeResolved(results) {
+  const output = [];
+  const byCanonical = new Map();
+  for (const item of results) {
+    if (item.status !== 'RESOLVED' || !item.full_name) {
+      output.push(item);
+      continue;
+    }
+    const key = item.full_name.toLowerCase();
+    const existing = byCanonical.get(key);
+    if (!existing) {
+      const copy = structuredClone(item);
+      copy.input_aliases = [item.input_upstream_ref].filter(Boolean);
+      byCanonical.set(key, copy);
+      output.push(copy);
+      continue;
+    }
+    mergeUnique(existing.discovery_candidate_ids, item.discovery_candidate_ids);
+    mergeUnique(existing.discovery_source_refs, item.discovery_source_refs);
+    mergeUnique(existing.input_aliases, [item.input_upstream_ref]);
+  }
+  return output;
 }
 
 export async function resolveDiscoveryUpstreams(discoveryReport, {
@@ -136,17 +170,19 @@ export async function resolveDiscoveryUpstreams(discoveryReport, {
 } = {}) {
   if (!Number.isInteger(concurrency) || concurrency < 1 || concurrency > 12) throw new Error('concurrency invalid');
   const repos = collectUpstreamRepos(discoveryReport, {maxRepos});
-  const results = [];
+  const rawResults = [];
   for (let i = 0; i < repos.length; i += concurrency) {
     const batch = repos.slice(i, i + concurrency);
     const resolved = await Promise.all(batch.map((repo) => resolveGithubRepo(repo, {token, timeoutMs, fetchImpl})));
-    results.push(...resolved);
+    rawResults.push(...resolved);
   }
+  const results = canonicalDedupeResolved(rawResults);
   return Object.freeze({
-    schema_version: '0.1.0',
+    schema_version: '0.2.0',
     execution_mode: 'READ_ONLY_UPSTREAM_RESOLUTION',
     observed_at: observedAt,
-    repos_requested: repos.length,
+    input_repos_requested: repos.length,
+    canonical_repos: results.length,
     repos_resolved: results.filter((item) => item.status === 'RESOLVED').length,
     repos_failed: results.filter((item) => item.status !== 'RESOLVED').length,
     code_executed: false,
@@ -171,10 +207,11 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   console.log(JSON.stringify({
     output,
     execution_mode: report.execution_mode,
-    repos_requested: report.repos_requested,
+    input_repos_requested: report.input_repos_requested,
+    canonical_repos: report.canonical_repos,
     repos_resolved: report.repos_resolved,
     repos_failed: report.repos_failed,
     code_executed: report.code_executed
   }));
-  if (report.repos_requested > 0 && report.repos_resolved === 0) process.exitCode = 2;
+  if (report.input_repos_requested > 0 && report.repos_resolved === 0) process.exitCode = 2;
 }
