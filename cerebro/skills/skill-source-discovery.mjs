@@ -8,19 +8,22 @@ const SOURCES = Object.freeze([
     url: 'https://lobehub.com/es/skills?category=all&sort=stars',
     candidate_path: /^\/(?:es\/)?skills\/[A-Za-z0-9._~!$&'()*+,;=:@%-]+/i,
     exclude_path: /\/skills\/skill\.md$/i,
+    generic_upstreams: ['https://github.com/lobehub/lobehub', 'https://github.com/lobehub/lobe-chat'],
     max_candidates: 12
   },
   {
     source_id: 'mcpservers-agent-skills',
     url: 'https://mcpservers.org/es/agent-skills',
     candidate_path: /^\/(?:es\/)?agent-skills\/[A-Za-z0-9._~!$&'()*+,;=:@%/-]+/i,
-    exclude_path: /\/(?:es\/)?agent-skills\/(?:official(?:\/|$)|author\/)/i,
+    exclude_path: /\/(?:es\/)?agent-skills\/(?:official(?:\/|$)|author\/|category\/)/i,
+    generic_upstreams: [],
     max_candidates: 12
   },
   {
     source_id: 'fragroger-skills',
     url: 'https://skills.fragroger.ai/es',
     candidate_path: /^\/es\/skills\/[A-Za-z0-9._~!$&'()*+,;=:@%/-]+/i,
+    generic_upstreams: [],
     max_candidates: 12
   }
 ]);
@@ -77,6 +80,52 @@ export function extractGithubUpstreams(html) {
   return unique(out);
 }
 
+function normalizeRepoKey(url) {
+  try {
+    const parsed = new URL(url);
+    const parts = parsed.pathname.split('/').filter(Boolean).slice(0, 2);
+    return parts.length === 2 ? parts.join('/').toLowerCase() : null;
+  } catch {
+    return null;
+  }
+}
+
+export function selectPrimaryUpstream({candidateUrl, source, upstreams}) {
+  if (!Array.isArray(upstreams) || upstreams.length === 0) return null;
+  const generic = new Set((source?.generic_upstreams ?? []).map(normalizeRepoKey).filter(Boolean));
+  const usable = upstreams.filter((item) => !generic.has(normalizeRepoKey(item)));
+  if (!usable.length) return null;
+
+  const candidate = new URL(candidateUrl);
+  const pathParts = candidate.pathname.split('/').filter(Boolean);
+  const slug = pathParts.at(-1)?.toLowerCase() ?? '';
+
+  if (source?.source_id === 'lobehub-skills') {
+    for (const item of usable) {
+      const key = normalizeRepoKey(item);
+      if (!key) continue;
+      const [owner, repo] = key.split('/');
+      if (slug.startsWith(`${owner}-${repo}-`) || slug === `${owner}-${repo}`) return item;
+    }
+  }
+
+  if (source?.source_id === 'mcpservers-agent-skills') {
+    const marker = pathParts.lastIndexOf('agent-skills');
+    const directoryAuthor = marker >= 0 ? pathParts[marker + 1]?.toLowerCase() : null;
+    if (directoryAuthor) {
+      const ownerMatch = usable.find((item) => {
+        const key = normalizeRepoKey(item);
+        if (!key) return false;
+        const owner = key.split('/')[0];
+        return owner === directoryAuthor || owner.startsWith(`${directoryAuthor}-`) || directoryAuthor.startsWith(owner);
+      });
+      if (ownerMatch) return ownerMatch;
+    }
+  }
+
+  return usable[0];
+}
+
 async function fetchText(url, {timeoutMs = 8000, userAgent = 'CEREBRO-OS-SkillScout/0.1 (+read-only)'} = {}) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -95,12 +144,15 @@ async function fetchText(url, {timeoutMs = 8000, userAgent = 'CEREBRO-OS-SkillSc
 
 async function inspectCandidate(candidateUrl, source, fetcher) {
   let upstreams = [];
+  let primaryUpstream = null;
   let candidateStatus = 'DISCOVERED';
   let error = null;
   try {
     const detailHtml = await fetcher(candidateUrl);
     upstreams = extractGithubUpstreams(detailHtml);
-    if (upstreams.length) candidateStatus = 'UPSTREAM_HINT_FOUND';
+    primaryUpstream = selectPrimaryUpstream({candidateUrl, source, upstreams});
+    if (primaryUpstream) candidateStatus = 'PRIMARY_UPSTREAM_HINT_FOUND';
+    else if (upstreams.length) candidateStatus = 'UPSTREAM_HINTS_UNRESOLVED';
   } catch (err) {
     candidateStatus = 'DETAIL_FETCH_FAILED';
     error = String(err?.message ?? err);
@@ -108,6 +160,7 @@ async function inspectCandidate(candidateUrl, source, fetcher) {
   return {
     candidate_id: `${source.source_id}:${stableId(candidateUrl)}`,
     source_ref: candidateUrl,
+    primary_upstream_hint: primaryUpstream,
     upstream_hints: upstreams,
     status: candidateStatus,
     error,
@@ -140,14 +193,16 @@ export async function runOnlineDiscovery({sources = SOURCES, fetcher = fetchText
   const sourceOk = results.filter((item) => item.status === 'OK').length;
   const candidates = results.reduce((sum, item) => sum + item.candidates.length, 0);
   const upstreamHints = results.reduce((sum, item) => sum + item.candidates.reduce((s, c) => s + c.upstream_hints.length, 0), 0);
+  const primaryUpstreams = results.reduce((sum, item) => sum + item.candidates.filter((c) => c.primary_upstream_hint).length, 0);
   return Object.freeze({
-    schema_version: '0.1.0',
+    schema_version: '0.2.0',
     execution_mode: 'READ_ONLY_DISCOVERY',
     observed_at: observedAt,
     sources_total: results.length,
     sources_ok: sourceOk,
     candidates_discovered: candidates,
     upstream_hints_found: upstreamHints,
+    primary_upstreams_found: primaryUpstreams,
     results
   });
 }
@@ -168,7 +223,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     sources_total: report.sources_total,
     sources_ok: report.sources_ok,
     candidates_discovered: report.candidates_discovered,
-    upstream_hints_found: report.upstream_hints_found
+    upstream_hints_found: report.upstream_hints_found,
+    primary_upstreams_found: report.primary_upstreams_found
   }));
   if (report.sources_ok === 0) process.exitCode = 2;
 }
