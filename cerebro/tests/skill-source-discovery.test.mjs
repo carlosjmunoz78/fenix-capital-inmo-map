@@ -5,13 +5,15 @@ import {
   discoverSource,
   extractGithubUpstreams,
   extractHrefs,
-  runOnlineDiscovery
+  runOnlineDiscovery,
+  selectPrimaryUpstream
 } from '../skills/skill-source-discovery.mjs';
 
 const source = {
   source_id: 'fixture',
   url: 'https://example.test/es/skills',
   candidate_path: /^\/es\/skills\/[A-Za-z0-9._~!$&'()*+,;=:@%/-]+/i,
+  generic_upstreams: [],
   max_candidates: 10
 };
 
@@ -30,7 +32,20 @@ test('extractGithubUpstreams returns canonical repository roots and drops placeh
   assert.deepEqual(extractGithubUpstreams(html), ['https://github.com/acme/skill-one', 'https://github.com/acme/repo-two']);
 });
 
-test('discoverSource never executes candidates and only records upstream hints', async () => {
+test('selectPrimaryUpstream excludes directory-owned generic repo and matches LobeHub slug', () => {
+  const lobehub = {
+    source_id: 'lobehub-skills',
+    generic_upstreams: ['https://github.com/lobehub/lobehub']
+  };
+  const result = selectPrimaryUpstream({
+    candidateUrl: 'https://lobehub.com/es/skills/openclaw-openclaw-weather',
+    source: lobehub,
+    upstreams: ['https://github.com/lobehub/lobehub', 'https://github.com/openclaw/openclaw']
+  });
+  assert.equal(result, 'https://github.com/openclaw/openclaw');
+});
+
+test('discoverSource never executes candidates and records a primary upstream hint', async () => {
   const pages = new Map([
     ['https://example.test/es/skills', '<a href="/es/skills/a">A</a>'],
     ['https://example.test/es/skills/a', 'npx skills add https://github.com/acme/skill-a']
@@ -42,7 +57,8 @@ test('discoverSource never executes candidates and only records upstream hints',
   const result = await discoverSource(source, {fetcher, observedAt: '2026-10-06T00:00:00Z'});
   assert.equal(result.status, 'OK');
   assert.equal(result.candidates.length, 1);
-  assert.equal(result.candidates[0].status, 'UPSTREAM_HINT_FOUND');
+  assert.equal(result.candidates[0].status, 'PRIMARY_UPSTREAM_HINT_FOUND');
+  assert.equal(result.candidates[0].primary_upstream_hint, 'https://github.com/acme/skill-a');
   assert.deepEqual(result.candidates[0].upstream_hints, ['https://github.com/acme/skill-a']);
   assert.equal(result.candidates[0].executed, false);
   assert.match(result.candidates[0].candidate_id, /^fixture:[a-f0-9]{20}$/);
@@ -65,4 +81,5 @@ test('runOnlineDiscovery tolerates one source failure and preserves evidence', a
   assert.equal(report.sources_ok, 1);
   assert.equal(report.candidates_discovered, 1);
   assert.equal(report.upstream_hints_found, 1);
+  assert.equal(report.primary_upstreams_found, 1);
 });
