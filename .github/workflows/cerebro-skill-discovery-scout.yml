@@ -11,6 +11,7 @@ on:
       - 'cerebro/skills/skill-bundle-scanner.mjs'
       - 'cerebro/skills/skill-license-evidence.mjs'
       - 'cerebro/skills/skill-prelab-admission.mjs'
+      - 'cerebro/skills/skill-wrapper-plan.mjs'
       - 'cerebro/skills/internal-capability-signals.v0.json'
       - 'cerebro/tests/skill-source-discovery.test.mjs'
       - 'cerebro/tests/skill-upstream-resolver.test.mjs'
@@ -20,6 +21,7 @@ on:
       - 'cerebro/tests/skill-bundle-scanner.test.mjs'
       - 'cerebro/tests/skill-license-evidence.test.mjs'
       - 'cerebro/tests/skill-prelab-admission.test.mjs'
+      - 'cerebro/tests/skill-wrapper-plan.test.mjs'
       - '.github/workflows/cerebro-skill-discovery-scout.yml'
   schedule:
     - cron: '17 4 * * *'
@@ -37,6 +39,7 @@ env:
   CEREBRO_BUNDLE_OUTPUT: artifacts/cerebro-skill-bundles-p0.json
   CEREBRO_LICENSE_OUTPUT: artifacts/cerebro-skill-license-evidence.json
   CEREBRO_PRELAB_OUTPUT: artifacts/cerebro-skill-prelab-p0.json
+  CEREBRO_WRAPPER_OUTPUT: artifacts/cerebro-skill-wrapper-plans-p0.json
   CEREBRO_UPSTREAM_MAX_REPOS: '24'
 
 jobs:
@@ -48,8 +51,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Contract tests for discovery, upstream, overlap, manifest, policy, bundle, license and pre-LAB
-        run: node --test cerebro/tests/skill-source-discovery.test.mjs cerebro/tests/skill-upstream-resolver.test.mjs cerebro/tests/skill-overlap-analyzer.test.mjs cerebro/tests/skill-manifest-resolver.test.mjs cerebro/tests/skill-candidate-policy.test.mjs cerebro/tests/skill-bundle-scanner.test.mjs cerebro/tests/skill-license-evidence.test.mjs cerebro/tests/skill-prelab-admission.test.mjs
+      - name: Contract tests for discovery, upstream, overlap, manifest, policy, bundle, license, pre-LAB and wrappers
+        run: node --test cerebro/tests/skill-source-discovery.test.mjs cerebro/tests/skill-upstream-resolver.test.mjs cerebro/tests/skill-overlap-analyzer.test.mjs cerebro/tests/skill-manifest-resolver.test.mjs cerebro/tests/skill-candidate-policy.test.mjs cerebro/tests/skill-bundle-scanner.test.mjs cerebro/tests/skill-license-evidence.test.mjs cerebro/tests/skill-prelab-admission.test.mjs cerebro/tests/skill-wrapper-plan.test.mjs
       - name: Discover public skill candidates without executing them
         run: node cerebro/skills/skill-source-discovery.mjs --output "$CEREBRO_DISCOVERY_OUTPUT"
       - name: Resolve GitHub repository metadata, license hint and exact head without executing code
@@ -74,6 +77,8 @@ jobs:
         run: node cerebro/skills/skill-bundle-scanner.mjs --shortlist "$CEREBRO_SHORTLIST_OUTPUT" --upstreams "$CEREBRO_UPSTREAM_OUTPUT" --manifests "$CEREBRO_MANIFEST_OUTPUT" --priority P0 --output "$CEREBRO_BUNDLE_OUTPUT"
       - name: Apply fail-closed P0 pre-LAB admission gate
         run: node cerebro/skills/skill-prelab-admission.mjs --shortlist "$CEREBRO_SHORTLIST_OUTPUT" --bundles "$CEREBRO_BUNDLE_OUTPUT" --licenses "$CEREBRO_LICENSE_OUTPUT" --output "$CEREBRO_PRELAB_OUTPUT"
+      - name: Generate disabled CEREBRO wrapper plans for static pre-LAB candidates
+        run: node cerebro/skills/skill-wrapper-plan.mjs --prelab "$CEREBRO_PRELAB_OUTPUT" --shortlist "$CEREBRO_SHORTLIST_OUTPUT" --manifests "$CEREBRO_MANIFEST_OUTPUT" --licenses "$CEREBRO_LICENSE_OUTPUT" --output "$CEREBRO_WRAPPER_OUTPUT"
       - name: Upload read-only discovery evidence
         uses: actions/upload-artifact@v4
         with:
@@ -87,5 +92,6 @@ jobs:
             artifacts/cerebro-skill-shortlist.json
             artifacts/cerebro-skill-bundles-p0.json
             artifacts/cerebro-skill-prelab-p0.json
+            artifacts/cerebro-skill-wrapper-plans-p0.json
           if-no-files-found: error
           retention-days: 14
