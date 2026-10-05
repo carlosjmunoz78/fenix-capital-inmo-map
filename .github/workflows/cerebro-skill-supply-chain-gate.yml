@@ -1,6 +1,12 @@
 name: CEREBRO Skill Supply Chain Gate
 
 on:
+  push:
+    paths:
+      - 'cerebro/skills/**'
+      - 'cerebro/tests/skill-supply-chain.test.mjs'
+      - 'cerebro/docs/SKILL_SUPPLY_CHAIN_V0.md'
+      - '.github/workflows/cerebro-skill-supply-chain-gate.yml'
   pull_request:
     paths:
       - 'cerebro/skills/**'
