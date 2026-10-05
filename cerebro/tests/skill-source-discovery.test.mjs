@@ -25,9 +25,9 @@ test('discoverCandidateUrls remains same-origin and pattern-scoped', () => {
   assert.deepEqual(discoverCandidateUrls({html, source}), ['https://example.test/es/skills/a']);
 });
 
-test('extractGithubUpstreams returns canonical repository roots', () => {
-  const html = 'Install https://github.com/acme/skill-one.git and see https://github.com/acme/skill-one/tree/main/docs plus https://github.com/org/repo-two';
-  assert.deepEqual(extractGithubUpstreams(html), ['https://github.com/acme/skill-one', 'https://github.com/org/repo-two']);
+test('extractGithubUpstreams returns canonical repository roots and drops placeholders', () => {
+  const html = 'Install https://github.com/acme/skill-one.git and see https://github.com/acme/skill-one/tree/main/docs plus https://github.com/org/repo and https://github.com/acme/repo-two';
+  assert.deepEqual(extractGithubUpstreams(html), ['https://github.com/acme/skill-one', 'https://github.com/acme/repo-two']);
 });
 
 test('discoverSource never executes candidates and only records upstream hints', async () => {
@@ -44,7 +44,8 @@ test('discoverSource never executes candidates and only records upstream hints',
   assert.equal(result.candidates.length, 1);
   assert.equal(result.candidates[0].status, 'UPSTREAM_HINT_FOUND');
   assert.deepEqual(result.candidates[0].upstream_hints, ['https://github.com/acme/skill-a']);
-  assert.equal('executed' in result.candidates[0], false);
+  assert.equal(result.candidates[0].executed, false);
+  assert.match(result.candidates[0].candidate_id, /^fixture:[a-f0-9]{20}$/);
 });
 
 test('runOnlineDiscovery tolerates one source failure and preserves evidence', async () => {
