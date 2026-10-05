@@ -9,6 +9,7 @@ on:
       - 'cerebro/tests/factory.test.mjs'
       - 'cerebro/tests/brandboot-candidate.test.mjs'
       - 'cerebro/docs/BRANDBOOT-001_CANDIDATE_2026-10-05.md'
+      - 'cerebro/docs/ADR_BRANDBOOT_001_ENGINE_VS_CAPABILITY_2026-10-05.md'
       - '.github/workflows/cerebro-gov001-registry-preprod.yml'
 jobs:
   gov001-registry:
