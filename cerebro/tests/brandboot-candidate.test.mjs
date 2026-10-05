@@ -6,13 +6,19 @@ import path from 'node:path';
 const root = path.resolve(new URL('..', import.meta.url).pathname);
 const candidate = JSON.parse(fs.readFileSync(path.join(root, 'registry', 'brandboot-001.candidate.json'), 'utf8'));
 const canonical = JSON.parse(fs.readFileSync(path.join(root, 'registry', 'engine-registry.seed.json'), 'utf8'));
+const legacy177 = JSON.parse(fs.readFileSync(path.join(root, 'evidence', 'registry-migrations', '2026-10-05', 'engine-registry.seed.177.snapshot.json'), 'utf8'));
 
-test('BRANDBOOT candidate does not silently mutate the 177-engine canonical seed', () => {
-  assert.equal(canonical.count, 177);
-  assert.equal(canonical.engine_ids.length, 177);
-  assert.equal(canonical.engine_ids.includes('BRANDBOOT-001'), false);
-  assert.equal(candidate.canonical_registry_seed_unchanged, true);
-  assert.equal(candidate.source_status, 'CANDIDATE_NOT_CANONICAL');
+test('BRANDBOOT migration is explicit: legacy 177 snapshot preserved and staged canonical registry is 178', () => {
+  assert.equal(legacy177.count, 177);
+  assert.equal(legacy177.engine_ids.length, 177);
+  assert.equal(legacy177.engine_ids.includes('BRANDBOOT-001'), false);
+  assert.equal(canonical.count, 178);
+  assert.equal(canonical.engine_ids.length, 178);
+  assert.equal(canonical.engine_ids.includes('BRANDBOOT-001'), true);
+  assert.equal(candidate.canonical_registry_seed_unchanged, false);
+  assert.equal(candidate.canonical_registry_count_target, 178);
+  assert.equal(candidate.lifecycle, 'MIGRATION_STAGED');
+  assert.equal(candidate.source_status, 'CANONICAL_MIGRATION_STAGED_PR_485');
 });
 
 test('BRANDBOOT candidate is multi-company and carries mandatory context', () => {
@@ -30,6 +36,7 @@ test('BRANDBOOT candidate is zero-added-cost and fail-closed for PROD', () => {
   assert.equal(candidate.permissions.publishing, false);
   assert.equal(candidate.promotion_gates.autonomous_prod, false);
   assert.equal(candidate.promotion_gates.naming_trademark_clearance_required_for_prod, true);
+  assert.equal(candidate.promotion_gates.preprod_required, true);
 });
 
 test('BRANDBOOT candidate preserves CEREBRO human-exception contract', () => {
