@@ -43,8 +43,11 @@ function licenseEvidenceState(item){
   if(!item) return {state:'LICENSE_EVIDENCE_MISSING',evidence:[]};
   if(item.status!=='EXACT_LICENSE_FILE_EVIDENCE') return {state:item.status??'LICENSE_EVIDENCE_MISSING',evidence:item.exact_evidence??[]};
   const detected=item.detected_families??[];
-  if(!detected.length||detected.includes('UNKNOWN')) return {state:'LICENSE_TEXT_UNCLASSIFIED',evidence:item.exact_evidence??[]};
+  const known=detected.filter((value)=>value&&value!=='UNKNOWN');
+  if(!known.length) return {state:'LICENSE_TEXT_UNCLASSIFIED',evidence:item.exact_evidence??[]};
+  if(item.repo_license_spdx&&known.includes(item.repo_license_spdx)) return {state:'EXACT_LICENSE_EVIDENCE_PRESENT',evidence:item.exact_evidence??[]};
   if(item.metadata_matches_detected===false&&item.repo_license_spdx) return {state:'LICENSE_METADATA_MISMATCH',evidence:item.exact_evidence??[]};
+  if(!item.repo_license_spdx) return {state:'LICENSE_REPOSITORY_METADATA_MISSING',evidence:item.exact_evidence??[]};
   return {state:'EXACT_LICENSE_EVIDENCE_PRESENT',evidence:item.exact_evidence??[]};
 }
 
@@ -93,7 +96,7 @@ export function buildPrelabAdmission(shortlist,bundles,licenses){
   for(const item of results) state_counts[item.prelab_state]=(state_counts[item.prelab_state]??0)+1;
   const staticReady=results.filter((r)=>r.prelab_state.startsWith('STATIC_PRELAB_READY'));
   return Object.freeze({
-    schema_version:'0.1.0',
+    schema_version:'0.1.1',
     execution_mode:'STATIC_PRELAB_GATE_ONLY',
     p0_candidates:results.filter((r)=>r.priority==='P0').length,
     static_prelab_ready:staticReady.length,
