@@ -7,7 +7,7 @@ export const OSS_RUNTIME=Object.freeze({
   model_repo:'HuggingFaceTB/SmolLM2-1.7B-Instruct',
   model_revision:'31b70e2e869a7173562077fd711b654946d38674',
   model_dtype:'q4',
-  model_q4_sha256:'467b7f366bc2094968787efd74506efb18a860624d1232192dbd5c577b5aff02',
+  model_q4_sha256:'467b7b8f62d99f184d3628d24b8d65c151e331695f6e9ea997616c4e279e9a51',
   model_license:'apache-2.0',
   device:'cpu',
   max_new_tokens:384,
