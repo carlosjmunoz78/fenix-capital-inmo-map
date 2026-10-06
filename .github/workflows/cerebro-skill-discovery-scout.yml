@@ -26,6 +26,7 @@ env:
   CEREBRO_VALUE_OUTPUT: artifacts/cerebro-skill-value-p0.json
   CEREBRO_LAB_PLAN_OUTPUT: artifacts/cerebro-skill-lab-eval-plans-p0.json
   CEREBRO_STATIC_LAB_OUTPUT: artifacts/cerebro-skill-static-lab-p0.json
+  CEREBRO_OLDNEW_OUTPUT: artifacts/cerebro-skill-old-vs-new-p0.json
   CEREBRO_EVENTS_OUTPUT: artifacts/cerebro-skill-improvement-events.json
   CEREBRO_RSI_SHADOW_OUTPUT: artifacts/cerebro-skill-rsi-shadow.json
   CEREBRO_UPSTREAM_MAX_REPOS: '24'
@@ -75,6 +76,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: node cerebro/skills/skill-static-lab-benchmark.mjs --plans "$CEREBRO_LAB_PLAN_OUTPUT" --manifests "$CEREBRO_MANIFEST_OUTPUT" --output "$CEREBRO_STATIC_LAB_OUTPUT"
+      - name: Generate OLD vs NEW synthetic behavioral contracts for static-LAB-green candidates
+        run: node cerebro/skills/skill-old-vs-new-contract.mjs --static-lab "$CEREBRO_STATIC_LAB_OUTPUT" --value "$CEREBRO_VALUE_OUTPUT" --wrappers "$CEREBRO_WRAPPER_OUTPUT" --output "$CEREBRO_OLDNEW_OUTPUT"
       - name: Emit LAB-aware improvement event proposals without persistent publish
         run: node cerebro/skills/skill-improvement-events.mjs --shortlist "$CEREBRO_SHORTLIST_OUTPUT" --prelab "$CEREBRO_PRELAB_OUTPUT" --wrappers "$CEREBRO_WRAPPER_OUTPUT" --value "$CEREBRO_VALUE_OUTPUT" --static-lab "$CEREBRO_STATIC_LAB_OUTPUT" --output "$CEREBRO_EVENTS_OUTPUT"
       - name: Validate current runtime and historical RSI contract through in-memory shadow bridge
@@ -96,6 +99,7 @@ jobs:
             artifacts/cerebro-skill-value-p0.json
             artifacts/cerebro-skill-lab-eval-plans-p0.json
             artifacts/cerebro-skill-static-lab-p0.json
+            artifacts/cerebro-skill-old-vs-new-p0.json
             artifacts/cerebro-skill-improvement-events.json
             artifacts/cerebro-skill-rsi-shadow.json
           if-no-files-found: error
