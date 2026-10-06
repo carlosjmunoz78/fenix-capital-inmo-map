@@ -27,7 +27,9 @@ env:
   CEREBRO_LAB_PLAN_OUTPUT: artifacts/cerebro-skill-lab-eval-plans-p0.json
   CEREBRO_STATIC_LAB_OUTPUT: artifacts/cerebro-skill-static-lab-p0.json
   CEREBRO_OLDNEW_OUTPUT: artifacts/cerebro-skill-old-vs-new-p0.json
+  CEREBRO_PROVIDER_BINDING_OUTPUT: artifacts/cerebro-skill-provider-binding.json
   CEREBRO_ZERO_COST_ROUTE_OUTPUT: artifacts/cerebro-skill-zero-cost-route.json
+  CEREBRO_FREE_QUOTA_OUTPUT: artifacts/cerebro-skill-free-quota-plan.json
   CEREBRO_EVENTS_OUTPUT: artifacts/cerebro-skill-improvement-events.json
   CEREBRO_RSI_SHADOW_OUTPUT: artifacts/cerebro-skill-rsi-shadow.json
   CEREBRO_UPSTREAM_MAX_REPOS: '24'
@@ -79,8 +81,23 @@ jobs:
         run: node cerebro/skills/skill-static-lab-benchmark.mjs --plans "$CEREBRO_LAB_PLAN_OUTPUT" --manifests "$CEREBRO_MANIFEST_OUTPUT" --output "$CEREBRO_STATIC_LAB_OUTPUT"
       - name: Generate OLD vs NEW synthetic behavioral contracts for static-LAB-green candidates
         run: node cerebro/skills/skill-old-vs-new-contract.mjs --static-lab "$CEREBRO_STATIC_LAB_OUTPUT" --value "$CEREBRO_VALUE_OUTPUT" --wrappers "$CEREBRO_WRAPPER_OUTPUT" --output "$CEREBRO_OLDNEW_OUTPUT"
-      - name: Audit zero-cost online inference route without using credentials or invoking a model
-        run: node cerebro/skills/skill-zero-cost-route-audit.mjs --providers cerebro/skills/zero-cost-provider-evidence.v0.json --oldnew "$CEREBRO_OLDNEW_OUTPUT" --output "$CEREBRO_ZERO_COST_ROUTE_OUTPUT"
+      - name: Bind zero-cost provider readiness from secret-presence booleans only
+        env:
+          CEREBRO_CF_TOKEN_PRESENT: ${{ secrets.CEREBRO_CF_WORKERS_AI_TOKEN != '' }}
+          CEREBRO_CF_ACCOUNT_PRESENT: ${{ secrets.CEREBRO_CF_ACCOUNT_ID != '' }}
+          CEREBRO_CF_POLICY_GREEN: 'false'
+          CEREBRO_CF_FREE_QUOTA_GUARD: 'true'
+          CEREBRO_GEMINI_KEY_PRESENT: ${{ secrets.CEREBRO_GEMINI_API_KEY != '' }}
+          CEREBRO_GEMINI_POLICY_GREEN: 'false'
+          CEREBRO_GEMINI_FREE_QUOTA_GUARD: 'true'
+          CEREBRO_MISTRAL_KEY_PRESENT: ${{ secrets.CEREBRO_MISTRAL_API_KEY != '' }}
+          CEREBRO_MISTRAL_POLICY_GREEN: 'false'
+          CEREBRO_MISTRAL_FREE_QUOTA_GUARD: 'true'
+        run: node cerebro/skills/skill-provider-binding-from-env.mjs --providers cerebro/skills/zero-cost-provider-evidence.v0.json --output "$CEREBRO_PROVIDER_BINDING_OUTPUT"
+      - name: Audit zero-cost online inference route without exposing credentials or invoking a model
+        run: node cerebro/skills/skill-zero-cost-route-audit.mjs --providers "$CEREBRO_PROVIDER_BINDING_OUTPUT" --oldnew "$CEREBRO_OLDNEW_OUTPUT" --output "$CEREBRO_ZERO_COST_ROUTE_OUTPUT"
+      - name: Build hard free-tier quota plan with no paid fallback and no model calls
+        run: node cerebro/skills/skill-free-quota-guard.mjs --oldnew "$CEREBRO_OLDNEW_OUTPUT" --route "$CEREBRO_ZERO_COST_ROUTE_OUTPUT" --output "$CEREBRO_FREE_QUOTA_OUTPUT"
       - name: Emit LAB-aware improvement event proposals without persistent publish
         run: node cerebro/skills/skill-improvement-events.mjs --shortlist "$CEREBRO_SHORTLIST_OUTPUT" --prelab "$CEREBRO_PRELAB_OUTPUT" --wrappers "$CEREBRO_WRAPPER_OUTPUT" --value "$CEREBRO_VALUE_OUTPUT" --static-lab "$CEREBRO_STATIC_LAB_OUTPUT" --output "$CEREBRO_EVENTS_OUTPUT"
       - name: Validate current runtime and historical RSI contract through in-memory shadow bridge
@@ -103,7 +120,9 @@ jobs:
             artifacts/cerebro-skill-lab-eval-plans-p0.json
             artifacts/cerebro-skill-static-lab-p0.json
             artifacts/cerebro-skill-old-vs-new-p0.json
+            artifacts/cerebro-skill-provider-binding.json
             artifacts/cerebro-skill-zero-cost-route.json
+            artifacts/cerebro-skill-free-quota-plan.json
             artifacts/cerebro-skill-improvement-events.json
             artifacts/cerebro-skill-rsi-shadow.json
           if-no-files-found: error
