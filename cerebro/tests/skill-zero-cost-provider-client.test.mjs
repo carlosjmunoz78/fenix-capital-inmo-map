@@ -51,14 +51,15 @@ test('429 and billing/permission signals stop with no fallback',async()=>{
   assert.equal(result.stop_reason,'PROVIDER_BILLING_OR_PERMISSION_REQUIRED');
 });
 
-test('successful provider invocation returns hashes and never emits secret values',async()=>{
+test('successful provider invocation returns hashes and never emits exact secret value',async()=>{
+  const apiKey='gemini-test-key-12345';
   const fetchImpl=async(url,options)=>{
-    assert.equal(options.headers['x-goog-api-key'],'secret');
+    assert.equal(options.headers['x-goog-api-key'],apiKey);
     return {status:200,ok:true,json:async()=>({candidates:[{content:{parts:[{text:'synthetic answer'}]}}],usageMetadata:{totalTokenCount:7}})};
   };
-  const result=await invokeZeroCostProvider({providerId:'google-gemini-api-free',prompt:'synthetic only',gate:openGate,quotaDecisionResult:quotaAllow,env:{CEREBRO_GEMINI_API_KEY:'secret'},fetchImpl});
+  const result=await invokeZeroCostProvider({providerId:'google-gemini-api-free',prompt:'synthetic only',gate:openGate,quotaDecisionResult:quotaAllow,env:{CEREBRO_GEMINI_API_KEY:apiKey},fetchImpl});
   assert.equal(result.ok,true);
   assert.equal(result.secret_values_emitted,false);
-  assert.equal(JSON.stringify(result).includes('secret'),false);
+  assert.equal(JSON.stringify(result).includes(apiKey),false);
   assert.equal(result.additional_cost_eur_claimed,0);
 });
