@@ -52,6 +52,9 @@ jobs:
           test -f artifacts/cerebro-skill-old-vs-new-p0.json
           test -f artifacts/cerebro-skill-manifests.json
           test -f artifacts/cerebro-skill-wrapper-plans-p0.json
+          test -f artifacts/cerebro-skill-static-lab-p0.json
+          test -f artifacts/cerebro-skill-license-evidence.json
+          test -f artifacts/cerebro-skill-rsi-shadow.json
 
       - name: Rebind Gemini readiness using presence only
         env:
@@ -82,18 +85,28 @@ jobs:
       - name: Prove wrapper binding rollback and rebuild independently of behavioral result
         run: node cerebro/skills/skill-rollback-proof.mjs --wrappers artifacts/cerebro-skill-wrapper-plans-p0.json --output artifacts/cerebro-skill-rollback-proof.manual.json
 
-      - name: Verify proxy and judge do not promote anything
+      - name: Run evidence-only Skill Tribunal
+        run: node cerebro/skills/skill-tribunal.mjs --static-lab artifacts/cerebro-skill-static-lab-p0.json --licenses artifacts/cerebro-skill-license-evidence.json --behavioral-results artifacts/cerebro-skill-behavioral-proxy.manual.json --independent-judge artifacts/cerebro-skill-independent-judge.manual.json --rollback artifacts/cerebro-skill-rollback-proof.manual.json --route artifacts/cerebro-skill-zero-cost-route.manual.json --rsi-shadow artifacts/cerebro-skill-rsi-shadow.json --output artifacts/cerebro-skill-tribunal.manual.json
+
+      - name: Assess PREPROD promotion readiness without auto-promotion
+        run: node cerebro/skills/skill-promotion-readiness.mjs --static-lab artifacts/cerebro-skill-static-lab-p0.json --oldnew artifacts/cerebro-skill-old-vs-new-p0.json --route artifacts/cerebro-skill-zero-cost-route.manual.json --quota artifacts/cerebro-skill-free-quota-plan.manual.json --behavioral-gate artifacts/cerebro-skill-behavioral-execution-gate.manual.json --rsi-shadow artifacts/cerebro-skill-rsi-shadow.json --behavioral-results artifacts/cerebro-skill-behavioral-proxy.manual.json --independent-judge artifacts/cerebro-skill-independent-judge.manual.json --tribunal artifacts/cerebro-skill-tribunal.manual.json --rollback artifacts/cerebro-skill-rollback-proof.manual.json --output artifacts/cerebro-skill-promotion-readiness.manual.json
+
+      - name: Verify LAB, judge and tribunal never promote anything
         run: |
           node - <<'NODE'
           const fs=require('fs');
           const p=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-behavioral-proxy.manual.json','utf8'));
           const j=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-independent-judge.manual.json','utf8'));
           const r=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-rollback-proof.manual.json','utf8'));
+          const t=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-tribunal.manual.json','utf8'));
+          const pr=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-promotion-readiness.manual.json','utf8'));
           if (p.prod_authorized !== false || p.promotion_authorized !== false || p.external_skill_code_executed !== false) process.exit(1);
           if (p.status !== 'PROXY_COMPLETE') process.exit(1);
           if (j.prod_authorized !== false || j.tribunal_satisfied !== false) process.exit(1);
           if (r.prod_authorized !== false) process.exit(1);
-          console.log(JSON.stringify({proxy_status:p.status,calls_executed:p.calls_executed,judge_decision:j.decision,rollback_status:r.status,prod_authorized:false,promotion_authorized:false}));
+          if (t.prod_authorized !== false || t.autonomous_promotion_authorized !== false) process.exit(1);
+          if (pr.merge_authorized !== false || pr.prod_authorized !== false || pr.autonomous_promotion_authorized !== false) process.exit(1);
+          console.log(JSON.stringify({proxy_status:p.status,calls_executed:p.calls_executed,judge_decision:j.decision,rollback_status:r.status,tribunal_decision:t.decision,promotion_readiness:pr.status,human_required:pr.human_required??null,prod_authorized:false,auto_promotion:false}));
           NODE
 
       - name: Upload synthetic behavioral evidence
@@ -108,5 +121,7 @@ jobs:
             artifacts/cerebro-skill-behavioral-proxy.manual.json
             artifacts/cerebro-skill-independent-judge.manual.json
             artifacts/cerebro-skill-rollback-proof.manual.json
+            artifacts/cerebro-skill-tribunal.manual.json
+            artifacts/cerebro-skill-promotion-readiness.manual.json
           if-no-files-found: error
           retention-days: 14
