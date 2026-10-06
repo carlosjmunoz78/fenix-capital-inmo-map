@@ -59,7 +59,7 @@ jobs:
       - name: Probe Gemini model metadata with zero inference calls
         env:
           CEREBRO_GEMINI_API_KEY: ${{ secrets.CEREBRO_GEMINI_API_KEY }}
-          CEREBRO_GEMINI_MODEL: gemini-3.5-flash-lite
+          CEREBRO_GEMINI_MODEL: gemini-3.1-flash-lite
         run: node cerebro/skills/skill-gemini-access-probe.mjs --output artifacts/cerebro-skill-gemini-access-probe.manual.json
 
       - name: Wait for GREEN discovery evidence for exactly this branch head
@@ -109,7 +109,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           CEREBRO_GEMINI_API_KEY: ${{ secrets.CEREBRO_GEMINI_API_KEY }}
-          CEREBRO_GEMINI_MODEL: gemini-3.5-flash-lite
+          CEREBRO_GEMINI_MODEL: gemini-3.1-flash-lite
         run: node cerebro/skills/skill-behavioral-proxy-runner.mjs --oldnew artifacts/cerebro-skill-old-vs-new-p0.json --manifests artifacts/cerebro-skill-manifests.json --gate artifacts/cerebro-skill-behavioral-execution-gate.manual.json --quota artifacts/cerebro-skill-free-quota-plan.manual.json --route artifacts/cerebro-skill-zero-cost-route.manual.json --output artifacts/cerebro-skill-behavioral-proxy.manual.json
 
       - name: Run deterministic independent judge
