@@ -1,0 +1,83 @@
+{
+  "schema_version": "0.1.0",
+  "evidence_type": "MANUAL_ASSISTANT_PRETRIBUNAL_REVIEW_NOT_RUNTIME",
+  "status": "SUPPORTING_EVIDENCE_ONLY",
+  "observed_at": "2026-10-06T15:25:00Z",
+  "candidate": {
+    "candidate_id": "mcpservers-agent-skills:4c2b2478f8fe3bed14df",
+    "name": "supabase-postgres-best-practices",
+    "upstream_full_name": "supabase/agent-skills",
+    "upstream_head_commit": "c9be0e931b7930f7d02126d04774d904c381e7d7",
+    "manifest_path": "skills/supabase-postgres-best-practices/SKILL.md",
+    "manifest_sha256": "ad65e776f45e761bafc609d3f506c77c1032225aa65e0c4c02f241b8071e5855",
+    "declared_license": "MIT",
+    "declared_version": "1.1.1"
+  },
+  "source_evidence": [
+    {
+      "path": "skills/supabase-postgres-best-practices/SKILL.md",
+      "sha": "6400792389dfcc82c81953054e546bd72ebcd259",
+      "purpose": "scope_and_rule_categories"
+    },
+    {
+      "path": "skills/supabase-postgres-best-practices/references/query-missing-indexes.md",
+      "sha": "e6daace7dd368c75cdf87dc61be4afd6ff66cbbe",
+      "purpose": "filtered_column_index_guidance"
+    },
+    {
+      "path": "skills/supabase-postgres-best-practices/references/query-composite-indexes.md",
+      "sha": "fea64523fd5bb3696f943d486ccaf2aea75d27b8",
+      "purpose": "composite_index_guidance"
+    },
+    {
+      "path": "skills/supabase-postgres-best-practices/references/security-rls-basics.md",
+      "sha": "c61e1a8503de113be0981759b82f5e37090f344c",
+      "purpose": "database_enforced_rls"
+    },
+    {
+      "path": "skills/supabase-postgres-best-practices/references/security-rls-performance.md",
+      "sha": "c3c7c416d57d9a46a9993f4e0c20f772fb64483d",
+      "purpose": "rls_performance_and_indexing"
+    }
+  ],
+  "fixtures": [
+    {
+      "fixture_id": "query-review",
+      "input_summary": "Synthetic 500k-row leads query filters company_id and orders by created_at desc.",
+      "assessment": "SUPPORTED_WITH_EVIDENCE_REQUIRED",
+      "candidate_value": "The upstream guidance explicitly treats indexes on filtered columns as critical and composite indexes as appropriate for multi-column access patterns. For CEREBRO, the safe response must inspect existing indexes and EXPLAIN evidence before proposing a concrete index; a likely candidate pattern is company_id plus created_at, but this review does not authorize SQL execution.",
+      "cerebro_constraints": ["NO_DB_WRITE", "INDEX_EVIDENCE", "TENANT_SCOPE"],
+      "side_effects": 0
+    },
+    {
+      "fixture_id": "rls-review",
+      "input_summary": "Synthetic RLS policy scopes only auth.uid() = user_id while company_id isolation is required.",
+      "assessment": "CANDIDATE_SHOULD_REJECT_POLICY_AS_INSUFFICIENT",
+      "candidate_value": "The upstream guidance explicitly requires database-enforced RLS for multi-tenant data and recommends indexed RLS predicates. Because the fixture requires company_id isolation, a policy scoped only to user_id is insufficient evidence of company isolation. Any correction must preserve/strengthen RLS, fail closed, and use the existing CEREBRO identity/company contract rather than inventing a tenant claim.",
+      "cerebro_constraints": ["NO_RLS_WEAKENING", "MULTI_COMPANY_ISOLATION", "FAIL_CLOSED"],
+      "side_effects": 0
+    },
+    {
+      "fixture_id": "migration-plan",
+      "input_summary": "Plan adding nullable source_version text to leads without execution.",
+      "assessment": "USEFUL_BUT_CEREBRO_WRAPPER_REMAINS_AUTHORITATIVE",
+      "candidate_value": "The skill explicitly covers schema design and migrations, but CEREBRO's migration contract remains authoritative for backup/snapshot, PREPROD-first validation, OLD-vs-NEW evidence and rollback. The candidate may improve implementation guidance but cannot relax those gates or execute the migration.",
+      "cerebro_constraints": ["NO_EXECUTION", "BACKUP_REQUIRED", "ROLLBACK_REQUIRED", "PREPROD_FIRST"],
+      "side_effects": 0
+    }
+  ],
+  "overall": {
+    "manual_support_for_behavioral_lab": true,
+    "policy_regression_detected": false,
+    "external_skill_code_executed": false,
+    "model_calls_executed": 0,
+    "prod_data_used": false,
+    "customer_data_used": false,
+    "prod_authorized": false,
+    "promotion_authorized": false,
+    "tribunal_satisfied": false,
+    "behavioral_old_vs_new_satisfied": false,
+    "rollback_proof_satisfied": false,
+    "next_gate": "AUTOMATED_SYNTHETIC_BEHAVIORAL_OLD_VS_NEW"
+  }
+}
