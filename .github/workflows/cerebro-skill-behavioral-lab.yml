@@ -56,6 +56,12 @@ jobs:
             exit 1
           fi
 
+      - name: Probe Gemini model metadata with zero inference calls
+        env:
+          CEREBRO_GEMINI_API_KEY: ${{ secrets.CEREBRO_GEMINI_API_KEY }}
+          CEREBRO_GEMINI_MODEL: gemini-3.5-flash-lite
+        run: node cerebro/skills/skill-gemini-access-probe.mjs --output artifacts/cerebro-skill-gemini-access-probe.manual.json
+
       - name: Wait for GREEN discovery evidence for exactly this branch head
         env:
           GH_TOKEN: ${{ github.token }}
@@ -118,15 +124,16 @@ jobs:
       - name: Assess PREPROD promotion readiness without auto-promotion
         run: node cerebro/skills/skill-promotion-readiness.mjs --static-lab artifacts/cerebro-skill-static-lab-p0.json --oldnew artifacts/cerebro-skill-old-vs-new-p0.json --route artifacts/cerebro-skill-zero-cost-route.manual.json --quota artifacts/cerebro-skill-free-quota-plan.manual.json --behavioral-gate artifacts/cerebro-skill-behavioral-execution-gate.manual.json --rsi-shadow artifacts/cerebro-skill-rsi-shadow.json --behavioral-results artifacts/cerebro-skill-behavioral-proxy.manual.json --independent-judge artifacts/cerebro-skill-independent-judge.manual.json --tribunal artifacts/cerebro-skill-tribunal.manual.json --rollback artifacts/cerebro-skill-rollback-proof.manual.json --output artifacts/cerebro-skill-promotion-readiness.manual.json
 
-      - name: Verify LAB, judge and tribunal never promote anything
+      - name: Verify no unsafe promotion; preserve safe HOLD evidence
         run: |
-          node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-behavioral-proxy.manual.json','utf8'));const j=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-independent-judge.manual.json','utf8'));const r=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-rollback-proof.manual.json','utf8'));const t=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-tribunal.manual.json','utf8'));const pr=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-promotion-readiness.manual.json','utf8'));if(p.prod_authorized!==false||p.promotion_authorized!==false||p.external_skill_code_executed!==false||p.status!=='PROXY_COMPLETE'||j.prod_authorized!==false||j.tribunal_satisfied!==false||r.prod_authorized!==false||t.prod_authorized!==false||t.autonomous_promotion_authorized!==false||pr.merge_authorized!==false||pr.prod_authorized!==false||pr.autonomous_promotion_authorized!==false)process.exit(1);console.log(JSON.stringify({proxy_status:p.status,calls_executed:p.calls_executed,judge_decision:j.decision,rollback_status:r.status,tribunal_decision:t.decision,promotion_readiness:pr.status,human_required:pr.human_required??null,prod_authorized:false,auto_promotion:false}))"
+          node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-behavioral-proxy.manual.json','utf8'));const j=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-independent-judge.manual.json','utf8'));const r=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-rollback-proof.manual.json','utf8'));const t=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-tribunal.manual.json','utf8'));const pr=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-promotion-readiness.manual.json','utf8'));if(p.prod_authorized!==false||p.external_skill_code_executed!==false||j.prod_authorized!==false||j.tribunal_satisfied!==false||r.prod_authorized!==false||t.prod_authorized!==false||t.autonomous_promotion_authorized!==false||pr.merge_authorized!==false||pr.prod_authorized!==false||pr.autonomous_promotion_authorized!==false)process.exit(1);console.log(JSON.stringify({safe:true,proxy_status:p.status,stop_reason:p.stop_reason??null,calls_executed:p.calls_executed,judge_decision:j.decision,rollback_status:r.status,tribunal_decision:t.decision,promotion_readiness:pr.status,human_required:pr.human_required??null,prod_authorized:false,auto_promotion:false}))"
 
       - name: Upload synthetic behavioral evidence
         uses: actions/upload-artifact@v4
         with:
           name: cerebro-skill-behavioral-lab-${{ github.run_id }}
           path: |
+            artifacts/cerebro-skill-gemini-access-probe.manual.json
             artifacts/cerebro-skill-provider-binding.manual.json
             artifacts/cerebro-skill-zero-cost-route.manual.json
             artifacts/cerebro-skill-free-quota-plan.manual.json
