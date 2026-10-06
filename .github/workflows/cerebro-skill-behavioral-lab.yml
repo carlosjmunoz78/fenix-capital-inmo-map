@@ -1,0 +1,99 @@
+name: CEREBRO Skill Behavioral LAB
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type RUN_SYNTHETIC_LAB to confirm synthetic-only zero-cost LAB execution'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+env:
+  CEREBRO_PREFERRED_ZERO_COST_PROVIDER: google-gemini-api-free
+  CEREBRO_BEHAVIORAL_EXECUTION_ENABLED: 'true'
+  CEREBRO_ALLOW_PROD_DATA: 'false'
+  CEREBRO_ALLOW_CUSTOMER_DATA: 'false'
+
+jobs:
+  synthetic-behavioral-lab:
+    if: ${{ inputs.confirm == 'RUN_SYNTHETIC_LAB' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Require Gemini free-tier credential without printing it
+        env:
+          CEREBRO_GEMINI_API_KEY: ${{ secrets.CEREBRO_GEMINI_API_KEY }}
+        run: |
+          if [ -z "$CEREBRO_GEMINI_API_KEY" ]; then
+            echo "::error::CEREBRO_GEMINI_API_KEY is not configured. No model call was made."
+            exit 1
+          fi
+
+      - name: Download latest successful discovery evidence for exactly this branch head
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          RUN_ID="$(gh run list --repo "$GITHUB_REPOSITORY" --workflow "CEREBRO Skill Discovery Scout" --branch "$GITHUB_REF_NAME" --status success --limit 1 --json databaseId,headSha --jq '.[0].databaseId')"
+          RUN_SHA="$(gh run view "$RUN_ID" --repo "$GITHUB_REPOSITORY" --json headSha --jq '.headSha')"
+          if [ "$RUN_SHA" != "$GITHUB_SHA" ]; then
+            echo "::error::Latest GREEN discovery evidence is stale for current branch head. Refusing behavioral execution."
+            exit 1
+          fi
+          gh run download "$RUN_ID" --repo "$GITHUB_REPOSITORY" --name "cerebro-skill-discovery-$RUN_ID" --dir artifacts
+          test -f artifacts/cerebro-skill-old-vs-new-p0.json
+          test -f artifacts/cerebro-skill-manifests.json
+
+      - name: Rebind Gemini readiness using presence only
+        env:
+          CEREBRO_GEMINI_KEY_PRESENT: 'true'
+          CEREBRO_GEMINI_FREE_QUOTA_GUARD: 'true'
+          CEREBRO_GEMINI_POLICY_GREEN: 'false'
+        run: node cerebro/skills/skill-provider-binding-from-env.mjs --providers cerebro/skills/zero-cost-provider-evidence.v0.json --output artifacts/cerebro-skill-provider-binding.manual.json
+
+      - name: Select Gemini zero-cost synthetic route only
+        run: node cerebro/skills/skill-zero-cost-route-audit.mjs --providers artifacts/cerebro-skill-provider-binding.manual.json --oldnew artifacts/cerebro-skill-old-vs-new-p0.json --preferred-provider google-gemini-api-free --output artifacts/cerebro-skill-zero-cost-route.manual.json
+
+      - name: Build hard free quota plan with no paid fallback
+        run: node cerebro/skills/skill-free-quota-guard.mjs --oldnew artifacts/cerebro-skill-old-vs-new-p0.json --route artifacts/cerebro-skill-zero-cost-route.manual.json --output artifacts/cerebro-skill-free-quota-plan.manual.json
+
+      - name: Open behavioral gate only for synthetic LAB
+        run: node cerebro/skills/skill-behavioral-execution-gate.mjs --oldnew artifacts/cerebro-skill-old-vs-new-p0.json --route artifacts/cerebro-skill-zero-cost-route.manual.json --quota artifacts/cerebro-skill-free-quota-plan.manual.json --output artifacts/cerebro-skill-behavioral-execution-gate.manual.json
+
+      - name: Execute synthetic baseline-vs-skill proxy with Gemini free tier
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          CEREBRO_GEMINI_API_KEY: ${{ secrets.CEREBRO_GEMINI_API_KEY }}
+          CEREBRO_GEMINI_MODEL: gemini-3.5-flash-lite
+        run: node cerebro/skills/skill-behavioral-proxy-runner.mjs --oldnew artifacts/cerebro-skill-old-vs-new-p0.json --manifests artifacts/cerebro-skill-manifests.json --gate artifacts/cerebro-skill-behavioral-execution-gate.manual.json --quota artifacts/cerebro-skill-free-quota-plan.manual.json --route artifacts/cerebro-skill-zero-cost-route.manual.json --output artifacts/cerebro-skill-behavioral-proxy.manual.json
+
+      - name: Verify no promotion can occur from proxy alone
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const x=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-behavioral-proxy.manual.json','utf8'));
+          if (x.prod_authorized !== false || x.promotion_authorized !== false || x.external_skill_code_executed !== false) process.exit(1);
+          if (x.status !== 'PROXY_COMPLETE') process.exit(1);
+          console.log(JSON.stringify({status:x.status,calls_executed:x.calls_executed,provider_id:x.provider_id,prod_authorized:false,promotion_authorized:false,external_skill_code_executed:false}));
+          NODE
+
+      - name: Upload synthetic behavioral evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-skill-behavioral-lab-${{ github.run_id }}
+          path: |
+            artifacts/cerebro-skill-provider-binding.manual.json
+            artifacts/cerebro-skill-zero-cost-route.manual.json
+            artifacts/cerebro-skill-free-quota-plan.manual.json
+            artifacts/cerebro-skill-behavioral-execution-gate.manual.json
+            artifacts/cerebro-skill-behavioral-proxy.manual.json
+          if-no-files-found: error
+          retention-days: 14
