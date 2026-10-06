@@ -51,6 +51,7 @@ jobs:
           gh run download "$RUN_ID" --repo "$GITHUB_REPOSITORY" --name "cerebro-skill-discovery-$RUN_ID" --dir artifacts
           test -f artifacts/cerebro-skill-old-vs-new-p0.json
           test -f artifacts/cerebro-skill-manifests.json
+          test -f artifacts/cerebro-skill-wrapper-plans-p0.json
 
       - name: Rebind Gemini readiness using presence only
         env:
@@ -75,14 +76,24 @@ jobs:
           CEREBRO_GEMINI_MODEL: gemini-3.5-flash-lite
         run: node cerebro/skills/skill-behavioral-proxy-runner.mjs --oldnew artifacts/cerebro-skill-old-vs-new-p0.json --manifests artifacts/cerebro-skill-manifests.json --gate artifacts/cerebro-skill-behavioral-execution-gate.manual.json --quota artifacts/cerebro-skill-free-quota-plan.manual.json --route artifacts/cerebro-skill-zero-cost-route.manual.json --output artifacts/cerebro-skill-behavioral-proxy.manual.json
 
-      - name: Verify no promotion can occur from proxy alone
+      - name: Run deterministic independent judge
+        run: node cerebro/skills/skill-independent-judge.mjs --behavioral-results artifacts/cerebro-skill-behavioral-proxy.manual.json --output artifacts/cerebro-skill-independent-judge.manual.json
+
+      - name: Prove wrapper binding rollback and rebuild independently of behavioral result
+        run: node cerebro/skills/skill-rollback-proof.mjs --wrappers artifacts/cerebro-skill-wrapper-plans-p0.json --output artifacts/cerebro-skill-rollback-proof.manual.json
+
+      - name: Verify proxy and judge do not promote anything
         run: |
           node - <<'NODE'
           const fs=require('fs');
-          const x=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-behavioral-proxy.manual.json','utf8'));
-          if (x.prod_authorized !== false || x.promotion_authorized !== false || x.external_skill_code_executed !== false) process.exit(1);
-          if (x.status !== 'PROXY_COMPLETE') process.exit(1);
-          console.log(JSON.stringify({status:x.status,calls_executed:x.calls_executed,provider_id:x.provider_id,prod_authorized:false,promotion_authorized:false,external_skill_code_executed:false}));
+          const p=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-behavioral-proxy.manual.json','utf8'));
+          const j=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-independent-judge.manual.json','utf8'));
+          const r=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-rollback-proof.manual.json','utf8'));
+          if (p.prod_authorized !== false || p.promotion_authorized !== false || p.external_skill_code_executed !== false) process.exit(1);
+          if (p.status !== 'PROXY_COMPLETE') process.exit(1);
+          if (j.prod_authorized !== false || j.tribunal_satisfied !== false) process.exit(1);
+          if (r.prod_authorized !== false) process.exit(1);
+          console.log(JSON.stringify({proxy_status:p.status,calls_executed:p.calls_executed,judge_decision:j.decision,rollback_status:r.status,prod_authorized:false,promotion_authorized:false}));
           NODE
 
       - name: Upload synthetic behavioral evidence
@@ -95,5 +106,7 @@ jobs:
             artifacts/cerebro-skill-free-quota-plan.manual.json
             artifacts/cerebro-skill-behavioral-execution-gate.manual.json
             artifacts/cerebro-skill-behavioral-proxy.manual.json
+            artifacts/cerebro-skill-independent-judge.manual.json
+            artifacts/cerebro-skill-rollback-proof.manual.json
           if-no-files-found: error
           retention-days: 14
