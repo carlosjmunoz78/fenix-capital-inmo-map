@@ -13,11 +13,20 @@ test('complete clean paired evidence becomes green for tribunal review only',()=
   assert.equal(r.prod_authorized,false);
 });
 
-test('missing behavioral evidence fails closed',()=>{
+test('missing behavioral evidence fails closed without falsely classifying it as explicit non-synthetic evidence',()=>{
   const r=judgeBehavioralEvidence({behavioralResults:null});
   assert.equal(r.green,false);
   assert.ok(r.blockers.includes('BEHAVIORAL_PROXY_NOT_COMPLETE'));
   assert.ok(r.blockers.includes('BEHAVIORAL_RESULTS_MISSING'));
+  assert.equal(r.blockers.includes('NON_SYNTHETIC_EVIDENCE_FORBIDDEN'),false);
+});
+
+test('blocked proxy without synthetic marker remains not ready but is not mislabeled non-synthetic',()=>{
+  const r=judgeBehavioralEvidence({behavioralResults:{status:'BLOCKED_BY_EXECUTION_GATE',calls_executed:0,results:[]}});
+  assert.equal(r.green,false);
+  assert.ok(r.blockers.includes('BEHAVIORAL_PROXY_NOT_COMPLETE'));
+  assert.ok(r.blockers.includes('NO_BEHAVIORAL_CALL_EVIDENCE'));
+  assert.equal(r.blockers.includes('NON_SYNTHETIC_EVIDENCE_FORBIDDEN'),false);
 });
 
 test('policy violation or candidate regression blocks package',()=>{
@@ -30,7 +39,7 @@ test('policy violation or candidate regression blocks package',()=>{
   assert.ok(r.packages[0].blockers.includes('CANDIDATE_CONSTRAINT_REGRESSION'));
 });
 
-test('non synthetic or external skill execution is never judge-green',()=>{
+test('explicit non synthetic or external skill execution is never judge-green',()=>{
   const b=complete();
   b.synthetic_only=false;
   b.external_skill_code_executed=true;
