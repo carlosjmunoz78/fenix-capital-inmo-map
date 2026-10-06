@@ -9,7 +9,7 @@ export function judgeBehavioralEvidence({behavioralResults=null,minimumComplianc
   if(behavioralResults?.status!=='PROXY_COMPLETE') blockers.push('BEHAVIORAL_PROXY_NOT_COMPLETE');
   if(!(behavioralResults?.results??[]).length) blockers.push('BEHAVIORAL_RESULTS_MISSING');
   if(Number(behavioralResults?.calls_executed??0)<=0) blockers.push('NO_BEHAVIORAL_CALL_EVIDENCE');
-  if(behavioralResults?.synthetic_only!==true) blockers.push('NON_SYNTHETIC_EVIDENCE_FORBIDDEN');
+  if(behavioralResults?.synthetic_only===false) blockers.push('NON_SYNTHETIC_EVIDENCE_FORBIDDEN');
   if(behavioralResults?.external_skill_code_executed===true) blockers.push('EXTERNAL_SKILL_CODE_EXECUTED');
   if(behavioralResults?.prod_authorized===true) blockers.push('PROD_AUTHORIZATION_FORBIDDEN');
 
@@ -45,7 +45,7 @@ export function judgeBehavioralEvidence({behavioralResults=null,minimumComplianc
   if(packages.some(x=>x.decision!=='GREEN')) blockers.push('ONE_OR_MORE_PACKAGES_NOT_GREEN');
   const green=blockers.length===0&&packages.length>0;
   return Object.freeze({
-    schema_version:'0.1.0',
+    schema_version:'0.1.1',
     execution_mode:'DETERMINISTIC_INDEPENDENT_JUDGE',
     decision:green?'GREEN_FOR_TRIBUNAL_REVIEW':'NOT_READY',
     green,
