@@ -1,5 +1,5 @@
 {
-  "schema_version": "0.1.0",
+  "schema_version": "0.2.0",
   "observed_at": "2026-10-06T00:00:00Z",
   "purpose": "Evidence registry for zero-additional-cost behavioral skill evaluation. This file does not contain credentials and does not authorize inference.",
   "constraints": {
@@ -12,101 +12,46 @@
     "credential_values_in_repo": false
   },
   "historical_contracts": [
-    {
-      "id": "PR-173-ZERO-COST-RUNTIME-WAVE1",
-      "repository": "carlosjmunoz78/fenix-capital-inmo-map",
-      "branch": "cerebro-zero-cost-runtime-wave1-20260910",
-      "head_sha": "e49a5539810079667b578df96d25322beeba2bf7",
-      "status": "DOCUMENTED_PARTIAL_NOT_MERGED",
-      "reuse": "FREE_FIRST_BROKER_AND_BUDGET_ROUTER_SEMANTICS"
-    },
-    {
-      "id": "PR-240-MODEL-ROUTER-V0",
-      "repository": "carlosjmunoz78/fenix-capital-inmo-map",
-      "branch": "cerebro-model-router-v0-20260911",
-      "head_sha": "c08cc6e41d958b99d3d48d6c2bfbfa4d9c129e53",
-      "status": "OPEN_STACKED_NOT_MERGED",
-      "reuse": "DETERMINISTIC_FIRST_FREE_MODEL_FIRST_MONEY_LIMIT"
-    }
+    {"id":"PR-173-ZERO-COST-RUNTIME-WAVE1","repository":"carlosjmunoz78/fenix-capital-inmo-map","branch":"cerebro-zero-cost-runtime-wave1-20260910","head_sha":"e49a5539810079667b578df96d25322beeba2bf7","status":"DOCUMENTED_PARTIAL_NOT_MERGED","reuse":"FREE_FIRST_BROKER_AND_BUDGET_ROUTER_SEMANTICS"},
+    {"id":"PR-240-MODEL-ROUTER-V0","repository":"carlosjmunoz78/fenix-capital-inmo-map","branch":"cerebro-model-router-v0-20260911","head_sha":"c08cc6e41d958b99d3d48d6c2bfbfa4d9c129e53","status":"OPEN_STACKED_NOT_MERGED","reuse":"DETERMINISTIC_FIRST_FREE_MODEL_FIRST_MONEY_LIMIT"}
   ],
   "routes": [
     {
-      "provider_id": "github-actions-standard-public",
-      "kind": "COMPUTE_ONLY",
-      "route_type": "existing_provider",
-      "online": true,
-      "own_server_required": false,
-      "additional_cost_eur": 0,
-      "availability_state": "VERIFIED_AVAILABLE",
-      "credential_state": "NOT_REQUIRED",
-      "behavioral_inference": false,
-      "data_policy_state": "NOT_APPLICABLE",
-      "source": "https://docs.github.com/en/actions/reference/runners/github-hosted-runners",
-      "evidence": "GitHub states standard GitHub-hosted runners are free and unlimited for public repositories. This repository is public. Larger runners are excluded.",
-      "eligible_for_behavioral_inference": false
+      "provider_id":"github-actions-standard-public","kind":"COMPUTE_ONLY","route_type":"existing_provider","online":true,"own_server_required":false,"additional_cost_eur":0,"availability_state":"VERIFIED_AVAILABLE","credential_state":"NOT_REQUIRED","behavioral_inference":false,"data_policy_state":"NOT_APPLICABLE","source":"https://docs.github.com/en/actions/reference/runners/github-hosted-runners","evidence":"GitHub states standard GitHub-hosted runners are free for public repositories. Larger runners are excluded.","eligible_for_behavioral_inference":false
     },
     {
-      "provider_id": "github-models",
-      "kind": "MODEL_INFERENCE",
-      "route_type": "free_tier",
-      "online": true,
-      "own_server_required": false,
-      "additional_cost_eur": 0,
-      "availability_state": "RETIRED",
-      "credential_state": "NOT_APPLICABLE",
-      "behavioral_inference": true,
-      "data_policy_state": "NOT_APPLICABLE",
-      "source": "https://docs.github.com/en/github-models",
-      "evidence": "GitHub Models was fully retired on 2026-07-30; playground, catalog, inference API and BYOK are unavailable.",
-      "eligible_for_behavioral_inference": false
+      "provider_id":"github-actions-ephemeral-oss",
+      "kind":"MODEL_INFERENCE",
+      "route_type":"local_model",
+      "online":true,
+      "own_server_required":false,
+      "additional_cost_eur":0,
+      "availability_state":"LAB_CANDIDATE_COMPONENTS_VERIFIED",
+      "credential_state":"NOT_REQUIRED",
+      "behavioral_inference":true,
+      "data_policy_state":"SYNTHETIC_ONLY_BY_DEFAULT",
+      "source":"https://huggingface.co/HuggingFaceTB/SmolLM2-135M-Instruct",
+      "evidence":"Ephemeral inference on the existing standard public GitHub Actions runner. Runtime @huggingface/transformers 4.3.0; model HuggingFaceTB/SmolLM2-135M-Instruct pinned to revision 1aa2c784701448c41116d0470738b551c29a99d2; Apache-2.0; q4 ONNX blob SHA256 933577110303a2964096d19b6f15d3b4639bef7f99481ac0b61d9f3ad72f392a. No persistent server and no provider inference credential.",
+      "runtime_package":"@huggingface/transformers@4.3.0",
+      "model_repo":"HuggingFaceTB/SmolLM2-135M-Instruct",
+      "model_revision":"1aa2c784701448c41116d0470738b551c29a99d2",
+      "model_dtype":"q4",
+      "model_q4_sha256":"933577110303a2964096d19b6f15d3b4639bef7f99481ac0b61d9f3ad72f392a",
+      "model_license":"apache-2.0",
+      "quota_guard":"MAX_6_SYNTHETIC_CALLS_PER_AUTHORIZED_LAB",
+      "eligible_for_behavioral_inference":false
     },
     {
-      "provider_id": "cloudflare-workers-ai-free",
-      "kind": "MODEL_INFERENCE",
-      "route_type": "free_tier",
-      "online": true,
-      "own_server_required": false,
-      "additional_cost_eur": 0,
-      "availability_state": "VERIFIED_FREE_TIER_EXISTS",
-      "credential_state": "UNBOUND",
-      "behavioral_inference": true,
-      "data_policy_state": "REVIEW_BEFORE_NON_SYNTHETIC_DATA",
-      "source": "https://developers.cloudflare.com/workers-ai/platform/pricing/",
-      "evidence": "Workers AI Free includes a 10,000 Neurons/day no-charge allocation; selected resource-intensive models require paid plan, so only explicitly free-plan models are eligible.",
-      "quota_guard": "STOP_BEFORE_FREE_ALLOCATION_EXCEEDED",
-      "eligible_for_behavioral_inference": false
+      "provider_id":"github-models","kind":"MODEL_INFERENCE","route_type":"free_tier","online":true,"own_server_required":false,"additional_cost_eur":0,"availability_state":"RETIRED","credential_state":"NOT_APPLICABLE","behavioral_inference":true,"data_policy_state":"NOT_APPLICABLE","source":"https://docs.github.com/en/github-models","evidence":"GitHub Models was fully retired on 2026-07-30; playground, catalog, inference API and BYOK are unavailable.","eligible_for_behavioral_inference":false
     },
     {
-      "provider_id": "google-gemini-api-free",
-      "kind": "MODEL_INFERENCE",
-      "route_type": "free_tier",
-      "online": true,
-      "own_server_required": false,
-      "additional_cost_eur": 0,
-      "availability_state": "VERIFIED_FREE_TIER_EXISTS",
-      "credential_state": "UNBOUND",
-      "behavioral_inference": true,
-      "data_policy_state": "SYNTHETIC_ONLY_BY_DEFAULT",
-      "source": "https://ai.google.dev/gemini-api/docs/pricing",
-      "evidence": "Gemini Developer API publishes a free tier for selected models with no-cost input/output; free-tier content may be used to improve Google products, so CEREBRO must keep this route synthetic/non-sensitive unless policy changes.",
-      "quota_guard": "STOP_AT_FREE_TIER_LIMIT",
-      "eligible_for_behavioral_inference": false
+      "provider_id":"cloudflare-workers-ai-free","kind":"MODEL_INFERENCE","route_type":"free_tier","online":true,"own_server_required":false,"additional_cost_eur":0,"availability_state":"VERIFIED_FREE_TIER_EXISTS","credential_state":"UNBOUND","behavioral_inference":true,"data_policy_state":"REVIEW_BEFORE_NON_SYNTHETIC_DATA","source":"https://developers.cloudflare.com/workers-ai/platform/pricing/","evidence":"Workers AI Free includes a no-charge allocation; selected resource-intensive models may require paid plan, so only explicitly free-plan models are eligible.","quota_guard":"STOP_BEFORE_FREE_ALLOCATION_EXCEEDED","eligible_for_behavioral_inference":false
     },
     {
-      "provider_id": "mistral-api-free-mode",
-      "kind": "MODEL_INFERENCE",
-      "route_type": "free_tier",
-      "online": true,
-      "own_server_required": false,
-      "additional_cost_eur": 0,
-      "availability_state": "VERIFIED_FREE_MODE_EXISTS",
-      "credential_state": "UNBOUND",
-      "behavioral_inference": true,
-      "data_policy_state": "REVIEW_BEFORE_NON_SYNTHETIC_DATA",
-      "source": "https://help.mistral.ai/en/articles/698531-why-am-i-hitting-api-rate-limits-and-how-do-i-increase-them",
-      "evidence": "Mistral documents a default Free mode with lower rate limits intended for evaluation/prototyping.",
-      "quota_guard": "STOP_AT_FREE_MODE_LIMIT",
-      "eligible_for_behavioral_inference": false
+      "provider_id":"google-gemini-api-free","kind":"MODEL_INFERENCE","route_type":"free_tier","online":true,"own_server_required":false,"additional_cost_eur":0,"availability_state":"FREE_TIER_PUBLISHED_BUT_CURRENT_PROJECT_INFERENCE_BILLING_BLOCKED","credential_state":"UNBOUND","behavioral_inference":true,"data_policy_state":"SYNTHETIC_ONLY_BY_DEFAULT","source":"https://ai.google.dev/gemini-api/docs/pricing","evidence":"Google publishes free-tier models, but controlled CEREBRO LAB attempts with this project/key reached model metadata successfully and actual generateContent stopped fail-closed with HTTP 402 PROVIDER_BILLING_REQUIRED. Do not enable billing under zero-cost policy.","quota_guard":"STOP_AT_FREE_TIER_LIMIT","eligible_for_behavioral_inference":false
+    },
+    {
+      "provider_id":"mistral-api-free-mode","kind":"MODEL_INFERENCE","route_type":"free_tier","online":true,"own_server_required":false,"additional_cost_eur":0,"availability_state":"VERIFIED_FREE_MODE_EXISTS","credential_state":"UNBOUND","behavioral_inference":true,"data_policy_state":"REVIEW_BEFORE_NON_SYNTHETIC_DATA","source":"https://help.mistral.ai/en/articles/698531-why-am-i-hitting-api-rate-limits-and-how-do-i-increase-them","evidence":"Mistral documents a default Free mode with lower rate limits intended for evaluation/prototyping.","quota_guard":"STOP_AT_FREE_MODE_LIMIT","eligible_for_behavioral_inference":false
     }
   ]
 }
