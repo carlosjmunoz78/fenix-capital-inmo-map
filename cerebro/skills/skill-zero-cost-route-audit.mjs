@@ -23,15 +23,23 @@ export function unwrapProviderEvidence(input){
   return evidence;
 }
 
-export function auditZeroCostBehavioralRoute(providerEvidenceInput,oldVsNew,{allowSyntheticOnly=true}={}){
+export function auditZeroCostBehavioralRoute(providerEvidenceInput,oldVsNew,{allowSyntheticOnly=true,preferredProviderId=null}={}){
   const providerEvidence=unwrapProviderEvidence(providerEvidenceInput);
   if(!oldVsNew||typeof oldVsNew!=='object') throw new TypeError('oldVsNew required');
   if(typeof allowSyntheticOnly!=='boolean') throw new TypeError('allowSyntheticOnly must be boolean');
+  if(preferredProviderId!==null&&(typeof preferredProviderId!=='string'||!preferredProviderId.trim())) throw new TypeError('preferredProviderId invalid');
+  const preferred=preferredProviderId?.trim()||null;
   const packages=oldVsNew.packages??[];
   const routes=providerEvidence.routes??[];
   const retired=routes.filter(x=>x.availability_state==='RETIRED').map(x=>x.provider_id);
   const freeCandidates=routes.filter(x=>x.kind==='MODEL_INFERENCE'&&x.additional_cost_eur===0&&x.availability_state!=='RETIRED');
-  const ready=freeCandidates.filter(eligibleRoute).sort((a,b)=>(ROUTE_RANK[a.route_type]??99)-(ROUTE_RANK[b.route_type]??99)||a.provider_id.localeCompare(b.provider_id));
+  const ready=freeCandidates.filter(eligibleRoute).sort((a,b)=>{
+    if(preferred){
+      if(a.provider_id===preferred&&b.provider_id!==preferred) return -1;
+      if(b.provider_id===preferred&&a.provider_id!==preferred) return 1;
+    }
+    return (ROUTE_RANK[a.route_type]??99)-(ROUTE_RANK[b.route_type]??99)||a.provider_id.localeCompare(b.provider_id);
+  });
   const unbound=freeCandidates.filter(x=>x.credential_state!=='READY'||x.eligible_for_behavioral_inference!==true).map(x=>({provider_id:x.provider_id,credential_state:x.credential_state,data_policy_state:x.data_policy_state,quota_guard:x.quota_guard??null,eligible_for_behavioral_inference:x.eligible_for_behavioral_inference===true}));
   const paid=routes.filter(x=>Number(x.additional_cost_eur)>0||x.route_type==='paid_provider');
   let status='READY_ZERO_COST_ROUTE';
@@ -39,6 +47,9 @@ export function auditZeroCostBehavioralRoute(providerEvidenceInput,oldVsNew,{all
   let human_required=null;
   let reason='ZERO_COST_ROUTE_VERIFIED';
   if(packages.length===0){status='NO_BEHAVIORAL_PACKAGES';selected=null;reason='NO_STATIC_LAB_GREEN_CANDIDATES';}
+  else if(preferred&&freeCandidates.some(x=>x.provider_id===preferred)&&!ready.some(x=>x.provider_id===preferred)){
+    status='BLOCKED_PREFERRED_ZERO_COST_ROUTE_NOT_READY';selected=null;reason='PREFERRED_ZERO_COST_PROVIDER_NOT_BOUND_OR_NOT_ELIGIBLE';
+  }
   else if(!selected){
     status='BLOCKED_ZERO_COST_ROUTE_NOT_BOUND';
     reason=unbound.length?'ZERO_COST_INFERENCE_EXISTS_BUT_CREDENTIAL_OR_POLICY_BINDING_MISSING':'NO_VERIFIED_ZERO_COST_INFERENCE_ROUTE';
@@ -46,11 +57,12 @@ export function auditZeroCostBehavioralRoute(providerEvidenceInput,oldVsNew,{all
   }
   if(human_required&&!HUMAN_REASONS.has(human_required)) throw new Error('unsupported HUMAN_REQUIRED reason');
   return Object.freeze({
-    schema_version:'0.2.0',
+    schema_version:'0.3.0',
     execution_mode:'ROUTE_AUDIT_ONLY',
     packages_waiting:packages.length,
     status,
     reason,
+    preferred_provider_id:preferred,
     selected_route:selected?{provider_id:selected.provider_id,route_type:selected.route_type,additional_cost_eur:selected.additional_cost_eur,data_policy_state:selected.data_policy_state,quota_guard:selected.quota_guard??null}:null,
     retired_routes:retired,
     unbound_zero_cost_candidates:unbound,
@@ -84,8 +96,9 @@ if(import.meta.url===`file://${process.argv[1]}`){
   const providers=JSON.parse(fs.readFileSync(argValue('--providers')??'cerebro/skills/zero-cost-provider-evidence.v0.json','utf8'));
   const oldnew=JSON.parse(fs.readFileSync(argValue('--oldnew')??'artifacts/cerebro-skill-old-vs-new-p0.json','utf8'));
   const output=argValue('--output')??'artifacts/cerebro-skill-zero-cost-route.json';
-  const report=auditZeroCostBehavioralRoute(providers,oldnew);
+  const preferredProviderId=argValue('--preferred-provider')??process.env.CEREBRO_PREFERRED_ZERO_COST_PROVIDER??null;
+  const report=auditZeroCostBehavioralRoute(providers,oldnew,{preferredProviderId});
   fs.mkdirSync(path.dirname(output),{recursive:true});
   fs.writeFileSync(output,`${JSON.stringify(report,null,2)}\n`,'utf8');
-  console.log(JSON.stringify({output,status:report.status,reason:report.reason,packages_waiting:report.packages_waiting,selected_route:report.selected_route,unbound_zero_cost_candidates:report.unbound_zero_cost_candidates.map(x=>x.provider_id),retired_routes:report.retired_routes,inference_executed:false,prod_authorized:false}));
+  console.log(JSON.stringify({output,status:report.status,reason:report.reason,packages_waiting:report.packages_waiting,preferred_provider_id:report.preferred_provider_id,selected_route:report.selected_route,unbound_zero_cost_candidates:report.unbound_zero_cost_candidates.map(x=>x.provider_id),retired_routes:report.retired_routes,inference_executed:false,prod_authorized:false}));
 }
