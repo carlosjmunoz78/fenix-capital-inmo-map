@@ -33,6 +33,22 @@ test('synthetic-only Gemini route becomes eligible only with credentials and quo
   assert.equal(report.synthetic_only,true);
 });
 
+test('preferred Gemini wins deterministically when multiple zero-cost routes are ready',()=>{
+  let bound=bindProviderEvidence(providers,{provider_id:'google-gemini-api-free',credential_ready:true,policy_green:false,free_quota_guarded:true});
+  bound=bindProviderEvidence(bound,{provider_id:'cloudflare-workers-ai-free',credential_ready:true,policy_green:true,free_quota_guarded:true});
+  const report=auditZeroCostBehavioralRoute(bound,oldnew,{preferredProviderId:'google-gemini-api-free'});
+  assert.equal(report.status,'READY_ZERO_COST_ROUTE');
+  assert.equal(report.preferred_provider_id,'google-gemini-api-free');
+  assert.equal(report.selected_route.provider_id,'google-gemini-api-free');
+});
+
+test('preferred provider fails closed instead of silently selecting another provider',()=>{
+  const bound=bindProviderEvidence(providers,{provider_id:'cloudflare-workers-ai-free',credential_ready:true,policy_green:true,free_quota_guarded:true});
+  const report=auditZeroCostBehavioralRoute(bound,oldnew,{preferredProviderId:'google-gemini-api-free'});
+  assert.equal(report.status,'BLOCKED_PREFERRED_ZERO_COST_ROUTE_NOT_READY');
+  assert.equal(report.selected_route,null);
+});
+
 test('provider requiring policy review stays blocked until policy is green',()=>{
   const partially=bindProviderEvidence(providers,{provider_id:'cloudflare-workers-ai-free',credential_ready:true,policy_green:false,free_quota_guarded:true});
   assert.equal(auditZeroCostBehavioralRoute(partially,oldnew).selected_route,null);
