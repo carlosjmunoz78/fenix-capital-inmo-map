@@ -24,6 +24,28 @@ test('emits gap, security, license, permission and static-ready proposals',()=>{
   assert.equal(report.event_counts.SKILL_CANDIDATE_STATIC_READY,1);
 });
 
+test('LAB evidence upgrades only green candidates and holds policy conflicts',()=>{
+  const multiWrappers={plans:[
+    {...wrappers.plans[0],candidate_id:'green',wrapper_id:'skillwrap:green',provenance:{...wrappers.plans[0].provenance,upstream_head_commit:'g1'}},
+    {...wrappers.plans[0],candidate_id:'hold',wrapper_id:'skillwrap:hold',domain:'browser-automation-scraping',provenance:{...wrappers.plans[0].provenance,upstream_head_commit:'h1'}},
+    {...wrappers.plans[0],candidate_id:'lowfit',wrapper_id:'skillwrap:lowfit',domain:'agent-ai-orchestration',provenance:{...wrappers.plans[0].provenance,upstream_head_commit:'i1'}}
+  ]};
+  const valueReport={results:[
+    {candidate_id:'green',recommendation:'HIGH_VALUE_LAB_BENCHMARK',value_score:91,components:{operational_fit:100}},
+    {candidate_id:'hold',recommendation:'HIGH_VALUE_LAB_BENCHMARK',value_score:88,components:{operational_fit:100}},
+    {candidate_id:'lowfit',recommendation:'HOLD_LOW_OPERATIONAL_FIT',value_score:74,components:{operational_fit:15}}
+  ]};
+  const staticLabReport={results:[
+    {candidate_id:'green',status:'STATIC_LAB_GREEN_FOR_BEHAVIORAL_EVAL',coverage_score:100,policy_alignment_score:100},
+    {candidate_id:'hold',status:'STATIC_LAB_HOLD',coverage_score:88.89,policy_alignment_score:75}
+  ]};
+  const report=buildSkillImprovementEventProposals({results:[]},{results:[]},multiWrappers,{valueReport,staticLabReport});
+  assert.equal(report.event_counts.SKILL_CANDIDATE_STATIC_LAB_GREEN,1);
+  assert.equal(report.event_counts.SKILL_CANDIDATE_STATIC_LAB_HOLD,1);
+  assert.equal(report.event_counts.SKILL_CANDIDATE_LOW_OPERATIONAL_FIT,1);
+  assert.equal(report.event_counts.SKILL_CANDIDATE_STATIC_READY,undefined);
+});
+
 test('events are never published or PROD-authorized from this layer',()=>{
   const report=buildSkillImprovementEventProposals(shortlist,prelab,wrappers);
   assert.equal(report.publish_authorized,false);
