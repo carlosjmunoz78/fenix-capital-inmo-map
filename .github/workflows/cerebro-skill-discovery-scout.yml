@@ -30,6 +30,7 @@ env:
   CEREBRO_PROVIDER_BINDING_OUTPUT: artifacts/cerebro-skill-provider-binding.json
   CEREBRO_ZERO_COST_ROUTE_OUTPUT: artifacts/cerebro-skill-zero-cost-route.json
   CEREBRO_FREE_QUOTA_OUTPUT: artifacts/cerebro-skill-free-quota-plan.json
+  CEREBRO_BEHAVIORAL_GATE_OUTPUT: artifacts/cerebro-skill-behavioral-execution-gate.json
   CEREBRO_EVENTS_OUTPUT: artifacts/cerebro-skill-improvement-events.json
   CEREBRO_RSI_SHADOW_OUTPUT: artifacts/cerebro-skill-rsi-shadow.json
   CEREBRO_UPSTREAM_MAX_REPOS: '24'
@@ -98,6 +99,12 @@ jobs:
         run: node cerebro/skills/skill-zero-cost-route-audit.mjs --providers "$CEREBRO_PROVIDER_BINDING_OUTPUT" --oldnew "$CEREBRO_OLDNEW_OUTPUT" --output "$CEREBRO_ZERO_COST_ROUTE_OUTPUT"
       - name: Build hard free-tier quota plan with no paid fallback and no model calls
         run: node cerebro/skills/skill-free-quota-guard.mjs --oldnew "$CEREBRO_OLDNEW_OUTPUT" --route "$CEREBRO_ZERO_COST_ROUTE_OUTPUT" --output "$CEREBRO_FREE_QUOTA_OUTPUT"
+      - name: Keep behavioral execution fail-closed until explicitly enabled after zero-cost route is ready
+        env:
+          CEREBRO_BEHAVIORAL_EXECUTION_ENABLED: 'false'
+          CEREBRO_ALLOW_PROD_DATA: 'false'
+          CEREBRO_ALLOW_CUSTOMER_DATA: 'false'
+        run: node cerebro/skills/skill-behavioral-execution-gate.mjs --oldnew "$CEREBRO_OLDNEW_OUTPUT" --route "$CEREBRO_ZERO_COST_ROUTE_OUTPUT" --quota "$CEREBRO_FREE_QUOTA_OUTPUT" --output "$CEREBRO_BEHAVIORAL_GATE_OUTPUT"
       - name: Emit LAB-aware improvement event proposals without persistent publish
         run: node cerebro/skills/skill-improvement-events.mjs --shortlist "$CEREBRO_SHORTLIST_OUTPUT" --prelab "$CEREBRO_PRELAB_OUTPUT" --wrappers "$CEREBRO_WRAPPER_OUTPUT" --value "$CEREBRO_VALUE_OUTPUT" --static-lab "$CEREBRO_STATIC_LAB_OUTPUT" --output "$CEREBRO_EVENTS_OUTPUT"
       - name: Validate current runtime and historical RSI contract through in-memory shadow bridge
@@ -123,6 +130,7 @@ jobs:
             artifacts/cerebro-skill-provider-binding.json
             artifacts/cerebro-skill-zero-cost-route.json
             artifacts/cerebro-skill-free-quota-plan.json
+            artifacts/cerebro-skill-behavioral-execution-gate.json
             artifacts/cerebro-skill-improvement-events.json
             artifacts/cerebro-skill-rsi-shadow.json
           if-no-files-found: error
