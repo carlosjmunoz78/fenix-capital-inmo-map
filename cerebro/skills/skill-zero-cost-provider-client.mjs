@@ -17,6 +17,13 @@ export function providerModel(providerId,env=process.env){
   return base;
 }
 
+function geminiGenerationConfig(model){
+  // Gemini 3.x removed legacy sampling parameters from this route. Keep the
+  // request minimal and deterministic by constraining output only.
+  if(/^gemini-3\./.test(model)) return {maxOutputTokens:2048};
+  return {temperature:0,maxOutputTokens:2048};
+}
+
 export function buildProviderRequest({providerId,prompt,env=process.env}){
   const safePrompt=requireString(prompt,'prompt');
   const spec=providerModel(providerId,env);
@@ -28,7 +35,7 @@ export function buildProviderRequest({providerId,prompt,env=process.env}){
       url:`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(spec.model)}:generateContent`,
       method:'POST',
       headers:{'content-type':'application/json','x-goog-api-key':apiKey},
-      body:{contents:[{parts:[{text:safePrompt}]}],generationConfig:{temperature:0,maxOutputTokens:2048}},
+      body:{contents:[{parts:[{text:safePrompt}]}],generationConfig:geminiGenerationConfig(spec.model)},
       prompt_sha256:sha256(safePrompt),
       secret_header_names:['x-goog-api-key']
     });
@@ -71,6 +78,29 @@ export function parseProviderResponse(providerId,payload){
   throw new Error(`unsupported provider: ${providerId}`);
 }
 
+async function safeErrorEvidence(response){
+  let payload=null;
+  try{payload=await response.json();}catch{}
+  const error=payload?.error??null;
+  const rawMessage=typeof error?.message==='string'?error.message:'';
+  return Object.freeze({
+    provider_error_code:Number.isFinite(error?.code)?error.code:null,
+    provider_error_status:typeof error?.status==='string'?error.status:null,
+    provider_error_message_sha256:rawMessage?sha256(rawMessage):null,
+    raw_error_message_emitted:false
+  });
+}
+
+function failureReason(status,evidence){
+  if(status===429) return 'HTTP_429';
+  if(status===402) return 'PROVIDER_BILLING_REQUIRED';
+  if(status===403){
+    if(evidence.provider_error_status==='PERMISSION_DENIED') return 'PROVIDER_PERMISSION_DENIED';
+    return 'PROVIDER_PERMISSION_OR_BILLING_REQUIRED';
+  }
+  return `HTTP_${status}`;
+}
+
 export async function invokeZeroCostProvider({providerId,prompt,gate,quotaDecisionResult,env=process.env,fetchImpl=fetch,timeoutMs=30000}){
   if(gate?.allowed!==true) throw new Error('BEHAVIORAL_EXECUTION_GATE_CLOSED');
   if(quotaDecisionResult?.status!=='ALLOW_NEXT_SYNTHETIC_CALL') throw new Error(`QUOTA_BLOCK:${quotaDecisionResult?.reason??'UNKNOWN'}`);
@@ -79,9 +109,10 @@ export async function invokeZeroCostProvider({providerId,prompt,gate,quotaDecisi
   const {controller,timer}=timeoutSignal(timeoutMs);
   try{
     const response=await fetchImpl(request.url,{method:request.method,headers:request.headers,body:JSON.stringify(request.body),signal:controller.signal,redirect:'error'});
-    if(response.status===429) return Object.freeze({ok:false,stop_reason:'HTTP_429',provider_id:providerId,model:request.model,request:redactProviderRequest(request),secret_values_emitted:false});
-    if([402,403].includes(response.status)) return Object.freeze({ok:false,stop_reason:'PROVIDER_BILLING_OR_PERMISSION_REQUIRED',provider_id:providerId,model:request.model,request:redactProviderRequest(request),secret_values_emitted:false});
-    if(!response.ok) return Object.freeze({ok:false,stop_reason:`HTTP_${response.status}`,provider_id:providerId,model:request.model,request:redactProviderRequest(request),secret_values_emitted:false});
+    if(!response.ok){
+      const evidence=await safeErrorEvidence(response);
+      return Object.freeze({ok:false,stop_reason:failureReason(response.status,evidence),http_status:response.status,provider_id:providerId,model:request.model,request:redactProviderRequest(request),...evidence,secret_values_emitted:false});
+    }
     const payload=await response.json();
     const parsed=parseProviderResponse(providerId,payload);
     return Object.freeze({ok:true,provider_id:providerId,model:request.model,output_text:parsed.text,output_sha256:sha256(parsed.text),usage:parsed.usage,request:redactProviderRequest(request),secret_values_emitted:false,additional_cost_eur_claimed:0});
