@@ -9,6 +9,7 @@ export const OSS_RUNTIME=Object.freeze({
   model_dtype:'q4',
   model_q4_sha256:'933577110303a2964096d19b6f15d3b4639bef7f99481ac0b61d9f3ad72f392a',
   model_license:'apache-2.0',
+  device:'cpu',
   max_new_tokens:384,
   additional_cost_eur:0,
   own_server_required:false,
@@ -37,7 +38,7 @@ async function getGenerator({importImpl=(specifier)=>import(specifier)}={}){
       const generator=await mod.pipeline('text-generation',OSS_RUNTIME.model_repo,{
         dtype:OSS_RUNTIME.model_dtype,
         revision:OSS_RUNTIME.model_revision,
-        device:'wasm'
+        device:OSS_RUNTIME.device
       });
       return generator;
     })().catch(err=>{generatorPromise=null;throw err;});
@@ -72,6 +73,7 @@ export async function invokeEphemeralOssInference({prompt,gate,quotaDecisionResu
     model:OSS_RUNTIME.model_repo,
     model_revision:OSS_RUNTIME.model_revision,
     model_dtype:OSS_RUNTIME.model_dtype,
+    device:OSS_RUNTIME.device,
     output_text:text,
     output_sha256:sha256(text),
     prompt_sha256:sha256(prompt),
