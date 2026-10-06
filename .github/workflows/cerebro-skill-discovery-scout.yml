@@ -6,6 +6,7 @@ on:
       - 'cerebro/skills/**'
       - 'cerebro/tests/skill-*.test.mjs'
       - '.github/workflows/cerebro-skill-discovery-scout.yml'
+      - '.github/workflows/cerebro-skill-behavioral-lab.yml'
   schedule:
     - cron: '17 4 * * *'
   workflow_dispatch:
@@ -98,7 +99,7 @@ jobs:
           CEREBRO_MISTRAL_FREE_QUOTA_GUARD: 'true'
         run: node cerebro/skills/skill-provider-binding-from-env.mjs --providers cerebro/skills/zero-cost-provider-evidence.v0.json --output "$CEREBRO_PROVIDER_BINDING_OUTPUT"
       - name: Audit zero-cost online inference route without exposing credentials or invoking a model
-        run: node cerebro/skills/skill-zero-cost-route-audit.mjs --providers "$CEREBRO_PROVIDER_BINDING_OUTPUT" --oldnew "$CEREBRO_OLDNEW_OUTPUT" --output "$CEREBRO_ZERO_COST_ROUTE_OUTPUT"
+        run: node cerebro/skills/skill-zero-cost-route-audit.mjs --providers "$CEREBRO_PROVIDER_BINDING_OUTPUT" --oldnew "$CEREBRO_OLDNEW_OUTPUT" --preferred-provider google-gemini-api-free --output "$CEREBRO_ZERO_COST_ROUTE_OUTPUT"
       - name: Build hard free-tier quota plan with no paid fallback and no model calls
         run: node cerebro/skills/skill-free-quota-guard.mjs --oldnew "$CEREBRO_OLDNEW_OUTPUT" --route "$CEREBRO_ZERO_COST_ROUTE_OUTPUT" --output "$CEREBRO_FREE_QUOTA_OUTPUT"
       - name: Keep behavioral execution fail-closed until explicitly enabled after zero-cost route is ready
