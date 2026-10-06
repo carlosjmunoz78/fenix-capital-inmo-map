@@ -139,7 +139,29 @@ La Skill Supply Chain es una capa de capabilities, no sustituye SEO-001, Company
 
 Una nueva empresa sigue activando sus motores habituales. El Router podrá seleccionar skills verificadas cuando estén AVAILABLE/PREPROD_GREEN, pero no cambia el owner del proceso.
 
-## 11. Criterio de promoción
+## 11. Evidencia viva · 2026-10-06 post-secret
+
+Última pasada completa GREEN en rama aislada:
+
+- 141/141 tests PASS.
+- 36 candidatos descubiertos en 3 fuentes.
+- 12 upstream GitHub resueltos / 0 hard failures / 0 rate-limit deferrals.
+- 24 `SKILL.md` resueltos como texto inerte; 12 no resueltos permanecen fuera.
+- 24 evidencias exactas de licencia; compatibilidad jurídica general continúa UNASSESSED.
+- 9 candidatos P0 escaneados; 4 static-pre-LAB instruction-only.
+- Static LAB actual:
+  - `supabase-postgres-best-practices`: GREEN_FOR_BEHAVIORAL_EVAL (coverage 100 / policy 100).
+  - `github`: BLOCKED_SECURITY (coverage 100 / policy 0).
+  - `agent-browser`: HOLD (coverage 88.89 / policy 75).
+- OLD vs NEW actual: 1 paquete, Supabase/Postgres, 3 fixtures sintéticos.
+- `CEREBRO_GEMINI_API_KEY`: presencia confirmada por booleano; valor no leído ni emitido.
+- Gemini free route: `READY_ZERO_COST_ROUTE`, additional_cost_eur=0, synthetic-only, STOP_AT_FREE_TIER_LIMIT.
+- Hard quota: 3 baseline + 3 candidate = 6 llamadas máximas, paid fallback=false, executable=true.
+- Discovery mantiene behavioral gate cerrado: único blocker del gate `EXPLICIT_EXECUTION_ENABLE_MISSING`; 0 model calls en discovery.
+- RSI shadow: GREEN, 15 runtime events aceptados, sin publicación persistente ni PROD.
+- Promotion readiness: NOT_READY por behavioral OLD-vs-NEW no ejecutado, Tribunal no GREEN y rollback proof ausente.
+
+## 12. Criterio de promoción
 
 No declarar operativo hasta tener:
 
@@ -155,12 +177,11 @@ No declarar operativo hasta tener:
 - evidencia OLD vs NEW cuando sustituya una capability;
 - integración con RSI/Technology Scout reconciliada sin duplicación.
 
-## 12. Next block
+## 13. Next block
 
-1. Ejecutar CI de este V0.
-2. Corregir cualquier rojo.
-3. Auditar/reconciliar PR #176 + #201 + #241 + #263 + #416 contra `main` actual.
-4. Evitar merge directo de stacks históricos: extraer solo piezas vigentes y compatibles.
-5. Conectar discovery real en READ_ONLY con fuentes iniciales.
-6. Añadir almacenamiento de metadata e historial sin cargar Supabase con logs pesados.
-7. Activar scheduling continuo solo después de PREPROD GREEN y hard-cost guard.
+1. Ejecutar Behavioral LAB sintético únicamente para el candidato Supabase/Postgres que está Static-LAB GREEN.
+2. Mantener `github` en SECURITY_BLOCKED y `agent-browser` en HOLD hasta nueva evidencia; no forzar gates.
+3. Evaluar OLD vs NEW con fixtures sintéticos y hard quota 0 €.
+4. Pasar resultado por juez independiente / Tribunal.
+5. Probar rollback/rebuild antes de cualquier PREPROD promotion review.
+6. No merge directo, no PROD, no datos cliente/PROD y no Trading.
