@@ -1,5 +1,5 @@
 {
-  "schema_version": "0.2.1",
+  "schema_version": "0.2.2",
   "observed_at": "2026-10-06T00:00:00Z",
   "purpose": "Evidence registry for zero-additional-cost behavioral skill evaluation. This file does not contain credentials and does not authorize inference.",
   "constraints": {
@@ -30,13 +30,13 @@
       "credential_state":"NOT_REQUIRED",
       "behavioral_inference":true,
       "data_policy_state":"SYNTHETIC_ONLY_BY_DEFAULT",
-      "source":"https://huggingface.co/HuggingFaceTB/SmolLM2-360M-Instruct",
-      "evidence":"Ephemeral inference on the existing standard public GitHub Actions runner. Runtime @huggingface/transformers 4.3.0; official HuggingFaceTB/SmolLM2-360M-Instruct pinned to revision 8747f21e7ce7b9209590290fb0937720ba3c0cd5; Apache-2.0; q4 ONNX blob SHA256 a4ffda96e65beafc6f6cef0cbcf9fdc1cbdd79c230906bf3897d190547c7a596. Selected after the 135M evaluator completed transport but produced no valid structured arm pairs; this is an evaluator upgrade, not a candidate promotion.",
+      "source":"https://huggingface.co/HuggingFaceTB/SmolLM2-1.7B-Instruct",
+      "evidence":"Ephemeral inference on the existing standard public GitHub Actions runner. Runtime @huggingface/transformers 4.3.0; official HuggingFaceTB/SmolLM2-1.7B-Instruct pinned to revision 31b70e2e869a7173562077fd711b654946d38674; Apache-2.0; q4 ONNX blob SHA256 467b7f366bc2094968787efd74506efb18a860624d1232192dbd5c577b5aff02. Selected because the prior 360M evaluator completed all six synthetic calls but the independent judge classified its evidence as EVALUATOR_INADEQUATE. This is an evaluator upgrade only and does not promote any candidate skill.",
       "runtime_package":"@huggingface/transformers@4.3.0",
-      "model_repo":"HuggingFaceTB/SmolLM2-360M-Instruct",
-      "model_revision":"8747f21e7ce7b9209590290fb0937720ba3c0cd5",
+      "model_repo":"HuggingFaceTB/SmolLM2-1.7B-Instruct",
+      "model_revision":"31b70e2e869a7173562077fd711b654946d38674",
       "model_dtype":"q4",
-      "model_q4_sha256":"a4ffda96e65beafc6f6cef0cbcf9fdc1cbdd79c230906bf3897d190547c7a596",
+      "model_q4_sha256":"467b7f366bc2094968787efd74506efb18a860624d1232192dbd5c577b5aff02",
       "model_license":"apache-2.0",
       "quota_guard":"MAX_6_SYNTHETIC_CALLS_PER_AUTHORIZED_LAB",
       "eligible_for_behavioral_inference":false
