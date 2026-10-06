@@ -6,6 +6,12 @@ function stableEventId(type,candidateId,versionRef=''){
   return `evt:skill:${createHash('sha256').update(`${type}|${candidateId}|${versionRef}`).digest('hex').slice(0,24)}`;
 }
 
+function byCandidate(report){
+  const map=new Map();
+  for(const item of report?.results??[]) if(item?.candidate_id) map.set(item.candidate_id,item);
+  return map;
+}
+
 function makeEvent(type,item,{severity='INFO',reason=null,payload={}}={}){
   const versionRef=item.upstream_head_commit??item.provenance?.upstream_head_commit??'';
   return {
@@ -32,8 +38,10 @@ function makeEvent(type,item,{severity='INFO',reason=null,payload={}}={}){
   };
 }
 
-export function buildSkillImprovementEventProposals(shortlist,prelab,wrapperPlans){
+export function buildSkillImprovementEventProposals(shortlist,prelab,wrapperPlans,{valueReport=null,staticLabReport=null}={}){
   const events=[];
+  const valueMap=byCandidate(valueReport);
+  const staticLabMap=byCandidate(staticLabReport);
   for(const item of shortlist?.results??[]){
     if(item.disposition==='GAP_REVIEW_REQUIRED'){
       events.push(makeEvent('CAPABILITY_GAP_DETECTED',item,{severity:'MEDIUM',reason:'NO_EXISTING_DOMAIN_MATCH_CONFIRMED',payload:{top_domain:item.top_domain??null,overlap_state:item.overlap_state??null}}));
@@ -54,7 +62,7 @@ export function buildSkillImprovementEventProposals(shortlist,prelab,wrapperPlan
     }
   }
   for(const plan of wrapperPlans?.plans??[]){
-    events.push(makeEvent('SKILL_CANDIDATE_STATIC_READY',{
+    const base={
       candidate_id:plan.candidate_id,
       source_ref:plan.provenance?.source_ref,
       upstream_full_name:plan.provenance?.upstream_full_name,
@@ -62,7 +70,26 @@ export function buildSkillImprovementEventProposals(shortlist,prelab,wrapperPlan
       manifest_path:plan.provenance?.manifest_path,
       manifest_sha256:plan.provenance?.manifest_sha256,
       engine_bindings:plan.engine_bindings
-    },{severity:'INFO',reason:'STATIC_PRELAB_GATE_CLEAR',payload:{wrapper_id:plan.wrapper_id,domain:plan.domain,skill_class:plan.skill_class,next_gate:plan.next_gate}}));
+    };
+    const value=valueMap.get(plan.candidate_id)??null;
+    const staticLab=staticLabMap.get(plan.candidate_id)??null;
+    if(value?.recommendation==='HOLD_LOW_OPERATIONAL_FIT'){
+      events.push(makeEvent('SKILL_CANDIDATE_LOW_OPERATIONAL_FIT',base,{severity:'LOW',reason:'VALUE_GATE_LOW_OPERATIONAL_FIT',payload:{wrapper_id:plan.wrapper_id,domain:plan.domain,value_score:value.value_score,operational_fit:value.components?.operational_fit??null}}));
+      continue;
+    }
+    if(staticLab?.status==='STATIC_LAB_GREEN_FOR_BEHAVIORAL_EVAL'){
+      events.push(makeEvent('SKILL_CANDIDATE_STATIC_LAB_GREEN',base,{severity:'INFO',reason:'STATIC_LAB_GREEN',payload:{wrapper_id:plan.wrapper_id,domain:plan.domain,skill_class:plan.skill_class,value_score:value?.value_score??null,coverage_score:staticLab.coverage_score,policy_alignment_score:staticLab.policy_alignment_score,next_gate:'BEHAVIORAL_LAB_ON_SYNTHETIC_FIXTURES'}}));
+      continue;
+    }
+    if(staticLab?.status==='STATIC_LAB_HOLD'){
+      events.push(makeEvent('SKILL_CANDIDATE_STATIC_LAB_HOLD',base,{severity:'MEDIUM',reason:'STATIC_LAB_POLICY_OR_COVERAGE_HOLD',payload:{wrapper_id:plan.wrapper_id,domain:plan.domain,value_score:value?.value_score??null,coverage_score:staticLab.coverage_score,policy_alignment_score:staticLab.policy_alignment_score}}));
+      continue;
+    }
+    if(staticLab?.status?.includes('BLOCKED')||staticLab?.status?.includes('REJECT')){
+      events.push(makeEvent('SECURITY_ADVISORY',base,{severity:'HIGH',reason:staticLab.status,payload:{wrapper_id:plan.wrapper_id,domain:plan.domain,hard_blocks:staticLab.hard_blocks??[]}}));
+      continue;
+    }
+    events.push(makeEvent('SKILL_CANDIDATE_STATIC_READY',base,{severity:'INFO',reason:'STATIC_PRELAB_GATE_CLEAR',payload:{wrapper_id:plan.wrapper_id,domain:plan.domain,skill_class:plan.skill_class,next_gate:plan.next_gate}}));
   }
   const dedup=[];
   const seen=new Set();
@@ -74,7 +101,7 @@ export function buildSkillImprovementEventProposals(shortlist,prelab,wrapperPlan
   const counts={};
   for(const event of dedup) counts[event.event_type]=(counts[event.event_type]??0)+1;
   return Object.freeze({
-    schema_version:'0.1.0',
+    schema_version:'0.2.0',
     execution_mode:'EVENT_PROPOSALS_ONLY',
     events_total:dedup.length,
     event_counts:counts,
@@ -90,8 +117,12 @@ if(import.meta.url===`file://${process.argv[1]}`){
   const shortlist=JSON.parse(fs.readFileSync(argValue('--shortlist')??'artifacts/cerebro-skill-shortlist.json','utf8'));
   const prelab=JSON.parse(fs.readFileSync(argValue('--prelab')??'artifacts/cerebro-skill-prelab-p0.json','utf8'));
   const wrappers=JSON.parse(fs.readFileSync(argValue('--wrappers')??'artifacts/cerebro-skill-wrapper-plans-p0.json','utf8'));
+  const valuePath=argValue('--value');
+  const staticLabPath=argValue('--static-lab');
+  const valueReport=valuePath&&fs.existsSync(valuePath)?JSON.parse(fs.readFileSync(valuePath,'utf8')):null;
+  const staticLabReport=staticLabPath&&fs.existsSync(staticLabPath)?JSON.parse(fs.readFileSync(staticLabPath,'utf8')):null;
   const output=argValue('--output')??'artifacts/cerebro-skill-improvement-events.json';
-  const report=buildSkillImprovementEventProposals(shortlist,prelab,wrappers);
+  const report=buildSkillImprovementEventProposals(shortlist,prelab,wrappers,{valueReport,staticLabReport});
   fs.mkdirSync(path.dirname(output),{recursive:true});
   fs.writeFileSync(output,`${JSON.stringify(report,null,2)}\n`,'utf8');
   console.log(JSON.stringify({output,events_total:report.events_total,event_counts:report.event_counts,publish_authorized:false,rsi_hook_status:report.rsi_hook_status}));
