@@ -10,9 +10,10 @@ function base(){
     quotaPlan:{executable:true},
     behavioralGate:{allowed:true},
     rsiShadow:{bridge_status:'SHADOW_BRIDGE_GREEN'},
-    behavioralResults:{results:[{decision:'PASS'}]},
+    behavioralResults:{status:'PROXY_COMPLETE',results:[{decision:'PASS'}]},
+    independentJudge:{decision:'GREEN_FOR_TRIBUNAL_REVIEW',green:true},
     tribunal:{decision:'GREEN'},
-    rollback:{ready:true}
+    rollback:{ready:true,status:'GREEN_ROLLBACK_REBUILD_PROOF',proof_scope:'WRAPPER_BINDING_ONLY_SYNTHETIC'}
   };
 }
 
@@ -26,14 +27,16 @@ test('complete evidence can only reach PREPROD promotion review, never auto-merg
   assert.equal(report.human_required,'HIGH_RISK');
 });
 
-test('missing behavioral evidence remains not ready',()=>{
+test('missing behavioral, judge, tribunal and rollback evidence remains not ready',()=>{
   const input=base();
   input.behavioralResults=null;
+  input.independentJudge=null;
   input.tribunal=null;
   input.rollback=null;
   const report=assessPromotionReadiness(input);
   assert.equal(report.ready,false);
   assert.ok(report.blockers.includes('BEHAVIORAL_OLD_VS_NEW_NOT_EXECUTED'));
+  assert.ok(report.blockers.includes('INDEPENDENT_JUDGE_NOT_GREEN'));
   assert.ok(report.blockers.includes('TRIBUNAL_NOT_GREEN'));
   assert.ok(report.blockers.includes('ROLLBACK_PROOF_MISSING'));
   assert.equal(report.human_required,null);
