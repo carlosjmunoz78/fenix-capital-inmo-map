@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "confirm": "RUN_SYNTHETIC_LAB",
-  "one_shot_id": "skill-lab-20261006-1846-e1a7c4d9",
+  "one_shot_id": "skill-lab-20261006-1909-f7c2a91b",
   "scope": "LAB_SYNTHETIC_ONLY",
   "max_calls": 6,
   "paid_fallback": false,
@@ -13,5 +13,5 @@
   "authorization_basis": "explicit_user_instruction_ok_dale",
   "environment": "LAB",
   "company_scope": "transversal",
-  "created_at": "2026-10-06T18:46:00+02:00"
+  "created_at": "2026-10-06T19:09:00+02:00"
 }
