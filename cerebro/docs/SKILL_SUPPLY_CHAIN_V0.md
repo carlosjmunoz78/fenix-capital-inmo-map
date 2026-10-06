@@ -88,7 +88,7 @@ Recalcular score de skills disponibles, analizar fallos/fallbacks y benchmarkear
 ### Mensual
 Revisar obsolescencia, licencia, dependencias, coste y necesidad de sustitución.
 
-La frecuencia es contrato objetivo. La activación de schedules cloud solo se promoverá cuando el runtime y los gates estén verificados; V0 no introduce un daemon ni servidor nuevo.
+La frecuencia es contrato objetivo. V0 no introduce un daemon ni servidor nuevo.
 
 ## 7. Reglas de aprendizaje
 
@@ -103,85 +103,51 @@ La frecuencia es contrato objetivo. La activación de schedules cloud solo se pr
 
 No cargar miles de skills en contexto. Mantener metadata ligera y materializar el contenido completo únicamente para un job autorizado.
 
-Metadata mínima:
-
-- identity/version/upstream commit;
-- author/license;
-- clase y trust tier;
-- inputs/outputs;
-- permisos;
-- network/filesystem/credentials;
-- engine bindings;
-- coste;
-- tests/evals;
-- health/last_checked;
-- rollback/rebuild;
-- company_scope/environment.
-
 ## 9. Seguridad y rechazo
 
-Rechazo directo V0:
+Rechazo directo V0: CAPTCHA bypass, credential extraction furtiva, fingerprint spoofing/anti-detect, código ofuscado sin auditoría, upstream no resoluble, ejecución silenciosa en PROD y acceso a Trading desde CEREBRO general.
 
-- CAPTCHA bypass;
-- credential extraction furtiva;
-- fingerprint spoofing/anti-detect;
-- código ofuscado sin justificación y auditoría;
-- upstream no resoluble;
-- ejecución silenciosa en PROD;
-- acceso a Trading desde CEREBRO general.
-
-Licencia incompatible => REFERENCE_ONLY, no copia/adaptación.
-Nuevo gasto => MONEY_LIMIT antes de consumirlo.
+Licencia incompatible => REFERENCE_ONLY. Nuevo gasto => MONEY_LIMIT antes de consumirlo.
 
 ## 10. No interferencia con SEO y nuevas empresas
 
-La Skill Supply Chain es una capa de capabilities, no sustituye SEO-001, Company Onboarding ni el pipeline de alta de empresa. V0 es READ_ONLY_DISCOVERY y no ejecuta writes en PROD.
-
-Una nueva empresa sigue activando sus motores habituales. El Router podrá seleccionar skills verificadas cuando estén AVAILABLE/PREPROD_GREEN, pero no cambia el owner del proceso.
+La Skill Supply Chain es una capa de capabilities, no sustituye SEO-001, Company Onboarding ni el pipeline de alta de empresa. V0 no ejecuta writes en PROD.
 
 ## 11. Evidencia viva · 2026-10-06 post-secret
 
-Última pasada completa GREEN en rama aislada:
+Pasada completa GREEN y refrescada para la rama actual:
 
 - 141/141 tests PASS.
-- 36 candidatos descubiertos en 3 fuentes.
-- 12 upstream GitHub resueltos / 0 hard failures / 0 rate-limit deferrals.
-- 24 `SKILL.md` resueltos como texto inerte; 12 no resueltos permanecen fuera.
-- 24 evidencias exactas de licencia; compatibilidad jurídica general continúa UNASSESSED.
-- 9 candidatos P0 escaneados; 4 static-pre-LAB instruction-only.
-- Static LAB actual:
-  - `supabase-postgres-best-practices`: GREEN_FOR_BEHAVIORAL_EVAL (coverage 100 / policy 100).
-  - `github`: BLOCKED_SECURITY (coverage 100 / policy 0).
-  - `agent-browser`: HOLD (coverage 88.89 / policy 75).
-- OLD vs NEW actual: 1 paquete, Supabase/Postgres, 3 fixtures sintéticos.
-- `CEREBRO_GEMINI_API_KEY`: presencia confirmada por booleano; valor no leído ni emitido.
-- Gemini free route: `READY_ZERO_COST_ROUTE`, additional_cost_eur=0, synthetic-only, STOP_AT_FREE_TIER_LIMIT.
-- Hard quota: 3 baseline + 3 candidate = 6 llamadas máximas, paid fallback=false, executable=true.
-- Discovery mantiene behavioral gate cerrado: único blocker del gate `EXPLICIT_EXECUTION_ENABLE_MISSING`; 0 model calls en discovery.
-- RSI shadow: GREEN, 15 runtime events aceptados, sin publicación persistente ni PROD.
-- Promotion readiness: NOT_READY por behavioral OLD-vs-NEW no ejecutado, Tribunal no GREEN y rollback proof ausente.
+- 36 candidatos / 3 fuentes.
+- 12 upstream GitHub resueltos / 0 hard failures.
+- 24 `SKILL.md` resueltos como texto inerte.
+- 24 evidencias exactas de licencia; compatibilidad jurídica general sigue UNASSESSED.
+- 9 candidatos P0; 4 static-pre-LAB instruction-only.
+- `supabase-postgres-best-practices`: GREEN_FOR_BEHAVIORAL_EVAL (coverage 100 / policy 100).
+- `github`: BLOCKED_SECURITY (coverage 100 / policy 0). No forzar gate.
+- `agent-browser`: HOLD (coverage 88.89 / policy 75). No forzar gate.
+- OLD vs NEW: 1 paquete Supabase/Postgres, 3 fixtures sintéticos.
+- `CEREBRO_GEMINI_API_KEY`: presencia confirmada únicamente como booleano; valor no leído ni emitido.
+- Gemini: `READY_ZERO_COST_ROUTE`, additional_cost_eur=0, synthetic-only, STOP_AT_FREE_TIER_LIMIT.
+- Hard quota: 3 baseline + 3 candidate = 6 llamadas máximas; paid fallback=false; executable=true.
+- Discovery gate sigue cerrado intencionadamente: `EXPLICIT_EXECUTION_ENABLE_MISSING`; 0 model calls.
+- RSI shadow GREEN; sin publicación persistente ni PROD.
+- Evidencia auxiliar manual pre-Tribunal creada en `cerebro/evidence/skill-supabase-postgres-manual-review-20261006.json`; no sustituye behavioral runtime ni Tribunal.
 
-## 12. Criterio de promoción
+## 12. Restricción de ejecución actual
 
-No declarar operativo hasta tener:
+El workflow de Behavioral LAB está en la rama candidata y está diseñado para `workflow_dispatch`. No se promoverá un workflow a `main` únicamente para poder ejecutarlo: eso violaría CONSERVAR→ENTENDER→ENVOLVER→PROBAR→MEJORAR→MIGRAR. El conector disponible en este chat no expone una acción de workflow dispatch. Por tanto, el Behavioral OLD vs NEW permanece no ejecutado hasta disponer de una vía de dispatch autorizada o promover de forma justificada y separada un dispatcher mínimo tras sus gates.
 
-- contrato validado;
-- tests verdes;
-- licencia y upstream probados;
-- security gate;
-- aislamiento multiempresa;
-- coste medido;
-- observabilidad/auditoría;
-- rollback/rebuild;
-- PREPROD;
-- evidencia OLD vs NEW cuando sustituya una capability;
-- integración con RSI/Technology Scout reconciliada sin duplicación.
+Esta limitación no afecta al discovery continuo, al scoring, a la seguridad ni a la ruta zero-cost ya verificada.
 
-## 13. Next block
+## 13. Criterio de promoción
 
-1. Ejecutar Behavioral LAB sintético únicamente para el candidato Supabase/Postgres que está Static-LAB GREEN.
-2. Mantener `github` en SECURITY_BLOCKED y `agent-browser` en HOLD hasta nueva evidencia; no forzar gates.
-3. Evaluar OLD vs NEW con fixtures sintéticos y hard quota 0 €.
-4. Pasar resultado por juez independiente / Tribunal.
-5. Probar rollback/rebuild antes de cualquier PREPROD promotion review.
-6. No merge directo, no PROD, no datos cliente/PROD y no Trading.
+No declarar operativo hasta tener contrato, tests, licencia/upstream, security gate, aislamiento multiempresa, coste, observabilidad/auditoría, rollback/rebuild, PREPROD, OLD vs NEW cuando sustituya capacidad e integración RSI/Technology Scout sin duplicación.
+
+## 14. Next block
+
+1. Mantener discovery/scoring continuo y fail-closed.
+2. Preparar juez independiente y rollback/rebuild de la única candidata GREEN.
+3. Ejecutar Behavioral OLD vs NEW solo mediante una vía autorizada, sintética y 0 €.
+4. Tribunal después del Behavioral LAB, nunca antes.
+5. No merge directo, no PROD, no datos cliente/PROD y no Trading.
