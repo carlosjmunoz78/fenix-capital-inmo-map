@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-export function assessPromotionReadiness({staticLab,oldVsNew,routeAudit,quotaPlan,behavioralGate,rsiShadow,behavioralResults=null,tribunal=null,rollback=null}={}){
+export function assessPromotionReadiness({staticLab,oldVsNew,routeAudit,quotaPlan,behavioralGate,rsiShadow,behavioralResults=null,independentJudge=null,tribunal=null,rollback=null}={}){
   const blockers=[];
   const evidence={};
   evidence.static_lab_green=(staticLab?.results??[]).filter(x=>x.status==='STATIC_LAB_GREEN_FOR_BEHAVIORAL_EVAL').length;
@@ -10,9 +10,11 @@ export function assessPromotionReadiness({staticLab,oldVsNew,routeAudit,quotaPla
   evidence.quota_executable=quotaPlan?.executable===true;
   evidence.behavioral_gate_allowed=behavioralGate?.allowed===true;
   evidence.rsi_shadow_green=rsiShadow?.bridge_status==='SHADOW_BRIDGE_GREEN';
-  evidence.behavioral_results_present=Boolean(behavioralResults?.results?.length);
+  evidence.behavioral_results_present=Boolean(behavioralResults?.results?.length)&&behavioralResults?.status==='PROXY_COMPLETE';
+  evidence.independent_judge_green=independentJudge?.decision==='GREEN_FOR_TRIBUNAL_REVIEW'&&independentJudge?.green===true;
   evidence.tribunal_green=tribunal?.decision==='GREEN';
-  evidence.rollback_proven=rollback?.ready===true;
+  evidence.rollback_proven=rollback?.ready===true&&rollback?.status==='GREEN_ROLLBACK_REBUILD_PROOF';
+  evidence.rollback_scope=rollback?.proof_scope??'MISSING';
 
   if(evidence.static_lab_green===0) blockers.push('NO_STATIC_LAB_GREEN_CANDIDATES');
   if(evidence.old_vs_new_packages===0) blockers.push('OLD_VS_NEW_PACKAGES_MISSING');
@@ -21,12 +23,13 @@ export function assessPromotionReadiness({staticLab,oldVsNew,routeAudit,quotaPla
   if(!evidence.behavioral_gate_allowed) blockers.push('BEHAVIORAL_EXECUTION_GATE_CLOSED');
   if(!evidence.rsi_shadow_green) blockers.push('RSI_SHADOW_NOT_GREEN');
   if(!evidence.behavioral_results_present) blockers.push('BEHAVIORAL_OLD_VS_NEW_NOT_EXECUTED');
+  if(!evidence.independent_judge_green) blockers.push('INDEPENDENT_JUDGE_NOT_GREEN');
   if(!evidence.tribunal_green) blockers.push('TRIBUNAL_NOT_GREEN');
   if(!evidence.rollback_proven) blockers.push('ROLLBACK_PROOF_MISSING');
 
   const ready=blockers.length===0;
   return Object.freeze({
-    schema_version:'0.1.0',
+    schema_version:'0.2.0',
     execution_mode:'PROMOTION_READINESS_EVIDENCE_ONLY',
     ready,
     status:ready?'READY_FOR_PREPROD_PROMOTION_REVIEW':'NOT_READY',
@@ -51,6 +54,7 @@ if(import.meta.url===`file://${process.argv[1]}`){
     behavioralGate:load(argValue('--behavioral-gate')??'artifacts/cerebro-skill-behavioral-execution-gate.json'),
     rsiShadow:load(argValue('--rsi-shadow')??'artifacts/cerebro-skill-rsi-shadow.json'),
     behavioralResults:load(argValue('--behavioral-results')),
+    independentJudge:load(argValue('--independent-judge')),
     tribunal:load(argValue('--tribunal')),
     rollback:load(argValue('--rollback'))
   });
