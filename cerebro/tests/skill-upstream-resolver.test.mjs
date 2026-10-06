@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   canonicalDedupeResolved,
+  classifyGithubHttpFailure,
   collectUpstreamRepos,
   normalizeRepositoryMetadata,
   parseGithubRepoUrl,
@@ -27,6 +28,16 @@ test('collectUpstreamRepos uses primary hints, deduplicates and preserves candid
   assert.equal(repos[0].full_name, 'Acme/One');
   assert.deepEqual(repos[0].discovery_candidate_ids, ['a', 'b']);
   assert.deepEqual(repos[0].discovery_source_refs, ['https://directory/a', 'https://directory/b']);
+});
+
+test('classifyGithubHttpFailure recognizes primary and secondary rate limits', () => {
+  const primary = classifyGithubHttpFailure({status: 403, body: '{"message":"API rate limit exceeded"}', headers: new Headers({'x-ratelimit-remaining':'0','x-ratelimit-reset':'123'})});
+  assert.equal(primary.kind, 'RATE_LIMIT');
+  assert.equal(primary.rate_limit_reset_epoch, 123);
+  const secondary = classifyGithubHttpFailure({status: 429, body: 'secondary rate limit', headers: new Headers({'retry-after':'30'})});
+  assert.equal(secondary.kind, 'RATE_LIMIT');
+  assert.equal(secondary.retry_after_seconds, 30);
+  assert.equal(classifyGithubHttpFailure({status:404,body:'{}',headers:new Headers()}).kind,'NOT_FOUND');
 });
 
 test('normalizeRepositoryMetadata is evidence-only and leaves license compatibility unassessed', () => {
@@ -79,10 +90,12 @@ test('resolveDiscoveryUpstreams resolves metadata and head with mocked GitHub AP
     maxRepos: 4, token: 'test', fetchImpl, observedAt: '2026-10-06T00:00:00Z', concurrency: 2
   });
   assert.equal(report.execution_mode, 'READ_ONLY_UPSTREAM_RESOLUTION');
+  assert.equal(report.status, 'READY');
   assert.equal(report.input_repos_requested, 1);
   assert.equal(report.canonical_repos, 1);
   assert.equal(report.repos_resolved, 1);
   assert.equal(report.repos_failed, 0);
+  assert.equal(report.repos_rate_limited, 0);
   assert.equal(report.code_executed, false);
   assert.equal(report.results[0].head_commit, 'deadbeef');
   assert.equal(report.results[0].license_spdx, 'Apache-2.0');
@@ -97,6 +110,43 @@ test('resolver tolerates unavailable repository as evidence, not execution failu
   const report = await resolveDiscoveryUpstreams(discovery, {fetchImpl, token: 'test'});
   assert.equal(report.repos_resolved, 0);
   assert.equal(report.repos_failed, 1);
+  assert.equal(report.repos_hard_failed, 1);
+  assert.equal(report.deferred, false);
   assert.equal(report.results[0].status, 'NOT_FOUND');
   assert.equal(report.results[0].executed, false);
+});
+
+test('all-rate-limited upstream resolution becomes safe transient deferral, not hard failure', async () => {
+  const discovery = {results: [{candidates: [
+    {candidate_id:'a',source_ref:'https://directory/a',primary_upstream_hint:'https://github.com/acme/one'},
+    {candidate_id:'b',source_ref:'https://directory/b',primary_upstream_hint:'https://github.com/acme/two'},
+    {candidate_id:'c',source_ref:'https://directory/c',primary_upstream_hint:'https://github.com/acme/three'}
+  ]}]};
+  let calls=0;
+  const fetchImpl=async()=>{calls+=1;return new Response('{"message":"API rate limit exceeded for installation"}',{status:403,headers:{'x-ratelimit-remaining':'0','x-ratelimit-reset':'999'}});};
+  const report=await resolveDiscoveryUpstreams(discovery,{fetchImpl,token:'test',concurrency:2});
+  assert.equal(report.status,'DEFERRED_TRANSIENT_RATE_LIMIT');
+  assert.equal(report.deferred,true);
+  assert.equal(report.repos_resolved,0);
+  assert.equal(report.repos_rate_limited,3);
+  assert.equal(report.repos_hard_failed,0);
+  assert.ok(calls<=2);
+  assert.ok(report.results.every(x=>x.status==='DEFERRED_RATE_LIMIT'));
+});
+
+test('partial rate limit preserves resolved evidence and marks partial status', async () => {
+  const discovery={results:[{candidates:[
+    {candidate_id:'a',source_ref:'https://directory/a',primary_upstream_hint:'https://github.com/acme/one'},
+    {candidate_id:'b',source_ref:'https://directory/b',primary_upstream_hint:'https://github.com/acme/two'}
+  ]}]};
+  const fetchImpl=async(url)=>{
+    if(url==='https://api.github.com/repos/acme/one') return new Response(JSON.stringify({html_url:'https://github.com/acme/one',full_name:'acme/one',name:'one',owner:{login:'acme'},default_branch:null,archived:false,disabled:false,fork:false,visibility:'public',topics:[]}),{status:200});
+    return new Response('{"message":"rate limit exceeded"}',{status:403,headers:{'x-ratelimit-remaining':'0'}});
+  };
+  const report=await resolveDiscoveryUpstreams(discovery,{fetchImpl,token:'test',concurrency:2});
+  assert.equal(report.status,'PARTIAL_RATE_LIMIT');
+  assert.equal(report.partial_rate_limit,true);
+  assert.equal(report.repos_resolved,1);
+  assert.equal(report.repos_rate_limited,1);
+  assert.equal(report.deferred,false);
 });
