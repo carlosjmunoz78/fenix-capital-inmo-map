@@ -14,6 +14,10 @@ export function assessPromotionReadiness({staticLab,oldVsNew,routeAudit,quotaPla
   evidence.behavioral_results_present=Boolean(behavioralResults?.results?.length)&&behavioralResults?.status==='PROXY_COMPLETE';
   evidence.independent_judge_green=independentJudge?.decision==='GREEN_FOR_TRIBUNAL_REVIEW'&&independentJudge?.green===true;
   evidence.tribunal_green=tribunal?.decision==='GREEN';
+  evidence.tribunal_decision=tribunal?.decision??'MISSING';
+  evidence.tribunal_blockers=tribunal?.blockers??['TRIBUNAL_EVIDENCE_MISSING'];
+  evidence.tribunal_candidates=(tribunal?.candidates??[]).map(x=>({candidate_id:x.candidate_id,decision:x.decision,blockers:x.blockers??[]}));
+  evidence.tribunal_legal_final_opinion=tribunal?.legal_final_opinion===true;
   evidence.rollback_proven=rollback?.ready===true&&rollback?.status==='GREEN_ROLLBACK_REBUILD_PROOF';
   evidence.rollback_scope=rollback?.proof_scope??'MISSING';
 
@@ -30,7 +34,7 @@ export function assessPromotionReadiness({staticLab,oldVsNew,routeAudit,quotaPla
 
   const ready=blockers.length===0;
   return Object.freeze({
-    schema_version:'0.2.1',
+    schema_version:'0.2.2',
     execution_mode:'PROMOTION_READINESS_EVIDENCE_ONLY',
     ready,
     status:ready?'READY_FOR_PREPROD_PROMOTION_REVIEW':'NOT_READY',
