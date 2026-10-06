@@ -31,6 +31,7 @@ env:
   CEREBRO_ZERO_COST_ROUTE_OUTPUT: artifacts/cerebro-skill-zero-cost-route.json
   CEREBRO_FREE_QUOTA_OUTPUT: artifacts/cerebro-skill-free-quota-plan.json
   CEREBRO_BEHAVIORAL_GATE_OUTPUT: artifacts/cerebro-skill-behavioral-execution-gate.json
+  CEREBRO_BEHAVIORAL_PROXY_OUTPUT: artifacts/cerebro-skill-behavioral-proxy.json
   CEREBRO_EVENTS_OUTPUT: artifacts/cerebro-skill-improvement-events.json
   CEREBRO_RSI_SHADOW_OUTPUT: artifacts/cerebro-skill-rsi-shadow.json
   CEREBRO_PROMOTION_READINESS_OUTPUT: artifacts/cerebro-skill-promotion-readiness.json
@@ -106,12 +107,14 @@ jobs:
           CEREBRO_ALLOW_PROD_DATA: 'false'
           CEREBRO_ALLOW_CUSTOMER_DATA: 'false'
         run: node cerebro/skills/skill-behavioral-execution-gate.mjs --oldnew "$CEREBRO_OLDNEW_OUTPUT" --route "$CEREBRO_ZERO_COST_ROUTE_OUTPUT" --quota "$CEREBRO_FREE_QUOTA_OUTPUT" --output "$CEREBRO_BEHAVIORAL_GATE_OUTPUT"
+      - name: Prove behavioral proxy remains blocked with zero model calls in discovery workflow
+        run: node cerebro/skills/skill-behavioral-proxy-runner.mjs --oldnew "$CEREBRO_OLDNEW_OUTPUT" --manifests "$CEREBRO_MANIFEST_OUTPUT" --gate "$CEREBRO_BEHAVIORAL_GATE_OUTPUT" --quota "$CEREBRO_FREE_QUOTA_OUTPUT" --route "$CEREBRO_ZERO_COST_ROUTE_OUTPUT" --output "$CEREBRO_BEHAVIORAL_PROXY_OUTPUT"
       - name: Emit LAB-aware improvement event proposals without persistent publish
         run: node cerebro/skills/skill-improvement-events.mjs --shortlist "$CEREBRO_SHORTLIST_OUTPUT" --prelab "$CEREBRO_PRELAB_OUTPUT" --wrappers "$CEREBRO_WRAPPER_OUTPUT" --value "$CEREBRO_VALUE_OUTPUT" --static-lab "$CEREBRO_STATIC_LAB_OUTPUT" --output "$CEREBRO_EVENTS_OUTPUT"
       - name: Validate current runtime and historical RSI contract through in-memory shadow bridge
         run: node cerebro/skills/skill-rsi-shadow-bridge.mjs --events "$CEREBRO_EVENTS_OUTPUT" --output "$CEREBRO_RSI_SHADOW_OUTPUT"
       - name: Emit promotion readiness evidence and explicit blockers
-        run: node cerebro/skills/skill-promotion-readiness.mjs --static-lab "$CEREBRO_STATIC_LAB_OUTPUT" --oldnew "$CEREBRO_OLDNEW_OUTPUT" --route "$CEREBRO_ZERO_COST_ROUTE_OUTPUT" --quota "$CEREBRO_FREE_QUOTA_OUTPUT" --behavioral-gate "$CEREBRO_BEHAVIORAL_GATE_OUTPUT" --rsi-shadow "$CEREBRO_RSI_SHADOW_OUTPUT" --output "$CEREBRO_PROMOTION_READINESS_OUTPUT"
+        run: node cerebro/skills/skill-promotion-readiness.mjs --static-lab "$CEREBRO_STATIC_LAB_OUTPUT" --oldnew "$CEREBRO_OLDNEW_OUTPUT" --route "$CEREBRO_ZERO_COST_ROUTE_OUTPUT" --quota "$CEREBRO_FREE_QUOTA_OUTPUT" --behavioral-gate "$CEREBRO_BEHAVIORAL_GATE_OUTPUT" --rsi-shadow "$CEREBRO_RSI_SHADOW_OUTPUT" --behavioral-results "$CEREBRO_BEHAVIORAL_PROXY_OUTPUT" --output "$CEREBRO_PROMOTION_READINESS_OUTPUT"
       - name: Upload read-only discovery evidence
         uses: actions/upload-artifact@v4
         with:
@@ -134,6 +137,7 @@ jobs:
             artifacts/cerebro-skill-zero-cost-route.json
             artifacts/cerebro-skill-free-quota-plan.json
             artifacts/cerebro-skill-behavioral-execution-gate.json
+            artifacts/cerebro-skill-behavioral-proxy.json
             artifacts/cerebro-skill-improvement-events.json
             artifacts/cerebro-skill-rsi-shadow.json
             artifacts/cerebro-skill-promotion-readiness.json
