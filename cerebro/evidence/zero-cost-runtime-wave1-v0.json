@@ -1,0 +1,76 @@
+{
+  "evidence_id": "CEREBRO-ZERO-COST-RUNTIME-WAVE1-V0",
+  "date": "2026-09-10",
+  "status": "DOCUMENTED_PARTIAL",
+  "scope": {
+    "engine_ids": ["LOCAL-001", "FREE-001", "DBOFF-001", "STOROFF-001", "AIBUD-001", "ROUTE-001"],
+    "environment": "PREPROD",
+    "company_scope": "MULTI_COMPANY"
+  },
+  "constraints": {
+    "additional_cost_target_eur": 0,
+    "supabase_preprod_required": false,
+    "supabase_heavy_state": false,
+    "prod_writes": false,
+    "autonomous_prod": false,
+    "trading_access": false
+  },
+  "implementation": {
+    "runtime": "cerebro/runtime/zero-cost-runtime.mjs",
+    "harness": "cerebro/runtime/zero-cost-harness.mjs",
+    "tests": [
+      "cerebro/tests/zero-cost-runtime.test.mjs",
+      "cerebro/tests/zero-cost-harness.test.mjs"
+    ],
+    "runbook": "cerebro/docs/zero-cost-runtime-wave1-runbook.md",
+    "plan": "cerebro/docs/zero-cost-runtime-wave1-plan.md"
+  },
+  "gates": {
+    "exact_head_binding": {
+      "source": "pull_request.head.sha",
+      "required_relation": "CEREBRO Factory PREPROD workflow head_sha MUST equal pull_request.head.sha before technical closure",
+      "self_reference_policy": "This committed evidence records the latest verified code ancestor. Final exact-head proof is the GitHub Actions run and Codex review attached to the final PR HEAD, avoiding an impossible self-referential commit SHA."
+    },
+    "latest_verified_code_ancestor": {
+      "head_sha": "39bce80b1a1bf678a4f1f2256da20f4803865b48",
+      "factory_workflow": {
+        "run_id": 34474073254,
+        "run_number": 165,
+        "status": "completed",
+        "conclusion": "success"
+      },
+      "app_workflow": {
+        "run_id": 34474073233,
+        "run_number": 3621,
+        "status": "completed",
+        "conclusion": "success"
+      },
+      "codex_review": {
+        "result": "NO_MAJOR_ISSUES",
+        "reviewed_commit": "39bce80b1a"
+      },
+      "p1_p2_open": 0
+    },
+    "app_workflow": "PASSED_ON_LATEST_VERIFIED_CODE_ANCESTOR",
+    "codex_review": "PASSED_ON_LATEST_VERIFIED_CODE_ANCESTOR",
+    "p1_p2_open_at_evidence_commit": 0,
+    "closure_rule": "Do not mark Wave 1 technically green until this evidence commit itself has successful exact-head Factory CI, successful PRE-PROD App Build, and an exact-head Codex review with zero open P1/P2."
+  },
+  "autonomy": {
+    "level": "REFERENCE_V0",
+    "prod_autonomy": false,
+    "wiring_to_existing_consumers": false,
+    "old_vs_new_completed": false
+  },
+  "changelog": [
+    "Introduced deterministic LOCAL-001 selection with exact company, engine and version precedence before GLOBAL fallbacks.",
+    "Introduced FREE-001 free-first broker with zero-cost precedence, confidence filtering and strict boolean execution flags.",
+    "Introduced local DBOFF-001/STOROFF-001 offload stores with dense-snapshot validation, scoped backup/restore and recovery after ambiguous journal durability.",
+    "Rejects SharedArrayBuffer and shared-memory views using intrinsic backing-buffer inspection before durable persistence.",
+    "Requires distinct DBOFF/STOROFF/AIBUD journal paths to preserve rebuild integrity.",
+    "Prepared restore tokens are opaque, single-use and revision-bound; stale tokens fail closed so later cross-scope writes remain durable.",
+    "Introduced deterministic AIBUD-001/ROUTE-001 routing with HUMAN_REQUIRED gates.",
+    "Persisted route/cost decision evidence across rebuilds.",
+    "Introduced isolated integration harness with zero-cost/no-Supabase-PREPROD contract."
+  ]
+}
