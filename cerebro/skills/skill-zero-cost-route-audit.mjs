@@ -16,8 +16,15 @@ function eligibleRoute(route){
   return true;
 }
 
-export function auditZeroCostBehavioralRoute(providerEvidence,oldVsNew,{allowSyntheticOnly=true}={}){
-  if(!providerEvidence||typeof providerEvidence!=='object') throw new TypeError('providerEvidence required');
+export function unwrapProviderEvidence(input){
+  if(!input||typeof input!=='object') throw new TypeError('providerEvidence required');
+  const evidence=input.provider_evidence??input;
+  if(!evidence||typeof evidence!=='object'||!Array.isArray(evidence.routes)) throw new TypeError('providerEvidence.routes required');
+  return evidence;
+}
+
+export function auditZeroCostBehavioralRoute(providerEvidenceInput,oldVsNew,{allowSyntheticOnly=true}={}){
+  const providerEvidence=unwrapProviderEvidence(providerEvidenceInput);
   if(!oldVsNew||typeof oldVsNew!=='object') throw new TypeError('oldVsNew required');
   if(typeof allowSyntheticOnly!=='boolean') throw new TypeError('allowSyntheticOnly must be boolean');
   const packages=oldVsNew.packages??[];
@@ -25,7 +32,7 @@ export function auditZeroCostBehavioralRoute(providerEvidence,oldVsNew,{allowSyn
   const retired=routes.filter(x=>x.availability_state==='RETIRED').map(x=>x.provider_id);
   const freeCandidates=routes.filter(x=>x.kind==='MODEL_INFERENCE'&&x.additional_cost_eur===0&&x.availability_state!=='RETIRED');
   const ready=freeCandidates.filter(eligibleRoute).sort((a,b)=>(ROUTE_RANK[a.route_type]??99)-(ROUTE_RANK[b.route_type]??99)||a.provider_id.localeCompare(b.provider_id));
-  const unbound=freeCandidates.filter(x=>x.credential_state!=='READY').map(x=>({provider_id:x.provider_id,credential_state:x.credential_state,data_policy_state:x.data_policy_state,quota_guard:x.quota_guard??null}));
+  const unbound=freeCandidates.filter(x=>x.credential_state!=='READY'||x.eligible_for_behavioral_inference!==true).map(x=>({provider_id:x.provider_id,credential_state:x.credential_state,data_policy_state:x.data_policy_state,quota_guard:x.quota_guard??null,eligible_for_behavioral_inference:x.eligible_for_behavioral_inference===true}));
   const paid=routes.filter(x=>Number(x.additional_cost_eur)>0||x.route_type==='paid_provider');
   let status='READY_ZERO_COST_ROUTE';
   let selected=ready[0]??null;
@@ -39,7 +46,7 @@ export function auditZeroCostBehavioralRoute(providerEvidence,oldVsNew,{allowSyn
   }
   if(human_required&&!HUMAN_REASONS.has(human_required)) throw new Error('unsupported HUMAN_REQUIRED reason');
   return Object.freeze({
-    schema_version:'0.1.0',
+    schema_version:'0.2.0',
     execution_mode:'ROUTE_AUDIT_ONLY',
     packages_waiting:packages.length,
     status,
@@ -61,7 +68,7 @@ export function auditZeroCostBehavioralRoute(providerEvidence,oldVsNew,{allowSyn
 export function bindProviderEvidence(providerEvidence,{provider_id,credential_ready=false,policy_green=false,free_quota_guarded=false}={}){
   if(!provider_id) throw new TypeError('provider_id required');
   for(const label of ['credential_ready','policy_green','free_quota_guarded']) if(typeof ({credential_ready,policy_green,free_quota_guarded})[label]!=='boolean') throw new TypeError(`${label} must be boolean`);
-  const clone=structuredClone(providerEvidence);
+  const clone=structuredClone(unwrapProviderEvidence(providerEvidence));
   const route=(clone.routes??[]).find(x=>x.provider_id===provider_id);
   if(!route) throw new Error('provider not found');
   if(route.availability_state==='RETIRED') throw new Error('retired provider cannot be bound');
