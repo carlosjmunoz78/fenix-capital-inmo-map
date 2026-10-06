@@ -25,6 +25,7 @@ env:
   CEREBRO_WRAPPER_OUTPUT: artifacts/cerebro-skill-wrapper-plans-p0.json
   CEREBRO_VALUE_OUTPUT: artifacts/cerebro-skill-value-p0.json
   CEREBRO_LAB_PLAN_OUTPUT: artifacts/cerebro-skill-lab-eval-plans-p0.json
+  CEREBRO_STATIC_LAB_OUTPUT: artifacts/cerebro-skill-static-lab-p0.json
   CEREBRO_EVENTS_OUTPUT: artifacts/cerebro-skill-improvement-events.json
   CEREBRO_UPSTREAM_MAX_REPOS: '24'
 
@@ -65,10 +66,14 @@ jobs:
         run: node cerebro/skills/skill-prelab-admission.mjs --shortlist "$CEREBRO_SHORTLIST_OUTPUT" --bundles "$CEREBRO_BUNDLE_OUTPUT" --licenses "$CEREBRO_LICENSE_OUTPUT" --output "$CEREBRO_PRELAB_OUTPUT"
       - name: Generate disabled CEREBRO wrapper plans for static pre-LAB candidates
         run: node cerebro/skills/skill-wrapper-plan.mjs --prelab "$CEREBRO_PRELAB_OUTPUT" --shortlist "$CEREBRO_SHORTLIST_OUTPUT" --manifests "$CEREBRO_MANIFEST_OUTPUT" --licenses "$CEREBRO_LICENSE_OUTPUT" --output "$CEREBRO_WRAPPER_OUTPUT"
-      - name: Rank static-ready candidates by evidence-based value without popularity
-        run: node cerebro/skills/skill-value-evaluator.mjs --wrappers "$CEREBRO_WRAPPER_OUTPUT" --prelab "$CEREBRO_PRELAB_OUTPUT" --upstreams "$CEREBRO_UPSTREAM_OUTPUT" --overlap "$CEREBRO_OVERLAP_OUTPUT" --licenses "$CEREBRO_LICENSE_OUTPUT" --output "$CEREBRO_VALUE_OUTPUT"
+      - name: Rank static-ready candidates by evidence-based value and operational fit without popularity
+        run: node cerebro/skills/skill-value-evaluator.mjs --wrappers "$CEREBRO_WRAPPER_OUTPUT" --prelab "$CEREBRO_PRELAB_OUTPUT" --upstreams "$CEREBRO_UPSTREAM_OUTPUT" --overlap "$CEREBRO_OVERLAP_OUTPUT" --licenses "$CEREBRO_LICENSE_OUTPUT" --manifests "$CEREBRO_MANIFEST_OUTPUT" --output "$CEREBRO_VALUE_OUTPUT"
       - name: Generate top-3 LAB evaluation plans without executing external code
         run: node cerebro/skills/skill-lab-eval-plan.mjs --value "$CEREBRO_VALUE_OUTPUT" --top-n 3 --output "$CEREBRO_LAB_PLAN_OUTPUT"
+      - name: Run inert static LAB benchmark on exact-commit SKILL.md text
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node cerebro/skills/skill-static-lab-benchmark.mjs --plans "$CEREBRO_LAB_PLAN_OUTPUT" --manifests "$CEREBRO_MANIFEST_OUTPUT" --output "$CEREBRO_STATIC_LAB_OUTPUT"
       - name: Emit improvement event proposals without publishing to runtime or RSI
         run: node cerebro/skills/skill-improvement-events.mjs --shortlist "$CEREBRO_SHORTLIST_OUTPUT" --prelab "$CEREBRO_PRELAB_OUTPUT" --wrappers "$CEREBRO_WRAPPER_OUTPUT" --output "$CEREBRO_EVENTS_OUTPUT"
       - name: Upload read-only discovery evidence
@@ -87,6 +92,7 @@ jobs:
             artifacts/cerebro-skill-wrapper-plans-p0.json
             artifacts/cerebro-skill-value-p0.json
             artifacts/cerebro-skill-lab-eval-plans-p0.json
+            artifacts/cerebro-skill-static-lab-p0.json
             artifacts/cerebro-skill-improvement-events.json
           if-no-files-found: error
           retention-days: 14
