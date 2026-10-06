@@ -27,6 +27,7 @@ env:
   CEREBRO_LAB_PLAN_OUTPUT: artifacts/cerebro-skill-lab-eval-plans-p0.json
   CEREBRO_STATIC_LAB_OUTPUT: artifacts/cerebro-skill-static-lab-p0.json
   CEREBRO_EVENTS_OUTPUT: artifacts/cerebro-skill-improvement-events.json
+  CEREBRO_RSI_SHADOW_OUTPUT: artifacts/cerebro-skill-rsi-shadow.json
   CEREBRO_UPSTREAM_MAX_REPOS: '24'
 
 jobs:
@@ -74,8 +75,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: node cerebro/skills/skill-static-lab-benchmark.mjs --plans "$CEREBRO_LAB_PLAN_OUTPUT" --manifests "$CEREBRO_MANIFEST_OUTPUT" --output "$CEREBRO_STATIC_LAB_OUTPUT"
-      - name: Emit improvement event proposals without publishing to runtime or RSI
-        run: node cerebro/skills/skill-improvement-events.mjs --shortlist "$CEREBRO_SHORTLIST_OUTPUT" --prelab "$CEREBRO_PRELAB_OUTPUT" --wrappers "$CEREBRO_WRAPPER_OUTPUT" --output "$CEREBRO_EVENTS_OUTPUT"
+      - name: Emit LAB-aware improvement event proposals without persistent publish
+        run: node cerebro/skills/skill-improvement-events.mjs --shortlist "$CEREBRO_SHORTLIST_OUTPUT" --prelab "$CEREBRO_PRELAB_OUTPUT" --wrappers "$CEREBRO_WRAPPER_OUTPUT" --value "$CEREBRO_VALUE_OUTPUT" --static-lab "$CEREBRO_STATIC_LAB_OUTPUT" --output "$CEREBRO_EVENTS_OUTPUT"
+      - name: Validate current runtime and historical RSI contract through in-memory shadow bridge
+        run: node cerebro/skills/skill-rsi-shadow-bridge.mjs --events "$CEREBRO_EVENTS_OUTPUT" --output "$CEREBRO_RSI_SHADOW_OUTPUT"
       - name: Upload read-only discovery evidence
         uses: actions/upload-artifact@v4
         with:
@@ -94,5 +97,6 @@ jobs:
             artifacts/cerebro-skill-lab-eval-plans-p0.json
             artifacts/cerebro-skill-static-lab-p0.json
             artifacts/cerebro-skill-improvement-events.json
+            artifacts/cerebro-skill-rsi-shadow.json
           if-no-files-found: error
           retention-days: 14
