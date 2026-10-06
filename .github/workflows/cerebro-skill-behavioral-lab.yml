@@ -28,7 +28,7 @@ jobs:
   synthetic-behavioral-lab:
     if: ${{ github.event_name == 'push' || inputs.confirm == 'RUN_SYNTHETIC_LAB' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -55,7 +55,7 @@ jobs:
 
       - name: Verify pinned OSS model contract before loading weights
         run: |
-          node -e "import('./cerebro/skills/skill-ephemeral-oss-inference.mjs').then(({OSS_RUNTIME:r})=>{const ok=r.provider_id==='github-actions-ephemeral-oss'&&r.runtime_version==='4.3.0'&&r.model_repo==='HuggingFaceTB/SmolLM2-360M-Instruct'&&r.model_revision==='8747f21e7ce7b9209590290fb0937720ba3c0cd5'&&r.model_dtype==='q4'&&r.model_q4_sha256==='a4ffda96e65beafc6f6cef0cbcf9fdc1cbdd79c230906bf3897d190547c7a596'&&r.model_license==='apache-2.0'&&r.additional_cost_eur===0&&r.own_server_required===false;if(!ok)process.exit(1);console.log(JSON.stringify({provider_id:r.provider_id,model_repo:r.model_repo,model_revision:r.model_revision,dtype:r.model_dtype,license:r.model_license,additional_cost_eur:0,own_server_required:false}))})"
+          node -e "import('./cerebro/skills/skill-ephemeral-oss-inference.mjs').then(({OSS_RUNTIME:r})=>{const ok=r.provider_id==='github-actions-ephemeral-oss'&&r.runtime_version==='4.3.0'&&r.model_repo==='HuggingFaceTB/SmolLM2-1.7B-Instruct'&&r.model_revision==='31b70e2e869a7173562077fd711b654946d38674'&&r.model_dtype==='q4'&&r.model_q4_sha256==='467b7f366bc2094968787efd74506efb18a860624d1232192dbd5c577b5aff02'&&r.model_license==='apache-2.0'&&r.additional_cost_eur===0&&r.own_server_required===false;if(!ok)process.exit(1);console.log(JSON.stringify({provider_id:r.provider_id,model_repo:r.model_repo,model_revision:r.model_revision,dtype:r.model_dtype,license:r.model_license,additional_cost_eur:0,own_server_required:false}))})"
 
       - name: Wait for GREEN discovery evidence for exactly this branch head
         env:
@@ -113,12 +113,12 @@ jobs:
             exit 1
           fi
           ACTUAL="$(sha256sum "$MODEL_FILE" | awk '{print $1}')"
-          EXPECTED="a4ffda96e65beafc6f6cef0cbcf9fdc1cbdd79c230906bf3897d190547c7a596"
+          EXPECTED="467b7f366bc2094968787efd74506efb18a860624d1232192dbd5c577b5aff02"
           if [ "$ACTUAL" != "$EXPECTED" ]; then
             echo "::error::Pinned model SHA256 mismatch."
             exit 1
           fi
-          echo "{\"model_sha256_verified\":true,\"sha256\":\"$ACTUAL\",\"revision\":\"8747f21e7ce7b9209590290fb0937720ba3c0cd5\",\"prod_authorized\":false}" > artifacts/cerebro-skill-oss-model-integrity.manual.json
+          echo "{\"model_sha256_verified\":true,\"sha256\":\"$ACTUAL\",\"revision\":\"31b70e2e869a7173562077fd711b654946d38674\",\"prod_authorized\":false}" > artifacts/cerebro-skill-oss-model-integrity.manual.json
 
       - name: Run deterministic independent judge
         run: node cerebro/skills/skill-independent-judge.mjs --behavioral-results artifacts/cerebro-skill-behavioral-proxy.manual.json --output artifacts/cerebro-skill-independent-judge.manual.json
