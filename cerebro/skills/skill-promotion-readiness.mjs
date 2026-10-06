@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import {runSkillTribunal} from './skill-tribunal.mjs';
 
 export function assessPromotionReadiness({staticLab,oldVsNew,routeAudit,quotaPlan,behavioralGate,rsiShadow,behavioralResults=null,independentJudge=null,tribunal=null,rollback=null}={}){
   const blockers=[];
@@ -29,7 +30,7 @@ export function assessPromotionReadiness({staticLab,oldVsNew,routeAudit,quotaPla
 
   const ready=blockers.length===0;
   return Object.freeze({
-    schema_version:'0.2.0',
+    schema_version:'0.2.1',
     execution_mode:'PROMOTION_READINESS_EVIDENCE_ONLY',
     ready,
     status:ready?'READY_FOR_PREPROD_PROMOTION_REVIEW':'NOT_READY',
@@ -46,19 +47,34 @@ function argValue(name){const i=process.argv.indexOf(name);return i>=0?process.a
 function load(p){return p&&fs.existsSync(p)?JSON.parse(fs.readFileSync(p,'utf8')):null;}
 if(import.meta.url===`file://${process.argv[1]}`){
   const output=argValue('--output')??'artifacts/cerebro-skill-promotion-readiness.json';
-  const report=assessPromotionReadiness({
-    staticLab:load(argValue('--static-lab')??'artifacts/cerebro-skill-static-lab-p0.json'),
-    oldVsNew:load(argValue('--oldnew')??'artifacts/cerebro-skill-old-vs-new-p0.json'),
-    routeAudit:load(argValue('--route')??'artifacts/cerebro-skill-zero-cost-route.json'),
-    quotaPlan:load(argValue('--quota')??'artifacts/cerebro-skill-free-quota-plan.json'),
-    behavioralGate:load(argValue('--behavioral-gate')??'artifacts/cerebro-skill-behavioral-execution-gate.json'),
-    rsiShadow:load(argValue('--rsi-shadow')??'artifacts/cerebro-skill-rsi-shadow.json'),
-    behavioralResults:load(argValue('--behavioral-results')),
-    independentJudge:load(argValue('--independent-judge')),
-    tribunal:load(argValue('--tribunal')),
-    rollback:load(argValue('--rollback'))
-  });
+  const staticLab=load(argValue('--static-lab')??'artifacts/cerebro-skill-static-lab-p0.json');
+  const oldVsNew=load(argValue('--oldnew')??'artifacts/cerebro-skill-old-vs-new-p0.json');
+  const routeAudit=load(argValue('--route')??'artifacts/cerebro-skill-zero-cost-route.json');
+  const quotaPlan=load(argValue('--quota')??'artifacts/cerebro-skill-free-quota-plan.json');
+  const behavioralGate=load(argValue('--behavioral-gate')??'artifacts/cerebro-skill-behavioral-execution-gate.json');
+  const rsiShadow=load(argValue('--rsi-shadow')??'artifacts/cerebro-skill-rsi-shadow.json');
+  const behavioralResults=load(argValue('--behavioral-results'));
+  const independentJudge=load(argValue('--independent-judge'));
+  const rollback=load(argValue('--rollback'));
+  let tribunal=load(argValue('--tribunal'));
+
+  if(!tribunal){
+    tribunal=runSkillTribunal({
+      staticLab,
+      licenses:load(argValue('--licenses')??'artifacts/cerebro-skill-license-evidence.json'),
+      behavioralResults,
+      independentJudge,
+      rollback,
+      routeAudit,
+      rsiShadow
+    });
+    const tribunalOutput=argValue('--tribunal-output')??'artifacts/cerebro-skill-tribunal.json';
+    fs.mkdirSync(path.dirname(tribunalOutput),{recursive:true});
+    fs.writeFileSync(tribunalOutput,`${JSON.stringify(tribunal,null,2)}\n`,'utf8');
+  }
+
+  const report=assessPromotionReadiness({staticLab,oldVsNew,routeAudit,quotaPlan,behavioralGate,rsiShadow,behavioralResults,independentJudge,tribunal,rollback});
   fs.mkdirSync(path.dirname(output),{recursive:true});
   fs.writeFileSync(output,`${JSON.stringify(report,null,2)}\n`,'utf8');
-  console.log(JSON.stringify({output,status:report.status,ready:report.ready,blockers:report.blockers,evidence:report.evidence,merge_authorized:false,prod_authorized:false}));
+  console.log(JSON.stringify({output,status:report.status,ready:report.ready,blockers:report.blockers,evidence:report.evidence,tribunal_decision:tribunal?.decision??'MISSING',merge_authorized:false,prod_authorized:false}));
 }
