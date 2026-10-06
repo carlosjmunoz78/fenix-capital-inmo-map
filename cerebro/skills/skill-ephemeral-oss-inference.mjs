@@ -11,6 +11,7 @@ export const OSS_RUNTIME=Object.freeze({
   model_license:'apache-2.0',
   device:'cpu',
   max_new_tokens:384,
+  prompt_mode:'CHAT_TEMPLATE_MESSAGES',
   additional_cost_eur:0,
   own_server_required:false,
   execution_environment:'GITHUB_ACTIONS_EPHEMERAL_RUNNER'
@@ -61,7 +62,13 @@ export async function invokeEphemeralOssInference({prompt,gate,quotaDecisionResu
   requireSafeGate(gate,quotaDecisionResult);
   if(typeof prompt!=='string'||!prompt.trim()) throw new TypeError('prompt required');
   const generator=await getGenerator({importImpl});
-  const output=await generator(prompt,{
+  // Use the model's own instruct/chat template. The previous raw-string path was
+  // provenance-safe but produced prose without the requested JSON on all six
+  // synthetic arms, making the evaluator inconclusive rather than proving the
+  // candidate bad. This changes only prompt framing, not gates, data, quota,
+  // model, weights, scoring or promotion policy.
+  const chat=[{role:'user',content:prompt}];
+  const output=await generator(chat,{
     max_new_tokens:OSS_RUNTIME.max_new_tokens,
     do_sample:false,
     return_full_text:false
@@ -74,6 +81,7 @@ export async function invokeEphemeralOssInference({prompt,gate,quotaDecisionResu
     model_revision:OSS_RUNTIME.model_revision,
     model_dtype:OSS_RUNTIME.model_dtype,
     device:OSS_RUNTIME.device,
+    prompt_mode:OSS_RUNTIME.prompt_mode,
     output_text:text,
     output_sha256:sha256(text),
     prompt_sha256:sha256(prompt),
