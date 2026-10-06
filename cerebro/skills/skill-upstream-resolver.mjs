@@ -35,15 +35,45 @@ export function collectUpstreamRepos(discoveryReport, {maxRepos = DEFAULT_MAX_RE
   return [...byInputRepo.values()].slice(0, maxRepos);
 }
 
+function headerValue(headers, name) {
+  try { return headers?.get?.(name) ?? null; } catch { return null; }
+}
+
+export function classifyGithubHttpFailure({status, body = '', headers = null} = {}) {
+  const text = String(body ?? '').toLowerCase();
+  const remaining = headerValue(headers, 'x-ratelimit-remaining');
+  const retryAfter = headerValue(headers, 'retry-after');
+  const reset = headerValue(headers, 'x-ratelimit-reset');
+  const rateLimited = status === 429 || (status === 403 && (remaining === '0' || /rate limit|secondary rate|abuse detection/.test(text)));
+  if (rateLimited) {
+    return {
+      kind: 'RATE_LIMIT',
+      retry_after_seconds: retryAfter ? Number.parseInt(retryAfter, 10) || null : null,
+      rate_limit_reset_epoch: reset ? Number.parseInt(reset, 10) || null : null
+    };
+  }
+  if (status === 404) return {kind: 'NOT_FOUND', retry_after_seconds: null, rate_limit_reset_epoch: null};
+  return {kind: 'HTTP_FAILURE', retry_after_seconds: null, rate_limit_reset_epoch: null};
+}
+
 async function githubJson(url, {token = process.env.GITHUB_TOKEN, timeoutMs = 8000, fetchImpl = fetch} = {}) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
-  const headers = {accept: 'application/vnd.github+json', 'x-github-api-version': '2022-11-28', 'user-agent': 'CEREBRO-OS-SkillScout/0.2 (+read-only)'};
+  const headers = {accept: 'application/vnd.github+json', 'x-github-api-version': '2022-11-28', 'user-agent': 'CEREBRO-OS-SkillScout/0.3 (+read-only)'};
   if (token) headers.authorization = `Bearer ${token}`;
   try {
     const response = await fetchImpl(url, {headers, signal: controller.signal, redirect: 'follow'});
-    if (!response.ok) { const error = new Error(`GitHub HTTP ${response.status}`); error.status = response.status; throw error; }
-    return await response.json();
+    const raw = await response.text();
+    if (!response.ok) {
+      const classified = classifyGithubHttpFailure({status: response.status, body: raw, headers: response.headers});
+      const error = new Error(classified.kind === 'RATE_LIMIT' ? 'GitHub API rate limit deferred' : `GitHub HTTP ${response.status}`);
+      error.status = response.status;
+      error.failure_kind = classified.kind;
+      error.retry_after_seconds = classified.retry_after_seconds;
+      error.rate_limit_reset_epoch = classified.rate_limit_reset_epoch;
+      throw error;
+    }
+    return raw ? JSON.parse(raw) : {};
   } finally { clearTimeout(timer); }
 }
 
@@ -85,22 +115,34 @@ export async function resolveGithubRepo(parsed, options = {}) {
     const repo = await githubJson(apiBase, options);
     let commit = null;
     let commit_error = null;
+    let commit_error_kind = null;
     if (repo.default_branch) {
       try { commit = await githubJson(`${apiBase}/commits/${encodeURIComponent(repo.default_branch)}`, options); }
-      catch (err) { commit_error = String(err?.message ?? err); }
+      catch (err) {
+        commit_error = String(err?.message ?? err);
+        commit_error_kind = err?.failure_kind ?? 'UNKNOWN';
+      }
     }
     return {
       status: 'RESOLVED', input_upstream_ref: parsed.html_url,
       discovery_candidate_ids: [...(parsed.discovery_candidate_ids ?? [])],
       discovery_source_refs: [...(parsed.discovery_source_refs ?? [])],
-      ...normalizeRepositoryMetadata(repo, commit), commit_error, error: null
+      ...normalizeRepositoryMetadata(repo, commit), commit_error, commit_error_kind, error: null
     };
   } catch (err) {
+    const rateLimited = err?.failure_kind === 'RATE_LIMIT';
     return {
-      status: err?.status === 404 ? 'NOT_FOUND' : 'RESOLUTION_FAILED', input_upstream_ref: parsed.html_url,
-      upstream_ref: parsed.html_url, full_name: parsed.full_name,
+      status: rateLimited ? 'DEFERRED_RATE_LIMIT' : err?.status === 404 ? 'NOT_FOUND' : 'RESOLUTION_FAILED',
+      input_upstream_ref: parsed.html_url,
+      upstream_ref: parsed.html_url,
+      full_name: parsed.full_name,
       discovery_candidate_ids: [...(parsed.discovery_candidate_ids ?? [])],
-      discovery_source_refs: [...(parsed.discovery_source_refs ?? [])], executed: false, error: String(err?.message ?? err)
+      discovery_source_refs: [...(parsed.discovery_source_refs ?? [])],
+      executed: false,
+      error: String(err?.message ?? err),
+      failure_kind: err?.failure_kind ?? null,
+      retry_after_seconds: err?.retry_after_seconds ?? null,
+      rate_limit_reset_epoch: err?.rate_limit_reset_epoch ?? null
     };
   }
 }
@@ -125,16 +167,40 @@ export function canonicalDedupeResolved(results) {
   return output;
 }
 
-export async function resolveDiscoveryUpstreams(discoveryReport, {maxRepos = DEFAULT_MAX_REPOS, token = process.env.GITHUB_TOKEN, timeoutMs = 8000, fetchImpl = fetch, observedAt = new Date().toISOString(), concurrency = 6} = {}) {
+export async function resolveDiscoveryUpstreams(discoveryReport, {maxRepos = DEFAULT_MAX_REPOS, token = process.env.GITHUB_TOKEN, timeoutMs = 8000, fetchImpl = fetch, observedAt = new Date().toISOString(), concurrency = 4} = {}) {
   if (!Number.isInteger(concurrency) || concurrency < 1 || concurrency > 12) throw new Error('concurrency invalid');
   const repos = collectUpstreamRepos(discoveryReport, {maxRepos});
   const rawResults = [];
   for (let i = 0; i < repos.length; i += concurrency) {
     const batch = repos.slice(i, i + concurrency);
     rawResults.push(...await Promise.all(batch.map((repo) => resolveGithubRepo(repo, {token, timeoutMs, fetchImpl}))));
+    if (rawResults.some((item) => item.status === 'DEFERRED_RATE_LIMIT')) {
+      for (const pending of repos.slice(i + batch.length)) {
+        rawResults.push({
+          status: 'DEFERRED_RATE_LIMIT', input_upstream_ref: pending.html_url, upstream_ref: pending.html_url,
+          full_name: pending.full_name, discovery_candidate_ids: [...(pending.discovery_candidate_ids ?? [])],
+          discovery_source_refs: [...(pending.discovery_source_refs ?? [])], executed: false,
+          error: 'Skipped after GitHub API rate limit was observed in the same run', failure_kind: 'RATE_LIMIT',
+          retry_after_seconds: null, rate_limit_reset_epoch: null
+        });
+      }
+      break;
+    }
   }
   const results = canonicalDedupeResolved(rawResults);
-  return Object.freeze({schema_version: '0.2.1', execution_mode: 'READ_ONLY_UPSTREAM_RESOLUTION', observed_at: observedAt, input_repos_requested: repos.length, canonical_repos: results.length, repos_resolved: results.filter((item) => item.status === 'RESOLVED').length, repos_failed: results.filter((item) => item.status !== 'RESOLVED').length, code_executed: false, results});
+  const reposResolved = results.filter((item) => item.status === 'RESOLVED').length;
+  const rateLimited = results.filter((item) => item.status === 'DEFERRED_RATE_LIMIT').length;
+  const hardFailed = results.filter((item) => !['RESOLVED', 'DEFERRED_RATE_LIMIT'].includes(item.status)).length;
+  const deferred = repos.length > 0 && reposResolved === 0 && rateLimited > 0 && hardFailed === 0;
+  const partialRateLimit = reposResolved > 0 && rateLimited > 0;
+  return Object.freeze({
+    schema_version: '0.3.0', execution_mode: 'READ_ONLY_UPSTREAM_RESOLUTION', observed_at: observedAt,
+    input_repos_requested: repos.length, canonical_repos: results.length, repos_resolved: reposResolved,
+    repos_rate_limited: rateLimited, repos_hard_failed: hardFailed,
+    repos_failed: results.filter((item) => item.status !== 'RESOLVED').length,
+    status: deferred ? 'DEFERRED_TRANSIENT_RATE_LIMIT' : partialRateLimit ? 'PARTIAL_RATE_LIMIT' : hardFailed > 0 ? 'PARTIAL_OR_FAILED' : 'READY',
+    deferred, partial_rate_limit: partialRateLimit, code_executed: false, results
+  });
 }
 
 function argValue(name) { const index = process.argv.indexOf(name); return index >= 0 ? process.argv[index + 1] : null; }
@@ -146,6 +212,6 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const report = await resolveDiscoveryUpstreams(JSON.parse(fs.readFileSync(input, 'utf8')), {maxRepos});
   fs.mkdirSync(path.dirname(output), {recursive: true});
   fs.writeFileSync(output, `${JSON.stringify(report, null, 2)}\n`, 'utf8');
-  console.log(JSON.stringify({output, execution_mode: report.execution_mode, input_repos_requested: report.input_repos_requested, canonical_repos: report.canonical_repos, repos_resolved: report.repos_resolved, repos_failed: report.repos_failed, code_executed: report.code_executed}));
-  if (report.input_repos_requested > 0 && report.repos_resolved === 0) process.exitCode = 2;
+  console.log(JSON.stringify({output, execution_mode: report.execution_mode, status: report.status, deferred: report.deferred, input_repos_requested: report.input_repos_requested, canonical_repos: report.canonical_repos, repos_resolved: report.repos_resolved, repos_rate_limited: report.repos_rate_limited, repos_hard_failed: report.repos_hard_failed, repos_failed: report.repos_failed, code_executed: report.code_executed}));
+  if (report.input_repos_requested > 0 && report.repos_resolved === 0 && !report.deferred) process.exitCode = 2;
 }
