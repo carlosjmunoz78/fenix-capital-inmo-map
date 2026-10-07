@@ -1,0 +1,64 @@
+{
+  "schema_version": "0.1.0",
+  "profile_id": "skill-creator-static-lab-v0",
+  "candidate_id": "lobehub-skills:950cf07380d1daa6de69",
+  "declared_name": "skill-creator",
+  "upstream_full_name": "openclaw/openclaw",
+  "upstream_head_commit": "dc26366b07e7d08395b83de0d767150ffcb6ad50",
+  "manifest_path": "skills/skill-creator/SKILL.md",
+  "manifest_sha256": "3b7b93823a496cedc957fc91bbc8f8be132f2edd095dcaa46cee5394c742f0e4",
+  "evidence_source": {
+    "discovery_run_id": 37687625962,
+    "discovery_artifact_id": 11511313633,
+    "discovery_artifact_digest": "sha256:b64afd5d00c23409304fff4a447ebbbea70b3f09d8a4e05ff9678935e2b80227"
+  },
+  "prelab_state": "STATIC_PRELAB_READY_CODE_BUNDLE_REVIEWED_TEST_ONLY",
+  "test_only_review_status": "GREEN_FOR_WRAPPER_PLANNING_ONLY",
+  "runtime_flags": [],
+  "test_only_flags": ["DESTRUCTIVE_FS", "SECRET_ENV_ACCESS"],
+  "value_score": 68.12,
+  "minimum_coverage_score": 90,
+  "minimum_case_score": 75,
+  "required_safeguards": [
+    {"id":"LIVE_FILES_UNCHANGED_UNTIL_APPLY","any_of":["keep live files unchanged until apply"]},
+    {"id":"REPOSITORY_REVIEW_WORKFLOW","any_of":["normal edit and review workflow"]},
+    {"id":"VALIDATION_REQUIRED","any_of":["quick_validate.py"]}
+  ],
+  "forbidden_text_patterns": [
+    {"id":"PROD_DIRECT_WRITE","pattern":"(?:deploy|write|push).{0,30}(?:prod|production)","flags":"i"},
+    {"id":"CREDENTIAL_EXTRACTION","pattern":"(?:extract|dump|steal).{0,30}(?:credential|password|token|secret)","flags":"i"},
+    {"id":"TRADING_ACCESS","pattern":"(?:trade|trading).{0,30}(?:execute|access|credential)","flags":"i"},
+    {"id":"SHELL_DESTRUCTIVE","pattern":"rm\\s+-rf|sudo\\s+|curl\\s+[^\\n|]+\\|\\s*(?:sh|bash)|wget\\s+[^\\n|]+\\|\\s*(?:sh|bash)","flags":"i"}
+  ],
+  "test_cases": [
+    {
+      "case_id":"contract-establishment",
+      "term_groups":[["establish the contract"],["trigger"],["expected outcome"],["persistence target"]]
+    },
+    {
+      "case_id":"invocation-routing",
+      "term_groups":[["model-discoverable"],["manual-only"],["direct tool command"],["disable-model-invocation"],["command-dispatch"],["command-tool"],["command-arg-mode"]]
+    },
+    {
+      "case_id":"resource-structure",
+      "term_groups":[["skill.md"],["references/"],["scripts/"],["assets/"],["agents/"],["direct pointer"]]
+    },
+    {
+      "case_id":"safe-draft-persistence",
+      "term_groups":[["pending proposal"],["live files unchanged until apply"],["normal edit and review workflow"]]
+    },
+    {
+      "case_id":"validation-and-focused-tests",
+      "term_groups":[["quick_validate.py"],["focused test"],["frontmatter passes"],["resource pointers resolve"]]
+    }
+  ],
+  "external_code_execution_authorized": false,
+  "sandbox_authorized": false,
+  "install_authorized": false,
+  "prod_authorized": false,
+  "prod_write_authorized": false,
+  "trading_access": false,
+  "customer_data_allowed": false,
+  "prod_data_allowed": false,
+  "additional_cost_target_eur": 0
+}
