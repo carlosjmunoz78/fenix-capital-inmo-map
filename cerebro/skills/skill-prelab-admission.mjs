@@ -3,6 +3,7 @@ import path from 'node:path';
 
 const STRONG_FLAGS = new Set(['PROCESS_EXEC','DYNAMIC_EVAL','DESTRUCTIVE_FS','PACKAGE_INSTALL','PERMISSION_CHANGE','CAPTCHA_EVASION','ANTI_DETECT','CREDENTIAL_EXTRACTION']);
 const PERMISSION_FLAGS = new Set(['SECRET_ENV_ACCESS','NETWORK_CLIENT']);
+const ALLOWED_PRIORITY_SCOPES = new Set(['P0','P1','P2']);
 
 function byCandidate(report){
   const map=new Map();
@@ -51,8 +52,12 @@ function licenseEvidenceState(item){
   return {state:'EXACT_LICENSE_EVIDENCE_PRESENT',evidence:item.exact_evidence??[]};
 }
 
-function admissionDecision(shortlistItem,bundle,license){
-  if(shortlistItem.priority!=='P0') return {prelab_state:'OUT_OF_SCOPE_PRIORITY',next_action:'WAIT_FOR_P1_P2_PASS'};
+function outOfScopeNextAction(priorityScope){
+  return priorityScope==='P0'?'WAIT_FOR_P1_P2_PASS':`OUTSIDE_${priorityScope}_STATIC_PASS`;
+}
+
+function admissionDecision(shortlistItem,bundle,license,priorityScope){
+  if(shortlistItem.priority!==priorityScope) return {prelab_state:'OUT_OF_SCOPE_PRIORITY',next_action:outOfScopeNextAction(priorityScope)};
   if(shortlistItem.disposition!=='LAB_REVIEW_CANDIDATE') return {prelab_state:'BLOCKED_BY_EXISTING_POLICY',next_action:`RESOLVE_${shortlistItem.disposition}`};
   const bundleRisk=classifyBundleRisk(bundle);
   if(bundleRisk.state==='BUNDLE_SCAN_MISSING') return {prelab_state:'BUNDLE_EVIDENCE_REQUIRED',next_action:'COMPLETE_STATIC_BUNDLE_SCAN',bundle_risk:bundleRisk};
@@ -66,20 +71,22 @@ function admissionDecision(shortlistItem,bundle,license){
   return {prelab_state:'STATIC_PRELAB_READY_CODE_BUNDLE',next_action:'DESIGN_ISOLATED_SANDBOX_EVAL_WITH_NO_PROD_CREDENTIALS',bundle_risk:bundleRisk,license_evidence_state:lic.state};
 }
 
-export function buildPrelabAdmission(shortlist,bundles,licenses){
+export function buildPrelabAdmission(shortlist,bundles,licenses,{priority='P0'}={}){
+  if(!ALLOWED_PRIORITY_SCOPES.has(priority)) throw new Error(`unsupported pre-LAB priority scope:${priority}`);
   const bundleMap=byCandidate(bundles);
   const licenseMap=byCandidate(licenses);
   const results=[];
   for(const item of shortlist?.results??[]){
     const bundle=bundleMap.get(item.candidate_id)??null;
     const license=licenseMap.get(item.candidate_id)??null;
-    const decision=admissionDecision(item,bundle,license);
+    const decision=admissionDecision(item,bundle,license,priority);
     results.push({
       candidate_id:item.candidate_id,
       source_ref:item.source_ref,
       upstream_full_name:item.upstream_full_name,
       top_domain:item.top_domain,
       priority:item.priority,
+      priority_scope:priority,
       prior_disposition:item.disposition,
       repo_license_spdx:item.repo_license_spdx,
       legal_compatibility:'UNASSESSED',
@@ -96,9 +103,11 @@ export function buildPrelabAdmission(shortlist,bundles,licenses){
   for(const item of results) state_counts[item.prelab_state]=(state_counts[item.prelab_state]??0)+1;
   const staticReady=results.filter((r)=>r.prelab_state.startsWith('STATIC_PRELAB_READY'));
   return Object.freeze({
-    schema_version:'0.1.1',
+    schema_version:'0.2.0',
     execution_mode:'STATIC_PRELAB_GATE_ONLY',
+    priority_scope:priority,
     p0_candidates:results.filter((r)=>r.priority==='P0').length,
+    scoped_candidates:results.filter((r)=>r.priority===priority).length,
     static_prelab_ready:staticReady.length,
     state_counts,
     sandbox_authorized:false,
@@ -111,11 +120,14 @@ export function buildPrelabAdmission(shortlist,bundles,licenses){
 function argValue(name){const i=process.argv.indexOf(name);return i>=0?process.argv[i+1]:null;}
 if(import.meta.url===`file://${process.argv[1]}`){
   const shortlist=JSON.parse(fs.readFileSync(argValue('--shortlist')??'artifacts/cerebro-skill-shortlist.json','utf8'));
-  const bundles=JSON.parse(fs.readFileSync(argValue('--bundles')??'artifacts/cerebro-skill-bundles-p0.json','utf8'));
+  const priority=argValue('--priority')??'P0';
+  const defaultBundle=priority==='P0'?'artifacts/cerebro-skill-bundles-p0.json':`artifacts/cerebro-skill-bundles-${priority.toLowerCase()}.json`;
+  const defaultOutput=priority==='P0'?'artifacts/cerebro-skill-prelab-p0.json':`artifacts/cerebro-skill-prelab-${priority.toLowerCase()}.json`;
+  const bundles=JSON.parse(fs.readFileSync(argValue('--bundles')??defaultBundle,'utf8'));
   const licenses=JSON.parse(fs.readFileSync(argValue('--licenses')??'artifacts/cerebro-skill-license-evidence.json','utf8'));
-  const output=argValue('--output')??'artifacts/cerebro-skill-prelab.json';
-  const report=buildPrelabAdmission(shortlist,bundles,licenses);
+  const output=argValue('--output')??defaultOutput;
+  const report=buildPrelabAdmission(shortlist,bundles,licenses,{priority});
   fs.mkdirSync(path.dirname(output),{recursive:true});
   fs.writeFileSync(output,`${JSON.stringify(report,null,2)}\n`,'utf8');
-  console.log(JSON.stringify({output,p0_candidates:report.p0_candidates,static_prelab_ready:report.static_prelab_ready,state_counts:report.state_counts,sandbox_authorized:false,install_authorized:false,prod_authorized:false}));
+  console.log(JSON.stringify({output,priority_scope:report.priority_scope,scoped_candidates:report.scoped_candidates,static_prelab_ready:report.static_prelab_ready,state_counts:report.state_counts,sandbox_authorized:false,install_authorized:false,prod_authorized:false}));
 }
