@@ -1,0 +1,20 @@
+{
+  "schema_version": "0.1.0",
+  "confirm": "RUN_PREPROD_INTEGRATION",
+  "one_shot_id": "skill-preprod-20261007-step4-v01",
+  "expected_step3_parent_sha": "12e852ffc76a698b4961ec14035302cf01329ba1",
+  "scope": "PREPROD_LOCAL_CEREBRO_RUNTIME_ONLY",
+  "company_id": "CEREBRO_PREPROD",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "skill-preprod-v0.1.0",
+  "additional_cost_budget_eur": 0,
+  "allow_prod_data": false,
+  "allow_customer_data": false,
+  "allow_external_skill_code_execution": false,
+  "allow_prod_write": false,
+  "allow_trading_access": false,
+  "paid_fallback": false,
+  "expected_human_gate": "HIGH_RISK",
+  "created_at": "2026-10-07"
+}

@@ -1,0 +1,93 @@
+name: CEREBRO Skill PREPROD Integration
+
+on:
+  push:
+    branches:
+      - cerebro-skill-supply-chain-v0-20261006
+    paths:
+      - 'cerebro/skills/.preprod-integration-trigger.json'
+
+permissions:
+  contents: read
+
+env:
+  CEREBRO_ENVIRONMENT: PREPROD
+  CEREBRO_ALLOW_PROD_DATA: 'false'
+  CEREBRO_ALLOW_CUSTOMER_DATA: 'false'
+  CEREBRO_ALLOW_EXTERNAL_SKILL_CODE: 'false'
+  CEREBRO_ALLOW_PROD_WRITE: 'false'
+  CEREBRO_ALLOW_TRADING: 'false'
+  CEREBRO_PAID_FALLBACK: 'false'
+
+jobs:
+  skill-preprod-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Validate exact one-shot PREPROD authorization and Step 3 parent
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const t=JSON.parse(fs.readFileSync('cerebro/skills/.preprod-integration-trigger.json','utf8'));
+          const ok=t.confirm==='RUN_PREPROD_INTEGRATION'&&t.scope==='PREPROD_LOCAL_CEREBRO_RUNTIME_ONLY'&&t.company_id==='CEREBRO_PREPROD'&&t.engine_id==='FACT-001'&&t.environment==='PREPROD'&&t.additional_cost_budget_eur===0&&t.allow_prod_data===false&&t.allow_customer_data===false&&t.allow_external_skill_code_execution===false&&t.allow_prod_write===false&&t.allow_trading_access===false&&t.paid_fallback===false&&t.expected_human_gate==='HIGH_RISK';
+          if(!ok) process.exit(1);
+          console.log(JSON.stringify({authorized:true,scope:t.scope,environment:t.environment,cost_budget_eur:0,expected_human_gate:'HIGH_RISK'}));
+          NODE
+          EXPECTED="$(node -p "require('./cerebro/skills/.preprod-integration-trigger.json').expected_step3_parent_sha")"
+          ACTUAL="$(git rev-parse HEAD^)"
+          test "$ACTUAL" = "$EXPECTED"
+
+      - name: Verify Step 3 registry and contract remain fail-closed
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const r=JSON.parse(fs.readFileSync('cerebro/registry/skill-supply-chain-v0.json','utf8'));
+          const c=JSON.parse(fs.readFileSync('cerebro/contracts/skill-supply-chain-v0.json','utf8'));
+          const identity=r.capability_id==='cap:skill-supply-chain'&&r.owner_engine_id==='FACT-001';
+          const safe=identity&&r.safety?.prod_authorized===false&&r.safety?.merge_authorized===false&&r.safety?.autonomous_promotion_authorized===false&&c.invariants?.prod_write_default===false&&c.invariants?.external_skill_code_execution_default===false&&c.invariants?.paid_fallback_default===false;
+          if(!safe) process.exit(1);
+          console.log(JSON.stringify({registry:'GREEN',contract:'GREEN',prod_authorized:false,merge_authorized:false}));
+          NODE
+
+      - name: Run focused PREPROD integration tests
+        run: node --test cerebro/tests/skill-preprod-integration.test.mjs
+
+      - name: Execute actual CEREBRO PREPROD runtime binding OLD vs NEW
+        run: node cerebro/skills/skill-preprod-integration.mjs --state-root artifacts/preprod-state --output artifacts/cerebro-skill-preprod-integration.json
+
+      - name: Run deterministic independent PREPROD judge
+        run: node cerebro/skills/skill-preprod-judge.mjs --preprod artifacts/cerebro-skill-preprod-integration.json --output artifacts/cerebro-skill-preprod-judge.json
+
+      - name: Run PREPROD tribunal and enforce HIGH_RISK stop
+        run: node cerebro/skills/skill-preprod-tribunal.mjs --preprod artifacts/cerebro-skill-preprod-integration.json --judge artifacts/cerebro-skill-preprod-judge.json --registry cerebro/registry/skill-supply-chain-v0.json --contract cerebro/contracts/skill-supply-chain-v0.json --output artifacts/cerebro-skill-preprod-tribunal.json
+
+      - name: Verify PREPROD GREEN cannot auto-promote
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const p=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-preprod-integration.json','utf8'));
+          const j=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-preprod-judge.json','utf8'));
+          const t=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-preprod-tribunal.json','utf8'));
+          const ok=p.status==='PREPROD_INTEGRATION_COMPLETE'&&p.runtime_integration_real===true&&p.calls_executed===18&&p.measured_additional_cost_eur===0&&p.external_skill_code_executed===false&&p.prod_writes===false&&p.trading_access===false&&p.packages.every(x=>x.rollback_proof.ready&&x.rollback_proof.rebuild_default_disabled)&&j.decision==='GREEN_FOR_PREPROD_TRIBUNAL'&&t.decision==='GREEN_FOR_HIGH_RISK_PROMOTION_REVIEW'&&t.human_required==='HIGH_RISK'&&t.merge_authorized===false&&t.prod_authorized===false&&t.autonomous_promotion_authorized===false;
+          if(!ok) process.exit(1);
+          console.log(JSON.stringify({preprod:'GREEN',calls:18,cost_eur:0,physical_rollback:true,rebuild_disabled:true,tribunal:t.decision,human_required:'HIGH_RISK',merge_authorized:false,prod_authorized:false,autonomous_promotion_authorized:false}));
+          NODE
+
+      - name: Upload Skill Supply Chain PREPROD evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-skill-preprod-${{ github.run_id }}
+          path: |
+            artifacts/cerebro-skill-preprod-integration.json
+            artifacts/cerebro-skill-preprod-judge.json
+            artifacts/cerebro-skill-preprod-tribunal.json
+          if-no-files-found: warn
+          retention-days: 14
