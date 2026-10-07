@@ -22,6 +22,11 @@ const DOMAIN_CASES = Object.freeze({
     {case_id:'capability-routing',objective:'Route synthetic tasks to the minimum required capabilities without tool sprawl.',success:['minimal_capability_set','policy_respected','deterministic_first']},
     {case_id:'instruction-conflict',objective:'Identify conflicting instructions in a synthetic skill bundle and fail closed.',success:['conflict_detected','no_silent_override','human_exception_if_needed']},
     {case_id:'context-budget',objective:'Plan progressive disclosure so only job-relevant skill material enters context.',success:['bounded_context','metadata_first','lazy_materialization']}
+  ],
+  'knowledge-research-training': [
+    {case_id:'knowledge-read-search',objective:'Retrieve and search bounded synthetic knowledge notes without mutating the source.',success:['read_search_fit','bounded_scope','no_unapproved_write']},
+    {case_id:'knowledge-link-analysis',objective:'Inspect synthetic links, backlinks, tags and properties to explain knowledge relationships.',success:['relationship_evidence','metadata_awareness','read_only_analysis']},
+    {case_id:'knowledge-change-safety',objective:'Plan a note change on synthetic evidence while identifying mutation boundaries and rollback requirements.',success:['mutation_surface_identified','scope_explicit','rollback_required']}
   ]
 });
 
