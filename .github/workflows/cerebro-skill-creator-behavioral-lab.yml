@@ -16,13 +16,12 @@ env:
   CEREBRO_BEHAVIORAL_EXECUTION_ENABLED: 'true'
   CEREBRO_ALLOW_PROD_DATA: 'false'
   CEREBRO_ALLOW_CUSTOMER_DATA: 'false'
-  CEREBRO_GEMINI_MODEL: gemini-3.5-flash-lite
-  CEREBRO_SKILL_CREATOR_PROVIDER_TIMEOUT_MS: '45000'
+  CEREBRO_HF_CACHE_DIR: '.cache/cerebro-hf'
 
 jobs:
   synthetic-skill-creator-lab:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -38,6 +37,15 @@ jobs:
           if(!ok){console.error('Invalid skill-creator one-shot LAB trigger');process.exit(1)}
           console.log(JSON.stringify({trigger:'AUTHORIZED_ONE_SHOT_SKILL_CREATOR_BRANCH_ONLY',one_shot_id:t.one_shot_id,max_calls:6,max_retries_per_call:0,paid_fallback:false,prod_data:false,customer_data:false,external_skill_code:false,prod_write:false,trading:false}));
           NODE
+
+      - name: Install pinned OSS inference runtime without install scripts
+        run: |
+          npm install --no-save --ignore-scripts --package-lock=false @huggingface/transformers@4.3.0
+          node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('node_modules/@huggingface/transformers/package.json','utf8'));if(p.version!=='4.3.0')process.exit(1);console.log(JSON.stringify({runtime:p.name,version:p.version,install_scripts:false,pinned:true}))"
+
+      - name: Verify pinned OSS model contract before loading weights
+        run: |
+          node -e "import('./cerebro/skills/skill-ephemeral-oss-inference.mjs').then(({OSS_RUNTIME:r})=>{const ok=r.provider_id==='github-actions-ephemeral-oss'&&r.runtime_version==='4.3.0'&&r.model_repo==='HuggingFaceTB/SmolLM2-1.7B-Instruct'&&r.model_revision==='31b70e2e869a7173562077fd711b654946d38674'&&r.model_dtype==='q4'&&r.model_q4_sha256==='467b7b8f62d99f184d3628d24b8d65c151e331695f6e9ea997616c4e279e9a51'&&r.model_license==='apache-2.0'&&r.additional_cost_eur===0&&r.own_server_required===false;if(!ok)process.exit(1);console.log(JSON.stringify({provider_id:r.provider_id,model_repo:r.model_repo,revision:r.model_revision,dtype:r.model_dtype,license:r.model_license,additional_cost_eur:0}))})"
 
       - name: Run focused static and wrapper tests
         run: node --test cerebro/tests/skill-selected-candidate-static-lab.test.mjs cerebro/tests/skill-creator-wrapper.test.mjs
@@ -62,15 +70,15 @@ jobs:
           console.log(JSON.stringify({candidate_id:p.candidate_id,static_status:s.status,coverage_score:s.coverage_score,fixtures:3,planned_calls:6,external_skill_code:false,prod_authorized:false}));
           NODE
 
-      - name: Bind current Gemini free-tier readiness without exposing secret value
+      - name: Bind no-secret ephemeral OSS readiness
         env:
-          CEREBRO_GEMINI_KEY_PRESENT: ${{ secrets.CEREBRO_GEMINI_API_KEY != '' }}
-          CEREBRO_GEMINI_POLICY_GREEN: 'false'
-          CEREBRO_GEMINI_FREE_QUOTA_GUARD: 'true'
+          CEREBRO_GHA_OSS_RUNTIME_VERIFIED: 'true'
+          CEREBRO_GHA_OSS_QUOTA_GUARD: 'true'
+          CEREBRO_GHA_OSS_POLICY_GREEN: 'false'
         run: node cerebro/skills/skill-provider-binding-from-env.mjs --providers cerebro/skills/zero-cost-provider-evidence.v0.json --output artifacts/cerebro-skill-creator-provider-binding.json
 
-      - name: Select verified Gemini zero-cost synthetic route
-        run: node cerebro/skills/skill-zero-cost-route-audit.mjs --providers artifacts/cerebro-skill-creator-provider-binding.json --oldnew artifacts/cerebro-skill-creator-old-vs-new.json --preferred-provider google-gemini-api-free --output artifacts/cerebro-skill-creator-route.json
+      - name: Select pinned OSS zero-cost synthetic route
+        run: node cerebro/skills/skill-zero-cost-route-audit.mjs --providers artifacts/cerebro-skill-creator-provider-binding.json --oldnew artifacts/cerebro-skill-creator-old-vs-new.json --preferred-provider github-actions-ephemeral-oss --output artifacts/cerebro-skill-creator-route.json
 
       - name: Build hard six-call quota with zero retries and no paid fallback
         run: |
@@ -80,7 +88,7 @@ jobs:
           const oldnew=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-creator-old-vs-new.json','utf8'));
           const route=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-creator-route.json','utf8'));
           const report=buildFreeQuotaPlan(oldnew,route,{limits:{max_packages:1,max_fixtures_per_package:3,max_model_calls:6,max_retries_per_call:0,paid_fallback:false,prod_data:false,customer_data:false}});
-          if(!report.executable||report.planned_calls.total!==6||report.limits.max_model_calls!==6||report.limits.max_retries_per_call!==0){console.error('Hard six-call skill-creator quota not established');process.exit(1)}
+          if(!report.executable||report.provider_id!=='github-actions-ephemeral-oss'||report.planned_calls.total!==6||report.limits.max_model_calls!==6||report.limits.max_retries_per_call!==0){console.error('Hard six-call skill-creator OSS quota not established');process.exit(1)}
           fs.writeFileSync('artifacts/cerebro-skill-creator-quota.json',JSON.stringify(report,null,2)+'\n');
           console.log(JSON.stringify({provider_id:report.provider_id,planned_calls:report.planned_calls,max_model_calls:6,max_retries_per_call:0,paid_fallback:false}));
           NODE
@@ -88,15 +96,21 @@ jobs:
       - name: Open behavioral gate for synthetic Skill Creator package only
         run: node cerebro/skills/skill-behavioral-execution-gate.mjs --oldnew artifacts/cerebro-skill-creator-old-vs-new.json --route artifacts/cerebro-skill-creator-route.json --quota artifacts/cerebro-skill-creator-quota.json --output artifacts/cerebro-skill-creator-behavioral-gate.json
 
-      - name: Execute exactly six synthetic baseline-vs-wrapper calls on verified Gemini model
+      - name: Execute exactly six synthetic baseline-vs-wrapper calls on pinned OSS model
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          CEREBRO_GEMINI_API_KEY: ${{ secrets.CEREBRO_GEMINI_API_KEY }}
-          CEREBRO_GEMINI_MODEL: gemini-3.5-flash-lite
-          CEREBRO_SKILL_CREATOR_PROVIDER_TIMEOUT_MS: '45000'
         run: node cerebro/skills/skill-creator-behavioral-proxy-runner.mjs --oldnew artifacts/cerebro-skill-creator-old-vs-new.json --gate artifacts/cerebro-skill-creator-behavioral-gate.json --quota artifacts/cerebro-skill-creator-quota.json --route artifacts/cerebro-skill-creator-route.json --output artifacts/cerebro-skill-creator-behavioral-proxy.json
 
-      - name: Verify exact call count model wrapper and no unsafe execution
+      - name: Verify downloaded pinned q4 weight integrity
+        run: |
+          MODEL_FILE="$(find "$CEREBRO_HF_CACHE_DIR" -type f -name 'model_q4.onnx' | head -n 1)"
+          if [ -z "$MODEL_FILE" ]; then echo "::error::Pinned q4 model file not found"; exit 1; fi
+          ACTUAL="$(sha256sum "$MODEL_FILE" | awk '{print $1}')"
+          EXPECTED="467b7b8f62d99f184d3628d24b8d65c151e331695f6e9ea997616c4e279e9a51"
+          if [ "$ACTUAL" != "$EXPECTED" ]; then echo "::error::Pinned model SHA256 mismatch"; exit 1; fi
+          echo "{\"model_sha256_verified\":true,\"sha256\":\"$ACTUAL\",\"revision\":\"31b70e2e869a7173562077fd711b654946d38674\",\"prod_authorized\":false}" > artifacts/cerebro-skill-creator-oss-model-integrity.json
+
+      - name: Verify exact call count wrapper and no unsafe execution
         run: |
           node - <<'NODE'
           const fs=require('fs');
@@ -104,9 +118,9 @@ jobs:
           const arms=(p.results??[]).flatMap(r=>(r.fixture_results??[]).flatMap(f=>f.arms??[]));
           const c=arms.filter(a=>a.arm==='CANDIDATE_SKILL_PROXY');
           const b=arms.filter(a=>a.arm==='BASELINE_PROXY');
-          const ok=p.status==='PROXY_COMPLETE'&&p.calls_executed===6&&p.provider_id==='google-gemini-api-free'&&arms.length===6&&c.length===3&&b.length===3&&arms.every(a=>a.model==='gemini-3.5-flash-lite')&&c.every(a=>a.wrapper_applied===true&&a.wrapper_id==='skillwrap:cerebro-skill-creator-v0.1.0'&&a.wrapper_external_skill_code_execution===false&&a.wrapper_prod_authorized===false)&&b.every(a=>a.wrapper_applied===false)&&p.synthetic_only===true&&p.external_skill_code_executed===false&&p.prod_authorized===false;
-          if(!ok){console.error('Skill Creator behavioral invariant failed');process.exit(1)}
-          console.log(JSON.stringify({status:p.status,calls_executed:6,provider_id:p.provider_id,model:'gemini-3.5-flash-lite',candidate_wrapper_applied:3,baseline_wrapper_applied:0,synthetic_only:true,external_skill_code_executed:false,prod_authorized:false}));
+          const ok=p.status==='PROXY_COMPLETE'&&p.calls_executed===6&&p.provider_id==='github-actions-ephemeral-oss'&&arms.length===6&&c.length===3&&b.length===3&&arms.every(a=>a.model==='HuggingFaceTB/SmolLM2-1.7B-Instruct')&&c.every(a=>a.wrapper_applied===true&&a.wrapper_id==='skillwrap:cerebro-skill-creator-v0.1.0'&&a.wrapper_external_skill_code_execution===false&&a.wrapper_prod_authorized===false)&&b.every(a=>a.wrapper_applied===false)&&p.synthetic_only===true&&p.external_skill_code_executed===false&&p.prod_authorized===false;
+          if(!ok){console.error('Skill Creator OSS behavioral invariant failed');process.exit(1)}
+          console.log(JSON.stringify({status:p.status,calls_executed:6,provider_id:p.provider_id,model:'HuggingFaceTB/SmolLM2-1.7B-Instruct',candidate_wrapper_applied:3,baseline_wrapper_applied:0,synthetic_only:true,external_skill_code_executed:false,prod_authorized:false}));
           NODE
 
       - name: Run fixed-threshold deterministic independent judge
@@ -117,13 +131,7 @@ jobs:
           node - <<'NODE'
           const fs=require('fs');
           const profile=JSON.parse(fs.readFileSync('cerebro/skills/skill-creator-static-lab.v0.json','utf8'));
-          const plan={
-            wrapper_id:'skillwrap:cerebro-skill-creator-v0.1.0',candidate_id:profile.candidate_id,enabled:false,execution_authorized:false,install_authorized:false,prod_authorized:false,
-            contract:{side_effects:'DENY_BY_DEFAULT'},
-            permissions:{network:false,filesystem_read:false,filesystem_write:false,credentials:false,external_actions:false,prod_write:false,trading_access:false},
-            quality:{rollback_required:true},
-            provenance:{upstream_head_commit:profile.upstream_head_commit,manifest_sha256:profile.manifest_sha256}
-          };
+          const plan={wrapper_id:'skillwrap:cerebro-skill-creator-v0.1.0',candidate_id:profile.candidate_id,enabled:false,execution_authorized:false,install_authorized:false,prod_authorized:false,contract:{side_effects:'DENY_BY_DEFAULT'},permissions:{network:false,filesystem_read:false,filesystem_write:false,credentials:false,external_actions:false,prod_write:false,trading_access:false},quality:{rollback_required:true},provenance:{upstream_head_commit:profile.upstream_head_commit,manifest_sha256:profile.manifest_sha256}};
           fs.writeFileSync('artifacts/cerebro-skill-creator-wrapper-plan.json',JSON.stringify({plans:[plan]},null,2)+'\n');
           NODE
 
@@ -139,7 +147,7 @@ jobs:
           test -f artifacts/discovery/cerebro-skill-license-evidence.json
           test -f artifacts/discovery/cerebro-skill-rsi-shadow.json
 
-      - name: Build generic tribunal-compatible static evidence without mutating raw result
+      - name: Build tribunal-compatible static evidence without mutating raw result
         run: |
           node - <<'NODE'
           const fs=require('fs');
@@ -182,6 +190,7 @@ jobs:
             artifacts/cerebro-skill-creator-quota.json
             artifacts/cerebro-skill-creator-behavioral-gate.json
             artifacts/cerebro-skill-creator-behavioral-proxy.json
+            artifacts/cerebro-skill-creator-oss-model-integrity.json
             artifacts/cerebro-skill-creator-independent-judge.json
             artifacts/cerebro-skill-creator-wrapper-plan.json
             artifacts/cerebro-skill-creator-rollback-proof.json
