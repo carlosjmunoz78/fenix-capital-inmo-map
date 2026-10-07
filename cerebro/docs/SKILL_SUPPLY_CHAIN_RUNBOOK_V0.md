@@ -16,9 +16,29 @@ Fecha: 2026-10-07
 
 Supabase/Postgres y agent-browser alcanzaron `READY_FOR_PREPROD_PROMOTION_REVIEW`. agent-browser conserva intacto su raw `STATIC_LAB_HOLD`; el avance usa wrapper normalizado interno sin alterar thresholds.
 
+GitHub alcanzó `READY_FOR_PREPROD_PROMOTION_REVIEW` en run `37666101006`, head `08d46dd25ee40376bf4f548f4f2f6083c53e93f0`, artifact `11502662046`, usando `google-gemini-api-free` + `gemini-3.5-flash-lite`, 6/6 llamadas, Judge GREEN, rollback GREEN y Tribunal GREEN.
+
 ## HECHO · PREPROD
 
 Run `37647914902`, head `86369e0cd0d54c9c205bd39f309804a62b2c59d3`: 18 ejecuciones OLD/NEW/rollback, 2 packages, fixtures sintéticos no cliente, observabilidad/audit/FinOps, coste 0 €, rollback físico GREEN, rebuild `DISABLED`, Judge GREEN y Tribunal `GREEN_FOR_HIGH_RISK_PROMOTION_REVIEW`.
+
+### GitHub candidate · PREPROD aislado
+
+Run `37668271189`, head `feff48e1764474db0aa118af152b23d816edd00d`, artifact `11503718236`, digest `sha256:d6e0fddf4932db4939b78802ee24bd104f1f6775ebe9877657849efdc284130d`.
+
+- 3 fixtures sintéticos no cliente.
+- 9 ejecuciones: BASELINE → GITHUB_WRAPPER → ROLLBACK_BASELINE.
+- `SharedRuntime` PREPROD real y binding físico temporal.
+- Observabilidad 9 / audit 9 / FinOps 9; audit chain válida.
+- Tests focalizados 5/5 GREEN.
+- Judge `GREEN_FOR_PREPROD_TRIBUNAL`.
+- Tribunal `GREEN_FOR_HIGH_RISK_PROD_READONLY_CANARY_REVIEW`.
+- Rollback físico GREEN y rebuild final `DISABLED`.
+- Coste adicional 0 €.
+- Datos PROD/cliente, ejecución de código externo, write PROD, Trading y paid fallback: NO.
+- `prod_authorized=false`, `merge_authorized=false`, `autonomous_promotion_authorized=false`.
+
+El primer intento `37667783071` paró fail-closed antes del runtime por una aserción de schema (`merge_authorized` vs `prod_write_authorized`). Se corrigió solo esa comprobación, sin alterar permisos, thresholds ni evidencia LAB.
 
 ## HECHO · Dark launch main
 
@@ -38,14 +58,18 @@ Run `37662400743`, head `c84efac4b014aab873d4f484207cbce564792030`, artifact `11
 - Binding temporal restaurado a `DISABLED`.
 - Rollback: GREEN.
 
+Esta evidencia PROD read-only previa no autoriza automáticamente al candidato GitHub. GitHub permanece detenido tras PREPROD hasta un gate humano nuevo.
+
 ## Operación normal
 
 Skill Supply Chain V0 puede mantenerse en modo read-only/advisory y seguir incorporando nuevas skills mediante el pipeline completo. No ejecutar código externo de skills por defecto. No permitir que una skill reemplace policy/routing CEREBRO.
 
 ## Gate de expansión
 
+Para el candidato GitHub, el siguiente paso exacto es `PROD_READONLY_CANARY` y requiere `HUMAN_REQUIRED=HIGH_RISK`. Mientras no exista esa autorización, no ejecutar observación PROD del wrapper GitHub ni fusionarlo/promoverlo por inferencia.
+
 Cualquier cambio que añada write PROD, side effects, datos cliente, credenciales nuevas, permisos superiores, ejecución de código externo o acceso Trading requiere un nuevo gate `HUMAN_REQUIRED=HIGH_RISK` o el motivo de excepción aplicable.
 
 ## No hacer
 
-No reinterpretar PROD read-only GREEN como autorización de escritura. No copiar credenciales. No borrar/reemplazar App/CRM/Supabase/Notion/WordPress/SEO/Training/Trading. No activar pago como fallback.
+No reinterpretar PROD read-only GREEN como autorización de escritura. No reinterpretar el canary existente de Supabase/agent-browser como autorización para GitHub. No copiar credenciales. No borrar/reemplazar App/CRM/Supabase/Notion/WordPress/SEO/Training/Trading. No activar pago como fallback.
