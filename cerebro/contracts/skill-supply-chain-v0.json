@@ -1,5 +1,5 @@
 {
-  "schema_version": "0.1.1",
+  "schema_version": "0.1.2",
   "contract_id": "contract:skill-supply-chain-v0",
   "capability_id": "cap:skill-supply-chain",
   "owner_engine_id": "FACT-001",
@@ -26,7 +26,8 @@
     "PREPROD_INDEPENDENT_JUDGE",
     "PREPROD_TRIBUNAL",
     "HIGH_RISK_PROMOTION_REVIEW",
-    "CANARY",
+    "DARK_LAUNCH_MAIN",
+    "PROD_READONLY_CANARY",
     "PROMOTE",
     "MONITOR",
     "LEARN",
@@ -38,6 +39,7 @@
     "lab_green_does_not_mean_prod": true,
     "tribunal_green_does_not_mean_prod": true,
     "preprod_green_does_not_mean_prod": true,
+    "prod_readonly_canary_does_not_authorize_prod_write": true,
     "raw_gate_status_must_be_preserved": true,
     "threshold_relaxation_for_admission_forbidden": true,
     "external_skill_code_execution_default": false,
@@ -74,11 +76,31 @@
       "OLD_VS_NEW"
     ],
     "preprod_evidence_head": "86369e0cd0d54c9c205bd39f309804a62b2c59d3",
-    "current_state": "GREEN_FOR_HIGH_RISK_PROMOTION_REVIEW",
-    "current_human_required": "HIGH_RISK",
-    "merge_authorized": false,
+    "dark_launch_main_sha": "a9b51ee98cdfbf674a02e9b68b15bbf0e455d19b",
+    "prod_readonly_canary": {
+      "authorized_by_human": true,
+      "run_id": 37662400743,
+      "head_sha": "c84efac4b014aab873d4f484207cbce564792030",
+      "artifact_id": 11500917864,
+      "artifact_digest": "sha256:90f4f554e7e18fcb2ad22094956d5f5dfa3e0c8cad088c6efaf4cde9f2f0eecf",
+      "status": "GREEN_PROD_READONLY_CANARY",
+      "environment": "PROD_CANARY",
+      "live_requests": 2,
+      "methods_used": ["GET"],
+      "prod_write": false,
+      "customer_data_used": false,
+      "external_skill_code_executed": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "rollback_proven": true,
+      "binding_after": "DISABLED"
+    },
+    "current_state": "GREEN_PROD_READONLY_CANARY",
+    "prod_readonly_canary_authorized": true,
+    "prod_write_authorized": false,
     "prod_authorized": false,
-    "autonomous_promotion_authorized": false
+    "autonomous_promotion_authorized": false,
+    "future_permission_expansion_requires": "HIGH_RISK"
   },
   "preservation_rule": "CONSERVAR_ENTENDER_ENVOLVER_PROBAR_MEJORAR_MIGRAR"
 }
