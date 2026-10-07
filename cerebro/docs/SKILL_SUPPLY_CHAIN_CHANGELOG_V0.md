@@ -1,5 +1,21 @@
 # CEREBRO OS · Skill Supply Chain · Changelog V0
 
+## 2026-10-07 · GitHub candidate PROD read-only canary GREEN
+
+- Autorización humana permanente registrada para mejoras seguras/reversibles que preserven lo existente; el alcance del canary quedó limitado a lectura GitHub.
+- Runtime canary específico `skill-github-prod-readonly-canary.mjs`, paralelo al canary existente y fail-closed.
+- Workflow run `37670597824`, head `7ee76db7a44b7e3c1153fd3b35365fc2e2ca5554`: SUCCESS.
+- Artifact `11505096443`, digest `sha256:7837d90b4a12c2b1d61faf9db1ac2c3300fc166a554d8b2e3057098c08acf387`.
+- 2 GET reales a GitHub: metadata del repositorio y ref `main`.
+- Repositorio: `carlosjmunoz78/fenix-capital-inmo-map`; SHA `main` observado: `3304c93b3aceed338fc2bb7d377c4d562d2d18b2`.
+- Tests canary 4/4 GREEN; evidencia PREPROD inmutable revalidada antes del canary.
+- Wrapper `skillwrap:cerebro-github-v0.1.0` aplicado localmente; `prod_authorized=false` preservado.
+- GitHub writes, merge, push, mutación issues/PR y workflow dispatch: NO.
+- Datos cliente, credenciales expuestas, código externo de skills, Trading y paid fallback: NO.
+- Coste adicional 0 €.
+- Binding efímero restaurado a `DISABLED`; rollback GREEN.
+- Estado GitHub: `PROD_READONLY_ADVISORY_ELIGIBLE`; cualquier expansión de permisos/write permanece gated.
+
 ## 2026-10-07 · GitHub candidate PREPROD GREEN
 
 - Candidato `github`: `lobehub-skills:52441cd3d76607ffffab`, upstream fijado `openclaw/openclaw`, manifest `skills/github/SKILL.md`, wrapper `skillwrap:cerebro-github-v0.1.0`.
@@ -16,7 +32,7 @@
 - Tribunal: `GREEN_FOR_HIGH_RISK_PROD_READONLY_CANARY_REVIEW`, blockers 0.
 - Rollback físico: GREEN; rebuild final: `DISABLED`.
 - Datos PROD/cliente, código externo, writes PROD, Trading y paid fallback: NO.
-- Próximo gate del candidato GitHub: `HUMAN_REQUIRED=HIGH_RISK` para `PROD_READONLY_CANARY`; no autorizado todavía.
+- Próximo gate del candidato GitHub: `HUMAN_REQUIRED=HIGH_RISK` para `PROD_READONLY_CANARY`; no autorizado todavía en ese corte.
 
 ## 2026-10-07 · Step 5 dark launch + PROD read-only canary GREEN
 
