@@ -1,5 +1,5 @@
 {
-  "schema_version": "0.1.5",
+  "schema_version": "0.1.6",
   "registry_record_type": "TRANSVERSAL_CAPABILITY_BINDING",
   "capability_id": "cap:skill-supply-chain",
   "owner_engine_id": "FACT-001",
@@ -14,6 +14,7 @@
   "frozen_preprod_evidence_head": "86369e0cd0d54c9c205bd39f309804a62b2c59d3",
   "dark_launch_main_sha": "a9b51ee98cdfbf674a02e9b68b15bbf0e455d19b",
   "github_readonly_advisory_main_sha": "257ba1b9f6d757866a67240c64c7300b6c5de223",
+  "skill_creator_readonly_advisory_main_sha": "060d438f622b820472154c56f67d4cd4ac57bbac",
   "dependencies": [
     "GOV-001",
     "INT-001",
@@ -70,6 +71,20 @@
       "tribunal_decision": "GREEN",
       "decision": "READY_FOR_PREPROD_PROMOTION_REVIEW",
       "human_required": "HIGH_RISK"
+    },
+    "skill-creator": {
+      "candidate_id": "lobehub-skills:950cf07380d1daa6de69",
+      "upstream_full_name": "openclaw/openclaw",
+      "manifest_path": "skills/skill-creator/SKILL.md",
+      "wrapper_id": "skillwrap:cerebro-skill-creator-v0.1.0",
+      "run_id": 37690565349,
+      "head_sha": "6c98b4c15b05b7ec89077421b69fdd01c9046899",
+      "artifact_id": 11514120335,
+      "artifact_digest": "sha256:ea2da7c73a0a351ff667aaf65885e6806ca215f99e356649ed41c1d3bfe844de",
+      "judge_decision": "GREEN_FOR_TRIBUNAL_REVIEW",
+      "tribunal_decision": "GREEN",
+      "decision": "READY_FOR_PREPROD_PROMOTION_REVIEW",
+      "human_required": "HIGH_RISK"
     }
   },
   "preprod_evidence": {
@@ -116,6 +131,34 @@
     "prod_authorized": false,
     "autonomous_promotion_authorized": false
   },
+  "skill_creator_preprod_evidence": {
+    "candidate_id": "lobehub-skills:950cf07380d1daa6de69",
+    "run_id": 37696182720,
+    "head_sha": "58ca287025595686178895c642c2e07c67f31517",
+    "artifact_id": 11514918346,
+    "artifact_digest": "sha256:56c7d15d4f724101466aeb16703309b838d6b882c32a56a913a78c17acfb5c9c",
+    "integration_status": "PREPROD_INTEGRATION_COMPLETE",
+    "runtime_integration_real": true,
+    "fixture_data": "SYNTHETIC_NON_CUSTOMER_PREPROD_FIXTURES",
+    "calls_executed": 9,
+    "packages": 1,
+    "observability_records": 9,
+    "audit_records": 9,
+    "finops_records": 9,
+    "audit_chain_valid": true,
+    "measured_additional_cost_eur": 0,
+    "physical_rollback": true,
+    "rebuild_default_disabled": true,
+    "final_binding_state": "DISABLED",
+    "judge_decision": "GREEN_FOR_PREPROD_TRIBUNAL",
+    "tribunal_decision": "GREEN_FOR_HIGH_RISK_PROD_READONLY_CANARY_REVIEW",
+    "human_required": "HIGH_RISK",
+    "next_gate": "PROD_READONLY_CANARY",
+    "prod_readonly_canary_authorized": true,
+    "prod_write_authorized": false,
+    "prod_authorized": false,
+    "autonomous_promotion_authorized": false
+  },
   "github_prod_readonly_canary_evidence": {
     "run_id": 37670597824,
     "head_sha": "7ee76db7a44b7e3c1153fd3b35365fc2e2ca5554",
@@ -128,7 +171,9 @@
     "default_branch": "main",
     "observed_main_sha": "3304c93b3aceed338fc2bb7d377c4d562d2d18b2",
     "live_requests": 2,
-    "methods_used": ["GET"],
+    "methods_used": [
+      "GET"
+    ],
     "wrapper_id": "skillwrap:cerebro-github-v0.1.0",
     "prod_write": false,
     "github_write": false,
@@ -148,6 +193,48 @@
     "prod_write_authorized": false,
     "autonomous_promotion_authorized": false
   },
+  "skill_creator_prod_readonly_canary_evidence": {
+    "candidate_id": "lobehub-skills:950cf07380d1daa6de69",
+    "run_id": 37698393553,
+    "head_sha": "5493cf3d120c5bec89261512a9097a97f167c198",
+    "artifact_id": 11516252090,
+    "artifact_digest": "sha256:27658b395b51b8696dc329075c84a5b27ca391276b884d030fb916da4d80e679",
+    "status": "GREEN_SKILL_CREATOR_PROD_READONLY_CANARY",
+    "execution_mode": "SKILL_CREATOR_PROD_READONLY_ADVISORY_CANARY",
+    "prod_surface": "CEREBRO_CONTROL_PLANE_GITHUB_READONLY",
+    "repository": "carlosjmunoz78/fenix-capital-inmo-map",
+    "default_branch": "main",
+    "live_requests": 2,
+    "methods_used": [
+      "GET"
+    ],
+    "wrapper_id": "skillwrap:cerebro-skill-creator-v0.1.0",
+    "fixture_probes": 3,
+    "observability_records": 5,
+    "audit_records": 5,
+    "finops_records": 5,
+    "audit_chain_valid": true,
+    "measured_additional_cost_eur": 0,
+    "prod_write": false,
+    "github_write": false,
+    "merge_performed": false,
+    "push_performed": false,
+    "issue_or_pr_mutation": false,
+    "workflow_dispatch_performed": false,
+    "customer_data_used": false,
+    "prod_data_used": false,
+    "credentials_exposed": false,
+    "external_skill_code_executed": false,
+    "trading_access": false,
+    "paid_fallback": false,
+    "rollback_proven": true,
+    "rebuild_proven": true,
+    "binding_after": "DISABLED",
+    "prod_readonly_advisory_eligible": true,
+    "prod_write_authorized": false,
+    "prod_authorized": false,
+    "autonomous_promotion_authorized": false
+  },
   "github_readonly_advisory_main_promotion": {
     "pr_number": 488,
     "main_sha": "257ba1b9f6d757866a67240c64c7300b6c5de223",
@@ -164,6 +251,24 @@
     "app_redeployed": false,
     "permission_expansion": false
   },
+  "skill_creator_readonly_advisory_main_promotion": {
+    "pr_number": 491,
+    "main_sha": "060d438f622b820472154c56f67d4cd4ac57bbac",
+    "pr_supply_chain_gate_run_id": 37698907320,
+    "pr_supply_chain_gate_conclusion": "success",
+    "postmerge_supply_chain_gate_run_id": 37699010511,
+    "postmerge_supply_chain_gate_conclusion": "success",
+    "prod_runtime_smoke_run_id": 37699010488,
+    "prod_runtime_smoke_conclusion": "success",
+    "prod_live_deploy_run_id": 37699010550,
+    "prod_live_deploy_conclusion": "skipped",
+    "discovery_scout_run_id": 37699010548,
+    "discovery_scout_conclusion": "success",
+    "discovery_artifact_id": 11516148325,
+    "discovery_artifact_digest": "sha256:c785af8583b726483f6bbffcccf3783734683abd204590b28863397be1df1eb1",
+    "app_redeployed": false,
+    "permission_expansion": false
+  },
   "github_readonly_monitor_evidence": {
     "run_id": 37679202506,
     "head_sha": "0a128fac3df39120d1d7f9fcda30857c18694969",
@@ -173,7 +278,9 @@
     "monitor_mode": "SCHEDULED_OR_MANUAL_READONLY_RECHECK",
     "observed_main_sha": "257ba1b9f6d757866a67240c64c7300b6c5de223",
     "live_requests": 2,
-    "methods_used": ["GET"],
+    "methods_used": [
+      "GET"
+    ],
     "tests_passed": 4,
     "tests_failed": 0,
     "prod_write": false,
@@ -194,8 +301,13 @@
     "status": "GREEN_PROD_READONLY_CANARY",
     "execution_mode": "ISOLATED_PROD_READONLY_OBSERVATION_CANARY",
     "live_requests": 2,
-    "methods_used": ["GET"],
-    "observed_targets": ["APP_PUBLIC_ROOT", "FENIX_APP_GATEWAY_HEALTH"],
+    "methods_used": [
+      "GET"
+    ],
+    "observed_targets": [
+      "APP_PUBLIC_ROOT",
+      "FENIX_APP_GATEWAY_HEALTH"
+    ],
     "gateway_env": "PROD",
     "gateway_service": "fenix-app-gateway",
     "prod_write": false,
@@ -224,8 +336,13 @@
     "github_prod_readonly_advisory_eligible": true,
     "github_prod_write_authorized": false,
     "github_prod_authorized": false,
-    "github_readonly_monitor_enabled": true
+    "github_readonly_monitor_enabled": true,
+    "skill_creator_prod_readonly_canary_authorized": true,
+    "skill_creator_prod_readonly_advisory_eligible": true,
+    "skill_creator_prod_write_authorized": false,
+    "skill_creator_prod_authorized": false
   },
   "github_candidate_next_gate": "MONITOR_READONLY_ADVISORY_OR_HIGH_RISK_FOR_PERMISSION_EXPANSION",
-  "next_gate": "MONITOR_READONLY_CANARY_OR_HIGH_RISK_FOR_PERMISSION_EXPANSION"
+  "skill_creator_candidate_next_gate": "MONITOR_READONLY_ADVISORY_OR_HIGH_RISK_FOR_PERMISSION_EXPANSION",
+  "next_gate": "CONTINUE_NEXT_UNPROCESSED_SKILL_CANDIDATE_OR_HIGH_RISK_FOR_PERMISSION_EXPANSION"
 }

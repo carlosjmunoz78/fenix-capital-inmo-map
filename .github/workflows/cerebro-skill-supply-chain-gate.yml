@@ -4,13 +4,17 @@ on:
   push:
     paths:
       - 'cerebro/skills/**'
+      - 'cerebro/registry/skill-supply-chain-v0.json'
       - 'cerebro/tests/skill-supply-chain.test.mjs'
+      - 'cerebro/tests/skill-next-candidate-antiloop.test.mjs'
       - 'cerebro/docs/SKILL_SUPPLY_CHAIN_V0.md'
       - '.github/workflows/cerebro-skill-supply-chain-gate.yml'
   pull_request:
     paths:
       - 'cerebro/skills/**'
+      - 'cerebro/registry/skill-supply-chain-v0.json'
       - 'cerebro/tests/skill-supply-chain.test.mjs'
+      - 'cerebro/tests/skill-next-candidate-antiloop.test.mjs'
       - 'cerebro/docs/SKILL_SUPPLY_CHAIN_V0.md'
       - '.github/workflows/cerebro-skill-supply-chain-gate.yml'
   workflow_dispatch:
@@ -27,5 +31,5 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Deterministic contract and hard-gate tests
-        run: node --test cerebro/tests/skill-supply-chain.test.mjs
+      - name: Deterministic contract, hard-gate and anti-loop tests
+        run: node --test cerebro/tests/skill-supply-chain.test.mjs cerebro/tests/skill-next-candidate-antiloop.test.mjs
