@@ -27,8 +27,10 @@ env:
   CEREBRO_BUNDLE_OUTPUT: artifacts/cerebro-skill-bundles-p0.json
   CEREBRO_LICENSE_OUTPUT: artifacts/cerebro-skill-license-evidence.json
   CEREBRO_PRELAB_OUTPUT: artifacts/cerebro-skill-prelab-p0.json
+  CEREBRO_REVIEWED_PRELAB_OUTPUT: artifacts/cerebro-skill-prelab-reviewed-p0.json
   CEREBRO_WRAPPER_OUTPUT: artifacts/cerebro-skill-wrapper-plans-p0.json
   CEREBRO_VALUE_OUTPUT: artifacts/cerebro-skill-value-p0.json
+  CEREBRO_NEXT_CANDIDATE_OUTPUT: artifacts/cerebro-skill-next-candidate.json
   CEREBRO_LAB_PLAN_OUTPUT: artifacts/cerebro-skill-lab-eval-plans-p0.json
   CEREBRO_STATIC_LAB_OUTPUT: artifacts/cerebro-skill-static-lab-p0.json
   CEREBRO_NORMALIZED_WRAPPER_ADMISSION_OUTPUT: artifacts/cerebro-skill-normalized-wrapper-admission-p0.json
@@ -96,12 +98,18 @@ jobs:
       - name: Apply fail-closed P0 pre-LAB admission gate
         if: steps.upstream.outputs.ready == 'true'
         run: node cerebro/skills/skill-prelab-admission.mjs --shortlist "$CEREBRO_SHORTLIST_OUTPUT" --bundles "$CEREBRO_BUNDLE_OUTPUT" --licenses "$CEREBRO_LICENSE_OUTPUT" --output "$CEREBRO_PRELAB_OUTPUT"
-      - name: Generate disabled CEREBRO wrapper plans for static pre-LAB candidates
+      - name: Review test-only flags without executing external or test code
         if: steps.upstream.outputs.ready == 'true'
-        run: node cerebro/skills/skill-wrapper-plan.mjs --prelab "$CEREBRO_PRELAB_OUTPUT" --shortlist "$CEREBRO_SHORTLIST_OUTPUT" --manifests "$CEREBRO_MANIFEST_OUTPUT" --licenses "$CEREBRO_LICENSE_OUTPUT" --output "$CEREBRO_WRAPPER_OUTPUT"
+        run: node cerebro/skills/skill-test-only-prelab-review.mjs --prelab "$CEREBRO_PRELAB_OUTPUT" --bundles "$CEREBRO_BUNDLE_OUTPUT" --licenses "$CEREBRO_LICENSE_OUTPUT" --output "$CEREBRO_REVIEWED_PRELAB_OUTPUT"
+      - name: Generate disabled CEREBRO wrapper plans for reviewed static pre-LAB candidates
+        if: steps.upstream.outputs.ready == 'true'
+        run: node cerebro/skills/skill-wrapper-plan.mjs --prelab "$CEREBRO_REVIEWED_PRELAB_OUTPUT" --shortlist "$CEREBRO_SHORTLIST_OUTPUT" --manifests "$CEREBRO_MANIFEST_OUTPUT" --licenses "$CEREBRO_LICENSE_OUTPUT" --output "$CEREBRO_WRAPPER_OUTPUT"
       - name: Rank static-ready candidates by evidence-based value and operational fit without popularity
         if: steps.upstream.outputs.ready == 'true'
-        run: node cerebro/skills/skill-value-evaluator.mjs --wrappers "$CEREBRO_WRAPPER_OUTPUT" --prelab "$CEREBRO_PRELAB_OUTPUT" --upstreams "$CEREBRO_UPSTREAM_OUTPUT" --overlap "$CEREBRO_OVERLAP_OUTPUT" --licenses "$CEREBRO_LICENSE_OUTPUT" --manifests "$CEREBRO_MANIFEST_OUTPUT" --output "$CEREBRO_VALUE_OUTPUT"
+        run: node cerebro/skills/skill-value-evaluator.mjs --wrappers "$CEREBRO_WRAPPER_OUTPUT" --prelab "$CEREBRO_REVIEWED_PRELAB_OUTPUT" --upstreams "$CEREBRO_UPSTREAM_OUTPUT" --overlap "$CEREBRO_OVERLAP_OUTPUT" --licenses "$CEREBRO_LICENSE_OUTPUT" --manifests "$CEREBRO_MANIFEST_OUTPUT" --output "$CEREBRO_VALUE_OUTPUT"
+      - name: Select next unprocessed candidate from evidence only
+        if: steps.upstream.outputs.ready == 'true'
+        run: node cerebro/skills/skill-next-candidate-selector.mjs --value "$CEREBRO_VALUE_OUTPUT" --registry cerebro/registry/skill-supply-chain-v0.json --output "$CEREBRO_NEXT_CANDIDATE_OUTPUT"
       - name: Generate top-3 LAB evaluation plans without executing external code
         if: steps.upstream.outputs.ready == 'true'
         run: node cerebro/skills/skill-lab-eval-plan.mjs --value "$CEREBRO_VALUE_OUTPUT" --top-n 3 --output "$CEREBRO_LAB_PLAN_OUTPUT"
@@ -157,7 +165,7 @@ jobs:
         run: node cerebro/skills/skill-rollback-proof.mjs --wrappers "$CEREBRO_WRAPPER_OUTPUT" --output "$CEREBRO_ROLLBACK_OUTPUT"
       - name: Emit LAB-aware improvement event proposals without persistent publish
         if: steps.upstream.outputs.ready == 'true'
-        run: node cerebro/skills/skill-improvement-events.mjs --shortlist "$CEREBRO_SHORTLIST_OUTPUT" --prelab "$CEREBRO_PRELAB_OUTPUT" --wrappers "$CEREBRO_WRAPPER_OUTPUT" --value "$CEREBRO_VALUE_OUTPUT" --static-lab "$CEREBRO_STATIC_LAB_OUTPUT" --output "$CEREBRO_EVENTS_OUTPUT"
+        run: node cerebro/skills/skill-improvement-events.mjs --shortlist "$CEREBRO_SHORTLIST_OUTPUT" --prelab "$CEREBRO_REVIEWED_PRELAB_OUTPUT" --wrappers "$CEREBRO_WRAPPER_OUTPUT" --value "$CEREBRO_VALUE_OUTPUT" --static-lab "$CEREBRO_STATIC_LAB_OUTPUT" --output "$CEREBRO_EVENTS_OUTPUT"
       - name: Validate current runtime and historical RSI contract through in-memory shadow bridge
         if: steps.upstream.outputs.ready == 'true'
         run: node cerebro/skills/skill-rsi-shadow-bridge.mjs --events "$CEREBRO_EVENTS_OUTPUT" --output "$CEREBRO_RSI_SHADOW_OUTPUT"
@@ -178,8 +186,10 @@ jobs:
             artifacts/cerebro-skill-shortlist.json
             artifacts/cerebro-skill-bundles-p0.json
             artifacts/cerebro-skill-prelab-p0.json
+            artifacts/cerebro-skill-prelab-reviewed-p0.json
             artifacts/cerebro-skill-wrapper-plans-p0.json
             artifacts/cerebro-skill-value-p0.json
+            artifacts/cerebro-skill-next-candidate.json
             artifacts/cerebro-skill-lab-eval-plans-p0.json
             artifacts/cerebro-skill-static-lab-p0.json
             artifacts/cerebro-skill-normalized-wrapper-admission-p0.json
