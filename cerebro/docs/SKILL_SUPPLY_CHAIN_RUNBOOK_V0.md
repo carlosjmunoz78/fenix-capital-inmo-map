@@ -1,6 +1,6 @@
 # CEREBRO OS · Skill Supply Chain · Runbook V0
 
-Estado: HECHO LAB + PREPROD + DARK LAUNCH + PROD READ-ONLY CANARY
+Estado: HECHO LAB + PREPROD + DARK LAUNCH + PROD READ-ONLY CANARY + GITHUB PROD READ-ONLY CANARY
 Fecha: 2026-10-07
 
 ## Safe loop
@@ -44,7 +44,7 @@ El primer intento `37667783071` paró fail-closed antes del runtime por una aser
 
 PR #486 fue fusionado a `main` en `a9b51ee98cdfbf674a02e9b68b15bbf0e455d19b` tras autorización humana HIGH_RISK. No se disparó despliegue de la App y el runtime smoke PROD posterior quedó GREEN.
 
-## HECHO · PROD read-only canary
+## HECHO · PROD read-only canary existente
 
 Run `37662400743`, head `c84efac4b014aab873d4f484207cbce564792030`, artifact `11500917864`, digest `sha256:90f4f554e7e18fcb2ad22094956d5f5dfa3e0c8cad088c6efaf4cde9f2f0eecf`.
 
@@ -58,18 +58,32 @@ Run `37662400743`, head `c84efac4b014aab873d4f484207cbce564792030`, artifact `11
 - Binding temporal restaurado a `DISABLED`.
 - Rollback: GREEN.
 
-Esta evidencia PROD read-only previa no autoriza automáticamente al candidato GitHub. GitHub permanece detenido tras PREPROD hasta un gate humano nuevo.
+## HECHO · GitHub PROD read-only canary
+
+Autorizado por la instrucción humana permanente de mejora segura y reversible, sin romper lo existente. Run `37670597824`, head `7ee76db7a44b7e3c1153fd3b35365fc2e2ca5554`, artifact `11505096443`, digest `sha256:7837d90b4a12c2b1d61faf9db1ac2c3300fc166a554d8b2e3057098c08acf387`.
+
+- 2 GET reales contra GitHub: metadata del repositorio y ref `main`.
+- Repositorio observado: `carlosjmunoz78/fenix-capital-inmo-map`.
+- SHA `main` observado: `3304c93b3aceed338fc2bb7d377c4d562d2d18b2`.
+- Wrapper `skillwrap:cerebro-github-v0.1.0` ejercitado localmente.
+- Tests canary: 4/4 GREEN.
+- `prod_authorized=false` preservado en el wrapper.
+- GitHub writes, merge, push, mutación de issues/PR y workflow dispatch: NO.
+- Datos cliente, credenciales expuestas, código externo de skills, Trading y paid fallback: NO.
+- Coste adicional: 0 €.
+- Binding temporal restaurado a `DISABLED`.
+- Rollback: GREEN.
 
 ## Operación normal
 
-Skill Supply Chain V0 puede mantenerse en modo read-only/advisory y seguir incorporando nuevas skills mediante el pipeline completo. No ejecutar código externo de skills por defecto. No permitir que una skill reemplace policy/routing CEREBRO.
+Skill Supply Chain V0 puede mantenerse en modo read-only/advisory y seguir incorporando nuevas skills mediante el pipeline completo. GitHub queda elegible para operación read-only/advisory detrás del wrapper CEREBRO. No ejecutar código externo de skills por defecto. No permitir que una skill reemplace policy/routing CEREBRO.
 
 ## Gate de expansión
 
-Para el candidato GitHub, el siguiente paso exacto es `PROD_READONLY_CANARY` y requiere `HUMAN_REQUIRED=HIGH_RISK`. Mientras no exista esa autorización, no ejecutar observación PROD del wrapper GitHub ni fusionarlo/promoverlo por inferencia.
+La autorización permanente del usuario cubre mejoras seguras y reversibles que preserven lo existente y superen los gates técnicos. No convierte writes, permisos superiores o side effects en operaciones ordinarias.
 
-Cualquier cambio que añada write PROD, side effects, datos cliente, credenciales nuevas, permisos superiores, ejecución de código externo o acceso Trading requiere un nuevo gate `HUMAN_REQUIRED=HIGH_RISK` o el motivo de excepción aplicable.
+Cualquier cambio que añada write PROD/GitHub, merge automático, push, mutación de issues/PR, datos cliente, nuevas credenciales, permisos superiores, ejecución de código externo o acceso Trading requiere `HUMAN_REQUIRED=HIGH_RISK` o el motivo de excepción aplicable; la implementación debe seguir siendo fail-closed y reversible.
 
 ## No hacer
 
-No reinterpretar PROD read-only GREEN como autorización de escritura. No reinterpretar el canary existente de Supabase/agent-browser como autorización para GitHub. No copiar credenciales. No borrar/reemplazar App/CRM/Supabase/Notion/WordPress/SEO/Training/Trading. No activar pago como fallback.
+No reinterpretar PROD read-only GREEN como autorización de escritura. No copiar credenciales. No borrar/reemplazar App/CRM/Supabase/Notion/WordPress/SEO/Training/Trading. No activar pago como fallback. No ejecutar código externo de la skill GitHub ni usarla para saltarse reviews, branch protection, policy o checks.
