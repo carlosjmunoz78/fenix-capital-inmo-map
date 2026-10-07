@@ -6,7 +6,7 @@ Fecha: 2026-10-07
 ## Backup
 
 - Código, workflows, wrappers, contratos y documentación: historial Git + SHA exacto.
-- Behavioral baseline: `135fc29a9b41d7257381a119c20b5eb198efad04175`.
+- Behavioral baseline: `135fc29a9b41d7257381c08efea49015db1e71d9`.
 - PREPROD evidence head: `86369e0cd0d54c9c205bd39f309804a62b2c59d3`.
 - Dark launch main: `a9b51ee98cdfbf674a02e9b68b15bbf0e455d19b`.
 - Supabase artifact: `11492473830`.
