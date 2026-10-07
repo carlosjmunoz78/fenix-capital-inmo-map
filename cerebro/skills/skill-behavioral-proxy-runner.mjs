@@ -7,6 +7,8 @@ import {applySupabaseCerebroWrapper,renderSupabaseWrapperPromptContract} from '.
 
 const MAX_SKILL_BYTES=256*1024;
 const MAX_DIAGNOSTIC_CHARS=1800;
+const DEFAULT_PROVIDER_TIMEOUT_MS=60000;
+const MAX_PROVIDER_TIMEOUT_MS=60000;
 const HUMAN_CODES=['LEGAL_REQUIRED','SIGNATURE_REQUIRED','LOW_CONFIDENCE','HIGH_RISK','POLICY_CONFLICT','SECURITY_INCIDENT','MONEY_LIMIT','CUSTOMER_HUMAN_REQUEST'];
 const PROHIBITED_OUTPUT=[
   ['PROD_WRITE',/\b(?:write|deploy|publish|merge|delete|alter)\b.{0,80}\bprod(?:uction)?\b/i],
@@ -17,6 +19,11 @@ const PROHIBITED_OUTPUT=[
 
 function sha256(text){return createHash('sha256').update(String(text??'')).digest('hex');}
 function byCandidate(report,key='results'){const m=new Map();for(const x of report?.[key]??[]) if(x?.candidate_id)m.set(x.candidate_id,x);return m;}
+function providerTimeoutMs(env){
+  const parsed=Number(env?.CEREBRO_SUPABASE_PROVIDER_TIMEOUT_MS??DEFAULT_PROVIDER_TIMEOUT_MS);
+  if(!Number.isFinite(parsed)) return DEFAULT_PROVIDER_TIMEOUT_MS;
+  return Math.min(MAX_PROVIDER_TIMEOUT_MS,Math.max(30000,Math.trunc(parsed)));
+}
 function extractJson(text){
   const raw=String(text??'').trim();
   const fenced=raw.match(/```(?:json)?\s*([\s\S]*?)```/i)?.[1]?.trim();
@@ -150,8 +157,9 @@ async function fetchExactSkillText(candidate,manifest,{token=process.env.GITHUB_
 }
 
 export async function runBehavioralProxy({oldVsNew,manifests,gate,quotaPlan,routeAudit,env=process.env,providerFetch=fetch,githubFetch=fetch,githubToken=process.env.GITHUB_TOKEN,observedAt=new Date().toISOString()}={}){
-  if(gate?.allowed!==true) return Object.freeze({schema_version:'0.3.0',execution_mode:'SYNTHETIC_BEHAVIORAL_PROXY',status:'BLOCKED_BY_EXECUTION_GATE',blockers:gate?.blockers??['GATE_CLOSED'],calls_executed:0,external_skill_code_executed:false,prod_authorized:false,results:[]});
-  if(quotaPlan?.executable!==true||!routeAudit?.selected_route) return Object.freeze({schema_version:'0.3.0',execution_mode:'SYNTHETIC_BEHAVIORAL_PROXY',status:'BLOCKED_BY_ROUTE_OR_QUOTA',calls_executed:0,external_skill_code_executed:false,prod_authorized:false,results:[]});
+  const timeoutMs=providerTimeoutMs(env);
+  if(gate?.allowed!==true) return Object.freeze({schema_version:'0.3.1',execution_mode:'SYNTHETIC_BEHAVIORAL_PROXY',status:'BLOCKED_BY_EXECUTION_GATE',blockers:gate?.blockers??['GATE_CLOSED'],calls_executed:0,provider_timeout_ms:timeoutMs,external_skill_code_executed:false,prod_authorized:false,results:[]});
+  if(quotaPlan?.executable!==true||!routeAudit?.selected_route) return Object.freeze({schema_version:'0.3.1',execution_mode:'SYNTHETIC_BEHAVIORAL_PROXY',status:'BLOCKED_BY_ROUTE_OR_QUOTA',calls_executed:0,provider_timeout_ms:timeoutMs,external_skill_code_executed:false,prod_authorized:false,results:[]});
   const manifestMap=byCandidate(manifests);
   const providerId=routeAudit.selected_route.provider_id;
   const results=[]; let callsUsed=0; let stopReason=null;
@@ -170,7 +178,7 @@ export async function runBehavioralProxy({oldVsNew,manifests,gate,quotaPlan,rout
         const q=quotaDecision(quotaPlan,{calls_used:callsUsed});
         if(q.status!=='ALLOW_NEXT_SYNTHETIC_CALL'){stopReason=q.reason;break;}
         const prompt=compileBehavioralPrompt({fixture,skillText:skill,arm,domain:pkg.domain});
-        const response=await invokeZeroCostProvider({providerId,prompt,gate,quotaDecisionResult:q,env,fetchImpl:providerFetch});
+        const response=await invokeZeroCostProvider({providerId,prompt,gate,quotaDecisionResult:q,env,fetchImpl:providerFetch,timeoutMs});
         callsUsed+=1;
         if(!response.ok){stopReason=response.stop_reason;break;}
         const wrapped=applySupabaseCerebroWrapper({rawOutput:response.output_text,fixture,domain:pkg.domain,arm});
@@ -204,7 +212,7 @@ export async function runBehavioralProxy({oldVsNew,manifests,gate,quotaPlan,rout
     const metricSet=(arms)=>({constraint_compliance:avg(arms,'constraint_compliance'),task_correctness_proxy:avg(arms,'task_correctness_proxy'),evidence_quality_proxy:avg(arms,'evidence_quality_proxy'),human_exception_correctness:avg(arms,'human_exception_correctness')});
     results.push({package_id:pkg.package_id,candidate_id:pkg.candidate_id,domain:pkg.domain,status:stopReason?'PARTIAL_STOPPED':'PROXY_COMPLETE',baseline_metrics:metricSet(baselineArms),candidate_metrics:metricSet(candidateArms),fixture_results:fixtureResults,actual_current_engine_baseline_executed:false,independent_judge_executed:false,rollback_proof:false,promotion_authorized:false});
   }
-  return Object.freeze({schema_version:'0.3.0',execution_mode:'SYNTHETIC_BEHAVIORAL_PROXY',observed_at:observedAt,status:stopReason?'STOPPED_FAIL_CLOSED':'PROXY_COMPLETE',stop_reason:stopReason,calls_executed:callsUsed,provider_id:providerId,synthetic_only:true,external_skill_code_executed:false,actual_current_engine_baseline_executed:false,independent_judge_executed:false,prod_authorized:false,promotion_authorized:false,results});
+  return Object.freeze({schema_version:'0.3.1',execution_mode:'SYNTHETIC_BEHAVIORAL_PROXY',observed_at:observedAt,status:stopReason?'STOPPED_FAIL_CLOSED':'PROXY_COMPLETE',stop_reason:stopReason,calls_executed:callsUsed,provider_id:providerId,provider_timeout_ms:timeoutMs,synthetic_only:true,external_skill_code_executed:false,actual_current_engine_baseline_executed:false,independent_judge_executed:false,prod_authorized:false,promotion_authorized:false,results});
 }
 
 function argValue(name){const i=process.argv.indexOf(name);return i>=0?process.argv[i+1]:null;}
@@ -213,5 +221,5 @@ if(import.meta.url===`file://${process.argv[1]}`){
   const report=await runBehavioralProxy({oldVsNew:load(argValue('--oldnew')??'artifacts/cerebro-skill-old-vs-new-p0.json'),manifests:load(argValue('--manifests')??'artifacts/cerebro-skill-manifests.json'),gate:load(argValue('--gate')??'artifacts/cerebro-skill-behavioral-execution-gate.json'),quotaPlan:load(argValue('--quota')??'artifacts/cerebro-skill-free-quota-plan.json'),routeAudit:load(argValue('--route')??'artifacts/cerebro-skill-zero-cost-route.json')});
   const output=argValue('--output')??'artifacts/cerebro-skill-behavioral-proxy.json';
   fs.mkdirSync(path.dirname(output),{recursive:true});fs.writeFileSync(output,`${JSON.stringify(report,null,2)}\n`,'utf8');
-  console.log(JSON.stringify({output,status:report.status,stop_reason:report.stop_reason??null,calls_executed:report.calls_executed,provider_id:report.provider_id??null,synthetic_only:true,external_skill_code_executed:false,prod_authorized:false}));
+  console.log(JSON.stringify({output,status:report.status,stop_reason:report.stop_reason??null,calls_executed:report.calls_executed,provider_id:report.provider_id??null,provider_timeout_ms:report.provider_timeout_ms,synthetic_only:true,external_skill_code_executed:false,prod_authorized:false}));
 }
