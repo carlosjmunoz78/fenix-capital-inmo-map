@@ -2,125 +2,56 @@ name: CEREBRO Skill Creator Static LAB
 
 on:
   push:
-    branches:
-      - cerebro-skill-testonly-review-20261007
     paths:
+      - 'cerebro/skills/skill-selected-candidate-static-lab.mjs'
+      - 'cerebro/skills/skill-creator-static-lab.v0.json'
+      - 'cerebro/tests/skill-selected-candidate-static-lab.test.mjs'
       - '.github/workflows/cerebro-skill-creator-static-lab.yml'
-
-permissions:
-  contents: read
+  workflow_dispatch:
 
 concurrency:
   group: cerebro-skill-creator-static-lab-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
+env:
+  CEREBRO_PROFILE: cerebro/skills/skill-creator-static-lab.v0.json
+  CEREBRO_OUTPUT: artifacts/cerebro-skill-creator-static-lab.json
+
 jobs:
-  static-lab:
+  skill-creator-static-lab:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Run Skill Supply Chain focused tests
-        run: node --test cerebro/tests/skill-*.test.mjs
-      - name: Freeze exact candidate evidence and LAB plan
-        run: |
-          mkdir -p artifacts
-          cat > artifacts/cerebro-skill-creator-manifest.json <<'JSON'
-          {
-            "schema_version": "0.1.0",
-            "results": [
-              {
-                "candidate_id": "lobehub-skills:950cf07380d1daa6de69",
-                "status": "MANIFEST_RESOLVED_STATIC_ONLY",
-                "upstream_full_name": "openclaw/openclaw",
-                "upstream_head_commit": "c18456cce92eb683c63218bad43aa64febf27c68",
-                "manifest_path": "skills/skill-creator/SKILL.md",
-                "sha256": "3b7b93823a496cedc957fc91bbc8f8be132f2edd095dcaa46cee5394c742f0e4",
-                "declared_name": "skill-creator",
-                "declared_description": "Author or review AgentSkills: create, repair, validate, or restructure SKILL.md files and bundled resources.",
-                "static_flags": [],
-                "executed": false,
-                "instructions_interpreted": false
-              }
-            ]
-          }
-          JSON
-          cat > artifacts/cerebro-skill-creator-plan.json <<'JSON'
-          {
-            "schema_version": "0.1.0",
-            "execution_mode": "LAB_EVAL_PLAN_ONLY",
-            "plans_total": 1,
-            "external_code_execution_authorized": false,
-            "install_authorized": false,
-            "prod_authorized": false,
-            "plans": [
-              {
-                "lab_eval_id": "labeval:skill-creator-20261007-static",
-                "status": "LAB_EVAL_PLAN_ONLY",
-                "candidate_id": "lobehub-skills:950cf07380d1daa6de69",
-                "wrapper_id": "skillwrap:6b53cc9656b550a47370",
-                "domain": "agent-ai-orchestration",
-                "engine_bindings": ["ORCH-001","ROUTE-001","FACT-001","RAG-001","LRN-001","ACTGW-001"],
-                "value_score": 68.12,
-                "recommendation": "LAB_BENCHMARK",
-                "evidence_refs": {
-                  "upstream_full_name": "openclaw/openclaw",
-                  "upstream_head_commit": "c18456cce92eb683c63218bad43aa64febf27c68",
-                  "manifest_sha256": "3b7b93823a496cedc957fc91bbc8f8be132f2edd095dcaa46cee5394c742f0e4",
-                  "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
-                },
-                "baseline": "CURRENT_CEREBRO_CAPABILITY_FOR_SAME_DOMAIN",
-                "comparison_mode": "OLD_VS_NEW_ON_IDENTICAL_SYNTHETIC_FIXTURES",
-                "test_cases": [
-                  {
-                    "case_id": "capability-routing",
-                    "objective": "Route synthetic tasks to the minimum required capabilities without tool sprawl.",
-                    "success": ["minimal_capability_set","policy_respected","deterministic_first"]
-                  },
-                  {
-                    "case_id": "instruction-conflict",
-                    "objective": "Identify conflicting instructions in a synthetic skill bundle and fail closed.",
-                    "success": ["conflict_detected","no_silent_override","human_exception_if_needed"]
-                  },
-                  {
-                    "case_id": "context-budget",
-                    "objective": "Plan progressive disclosure so only job-relevant skill material enters context.",
-                    "success": ["bounded_context","metadata_first","lazy_materialization"]
-                  }
-                ],
-                "external_code_execution_authorized": false,
-                "install_authorized": false,
-                "prod_authorized": false
-              }
-            ]
-          }
-          JSON
-      - name: Run inert exact-commit static LAB on SKILL.md text only
+      - name: Run focused deterministic static LAB tests
+        run: node --test cerebro/tests/skill-selected-candidate-static-lab.test.mjs
+      - name: Evaluate exact-commit skill-creator manifest as inert text only
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: node cerebro/skills/skill-static-lab-benchmark.mjs --plans artifacts/cerebro-skill-creator-plan.json --manifests artifacts/cerebro-skill-creator-manifest.json --output artifacts/cerebro-skill-creator-static-lab.json
-      - name: Enforce no security/provenance failure and preserve raw outcome
+        run: node cerebro/skills/skill-selected-candidate-static-lab.mjs --profile "$CEREBRO_PROFILE" --output "$CEREBRO_OUTPUT"
+      - name: Enforce GREEN static-only contract and zero-risk boundary
         run: |
           node - <<'NODE'
-          const fs = require('fs');
-          const r = JSON.parse(fs.readFileSync('artifacts/cerebro-skill-creator-static-lab.json','utf8'));
-          const x = r.results?.[0];
-          if (!x) throw new Error('missing static LAB result');
-          const blocked = new Set(['STATIC_LAB_BLOCKED_SECURITY','BLOCKED_PROVENANCE_HASH_MISMATCH','BLOCKED_UNSAFE_PLAN','BLOCKED_MANIFEST_EVIDENCE_MISSING','STATIC_LAB_FETCH_FAILED']);
-          console.log(JSON.stringify({candidate_id:x.candidate_id,status:x.status,coverage_score:x.coverage_score,policy_alignment_score:x.policy_alignment_score,hard_blocks:x.hard_blocks,external_code_executed:r.external_code_executed,prod_authorized:r.prod_authorized}));
-          if (blocked.has(x.status)) process.exit(1);
-          if (r.external_code_executed !== false || r.prod_authorized !== false) process.exit(1);
+          const fs=require('fs');
+          const r=JSON.parse(fs.readFileSync(process.env.CEREBRO_OUTPUT,'utf8'));
+          const ok=r.status==='STATIC_LAB_GREEN_FOR_NORMALIZED_WRAPPER_DESIGN' &&
+            r.provenance_exact===true && r.external_code_executed===false && r.test_code_executed===false &&
+            r.external_code_execution_authorized===false && r.sandbox_authorized===false && r.install_authorized===false &&
+            r.prod_authorized===false && r.prod_write_authorized===false && r.customer_data_used===false &&
+            r.prod_data_used===false && r.trading_access===false && r.additional_cost_eur===0;
+          console.log(JSON.stringify({status:r.status,candidate_id:r.candidate_id,coverage_score:r.coverage_score,provenance_exact:r.provenance_exact,external_code_executed:r.external_code_executed,prod_authorized:r.prod_authorized,additional_cost_eur:r.additional_cost_eur}));
+          if(!ok) process.exit(1);
           NODE
       - name: Upload immutable static LAB evidence
         uses: actions/upload-artifact@v4
         with:
           name: cerebro-skill-creator-static-lab-${{ github.run_id }}
-          path: |
-            artifacts/cerebro-skill-creator-plan.json
-            artifacts/cerebro-skill-creator-manifest.json
-            artifacts/cerebro-skill-creator-static-lab.json
+          path: artifacts/cerebro-skill-creator-static-lab.json
           if-no-files-found: error
           retention-days: 30
