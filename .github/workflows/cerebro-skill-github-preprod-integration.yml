@@ -1,0 +1,173 @@
+name: CEREBRO Skill GitHub PREPROD Integration
+
+on:
+  push:
+    branches:
+      - cerebro-skill-supply-chain-v0-20261006
+    paths:
+      - 'cerebro/skills/.github-preprod-integration-trigger.json'
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: cerebro-skill-github-preprod-integration
+  cancel-in-progress: false
+
+env:
+  CEREBRO_ENVIRONMENT: PREPROD
+  CEREBRO_ALLOW_PROD_DATA: 'false'
+  CEREBRO_ALLOW_CUSTOMER_DATA: 'false'
+  CEREBRO_ALLOW_EXTERNAL_SKILL_CODE: 'false'
+  CEREBRO_ALLOW_PROD_WRITE: 'false'
+  CEREBRO_ALLOW_TRADING: 'false'
+  CEREBRO_PAID_FALLBACK: 'false'
+
+jobs:
+  github-preprod-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout exact PREPROD source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Validate exact one-shot GitHub PREPROD authorization
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs');
+          const t=JSON.parse(fs.readFileSync('cerebro/skills/.github-preprod-integration-trigger.json','utf8'));
+          const ok=t.confirm==='RUN_GITHUB_PREPROD_INTEGRATION'&&
+            t.scope==='PREPROD_LOCAL_CEREBRO_RUNTIME_ONLY'&&
+            t.target_candidate==='github'&&
+            t.target_candidate_id==='lobehub-skills:52441cd3d76607ffffab'&&
+            t.expected_wrapper_id==='skillwrap:cerebro-github-v0.1.0'&&
+            t.company_id==='CEREBRO_PREPROD'&&t.engine_id==='FACT-001'&&t.environment==='PREPROD'&&
+            t.additional_cost_budget_eur===0&&t.allow_prod_data===false&&t.allow_customer_data===false&&
+            t.allow_external_skill_code_execution===false&&t.allow_prod_write===false&&t.allow_trading_access===false&&
+            t.paid_fallback===false&&t.expected_human_gate==='HIGH_RISK'&&
+            t.expected_lab_head_sha==='08d46dd25ee40376bf4f548f4f2f6083c53e93f0'&&
+            t.expected_lab_run_id===37666101006&&t.expected_lab_artifact_id===11502662046&&
+            t.expected_lab_artifact_digest==='sha256:5d2054116652c980866fe0c11a89d239151299d7e4a1bcdc1b3e19071359540e'&&
+            typeof t.one_shot_id==='string'&&t.one_shot_id.length>=16;
+          if(!ok){console.error('Invalid GitHub PREPROD one-shot authorization');process.exit(1)}
+          console.log(JSON.stringify({authorized:true,target:'github',scope:t.scope,environment:t.environment,cost_budget_eur:0,expected_lab_head_sha:t.expected_lab_head_sha,expected_lab_run_id:t.expected_lab_run_id,expected_human_gate:'HIGH_RISK',prod_authorized:false}));
+          NODE
+          EXPECTED_PARENT="$(node -p "require('./cerebro/skills/.github-preprod-integration-trigger.json').expected_parent_sha")"
+          ACTUAL_PARENT="$(git rev-parse HEAD^)"
+          test "$ACTUAL_PARENT" = "$EXPECTED_PARENT"
+
+      - name: Verify and download immutable successful GitHub LAB evidence
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/lab
+          LAB_RUN_ID="$(node -p "require('./cerebro/skills/.github-preprod-integration-trigger.json').expected_lab_run_id")"
+          LAB_SHA="$(node -p "require('./cerebro/skills/.github-preprod-integration-trigger.json').expected_lab_head_sha")"
+          ARTIFACT_ID="$(node -p "require('./cerebro/skills/.github-preprod-integration-trigger.json').expected_lab_artifact_id")"
+          ARTIFACT_DIGEST="$(node -p "require('./cerebro/skills/.github-preprod-integration-trigger.json').expected_lab_artifact_digest")"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$LAB_RUN_ID" --jq '.head_sha')" = "$LAB_SHA"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$LAB_RUN_ID" --jq '.status')" = 'completed'
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$LAB_RUN_ID" --jq '.conclusion')" = 'success'
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$LAB_RUN_ID" --jq '.name')" = 'CEREBRO Skill GitHub Behavioral LAB'
+          FOUND_ID="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$LAB_RUN_ID/artifacts" --jq ".artifacts[] | select(.id == $ARTIFACT_ID) | .id")"
+          FOUND_DIGEST="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$LAB_RUN_ID/artifacts" --jq ".artifacts[] | select(.id == $ARTIFACT_ID) | .digest")"
+          test "$FOUND_ID" = "$ARTIFACT_ID"
+          test "$FOUND_DIGEST" = "$ARTIFACT_DIGEST"
+          gh run download "$LAB_RUN_ID" --repo "$GITHUB_REPOSITORY" --name "cerebro-skill-github-behavioral-lab-$LAB_RUN_ID" --dir artifacts/lab
+          test -f artifacts/lab/cerebro-skill-github-promotion-readiness.manual.json
+          test -f artifacts/lab/cerebro-skill-github-tribunal.manual.json
+          test -f artifacts/lab/cerebro-skill-behavioral-proxy.github.manual.json
+          test -f artifacts/lab/cerebro-skill-rollback-proof.github.manual.json
+
+      - name: Reassert LAB gate before PREPROD binding
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs');
+          const r=JSON.parse(fs.readFileSync('artifacts/lab/cerebro-skill-github-promotion-readiness.manual.json','utf8'));
+          const t=JSON.parse(fs.readFileSync('artifacts/lab/cerebro-skill-github-tribunal.manual.json','utf8'));
+          const p=JSON.parse(fs.readFileSync('artifacts/lab/cerebro-skill-behavioral-proxy.github.manual.json','utf8'));
+          const rb=JSON.parse(fs.readFileSync('artifacts/lab/cerebro-skill-rollback-proof.github.manual.json','utf8'));
+          const ok=r.status==='READY_FOR_PREPROD_PROMOTION_REVIEW'&&r.ready===true&&r.human_required==='HIGH_RISK'&&
+            r.merge_authorized===false&&r.prod_authorized===false&&r.autonomous_promotion_authorized===false&&
+            t.decision==='GREEN'&&t.green===true&&(t.blockers??[]).length===0&&t.prod_authorized===false&&
+            p.status==='PROXY_COMPLETE'&&p.calls_executed===6&&p.external_skill_code_executed===false&&p.prod_authorized===false&&
+            rb.status==='GREEN_ROLLBACK_REBUILD_PROOF'&&rb.ready===true&&rb.prod_authorized===false;
+          if(!ok){console.error('Immutable GitHub LAB gate evidence is not GREEN/fail-closed');process.exit(1)}
+          console.log(JSON.stringify({lab_gate:'GREEN',behavioral_calls:6,rollback:'GREEN',tribunal:'GREEN',human_required:'HIGH_RISK',prod_authorized:false}));
+          NODE
+
+      - name: Verify registry and contract remain fail-closed
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs');
+          const r=JSON.parse(fs.readFileSync('cerebro/registry/skill-supply-chain-v0.json','utf8'));
+          const c=JSON.parse(fs.readFileSync('cerebro/contracts/skill-supply-chain-v0.json','utf8'));
+          const ok=r.capability_id==='cap:skill-supply-chain'&&r.owner_engine_id==='FACT-001'&&
+            r.safety?.prod_authorized===false&&r.safety?.merge_authorized===false&&r.safety?.autonomous_promotion_authorized===false&&
+            c.contract_id==='contract:skill-supply-chain-v0'&&c.owner_engine_id==='FACT-001'&&
+            c.invariants?.prod_write_default===false&&c.invariants?.external_skill_code_execution_default===false&&c.invariants?.paid_fallback_default===false;
+          if(!ok) process.exit(1);
+          console.log(JSON.stringify({registry:'GREEN',contract:'GREEN',prod_authorized:false,merge_authorized:false}));
+          NODE
+
+      - name: Run focused GitHub PREPROD tests
+        run: node --test cerebro/tests/skill-github-preprod-integration.test.mjs cerebro/tests/skill-cerebro-github-wrapper.test.mjs
+
+      - name: Execute GitHub OLD vs NEW on actual CEREBRO PREPROD runtime binding
+        run: node cerebro/skills/skill-github-preprod-integration.mjs --state-root artifacts/github-preprod-state --output artifacts/cerebro-skill-github-preprod-integration.json
+
+      - name: Run deterministic independent PREPROD judge
+        run: node cerebro/skills/skill-preprod-judge.mjs --preprod artifacts/cerebro-skill-github-preprod-integration.json --output artifacts/cerebro-skill-github-preprod-judge.json
+
+      - name: Run GitHub PREPROD tribunal
+        run: node cerebro/skills/skill-github-preprod-tribunal.mjs --preprod artifacts/cerebro-skill-github-preprod-integration.json --judge artifacts/cerebro-skill-github-preprod-judge.json --lab-readiness artifacts/lab/cerebro-skill-github-promotion-readiness.manual.json --lab-tribunal artifacts/lab/cerebro-skill-github-tribunal.manual.json --registry cerebro/registry/skill-supply-chain-v0.json --contract cerebro/contracts/skill-supply-chain-v0.json --trigger cerebro/skills/.github-preprod-integration-trigger.json --output artifacts/cerebro-skill-github-preprod-tribunal.json
+
+      - name: Enforce GREEN PREPROD evidence and stop at next HIGH_RISK gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs');
+          const p=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-github-preprod-integration.json','utf8'));
+          const j=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-github-preprod-judge.json','utf8'));
+          const t=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-github-preprod-tribunal.json','utf8'));
+          const pkg=p.packages?.[0];
+          const ok=p.status==='PREPROD_INTEGRATION_COMPLETE'&&p.runtime_integration_real===true&&p.calls_executed===9&&
+            p.observability_records===9&&p.audit_records===9&&p.finops_records===9&&p.audit_chain_valid===true&&
+            p.measured_additional_cost_eur===0&&p.external_skill_code_executed===false&&p.prod_writes===false&&p.trading_access===false&&p.paid_fallback===false&&
+            p.final_binding_state==='DISABLED'&&pkg?.wrapper_id==='skillwrap:cerebro-github-v0.1.0'&&pkg?.rollback_proof?.ready===true&&pkg?.rollback_proof?.rebuild_default_disabled===true&&
+            j.decision==='GREEN_FOR_PREPROD_TRIBUNAL'&&j.green===true&&
+            t.decision==='GREEN_FOR_HIGH_RISK_PROD_READONLY_CANARY_REVIEW'&&t.green===true&&t.human_required==='HIGH_RISK'&&t.next_gate==='PROD_READONLY_CANARY'&&
+            t.merge_authorized===false&&t.prod_authorized===false&&t.autonomous_promotion_authorized===false;
+          if(!ok){console.error('GitHub PREPROD invariant failed');process.exit(1)}
+          console.log(JSON.stringify({preprod:'GREEN',old_vs_new:'GREEN',calls:9,observability:9,audit:9,finops:9,cost_eur:0,rollback:'GREEN',rebuild_default_disabled:true,tribunal:t.decision,next_gate:t.next_gate,human_required:'HIGH_RISK',merge_authorized:false,prod_authorized:false,auto_promotion:false}));
+          NODE
+
+      - name: Upload immutable GitHub PREPROD evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-skill-github-preprod-${{ github.run_id }}
+          path: |
+            cerebro/skills/.github-preprod-integration-trigger.json
+            artifacts/cerebro-skill-github-preprod-integration.json
+            artifacts/cerebro-skill-github-preprod-judge.json
+            artifacts/cerebro-skill-github-preprod-tribunal.json
+          if-no-files-found: warn
+          retention-days: 30
