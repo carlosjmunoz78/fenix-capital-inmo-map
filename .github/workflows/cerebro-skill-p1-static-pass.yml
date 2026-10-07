@@ -1,0 +1,140 @@
+name: CEREBRO Skill P1 Static Pass
+
+on:
+  push:
+    branches:
+      - cerebro/skill-supply-chain-p1-static-pass-20261008
+    paths:
+      - 'cerebro/skills/skill-prelab-admission.mjs'
+      - 'cerebro/tests/skill-prelab-admission.test.mjs'
+      - '.github/workflows/cerebro-skill-p1-static-pass.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: cerebro-skill-p1-static-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CEREBRO_DISCOVERY_OUTPUT: artifacts/p1/cerebro-skill-discovery.json
+  CEREBRO_UPSTREAM_OUTPUT: artifacts/p1/cerebro-skill-upstreams.json
+  CEREBRO_MANIFEST_OUTPUT: artifacts/p1/cerebro-skill-manifests.json
+  CEREBRO_LICENSE_OUTPUT: artifacts/p1/cerebro-skill-license-evidence.json
+  CEREBRO_OVERLAP_OUTPUT: artifacts/p1/cerebro-skill-overlap.json
+  CEREBRO_SHORTLIST_OUTPUT: artifacts/p1/cerebro-skill-shortlist.json
+  CEREBRO_BUNDLE_OUTPUT: artifacts/p1/cerebro-skill-bundles-p1.json
+  CEREBRO_PRELAB_OUTPUT: artifacts/p1/cerebro-skill-prelab-p1.json
+  CEREBRO_REVIEWED_PRELAB_OUTPUT: artifacts/p1/cerebro-skill-prelab-reviewed-p1.json
+  CEREBRO_WRAPPER_OUTPUT: artifacts/p1/cerebro-skill-wrapper-plans-p1.json
+  CEREBRO_VALUE_OUTPUT: artifacts/p1/cerebro-skill-value-p1.json
+  CEREBRO_NEXT_CANDIDATE_OUTPUT: artifacts/p1/cerebro-skill-next-candidate-p1.json
+  CEREBRO_LAB_PLAN_OUTPUT: artifacts/p1/cerebro-skill-lab-eval-plans-p1.json
+  CEREBRO_STATIC_LAB_OUTPUT: artifacts/p1/cerebro-skill-static-lab-p1.json
+  CEREBRO_UPSTREAM_MAX_REPOS: '24'
+
+jobs:
+  p1-static-readonly:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Verify priority-scope and static supply-chain contracts
+        run: node --test cerebro/tests/skill-prelab-admission.test.mjs cerebro/tests/skill-bundle-scanner.test.mjs cerebro/tests/skill-test-only-prelab-review.test.mjs cerebro/tests/skill-wrapper-plan.test.mjs cerebro/tests/skill-value-evaluator.test.mjs cerebro/tests/skill-next-candidate-selector.test.mjs cerebro/tests/skill-next-candidate-antiloop.test.mjs cerebro/tests/skill-lab-eval-plan.test.mjs cerebro/tests/skill-static-lab-benchmark.test.mjs
+      - name: Discover public candidates as metadata only
+        run: node cerebro/skills/skill-source-discovery.mjs --output "$CEREBRO_DISCOVERY_OUTPUT"
+      - name: Resolve upstream evidence read-only
+        id: upstream
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          node cerebro/skills/skill-upstream-resolver.mjs --input "$CEREBRO_DISCOVERY_OUTPUT" --output "$CEREBRO_UPSTREAM_OUTPUT" --max-repos "$CEREBRO_UPSTREAM_MAX_REPOS"
+          node - <<'NODE'
+          const fs=require('fs');
+          const r=JSON.parse(fs.readFileSync(process.env.CEREBRO_UPSTREAM_OUTPUT,'utf8'));
+          const ready=r.deferred!==true;
+          fs.appendFileSync(process.env.GITHUB_OUTPUT,`ready=${ready}\nstatus=${r.status}\n`);
+          console.log(JSON.stringify({upstream_status:r.status,downstream_ready:ready,repos_resolved:r.repos_resolved,repos_rate_limited:r.repos_rate_limited}));
+          NODE
+      - name: Resolve manifests as inert text
+        if: steps.upstream.outputs.ready == 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node cerebro/skills/skill-manifest-resolver.mjs --discovery "$CEREBRO_DISCOVERY_OUTPUT" --upstreams "$CEREBRO_UPSTREAM_OUTPUT" --output "$CEREBRO_MANIFEST_OUTPUT"
+      - name: Resolve exact license evidence read-only
+        if: steps.upstream.outputs.ready == 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node cerebro/skills/skill-license-evidence.mjs --discovery "$CEREBRO_DISCOVERY_OUTPUT" --upstreams "$CEREBRO_UPSTREAM_OUTPUT" --manifests "$CEREBRO_MANIFEST_OUTPUT" --output "$CEREBRO_LICENSE_OUTPUT"
+      - name: Analyze overlap without mutation
+        if: steps.upstream.outputs.ready == 'true'
+        run: node cerebro/skills/skill-overlap-analyzer.mjs --discovery "$CEREBRO_DISCOVERY_OUTPUT" --upstreams "$CEREBRO_UPSTREAM_OUTPUT" --manifests "$CEREBRO_MANIFEST_OUTPUT" --output "$CEREBRO_OVERLAP_OUTPUT"
+      - name: Apply candidate policy
+        if: steps.upstream.outputs.ready == 'true'
+        run: node cerebro/skills/skill-candidate-policy.mjs --discovery "$CEREBRO_DISCOVERY_OUTPUT" --upstreams "$CEREBRO_UPSTREAM_OUTPUT" --overlap "$CEREBRO_OVERLAP_OUTPUT" --manifests "$CEREBRO_MANIFEST_OUTPUT" --output "$CEREBRO_SHORTLIST_OUTPUT"
+      - name: Statically inventory P1 bundles without executing code
+        if: steps.upstream.outputs.ready == 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node cerebro/skills/skill-bundle-scanner.mjs --shortlist "$CEREBRO_SHORTLIST_OUTPUT" --upstreams "$CEREBRO_UPSTREAM_OUTPUT" --manifests "$CEREBRO_MANIFEST_OUTPUT" --priority P1 --output "$CEREBRO_BUNDLE_OUTPUT"
+      - name: Apply explicit P1 fail-closed pre-LAB gate
+        if: steps.upstream.outputs.ready == 'true'
+        run: node cerebro/skills/skill-prelab-admission.mjs --shortlist "$CEREBRO_SHORTLIST_OUTPUT" --bundles "$CEREBRO_BUNDLE_OUTPUT" --licenses "$CEREBRO_LICENSE_OUTPUT" --priority P1 --output "$CEREBRO_PRELAB_OUTPUT"
+      - name: Review P1 test-only flags without executing test or external code
+        if: steps.upstream.outputs.ready == 'true'
+        run: node cerebro/skills/skill-test-only-prelab-review.mjs --prelab "$CEREBRO_PRELAB_OUTPUT" --bundles "$CEREBRO_BUNDLE_OUTPUT" --licenses "$CEREBRO_LICENSE_OUTPUT" --output "$CEREBRO_REVIEWED_PRELAB_OUTPUT"
+      - name: Generate disabled P1 wrapper plans only
+        if: steps.upstream.outputs.ready == 'true'
+        run: node cerebro/skills/skill-wrapper-plan.mjs --prelab "$CEREBRO_REVIEWED_PRELAB_OUTPUT" --shortlist "$CEREBRO_SHORTLIST_OUTPUT" --manifests "$CEREBRO_MANIFEST_OUTPUT" --licenses "$CEREBRO_LICENSE_OUTPUT" --output "$CEREBRO_WRAPPER_OUTPUT"
+      - name: Rank P1 static-ready candidates without popularity or paid services
+        if: steps.upstream.outputs.ready == 'true'
+        run: node cerebro/skills/skill-value-evaluator.mjs --wrappers "$CEREBRO_WRAPPER_OUTPUT" --prelab "$CEREBRO_REVIEWED_PRELAB_OUTPUT" --upstreams "$CEREBRO_UPSTREAM_OUTPUT" --overlap "$CEREBRO_OVERLAP_OUTPUT" --licenses "$CEREBRO_LICENSE_OUTPUT" --manifests "$CEREBRO_MANIFEST_OUTPUT" --output "$CEREBRO_VALUE_OUTPUT"
+      - name: Select next unprocessed P1 candidate from canonical evidence
+        if: steps.upstream.outputs.ready == 'true'
+        run: node cerebro/skills/skill-next-candidate-selector.mjs --value "$CEREBRO_VALUE_OUTPUT" --registry cerebro/registry/skill-supply-chain-v0.json --output "$CEREBRO_NEXT_CANDIDATE_OUTPUT"
+      - name: Generate P1 static LAB plans only
+        if: steps.upstream.outputs.ready == 'true'
+        run: node cerebro/skills/skill-lab-eval-plan.mjs --value "$CEREBRO_VALUE_OUTPUT" --top-n 3 --output "$CEREBRO_LAB_PLAN_OUTPUT"
+      - name: Run inert P1 static LAB on exact-commit SKILL text only
+        if: steps.upstream.outputs.ready == 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node cerebro/skills/skill-static-lab-benchmark.mjs --plans "$CEREBRO_LAB_PLAN_OUTPUT" --manifests "$CEREBRO_MANIFEST_OUTPUT" --output "$CEREBRO_STATIC_LAB_OUTPUT"
+      - name: Assert P1 pass remains non-mutating and zero-cost by contract
+        if: steps.upstream.outputs.ready == 'true'
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const files=['CEREBRO_PRELAB_OUTPUT','CEREBRO_REVIEWED_PRELAB_OUTPUT','CEREBRO_WRAPPER_OUTPUT','CEREBRO_VALUE_OUTPUT','CEREBRO_NEXT_CANDIDATE_OUTPUT','CEREBRO_LAB_PLAN_OUTPUT','CEREBRO_STATIC_LAB_OUTPUT'];
+          for(const key of files){
+            const r=JSON.parse(fs.readFileSync(process.env[key],'utf8'));
+            if(r.prod_authorized!==false) throw new Error(`${key}:prod_authorized_not_false`);
+            if('external_code_executed' in r&&r.external_code_executed!==false) throw new Error(`${key}:external_code_executed`);
+            if('install_authorized' in r&&r.install_authorized!==false) throw new Error(`${key}:install_authorized`);
+          }
+          const pre=JSON.parse(fs.readFileSync(process.env.CEREBRO_PRELAB_OUTPUT,'utf8'));
+          if(pre.priority_scope!=='P1') throw new Error('P1 priority scope not preserved');
+          console.log(JSON.stringify({p1_scope:'P1',static_ready:pre.static_prelab_ready,external_code_executed:false,prod_authorized:false,additional_cost_eur:0}));
+          NODE
+      - name: Upload immutable P1 static evidence
+        if: steps.upstream.outputs.ready == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-skill-p1-static-${{ github.run_id }}
+          path: artifacts/p1/*.json
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload transient upstream deferral evidence
+        if: steps.upstream.outputs.ready != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-skill-p1-static-deferred-${{ github.run_id }}
+          path: |
+            artifacts/p1/cerebro-skill-discovery.json
+            artifacts/p1/cerebro-skill-upstreams.json
+          if-no-files-found: error
+          retention-days: 7
