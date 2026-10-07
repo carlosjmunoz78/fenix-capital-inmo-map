@@ -6,7 +6,8 @@ const value={results:[
   {candidate_id:'github',wrapper_id:'w1',domain:'software-engineering-devops',engine_bindings:['FACT-001'],value_score:91,recommendation:'HIGH_VALUE_LAB_BENCHMARK',evidence_refs:{upstream_head_commit:'a'}},
   {candidate_id:'browser',wrapper_id:'w2',domain:'browser-automation-scraping',engine_bindings:['AUTO-001'],value_score:88,recommendation:'HIGH_VALUE_LAB_BENCHMARK',evidence_refs:{upstream_head_commit:'b'}},
   {candidate_id:'db',wrapper_id:'w3',domain:'data-database-supabase',engine_bindings:['DATA-001'],value_score:83,recommendation:'HIGH_VALUE_LAB_BENCHMARK',evidence_refs:{upstream_head_commit:'c'}},
-  {candidate_id:'help',wrapper_id:'w4',domain:'agent-ai-orchestration',engine_bindings:['ORCH-001'],value_score:68,recommendation:'LAB_BENCHMARK',evidence_refs:{upstream_head_commit:'d'}}
+  {candidate_id:'help',wrapper_id:'w4',domain:'agent-ai-orchestration',engine_bindings:['ORCH-001'],value_score:68,recommendation:'LAB_BENCHMARK',evidence_refs:{upstream_head_commit:'d'}},
+  {candidate_id:'knowledge',wrapper_id:'w5',domain:'knowledge-research-training',engine_bindings:['KNW-001'],value_score:84,recommendation:'HIGH_VALUE_LAB_BENCHMARK',evidence_refs:{upstream_head_commit:'e'}}
 ]};
 
 test('selects only top N candidates already ranked by static value',()=>{
@@ -36,6 +37,14 @@ test('database plan checks RLS and migration safety',()=>{
   assert.ok(plan.test_cases.some((x)=>x.case_id==='rls-review'));
   assert.ok(plan.test_cases.some((x)=>x.case_id==='migration-plan'));
   assert.equal(plan.pass_contract.no_prod_write,true);
+});
+
+test('knowledge plan measures read/search, relationships and mutation safety separately',()=>{
+  const plan=buildLabEvaluationPlans({results:[value.results[4]]},{topN:1}).plans[0];
+  assert.deepEqual(plan.test_cases.map((x)=>x.case_id),['knowledge-read-search','knowledge-link-analysis','knowledge-change-safety']);
+  assert.ok(plan.test_cases.find((x)=>x.case_id==='knowledge-change-safety').success.includes('rollback_required'));
+  assert.equal(plan.pass_contract.no_prod_write,true);
+  assert.equal(plan.sandbox.authorized,false);
 });
 
 test('plans never authorize execution, installation or promotion',()=>{
