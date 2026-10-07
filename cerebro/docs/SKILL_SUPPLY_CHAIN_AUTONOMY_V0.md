@@ -6,38 +6,43 @@ Fecha: 2026-10-07
 
 - Discovery/static gates fail-closed.
 - Zero-cost route audit y hard quota de LAB.
-- Supabase/Postgres Behavioral LAB sintético completo.
-- agent-browser Behavioral LAB sintético completo mediante wrapper normalizado.
-- PREPROD runtime OLD vs NEW completo sobre `SharedRuntime` real en environment PREPROD.
-- Observabilidad/audit/FinOps PREPROD activados.
-- Rollback físico del binding y rebuild default-disabled GREEN.
-- PREPROD Judge `GREEN_FOR_PREPROD_TRIBUNAL`.
-- PREPROD Tribunal `GREEN_FOR_HIGH_RISK_PROMOTION_REVIEW`.
+- Supabase/Postgres Behavioral LAB completo.
+- agent-browser Behavioral LAB completo mediante wrapper normalizado.
+- PREPROD runtime OLD vs NEW completo.
+- Observabilidad/audit/FinOps PREPROD activos.
+- Rollback físico y rebuild default-disabled GREEN.
+- Dark launch a `main` completado sin App deploy.
+- PROD Runtime Smoke post-merge GREEN.
+- PROD read-only canary real GREEN sobre App pública y Gateway health.
+- Binding canary restaurado a `DISABLED`.
 
 ## EXISTENTE Y PRESERVADO
 
-- App/CRM/Supabase/Notion/WordPress/SEO/Training no han sido sustituidos por la capability.
+- App/CRM/Supabase/Notion/WordPress/SEO/Training no han sido sustituidos.
 - Trading permanece aislado.
 - FACT-001 sigue siendo owner; no se crea nuevo engine_id.
+- Wrappers mantienen `prod_authorized=false` para side effects/writes.
 
-## ALCANCE DEL GREEN
+## Alcance del GREEN
 
-El PREPROD usó fixtures sintéticos no cliente y ejercitó el runtime/binding CEREBRO real. No ejecutó código externo de skills ni side effects contra sistemas externos. Las skills siguen siendo guidance subordinado a wrappers/policy CEREBRO.
+El canary PROD hizo únicamente 2 GET reales sobre superficies públicas/read-only. No usó datos cliente, no ejecutó código externo de skills, no realizó writes PROD, no tocó Trading y costó 0 €.
 
 ## Estado de autonomía
 
-`autonomy_level = PREPROD_GREEN_HUMAN_GATE_REQUIRED`.
+`autonomy_level = PROD_READONLY_ADVISORY_GREEN`.
 
-- `human_required = HIGH_RISK`
-- `merge_authorized = false`
+- `prod_readonly_canary_authorized = true`
+- `prod_write_authorized = false`
 - `prod_authorized = false`
 - `autonomous_promotion_authorized = false`
 - `prod_writes = false`
 - `trading_access = false`
 - `additional_cost_eur = 0`
 
-## HUMAN_REQUIRED actual
+## Operación sin humano
 
-`HIGH_RISK`: la siguiente acción relevante sería merge/promoción/canary con posible impacto en PROD. No se ejecuta automáticamente.
+CEREBRO puede mantener discovery, evaluación, wrappers, monitorización y read-only/advisory dentro de contratos actuales. No necesita intervención humana para trabajo ordinario que permanezca dentro de esas fronteras.
 
-No existe evidencia que autorice declarar esta capability autónoma en PROD.
+## HUMAN_REQUIRED futuro
+
+Solo vuelve a `HUMAN_REQUIRED` cuando aparezca una excepción real. En esta capability, cualquier ampliación a write PROD, side effect, datos cliente, permisos superiores, nuevas credenciales, ejecución externa o Trading es `HIGH_RISK` salvo que otro motivo permitido sea más específico.
