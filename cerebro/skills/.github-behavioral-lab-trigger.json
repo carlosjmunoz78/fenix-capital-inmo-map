@@ -1,7 +1,7 @@
 {
-  "schema_version": "0.1.2",
+  "schema_version": "0.1.3",
   "confirm": "RUN_SYNTHETIC_LAB",
-  "one_shot_id": "skill-lab-20261007-github-gemini-v03-3304c93b",
+  "one_shot_id": "skill-lab-20261007-github-gemini-v04-41c5cadc",
   "target_candidate": "github",
   "target_candidate_id": "lobehub-skills:52441cd3d76607ffffab",
   "expected_upstream_full_name": "openclaw/openclaw",
@@ -19,7 +19,7 @@
   "authorization_basis": "explicit_user_instruction_proceed_after_skill_supply_chain_v0_green",
   "environment": "LAB",
   "company_scope": "transversal",
-  "previous_run_id": 37631900722,
-  "retry_reason": "validated_new_zero_cost_gemini_key_and_route_after_prior_transient_503",
+  "previous_run_id": 37665334003,
+  "retry_reason": "switch_verified_zero_cost_model_from_3_1_to_3_5_after_repeat_http_503",
   "created_at": "2026-10-07"
 }
