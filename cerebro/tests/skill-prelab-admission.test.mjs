@@ -14,6 +14,7 @@ function baseLicense(overrides={}){
 
 test('clean instruction-only P0 candidate becomes static pre-LAB ready but not authorized',()=>{
   const report=buildPrelabAdmission(baseShortlist(),baseBundle(),baseLicense());
+  assert.equal(report.priority_scope,'P0');
   assert.equal(report.static_prelab_ready,1);
   assert.equal(report.results[0].prelab_state,'STATIC_PRELAB_READY_INSTRUCTION_ONLY');
   assert.equal(report.results[0].sandbox_authorized,false);
@@ -68,8 +69,36 @@ test('existing candidate policy remains authoritative before pre-LAB',()=>{
   assert.equal(item.prelab_state,'BLOCKED_BY_EXISTING_POLICY');
 });
 
-test('P1/P2 candidates are out of current P0 admission scope',()=>{
+test('P1/P2 candidates remain out of default P0 admission scope',()=>{
   const shortlist=baseShortlist({priority:'P1'});
-  const item=buildPrelabAdmission(shortlist,baseBundle(),baseLicense()).results[0];
-  assert.equal(item.prelab_state,'OUT_OF_SCOPE_PRIORITY');
+  const report=buildPrelabAdmission(shortlist,baseBundle(),baseLicense());
+  assert.equal(report.priority_scope,'P0');
+  assert.equal(report.results[0].prelab_state,'OUT_OF_SCOPE_PRIORITY');
+  assert.equal(report.results[0].next_action,'WAIT_FOR_P1_P2_PASS');
+});
+
+test('explicit P1 scope evaluates P1 while preserving P0 out of scope',()=>{
+  const shortlist={results:[
+    {...baseShortlist().results[0],candidate_id:'p0',priority:'P0'},
+    {...baseShortlist().results[0],candidate_id:'p1',priority:'P1'}
+  ]};
+  const bundles={results:[
+    {...baseBundle().results[0],candidate_id:'p0'},
+    {...baseBundle().results[0],candidate_id:'p1'}
+  ]};
+  const licenses={results:[
+    {...baseLicense().results[0],candidate_id:'p0'},
+    {...baseLicense().results[0],candidate_id:'p1'}
+  ]};
+  const report=buildPrelabAdmission(shortlist,bundles,licenses,{priority:'P1'});
+  assert.equal(report.priority_scope,'P1');
+  assert.equal(report.scoped_candidates,1);
+  assert.equal(report.static_prelab_ready,1);
+  assert.equal(report.results.find((x)=>x.candidate_id==='p0').prelab_state,'OUT_OF_SCOPE_PRIORITY');
+  assert.equal(report.results.find((x)=>x.candidate_id==='p1').prelab_state,'STATIC_PRELAB_READY_INSTRUCTION_ONLY');
+  assert.equal(report.prod_authorized,false);
+});
+
+test('unsupported priority scope fails closed',()=>{
+  assert.throws(()=>buildPrelabAdmission(baseShortlist(),baseBundle(),baseLicense(),{priority:'P3'}),/unsupported pre-LAB priority scope/);
 });
