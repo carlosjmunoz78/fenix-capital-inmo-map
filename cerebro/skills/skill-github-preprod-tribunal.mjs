@@ -40,7 +40,7 @@ export function runGitHubPreprodTribunal({preprod,judge,labReadiness,labTribunal
   if(judge?.prod_authorized!==false||judge?.merge_authorized!==false||judge?.autonomous_promotion_authorized!==false) blockers.push('PREPROD_JUDGE_UNSAFE_AUTHORIZATION');
 
   if(registry?.capability_id!=='cap:skill-supply-chain'||registry?.owner_engine_id!=='FACT-001') blockers.push('REGISTRY_BINDING_MISMATCH');
-  if(registry?.safety?.prod_authorized!==false||registry?.safety?.merge_authorized!==false||registry?.safety?.autonomous_promotion_authorized!==false) blockers.push('REGISTRY_FAIL_CLOSED_SAFETY_MISSING');
+  if(registry?.safety?.prod_authorized!==false||registry?.safety?.prod_write_authorized!==false||registry?.safety?.autonomous_promotion_authorized!==false) blockers.push('REGISTRY_FAIL_CLOSED_SAFETY_MISSING');
   if(contract?.contract_id!=='contract:skill-supply-chain-v0'||contract?.owner_engine_id!=='FACT-001') blockers.push('CONTRACT_MISMATCH');
   if(contract?.invariants?.prod_write_default!==false||contract?.invariants?.external_skill_code_execution_default!==false||contract?.invariants?.paid_fallback_default!==false) blockers.push('CONTRACT_SAFETY_INVARIANT_MISSING');
 
