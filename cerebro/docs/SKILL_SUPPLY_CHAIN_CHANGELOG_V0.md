@@ -1,5 +1,20 @@
 # CEREBRO OS · Skill Supply Chain · Changelog V0
 
+## 2026-10-07 · GitHub read-only advisory promoted + MONITOR GREEN
+
+- PR #488 fusionado a `main` en `257ba1b9f6d757866a67240c64c7300b6c5de223` sin ampliar permisos.
+- Supply Chain Gate post-merge `37671631421`: SUCCESS.
+- PROD Runtime Smoke post-merge `37671631622`: SUCCESS.
+- PROD Live Deploy `37671631338`: SKIPPED; la App no se redesplegó.
+- Discovery Scout `37671631072`: SUCCESS; artifact `11505407332`, digest `sha256:a0c83328273ce7d7598c34b88487e8dadc781bb3908b28821ab8564d32f3e8cd`.
+- Añadido lane paralelo `CEREBRO Skill GitHub Read-only Monitor` con `contents: read`, schedule diario `47 4 * * *`, manual dispatch y fail-closed contract check.
+- Primer monitor run `37679202506`, head `0a128fac3df39120d1d7f9fcda30857c18694969`: SUCCESS.
+- Artifact `11508121977`, digest `sha256:0f7fa772e09434acabcf9180ac5eab7a9b640f68bfc2c27f07c0da4cb5b04672`.
+- Monitor: 4/4 tests GREEN, 2 GET reales, `main` observado `257ba1b9f6d757866a67240c64c7300b6c5de223`.
+- GitHub writes, merge, push, mutaciones issues/PR, workflow dispatch, datos cliente, código externo, Trading y paid fallback: NO.
+- Coste adicional: 0 €; rollback GREEN; binding final `DISABLED`.
+- Estado operativo permitido: `PROD_READONLY_ADVISORY_GREEN`; cualquier expansión de permisos sigue gated.
+
 ## 2026-10-07 · GitHub candidate PROD read-only canary GREEN
 
 - Autorización humana permanente registrada para mejoras seguras/reversibles que preserven lo existente; el alcance del canary quedó limitado a lectura GitHub.
@@ -32,33 +47,20 @@
 - Tribunal: `GREEN_FOR_HIGH_RISK_PROD_READONLY_CANARY_REVIEW`, blockers 0.
 - Rollback físico: GREEN; rebuild final: `DISABLED`.
 - Datos PROD/cliente, código externo, writes PROD, Trading y paid fallback: NO.
-- Próximo gate del candidato GitHub: `HUMAN_REQUIRED=HIGH_RISK` para `PROD_READONLY_CANARY`; no autorizado todavía en ese corte.
 
 ## 2026-10-07 · Step 5 dark launch + PROD read-only canary GREEN
 
 - PR #486 fusionado a `main` en `a9b51ee98cdfbf674a02e9b68b15bbf0e455d19b` tras autorización humana `HIGH_RISK`.
 - `PROD Live Deploy` quedó SKIPPED: no se usó `[DEPLOY_PROD]`; App no se redesplegó por este cambio.
 - `PROD Runtime Smoke` post-merge: SUCCESS.
-- Implementado runtime canary aislado `PROD_CANARY`, fail-closed, coste 0 € y sin writes.
 - Canary run `37662400743`, head `c84efac4b014aab873d4f484207cbce564792030`: SUCCESS.
 - Artifact `11500917864`, digest `sha256:90f4f554e7e18fcb2ad22094956d5f5dfa3e0c8cad088c6efaf4cde9f2f0eecf`.
-- 2 GET reales: App pública + `fenix-app-gateway/health`.
-- App 200; Gateway 200, `env=PROD`, `service=fenix-app-gateway`.
-- Wrappers Supabase/Postgres y agent-browser ejercitados localmente; `prod_authorized=false` preservado.
-- Datos cliente, credenciales expuestas, código externo, Trading, paid fallback y writes PROD: NO.
-- Binding canary volvió a `DISABLED`; rollback GREEN.
-- Estado canónico: `GREEN_PROD_READONLY_CANARY`; expansión de permisos continúa gated.
+- 2 GET reales: App pública + `fenix-app-gateway/health`; no writes/customer data/código externo/Trading/paid fallback; rollback GREEN.
 
 ## 2026-10-07 · Step 4 PREPROD runtime integration GREEN
 
-- Harness PREPROD separado del proxy sintético sobre `SharedRuntime` y ledgers existentes.
-- Evidence head `86369e0cd0d54c9c205bd39f309804a62b2c59d3`.
-- Workflow `37647914902`: SUCCESS.
-- Artifact `11494354501`, digest `sha256:9dac9feec60dee265d3af9b2413f48394eaf54b7f4109f4ba96051f374770c10`.
-- 18 ejecuciones, 2 packages, 3/3 tests focalizados GREEN.
-- Rollback físico y rebuild default-disabled GREEN.
-- Judge `GREEN_FOR_PREPROD_TRIBUNAL`; Tribunal `GREEN_FOR_HIGH_RISK_PROMOTION_REVIEW`.
-- Sin datos PROD/cliente, sin código externo, writes PROD, Trading ni paid fallback.
+- Evidence head `86369e0cd0d54c9c205bd39f309804a62b2c59d3`; workflow `37647914902`: SUCCESS; artifact `11494354501`, digest `sha256:9dac9feec60dee265d3af9b2413f48394eaf54b7f4109f4ba96051f374770c10`.
+- 18 ejecuciones, 2 packages, 3/3 tests focalizados GREEN; rollback/rebuild GREEN; Judge/Tribunal GREEN; coste adicional 0 €.
 
 ## 2026-10-07 · Step 3 behavioral evidence closure
 

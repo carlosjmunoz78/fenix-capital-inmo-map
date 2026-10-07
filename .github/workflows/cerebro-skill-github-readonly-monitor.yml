@@ -1,0 +1,124 @@
+name: CEREBRO Skill GitHub Read-only Monitor
+
+on:
+  push:
+    branches:
+      - main
+      - cerebro-skill-supply-chain-monitor-20261007
+    paths:
+      - '.github/workflows/cerebro-skill-github-readonly-monitor.yml'
+      - 'cerebro/skills/skill-github-prod-readonly-canary.mjs'
+      - 'cerebro/skills/skill-cerebro-github-wrapper.mjs'
+      - 'cerebro/registry/skill-supply-chain-v0.json'
+      - 'cerebro/contracts/skill-supply-chain-v0.json'
+  schedule:
+    - cron: '47 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-skill-github-readonly-monitor-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CEREBRO_ENVIRONMENT: PROD_CANARY
+  CEREBRO_ALLOW_PROD_DATA: 'false'
+  CEREBRO_ALLOW_CUSTOMER_DATA: 'false'
+  CEREBRO_ALLOW_EXTERNAL_SKILL_CODE: 'false'
+  CEREBRO_ALLOW_PROD_WRITE: 'false'
+  CEREBRO_ALLOW_GITHUB_WRITE: 'false'
+  CEREBRO_ALLOW_TRADING: 'false'
+  CEREBRO_PAID_FALLBACK: 'false'
+
+jobs:
+  github-readonly-monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact monitor source
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Assert canonical GitHub read-only advisory contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs');
+          const r=JSON.parse(fs.readFileSync('cerebro/registry/skill-supply-chain-v0.json','utf8'));
+          const c=JSON.parse(fs.readFileSync('cerebro/contracts/skill-supply-chain-v0.json','utf8'));
+          const g=r.github_prod_readonly_canary_evidence??{};
+          const gc=c.promotion_contract?.github_candidate??{};
+          const ok=r.capability_id==='cap:skill-supply-chain'&&r.owner_engine_id==='FACT-001'&&
+            r.status==='GREEN_PROD_READONLY_CANARY'&&
+            g.status==='GREEN_GITHUB_PROD_READONLY_CANARY'&&g.prod_readonly_advisory_eligible===true&&
+            g.prod_write===false&&g.github_write===false&&g.external_skill_code_executed===false&&g.trading_access===false&&g.paid_fallback===false&&
+            r.safety?.github_prod_readonly_advisory_eligible===true&&
+            r.safety?.prod_write_authorized===false&&r.safety?.prod_authorized===false&&r.safety?.autonomous_promotion_authorized===false&&
+            r.safety?.github_prod_write_authorized===false&&r.safety?.github_prod_authorized===false&&
+            c.contract_id==='contract:skill-supply-chain-v0'&&c.owner_engine_id==='FACT-001'&&
+            c.invariants?.prod_readonly_canary_does_not_authorize_prod_write===true&&
+            c.invariants?.prod_write_default===false&&c.invariants?.external_skill_code_execution_default===false&&c.invariants?.paid_fallback_default===false&&
+            gc.prod_readonly_advisory_eligible===true&&gc.prod_write_authorized===false&&gc.prod_authorized===false&&gc.autonomous_promotion_authorized===false;
+          if(!ok){console.error('Canonical GitHub read-only advisory contract is not fail-closed');process.exit(1)}
+          console.log(JSON.stringify({contract:'GREEN',mode:'READ_ONLY_ADVISORY',prod_write:false,github_write:false,external_skill_code:false,trading:false,paid_fallback:false}));
+          NODE
+
+      - name: Unit-test fail-closed GitHub read-only monitor runtime
+        run: node --test cerebro/tests/skill-github-prod-readonly-canary.test.mjs
+
+      - name: Execute bounded real GitHub read-only observation
+        shell: bash
+        env:
+          CEREBRO_GITHUB_PROD_CANARY_CONFIRM: RUN_GITHUB_PROD_READONLY_CANARY
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          node cerebro/skills/skill-github-prod-readonly-canary.mjs --output artifacts/cerebro-skill-github-readonly-monitor.json
+
+      - name: Assert monitor evidence is GREEN and non-mutating
+        shell: bash
+        run: |
+          set -euo pipefail
+          f=artifacts/cerebro-skill-github-readonly-monitor.json
+          test "$(jq -r '.status' "$f")" = 'GREEN_GITHUB_PROD_READONLY_CANARY'
+          test "$(jq -r '.environment' "$f")" = 'PROD_CANARY'
+          test "$(jq -r '.live_requests' "$f")" = '2'
+          test "$(jq -r '.methods_used | join(",")' "$f")" = 'GET'
+          test "$(jq -r '.repository.full_name' "$f")" = 'carlosjmunoz78/fenix-capital-inmo-map'
+          test "$(jq -r '.repository.default_branch' "$f")" = 'main'
+          test "$(jq -r '.wrapper.wrapper_id' "$f")" = 'skillwrap:cerebro-github-v0.1.0'
+          test "$(jq -r '.wrapper.policy_conflict' "$f")" = 'false'
+          test "$(jq -r '.wrapper.prod_authorized' "$f")" = 'false'
+          test "$(jq -r '.prod_write' "$f")" = 'false'
+          test "$(jq -r '.github_write' "$f")" = 'false'
+          test "$(jq -r '.merge_performed' "$f")" = 'false'
+          test "$(jq -r '.push_performed' "$f")" = 'false'
+          test "$(jq -r '.issue_or_pr_mutation' "$f")" = 'false'
+          test "$(jq -r '.workflow_dispatch_performed' "$f")" = 'false'
+          test "$(jq -r '.customer_data_used' "$f")" = 'false'
+          test "$(jq -r '.credentials_exposed' "$f")" = 'false'
+          test "$(jq -r '.external_skill_code_executed' "$f")" = 'false'
+          test "$(jq -r '.trading_access' "$f")" = 'false'
+          test "$(jq -r '.additional_cost_eur' "$f")" = '0'
+          test "$(jq -r '.paid_fallback' "$f")" = 'false'
+          test "$(jq -r '.rollback_proven' "$f")" = 'true'
+          test "$(jq -r '.binding_after' "$f")" = 'DISABLED'
+          test "$(jq -r '.prod_write_authorized' "$f")" = 'false'
+          test "$(jq -r '.autonomous_promotion_authorized' "$f")" = 'false'
+
+      - name: Upload immutable read-only monitor evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-skill-github-readonly-monitor-${{ github.run_id }}
+          path: artifacts/cerebro-skill-github-readonly-monitor.json
+          if-no-files-found: error
+          retention-days: 30
