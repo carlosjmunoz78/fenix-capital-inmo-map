@@ -31,6 +31,8 @@ env:
   CEREBRO_VALUE_OUTPUT: artifacts/cerebro-skill-value-p0.json
   CEREBRO_LAB_PLAN_OUTPUT: artifacts/cerebro-skill-lab-eval-plans-p0.json
   CEREBRO_STATIC_LAB_OUTPUT: artifacts/cerebro-skill-static-lab-p0.json
+  CEREBRO_NORMALIZED_WRAPPER_ADMISSION_OUTPUT: artifacts/cerebro-skill-normalized-wrapper-admission-p0.json
+  CEREBRO_AGENT_BROWSER_OLDNEW_OUTPUT: artifacts/cerebro-skill-old-vs-new-agent-browser-p0.json
   CEREBRO_OLDNEW_OUTPUT: artifacts/cerebro-skill-old-vs-new-p0.json
   CEREBRO_PROVIDER_BINDING_OUTPUT: artifacts/cerebro-skill-provider-binding.json
   CEREBRO_ZERO_COST_ROUTE_OUTPUT: artifacts/cerebro-skill-zero-cost-route.json
@@ -108,7 +110,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: node cerebro/skills/skill-static-lab-benchmark.mjs --plans "$CEREBRO_LAB_PLAN_OUTPUT" --manifests "$CEREBRO_MANIFEST_OUTPUT" --output "$CEREBRO_STATIC_LAB_OUTPUT"
-      - name: Generate OLD vs NEW synthetic behavioral contracts for static-LAB-green candidates
+      - name: Assess normalized internal wrapper admission without mutating raw static evidence
+        if: steps.upstream.outputs.ready == 'true'
+        run: node cerebro/skills/skill-normalized-wrapper-admission.mjs --static-lab "$CEREBRO_STATIC_LAB_OUTPUT" --wrappers "$CEREBRO_WRAPPER_OUTPUT" --output "$CEREBRO_NORMALIZED_WRAPPER_ADMISSION_OUTPUT"
+      - name: Build isolated agent-browser OLD vs NEW contract from wrapper admission only
+        if: steps.upstream.outputs.ready == 'true'
+        run: node cerebro/skills/skill-agent-browser-old-vs-new.mjs --admission "$CEREBRO_NORMALIZED_WRAPPER_ADMISSION_OUTPUT" --value "$CEREBRO_VALUE_OUTPUT" --wrappers "$CEREBRO_WRAPPER_OUTPUT" --output "$CEREBRO_AGENT_BROWSER_OLDNEW_OUTPUT"
+      - name: Generate OLD vs NEW synthetic behavioral contracts for raw static-LAB-green candidates
         if: steps.upstream.outputs.ready == 'true'
         run: node cerebro/skills/skill-old-vs-new-contract.mjs --static-lab "$CEREBRO_STATIC_LAB_OUTPUT" --value "$CEREBRO_VALUE_OUTPUT" --wrappers "$CEREBRO_WRAPPER_OUTPUT" --output "$CEREBRO_OLDNEW_OUTPUT"
       - name: Bind zero-cost provider readiness from secret-presence booleans only
@@ -174,6 +182,8 @@ jobs:
             artifacts/cerebro-skill-value-p0.json
             artifacts/cerebro-skill-lab-eval-plans-p0.json
             artifacts/cerebro-skill-static-lab-p0.json
+            artifacts/cerebro-skill-normalized-wrapper-admission-p0.json
+            artifacts/cerebro-skill-old-vs-new-agent-browser-p0.json
             artifacts/cerebro-skill-old-vs-new-p0.json
             artifacts/cerebro-skill-provider-binding.json
             artifacts/cerebro-skill-zero-cost-route.json
