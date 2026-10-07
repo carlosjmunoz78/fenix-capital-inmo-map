@@ -119,11 +119,11 @@ jobs:
           const r=JSON.parse(fs.readFileSync('cerebro/registry/skill-supply-chain-v0.json','utf8'));
           const c=JSON.parse(fs.readFileSync('cerebro/contracts/skill-supply-chain-v0.json','utf8'));
           const ok=r.capability_id==='cap:skill-supply-chain'&&r.owner_engine_id==='FACT-001'&&
-            r.safety?.prod_authorized===false&&r.safety?.merge_authorized===false&&r.safety?.autonomous_promotion_authorized===false&&
+            r.safety?.prod_authorized===false&&r.safety?.prod_write_authorized===false&&r.safety?.autonomous_promotion_authorized===false&&
             c.contract_id==='contract:skill-supply-chain-v0'&&c.owner_engine_id==='FACT-001'&&
             c.invariants?.prod_write_default===false&&c.invariants?.external_skill_code_execution_default===false&&c.invariants?.paid_fallback_default===false;
           if(!ok) process.exit(1);
-          console.log(JSON.stringify({registry:'GREEN',contract:'GREEN',prod_authorized:false,merge_authorized:false}));
+          console.log(JSON.stringify({registry:'GREEN',contract:'GREEN',prod_authorized:false,prod_write_authorized:false,autonomous_promotion_authorized:false}));
           NODE
 
       - name: Run focused GitHub PREPROD tests
