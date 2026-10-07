@@ -115,6 +115,7 @@ export function applySupabaseCerebroWrapper({rawOutput,fixture,domain,arm}){
   if(arm!=='CANDIDATE_SKILL_PROXY'||domain!==CEREBRO_SUPABASE_WRAPPER.domain){
     return Object.freeze({
       text:raw,
+      semantic_overlay_text:'',
       applied:false,
       wrapper_id:null,
       wrapper_version:null,
@@ -130,6 +131,7 @@ export function applySupabaseCerebroWrapper({rawOutput,fixture,domain,arm}){
   const advisory=conflict
     ? '[discarded by CEREBRO wrapper because the upstream/model draft conflicted with mandatory policy]'
     : (raw||'[no upstream/model advisory returned]');
+  const semanticOverlayText=profile.safeguards.join('\n');
   const text=[
     'CEREBRO WRAPPED ADVISORY — SYNTHETIC LAB ONLY',
     `Wrapper: ${profile.wrapper_id}`,
@@ -141,6 +143,8 @@ export function applySupabaseCerebroWrapper({rawOutput,fixture,domain,arm}){
   ].join('\n');
   return Object.freeze({
     text,
+    semantic_overlay_text:semanticOverlayText,
+    semantic_overlay_sha256:sha256(semanticOverlayText),
     applied:true,
     wrapper_id:profile.wrapper_id,
     wrapper_version:profile.wrapper_version,
