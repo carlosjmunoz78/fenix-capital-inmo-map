@@ -77,3 +77,31 @@ test('successful provider invocation returns hashes and never emits exact secret
   assert.equal(JSON.stringify(result).includes(apiKey),false);
   assert.equal(result.additional_cost_eur_claimed,0);
 });
+
+test('provider timeout returns structured fail-closed evidence instead of throwing',async()=>{
+  const apiKey='timeout-test-key';
+  const fetchImpl=async(url,options)=>new Promise((resolve,reject)=>{
+    options.signal.addEventListener('abort',()=>{
+      const error=new Error('request aborted after timeout');
+      error.name='AbortError';
+      reject(error);
+    },{once:true});
+  });
+  const result=await invokeZeroCostProvider({providerId:'google-gemini-api-free',prompt:'synthetic timeout fixture',gate:openGate,quotaDecisionResult:quotaAllow,env:{CEREBRO_GEMINI_API_KEY:apiKey},fetchImpl,timeoutMs:5});
+  assert.equal(result.ok,false);
+  assert.equal(result.stop_reason,'PROVIDER_TIMEOUT');
+  assert.equal(result.http_status,null);
+  assert.equal(result.raw_error_message_emitted,false);
+  assert.equal(result.secret_values_emitted,false);
+  assert.equal(JSON.stringify(result).includes(apiKey),false);
+});
+
+test('provider transport errors return hashed fail-closed diagnostics without raw messages',async()=>{
+  const raw='socket failure with provider detail';
+  const result=await invokeZeroCostProvider({providerId:'google-gemini-api-free',prompt:'synthetic transport fixture',gate:openGate,quotaDecisionResult:quotaAllow,env:{CEREBRO_GEMINI_API_KEY:'transport-test-key'},fetchImpl:async()=>{throw new Error(raw);}});
+  assert.equal(result.ok,false);
+  assert.equal(result.stop_reason,'PROVIDER_TRANSPORT_ERROR');
+  assert.equal(result.provider_error_message_sha256.length,64);
+  assert.equal(result.raw_error_message_emitted,false);
+  assert.equal(JSON.stringify(result).includes(raw),false);
+});
