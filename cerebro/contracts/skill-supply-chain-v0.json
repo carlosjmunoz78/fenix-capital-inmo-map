@@ -1,5 +1,5 @@
 {
-  "schema_version": "0.1.2",
+  "schema_version": "0.1.3",
   "contract_id": "contract:skill-supply-chain-v0",
   "capability_id": "cap:skill-supply-chain",
   "owner_engine_id": "FACT-001",
@@ -94,6 +94,42 @@
       "additional_cost_eur": 0,
       "rollback_proven": true,
       "binding_after": "DISABLED"
+    },
+    "github_candidate": {
+      "candidate_id": "lobehub-skills:52441cd3d76607ffffab",
+      "wrapper_id": "skillwrap:cerebro-github-v0.1.0",
+      "upstream_full_name": "openclaw/openclaw",
+      "manifest_path": "skills/github/SKILL.md",
+      "behavioral_lab": {
+        "run_id": 37666101006,
+        "head_sha": "08d46dd25ee40376bf4f548f4f2f6083c53e93f0",
+        "artifact_id": 11502662046,
+        "artifact_digest": "sha256:5d2054116652c980866fe0c11a89d239151299d7e4a1bcdc1b3e19071359540e",
+        "status": "READY_FOR_PREPROD_PROMOTION_REVIEW"
+      },
+      "preprod": {
+        "run_id": 37668271189,
+        "head_sha": "feff48e1764474db0aa118af152b23d816edd00d",
+        "artifact_id": 11503718236,
+        "artifact_digest": "sha256:d6e0fddf4932db4939b78802ee24bd104f1f6775ebe9877657849efdc284130d",
+        "status": "PREPROD_INTEGRATION_COMPLETE",
+        "calls_executed": 9,
+        "observability_records": 9,
+        "audit_records": 9,
+        "finops_records": 9,
+        "additional_cost_eur": 0,
+        "rollback_proven": true,
+        "rebuild_default_disabled": true,
+        "binding_after": "DISABLED",
+        "judge_decision": "GREEN_FOR_PREPROD_TRIBUNAL",
+        "tribunal_decision": "GREEN_FOR_HIGH_RISK_PROD_READONLY_CANARY_REVIEW"
+      },
+      "next_gate": "PROD_READONLY_CANARY",
+      "human_required": "HIGH_RISK",
+      "prod_readonly_canary_authorized": false,
+      "prod_write_authorized": false,
+      "prod_authorized": false,
+      "autonomous_promotion_authorized": false
     },
     "current_state": "GREEN_PROD_READONLY_CANARY",
     "prod_readonly_canary_authorized": true,
