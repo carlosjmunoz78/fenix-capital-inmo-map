@@ -7,8 +7,8 @@ import {applySupabaseCerebroWrapper,renderSupabaseWrapperPromptContract} from '.
 
 const MAX_SKILL_BYTES=256*1024;
 const MAX_DIAGNOSTIC_CHARS=1800;
-const DEFAULT_PROVIDER_TIMEOUT_MS=60000;
-const MAX_PROVIDER_TIMEOUT_MS=60000;
+const DEFAULT_PROVIDER_TIMEOUT_MS=120000;
+const MAX_PROVIDER_TIMEOUT_MS=120000;
 const HUMAN_CODES=['LEGAL_REQUIRED','SIGNATURE_REQUIRED','LOW_CONFIDENCE','HIGH_RISK','POLICY_CONFLICT','SECURITY_INCIDENT','MONEY_LIMIT','CUSTOMER_HUMAN_REQUEST'];
 const PROHIBITED_OUTPUT=[
   ['PROD_WRITE',/\b(?:write|deploy|publish|merge|delete|alter)\b.{0,80}\bprod(?:uction)?\b/i],
@@ -158,8 +158,8 @@ async function fetchExactSkillText(candidate,manifest,{token=process.env.GITHUB_
 
 export async function runBehavioralProxy({oldVsNew,manifests,gate,quotaPlan,routeAudit,env=process.env,providerFetch=fetch,githubFetch=fetch,githubToken=process.env.GITHUB_TOKEN,observedAt=new Date().toISOString()}={}){
   const timeoutMs=providerTimeoutMs(env);
-  if(gate?.allowed!==true) return Object.freeze({schema_version:'0.3.1',execution_mode:'SYNTHETIC_BEHAVIORAL_PROXY',status:'BLOCKED_BY_EXECUTION_GATE',blockers:gate?.blockers??['GATE_CLOSED'],calls_executed:0,provider_timeout_ms:timeoutMs,external_skill_code_executed:false,prod_authorized:false,results:[]});
-  if(quotaPlan?.executable!==true||!routeAudit?.selected_route) return Object.freeze({schema_version:'0.3.1',execution_mode:'SYNTHETIC_BEHAVIORAL_PROXY',status:'BLOCKED_BY_ROUTE_OR_QUOTA',calls_executed:0,provider_timeout_ms:timeoutMs,external_skill_code_executed:false,prod_authorized:false,results:[]});
+  if(gate?.allowed!==true) return Object.freeze({schema_version:'0.3.2',execution_mode:'SYNTHETIC_BEHAVIORAL_PROXY',status:'BLOCKED_BY_EXECUTION_GATE',blockers:gate?.blockers??['GATE_CLOSED'],calls_executed:0,provider_timeout_ms:timeoutMs,external_skill_code_executed:false,prod_authorized:false,results:[]});
+  if(quotaPlan?.executable!==true||!routeAudit?.selected_route) return Object.freeze({schema_version:'0.3.2',execution_mode:'SYNTHETIC_BEHAVIORAL_PROXY',status:'BLOCKED_BY_ROUTE_OR_QUOTA',calls_executed:0,provider_timeout_ms:timeoutMs,external_skill_code_executed:false,prod_authorized:false,results:[]});
   const manifestMap=byCandidate(manifests);
   const providerId=routeAudit.selected_route.provider_id;
   const results=[]; let callsUsed=0; let stopReason=null;
@@ -212,7 +212,7 @@ export async function runBehavioralProxy({oldVsNew,manifests,gate,quotaPlan,rout
     const metricSet=(arms)=>({constraint_compliance:avg(arms,'constraint_compliance'),task_correctness_proxy:avg(arms,'task_correctness_proxy'),evidence_quality_proxy:avg(arms,'evidence_quality_proxy'),human_exception_correctness:avg(arms,'human_exception_correctness')});
     results.push({package_id:pkg.package_id,candidate_id:pkg.candidate_id,domain:pkg.domain,status:stopReason?'PARTIAL_STOPPED':'PROXY_COMPLETE',baseline_metrics:metricSet(baselineArms),candidate_metrics:metricSet(candidateArms),fixture_results:fixtureResults,actual_current_engine_baseline_executed:false,independent_judge_executed:false,rollback_proof:false,promotion_authorized:false});
   }
-  return Object.freeze({schema_version:'0.3.1',execution_mode:'SYNTHETIC_BEHAVIORAL_PROXY',observed_at:observedAt,status:stopReason?'STOPPED_FAIL_CLOSED':'PROXY_COMPLETE',stop_reason:stopReason,calls_executed:callsUsed,provider_id:providerId,provider_timeout_ms:timeoutMs,synthetic_only:true,external_skill_code_executed:false,actual_current_engine_baseline_executed:false,independent_judge_executed:false,prod_authorized:false,promotion_authorized:false,results});
+  return Object.freeze({schema_version:'0.3.2',execution_mode:'SYNTHETIC_BEHAVIORAL_PROXY',observed_at:observedAt,status:stopReason?'STOPPED_FAIL_CLOSED':'PROXY_COMPLETE',stop_reason:stopReason,calls_executed:callsUsed,provider_id:providerId,provider_timeout_ms:timeoutMs,synthetic_only:true,external_skill_code_executed:false,actual_current_engine_baseline_executed:false,independent_judge_executed:false,prod_authorized:false,promotion_authorized:false,results});
 }
 
 function argValue(name){const i=process.argv.indexOf(name);return i>=0?process.argv[i+1]:null;}

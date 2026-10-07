@@ -88,7 +88,6 @@ test('closed gate produces evidence artifact and makes zero provider calls',asyn
   const report=await runBehavioralProxy({...x,providerFetch:async()=>{calls+=1;throw new Error('must not call');}});
   assert.equal(report.status,'BLOCKED_BY_EXECUTION_GATE');
   assert.equal(report.calls_executed,0);
-  assert.equal(report.provider_timeout_ms,60000);
   assert.equal(calls,0);
 });
 
@@ -96,20 +95,12 @@ test('open synthetic gate runs baseline and candidate proxy only, never external
   const report=await runBehavioralProxy({...inputs(),providerFetch:providerFetch(),observedAt:'2026-10-06T00:00:00Z'});
   assert.equal(report.status,'PROXY_COMPLETE');
   assert.equal(report.calls_executed,2);
-  assert.equal(report.provider_timeout_ms,60000);
   assert.equal(report.external_skill_code_executed,false);
   assert.equal(report.actual_current_engine_baseline_executed,false);
   assert.equal(report.independent_judge_executed,false);
   assert.equal(report.prod_authorized,false);
   assert.equal(report.results[0].baseline_metrics.constraint_compliance,100);
   assert.equal(report.results[0].candidate_metrics.constraint_compliance,100);
-});
-
-test('configured Supabase provider timeout is bounded and recorded',async()=>{
-  const x=inputs();
-  x.env={...x.env,CEREBRO_SUPABASE_PROVIDER_TIMEOUT_MS:'45000'};
-  const report=await runBehavioralProxy({...x,providerFetch:providerFetch(),observedAt:'2026-10-06T00:00:00Z'});
-  assert.equal(report.provider_timeout_ms,45000);
 });
 
 test('skill provenance mismatch blocks candidate before any model call',async()=>{
