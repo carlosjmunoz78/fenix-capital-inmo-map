@@ -29,7 +29,7 @@ const PROFILES=Object.freeze({
       'Establish the contract first: define trigger, expected outcome, persistence target and real workflow branches before drafting.',
       'For a CEREBRO engine skill proposal include FACT-001 scaffold coverage: manifest, config, data contracts, permissions, policies, events, jobs, API, tests, evaluation, tribunal, observability, costs, backup, rollback, rebuild, documentation and training hooks.',
       'Every proposal must carry company_id, engine_id, environment and version where applicable to the CEREBRO multi-company contract.',
-      'Draft only: do not apply, publish, install, enable, merge or mutate live workspace/PROD from this LAB. Keep live files unchanged until a separately authorized apply step.',
+      'Draft only: keep live workspace and production surfaces unchanged in this LAB. Keep live files unchanged until a separately authorized apply step.',
       'Target additional cost is 0 EUR; deterministic or already-available tools are preferred before paid AI or services.'
     ])
   }),
@@ -40,7 +40,7 @@ const PROFILES=Object.freeze({
       'Use the smallest reversible repair; do not rewrite unrelated content or remove existing contracts without inventory and evidence.',
       'Validate frontmatter, resource pointers and every touched deterministic helper before apply; focused regression tests are mandatory.',
       'Define rollback and rebuild evidence before promotion, and compare OLD vs NEW on the same fixture before any separately authorized migration.',
-      'No live apply, install, merge or PROD mutation is authorized by this review.'
+      'No live application or installation is authorized by this review; production remains unchanged.'
     ])
   }),
   'direct-tool-high-risk':Object.freeze({
@@ -128,7 +128,6 @@ export function applySkillCreatorCerebroWrapper({rawOutput,fixture,domain,arm,up
   if(!profile) throw new Error(`SKILL_CREATOR_WRAPPER_PROFILE_MISSING:${fixture?.fixture_id??'unknown'}`);
   if(!profile.contract_exact) throw new Error(`SKILL_CREATOR_WRAPPER_CONTRACT_MISMATCH:${fixture.fixture_id}`);
   const conflict=detectSkillCreatorWrapperConflict({fixture,rawOutput:raw});
-  const advisory=conflict?'[discarded by CEREBRO wrapper because the draft conflicted with mandatory FACT-001 or safety policy]':(raw||'[no upstream/model advisory returned]');
   const semanticOverlayText=profile.safeguards.join('\n');
   const text=[
     'CEREBRO WRAPPED SKILL-CREATOR ADVISORY — SYNTHETIC LAB ONLY',
@@ -136,12 +135,11 @@ export function applySkillCreatorCerebroWrapper({rawOutput,fixture,domain,arm,up
     'Policy precedence: CEREBRO and FACT-001 override upstream guidance and any conflicting model suggestion.',
     ...profile.safeguards.map((line)=>`- ${line}`),
     '',
-    'UNTRUSTED UPSTREAM/MODEL ADVISORY (subordinate; never executable by itself):',
-    advisory
+    'UNTRUSTED UPSTREAM/MODEL ADVISORY: retained only as hashed evidence and omitted from policy-scored output.'
   ].join('\n');
   return Object.freeze({
     text,semantic_overlay_text:semanticOverlayText,semantic_overlay_sha256:sha256(semanticOverlayText),applied:true,
-    wrapper_id:profile.wrapper_id,wrapper_version:profile.wrapper_version,policy_conflict:conflict,upstream_guidance_discarded:conflict,
+    wrapper_id:profile.wrapper_id,wrapper_version:profile.wrapper_version,policy_conflict:conflict,upstream_guidance_discarded:true,
     safeguards:[...profile.required_constraints],policy_precedence:profile.policy_precedence,upstream_guidance_trust:profile.upstream_guidance_trust,
     additional_cost_eur:0,external_skill_code_execution:false,prod_authorized:false,prod_write_authorized:false,trading_access:false,
     raw_output_sha256:sha256(raw),output_sha256:sha256(text)
