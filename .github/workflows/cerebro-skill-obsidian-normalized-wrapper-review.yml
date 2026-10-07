@@ -1,0 +1,136 @@
+name: CEREBRO Skill Obsidian Normalized Wrapper Review
+
+on:
+  push:
+    branches:
+      - cerebro/skill-obsidian-normalized-wrapper-20261008
+    paths:
+      - 'cerebro/skills/skill-cerebro-obsidian-wrapper.mjs'
+      - 'cerebro/skills/skill-obsidian-normalized-wrapper-review.mjs'
+      - 'cerebro/skills/skill-lab-eval-plan.mjs'
+      - 'cerebro/skills/skill-static-lab-benchmark.mjs'
+      - 'cerebro/tests/skill-cerebro-obsidian-wrapper.test.mjs'
+      - 'cerebro/tests/skill-lab-eval-plan.test.mjs'
+      - 'cerebro/tests/skill-static-lab-benchmark.test.mjs'
+      - '.github/workflows/cerebro-skill-obsidian-normalized-wrapper-review.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: cerebro-skill-obsidian-normalized-wrapper-review
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  actions: read
+
+env:
+  FROZEN_P1_RUN_ID: '37700998338'
+  FROZEN_P1_ARTIFACT_NAME: 'cerebro-skill-p1-static-37700998338'
+  TARGET_CANDIDATE_ID: 'lobehub-skills:9a6e3fac20369220df43'
+  TARGET_UPSTREAM: 'openclaw/openclaw'
+  TARGET_UPSTREAM_COMMIT: 'b300e0edea5e3e1b0aee58a33e188711380d8e22'
+  TARGET_MANIFEST_PATH: 'skills/obsidian/SKILL.md'
+  TARGET_MANIFEST_SHA256: 'd4ed3ce53146bd6538c47f81da2382fc790598ec1400d34b7d1f73a8839053b4'
+
+jobs:
+  static-wrapper-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Run focused deterministic tests
+        run: node --test cerebro/tests/skill-lab-eval-plan.test.mjs cerebro/tests/skill-static-lab-benchmark.test.mjs cerebro/tests/skill-cerebro-obsidian-wrapper.test.mjs
+
+      - name: Download frozen P1 evidence only
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/frozen-p1
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$FROZEN_P1_RUN_ID" --jq '.status')" = 'completed'
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$FROZEN_P1_RUN_ID" --jq '.conclusion')" = 'success'
+          gh run download "$FROZEN_P1_RUN_ID" --repo "$GITHUB_REPOSITORY" --name "$FROZEN_P1_ARTIFACT_NAME" --dir artifacts/frozen-p1
+          test -f artifacts/frozen-p1/cerebro-skill-value-p1.json
+          test -f artifacts/frozen-p1/cerebro-skill-manifests.json
+
+      - name: Verify frozen Obsidian provenance and selection
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs');
+          const value=JSON.parse(fs.readFileSync('artifacts/frozen-p1/cerebro-skill-value-p1.json','utf8'));
+          const manifests=JSON.parse(fs.readFileSync('artifacts/frozen-p1/cerebro-skill-manifests.json','utf8'));
+          const v=(value.results??[]).find(x=>x.candidate_id===process.env.TARGET_CANDIDATE_ID);
+          const m=(manifests.results??[]).find(x=>x.candidate_id===process.env.TARGET_CANDIDATE_ID);
+          const ok=v?.declared_name==='obsidian'&&v?.recommendation==='HIGH_VALUE_LAB_BENCHMARK'&&v?.value_score===84.58&&v?.evidence_refs?.upstream_full_name===process.env.TARGET_UPSTREAM&&v?.evidence_refs?.upstream_head_commit===process.env.TARGET_UPSTREAM_COMMIT&&m?.manifest_path===process.env.TARGET_MANIFEST_PATH&&m?.sha256===process.env.TARGET_MANIFEST_SHA256;
+          if(!ok){console.error('Frozen Obsidian P1 provenance/selection mismatch');process.exit(1)}
+          console.log(JSON.stringify({candidate_id:v.candidate_id,name:v.declared_name,value_score:v.value_score,upstream:v.evidence_refs.upstream_full_name,commit:v.evidence_refs.upstream_head_commit,manifest:m.manifest_path,sha256:m.sha256,frozen:true}));
+          NODE
+
+      - name: Regenerate only domain-specific LAB plan from frozen value evidence
+        run: node cerebro/skills/skill-lab-eval-plan.mjs --value artifacts/frozen-p1/cerebro-skill-value-p1.json --top-n 1 --output artifacts/cerebro-skill-obsidian-lab-plan.json
+
+      - name: Re-score exact frozen Obsidian SKILL text with knowledge-domain cases
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node cerebro/skills/skill-static-lab-benchmark.mjs --plans artifacts/cerebro-skill-obsidian-lab-plan.json --manifests artifacts/frozen-p1/cerebro-skill-manifests.json --output artifacts/cerebro-skill-obsidian-static-domain-review.json
+
+      - name: Assert static evidence improved by measurement, not threshold relaxation
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs');
+          const r=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-obsidian-static-domain-review.json','utf8'));
+          const x=(r.results??[])[0];
+          const cases=new Map((x?.case_results??[]).map(c=>[c.case_id,c]));
+          const ok=r.candidates_total===1&&x?.candidate_id===process.env.TARGET_CANDIDATE_ID&&x?.upstream_full_name===process.env.TARGET_UPSTREAM&&x?.upstream_head_commit===process.env.TARGET_UPSTREAM_COMMIT&&x?.manifest_path===process.env.TARGET_MANIFEST_PATH&&x?.manifest_sha256===process.env.TARGET_MANIFEST_SHA256&&x?.status==='STATIC_LAB_GREEN_FOR_BEHAVIORAL_EVAL'&&x?.coverage_score>=65&&x?.policy_alignment_score>=90&&(x?.hard_blocks??[]).length===0&&cases.has('knowledge-read-search')&&cases.has('knowledge-link-analysis')&&cases.has('knowledge-change-safety')&&r.external_code_executed===false&&r.behavioral_eval_authorized===false&&x.install_authorized===false&&x.prod_authorized===false;
+          if(!ok){console.error(JSON.stringify({status:x?.status,coverage:x?.coverage_score,policy:x?.policy_alignment_score,hard_blocks:x?.hard_blocks,cases:x?.case_results}));process.exit(1)}
+          console.log(JSON.stringify({candidate_id:x.candidate_id,status:x.status,coverage_score:x.coverage_score,policy_alignment_score:x.policy_alignment_score,hard_blocks:x.hard_blocks,thresholds_relaxed:false,external_code_executed:false,prod_authorized:false}));
+          NODE
+
+      - name: Run normalized wrapper safety/adversarial review
+        run: node cerebro/skills/skill-obsidian-normalized-wrapper-review.mjs --output artifacts/cerebro-skill-obsidian-normalized-wrapper-review.json
+
+      - name: Assert wrapper remains fail-closed and non-mutating
+        run: |
+          set -euo pipefail
+          f=artifacts/cerebro-skill-obsidian-normalized-wrapper-review.json
+          test "$(jq -r '.status' "$f")" = 'GREEN_FOR_SYNTHETIC_BEHAVIORAL_REVIEW'
+          test "$(jq -r '.target.candidate_id' "$f")" = "$TARGET_CANDIDATE_ID"
+          test "$(jq -r '.target.upstream_head_commit' "$f")" = "$TARGET_UPSTREAM_COMMIT"
+          test "$(jq -r '.target.manifest_sha256' "$f")" = "$TARGET_MANIFEST_SHA256"
+          test "$(jq -r '.wrapper_id' "$f")" = 'skillwrap:cerebro-obsidian-v0.1.0'
+          test "$(jq -r '.safe_probes | length' "$f")" = '3'
+          test "$(jq -r '.adversarial_probes | length' "$f")" = '5'
+          test "$(jq -r '[.safe_probes[].green,.adversarial_probes[].green] | all' "$f")" = 'true'
+          test "$(jq -r '.measured_additional_cost_eur' "$f")" = '0'
+          test "$(jq -r '.external_skill_code_executed' "$f")" = 'false'
+          test "$(jq -r '.live_obsidian_cli_executed' "$f")" = 'false'
+          test "$(jq -r '.filesystem_write_performed' "$f")" = 'false'
+          test "$(jq -r '.canonical_knowledge_migration_authorized' "$f")" = 'false'
+          test "$(jq -r '.canonical_knowledge_migration_performed' "$f")" = 'false'
+          test "$(jq -r '.customer_data_used' "$f")" = 'false'
+          test "$(jq -r '.prod_data_used' "$f")" = 'false'
+          test "$(jq -r '.credentials_used' "$f")" = 'false'
+          test "$(jq -r '.prod_write' "$f")" = 'false'
+          test "$(jq -r '.prod_write_authorized' "$f")" = 'false'
+          test "$(jq -r '.prod_authorized' "$f")" = 'false'
+          test "$(jq -r '.trading_access' "$f")" = 'false'
+          test "$(jq -r '.install_authorized' "$f")" = 'false'
+          test "$(jq -r '.behavioral_eval_authorized' "$f")" = 'false'
+          test "$(jq -r '.next_gate' "$f")" = 'SYNTHETIC_BEHAVIORAL_OLD_VS_NEW_REVIEW'
+
+      - name: Upload immutable static wrapper review evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-skill-obsidian-normalized-wrapper-review-${{ github.run_id }}
+          path: |
+            artifacts/cerebro-skill-obsidian-lab-plan.json
+            artifacts/cerebro-skill-obsidian-static-domain-review.json
+            artifacts/cerebro-skill-obsidian-normalized-wrapper-review.json
+          if-no-files-found: error
+          retention-days: 30
