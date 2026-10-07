@@ -1,0 +1,15 @@
+name: CEREBRO RSI Observability Security Gate
+on:
+  pull_request:
+    paths: ['cerebro/runtime/rsi-observability-security.mjs','cerebro/tests/rsi-observability-security.test.mjs','cerebro/docs/RSI_OBSERVABILITY_FINOPS_SECURITY_V0.md','.github/workflows/cerebro-rsi-observability-security-gate.yml']
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  block-k-observability-security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 20}
+      - run: node --test cerebro/tests/rsi-observability-security.test.mjs

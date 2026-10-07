@@ -1,0 +1,20 @@
+name: CEREBRO RSI Experiment Gate
+on:
+  pull_request:
+    paths:
+      - 'cerebro/runtime/experiment-pipeline.mjs'
+      - 'cerebro/tests/experiment-pipeline.test.mjs'
+      - 'cerebro/docs/RSI_EXPERIMENT_SIM_TWIN_V0.md'
+      - '.github/workflows/cerebro-rsi-experiment-gate.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  block-e-experiment:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 20}
+      - run: node --test cerebro/tests/experiment-pipeline.test.mjs

@@ -1,0 +1,19 @@
+name: CEREBRO RSI End To End Gate
+on:
+  pull_request:
+    paths:
+      - 'cerebro/runtime/**'
+      - 'cerebro/tests/rsi-e2e.test.mjs'
+      - 'cerebro/docs/RSI_E2E_GATE_V0.md'
+      - '.github/workflows/cerebro-rsi-e2e-gate.yml'
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  rsi-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 20}
+      - run: node --test cerebro/tests/rsi-e2e.test.mjs
