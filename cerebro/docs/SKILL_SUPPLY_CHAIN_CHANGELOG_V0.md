@@ -1,5 +1,39 @@
 # CEREBRO OS · Skill Supply Chain · Changelog V0
 
+## 2026-10-07 · GitHub candidate PROD read-only canary GREEN
+
+- Autorización humana permanente registrada para mejoras seguras/reversibles que preserven lo existente; el alcance del canary quedó limitado a lectura GitHub.
+- Runtime canary específico `skill-github-prod-readonly-canary.mjs`, paralelo al canary existente y fail-closed.
+- Workflow run `37670597824`, head `7ee76db7a44b7e3c1153fd3b35365fc2e2ca5554`: SUCCESS.
+- Artifact `11505096443`, digest `sha256:7837d90b4a12c2b1d61faf9db1ac2c3300fc166a554d8b2e3057098c08acf387`.
+- 2 GET reales a GitHub: metadata del repositorio y ref `main`.
+- Repositorio: `carlosjmunoz78/fenix-capital-inmo-map`; SHA `main` observado: `3304c93b3aceed338fc2bb7d377c4d562d2d18b2`.
+- Tests canary 4/4 GREEN; evidencia PREPROD inmutable revalidada antes del canary.
+- Wrapper `skillwrap:cerebro-github-v0.1.0` aplicado localmente; `prod_authorized=false` preservado.
+- GitHub writes, merge, push, mutación issues/PR y workflow dispatch: NO.
+- Datos cliente, credenciales expuestas, código externo de skills, Trading y paid fallback: NO.
+- Coste adicional 0 €.
+- Binding efímero restaurado a `DISABLED`; rollback GREEN.
+- Estado GitHub: `PROD_READONLY_ADVISORY_ELIGIBLE`; cualquier expansión de permisos/write permanece gated.
+
+## 2026-10-07 · GitHub candidate PREPROD GREEN
+
+- Candidato `github`: `lobehub-skills:52441cd3d76607ffffab`, upstream fijado `openclaw/openclaw`, manifest `skills/github/SKILL.md`, wrapper `skillwrap:cerebro-github-v0.1.0`.
+- Behavioral LAB previo: run `37666101006`, head `08d46dd25ee40376bf4f548f4f2f6083c53e93f0`, artifact `11502662046`, digest `sha256:5d2054116652c980866fe0c11a89d239151299d7e4a1bcdc1b3e19071359540e`.
+- PREPROD aislado y paralelo para no alterar el workflow genérico existente.
+- Primer intento PREPROD `37667783071`: FAIL-CLOSED antes de ejecutar el binding por una aserción documental que esperaba `merge_authorized`; el Registry canónico usa `prod_write_authorized`. No hubo ejecución PREPROD ni side effects en ese intento.
+- Corrección mínima: alinear la aserción con el schema canónico sin modificar permisos ni umbrales.
+- PREPROD run `37668271189`, head `feff48e1764474db0aa118af152b23d816edd00d`: SUCCESS.
+- Artifact `11503718236`, digest `sha256:d6e0fddf4932db4939b78802ee24bd104f1f6775ebe9877657849efdc284130d`.
+- 9 ejecuciones PREPROD: baseline + candidate + rollback baseline sobre 3 fixtures.
+- Observabilidad: 9; audit: 9; FinOps: 9; audit chain válida; coste adicional 0 €.
+- Tests focalizados: 5/5 GREEN.
+- Judge: `GREEN_FOR_PREPROD_TRIBUNAL`.
+- Tribunal: `GREEN_FOR_HIGH_RISK_PROD_READONLY_CANARY_REVIEW`, blockers 0.
+- Rollback físico: GREEN; rebuild final: `DISABLED`.
+- Datos PROD/cliente, código externo, writes PROD, Trading y paid fallback: NO.
+- Próximo gate del candidato GitHub: `HUMAN_REQUIRED=HIGH_RISK` para `PROD_READONLY_CANARY`; no autorizado todavía en ese corte.
+
 ## 2026-10-07 · Step 5 dark launch + PROD read-only canary GREEN
 
 - PR #486 fusionado a `main` en `a9b51ee98cdfbf674a02e9b68b15bbf0e455d19b` tras autorización humana `HIGH_RISK`.

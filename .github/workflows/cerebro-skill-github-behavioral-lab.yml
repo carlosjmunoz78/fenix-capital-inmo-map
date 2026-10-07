@@ -15,7 +15,7 @@ env:
   CEREBRO_BEHAVIORAL_EXECUTION_ENABLED: 'true'
   CEREBRO_ALLOW_PROD_DATA: 'false'
   CEREBRO_ALLOW_CUSTOMER_DATA: 'false'
-  CEREBRO_GEMINI_MODEL: gemini-3.1-flash-lite
+  CEREBRO_GEMINI_MODEL: gemini-3.5-flash-lite
   CEREBRO_GITHUB_PROVIDER_TIMEOUT_MS: '45000'
 
 jobs:
@@ -125,7 +125,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           CEREBRO_GEMINI_API_KEY: ${{ secrets.CEREBRO_GEMINI_API_KEY }}
-          CEREBRO_GEMINI_MODEL: gemini-3.1-flash-lite
+          CEREBRO_GEMINI_MODEL: gemini-3.5-flash-lite
           CEREBRO_GITHUB_PROVIDER_TIMEOUT_MS: '45000'
         run: node cerebro/skills/skill-github-behavioral-proxy-runner.mjs --oldnew artifacts/cerebro-skill-old-vs-new-github.manual.json --manifests artifacts/cerebro-skill-manifests.json --gate artifacts/cerebro-skill-behavioral-execution-gate.github.manual.json --quota artifacts/cerebro-skill-free-quota-plan.github.manual.json --route artifacts/cerebro-skill-zero-cost-route.github.manual.json --output artifacts/cerebro-skill-behavioral-proxy.github.manual.json
 
@@ -137,9 +137,9 @@ jobs:
           const arms=(p.results??[]).flatMap(r=>(r.fixture_results??[]).flatMap(f=>f.arms??[]));
           const candidateArms=arms.filter(a=>a.arm==='CANDIDATE_SKILL_PROXY');
           const baselineArms=arms.filter(a=>a.arm==='BASELINE_PROXY');
-          const ok=p.status==='PROXY_COMPLETE'&&p.calls_executed===6&&p.provider_id==='google-gemini-api-free'&&arms.length===6&&candidateArms.length===3&&baselineArms.length===3&&arms.every(a=>a.model==='gemini-3.1-flash-lite')&&candidateArms.every(a=>a.wrapper_applied===true&&a.wrapper_id==='skillwrap:cerebro-github-v0.1.0')&&baselineArms.every(a=>a.wrapper_applied===false)&&p.synthetic_only===true&&p.external_skill_code_executed===false&&p.prod_authorized===false;
+          const ok=p.status==='PROXY_COMPLETE'&&p.calls_executed===6&&p.provider_id==='google-gemini-api-free'&&arms.length===6&&candidateArms.length===3&&baselineArms.length===3&&arms.every(a=>a.model==='gemini-3.5-flash-lite')&&candidateArms.every(a=>a.wrapper_applied===true&&a.wrapper_id==='skillwrap:cerebro-github-v0.1.0')&&baselineArms.every(a=>a.wrapper_applied===false)&&p.synthetic_only===true&&p.external_skill_code_executed===false&&p.prod_authorized===false;
           if(!ok){console.error('GitHub behavioral execution invariant failed');process.exit(1)}
-          console.log(JSON.stringify({status:p.status,calls_executed:6,provider_id:p.provider_id,model:'gemini-3.1-flash-lite',candidate_wrapper_applied:3,baseline_wrapper_applied:0,synthetic_only:true,external_skill_code_executed:false,prod_authorized:false}));
+          console.log(JSON.stringify({status:p.status,calls_executed:6,provider_id:p.provider_id,model:'gemini-3.5-flash-lite',candidate_wrapper_applied:3,baseline_wrapper_applied:0,synthetic_only:true,external_skill_code_executed:false,prod_authorized:false}));
           NODE
 
       - name: Run fixed-threshold deterministic independent judge
