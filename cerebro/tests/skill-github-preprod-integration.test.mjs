@@ -17,7 +17,7 @@ const trigger=Object.freeze({
 });
 const labReadiness=Object.freeze({status:'READY_FOR_PREPROD_PROMOTION_REVIEW',ready:true,human_required:'HIGH_RISK',merge_authorized:false,prod_authorized:false,autonomous_promotion_authorized:false});
 const labTribunal=Object.freeze({decision:'GREEN',green:true,blockers:[],prod_authorized:false,autonomous_promotion_authorized:false});
-const registry=Object.freeze({capability_id:'cap:skill-supply-chain',owner_engine_id:'FACT-001',safety:{prod_authorized:false,merge_authorized:false,autonomous_promotion_authorized:false}});
+const registry=Object.freeze({capability_id:'cap:skill-supply-chain',owner_engine_id:'FACT-001',safety:{prod_authorized:false,prod_write_authorized:false,autonomous_promotion_authorized:false}});
 const contract=Object.freeze({contract_id:'contract:skill-supply-chain-v0',owner_engine_id:'FACT-001',invariants:{prod_write_default:false,external_skill_code_execution_default:false,paid_fallback_default:false}});
 
 test('GitHub PREPROD executes OLD vs NEW, observability, rollback and rebuild with zero side effects',async()=>{
