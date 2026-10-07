@@ -22,9 +22,11 @@ const CASE_TERM_GROUPS=Object.freeze({
 const HARD_BLOCK_PATTERNS=Object.freeze([
   ['CAPTCHA_BYPASS',/captcha.{0,40}(?:bypass|solve|evad)/i],
   ['ANTI_DETECT',/anti[- ]?detect|fingerprint.{0,30}(?:spoof|evad)/i],
-  ['CREDENTIAL_EXTRACTION',/(?:extract|dump|steal).{0,40}(?:credential|password|token|secret)/i],
-  ['SAFETY_OVERRIDE',/(?:ignore|bypass|disable).{0,40}(?:safety|policy|permission|guardrail)/i]
+  ['CREDENTIAL_EXTRACTION',/(?:extract|dump|steal).{0,40}(?:credential|password|token|secret)/i]
 ]);
+const SAFETY_OVERRIDE_PATTERN=/(?:ignore|bypass|disable).{0,40}(?:safety|policy|permission|guardrail)/gi;
+const SAFETY_PROHIBITION_CUE=/(?:\bdo not\b|\bdon't\b|\bnever\b|\bmust not\b|\bshould not\b|\bshall not\b|\bcannot\b|\bcan't\b)/gi;
+const CLAUSE_BOUNDARY=/[.!?;\n\r]/;
 
 function byCandidate(report){
   const map=new Map();
@@ -38,6 +40,30 @@ function clamp(n,min=0,max=100){return Math.max(min,Math.min(max,n));}
 
 function groupHit(text,terms){return terms.some((term)=>text.includes(term));}
 
+function clauseStartBefore(text,index){
+  for(let i=index-1;i>=0;i-=1) if(CLAUSE_BOUNDARY.test(text[i])) return i+1;
+  return 0;
+}
+
+function isExplicitlyProhibitedSafetyOverride(text,matchIndex){
+  const prefix=text.slice(clauseStartBefore(text,matchIndex),matchIndex);
+  SAFETY_PROHIBITION_CUE.lastIndex=0;
+  let cue=null,current;
+  while((current=SAFETY_PROHIBITION_CUE.exec(prefix))!==null) cue=current;
+  if(!cue) return false;
+  const distance=prefix.length-(cue.index+cue[0].length);
+  return distance<=48;
+}
+
+function hasUnprohibitedSafetyOverride(text){
+  SAFETY_OVERRIDE_PATTERN.lastIndex=0;
+  let match;
+  while((match=SAFETY_OVERRIDE_PATTERN.exec(text))!==null){
+    if(!isExplicitlyProhibitedSafetyOverride(text,match.index)) return true;
+  }
+  return false;
+}
+
 export function scoreCaseCoverage(content,testCase){
   const text=normalizeText(content);
   const groups=CASE_TERM_GROUPS[testCase?.case_id]??[];
@@ -50,6 +76,7 @@ export function analyzeStaticLabContent(content,{manifestFlags=[]}={}){
   const text=String(content??'');
   const hardBlocks=[];
   for(const [id,re] of HARD_BLOCK_PATTERNS) if(re.test(text)) hardBlocks.push(id);
+  if(hasUnprohibitedSafetyOverride(text)) hardBlocks.push('SAFETY_OVERRIDE');
   let policyScore=100;
   const flags=new Set(manifestFlags??[]);
   if(flags.has('ROUTER_PRECEDENCE_CLAIM')) policyScore-=12;
