@@ -16,7 +16,8 @@ Fecha: 2026-10-07
 - Dark launch a `main` completado sin App deploy para el lane previamente autorizado.
 - PROD Runtime Smoke post-merge GREEN.
 - PROD read-only canary real GREEN sobre App pública y Gateway health para el lane previamente autorizado.
-- Binding canary restaurado a `DISABLED`.
+- GitHub PROD read-only canary real GREEN: run `37670597824`, 2 GET reales contra metadata del repo y ref `main`.
+- Binding GitHub canary restaurado a `DISABLED`.
 
 ## EXISTENTE Y PRESERVADO
 
@@ -24,19 +25,22 @@ Fecha: 2026-10-07
 - Trading permanece aislado.
 - FACT-001 sigue siendo owner; no se crea nuevo engine_id.
 - Wrappers mantienen `prod_authorized=false` para side effects/writes.
-- El PREPROD GitHub se implementó en paralelo y no sustituyó el workflow PREPROD genérico.
+- El PREPROD y el canary GitHub se implementaron en paralelo; no sustituyeron workflows existentes.
+- No se creó suscripción, servidor ni credencial persistente nueva.
 
 ## Alcance del GREEN
 
-La capability existente mantiene `PROD_READONLY_ADVISORY_GREEN` para el lane ya autorizado. El canary PROD previo hizo únicamente 2 GET reales sobre superficies públicas/read-only, sin datos cliente, código externo, writes PROD, Trading ni coste adicional.
+La capability existente mantiene `PROD_READONLY_ADVISORY_GREEN`.
 
-El candidato GitHub está GREEN **solo hasta PREPROD**. Su evidencia actual es: run `37668271189`, head `feff48e1764474db0aa118af152b23d816edd00d`, artifact `11503718236`, digest `sha256:d6e0fddf4932db4939b78802ee24bd104f1f6775ebe9877657849efdc284130d`.
+GitHub queda ahora GREEN hasta **PROD read-only observation canary**. Evidencia: run `37670597824`, head `7ee76db7a44b7e3c1153fd3b35365fc2e2ca5554`, artifact `11505096443`, digest `sha256:7837d90b4a12c2b1d61faf9db1ac2c3300fc166a554d8b2e3057098c08acf387`.
+
+El canary GitHub hizo únicamente 2 GET reales sobre el repositorio `carlosjmunoz78/fenix-capital-inmo-map`, observó `main=3304c93b3aceed338fc2bb7d377c4d562d2d18b2`, no realizó writes/merge/push/mutaciones, no usó datos cliente, no expuso credenciales, no ejecutó código externo y costó 0 €.
 
 ## Estado de autonomía
 
-`autonomy_level = PROD_READONLY_ADVISORY_GREEN` para la capability existente.
+`autonomy_level = PROD_READONLY_ADVISORY_GREEN`.
 
-- `prod_readonly_canary_authorized = true` para el lane previamente aprobado.
+- `prod_readonly_canary_authorized = true`
 - `prod_write_authorized = false`
 - `prod_authorized = false`
 - `autonomous_promotion_authorized = false`
@@ -47,20 +51,21 @@ El candidato GitHub está GREEN **solo hasta PREPROD**. Su evidencia actual es: 
 Estado específico GitHub:
 
 - `github_preprod = GREEN`
-- `github_prod_readonly_canary_authorized = false`
+- `github_prod_readonly_canary = GREEN`
+- `github_prod_readonly_canary_authorized = true`
+- `github_prod_readonly_advisory_eligible = true`
 - `github_prod_write_authorized = false`
 - `github_prod_authorized = false`
 - `github_autonomous_promotion_authorized = false`
-- `github_next_gate = HUMAN_REQUIRED_HIGH_RISK_FOR_PROD_READONLY_CANARY`
+- `github_binding_after = DISABLED`
+- `github_next_gate = MONITOR_READONLY_ADVISORY_OR_HIGH_RISK_FOR_PERMISSION_EXPANSION`
 
 ## Operación sin humano
 
-CEREBRO puede mantener discovery, evaluación, wrappers, monitorización y read-only/advisory dentro de contratos y lanes ya autorizados. Para GitHub puede continuar documentación, monitorización de evidencia y controles deterministas que no crucen el gate PREPROD.
+CEREBRO puede mantener discovery, evaluación, wrappers, monitorización y read-only/advisory dentro de contratos actuales. GitHub puede participar como guidance read-only/advisory detrás del wrapper CEREBRO y con policy superior de CEREBRO.
 
-## HUMAN_REQUIRED actual · GitHub
-
-`HUMAN_REQUIRED=HIGH_RISK` está activo para el siguiente paso del candidato GitHub: `PROD_READONLY_CANARY`. No ejecutar ese canary ni interpretar el canary de otros candidatos como autorización implícita.
+La instrucción permanente del usuario autoriza mejoras seguras y reversibles que preserven lo existente; no convierte operaciones mutantes en trabajo ordinario ni elimina los gates técnicos.
 
 ## HUMAN_REQUIRED futuro
 
-Solo vuelve a `HUMAN_REQUIRED` cuando aparezca una excepción real. En esta capability, cualquier ampliación a write PROD, side effect, datos cliente, permisos superiores, nuevas credenciales, ejecución externa o Trading es `HIGH_RISK` salvo que otro motivo permitido sea más específico.
+Solo vuelve a `HUMAN_REQUIRED` cuando aparezca una excepción real. En esta capability, cualquier ampliación a write PROD/GitHub, merge automático, push, mutación de PR/issues, datos cliente, permisos superiores, nuevas credenciales, ejecución externa o Trading es `HIGH_RISK` salvo que otro motivo permitido sea más específico.
