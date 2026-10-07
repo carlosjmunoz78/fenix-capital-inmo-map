@@ -72,6 +72,8 @@ function failureReason(status,evidence){
   return `HTTP_${status}`;
 }
 
+function isAbortError(error){return error?.name==='AbortError'||error?.code==='ABORT_ERR';}
+
 export async function invokeZeroCostProvider({providerId,prompt,gate,quotaDecisionResult,env=process.env,fetchImpl=fetch,timeoutMs=30000,ossImportImpl}={}){
   if(providerId==='github-actions-ephemeral-oss'){
     return invokeEphemeralOssInference({prompt,gate,quotaDecisionResult,importImpl:ossImportImpl});
@@ -86,5 +88,8 @@ export async function invokeZeroCostProvider({providerId,prompt,gate,quotaDecisi
     if(!response.ok){const evidence=await safeErrorEvidence(response);return Object.freeze({ok:false,stop_reason:failureReason(response.status,evidence),http_status:response.status,provider_id:providerId,model:request.model,request:redactProviderRequest(request),...evidence,secret_values_emitted:false});}
     const payload=await response.json();const parsed=parseProviderResponse(providerId,payload);
     return Object.freeze({ok:true,provider_id:providerId,model:request.model,output_text:parsed.text,output_sha256:sha256(parsed.text),usage:parsed.usage,request:redactProviderRequest(request),secret_values_emitted:false,additional_cost_eur_claimed:0});
+  } catch(error) {
+    const reason=isAbortError(error)?'PROVIDER_TIMEOUT':'PROVIDER_TRANSPORT_ERROR';
+    return Object.freeze({ok:false,stop_reason:reason,http_status:null,provider_id:providerId,model:request.model,request:redactProviderRequest(request),provider_error_code:null,provider_error_status:null,provider_error_message_sha256:error?.message?sha256(error.message):null,raw_error_message_emitted:false,secret_values_emitted:false});
   } finally {clearTimeout(timer);}
 }
