@@ -1,13 +1,13 @@
 # CEREBRO OS · Skill Supply Chain · Dependency Map V0
 
-Estado: HECHO documental / PREPROD GREEN / PROD NO AUTORIZADO
+Estado: HECHO documental / PROD READ-ONLY CANARY GREEN / PROD WRITES DISABLED
 Fecha: 2026-10-07
 
 ## Ownership
 
 `cap:skill-supply-chain → FACT-001`.
 
-No se crea un `engine_id` nuevo. La capability es transversal y reutiliza runtime, eventos, observabilidad, evaluación y gobierno existentes.
+No se crea un `engine_id` nuevo. La capability reutiliza runtime, eventos, observabilidad, evaluación y gobierno existentes.
 
 ## Dependencias CEREBRO
 
@@ -19,31 +19,33 @@ Bindings funcionales candidatos no cambian ownership de App, CRM, Supabase, SEO,
 
 - GitHub: procedencia, exact commit, CI y artifacts.
 - Fuentes de discovery: solo descubrimiento/referencia; nunca autoridad de confianza por sí solas.
-- `google-gemini-api-free`: usada únicamente en los LAB sintéticos cerrados, con hard quota y `paid_fallback=false`; no es dependencia del PREPROD runtime ejecutado en Step 4.
-- PREPROD Step 4: runtime CEREBRO local/ephemeral y ledgers existentes; coste adicional medido 0 €.
+- Gemini free: solo evaluación sintética acotada; `paid_fallback=false`.
+- PREPROD: `SharedRuntime` y ledgers CEREBRO existentes; coste 0 €.
+- PROD read-only canary: `https://app.fenixcapital.es/` y `fenix-app-gateway/health` exclusivamente mediante GET.
+- Se reutiliza `PROD_SUPABASE_PUBLISHABLE_KEY` ya existente solo como clave pública del health endpoint; no se crea credencial nueva.
 
 ## Evidencia congelada
 
-- Behavioral Supabase/Postgres: run `37642814017`, head `1bbfc2250a8f27e8e767fa03ab11a4ddb7a833a7`, artifact `11492473830`.
-- Behavioral agent-browser: run `37644374137`, head `135fc29a9b41d7257381c08efea49015db1e71d9`, artifact `11494440533`.
-- PREPROD runtime OLD vs NEW: run `37647914902`, head `86369e0cd0d54c9c205bd39f309804a62b2c59d3`, artifact `11494354501`, digest `sha256:9dac9feec60dee265d3af9b2413f48394eaf54b7f4109f4ba96051f374770c10`.
+- Behavioral Supabase/Postgres: run `37642814017`, artifact `11492473830`.
+- Behavioral agent-browser: run `37644374137`, artifact `11494440533`.
+- PREPROD runtime: run `37647914902`, head `86369e0cd0d54c9c205bd39f309804a62b2c59d3`, artifact `11494354501`.
+- Dark launch main: `a9b51ee98cdfbf674a02e9b68b15bbf0e455d19b`.
+- PROD read-only canary: run `37662400743`, head `c84efac4b014aab873d4f484207cbce564792030`, artifact `11500917864`, digest `sha256:90f4f554e7e18fcb2ad22094956d5f5dfa3e0c8cad088c6efaf4cde9f2f0eecf`.
 
-## PREPROD probado
+## PROD read-only probado
 
-La integración ejecutó `SharedRuntime` real en `PREPROD`, 18 operaciones controladas sobre dos bindings y seis fixtures sintéticos no cliente. Se ejercitaron baseline, wrapper y rollback de binding físico local; el rebuild vuelve a `DISABLED`. Judge: `GREEN_FOR_PREPROD_TRIBUNAL`. Tribunal: `GREEN_FOR_HIGH_RISK_PROMOTION_REVIEW`.
-
-No se ejecutó código externo de las skills ni se realizaron side effects contra Supabase/Browser externos: las skills siguen tratándose como guidance no confiable detrás de wrappers CEREBRO.
+El canary realizó 2 lecturas reales sobre superficies PROD vivas: raíz pública de App y health del Gateway. Ambas respondieron 200; Gateway reportó `env=PROD` y `service=fenix-app-gateway`. Los wrappers se ejercitaron localmente bajo policy CEREBRO y conservaron `prod_authorized=false`.
 
 ## Fronteras de seguridad
 
-- Datos PROD: NO.
 - Datos cliente: NO.
 - Código externo de skills ejecutado: NO.
 - Escritura PROD: NO.
 - Trading: NO.
 - Paid fallback: NO.
-- Merge/PROD/autopromotion: NO.
+- Coste adicional: 0 €.
+- App deploy por este canary: NO.
 
-## Próxima dependencia/gate
+## Próximo gate
 
-`HUMAN_REQUIRED=HIGH_RISK` antes de cualquier merge/promoción que pueda afectar PROD. PREPROD GREEN no equivale a autorización PROD.
+No existe bloqueo para operación read-only/advisory. Cualquier ampliación de permisos, write PROD, uso de datos cliente, nuevas credenciales o side effects vuelve a `HUMAN_REQUIRED=HIGH_RISK` o al motivo de excepción aplicable.

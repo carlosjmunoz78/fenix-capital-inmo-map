@@ -1,28 +1,34 @@
 # CEREBRO OS · Skill Supply Chain · Changelog V0
 
+## 2026-10-07 · Step 5 dark launch + PROD read-only canary GREEN
+
+- PR #486 fusionado a `main` en `a9b51ee98cdfbf674a02e9b68b15bbf0e455d19b` tras autorización humana `HIGH_RISK`.
+- `PROD Live Deploy` quedó SKIPPED: no se usó `[DEPLOY_PROD]`; App no se redesplegó por este cambio.
+- `PROD Runtime Smoke` post-merge: SUCCESS.
+- Implementado runtime canary aislado `PROD_CANARY`, fail-closed, coste 0 € y sin writes.
+- Canary run `37662400743`, head `c84efac4b014aab873d4f484207cbce564792030`: SUCCESS.
+- Artifact `11500917864`, digest `sha256:90f4f554e7e18fcb2ad22094956d5f5dfa3e0c8cad088c6efaf4cde9f2f0eecf`.
+- 2 GET reales: App pública + `fenix-app-gateway/health`.
+- App 200; Gateway 200, `env=PROD`, `service=fenix-app-gateway`.
+- Wrappers Supabase/Postgres y agent-browser ejercitados localmente; `prod_authorized=false` preservado.
+- Datos cliente, credenciales expuestas, código externo, Trading, paid fallback y writes PROD: NO.
+- Binding canary volvió a `DISABLED`; rollback GREEN.
+- Estado canónico: `GREEN_PROD_READONLY_CANARY`; expansión de permisos continúa gated.
+
 ## 2026-10-07 · Step 4 PREPROD runtime integration GREEN
 
-- Implementado harness PREPROD separado del proxy sintético, reutilizando `SharedRuntime` y ledgers existentes.
-- PREPROD evidence head: `86369e0cd0d54c9c205bd39f309804a62b2c59d3`.
-- Workflow run `37647914902`: SUCCESS.
+- Harness PREPROD separado del proxy sintético sobre `SharedRuntime` y ledgers existentes.
+- Evidence head `86369e0cd0d54c9c205bd39f309804a62b2c59d3`.
+- Workflow `37647914902`: SUCCESS.
 - Artifact `11494354501`, digest `sha256:9dac9feec60dee265d3af9b2413f48394eaf54b7f4109f4ba96051f374770c10`.
-- 3/3 tests focalizados GREEN, incluidos fail-closed y tamper cases.
-- Integración `PREPROD_INTEGRATION_COMPLETE`: 18 ejecuciones, 2 packages, coste adicional medido 0 €.
-- OLD/current baseline y NEW/wrapper ejecutados por el runtime PREPROD; rollback físico del binding GREEN; rebuild default disabled GREEN.
-- Judge: `GREEN_FOR_PREPROD_TRIBUNAL`, blockers=[].
-- Tribunal: `GREEN_FOR_HIGH_RISK_PROMOTION_REVIEW`, blockers=[], `HUMAN_REQUIRED=HIGH_RISK`.
-- Sin datos PROD/cliente, sin código externo de skills, sin writes PROD, sin Trading y sin paid fallback.
-- Todos los checks observados del evidence head terminaron SUCCESS.
-- Merge/PROD/autopromotion continúan no autorizados.
+- 18 ejecuciones, 2 packages, 3/3 tests focalizados GREEN.
+- Rollback físico y rebuild default-disabled GREEN.
+- Judge `GREEN_FOR_PREPROD_TRIBUNAL`; Tribunal `GREEN_FOR_HIGH_RISK_PROMOTION_REVIEW`.
+- Sin datos PROD/cliente, sin código externo, writes PROD, Trading ni paid fallback.
 
-## 2026-10-07 · Step 3 evidence/documentation closure
+## 2026-10-07 · Step 3 behavioral evidence closure
 
-- Congelado como baseline behavioral el head `135fc29a9b41d7257381c08efea49015db1e71d9` antes del commit documental.
-- Supabase/Postgres Behavioral LAB run `37642814017`: SUCCESS; 6/6 llamadas sintéticas; Gemini `gemini-3.5-flash-lite`; Judge GREEN; rollback/rebuild GREEN; Tribunal GREEN; `READY_FOR_PREPROD_PROMOTION_REVIEW`; `HUMAN_REQUIRED=HIGH_RISK`.
-- Supabase artifact `11492473830`, digest `sha256:2837ab122a2efbab92536f32519c971d7967c071ada5594dff2258f78796c3e0`.
-- agent-browser Behavioral LAB run `37644374137`: SUCCESS; 6/6 llamadas sintéticas; Judge GREEN; rollback/rebuild GREEN; Tribunal GREEN; `READY_FOR_PREPROD_PROMOTION_REVIEW`; `HUMAN_REQUIRED=HIGH_RISK`.
-- agent-browser raw `STATIC_LAB_HOLD` preservado; normalized wrapper GREEN; thresholds no relajados.
-- agent-browser artifact `11494440533`, digest `sha256:0a1f97bf1e7271454627eb7553147dfa5930c28a26fac20232fd1acd58e06d5c`.
-- Coste adicional observado en estos LAB: 0 €; paid fallback=false.
-- No datos PROD/cliente, no ejecución de código externo de skills, no writes PROD y no Trading.
-- PR #486 sigue DRAFT; merge/PROD/autopromotion continúan no autorizados.
+- Behavioral baseline `135fc29a9b41d7257381c08efea49015db1e71d9`.
+- Supabase/Postgres run `37642814017`: SUCCESS; artifact `11492473830`; Gemini free; Judge/rollback/Tribunal GREEN.
+- agent-browser run `37644374137`: SUCCESS; artifact `11494440533`; raw `STATIC_LAB_HOLD` preservado; wrapper normalizado GREEN; thresholds no relajados.
+- Coste adicional: 0 €; paid fallback=false.

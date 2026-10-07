@@ -1,6 +1,6 @@
 # CEREBRO OS · Skill Supply Chain · Runbook V0
 
-Estado: HECHO LAB + PREPROD runtime / HUMAN_REQUIRED HIGH_RISK
+Estado: HECHO LAB + PREPROD + DARK LAUNCH + PROD READ-ONLY CANARY
 Fecha: 2026-10-07
 
 ## Safe loop
@@ -8,43 +8,44 @@ Fecha: 2026-10-07
 1. CONSERVAR: fijar SHA, contratos, owner, evidencia y baseline existente.
 2. ENTENDER: resolver upstream exacto, licencia, permisos, solapamiento y dependencias.
 3. ENVOLVER: wrapper CEREBRO disabled/fail-closed; no reemplazar sistema existente.
-4. PROBAR: static LAB → OLD vs NEW sintético → behavioral LAB → PREPROD runtime OLD vs NEW → judge → rollback/rebuild → tribunal.
+4. PROBAR: static LAB → OLD vs NEW → behavioral LAB → PREPROD runtime → judge → rollback/rebuild → tribunal → dark launch → PROD read-only canary.
 5. MEJORAR: corregir solo el rojo exacto, sin rebajar umbrales ni permisos.
-6. MIGRAR: únicamente después de PREPROD GREEN y revisión humana `HIGH_RISK`.
+6. MIGRAR: gradual, reversible y únicamente dentro del alcance autorizado.
 
 ## HECHO · LAB
 
-Supabase/Postgres y agent-browser alcanzaron `READY_FOR_PREPROD_PROMOTION_REVIEW` en LAB. agent-browser conserva intacto su raw `STATIC_LAB_HOLD`; el avance usa wrapper normalizado interno sin alterar thresholds.
+Supabase/Postgres y agent-browser alcanzaron `READY_FOR_PREPROD_PROMOTION_REVIEW`. agent-browser conserva intacto su raw `STATIC_LAB_HOLD`; el avance usa wrapper normalizado interno sin alterar thresholds.
 
-## HECHO · PREPROD Step 4
+## HECHO · PREPROD
 
-Run `37647914902`, head `86369e0cd0d54c9c205bd39f309804a62b2c59d3`:
+Run `37647914902`, head `86369e0cd0d54c9c205bd39f309804a62b2c59d3`: 18 ejecuciones OLD/NEW/rollback, 2 packages, fixtures sintéticos no cliente, observabilidad/audit/FinOps, coste 0 €, rollback físico GREEN, rebuild `DISABLED`, Judge GREEN y Tribunal `GREEN_FOR_HIGH_RISK_PROMOTION_REVIEW`.
 
-- `PREPROD_INTEGRATION_COMPLETE`.
-- Runtime CEREBRO real en environment `PREPROD`.
-- 18 ejecuciones OLD/NEW/rollback sobre 2 packages.
-- Fixtures: sintéticos no cliente.
-- Observabilidad + audit + FinOps persistentes locales activados.
-- Coste adicional medido: 0 €.
-- Rollback físico del binding: GREEN.
-- Rebuild: vuelve disabled por defecto.
-- Judge: `GREEN_FOR_PREPROD_TRIBUNAL`.
-- Tribunal: `GREEN_FOR_HIGH_RISK_PROMOTION_REVIEW`.
-- `HUMAN_REQUIRED=HIGH_RISK`.
-- merge/PROD/autopromotion: false.
+## HECHO · Dark launch main
 
-## Alcance exacto del PREPROD
+PR #486 fue fusionado a `main` en `a9b51ee98cdfbf674a02e9b68b15bbf0e455d19b` tras autorización humana HIGH_RISK. No se disparó despliegue de la App y el runtime smoke PROD posterior quedó GREEN.
 
-Se probó la integración del wrapper dentro del runtime CEREBRO y su reversibilidad. No se ejecutó código externo de las skills ni side effects reales contra sistemas externos; esta exclusión es intencionada porque las skills admitidas son guidance no confiable, no ejecutables autónomos.
+## HECHO · PROD read-only canary
 
-## Gate actual
+Run `37662400743`, head `c84efac4b014aab873d4f484207cbce564792030`, artifact `11500917864`, digest `sha256:90f4f554e7e18fcb2ad22094956d5f5dfa3e0c8cad088c6efaf4cde9f2f0eecf`.
 
-STOP en `HIGH_RISK`. Antes de cualquier merge/promoción con impacto potencial en PROD se exige revisión humana explícita. No convertir el GREEN de PREPROD en autorización automática.
+- 2 GET reales: App pública y health del Gateway PROD.
+- Ambos HTTP 200.
+- Gateway: `env=PROD`, `service=fenix-app-gateway`.
+- Wrappers Supabase/Postgres y agent-browser ejercitados localmente.
+- `prod_authorized=false` preservado en wrappers.
+- PROD writes, customer data, external skill code, Trading y paid fallback: NO.
+- Coste adicional: 0 €.
+- Binding temporal restaurado a `DISABLED`.
+- Rollback: GREEN.
 
-## Si se autoriza avanzar después del HIGH_RISK
+## Operación normal
 
-Aplicar canary/binding gradual, conservar baseline, observabilidad activa y rollback inmediato; no ampliar permisos, datos o coste en el mismo cambio. Cualquier coste >0 → `MONEY_LIMIT`. Cualquier acceso no autorizado a datos PROD/cliente, write PROD, código externo o Trading → STOP.
+Skill Supply Chain V0 puede mantenerse en modo read-only/advisory y seguir incorporando nuevas skills mediante el pipeline completo. No ejecutar código externo de skills por defecto. No permitir que una skill reemplace policy/routing CEREBRO.
+
+## Gate de expansión
+
+Cualquier cambio que añada write PROD, side effects, datos cliente, credenciales nuevas, permisos superiores, ejecución de código externo o acceso Trading requiere un nuevo gate `HUMAN_REQUIRED=HIGH_RISK` o el motivo de excepción aplicable.
 
 ## No hacer
 
-No merge directo por inferencia. No activar wrappers en PROD sin gate humano. No copiar credenciales. No borrar/reemplazar App/CRM/Supabase/Notion/WordPress/SEO/Training/Trading. No reinterpretar PREPROD GREEN como PROD GREEN.
+No reinterpretar PROD read-only GREEN como autorización de escritura. No copiar credenciales. No borrar/reemplazar App/CRM/Supabase/Notion/WordPress/SEO/Training/Trading. No activar pago como fallback.

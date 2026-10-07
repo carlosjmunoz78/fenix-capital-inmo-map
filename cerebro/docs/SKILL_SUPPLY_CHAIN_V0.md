@@ -1,16 +1,14 @@
 # CEREBRO OS · Skill Supply Chain V0
 
-Estado: PREPROD GREEN / HUMAN_REQUIRED HIGH_RISK / PROD NO AUTORIZADO
+Estado: **PROD READ-ONLY CANARY GREEN / PROD WRITES DISABLED**
 Fecha de corte: 2026-10-07
 Coste adicional medido: 0 €
-PROD writes: NO
 Nuevo engine_id: NO
+Owner: `FACT-001`
 External skill code execution: NO
 Trading access: NO
-Merge autorizado: NO
-PROD autorizado: NO
+PROD writes: NO
 Autopromoción: NO
-HUMAN_REQUIRED actual: HIGH_RISK
 
 ## 1. Encaje arquitectónico
 
@@ -20,84 +18,63 @@ Regla: CONSERVAR → ENTENDER → ENVOLVER → PROBAR → MEJORAR → MIGRAR.
 
 ## 2. Flujo canónico
 
-DISCOVER → RESOLVE_UPSTREAM → MANIFEST_STATIC_SCAN → LICENSE_EVIDENCE → SECURITY/POLICY_GATE → DEDUP/OVERLAP → PRELAB → DISABLED_WRAPPER → STATIC_LAB → OLD_VS_NEW → ZERO_COST_ROUTE → HARD_QUOTA → BEHAVIORAL_LAB → INDEPENDENT_JUDGE → LAB TRIBUNAL → PREPROD RUNTIME INTEGRATION → PREPROD JUDGE → PREPROD TRIBUNAL → HIGH_RISK PROMOTION REVIEW → CANARY cuando se autorice → PROMOTE → MONITOR → LEARN → RECHECK.
+DISCOVER → RESOLVE_UPSTREAM → MANIFEST_STATIC_SCAN → LICENSE_EVIDENCE → SECURITY/POLICY_GATE → DEDUP/OVERLAP → PRELAB → DISABLED_WRAPPER → STATIC_LAB → OLD_VS_NEW → ZERO_COST_ROUTE → HARD_QUOTA → BEHAVIORAL_LAB → INDEPENDENT_JUDGE → LAB TRIBUNAL → PREPROD RUNTIME → PREPROD JUDGE → PREPROD TRIBUNAL → HIGH_RISK REVIEW → DARK LAUNCH MAIN → PROD READ-ONLY CANARY → MONITOR → LEARN → RECHECK.
 
-Todo es fail-closed. Descubrir no implica confiar; auditar no implica instalar; LAB GREEN no implica PROD; PREPROD GREEN no implica PROD.
+Descubrir no implica confiar. LAB GREEN no implica PROD. PREPROD GREEN no implica PROD. PROD read-only GREEN no autoriza writes PROD.
 
-## 3. Frozen LAB evidence
+## 3. LAB Behavioral · HECHO
 
 Behavioral evidence baseline: `135fc29a9b41d7257381c08efea49015db1e71d9`.
 
-Supabase/Postgres:
-- run `37642814017`, artifact `11492473830`;
-- 6/6 llamadas sintéticas;
-- Gemini `gemini-3.5-flash-lite` bajo ruta gratuita acotada;
-- Judge GREEN, rollback binding GREEN, Tribunal GREEN;
-- `READY_FOR_PREPROD_PROMOTION_REVIEW`.
+Supabase/Postgres: run `37642814017`, artifact `11492473830`, 6/6 llamadas sintéticas, Gemini gratuito acotado, Judge GREEN, rollback/rebuild GREEN, Tribunal GREEN, `READY_FOR_PREPROD_PROMOTION_REVIEW`.
 
-agent-browser:
-- run `37644374137`, artifact `11494440533`;
-- raw `STATIC_LAB_HOLD` preservado;
-- normalized wrapper GREEN, thresholds no relajados;
-- 6/6 llamadas sintéticas;
-- Judge GREEN, rollback binding GREEN, Tribunal GREEN;
-- `READY_FOR_PREPROD_PROMOTION_REVIEW`.
+agent-browser: run `37644374137`, artifact `11494440533`, raw `STATIC_LAB_HOLD` preservado, wrapper normalizado GREEN sin relajar thresholds, 6/6 llamadas sintéticas, Judge GREEN, rollback/rebuild GREEN, Tribunal GREEN, `READY_FOR_PREPROD_PROMOTION_REVIEW`.
 
-## 4. Step 4 · PREPROD runtime integration · HECHO
+## 4. PREPROD runtime · HECHO
 
-Evidence head: `86369e0cd0d54c9c205bd39f309804a62b2c59d3`.
-Workflow run: `37647914902` — SUCCESS.
-Artifact: `cerebro-skill-preprod-37647914902`, ID `11494354501`, digest `sha256:9dac9feec60dee265d3af9b2413f48394eaf54b7f4109f4ba96051f374770c10`.
+Evidence head `86369e0cd0d54c9c205bd39f309804a62b2c59d3`, workflow `37647914902`, artifact `11494354501`, digest `sha256:9dac9feec60dee265d3af9b2413f48394eaf54b7f4109f4ba96051f374770c10`.
 
-Se creó un harness PREPROD separado del proxy LAB y se ejecutó sobre el runtime CEREBRO existente:
+Se ejecutaron 18 operaciones OLD/NEW/rollback sobre 2 bindings dentro de `SharedRuntime` PREPROD, con fixtures sintéticos no cliente, observabilidad/audit/FinOps, coste 0 €, rollback físico GREEN y rebuild final `DISABLED`. Judge `GREEN_FOR_PREPROD_TRIBUNAL`; Tribunal `GREEN_FOR_HIGH_RISK_PROMOTION_REVIEW`.
 
-- `SharedRuntime` real, environment exacto `PREPROD`.
-- `FACT-001` como owner/runtime engine.
-- Dos bindings evaluados: Supabase/Postgres wrapper y agent-browser wrapper.
-- Seis fixtures sintéticos no cliente.
-- 18 ejecuciones totales: baseline OLD + wrapper NEW + rollback baseline.
-- Observabilidad, audit chain y FinOps persistentes locales.
-- Coste adicional medido: 0 €.
-- No PROD/customer data.
-- No external skill code.
-- No PROD writes.
-- No Trading.
-- No paid fallback.
+## 5. Dark launch a main · HECHO
 
-## 5. OLD vs NEW y rollback · HECHO
+Con autorización humana `HIGH_RISK`, PR #486 fue fusionado a `main` en `a9b51ee98cdfbf674a02e9b68b15bbf0e455d19b`.
 
-Para cada binding se ejecutó el baseline CEREBRO, después el wrapper normalizado y después rollback físico a baseline. La salida restaurada se contrastó por hash. Finalmente se reconstruyó el estado sin binding persistido, quedando `DISABLED` por defecto.
+El despliegue de la App Fénix no se disparó; `PROD Live Deploy` quedó SKIPPED al no existir token `[DEPLOY_PROD]`. El `PROD Runtime Smoke` posterior quedó GREEN, preservando App/Gateway y fail-closed existentes.
 
-Resultado: `PREPROD_INTEGRATION_COMPLETE`, 2 packages GREEN, rollback físico GREEN y rebuild default-disabled GREEN.
+## 6. PROD read-only canary · HECHO
 
-El test focalizado ejecutó 3/3 subtests GREEN, incluyendo rechazo fail-closed de PROD, coste >0, datos PROD/cliente, writes, código externo y Trading, además de tampering de rollback/coste.
+Workflow `37662400743` sobre head `c84efac4b014aab873d4f484207cbce564792030`.
+Artifact `11500917864`.
+Digest `sha256:90f4f554e7e18fcb2ad22094956d5f5dfa3e0c8cad088c6efaf4cde9f2f0eecf`.
 
-## 6. PREPROD Judge y Tribunal · HECHO
+Resultado: `GREEN_PROD_READONLY_CANARY`.
 
-- Independent PREPROD Judge: `GREEN_FOR_PREPROD_TRIBUNAL`, blockers=[];
-- PREPROD Tribunal: `GREEN_FOR_HIGH_RISK_PROMOTION_REVIEW`, blockers=[];
-- `HUMAN_REQUIRED=HIGH_RISK`;
-- `merge_authorized=false`;
-- `prod_authorized=false`;
-- `autonomous_promotion_authorized=false`.
+- Runtime canary aislado `PROD_CANARY`.
+- 2 lecturas reales PROD mediante GET: raíz pública de App y health del `fenix-app-gateway`.
+- App HTTP 200.
+- Gateway HTTP 200, `env=PROD`, `service=fenix-app-gateway`.
+- Wrappers Supabase/Postgres y agent-browser ejercitados localmente bajo policy CEREBRO.
+- Los wrappers conservan `prod_authorized=false`.
+- PROD writes: NO.
+- Datos cliente: NO.
+- Credenciales expuestas: NO.
+- Código externo de skills: NO.
+- Trading: NO.
+- Paid fallback: NO.
+- Coste adicional: 0 €.
+- Binding temporal: ENABLED solo durante canary y restaurado a `DISABLED`.
+- Rollback: GREEN.
 
-Todos los checks observados del evidence head `86369e0...` finalizaron SUCCESS.
+## 7. Alcance exacto del GREEN actual
 
-## 7. Alcance exacto: qué significa PREPROD real aquí
+La capability está probada de extremo a extremo hasta **PROD read-only observation canary**. Esto valida compatibilidad con superficies PROD vivas y la reversibilidad del binding sin introducir mutaciones.
 
-Es real respecto al runtime/binding CEREBRO: el código de integración pasó por `SharedRuntime`, binding persistente local, observabilidad/audit/FinOps y rollback/rebuild físicos del binding.
-
-Los fixtures son deliberadamente sintéticos no cliente. No se ejecutó código externo de las skills ni se realizaron side effects reales contra Supabase o un navegador externo. Esto no es una carencia oculta: forma parte del contrato de seguridad porque las skills admitidas se usan como guidance no confiable detrás de wrappers CEREBRO, no como ejecutables autónomos.
+No se autoriza ni se necesita convertir estas skills en ejecutables autónomos: continúan siendo guidance no confiable detrás de wrappers CEREBRO. Cualquier futura ampliación que introduzca write PROD, datos cliente, nuevas credenciales, permisos, side effects o Trading vuelve a `HUMAN_REQUIRED=HIGH_RISK` o al motivo de excepción aplicable.
 
 ## 8. No interferencia
 
-- PROD no tocado.
-- Datos PROD/cliente no usados.
-- App/CRM/SEO/WordPress/Supabase PROD no modificados.
-- Código externo de skills no ejecutado.
-- Writes PROD: NO.
-- Trading: aislado/no accesible.
-- No nuevo servidor ni suscripción de pago.
+App/CRM/Supabase/Notion/WordPress/SEO/Training se preservan. Trading permanece aislado. No hay nueva suscripción ni servidor. No se ha activado despliegue de App por este cambio.
 
 ## 9. Estado documental
 
@@ -109,20 +86,18 @@ Los fixtures son deliberadamente sintéticos no cliente. No se ejecutó código 
 - Backup/rebuild: `cerebro/docs/SKILL_SUPPLY_CHAIN_BACKUP_REBUILD_V0.md`.
 - Autonomy: `cerebro/docs/SKILL_SUPPLY_CHAIN_AUTONOMY_V0.md`.
 
-## 10. Status semántico
+## 10. Estado semántico
 
-HECHO: LABs, PREPROD runtime integration, OLD vs NEW controlado, observabilidad/audit/FinOps, rollback físico del binding, rebuild disabled, PREPROD Judge y Tribunal.
+HECHO: Discovery, LAB, OLD vs NEW, Gemini zero-cost, Judge/Tribunal, PREPROD runtime, rollback/rebuild, dark launch a main, regresión PROD y canary PROD read-only.
 
-EXISTENTE: FACT-001, shared runtime, ledgers, policy/governance y sistemas Fénix preservados.
+EXISTENTE: FACT-001, runtime compartido, ledgers, policy/governance y sistemas Fénix preservados.
 
-PARCIAL: autonomía total, porque no hay PROD ni canary autorizado.
+PARCIAL: solo cualquier futura capacidad de escritura/side-effect PROD; permanece prohibida.
 
-DEFINIDO: promoción gradual posterior al gate humano, con baseline y rollback preservados.
+DEFINIDO: operación read-only/advisory fail-closed, coste 0 €, wrappers subordinados y rollback inmediato.
 
-PLANIFICADO: canary/promoción únicamente si el humano supera el gate `HIGH_RISK`.
+PLANIFICADO: monitor/recheck incremental; cualquier expansión de permisos vuelve a gate humano.
 
 ## 11. Next block
 
-**STOP automático en `HUMAN_REQUIRED=HIGH_RISK`.**
-
-La siguiente acción sería decidir si se autoriza la revisión/promoción gradual. No se hace merge, canary ni PROD por inferencia. Si se autoriza en un paso posterior, debe mantenerse el mismo contrato: cambio gradual, observabilidad, coste 0 €, rollback inmediato y sin ampliar permisos simultáneamente.
+No hay bloqueo técnico para mantener Skill Supply Chain V0 en modo PROD read-only/advisory. El siguiente trabajo ordinario es monitorizar, aprender y añadir nuevas skills mediante la misma fábrica. Cualquier permiso nuevo o write PROD requiere un gate separado y explícito.

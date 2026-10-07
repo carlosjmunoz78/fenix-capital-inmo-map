@@ -1,0 +1,98 @@
+name: CEREBRO Skill PROD Read-only Canary
+
+on:
+  push:
+    branches:
+      - cerebro-skill-prod-canary-v0-20261007c
+    paths:
+      - 'cerebro/skills/skill-prod-readonly-canary.mjs'
+      - 'cerebro/tests/skill-prod-readonly-canary.test.mjs'
+      - '.github/workflows/cerebro-skill-prod-readonly-canary.yml'
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type RUN_PROD_READONLY_CANARY'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: cerebro-skill-prod-readonly-canary
+  cancel-in-progress: false
+
+env:
+  PROD_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
+
+jobs:
+  prod-readonly-canary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact canary source
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Assert explicit bounded authorization
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          MANUAL_CONFIRM: ${{ inputs.confirm }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT_NAME" = 'workflow_dispatch' ]; then
+            test "$MANUAL_CONFIRM" = 'RUN_PROD_READONLY_CANARY'
+          else
+            test "$EVENT_NAME" = 'push'
+            test "$REF_NAME" = 'cerebro-skill-prod-canary-v0-20261007c'
+          fi
+          test -n "$PROD_SUPABASE_PUBLISHABLE_KEY"
+          case "$PROD_SUPABASE_PUBLISHABLE_KEY" in
+            sb_publishable_*) ;;
+            *) echo 'FAIL_CLOSED: PROD publishable key shape invalid' >&2; exit 2 ;;
+          esac
+
+      - name: Unit-test canary fail-closed contract
+        run: node --test cerebro/tests/skill-prod-readonly-canary.test.mjs cerebro/tests/skill-cerebro-supabase-wrapper.test.mjs cerebro/tests/skill-cerebro-agent-browser-wrapper.test.mjs
+
+      - name: Execute real PROD read-only canary
+        shell: bash
+        env:
+          CEREBRO_PROD_CANARY_CONFIRM: RUN_PROD_READONLY_CANARY
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          node cerebro/skills/skill-prod-readonly-canary.mjs --output artifacts/cerebro-skill-prod-readonly-canary.json
+
+      - name: Assert canary evidence is GREEN and non-mutating
+        shell: bash
+        run: |
+          set -euo pipefail
+          f=artifacts/cerebro-skill-prod-readonly-canary.json
+          test "$(jq -r '.status' "$f")" = 'GREEN_PROD_READONLY_CANARY'
+          test "$(jq -r '.environment' "$f")" = 'PROD_CANARY'
+          test "$(jq -r '.live_requests' "$f")" = '2'
+          test "$(jq -r '.prod_write' "$f")" = 'false'
+          test "$(jq -r '.customer_data_used' "$f")" = 'false'
+          test "$(jq -r '.external_skill_code_executed' "$f")" = 'false'
+          test "$(jq -r '.trading_access' "$f")" = 'false'
+          test "$(jq -r '.additional_cost_eur' "$f")" = '0'
+          test "$(jq -r '.rollback_proven' "$f")" = 'true'
+          test "$(jq -r '.binding_after' "$f")" = 'DISABLED'
+          test "$(jq -r '.wrappers_remain_prod_authorized_false' "$f")" = 'true'
+
+      - name: Upload immutable canary evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-skill-prod-readonly-canary-${{ github.sha }}
+          path: artifacts/cerebro-skill-prod-readonly-canary.json
+          if-no-files-found: error
+          retention-days: 30
