@@ -1,6 +1,6 @@
 # CEREBRO OS · Skill Supply Chain · Runbook V0
 
-Estado: HECHO LAB + PREPROD + DARK LAUNCH + PROD READ-ONLY CANARY + GITHUB PROD READ-ONLY CANARY
+Estado: HECHO LAB + PREPROD + PROD READ-ONLY + GITHUB READ-ONLY ADVISORY + MONITOR/RECHECK
 Fecha: 2026-10-07
 
 ## Safe loop
@@ -11,6 +11,7 @@ Fecha: 2026-10-07
 4. PROBAR: static LAB → OLD vs NEW → behavioral LAB → PREPROD runtime → judge → rollback/rebuild → tribunal → dark launch → PROD read-only canary.
 5. MEJORAR: corregir solo el rojo exacto, sin rebajar umbrales ni permisos.
 6. MIGRAR: gradual, reversible y únicamente dentro del alcance autorizado.
+7. MONITORIZAR: revalidar contrato + evidencia viva mínima; si aparece rojo, fail-closed y volver al gate correspondiente.
 
 ## HECHO · LAB
 
@@ -20,70 +21,56 @@ GitHub alcanzó `READY_FOR_PREPROD_PROMOTION_REVIEW` en run `37666101006`, head 
 
 ## HECHO · PREPROD
 
-Run `37647914902`, head `86369e0cd0d54c9c205bd39f309804a62b2c59d3`: 18 ejecuciones OLD/NEW/rollback, 2 packages, fixtures sintéticos no cliente, observabilidad/audit/FinOps, coste 0 €, rollback físico GREEN, rebuild `DISABLED`, Judge GREEN y Tribunal `GREEN_FOR_HIGH_RISK_PROMOTION_REVIEW`.
+Run genérico `37647914902`, head `86369e0cd0d54c9c205bd39f309804a62b2c59d3`: 18 ejecuciones OLD/NEW/rollback, 2 packages, fixtures sintéticos no cliente, observabilidad/audit/FinOps, coste 0 €, rollback físico GREEN, rebuild `DISABLED`, Judge GREEN y Tribunal `GREEN_FOR_HIGH_RISK_PROMOTION_REVIEW`.
 
-### GitHub candidate · PREPROD aislado
+GitHub PREPROD: run `37668271189`, head `feff48e1764474db0aa118af152b23d816edd00d`, artifact `11503718236`, digest `sha256:d6e0fddf4932db4939b78802ee24bd104f1f6775ebe9877657849efdc284130d`; 9 ejecuciones, 5/5 tests, observabilidad/audit/FinOps 9/9/9, rollback físico GREEN, rebuild `DISABLED`, Judge y Tribunal GREEN. Sin datos PROD/cliente, código externo, write PROD, Trading ni paid fallback.
 
-Run `37668271189`, head `feff48e1764474db0aa118af152b23d816edd00d`, artifact `11503718236`, digest `sha256:d6e0fddf4932db4939b78802ee24bd104f1f6775ebe9877657849efdc284130d`.
+## HECHO · PROD read-only
 
-- 3 fixtures sintéticos no cliente.
-- 9 ejecuciones: BASELINE → GITHUB_WRAPPER → ROLLBACK_BASELINE.
-- `SharedRuntime` PREPROD real y binding físico temporal.
-- Observabilidad 9 / audit 9 / FinOps 9; audit chain válida.
-- Tests focalizados 5/5 GREEN.
-- Judge `GREEN_FOR_PREPROD_TRIBUNAL`.
-- Tribunal `GREEN_FOR_HIGH_RISK_PROD_READONLY_CANARY_REVIEW`.
-- Rollback físico GREEN y rebuild final `DISABLED`.
-- Coste adicional 0 €.
-- Datos PROD/cliente, ejecución de código externo, write PROD, Trading y paid fallback: NO.
-- `prod_authorized=false`, `merge_authorized=false`, `autonomous_promotion_authorized=false`.
+Canary genérico: run `37662400743`, artifact `11500917864`, 2 GET reales sobre App pública + Gateway health, coste 0 €, binding final `DISABLED`.
 
-El primer intento `37667783071` paró fail-closed antes del runtime por una aserción de schema (`merge_authorized` vs `prod_write_authorized`). Se corrigió solo esa comprobación, sin alterar permisos, thresholds ni evidencia LAB.
+GitHub canary: run `37670597824`, artifact `11505096443`, digest `sha256:7837d90b4a12c2b1d61faf9db1ac2c3300fc166a554d8b2e3057098c08acf387`; 2 GET a metadata repo + ref `main`; 4/4 tests; no writes/merge/push/mutaciones/workflow dispatch; coste 0 €; binding `DISABLED`.
 
-## HECHO · Dark launch main
+## HECHO · Promoción GitHub read-only/advisory
 
-PR #486 fue fusionado a `main` en `a9b51ee98cdfbf674a02e9b68b15bbf0e455d19b` tras autorización humana HIGH_RISK. No se disparó despliegue de la App y el runtime smoke PROD posterior quedó GREEN.
+PR #488 → `main` `257ba1b9f6d757866a67240c64c7300b6c5de223`.
 
-## HECHO · PROD read-only canary existente
+Post-merge obligatorio:
 
-Run `37662400743`, head `c84efac4b014aab873d4f484207cbce564792030`, artifact `11500917864`, digest `sha256:90f4f554e7e18fcb2ad22094956d5f5dfa3e0c8cad088c6efaf4cde9f2f0eecf`.
+- Supply Chain Gate `37671631421`: SUCCESS.
+- PROD Runtime Smoke `37671631622`: SUCCESS.
+- PROD Live Deploy `37671631338`: SKIPPED, App no redesplegada.
+- Discovery Scout `37671631072`: SUCCESS; artifact `11505407332`, digest `sha256:a0c83328273ce7d7598c34b88487e8dadc781bb3908b28821ab8564d32f3e8cd`.
 
-- 2 GET reales: App pública y health del Gateway PROD.
-- Ambos HTTP 200.
-- Gateway: `env=PROD`, `service=fenix-app-gateway`.
-- Wrappers Supabase/Postgres y agent-browser ejercitados localmente.
-- `prod_authorized=false` preservado en wrappers.
-- PROD writes, customer data, external skill code, Trading y paid fallback: NO.
-- Coste adicional: 0 €.
-- Binding temporal restaurado a `DISABLED`.
-- Rollback: GREEN.
+## HECHO · Monitor/recheck GitHub read-only
 
-## HECHO · GitHub PROD read-only canary
+Workflow paralelo `CEREBRO Skill GitHub Read-only Monitor`.
 
-Autorizado por la instrucción humana permanente de mejora segura y reversible, sin romper lo existente. Run `37670597824`, head `7ee76db7a44b7e3c1153fd3b35365fc2e2ca5554`, artifact `11505096443`, digest `sha256:7837d90b4a12c2b1d61faf9db1ac2c3300fc166a554d8b2e3057098c08acf387`.
+Triggers previstos al quedar en `main`: schedule diario `47 4 * * *`, `workflow_dispatch` y cambios acotados de workflow/runtime/Registry/Contract. Permisos GitHub: `contents: read` únicamente.
 
-- 2 GET reales contra GitHub: metadata del repositorio y ref `main`.
-- Repositorio observado: `carlosjmunoz78/fenix-capital-inmo-map`.
-- SHA `main` observado: `3304c93b3aceed338fc2bb7d377c4d562d2d18b2`.
-- Wrapper `skillwrap:cerebro-github-v0.1.0` ejercitado localmente.
-- Tests canary: 4/4 GREEN.
-- `prod_authorized=false` preservado en el wrapper.
-- GitHub writes, merge, push, mutación de issues/PR y workflow dispatch: NO.
-- Datos cliente, credenciales expuestas, código externo de skills, Trading y paid fallback: NO.
-- Coste adicional: 0 €.
-- Binding temporal restaurado a `DISABLED`.
-- Rollback: GREEN.
+Cada iteración debe:
+
+1. revalidar Registry + Contract fail-closed;
+2. comprobar tests del runtime read-only;
+3. ejecutar exactamente 2 GET contra las superficies permitidas;
+4. exigir GitHub write/merge/push/mutación/dispatch = false;
+5. exigir customer data/external skill code/Trading/paid fallback = false;
+6. exigir coste adicional = 0 €;
+7. restaurar binding a `DISABLED` incluso ante error;
+8. subir artifact inmutable; si cualquier aserción falla, finalizar HOLD/FAIL-CLOSED sin ampliar permisos.
+
+Primer monitor GREEN: run `37679202506`, head `0a128fac3df39120d1d7f9fcda30857c18694969`, artifact `11508121977`, digest `sha256:0f7fa772e09434acabcf9180ac5eab7a9b640f68bfc2c27f07c0da4cb5b04672`. 4/4 tests, 2 GET, `main` observado `257ba1b9f6d757866a67240c64c7300b6c5de223`, coste 0 €, rollback GREEN, binding final `DISABLED`.
 
 ## Operación normal
 
-Skill Supply Chain V0 puede mantenerse en modo read-only/advisory y seguir incorporando nuevas skills mediante el pipeline completo. GitHub queda elegible para operación read-only/advisory detrás del wrapper CEREBRO. No ejecutar código externo de skills por defecto. No permitir que una skill reemplace policy/routing CEREBRO.
+Skill Supply Chain V0 puede mantenerse en modo read-only/advisory y seguir descubriendo/evaluando nuevas skills mediante el pipeline completo. El monitor no es autorización de ejecución externa ni de escritura.
+
+El siguiente candidato debe elegirse exclusivamente desde evidencia del Discovery Scout y recorrer de nuevo los gates desde DISCOVER; ningún GREEN previo se hereda entre candidatos.
 
 ## Gate de expansión
 
-La autorización permanente del usuario cubre mejoras seguras y reversibles que preserven lo existente y superen los gates técnicos. No convierte writes, permisos superiores o side effects en operaciones ordinarias.
-
-Cualquier cambio que añada write PROD/GitHub, merge automático, push, mutación de issues/PR, datos cliente, nuevas credenciales, permisos superiores, ejecución de código externo o acceso Trading requiere `HUMAN_REQUIRED=HIGH_RISK` o el motivo de excepción aplicable; la implementación debe seguir siendo fail-closed y reversible.
+La autorización permanente del usuario cubre mejoras seguras y reversibles que preserven lo existente y superen gates técnicos. Cualquier cambio que añada write PROD/GitHub, merge automático, push, mutación de issues/PR, datos cliente, nuevas credenciales, permisos superiores, ejecución de código externo o Trading requiere `HUMAN_REQUIRED=HIGH_RISK` o el motivo de excepción aplicable.
 
 ## No hacer
 
-No reinterpretar PROD read-only GREEN como autorización de escritura. No copiar credenciales. No borrar/reemplazar App/CRM/Supabase/Notion/WordPress/SEO/Training/Trading. No activar pago como fallback. No ejecutar código externo de la skill GitHub ni usarla para saltarse reviews, branch protection, policy o checks.
+No reinterpretar monitor/read-only GREEN como autorización de escritura. No copiar credenciales. No borrar/reemplazar App/CRM/Supabase/Notion/WordPress/SEO/Training/Trading. No activar pago como fallback. No ejecutar código externo de una skill por inferencia. No saltarse reviews, branch protection, policy o checks.
