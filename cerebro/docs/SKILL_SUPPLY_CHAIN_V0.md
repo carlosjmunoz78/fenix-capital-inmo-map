@@ -1,8 +1,8 @@
 # CEREBRO OS · Skill Supply Chain V0
 
-Estado: PARCIAL / READY_FOR_PREPROD_PROMOTION_REVIEW
+Estado: PREPROD GREEN / HUMAN_REQUIRED HIGH_RISK / PROD NO AUTORIZADO
 Fecha de corte: 2026-10-07
-Coste adicional observado en los LAB cerrados: 0 €
+Coste adicional medido: 0 €
 PROD writes: NO
 Nuevo engine_id: NO
 External skill code execution: NO
@@ -10,95 +10,98 @@ Trading access: NO
 Merge autorizado: NO
 PROD autorizado: NO
 Autopromoción: NO
-HUMAN_REQUIRED actual para el siguiente salto: HIGH_RISK
+HUMAN_REQUIRED actual: HIGH_RISK
 
 ## 1. Encaje arquitectónico
 
 `cap:skill-supply-chain` es una capability transversal coordinada por `FACT-001`. Reutiliza Registry, contratos, seguridad/policy, QA/evaluación/Tribunal, Model Router, FinOps/free-tier, observabilidad y aprendizaje existentes. No sustituye SEO-001, Company Onboarding, App, CRM, Supabase, Notion, WordPress, Training ni Trading y no crea un engine_id nuevo.
 
-Regla de trabajo: CONSERVAR → ENTENDER → ENVOLVER → PROBAR → MEJORAR → MIGRAR.
+Regla: CONSERVAR → ENTENDER → ENVOLVER → PROBAR → MEJORAR → MIGRAR.
 
 ## 2. Flujo canónico
 
-DISCOVER → RESOLVE_UPSTREAM → MANIFEST_STATIC_SCAN → LICENSE_EVIDENCE → SECURITY/POLICY_GATE → DEDUP/OVERLAP → PRELAB → DISABLED_WRAPPER → VALUE/OPERATIONAL_FIT → STATIC_LAB → OLD_VS_NEW → ZERO_COST_ROUTE → HARD_QUOTA → BEHAVIORAL_LAB → INDEPENDENT_JUDGE → ROLLBACK/REBUILD_PROOF → TRIBUNAL → PREPROD_PROMOTION_REVIEW → CANARY cuando aplique → PROMOTE → MONITOR → LEARN → RECHECK.
+DISCOVER → RESOLVE_UPSTREAM → MANIFEST_STATIC_SCAN → LICENSE_EVIDENCE → SECURITY/POLICY_GATE → DEDUP/OVERLAP → PRELAB → DISABLED_WRAPPER → STATIC_LAB → OLD_VS_NEW → ZERO_COST_ROUTE → HARD_QUOTA → BEHAVIORAL_LAB → INDEPENDENT_JUDGE → LAB TRIBUNAL → PREPROD RUNTIME INTEGRATION → PREPROD JUDGE → PREPROD TRIBUNAL → HIGH_RISK PROMOTION REVIEW → CANARY cuando se autorice → PROMOTE → MONITOR → LEARN → RECHECK.
 
-Todo es fail-closed. Descubrir no implica confiar; auditar no implica instalar; LAB GREEN no implica PROD; Tribunal GREEN no implica PROD.
+Todo es fail-closed. Descubrir no implica confiar; auditar no implica instalar; LAB GREEN no implica PROD; PREPROD GREEN no implica PROD.
 
-## 3. Discovery y no duplicación
+## 3. Frozen LAB evidence
 
-La línea conserva y envuelve capacidades previas de FACT-001, Technology Scout, Capability Guard, IAM/Policy, RSI/Meta-Learning, Zero-Cost Runtime, Model Router, Runtime/EventBus, observabilidad y FinOps. Popularidad/stars no son una señal decisora.
+Behavioral evidence baseline: `135fc29a9b41d7257381c08efea49015db1e71d9`.
 
-Último snapshot de discovery previo a los LAB cerrados mantiene 36 candidatos / 3 fuentes, 12 upstream GitHub canónicos resueltos, 24 `SKILL.md` tratados como texto inerte, P0/P1/P2 y wrappers disabled. Candidatas bloqueadas/hold no se fuerzan.
+Supabase/Postgres:
+- run `37642814017`, artifact `11492473830`;
+- 6/6 llamadas sintéticas;
+- Gemini `gemini-3.5-flash-lite` bajo ruta gratuita acotada;
+- Judge GREEN, rollback binding GREEN, Tribunal GREEN;
+- `READY_FOR_PREPROD_PROMOTION_REVIEW`.
 
-## 4. Frozen behavioral evidence baseline
+agent-browser:
+- run `37644374137`, artifact `11494440533`;
+- raw `STATIC_LAB_HOLD` preservado;
+- normalized wrapper GREEN, thresholds no relajados;
+- 6/6 llamadas sintéticas;
+- Judge GREEN, rollback binding GREEN, Tribunal GREEN;
+- `READY_FOR_PREPROD_PROMOTION_REVIEW`.
 
-Head de evidencia behavioral y CI previo al cierre documental: `135fc29a9b41d7257381c08efea49015db1e71d9`.
-Base main observada: `3c37a1bc21b5c5a8c44bc842c4535495834f77bc`.
-PR: #486, DRAFT.
+## 4. Step 4 · PREPROD runtime integration · HECHO
 
-En ese head los checks observados terminaron SUCCESS y el discovery exact-head usado por agent-browser fue GREEN.
+Evidence head: `86369e0cd0d54c9c205bd39f309804a62b2c59d3`.
+Workflow run: `37647914902` — SUCCESS.
+Artifact: `cerebro-skill-preprod-37647914902`, ID `11494354501`, digest `sha256:9dac9feec60dee265d3af9b2413f48394eaf54b7f4109f4ba96051f374770c10`.
 
-## 5. Supabase/Postgres · HECHO en LAB sintético
+Se creó un harness PREPROD separado del proxy LAB y se ejecutó sobre el runtime CEREBRO existente:
 
-Candidata: `supabase-postgres-best-practices` / `mcpservers-agent-skills:4c2b2478f8fe3bed14df`.
+- `SharedRuntime` real, environment exacto `PREPROD`.
+- `FACT-001` como owner/runtime engine.
+- Dos bindings evaluados: Supabase/Postgres wrapper y agent-browser wrapper.
+- Seis fixtures sintéticos no cliente.
+- 18 ejecuciones totales: baseline OLD + wrapper NEW + rollback baseline.
+- Observabilidad, audit chain y FinOps persistentes locales.
+- Coste adicional medido: 0 €.
+- No PROD/customer data.
+- No external skill code.
+- No PROD writes.
+- No Trading.
+- No paid fallback.
 
-Workflow run: `37642814017` sobre head `1bbfc2250a8f27e8e767fa03ab11a4ddb7a833a7` — SUCCESS.
-Artifact: `cerebro-skill-supabase-behavioral-lab-37642814017`, ID `11492473830`, digest `sha256:2837ab122a2efbab92536f32519c971d7967c071ada5594dff2258f78796c3e0`.
+## 5. OLD vs NEW y rollback · HECHO
 
-Evidencia:
-- Static LAB: `STATIC_LAB_GREEN_FOR_BEHAVIORAL_EVAL`, policy 100, sin hard blocks.
-- Licencia detectada: MIT con evidencia exacta; `legal_final_opinion=false`.
-- Zero-cost route: `READY_ZERO_COST_ROUTE`.
-- 6/6 llamadas sintéticas, 3 baseline + 3 candidate, retries=0, paid fallback=false.
-- Provider/model: `google-gemini-api-free` / `gemini-3.5-flash-lite`.
-- Behavioral proxy: `PROXY_COMPLETE`.
-- Independent Judge: `GREEN_FOR_TRIBUNAL_REVIEW`.
-- Rollback/rebuild: `GREEN_ROLLBACK_REBUILD_PROOF`, scope `WRAPPER_BINDING_ONLY_SYNTHETIC`.
-- Tribunal: `GREEN`, blockers=[]; PROD no autorizado.
-- Promotion readiness: `READY_FOR_PREPROD_PROMOTION_REVIEW`, blockers=[].
-- `HUMAN_REQUIRED=HIGH_RISK`.
+Para cada binding se ejecutó el baseline CEREBRO, después el wrapper normalizado y después rollback físico a baseline. La salida restaurada se contrastó por hash. Finalmente se reconstruyó el estado sin binding persistido, quedando `DISABLED` por defecto.
 
-## 6. agent-browser · HECHO en LAB sintético normalizado
+Resultado: `PREPROD_INTEGRATION_COMPLETE`, 2 packages GREEN, rollback físico GREEN y rebuild default-disabled GREEN.
 
-Candidata: `agent-browser` / `mcpservers-agent-skills:157e52d4ac5038d53c1a`.
+El test focalizado ejecutó 3/3 subtests GREEN, incluyendo rechazo fail-closed de PROD, coste >0, datos PROD/cliente, writes, código externo y Trading, además de tampering de rollback/coste.
 
-Workflow run: `37644374137` sobre head `135fc29a9b41d7257381c08efea49015db1e71d9` — SUCCESS.
-Artifact: `cerebro-skill-agent-browser-behavioral-lab-37644374137`, ID `11494440533`, digest `sha256:0a1f97bf1e7271454627eb7553147dfa5930c28a26fac20232fd1acd58e06d5c`.
+## 6. PREPROD Judge y Tribunal · HECHO
 
-Evidencia:
-- Raw static: `STATIC_LAB_HOLD`, preservado.
-- Normalized wrapper: `NORMALIZED_WRAPPER_GREEN_FOR_BEHAVIORAL_EVAL`.
-- Raw thresholds relajados: NO.
-- 6/6 llamadas sintéticas, retries=0, paid fallback=false.
-- Provider/model: `google-gemini-api-free` / `gemini-3.5-flash-lite`.
-- Behavioral proxy: `PROXY_COMPLETE`.
-- Independent Judge: `GREEN_FOR_TRIBUNAL_REVIEW`.
-- Rollback/rebuild: `GREEN_ROLLBACK_REBUILD_PROOF`.
-- Tribunal normalizado: `GREEN`, blockers=[].
-- Promotion readiness: `READY_FOR_PREPROD_PROMOTION_REVIEW`.
-- `HUMAN_REQUIRED=HIGH_RISK`.
+- Independent PREPROD Judge: `GREEN_FOR_PREPROD_TRIBUNAL`, blockers=[];
+- PREPROD Tribunal: `GREEN_FOR_HIGH_RISK_PROMOTION_REVIEW`, blockers=[];
+- `HUMAN_REQUIRED=HIGH_RISK`;
+- `merge_authorized=false`;
+- `prod_authorized=false`;
+- `autonomous_promotion_authorized=false`.
 
-El wrapper no convierte el HOLD raw en GREEN ni muta la evidencia original: aplica una política interna más restrictiva y deja trazabilidad de ambos estados.
+Todos los checks observados del evidence head `86369e0...` finalizaron SUCCESS.
 
-## 7. Ruta Gemini 0 € · alcance exacto
+## 7. Alcance exacto: qué significa PREPROD real aquí
 
-La ruta `google-gemini-api-free` quedó verificada para estos LAB sintéticos con hard quota, stop al free-tier limit y `paid_fallback=false`. Esto no se interpreta como garantía universal/permanente de gratuidad ni como autorización para uso PROD. Cualquier señal de billing o coste >0 obliga STOP y `MONEY_LIMIT`.
+Es real respecto al runtime/binding CEREBRO: el código de integración pasó por `SharedRuntime`, binding persistente local, observabilidad/audit/FinOps y rollback/rebuild físicos del binding.
 
-Las credenciales no se registran en artifacts ni documentación.
+Los fixtures son deliberadamente sintéticos no cliente. No se ejecutó código externo de las skills ni se realizaron side effects reales contra Supabase o un navegador externo. Esto no es una carencia oculta: forma parte del contrato de seguridad porque las skills admitidas se usan como guidance no confiable detrás de wrappers CEREBRO, no como ejecutables autónomos.
 
 ## 8. No interferencia
 
 - PROD no tocado.
 - Datos PROD/cliente no usados.
-- App/CRM/SEO/WordPress/Supabase PROD no modificados por estos LAB.
+- App/CRM/SEO/WordPress/Supabase PROD no modificados.
 - Código externo de skills no ejecutado.
 - Writes PROD: NO.
 - Trading: aislado/no accesible.
 - No nuevo servidor ni suscripción de pago.
 
-## 9. Documentación canónica Step 3
+## 9. Estado documental
 
-- Registry sidecar: `cerebro/registry/skill-supply-chain-v0.json`.
+- Registry: `cerebro/registry/skill-supply-chain-v0.json`.
 - Contract: `cerebro/contracts/skill-supply-chain-v0.json`.
 - Dependency map: `cerebro/docs/SKILL_SUPPLY_CHAIN_DEPENDENCY_MAP_V0.md`.
 - Runbook: `cerebro/docs/SKILL_SUPPLY_CHAIN_RUNBOOK_V0.md`.
@@ -106,29 +109,20 @@ Las credenciales no se registran en artifacts ni documentación.
 - Backup/rebuild: `cerebro/docs/SKILL_SUPPLY_CHAIN_BACKUP_REBUILD_V0.md`.
 - Autonomy: `cerebro/docs/SKILL_SUPPLY_CHAIN_AUTONOMY_V0.md`.
 
-## 10. Qué está GREEN y qué NO
+## 10. Status semántico
 
-HECHO: discovery/gates, Behavioral LAB sintético de Supabase, Behavioral LAB sintético normalizado de agent-browser, Judge, rollback binding proof y Tribunal de ambos.
+HECHO: LABs, PREPROD runtime integration, OLD vs NEW controlado, observabilidad/audit/FinOps, rollback físico del binding, rebuild disabled, PREPROD Judge y Tribunal.
 
-PARCIAL: la capability total sigue sin integración PREPROD real y sin evidencia de efectos reales controlados.
+EXISTENTE: FACT-001, shared runtime, ledgers, policy/governance y sistemas Fénix preservados.
 
-DEFINIDO: contratos, dependencias, rollback/rebuild y política de promoción.
+PARCIAL: autonomía total, porque no hay PROD ni canary autorizado.
 
-PLANIFICADO: PREPROD real.
+DEFINIDO: promoción gradual posterior al gate humano, con baseline y rollback preservados.
 
-NO AUTORIZADO: merge, PROD, writes PROD, autopromoción.
+PLANIFICADO: canary/promoción únicamente si el humano supera el gate `HIGH_RISK`.
 
 ## 11. Next block
 
-Step 4 = PREPROD real y reversible:
+**STOP automático en `HUMAN_REQUIRED=HIGH_RISK`.**
 
-1. scope PREPROD aislado;
-2. revalidar exact HEAD/provenance/contract;
-3. OLD vs NEW sobre integración controlada;
-4. observabilidad y coste medido;
-5. rollback físico + rebuild disabled;
-6. Judge + Tribunal con evidencia PREPROD;
-7. si todo GREEN, dejar listo para revisión de promoción;
-8. detenerse en `HIGH_RISK` antes de cualquier merge/promoción que pueda afectar PROD.
-
-No usar el LAB sintético como sustituto de PREPROD.
+La siguiente acción sería decidir si se autoriza la revisión/promoción gradual. No se hace merge, canary ni PROD por inferencia. Si se autoriza en un paso posterior, debe mantenerse el mismo contrato: cambio gradual, observabilidad, coste 0 €, rollback inmediato y sin ampliar permisos simultáneamente.

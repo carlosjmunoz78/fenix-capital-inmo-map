@@ -1,6 +1,6 @@
 # CEREBRO OS · Skill Supply Chain · Runbook V0
 
-Estado: HECHO para LAB / PLANIFICADO para PREPROD real
+Estado: HECHO LAB + PREPROD runtime / HUMAN_REQUIRED HIGH_RISK
 Fecha: 2026-10-07
 
 ## Safe loop
@@ -8,31 +8,43 @@ Fecha: 2026-10-07
 1. CONSERVAR: fijar SHA, contratos, owner, evidencia y baseline existente.
 2. ENTENDER: resolver upstream exacto, licencia, permisos, solapamiento y dependencias.
 3. ENVOLVER: wrapper CEREBRO disabled/fail-closed; no reemplazar sistema existente.
-4. PROBAR: static LAB → OLD vs NEW sintético → behavioral LAB → judge → rollback/rebuild → tribunal.
+4. PROBAR: static LAB → OLD vs NEW sintético → behavioral LAB → PREPROD runtime OLD vs NEW → judge → rollback/rebuild → tribunal.
 5. MEJORAR: corregir solo el rojo exacto, sin rebajar umbrales ni permisos.
-6. MIGRAR: únicamente después de PREPROD real GREEN y revisión humana cuando `HIGH_RISK`.
+6. MIGRAR: únicamente después de PREPROD GREEN y revisión humana `HIGH_RISK`.
 
-## Estado congelado
+## HECHO · LAB
 
-Supabase/Postgres y agent-browser han alcanzado `READY_FOR_PREPROD_PROMOTION_REVIEW` en LAB sintético. Ambos conservan `merge_authorized=false`, `prod_authorized=false` y `autonomous_promotion_authorized=false`.
+Supabase/Postgres y agent-browser alcanzaron `READY_FOR_PREPROD_PROMOTION_REVIEW` en LAB. agent-browser conserva intacto su raw `STATIC_LAB_HOLD`; el avance usa wrapper normalizado interno sin alterar thresholds.
 
-Para agent-browser el raw `STATIC_LAB_HOLD` permanece intacto; el avance se produce mediante wrapper normalizado interno, sin alterar thresholds.
+## HECHO · PREPROD Step 4
 
-## Runbook PREPROD siguiente
+Run `37647914902`, head `86369e0cd0d54c9c205bd39f309804a62b2c59d3`:
 
-- Crear scope PREPROD aislado y reversible.
-- Revalidar exact HEAD, contrato y licencias/procedencia.
-- Ejecutar OLD vs NEW contra la integración PREPROD controlada, nunca contra PROD.
-- Activar observabilidad de latencia, errores, policy violations, side effects y coste.
-- Ejecutar rollback físico del binding/integración y verificar rebuild disabled por defecto.
-- Reejecutar Judge y Tribunal sobre evidencia PREPROD, no reutilizar LAB como sustituto.
-- Si GREEN: dejar `READY_FOR_PROMOTION_REVIEW`; por `HIGH_RISK` detenerse para revisión humana antes de cualquier promoción.
-- Si RED/HOLD: corregir en rama y repetir; no relajar policy, permisos, seguridad ni coste.
+- `PREPROD_INTEGRATION_COMPLETE`.
+- Runtime CEREBRO real en environment `PREPROD`.
+- 18 ejecuciones OLD/NEW/rollback sobre 2 packages.
+- Fixtures: sintéticos no cliente.
+- Observabilidad + audit + FinOps persistentes locales activados.
+- Coste adicional medido: 0 €.
+- Rollback físico del binding: GREEN.
+- Rebuild: vuelve disabled por defecto.
+- Judge: `GREEN_FOR_PREPROD_TRIBUNAL`.
+- Tribunal: `GREEN_FOR_HIGH_RISK_PROMOTION_REVIEW`.
+- `HUMAN_REQUIRED=HIGH_RISK`.
+- merge/PROD/autopromotion: false.
 
-## Fail-closed
+## Alcance exacto del PREPROD
 
-Cualquier coste >0 o billing inesperado → `MONEY_LIMIT` y STOP. Cualquier acceso a datos cliente/PROD, write PROD, ejecución de código externo no autorizada o acceso Trading → STOP y tratar como incidente/policy conflict según proceda.
+Se probó la integración del wrapper dentro del runtime CEREBRO y su reversibilidad. No se ejecutó código externo de las skills ni side effects reales contra sistemas externos; esta exclusión es intencionada porque las skills admitidas son guidance no confiable, no ejecutables autónomos.
+
+## Gate actual
+
+STOP en `HIGH_RISK`. Antes de cualquier merge/promoción con impacto potencial en PROD se exige revisión humana explícita. No convertir el GREEN de PREPROD en autorización automática.
+
+## Si se autoriza avanzar después del HIGH_RISK
+
+Aplicar canary/binding gradual, conservar baseline, observabilidad activa y rollback inmediato; no ampliar permisos, datos o coste en el mismo cambio. Cualquier coste >0 → `MONEY_LIMIT`. Cualquier acceso no autorizado a datos PROD/cliente, write PROD, código externo o Trading → STOP.
 
 ## No hacer
 
-No merge directo. No activar wrappers en PROD. No copiar credenciales. No usar evidencia histórica como si fuese evidencia del nuevo HEAD. No borrar/reemplazar App/CRM/Supabase/Notion/WordPress/SEO/Training/Trading.
+No merge directo por inferencia. No activar wrappers en PROD sin gate humano. No copiar credenciales. No borrar/reemplazar App/CRM/Supabase/Notion/WordPress/SEO/Training/Trading. No reinterpretar PREPROD GREEN como PROD GREEN.

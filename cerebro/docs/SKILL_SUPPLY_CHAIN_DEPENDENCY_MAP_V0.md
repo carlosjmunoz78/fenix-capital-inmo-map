@@ -1,6 +1,6 @@
 # CEREBRO OS · Skill Supply Chain · Dependency Map V0
 
-Estado: HECHO documental / PARCIAL operativo
+Estado: HECHO documental / PREPROD GREEN / PROD NO AUTORIZADO
 Fecha: 2026-10-07
 
 ## Ownership
@@ -17,14 +17,22 @@ Bindings funcionales candidatos no cambian ownership de App, CRM, Supabase, SEO,
 
 ## Dependencias externas acotadas
 
-- GitHub: procedencia, exact commit, licencia, CI y artifacts.
+- GitHub: procedencia, exact commit, CI y artifacts.
 - Fuentes de discovery: solo descubrimiento/referencia; nunca autoridad de confianza por sí solas.
-- `google-gemini-api-free`: ruta de inferencia verificada exclusivamente para los LAB sintéticos cerrados aquí, con hard quota y `paid_fallback=false`. No constituye autorización general de uso gratuito ni de PROD.
+- `google-gemini-api-free`: usada únicamente en los LAB sintéticos cerrados, con hard quota y `paid_fallback=false`; no es dependencia del PREPROD runtime ejecutado en Step 4.
+- PREPROD Step 4: runtime CEREBRO local/ephemeral y ledgers existentes; coste adicional medido 0 €.
 
-## Evidencia Behavioral congelada
+## Evidencia congelada
 
-- Supabase/Postgres: run `37642814017`, head `1bbfc2250a8f27e8e767fa03ab11a4ddb7a833a7`, artifact `11492473830`.
-- agent-browser: run `37644374137`, head `135fc29a9b41d7257381c08efea49015db1e71d9`, artifact `11494440533`.
+- Behavioral Supabase/Postgres: run `37642814017`, head `1bbfc2250a8f27e8e767fa03ab11a4ddb7a833a7`, artifact `11492473830`.
+- Behavioral agent-browser: run `37644374137`, head `135fc29a9b41d7257381c08efea49015db1e71d9`, artifact `11494440533`.
+- PREPROD runtime OLD vs NEW: run `37647914902`, head `86369e0cd0d54c9c205bd39f309804a62b2c59d3`, artifact `11494354501`, digest `sha256:9dac9feec60dee265d3af9b2413f48394eaf54b7f4109f4ba96051f374770c10`.
+
+## PREPROD probado
+
+La integración ejecutó `SharedRuntime` real en `PREPROD`, 18 operaciones controladas sobre dos bindings y seis fixtures sintéticos no cliente. Se ejercitaron baseline, wrapper y rollback de binding físico local; el rebuild vuelve a `DISABLED`. Judge: `GREEN_FOR_PREPROD_TRIBUNAL`. Tribunal: `GREEN_FOR_HIGH_RISK_PROMOTION_REVIEW`.
+
+No se ejecutó código externo de las skills ni se realizaron side effects contra Supabase/Browser externos: las skills siguen tratándose como guidance no confiable detrás de wrappers CEREBRO.
 
 ## Fronteras de seguridad
 
@@ -36,6 +44,6 @@ Bindings funcionales candidatos no cambian ownership de App, CRM, Supabase, SEO,
 - Paid fallback: NO.
 - Merge/PROD/autopromotion: NO.
 
-## Dependencia pendiente antes de promoción
+## Próxima dependencia/gate
 
-El siguiente salto es PREPROD real: OLD vs NEW sobre integración controlada, observabilidad, rollback/rebuild y revisión `HIGH_RISK`. Ningún resultado de LAB sustituye este gate.
+`HUMAN_REQUIRED=HIGH_RISK` antes de cualquier merge/promoción que pueda afectar PROD. PREPROD GREEN no equivale a autorización PROD.

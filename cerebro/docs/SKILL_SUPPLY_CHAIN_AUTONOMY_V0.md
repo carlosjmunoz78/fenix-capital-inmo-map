@@ -5,31 +5,28 @@ Fecha: 2026-10-07
 ## HECHO
 
 - Discovery/static gates fail-closed.
-- Zero-cost route audit y hard quota.
+- Zero-cost route audit y hard quota de LAB.
 - Supabase/Postgres Behavioral LAB sintético completo.
 - agent-browser Behavioral LAB sintético completo mediante wrapper normalizado.
-- Independent Judge GREEN para ambos LAB.
-- Rollback/rebuild binding proof GREEN para ambos.
-- Tribunal GREEN para ambos.
-- Promotion readiness: `READY_FOR_PREPROD_PROMOTION_REVIEW` para ambos.
+- PREPROD runtime OLD vs NEW completo sobre `SharedRuntime` real en environment PREPROD.
+- Observabilidad/audit/FinOps PREPROD activados.
+- Rollback físico del binding y rebuild default-disabled GREEN.
+- PREPROD Judge `GREEN_FOR_PREPROD_TRIBUNAL`.
+- PREPROD Tribunal `GREEN_FOR_HIGH_RISK_PROMOTION_REVIEW`.
 
-## PARCIAL
+## EXISTENTE Y PRESERVADO
 
-- Evidencia actual es LAB sintético; no equivale a integración PREPROD real ni a PROD.
-- Rollback probado solo para `WRAPPER_BINDING_ONLY_SYNTHETIC`.
+- App/CRM/Supabase/Notion/WordPress/SEO/Training no han sido sustituidos por la capability.
+- Trading permanece aislado.
+- FACT-001 sigue siendo owner; no se crea nuevo engine_id.
 
-## DEFINIDO
+## ALCANCE DEL GREEN
 
-- PREPROD deberá ejecutar OLD vs NEW real controlado, observabilidad, rollback/rebuild, evaluación y Tribunal sobre evidencia del propio PREPROD.
-
-## PLANIFICADO
-
-- Step 4: PREPROD real y revisión de promoción.
-- Step 5: canary/promoción gradual solo si Step 4 queda GREEN y se supera `HIGH_RISK` humano.
+El PREPROD usó fixtures sintéticos no cliente y ejercitó el runtime/binding CEREBRO real. No ejecutó código externo de skills ni side effects contra sistemas externos. Las skills siguen siendo guidance subordinado a wrappers/policy CEREBRO.
 
 ## Estado de autonomía
 
-`autonomy_level = PREPROD_REVIEW_CANDIDATE_ONLY`.
+`autonomy_level = PREPROD_GREEN_HUMAN_GATE_REQUIRED`.
 
 - `human_required = HIGH_RISK`
 - `merge_authorized = false`
@@ -37,5 +34,10 @@ Fecha: 2026-10-07
 - `autonomous_promotion_authorized = false`
 - `prod_writes = false`
 - `trading_access = false`
+- `additional_cost_eur = 0`
+
+## HUMAN_REQUIRED actual
+
+`HIGH_RISK`: la siguiente acción relevante sería merge/promoción/canary con posible impacto en PROD. No se ejecuta automáticamente.
 
 No existe evidencia que autorice declarar esta capability autónoma en PROD.
