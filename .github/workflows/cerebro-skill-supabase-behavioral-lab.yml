@@ -15,7 +15,8 @@ env:
   CEREBRO_BEHAVIORAL_EXECUTION_ENABLED: 'true'
   CEREBRO_ALLOW_PROD_DATA: 'false'
   CEREBRO_ALLOW_CUSTOMER_DATA: 'false'
-  CEREBRO_GEMINI_MODEL: gemini-3.1-flash-lite
+  CEREBRO_GEMINI_MODEL: gemini-3.5-flash-lite
+  CEREBRO_SUPABASE_PROVIDER_TIMEOUT_MS: '120000'
 
 jobs:
   synthetic-supabase-lab:
@@ -32,9 +33,9 @@ jobs:
           node - <<'NODE'
           const fs=require('fs');
           const t=JSON.parse(fs.readFileSync('cerebro/skills/.supabase-behavioral-lab-trigger.json','utf8'));
-          const ok=t.confirm==='RUN_SYNTHETIC_LAB'&&t.target_candidate==='supabase-postgres-best-practices'&&t.target_candidate_id==='mcpservers-agent-skills:4c2b2478f8fe3bed14df'&&t.expected_upstream_full_name==='supabase/agent-skills'&&t.expected_manifest_path==='skills/supabase-postgres-best-practices/SKILL.md'&&t.scope==='LAB_SYNTHETIC_ONLY'&&t.max_calls===6&&t.max_retries_per_call===0&&t.paid_fallback===false&&t.allow_prod_data===false&&t.allow_customer_data===false&&t.allow_external_skill_code_execution===false&&t.allow_prod_write===false&&t.allow_trading_access===false&&typeof t.one_shot_id==='string'&&t.one_shot_id.length>=16;
+          const ok=t.confirm==='RUN_SYNTHETIC_LAB'&&t.target_candidate==='supabase-postgres-best-practices'&&t.target_candidate_id==='mcpservers-agent-skills:4c2b2478f8fe3bed14df'&&t.expected_upstream_full_name==='supabase/agent-skills'&&t.expected_manifest_path==='skills/supabase-postgres-best-practices/SKILL.md'&&t.scope==='LAB_SYNTHETIC_ONLY'&&t.max_calls===6&&t.max_retries_per_call===0&&t.provider_timeout_ms===120000&&t.paid_fallback===false&&t.allow_prod_data===false&&t.allow_customer_data===false&&t.allow_external_skill_code_execution===false&&t.allow_prod_write===false&&t.allow_trading_access===false&&typeof t.one_shot_id==='string'&&t.one_shot_id.length>=16;
           if(!ok){console.error('Invalid Supabase one-shot LAB trigger');process.exit(1)}
-          console.log(JSON.stringify({trigger:'AUTHORIZED_ONE_SHOT_SUPABASE_BRANCH_ONLY',one_shot_id:t.one_shot_id,target:t.target_candidate,target_candidate_id:t.target_candidate_id,max_calls:6,max_retries_per_call:0,paid_fallback:false,prod_data:false,customer_data:false,external_skill_code:false,prod_write:false,trading:false}));
+          console.log(JSON.stringify({trigger:'AUTHORIZED_ONE_SHOT_SUPABASE_BRANCH_ONLY',one_shot_id:t.one_shot_id,target:t.target_candidate,target_candidate_id:t.target_candidate_id,max_calls:6,max_retries_per_call:0,provider_timeout_ms:120000,paid_fallback:false,prod_data:false,customer_data:false,external_skill_code:false,prod_write:false,trading:false}));
           NODE
 
       - name: Wait for GREEN discovery evidence for exactly this branch head
@@ -116,7 +117,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           CEREBRO_GEMINI_API_KEY: ${{ secrets.CEREBRO_GEMINI_API_KEY }}
-          CEREBRO_GEMINI_MODEL: gemini-3.1-flash-lite
+          CEREBRO_GEMINI_MODEL: gemini-3.5-flash-lite
+          CEREBRO_SUPABASE_PROVIDER_TIMEOUT_MS: '120000'
         run: node cerebro/skills/skill-behavioral-proxy-runner.mjs --oldnew artifacts/cerebro-skill-old-vs-new-supabase.manual.json --manifests artifacts/cerebro-skill-manifests.json --gate artifacts/cerebro-skill-behavioral-execution-gate.supabase.manual.json --quota artifacts/cerebro-skill-free-quota-plan.supabase.manual.json --route artifacts/cerebro-skill-zero-cost-route.supabase.manual.json --output artifacts/cerebro-skill-behavioral-proxy.supabase.manual.json
 
       - name: Verify exact call count provider model wrapper and no unsafe execution
@@ -127,9 +129,9 @@ jobs:
           const arms=(p.results??[]).flatMap(r=>(r.fixture_results??[]).flatMap(f=>f.arms??[]));
           const candidateArms=arms.filter(a=>a.arm==='CANDIDATE_SKILL_PROXY');
           const baselineArms=arms.filter(a=>a.arm==='BASELINE_PROXY');
-          const ok=p.status==='PROXY_COMPLETE'&&p.calls_executed===6&&p.provider_id==='google-gemini-api-free'&&arms.length===6&&candidateArms.length===3&&baselineArms.length===3&&arms.every(a=>a.model==='gemini-3.1-flash-lite')&&candidateArms.every(a=>a.wrapper_applied===true&&a.wrapper_id==='skillwrap:cerebro-supabase-postgres-v0.1.0'&&a.wrapper_prod_authorized===false&&a.wrapper_trading_access===false)&&baselineArms.every(a=>a.wrapper_applied===false)&&p.synthetic_only===true&&p.external_skill_code_executed===false&&p.prod_authorized===false;
+          const ok=p.status==='PROXY_COMPLETE'&&p.calls_executed===6&&p.provider_id==='google-gemini-api-free'&&p.provider_timeout_ms===120000&&arms.length===6&&candidateArms.length===3&&baselineArms.length===3&&arms.every(a=>a.model==='gemini-3.5-flash-lite')&&candidateArms.every(a=>a.wrapper_applied===true&&a.wrapper_id==='skillwrap:cerebro-supabase-postgres-v0.1.0'&&a.wrapper_prod_authorized===false&&a.wrapper_trading_access===false)&&baselineArms.every(a=>a.wrapper_applied===false)&&p.synthetic_only===true&&p.external_skill_code_executed===false&&p.prod_authorized===false;
           if(!ok){console.error('Supabase behavioral execution invariant failed');process.exit(1)}
-          console.log(JSON.stringify({status:p.status,calls_executed:6,provider_id:p.provider_id,model:'gemini-3.1-flash-lite',candidate_wrapper_applied:3,baseline_wrapper_applied:0,synthetic_only:true,external_skill_code_executed:false,prod_authorized:false}));
+          console.log(JSON.stringify({status:p.status,calls_executed:6,provider_id:p.provider_id,model:'gemini-3.5-flash-lite',provider_timeout_ms:p.provider_timeout_ms,candidate_wrapper_applied:3,baseline_wrapper_applied:0,synthetic_only:true,external_skill_code_executed:false,prod_authorized:false}));
           NODE
 
       - name: Run fixed-threshold deterministic independent judge
