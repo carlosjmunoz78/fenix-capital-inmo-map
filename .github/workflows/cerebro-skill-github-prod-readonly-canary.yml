@@ -1,0 +1,183 @@
+name: CEREBRO Skill GitHub PROD Read-only Canary
+
+on:
+  push:
+    branches:
+      - cerebro-skill-supply-chain-v0-20261006
+    paths:
+      - 'cerebro/skills/.github-prod-readonly-canary-trigger.json'
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: cerebro-skill-github-prod-readonly-canary
+  cancel-in-progress: false
+
+env:
+  CEREBRO_ENVIRONMENT: PROD_CANARY
+  CEREBRO_ALLOW_PROD_DATA: 'false'
+  CEREBRO_ALLOW_CUSTOMER_DATA: 'false'
+  CEREBRO_ALLOW_EXTERNAL_SKILL_CODE: 'false'
+  CEREBRO_ALLOW_PROD_WRITE: 'false'
+  CEREBRO_ALLOW_GITHUB_WRITE: 'false'
+  CEREBRO_ALLOW_TRADING: 'false'
+  CEREBRO_PAID_FALLBACK: 'false'
+
+jobs:
+  github-prod-readonly-canary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact canary source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Validate explicit bounded standing authorization
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs');
+          const t=JSON.parse(fs.readFileSync('cerebro/skills/.github-prod-readonly-canary-trigger.json','utf8'));
+          const ok=t.confirm==='RUN_GITHUB_PROD_READONLY_CANARY'&&
+            t.scope==='PROD_GITHUB_READONLY_CANARY_ONLY'&&
+            t.target_candidate==='github'&&
+            t.target_candidate_id==='lobehub-skills:52441cd3d76607ffffab'&&
+            t.expected_wrapper_id==='skillwrap:cerebro-github-v0.1.0'&&
+            t.company_id==='GLOBAL'&&t.engine_id==='FACT-001'&&t.environment==='PROD_CANARY'&&
+            t.additional_cost_budget_eur===0&&t.allow_prod_data===false&&t.allow_customer_data===false&&
+            t.allow_external_skill_code_execution===false&&t.allow_prod_write===false&&t.allow_github_write===false&&
+            t.allow_merge===false&&t.allow_push===false&&t.allow_issue_or_pr_mutation===false&&t.allow_workflow_dispatch===false&&
+            t.allow_trading_access===false&&t.paid_fallback===false&&
+            t.expected_human_gate==='HIGH_RISK'&&t.human_authorization_granted===true&&
+            t.authorization_scope==='SAFE_REVERSIBLE_IMPROVEMENT_PRESERVE_EXISTING'&&
+            Array.isArray(t.allowed_http_methods)&&t.allowed_http_methods.length===1&&t.allowed_http_methods[0]==='GET'&&
+            t.expected_preprod_run_id===37668271189&&t.expected_preprod_head_sha==='feff48e1764474db0aa118af152b23d816edd00d'&&
+            t.expected_preprod_artifact_id===11503718236&&
+            t.expected_preprod_artifact_digest==='sha256:d6e0fddf4932db4939b78802ee24bd104f1f6775ebe9877657849efdc284130d'&&
+            typeof t.one_shot_id==='string'&&t.one_shot_id.length>=16;
+          if(!ok){console.error('Invalid GitHub PROD read-only canary authorization');process.exit(1)}
+          console.log(JSON.stringify({authorized:true,target:'github',scope:t.scope,environment:t.environment,methods:t.allowed_http_methods,cost_budget_eur:0,human_gate:'HIGH_RISK',prod_write:false,github_write:false}));
+          NODE
+          EXPECTED_PARENT="$(node -p "require('./cerebro/skills/.github-prod-readonly-canary-trigger.json').expected_parent_sha")"
+          ACTUAL_PARENT="$(git rev-parse HEAD^)"
+          test "$ACTUAL_PARENT" = "$EXPECTED_PARENT"
+
+      - name: Verify immutable successful GitHub PREPROD evidence
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/preprod
+          RUN_ID="$(node -p "require('./cerebro/skills/.github-prod-readonly-canary-trigger.json').expected_preprod_run_id")"
+          SHA="$(node -p "require('./cerebro/skills/.github-prod-readonly-canary-trigger.json').expected_preprod_head_sha")"
+          ARTIFACT_ID="$(node -p "require('./cerebro/skills/.github-prod-readonly-canary-trigger.json').expected_preprod_artifact_id")"
+          ARTIFACT_DIGEST="$(node -p "require('./cerebro/skills/.github-prod-readonly-canary-trigger.json').expected_preprod_artifact_digest")"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID" --jq '.head_sha')" = "$SHA"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID" --jq '.status')" = 'completed'
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID" --jq '.conclusion')" = 'success'
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID" --jq '.name')" = 'CEREBRO Skill GitHub PREPROD Integration'
+          FOUND_ID="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID/artifacts" --jq ".artifacts[] | select(.id == $ARTIFACT_ID) | .id")"
+          FOUND_DIGEST="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID/artifacts" --jq ".artifacts[] | select(.id == $ARTIFACT_ID) | .digest")"
+          test "$FOUND_ID" = "$ARTIFACT_ID"
+          test "$FOUND_DIGEST" = "$ARTIFACT_DIGEST"
+          gh run download "$RUN_ID" --repo "$GITHUB_REPOSITORY" --name "cerebro-skill-github-preprod-$RUN_ID" --dir artifacts/preprod
+          P="$(find artifacts/preprod -type f -name 'cerebro-skill-github-preprod-integration.json' -print -quit)"
+          J="$(find artifacts/preprod -type f -name 'cerebro-skill-github-preprod-judge.json' -print -quit)"
+          T="$(find artifacts/preprod -type f -name 'cerebro-skill-github-preprod-tribunal.json' -print -quit)"
+          test -n "$P"; test -n "$J"; test -n "$T"
+          node - "$P" "$J" "$T" <<'NODE'
+          const fs=require('fs');
+          const [pPath,jPath,tPath]=process.argv.slice(2);
+          const p=JSON.parse(fs.readFileSync(pPath,'utf8'));
+          const j=JSON.parse(fs.readFileSync(jPath,'utf8'));
+          const t=JSON.parse(fs.readFileSync(tPath,'utf8'));
+          const ok=p.status==='PREPROD_INTEGRATION_COMPLETE'&&p.runtime_integration_real===true&&p.final_binding_state==='DISABLED'&&
+            p.measured_additional_cost_eur===0&&p.external_skill_code_executed===false&&p.prod_writes===false&&p.trading_access===false&&p.paid_fallback===false&&
+            j.decision==='GREEN_FOR_PREPROD_TRIBUNAL'&&j.green===true&&(j.blockers??[]).length===0&&
+            t.decision==='GREEN_FOR_HIGH_RISK_PROD_READONLY_CANARY_REVIEW'&&t.green===true&&t.human_required==='HIGH_RISK'&&t.next_gate==='PROD_READONLY_CANARY'&&
+            t.prod_authorized===false&&t.merge_authorized===false&&t.autonomous_promotion_authorized===false;
+          if(!ok){console.error('Immutable GitHub PREPROD evidence is not GREEN/fail-closed');process.exit(1)}
+          console.log(JSON.stringify({preprod_gate:'GREEN',next_gate:t.next_gate,human_required:t.human_required,cost_eur:0,prod_authorized:false}));
+          NODE
+
+      - name: Verify registry and contract remain fail-closed
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs');
+          const r=JSON.parse(fs.readFileSync('cerebro/registry/skill-supply-chain-v0.json','utf8'));
+          const c=JSON.parse(fs.readFileSync('cerebro/contracts/skill-supply-chain-v0.json','utf8'));
+          const g=r.github_preprod_evidence??{};
+          const ok=r.capability_id==='cap:skill-supply-chain'&&r.owner_engine_id==='FACT-001'&&
+            g.run_id===37668271189&&g.tribunal_decision==='GREEN_FOR_HIGH_RISK_PROD_READONLY_CANARY_REVIEW'&&
+            g.prod_readonly_canary_authorized===false&&g.prod_write_authorized===false&&g.prod_authorized===false&&
+            r.safety?.prod_write_authorized===false&&r.safety?.prod_authorized===false&&r.safety?.github_prod_write_authorized===false&&
+            c.contract_id==='contract:skill-supply-chain-v0'&&c.owner_engine_id==='FACT-001'&&
+            c.invariants?.prod_write_default===false&&c.invariants?.external_skill_code_execution_default===false&&c.invariants?.paid_fallback_default===false;
+          if(!ok){console.error('Registry/contract are not fail-closed for GitHub canary');process.exit(1)}
+          console.log(JSON.stringify({registry:'GREEN',contract:'GREEN',github_preprod:'GREEN',prod_write_authorized:false,prod_authorized:false}));
+          NODE
+
+      - name: Unit-test GitHub canary fail-closed contract
+        run: node --test cerebro/tests/skill-github-prod-readonly-canary.test.mjs cerebro/tests/skill-cerebro-github-wrapper.test.mjs
+
+      - name: Execute real GitHub PROD read-only canary
+        shell: bash
+        env:
+          CEREBRO_GITHUB_PROD_CANARY_CONFIRM: RUN_GITHUB_PROD_READONLY_CANARY
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          node cerebro/skills/skill-github-prod-readonly-canary.mjs --output artifacts/cerebro-skill-github-prod-readonly-canary.json
+
+      - name: Assert GitHub canary evidence is GREEN and non-mutating
+        shell: bash
+        run: |
+          set -euo pipefail
+          f=artifacts/cerebro-skill-github-prod-readonly-canary.json
+          test "$(jq -r '.status' "$f")" = 'GREEN_GITHUB_PROD_READONLY_CANARY'
+          test "$(jq -r '.environment' "$f")" = 'PROD_CANARY'
+          test "$(jq -r '.live_requests' "$f")" = '2'
+          test "$(jq -r '.methods_used | join(",")' "$f")" = 'GET'
+          test "$(jq -r '.repository.full_name' "$f")" = 'carlosjmunoz78/fenix-capital-inmo-map'
+          test "$(jq -r '.repository.default_branch' "$f")" = 'main'
+          test "$(jq -r '.wrapper.wrapper_id' "$f")" = 'skillwrap:cerebro-github-v0.1.0'
+          test "$(jq -r '.wrapper.policy_conflict' "$f")" = 'false'
+          test "$(jq -r '.wrapper.prod_authorized' "$f")" = 'false'
+          test "$(jq -r '.prod_write' "$f")" = 'false'
+          test "$(jq -r '.github_write' "$f")" = 'false'
+          test "$(jq -r '.merge_performed' "$f")" = 'false'
+          test "$(jq -r '.push_performed' "$f")" = 'false'
+          test "$(jq -r '.issue_or_pr_mutation' "$f")" = 'false'
+          test "$(jq -r '.workflow_dispatch_performed' "$f")" = 'false'
+          test "$(jq -r '.customer_data_used' "$f")" = 'false'
+          test "$(jq -r '.credentials_exposed' "$f")" = 'false'
+          test "$(jq -r '.external_skill_code_executed' "$f")" = 'false'
+          test "$(jq -r '.trading_access' "$f")" = 'false'
+          test "$(jq -r '.additional_cost_eur' "$f")" = '0'
+          test "$(jq -r '.paid_fallback' "$f")" = 'false'
+          test "$(jq -r '.rollback_proven' "$f")" = 'true'
+          test "$(jq -r '.binding_after' "$f")" = 'DISABLED'
+          test "$(jq -r '.prod_write_authorized' "$f")" = 'false'
+          test "$(jq -r '.autonomous_promotion_authorized' "$f")" = 'false'
+
+      - name: Upload immutable GitHub canary evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-skill-github-prod-readonly-canary-${{ github.run_id }}
+          path: artifacts/cerebro-skill-github-prod-readonly-canary.json
+          if-no-files-found: warn
+          retention-days: 30
