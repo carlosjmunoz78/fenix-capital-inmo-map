@@ -15,7 +15,7 @@ env:
   CEREBRO_BEHAVIORAL_EXECUTION_ENABLED: 'true'
   CEREBRO_ALLOW_PROD_DATA: 'false'
   CEREBRO_ALLOW_CUSTOMER_DATA: 'false'
-  CEREBRO_GEMINI_MODEL: gemini-3.1-flash-lite
+  CEREBRO_GEMINI_MODEL: gemini-3.5-flash-lite
 
 jobs:
   synthetic-agent-browser-lab:
@@ -115,7 +115,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           CEREBRO_GEMINI_API_KEY: ${{ secrets.CEREBRO_GEMINI_API_KEY }}
-          CEREBRO_GEMINI_MODEL: gemini-3.1-flash-lite
+          CEREBRO_GEMINI_MODEL: gemini-3.5-flash-lite
         run: node cerebro/skills/skill-agent-browser-behavioral-proxy-runner.mjs --oldnew artifacts/cerebro-skill-old-vs-new-agent-browser-p0.json --manifests artifacts/cerebro-skill-manifests.json --gate artifacts/cerebro-skill-behavioral-execution-gate.agent-browser.manual.json --quota artifacts/cerebro-skill-free-quota-plan.agent-browser.manual.json --route artifacts/cerebro-skill-zero-cost-route.agent-browser.manual.json --output artifacts/cerebro-skill-behavioral-proxy.agent-browser.manual.json
 
       - name: Verify exact call count provider model and no unsafe execution
@@ -124,9 +124,9 @@ jobs:
           const fs=require('fs');
           const p=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-behavioral-proxy.agent-browser.manual.json','utf8'));
           const arms=(p.results??[]).flatMap(r=>(r.fixture_results??[]).flatMap(f=>f.arms??[]));
-          const ok=p.status==='PROXY_COMPLETE'&&p.calls_executed===6&&p.provider_id==='google-gemini-api-free'&&arms.length===6&&arms.every(a=>a.model==='gemini-3.1-flash-lite')&&p.synthetic_only===true&&p.external_skill_code_executed===false&&p.prod_authorized===false;
+          const ok=p.status==='PROXY_COMPLETE'&&p.calls_executed===6&&p.provider_id==='google-gemini-api-free'&&arms.length===6&&arms.every(a=>a.model==='gemini-3.5-flash-lite')&&p.synthetic_only===true&&p.external_skill_code_executed===false&&p.prod_authorized===false;
           if(!ok){console.error('Agent-browser behavioral execution invariant failed');process.exit(1)}
-          console.log(JSON.stringify({status:p.status,calls_executed:6,provider_id:p.provider_id,model:'gemini-3.1-flash-lite',synthetic_only:true,external_skill_code_executed:false,prod_authorized:false}));
+          console.log(JSON.stringify({status:p.status,calls_executed:6,provider_id:p.provider_id,model:'gemini-3.5-flash-lite',synthetic_only:true,external_skill_code_executed:false,prod_authorized:false}));
           NODE
 
       - name: Run fixed-threshold deterministic independent judge
