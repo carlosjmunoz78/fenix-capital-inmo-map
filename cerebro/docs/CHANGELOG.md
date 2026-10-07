@@ -1,5 +1,16 @@
 # CEREBRO OS · CHANGELOG
 
+## 2026-10-07 · Skill Supply Chain Step 3 closure
+
+- PR #486 permanece DRAFT y sin autorización de merge/PROD.
+- Congelada evidencia behavioral en `135fc29a9b41d7257381c08efea49015db1e71d9` antes del commit documental.
+- Supabase/Postgres run `37642814017`: Behavioral proxy 6/6, Judge GREEN, rollback/rebuild GREEN, Tribunal GREEN y `READY_FOR_PREPROD_PROMOTION_REVIEW`; artifact `11492473830`, digest `sha256:2837ab122a2efbab92536f32519c971d7967c071ada5594dff2258f78796c3e0`.
+- agent-browser run `37644374137`: Behavioral proxy 6/6, raw `STATIC_LAB_HOLD` preservado, normalized wrapper GREEN, Judge GREEN, rollback/rebuild GREEN, Tribunal GREEN y `READY_FOR_PREPROD_PROMOTION_REVIEW`; artifact `11494440533`, digest `sha256:0a1f97bf1e7271454627eb7553147dfa5930c28a26fac20232fd1acd58e06d5c`.
+- Ambos quedan `HUMAN_REQUIRED=HIGH_RISK`, `merge_authorized=false`, `prod_authorized=false`, `autonomous_promotion_authorized=false`.
+- 0 € adicionales observados en los LAB, sin paid fallback, datos PROD/cliente, ejecución de código externo, writes PROD ni Trading.
+- Añadidos registry/contract/dependency/runbook/changelog/backup-rebuild/autonomy sidecars canónicos de la capability.
+- Siguiente bloque: PREPROD real OLD vs NEW + observabilidad + rollback físico; LAB GREEN no sustituye PREPROD.
+
 ## 2026-09-09 · Persistent EVT-001 / JOB-001 V0
 
 - PR #168 merged as `26fb9c75b9a7361afccccdc111761ad10aac5fa4` after exact-head review of `16484fdf50760afbd98e1d85824ed352dd3a5585`.

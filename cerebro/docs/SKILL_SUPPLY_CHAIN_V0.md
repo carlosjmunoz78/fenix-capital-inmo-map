@@ -1,295 +1,134 @@
 # CEREBRO OS · Skill Supply Chain V0
 
-Estado: PARCIAL / PREPROD_CANDIDATE
-Fecha: 2026-10-06
-Coste adicional consumido: 0 €
+Estado: PARCIAL / READY_FOR_PREPROD_PROMOTION_REVIEW
+Fecha de corte: 2026-10-07
+Coste adicional observado en los LAB cerrados: 0 €
 PROD writes: NO
 Nuevo engine_id: NO
 External skill code execution: NO
 Trading access: NO
+Merge autorizado: NO
+PROD autorizado: NO
+Autopromoción: NO
+HUMAN_REQUIRED actual para el siguiente salto: HIGH_RISK
 
-## 1. Encaje arquitectónico y no duplicación
+## 1. Encaje arquitectónico
 
-La capacidad no parte de cero. Conserva y envuelve piezas existentes, sin crear un motor nuevo:
+`cap:skill-supply-chain` es una capability transversal coordinada por `FACT-001`. Reutiliza Registry, contratos, seguridad/policy, QA/evaluación/Tribunal, Model Router, FinOps/free-tier, observabilidad y aprendizaje existentes. No sustituye SEO-001, Company Onboarding, App, CRM, Supabase, Notion, WordPress, Training ni Trading y no crea un engine_id nuevo.
 
-- PR #175 · Digital Build + Tech Scout overlap audit.
-- PR #176 · catálogo versionado de capabilities/templates/skills bajo FACT-001.
-- PR #177 · Digital Build Orchestrator PLAN_ONLY.
-- PR #201 · Technology Scout V0.
-- PR #241 · Capability Guard V0.
-- PR #263 · IAM-001 Policy Runtime V0.
-- PR #416 · RSI Continuous Improvement + Meta-Learning.
-- PR #173 · Zero-Cost Runtime Wave 1.
-- PR #240 · Model Router V0.
-- Runtime/EventBus, observabilidad, auditoría y FinOps existentes.
-
-Conclusión: `cap:skill-supply-chain` es una capability transversal coordinada por FACT-001. No sustituye SEO-001, Company Onboarding, App, CRM, WordPress, Supabase ni otros owners funcionales.
-
-## 2. Objetivo
-
-Mantener un catálogo vivo de skills/capabilities internas y externas y convertirlo en una cadena segura de suministro de capacidades para CEREBRO y todas las empresas.
-
-Regla: descubrir no implica confiar; auditar no implica instalar; LAB GREEN no implica promover; Tribunal GREEN no implica PROD.
+Regla de trabajo: CONSERVAR → ENTENDER → ENVOLVER → PROBAR → MEJORAR → MIGRAR.
 
-## 3. Flujo canónico
-
-DISCOVER
-→ RESOLVE_UPSTREAM
-→ MANIFEST_STATIC_SCAN
-→ LICENSE_EVIDENCE
-→ SECURITY/POLICY_GATE
-→ DEDUP/OVERLAP
-→ PRELAB
-→ DISABLED_WRAPPER
-→ VALUE/OPERATIONAL_FIT
-→ STATIC_LAB
-→ OLD_VS_NEW
-→ ZERO_COST_ROUTE
-→ HARD_QUOTA
-→ BEHAVIORAL_LAB
-→ INDEPENDENT_JUDGE
-→ ROLLBACK/REBUILD_PROOF
-→ TRIBUNAL
-→ PREPROD_PROMOTION_REVIEW
-→ CANARY cuando aplique
-→ PROMOTE
-→ MONITOR
-→ LEARN
-→ RECHECK
+## 2. Flujo canónico
 
-Todo fail-closed. Ningún marketplace es autoridad de confianza por sí mismo.
+DISCOVER → RESOLVE_UPSTREAM → MANIFEST_STATIC_SCAN → LICENSE_EVIDENCE → SECURITY/POLICY_GATE → DEDUP/OVERLAP → PRELAB → DISABLED_WRAPPER → VALUE/OPERATIONAL_FIT → STATIC_LAB → OLD_VS_NEW → ZERO_COST_ROUTE → HARD_QUOTA → BEHAVIORAL_LAB → INDEPENDENT_JUDGE → ROLLBACK/REBUILD_PROOF → TRIBUNAL → PREPROD_PROMOTION_REVIEW → CANARY cuando aplique → PROMOTE → MONITOR → LEARN → RECHECK.
 
-## 4. Fuentes V0
+Todo es fail-closed. Descubrir no implica confiar; auditar no implica instalar; LAB GREEN no implica PROD; Tribunal GREEN no implica PROD.
 
-- LobeHub: discovery; resolver upstream original.
-- MCPServers Agent Skills: discovery; resolver upstream/licencia exactos.
-- FragRoger: REFERENCE_ONLY hasta licencia empresarial compatible demostrada.
-- GitHub: upstream, commit, procedencia, licencia y mantenimiento.
+## 3. Discovery y no duplicación
 
-Technology Scout puede añadir fuentes sin convertirlas automáticamente en confiables.
+La línea conserva y envuelve capacidades previas de FACT-001, Technology Scout, Capability Guard, IAM/Policy, RSI/Meta-Learning, Zero-Cost Runtime, Model Router, Runtime/EventBus, observabilidad y FinOps. Popularidad/stars no son una señal decisora.
 
-## 5. Bindings con CEREBRO
+Último snapshot de discovery previo a los LAB cerrados mantiene 36 candidatos / 3 fuentes, 12 upstream GitHub canónicos resueltos, 24 `SKILL.md` tratados como texto inerte, P0/P1/P2 y wrappers disabled. Candidatas bloqueadas/hold no se fuerzan.
 
-- FACT-001: wrappers/adapters/skills nativas ante gap real.
-- INT-001: inventario y dependencias.
-- RSH-001 / INN-001 / OPP-001 / OBS-001: descubrimiento, investigación y obsolescencia.
-- SEC-001 / SEC-002 / IAM-001 / POL-001: seguridad, identidad, permisos y policy.
-- QA-001 / REG-001 / EVA-001 / JDG-001: tests, regresión, evaluación y juicio.
-- FINOPS-001 / FREE-001: coste y hard quota.
-- ORCH-001 / ROUTE-001: selección y composición.
-- LRN-001 / UPD-001 / SUP-001: aprendizaje, actualización y supervisión.
-- RSI: recibe propuestas/evidencia; no puede autopromover ni elevar permisos/presupuesto.
+## 4. Frozen behavioral evidence baseline
 
-## 6. Descubrimiento continuo
+Head de evidencia behavioral y CI previo al cierre documental: `135fc29a9b41d7257381c08efea49015db1e71d9`.
+Base main observada: `3c37a1bc21b5c5a8c44bc842c4535495834f77bc`.
+PR: #486, DRAFT.
 
-Objetivo contractual:
+En ese head los checks observados terminaron SUCCESS y el discovery exact-head usado por agent-browser fue GREEN.
 
-- event-driven: gap, fallo repetido, nueva empresa, nueva capability, release upstream o advisory;
-- diario: descubrir cambios y versiones;
-- semanal: rescoring, fallos/fallbacks y benchmark de alto valor;
-- mensual: obsolescencia, licencia, dependencias y coste.
+## 5. Supabase/Postgres · HECHO en LAB sintético
 
-V0 no añade daemon ni servidor propio. La activación persistente se hará solo tras gates correspondientes.
+Candidata: `supabase-postgres-best-practices` / `mcpservers-agent-skills:4c2b2478f8fe3bed14df`.
 
-## 7. Reglas de aprendizaje
+Workflow run: `37642814017` sobre head `1bbfc2250a8f27e8e767fa03ab11a4ddb7a833a7` — SUCCESS.
+Artifact: `cerebro-skill-supabase-behavioral-lab-37642814017`, ID `11492473830`, digest `sha256:2837ab122a2efbab92536f32519c971d7967c071ada5594dff2258f78796c3e0`.
 
-- Popularidad/stars no son señal suficiente ni se usan como score decisor.
-- Aprender de evidencia verificada: calidad, éxito, latencia, coste, fallos, seguridad y reversibilidad.
-- Conservar versión, upstream y evidencia de cada decisión.
-- Degradar/retirar sin borrar historial si una skill empeora.
-- Nunca relajar políticas, permisos o contratos para hacer pasar una skill.
-- Sustitución de capability existente exige OLD vs NEW y rollback.
-- Cargar metadata ligera; materializar contenido completo solo para un job autorizado.
+Evidencia:
+- Static LAB: `STATIC_LAB_GREEN_FOR_BEHAVIORAL_EVAL`, policy 100, sin hard blocks.
+- Licencia detectada: MIT con evidencia exacta; `legal_final_opinion=false`.
+- Zero-cost route: `READY_ZERO_COST_ROUTE`.
+- 6/6 llamadas sintéticas, 3 baseline + 3 candidate, retries=0, paid fallback=false.
+- Provider/model: `google-gemini-api-free` / `gemini-3.5-flash-lite`.
+- Behavioral proxy: `PROXY_COMPLETE`.
+- Independent Judge: `GREEN_FOR_TRIBUNAL_REVIEW`.
+- Rollback/rebuild: `GREEN_ROLLBACK_REBUILD_PROOF`, scope `WRAPPER_BINDING_ONLY_SYNTHETIC`.
+- Tribunal: `GREEN`, blockers=[]; PROD no autorizado.
+- Promotion readiness: `READY_FOR_PREPROD_PROMOTION_REVIEW`, blockers=[].
+- `HUMAN_REQUIRED=HIGH_RISK`.
 
-## 8. Seguridad y rechazo
+## 6. agent-browser · HECHO en LAB sintético normalizado
 
-Rechazo/cuarentena V0 incluye CAPTCHA bypass, anti-detect/fingerprint spoofing, credential exfiltration, código ofuscado sin auditoría, ejecución silenciosa en PROD, acceso a Trading desde CEREBRO general, upstream no resoluble y permisos/gastos no justificados.
+Candidata: `agent-browser` / `mcpservers-agent-skills:157e52d4ac5038d53c1a`.
 
-Licencia incompatible => REFERENCE_ONLY. Gasto nuevo => MONEY_LIMIT antes de consumirlo.
+Workflow run: `37644374137` sobre head `135fc29a9b41d7257381c08efea49015db1e71d9` — SUCCESS.
+Artifact: `cerebro-skill-agent-browser-behavioral-lab-37644374137`, ID `11494440533`, digest `sha256:0a1f97bf1e7271454627eb7553147dfa5930c28a26fac20232fd1acd58e06d5c`.
 
-## 9. Evidencia viva · rama candidata
+Evidencia:
+- Raw static: `STATIC_LAB_HOLD`, preservado.
+- Normalized wrapper: `NORMALIZED_WRAPPER_GREEN_FOR_BEHAVIORAL_EVAL`.
+- Raw thresholds relajados: NO.
+- 6/6 llamadas sintéticas, retries=0, paid fallback=false.
+- Provider/model: `google-gemini-api-free` / `gemini-3.5-flash-lite`.
+- Behavioral proxy: `PROXY_COMPLETE`.
+- Independent Judge: `GREEN_FOR_TRIBUNAL_REVIEW`.
+- Rollback/rebuild: `GREEN_ROLLBACK_REBUILD_PROOF`.
+- Tribunal normalizado: `GREEN`, blockers=[].
+- Promotion readiness: `READY_FOR_PREPROD_PROMOTION_REVIEW`.
+- `HUMAN_REQUIRED=HIGH_RISK`.
 
-Rama: `cerebro-skill-supply-chain-v0-20261006`.
-Última pasada completa verificada previa a esta actualización documental: `eeea148d5e802dc132ebcc3a4eca2b072e42fae3`.
-Workflow discovery run: `37500034426` — SUCCESS.
-Artifact: `cerebro-skill-discovery-37500034426`, ID `11429431477`, SHA256 `e61ba9387e83a088bf3323cf7d007b4fcc53dc4e59209994ea09bb9f5983d571`.
+El wrapper no convierte el HOLD raw en GREEN ni muta la evidencia original: aplica una política interna más restrictiva y deja trazabilidad de ambos estados.
 
-### CI y discovery
+## 7. Ruta Gemini 0 € · alcance exacto
 
-- 153/153 tests PASS; 0 FAIL; 0 skipped; 0 cancelled.
-- 36 candidatos / 3 fuentes OK.
-- 12 upstream GitHub canónicos resueltos; 0 rate-limit; 0 hard failures.
-- 24 `SKILL.md` resueltos como texto inerte; 12 no resueltos quedan fuera.
-- 24 evidencias exactas de licencia; compatibilidad jurídica global sigue `UNASSESSED`.
-- 26 candidatos con solapamiento de dominio; 10 capability-gap candidates.
-- P0: 9; P1: 4; P2: 23.
-- 4 `STATIC_PRELAB_READY_INSTRUCTION_ONLY`.
-- 4 wrappers planificados; 0 habilitados; execute/install/PROD = false.
+La ruta `google-gemini-api-free` quedó verificada para estos LAB sintéticos con hard quota, stop al free-tier limit y `paid_fallback=false`. Esto no se interpreta como garantía universal/permanente de gratuidad ni como autorización para uso PROD. Cualquier señal de billing o coste >0 obliga STOP y `MONEY_LIMIT`.
 
-### Ranking de utilidad operativa
+Las credenciales no se registran en artifacts ni documentación.
 
-Stars/popularity no participan en el score:
-
-- `github`: 90 / operational fit 90.
-- `supabase-postgres-best-practices`: 89.7 / operational fit 100.
-- `agent-browser`: 88.53 / operational fit 100.
-- `caveman-help`: 75.64 / operational fit 15 → HOLD_LOW_OPERATIONAL_FIT.
-
-### Static LAB
-
-- `github`: `STATIC_LAB_BLOCKED_SECURITY` — coverage 100 / policy 0.
-- `supabase-postgres-best-practices`: `STATIC_LAB_GREEN_FOR_BEHAVIORAL_EVAL` — coverage 100 / policy 100.
-- `agent-browser`: `STATIC_LAB_HOLD` — coverage 88.89 / policy 75.
-
-No se fuerza ningún gate rojo/hold.
-
-### OLD vs NEW
-
-Solo la candidata Supabase/Postgres recibe paquete:
-
-- 1 paquete;
-- 3 fixtures sintéticos;
-- estado `PLANNED_NOT_EXECUTED`.
-
-No ejecuta la skill ni el motor real; compara proxies sintéticos únicamente cuando el Behavioral LAB esté explícitamente habilitado.
-
-## 10. Ruta IA 0 €
-
-`CEREBRO_GEMINI_API_KEY` está configurada. El pipeline normal comprueba únicamente su presencia como booleano; no lee ni emite el valor.
-
-Estado verificado:
-
-- `google-gemini-api-free`: `READY_ZERO_COST_ROUTE`;
-- additional_cost_eur = 0;
-- synthetic-only;
-- `STOP_AT_FREE_TIER_LIMIT`;
-- paid fallback = false;
-- hard quota actual: 3 baseline + 3 candidate = 6 llamadas máximas;
-- llamadas de modelo ejecutadas por discovery = 0.
-
-Cualquier señal de billing/coste >0 debe parar y mapearse a MONEY_LIMIT.
-
-## 11. Independent Judge
-
-Existe `skill-independent-judge.mjs`, determinista e independiente de la skill candidata.
-
-Exige behavioral proxy completo, arms baseline/candidate emparejados, JSON válido, 100% de constraints/correctness por defecto, cero policy violations, cero side effects y no empeorar baseline.
-
-En discovery actual: `NOT_READY`, correctamente por falta de ejecución behavioral. Bloqueadores exactos:
-
-- `BEHAVIORAL_PROXY_NOT_COMPLETE`;
-- `BEHAVIORAL_RESULTS_MISSING`;
-- `NO_BEHAVIORAL_CALL_EVIDENCE`.
-
-No confunde ausencia de evidencia con evidencia explícitamente no sintética.
-
-## 12. Rollback / rebuild proof
-
-Existe `skill-rollback-proof.mjs`.
-
-Estado: `GREEN_ROLLBACK_REBUILD_PROOF` / `ready=true`.
-Scope: `WRAPPER_BINDING_ONLY_SYNTHETIC`.
-
-Prueba que los wrappers están disabled, zero-permission, DENY_BY_DEFAULT, con provenance y rollback requerido; el baseline se restaura y el rebuild vuelve disabled.
-
-Importante: este GREEN demuestra reversibilidad de la capa de binding del wrapper. NO demuestra rollback futuro de efectos DB/filesystem/network/PROD.
-
-## 13. Tribunal
-
-Existe `skill-tribunal.mjs`, evidence-only y fail-closed.
-
-Solo evalúa candidatas Static-LAB GREEN. Para cada una exige:
-
-- static policy 100 y sin hard security blocks;
-- evidencia exacta de licencia y coincidencia metadata/family;
-- behavioral package completo;
-- independent judge package GREEN;
-- rollback binding proof GREEN;
-- zero-cost route READY;
-- RSI shadow GREEN.
-
-La comprobación de licencia es evidencia técnica; `legal_final_opinion=false` y no sustituye una opinión legal cuando fuese necesaria.
-
-Estado actual del Tribunal: `NOT_READY`. La única candidata examinada, `supabase-postgres-best-practices`, está HOLD exclusivamente por:
-
-- `BEHAVIORAL_PACKAGE_NOT_COMPLETE`;
-- `INDEPENDENT_JUDGE_PACKAGE_NOT_GREEN`.
-
-## 14. RSI / mejora continua
-
-Última pasada:
-
-- 15 improvement events;
-- RSI shadow `SHADOW_BRIDGE_GREEN`;
-- 15 runtime events aceptados;
-- 15 learning candidates válidos;
-- persistent publish = false;
-- RSI real publish = false;
-- PROD = false;
-- elevación automática de permisos/presupuesto = false.
-
-## 15. Promotion Readiness actual
-
-Estado: `NOT_READY`.
-
-Ya están verdes: Static LAB de la candidata Supabase, zero-cost route, hard quota, RSI shadow y rollback binding proof.
-
-Bloqueadores restantes exactos:
-
-1. `BEHAVIORAL_EXECUTION_GATE_CLOSED`;
-2. `BEHAVIORAL_OLD_VS_NEW_NOT_EXECUTED`;
-3. `INDEPENDENT_JUDGE_NOT_GREEN`;
-4. `TRIBUNAL_NOT_GREEN`.
-
-`merge_authorized=false`, `prod_authorized=false`, `autonomous_promotion_authorized=false`.
-
-Incluso si todos los gates quedaran GREEN, el siguiente estado sería `READY_FOR_PREPROD_PROMOTION_REVIEW`; no PROD automático. La promoción de alto riesgo mantiene HUMAN_REQUIRED=`HIGH_RISK`.
-
-## 16. Behavioral LAB preparado
-
-`.github/workflows/cerebro-skill-behavioral-lab.yml` está preparado para:
-
-1. exigir confirmación exacta `RUN_SYNTHETIC_LAB`;
-2. verificar la credencial gratuita sin imprimirla;
-3. exigir artifact GREEN del mismo branch head;
-4. abrir el gate solo para LAB sintético;
-5. ejecutar baseline proxy vs candidate proxy;
-6. ejecutar Independent Judge;
-7. ejecutar rollback proof;
-8. ejecutar Tribunal;
-9. calcular PREPROD promotion readiness;
-10. subir evidencia sin autorizar merge/PROD/autopromotion.
-
-## 17. Bloqueo físico actual
-
-El Behavioral LAB es `workflow_dispatch` y está en la rama candidata. El conector GitHub disponible en este chat no expone una operación para iniciar `workflow_dispatch`.
-
-No se copiará/mergeará el workflow a `main` solamente para poder lanzarlo: eso rompería la política de conservación y promoción. Tampoco se inventará evidencia behavioral.
-
-Por tanto, el único gate físico pendiente antes de continuar automáticamente con Judge → Tribunal → PREPROD readiness es una vía autorizada de dispatch del workflow manual.
-
-## 18. Estado de no interferencia
-
-HECHO y verificado en esta línea de trabajo:
+## 8. No interferencia
 
 - PROD no tocado.
-- App/CRM/SEO/WordPress/Supabase PROD no modificados.
-- Trading aislado.
-- datos cliente/PROD no usados.
-- código externo de skills no ejecutado.
-- coste adicional 0 €.
-- no nuevo servidor.
-- PR permanece DRAFT.
+- Datos PROD/cliente no usados.
+- App/CRM/SEO/WordPress/Supabase PROD no modificados por estos LAB.
+- Código externo de skills no ejecutado.
+- Writes PROD: NO.
+- Trading: aislado/no accesible.
+- No nuevo servidor ni suscripción de pago.
 
-## 19. Mantenimiento detectado
+## 9. Documentación canónica Step 3
 
-GitHub Actions avisa de deprecación de Node.js 20 en actions/checkout/setup-node/upload-artifact, que el runner fuerza internamente a Node.js 24. No ha roto CI y no es un blocker funcional actual, pero queda como tech-debt de compatibilidad a revisar de forma separada.
+- Registry sidecar: `cerebro/registry/skill-supply-chain-v0.json`.
+- Contract: `cerebro/contracts/skill-supply-chain-v0.json`.
+- Dependency map: `cerebro/docs/SKILL_SUPPLY_CHAIN_DEPENDENCY_MAP_V0.md`.
+- Runbook: `cerebro/docs/SKILL_SUPPLY_CHAIN_RUNBOOK_V0.md`.
+- Changelog: `cerebro/docs/SKILL_SUPPLY_CHAIN_CHANGELOG_V0.md`.
+- Backup/rebuild: `cerebro/docs/SKILL_SUPPLY_CHAIN_BACKUP_REBUILD_V0.md`.
+- Autonomy: `cerebro/docs/SKILL_SUPPLY_CHAIN_AUTONOMY_V0.md`.
 
-## 20. Next block
+## 10. Qué está GREEN y qué NO
 
-1. Mantener discovery/scoring automático fail-closed.
-2. No tocar candidates bloqueadas/hold.
-3. Ejecutar Behavioral LAB únicamente mediante dispatch autorizado, sintético y 0 €.
-4. Si behavioral GREEN: Independent Judge → Tribunal → PREPROD promotion review automáticamente.
-5. Si cualquier gate falla: HOLD/corregir en rama, sin relajar políticas.
-6. No merge directo, no PROD, no datos reales y no Trading.
+HECHO: discovery/gates, Behavioral LAB sintético de Supabase, Behavioral LAB sintético normalizado de agent-browser, Judge, rollback binding proof y Tribunal de ambos.
+
+PARCIAL: la capability total sigue sin integración PREPROD real y sin evidencia de efectos reales controlados.
+
+DEFINIDO: contratos, dependencias, rollback/rebuild y política de promoción.
+
+PLANIFICADO: PREPROD real.
+
+NO AUTORIZADO: merge, PROD, writes PROD, autopromoción.
+
+## 11. Next block
+
+Step 4 = PREPROD real y reversible:
+
+1. scope PREPROD aislado;
+2. revalidar exact HEAD/provenance/contract;
+3. OLD vs NEW sobre integración controlada;
+4. observabilidad y coste medido;
+5. rollback físico + rebuild disabled;
+6. Judge + Tribunal con evidencia PREPROD;
+7. si todo GREEN, dejar listo para revisión de promoción;
+8. detenerse en `HIGH_RISK` antes de cualquier merge/promoción que pueda afectar PROD.
+
+No usar el LAB sintético como sustituto de PREPROD.
