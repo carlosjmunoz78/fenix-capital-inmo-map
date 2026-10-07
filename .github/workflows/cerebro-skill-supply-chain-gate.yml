@@ -1,0 +1,31 @@
+name: CEREBRO Skill Supply Chain Gate
+
+on:
+  push:
+    paths:
+      - 'cerebro/skills/**'
+      - 'cerebro/tests/skill-supply-chain.test.mjs'
+      - 'cerebro/docs/SKILL_SUPPLY_CHAIN_V0.md'
+      - '.github/workflows/cerebro-skill-supply-chain-gate.yml'
+  pull_request:
+    paths:
+      - 'cerebro/skills/**'
+      - 'cerebro/tests/skill-supply-chain.test.mjs'
+      - 'cerebro/docs/SKILL_SUPPLY_CHAIN_V0.md'
+      - '.github/workflows/cerebro-skill-supply-chain-gate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  skill-supply-chain-v0:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Deterministic contract and hard-gate tests
+        run: node --test cerebro/tests/skill-supply-chain.test.mjs

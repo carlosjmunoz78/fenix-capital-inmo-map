@@ -1,0 +1,156 @@
+name: CEREBRO Skill Behavioral LAB
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type RUN_SYNTHETIC_LAB to confirm synthetic-only zero-cost LAB execution'
+        required: true
+        type: string
+  push:
+    branches:
+      - cerebro-skill-supply-chain-v0-20261006
+    paths:
+      - 'cerebro/skills/.behavioral-lab-trigger.json'
+
+permissions:
+  contents: read
+  actions: read
+
+env:
+  CEREBRO_PREFERRED_ZERO_COST_PROVIDER: github-actions-ephemeral-oss
+  CEREBRO_BEHAVIORAL_EXECUTION_ENABLED: 'true'
+  CEREBRO_ALLOW_PROD_DATA: 'false'
+  CEREBRO_ALLOW_CUSTOMER_DATA: 'false'
+  CEREBRO_HF_CACHE_DIR: '.cache/cerebro-hf'
+
+jobs:
+  synthetic-behavioral-lab:
+    if: ${{ github.event_name == 'push' || inputs.confirm == 'RUN_SYNTHETIC_LAB' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Validate explicit one-shot authorization
+        env:
+          MANUAL_CONFIRM: ${{ inputs.confirm }}
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            if [ "$MANUAL_CONFIRM" != "RUN_SYNTHETIC_LAB" ]; then
+              echo "::error::Manual confirmation mismatch."
+              exit 1
+            fi
+          else
+            node -e "const fs=require('fs');const t=JSON.parse(fs.readFileSync('cerebro/skills/.behavioral-lab-trigger.json','utf8'));const ok=t.confirm==='RUN_SYNTHETIC_LAB'&&t.scope==='LAB_SYNTHETIC_ONLY'&&t.max_calls===6&&t.paid_fallback===false&&t.allow_prod_data===false&&t.allow_customer_data===false&&t.allow_external_skill_code_execution===false&&t.allow_prod_write===false&&t.allow_trading_access===false&&typeof t.one_shot_id==='string'&&t.one_shot_id.length>=16;if(!ok){console.error('Invalid one-shot LAB trigger');process.exit(1)};console.log(JSON.stringify({trigger:'AUTHORIZED_ONE_SHOT_BRANCH_ONLY',one_shot_id:t.one_shot_id,scope:t.scope,max_calls:t.max_calls,paid_fallback:false,prod_data:false,customer_data:false,external_skill_code:false,prod_write:false,trading:false}))"
+          fi
+
+      - name: Install pinned OSS inference runtime without install scripts
+        run: |
+          npm install --no-save --ignore-scripts --package-lock=false @huggingface/transformers@4.3.0
+          node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('node_modules/@huggingface/transformers/package.json','utf8'));if(p.version!=='4.3.0')process.exit(1);console.log(JSON.stringify({runtime:p.name,version:p.version,install_scripts:false,pinned:true}))"
+
+      - name: Verify pinned OSS model contract before loading weights
+        run: |
+          node -e "import('./cerebro/skills/skill-ephemeral-oss-inference.mjs').then(({OSS_RUNTIME:r})=>{const ok=r.provider_id==='github-actions-ephemeral-oss'&&r.runtime_version==='4.3.0'&&r.model_repo==='HuggingFaceTB/SmolLM2-1.7B-Instruct'&&r.model_revision==='31b70e2e869a7173562077fd711b654946d38674'&&r.model_dtype==='q4'&&r.model_q4_sha256==='467b7b8f62d99f184d3628d24b8d65c151e331695f6e9ea997616c4e279e9a51'&&r.model_license==='apache-2.0'&&r.additional_cost_eur===0&&r.own_server_required===false;if(!ok)process.exit(1);console.log(JSON.stringify({provider_id:r.provider_id,model_repo:r.model_repo,model_revision:r.model_revision,dtype:r.model_dtype,license:r.model_license,additional_cost_eur:0,own_server_required:false}))})"
+
+      - name: Wait for GREEN discovery evidence for exactly this branch head
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          RUN_ID=""
+          for i in $(seq 1 42); do
+            RUN_ID="$(gh run list --repo "$GITHUB_REPOSITORY" --workflow "CEREBRO Skill Discovery Scout" --branch "$GITHUB_REF_NAME" --limit 30 --json databaseId,headSha,status,conclusion --jq ".[] | select(.headSha == \"$GITHUB_SHA\" and .status == \"completed\" and .conclusion == \"success\") | .databaseId" | head -n 1)"
+            if [ -n "$RUN_ID" ]; then break; fi
+            sleep 10
+          done
+          if [ -z "$RUN_ID" ]; then
+            echo "::error::No GREEN discovery evidence became available for current branch head. Refusing behavioral execution."
+            exit 1
+          fi
+          RUN_SHA="$(gh run view "$RUN_ID" --repo "$GITHUB_REPOSITORY" --json headSha --jq '.headSha')"
+          if [ "$RUN_SHA" != "$GITHUB_SHA" ]; then
+            echo "::error::GREEN discovery evidence is stale for current branch head. Refusing behavioral execution."
+            exit 1
+          fi
+          gh run download "$RUN_ID" --repo "$GITHUB_REPOSITORY" --name "cerebro-skill-discovery-$RUN_ID" --dir artifacts
+          test -f artifacts/cerebro-skill-old-vs-new-p0.json
+          test -f artifacts/cerebro-skill-manifests.json
+          test -f artifacts/cerebro-skill-wrapper-plans-p0.json
+          test -f artifacts/cerebro-skill-static-lab-p0.json
+          test -f artifacts/cerebro-skill-license-evidence.json
+          test -f artifacts/cerebro-skill-rsi-shadow.json
+
+      - name: Bind no-secret ephemeral OSS readiness
+        env:
+          CEREBRO_GHA_OSS_RUNTIME_VERIFIED: 'true'
+          CEREBRO_GHA_OSS_QUOTA_GUARD: 'true'
+          CEREBRO_GHA_OSS_POLICY_GREEN: 'false'
+        run: node cerebro/skills/skill-provider-binding-from-env.mjs --providers cerebro/skills/zero-cost-provider-evidence.v0.json --output artifacts/cerebro-skill-provider-binding.manual.json
+
+      - name: Select ephemeral OSS zero-cost synthetic route
+        run: node cerebro/skills/skill-zero-cost-route-audit.mjs --providers artifacts/cerebro-skill-provider-binding.manual.json --oldnew artifacts/cerebro-skill-old-vs-new-p0.json --preferred-provider github-actions-ephemeral-oss --output artifacts/cerebro-skill-zero-cost-route.manual.json
+
+      - name: Build hard six-call quota plan with no paid fallback
+        run: node cerebro/skills/skill-free-quota-guard.mjs --oldnew artifacts/cerebro-skill-old-vs-new-p0.json --route artifacts/cerebro-skill-zero-cost-route.manual.json --output artifacts/cerebro-skill-free-quota-plan.manual.json
+
+      - name: Open behavioral gate only for synthetic LAB
+        run: node cerebro/skills/skill-behavioral-execution-gate.mjs --oldnew artifacts/cerebro-skill-old-vs-new-p0.json --route artifacts/cerebro-skill-zero-cost-route.manual.json --quota artifacts/cerebro-skill-free-quota-plan.manual.json --output artifacts/cerebro-skill-behavioral-execution-gate.manual.json
+
+      - name: Execute synthetic baseline-vs-skill proxy on ephemeral OSS model
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node cerebro/skills/skill-behavioral-proxy-runner.mjs --oldnew artifacts/cerebro-skill-old-vs-new-p0.json --manifests artifacts/cerebro-skill-manifests.json --gate artifacts/cerebro-skill-behavioral-execution-gate.manual.json --quota artifacts/cerebro-skill-free-quota-plan.manual.json --route artifacts/cerebro-skill-zero-cost-route.manual.json --output artifacts/cerebro-skill-behavioral-proxy.manual.json
+
+      - name: Verify downloaded pinned q4 weight integrity
+        run: |
+          MODEL_FILE="$(find "$CEREBRO_HF_CACHE_DIR" -type f -name 'model_q4.onnx' | head -n 1)"
+          if [ -z "$MODEL_FILE" ]; then
+            echo "::error::Pinned q4 model file not found in ephemeral cache."
+            exit 1
+          fi
+          ACTUAL="$(sha256sum "$MODEL_FILE" | awk '{print $1}')"
+          EXPECTED="467b7b8f62d99f184d3628d24b8d65c151e331695f6e9ea997616c4e279e9a51"
+          if [ "$ACTUAL" != "$EXPECTED" ]; then
+            echo "::error::Pinned model SHA256 mismatch."
+            exit 1
+          fi
+          echo "{\"model_sha256_verified\":true,\"sha256\":\"$ACTUAL\",\"revision\":\"31b70e2e869a7173562077fd711b654946d38674\",\"prod_authorized\":false}" > artifacts/cerebro-skill-oss-model-integrity.manual.json
+
+      - name: Run deterministic independent judge
+        run: node cerebro/skills/skill-independent-judge.mjs --behavioral-results artifacts/cerebro-skill-behavioral-proxy.manual.json --output artifacts/cerebro-skill-independent-judge.manual.json
+
+      - name: Prove wrapper binding rollback and rebuild independently of behavioral result
+        run: node cerebro/skills/skill-rollback-proof.mjs --wrappers artifacts/cerebro-skill-wrapper-plans-p0.json --output artifacts/cerebro-skill-rollback-proof.manual.json
+
+      - name: Run evidence-only Skill Tribunal
+        run: node cerebro/skills/skill-tribunal.mjs --static-lab artifacts/cerebro-skill-static-lab-p0.json --licenses artifacts/cerebro-skill-license-evidence.json --behavioral-results artifacts/cerebro-skill-behavioral-proxy.manual.json --independent-judge artifacts/cerebro-skill-independent-judge.manual.json --rollback artifacts/cerebro-skill-rollback-proof.manual.json --route artifacts/cerebro-skill-zero-cost-route.manual.json --rsi-shadow artifacts/cerebro-skill-rsi-shadow.json --output artifacts/cerebro-skill-tribunal.manual.json
+
+      - name: Assess PREPROD promotion readiness without auto-promotion
+        run: node cerebro/skills/skill-promotion-readiness.mjs --static-lab artifacts/cerebro-skill-static-lab-p0.json --oldnew artifacts/cerebro-skill-old-vs-new-p0.json --route artifacts/cerebro-skill-zero-cost-route.manual.json --quota artifacts/cerebro-skill-free-quota-plan.manual.json --behavioral-gate artifacts/cerebro-skill-behavioral-execution-gate.manual.json --rsi-shadow artifacts/cerebro-skill-rsi-shadow.json --behavioral-results artifacts/cerebro-skill-behavioral-proxy.manual.json --independent-judge artifacts/cerebro-skill-independent-judge.manual.json --tribunal artifacts/cerebro-skill-tribunal.manual.json --rollback artifacts/cerebro-skill-rollback-proof.manual.json --output artifacts/cerebro-skill-promotion-readiness.manual.json
+
+      - name: Verify no unsafe promotion
+        run: |
+          node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-behavioral-proxy.manual.json','utf8'));const j=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-independent-judge.manual.json','utf8'));const r=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-rollback-proof.manual.json','utf8'));const t=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-tribunal.manual.json','utf8'));const pr=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-promotion-readiness.manual.json','utf8'));if(p.prod_authorized!==false||p.external_skill_code_executed!==false||j.prod_authorized!==false||j.tribunal_satisfied!==false||r.prod_authorized!==false||t.prod_authorized!==false||t.autonomous_promotion_authorized!==false||pr.merge_authorized!==false||pr.prod_authorized!==false||pr.autonomous_promotion_authorized!==false)process.exit(1);console.log(JSON.stringify({safe:true,proxy_status:p.status,stop_reason:p.stop_reason??null,calls_executed:p.calls_executed,judge_decision:j.decision,rollback_status:r.status,tribunal_decision:t.decision,promotion_readiness:pr.status,human_required:pr.human_required??null,prod_authorized:false,auto_promotion:false}))"
+
+      - name: Upload synthetic behavioral evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-skill-behavioral-lab-${{ github.run_id }}
+          path: |
+            artifacts/cerebro-skill-provider-binding.manual.json
+            artifacts/cerebro-skill-zero-cost-route.manual.json
+            artifacts/cerebro-skill-free-quota-plan.manual.json
+            artifacts/cerebro-skill-behavioral-execution-gate.manual.json
+            artifacts/cerebro-skill-behavioral-proxy.manual.json
+            artifacts/cerebro-skill-oss-model-integrity.manual.json
+            artifacts/cerebro-skill-independent-judge.manual.json
+            artifacts/cerebro-skill-rollback-proof.manual.json
+            artifacts/cerebro-skill-tribunal.manual.json
+            artifacts/cerebro-skill-promotion-readiness.manual.json
+          if-no-files-found: warn
+          retention-days: 14

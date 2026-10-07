@@ -1,0 +1,178 @@
+name: CEREBRO Skill Agent Browser Behavioral LAB
+
+on:
+  push:
+    branches:
+      - cerebro-skill-supply-chain-v0-20261006
+    paths:
+      - 'cerebro/skills/.agent-browser-behavioral-lab-trigger.json'
+
+permissions:
+  contents: read
+  actions: read
+
+env:
+  CEREBRO_BEHAVIORAL_EXECUTION_ENABLED: 'true'
+  CEREBRO_ALLOW_PROD_DATA: 'false'
+  CEREBRO_ALLOW_CUSTOMER_DATA: 'false'
+  CEREBRO_GEMINI_MODEL: gemini-3.5-flash-lite
+
+jobs:
+  synthetic-agent-browser-lab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Validate exact one-shot agent-browser authorization
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const t=JSON.parse(fs.readFileSync('cerebro/skills/.agent-browser-behavioral-lab-trigger.json','utf8'));
+          const ok=t.confirm==='RUN_SYNTHETIC_LAB'&&t.target_candidate==='agent-browser'&&t.scope==='LAB_SYNTHETIC_ONLY'&&t.max_calls===6&&t.paid_fallback===false&&t.allow_prod_data===false&&t.allow_customer_data===false&&t.allow_external_skill_code_execution===false&&t.allow_prod_write===false&&t.allow_trading_access===false&&typeof t.one_shot_id==='string'&&t.one_shot_id.length>=16;
+          if(!ok){console.error('Invalid agent-browser one-shot LAB trigger');process.exit(1)}
+          console.log(JSON.stringify({trigger:'AUTHORIZED_ONE_SHOT_AGENT_BROWSER_BRANCH_ONLY',one_shot_id:t.one_shot_id,target:t.target_candidate,max_calls:6,paid_fallback:false,prod_data:false,customer_data:false,external_skill_code:false,prod_write:false,trading:false}));
+          NODE
+
+      - name: Wait for GREEN discovery evidence for exactly this branch head
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          RUN_ID=""
+          for i in $(seq 1 42); do
+            RUN_ID="$(gh run list --repo "$GITHUB_REPOSITORY" --workflow "CEREBRO Skill Discovery Scout" --branch "$GITHUB_REF_NAME" --limit 30 --json databaseId,headSha,status,conclusion --jq ".[] | select(.headSha == \"$GITHUB_SHA\" and .status == \"completed\" and .conclusion == \"success\") | .databaseId" | head -n 1)"
+            if [ -n "$RUN_ID" ]; then break; fi
+            sleep 10
+          done
+          if [ -z "$RUN_ID" ]; then
+            echo "::error::No GREEN discovery evidence for the exact agent-browser branch head."
+            exit 1
+          fi
+          RUN_SHA="$(gh run view "$RUN_ID" --repo "$GITHUB_REPOSITORY" --json headSha --jq '.headSha')"
+          test "$RUN_SHA" = "$GITHUB_SHA"
+          gh run download "$RUN_ID" --repo "$GITHUB_REPOSITORY" --name "cerebro-skill-discovery-$RUN_ID" --dir artifacts
+          test -f artifacts/cerebro-skill-normalized-wrapper-admission-p0.json
+          test -f artifacts/cerebro-skill-old-vs-new-agent-browser-p0.json
+          test -f artifacts/cerebro-skill-manifests.json
+          test -f artifacts/cerebro-skill-wrapper-plans-p0.json
+          test -f artifacts/cerebro-skill-license-evidence.json
+          test -f artifacts/cerebro-skill-rsi-shadow.json
+
+      - name: Verify normalized admission preserves raw HOLD and exact target
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const a=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-normalized-wrapper-admission-p0.json','utf8'));
+          const o=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-old-vs-new-agent-browser-p0.json','utf8'));
+          const green=(a.results??[]).filter(x=>x.status==='NORMALIZED_WRAPPER_GREEN_FOR_BEHAVIORAL_EVAL');
+          const ok=green.length===1&&green[0].raw_static_status==='STATIC_LAB_HOLD'&&green[0].raw_status_preserved===true&&(green[0].raw_hard_blocks??[]).length===0&&green[0].normalized_policy_alignment_score===100&&o.packages_total===1&&o.packages?.[0]?.admission_basis==='NORMALIZED_CEREBRO_WRAPPER'&&o.packages?.[0]?.raw_static_status==='STATIC_LAB_HOLD'&&o.packages?.[0]?.raw_status_preserved===true&&(o.packages?.[0]?.fixtures??[]).length===3;
+          if(!ok){console.error('Normalized agent-browser admission evidence is not exact/fail-closed');process.exit(1)}
+          console.log(JSON.stringify({candidate_id:green[0].candidate_id,raw_static_status:'STATIC_LAB_HOLD',raw_status_preserved:true,normalized_wrapper_status:green[0].status,fixtures:3,planned_calls:6,thresholds_relaxed:false}));
+          NODE
+
+      - name: Select exact agent-browser wrapper plan for rollback proof
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const o=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-old-vs-new-agent-browser-p0.json','utf8'));
+          const w=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-wrapper-plans-p0.json','utf8'));
+          const id=o.packages?.[0]?.candidate_id;
+          const plans=(w.plans??[]).filter(x=>x.candidate_id===id);
+          if(plans.length!==1){console.error('Exact agent-browser wrapper plan not found');process.exit(1)}
+          fs.writeFileSync('artifacts/cerebro-skill-wrapper-plans-agent-browser.manual.json',JSON.stringify({...w,wrapper_plans:1,enabled_wrappers:0,plans},null,2)+'\n');
+          NODE
+
+      - name: Bind current Gemini free-tier readiness without exposing secret value
+        env:
+          CEREBRO_GEMINI_KEY_PRESENT: ${{ secrets.CEREBRO_GEMINI_API_KEY != '' }}
+          CEREBRO_GEMINI_POLICY_GREEN: 'false'
+          CEREBRO_GEMINI_FREE_QUOTA_GUARD: 'true'
+        run: node cerebro/skills/skill-provider-binding-from-env.mjs --providers cerebro/skills/zero-cost-provider-evidence.v0.json --output artifacts/cerebro-skill-provider-binding.agent-browser.manual.json
+
+      - name: Select verified Gemini zero-cost synthetic route
+        run: node cerebro/skills/skill-zero-cost-route-audit.mjs --providers artifacts/cerebro-skill-provider-binding.agent-browser.manual.json --oldnew artifacts/cerebro-skill-old-vs-new-agent-browser-p0.json --preferred-provider google-gemini-api-free --output artifacts/cerebro-skill-zero-cost-route.agent-browser.manual.json
+
+      - name: Build hard six-call quota with zero retries and no paid fallback
+        run: |
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          import {buildFreeQuotaPlan} from './cerebro/skills/skill-free-quota-guard.mjs';
+          const oldnew=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-old-vs-new-agent-browser-p0.json','utf8'));
+          const route=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-zero-cost-route.agent-browser.manual.json','utf8'));
+          const report=buildFreeQuotaPlan(oldnew,route,{limits:{max_packages:1,max_fixtures_per_package:3,max_model_calls:6,max_retries_per_call:0,paid_fallback:false,prod_data:false,customer_data:false}});
+          if(!report.executable||report.planned_calls.total!==6||report.limits.max_model_calls!==6){console.error('Hard six-call quota not established');process.exit(1)}
+          fs.writeFileSync('artifacts/cerebro-skill-free-quota-plan.agent-browser.manual.json',JSON.stringify(report,null,2)+'\n');
+          console.log(JSON.stringify({provider_id:report.provider_id,planned_calls:report.planned_calls,max_model_calls:report.limits.max_model_calls,max_retries_per_call:0,paid_fallback:false}));
+          NODE
+
+      - name: Open behavioral gate for synthetic agent-browser package only
+        run: node cerebro/skills/skill-behavioral-execution-gate.mjs --oldnew artifacts/cerebro-skill-old-vs-new-agent-browser-p0.json --route artifacts/cerebro-skill-zero-cost-route.agent-browser.manual.json --quota artifacts/cerebro-skill-free-quota-plan.agent-browser.manual.json --output artifacts/cerebro-skill-behavioral-execution-gate.agent-browser.manual.json
+
+      - name: Execute exactly six synthetic baseline-vs-wrapper calls on verified Gemini model
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          CEREBRO_GEMINI_API_KEY: ${{ secrets.CEREBRO_GEMINI_API_KEY }}
+          CEREBRO_GEMINI_MODEL: gemini-3.5-flash-lite
+        run: node cerebro/skills/skill-agent-browser-behavioral-proxy-runner.mjs --oldnew artifacts/cerebro-skill-old-vs-new-agent-browser-p0.json --manifests artifacts/cerebro-skill-manifests.json --gate artifacts/cerebro-skill-behavioral-execution-gate.agent-browser.manual.json --quota artifacts/cerebro-skill-free-quota-plan.agent-browser.manual.json --route artifacts/cerebro-skill-zero-cost-route.agent-browser.manual.json --output artifacts/cerebro-skill-behavioral-proxy.agent-browser.manual.json
+
+      - name: Verify exact call count provider model and no unsafe execution
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const p=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-behavioral-proxy.agent-browser.manual.json','utf8'));
+          const arms=(p.results??[]).flatMap(r=>(r.fixture_results??[]).flatMap(f=>f.arms??[]));
+          const ok=p.status==='PROXY_COMPLETE'&&p.calls_executed===6&&p.provider_id==='google-gemini-api-free'&&arms.length===6&&arms.every(a=>a.model==='gemini-3.5-flash-lite')&&p.synthetic_only===true&&p.external_skill_code_executed===false&&p.prod_authorized===false;
+          if(!ok){console.error('Agent-browser behavioral execution invariant failed');process.exit(1)}
+          console.log(JSON.stringify({status:p.status,calls_executed:6,provider_id:p.provider_id,model:'gemini-3.5-flash-lite',synthetic_only:true,external_skill_code_executed:false,prod_authorized:false}));
+          NODE
+
+      - name: Run fixed-threshold deterministic independent judge
+        run: node cerebro/skills/skill-independent-judge.mjs --behavioral-results artifacts/cerebro-skill-behavioral-proxy.agent-browser.manual.json --output artifacts/cerebro-skill-independent-judge.agent-browser.manual.json
+
+      - name: Prove focused wrapper rollback and rebuild
+        run: node cerebro/skills/skill-rollback-proof.mjs --wrappers artifacts/cerebro-skill-wrapper-plans-agent-browser.manual.json --output artifacts/cerebro-skill-rollback-proof.agent-browser.manual.json
+
+      - name: Run normalized agent-browser evidence tribunal
+        run: node cerebro/skills/skill-agent-browser-tribunal.mjs --admission artifacts/cerebro-skill-normalized-wrapper-admission-p0.json --licenses artifacts/cerebro-skill-license-evidence.json --behavioral-results artifacts/cerebro-skill-behavioral-proxy.agent-browser.manual.json --independent-judge artifacts/cerebro-skill-independent-judge.agent-browser.manual.json --rollback artifacts/cerebro-skill-rollback-proof.agent-browser.manual.json --route artifacts/cerebro-skill-zero-cost-route.agent-browser.manual.json --rsi-shadow artifacts/cerebro-skill-rsi-shadow.json --output artifacts/cerebro-skill-agent-browser-tribunal.manual.json
+
+      - name: Assess PREPROD review readiness without promotion
+        run: node cerebro/skills/skill-agent-browser-promotion-readiness.mjs --admission artifacts/cerebro-skill-normalized-wrapper-admission-p0.json --oldnew artifacts/cerebro-skill-old-vs-new-agent-browser-p0.json --route artifacts/cerebro-skill-zero-cost-route.agent-browser.manual.json --quota artifacts/cerebro-skill-free-quota-plan.agent-browser.manual.json --behavioral-gate artifacts/cerebro-skill-behavioral-execution-gate.agent-browser.manual.json --rsi-shadow artifacts/cerebro-skill-rsi-shadow.json --behavioral-results artifacts/cerebro-skill-behavioral-proxy.agent-browser.manual.json --independent-judge artifacts/cerebro-skill-independent-judge.agent-browser.manual.json --tribunal artifacts/cerebro-skill-agent-browser-tribunal.manual.json --rollback artifacts/cerebro-skill-rollback-proof.agent-browser.manual.json --output artifacts/cerebro-skill-agent-browser-promotion-readiness.manual.json
+
+      - name: Verify no unsafe promotion or raw threshold mutation
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const a=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-normalized-wrapper-admission-p0.json','utf8'));
+          const p=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-behavioral-proxy.agent-browser.manual.json','utf8'));
+          const j=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-independent-judge.agent-browser.manual.json','utf8'));
+          const r=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-rollback-proof.agent-browser.manual.json','utf8'));
+          const t=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-agent-browser-tribunal.manual.json','utf8'));
+          const pr=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-agent-browser-promotion-readiness.manual.json','utf8'));
+          const rawPreserved=(a.results??[]).filter(x=>x.status==='NORMALIZED_WRAPPER_GREEN_FOR_BEHAVIORAL_EVAL').every(x=>x.raw_static_status==='STATIC_LAB_HOLD'&&x.raw_status_preserved===true);
+          if(!rawPreserved||a.thresholds_relaxed!==false||p.prod_authorized!==false||p.external_skill_code_executed!==false||j.prod_authorized!==false||j.tribunal_satisfied!==false||r.prod_authorized!==false||t.prod_authorized!==false||t.autonomous_promotion_authorized!==false||pr.merge_authorized!==false||pr.prod_authorized!==false||pr.autonomous_promotion_authorized!==false) process.exit(1);
+          console.log(JSON.stringify({safe:true,raw_static_hold_preserved:true,thresholds_relaxed:false,proxy_status:p.status,calls_executed:p.calls_executed,judge_decision:j.decision,rollback_status:r.status,tribunal_decision:t.decision,promotion_readiness:pr.status,human_required:pr.human_required??null,prod_authorized:false,auto_promotion:false}));
+          NODE
+
+      - name: Upload agent-browser synthetic behavioral evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-skill-agent-browser-behavioral-lab-${{ github.run_id }}
+          path: |
+            artifacts/cerebro-skill-normalized-wrapper-admission-p0.json
+            artifacts/cerebro-skill-old-vs-new-agent-browser-p0.json
+            artifacts/cerebro-skill-provider-binding.agent-browser.manual.json
+            artifacts/cerebro-skill-zero-cost-route.agent-browser.manual.json
+            artifacts/cerebro-skill-free-quota-plan.agent-browser.manual.json
+            artifacts/cerebro-skill-behavioral-execution-gate.agent-browser.manual.json
+            artifacts/cerebro-skill-behavioral-proxy.agent-browser.manual.json
+            artifacts/cerebro-skill-wrapper-plans-agent-browser.manual.json
+            artifacts/cerebro-skill-independent-judge.agent-browser.manual.json
+            artifacts/cerebro-skill-rollback-proof.agent-browser.manual.json
+            artifacts/cerebro-skill-agent-browser-tribunal.manual.json
+            artifacts/cerebro-skill-agent-browser-promotion-readiness.manual.json
+          if-no-files-found: warn
+          retention-days: 14

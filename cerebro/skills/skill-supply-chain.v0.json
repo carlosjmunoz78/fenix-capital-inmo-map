@@ -1,0 +1,114 @@
+{
+  "contract_id": "CEREBRO-SKILL-SUPPLY-CHAIN-V0",
+  "version": "0.1.0",
+  "status": "DEFINED_NOT_PROMOTED",
+  "owner_engine_id": "FACT-001",
+  "capability_id": "cap:skill-supply-chain",
+  "new_engine_id": false,
+  "environment": "PREPROD_CANDIDATE",
+  "execution_mode": "READ_ONLY_DISCOVERY",
+  "additional_cost_target_eur": 0,
+  "prod_writes": false,
+  "autonomous_prod": false,
+  "trading_access": false,
+  "required_context": ["company_id", "engine_id", "environment", "version"],
+  "engine_bindings": [
+    "FACT-001", "INT-001", "RSH-001", "INN-001", "OPP-001", "OBS-001",
+    "SEC-001", "SEC-002", "IAM-001", "POL-001", "QA-001", "REG-001",
+    "EVA-001", "JDG-001", "FINOPS-001", "FREE-001", "ORCH-001", "ROUTE-001",
+    "LRN-001", "UPD-001", "SUP-001"
+  ],
+  "sources": [
+    {
+      "source_id": "lobehub-skills",
+      "url": "https://lobehub.com/es/skills",
+      "source_role": "DISCOVERY_ONLY",
+      "trust_default": "UNVERIFIED_MARKETPLACE",
+      "upstream_required": true
+    },
+    {
+      "source_id": "fragroger-skills",
+      "url": "https://skills.fragroger.ai/es",
+      "source_role": "REFERENCE_ONLY_UNTIL_LICENSE_CLEAR",
+      "trust_default": "REFERENCE_ONLY",
+      "upstream_required": true
+    },
+    {
+      "source_id": "mcpservers-agent-skills",
+      "url": "https://mcpservers.org/es/agent-skills",
+      "source_role": "DISCOVERY_ONLY",
+      "trust_default": "UNVERIFIED_DIRECTORY",
+      "upstream_required": true
+    },
+    {
+      "source_id": "github-upstream",
+      "url": "https://github.com",
+      "source_role": "UPSTREAM_RESOLUTION",
+      "trust_default": "DEPENDS_ON_OWNER_LICENSE_AND_COMMIT",
+      "upstream_required": false
+    }
+  ],
+  "skill_classes": ["CEREBRO_RUNTIME", "BUILDER", "SHARED", "REFERENCE_ONLY", "REJECTED"],
+  "trust_tiers": ["TRUSTED_UPSTREAM", "TRUSTED_COMMUNITY", "VERIFIED_MIRROR", "UNVERIFIED", "REJECTED"],
+  "lifecycle": [
+    "DISCOVERED", "UPSTREAM_RESOLVED", "LICENSE_CHECKED", "SECURITY_CHECKED",
+    "NORMALIZED", "QUARANTINED", "LAB_GREEN", "AVAILABLE", "PREPROD_GREEN",
+    "PROMOTED", "DEPRECATED", "REJECTED"
+  ],
+  "required_candidate_fields": [
+    "candidate_id", "name", "source_id", "source_ref", "upstream_ref", "upstream_commit",
+    "license_id", "license_compatible", "skill_class", "trust_tier", "version_ref",
+    "observed_at", "fit", "security", "maintainability", "interoperability", "reversibility",
+    "reuse_value", "cost_eur_month", "network_access", "filesystem_access", "credential_access",
+    "prod_write", "trading_access", "forbidden_behaviors"
+  ],
+  "score_weights": {
+    "security": 20,
+    "fit": 20,
+    "license": 15,
+    "reuse_value": 15,
+    "interoperability": 10,
+    "zero_cost": 10,
+    "maintainability": 5,
+    "reversibility": 5
+  },
+  "hard_gates": {
+    "missing_upstream": "REJECT",
+    "license_incompatible": "REFERENCE_ONLY",
+    "security_fail": "REJECT",
+    "captcha_bypass": "REJECT",
+    "credential_extraction": "REJECT",
+    "fingerprint_spoofing": "REJECT",
+    "anti_detect": "REJECT",
+    "prod_write": "HUMAN_REQUIRED_HIGH_RISK",
+    "trading_access": "HUMAN_REQUIRED_POLICY_CONFLICT",
+    "new_paid_cost": "HUMAN_REQUIRED_MONEY_LIMIT"
+  },
+  "continuous_improvement": {
+    "event_driven": [
+      "CAPABILITY_GAP_DETECTED", "ENGINE_FAILURE_REPEATED", "NEW_COMPANY",
+      "NEW_ENGINE_OR_CAPABILITY", "UPSTREAM_RELEASE", "SECURITY_ADVISORY"
+    ],
+    "daily": ["discover_changed_sources", "resolve_upstream_changes", "quarantine_new_candidates"],
+    "weekly": ["rescore_available_skills", "review_failures_and_fallbacks", "benchmark_top_candidates"],
+    "monthly": ["obsolescence_review", "license_recheck", "dependency_recheck", "cost_recheck"],
+    "rsi_hook": "emit_candidate_improvement_only_after_evidence_and_never_self_promote",
+    "learning_rule": "learn_from_verified_outcomes_not_from_popularity_or_stars"
+  },
+  "promotion_sequence": [
+    "DISCOVER", "RESOLVE_UPSTREAM", "LICENSE_GATE", "SECURITY_GATE", "DEDUP_OVERLAP",
+    "NORMALIZE", "LAB", "TEST", "EVALUATE", "TRIBUNAL", "PREPROD",
+    "OLD_VS_NEW", "ROLLBACK_PROOF", "CANARY_IF_APPLICABLE", "PROMOTE", "MONITOR"
+  ],
+  "invariants": [
+    "do_not_replace_working_capability_without_old_vs_new_evidence",
+    "do_not_create_new_engine_id_for_a_skill_without_documented_gap",
+    "do_not_load_all_skills_into_context",
+    "materialize_skill_only_for_an_authorized_job",
+    "preserve_company_isolation",
+    "preserve_secrets_outside_skill_content",
+    "no_silent_cost",
+    "no_direct_prod_promotion",
+    "trading_remains_isolated"
+  ]
+}
