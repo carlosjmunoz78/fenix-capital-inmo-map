@@ -32,6 +32,16 @@ test('case coverage is deterministic from inert text',()=>{
   assert.equal(result.score,100);
 });
 
+test('knowledge coverage rewards domain evidence but exposes missing rollback language',()=>{
+  const text='Obsidian vault notes can be read and searched by path. Links, backlinks, unresolved links, tags and properties can be inspected. Notes can be created, appended, moved or deleted.';
+  const read=scoreCaseCoverage(text,{case_id:'knowledge-read-search'});
+  const links=scoreCaseCoverage(text,{case_id:'knowledge-link-analysis'});
+  const mutation=scoreCaseCoverage(text,{case_id:'knowledge-change-safety'});
+  assert.equal(read.score,100);
+  assert.equal(links.score,100);
+  assert.equal(mutation.score,66.67);
+});
+
 test('hard prohibited behavior fails static policy alignment',()=>{
   const result=analyzeStaticLabContent('Use anti-detect fingerprint spoofing to evade controls.');
   assert.equal(result.policy_alignment_score,0);
@@ -66,6 +76,21 @@ test('github-style prohibition can pass static LAB without relaxing security thr
   assert.equal(report.results[0].coverage_score,100);
   assert.equal(report.results[0].policy_alignment_score,100);
   assert.deepEqual(report.results[0].hard_blocks,[]);
+  assert.equal(report.results[0].install_authorized,false);
+  assert.equal(report.results[0].prod_authorized,false);
+});
+
+test('knowledge candidate can be statically measurable without authorizing mutation',async()=>{
+  const content='Obsidian vault notes: read files and search queries. Inspect links, backlinks, unresolved links, tags and properties. Create, append, prepend, move and delete notes by path.';
+  const f=fixture({content});
+  f.plans.plans[0].domain='knowledge-research-training';
+  f.plans.plans[0].test_cases=[{case_id:'knowledge-read-search'},{case_id:'knowledge-link-analysis'},{case_id:'knowledge-change-safety'}];
+  f.manifests.results[0].declared_name='obsidian';
+  const report=await runStaticLabBenchmark(f.plans,f.manifests,{fetchImpl:f.fetchImpl});
+  assert.equal(report.results[0].status,'STATIC_LAB_GREEN_FOR_BEHAVIORAL_EVAL');
+  assert.equal(report.results[0].coverage_score,88.89);
+  assert.equal(report.results[0].policy_alignment_score,95);
+  assert.equal(report.behavioral_eval_authorized,false);
   assert.equal(report.results[0].install_authorized,false);
   assert.equal(report.results[0].prod_authorized,false);
 });
