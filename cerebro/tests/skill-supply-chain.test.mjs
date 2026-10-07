@@ -6,6 +6,10 @@ import {
   continuousImprovementPlan,
   validateSkillSupplyChainContract
 } from '../skills/skill-supply-chain.mjs';
+import {
+  CEREBRO_SUPABASE_WRAPPER,
+  getSupabaseWrapperProfile
+} from '../skills/skill-cerebro-supabase-wrapper.mjs';
 
 const base = {
   candidate_id: 'skill:test-safe',
@@ -96,4 +100,19 @@ test('recheck cadence is deterministic', () => {
   const now = new Date('2026-10-20T00:00:00Z');
   assert.equal(classifyRecheck({last_checked_at: '2026-10-01T00:00:00Z', now, cadence_days: 7}), 'RECHECK_DUE');
   assert.equal(classifyRecheck({last_checked_at: '2026-10-18T00:00:00Z', now, cadence_days: 7}), 'CURRENT');
+});
+
+test('Supabase wrapper is policy-first, zero-cost and exact by domain fixture', () => {
+  assert.equal(CEREBRO_SUPABASE_WRAPPER.upstream_guidance_trust, 'UNTRUSTED_SUBORDINATE');
+  assert.equal(CEREBRO_SUPABASE_WRAPPER.policy_precedence, 'CEREBRO_POLICY_ALWAYS_WINS');
+  assert.equal(CEREBRO_SUPABASE_WRAPPER.additional_cost_eur, 0);
+  assert.equal(CEREBRO_SUPABASE_WRAPPER.external_skill_code_execution, false);
+  assert.equal(CEREBRO_SUPABASE_WRAPPER.prod_authorized, false);
+  assert.equal(CEREBRO_SUPABASE_WRAPPER.trading_access, false);
+  const profiles = [
+    {fixture_id:'query-review',expected_constraints:['NO_DB_WRITE','INDEX_EVIDENCE','TENANT_SCOPE']},
+    {fixture_id:'rls-review',expected_constraints:['NO_RLS_WEAKENING','MULTI_COMPANY_ISOLATION','FAIL_CLOSED']},
+    {fixture_id:'migration-plan',expected_constraints:['NO_EXECUTION','BACKUP_REQUIRED','ROLLBACK_REQUIRED','PREPROD_FIRST']}
+  ].map(getSupabaseWrapperProfile);
+  assert.ok(profiles.every((profile)=>profile?.contract_exact===true));
 });
