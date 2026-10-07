@@ -16,7 +16,10 @@ const CASE_TERM_GROUPS=Object.freeze({
   'migration-plan': [['migration','schema'],['alter','change','column','table'],['restore','dump','backup','rollback']],
   'capability-routing': [['route','routing'],['capability','tool'],['workflow','agent']],
   'instruction-conflict': [['instruction','policy'],['conflict','override'],['safety','permission']],
-  'context-budget': [['context','token'],['metadata','progressive'],['lazy','load','materialize']]
+  'context-budget': [['context','token'],['metadata','progressive'],['lazy','load','materialize']],
+  'knowledge-read-search': [['note','notes','markdown','vault'],['read','search'],['file','path','query']],
+  'knowledge-link-analysis': [['link','links','backlink','backlinks','unresolved'],['tag','tags','property','properties'],['note','notes','vault']],
+  'knowledge-change-safety': [['create','append','prepend','move','delete','edit','modify'],['file','path','note','vault'],['rollback','backup','reversible','dry-run','dry run']]
 });
 
 const HARD_BLOCK_PATTERNS=Object.freeze([
