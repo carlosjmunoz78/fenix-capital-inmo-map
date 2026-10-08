@@ -54,7 +54,6 @@ Every promoted engine must retain: contracts, permissions, tests, evaluation, tr
 
 Before wiring persistent `EVT-001`/`JOB-001` into `SharedRuntime`, require explicit OLD-vs-NEW comparison, rollback path, dependency review and multi-process/shared-worker safety design. The current persistent adapters remain parallel by design.
 
-
 ## VOICE-001 / Explicit Learning V1 · 2026-10-01
 
 - `VOICE-001` remains browser-native for STT/TTS and therefore adds no paid voice service.
@@ -63,7 +62,6 @@ Before wiring persistent `EVT-001`/`JOB-001` into `SharedRuntime`, require expli
 - Durable learning is explicit only. Session corrections may be applied ephemerally; persistence requires an explicit instruction such as `guárdalo`, `recuérdalo` or `a partir de ahora...`.
 - Existing `fenix-memory-api` is preserved for entity/CRM relationship memory and is not replaced or overloaded by this preference layer.
 - Preference writes are a narrowly scoped exception to the Console reference rule of no operational Supabase writes; they do not authorize business-action writes, permission changes or autonomous PROD execution.
-
 
 ## Conversational Learning + Dynamic Prosody V1 · 2026-10-01
 
@@ -76,7 +74,6 @@ Before wiring persistent `EVT-001`/`JOB-001` into `SharedRuntime`, require expli
 - Estas escrituras internas de aprendizaje son una excepción acotada de service-role; no habilitan escrituras de negocio, ampliación de permisos ni autonomía PROD.
 - `fenix-memory-api` existente permanece intacta para memoria relacional/CRM; no se sustituye.
 
-
 ## Spoken Summary V1 · 2026-10-01
 
 - Salida escrita y salida hablada quedan separadas: `Gateway response → full written UI response → deterministic spoken summary → prosody segments → browser speechSynthesis`.
@@ -86,14 +83,12 @@ Before wiring persistent `EVT-001`/`JOB-001` into `SharedRuntime`, require expli
 - Para acciones pendientes, el resumen hablado conserva la pregunta final de confirmación; esta capa no reduce ni amplía permisos.
 - `VOICE-001`, memoria conversacional, ACTGW y contratos de acción existentes se conservan; este cambio es únicamente de presentación hablada.
 
-
 ## Spoken Summary V2 · 2026-10-01
 
 - Flujo: `Gateway structured response → full written response → intent/status aware spoken summarizer → prosody segmentation → browser speechSynthesis`.
 - No se añade un modelo ni una API de voz: la mejora reutiliza metadatos de la respuesta y reglas deterministas.
 - `action` y `read_context` solo informan la presentación hablada; no alteran permisos, confirmaciones ni ejecución.
 - El resumen hablado es una vista derivada. Nunca sustituye el mensaje escrito como evidencia completa.
-
 
 ## Verbal Barge-in V1 + Spoken Digest V3 · 2026-10-01
 
@@ -103,14 +98,12 @@ Before wiring persistent `EVT-001`/`JOB-001` into `SharedRuntime`, require expli
 - Spoken Digest V3 sigue siendo una vista derivada determinista; no sustituye texto, evidencia, memoria ni contratos de acción.
 - No se añade infraestructura, modelo ni servicio de pago.
 
-
 ## Local VAD Barge-in V2 · 2026-10-01
 
 - Flujo de interrupción: `micrófono → getUserMedia → Web Audio analyser → VAD adaptativo → cancel speechSynthesis → SpeechRecognition normal`.
 - El VAD no interpreta contenido, no llama al Gateway y no puede confirmar acciones.
 - La detección es local al navegador y no añade carga a Supabase ni servicios de pago.
 - `SpeechRecognition` concurrente durante TTS queda como fallback, no como mecanismo primario.
-
 
 ## Human Dialogue + Knowledge Map + Clarification V1 · 2026-10-01
 
@@ -121,7 +114,6 @@ Before wiring persistent `EVT-001`/`JOB-001` into `SharedRuntime`, require expli
 - Los saludos personalizados y lead-ins son presentación conversacional; no alteran memoria, permisos, identidad ni contrato de acción.
 - No se añade modelo, infraestructura ni suscripción de pago.
 
-
 ## Conversational Intelligence V2 · 2026-10-01
 
 - Flujo inmediato: `últimos turnos UI → conversation_context acotado → Gateway validation → contextualizeMessage → knowledge/action routing`.
@@ -131,7 +123,6 @@ Before wiring persistent `EVT-001`/`JOB-001` into `SharedRuntime`, require expli
 - `fenix-memory-api` relacional/CRM sigue intacta y separada.
 - Currentness: preguntas sensibles al tiempo pueden quedar marcadas `REQUIRES_CURRENT_VERIFICATION`; la verificación externa/canónica ocurre antes de usar el dato como decisión vigente.
 - No se añade modelo, worker, servidor ni suscripción de pago.
-
 
 ## FACT-001 Automatic Factory V0 · 2026-10-08
 
@@ -147,15 +138,16 @@ Ingress remains bounded to `cerebro/factory/requests/*.json`, explicit workflow 
 
 Target-engine output stays `SCAFFOLD`; behavioral evaluation, tribunal, PREPROD and all production promotion gates remain downstream. FACT-001 automation verification does not transfer autonomy to generated engines.
 
-
 ## COMP-ONB-001 Structural Onboarding V0 · 2026-10-08
 
-Candidate dependency chain:
+Verified structural dependency chain:
 
-`bounded company request → existing COMP-REG/Phase 4 dependency graph → verified FACT-001 AutoFactory → 17 canonical Phase 4 scaffolds → structural evidence artifact`
+`bounded company request → existing COMP-REG/Phase 4 dependency graph → verified FACT-001 AutoFactory → 17 canonical Phase 4 scaffolds → immutable structural evidence`
 
 The adapter preserves the existing `multicompany-bootstrap.json` graph and `MultiCompanyBootstrap` state machine. FACT generates generic SCAFFOLD bytes; tenant identity is carried in request/evidence metadata rather than rewriting canonical scaffold files.
 
-Structural output is bounded to the 17 Phase 4 engines and 306 canonical scaffold files. A structural run is explicitly prohibited from turning any business engine GREEN. `COMP-REG-001` / `TENANT-001` and all later scan/SEO/social/local/marketing/knowledge/CRM/App/automation/Training/activation steps still require real PREPROD execution evidence.
+Structural automation is verified on `main` at source SHA `cb46c0c95b4e628608990404e4c1ac38e889b79e`. Run `37833181826` attempt 1 completed SUCCESS after automatic push ingress; attempt 2 completed SUCCESS as a deterministic rerun. Both produced 17 Phase 4 engines, 306 structural files and identical aggregate SHA-256 `295be8b701fe80ea57b034e882da1698def79a97502b9831e9453871c7fc1ed6`. COMP-ONB-001 is therefore `AUTOMATIC_COMPANY_SCAFFOLD_VERIFIED` for the structural scope only.
 
-The candidate workflow is hostless and repository read-only, with automatic main self-check plus explicit and defined repository dispatch. `ACTGW-001 → cerebro_new_company_scaffold` remains **DEFINED / POR AUDITAR LIVE** until a real Gateway request is observed.
+A structural run is explicitly prohibited from turning any business engine GREEN. `COMP-REG-001` / `TENANT-001` and all later scan/SEO/social/local/marketing/knowledge/CRM/App/automation/Training/activation steps still require real PREPROD execution evidence. The next gate is `COMP_REG_AND_TENANT_PREPROD_EXECUTION_REQUIRED`.
+
+The workflow is hostless and repository read-only, with automatic main self-check plus explicit and defined repository dispatch. `ACTGW-001 → cerebro_new_company_scaffold` remains **DEFINED / POR AUDITAR LIVE** until a real Gateway request is observed.
