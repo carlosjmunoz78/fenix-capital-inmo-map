@@ -146,3 +146,16 @@ Ingress remains bounded to `cerebro/factory/requests/*.json`, explicit workflow 
 `ACTGW-001 → repository_dispatch` is **DEFINED / POR AUDITAR LIVE**; no claim is made that Gateway dispatch itself has been physically/live verified yet.
 
 Target-engine output stays `SCAFFOLD`; behavioral evaluation, tribunal, PREPROD and all production promotion gates remain downstream. FACT-001 automation verification does not transfer autonomy to generated engines.
+
+
+## COMP-ONB-001 Structural Onboarding V0 · 2026-10-08
+
+Candidate dependency chain:
+
+`bounded company request → existing COMP-REG/Phase 4 dependency graph → verified FACT-001 AutoFactory → 17 canonical Phase 4 scaffolds → structural evidence artifact`
+
+The adapter preserves the existing `multicompany-bootstrap.json` graph and `MultiCompanyBootstrap` state machine. FACT generates generic SCAFFOLD bytes; tenant identity is carried in request/evidence metadata rather than rewriting canonical scaffold files.
+
+Structural output is bounded to the 17 Phase 4 engines and 306 canonical scaffold files. A structural run is explicitly prohibited from turning any business engine GREEN. `COMP-REG-001` / `TENANT-001` and all later scan/SEO/social/local/marketing/knowledge/CRM/App/automation/Training/activation steps still require real PREPROD execution evidence.
+
+The candidate workflow is hostless and repository read-only, with automatic main self-check plus explicit and defined repository dispatch. `ACTGW-001 → cerebro_new_company_scaffold` remains **DEFINED / POR AUDITAR LIVE** until a real Gateway request is observed.
