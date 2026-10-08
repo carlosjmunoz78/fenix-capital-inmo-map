@@ -11,6 +11,8 @@ import {
 } from '../governance/human-communication.mjs';
 import {
   initialCommunicationState,
+  envelopeFromHumanRequired,
+  standingExecutionBinding,
   ingestSkillHumanRequired,
   applyOwnerMessages,
   prepareOutbound
@@ -29,6 +31,7 @@ const baseItem={
   customer_data_requested:false,
   rollback_green:true
 };
+const safeLearnableItem={...baseItem,stage:'PREPROD_PROMOTION_REVIEW',prod_write:false,customer_data_used:false,external_skill_code_execution:false,trading_access:false,paid_fallback:false,max_money_eur:0};
 
 test('human alias remains understandable and technical identity is separate',()=>{
   assert.equal(resolveHumanAlias(baseItem),'Memoria Obsidian');
@@ -122,7 +125,34 @@ test('repeated approvals only propose standing authorization with positive rollb
   assert.equal(blocked.eligible,false);
 });
 
-test('nighttime keeps pending approvals unsent and daytime creates one batch',()=>{
+test('authorization learning requires a real safe execution binding and rejects destructive requested aliases',()=>{
+  assert.equal(standingExecutionBinding(safeLearnableItem),'SKILL_AUTONOMY_READONLY_V1');
+  const safe=envelopeFromHumanRequired(safeLearnableItem);
+  assert.equal(safe.standing_learning_eligible,true);
+  assert.equal(safe.standing_execution_binding,'SKILL_AUTONOMY_READONLY_V1');
+
+  const destructive=envelopeFromHumanRequired({...safeLearnableItem,destructive_delete_requested:true});
+  const unbounded=envelopeFromHumanRequired({...safeLearnableItem,unbounded_prod_write_requested:true});
+  assert.equal(destructive.standing_learning_eligible,false);
+  assert.equal(destructive.standing_execution_binding,null);
+  assert.equal(unbounded.standing_learning_eligible,false);
+  assert.equal(unbounded.standing_execution_binding,null);
+});
+
+test('active learned standing authorization suppresses mail only when a registered executor binding matches',()=>{
+  const env=envelopeFromHumanRequired(safeLearnableItem);
+  let state=initialCommunicationState('2026-10-08T07:00:00Z');
+  state.standing_authorizations[env.scope_fingerprint]={status:'ACTIVE',approval_id:'APR-STANDING',scope_fingerprint:env.scope_fingerprint,exact_scope_only:true,execution_binding:'SKILL_AUTONOMY_READONLY_V1'};
+  const suppressed=ingestSkillHumanRequired(state,{waiting_human:{a:safeLearnableItem}},'2026-10-08T07:01:00Z');
+  assert.equal(Object.keys(suppressed.pending).length,0);
+
+  const bad=initialCommunicationState('2026-10-08T07:00:00Z');
+  bad.standing_authorizations[env.scope_fingerprint]={status:'ACTIVE',approval_id:'APR-STANDING',scope_fingerprint:env.scope_fingerprint,exact_scope_only:true,execution_binding:'UNKNOWN'};
+  const notSuppressed=ingestSkillHumanRequired(bad,{waiting_human:{a:safeLearnableItem}},'2026-10-08T07:01:00Z');
+  assert.equal(Object.keys(notSuppressed.pending).length,1);
+});
+
+test('nighttime keeps pending approvals unsent and daytime creates one batch with stable per-approval delivery key',()=>{
   const skillState={waiting_human:{[baseItem.candidate_id]:baseItem}};
   let state=ingestSkillHumanRequired(initialCommunicationState('2026-10-08T19:30:00Z'),skillState,'2026-10-08T19:30:00Z');
   const night=prepareOutbound(state,{now:new Date('2026-10-08T19:30:00Z'),repoSummary:{}});
@@ -130,6 +160,17 @@ test('nighttime keeps pending approvals unsent and daytime creates one batch',()
   const morning=prepareOutbound(night.state,{now:new Date('2026-10-09T06:05:00Z'),repoSummary:{}});
   assert.ok(morning.approvalMail);
   assert.equal(morning.approvalMail.approval_ids.length,1);
+  assert.equal(morning.approvalMail.kind,'approval_batch');
+  assert.equal(morning.approvalMail.items[0].delivery_key,`APPROVAL:${morning.approvalMail.approval_ids[0]}`);
+});
+
+test('daily digest has a stable logical delivery key independent of mutable content',()=>{
+  const state=initialCommunicationState('2026-10-08T06:20:00Z');
+  const first=prepareOutbound(state,{now:new Date('2026-10-08T06:20:00Z'),repoSummary:{human:['A']}});
+  const second=prepareOutbound(state,{now:new Date('2026-10-08T06:21:00Z'),repoSummary:{human:['B']}});
+  assert.equal(first.digestMail.delivery_key,'DIGEST:2026-10-08');
+  assert.equal(second.digestMail.delivery_key,'DIGEST:2026-10-08');
+  assert.notEqual(first.digestMail.text,second.digestMail.text);
 });
 
 test('one owner email may authorize multiple exact APR lines independently and authorized action stays visible until consumed',()=>{
@@ -145,7 +186,7 @@ test('one owner email may authorize multiple exact APR lines independently and a
   assert.equal(state.pending[ids[1]],undefined);
 });
 
-test('EXPLICAME returns an expanded human explanation without authorizing',()=>{
+test('EXPLICAME returns an expanded human explanation with its own stable delivery key without authorizing',()=>{
   let state=initialCommunicationState('2026-10-08T07:00:00Z');
   state=ingestSkillHumanRequired(state,{waiting_human:{a:baseItem}},'2026-10-08T07:00:00Z');
   const id=Object.keys(state.pending)[0];
@@ -155,4 +196,5 @@ test('EXPLICAME returns an expanded human explanation without authorizing',()=>{
   const prepared=prepareOutbound(state,{now:new Date('2026-10-08T07:10:00Z'),repoSummary:{}});
   assert.ok(prepared.approvalMail.text.includes('Explicación ampliada'));
   assert.ok(prepared.approvalMail.text.includes('autorización de un solo uso'));
+  assert.match(prepared.approvalMail.items[0].delivery_key,new RegExp(`^EXPLAIN:${id}:`));
 });
