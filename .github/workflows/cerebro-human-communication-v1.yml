@@ -9,6 +9,7 @@ on:
       - 'cerebro/governance/human-communication.mjs'
       - 'cerebro/communication/**'
       - 'cerebro/tests/human-communication-v1.test.mjs'
+      - 'cerebro/tests/owner-approval-gate-v1.test.mjs'
       - '.github/workflows/cerebro-human-communication-v1.yml'
   schedule:
     - cron: '*/10 * * * *'
@@ -43,8 +44,8 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Test communication contracts
-        run: node --test cerebro/tests/human-communication-v1.test.mjs
+      - name: Test communication and exact owner-approval contracts
+        run: node --test cerebro/tests/human-communication-v1.test.mjs cerebro/tests/owner-approval-gate-v1.test.mjs
 
       - name: Load persistent communication and Skill AutoLoop state
         run: |
