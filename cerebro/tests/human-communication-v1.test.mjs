@@ -63,6 +63,15 @@ test('effective privileges change the scope fingerprint even without requested a
   assert.notEqual(safe,trading);
 });
 
+test('human gate reason changes the standing authorization scope fingerprint',()=>{
+  const highRisk=approvalScopeFingerprint({...baseItem,human_required:'HIGH_RISK'});
+  const legal=approvalScopeFingerprint({...baseItem,human_required:'LEGAL_REQUIRED'});
+  const security=approvalScopeFingerprint({...baseItem,human_required:'SECURITY_INCIDENT'});
+  assert.notEqual(highRisk,legal);
+  assert.notEqual(highRisk,security);
+  assert.notEqual(legal,security);
+});
+
 test('multiple exact commands are accepted in a single reply while generic yes is ignored',()=>{
   const a=buildHumanRequiredEmailEnvelope({item:baseItem,event_version:'a',rollback_green:true});
   const b=buildHumanRequiredEmailEnvelope({item:{...baseItem,candidate_id:'x2',name:'github',updated_at:'2026-10-08T07:01:00Z'},event_version:'b',rollback_green:true});
