@@ -103,6 +103,20 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      - name: Parse Windows host PowerShell assets
+        shell: pwsh
+        run: |
+          $failed = $false
+          Get-ChildItem 'cerebro/host/windows/*.ps1' | ForEach-Object {
+            $tokens = $null
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile($_.FullName, [ref]$tokens, [ref]$errors) | Out-Null
+            if ($errors.Count -gt 0) {
+              $failed = $true
+              Write-Error ("PowerShell parse error in {0}: {1}" -f $_.Name, (($errors | ForEach-Object { $_.Message }) -join '; '))
+            }
+          }
+          if ($failed) { exit 1 }
       - name: Recovered RSI runtime, PREPROD persistence, host binding, governance and bridge regression tests
         run: >-
           node --test
