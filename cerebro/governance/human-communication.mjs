@@ -12,6 +12,7 @@ const EXPLICIT_ALIASES = Object.freeze({
 
 const COMMAND_RE = /^(AUTORIZO|NO AUTORIZO|EXPL[IÍ]CAME)\s+(APR-\d{8}-[A-F0-9]{8})$/iu;
 const GENERIC_AUTH_WORD_RE = /(^|[^a-z0-9])(si|vale|ok|okay|procede|continua)([^a-z0-9]|$)/i;
+const QUOTED_REPLY_BOUNDARY_RE = /^(on .+wrote:|el .+escribi[oó]:|from:\s+.+|de:\s+.+|-{2,}\s*(original message|mensaje original)\s*-{2,})$/i;
 
 function clean(value){
   return typeof value === 'string' ? value.trim() : '';
@@ -146,12 +147,23 @@ export function buildHumanRequiredEmailEnvelope({
   });
 }
 
+export function extractUnquotedReplyText(text){
+  const out=[];
+  for(const rawLine of String(text ?? '').split(/\r?\n/)){
+    const trimmed=rawLine.trim();
+    if(QUOTED_REPLY_BOUNDARY_RE.test(trimmed)) break;
+    if(trimmed.startsWith('>')) continue;
+    out.push(rawLine);
+  }
+  return out.join('\n');
+}
+
 export function parseApprovalCommands(text,pendingApprovals={}){
   const pending=pendingApprovals instanceof Map ? pendingApprovals : new Map(Object.entries(pendingApprovals || {}));
-  const accepted=[];
   const ignored=[];
-  const seen=new Set();
-  for(const rawLine of String(text ?? '').split(/\r?\n/)){
+  const candidates=[];
+  const safeText=extractUnquotedReplyText(text);
+  for(const rawLine of safeText.split(/\r?\n/)){
     const line=rawLine.trim();
     if(!line) continue;
     const match=line.match(COMMAND_RE);
@@ -161,13 +173,25 @@ export function parseApprovalCommands(text,pendingApprovals={}){
     }
     const verb=match[1].toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
     const approval_id=match[2].toUpperCase();
-    const dedupe=`${verb}|${approval_id}`;
-    if(seen.has(dedupe)) continue;
-    seen.add(dedupe);
     const request=pending.get(approval_id);
     if(!request){ ignored.push({line,approval_id,reason:'UNKNOWN_OR_CLOSED_APPROVAL_ID'}); continue; }
     const decision=verb === 'AUTORIZO' ? 'AUTHORIZED' : verb === 'NO AUTORIZO' ? 'DENIED' : 'EXPLAIN_REQUESTED';
-    accepted.push({approval_id,decision,scope_fingerprint:request.scope_fingerprint ?? null,technical_id:request.technical_id ?? null});
+    candidates.push({line,approval_id,decision,scope_fingerprint:request.scope_fingerprint ?? null,technical_id:request.technical_id ?? null});
+  }
+
+  const accepted=[];
+  const byId=new Map();
+  for(const candidate of candidates){
+    if(!byId.has(candidate.approval_id)) byId.set(candidate.approval_id,[]);
+    byId.get(candidate.approval_id).push(candidate);
+  }
+  for(const [approval_id,rows] of byId){
+    const decisions=new Set(rows.map(x=>x.decision));
+    if(decisions.size>1){
+      ignored.push({approval_id,reason:'CONFLICTING_COMMANDS_FOR_SAME_APPROVAL_ID'});
+      continue;
+    }
+    accepted.push(rows[0]);
   }
   return Object.freeze({accepted,ignored});
 }
