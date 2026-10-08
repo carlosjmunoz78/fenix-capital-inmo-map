@@ -79,9 +79,8 @@ Before wiring persistent `EVT-001`/`JOB-001` into `SharedRuntime`, require expli
 - Salida escrita y salida hablada quedan separadas: `Gateway response → full written UI response → deterministic spoken summary → prosody segments → browser speechSynthesis`.
 - La respuesta escrita conserva el detalle completo. La voz selecciona una síntesis corta y conversacional.
 - Los enlaces se mantienen visibles/clicables en pantalla, pero se eliminan del TTS y se sustituyen por «te dejo el enlace por escrito».
-- Los marcadores de listas numeradas/viñetas se eliminan del canal hablado para evitar lecturas como «uno punto».
+- Los marcadores de enumeración se suprimen del canal hablado.
 - Para acciones pendientes, el resumen hablado conserva la pregunta final de confirmación; esta capa no reduce ni amplía permisos.
-- `VOICE-001`, memoria conversacional, ACTGW y contratos de acción existentes se conservan; este cambio es únicamente de presentación hablada.
 
 ## Spoken Summary V2 · 2026-10-01
 
@@ -148,6 +147,20 @@ The adapter preserves the existing `multicompany-bootstrap.json` graph and `Mult
 
 Structural automation is verified on `main` at source SHA `cb46c0c95b4e628608990404e4c1ac38e889b79e`. Run `37833181826` attempt 1 completed SUCCESS after automatic push ingress; attempt 2 completed SUCCESS as a deterministic rerun. Both produced 17 Phase 4 engines, 306 structural files and identical aggregate SHA-256 `295be8b701fe80ea57b034e882da1698def79a97502b9831e9453871c7fc1ed6`. COMP-ONB-001 is therefore `AUTOMATIC_COMPANY_SCAFFOLD_VERIFIED` for the structural scope only.
 
-A structural run is explicitly prohibited from turning any business engine GREEN. `COMP-REG-001` / `TENANT-001` and all later scan/SEO/social/local/marketing/knowledge/CRM/App/automation/Training/activation steps still require real PREPROD execution evidence. The next gate is `COMP_REG_AND_TENANT_PREPROD_EXECUTION_REQUIRED`.
+A structural run is explicitly prohibited from turning any business engine GREEN. `COMP-REG-001` / `TENANT-001` and all later scan/SEO/social/local/marketing/knowledge/CRM/App/automation/Training/activation steps still require real PREPROD execution evidence.
 
 The workflow is hostless and repository read-only, with automatic main self-check plus explicit and defined repository dispatch. `ACTGW-001 → cerebro_new_company_scaffold` remains **DEFINED / POR AUDITAR LIVE** until a real Gateway request is observed.
+
+## COMP-REG-001 + TENANT-001 PREPROD reference execution · 2026-10-08
+
+Verified dependency progression:
+
+`REGISTERED_PREPROD → COMP-REG-001 GREEN → {COMP-ONB-001 READY, TENANT-001 READY} → TENANT-001 GREEN → COMP-ONB-001 remains READY → SCAN-001 / ENGACT-001 remain BLOCKED`
+
+This path is verified on `main` source SHA `6710067e0f1beb28f930c038aceebfb9168f965a` by workflow run `37838584276` attempts 1 and 2, both SUCCESS and both reproducing execution SHA-256 `c1dc362d98ac5b5ad23d441a8299d64182d2bb4e6bfd271e13ca45538ad1cdc8`.
+
+A separate synthetic control tenant remains unchanged during the primary execution, providing bounded tenant-isolation evidence. Promotion remains denied with `PHASE4_NOT_ALL_GREEN`.
+
+The current dependency authority remains `MultiCompanyBootstrap`, whose company registry is an in-memory `Map`. Therefore the accepted state is `PREPROD_REFERENCE_EXECUTION_VERIFIED`, not durable operational registration. `supabase_writes=false` remains enforced.
+
+Next dependency gate: `DURABLE_COMPANY_REGISTRY_PREPROD_PERSISTENCE_REQUIRED`. Before binding persistence, inventory existing Supabase company/tenant/registry schemas, RLS/RPCs and App/CRM dependencies; then implement additive PREPROD persistence with backup, rollback and OLD-vs-NEW evidence.
