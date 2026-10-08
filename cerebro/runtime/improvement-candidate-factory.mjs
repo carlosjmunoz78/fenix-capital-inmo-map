@@ -32,7 +32,7 @@ function changeIntentFor(sourceType){
 function validateCandidate(candidate){
   const errors=[];
   if(!candidate||typeof candidate!=='object') return {ok:false,errors:['candidate must be object']};
-  for(const key of ['candidate_id','company_id','engine_id','environment','baseline_version','candidate_version','source_learning_id','hypothesis','change_intent','created_at','state','next_gate']){
+  for(const key of ['candidate_id','company_id','engine_id','environment','baseline_version','baseline_version_source','candidate_version','source_learning_id','hypothesis','change_intent','created_at','state','next_gate']){
     if(candidate[key]===undefined||candidate[key]===null||candidate[key]==='') errors.push(`missing:${key}`);
   }
   if(candidate.environment!==PREPROD) errors.push('environment_must_be_preprod');
@@ -51,22 +51,25 @@ export function buildVersionedImprovementCandidate(learning){
   if(learning.promotion_state!=='CANDIDATE') return Object.freeze({ok:false,reasons:['LEARNING_NOT_CANDIDATE'],human_required:null,candidate:null});
   if(['HIGH','CRITICAL'].includes(learning.risk_class)) return Object.freeze({ok:false,reasons:['HIGH_RISK_REQUIRES_HUMAN'],human_required:'HIGH_RISK',candidate:null});
   if(learning.confidence<MIN_AUTONOMOUS_CONFIDENCE) return Object.freeze({ok:false,reasons:['LOW_CONFIDENCE_REQUIRES_HUMAN'],human_required:'LOW_CONFIDENCE',candidate:null});
-  const baselineVersion=reqString(learning.source_version??learning.version,'baseline_version');
+  const hasSourceVersion=typeof learning.source_version==='string'&&learning.source_version.trim().length>0;
+  const baselineVersion=reqString(hasSourceVersion?learning.source_version:learning.version,'baseline_version');
+  const baselineVersionSource=hasSourceVersion?'SOURCE_EVIDENCE_VERSION':'LEARNING_CONTEXT_VERSION_REQUIRES_OLD_CONTRACT_RESOLUTION';
   const metric=normalizeMetric(learning.expected_metric_delta);
   const fingerprint=stableIdempotencyKey({
     company_id:learning.company_id,engine_id:learning.engine_id,source_learning_id:learning.learning_id,
-    baseline_version:baselineVersion,hypothesis:learning.hypothesis,metric,evidence_refs:[...learning.evidence_refs].sort()
+    baseline_version:baselineVersion,baseline_version_source:baselineVersionSource,hypothesis:learning.hypothesis,metric,evidence_refs:[...learning.evidence_refs].sort()
   });
   const candidateVersion=`${baselineVersion}-rsi-cand.${fingerprint.slice(0,8)}`;
   const candidate={
     schema_version:'1.0.0',state_type:'CEREBRO_VERSIONED_IMPROVEMENT_CANDIDATE',candidate_id:`cand:${fingerprint.slice(0,24)}`,
     company_id:learning.company_id,engine_id:learning.engine_id,environment:PREPROD,
-    baseline_version:baselineVersion,candidate_version:candidateVersion,learning_runtime_version:learning.version,
+    baseline_version:baselineVersion,baseline_version_source:baselineVersionSource,baseline_verification_required:!hasSourceVersion,
+    candidate_version:candidateVersion,learning_runtime_version:learning.version,
     source_learning_id:learning.learning_id,source_event_ids:[...learning.source_event_ids],source_type:learning.source_type,
     source_environment:learning.source_environment??null,hypothesis:learning.hypothesis,change_intent:changeIntentFor(learning.source_type),
     target_metric:metric,confidence:learning.confidence,risk_class:learning.risk_class,evidence_refs:[...new Set(learning.evidence_refs)].sort(),
     created_at:learning.observed_at,state:'CANDIDATE',next_gate:'OLD_VS_NEW_EXPERIMENT',
-    experiment_contract:{required:true,old_version:baselineVersion,new_version:candidateVersion,dataset_kinds:['HISTORICAL','SYNTHETIC'],prod_writes:false,customer_data_required:false},
+    experiment_contract:{required:true,old_version:baselineVersion,new_version:candidateVersion,baseline_resolution_required:!hasSourceVersion,dataset_kinds:['HISTORICAL','SYNTHETIC'],prod_writes:false,customer_data_required:false},
     preservation_contract:{preserve_existing:true,contract_resolution_required:true,rollback_required:true,rebuild_required:true,policy_mutation_allowed:false,permission_elevation_allowed:false,budget_elevation_allowed:false},
     auto_experiment_eligible:true,promotion_authorized:false,persistent_publish_authorized:true,persistence_scope:'LOCAL_PREPROD_IMPROVEMENT_CANDIDATE_LEDGER_ONLY',
     prod_authorized:false,prod_write_authorized:false,trading_access:false,additional_cost_eur:0

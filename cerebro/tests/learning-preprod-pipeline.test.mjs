@@ -27,6 +27,15 @@ test('low-risk green shadow can be prepared only with explicit policy security a
   assert.equal(prepared.candidate.persistence_scope,'LOCAL_PREPROD_LRN_LEDGER_ONLY');
   assert.equal(prepared.candidate.rsi_publish_authorized,false);
   assert.equal(prepared.candidate.prod_authorized,false);
+  assert.equal(Object.hasOwn(prepared.candidate,'source_version'),false);
+});
+
+test('stable deterministic learning payload remains backward-compatible with the durable ledger schema',()=>{
+  const prepared=preparePreprodLearningCandidate({shadow_record:shadow('LOW','learn:legacy-compatible'),preprod_version:'0.2.0',bridge_status:'SHADOW_BRIDGE_GREEN',policy_pass:true,security_pass:true,local_persistence_enabled:true});
+  assert.equal(prepared.ok,true);
+  assert.equal(Object.hasOwn(prepared.candidate,'source_version'),false);
+  assert.equal(prepared.candidate.version,'0.2.0');
+  assert.equal(prepared.candidate.source_learning_id,'learn:legacy-compatible');
 });
 
 test('HIGH/CRITICAL risk produces canonical HUMAN_REQUIRED HIGH_RISK instead of automatic persistence',()=>{
