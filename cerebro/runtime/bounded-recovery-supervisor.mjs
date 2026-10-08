@@ -6,7 +6,7 @@ const PREPROD='PREPROD';
 const KIND='RSI-RECOVERY-SUPERVISOR-001';
 const SAFE_ACTIONS=Object.freeze(['REFETCH_REMOTE_EVIDENCE','REOPEN_LOCAL_STATE','REBUILD_EPHEMERAL_WORKSPACE','RETRY_TRANSIENT_OPERATION','ROLLBACK_LAST_CANDIDATE']);
 const DIRECT_HUMAN=Object.freeze({
-  LEGAL_REQUIRED:'LEGAL_REQUIRED',SIGNATURE_REQUIRED:'SIGNATURE_REQUIRED',CUSTOMER_HUMAN_REQUEST:'CUSTOMER_HUMAN_REQUEST',
+  LEGAL_REQUIRED:'LEGAL_REQUIRED',SIGNATURE_REQUIRED:'SIGNATURE_REQUIRED',LOW_CONFIDENCE:'LOW_CONFIDENCE',CUSTOMER_HUMAN_REQUEST:'CUSTOMER_HUMAN_REQUEST',
   SECURITY_INCIDENT:'SECURITY_INCIDENT',MONEY_LIMIT:'MONEY_LIMIT',POLICY_CONFLICT:'POLICY_CONFLICT',HIGH_RISK:'HIGH_RISK'
 });
 function clone(v){return deserialize(serialize(v));}
@@ -17,6 +17,7 @@ function validateObservation(o){
   if(o.environment!==PREPROD)throw new Error('recovery supervisor accepts exact PREPROD only');
   if(Number.isNaN(Date.parse(o.observed_at)))throw new Error('invalid observed_at');
   if(o.prod_authorized!==false||o.trading_access!==false)throw new Error('failure observation authority expanded');
+  if(o.exception_code!=null&&!HUMAN_REQUIRED_CODES.includes(o.exception_code))throw new Error('invalid HUMAN_REQUIRED exception code');
   return o;
 }
 function initialActionFor(family){
@@ -81,14 +82,16 @@ export class BoundedRecoveryLedger{
   }
   open(observation){
     const plan=planRecovery(observation);const prior=this.#cases.get(plan.case_id);
-    if(prior)return Object.freeze({accepted:false,duplicate:true,case:clone(prior),plan:planRecovery(observation,{attempts:prior.attempts??0,previous_actions:prior.previous_actions??[]})});
+    if(prior)return Object.freeze({accepted:false,duplicate:true,case:clone(prior),plan:this.next(prior.case_id)});
     const item={case_id:plan.case_id,observation:clone(observation),attempts:0,previous_actions:[],state:plan.state,human_required:plan.human_required??null,prod_authorized:false,trading_access:false};
     this.#commit({op:'OPEN',case:item});return Object.freeze({accepted:true,duplicate:false,case:clone(item),plan});
   }
   next(case_id){
     const item=this.#cases.get(req(case_id,'case_id'));if(!item)throw new Error('unknown recovery case');
-    if(item.state==='RESOLVED')return Object.freeze({state:'RESOLVED',case_id,action:null,human_required:null,prod_authorized:false});
-    return planRecovery(item.observation,{attempts:item.attempts,previous_actions:item.previous_actions});
+    if(item.state==='RESOLVED')return Object.freeze({state:'RESOLVED',case_id,action:null,human_required:null,prod_authorized:false,prod_write_authorized:false,trading_access:false});
+    const base=planRecovery(item.observation,{attempts:item.attempts,previous_actions:item.previous_actions});
+    if(item.state==='ROLLBACK_REQUIRED'&&base.state==='RECOVERY_PLANNED')return Object.freeze({...base,action:'ROLLBACK_LAST_CANDIDATE',strategy_change_required:true,requires_test_after_action:true,requires_rollback_on_regression:true});
+    return base;
   }
   beginAttempt(case_id){
     const item=this.#cases.get(req(case_id,'case_id'));if(!item)throw new Error('unknown recovery case');
