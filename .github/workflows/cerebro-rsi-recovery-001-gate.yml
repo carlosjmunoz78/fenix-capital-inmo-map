@@ -8,12 +8,18 @@ on:
       - 'cerebro/runtime/learning-pipeline.mjs'
       - 'cerebro/runtime/experiment-pipeline.mjs'
       - 'cerebro/runtime/evaluation-tribunal.mjs'
+      - 'cerebro/runtime/promotion-pipeline.mjs'
+      - 'cerebro/runtime/meta-learning.mjs'
+      - 'cerebro/runtime/multi-company-learning.mjs'
       - 'cerebro/skills/skill-rsi-shadow-bridge.mjs'
       - 'cerebro/tests/continuous-improvement-contract.test.mjs'
       - 'cerebro/tests/continuous-improvement-scheduler.test.mjs'
       - 'cerebro/tests/learning-pipeline.test.mjs'
       - 'cerebro/tests/experiment-pipeline.test.mjs'
       - 'cerebro/tests/evaluation-tribunal.test.mjs'
+      - 'cerebro/tests/promotion-pipeline.test.mjs'
+      - 'cerebro/tests/meta-learning.test.mjs'
+      - 'cerebro/tests/multi-company-learning.test.mjs'
       - 'cerebro/tests/skill-rsi-shadow-bridge.test.mjs'
       - 'cerebro/docs/RSI_RECOVERY_001_AUDIT_2026-10-08.md'
       - '.github/workflows/cerebro-rsi-recovery-001-gate.yml'
@@ -24,12 +30,18 @@ on:
       - 'cerebro/runtime/learning-pipeline.mjs'
       - 'cerebro/runtime/experiment-pipeline.mjs'
       - 'cerebro/runtime/evaluation-tribunal.mjs'
+      - 'cerebro/runtime/promotion-pipeline.mjs'
+      - 'cerebro/runtime/meta-learning.mjs'
+      - 'cerebro/runtime/multi-company-learning.mjs'
       - 'cerebro/skills/skill-rsi-shadow-bridge.mjs'
       - 'cerebro/tests/continuous-improvement-contract.test.mjs'
       - 'cerebro/tests/continuous-improvement-scheduler.test.mjs'
       - 'cerebro/tests/learning-pipeline.test.mjs'
       - 'cerebro/tests/experiment-pipeline.test.mjs'
       - 'cerebro/tests/evaluation-tribunal.test.mjs'
+      - 'cerebro/tests/promotion-pipeline.test.mjs'
+      - 'cerebro/tests/meta-learning.test.mjs'
+      - 'cerebro/tests/multi-company-learning.test.mjs'
       - 'cerebro/tests/skill-rsi-shadow-bridge.test.mjs'
       - 'cerebro/docs/RSI_RECOVERY_001_AUDIT_2026-10-08.md'
       - '.github/workflows/cerebro-rsi-recovery-001-gate.yml'
@@ -55,4 +67,7 @@ jobs:
           cerebro/tests/learning-pipeline.test.mjs
           cerebro/tests/experiment-pipeline.test.mjs
           cerebro/tests/evaluation-tribunal.test.mjs
+          cerebro/tests/promotion-pipeline.test.mjs
+          cerebro/tests/meta-learning.test.mjs
+          cerebro/tests/multi-company-learning.test.mjs
           cerebro/tests/skill-rsi-shadow-bridge.test.mjs
