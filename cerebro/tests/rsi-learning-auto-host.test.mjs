@@ -24,10 +24,10 @@ test('one autonomous iteration pulls verified outbox then persists LOW learning 
   try{
     const result=await runAutoHostIteration({raw_config:config(root),fetch_impl:remote(),now:()=> '2026-10-08T14:00:00.000Z'});
     assert.equal(result.status,'GREEN');assert.equal(result.remote_outbox.status,'REMOTE_OUTBOX_GREEN');assert.equal(result.remote_outbox.downloaded_total,1);
-    assert.equal(result.learning.persisted_total,1);assert.equal(result.prod_authorized,false);assert.equal(result.trading_access,false);
+    assert.equal(result.learning.last_result.persisted_total,1);assert.equal(result.prod_authorized,false);assert.equal(result.trading_access,false);
     assert.equal(fs.existsSync(path.join(root,'data','fenix','LRN-001','learning.v8')),true);
     const rerun=await runAutoHostIteration({raw_config:config(root),fetch_impl:remote(),now:()=> '2026-10-08T14:01:00.000Z'});
-    assert.equal(rerun.remote_outbox.skipped_total,1);assert.equal(rerun.learning.persisted_total,0);assert.ok(rerun.learning.skipped_receipts>=1);
+    assert.equal(rerun.remote_outbox.skipped_total,1);assert.equal(rerun.learning.last_result.persisted_total,0);assert.ok(rerun.learning.last_result.skipped_receipts>=1);
   }finally{fs.rmSync(root,{recursive:true,force:true});}
 });
 
