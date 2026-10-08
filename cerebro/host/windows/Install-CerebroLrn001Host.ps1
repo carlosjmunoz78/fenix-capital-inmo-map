@@ -2,10 +2,11 @@
 param(
   [string]$RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..\..')).Path,
   [string]$CompanyId = 'fenix',
-  [string]$Version = '0.4.0',
+  [string]$Version = '0.5.0',
   [string]$TaskName = 'CEREBRO-LRN-001-PREPROD',
   [string]$DataRoot = (Join-Path $env:ProgramData 'CEREBRO'),
   [ValidateRange(5000,3600000)][int]$PollIntervalMs = 60000,
+  [string]$RemoteOutboxBaseUrl = 'https://raw.githubusercontent.com/carlosjmunoz78/fenix-capital-inmo-map/cerebro-rsi-learning-outbox-v0/cerebro/runtime/rsi-outbox',
   [switch]$PolicyPass,
   [switch]$SecurityPass,
   [switch]$EnableLocalPersistence,
@@ -36,11 +37,16 @@ function Write-Utf8NoBom([string]$Path,[string]$Text) {
 }
 
 Assert-Admin
-if (-not (Test-Path -LiteralPath (Join-Path $RepoRoot 'cerebro\runtime\rsi-learning-host.mjs'))) {
-  throw 'RepoRoot does not contain cerebro/runtime/rsi-learning-host.mjs.'
+foreach ($required in @(
+  'cerebro\runtime\rsi-learning-host.mjs',
+  'cerebro\runtime\rsi-learning-auto-host.mjs',
+  'cerebro\runtime\rsi-outbox-client.mjs',
+  'cerebro\host\windows\Start-CerebroLrn001Host.ps1'
+)) {
+  if (-not (Test-Path -LiteralPath (Join-Path $RepoRoot $required))) { throw "RepoRoot missing required host asset: $required" }
 }
-if (-not (Test-Path -LiteralPath (Join-Path $RepoRoot 'cerebro\host\windows\Start-CerebroLrn001Host.ps1'))) {
-  throw 'RepoRoot does not contain the Windows LRN launcher.'
+if ($RemoteOutboxBaseUrl -notmatch '^https://raw\.githubusercontent\.com/carlosjmunoz78/fenix-capital-inmo-map/cerebro-rsi-learning-outbox-v0/cerebro/runtime/rsi-outbox/?$') {
+  throw 'RemoteOutboxBaseUrl must target the dedicated CEREBRO PREPROD outbox state branch.'
 }
 
 $nodePath = Resolve-Node
@@ -58,7 +64,7 @@ $backupRoot = Join-Path $DataRoot (Join-Path 'backups' (Join-Path $CompanyId $en
 $logRoot = Join-Path $DataRoot (Join-Path 'logs' (Join-Path $CompanyId $engineId))
 $configPath = Join-Path $configRoot 'host.json'
 $launcherPath = Join-Path $hostRoot 'Start-CerebroLrn001Host.ps1'
-$hostScript = Join-Path $runtimeRoot 'rsi-learning-host.mjs'
+$hostScript = Join-Path $runtimeRoot 'rsi-learning-auto-host.mjs'
 $manifestPath = Join-Path $hostRoot 'deployment-manifest.json'
 $preservationSnapshot = $null
 
@@ -85,13 +91,14 @@ foreach ($file in $files) {
   $fileManifest += [ordered]@{ path = $relative; sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $file.FullName).Hash.ToLowerInvariant(); bytes = $file.Length }
 }
 $deploymentManifest = [ordered]@{
-  schema_version = '1.0.0'
+  schema_version = '1.1.0'
   company_id = $CompanyId
   engine_id = $engineId
   environment = $environment
   version = $Version
   installed_at = (Get-Date).ToUniversalTime().ToString('o')
-  source_host_sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $RepoRoot 'cerebro\runtime\rsi-learning-host.mjs')).Hash.ToLowerInvariant()
+  source_host_sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $RepoRoot 'cerebro\runtime\rsi-learning-auto-host.mjs')).Hash.ToLowerInvariant()
+  remote_outbox = [ordered]@{ enabled = $true; base_url = $RemoteOutboxBaseUrl; credentials_required = $false }
   files = $fileManifest
   preservation_snapshot = $preservationSnapshot
   additional_cost_eur = 0
@@ -117,8 +124,13 @@ $config = [ordered]@{
   policy_pass = [bool]$PolicyPass
   security_pass = [bool]$SecurityPass
   local_persistence_enabled = [bool]$EnableLocalPersistence
+  remote_outbox = [ordered]@{
+    enabled = $true
+    base_url = $RemoteOutboxBaseUrl
+    credentials_required = $false
+  }
 }
-Write-Utf8NoBom -Path $configPath -Text ($config | ConvertTo-Json -Depth 4)
+Write-Utf8NoBom -Path $configPath -Text ($config | ConvertTo-Json -Depth 5)
 
 $arguments = @(
   '-NoProfile',
@@ -133,7 +145,7 @@ $action = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument $arguments
 $trigger = New-ScheduledTaskTrigger -AtStartup
 $principal = New-ScheduledTaskPrincipal -UserId 'SYSTEM' -LogonType ServiceAccount -RunLevel Highest
 $settings = New-ScheduledTaskSettingsSet -StartWhenAvailable -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -RestartCount 3 -RestartInterval (New-TimeSpan -Minutes 1) -MultipleInstances IgnoreNew -ExecutionTimeLimit ([TimeSpan]::Zero)
-Register-ScheduledTask -TaskName $TaskName -Action $action -Trigger $trigger -Principal $principal -Settings $settings -Description 'CEREBRO LRN-001 PREPROD zero-cost local learning host. No PROD authority.' -Force | Out-Null
+Register-ScheduledTask -TaskName $TaskName -Action $action -Trigger $trigger -Principal $principal -Settings $settings -Description 'CEREBRO LRN-001 PREPROD autonomous zero-cost learning host. No PROD authority.' -Force | Out-Null
 Start-ScheduledTask -TaskName $TaskName
 Start-Sleep -Seconds 2
 
@@ -148,6 +160,8 @@ Start-Sleep -Seconds 2
   deployment_manifest = $manifestPath
   preservation_snapshot = $preservationSnapshot
   node_path = $nodePath
+  remote_outbox_enabled = $true
+  remote_outbox_credentials_required = $false
   policy_pass = [bool]$PolicyPass
   security_pass = [bool]$SecurityPass
   local_persistence_enabled = [bool]$EnableLocalPersistence
