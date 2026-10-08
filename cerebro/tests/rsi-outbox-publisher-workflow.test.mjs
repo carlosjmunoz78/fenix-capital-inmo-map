@@ -9,7 +9,7 @@ test('publisher listens only to successful main Skill Discovery or explicit disp
   assert.match(workflow,/CEREBRO Skill Discovery Scout/);
   assert.match(workflow,/workflow_run\.conclusion == 'success'/);
   assert.match(workflow,/workflow_run\.head_branch == 'main'/);
-  assert.match(workflow,/group: cerebro-rsi-learning-outbox-publisher-v0/);
+  assert.match(workflow,/group: cerebro-rsi-learning-outbox-writer-v0/);
   assert.match(workflow,/cancel-in-progress: false/);
 });
 
