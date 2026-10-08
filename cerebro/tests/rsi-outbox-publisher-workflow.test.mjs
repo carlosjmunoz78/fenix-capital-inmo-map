@@ -21,11 +21,11 @@ test('publisher uses dedicated append-only state branch and exact immutable disc
   assert.match(workflow,/git push origin "HEAD:refs\/heads\/\$OUTBOX_STATE_BRANCH"/);
 });
 
-test('publisher has no secrets, paid providers, PROD or Trading authority',()=>{
+test('publisher has no secrets or paid providers and explicitly denies PROD or Trading authority',()=>{
   assert.match(workflow,/contents: write/);
   assert.match(workflow,/actions: read/);
   assert.match(workflow,/prod_authorized \/\/ false/);
   assert.match(workflow,/trading_access \/\/ false/);
   assert.match(workflow,/additional_cost_eur \/\/ 0/);
-  assert.doesNotMatch(workflow,/secrets\.|API_KEY|STRIPE|SUPABASE_SERVICE|TRADING/i);
+  assert.doesNotMatch(workflow,/secrets\.|API_KEY|STRIPE|SUPABASE_SERVICE/i);
 });
