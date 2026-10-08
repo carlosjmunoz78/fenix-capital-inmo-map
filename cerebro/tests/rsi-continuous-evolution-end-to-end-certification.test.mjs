@@ -24,7 +24,15 @@ function materialize({learning,candidates}){return materializeImprovementCandida
 function candidateList(file){return new ImprovementCandidateLedgerV0({file_path:file}).list();}
 function armExecutor(oldValue,newValue){return async(input)=>({version:input.version,fixture_id:input.fixture_id,metrics:{[input.metric]:input.arm==='OLD'?oldValue:newValue},evidence_refs:[`cert:${input.arm}:${input.version}`],prod_authorized:false,prod_write_authorized:false,trading_access:false,additional_cost_eur:0});}
 function b3Args(candidate,{oldValue=70,newValue=90}={}){
-  return {candidate,fixture:{fixture_ref:'fixture:rsi-full-cert:v1',case_ids:['case-1','case-2','case-3'],dataset_kind:'SYNTHETIC'},execute_arm:armExecutor(oldValue,newValue),benchmark_contract:{benchmark_id:'rsi-full-cert-quality',benchmark_version:'v1',holdout_ref:'holdout:rsi-full-cert:secret',adversarial_refs:['adv:rsi-full-cert:1']},judge:{judge_id:'JDG-RSI-CERT-001',candidate_actor_id:'LRN-001'},backup_ref:'backup:rsi-full-cert',rollback_ref:'rollback:rsi-full-cert',rebuild_ref:'rebuild:rsi-full-cert',post_metric_rule:{min:80},canary_percent:5,candidate_visible_holdout:false};
+  return {
+    candidate,
+    fixture:{fixture_ref:'fixture:rsi-full-cert:v1',case_ids:['case-1','case-2','case-3'],dataset_kind:'SYNTHETIC'},
+    execute_arm:armExecutor(oldValue,newValue),
+    benchmark_contract:{benchmark_id:'rsi-full-cert-quality',benchmark_version:'v1',holdout_ref:'holdout:rsi-full-cert:secret',adversarial_refs:['adv:rsi-full-cert:1']},
+    judge:{judge_id:'JDG-RSI-CERT-001',candidate_actor_id:'LRN-001'},
+    baseline_resolution:candidate.baseline_verification_required===true?{verified:true,resolved_version:'old-v1',evidence_ref:'git:certification:exact-old-v1'}:null,
+    backup_ref:'backup:rsi-full-cert',rollback_ref:'rollback:rsi-full-cert',rebuild_ref:'rebuild:rsi-full-cert',post_metric_rule:{min:80},canary_percent:5,candidate_visible_holdout:false
+  };
 }
 function policy(candidate){return defineDomainAutonomyPolicy({policy_id:'rsi-domain:seo-preprod-cert',policy_version:'v1',company_id:candidate.company_id,engine_id:candidate.engine_id,domain_id:'seo.continuous_improvement',environment:'PREPROD',autonomy_mode:'PREPROD_AUTONOMOUS',kill_switch_enabled:true,kill_switch_state:'ARMED',automatic_rollback_allowed:true,min_confidence:0.60,max_canary_percent:10,blast_radius:{max_percent:10,max_records:100,scope:'PREPROD_ONLY'},additional_cost_limit_eur:0,allowed_risk_classes:['LOW','MEDIUM']});}
 function b4Args(promotion_plan,metricName,value){return {promotion_plan,shadow_evidence:{pass:true,evidence_refs:['shadow:cert:green'],prod_authorized:false,prod_write_authorized:false,trading_access:false,additional_cost_eur:0},canary_evidence:{pass:true,evidence_refs:['canary:cert:green'],prod_authorized:false,prod_write_authorized:false,trading_access:false,additional_cost_eur:0},observed_metrics:{[metricName]:value},observed_at:'2026-10-09T00:10:00Z',evidence_refs:['tribunal:cert:green']};}
