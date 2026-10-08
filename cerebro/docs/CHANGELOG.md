@@ -1,15 +1,16 @@
 # CEREBRO OS · CHANGELOG
 
-## 2026-10-08 · FACT-001 AutoFactory V0 candidate
+## 2026-10-08 · FACT-001 AutoFactory V0 accepted
 
-- Added bounded structured FACT-001 request contract with canonical `company_id`, `engine_id`, `environment`, `version` context.
-- Added deterministic `fact001-request-runner.mjs` that wraps the existing FACT-001 generator instead of replacing it.
-- Added hostless/event-driven workflow `CEREBRO FACT-001 AutoFactory V0` using `push`, `workflow_dispatch` and future `repository_dispatch` ingress.
-- Workflow permission remains `contents: read`; generated output is CI artifact evidence only and cannot modify the Engine Registry or application surfaces.
-- Valid requests remain exact `SCAFFOLD`, additional cost 0 €, PROD/PROD-write/Trading/external-code authority false.
-- Unknown engine/schema drift routes fail-closed to `POLICY_CONFLICT`; authority expansion to `HIGH_RISK`; non-zero cost to `MONEY_LIMIT`.
-- Target-engine behavioral evaluation/tribunal/PREPROD remain explicitly downstream; this candidate proves only structural factory automation.
-- Live automatic post-merge run and deterministic rerun are still required before FACT-001 autonomy is promoted from `PARCIAL` to automatic/verified.
+- FACT-001 bounded request contract remains scoped by canonical `company_id`, `engine_id`, `environment`, `version` context and wraps the existing factory authority instead of replacing it.
+- PR #507 merged the hostless/event-driven AutoFactory implementation to `main` as `a20b98ac9ff006ebbbd9a6fbd51f16d8cdf8cee4` after exact-head promotion/readiness gates passed.
+- Merge to `main` automatically triggered run `37830400943` attempt 1 without manual launch: `FACTORY_SCAFFOLD_GREEN`, 18 structural files, 634 regression tests passed / 0 failed, no HUMAN_REQUIRED, cost 0, PROD/Trading false.
+- Deterministic rerun `37830400943` attempt 2 completed SUCCESS against the same immutable source/request.
+- Both attempts produced the same idempotency key `fact001:9d7a6ad8651866e85f7199b3cfdf38928a09a302fa29cf2e6a962853dfac6427`, same generated bundle SHA-256 `e55c45943dba3cf084c0f657cc1cb529a3a23e5b293e2549b2b51ffb36675b74` and same registry SHA-256 `92717b6109caade90e9c3c89940536122d8583cd8fe8695a4118119febe2caf8`.
+- FACT-001 autonomy state is promoted to `AUTOMATIC_SCAFFOLD_VERIFIED` only for connected canonical SCAFFOLD request generation.
+- Generated target engines remain SCAFFOLD-only: target behavioral evaluation, tribunal, PREPROD and any PROD promotion remain downstream gates.
+- ACTGW-001 → `repository_dispatch` support is defined but remains POR AUDITAR LIVE; Git-backed automatic request execution is verified.
+- Workflow permission remains `contents: read`; no new credentials, Supabase writes, production writes, Trading access or paid path were introduced.
 
 ## 2026-10-07 · Skill Supply Chain Step 4 PREPROD GREEN
 
