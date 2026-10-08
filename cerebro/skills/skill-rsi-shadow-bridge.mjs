@@ -16,6 +16,10 @@ const RSI_COMPATIBILITY_TARGET=Object.freeze({
 
 function stableId(prefix,value){return `${prefix}:${createHash('sha256').update(JSON.stringify(value)).digest('hex').slice(0,24)}`;}
 function evidenceRefs(event){
+  if(Array.isArray(event?.evidence_refs)){
+    const direct=[...new Set(event.evidence_refs.filter(ref=>typeof ref==='string'&&ref.trim()).map(ref=>ref.trim()))];
+    if(direct.length) return direct;
+  }
   const e=event?.evidence_ref??{};
   const refs=[];
   if(e.source_ref) refs.push(`source:${e.source_ref}`);
@@ -25,6 +29,7 @@ function evidenceRefs(event){
 }
 
 function riskFor(event){
+  if(['LOW','MEDIUM','HIGH','CRITICAL'].includes(event?.risk_class)) return event.risk_class;
   if(event?.event_type==='SECURITY_ADVISORY') return event.severity==='HIGH'?'HIGH':'MEDIUM';
   if(event?.event_type==='SKILL_CANDIDATE_STATIC_LAB_GREEN') return 'LOW';
   if(event?.event_type==='SKILL_CANDIDATE_STATIC_LAB_HOLD') return 'MEDIUM';
@@ -34,6 +39,7 @@ function riskFor(event){
 }
 
 function confidenceFor(event){
+  if(typeof event?.confidence==='number'&&Number.isFinite(event.confidence)&&event.confidence>=0&&event.confidence<=1) return event.confidence;
   if(event?.event_type==='SKILL_CANDIDATE_STATIC_LAB_GREEN') return 0.85;
   if(event?.event_type==='SECURITY_ADVISORY') return 0.9;
   if(event?.event_type==='SKILL_CANDIDATE_STATIC_LAB_HOLD') return 0.7;
@@ -43,6 +49,7 @@ function confidenceFor(event){
 }
 
 function hypothesisFor(event){
+  if(typeof event?.learning_hypothesis==='string'&&event.learning_hypothesis.trim()) return event.learning_hypothesis.trim();
   switch(event?.event_type){
     case 'SKILL_CANDIDATE_STATIC_LAB_GREEN': return `Candidate ${event.candidate_id} may improve or safely augment ${event.payload?.domain??'an existing capability'} and merits behavioral OLD-vs-NEW evaluation.`;
     case 'SKILL_CANDIDATE_STATIC_LAB_HOLD': return `Candidate ${event.candidate_id} has potential value but must not advance until policy or coverage concerns are resolved.`;
@@ -51,8 +58,14 @@ function hypothesisFor(event){
     case 'SECURITY_ADVISORY': return `Observed skill evidence indicates a security or supply-chain risk that should tighten candidate policy or quarantine rules.`;
     case 'SKILL_LICENSE_REVIEW_REQUIRED': return `License evidence is insufficient for adoption and should remain reference-only until compatibility is resolved.`;
     case 'SKILL_PERMISSION_REVIEW_REQUIRED': return `Permission requirements may exceed least privilege and should be reduced or rejected before LAB execution.`;
-    default: return `Skill supply-chain event ${event?.event_type??'UNKNOWN'} should be evaluated as a controlled improvement candidate.`;
+    default: return `CEREBRO event ${event?.event_type??'UNKNOWN'} should be evaluated as a controlled improvement candidate.`;
   }
+}
+
+function metricFor(event){
+  const metric=event?.expected_metric_delta;
+  if(metric&&typeof metric==='object'&&!Array.isArray(metric)&&typeof metric.name==='string'&&typeof metric.direction==='string') return {...metric};
+  return {metric:event?.event_type==='SECURITY_ADVISORY'?'risk':'capability_quality',direction:event?.event_type==='SECURITY_ADVISORY'?'LOWER':'HIGHER',measurement:'BEHAVIORAL_LAB_OR_POLICY_REVIEW_REQUIRED'};
 }
 
 export function validateRsiCompatibleLearningRecord(record){
@@ -61,23 +74,25 @@ export function validateRsiCompatibleLearningRecord(record){
 
 function toLearningRecord(event,runtimeEvent,{observedAt}){
   return {
-    learning_id:stableId('learn',[event.event_id,event.candidate_id,event.event_type]),
+    learning_id:stableId('learn',[event.event_id,event.candidate_id??event.signal_id??null,event.event_type]),
     company_id:event.company_id||'GLOBAL_ONLY',
     engine_id:event.engine_id||'FACT-001',
     environment:'LAB',
     version:event.version||'0.1.0',
     source_event_ids:[runtimeEvent.event_id],
-    source_type:'SKILL_SUPPLY_CHAIN',
-    observed_at:observedAt,
+    source_type:event.source_type||'SKILL_SUPPLY_CHAIN',
+    observed_at:event.observed_at||observedAt,
     hypothesis:hypothesisFor(event),
-    expected_metric_delta:{metric:event.event_type==='SECURITY_ADVISORY'?'risk':'capability_quality',direction:event.event_type==='SECURITY_ADVISORY'?'LOWER':'HIGHER',measurement:'BEHAVIORAL_LAB_OR_POLICY_REVIEW_REQUIRED'},
+    expected_metric_delta:metricFor(event),
     confidence:confidenceFor(event),
     risk_class:riskFor(event),
     evidence_refs:evidenceRefs(event),
     promotion_state:'CANDIDATE',
-    created_by:'cap:skill-supply-chain',
+    created_by:event.source_type&&event.source_type!=='SKILL_SUPPLY_CHAIN'?'cap:universal-learning-ingress':'cap:skill-supply-chain',
     reason:event.reason||event.event_type,
     candidate_id:event.candidate_id??null,
+    signal_id:event.signal_id??null,
+    source_environment:event.source_environment??null,
     target_engine_bindings:[...(event.target_engine_bindings??[])],
     source_event_type:event.event_type,
     judge_decision:null
@@ -94,7 +109,7 @@ export function buildRsiShadowBridge(eventReport,{observedAt=new Date().toISOStr
       type:proposal.event_type,
       context,
       idempotency_key:proposal.event_id,
-      payload:{candidate_id:proposal.candidate_id??null,severity:proposal.severity??'INFO',reason:proposal.reason??null,evidence_ref:proposal.evidence_ref??null,payload:proposal.payload??{},target_engine_bindings:proposal.target_engine_bindings??[]}
+      payload:{candidate_id:proposal.candidate_id??null,signal_id:proposal.signal_id??null,source_type:proposal.source_type??'SKILL_SUPPLY_CHAIN',severity:proposal.severity??'INFO',reason:proposal.reason??null,evidence_ref:proposal.evidence_ref??null,evidence_refs:proposal.evidence_refs??null,payload:proposal.payload??{},target_engine_bindings:proposal.target_engine_bindings??[]}
     });
     if(!published.accepted){
       runtimeEvents.push({proposal_event_id:proposal.event_id,accepted:false,duplicate:true,idempotency_key:published.idempotency_key});
@@ -107,7 +122,7 @@ export function buildRsiShadowBridge(eventReport,{observedAt=new Date().toISOStr
     else validationErrors.push({proposal_event_id:proposal.event_id,errors:check.errors});
   }
   return Object.freeze({
-    schema_version:'0.2.0',
+    schema_version:'0.3.0',
     execution_mode:'SHADOW_IN_MEMORY_ONLY',
     compatibility_target:RSI_COMPATIBILITY_TARGET,
     runtime_contract:'RUNTIME-001/EventBus main + recovered continuous-improvement-contract',
