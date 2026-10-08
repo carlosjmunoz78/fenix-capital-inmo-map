@@ -1,0 +1,43 @@
+{
+  "schema_version": "0.1.0",
+  "registry_id": "CEREBRO-SKILL-MULTILANE-FACTORY-001",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "LAB",
+  "version": "0.1.0",
+  "status": "ACTIVE_PARALLEL_STUDY",
+  "purpose": "Study and adapt multiple skill candidates in parallel without replacing or weakening the canonical Skill AutoLoop promotion gates.",
+  "lanes": [
+    {"id": "ENGINEERING", "human_name": "CEREBRO e Ingeniería", "capacity": 1, "scope": ["CEREBRO", "software engineering", "architecture", "debugging", "observability", "human communication"]},
+    {"id": "DEVICE_CONTROL", "human_name": "Control de PC, móvil y tablet", "capacity": 1, "scope": ["browser", "computer use", "Windows", "Android", "iOS", "mobile", "tablet", "device automation"]},
+    {"id": "GROWTH", "human_name": "SEO, Research y Crecimiento", "capacity": 1, "scope": ["SEO", "keyword research", "competitors", "market research", "social", "content", "growth"]},
+    {"id": "CREATION", "human_name": "Imagen, vídeo, voz y creación digital", "capacity": 1, "scope": ["images", "video", "voice", "audio", "design", "editing", "rendering"]},
+    {"id": "COMPANY", "human_name": "Web, CRM, App y creación de empresa", "capacity": 1, "scope": ["web", "CRM", "App", "database", "Supabase", "WordPress", "company bootstrap"]},
+    {"id": "FAST_LANE", "human_name": "Vía rápida", "capacity": 3, "scope": ["cross-domain low-risk short studies"]}
+  ],
+  "work_classes": ["EXPRESS", "STANDARD", "DEEP"],
+  "routing": {
+    "strategy": "value_first_with_domain_routing_and_fast_lane",
+    "fast_lane_rule": "Only zero-cost, low-permission, low-instruction-risk, portable EXPRESS candidates; up to three per cycle.",
+    "human_required_behavior": "Remove the blocked action from the runnable lane and continue all unrelated safe work."
+  },
+  "execution": {
+    "schedule_adapter": "GitHub Actions",
+    "schedule": "hourly_staggered",
+    "parallel_matrix": true,
+    "canonical_autoloop_replaced": false,
+    "canonical_autoloop_mutated": false,
+    "external_skill_code_execution": false,
+    "customer_data": false,
+    "prod_write": false,
+    "trading": false,
+    "paid_fallback": false,
+    "additional_cost_eur": 0
+  },
+  "promotion": {
+    "parallel_layer_scope": "LAB static study, disabled wrapper adaptation, synthetic OLD vs NEW and rollback proof",
+    "canonical_promotion_path_preserved": true,
+    "prod_authorized": false,
+    "note": "A green parallel study is evidence, not production authorization. Existing PREPROD, tribunal, canary, policy and HUMAN_REQUIRED gates remain authoritative."
+  }
+}

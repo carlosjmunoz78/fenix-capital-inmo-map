@@ -1,0 +1,265 @@
+name: CEREBRO Skill Multilane Factory V0
+
+on:
+  push:
+    branches:
+      - main
+      - cerebro/skill-multilane-factory-v0-20261008
+    paths:
+      - 'cerebro/skills/skill-multilane-*.mjs'
+      - 'cerebro/tests/skill-multilane-planner.test.mjs'
+      - 'cerebro/registry/skill-multilane-factory.v0.json'
+      - 'cerebro/skills/MULTILANE_SKILL_FACTORY_V0.md'
+      - '.github/workflows/cerebro-skill-multilane-study-v0.yml'
+  schedule:
+    - cron: '37 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: cerebro-skill-multilane-factory-v0
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  actions: read
+
+env:
+  DISCOVERY_WORKFLOW_ID: '375875423'
+  AUTOLOOP_STATE_BRANCH: cerebro/skill-autoloop-state-v0
+  AUTOLOOP_STATE_PATH: cerebro/runtime/skill-autoloop-state.v0.json
+  STUDY_STATE_BRANCH: cerebro/skill-multilane-study-state-v0
+  STUDY_STATE_PATH: cerebro/runtime/skill-multilane-study-state.v0.json
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+      has_candidates: ${{ steps.matrix.outputs.has_candidates }}
+      discovery_run_id: ${{ steps.discovery.outputs.run_id }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Validate multilane contracts and preserve canonical AutoLoop safety
+        run: |
+          node --test cerebro/tests/skill-multilane-planner.test.mjs cerebro/tests/skill-autoloop-controller.test.mjs cerebro/tests/skill-autoloop-safe-handler.test.mjs
+
+      - name: Load latest successful immutable discovery evidence
+        id: discovery
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/source artifacts/multilane
+          RUN_ID="$(gh api -X GET "repos/$GITHUB_REPOSITORY/actions/workflows/$DISCOVERY_WORKFLOW_ID/runs?status=success&branch=main&per_page=20" --jq '.workflow_runs[0].id')"
+          test -n "$RUN_ID" && test "$RUN_ID" != null
+          ARTIFACT_NAME="$(gh api -X GET "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID/artifacts" --jq '.artifacts[] | select(.expired==false and (.name|startswith("cerebro-skill-discovery-"))) | .name' | head -n 1)"
+          test -n "$ARTIFACT_NAME"
+          gh run download "$RUN_ID" --repo "$GITHUB_REPOSITORY" --name "$ARTIFACT_NAME" --dir artifacts/source
+          for f in cerebro-skill-value-p0.json cerebro-skill-wrapper-plans-p0.json cerebro-skill-manifests.json; do test -f "artifacts/source/$f"; done
+          echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
+          printf '{"discovery_run_id":%s,"artifact_name":"%s","immutable_source":true}\n' "$RUN_ID" "$ARTIFACT_NAME" > artifacts/multilane/source.json
+
+      - name: Load canonical AutoLoop state and independent multilane study state
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin "refs/heads/$AUTOLOOP_STATE_BRANCH:refs/remotes/origin/$AUTOLOOP_STATE_BRANCH"
+          git show "refs/remotes/origin/$AUTOLOOP_STATE_BRANCH:$AUTOLOOP_STATE_PATH" > artifacts/multilane/autoloop-state.json
+          if git fetch --no-tags origin "refs/heads/$STUDY_STATE_BRANCH:refs/remotes/origin/$STUDY_STATE_BRANCH" 2>/dev/null; then
+            git show "refs/remotes/origin/$STUDY_STATE_BRANCH:$STUDY_STATE_PATH" > artifacts/multilane/study-state.json
+          else
+            node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          import {initialMultilaneState} from './cerebro/skills/skill-multilane-reconcile.mjs';
+          fs.writeFileSync('artifacts/multilane/study-state.json',JSON.stringify(initialMultilaneState(),null,2)+'\n');
+          NODE
+          fi
+
+      - name: Build six-lane plan without mutating canonical state
+        run: |
+          node cerebro/skills/skill-multilane-planner.mjs \
+            --value artifacts/source/cerebro-skill-value-p0.json \
+            --autoloop-state artifacts/multilane/autoloop-state.json \
+            --study-state artifacts/multilane/study-state.json \
+            --output artifacts/multilane/plan.json
+
+      - name: Publish dynamic parallel matrix
+        id: matrix
+        run: |
+          set -euo pipefail
+          MATRIX="$(jq -c '{include:[.matrix[] | {slot_id,lane,lane_human_name,candidate_id,name,human_alias,domain,wrapper_id,value_score,recommendation,work_class}]}' artifacts/multilane/plan.json)"
+          COUNT="$(jq '.matrix|length' artifacts/multilane/plan.json)"
+          echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
+          if [ "$COUNT" -gt 0 ]; then echo 'has_candidates=true' >> "$GITHUB_OUTPUT"; else echo 'has_candidates=false' >> "$GITHUB_OUTPUT"; fi
+
+      - name: Upload plan and immutable study inputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-multilane-plan-${{ github.run_id }}
+          path: |
+            artifacts/source/**
+            artifacts/multilane/**
+          retention-days: 30
+
+  study:
+    needs: plan
+    if: needs.plan.outputs.has_candidates == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix: ${{ fromJson(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: actions/download-artifact@v4
+        with:
+          name: cerebro-multilane-plan-${{ github.run_id }}
+          path: artifacts/input
+
+      - name: Freeze exact selected candidate evidence only
+        env:
+          CANDIDATE_ID: ${{ matrix.candidate_id }}
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/candidate artifacts/result
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const id=process.env.CANDIDATE_ID;
+          const specs=[
+            ['artifacts/input/source/cerebro-skill-value-p0.json','results','artifacts/candidate/value.json'],
+            ['artifacts/input/source/cerebro-skill-wrapper-plans-p0.json','plans','artifacts/candidate/wrappers.json'],
+            ['artifacts/input/source/cerebro-skill-manifests.json','results','artifacts/candidate/manifests.json']
+          ];
+          for(const [src,key,dst] of specs){
+            const raw=JSON.parse(fs.readFileSync(src,'utf8'));
+            const rows=(raw[key]??[]).filter((x)=>x.candidate_id===id);
+            if(rows.length!==1) throw new Error(`${src}: expected one candidate ${id}, found ${rows.length}`);
+            fs.writeFileSync(dst,JSON.stringify({...raw,[key]:rows},null,2)+'\n');
+          }
+          NODE
+
+      - name: Run inert candidate-specific LAB study and rollback proof
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          node cerebro/skills/skill-lab-eval-plan.mjs --value artifacts/candidate/value.json --top-n 1 --output artifacts/candidate/lab-plan.json
+          node cerebro/skills/skill-static-lab-benchmark.mjs --plans artifacts/candidate/lab-plan.json --manifests artifacts/candidate/manifests.json --output artifacts/candidate/static-lab.json
+          node cerebro/skills/skill-rollback-proof.mjs --wrappers artifacts/candidate/wrappers.json --output artifacts/candidate/rollback.json
+          STATUS="$(jq -r '.results[0].status // "MISSING"' artifacts/candidate/static-lab.json)"
+          if [ "$STATUS" = 'STATIC_LAB_GREEN_FOR_BEHAVIORAL_EVAL' ]; then
+            node cerebro/skills/skill-autoloop-old-vs-new-overlay.mjs --static-lab artifacts/candidate/static-lab.json --value artifacts/candidate/value.json --wrappers artifacts/candidate/wrappers.json --output artifacts/candidate/old-vs-new.json
+          fi
+
+      - name: Emit bounded lane result
+        env:
+          SLOT_ID: ${{ matrix.slot_id }}
+          LANE: ${{ matrix.lane }}
+          CANDIDATE_ID: ${{ matrix.candidate_id }}
+          NAME: ${{ matrix.name }}
+          HUMAN_ALIAS: ${{ matrix.human_alias }}
+          WORK_CLASS: ${{ matrix.work_class }}
+          VALUE_SCORE: ${{ matrix.value_score }}
+          DISCOVERY_RUN_ID: ${{ needs.plan.outputs.discovery_run_id }}
+        run: |
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const staticLab=JSON.parse(fs.readFileSync('artifacts/candidate/static-lab.json','utf8'));
+          const rollback=JSON.parse(fs.readFileSync('artifacts/candidate/rollback.json','utf8'));
+          const status=staticLab.results?.[0]?.status??'MISSING';
+          const green=status==='STATIC_LAB_GREEN_FOR_BEHAVIORAL_EVAL';
+          const out={schema_version:'0.1.0',state_type:'CEREBRO_SKILL_MULTILANE_LANE_RESULT',slot_id:process.env.SLOT_ID,lane:process.env.LANE,candidate_id:process.env.CANDIDATE_ID,name:process.env.NAME,human_alias:process.env.HUMAN_ALIAS,work_class:process.env.WORK_CLASS,value_score:Number(process.env.VALUE_SCORE),source_discovery_run_id:Number(process.env.DISCOVERY_RUN_ID),assessment_complete:true,assessment_status:green&&rollback.ready===true?'STATIC_STUDY_GREEN':'STATIC_STUDY_HOLD',static_status:status,rollback_green:rollback.ready===true,old_vs_new_built:fs.existsSync('artifacts/candidate/old-vs-new.json'),prod_authorized:false,prod_write:false,customer_data_used:false,external_skill_code_execution:false,trading_access:false,paid_fallback:false,additional_cost_eur:0};
+          fs.writeFileSync(`artifacts/result/result-${process.env.SLOT_ID}.json`,JSON.stringify(out,null,2)+'\n');
+          console.log(JSON.stringify(out));
+          NODE
+
+      - name: Upload independent lane evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-multilane-result-${{ matrix.slot_id }}-${{ github.run_id }}
+          path: |
+            artifacts/candidate/**
+            artifacts/result/**
+          retention-days: 30
+
+  reconcile:
+    needs: [plan, study]
+    if: always() && needs.plan.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: actions/download-artifact@v4
+        with:
+          name: cerebro-multilane-plan-${{ github.run_id }}
+          path: artifacts/plan
+      - uses: actions/download-artifact@v4
+        if: needs.plan.outputs.has_candidates == 'true'
+        with:
+          pattern: cerebro-multilane-result-*-${{ github.run_id }}
+          path: artifacts/results
+          merge-multiple: true
+
+      - name: Reconcile only completed safe studies
+        run: |
+          mkdir -p artifacts/results artifacts/out
+          node cerebro/skills/skill-multilane-reconcile.mjs \
+            --state artifacts/plan/multilane/study-state.json \
+            --results-dir artifacts/results \
+            --run-id '${{ github.run_id }}' \
+            --output artifacts/out/state.after.json
+
+      - name: Assert six-lane factory never expanded production authority
+        run: |
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const s=JSON.parse(fs.readFileSync('artifacts/out/state.after.json','utf8'));
+          const i=s.invariants??{};
+          const green=i.prod_authorized===false&&i.prod_write===false&&i.customer_data===false&&i.external_skill_code_execution===false&&i.trading===false&&i.paid_fallback===false&&Number(i.additional_cost_eur)===0;
+          if(!green) process.exit(1);
+          console.log(JSON.stringify({status:'GREEN_MULTILANE_SAFETY',studied_total:s.studied_candidate_ids?.length??0,prod_authorized:false,additional_cost_eur:0}));
+          NODE
+
+      - name: Persist dedicated study state only on main
+        if: github.ref == 'refs/heads/main'
+        run: |
+          set -euo pipefail
+          cp artifacts/out/state.after.json /tmp/multilane-state.json
+          if git fetch --no-tags origin "+refs/heads/$STUDY_STATE_BRANCH:refs/remotes/origin/$STUDY_STATE_BRANCH" 2>/dev/null; then
+            git checkout --detach "refs/remotes/origin/$STUDY_STATE_BRANCH"
+          else
+            git checkout --detach "$GITHUB_SHA"
+          fi
+          mkdir -p "$(dirname "$STUDY_STATE_PATH")"
+          cp /tmp/multilane-state.json "$STUDY_STATE_PATH"
+          git config user.name 'cerebro-multilane[bot]'
+          git config user.email 'cerebro-multilane[bot]@users.noreply.github.com'
+          git add "$STUDY_STATE_PATH"
+          if ! git diff --cached --quiet; then
+            git commit -m 'chore(cerebro): advance multilane skill study state'
+            git push origin "HEAD:refs/heads/$STUDY_STATE_BRANCH"
+          fi
+
+      - name: Upload multilane reconciliation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-multilane-reconcile-${{ github.run_id }}
+          path: artifacts/out/**
+          if-no-files-found: warn
+          retention-days: 30
