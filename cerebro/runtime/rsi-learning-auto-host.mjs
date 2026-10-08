@@ -8,6 +8,7 @@ import {syncRemoteOutboxOnce} from './rsi-outbox-client.mjs';
 import {persistDueLearningPlans} from './learning-orchestrator.mjs';
 import {executePendingLearningHorizons} from './learning-horizon-executor.mjs';
 import {MetaObservabilityLedger,makeMetaTimingSample} from './meta-observability-ledger.mjs';
+import {materializeImprovementCandidates} from './improvement-candidate-factory.mjs';
 
 function readJson(file){return JSON.parse(fs.readFileSync(file,'utf8'));}
 function ensureDir(dir){fs.mkdirSync(dir,{recursive:true});return dir;}
@@ -58,11 +59,14 @@ export async function runAutoHostIteration({raw_config,fetch_impl=globalThis.fet
   const learnStarted=performance.now();
   const learning=runHostCycle({config:cfg,now:fixedNow});
   const learnMs=elapsed(learnStarted);
+  let candidates={status:'CANDIDATES_KILLED',persisted_total:0,duplicates_total:0,held_total:0,human_required:[],candidate_total:0,next_gate:'OLD_VS_NEW_EXPERIMENT',prod_authorized:false,prod_write_authorized:false,trading_access:false,additional_cost_eur:0};
   let orchestration={status:'ORCHESTRATOR_KILLED',planned_total:0,created_total:0,prod_authorized:false,prod_write_authorized:false,trading_access:false,additional_cost_eur:0};
   let horizons={status:'HORIZON_EXECUTORS_KILLED',completed_total:0,skipped_total:0,prod_authorized:false,prod_write_authorized:false,trading_access:false,additional_cost_eur:0};
   let meta_observability={status:'META_METRICS_KILLED',accepted:false,not_due:false,samples_total:0,prod_authorized:false,trading_access:false};
   if(learning.status!=='KILLED'){
     const evaluateStarted=performance.now();
+    const candidateLedgerFile=path.join(paths.companyRoot,'improvement-candidates.v8');
+    candidates=materializeImprovementCandidates({learning_ledger_file:paths.ledger,candidate_ledger_file:candidateLedgerFile,company_id:cfg.company_id});
     const stateFile=path.join(paths.companyRoot,'orchestration-state.json');
     const plansDir=path.join(paths.companyRoot,'orchestration-plans');
     const resultsDir=path.join(paths.companyRoot,'orchestration-results');
@@ -71,12 +75,12 @@ export async function runAutoHostIteration({raw_config,fetch_impl=globalThis.fet
     horizons=executePendingLearningHorizons({state_file:stateFile,plans_dir:plansDir,results_dir:resultsDir,company_id:cfg.company_id,version:cfg.version,ledger_file:paths.ledger,receipts_dir:paths.receipts,heartbeat_file:paths.heartbeat,meta_metrics_file:metaMetricsFile,now:tick});
     const evaluateMs=elapsed(evaluateStarted);
     const metrics=new MetaObservabilityLedger({file_path:metaMetricsFile});
-    const append=metrics.appendIfDue(makeMetaTimingSample({company_id:cfg.company_id,version:cfg.version,observed_at:tick,collect_ms:collectMs,learn_ms:learnMs,evaluate_ms:evaluateMs,statuses:{remote:remote.status,learning:learning.status,orchestration:orchestration.status,horizons:horizons.status}}));
+    const append=metrics.appendIfDue(makeMetaTimingSample({company_id:cfg.company_id,version:cfg.version,observed_at:tick,collect_ms:collectMs,learn_ms:learnMs,evaluate_ms:evaluateMs,statuses:{remote:remote.status,learning:learning.status,candidates:candidates.status,orchestration:orchestration.status,horizons:horizons.status}}));
     const summary=metrics.summarize({company_id:cfg.company_id,version:cfg.version,limit:168});
     meta_observability={status:'META_METRICS_GREEN',accepted:append.accepted===true,not_due:append.not_due===true,samples_total:summary.samples_total,stage_metrics:summary.stage_metrics,prod_authorized:false,trading_access:false};
   }
   const status=remote.status==='REMOTE_OUTBOX_ERROR'?'PARTIAL_REMOTE_ERROR':learning.status;
-  return Object.freeze({status,remote_outbox:remote,learning,orchestration,horizons,meta_observability,additional_cost_eur:0,prod_authorized:false,prod_write_authorized:false,trading_access:false});
+  return Object.freeze({status,remote_outbox:remote,learning,candidates,orchestration,horizons,meta_observability,additional_cost_eur:0,prod_authorized:false,prod_write_authorized:false,trading_access:false});
 }
 
 export async function runAutoHostLoop({raw_config,signal,fetch_impl=globalThis.fetch,sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms)),now=()=>new Date().toISOString()}){

@@ -23,6 +23,7 @@ export function preparePreprodLearningCandidate({
   const candidate={
     ...shadow_record,
     learning_id:`learn-preprod:${stableIdempotencyKey({source_learning_id:sourceLearningId,company_id:shadow_record.company_id,engine_id:shadow_record.engine_id,preprod_version}).slice(0,24)}`,
+    source_version:shadow_record.version,
     environment:'PREPROD',version:preprod_version,
     source_learning_id:sourceLearningId,
     evidence_refs:[...new Set([...shadow_record.evidence_refs,`shadow-learning:${sourceLearningId}`])],

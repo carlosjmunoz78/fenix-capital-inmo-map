@@ -8,6 +8,8 @@ test('control plane is hostless, periodic and event-driven without requiring the
   assert.match(workflow,/cron: '\*\/15 \* \* \* \*'/);
   assert.match(workflow,/workflow_run:/);
   assert.match(workflow,/CEREBRO RSI Learning Outbox Publisher V0/);
+  assert.match(workflow,/CEREBRO RSI Universal Learning Ingress V0/);
+  assert.match(workflow,/CEREBRO RSI Improvement Candidate Factory V0 Gate/);
   assert.match(workflow,/workflow_run\.conclusion == 'success'/);
   assert.match(workflow,/workflow_run\.head_branch == 'main'/);
   assert.match(workflow,/schedule_semantics:"BEST_EFFORT_15_MINUTE_PLUS_EVENT"/);
@@ -29,6 +31,12 @@ test('bounded runner uses Node 24 and one runAutoHostIteration rather than a dae
   assert.match(workflow,/runAutoHostIteration/);
   assert.match(workflow,/HOSTLESS_BOUNDED_ITERATION/);
   assert.doesNotMatch(workflow,/runAutoHostLoop| daemon --config/);
+});
+
+test('candidate factory is part of control-plane validation and persistent state remains bounded',()=>{
+  assert.match(workflow,/improvement-candidate-factory\.test\.mjs/);
+  assert.match(workflow,/local_persistence_enabled:true/);
+  assert.match(workflow,/git add "\$LRN_STATE_ROOT"/);
 });
 
 test('control plane persists PREPROD-only state with zero added cost and no Trading or PROD authority',()=>{

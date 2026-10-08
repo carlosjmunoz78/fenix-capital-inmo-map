@@ -7,6 +7,7 @@ on:
     workflows:
       - CEREBRO RSI Learning Outbox Publisher V0
       - CEREBRO RSI Universal Learning Ingress V0
+      - CEREBRO RSI Improvement Candidate Factory V0 Gate
     types:
       - completed
   workflow_dispatch:
@@ -17,6 +18,8 @@ on:
       - '.github/workflows/cerebro-rsi-universal-learning-ingress-v0.yml'
       - 'cerebro/runtime/universal-learning-ingress.mjs'
       - 'cerebro/tests/universal-learning-ingress.test.mjs'
+      - 'cerebro/runtime/improvement-candidate-factory.mjs'
+      - 'cerebro/tests/improvement-candidate-factory.test.mjs'
 
 concurrency:
   group: cerebro-rsi-learning-control-plane-v0
@@ -44,6 +47,7 @@ jobs:
         run: |
           node --test cerebro/tests/rsi-hostless-control-plane-workflow.test.mjs
           node --test cerebro/tests/universal-learning-ingress.test.mjs
+          node --test cerebro/tests/improvement-candidate-factory.test.mjs
 
   run-preprod-control-plane:
     if: >-

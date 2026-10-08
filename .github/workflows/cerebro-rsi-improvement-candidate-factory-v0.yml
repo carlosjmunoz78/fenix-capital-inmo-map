@@ -1,0 +1,43 @@
+name: CEREBRO RSI Improvement Candidate Factory V0 Gate
+
+on:
+  push:
+    paths:
+      - 'cerebro/runtime/improvement-candidate-factory.mjs'
+      - 'cerebro/runtime/learning-preprod-pipeline.mjs'
+      - 'cerebro/runtime/rsi-learning-auto-host.mjs'
+      - 'cerebro/tests/improvement-candidate-factory.test.mjs'
+      - 'cerebro/tests/rsi-learning-auto-host.test.mjs'
+      - '.github/workflows/cerebro-rsi-improvement-candidate-factory-v0.yml'
+  pull_request:
+    paths:
+      - 'cerebro/runtime/improvement-candidate-factory.mjs'
+      - 'cerebro/runtime/learning-preprod-pipeline.mjs'
+      - 'cerebro/runtime/rsi-learning-auto-host.mjs'
+      - 'cerebro/tests/improvement-candidate-factory.test.mjs'
+      - 'cerebro/tests/rsi-learning-auto-host.test.mjs'
+      - '.github/workflows/cerebro-rsi-improvement-candidate-factory-v0.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  candidate-factory-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Prove learning to versioned candidate automation
+        run: >-
+          node --test
+          cerebro/tests/improvement-candidate-factory.test.mjs
+          cerebro/tests/learning-preprod-pipeline.test.mjs
+          cerebro/tests/rsi-learning-auto-host.test.mjs
+      - name: Assert authority boundary
+        run: |
+          set -euo pipefail
+          ! grep -Eq 'prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true' cerebro/runtime/improvement-candidate-factory.mjs
