@@ -64,6 +64,21 @@ test('multiple exact commands are accepted in a single reply while generic yes i
   assert.ok(parsed.ignored.some(x=>x.reason==='GENERIC_TEXT_NOT_AUTHORIZATION'));
 });
 
+test('quoted original authorization instructions are never parsed as owner commands',()=>{
+  const a=buildHumanRequiredEmailEnvelope({item:baseItem,event_version:'quoted'});
+  const pending=new Map([[a.approval_id,a]]);
+  const parsed=parseApprovalCommands(`No quiero autorizar esto todavía.\n\nEl miércoles CEREBRO escribió:\n> AUTORIZO ${a.approval_id}\n> NO AUTORIZO ${a.approval_id}`,pending);
+  assert.equal(parsed.accepted.length,0);
+});
+
+test('conflicting commands for the same approval id fail closed',()=>{
+  const a=buildHumanRequiredEmailEnvelope({item:baseItem,event_version:'conflict'});
+  const pending=new Map([[a.approval_id,a]]);
+  const parsed=parseApprovalCommands(`AUTORIZO ${a.approval_id}\nNO AUTORIZO ${a.approval_id}`,pending);
+  assert.equal(parsed.accepted.length,0);
+  assert.ok(parsed.ignored.some(x=>x.reason==='CONFLICTING_COMMANDS_FOR_SAME_APPROVAL_ID'));
+});
+
 test('Madrid quiet hours aggregate from 21:00 until 08:00',()=>{
   assert.equal(isQuietHours(new Date('2026-10-08T19:30:00Z')),true);
   assert.equal(isQuietHours(new Date('2026-10-08T05:30:00Z')),true);
