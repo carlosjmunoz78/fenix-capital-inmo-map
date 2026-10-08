@@ -44,7 +44,7 @@
 - `CEREBRO RSI Learning Control Plane V0`, run `37827544846` = SUCCESS: un batch real descargado/procesado, 15 learning records persistidos, ledger existente, cero HOLD/HUMAN_REQUIRED.
 - `CEREBRO RSI Learning Outbox Publisher V0`, run `37823708844`, attempt 4 = SUCCESS.
 - `CEREBRO RSI Learning Control Plane V0`, run `37827678008` = SUCCESS: 0 descargas nuevas, 1 batch saltado por receipt, 0 persistencias nuevas y ledger existente.
-- Engine binding `LRN-001` actualizado a `AUTOMATIC_PREPROD_VERIFIED`.
+- `LRN-001` registrado en el overlay canónico `engine-autonomy-state.v0.json` como `AUTOMATIC_PREPROD_VERIFIED`, sin alterar el inventario Phase 2 de bindings existentes.
 - Core hostless: no depende de PC permanentemente encendido.
 - Coste adicional observado/contratado para este V0: 0 EUR; sin nuevas credenciales.
 
