@@ -166,7 +166,12 @@ jobs:
           git add "$LRN_STATE_ROOT"
           if git diff --cached --quiet; then
             echo 'No LRN state delta; idempotent no-op.'
-            exit 0
+          else
+            git commit -m "chore(cerebro): persist bounded LRN PREPROD state from run $GITHUB_RUN_ID"
+            git push origin "HEAD:refs/heads/$LRN_STATE_BRANCH"
           fi
-          git commit -m "chore(cerebro): persist bounded LRN PREPROD state from run $GITHUB_RUN_ID"
-          git push origin "HEAD:refs/heads/$LRN_STATE_BRANCH"
+
+      - name: Assert remote transport healthy after evidence persistence
+        run: |
+          set -euo pipefail
+          jq -e '.status != "PARTIAL_REMOTE_ERROR" and .remote_outbox.status != "REMOTE_OUTBOX_ERROR"' /tmp/cerebro-rsi-result.json >/dev/null
