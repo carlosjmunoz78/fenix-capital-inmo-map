@@ -13,6 +13,7 @@
 - RUNTIME-001 / FINOPS-001 are executable reference V0 components.
 - EVT-001 / JOB-001 are persistent reference components but are not yet wired as the SharedRuntime replacement, not multi-process/shared-worker coordinated and not autonomous PROD.
 - Existing-engine bindings are wrappers/contracts only until live evidence is audited.
+- FACT-001 AutoFactory V0 software is implemented as an additive hostless/event-driven scaffold path; live post-merge automatic acceptance is still required before marking FACT-001 automatic/verified.
 
 ### DEFINIDO
 - DBOFF-001 / STOROFF-001 / FREE-001 / AIBUD-001 contracts/targets.
@@ -28,6 +29,7 @@ HUMAN_REQUIRED_SET: `["LEGAL_REQUIRED","SIGNATURE_REQUIRED","LOW_CONFIDENCE","HI
 
 - Git history is the source snapshot for code/config/docs in `cerebro/`.
 - Factory generated output is not a backup source; it is rebuildable output.
+- FACT-001 AutoFactory request contracts and seed requests are Git-backed; generated request artifacts are reproducible and retained by GitHub Actions as run evidence, not treated as source of truth.
 - Persistent EVT/JOB V0 journal files are runtime state and are not replaced by Git history; production-grade activation would require an explicit state backup/restore contract before migration.
 - Existing production systems and their data remain governed by their existing backup mechanisms; this V0 does not replace or modify them.
 - No new paid backup service is introduced.
@@ -36,6 +38,7 @@ HUMAN_REQUIRED_SET: `["LEGAL_REQUIRED","SIGNATURE_REQUIRED","LOW_CONFIDENCE","HI
 
 - Before merge, exact branch HEAD is preserved in Git history and PREPROD evidence is tied to that SHA.
 - After merge, exact merge SHA is captured and production safety workflows are verified.
+- FACT-001 AutoFactory has repository read-only permission and writes only temporary runner files plus CI artifacts. Rollback is therefore a narrow Git revert of the workflow/runner/request-contract additions; no application or business-data rollback is required.
 - Persistent EVT/JOB adapters remain parallel to the existing in-memory runtime, so no runtime cutover rollback is required for this V0. Any future SharedRuntime wiring must define and test OLD-vs-NEW rollback before promotion.
 - If production deploy/smoke fails after exposure, execute the canonical repository rollback in `docs/PROD_ROLLBACK_RUNBOOK.md`: rehearse last known-good, revert offending commit(s) on a branch without rewriting history, merge through PREPROD, then require exact-SHA PROD deploy/smoke green.
 - Prefer narrow revert/hotfix over destructive rebuild or replacement of existing systems.
@@ -49,6 +52,14 @@ npm test
 npm run validate
 npm run generate -- --out ./.cerebro-generated
 ```
+
+FACT-001 AutoFactory single-request rebuild:
+```bash
+node cerebro/runtime/fact001-request-runner.mjs \
+  --request cerebro/factory/requests/fact001-selfcheck.v0.json \
+  --out /tmp/fact001-scaffold
+```
+Expected boundary: exact `SCAFFOLD`, 18 structural files, deterministic hashes, additional cost 0, PROD/Trading false.
 
 Reference runtime/multi-company/console/governance behavior is rebuilt from repository source and verified through `npm test` plus PREPROD gates.
 
