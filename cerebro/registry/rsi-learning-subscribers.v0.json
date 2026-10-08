@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "state_type": "CEREBRO_RSI_LEARNING_SUBSCRIBERS",
   "environment": "PREPROD",
   "engine_id": "LRN-001",
@@ -7,13 +7,24 @@
   "prod_authorized": false,
   "trading_access": false,
   "default_subscription_state": "DISABLED",
+  "accepted_signal_families": [
+    "SKILL_SUPPLY_CHAIN",
+    "ENGINE_RESULT",
+    "ENGINE_ERROR",
+    "ENGINE_EVENT",
+    "METRIC_OBSERVATION",
+    "COST_OBSERVATION",
+    "HUMAN_CORRECTION",
+    "TRIBUNAL_DECISION",
+    "OBSERVABILITY_ALERT"
+  ],
   "subscribers": [
     {
       "company_id": "fenix",
       "enabled": true,
       "environment": "PREPROD",
       "version": "0.5.0",
-      "source_scope": "GLOBAL_SKILL_SUPPLY_CHAIN_ONLY",
+      "source_scope": "GLOBAL_AND_TENANT_OPERATIONAL_LEARNING_SIGNALS_V0",
       "local_validation_required": true,
       "local_persistence_scope": "LOCAL_PREPROD_LRN_LEDGER_ONLY",
       "prod_authorized": false,
