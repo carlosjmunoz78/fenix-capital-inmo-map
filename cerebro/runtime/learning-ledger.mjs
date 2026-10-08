@@ -5,12 +5,26 @@ import {stableIdempotencyKey,validateLearningRecord} from './continuous-improvem
 const KIND='LRN-001';
 const PREPROD='PREPROD';
 const PERSISTENCE_SCOPE='LOCAL_PREPROD_LRN_LEDGER_ONLY';
+const ADDITIVE_PROVENANCE_FIELDS=Object.freeze(['signal_id','source_environment']);
 
 function clone(value){return deserialize(serialize(value));}
-function semanticLearningHash(record){
-  const safe=clone(record);
-  delete safe.observed_at;
-  return stableIdempotencyKey(safe);
+function missing(value){return value===undefined||value===null||value==='';}
+function compatibleRepeat(prior,incoming){
+  const left=clone(prior);const right=clone(incoming);const compatibilityFields=[];
+  if(left.observed_at!==right.observed_at) compatibilityFields.push('observed_at');
+  delete left.observed_at;delete right.observed_at;
+  for(const field of ADDITIVE_PROVENANCE_FIELDS){
+    const before=left[field];const after=right[field];
+    if(stableIdempotencyKey({value:before??null})===stableIdempotencyKey({value:after??null})) continue;
+    if(missing(before)&&!missing(after)){
+      compatibilityFields.push(field);
+      delete left[field];delete right[field];
+      continue;
+    }
+    return Object.freeze({ok:false,compatibility_fields:[]});
+  }
+  const ok=stableIdempotencyKey(left)===stableIdempotencyKey(right);
+  return Object.freeze({ok,compatibility_fields:ok?compatibilityFields.sort():[]});
 }
 function validateStored(item,index){
   if(!item||item.kind!==KIND) throw new Error('invalid LRN-001 record');
@@ -48,8 +62,9 @@ export class LearningLedgerV0{
       if(prior.record_hash===recordHash){
         return Object.freeze({accepted:false,duplicate:true,semantic_duplicate:false,sequence:prior.sequence,learning_id:safe.learning_id,record_hash:prior.record_hash,prod_authorized:false});
       }
-      if(semanticLearningHash(prior.record)===semanticLearningHash(safe)){
-        return Object.freeze({accepted:false,duplicate:true,semantic_duplicate:true,preserved_observed_at:prior.record.observed_at,sequence:prior.sequence,learning_id:safe.learning_id,record_hash:prior.record_hash,prod_authorized:false});
+      const compatibility=compatibleRepeat(prior.record,safe);
+      if(compatibility.ok){
+        return Object.freeze({accepted:false,duplicate:true,semantic_duplicate:true,compatibility_fields:compatibility.compatibility_fields,preserved_observed_at:prior.record.observed_at,sequence:prior.sequence,learning_id:safe.learning_id,record_hash:prior.record_hash,prod_authorized:false});
       }
       throw new Error('learning_id conflict with different payload');
     }
@@ -77,7 +92,8 @@ export const LEARNING_LEDGER_V0_CONTRACT=Object.freeze({
   environment:PREPROD,
   persistence:'local-atomic-v8-journal',
   persistence_scope:PERSISTENCE_SCOPE,
-  duplicate_policy:'EXACT_OR_OBSERVED_AT_ONLY_SEMANTIC_DUPLICATE_PRESERVES_FIRST_SEEN_RECORD',
+  duplicate_policy:'FIRST_SEEN_IMMUTABLE; OBSERVED_AT_MAY_CHANGE; SIGNAL_ID_AND_SOURCE_ENVIRONMENT_MAY_ONLY_BE_ADDED_TO_LEGACY_RECORDS; ALL_OTHER_SAME_ID_MUTATIONS_FAIL_CLOSED',
+  additive_provenance_fields:ADDITIVE_PROVENANCE_FIELDS,
   supabase_required:false,
   additional_cost_target_eur:0,
   customer_data_required:false,
