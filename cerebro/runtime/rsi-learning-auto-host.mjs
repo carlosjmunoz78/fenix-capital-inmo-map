@@ -75,7 +75,8 @@ export async function runAutoHostIteration({raw_config,fetch_impl=globalThis.fet
     const summary=metrics.summarize({company_id:cfg.company_id,version:cfg.version,limit:168});
     meta_observability={status:'META_METRICS_GREEN',accepted:append.accepted===true,not_due:append.not_due===true,samples_total:summary.samples_total,stage_metrics:summary.stage_metrics,prod_authorized:false,trading_access:false};
   }
-  return Object.freeze({status:learning.status,remote_outbox:remote,learning,orchestration,horizons,meta_observability,additional_cost_eur:0,prod_authorized:false,prod_write_authorized:false,trading_access:false});
+  const status=remote.status==='REMOTE_OUTBOX_ERROR'?'PARTIAL_REMOTE_ERROR':learning.status;
+  return Object.freeze({status,remote_outbox:remote,learning,orchestration,horizons,meta_observability,additional_cost_eur:0,prod_authorized:false,prod_write_authorized:false,trading_access:false});
 }
 
 export async function runAutoHostLoop({raw_config,signal,fetch_impl=globalThis.fetch,sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms)),now=()=>new Date().toISOString()}){
