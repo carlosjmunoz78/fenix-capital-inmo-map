@@ -1,0 +1,130 @@
+name: CEREBRO RSI Learning Outbox Publisher V0
+
+on:
+  workflow_run:
+    workflows:
+      - CEREBRO Skill Discovery Scout
+    types:
+      - completed
+  workflow_dispatch:
+    inputs:
+      source_run_id:
+        description: Successful main-branch Skill Discovery Scout run ID
+        required: true
+        type: string
+
+concurrency:
+  group: cerebro-rsi-learning-outbox-publisher-v0
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  actions: read
+
+env:
+  OUTBOX_STATE_BRANCH: cerebro-rsi-learning-outbox-v0
+  OUTBOX_STATE_ROOT: cerebro/runtime/rsi-outbox
+  SUBSCRIBERS_FILE: cerebro/registry/rsi-learning-subscribers.v0.json
+
+jobs:
+  publish-preprod-learning-outbox:
+    if: >-
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'main') ||
+      github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Resolve and verify immutable source run
+        id: source
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_RUN_ID: ${{ github.event.workflow_run.id }}
+          INPUT_RUN_ID: ${{ inputs.source_run_id }}
+        run: |
+          set -euo pipefail
+          if [ "$GITHUB_EVENT_NAME" = 'workflow_run' ]; then
+            SOURCE_RUN_ID="$EVENT_RUN_ID"
+          else
+            SOURCE_RUN_ID="$INPUT_RUN_ID"
+          fi
+          test -n "$SOURCE_RUN_ID"
+          RUN_JSON="$(gh api -X GET "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_RUN_ID")"
+          NAME="$(jq -r '.name' <<<"$RUN_JSON")"
+          CONCLUSION="$(jq -r '.conclusion' <<<"$RUN_JSON")"
+          HEAD_BRANCH="$(jq -r '.head_branch' <<<"$RUN_JSON")"
+          HEAD_SHA="$(jq -r '.head_sha' <<<"$RUN_JSON")"
+          test "$NAME" = 'CEREBRO Skill Discovery Scout'
+          test "$CONCLUSION" = 'success'
+          test "$HEAD_BRANCH" = 'main'
+          [[ "$HEAD_SHA" =~ ^[0-9a-f]{40}$ ]]
+          echo "run_id=$SOURCE_RUN_ID" >> "$GITHUB_OUTPUT"
+          echo "head_sha=$HEAD_SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Download exact Skill Discovery evidence artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_RUN_ID: ${{ steps.source.outputs.run_id }}
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/source
+          gh run download "$SOURCE_RUN_ID" --repo "$GITHUB_REPOSITORY" --name "cerebro-skill-discovery-$SOURCE_RUN_ID" --dir artifacts/source
+          test -f artifacts/source/cerebro-skill-improvement-events.json
+          jq -e '.prod_authorized == false and (.events | type == "array")' artifacts/source/cerebro-skill-improvement-events.json >/dev/null
+
+      - name: Prepare dedicated append-only outbox state worktree
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/cerebro-rsi-outbox-state
+          if git fetch --no-tags origin "+refs/heads/$OUTBOX_STATE_BRANCH:refs/remotes/origin/$OUTBOX_STATE_BRANCH" 2>/dev/null; then
+            git worktree add --detach /tmp/cerebro-rsi-outbox-state "refs/remotes/origin/$OUTBOX_STATE_BRANCH"
+          else
+            git worktree add --detach /tmp/cerebro-rsi-outbox-state origin/main
+          fi
+
+      - name: Fan out GLOBAL_ONLY events to tenant-local PREPROD outbox
+        env:
+          SOURCE_RUN_ID: ${{ steps.source.outputs.run_id }}
+          SOURCE_HEAD_SHA: ${{ steps.source.outputs.head_sha }}
+        run: |
+          set -euo pipefail
+          node cerebro/runtime/rsi-event-outbox.mjs \
+            --events artifacts/source/cerebro-skill-improvement-events.json \
+            --subscribers "$SUBSCRIBERS_FILE" \
+            --output-root "/tmp/cerebro-rsi-outbox-state/$OUTBOX_STATE_ROOT" \
+            --source-run-id "$SOURCE_RUN_ID" \
+            --source-head-sha "$SOURCE_HEAD_SHA" \
+            --source-workflow 'CEREBRO Skill Discovery Scout'
+
+      - name: Assert outbox state cannot expand authority
+        run: |
+          set -euo pipefail
+          find "/tmp/cerebro-rsi-outbox-state/$OUTBOX_STATE_ROOT" -name '*.json' -type f -print0 | while IFS= read -r -d '' f; do
+            jq -e '(.prod_authorized // false) == false and (.trading_access // false) == false and (.additional_cost_eur // 0) == 0' "$f" >/dev/null
+          done
+
+      - name: Persist only append-only LRN outbox state
+        env:
+          SOURCE_RUN_ID: ${{ steps.source.outputs.run_id }}
+        run: |
+          set -euo pipefail
+          cd /tmp/cerebro-rsi-outbox-state
+          git config user.name 'cerebro-rsi-outbox[bot]'
+          git config user.email 'cerebro-rsi-outbox[bot]@users.noreply.github.com'
+          git add "$OUTBOX_STATE_ROOT"
+          if git diff --cached --quiet; then
+            echo 'No new outbox batch; idempotent no-op.'
+            exit 0
+          fi
+          git commit -m "chore(cerebro): append LRN PREPROD outbox from discovery $SOURCE_RUN_ID"
+          git push origin "HEAD:refs/heads/$OUTBOX_STATE_BRANCH"
