@@ -4,6 +4,7 @@ import email
 import imaplib
 import json
 import os
+import re
 import smtplib
 import ssl
 from email.header import decode_header
@@ -62,6 +63,8 @@ def send_message(input_path):
     msg["From"] = from_addr
     msg["To"] = to_addr
     msg["Subject"] = payload["subject"]
+    msg["X-CEREBRO-Generated"] = "owner-communication-v1"
+    msg["Auto-Submitted"] = "auto-generated"
     msg.set_content(payload["text"], charset="utf-8")
 
     context = ssl.create_default_context()
@@ -77,6 +80,14 @@ def send_message(input_path):
             smtp.login(username, password)
             smtp.send_message(msg)
     print(json.dumps({"sent": True, "recipient": "OWNER_PRIVATE_IDENTITY"}))
+
+
+def is_real_owner_reply(msg, subject):
+    if (msg.get("X-CEREBRO-Generated") or "").strip().lower() == "owner-communication-v1":
+        return False
+    if msg.get("In-Reply-To"):
+        return True
+    return bool(re.match(r"^\s*(re|rv|fwd|fw)\s*:", subject or "", flags=re.IGNORECASE))
 
 
 def poll_owner(output_path, limit):
@@ -112,17 +123,21 @@ def poll_owner(output_path, limit):
             sender = parseaddr(msg.get("From") or "")[1]
             if sender.lower() != owner.lower():
                 continue
+            subject = decode_header_text(msg.get("Subject"))
+            if not is_real_owner_reply(msg, subject):
+                continue
             messages.append({
                 "message_id": msg.get("Message-ID") or f"imap:{msg_id.decode()}",
+                "in_reply_to": msg.get("In-Reply-To") or None,
                 "from_identity": "OWNER_PRIVATE_IDENTITY",
-                "subject": decode_header_text(msg.get("Subject")),
+                "subject": subject,
                 "date": msg.get("Date") or "",
                 "text": extract_text(msg),
             })
         with open(output_path, "w", encoding="utf-8") as fh:
             json.dump(messages, fh, ensure_ascii=False, indent=2)
             fh.write("\n")
-        print(json.dumps({"polled": len(messages), "sender": "OWNER_PRIVATE_IDENTITY"}))
+        print(json.dumps({"polled": len(messages), "sender": "OWNER_PRIVATE_IDENTITY", "reply_only": True}))
     finally:
         try:
             conn.logout()
