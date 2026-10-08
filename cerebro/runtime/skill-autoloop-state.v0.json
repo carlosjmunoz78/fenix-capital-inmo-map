@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-08T05:30:47.248Z",
+  "updated_at": "2026-10-08T05:34:12.634Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -31,7 +31,8 @@
   },
   "processed_candidate_ids": [
     "lobehub-skills:9a6e3fac20369220df43",
-    "github-wide-skills:9f382a637a7264314ac8"
+    "github-wide-skills:9f382a637a7264314ac8",
+    "github-wide-skills:cc9f94a093bbe8a4251c"
   ],
   "in_flight": {
     "lobehub-skills:9a6e3fac20369220df43": {
@@ -82,6 +83,41 @@
       "trading_access": false,
       "paid_fallback": false,
       "additional_cost_eur": 0
+    },
+    "github-wide-skills:cc9f94a093bbe8a4251c": {
+      "candidate_id": "github-wide-skills:cc9f94a093bbe8a4251c",
+      "name": "kairos-lite",
+      "wrapper_id": "skillwrap:77f6ab4fd6c12c08aa09",
+      "domain": "software-engineering-devops",
+      "engine_bindings": [
+        "FACT-001",
+        "ARCH-001",
+        "API-001",
+        "DEP-001",
+        "MIG-001",
+        "QA-001",
+        "REG-001",
+        "DOCS-001"
+      ],
+      "value_score": 82.31,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "kentunderage549/cc-harness-skills",
+        "upstream_head_commit": "2bfbfdd1cd5a3cc53fa28b36aef5d38297d52c2a",
+        "manifest_sha256": "fe95b31fc506fad27d185b524be262b17e813cf0d48880dc41ec10dcfb3e6ad9",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 37733008681,
+      "checkpointed_at": "2026-10-08T05:34:12.634Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
     }
   },
   "completed": {},
@@ -99,5 +135,5 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 37732710744
+  "last_discovery_run_id": 37733008681
 }
