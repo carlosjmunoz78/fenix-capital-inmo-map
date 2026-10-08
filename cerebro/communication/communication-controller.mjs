@@ -11,6 +11,8 @@ import {
   shouldSendDailyDigest
 } from '../governance/human-communication.mjs';
 
+const SKILL_READONLY_BINDING='SKILL_AUTONOMY_READONLY_V1';
+
 function clone(value){return JSON.parse(JSON.stringify(value??{}));}
 function clean(v){return typeof v==='string'?v.trim():'';}
 function readJson(file,fallback={}){return file&&fs.existsSync(file)?JSON.parse(fs.readFileSync(file,'utf8')):clone(fallback);}
@@ -62,18 +64,34 @@ function positiveRollbackGreen(item){
   return item?.rollback_green===true || item?.evidence?.rollback_green===true || item?.evidence?.rollback_status==='GREEN' || item?.evidence?.rollback_proof_status==='GREEN';
 }
 
+export function standingExecutionBinding(item){
+  if((clean(item?.engine_id)||'FACT-001')!=='FACT-001') return null;
+  if(clean(item?.stage)!=='PREPROD_PROMOTION_REVIEW'||clean(item?.human_required)!=='HIGH_RISK') return null;
+  if(!positiveRollbackGreen(item)) return null;
+  if(effectiveTrue(item?.prod_write,item?.prod_write_requested,item?.evidence?.prod_write)) return null;
+  if(effectiveTrue(item?.customer_data_requested,item?.customer_data_used,item?.customer_data_access,item?.evidence?.customer_data_used)) return null;
+  if(effectiveTrue(item?.external_skill_code_execution_requested,item?.external_skill_code_execution,item?.external_skill_code_executed,item?.evidence?.external_skill_code_executed)) return null;
+  if(effectiveTrue(item?.trading_requested,item?.trading_access,item?.evidence?.trading_access)) return null;
+  if(effectiveTrue(item?.paid_fallback_requested,item?.paid_fallback,item?.evidence?.paid_fallback)) return null;
+  if(clean(item?.credential_scope)||effectiveTrue(item?.new_credentials_requested,item?.new_credentials)) return null;
+  if(effectiveTrue(item?.destructive_delete,item?.destructive_delete_requested,item?.unbounded_prod_write,item?.unbounded_prod_write_requested)) return null;
+  if(Number(item?.max_money_eur??0)!==0) return null;
+  return SKILL_READONLY_BINDING;
+}
+
 function learningEligible(item){
   const forbidden=new Set(['LEGAL_REQUIRED','SIGNATURE_REQUIRED','SECURITY_INCIDENT','MONEY_LIMIT','CUSTOMER_HUMAN_REQUEST']);
   if(forbidden.has(clean(item.human_required))) return false;
   if(effectiveTrue(item.trading_requested,item.trading_access,item.evidence?.trading_access)) return false;
   if(clean(item.credential_scope)||effectiveTrue(item.new_credentials_requested,item.new_credentials)) return false;
-  if(effectiveTrue(item.destructive_delete,item.unbounded_prod_write)) return false;
-  return positiveRollbackGreen(item);
+  if(effectiveTrue(item.destructive_delete,item.destructive_delete_requested,item.unbounded_prod_write,item.unbounded_prod_write_requested)) return false;
+  return positiveRollbackGreen(item)&&Boolean(standingExecutionBinding(item));
 }
 
 export function envelopeFromHumanRequired(item){
   const rollbackGreen=positiveRollbackGreen(item);
-  return buildHumanRequiredEmailEnvelope({
+  const binding=standingExecutionBinding(item);
+  const envelope=buildHumanRequiredEmailEnvelope({
     item,
     plain_language:`CEREBRO ha llegado a un límite que no debe cruzar solo (${clean(item.human_required)||'HUMAN_REQUIRED'}). Necesita una decisión tuya para este caso concreto.`,
     purpose:normalPurpose(item),
@@ -88,6 +106,7 @@ export function envelopeFromHumanRequired(item){
     event_version:item.updated_at??item.run_id??item.evidence?.handler_run_id??null,
     standing_learning_eligible:learningEligible(item)
   });
+  return Object.freeze({...envelope,standing_execution_binding:binding});
 }
 
 export function ingestSkillHumanRequired(state,skillState,now=new Date().toISOString()){
@@ -95,9 +114,12 @@ export function ingestSkillHumanRequired(state,skillState,now=new Date().toISOSt
   out.pending=out.pending??{};
   out.authorized_actions=out.authorized_actions??{};
   out.standing_authorizations=out.standing_authorizations??{};
-  for(const item of Object.values(skillState?.waiting_human??{})){
-    const env=envelopeFromHumanRequired({...item,engine_id:item.engine_id??'FACT-001'});
-    if(out.standing_authorizations?.[env.scope_fingerprint]?.status==='ACTIVE') continue;
+  for(const rawItem of Object.values(skillState?.waiting_human??{})){
+    const item={...rawItem,engine_id:rawItem.engine_id??'FACT-001'};
+    const env=envelopeFromHumanRequired(item);
+    const activeStanding=out.standing_authorizations?.[env.scope_fingerprint];
+    const binding=standingExecutionBinding(item);
+    if(activeStanding?.status==='ACTIVE'&&activeStanding?.exact_scope_only===true&&binding&&activeStanding?.execution_binding===binding) continue;
     if(out.authorized_actions?.[env.approval_id]?.status==='AUTHORIZED_WAITING_EXECUTION') continue;
     if(out.decisions?.some(d=>d.approval_id===env.approval_id&&d.decision==='DENIED')) continue;
     if(!out.pending[env.approval_id]) out.pending[env.approval_id]={...env,kind:'ACTION_APPROVAL',created_at:now,delivered_at:null,status:'PENDING_OWNER'};
@@ -129,10 +151,20 @@ export function buildApprovalBatch(requests,{night_batch=false,now=new Date()}={
     ? `Te necesito. Durante la noche he agrupado ${items.length} decisiones para no enviarte correos separados. Puedes responder a este mismo correo con varias líneas de autorización.`
     : explanationOnly ? `Aquí tienes la explicación ampliada que pediste. La autorización sigue bloqueada hasta que respondas con la frase exacta.`
     : `Te necesito. Tengo ${items.length} decisión${items.length===1?'':'es'} pendiente${items.length===1?'':'s'}. Puedes responder a este mismo correo con una o varias líneas.`;
-  return {subject,text:`${intro}\n\n${items.map((x,i)=>renderItem(x,i+1)).join('\n\n------------------------------\n\n')}\n\nIMPORTANTE: “sí”, “vale”, “ok” o “procede” no autorizan nada. Solo cuentan las frases exactas con APR.\n`,local_date:local.date,approval_ids:items.map(x=>x.approval_id)};
+  const deliveryItems=items.map((req,index)=>({
+    approval_id:req.approval_id,
+    delivery_key:req.status==='PENDING_OWNER_EXPLANATION'?`EXPLAIN:${req.approval_id}:${req.explanation_requested_at??req.updated_at??req.created_at}`:`APPROVAL:${req.approval_id}`,
+    text:renderItem(req,index+1)
+  }));
+  return {
+    kind:'approval_batch',subject,intro,night_batch,local_date:local.date,approval_ids:items.map(x=>x.approval_id),items:deliveryItems,
+    text:`${intro}\n\n${deliveryItems.map(x=>x.text).join('\n\n------------------------------\n\n')}\n\nIMPORTANTE: “sí”, “vale”, “ok” o “procede” no autorizan nada. Solo cuentan las frases exactas con APR.\n`
+  };
 }
 
 function maybeCreateStandingProposal(out,request,now){
+  const binding=request.standing_execution_binding;
+  if(!binding) return;
   const evaluated=evaluateStandingAuthorizationCandidate({history:out.decisions,request,minimum:3});
   if(!evaluated.eligible) return;
   const scope=request.scope_fingerprint;
@@ -142,14 +174,14 @@ function maybeCreateStandingProposal(out,request,now){
     item:proposalItem,event_version:scope,
     plain_language:`Has autorizado al menos 3 veces el mismo tipo de acción con rollback verificado, sin denegaciones ni incidentes. CEREBRO propone dejar de preguntarte por este alcance exacto.`,
     purpose:`Evitar autorizaciones repetitivas para ${request.human_alias} sin ampliar permisos fuera de lo ya repetidamente aprobado.`,
-    requested_change:`Crear una autorización permanente únicamente para la huella ${scope}.`,
-    can_modify:['la política de autorización para este alcance exacto'],
+    requested_change:`Crear una autorización permanente únicamente para la huella ${scope} y el ejecutor ${binding}.`,
+    can_modify:['la política de autorización para este alcance exacto y ejecutor ya probado'],
     cannot_modify:['cualquier alcance distinto','legal/firma','Trading real','credenciales nuevas','borrados destructivos','límites económicos'],
     risk:'POLÍTICA_ACOTADA_REQUIERE_ÚLTIMO_SÍ_EXPLÍCITO',rollback:'REVOCABLE',rollback_green:true,standing_learning_eligible:false
   });
   out.standing_policy_proposals=out.standing_policy_proposals??{};
-  out.standing_policy_proposals[scope]={approval_id:proposal.approval_id,source_scope_fingerprint:scope,created_at:now,status:'PENDING_OWNER'};
-  out.pending[proposal.approval_id]={...proposal,kind:'STANDING_POLICY_ACTIVATION',source_scope_fingerprint:scope,created_at:now,delivered_at:null,status:'PENDING_OWNER'};
+  out.standing_policy_proposals[scope]={approval_id:proposal.approval_id,source_scope_fingerprint:scope,source_execution_binding:binding,created_at:now,status:'PENDING_OWNER'};
+  out.pending[proposal.approval_id]={...proposal,kind:'STANDING_POLICY_ACTIVATION',source_scope_fingerprint:scope,source_execution_binding:binding,created_at:now,delivered_at:null,status:'PENDING_OWNER'};
 }
 
 export function applyOwnerMessages(state,messages,now=new Date().toISOString()){
@@ -178,8 +210,10 @@ export function applyOwnerMessages(state,messages,now=new Date().toISOString()){
       out.decisions.push(decision);
       if(cmd.decision==='AUTHORIZED'&&req.kind==='STANDING_POLICY_ACTIVATION'){
         const scope=req.source_scope_fingerprint;
+        const binding=clean(req.source_execution_binding);
+        if(!scope||!binding) throw new Error('STANDING_POLICY_EXECUTION_BINDING_MISSING');
         out.standing_authorizations=out.standing_authorizations??{};
-        out.standing_authorizations[scope]={status:'ACTIVE',activated_at:now,approval_id:req.approval_id,revocable:true,exact_scope_only:true};
+        out.standing_authorizations[scope]={status:'ACTIVE',activated_at:now,approval_id:req.approval_id,scope_fingerprint:scope,execution_binding:binding,revocable:true,exact_scope_only:true};
         if(out.standing_policy_proposals?.[scope]) out.standing_policy_proposals[scope].status='ACTIVE';
         delete out.pending[cmd.approval_id];
         continue;
@@ -234,7 +268,7 @@ export function prepareOutbound(state,{now=new Date(),repoSummary={}}={}){
     const labels={human:'EN PALABRAS NORMALES',published:'PUBLICADO O CAMBIADO',failures:'FALLOS E INCIDENCIAS',seo_web:'SEO Y WEB',app_crm:'APP Y CRM',automations:'AUTOMATIZACIONES E INTEGRACIONES',skills_engines:'SKILLS Y MOTORES',training_learning:'TRAINING Y APRENDIZAJE',holds_human_required:'HOLDS Y HUMAN_REQUIRED',cost:'COSTE ADICIONAL',next_safe_work:'SIGUIENTE TRABAJO SEGURO',missing_telemetry:'COBERTURA / TELEMETRÍA PENDIENTE'};
     const body=[];
     for(const [key,label] of Object.entries(labels)){const rows=digest.sections[key]??[];body.push(`${label}\n${rows.length?rows.map(x=>`- ${x}`).join('\n'):'- Sin novedades registradas en esta sección.'}`);}
-    digestMail={subject:digest.subject,text:`Resumen diario único de CEREBRO.\n\n${body.join('\n\n')}\n`};
+    digestMail={kind:'daily_digest',digest_date:digest.date,delivery_key:`DIGEST:${digest.date}`,subject:digest.subject,text:`Resumen diario único de CEREBRO.\n\n${body.join('\n\n')}\n`};
     out.last_digest_date=digest.date;
   }
   out.updated_at=now.toISOString();
