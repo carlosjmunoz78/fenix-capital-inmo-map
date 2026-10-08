@@ -1,0 +1,139 @@
+name: CEREBRO Skill Autonomy Read-only V1
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cerebro/governance/skill-autonomy-standing-authorization.v1.json'
+      - 'cerebro/skills/skill-autonomous-promotion-v1.mjs'
+      - 'cerebro/tests/skill-autonomous-promotion-v1.test.mjs'
+      - '.github/workflows/cerebro-skill-autonomy-readonly-v1.yml'
+  schedule:
+    - cron: '43 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: cerebro-skill-autonomy-readonly-v1
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  actions: read
+
+env:
+  AUTOLOOP_STATE_BRANCH: cerebro/skill-autoloop-state-v0
+  AUTOLOOP_STATE_PATH: cerebro/runtime/skill-autoloop-state.v0.json
+  AUTONOMY_POLICY_PATH: cerebro/governance/skill-autonomy-standing-authorization.v1.json
+
+jobs:
+  readonly-autonomy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Test autonomy contracts
+        run: node --test cerebro/tests/skill-autonomous-promotion-v1.test.mjs
+      - name: Load state and select candidate covered by standing authorization
+        id: select
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/autonomy artifacts/source
+          git fetch --no-tags origin "refs/heads/$AUTOLOOP_STATE_BRANCH:refs/remotes/origin/$AUTOLOOP_STATE_BRANCH"
+          git show "refs/remotes/origin/$AUTOLOOP_STATE_BRANCH:$AUTOLOOP_STATE_PATH" > artifacts/autonomy/state.before.json
+          node cerebro/skills/skill-autonomous-promotion-v1.mjs --state artifacts/autonomy/state.before.json --authorization "$AUTONOMY_POLICY_PATH" --output artifacts/autonomy/selection.json
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const x=JSON.parse(fs.readFileSync('artifacts/autonomy/selection.json','utf8')).selected;
+          fs.appendFileSync(process.env.GITHUB_OUTPUT,`has_candidate=${Boolean(x)}\n`);
+          if(x){const runId=x.evidence?.handler_run_id??x.evidence?.run_id??x.run_id;if(!runId)throw new Error('SOURCE_RUN_MISSING');fs.appendFileSync(process.env.GITHUB_OUTPUT,`candidate_id=${x.candidate_id}\nsource_run_id=${runId}\n`);}
+          NODE
+      - name: Verify immutable source evidence
+        if: steps.select.outputs.has_candidate == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_RUN_ID: ${{ steps.select.outputs.source_run_id }}
+        run: |
+          set -euo pipefail
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_RUN_ID" --jq '.status')" = completed
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_RUN_ID" --jq '.conclusion')" = success
+          gh run download "$SOURCE_RUN_ID" --repo "$GITHUB_REPOSITORY" --dir artifacts/source
+          READY="$(find artifacts/source -type f -name '*promotion-readiness*.json' -print -quit)"
+          TRIBUNAL="$(find artifacts/source -type f -name '*tribunal*.json' ! -name '*preprod*' -print -quit)"
+          ROLLBACK="$(find artifacts/source -type f -name '*rollback*proof*.json' -print -quit)"
+          OLDNEW="$(find artifacts/source -type f -name '*old-vs-new*.json' -print -quit)"
+          test -n "$READY"; test -n "$TRIBUNAL"; test -n "$ROLLBACK"; test -n "$OLDNEW"
+          READY="$READY" TRIBUNAL="$TRIBUNAL" ROLLBACK="$ROLLBACK" OLDNEW="$OLDNEW" node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const r=JSON.parse(fs.readFileSync(process.env.READY,'utf8'));
+          const t=JSON.parse(fs.readFileSync(process.env.TRIBUNAL,'utf8'));
+          const b=JSON.parse(fs.readFileSync(process.env.ROLLBACK,'utf8'));
+          const o=JSON.parse(fs.readFileSync(process.env.OLDNEW,'utf8'));
+          if(!(r.ready===true&&r.status==='READY_FOR_PREPROD_PROMOTION_REVIEW'&&r.human_required==='HIGH_RISK'&&r.prod_authorized===false)) throw new Error('READINESS_NOT_GREEN');
+          if(!(t.green===true&&t.decision==='GREEN'&&t.prod_authorized===false&&t.external_skill_code_executed===false)) throw new Error('TRIBUNAL_NOT_GREEN');
+          if(!(b.ready===true&&b.status==='GREEN_ROLLBACK_REBUILD_PROOF'&&b.external_code_executed===false&&b.persistent_data_mutation===false&&b.schema_mutation===false)) throw new Error('ROLLBACK_NOT_GREEN');
+          const c=o.packages?.[0]?.candidate;
+          if(!c?.upstream_full_name||!c?.upstream_head_commit||!c?.manifest_path||!c?.manifest_sha256) throw new Error('PROVENANCE_INCOMPLETE');
+          fs.writeFileSync('artifacts/autonomy/provenance.json',JSON.stringify(c,null,2)+'\n');
+          NODE
+      - name: Revalidate source and current main by GET only
+        if: steps.select.outputs.has_candidate == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          U="$(jq -r '.upstream_full_name' artifacts/autonomy/provenance.json)"
+          C="$(jq -r '.upstream_head_commit' artifacts/autonomy/provenance.json)"
+          P="$(jq -r '.manifest_path' artifacts/autonomy/provenance.json)"
+          H="$(jq -r '.manifest_sha256' artifacts/autonomy/provenance.json)"
+          gh api "repos/$U/commits/$C" > artifacts/autonomy/upstream.json
+          gh api "repos/$U/contents/$P?ref=$C" --jq '.content' | tr -d '\n' | base64 -d > artifacts/autonomy/manifest.md
+          test "$(sha256sum artifacts/autonomy/manifest.md | awk '{print $1}')" = "$H"
+          gh api "repos/$GITHUB_REPOSITORY/branches/main" > artifacts/autonomy/main.json
+      - name: Build PREPROD shadow and read-only canary evidence
+        if: steps.select.outputs.has_candidate == 'true'
+        env:
+          CANDIDATE_ID: ${{ steps.select.outputs.candidate_id }}
+          SOURCE_RUN_ID: ${{ steps.select.outputs.source_run_id }}
+        run: |
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          import {buildAutonomousPreprodContract,buildAutonomousReadonlyCanaryContract,completeReadonlyAdvisoryPromotion} from './cerebro/skills/skill-autonomous-promotion-v1.mjs';
+          const state=JSON.parse(fs.readFileSync('artifacts/autonomy/state.before.json','utf8'));
+          const auth=JSON.parse(fs.readFileSync(process.env.AUTONOMY_POLICY_PATH,'utf8'));
+          const item=state.waiting_human[process.env.CANDIDATE_ID];
+          const preprod=buildAutonomousPreprodContract(item,{source_run_id:Number(process.env.SOURCE_RUN_ID)});
+          const main=JSON.parse(fs.readFileSync('artifacts/autonomy/main.json','utf8'));
+          const canary=buildAutonomousReadonlyCanaryContract(item,{observed_main_sha:main.commit.sha,source_manifest_verified:true});
+          const out=completeReadonlyAdvisoryPromotion(state,process.env.CANDIDATE_ID,{authorization:auth,preprod,canary});
+          fs.writeFileSync('artifacts/autonomy/preprod.json',JSON.stringify(preprod,null,2)+'\n');
+          fs.writeFileSync('artifacts/autonomy/canary.json',JSON.stringify(canary,null,2)+'\n');
+          fs.writeFileSync('artifacts/autonomy/state.after.json',JSON.stringify(out,null,2)+'\n');
+          NODE
+      - name: Persist only dedicated AutoLoop state branch
+        if: steps.select.outputs.has_candidate == 'true' && github.ref == 'refs/heads/main'
+        run: |
+          set -euo pipefail
+          cp artifacts/autonomy/state.after.json /tmp/state.json
+          git fetch --no-tags origin "refs/heads/$AUTOLOOP_STATE_BRANCH:refs/remotes/origin/$AUTOLOOP_STATE_BRANCH"
+          git checkout --detach "refs/remotes/origin/$AUTOLOOP_STATE_BRANCH"
+          cp /tmp/state.json "$AUTOLOOP_STATE_PATH"
+          git config user.name "cerebro-autonomy[bot]"
+          git config user.email "cerebro-autonomy[bot]@users.noreply.github.com"
+          git add "$AUTOLOOP_STATE_PATH"
+          if ! git diff --cached --quiet; then git commit -m "chore(cerebro): advance bounded autonomous read-only skill state"; git push origin "HEAD:refs/heads/$AUTOLOOP_STATE_BRANCH"; fi
+      - name: Healthy idle
+        if: steps.select.outputs.has_candidate != 'true'
+        run: echo '{"status":"IDLE_NO_ELIGIBLE_CANDIDATE","prod_write":false,"additional_cost_eur":0}' > artifacts/autonomy/idle.json
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-skill-autonomy-readonly-v1-${{ github.run_id }}
+          path: artifacts/autonomy/*
+          if-no-files-found: warn
+          retention-days: 30
