@@ -14,7 +14,7 @@ on:
         type: string
 
 concurrency:
-  group: cerebro-rsi-learning-outbox-publisher-v0
+  group: cerebro-rsi-learning-outbox-writer-v0
   cancel-in-progress: false
 
 permissions:
