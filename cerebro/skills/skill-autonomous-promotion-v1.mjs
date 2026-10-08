@@ -23,9 +23,8 @@ export function validateStandingAuthorization(auth){
   return Object.freeze({green:errors.length===0,errors});
 }
 
-export function isCandidateEligibleForStandingSafeLane(item,auth){
-  const a=validateStandingAuthorization(auth);
-  const errors=[...a.errors];
+function safeCandidateErrors(item){
+  const errors=[];
   if(item?.status!=='WAITING_HUMAN') errors.push('NOT_WAITING_HUMAN');
   if(item?.stage!=='PREPROD_PROMOTION_REVIEW') errors.push('NOT_PREPROD_REVIEW');
   if(item?.human_required!=='HIGH_RISK') errors.push('NOT_HIGH_RISK_GATE');
@@ -39,43 +38,75 @@ export function isCandidateEligibleForStandingSafeLane(item,auth){
   if(item?.trading_access===true||ev.trading_access===true) errors.push('TRADING_USED');
   if(item?.paid_fallback===true||ev.paid_fallback===true) errors.push('PAID_FALLBACK_USED');
   if(Number(item?.additional_cost_eur??ev.additional_cost_eur??0)!==0) errors.push('NONZERO_COST');
+  return errors;
+}
+
+export function isCandidateEligibleForStandingSafeLane(item,auth){
+  const a=validateStandingAuthorization(auth);
+  const errors=[...a.errors,...safeCandidateErrors(item)];
   return Object.freeze({green:errors.length===0,errors,human_alias:resolveHumanAlias(item)});
 }
 
-export function buildAutonomousPreprodContract(item,{source_run_id,artifact_id,artifact_digest}={}){
+export function isCandidateEligibleForExactOwnerLane(item,ownerAction){
+  const errors=[...safeCandidateErrors(item)];
+  if(ownerAction?.status!=='AUTHORIZED_WAITING_EXECUTION') errors.push('OWNER_ACTION_NOT_AUTHORIZED_WAITING_EXECUTION');
+  if(ownerAction?.source!=='OWNER_EMAIL_EXACT_COMMAND') errors.push('OWNER_ACTION_SOURCE_INVALID');
+  if(ownerAction?.one_time!==true) errors.push('OWNER_ACTION_NOT_ONE_TIME');
+  if(clean(ownerAction?.technical_id)!==clean(item?.candidate_id)) errors.push('OWNER_ACTION_CANDIDATE_MISMATCH');
+  if(clean(ownerAction?.stage)!==clean(item?.stage)) errors.push('OWNER_ACTION_STAGE_MISMATCH');
+  if(!clean(ownerAction?.scope_fingerprint)) errors.push('OWNER_ACTION_SCOPE_MISSING');
+  return Object.freeze({green:errors.length===0,errors,human_alias:resolveHumanAlias(item)});
+}
+
+export function selectPromotionCandidate(state,auth,communicationState={}){
+  const rows=Object.values(state?.waiting_human??{}).sort((a,b)=>String(a.updated_at??'').localeCompare(String(b.updated_at??''))||String(a.candidate_id).localeCompare(String(b.candidate_id)));
+  for(const item of rows){
+    const standing=isCandidateEligibleForStandingSafeLane(item,auth);
+    if(standing.green) return Object.freeze({item,authorization_source:'STANDING_AUTHORIZATION',approval_id:null,owner_action:null});
+    const ownerAction=Object.values(communicationState?.authorized_actions??{}).find(x=>x?.status==='AUTHORIZED_WAITING_EXECUTION'&&clean(x?.technical_id)===clean(item?.candidate_id)&&clean(x?.stage)===clean(item?.stage));
+    const exact=isCandidateEligibleForExactOwnerLane(item,ownerAction);
+    if(exact.green) return Object.freeze({item,authorization_source:'OWNER_EMAIL_EXACT_COMMAND',approval_id:ownerAction.approval_id,owner_action:ownerAction});
+  }
+  return null;
+}
+
+export function buildAutonomousPreprodContract(item,{source_run_id,artifact_id,artifact_digest,authorization_source='STANDING_AUTHORIZATION'}={}){
   return Object.freeze({
     schema_version:'1.0.0',candidate_id:item.candidate_id,name:item.name??null,human_alias:resolveHumanAlias(item),
     wrapper_id:item.wrapper_id??null,stage:'AUTONOMOUS_PREPROD_SHADOW',status:'GREEN_AUTONOMOUS_PREPROD_SHADOW',
     execution_mode:'SYNTHETIC_NON_CUSTOMER_SHADOW_ONLY',source_run_id:source_run_id??item.run_id??item.evidence?.handler_run_id??null,
     artifact_id:artifact_id??null,artifact_digest:artifact_digest??null,customer_data_used:false,prod_data_used:false,
     prod_write:false,external_skill_code_executed:false,trading_access:false,paid_fallback:false,additional_cost_eur:0,
-    rollback_required:true,rebuild_disabled_by_default:true,standing_authorization_consumed:true
+    rollback_required:true,rebuild_disabled_by_default:true,authorization_source,
+    standing_authorization_consumed:authorization_source==='STANDING_AUTHORIZATION'
   });
 }
 
-export function buildAutonomousReadonlyCanaryContract(item,{observed_main_sha,source_manifest_verified=true}={}){
+export function buildAutonomousReadonlyCanaryContract(item,{observed_main_sha,source_manifest_verified=true,authorization_source='STANDING_AUTHORIZATION'}={}){
   return Object.freeze({
     schema_version:'1.0.0',candidate_id:item.candidate_id,name:item.name??null,human_alias:resolveHumanAlias(item),
     wrapper_id:item.wrapper_id??null,stage:'AUTONOMOUS_PROD_READONLY_CANARY',status:'GREEN_AUTONOMOUS_PROD_READONLY_CANARY',
     execution_mode:'READONLY_ADVISORY_OBSERVATION_ONLY',observed_main_sha:observed_main_sha??null,
     source_manifest_verified:Boolean(source_manifest_verified),allowed_http_methods:['GET'],customer_data_used:false,prod_data_used:false,
     prod_write:false,github_business_mutation:false,external_skill_code_executed:false,trading_access:false,paid_fallback:false,
-    additional_cost_eur:0,rollback_required:true,rebuild_disabled_by_default:true,standing_authorization_consumed:true
+    additional_cost_eur:0,rollback_required:true,rebuild_disabled_by_default:true,authorization_source,
+    standing_authorization_consumed:authorization_source==='STANDING_AUTHORIZATION'
   });
 }
 
-export function completeReadonlyAdvisoryPromotion(state,candidateId,{authorization,preprod,canary,now=new Date().toISOString()}={}){
+export function completeReadonlyAdvisoryPromotion(state,candidateId,{authorization,owner_action=null,preprod,canary,now=new Date().toISOString()}={}){
   const out=clone(state);
   const item=out.waiting_human?.[candidateId];
   if(!item) throw new Error('CANDIDATE_NOT_WAITING_HUMAN');
-  const eligible=isCandidateEligibleForStandingSafeLane(item,authorization);
+  const eligible=owner_action ? isCandidateEligibleForExactOwnerLane(item,owner_action) : isCandidateEligibleForStandingSafeLane(item,authorization);
   if(!eligible.green) throw new Error(`CANDIDATE_NOT_ELIGIBLE:${eligible.errors.join(',')}`);
   const preprodOk=preprod?.status==='GREEN_AUTONOMOUS_PREPROD_SHADOW'&&preprod?.prod_write===false&&preprod?.customer_data_used===false&&preprod?.external_skill_code_executed===false&&Number(preprod?.additional_cost_eur)===0;
   const canaryOk=canary?.status==='GREEN_AUTONOMOUS_PROD_READONLY_CANARY'&&canary?.prod_write===false&&canary?.customer_data_used===false&&canary?.external_skill_code_executed===false&&Number(canary?.additional_cost_eur)===0&&Array.isArray(canary?.allowed_http_methods)&&canary.allowed_http_methods.every((m)=>m==='GET');
   if(!preprodOk) throw new Error('AUTONOMOUS_PREPROD_NOT_GREEN');
   if(!canaryOk) throw new Error('AUTONOMOUS_CANARY_NOT_GREEN');
+  const authorizationSource=owner_action?'OWNER_EMAIL_EXACT_COMMAND':'STANDING_AUTHORIZATION';
   out.completed=out.completed??{};
-  out.completed[candidateId]={...item,candidate_id:candidateId,human_alias:eligible.human_alias,stage:'READONLY_ADVISORY_REGISTERED',status:'COMPLETED_READONLY_ADVISORY',human_required:null,authorization_basis:authorization.authorization_basis,preprod,canary,updated_at:now,prod_authorized:false,prod_write:false,autonomous_business_prod_write_authorized:false,external_skill_code_execution:false,customer_data_used:false,trading_access:false,paid_fallback:false,additional_cost_eur:0};
+  out.completed[candidateId]={...item,candidate_id:candidateId,human_alias:eligible.human_alias,stage:'READONLY_ADVISORY_REGISTERED',status:'COMPLETED_READONLY_ADVISORY',human_required:null,authorization_basis:owner_action?.approval_id??authorization?.authorization_basis??null,authorization_source:authorizationSource,preprod,canary,updated_at:now,prod_authorized:false,prod_write:false,autonomous_business_prod_write_authorized:false,external_skill_code_execution:false,customer_data_used:false,trading_access:false,paid_fallback:false,additional_cost_eur:0};
   delete out.waiting_human[candidateId];
   out.updated_at=now;
   out.last_action='AUTONOMOUS_READONLY_ADVISORY_PROMOTION_COMPLETE_CONTINUE_QUEUE';
@@ -86,13 +117,15 @@ function argValue(name){const i=process.argv.indexOf(name);return i>=0?process.a
 if(import.meta.url===`file://${process.argv[1]}`){
   const statePath=argValue('--state');
   const authPath=argValue('--authorization');
+  const communicationStatePath=argValue('--communication-state');
   const output=argValue('--output')??'artifacts/autonomy/selection.json';
   if(!statePath||!authPath) throw new Error('REQUIRED: --state --authorization');
   const state=JSON.parse(fs.readFileSync(statePath,'utf8'));
   const auth=JSON.parse(fs.readFileSync(authPath,'utf8'));
-  const candidates=Object.values(state.waiting_human??{}).filter((x)=>isCandidateEligibleForStandingSafeLane(x,auth).green).sort((a,b)=>String(a.updated_at??'').localeCompare(String(b.updated_at??''))||String(a.candidate_id).localeCompare(String(b.candidate_id)));
-  const selected=candidates[0]??null;
+  const communicationState=communicationStatePath&&fs.existsSync(communicationStatePath)?JSON.parse(fs.readFileSync(communicationStatePath,'utf8')):{};
+  const selection=selectPromotionCandidate(state,auth,communicationState);
+  const selected=selection?.item??null;
   fs.mkdirSync(path.dirname(output),{recursive:true});
-  fs.writeFileSync(output,JSON.stringify({schema_version:'1.0.0',selected:selected?{...selected,human_alias:resolveHumanAlias(selected)}:null,standing_authorization_green:validateStandingAuthorization(auth).green,prod_write:false,customer_data:false,external_skill_code_execution:false,additional_cost_eur:0},null,2)+'\n');
-  console.log(JSON.stringify({selected_candidate_id:selected?.candidate_id??null,human_alias:selected?resolveHumanAlias(selected):null,prod_write:false,cost_eur:0}));
+  fs.writeFileSync(output,JSON.stringify({schema_version:'1.0.0',selected:selected?{...selected,human_alias:resolveHumanAlias(selected)}:null,authorization_source:selection?.authorization_source??null,approval_id:selection?.approval_id??null,owner_action:selection?.owner_action??null,standing_authorization_green:validateStandingAuthorization(auth).green,prod_write:false,customer_data:false,external_skill_code_execution:false,additional_cost_eur:0},null,2)+'\n');
+  console.log(JSON.stringify({selected_candidate_id:selected?.candidate_id??null,human_alias:selected?resolveHumanAlias(selected):null,authorization_source:selection?.authorization_source??null,approval_id:selection?.approval_id??null,prod_write:false,cost_eur:0}));
 }
