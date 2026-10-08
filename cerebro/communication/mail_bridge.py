@@ -2,7 +2,6 @@
 import argparse
 import email
 import hashlib
-import hmac
 import imaplib
 import json
 import os
@@ -13,8 +12,7 @@ from email.header import decode_header
 from email.message import EmailMessage
 from email.utils import parseaddr
 
-SIGNED_COMMAND_RE = re.compile(r"^(AUTORIZO|NO AUTORIZO|EXPLICAME)\s+(APR-\d{8}-[A-F0-9]{8})\s+SIG-([A-F0-9]{32})$", re.IGNORECASE)
-UNSIGNED_COMMAND_RE = re.compile(r"^(AUTORIZO|NO AUTORIZO|EXPLICAME)\s+(APR-\d{8}-[A-F0-9]{8})$", re.IGNORECASE)
+COMMAND_RE = re.compile(r"^(AUTORIZO|NO AUTORIZO|EXPLICAME)\s+(APR-\d{8}-[A-F0-9]{8})$", re.IGNORECASE)
 QUOTED_BOUNDARY_RE = re.compile(r"^(on .+wrote:|el .+escribi[oó]:|from:\s+.+|de:\s+.+|-{2,}\s*(original message|mensaje original)\s*-{2,})$", re.IGNORECASE)
 
 
@@ -51,23 +49,6 @@ def extract_text(msg):
     return payload.decode(msg.get_content_charset() or "utf-8", errors="replace")
 
 
-def command_signature(secret, verb, approval_id):
-    message = f"{verb.upper()}|{approval_id.upper()}".encode("utf-8")
-    return hmac.new(secret.encode("utf-8"), message, hashlib.sha256).hexdigest()[:32].upper()
-
-
-def sign_command_line(line, secret):
-    match = UNSIGNED_COMMAND_RE.match(line.strip())
-    if not match:
-        return line
-    verb, approval_id = match.group(1).upper(), match.group(2).upper()
-    return f"{verb} {approval_id} SIG-{command_signature(secret, verb, approval_id)}"
-
-
-def sign_command_text(text, secret):
-    return "\n".join(sign_command_line(line, secret) for line in str(text).splitlines())
-
-
 def extract_unquoted_reply_text(text):
     out = []
     for raw in str(text or "").splitlines():
@@ -80,17 +61,14 @@ def extract_unquoted_reply_text(text):
     return "\n".join(out)
 
 
-def verified_commands(text, secret):
+def exact_commands(text):
     commands = []
     for raw in extract_unquoted_reply_text(text).splitlines():
         line = raw.strip()
-        match = SIGNED_COMMAND_RE.match(line)
+        match = COMMAND_RE.match(line)
         if not match:
             continue
-        verb, approval_id, supplied = match.group(1).upper(), match.group(2).upper(), match.group(3).upper()
-        expected = command_signature(secret, verb, approval_id)
-        if hmac.compare_digest(supplied, expected):
-            commands.append(f"{verb} {approval_id}")
+        commands.append(f"{match.group(1).upper()} {match.group(2).upper()}")
     return commands
 
 
@@ -129,7 +107,7 @@ def existing_delivery_keys(keys):
             pass
 
 
-def prepare_delivery(payload, secret):
+def prepare_delivery(payload):
     kind = payload.get("kind")
     if kind == "approval_batch":
         raw_items = payload.get("items") or []
@@ -142,8 +120,8 @@ def prepare_delivery(payload, secret):
             intro = f"Te necesito. Durante la noche he agrupado {count} decisión{'es' if count != 1 else ''} pendiente{'s' if count != 1 else ''}. Puedes responder a este mismo correo con varias líneas de autorización."
         else:
             intro = f"Te necesito. Tengo {count} decisión{'es' if count != 1 else ''} pendiente{'s' if count != 1 else ''}. Puedes responder a este mismo correo con una o varias líneas."
-        body_items = [sign_command_text(item.get("text", ""), secret) for item in remaining]
-        text = f"{intro}\n\n" + "\n\n------------------------------\n\n".join(body_items) + "\n\nIMPORTANTE: “sí”, “vale”, “ok” o “procede” no autorizan nada. Solo cuentan las frases exactas con APR y su firma.\n"
+        body_items = [item.get("text", "") for item in remaining]
+        text = f"{intro}\n\n" + "\n\n------------------------------\n\n".join(body_items) + "\n\nIMPORTANTE: “sí”, “vale”, “ok” o “procede” no autorizan nada. Solo cuentan las frases exactas con APR.\n"
         subject = payload.get("subject") if count == len(raw_items) else f"CEREBRO · {count} AUTORIZACIÓN{'ES' if count != 1 else ''} PENDIENTE{'S' if count != 1 else ''}"
         keys = [item["delivery_key"] for item in remaining]
         return {"subject": subject, "text": text, "delivery_keys": keys}, already
@@ -164,7 +142,6 @@ def send_message(input_path):
     password = env("CEREBRO_MAIL_PASSWORD")
     from_addr = env("CEREBRO_MAIL_FROM", required=False, default=username)
     owner = env("CEREBRO_OWNER_EMAIL")
-    approval_secret = env("CEREBRO_MAIL_APPROVAL_HMAC_SECRET")
 
     with open(input_path, "r", encoding="utf-8") as fh:
         payload = json.load(fh)
@@ -172,7 +149,7 @@ def send_message(input_path):
     if to_addr.lower() != owner.lower():
         raise RuntimeError("mail bridge can only send to configured owner identity")
 
-    prepared, already = prepare_delivery(payload, approval_secret)
+    prepared, already = prepare_delivery(payload)
     if prepared is None:
         print(json.dumps({"sent": False, "deduplicated": True, "delivery_keys": sorted(already), "recipient": "OWNER_PRIVATE_IDENTITY"}))
         return
@@ -218,7 +195,6 @@ def poll_owner(output_path, limit):
     username = env("CEREBRO_MAIL_USERNAME")
     password = env("CEREBRO_MAIL_PASSWORD")
     owner = env("CEREBRO_OWNER_EMAIL")
-    approval_secret = env("CEREBRO_MAIL_APPROVAL_HMAC_SECRET")
 
     conn = imaplib.IMAP4_SSL(host, port, ssl_context=ssl.create_default_context())
     try:
@@ -249,13 +225,13 @@ def poll_owner(output_path, limit):
             subject = decode_header_text(msg.get("Subject"))
             if not is_real_owner_reply(msg, subject):
                 continue
-            commands = verified_commands(extract_text(msg), approval_secret)
+            commands = exact_commands(extract_text(msg))
             if not commands:
                 continue
             messages.append({
                 "message_id": msg.get("Message-ID") or f"imap:{msg_id.decode()}",
                 "in_reply_to": msg.get("In-Reply-To") or None,
-                "from_identity": "OWNER_PRIVATE_IDENTITY_HMAC_VERIFIED_COMMAND",
+                "from_identity": "OWNER_PRIVATE_IDENTITY_FROM_MATCH",
                 "subject": subject,
                 "date": msg.get("Date") or "",
                 "text": "\n".join(commands),
@@ -263,7 +239,7 @@ def poll_owner(output_path, limit):
         with open(output_path, "w", encoding="utf-8") as fh:
             json.dump(messages, fh, ensure_ascii=False, indent=2)
             fh.write("\n")
-        print(json.dumps({"polled": len(messages), "sender": "OWNER_PRIVATE_IDENTITY", "reply_only": True, "hmac_verified": True}))
+        print(json.dumps({"polled": len(messages), "sender": "OWNER_PRIVATE_IDENTITY", "reply_only": True, "trust_mode": "EXACT_FROM_MATCH_OWNER_ACCEPTED_V0"}))
     finally:
         try:
             conn.logout()
