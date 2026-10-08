@@ -107,3 +107,22 @@ Do not record this block as verified until:
 4. deterministic rerun reproduces the same `execution_sha256` against the same source/request.
 
 Even after acceptance, durable Company Registry persistence remains a separate gate.
+
+## Acceptance closure · 2026-10-08
+
+The promotion rule is satisfied for the PREPROD reference-execution scope only.
+
+- PR #511 merged additively to `main` at `6710067e0f1beb28f930c038aceebfb9168f965a`.
+- Automatic run `37838584276` attempt 1 completed SUCCESS.
+- Deterministic rerun of the same source/request, attempt 2, completed SUCCESS.
+- Both attempts completed `651 passed / 0 failed` CEREBRO tests.
+- Both produced `COMP_REG_TENANT_PREPROD_GREEN` with GREEN engines exactly `COMP-REG-001` and `TENANT-001`.
+- Both reproduced execution SHA-256 `c1dc362d98ac5b5ad23d441a8299d64182d2bb4e6bfd271e13ca45538ad1cdc8`.
+- `COMP-ONB-001` became READY; `SCAN-001` and `ENGACT-001` remained BLOCKED.
+- The synthetic control tenant remained unchanged, proving tenant isolation in this bounded reference path.
+- Promotion remained denied with `PHASE4_NOT_ALL_GREEN`.
+- Additional cost remained 0 EUR and PROD/PROD-write/Trading/Supabase-write/external-code authority remained false.
+
+Accepted state for both engines: `PREPROD_REFERENCE_EXECUTION_VERIFIED` with `durability_state=IN_MEMORY_REFERENCE_ONLY`.
+
+Next gate remains `DURABLE_COMPANY_REGISTRY_PREPROD_PERSISTENCE_REQUIRED`.
