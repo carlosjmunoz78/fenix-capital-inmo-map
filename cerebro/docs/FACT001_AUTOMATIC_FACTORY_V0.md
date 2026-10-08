@@ -10,28 +10,29 @@ Rule applied: **CONSERVAR → ENTENDER → ENVOLVER → PROBAR → MEJORAR → M
 
 ## Status
 
-### HECHO · software on candidate branch
+### HECHO · `AUTOMATIC_SCAFFOLD_VERIFIED`
 
 - Existing canonical factory remains the only scaffold-generation authority.
-- New `fact001-request-runner.mjs` validates a bounded request and invokes the existing factory; it does not reimplement or replace FACT-001.
-- New request contract under `cerebro/factory/requests/`.
-- New hostless GitHub Actions control path with `push`, `workflow_dispatch` and `repository_dispatch` ingress.
-- Exactly one requested canonical engine scaffold is extracted from the existing deterministic 177-engine generation.
+- `fact001-request-runner.mjs` validates a bounded request and invokes the existing factory; it does not reimplement or replace FACT-001.
+- Request contract lives under `cerebro/factory/requests/`.
+- Hostless GitHub Actions control path supports `push`, `workflow_dispatch` and `repository_dispatch` ingress.
+- Exactly one requested canonical engine scaffold is extracted from the deterministic 177-engine generation.
 - Exactly 18 mandatory scaffold files are structurally checked.
 - Deterministic request idempotency key, registry checksum and bundle checksum are emitted.
 - Run evidence is archived as a GitHub Actions artifact.
 - Repository permission is read-only; no new credential, paid provider, Supabase write, PROD write or Trading path is introduced.
+- Automatic post-merge `main` run `37830400943` attempt 1 completed SUCCESS from push without manual launch.
+- Same immutable run rerun as attempt 2 completed SUCCESS with the same request idempotency key, bundle checksum and registry checksum.
+- Acceptance evidence is recorded in `FACT001_AUTOMATIC_FACTORY_ACCEPTANCE_2026-10-08.md` and the autonomy registry overlay.
 
 ### PARCIAL
 
-- Live post-merge acceptance is still required before FACT-001 can be labeled `AUTOMATIC_SCAFFOLD_VERIFIED`.
-- The target engine itself remains only `SCAFFOLD`; this workflow does not claim target-engine behavioral evaluation, tribunal or PREPROD readiness.
-- CEREBRO Gateway dispatch wiring is supported by contract (`repository_dispatch`) but is not claimed live until ACTGW sends and verifies a real request.
+- The generated target engine itself remains only `SCAFFOLD`; this workflow does not claim target-engine behavioral evaluation, tribunal or PREPROD readiness.
+- CEREBRO Gateway dispatch wiring is supported by contract (`repository_dispatch`) but is not claimed live until ACTGW-001 sends and verifies a real request.
 
 ### POR AUDITAR
 
-- First real automatic `main` run from `fact001-selfcheck.v0.json`.
-- Deterministic rerun/idempotency evidence on the same request.
+- Live ACTGW-001 → `repository_dispatch` request proof.
 - Future high-volume request queue behavior beyond the V0 bound of 50 request files per run.
 
 ## Request contract
@@ -60,6 +61,21 @@ These are canonical HUMAN_REQUIRED reasons. No ad-hoc human reason is introduced
 
 The workflow runs entirely on GitHub-hosted Actions and therefore does not depend on the Windows PC or Browser Bridge. The runtime uses deterministic Node/JSON logic; paid AI is not required.
 
+## Live acceptance identity
+
+- source SHA: `a20b98ac9ff006ebbbd9a6fbd51f16d8cdf8cee4`
+- run: `37830400943`
+- accepted attempts: `1` and `2`
+- request: `fact001-selfcheck-v0`
+- idempotency key: `fact001:9d7a6ad8651866e85f7199b3cfdf38928a09a302fa29cf2e6a962853dfac6427`
+- bundle SHA-256: `e55c45943dba3cf084c0f657cc1cb529a3a23e5b293e2549b2b51ffb36675b74`
+- registry SHA-256: `92717b6109caade90e9c3c89940536122d8583cd8fe8695a4118119febe2caf8`
+- generated scaffold files: `18`
+- regression suite in accepted live run: `634 passed / 0 failed`
+- HUMAN_REQUIRED: none
+- additional cost: `0 EUR`
+- PROD/Trading: false
+
 ## Evaluation boundary
 
 The AutoFactory evaluates **factory structural correctness**, not the business behavior of the generated engine. The generated target keeps its native scaffold fields such as `evaluation.status = NOT_EVALUATED` and `tribunal.status = NOT_RUN` until an implementation exists and the normal promotion chain is executed.
@@ -81,9 +97,7 @@ It does **not** mean:
 
 ## Rollback
 
-Before merge: abandon/revert the candidate branch.
-
-After merge, rollback is a narrow Git revert of:
+Rollback is a narrow Git revert of:
 
 - `.github/workflows/cerebro-fact001-autofactory-v0.yml`
 - `cerebro/runtime/fact001-request-runner.mjs`
@@ -112,15 +126,8 @@ node cerebro/runtime/fact001-request-runner.mjs \
 
 Expected: `FACTORY_SCAFFOLD_GREEN`, 18 generated files, deterministic hashes, cost 0, PROD/Trading false.
 
-## Promotion rule
+## Downstream promotion rule for generated engines
 
-FACT-001 itself may move to `AUTOMATIC_SCAFFOLD_VERIFIED` only after:
+FACT-001 automation being verified does not bypass the promotion contract of any generated target. Each target still requires its own implementation, contracts, permissions, tests, evaluation, tribunal, observability, rollback, backup, rebuild, measured cost, policy and PREPROD evidence before any higher autonomy state.
 
-1. exact-head regression gates GREEN;
-2. implementation merged additively to `main`;
-3. automatic `main` workflow executes without manual launch;
-4. real scaffold artifact is present and safe;
-5. same request rerun reproduces the same idempotency/bundle identity or otherwise proves deterministic idempotency;
-6. autonomy registry, dependency map, changelog and current state are updated from observed evidence.
-
-PROD authority is explicitly outside V0.
+PROD authority is explicitly outside FACT-001 AutoFactory V0.
