@@ -47,3 +47,41 @@ export function persistPreparedCandidate({prepared,ledger}){
   const result=ledger.persist(prepared.candidate);
   return Object.freeze({...result,next_gate:'EXPERIMENT_OR_EVALUATION',rsi_publish_authorized:false,prod_authorized:false,prod_write_authorized:false});
 }
+
+export function persistBridgeReportToPreprod({
+  bridge_report,ledger,preprod_version,policy_pass=false,security_pass=false,local_persistence_enabled=false
+}){
+  if(!bridge_report||!Array.isArray(bridge_report.learning_candidates)) throw new Error('bridge report required');
+  if(!ledger||typeof ledger.persist!=='function') throw new Error('learning ledger required');
+  const persisted=[];
+  const held=[];
+  for(const shadow_record of bridge_report.learning_candidates){
+    const prepared=preparePreprodLearningCandidate({
+      shadow_record,
+      preprod_version,
+      bridge_status:bridge_report.bridge_status,
+      policy_pass,
+      security_pass,
+      local_persistence_enabled
+    });
+    if(!prepared.ok){
+      held.push({source_learning_id:shadow_record.learning_id,reasons:prepared.reasons,human_required:prepared.human_required});
+      continue;
+    }
+    persisted.push(persistPreparedCandidate({prepared,ledger}));
+  }
+  const humanRequired=[...new Set(held.map((item)=>item.human_required).filter(Boolean))];
+  return Object.freeze({
+    source_candidates:bridge_report.learning_candidates.length,
+    persisted_total:persisted.filter((item)=>item.accepted).length,
+    duplicates_total:persisted.filter((item)=>item.duplicate).length,
+    held_total:held.length,
+    human_required:humanRequired,
+    persisted:Object.freeze(persisted),
+    held:Object.freeze(held),
+    next_gate:held.length?'REVIEW_HELD_OR_CONTINUE_LOW_RISK':'EXPERIMENT_OR_EVALUATION',
+    rsi_publish_authorized:false,
+    prod_authorized:false,
+    prod_write_authorized:false
+  });
+}
