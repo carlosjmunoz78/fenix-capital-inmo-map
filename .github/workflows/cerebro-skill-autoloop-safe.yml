@@ -1,0 +1,138 @@
+name: CEREBRO Skill AutoLoop Safe V0
+
+on:
+  push:
+    branches:
+      - main
+      - cerebro/skill-autoloop-v0-20261008
+    paths:
+      - 'cerebro/skills/skill-autoloop-controller.mjs'
+      - 'cerebro/skills/skill-next-candidate-selector.mjs'
+      - 'cerebro/tests/skill-autoloop-controller.test.mjs'
+      - 'cerebro/tests/skill-next-candidate-selector.test.mjs'
+      - '.github/workflows/cerebro-skill-autoloop-safe.yml'
+  schedule:
+    - cron: '37 */6 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: cerebro-skill-autoloop-safe-v0
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  actions: read
+
+env:
+  AUTOLOOP_STATE_BRANCH: cerebro/skill-autoloop-state-v0
+  AUTOLOOP_STATE_PATH: cerebro/runtime/skill-autoloop-state.v0.json
+  DISCOVERY_WORKFLOW: CEREBRO Skill Discovery Scout
+
+jobs:
+  safe-autoloop:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Run AutoLoop and selector contract tests
+        run: node --test cerebro/tests/skill-autoloop-controller.test.mjs cerebro/tests/skill-next-candidate-selector.test.mjs
+
+      - name: Load dedicated AutoLoop state branch only
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/autoloop
+          git fetch --no-tags origin "refs/heads/$AUTOLOOP_STATE_BRANCH:refs/remotes/origin/$AUTOLOOP_STATE_BRANCH"
+          git show "refs/remotes/origin/$AUTOLOOP_STATE_BRANCH:$AUTOLOOP_STATE_PATH" > artifacts/autoloop/state.before.json
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          import {validateSafeAutoloopState} from './cerebro/skills/skill-autoloop-controller.mjs';
+          const state=JSON.parse(fs.readFileSync('artifacts/autoloop/state.before.json','utf8'));
+          const v=validateSafeAutoloopState(state);
+          if(!v.green){console.error(JSON.stringify(v));process.exit(1)}
+          console.log(JSON.stringify({state:'GREEN_SAFE_AUTONOMY_V0',processed:(state.processed_candidate_ids??[]).length,prod_authorized:false,cost_budget_eur:0}));
+          NODE
+
+      - name: Resolve latest successful main Discovery Scout evidence
+        id: discovery
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          RUN_ID="$(gh run list --repo "$GITHUB_REPOSITORY" --workflow "$DISCOVERY_WORKFLOW" --branch main --status success --limit 1 --json databaseId --jq '.[0].databaseId')"
+          if [ -z "$RUN_ID" ] || [ "$RUN_ID" = "null" ]; then echo "::error::No successful main Discovery Scout run found"; exit 1; fi
+          echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
+          mkdir -p artifacts/discovery
+          gh run download "$RUN_ID" --repo "$GITHUB_REPOSITORY" --name "cerebro-skill-discovery-$RUN_ID" --dir artifacts/discovery
+          test -f artifacts/discovery/cerebro-skill-value-p0.json
+          echo "Resolved immutable discovery run $RUN_ID"
+
+      - name: Re-select next candidate using persistent anti-loop state
+        run: |
+          node cerebro/skills/skill-next-candidate-selector.mjs \
+            --value artifacts/discovery/cerebro-skill-value-p0.json \
+            --registry cerebro/registry/skill-supply-chain-v0.json \
+            --state artifacts/autoloop/state.before.json \
+            --output artifacts/autoloop/next-candidate.json
+
+      - name: Checkpoint safe queue decision without crossing a human gate
+        run: |
+          node cerebro/skills/skill-autoloop-controller.mjs \
+            --state artifacts/autoloop/state.before.json \
+            --next artifacts/autoloop/next-candidate.json \
+            --source-run-id "${{ steps.discovery.outputs.run_id }}" \
+            --output artifacts/autoloop/decision.json \
+            --state-output artifacts/autoloop/state.after.json
+
+      - name: Enforce zero-cost and no-PROD safety invariants
+        run: |
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          import {validateSafeAutoloopState} from './cerebro/skills/skill-autoloop-controller.mjs';
+          const before=JSON.parse(fs.readFileSync('artifacts/autoloop/state.before.json','utf8'));
+          const after=JSON.parse(fs.readFileSync('artifacts/autoloop/state.after.json','utf8'));
+          const d=JSON.parse(fs.readFileSync('artifacts/autoloop/decision.json','utf8'));
+          const v=validateSafeAutoloopState(after);
+          const immutableSafety=after.safe_autonomy.prod_write===false&&after.safe_autonomy.auto_merge===false&&after.safe_autonomy.preprod_promotion===false&&after.safe_autonomy.prod_readonly_canary===false&&after.safe_autonomy.customer_data===false&&after.safe_autonomy.external_skill_code_execution===false&&after.safe_autonomy.trading===false&&after.safe_autonomy.paid_fallback===false&&after.safe_autonomy.additional_cost_budget_eur===0&&after.prod_authorized===false&&after.autonomous_prod_promotion_authorized===false;
+          if(!v.green||!immutableSafety||d.prod_authorized!==false||d.autonomous_prod_promotion_authorized!==false){console.error('AUTOLOOP_SAFETY_INVARIANT_FAILED');process.exit(1)}
+          if(before.mode!==after.mode||after.mode!=='SAFE_AUTONOMY_V0'){console.error('AUTOLOOP_MODE_CHANGED');process.exit(1)}
+          console.log(JSON.stringify({decision:d.decision,candidate_id:d.candidate_id??null,safety:'GREEN',prod_write:false,auto_merge:false,preprod_promotion:false,customer_data:false,external_skill_code:false,trading:false,paid_fallback:false,cost_budget_eur:0}));
+          NODE
+
+      - name: Persist checkpoint only to dedicated AutoLoop state branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          cp artifacts/autoloop/state.after.json /tmp/cerebro-skill-autoloop-state.v0.json
+          git fetch --no-tags origin "refs/heads/$AUTOLOOP_STATE_BRANCH:refs/remotes/origin/$AUTOLOOP_STATE_BRANCH"
+          git checkout --detach "refs/remotes/origin/$AUTOLOOP_STATE_BRANCH"
+          mkdir -p "$(dirname "$AUTOLOOP_STATE_PATH")"
+          cp /tmp/cerebro-skill-autoloop-state.v0.json "$AUTOLOOP_STATE_PATH"
+          git config user.name "cerebro-autoloop[bot]"
+          git config user.email "cerebro-autoloop[bot]@users.noreply.github.com"
+          git add "$AUTOLOOP_STATE_PATH"
+          if git diff --cached --quiet; then
+            echo "No AutoLoop state change to persist"
+          else
+            git commit -m "chore(cerebro): checkpoint safe Skill AutoLoop state"
+            git push origin "HEAD:refs/heads/$AUTOLOOP_STATE_BRANCH"
+          fi
+
+      - name: Upload immutable AutoLoop decision evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-skill-autoloop-safe-${{ github.run_id }}
+          path: |
+            artifacts/autoloop/state.before.json
+            artifacts/autoloop/next-candidate.json
+            artifacts/autoloop/decision.json
+            artifacts/autoloop/state.after.json
+          if-no-files-found: warn
+          retention-days: 30
