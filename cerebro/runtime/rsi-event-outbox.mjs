@@ -9,6 +9,7 @@ const ENGINE_ID='LRN-001';
 function reqString(value,label){if(typeof value!=='string'||!value.trim()) throw new Error(`${label} required`);return value.trim();}
 function stableHash(value){return crypto.createHash('sha256').update(typeof value==='string'?value:JSON.stringify(value)).digest('hex');}
 function sha256Bytes(value){return crypto.createHash('sha256').update(value).digest('hex');}
+function legacyBufferSha256(value){return crypto.createHash('sha256').update(JSON.stringify(Buffer.from(value))).digest('hex');}
 function ensureDir(dir){fs.mkdirSync(dir,{recursive:true});return dir;}
 function atomicJson(file,value){ensureDir(path.dirname(file));const tmp=`${file}.tmp-${process.pid}-${crypto.randomBytes(4).toString('hex')}`;fs.writeFileSync(tmp,`${JSON.stringify(value,null,2)}\n`,{encoding:'utf8',mode:0o600});fs.renameSync(tmp,file);}
 function readJson(file){return JSON.parse(fs.readFileSync(file,'utf8'));}
@@ -105,6 +106,10 @@ function validateExistingBatch(file,batch){
   const next=`${JSON.stringify(batch,null,2)}\n`;
   if(stableHash(existing)!==stableHash(next)) throw new Error(`OUTBOX_BATCH_CONFLICT: ${batch.batch_id}`);
 }
+function sameEntryExceptSha(a,b){
+  const left={...a};const right={...b};delete left.sha256;delete right.sha256;
+  return JSON.stringify(left)===JSON.stringify(right);
+}
 
 export function persistLearningOutbox({build,output_root}){
   if(!build||!Array.isArray(build.batches)) throw new Error('outbox build required');
@@ -127,13 +132,23 @@ export function persistLearningOutbox({build,output_root}){
     if(prior.company_id!==batch.company_id||prior.engine_id!==ENGINE_ID||prior.environment!==PREPROD||prior.prod_authorized!==false) throw new Error(`OUTBOX_INDEX_CONTEXT_MISMATCH: ${batch.company_id}`);
     const existing=prior.batches??[];
     const same=existing.find(item=>item.batch_id===entry.batch_id);
-    if(same&&JSON.stringify(same)!==JSON.stringify(entry)) throw new Error(`OUTBOX_INDEX_CONFLICT: ${entry.batch_id}`);
-    const batches=same?existing:[...existing,entry].sort((a,b)=>a.batch_id.localeCompare(b.batch_id));
+    let checksumMigrated=false;
+    let batches;
+    if(!same){
+      batches=[...existing,entry].sort((a,b)=>a.batch_id.localeCompare(b.batch_id));
+    }else if(JSON.stringify(same)===JSON.stringify(entry)){
+      batches=existing;
+    }else if(sameEntryExceptSha(same,entry)&&same.sha256===legacyBufferSha256(bytes)&&entry.sha256===sha256Bytes(bytes)){
+      batches=existing.map(item=>item.batch_id===entry.batch_id?entry:item);
+      checksumMigrated=true;
+    }else{
+      throw new Error(`OUTBOX_INDEX_CONFLICT: ${entry.batch_id}`);
+    }
     const index={...prior,version:batch.version,batches_total:batches.length,batches,prod_authorized:false,trading_access:false,additional_cost_eur:0};
     atomicJson(indexFile,index);
-    results.push({company_id:batch.company_id,batch_id:batch.batch_id,created,batch_file:batchFile,index_file:indexFile,sha256:entry.sha256});
+    results.push({company_id:batch.company_id,batch_id:batch.batch_id,created,checksum_migrated:checksumMigrated,batch_file:batchFile,index_file:indexFile,sha256:entry.sha256});
   }
-  return Object.freeze({status:'OUTBOX_GREEN',results:Object.freeze(results),created_total:results.filter(r=>r.created).length,batches_total:results.length,prod_authorized:false,trading_access:false,additional_cost_eur:0});
+  return Object.freeze({status:'OUTBOX_GREEN',results:Object.freeze(results),created_total:results.filter(r=>r.created).length,migrated_checksum_total:results.filter(r=>r.checksum_migrated).length,batches_total:results.length,prod_authorized:false,trading_access:false,additional_cost_eur:0});
 }
 
 function arg(name){const i=process.argv.indexOf(name);return i>=0?process.argv[i+1]:null;}
