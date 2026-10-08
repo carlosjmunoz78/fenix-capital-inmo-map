@@ -1,0 +1,35 @@
+name: CEREBRO RSI Recovery 001 Gate
+
+on:
+  push:
+    paths:
+      - 'cerebro/runtime/continuous-improvement-contract.mjs'
+      - 'cerebro/skills/skill-rsi-shadow-bridge.mjs'
+      - 'cerebro/tests/continuous-improvement-contract.test.mjs'
+      - 'cerebro/tests/skill-rsi-shadow-bridge.test.mjs'
+      - 'cerebro/docs/RSI_RECOVERY_001_AUDIT_2026-10-08.md'
+      - '.github/workflows/cerebro-rsi-recovery-001-gate.yml'
+  pull_request:
+    paths:
+      - 'cerebro/runtime/continuous-improvement-contract.mjs'
+      - 'cerebro/skills/skill-rsi-shadow-bridge.mjs'
+      - 'cerebro/tests/continuous-improvement-contract.test.mjs'
+      - 'cerebro/tests/skill-rsi-shadow-bridge.test.mjs'
+      - 'cerebro/docs/RSI_RECOVERY_001_AUDIT_2026-10-08.md'
+      - '.github/workflows/cerebro-rsi-recovery-001-gate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rsi-recovery-001-contract-bridge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Recovered contract and existing bridge regression tests
+        run: node --test cerebro/tests/continuous-improvement-contract.test.mjs cerebro/tests/skill-rsi-shadow-bridge.test.mjs
