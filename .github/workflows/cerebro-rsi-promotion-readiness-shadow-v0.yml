@@ -18,15 +18,23 @@ concurrency:
   group: cerebro-rsi-promotion-readiness-${{ github.event.pull_request.head.sha || github.sha }}
   cancel-in-progress: true
 
+env:
+  EXACT_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+
 jobs:
   factory-preprod-shadow:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.EXACT_HEAD }}
+          fetch-depth: 1
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+      - name: Assert exact PR head checkout
+        run: test "$(git rev-parse HEAD)" = "$EXACT_HEAD"
       - name: Validate canonical engine registry
         working-directory: cerebro
         run: npm run validate
@@ -39,15 +47,13 @@ jobs:
       - name: Assert canonical engine count and no repo mutation
         run: |
           set -euo pipefail
-          EXPECTED_COUNT="$(node -e "const x=require('./cerebro/registry/engine-registry.seed.json'); console.log(Array.isArray(x)?x.length:(x.engines?.length ?? x.engine_count ?? ''))")"
+          EXPECTED_COUNT="$(node -e "const x=require('./cerebro/registry/engine-registry.seed.json'); console.log(Array.isArray(x)?x.length:(x.engines?.length ?? x.engine_count ?? x.count ?? ''))")"
           GENERATED_COUNT="$(node -e "const x=require('/tmp/cerebro-generated/skeleton-index.json'); console.log(x.engine_count)")"
           test -n "$EXPECTED_COUNT"
           test "$GENERATED_COUNT" = "$EXPECTED_COUNT"
           git diff --exit-code
       - name: Mark equivalence boundary
-        run: |
-          echo 'SHADOW_EQUIVALENCE_ONLY=true' >> "$GITHUB_ENV"
-          echo 'This job executes the validation body of CEREBRO Factory PREPROD on the exact PR head; it does not claim the named manual gate ran.' >> "$GITHUB_STEP_SUMMARY"
+        run: echo 'This job executes the validation body of CEREBRO Factory PREPROD on the exact PR head; it does not claim the named manual gate ran.' >> "$GITHUB_STEP_SUMMARY"
 
   app-preprod-build-shadow:
     runs-on: ubuntu-latest
@@ -58,10 +64,15 @@ jobs:
       VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_uvtiidkBBkFRt2K34so27g_JpCbMUZw
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.EXACT_HEAD }}
+          fetch-depth: 1
       - uses: actions/setup-node@v4
         with:
           node-version: 24
           cache: npm
+      - name: Assert exact PR head checkout
+        run: test "$(git rev-parse HEAD)" = "$EXACT_HEAD"
       - name: Install dependencies reproducibly
         run: |
           set -euo pipefail
@@ -98,7 +109,7 @@ jobs:
       - name: Archive PREPROD build evidence only
         uses: actions/upload-artifact@v4
         with:
-          name: rsi-promotion-readiness-preprod-${{ github.event.pull_request.head.sha || github.sha }}
+          name: rsi-promotion-readiness-preprod-${{ env.EXACT_HEAD }}
           path: |
             dist
             playwright-report
@@ -112,9 +123,14 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.EXACT_HEAD }}
+          fetch-depth: 1
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+      - name: Assert exact PR head checkout
+        run: test "$(git rev-parse HEAD)" = "$EXACT_HEAD"
       - name: Independent-evaluation and promotion safety contracts
         run: >-
           node --test
@@ -128,7 +144,7 @@ jobs:
         run: |
           set -euo pipefail
           git fetch origin "${{ github.event.pull_request.base.sha }}" --depth=1
-          changed="$(git diff --name-only "${{ github.event.pull_request.base.sha }}"...HEAD)"
+          changed="$(git diff --name-only "${{ github.event.pull_request.base.sha }}" HEAD)"
           if echo "$changed" | grep -Eq '^(src/|supabase/|public/|index.html$|package.json$|package-lock.json$|\.github/workflows/prod-)'; then
             echo 'Unexpected application/production surface changed by RSI recovery.' >&2
             echo "$changed" >&2
