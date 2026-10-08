@@ -20,6 +20,12 @@ test('domain routing matches the owner-approved strategic lines',()=>{
   assert.equal(classifyStrategicLane(c('b','sales-crm-customer','crm-builder')),'COMPANY');
 });
 
+test('explicit domain wins over ambiguous keywords such as database design',()=>{
+  const supabase=c('db','data-database-supabase','supabase-postgres-best-practices');
+  supabase.declared_description='Postgres database design and query optimization';
+  assert.equal(classifyStrategicLane(supabase),'COMPANY');
+});
+
 test('heavy device/company skills go DEEP while simple low-risk skills can be EXPRESS',()=>{
   assert.equal(estimateWorkClass(c('d','browser-automation-scraping','browser-control')),'DEEP');
   assert.equal(estimateWorkClass(c('b','multi-company-business-bootstrap','company-builder')),'DEEP');
