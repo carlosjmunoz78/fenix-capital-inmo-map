@@ -28,13 +28,18 @@ test('a historical decision alone does not authorize execution',()=>{
   assert.equal(result.reason,'NO_MATCHING_OWNER_AUTHORIZATION');
 });
 
-test('active standing authorization authorizes exact scope but not a different scope',()=>{
-  const standing={decisions:[],authorized_actions:{},standing_authorizations:{'SCOPE-12345678':{status:'ACTIVE',exact_scope_only:true,approval_id:'APR-OLD'}}};
-  const ok=evaluateOwnerAuthorization({communicationState:standing,request});
+test('active standing authorization requires exact scope and registered execution binding',()=>{
+  const binding='SKILL_AUTONOMY_READONLY_V1';
+  const standing={decisions:[],authorized_actions:{},standing_authorizations:{'SCOPE-12345678':{status:'ACTIVE',exact_scope_only:true,approval_id:'APR-OLD',execution_binding:binding}}};
+  const ok=evaluateOwnerAuthorization({communicationState:standing,request:{...request,execution_binding:binding}});
   assert.equal(ok.authorized,true);
   assert.equal(ok.source,'STANDING_AUTHORIZATION');
-  const no=evaluateOwnerAuthorization({communicationState:standing,request:{...request,scope_fingerprint:'SCOPE-99999999'}});
-  assert.equal(no.authorized,false);
+  const noBinding=evaluateOwnerAuthorization({communicationState:standing,request});
+  assert.equal(noBinding.authorized,false);
+  const wrongBinding=evaluateOwnerAuthorization({communicationState:standing,request:{...request,execution_binding:'OTHER'}});
+  assert.equal(wrongBinding.authorized,false);
+  const wrongScope=evaluateOwnerAuthorization({communicationState:standing,request:{...request,scope_fingerprint:'SCOPE-99999999',execution_binding:binding}});
+  assert.equal(wrongScope.authorized,false);
 });
 
 test('audit event follows console owner decision contract semantics',()=>{
