@@ -5,6 +5,7 @@ import {fileURLToPath} from 'node:url';
 import {normalizeHostConfig,hostPaths,runHostCycle} from './rsi-learning-host.mjs';
 import {syncRemoteOutboxOnce} from './rsi-outbox-client.mjs';
 import {persistDueLearningPlans} from './learning-orchestrator.mjs';
+import {executePendingLearningHorizons} from './learning-horizon-executor.mjs';
 
 function readJson(file){return JSON.parse(fs.readFileSync(file,'utf8'));}
 function ensureDir(dir){fs.mkdirSync(dir,{recursive:true});return dir;}
@@ -35,6 +36,8 @@ function clearRemoteFailure(file){if(fs.existsSync(file))fs.rmSync(file,{force:t
 export async function runAutoHostIteration({raw_config,fetch_impl=globalThis.fetch,now=()=>new Date().toISOString()}){
   const cfg=normalizeHostConfig(raw_config);
   const paths=hostPaths(cfg);
+  const tick=typeof now==='function'?now():now;
+  const fixedNow=()=>tick;
   const remoteFailure=path.join(paths.companyRoot,'remote-sync-failure.json');
   let remote={status:'REMOTE_OUTBOX_DISABLED',downloaded_total:0,skipped_total:0,prod_authorized:false};
   if(!fs.existsSync(paths.killSwitch)&&raw_config.remote_outbox?.enabled===true){
@@ -47,18 +50,17 @@ export async function runAutoHostIteration({raw_config,fetch_impl=globalThis.fet
       remote={status:'REMOTE_OUTBOX_ERROR',error:String(error?.message??error).slice(0,500),consecutive_same_error:count,downloaded_total:0,skipped_total:0,prod_authorized:false};
     }
   }
-  const learning=runHostCycle({config:cfg,now});
+  const learning=runHostCycle({config:cfg,now:fixedNow});
   let orchestration={status:'ORCHESTRATOR_KILLED',planned_total:0,created_total:0,prod_authorized:false,prod_write_authorized:false,trading_access:false,additional_cost_eur:0};
+  let horizons={status:'HORIZON_EXECUTORS_KILLED',completed_total:0,skipped_total:0,prod_authorized:false,prod_write_authorized:false,trading_access:false,additional_cost_eur:0};
   if(learning.status!=='KILLED'){
-    orchestration=persistDueLearningPlans({
-      state_file:path.join(paths.companyRoot,'orchestration-state.json'),
-      plans_dir:path.join(paths.companyRoot,'orchestration-plans'),
-      company_id:cfg.company_id,
-      version:cfg.version,
-      now:typeof now==='function'?now():now
-    });
+    const stateFile=path.join(paths.companyRoot,'orchestration-state.json');
+    const plansDir=path.join(paths.companyRoot,'orchestration-plans');
+    const resultsDir=path.join(paths.companyRoot,'orchestration-results');
+    orchestration=persistDueLearningPlans({state_file:stateFile,plans_dir:plansDir,company_id:cfg.company_id,version:cfg.version,now:tick});
+    horizons=executePendingLearningHorizons({state_file:stateFile,plans_dir:plansDir,results_dir:resultsDir,company_id:cfg.company_id,version:cfg.version,ledger_file:paths.ledger,receipts_dir:paths.receipts,heartbeat_file:paths.heartbeat,now:tick});
   }
-  return Object.freeze({status:learning.status,remote_outbox:remote,learning,orchestration,additional_cost_eur:0,prod_authorized:false,prod_write_authorized:false,trading_access:false});
+  return Object.freeze({status:learning.status,remote_outbox:remote,learning,orchestration,horizons,additional_cost_eur:0,prod_authorized:false,prod_write_authorized:false,trading_access:false});
 }
 
 export async function runAutoHostLoop({raw_config,signal,fetch_impl=globalThis.fetch,sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms)),now=()=>new Date().toISOString()}){
