@@ -7,13 +7,25 @@ import {persistBridgeReportToPreprod} from './learning-preprod-pipeline.mjs';
 
 const PREPROD='PREPROD';
 
+function pidAlive(pid){
+  if(!Number.isInteger(pid)||pid<=0) return false;
+  try{process.kill(pid,0);return true;}
+  catch(error){return error?.code==='EPERM';}
+}
+function writeOwner(lockDir){fs.writeFileSync(path.join(lockDir,'owner.json'),JSON.stringify({pid:process.pid,started_at:new Date().toISOString()}),{encoding:'utf8',mode:0o600,flag:'wx'});}
 function acquireLock(lockDir){
-  try{fs.mkdirSync(lockDir,{recursive:false,mode:0o700});}
+  try{fs.mkdirSync(lockDir,{recursive:false,mode:0o700});writeOwner(lockDir);}
   catch(error){
-    if(error?.code==='EEXIST') throw new Error('LRN-001 single-writer lock already held');
-    throw error;
+    if(error?.code!=='EEXIST') throw error;
+    const ownerFile=path.join(lockDir,'owner.json');
+    if(!fs.existsSync(ownerFile)) throw new Error('LRN-001 single-writer lock already held or owner metadata missing');
+    let owner;
+    try{owner=JSON.parse(fs.readFileSync(ownerFile,'utf8'));}catch{throw new Error('LRN-001 single-writer lock owner metadata invalid');}
+    if(pidAlive(owner?.pid)) throw new Error('LRN-001 single-writer lock already held');
+    fs.rmSync(lockDir,{recursive:true,force:true});
+    fs.mkdirSync(lockDir,{recursive:false,mode:0o700});writeOwner(lockDir);
   }
-  return ()=>{try{fs.rmdirSync(lockDir);}catch{}};
+  return ()=>{try{fs.rmSync(lockDir,{recursive:true,force:true});}catch{}};
 }
 
 export function runLearningWorkerOnce({
