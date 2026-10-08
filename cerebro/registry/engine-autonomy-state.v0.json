@@ -9,6 +9,33 @@
   "updated_at": "2026-10-08",
   "engines": [
     {
+      "engine_id": "FACT-001",
+      "company_id": "GLOBAL_ONLY",
+      "environment": "SCAFFOLD",
+      "version": "0.1.0",
+      "autonomy_state": "AUTOMATIC_SCAFFOLD_SOFTWARE_READY_LIVE_ACCEPTANCE_PENDING",
+      "execution_model": "GITHUB_EVENT_DRIVEN_HOSTLESS",
+      "trigger_semantics": "MAIN_REQUEST_FILE_PLUS_EXPLICIT_DISPATCH",
+      "connected_scope": "CANONICAL_ENGINE_SCAFFOLD_REQUESTS_ONLY",
+      "live_acceptance_run_id": null,
+      "idempotency_acceptance_run_id": null,
+      "structural_file_count": 18,
+      "rollback_documented": true,
+      "rebuild_documented": true,
+      "observability_verified": false,
+      "human_required_policy_enforced": true,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "evidence_refs": [
+        "cerebro/docs/FACT001_AUTOMATIC_FACTORY_V0.md",
+        ".github/workflows/cerebro-fact001-autofactory-v0.yml",
+        "cerebro/factory/requests/README.md",
+        "cerebro/runtime/fact001-request-runner.mjs"
+      ]
+    },
+    {
       "engine_id": "LRN-001",
       "company_id": "fenix",
       "environment": "PREPROD",
