@@ -5,6 +5,7 @@ on:
     paths:
       - 'cerebro/runtime/continuous-improvement-contract.mjs'
       - 'cerebro/runtime/continuous-improvement-scheduler.mjs'
+      - 'cerebro/runtime/learning-orchestrator.mjs'
       - 'cerebro/runtime/learning-pipeline.mjs'
       - 'cerebro/runtime/learning-ledger.mjs'
       - 'cerebro/runtime/learning-preprod-pipeline.mjs'
@@ -27,6 +28,7 @@ on:
       - 'cerebro/skills/skill-rsi-shadow-bridge.mjs'
       - 'cerebro/tests/continuous-improvement-contract.test.mjs'
       - 'cerebro/tests/continuous-improvement-scheduler.test.mjs'
+      - 'cerebro/tests/learning-orchestrator.test.mjs'
       - 'cerebro/tests/learning-pipeline.test.mjs'
       - 'cerebro/tests/learning-ledger.test.mjs'
       - 'cerebro/tests/learning-preprod-pipeline.test.mjs'
@@ -53,12 +55,14 @@ on:
       - 'cerebro/docs/RSI_RECOVERY_003_*.md'
       - 'cerebro/docs/RSI_RECOVERY_004_*.md'
       - 'cerebro/docs/RSI_RECOVERY_005_*.md'
+      - 'cerebro/docs/RSI_RECOVERY_006_*.md'
       - '.github/workflows/cerebro-rsi-learning-outbox-publisher-v0.yml'
       - '.github/workflows/cerebro-rsi-recovery-001-gate.yml'
   pull_request:
     paths:
       - 'cerebro/runtime/continuous-improvement-contract.mjs'
       - 'cerebro/runtime/continuous-improvement-scheduler.mjs'
+      - 'cerebro/runtime/learning-orchestrator.mjs'
       - 'cerebro/runtime/learning-pipeline.mjs'
       - 'cerebro/runtime/learning-ledger.mjs'
       - 'cerebro/runtime/learning-preprod-pipeline.mjs'
@@ -81,6 +85,7 @@ on:
       - 'cerebro/skills/skill-rsi-shadow-bridge.mjs'
       - 'cerebro/tests/continuous-improvement-contract.test.mjs'
       - 'cerebro/tests/continuous-improvement-scheduler.test.mjs'
+      - 'cerebro/tests/learning-orchestrator.test.mjs'
       - 'cerebro/tests/learning-pipeline.test.mjs'
       - 'cerebro/tests/learning-ledger.test.mjs'
       - 'cerebro/tests/learning-preprod-pipeline.test.mjs'
@@ -107,6 +112,7 @@ on:
       - 'cerebro/docs/RSI_RECOVERY_003_*.md'
       - 'cerebro/docs/RSI_RECOVERY_004_*.md'
       - 'cerebro/docs/RSI_RECOVERY_005_*.md'
+      - 'cerebro/docs/RSI_RECOVERY_006_*.md'
       - '.github/workflows/cerebro-rsi-learning-outbox-publisher-v0.yml'
       - '.github/workflows/cerebro-rsi-recovery-001-gate.yml'
   workflow_dispatch:
@@ -137,11 +143,12 @@ jobs:
             }
           }
           if ($failed) { exit 1 }
-      - name: Recovered RSI runtime, real event wiring, PREPROD persistence, host binding, governance and bridge regression tests
+      - name: Recovered RSI runtime, autonomous horizons, real event wiring, PREPROD persistence, host binding, governance and bridge regression tests
         run: >-
           node --test
           cerebro/tests/continuous-improvement-contract.test.mjs
           cerebro/tests/continuous-improvement-scheduler.test.mjs
+          cerebro/tests/learning-orchestrator.test.mjs
           cerebro/tests/learning-pipeline.test.mjs
           cerebro/tests/learning-ledger.test.mjs
           cerebro/tests/learning-preprod-pipeline.test.mjs
