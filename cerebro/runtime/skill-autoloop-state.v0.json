@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-08T14:38:21.469Z",
+  "updated_at": "2026-10-08T23:31:29.748Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -209,7 +209,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "TERMINAL_HOLD_CONTINUE_OTHER_SAFE_WORK",
+  "last_action": "IDLE_NO_NEW_ELIGIBLE_CANDIDATE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -222,5 +222,5 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 37770026157
+  "last_discovery_run_id": 37848329080
 }
