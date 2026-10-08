@@ -1,0 +1,63 @@
+name: CEREBRO RSI Learning Conflict Diagnostic V0
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/runtime/learning-conflict-diagnostic.mjs'
+      - '.github/workflows/cerebro-rsi-learning-conflict-diagnostic-v0.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose-existing-durable-state:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Fetch immutable diagnostic inputs
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin \
+            '+refs/heads/cerebro-rsi-learning-state-v0:refs/remotes/origin/cerebro-rsi-learning-state-v0' \
+            '+refs/heads/cerebro-rsi-learning-outbox-v0:refs/remotes/origin/cerebro-rsi-learning-outbox-v0'
+          rm -rf /tmp/cerebro-lrn-state /tmp/cerebro-lrn-outbox /tmp/cerebro-lrn-diag
+          git worktree add --detach /tmp/cerebro-lrn-state refs/remotes/origin/cerebro-rsi-learning-state-v0
+          git worktree add --detach /tmp/cerebro-lrn-outbox refs/remotes/origin/cerebro-rsi-learning-outbox-v0
+          mkdir -p /tmp/cerebro-lrn-diag
+      - name: Diagnose every remote batch not yet receipted by durable LRN state
+        run: |
+          set -euo pipefail
+          STATE=/tmp/cerebro-lrn-state/cerebro/runtime/rsi-learning-state
+          OUTBOX=/tmp/cerebro-lrn-outbox/cerebro/runtime/rsi-outbox/fenix
+          LEDGER="$STATE/data/fenix/LRN-001/learning.v8"
+          RECEIPTS="$STATE/data/fenix/LRN-001/receipts"
+          INDEX="$OUTBOX/index.json"
+          test -f "$LEDGER" && test -f "$INDEX"
+          count=0
+          while IFS=$'\t' read -r digest relpath; do
+            if test -f "$RECEIPTS/$digest.json"; then
+              continue
+            fi
+            count=$((count+1))
+            node cerebro/runtime/learning-conflict-diagnostic.mjs \
+              --ledger "$LEDGER" \
+              --batch "$OUTBOX/$relpath" \
+              --preprod-version 0.5.0 \
+              --company-id fenix \
+              --output "/tmp/cerebro-lrn-diag/$digest.json" >/tmp/cerebro-lrn-diag/latest.json
+          done < <(jq -r '.batches[] | [.sha256,.path] | @tsv' "$INDEX")
+          test "$count" -gt 0
+          jq -s '{batches:length,semantic_conflicts:(map(.semantic_conflicts)|add),observed_at_only_duplicates:(map(.observed_at_only_duplicates)|add),exact_duplicates:(map(.exact_duplicates)|add),new_records:(map(.new_records)|add),different_fields:(map(.conflicts[].different_fields[])|unique)}' /tmp/cerebro-lrn-diag/*.json
+      - name: Assert diagnostic is read-only and authority-neutral
+        run: |
+          set -euo pipefail
+          git diff --exit-code
+          git status --porcelain | test ! -s /dev/stdin
+          ! grep -Eq 'prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true' cerebro/runtime/learning-conflict-diagnostic.mjs
