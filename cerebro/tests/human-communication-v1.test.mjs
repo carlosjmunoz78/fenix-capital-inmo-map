@@ -8,6 +8,12 @@ import {
   evaluateStandingAuthorizationCandidate,
   resolveHumanAlias
 } from '../governance/human-communication.mjs';
+import {
+  initialCommunicationState,
+  ingestSkillHumanRequired,
+  applyOwnerMessages,
+  prepareOutbound
+} from '../communication/communication-controller.mjs';
 
 const baseItem={
   candidate_id:'lobehub-skills:abc123',
@@ -19,7 +25,8 @@ const baseItem={
   authorization_class:'BOUNDED_PREPROD_PROMOTION',
   requested_capability:'PREPROD_PROMOTION',
   prod_write_requested:false,
-  customer_data_requested:false
+  customer_data_requested:false,
+  rollback_green:true
 };
 
 test('human alias remains understandable and technical identity is separate',()=>{
@@ -58,9 +65,9 @@ test('multiple exact commands are accepted in a single reply while generic yes i
 });
 
 test('Madrid quiet hours aggregate from 21:00 until 08:00',()=>{
-  assert.equal(isQuietHours(new Date('2026-10-08T19:30:00Z')),true); // 21:30 CEST
-  assert.equal(isQuietHours(new Date('2026-10-08T05:30:00Z')),true); // 07:30 CEST
-  assert.equal(isQuietHours(new Date('2026-10-08T06:30:00Z')),false); // 08:30 CEST
+  assert.equal(isQuietHours(new Date('2026-10-08T19:30:00Z')),true);
+  assert.equal(isQuietHours(new Date('2026-10-08T05:30:00Z')),true);
+  assert.equal(isQuietHours(new Date('2026-10-08T06:30:00Z')),false);
 });
 
 test('daily digest sends once after 08:20 Madrid',()=>{
@@ -75,4 +82,25 @@ test('repeated approvals only propose, never silently broaden, standing authoriz
   const result=evaluateStandingAuthorizationCandidate({history,request});
   assert.equal(result.eligible,true);
   assert.equal(result.requires_explicit_owner_command,true);
+});
+
+test('nighttime keeps pending approvals unsent and daytime creates one batch',()=>{
+  const skillState={waiting_human:{[baseItem.candidate_id]:baseItem}};
+  let state=ingestSkillHumanRequired(initialCommunicationState('2026-10-08T19:30:00Z'),skillState,'2026-10-08T19:30:00Z');
+  const night=prepareOutbound(state,{now:new Date('2026-10-08T19:30:00Z'),repoSummary:{}});
+  assert.equal(night.approvalMail,null);
+  const morning=prepareOutbound(night.state,{now:new Date('2026-10-09T06:05:00Z'),repoSummary:{}});
+  assert.ok(morning.approvalMail);
+  assert.equal(morning.approvalMail.approval_ids.length,1);
+});
+
+test('one owner email may authorize multiple exact APR lines independently',()=>{
+  const item2={...baseItem,candidate_id:'candidate-2',name:'github',updated_at:'2026-10-08T07:02:00Z'};
+  let state=initialCommunicationState('2026-10-08T07:00:00Z');
+  state=ingestSkillHumanRequired(state,{waiting_human:{a:baseItem,b:item2}},'2026-10-08T07:00:00Z');
+  const ids=Object.keys(state.pending);
+  assert.equal(ids.length,2);
+  state=applyOwnerMessages(state,[{message_id:'msg-1',text:`AUTORIZO ${ids[0]}\nNO AUTORIZO ${ids[1]}`}],'2026-10-08T07:05:00Z');
+  assert.equal(state.decisions.length,2);
+  assert.equal(Object.keys(state.pending).length,0);
 });
