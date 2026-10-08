@@ -1,0 +1,143 @@
+name: CEREBRO Skill GitHub Wide Scout
+
+on:
+  push:
+    branches:
+      - cerebro/skill-github-wide-discovery-v0-20261008
+      - main
+    paths:
+      - 'cerebro/skills/skill-github-wide-discovery.mjs'
+      - 'cerebro/skills/skill-discovery-merge.mjs'
+      - 'cerebro/tests/skill-github-wide-discovery.test.mjs'
+      - 'cerebro/tests/skill-discovery-merge.test.mjs'
+      - '.github/workflows/cerebro-skill-github-wide-scout.yml'
+  schedule:
+    - cron: '47 4 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: cerebro-skill-github-wide-scout
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  actions: read
+
+env:
+  AUTOLOOP_STATE_BRANCH: cerebro/skill-autoloop-state-v0
+  AUTOLOOP_STATE_PATH: cerebro/runtime/skill-autoloop-state.v0.json
+  CEREBRO_UPSTREAM_MAX_REPOS: '8'
+
+jobs:
+  github-wide-readonly-scout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Run focused discovery and supply-chain regression tests
+        run: node --test cerebro/tests/skill-github-wide-discovery.test.mjs cerebro/tests/skill-discovery-merge.test.mjs cerebro/tests/skill-next-candidate-selector.test.mjs cerebro/tests/skill-autoloop-controller.test.mjs cerebro/tests/skill-manifest-resolver.test.mjs cerebro/tests/skill-upstream-resolver.test.mjs
+
+      - name: Load dedicated safe AutoLoop state
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/autoloop
+          git fetch --no-tags origin "refs/heads/$AUTOLOOP_STATE_BRANCH:refs/remotes/origin/$AUTOLOOP_STATE_BRANCH"
+          git show "refs/remotes/origin/$AUTOLOOP_STATE_BRANCH:$AUTOLOOP_STATE_PATH" > artifacts/autoloop/state.before.json
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          import {validateSafeAutoloopState} from './cerebro/skills/skill-autoloop-controller.mjs';
+          const s=JSON.parse(fs.readFileSync('artifacts/autoloop/state.before.json','utf8'));
+          const v=validateSafeAutoloopState(s);
+          if(!v.green){console.error(JSON.stringify(v));process.exit(1)}
+          NODE
+
+      - name: Discover GitHub-wide public skill manifests as inert metadata only
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node cerebro/skills/skill-github-wide-discovery.mjs --output artifacts/cerebro-skill-discovery.json
+
+      - name: Resolve bounded upstream metadata
+        id: upstream
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          node cerebro/skills/skill-upstream-resolver.mjs --input artifacts/cerebro-skill-discovery.json --output artifacts/cerebro-skill-upstreams.json --max-repos "$CEREBRO_UPSTREAM_MAX_REPOS"
+          node - <<'NODE'
+          const fs=require('fs');const r=JSON.parse(fs.readFileSync('artifacts/cerebro-skill-upstreams.json','utf8'));
+          fs.appendFileSync(process.env.GITHUB_OUTPUT,`ready=${r.deferred!==true}\n`);
+          NODE
+
+      - name: Resolve exact-commit SKILL.md and inert static scan
+        if: steps.upstream.outputs.ready == 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node cerebro/skills/skill-manifest-resolver.mjs --discovery artifacts/cerebro-skill-discovery.json --upstreams artifacts/cerebro-skill-upstreams.json --output artifacts/cerebro-skill-manifests.json
+
+      - name: Collect exact-commit license evidence
+        if: steps.upstream.outputs.ready == 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node cerebro/skills/skill-license-evidence.mjs --discovery artifacts/cerebro-skill-discovery.json --upstreams artifacts/cerebro-skill-upstreams.json --manifests artifacts/cerebro-skill-manifests.json --output artifacts/cerebro-skill-license-evidence.json
+
+      - name: Analyze overlap and policy without installing anything
+        if: steps.upstream.outputs.ready == 'true'
+        run: |
+          node cerebro/skills/skill-overlap-analyzer.mjs --discovery artifacts/cerebro-skill-discovery.json --upstreams artifacts/cerebro-skill-upstreams.json --manifests artifacts/cerebro-skill-manifests.json --output artifacts/cerebro-skill-overlap.json
+          node cerebro/skills/skill-candidate-policy.mjs --discovery artifacts/cerebro-skill-discovery.json --upstreams artifacts/cerebro-skill-upstreams.json --overlap artifacts/cerebro-skill-overlap.json --manifests artifacts/cerebro-skill-manifests.json --output artifacts/cerebro-skill-shortlist.json
+
+      - name: Build static bundle, admission, disabled wrapper and value evidence
+        if: steps.upstream.outputs.ready == 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          node cerebro/skills/skill-bundle-scanner.mjs --shortlist artifacts/cerebro-skill-shortlist.json --upstreams artifacts/cerebro-skill-upstreams.json --manifests artifacts/cerebro-skill-manifests.json --priority P0 --output artifacts/cerebro-skill-bundles-p0.json
+          node cerebro/skills/skill-prelab-admission.mjs --shortlist artifacts/cerebro-skill-shortlist.json --bundles artifacts/cerebro-skill-bundles-p0.json --licenses artifacts/cerebro-skill-license-evidence.json --output artifacts/cerebro-skill-prelab-p0.json
+          node cerebro/skills/skill-test-only-prelab-review.mjs --prelab artifacts/cerebro-skill-prelab-p0.json --bundles artifacts/cerebro-skill-bundles-p0.json --licenses artifacts/cerebro-skill-license-evidence.json --output artifacts/cerebro-skill-prelab-reviewed-p0.json
+          node cerebro/skills/skill-wrapper-plan.mjs --prelab artifacts/cerebro-skill-prelab-reviewed-p0.json --shortlist artifacts/cerebro-skill-shortlist.json --manifests artifacts/cerebro-skill-manifests.json --licenses artifacts/cerebro-skill-license-evidence.json --output artifacts/cerebro-skill-wrapper-plans-p0.json
+          node cerebro/skills/skill-value-evaluator.mjs --wrappers artifacts/cerebro-skill-wrapper-plans-p0.json --prelab artifacts/cerebro-skill-prelab-reviewed-p0.json --upstreams artifacts/cerebro-skill-upstreams.json --overlap artifacts/cerebro-skill-overlap.json --licenses artifacts/cerebro-skill-license-evidence.json --manifests artifacts/cerebro-skill-manifests.json --output artifacts/cerebro-skill-value-p0.json
+
+      - name: Select next GitHub-wide candidate with persistent anti-loop state
+        if: steps.upstream.outputs.ready == 'true'
+        run: node cerebro/skills/skill-next-candidate-selector.mjs --value artifacts/cerebro-skill-value-p0.json --registry cerebro/registry/skill-supply-chain-v0.json --state artifacts/autoloop/state.before.json --output artifacts/cerebro-skill-next-candidate.json
+
+      - name: Checkpoint next safe candidate without crossing human gates
+        if: steps.upstream.outputs.ready == 'true'
+        run: node cerebro/skills/skill-autoloop-controller.mjs --state artifacts/autoloop/state.before.json --next artifacts/cerebro-skill-next-candidate.json --source-run-id "${{ github.run_id }}" --output artifacts/autoloop/decision.json --state-output artifacts/autoloop/state.after.json
+
+      - name: Enforce immutable zero-cost no-PROD boundaries
+        if: steps.upstream.outputs.ready == 'true'
+        run: |
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';import {validateSafeAutoloopState} from './cerebro/skills/skill-autoloop-controller.mjs';
+          const s=JSON.parse(fs.readFileSync('artifacts/autoloop/state.after.json','utf8'));const v=validateSafeAutoloopState(s);
+          if(!v.green||s.prod_authorized!==false||s.autonomous_prod_promotion_authorized!==false||s.safe_autonomy.external_skill_code_execution!==false||s.safe_autonomy.customer_data!==false||s.safe_autonomy.prod_write!==false||s.safe_autonomy.trading!==false||s.safe_autonomy.paid_fallback!==false||s.safe_autonomy.additional_cost_budget_eur!==0) process.exit(1);
+          console.log(JSON.stringify({safety:'GREEN',prod:false,external_skill_code:false,customer_data:false,trading:false,paid:false,cost_eur:0}));
+          NODE
+
+      - name: Persist checkpoint only to dedicated AutoLoop state branch
+        if: steps.upstream.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          cp artifacts/autoloop/state.after.json /tmp/state.json
+          git fetch --no-tags origin "refs/heads/$AUTOLOOP_STATE_BRANCH:refs/remotes/origin/$AUTOLOOP_STATE_BRANCH"
+          git checkout --detach "refs/remotes/origin/$AUTOLOOP_STATE_BRANCH"
+          cp /tmp/state.json "$AUTOLOOP_STATE_PATH"
+          git config user.name "cerebro-autoloop[bot]"
+          git config user.email "cerebro-autoloop[bot]@users.noreply.github.com"
+          git add "$AUTOLOOP_STATE_PATH"
+          if ! git diff --cached --quiet; then git commit -m "chore(cerebro): checkpoint GitHub-wide safe scout"; git push origin "HEAD:refs/heads/$AUTOLOOP_STATE_BRANCH"; fi
+
+      - name: Upload immutable GitHub-wide scouting evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-skill-github-wide-${{ github.run_id }}
+          path: |
+            artifacts/cerebro-skill-*.json
+            artifacts/autoloop/*.json
+          if-no-files-found: warn
+          retention-days: 30
