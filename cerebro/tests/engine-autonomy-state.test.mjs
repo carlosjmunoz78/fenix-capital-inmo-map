@@ -62,6 +62,28 @@ test('FACT-001 is accepted only as automatic SCAFFOLD with real and deterministi
   assert.equal(fact.gateway_repository_dispatch_live_verified,false);
 });
 
+test('COMP-ONB-001 structural automation candidate cannot overclaim live onboarding or business-engine GREEN',()=>{
+  const onboarding=autonomy.engines.find(engine=>engine.engine_id==='COMP-ONB-001');
+  assert.ok(onboarding);
+  assert.equal(onboarding.company_id,'GLOBAL_ONLY');
+  assert.equal(onboarding.environment,'PREPROD');
+  assert.equal(onboarding.autonomy_state,'AUTOMATIC_COMPANY_SCAFFOLD_SOFTWARE_READY_LIVE_ACCEPTANCE_PENDING');
+  assert.equal(onboarding.execution_model,'GITHUB_EVENT_DRIVEN_HOSTLESS');
+  assert.equal(onboarding.connected_scope,'PHASE4_STRUCTURAL_SCAFFOLD_ONLY');
+  assert.equal(onboarding.phase4_engine_count,17);
+  assert.equal(onboarding.structural_files_expected,306);
+  assert.equal(onboarding.fact001_dependency_state,'AUTOMATIC_SCAFFOLD_VERIFIED');
+  assert.equal(onboarding.live_acceptance_run_id,null);
+  assert.equal(onboarding.idempotency_acceptance_run_id,null);
+  assert.equal(onboarding.structural_evaluation_verified,false);
+  assert.equal(onboarding.business_engine_green_from_scaffold_authorized,false);
+  assert.equal(onboarding.target_engine_evaluation_state,'NOT_RUN_STRUCTURAL_ONLY');
+  assert.equal(onboarding.target_engine_tribunal_state,'NOT_RUN_STRUCTURAL_ONLY');
+  assert.equal(onboarding.supabase_writes,false);
+  assert.equal(onboarding.gateway_repository_dispatch_defined,true);
+  assert.equal(onboarding.gateway_repository_dispatch_live_verified,false);
+});
+
 test('LRN-001 is accepted only as automatic PREPROD with real and idempotent evidence',()=>{
   const lrn=autonomy.engines.find(engine=>engine.engine_id==='LRN-001');
   assert.ok(lrn);
