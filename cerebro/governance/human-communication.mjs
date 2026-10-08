@@ -39,6 +39,7 @@ export function approvalScopeFingerprint(item={}){
   const scope={
     company_id:clean(item.company_id) || 'GLOBAL',
     engine_id:clean(item.engine_id) || null,
+    human_required:clean(item.human_required) || 'HUMAN_REQUIRED',
     authorization_class:clean(item.authorization_class) || null,
     requested_capability:clean(item.requested_capability) || clean(item.stage) || null,
     prod_write:effectiveTrue(item.prod_write_requested,item.prod_write,item.evidence?.prod_write),
