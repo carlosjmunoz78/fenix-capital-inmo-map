@@ -1,0 +1,172 @@
+name: CEREBRO RSI Learning Control Plane V0
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_run:
+    workflows:
+      - CEREBRO RSI Learning Outbox Publisher V0
+    types:
+      - completed
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/cerebro-rsi-learning-control-plane-v0.yml'
+      - 'cerebro/tests/rsi-hostless-control-plane-workflow.test.mjs'
+
+concurrency:
+  group: cerebro-rsi-learning-control-plane-v0
+  cancel-in-progress: false
+
+env:
+  OUTBOX_STATE_BRANCH: cerebro-rsi-learning-outbox-v0
+  LRN_STATE_BRANCH: cerebro-rsi-learning-state-v0
+  LRN_STATE_ROOT: cerebro/runtime/rsi-learning-state
+  SUBSCRIBERS_FILE: cerebro/registry/rsi-learning-subscribers.v0.json
+
+jobs:
+  contract-test:
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Validate hostless control-plane contract
+        run: node --test cerebro/tests/rsi-hostless-control-plane-workflow.test.mjs
+
+  run-preprod-control-plane:
+    if: >-
+      github.event_name == 'schedule' ||
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'main')
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout current CEREBRO source authority
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Resolve enabled PREPROD LRN subscriber
+        id: tenant
+        run: |
+          set -euo pipefail
+          COMPANY_ID="$(jq -r '.subscribers[] | select(.enabled == true and .environment == "PREPROD" and .prod_authorized == false and .trading_access == false) | .company_id' "$SUBSCRIBERS_FILE" | head -n1)"
+          VERSION="$(jq -r --arg company "$COMPANY_ID" '.subscribers[] | select(.company_id == $company and .enabled == true) | .version' "$SUBSCRIBERS_FILE" | head -n1)"
+          test -n "$COMPANY_ID" && test "$COMPANY_ID" != 'null'
+          test -n "$VERSION" && test "$VERSION" != 'null'
+          echo "company_id=$COMPANY_ID" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare dedicated durable LRN state worktree
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/cerebro-rsi-learning-state
+          if git fetch --no-tags origin "+refs/heads/$LRN_STATE_BRANCH:refs/remotes/origin/$LRN_STATE_BRANCH" 2>/dev/null; then
+            git worktree add --detach /tmp/cerebro-rsi-learning-state "refs/remotes/origin/$LRN_STATE_BRANCH"
+          else
+            git worktree add --detach /tmp/cerebro-rsi-learning-state origin/main
+          fi
+          mkdir -p "/tmp/cerebro-rsi-learning-state/$LRN_STATE_ROOT"
+
+      - name: Build ephemeral zero-secret PREPROD config
+        env:
+          COMPANY_ID: ${{ steps.tenant.outputs.company_id }}
+          LRN_VERSION: ${{ steps.tenant.outputs.version }}
+        run: |
+          set -euo pipefail
+          STATE_ROOT="/tmp/cerebro-rsi-learning-state/$LRN_STATE_ROOT"
+          OUTBOX_URL="https://raw.githubusercontent.com/$GITHUB_REPOSITORY/$OUTBOX_STATE_BRANCH/cerebro/runtime/rsi-outbox"
+          jq -n \
+            --arg company "$COMPANY_ID" \
+            --arg version "$LRN_VERSION" \
+            --arg data "$STATE_ROOT/data" \
+            --arg inbox "$STATE_ROOT/inbox" \
+            --arg backups "$STATE_ROOT/backups" \
+            --arg outbox "$OUTBOX_URL" \
+            '{
+              company_id:$company,
+              engine_id:"LRN-001",
+              environment:"PREPROD",
+              version:$version,
+              preprod_version:$version,
+              data_dir:$data,
+              inbox_dir:$inbox,
+              backup_dir:$backups,
+              poll_interval_ms:900000,
+              policy_pass:true,
+              security_pass:true,
+              local_persistence_enabled:true,
+              remote_outbox:{enabled:true,base_url:$outbox}
+            }' > /tmp/cerebro-rsi-config.json
+          jq -e '.environment == "PREPROD" and .engine_id == "LRN-001" and .policy_pass == true and .security_pass == true and .local_persistence_enabled == true' /tmp/cerebro-rsi-config.json >/dev/null
+
+      - name: Execute one bounded autonomous LRN iteration
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import {runAutoHostIteration} from './cerebro/runtime/rsi-learning-auto-host.mjs';
+          const raw=JSON.parse(fs.readFileSync('/tmp/cerebro-rsi-config.json','utf8'));
+          const result=await runAutoHostIteration({raw_config:raw});
+          fs.writeFileSync('/tmp/cerebro-rsi-result.json',`${JSON.stringify(result,null,2)}\n`);
+          NODE
+          jq -e '.prod_authorized == false and .prod_write_authorized == false and .trading_access == false and .additional_cost_eur == 0' /tmp/cerebro-rsi-result.json >/dev/null
+
+      - name: Persist bounded run evidence inside LRN state only
+        env:
+          COMPANY_ID: ${{ steps.tenant.outputs.company_id }}
+          LRN_VERSION: ${{ steps.tenant.outputs.version }}
+        run: |
+          set -euo pipefail
+          STATE_ROOT="/tmp/cerebro-rsi-learning-state/$LRN_STATE_ROOT"
+          jq \
+            --arg company "$COMPANY_ID" \
+            --arg version "$LRN_VERSION" \
+            --arg run_id "$GITHUB_RUN_ID" \
+            --arg head_sha "$GITHUB_SHA" \
+            '. + {
+              control_plane:{
+                company_id:$company,
+                engine_id:"LRN-001",
+                environment:"PREPROD",
+                version:$version,
+                github_run_id:$run_id,
+                source_head_sha:$head_sha,
+                execution_model:"HOSTLESS_BOUNDED_ITERATION",
+                schedule_semantics:"BEST_EFFORT_15_MINUTE_PLUS_EVENT",
+                additional_cost_eur:0,
+                prod_authorized:false,
+                prod_write_authorized:false,
+                trading_access:false
+              }
+            }' /tmp/cerebro-rsi-result.json > "$STATE_ROOT/last-control-plane-run.json"
+          jq -e '.control_plane.prod_authorized == false and .control_plane.prod_write_authorized == false and .control_plane.trading_access == false and .control_plane.additional_cost_eur == 0' "$STATE_ROOT/last-control-plane-run.json" >/dev/null
+
+      - name: Commit only durable LRN state
+        run: |
+          set -euo pipefail
+          cd /tmp/cerebro-rsi-learning-state
+          git config user.name 'cerebro-rsi-learning[bot]'
+          git config user.email 'cerebro-rsi-learning[bot]@users.noreply.github.com'
+          git add "$LRN_STATE_ROOT"
+          if git diff --cached --quiet; then
+            echo 'No LRN state delta; idempotent no-op.'
+            exit 0
+          fi
+          git commit -m "chore(cerebro): persist bounded LRN PREPROD state from run $GITHUB_RUN_ID"
+          git push origin "HEAD:refs/heads/$LRN_STATE_BRANCH"
