@@ -1,0 +1,155 @@
+name: CEREBRO RSI Universal Learning Ingress V0
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'cerebro/runtime/universal-learning-ingress.mjs'
+      - 'cerebro/runtime/fixtures/universal-learning-signal-selfcheck.v0.json'
+      - 'cerebro/skills/skill-rsi-shadow-bridge.mjs'
+      - 'cerebro/runtime/rsi-event-outbox.mjs'
+      - 'cerebro/registry/rsi-learning-subscribers.v0.json'
+      - 'cerebro/tests/universal-learning-ingress.test.mjs'
+      - '.github/workflows/cerebro-rsi-universal-learning-ingress-v0.yml'
+  repository_dispatch:
+    types:
+      - cerebro_learning_signal
+  workflow_dispatch:
+    inputs:
+      fixture_path:
+        description: 'Repository fixture under cerebro/runtime/fixtures/'
+        required: false
+        default: 'cerebro/runtime/fixtures/universal-learning-signal-selfcheck.v0.json'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cerebro-rsi-learning-outbox-writer-v0
+  cancel-in-progress: false
+
+env:
+  OUTBOX_STATE_BRANCH: cerebro-rsi-learning-outbox-v0
+  OUTBOX_STATE_ROOT: cerebro/runtime/rsi-outbox
+  SUBSCRIBERS_FILE: cerebro/registry/rsi-learning-subscribers.v0.json
+  DISPATCH_SIGNAL_JSON: ${{ toJson(github.event.client_payload.signal) }}
+
+jobs:
+  normalize-and-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Validate universal ingress contracts
+        run: |
+          set -euo pipefail
+          node --test \
+            cerebro/tests/universal-learning-ingress.test.mjs \
+            cerebro/tests/rsi-event-outbox.test.mjs \
+            cerebro/tests/rsi-learning-worker.test.mjs
+
+      - name: Resolve bounded learning signal input
+        id: input
+        shell: bash
+        env:
+          FIXTURE_PATH: ${{ inputs.fixture_path }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/cerebro-universal-ingress
+          if [ "$GITHUB_EVENT_NAME" = 'repository_dispatch' ]; then
+            node <<'NODE'
+          const fs=require('fs');
+          const raw=process.env.DISPATCH_SIGNAL_JSON;
+          if(!raw||raw==='null') throw new Error('repository_dispatch requires client_payload.signal');
+          const value=JSON.parse(raw);
+          if(!value||typeof value!=='object') throw new Error('client_payload.signal must be an object or signal batch');
+          fs.writeFileSync('/tmp/cerebro-universal-ingress/input.json',JSON.stringify(value,null,2)+'\n','utf8');
+          NODE
+            echo 'input_file=/tmp/cerebro-universal-ingress/input.json' >> "$GITHUB_OUTPUT"
+          elif [ "$GITHUB_EVENT_NAME" = 'workflow_dispatch' ]; then
+            case "$FIXTURE_PATH" in
+              cerebro/runtime/fixtures/*.json) ;;
+              *) echo 'fixture_path must remain under cerebro/runtime/fixtures/*.json' >&2; exit 1 ;;
+            esac
+            test -f "$FIXTURE_PATH"
+            echo "input_file=$FIXTURE_PATH" >> "$GITHUB_OUTPUT"
+          else
+            test -f cerebro/runtime/fixtures/universal-learning-signal-selfcheck.v0.json
+            echo 'input_file=cerebro/runtime/fixtures/universal-learning-signal-selfcheck.v0.json' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Normalize operational evidence into canonical learning events
+        shell: bash
+        run: |
+          set -euo pipefail
+          node cerebro/runtime/universal-learning-ingress.mjs \
+            --input '${{ steps.input.outputs.input_file }}' \
+            --output /tmp/cerebro-universal-ingress/events.json
+          jq -e '
+            .state_type == "CEREBRO_RSI_UNIVERSAL_LEARNING_EVENT_REPORT" and
+            .events_total > 0 and
+            .prod_authorized == false and
+            .prod_write_authorized == false and
+            .trading_access == false and
+            .additional_cost_eur == 0 and
+            ([.events[].source_type] | all(. == "ENGINE_RESULT" or . == "ENGINE_ERROR" or . == "ENGINE_EVENT" or . == "METRIC_OBSERVATION" or . == "COST_OBSERVATION" or . == "HUMAN_CORRECTION" or . == "TRIBUNAL_DECISION" or . == "OBSERVABILITY_ALERT"))
+          ' /tmp/cerebro-universal-ingress/events.json >/dev/null
+
+      - name: Prepare serialized append-only LRN outbox state
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/cerebro-rsi-outbox-state
+          if git fetch --no-tags origin "+refs/heads/$OUTBOX_STATE_BRANCH:refs/remotes/origin/$OUTBOX_STATE_BRANCH" 2>/dev/null; then
+            git worktree add --detach /tmp/cerebro-rsi-outbox-state "refs/remotes/origin/$OUTBOX_STATE_BRANCH"
+          else
+            git worktree add --detach /tmp/cerebro-rsi-outbox-state origin/main
+          fi
+
+      - name: Fan out universal evidence to tenant-local PREPROD outbox
+        shell: bash
+        run: |
+          set -euo pipefail
+          SOURCE_HEAD_SHA="$(git rev-parse HEAD)"
+          node cerebro/runtime/rsi-event-outbox.mjs \
+            --events /tmp/cerebro-universal-ingress/events.json \
+            --subscribers "$SUBSCRIBERS_FILE" \
+            --output-root "/tmp/cerebro-rsi-outbox-state/$OUTBOX_STATE_ROOT" \
+            --source-run-id "$GITHUB_RUN_ID" \
+            --source-head-sha "$SOURCE_HEAD_SHA" \
+            --source-workflow 'CEREBRO RSI Universal Learning Ingress V0'
+
+      - name: Assert outbox cannot expand authority or leak cross-tenant events
+        run: |
+          set -euo pipefail
+          find "/tmp/cerebro-rsi-outbox-state/$OUTBOX_STATE_ROOT" -name '*.json' -type f -print0 | while IFS= read -r -d '' f; do
+            jq -e '(.prod_authorized // false) == false and (.prod_write_authorized // false) == false and (.trading_access // false) == false and (.additional_cost_eur // 0) == 0' "$f" >/dev/null
+          done
+
+      - name: Persist only append-only universal LRN outbox state
+        run: |
+          set -euo pipefail
+          cd /tmp/cerebro-rsi-outbox-state
+          git config user.name 'cerebro-rsi-outbox[bot]'
+          git config user.email 'cerebro-rsi-outbox[bot]@users.noreply.github.com'
+          git add "$OUTBOX_STATE_ROOT"
+          if git diff --cached --quiet; then
+            echo 'No new universal learning batch; idempotent no-op.'
+          else
+            git commit -m "chore(cerebro): append universal LRN PREPROD outbox from run $GITHUB_RUN_ID"
+            git push origin "HEAD:refs/heads/$OUTBOX_STATE_BRANCH"
+          fi
+
+      - name: Record strict learning boundary
+        run: |
+          echo 'Universal ingress accepted operational evidence and persisted only PREPROD LRN outbox state.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Accepted families: engine results/errors/events, metrics, costs, human corrections, tribunal decisions, observability alerts.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'No raw customer data, secrets, PROD-write authority, Trading authority or incremental cost is permitted.' >> "$GITHUB_STEP_SUMMARY"
