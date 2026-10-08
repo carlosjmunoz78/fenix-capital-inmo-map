@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import {buildLearningOutbox,persistLearningOutbox,normalizeLearningSubscribers} from '../runtime/rsi-event-outbox.mjs';
 
 function temp(){return fs.mkdtempSync(path.join(os.tmpdir(),'cerebro-rsi-outbox-'));}
@@ -34,7 +35,7 @@ test('tenant-specific event never leaks into a different subscriber',()=>{
   assert.equal(build.batches_total,1);assert.equal(build.batches[0].company_id,'fenix');
 });
 
-test('persisted outbox is append-only/idempotent and maintains checksum index',()=>{
+test('persisted outbox is append-only/idempotent and maintains raw-byte checksum index',()=>{
   const root=temp();
   try{
     const build=buildLearningOutbox({event_report:{events:[event()]},subscriber_registry:registry(),source});
@@ -45,6 +46,11 @@ test('persisted outbox is append-only/idempotent and maintains checksum index',(
     const index=JSON.parse(fs.readFileSync(path.join(root,'fenix','index.json'),'utf8'));
     assert.equal(index.batches_total,1);assert.equal(index.prod_authorized,false);assert.equal(index.trading_access,false);
     const batchPath=path.join(root,'fenix',index.batches[0].path);assert.equal(fs.existsSync(batchPath),true);
+    const rawBytes=fs.readFileSync(batchPath);
+    const expected=crypto.createHash('sha256').update(rawBytes).digest('hex');
+    const expectedFromConsumerText=crypto.createHash('sha256').update(rawBytes.toString('utf8'),'utf8').digest('hex');
+    assert.equal(index.batches[0].sha256,expected);
+    assert.equal(index.batches[0].sha256,expectedFromConsumerText);
     assert.match(index.batches[0].sha256,/^[0-9a-f]{64}$/);
   }finally{fs.rmSync(root,{recursive:true,force:true});}
 });
