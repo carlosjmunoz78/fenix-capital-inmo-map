@@ -9,7 +9,8 @@
   "studied_candidate_ids": [
     "mcpservers-agent-skills:4c2b2478f8fe3bed14df",
     "mcpservers-agent-skills:157e52d4ac5038d53c1a",
-    "lobehub-skills:52441cd3d76607ffffab"
+    "lobehub-skills:52441cd3d76607ffffab",
+    "lobehub-skills:950cf07380d1daa6de69"
   ],
   "assessments": {
     "mcpservers-agent-skills:4c2b2478f8fe3bed14df": {
@@ -74,10 +75,53 @@
       "trading_access": false,
       "paid_fallback": false,
       "additional_cost_eur": 0
+    },
+    "lobehub-skills:950cf07380d1daa6de69": {
+      "candidate_id": "lobehub-skills:950cf07380d1daa6de69",
+      "name": "skill-creator",
+      "human_alias": "Creador de Skills",
+      "lane": "ENGINEERING",
+      "work_class": "DEEP",
+      "value_score": 68.12,
+      "static_status": "STATIC_LAB_HOLD",
+      "rollback_green": true,
+      "assessment_status": "STATIC_STUDY_HOLD",
+      "source_discovery_run_id": 37770026157,
+      "study_run_id": 37817715419,
+      "assessed_at": "2026-10-08T17:35:55.336Z",
+      "prod_authorized": false,
+      "prod_write": false,
+      "customer_data_used": false,
+      "external_skill_code_execution": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
     }
   },
   "lane_history": {
-    "ENGINEERING": [],
+    "ENGINEERING": [
+      {
+        "candidate_id": "lobehub-skills:950cf07380d1daa6de69",
+        "name": "skill-creator",
+        "human_alias": "Creador de Skills",
+        "lane": "ENGINEERING",
+        "work_class": "DEEP",
+        "value_score": 68.12,
+        "static_status": "STATIC_LAB_HOLD",
+        "rollback_green": true,
+        "assessment_status": "STATIC_STUDY_HOLD",
+        "source_discovery_run_id": 37770026157,
+        "study_run_id": 37817715419,
+        "assessed_at": "2026-10-08T17:35:55.336Z",
+        "prod_authorized": false,
+        "prod_write": false,
+        "customer_data_used": false,
+        "external_skill_code_execution": false,
+        "trading_access": false,
+        "paid_fallback": false,
+        "additional_cost_eur": 0
+      }
+    ],
     "DEVICE_CONTROL": [
       {
         "candidate_id": "mcpservers-agent-skills:157e52d4ac5038d53c1a",
@@ -150,8 +194,8 @@
       }
     ]
   },
-  "last_plan_run_id": 37763278357,
-  "last_reconciled_at": "2026-10-08T10:25:03.733Z",
+  "last_plan_run_id": 37817715419,
+  "last_reconciled_at": "2026-10-08T17:35:55.336Z",
   "invariants": {
     "prod_authorized": false,
     "prod_write": false,
