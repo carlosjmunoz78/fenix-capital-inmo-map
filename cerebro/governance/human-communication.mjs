@@ -71,7 +71,7 @@ export function buildHumanRequiredEmailEnvelope({item={},plain_language,purpose,
   const version=clean(event_version) || clean(item.updated_at) || String(item.run_id ?? 'unknown');
   const approval_id=buildApprovalId(item,event_version);
   const scope_fingerprint=approvalScopeFingerprint(item);
-  const dedupe_marker=`[CEREBRO-HUMAN:${approval_id}:${version}]`;
+  const dedupe_marker=`[CEREBRO-HUMAN:${technical_id}:${stage}:${approval_id}:${version}]`;
   return Object.freeze({
     approval_id,scope_fingerprint,subject:`CEREBRO · TE NECESITO · ${human_alias} · ${human_required}`,first_line:'Te necesito.',human_alias,technical_id,human_required,stage,
     plain_language:clean(plain_language),purpose:clean(purpose),requested_change:clean(requested_change) || clean(exact_action),can_modify:list(can_modify),cannot_modify:list(cannot_modify),risk:clean(risk),rollback:clean(rollback),rollback_green:rollback_green===true,exact_action:clean(exact_action),
