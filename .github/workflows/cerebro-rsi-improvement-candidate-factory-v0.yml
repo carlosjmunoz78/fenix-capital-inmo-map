@@ -4,17 +4,21 @@ on:
   push:
     paths:
       - 'cerebro/runtime/improvement-candidate-factory.mjs'
+      - 'cerebro/runtime/learning-ledger.mjs'
       - 'cerebro/runtime/learning-preprod-pipeline.mjs'
       - 'cerebro/runtime/rsi-learning-auto-host.mjs'
       - 'cerebro/tests/improvement-candidate-factory.test.mjs'
+      - 'cerebro/tests/learning-ledger.test.mjs'
       - 'cerebro/tests/rsi-learning-auto-host.test.mjs'
       - '.github/workflows/cerebro-rsi-improvement-candidate-factory-v0.yml'
   pull_request:
     paths:
       - 'cerebro/runtime/improvement-candidate-factory.mjs'
+      - 'cerebro/runtime/learning-ledger.mjs'
       - 'cerebro/runtime/learning-preprod-pipeline.mjs'
       - 'cerebro/runtime/rsi-learning-auto-host.mjs'
       - 'cerebro/tests/improvement-candidate-factory.test.mjs'
+      - 'cerebro/tests/learning-ledger.test.mjs'
       - 'cerebro/tests/rsi-learning-auto-host.test.mjs'
       - '.github/workflows/cerebro-rsi-improvement-candidate-factory-v0.yml'
   workflow_dispatch:
@@ -35,6 +39,7 @@ jobs:
         run: >-
           node --test
           cerebro/tests/improvement-candidate-factory.test.mjs
+          cerebro/tests/learning-ledger.test.mjs
           cerebro/tests/learning-preprod-pipeline.test.mjs
           cerebro/tests/rsi-learning-auto-host.test.mjs
       - name: Assert authority boundary
