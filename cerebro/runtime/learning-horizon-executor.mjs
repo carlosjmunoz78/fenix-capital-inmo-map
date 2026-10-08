@@ -3,6 +3,8 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import {LearningLedgerV0} from './learning-ledger.mjs';
 import {recordLearningHorizonResult} from './learning-orchestrator.mjs';
+import {MetaObservabilityLedger} from './meta-observability-ledger.mjs';
+import {buildMetaLearningReview} from './meta-learning-runner.mjs';
 
 const PREPROD='PREPROD';
 const ENGINE_ID='LRN-001';
@@ -38,30 +40,36 @@ function executeDaily({plan,context}){
 function executeWeekly({plan,context}){
   const daily=jsonFiles(context.results_dir).map(f=>{try{return readJson(f);}catch{return null;}}).filter(x=>x?.cadence==='DAILY'&&x?.status==='GREEN'&&x?.evidence?.company_id===context.company_id);
   const recent=daily.slice(-7);
-  const evidence={reports_considered:recent.length,learning_records_latest:recent.at(-1)?.evidence?.learning_records_total??0,held_total:recent.reduce((n,x)=>n+Number(x.evidence?.held_total??0),0),human_required:[...new Set(recent.flatMap(x=>x.evidence?.human_required??[]))].sort(),meta_metrics_ready:false,reason:recent.length>=2?'NO_VALIDATED_OUTCOME_METRICS_YET':'INSUFFICIENT_DAILY_EVIDENCE'};
-  return {status:'GREEN',cadence:'WEEKLY',task:plan.task,evidence,meta_candidate_generated:false,meta_candidate_reason:evidence.reason,factory_candidate_generated:false,supervisor_reason:'NO_CROSS_ENGINE_REPEATED_FAILURE_EVIDENCE'};
+  let meta_review={status:'MORE_EVIDENCE',candidate:null,gate:{ok:false,reasons:['meta_metrics_ledger_missing'],next_gate:'HOLD',prod_authorized:false}};
+  if(context.meta_metrics_file&&fs.existsSync(context.meta_metrics_file)){
+    const metrics=new MetaObservabilityLedger({file_path:context.meta_metrics_file});
+    const summary=metrics.summarize({company_id:context.company_id,version:context.version,limit:168});
+    meta_review=buildMetaLearningReview({summary,company_id:context.company_id,version:context.version,reviewed_at:context.now});
+  }
+  const evidence={reports_considered:recent.length,learning_records_latest:recent.at(-1)?.evidence?.learning_records_total??0,held_total:recent.reduce((n,x)=>n+Number(x.evidence?.held_total??0),0),human_required:[...new Set(recent.flatMap(x=>x.evidence?.human_required??[]))].sort(),meta_metrics_ready:meta_review.status==='META_CANDIDATE_CREATED_HELD',meta_review_status:meta_review.status};
+  return {status:'GREEN',cadence:'WEEKLY',task:plan.task,evidence,meta_candidate_generated:Boolean(meta_review.candidate),meta_review,factory_candidate_generated:false,supervisor_reason:'NO_CROSS_ENGINE_REPEATED_FAILURE_EVIDENCE'};
 }
 function executeMonthly({plan,context}){
   const weekly=jsonFiles(context.results_dir).map(f=>{try{return readJson(f);}catch{return null;}}).filter(x=>x?.cadence==='WEEKLY'&&x?.status==='GREEN'&&x?.company_id===context.company_id);
   return {status:'GREEN',cadence:'MONTHLY',task:plan.task,evidence:{weekly_reports_total:weekly.length,knowledge_index_bound:false,policy_mutation_authorized:false},knowledge_mutations:0,reason:'KNOWLEDGE_INDEX_NOT_BOUND_NO_DESTRUCTIVE_ACTION'};
 }
 
-export function executeLearningHorizonPlan({plan,company_id,version,ledger_file,receipts_dir,heartbeat_file,results_dir,now}){
+export function executeLearningHorizonPlan({plan,company_id,version,ledger_file,receipts_dir,heartbeat_file,meta_metrics_file=null,results_dir,now}){
   if(!plan||plan.company_id!==company_id||plan.engine_id!==ENGINE_ID||plan.environment!==PREPROD||plan.version!==version)throw new Error('HORIZON_PLAN_CONTEXT_MISMATCH');
   if(plan.prod_authorized!==false||plan.trading_access!==false)throw new Error('HORIZON_PLAN_AUTHORITY_EXPANDED');
-  const context={company_id,version,ledger_file,receipts_dir,heartbeat_file,results_dir:path.resolve(results_dir),now:iso(now)};
+  const context={company_id,version,ledger_file,receipts_dir,heartbeat_file,meta_metrics_file:meta_metrics_file?path.resolve(meta_metrics_file):null,results_dir:path.resolve(results_dir),now:iso(now)};
   if(plan.cadence==='DAILY')return Object.freeze(executeDaily({plan,context}));
   if(plan.cadence==='WEEKLY')return Object.freeze(executeWeekly({plan,context}));
   if(plan.cadence==='MONTHLY')return Object.freeze(executeMonthly({plan,context}));
   throw new Error('unsupported horizon cadence');
 }
 
-export function executePendingLearningHorizons({state_file,plans_dir,results_dir,company_id,version,ledger_file,receipts_dir,heartbeat_file,now}){
+export function executePendingLearningHorizons({state_file,plans_dir,results_dir,company_id,version,ledger_file,receipts_dir,heartbeat_file,meta_metrics_file=null,now}){
   const plansRoot=path.resolve(reqString(plans_dir,'plans_dir'));const resultsRoot=ensureDir(path.resolve(reqString(results_dir,'results_dir')));const completed=[];const skipped=[];
   for(const planFile of jsonFiles(plansRoot)){
     const plan=readJson(planFile);const resultFile=path.join(resultsRoot,`${safeName(plan.lock_key)}.json`);
     if(fs.existsSync(resultFile)){skipped.push(plan.lock_key);continue;}
-    const executed=executeLearningHorizonPlan({plan,company_id,version,ledger_file,receipts_dir,heartbeat_file,results_dir:resultsRoot,now});
+    const executed=executeLearningHorizonPlan({plan,company_id,version,ledger_file,receipts_dir,heartbeat_file,meta_metrics_file,results_dir:resultsRoot,now});
     const result={schema_version:'1.0.0',state_type:'CEREBRO_LRN_HORIZON_RESULT',company_id,engine_id:ENGINE_ID,environment:PREPROD,version,lock_key:plan.lock_key,horizon_bucket:plan.horizon_bucket,cadence:plan.cadence,task:plan.task,status:executed.status,completed_at:iso(now),...executed,additional_cost_eur:0,prod_authorized:false,prod_write_authorized:false,trading_access:false};
     atomicJson(resultFile,result);
     recordLearningHorizonResult({state_file,company_id,version,cadence:plan.cadence,status:result.status,completed_at:result.completed_at});
