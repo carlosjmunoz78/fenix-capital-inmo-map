@@ -1,0 +1,359 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_RSI_LRN_EVENT_BATCH",
+  "batch_id": "lrn-batch:bcc60e9b2c5a523da0e08faf",
+  "company_id": "fenix",
+  "engine_id": "LRN-001",
+  "environment": "PREPROD",
+  "version": "0.5.0",
+  "source": {
+    "workflow": "CEREBRO RSI Universal Learning Ingress V0",
+    "run_id": 37848329104,
+    "head_sha": "f876644cbd3b632c879f53d226e4d5a1cc6a47c3"
+  },
+  "source_event_count": 8,
+  "events_total": 8,
+  "events": [
+    {
+      "schema_version": "1.0.0",
+      "event_id": "evt:lrn:3dc702a36238f77872f0b943",
+      "event_type": "CEREBRO_ENGINE_ERROR",
+      "signal_id": "selfcheck-engine-error-001",
+      "source_type": "ENGINE_ERROR",
+      "company_id": "fenix",
+      "engine_id": "CRM-001",
+      "environment": "PREPROD_CANDIDATE",
+      "source_environment": "PREPROD",
+      "version": "0.1.0",
+      "observed_at": "2026-10-08T20:01:00.000Z",
+      "severity": "MEDIUM",
+      "confidence": 0.85,
+      "risk_class": "MEDIUM",
+      "reason": "Synthetic repeated failure evidence",
+      "learning_hypothesis": "Observed error from CRM-001 may reveal a repeatable failure pattern that should be corrected without weakening existing contracts. Evidence reason: Synthetic repeated failure evidence",
+      "expected_metric_delta": {
+        "name": "failure_rate",
+        "direction": "LOWER",
+        "measurement": "CONTROLLED_OLD_VS_NEW"
+      },
+      "evidence_refs": [
+        "selfcheck:engine-error:001"
+      ],
+      "payload": {
+        "error_class": "SYNTHETIC_TIMEOUT",
+        "occurrences": 2
+      },
+      "local_validation_required": true,
+      "publish_authorized": false,
+      "persistent_publish_authorized": false,
+      "rsi_publish_authorized": false,
+      "contains_customer_data": false,
+      "contains_secrets": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "origin_event_id": "evt:universal:b22d30209216a12e4c24f7dc",
+      "origin_company_id": "fenix"
+    },
+    {
+      "schema_version": "1.0.0",
+      "event_id": "evt:lrn:7eb7b72029789c1e3291cdc8",
+      "event_type": "CEREBRO_METRIC_OBSERVATION",
+      "signal_id": "selfcheck-metric-001",
+      "source_type": "METRIC_OBSERVATION",
+      "company_id": "fenix",
+      "engine_id": "RUNTIME-001",
+      "environment": "PREPROD_CANDIDATE",
+      "source_environment": "PREPROD",
+      "version": "0.1.0",
+      "observed_at": "2026-10-08T20:03:00.000Z",
+      "severity": "INFO",
+      "confidence": 0.8,
+      "risk_class": "LOW",
+      "reason": "Synthetic latency observation",
+      "learning_hypothesis": "Metric evidence from RUNTIME-001 should be evaluated for a measurable OLD-vs-NEW improvement opportunity. Evidence reason: Synthetic latency observation",
+      "expected_metric_delta": {
+        "name": "p95_latency_ms",
+        "direction": "LOWER",
+        "measurement": "PREPROD_RUN_METRIC"
+      },
+      "evidence_refs": [
+        "selfcheck:metric:001"
+      ],
+      "payload": {
+        "value": 142
+      },
+      "local_validation_required": true,
+      "publish_authorized": false,
+      "persistent_publish_authorized": false,
+      "rsi_publish_authorized": false,
+      "contains_customer_data": false,
+      "contains_secrets": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "origin_event_id": "evt:universal:ee72479604b7ddf00e3456ef",
+      "origin_company_id": "fenix"
+    },
+    {
+      "schema_version": "1.0.0",
+      "event_id": "evt:lrn:952df355e446b12135379dcf",
+      "event_type": "CEREBRO_COST_OBSERVATION",
+      "signal_id": "selfcheck-cost-001",
+      "source_type": "COST_OBSERVATION",
+      "company_id": "fenix",
+      "engine_id": "MODEL-ROUTER-001",
+      "environment": "PREPROD_CANDIDATE",
+      "source_environment": "PREPROD",
+      "version": "0.1.0",
+      "observed_at": "2026-10-08T20:04:00.000Z",
+      "severity": "INFO",
+      "confidence": 0.8,
+      "risk_class": "MEDIUM",
+      "reason": "Synthetic route cost observation",
+      "learning_hypothesis": "Cost evidence from MODEL-ROUTER-001 should be evaluated for a lower-cost equivalent path without reducing quality or authority controls. Evidence reason: Synthetic route cost observation",
+      "expected_metric_delta": {
+        "name": "additional_cost_eur",
+        "direction": "LOWER",
+        "measurement": "QUALITY_GATES_MUST_NOT_DEGRADE"
+      },
+      "evidence_refs": [
+        "selfcheck:cost:001"
+      ],
+      "payload": {
+        "observed_cost_eur": 0,
+        "route": "DETERMINISTIC"
+      },
+      "local_validation_required": true,
+      "publish_authorized": false,
+      "persistent_publish_authorized": false,
+      "rsi_publish_authorized": false,
+      "contains_customer_data": false,
+      "contains_secrets": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "origin_event_id": "evt:universal:42811f24f23a21877e71c4e6",
+      "origin_company_id": "fenix"
+    },
+    {
+      "schema_version": "1.0.0",
+      "event_id": "evt:lrn:9dff34aba81d18ba823c0f17",
+      "event_type": "CEREBRO_TRIBUNAL_DECISION",
+      "signal_id": "selfcheck-tribunal-001",
+      "source_type": "TRIBUNAL_DECISION",
+      "company_id": "fenix",
+      "engine_id": "FACT-001",
+      "environment": "PREPROD_CANDIDATE",
+      "source_environment": "PREPROD",
+      "version": "0.1.0",
+      "observed_at": "2026-10-08T20:06:00.000Z",
+      "severity": "INFO",
+      "confidence": 0.95,
+      "risk_class": "LOW",
+      "reason": "Synthetic tribunal pass evidence",
+      "learning_hypothesis": "Tribunal evidence affecting FACT-001 should update future candidate selection and evaluation behavior. Evidence reason: Synthetic tribunal pass evidence",
+      "expected_metric_delta": {
+        "name": "candidate_decision_quality",
+        "direction": "HIGHER",
+        "measurement": "FUTURE_TRIBUNAL_EVIDENCE"
+      },
+      "evidence_refs": [
+        "selfcheck:tribunal:001"
+      ],
+      "payload": {
+        "decision": "PASS",
+        "candidate_class": "SYNTHETIC"
+      },
+      "local_validation_required": true,
+      "publish_authorized": false,
+      "persistent_publish_authorized": false,
+      "rsi_publish_authorized": false,
+      "contains_customer_data": false,
+      "contains_secrets": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "origin_event_id": "evt:universal:8675d1858fd077f4d041ba96",
+      "origin_company_id": "fenix"
+    },
+    {
+      "schema_version": "1.0.0",
+      "event_id": "evt:lrn:a3bfe3219bf9127b4892dbb0",
+      "event_type": "CEREBRO_ENGINE_EVENT",
+      "signal_id": "selfcheck-engine-event-001",
+      "source_type": "ENGINE_EVENT",
+      "company_id": "fenix",
+      "engine_id": "FACT-001",
+      "environment": "PREPROD_CANDIDATE",
+      "source_environment": "LAB",
+      "version": "0.1.0",
+      "observed_at": "2026-10-08T20:02:00.000Z",
+      "severity": "LOW",
+      "confidence": 0.75,
+      "risk_class": "LOW",
+      "reason": "Synthetic engine lifecycle evidence",
+      "learning_hypothesis": "Operational event from FACT-001 may contain evidence useful for improving its strategy, contracts, or orchestration. Evidence reason: Synthetic engine lifecycle evidence",
+      "expected_metric_delta": {
+        "name": "operational_quality",
+        "direction": "HIGHER",
+        "measurement": "CONTROLLED_OLD_VS_NEW"
+      },
+      "evidence_refs": [
+        "selfcheck:engine-event:001"
+      ],
+      "payload": {
+        "event": "CANDIDATE_EVALUATED"
+      },
+      "local_validation_required": true,
+      "publish_authorized": false,
+      "persistent_publish_authorized": false,
+      "rsi_publish_authorized": false,
+      "contains_customer_data": false,
+      "contains_secrets": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "origin_event_id": "evt:universal:988b30c326100673fd157e62",
+      "origin_company_id": "fenix"
+    },
+    {
+      "schema_version": "1.0.0",
+      "event_id": "evt:lrn:ba04fc281fb1b5e22ea75e43",
+      "event_type": "CEREBRO_ENGINE_RESULT",
+      "signal_id": "selfcheck-engine-result-001",
+      "source_type": "ENGINE_RESULT",
+      "company_id": "fenix",
+      "engine_id": "SEO-001",
+      "environment": "PREPROD_CANDIDATE",
+      "source_environment": "PROD",
+      "version": "0.1.0",
+      "observed_at": "2026-10-08T20:00:00.000Z",
+      "severity": "INFO",
+      "confidence": 0.85,
+      "risk_class": "LOW",
+      "reason": "Synthetic read-only result evidence for ingress acceptance",
+      "learning_hypothesis": "Observed result from SEO-001 should be compared with prior outcomes to reinforce or revise its current strategy. Evidence reason: Synthetic read-only result evidence for ingress acceptance",
+      "expected_metric_delta": {
+        "name": "operational_quality",
+        "direction": "HIGHER",
+        "measurement": "CONTROLLED_OLD_VS_NEW"
+      },
+      "evidence_refs": [
+        "selfcheck:engine-result:001"
+      ],
+      "payload": {
+        "status": "SUCCESS",
+        "quality_score": 0.91
+      },
+      "local_validation_required": true,
+      "publish_authorized": false,
+      "persistent_publish_authorized": false,
+      "rsi_publish_authorized": false,
+      "contains_customer_data": false,
+      "contains_secrets": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "origin_event_id": "evt:universal:18e3edaa6262f2eed17fea46",
+      "origin_company_id": "fenix"
+    },
+    {
+      "schema_version": "1.0.0",
+      "event_id": "evt:lrn:ba28412590ca32843e8549ad",
+      "event_type": "CEREBRO_HUMAN_CORRECTION",
+      "signal_id": "selfcheck-human-correction-001",
+      "source_type": "HUMAN_CORRECTION",
+      "company_id": "fenix",
+      "engine_id": "SEO-001",
+      "environment": "PREPROD_CANDIDATE",
+      "source_environment": "PREPROD",
+      "version": "0.1.0",
+      "observed_at": "2026-10-08T20:05:00.000Z",
+      "severity": "LOW",
+      "confidence": 0.9,
+      "risk_class": "MEDIUM",
+      "reason": "Synthetic correction classification only; no raw customer content",
+      "learning_hypothesis": "A human correction affecting SEO-001 should be learned as evidence so the same correction is less likely to be required again. Evidence reason: Synthetic correction classification only; no raw customer content",
+      "expected_metric_delta": {
+        "name": "repeat_human_correction_rate",
+        "direction": "LOWER",
+        "measurement": "FUTURE_EQUIVALENT_CASES"
+      },
+      "evidence_refs": [
+        "selfcheck:human-correction:001"
+      ],
+      "payload": {
+        "correction_class": "OUTPUT_FORMAT",
+        "accepted": true
+      },
+      "local_validation_required": true,
+      "publish_authorized": false,
+      "persistent_publish_authorized": false,
+      "rsi_publish_authorized": false,
+      "contains_customer_data": false,
+      "contains_secrets": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "origin_event_id": "evt:universal:b90c359bbeda811dd40b00d8",
+      "origin_company_id": "fenix"
+    },
+    {
+      "schema_version": "1.0.0",
+      "event_id": "evt:lrn:e32541dc5dba47fc32fa49f6",
+      "event_type": "CEREBRO_OBSERVABILITY_ALERT",
+      "signal_id": "selfcheck-observability-001",
+      "source_type": "OBSERVABILITY_ALERT",
+      "company_id": "fenix",
+      "engine_id": "OBS-001",
+      "environment": "PREPROD_CANDIDATE",
+      "source_environment": "PREPROD",
+      "version": "0.1.0",
+      "observed_at": "2026-10-08T20:07:00.000Z",
+      "severity": "MEDIUM",
+      "confidence": 0.75,
+      "risk_class": "MEDIUM",
+      "reason": "Synthetic reliability alert evidence",
+      "learning_hypothesis": "Observability evidence from OBS-001 may indicate a reliability or performance pattern requiring controlled improvement. Evidence reason: Synthetic reliability alert evidence",
+      "expected_metric_delta": {
+        "name": "failure_rate",
+        "direction": "LOWER",
+        "measurement": "CONTROLLED_OLD_VS_NEW"
+      },
+      "evidence_refs": [
+        "selfcheck:observability:001"
+      ],
+      "payload": {
+        "alert_class": "LATENCY_REGRESSION",
+        "breach": true
+      },
+      "local_validation_required": true,
+      "publish_authorized": false,
+      "persistent_publish_authorized": false,
+      "rsi_publish_authorized": false,
+      "contains_customer_data": false,
+      "contains_secrets": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "origin_event_id": "evt:universal:e7b186e01cd5e2e273034782",
+      "origin_company_id": "fenix"
+    }
+  ],
+  "local_validation_required": true,
+  "persistent_publish_authorized": false,
+  "rsi_publish_authorized": false,
+  "prod_authorized": false,
+  "prod_write_authorized": false,
+  "trading_access": false,
+  "additional_cost_eur": 0
+}
