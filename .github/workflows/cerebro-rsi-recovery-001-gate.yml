@@ -9,6 +9,7 @@ on:
       - 'cerebro/runtime/learning-ledger.mjs'
       - 'cerebro/runtime/learning-preprod-pipeline.mjs'
       - 'cerebro/runtime/rsi-learning-worker.mjs'
+      - 'cerebro/runtime/rsi-learning-host.mjs'
       - 'cerebro/runtime/experiment-pipeline.mjs'
       - 'cerebro/runtime/evaluation-tribunal.mjs'
       - 'cerebro/runtime/promotion-pipeline.mjs'
@@ -18,6 +19,7 @@ on:
       - 'cerebro/runtime/knowledge-obsolescence.mjs'
       - 'cerebro/runtime/continuity-handoff.mjs'
       - 'cerebro/runtime/rsi-observability-adapter.mjs'
+      - 'cerebro/host/windows/*.ps1'
       - 'cerebro/skills/skill-rsi-shadow-bridge.mjs'
       - 'cerebro/tests/continuous-improvement-contract.test.mjs'
       - 'cerebro/tests/continuous-improvement-scheduler.test.mjs'
@@ -25,6 +27,8 @@ on:
       - 'cerebro/tests/learning-ledger.test.mjs'
       - 'cerebro/tests/learning-preprod-pipeline.test.mjs'
       - 'cerebro/tests/rsi-learning-worker.test.mjs'
+      - 'cerebro/tests/rsi-learning-host.test.mjs'
+      - 'cerebro/tests/rsi-learning-windows-host.test.mjs'
       - 'cerebro/tests/experiment-pipeline.test.mjs'
       - 'cerebro/tests/evaluation-tribunal.test.mjs'
       - 'cerebro/tests/promotion-pipeline.test.mjs'
@@ -39,6 +43,7 @@ on:
       - 'cerebro/docs/RSI_RECOVERY_001_*.md'
       - 'cerebro/docs/RSI_RECOVERY_002_*.md'
       - 'cerebro/docs/RSI_RECOVERY_003_*.md'
+      - 'cerebro/docs/RSI_RECOVERY_004_*.md'
       - '.github/workflows/cerebro-rsi-recovery-001-gate.yml'
   pull_request:
     paths:
@@ -48,6 +53,7 @@ on:
       - 'cerebro/runtime/learning-ledger.mjs'
       - 'cerebro/runtime/learning-preprod-pipeline.mjs'
       - 'cerebro/runtime/rsi-learning-worker.mjs'
+      - 'cerebro/runtime/rsi-learning-host.mjs'
       - 'cerebro/runtime/experiment-pipeline.mjs'
       - 'cerebro/runtime/evaluation-tribunal.mjs'
       - 'cerebro/runtime/promotion-pipeline.mjs'
@@ -57,6 +63,7 @@ on:
       - 'cerebro/runtime/knowledge-obsolescence.mjs'
       - 'cerebro/runtime/continuity-handoff.mjs'
       - 'cerebro/runtime/rsi-observability-adapter.mjs'
+      - 'cerebro/host/windows/*.ps1'
       - 'cerebro/skills/skill-rsi-shadow-bridge.mjs'
       - 'cerebro/tests/continuous-improvement-contract.test.mjs'
       - 'cerebro/tests/continuous-improvement-scheduler.test.mjs'
@@ -64,6 +71,8 @@ on:
       - 'cerebro/tests/learning-ledger.test.mjs'
       - 'cerebro/tests/learning-preprod-pipeline.test.mjs'
       - 'cerebro/tests/rsi-learning-worker.test.mjs'
+      - 'cerebro/tests/rsi-learning-host.test.mjs'
+      - 'cerebro/tests/rsi-learning-windows-host.test.mjs'
       - 'cerebro/tests/experiment-pipeline.test.mjs'
       - 'cerebro/tests/evaluation-tribunal.test.mjs'
       - 'cerebro/tests/promotion-pipeline.test.mjs'
@@ -78,6 +87,7 @@ on:
       - 'cerebro/docs/RSI_RECOVERY_001_*.md'
       - 'cerebro/docs/RSI_RECOVERY_002_*.md'
       - 'cerebro/docs/RSI_RECOVERY_003_*.md'
+      - 'cerebro/docs/RSI_RECOVERY_004_*.md'
       - '.github/workflows/cerebro-rsi-recovery-001-gate.yml'
   workflow_dispatch:
 
@@ -93,7 +103,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Recovered RSI runtime, PREPROD persistence, worker, governance and bridge regression tests
+      - name: Recovered RSI runtime, PREPROD persistence, host binding, governance and bridge regression tests
         run: >-
           node --test
           cerebro/tests/continuous-improvement-contract.test.mjs
@@ -102,6 +112,8 @@ jobs:
           cerebro/tests/learning-ledger.test.mjs
           cerebro/tests/learning-preprod-pipeline.test.mjs
           cerebro/tests/rsi-learning-worker.test.mjs
+          cerebro/tests/rsi-learning-host.test.mjs
+          cerebro/tests/rsi-learning-windows-host.test.mjs
           cerebro/tests/experiment-pipeline.test.mjs
           cerebro/tests/evaluation-tribunal.test.mjs
           cerebro/tests/promotion-pipeline.test.mjs
