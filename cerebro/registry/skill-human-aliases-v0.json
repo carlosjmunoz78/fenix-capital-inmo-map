@@ -1,0 +1,46 @@
+{
+  "schema_version": "0.1.0",
+  "registry_record_type": "SKILL_HUMAN_ALIAS_REGISTRY",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "GLOBAL",
+  "version": "0.1.0",
+  "status": "ACTIVE_CONTRACT",
+  "rules": {
+    "human_alias_required": true,
+    "human_alias_display_first": true,
+    "technical_identity_preserved": true,
+    "language": "es",
+    "fallback_alias_allowed": true
+  },
+  "aliases": {
+    "skill-creator": {
+      "human_alias": "Creador de Skills",
+      "human_purpose": "Crea y estructura nuevas skills siguiendo los contratos y límites de CEREBRO."
+    },
+    "github": {
+      "human_alias": "Gestor de GitHub",
+      "human_purpose": "Consulta repositorios y evidencia de GitHub dentro de los permisos autorizados."
+    },
+    "agent-browser": {
+      "human_alias": "Navegador Automático",
+      "human_purpose": "Apoya navegación web controlada cuando el entorno y los permisos lo permiten."
+    },
+    "supabase-postgres-best-practices": {
+      "human_alias": "Buenas Prácticas Supabase",
+      "human_purpose": "Aporta criterios técnicos para trabajar mejor y con más seguridad sobre Supabase/Postgres."
+    },
+    "obsidian": {
+      "human_alias": "Memoria Obsidian",
+      "human_purpose": "Ayuda a organizar y trabajar con conocimiento estructurado en Obsidian."
+    },
+    "kairos-lite": {
+      "human_alias": "Asistente de Ingeniería Kairos",
+      "human_purpose": "Apoya tareas de ingeniería de software y DevOps."
+    },
+    "reddit-content-ops": {
+      "human_alias": "Operador de Contenido Reddit",
+      "human_purpose": "Apoya operaciones de contenido relacionadas con Reddit."
+    }
+  }
+}

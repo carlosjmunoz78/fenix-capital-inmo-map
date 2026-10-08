@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {checkpointNextCandidate,moveCandidateToHumanGate,validateSafeAutoloopState} from '../skills/skill-autoloop-controller.mjs';
+import {buildHumanRequiredEmailEnvelope,resolveHumanAlias} from '../governance/human-communication.mjs';
 
 function baseState(){return {
   schema_version:'0.1.0',state_type:'CEREBRO_SKILL_AUTOLOOP_SAFE_STATE',company_id:'GLOBAL',engine_id:'FACT-001',environment:'LAB',version:'0.1.0',enabled:true,mode:'SAFE_AUTONOMY_V0',
@@ -25,6 +26,7 @@ test('new static-ready candidate is checkpointed without PROD or human escalatio
   assert.equal(d.human_required,null);
   assert.equal(d.prod_authorized,false);
   assert.equal(d.state.waiting_safe_handler['candidate-a'].status,'WAITING_SAFE_HANDLER');
+  assert.equal(d.state.waiting_safe_handler['candidate-a'].human_alias,'Skill A');
   assert.equal(d.state.waiting_safe_handler['candidate-a'].external_skill_code_execution,false);
   assert.equal(d.state.waiting_safe_handler['candidate-a'].additional_cost_eur,0);
 });
@@ -36,11 +38,12 @@ test('checkpoint is idempotent and does not loop the same candidate',()=>{
   assert.equal(second.state.processed_candidate_ids.filter((x)=>x==='candidate-a').length,1);
 });
 
-test('human gate moves only that candidate and leaves safe queue enabled',()=>{
+test('human gate moves only that candidate, preserves alias and leaves safe queue enabled',()=>{
   const first=checkpointNextCandidate(baseState(),selected,{source_run_id:1});
   const moved=moveCandidateToHumanGate(first.state,'candidate-a',{human_required:'HIGH_RISK',stage:'PREPROD_PROMOTION_REVIEW',evidence:{run_id:99}});
   assert.equal(moved.waiting_safe_handler['candidate-a'],undefined);
   assert.equal(moved.waiting_human['candidate-a'].human_required,'HIGH_RISK');
+  assert.equal(moved.waiting_human['candidate-a'].human_alias,'Skill A');
   assert.equal(moved.enabled,true);
   assert.equal(moved.prod_authorized,false);
   assert.match(moved.last_action,/CONTINUE_OTHER_SAFE_WORK/);
@@ -54,4 +57,18 @@ test('empty next candidate becomes idle without disabling AutoLoop',()=>{
   const d=checkpointNextCandidate(baseState(),{selected:null},{source_run_id:3});
   assert.equal(d.decision,'IDLE_NO_NEW_ELIGIBLE_CANDIDATE');
   assert.equal(d.state.enabled,true);
+});
+
+test('known skill aliases are human-first without replacing technical identity',()=>{
+  assert.equal(resolveHumanAlias({name:'skill-creator',candidate_id:'technical-id'}),'Creador de Skills');
+  assert.equal(resolveHumanAlias({name:'obsidian'}),'Memoria Obsidian');
+  const email=buildHumanRequiredEmailEnvelope({
+    item:{name:'obsidian',candidate_id:'lobehub:123',stage:'PREPROD_PROMOTION_REVIEW',human_required:'HIGH_RISK',updated_at:'2026-10-08T00:00:00Z'},
+    plain_language:'Necesito que autorices el siguiente paso.',
+    exact_action:'Revisar y decidir.'
+  });
+  assert.match(email.subject,/Memoria Obsidian/);
+  assert.equal(email.first_line,'Te necesito.');
+  assert.match(email.dedupe_marker,/lobehub:123/);
+  assert.equal(email.gated_action_authorized,false);
 });

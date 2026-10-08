@@ -1,0 +1,84 @@
+{
+  "schema_version": "0.1.0",
+  "policy_id": "CEREBRO-HUMAN-COMM-001",
+  "company_id": "GLOBAL",
+  "engine_id": "HEX-001",
+  "environment": "GLOBAL",
+  "version": "0.1.0",
+  "status": "ACTIVE_CONTRACT",
+  "additional_cost_budget_eur": 0,
+  "human_required_email": {
+    "enabled": true,
+    "required": true,
+    "trigger": "ANY_CANONICAL_HUMAN_REQUIRED",
+    "human_required_reasons": [
+      "LEGAL_REQUIRED",
+      "SIGNATURE_REQUIRED",
+      "LOW_CONFIDENCE",
+      "HIGH_RISK",
+      "POLICY_CONFLICT",
+      "SECURITY_INCIDENT",
+      "MONEY_LIMIT",
+      "CUSTOMER_HUMAN_REQUEST"
+    ],
+    "channel": "EMAIL",
+    "recipient_ref": "CEREBRO_OWNER_EMAIL_PRIVATE_CONNECTOR",
+    "subject_template": "CEREBRO · TE NECESITO · <human_alias> · <human_required>",
+    "first_line": "Te necesito.",
+    "body_order": [
+      "EN_PALABRAS_NORMALES",
+      "ACCION_EXACTA_NECESARIA",
+      "DETALLE_TECNICO_SOLO_SI_APORTA_VALOR"
+    ],
+    "dedupe_required": true,
+    "dedupe_marker_template": "[CEREBRO-HUMAN:<technical_id>:<stage>:<event_version>]",
+    "delivery_target": "AS_SOON_AS_DETECTED",
+    "polling_fallback_max_minutes": 60
+  },
+  "daily_digest_email": {
+    "enabled": true,
+    "required": true,
+    "cadence": "DAILY",
+    "channel": "EMAIL",
+    "recipient_ref": "CEREBRO_OWNER_EMAIL_PRIVATE_CONNECTOR",
+    "subject_template": "CEREBRO · NOVEDADES DEL DÍA · <date>",
+    "send_even_without_material_changes": true,
+    "human_first": true,
+    "required_sections": [
+      "EN_PALABRAS_NORMALES",
+      "NUEVOS_SKILLS_Y_PARA_QUE_SIRVEN",
+      "AVANCES_Y_CAMBIOS_DE_FASE",
+      "HOLDS_Y_HUMAN_REQUIRED",
+      "COSTE_ADICIONAL",
+      "SIGUIENTE_TRABAJO_SEGURO"
+    ],
+    "technical_appendix": "ONLY_WHEN_USEFUL"
+  },
+  "skill_human_alias": {
+    "required_for_every_skill": true,
+    "field": "human_alias",
+    "language": "es",
+    "display_human_alias_first": true,
+    "technical_name_or_id_display": "SECONDARY_WHEN_USEFUL",
+    "technical_identity_immutable": true,
+    "must_be_short_and_understandable": true,
+    "must_not_replace_candidate_id_wrapper_id_or_engine_id": true,
+    "fallback_generation_allowed": true,
+    "explicit_alias_override_allowed": true
+  },
+  "privacy": {
+    "personal_email_address_in_public_repository": false,
+    "recipient_resolved_only_from_private_connector_or_secret": true,
+    "secrets_in_email_body": false
+  },
+  "safety": {
+    "notification_does_not_authorize_gated_action": true,
+    "prod_write_authorized": false,
+    "auto_merge_authorized": false,
+    "customer_data_required": false,
+    "external_skill_code_execution_required": false,
+    "trading_access_required": false,
+    "paid_fallback_required": false,
+    "additional_cost_eur": 0
+  }
+}
