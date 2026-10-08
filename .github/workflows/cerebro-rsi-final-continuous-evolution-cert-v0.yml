@@ -19,6 +19,7 @@ on:
       - 'cerebro/tests/universal-learning-ingress.test.mjs'
       - 'cerebro/tests/rsi-learning-worker.test.mjs'
       - 'cerebro/tests/improvement-candidate-factory.test.mjs'
+      - 'cerebro/docs/CEREBRO_RSI_CONTINUOUS_EVOLUTION_V0_CERTIFICATION_2026-10-09.md'
       - '.github/workflows/cerebro-rsi-final-continuous-evolution-cert-v0.yml'
   pull_request:
     paths:
@@ -38,6 +39,7 @@ on:
       - 'cerebro/tests/universal-learning-ingress.test.mjs'
       - 'cerebro/tests/rsi-learning-worker.test.mjs'
       - 'cerebro/tests/improvement-candidate-factory.test.mjs'
+      - 'cerebro/docs/CEREBRO_RSI_CONTINUOUS_EVOLUTION_V0_CERTIFICATION_2026-10-09.md'
       - '.github/workflows/cerebro-rsi-final-continuous-evolution-cert-v0.yml'
   workflow_dispatch:
 
@@ -85,6 +87,16 @@ jobs:
           grep -F 'B1_UNIVERSAL_LEARNING_INGRESS' cerebro/runtime/rsi-preprod-adoption-monitoring-loop.mjs
           grep -F 'runLearningWorkerOnce' cerebro/tests/rsi-continuous-evolution-end-to-end-certification.test.mjs
           grep -F 'materializeImprovementCandidates' cerebro/tests/rsi-continuous-evolution-end-to-end-certification.test.mjs
+      - name: Assert documentation records registry recovery autonomy and boundaries
+        run: |
+          set -euo pipefail
+          DOC=cerebro/docs/CEREBRO_RSI_CONTINUOUS_EVOLUTION_V0_CERTIFICATION_2026-10-09.md
+          grep -F 'Registry impact' "$DOC"
+          grep -F 'Dependency map' "$DOC"
+          grep -F 'Recovery / backup / rollback / rebuild' "$DOC"
+          grep -F 'Domain autonomy contract' "$DOC"
+          grep -F 'Changelog' "$DOC"
+          grep -F 'Runbook' "$DOC"
       - name: Assert MULTIEMPRESA and production rollout are not part of certification
         run: |
           set -euo pipefail
