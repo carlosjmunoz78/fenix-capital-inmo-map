@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import email
+import hashlib
 import imaplib
 import json
 import os
@@ -45,6 +46,37 @@ def extract_text(msg):
     return payload.decode(msg.get_content_charset() or "utf-8", errors="replace")
 
 
+def deterministic_delivery_id(payload):
+    canonical = json.dumps({"subject": payload.get("subject", ""), "text": payload.get("text", ""), "to": payload.get("to") or "OWNER_PRIVATE_IDENTITY"}, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()[:32]
+
+
+def deterministic_message_id(payload):
+    return f"<cerebro-{deterministic_delivery_id(payload)}@owner-communication.local>"
+
+
+def inbox_contains_message_id(message_id):
+    host = env("CEREBRO_MAIL_IMAP_HOST")
+    port = int(env("CEREBRO_MAIL_IMAP_PORT", required=False, default="993"))
+    username = env("CEREBRO_MAIL_USERNAME")
+    password = env("CEREBRO_MAIL_PASSWORD")
+    conn = imaplib.IMAP4_SSL(host, port, ssl_context=ssl.create_default_context())
+    try:
+        conn.login(username, password)
+        status, _ = conn.select("INBOX", readonly=True)
+        if status != "OK":
+            raise RuntimeError("unable to select INBOX for idempotency check")
+        status, data = conn.search(None, "HEADER", "Message-ID", f'"{message_id}"')
+        if status != "OK":
+            raise RuntimeError("unable to search deterministic Message-ID")
+        return bool((data[0] or b"").split())
+    finally:
+        try:
+            conn.logout()
+        except Exception:
+            pass
+
+
 def send_message(input_path):
     host = env("CEREBRO_MAIL_SMTP_HOST")
     port = int(env("CEREBRO_MAIL_SMTP_PORT", required=False, default="465"))
@@ -59,10 +91,18 @@ def send_message(input_path):
     if to_addr.lower() != owner.lower():
         raise RuntimeError("mail bridge can only send to configured owner identity")
 
+    delivery_id = deterministic_delivery_id(payload)
+    message_id = deterministic_message_id(payload)
+    if inbox_contains_message_id(message_id):
+        print(json.dumps({"sent": False, "deduplicated": True, "delivery_id": delivery_id, "recipient": "OWNER_PRIVATE_IDENTITY"}))
+        return
+
     msg = EmailMessage()
     msg["From"] = from_addr
     msg["To"] = to_addr
     msg["Subject"] = payload["subject"]
+    msg["Message-ID"] = message_id
+    msg["X-CEREBRO-Delivery-ID"] = delivery_id
     msg["X-CEREBRO-Generated"] = "owner-communication-v1"
     msg["Auto-Submitted"] = "auto-generated"
     msg.set_content(payload["text"], charset="utf-8")
@@ -79,7 +119,7 @@ def send_message(input_path):
             smtp.ehlo()
             smtp.login(username, password)
             smtp.send_message(msg)
-    print(json.dumps({"sent": True, "recipient": "OWNER_PRIVATE_IDENTITY"}))
+    print(json.dumps({"sent": True, "deduplicated": False, "delivery_id": delivery_id, "recipient": "OWNER_PRIVATE_IDENTITY"}))
 
 
 def is_real_owner_reply(msg, subject):
