@@ -1,11 +1,12 @@
 {
-  "schema_version": "0.1.0",
+  "schema_version": "0.2.0",
   "policy_id": "CEREBRO-HUMAN-COMM-001",
   "company_id": "GLOBAL",
   "engine_id": "HEX-001",
   "environment": "GLOBAL",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "status": "ACTIVE_CONTRACT",
+  "timezone": "Europe/Madrid",
   "additional_cost_budget_eur": 0,
   "human_required_email": {
     "enabled": true,
@@ -27,32 +28,91 @@
     "first_line": "Te necesito.",
     "body_order": [
       "EN_PALABRAS_NORMALES",
-      "ACCION_EXACTA_NECESARIA",
+      "PARA_QUE_SIRVE",
+      "QUE_QUIERE_HACER_AHORA",
+      "QUE_PUEDE_MODIFICAR",
+      "QUE_NO_PUEDE_MODIFICAR",
+      "RIESGO_Y_ROLLBACK",
+      "FRASES_EXACTAS_DE_RESPUESTA",
       "DETALLE_TECNICO_SOLO_SI_APORTA_VALOR"
     ],
+    "exact_reply_protocol": {
+      "required": true,
+      "approval_id_required": true,
+      "authorize_template": "AUTORIZO <approval_id>",
+      "deny_template": "NO AUTORIZO <approval_id>",
+      "explain_template": "EXPLICAME <approval_id>",
+      "accept_multiple_commands_in_one_reply": true,
+      "one_command_per_line": true,
+      "generic_yes_ok_continue_are_not_authorization": true,
+      "owner_sender_must_match_private_owner_identity": true,
+      "dedupe_by_message_and_approval_id": true
+    },
+    "daytime_delivery": {
+      "window_local": "08:00-21:00",
+      "delivery_target": "AS_SOON_AS_DETECTED",
+      "batch_new_items_per_delivery": true,
+      "polling_target_minutes": 10
+    },
+    "night_delivery": {
+      "window_local": "21:00-08:00",
+      "send_individual_emails": false,
+      "queue_all_non_delivered_requests": true,
+      "morning_batch_local_time": "08:00",
+      "single_batch_email": true
+    },
     "dedupe_required": true,
-    "dedupe_marker_template": "[CEREBRO-HUMAN:<technical_id>:<stage>:<event_version>]",
-    "delivery_target": "AS_SOON_AS_DETECTED",
-    "polling_fallback_max_minutes": 60
+    "dedupe_marker_template": "[CEREBRO-HUMAN:<approval_id>:<event_version>]"
   },
   "daily_digest_email": {
     "enabled": true,
     "required": true,
     "cadence": "DAILY",
+    "local_send_time": "08:20",
     "channel": "EMAIL",
     "recipient_ref": "CEREBRO_OWNER_EMAIL_PRIVATE_CONNECTOR",
     "subject_template": "CEREBRO · NOVEDADES DEL DÍA · <date>",
+    "scope": "ALL_CEREBRO_ENGINES_AND_COMPANIES",
     "send_even_without_material_changes": true,
     "human_first": true,
     "required_sections": [
       "EN_PALABRAS_NORMALES",
-      "NUEVOS_SKILLS_Y_PARA_QUE_SIRVEN",
-      "AVANCES_Y_CAMBIOS_DE_FASE",
+      "PUBLICADO_O_CAMBIADO",
+      "FALLOS_E_INCIDENCIAS",
+      "SEO_Y_WEB",
+      "APP_Y_CRM",
+      "AUTOMATIZACIONES_Y_INTEGRACIONES",
+      "SKILLS_Y_MOTORES",
+      "TRAINING_Y_APRENDIZAJE",
       "HOLDS_Y_HUMAN_REQUIRED",
       "COSTE_ADICIONAL",
       "SIGUIENTE_TRABAJO_SEGURO"
     ],
-    "technical_appendix": "ONLY_WHEN_USEFUL"
+    "technical_appendix": "ONLY_WHEN_USEFUL",
+    "missing_telemetry_must_be_declared": true
+  },
+  "authorization_learning": {
+    "enabled": true,
+    "minimum_matching_owner_approvals_before_policy_candidate": 3,
+    "require_same_scope_fingerprint": true,
+    "require_zero_denials_for_scope": true,
+    "require_zero_incidents_for_scope": true,
+    "require_rollback_green": true,
+    "automatic_permission_broadening": false,
+    "result": "PROPOSE_STANDING_AUTHORIZATION_ONCE",
+    "standing_authorization_requires_one_explicit_owner_command": true,
+    "after_activation_do_not_ask_again_inside_exact_scope": true,
+    "never_learn_without_new_owner_policy": [
+      "LEGAL_REQUIRED",
+      "SIGNATURE_REQUIRED",
+      "SECURITY_INCIDENT",
+      "MONEY_LIMIT",
+      "CUSTOMER_HUMAN_REQUEST",
+      "TRADING_REAL",
+      "NEW_CREDENTIALS_OR_SECRET_SCOPE",
+      "DESTRUCTIVE_DELETE",
+      "UNBOUNDED_PROD_WRITE"
+    ]
   },
   "skill_human_alias": {
     "required_for_every_skill": true,
@@ -69,12 +129,14 @@
   "privacy": {
     "personal_email_address_in_public_repository": false,
     "recipient_resolved_only_from_private_connector_or_secret": true,
-    "secrets_in_email_body": false
+    "secrets_in_email_body": false,
+    "approval_reply_sender_allowlist_private": true
   },
   "safety": {
     "notification_does_not_authorize_gated_action": true,
-    "prod_write_authorized": false,
-    "auto_merge_authorized": false,
+    "authorization_applies_only_to_exact_approval_id_and_scope": true,
+    "prod_write_authorized_by_default": false,
+    "auto_merge_authorized_by_default": false,
     "customer_data_required": false,
     "external_skill_code_execution_required": false,
     "trading_access_required": false,
