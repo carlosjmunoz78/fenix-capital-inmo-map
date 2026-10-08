@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-08T05:24:18.847Z",
+  "updated_at": "2026-10-08T05:30:47.248Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -30,7 +30,8 @@
     "additional_cost_budget_eur": 0
   },
   "processed_candidate_ids": [
-    "lobehub-skills:9a6e3fac20369220df43"
+    "lobehub-skills:9a6e3fac20369220df43",
+    "github-wide-skills:9f382a637a7264314ac8"
   ],
   "in_flight": {
     "lobehub-skills:9a6e3fac20369220df43": {
@@ -48,10 +49,44 @@
     }
   },
   "waiting_human": {},
-  "waiting_safe_handler": {},
+  "waiting_safe_handler": {
+    "github-wide-skills:9f382a637a7264314ac8": {
+      "candidate_id": "github-wide-skills:9f382a637a7264314ac8",
+      "name": "reddit-content-ops",
+      "wrapper_id": "skillwrap:93ea4012f67f96f52092",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 86.91,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "beggarticksarthurtatum121/reddit-skills",
+        "upstream_head_commit": "ce15e03d9334099e82760f931950ce8659efa675",
+        "manifest_sha256": "3536c3a8973241f1410973de218ea7e98499e94dfe2a2e5ad8a37ef150cf388c",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 37732710744,
+      "checkpointed_at": "2026-10-08T05:30:47.248Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    }
+  },
   "completed": {},
   "terminal_hold": {},
-  "last_action": "IDLE_NO_NEW_ELIGIBLE_CANDIDATE",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -64,5 +99,5 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 37702433996
+  "last_discovery_run_id": 37732710744
 }
