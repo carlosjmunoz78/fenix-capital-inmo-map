@@ -1,0 +1,91 @@
+name: CEREBRO RSI Final Continuous Evolution Cert V0
+
+on:
+  push:
+    paths:
+      - 'cerebro/runtime/rsi-domain-autonomy-policy.mjs'
+      - 'cerebro/runtime/rsi-old-new-evaluation-tribunal-gate.mjs'
+      - 'cerebro/runtime/rsi-preprod-adoption-monitoring-loop.mjs'
+      - 'cerebro/runtime/universal-learning-ingress.mjs'
+      - 'cerebro/runtime/rsi-learning-worker.mjs'
+      - 'cerebro/runtime/improvement-candidate-factory.mjs'
+      - 'cerebro/runtime/experiment-pipeline.mjs'
+      - 'cerebro/runtime/evaluation-tribunal.mjs'
+      - 'cerebro/runtime/promotion-pipeline.mjs'
+      - 'cerebro/tests/rsi-domain-autonomy-policy.test.mjs'
+      - 'cerebro/tests/rsi-continuous-evolution-end-to-end-certification.test.mjs'
+      - 'cerebro/tests/rsi-old-new-evaluation-tribunal-gate.test.mjs'
+      - 'cerebro/tests/rsi-preprod-adoption-monitoring-loop.test.mjs'
+      - 'cerebro/tests/universal-learning-ingress.test.mjs'
+      - 'cerebro/tests/rsi-learning-worker.test.mjs'
+      - 'cerebro/tests/improvement-candidate-factory.test.mjs'
+      - '.github/workflows/cerebro-rsi-final-continuous-evolution-cert-v0.yml'
+  pull_request:
+    paths:
+      - 'cerebro/runtime/rsi-domain-autonomy-policy.mjs'
+      - 'cerebro/runtime/rsi-old-new-evaluation-tribunal-gate.mjs'
+      - 'cerebro/runtime/rsi-preprod-adoption-monitoring-loop.mjs'
+      - 'cerebro/runtime/universal-learning-ingress.mjs'
+      - 'cerebro/runtime/rsi-learning-worker.mjs'
+      - 'cerebro/runtime/improvement-candidate-factory.mjs'
+      - 'cerebro/runtime/experiment-pipeline.mjs'
+      - 'cerebro/runtime/evaluation-tribunal.mjs'
+      - 'cerebro/runtime/promotion-pipeline.mjs'
+      - 'cerebro/tests/rsi-domain-autonomy-policy.test.mjs'
+      - 'cerebro/tests/rsi-continuous-evolution-end-to-end-certification.test.mjs'
+      - 'cerebro/tests/rsi-old-new-evaluation-tribunal-gate.test.mjs'
+      - 'cerebro/tests/rsi-preprod-adoption-monitoring-loop.test.mjs'
+      - 'cerebro/tests/universal-learning-ingress.test.mjs'
+      - 'cerebro/tests/rsi-learning-worker.test.mjs'
+      - 'cerebro/tests/improvement-candidate-factory.test.mjs'
+      - '.github/workflows/cerebro-rsi-final-continuous-evolution-cert-v0.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  final-continuous-evolution-certification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Certify B1 B2 B3 B4 and persistent relearning loop
+        run: >-
+          node --test
+          cerebro/tests/universal-learning-ingress.test.mjs
+          cerebro/tests/rsi-learning-worker.test.mjs
+          cerebro/tests/improvement-candidate-factory.test.mjs
+          cerebro/tests/rsi-old-new-evaluation-tribunal-gate.test.mjs
+          cerebro/tests/rsi-preprod-adoption-monitoring-loop.test.mjs
+          cerebro/tests/rsi-domain-autonomy-policy.test.mjs
+          cerebro/tests/rsi-continuous-evolution-end-to-end-certification.test.mjs
+      - name: Assert final authority boundary
+        run: |
+          set -euo pipefail
+          for f in \
+            cerebro/runtime/rsi-domain-autonomy-policy.mjs \
+            cerebro/runtime/rsi-old-new-evaluation-tribunal-gate.mjs \
+            cerebro/runtime/rsi-preprod-adoption-monitoring-loop.mjs; do
+            ! grep -Eq 'prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true' "$f"
+          done
+      - name: Assert domain policy has blast radius kill switch and automatic rollback
+        run: |
+          set -euo pipefail
+          grep -F 'PER_DOMAIN' cerebro/runtime/rsi-domain-autonomy-policy.mjs
+          grep -F 'kill_switch_state' cerebro/runtime/rsi-domain-autonomy-policy.mjs
+          grep -F 'blast_radius' cerebro/runtime/rsi-domain-autonomy-policy.mjs
+          grep -F 'automatic_rollback_allowed' cerebro/runtime/rsi-domain-autonomy-policy.mjs
+      - name: Assert full loop explicitly returns monitoring evidence to learning
+        run: |
+          set -euo pipefail
+          grep -F 'B1_UNIVERSAL_LEARNING_INGRESS' cerebro/runtime/rsi-preprod-adoption-monitoring-loop.mjs
+          grep -F 'runLearningWorkerOnce' cerebro/tests/rsi-continuous-evolution-end-to-end-certification.test.mjs
+          grep -F 'materializeImprovementCandidates' cerebro/tests/rsi-continuous-evolution-end-to-end-certification.test.mjs
+      - name: Assert MULTIEMPRESA and production rollout are not part of certification
+        run: |
+          set -euo pipefail
+          ! grep -Eq 'COMP-ONB|MULTIEMPRESA.*(activate|continue|deploy)|production_activation' cerebro/runtime/rsi-domain-autonomy-policy.mjs cerebro/tests/rsi-continuous-evolution-end-to-end-certification.test.mjs
