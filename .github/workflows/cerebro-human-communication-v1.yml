@@ -10,13 +10,14 @@ on:
       - 'cerebro/communication/**'
       - 'cerebro/tests/human-communication-v1.test.mjs'
       - 'cerebro/tests/owner-approval-gate-v1.test.mjs'
+      - 'cerebro/tests/test_mail_bridge.py'
       - '.github/workflows/cerebro-human-communication-v1.yml'
   schedule:
     - cron: '*/10 * * * *'
   workflow_dispatch:
 
 concurrency:
-  group: cerebro-human-communication-v1
+  group: cerebro-owner-communication-state-v1
   cancel-in-progress: false
 
 permissions:
@@ -45,7 +46,9 @@ jobs:
           python-version: '3.12'
 
       - name: Test communication and exact owner-approval contracts
-        run: node --test cerebro/tests/human-communication-v1.test.mjs cerebro/tests/owner-approval-gate-v1.test.mjs
+        run: |
+          node --test cerebro/tests/human-communication-v1.test.mjs cerebro/tests/owner-approval-gate-v1.test.mjs
+          python -m unittest cerebro/tests/test_mail_bridge.py
 
       - name: Load persistent communication and Skill AutoLoop state
         run: |
@@ -80,15 +83,16 @@ jobs:
           SMTP_PASS: ${{ secrets.CEREBRO_MAIL_PASSWORD }}
           IMAP_HOST: ${{ secrets.CEREBRO_MAIL_IMAP_HOST }}
           OWNER_EMAIL: ${{ secrets.CEREBRO_OWNER_EMAIL }}
+          APPROVAL_HMAC_SECRET: ${{ secrets.CEREBRO_MAIL_APPROVAL_HMAC_SECRET }}
         run: |
           set -euo pipefail
-          if [ -n "$SMTP_HOST" ] && [ -n "$SMTP_USER" ] && [ -n "$SMTP_PASS" ] && [ -n "$IMAP_HOST" ] && [ -n "$OWNER_EMAIL" ]; then
+          if [ -n "$SMTP_HOST" ] && [ -n "$SMTP_USER" ] && [ -n "$SMTP_PASS" ] && [ -n "$IMAP_HOST" ] && [ -n "$OWNER_EMAIL" ] && [ -n "$APPROVAL_HMAC_SECRET" ]; then
             echo 'ready=true' >> "$GITHUB_OUTPUT"
           else
             echo 'ready=false' >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Poll exact owner replies
+      - name: Poll authenticated exact owner replies
         if: github.ref == 'refs/heads/main' && steps.mail.outputs.ready == 'true'
         env:
           CEREBRO_MAIL_SMTP_HOST: ${{ secrets.CEREBRO_MAIL_SMTP_HOST }}
@@ -99,6 +103,7 @@ jobs:
           CEREBRO_MAIL_PASSWORD: ${{ secrets.CEREBRO_MAIL_PASSWORD }}
           CEREBRO_MAIL_FROM: ${{ secrets.CEREBRO_MAIL_FROM }}
           CEREBRO_OWNER_EMAIL: ${{ secrets.CEREBRO_OWNER_EMAIL }}
+          CEREBRO_MAIL_APPROVAL_HMAC_SECRET: ${{ secrets.CEREBRO_MAIL_APPROVAL_HMAC_SECRET }}
         run: python cerebro/communication/mail_bridge.py poll --output artifacts/communication/messages.json --limit 50
 
       - name: Use empty inbox for branch validation or unconfigured transport
@@ -125,7 +130,7 @@ jobs:
         run: |
           set -euo pipefail
           if [ -f artifacts/communication/out/approval-mail.json ] || [ -f artifacts/communication/out/digest-mail.json ]; then
-            echo '{"status":"HUMAN_REQUIRED_MAIL_TRANSPORT_NOT_CONFIGURED","required_secret_names":["CEREBRO_MAIL_SMTP_HOST","CEREBRO_MAIL_IMAP_HOST","CEREBRO_MAIL_USERNAME","CEREBRO_MAIL_PASSWORD","CEREBRO_OWNER_EMAIL"],"prod_write":false,"additional_cost_eur":0}' > artifacts/communication/mail-blocker.json
+            echo '{"status":"HUMAN_REQUIRED_MAIL_TRANSPORT_NOT_CONFIGURED","required_secret_names":["CEREBRO_MAIL_SMTP_HOST","CEREBRO_MAIL_IMAP_HOST","CEREBRO_MAIL_USERNAME","CEREBRO_MAIL_PASSWORD","CEREBRO_OWNER_EMAIL","CEREBRO_MAIL_APPROVAL_HMAC_SECRET"],"prod_write":false,"additional_cost_eur":0}' > artifacts/communication/mail-blocker.json
             exit 1
           fi
 
@@ -140,6 +145,7 @@ jobs:
           CEREBRO_MAIL_PASSWORD: ${{ secrets.CEREBRO_MAIL_PASSWORD }}
           CEREBRO_MAIL_FROM: ${{ secrets.CEREBRO_MAIL_FROM }}
           CEREBRO_OWNER_EMAIL: ${{ secrets.CEREBRO_OWNER_EMAIL }}
+          CEREBRO_MAIL_APPROVAL_HMAC_SECRET: ${{ secrets.CEREBRO_MAIL_APPROVAL_HMAC_SECRET }}
         run: python cerebro/communication/mail_bridge.py send --input artifacts/communication/out/approval-mail.json
 
       - name: Send one daily all-CEREBRO digest
@@ -153,6 +159,7 @@ jobs:
           CEREBRO_MAIL_PASSWORD: ${{ secrets.CEREBRO_MAIL_PASSWORD }}
           CEREBRO_MAIL_FROM: ${{ secrets.CEREBRO_MAIL_FROM }}
           CEREBRO_OWNER_EMAIL: ${{ secrets.CEREBRO_OWNER_EMAIL }}
+          CEREBRO_MAIL_APPROVAL_HMAC_SECRET: ${{ secrets.CEREBRO_MAIL_APPROVAL_HMAC_SECRET }}
         run: python cerebro/communication/mail_bridge.py send --input artifacts/communication/out/digest-mail.json
 
       - name: Persist communication state only after successful delivery path
@@ -160,7 +167,7 @@ jobs:
         run: |
           set -euo pipefail
           cp artifacts/communication/out/state.after.json /tmp/comm-state.json
-          git fetch --no-tags origin "refs/heads/$COMM_STATE_BRANCH:refs/remotes/origin/$COMM_STATE_BRANCH"
+          git fetch --no-tags origin "+refs/heads/$COMM_STATE_BRANCH:refs/remotes/origin/$COMM_STATE_BRANCH"
           git checkout --detach "refs/remotes/origin/$COMM_STATE_BRANCH"
           cp /tmp/comm-state.json "$COMM_STATE_PATH"
           git config user.name 'cerebro-communication[bot]'
