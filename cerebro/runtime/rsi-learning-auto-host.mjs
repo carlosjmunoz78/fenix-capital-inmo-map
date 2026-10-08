@@ -4,6 +4,7 @@ import crypto from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import {normalizeHostConfig,hostPaths,runHostCycle} from './rsi-learning-host.mjs';
 import {syncRemoteOutboxOnce} from './rsi-outbox-client.mjs';
+import {persistDueLearningPlans} from './learning-orchestrator.mjs';
 
 function readJson(file){return JSON.parse(fs.readFileSync(file,'utf8'));}
 function ensureDir(dir){fs.mkdirSync(dir,{recursive:true});return dir;}
@@ -47,7 +48,17 @@ export async function runAutoHostIteration({raw_config,fetch_impl=globalThis.fet
     }
   }
   const learning=runHostCycle({config:cfg,now});
-  return Object.freeze({status:learning.status,remote_outbox:remote,learning,additional_cost_eur:0,prod_authorized:false,prod_write_authorized:false,trading_access:false});
+  let orchestration={status:'ORCHESTRATOR_KILLED',planned_total:0,created_total:0,prod_authorized:false,prod_write_authorized:false,trading_access:false,additional_cost_eur:0};
+  if(learning.status!=='KILLED'){
+    orchestration=persistDueLearningPlans({
+      state_file:path.join(paths.companyRoot,'orchestration-state.json'),
+      plans_dir:path.join(paths.companyRoot,'orchestration-plans'),
+      company_id:cfg.company_id,
+      version:cfg.version,
+      now:typeof now==='function'?now():now
+    });
+  }
+  return Object.freeze({status:learning.status,remote_outbox:remote,learning,orchestration,additional_cost_eur:0,prod_authorized:false,prod_write_authorized:false,trading_access:false});
 }
 
 export async function runAutoHostLoop({raw_config,signal,fetch_impl=globalThis.fetch,sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms)),now=()=>new Date().toISOString()}){
