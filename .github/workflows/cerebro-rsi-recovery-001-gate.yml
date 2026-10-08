@@ -4,16 +4,24 @@ on:
   push:
     paths:
       - 'cerebro/runtime/continuous-improvement-contract.mjs'
+      - 'cerebro/runtime/continuous-improvement-scheduler.mjs'
+      - 'cerebro/runtime/learning-pipeline.mjs'
       - 'cerebro/skills/skill-rsi-shadow-bridge.mjs'
       - 'cerebro/tests/continuous-improvement-contract.test.mjs'
+      - 'cerebro/tests/continuous-improvement-scheduler.test.mjs'
+      - 'cerebro/tests/learning-pipeline.test.mjs'
       - 'cerebro/tests/skill-rsi-shadow-bridge.test.mjs'
       - 'cerebro/docs/RSI_RECOVERY_001_AUDIT_2026-10-08.md'
       - '.github/workflows/cerebro-rsi-recovery-001-gate.yml'
   pull_request:
     paths:
       - 'cerebro/runtime/continuous-improvement-contract.mjs'
+      - 'cerebro/runtime/continuous-improvement-scheduler.mjs'
+      - 'cerebro/runtime/learning-pipeline.mjs'
       - 'cerebro/skills/skill-rsi-shadow-bridge.mjs'
       - 'cerebro/tests/continuous-improvement-contract.test.mjs'
+      - 'cerebro/tests/continuous-improvement-scheduler.test.mjs'
+      - 'cerebro/tests/learning-pipeline.test.mjs'
       - 'cerebro/tests/skill-rsi-shadow-bridge.test.mjs'
       - 'cerebro/docs/RSI_RECOVERY_001_AUDIT_2026-10-08.md'
       - '.github/workflows/cerebro-rsi-recovery-001-gate.yml'
@@ -23,7 +31,7 @@ permissions:
   contents: read
 
 jobs:
-  rsi-recovery-001-contract-bridge:
+  rsi-recovery-001-runtime-slice:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -31,5 +39,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Recovered contract and existing bridge regression tests
-        run: node --test cerebro/tests/continuous-improvement-contract.test.mjs cerebro/tests/skill-rsi-shadow-bridge.test.mjs
+      - name: Recovered RSI runtime slice and current bridge regression tests
+        run: >-
+          node --test
+          cerebro/tests/continuous-improvement-contract.test.mjs
+          cerebro/tests/continuous-improvement-scheduler.test.mjs
+          cerebro/tests/learning-pipeline.test.mjs
+          cerebro/tests/skill-rsi-shadow-bridge.test.mjs
