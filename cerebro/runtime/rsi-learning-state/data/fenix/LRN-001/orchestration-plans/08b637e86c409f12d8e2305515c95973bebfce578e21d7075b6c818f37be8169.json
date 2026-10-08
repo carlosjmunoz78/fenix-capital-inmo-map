@@ -1,0 +1,30 @@
+{
+  "company_id": "fenix",
+  "engine_id": "LRN-001",
+  "environment": "PREPROD",
+  "version": "0.5.0",
+  "cadence": "DAILY",
+  "event_type": null,
+  "scheduled_at": "2026-10-08T18:22:32.144Z",
+  "checkpoint": {
+    "task": "LEARNING_METRICS_AND_FAILURE_SCAN",
+    "horizon_bucket": "2026-10-08"
+  },
+  "lock_key": "08b637e86c409f12d8e2305515c95973bebfce578e21d7075b6c818f37be8169",
+  "max_attempts": 3,
+  "backoff_seconds": [
+    30,
+    120,
+    600
+  ],
+  "budget_eur": 0,
+  "execution_mode": "INCREMENTAL_PLAN_ONLY",
+  "allow_prod_writes": false,
+  "prod_authorized": false,
+  "paid_fallback": false,
+  "trading_access": false,
+  "customer_data_access": false,
+  "horizon_bucket": "2026-10-08",
+  "task": "LEARNING_METRICS_AND_FAILURE_SCAN",
+  "execution_authority": "PREPROD_PLAN_ONLY"
+}

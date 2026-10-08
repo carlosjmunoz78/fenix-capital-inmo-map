@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_LRN_ORCHESTRATOR_STATE",
+  "company_id": "fenix",
+  "engine_id": "LRN-001",
+  "environment": "PREPROD",
+  "version": "0.5.0",
+  "last_success": {
+    "DAILY": "2026-10-08T18:22:32.144Z",
+    "WEEKLY": "2026-10-08T18:22:32.144Z",
+    "MONTHLY": "2026-10-08T18:22:32.144Z"
+  },
+  "plans_emitted": 3,
+  "additional_cost_eur": 0,
+  "prod_authorized": false,
+  "prod_write_authorized": false,
+  "trading_access": false,
+  "last_planned_at": "2026-10-08T18:22:32.144Z",
+  "last_result": {
+    "cadence": "WEEKLY",
+    "status": "GREEN",
+    "completed_at": "2026-10-08T18:22:32.144Z"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "company_id": "fenix",
+  "engine_id": "LRN-001",
+  "environment": "PREPROD",
+  "version": "0.5.0",
+  "cadence": "MONTHLY",
+  "event_type": null,
+  "scheduled_at": "2026-10-08T18:22:32.144Z",
+  "checkpoint": {
+    "task": "KNOWLEDGE_OBSOLESCENCE_AND_POLICY_REVIEW",
+    "horizon_bucket": "2026-10"
+  },
+  "lock_key": "a579fadb73bd476d737c757a53a7a731e7895fece2fabb9100a01c93cd997dc8",
+  "max_attempts": 3,
+  "backoff_seconds": [
+    30,
+    120,
+    600
+  ],
+  "budget_eur": 0,
+  "execution_mode": "INCREMENTAL_PLAN_ONLY",
+  "allow_prod_writes": false,
+  "prod_authorized": false,
+  "paid_fallback": false,
+  "trading_access": false,
+  "customer_data_access": false,
+  "horizon_bucket": "2026-10",
+  "task": "KNOWLEDGE_OBSOLESCENCE_AND_POLICY_REVIEW",
+  "execution_authority": "PREPROD_PLAN_ONLY"
+}

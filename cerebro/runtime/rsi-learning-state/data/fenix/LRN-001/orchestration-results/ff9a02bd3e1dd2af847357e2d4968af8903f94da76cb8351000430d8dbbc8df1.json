@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_LRN_HORIZON_RESULT",
+  "company_id": "fenix",
+  "engine_id": "LRN-001",
+  "environment": "PREPROD",
+  "version": "0.5.0",
+  "lock_key": "ff9a02bd3e1dd2af847357e2d4968af8903f94da76cb8351000430d8dbbc8df1",
+  "horizon_bucket": "2026-10-05",
+  "cadence": "WEEKLY",
+  "task": "METALEARN_BOTTLENECK_AND_SUPERVISOR_SCAN",
+  "status": "GREEN",
+  "completed_at": "2026-10-08T18:22:32.144Z",
+  "evidence": {
+    "reports_considered": 1,
+    "learning_records_latest": 0,
+    "held_total": 0,
+    "human_required": [],
+    "meta_metrics_ready": false,
+    "meta_review_status": "MORE_EVIDENCE"
+  },
+  "meta_candidate_generated": false,
+  "meta_review": {
+    "status": "MORE_EVIDENCE",
+    "candidate": null,
+    "gate": {
+      "ok": false,
+      "reasons": [
+        "meta_metrics_ledger_missing"
+      ],
+      "next_gate": "HOLD",
+      "prod_authorized": false
+    }
+  },
+  "factory_candidate_generated": false,
+  "supervisor_reason": "NO_CROSS_ENGINE_REPEATED_FAILURE_EVIDENCE",
+  "additional_cost_eur": 0,
+  "prod_authorized": false,
+  "prod_write_authorized": false,
+  "trading_access": false
+}
