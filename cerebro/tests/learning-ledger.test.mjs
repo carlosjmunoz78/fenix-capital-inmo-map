@@ -20,6 +20,7 @@ test('ledger is local PREPROD only, zero-cost and not Supabase-backed',()=>{
   assert.equal(LEARNING_LEDGER_V0_CONTRACT.supabase_required,false);
   assert.equal(LEARNING_LEDGER_V0_CONTRACT.additional_cost_target_eur,0);
   assert.equal(LEARNING_LEDGER_V0_CONTRACT.prod_writes,false);
+  assert.match(LEARNING_LEDGER_V0_CONTRACT.duplicate_policy,/PRESERVES_FIRST_SEEN_RECORD/);
 });
 
 test('ledger persists, restarts, scopes and deduplicates identical learning records',()=>{
@@ -32,6 +33,7 @@ test('ledger persists, restarts, scopes and deduplicates identical learning reco
     const duplicate=ledger.persist(candidate());
     assert.equal(duplicate.accepted,false);
     assert.equal(duplicate.duplicate,true);
+    assert.equal(duplicate.semantic_duplicate,false);
     assert.equal(ledger.operation_count,1);
     const reopened=new LearningLedgerV0({file_path:file});
     assert.equal(reopened.operation_count,1);
@@ -39,12 +41,30 @@ test('ledger persists, restarts, scopes and deduplicates identical learning reco
   }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });
 
-test('ledger rejects PROD, unauthorized persistence and learning_id payload conflicts',()=>{
+test('same deterministic learning re-observed later is an idempotent semantic duplicate and preserves first-seen evidence',()=>{
+  const {dir,file}=tempFile();
+  try{
+    const ledger=new LearningLedgerV0({file_path:file});
+    const first=ledger.persist(candidate());
+    const later=ledger.persist({...candidate(),observed_at:'2026-10-08T22:10:00Z'});
+    assert.equal(later.accepted,false);
+    assert.equal(later.duplicate,true);
+    assert.equal(later.semantic_duplicate,true);
+    assert.equal(later.preserved_observed_at,'2026-10-08T12:00:00Z');
+    assert.equal(later.record_hash,first.record_hash);
+    assert.equal(ledger.operation_count,1);
+    assert.equal(ledger.list()[0].observed_at,'2026-10-08T12:00:00Z');
+  }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
+
+test('ledger still rejects genuine same-ID payload conflicts and never masks changed evidence or policy fields',()=>{
   const {dir,file}=tempFile();
   try{
     const ledger=new LearningLedgerV0({file_path:file});
     ledger.persist(candidate());
     assert.throws(()=>ledger.persist({...candidate(),hypothesis:'different payload'}),/learning_id conflict/);
+    assert.throws(()=>ledger.persist({...candidate(),observed_at:'2026-10-08T22:10:00Z',evidence_refs:['e:changed']}),/learning_id conflict/);
+    assert.throws(()=>ledger.persist({...candidate(),observed_at:'2026-10-08T22:10:00Z',risk_class:'MEDIUM'}),/learning_id conflict/);
     assert.throws(()=>ledger.persist({...candidate(),learning_id:'x',persistent_publish_authorized:false}),/persistence authorization/);
     assert.throws(()=>ledger.persist({...candidate(),learning_id:'y',environment:'PROD'}),/exact PREPROD/);
   }finally{fs.rmSync(dir,{recursive:true,force:true});}
