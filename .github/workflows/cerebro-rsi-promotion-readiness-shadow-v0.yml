@@ -92,7 +92,21 @@ jobs:
       - name: Browser QA
         env:
           PLAYWRIGHT_SKIP_BUILD: '1'
-        run: npm run test:e2e
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run test:e2e 2>&1 | tee /tmp/browser-qa.log
+      - name: Archive Browser QA failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rsi-browser-qa-failure-${{ env.EXACT_HEAD }}
+          path: |
+            /tmp/browser-qa.log
+            playwright-report
+            test-results
+          if-no-files-found: warn
+          retention-days: 7
       - name: PRE-PROD Ana CORS smoke
         shell: bash
         run: |
