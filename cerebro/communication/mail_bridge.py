@@ -2,6 +2,7 @@
 import argparse
 import email
 import hashlib
+import hmac
 import imaplib
 import json
 import os
@@ -11,6 +12,10 @@ import ssl
 from email.header import decode_header
 from email.message import EmailMessage
 from email.utils import parseaddr
+
+SIGNED_COMMAND_RE = re.compile(r"^(AUTORIZO|NO AUTORIZO|EXPLICAME)\s+(APR-\d{8}-[A-F0-9]{8})\s+SIG-([A-F0-9]{32})$", re.IGNORECASE)
+UNSIGNED_COMMAND_RE = re.compile(r"^(AUTORIZO|NO AUTORIZO|EXPLICAME)\s+(APR-\d{8}-[A-F0-9]{8})$", re.IGNORECASE)
+QUOTED_BOUNDARY_RE = re.compile(r"^(on .+wrote:|el .+escribi[oó]:|from:\s+.+|de:\s+.+|-{2,}\s*(original message|mensaje original)\s*-{2,})$", re.IGNORECASE)
 
 
 def env(name, required=True, default=None):
@@ -46,35 +51,110 @@ def extract_text(msg):
     return payload.decode(msg.get_content_charset() or "utf-8", errors="replace")
 
 
-def deterministic_delivery_id(payload):
-    canonical = json.dumps({"subject": payload.get("subject", ""), "text": payload.get("text", ""), "to": payload.get("to") or "OWNER_PRIVATE_IDENTITY"}, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
-    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()[:32]
+def command_signature(secret, verb, approval_id):
+    message = f"{verb.upper()}|{approval_id.upper()}".encode("utf-8")
+    return hmac.new(secret.encode("utf-8"), message, hashlib.sha256).hexdigest()[:32].upper()
 
 
-def deterministic_message_id(payload):
-    return f"<cerebro-{deterministic_delivery_id(payload)}@owner-communication.local>"
+def sign_command_line(line, secret):
+    match = UNSIGNED_COMMAND_RE.match(line.strip())
+    if not match:
+        return line
+    verb, approval_id = match.group(1).upper(), match.group(2).upper()
+    return f"{verb} {approval_id} SIG-{command_signature(secret, verb, approval_id)}"
 
 
-def inbox_contains_message_id(message_id):
+def sign_command_text(text, secret):
+    return "\n".join(sign_command_line(line, secret) for line in str(text).splitlines())
+
+
+def extract_unquoted_reply_text(text):
+    out = []
+    for raw in str(text or "").splitlines():
+        trimmed = raw.strip()
+        if QUOTED_BOUNDARY_RE.match(trimmed):
+            break
+        if trimmed.startswith(">"):
+            continue
+        out.append(raw)
+    return "\n".join(out)
+
+
+def verified_commands(text, secret):
+    commands = []
+    for raw in extract_unquoted_reply_text(text).splitlines():
+        line = raw.strip()
+        match = SIGNED_COMMAND_RE.match(line)
+        if not match:
+            continue
+        verb, approval_id, supplied = match.group(1).upper(), match.group(2).upper(), match.group(3).upper()
+        expected = command_signature(secret, verb, approval_id)
+        if hmac.compare_digest(supplied, expected):
+            commands.append(f"{verb} {approval_id}")
+    return commands
+
+
+def deterministic_message_id(delivery_keys):
+    canonical = "|".join(sorted(set(delivery_keys)))
+    digest = hashlib.sha256(canonical.encode("utf-8")).hexdigest()[:32]
+    return f"<cerebro-{digest}@owner-communication.local>"
+
+
+def existing_delivery_keys(keys):
+    keys = list(dict.fromkeys(k for k in keys if k))
+    if not keys:
+        return set()
     host = env("CEREBRO_MAIL_IMAP_HOST")
     port = int(env("CEREBRO_MAIL_IMAP_PORT", required=False, default="993"))
     username = env("CEREBRO_MAIL_USERNAME")
     password = env("CEREBRO_MAIL_PASSWORD")
     conn = imaplib.IMAP4_SSL(host, port, ssl_context=ssl.create_default_context())
+    found = set()
     try:
         conn.login(username, password)
         status, _ = conn.select("INBOX", readonly=True)
         if status != "OK":
             raise RuntimeError("unable to select INBOX for idempotency check")
-        status, data = conn.search(None, "HEADER", "Message-ID", f'"{message_id}"')
-        if status != "OK":
-            raise RuntimeError("unable to search deterministic Message-ID")
-        return bool((data[0] or b"").split())
+        for key in keys:
+            status, data = conn.search(None, "HEADER", "X-CEREBRO-Delivery-Key", f'"{key}"')
+            if status != "OK":
+                raise RuntimeError("unable to search logical delivery key")
+            if (data[0] or b"").split():
+                found.add(key)
+        return found
     finally:
         try:
             conn.logout()
         except Exception:
             pass
+
+
+def prepare_delivery(payload, secret):
+    kind = payload.get("kind")
+    if kind == "approval_batch":
+        raw_items = payload.get("items") or []
+        already = existing_delivery_keys([item.get("delivery_key") for item in raw_items])
+        remaining = [item for item in raw_items if item.get("delivery_key") and item.get("delivery_key") not in already]
+        if not remaining:
+            return None, already
+        count = len(remaining)
+        if payload.get("night_batch"):
+            intro = f"Te necesito. Durante la noche he agrupado {count} decisión{'es' if count != 1 else ''} pendiente{'s' if count != 1 else ''}. Puedes responder a este mismo correo con varias líneas de autorización."
+        else:
+            intro = f"Te necesito. Tengo {count} decisión{'es' if count != 1 else ''} pendiente{'s' if count != 1 else ''}. Puedes responder a este mismo correo con una o varias líneas."
+        body_items = [sign_command_text(item.get("text", ""), secret) for item in remaining]
+        text = f"{intro}\n\n" + "\n\n------------------------------\n\n".join(body_items) + "\n\nIMPORTANTE: “sí”, “vale”, “ok” o “procede” no autorizan nada. Solo cuentan las frases exactas con APR y su firma.\n"
+        subject = payload.get("subject") if count == len(raw_items) else f"CEREBRO · {count} AUTORIZACIÓN{'ES' if count != 1 else ''} PENDIENTE{'S' if count != 1 else ''}"
+        keys = [item["delivery_key"] for item in remaining]
+        return {"subject": subject, "text": text, "delivery_keys": keys}, already
+
+    key = payload.get("delivery_key") or (f"DIGEST:{payload.get('digest_date')}" if payload.get("digest_date") else None)
+    if not key:
+        raise RuntimeError("logical delivery key missing")
+    already = existing_delivery_keys([key])
+    if key in already:
+        return None, already
+    return {"subject": payload["subject"], "text": payload["text"], "delivery_keys": [key]}, already
 
 
 def send_message(input_path):
@@ -84,6 +164,7 @@ def send_message(input_path):
     password = env("CEREBRO_MAIL_PASSWORD")
     from_addr = env("CEREBRO_MAIL_FROM", required=False, default=username)
     owner = env("CEREBRO_OWNER_EMAIL")
+    approval_secret = env("CEREBRO_MAIL_APPROVAL_HMAC_SECRET")
 
     with open(input_path, "r", encoding="utf-8") as fh:
         payload = json.load(fh)
@@ -91,21 +172,22 @@ def send_message(input_path):
     if to_addr.lower() != owner.lower():
         raise RuntimeError("mail bridge can only send to configured owner identity")
 
-    delivery_id = deterministic_delivery_id(payload)
-    message_id = deterministic_message_id(payload)
-    if inbox_contains_message_id(message_id):
-        print(json.dumps({"sent": False, "deduplicated": True, "delivery_id": delivery_id, "recipient": "OWNER_PRIVATE_IDENTITY"}))
+    prepared, already = prepare_delivery(payload, approval_secret)
+    if prepared is None:
+        print(json.dumps({"sent": False, "deduplicated": True, "delivery_keys": sorted(already), "recipient": "OWNER_PRIVATE_IDENTITY"}))
         return
 
+    keys = prepared["delivery_keys"]
     msg = EmailMessage()
     msg["From"] = from_addr
     msg["To"] = to_addr
-    msg["Subject"] = payload["subject"]
-    msg["Message-ID"] = message_id
-    msg["X-CEREBRO-Delivery-ID"] = delivery_id
+    msg["Subject"] = prepared["subject"]
+    msg["Message-ID"] = deterministic_message_id(keys)
+    for key in keys:
+        msg["X-CEREBRO-Delivery-Key"] = key
     msg["X-CEREBRO-Generated"] = "owner-communication-v1"
     msg["Auto-Submitted"] = "auto-generated"
-    msg.set_content(payload["text"], charset="utf-8")
+    msg.set_content(prepared["text"], charset="utf-8")
 
     context = ssl.create_default_context()
     if port == 465:
@@ -119,7 +201,7 @@ def send_message(input_path):
             smtp.ehlo()
             smtp.login(username, password)
             smtp.send_message(msg)
-    print(json.dumps({"sent": True, "deduplicated": False, "delivery_id": delivery_id, "recipient": "OWNER_PRIVATE_IDENTITY"}))
+    print(json.dumps({"sent": True, "deduplicated": bool(already), "delivery_keys": keys, "recipient": "OWNER_PRIVATE_IDENTITY"}))
 
 
 def is_real_owner_reply(msg, subject):
@@ -136,6 +218,7 @@ def poll_owner(output_path, limit):
     username = env("CEREBRO_MAIL_USERNAME")
     password = env("CEREBRO_MAIL_PASSWORD")
     owner = env("CEREBRO_OWNER_EMAIL")
+    approval_secret = env("CEREBRO_MAIL_APPROVAL_HMAC_SECRET")
 
     conn = imaplib.IMAP4_SSL(host, port, ssl_context=ssl.create_default_context())
     try:
@@ -166,18 +249,21 @@ def poll_owner(output_path, limit):
             subject = decode_header_text(msg.get("Subject"))
             if not is_real_owner_reply(msg, subject):
                 continue
+            commands = verified_commands(extract_text(msg), approval_secret)
+            if not commands:
+                continue
             messages.append({
                 "message_id": msg.get("Message-ID") or f"imap:{msg_id.decode()}",
                 "in_reply_to": msg.get("In-Reply-To") or None,
-                "from_identity": "OWNER_PRIVATE_IDENTITY",
+                "from_identity": "OWNER_PRIVATE_IDENTITY_HMAC_VERIFIED_COMMAND",
                 "subject": subject,
                 "date": msg.get("Date") or "",
-                "text": extract_text(msg),
+                "text": "\n".join(commands),
             })
         with open(output_path, "w", encoding="utf-8") as fh:
             json.dump(messages, fh, ensure_ascii=False, indent=2)
             fh.write("\n")
-        print(json.dumps({"polled": len(messages), "sender": "OWNER_PRIVATE_IDENTITY", "reply_only": True}))
+        print(json.dumps({"polled": len(messages), "sender": "OWNER_PRIVATE_IDENTITY", "reply_only": True, "hmac_verified": True}))
     finally:
         try:
             conn.logout()
