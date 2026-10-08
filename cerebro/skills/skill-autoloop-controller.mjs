@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import {resolveHumanAlias} from '../governance/human-communication.mjs';
 
 const HUMAN_EXCEPTIONS=Object.freeze([
   'LEGAL_REQUIRED','SIGNATURE_REQUIRED','LOW_CONFIDENCE','HIGH_RISK',
@@ -72,6 +73,7 @@ export function checkpointNextCandidate(state,nextReport,{now=new Date().toISOSt
   out.waiting_safe_handler[id]={
     candidate_id:id,
     name:selected.declared_name??null,
+    human_alias:resolveHumanAlias({...selected,name:selected.declared_name??null}),
     wrapper_id:selected.wrapper_id??null,
     domain:selected.domain??null,
     engine_bindings:[...(selected.engine_bindings??[])],
@@ -115,8 +117,17 @@ export function moveCandidateToHumanGate(state,candidateId,{human_required,stage
   if(out.waiting_safe_handler) delete out.waiting_safe_handler[candidateId];
   out.waiting_human=out.waiting_human??{};
   out.waiting_human[candidateId]={
-    ...current,candidate_id:candidateId,stage:stage??current.stage??'HUMAN_GATE',status:'WAITING_HUMAN',
-    human_required,evidence,updated_at:now,prod_authorized:false,prod_write:false,autonomous_promotion_authorized:false
+    ...current,
+    candidate_id:candidateId,
+    human_alias:resolveHumanAlias({...current,candidate_id:candidateId}),
+    stage:stage??current.stage??'HUMAN_GATE',
+    status:'WAITING_HUMAN',
+    human_required,
+    evidence,
+    updated_at:now,
+    prod_authorized:false,
+    prod_write:false,
+    autonomous_promotion_authorized:false
   };
   out.processed_candidate_ids=uniq([...(out.processed_candidate_ids??[]),candidateId]);
   out.updated_at=now;

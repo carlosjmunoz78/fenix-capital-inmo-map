@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.0.1",
   "phase": "GOVERNANCE_POLICY_HUMAN_EXCEPTION_V0",
   "environment": "PREPROD",
   "additional_cost_target_eur": 0,
@@ -7,6 +7,10 @@
   "autonomous_prod": false,
   "supabase_writes": false,
   "external_actions": false,
+  "policy_refs": {
+    "human_communication": "cerebro/governance/communication-policy.v0.json",
+    "skill_human_alias_registry": "cerebro/registry/skill-human-aliases-v0.json"
+  },
   "engines": [
     {
       "engine_id": "POL-001",
@@ -43,6 +47,13 @@
     "cross_company_access": "DENY",
     "training_or_lab_direct_prod_promotion": "DENY",
     "default_external_action": "DENY",
-    "default_additional_cost_eur": 0
+    "default_additional_cost_eur": 0,
+    "human_required_email_notification": "REQUIRED",
+    "human_required_email_human_explanation_first": true,
+    "daily_cerebro_digest_email": "REQUIRED",
+    "skill_human_alias": "REQUIRED_USER_FACING_FIRST",
+    "technical_skill_identity_preservation": "REQUIRED",
+    "personal_email_address_in_public_repository": "DENY",
+    "notification_recipient_ref": "CEREBRO_OWNER_EMAIL_PRIVATE_CONNECTOR"
   }
 }
