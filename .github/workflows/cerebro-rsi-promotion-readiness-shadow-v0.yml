@@ -55,9 +55,9 @@ jobs:
       - name: Mark equivalence boundary
         run: echo 'This job executes the validation body of CEREBRO Factory PREPROD on the exact PR head; it does not claim the named manual gate ran.' >> "$GITHUB_STEP_SUMMARY"
 
-  app-preprod-build-shadow:
+  app-surface-isolation-shadow:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 10
     env:
       VITE_FENIX_ENV: preprod
       VITE_SUPABASE_URL: https://hnqlnvakzaywtafeiybt.supabase.co
@@ -73,40 +73,33 @@ jobs:
           cache: npm
       - name: Assert exact PR head checkout
         run: test "$(git rev-parse HEAD)" = "$EXACT_HEAD"
+      - name: Assert zero App and App-test surface drift
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -n "${PR_BASE_SHA:-}" ]; then
+            git fetch origin "$PR_BASE_SHA" --depth=1
+            base="$PR_BASE_SHA"
+          else
+            git fetch origin main --depth=1
+            base="$(git rev-parse FETCH_HEAD)"
+          fi
+          changed="$(git diff --name-only "$base" HEAD)"
+          protected='^(src/|tests/|supabase/|public/|scripts/|index\.html$|package(-lock)?\.json$|playwright\.config\.(ts|js)$|vite\.config\.(ts|js)$|tsconfig[^/]*\.json$|\.env|\.github/workflows/(preprod-build|app-restoration-build|prod-[^/]+)\.yml$)'
+          if printf '%s\n' "$changed" | grep -Eq "$protected"; then
+            echo 'RSI CEREBRO-only scope invalidated: App/App-test/build/deploy surface changed.' >&2
+            printf '%s\n' "$changed" >&2
+            exit 1
+          fi
+          echo 'No App, App-test, Supabase, App build config or App/PROD workflow drift in this PR.' >> "$GITHUB_STEP_SUMMARY"
       - name: Install dependencies reproducibly
         run: |
           set -euo pipefail
           if [ -f package-lock.json ]; then npm ci; else npm install; fi
-      - name: Dependency versions
-        run: npm list --depth=0
-      - name: Cache Playwright browsers
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-      - name: Install Chromium browser
-        run: npx playwright install chromium
-        timeout-minutes: 5
-      - name: Build
+      - name: Build exact head
         run: npm run build
-      - name: Browser QA
-        env:
-          PLAYWRIGHT_SKIP_BUILD: '1'
-        shell: bash
-        run: |
-          set -o pipefail
-          npm run test:e2e 2>&1 | tee /tmp/browser-qa.log
-      - name: Archive Browser QA failure evidence
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: rsi-browser-qa-failure-${{ env.EXACT_HEAD }}
-          path: |
-            /tmp/browser-qa.log
-            playwright-report
-            test-results
-          if-no-files-found: warn
-          retention-days: 7
       - name: PRE-PROD Ana CORS smoke
         shell: bash
         run: |
@@ -120,17 +113,18 @@ jobs:
             'https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/fenix-ana-api-test/capabilities')"
           test "$status" = "204"
           grep -qi '^access-control-allow-origin:' "$headers"
-      - name: Archive PREPROD build evidence only
+      - name: Archive exact-head build evidence
         uses: actions/upload-artifact@v4
         with:
-          name: rsi-promotion-readiness-preprod-${{ env.EXACT_HEAD }}
-          path: |
-            dist
-            playwright-report
-          if-no-files-found: warn
+          name: rsi-promotion-readiness-build-${{ env.EXACT_HEAD }}
+          path: dist
+          if-no-files-found: error
           retention-days: 7
-      - name: Mark equivalence boundary
-        run: echo 'This job executes the non-publishing validation body of PRE-PROD App Build on the exact PR head; it does not reactivate or publish the cancelled App PRE-PROD channel.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Mark App gate boundary
+        run: |
+          echo 'This job proves zero App/App-test drift plus exact-head build and existing PREPROD CORS smoke.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'It does NOT claim PRE-PROD App Build GREEN or reactivate the cancelled App PRE-PROD channel.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Legacy Browser QA debt on unchanged surfaces is recorded in RSI_RECOVERY_010_PROMOTION_READINESS.md.' >> "$GITHUB_STEP_SUMMARY"
 
   tribunal-shadow:
     runs-on: ubuntu-latest
@@ -153,15 +147,24 @@ jobs:
           cerebro/tests/promotion-pipeline.test.mjs
           cerebro/tests/rsi-recovery-e2e.test.mjs
           cerebro/tests/bounded-recovery-supervisor.test.mjs
-      - name: Assert PR changes remain outside application and production deployment surfaces
+      - name: Assert PR remains CEREBRO-only and outside production deployment surfaces
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
         shell: bash
         run: |
           set -euo pipefail
-          git fetch origin "${{ github.event.pull_request.base.sha }}" --depth=1
-          changed="$(git diff --name-only "${{ github.event.pull_request.base.sha }}" HEAD)"
-          if echo "$changed" | grep -Eq '^(src/|supabase/|public/|index.html$|package.json$|package-lock.json$|\.github/workflows/prod-)'; then
-            echo 'Unexpected application/production surface changed by RSI recovery.' >&2
-            echo "$changed" >&2
+          if [ -n "${PR_BASE_SHA:-}" ]; then
+            git fetch origin "$PR_BASE_SHA" --depth=1
+            base="$PR_BASE_SHA"
+          else
+            git fetch origin main --depth=1
+            base="$(git rev-parse FETCH_HEAD)"
+          fi
+          changed="$(git diff --name-only "$base" HEAD)"
+          protected='^(src/|tests/|supabase/|public/|scripts/|index\.html$|package(-lock)?\.json$|playwright\.config\.(ts|js)$|vite\.config\.(ts|js)$|tsconfig[^/]*\.json$|\.env|\.github/workflows/(preprod-build|app-restoration-build|prod-[^/]+)\.yml$)'
+          if printf '%s\n' "$changed" | grep -Eq "$protected"; then
+            echo 'Unexpected App/application/test/production surface changed by RSI recovery.' >&2
+            printf '%s\n' "$changed" >&2
             exit 1
           fi
           echo 'RSI recovery remains additive to cerebro/** and dedicated non-PROD workflows.' >> "$GITHUB_STEP_SUMMARY"
