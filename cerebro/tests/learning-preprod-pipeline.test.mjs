@@ -4,13 +4,13 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {LearningLedgerV0} from '../runtime/learning-ledger.mjs';
-import {preparePreprodLearningCandidate,persistPreparedCandidate} from '../runtime/learning-preprod-pipeline.mjs';
+import {preparePreprodLearningCandidate,persistPreparedCandidate,persistBridgeReportToPreprod} from '../runtime/learning-preprod-pipeline.mjs';
 
-function shadow(risk_class='LOW'){return {
-  learning_id:'learn:shadow-test',company_id:'fenix',engine_id:'FACT-001',environment:'LAB',version:'0.1.0',
-  source_event_ids:['evt:shadow'],source_type:'SKILL_SUPPLY_CHAIN',observed_at:'2026-10-08T12:00:00Z',
+function shadow(risk_class='LOW',learning_id='learn:shadow-test'){return {
+  learning_id,company_id:'fenix',engine_id:'FACT-001',environment:'LAB',version:'0.1.0',
+  source_event_ids:[`evt:${learning_id}`],source_type:'SKILL_SUPPLY_CHAIN',observed_at:'2026-10-08T12:00:00Z',
   hypothesis:'candidate may improve capability quality',expected_metric_delta:{metric:'quality',direction:'HIGHER'},confidence:0.85,risk_class,
-  evidence_refs:['event:shadow'],promotion_state:'CANDIDATE',created_by:'cap:skill-supply-chain',reason:'STATIC_LAB_GREEN',judge_decision:null,
+  evidence_refs:[`event:${learning_id}`],promotion_state:'CANDIDATE',created_by:'cap:skill-supply-chain',reason:'STATIC_LAB_GREEN',judge_decision:null,
   persistent_publish_authorized:false,rsi_publish_authorized:false,prod_authorized:false,prod_write_authorized:false
 };}
 
@@ -47,5 +47,23 @@ test('prepared candidate persists in local ledger and stays outside external RSI
     assert.equal(persisted.rsi_publish_authorized,false);
     assert.equal(persisted.prod_write_authorized,false);
     assert.equal(ledger.operation_count,1);
+  }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
+
+test('bridge report automatically persists low-risk candidates and holds HIGH risk for human exception',()=>{
+  const {dir,file}=tempFile();
+  try{
+    const ledger=new LearningLedgerV0({file_path:file});
+    const bridge_report={bridge_status:'SHADOW_BRIDGE_GREEN',learning_candidates:[shadow('LOW','learn:low'),shadow('HIGH','learn:high')]};
+    const result=persistBridgeReportToPreprod({bridge_report,ledger,preprod_version:'0.2.0',policy_pass:true,security_pass:true,local_persistence_enabled:true});
+    assert.equal(result.persisted_total,1);
+    assert.equal(result.held_total,1);
+    assert.deepEqual(result.human_required,['HIGH_RISK']);
+    assert.equal(result.prod_authorized,false);
+    assert.equal(result.prod_write_authorized,false);
+    assert.equal(ledger.operation_count,1);
+    const duplicate=persistBridgeReportToPreprod({bridge_report:{bridge_status:'SHADOW_BRIDGE_GREEN',learning_candidates:[shadow('LOW','learn:low')]},ledger,preprod_version:'0.2.0',policy_pass:true,security_pass:true,local_persistence_enabled:true});
+    assert.equal(duplicate.persisted_total,0);
+    assert.equal(duplicate.duplicates_total,1);
   }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });
