@@ -63,7 +63,8 @@ export function runLearningWorkerOnce({
 function arg(name){const index=process.argv.indexOf(name);return index>=0?process.argv[index+1]:null;}
 function flag(name){return process.argv.includes(name);}
 
-if(import.meta.url===`file://${fileURLToPath(import.meta.url)}`){
+const isEntrypoint=Boolean(process.argv[1])&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url);
+if(isEntrypoint){
   const eventsPath=arg('--events');
   const ledgerFile=arg('--ledger');
   const preprodVersion=arg('--version');
