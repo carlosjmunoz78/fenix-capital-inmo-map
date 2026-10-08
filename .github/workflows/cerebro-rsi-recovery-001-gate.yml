@@ -11,6 +11,9 @@ on:
       - 'cerebro/runtime/promotion-pipeline.mjs'
       - 'cerebro/runtime/meta-learning.mjs'
       - 'cerebro/runtime/multi-company-learning.mjs'
+      - 'cerebro/runtime/factory-supervisor-improvement.mjs'
+      - 'cerebro/runtime/knowledge-obsolescence.mjs'
+      - 'cerebro/runtime/continuity-handoff.mjs'
       - 'cerebro/skills/skill-rsi-shadow-bridge.mjs'
       - 'cerebro/tests/continuous-improvement-contract.test.mjs'
       - 'cerebro/tests/continuous-improvement-scheduler.test.mjs'
@@ -20,6 +23,9 @@ on:
       - 'cerebro/tests/promotion-pipeline.test.mjs'
       - 'cerebro/tests/meta-learning.test.mjs'
       - 'cerebro/tests/multi-company-learning.test.mjs'
+      - 'cerebro/tests/factory-supervisor-improvement.test.mjs'
+      - 'cerebro/tests/knowledge-obsolescence.test.mjs'
+      - 'cerebro/tests/continuity-handoff.test.mjs'
       - 'cerebro/tests/skill-rsi-shadow-bridge.test.mjs'
       - 'cerebro/docs/RSI_RECOVERY_001_AUDIT_2026-10-08.md'
       - '.github/workflows/cerebro-rsi-recovery-001-gate.yml'
@@ -33,6 +39,9 @@ on:
       - 'cerebro/runtime/promotion-pipeline.mjs'
       - 'cerebro/runtime/meta-learning.mjs'
       - 'cerebro/runtime/multi-company-learning.mjs'
+      - 'cerebro/runtime/factory-supervisor-improvement.mjs'
+      - 'cerebro/runtime/knowledge-obsolescence.mjs'
+      - 'cerebro/runtime/continuity-handoff.mjs'
       - 'cerebro/skills/skill-rsi-shadow-bridge.mjs'
       - 'cerebro/tests/continuous-improvement-contract.test.mjs'
       - 'cerebro/tests/continuous-improvement-scheduler.test.mjs'
@@ -42,6 +51,9 @@ on:
       - 'cerebro/tests/promotion-pipeline.test.mjs'
       - 'cerebro/tests/meta-learning.test.mjs'
       - 'cerebro/tests/multi-company-learning.test.mjs'
+      - 'cerebro/tests/factory-supervisor-improvement.test.mjs'
+      - 'cerebro/tests/knowledge-obsolescence.test.mjs'
+      - 'cerebro/tests/continuity-handoff.test.mjs'
       - 'cerebro/tests/skill-rsi-shadow-bridge.test.mjs'
       - 'cerebro/docs/RSI_RECOVERY_001_AUDIT_2026-10-08.md'
       - '.github/workflows/cerebro-rsi-recovery-001-gate.yml'
@@ -70,4 +82,7 @@ jobs:
           cerebro/tests/promotion-pipeline.test.mjs
           cerebro/tests/meta-learning.test.mjs
           cerebro/tests/multi-company-learning.test.mjs
+          cerebro/tests/factory-supervisor-improvement.test.mjs
+          cerebro/tests/knowledge-obsolescence.test.mjs
+          cerebro/tests/continuity-handoff.test.mjs
           cerebro/tests/skill-rsi-shadow-bridge.test.mjs
