@@ -1,0 +1,157 @@
+name: CEREBRO Multi-Company Structural Bootstrap V0
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'cerebro/multicompany/company-scaffold-bootstrap.mjs'
+      - 'cerebro/multicompany/bootstrap.mjs'
+      - 'cerebro/multicompany/requests/company-bootstrap-selfcheck.v0.json'
+      - 'cerebro/registry/multicompany-bootstrap.json'
+      - 'cerebro/runtime/fact001-request-runner.mjs'
+      - 'cerebro/factory.mjs'
+      - 'cerebro/registry/engine-registry.seed.json'
+      - '.github/workflows/cerebro-multicompany-scaffold-bootstrap-v0.yml'
+  workflow_dispatch:
+    inputs:
+      request_path:
+        description: 'Repository request JSON under cerebro/multicompany/requests/'
+        required: false
+        default: 'cerebro/multicompany/requests/company-bootstrap-selfcheck.v0.json'
+  repository_dispatch:
+    types:
+      - cerebro_new_company_scaffold
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-company-scaffold-${{ github.event_name }}-${{ github.sha }}
+  cancel-in-progress: false
+
+env:
+  EXACT_SOURCE_SHA: ${{ github.sha }}
+  DISPATCH_REQUEST_JSON: ${{ toJson(github.event.client_payload.request) }}
+
+jobs:
+  structural-company-bootstrap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.EXACT_SOURCE_SHA }}
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Assert immutable source checkout
+        shell: bash
+        run: test "$(git rev-parse HEAD)" = "$EXACT_SOURCE_SHA"
+
+      - name: Validate CEREBRO contracts before onboarding
+        working-directory: cerebro
+        run: |
+          set -euo pipefail
+          npm run validate
+          npm test
+
+      - name: Resolve one bounded company request
+        id: request
+        shell: bash
+        env:
+          REQUEST_PATH: ${{ github.event.inputs.request_path }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/company-bootstrap-input /tmp/company-bootstrap-evidence
+
+          if [ "$GITHUB_EVENT_NAME" = "repository_dispatch" ]; then
+            node <<'NODE'
+          const fs = require('fs');
+          const raw = process.env.DISPATCH_REQUEST_JSON;
+          if (!raw || raw === 'null') throw new Error('repository_dispatch requires client_payload.request');
+          const value = JSON.parse(raw);
+          if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('client_payload.request must be an object');
+          fs.writeFileSync('/tmp/company-bootstrap-input/request.json', JSON.stringify(value, null, 2) + '\n', 'utf8');
+          NODE
+            echo 'request_file=/tmp/company-bootstrap-input/request.json' >> "$GITHUB_OUTPUT"
+          elif [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            case "$REQUEST_PATH" in
+              cerebro/multicompany/requests/*.json) ;;
+              *) echo 'request_path must remain under cerebro/multicompany/requests/*.json' >&2; exit 1 ;;
+            esac
+            test -f "$REQUEST_PATH"
+            echo "request_file=$REQUEST_PATH" >> "$GITHUB_OUTPUT"
+          else
+            request='cerebro/multicompany/requests/company-bootstrap-selfcheck.v0.json'
+            test -f "$request"
+            echo "request_file=$request" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Generate canonical Phase 4 company scaffolds
+        shell: bash
+        run: |
+          set -euo pipefail
+          node cerebro/multicompany/company-scaffold-bootstrap.mjs \
+            --request '${{ steps.request.outputs.request_file }}' \
+            --out /tmp/company-bootstrap-evidence/output \
+            | tee /tmp/company-bootstrap-evidence/runner-summary.json
+
+      - name: Assert structural-only authority boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('fs');
+          const path = '/tmp/company-bootstrap-evidence/output/company-bootstrap-result.json';
+          const result = JSON.parse(fs.readFileSync(path, 'utf8'));
+          if (result.status !== 'STRUCTURAL_BOOTSTRAP_GREEN') throw new Error('structural bootstrap not green');
+          if (result.engine_id !== 'COMP-ONB-001') throw new Error('wrong onboarding engine');
+          if (result.environment !== 'PREPROD' || result.scaffold_environment !== 'SCAFFOLD') throw new Error('environment expansion');
+          if (result.phase4_engine_count !== 17 || result.structural_files_total !== 306) throw new Error('Phase 4 structural count drift');
+          if ((result.logical_bootstrap_state?.green_engines ?? []).length !== 0) throw new Error('scaffold generation cannot mark business engines GREEN');
+          if (result.logical_bootstrap_state?.all_green !== false) throw new Error('structural run overclaimed completed onboarding');
+          if (result.additional_cost_eur !== 0) throw new Error('non-zero cost');
+          if (result.prod_authorized !== false || result.prod_write_authorized !== false) throw new Error('PROD authority expansion');
+          if (result.trading_access !== false || result.supabase_writes !== false || result.external_code_execution !== false) throw new Error('forbidden authority');
+          for (const engine of result.engines) {
+            if (engine.generated_file_count !== 18 || engine.scaffold_environment !== 'SCAFFOLD') throw new Error(`${engine.engine_id}: invalid scaffold`);
+            if (engine.behavioral_evaluation !== 'NOT_RUN_STRUCTURAL_ONLY' || engine.tribunal !== 'NOT_RUN_STRUCTURAL_ONLY') throw new Error(`${engine.engine_id}: evaluation overclaim`);
+          }
+          fs.writeFileSync('/tmp/company-bootstrap-evidence/acceptance-summary.json', JSON.stringify({
+            schema_version: '1.0.0',
+            status: 'STRUCTURAL_BOOTSTRAP_GREEN',
+            source_sha: process.env.EXACT_SOURCE_SHA,
+            github_run_id: process.env.GITHUB_RUN_ID,
+            github_run_attempt: process.env.GITHUB_RUN_ATTEMPT,
+            request_id: result.request_id,
+            company_id: result.company_id,
+            phase4_engine_count: result.phase4_engine_count,
+            structural_files_total: result.structural_files_total,
+            aggregate_sha256: result.aggregate_sha256,
+            green_business_engines: result.logical_bootstrap_state.green_engines,
+            next_gate: result.next_gate,
+            additional_cost_eur: 0,
+            prod_authorized: false,
+            prod_write_authorized: false,
+            trading_access: false
+          }, null, 2) + '\n');
+          NODE
+
+      - name: Upload immutable structural onboarding evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: company-scaffold-bootstrap-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/company-bootstrap-evidence
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Record strict boundary
+        shell: bash
+        run: |
+          echo 'COMP-ONB-001 structural bootstrap generated all 17 Phase 4 canonical scaffolds.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'This does NOT mark scanning, SEO, social, CRM, App, automation, Training or activation engines GREEN.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Next gate: real COMP-REG-001 + TENANT-001 PREPROD execution/evidence. PROD/Trading/cost expansion remains denied.' >> "$GITHUB_STEP_SUMMARY"
