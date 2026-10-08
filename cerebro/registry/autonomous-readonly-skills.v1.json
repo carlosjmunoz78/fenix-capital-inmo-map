@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "registry_type": "CEREBRO_AUTONOMOUS_READONLY_SKILL_ADVISORY_REGISTRY",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PROD_READONLY_ADVISORY",
+  "version": "1.0.0",
+  "status": "ACTIVE_EMPTY",
+  "policy_ref": "CEREBRO-SKILL-AUTONOMY-STANDING-AUTH-001",
+  "entries": {},
+  "safety": {
+    "prod_write": false,
+    "customer_data": false,
+    "external_skill_code_execution": false,
+    "trading": false,
+    "paid_fallback": false,
+    "app_fenix_deploy": false,
+    "additional_cost_eur": 0
+  }
+}
