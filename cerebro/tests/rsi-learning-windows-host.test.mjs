@@ -6,6 +6,7 @@ const installer=fs.readFileSync(new URL('../host/windows/Install-CerebroLrn001Ho
 const launcher=fs.readFileSync(new URL('../host/windows/Start-CerebroLrn001Host.ps1',import.meta.url),'utf8');
 const uninstaller=fs.readFileSync(new URL('../host/windows/Uninstall-CerebroLrn001Host.ps1',import.meta.url),'utf8');
 const health=fs.readFileSync(new URL('../host/windows/Get-CerebroLrn001Health.ps1',import.meta.url),'utf8');
+const oneClick=fs.readFileSync(new URL('../host/windows/INSTALL_CEREBRO_LRN001_PREPROD.cmd',import.meta.url),'utf8');
 
 test('Windows binding uses native AtStartup SYSTEM scheduling and immutable copied host code',()=>{
   assert.match(installer,/New-ScheduledTaskTrigger -AtStartup/);
@@ -32,6 +33,15 @@ test('launcher runs only local Node host daemon and appends local logs',()=>{
   assert.match(launcher,/& \$NodePath \$HostScript daemon --config \$ConfigPath/);
   assert.match(launcher,/\*>> \$logFile/);
   assert.doesNotMatch(launcher,/Invoke-WebRequest|Invoke-RestMethod|curl|wget/i);
+});
+
+test('one-click launcher elevates only the local PREPROD installer with explicit safe gates',()=>{
+  assert.match(oneClick,/Start-Process powershell\.exe -Verb RunAs/);
+  assert.match(oneClick,/Install-CerebroLrn001Host\.ps1/);
+  assert.match(oneClick,/-PolicyPass/);
+  assert.match(oneClick,/-SecurityPass/);
+  assert.match(oneClick,/-EnableLocalPersistence/);
+  assert.doesNotMatch(oneClick,/PROD|Trading|Invoke-WebRequest|curl|wget/i);
 });
 
 test('uninstaller removes scheduled execution but preserves state backup inbox and config by default',()=>{
