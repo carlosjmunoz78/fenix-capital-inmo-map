@@ -93,6 +93,33 @@ test('COMP-ONB-001 is accepted only as automatic structural PREPROD scaffold wit
   assert.equal(onboarding.gateway_repository_dispatch_live_verified,false);
 });
 
+test('COMP-REG-001 and TENANT-001 are accepted only as in-memory PREPROD reference execution',()=>{
+  const expectedIds=['COMP-REG-001','TENANT-001'];
+  for(const engineId of expectedIds){
+    const engine=autonomy.engines.find(item=>item.engine_id===engineId);
+    assert.ok(engine,`missing ${engineId}`);
+    assert.equal(engine.company_id,'cerebro-reg-tenant-selfcheck');
+    assert.equal(engine.environment,'PREPROD');
+    assert.equal(engine.version,'0.1.0');
+    assert.equal(engine.autonomy_state,'PREPROD_REFERENCE_EXECUTION_VERIFIED');
+    assert.equal(engine.execution_model,'GITHUB_EVENT_DRIVEN_HOSTLESS_REFERENCE');
+    assert.equal(engine.connected_scope,'IN_MEMORY_PHASE4_REFERENCE_ONLY');
+    assert.equal(engine.live_acceptance_run_id,'37838584276');
+    assert.equal(engine.live_acceptance_attempt,1);
+    assert.equal(engine.idempotency_acceptance_run_id,'37838584276');
+    assert.equal(engine.idempotency_acceptance_attempt,2);
+    assert.equal(engine.live_source_sha,'6710067e0f1beb28f930c038aceebfb9168f965a');
+    assert.equal(engine.request_id,'company-reg-tenant-selfcheck-v0');
+    assert.equal(engine.execution_sha256,'c1dc362d98ac5b5ad23d441a8299d64182d2bb4e6bfd271e13ca45538ad1cdc8');
+    assert.equal(engine.engine_state_verified,'GREEN');
+    assert.equal(engine.tenant_isolation_verified,true);
+    assert.equal(engine.durability_state,'IN_MEMORY_REFERENCE_ONLY');
+    assert.equal(engine.next_gate,'DURABLE_COMPANY_REGISTRY_PREPROD_PERSISTENCE_REQUIRED');
+    assert.equal(engine.promotion_authorized,false);
+    assert.equal(engine.supabase_writes,false);
+  }
+});
+
 test('LRN-001 is accepted only as automatic PREPROD with real and idempotent evidence',()=>{
   const lrn=autonomy.engines.find(engine=>engine.engine_id==='LRN-001');
   assert.ok(lrn);

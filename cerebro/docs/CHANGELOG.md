@@ -1,5 +1,16 @@
 # CEREBRO OS · CHANGELOG
 
+## 2026-10-08 · COMP-REG-001 + TENANT-001 PREPROD reference execution accepted
+
+- PR #511 merged the additive hostless reference executor to `main` as `6710067e0f1beb28f930c038aceebfb9168f965a` after exact-head promotion/readiness gates passed.
+- Automatic `main` run `37838584276` attempt 1 completed SUCCESS; deterministic attempt 2 also completed SUCCESS against the same immutable source/request.
+- Both attempts completed 651 CEREBRO tests with 651 passed / 0 failed and reproduced execution SHA-256 `c1dc362d98ac5b5ad23d441a8299d64182d2bb4e6bfd271e13ca45538ad1cdc8`.
+- Both produced `COMP_REG_TENANT_PREPROD_GREEN`: `COMP-REG-001` and `TENANT-001` GREEN, `COMP-ONB-001` READY, `SCAN-001`/`ENGACT-001` BLOCKED.
+- A separate synthetic control tenant remained unchanged, verifying bounded tenant isolation; promotion remained denied with `PHASE4_NOT_ALL_GREEN`.
+- Accepted state for both engines is `PREPROD_REFERENCE_EXECUTION_VERIFIED`, explicitly `IN_MEMORY_REFERENCE_ONLY`.
+- Cost remained 0 EUR; PROD/PROD-write/Trading/Supabase-write/external-code authority remained false.
+- Next gate: `DURABLE_COMPANY_REGISTRY_PREPROD_PERSISTENCE_REQUIRED`; no durable Company Registry claim is made.
+
 ## 2026-10-08 · COMP-ONB-001 Structural Onboarding V0 accepted
 
 - Added an additive multi-company structural adapter that composes the existing Phase 4 dependency graph with verified FACT-001 AutoFactory; no new canonical engine ID is introduced.
@@ -50,7 +61,7 @@
 - Added exact persisted payload checksum, atomic temp-write/fsync/rename/directory-fsync, ancestor-directory fsync, deterministic replay, restart idempotency and corruption/kind fail-closed handling.
 - Hardened caller-input snapshots, exact PREPROD operation boundaries, ambiguous post-rename durability poisoning and tenant/context isolation.
 - Added durable restart recovery for jobs abandoned in `RUNNING`: retry to `QUEUED` when attempts remain, otherwise terminal `FAILED`.
-- PREPROD Factory `34337677363` and App Build `34337677429` success on exact reviewed head.
+- PREPROD Factory `34337677363` and App `34337677429` success on exact reviewed head.
 - Codex exact-head review closed with no remaining P1/P2 suggestions.
 - PROD Live Deploy `34340279918` and PROD Runtime Smoke `34340279922` success on exact merge SHA.
 - `autonomous_prod=false`, `prod_writes=false`, no Supabase dependency and no new paid service.
@@ -66,7 +77,7 @@
 ## 2026-09-09 · Phase 2 read-only evidence audit V0
 
 - Audited all nine existing-engine bindings without activation, writes or new cost.
-- `APP-001` moved at evidence level to `CONFIRMED_OPERATIONAL` for the existing App surface only, based on exact-SHA PROD Live Deploy `34293941974` and PROD Runtime Smoke `34293942069` on `6bf6af92c1106884da87fb9a659f807093d47e0a`.
+- `APP-001` moved at evidence level to `CONFIRMED_OPERATIONAL` for the existing App surface only, based on exact-SHA PROD deploy/smoke on `6bf6af92c1106884da87fb9a659f807093d47e0a` (`34293941974`, `34293942069`). This does not imply autonomous CEREBRO execution.
 - `CORE-001`, `SUP-001`, `TRN-001`, `DOC-001` remain `DOCUMENTED_PARTIAL`.
 - `CRM-001`, `SEO-001`, `WEB-001`, `LAB-TRD` remain `UNKNOWN_REQUIRES_AUDIT`; Trading stays isolated and requires separate audit.
 - Added machine-validated evidence ledger and tests preventing partial/source-only evidence from being mislabeled as live confirmation.
