@@ -1,5 +1,16 @@
 # CEREBRO OS · CHANGELOG
 
+## 2026-10-08 · FACT-001 AutoFactory V0 candidate
+
+- Added bounded structured FACT-001 request contract with canonical `company_id`, `engine_id`, `environment`, `version` context.
+- Added deterministic `fact001-request-runner.mjs` that wraps the existing FACT-001 generator instead of replacing it.
+- Added hostless/event-driven workflow `CEREBRO FACT-001 AutoFactory V0` using `push`, `workflow_dispatch` and future `repository_dispatch` ingress.
+- Workflow permission remains `contents: read`; generated output is CI artifact evidence only and cannot modify the Engine Registry or application surfaces.
+- Valid requests remain exact `SCAFFOLD`, additional cost 0 €, PROD/PROD-write/Trading/external-code authority false.
+- Unknown engine/schema drift routes fail-closed to `POLICY_CONFLICT`; authority expansion to `HIGH_RISK`; non-zero cost to `MONEY_LIMIT`.
+- Target-engine behavioral evaluation/tribunal/PREPROD remain explicitly downstream; this candidate proves only structural factory automation.
+- Live automatic post-merge run and deterministic rerun are still required before FACT-001 autonomy is promoted from `PARCIAL` to automatic/verified.
+
 ## 2026-10-07 · Skill Supply Chain Step 4 PREPROD GREEN
 
 - Evidence head `86369e0cd0d54c9c205bd39f309804a62b2c59d3`; workflow `37647914902` SUCCESS; artifact `11494354501`, digest `sha256:9dac9feec60dee265d3af9b2413f48394eaf54b7f4109f4ba96051f374770c10`.

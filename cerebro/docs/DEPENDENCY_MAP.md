@@ -131,3 +131,14 @@ Before wiring persistent `EVT-001`/`JOB-001` into `SharedRuntime`, require expli
 - `fenix-memory-api` relacional/CRM sigue intacta y separada.
 - Currentness: preguntas sensibles al tiempo pueden quedar marcadas `REQUIRES_CURRENT_VERIFICATION`; la verificación externa/canónica ocurre antes de usar el dato como decisión vigente.
 - No se añade modelo, worker, servidor ni suscripción de pago.
+
+
+## FACT-001 Automatic Factory V0 · 2026-10-08
+
+Candidate dependency chain:
+
+`structured request → GOV-001 canonical Engine Registry → existing FACT-001 deterministic generator → structural verification → immutable CI artifact evidence`
+
+Ingress is bounded to `cerebro/factory/requests/*.json`, explicit workflow dispatch, or future `repository_dispatch` from CEREBRO Gateway. The automation has repository `contents: read` only. It cannot mutate the registry, App, CRM, Supabase, WordPress, SEO, Training, Trading, or any PROD surface.
+
+Target-engine output stays `SCAFFOLD`; behavioral evaluation, tribunal, PREPROD and all production promotion gates remain downstream. Live post-merge acceptance is required before FACT-001 itself is marked automatic/verified.
