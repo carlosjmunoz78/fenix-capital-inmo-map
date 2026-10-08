@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  approvalScopeFingerprint,
   buildHumanRequiredEmailEnvelope,
   parseApprovalCommands,
   isQuietHours,
@@ -43,6 +44,7 @@ test('approval envelope explains capability and emits exact copyable phrases',()
     cannot_modify:['datos de clientes','Trading'],
     risk:'MEDIO_CONTROLADO',
     rollback:'GREEN',
+    rollback_green:true,
     standing_learning_eligible:true
   });
   assert.match(envelope.approval_id,/^APR-20261008-[A-F0-9]{8}$/);
@@ -53,9 +55,17 @@ test('approval envelope explains capability and emits exact copyable phrases',()
   assert.deepEqual(envelope.cannot_modify,['datos de clientes','Trading']);
 });
 
+test('effective privileges change the scope fingerprint even without requested aliases',()=>{
+  const safe=approvalScopeFingerprint({...baseItem,prod_write:false,trading_access:false});
+  const write=approvalScopeFingerprint({...baseItem,prod_write:true,trading_access:false});
+  const trading=approvalScopeFingerprint({...baseItem,prod_write:false,trading_access:true});
+  assert.notEqual(safe,write);
+  assert.notEqual(safe,trading);
+});
+
 test('multiple exact commands are accepted in a single reply while generic yes is ignored',()=>{
-  const a=buildHumanRequiredEmailEnvelope({item:baseItem,event_version:'a',standing_learning_eligible:true});
-  const b=buildHumanRequiredEmailEnvelope({item:{...baseItem,candidate_id:'x2',name:'github',updated_at:'2026-10-08T07:01:00Z'},event_version:'b'});
+  const a=buildHumanRequiredEmailEnvelope({item:baseItem,event_version:'a',rollback_green:true});
+  const b=buildHumanRequiredEmailEnvelope({item:{...baseItem,candidate_id:'x2',name:'github',updated_at:'2026-10-08T07:01:00Z'},event_version:'b',rollback_green:true});
   const pending=new Map([[a.approval_id,a],[b.approval_id,b]]);
   const parsed=parseApprovalCommands(`sí, adelante\nAUTORIZO ${a.approval_id}\nNO AUTORIZO ${b.approval_id}`,pending);
   assert.equal(parsed.accepted.length,2);
@@ -91,12 +101,16 @@ test('daily digest sends once after 08:20 Madrid',()=>{
   assert.equal(shouldSendDailyDigest({now:new Date('2026-10-08T06:30:00Z'),last_digest_date:'2026-10-08'}),false);
 });
 
-test('repeated approvals only propose, never silently broaden, standing authorization',()=>{
-  const request=buildHumanRequiredEmailEnvelope({item:baseItem,event_version:'learn',standing_learning_eligible:true});
+test('repeated approvals only propose standing authorization with positive rollback evidence',()=>{
+  const request=buildHumanRequiredEmailEnvelope({item:baseItem,event_version:'learn',standing_learning_eligible:true,rollback_green:true});
   const history=[1,2,3].map(()=>({scope_fingerprint:request.scope_fingerprint,decision:'AUTHORIZED',rollback_green:true}));
   const result=evaluateStandingAuthorizationCandidate({history,request});
   assert.equal(result.eligible,true);
   assert.equal(result.requires_explicit_owner_command,true);
+
+  const noRollback=buildHumanRequiredEmailEnvelope({item:{...baseItem,rollback_green:undefined},event_version:'no-rollback',standing_learning_eligible:true,rollback_green:false});
+  const blocked=evaluateStandingAuthorizationCandidate({history:[1,2,3].map(()=>({scope_fingerprint:noRollback.scope_fingerprint,decision:'AUTHORIZED',rollback_green:false})),request:noRollback});
+  assert.equal(blocked.eligible,false);
 });
 
 test('nighttime keeps pending approvals unsent and daytime creates one batch',()=>{
@@ -109,7 +123,7 @@ test('nighttime keeps pending approvals unsent and daytime creates one batch',()
   assert.equal(morning.approvalMail.approval_ids.length,1);
 });
 
-test('one owner email may authorize multiple exact APR lines independently',()=>{
+test('one owner email may authorize multiple exact APR lines independently and authorized action stays visible until consumed',()=>{
   const item2={...baseItem,candidate_id:'candidate-2',name:'github',updated_at:'2026-10-08T07:02:00Z'};
   let state=initialCommunicationState('2026-10-08T07:00:00Z');
   state=ingestSkillHumanRequired(state,{waiting_human:{a:baseItem,b:item2}},'2026-10-08T07:00:00Z');
@@ -117,5 +131,19 @@ test('one owner email may authorize multiple exact APR lines independently',()=>
   assert.equal(ids.length,2);
   state=applyOwnerMessages(state,[{message_id:'msg-1',text:`AUTORIZO ${ids[0]}\nNO AUTORIZO ${ids[1]}`}],'2026-10-08T07:05:00Z');
   assert.equal(state.decisions.length,2);
-  assert.equal(Object.keys(state.pending).length,0);
+  assert.equal(state.pending[ids[0]].status,'AUTHORIZED_WAITING_EXECUTION');
+  assert.equal(state.authorized_actions[ids[0]].status,'AUTHORIZED_WAITING_EXECUTION');
+  assert.equal(state.pending[ids[1]],undefined);
+});
+
+test('EXPLICAME returns an expanded human explanation without authorizing',()=>{
+  let state=initialCommunicationState('2026-10-08T07:00:00Z');
+  state=ingestSkillHumanRequired(state,{waiting_human:{a:baseItem}},'2026-10-08T07:00:00Z');
+  const id=Object.keys(state.pending)[0];
+  state=applyOwnerMessages(state,[{message_id:'msg-explain',text:`EXPLICAME ${id}`}],'2026-10-08T07:05:00Z');
+  assert.equal(state.decisions.length,0);
+  assert.equal(state.pending[id].status,'PENDING_OWNER_EXPLANATION');
+  const prepared=prepareOutbound(state,{now:new Date('2026-10-08T07:10:00Z'),repoSummary:{}});
+  assert.ok(prepared.approvalMail.text.includes('Explicación ampliada'));
+  assert.ok(prepared.approvalMail.text.includes('autorización de un solo uso'));
 });
