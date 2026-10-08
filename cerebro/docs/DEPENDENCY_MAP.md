@@ -135,10 +135,14 @@ Before wiring persistent `EVT-001`/`JOB-001` into `SharedRuntime`, require expli
 
 ## FACT-001 Automatic Factory V0 · 2026-10-08
 
-Candidate dependency chain:
+Verified dependency chain:
 
 `structured request → GOV-001 canonical Engine Registry → existing FACT-001 deterministic generator → structural verification → immutable CI artifact evidence`
 
-Ingress is bounded to `cerebro/factory/requests/*.json`, explicit workflow dispatch, or future `repository_dispatch` from CEREBRO Gateway. The automation has repository `contents: read` only. It cannot mutate the registry, App, CRM, Supabase, WordPress, SEO, Training, Trading, or any PROD surface.
+Git-backed automatic ingress is verified on `main`: run `37830400943` attempt 1 was triggered by push and completed GREEN; attempt 2 reproduced the same request idempotency key, generated bundle SHA-256 and registry SHA-256 against the same immutable source SHA. FACT-001 is therefore `AUTOMATIC_SCAFFOLD_VERIFIED` for connected canonical SCAFFOLD request generation.
 
-Target-engine output stays `SCAFFOLD`; behavioral evaluation, tribunal, PREPROD and all production promotion gates remain downstream. Live post-merge acceptance is required before FACT-001 itself is marked automatic/verified.
+Ingress remains bounded to `cerebro/factory/requests/*.json`, explicit workflow dispatch, or defined `repository_dispatch` from CEREBRO Gateway. The automation has repository `contents: read` only. It cannot mutate the registry, App, CRM, Supabase, WordPress, SEO, Training, Trading, or any PROD surface.
+
+`ACTGW-001 → repository_dispatch` is **DEFINED / POR AUDITAR LIVE**; no claim is made that Gateway dispatch itself has been physically/live verified yet.
+
+Target-engine output stays `SCAFFOLD`; behavioral evaluation, tribunal, PREPROD and all production promotion gates remain downstream. FACT-001 automation verification does not transfer autonomy to generated engines.

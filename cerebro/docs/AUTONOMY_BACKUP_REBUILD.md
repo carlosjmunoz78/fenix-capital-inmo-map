@@ -4,6 +4,7 @@
 
 ### HECHO structural/reference
 - FACT-001 / GOV-001.
+- FACT-001 AutoFactory V0 is `AUTOMATIC_SCAFFOLD_VERIFIED` for bounded canonical SCAFFOLD requests, backed by live push run `37830400943` and deterministic rerun evidence.
 - Phase 4 multi-company bootstrap V0.
 - Phase 5 Console/Gateway V0.
 - Governance V0: POL-001 / HEX-001.
@@ -13,7 +14,8 @@
 - RUNTIME-001 / FINOPS-001 are executable reference V0 components.
 - EVT-001 / JOB-001 are persistent reference components but are not yet wired as the SharedRuntime replacement, not multi-process/shared-worker coordinated and not autonomous PROD.
 - Existing-engine bindings are wrappers/contracts only until live evidence is audited.
-- FACT-001 AutoFactory V0 software is implemented as an additive hostless/event-driven scaffold path; live post-merge automatic acceptance is still required before marking FACT-001 automatic/verified.
+- FACT-001 `repository_dispatch` support is defined, but ACTGW-001 → repository_dispatch live proof is still pending. Git-backed automatic request execution is verified.
+- Generated target engines remain `SCAFFOLD` until their own implementation/evaluation/tribunal/PREPROD gates pass.
 
 ### DEFINIDO
 - DBOFF-001 / STOROFF-001 / FREE-001 / AIBUD-001 contracts/targets.
@@ -30,6 +32,7 @@ HUMAN_REQUIRED_SET: `["LEGAL_REQUIRED","SIGNATURE_REQUIRED","LOW_CONFIDENCE","HI
 - Git history is the source snapshot for code/config/docs in `cerebro/`.
 - Factory generated output is not a backup source; it is rebuildable output.
 - FACT-001 AutoFactory request contracts and seed requests are Git-backed; generated request artifacts are reproducible and retained by GitHub Actions as run evidence, not treated as source of truth.
+- FACT-001 accepted deterministic identity is the request idempotency key + generated bundle checksum + registry checksum; ZIP artifact digests may differ because archive metadata is not the scaffold identity.
 - Persistent EVT/JOB V0 journal files are runtime state and are not replaced by Git history; production-grade activation would require an explicit state backup/restore contract before migration.
 - Existing production systems and their data remain governed by their existing backup mechanisms; this V0 does not replace or modify them.
 - No new paid backup service is introduced.
