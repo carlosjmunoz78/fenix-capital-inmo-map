@@ -15,6 +15,8 @@ on:
       - 'cerebro/runtime/rsi-learning-auto-host.mjs'
       - 'cerebro/runtime/rsi-event-outbox.mjs'
       - 'cerebro/runtime/rsi-outbox-client.mjs'
+      - 'cerebro/runtime/meta-observability-ledger.mjs'
+      - 'cerebro/runtime/meta-learning-runner.mjs'
       - 'cerebro/runtime/experiment-pipeline.mjs'
       - 'cerebro/runtime/evaluation-tribunal.mjs'
       - 'cerebro/runtime/promotion-pipeline.mjs'
@@ -41,6 +43,8 @@ on:
       - 'cerebro/tests/rsi-outbox-client.test.mjs'
       - 'cerebro/tests/rsi-outbox-publisher-workflow.test.mjs'
       - 'cerebro/tests/rsi-learning-windows-host.test.mjs'
+      - 'cerebro/tests/meta-observability-ledger.test.mjs'
+      - 'cerebro/tests/meta-learning-runner.test.mjs'
       - 'cerebro/tests/experiment-pipeline.test.mjs'
       - 'cerebro/tests/evaluation-tribunal.test.mjs'
       - 'cerebro/tests/promotion-pipeline.test.mjs'
@@ -75,6 +79,8 @@ on:
       - 'cerebro/runtime/rsi-learning-auto-host.mjs'
       - 'cerebro/runtime/rsi-event-outbox.mjs'
       - 'cerebro/runtime/rsi-outbox-client.mjs'
+      - 'cerebro/runtime/meta-observability-ledger.mjs'
+      - 'cerebro/runtime/meta-learning-runner.mjs'
       - 'cerebro/runtime/experiment-pipeline.mjs'
       - 'cerebro/runtime/evaluation-tribunal.mjs'
       - 'cerebro/runtime/promotion-pipeline.mjs'
@@ -101,6 +107,8 @@ on:
       - 'cerebro/tests/rsi-outbox-client.test.mjs'
       - 'cerebro/tests/rsi-outbox-publisher-workflow.test.mjs'
       - 'cerebro/tests/rsi-learning-windows-host.test.mjs'
+      - 'cerebro/tests/meta-observability-ledger.test.mjs'
+      - 'cerebro/tests/meta-learning-runner.test.mjs'
       - 'cerebro/tests/experiment-pipeline.test.mjs'
       - 'cerebro/tests/evaluation-tribunal.test.mjs'
       - 'cerebro/tests/promotion-pipeline.test.mjs'
@@ -149,7 +157,7 @@ jobs:
             }
           }
           if ($failed) { exit 1 }
-      - name: Recovered RSI runtime, horizon execution, autonomous scheduling, real event wiring, PREPROD persistence, host binding, governance and bridge regression tests
+      - name: Recovered RSI runtime, measured MetaLearn, horizon execution, autonomous scheduling, real event wiring, PREPROD persistence, host binding, governance and bridge regression tests
         run: >-
           node --test
           cerebro/tests/continuous-improvement-contract.test.mjs
@@ -166,6 +174,8 @@ jobs:
           cerebro/tests/rsi-outbox-client.test.mjs
           cerebro/tests/rsi-outbox-publisher-workflow.test.mjs
           cerebro/tests/rsi-learning-windows-host.test.mjs
+          cerebro/tests/meta-observability-ledger.test.mjs
+          cerebro/tests/meta-learning-runner.test.mjs
           cerebro/tests/experiment-pipeline.test.mjs
           cerebro/tests/evaluation-tribunal.test.mjs
           cerebro/tests/promotion-pipeline.test.mjs
