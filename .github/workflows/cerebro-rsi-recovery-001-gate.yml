@@ -8,6 +8,7 @@ on:
       - 'cerebro/runtime/learning-pipeline.mjs'
       - 'cerebro/runtime/learning-ledger.mjs'
       - 'cerebro/runtime/learning-preprod-pipeline.mjs'
+      - 'cerebro/runtime/rsi-learning-worker.mjs'
       - 'cerebro/runtime/experiment-pipeline.mjs'
       - 'cerebro/runtime/evaluation-tribunal.mjs'
       - 'cerebro/runtime/promotion-pipeline.mjs'
@@ -23,6 +24,7 @@ on:
       - 'cerebro/tests/learning-pipeline.test.mjs'
       - 'cerebro/tests/learning-ledger.test.mjs'
       - 'cerebro/tests/learning-preprod-pipeline.test.mjs'
+      - 'cerebro/tests/rsi-learning-worker.test.mjs'
       - 'cerebro/tests/experiment-pipeline.test.mjs'
       - 'cerebro/tests/evaluation-tribunal.test.mjs'
       - 'cerebro/tests/promotion-pipeline.test.mjs'
@@ -36,6 +38,7 @@ on:
       - 'cerebro/tests/skill-rsi-shadow-bridge.test.mjs'
       - 'cerebro/docs/RSI_RECOVERY_001_*.md'
       - 'cerebro/docs/RSI_RECOVERY_002_*.md'
+      - 'cerebro/docs/RSI_RECOVERY_003_*.md'
       - '.github/workflows/cerebro-rsi-recovery-001-gate.yml'
   pull_request:
     paths:
@@ -44,6 +47,7 @@ on:
       - 'cerebro/runtime/learning-pipeline.mjs'
       - 'cerebro/runtime/learning-ledger.mjs'
       - 'cerebro/runtime/learning-preprod-pipeline.mjs'
+      - 'cerebro/runtime/rsi-learning-worker.mjs'
       - 'cerebro/runtime/experiment-pipeline.mjs'
       - 'cerebro/runtime/evaluation-tribunal.mjs'
       - 'cerebro/runtime/promotion-pipeline.mjs'
@@ -59,6 +63,7 @@ on:
       - 'cerebro/tests/learning-pipeline.test.mjs'
       - 'cerebro/tests/learning-ledger.test.mjs'
       - 'cerebro/tests/learning-preprod-pipeline.test.mjs'
+      - 'cerebro/tests/rsi-learning-worker.test.mjs'
       - 'cerebro/tests/experiment-pipeline.test.mjs'
       - 'cerebro/tests/evaluation-tribunal.test.mjs'
       - 'cerebro/tests/promotion-pipeline.test.mjs'
@@ -72,6 +77,7 @@ on:
       - 'cerebro/tests/skill-rsi-shadow-bridge.test.mjs'
       - 'cerebro/docs/RSI_RECOVERY_001_*.md'
       - 'cerebro/docs/RSI_RECOVERY_002_*.md'
+      - 'cerebro/docs/RSI_RECOVERY_003_*.md'
       - '.github/workflows/cerebro-rsi-recovery-001-gate.yml'
   workflow_dispatch:
 
@@ -87,7 +93,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Recovered RSI runtime, PREPROD persistence, governance and bridge regression tests
+      - name: Recovered RSI runtime, PREPROD persistence, worker, governance and bridge regression tests
         run: >-
           node --test
           cerebro/tests/continuous-improvement-contract.test.mjs
@@ -95,6 +101,7 @@ jobs:
           cerebro/tests/learning-pipeline.test.mjs
           cerebro/tests/learning-ledger.test.mjs
           cerebro/tests/learning-preprod-pipeline.test.mjs
+          cerebro/tests/rsi-learning-worker.test.mjs
           cerebro/tests/experiment-pipeline.test.mjs
           cerebro/tests/evaluation-tribunal.test.mjs
           cerebro/tests/promotion-pipeline.test.mjs
