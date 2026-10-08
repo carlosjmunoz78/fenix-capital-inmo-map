@@ -3,6 +3,7 @@ name: CEREBRO Skill AutoLoop Safe V0
 on:
   push:
     branches:
+      - main
       - cerebro/skill-autoloop-v0-20261008
     paths:
       - 'cerebro/skills/skill-autoloop-controller.mjs'
