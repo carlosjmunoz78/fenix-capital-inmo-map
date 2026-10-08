@@ -104,7 +104,13 @@ function heartbeatBody(config,{status,cycle_started_at,cycle_finished_at,last_ba
   };
 }
 
-function writeHeartbeat(config,body){atomicJson(hostPaths(config).heartbeat,body);return body;}
+function writeHeartbeat(config,body){
+  const heartbeat=hostPaths(config).heartbeat;
+  if(body.last_success_at===null&&fs.existsSync(heartbeat)){
+    try{body={...body,last_success_at:readJson(heartbeat).last_success_at??null};}catch{}
+  }
+  atomicJson(heartbeat,body);return body;
+}
 function receiptFile(config,digest){return path.join(hostPaths(config).receipts,`${digest}.json`);}
 
 export function runHostCycle({config,now=()=>new Date().toISOString()}){
@@ -126,6 +132,9 @@ export function runHostCycle({config,now=()=>new Date().toISOString()}){
       if(fs.existsSync(receipt)){skipped_receipts+=1;continue;}
       const report=JSON.parse(bytes.toString('utf8'));
       if(!Array.isArray(report.events)) throw new Error(`event report missing events array: ${path.basename(file)}`);
+      for(const event of report.events){
+        if(!event||event.company_id!==cfg.company_id) throw new Error(`CROSS_COMPANY_EVENT: ${event?.company_id??'MISSING'} != ${cfg.company_id}`);
+      }
       const result=runLearningWorkerOnce({
         event_report:report,
         ledger_file:paths.ledger,
