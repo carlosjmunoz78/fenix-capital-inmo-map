@@ -35,6 +35,15 @@ test('green candidate is eligible but unsafe evidence fails closed',()=>{
   assert.equal(isCandidateEligibleForStandingSafeLane(bad,auth()).green,false);
 });
 
+test('requested destructive or unbounded scopes fail closed',()=>{
+  const destructive=item();destructive.destructive_delete_requested=true;
+  assert.equal(isCandidateEligibleForStandingSafeLane(destructive,auth()).green,false);
+  const unbounded=item();unbounded.unbounded_prod_write_requested=true;
+  assert.equal(isCandidateEligibleForStandingSafeLane(unbounded,auth()).green,false);
+  const money=item();money.max_money_eur=1;
+  assert.equal(isCandidateEligibleForStandingSafeLane(money,auth()).green,false);
+});
+
 test('exact owner action must match current candidate stage and scope',()=>{
   assert.equal(isCandidateEligibleForExactOwnerLane(item(),ownerAction()).green,true);
   assert.equal(isCandidateEligibleForExactOwnerLane(item(),ownerAction({stage:'OTHER'})).green,false);
