@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1.0",
   "confirm": "RUN_SYNTHETIC_LAB",
-  "one_shot_id": "obsidian-synthetic-lab-20261008-v01-safe",
+  "one_shot_id": "obsidian-synthetic-lab-20261008-v02-contained-conflict",
   "scope": "LAB_SYNTHETIC_ONLY",
   "target_candidate": "obsidian",
   "target_candidate_id": "lobehub-skills:9a6e3fac20369220df43",
@@ -20,6 +20,6 @@
   "allow_prod_write": false,
   "allow_trading_access": false,
   "additional_cost_budget_eur": 0,
-  "authorization_basis": "continue_safe_work_current_chat_2026-10-08",
+  "authorization_basis": "user_authorized_safe_automation_current_chat_2026-10-08",
   "created_at": "2026-10-08"
 }
