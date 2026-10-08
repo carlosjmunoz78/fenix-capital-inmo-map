@@ -1,53 +1,78 @@
-# CEREBRO · Comunicación humana y alias de skills V0
+# CEREBRO · Comunicación humana y autorizaciones V0.2
 
 ## Objetivo
 
-CEREBRO debe poder trabajar de forma autónoma en la zona segura y llamar al humano únicamente cuando exista una excepción canónica. Cuando necesite a Carlos, la llamada no puede quedar escondida en logs, GitHub o un estado técnico: debe generar un aviso por correo.
+CEREBRO trabaja de forma autónoma dentro de las políticas vigentes y llama a Carlos solo ante una excepción humana real. La comunicación operativa pertenece a CEREBRO, no a una alarma externa de ChatGPT.
 
-## Regla de correo HUMAN_REQUIRED
+## HUMAN_REQUIRED por correo
 
-Todo `HUMAN_REQUIRED` canónico debe producir un correo al propietario de CEREBRO usando una referencia privada al destinatario, nunca una dirección personal guardada en este repositorio público.
+Todo `HUMAN_REQUIRED` canónico debe generar una solicitud de autorización trazable. El correo debe usar siempre primero el alias humano y explicar antes de cualquier detalle técnico:
 
-Formato obligatorio:
+1. `Te necesito.`
+2. `En palabras normales`: qué ha ocurrido y por qué se ha detenido.
+3. `Para qué sirve`: qué hace el skill/motor.
+4. `Qué quiere hacer ahora`.
+5. `Qué puede modificar`.
+6. `Qué NO puede modificar`.
+7. `Riesgo y rollback`.
+8. Las frases exactas que Carlos puede copiar.
+9. Detalle técnico solo si aporta valor.
 
-1. Asunto: `CEREBRO · TE NECESITO · <alias humano> · <motivo>`.
-2. Primera línea: `Te necesito.`
-3. `En palabras normales`: qué ha ocurrido, por qué CEREBRO se ha detenido y qué decisión o acción necesita.
-4. `Detalle técnico`: solo cuando aporte valor; puede incluir ID técnico, stage, run, branch, evidencia, permisos y riesgo.
-5. Marcador de deduplicación para impedir correos repetidos por el mismo evento.
+Cada solicitud tiene un `approval_id` único. Las únicas órdenes válidas por correo son, una por línea:
 
-El correo informa; nunca autoriza por sí solo la acción bloqueada.
+- `AUTORIZO <approval_id>`
+- `NO AUTORIZO <approval_id>`
+- `EXPLICAME <approval_id>`
 
-## Resumen diario
+`Sí`, `vale`, `ok`, `procede` o expresiones genéricas nunca autorizan un gate sensible. Una autorización solo desbloquea el caso y alcance exactos vinculados a su `approval_id`.
 
-Una vez al día debe enviarse un correo de novedades de CEREBRO. Debe explicar primero en lenguaje normal:
+## Varias autorizaciones en un mismo correo
 
-- skills o motores nuevos y para qué sirven;
-- avances y cambios de fase;
-- mejoras relevantes;
-- elementos en HOLD;
-- excepciones humanas pendientes;
-- coste adicional del día;
-- siguiente trabajo seguro.
+Una respuesta puede contener varias líneas y CEREBRO debe procesarlas por separado. Ejemplo:
 
-Si no ha habido cambios relevantes, el correo debe indicar expresamente que no hubo novedades significativas y resumir el estado general.
+```text
+AUTORIZO APR-20261008-1234ABCD
+AUTORIZO APR-20261008-5678EF90
+NO AUTORIZO APR-20261008-A1B2C3D4
+EXPLICAME APR-20261008-E5F6A7B8
+```
+
+No existe un `AUTORIZO TODO` genérico para saltar controles.
+
+## Horario de envío
+
+Zona horaria canónica: `Europe/Madrid`.
+
+- De `08:00` a `21:00`: CEREBRO puede enviar las solicitudes nuevas progresivamente, agrupando las que coincidan en la misma pasada.
+- De `21:00` a `08:00`: CEREBRO no envía solicitudes individuales; las acumula.
+- A partir de `08:00`: envía un único lote con todo lo pendiente de la noche.
+
+El procesamiento interno, mitigaciones seguras, logging y trabajo que no requiera al humano continúan durante la noche.
+
+## Resumen diario único de TODO CEREBRO
+
+Cada día, a las `08:20` hora de Madrid, debe enviarse un solo correo `CEREBRO · NOVEDADES DEL DÍA · <fecha>` con el estado y los avances de todo CEREBRO, no solo de skills.
+
+Debe incluir, cuando aplique: publicaciones/cambios, fallos e incidencias, SEO y web, App y CRM, automatizaciones e integraciones, skills y motores, Training/aprendizaje, HOLDs, HUMAN_REQUIRED, coste adicional y siguiente trabajo seguro.
+
+Si una zona todavía no emite telemetría suficiente, el correo debe decirlo expresamente. Nunca se inventa un estado.
+
+## Aprender de autorizaciones repetidas
+
+CEREBRO registra el patrón de cada autorización mediante una huella de alcance. Tras al menos 3 autorizaciones equivalentes, sin denegaciones ni incidentes y con rollback verde, puede proponer una autorización permanente para ese alcance exacto.
+
+No amplía permisos silenciosamente. La activación de una nueva política permanente requiere una última orden explícita de Carlos. Una vez activada, CEREBRO deja de pedir permiso para acciones que permanezcan exactamente dentro de ese alcance.
+
+No se aprende automáticamente una autorización permanente para legal, firma, incidente de seguridad, límites económicos, petición humana de cliente, Trading real, nuevas credenciales/secretos, borrados destructivos o escrituras PROD no acotadas.
 
 ## Alias humano obligatorio
 
-Cada skill conserva siempre su identidad técnica (`candidate_id`, `wrapper_id`, nombre técnico, versión y evidencia), pero además debe tener `human_alias`.
+Cada skill conserva `candidate_id`, `wrapper_id`, nombre técnico, versión y evidencia, pero debe tener también `human_alias`. El alias humano se muestra primero; el nombre técnico queda como referencia secundaria.
 
-Reglas:
+## Privacidad, identidad y coste
 
-- el alias humano se muestra primero en interfaces y comunicaciones dirigidas a personas;
-- debe ser corto, comprensible y preferentemente en español;
-- no sustituye ni modifica el ID técnico;
-- puede existir un alias explícito en el registro canónico;
-- si todavía no existe, CEREBRO genera un alias legible de forma determinista hasta que haya uno mejor;
-- ningún cambio de alias altera trazabilidad, permisos, rollback ni contratos del skill.
-
-## Privacidad y coste
-
-- La dirección de correo real se resuelve desde un conector o secreto privado.
-- No se guarda PII personal en el repositorio público.
+- La dirección real de Carlos y las credenciales de correo solo existen en secretos/conectores privados.
+- CEREBRO solo acepta autorizaciones desde la identidad privada del propietario configurada.
+- Cada mensaje y `approval_id` se deduplican.
 - Coste adicional objetivo: `0 €`.
-- No se habilitan PROD writes, auto-merge, customer data, Trading, ejecución de código externo ni paid fallback por esta política.
+- Esta política no habilita por sí misma PROD writes, Trading, datos de clientes, código externo, credenciales nuevas ni servicios de pago.
