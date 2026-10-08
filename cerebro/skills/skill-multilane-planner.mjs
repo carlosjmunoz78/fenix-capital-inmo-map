@@ -24,10 +24,18 @@ function safeNumber(v,fallback=0){const n=Number(v);return Number.isFinite(n)?n:
 export function classifyStrategicLane(candidate){
   const domain=candidate?.domain??'';
   const text=textOf(candidate);
-  if(domain==='browser-automation-scraping'||DEVICE_TERMS.test(text)) return 'DEVICE_CONTROL';
-  if(domain==='multimedia-voice-video-design'||CREATION_TERMS.test(text)) return 'CREATION';
-  if(['seo-search-content','marketing-growth-social','external-information-retrieval'].includes(domain)||GROWTH_TERMS.test(text)) return 'GROWTH';
-  if(['multi-company-business-bootstrap','web-wordpress-frontend','sales-crm-customer','data-database-supabase'].includes(domain)||COMPANY_TERMS.test(text)) return 'COMPANY';
+
+  // Explicit supply-chain domains are authoritative. Keyword hints are only a fallback
+  // for generic/mixed domains, so "database design" can never be mistaken for image/design work.
+  if(domain==='browser-automation-scraping') return 'DEVICE_CONTROL';
+  if(domain==='multimedia-voice-video-design') return 'CREATION';
+  if(['seo-search-content','marketing-growth-social','external-information-retrieval'].includes(domain)) return 'GROWTH';
+  if(['multi-company-business-bootstrap','web-wordpress-frontend','sales-crm-customer','data-database-supabase'].includes(domain)) return 'COMPANY';
+
+  if(DEVICE_TERMS.test(text)) return 'DEVICE_CONTROL';
+  if(CREATION_TERMS.test(text)) return 'CREATION';
+  if(GROWTH_TERMS.test(text)) return 'GROWTH';
+  if(COMPANY_TERMS.test(text)) return 'COMPANY';
   return 'ENGINEERING';
 }
 
