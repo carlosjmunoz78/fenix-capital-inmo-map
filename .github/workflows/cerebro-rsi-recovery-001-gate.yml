@@ -30,7 +30,7 @@ on:
       - 'cerebro/tests/rsi-observability-adapter.test.mjs'
       - 'cerebro/tests/rsi-recovery-e2e.test.mjs'
       - 'cerebro/tests/skill-rsi-shadow-bridge.test.mjs'
-      - 'cerebro/docs/RSI_RECOVERY_001_AUDIT_2026-10-08.md'
+      - 'cerebro/docs/RSI_RECOVERY_001_*.md'
       - '.github/workflows/cerebro-rsi-recovery-001-gate.yml'
   pull_request:
     paths:
@@ -61,7 +61,7 @@ on:
       - 'cerebro/tests/rsi-observability-adapter.test.mjs'
       - 'cerebro/tests/rsi-recovery-e2e.test.mjs'
       - 'cerebro/tests/skill-rsi-shadow-bridge.test.mjs'
-      - 'cerebro/docs/RSI_RECOVERY_001_AUDIT_2026-10-08.md'
+      - 'cerebro/docs/RSI_RECOVERY_001_*.md'
       - '.github/workflows/cerebro-rsi-recovery-001-gate.yml'
   workflow_dispatch:
 
