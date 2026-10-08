@@ -78,7 +78,7 @@ export function checkpointNextCandidate(state,nextReport,{now=new Date().toISOSt
     value_score:selected.value_score??null,
     recommendation:selected.recommendation??null,
     evidence_refs:selected.evidence_refs??null,
-    stage:'SAFE_STATIC_LANE_COMPLETE_NEEDS_CANDIDATE_SPECIFIC_HANDLER',
+    stage:'DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER',
     status:'WAITING_SAFE_HANDLER',
     source_discovery_run_id:source_run_id,
     checkpointed_at:now,
@@ -137,7 +137,8 @@ if(import.meta.url===`file://${process.argv[1]}`){
   const decision=checkpointNextCandidate(state,next,{source_run_id:runId?Number(runId):null});
   fs.mkdirSync(path.dirname(output),{recursive:true});
   fs.mkdirSync(path.dirname(stateOutput),{recursive:true});
-  fs.writeFileSync(output,`${JSON.stringify({...decision,state:undefined},null,2)}\n`,'utf8');
+  const evidence={...decision};delete evidence.state;
+  fs.writeFileSync(output,`${JSON.stringify(evidence,null,2)}\n`,'utf8');
   fs.writeFileSync(stateOutput,`${JSON.stringify(decision.state,null,2)}\n`,'utf8');
   console.log(JSON.stringify({decision:decision.decision,candidate_id:decision.candidate_id,human_required:decision.human_required,prod_authorized:false,autonomous_prod_promotion_authorized:false}));
 }
