@@ -17,6 +17,7 @@ on:
       - 'cerebro/runtime/rsi-outbox-client.mjs'
       - 'cerebro/runtime/meta-observability-ledger.mjs'
       - 'cerebro/runtime/meta-learning-runner.mjs'
+      - 'cerebro/runtime/hygiene-audit.mjs'
       - 'cerebro/runtime/experiment-pipeline.mjs'
       - 'cerebro/runtime/evaluation-tribunal.mjs'
       - 'cerebro/runtime/promotion-pipeline.mjs'
@@ -46,6 +47,7 @@ on:
       - 'cerebro/tests/rsi-learning-windows-host.test.mjs'
       - 'cerebro/tests/meta-observability-ledger.test.mjs'
       - 'cerebro/tests/meta-learning-runner.test.mjs'
+      - 'cerebro/tests/hygiene-audit.test.mjs'
       - 'cerebro/tests/experiment-pipeline.test.mjs'
       - 'cerebro/tests/evaluation-tribunal.test.mjs'
       - 'cerebro/tests/promotion-pipeline.test.mjs'
@@ -57,15 +59,10 @@ on:
       - 'cerebro/tests/rsi-observability-adapter.test.mjs'
       - 'cerebro/tests/rsi-recovery-e2e.test.mjs'
       - 'cerebro/tests/skill-rsi-shadow-bridge.test.mjs'
-      - 'cerebro/docs/RSI_RECOVERY_001_*.md'
-      - 'cerebro/docs/RSI_RECOVERY_002_*.md'
-      - 'cerebro/docs/RSI_RECOVERY_003_*.md'
-      - 'cerebro/docs/RSI_RECOVERY_004_*.md'
-      - 'cerebro/docs/RSI_RECOVERY_005_*.md'
-      - 'cerebro/docs/RSI_RECOVERY_006_*.md'
-      - 'cerebro/docs/RSI_RECOVERY_007_*.md'
+      - 'cerebro/docs/RSI_RECOVERY_*.md'
       - '.github/workflows/cerebro-rsi-learning-outbox-publisher-v0.yml'
       - '.github/workflows/cerebro-rsi-learning-control-plane-v0.yml'
+      - '.github/workflows/cerebro-hygiene-audit-v0.yml'
       - '.github/workflows/cerebro-rsi-recovery-001-gate.yml'
   pull_request:
     paths:
@@ -83,6 +80,7 @@ on:
       - 'cerebro/runtime/rsi-outbox-client.mjs'
       - 'cerebro/runtime/meta-observability-ledger.mjs'
       - 'cerebro/runtime/meta-learning-runner.mjs'
+      - 'cerebro/runtime/hygiene-audit.mjs'
       - 'cerebro/runtime/experiment-pipeline.mjs'
       - 'cerebro/runtime/evaluation-tribunal.mjs'
       - 'cerebro/runtime/promotion-pipeline.mjs'
@@ -112,6 +110,7 @@ on:
       - 'cerebro/tests/rsi-learning-windows-host.test.mjs'
       - 'cerebro/tests/meta-observability-ledger.test.mjs'
       - 'cerebro/tests/meta-learning-runner.test.mjs'
+      - 'cerebro/tests/hygiene-audit.test.mjs'
       - 'cerebro/tests/experiment-pipeline.test.mjs'
       - 'cerebro/tests/evaluation-tribunal.test.mjs'
       - 'cerebro/tests/promotion-pipeline.test.mjs'
@@ -123,15 +122,10 @@ on:
       - 'cerebro/tests/rsi-observability-adapter.test.mjs'
       - 'cerebro/tests/rsi-recovery-e2e.test.mjs'
       - 'cerebro/tests/skill-rsi-shadow-bridge.test.mjs'
-      - 'cerebro/docs/RSI_RECOVERY_001_*.md'
-      - 'cerebro/docs/RSI_RECOVERY_002_*.md'
-      - 'cerebro/docs/RSI_RECOVERY_003_*.md'
-      - 'cerebro/docs/RSI_RECOVERY_004_*.md'
-      - 'cerebro/docs/RSI_RECOVERY_005_*.md'
-      - 'cerebro/docs/RSI_RECOVERY_006_*.md'
-      - 'cerebro/docs/RSI_RECOVERY_007_*.md'
+      - 'cerebro/docs/RSI_RECOVERY_*.md'
       - '.github/workflows/cerebro-rsi-learning-outbox-publisher-v0.yml'
       - '.github/workflows/cerebro-rsi-learning-control-plane-v0.yml'
+      - '.github/workflows/cerebro-hygiene-audit-v0.yml'
       - '.github/workflows/cerebro-rsi-recovery-001-gate.yml'
   workflow_dispatch:
 
@@ -161,7 +155,7 @@ jobs:
             }
           }
           if ($failed) { exit 1 }
-      - name: Recovered RSI runtime, hostless control plane, measured MetaLearn, horizon execution, autonomous scheduling, real event wiring, PREPROD persistence, host binding, governance and bridge regression tests
+      - name: Recovered RSI runtime, hostless control plane, HYG audit-only, measured MetaLearn, horizon execution, autonomous scheduling, real event wiring, PREPROD persistence, host binding, governance and bridge regression tests
         run: >-
           node --test
           cerebro/tests/continuous-improvement-contract.test.mjs
@@ -181,6 +175,7 @@ jobs:
           cerebro/tests/rsi-learning-windows-host.test.mjs
           cerebro/tests/meta-observability-ledger.test.mjs
           cerebro/tests/meta-learning-runner.test.mjs
+          cerebro/tests/hygiene-audit.test.mjs
           cerebro/tests/experiment-pipeline.test.mjs
           cerebro/tests/evaluation-tribunal.test.mjs
           cerebro/tests/promotion-pipeline.test.mjs
