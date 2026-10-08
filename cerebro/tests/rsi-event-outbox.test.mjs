@@ -10,6 +10,7 @@ function temp(){return fs.mkdtempSync(path.join(os.tmpdir(),'cerebro-rsi-outbox-
 const source={workflow:'CEREBRO Skill Discovery Scout',run_id:123456,head_sha:'a'.repeat(40)};
 function registry(extra=[]){return {schema_version:'1.0.0',state_type:'CEREBRO_RSI_LEARNING_SUBSCRIBERS',environment:'PREPROD',engine_id:'LRN-001',prod_authorized:false,trading_access:false,subscribers:[{company_id:'fenix',enabled:true,environment:'PREPROD',version:'0.5.0',local_validation_required:true,prod_authorized:false,prod_write_authorized:false,trading_access:false},...extra]};}
 function event(id='evt:skill:abc',company_id='GLOBAL_ONLY'){return {event_id:id,event_type:'SKILL_CANDIDATE_STATIC_LAB_GREEN',severity:'INFO',company_id,engine_id:'FACT-001',environment:'PREPROD_CANDIDATE',version:'0.1.0',candidate_id:'candidate:x',reason:'STATIC_LAB_GREEN',evidence_ref:{source_ref:'source:x'},payload:{domain:'seo'},target_engine_bindings:['SEO-001'],publish_authorized:false,prod_authorized:false};}
+function legacyBufferSha(value){return crypto.createHash('sha256').update(JSON.stringify(Buffer.from(value))).digest('hex');}
 
 test('subscriber registry is exact PREPROD and cannot expand PROD or Trading',()=>{
   assert.equal(normalizeLearningSubscribers(registry()).length,1);
@@ -40,9 +41,9 @@ test('persisted outbox is append-only/idempotent and maintains raw-byte checksum
   try{
     const build=buildLearningOutbox({event_report:{events:[event()]},subscriber_registry:registry(),source});
     const first=persistLearningOutbox({build,output_root:root});
-    assert.equal(first.status,'OUTBOX_GREEN');assert.equal(first.created_total,1);
+    assert.equal(first.status,'OUTBOX_GREEN');assert.equal(first.created_total,1);assert.equal(first.migrated_checksum_total,0);
     const second=persistLearningOutbox({build,output_root:root});
-    assert.equal(second.created_total,0);
+    assert.equal(second.created_total,0);assert.equal(second.migrated_checksum_total,0);
     const index=JSON.parse(fs.readFileSync(path.join(root,'fenix','index.json'),'utf8'));
     assert.equal(index.batches_total,1);assert.equal(index.prod_authorized,false);assert.equal(index.trading_access,false);
     const batchPath=path.join(root,'fenix',index.batches[0].path);assert.equal(fs.existsSync(batchPath),true);
@@ -52,6 +53,41 @@ test('persisted outbox is append-only/idempotent and maintains raw-byte checksum
     assert.equal(index.batches[0].sha256,expected);
     assert.equal(index.batches[0].sha256,expectedFromConsumerText);
     assert.match(index.batches[0].sha256,/^[0-9a-f]{64}$/);
+  }finally{fs.rmSync(root,{recursive:true,force:true});}
+});
+
+test('verified historical Buffer-JSON checksum migrates metadata only and becomes idempotent',()=>{
+  const root=temp();
+  try{
+    const build=buildLearningOutbox({event_report:{events:[event()]},subscriber_registry:registry(),source});
+    persistLearningOutbox({build,output_root:root});
+    const indexPath=path.join(root,'fenix','index.json');
+    const index=JSON.parse(fs.readFileSync(indexPath,'utf8'));
+    const batchPath=path.join(root,'fenix',index.batches[0].path);
+    const beforeBatch=fs.readFileSync(batchPath);
+    const rawSha=crypto.createHash('sha256').update(beforeBatch).digest('hex');
+    index.batches[0].sha256=legacyBufferSha(beforeBatch);
+    fs.writeFileSync(indexPath,`${JSON.stringify(index,null,2)}\n`,'utf8');
+
+    const migrated=persistLearningOutbox({build,output_root:root});
+    assert.equal(migrated.created_total,0);assert.equal(migrated.migrated_checksum_total,1);assert.equal(migrated.results[0].checksum_migrated,true);
+    const after=JSON.parse(fs.readFileSync(indexPath,'utf8'));
+    assert.equal(after.batches[0].sha256,rawSha);
+    assert.deepEqual(fs.readFileSync(batchPath),beforeBatch);
+
+    const rerun=persistLearningOutbox({build,output_root:root});
+    assert.equal(rerun.created_total,0);assert.equal(rerun.migrated_checksum_total,0);assert.equal(rerun.results[0].checksum_migrated,false);
+  }finally{fs.rmSync(root,{recursive:true,force:true});}
+});
+
+test('unknown index checksum conflict still fails closed',()=>{
+  const root=temp();
+  try{
+    const build=buildLearningOutbox({event_report:{events:[event()]},subscriber_registry:registry(),source});
+    persistLearningOutbox({build,output_root:root});
+    const indexPath=path.join(root,'fenix','index.json');
+    const index=JSON.parse(fs.readFileSync(indexPath,'utf8'));index.batches[0].sha256='0'.repeat(64);fs.writeFileSync(indexPath,`${JSON.stringify(index,null,2)}\n`,'utf8');
+    assert.throws(()=>persistLearningOutbox({build,output_root:root}),/OUTBOX_INDEX_CONFLICT/);
   }finally{fs.rmSync(root,{recursive:true,force:true});}
 });
 
