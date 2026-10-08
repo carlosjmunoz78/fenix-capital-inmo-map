@@ -1,7 +1,7 @@
 # RSI-RECOVERY-004 · LRN-001 HOST BINDING
 
 Fecha: 2026-10-08
-Estado global: PARCIAL · SOFTWARE_GREEN / PHYSICAL_HOST_POR_AUDITAR
+Estado global: PARCIAL · SOFTWARE_GREEN / ALWAYS_ON_CORE_HOST_POR_AUDITAR
 Entorno: PREPROD exacto
 Coste adicional objetivo: 0 EUR
 PROD authority: false
@@ -9,14 +9,26 @@ Trading access: false
 
 ## Objetivo
 
-Convertir `LRN-001` de worker one-shot probado a runtime persistente 24/7 sin comprar infraestructura y sin depender de ChatGPT Scheduler, Make, Supabase para jobs largos ni del Browser Bridge.
+Convertir `LRN-001` de worker probado a runtime persistente y autónomo sin depender de ChatGPT Scheduler, Make, Supabase para jobs largos, Browser Bridge ni de un PC de usuario que pueda estar apagado.
 
-## Inventario y decisión
+## Corrección de arquitectura 2026-10-08
 
-1. GitHub Actions permanece como CI/scheduler de repositorio, no se trata como host persistente de CEREBRO.
-2. Supabase no se selecciona como host de `LRN-001`: el proyecto reserva Supabase principalmente para core transaccional y evita usarlo como runtime de jobs largos/learning pesado.
-3. Existe evidencia histórica de un PC Windows utilizado por CEREBRO/Browser Bridge, pero no existe en esta recuperación evidencia viva suficiente para afirmar que el Browser Bridge arranca solo y permanece estable tras reboot. Por tanto el Browser Bridge NO es dependencia de `LRN-001`.
-4. Se selecciona como binding V0 un host Windows local ya existente, usando únicamente Node.js + Windows Task Scheduler nativo. El binding queda preparado para instalarse en el mismo PC u otro Windows ya disponible, sin suscripción nueva.
+El PC Windows de Carlos NO estará encendido permanentemente. Por tanto:
+
+- queda descartado como host core 24/7 de `LRN-001`;
+- no puede ser single point of failure de learning, scheduler, MetaLearn ni supervisor;
+- el binding Windows construido se conserva como EDGE RUNNER opcional, aceptación física, Computer Use/Browser Bridge y capacidad local cuando el PC esté disponible;
+- el runtime `LRN-001` mantiene diseño host-neutral para poder ejecutarse en un host always-on independiente;
+- antes de introducir gasto se debe auditar infraestructura ya existente y gratuita/contratada;
+- no se autoriza nueva suscripción mientras exista alternativa razonable de coste 0 EUR.
+
+## Inventario y decisión actual
+
+1. GitHub Actions sigue siendo CI y puede producir/publicar eventos; NO se trata como daemon persistente 24/7 ni como almacenamiento local permanente.
+2. Supabase no se selecciona como runtime de jobs largos de `LRN-001`; permanece principalmente como core transaccional.
+3. Windows Task Scheduler se conserva como binding EDGE opcional, no como autoridad core 24/7.
+4. La autoridad operativa 24/7 queda pendiente de `ALWAYS_ON_CORE_HOST_AUDIT`.
+5. Orden de selección del host: infraestructura ya contratada/always-on → self-hosted existente → free tier con almacenamiento persistente → servicio externo barato solo con justificación.
 
 ## Implementación HECHA
 
@@ -25,112 +37,83 @@ Convertir `LRN-001` de worker one-shot probado a runtime persistente 24/7 sin co
 `cerebro/runtime/rsi-learning-host.mjs`
 
 - daemon PREPROD-only;
-- instancia tenant-scoped por `company_id` + `LRN-001`;
-- inbox local no destructivo;
+- tenant-scoped por `company_id` + `LRN-001`;
+- inbox no destructivo;
 - receipts SHA-256 idempotentes;
 - heartbeat atómico;
-- kill switch por archivo;
-- single-writer host lock + worker lock;
+- kill switch;
+- single-writer host/worker locks crash-recoverable;
 - ledger durable local `learning.v8`;
-- rechazo de eventos cross-company;
+- rechazo cross-company;
 - preservación de source event files;
-- backup con SHA-256 + manifest;
-- restore solo con kill switch activo, lock ausente y confirmación explícita;
-- pre-restore backup automático;
-- anti-loop: al tercer error de la misma familia cambia estrategia a `HOLD_SAME_ERROR_FAMILY`;
+- backup con checksum + manifest;
+- restore fail-closed y preservation backup;
+- anti-loop same-error-family;
 - coste adicional 0 EUR;
 - `prod_authorized=false`, `prod_write_authorized=false`, `trading_access=false`.
 
-### Windows host binding
+### Real event wiring
 
-`cerebro/host/windows/Install-CerebroLrn001Host.ps1`
+Ya existe el camino automático Skill Factory / improvement events → outbox persistente → consumer → inbox `LRN-001` → ledger PREPROD, con idempotencia, checksum y sin JSON manual.
 
-- copia runtime/skills a una ruta versionada bajo `%ProgramData%\CEREBRO\host-code`;
-- genera manifest SHA-256 de la copia instalada;
-- crea config PREPROD separada de código;
-- crea Scheduled Task `CEREBRO-LRN-001-PREPROD`;
-- trigger nativo `AtStartup`;
-- cuenta `SYSTEM` / ServiceAccount;
-- `StartWhenAvailable`;
-- restart acotado a 3 intentos;
-- `MultipleInstances IgnoreNew`;
-- no depende de sesión Chrome ni Browser Bridge;
-- no usa red, API pagada ni credenciales nuevas;
-- si existe código de la misma versión, no lo pisa salvo `-ForceReinstall`; con reinstall explícito crea snapshot previo;
-- config anterior se preserva antes de sobrescribir.
+### Scheduling y horizontes
 
-`Start-CerebroLrn001Host.ps1`
-- ejecuta únicamente Node local + host daemon;
-- logs locales append-only por día.
+Ya existen DAILY / WEEKLY / MONTHLY + EVENT planning y execution en PREPROD, con estado persistente, ejecución idempotente y sin autoridad PROD.
 
-`Get-CerebroLrn001Health.ps1`
-- exige Task Running;
-- heartbeat fresco;
-- `environment=PREPROD`;
-- `engine_id=LRN-001`;
-- no autoridad PROD;
-- solo entonces devuelve `physical_host_confirmed=true`.
+### Binding Windows conservado como EDGE
 
-`Uninstall-CerebroLrn001Host.ps1`
-- desregistra la ejecución;
-- preserva state, ledger, backups, inbox y config por defecto;
-- borrar solo runtime code requiere switch explícito.
+`cerebro/host/windows/Install-CerebroLrn001Host.ps1` y herramientas asociadas:
 
-`INSTALL_CEREBRO_LRN001_PREPROD.cmd`
-- launcher de un clic;
-- solicita elevación UAC;
-- instala el binding PREPROD con policy/security/local-persistence habilitados para este scope aislado.
+- útiles para ejecución local cuando el PC esté disponible;
+- arranque `AtStartup`, SYSTEM, StartWhenAvailable, restart acotado;
+- health, kill switch, backup/restore y aceptación física;
+- no dependen de Chrome ni Browser Bridge;
+- no usan credenciales nuevas ni proveedores pagados;
+- no son requisito del core 24/7.
 
 ## Evidencia CI
 
-Recovery gate extendido para host runtime + Windows binding. La suite incluye:
+La suite valida runtime, real event wiring, scheduling/horizons, MetaLearn observability, host binding, PowerShell parsing, aislamiento multiempresa, kill switch, backup/restore, anti-loop y no-PROD.
 
-- PREPROD exacto y 0 EUR;
-- persistencia idempotente;
-- receipts + source preservation;
-- HIGH_RISK hold;
-- kill switch;
-- tenant isolation;
-- anti-loop same-family;
-- backup/checksum/restore con preservation backup;
-- contrato de Windows Task Scheduler;
-- uninstall no destructivo;
-- health fail-closed.
-
-Run de referencia del primer host binding completo: `37781020591` sobre head `5ed3edefd75ef35fabdf4035f29c3cbfa314ebb3`, step `Recovered RSI runtime, PREPROD persistence, host binding, governance and bridge regression tests` = SUCCESS.
+El CI GREEN prueba comportamiento de software; NO demuestra disponibilidad física 24/7.
 
 ## Lo que NO está demostrado todavía
 
-- No se afirma que el Scheduled Task esté instalado físicamente en el PC Windows.
-- No se afirma heartbeat físico GREEN.
-- No se afirma reboot/restart físico probado.
-- No se afirma ingestión automática desde Skill Factory; el inbox es el boundary para `RSI-RECOVERY-005`.
+- No existe evidencia viva de un host always-on asignado a `LRN-001`.
+- No se afirma disponibilidad 24/7.
+- No se afirma restart/reboot del host core.
 - No se autoriza PROD.
+- No se introduce gasto.
 
-## Gate físico para cerrar RSI-RECOVERY-004
+## Gate para cerrar RSI-RECOVERY-004
 
-En el host Windows real:
+Para declarar `CONFIRMED_OPERATIONAL_PREPROD_24X7` se requiere:
 
-1. ejecutar el launcher one-click desde una copia exacta de esta recovery branch;
-2. comprobar Task `CEREBRO-LRN-001-PREPROD` RUNNING;
-3. comprobar `Get-CerebroLrn001Health.ps1` = GREEN;
-4. inyectar un fixture LOW y verificar ledger + receipt + heartbeat;
-5. inyectar fixture HIGH y verificar `HUMAN_REQUIRED=HIGH_RISK` sin persistencia indebida;
-6. activar `KILL_SWITCH` y verificar 0 nuevas persistencias;
-7. probar backup + verify;
-8. restore de prueba con kill switch y pre-restore preservation backup;
-9. reiniciar el task/proceso y comprobar restart/idempotencia;
-10. cuando sea posible, reboot físico del PC y verificar auto-start + heartbeat fresco.
-
-Solo tras estos puntos el host pasa a `CONFIRMED_OPERATIONAL_PREPROD`.
+1. identificar host always-on real;
+2. demostrar almacenamiento persistente y capacidad suficiente;
+3. desplegar copia versionada del runtime;
+4. heartbeat continuo;
+5. restart automático;
+6. fixture LOW + HIGH_RISK;
+7. kill switch;
+8. backup + verify + restore;
+9. restart/reboot o redeploy real;
+10. verificar continuidad de ledger/receipts/orchestrator;
+11. observabilidad y rollback probados;
+12. coste medido y aceptado.
 
 ## Rollback
 
-- parar/desregistrar Scheduled Task;
-- mantener state/ledger/backups/inbox/config;
-- usar backup manifest SHA-256 si se requiere restore;
+- detener host core sin borrar estado;
+- conservar ledger, receipts, backups, outbox y config;
+- mantener Windows EDGE separado;
 - no tocar Browser Bridge/App/CRM/Supabase/SEO/Notion/WordPress/Training/Trading.
 
 ## Next block
 
-Después del GREEN físico: `RSI-RECOVERY-005 · REAL EVENT WIRING`: conectar `skill-improvement-events` / Skill Factory al inbox de `LRN-001`, con outbox/receipt idempotente, sin JSON manual y sin autoridad PROD.
+`RSI-RECOVERY-004B · ALWAYS_ON_CORE_HOST_AUDIT`:
+
+- inventariar hosting ya contratado y procesos persistentes existentes;
+- descartar explícitamente opciones incompatibles con persistencia/jobs largos;
+- elegir host core con coste adicional 0 EUR si existe;
+- solo si no existe, elevar alternativa de pago con ROI/coste justificado.
