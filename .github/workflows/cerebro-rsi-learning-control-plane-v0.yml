@@ -6,6 +6,7 @@ on:
   workflow_run:
     workflows:
       - CEREBRO RSI Learning Outbox Publisher V0
+      - CEREBRO RSI Universal Learning Ingress V0
     types:
       - completed
   workflow_dispatch:
@@ -13,6 +14,9 @@ on:
     paths:
       - '.github/workflows/cerebro-rsi-learning-control-plane-v0.yml'
       - 'cerebro/tests/rsi-hostless-control-plane-workflow.test.mjs'
+      - '.github/workflows/cerebro-rsi-universal-learning-ingress-v0.yml'
+      - 'cerebro/runtime/universal-learning-ingress.mjs'
+      - 'cerebro/tests/universal-learning-ingress.test.mjs'
 
 concurrency:
   group: cerebro-rsi-learning-control-plane-v0
@@ -37,7 +41,9 @@ jobs:
         with:
           node-version: 24
       - name: Validate hostless control-plane contract
-        run: node --test cerebro/tests/rsi-hostless-control-plane-workflow.test.mjs
+        run: |
+          node --test cerebro/tests/rsi-hostless-control-plane-workflow.test.mjs
+          node --test cerebro/tests/universal-learning-ingress.test.mjs
 
   run-preprod-control-plane:
     if: >-
