@@ -1,0 +1,177 @@
+name: CEREBRO FACT-001 AutoFactory V0
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'cerebro/factory/requests/**.json'
+      - 'cerebro/factory.mjs'
+      - 'cerebro/runtime/fact001-request-runner.mjs'
+      - 'cerebro/registry/engine-registry.seed.json'
+      - '.github/workflows/cerebro-fact001-autofactory-v0.yml'
+  workflow_dispatch:
+    inputs:
+      request_path:
+        description: 'Repository request JSON under cerebro/factory/requests/'
+        required: false
+        default: 'cerebro/factory/requests/fact001-selfcheck.v0.json'
+  repository_dispatch:
+    types:
+      - cerebro_fact001_engine_request
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-fact001-autofactory-${{ github.event_name }}-${{ github.sha }}
+  cancel-in-progress: false
+
+env:
+  EXACT_SOURCE_SHA: ${{ github.sha }}
+  DISPATCH_REQUEST_JSON: ${{ toJson(github.event.client_payload.request) }}
+
+jobs:
+  automatic-scaffold:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.EXACT_SOURCE_SHA }}
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Assert immutable source checkout
+        shell: bash
+        run: test "$(git rev-parse HEAD)" = "$EXACT_SOURCE_SHA"
+
+      - name: Validate FACT-001 authority and regression contracts
+        working-directory: cerebro
+        run: |
+          set -euo pipefail
+          npm run validate
+          npm test
+
+      - name: Resolve bounded request set
+        id: requests
+        shell: bash
+        env:
+          REQUEST_PATH: ${{ github.event.inputs.request_path }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/fact001-input /tmp/fact001-artifacts
+
+          if [ "$GITHUB_EVENT_NAME" = "repository_dispatch" ]; then
+            node <<'NODE'
+          const fs = require('fs');
+          const raw = process.env.DISPATCH_REQUEST_JSON;
+          if (!raw || raw === 'null') throw new Error('repository_dispatch requires client_payload.request');
+          const value = JSON.parse(raw);
+          if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('client_payload.request must be an object');
+          fs.writeFileSync('/tmp/fact001-input/repository-dispatch.json', JSON.stringify(value, null, 2) + '\n', 'utf8');
+          NODE
+            printf '%s\n' '/tmp/fact001-input/repository-dispatch.json' > /tmp/fact001-input/request-list.txt
+          elif [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            case "$REQUEST_PATH" in
+              cerebro/factory/requests/*.json) ;;
+              *) echo 'request_path must remain under cerebro/factory/requests/*.json' >&2; exit 1 ;;
+            esac
+            test -f "$REQUEST_PATH"
+            printf '%s\n' "$REQUEST_PATH" > /tmp/fact001-input/request-list.txt
+          else
+            find cerebro/factory/requests -maxdepth 1 -type f -name '*.json' -print | LC_ALL=C sort > /tmp/fact001-input/request-list.txt
+          fi
+
+          test -s /tmp/fact001-input/request-list.txt
+          count="$(wc -l < /tmp/fact001-input/request-list.txt | tr -d ' ')"
+          test "$count" -ge 1
+          test "$count" -le 50
+          echo "count=$count" >> "$GITHUB_OUTPUT"
+
+      - name: Execute deterministic factory requests
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r request; do
+            [ -n "$request" ] || continue
+            name="$(basename "$request" .json | tr -c 'A-Za-z0-9._-' '_')"
+            root="/tmp/fact001-artifacts/$name"
+            mkdir -p "$root"
+            node cerebro/runtime/fact001-request-runner.mjs \
+              --request "$request" \
+              --out "$root/scaffold" \
+              | tee "$root/runner-result.json"
+          done < /tmp/fact001-input/request-list.txt
+
+      - name: Structural evaluation and authority boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+          const root = '/tmp/fact001-artifacts';
+          const entries = fs.readdirSync(root).sort();
+          if (!entries.length) throw new Error('no FACT-001 results');
+          const summary = [];
+          for (const name of entries) {
+            const file = path.join(root, name, 'scaffold', 'fact001-result.json');
+            const result = JSON.parse(fs.readFileSync(file, 'utf8'));
+            if (result.status !== 'FACTORY_SCAFFOLD_GREEN') throw new Error(`${name}: scaffold not green`);
+            if (result.generated_file_count !== 18) throw new Error(`${name}: wrong scaffold file count`);
+            if (result.environment !== 'SCAFFOLD') throw new Error(`${name}: environment expansion`);
+            if (result.additional_cost_eur !== 0) throw new Error(`${name}: non-zero cost`);
+            if (result.prod_authorized !== false || result.prod_write_authorized !== false) throw new Error(`${name}: PROD authority expansion`);
+            if (result.trading_access !== false || result.external_code_execution !== false) throw new Error(`${name}: forbidden authority`);
+            summary.push({
+              request_id: result.request_id,
+              company_id: result.company_id,
+              engine_id: result.engine_id,
+              environment: result.environment,
+              version: result.version,
+              idempotency_key: result.idempotency_key,
+              bundle_sha256: result.bundle_sha256,
+              generated_file_count: result.generated_file_count,
+              structural_evaluation: 'GREEN',
+              engine_evaluation: 'NOT_RUN_SCAFFOLD_ONLY',
+              tribunal: 'NOT_RUN_SCAFFOLD_ONLY',
+              next_gate: result.next_gate,
+              additional_cost_eur: 0,
+              prod_authorized: false,
+              prod_write_authorized: false,
+              trading_access: false
+            });
+          }
+          fs.writeFileSync(path.join(root, 'fact001-run-evidence.json'), JSON.stringify({
+            schema_version: '1.0.0',
+            state_type: 'CEREBRO_FACT001_AUTOMATIC_RUN_EVIDENCE',
+            source_sha: process.env.EXACT_SOURCE_SHA,
+            github_run_id: process.env.GITHUB_RUN_ID,
+            request_count: summary.length,
+            status: 'STRUCTURAL_FACTORY_GREEN',
+            results: summary,
+            additional_cost_eur: 0,
+            prod_authorized: false,
+            prod_write_authorized: false,
+            trading_access: false
+          }, null, 2) + '\n');
+          NODE
+
+      - name: Upload immutable FACT-001 evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: fact001-autofactory-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/fact001-artifacts
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Record boundary
+        shell: bash
+        run: |
+          echo 'FACT-001 AutoFactory V0 generated and structurally evaluated SCAFFOLD evidence only.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'No target engine was enabled or promoted. Engine behavioral evaluation/tribunal remain later gates.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Additional cost target: 0 EUR. PROD/Trading authority: false.' >> "$GITHUB_STEP_SUMMARY"
