@@ -78,14 +78,12 @@ jobs:
       - name: Check private mail transport configuration
         id: mail
         env:
-          SMTP_HOST: ${{ secrets.CEREBRO_MAIL_SMTP_HOST }}
           SMTP_USER: ${{ secrets.CEREBRO_MAIL_USERNAME }}
           SMTP_PASS: ${{ secrets.CEREBRO_MAIL_PASSWORD }}
-          IMAP_HOST: ${{ secrets.CEREBRO_MAIL_IMAP_HOST }}
           OWNER_EMAIL: ${{ secrets.CEREBRO_OWNER_EMAIL }}
         run: |
           set -euo pipefail
-          if [ -n "$SMTP_HOST" ] && [ -n "$SMTP_USER" ] && [ -n "$SMTP_PASS" ] && [ -n "$IMAP_HOST" ] && [ -n "$OWNER_EMAIL" ]; then
+          if [ -n "$SMTP_USER" ] && [ -n "$SMTP_PASS" ] && [ -n "$OWNER_EMAIL" ]; then
             echo 'ready=true' >> "$GITHUB_OUTPUT"
           else
             echo 'ready=false' >> "$GITHUB_OUTPUT"
@@ -94,7 +92,7 @@ jobs:
       - name: Poll exact owner replies
         if: github.ref == 'refs/heads/main' && steps.mail.outputs.ready == 'true'
         env:
-          CEREBRO_MAIL_IMAP_HOST: ${{ secrets.CEREBRO_MAIL_IMAP_HOST }}
+          CEREBRO_MAIL_IMAP_HOST: 'imap.gmail.com'
           CEREBRO_MAIL_IMAP_PORT: '993'
           CEREBRO_MAIL_USERNAME: ${{ secrets.CEREBRO_MAIL_USERNAME }}
           CEREBRO_MAIL_PASSWORD: ${{ secrets.CEREBRO_MAIL_PASSWORD }}
@@ -125,16 +123,16 @@ jobs:
         run: |
           set -euo pipefail
           if [ -f artifacts/communication/out/approval-mail.json ] || [ -f artifacts/communication/out/digest-mail.json ]; then
-            echo '{"status":"HUMAN_REQUIRED_MAIL_TRANSPORT_NOT_CONFIGURED","required_secret_names":["CEREBRO_MAIL_SMTP_HOST","CEREBRO_MAIL_IMAP_HOST","CEREBRO_MAIL_USERNAME","CEREBRO_MAIL_PASSWORD","CEREBRO_OWNER_EMAIL"],"prod_write":false,"additional_cost_eur":0}' > artifacts/communication/mail-blocker.json
+            echo '{"status":"HUMAN_REQUIRED_MAIL_TRANSPORT_NOT_CONFIGURED","required_secret_names":["CEREBRO_MAIL_USERNAME","CEREBRO_MAIL_PASSWORD","CEREBRO_OWNER_EMAIL"],"prod_write":false,"additional_cost_eur":0}' > artifacts/communication/mail-blocker.json
             exit 1
           fi
 
       - name: Send authorization request batch
         if: github.ref == 'refs/heads/main' && steps.mail.outputs.ready == 'true' && hashFiles('artifacts/communication/out/approval-mail.json') != ''
         env:
-          CEREBRO_MAIL_SMTP_HOST: ${{ secrets.CEREBRO_MAIL_SMTP_HOST }}
+          CEREBRO_MAIL_SMTP_HOST: 'smtp.gmail.com'
           CEREBRO_MAIL_SMTP_PORT: '465'
-          CEREBRO_MAIL_IMAP_HOST: ${{ secrets.CEREBRO_MAIL_IMAP_HOST }}
+          CEREBRO_MAIL_IMAP_HOST: 'imap.gmail.com'
           CEREBRO_MAIL_IMAP_PORT: '993'
           CEREBRO_MAIL_USERNAME: ${{ secrets.CEREBRO_MAIL_USERNAME }}
           CEREBRO_MAIL_PASSWORD: ${{ secrets.CEREBRO_MAIL_PASSWORD }}
@@ -145,9 +143,9 @@ jobs:
       - name: Send one daily all-CEREBRO digest
         if: github.ref == 'refs/heads/main' && steps.mail.outputs.ready == 'true' && hashFiles('artifacts/communication/out/digest-mail.json') != ''
         env:
-          CEREBRO_MAIL_SMTP_HOST: ${{ secrets.CEREBRO_MAIL_SMTP_HOST }}
+          CEREBRO_MAIL_SMTP_HOST: 'smtp.gmail.com'
           CEREBRO_MAIL_SMTP_PORT: '465'
-          CEREBRO_MAIL_IMAP_HOST: ${{ secrets.CEREBRO_MAIL_IMAP_HOST }}
+          CEREBRO_MAIL_IMAP_HOST: 'imap.gmail.com'
           CEREBRO_MAIL_IMAP_PORT: '993'
           CEREBRO_MAIL_USERNAME: ${{ secrets.CEREBRO_MAIL_USERNAME }}
           CEREBRO_MAIL_PASSWORD: ${{ secrets.CEREBRO_MAIL_PASSWORD }}
