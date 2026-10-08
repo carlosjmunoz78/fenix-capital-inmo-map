@@ -10,6 +10,9 @@ on:
       - 'cerebro/runtime/learning-preprod-pipeline.mjs'
       - 'cerebro/runtime/rsi-learning-worker.mjs'
       - 'cerebro/runtime/rsi-learning-host.mjs'
+      - 'cerebro/runtime/rsi-learning-auto-host.mjs'
+      - 'cerebro/runtime/rsi-event-outbox.mjs'
+      - 'cerebro/runtime/rsi-outbox-client.mjs'
       - 'cerebro/runtime/experiment-pipeline.mjs'
       - 'cerebro/runtime/evaluation-tribunal.mjs'
       - 'cerebro/runtime/promotion-pipeline.mjs'
@@ -19,6 +22,7 @@ on:
       - 'cerebro/runtime/knowledge-obsolescence.mjs'
       - 'cerebro/runtime/continuity-handoff.mjs'
       - 'cerebro/runtime/rsi-observability-adapter.mjs'
+      - 'cerebro/registry/rsi-learning-subscribers.v0.json'
       - 'cerebro/host/windows/*'
       - 'cerebro/skills/skill-rsi-shadow-bridge.mjs'
       - 'cerebro/tests/continuous-improvement-contract.test.mjs'
@@ -28,6 +32,10 @@ on:
       - 'cerebro/tests/learning-preprod-pipeline.test.mjs'
       - 'cerebro/tests/rsi-learning-worker.test.mjs'
       - 'cerebro/tests/rsi-learning-host.test.mjs'
+      - 'cerebro/tests/rsi-learning-auto-host.test.mjs'
+      - 'cerebro/tests/rsi-event-outbox.test.mjs'
+      - 'cerebro/tests/rsi-outbox-client.test.mjs'
+      - 'cerebro/tests/rsi-outbox-publisher-workflow.test.mjs'
       - 'cerebro/tests/rsi-learning-windows-host.test.mjs'
       - 'cerebro/tests/experiment-pipeline.test.mjs'
       - 'cerebro/tests/evaluation-tribunal.test.mjs'
@@ -44,6 +52,8 @@ on:
       - 'cerebro/docs/RSI_RECOVERY_002_*.md'
       - 'cerebro/docs/RSI_RECOVERY_003_*.md'
       - 'cerebro/docs/RSI_RECOVERY_004_*.md'
+      - 'cerebro/docs/RSI_RECOVERY_005_*.md'
+      - '.github/workflows/cerebro-rsi-learning-outbox-publisher-v0.yml'
       - '.github/workflows/cerebro-rsi-recovery-001-gate.yml'
   pull_request:
     paths:
@@ -54,6 +64,9 @@ on:
       - 'cerebro/runtime/learning-preprod-pipeline.mjs'
       - 'cerebro/runtime/rsi-learning-worker.mjs'
       - 'cerebro/runtime/rsi-learning-host.mjs'
+      - 'cerebro/runtime/rsi-learning-auto-host.mjs'
+      - 'cerebro/runtime/rsi-event-outbox.mjs'
+      - 'cerebro/runtime/rsi-outbox-client.mjs'
       - 'cerebro/runtime/experiment-pipeline.mjs'
       - 'cerebro/runtime/evaluation-tribunal.mjs'
       - 'cerebro/runtime/promotion-pipeline.mjs'
@@ -63,6 +76,7 @@ on:
       - 'cerebro/runtime/knowledge-obsolescence.mjs'
       - 'cerebro/runtime/continuity-handoff.mjs'
       - 'cerebro/runtime/rsi-observability-adapter.mjs'
+      - 'cerebro/registry/rsi-learning-subscribers.v0.json'
       - 'cerebro/host/windows/*'
       - 'cerebro/skills/skill-rsi-shadow-bridge.mjs'
       - 'cerebro/tests/continuous-improvement-contract.test.mjs'
@@ -72,6 +86,10 @@ on:
       - 'cerebro/tests/learning-preprod-pipeline.test.mjs'
       - 'cerebro/tests/rsi-learning-worker.test.mjs'
       - 'cerebro/tests/rsi-learning-host.test.mjs'
+      - 'cerebro/tests/rsi-learning-auto-host.test.mjs'
+      - 'cerebro/tests/rsi-event-outbox.test.mjs'
+      - 'cerebro/tests/rsi-outbox-client.test.mjs'
+      - 'cerebro/tests/rsi-outbox-publisher-workflow.test.mjs'
       - 'cerebro/tests/rsi-learning-windows-host.test.mjs'
       - 'cerebro/tests/experiment-pipeline.test.mjs'
       - 'cerebro/tests/evaluation-tribunal.test.mjs'
@@ -88,6 +106,8 @@ on:
       - 'cerebro/docs/RSI_RECOVERY_002_*.md'
       - 'cerebro/docs/RSI_RECOVERY_003_*.md'
       - 'cerebro/docs/RSI_RECOVERY_004_*.md'
+      - 'cerebro/docs/RSI_RECOVERY_005_*.md'
+      - '.github/workflows/cerebro-rsi-learning-outbox-publisher-v0.yml'
       - '.github/workflows/cerebro-rsi-recovery-001-gate.yml'
   workflow_dispatch:
 
@@ -117,7 +137,7 @@ jobs:
             }
           }
           if ($failed) { exit 1 }
-      - name: Recovered RSI runtime, PREPROD persistence, host binding, governance and bridge regression tests
+      - name: Recovered RSI runtime, real event wiring, PREPROD persistence, host binding, governance and bridge regression tests
         run: >-
           node --test
           cerebro/tests/continuous-improvement-contract.test.mjs
@@ -127,6 +147,10 @@ jobs:
           cerebro/tests/learning-preprod-pipeline.test.mjs
           cerebro/tests/rsi-learning-worker.test.mjs
           cerebro/tests/rsi-learning-host.test.mjs
+          cerebro/tests/rsi-learning-auto-host.test.mjs
+          cerebro/tests/rsi-event-outbox.test.mjs
+          cerebro/tests/rsi-outbox-client.test.mjs
+          cerebro/tests/rsi-outbox-publisher-workflow.test.mjs
           cerebro/tests/rsi-learning-windows-host.test.mjs
           cerebro/tests/experiment-pipeline.test.mjs
           cerebro/tests/evaluation-tribunal.test.mjs
