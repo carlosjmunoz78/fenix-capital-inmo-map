@@ -30,6 +30,10 @@ function Resolve-Node {
 }
 
 function Timestamp { return (Get-Date).ToUniversalTime().ToString('yyyyMMddTHHmmssfffZ') }
+function Write-Utf8NoBom([string]$Path,[string]$Text) {
+  $encoding = New-Object System.Text.UTF8Encoding($false)
+  [System.IO.File]::WriteAllText($Path,$Text,$encoding)
+}
 
 Assert-Admin
 if (-not (Test-Path -LiteralPath (Join-Path $RepoRoot 'cerebro\runtime\rsi-learning-host.mjs'))) {
@@ -94,7 +98,7 @@ $deploymentManifest = [ordered]@{
   prod_authorized = $false
   trading_access = $false
 }
-$deploymentManifest | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $manifestPath -Encoding UTF8
+Write-Utf8NoBom -Path $manifestPath -Text ($deploymentManifest | ConvertTo-Json -Depth 6)
 
 if (Test-Path -LiteralPath $configPath) {
   $configBackup = Join-Path $configBackupRoot ("host-{0}.json" -f (Timestamp))
@@ -114,7 +118,7 @@ $config = [ordered]@{
   security_pass = [bool]$SecurityPass
   local_persistence_enabled = [bool]$EnableLocalPersistence
 }
-$config | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath $configPath -Encoding UTF8
+Write-Utf8NoBom -Path $configPath -Text ($config | ConvertTo-Json -Depth 4)
 
 $arguments = @(
   '-NoProfile',
