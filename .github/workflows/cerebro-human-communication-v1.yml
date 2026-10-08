@@ -1,0 +1,181 @@
+name: CEREBRO Human Communication V1
+
+on:
+  push:
+    branches: [main, cerebro/human-approval-email-v1-20261008]
+    paths:
+      - 'cerebro/governance/communication-policy.v0.json'
+      - 'cerebro/governance/CEREBRO_HUMAN_COMMUNICATION_POLICY_V0.md'
+      - 'cerebro/governance/human-communication.mjs'
+      - 'cerebro/communication/**'
+      - 'cerebro/tests/human-communication-v1.test.mjs'
+      - 'cerebro/tests/owner-approval-gate-v1.test.mjs'
+      - 'cerebro/tests/test_mail_bridge.py'
+      - '.github/workflows/cerebro-human-communication-v1.yml'
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: cerebro-owner-communication-state-v1
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  actions: read
+
+env:
+  COMM_STATE_BRANCH: cerebro/communication-state-v1-20261008
+  COMM_STATE_PATH: cerebro/runtime/human-communication-state.v1.json
+  SKILL_STATE_BRANCH: cerebro/skill-autoloop-state-v0
+  SKILL_STATE_PATH: cerebro/runtime/skill-autoloop-state.v0.json
+
+jobs:
+  communication:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Test communication and exact owner-approval contracts
+        run: |
+          node --test cerebro/tests/human-communication-v1.test.mjs cerebro/tests/owner-approval-gate-v1.test.mjs
+          python -m unittest cerebro/tests/test_mail_bridge.py
+
+      - name: Load persistent communication and Skill AutoLoop state
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/communication
+          git fetch --no-tags origin "refs/heads/$COMM_STATE_BRANCH:refs/remotes/origin/$COMM_STATE_BRANCH"
+          git fetch --no-tags origin "refs/heads/$SKILL_STATE_BRANCH:refs/remotes/origin/$SKILL_STATE_BRANCH"
+          git show "refs/remotes/origin/$COMM_STATE_BRANCH:$COMM_STATE_PATH" > artifacts/communication/state.before.json
+          git show "refs/remotes/origin/$SKILL_STATE_BRANCH:$SKILL_STATE_PATH" > artifacts/communication/skill-state.json
+
+      - name: Build 24h CEREBRO evidence window
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          SINCE="$(date -u -d '24 hours ago' +%Y-%m-%dT%H:%M:%SZ)"
+          gh api -X GET "repos/$GITHUB_REPOSITORY/actions/runs" -f per_page=100 > artifacts/communication/runs.raw.json
+          jq --arg since "$SINCE" '[.workflow_runs[] | select((.run_started_at // .created_at) >= $since)]' artifacts/communication/runs.raw.json > artifacts/communication/runs.json
+          gh api -X GET "repos/$GITHUB_REPOSITORY/commits" -f per_page=100 -f since="$SINCE" > artifacts/communication/commits.json
+          node cerebro/communication/repo-daily-summary.mjs \
+            --runs artifacts/communication/runs.json \
+            --commits artifacts/communication/commits.json \
+            --skill-state artifacts/communication/skill-state.json \
+            --communication-state artifacts/communication/state.before.json \
+            --output artifacts/communication/daily-summary.json
+
+      - name: Check private mail transport configuration
+        id: mail
+        env:
+          SMTP_HOST: ${{ secrets.CEREBRO_MAIL_SMTP_HOST }}
+          SMTP_USER: ${{ secrets.CEREBRO_MAIL_USERNAME }}
+          SMTP_PASS: ${{ secrets.CEREBRO_MAIL_PASSWORD }}
+          IMAP_HOST: ${{ secrets.CEREBRO_MAIL_IMAP_HOST }}
+          OWNER_EMAIL: ${{ secrets.CEREBRO_OWNER_EMAIL }}
+        run: |
+          set -euo pipefail
+          if [ -n "$SMTP_HOST" ] && [ -n "$SMTP_USER" ] && [ -n "$SMTP_PASS" ] && [ -n "$IMAP_HOST" ] && [ -n "$OWNER_EMAIL" ]; then
+            echo 'ready=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'ready=false' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Poll exact owner replies
+        if: github.ref == 'refs/heads/main' && steps.mail.outputs.ready == 'true'
+        env:
+          CEREBRO_MAIL_IMAP_HOST: ${{ secrets.CEREBRO_MAIL_IMAP_HOST }}
+          CEREBRO_MAIL_IMAP_PORT: ${{ secrets.CEREBRO_MAIL_IMAP_PORT }}
+          CEREBRO_MAIL_USERNAME: ${{ secrets.CEREBRO_MAIL_USERNAME }}
+          CEREBRO_MAIL_PASSWORD: ${{ secrets.CEREBRO_MAIL_PASSWORD }}
+          CEREBRO_OWNER_EMAIL: ${{ secrets.CEREBRO_OWNER_EMAIL }}
+        run: python cerebro/communication/mail_bridge.py poll --output artifacts/communication/messages.json --limit 50
+
+      - name: Use empty inbox for branch validation or unconfigured transport
+        if: github.ref != 'refs/heads/main' || steps.mail.outputs.ready != 'true'
+        run: echo '[]' > artifacts/communication/messages.json
+
+      - name: Reconcile queue, replies, quiet hours and daily digest
+        run: |
+          node cerebro/communication/communication-controller.mjs \
+            --state artifacts/communication/state.before.json \
+            --skill-state artifacts/communication/skill-state.json \
+            --messages artifacts/communication/messages.json \
+            --summary artifacts/communication/daily-summary.json \
+            --output-dir artifacts/communication/out
+
+      - name: Assert branch is dry-run only
+        if: github.ref != 'refs/heads/main'
+        run: |
+          test -f artifacts/communication/out/state.after.json
+          echo '{"status":"GREEN_DRY_RUN","mail_sent":false,"state_persisted":false}' > artifacts/communication/branch-gate.json
+
+      - name: Require private mail transport before any due delivery
+        if: github.ref == 'refs/heads/main' && steps.mail.outputs.ready != 'true'
+        run: |
+          set -euo pipefail
+          if [ -f artifacts/communication/out/approval-mail.json ] || [ -f artifacts/communication/out/digest-mail.json ]; then
+            echo '{"status":"HUMAN_REQUIRED_MAIL_TRANSPORT_NOT_CONFIGURED","required_secret_names":["CEREBRO_MAIL_SMTP_HOST","CEREBRO_MAIL_IMAP_HOST","CEREBRO_MAIL_USERNAME","CEREBRO_MAIL_PASSWORD","CEREBRO_OWNER_EMAIL"],"prod_write":false,"additional_cost_eur":0}' > artifacts/communication/mail-blocker.json
+            exit 1
+          fi
+
+      - name: Send authorization request batch
+        if: github.ref == 'refs/heads/main' && steps.mail.outputs.ready == 'true' && hashFiles('artifacts/communication/out/approval-mail.json') != ''
+        env:
+          CEREBRO_MAIL_SMTP_HOST: ${{ secrets.CEREBRO_MAIL_SMTP_HOST }}
+          CEREBRO_MAIL_SMTP_PORT: ${{ secrets.CEREBRO_MAIL_SMTP_PORT }}
+          CEREBRO_MAIL_IMAP_HOST: ${{ secrets.CEREBRO_MAIL_IMAP_HOST }}
+          CEREBRO_MAIL_IMAP_PORT: ${{ secrets.CEREBRO_MAIL_IMAP_PORT }}
+          CEREBRO_MAIL_USERNAME: ${{ secrets.CEREBRO_MAIL_USERNAME }}
+          CEREBRO_MAIL_PASSWORD: ${{ secrets.CEREBRO_MAIL_PASSWORD }}
+          CEREBRO_MAIL_FROM: ${{ secrets.CEREBRO_MAIL_FROM }}
+          CEREBRO_OWNER_EMAIL: ${{ secrets.CEREBRO_OWNER_EMAIL }}
+        run: python cerebro/communication/mail_bridge.py send --input artifacts/communication/out/approval-mail.json
+
+      - name: Send one daily all-CEREBRO digest
+        if: github.ref == 'refs/heads/main' && steps.mail.outputs.ready == 'true' && hashFiles('artifacts/communication/out/digest-mail.json') != ''
+        env:
+          CEREBRO_MAIL_SMTP_HOST: ${{ secrets.CEREBRO_MAIL_SMTP_HOST }}
+          CEREBRO_MAIL_SMTP_PORT: ${{ secrets.CEREBRO_MAIL_SMTP_PORT }}
+          CEREBRO_MAIL_IMAP_HOST: ${{ secrets.CEREBRO_MAIL_IMAP_HOST }}
+          CEREBRO_MAIL_IMAP_PORT: ${{ secrets.CEREBRO_MAIL_IMAP_PORT }}
+          CEREBRO_MAIL_USERNAME: ${{ secrets.CEREBRO_MAIL_USERNAME }}
+          CEREBRO_MAIL_PASSWORD: ${{ secrets.CEREBRO_MAIL_PASSWORD }}
+          CEREBRO_MAIL_FROM: ${{ secrets.CEREBRO_MAIL_FROM }}
+          CEREBRO_OWNER_EMAIL: ${{ secrets.CEREBRO_OWNER_EMAIL }}
+        run: python cerebro/communication/mail_bridge.py send --input artifacts/communication/out/digest-mail.json
+
+      - name: Persist communication state only after successful delivery path
+        if: github.ref == 'refs/heads/main' && steps.mail.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          cp artifacts/communication/out/state.after.json /tmp/comm-state.json
+          git fetch --no-tags origin "+refs/heads/$COMM_STATE_BRANCH:refs/remotes/origin/$COMM_STATE_BRANCH"
+          git checkout --detach "refs/remotes/origin/$COMM_STATE_BRANCH"
+          cp /tmp/comm-state.json "$COMM_STATE_PATH"
+          git config user.name 'cerebro-communication[bot]'
+          git config user.email 'cerebro-communication[bot]@users.noreply.github.com'
+          git add "$COMM_STATE_PATH"
+          if ! git diff --cached --quiet; then
+            git commit -m 'chore(cerebro): advance owner communication state'
+            git push origin "HEAD:refs/heads/$COMM_STATE_BRANCH"
+          fi
+
+      - name: Upload communication evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-human-communication-v1-${{ github.run_id }}
+          path: artifacts/communication/**
+          if-no-files-found: warn
+          retention-days: 30
