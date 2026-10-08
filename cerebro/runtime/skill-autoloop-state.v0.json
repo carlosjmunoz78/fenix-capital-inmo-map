@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-08T06:41:16.064Z",
+  "updated_at": "2026-10-08T06:57:07.273Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -35,32 +35,7 @@
     "github-wide-skills:cc9f94a093bbe8a4251c"
   ],
   "in_flight": {},
-  "waiting_human": {
-    "lobehub-skills:9a6e3fac20369220df43": {
-      "candidate_id": "lobehub-skills:9a6e3fac20369220df43",
-      "name": "obsidian",
-      "stage": "PREPROD_PROMOTION_REVIEW",
-      "status": "WAITING_HUMAN",
-      "branch": "cerebro/skill-obsidian-behavioral-lab-20261008",
-      "run_id": 37731262882,
-      "head_sha": "9d27c22adbef807c44272f4c0fee03664bcdc7bd",
-      "human_required": "HIGH_RISK",
-      "prod_authorized": false,
-      "external_skill_code_execution": false,
-      "additional_cost_eur": 0,
-      "evidence": {
-        "run_id": 37731262882,
-        "reason": "GREEN_PROMOTION_READINESS",
-        "reconciled_from_legacy_in_flight": true
-      },
-      "updated_at": "2026-10-08T06:23:03.132Z",
-      "prod_write": false,
-      "autonomous_promotion_authorized": false,
-      "customer_data_used": false,
-      "trading_access": false,
-      "paid_fallback": false
-    }
-  },
+  "waiting_human": {},
   "waiting_safe_handler": {
     "github-wide-skills:cc9f94a093bbe8a4251c": {
       "candidate_id": "github-wide-skills:cc9f94a093bbe8a4251c",
@@ -98,7 +73,84 @@
       "additional_cost_eur": 0
     }
   },
-  "completed": {},
+  "completed": {
+    "lobehub-skills:9a6e3fac20369220df43": {
+      "candidate_id": "lobehub-skills:9a6e3fac20369220df43",
+      "name": "obsidian",
+      "stage": "READONLY_ADVISORY_REGISTERED",
+      "status": "COMPLETED_READONLY_ADVISORY",
+      "branch": "cerebro/skill-obsidian-behavioral-lab-20261008",
+      "run_id": 37731262882,
+      "head_sha": "9d27c22adbef807c44272f4c0fee03664bcdc7bd",
+      "human_required": null,
+      "prod_authorized": false,
+      "external_skill_code_execution": false,
+      "additional_cost_eur": 0,
+      "evidence": {
+        "run_id": 37731262882,
+        "reason": "GREEN_PROMOTION_READINESS",
+        "reconciled_from_legacy_in_flight": true
+      },
+      "updated_at": "2026-10-08T06:57:07.273Z",
+      "prod_write": false,
+      "autonomous_promotion_authorized": false,
+      "customer_data_used": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "human_alias": "Memoria Obsidian",
+      "authorization_basis": "explicit_owner_instruction_current_chat_2026-10-08_leave_skill_pipeline_fully_automatic",
+      "preprod": {
+        "schema_version": "1.0.0",
+        "candidate_id": "lobehub-skills:9a6e3fac20369220df43",
+        "name": "obsidian",
+        "human_alias": "Memoria Obsidian",
+        "wrapper_id": null,
+        "stage": "AUTONOMOUS_PREPROD_SHADOW",
+        "status": "GREEN_AUTONOMOUS_PREPROD_SHADOW",
+        "execution_mode": "SYNTHETIC_NON_CUSTOMER_SHADOW_ONLY",
+        "source_run_id": 37731262882,
+        "artifact_id": null,
+        "artifact_digest": null,
+        "customer_data_used": false,
+        "prod_data_used": false,
+        "prod_write": false,
+        "external_skill_code_executed": false,
+        "trading_access": false,
+        "paid_fallback": false,
+        "additional_cost_eur": 0,
+        "rollback_required": true,
+        "rebuild_disabled_by_default": true,
+        "standing_authorization_consumed": true
+      },
+      "canary": {
+        "schema_version": "1.0.0",
+        "candidate_id": "lobehub-skills:9a6e3fac20369220df43",
+        "name": "obsidian",
+        "human_alias": "Memoria Obsidian",
+        "wrapper_id": null,
+        "stage": "AUTONOMOUS_PROD_READONLY_CANARY",
+        "status": "GREEN_AUTONOMOUS_PROD_READONLY_CANARY",
+        "execution_mode": "READONLY_ADVISORY_OBSERVATION_ONLY",
+        "observed_main_sha": "9d89bad27fe49280f992010583ccc775ce056e14",
+        "source_manifest_verified": true,
+        "allowed_http_methods": [
+          "GET"
+        ],
+        "customer_data_used": false,
+        "prod_data_used": false,
+        "prod_write": false,
+        "github_business_mutation": false,
+        "external_skill_code_executed": false,
+        "trading_access": false,
+        "paid_fallback": false,
+        "additional_cost_eur": 0,
+        "rollback_required": true,
+        "rebuild_disabled_by_default": true,
+        "standing_authorization_consumed": true
+      },
+      "autonomous_business_prod_write_authorized": false
+    }
+  },
   "terminal_hold": {
     "github-wide-skills:9f382a637a7264314ac8": {
       "candidate_id": "github-wide-skills:9f382a637a7264314ac8",
@@ -146,7 +198,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "IDLE_NO_NEW_ELIGIBLE_CANDIDATE",
+  "last_action": "AUTONOMOUS_READONLY_ADVISORY_PROMOTION_COMPLETE_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
