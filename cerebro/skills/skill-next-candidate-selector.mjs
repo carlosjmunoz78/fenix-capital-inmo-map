@@ -30,19 +30,20 @@ export function autoloopStateCandidateIds(state){
   return ids;
 }
 
-function processedCandidateIds(registry,state){
-  const ids=registryProcessedCandidateIds(registry);
-  for(const id of autoloopStateCandidateIds(state)) ids.add(id);
-  return ids;
-}
-
 export function selectNextCandidate(valueReport,registry,state={}){
-  const processed=processedCandidateIds(registry,state);
+  const registryProcessed=registryProcessedCandidateIds(registry);
+  const stateProcessed=autoloopStateCandidateIds(state);
+  const processed=new Set([...registryProcessed,...stateProcessed]);
   const eligible=(valueReport?.results??[])
     .filter((item)=>['HIGH_VALUE_LAB_BENCHMARK','LAB_BENCHMARK'].includes(item.recommendation))
     .slice()
     .sort((a,b)=>(b.value_score??0)-(a.value_score??0)||String(a.candidate_id).localeCompare(String(b.candidate_id)));
-  const skipped=eligible.filter((item)=>processed.has(item.candidate_id)).map((item)=>({candidate_id:item.candidate_id,value_score:item.value_score,recommendation:item.recommendation,reason:'ALREADY_HAS_EVIDENCE_OR_AUTOLOOP_STATE'}));
+  const skipped=eligible.filter((item)=>processed.has(item.candidate_id)).map((item)=>({
+    candidate_id:item.candidate_id,
+    value_score:item.value_score,
+    recommendation:item.recommendation,
+    reason:registryProcessed.has(item.candidate_id)?'ALREADY_HAS_BEHAVIORAL_OR_LATER_EVIDENCE':'ALREADY_CHECKPOINTED_AUTOLOOP_STATE'
+  }));
   const selected=eligible.find((item)=>!processed.has(item.candidate_id))??null;
   return Object.freeze({
     schema_version:'0.2.0',
