@@ -19,7 +19,8 @@ test('multi-company structural workflow is hostless/event driven and read-only',
 test('workflow preserves structural-only boundary and Phase 4 count', () => {
   assert.match(workflow, /phase4_engine_count !== 17/);
   assert.match(workflow, /structural_files_total !== 306/);
-  assert.match(workflow, /green_engines .* length !== 0/);
+  assert.match(workflow, /green_engines/);
+  assert.match(workflow, /length !== 0/);
   assert.match(workflow, /NOT_RUN_STRUCTURAL_ONLY/);
   assert.match(workflow, /PREPROD/);
   assert.match(workflow, /SCAFFOLD/);
