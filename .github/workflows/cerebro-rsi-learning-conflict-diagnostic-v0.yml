@@ -51,10 +51,10 @@ jobs:
               --batch "$OUTBOX/$relpath" \
               --preprod-version 0.5.0 \
               --company-id fenix \
-              --output "/tmp/cerebro-lrn-diag/$digest.json" >/tmp/cerebro-lrn-diag/latest.json
+              --output "/tmp/cerebro-lrn-diag/$digest.json" >/tmp/cerebro-lrn-diag/latest.txt
           done < <(jq -r '.batches[] | [.sha256,.path] | @tsv' "$INDEX")
           test "$count" -gt 0
-          jq -s '{batches:length,semantic_conflicts:(map(.semantic_conflicts)|add),observed_at_only_duplicates:(map(.observed_at_only_duplicates)|add),exact_duplicates:(map(.exact_duplicates)|add),new_records:(map(.new_records)|add),different_fields:(map(.conflicts[].different_fields[])|unique)}' /tmp/cerebro-lrn-diag/*.json
+          jq -s '{batches:length,semantic_conflicts:(map(.semantic_conflicts)|add),observed_at_only_duplicates:(map(.observed_at_only_duplicates)|add),exact_duplicates:(map(.exact_duplicates)|add),new_records:(map(.new_records)|add),different_fields:(map(.conflicts[].different_fields[])|unique),conflict_patterns:(map(.conflicts[])|sort_by(.different_fields|join(","))|group_by(.different_fields|join(","))|map({count:length,different_fields:.[0].different_fields}))}' /tmp/cerebro-lrn-diag/*.json
       - name: Assert diagnostic is read-only and authority-neutral
         run: |
           set -euo pipefail
