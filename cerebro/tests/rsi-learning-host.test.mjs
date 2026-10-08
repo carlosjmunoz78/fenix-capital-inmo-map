@@ -13,6 +13,7 @@ function lowEvent(id='evt-host-low',company_id='fenix'){return {event_id:id,even
 function highEvent(id='evt-host-high'){return {event_id:id,event_type:'SECURITY_ADVISORY',candidate_id:`candidate:${id}`,company_id:'fenix',engine_id:'FACT-001',version:'0.1.0',severity:'HIGH',reason:'SECURITY_HIGH',evidence_ref:{source_ref:`source:${id}`},payload:{domain:'skills'}};}
 function writeReport(cfg,name,events){fs.mkdirSync(cfg.inbox_dir,{recursive:true});fs.writeFileSync(path.join(cfg.inbox_dir,name),JSON.stringify({events}));}
 function clock(){let n=0;return ()=>`2026-10-08T13:00:${String(n++).padStart(2,'0')}.000Z`;}
+function writeLock(lockDir,owner){fs.mkdirSync(lockDir,{recursive:true});if(owner!==undefined)fs.writeFileSync(path.join(lockDir,'owner.json'),typeof owner==='string'?owner:JSON.stringify(owner));}
 
 test('host config is exact PREPROD LRN-001, zero-cost and fail-closed',()=>{
   const root=temp();
@@ -48,6 +49,7 @@ test('HIGH risk is held canonically and kill switch stops all new persistence',(
     writeReport(cfg,'002.json',[lowEvent('evt-after-kill')]);
     const killed=runHostCycle({config:cfg,now});assert.equal(killed.status,'KILLED');assert.equal(killed.kill_switch_enabled,true);
     assert.equal(fs.readdirSync(paths.receipts).length,1);
+    assert.equal(killed.last_success_at,held.last_success_at);
   }finally{fs.rmSync(root,{recursive:true,force:true});}
 });
 
@@ -67,6 +69,22 @@ test('three identical failures change strategy to HOLD_SAME_ERROR_FAMILY',()=>{
     for(let i=1;i<=2;i++) assert.throws(()=>runHostCycle({config:cfg,now}),/ERROR/);
     assert.throws(()=>runHostCycle({config:cfg,now}),/HOLD_SAME_ERROR_FAMILY/);
     assert.equal(readHeartbeat(normalizeHostConfig(cfg)).status,'HOLD_SAME_ERROR_FAMILY');
+  }finally{fs.rmSync(root,{recursive:true,force:true});}
+});
+
+test('backup refuses live host ownership, reclaims trusted stale host lock, and fails closed on ambiguous lock metadata',()=>{
+  const root=temp();const cfg=config(root);const now=clock();const normalized=normalizeHostConfig(cfg);
+  try{
+    writeReport(cfg,'001.json',[lowEvent('evt-lock-backup')]);runHostCycle({config:cfg,now});
+    const paths=hostPaths(normalized);
+    writeLock(paths.hostLock,{schema_version:'1.0.0',kind:'LRN_HOST',pid:process.pid,started_at:'2026-10-08T12:00:00.000Z'});
+    assert.throws(()=>createLedgerBackup({config:cfg,now}),/host lock is active/);
+    fs.rmSync(paths.hostLock,{recursive:true,force:true});
+    writeLock(paths.hostLock,{schema_version:'1.0.0',kind:'LRN_HOST',pid:2147483647,started_at:'2026-10-08T11:00:00.000Z'});
+    const recovered=createLedgerBackup({config:cfg,now});
+    assert.equal(recovered.status,'BACKUP_GREEN');assert.equal(fs.existsSync(paths.hostLock),false);
+    writeLock(paths.hostLock);
+    assert.throws(()=>createLedgerBackup({config:cfg,now}),/owner metadata missing/);
   }finally{fs.rmSync(root,{recursive:true,force:true});}
 });
 
