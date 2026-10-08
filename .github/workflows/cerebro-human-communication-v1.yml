@@ -95,7 +95,7 @@ jobs:
         if: github.ref == 'refs/heads/main' && steps.mail.outputs.ready == 'true'
         env:
           CEREBRO_MAIL_IMAP_HOST: ${{ secrets.CEREBRO_MAIL_IMAP_HOST }}
-          CEREBRO_MAIL_IMAP_PORT: ${{ secrets.CEREBRO_MAIL_IMAP_PORT }}
+          CEREBRO_MAIL_IMAP_PORT: '993'
           CEREBRO_MAIL_USERNAME: ${{ secrets.CEREBRO_MAIL_USERNAME }}
           CEREBRO_MAIL_PASSWORD: ${{ secrets.CEREBRO_MAIL_PASSWORD }}
           CEREBRO_OWNER_EMAIL: ${{ secrets.CEREBRO_OWNER_EMAIL }}
@@ -133,12 +133,12 @@ jobs:
         if: github.ref == 'refs/heads/main' && steps.mail.outputs.ready == 'true' && hashFiles('artifacts/communication/out/approval-mail.json') != ''
         env:
           CEREBRO_MAIL_SMTP_HOST: ${{ secrets.CEREBRO_MAIL_SMTP_HOST }}
-          CEREBRO_MAIL_SMTP_PORT: ${{ secrets.CEREBRO_MAIL_SMTP_PORT }}
+          CEREBRO_MAIL_SMTP_PORT: '465'
           CEREBRO_MAIL_IMAP_HOST: ${{ secrets.CEREBRO_MAIL_IMAP_HOST }}
-          CEREBRO_MAIL_IMAP_PORT: ${{ secrets.CEREBRO_MAIL_IMAP_PORT }}
+          CEREBRO_MAIL_IMAP_PORT: '993'
           CEREBRO_MAIL_USERNAME: ${{ secrets.CEREBRO_MAIL_USERNAME }}
           CEREBRO_MAIL_PASSWORD: ${{ secrets.CEREBRO_MAIL_PASSWORD }}
-          CEREBRO_MAIL_FROM: ${{ secrets.CEREBRO_MAIL_FROM }}
+          CEREBRO_MAIL_FROM: ${{ secrets.CEREBRO_MAIL_USERNAME }}
           CEREBRO_OWNER_EMAIL: ${{ secrets.CEREBRO_OWNER_EMAIL }}
         run: python cerebro/communication/mail_bridge.py send --input artifacts/communication/out/approval-mail.json
 
@@ -146,12 +146,12 @@ jobs:
         if: github.ref == 'refs/heads/main' && steps.mail.outputs.ready == 'true' && hashFiles('artifacts/communication/out/digest-mail.json') != ''
         env:
           CEREBRO_MAIL_SMTP_HOST: ${{ secrets.CEREBRO_MAIL_SMTP_HOST }}
-          CEREBRO_MAIL_SMTP_PORT: ${{ secrets.CEREBRO_MAIL_SMTP_PORT }}
+          CEREBRO_MAIL_SMTP_PORT: '465'
           CEREBRO_MAIL_IMAP_HOST: ${{ secrets.CEREBRO_MAIL_IMAP_HOST }}
-          CEREBRO_MAIL_IMAP_PORT: ${{ secrets.CEREBRO_MAIL_IMAP_PORT }}
+          CEREBRO_MAIL_IMAP_PORT: '993'
           CEREBRO_MAIL_USERNAME: ${{ secrets.CEREBRO_MAIL_USERNAME }}
           CEREBRO_MAIL_PASSWORD: ${{ secrets.CEREBRO_MAIL_PASSWORD }}
-          CEREBRO_MAIL_FROM: ${{ secrets.CEREBRO_MAIL_FROM }}
+          CEREBRO_MAIL_FROM: ${{ secrets.CEREBRO_MAIL_USERNAME }}
           CEREBRO_OWNER_EMAIL: ${{ secrets.CEREBRO_OWNER_EMAIL }}
         run: python cerebro/communication/mail_bridge.py send --input artifacts/communication/out/digest-mail.json
 
