@@ -75,4 +75,4 @@ test('completed exact-owner promotion records approval source without broadening
   assert.equal(out.completed['candidate-a'].authorization_basis,ownerAction().approval_id);
   assert.equal(out.completed['candidate-a'].prod_write,false);
   assert.equal(out.completed['candidate-a'].customer_data_used,false);
-}");
+});
