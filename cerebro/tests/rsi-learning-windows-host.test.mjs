@@ -7,6 +7,8 @@ const launcher=fs.readFileSync(new URL('../host/windows/Start-CerebroLrn001Host.
 const uninstaller=fs.readFileSync(new URL('../host/windows/Uninstall-CerebroLrn001Host.ps1',import.meta.url),'utf8');
 const health=fs.readFileSync(new URL('../host/windows/Get-CerebroLrn001Health.ps1',import.meta.url),'utf8');
 const oneClick=fs.readFileSync(new URL('../host/windows/INSTALL_CEREBRO_LRN001_PREPROD.cmd',import.meta.url),'utf8');
+const acceptance=fs.readFileSync(new URL('../host/windows/Test-CerebroLrn001Host.ps1',import.meta.url),'utf8');
+const acceptanceClick=fs.readFileSync(new URL('../host/windows/TEST_CEREBRO_LRN001_PREPROD.cmd',import.meta.url),'utf8');
 
 test('Windows binding uses native AtStartup SYSTEM scheduling and immutable copied host code',()=>{
   assert.match(installer,/New-ScheduledTaskTrigger -AtStartup/);
@@ -17,6 +19,7 @@ test('Windows binding uses native AtStartup SYSTEM scheduling and immutable copi
   assert.match(installer,/host-code/);
   assert.match(installer,/deployment-manifest\.json/);
   assert.match(installer,/source_host_sha256/);
+  assert.match(installer,/UTF8Encoding\(\$false\)/);
   assert.match(installer,/additional_cost_eur = 0/);
   assert.match(installer,/prod_authorized = \$false/);
 });
@@ -35,8 +38,10 @@ test('launcher runs only local Node host daemon and appends local logs',()=>{
   assert.doesNotMatch(launcher,/Invoke-WebRequest|Invoke-RestMethod|curl|wget/i);
 });
 
-test('one-click launcher elevates only the local PREPROD installer with explicit safe gates',()=>{
+test('one-click launcher elevates only the local PREPROD installer with explicit safe gates and propagates exit status',()=>{
   assert.match(oneClick,/Start-Process powershell\.exe -Verb RunAs/);
+  assert.match(oneClick,/-PassThru/);
+  assert.match(oneClick,/exit \$p\.ExitCode/);
   assert.match(oneClick,/Install-CerebroLrn001Host\.ps1/);
   assert.match(oneClick,/-PolicyPass/);
   assert.match(oneClick,/-SecurityPass/);
@@ -60,4 +65,16 @@ test('physical health is fail-closed until task heartbeat and PREPROD safety all
   assert.match(health,/heartbeat\.prod_authorized -eq \$false/);
   assert.match(health,/heartbeat\.prod_write_authorized -eq \$false/);
   assert.match(health,/heartbeat_fresh/);
+});
+
+test('physical acceptance uses isolated fixture company, preserves operator kill switch and never auto-reboots',()=>{
+  assert.match(acceptance,/acceptCompany = 'cerebro-acceptance'/);
+  assert.match(acceptance,/fixture=\$true/);
+  assert.match(acceptance,/SKIPPED_PREEXISTING_KILL/);
+  assert.match(acceptance,/preservation_backup/);
+  assert.match(acceptance,/reboot_auto_start_pending=\$true/);
+  assert.doesNotMatch(acceptance,/Restart-Computer|shutdown\.exe|Stop-Computer/i);
+  assert.match(acceptanceClick,/Test-CerebroLrn001Host\.ps1/);
+  assert.match(acceptanceClick,/-PassThru/);
+  assert.match(acceptanceClick,/exit \$p\.ExitCode/);
 });
