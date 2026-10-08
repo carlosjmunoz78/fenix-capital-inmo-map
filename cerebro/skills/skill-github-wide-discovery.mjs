@@ -12,7 +12,7 @@ const MAX_MANIFESTS_PER_REPO=4;
 const MAX_CANDIDATES=24;
 
 function stableId(value){return createHash('sha256').update(String(value)).digest('hex').slice(0,20);}
-function encodePath(p){return String(p).split('/').map(encodeURIComponent).join('/');}
+function encodePath(p){return String(p).split('/').filter(Boolean).map(encodeURIComponent).join('/');}
 
 async function githubJson(url,{token=process.env.GITHUB_TOKEN,fetchImpl=fetch,timeoutMs=8000}={}){
   const controller=new AbortController();
@@ -39,7 +39,8 @@ export function candidatesFromRepoTree(repo,tree,{maxPerRepo=MAX_MANIFESTS_PER_R
     .sort((a,b)=>String(a.path).localeCompare(String(b.path)))
     .slice(0,maxPerRepo)
     .map((entry)=>{
-      const sourceRef=`${repo.html_url}/blob/${encodeURIComponent(repo.default_branch)}/${encodePath(entry.path)}`;
+      const directory=String(entry.path).replace(/\/?SKILL\.md$/i,'');
+      const sourceRef=`${repo.html_url}/tree/${encodeURIComponent(repo.default_branch)}/${encodePath(directory)}`;
       return {
         candidate_id:`github-wide-skills:${stableId(`${repo.full_name}@${entry.path}`)}`,
         source_ref:sourceRef,
