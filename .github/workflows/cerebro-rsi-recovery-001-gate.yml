@@ -18,6 +18,7 @@ on:
       - 'cerebro/runtime/meta-observability-ledger.mjs'
       - 'cerebro/runtime/meta-learning-runner.mjs'
       - 'cerebro/runtime/hygiene-audit.mjs'
+      - 'cerebro/runtime/bounded-recovery-supervisor.mjs'
       - 'cerebro/runtime/experiment-pipeline.mjs'
       - 'cerebro/runtime/evaluation-tribunal.mjs'
       - 'cerebro/runtime/promotion-pipeline.mjs'
@@ -48,6 +49,7 @@ on:
       - 'cerebro/tests/meta-observability-ledger.test.mjs'
       - 'cerebro/tests/meta-learning-runner.test.mjs'
       - 'cerebro/tests/hygiene-audit.test.mjs'
+      - 'cerebro/tests/bounded-recovery-supervisor.test.mjs'
       - 'cerebro/tests/experiment-pipeline.test.mjs'
       - 'cerebro/tests/evaluation-tribunal.test.mjs'
       - 'cerebro/tests/promotion-pipeline.test.mjs'
@@ -81,6 +83,7 @@ on:
       - 'cerebro/runtime/meta-observability-ledger.mjs'
       - 'cerebro/runtime/meta-learning-runner.mjs'
       - 'cerebro/runtime/hygiene-audit.mjs'
+      - 'cerebro/runtime/bounded-recovery-supervisor.mjs'
       - 'cerebro/runtime/experiment-pipeline.mjs'
       - 'cerebro/runtime/evaluation-tribunal.mjs'
       - 'cerebro/runtime/promotion-pipeline.mjs'
@@ -111,6 +114,7 @@ on:
       - 'cerebro/tests/meta-observability-ledger.test.mjs'
       - 'cerebro/tests/meta-learning-runner.test.mjs'
       - 'cerebro/tests/hygiene-audit.test.mjs'
+      - 'cerebro/tests/bounded-recovery-supervisor.test.mjs'
       - 'cerebro/tests/experiment-pipeline.test.mjs'
       - 'cerebro/tests/evaluation-tribunal.test.mjs'
       - 'cerebro/tests/promotion-pipeline.test.mjs'
@@ -155,7 +159,7 @@ jobs:
             }
           }
           if ($failed) { exit 1 }
-      - name: Recovered RSI runtime, hostless control plane, HYG audit-only, measured MetaLearn, horizon execution, autonomous scheduling, real event wiring, PREPROD persistence, host binding, governance and bridge regression tests
+      - name: Recovered RSI runtime, hostless control plane, HYG audit-only, bounded recovery, measured MetaLearn, horizon execution, autonomous scheduling, real event wiring, PREPROD persistence, host binding, governance and bridge regression tests
         run: >-
           node --test
           cerebro/tests/continuous-improvement-contract.test.mjs
@@ -176,6 +180,7 @@ jobs:
           cerebro/tests/meta-observability-ledger.test.mjs
           cerebro/tests/meta-learning-runner.test.mjs
           cerebro/tests/hygiene-audit.test.mjs
+          cerebro/tests/bounded-recovery-supervisor.test.mjs
           cerebro/tests/experiment-pipeline.test.mjs
           cerebro/tests/evaluation-tribunal.test.mjs
           cerebro/tests/promotion-pipeline.test.mjs
