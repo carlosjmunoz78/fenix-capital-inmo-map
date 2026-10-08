@@ -110,3 +110,20 @@ Expected:
 `COMP-ONB-001` may be recorded as `AUTOMATIC_COMPANY_SCAFFOLD_VERIFIED` only after exact-head gates are green, implementation merges additively to `main`, an automatic main run succeeds and an identical rerun reproduces the aggregate deterministic identity.
 
 Even after that structural acceptance, actual onboarding remains **PARCIAL** until the real execution chain progresses through `COMP-REG-001` and `TENANT-001`, then the scanning/bootstrap engines, with their own PREPROD evidence. Autonomous PROD is outside this V0.
+
+## Acceptance closure · 2026-10-08
+
+The promotion rule above is now satisfied for the structural scope only.
+
+- PR #509 merged additively to `main` as `cb46c0c95b4e628608990404e4c1ac38e889b79e`.
+- Automatic `main` run `37833181826`, attempt 1: SUCCESS.
+- Deterministic rerun of the same run, attempt 2: SUCCESS.
+- Both attempts: `643 passed / 0 failed` in the CEREBRO regression suite.
+- Both attempts produced `STRUCTURAL_BOOTSTRAP_GREEN` for request `company-bootstrap-selfcheck-v0` / company `cerebro-bootstrap-selfcheck`.
+- Both attempts produced 17 Phase 4 engines, 306 canonical structural files and identical aggregate SHA-256 `295be8b701fe80ea57b034e882da1698def79a97502b9831e9453871c7fc1ed6`.
+- No business engine was marked GREEN from scaffold generation.
+- Cost remained 0 EUR; PROD, PROD write, Trading and Supabase-write authority remained false.
+
+Accepted autonomy state: `AUTOMATIC_COMPANY_SCAFFOLD_VERIFIED`.
+
+The next real execution gate is `COMP_REG_AND_TENANT_PREPROD_EXECUTION_REQUIRED`. `ACTGW-001 → cerebro_new_company_scaffold` remains defined but live Gateway dispatch is still `POR AUDITAR`.
