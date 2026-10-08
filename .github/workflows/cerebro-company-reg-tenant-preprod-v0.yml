@@ -1,0 +1,154 @@
+name: CEREBRO Company Registry Tenant PREPROD V0
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'cerebro/multicompany/company-reg-tenant-preprod.mjs'
+      - 'cerebro/multicompany/bootstrap.mjs'
+      - 'cerebro/multicompany/requests/company-reg-tenant-selfcheck.v0.json'
+      - 'cerebro/registry/multicompany-bootstrap.json'
+      - '.github/workflows/cerebro-company-reg-tenant-preprod-v0.yml'
+  workflow_dispatch:
+    inputs:
+      request_path:
+        description: 'Repository request JSON under cerebro/multicompany/requests/'
+        required: false
+        default: 'cerebro/multicompany/requests/company-reg-tenant-selfcheck.v0.json'
+  repository_dispatch:
+    types:
+      - cerebro_company_reg_tenant_preprod
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-company-reg-tenant-${{ github.event_name }}-${{ github.sha }}
+  cancel-in-progress: false
+
+env:
+  EXACT_SOURCE_SHA: ${{ github.sha }}
+  DISPATCH_REQUEST_JSON: ${{ toJson(github.event.client_payload.request) }}
+
+jobs:
+  company-registry-tenant-preprod:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.EXACT_SOURCE_SHA }}
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Assert immutable source checkout
+        shell: bash
+        run: test "$(git rev-parse HEAD)" = "$EXACT_SOURCE_SHA"
+
+      - name: Validate CEREBRO contracts before execution
+        working-directory: cerebro
+        run: |
+          set -euo pipefail
+          npm run validate
+          npm test
+
+      - name: Resolve one bounded PREPROD request
+        id: request
+        shell: bash
+        env:
+          REQUEST_PATH: ${{ github.event.inputs.request_path }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/cerebro-company-reg-input /tmp/cerebro-company-reg-evidence
+
+          if [ "$GITHUB_EVENT_NAME" = "repository_dispatch" ]; then
+            node <<'NODE'
+          const fs = require('fs');
+          const raw = process.env.DISPATCH_REQUEST_JSON;
+          if (!raw || raw === 'null') throw new Error('repository_dispatch requires client_payload.request');
+          const value = JSON.parse(raw);
+          if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('client_payload.request must be an object');
+          fs.writeFileSync('/tmp/cerebro-company-reg-input/request.json', JSON.stringify(value, null, 2) + '\n', 'utf8');
+          NODE
+            echo 'request_file=/tmp/cerebro-company-reg-input/request.json' >> "$GITHUB_OUTPUT"
+          elif [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            case "$REQUEST_PATH" in
+              cerebro/multicompany/requests/*.json) ;;
+              *) echo 'request_path must remain under cerebro/multicompany/requests/*.json' >&2; exit 1 ;;
+            esac
+            test -f "$REQUEST_PATH"
+            echo "request_file=$REQUEST_PATH" >> "$GITHUB_OUTPUT"
+          else
+            request='cerebro/multicompany/requests/company-reg-tenant-selfcheck.v0.json'
+            test -f "$request"
+            echo "request_file=$request" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Execute COMP-REG-001 and TENANT-001 reference path
+        shell: bash
+        run: |
+          set -euo pipefail
+          node cerebro/multicompany/company-reg-tenant-preprod.mjs \
+            --request '${{ steps.request.outputs.request_file }}' \
+            --out /tmp/cerebro-company-reg-evidence/result.json \
+            | tee /tmp/cerebro-company-reg-evidence/runner-summary.json
+
+      - name: Assert PREPROD tenant boundary and no promotion authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('fs');
+          const result = JSON.parse(fs.readFileSync('/tmp/cerebro-company-reg-evidence/result.json', 'utf8'));
+          if (result.status !== 'COMP_REG_TENANT_PREPROD_GREEN') throw new Error('COMP-REG/TENANT path not green');
+          if (result.environment !== 'PREPROD') throw new Error('environment expansion');
+          if (JSON.stringify(result.green_engines) !== JSON.stringify(['COMP-REG-001','TENANT-001'])) throw new Error('unexpected GREEN engines');
+          if (!result.next_ready.includes('COMP-ONB-001')) throw new Error('COMP-ONB dependency did not unlock');
+          if (result.scan_state !== 'BLOCKED' || result.activation_state !== 'BLOCKED') throw new Error('business chain over-unlocked');
+          if (result.tenant_isolation_verified !== true || result.control_green_engines.length !== 0) throw new Error('tenant isolation not verified');
+          if (result.promotion?.allowed !== false || result.promotion?.reason !== 'PHASE4_NOT_ALL_GREEN') throw new Error('promotion boundary drift');
+          if (result.durability_state !== 'IN_MEMORY_REFERENCE_ONLY') throw new Error('durability overclaim');
+          if (result.next_gate !== 'DURABLE_COMPANY_REGISTRY_PREPROD_PERSISTENCE_REQUIRED') throw new Error('wrong next gate');
+          if (result.additional_cost_eur !== 0) throw new Error('non-zero cost');
+          if (result.prod_authorized !== false || result.prod_write_authorized !== false) throw new Error('PROD authority expansion');
+          if (result.trading_access !== false || result.supabase_writes !== false || result.external_code_execution !== false) throw new Error('forbidden authority');
+          fs.writeFileSync('/tmp/cerebro-company-reg-evidence/acceptance-summary.json', JSON.stringify({
+            schema_version: '1.0.0',
+            status: result.status,
+            source_sha: process.env.EXACT_SOURCE_SHA,
+            github_run_id: process.env.GITHUB_RUN_ID,
+            github_run_attempt: process.env.GITHUB_RUN_ATTEMPT,
+            request_id: result.request_id,
+            company_id: result.company_id,
+            green_engines: result.green_engines,
+            next_ready: result.next_ready,
+            tenant_isolation_verified: result.tenant_isolation_verified,
+            execution_sha256: result.execution_sha256,
+            durability_state: result.durability_state,
+            next_gate: result.next_gate,
+            additional_cost_eur: 0,
+            prod_authorized: false,
+            prod_write_authorized: false,
+            trading_access: false,
+            supabase_writes: false
+          }, null, 2) + '\n');
+          NODE
+
+      - name: Upload immutable COMP-REG TENANT PREPROD evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: company-reg-tenant-preprod-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/cerebro-company-reg-evidence
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Record strict boundary
+        shell: bash
+        run: |
+          echo 'COMP-REG-001 + TENANT-001 deterministic PREPROD reference execution completed.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Tenant isolation and dependency progression are verified; no business chain or PROD promotion authority is granted.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Durability remains IN_MEMORY_REFERENCE_ONLY. Next gate: durable Company Registry PREPROD persistence contract/audit.' >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0.0",
+  "request_id": "company-reg-tenant-selfcheck-v0",
+  "company_id": "cerebro-reg-tenant-selfcheck",
+  "environment": "PREPROD",
+  "version": "0.1.0",
+  "intent": "EXECUTE_COMP_REG_TENANT_PREPROD",
+  "additional_cost_eur": 0,
+  "prod_authorized": false,
+  "prod_write_authorized": false,
+  "trading_access": false,
+  "supabase_writes": false,
+  "external_code_execution": false
+}
