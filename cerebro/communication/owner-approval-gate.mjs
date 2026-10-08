@@ -10,6 +10,7 @@ export function evaluateOwnerAuthorization({communicationState={},request={}}={}
   const scope=clean(request.scope_fingerprint);
   const technicalId=clean(request.technical_id);
   const stage=clean(request.stage);
+  const executionBinding=clean(request.execution_binding);
   if(!approvalId||!scope||!technicalId||!stage) return Object.freeze({authorized:false,reason:'INCOMPLETE_EXACT_REQUEST',source:null});
 
   const action=communicationState?.authorized_actions?.[approvalId];
@@ -18,8 +19,8 @@ export function evaluateOwnerAuthorization({communicationState={},request={}}={}
   }
 
   const standing=communicationState?.standing_authorizations?.[scope];
-  if(standing?.status==='ACTIVE'&&standing?.exact_scope_only===true){
-    return Object.freeze({authorized:true,reason:'ACTIVE_STANDING_AUTHORIZATION_EXACT_SCOPE',source:'STANDING_AUTHORIZATION',approval_id:standing.approval_id??null,scope_fingerprint:scope,one_time:false,policy_changed:false,policy_basis_active:true});
+  if(standing?.status==='ACTIVE'&&standing?.exact_scope_only===true&&executionBinding&&clean(standing?.execution_binding)===executionBinding){
+    return Object.freeze({authorized:true,reason:'ACTIVE_STANDING_AUTHORIZATION_EXACT_SCOPE_AND_EXECUTOR',source:'STANDING_AUTHORIZATION',approval_id:standing.approval_id??null,scope_fingerprint:scope,execution_binding:executionBinding,one_time:false,policy_changed:false,policy_basis_active:true});
   }
 
   return Object.freeze({authorized:false,reason:'NO_MATCHING_OWNER_AUTHORIZATION',source:null,approval_id:approvalId,scope_fingerprint:scope});
@@ -31,7 +32,7 @@ export function buildOwnerDecisionAuditEvent({request={},authorization={},compan
     decision_type:'human_decision',
     state:authorization?.authorized===true?'CONFIRMED':'ACTION_PROPOSAL',
     confirmation_semantics:'EXPLICIT_YES_TO_CURRENT_EXACT_PROPOSAL',scope_change_invalidates_confirmation:true,
-    approval_id:clean(request.approval_id)||null,scope_fingerprint:clean(request.scope_fingerprint)||null,technical_id:clean(request.technical_id)||null,stage:clean(request.stage)||null,
+    approval_id:clean(request.approval_id)||null,scope_fingerprint:clean(request.scope_fingerprint)||null,technical_id:clean(request.technical_id)||null,stage:clean(request.stage)||null,execution_binding:clean(request.execution_binding)||null,
     authorization_source:authorization?.source??null,authorized:authorization?.authorized===true,reason:authorization?.reason??'UNKNOWN',idempotency_required_before_execution:true,questions_do_not_execute:true,
     permanent_policy_change:false,standing_policy_basis:authorization?.source==='STANDING_AUTHORIZATION',recorded_at:now
   });
