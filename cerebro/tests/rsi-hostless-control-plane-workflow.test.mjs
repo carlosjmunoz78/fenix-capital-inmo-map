@@ -43,6 +43,14 @@ test('control plane persists PREPROD-only state with zero added cost and no Trad
   assert.match(workflow,/local_persistence_enabled:true/);
 });
 
+test('remote transport error is persisted as evidence and then fails the workflow visibly',()=>{
+  const commitPos=workflow.indexOf('Commit only durable LRN state');
+  const assertPos=workflow.indexOf('Assert remote transport healthy after evidence persistence');
+  assert.ok(commitPos>=0&&assertPos>commitPos);
+  assert.match(workflow,/PARTIAL_REMOTE_ERROR/);
+  assert.match(workflow,/REMOTE_OUTBOX_ERROR/);
+});
+
 test('runtime job needs only GitHub contents write and introduces no external credentials or paid provider dependency',()=>{
   assert.match(workflow,/run-preprod-control-plane:[\s\S]*?permissions:\s*\n\s*contents: write/);
   assert.match(workflow,/contract-test:[\s\S]*?permissions:\s*\n\s*contents: read/);
