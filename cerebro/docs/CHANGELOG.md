@@ -1,5 +1,17 @@
 # CEREBRO OS · CHANGELOG
 
+## 2026-10-08 · COMP-ONB-001 Structural Onboarding V0 candidate
+
+- Added an additive multi-company structural adapter that composes the existing Phase 4 dependency graph with verified FACT-001 AutoFactory; no new canonical engine ID is introduced.
+- A bounded new-company structural request now prepares the 17 canonical Phase 4 engine scaffolds in tenant-scoped evidence while preserving the generic 18-file FACT scaffold bytes.
+- Expected structural output is 17 engines × 18 canonical files = 306 files.
+- Structural generation is explicitly forbidden from marking business engines GREEN; after registration the existing READY/BLOCKED Phase 4 state remains authoritative until real PREPROD execution evidence exists.
+- Added hostless GitHub automation for push self-check, explicit dispatch and future `repository_dispatch: cerebro_new_company_scaffold`, with repository `contents: read` only.
+- PREPROD adapter / SCAFFOLD sub-generation only; cost 0; PROD/PROD-write/Trading/Supabase-write/external-code authority false.
+- Small optional structural profile metadata is fingerprinted rather than persisted in result evidence; credential/secret/bank-like fields fail closed to `SECURITY_INCIDENT`.
+- Autonomy overlay records `AUTOMATIC_COMPANY_SCAFFOLD_SOFTWARE_READY_LIVE_ACCEPTANCE_PENDING`; no automatic/live claim will be made until exact-head gates, merge, automatic main run and deterministic rerun succeed.
+- Real scanning, keyword research, SEO, social/local audit, marketing, knowledge, CRM, App, automations, Training, TENANT activation and PROD remain downstream and are not claimed by this candidate.
+
 ## 2026-10-08 · FACT-001 AutoFactory V0 accepted
 
 - FACT-001 bounded request contract remains scoped by canonical `company_id`, `engine_id`, `environment`, `version` context and wraps the existing factory authority instead of replacing it.
