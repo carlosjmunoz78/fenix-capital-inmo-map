@@ -41,7 +41,7 @@ test('one-click launcher elevates only the local PREPROD installer with explicit
   assert.match(oneClick,/-PolicyPass/);
   assert.match(oneClick,/-SecurityPass/);
   assert.match(oneClick,/-EnableLocalPersistence/);
-  assert.doesNotMatch(oneClick,/PROD|Trading|Invoke-WebRequest|curl|wget/i);
+  assert.doesNotMatch(oneClick,/\bPROD\b|Trading|Invoke-WebRequest|curl|wget/i);
 });
 
 test('uninstaller removes scheduled execution but preserves state backup inbox and config by default',()=>{
