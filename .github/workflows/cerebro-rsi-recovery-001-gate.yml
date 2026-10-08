@@ -14,6 +14,7 @@ on:
       - 'cerebro/runtime/factory-supervisor-improvement.mjs'
       - 'cerebro/runtime/knowledge-obsolescence.mjs'
       - 'cerebro/runtime/continuity-handoff.mjs'
+      - 'cerebro/runtime/rsi-observability-adapter.mjs'
       - 'cerebro/skills/skill-rsi-shadow-bridge.mjs'
       - 'cerebro/tests/continuous-improvement-contract.test.mjs'
       - 'cerebro/tests/continuous-improvement-scheduler.test.mjs'
@@ -26,6 +27,8 @@ on:
       - 'cerebro/tests/factory-supervisor-improvement.test.mjs'
       - 'cerebro/tests/knowledge-obsolescence.test.mjs'
       - 'cerebro/tests/continuity-handoff.test.mjs'
+      - 'cerebro/tests/rsi-observability-adapter.test.mjs'
+      - 'cerebro/tests/rsi-recovery-e2e.test.mjs'
       - 'cerebro/tests/skill-rsi-shadow-bridge.test.mjs'
       - 'cerebro/docs/RSI_RECOVERY_001_AUDIT_2026-10-08.md'
       - '.github/workflows/cerebro-rsi-recovery-001-gate.yml'
@@ -42,6 +45,7 @@ on:
       - 'cerebro/runtime/factory-supervisor-improvement.mjs'
       - 'cerebro/runtime/knowledge-obsolescence.mjs'
       - 'cerebro/runtime/continuity-handoff.mjs'
+      - 'cerebro/runtime/rsi-observability-adapter.mjs'
       - 'cerebro/skills/skill-rsi-shadow-bridge.mjs'
       - 'cerebro/tests/continuous-improvement-contract.test.mjs'
       - 'cerebro/tests/continuous-improvement-scheduler.test.mjs'
@@ -54,6 +58,8 @@ on:
       - 'cerebro/tests/factory-supervisor-improvement.test.mjs'
       - 'cerebro/tests/knowledge-obsolescence.test.mjs'
       - 'cerebro/tests/continuity-handoff.test.mjs'
+      - 'cerebro/tests/rsi-observability-adapter.test.mjs'
+      - 'cerebro/tests/rsi-recovery-e2e.test.mjs'
       - 'cerebro/tests/skill-rsi-shadow-bridge.test.mjs'
       - 'cerebro/docs/RSI_RECOVERY_001_AUDIT_2026-10-08.md'
       - '.github/workflows/cerebro-rsi-recovery-001-gate.yml'
@@ -71,7 +77,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Recovered RSI runtime slice and current bridge regression tests
+      - name: Recovered RSI runtime slice, governance and current bridge regression tests
         run: >-
           node --test
           cerebro/tests/continuous-improvement-contract.test.mjs
@@ -85,4 +91,6 @@ jobs:
           cerebro/tests/factory-supervisor-improvement.test.mjs
           cerebro/tests/knowledge-obsolescence.test.mjs
           cerebro/tests/continuity-handoff.test.mjs
+          cerebro/tests/rsi-observability-adapter.test.mjs
+          cerebro/tests/rsi-recovery-e2e.test.mjs
           cerebro/tests/skill-rsi-shadow-bridge.test.mjs
