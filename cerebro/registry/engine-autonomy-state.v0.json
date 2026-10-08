@@ -1,0 +1,44 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_ENGINE_AUTONOMY_STATE",
+  "source_registry": "cerebro/registry/engine-registry.seed.json",
+  "environment_scope": "NON_PROD",
+  "default_state": "UNKNOWN_REQUIRES_AUDIT",
+  "prod_execution_enabled": false,
+  "additional_cost_eur": 0,
+  "updated_at": "2026-10-08",
+  "engines": [
+    {
+      "engine_id": "LRN-001",
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "0.5.0",
+      "autonomy_state": "AUTOMATIC_PREPROD_VERIFIED",
+      "execution_model": "HOSTLESS_BOUNDED_ITERATION",
+      "schedule_semantics": "BEST_EFFORT_15_MINUTE_PLUS_EVENT",
+      "connected_scope": "CONNECTED_EVENT_AND_LEARNING_HOOKS_ONLY",
+      "first_real_acceptance_run_id": "37827544846",
+      "idempotency_acceptance_run_id": "37827678008",
+      "real_events_persisted": 15,
+      "idempotent_rerun_new_persisted": 0,
+      "ledger_verified": true,
+      "rollback_documented": true,
+      "rebuild_documented": true,
+      "observability_verified": true,
+      "human_required_policy_enforced": true,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "evidence_refs": [
+        "cerebro/docs/RSI_RECOVERY_011_POSTMERGE_AUTONOMY_ACCEPTANCE.md",
+        ".github/workflows/cerebro-rsi-learning-control-plane-v0.yml",
+        ".github/workflows/cerebro-rsi-learning-outbox-publisher-v0.yml",
+        "cerebro/registry/rsi-learning-subscribers.v0.json",
+        "cerebro/runtime/rsi-learning-auto-host.mjs",
+        "cerebro/runtime/rsi-event-outbox.mjs",
+        "cerebro/runtime/rsi-outbox-client.mjs"
+      ]
+    }
+  ]
+}
