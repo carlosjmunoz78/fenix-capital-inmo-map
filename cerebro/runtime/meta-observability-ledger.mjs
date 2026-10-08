@@ -26,6 +26,12 @@ export class MetaObservabilityLedger{
     if(prior)return Object.freeze({accepted:false,duplicate:true,sequence:prior.sequence,sample_id});
     const item={sequence:this.#items.length+1,sample_id,sample:safe};const next=[...this.#items,item];this.#journal.commit(next);this.#items=next;return Object.freeze({accepted:true,duplicate:false,sequence:item.sequence,sample_id});
   }
+  appendIfDue(sample,{min_interval_ms=3600000}={}){
+    const safe=clone(validate(sample));if(!Number.isInteger(min_interval_ms)||min_interval_ms<60000)throw new Error('min_interval_ms must be >= 60000');
+    const same=this.#items.map(x=>x.sample).filter(x=>x.company_id===safe.company_id&&x.version===safe.version);const last=same.at(-1);
+    if(last){const elapsed=Date.parse(safe.observed_at)-Date.parse(last.observed_at);if(elapsed<0)throw new Error('meta sample time moved backwards');if(elapsed<min_interval_ms)return Object.freeze({accepted:false,duplicate:false,not_due:true,sequence:same.length,sample_id:null});}
+    return this.append(safe);
+  }
   list({company_id,version,limit=100}={}){let xs=this.#items.map(x=>x.sample);if(company_id)xs=xs.filter(x=>x.company_id===company_id);if(version)xs=xs.filter(x=>x.version===version);return clone(xs.slice(-Math.max(1,Math.min(1000,limit))));}
   summarize({company_id,version,limit=100}={}){
     const samples=this.list({company_id,version,limit});const stage_metrics={};
