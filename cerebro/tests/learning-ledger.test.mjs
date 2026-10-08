@@ -20,7 +20,8 @@ test('ledger is local PREPROD only, zero-cost and not Supabase-backed',()=>{
   assert.equal(LEARNING_LEDGER_V0_CONTRACT.supabase_required,false);
   assert.equal(LEARNING_LEDGER_V0_CONTRACT.additional_cost_target_eur,0);
   assert.equal(LEARNING_LEDGER_V0_CONTRACT.prod_writes,false);
-  assert.match(LEARNING_LEDGER_V0_CONTRACT.duplicate_policy,/PRESERVES_FIRST_SEEN_RECORD/);
+  assert.match(LEARNING_LEDGER_V0_CONTRACT.duplicate_policy,/FIRST_SEEN_IMMUTABLE/);
+  assert.deepEqual(LEARNING_LEDGER_V0_CONTRACT.additive_provenance_fields,['signal_id','source_environment']);
 });
 
 test('ledger persists, restarts, scopes and deduplicates identical learning records',()=>{
@@ -50,6 +51,7 @@ test('same deterministic learning re-observed later is an idempotent semantic du
     assert.equal(later.accepted,false);
     assert.equal(later.duplicate,true);
     assert.equal(later.semantic_duplicate,true);
+    assert.deepEqual(later.compatibility_fields,['observed_at']);
     assert.equal(later.preserved_observed_at,'2026-10-08T12:00:00Z');
     assert.equal(later.record_hash,first.record_hash);
     assert.equal(ledger.operation_count,1);
@@ -57,7 +59,26 @@ test('same deterministic learning re-observed later is an idempotent semantic du
   }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });
 
-test('ledger still rejects genuine same-ID payload conflicts and never masks changed evidence or policy fields',()=>{
+test('legacy record accepts only additive signal/source-environment provenance while preserving immutable first-seen payload',()=>{
+  const {dir,file}=tempFile();
+  try{
+    const ledger=new LearningLedgerV0({file_path:file});
+    const first=ledger.persist(candidate());
+    const enriched=ledger.persist({...candidate(),observed_at:'2026-10-08T22:10:00Z',signal_id:'evt:source:1',source_environment:'PREPROD_CANDIDATE'});
+    assert.equal(enriched.accepted,false);
+    assert.equal(enriched.duplicate,true);
+    assert.equal(enriched.semantic_duplicate,true);
+    assert.deepEqual(enriched.compatibility_fields,['observed_at','signal_id','source_environment']);
+    assert.equal(enriched.record_hash,first.record_hash);
+    assert.equal(ledger.operation_count,1);
+    const stored=ledger.list()[0];
+    assert.equal(stored.observed_at,'2026-10-08T12:00:00Z');
+    assert.equal(Object.hasOwn(stored,'signal_id'),false);
+    assert.equal(Object.hasOwn(stored,'source_environment'),false);
+  }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
+
+test('ledger still rejects genuine same-ID payload conflicts and never masks changed evidence, policy, or existing provenance',()=>{
   const {dir,file}=tempFile();
   try{
     const ledger=new LearningLedgerV0({file_path:file});
@@ -67,5 +88,16 @@ test('ledger still rejects genuine same-ID payload conflicts and never masks cha
     assert.throws(()=>ledger.persist({...candidate(),observed_at:'2026-10-08T22:10:00Z',risk_class:'MEDIUM'}),/learning_id conflict/);
     assert.throws(()=>ledger.persist({...candidate(),learning_id:'x',persistent_publish_authorized:false}),/persistence authorization/);
     assert.throws(()=>ledger.persist({...candidate(),learning_id:'y',environment:'PROD'}),/exact PREPROD/);
+  }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
+
+test('once provenance exists it is immutable: later signal/environment changes fail closed',()=>{
+  const {dir,file}=tempFile();
+  try{
+    const ledger=new LearningLedgerV0({file_path:file});
+    const enriched={...candidate(),signal_id:'evt:source:1',source_environment:'PREPROD_CANDIDATE'};
+    ledger.persist(enriched);
+    assert.throws(()=>ledger.persist({...enriched,observed_at:'2026-10-08T22:10:00Z',signal_id:'evt:source:2'}),/learning_id conflict/);
+    assert.throws(()=>ledger.persist({...enriched,observed_at:'2026-10-08T22:10:00Z',source_environment:'LAB'}),/learning_id conflict/);
   }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });
