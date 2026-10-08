@@ -7,15 +7,19 @@ import {LearningLedgerV0} from '../runtime/learning-ledger.mjs';
 import {buildVersionedImprovementCandidate,ImprovementCandidateLedgerV0,materializeImprovementCandidates,IMPROVEMENT_CANDIDATE_FACTORY_V0_CONTRACT} from '../runtime/improvement-candidate-factory.mjs';
 
 function temp(){const dir=fs.mkdtempSync(path.join(os.tmpdir(),'cerebro-rsi-candidate-'));return {dir,learning:path.join(dir,'learning.v8'),candidates:path.join(dir,'candidates.v8')};}
-function learning({id='learn-preprod:1',company_id='fenix',engine_id='SEO-001',source_version='2.4.0',risk_class='LOW',confidence=0.85}={}){return {
-  learning_id:id,company_id,engine_id,environment:'PREPROD',version:'0.5.0',source_version,
-  source_event_ids:[`evt:${id}`],source_type:'ENGINE_ERROR',observed_at:'2026-10-08T21:45:00.000Z',
-  hypothesis:'Repeated timeout pattern should be reduced without weakening current contracts.',
-  expected_metric_delta:{name:'failure_rate',direction:'LOWER',measurement:'CONTROLLED_OLD_VS_NEW'},confidence,risk_class,
-  evidence_refs:[`evidence:${id}`],promotion_state:'CANDIDATE',created_by:'cap:universal-learning-ingress',reason:'ENGINE_ERROR',judge_decision:null,
-  persistent_publish_authorized:true,persistence_scope:'LOCAL_PREPROD_LRN_LEDGER_ONLY',rsi_publish_authorized:false,
-  prod_authorized:false,prod_write_authorized:false,trading_access:false
-};}
+function learning({id='learn-preprod:1',company_id='fenix',engine_id='SEO-001',source_version='2.4.0',risk_class='LOW',confidence=0.85}={}){
+  const record={
+    learning_id:id,company_id,engine_id,environment:'PREPROD',version:'0.5.0',
+    source_event_ids:[`evt:${id}`],source_type:'ENGINE_ERROR',observed_at:'2026-10-08T21:45:00.000Z',
+    hypothesis:'Repeated timeout pattern should be reduced without weakening current contracts.',
+    expected_metric_delta:{name:'failure_rate',direction:'LOWER',measurement:'CONTROLLED_OLD_VS_NEW'},confidence,risk_class,
+    evidence_refs:[`evidence:${id}`],promotion_state:'CANDIDATE',created_by:'cap:universal-learning-ingress',reason:'ENGINE_ERROR',judge_decision:null,
+    persistent_publish_authorized:true,persistence_scope:'LOCAL_PREPROD_LRN_LEDGER_ONLY',rsi_publish_authorized:false,
+    prod_authorized:false,prod_write_authorized:false,trading_access:false
+  };
+  if(source_version) record.source_version=source_version;
+  return record;
+}
 
 test('LOW/MEDIUM learning becomes deterministic versioned PREPROD improvement candidate',()=>{
   const first=buildVersionedImprovementCandidate(learning());
@@ -23,14 +27,29 @@ test('LOW/MEDIUM learning becomes deterministic versioned PREPROD improvement ca
   assert.equal(first.ok,true);assert.equal(second.ok,true);
   assert.equal(first.candidate.candidate_id,second.candidate.candidate_id);
   assert.equal(first.candidate.baseline_version,'2.4.0');
+  assert.equal(first.candidate.baseline_version_source,'SOURCE_EVIDENCE_VERSION');
+  assert.equal(first.candidate.baseline_verification_required,false);
   assert.match(first.candidate.candidate_version,/^2\.4\.0-rsi-cand\.[0-9a-f]{8}$/);
   assert.notEqual(first.candidate.baseline_version,first.candidate.candidate_version);
   assert.equal(first.candidate.next_gate,'OLD_VS_NEW_EXPERIMENT');
   assert.equal(first.candidate.experiment_contract.old_version,'2.4.0');
   assert.equal(first.candidate.experiment_contract.new_version,first.candidate.candidate_version);
+  assert.equal(first.candidate.experiment_contract.baseline_resolution_required,false);
   assert.equal(first.candidate.preservation_contract.preserve_existing,true);
   assert.equal(first.candidate.preservation_contract.contract_resolution_required,true);
   assert.equal(first.candidate.prod_authorized,false);assert.equal(first.candidate.prod_write_authorized,false);assert.equal(first.candidate.trading_access,false);assert.equal(first.candidate.additional_cost_eur,0);
+});
+
+test('legacy learning without source version stays usable but forces exact OLD contract resolution before experiment',()=>{
+  const legacy=buildVersionedImprovementCandidate(learning({id:'learn:legacy',source_version:null}));
+  assert.equal(legacy.ok,true);
+  assert.equal(legacy.candidate.baseline_version,'0.5.0');
+  assert.equal(legacy.candidate.baseline_version_source,'LEARNING_CONTEXT_VERSION_REQUIRES_OLD_CONTRACT_RESOLUTION');
+  assert.equal(legacy.candidate.baseline_verification_required,true);
+  assert.equal(legacy.candidate.experiment_contract.baseline_resolution_required,true);
+  assert.equal(legacy.candidate.preservation_contract.contract_resolution_required,true);
+  assert.equal(legacy.candidate.next_gate,'OLD_VS_NEW_EXPERIMENT');
+  assert.equal(legacy.candidate.prod_authorized,false);
 });
 
 test('HIGH/CRITICAL and LOW_CONFIDENCE remain canonical human exceptions',()=>{
