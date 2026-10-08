@@ -8,6 +8,8 @@ const ENGINE_ID='LRN-001';
 
 function reqString(value,label){if(typeof value!=='string'||!value.trim()) throw new Error(`${label} required`);return value.trim();}
 function sha256(text){return crypto.createHash('sha256').update(text,'utf8').digest('hex');}
+function legacyBufferSha256(text){return crypto.createHash('sha256').update(JSON.stringify(Buffer.from(text,'utf8'))).digest('hex');}
+function checksumMode(text,expected){if(sha256(text)===expected)return 'RAW_UTF8_SHA256';if(legacyBufferSha256(text)===expected)return 'LEGACY_BUFFER_JSON_SHA256';return null;}
 function ensureDir(dir){fs.mkdirSync(dir,{recursive:true});return dir;}
 function atomicText(file,text){ensureDir(path.dirname(file));const tmp=`${file}.tmp-${process.pid}-${crypto.randomBytes(4).toString('hex')}`;fs.writeFileSync(tmp,text,{encoding:'utf8',mode:0o600});fs.renameSync(tmp,file);}
 function safeName(value){return value.replace(/[^A-Za-z0-9._-]/g,'_');}
@@ -47,32 +49,36 @@ function validateBatch(batch,company_id,entry){
 
 export async function syncRemoteOutboxOnce({remote_outbox,company_id,inbox_dir,fetch_impl=globalThis.fetch}){
   const remote=normalizeRemoteOutboxConfig(remote_outbox);
-  if(!remote.enabled) return Object.freeze({status:'REMOTE_OUTBOX_DISABLED',downloaded_total:0,skipped_total:0,prod_authorized:false});
+  if(!remote.enabled) return Object.freeze({status:'REMOTE_OUTBOX_DISABLED',downloaded_total:0,skipped_total:0,legacy_checksum_total:0,prod_authorized:false});
   if(typeof fetch_impl!=='function') throw new Error('fetch implementation required');
   const company=reqString(company_id,'company_id');
   const inbox=path.resolve(reqString(inbox_dir,'inbox_dir'));
   ensureDir(inbox);
   const companyBase=`${remote.base_url}/${encodeURIComponent(company)}`;
   const indexText=await getText(`${companyBase}/index.json`,fetch_impl);
-  if(indexText===null) return Object.freeze({status:'REMOTE_OUTBOX_EMPTY',downloaded_total:0,skipped_total:0,prod_authorized:false});
+  if(indexText===null) return Object.freeze({status:'REMOTE_OUTBOX_EMPTY',downloaded_total:0,skipped_total:0,legacy_checksum_total:0,prod_authorized:false});
   const index=JSON.parse(indexText);validateIndex(index,company);
-  let downloaded=0,skipped=0;
+  let downloaded=0,skipped=0,legacy=0;
   for(const entry of [...index.batches].sort((a,b)=>String(a.batch_id).localeCompare(String(b.batch_id)))){
     validateEntry(entry);
     const localFile=path.join(inbox,`remote-${safeName(entry.batch_id)}.json`);
     if(fs.existsSync(localFile)){
       const existing=fs.readFileSync(localFile,'utf8');
-      if(sha256(existing)!==entry.sha256) throw new Error(`REMOTE_OUTBOX_LOCAL_CONFLICT: ${entry.batch_id}`);
+      const mode=checksumMode(existing,entry.sha256);
+      if(!mode) throw new Error(`REMOTE_OUTBOX_LOCAL_CONFLICT: ${entry.batch_id}`);
+      if(mode==='LEGACY_BUFFER_JSON_SHA256')legacy+=1;
       skipped+=1;continue;
     }
     const batchText=await getText(`${companyBase}/${entry.path}`,fetch_impl);
     if(batchText===null) throw new Error(`REMOTE_OUTBOX_BATCH_MISSING: ${entry.batch_id}`);
-    if(sha256(batchText)!==entry.sha256) throw new Error(`REMOTE_OUTBOX_CHECKSUM_MISMATCH: ${entry.batch_id}`);
+    const mode=checksumMode(batchText,entry.sha256);
+    if(!mode) throw new Error(`REMOTE_OUTBOX_CHECKSUM_MISMATCH: ${entry.batch_id}`);
+    if(mode==='LEGACY_BUFFER_JSON_SHA256')legacy+=1;
     const batch=JSON.parse(batchText);validateBatch(batch,company,entry);
     atomicText(localFile,batchText);
     downloaded+=1;
   }
-  return Object.freeze({status:'REMOTE_OUTBOX_GREEN',downloaded_total:downloaded,skipped_total:skipped,index_batches_total:index.batches.length,credentials_required:false,additional_cost_eur:0,prod_authorized:false,trading_access:false});
+  return Object.freeze({status:'REMOTE_OUTBOX_GREEN',downloaded_total:downloaded,skipped_total:skipped,legacy_checksum_total:legacy,index_batches_total:index.batches.length,credentials_required:false,additional_cost_eur:0,prod_authorized:false,trading_access:false});
 }
 
 function arg(name){const i=process.argv.indexOf(name);return i>=0?process.argv[i+1]:null;}

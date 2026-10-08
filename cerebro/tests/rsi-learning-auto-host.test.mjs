@@ -41,13 +41,13 @@ test('kill switch skips remote pull and performs zero new persistence',async()=>
   }finally{fs.rmSync(root,{recursive:true,force:true});}
 });
 
-test('remote transient failures fail soft twice then switch strategy on third identical failure',async()=>{
+test('remote transient failures are visible twice then switch strategy on third identical failure',async()=>{
   const root=temp();
   try{
     const cfg=config(root);const bad=async()=>{throw new Error('network-down');};
     for(let i=1;i<=2;i++){
       const result=await runAutoHostIteration({raw_config:cfg,fetch_impl:bad,now:()=>`2026-10-08T14:0${i}:00.000Z`});
-      assert.equal(result.remote_outbox.status,'REMOTE_OUTBOX_ERROR');assert.equal(result.remote_outbox.consecutive_same_error,i);
+      assert.equal(result.status,'PARTIAL_REMOTE_ERROR');assert.equal(result.remote_outbox.status,'REMOTE_OUTBOX_ERROR');assert.equal(result.remote_outbox.consecutive_same_error,i);
     }
     await assert.rejects(()=>runAutoHostIteration({raw_config:cfg,fetch_impl:bad,now:()=> '2026-10-08T14:03:00.000Z'}),/HOLD_REMOTE_OUTBOX_SAME_ERROR_FAMILY/);
   }finally{fs.rmSync(root,{recursive:true,force:true});}
