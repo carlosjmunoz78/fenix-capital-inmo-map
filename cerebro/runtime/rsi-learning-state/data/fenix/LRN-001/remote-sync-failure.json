@@ -1,6 +1,0 @@
-{
-  "fingerprint": "e675040fc62b8b474e909d6d",
-  "count": 1,
-  "last_error_at": "2026-10-08T18:22:32.606Z",
-  "message": "REMOTE_OUTBOX_CHECKSUM_MISMATCH: lrn-batch:b8b672b50c515262a7ac25c8"
-}
