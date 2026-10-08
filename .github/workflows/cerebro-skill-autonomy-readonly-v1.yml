@@ -5,17 +5,18 @@ on:
     branches: [main, cerebro/human-approval-email-v1-20261008]
     paths:
       - 'cerebro/governance/skill-autonomy-standing-authorization.v1.json'
+      - 'cerebro/governance/human-communication.mjs'
       - 'cerebro/skills/skill-autonomous-promotion-v1.mjs'
       - 'cerebro/communication/owner-approval-gate.mjs'
       - 'cerebro/tests/skill-autonomous-promotion-v1.test.mjs'
       - 'cerebro/tests/owner-approval-gate-v1.test.mjs'
       - '.github/workflows/cerebro-skill-autonomy-readonly-v1.yml'
   schedule:
-    - cron: '43 * * * *'
+    - cron: '5-55/10 * * * *'
   workflow_dispatch:
 
 concurrency:
-  group: cerebro-skill-autonomy-readonly-v1
+  group: cerebro-owner-communication-state-v1
   cancel-in-progress: false
 
 permissions:
@@ -130,7 +131,7 @@ jobs:
           const preprod=buildAutonomousPreprodContract(item,{source_run_id:Number(process.env.SOURCE_RUN_ID),authorization_source:authorizationSource});
           const main=JSON.parse(fs.readFileSync('artifacts/autonomy/main.json','utf8'));
           const canary=buildAutonomousReadonlyCanaryContract(item,{observed_main_sha:main.commit.sha,source_manifest_verified:true,authorization_source:authorizationSource});
-          const out=completeReadonlyAdvisoryPromotion(state,process.env.CANDIDATE_ID,{authorization:auth,owner_action:selection.owner_action??null,preprod,canary});
+          const out=completeReadonlyAdvisoryPromotion(state,process.env.CANDIDATE_ID,{authorization:auth,owner_action:selection.owner_action??null,learned_standing:selection.learned_standing??null,preprod,canary});
           fs.writeFileSync('artifacts/autonomy/preprod.json',JSON.stringify(preprod,null,2)+'\n');
           fs.writeFileSync('artifacts/autonomy/canary.json',JSON.stringify(canary,null,2)+'\n');
           fs.writeFileSync('artifacts/autonomy/state.after.json',JSON.stringify(out,null,2)+'\n');
