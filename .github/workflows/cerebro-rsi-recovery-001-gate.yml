@@ -1,0 +1,194 @@
+name: CEREBRO RSI Recovery 001 Gate
+
+on:
+  push:
+    paths:
+      - 'cerebro/runtime/continuous-improvement-contract.mjs'
+      - 'cerebro/runtime/continuous-improvement-scheduler.mjs'
+      - 'cerebro/runtime/learning-orchestrator.mjs'
+      - 'cerebro/runtime/learning-horizon-executor.mjs'
+      - 'cerebro/runtime/learning-pipeline.mjs'
+      - 'cerebro/runtime/learning-ledger.mjs'
+      - 'cerebro/runtime/learning-preprod-pipeline.mjs'
+      - 'cerebro/runtime/rsi-learning-worker.mjs'
+      - 'cerebro/runtime/rsi-learning-host.mjs'
+      - 'cerebro/runtime/rsi-learning-auto-host.mjs'
+      - 'cerebro/runtime/rsi-event-outbox.mjs'
+      - 'cerebro/runtime/rsi-outbox-client.mjs'
+      - 'cerebro/runtime/meta-observability-ledger.mjs'
+      - 'cerebro/runtime/meta-learning-runner.mjs'
+      - 'cerebro/runtime/hygiene-audit.mjs'
+      - 'cerebro/runtime/bounded-recovery-supervisor.mjs'
+      - 'cerebro/runtime/experiment-pipeline.mjs'
+      - 'cerebro/runtime/evaluation-tribunal.mjs'
+      - 'cerebro/runtime/promotion-pipeline.mjs'
+      - 'cerebro/runtime/meta-learning.mjs'
+      - 'cerebro/runtime/multi-company-learning.mjs'
+      - 'cerebro/runtime/factory-supervisor-improvement.mjs'
+      - 'cerebro/runtime/knowledge-obsolescence.mjs'
+      - 'cerebro/runtime/continuity-handoff.mjs'
+      - 'cerebro/runtime/rsi-observability-adapter.mjs'
+      - 'cerebro/registry/rsi-learning-subscribers.v0.json'
+      - 'cerebro/host/windows/*'
+      - 'cerebro/skills/skill-rsi-shadow-bridge.mjs'
+      - 'cerebro/tests/continuous-improvement-contract.test.mjs'
+      - 'cerebro/tests/continuous-improvement-scheduler.test.mjs'
+      - 'cerebro/tests/learning-orchestrator.test.mjs'
+      - 'cerebro/tests/learning-horizon-executor.test.mjs'
+      - 'cerebro/tests/learning-pipeline.test.mjs'
+      - 'cerebro/tests/learning-ledger.test.mjs'
+      - 'cerebro/tests/learning-preprod-pipeline.test.mjs'
+      - 'cerebro/tests/rsi-learning-worker.test.mjs'
+      - 'cerebro/tests/rsi-learning-host.test.mjs'
+      - 'cerebro/tests/rsi-learning-auto-host.test.mjs'
+      - 'cerebro/tests/rsi-event-outbox.test.mjs'
+      - 'cerebro/tests/rsi-outbox-client.test.mjs'
+      - 'cerebro/tests/rsi-outbox-publisher-workflow.test.mjs'
+      - 'cerebro/tests/rsi-hostless-control-plane-workflow.test.mjs'
+      - 'cerebro/tests/rsi-learning-windows-host.test.mjs'
+      - 'cerebro/tests/meta-observability-ledger.test.mjs'
+      - 'cerebro/tests/meta-learning-runner.test.mjs'
+      - 'cerebro/tests/hygiene-audit.test.mjs'
+      - 'cerebro/tests/bounded-recovery-supervisor.test.mjs'
+      - 'cerebro/tests/experiment-pipeline.test.mjs'
+      - 'cerebro/tests/evaluation-tribunal.test.mjs'
+      - 'cerebro/tests/promotion-pipeline.test.mjs'
+      - 'cerebro/tests/meta-learning.test.mjs'
+      - 'cerebro/tests/multi-company-learning.test.mjs'
+      - 'cerebro/tests/factory-supervisor-improvement.test.mjs'
+      - 'cerebro/tests/knowledge-obsolescence.test.mjs'
+      - 'cerebro/tests/continuity-handoff.test.mjs'
+      - 'cerebro/tests/rsi-observability-adapter.test.mjs'
+      - 'cerebro/tests/rsi-recovery-e2e.test.mjs'
+      - 'cerebro/tests/skill-rsi-shadow-bridge.test.mjs'
+      - 'cerebro/docs/RSI_RECOVERY_*.md'
+      - '.github/workflows/cerebro-rsi-learning-outbox-publisher-v0.yml'
+      - '.github/workflows/cerebro-rsi-learning-control-plane-v0.yml'
+      - '.github/workflows/cerebro-hygiene-audit-v0.yml'
+      - '.github/workflows/cerebro-rsi-recovery-001-gate.yml'
+  pull_request:
+    paths:
+      - 'cerebro/runtime/continuous-improvement-contract.mjs'
+      - 'cerebro/runtime/continuous-improvement-scheduler.mjs'
+      - 'cerebro/runtime/learning-orchestrator.mjs'
+      - 'cerebro/runtime/learning-horizon-executor.mjs'
+      - 'cerebro/runtime/learning-pipeline.mjs'
+      - 'cerebro/runtime/learning-ledger.mjs'
+      - 'cerebro/runtime/learning-preprod-pipeline.mjs'
+      - 'cerebro/runtime/rsi-learning-worker.mjs'
+      - 'cerebro/runtime/rsi-learning-host.mjs'
+      - 'cerebro/runtime/rsi-learning-auto-host.mjs'
+      - 'cerebro/runtime/rsi-event-outbox.mjs'
+      - 'cerebro/runtime/rsi-outbox-client.mjs'
+      - 'cerebro/runtime/meta-observability-ledger.mjs'
+      - 'cerebro/runtime/meta-learning-runner.mjs'
+      - 'cerebro/runtime/hygiene-audit.mjs'
+      - 'cerebro/runtime/bounded-recovery-supervisor.mjs'
+      - 'cerebro/runtime/experiment-pipeline.mjs'
+      - 'cerebro/runtime/evaluation-tribunal.mjs'
+      - 'cerebro/runtime/promotion-pipeline.mjs'
+      - 'cerebro/runtime/meta-learning.mjs'
+      - 'cerebro/runtime/multi-company-learning.mjs'
+      - 'cerebro/runtime/factory-supervisor-improvement.mjs'
+      - 'cerebro/runtime/knowledge-obsolescence.mjs'
+      - 'cerebro/runtime/continuity-handoff.mjs'
+      - 'cerebro/runtime/rsi-observability-adapter.mjs'
+      - 'cerebro/registry/rsi-learning-subscribers.v0.json'
+      - 'cerebro/host/windows/*'
+      - 'cerebro/skills/skill-rsi-shadow-bridge.mjs'
+      - 'cerebro/tests/continuous-improvement-contract.test.mjs'
+      - 'cerebro/tests/continuous-improvement-scheduler.test.mjs'
+      - 'cerebro/tests/learning-orchestrator.test.mjs'
+      - 'cerebro/tests/learning-horizon-executor.test.mjs'
+      - 'cerebro/tests/learning-pipeline.test.mjs'
+      - 'cerebro/tests/learning-ledger.test.mjs'
+      - 'cerebro/tests/learning-preprod-pipeline.test.mjs'
+      - 'cerebro/tests/rsi-learning-worker.test.mjs'
+      - 'cerebro/tests/rsi-learning-host.test.mjs'
+      - 'cerebro/tests/rsi-learning-auto-host.test.mjs'
+      - 'cerebro/tests/rsi-event-outbox.test.mjs'
+      - 'cerebro/tests/rsi-outbox-client.test.mjs'
+      - 'cerebro/tests/rsi-outbox-publisher-workflow.test.mjs'
+      - 'cerebro/tests/rsi-hostless-control-plane-workflow.test.mjs'
+      - 'cerebro/tests/rsi-learning-windows-host.test.mjs'
+      - 'cerebro/tests/meta-observability-ledger.test.mjs'
+      - 'cerebro/tests/meta-learning-runner.test.mjs'
+      - 'cerebro/tests/hygiene-audit.test.mjs'
+      - 'cerebro/tests/bounded-recovery-supervisor.test.mjs'
+      - 'cerebro/tests/experiment-pipeline.test.mjs'
+      - 'cerebro/tests/evaluation-tribunal.test.mjs'
+      - 'cerebro/tests/promotion-pipeline.test.mjs'
+      - 'cerebro/tests/meta-learning.test.mjs'
+      - 'cerebro/tests/multi-company-learning.test.mjs'
+      - 'cerebro/tests/factory-supervisor-improvement.test.mjs'
+      - 'cerebro/tests/knowledge-obsolescence.test.mjs'
+      - 'cerebro/tests/continuity-handoff.test.mjs'
+      - 'cerebro/tests/rsi-observability-adapter.test.mjs'
+      - 'cerebro/tests/rsi-recovery-e2e.test.mjs'
+      - 'cerebro/tests/skill-rsi-shadow-bridge.test.mjs'
+      - 'cerebro/docs/RSI_RECOVERY_*.md'
+      - '.github/workflows/cerebro-rsi-learning-outbox-publisher-v0.yml'
+      - '.github/workflows/cerebro-rsi-learning-control-plane-v0.yml'
+      - '.github/workflows/cerebro-hygiene-audit-v0.yml'
+      - '.github/workflows/cerebro-rsi-recovery-001-gate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rsi-recovery-001-runtime-slice:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Parse Windows host PowerShell assets
+        shell: pwsh
+        run: |
+          $failed = $false
+          Get-ChildItem 'cerebro/host/windows/*.ps1' | ForEach-Object {
+            $tokens = $null
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile($_.FullName, [ref]$tokens, [ref]$errors) | Out-Null
+            if ($errors.Count -gt 0) {
+              $failed = $true
+              Write-Error ("PowerShell parse error in {0}: {1}" -f $_.Name, (($errors | ForEach-Object { $_.Message }) -join '; '))
+            }
+          }
+          if ($failed) { exit 1 }
+      - name: Recovered RSI runtime, hostless control plane, HYG audit-only, bounded recovery, measured MetaLearn, horizon execution, autonomous scheduling, real event wiring, PREPROD persistence, host binding, governance and bridge regression tests
+        run: >-
+          node --test
+          cerebro/tests/continuous-improvement-contract.test.mjs
+          cerebro/tests/continuous-improvement-scheduler.test.mjs
+          cerebro/tests/learning-orchestrator.test.mjs
+          cerebro/tests/learning-horizon-executor.test.mjs
+          cerebro/tests/learning-pipeline.test.mjs
+          cerebro/tests/learning-ledger.test.mjs
+          cerebro/tests/learning-preprod-pipeline.test.mjs
+          cerebro/tests/rsi-learning-worker.test.mjs
+          cerebro/tests/rsi-learning-host.test.mjs
+          cerebro/tests/rsi-learning-auto-host.test.mjs
+          cerebro/tests/rsi-event-outbox.test.mjs
+          cerebro/tests/rsi-outbox-client.test.mjs
+          cerebro/tests/rsi-outbox-publisher-workflow.test.mjs
+          cerebro/tests/rsi-hostless-control-plane-workflow.test.mjs
+          cerebro/tests/rsi-learning-windows-host.test.mjs
+          cerebro/tests/meta-observability-ledger.test.mjs
+          cerebro/tests/meta-learning-runner.test.mjs
+          cerebro/tests/hygiene-audit.test.mjs
+          cerebro/tests/bounded-recovery-supervisor.test.mjs
+          cerebro/tests/experiment-pipeline.test.mjs
+          cerebro/tests/evaluation-tribunal.test.mjs
+          cerebro/tests/promotion-pipeline.test.mjs
+          cerebro/tests/meta-learning.test.mjs
+          cerebro/tests/multi-company-learning.test.mjs
+          cerebro/tests/factory-supervisor-improvement.test.mjs
+          cerebro/tests/knowledge-obsolescence.test.mjs
+          cerebro/tests/continuity-handoff.test.mjs
+          cerebro/tests/rsi-observability-adapter.test.mjs
+          cerebro/tests/rsi-recovery-e2e.test.mjs
+          cerebro/tests/skill-rsi-shadow-bridge.test.mjs

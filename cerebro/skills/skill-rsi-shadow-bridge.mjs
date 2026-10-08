@@ -2,18 +2,17 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {EventBus} from '../runtime/runtime.mjs';
+import {RSI_RECOVERY_SOURCE,validateLearningRecord} from '../runtime/continuous-improvement-contract.mjs';
 
 const RSI_COMPATIBILITY_TARGET=Object.freeze({
   pull_request:416,
   branch:'cerebro-rsi-continuous-improvement-loop-v0-20260919',
   head_sha:'a79d51dccb794ab0718d6959554185bfab3ca0b4',
-  contract_path:'cerebro/runtime/continuous-improvement-contract.mjs',
-  contract_blob_sha:'ba0021a2801cd550cc5cf7d9bbb34b31d550d378'
+  historical_contract_path:'cerebro/runtime/continuous-improvement-contract.mjs',
+  historical_contract_blob_sha:'ba0021a2801cd550cc5cf7d9bbb34b31d550d378',
+  recovered_contract_source:RSI_RECOVERY_SOURCE,
+  validator_mode:'CANONICAL_RECOVERED_CONTRACT'
 });
-
-const ALLOWED_RISK=new Set(['LOW','MEDIUM','HIGH','CRITICAL']);
-const ALLOWED_PROMOTION=new Set(['CANDIDATE','SHADOW','PREPROD','CANARY','ACTIVE','REJECTED','ROLLED_BACK']);
-const ALLOWED_ENV=new Set(['LAB','PREPROD','PROD']);
 
 function stableId(prefix,value){return `${prefix}:${createHash('sha256').update(JSON.stringify(value)).digest('hex').slice(0,24)}`;}
 function evidenceRefs(event){
@@ -57,20 +56,11 @@ function hypothesisFor(event){
 }
 
 export function validateRsiCompatibleLearningRecord(record){
-  const required=['learning_id','company_id','engine_id','environment','version','source_event_ids','source_type','observed_at','hypothesis','expected_metric_delta','confidence','risk_class','evidence_refs','promotion_state','created_by','reason'];
-  const errors=[];
-  for(const key of required) if(record?.[key]===undefined||record?.[key]===null||record?.[key]==='') errors.push(`missing:${key}`);
-  if(!ALLOWED_ENV.has(record?.environment)) errors.push('invalid:environment');
-  if(!ALLOWED_RISK.has(record?.risk_class)) errors.push('invalid:risk_class');
-  if(!ALLOWED_PROMOTION.has(record?.promotion_state)) errors.push('invalid:promotion_state');
-  if(!Array.isArray(record?.source_event_ids)||record.source_event_ids.length===0) errors.push('invalid:source_event_ids');
-  if(!Array.isArray(record?.evidence_refs)||record.evidence_refs.length===0) errors.push('invalid:evidence_refs');
-  if(typeof record?.confidence!=='number'||record.confidence<0||record.confidence>1) errors.push('invalid:confidence');
-  return {ok:errors.length===0,errors};
+  return validateLearningRecord(record);
 }
 
 function toLearningRecord(event,runtimeEvent,{observedAt}){
-  const record={
+  return {
     learning_id:stableId('learn',[event.event_id,event.candidate_id,event.event_type]),
     company_id:event.company_id||'GLOBAL_ONLY',
     engine_id:event.engine_id||'FACT-001',
@@ -92,7 +82,6 @@ function toLearningRecord(event,runtimeEvent,{observedAt}){
     source_event_type:event.event_type,
     judge_decision:null
   };
-  return record;
 }
 
 export function buildRsiShadowBridge(eventReport,{observedAt=new Date().toISOString(),eventBus=new EventBus()}={}){
@@ -118,10 +107,10 @@ export function buildRsiShadowBridge(eventReport,{observedAt=new Date().toISOStr
     else validationErrors.push({proposal_event_id:proposal.event_id,errors:check.errors});
   }
   return Object.freeze({
-    schema_version:'0.1.0',
+    schema_version:'0.2.0',
     execution_mode:'SHADOW_IN_MEMORY_ONLY',
     compatibility_target:RSI_COMPATIBILITY_TARGET,
-    runtime_contract:'RUNTIME-001/EventBus main',
+    runtime_contract:'RUNTIME-001/EventBus main + recovered continuous-improvement-contract',
     source_events_total:eventReport?.events?.length??0,
     runtime_events_accepted:runtimeEvents.filter(x=>x.accepted).length,
     runtime_duplicates:runtimeEvents.filter(x=>x.duplicate).length,
@@ -131,6 +120,7 @@ export function buildRsiShadowBridge(eventReport,{observedAt=new Date().toISOStr
     persistent_publish_authorized:false,
     rsi_publish_authorized:false,
     prod_authorized:false,
+    prod_write_authorized:false,
     permissions_elevated:false,
     budget_elevated:false,
     runtime_events:runtimeEvents,

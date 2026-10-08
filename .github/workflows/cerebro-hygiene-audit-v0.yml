@@ -1,0 +1,85 @@
+name: CEREBRO HYG-001 Audit V0
+
+on:
+  schedule:
+    - cron: '30 5 * * 1'
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/cerebro-hygiene-audit-v0.yml'
+      - 'cerebro/runtime/hygiene-audit.mjs'
+      - 'cerebro/tests/hygiene-audit.test.mjs'
+
+permissions:
+  contents: read
+  pull-requests: read
+
+env:
+  HYG_ENGINE_ID: HYG-001
+  HYG_ENVIRONMENT: AUDIT_ONLY
+
+jobs:
+  contract-test:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Validate HYG-001 audit-only contract
+        run: node --test cerebro/tests/hygiene-audit.test.mjs
+
+  repository-audit:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Collect read-only branch and open PR evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/hyg
+          gh api --paginate "repos/$GITHUB_REPOSITORY/branches?per_page=100" --jq '.[]' | jq -s '.' > artifacts/hyg/branches.json
+          gh api --paginate "repos/$GITHUB_REPOSITORY/pulls?state=open&per_page=100" --jq '.[]' | jq -s '.' > artifacts/hyg/open-prs.json
+
+      - name: Build HYG-001 audit report
+        run: |
+          set -euo pipefail
+          node cerebro/runtime/hygiene-audit.mjs \
+            --branches artifacts/hyg/branches.json \
+            --open-prs artifacts/hyg/open-prs.json \
+            --output artifacts/hyg/hyg-001-report.json
+          jq -e '.engine_id == "HYG-001" and .environment == "AUDIT_ONLY" and .destructive_changes_performed == 0 and .delete_authorized == false and .mutation_authorized == false and .prod_authorized == false and .trading_access == false' artifacts/hyg/hyg-001-report.json >/dev/null
+
+      - name: Publish concise audit summary
+        run: |
+          set -euo pipefail
+          {
+            echo '## CEREBRO HYG-001 · AUDIT_ONLY'
+            echo
+            echo "Branches audited: $(jq -r '.branches_total' artifacts/hyg/hyg-001-report.json)"
+            echo "Snapshot candidates: $(jq -r '.classification_counts.SNAPSHOT_CANDIDATE // 0' artifacts/hyg/hyg-001-report.json)"
+            echo "Duplicate-head groups: $(jq -r '.duplicate_head_groups | length' artifacts/hyg/hyg-001-report.json)"
+            echo 'Destructive changes: 0'
+            echo 'Deletion authority: false'
+            echo
+            echo '### Review candidates'
+            jq -r '.branches[] | select(.classification == "SNAPSHOT_CANDIDATE" or (.reasons | index("DUPLICATE_HEAD"))) | "- `\(.branch)` · \(.classification) · \(.recommended_action)"' artifacts/hyg/hyg-001-report.json
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload immutable audit evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-hyg-001-${{ github.run_id }}
+          path: artifacts/hyg/
+          retention-days: 30
+          if-no-files-found: error

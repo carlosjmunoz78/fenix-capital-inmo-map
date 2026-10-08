@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_RSI_LEARNING_SUBSCRIBERS",
+  "environment": "PREPROD",
+  "engine_id": "LRN-001",
+  "additional_cost_eur": 0,
+  "prod_authorized": false,
+  "trading_access": false,
+  "default_subscription_state": "DISABLED",
+  "subscribers": [
+    {
+      "company_id": "fenix",
+      "enabled": true,
+      "environment": "PREPROD",
+      "version": "0.5.0",
+      "source_scope": "GLOBAL_SKILL_SUPPLY_CHAIN_ONLY",
+      "local_validation_required": true,
+      "local_persistence_scope": "LOCAL_PREPROD_LRN_LEDGER_ONLY",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false
+    }
+  ]
+}

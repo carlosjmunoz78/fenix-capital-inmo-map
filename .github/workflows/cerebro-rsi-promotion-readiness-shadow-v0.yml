@@ -1,0 +1,170 @@
+name: CEREBRO RSI Promotion Readiness Shadow V0
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'cerebro/**'
+      - '.github/workflows/cerebro-rsi-*.yml'
+      - '.github/workflows/cerebro-hygiene-audit-v0.yml'
+      - '.github/workflows/cerebro-rsi-promotion-readiness-shadow-v0.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-rsi-promotion-readiness-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: true
+
+env:
+  EXACT_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+
+jobs:
+  factory-preprod-shadow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.EXACT_HEAD }}
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Assert exact PR head checkout
+        run: test "$(git rev-parse HEAD)" = "$EXACT_HEAD"
+      - name: Validate canonical engine registry
+        working-directory: cerebro
+        run: npm run validate
+      - name: Test FACT-001 and GOV-001 contracts
+        working-directory: cerebro
+        run: npm test
+      - name: Generate all engine skeletons
+        working-directory: cerebro
+        run: npm run generate -- --out /tmp/cerebro-generated
+      - name: Assert canonical engine count and no repo mutation
+        run: |
+          set -euo pipefail
+          EXPECTED_COUNT="$(node -e "const x=require('./cerebro/registry/engine-registry.seed.json'); console.log(Array.isArray(x)?x.length:(x.engines?.length ?? x.engine_count ?? x.count ?? ''))")"
+          GENERATED_COUNT="$(node -e "const x=require('/tmp/cerebro-generated/skeleton-index.json'); console.log(x.engine_count)")"
+          test -n "$EXPECTED_COUNT"
+          test "$GENERATED_COUNT" = "$EXPECTED_COUNT"
+          git diff --exit-code
+      - name: Mark equivalence boundary
+        run: echo 'This job executes the validation body of CEREBRO Factory PREPROD on the exact PR head; it does not claim the named manual gate ran.' >> "$GITHUB_STEP_SUMMARY"
+
+  app-surface-isolation-shadow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      VITE_FENIX_ENV: preprod
+      VITE_SUPABASE_URL: https://hnqlnvakzaywtafeiybt.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_uvtiidkBBkFRt2K34so27g_JpCbMUZw
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.EXACT_HEAD }}
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Assert exact PR head checkout
+        run: test "$(git rev-parse HEAD)" = "$EXACT_HEAD"
+      - name: Assert zero App and App-test surface drift
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -n "${PR_BASE_SHA:-}" ]; then
+            git fetch origin "$PR_BASE_SHA" --depth=1
+            base="$PR_BASE_SHA"
+          else
+            git fetch origin main --depth=1
+            base="$(git rev-parse FETCH_HEAD)"
+          fi
+          changed="$(git diff --name-only "$base" HEAD)"
+          protected='^(src/|tests/|supabase/|public/|scripts/|index\.html$|package(-lock)?\.json$|playwright\.config\.(ts|js)$|vite\.config\.(ts|js)$|tsconfig[^/]*\.json$|\.env|\.github/workflows/(preprod-build|app-restoration-build|prod-[^/]+)\.yml$)'
+          if printf '%s\n' "$changed" | grep -Eq "$protected"; then
+            echo 'RSI CEREBRO-only scope invalidated: App/App-test/build/deploy surface changed.' >&2
+            printf '%s\n' "$changed" >&2
+            exit 1
+          fi
+          echo 'No App, App-test, Supabase, App build config or App/PROD workflow drift in this PR.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Install dependencies reproducibly
+        run: |
+          set -euo pipefail
+          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+      - name: Build exact head
+        run: npm run build
+      - name: PRE-PROD Ana CORS smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          headers="$(mktemp)"
+          status="$(curl --silent --show-error --output /dev/null --dump-header "$headers" --write-out '%{http_code}' --max-time 20 \
+            -X OPTIONS \
+            -H 'Origin: https://carlosjmunoz78.github.io' \
+            -H 'Access-Control-Request-Method: GET' \
+            -H 'Access-Control-Request-Headers: authorization,apikey' \
+            'https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/fenix-ana-api-test/capabilities')"
+          test "$status" = "204"
+          grep -qi '^access-control-allow-origin:' "$headers"
+      - name: Archive exact-head build evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: rsi-promotion-readiness-build-${{ env.EXACT_HEAD }}
+          path: dist
+          if-no-files-found: error
+          retention-days: 7
+      - name: Mark App gate boundary
+        run: |
+          echo 'This job proves zero App/App-test drift plus exact-head build and existing PREPROD CORS smoke.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'It does NOT claim PRE-PROD App Build GREEN or reactivate the cancelled App PRE-PROD channel.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Legacy Browser QA debt on unchanged surfaces is recorded in RSI_RECOVERY_010_PROMOTION_READINESS.md.' >> "$GITHUB_STEP_SUMMARY"
+
+  tribunal-shadow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.EXACT_HEAD }}
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Assert exact PR head checkout
+        run: test "$(git rev-parse HEAD)" = "$EXACT_HEAD"
+      - name: Independent-evaluation and promotion safety contracts
+        run: >-
+          node --test
+          cerebro/tests/evaluation-tribunal.test.mjs
+          cerebro/tests/experiment-pipeline.test.mjs
+          cerebro/tests/promotion-pipeline.test.mjs
+          cerebro/tests/rsi-recovery-e2e.test.mjs
+          cerebro/tests/bounded-recovery-supervisor.test.mjs
+      - name: Assert PR remains CEREBRO-only and outside production deployment surfaces
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -n "${PR_BASE_SHA:-}" ]; then
+            git fetch origin "$PR_BASE_SHA" --depth=1
+            base="$PR_BASE_SHA"
+          else
+            git fetch origin main --depth=1
+            base="$(git rev-parse FETCH_HEAD)"
+          fi
+          changed="$(git diff --name-only "$base" HEAD)"
+          protected='^(src/|tests/|supabase/|public/|scripts/|index\.html$|package(-lock)?\.json$|playwright\.config\.(ts|js)$|vite\.config\.(ts|js)$|tsconfig[^/]*\.json$|\.env|\.github/workflows/(preprod-build|app-restoration-build|prod-[^/]+)\.yml$)'
+          if printf '%s\n' "$changed" | grep -Eq "$protected"; then
+            echo 'Unexpected App/application/test/production surface changed by RSI recovery.' >&2
+            printf '%s\n' "$changed" >&2
+            exit 1
+          fi
+          echo 'RSI recovery remains additive to cerebro/** and dedicated non-PROD workflows.' >> "$GITHUB_STEP_SUMMARY"
