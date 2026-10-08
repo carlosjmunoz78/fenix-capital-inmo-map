@@ -24,6 +24,15 @@ test('Windows binding uses native AtStartup SYSTEM scheduling and immutable copi
   assert.match(installer,/prod_authorized = \$false/);
 });
 
+test('Windows binding schedules autonomous outbox-aware host with zero credentials and dedicated PREPROD state branch',()=>{
+  assert.match(installer,/rsi-learning-auto-host\.mjs/);
+  assert.match(installer,/rsi-outbox-client\.mjs/);
+  assert.match(installer,/cerebro-rsi-learning-outbox-v0/);
+  assert.match(installer,/credentials_required = \$false/);
+  assert.match(installer,/remote_outbox_enabled = \$true/);
+  assert.doesNotMatch(installer,/GITHUB_TOKEN|API_KEY|Authorization:/i);
+});
+
 test('reinstall is preservation-first and cannot overwrite host code silently',()=>{
   assert.match(installer,/ForceReinstall/);
   assert.match(installer,/preservationSnapshot/);
