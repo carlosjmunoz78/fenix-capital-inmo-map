@@ -23,6 +23,20 @@
       "notes": "Knowledge/training surfaces are evidence candidates only."
     },
     {
+      "engine_id": "LRN-001",
+      "binding_state": "AUTOMATIC_PREPROD_VERIFIED",
+      "evidence_refs": [
+        "cerebro/docs/RSI_RECOVERY_011_POSTMERGE_AUTONOMY_ACCEPTANCE.md",
+        ".github/workflows/cerebro-rsi-learning-control-plane-v0.yml",
+        ".github/workflows/cerebro-rsi-learning-outbox-publisher-v0.yml",
+        "cerebro/registry/rsi-learning-subscribers.v0.json",
+        "cerebro/runtime/rsi-learning-auto-host.mjs",
+        "cerebro/runtime/rsi-event-outbox.mjs",
+        "cerebro/runtime/rsi-outbox-client.mjs"
+      ],
+      "notes": "Real post-merge PREPROD path verified twice: first run ingested one real Skill Factory batch and persisted 15 learnings; second run recognized the receipt and persisted zero duplicates. Hostless core; PROD and Trading remain HOLD."
+    },
+    {
       "engine_id": "APP-001",
       "binding_state": "DISCOVERED_READ_ONLY",
       "evidence_refs": ["src/App.tsx", "tests", ".github/workflows/preprod-build.yml", ".github/workflows/prod-runtime-smoke.yml"],
