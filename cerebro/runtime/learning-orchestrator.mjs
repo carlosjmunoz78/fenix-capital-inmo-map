@@ -13,6 +13,17 @@ function atomicJson(file,value){ensureDir(path.dirname(file));const tmp=`${file}
 function readJson(file){return JSON.parse(fs.readFileSync(file,'utf8'));}
 function iso(value){const d=new Date(value);if(Number.isNaN(d.getTime()))throw new Error('invalid now');return d.toISOString();}
 function safeKey(value){return value.replace(/[^A-Za-z0-9._-]/g,'_');}
+function horizonBucket(cadence,current){
+  const d=new Date(current);
+  if(cadence===CADENCES.DAILY)return d.toISOString().slice(0,10);
+  if(cadence===CADENCES.MONTHLY)return d.toISOString().slice(0,7);
+  if(cadence===CADENCES.WEEKLY){
+    const utcMidnight=Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate());
+    const day=(d.getUTCDay()+6)%7;
+    return new Date(utcMidnight-day*86400000).toISOString().slice(0,10);
+  }
+  throw new Error('unsupported horizon cadence');
+}
 
 export function initialOrchestratorState({company_id,version}){
   return Object.freeze({schema_version:'1.0.0',state_type:'CEREBRO_LRN_ORCHESTRATOR_STATE',company_id:reqString(company_id,'company_id'),engine_id:ENGINE_ID,environment:PREPROD,version:reqString(version,'version'),last_success:{DAILY:null,WEEKLY:null,MONTHLY:null},plans_emitted:0,additional_cost_eur:0,prod_authorized:false,prod_write_authorized:false,trading_access:false});
@@ -30,10 +41,15 @@ export function planLearningHorizons({company_id,version,now,state}){
   const tasks={DAILY:'LEARNING_METRICS_AND_FAILURE_SCAN',WEEKLY:'METALEARN_BOTTLENECK_AND_SUPERVISOR_SCAN',MONTHLY:'KNOWLEDGE_OBSOLESCENCE_AND_POLICY_REVIEW'};
   for(const cadence of HORIZONS){
     if(!shouldRunHorizon({cadence,last_run_at:valid.last_success[cadence],now:current}))continue;
-    const cycle=createCyclePlan({company_id,engine_id:ENGINE_ID,environment:PREPROD,version,cadence,now:current,checkpoint:{task:tasks[cadence],state_plans_emitted:valid.plans_emitted},max_attempts:3,budget_eur:0});
-    due.push(Object.freeze({...cycle,task:tasks[cadence],execution_authority:'PREPROD_PLAN_ONLY'}));
+    const bucket=horizonBucket(cadence,current);
+    const cycle=createCyclePlan({company_id,engine_id:ENGINE_ID,environment:PREPROD,version,cadence,now:current,checkpoint:{task:tasks[cadence],horizon_bucket:bucket},max_attempts:3,budget_eur:0});
+    due.push(Object.freeze({...cycle,horizon_bucket:bucket,task:tasks[cadence],execution_authority:'PREPROD_PLAN_ONLY'}));
   }
   return Object.freeze({schema_version:'1.0.0',company_id,engine_id:ENGINE_ID,environment:PREPROD,version,planned_at:current,due_total:due.length,due:Object.freeze(due),event_path:'DIRECT_OUTBOX_TO_LRN',additional_cost_eur:0,prod_authorized:false,prod_write_authorized:false,trading_access:false});
+}
+
+function sameImmutablePlan(existing,plan){
+  return existing?.lock_key===plan.lock_key&&existing?.company_id===plan.company_id&&existing?.engine_id===plan.engine_id&&existing?.environment===plan.environment&&existing?.version===plan.version&&existing?.cadence===plan.cadence&&existing?.horizon_bucket===plan.horizon_bucket&&existing?.task===plan.task&&existing?.prod_authorized===false&&existing?.trading_access===false;
 }
 
 export function persistDueLearningPlans({state_file,plans_dir,company_id,version,now}){
@@ -45,12 +61,12 @@ export function persistDueLearningPlans({state_file,plans_dir,company_id,version
   let created=0;
   for(const plan of planned.due){
     const file=path.join(plansRoot,`${safeKey(plan.lock_key)}.json`);
-    const text=`${JSON.stringify(plan,null,2)}\n`;
     if(fs.existsSync(file)){
-      if(fs.readFileSync(file,'utf8')!==text)throw new Error(`ORCHESTRATOR_PLAN_CONFLICT: ${plan.lock_key}`);
+      const existing=readJson(file);
+      if(!sameImmutablePlan(existing,plan))throw new Error(`ORCHESTRATOR_PLAN_CONFLICT: ${plan.lock_key}`);
       continue;
     }
-    fs.writeFileSync(file,text,{encoding:'utf8',mode:0o600,flag:'wx'});created+=1;
+    fs.writeFileSync(file,`${JSON.stringify(plan,null,2)}\n`,{encoding:'utf8',mode:0o600,flag:'wx'});created+=1;
   }
   const next={...state,plans_emitted:Number(state.plans_emitted??0)+created,last_planned_at:planned.planned_at,additional_cost_eur:0,prod_authorized:false,prod_write_authorized:false,trading_access:false};
   atomicJson(statePath,next);
