@@ -1,0 +1,137 @@
+name: CEREBRO RSI Promotion Readiness Shadow V0
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'cerebro/**'
+      - '.github/workflows/cerebro-rsi-*.yml'
+      - '.github/workflows/cerebro-hygiene-audit-v0.yml'
+      - '.github/workflows/cerebro-rsi-promotion-readiness-shadow-v0.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-rsi-promotion-readiness-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  factory-preprod-shadow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Validate canonical engine registry
+        working-directory: cerebro
+        run: npm run validate
+      - name: Test FACT-001 and GOV-001 contracts
+        working-directory: cerebro
+        run: npm test
+      - name: Generate all engine skeletons
+        working-directory: cerebro
+        run: npm run generate -- --out /tmp/cerebro-generated
+      - name: Assert canonical engine count and no repo mutation
+        run: |
+          set -euo pipefail
+          EXPECTED_COUNT="$(node -e "const x=require('./cerebro/registry/engine-registry.seed.json'); console.log(Array.isArray(x)?x.length:(x.engines?.length ?? x.engine_count ?? ''))")"
+          GENERATED_COUNT="$(node -e "const x=require('/tmp/cerebro-generated/skeleton-index.json'); console.log(x.engine_count)")"
+          test -n "$EXPECTED_COUNT"
+          test "$GENERATED_COUNT" = "$EXPECTED_COUNT"
+          git diff --exit-code
+      - name: Mark equivalence boundary
+        run: |
+          echo 'SHADOW_EQUIVALENCE_ONLY=true' >> "$GITHUB_ENV"
+          echo 'This job executes the validation body of CEREBRO Factory PREPROD on the exact PR head; it does not claim the named manual gate ran.' >> "$GITHUB_STEP_SUMMARY"
+
+  app-preprod-build-shadow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      VITE_FENIX_ENV: preprod
+      VITE_SUPABASE_URL: https://hnqlnvakzaywtafeiybt.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_uvtiidkBBkFRt2K34so27g_JpCbMUZw
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install dependencies reproducibly
+        run: |
+          set -euo pipefail
+          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+      - name: Dependency versions
+        run: npm list --depth=0
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - name: Install Chromium browser
+        run: npx playwright install chromium
+        timeout-minutes: 5
+      - name: Build
+        run: npm run build
+      - name: Browser QA
+        env:
+          PLAYWRIGHT_SKIP_BUILD: '1'
+        run: npm run test:e2e
+      - name: PRE-PROD Ana CORS smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          headers="$(mktemp)"
+          status="$(curl --silent --show-error --output /dev/null --dump-header "$headers" --write-out '%{http_code}' --max-time 20 \
+            -X OPTIONS \
+            -H 'Origin: https://carlosjmunoz78.github.io' \
+            -H 'Access-Control-Request-Method: GET' \
+            -H 'Access-Control-Request-Headers: authorization,apikey' \
+            'https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/fenix-ana-api-test/capabilities')"
+          test "$status" = "204"
+          grep -qi '^access-control-allow-origin:' "$headers"
+      - name: Archive PREPROD build evidence only
+        uses: actions/upload-artifact@v4
+        with:
+          name: rsi-promotion-readiness-preprod-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            dist
+            playwright-report
+          if-no-files-found: warn
+          retention-days: 7
+      - name: Mark equivalence boundary
+        run: echo 'This job executes the non-publishing validation body of PRE-PROD App Build on the exact PR head; it does not reactivate or publish the cancelled App PRE-PROD channel.' >> "$GITHUB_STEP_SUMMARY"
+
+  tribunal-shadow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Independent-evaluation and promotion safety contracts
+        run: >-
+          node --test
+          cerebro/tests/evaluation-tribunal.test.mjs
+          cerebro/tests/experiment-pipeline.test.mjs
+          cerebro/tests/promotion-pipeline.test.mjs
+          cerebro/tests/rsi-recovery-e2e.test.mjs
+          cerebro/tests/bounded-recovery-supervisor.test.mjs
+      - name: Assert PR changes remain outside application and production deployment surfaces
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin "${{ github.event.pull_request.base.sha }}" --depth=1
+          changed="$(git diff --name-only "${{ github.event.pull_request.base.sha }}"...HEAD)"
+          if echo "$changed" | grep -Eq '^(src/|supabase/|public/|index.html$|package.json$|package-lock.json$|\.github/workflows/prod-)'; then
+            echo 'Unexpected application/production surface changed by RSI recovery.' >&2
+            echo "$changed" >&2
+            exit 1
+          fi
+          echo 'RSI recovery remains additive to cerebro/** and dedicated non-PROD workflows.' >> "$GITHUB_STEP_SUMMARY"
