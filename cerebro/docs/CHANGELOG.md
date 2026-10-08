@@ -1,16 +1,17 @@
 # CEREBRO OS · CHANGELOG
 
-## 2026-10-08 · COMP-ONB-001 Structural Onboarding V0 candidate
+## 2026-10-08 · COMP-ONB-001 Structural Onboarding V0 accepted
 
 - Added an additive multi-company structural adapter that composes the existing Phase 4 dependency graph with verified FACT-001 AutoFactory; no new canonical engine ID is introduced.
-- A bounded new-company structural request now prepares the 17 canonical Phase 4 engine scaffolds in tenant-scoped evidence while preserving the generic 18-file FACT scaffold bytes.
-- Expected structural output is 17 engines × 18 canonical files = 306 files.
-- Structural generation is explicitly forbidden from marking business engines GREEN; after registration the existing READY/BLOCKED Phase 4 state remains authoritative until real PREPROD execution evidence exists.
-- Added hostless GitHub automation for push self-check, explicit dispatch and future `repository_dispatch: cerebro_new_company_scaffold`, with repository `contents: read` only.
-- PREPROD adapter / SCAFFOLD sub-generation only; cost 0; PROD/PROD-write/Trading/Supabase-write/external-code authority false.
-- Small optional structural profile metadata is fingerprinted rather than persisted in result evidence; credential/secret/bank-like fields fail closed to `SECURITY_INCIDENT`.
-- Autonomy overlay records `AUTOMATIC_COMPANY_SCAFFOLD_SOFTWARE_READY_LIVE_ACCEPTANCE_PENDING`; no automatic/live claim will be made until exact-head gates, merge, automatic main run and deterministic rerun succeed.
-- Real scanning, keyword research, SEO, social/local audit, marketing, knowledge, CRM, App, automations, Training, TENANT activation and PROD remain downstream and are not claimed by this candidate.
+- A bounded new-company structural request prepares the 17 canonical Phase 4 engine scaffolds in tenant-scoped evidence while preserving the generic 18-file FACT scaffold bytes: 17 × 18 = 306 files.
+- PR #509 merged additively to `main` as `cb46c0c95b4e628608990404e4c1ac38e889b79e` after exact-head promotion/readiness gates passed.
+- Automatic `main` push run `37833181826` attempt 1 completed SUCCESS; deterministic attempt 2 also completed SUCCESS against the same immutable source/request.
+- Both attempts ran 643 CEREBRO regression tests with 643 passed / 0 failed and produced the same structural aggregate SHA-256 `295be8b701fe80ea57b034e882da1698def79a97502b9831e9453871c7fc1ed6`.
+- Both attempts produced `STRUCTURAL_BOOTSTRAP_GREEN`, 17 Phase 4 engines and 306 structural files, while preserving zero business engines GREEN from scaffold generation.
+- COMP-ONB-001 autonomy state is promoted to `AUTOMATIC_COMPANY_SCAFFOLD_VERIFIED` for structural PREPROD/SCAFFOLD generation only.
+- Workflow remains hostless and repository read-only; cost 0; PROD/PROD-write/Trading/Supabase-write/external-code authority false.
+- `ACTGW-001 → cerebro_new_company_scaffold` remains DEFINED / POR AUDITAR LIVE. Real `COMP-REG-001 + TENANT-001` PREPROD execution is the next gate.
+- Real scanning, keyword research, SEO, social/local audit, marketing, knowledge, CRM, App, automations, Training, TENANT activation and PROD remain downstream and are not claimed by this acceptance.
 
 ## 2026-10-08 · FACT-001 AutoFactory V0 accepted
 

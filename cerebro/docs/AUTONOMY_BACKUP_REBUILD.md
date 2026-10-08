@@ -5,6 +5,7 @@
 ### HECHO structural/reference
 - FACT-001 / GOV-001.
 - FACT-001 AutoFactory V0 is `AUTOMATIC_SCAFFOLD_VERIFIED` for bounded canonical SCAFFOLD requests, backed by live push run `37830400943` and deterministic rerun evidence.
+- COMP-ONB-001 structural onboarding V0 is `AUTOMATIC_COMPANY_SCAFFOLD_VERIFIED`, backed by `main` run `37833181826` attempts 1 and 2 on exact source SHA `cb46c0c95b4e628608990404e4c1ac38e889b79e`, both producing 17 engines, 306 structural files and aggregate SHA-256 `295be8b701fe80ea57b034e882da1698def79a97502b9831e9453871c7fc1ed6`.
 - Phase 4 multi-company bootstrap V0.
 - Phase 5 Console/Gateway V0.
 - Governance V0: POL-001 / HEX-001.
@@ -16,8 +17,8 @@
 - Existing-engine bindings are wrappers/contracts only until live evidence is audited.
 - FACT-001 `repository_dispatch` support is defined, but ACTGW-001 → repository_dispatch live proof is still pending. Git-backed automatic request execution is verified.
 - Generated target engines remain `SCAFFOLD` until their own implementation/evaluation/tribunal/PREPROD gates pass.
-- COMP-ONB-001 structural automation is `AUTOMATIC_COMPANY_SCAFFOLD_SOFTWARE_READY_LIVE_ACCEPTANCE_PENDING`: software can compose the 17 Phase 4 scaffolds, but automatic main-run/idempotency evidence is still required before structural autonomy is accepted.
-- Structural company bootstrap does not mark scan/SEO/social/local/marketing/knowledge/CRM/App/automation/Training/TENANT/activation engines GREEN; actual onboarding execution remains downstream.
+- COMP-ONB-001 is verified only for structural company scaffold generation. Structural company bootstrap does not mark scan/SEO/social/local/marketing/knowledge/CRM/App/automation/Training/TENANT/activation engines GREEN; actual onboarding execution remains downstream.
+- Real `COMP-REG-001 + TENANT-001` PREPROD execution/evidence remains the next company-onboarding gate.
 
 ### DEFINIDO
 - DBOFF-001 / STOROFF-001 / FREE-001 / AIBUD-001 contracts/targets.
@@ -37,6 +38,7 @@ HUMAN_REQUIRED_SET: `["LEGAL_REQUIRED","SIGNATURE_REQUIRED","LOW_CONFIDENCE","HI
 - FACT-001 AutoFactory request contracts and seed requests are Git-backed; generated request artifacts are reproducible and retained by GitHub Actions as run evidence, not treated as source of truth.
 - FACT-001 accepted deterministic identity is the request idempotency key + generated bundle checksum + registry checksum; ZIP artifact digests may differ because archive metadata is not the scaffold identity.
 - COMP-ONB structural request contracts and synthetic acceptance fixture are Git-backed. The 17 generated Phase 4 structures are rebuildable artifacts, not a business-data backup or source of truth.
+- COMP-ONB accepted deterministic identity is exact source/request context plus aggregate SHA-256 `295be8b701fe80ea57b034e882da1698def79a97502b9831e9453871c7fc1ed6`; Actions ZIP digests may differ because archive metadata is not the structural identity.
 - Optional structural company profile data is not persisted raw in the result; only a SHA-256 fingerprint is retained. Credential/secret/bank-like fields are rejected before generation.
 - Persistent EVT/JOB V0 journal files are runtime state and are not replaced by Git history; production-grade activation would require an explicit state backup/restore contract before migration.
 - Existing production systems and their data remain governed by their existing backup mechanisms; these structural V0 paths do not replace or modify them.
@@ -77,7 +79,7 @@ node multicompany/company-scaffold-bootstrap.mjs \
   --request multicompany/requests/company-bootstrap-selfcheck.v0.json \
   --out /tmp/cerebro-company-bootstrap
 ```
-Expected boundary: `STRUCTURAL_BOOTSTRAP_GREEN`, 17 Phase 4 engines, 306 canonical structural files, zero business engines marked GREEN from scaffold generation, exact PREPROD adapter/SCAFFOLD outputs, additional cost 0 and PROD/Trading/Supabase-write false.
+Expected boundary: `STRUCTURAL_BOOTSTRAP_GREEN`, 17 Phase 4 engines, 306 canonical structural files, zero business engines marked GREEN from scaffold generation, exact PREPROD adapter/SCAFFOLD outputs, aggregate SHA-256 `295be8b701fe80ea57b034e882da1698def79a97502b9831e9453871c7fc1ed6`, additional cost 0 and PROD/Trading/Supabase-write false.
 
 Reference runtime/multi-company/console/governance behavior is rebuilt from repository source and verified through `npm test` plus PREPROD gates.
 

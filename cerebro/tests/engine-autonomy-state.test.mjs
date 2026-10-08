@@ -62,20 +62,29 @@ test('FACT-001 is accepted only as automatic SCAFFOLD with real and deterministi
   assert.equal(fact.gateway_repository_dispatch_live_verified,false);
 });
 
-test('COMP-ONB-001 structural automation candidate cannot overclaim live onboarding or business-engine GREEN',()=>{
+test('COMP-ONB-001 is accepted only as automatic structural PREPROD scaffold with real deterministic evidence',()=>{
   const onboarding=autonomy.engines.find(engine=>engine.engine_id==='COMP-ONB-001');
   assert.ok(onboarding);
   assert.equal(onboarding.company_id,'GLOBAL_ONLY');
   assert.equal(onboarding.environment,'PREPROD');
-  assert.equal(onboarding.autonomy_state,'AUTOMATIC_COMPANY_SCAFFOLD_SOFTWARE_READY_LIVE_ACCEPTANCE_PENDING');
+  assert.equal(onboarding.version,'0.1.0');
+  assert.equal(onboarding.autonomy_state,'AUTOMATIC_COMPANY_SCAFFOLD_VERIFIED');
   assert.equal(onboarding.execution_model,'GITHUB_EVENT_DRIVEN_HOSTLESS');
   assert.equal(onboarding.connected_scope,'PHASE4_STRUCTURAL_SCAFFOLD_ONLY');
   assert.equal(onboarding.phase4_engine_count,17);
   assert.equal(onboarding.structural_files_expected,306);
+  assert.equal(onboarding.structural_files_verified,306);
   assert.equal(onboarding.fact001_dependency_state,'AUTOMATIC_SCAFFOLD_VERIFIED');
-  assert.equal(onboarding.live_acceptance_run_id,null);
-  assert.equal(onboarding.idempotency_acceptance_run_id,null);
-  assert.equal(onboarding.structural_evaluation_verified,false);
+  assert.equal(onboarding.live_acceptance_run_id,'37833181826');
+  assert.equal(onboarding.live_acceptance_attempt,1);
+  assert.equal(onboarding.idempotency_acceptance_run_id,'37833181826');
+  assert.equal(onboarding.idempotency_acceptance_attempt,2);
+  assert.equal(onboarding.live_source_sha,'cb46c0c95b4e628608990404e4c1ac38e889b79e');
+  assert.equal(onboarding.request_id,'company-bootstrap-selfcheck-v0');
+  assert.equal(onboarding.acceptance_company_id,'cerebro-bootstrap-selfcheck');
+  assert.equal(onboarding.aggregate_sha256,'295be8b701fe80ea57b034e882da1698def79a97502b9831e9453871c7fc1ed6');
+  assert.equal(onboarding.structural_evaluation_verified,true);
+  assert.equal(onboarding.observability_verified,true);
   assert.equal(onboarding.business_engine_green_from_scaffold_authorized,false);
   assert.equal(onboarding.target_engine_evaluation_state,'NOT_RUN_STRUCTURAL_ONLY');
   assert.equal(onboarding.target_engine_tribunal_state,'NOT_RUN_STRUCTURAL_ONLY');
