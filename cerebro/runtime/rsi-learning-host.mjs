@@ -33,6 +33,39 @@ function sortedJsonFiles(dir){
     .map(entry=>path.join(dir,entry.name))
     .sort((a,b)=>a.localeCompare(b));
 }
+function pidAlive(pid){
+  if(!Number.isInteger(pid)||pid<=0) return false;
+  try{process.kill(pid,0);return true;}
+  catch(error){return error?.code==='EPERM';}
+}
+function writeLockOwner(lockDir,kind){
+  atomicJson(path.join(lockDir,'owner.json'),{schema_version:'1.0.0',kind,pid:process.pid,started_at:new Date().toISOString()});
+}
+function inspectExistingLock(lockDir,label,{reclaimStale=false}={}){
+  if(!fs.existsSync(lockDir)) return Object.freeze({exists:false,active:false,reclaimed:false});
+  const ownerFile=path.join(lockDir,'owner.json');
+  if(!fs.existsSync(ownerFile)) throw new Error(`${label} lock owner metadata missing`);
+  let owner;
+  try{owner=readJson(ownerFile);}catch{throw new Error(`${label} lock owner metadata invalid`);}
+  if(!Number.isInteger(owner?.pid)||owner.pid<=0) throw new Error(`${label} lock owner pid invalid`);
+  if(pidAlive(owner.pid)) return Object.freeze({exists:true,active:true,reclaimed:false,owner});
+  if(!reclaimStale) return Object.freeze({exists:true,active:false,reclaimed:false,owner});
+  fs.rmSync(lockDir,{recursive:true,force:true});
+  return Object.freeze({exists:true,active:false,reclaimed:true,owner});
+}
+function acquireManagedLock(lockDir,label,kind){
+  ensureDir(path.dirname(lockDir));
+  try{fs.mkdirSync(lockDir,{recursive:false,mode:0o700});}
+  catch(error){
+    if(error?.code!=='EEXIST') throw error;
+    const state=inspectExistingLock(lockDir,label,{reclaimStale:true});
+    if(state.active) throw new Error(`${label} lock already held`);
+    try{fs.mkdirSync(lockDir,{recursive:false,mode:0o700});}
+    catch(retryError){if(retryError?.code==='EEXIST') throw new Error(`${label} lock acquisition raced with another owner`);throw retryError;}
+  }
+  writeLockOwner(lockDir,kind);
+  return ()=>{try{fs.rmSync(lockDir,{recursive:true,force:true});}catch{}};
+}
 
 export function normalizeHostConfig(input,configDir=process.cwd()){
   if(!input||typeof input!=='object'||Array.isArray(input)) throw new Error('host config object required');
@@ -177,7 +210,10 @@ export function runHostCycle({config,now=()=>new Date().toISOString()}){
 
 function assertNoActiveLock(config){
   const paths=hostPaths(config);
-  if(fs.existsSync(paths.hostLock)||fs.existsSync(`${paths.ledger}.lock`)) throw new Error('LRN host/worker lock is active');
+  for(const [lockDir,label] of [[paths.hostLock,'LRN-001 host'],[`${paths.ledger}.lock`,'LRN-001 worker']]){
+    const state=inspectExistingLock(lockDir,label,{reclaimStale:true});
+    if(state.active) throw new Error(`${label} lock is active`);
+  }
 }
 
 export function createLedgerBackup({config,now=()=>new Date().toISOString()}){
@@ -215,10 +251,7 @@ export function restoreLedgerBackup({config,manifest_file,confirm_restore=false,
 }
 
 function acquireHostLock(config){
-  const {hostLock}=hostPaths(config);ensureDir(path.dirname(hostLock));
-  try{fs.mkdirSync(hostLock,{mode:0o700});}
-  catch(error){if(error?.code==='EEXIST') throw new Error('LRN-001 host lock already held');throw error;}
-  return ()=>{try{fs.rmdirSync(hostLock);}catch{}};
+  return acquireManagedLock(hostPaths(config).hostLock,'LRN-001 host','LRN_HOST');
 }
 
 export async function runHostLoop({config,signal,now=()=>new Date().toISOString(),sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms))}){
