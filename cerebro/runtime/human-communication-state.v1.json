@@ -5,13 +5,13 @@
   "engine_id": "HEX-001",
   "environment": "PROD_CONTROL_PLANE",
   "version": "1.0.0",
-  "updated_at": "2026-10-08T07:10:00Z",
+  "updated_at": "2026-10-08T09:37:26.419Z",
   "pending": {},
   "decisions": [],
   "processed_message_ids": [],
   "standing_authorizations": {},
   "standing_policy_proposals": {},
-  "last_digest_date": null,
+  "last_digest_date": "2026-10-08",
   "last_delivery_at": null,
   "mail_transport": {
     "status": "UNVERIFIED",
@@ -23,5 +23,6 @@
     "trading": false,
     "paid_fallback": false,
     "additional_cost_budget_eur": 0
-  }
+  },
+  "authorized_actions": {}
 }
