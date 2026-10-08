@@ -1,0 +1,57 @@
+name: CEREBRO RSI B4 PREPROD Monitor Relearn V0
+
+on:
+  push:
+    paths:
+      - 'cerebro/runtime/rsi-preprod-adoption-monitoring-loop.mjs'
+      - 'cerebro/runtime/promotion-pipeline.mjs'
+      - 'cerebro/runtime/universal-learning-ingress.mjs'
+      - 'cerebro/runtime/continuous-improvement-scheduler.mjs'
+      - 'cerebro/tests/rsi-preprod-adoption-monitoring-loop.test.mjs'
+      - 'cerebro/tests/promotion-pipeline.test.mjs'
+      - 'cerebro/tests/universal-learning-ingress.test.mjs'
+      - 'cerebro/tests/continuous-improvement-scheduler.test.mjs'
+      - '.github/workflows/cerebro-rsi-b4-preprod-monitor-relearn-v0.yml'
+  pull_request:
+    paths:
+      - 'cerebro/runtime/rsi-preprod-adoption-monitoring-loop.mjs'
+      - 'cerebro/runtime/promotion-pipeline.mjs'
+      - 'cerebro/runtime/universal-learning-ingress.mjs'
+      - 'cerebro/runtime/continuous-improvement-scheduler.mjs'
+      - 'cerebro/tests/rsi-preprod-adoption-monitoring-loop.test.mjs'
+      - 'cerebro/tests/promotion-pipeline.test.mjs'
+      - 'cerebro/tests/universal-learning-ingress.test.mjs'
+      - 'cerebro/tests/continuous-improvement-scheduler.test.mjs'
+      - '.github/workflows/cerebro-rsi-b4-preprod-monitor-relearn-v0.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  b4-preprod-monitor-relearn:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Prove PREPROD shadow canary monitor rollback keep and relearn loop
+        run: >-
+          node --test
+          cerebro/tests/promotion-pipeline.test.mjs
+          cerebro/tests/universal-learning-ingress.test.mjs
+          cerebro/tests/continuous-improvement-scheduler.test.mjs
+          cerebro/tests/rsi-preprod-adoption-monitoring-loop.test.mjs
+      - name: Assert B4 authority boundary
+        run: |
+          set -euo pipefail
+          ! grep -Eq 'prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true' cerebro/runtime/rsi-preprod-adoption-monitoring-loop.mjs
+      - name: Assert B4 closes only to canonical universal relearning ingress
+        run: |
+          set -euo pipefail
+          grep -F "from './promotion-pipeline.mjs'" cerebro/runtime/rsi-preprod-adoption-monitoring-loop.mjs
+          grep -F "from './universal-learning-ingress.mjs'" cerebro/runtime/rsi-preprod-adoption-monitoring-loop.mjs
+          grep -F "from './continuous-improvement-scheduler.mjs'" cerebro/runtime/rsi-preprod-adoption-monitoring-loop.mjs
+          grep -F "B1_UNIVERSAL_LEARNING_INGRESS" cerebro/runtime/rsi-preprod-adoption-monitoring-loop.mjs
