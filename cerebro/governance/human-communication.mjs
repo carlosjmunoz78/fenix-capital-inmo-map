@@ -11,9 +11,14 @@ const EXPLICIT_ALIASES = Object.freeze({
 });
 
 const COMMAND_RE = /^(AUTORIZO|NO AUTORIZO|EXPL[IÍ]CAME)\s+(APR-\d{8}-[A-F0-9]{8})$/iu;
+const GENERIC_AUTH_WORD_RE = /(^|[^a-z0-9])(si|vale|ok|okay|procede|continua)([^a-z0-9]|$)/i;
 
 function clean(value){
   return typeof value === 'string' ? value.trim() : '';
+}
+
+function normalizedAscii(value){
+  return String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
 }
 
 function list(value){
@@ -151,7 +156,7 @@ export function parseApprovalCommands(text,pendingApprovals={}){
     if(!line) continue;
     const match=line.match(COMMAND_RE);
     if(!match){
-      if(/\b(si|sí|vale|ok|okay|procede|continua|continúa)\b/iu.test(line)) ignored.push({line,reason:'GENERIC_TEXT_NOT_AUTHORIZATION'});
+      if(GENERIC_AUTH_WORD_RE.test(normalizedAscii(line))) ignored.push({line,reason:'GENERIC_TEXT_NOT_AUTHORIZATION'});
       continue;
     }
     const verb=match[1].toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
