@@ -8,6 +8,7 @@ const ENGINE_ID='LRN-001';
 
 function reqString(value,label){if(typeof value!=='string'||!value.trim()) throw new Error(`${label} required`);return value.trim();}
 function stableHash(value){return crypto.createHash('sha256').update(typeof value==='string'?value:JSON.stringify(value)).digest('hex');}
+function sha256Bytes(value){return crypto.createHash('sha256').update(value).digest('hex');}
 function ensureDir(dir){fs.mkdirSync(dir,{recursive:true});return dir;}
 function atomicJson(file,value){ensureDir(path.dirname(file));const tmp=`${file}.tmp-${process.pid}-${crypto.randomBytes(4).toString('hex')}`;fs.writeFileSync(tmp,`${JSON.stringify(value,null,2)}\n`,{encoding:'utf8',mode:0o600});fs.renameSync(tmp,file);}
 function readJson(file){return JSON.parse(fs.readFileSync(file,'utf8'));}
@@ -119,7 +120,7 @@ export function persistLearningOutbox({build,output_root}){
     if(fs.existsSync(batchFile)) validateExistingBatch(batchFile,batch);
     else{atomicJson(batchFile,batch);created=true;}
     const bytes=fs.readFileSync(batchFile);
-    const entry={batch_id:batch.batch_id,path:`batches/${filename}`,sha256:stableHash(bytes),events_total:batch.events_total,source_run_id:batch.source.run_id,source_head_sha:batch.source.head_sha};
+    const entry={batch_id:batch.batch_id,path:`batches/${filename}`,sha256:sha256Bytes(bytes),events_total:batch.events_total,source_run_id:batch.source.run_id,source_head_sha:batch.source.head_sha};
     const indexFile=path.join(companyRoot,'index.json');
     let prior={schema_version:'1.0.0',state_type:'CEREBRO_RSI_LRN_OUTBOX_INDEX',company_id:batch.company_id,engine_id:ENGINE_ID,environment:PREPROD,version:batch.version,batches:[],prod_authorized:false,trading_access:false,additional_cost_eur:0};
     if(fs.existsSync(indexFile)) prior=readJson(indexFile);
