@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_HUMAN_COMMUNICATION_STATE",
+  "company_id": "GLOBAL",
+  "engine_id": "HEX-001",
+  "environment": "PROD_CONTROL_PLANE",
+  "version": "1.0.0",
+  "updated_at": "2026-10-08T07:10:00Z",
+  "pending": {},
+  "decisions": [],
+  "processed_message_ids": [],
+  "standing_authorizations": {},
+  "standing_policy_proposals": {},
+  "last_digest_date": null,
+  "last_delivery_at": null,
+  "mail_transport": {
+    "status": "UNVERIFIED",
+    "last_success_at": null,
+    "last_error": null
+  },
+  "safety": {
+    "prod_write": false,
+    "trading": false,
+    "paid_fallback": false,
+    "additional_cost_budget_eur": 0
+  }
+}
