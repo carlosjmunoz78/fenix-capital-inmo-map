@@ -42,6 +42,7 @@ on:
       - 'cerebro/tests/rsi-event-outbox.test.mjs'
       - 'cerebro/tests/rsi-outbox-client.test.mjs'
       - 'cerebro/tests/rsi-outbox-publisher-workflow.test.mjs'
+      - 'cerebro/tests/rsi-hostless-control-plane-workflow.test.mjs'
       - 'cerebro/tests/rsi-learning-windows-host.test.mjs'
       - 'cerebro/tests/meta-observability-ledger.test.mjs'
       - 'cerebro/tests/meta-learning-runner.test.mjs'
@@ -64,6 +65,7 @@ on:
       - 'cerebro/docs/RSI_RECOVERY_006_*.md'
       - 'cerebro/docs/RSI_RECOVERY_007_*.md'
       - '.github/workflows/cerebro-rsi-learning-outbox-publisher-v0.yml'
+      - '.github/workflows/cerebro-rsi-learning-control-plane-v0.yml'
       - '.github/workflows/cerebro-rsi-recovery-001-gate.yml'
   pull_request:
     paths:
@@ -106,6 +108,7 @@ on:
       - 'cerebro/tests/rsi-event-outbox.test.mjs'
       - 'cerebro/tests/rsi-outbox-client.test.mjs'
       - 'cerebro/tests/rsi-outbox-publisher-workflow.test.mjs'
+      - 'cerebro/tests/rsi-hostless-control-plane-workflow.test.mjs'
       - 'cerebro/tests/rsi-learning-windows-host.test.mjs'
       - 'cerebro/tests/meta-observability-ledger.test.mjs'
       - 'cerebro/tests/meta-learning-runner.test.mjs'
@@ -128,6 +131,7 @@ on:
       - 'cerebro/docs/RSI_RECOVERY_006_*.md'
       - 'cerebro/docs/RSI_RECOVERY_007_*.md'
       - '.github/workflows/cerebro-rsi-learning-outbox-publisher-v0.yml'
+      - '.github/workflows/cerebro-rsi-learning-control-plane-v0.yml'
       - '.github/workflows/cerebro-rsi-recovery-001-gate.yml'
   workflow_dispatch:
 
@@ -142,7 +146,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
       - name: Parse Windows host PowerShell assets
         shell: pwsh
         run: |
@@ -157,7 +161,7 @@ jobs:
             }
           }
           if ($failed) { exit 1 }
-      - name: Recovered RSI runtime, measured MetaLearn, horizon execution, autonomous scheduling, real event wiring, PREPROD persistence, host binding, governance and bridge regression tests
+      - name: Recovered RSI runtime, hostless control plane, measured MetaLearn, horizon execution, autonomous scheduling, real event wiring, PREPROD persistence, host binding, governance and bridge regression tests
         run: >-
           node --test
           cerebro/tests/continuous-improvement-contract.test.mjs
@@ -173,6 +177,7 @@ jobs:
           cerebro/tests/rsi-event-outbox.test.mjs
           cerebro/tests/rsi-outbox-client.test.mjs
           cerebro/tests/rsi-outbox-publisher-workflow.test.mjs
+          cerebro/tests/rsi-hostless-control-plane-workflow.test.mjs
           cerebro/tests/rsi-learning-windows-host.test.mjs
           cerebro/tests/meta-observability-ledger.test.mjs
           cerebro/tests/meta-learning-runner.test.mjs
