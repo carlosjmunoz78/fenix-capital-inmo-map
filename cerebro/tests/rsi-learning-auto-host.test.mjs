@@ -19,25 +19,28 @@ function remote(){
   return async url=>{if(url===`${companyBase}/index.json`)return {ok:true,status:200,text:async()=>indexText};if(url===`${companyBase}/batches/lrn-batch_auto1.json`)return {ok:true,status:200,text:async()=>batchText};return {ok:false,status:404,text:async()=>''};};
 }
 
-test('one autonomous iteration pulls verified outbox then persists LOW learning without manual JSON',async()=>{
+test('one autonomous iteration pulls verified outbox, learns and materializes one versioned candidate without manual JSON',async()=>{
   const root=temp();
   try{
     const result=await runAutoHostIteration({raw_config:config(root),fetch_impl:remote(),now:()=> '2026-10-08T14:00:00.000Z'});
     assert.equal(result.status,'GREEN');assert.equal(result.remote_outbox.status,'REMOTE_OUTBOX_GREEN');assert.equal(result.remote_outbox.downloaded_total,1);
     assert.equal(result.learning.last_result.persisted_total,1);assert.equal(result.prod_authorized,false);assert.equal(result.trading_access,false);
+    assert.equal(result.candidates.status,'CANDIDATES_GREEN');assert.equal(result.candidates.persisted_total,1);assert.equal(result.candidates.candidate_total,1);assert.equal(result.candidates.next_gate,'OLD_VS_NEW_EXPERIMENT');
     assert.equal(fs.existsSync(path.join(root,'data','fenix','LRN-001','learning.v8')),true);
+    assert.equal(fs.existsSync(path.join(root,'data','fenix','LRN-001','improvement-candidates.v8')),true);
     const rerun=await runAutoHostIteration({raw_config:config(root),fetch_impl:remote(),now:()=> '2026-10-08T14:01:00.000Z'});
     assert.equal(rerun.remote_outbox.skipped_total,1);assert.equal(rerun.learning.last_result.persisted_total,0);assert.ok(rerun.learning.last_result.skipped_receipts>=1);
+    assert.equal(rerun.candidates.persisted_total,0);assert.equal(rerun.candidates.duplicates_total,1);assert.equal(rerun.candidates.candidate_total,1);
   }finally{fs.rmSync(root,{recursive:true,force:true});}
 });
 
-test('kill switch skips remote pull and performs zero new persistence',async()=>{
+test('kill switch skips remote pull and performs zero new persistence or candidate generation',async()=>{
   const root=temp();
   try{
     const cfg=config(root);const engineRoot=path.join(root,'data','fenix','LRN-001');fs.mkdirSync(engineRoot,{recursive:true});fs.writeFileSync(path.join(engineRoot,'KILL_SWITCH'),'enabled\n');
     let calls=0;const fetch=async()=>{calls+=1;throw new Error('must not call');};
     const result=await runAutoHostIteration({raw_config:cfg,fetch_impl:fetch,now:()=> '2026-10-08T14:00:00.000Z'});
-    assert.equal(calls,0);assert.equal(result.status,'KILLED');assert.equal(result.learning.last_result.reason,'KILL_SWITCH');
+    assert.equal(calls,0);assert.equal(result.status,'KILLED');assert.equal(result.learning.last_result.reason,'KILL_SWITCH');assert.equal(result.candidates.status,'CANDIDATES_KILLED');
   }finally{fs.rmSync(root,{recursive:true,force:true});}
 });
 
