@@ -1,0 +1,68 @@
+{
+  "schema_version": "1.0.0",
+  "policy_id": "CEREBRO-SKILL-AUTONOMY-STANDING-AUTH-001",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "GLOBAL",
+  "version": "1.0.0",
+  "status": "ACTIVE_STANDING_AUTHORIZATION",
+  "authorization_basis": "explicit_owner_instruction_current_chat_2026-10-08_leave_skill_pipeline_fully_automatic",
+  "granted_at": "2026-10-08",
+  "revocable": true,
+  "scope": {
+    "autonomous_preprod_shadow_promotion": true,
+    "autonomous_prod_readonly_canary": true,
+    "autonomous_readonly_advisory_registration": true,
+    "autonomous_retry_and_recovery": true,
+    "autonomous_prod_write": false,
+    "autonomous_customer_data_access": false,
+    "autonomous_external_skill_code_execution": false,
+    "autonomous_new_credentials": false,
+    "autonomous_trading": false,
+    "autonomous_paid_fallback": false,
+    "autonomous_app_fenix_deploy": false
+  },
+  "mandatory_gates": {
+    "source_evidence_immutable": true,
+    "license_evidence_required": true,
+    "static_lab_green": true,
+    "old_vs_new_required": true,
+    "behavioral_synthetic_green": true,
+    "independent_judge_green": true,
+    "tribunal_green": true,
+    "rollback_green": true,
+    "rebuild_disabled_by_default": true,
+    "additional_cost_eur": 0,
+    "customer_data_used": false,
+    "prod_write": false,
+    "external_skill_code_executed": false,
+    "trading_access": false,
+    "paid_fallback": false
+  },
+  "promotion_semantics": {
+    "preprod": "SHADOW_SYNTHETIC_NON_CUSTOMER_ONLY",
+    "prod_canary": "READONLY_OBSERVATION_ONLY_GET_WHERE_APPLICABLE",
+    "final_registration": "READONLY_ADVISORY_METADATA_ONLY",
+    "business_prod_side_effects": "DENY",
+    "app_deploy": "DENY"
+  },
+  "human_required_still_mandatory_for": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST",
+    "HIGH_RISK_OUTSIDE_THIS_EXACT_READONLY_ZERO_COST_SCOPE"
+  ],
+  "communication": {
+    "human_required_email_policy": "CEREBRO-HUMAN-COMM-001",
+    "daily_digest_required": true,
+    "human_alias_required": true
+  },
+  "cost": {
+    "additional_cost_budget_eur": 0,
+    "paid_ai_required": false
+  }
+}
