@@ -1,0 +1,58 @@
+name: CEREBRO RSI B3 OLD NEW Evaluation Tribunal V0
+
+on:
+  push:
+    paths:
+      - 'cerebro/runtime/rsi-old-new-evaluation-tribunal-gate.mjs'
+      - 'cerebro/runtime/experiment-pipeline.mjs'
+      - 'cerebro/runtime/evaluation-tribunal.mjs'
+      - 'cerebro/runtime/promotion-pipeline.mjs'
+      - 'cerebro/runtime/continuous-improvement-contract.mjs'
+      - 'cerebro/tests/rsi-old-new-evaluation-tribunal-gate.test.mjs'
+      - 'cerebro/tests/experiment-pipeline.test.mjs'
+      - 'cerebro/tests/evaluation-tribunal.test.mjs'
+      - 'cerebro/tests/promotion-pipeline.test.mjs'
+      - '.github/workflows/cerebro-rsi-b3-old-new-evaluation-tribunal-v0.yml'
+  pull_request:
+    paths:
+      - 'cerebro/runtime/rsi-old-new-evaluation-tribunal-gate.mjs'
+      - 'cerebro/runtime/experiment-pipeline.mjs'
+      - 'cerebro/runtime/evaluation-tribunal.mjs'
+      - 'cerebro/runtime/promotion-pipeline.mjs'
+      - 'cerebro/runtime/continuous-improvement-contract.mjs'
+      - 'cerebro/tests/rsi-old-new-evaluation-tribunal-gate.test.mjs'
+      - 'cerebro/tests/experiment-pipeline.test.mjs'
+      - 'cerebro/tests/evaluation-tribunal.test.mjs'
+      - 'cerebro/tests/promotion-pipeline.test.mjs'
+      - '.github/workflows/cerebro-rsi-b3-old-new-evaluation-tribunal-v0.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  b3-old-new-tribunal-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Prove canonical OLD vs NEW evaluation tribunal flow
+        run: >-
+          node --test
+          cerebro/tests/experiment-pipeline.test.mjs
+          cerebro/tests/evaluation-tribunal.test.mjs
+          cerebro/tests/promotion-pipeline.test.mjs
+          cerebro/tests/rsi-old-new-evaluation-tribunal-gate.test.mjs
+      - name: Assert B3 authority boundary
+        run: |
+          set -euo pipefail
+          ! grep -Eq 'prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true' cerebro/runtime/rsi-old-new-evaluation-tribunal-gate.mjs
+      - name: Assert B3 reuses canonical experiment evaluation and promotion pipelines
+        run: |
+          set -euo pipefail
+          grep -F "from './experiment-pipeline.mjs'" cerebro/runtime/rsi-old-new-evaluation-tribunal-gate.mjs
+          grep -F "from './evaluation-tribunal.mjs'" cerebro/runtime/rsi-old-new-evaluation-tribunal-gate.mjs
+          grep -F "from './promotion-pipeline.mjs'" cerebro/runtime/rsi-old-new-evaluation-tribunal-gate.mjs
