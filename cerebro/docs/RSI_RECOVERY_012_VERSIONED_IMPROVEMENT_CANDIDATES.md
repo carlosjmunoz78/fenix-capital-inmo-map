@@ -2,7 +2,7 @@
 
 Date: 2026-10-08
 Scope: CEREBRO OS / LRN-001 / PREPROD
-Status at this commit: COMPATIBILITY_FIX_VERIFIED_IN_CODE · POSTMERGE_DURABLE_STATE_RETEST_PENDING
+Status at this commit: REOBSERVATION_IDEMPOTENCY_FIX_PREMERGE · LIVE_DURABLE_STATE_ACCEPTANCE_PENDING
 Additional cost: 0 EUR
 PROD authority: false
 Trading access: false
@@ -55,7 +55,18 @@ The PREPROD LearningLedger is append-only and uses deterministic `learning_id` v
 
 The first Block 2 merge attempted to add `source_version` directly to PREPROD learning records. The post-merge live control-plane acceptance run `37850249250` correctly rejected that mutation with `learning_id conflict with different payload`: an existing deterministic learning ID was being presented with a different payload. No state was deleted or rewritten and no PROD deployment occurred.
 
-The correction preserves the existing LearningLedger payload exactly. Version provenance is handled at the improvement-candidate layer instead:
+The first compatibility correction removed that schema mutation. A second live durable-state run, `37850898761`, still failed closed with the same error family. Investigation showed a different causal variable: the outbox had added a new batch containing some already-known deterministic event IDs. Those events are valid re-observations, but the bridge assigns a new processing-time `observed_at` when the source event has no explicit observation timestamp. The resulting learning record therefore kept the same deterministic `learning_id` while differing only in `observed_at`.
+
+The second correction changes strategy at the ledger boundary without weakening conflict detection:
+
+- exact same-ID/same-payload records remain ordinary duplicates;
+- same-ID records whose complete semantic payload is identical except `observed_at` are treated as `semantic_duplicate=true`;
+- the immutable first-seen record and original `observed_at` are preserved; no journal entry is rewritten or appended;
+- any same-ID difference in hypothesis, evidence, risk, policy/authority fields or any other semantic field remains a hard `learning_id conflict with different payload` error.
+
+This keeps first-seen audit evidence immutable while allowing repeated observations of the same deterministic event to be idempotent across later discovery batches.
+
+Version provenance remains handled at the improvement-candidate layer:
 
 - when a learning/evidence contract already provides an explicit `source_version`, the candidate records `baseline_version_source=SOURCE_EVIDENCE_VERSION` and no baseline verification is required;
 - for current/legacy learning records without that field, the candidate uses the persisted learning context version only as a provisional baseline label, records `baseline_version_source=LEARNING_CONTEXT_VERSION_REQUIRES_OLD_CONTRACT_RESOLUTION`, and sets `baseline_verification_required=true` plus `experiment_contract.baseline_resolution_required=true`.
@@ -79,17 +90,20 @@ The candidate ledger path under each durable LRN company state is:
 
 `<LRN_STATE_ROOT>/data/<company_id>/LRN-001/improvement-candidates.v8`
 
-## Verification before compatibility-fix merge
+The LearningLedger duplicate policy is intentionally narrower than generic conflict suppression: only a pure re-observation-time difference is compatible. All semantic mutations continue to fail closed.
+
+## Verification required before closeout
 
 Exact-head gates must remain green for:
 
-1. Improvement Candidate Factory contract/integration tests, including legacy baseline resolution.
-2. PREPROD learning-payload backward-compatibility regression.
-3. RSI Recovery runtime regression suite.
-4. Hostless Learning Control Plane contract.
-5. Promotion Readiness Shadow boundary tests where triggered.
+1. Improvement Candidate Factory contract/integration tests.
+2. LearningLedger exact duplicate + re-observation semantic duplicate + real payload-conflict tests.
+3. PREPROD learning-payload backward-compatibility regression.
+4. RSI Recovery runtime regression suite.
+5. Hostless Learning Control Plane contract.
+6. Promotion Readiness Shadow boundary tests where triggered.
 
-The post-merge acceptance gate is not satisfied by CI alone. After the compatibility fix merges, the main-branch Candidate Factory gate must succeed and automatically wake the main LRN control plane against the existing durable state. Durable `last-control-plane-run.json` must then show the candidate stage without PROD/Trading authority.
+The post-merge acceptance gate is not satisfied by CI alone. After this correction merges, the main-branch Candidate Factory gate must succeed and automatically wake the main LRN control plane against the existing durable state. Durable `last-control-plane-run.json` must then show the candidate stage without PROD/Trading authority and `improvement-candidates.v8` must exist.
 
 ## Rollback
 

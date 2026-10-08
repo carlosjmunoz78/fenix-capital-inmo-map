@@ -7,6 +7,11 @@ const PREPROD='PREPROD';
 const PERSISTENCE_SCOPE='LOCAL_PREPROD_LRN_LEDGER_ONLY';
 
 function clone(value){return deserialize(serialize(value));}
+function semanticLearningHash(record){
+  const safe=clone(record);
+  delete safe.observed_at;
+  return stableIdempotencyKey(safe);
+}
 function validateStored(item,index){
   if(!item||item.kind!==KIND) throw new Error('invalid LRN-001 record');
   if(item.sequence!==index+1) throw new Error('learning ledger sequence mismatch');
@@ -40,15 +45,20 @@ export class LearningLedgerV0{
     const recordHash=stableIdempotencyKey(safe);
     const prior=this.#records.find((item)=>item.record.learning_id===safe.learning_id);
     if(prior){
-      if(prior.record_hash!==recordHash) throw new Error('learning_id conflict with different payload');
-      return Object.freeze({accepted:false,duplicate:true,sequence:prior.sequence,learning_id:safe.learning_id,record_hash:recordHash,prod_authorized:false});
+      if(prior.record_hash===recordHash){
+        return Object.freeze({accepted:false,duplicate:true,semantic_duplicate:false,sequence:prior.sequence,learning_id:safe.learning_id,record_hash:prior.record_hash,prod_authorized:false});
+      }
+      if(semanticLearningHash(prior.record)===semanticLearningHash(safe)){
+        return Object.freeze({accepted:false,duplicate:true,semantic_duplicate:true,preserved_observed_at:prior.record.observed_at,sequence:prior.sequence,learning_id:safe.learning_id,record_hash:prior.record_hash,prod_authorized:false});
+      }
+      throw new Error('learning_id conflict with different payload');
     }
     const item={kind:KIND,sequence:this.#records.length+1,record:safe,record_hash:recordHash};
     const candidate=[...this.#records,item];
     candidate.forEach((entry,index)=>validateStored(entry,index));
     this.#journal.commit(candidate);
     this.#records=candidate;
-    return Object.freeze({accepted:true,duplicate:false,sequence:item.sequence,learning_id:safe.learning_id,record_hash:recordHash,prod_authorized:false});
+    return Object.freeze({accepted:true,duplicate:false,semantic_duplicate:false,sequence:item.sequence,learning_id:safe.learning_id,record_hash:recordHash,prod_authorized:false});
   }
 
   list(){return clone(this.#records.map((item)=>item.record));}
@@ -67,6 +77,7 @@ export const LEARNING_LEDGER_V0_CONTRACT=Object.freeze({
   environment:PREPROD,
   persistence:'local-atomic-v8-journal',
   persistence_scope:PERSISTENCE_SCOPE,
+  duplicate_policy:'EXACT_OR_OBSERVED_AT_ONLY_SEMANTIC_DUPLICATE_PRESERVES_FIRST_SEEN_RECORD',
   supabase_required:false,
   additional_cost_target_eur:0,
   customer_data_required:false,
