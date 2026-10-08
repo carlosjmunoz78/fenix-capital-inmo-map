@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_RSI_LRN_OUTBOX_INDEX",
+  "company_id": "fenix",
+  "engine_id": "LRN-001",
+  "environment": "PREPROD",
+  "version": "0.5.0",
+  "batches": [
+    {
+      "batch_id": "lrn-batch:b8b672b50c515262a7ac25c8",
+      "path": "batches/lrn-batch_b8b672b50c515262a7ac25c8.json",
+      "sha256": "ca8974d87ac7e77169c01695bdc779d51da376fc7b111cbbff9a83e76f2d3d6a",
+      "events_total": 15,
+      "source_run_id": 37823595302,
+      "source_head_sha": "9321f7e68bee3027117917bd362ffd795d1a17e5"
+    }
+  ],
+  "prod_authorized": false,
+  "trading_access": false,
+  "additional_cost_eur": 0,
+  "batches_total": 1
+}
