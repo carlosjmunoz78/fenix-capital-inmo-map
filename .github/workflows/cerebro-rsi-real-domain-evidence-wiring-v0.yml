@@ -1,0 +1,211 @@
+name: CEREBRO RSI Real Domain Evidence Wiring V0
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/registry/rsi-domain-evidence-sources.v0.json'
+      - 'cerebro/registry/rsi-domain-autonomy-policies.v0.json'
+      - 'cerebro/runtime/rsi-real-domain-evidence-wiring.mjs'
+      - 'cerebro/runtime/universal-learning-ingress.mjs'
+      - 'cerebro/runtime/rsi-event-outbox.mjs'
+      - 'cerebro/tests/rsi-real-domain-evidence-wiring.test.mjs'
+      - 'cerebro/docs/CEREBRO_RSI_REAL_DOMAIN_EVIDENCE_WIRING_V0_2026-10-09.md'
+      - '.github/workflows/cerebro-rsi-real-domain-evidence-wiring-v0.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'cerebro/registry/rsi-domain-evidence-sources.v0.json'
+      - 'cerebro/runtime/rsi-real-domain-evidence-wiring.mjs'
+      - 'cerebro/tests/rsi-real-domain-evidence-wiring.test.mjs'
+      - 'cerebro/docs/CEREBRO_RSI_REAL_DOMAIN_EVIDENCE_WIRING_V0_2026-10-09.md'
+      - '.github/workflows/cerebro-rsi-real-domain-evidence-wiring-v0.yml'
+  workflow_run:
+    workflows:
+      - PROD Runtime Smoke
+      - CEREBRO RSI Learning Control Plane V0
+      - CEREBRO RSI Learning Outbox Publisher V0
+    types: [completed]
+  schedule:
+    - cron: '17 * * * *'
+  repository_dispatch:
+    types: [cerebro-domain-evidence-v0]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ (github.event_name == 'pull_request' || github.event_name == 'push') && format('cerebro-rsi-real-domain-evidence-cert-{0}', github.ref) || 'cerebro-rsi-learning-outbox-writer-v0' }}
+  cancel-in-progress: false
+
+env:
+  OUTBOX_STATE_BRANCH: cerebro-rsi-learning-outbox-v0
+  OUTBOX_STATE_ROOT: cerebro/runtime/rsi-outbox
+  SUBSCRIBERS_FILE: cerebro/registry/rsi-learning-subscribers.v0.json
+
+jobs:
+  certify-contract:
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Assert exact PR head checkout when applicable
+        if: github.event_name == 'pull_request'
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+      - name: Test real-domain evidence adapters and safety boundaries
+        run: >-
+          node --test
+          cerebro/tests/universal-learning-ingress.test.mjs
+          cerebro/tests/rsi-real-domain-evidence-wiring.test.mjs
+      - name: Assert every Step-1 policy domain has an evidence source without autonomy escalation
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import {realDomainEvidenceCoverage} from './cerebro/runtime/rsi-real-domain-evidence-wiring.mjs';
+          import {loadDomainPolicyRegistry} from './cerebro/runtime/rsi-domain-policy-registry.mjs';
+          const c=realDomainEvidenceCoverage();
+          const p=loadDomainPolicyRegistry();
+          if(!c.coverage_complete||c.covered_domain_count!==p.policy_count) throw new Error('domain evidence coverage incomplete');
+          if(p.autonomous_count!==1||p.policies.find(x=>x.autonomy_mode==='PREPROD_AUTONOMOUS')?.engine_id!=='LRN-001') throw new Error('unexpected autonomy escalation');
+          if(c.prod_authorized!==false||c.prod_write_authorized!==false||c.trading_access!==false||c.additional_cost_eur!==0) throw new Error('authority/cost drift');
+          NODE
+      - name: Assert source registry cannot carry secrets customer data PROD Trading or MULTIEMPRESA authority
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs');
+          const r=JSON.parse(fs.readFileSync('cerebro/registry/rsi-domain-evidence-sources.v0.json','utf8'));
+          if(r.company_id!=='fenix'||r.environment!=='PREPROD'||r.prod_authorized!==false||r.prod_write_authorized!==false||r.trading_access!==false||r.additional_cost_eur!==0||r.multicompany_continuation!==false) process.exit(1);
+          if(r.external_dispatch.contains_customer_data!==false||r.external_dispatch.contains_secrets!==false||r.external_dispatch.prod_authorized!==false||r.external_dispatch.prod_write_authorized!==false||r.external_dispatch.trading_access!==false||r.external_dispatch.additional_cost_eur!==0) process.exit(1);
+          NODE
+      - name: Assert next gate and documentation boundary
+        run: |
+          set -euo pipefail
+          DOC=cerebro/docs/CEREBRO_RSI_REAL_DOMAIN_EVIDENCE_WIRING_V0_2026-10-09.md
+          grep -F 'HUMAN_EXCEPTION_SUPERVISOR_V0' "$DOC"
+          grep -F 'ASSISTED remains ASSISTED' "$DOC"
+          grep -F 'MULTIEMPRESA continuation: FALSE' "$DOC"
+          grep -F 'PROD authority: FALSE' "$DOC"
+
+  publish-real-domain-evidence:
+    if: >-
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion != 'skipped' &&
+       github.event.workflow_run.head_branch == 'main') ||
+      github.event_name == 'schedule' ||
+      github.event_name == 'repository_dispatch' ||
+      github.event_name == 'workflow_dispatch'
+    permissions:
+      contents: write
+      actions: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout current CEREBRO source authority
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Build sanitized evidence input and immutable source identity
+        id: source
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT_NAME" = 'workflow_run' ]; then
+            jq '{name:.workflow_run.name,run_id:.workflow_run.id,run_attempt:.workflow_run.run_attempt,head_sha:.workflow_run.head_sha,head_branch:.workflow_run.head_branch,event:.workflow_run.event,conclusion:.workflow_run.conclusion,updated_at:.workflow_run.updated_at}' "$GITHUB_EVENT_PATH" > /tmp/domain-evidence-input.json
+            echo 'mode=workflow_run' >> "$GITHUB_OUTPUT"
+            echo "source_run_id=$(jq -r '.workflow_run.id' "$GITHUB_EVENT_PATH")" >> "$GITHUB_OUTPUT"
+            echo "source_head_sha=$(jq -r '.workflow_run.head_sha' "$GITHUB_EVENT_PATH")" >> "$GITHUB_OUTPUT"
+            echo "source_workflow=$(jq -r '.workflow_run.name' "$GITHUB_EVENT_PATH")" >> "$GITHUB_OUTPUT"
+          elif [ "$EVENT_NAME" = 'repository_dispatch' ]; then
+            jq '.client_payload' "$GITHUB_EVENT_PATH" > /tmp/domain-evidence-input.json
+            echo 'mode=external_dispatch' >> "$GITHUB_OUTPUT"
+            echo "source_run_id=$GITHUB_RUN_ID" >> "$GITHUB_OUTPUT"
+            echo "source_head_sha=$GITHUB_SHA" >> "$GITHUB_OUTPUT"
+            echo 'source_workflow=Authorized repository_dispatch domain evidence' >> "$GITHUB_OUTPUT"
+          else
+            NOW="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            probe() {
+              URL="$1"
+              RESULT="$(curl -L -sS -o /dev/null --max-time 20 -w '%{http_code}|%{time_total}' "$URL" || true)"
+              STATUS="${RESULT%%|*}"; SECONDS="${RESULT#*|}"
+              [[ "$STATUS" =~ ^[0-9]{3}$ ]] || STATUS=0
+              [[ "$SECONDS" =~ ^[0-9]+([.][0-9]+)?$ ]] || SECONDS=20
+              LATENCY="$(awk -v s="$SECONDS" 'BEGIN { printf "%.0f", s*1000 }')"
+              jq -n --arg url "$URL" --arg observed "$NOW" --argjson status "$STATUS" --argjson latency "$LATENCY" '{url:$url,http_status:$status,latency_ms:$latency,observed_at:$observed}'
+            }
+            { echo '['; probe 'https://fenixcapital.es/'; echo ','; probe 'https://fenixcapital.es/robots.txt'; echo ']'; } | jq -s 'flatten' > /tmp/domain-evidence-input.json
+            echo 'mode=public_probe' >> "$GITHUB_OUTPUT"
+            echo "source_run_id=$GITHUB_RUN_ID" >> "$GITHUB_OUTPUT"
+            echo "source_head_sha=$GITHUB_SHA" >> "$GITHUB_OUTPUT"
+            echo 'source_workflow=CEREBRO RSI public read-only domain probes' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Normalize real evidence through canonical universal learning ingress
+        env:
+          MODE: ${{ steps.source.outputs.mode }}
+        run: |
+          set -euo pipefail
+          node cerebro/runtime/rsi-real-domain-evidence-wiring.mjs --mode "$MODE" --input /tmp/domain-evidence-input.json --output /tmp/domain-evidence-report.json
+          jq -e '.prod_authorized == false and .prod_write_authorized == false and .trading_access == false and .additional_cost_eur == 0 and (.events | type == "array")' /tmp/domain-evidence-report.json >/dev/null
+          jq -e '[.events[] | select(.contains_customer_data != false or .contains_secrets != false or .prod_authorized != false or .prod_write_authorized != false or .trading_access != false or .additional_cost_eur != 0)] | length == 0' /tmp/domain-evidence-report.json >/dev/null
+
+      - name: Prepare dedicated append-only learning outbox state
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/cerebro-rsi-domain-outbox
+          if git fetch --no-tags origin "+refs/heads/$OUTBOX_STATE_BRANCH:refs/remotes/origin/$OUTBOX_STATE_BRANCH" 2>/dev/null; then
+            git worktree add --detach /tmp/cerebro-rsi-domain-outbox "refs/remotes/origin/$OUTBOX_STATE_BRANCH"
+          else
+            git worktree add --detach /tmp/cerebro-rsi-domain-outbox origin/main
+          fi
+          mkdir -p "/tmp/cerebro-rsi-domain-outbox/$OUTBOX_STATE_ROOT"
+
+      - name: Fan real evidence into existing tenant-local LRN outbox
+        env:
+          SOURCE_RUN_ID: ${{ steps.source.outputs.source_run_id }}
+          SOURCE_HEAD_SHA: ${{ steps.source.outputs.source_head_sha }}
+          SOURCE_WORKFLOW: ${{ steps.source.outputs.source_workflow }}
+        run: |
+          set -euo pipefail
+          node cerebro/runtime/rsi-event-outbox.mjs \
+            --events /tmp/domain-evidence-report.json \
+            --subscribers "$SUBSCRIBERS_FILE" \
+            --output-root "/tmp/cerebro-rsi-domain-outbox/$OUTBOX_STATE_ROOT" \
+            --source-run-id "$SOURCE_RUN_ID" \
+            --source-head-sha "$SOURCE_HEAD_SHA" \
+            --source-workflow "$SOURCE_WORKFLOW"
+
+      - name: Assert append-only outbox remains PREPROD and authority-safe
+        run: |
+          set -euo pipefail
+          find "/tmp/cerebro-rsi-domain-outbox/$OUTBOX_STATE_ROOT" -name '*.json' -type f -print0 | while IFS= read -r -d '' f; do
+            jq -e '(.prod_authorized // false) == false and (.prod_write_authorized // false) == false and (.trading_access // false) == false and (.additional_cost_eur // 0) == 0' "$f" >/dev/null
+          done
+
+      - name: Persist only new real-domain PREPROD learning evidence
+        env:
+          SOURCE_RUN_ID: ${{ steps.source.outputs.source_run_id }}
+        run: |
+          set -euo pipefail
+          cd /tmp/cerebro-rsi-domain-outbox
+          git config user.name 'cerebro-rsi-domain-evidence[bot]'
+          git config user.email 'cerebro-rsi-domain-evidence[bot]@users.noreply.github.com'
+          git add "$OUTBOX_STATE_ROOT"
+          if git diff --cached --quiet; then
+            echo 'No new domain evidence batch; idempotent no-op.'
+          else
+            git commit -m "chore(cerebro): append real-domain LRN evidence from source $SOURCE_RUN_ID"
+            git push origin "HEAD:refs/heads/$OUTBOX_STATE_BRANCH"
+          fi
