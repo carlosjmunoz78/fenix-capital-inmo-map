@@ -73,7 +73,7 @@ test('payload fails closed on secrets, customer data, authority, cost, other com
   assert.throws(()=>normalizeHumanException(payload({additional_cost_eur:1})),/cannot grant authority or cost/);
   assert.throws(()=>normalizeHumanException(payload({company_id:'other'})),/company_id denied/);
   assert.throws(()=>normalizeHumanException(payload({engine_id:'NOT-AN-ENGINE'})),/non-canonical engine_id/);
-  assert.throws(()=>normalizeHumanException(payload({plain_language:'token=abc',contains_secrets:false})),/secret-like material/);
+  assert.throws(()=>normalizeHumanException(payload({plain_language:'access_token=abc',contains_secrets:false})),/secret-like material/);
 });
 
 test('supervisor output is directly consumable by the existing human communication layer with stable dedupe',()=>{
