@@ -1,10 +1,10 @@
 {
-  "schema_version": "0.2.0",
+  "schema_version": "0.3.0",
   "policy_id": "CEREBRO-HUMAN-COMM-001",
   "company_id": "GLOBAL",
   "engine_id": "HEX-001",
   "environment": "GLOBAL",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "status": "ACTIVE_CONTRACT",
   "timezone": "Europe/Madrid",
   "additional_cost_budget_eur": 0,
@@ -75,6 +75,30 @@
     "scope": "ALL_CEREBRO_ENGINES_AND_COMPANIES",
     "send_even_without_material_changes": true,
     "human_first": true,
+    "owner_readability_rules": {
+      "plain_spanish_first": true,
+      "do_not_lead_with_ids_shas_prs_runs_or_internal_codes": true,
+      "technical_details_preserved_for_audit_but_hidden_from_main_body": true,
+      "technical_details_visible_only_when_needed_for_decision_or_incident": true,
+      "state_words": [
+        "TRABAJANDO_AHORA",
+        "EN_PRUEBAS",
+        "CASI_TERMINADO",
+        "TERMINADO",
+        "HOLD",
+        "NECESITA_TU_DECISION"
+      ]
+    },
+    "skill_card_required_fields": [
+      "SKILL_EN_LA_QUE_SE_ESTA_TRABAJANDO",
+      "QUE_ES_REALMENTE",
+      "ESTADO_ACTUAL",
+      "QUE_SE_HA_CONSEGUIDO",
+      "QUE_FALTA",
+      "DONDE_MEJORA_CEREBRO",
+      "SIGUIENTE_PASO",
+      "NECESITAS_HACER_ALGO"
+    ],
     "required_sections": [
       "EN_PALABRAS_NORMALES",
       "PUBLICADO_O_CAMBIADO",
