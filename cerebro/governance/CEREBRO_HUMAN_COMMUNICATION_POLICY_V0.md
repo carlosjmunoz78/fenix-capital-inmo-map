@@ -1,112 +1,136 @@
-# CEREBRO · Comunicación humana y autorizaciones V0.3
+# CEREBRO · Comunicación humana y autorizaciones V0.4
 
 ## Objetivo
 
 CEREBRO trabaja de forma autónoma dentro de las políticas vigentes y llama a Carlos solo ante una excepción humana real. La comunicación operativa pertenece a CEREBRO, no a una alarma externa de ChatGPT.
 
-La regla de presentación es obligatoria: **primero español claro y útil para Carlos; después, solo si aporta valor, el detalle técnico**. IDs, SHA, PR, runs, nombres internos, ramas, manifests y códigos de estado se conservan para auditoría, pero no deben dominar el cuerpo principal de los correos.
+Regla obligatoria: **primero español claro y útil para Carlos; después, solo si aporta valor, el detalle técnico**. IDs, SHA, PR, runs, ramas, manifests y códigos internos se conservan para auditoría, pero no deben dominar el cuerpo principal de los correos.
 
 ## HUMAN_REQUIRED por correo
 
-Todo `HUMAN_REQUIRED` canónico debe generar una solicitud de autorización trazable. El correo debe usar siempre primero el alias humano y explicar antes de cualquier detalle técnico:
+Solo los motivos canónicos pueden detener el trabajo y pedir intervención humana:
 
-1. `Te necesito.`
-2. `En palabras normales`: qué ha ocurrido y por qué se ha detenido.
-3. `Para qué sirve`: qué hace el skill/motor.
-4. `Qué quiere hacer ahora`.
-5. `Qué puede modificar`.
-6. `Qué NO puede modificar`.
-7. `Riesgo y rollback`.
-8. Las frases exactas que Carlos puede copiar.
-9. Detalle técnico solo si aporta valor.
+- `LEGAL_REQUIRED`
+- `SIGNATURE_REQUIRED`
+- `LOW_CONFIDENCE`
+- `HIGH_RISK`
+- `POLICY_CONFLICT`
+- `SECURITY_INCIDENT`
+- `MONEY_LIMIT`
+- `CUSTOMER_HUMAN_REQUEST`
 
-Cada solicitud tiene un `approval_id` único. Las únicas órdenes válidas por correo son, una por línea:
+El correo debe explicar primero:
+
+1. Qué ha ocurrido.
+2. Para qué sirve la acción o skill.
+3. Qué quiere hacer CEREBRO.
+4. Qué puede modificar.
+5. Qué NO puede modificar.
+6. Riesgo y rollback.
+7. Qué decisión necesita de Carlos.
+8. Detalle técnico solo si ayuda a decidir o diagnosticar.
+
+Cada solicitud conserva un `approval_id` único y un alcance exacto. La autorización nunca se reutiliza para otro stage, recurso o permiso.
+
+## Botones de decisión
+
+La experiencia objetivo del correo es:
+
+- `✅ AUTORIZAR`
+- `❌ RECHAZAR`
+- `ℹ️ EXPLÍCAME`
+- `⏸️ APARCAR`
+
+Reglas de seguridad obligatorias:
+
+- Abrir el correo o hacer un `GET` **nunca autoriza** una acción.
+- Un escáner de enlaces, prefetcher o antivirus **nunca puede aprobar** una acción.
+- El botón debe llevar a una sesión autenticada de CEREBRO/App.
+- La decisión real se ejecuta como `POST` autenticado y queda ligada al `approval_id`, huella de alcance, entorno y acción exacta.
+- La autorización es de un solo uso, idempotente, caduca y deja auditoría de actor, decisión, fecha, alcance y resultado.
+- Si no existe una sesión autenticada válida, la acción permanece bloqueada.
+- Los botones no pueden eludir una obligación legal, firma obligatoria, límite económico, incidente de seguridad ni ninguna validación adicional requerida por política o ley.
+- Hasta que el puente autenticado de botones esté físicamente validado, se mantiene el mecanismo exacto por respuesta de correo como fallback y no se declara el botón operativo.
+
+## Fallback exacto por respuesta de correo
+
+Mientras sea necesario, las únicas órdenes válidas por correo son, una por línea:
 
 - `AUTORIZO <approval_id>`
 - `NO AUTORIZO <approval_id>`
 - `EXPLICAME <approval_id>`
+- `APARCO <approval_id>`
 
-`Sí`, `vale`, `ok`, `procede` o expresiones genéricas nunca autorizan un gate sensible. Una autorización solo desbloquea el caso y alcance exactos vinculados a su `approval_id`.
-
-## Varias autorizaciones en un mismo correo
-
-Una respuesta puede contener varias líneas y CEREBRO debe procesarlas por separado. Ejemplo:
-
-```text
-AUTORIZO APR-20261008-1234ABCD
-AUTORIZO APR-20261008-5678EF90
-NO AUTORIZO APR-20261008-A1B2C3D4
-EXPLICAME APR-20261008-E5F6A7B8
-```
-
-No existe un `AUTORIZO TODO` genérico para saltar controles.
+`Sí`, `vale`, `ok`, `procede`, `aparca` o expresiones genéricas nunca autorizan ni aparcan un gate sensible. No existe `AUTORIZO TODO`.
 
 ## Horario de envío
 
 Zona horaria canónica: `Europe/Madrid`.
 
-- De `08:00` a `21:00`: CEREBRO puede enviar las solicitudes nuevas progresivamente, agrupando las que coincidan en la misma pasada.
-- De `21:00` a `08:00`: CEREBRO no envía solicitudes individuales; las acumula.
-- A partir de `08:00`: envía un único lote con todo lo pendiente de la noche.
+- `08:00–21:00`: nuevas solicitudes pueden enviarse progresivamente y agruparse por pasada.
+- `21:00–08:00`: no se envían solicitudes individuales; se acumulan.
+- Desde `08:00`: un único lote resume las pendientes de la noche.
+- A las `08:20`: un solo resumen ejecutivo diario de todo CEREBRO.
 
-El procesamiento interno, mitigaciones seguras, logging y trabajo que no requiera al humano continúan durante la noche.
+El trabajo seguro, mitigaciones, logging y operaciones que no requieren humano continúan durante la noche.
 
-## Resumen diario único de TODO CEREBRO
+## Resumen ejecutivo diario
 
-Cada día, a las `08:20` hora de Madrid, debe enviarse un solo correo `CEREBRO · NOVEDADES DEL DÍA · <fecha>` con el estado y los avances de todo CEREBRO, no solo de skills.
+El correo diario es un cuadro de mando para el propietario, no un volcado técnico.
 
-Debe incluir, cuando aplique: publicaciones/cambios, fallos e incidencias, SEO y web, App y CRM, automatizaciones e integraciones, skills y motores, Training/aprendizaje, HOLDs, HUMAN_REQUIRED, coste adicional y siguiente trabajo seguro.
+Debe empezar por un **RESUMEN DE 20 SEGUNDOS** con:
 
-### Regla nueva obligatoria para SKILLS Y MOTORES
+- qué capacidad nueva ha ganado CEREBRO, si existe evidencia real;
+- qué está avanzando;
+- qué se ha descartado o aparcado;
+- si Carlos necesita hacer algo;
+- coste adicional visible.
 
-Carlos no debe recibir una lista de nombres técnicos sin contexto. Cada skill que aparezca en el correo debe explicarse como una ficha corta con este orden:
+### Solo cambios relevantes
 
-1. **Skill en la que se está trabajando**: alias humano primero.
-2. **Qué es realmente**: para qué sirve en palabras normales.
-3. **Estado actual**: `TRABAJANDO AHORA`, `EN PRUEBAS`, `CASI TERMINADO`, `TERMINADO`, `HOLD` o `NECESITA TU DECISIÓN`.
-4. **Qué se ha conseguido**: avance real demostrado.
-5. **Qué falta**: lo pendiente para cerrar el alcance actual.
-6. **Dónde mejora CEREBRO**: áreas o motores expresados en lenguaje de negocio.
-7. **Siguiente paso**: qué hará CEREBRO después.
-8. **¿Necesitas hacer algo?**: `NO` por defecto; `SÍ` solo ante un `HUMAN_REQUIRED` canónico.
+El cuerpo principal muestra prioritariamente lo que ha cambiado desde el último informe. Las skills sin cambios se colapsan en un contador. Las decisiones humanas activas permanecen visibles aunque no hayan cambiado.
 
-Ejemplo de presentación válida:
+En la primera fotografía del nuevo formato, CEREBRO registra la línea base y limita las fichas de HOLD/completadas para no inundar el correo.
 
-```text
-Navegador Automático
-Qué es realmente: permite que CEREBRO navegue por webs y compruebe resultados de forma controlada.
-Estado: EN PRUEBAS.
-Qué se ha conseguido: navegación y comprobación básica validadas.
-Qué falta: cerrar el siguiente bloque seguro y comparar OLD vs NEW.
-Dónde mejora CEREBRO: web, SEO, WordPress y comprobaciones automáticas.
-Siguiente paso: continuar pruebas en LAB/PREPROD.
-¿Necesitas hacer algo?: NO.
-```
+### Ficha obligatoria de una skill relevante
 
-No se deben mostrar por defecto en el cuerpo principal: `candidate_id`, `wrapper_id`, SHA, PR, run ID, nombre de rama, manifest hashes, códigos internos de stage o nombres de workflows. Esa evidencia se conserva intacta para auditoría y solo se muestra cuando ayude a decidir, diagnosticar un fallo o responder a `EXPLICAME`.
+Cada skill detallada debe usar este orden:
 
-### Resto del resumen diario
+1. **Qué es realmente**.
+2. **Por qué la queremos**.
+3. **Ejemplo real en Fénix/CEREBRO**.
+4. **Estado**: `🟢 TERMINADA`, `🔵 EN PRUEBAS SEGURAS`, `🟡 EN CONSTRUCCIÓN / EVALUACIÓN`, `⏸️ APARCADA` o `🔴 NECESITA TU DECISIÓN`.
+5. **Qué ha cambiado desde el último informe**.
+6. **Qué se ha conseguido**.
+7. **Qué falta**.
+8. **Qué podrá hacer CEREBRO cuando termine**.
+9. **Dónde puede mejorar CEREBRO**.
+10. **Impacto medido**: tiempo, calidad o coste solo si existe evidencia; nunca inventar ahorro.
+11. **Decisión de CEREBRO**: `INTEGRAR`, `SEGUIR PROBANDO`, `APARCAR` o `DESCARTAR`.
+12. **Siguiente paso automático**.
+13. **¿Necesitas hacer algo?**: `NO` por defecto; `SÍ` solo ante `HUMAN_REQUIRED` real.
 
-Los bloques generales también deben resumirse en lenguaje normal. Si existen 20 commits o 10 workflows, Carlos debe recibir el resultado o el problema relevante, no una descarga de nombres técnicos. El detalle completo permanece en la evidencia.
+La pregunta de control es: **¿Qué puede hacer CEREBRO ahora que antes no podía hacer?** Si no existe una respuesta demostrada, no se declara una nueva capacidad.
 
-Si una zona todavía no emite telemetría suficiente, el correo debe decirlo expresamente. Nunca se inventa un estado.
+### Filtrado de ruido
+
+Si CEREBRO analiza muchas skills equivalentes, no envía una ficha por cada una. Resume las descartadas/duplicadas y detalla solo las que aportan una diferencia real o requieren decisión.
+
+No se muestran por defecto en el cuerpo principal: `candidate_id`, `wrapper_id`, SHA, PR, run ID, ramas, hashes, stages o nombres de workflows. La evidencia permanece íntegra para auditoría.
 
 ## Aprender de autorizaciones repetidas
 
-CEREBRO registra el patrón de cada autorización mediante una huella de alcance. Tras al menos 3 autorizaciones equivalentes, sin denegaciones ni incidentes y con rollback verde, puede proponer una autorización permanente para ese alcance exacto.
+CEREBRO registra cada autorización mediante una huella de alcance. Tras al menos 3 autorizaciones equivalentes, sin denegaciones, aparcados ni incidentes y con rollback verde, puede proponer una autorización permanente para ese alcance exacto.
 
-No amplía permisos silenciosamente. La activación de una nueva política permanente requiere una última orden explícita de Carlos. Una vez activada, CEREBRO deja de pedir permiso para acciones que permanezcan exactamente dentro de ese alcance.
+La política permanente nunca se activa silenciosamente: requiere una última aprobación explícita y sigue siendo revocable.
 
 No se aprende automáticamente una autorización permanente para legal, firma, incidente de seguridad, límites económicos, petición humana de cliente, Trading real, nuevas credenciales/secretos, borrados destructivos o escrituras PROD no acotadas.
 
-## Alias humano obligatorio
+## Alias humano, privacidad y coste
 
-Cada skill conserva `candidate_id`, `wrapper_id`, nombre técnico, versión y evidencia, pero debe tener también `human_alias`. El alias humano se muestra primero; el nombre técnico queda como referencia secundaria.
-
-## Privacidad, identidad y coste
-
-- La dirección real de Carlos y las credenciales de correo solo existen en secretos/conectores privados.
-- CEREBRO solo acepta autorizaciones desde la identidad privada del propietario configurada.
+- Cada skill conserva identidad técnica y evidencia, pero muestra primero `human_alias`.
+- La identidad y credenciales de correo se mantienen en secretos/conectores privados.
+- CEREBRO solo acepta decisiones desde una identidad/autenticación autorizada.
 - Cada mensaje y `approval_id` se deduplican.
 - Coste adicional objetivo: `0 €`.
-- Esta política no habilita por sí misma PROD writes, Trading, datos de clientes, código externo, credenciales nuevas ni servicios de pago.
+- Esta política no habilita por sí sola PROD writes, Trading, datos de clientes, código externo, credenciales nuevas ni servicios de pago.

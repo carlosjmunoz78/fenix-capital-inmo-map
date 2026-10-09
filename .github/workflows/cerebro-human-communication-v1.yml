@@ -2,13 +2,15 @@ name: CEREBRO Human Communication V1
 
 on:
   push:
-    branches: [main, cerebro/human-approval-email-v1-20261008]
+    branches: [main, cerebro/human-approval-email-v1-20261008, cerebro/skills-email-human-approval-v0]
     paths:
       - 'cerebro/governance/communication-policy.v0.json'
       - 'cerebro/governance/CEREBRO_HUMAN_COMMUNICATION_POLICY_V0.md'
       - 'cerebro/governance/human-communication.mjs'
       - 'cerebro/communication/**'
       - 'cerebro/tests/human-communication-v1.test.mjs'
+      - 'cerebro/tests/human-communication-executive-v1.test.mjs'
+      - 'cerebro/tests/repo-daily-summary-human-readable-v1.test.mjs'
       - 'cerebro/tests/owner-approval-gate-v1.test.mjs'
       - 'cerebro/tests/test_mail_bridge.py'
       - '.github/workflows/cerebro-human-communication-v1.yml'
@@ -49,9 +51,13 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Test communication and exact owner-approval contracts
+      - name: Test communication, executive digest and exact owner-approval contracts
         run: |
-          node --test cerebro/tests/human-communication-v1.test.mjs cerebro/tests/owner-approval-gate-v1.test.mjs
+          node --test \
+            cerebro/tests/human-communication-v1.test.mjs \
+            cerebro/tests/human-communication-executive-v1.test.mjs \
+            cerebro/tests/repo-daily-summary-human-readable-v1.test.mjs \
+            cerebro/tests/owner-approval-gate-v1.test.mjs
           python -m unittest cerebro/tests/test_mail_bridge.py
 
       - name: Load persistent communication Skill AutoLoop and Human Exception state
@@ -143,7 +149,7 @@ jobs:
         if: github.ref != 'refs/heads/main'
         run: |
           test -f artifacts/communication/out/state.after.json
-          echo '{"status":"GREEN_DRY_RUN","mail_sent":false,"state_persisted":false}' > artifacts/communication/branch-gate.json
+          echo '{"status":"GREEN_DRY_RUN","mail_sent":false,"state_persisted":false,"prod_changed":false}' > artifacts/communication/branch-gate.json
 
       - name: Require private mail transport before any due delivery
         if: github.ref == 'refs/heads/main' && steps.mail.outputs.ready != 'true'

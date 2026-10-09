@@ -10,8 +10,8 @@ const EXPLICIT_ALIASES = Object.freeze({
   'reddit-content-ops': 'Operador de Contenido Reddit'
 });
 
-const COMMAND_RE = /^(AUTORIZO|NO AUTORIZO|EXPL[IÍ]CAME)\s+(APR-\d{8}-[A-F0-9]{8})$/iu;
-const GENERIC_AUTH_WORD_RE = /(^|[^a-z0-9])(si|vale|ok|okay|procede|continua)([^a-z0-9]|$)/i;
+const COMMAND_RE = /^(AUTORIZO|NO AUTORIZO|EXPL[IÍ]CAME|APARCO)\s+(APR-\d{8}-[A-F0-9]{8})$/iu;
+const GENERIC_AUTH_WORD_RE = /(^|[^a-z0-9])(si|vale|ok|okay|procede|continua|aparca|aparcado)([^a-z0-9]|$)/i;
 const QUOTED_REPLY_BOUNDARY_RE = /^(on .+wrote:|el .+escribi[oó]:|from:\s+.+|de:\s+.+|-{2,}\s*(original message|mensaje original)\s*-{2,})$/i;
 
 function clean(value){return typeof value === 'string' ? value.trim() : '';}
@@ -75,7 +75,7 @@ export function buildHumanRequiredEmailEnvelope({item={},plain_language,purpose,
   return Object.freeze({
     approval_id,scope_fingerprint,subject:`CEREBRO · TE NECESITO · ${human_alias} · ${human_required}`,first_line:'Te necesito.',human_alias,technical_id,human_required,stage,
     plain_language:clean(plain_language),purpose:clean(purpose),requested_change:clean(requested_change) || clean(exact_action),can_modify:list(can_modify),cannot_modify:list(cannot_modify),risk:clean(risk),rollback:clean(rollback),rollback_green:rollback_green===true,exact_action:clean(exact_action),
-    authorize_phrase:`AUTORIZO ${approval_id}`,deny_phrase:`NO AUTORIZO ${approval_id}`,explain_phrase:`EXPLICAME ${approval_id}`,technical_detail:technical_detail ?? null,
+    authorize_phrase:`AUTORIZO ${approval_id}`,deny_phrase:`NO AUTORIZO ${approval_id}`,explain_phrase:`EXPLICAME ${approval_id}`,park_phrase:`APARCO ${approval_id}`,technical_detail:technical_detail ?? null,
     standing_learning_eligible:Boolean(standing_learning_eligible)&&rollback_green===true,dedupe_marker,gated_action_authorized:false
   });
 }
@@ -101,7 +101,7 @@ export function parseApprovalCommands(text,pendingApprovals={}){
     const verb=match[1].toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
     const approval_id=match[2].toUpperCase(); const request=pending.get(approval_id);
     if(!request){ignored.push({line,approval_id,reason:'UNKNOWN_OR_CLOSED_APPROVAL_ID'}); continue;}
-    const decision=verb === 'AUTORIZO' ? 'AUTHORIZED' : verb === 'NO AUTORIZO' ? 'DENIED' : 'EXPLAIN_REQUESTED';
+    const decision=verb === 'AUTORIZO' ? 'AUTHORIZED' : verb === 'NO AUTORIZO' ? 'DENIED' : verb === 'APARCO' ? 'PARKED' : 'EXPLAIN_REQUESTED';
     candidates.push({line,approval_id,decision,scope_fingerprint:request.scope_fingerprint ?? null,technical_id:request.technical_id ?? null});
   }
   const accepted=[]; const byId=new Map();
@@ -122,9 +122,9 @@ export function evaluateStandingAuthorizationCandidate({history=[],request=null,
   const scope=request.scope_fingerprint;
   const same=(history || []).filter(x=>x?.scope_fingerprint === scope);
   const approvals=same.filter(x=>x?.decision === 'AUTHORIZED'&&x?.rollback_green===true);
-  const denials=same.filter(x=>x?.decision === 'DENIED');
+  const denials=same.filter(x=>x?.decision === 'DENIED'||x?.decision === 'PARKED');
   const incidents=same.filter(x=>x?.incident === true || x?.rollback_green !== true);
-  if(denials.length) return Object.freeze({eligible:false,reason:'OWNER_DENIAL_EXISTS',approvals:approvals.length});
+  if(denials.length) return Object.freeze({eligible:false,reason:'OWNER_DENIAL_OR_PARK_EXISTS',approvals:approvals.length});
   if(incidents.length) return Object.freeze({eligible:false,reason:'INCIDENT_OR_MISSING_ROLLBACK_EVIDENCE_EXISTS',approvals:approvals.length});
   if(approvals.length < minimum) return Object.freeze({eligible:false,reason:'INSUFFICIENT_MATCHING_APPROVALS',approvals:approvals.length,minimum});
   return Object.freeze({eligible:true,reason:'PROPOSE_STANDING_AUTHORIZATION_ONCE',scope_fingerprint:scope,approvals:approvals.length,requires_explicit_owner_command:true});
