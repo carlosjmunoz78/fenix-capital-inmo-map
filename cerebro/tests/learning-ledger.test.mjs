@@ -22,7 +22,7 @@ test('ledger is local PREPROD only, zero-cost and not Supabase-backed',()=>{
   assert.equal(LEARNING_LEDGER_V0_CONTRACT.prod_writes,false);
   assert.match(LEARNING_LEDGER_V0_CONTRACT.duplicate_policy,/FIRST_SEEN_IMMUTABLE/);
   assert.deepEqual(LEARNING_LEDGER_V0_CONTRACT.additive_provenance_fields,['signal_id','source_environment']);
-  assert.equal(LEARNING_LEDGER_V0_CONTRACT.conflict_diagnostics,'FIELD_NAMES_ONLY_NO_PAYLOAD_VALUES');
+  assert.equal(LEARNING_LEDGER_V0_CONTRACT.conflict_diagnostics,'FIELD_NAMES_AND_PRESENCE_ONLY_NO_PAYLOAD_VALUES');
 });
 
 test('ledger persists, restarts, scopes and deduplicates identical learning records',()=>{
@@ -107,6 +107,21 @@ test('conflict diagnostics expose sorted field names only and never payload valu
     assert.equal(error.message,'learning_id conflict with different payload fields:evidence_refs,hypothesis');
     assert.equal(error.message.includes(secretHypothesis),false);
     assert.equal(error.message.includes(secretEvidence),false);
+  }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
+
+test('conflict diagnostics distinguish missing-vs-present optional fields without exposing values',()=>{
+  const {dir,file}=tempFile();
+  try{
+    const ledger=new LearningLedgerV0({file_path:file});
+    const stored={...candidate(),candidate_id:null};
+    ledger.persist(stored);
+    const incoming={...candidate(),observed_at:'2026-10-08T22:10:00Z'};
+    let error;
+    try{ledger.persist(incoming);}catch(caught){error=caught;}
+    assert.ok(error instanceof Error);
+    assert.equal(error.message,'learning_id conflict with different payload fields:candidate_id#presence,observed_at');
+    assert.equal(error.message.includes('null'),false);
   }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });
 
