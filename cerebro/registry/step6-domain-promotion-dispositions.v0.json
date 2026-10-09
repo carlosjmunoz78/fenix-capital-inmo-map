@@ -1,0 +1,116 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_STEP6_DOMAIN_PROMOTION_DISPOSITIONS",
+  "company_id": "fenix",
+  "environment": "PREPROD",
+  "macro_step": "6/6 - AUTONOMIA Y PROMOCION POR DOMINIO",
+  "closure_semantics": "CLOSED_WHEN_EVERY_CANONICAL_DOMAIN_HAS_AN_EVIDENCE_BACKED_PROMOTE_OR_HOLD_DISPOSITION",
+  "global_status": "STEP6_CLOSED_SAFE",
+  "prod_authorized": false,
+  "prod_write_authorized": false,
+  "business_execution_authorized": false,
+  "trading_access": false,
+  "multicompany_continuation": false,
+  "additional_cost_eur": 0,
+  "paid_fallback": false,
+  "browser_binding_required_for_closure": false,
+  "notes": "Closing Step 6 does not mean every domain is autonomous. It means every canonical domain has been evaluated and either safely promoted inside the certified PREPROD envelope or explicitly held/assisted with a concrete evidence gap. No HOLD is silently converted into HUMAN_REQUIRED.",
+  "summary": {
+    "canonical_domains_total": 10,
+    "preprod_autonomous_postmerge_certified": 2,
+    "assisted_or_hold": 8,
+    "unclassified": 0
+  },
+  "dispositions": [
+    {
+      "engine_id": "LRN-001",
+      "domain_id": "cerebro.learning.continuous_evolution",
+      "policy_mode": "PREPROD_AUTONOMOUS",
+      "decision": "PROMOTED_PREPROD_POSTMERGE_CERTIFIED",
+      "evidence_depth": "LIVE_POSTMERGE_CERTIFIED_CONTROL_PLANE",
+      "remaining_blocker": null,
+      "prod_authority": false
+    },
+    {
+      "engine_id": "APP-001",
+      "domain_id": "fenix.app",
+      "policy_mode": "ASSISTED",
+      "decision": "HOLD_DOMAIN_ACCEPTANCE_GATE",
+      "evidence_depth": "LIVE_READONLY_OPERATIONAL_CONTRACT",
+      "remaining_blocker": "No domain-specific write/adoption OLD-vs-NEW, tribunal, canary and rollback proof exists for APP changes.",
+      "prod_authority": false
+    },
+    {
+      "engine_id": "CRM-001",
+      "domain_id": "fenix.crm",
+      "policy_mode": "ASSISTED",
+      "decision": "HOLD_DOMAIN_ACCEPTANCE_GATE",
+      "evidence_depth": "LIVE_READONLY_API_CONTRACT_PROXY",
+      "remaining_blocker": "Current evidence is a read-only proxy contract; autonomous CRM mutation/adoption is not certified.",
+      "prod_authority": false
+    },
+    {
+      "engine_id": "DATA-001",
+      "domain_id": "fenix.data",
+      "policy_mode": "ASSISTED",
+      "decision": "HOLD_DOMAIN_ACCEPTANCE_GATE",
+      "evidence_depth": "LIVE_READONLY_DATA_API_CONTRACT_PROXY",
+      "remaining_blocker": "Data-domain write safety, migration rollback and low-blast-radius canary evidence are not independently certified.",
+      "prod_authority": false
+    },
+    {
+      "engine_id": "KNW-001",
+      "domain_id": "fenix.knowledge.notion",
+      "policy_mode": "ASSISTED",
+      "decision": "HOLD_DOMAIN_ACCEPTANCE_GATE",
+      "evidence_depth": "LIVE_READONLY_ANA_KNOWLEDGE_CONTRACT",
+      "remaining_blocker": "Read-only knowledge evidence exists, but autonomous knowledge mutation/adoption does not have an independent OLD-vs-NEW and rollback certification.",
+      "prod_authority": false
+    },
+    {
+      "engine_id": "WEB-001",
+      "domain_id": "fenix.web.wordpress",
+      "policy_mode": "ASSISTED",
+      "decision": "HOLD_DOMAIN_ACCEPTANCE_GATE",
+      "evidence_depth": "LIVE_PUBLIC_AVAILABILITY",
+      "remaining_blocker": "Public availability proves reachability only; it is insufficient evidence for autonomous WordPress changes.",
+      "prod_authority": false
+    },
+    {
+      "engine_id": "SEO-001",
+      "domain_id": "fenix.seo",
+      "policy_mode": "ASSISTED",
+      "decision": "HOLD_CORE_GUARD_CANONICAL_RECONCILIATION",
+      "evidence_depth": "LIVE_PUBLIC_SEO_AVAILABILITY_ONLY",
+      "remaining_blocker": "CORE_GUARD_CANONICAL_RECONCILIATION_BEFORE_PROD_PROMOTION remains mandatory and cannot be bypassed by RSI, Router, evidence wiring or supervisor layers.",
+      "prod_authority": false
+    },
+    {
+      "engine_id": "MKT-001",
+      "domain_id": "fenix.marketing",
+      "policy_mode": "ASSISTED",
+      "decision": "HOLD_DOMAIN_ACCEPTANCE_GATE",
+      "evidence_depth": "LIVE_PUBLIC_MARKETING_SURFACE_AVAILABILITY_ONLY",
+      "remaining_blocker": "Public surface availability is not sufficient to certify autonomous campaign/content mutation or publishing.",
+      "prod_authority": false
+    },
+    {
+      "engine_id": "AUTO-001",
+      "domain_id": "fenix.automation",
+      "policy_mode": "PREPROD_AUTONOMOUS",
+      "decision": "PROMOTED_PREPROD_POSTMERGE_CERTIFIED",
+      "evidence_depth": "LIVE_AUTOMATION_CONTROL_PLANE_PLUS_ROUTE_REPEATABILITY_AND_TRIBUNAL",
+      "remaining_blocker": null,
+      "prod_authority": false
+    },
+    {
+      "engine_id": "TRN-001",
+      "domain_id": "fenix.training",
+      "policy_mode": "ASSISTED",
+      "decision": "HOLD_DOMAIN_ACCEPTANCE_GATE",
+      "evidence_depth": "LIVE_LEARNING_TRAINING_CONTROL_PLANE",
+      "remaining_blocker": "Training control-plane evidence is live, but TRN-001 lacks an independent same-fixture OLD-vs-NEW, tribunal, canary and rollback certification for autonomous adoption.",
+      "prod_authority": false
+    }
+  ]
+}
