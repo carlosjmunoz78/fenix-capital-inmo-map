@@ -16,6 +16,7 @@ import {
   validateSkillManifest
 } from '../runtime/skill-capability-evolution.mjs';
 import {LearningLedgerV0} from '../runtime/learning-ledger.mjs';
+import {buildVersionedImprovementCandidate} from '../runtime/improvement-candidate-factory.mjs';
 
 function temp(){return fs.mkdtempSync(path.join(os.tmpdir(),'cerebro-skill-evolution-'));}
 function skill(overrides={}){return {company_id:'fenix',environment:'PREPROD',skill_id:'VIDEO-ANALYSIS',skill_version:'1.0.0',capabilities:['video_analysis','content_quality'],inputs:['video'],outputs:['quality_signal'],tags:['marketing','training'],risk_class:'LOW',additional_cost_eur:0,...overrides};}
@@ -93,11 +94,21 @@ test('quality, cost or safety regression fails closed to rollback',()=>{
   assert.equal(quality.decision,'FAIL');assert.ok(quality.reasons.includes('METRIC_REGRESSION'));
 });
 
+test('failed OLD vs NEW evidence is learned as REJECTED and cannot become a new improvement candidate',()=>{
+  const {canonical,plan,result}=planAndResult({candidate:{success_rate:0.79,quality:0.79,latency_ms:101,cost_eur:0,policy_violations:0,safety_violations:0}});
+  const learning=buildSkillLearningRecord({skill:canonical,plan,result,observed_at:'2026-10-09T11:09:00Z'});
+  assert.equal(learning.judge_decision,'FAIL');
+  assert.equal(learning.promotion_state,'REJECTED');
+  const candidate=buildVersionedImprovementCandidate(learning);
+  assert.equal(candidate.ok,false);
+  assert.ok(candidate.reasons.includes('LEARNING_NOT_CANDIDATE'));
+});
+
 test('measured result becomes a valid LRN-001 record and persists idempotently',()=>{
   const root=temp();try{
     const {canonical,plan,result}=planAndResult();const ledgerFile=path.join(root,'learning.v8');
     const learning=buildSkillLearningRecord({skill:canonical,plan,result,observed_at:'2026-10-09T11:10:00Z'});
-    assert.equal(learning.created_by,'CEREBRO_SKILL_CAPABILITY_EVOLUTION_V0');assert.equal(learning.environment,'PREPROD');assert.equal(learning.judge_decision,'PASS');
+    assert.equal(learning.created_by,'CEREBRO_SKILL_CAPABILITY_EVOLUTION_V0');assert.equal(learning.environment,'PREPROD');assert.equal(learning.judge_decision,'PASS');assert.equal(learning.promotion_state,'CANDIDATE');
     const first=finalizeSkillEvaluation({skill:canonical,plan,result,learning_ledger_file:ledgerFile,observed_at:'2026-10-09T11:10:00Z'});
     const second=finalizeSkillEvaluation({skill:canonical,plan,result,learning_ledger_file:ledgerFile,observed_at:'2026-10-09T11:11:00Z'});
     assert.equal(first.learning_persistence.accepted,true);assert.equal(second.learning_persistence.duplicate,true);
