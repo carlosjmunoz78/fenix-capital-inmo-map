@@ -29,8 +29,8 @@ test('registry loads explicit Fenix real-domain policies and remains fail-closed
   assert.equal(registry.company_id,'fenix');
   assert.equal(registry.environment,'PREPROD');
   assert.equal(registry.policy_count,10);
-  assert.equal(registry.autonomous_count,1);
-  assert.equal(registry.assisted_count,9);
+  assert.equal(registry.autonomous_count,2);
+  assert.equal(registry.assisted_count,8);
   assert.equal(registry.prod_authorized,false);
   assert.equal(registry.prod_write_authorized,false);
   assert.equal(registry.trading_access,false);
@@ -38,13 +38,14 @@ test('registry loads explicit Fenix real-domain policies and remains fail-closed
   assert.equal(registry.multicompany_continuation,false);
 });
 
-test('coverage exposes only the certified learning control plane as PREPROD autonomous',()=>{
+test('coverage exposes only certified learning and bounded AUTO-001 control plane as PREPROD autonomous',()=>{
   const coverage=domainPolicyCoverage();
-  assert.deepEqual(coverage.autonomous_domains,['cerebro.learning.continuous_evolution']);
+  assert.deepEqual(coverage.autonomous_domains,['cerebro.learning.continuous_evolution','fenix.automation']);
   assert.equal(coverage.assisted_domains.includes('fenix.app'),true);
   assert.equal(coverage.assisted_domains.includes('fenix.crm'),true);
   assert.equal(coverage.assisted_domains.includes('fenix.seo'),true);
   assert.equal(coverage.assisted_domains.includes('fenix.web.wordpress'),true);
+  assert.equal(coverage.assisted_domains.includes('fenix.training'),true);
   assert.equal(coverage.default_unregistered_domain_decision,'HOLD');
   assert.equal(coverage.multicompany_continuation,false);
 });
@@ -58,7 +59,7 @@ test('unregistered domain cannot enter the autonomous loop',()=>{
   assert.equal(result.prod_authorized,false);
 });
 
-test('registered but not yet evidence-wired domain stays ASSISTED and cannot start B4',()=>{
+test('SEO remains ASSISTED and cannot start B4 or bypass its separate Core Guard gate',()=>{
   const engine_id='SEO-001';
   const result=runRegisteredDomainPreprodLoop({
     company_id:'fenix',engine_id,domain_id:'fenix.seo',candidate:candidate(engine_id),promotion_plan:promotion(engine_id),
@@ -94,19 +95,50 @@ test('certified learning control plane resolves policy and can run bounded PREPR
   assert.equal(result.additional_cost_eur,0);
 });
 
+test('AUTO-001 resolves policy and can run bounded PREPROD B4 while staying non-business/non-PROD',()=>{
+  const engine_id='AUTO-001';
+  const policyDecision=evaluateRegisteredDomainAdoption({
+    company_id:'fenix',engine_id,domain_id:'fenix.automation',candidate:candidate(engine_id,{confidence:0.90}),promotion_plan:promotion(engine_id)
+  });
+  assert.equal(policyDecision.decision,'ALLOW_PREPROD_CANARY');
+  const result=runRegisteredDomainPreprodLoop({
+    company_id:'fenix',engine_id,domain_id:'fenix.automation',candidate:candidate(engine_id,{confidence:0.90}),promotion_plan:promotion(engine_id),
+    shadow_evidence:{pass:true,evidence_refs:['auto:shadow'],additional_cost_eur:0},
+    canary_evidence:{pass:true,evidence_refs:['auto:canary'],additional_cost_eur:0},
+    observed_metrics:{quality_score:90},observed_at:'2026-10-09T07:30:00Z',evidence_refs:['auto:first-real-domain']
+  });
+  assert.equal(result.loop_started,true);
+  assert.equal(result.decision,'KEEP_NONPROD_AND_RELEARN');
+  assert.equal(result.domain_autonomy_mode,'PREPROD_AUTONOMOUS');
+  assert.equal(result.prod_authorized,false);
+  assert.equal(result.prod_write_authorized,false);
+  assert.equal(result.trading_access,false);
+  assert.equal(result.additional_cost_eur,0);
+});
+
 test('registered policy still maps risk, confidence and money boundary to canonical decisions',()=>{
   const high=evaluateRegisteredDomainAdoption({
-    company_id:'fenix',engine_id:'LRN-001',domain_id:'cerebro.learning.continuous_evolution',candidate:candidate('LRN-001',{risk_class:'HIGH'}),promotion_plan:promotion('LRN-001')
+    company_id:'fenix',engine_id:'AUTO-001',domain_id:'fenix.automation',candidate:candidate('AUTO-001',{risk_class:'HIGH'}),promotion_plan:promotion('AUTO-001')
   });
   assert.equal(high.human_required,'HIGH_RISK');
   const low=evaluateRegisteredDomainAdoption({
-    company_id:'fenix',engine_id:'LRN-001',domain_id:'cerebro.learning.continuous_evolution',candidate:candidate('LRN-001',{confidence:0.5}),promotion_plan:promotion('LRN-001')
+    company_id:'fenix',engine_id:'AUTO-001',domain_id:'fenix.automation',candidate:candidate('AUTO-001',{confidence:0.5}),promotion_plan:promotion('AUTO-001')
   });
   assert.equal(low.human_required,'LOW_CONFIDENCE');
   const money=evaluateRegisteredDomainAdoption({
-    company_id:'fenix',engine_id:'LRN-001',domain_id:'cerebro.learning.continuous_evolution',candidate:candidate('LRN-001'),promotion_plan:{...promotion('LRN-001'),additional_cost_budget_eur:1}
+    company_id:'fenix',engine_id:'AUTO-001',domain_id:'fenix.automation',candidate:candidate('AUTO-001'),promotion_plan:{...promotion('AUTO-001'),additional_cost_budget_eur:1}
   });
   assert.equal(money.human_required,'MONEY_LIMIT');
+});
+
+test('exact autonomous set is LRN-001 plus AUTO-001 only',()=>{
+  const registry=loadDomainPolicyRegistry();
+  const ids=registry.policies.filter(x=>x.autonomy_mode==='PREPROD_AUTONOMOUS').map(x=>x.engine_id).sort();
+  assert.deepEqual(ids,['AUTO-001','LRN-001']);
+  assert.equal(registry.policies.find(x=>x.engine_id==='SEO-001').autonomy_mode,'ASSISTED');
+  assert.equal(registry.policies.find(x=>x.engine_id==='APP-001').autonomy_mode,'ASSISTED');
+  assert.equal(registry.policies.find(x=>x.engine_id==='CRM-001').autonomy_mode,'ASSISTED');
+  assert.equal(registry.policies.find(x=>x.engine_id==='DATA-001').autonomy_mode,'ASSISTED');
 });
 
 test('registry contract never grants PROD, Trading or MULTIEMPRESA authority',()=>{
