@@ -137,8 +137,10 @@ test('contracts preserve no paid discovery, no business execution and next bound
   assert.equal(ROUTE001_RESOURCE_DISCOVERY_V0_CONTRACT.paid_resources_discovered,false);
   assert.equal(ROUTE001_RESOURCE_DISCOVERY_V0_CONTRACT.repo_public_required_for_zero_cost_gha_claim,true);
   assert.equal(ROUTE001_SAFE_PREPROD_LOOP_V0_CONTRACT.business_execution,false);
-  assert.equal(ROUTE001_SAFE_PREPROD_LOOP_V0_CONTRACT.network_write,false);
-  assert.equal(ROUTE001_SAFE_PREPROD_LOOP_V0_CONTRACT.repo_write,false);
+  assert.equal(ROUTE001_SAFE_PREPROD_LOOP_V0_CONTRACT.business_network_write,false);
+  assert.equal(ROUTE001_SAFE_PREPROD_LOOP_V0_CONTRACT.business_repo_write,false);
+  assert.equal(ROUTE001_SAFE_PREPROD_LOOP_V0_CONTRACT.control_plane_state_write,true);
+  assert.equal(ROUTE001_SAFE_PREPROD_LOOP_V0_CONTRACT.learning_dispatch,true);
   assert.equal(ROUTE001_SAFE_PREPROD_LOOP_V0_CONTRACT.multicompany_continuation,false);
   assert.equal(ROUTE001_SAFE_PREPROD_LOOP_V0_CONTRACT.next_gate,'ROUTE001_REPEATABLE_AUTONOMOUS_PREPROD_CYCLES_V0');
 });
