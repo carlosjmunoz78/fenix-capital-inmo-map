@@ -1,0 +1,91 @@
+name: CEREBRO Step6 Domain Promotion Closure V0
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/registry/step6-domain-promotion-dispositions.v0.json'
+      - 'cerebro/runtime/step6-domain-promotion-closure.mjs'
+      - 'cerebro/tests/step6-domain-promotion-closure-v0.test.mjs'
+      - 'cerebro/docs/CEREBRO_STEP6_DOMAIN_PROMOTION_CLOSURE_V0_2026-10-09.md'
+      - 'cerebro/registry/rsi-domain-autonomy-policies.v0.json'
+      - 'cerebro/registry/rsi-domain-evidence-sources.v0.json'
+      - '.github/workflows/cerebro-step6-domain-promotion-closure-v0.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'cerebro/registry/step6-domain-promotion-dispositions.v0.json'
+      - 'cerebro/runtime/step6-domain-promotion-closure.mjs'
+      - 'cerebro/tests/step6-domain-promotion-closure-v0.test.mjs'
+      - 'cerebro/docs/CEREBRO_STEP6_DOMAIN_PROMOTION_CLOSURE_V0_2026-10-09.md'
+      - 'cerebro/registry/rsi-domain-autonomy-policies.v0.json'
+      - 'cerebro/registry/rsi-domain-evidence-sources.v0.json'
+      - '.github/workflows/cerebro-step6-domain-promotion-closure-v0.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: cerebro-step6-domain-promotion-closure-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  certify-step6-closure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Assert exact PR head checkout when applicable
+        if: github.event_name == 'pull_request'
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+
+      - name: Run Step-6 closure and existing domain safety regressions
+        run: >-
+          node --test
+          cerebro/tests/step6-domain-promotion-closure-v0.test.mjs
+          cerebro/tests/rsi-domain-policy-registry.test.mjs
+          cerebro/tests/rsi-old-new-evaluation-tribunal-gate.test.mjs
+          cerebro/tests/rsi-preprod-adoption-monitoring-loop.test.mjs
+
+      - name: Execute closure certificate
+        run: node cerebro/runtime/step6-domain-promotion-closure.mjs | tee /tmp/step6-closure.json
+
+      - name: Assert exact closure output
+        run: |
+          set -euo pipefail
+          jq -e '.ok == true and .status == "STEP6_DOMAIN_PROMOTION_CLOSED_SAFE" and .macro_step == "6/6" and .classified_domains == 10 and .assisted_or_hold == 8 and .autonomous_preprod == ["AUTO-001","LRN-001"] and .prod_authorized == false and .prod_write_authorized == false and .business_execution_authorized == false and .trading_access == false and .multicompany_continuation == false and .additional_cost_eur == 0 and .browser_binding_is_separate_step4_gate == true' /tmp/step6-closure.json >/dev/null
+
+      - name: Assert existing AUTO-001 and runtime evidence remain physically green on main
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs?branch=main&per_page=100" > /tmp/main-runs.json
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const d=JSON.parse(fs.readFileSync('/tmp/main-runs.json','utf8'));
+          const runs=d.workflow_runs??[];
+          const required=['CEREBRO First Real Domain AUTO001 V0','PROD Runtime Smoke'];
+          for(const name of required){
+            const r=runs.filter(x=>x.name===name&&x.head_branch==='main').sort((a,b)=>Date.parse(b.created_at)-Date.parse(a.created_at))[0];
+            if(!r||r.status!=='completed'||r.conclusion!=='success') throw new Error(`required live evidence not green:${name}`);
+          }
+          const deploy=runs.filter(x=>x.name==='PROD Live Deploy'&&x.head_branch==='main').sort((a,b)=>Date.parse(b.created_at)-Date.parse(a.created_at))[0];
+          if(!deploy||deploy.status!=='completed'||deploy.conclusion!=='skipped') throw new Error('latest PROD Live Deploy is not safely skipped');
+          NODE
+
+      - name: Assert documentation preserves no-overclaim boundary
+        run: |
+          set -euo pipefail
+          DOC=cerebro/docs/CEREBRO_STEP6_DOMAIN_PROMOTION_CLOSURE_V0_2026-10-09.md
+          grep -F 'does not mean that every domain becomes autonomous' "$DOC"
+          grep -F 'CORE_GUARD_CANONICAL_RECONCILIATION_BEFORE_PROD_PROMOTION' "$DOC"
+          grep -F 'macro Step 6/6 is HECHO' "$DOC"
