@@ -1,0 +1,88 @@
+name: CEREBRO ROUTE001 Zero Cost Router V0
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/registry/execution-model-router-policy.v0.json'
+      - 'cerebro/router/execution-model-router.mjs'
+      - 'cerebro/tests/execution-model-router-v0.test.mjs'
+      - 'cerebro/docs/CEREBRO_ROUTE001_ZERO_COST_EXECUTION_MODEL_ROUTER_V0_2026-10-09.md'
+      - '.github/workflows/cerebro-route001-zero-cost-router-v0.yml'
+      - 'cerebro/governance/identity-credential-broker.mjs'
+      - 'cerebro/governance/identity-session-lifecycle.mjs'
+  push:
+    branches: [main]
+    paths:
+      - 'cerebro/registry/execution-model-router-policy.v0.json'
+      - 'cerebro/router/execution-model-router.mjs'
+      - 'cerebro/tests/execution-model-router-v0.test.mjs'
+      - 'cerebro/docs/CEREBRO_ROUTE001_ZERO_COST_EXECUTION_MODEL_ROUTER_V0_2026-10-09.md'
+      - '.github/workflows/cerebro-route001-zero-cost-router-v0.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  certify-router:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Assert exact PR head checkout when applicable
+        if: github.event_name == 'pull_request'
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+      - name: Test router plus IAM foundations
+        run: >-
+          node --test
+          cerebro/tests/execution-model-router-v0.test.mjs
+          cerebro/tests/identity-credential-broker-v0.test.mjs
+          cerebro/tests/identity-session-lifecycle-v0.test.mjs
+      - name: Assert canonical engine identities and hard zero-cost boundary
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import {loadRouterPolicy,EXECUTION_MODEL_ROUTER_V0_CONTRACT,budgetDecision} from './cerebro/router/execution-model-router.mjs';
+          const engines=JSON.parse(fs.readFileSync('cerebro/registry/engine-registry.seed.json','utf8'));
+          for(const id of ['ROUTE-001','FREE-001','AIBUD-001','LOCAL-001','IAM-001']) if(!engines.engine_ids?.includes(id)) throw new Error(`missing canonical engine:${id}`);
+          const p=loadRouterPolicy();
+          if(p.budget.incremental_cost_hard_cap_eur!==0||p.budget.automatic_paid_fallback!==false||p.budget.silent_spend_allowed!==false) throw new Error('zero cost guard drift');
+          const paid=budgetDecision({estimated_incremental_cost_eur:0.01,paid_route_requested:true});
+          if(paid.status!=='HUMAN_REQUIRED'||paid.human_required!=='MONEY_LIMIT'||paid.execution_authorized!==false||paid.additional_cost_eur!==0) throw new Error('paid fallback safety drift');
+          if(EXECUTION_MODEL_ROUTER_V0_CONTRACT.prod_authorized!==false||EXECUTION_MODEL_ROUTER_V0_CONTRACT.prod_write_authorized!==false||EXECUTION_MODEL_ROUTER_V0_CONTRACT.execution_authorized!==false||EXECUTION_MODEL_ROUTER_V0_CONTRACT.trading_access!==false||EXECUTION_MODEL_ROUTER_V0_CONTRACT.multicompany_continuation!==false) throw new Error('router authority drift');
+          NODE
+      - name: Verify preserve-first legacy router evidence without merging stale branch
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin 'refs/heads/cerebro-model-router-v0-20260911:refs/remotes/origin/cerebro-model-router-v0-20260911'
+          git show 'refs/remotes/origin/cerebro-model-router-v0-20260911:cerebro/router/model-router.mjs' > /tmp/legacy-model-router.mjs
+          grep -F "deterministic=new Set(['sql','python','typescript','rule','api','local_tool','engine_call'])" /tmp/legacy-model-router.mjs >/dev/null
+          grep -F "reason:'MONEY_LIMIT'" /tmp/legacy-model-router.mjs >/dev/null
+          grep -F 'cerebro-model-router-v0-20260911' cerebro/registry/execution-model-router-policy.v0.json >/dev/null
+      - name: Certify representative no-cost routes and fail-closed fallbacks
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import {routeWork} from './cerebro/router/execution-model-router.mjs';
+          const lifecycle={credential_health:{'credref:github-actions-token':{usable:true,status:'HEALTHY_PROVIDER_MANAGED'}},disabled_credential_refs:[]};
+          const local={resource_id:'local-rule',resource_class:'DETERMINISTIC_LOCAL',capabilities:['rule'],available:true,incremental_cost_eur:0,privacy:'LOCAL',ai:false,latency_ms:1};
+          const r=routeWork({company_id:'fenix',environment:'PREPROD',task_type:'rule',risk:'LOW',confidence:1,contains_customer_data:false,contains_secrets:false,prod_write_requested:false,trading_requested:false,available_resources:[local],lifecycle_state:lifecycle});
+          if(r.status!=='ROUTED'||r.selected_resource_id!=='local-rule'||r.ai_required!==false||r.cost_target_eur!==0||r.execution_authorized!==false) throw new Error('deterministic zero-cost route failed');
+          const paid=routeWork({company_id:'fenix',environment:'PREPROD',task_type:'research',risk:'LOW',confidence:1,contains_customer_data:false,contains_secrets:false,prod_write_requested:false,trading_requested:false,paid_route_requested:true,estimated_paid_cost_eur:0.2,available_resources:[{resource_id:'paid',resource_class:'PAID_EXTERNAL',capabilities:['research'],available:true,incremental_cost_eur:0.2,privacy:'APPROVED_CLOUD',ai:true}]});
+          if(paid.human_required!=='MONEY_LIMIT'||paid.execution_authorized!==false) throw new Error('paid route did not fail closed');
+          NODE
+      - name: Assert browser and privacy safeguards are explicit
+        run: |
+          set -euo pipefail
+          grep -F '"fallback_only": true' cerebro/registry/execution-model-router-policy.v0.json >/dev/null
+          grep -F '"captcha_bypass_allowed": false' cerebro/registry/execution-model-router-policy.v0.json >/dev/null
+          grep -F '"mfa_bypass_allowed": false' cerebro/registry/execution-model-router-policy.v0.json >/dev/null
+          grep -F '"customer_data_external_free_ai_allowed": false' cerebro/registry/execution-model-router-policy.v0.json >/dev/null
+          grep -F 'ROUTE001_REAL_RESOURCE_DISCOVERY_AND_PREPROD_LOOP_V0' cerebro/docs/CEREBRO_ROUTE001_ZERO_COST_EXECUTION_MODEL_ROUTER_V0_2026-10-09.md >/dev/null
