@@ -1,0 +1,81 @@
+name: CEREBRO Universal Capability Evolution Loop V0
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/runtime/capability-evolution-loop.mjs'
+      - 'cerebro/registry/capability-evolution-registry.v0.json'
+      - 'cerebro/tests/capability-evolution-loop-v0.test.mjs'
+      - 'cerebro/docs/CEREBRO_UNIVERSAL_CAPABILITY_EVOLUTION_LOOP_V0_2026-10-09.md'
+      - '.github/workflows/cerebro-universal-capability-evolution-loop-v0.yml'
+      - 'cerebro/runtime/universal-learning-ingress.mjs'
+      - 'cerebro/runtime/continuous-improvement-contract.mjs'
+      - 'cerebro/runtime/rsi-domain-policy-registry.mjs'
+      - 'cerebro/registry/rsi-domain-autonomy-policies.v0.json'
+      - 'cerebro/registry/engine-registry.seed.json'
+  push:
+    branches: [main]
+    paths:
+      - 'cerebro/runtime/capability-evolution-loop.mjs'
+      - 'cerebro/registry/capability-evolution-registry.v0.json'
+      - 'cerebro/tests/capability-evolution-loop-v0.test.mjs'
+      - 'cerebro/docs/CEREBRO_UNIVERSAL_CAPABILITY_EVOLUTION_LOOP_V0_2026-10-09.md'
+      - '.github/workflows/cerebro-universal-capability-evolution-loop-v0.yml'
+      - 'cerebro/runtime/universal-learning-ingress.mjs'
+      - 'cerebro/runtime/continuous-improvement-contract.mjs'
+      - 'cerebro/runtime/rsi-domain-policy-registry.mjs'
+      - 'cerebro/registry/rsi-domain-autonomy-policies.v0.json'
+      - 'cerebro/registry/engine-registry.seed.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-universal-capability-evolution-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  capability-evolution-v0:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Assert exact PR head checkout when applicable
+        if: github.event_name == 'pull_request'
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+
+      - name: Run capability loop and safety regressions
+        run: >-
+          node --test
+          cerebro/tests/capability-evolution-loop-v0.test.mjs
+          cerebro/tests/continuous-improvement-contract.test.mjs
+          cerebro/tests/rsi-domain-policy-registry.test.mjs
+          cerebro/tests/rsi-real-domain-evidence-wiring.test.mjs
+          cerebro/tests/human-exception-supervisor-v0.test.mjs
+
+      - name: Assert capability registry safety envelope
+        run: |
+          set -euo pipefail
+          jq -e '.state_type == "CEREBRO_CAPABILITY_EVOLUTION_REGISTRY" and .environment == "PREPROD_CONTROL_PLANE" and .multi_company_ready == true and .multicompany_runtime_activation == false and .direct_prod_binding_allowed == false and .engine_creation_directly_authorized == false and .extend_existing_before_create == true and .zero_cost_first == true and .prod_authorized == false and .prod_write_authorized == false and .trading_access == false and .additional_cost_eur == 0' cerebro/registry/capability-evolution-registry.v0.json >/dev/null
+
+      - name: Assert runtime contract without mutating existing systems
+        run: |
+          set -euo pipefail
+          node --input-type=module -e "import {CAPABILITY_EVOLUTION_LOOP_V0_CONTRACT as c} from './cerebro/runtime/capability-evolution-loop.mjs'; if(c.new_engine_id_created!==false||c.any_canonical_engine_can_be_target!==true||c.direct_prod_binding_allowed!==false||c.engine_creation_directly_authorized!==false||c.additional_cost_target_eur!==0) process.exit(1); console.log(JSON.stringify(c));"
+
+      - name: Assert documentation no-overclaim boundary
+        run: |
+          set -euo pipefail
+          DOC=cerebro/docs/CEREBRO_UNIVERSAL_CAPABILITY_EVOLUTION_LOOP_V0_2026-10-09.md
+          grep -F '**No es un Paso 7.**' "$DOC"
+          grep -F '**Todos los 177 motores canónicos pueden ser targets explícitos de una capability.**' "$DOC"
+          grep -F 'no una autorización universal de mutación' "$DOC"
+          grep -F 'prod_authorized=false' "$DOC"
