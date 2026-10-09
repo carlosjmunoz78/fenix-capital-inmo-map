@@ -60,7 +60,7 @@ jobs:
           import {CANONICAL_HUMAN_REQUIRED,HUMAN_EXCEPTION_SUPERVISOR_V0_CONTRACT} from './cerebro/governance/human-exception-supervisor.mjs';
           const p=JSON.parse(fs.readFileSync('cerebro/governance/communication-policy.v0.json','utf8'));
           const expected=[...CANONICAL_HUMAN_REQUIRED].sort();
-          const actual=[...(p.human_required_reasons??[])].sort();
+          const actual=[...(p.human_required_email?.human_required_reasons??[])].sort();
           if(JSON.stringify(expected)!==JSON.stringify(actual)) throw new Error('human exception policy mismatch');
           if(HUMAN_EXCEPTION_SUPERVISOR_V0_CONTRACT.engine_id!=='HEX-001'||HUMAN_EXCEPTION_SUPERVISOR_V0_CONTRACT.prod_authorized!==false||HUMAN_EXCEPTION_SUPERVISOR_V0_CONTRACT.trading_access!==false||HUMAN_EXCEPTION_SUPERVISOR_V0_CONTRACT.additional_cost_target_eur!==0) throw new Error('supervisor contract drift');
           NODE
