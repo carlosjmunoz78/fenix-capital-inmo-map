@@ -1,8 +1,10 @@
 # CEREBRO Skill Capability Evolution V0
 
 Fecha: 2026-10-09  
-Estado de implementación en esta rama: CANDIDATE / PREPROD ONLY  
-Coste adicional objetivo: 0 EUR
+Estado: **HECHO / MERGED / CERTIFIED PREPROD**  
+Merge principal: `0c92fa1ba1b72d3ef4f1a772990d4d17428dee70`  
+PR de implementación: `#537`  
+Coste adicional objetivo y medido en contrato: **0 EUR**
 
 ## Objetivo
 
@@ -34,6 +36,7 @@ Restricciones fail-closed:
 - Aprendizaje persistente existente: `runtime/learning-ledger.mjs` (`LRN-001`).
 - FACT-001 existente permanece como unica fabrica de scaffold; esta capa solo emite gap candidato.
 - Tribunal, Supervisor, autonomia por dominio, permisos, rollback y rebuild siguen siendo gates obligatorios existentes.
+- Skill Discovery/Supply Chain existente permanece intacto; esta capa cierra el enlace universal desde manifest admitido hasta impacto, experimento y aprendizaje.
 
 No se sustituye ningun runtime, motor, tabla, workflow o integracion existente.
 
@@ -64,7 +67,10 @@ La evaluacion rechaza automaticamente regresiones de coste, seguridad, politica 
 
 ## Aprendizaje LRN-001
 
-Cada resultado medido se transforma en un learning record compatible con `LRN-001`. Las mejoras aprobadas continuan hacia tribunal. Los resultados negativos se conservan como evidencia de aprendizaje pero no autorizan promocion.
+Cada resultado medido se transforma en un learning record compatible con `LRN-001`.
+
+- Un resultado `PASS` queda como `promotion_state=CANDIDATE` y continua hacia tribunal.
+- Un resultado `FAIL` queda como `promotion_state=REJECTED`: se conserva como aprendizaje, pero no puede volver a materializarse como candidato de mejora.
 
 ## Runbook
 
@@ -83,6 +89,8 @@ Cada resultado medido se transforma en un learning record compatible con `LRN-00
 
 La capa no modifica PROD. Si un candidato empeora una metrica, aumenta coste o introduce una regresion de seguridad/politica, el resultado es `ROLLBACK`. La version baseline permanece como referencia y la candidate no recibe autoridad de promocion.
 
+Los resultados FAIL se persisten como evidencia `REJECTED`, evitando que el candidate factory generico los recicle como mejora valida.
+
 ## Rebuild
 
 El registro de skills es reproducible desde manifests canonicos. Los fingerprints son deterministas respecto al contrato y no dependen del timestamp de registro. Los planes OLD vs NEW se regeneran a partir del manifest canonico + descriptores de motores.
@@ -90,14 +98,16 @@ El registro de skills es reproducible desde manifests canonicos. Los fingerprint
 ## Estado de autonomia
 
 - LAB: permitido para pruebas locales.
-- PREPROD: objetivo operativo de V0.
-- PROD global: NO autorizado.
+- PREPROD: **operativo/certificado para este V0**.
+- PROD global: **NO autorizado**.
 - Autoaplicacion: solo puede avanzar en los dominios cuya politica de autonomia ya lo permita y siempre tras evaluacion + tribunal + supervisor.
 - Trading: aislado y no accesible.
 
-## Aceptacion V0
+Esta ampliacion transversal no crea un Paso 7: los seis pasos canonicos de CEREBRO permanecen cerrados y esta capa se integra sobre ellos.
 
-La certificacion debe demostrar como minimo:
+## Certificacion V0
+
+La implementacion certificada demuestra:
 
 1. idempotencia y conflicto de version;
 2. campos multiempresa;
@@ -107,7 +117,29 @@ La certificacion debe demostrar como minimo:
 6. OLD vs NEW bloquea regresiones;
 7. resultado llega a LRN-001;
 8. rollback ante regresion;
-9. HUMAN_REQUIRED fuera del canon es rechazado;
-10. coste adicional 0 EUR;
-11. PREPROD fail-closed y sin PROD global;
-12. no regresion de seguridad/politicas.
+9. aprendizaje negativo queda REJECTED y no vuelve a promocion;
+10. HUMAN_REQUIRED fuera del canon es rechazado;
+11. coste adicional 0 EUR;
+12. PREPROD fail-closed y sin PROD global;
+13. no regresion de seguridad/politicas;
+14. aislamiento de App conservado;
+15. Step 6 permanece CLOSED SAFE.
+
+## Evidencia de aceptación
+
+- PR `#537` head `0987955832ce23f989c612d85cca16c5d44cdf83`.
+- `CEREBRO RSI Promotion Readiness Shadow V0` run `37926933527`: `app-surface-isolation-shadow`, `factory-preprod-shadow` y `tribunal-shadow` en SUCCESS.
+- `CEREBRO Step6 Domain Promotion Closure V0` PR run `37926933855`: SUCCESS.
+- Merge `0c92fa1ba1b72d3ef4f1a772990d4d17428dee70`.
+- `PROD Runtime Smoke` post-merge run `37927030302`: SUCCESS. Es smoke de no regresion; no autoriza esta capa en PROD.
+- `CEREBRO Step6 Domain Promotion Closure V0` post-merge run `37927030289`: SUCCESS.
+- `CEREBRO Skill Discovery Scout` post-merge run `37927030303`: SUCCESS, preservando discovery read-only/fail-closed y supply-chain existente.
+- `PROD Live Deploy` run `37927030319`: SKIPPED. No hubo despliegue de esta ampliacion a PROD.
+
+## Changelog 2026-10-09
+
+- Añadido `runtime/skill-capability-evolution.mjs`.
+- Añadidos tests de aceptación `tests/skill-capability-evolution.test.mjs`.
+- Corregida deuda de path CWD-independiente en tests de cierre Step 6 sin alterar disposiciones ni autoridad.
+- Añadida barrera para que evidencia negativa de skills sea aprendida como `REJECTED` y no reciclada como candidato.
+- PR #537 fusionada y certificada en PREPROD; PROD global permanece bloqueado.
