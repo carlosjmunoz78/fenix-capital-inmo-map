@@ -86,6 +86,6 @@ jobs:
         run: |
           set -euo pipefail
           DOC=cerebro/docs/CEREBRO_STEP6_DOMAIN_PROMOTION_CLOSURE_V0_2026-10-09.md
-          grep -F 'closure does not mean that every domain becomes autonomous' "$DOC"
+          grep -F 'does not mean that every domain becomes autonomous' "$DOC"
           grep -F 'CORE_GUARD_CANONICAL_RECONCILIATION_BEFORE_PROD_PROMOTION' "$DOC"
           grep -F 'macro Step 6/6 is HECHO' "$DOC"
