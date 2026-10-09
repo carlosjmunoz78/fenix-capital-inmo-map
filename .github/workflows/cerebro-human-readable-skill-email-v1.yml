@@ -1,0 +1,26 @@
+name: CEREBRO Human Readable Skill Email V1
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/communication/repo-daily-summary.mjs'
+      - 'cerebro/governance/communication-policy.v0.json'
+      - 'cerebro/governance/CEREBRO_HUMAN_COMMUNICATION_POLICY_V0.md'
+      - 'cerebro/tests/repo-daily-summary-human-readable-v1.test.mjs'
+      - '.github/workflows/cerebro-human-readable-skill-email-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  human-readable-email-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Validate owner-facing skill email contract
+        run: node --test cerebro/tests/repo-daily-summary-human-readable-v1.test.mjs
