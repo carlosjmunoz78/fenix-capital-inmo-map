@@ -26,13 +26,14 @@ function compatibleRepeat(prior,incoming){
   delete left.observed_at;delete right.observed_at;
   for(const field of ADDITIVE_PROVENANCE_FIELDS){
     const before=left[field];const after=right[field];
-    if(sameValue(before,after)) continue;
     const beforeMissing=missing(before);const afterMissing=missing(after);
-    if(beforeMissing!==afterMissing){
-      compatibilityFields.push(field);
+    if(beforeMissing||afterMissing){
+      const presenceDiffers=Object.hasOwn(left,field)!==Object.hasOwn(right,field);
+      if(presenceDiffers||!sameValue(before,after)) compatibilityFields.push(field);
       delete left[field];delete right[field];
       continue;
     }
+    if(sameValue(before,after)) continue;
     return Object.freeze({ok:false,compatibility_fields:[],conflict_fields:differingFields(prior,incoming)});
   }
   const ok=stableIdempotencyKey(left)===stableIdempotencyKey(right);
@@ -104,7 +105,7 @@ export const LEARNING_LEDGER_V0_CONTRACT=Object.freeze({
   environment:PREPROD,
   persistence:'local-atomic-v8-journal',
   persistence_scope:PERSISTENCE_SCOPE,
-  duplicate_policy:'FIRST_SEEN_IMMUTABLE; OBSERVED_AT_MAY_CHANGE; SIGNAL_ID_AND_SOURCE_ENVIRONMENT_MAY_DIFFER ONLY BY LEGACY PRESENCE_OR_ABSENCE; NONEMPTY_PROVENANCE_VALUE_CHANGES_AND_ALL_OTHER_SAME_ID_MUTATIONS_FAIL_CLOSED',
+  duplicate_policy:'FIRST_SEEN_IMMUTABLE; OBSERVED_AT_MAY_CHANGE; SIGNAL_ID_AND_SOURCE_ENVIRONMENT_MAY_DIFFER ONLY BY LEGACY MISSING_FORMS_OR_PRESENCE_ABSENCE; NONEMPTY_PROVENANCE_VALUE_CHANGES_AND_ALL_OTHER_SAME_ID_MUTATIONS_FAIL_CLOSED',
   additive_provenance_fields:ADDITIVE_PROVENANCE_FIELDS,
   conflict_diagnostics:'FIELD_NAMES_AND_PRESENCE_ONLY_NO_PAYLOAD_VALUES',
   supabase_required:false,
