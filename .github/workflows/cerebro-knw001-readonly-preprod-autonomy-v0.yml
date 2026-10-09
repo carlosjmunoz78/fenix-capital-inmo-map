@@ -1,0 +1,109 @@
+name: CEREBRO KNW001 Readonly PREPROD Autonomy V0
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/registry/rsi-domain-autonomy-policies.v0.json'
+      - 'cerebro/runtime/rsi-domain-autonomy-policy.mjs'
+      - 'cerebro/runtime/rsi-domain-policy-registry.mjs'
+      - 'cerebro/runtime/knw001-readonly-preprod-autonomy-gate.mjs'
+      - 'cerebro/tests/rsi-domain-policy-registry.test.mjs'
+      - 'cerebro/tests/knw001-readonly-preprod-autonomy-v0.test.mjs'
+      - 'cerebro/docs/CEREBRO_KNW001_READONLY_PREPROD_AUTONOMY_V0_2026-10-09.md'
+      - 'src/AnaKnowledgeReviewGuard.tsx'
+      - '.github/workflows/cerebro-knw001-readonly-preprod-autonomy-v0.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'cerebro/registry/rsi-domain-autonomy-policies.v0.json'
+      - 'cerebro/runtime/rsi-domain-autonomy-policy.mjs'
+      - 'cerebro/runtime/rsi-domain-policy-registry.mjs'
+      - 'cerebro/runtime/knw001-readonly-preprod-autonomy-gate.mjs'
+      - 'cerebro/tests/rsi-domain-policy-registry.test.mjs'
+      - 'cerebro/tests/knw001-readonly-preprod-autonomy-v0.test.mjs'
+      - 'cerebro/docs/CEREBRO_KNW001_READONLY_PREPROD_AUTONOMY_V0_2026-10-09.md'
+      - '.github/workflows/cerebro-knw001-readonly-preprod-autonomy-v0.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  certify-knw-readonly:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Assert exact PR head when applicable
+        if: github.event_name == 'pull_request'
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+      - name: Run KNW capability and shared domain-policy tests
+        run: >-
+          node --test
+          cerebro/tests/knw001-readonly-preprod-autonomy-v0.test.mjs
+          cerebro/tests/rsi-domain-policy-registry.test.mjs
+          cerebro/tests/rsi-domain-autonomy-policy.test.mjs
+          cerebro/tests/rsi-old-new-evaluation-tribunal-gate.test.mjs
+          cerebro/tests/rsi-preprod-adoption-monitoring-loop.test.mjs
+      - name: Resolve fresh successful PROD Runtime Smoke evidence on main
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/knw001
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs?branch=main&status=success&per_page=100" > artifacts/knw001/runs.json
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const data=JSON.parse(fs.readFileSync('artifacts/knw001/runs.json','utf8'));
+          const cutoff=Date.now()-48*3600*1000;
+          const rows=(data.workflow_runs??[]).filter(r=>r.name==='PROD Runtime Smoke'&&r.conclusion==='success'&&r.head_branch==='main'&&Date.parse(r.updated_at??r.created_at)>=cutoff).sort((a,b)=>Date.parse(b.updated_at??b.created_at)-Date.parse(a.updated_at??a.created_at));
+          if(!rows.length) throw new Error('fresh PROD Runtime Smoke evidence missing');
+          const r=rows[0];
+          fs.writeFileSync('artifacts/knw001/runtime-smoke.json',JSON.stringify({workflow_name:r.name,run_id:r.id,head_sha:r.head_sha,head_branch:r.head_branch,conclusion:r.conclusion,observed_at:r.updated_at??r.created_at},null,2)+'\n');
+          NODE
+      - name: Prove existing human knowledge authority guard remains intact
+        run: |
+          set -euo pipefail
+          grep -F "prepare(item:KnowledgeItem" src/AnaKnowledgeReviewGuard.tsx >/dev/null
+          grep -F "Confirmar clasificación" src/AnaKnowledgeReviewGuard.tsx >/dev/null
+          grep -F "r.status===403" src/AnaKnowledgeReviewGuard.tsx >/dev/null
+          grep -F "Hipotecas y Finanzas quedan reservadas a Belén" src/AnaKnowledgeReviewGuard.tsx >/dev/null
+          grep -F "/decision" src/AnaKnowledgeReviewGuard.tsx >/dev/null
+      - name: Execute physical KNW read-only OLD-vs-NEW tribunal and B4 gate
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import {runKnwReadonlyAutonomyGate} from './cerebro/runtime/knw001-readonly-preprod-autonomy-gate.mjs';
+          const smoke=JSON.parse(fs.readFileSync('artifacts/knw001/runtime-smoke.json','utf8'));
+          const r=await runKnwReadonlyAutonomyGate({runtime_smoke:smoke,observed_at:new Date().toISOString()});
+          fs.writeFileSync('artifacts/knw001/gate-result.json',JSON.stringify(r,null,2)+'\n');
+          if(r.ok!==true||r.status!=='KNW001_READONLY_CAPABILITY_PREPROD_GREEN'||r.b3_decision!=='APPROVE_PREPROD_NEXT_STAGE'||r.tribunal_decision!=='PASS'||r.b4_decision!=='KEEP_NONPROD_AND_RELEARN'||r.whole_domain_autonomy!==false||r.domain_autonomy_mode!=='ASSISTED'||r.capability_autonomy_mode!=='PREPROD_AUTONOMOUS'||r.human_classification_approval_required!==true||r.prod_authorized!==false||r.prod_write_authorized!==false||r.trading_access!==false||r.additional_cost_eur!==0) throw new Error(`KNW gate not green:${JSON.stringify(r)}`);
+          NODE
+      - name: Assert whole-domain autonomy set is unchanged and capability scope is exact
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import {loadDomainPolicyRegistry} from './cerebro/runtime/rsi-domain-policy-registry.mjs';
+          const r=loadDomainPolicyRegistry();
+          const autonomous=r.policies.filter(x=>x.autonomy_mode==='PREPROD_AUTONOMOUS').map(x=>x.engine_id).sort();
+          if(JSON.stringify(autonomous)!==JSON.stringify(['AUTO-001','LRN-001'])) throw new Error(`whole-domain autonomy drift:${autonomous}`);
+          const k=r.policies.find(x=>x.engine_id==='KNW-001');
+          if(k.autonomy_mode!=='ASSISTED'||k.capability_autonomy_mode!=='PREPROD_AUTONOMOUS'||JSON.stringify(k.allowed_capabilities)!==JSON.stringify(['READONLY_REVIEW_PREPARATION'])) throw new Error('KNW capability scope drift');
+          if(r.prod_authorized!==false||r.prod_write_authorized!==false||r.trading_access!==false||r.additional_cost_eur!==0||r.multicompany_continuation!==false) throw new Error('authority/cost drift');
+          NODE
+      - name: Upload KNW exact-head evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-knw001-readonly-preprod-autonomy-v0-${{ github.run_id }}
+          path: artifacts/knw001/**
+          if-no-files-found: warn
+          retention-days: 30
