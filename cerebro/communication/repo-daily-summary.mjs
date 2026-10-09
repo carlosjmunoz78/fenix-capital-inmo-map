@@ -1,13 +1,33 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import {createHash} from 'node:crypto';
 
 function read(file,fallback){return file&&fs.existsSync(file)?JSON.parse(fs.readFileSync(file,'utf8')):fallback;}
 function uniq(values){return [...new Set(values.filter(Boolean))];}
 function text(value){return String(value??'').trim();}
 function matches(value,words){const x=text(value).toLowerCase();return words.some(w=>x.includes(w));}
 function listValues(value){return Object.values(value??{});}
-function humanName(item={}){return text(item.human_alias)||text(item.name)||text(item.candidate_id)||'Habilidad sin nombre';}
-function stableSkillId(item={}){return text(item.candidate_id)||text(item.wrapper_id)||text(item.name)||humanName(item);}
+function humanName(item={}){return text(item.human_alias)||text(item.name)||'Habilidad sin nombre';}
+function stableSkillId(item={}){
+  const name=text(item.name).toLowerCase();
+  if(name)return `name:${name}`;
+  const alias=text(item.human_alias).toLowerCase();
+  if(alias)return `alias:${alias}`;
+  const raw=text(item.candidate_id)||text(item.wrapper_id)||JSON.stringify(item);
+  return `anon:${createHash('sha256').update(raw).digest('hex').slice(0,16)}`;
+}
+
+const HUMAN_REASON=Object.freeze({
+  LEGAL_REQUIRED:'obligación legal',
+  SIGNATURE_REQUIRED:'firma obligatoria',
+  LOW_CONFIDENCE:'confianza insuficiente para decidir solo',
+  HIGH_RISK:'riesgo alto',
+  POLICY_CONFLICT:'conflicto con una política de CEREBRO',
+  SECURITY_INCIDENT:'incidente de seguridad',
+  MONEY_LIMIT:'límite económico',
+  CUSTOMER_HUMAN_REQUEST:'petición expresa de intervención humana'
+});
+function humanReason(code){return HUMAN_REASON[text(code)]||'una excepción humana real';}
 
 const SKILL_PURPOSE=Object.freeze({
   'obsidian':'Sirve para organizar, relacionar y reutilizar mejor el conocimiento que CEREBRO necesita recordar.',
@@ -57,129 +77,86 @@ const ENGINE_IMPACT=Object.freeze({
 
 function skillPurpose(item={}){
   const name=text(item.name).toLowerCase();
-  if(SKILL_PURPOSE[name]) return SKILL_PURPOSE[name];
+  if(SKILL_PURPOSE[name])return SKILL_PURPOSE[name];
   const domain=text(item.domain).toLowerCase();
-  if(DOMAIN_PURPOSE[domain]) return DOMAIN_PURPOSE[domain];
+  if(DOMAIN_PURPOSE[domain])return DOMAIN_PURPOSE[domain];
   return 'Es una habilidad que CEREBRO está evaluando para comprobar si aporta una mejora real antes de integrarla.';
 }
-
-function skillWhy(item={}){
-  const name=text(item.name).toLowerCase();
-  if(SKILL_WHY[name]) return `La queremos ${SKILL_WHY[name]}`;
-  return 'La queremos solo si demuestra una capacidad que no esté ya cubierta o una mejora medible sobre lo existente.';
-}
-
-function skillExample(item={}){
-  const name=text(item.name).toLowerCase();
-  return SKILL_EXAMPLE[name]||'Ejemplo: usarla en un caso real controlado y conservarla únicamente si mejora el resultado frente a la alternativa actual.';
-}
+function skillWhy(item={}){const name=text(item.name).toLowerCase();return SKILL_WHY[name]?`La queremos ${SKILL_WHY[name]}`:'La queremos solo si demuestra una capacidad que no esté ya cubierta o una mejora medible sobre lo existente.';}
+function skillExample(item={}){const name=text(item.name).toLowerCase();return SKILL_EXAMPLE[name]||'Ejemplo: usarla en un caso real controlado y conservarla únicamente si mejora el resultado frente a la alternativa actual.';}
 
 function skillImpact(item={}){
   const bindings=Array.isArray(item.engine_bindings)?item.engine_bindings:[];
   const labels=uniq(bindings.map(x=>ENGINE_IMPACT[x]).filter(Boolean));
-  if(labels.length) return labels.slice(0,4).join(', ')+'.';
+  if(labels.length)return labels.slice(0,4).join(', ')+'.';
   const name=text(item.name).toLowerCase();
-  if(name==='obsidian') return 'memoria, conocimiento y aprendizaje.';
-  if(name==='github'||name==='kairos-lite') return 'programación, App, automatizaciones y mantenimiento técnico.';
-  if(name==='agent-browser') return 'web, SEO, WordPress, comprobaciones y automatizaciones de navegador.';
-  if(name==='supabase-postgres-best-practices') return 'App, CRM, datos, permisos y rendimiento.';
-  if(name==='skill-creator') return 'todo CEREBRO, porque permite crear nuevas habilidades reutilizables.';
+  if(name==='obsidian')return 'memoria, conocimiento y aprendizaje.';
+  if(name==='github'||name==='kairos-lite')return 'programación, App, automatizaciones y mantenimiento técnico.';
+  if(name==='agent-browser')return 'web, SEO, WordPress, comprobaciones y automatizaciones de navegador.';
+  if(name==='supabase-postgres-best-practices')return 'App, CRM, datos, permisos y rendimiento.';
+  if(name==='skill-creator')return 'todo CEREBRO, porque permite crear nuevas habilidades reutilizables.';
   return 'las áreas que superen las pruebas OLD vs NEW sin empeorar seguridad, coste o calidad.';
 }
 
 function simpleState(kind,item={}){
-  if(kind==='IN_FLIGHT') return '🟡 EN CONSTRUCCIÓN / EVALUACIÓN';
-  if(kind==='WAITING_SAFE') return '🔵 EN PRUEBAS SEGURAS';
-  if(kind==='WAITING_HUMAN') return '🔴 NECESITA TU DECISIÓN';
-  if(kind==='HOLD') return '⏸️ APARCADA';
-  if(kind==='COMPLETED'){
-    if(item?.canary?.status==='GREEN_AUTONOMOUS_PROD_READONLY_CANARY') return '🟢 TERMINADA EN MODO LECTURA';
-    return '🟢 TERMINADA EN EL ALCANCE PROBADO';
-  }
+  if(kind==='IN_FLIGHT')return '🟡 EN CONSTRUCCIÓN / EVALUACIÓN';
+  if(kind==='WAITING_SAFE')return '🔵 EN PRUEBAS SEGURAS';
+  if(kind==='WAITING_HUMAN')return '🔴 NECESITA TU DECISIÓN';
+  if(kind==='HOLD')return '⏸️ APARCADA';
+  if(kind==='COMPLETED')return item?.canary?.status==='GREEN_AUTONOMOUS_PROD_READONLY_CANARY'?'🟢 TERMINADA EN MODO LECTURA':'🟢 TERMINADA EN EL ALCANCE PROBADO';
   return 'EN REVISIÓN';
 }
-
 function achieved(kind,item={}){
-  if(kind==='IN_FLIGHT') return 'CEREBRO ya la ha seleccionado y está ejecutando su ciclo de evaluación.';
-  if(kind==='WAITING_SAFE') return 'La parte ya probada se mantiene segura; el siguiente bloque está acotado antes de continuar.';
-  if(kind==='WAITING_HUMAN') return 'CEREBRO ha llegado al límite exacto que exige intervención humana y no lo ha sobrepasado.';
-  if(kind==='HOLD') return 'La habilidad ya fue analizada y quedó aislada; no ejecuta código externo, no toca clientes y no escribe en PROD.';
-  if(kind==='COMPLETED'){
-    if(item?.canary?.status==='GREEN_AUTONOMOUS_PROD_READONLY_CANARY') return 'Ha superado el circuito seguro y puede observar en modo solo lectura dentro del alcance autorizado.';
-    return 'Ha completado las pruebas previstas para su alcance actual.';
-  }
+  if(kind==='IN_FLIGHT')return 'CEREBRO ya la ha seleccionado y está ejecutando su ciclo de evaluación.';
+  if(kind==='WAITING_SAFE')return 'La parte ya probada se mantiene segura; el siguiente bloque está acotado antes de continuar.';
+  if(kind==='WAITING_HUMAN')return 'CEREBRO ha llegado al límite exacto que exige intervención humana y no lo ha sobrepasado.';
+  if(kind==='HOLD')return 'La habilidad ya fue analizada y quedó aislada; no ejecuta código externo, no toca clientes y no escribe en PROD.';
+  if(kind==='COMPLETED')return item?.canary?.status==='GREEN_AUTONOMOUS_PROD_READONLY_CANARY'?'Ha superado el circuito seguro y puede observar en modo solo lectura dentro del alcance autorizado.':'Ha completado las pruebas previstas para su alcance actual.';
   return 'Se ha registrado y está siendo evaluada.';
 }
-
 function missing(kind,item={}){
-  if(kind==='IN_FLIGHT') return 'Terminar pruebas, comparación OLD vs NEW y evaluación antes de conservar cualquier mejora.';
-  if(kind==='WAITING_SAFE') return 'Ejecutar el siguiente bloque seguro y volver a medir el resultado.';
-  if(kind==='WAITING_HUMAN') return `Tu decisión es necesaria por ${text(item.human_required)||'una excepción humana real'}.`;
-  if(kind==='HOLD') return 'Nada urgente. Solo se retomará si aparece un caso de uso claro o nueva evidencia que justifique seguir.';
-  if(kind==='COMPLETED') return 'No hay nada urgente. Cualquier ampliación futura de permisos volverá a pasar por sus controles.';
+  if(kind==='IN_FLIGHT')return 'Terminar pruebas, comparación OLD vs NEW y evaluación antes de conservar cualquier mejora.';
+  if(kind==='WAITING_SAFE')return 'Ejecutar el siguiente bloque seguro y volver a medir el resultado.';
+  if(kind==='WAITING_HUMAN')return `Tu decisión es necesaria por ${humanReason(item.human_required)}.`;
+  if(kind==='HOLD')return 'Nada urgente. Solo se retomará si aparece un caso de uso claro o nueva evidencia que justifique seguir.';
+  if(kind==='COMPLETED')return 'No hay nada urgente. Cualquier ampliación futura de permisos volverá a pasar por sus controles.';
   return 'Completar la evaluación.';
 }
-
-function nextStep(kind,item={}){
-  if(kind==='IN_FLIGHT') return 'CEREBRO seguirá probándola automáticamente dentro de LAB/PREPROD.';
-  if(kind==='WAITING_SAFE') return 'CEREBRO continuará con el siguiente paso seguro disponible.';
-  if(kind==='WAITING_HUMAN') return 'Esperar tu decisión exacta; el resto del trabajo seguro continúa en paralelo.';
-  if(kind==='HOLD') return 'Queda apartada mientras CEREBRO continúa con otras habilidades útiles.';
-  if(kind==='COMPLETED') return 'Mantenerla dentro de su alcance validado y observar resultados; no ampliar permisos por defecto.';
+function nextStep(kind){
+  if(kind==='IN_FLIGHT')return 'CEREBRO seguirá probándola automáticamente dentro de LAB/PREPROD.';
+  if(kind==='WAITING_SAFE')return 'CEREBRO continuará con el siguiente paso seguro disponible.';
+  if(kind==='WAITING_HUMAN')return 'Esperar tu decisión exacta; el resto del trabajo seguro continúa en paralelo.';
+  if(kind==='HOLD')return 'Queda apartada mientras CEREBRO continúa con otras habilidades útiles.';
+  if(kind==='COMPLETED')return 'Mantenerla dentro de su alcance validado y observar resultados; no ampliar permisos por defecto.';
   return 'Continuar la evaluación segura.';
 }
-
-function ownerAction(kind,item={}){
-  if(kind==='WAITING_HUMAN') return `SÍ. Motivo: ${text(item.human_required)||'excepción humana real'}.`;
-  return 'NO. CEREBRO continúa solo dentro de los límites seguros.';
-}
-
+function ownerAction(kind,item={}){return kind==='WAITING_HUMAN'?`SÍ. Motivo: ${humanReason(item.human_required)}.`:'NO. CEREBRO continúa solo dentro de los límites seguros.';}
 function decision(kind){
-  if(kind==='COMPLETED') return 'INTEGRAR / CONSERVAR DENTRO DEL ALCANCE VALIDADO';
-  if(kind==='IN_FLIGHT'||kind==='WAITING_SAFE') return 'SEGUIR PROBANDO';
-  if(kind==='WAITING_HUMAN') return 'ESPERAR DECISIÓN DE CARLOS';
-  if(kind==='HOLD') return 'APARCAR';
+  if(kind==='COMPLETED')return 'INTEGRAR / CONSERVAR DENTRO DEL ALCANCE VALIDADO';
+  if(kind==='IN_FLIGHT'||kind==='WAITING_SAFE')return 'SEGUIR PROBANDO';
+  if(kind==='WAITING_HUMAN')return 'ESPERAR DECISIÓN DE CARLOS';
+  if(kind==='HOLD')return 'APARCAR';
   return 'SEGUIR EVALUANDO';
 }
-
 function capabilityGain(kind,item={}){
-  if(kind==='COMPLETED') return `CEREBRO ya puede usar el alcance validado de ${humanName(item)} sin ampliar permisos fuera de lo probado.`;
-  if(kind==='HOLD') return 'Ninguna capacidad nueva: se ha evitado añadir complejidad sin beneficio demostrado.';
-  if(kind==='WAITING_HUMAN') return 'Todavía ninguna: la capacidad queda bloqueada hasta tu decisión exacta.';
+  if(kind==='COMPLETED')return `CEREBRO ya puede usar el alcance validado de ${humanName(item)} sin ampliar permisos fuera de lo probado.`;
+  if(kind==='HOLD')return 'Ninguna capacidad nueva: se ha evitado añadir complejidad sin beneficio demostrado.';
+  if(kind==='WAITING_HUMAN')return 'Todavía ninguna: la capacidad queda bloqueada hasta tu decisión exacta.';
   return 'Todavía no se da por ganada: primero debe demostrar mejora real y pasar las pruebas.';
 }
-
 function measuredImpact(item={}){
-  const cost=Number(item?.additional_cost_eur??0);
-  const time=text(item?.measured_time_saved)||text(item?.impact?.time_saved);
-  const quality=text(item?.measured_quality_gain)||text(item?.impact?.quality_gain);
-  const parts=[];
-  if(Number.isFinite(cost)) parts.push(`coste adicional registrado ${cost.toFixed(2)} €`);
-  if(time) parts.push(`tiempo: ${time}`);
-  if(quality) parts.push(`calidad: ${quality}`);
+  const cost=Number(item?.additional_cost_eur??0);const time=text(item?.measured_time_saved)||text(item?.impact?.time_saved);const quality=text(item?.measured_quality_gain)||text(item?.impact?.quality_gain);const parts=[];
+  if(Number.isFinite(cost))parts.push(`coste adicional registrado ${cost.toFixed(2)} €`);if(time)parts.push(`tiempo: ${time}`);if(quality)parts.push(`calidad: ${quality}`);
   return parts.length?`${parts.join(' · ')}.`:'Aún no medido con evidencia suficiente; CEREBRO no inventa ahorro.';
 }
 
-function snapshotEntry(kind,item={}){
-  return {kind,name:text(item.name),human_alias:humanName(item),status:text(item.status),stage:text(item.stage),human_required:text(item.human_required),updated_at:text(item.updated_at),canary:text(item?.canary?.status),additional_cost_eur:Number(item?.additional_cost_eur??0)};
-}
+function snapshotEntry(kind,item={}){return {kind,name:text(item.name),human_alias:humanName(item),status:text(item.status),stage:text(item.stage),human_required:text(item.human_required),updated_at:text(item.updated_at),canary:text(item?.canary?.status),additional_cost_eur:Number(item?.additional_cost_eur??0)};}
+function currentSnapshot(groups){const out={};for(const [kind,items] of Object.entries(groups))for(const item of items)out[stableSkillId(item)]=snapshotEntry(kind,item);return out;}
+function changedSkillIds(snapshot,previous={}){const ids=[];for(const [id,value] of Object.entries(snapshot))if(JSON.stringify(value)!==JSON.stringify(previous?.[id]??null))ids.push(id);return ids;}
 
-function currentSnapshot(groups){
-  const out={};
-  for(const [kind,items] of Object.entries(groups)) for(const item of items) out[stableSkillId(item)]=snapshotEntry(kind,item);
-  return out;
-}
-
-function changedSkillIds(snapshot,previous={}){
-  const ids=[];
-  for(const [id,value] of Object.entries(snapshot)){
-    if(JSON.stringify(value)!==JSON.stringify(previous?.[id]??null)) ids.push(id);
-  }
-  return ids;
-}
-
-export function buildHumanSkillCard(item={},kind='IN_REVIEW',{changed=true}={}){
-  return `${humanName(item)}\n  Qué es realmente: ${skillPurpose(item)}\n  Por qué la queremos: ${skillWhy(item)}\n  Ejemplo real: ${skillExample(item)}\n  Estado: ${simpleState(kind,item)}\n  Qué ha cambiado desde el último informe: ${changed?'Tiene un cambio relevante o todavía no había sido informada con este estado.':'Sin cambios relevantes desde el último informe.'}\n  Qué se ha conseguido: ${achieved(kind,item)}\n  Qué falta: ${missing(kind,item)}\n  Qué podrá hacer CEREBRO: ${capabilityGain(kind,item)}\n  Dónde puede mejorar CEREBRO: ${skillImpact(item)}\n  Impacto medido: ${measuredImpact(item)}\n  Decisión de CEREBRO: ${decision(kind)}\n  Siguiente paso: ${nextStep(kind,item)}\n  ¿Necesitas hacer algo?: ${ownerAction(kind,item)}`;
+export function buildHumanSkillCard(item={},kind='IN_REVIEW',{changed=true,first_report=false}={}){
+  const changeText=first_report?'Primera fotografía ejecutiva de esta habilidad.':changed?'Tiene un cambio relevante desde el informe anterior.':'Sin cambios relevantes desde el último informe.';
+  return `${humanName(item)}\n  Qué es realmente: ${skillPurpose(item)}\n  Por qué la queremos: ${skillWhy(item)}\n  Ejemplo real: ${skillExample(item)}\n  Estado: ${simpleState(kind,item)}\n  Qué ha cambiado desde el último informe: ${changeText}\n  Qué se ha conseguido: ${achieved(kind,item)}\n  Qué falta: ${missing(kind,item)}\n  Qué podrá hacer CEREBRO: ${capabilityGain(kind,item)}\n  Dónde puede mejorar CEREBRO: ${skillImpact(item)}\n  Impacto medido: ${measuredImpact(item)}\n  Decisión de CEREBRO: ${decision(kind)}\n  Siguiente paso: ${nextStep(kind)}\n  ¿Necesitas hacer algo?: ${ownerAction(kind,item)}`;
 }
 
 function countRelated(runs,commits,words){return runs.filter(r=>matches(`${r.name} ${r.path} ${r.display_title}`,words)).length+commits.filter(c=>matches(c?.commit?.message||c?.message,words)).length;}
@@ -187,38 +164,30 @@ function plainAreaSummary(runs,commits,words,label){const count=countRelated(run
 function safeNextAction(code){const known={'TERMINAL_HOLD_CONTINUE_OTHER_SAFE_WORK':'CEREBRO seguirá con otras habilidades seguras; las aparcadas permanecen apartadas.','WAITING_SAFE_HANDLER':'CEREBRO ejecutará el siguiente bloque seguro disponible.','CONTINUE_SAFE_WORK':'CEREBRO seguirá trabajando automáticamente dentro de LAB/PREPROD.'};if(known[text(code)])return known[text(code)];return code?'CEREBRO seguirá con el siguiente trabajo seguro registrado. El código técnico queda en auditoría.':'No hay un siguiente trabajo del ciclo de skills registrado en este momento.';}
 
 export function buildRepoDailySummary({runs=[],commits=[],skillState={},communicationState={}}={}){
-  const completedRuns=runs.filter(r=>r?.status==='completed');
-  const failed=completedRuns.filter(r=>!['success','skipped','neutral'].includes(r?.conclusion));
-  const inFlight=listValues(skillState?.in_flight),waitingHuman=listValues(skillState?.waiting_human),waitingSafe=listValues(skillState?.waiting_safe_handler),holds=listValues(skillState?.terminal_hold),completedSkills=listValues(skillState?.completed);
-  const pending=listValues(communicationState?.pending);
-  const groups={IN_FLIGHT:inFlight,WAITING_SAFE:waitingSafe,WAITING_HUMAN:waitingHuman,HOLD:holds,COMPLETED:completedSkills};
-  const snapshot=currentSnapshot(groups);
-  const previous=communicationState?.skill_digest_snapshot??{};
-  const changedIds=new Set(changedSkillIds(snapshot,previous));
-  const firstSnapshot=!Object.keys(previous).length;
-  const costs=[...inFlight,...waitingHuman,...waitingSafe,...holds,...completedSkills].map(x=>Number(x?.additional_cost_eur??0)).filter(Number.isFinite);
-  const visibleCost=costs.reduce((a,b)=>a+b,0);
-  const commitsToday=uniq(commits.map(c=>{const m=text(c?.commit?.message||c?.message).split('\n')[0];return m||null;})).slice(0,30);
+  const completedRuns=runs.filter(r=>r?.status==='completed');const failed=completedRuns.filter(r=>!['success','skipped','neutral'].includes(r?.conclusion));
+  const inFlight=listValues(skillState?.in_flight),waitingHuman=listValues(skillState?.waiting_human),waitingSafe=listValues(skillState?.waiting_safe_handler),holds=listValues(skillState?.terminal_hold),completedSkills=listValues(skillState?.completed);const pending=listValues(communicationState?.pending);
+  const groups={IN_FLIGHT:inFlight,WAITING_SAFE:waitingSafe,WAITING_HUMAN:waitingHuman,HOLD:holds,COMPLETED:completedSkills};const snapshot=currentSnapshot(groups);const previous=communicationState?.skill_digest_snapshot??{};const changedIds=new Set(changedSkillIds(snapshot,previous));const firstSnapshot=!Object.keys(previous).length;
+  const costs=[...inFlight,...waitingHuman,...waitingSafe,...holds,...completedSkills].map(x=>Number(x?.additional_cost_eur??0)).filter(Number.isFinite);const visibleCost=costs.reduce((a,b)=>a+b,0);const commitsToday=uniq(commits.map(c=>text(c?.commit?.message||c?.message).split('\n')[0]||null)).slice(0,30);
 
   const skillCards=[];const seen=new Set();
-  const add=(kind,item)=>{const id=stableSkillId(item);if(seen.has(id))return;seen.add(id);const important=kind==='WAITING_HUMAN'||kind==='IN_FLIGHT'||kind==='WAITING_SAFE'||changedIds.has(id)||firstSnapshot;if(important)skillCards.push(buildHumanSkillCard(item,kind,{changed:changedIds.has(id)||firstSnapshot}));};
-  inFlight.forEach(x=>add('IN_FLIGHT',x));waitingSafe.forEach(x=>add('WAITING_SAFE',x));waitingHuman.forEach(x=>add('WAITING_HUMAN',x));holds.forEach(x=>add('HOLD',x));completedSkills.slice(-3).forEach(x=>add('COMPLETED',x));
+  const add=(kind,item)=>{const id=stableSkillId(item);if(seen.has(id))return;seen.add(id);skillCards.push(buildHumanSkillCard(item,kind,{changed:changedIds.has(id),first_report:firstSnapshot}));};
+  inFlight.forEach(x=>add('IN_FLIGHT',x));waitingSafe.forEach(x=>add('WAITING_SAFE',x));waitingHuman.forEach(x=>add('WAITING_HUMAN',x));
+  const holdDetail=firstSnapshot?holds.slice(-3):holds.filter(x=>changedIds.has(stableSkillId(x)));
+  const completedDetail=(firstSnapshot?completedSkills:completedSkills.filter(x=>changedIds.has(stableSkillId(x)))).slice(-3);
+  holdDetail.forEach(x=>add('HOLD',x));completedDetail.forEach(x=>add('COMPLETED',x));
 
-  const allVisibleIds=new Set([...inFlight,...waitingHuman,...waitingSafe,...holds,...completedSkills].map(stableSkillId));
-  const unchangedCount=[...allVisibleIds].filter(id=>!changedIds.has(id)).length;
-  const activeCount=inFlight.length+waitingSafe.length;
-  const newlyCompleted=completedSkills.filter(x=>changedIds.has(stableSkillId(x))).length;
+  const allVisibleIds=new Set([...inFlight,...waitingHuman,...waitingSafe,...holds,...completedSkills].map(stableSkillId));const unchangedCount=firstSnapshot?Math.max(0,allVisibleIds.size-skillCards.length):[...allVisibleIds].filter(id=>!changedIds.has(id)).length;const activeCount=inFlight.length+waitingSafe.length;const newlyCompleted=firstSnapshot?0:completedSkills.filter(x=>changedIds.has(stableSkillId(x))).length;
   const newCapability=newlyCompleted?`CEREBRO tiene ${newlyCompleted} capacidad${newlyCompleted===1?'':'es'} recién terminada${newlyCompleted===1?'':'s'} dentro del alcance probado.`:'No doy por ganada ninguna capacidad nueva sin evidencia de cierre en esta ventana.';
   const humanSummary=[
     `RESUMEN DE 20 SEGUNDOS: ${newCapability}`,
     `Ahora mismo hay ${activeCount} skill${activeCount===1?'':'s'} avanzando, ${waitingHuman.length} esperando tu decisión y ${holds.length} aparcada${holds.length===1?'':'s'}.`,
-    changedIds.size?`Han cambiado ${changedIds.size} skill${changedIds.size===1?'':'s'} desde la última fotografía comunicada.`:'No hay cambios de estado de skills frente a la última fotografía comunicada.',
+    firstSnapshot?'Primera fotografía ejecutiva registrada; a partir del siguiente informe solo se detallarán los cambios relevantes.':changedIds.size?`Han cambiado ${changedIds.size} skill${changedIds.size===1?'':'s'} desde el último informe.`:'No hay cambios de estado de skills frente al último informe.',
     unchangedCount?`${unchangedCount} skill${unchangedCount===1?' permanece':'s permanecen'} sin cambios y no se repiten con detalle.`:'No hay skills sin cambios que ocultar.',
     pending.length?`Carlos: SÍ hay ${pending.length} autorización${pending.length===1?'':'es'} pendiente${pending.length===1?'':'s'}.`:'Carlos: NO necesitas hacer nada por autorizaciones en este momento.',
     `Coste adicional visible del ciclo de skills: ${visibleCost.toFixed(2)} €.`
   ];
 
-  const holdsHuman=[...waitingHuman.map(x=>`${humanName(x)} necesita tu decisión por ${text(x.human_required)||'una excepción humana real'}.`),...pending.map(x=>`Hay una autorización pendiente relacionada con ${text(x.human_alias)||text(x.technical_id)||'una acción de CEREBRO'}.`),holds.length?`${holds.length} habilidad${holds.length===1?' está':'es están'} aparcada${holds.length===1?'':'s'}; no ocupan el correo salvo cambio relevante.`:null].filter(Boolean);
+  const holdsHuman=[...waitingHuman.map(x=>`${humanName(x)} necesita tu decisión por ${humanReason(x.human_required)}.`),...pending.map(x=>`Hay una autorización pendiente relacionada con ${text(x.human_alias)||'una acción de CEREBRO'}.`),holds.length?`${holds.length} habilidad${holds.length===1?' está':'es están'} aparcada${holds.length===1?'':'s'}; no ocupan el correo salvo cambio relevante.`:null].filter(Boolean);
 
   return {
     human:humanSummary,
@@ -240,8 +209,5 @@ export function buildRepoDailySummary({runs=[],commits=[],skillState={},communic
 function arg(name){const i=process.argv.indexOf(name);return i>=0?process.argv[i+1]:null;}
 if(import.meta.url===`file://${process.argv[1]}`){
   const summary=buildRepoDailySummary({runs:read(arg('--runs'),[]),commits:read(arg('--commits'),[]),skillState:read(arg('--skill-state'),{}),communicationState:read(arg('--communication-state'),{})});
-  const output=arg('--output')||'artifacts/communication/daily-summary.json';
-  fs.mkdirSync(path.dirname(output),{recursive:true});
-  fs.writeFileSync(output,JSON.stringify(summary,null,2)+'\n','utf8');
-  console.log(JSON.stringify({sections:Object.keys(summary).length}));
+  const output=arg('--output')||'artifacts/communication/daily-summary.json';fs.mkdirSync(path.dirname(output),{recursive:true});fs.writeFileSync(output,JSON.stringify(summary,null,2)+'\n','utf8');console.log(JSON.stringify({sections:Object.keys(summary).length}));
 }
