@@ -99,6 +99,30 @@ test('legacy replay may omit provenance added to first-seen record without mutat
   }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });
 
+test('legacy null-vs-absent provenance forms are semantic duplicates in both directions',()=>{
+  const {dir,file}=tempFile();
+  try{
+    const ledger=new LearningLedgerV0({file_path:file});
+    const withNulls={...candidate(),signal_id:null,source_environment:null};
+    const first=ledger.persist(withNulls);
+    const absentReplay=ledger.persist({...candidate(),observed_at:'2026-10-08T22:10:00Z'});
+    assert.equal(absentReplay.accepted,false);
+    assert.equal(absentReplay.semantic_duplicate,true);
+    assert.deepEqual(absentReplay.compatibility_fields,['observed_at','signal_id','source_environment']);
+    assert.equal(absentReplay.record_hash,first.record_hash);
+    assert.equal(ledger.operation_count,1);
+
+    const secondId={...candidate(),learning_id:'learn-preprod:test:reverse'};
+    const second=ledger.persist(secondId);
+    const nullReplay=ledger.persist({...secondId,observed_at:'2026-10-08T22:10:00Z',signal_id:null,source_environment:null});
+    assert.equal(nullReplay.accepted,false);
+    assert.equal(nullReplay.semantic_duplicate,true);
+    assert.deepEqual(nullReplay.compatibility_fields,['observed_at','signal_id','source_environment']);
+    assert.equal(nullReplay.record_hash,second.record_hash);
+    assert.equal(ledger.operation_count,2);
+  }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
+
 test('ledger still rejects genuine same-ID payload conflicts and never masks changed evidence, policy, or existing provenance',()=>{
   const {dir,file}=tempFile();
   try{
