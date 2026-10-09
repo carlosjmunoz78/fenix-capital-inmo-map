@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_HUMAN_EXCEPTION_SUPERVISOR_STATE",
+  "company_id": "fenix",
+  "engine_id": "HEX-001",
+  "environment": "PROD_CONTROL_PLANE",
+  "version": "1.0.0",
+  "updated_at": "2026-10-09T00:00:00.000Z",
+  "waiting_human": {},
+  "processed_event_ids": [],
+  "stats": {
+    "accepted_total": 0,
+    "deduped_total": 0,
+    "rejected_total": 0
+  },
+  "human_exception_policy": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "prod_authorized": false,
+  "prod_write_authorized": false,
+  "trading_access": false,
+  "multicompany_continuation": false,
+  "additional_cost_eur": 0
+}
