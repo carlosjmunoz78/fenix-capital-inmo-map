@@ -38,8 +38,9 @@ test('bounded rehearsal proves primary Node, real Python fallback, restore, and 
 });
 
 test('Python fallback is an actual fixed subprocess executor, not a mislabeled Node execution',()=>{
-  const d=discoverZeroCostResources(observation());
-  d.resources=d.resources.map(x=>x.resource_id==='gha-node-runtime'?{...x,available:false}:x);
+  const baseDiscovery=discoverZeroCostResources(observation());
+  const d=JSON.parse(JSON.stringify(baseDiscovery));
+  d.resources=d.resources.map(x=>x.resource_id==='gha-node-runtime'?{...x,available:false,availability_state:'CONTROLLED_TEST_RESOURCE_LOSS'}:x);
   const loop=runSafePreprodLoop({discovery:d,lifecycle_state:lifecycle});
   assert.equal(loop.status,'SAFE_PREPROD_LOOP_GREEN');
   assert.equal(loop.route.selected_resource_id,'gha-python-runtime');
