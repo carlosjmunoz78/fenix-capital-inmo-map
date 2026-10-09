@@ -141,10 +141,10 @@ jobs:
             probe() {
               URL="$1"
               RESULT="$(curl -L -sS -o /dev/null --max-time 20 -w '%{http_code}|%{time_total}' "$URL" || true)"
-              STATUS="${RESULT%%|*}"; SECONDS="${RESULT#*|}"
+              STATUS="${RESULT%%|*}"; ELAPSED_SECONDS="${RESULT#*|}"
               [[ "$STATUS" =~ ^[0-9]{3}$ ]] || STATUS=0
-              [[ "$SECONDS" =~ ^[0-9]+([.][0-9]+)?$ ]] || SECONDS=20
-              LATENCY="$(awk -v s="$SECONDS" 'BEGIN { printf "%.0f", s*1000 }')"
+              [[ "$ELAPSED_SECONDS" =~ ^[0-9]+([.][0-9]+)?$ ]] || ELAPSED_SECONDS=20
+              LATENCY="$(awk -v s="$ELAPSED_SECONDS" 'BEGIN { printf "%.0f", s*1000 }')"
               jq -n --arg url "$URL" --arg observed "$NOW" --argjson status "$STATUS" --argjson latency "$LATENCY" '{url:$url,http_status:$status,latency_ms:$latency,observed_at:$observed}'
             }
             { echo '['; probe 'https://fenixcapital.es/'; echo ','; probe 'https://fenixcapital.es/robots.txt'; echo ']'; } | jq -s 'flatten' > /tmp/domain-evidence-input.json
