@@ -2,7 +2,7 @@ name: CEREBRO Human Communication V1
 
 on:
   push:
-    branches: [main, cerebro/human-approval-email-v1-20261008, cerebro/skills-email-human-approval-v0]
+    branches: [main, cerebro/human-approval-email-v1-20261008, cerebro/skills-email-human-approval-v0, cerebro/mail-bridge-aparco-v0]
     paths:
       - 'cerebro/governance/communication-policy.v0.json'
       - 'cerebro/governance/CEREBRO_HUMAN_COMMUNICATION_POLICY_V0.md'

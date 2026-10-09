@@ -12,7 +12,7 @@ from email.header import decode_header
 from email.message import EmailMessage
 from email.utils import parseaddr
 
-COMMAND_RE = re.compile(r"^(AUTORIZO|NO AUTORIZO|EXPLICAME)\s+(APR-\d{8}-[A-F0-9]{8})$", re.IGNORECASE)
+COMMAND_RE = re.compile(r"^(AUTORIZO|NO AUTORIZO|EXPLICAME|APARCO)\s+(APR-\d{8}-[A-F0-9]{8})$", re.IGNORECASE)
 QUOTED_BOUNDARY_RE = re.compile(r"^(on .+wrote:|el .+escribi[oó]:|from:\s+.+|de:\s+.+|-{2,}\s*(original message|mensaje original)\s*-{2,})$", re.IGNORECASE)
 
 
@@ -117,11 +117,11 @@ def prepare_delivery(payload):
             return None, already
         count = len(remaining)
         if payload.get("night_batch"):
-            intro = f"Te necesito. Durante la noche he agrupado {count} decisión{'es' if count != 1 else ''} pendiente{'s' if count != 1 else ''}. Puedes responder a este mismo correo con varias líneas de autorización."
+            intro = f"Te necesito. Durante la noche he agrupado {count} decisión{'es' if count != 1 else ''} pendiente{'s' if count != 1 else ''}. Puedes responder a este mismo correo con varias líneas de decisión."
         else:
             intro = f"Te necesito. Tengo {count} decisión{'es' if count != 1 else ''} pendiente{'s' if count != 1 else ''}. Puedes responder a este mismo correo con una o varias líneas."
         body_items = [item.get("text", "") for item in remaining]
-        text = f"{intro}\n\n" + "\n\n------------------------------\n\n".join(body_items) + "\n\nIMPORTANTE: “sí”, “vale”, “ok” o “procede” no autorizan nada. Solo cuentan las frases exactas con APR.\n"
+        text = f"{intro}\n\n" + "\n\n------------------------------\n\n".join(body_items) + "\n\nIMPORTANTE: “sí”, “vale”, “ok”, “procede” o “aparca” no ejecutan ninguna decisión. Solo cuentan las frases exactas con APR.\n"
         subject = payload.get("subject") if count == len(raw_items) else f"CEREBRO · {count} AUTORIZACIÓN{'ES' if count != 1 else ''} PENDIENTE{'S' if count != 1 else ''}"
         keys = [item["delivery_key"] for item in remaining]
         return {"subject": subject, "text": text, "delivery_keys": keys}, already

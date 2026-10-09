@@ -16,19 +16,24 @@ class MailBridgeTests(unittest.TestCase):
         line = f"AUTORIZO {self.approval_id}"
         self.assertEqual(mail_bridge.exact_commands(line), [line])
 
-    def test_generic_yes_is_not_an_authorization(self):
-        self.assertEqual(mail_bridge.exact_commands("sí, vale, procede"), [])
+    def test_exact_park_command_is_accepted(self):
+        line = f"APARCO {self.approval_id}"
+        self.assertEqual(mail_bridge.exact_commands(line), [line])
+
+    def test_generic_yes_or_park_is_not_a_decision(self):
+        self.assertEqual(mail_bridge.exact_commands("sí, vale, procede, aparca"), [])
 
     def test_multiple_independent_commands_are_accepted(self):
         lines = [
             f"AUTORIZO {self.approval_id}",
             "NO AUTORIZO APR-20261008-12345678",
             "EXPLICAME APR-20261008-87654321",
+            "APARCO APR-20261008-A1B2C3D4",
         ]
         self.assertEqual(mail_bridge.exact_commands("\n".join(lines)), lines)
 
     def test_quoted_commands_are_not_accepted(self):
-        text = f"No autorizo todavía.\n\nEl miércoles CEREBRO escribió:\n> AUTORIZO {self.approval_id}"
+        text = f"No autorizo todavía.\n\nEl miércoles CEREBRO escribió:\n> AUTORIZO {self.approval_id}\n> APARCO {self.approval_id}"
         self.assertEqual(mail_bridge.exact_commands(text), [])
 
     def test_delivery_message_id_is_stable_for_same_logical_items(self):
