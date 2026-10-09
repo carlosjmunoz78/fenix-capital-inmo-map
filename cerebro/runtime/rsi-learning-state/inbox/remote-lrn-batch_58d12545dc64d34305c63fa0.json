@@ -1,0 +1,643 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_RSI_LRN_EVENT_BATCH",
+  "batch_id": "lrn-batch:58d12545dc64d34305c63fa0",
+  "company_id": "fenix",
+  "engine_id": "LRN-001",
+  "environment": "PREPROD",
+  "version": "0.5.0",
+  "source": {
+    "workflow": "CEREBRO Skill Discovery Scout",
+    "run_id": 37927030303,
+    "head_sha": "0c92fa1ba1b72d3ef4f1a772990d4d17428dee70"
+  },
+  "source_event_count": 15,
+  "events_total": 15,
+  "events": [
+    {
+      "event_id": "evt:lrn:10693829c32c492af5317801",
+      "event_type": "SKILL_PERMISSION_REVIEW_REQUIRED",
+      "severity": "MEDIUM",
+      "company_id": "fenix",
+      "engine_id": "FACT-001",
+      "environment": "PREPROD_CANDIDATE",
+      "version": "0.1.0",
+      "candidate_id": "mcpservers-agent-skills:90e8b7419678e502ccf0",
+      "target_engine_bindings": [
+        "AUTO-001",
+        "AUTBOOT-001",
+        "QA-001",
+        "WEB-001",
+        "SCAN-001"
+      ],
+      "reason": "PERMISSION_GATE_NOT_CLEARED",
+      "evidence_ref": {
+        "source_ref": "https://mcpservers.org/es/agent-skills/scrapegraphai/just-scrape",
+        "upstream_full_name": "ScrapeGraphAI/just-scrape",
+        "upstream_head_commit": "a3d179ffe2695c5bb7aacffec2c6018d3d9f056e",
+        "manifest_path": "skills/just-scrape/SKILL.md",
+        "manifest_sha256": "28b2d87fe0b5bc267ba9b8dae1592c4d74fe84b2a5f88b2b805c86b4010bb847"
+      },
+      "payload": {
+        "static_flags": [
+          "SECRET_ACCESS_MENTION"
+        ]
+      },
+      "publish_authorized": false,
+      "prod_authorized": false,
+      "origin_event_id": "evt:skill:67673083b8b381b7036726b5",
+      "origin_company_id": "GLOBAL_ONLY",
+      "local_validation_required": true,
+      "persistent_publish_authorized": false,
+      "rsi_publish_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "event_id": "evt:lrn:1585dcb8655112a9b7208a4d",
+      "event_type": "SKILL_PERMISSION_REVIEW_REQUIRED",
+      "severity": "MEDIUM",
+      "company_id": "fenix",
+      "engine_id": "FACT-001",
+      "environment": "PREPROD_CANDIDATE",
+      "version": "0.1.0",
+      "candidate_id": "lobehub-skills:59c079d86b1c63e153dd",
+      "target_engine_bindings": [
+        "AUTO-001",
+        "COM-001",
+        "AGD-001",
+        "DOC-001",
+        "INT-001"
+      ],
+      "reason": "PERMISSION_GATE_NOT_CLEARED",
+      "evidence_ref": {
+        "source_ref": "https://lobehub.com/es/skills/openclaw-openclaw-gog",
+        "upstream_full_name": "openclaw/openclaw",
+        "upstream_head_commit": "2bf85a4b1d74cafe1d6bb513b5d7b3cb87b1a2ca",
+        "manifest_path": "skills/gog/SKILL.md",
+        "manifest_sha256": "d54a8e52b1e00bb5d33b46915fd549f8b792ef3a383fe40e92b195d11d2d5255"
+      },
+      "payload": {
+        "static_flags": [
+          "SECRET_ACCESS_MENTION"
+        ]
+      },
+      "publish_authorized": false,
+      "prod_authorized": false,
+      "origin_event_id": "evt:skill:eec76c20999c29ef9c202843",
+      "origin_company_id": "GLOBAL_ONLY",
+      "local_validation_required": true,
+      "persistent_publish_authorized": false,
+      "rsi_publish_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "event_id": "evt:lrn:1669df44650473ca13a3599b",
+      "event_type": "SKILL_CANDIDATE_STATIC_READY",
+      "severity": "INFO",
+      "company_id": "fenix",
+      "engine_id": "FACT-001",
+      "environment": "PREPROD_CANDIDATE",
+      "version": "0.1.0",
+      "candidate_id": "lobehub-skills:950cf07380d1daa6de69",
+      "target_engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "reason": "STATIC_PRELAB_GATE_CLEAR",
+      "evidence_ref": {
+        "source_ref": "https://lobehub.com/es/skills/openclaw-openclaw-skill-creator",
+        "upstream_full_name": "openclaw/openclaw",
+        "upstream_head_commit": "2bf85a4b1d74cafe1d6bb513b5d7b3cb87b1a2ca",
+        "manifest_path": "skills/skill-creator/SKILL.md",
+        "manifest_sha256": "3b7b93823a496cedc957fc91bbc8f8be132f2edd095dcaa46cee5394c742f0e4"
+      },
+      "payload": {
+        "wrapper_id": "skillwrap:a5a2b32205c59eb9bbab",
+        "domain": "agent-ai-orchestration",
+        "skill_class": "SHARED",
+        "next_gate": "DESIGN_ISOLATED_SANDBOX_BEFORE_ANY_CODE_EXECUTION"
+      },
+      "publish_authorized": false,
+      "prod_authorized": false,
+      "origin_event_id": "evt:skill:58c8c1966e1c097ed0a3ec21",
+      "origin_company_id": "GLOBAL_ONLY",
+      "local_validation_required": true,
+      "persistent_publish_authorized": false,
+      "rsi_publish_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "event_id": "evt:lrn:2fbee55d8b2376fc95e4a647",
+      "event_type": "CAPABILITY_GAP_DETECTED",
+      "severity": "MEDIUM",
+      "company_id": "fenix",
+      "engine_id": "FACT-001",
+      "environment": "PREPROD_CANDIDATE",
+      "version": "0.1.0",
+      "candidate_id": "mcpservers-agent-skills:5e34cd75e98ad9e6e7f5",
+      "target_engine_bindings": [],
+      "reason": "NO_EXISTING_DOMAIN_MATCH_CONFIRMED",
+      "evidence_ref": {
+        "source_ref": "https://mcpservers.org/es/agent-skills/mattpocock/grill-me",
+        "upstream_full_name": "mattpocock/skills",
+        "upstream_head_commit": "49dd158d1076134a641b33efb035946536778336",
+        "manifest_path": "skills/productivity/grill-me/SKILL.md",
+        "manifest_sha256": "caaf8b8de1684f96e26b28f3c29189db5c89cce4b73e1c93d86164f66ef88637"
+      },
+      "payload": {
+        "top_domain": null,
+        "overlap_state": "CAPABILITY_GAP_CANDIDATE"
+      },
+      "publish_authorized": false,
+      "prod_authorized": false,
+      "origin_event_id": "evt:skill:3ca5000f8ebc60aca9bf437e",
+      "origin_company_id": "GLOBAL_ONLY",
+      "local_validation_required": true,
+      "persistent_publish_authorized": false,
+      "rsi_publish_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "event_id": "evt:lrn:4445fefff48cd90688614acd",
+      "event_type": "SKILL_PERMISSION_REVIEW_REQUIRED",
+      "severity": "MEDIUM",
+      "company_id": "fenix",
+      "engine_id": "FACT-001",
+      "environment": "PREPROD_CANDIDATE",
+      "version": "0.1.0",
+      "candidate_id": "lobehub-skills:c6f9444f51c4596f0f84",
+      "target_engine_bindings": [
+        "VOICE-001",
+        "VOICEUI-001",
+        "COM-001",
+        "MKT-001",
+        "WEB-001"
+      ],
+      "reason": "PERMISSION_GATE_NOT_CLEARED",
+      "evidence_ref": {
+        "source_ref": "https://lobehub.com/es/skills/openclaw-openclaw-openai-whisper",
+        "upstream_full_name": "openclaw/openclaw",
+        "upstream_head_commit": "2bf85a4b1d74cafe1d6bb513b5d7b3cb87b1a2ca",
+        "manifest_path": "skills/openai-whisper/SKILL.md",
+        "manifest_sha256": "802e31d7310316fc25a5ec4fbe29308a0897c039cd2ae897f59fc25128ab4644"
+      },
+      "payload": {
+        "static_flags": [
+          "SECRET_ACCESS_MENTION"
+        ]
+      },
+      "publish_authorized": false,
+      "prod_authorized": false,
+      "origin_event_id": "evt:skill:1ede6575f141bf7fd24cc016",
+      "origin_company_id": "GLOBAL_ONLY",
+      "local_validation_required": true,
+      "persistent_publish_authorized": false,
+      "rsi_publish_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "event_id": "evt:lrn:6ab0f165bd7711959a94a405",
+      "event_type": "SKILL_CANDIDATE_STATIC_LAB_GREEN",
+      "severity": "INFO",
+      "company_id": "fenix",
+      "engine_id": "FACT-001",
+      "environment": "PREPROD_CANDIDATE",
+      "version": "0.1.0",
+      "candidate_id": "lobehub-skills:52441cd3d76607ffffab",
+      "target_engine_bindings": [
+        "FACT-001",
+        "ARCH-001",
+        "API-001",
+        "DEP-001",
+        "MIG-001",
+        "QA-001",
+        "REG-001",
+        "DOCS-001"
+      ],
+      "reason": "STATIC_LAB_GREEN",
+      "evidence_ref": {
+        "source_ref": "https://lobehub.com/es/skills/openclaw-openclaw-github",
+        "upstream_full_name": "openclaw/openclaw",
+        "upstream_head_commit": "2bf85a4b1d74cafe1d6bb513b5d7b3cb87b1a2ca",
+        "manifest_path": "skills/github/SKILL.md",
+        "manifest_sha256": "04d13709b66a75f73774d47c1fb8446669623c8326c2d0af4e7d01017e2f29dc"
+      },
+      "payload": {
+        "wrapper_id": "skillwrap:78ef435b5aed1c32e9c1",
+        "domain": "software-engineering-devops",
+        "skill_class": "SHARED",
+        "value_score": 90,
+        "coverage_score": 100,
+        "policy_alignment_score": 95,
+        "next_gate": "BEHAVIORAL_LAB_ON_SYNTHETIC_FIXTURES"
+      },
+      "publish_authorized": false,
+      "prod_authorized": false,
+      "origin_event_id": "evt:skill:c268f30e5ff8a2f81f4aef5b",
+      "origin_company_id": "GLOBAL_ONLY",
+      "local_validation_required": true,
+      "persistent_publish_authorized": false,
+      "rsi_publish_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "event_id": "evt:lrn:73248c94f6efb9ff4a2c447f",
+      "event_type": "SKILL_PERMISSION_REVIEW_REQUIRED",
+      "severity": "MEDIUM",
+      "company_id": "fenix",
+      "engine_id": "FACT-001",
+      "environment": "PREPROD_CANDIDATE",
+      "version": "0.1.0",
+      "candidate_id": "lobehub-skills:711bfb70922cf1f8eb6a",
+      "target_engine_bindings": [
+        "DOC-001",
+        "DOC-003",
+        "DOCS-001",
+        "DATA-001"
+      ],
+      "reason": "PERMISSION_GATE_NOT_CLEARED",
+      "evidence_ref": {
+        "source_ref": "https://lobehub.com/es/skills/openclaw-openclaw-summarize",
+        "upstream_full_name": "openclaw/openclaw",
+        "upstream_head_commit": "2bf85a4b1d74cafe1d6bb513b5d7b3cb87b1a2ca",
+        "manifest_path": "skills/summarize/SKILL.md",
+        "manifest_sha256": "b6d9be0ff47e646280a0ff40203823d7ca36913ab1bea25575b2de4afb3cc0df"
+      },
+      "payload": {
+        "static_flags": [
+          "SECRET_ACCESS_MENTION"
+        ]
+      },
+      "publish_authorized": false,
+      "prod_authorized": false,
+      "origin_event_id": "evt:skill:c87a6c679ca9b4f14a33ae10",
+      "origin_company_id": "GLOBAL_ONLY",
+      "local_validation_required": true,
+      "persistent_publish_authorized": false,
+      "rsi_publish_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "event_id": "evt:lrn:990b728b1d7c75b322f69700",
+      "event_type": "SKILL_CANDIDATE_LOW_OPERATIONAL_FIT",
+      "severity": "LOW",
+      "company_id": "fenix",
+      "engine_id": "FACT-001",
+      "environment": "PREPROD_CANDIDATE",
+      "version": "0.1.0",
+      "candidate_id": "mcpservers-agent-skills:b3b3ee85f48e8b2c3469",
+      "target_engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "reason": "VALUE_GATE_LOW_OPERATIONAL_FIT",
+      "evidence_ref": {
+        "source_ref": "https://mcpservers.org/es/agent-skills/juliusbrussee/caveman-help",
+        "upstream_full_name": "JuliusBrussee/caveman",
+        "upstream_head_commit": "2e08b9177c07bb7249a8a2d1a6758e5db281d002",
+        "manifest_path": "skills/caveman-help/SKILL.md",
+        "manifest_sha256": "0bf9ee3fc8a9258b2d5f6b8bf24ac21f0bf2e4b9b4641dbc426b74f18186f81d"
+      },
+      "payload": {
+        "wrapper_id": "skillwrap:bade77fcafbe19a29981",
+        "domain": "agent-ai-orchestration",
+        "value_score": 75.64,
+        "operational_fit": 15
+      },
+      "publish_authorized": false,
+      "prod_authorized": false,
+      "origin_event_id": "evt:skill:270d10fed3d28981da08347b",
+      "origin_company_id": "GLOBAL_ONLY",
+      "local_validation_required": true,
+      "persistent_publish_authorized": false,
+      "rsi_publish_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "event_id": "evt:lrn:b0f43c7b87818b06d022a258",
+      "event_type": "SKILL_PERMISSION_REVIEW_REQUIRED",
+      "severity": "MEDIUM",
+      "company_id": "fenix",
+      "engine_id": "FACT-001",
+      "environment": "PREPROD_CANDIDATE",
+      "version": "0.1.0",
+      "candidate_id": "mcpservers-agent-skills:28679c06c77906722ed4",
+      "target_engine_bindings": [
+        "OBSERV-001",
+        "INC-001",
+        "SUP-001",
+        "QA-001",
+        "REG-001",
+        "DR-001",
+        "RBLD-001",
+        "BCP-001"
+      ],
+      "reason": "PERMISSION_GATE_NOT_CLEARED",
+      "evidence_ref": {
+        "source_ref": "https://mcpservers.org/es/agent-skills/juliusbrussee/caveman-compress",
+        "upstream_full_name": "JuliusBrussee/caveman",
+        "upstream_head_commit": "2e08b9177c07bb7249a8a2d1a6758e5db281d002",
+        "manifest_path": "plugins/caveman/skills/caveman-compress/SKILL.md",
+        "manifest_sha256": "377b0b8682d9db1a832c20ee6732ed0f19f55e4f7048955296128244c869c916"
+      },
+      "payload": {
+        "static_flags": [
+          "SECRET_ACCESS_MENTION"
+        ]
+      },
+      "publish_authorized": false,
+      "prod_authorized": false,
+      "origin_event_id": "evt:skill:709b0bd9128df25f7fc8abe2",
+      "origin_company_id": "GLOBAL_ONLY",
+      "local_validation_required": true,
+      "persistent_publish_authorized": false,
+      "rsi_publish_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "event_id": "evt:lrn:b3a986a390a3446de9d6f388",
+      "event_type": "SKILL_CANDIDATE_STATIC_LAB_HOLD",
+      "severity": "MEDIUM",
+      "company_id": "fenix",
+      "engine_id": "FACT-001",
+      "environment": "PREPROD_CANDIDATE",
+      "version": "0.1.0",
+      "candidate_id": "mcpservers-agent-skills:157e52d4ac5038d53c1a",
+      "target_engine_bindings": [
+        "AUTO-001",
+        "AUTBOOT-001",
+        "QA-001",
+        "WEB-001",
+        "SCAN-001"
+      ],
+      "reason": "STATIC_LAB_POLICY_OR_COVERAGE_HOLD",
+      "evidence_ref": {
+        "source_ref": "https://mcpservers.org/es/agent-skills/vercel/agent-browser",
+        "upstream_full_name": "vercel-labs/agent-browser",
+        "upstream_head_commit": "0207911f1bd4d0393eddaa90f2e50f96e0fb8974",
+        "manifest_path": "skills/agent-browser/SKILL.md",
+        "manifest_sha256": "3a7520e64de2dfaa516b6721c001e84e06e3c06a187b82af029ae721540ebfac"
+      },
+      "payload": {
+        "wrapper_id": "skillwrap:8393b4c849644b00694c",
+        "domain": "browser-automation-scraping",
+        "value_score": 88.53,
+        "coverage_score": 88.89,
+        "policy_alignment_score": 75
+      },
+      "publish_authorized": false,
+      "prod_authorized": false,
+      "origin_event_id": "evt:skill:4487c39b4c82fd1d2bff6830",
+      "origin_company_id": "GLOBAL_ONLY",
+      "local_validation_required": true,
+      "persistent_publish_authorized": false,
+      "rsi_publish_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "event_id": "evt:lrn:cf49f6e1d95cb2be544b72cb",
+      "event_type": "SECURITY_ADVISORY",
+      "severity": "MEDIUM",
+      "company_id": "fenix",
+      "engine_id": "FACT-001",
+      "environment": "PREPROD_CANDIDATE",
+      "version": "0.1.0",
+      "candidate_id": "mcpservers-agent-skills:9c0db36b91ed5310497b",
+      "target_engine_bindings": [
+        "MKT-001",
+        "MKT-002",
+        "MKTBOOT-001",
+        "SOCAUD-001",
+        "SOCBOOT-001",
+        "COM-001",
+        "CAP-001"
+      ],
+      "reason": "QUARANTINE_SECURITY_REVIEW",
+      "evidence_ref": {
+        "source_ref": "https://mcpservers.org/es/agent-skills/higgsfield-ai/higgsfield-product-photoshoot",
+        "upstream_full_name": "higgsfield-ai/skills",
+        "upstream_head_commit": "f83af0bc1d937c8119099a11f8ebbf5e6fb99819",
+        "manifest_path": "higgsfield-product-photoshoot/SKILL.md",
+        "manifest_sha256": "dc67bd308bb4c8540855aeaf463d8afa5a9ae4ffacb6ed33915af7a852a6e431"
+      },
+      "payload": {
+        "static_flags": [
+          "SHELL_PIPE_EXEC",
+          "SECRET_ACCESS_MENTION"
+        ]
+      },
+      "publish_authorized": false,
+      "prod_authorized": false,
+      "origin_event_id": "evt:skill:46b3bdf6d056ce3153c10601",
+      "origin_company_id": "GLOBAL_ONLY",
+      "local_validation_required": true,
+      "persistent_publish_authorized": false,
+      "rsi_publish_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "event_id": "evt:lrn:d7b21232f56099edbd835889",
+      "event_type": "SKILL_PERMISSION_REVIEW_REQUIRED",
+      "severity": "MEDIUM",
+      "company_id": "fenix",
+      "engine_id": "FACT-001",
+      "environment": "PREPROD_CANDIDATE",
+      "version": "0.1.0",
+      "candidate_id": "lobehub-skills:eeb3a68d09725b624239",
+      "target_engine_bindings": [
+        "FACT-001",
+        "ARCH-001",
+        "API-001",
+        "DEP-001",
+        "MIG-001",
+        "QA-001",
+        "REG-001",
+        "DOCS-001"
+      ],
+      "reason": "PERMISSION_GATE_NOT_CLEARED",
+      "evidence_ref": {
+        "source_ref": "https://lobehub.com/es/skills/openclaw-openclaw-coding-agent",
+        "upstream_full_name": "openclaw/openclaw",
+        "upstream_head_commit": "2bf85a4b1d74cafe1d6bb513b5d7b3cb87b1a2ca",
+        "manifest_path": "skills/coding-agent/SKILL.md",
+        "manifest_sha256": "cabfef83abacbecaf73081677a9fb1c718770594dfd729aafae93581dae2b242"
+      },
+      "payload": {
+        "static_flags": [
+          "SECRET_ACCESS_MENTION"
+        ]
+      },
+      "publish_authorized": false,
+      "prod_authorized": false,
+      "origin_event_id": "evt:skill:60640b271f3ab87f55019b40",
+      "origin_company_id": "GLOBAL_ONLY",
+      "local_validation_required": true,
+      "persistent_publish_authorized": false,
+      "rsi_publish_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "event_id": "evt:lrn:e4e84e0c71dc262b7832d555",
+      "event_type": "SKILL_LICENSE_REVIEW_REQUIRED",
+      "severity": "MEDIUM",
+      "company_id": "fenix",
+      "engine_id": "FACT-001",
+      "environment": "PREPROD_CANDIDATE",
+      "version": "0.1.0",
+      "candidate_id": "mcpservers-agent-skills:dc91c64ee7e4f8930cfc",
+      "target_engine_bindings": [
+        "VOICE-001",
+        "VOICEUI-001",
+        "COM-001",
+        "MKT-001",
+        "WEB-001"
+      ],
+      "reason": "LICENSE_GATE_NOT_CLEARED",
+      "evidence_ref": {
+        "source_ref": "https://mcpservers.org/es/agent-skills/anthropic/frontend-design",
+        "upstream_full_name": "anthropics/skills",
+        "upstream_head_commit": "9d630808e4add0a7146de4af9384155d5dee350a",
+        "manifest_path": "skills/frontend-design/SKILL.md",
+        "manifest_sha256": "d91970639e9f5c37682ac7ab60094d35f1c7c1f38d731bd56396563aee10c1d3"
+      },
+      "payload": {
+        "repo_license_spdx": null
+      },
+      "publish_authorized": false,
+      "prod_authorized": false,
+      "origin_event_id": "evt:skill:a7dc23f58ff2b42277871c59",
+      "origin_company_id": "GLOBAL_ONLY",
+      "local_validation_required": true,
+      "persistent_publish_authorized": false,
+      "rsi_publish_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "event_id": "evt:lrn:f0a2e42eb6965ab5fa2ec207",
+      "event_type": "CAPABILITY_GAP_DETECTED",
+      "severity": "MEDIUM",
+      "company_id": "fenix",
+      "engine_id": "FACT-001",
+      "environment": "PREPROD_CANDIDATE",
+      "version": "0.1.0",
+      "candidate_id": "lobehub-skills:451d1857ec73a67db655",
+      "target_engine_bindings": [
+        "FACT-001",
+        "ARCH-001",
+        "API-001",
+        "DEP-001",
+        "MIG-001",
+        "QA-001",
+        "REG-001",
+        "DOCS-001"
+      ],
+      "reason": "NO_EXISTING_DOMAIN_MATCH_CONFIRMED",
+      "evidence_ref": {
+        "source_ref": "https://lobehub.com/es/skills/openclaw-openclaw-canvas",
+        "upstream_full_name": "openclaw/openclaw",
+        "upstream_head_commit": "2bf85a4b1d74cafe1d6bb513b5d7b3cb87b1a2ca",
+        "manifest_path": "extensions/canvas/skills/canvas/SKILL.md",
+        "manifest_sha256": "8c373f5fa851990d5c66d4c9ddcec18f8e67ee958d520771955ada81b92ed664"
+      },
+      "payload": {
+        "top_domain": "software-engineering-devops",
+        "overlap_state": "CAPABILITY_GAP_CANDIDATE"
+      },
+      "publish_authorized": false,
+      "prod_authorized": false,
+      "origin_event_id": "evt:skill:a39a4d14f2fa0f6c7e442ff2",
+      "origin_company_id": "GLOBAL_ONLY",
+      "local_validation_required": true,
+      "persistent_publish_authorized": false,
+      "rsi_publish_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "event_id": "evt:lrn:f2fe4867ff90ae0a0a774e83",
+      "event_type": "SKILL_CANDIDATE_STATIC_LAB_GREEN",
+      "severity": "INFO",
+      "company_id": "fenix",
+      "engine_id": "FACT-001",
+      "environment": "PREPROD_CANDIDATE",
+      "version": "0.1.0",
+      "candidate_id": "mcpservers-agent-skills:4c2b2478f8fe3bed14df",
+      "target_engine_bindings": [
+        "DATA-001",
+        "DBOFF-001",
+        "STOROFF-001",
+        "API-001",
+        "CRM-001"
+      ],
+      "reason": "STATIC_LAB_GREEN",
+      "evidence_ref": {
+        "source_ref": "https://mcpservers.org/es/agent-skills/supabase/postgres-best-practices",
+        "upstream_full_name": "supabase/agent-skills",
+        "upstream_head_commit": "c9be0e931b7930f7d02126d04774d904c381e7d7",
+        "manifest_path": "skills/supabase-postgres-best-practices/SKILL.md",
+        "manifest_sha256": "ad65e776f45e761bafc609d3f506c77c1032225aa65e0c4c02f241b8071e5855"
+      },
+      "payload": {
+        "wrapper_id": "skillwrap:65bb409d1f80db28298f",
+        "domain": "data-database-supabase",
+        "skill_class": "SHARED",
+        "value_score": 89.7,
+        "coverage_score": 100,
+        "policy_alignment_score": 100,
+        "next_gate": "BEHAVIORAL_LAB_ON_SYNTHETIC_FIXTURES"
+      },
+      "publish_authorized": false,
+      "prod_authorized": false,
+      "origin_event_id": "evt:skill:db817d584ca5279991307884",
+      "origin_company_id": "GLOBAL_ONLY",
+      "local_validation_required": true,
+      "persistent_publish_authorized": false,
+      "rsi_publish_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    }
+  ],
+  "local_validation_required": true,
+  "persistent_publish_authorized": false,
+  "rsi_publish_authorized": false,
+  "prod_authorized": false,
+  "prod_write_authorized": false,
+  "trading_access": false,
+  "additional_cost_eur": 0
+}
