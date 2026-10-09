@@ -159,12 +159,12 @@
     },
     {
       "policy_id": "rsi-domain:fenix-automation",
-      "policy_version": "v1",
+      "policy_version": "v2",
       "company_id": "fenix",
       "engine_id": "AUTO-001",
       "domain_id": "fenix.automation",
       "environment": "PREPROD",
-      "autonomy_mode": "ASSISTED",
+      "autonomy_mode": "PREPROD_AUTONOMOUS",
       "kill_switch_enabled": true,
       "kill_switch_state": "ARMED",
       "automatic_rollback_allowed": true,
@@ -173,7 +173,8 @@
       "blast_radius": {"max_percent": 5, "max_records": 50, "scope": "PREPROD_ONLY"},
       "additional_cost_limit_eur": 0,
       "allowed_risk_classes": ["LOW", "MEDIUM"],
-      "evidence_state": "DOMAIN_EVIDENCE_WIRING_REQUIRED"
+      "evidence_state": "FIRST_REAL_DOMAIN_EXACT_HEAD_CERTIFIED",
+      "autonomy_reason": "Exact-head first-real-domain gate is GREEN with live automation-control-plane evidence, three ROUTE-001 repeatable GREEN cycles, OLD-vs-NEW tribunal PASS, SHADOW/CANARY monitoring and relearning. Business execution and PROD authority remain false pending post-merge certification."
     },
     {
       "policy_id": "rsi-domain:fenix-training",

@@ -63,7 +63,7 @@ jobs:
           node --test
           cerebro/tests/universal-learning-ingress.test.mjs
           cerebro/tests/rsi-real-domain-evidence-wiring.test.mjs
-      - name: Assert every Step-1 policy domain has an evidence source without autonomy escalation
+      - name: Assert every registered policy domain has evidence and only certified PREPROD domains are autonomous
         run: |
           set -euo pipefail
           node --input-type=module <<'NODE'
@@ -72,7 +72,10 @@ jobs:
           const c=realDomainEvidenceCoverage();
           const p=loadDomainPolicyRegistry();
           if(!c.coverage_complete||c.covered_domain_count!==p.policy_count) throw new Error('domain evidence coverage incomplete');
-          if(p.autonomous_count!==1||p.policies.find(x=>x.autonomy_mode==='PREPROD_AUTONOMOUS')?.engine_id!=='LRN-001') throw new Error('unexpected autonomy escalation');
+          const autonomous=p.policies.filter(x=>x.autonomy_mode==='PREPROD_AUTONOMOUS').map(x=>x.engine_id).sort();
+          if(JSON.stringify(autonomous)!==JSON.stringify(['AUTO-001','LRN-001'])) throw new Error(`unexpected autonomy set:${autonomous.join(',')}`);
+          if(p.autonomous_count!==2||p.assisted_count!==8) throw new Error('unexpected autonomy counts');
+          if(p.policies.find(x=>x.engine_id==='SEO-001')?.autonomy_mode!=='ASSISTED') throw new Error('SEO Core Guard boundary bypassed');
           if(c.prod_authorized!==false||c.prod_write_authorized!==false||c.trading_access!==false||c.additional_cost_eur!==0) throw new Error('authority/cost drift');
           NODE
       - name: Assert source registry cannot carry secrets customer data PROD Trading or MULTIEMPRESA authority
@@ -84,12 +87,11 @@ jobs:
           if(r.company_id!=='fenix'||r.environment!=='PREPROD'||r.prod_authorized!==false||r.prod_write_authorized!==false||r.trading_access!==false||r.additional_cost_eur!==0||r.multicompany_continuation!==false) process.exit(1);
           if(r.external_dispatch.contains_customer_data!==false||r.external_dispatch.contains_secrets!==false||r.external_dispatch.prod_authorized!==false||r.external_dispatch.prod_write_authorized!==false||r.external_dispatch.trading_access!==false||r.external_dispatch.additional_cost_eur!==0) process.exit(1);
           NODE
-      - name: Assert next gate and documentation boundary
+      - name: Assert evidence-wiring documentation boundary remains historical and safety-safe
         run: |
           set -euo pipefail
           DOC=cerebro/docs/CEREBRO_RSI_REAL_DOMAIN_EVIDENCE_WIRING_V0_2026-10-09.md
           grep -F 'HUMAN_EXCEPTION_SUPERVISOR_V0' "$DOC"
-          grep -F 'ASSISTED remains ASSISTED' "$DOC"
           grep -F 'MULTIEMPRESA continuation: FALSE' "$DOC"
           grep -F 'PROD authority: FALSE' "$DOC"
 
