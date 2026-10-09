@@ -59,8 +59,9 @@ Mientras sea necesario, las únicas órdenes válidas por correo son, una por l�
 - `AUTORIZO <approval_id>`
 - `NO AUTORIZO <approval_id>`
 - `EXPLICAME <approval_id>`
+- `APARCO <approval_id>`
 
-`Sí`, `vale`, `ok`, `procede` o expresiones genéricas nunca autorizan un gate sensible. No existe `AUTORIZO TODO`.
+`Sí`, `vale`, `ok`, `procede`, `aparca` o expresiones genéricas nunca autorizan ni aparcan un gate sensible. No existe `AUTORIZO TODO`.
 
 ## Horario de envío
 
@@ -119,7 +120,7 @@ No se muestran por defecto en el cuerpo principal: `candidate_id`, `wrapper_id`,
 
 ## Aprender de autorizaciones repetidas
 
-CEREBRO registra cada autorización mediante una huella de alcance. Tras al menos 3 autorizaciones equivalentes, sin denegaciones ni incidentes y con rollback verde, puede proponer una autorización permanente para ese alcance exacto.
+CEREBRO registra cada autorización mediante una huella de alcance. Tras al menos 3 autorizaciones equivalentes, sin denegaciones, aparcados ni incidentes y con rollback verde, puede proponer una autorización permanente para ese alcance exacto.
 
 La política permanente nunca se activa silenciosamente: requiere una última aprobación explícita y sigue siendo revocable.
 
