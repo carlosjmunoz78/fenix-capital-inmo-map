@@ -5,6 +5,7 @@ on:
     paths:
       - 'cerebro/skills/**'
       - 'cerebro/tests/skill-*.test.mjs'
+      - 'cerebro/runtime/skill-capability-evolution.mjs'
       - '.github/workflows/cerebro-skill-discovery-scout.yml'
       - '.github/workflows/cerebro-skill-behavioral-lab.yml'
   schedule:
@@ -29,6 +30,8 @@ env:
   CEREBRO_PRELAB_OUTPUT: artifacts/cerebro-skill-prelab-p0.json
   CEREBRO_REVIEWED_PRELAB_OUTPUT: artifacts/cerebro-skill-prelab-reviewed-p0.json
   CEREBRO_WRAPPER_OUTPUT: artifacts/cerebro-skill-wrapper-plans-p0.json
+  CEREBRO_CAPABILITY_EVOLUTION_OUTPUT: artifacts/cerebro-skill-capability-evolution.json
+  CEREBRO_CAPABILITY_REGISTRY_OUTPUT: artifacts/cerebro-skill-capability-registry.v8
   CEREBRO_VALUE_OUTPUT: artifacts/cerebro-skill-value-p0.json
   CEREBRO_NEXT_CANDIDATE_OUTPUT: artifacts/cerebro-skill-next-candidate.json
   CEREBRO_LAB_PLAN_OUTPUT: artifacts/cerebro-skill-lab-eval-plans-p0.json
@@ -104,6 +107,16 @@ jobs:
       - name: Generate disabled CEREBRO wrapper plans for reviewed static pre-LAB candidates
         if: steps.upstream.outputs.ready == 'true'
         run: node cerebro/skills/skill-wrapper-plan.mjs --prelab "$CEREBRO_REVIEWED_PRELAB_OUTPUT" --shortlist "$CEREBRO_SHORTLIST_OUTPUT" --manifests "$CEREBRO_MANIFEST_OUTPUT" --licenses "$CEREBRO_LICENSE_OUTPUT" --output "$CEREBRO_WRAPPER_OUTPUT"
+      - name: Auto-register admitted skills and prepare cross-engine OLD vs NEW plans
+        if: steps.upstream.outputs.ready == 'true'
+        run: |
+          node cerebro/skills/skill-capability-evolution-bridge.mjs \
+            --wrappers "$CEREBRO_WRAPPER_OUTPUT" \
+            --subscribers cerebro/registry/rsi-learning-subscribers.v0.json \
+            --engine-registry cerebro/registry/engine-registry.seed.json \
+            --registry "$CEREBRO_CAPABILITY_REGISTRY_OUTPUT" \
+            --output "$CEREBRO_CAPABILITY_EVOLUTION_OUTPUT"
+          node -e "const r=require('./$CEREBRO_CAPABILITY_EVOLUTION_OUTPUT'); if(r.prod_authorized||r.prod_write_authorized||r.trading_access||r.additional_cost_eur!==0||r.behavior_execution_authorized) process.exit(1)"
       - name: Rank static-ready candidates by evidence-based value and operational fit without popularity
         if: steps.upstream.outputs.ready == 'true'
         run: node cerebro/skills/skill-value-evaluator.mjs --wrappers "$CEREBRO_WRAPPER_OUTPUT" --prelab "$CEREBRO_REVIEWED_PRELAB_OUTPUT" --upstreams "$CEREBRO_UPSTREAM_OUTPUT" --overlap "$CEREBRO_OVERLAP_OUTPUT" --licenses "$CEREBRO_LICENSE_OUTPUT" --manifests "$CEREBRO_MANIFEST_OUTPUT" --output "$CEREBRO_VALUE_OUTPUT"
@@ -188,6 +201,8 @@ jobs:
             artifacts/cerebro-skill-prelab-p0.json
             artifacts/cerebro-skill-prelab-reviewed-p0.json
             artifacts/cerebro-skill-wrapper-plans-p0.json
+            artifacts/cerebro-skill-capability-evolution.json
+            artifacts/cerebro-skill-capability-registry.v8
             artifacts/cerebro-skill-value-p0.json
             artifacts/cerebro-skill-next-candidate.json
             artifacts/cerebro-skill-lab-eval-plans-p0.json
