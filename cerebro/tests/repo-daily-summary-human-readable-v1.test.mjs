@@ -29,7 +29,7 @@ test('skill card explains what the skill really does before any technical detail
   const card=buildHumanSkillCard(holdSkill,'HOLD');
   assert.match(card,/Asistente de Ingeniería Kairos/);
   assert.match(card,/Qué es realmente:/);
-  assert.match(card,/construye, prueba, despliega y mantiene software/);
+  assert.match(card,/planifica, construye, prueba y mantiene software/);
   assert.match(card,/Estado: APARCADA · NO SE INTEGRA DE MOMENTO/);
   assert.match(card,/Qué se ha conseguido:/);
   assert.match(card,/Qué falta:/);
