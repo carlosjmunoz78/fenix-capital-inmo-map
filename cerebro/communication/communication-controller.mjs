@@ -28,6 +28,15 @@ export function initialCommunicationState(now=new Date().toISOString()){
   };
 }
 
+export function normalizeCommunicationState(state={},now=new Date().toISOString()){
+  const base=initialCommunicationState(now);const src=clone(state);
+  return {
+    ...base,...src,schema_version:'1.1.0',version:'1.1.0',updated_at:src.updated_at??now,
+    pending:src.pending??{},authorized_actions:src.authorized_actions??{},decisions:Array.isArray(src.decisions)?src.decisions:[],consumed_authorizations:Array.isArray(src.consumed_authorizations)?src.consumed_authorizations:[],processed_message_ids:Array.isArray(src.processed_message_ids)?src.processed_message_ids:[],standing_authorizations:src.standing_authorizations??{},standing_policy_proposals:src.standing_policy_proposals??{},skill_digest_snapshot:src.skill_digest_snapshot??{},
+    mail_transport:{...base.mail_transport,...(src.mail_transport??{})},safety:{...base.safety,...(src.safety??{})}
+  };
+}
+
 function normalPurpose(item){
   const alias=resolveHumanAlias(item);
   const domain=clean(item.domain);
@@ -101,30 +110,30 @@ export function envelopeFromHumanRequired(item){
 }
 
 export function ingestSkillHumanRequired(state,skillState,now=new Date().toISOString()){
-  const out=clone(state);out.pending=out.pending??{};out.authorized_actions=out.authorized_actions??{};out.standing_authorizations=out.standing_authorizations??{};
+  const out=normalizeCommunicationState(state,now);
   for(const rawItem of Object.values(skillState?.waiting_human??{})){
     const item={...rawItem,engine_id:rawItem.engine_id??'FACT-001'};const env=envelopeFromHumanRequired(item);const activeStanding=out.standing_authorizations?.[env.scope_fingerprint];const binding=standingExecutionBinding(item);
     if(activeStanding?.status==='ACTIVE'&&activeStanding?.exact_scope_only===true&&binding&&activeStanding?.execution_binding===binding) continue;
     if(out.authorized_actions?.[env.approval_id]?.status==='AUTHORIZED_WAITING_EXECUTION') continue;
-    if(out.decisions?.some(d=>d.approval_id===env.approval_id&&d.decision==='DENIED')) continue;
+    if(out.decisions?.some(d=>d.approval_id===env.approval_id&&['DENIED','PARKED'].includes(d.decision))) continue;
     if(!out.pending[env.approval_id]) out.pending[env.approval_id]={...env,kind:'ACTION_APPROVAL',created_at:now,delivered_at:null,status:'PENDING_OWNER'};
   }
   out.updated_at=now;return out;
 }
 
-function expandedExplanation(req){return `Este permiso vale solo para “${req.human_alias}” y únicamente para la acción “${req.requested_change}”. Si respondes AUTORIZO, CEREBRO registra una autorización de un solo uso para ${req.approval_id}; el motor que pidió el permiso debe volver a validar el mismo alcance antes de ejecutar y la autorización no se puede reutilizar para otro stage, recurso o permiso. Si respondes NO AUTORIZO, la acción seguirá bloqueada. Esta autorización no concede por sí sola acceso a nada incluido en “Qué NO puede modificar”.`;}
+function expandedExplanation(req){return `Este permiso vale solo para “${req.human_alias}” y únicamente para la acción “${req.requested_change}”. Si respondes AUTORIZO, CEREBRO registra una autorización de un solo uso para ${req.approval_id}; el motor que pidió el permiso debe volver a validar el mismo alcance antes de ejecutar y la autorización no se puede reutilizar para otro stage, recurso o permiso. Si respondes NO AUTORIZO, la acción seguirá bloqueada. Si respondes APARCO, CEREBRO cierra esta petición sin autorizarla y sigue con otros trabajos seguros. Esta autorización no concede por sí sola acceso a nada incluido en “Qué NO puede modificar”.`;}
 
 function renderItem(req,index){
   const can=(req.can_modify??[]).map(x=>`  - ${x}`).join('\n')||'  - Nada no descrito expresamente.';const cannot=(req.cannot_modify??[]).map(x=>`  - ${x}`).join('\n')||'  - Todo lo que quede fuera del alcance exacto.';const explanation=req.status==='PENDING_OWNER_EXPLANATION'?`\n\nExplicación ampliada\n${req.explanation_text||expandedExplanation(req)}`:'';
-  return `${index}. ${req.human_alias}\n\nEn palabras normales\n${req.plain_language}\n\nPara qué sirve\n${req.purpose}\n\nQué quiere hacer ahora\n${req.requested_change}\n\nQué puede modificar\n${can}\n\nQué NO puede modificar\n${cannot}\n\nRiesgo\n${req.risk}\n\nRollback\n${req.rollback}${explanation}\n\nPara autorizar:\n${req.authorize_phrase}\n\nPara no autorizar:\n${req.deny_phrase}\n\nSi quieres más explicación:\n${req.explain_phrase}\n\nReferencia técnica: ${req.technical_id} · ${req.stage}\n${req.dedupe_marker}`;
+  return `${index}. ${req.human_alias}\n\nEn palabras normales\n${req.plain_language}\n\nPara qué sirve\n${req.purpose}\n\nQué quiere hacer ahora\n${req.requested_change}\n\nQué puede modificar\n${can}\n\nQué NO puede modificar\n${cannot}\n\nRiesgo\n${req.risk}\n\nRollback\n${req.rollback}${explanation}\n\nPara autorizar:\n${req.authorize_phrase}\n\nPara no autorizar:\n${req.deny_phrase}\n\nSi quieres más explicación:\n${req.explain_phrase}\n\nPara aparcarlo y que CEREBRO siga con otras cosas:\n${req.park_phrase}\n\nReferencia técnica: ${req.technical_id} · ${req.stage}\n${req.dedupe_marker}`;
 }
 
 export function buildApprovalBatch(requests,{night_batch=false,now=new Date()}={}){
   const items=[...requests];if(!items.length)return null;const local=madridClockParts(now);const explanationOnly=items.every(x=>x.status==='PENDING_OWNER_EXPLANATION');
   const subject=explanationOnly&&items.length===1?`CEREBRO · EXPLICACIÓN · ${items[0].human_alias} · ${items[0].approval_id}`:items.length===1?items[0].subject:`CEREBRO · ${items.length} AUTORIZACIONES PENDIENTES${night_batch?' · LOTE NOCHE':''}`;
   const intro=night_batch?`Te necesito. Durante la noche he agrupado ${items.length} decisiones para no enviarte correos separados.`:explanationOnly?'Aquí tienes la explicación ampliada que pediste. La autorización sigue bloqueada hasta tu decisión exacta.':`Te necesito. Tengo ${items.length} decisión${items.length===1?'':'es'} pendiente${items.length===1?'':'s'}.`;
-  const deliveryItems=items.map((req,index)=>({approval_id:req.approval_id,delivery_key:req.status==='PENDING_OWNER_EXPLANATION'?`EXPLAIN:${req.approval_id}:${req.explanation_requested_at??req.updated_at??req.created_at}`:`APPROVAL:${req.approval_id}`,text:renderItem(req,index+1),human_alias:req.human_alias,authorize_phrase:req.authorize_phrase,deny_phrase:req.deny_phrase,explain_phrase:req.explain_phrase}));
-  return {kind:'approval_batch',subject,intro,night_batch,local_date:local.date,approval_ids:items.map(x=>x.approval_id),items:deliveryItems,text:`${intro}\n\n${deliveryItems.map(x=>x.text).join('\n\n------------------------------\n\n')}\n\nIMPORTANTE: “sí”, “vale”, “ok” o “procede” no autorizan nada. Solo cuentan las decisiones exactas ligadas a cada APR.\n`};
+  const deliveryItems=items.map((req,index)=>({approval_id:req.approval_id,delivery_key:req.status==='PENDING_OWNER_EXPLANATION'?`EXPLAIN:${req.approval_id}:${req.explanation_requested_at??req.updated_at??req.created_at}`:`APPROVAL:${req.approval_id}`,text:renderItem(req,index+1),human_alias:req.human_alias,authorize_phrase:req.authorize_phrase,deny_phrase:req.deny_phrase,explain_phrase:req.explain_phrase,park_phrase:req.park_phrase}));
+  return {kind:'approval_batch',subject,intro,night_batch,local_date:local.date,approval_ids:items.map(x=>x.approval_id),items:deliveryItems,text:`${intro}\n\n${deliveryItems.map(x=>x.text).join('\n\n------------------------------\n\n')}\n\nIMPORTANTE: “sí”, “vale”, “ok”, “procede” o “aparca” no ejecutan ninguna decisión. Solo cuentan las órdenes exactas ligadas a cada APR.\n`};
 }
 
 function maybeCreateStandingProposal(out,request,now){
@@ -135,7 +144,7 @@ function maybeCreateStandingProposal(out,request,now){
 }
 
 export function applyOwnerMessages(state,messages,now=new Date().toISOString()){
-  const out=clone(state);out.pending=out.pending??{};out.authorized_actions=out.authorized_actions??{};out.decisions=out.decisions??[];out.processed_message_ids=out.processed_message_ids??[];const processed=new Set(out.processed_message_ids);
+  const out=normalizeCommunicationState(state,now);const processed=new Set(out.processed_message_ids);
   for(const msg of messages??[]){
     const messageId=clean(msg.message_id);if(!messageId||processed.has(messageId))continue;const commandable=Object.fromEntries(Object.entries(out.pending).filter(([,req])=>['PENDING_OWNER','PENDING_OWNER_EXPLANATION'].includes(req?.status)));const parsed=parseApprovalCommands(msg.text,commandable);
     for(const cmd of parsed.accepted){
@@ -144,19 +153,20 @@ export function applyOwnerMessages(state,messages,now=new Date().toISOString()){
       const decision={approval_id:cmd.approval_id,decision:cmd.decision,scope_fingerprint:req.scope_fingerprint??null,technical_id:req.technical_id??null,stage:req.stage??null,decided_at:now,source:'OWNER_EMAIL_EXACT_COMMAND',rollback_green:req.rollback_green===true};out.decisions.push(decision);
       if(cmd.decision==='AUTHORIZED'&&req.kind==='STANDING_POLICY_ACTIVATION'){const scope=req.source_scope_fingerprint;const binding=clean(req.source_execution_binding);if(!scope||!binding)throw new Error('STANDING_POLICY_EXECUTION_BINDING_MISSING');out.standing_authorizations=out.standing_authorizations??{};out.standing_authorizations[scope]={status:'ACTIVE',activated_at:now,approval_id:req.approval_id,scope_fingerprint:scope,execution_binding:binding,revocable:true,exact_scope_only:true};if(out.standing_policy_proposals?.[scope])out.standing_policy_proposals[scope].status='ACTIVE';delete out.pending[cmd.approval_id];continue;}
       if(cmd.decision==='AUTHORIZED'&&req.kind==='ACTION_APPROVAL'){req.status='AUTHORIZED_WAITING_EXECUTION';req.authorized_at=now;out.authorized_actions[cmd.approval_id]={approval_id:cmd.approval_id,status:'AUTHORIZED_WAITING_EXECUTION',scope_fingerprint:req.scope_fingerprint,technical_id:req.technical_id,stage:req.stage,human_alias:req.human_alias,authorized_at:now,source:'OWNER_EMAIL_EXACT_COMMAND',one_time:true,rollback_green:req.rollback_green===true};maybeCreateStandingProposal(out,req,now);continue;}
-      if(cmd.decision==='DENIED')delete out.pending[cmd.approval_id];
+      if(cmd.decision==='PARKED'&&req.kind==='STANDING_POLICY_ACTIVATION'&&req.source_scope_fingerprint&&out.standing_policy_proposals?.[req.source_scope_fingerprint]) out.standing_policy_proposals[req.source_scope_fingerprint].status='PARKED';
+      if(['DENIED','PARKED'].includes(cmd.decision)) delete out.pending[cmd.approval_id];
     }
     processed.add(messageId);
   }
   out.processed_message_ids=[...processed].slice(-1000);out.updated_at=now;return out;
 }
 
-export function markAuthorizedActionConsumed(state,approvalId,{execution_id=null,now=new Date().toISOString()}={}){const out=clone(state);const action=out.authorized_actions?.[approvalId];if(!action||action.status!=='AUTHORIZED_WAITING_EXECUTION')return Object.freeze({state:out,consumed:false,reason:'AUTHORIZED_ACTION_NOT_AVAILABLE'});action.status='CONSUMED';action.execution_id=execution_id;action.consumed_at=now;out.consumed_authorizations=out.consumed_authorizations??[];out.consumed_authorizations.push({...action});if(out.pending)delete out.pending[approvalId];out.updated_at=now;return Object.freeze({state:out,consumed:true,reason:'CONSUMED'});}
+export function markAuthorizedActionConsumed(state,approvalId,{execution_id=null,now=new Date().toISOString()}={}){const out=normalizeCommunicationState(state,now);const action=out.authorized_actions?.[approvalId];if(!action||action.status!=='AUTHORIZED_WAITING_EXECUTION')return Object.freeze({state:out,consumed:false,reason:'AUTHORIZED_ACTION_NOT_AVAILABLE'});action.status='CONSUMED';action.execution_id=execution_id;action.consumed_at=now;out.consumed_authorizations.push({...action});if(out.pending)delete out.pending[approvalId];out.updated_at=now;return Object.freeze({state:out,consumed:true,reason:'CONSUMED'});}
 
 export function approvedDecisionEvents(state){return Object.values(state.authorized_actions??{}).filter(x=>x.status==='AUTHORIZED_WAITING_EXECUTION').map(x=>({...x,authorization_applies_only_to_exact_approval_id_and_scope:true}));}
 
 export function prepareOutbound(state,{now=new Date(),repoSummary={}}={}){
-  const out=clone(state);const quiet=isQuietHours(now);const unsent=Object.values(out.pending??{}).filter(x=>['PENDING_OWNER','PENDING_OWNER_EXPLANATION'].includes(x.status)&&!x.delivered_at).sort((a,b)=>String(a.created_at).localeCompare(String(b.created_at))||String(a.approval_id).localeCompare(String(b.approval_id)));
+  const out=normalizeCommunicationState(state,now.toISOString());const quiet=isQuietHours(now);const unsent=Object.values(out.pending??{}).filter(x=>['PENDING_OWNER','PENDING_OWNER_EXPLANATION'].includes(x.status)&&!x.delivered_at).sort((a,b)=>String(a.created_at).localeCompare(String(b.created_at))||String(a.approval_id).localeCompare(String(b.approval_id)));
   let approvalMail=null;if(!quiet&&unsent.length){const local=madridClockParts(now);approvalMail=buildApprovalBatch(unsent,{night_batch:local.hour===8,now});for(const req of unsent)out.pending[req.approval_id].delivered_at=now.toISOString();out.last_delivery_at=now.toISOString();}
   let digestMail=null;
   if(shouldSendDailyDigest({now,last_digest_date:out.last_digest_date})){
@@ -172,5 +182,5 @@ export function prepareOutbound(state,{now=new Date(),repoSummary={}}={}){
 
 function arg(name){const i=process.argv.indexOf(name);return i>=0?process.argv[i+1]:null;}
 if(import.meta.url===`file://${process.argv[1]}`){
-  const statePath=arg('--state');const skillStatePath=arg('--skill-state');const messagesPath=arg('--messages');const summaryPath=arg('--summary');const outputDir=arg('--output-dir')??'artifacts/communication';const nowArg=arg('--now');const now=nowArg?new Date(nowArg):new Date();let state=readJson(statePath,initialCommunicationState(now.toISOString()));const skillState=readJson(skillStatePath,{});state=ingestSkillHumanRequired(state,skillState,now.toISOString());state=applyOwnerMessages(state,readJson(messagesPath,[]),now.toISOString());const prepared=prepareOutbound(state,{now,repoSummary:readJson(summaryPath,{})});fs.mkdirSync(outputDir,{recursive:true});writeJson(path.join(outputDir,'state.after.json'),prepared.state);writeJson(path.join(outputDir,'decision-events.json'),prepared.decisionEvents);if(prepared.approvalMail)writeJson(path.join(outputDir,'approval-mail.json'),prepared.approvalMail);if(prepared.digestMail)writeJson(path.join(outputDir,'digest-mail.json'),prepared.digestMail);console.log(JSON.stringify({pending:Object.keys(prepared.state.pending??{}).length,authorized_waiting_execution:Object.values(prepared.state.authorized_actions??{}).filter(x=>x?.status==='AUTHORIZED_WAITING_EXECUTION').length,approval_mail:Boolean(prepared.approvalMail),digest_mail:Boolean(prepared.digestMail),decisions:prepared.state.decisions?.length??0,quiet:isQuietHours(now)}));
+  const statePath=arg('--state');const skillStatePath=arg('--skill-state');const messagesPath=arg('--messages');const summaryPath=arg('--summary');const outputDir=arg('--output-dir')??'artifacts/communication';const nowArg=arg('--now');const now=nowArg?new Date(nowArg):new Date();let state=normalizeCommunicationState(readJson(statePath,initialCommunicationState(now.toISOString())),now.toISOString());const skillState=readJson(skillStatePath,{});state=ingestSkillHumanRequired(state,skillState,now.toISOString());state=applyOwnerMessages(state,readJson(messagesPath,[]),now.toISOString());const prepared=prepareOutbound(state,{now,repoSummary:readJson(summaryPath,{})});fs.mkdirSync(outputDir,{recursive:true});writeJson(path.join(outputDir,'state.after.json'),prepared.state);writeJson(path.join(outputDir,'decision-events.json'),prepared.decisionEvents);if(prepared.approvalMail)writeJson(path.join(outputDir,'approval-mail.json'),prepared.approvalMail);if(prepared.digestMail)writeJson(path.join(outputDir,'digest-mail.json'),prepared.digestMail);console.log(JSON.stringify({pending:Object.keys(prepared.state.pending??{}).length,authorized_waiting_execution:Object.values(prepared.state.authorized_actions??{}).filter(x=>x?.status==='AUTHORIZED_WAITING_EXECUTION').length,approval_mail:Boolean(prepared.approvalMail),digest_mail:Boolean(prepared.digestMail),decisions:prepared.state.decisions?.length??0,quiet:isQuietHours(now)}));
 }
