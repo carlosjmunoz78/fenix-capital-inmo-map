@@ -25,7 +25,6 @@ function readJson(file,label){let x;try{x=JSON.parse(fs.readFileSync(file,'utf8'
 function safe(v){return Object.freeze({...v,prod_authorized:false,prod_write_authorized:false,trading_access:false,additional_cost_eur:0});}
 function human(code){return code&&HUMAN_SET.has(code)?code:null;}
 function failDecision(decision,reasons,human_required=null,extra={}){return safe({ok:false,decision,reasons:[...new Set(reasons)],human_required:human(human_required),...extra});}
-function metricDirection(name){return ['cost_eur','latency_ms','error_rate'].includes(name)?'LOWER':'HIGHER';}
 function canonicalTags(domainId){return [...new Set(String(domainId??'').toLowerCase().split(/[^a-z0-9]+/).filter(x=>x&&x.length>2&&!TAG_STOP.has(x)))];}
 function validateRegistryEnvelope(x){
   if(!x||typeof x!=='object'||Array.isArray(x)||x.state_type!=='CEREBRO_CAPABILITY_EVOLUTION_REGISTRY'||x.environment!=='PREPROD_CONTROL_PLANE')throw new Error('capability registry identity drift');
@@ -41,6 +40,7 @@ export function loadCapabilityEvolutionRegistry(file=DEFAULT_CAPABILITY_REGISTRY
 
 export function normalizeCapabilityManifest(raw,{engine_registry_path=DEFAULT_ENGINE_REGISTRY}={}){
   if(!raw||typeof raw!=='object'||Array.isArray(raw))throw new Error('capability manifest object required');
+  if(raw.contains_customer_data===true||raw.contains_secrets===true||raw.prod_authorized===true||raw.prod_write_authorized===true||raw.trading_access===true||Number(raw.additional_cost_eur??0)!==0)throw new Error('capability manifest authority/data boundary denied');
   const engines=readJson(engine_registry_path,'engine registry');
   const canonical=new Set(engines.engine_ids??[]);
   const capability_id=req(raw.capability_id,'capability_id',160);
@@ -180,29 +180,38 @@ export function buildCapabilityLearningReport({manifest,target,evaluation}={}){
 export function activatePreprodBinding(registryRaw,{manifest,target,evaluation,policy_registry=null}={}){
   const registry=clone(validateRegistryEnvelope(registryRaw));
   if(!manifest?.manifest_fingerprint||!target||typeof target!=='object'||!evaluation||typeof evaluation!=='object')return failDecision('HOLD_BINDING_INPUT_INVALID',['MANIFEST_TARGET_EVALUATION_REQUIRED'],null,{registry});
+  let canonicalManifest;
+  try{canonicalManifest=normalizeCapabilityManifest(manifest);}catch{return failDecision('HOLD_MANIFEST_INTEGRITY',['MANIFEST_RENORMALIZATION_FAILED'],'POLICY_CONFLICT',{registry});}
+  if(canonicalManifest.manifest_fingerprint!==manifest.manifest_fingerprint)return failDecision('HOLD_MANIFEST_INTEGRITY',['MANIFEST_FINGERPRINT_MISMATCH'],'POLICY_CONFLICT',{registry});
   const company_id=req(target.company_id,'target.company_id',80),engine_id=req(target.engine_id,'target.engine_id',80),domain_id=req(target.domain_id,'target.domain_id',200);
-  if(!(manifest.company_scope.includes(company_id)||manifest.company_scope.includes('*')))return failDecision('HOLD_COMPANY_SCOPE',['CAPABILITY_NOT_AUTHORIZED_FOR_COMPANY'],null,{registry});
-  const registration=registry.records.find(x=>x.capability_id===manifest.capability_id&&x.version===manifest.version&&x.manifest_fingerprint===manifest.manifest_fingerprint&&x.state==='REGISTERED'&&Array.isArray(x.company_scope)&&(x.company_scope.includes(company_id)||x.company_scope.includes('*')))??null;
+  if(!(canonicalManifest.company_scope.includes(company_id)||canonicalManifest.company_scope.includes('*')))return failDecision('HOLD_COMPANY_SCOPE',['CAPABILITY_NOT_AUTHORIZED_FOR_COMPANY'],null,{registry});
+  const registration=registry.records.find(x=>x.capability_id===canonicalManifest.capability_id&&x.version===canonicalManifest.version&&x.manifest_fingerprint===canonicalManifest.manifest_fingerprint&&x.state==='REGISTERED'&&Array.isArray(x.company_scope)&&(x.company_scope.includes(company_id)||x.company_scope.includes('*')))??null;
   if(!registration)return failDecision('HOLD_CAPABILITY_NOT_REGISTERED',['MATCHING_REGISTERED_CAPABILITY_REQUIRED'],null,{registry});
-  const expectedRegistrationId=`capreg:${stableIdempotencyKey({capability_id:manifest.capability_id,version:manifest.version,company_scope:manifest.company_scope,manifest_fingerprint:manifest.manifest_fingerprint}).slice(0,24)}`;
+  let registeredManifest;
+  try{registeredManifest=normalizeCapabilityManifest(registration);}catch{return failDecision('HOLD_REGISTRATION_INTEGRITY',['REGISTERED_MANIFEST_RENORMALIZATION_FAILED'],'POLICY_CONFLICT',{registry});}
+  if(registeredManifest.manifest_fingerprint!==registration.manifest_fingerprint||registeredManifest.manifest_fingerprint!==canonicalManifest.manifest_fingerprint)return failDecision('HOLD_REGISTRATION_INTEGRITY',['REGISTERED_MANIFEST_FINGERPRINT_MISMATCH'],'POLICY_CONFLICT',{registry});
+  const expectedRegistrationId=`capreg:${stableIdempotencyKey({capability_id:registeredManifest.capability_id,version:registeredManifest.version,company_scope:registeredManifest.company_scope,manifest_fingerprint:registeredManifest.manifest_fingerprint}).slice(0,24)}`;
   if(registration.registration_id!==expectedRegistrationId)return failDecision('HOLD_REGISTRATION_INTEGRITY',['REGISTRATION_ID_MISMATCH'],'POLICY_CONFLICT',{registry});
   const policyRegistry=policy_registry??loadDomainPolicyRegistry();
+  const impact=analyzeCapabilityImpact(registeredManifest,{company_id,policy_registry:policyRegistry});
+  const compatibleTarget=impact.ok&&impact.decision==='EXTEND_EXISTING'&&impact.impacts.some(x=>x.engine_id===engine_id&&x.domain_id===domain_id);
+  if(!compatibleTarget)return failDecision('HOLD_TARGET_NOT_COMPATIBLE',['TARGET_NOT_DECLARED_OR_INFERRED_COMPATIBLE'],null,{registry});
   const currentPolicy=(policyRegistry?.policies??[]).find(p=>p.company_id===company_id&&p.engine_id===engine_id&&p.domain_id===domain_id)??null;
   if(!currentPolicy)return failDecision('HOLD_DOMAIN_POLICY_MISSING',['CURRENT_DOMAIN_POLICY_REQUIRED'],null,{registry});
   if(currentPolicy.autonomy_mode!=='PREPROD_AUTONOMOUS'||currentPolicy.kill_switch_enabled!==true||currentPolicy.automatic_rollback_allowed!==true)return failDecision('HOLD_BINDING_NOT_AUTHORIZED',['CURRENT_PREPROD_AUTONOMOUS_POLICY_REQUIRED'],null,{registry});
-  if(!currentPolicy.allowed_risk_classes.includes(manifest.risk_class))return failDecision('HOLD_POLICY_CONFLICT',['CAPABILITY_RISK_NOT_ALLOWED_BY_CURRENT_POLICY'],'POLICY_CONFLICT',{registry});
-  if(manifest.confidence<Number(currentPolicy.min_confidence??1))return failDecision('HOLD_LOW_CONFIDENCE',['CAPABILITY_CONFIDENCE_BELOW_CURRENT_POLICY'],'LOW_CONFIDENCE',{registry});
-  const evaluationMatches=evaluation.ok===true&&evaluation.decision==='PREPROD_CANDIDATE_PROMOTION'&&evaluation.next_gate==='PREPROD_BINDING_ACTIVATION'&&evaluation.company_id===company_id&&evaluation.engine_id===engine_id&&(evaluation.domain_id??null)===domain_id&&evaluation.capability_id===manifest.capability_id&&evaluation.capability_version===manifest.version&&evaluation.promotion_environment==='PREPROD'&&evaluation.prod_binding_authorized===false&&evaluation.prod_authorized===false&&evaluation.prod_write_authorized===false&&evaluation.trading_access===false&&Number(evaluation.additional_cost_eur)===0&&Array.isArray(evaluation.regressions)&&evaluation.regressions.length===0&&Array.isArray(evaluation.improvements)&&evaluation.improvements.length>0&&evaluation.rollback_ref===manifest.rollback_ref&&evaluation.rebuild_ref===manifest.rebuild_ref;
-  if(!evaluationMatches)return failDecision('HOLD_EVALUATION_SCOPE_MISMATCH',['MATCHING_GREEN_PREPROD_EVALUATION_REQUIRED'],null,{registry});
-  const oldM=normalizeMetrics(evaluation.baseline_metrics,'evaluation.baseline_metrics'),newM=normalizeMetrics(evaluation.candidate_metrics,'evaluation.candidate_metrics');
-  const expectedEvaluationId=`capeval:${stableIdempotencyKey({company_id,engine_id,capability_id:manifest.capability_id,version:manifest.version,oldM,newM,decision:evaluation.decision}).slice(0,24)}`;
-  if(evaluation.evaluation_id!==expectedEvaluationId)return failDecision('HOLD_EVALUATION_INTEGRITY',['EVALUATION_ID_MISMATCH'],'POLICY_CONFLICT',{registry});
-  const key=`${company_id}::${engine_id}::${manifest.capability_id}`;
+  if(!currentPolicy.allowed_risk_classes.includes(registeredManifest.risk_class))return failDecision('HOLD_POLICY_CONFLICT',['CAPABILITY_RISK_NOT_ALLOWED_BY_CURRENT_POLICY'],'POLICY_CONFLICT',{registry});
+  if(registeredManifest.confidence<Number(currentPolicy.min_confidence??1))return failDecision('HOLD_LOW_CONFIDENCE',['CAPABILITY_CONFIDENCE_BELOW_CURRENT_POLICY'],'LOW_CONFIDENCE',{registry});
+  const canonicalTarget={company_id,engine_id,domain_id,route:'EXTEND_EXISTING',policy_mode:currentPolicy.autonomy_mode,policy_id:currentPolicy.policy_id,min_confidence:currentPolicy.min_confidence,allowed_risk_classes:currentPolicy.allowed_risk_classes,automatic_rollback_allowed:currentPolicy.automatic_rollback_allowed,kill_switch_enabled:currentPolicy.kill_switch_enabled};
+  let recomputed;
+  try{recomputed=evaluateCapabilityTrial({manifest:registeredManifest,target:canonicalTarget,baseline_metrics:evaluation.baseline_metrics,candidate_metrics:evaluation.candidate_metrics,evidence_refs:evaluation.evidence_refs??[],observed_at:evaluation.observed_at});}catch{return failDecision('HOLD_EVALUATION_INTEGRITY',['EVALUATION_RECOMPUTE_FAILED'],'POLICY_CONFLICT',{registry});}
+  const evaluationMatches=evaluation.ok===recomputed.ok&&evaluation.evaluation_id===recomputed.evaluation_id&&evaluation.decision===recomputed.decision&&evaluation.next_gate===recomputed.next_gate&&evaluation.company_id===recomputed.company_id&&evaluation.engine_id===recomputed.engine_id&&(evaluation.domain_id??null)===(recomputed.domain_id??null)&&evaluation.capability_id===recomputed.capability_id&&evaluation.capability_version===recomputed.capability_version&&evaluation.promotion_environment===recomputed.promotion_environment&&evaluation.prod_binding_authorized===recomputed.prod_binding_authorized&&evaluation.prod_authorized===false&&evaluation.prod_write_authorized===false&&evaluation.trading_access===false&&Number(evaluation.additional_cost_eur)===0&&JSON.stringify(evaluation.regressions??[])===JSON.stringify(recomputed.regressions)&&JSON.stringify(evaluation.improvements??[])===JSON.stringify(recomputed.improvements)&&evaluation.rollback_ref===registeredManifest.rollback_ref&&evaluation.rebuild_ref===registeredManifest.rebuild_ref;
+  if(!evaluationMatches||recomputed.ok!==true||recomputed.decision!=='PREPROD_CANDIDATE_PROMOTION'||recomputed.next_gate!=='PREPROD_BINDING_ACTIVATION')return failDecision('HOLD_EVALUATION_INTEGRITY',['MATCHING_RECOMPUTED_GREEN_PREPROD_EVALUATION_REQUIRED'],'POLICY_CONFLICT',{registry});
+  const key=`${company_id}::${engine_id}::${registeredManifest.capability_id}`;
   const prior=registry.bindings.find(x=>x.binding_key===key)??null;
-  if(prior&&prior.environment==='PREPROD'&&prior.capability_version===manifest.version&&prior.evaluation_id===evaluation.evaluation_id)return safe({ok:true,decision:'DUPLICATE_NOOP',duplicate:true,registry,binding:clone(prior),previous_binding:clone(prior)});
-  const binding={binding_key:key,company_id,engine_id,domain_id,environment:'PREPROD',capability_id:manifest.capability_id,capability_version:manifest.version,evaluation_id:evaluation.evaluation_id,policy_id:currentPolicy.policy_id,policy_version:currentPolicy.policy_version,state:'ACTIVE_PREPROD',rollback_ref:manifest.rollback_ref,rebuild_ref:manifest.rebuild_ref,prod_authorized:false,prod_write_authorized:false,trading_access:false,additional_cost_eur:0};
+  if(prior&&prior.environment==='PREPROD'&&prior.capability_version===registeredManifest.version&&prior.evaluation_id===recomputed.evaluation_id)return safe({ok:true,decision:'DUPLICATE_NOOP',duplicate:true,registry,binding:clone(prior),previous_binding:clone(prior)});
+  const binding={binding_key:key,company_id,engine_id,domain_id,environment:'PREPROD',capability_id:registeredManifest.capability_id,capability_version:registeredManifest.version,evaluation_id:recomputed.evaluation_id,policy_id:currentPolicy.policy_id,policy_version:currentPolicy.policy_version,state:'ACTIVE_PREPROD',rollback_ref:registeredManifest.rollback_ref,rebuild_ref:registeredManifest.rebuild_ref,prod_authorized:false,prod_write_authorized:false,trading_access:false,additional_cost_eur:0};
   registry.bindings=[...registry.bindings.filter(x=>x.binding_key!==key),binding].sort((a,b)=>a.binding_key.localeCompare(b.binding_key));
-  registry.binding_history=[...registry.binding_history,{history_id:`caphist:${stableIdempotencyKey({key,evaluation_id:evaluation.evaluation_id,prior}).slice(0,24)}`,binding_key:key,action:'ACTIVATE_PREPROD',previous_binding:prior?clone(prior):null,new_binding:clone(binding),evaluation_id:evaluation.evaluation_id,policy_id:currentPolicy.policy_id,policy_version:currentPolicy.policy_version}];
+  registry.binding_history=[...registry.binding_history,{history_id:`caphist:${stableIdempotencyKey({key,evaluation_id:recomputed.evaluation_id,prior}).slice(0,24)}`,binding_key:key,action:'ACTIVATE_PREPROD',previous_binding:prior?clone(prior):null,new_binding:clone(binding),evaluation_id:recomputed.evaluation_id,policy_id:currentPolicy.policy_id,policy_version:currentPolicy.policy_version}];
   return safe({ok:true,decision:'PREPROD_BINDING_ACTIVE',duplicate:false,registry,binding,previous_binding:prior});
 }
 
