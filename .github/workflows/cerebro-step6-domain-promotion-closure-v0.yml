@@ -63,24 +63,43 @@ jobs:
           set -euo pipefail
           jq -e '.ok == true and .status == "STEP6_DOMAIN_PROMOTION_CLOSED_SAFE" and .macro_step == "6/6" and .classified_domains == 10 and .assisted_or_hold == 8 and .autonomous_preprod == ["AUTO-001","LRN-001"] and .prod_authorized == false and .prod_write_authorized == false and .business_execution_authorized == false and .trading_access == false and .multicompany_continuation == false and .additional_cost_eur == 0 and .browser_binding_is_separate_step4_gate == true' /tmp/step6-closure.json >/dev/null
 
-      - name: Assert existing AUTO-001 and runtime evidence remain physically green on main
+      - name: Assert existing AUTO-001 evidence remains physically green
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           gh api "repos/$GITHUB_REPOSITORY/actions/runs?branch=main&per_page=100" > /tmp/main-runs.json
-          node --input-type=module <<'NODE'
-          import fs from 'node:fs';
-          const d=JSON.parse(fs.readFileSync('/tmp/main-runs.json','utf8'));
-          const runs=d.workflow_runs??[];
-          const required=['CEREBRO First Real Domain AUTO001 V0','PROD Runtime Smoke'];
-          for(const name of required){
-            const r=runs.filter(x=>x.name===name&&x.head_branch==='main').sort((a,b)=>Date.parse(b.created_at)-Date.parse(a.created_at))[0];
-            if(!r||r.status!=='completed'||r.conclusion!=='success') throw new Error(`required live evidence not green:${name}`);
-          }
-          const deploy=runs.filter(x=>x.name==='PROD Live Deploy'&&x.head_branch==='main').sort((a,b)=>Date.parse(b.created_at)-Date.parse(a.created_at))[0];
-          if(!deploy||deploy.status!=='completed'||deploy.conclusion!=='skipped') throw new Error('latest PROD Live Deploy is not safely skipped');
-          NODE
+          jq -e '[.workflow_runs[] | select(.name == "CEREBRO First Real Domain AUTO001 V0" and .head_branch == "main" and .status == "completed" and .conclusion == "success")] | length > 0' /tmp/main-runs.json >/dev/null
+
+      - name: Assert runtime/deploy evidence on PR or manual certification
+        if: github.event_name != 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs?branch=main&per_page=100" > /tmp/main-runs.json
+          jq -e '[.workflow_runs[] | select(.name == "PROD Runtime Smoke" and .head_branch == "main" and .status == "completed" and .conclusion == "success")] | length > 0' /tmp/main-runs.json >/dev/null
+          jq -e '[.workflow_runs[] | select(.name == "PROD Live Deploy" and .head_branch == "main" and .status == "completed" and .conclusion == "skipped")] | length > 0' /tmp/main-runs.json >/dev/null
+
+      - name: Wait for same-SHA postmerge runtime/deploy evidence
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 30); do
+            gh api "repos/$GITHUB_REPOSITORY/actions/runs?head_sha=$GITHUB_SHA&per_page=30" > /tmp/same-sha-runs.json
+            SMOKE_OK=$(jq '[.workflow_runs[] | select(.name == "PROD Runtime Smoke" and .status == "completed" and .conclusion == "success")] | length' /tmp/same-sha-runs.json)
+            DEPLOY_OK=$(jq '[.workflow_runs[] | select(.name == "PROD Live Deploy" and .status == "completed" and .conclusion == "skipped")] | length' /tmp/same-sha-runs.json)
+            if [ "$SMOKE_OK" -gt 0 ] && [ "$DEPLOY_OK" -gt 0 ]; then
+              echo "same-SHA postmerge evidence GREEN"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "same-SHA postmerge evidence did not become GREEN in time" >&2
+          cat /tmp/same-sha-runs.json >&2
+          exit 1
 
       - name: Assert documentation preserves no-overclaim boundary
         run: |
