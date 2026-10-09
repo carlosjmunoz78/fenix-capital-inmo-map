@@ -173,8 +173,8 @@
       "blast_radius": {"max_percent": 5, "max_records": 50, "scope": "PREPROD_ONLY"},
       "additional_cost_limit_eur": 0,
       "allowed_risk_classes": ["LOW", "MEDIUM"],
-      "evidence_state": "FIRST_REAL_DOMAIN_EXACT_HEAD_GATE_REQUIRED",
-      "autonomy_reason": "First real low-risk domain candidate: live automation-control-plane evidence plus ROUTE-001 repeatability, rollback, tribunal, canary and relearning are required before merge. Business execution and PROD authority remain false."
+      "evidence_state": "FIRST_REAL_DOMAIN_EXACT_HEAD_CERTIFIED",
+      "autonomy_reason": "Exact-head first-real-domain gate is GREEN with live automation-control-plane evidence, three ROUTE-001 repeatable GREEN cycles, OLD-vs-NEW tribunal PASS, SHADOW/CANARY monitoring and relearning. Business execution and PROD authority remain false pending post-merge certification."
     },
     {
       "policy_id": "rsi-domain:fenix-training",
