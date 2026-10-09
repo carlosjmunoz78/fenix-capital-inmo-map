@@ -10,6 +10,13 @@ function finite(value,label){const n=Number(value);if(!Number.isFinite(n))throw 
 function frozen(value){return Object.freeze({...value,prod_authorized:false,prod_write_authorized:false,trading_access:false,additional_cost_eur:0});}
 function human(code,reasons,policy,candidate){return frozen({ok:false,decision:'HUMAN_REQUIRED',human_required:code,reasons:[...reasons],policy_id:policy?.policy_id??null,candidate_id:candidate?.candidate_id??null,next_gate:'HUMAN_REQUIRED'});}
 function hold(reason,policy,candidate){return frozen({ok:false,decision:'HOLD',human_required:null,reasons:[reason],policy_id:policy?.policy_id??null,candidate_id:candidate?.candidate_id??null,next_gate:'DOMAIN_POLICY_EVIDENCE_REQUIRED'});}
+function capabilities(input){
+  const raw=Array.isArray(input)?input:['*'];
+  const values=[...new Set(raw.map((x)=>req(String(x),'allowed_capability').toUpperCase()))].sort();
+  if(!values.length) throw new Error('allowed_capabilities cannot be empty');
+  if(values.includes('*')&&values.length>1) throw new Error('wildcard capability cannot be combined with explicit capabilities');
+  return values;
+}
 
 export function defineDomainAutonomyPolicy(input={}){
   const policy={
@@ -32,6 +39,7 @@ export function defineDomainAutonomyPolicy(input={}){
     },
     additional_cost_limit_eur:finite(input.additional_cost_limit_eur??0,'additional_cost_limit_eur'),
     allowed_risk_classes:Array.isArray(input.allowed_risk_classes)?[...new Set(input.allowed_risk_classes.map((x)=>req(String(x),'allowed_risk_class').toUpperCase()))].sort():['LOW','MEDIUM'],
+    allowed_capabilities:capabilities(input.allowed_capabilities),
     prod_promotion_authorized:false,
     prod_write_authorized:false,
     trading_access:false
@@ -47,7 +55,7 @@ export function defineDomainAutonomyPolicy(input={}){
   if(policy.additional_cost_limit_eur!==0) throw new Error('additional cost limit must remain zero');
   for(const risk of policy.allowed_risk_classes) if(!ALLOWED_RISK.has(risk)) throw new Error('allowed_risk_classes may only contain LOW/MEDIUM');
   if(policy.prod_promotion_authorized!==false||policy.prod_write_authorized!==false||policy.trading_access!==false) throw new Error('domain policy cannot grant PROD or Trading authority');
-  return Object.freeze({...policy,blast_radius:Object.freeze({...policy.blast_radius}),allowed_risk_classes:Object.freeze([...policy.allowed_risk_classes]),policy_hash:stableIdempotencyKey(policy)});
+  return Object.freeze({...policy,blast_radius:Object.freeze({...policy.blast_radius}),allowed_risk_classes:Object.freeze([...policy.allowed_risk_classes]),allowed_capabilities:Object.freeze([...policy.allowed_capabilities]),policy_hash:stableIdempotencyKey(policy)});
 }
 
 export function evaluateDomainAdoptionPolicy({policy,candidate,promotion_plan}={}){
@@ -63,6 +71,11 @@ export function evaluateDomainAdoptionPolicy({policy,candidate,promotion_plan}={
   const confidence=finite(candidate.confidence,'candidate.confidence');
   if(confidence<policy.min_confidence) return human('LOW_CONFIDENCE',['confidence_below_domain_threshold'],policy,candidate);
   if(policy.autonomy_mode!=='PREPROD_AUTONOMOUS') return hold('DOMAIN_AUTONOMY_NOT_PREPROD_AUTONOMOUS',policy,candidate);
+  const requestedCapability=typeof candidate.requested_capability==='string'&&candidate.requested_capability.trim()?candidate.requested_capability.trim().toUpperCase():null;
+  if(!policy.allowed_capabilities.includes('*')){
+    if(!requestedCapability) return hold('EXPLICIT_CAPABILITY_REQUIRED',policy,candidate);
+    if(!policy.allowed_capabilities.includes(requestedCapability)) return hold('CAPABILITY_NOT_AUTONOMOUS',policy,candidate);
+  }
   if(!policy.kill_switch_enabled) return hold('KILL_SWITCH_REQUIRED',policy,candidate);
   if(policy.kill_switch_state==='TRIPPED') return frozen({ok:false,decision:'KILL_SWITCH_BLOCK',human_required:null,reasons:['KILL_SWITCH_TRIPPED'],policy_id:policy.policy_id,candidate_id:candidate.candidate_id,next_gate:'RECOVERY_AND_REVIEW'});
   if(!policy.automatic_rollback_allowed) return hold('AUTOMATIC_ROLLBACK_REQUIRED_FOR_CANARY',policy,candidate);
@@ -72,11 +85,11 @@ export function evaluateDomainAdoptionPolicy({policy,candidate,promotion_plan}={
   if(canary>effectiveMax) return hold('CANARY_EXCEEDS_BLAST_RADIUS',policy,candidate);
   if(promotion_plan.additional_cost_budget_eur!==0) return human('MONEY_LIMIT',['nonzero_incremental_cost_budget'],policy,candidate);
   if(!promotion_plan.rollback_ref||!promotion_plan.rebuild_ref) return hold('ROLLBACK_AND_REBUILD_REQUIRED',policy,candidate);
-  const decision_id=stableIdempotencyKey({policy_hash:policy.policy_hash,candidate_id:candidate.candidate_id,promotion_id:promotion_plan.promotion_id,canary_percent:canary});
+  const decision_id=stableIdempotencyKey({policy_hash:policy.policy_hash,candidate_id:candidate.candidate_id,promotion_id:promotion_plan.promotion_id,canary_percent:canary,requested_capability:requestedCapability});
   return frozen({
     ok:true,decision:'ALLOW_PREPROD_CANARY',human_required:null,reasons:[],policy_id:policy.policy_id,policy_version:policy.policy_version,
-    decision_id,candidate_id:candidate.candidate_id,promotion_id:promotion_plan.promotion_id,domain_id:policy.domain_id,
-    autonomy_mode:policy.autonomy_mode,kill_switch_state:policy.kill_switch_state,automatic_rollback_allowed:true,
+    decision_id,candidate_id:candidate.candidate_id,promotion_id:promotion_plan.promotion_id,domain_id:policy.domain_id,requested_capability:requestedCapability,
+    allowed_capabilities:policy.allowed_capabilities,autonomy_mode:policy.autonomy_mode,kill_switch_state:policy.kill_switch_state,automatic_rollback_allowed:true,
     blast_radius:Object.freeze({...policy.blast_radius,effective_max_percent:effectiveMax}),next_gate:'B4_PREPROD_SHADOW_CANARY'
   });
 }
@@ -87,8 +100,8 @@ export function tripDomainKillSwitch(policy,reason='OPERATOR_OR_MONITOR_TRIP'){
 }
 
 export const RSI_DOMAIN_AUTONOMY_POLICY_CONTRACT=Object.freeze({
-  scope:'PER_DOMAIN',environment:PREPROD,required:['policy_id','policy_version','company_id','engine_id','domain_id','autonomy_mode','kill_switch','blast_radius','automatic_rollback','confidence','risk','zero_cost'],
-  max_canary_percent:25,allowed_autonomous_risk:['LOW','MEDIUM'],min_confidence_floor:0.60,
+  scope:'PER_DOMAIN_CAPABILITY',environment:PREPROD,required:['policy_id','policy_version','company_id','engine_id','domain_id','autonomy_mode','kill_switch','blast_radius','automatic_rollback','confidence','risk','zero_cost'],
+  max_canary_percent:25,allowed_autonomous_risk:['LOW','MEDIUM'],min_confidence_floor:0.60,capability_default:'*',explicit_capability_policy:'HOLD_IF_MISSING_OR_UNAUTHORIZED',
   high_risk:'HUMAN_REQUIRED:HIGH_RISK',low_confidence:'HUMAN_REQUIRED:LOW_CONFIDENCE',authority_violation:'HUMAN_REQUIRED:SECURITY_INCIDENT',
   prod_authorized:false,prod_write_authorized:false,trading_access:false,additional_cost_target_eur:0
 });
