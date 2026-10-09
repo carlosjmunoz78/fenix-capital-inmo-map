@@ -1,0 +1,253 @@
+name: CEREBRO ROUTE001 Real Resource PREPROD Loop V0
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/runtime/route001-resource-discovery.mjs'
+      - 'cerebro/runtime/route001-safe-preprod-loop.mjs'
+      - 'cerebro/tests/route001-real-resource-preprod-loop-v0.test.mjs'
+      - 'cerebro/docs/CEREBRO_ROUTE001_REAL_RESOURCE_DISCOVERY_PREPROD_LOOP_V0_2026-10-09.md'
+      - '.github/workflows/cerebro-route001-real-resource-preprod-loop-v0.yml'
+      - 'cerebro/router/execution-model-router.mjs'
+      - 'cerebro/runtime/universal-learning-ingress.mjs'
+      - 'cerebro/skills/zero-cost-provider-evidence.v0.json'
+  push:
+    branches: [main]
+    paths:
+      - 'cerebro/runtime/route001-resource-discovery.mjs'
+      - 'cerebro/runtime/route001-safe-preprod-loop.mjs'
+      - 'cerebro/tests/route001-real-resource-preprod-loop-v0.test.mjs'
+      - 'cerebro/docs/CEREBRO_ROUTE001_REAL_RESOURCE_DISCOVERY_PREPROD_LOOP_V0_2026-10-09.md'
+      - '.github/workflows/cerebro-route001-real-resource-preprod-loop-v0.yml'
+  schedule:
+    - cron: '31 */6 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && format('cerebro-route001-real-resource-cert-{0}', github.ref) || 'cerebro-route001-resource-state-v0' }}
+  cancel-in-progress: false
+
+env:
+  RESOURCE_STATE_BRANCH: cerebro-route001-resource-state-v0
+  RESOURCE_STATE_PATH: cerebro/runtime/route001-resource-state.v0.json
+  IAM_STATE_BRANCH: cerebro-iam001-lifecycle-state-v0
+  IAM_STATE_PATH: cerebro/runtime/iam001-lifecycle-state.v0.json
+
+jobs:
+  certify-pr:
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      actions: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Assert exact PR head
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+      - name: Test live discovery safe loop router IAM and universal ingress contracts
+        run: >-
+          node --test
+          cerebro/tests/route001-real-resource-preprod-loop-v0.test.mjs
+          cerebro/tests/execution-model-router-v0.test.mjs
+          cerebro/tests/identity-credential-broker-v0.test.mjs
+          cerebro/tests/identity-session-lifecycle-v0.test.mjs
+          cerebro/tests/universal-learning-ingress.test.mjs
+      - name: Load physical metadata-only IAM and ROUTE state branches
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/route001
+          git fetch --no-tags origin "refs/heads/$IAM_STATE_BRANCH:refs/remotes/origin/$IAM_STATE_BRANCH"
+          git fetch --no-tags origin "refs/heads/$RESOURCE_STATE_BRANCH:refs/remotes/origin/$RESOURCE_STATE_BRANCH"
+          git show "refs/remotes/origin/$IAM_STATE_BRANCH:$IAM_STATE_PATH" > artifacts/route001/iam-state.json
+          git show "refs/remotes/origin/$RESOURCE_STATE_BRANCH:$RESOURCE_STATE_PATH" > artifacts/route001/resource-state.before.json
+          jq -e '.contains_secret_values == false and .prod_authorized == false and .prod_write_authorized == false and .trading_access == false and .multicompany_continuation == false and .additional_cost_eur == 0' artifacts/route001/iam-state.json >/dev/null
+          jq -e '.contains_secrets == false and .prod_authorized == false and .prod_write_authorized == false and .execution_authorized == false and .trading_access == false and .multicompany_continuation == false and .additional_cost_eur == 0' artifacts/route001/resource-state.before.json >/dev/null
+      - name: Probe current PR runner and repository visibility without secret values
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          VISIBILITY="$(gh api "repos/$GITHUB_REPOSITORY" --jq '.visibility')"
+          test "$VISIBILITY" = 'public'
+          NODE_VERSION="$(node --version)"
+          PYTHON_VERSION="$(python --version 2>&1)"
+          GH_VERSION="$(gh --version | head -n1)"
+          jq -n \
+            --arg observed_at "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --arg visibility "$VISIBILITY" \
+            --arg node_version "$NODE_VERSION" \
+            --arg python_version "$PYTHON_VERSION" \
+            --arg gh_version "$GH_VERSION" \
+            --arg sha "$GITHUB_SHA" \
+            --arg run_ref "github-run:$GITHUB_RUN_ID" \
+            --argjson run_id "$GITHUB_RUN_ID" \
+            '{company_id:"fenix",environment:"PREPROD",observed_at:$observed_at,repository_visibility:$visibility,source_run_id:$run_id,source_head_sha:$sha,source_run_ref:$run_ref,runtime:{node:{available:true,version:$node_version},python:{available:true,version:$python_version},github_actions:{available:true,version:$gh_version}},providers:{"github-actions-ephemeral-oss":{runtime_verified:false,integrity_verified:false,quota_guarded:false,remaining_calls:0},"google-gemini-api-free":{reference_present:false,policy_green:false,quota_guarded:false,current_zero_cost_probe_green:false,remaining_calls:0},"cloudflare-workers-ai-free":{reference_present:false,policy_green:false,quota_guarded:false,current_zero_cost_probe_green:false,remaining_calls:0},"mistral-api-free-mode":{reference_present:false,policy_green:false,quota_guarded:false,current_zero_cost_probe_green:false,remaining_calls:0}},browser:{binding_status:"HOLD_BROWSER_REAL_IDENTITY_BINDING_AUDIT",connector_registered:true,current_attestation_green:false}}' \
+            > artifacts/route001/observations.json
+      - name: Dry-run real discovery and safe deterministic PREPROD fixture
+        run: |
+          set -euo pipefail
+          node cerebro/runtime/route001-resource-discovery.mjs --input artifacts/route001/observations.json --output artifacts/route001/discovery.json
+          node cerebro/runtime/route001-safe-preprod-loop.mjs --discovery artifacts/route001/discovery.json --lifecycle artifacts/route001/iam-state.json --fixture canonical-json-hash-v0 --output artifacts/route001/loop.json
+          jq -e '.status == "SAFE_PREPROD_LOOP_GREEN" and .route.selected_resource_id == "gha-node-runtime" and .fixture_execution_performed == true and .learning_signal_report.events_total == 3 and .prod_authorized == false and .prod_write_authorized == false and .execution_authorized == false and .trading_access == false and .multicompany_continuation == false and .additional_cost_eur == 0' artifacts/route001/loop.json >/dev/null
+      - name: Prove PR is dry-run only and external AI/browser remain unexecuted
+        run: |
+          set -euo pipefail
+          jq -e '[.resources[] | select(.resource_id == "google-gemini-api-free")][0].available == false' artifacts/route001/discovery.json >/dev/null
+          jq -e '[.resources[] | select(.resource_id == "agent-browser-real")][0].available == false' artifacts/route001/discovery.json >/dev/null
+          echo '{"state_persisted":false,"learning_dispatch_sent":false,"external_ai_called":false,"browser_called":false,"business_execution":false}' > artifacts/route001/pr-dry-run-proof.json
+      - name: Upload PR certification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-route001-real-resource-pr-${{ github.run_id }}
+          path: artifacts/route001/**
+          if-no-files-found: warn
+          retention-days: 30
+
+  live-preprod-loop:
+    if: github.event_name != 'pull_request'
+    permissions:
+      contents: write
+      actions: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Load previous ROUTE resource state and current IAM lifecycle metadata
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/route001
+          git fetch --no-tags origin "+refs/heads/$IAM_STATE_BRANCH:refs/remotes/origin/$IAM_STATE_BRANCH"
+          git fetch --no-tags origin "+refs/heads/$RESOURCE_STATE_BRANCH:refs/remotes/origin/$RESOURCE_STATE_BRANCH"
+          git show "refs/remotes/origin/$IAM_STATE_BRANCH:$IAM_STATE_PATH" > artifacts/route001/iam-state.json
+          git show "refs/remotes/origin/$RESOURCE_STATE_BRANCH:$RESOURCE_STATE_PATH" > artifacts/route001/resource-state.before.json
+      - name: Probe actual zero-cost runtime and build evidence-only observations
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GEMINI_REFERENCE_PRESENT: ${{ secrets.CEREBRO_GEMINI_API_KEY != '' }}
+        run: |
+          set -euo pipefail
+          VISIBILITY="$(gh api "repos/$GITHUB_REPOSITORY" --jq '.visibility')"
+          NODE_AVAILABLE=false; command -v node >/dev/null 2>&1 && NODE_AVAILABLE=true
+          PYTHON_AVAILABLE=false; command -v python >/dev/null 2>&1 && PYTHON_AVAILABLE=true
+          GH_AVAILABLE=false; command -v gh >/dev/null 2>&1 && GH_AVAILABLE=true
+          NODE_VERSION="$(node --version 2>/dev/null || true)"
+          PYTHON_VERSION="$(python --version 2>&1 || true)"
+          GH_VERSION="$(gh --version 2>/dev/null | head -n1 || true)"
+          BROWSER_STATUS="$(jq -r '.browser_session_binding.status // "HOLD_BROWSER_REAL_IDENTITY_BINDING_AUDIT"' artifacts/route001/iam-state.json)"
+          BROWSER_ATTESTED_AT="$(jq -r '.browser_session_binding.attested_at // empty' artifacts/route001/iam-state.json)"
+          BROWSER_FRESH=false
+          if [ "$BROWSER_STATUS" = 'BROWSER_SESSION_BINDING_HEALTHY' ] && [ -n "$BROWSER_ATTESTED_AT" ]; then
+            NOW_EPOCH="$(date -u +%s)"
+            ATTEST_EPOCH="$(date -u -d "$BROWSER_ATTESTED_AT" +%s 2>/dev/null || echo 0)"
+            AGE=$((NOW_EPOCH-ATTEST_EPOCH))
+            if [ "$AGE" -ge 0 ] && [ "$AGE" -le 900 ]; then BROWSER_FRESH=true; fi
+          fi
+          jq -n \
+            --arg observed_at "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --arg visibility "$VISIBILITY" \
+            --arg node_version "$NODE_VERSION" \
+            --arg python_version "$PYTHON_VERSION" \
+            --arg gh_version "$GH_VERSION" \
+            --arg sha "$(git rev-parse HEAD)" \
+            --arg run_ref "github-run:$GITHUB_RUN_ID" \
+            --arg browser_status "$BROWSER_STATUS" \
+            --argjson run_id "$GITHUB_RUN_ID" \
+            --argjson node_available "$NODE_AVAILABLE" \
+            --argjson python_available "$PYTHON_AVAILABLE" \
+            --argjson gh_available "$GH_AVAILABLE" \
+            --argjson gemini_reference_present "$GEMINI_REFERENCE_PRESENT" \
+            --argjson browser_fresh "$BROWSER_FRESH" \
+            '{company_id:"fenix",environment:"PREPROD",observed_at:$observed_at,repository_visibility:$visibility,source_run_id:$run_id,source_head_sha:$sha,source_run_ref:$run_ref,runtime:{node:{available:$node_available,version:$node_version},python:{available:$python_available,version:$python_version},github_actions:{available:$gh_available,version:$gh_version}},providers:{"github-actions-ephemeral-oss":{runtime_verified:false,integrity_verified:false,quota_guarded:false,remaining_calls:0},"google-gemini-api-free":{reference_present:$gemini_reference_present,policy_green:false,quota_guarded:false,current_zero_cost_probe_green:false,remaining_calls:0},"cloudflare-workers-ai-free":{reference_present:false,policy_green:false,quota_guarded:false,current_zero_cost_probe_green:false,remaining_calls:0},"mistral-api-free-mode":{reference_present:false,policy_green:false,quota_guarded:false,current_zero_cost_probe_green:false,remaining_calls:0}},browser:{binding_status:$browser_status,connector_registered:true,current_attestation_green:$browser_fresh}}' \
+            > artifacts/route001/observations.json
+          echo "Repository visibility: $VISIBILITY"
+          echo "Current deterministic probes: node=$NODE_AVAILABLE python=$PYTHON_AVAILABLE gh=$GH_AVAILABLE"
+          echo "Gemini symbolic reference present: $GEMINI_REFERENCE_PRESENT; current free probe deliberately not fabricated."
+          echo "Browser fresh binding evidence: $BROWSER_FRESH"
+      - name: Discover only currently evidenced resources
+        run: |
+          set -euo pipefail
+          node cerebro/runtime/route001-resource-discovery.mjs --input artifacts/route001/observations.json --output artifacts/route001/discovery.json
+          jq -e '.repository_visibility == "public" and .discovery_summary.available_zero_cost_total >= 2 and .prod_authorized == false and .prod_write_authorized == false and .execution_authorized == false and .trading_access == false and .multicompany_continuation == false and .additional_cost_eur == 0' artifacts/route001/discovery.json >/dev/null
+      - name: Execute one allowlisted deterministic PREPROD fixture through ROUTE-001
+        run: |
+          set -euo pipefail
+          node cerebro/runtime/route001-safe-preprod-loop.mjs --discovery artifacts/route001/discovery.json --lifecycle artifacts/route001/iam-state.json --fixture canonical-json-hash-v0 --output artifacts/route001/loop.json
+          jq -e '.status == "SAFE_PREPROD_LOOP_GREEN" and .route.selected_resource_id == "gha-node-runtime" and .fixture_execution_performed == true and .learning_signal_report.events_total == 3 and .prod_authorized == false and .prod_write_authorized == false and .execution_authorized == false and .trading_access == false and .multicompany_continuation == false and .additional_cost_eur == 0' artifacts/route001/loop.json >/dev/null
+      - name: Build metadata-only persistent resource state
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import {buildResourceState} from './cerebro/runtime/route001-resource-discovery.mjs';
+          const discovery=JSON.parse(fs.readFileSync('artifacts/route001/discovery.json','utf8'));
+          const previous=JSON.parse(fs.readFileSync('artifacts/route001/resource-state.before.json','utf8'));
+          const loop=JSON.parse(fs.readFileSync('artifacts/route001/loop.json','utf8'));
+          const last_safe_loop={status:loop.status,fixture_id:loop.fixture_id,selected_resource_id:loop.route.selected_resource_id,selected_resource_class:loop.route.selected_resource_class,observed_at:loop.observed_at,duration_ms:loop.duration_ms,learning_events:loop.learning_signal_report.events_total,business_execution:false};
+          const state=buildResourceState(discovery,{previous_state:previous,last_safe_loop});
+          fs.writeFileSync('artifacts/route001/resource-state.after.json',JSON.stringify(state,null,2)+'\n');
+          NODE
+          jq -e '.contains_secrets == false and .contains_customer_data == false and .prod_authorized == false and .prod_write_authorized == false and .execution_authorized == false and .trading_access == false and .multicompany_continuation == false and .additional_cost_eur == 0 and .last_safe_loop.status == "SAFE_PREPROD_LOOP_GREEN"' artifacts/route001/resource-state.after.json >/dev/null
+          if grep -Eq 'eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.|sb_secret_[A-Za-z0-9_-]{8,}|AIza[A-Za-z0-9_-]{12,}|BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY' artifacts/route001/resource-state.after.json; then echo 'raw credential-like material found in resource state' >&2; exit 1; fi
+      - name: Persist only ROUTE control-plane resource metadata
+        run: |
+          set -euo pipefail
+          cp artifacts/route001/resource-state.after.json /tmp/route001-resource-state.json
+          git fetch --no-tags origin "+refs/heads/$RESOURCE_STATE_BRANCH:refs/remotes/origin/$RESOURCE_STATE_BRANCH"
+          git checkout --detach "refs/remotes/origin/$RESOURCE_STATE_BRANCH"
+          cp /tmp/route001-resource-state.json "$RESOURCE_STATE_PATH"
+          git config user.name 'cerebro-route001-resource[bot]'
+          git config user.email 'cerebro-route001-resource[bot]@users.noreply.github.com'
+          git add "$RESOURCE_STATE_PATH"
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(cerebro): advance ROUTE-001 real resource state from run $GITHUB_RUN_ID"
+            git push origin "HEAD:refs/heads/$RESOURCE_STATE_BRANCH"
+          fi
+      - name: Return safe operational observations to the existing universal RSI learning ingress
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          jq '{event_type:"cerebro_learning_signal",client_payload:{signal:{signals:.learning_signals}}}' artifacts/route001/loop.json > /tmp/route001-learning-dispatch.json
+          jq -e '.client_payload.signal.signals | length == 3' /tmp/route001-learning-dispatch.json >/dev/null
+          gh api --method POST "repos/$GITHUB_REPOSITORY/dispatches" --input /tmp/route001-learning-dispatch.json
+          echo '{"dispatch":"cerebro_learning_signal","signals":3,"customer_data":false,"secrets":false,"prod_write":false,"trading":false,"additional_cost_eur":0}' > artifacts/route001/learning-dispatch-proof.json
+      - name: Record acceptance summary
+        run: |
+          {
+            echo '### ROUTE-001 real zero-cost PREPROD loop'
+            echo "- resource: $(jq -r '.route.selected_resource_id' artifacts/route001/loop.json)"
+            echo "- fixture: $(jq -r '.fixture_id' artifacts/route001/loop.json)"
+            echo "- learning events: $(jq -r '.learning_signal_report.events_total' artifacts/route001/loop.json)"
+            echo '- external AI call: false'
+            echo '- browser call: false unless separately proven current and selected; this V0 fixture does not select it'
+            echo '- PROD/Trading/MULTIEMPRESA authority: false'
+            echo '- incremental cost: 0 EUR'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload live discovery loop evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-route001-real-resource-preprod-loop-${{ github.run_id }}
+          path: artifacts/route001/**
+          if-no-files-found: warn
+          retention-days: 30
