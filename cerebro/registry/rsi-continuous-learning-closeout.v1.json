@@ -1,0 +1,83 @@
+{
+  "schema_version": "1.0.0",
+  "date": "2026-10-09",
+  "project": "CEREBRO OS RSI Continuous Learning",
+  "company_id": "fenix",
+  "engine_id": "LRN-001",
+  "environment": "PREPROD",
+  "status": "CONFIRMED_OPERATIONAL_PREPROD",
+  "runtime_baseline_main_sha": "aae57c7b463e4b60f811713c90fdf51dd1ee3eab",
+  "execution_model": "HOSTLESS_BOUNDED_ITERATION",
+  "schedule_semantics": "BEST_EFFORT_15_MINUTE_PLUS_EVENT",
+  "durable_state": {
+    "outbox_branch": "cerebro-rsi-learning-outbox-v0",
+    "learning_state_branch": "cerebro-rsi-learning-state-v0",
+    "last_real_domain_evidence_run_id": 37942182281,
+    "last_real_domain_batch_id": "lrn-batch:d7b101719a9f39885d1e542a",
+    "last_real_domain_batch_sha256": "89845ec7e1ffb2e6e31dc3ac822a3f9d45d615d9ca044335e7bb51587edd1737",
+    "last_verified_candidate_total": 179,
+    "last_verified_learning_total": 179,
+    "last_verified_held_total": 0,
+    "last_verified_human_required": []
+  },
+  "pipeline": [
+    "real_evidence_or_skill",
+    "universal_learning_ingress",
+    "tenant_local_outbox",
+    "durable_learning",
+    "versioned_candidate",
+    "old_vs_new",
+    "independent_tribunal",
+    "preprod_shadow",
+    "preprod_canary",
+    "monitor",
+    "keep_or_rollback",
+    "relearn",
+    "next_version"
+  ],
+  "accepted_components": {
+    "persistent_continuous_evolution": "PR_522_MERGED",
+    "old_vs_new_tribunal": "PR_520_MERGED",
+    "preprod_monitor_relearn": "PR_521_MERGED",
+    "skill_capability_evolution": "PR_537_MERGED",
+    "skill_capability_evolution_certification": "PR_538_MERGED",
+    "skill_auto_hook": "PR_539_MERGED",
+    "scheduled_real_domain_probe_fix": "PR_540_MERGED",
+    "safe_conflict_diagnostics": "PR_541_MERGED",
+    "structural_conflict_diagnostics": "PR_542_MERGED",
+    "legacy_provenance_replay_compatibility": "PR_543_MERGED",
+    "legacy_null_absent_provenance_normalization": "PR_544_MERGED"
+  },
+  "autonomy": {
+    "PREPROD_AUTONOMOUS": [
+      "LRN-001",
+      "AUTO-001"
+    ],
+    "global_autonomy": false,
+    "prod_autonomy": false,
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "trading_access": false,
+    "multicompany_continuation": false
+  },
+  "cost": {
+    "additional_cost_eur": 0,
+    "paid_ai_required": false
+  },
+  "separate_gates_not_blocking_this_closeout": [
+    "PROD_PROMOTION_HIGH_RISK",
+    "SEO_CORE_GUARD_CANONICAL_RECONCILIATION",
+    "BROWSER_BRIDGE_PHYSICAL_GATES_WHERE_APPLICABLE",
+    "MULTIEMPRESA_RUNTIME_CONTINUATION"
+  ],
+  "superseded_non_authority": [
+    "PR_536"
+  ],
+  "resume_rule": "Do not rebuild or repeat the RSI pipeline. Verify current main, latest Learning Control Plane, durable learning state, durable outbox, and unchanged PROD/Trading authority; then continue from the next evidence-backed improvement.",
+  "prod_promotion_gate": {
+    "status": "HUMAN_REQUIRED",
+    "reason": "HIGH_RISK",
+    "explicit_authorization_required": true,
+    "authorized_by_this_record": false
+  }
+}
