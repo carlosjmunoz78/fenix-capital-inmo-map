@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import type { CSSProperties } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from './supabase';
 
@@ -53,8 +54,8 @@ export default function CerebroOwnerDecisionGuard(){
     setResult('accepted');
   }
 
-  const card:React.CSSProperties={maxWidth:620,width:'calc(100% - 32px)',background:'var(--card-bg, #fff)',color:'var(--text, #151515)',borderRadius:20,padding:'28px',boxShadow:'0 24px 80px rgba(0,0,0,.22)'};
-  const button:React.CSSProperties={width:'100%',border:0,borderRadius:12,padding:'14px 16px',fontWeight:800,cursor:'pointer',fontSize:16};
+  const card:CSSProperties={maxWidth:620,width:'calc(100% - 32px)',background:'var(--card-bg, #fff)',color:'var(--text, #151515)',borderRadius:20,padding:'28px',boxShadow:'0 24px 80px rgba(0,0,0,.22)'};
+  const button:CSSProperties={width:'100%',border:0,borderRadius:12,padding:'14px 16px',fontWeight:800,cursor:'pointer',fontSize:16};
 
   return <div data-cerebro-owner-decision="v0" style={{position:'fixed',inset:0,zIndex:100000,display:'grid',placeItems:'center',background:'rgba(12,17,24,.72)',backdropFilter:'blur(5px)'}}>
     <section style={card} aria-live="polite">
