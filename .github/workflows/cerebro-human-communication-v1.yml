@@ -14,6 +14,8 @@ on:
       - '.github/workflows/cerebro-human-communication-v1.yml'
   schedule:
     - cron: '*/10 * * * *'
+  repository_dispatch:
+    types: [cerebro-human-communication-wake-v0]
   workflow_dispatch:
 
 concurrency:
@@ -29,6 +31,8 @@ env:
   COMM_STATE_PATH: cerebro/runtime/human-communication-state.v1.json
   SKILL_STATE_BRANCH: cerebro/skill-autoloop-state-v0
   SKILL_STATE_PATH: cerebro/runtime/skill-autoloop-state.v0.json
+  HUMAN_EXCEPTION_STATE_BRANCH: cerebro-human-exception-state-v0
+  HUMAN_EXCEPTION_STATE_PATH: cerebro/runtime/human-exception-supervisor-state.v0.json
 
 jobs:
   communication:
@@ -50,14 +54,37 @@ jobs:
           node --test cerebro/tests/human-communication-v1.test.mjs cerebro/tests/owner-approval-gate-v1.test.mjs
           python -m unittest cerebro/tests/test_mail_bridge.py
 
-      - name: Load persistent communication and Skill AutoLoop state
+      - name: Load persistent communication Skill AutoLoop and Human Exception state
         run: |
           set -euo pipefail
           mkdir -p artifacts/communication
           git fetch --no-tags origin "refs/heads/$COMM_STATE_BRANCH:refs/remotes/origin/$COMM_STATE_BRANCH"
           git fetch --no-tags origin "refs/heads/$SKILL_STATE_BRANCH:refs/remotes/origin/$SKILL_STATE_BRANCH"
+          git fetch --no-tags origin "refs/heads/$HUMAN_EXCEPTION_STATE_BRANCH:refs/remotes/origin/$HUMAN_EXCEPTION_STATE_BRANCH"
           git show "refs/remotes/origin/$COMM_STATE_BRANCH:$COMM_STATE_PATH" > artifacts/communication/state.before.json
           git show "refs/remotes/origin/$SKILL_STATE_BRANCH:$SKILL_STATE_PATH" > artifacts/communication/skill-state.json
+          git show "refs/remotes/origin/$HUMAN_EXCEPTION_STATE_BRANCH:$HUMAN_EXCEPTION_STATE_PATH" > artifacts/communication/human-exception-state.json
+
+      - name: Merge canonical supervisor queue into existing communication ingress without changing approval semantics
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs');
+          const skill=JSON.parse(fs.readFileSync('artifacts/communication/skill-state.json','utf8'));
+          const hex=JSON.parse(fs.readFileSync('artifacts/communication/human-exception-state.json','utf8'));
+          const canonical=new Set(['LEGAL_REQUIRED','SIGNATURE_REQUIRED','LOW_CONFIDENCE','HIGH_RISK','POLICY_CONFLICT','SECURITY_INCIDENT','MONEY_LIMIT','CUSTOMER_HUMAN_REQUEST']);
+          if(hex.state_type!=='CEREBRO_HUMAN_EXCEPTION_SUPERVISOR_STATE'||hex.company_id!=='fenix'||hex.engine_id!=='HEX-001'||hex.prod_authorized!==false||hex.prod_write_authorized!==false||hex.trading_access!==false||hex.multicompany_continuation!==false||Number(hex.additional_cost_eur)!==0) throw new Error('human exception state safety drift');
+          const skillWaiting=skill.waiting_human??{};
+          const hexWaiting=hex.waiting_human??{};
+          for(const [key,item] of Object.entries(hexWaiting)){
+            if(!canonical.has(item?.human_required)) throw new Error(`noncanonical human exception reached communication:${key}`);
+            if(item?.prod_authorized!==false||item?.prod_write_authorized!==false||item?.trading_access!==false||Number(item?.additional_cost_eur)!==0) throw new Error(`human exception authority drift:${key}`);
+            if(skillWaiting[key]&&JSON.stringify(skillWaiting[key])!==JSON.stringify(item)) throw new Error(`waiting_human key collision:${key}`);
+          }
+          const merged={...skill,waiting_human:{...skillWaiting,...hexWaiting},human_exception_supervisor_source:{state_type:hex.state_type,updated_at:hex.updated_at,waiting_total:Object.keys(hexWaiting).length}};
+          fs.writeFileSync('artifacts/communication/human-required-input-state.json',JSON.stringify(merged,null,2)+'\n');
+          console.log(JSON.stringify({skill_waiting:Object.keys(skillWaiting).length,supervisor_waiting:Object.keys(hexWaiting).length,merged_waiting:Object.keys(merged.waiting_human).length}));
+          NODE
 
       - name: Build 24h CEREBRO evidence window
         env:
@@ -71,7 +98,7 @@ jobs:
           node cerebro/communication/repo-daily-summary.mjs \
             --runs artifacts/communication/runs.json \
             --commits artifacts/communication/commits.json \
-            --skill-state artifacts/communication/skill-state.json \
+            --skill-state artifacts/communication/human-required-input-state.json \
             --communication-state artifacts/communication/state.before.json \
             --output artifacts/communication/daily-summary.json
 
@@ -103,11 +130,11 @@ jobs:
         if: github.ref != 'refs/heads/main' || steps.mail.outputs.ready != 'true'
         run: echo '[]' > artifacts/communication/messages.json
 
-      - name: Reconcile queue, replies, quiet hours and daily digest
+      - name: Reconcile queue replies quiet hours and daily digest through the existing controller
         run: |
           node cerebro/communication/communication-controller.mjs \
             --state artifacts/communication/state.before.json \
-            --skill-state artifacts/communication/skill-state.json \
+            --skill-state artifacts/communication/human-required-input-state.json \
             --messages artifacts/communication/messages.json \
             --summary artifacts/communication/daily-summary.json \
             --output-dir artifacts/communication/out
