@@ -1,0 +1,242 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_RSI_LRN_EVENT_BATCH",
+  "batch_id": "lrn-batch:ddef50240145e8e14a1dbd30",
+  "company_id": "fenix",
+  "engine_id": "LRN-001",
+  "environment": "PREPROD",
+  "version": "0.5.0",
+  "source": {
+    "workflow": "CEREBRO RSI Universal Learning Ingress V0",
+    "run_id": 38001126261,
+    "head_sha": "739e296a3be866ea86fdcb5761fc0b167cd06c8f"
+  },
+  "source_event_count": 4,
+  "events_total": 4,
+  "events": [
+    {
+      "schema_version": "1.0.0",
+      "event_id": "evt:lrn:1da7866729aee110dbbc9e2a",
+      "event_type": "CEREBRO_ENGINE_RESULT",
+      "signal_id": "route001:38001109378:canonical-json-hash-v0:node:result",
+      "source_type": "ENGINE_RESULT",
+      "company_id": "fenix",
+      "engine_id": "ROUTE-001",
+      "environment": "PREPROD_CANDIDATE",
+      "source_environment": "PREPROD",
+      "version": "0.2.0",
+      "observed_at": "2026-10-09T22:47:44.000Z",
+      "severity": "INFO",
+      "confidence": 1,
+      "risk_class": "LOW",
+      "reason": "Real zero-cost PREPROD route completed an allowlisted synthetic deterministic fixture on the runtime actually selected by ROUTE-001.",
+      "learning_hypothesis": "Observed result from ROUTE-001 should be compared with prior outcomes to reinforce or revise its current strategy. Evidence reason: Real zero-cost PREPROD route completed an allowlisted synthetic deterministic fixture on the runtime actually selected by ROUTE-001.",
+      "expected_metric_delta": {
+        "name": "route_success",
+        "direction": "HIGHER",
+        "measurement": "ALLOWLISTED_SYNTHETIC_PREPROD_FIXTURE"
+      },
+      "evidence_refs": [
+        "git:739e296a3be866ea86fdcb5761fc0b167cd06c8f",
+        "github-run:38001109378",
+        "route001:executor:NODE_IN_PROCESS_FIXED_FIXTURE",
+        "route001:fixture:canonical-json-hash-v0"
+      ],
+      "payload": {
+        "actual_runtime": "node",
+        "business_execution": false,
+        "duration_ms": 0.43264,
+        "execution_provenance": "NODE_IN_PROCESS_FIXED_FIXTURE",
+        "fixture_id": "canonical-json-hash-v0",
+        "fixture_marker": "ROUTE001_SAFE_FIXTURE_GREEN",
+        "route_status": "ROUTED",
+        "selected_resource_class": "DETERMINISTIC_LOCAL",
+        "selected_resource_id": "gha-node-runtime",
+        "zero_cost": true
+      },
+      "local_validation_required": true,
+      "publish_authorized": false,
+      "persistent_publish_authorized": false,
+      "rsi_publish_authorized": false,
+      "contains_customer_data": false,
+      "contains_secrets": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "origin_event_id": "evt:universal:a0a31b7069ca14633d1e79d3",
+      "origin_company_id": "fenix"
+    },
+    {
+      "schema_version": "1.0.0",
+      "event_id": "evt:lrn:489cab0bbfc0fffe9ede8d34",
+      "event_type": "CEREBRO_COST_OBSERVATION",
+      "signal_id": "route001:38001109378:canonical-json-hash-v0:node:cost",
+      "source_type": "COST_OBSERVATION",
+      "company_id": "fenix",
+      "engine_id": "ROUTE-001",
+      "environment": "PREPROD_CANDIDATE",
+      "source_environment": "PREPROD",
+      "version": "0.2.0",
+      "observed_at": "2026-10-09T22:47:44.000Z",
+      "severity": "INFO",
+      "confidence": 1,
+      "risk_class": "LOW",
+      "reason": "Observed incremental cost remained zero for the allowlisted PREPROD fixture.",
+      "learning_hypothesis": "Cost evidence from ROUTE-001 should be evaluated for a lower-cost equivalent path without reducing quality or authority controls. Evidence reason: Observed incremental cost remained zero for the allowlisted PREPROD fixture.",
+      "expected_metric_delta": {
+        "name": "additional_cost_eur",
+        "direction": "LOWER",
+        "measurement": "ROUTE_POLICY_AND_PUBLIC_RUNNER_EVIDENCE"
+      },
+      "evidence_refs": [
+        "git:739e296a3be866ea86fdcb5761fc0b167cd06c8f",
+        "github-run:38001109378",
+        "route001:executor:NODE_IN_PROCESS_FIXED_FIXTURE",
+        "route001:fixture:canonical-json-hash-v0"
+      ],
+      "payload": {
+        "actual_runtime": "node",
+        "execution_provenance": "NODE_IN_PROCESS_FIXED_FIXTURE",
+        "fixture_id": "canonical-json-hash-v0",
+        "observed_incremental_cost_eur": 0,
+        "paid_fallback_used": false,
+        "selected_resource_id": "gha-node-runtime"
+      },
+      "local_validation_required": true,
+      "publish_authorized": false,
+      "persistent_publish_authorized": false,
+      "rsi_publish_authorized": false,
+      "contains_customer_data": false,
+      "contains_secrets": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "origin_event_id": "evt:universal:658c1473eef3067e6843253c",
+      "origin_company_id": "fenix"
+    },
+    {
+      "schema_version": "1.0.0",
+      "event_id": "evt:lrn:56cbefcf4234c75dd8189b2c",
+      "event_type": "CEREBRO_ENGINE_RESULT",
+      "signal_id": "route001:38001109378:repeatability-rehearsal",
+      "source_type": "ENGINE_RESULT",
+      "company_id": "fenix",
+      "engine_id": "ROUTE-001",
+      "environment": "PREPROD_CANDIDATE",
+      "source_environment": "PREPROD",
+      "version": "0.3.0",
+      "observed_at": "2026-10-09T22:47:44.000Z",
+      "severity": "INFO",
+      "confidence": 1,
+      "risk_class": "LOW",
+      "reason": "ROUTE-001 completed a bounded repeatability and deterministic fallback rehearsal without business execution.",
+      "learning_hypothesis": "Observed result from ROUTE-001 should be compared with prior outcomes to reinforce or revise its current strategy. Evidence reason: ROUTE-001 completed a bounded repeatability and deterministic fallback rehearsal without business execution.",
+      "expected_metric_delta": {
+        "name": "repeatable_zero_cost_cycles",
+        "direction": "HIGHER",
+        "measurement": "BOUNDED_CONTROLLED_PREPROD_REHEARSAL"
+      },
+      "evidence_refs": [
+        "git:739e296a3be866ea86fdcb5761fc0b167cd06c8f",
+        "github-run:38001109378"
+      ],
+      "payload": {
+        "executors": [
+          {
+            "actual_runtime": "node",
+            "execution_provenance": "NODE_IN_PROCESS_FIXED_FIXTURE",
+            "scenario": "PRIMARY_CURRENT_EVIDENCE",
+            "selected_resource_id": "gha-node-runtime"
+          },
+          {
+            "actual_runtime": "python",
+            "execution_provenance": "PYTHON_FIXED_SUBPROCESS_NO_SHELL",
+            "scenario": "CONTROLLED_PRIMARY_RESOURCE_LOSS",
+            "selected_resource_id": "gha-python-runtime"
+          },
+          {
+            "actual_runtime": "node",
+            "execution_provenance": "NODE_IN_PROCESS_FIXED_FIXTURE",
+            "scenario": "CONTROLLED_PRIMARY_RESTORE",
+            "selected_resource_id": "gha-node-runtime"
+          }
+        ],
+        "fallback_rehearsal_green": true,
+        "green_execution_cycles": 3,
+        "hold_cycles": 1,
+        "no_human_noise": true,
+        "restoration_green": true,
+        "status": "REPEATABILITY_REHEARSAL_GREEN"
+      },
+      "local_validation_required": true,
+      "publish_authorized": false,
+      "persistent_publish_authorized": false,
+      "rsi_publish_authorized": false,
+      "contains_customer_data": false,
+      "contains_secrets": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "origin_event_id": "evt:universal:5e291333350b51cbd12c6f86",
+      "origin_company_id": "fenix"
+    },
+    {
+      "schema_version": "1.0.0",
+      "event_id": "evt:lrn:d5e557874e1e32eeeefb42c8",
+      "event_type": "CEREBRO_METRIC_OBSERVATION",
+      "signal_id": "route001:38001109378:canonical-json-hash-v0:node:latency",
+      "source_type": "METRIC_OBSERVATION",
+      "company_id": "fenix",
+      "engine_id": "ROUTE-001",
+      "environment": "PREPROD_CANDIDATE",
+      "source_environment": "PREPROD",
+      "version": "0.2.0",
+      "observed_at": "2026-10-09T22:47:44.000Z",
+      "severity": "INFO",
+      "confidence": 1,
+      "risk_class": "LOW",
+      "reason": "Observed duration of the real zero-cost PREPROD fixture route.",
+      "learning_hypothesis": "Metric evidence from ROUTE-001 should be evaluated for a measurable OLD-vs-NEW improvement opportunity. Evidence reason: Observed duration of the real zero-cost PREPROD fixture route.",
+      "expected_metric_delta": {
+        "name": "route_fixture_duration_ms",
+        "direction": "LOWER",
+        "measurement": "MONOTONIC_PROCESS_CLOCK"
+      },
+      "evidence_refs": [
+        "git:739e296a3be866ea86fdcb5761fc0b167cd06c8f",
+        "github-run:38001109378",
+        "route001:executor:NODE_IN_PROCESS_FIXED_FIXTURE",
+        "route001:fixture:canonical-json-hash-v0"
+      ],
+      "payload": {
+        "actual_runtime": "node",
+        "duration_ms": 0.43264,
+        "execution_provenance": "NODE_IN_PROCESS_FIXED_FIXTURE",
+        "fixture_id": "canonical-json-hash-v0",
+        "selected_resource_id": "gha-node-runtime"
+      },
+      "local_validation_required": true,
+      "publish_authorized": false,
+      "persistent_publish_authorized": false,
+      "rsi_publish_authorized": false,
+      "contains_customer_data": false,
+      "contains_secrets": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "origin_event_id": "evt:universal:f699fbe959968935e625ec0b",
+      "origin_company_id": "fenix"
+    }
+  ],
+  "local_validation_required": true,
+  "persistent_publish_authorized": false,
+  "rsi_publish_authorized": false,
+  "prod_authorized": false,
+  "prod_write_authorized": false,
+  "trading_access": false,
+  "additional_cost_eur": 0
+}
