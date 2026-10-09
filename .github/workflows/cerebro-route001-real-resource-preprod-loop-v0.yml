@@ -5,8 +5,11 @@ on:
     paths:
       - 'cerebro/runtime/route001-resource-discovery.mjs'
       - 'cerebro/runtime/route001-safe-preprod-loop.mjs'
+      - 'cerebro/runtime/route001-repeatable-cycles.mjs'
       - 'cerebro/tests/route001-real-resource-preprod-loop-v0.test.mjs'
+      - 'cerebro/tests/route001-repeatable-cycles-v0.test.mjs'
       - 'cerebro/docs/CEREBRO_ROUTE001_REAL_RESOURCE_DISCOVERY_PREPROD_LOOP_V0_2026-10-09.md'
+      - 'cerebro/docs/CEREBRO_ROUTE001_REPEATABLE_AUTONOMOUS_PREPROD_CYCLES_V0_2026-10-09.md'
       - '.github/workflows/cerebro-route001-real-resource-preprod-loop-v0.yml'
       - 'cerebro/router/execution-model-router.mjs'
       - 'cerebro/runtime/universal-learning-ingress.mjs'
@@ -16,8 +19,11 @@ on:
     paths:
       - 'cerebro/runtime/route001-resource-discovery.mjs'
       - 'cerebro/runtime/route001-safe-preprod-loop.mjs'
+      - 'cerebro/runtime/route001-repeatable-cycles.mjs'
       - 'cerebro/tests/route001-real-resource-preprod-loop-v0.test.mjs'
+      - 'cerebro/tests/route001-repeatable-cycles-v0.test.mjs'
       - 'cerebro/docs/CEREBRO_ROUTE001_REAL_RESOURCE_DISCOVERY_PREPROD_LOOP_V0_2026-10-09.md'
+      - 'cerebro/docs/CEREBRO_ROUTE001_REPEATABLE_AUTONOMOUS_PREPROD_CYCLES_V0_2026-10-09.md'
       - '.github/workflows/cerebro-route001-real-resource-preprod-loop-v0.yml'
   schedule:
     - cron: '31 */6 * * *'
@@ -40,7 +46,7 @@ jobs:
       contents: read
       actions: read
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
         with:
@@ -54,10 +60,11 @@ jobs:
           python-version: '3.12'
       - name: Assert exact PR head
         run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
-      - name: Test live discovery safe loop router IAM and universal ingress contracts
+      - name: Test discovery repeatability router IAM and universal ingress contracts
         run: >-
           node --test
           cerebro/tests/route001-real-resource-preprod-loop-v0.test.mjs
+          cerebro/tests/route001-repeatable-cycles-v0.test.mjs
           cerebro/tests/execution-model-router-v0.test.mjs
           cerebro/tests/identity-credential-broker-v0.test.mjs
           cerebro/tests/identity-session-lifecycle-v0.test.mjs
@@ -93,23 +100,32 @@ jobs:
             --argjson run_id "$GITHUB_RUN_ID" \
             '{company_id:"fenix",environment:"PREPROD",observed_at:$observed_at,repository_visibility:$visibility,source_run_id:$run_id,source_head_sha:$sha,source_run_ref:$run_ref,runtime:{node:{available:true,version:$node_version},python:{available:true,version:$python_version},github_actions:{available:true,version:$gh_version}},providers:{"github-actions-ephemeral-oss":{runtime_verified:false,integrity_verified:false,quota_guarded:false,remaining_calls:0},"google-gemini-api-free":{reference_present:false,policy_green:false,quota_guarded:false,current_zero_cost_probe_green:false,remaining_calls:0},"cloudflare-workers-ai-free":{reference_present:false,policy_green:false,quota_guarded:false,current_zero_cost_probe_green:false,remaining_calls:0},"mistral-api-free-mode":{reference_present:false,policy_green:false,quota_guarded:false,current_zero_cost_probe_green:false,remaining_calls:0}},browser:{binding_status:"HOLD_BROWSER_REAL_IDENTITY_BINDING_AUDIT",connector_registered:true,current_attestation_green:false}}' \
             > artifacts/route001/observations.json
-      - name: Dry-run real discovery and safe deterministic PREPROD fixture
+      - name: Dry-run real discovery current loop and bounded fallback rehearsal
         run: |
           set -euo pipefail
           node cerebro/runtime/route001-resource-discovery.mjs --input artifacts/route001/observations.json --output artifacts/route001/discovery.json
           node cerebro/runtime/route001-safe-preprod-loop.mjs --discovery artifacts/route001/discovery.json --lifecycle artifacts/route001/iam-state.json --fixture canonical-json-hash-v0 --output artifacts/route001/loop.json
-          jq -e '.status == "SAFE_PREPROD_LOOP_GREEN" and .route.selected_resource_id == "gha-node-runtime" and .fixture_execution_performed == true and .learning_signal_report.events_total == 3 and .prod_authorized == false and .prod_write_authorized == false and .execution_authorized == false and .trading_access == false and .multicompany_continuation == false and .additional_cost_eur == 0' artifacts/route001/loop.json >/dev/null
-      - name: Prove PR is dry-run only and external AI/browser remain unexecuted
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import {runRepeatabilityRehearsal} from './cerebro/runtime/route001-repeatable-cycles.mjs';
+          const discovery=JSON.parse(fs.readFileSync('artifacts/route001/discovery.json','utf8'));
+          const lifecycle=JSON.parse(fs.readFileSync('artifacts/route001/iam-state.json','utf8'));
+          const rehearsal=runRepeatabilityRehearsal({discovery,lifecycle_state:lifecycle});
+          fs.writeFileSync('artifacts/route001/rehearsal.json',JSON.stringify(rehearsal,null,2)+'\n');
+          NODE
+          jq -e '.status == "SAFE_PREPROD_LOOP_GREEN" and .route.selected_resource_id == "gha-node-runtime" and .actual_runtime == "node" and .fixture_execution_performed == true and .learning_signal_report.events_total == 3' artifacts/route001/loop.json >/dev/null
+          jq -e '.status == "REPEATABILITY_REHEARSAL_GREEN" and .green_execution_cycles == 3 and .hold_cycles == 1 and .fallback_rehearsal_green == true and .restoration_green == true and .full_loss_hold_green == true and .no_human_noise == true and .cycles[1].selected_resource_id == "gha-python-runtime" and .cycles[1].actual_runtime == "python" and .cycles[1].execution_provenance == "PYTHON_FIXED_SUBPROCESS_NO_SHELL" and .cycles[3].status == "HOLD_NO_SAFE_ROUTE" and .cycles[3].human_required == null and .learning_signal_report.events_total == 1' artifacts/route001/rehearsal.json >/dev/null
+      - name: Prove PR is dry-run only and external AI browser and business actions remain unexecuted
         run: |
           set -euo pipefail
           jq -e '[.resources[] | select(.resource_id == "google-gemini-api-free")][0].available == false' artifacts/route001/discovery.json >/dev/null
           jq -e '[.resources[] | select(.resource_id == "agent-browser-real")][0].available == false' artifacts/route001/discovery.json >/dev/null
-          echo '{"state_persisted":false,"learning_dispatch_sent":false,"external_ai_called":false,"browser_called":false,"business_execution":false}' > artifacts/route001/pr-dry-run-proof.json
+          echo '{"state_persisted":false,"learning_dispatch_sent":false,"external_ai_called":false,"browser_called":false,"business_execution":false,"python_fallback_rehearsed":true,"arbitrary_shell":false}' > artifacts/route001/pr-dry-run-proof.json
       - name: Upload PR certification evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: cerebro-route001-real-resource-pr-${{ github.run_id }}
+          name: cerebro-route001-repeatability-pr-${{ github.run_id }}
           path: artifacts/route001/**
           if-no-files-found: warn
           retention-days: 30
@@ -120,7 +136,7 @@ jobs:
       contents: write
       actions: read
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:
@@ -188,27 +204,36 @@ jobs:
           set -euo pipefail
           node cerebro/runtime/route001-resource-discovery.mjs --input artifacts/route001/observations.json --output artifacts/route001/discovery.json
           jq -e '.repository_visibility == "public" and .discovery_summary.available_zero_cost_total >= 2 and .prod_authorized == false and .prod_write_authorized == false and .execution_authorized == false and .trading_access == false and .multicompany_continuation == false and .additional_cost_eur == 0' artifacts/route001/discovery.json >/dev/null
-      - name: Execute one allowlisted deterministic PREPROD fixture through ROUTE-001
+      - name: Execute current evidence loop and bounded real fallback rehearsal
         run: |
           set -euo pipefail
           node cerebro/runtime/route001-safe-preprod-loop.mjs --discovery artifacts/route001/discovery.json --lifecycle artifacts/route001/iam-state.json --fixture canonical-json-hash-v0 --output artifacts/route001/loop.json
-          jq -e '.status == "SAFE_PREPROD_LOOP_GREEN" and .route.selected_resource_id == "gha-node-runtime" and .fixture_execution_performed == true and .learning_signal_report.events_total == 3 and .prod_authorized == false and .prod_write_authorized == false and .execution_authorized == false and .trading_access == false and .multicompany_continuation == false and .additional_cost_eur == 0' artifacts/route001/loop.json >/dev/null
-      - name: Build metadata-only persistent resource state
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import {runRepeatabilityRehearsal} from './cerebro/runtime/route001-repeatable-cycles.mjs';
+          const discovery=JSON.parse(fs.readFileSync('artifacts/route001/discovery.json','utf8'));
+          const lifecycle=JSON.parse(fs.readFileSync('artifacts/route001/iam-state.json','utf8'));
+          const rehearsal=runRepeatabilityRehearsal({discovery,lifecycle_state:lifecycle});
+          fs.writeFileSync('artifacts/route001/rehearsal.json',JSON.stringify(rehearsal,null,2)+'\n');
+          NODE
+          jq -e '.status == "SAFE_PREPROD_LOOP_GREEN" and .route.selected_resource_id == "gha-node-runtime" and .actual_runtime == "node" and .fixture_execution_performed == true and .learning_signal_report.events_total == 3' artifacts/route001/loop.json >/dev/null
+          jq -e '.status == "REPEATABILITY_REHEARSAL_GREEN" and .green_execution_cycles == 3 and .hold_cycles == 1 and .fallback_rehearsal_green == true and .restoration_green == true and .full_loss_hold_green == true and .no_human_noise == true and .cycles[1].selected_resource_id == "gha-python-runtime" and .cycles[1].actual_runtime == "python" and .cycles[1].execution_provenance == "PYTHON_FIXED_SUBPROCESS_NO_SHELL" and .cycles[3].status == "HOLD_NO_SAFE_ROUTE" and .cycles[3].human_required == null and .learning_signal_report.events_total == 1' artifacts/route001/rehearsal.json >/dev/null
+      - name: Advance persistent repeatability state only after both live loop and rehearsal are GREEN
         run: |
           set -euo pipefail
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
-          import {buildResourceState} from './cerebro/runtime/route001-resource-discovery.mjs';
+          import {advanceRepeatabilityResourceState} from './cerebro/runtime/route001-repeatable-cycles.mjs';
           const discovery=JSON.parse(fs.readFileSync('artifacts/route001/discovery.json','utf8'));
           const previous=JSON.parse(fs.readFileSync('artifacts/route001/resource-state.before.json','utf8'));
           const loop=JSON.parse(fs.readFileSync('artifacts/route001/loop.json','utf8'));
-          const last_safe_loop={status:loop.status,fixture_id:loop.fixture_id,selected_resource_id:loop.route.selected_resource_id,selected_resource_class:loop.route.selected_resource_class,observed_at:loop.observed_at,duration_ms:loop.duration_ms,learning_events:loop.learning_signal_report.events_total,business_execution:false};
-          const state=buildResourceState(discovery,{previous_state:previous,last_safe_loop});
+          const rehearsal=JSON.parse(fs.readFileSync('artifacts/route001/rehearsal.json','utf8'));
+          const state=advanceRepeatabilityResourceState({previous_state:previous,discovery,live_loop:loop,rehearsal});
           fs.writeFileSync('artifacts/route001/resource-state.after.json',JSON.stringify(state,null,2)+'\n');
           NODE
-          jq -e '.contains_secrets == false and .contains_customer_data == false and .prod_authorized == false and .prod_write_authorized == false and .execution_authorized == false and .trading_access == false and .multicompany_continuation == false and .additional_cost_eur == 0 and .last_safe_loop.status == "SAFE_PREPROD_LOOP_GREEN"' artifacts/route001/resource-state.after.json >/dev/null
+          jq -e '.contains_secrets == false and .contains_customer_data == false and .prod_authorized == false and .prod_write_authorized == false and .execution_authorized == false and .trading_access == false and .multicompany_continuation == false and .additional_cost_eur == 0 and .last_safe_loop.status == "SAFE_PREPROD_LOOP_GREEN" and .repeatability.consecutive_live_green_cycles >= 2 and .repeatability.fallback_rehearsal_green == true and .repeatability.no_human_noise == true' artifacts/route001/resource-state.after.json >/dev/null
           if grep -Eq 'eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.|sb_secret_[A-Za-z0-9_-]{8,}|AIza[A-Za-z0-9_-]{12,}|BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY' artifacts/route001/resource-state.after.json; then echo 'raw credential-like material found in resource state' >&2; exit 1; fi
-      - name: Persist only ROUTE control-plane resource metadata
+      - name: Persist only ROUTE control-plane resource and repeatability metadata
         run: |
           set -euo pipefail
           cp artifacts/route001/resource-state.after.json /tmp/route001-resource-state.json
@@ -219,35 +244,45 @@ jobs:
           git config user.email 'cerebro-route001-resource[bot]@users.noreply.github.com'
           git add "$RESOURCE_STATE_PATH"
           if ! git diff --cached --quiet; then
-            git commit -m "chore(cerebro): advance ROUTE-001 real resource state from run $GITHUB_RUN_ID"
+            git commit -m "chore(cerebro): advance ROUTE-001 repeatability state from run $GITHUB_RUN_ID"
             git push origin "HEAD:refs/heads/$RESOURCE_STATE_BRANCH"
           fi
-      - name: Return safe operational observations to the existing universal RSI learning ingress
+      - name: Return current-loop and fallback-rehearsal observations to existing universal RSI learning ingress
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          jq '{event_type:"cerebro_learning_signal",client_payload:{signal:{signals:.learning_signals}}}' artifacts/route001/loop.json > /tmp/route001-learning-dispatch.json
-          jq -e '.client_payload.signal.signals | length == 3' /tmp/route001-learning-dispatch.json >/dev/null
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const loop=JSON.parse(fs.readFileSync('artifacts/route001/loop.json','utf8'));
+          const rehearsal=JSON.parse(fs.readFileSync('artifacts/route001/rehearsal.json','utf8'));
+          const payload={event_type:'cerebro_learning_signal',client_payload:{signal:{signals:[...loop.learning_signals,rehearsal.learning_signal]}}};
+          fs.writeFileSync('/tmp/route001-learning-dispatch.json',JSON.stringify(payload));
+          NODE
+          jq -e '.client_payload.signal.signals | length == 4' /tmp/route001-learning-dispatch.json >/dev/null
           gh api --method POST "repos/$GITHUB_REPOSITORY/dispatches" --input /tmp/route001-learning-dispatch.json
-          echo '{"dispatch":"cerebro_learning_signal","signals":3,"customer_data":false,"secrets":false,"prod_write":false,"trading":false,"additional_cost_eur":0}' > artifacts/route001/learning-dispatch-proof.json
+          echo '{"dispatch":"cerebro_learning_signal","signals":4,"customer_data":false,"secrets":false,"prod_write":false,"trading":false,"additional_cost_eur":0}' > artifacts/route001/learning-dispatch-proof.json
       - name: Record acceptance summary
         run: |
           {
-            echo '### ROUTE-001 real zero-cost PREPROD loop'
-            echo "- resource: $(jq -r '.route.selected_resource_id' artifacts/route001/loop.json)"
-            echo "- fixture: $(jq -r '.fixture_id' artifacts/route001/loop.json)"
-            echo "- learning events: $(jq -r '.learning_signal_report.events_total' artifacts/route001/loop.json)"
+            echo '### ROUTE-001 repeatable zero-cost PREPROD loop'
+            echo "- current resource: $(jq -r '.route.selected_resource_id' artifacts/route001/loop.json)"
+            echo "- current runtime: $(jq -r '.actual_runtime' artifacts/route001/loop.json)"
+            echo "- fallback resource: $(jq -r '.cycles[1].selected_resource_id' artifacts/route001/rehearsal.json)"
+            echo "- fallback runtime: $(jq -r '.cycles[1].actual_runtime' artifacts/route001/rehearsal.json)"
+            echo "- consecutive distinct live GREEN cycles: $(jq -r '.repeatability.consecutive_live_green_cycles' artifacts/route001/resource-state.after.json) / 3"
+            echo "- target reached: $(jq -r '.repeatability.target_reached' artifacts/route001/resource-state.after.json)"
+            echo '- full deterministic loss: quiet HOLD_NO_SAFE_ROUTE'
             echo '- external AI call: false'
-            echo '- browser call: false unless separately proven current and selected; this V0 fixture does not select it'
+            echo '- browser call: false'
             echo '- PROD/Trading/MULTIEMPRESA authority: false'
             echo '- incremental cost: 0 EUR'
           } >> "$GITHUB_STEP_SUMMARY"
-      - name: Upload live discovery loop evidence
+      - name: Upload live repeatability evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: cerebro-route001-real-resource-preprod-loop-${{ github.run_id }}
+          name: cerebro-route001-repeatable-preprod-${{ github.run_id }}
           path: artifacts/route001/**
           if-no-files-found: warn
           retention-days: 30
