@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-09T06:34:50.660Z",
+  "updated_at": "2026-10-09T11:31:20.140Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -32,11 +32,47 @@
   "processed_candidate_ids": [
     "lobehub-skills:9a6e3fac20369220df43",
     "github-wide-skills:9f382a637a7264314ac8",
-    "github-wide-skills:cc9f94a093bbe8a4251c"
+    "github-wide-skills:cc9f94a093bbe8a4251c",
+    "github-wide-skills:b9cc8358937d1079ab04"
   ],
   "in_flight": {},
   "waiting_human": {},
-  "waiting_safe_handler": {},
+  "waiting_safe_handler": {
+    "github-wide-skills:b9cc8358937d1079ab04": {
+      "candidate_id": "github-wide-skills:b9cc8358937d1079ab04",
+      "name": "ai-behavior-trees-utility-ai",
+      "human_alias": "Ai Behavior Trees Utility Ai",
+      "wrapper_id": "skillwrap:832ee647f5725eeb3565",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 87.71,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "gamedev-skills/awesome-gamedev-agent-skills",
+        "upstream_head_commit": "0a70cfc64672d512c5b5b6006b5dcb5cf90dbdbd",
+        "manifest_sha256": "185960eddb169cb81490e0d01efb9240663b8a465ca34ec34e0f015a727f06e4",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 37924195826,
+      "checkpointed_at": "2026-10-09T11:31:20.140Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    }
+  },
   "completed": {
     "lobehub-skills:9a6e3fac20369220df43": {
       "candidate_id": "lobehub-skills:9a6e3fac20369220df43",
@@ -209,7 +245,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "IDLE_NO_NEW_ELIGIBLE_CANDIDATE",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -222,5 +258,5 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 37848329080
+  "last_discovery_run_id": 37924195826
 }
