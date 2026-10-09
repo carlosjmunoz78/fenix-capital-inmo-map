@@ -50,7 +50,7 @@ jobs:
           cerebro/tests/rsi-domain-autonomy-policy.test.mjs
           cerebro/tests/rsi-domain-policy-registry.test.mjs
           cerebro/tests/rsi-preprod-adoption-monitoring-loop.test.mjs
-      - name: Assert explicit fail-closed registry boundaries
+      - name: Assert explicit fail-closed registry boundaries and exact autonomous set
         run: |
           set -euo pipefail
           node - <<'NODE'
@@ -61,11 +61,12 @@ jobs:
           if(r.prod_authorized!==false||r.prod_write_authorized!==false||r.trading_access!==false) throw new Error('authority drift');
           if(r.additional_cost_eur!==0) throw new Error('cost drift');
           if(r.multicompany_continuation!==false) throw new Error('MULTIEMPRESA drift');
-          const autonomous=r.policies.filter(p=>p.autonomy_mode==='PREPROD_AUTONOMOUS');
-          if(autonomous.length!==1||autonomous[0].engine_id!=='LRN-001') throw new Error('unexpected autonomous real domain');
+          const autonomous=r.policies.filter(p=>p.autonomy_mode==='PREPROD_AUTONOMOUS').map(p=>p.engine_id).sort();
+          if(JSON.stringify(autonomous)!==JSON.stringify(['AUTO-001','LRN-001'])) throw new Error(`unexpected autonomous real domain set:${autonomous}`);
           for(const p of r.policies){
             if(p.environment!=='PREPROD'||p.kill_switch_enabled!==true||p.automatic_rollback_allowed!==true||p.additional_cost_limit_eur!==0) throw new Error(`unsafe policy ${p.policy_id}`);
           }
+          if(r.policies.find(p=>p.engine_id==='SEO-001')?.autonomy_mode!=='ASSISTED') throw new Error('SEO Core Guard boundary bypassed');
           NODE
       - name: Assert canonical engine bindings
         run: |
@@ -83,10 +84,11 @@ jobs:
           ! grep -Eq 'prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true|multicompany_continuation[[:space:]]*:[[:space:]]*true' \
             cerebro/runtime/rsi-domain-policy-registry.mjs \
             cerebro/registry/rsi-domain-autonomy-policies.v0.json
-      - name: Assert documentation preserves the next gate
+      - name: Assert historical registry documentation and current first-domain gate coexist
         run: |
           set -euo pipefail
           DOC=cerebro/docs/CEREBRO_RSI_DOMAIN_POLICY_REGISTRY_V0_2026-10-09.md
           grep -F 'RSI_REAL_DOMAIN_EVIDENCE_WIRING_V0' "$DOC"
           grep -F 'MULTIEMPRESA continuation: FALSE' "$DOC"
           grep -F 'PROD authority: FALSE' "$DOC"
+          test -f cerebro/docs/CEREBRO_FIRST_REAL_LOW_RISK_DOMAIN_AUTO001_V0_2026-10-09.md
