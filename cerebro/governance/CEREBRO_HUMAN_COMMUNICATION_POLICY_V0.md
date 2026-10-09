@@ -1,8 +1,10 @@
-# CEREBRO · Comunicación humana y autorizaciones V0.2
+# CEREBRO · Comunicación humana y autorizaciones V0.3
 
 ## Objetivo
 
 CEREBRO trabaja de forma autónoma dentro de las políticas vigentes y llama a Carlos solo ante una excepción humana real. La comunicación operativa pertenece a CEREBRO, no a una alarma externa de ChatGPT.
+
+La regla de presentación es obligatoria: **primero español claro y útil para Carlos; después, solo si aporta valor, el detalle técnico**. IDs, SHA, PR, runs, nombres internos, ramas, manifests y códigos de estado se conservan para auditoría, pero no deben dominar el cuerpo principal de los correos.
 
 ## HUMAN_REQUIRED por correo
 
@@ -54,6 +56,38 @@ El procesamiento interno, mitigaciones seguras, logging y trabajo que no requier
 Cada día, a las `08:20` hora de Madrid, debe enviarse un solo correo `CEREBRO · NOVEDADES DEL DÍA · <fecha>` con el estado y los avances de todo CEREBRO, no solo de skills.
 
 Debe incluir, cuando aplique: publicaciones/cambios, fallos e incidencias, SEO y web, App y CRM, automatizaciones e integraciones, skills y motores, Training/aprendizaje, HOLDs, HUMAN_REQUIRED, coste adicional y siguiente trabajo seguro.
+
+### Regla nueva obligatoria para SKILLS Y MOTORES
+
+Carlos no debe recibir una lista de nombres técnicos sin contexto. Cada skill que aparezca en el correo debe explicarse como una ficha corta con este orden:
+
+1. **Skill en la que se está trabajando**: alias humano primero.
+2. **Qué es realmente**: para qué sirve en palabras normales.
+3. **Estado actual**: `TRABAJANDO AHORA`, `EN PRUEBAS`, `CASI TERMINADO`, `TERMINADO`, `HOLD` o `NECESITA TU DECISIÓN`.
+4. **Qué se ha conseguido**: avance real demostrado.
+5. **Qué falta**: lo pendiente para cerrar el alcance actual.
+6. **Dónde mejora CEREBRO**: áreas o motores expresados en lenguaje de negocio.
+7. **Siguiente paso**: qué hará CEREBRO después.
+8. **¿Necesitas hacer algo?**: `NO` por defecto; `SÍ` solo ante un `HUMAN_REQUIRED` canónico.
+
+Ejemplo de presentación válida:
+
+```text
+Navegador Automático
+Qué es realmente: permite que CEREBRO navegue por webs y compruebe resultados de forma controlada.
+Estado: EN PRUEBAS.
+Qué se ha conseguido: navegación y comprobación básica validadas.
+Qué falta: cerrar el siguiente bloque seguro y comparar OLD vs NEW.
+Dónde mejora CEREBRO: web, SEO, WordPress y comprobaciones automáticas.
+Siguiente paso: continuar pruebas en LAB/PREPROD.
+¿Necesitas hacer algo?: NO.
+```
+
+No se deben mostrar por defecto en el cuerpo principal: `candidate_id`, `wrapper_id`, SHA, PR, run ID, nombre de rama, manifest hashes, códigos internos de stage o nombres de workflows. Esa evidencia se conserva intacta para auditoría y solo se muestra cuando ayude a decidir, diagnosticar un fallo o responder a `EXPLICAME`.
+
+### Resto del resumen diario
+
+Los bloques generales también deben resumirse en lenguaje normal. Si existen 20 commits o 10 workflows, Carlos debe recibir el resultado o el problema relevante, no una descarga de nombres técnicos. El detalle completo permanece en la evidencia.
 
 Si una zona todavía no emite telemetría suficiente, el correo debe decirlo expresamente. Nunca se inventa un estado.
 
