@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_ROUTE001_REAL_RESOURCE_STATE",
+  "company_id": "fenix",
+  "engine_id": "ROUTE-001",
+  "environment": "PREPROD_CONTROL_PLANE",
+  "version": "0.1.0",
+  "updated_at": "2026-10-09T00:00:00.000Z",
+  "source_run_id": null,
+  "source_head_sha": null,
+  "repository_visibility": "public",
+  "resources": [],
+  "discovery_summary": {
+    "observed_total": 0,
+    "available_zero_cost_total": 0,
+    "historical_only_total": 0,
+    "hold_total": 0
+  },
+  "last_safe_loop": null,
+  "contains_customer_data": false,
+  "contains_secrets": false,
+  "prod_authorized": false,
+  "prod_write_authorized": false,
+  "execution_authorized": false,
+  "trading_access": false,
+  "multicompany_continuation": false,
+  "additional_cost_eur": 0
+}
