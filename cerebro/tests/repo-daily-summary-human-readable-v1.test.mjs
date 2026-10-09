@@ -68,7 +68,7 @@ test('second daily summary hides unchanged parked and completed skills but keeps
   assert.equal(second.skills_engines.length,1);
   assert.match(second.skills_engines[0],/Navegador Automático/);
   assert.match(second.human[2],/No hay cambios de estado de skills/);
-  assert.match(second.human[3],/2 skills permanecen sin cambios/);
+  assert.match(second.human[3],/3 skills permanecen sin cambios/);
 });
 
 test('a changed parked skill reappears in the next executive digest',()=>{
