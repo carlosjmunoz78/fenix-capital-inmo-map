@@ -1,0 +1,129 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_IDENTITY_ACCESS_REGISTRY",
+  "company_id": "fenix",
+  "engine_id": "IAM-001",
+  "environment": "CONTROL_PLANE",
+  "version": "0.1.0",
+  "evidence_cutoff_main_sha": "944cca8fe862b165e414129e065c4197367a53c0",
+  "default_decision": "DENY_UNREGISTERED_IDENTITY",
+  "identities": [
+    {
+      "identity_id": "iam:github-actions-job",
+      "provider": "github",
+      "identity_type": "EPHEMERAL_WORKLOAD_IDENTITY",
+      "credential_ref_ids": ["credref:github-actions-token"],
+      "environments": ["LAB", "PREPROD", "PROD_CONTROL_PLANE"],
+      "scope_evidence": "PER_WORKFLOW_PERMISSIONS",
+      "lifecycle": "EPHEMERAL_PER_JOB",
+      "rotation_state": "PROVIDER_MANAGED",
+      "revocation_state": "PROVIDER_MANAGED_JOB_END",
+      "evidence_refs": [
+        ".github/workflows/prod-live-deploy.yml",
+        ".github/workflows/cerebro-skill-github-preprod-integration.yml"
+      ],
+      "audit_state": "EXISTING_EVIDENCED"
+    },
+    {
+      "identity_id": "iam:supabase-browser-public",
+      "provider": "supabase",
+      "identity_type": "PUBLIC_CLIENT_IDENTITY",
+      "credential_ref_ids": ["credref:prod-supabase-publishable-key"],
+      "environments": ["PROD"],
+      "scope_evidence": "PUBLISHABLE_BROWSER_KEY_CLASS_ASSERTED",
+      "lifecycle": "LONG_LIVED_REFERENCE",
+      "rotation_state": "POR_AUDITAR",
+      "revocation_state": "POR_AUDITAR",
+      "evidence_refs": [
+        ".github/workflows/cerebro-secret-ref-audit.yml",
+        ".github/workflows/prod-live-deploy.yml",
+        ".github/workflows/prod-runtime-smoke.yml"
+      ],
+      "audit_state": "EXISTING_PARTIAL_LIFECYCLE"
+    },
+    {
+      "identity_id": "iam:supabase-e2e-user",
+      "provider": "supabase",
+      "identity_type": "USER_SESSION_IDENTITY",
+      "credential_ref_ids": ["credref:cerebro-e2e-user-jwt", "credref:prod-supabase-publishable-key"],
+      "environments": ["PROD_READONLY_E2E"],
+      "scope_evidence": "AUTHENTICATED_READ_PARITY_ONLY",
+      "lifecycle": "SESSION_TOKEN_REFERENCE",
+      "rotation_state": "POR_AUDITAR_NO_AUTOMATED_REFRESH_EVIDENCED",
+      "revocation_state": "POR_AUDITAR",
+      "evidence_refs": [
+        ".github/workflows/cerebro-session-context-auth-e2e.yml",
+        "scripts/cerebro-secdef-canary-auth-e2e.sh"
+      ],
+      "audit_state": "PARCIAL_LIFECYCLE_GAP"
+    },
+    {
+      "identity_id": "iam:notion-private-doc-reader",
+      "provider": "notion",
+      "identity_type": "SERVICE_INTEGRATION",
+      "credential_ref_ids": ["credref:notion-token"],
+      "environments": ["QA_PRIVATE_DOC_GATE"],
+      "scope_evidence": "READONLY_USE_INTENT_EVIDENCED_SCOPE_NOT_VERIFIED",
+      "lifecycle": "LONG_LIVED_REFERENCE",
+      "rotation_state": "POR_AUDITAR",
+      "revocation_state": "POR_AUDITAR",
+      "evidence_refs": [".github/workflows/private-physical-document-gate.yml"],
+      "audit_state": "PARCIAL_SCOPE_AND_LIFECYCLE_GAP"
+    },
+    {
+      "identity_id": "iam:gemini-free-lab",
+      "provider": "google-gemini-api",
+      "identity_type": "SERVICE_API_IDENTITY",
+      "credential_ref_ids": ["credref:cerebro-gemini-api-key"],
+      "environments": ["LAB"],
+      "scope_evidence": "SYNTHETIC_ONLY_NO_PROD_OR_CUSTOMER_DATA",
+      "lifecycle": "LONG_LIVED_REFERENCE",
+      "rotation_state": "POR_AUDITAR",
+      "revocation_state": "POR_AUDITAR",
+      "evidence_refs": [
+        ".github/workflows/cerebro-skill-agent-browser-behavioral-lab.yml",
+        ".github/workflows/cerebro-skill-supabase-behavioral-lab.yml"
+      ],
+      "audit_state": "EXISTING_LAB_ONLY_PARTIAL_LIFECYCLE"
+    },
+    {
+      "identity_id": "iam:owner-private-mailbox",
+      "provider": "gmail-imap-smtp",
+      "identity_type": "HUMAN_OWNER_MAILBOX_BRIDGE",
+      "credential_ref_ids": ["credref:cerebro-mail-username", "credref:cerebro-mail-password", "credref:cerebro-owner-email"],
+      "environments": ["PROD_CONTROL_PLANE"],
+      "scope_evidence": "OWNER_HUMAN_COMMUNICATION_ONLY",
+      "lifecycle": "LONG_LIVED_REFERENCE",
+      "rotation_state": "POR_AUDITAR",
+      "revocation_state": "POR_AUDITAR",
+      "evidence_refs": [".github/workflows/cerebro-human-communication-v1.yml"],
+      "audit_state": "EXISTING_PARTIAL_LIFECYCLE"
+    },
+    {
+      "identity_id": "iam:local-browser-profile",
+      "provider": "local-browser-runtime",
+      "identity_type": "INTERACTIVE_BROWSER_SESSION",
+      "credential_ref_ids": [],
+      "environments": ["LAB", "PREPROD"],
+      "scope_evidence": "NO_REAL_REPO_BOUND_IDENTITY_EVIDENCE",
+      "lifecycle": "POR_AUDITAR",
+      "rotation_state": "NOT_APPLICABLE_SESSION_BASED",
+      "revocation_state": "POR_AUDITAR",
+      "evidence_refs": [".github/workflows/cerebro-skill-agent-browser-behavioral-lab.yml"],
+      "audit_state": "POR_AUDITAR_REAL_SESSION_BINDING"
+    }
+  ],
+  "global_gaps": [
+    "No evidence-backed centralized credential lease broker existed at audit cutoff.",
+    "Automated expiry/refresh for CEREBRO_E2E_USER_JWT is not evidenced.",
+    "Rotation and revocation metadata is not evidenced for long-lived repository secret references.",
+    "Real browser profile/session inventory is not evidenced in canonical repository state.",
+    "Provider-side effective scopes must not be inferred from symbolic secret names."
+  ],
+  "contains_secret_values": false,
+  "prod_authorized": false,
+  "prod_write_authorized": false,
+  "trading_access": false,
+  "multicompany_continuation": false,
+  "additional_cost_eur": 0
+}
