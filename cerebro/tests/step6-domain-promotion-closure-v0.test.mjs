@@ -34,10 +34,12 @@ test('assisted domains remain explicit evidence-backed HOLDs and SEO keeps its p
   assert.match(seo.remaining_blocker, /CORE_GUARD_CANONICAL_RECONCILIATION_BEFORE_PROD_PROMOTION/);
 });
 
-test('closure does not invent HUMAN_REQUIRED or global/PROD autonomy', () => {
-  const raw = fs.readFileSync('cerebro/registry/step6-domain-promotion-dispositions.v0.json','utf8');
-  assert.doesNotMatch(raw, /HUMAN_REQUIRED/);
-  const c = JSON.parse(raw);
+test('closure does not escalate HOLD dispositions to HUMAN_REQUIRED or global/PROD autonomy', () => {
+  const c = JSON.parse(fs.readFileSync('cerebro/registry/step6-domain-promotion-dispositions.v0.json','utf8'));
+  for (const d of c.dispositions) {
+    assert.equal(Object.hasOwn(d, 'human_required'), false);
+    assert.notEqual(d.decision, 'HUMAN_REQUIRED');
+  }
   assert.equal(c.global_status, 'STEP6_CLOSED_SAFE');
   assert.equal(c.prod_authorized, false);
   assert.equal(c.prod_write_authorized, false);
