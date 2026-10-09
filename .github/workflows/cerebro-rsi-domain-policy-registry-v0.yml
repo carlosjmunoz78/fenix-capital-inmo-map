@@ -1,0 +1,92 @@
+name: CEREBRO RSI Domain Policy Registry V0
+
+on:
+  push:
+    paths:
+      - 'cerebro/registry/rsi-domain-autonomy-policies.v0.json'
+      - 'cerebro/registry/engine-registry.seed.json'
+      - 'cerebro/runtime/rsi-domain-policy-registry.mjs'
+      - 'cerebro/runtime/rsi-domain-autonomy-policy.mjs'
+      - 'cerebro/runtime/rsi-preprod-adoption-monitoring-loop.mjs'
+      - 'cerebro/runtime/promotion-pipeline.mjs'
+      - 'cerebro/tests/rsi-domain-policy-registry.test.mjs'
+      - 'cerebro/docs/CEREBRO_RSI_DOMAIN_POLICY_REGISTRY_V0_2026-10-09.md'
+      - '.github/workflows/cerebro-rsi-domain-policy-registry-v0.yml'
+  pull_request:
+    paths:
+      - 'cerebro/registry/rsi-domain-autonomy-policies.v0.json'
+      - 'cerebro/registry/engine-registry.seed.json'
+      - 'cerebro/runtime/rsi-domain-policy-registry.mjs'
+      - 'cerebro/runtime/rsi-domain-autonomy-policy.mjs'
+      - 'cerebro/runtime/rsi-preprod-adoption-monitoring-loop.mjs'
+      - 'cerebro/runtime/promotion-pipeline.mjs'
+      - 'cerebro/tests/rsi-domain-policy-registry.test.mjs'
+      - 'cerebro/docs/CEREBRO_RSI_DOMAIN_POLICY_REGISTRY_V0_2026-10-09.md'
+      - '.github/workflows/cerebro-rsi-domain-policy-registry-v0.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  domain-policy-registry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Assert exact PR head checkout when applicable
+        if: github.event_name == 'pull_request'
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+      - name: Test registered-domain policy and loop wiring
+        run: >-
+          node --test
+          cerebro/tests/rsi-domain-autonomy-policy.test.mjs
+          cerebro/tests/rsi-domain-policy-registry.test.mjs
+          cerebro/tests/rsi-preprod-adoption-monitoring-loop.test.mjs
+      - name: Assert explicit fail-closed registry boundaries
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs');
+          const r=JSON.parse(fs.readFileSync('cerebro/registry/rsi-domain-autonomy-policies.v0.json','utf8'));
+          if(r.environment!=='PREPROD') throw new Error('registry environment drift');
+          if(r.default_policy_mode!=='ASSISTED_FAIL_CLOSED') throw new Error('fail-closed default drift');
+          if(r.prod_authorized!==false||r.prod_write_authorized!==false||r.trading_access!==false) throw new Error('authority drift');
+          if(r.additional_cost_eur!==0) throw new Error('cost drift');
+          if(r.multicompany_continuation!==false) throw new Error('MULTIEMPRESA drift');
+          const autonomous=r.policies.filter(p=>p.autonomy_mode==='PREPROD_AUTONOMOUS');
+          if(autonomous.length!==1||autonomous[0].engine_id!=='LRN-001') throw new Error('unexpected autonomous real domain');
+          for(const p of r.policies){
+            if(p.environment!=='PREPROD'||p.kill_switch_enabled!==true||p.automatic_rollback_allowed!==true||p.additional_cost_limit_eur!==0) throw new Error(`unsafe policy ${p.policy_id}`);
+          }
+          NODE
+      - name: Assert canonical engine bindings
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs');
+          const r=JSON.parse(fs.readFileSync('cerebro/registry/rsi-domain-autonomy-policies.v0.json','utf8'));
+          const e=JSON.parse(fs.readFileSync('cerebro/registry/engine-registry.seed.json','utf8'));
+          const ids=new Set(e.engine_ids);
+          for(const p of r.policies) if(!ids.has(p.engine_id)) throw new Error(`non-canonical engine ${p.engine_id}`);
+          NODE
+      - name: Assert no PROD Trading or MULTIEMPRESA authority was introduced
+        run: |
+          set -euo pipefail
+          ! grep -Eq 'prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true|multicompany_continuation[[:space:]]*:[[:space:]]*true' \
+            cerebro/runtime/rsi-domain-policy-registry.mjs \
+            cerebro/registry/rsi-domain-autonomy-policies.v0.json
+      - name: Assert documentation preserves the next gate
+        run: |
+          set -euo pipefail
+          DOC=cerebro/docs/CEREBRO_RSI_DOMAIN_POLICY_REGISTRY_V0_2026-10-09.md
+          grep -F 'RSI_REAL_DOMAIN_EVIDENCE_WIRING_V0' "$DOC"
+          grep -F 'MULTIEMPRESA continuation: FALSE' "$DOC"
+          grep -F 'PROD authority: FALSE' "$DOC"
