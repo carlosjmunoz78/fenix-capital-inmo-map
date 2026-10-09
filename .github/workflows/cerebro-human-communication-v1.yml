@@ -9,6 +9,7 @@ on:
       - 'cerebro/governance/human-communication.mjs'
       - 'cerebro/communication/**'
       - 'cerebro/tests/human-communication-v1.test.mjs'
+      - 'cerebro/tests/human-communication-executive-v1.test.mjs'
       - 'cerebro/tests/repo-daily-summary-human-readable-v1.test.mjs'
       - 'cerebro/tests/owner-approval-gate-v1.test.mjs'
       - 'cerebro/tests/test_mail_bridge.py'
@@ -54,6 +55,7 @@ jobs:
         run: |
           node --test \
             cerebro/tests/human-communication-v1.test.mjs \
+            cerebro/tests/human-communication-executive-v1.test.mjs \
             cerebro/tests/repo-daily-summary-human-readable-v1.test.mjs \
             cerebro/tests/owner-approval-gate-v1.test.mjs
           python -m unittest cerebro/tests/test_mail_bridge.py
