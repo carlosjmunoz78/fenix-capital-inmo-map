@@ -1,0 +1,133 @@
+name: CEREBRO First Real Domain AUTO001 V0
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/registry/rsi-domain-autonomy-policies.v0.json'
+      - 'cerebro/runtime/first-real-domain-autonomy-template.mjs'
+      - 'cerebro/tests/first-real-domain-auto001-v0.test.mjs'
+      - 'cerebro/tests/rsi-domain-policy-registry.test.mjs'
+      - 'cerebro/docs/CEREBRO_FIRST_REAL_LOW_RISK_DOMAIN_AUTO001_V0_2026-10-09.md'
+      - '.github/workflows/cerebro-first-real-domain-auto001-v0.yml'
+      - '.github/workflows/cerebro-rsi-real-domain-evidence-wiring-v0.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'cerebro/registry/rsi-domain-autonomy-policies.v0.json'
+      - 'cerebro/runtime/first-real-domain-autonomy-template.mjs'
+      - 'cerebro/tests/first-real-domain-auto001-v0.test.mjs'
+      - 'cerebro/tests/rsi-domain-policy-registry.test.mjs'
+      - 'cerebro/docs/CEREBRO_FIRST_REAL_LOW_RISK_DOMAIN_AUTO001_V0_2026-10-09.md'
+      - '.github/workflows/cerebro-first-real-domain-auto001-v0.yml'
+      - '.github/workflows/cerebro-rsi-real-domain-evidence-wiring-v0.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: cerebro-first-real-domain-auto001-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  ROUTE_STATE_BRANCH: cerebro-route001-resource-state-v0
+  ROUTE_STATE_PATH: cerebro/runtime/route001-resource-state.v0.json
+
+jobs:
+  certify-auto001-first-real-domain:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Assert exact PR head checkout when applicable
+        if: github.event_name == 'pull_request'
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+
+      - name: Run first-real-domain and existing policy regression tests
+        run: >-
+          node --test
+          cerebro/tests/first-real-domain-auto001-v0.test.mjs
+          cerebro/tests/rsi-domain-policy-registry.test.mjs
+          cerebro/tests/rsi-old-new-evaluation-tribunal-gate.test.mjs
+          cerebro/tests/rsi-preprod-adoption-monitoring-loop.test.mjs
+
+      - name: Load physical ROUTE-001 repeatability state
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/auto001
+          git fetch --no-tags origin "refs/heads/$ROUTE_STATE_BRANCH:refs/remotes/origin/$ROUTE_STATE_BRANCH"
+          git show "refs/remotes/origin/$ROUTE_STATE_BRANCH:$ROUTE_STATE_PATH" > artifacts/auto001/route-state.json
+          jq -e '.state_type == "CEREBRO_ROUTE001_REAL_RESOURCE_STATE" and .environment == "PREPROD_CONTROL_PLANE" and .last_safe_loop.status == "SAFE_PREPROD_LOOP_GREEN" and .repeatability.target_reached == true and .repeatability.consecutive_live_green_cycles >= 3 and .repeatability.fallback_rehearsal_green == true and .repeatability.restoration_green == true and .repeatability.full_loss_hold_green == true and .repeatability.no_human_noise == true and .contains_customer_data == false and .contains_secrets == false and .prod_authorized == false and .prod_write_authorized == false and .execution_authorized == false and .trading_access == false and .multicompany_continuation == false and .additional_cost_eur == 0' artifacts/auto001/route-state.json >/dev/null
+
+      - name: Resolve fresh real successful AUTO-001 workflow evidence from main
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          CUTOFF="$(date -u -d '48 hours ago' +%s)"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs?branch=main&status=success&per_page=100" > artifacts/auto001/main-success-runs.json
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const data=JSON.parse(fs.readFileSync('artifacts/auto001/main-success-runs.json','utf8'));
+          const required=['CEREBRO RSI Learning Control Plane V0','CEREBRO RSI Learning Outbox Publisher V0'];
+          const cutoff=Number(process.env.CUTOFF_OVERRIDE||0)||Math.floor(Date.now()/1000)-48*3600;
+          const rows=[];
+          for(const name of required){
+            const candidates=(data.workflow_runs??[]).filter(r=>r.name===name&&r.conclusion==='success'&&r.head_branch==='main'&&Math.floor(Date.parse(r.updated_at??r.run_started_at??r.created_at)/1000)>=cutoff).sort((a,b)=>Date.parse(b.updated_at??b.created_at)-Date.parse(a.updated_at??a.created_at));
+            if(!candidates.length) throw new Error(`fresh successful main evidence missing:${name}`);
+            const r=candidates[0];
+            rows.push({workflow_name:name,run_id:r.id,head_sha:r.head_sha,conclusion:r.conclusion,observed_at:r.updated_at??r.run_started_at??r.created_at});
+          }
+          const out={environment:'PREPROD',successful_runs:rows,contains_customer_data:false,contains_secrets:false,prod_authorized:false,prod_write_authorized:false,trading_access:false,multicompany_continuation:false,additional_cost_eur:0};
+          fs.writeFileSync('artifacts/auto001/workflow-evidence.json',JSON.stringify(out,null,2)+'\n');
+          console.log(JSON.stringify({workflows:rows.map(x=>({name:x.workflow_name,run_id:x.run_id,observed_at:x.observed_at})),customer_data:false,secrets:false,cost_eur:0}));
+          NODE
+
+      - name: Execute physical AUTO-001 OLD-vs-NEW tribunal SHADOW CANARY and relearning gate
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import {runFirstRealAuto001AutonomyGate} from './cerebro/runtime/first-real-domain-autonomy-template.mjs';
+          const route=JSON.parse(fs.readFileSync('artifacts/auto001/route-state.json','utf8'));
+          const evidence=JSON.parse(fs.readFileSync('artifacts/auto001/workflow-evidence.json','utf8'));
+          const result=await runFirstRealAuto001AutonomyGate({route_state:route,auto_workflow_evidence:evidence,observed_at:new Date().toISOString()});
+          fs.writeFileSync('artifacts/auto001/gate-result.json',JSON.stringify(result,null,2)+'\n');
+          if(result.ok!==true||result.status!=='FIRST_REAL_DOMAIN_PREPROD_AUTONOMY_GREEN'||result.b3_decision!=='APPROVE_PREPROD_NEXT_STAGE'||result.tribunal_decision!=='PASS'||result.b4_decision!=='KEEP_NONPROD_AND_RELEARN'||result.autonomy_mode!=='PREPROD_AUTONOMOUS'||result.business_execution!==false||result.prod_authorized!==false||result.prod_write_authorized!==false||result.trading_access!==false||result.multicompany_continuation!==false||result.additional_cost_eur!==0) throw new Error(`AUTO-001 gate not green:${JSON.stringify(result)}`);
+          console.log(JSON.stringify({status:result.status,engine_id:result.engine_id,domain_id:result.domain_id,b3:result.b3_decision,tribunal:result.tribunal_decision,b4:result.b4_decision,feedback_events_total:result.feedback_events_total,business_execution:false,prod_authorized:false,trading_access:false,cost_eur:0}));
+          NODE
+
+      - name: Assert exact autonomous set and all other domains remain assisted
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import {loadDomainPolicyRegistry} from './cerebro/runtime/rsi-domain-policy-registry.mjs';
+          const p=loadDomainPolicyRegistry();
+          const autonomous=p.policies.filter(x=>x.autonomy_mode==='PREPROD_AUTONOMOUS').map(x=>x.engine_id).sort();
+          if(JSON.stringify(autonomous)!==JSON.stringify(['AUTO-001','LRN-001'])) throw new Error(`autonomy set drift:${autonomous}`);
+          if(p.policy_count!==10||p.autonomous_count!==2||p.assisted_count!==8) throw new Error('policy counts drift');
+          for(const id of ['APP-001','CRM-001','DATA-001','KNW-001','WEB-001','SEO-001','MKT-001','TRN-001']) if(p.policies.find(x=>x.engine_id===id)?.autonomy_mode!=='ASSISTED') throw new Error(`${id} unexpectedly autonomous`);
+          NODE
+
+      - name: Assert step-6 safety boundary and documentation
+        run: |
+          set -euo pipefail
+          grep -F 'Macro step: `6/6 - AUTONOMIA Y PROMOCION POR DOMINIO`' cerebro/docs/CEREBRO_FIRST_REAL_LOW_RISK_DOMAIN_AUTO001_V0_2026-10-09.md >/dev/null
+          grep -F 'SEO-001 retains its separate physical Core Guard' cerebro/docs/CEREBRO_FIRST_REAL_LOW_RISK_DOMAIN_AUTO001_V0_2026-10-09.md >/dev/null
+          grep -F 'PROD business execution authority' cerebro/docs/CEREBRO_FIRST_REAL_LOW_RISK_DOMAIN_AUTO001_V0_2026-10-09.md >/dev/null
+
+      - name: Upload exact-head AUTO-001 certification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-first-real-domain-auto001-v0-${{ github.run_id }}
+          path: artifacts/auto001/**
+          if-no-files-found: warn
+          retention-days: 30
