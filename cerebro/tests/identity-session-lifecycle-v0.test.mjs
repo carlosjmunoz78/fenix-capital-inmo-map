@@ -71,6 +71,6 @@ test('raw JWT/secret fields are rejected and no lifecycle failure is silently pr
 test('persistent state preserves kill switches and remains authority safe',()=>{
   const state=buildLifecycleState({previous_state:{disabled_credential_refs:['credref:notion-token'],disabled_connector_ids:['connector:notion-private-doc-read'],disabled_identity_ids:[]},observations:observations(),now,source_run_id:123});
   assert.deepEqual(state.disabled_credential_refs,['credref:notion-token']);
-  assert.equal(state.browser_session_binding.status,'HOLD_NO_REAL_ATTESTATION');
+  assert.equal(state.browser_session_binding.status,'HOLD_BROWSER_REAL_IDENTITY_BINDING_AUDIT');
   assert.equal(state.prod_authorized,false);assert.equal(state.prod_write_authorized,false);assert.equal(state.trading_access,false);assert.equal(state.multicompany_continuation,false);assert.equal(state.additional_cost_eur,0);
 });
