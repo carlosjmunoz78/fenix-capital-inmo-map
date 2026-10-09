@@ -60,7 +60,7 @@ test('same deterministic learning re-observed later is an idempotent semantic du
   }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });
 
-test('legacy record accepts only additive signal/source-environment provenance while preserving immutable first-seen payload',()=>{
+test('legacy record accepts additive signal/source-environment provenance while preserving immutable first-seen payload',()=>{
   const {dir,file}=tempFile();
   try{
     const ledger=new LearningLedgerV0({file_path:file});
@@ -76,6 +76,26 @@ test('legacy record accepts only additive signal/source-environment provenance w
     assert.equal(stored.observed_at,'2026-10-08T12:00:00Z');
     assert.equal(Object.hasOwn(stored,'signal_id'),false);
     assert.equal(Object.hasOwn(stored,'source_environment'),false);
+  }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
+
+test('legacy replay may omit provenance added to first-seen record without mutating or weakening it',()=>{
+  const {dir,file}=tempFile();
+  try{
+    const ledger=new LearningLedgerV0({file_path:file});
+    const enriched={...candidate(),signal_id:'evt:source:1',source_environment:'PREPROD_CANDIDATE'};
+    const first=ledger.persist(enriched);
+    const replay=ledger.persist({...candidate(),observed_at:'2026-10-08T22:10:00Z'});
+    assert.equal(replay.accepted,false);
+    assert.equal(replay.duplicate,true);
+    assert.equal(replay.semantic_duplicate,true);
+    assert.deepEqual(replay.compatibility_fields,['observed_at','signal_id','source_environment']);
+    assert.equal(replay.record_hash,first.record_hash);
+    assert.equal(ledger.operation_count,1);
+    const stored=ledger.list()[0];
+    assert.equal(stored.signal_id,'evt:source:1');
+    assert.equal(stored.source_environment,'PREPROD_CANDIDATE');
+    assert.equal(stored.observed_at,'2026-10-08T12:00:00Z');
   }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });
 
@@ -125,7 +145,7 @@ test('conflict diagnostics distinguish missing-vs-present optional fields withou
   }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });
 
-test('once provenance exists it is immutable: later signal/environment changes fail closed',()=>{
+test('once nonempty provenance exists, changing its value still fails closed',()=>{
   const {dir,file}=tempFile();
   try{
     const ledger=new LearningLedgerV0({file_path:file});
