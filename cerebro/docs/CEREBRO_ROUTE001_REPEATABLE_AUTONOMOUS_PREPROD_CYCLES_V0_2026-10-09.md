@@ -59,7 +59,63 @@ A source run ID already present in the streak cannot be counted twice.
 
 The live streak advances only if both the ordinary current-evidence loop and the bounded repeatability rehearsal are GREEN.
 
-The first accepted live cycle already exists from run `37896315736` at main SHA `7c34dfb5e1e2827053e4534861c2b569214e1961`. Subsequent distinct live runs may increment the same physical state. This document does not pre-claim the target before the state physically reaches it.
+### Observed evidence through cycle 2
+
+**HECHO / LIVE EVIDENCE**
+
+Cycle 1:
+
+- main SHA: `7c34dfb5e1e2827053e4534861c2b569214e1961`
+- ROUTE live run: `37896315736`
+- ordinary safe loop: GREEN
+- incremental cost: `0 EUR`
+
+Cycle 2:
+
+- PR: `#530`
+- merge SHA: `3edbe0bec2b70c34175c217bed8c1fd2638a2d91`
+- ROUTE live run: `37897230867` — SUCCESS
+- selected current executor: `gha-node-runtime`
+- actual runtime: Node
+- controlled fallback: `gha-python-runtime`
+- actual fallback runtime: Python
+- fallback provenance: `PYTHON_FIXED_SUBPROCESS_NO_SHELL`
+- restoration: GREEN
+- total deterministic-resource loss: quiet `HOLD_NO_SAFE_ROUTE`
+- human-noise condition: GREEN / none
+- RSI universal-learning ingress run: `37897255151` — SUCCESS
+- PROD Runtime Smoke run: `37897230799` — SUCCESS
+- PROD Live Deploy run: `37897230816` — SKIPPED
+- incremental cost: `0 EUR`
+
+Physical state after cycle 2:
+
+- `consecutive_live_green_cycles = 2`
+- `recent_live_green_run_ids = [37896315736, 37897230867]`
+- `fallback_rehearsal_green = true`
+- `restoration_green = true`
+- `full_loss_hold_green = true`
+- `no_human_noise = true`
+- `target_reached = false`
+
+Therefore the repeatability target is currently **PARCIAL: 2/3**, not yet certified as complete.
+
+### Closure rule for cycle 3
+
+This documentation-only closure change is intentionally included in the ROUTE workflow path. Its merge may provide a third **distinct real main workflow run**, but it is not pre-counted.
+
+The target becomes HECHO only after post-merge live evidence proves all of the following on a new run ID:
+
+1. ordinary real-resource loop GREEN;
+2. real Python fallback rehearsal GREEN;
+3. restore GREEN;
+4. full deterministic loss remains quiet HOLD;
+5. resource-state branch physically reports `consecutive_live_green_cycles >= 3` and `target_reached = true`;
+6. RSI universal learning ingress receives the resulting four-signal batch successfully;
+7. PROD Runtime Smoke remains GREEN;
+8. PROD Live Deploy remains not activated by this block.
+
+No PR dry-run counts toward the live streak.
 
 ## RSI/LRN feedback
 
