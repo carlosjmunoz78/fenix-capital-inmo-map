@@ -27,14 +27,16 @@ function human(code){return code&&HUMAN_SET.has(code)?code:null;}
 function failDecision(decision,reasons,human_required=null,extra={}){return safe({ok:false,decision,reasons:[...new Set(reasons)],human_required:human(human_required),...extra});}
 function metricDirection(name){return ['cost_eur','latency_ms','error_rate'].includes(name)?'LOWER':'HIGHER';}
 function canonicalTags(domainId){return [...new Set(String(domainId??'').toLowerCase().split(/[^a-z0-9]+/).filter(x=>x&&x.length>2&&!TAG_STOP.has(x)))];}
-
-export function loadCapabilityEvolutionRegistry(file=DEFAULT_CAPABILITY_REGISTRY){
-  const x=readJson(file,'capability evolution registry');
-  if(x.state_type!=='CEREBRO_CAPABILITY_EVOLUTION_REGISTRY'||x.environment!=='PREPROD_CONTROL_PLANE')throw new Error('capability registry identity drift');
+function validateRegistryEnvelope(x){
+  if(!x||typeof x!=='object'||Array.isArray(x)||x.state_type!=='CEREBRO_CAPABILITY_EVOLUTION_REGISTRY'||x.environment!=='PREPROD_CONTROL_PLANE')throw new Error('capability registry identity drift');
   if(x.prod_authorized!==false||x.prod_write_authorized!==false||x.trading_access!==false||Number(x.additional_cost_eur)!==0)throw new Error('capability registry authority/cost drift');
   if(x.direct_prod_binding_allowed!==false||x.multicompany_runtime_activation!==false||x.multi_company_ready!==true)throw new Error('capability registry policy drift');
   if(!Array.isArray(x.records)||!Array.isArray(x.bindings)||!Array.isArray(x.binding_history))throw new Error('capability registry collections invalid');
-  return clone(x);
+  return x;
+}
+
+export function loadCapabilityEvolutionRegistry(file=DEFAULT_CAPABILITY_REGISTRY){
+  return clone(validateRegistryEnvelope(readJson(file,'capability evolution registry')));
 }
 
 export function normalizeCapabilityManifest(raw,{engine_registry_path=DEFAULT_ENGINE_REGISTRY}={}){
@@ -78,8 +80,7 @@ export function normalizeCapabilityManifest(raw,{engine_registry_path=DEFAULT_EN
 }
 
 export function registerCapability(registryRaw,rawManifest,options={}){
-  const registry=clone(registryRaw);
-  if(!registry||registry.state_type!=='CEREBRO_CAPABILITY_EVOLUTION_REGISTRY')throw new Error('registry state invalid');
+  const registry=clone(validateRegistryEnvelope(registryRaw));
   const manifest=normalizeCapabilityManifest(rawManifest,options);
   const scopeKey=manifest.company_scope.join(',');
   const sameVersion=registry.records.find(x=>x.capability_id===manifest.capability_id&&x.version===manifest.version&&Array.isArray(x.company_scope)&&x.company_scope.join(',')===scopeKey);
@@ -93,8 +94,9 @@ export function registerCapability(registryRaw,rawManifest,options={}){
 }
 
 export function capabilitiesForCompany(registryRaw,company_id){
+  const registry=validateRegistryEnvelope(registryRaw);
   const company=req(company_id,'company_id',80);
-  const records=(registryRaw?.records??[]).filter(x=>Array.isArray(x.company_scope)&&(x.company_scope.includes(company)||x.company_scope.includes('*'))).map(clone);
+  const records=registry.records.filter(x=>Array.isArray(x.company_scope)&&(x.company_scope.includes(company)||x.company_scope.includes('*'))).map(clone);
   return Object.freeze(records);
 }
 
@@ -175,20 +177,37 @@ export function buildCapabilityLearningReport({manifest,target,evaluation}={}){
   return buildUniversalLearningEventReport([signal]);
 }
 
-export function activatePreprodBinding(registryRaw,{manifest,target,evaluation}={}){
-  const registry=clone(registryRaw);
-  if(evaluation?.decision!=='PREPROD_CANDIDATE_PROMOTION'||target?.policy_mode!=='PREPROD_AUTONOMOUS')return failDecision('HOLD_BINDING_NOT_AUTHORIZED',['PREPROD_AUTONOMOUS_PROMOTION_EVIDENCE_REQUIRED'],null,{registry});
-  if(target.company_id==null||target.engine_id==null)throw new Error('binding target incomplete');
-  const key=`${target.company_id}::${target.engine_id}::${manifest.capability_id}`;
+export function activatePreprodBinding(registryRaw,{manifest,target,evaluation,policy_registry=null}={}){
+  const registry=clone(validateRegistryEnvelope(registryRaw));
+  if(!manifest?.manifest_fingerprint||!target||typeof target!=='object'||!evaluation||typeof evaluation!=='object')return failDecision('HOLD_BINDING_INPUT_INVALID',['MANIFEST_TARGET_EVALUATION_REQUIRED'],null,{registry});
+  const company_id=req(target.company_id,'target.company_id',80),engine_id=req(target.engine_id,'target.engine_id',80),domain_id=req(target.domain_id,'target.domain_id',200);
+  if(!(manifest.company_scope.includes(company_id)||manifest.company_scope.includes('*')))return failDecision('HOLD_COMPANY_SCOPE',['CAPABILITY_NOT_AUTHORIZED_FOR_COMPANY'],null,{registry});
+  const registration=registry.records.find(x=>x.capability_id===manifest.capability_id&&x.version===manifest.version&&x.manifest_fingerprint===manifest.manifest_fingerprint&&x.state==='REGISTERED'&&Array.isArray(x.company_scope)&&(x.company_scope.includes(company_id)||x.company_scope.includes('*')))??null;
+  if(!registration)return failDecision('HOLD_CAPABILITY_NOT_REGISTERED',['MATCHING_REGISTERED_CAPABILITY_REQUIRED'],null,{registry});
+  const expectedRegistrationId=`capreg:${stableIdempotencyKey({capability_id:manifest.capability_id,version:manifest.version,company_scope:manifest.company_scope,manifest_fingerprint:manifest.manifest_fingerprint}).slice(0,24)}`;
+  if(registration.registration_id!==expectedRegistrationId)return failDecision('HOLD_REGISTRATION_INTEGRITY',['REGISTRATION_ID_MISMATCH'],'POLICY_CONFLICT',{registry});
+  const policyRegistry=policy_registry??loadDomainPolicyRegistry();
+  const currentPolicy=(policyRegistry?.policies??[]).find(p=>p.company_id===company_id&&p.engine_id===engine_id&&p.domain_id===domain_id)??null;
+  if(!currentPolicy)return failDecision('HOLD_DOMAIN_POLICY_MISSING',['CURRENT_DOMAIN_POLICY_REQUIRED'],null,{registry});
+  if(currentPolicy.autonomy_mode!=='PREPROD_AUTONOMOUS'||currentPolicy.kill_switch_enabled!==true||currentPolicy.automatic_rollback_allowed!==true)return failDecision('HOLD_BINDING_NOT_AUTHORIZED',['CURRENT_PREPROD_AUTONOMOUS_POLICY_REQUIRED'],null,{registry});
+  if(!currentPolicy.allowed_risk_classes.includes(manifest.risk_class))return failDecision('HOLD_POLICY_CONFLICT',['CAPABILITY_RISK_NOT_ALLOWED_BY_CURRENT_POLICY'],'POLICY_CONFLICT',{registry});
+  if(manifest.confidence<Number(currentPolicy.min_confidence??1))return failDecision('HOLD_LOW_CONFIDENCE',['CAPABILITY_CONFIDENCE_BELOW_CURRENT_POLICY'],'LOW_CONFIDENCE',{registry});
+  const evaluationMatches=evaluation.ok===true&&evaluation.decision==='PREPROD_CANDIDATE_PROMOTION'&&evaluation.next_gate==='PREPROD_BINDING_ACTIVATION'&&evaluation.company_id===company_id&&evaluation.engine_id===engine_id&&(evaluation.domain_id??null)===domain_id&&evaluation.capability_id===manifest.capability_id&&evaluation.capability_version===manifest.version&&evaluation.promotion_environment==='PREPROD'&&evaluation.prod_binding_authorized===false&&evaluation.prod_authorized===false&&evaluation.prod_write_authorized===false&&evaluation.trading_access===false&&Number(evaluation.additional_cost_eur)===0&&Array.isArray(evaluation.regressions)&&evaluation.regressions.length===0&&Array.isArray(evaluation.improvements)&&evaluation.improvements.length>0&&evaluation.rollback_ref===manifest.rollback_ref&&evaluation.rebuild_ref===manifest.rebuild_ref;
+  if(!evaluationMatches)return failDecision('HOLD_EVALUATION_SCOPE_MISMATCH',['MATCHING_GREEN_PREPROD_EVALUATION_REQUIRED'],null,{registry});
+  const oldM=normalizeMetrics(evaluation.baseline_metrics,'evaluation.baseline_metrics'),newM=normalizeMetrics(evaluation.candidate_metrics,'evaluation.candidate_metrics');
+  const expectedEvaluationId=`capeval:${stableIdempotencyKey({company_id,engine_id,capability_id:manifest.capability_id,version:manifest.version,oldM,newM,decision:evaluation.decision}).slice(0,24)}`;
+  if(evaluation.evaluation_id!==expectedEvaluationId)return failDecision('HOLD_EVALUATION_INTEGRITY',['EVALUATION_ID_MISMATCH'],'POLICY_CONFLICT',{registry});
+  const key=`${company_id}::${engine_id}::${manifest.capability_id}`;
   const prior=registry.bindings.find(x=>x.binding_key===key)??null;
-  const binding={binding_key:key,company_id:target.company_id,engine_id:target.engine_id,domain_id:target.domain_id??null,environment:'PREPROD',capability_id:manifest.capability_id,capability_version:manifest.version,evaluation_id:evaluation.evaluation_id,state:'ACTIVE_PREPROD',rollback_ref:manifest.rollback_ref,rebuild_ref:manifest.rebuild_ref,prod_authorized:false,prod_write_authorized:false,trading_access:false,additional_cost_eur:0};
+  if(prior&&prior.environment==='PREPROD'&&prior.capability_version===manifest.version&&prior.evaluation_id===evaluation.evaluation_id)return safe({ok:true,decision:'DUPLICATE_NOOP',duplicate:true,registry,binding:clone(prior),previous_binding:clone(prior)});
+  const binding={binding_key:key,company_id,engine_id,domain_id,environment:'PREPROD',capability_id:manifest.capability_id,capability_version:manifest.version,evaluation_id:evaluation.evaluation_id,policy_id:currentPolicy.policy_id,policy_version:currentPolicy.policy_version,state:'ACTIVE_PREPROD',rollback_ref:manifest.rollback_ref,rebuild_ref:manifest.rebuild_ref,prod_authorized:false,prod_write_authorized:false,trading_access:false,additional_cost_eur:0};
   registry.bindings=[...registry.bindings.filter(x=>x.binding_key!==key),binding].sort((a,b)=>a.binding_key.localeCompare(b.binding_key));
-  registry.binding_history=[...registry.binding_history,{history_id:`caphist:${stableIdempotencyKey({key,evaluation_id:evaluation.evaluation_id,prior}).slice(0,24)}`,binding_key:key,action:'ACTIVATE_PREPROD',previous_binding:prior?clone(prior):null,new_binding:clone(binding),evaluation_id:evaluation.evaluation_id}];
-  return safe({ok:true,decision:'PREPROD_BINDING_ACTIVE',registry,binding,previous_binding:prior});
+  registry.binding_history=[...registry.binding_history,{history_id:`caphist:${stableIdempotencyKey({key,evaluation_id:evaluation.evaluation_id,prior}).slice(0,24)}`,binding_key:key,action:'ACTIVATE_PREPROD',previous_binding:prior?clone(prior):null,new_binding:clone(binding),evaluation_id:evaluation.evaluation_id,policy_id:currentPolicy.policy_id,policy_version:currentPolicy.policy_version}];
+  return safe({ok:true,decision:'PREPROD_BINDING_ACTIVE',duplicate:false,registry,binding,previous_binding:prior});
 }
 
 export function rollbackCapabilityBinding(registryRaw,{company_id,engine_id,capability_id}={}){
-  const registry=clone(registryRaw);const key=`${req(company_id,'company_id',80)}::${req(engine_id,'engine_id',80)}::${req(capability_id,'capability_id',160)}`;
+  const registry=clone(validateRegistryEnvelope(registryRaw));const key=`${req(company_id,'company_id',80)}::${req(engine_id,'engine_id',80)}::${req(capability_id,'capability_id',160)}`;
   const history=[...registry.binding_history].reverse().find(x=>x.binding_key===key&&x.action==='ACTIVATE_PREPROD');
   if(!history)return failDecision('HOLD_ROLLBACK_EVIDENCE_MISSING',['NO_PREVIOUS_BINDING_HISTORY'],null,{registry});
   if(history.previous_binding)registry.bindings=[...registry.bindings.filter(x=>x.binding_key!==key),clone(history.previous_binding)].sort((a,b)=>a.binding_key.localeCompare(b.binding_key));
@@ -198,7 +217,7 @@ export function rollbackCapabilityBinding(registryRaw,{company_id,engine_id,capa
 }
 
 export function capabilityEvolutionStatus(registryRaw){
-  const r=clone(registryRaw);return safe({status:'CAPABILITY_EVOLUTION_LOOP_V0_READY',registered_capabilities:r.records.length,active_preprod_bindings:r.bindings.length,binding_history:r.binding_history.length,multi_company_ready:r.multi_company_ready===true,multicompany_runtime_activation:false,direct_prod_binding_allowed:false,engine_creation_directly_authorized:false,learning_ingress:'universal-learning-ingress.mjs',factory_gap_gate:'FACT001_EXISTING_ENGINE_OR_COMPOSITION_REVIEW'});
+  const r=clone(validateRegistryEnvelope(registryRaw));return safe({status:'CAPABILITY_EVOLUTION_LOOP_V0_READY',registered_capabilities:r.records.length,active_preprod_bindings:r.bindings.length,binding_history:r.binding_history.length,multi_company_ready:r.multi_company_ready===true,multicompany_runtime_activation:false,direct_prod_binding_allowed:false,engine_creation_directly_authorized:false,learning_ingress:'universal-learning-ingress.mjs',factory_gap_gate:'FACT001_EXISTING_ENGINE_OR_COMPOSITION_REVIEW'});
 }
 
 export const CAPABILITY_EVOLUTION_LOOP_V0_CONTRACT=Object.freeze({
