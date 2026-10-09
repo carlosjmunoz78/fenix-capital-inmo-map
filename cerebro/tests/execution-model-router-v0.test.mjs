@@ -13,7 +13,7 @@ const localPython={resource_id:'local-python',resource_class:'DETERMINISTIC_LOCA
 const localAi={resource_id:'local-ai',resource_class:'LOCAL_AI',capabilities:['research','reasoning','comparison'],available:true,incremental_cost_eur:0,privacy:'LOCAL',latency_ms:50,ai:true};
 const geminiLab={resource_id:'gemini-free-lab',resource_class:'FREE_AI',capabilities:['research','reasoning','comparison'],available:true,incremental_cost_eur:0,privacy:'APPROVED_CLOUD',latency_ms:100,ai:true,connector_id:'connector:gemini-free-lab'};
 const githubActions={resource_id:'github-actions',resource_class:'GITHUB_ACTIONS',capabilities:['python','typescript','research'],available:true,incremental_cost_eur:0,privacy:'APPROVED_CLOUD',latency_ms:200,ai:false,connector_id:'connector:github-actions'};
-const paidAi={resource_id:'paid-ai',resource_class:'PAID_EXTERNAL',capabilities:['research','reasoning'],available:true,incremental_cost_eur:0.03,privacy:'APPROVED_CLOUD',latency_ms:40,ai:true};
+const paidAi={resource_id:'paid-ai',resource_class:'PAID_EXTERNAL',capabilities:['python','research','reasoning'],available:true,incremental_cost_eur:0.03,privacy:'APPROVED_CLOUD',latency_ms:40,ai:true};
 
 function base(overrides={}){return {company_id:'fenix',environment:'LAB',task_type:'research',confidence:0.9,risk:'LOW',contains_customer_data:false,contains_secrets:false,prod_write_requested:false,trading_requested:false,available_resources:[localAi,geminiLab],lifecycle_state:lifecycle,...overrides};}
 
