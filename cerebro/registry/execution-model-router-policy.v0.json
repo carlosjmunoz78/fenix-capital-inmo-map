@@ -1,0 +1,76 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_EXECUTION_MODEL_ROUTER_POLICY",
+  "company_id": "fenix",
+  "engine_id": "ROUTE-001",
+  "supporting_engines": ["FREE-001", "AIBUD-001", "LOCAL-001", "IAM-001", "POL-001", "FINOPS-001", "OBSERV-001"],
+  "environment": "PREPROD_CONTROL_PLANE",
+  "version": "0.1.0",
+  "legacy_reference": {
+    "branch": "cerebro-model-router-v0-20260911",
+    "path": "cerebro/router/model-router.mjs",
+    "preserved_behaviors": [
+      "deterministic_tasks_do_not_require_ai",
+      "free_ai_before_paid_ai",
+      "paid_cost_requires_money_limit_human_exception"
+    ],
+    "migration_mode": "WRAP_AND_EXTEND_NOT_REPLACE_BLINDLY"
+  },
+  "deterministic_task_types": ["sql", "python", "typescript", "rule", "api", "local_tool", "engine_call"],
+  "interpretive_task_types": ["interpretation", "reasoning", "comparison", "redaction", "research"],
+  "resource_priority": [
+    "DETERMINISTIC_LOCAL",
+    "EXISTING_ENGINE",
+    "REGISTERED_API",
+    "GITHUB_ACTIONS",
+    "LOCAL_AI",
+    "FREE_AI",
+    "BROWSER_COMPUTER_USE",
+    "PAID_EXTERNAL"
+  ],
+  "zero_cost_classes": [
+    "DETERMINISTIC_LOCAL",
+    "EXISTING_ENGINE",
+    "REGISTERED_API",
+    "GITHUB_ACTIONS",
+    "LOCAL_AI",
+    "FREE_AI",
+    "BROWSER_COMPUTER_USE"
+  ],
+  "ai_allowed_only_for": ["interpretation", "reasoning", "comparison", "redaction", "research"],
+  "privacy": {
+    "customer_data_external_free_ai_allowed": false,
+    "customer_data_browser_allowed": false,
+    "secret_values_in_router_payload_allowed": false,
+    "local_or_registered_existing_path_required_for_sensitive_data": true
+  },
+  "browser": {
+    "fallback_only": true,
+    "allowed_environments": ["LAB", "PREPROD"],
+    "required_binding_status": "BROWSER_SESSION_BINDING_HEALTHY",
+    "captcha_bypass_allowed": false,
+    "mfa_bypass_allowed": false
+  },
+  "budget": {
+    "incremental_cost_hard_cap_eur": 0,
+    "automatic_paid_fallback": false,
+    "paid_route_exception": "MONEY_LIMIT",
+    "silent_spend_allowed": false
+  },
+  "confidence": {
+    "minimum_autonomous_confidence": 0.6,
+    "below_threshold_exception": "LOW_CONFIDENCE"
+  },
+  "risk": {
+    "autonomous_levels": ["LOW", "MEDIUM"],
+    "high_risk_exception": "HIGH_RISK"
+  },
+  "unknown_task_decision": "HUMAN_REQUIRED_LOW_CONFIDENCE",
+  "zero_cost_exhausted_decision": "HOLD_NO_ZERO_COST_ROUTE",
+  "prod_authorized": false,
+  "prod_write_authorized": false,
+  "execution_authorized": false,
+  "trading_access": false,
+  "multicompany_continuation": false,
+  "additional_cost_eur": 0
+}
