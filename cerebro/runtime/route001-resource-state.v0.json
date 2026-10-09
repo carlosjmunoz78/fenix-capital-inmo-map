@@ -5,18 +5,215 @@
   "engine_id": "ROUTE-001",
   "environment": "PREPROD_CONTROL_PLANE",
   "version": "0.1.0",
-  "updated_at": "2026-10-09T00:00:00.000Z",
-  "source_run_id": null,
-  "source_head_sha": null,
+  "updated_at": "2026-10-09T06:57:54.000Z",
+  "source_run_id": 37896315736,
+  "source_head_sha": "7c34dfb5e1e2827053e4534861c2b569214e1961",
   "repository_visibility": "public",
-  "resources": [],
+  "resources": [
+    {
+      "resource_id": "gha-node-runtime",
+      "resource_class": "DETERMINISTIC_LOCAL",
+      "capabilities": [
+        "engine_call",
+        "local_tool",
+        "rule",
+        "typescript"
+      ],
+      "available": true,
+      "incremental_cost_eur": 0,
+      "privacy": "LOCAL",
+      "latency_ms": 1,
+      "ai": false,
+      "availability_state": "CURRENT_RUNNER_PROBE_GREEN",
+      "quota_state": "NOT_APPLICABLE",
+      "current_observation": true,
+      "evidence_refs": [
+        "runtime:node:v24.21.0",
+        "github-run:37896315736"
+      ],
+      "reason": null
+    },
+    {
+      "resource_id": "gha-python-runtime",
+      "resource_class": "DETERMINISTIC_LOCAL",
+      "capabilities": [
+        "local_tool",
+        "python",
+        "rule"
+      ],
+      "available": true,
+      "incremental_cost_eur": 0,
+      "privacy": "LOCAL",
+      "latency_ms": 1,
+      "ai": false,
+      "availability_state": "CURRENT_RUNNER_PROBE_GREEN",
+      "quota_state": "NOT_APPLICABLE",
+      "current_observation": true,
+      "evidence_refs": [
+        "runtime:python:Python 3.12.15",
+        "github-run:37896315736"
+      ],
+      "reason": null
+    },
+    {
+      "resource_id": "github-actions-control",
+      "resource_class": "GITHUB_ACTIONS",
+      "capabilities": [
+        "api",
+        "engine_call",
+        "python",
+        "research",
+        "typescript"
+      ],
+      "available": true,
+      "incremental_cost_eur": 0,
+      "privacy": "REGISTERED_EXISTING_PATH",
+      "latency_ms": 20,
+      "ai": false,
+      "connector_id": "connector:github-actions",
+      "availability_state": "CURRENT_PUBLIC_RUNNER_AND_GH_PROBE_GREEN",
+      "quota_state": "NOT_APPLICABLE",
+      "current_observation": true,
+      "evidence_refs": [
+        "repo:visibility:public",
+        "runtime:gh:gh version 2.102.0 (2026-09-30)",
+        "github-run:37896315736"
+      ],
+      "reason": null
+    },
+    {
+      "resource_id": "github-actions-ephemeral-oss",
+      "resource_class": "LOCAL_AI",
+      "capabilities": [
+        "comparison",
+        "interpretation",
+        "reasoning",
+        "redaction",
+        "research"
+      ],
+      "available": false,
+      "incremental_cost_eur": 0,
+      "privacy": "LOCAL",
+      "latency_ms": 5000,
+      "ai": true,
+      "provider_id": "github-actions-ephemeral-oss",
+      "availability_state": "HISTORICAL_ONLY_CURRENT_PROBE_REQUIRED",
+      "quota_state": "CURRENT_QUOTA_UNPROVEN",
+      "current_observation": false,
+      "evidence_refs": [
+        "historical:LAB_CANDIDATE_COMPONENTS_VERIFIED:2026-10-07T08:28:11Z"
+      ],
+      "reason": "STATIC_OR_HISTORICAL_EVIDENCE_IS_NOT_CURRENT_AVAILABILITY"
+    },
+    {
+      "resource_id": "google-gemini-api-free",
+      "resource_class": "FREE_AI",
+      "capabilities": [
+        "comparison",
+        "interpretation",
+        "reasoning",
+        "redaction",
+        "research"
+      ],
+      "available": false,
+      "incremental_cost_eur": 0,
+      "privacy": "APPROVED_CLOUD",
+      "latency_ms": 5000,
+      "ai": true,
+      "connector_id": "connector:gemini-free-lab",
+      "provider_id": "google-gemini-api-free",
+      "availability_state": "HISTORICAL_ONLY_CURRENT_PROBE_REQUIRED",
+      "quota_state": "CURRENT_QUOTA_UNPROVEN",
+      "current_observation": false,
+      "evidence_refs": [
+        "historical:VERIFIED_SYNTHETIC_FREE_TIER_INFERENCE:2026-10-07T08:28:11Z"
+      ],
+      "reason": "REFERENCE_PRESENCE_ALONE_DOES_NOT_PROVE_CURRENT_FREE_AVAILABILITY"
+    },
+    {
+      "resource_id": "cloudflare-workers-ai-free",
+      "resource_class": "FREE_AI",
+      "capabilities": [
+        "comparison",
+        "interpretation",
+        "reasoning",
+        "redaction",
+        "research"
+      ],
+      "available": false,
+      "incremental_cost_eur": 0,
+      "privacy": "APPROVED_CLOUD",
+      "latency_ms": 5000,
+      "ai": true,
+      "provider_id": "cloudflare-workers-ai-free",
+      "availability_state": "HISTORICAL_ONLY_CURRENT_PROBE_REQUIRED",
+      "quota_state": "CURRENT_QUOTA_UNPROVEN",
+      "current_observation": false,
+      "evidence_refs": [
+        "historical:VERIFIED_FREE_TIER_EXISTS:2026-10-07T08:28:11Z"
+      ],
+      "reason": "CURRENT_FREE_AVAILABILITY_UNPROVEN"
+    },
+    {
+      "resource_id": "mistral-api-free-mode",
+      "resource_class": "FREE_AI",
+      "capabilities": [
+        "comparison",
+        "interpretation",
+        "reasoning",
+        "redaction",
+        "research"
+      ],
+      "available": false,
+      "incremental_cost_eur": 0,
+      "privacy": "APPROVED_CLOUD",
+      "latency_ms": 5000,
+      "ai": true,
+      "provider_id": "mistral-api-free-mode",
+      "availability_state": "HISTORICAL_ONLY_CURRENT_PROBE_REQUIRED",
+      "quota_state": "CURRENT_QUOTA_UNPROVEN",
+      "current_observation": false,
+      "evidence_refs": [
+        "historical:VERIFIED_FREE_MODE_EXISTS:2026-10-07T08:28:11Z"
+      ],
+      "reason": "CURRENT_FREE_AVAILABILITY_UNPROVEN"
+    },
+    {
+      "resource_id": "agent-browser-real",
+      "resource_class": "BROWSER_COMPUTER_USE",
+      "capabilities": [
+        "local_tool",
+        "research"
+      ],
+      "available": false,
+      "incremental_cost_eur": 0,
+      "privacy": "BROWSER",
+      "latency_ms": 1000,
+      "ai": false,
+      "connector_id": "connector:agent-browser-candidate",
+      "availability_state": "HOLD_BROWSER_REAL_IDENTITY_BINDING_AUDIT",
+      "quota_state": "NOT_APPLICABLE",
+      "current_observation": false,
+      "evidence_refs": [],
+      "reason": "REAL_BROWSER_BINDING_NOT_CURRENTLY_PROVEN"
+    }
+  ],
   "discovery_summary": {
-    "observed_total": 0,
-    "available_zero_cost_total": 0,
-    "historical_only_total": 0,
-    "hold_total": 0
+    "observed_total": 8,
+    "available_zero_cost_total": 3,
+    "historical_only_total": 4,
+    "hold_total": 5
   },
-  "last_safe_loop": null,
+  "last_safe_loop": {
+    "status": "SAFE_PREPROD_LOOP_GREEN",
+    "fixture_id": "canonical-json-hash-v0",
+    "selected_resource_id": "gha-node-runtime",
+    "selected_resource_class": "DETERMINISTIC_LOCAL",
+    "observed_at": "2026-10-09T06:57:54.000Z",
+    "duration_ms": 0.47827,
+    "learning_events": 3,
+    "business_execution": false
+  },
   "contains_customer_data": false,
   "contains_secrets": false,
   "prod_authorized": false,
