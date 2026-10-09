@@ -1,7 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { certifyStep6DomainPromotionClosure } from '../runtime/step6-domain-promotion-closure.mjs';
+
+const DISPOSITIONS_FILE = fileURLToPath(new URL('../registry/step6-domain-promotion-dispositions.v0.json', import.meta.url));
+function readDispositions(){
+  return JSON.parse(fs.readFileSync(DISPOSITIONS_FILE,'utf8'));
+}
 
 test('Step 6 closes only when all 10 domains are classified and authority remains bounded', () => {
   const r = certifyStep6DomainPromotionClosure();
@@ -21,7 +27,7 @@ test('Step 6 closes only when all 10 domains are classified and authority remain
 });
 
 test('assisted domains remain explicit evidence-backed HOLDs and SEO keeps its physical reconciliation gate', () => {
-  const c = JSON.parse(fs.readFileSync('cerebro/registry/step6-domain-promotion-dispositions.v0.json','utf8'));
+  const c = readDispositions();
   const assisted = c.dispositions.filter(x=>x.policy_mode==='ASSISTED');
   assert.equal(assisted.length, 8);
   for (const d of assisted) {
@@ -35,7 +41,7 @@ test('assisted domains remain explicit evidence-backed HOLDs and SEO keeps its p
 });
 
 test('closure does not escalate HOLD dispositions to HUMAN_REQUIRED or global/PROD autonomy', () => {
-  const c = JSON.parse(fs.readFileSync('cerebro/registry/step6-domain-promotion-dispositions.v0.json','utf8'));
+  const c = readDispositions();
   for (const d of c.dispositions) {
     assert.equal(Object.hasOwn(d, 'human_required'), false);
     assert.notEqual(d.decision, 'HUMAN_REQUIRED');
