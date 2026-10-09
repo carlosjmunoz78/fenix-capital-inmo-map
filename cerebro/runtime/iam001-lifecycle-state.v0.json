@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_IAM001_LIFECYCLE_STATE",
+  "company_id": "fenix",
+  "engine_id": "IAM-001",
+  "environment": "CONTROL_PLANE",
+  "version": "0.1.0",
+  "updated_at": "2026-10-09T00:00:00.000Z",
+  "last_source_run_id": null,
+  "credential_health": {},
+  "browser_session_binding": {
+    "status": "HOLD_NO_REAL_ATTESTATION",
+    "environment": "PREPROD",
+    "device_id_hash": null,
+    "profile_id_hash": null,
+    "paired": false,
+    "online": false,
+    "kill_switch_enabled": true,
+    "cloud_transport_status": "UNKNOWN",
+    "chrome_running": false,
+    "attested_at": null
+  },
+  "disabled_credential_refs": [],
+  "disabled_connector_ids": [],
+  "disabled_identity_ids": [],
+  "contains_secret_values": false,
+  "prod_authorized": false,
+  "prod_write_authorized": false,
+  "trading_access": false,
+  "multicompany_continuation": false,
+  "additional_cost_eur": 0
+}
