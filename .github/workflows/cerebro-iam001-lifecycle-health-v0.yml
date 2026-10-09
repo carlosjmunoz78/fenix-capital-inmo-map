@@ -1,0 +1,160 @@
+name: CEREBRO IAM001 Lifecycle Health V0
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/registry/credential-lifecycle-policy.v0.json'
+      - 'cerebro/governance/identity-session-lifecycle.mjs'
+      - 'cerebro/tests/identity-session-lifecycle-v0.test.mjs'
+      - 'cerebro/docs/CEREBRO_IAM001_LIFECYCLE_SESSION_BINDING_V0_2026-10-09.md'
+      - '.github/workflows/cerebro-iam001-lifecycle-health-v0.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'cerebro/registry/credential-lifecycle-policy.v0.json'
+      - 'cerebro/governance/identity-session-lifecycle.mjs'
+      - 'cerebro/tests/identity-session-lifecycle-v0.test.mjs'
+      - 'cerebro/docs/CEREBRO_IAM001_LIFECYCLE_SESSION_BINDING_V0_2026-10-09.md'
+      - '.github/workflows/cerebro-iam001-lifecycle-health-v0.yml'
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && format('cerebro-iam001-lifecycle-cert-{0}', github.ref) || 'cerebro-iam001-lifecycle-state-v0' }}
+  cancel-in-progress: false
+
+env:
+  IAM_STATE_BRANCH: cerebro-iam001-lifecycle-state-v0
+  IAM_STATE_PATH: cerebro/runtime/iam001-lifecycle-state.v0.json
+
+jobs:
+  certify-contract:
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Assert exact PR head
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+      - name: Test lifecycle and session guard
+        run: node --test cerebro/tests/identity-session-lifecycle-v0.test.mjs cerebro/tests/identity-credential-broker-v0.test.mjs
+      - name: Validate persistent state branch without reading any secret
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin "refs/heads/$IAM_STATE_BRANCH:refs/remotes/origin/$IAM_STATE_BRANCH"
+          git show "refs/remotes/origin/$IAM_STATE_BRANCH:$IAM_STATE_PATH" > /tmp/iam-state.json
+          jq -e '.state_type == "CEREBRO_IAM001_LIFECYCLE_STATE" and .company_id == "fenix" and .engine_id == "IAM-001" and .contains_secret_values == false and .prod_authorized == false and .prod_write_authorized == false and .trading_access == false and .multicompany_continuation == false and .additional_cost_eur == 0' /tmp/iam-state.json >/dev/null
+      - name: Assert next gate and fail-closed browser policy
+        run: |
+          grep -F 'EXECUTION_MODEL_ROUTER_ZERO_COST_V0' cerebro/docs/CEREBRO_IAM001_LIFECYCLE_SESSION_BINDING_V0_2026-10-09.md >/dev/null
+          grep -F 'HOLD_BROWSER_REAL_IDENTITY_BINDING_AUDIT' cerebro/registry/credential-lifecycle-policy.v0.json >/dev/null
+
+  monitor-live-metadata:
+    if: github.event_name != 'pull_request'
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Load previous metadata-only lifecycle state
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/iam001
+          git fetch --no-tags origin "+refs/heads/$IAM_STATE_BRANCH:refs/remotes/origin/$IAM_STATE_BRANCH"
+          git show "refs/remotes/origin/$IAM_STATE_BRANCH:$IAM_STATE_PATH" > artifacts/iam001/state.before.json
+      - name: Observe secret-reference presence and JWT expiry metadata without exposing values
+        env:
+          SUPABASE_PUBLISHABLE_PRESENT: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY != '' }}
+          SUPABASE_LEGACY_PRESENT: ${{ secrets.PROD_SUPABASE_LEGACY_ANON_JWT != '' }}
+          E2E_JWT_PRESENT: ${{ secrets.CEREBRO_E2E_USER_JWT != '' }}
+          CEREBRO_E2E_USER_JWT: ${{ secrets.CEREBRO_E2E_USER_JWT }}
+          NOTION_PRESENT: ${{ secrets.NOTION_TOKEN != '' }}
+          GEMINI_PRESENT: ${{ secrets.CEREBRO_GEMINI_API_KEY != '' }}
+          MAIL_USER_PRESENT: ${{ secrets.CEREBRO_MAIL_USERNAME != '' }}
+          MAIL_PASSWORD_PRESENT: ${{ secrets.CEREBRO_MAIL_PASSWORD != '' }}
+          OWNER_EMAIL_PRESENT: ${{ secrets.CEREBRO_OWNER_EMAIL != '' }}
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const yes=v=>v==='true';
+          let exp=null;
+          if(yes(process.env.E2E_JWT_PRESENT)){
+            try{
+              const parts=(process.env.CEREBRO_E2E_USER_JWT??'').split('.');
+              if(parts.length===3){
+                const payload=JSON.parse(Buffer.from(parts[1],'base64url').toString('utf8'));
+                if(Number.isInteger(Number(payload.exp))&&Number(payload.exp)>0) exp=Number(payload.exp);
+              }
+            }catch{}
+          }
+          const out={observed_at:new Date().toISOString(),credential_refs:{
+            'credref:prod-supabase-publishable-key':{present:yes(process.env.SUPABASE_PUBLISHABLE_PRESENT)},
+            'credref:prod-supabase-legacy-anon-jwt':{present:yes(process.env.SUPABASE_LEGACY_PRESENT)},
+            'credref:cerebro-e2e-user-jwt':{present:yes(process.env.E2E_JWT_PRESENT),exp_unix:exp},
+            'credref:notion-token':{present:yes(process.env.NOTION_PRESENT)},
+            'credref:cerebro-gemini-api-key':{present:yes(process.env.GEMINI_PRESENT)},
+            'credref:cerebro-mail-username':{present:yes(process.env.MAIL_USER_PRESENT)},
+            'credref:cerebro-mail-password':{present:yes(process.env.MAIL_PASSWORD_PRESENT)},
+            'credref:cerebro-owner-email':{present:yes(process.env.OWNER_EMAIL_PRESENT)}
+          }};
+          fs.writeFileSync('artifacts/iam001/observations.json',JSON.stringify(out,null,2)+'\n');
+          console.log(JSON.stringify({observed_at:out.observed_at,refs_observed:Object.keys(out.credential_refs).length,e2e_jwt_present:out.credential_refs['credref:cerebro-e2e-user-jwt'].present,e2e_exp_metadata_present:exp!==null,secret_values_logged:false}));
+          NODE
+      - name: Build fail-closed lifecycle state without browser identity fabrication
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import {buildLifecycleState} from './cerebro/governance/identity-session-lifecycle.mjs';
+          const prev=JSON.parse(fs.readFileSync('artifacts/iam001/state.before.json','utf8'));
+          const obs=JSON.parse(fs.readFileSync('artifacts/iam001/observations.json','utf8'));
+          const state=buildLifecycleState({previous_state:prev,observations:obs,browser_attestation:null,source_run_id:Number(process.env.GITHUB_RUN_ID),now:obs.observed_at});
+          fs.writeFileSync('artifacts/iam001/state.after.json',JSON.stringify(state,null,2)+'\n');
+          const holds=Object.values(state.credential_health).filter(x=>String(x.status).startsWith('HOLD_')).map(x=>({credential_ref_id:x.credential_ref_id,status:x.status}));
+          fs.writeFileSync('artifacts/iam001/health-summary.json',JSON.stringify({state_type:'CEREBRO_IAM001_LIFECYCLE_HEALTH_SUMMARY',observed_at:state.updated_at,holds,browser_status:state.browser_session_binding.status,human_required:null,prod_authorized:false,prod_write_authorized:false,trading_access:false,multicompany_continuation:false,additional_cost_eur:0},null,2)+'\n');
+          console.log(JSON.stringify({holds_total:holds.length,browser_status:state.browser_session_binding.status,human_required:null,secret_values_persisted:false}));
+          NODE
+      - name: Assert state contains no raw secret material and no authority escalation
+        run: |
+          set -euo pipefail
+          jq -e '.contains_secret_values == false and .prod_authorized == false and .prod_write_authorized == false and .trading_access == false and .multicompany_continuation == false and .additional_cost_eur == 0' artifacts/iam001/state.after.json >/dev/null
+          if grep -Eq 'eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.|sb_secret_[A-Za-z0-9_-]{8,}|AIza[A-Za-z0-9_-]{12,}' artifacts/iam001/state.after.json; then echo 'raw credential-like material found in lifecycle state' >&2; exit 1; fi
+      - name: Persist metadata-only lifecycle state
+        run: |
+          set -euo pipefail
+          cp artifacts/iam001/state.after.json /tmp/iam-state.json
+          git fetch --no-tags origin "+refs/heads/$IAM_STATE_BRANCH:refs/remotes/origin/$IAM_STATE_BRANCH"
+          git checkout --detach "refs/remotes/origin/$IAM_STATE_BRANCH"
+          cp /tmp/iam-state.json "$IAM_STATE_PATH"
+          git config user.name 'cerebro-iam-lifecycle[bot]'
+          git config user.email 'cerebro-iam-lifecycle[bot]@users.noreply.github.com'
+          git add "$IAM_STATE_PATH"
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(cerebro): advance IAM lifecycle metadata from run $GITHUB_RUN_ID"
+            git push origin "HEAD:refs/heads/$IAM_STATE_BRANCH"
+          fi
+      - name: Upload lifecycle health evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-iam001-lifecycle-health-v0-${{ github.run_id }}
+          path: artifacts/iam001/**
+          if-no-files-found: warn
+          retention-days: 30
