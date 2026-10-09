@@ -139,16 +139,57 @@ test('capability trial evidence is emitted into existing universal LRN-001 ingre
   assert.equal(report.events[0].prod_authorized,false);
 });
 
+test('binding activation requires registered capability, exact evaluation identity and current domain policy',()=>{
+  const seed=loadCapabilityEvolutionRegistry();
+  const target=autoTarget('LRN-001');
+  const raw=manifest();
+  const m=normalizeCapabilityManifest(raw);
+  const evaluation=evaluateCapabilityTrial({manifest:m,target,baseline_metrics:metrics(),candidate_metrics:metrics({quality_score:0.90}),evidence_refs:['trial:binding-integrity'],observed_at:'2026-10-09T12:02:30Z'});
+  const unregistered=activatePreprodBinding(seed,{manifest:m,target,evaluation,policy_registry:policies});
+  assert.equal(unregistered.decision,'HOLD_CAPABILITY_NOT_REGISTERED');
+  const registered=registerCapability(seed,raw);
+  const mismatched=activatePreprodBinding(registered.registry,{manifest:registered.manifest,target,evaluation:{...evaluation,engine_id:'AUTO-001'},policy_registry:policies});
+  assert.equal(mismatched.decision,'HOLD_EVALUATION_SCOPE_MISMATCH');
+  const badId=activatePreprodBinding(registered.registry,{manifest:registered.manifest,target,evaluation:{...evaluation,evaluation_id:'capeval:000000000000000000000000'},policy_registry:policies});
+  assert.equal(badId.decision,'HOLD_EVALUATION_INTEGRITY');
+  assert.equal(badId.human_required,'POLICY_CONFLICT');
+  const seoPolicy=autoTarget('SEO-001');
+  const forgedAutoTarget={...seoPolicy,policy_mode:'PREPROD_AUTONOMOUS'};
+  const seoRaw=manifest({capability_id:'skill.test.seo',compatible_engine_ids:['SEO-001']});
+  const seoRegistered=registerCapability(seed,seoRaw);
+  const seoEval=evaluateCapabilityTrial({manifest:seoRegistered.manifest,target:forgedAutoTarget,baseline_metrics:metrics(),candidate_metrics:metrics({quality_score:0.90}),evidence_refs:['trial:seo-forged-auto'],observed_at:'2026-10-09T12:02:40Z'});
+  assert.equal(seoEval.decision,'PREPROD_CANDIDATE_PROMOTION');
+  const currentPolicyBlock=activatePreprodBinding(seoRegistered.registry,{manifest:seoRegistered.manifest,target:forgedAutoTarget,evaluation:seoEval,policy_registry:policies});
+  assert.equal(currentPolicyBlock.decision,'HOLD_BINDING_NOT_AUTHORIZED');
+});
+
+test('repeated identical binding activation is an idempotent no-op and rollback still removes first binding',()=>{
+  const target=autoTarget();
+  const registered=registerCapability(loadCapabilityEvolutionRegistry(),manifest());
+  const m=registered.manifest;
+  const evaluation=evaluateCapabilityTrial({manifest:m,target,baseline_metrics:metrics(),candidate_metrics:metrics({quality_score:0.90}),evidence_refs:['trial:idempotent-binding'],observed_at:'2026-10-09T12:02:50Z'});
+  const first=activatePreprodBinding(registered.registry,{manifest:m,target,evaluation,policy_registry:policies});
+  assert.equal(first.decision,'PREPROD_BINDING_ACTIVE');
+  assert.equal(first.registry.binding_history.length,1);
+  const second=activatePreprodBinding(first.registry,{manifest:m,target,evaluation,policy_registry:policies});
+  assert.equal(second.decision,'DUPLICATE_NOOP');
+  assert.equal(second.registry.binding_history.length,1);
+  const rb=rollbackCapabilityBinding(second.registry,{company_id:'fenix',engine_id:'LRN-001',capability_id:m.capability_id});
+  assert.equal(rb.decision,'ROLLBACK_RESTORED_PREVIOUS_BINDING');
+  assert.equal(rb.restored_binding,null);
+  assert.equal(rb.registry.bindings.length,0);
+});
+
 test('rollback restores previous capability binding',()=>{
   let registry=loadCapabilityEvolutionRegistry();
   const target=autoTarget();
-  const m1=normalizeCapabilityManifest(manifest({version:'1.0.0'}));
+  const reg1=registerCapability(registry,manifest({version:'1.0.0'}));registry=reg1.registry;const m1=reg1.manifest;
   const e1=evaluateCapabilityTrial({manifest:m1,target,baseline_metrics:metrics(),candidate_metrics:metrics({quality_score:0.90}),evidence_refs:['trial:v1'],observed_at:'2026-10-09T12:03:00Z'});
-  const a1=activatePreprodBinding(registry,{manifest:m1,target,evaluation:e1});
+  const a1=activatePreprodBinding(registry,{manifest:m1,target,evaluation:e1,policy_registry:policies});
   assert.equal(a1.decision,'PREPROD_BINDING_ACTIVE');registry=a1.registry;
-  const m2=normalizeCapabilityManifest(manifest({version:'1.1.0',source_ref:'skills://test/analysis/v1.1/skill.md'}));
+  const reg2=registerCapability(registry,manifest({version:'1.1.0',source_ref:'skills://test/analysis/v1.1/skill.md'}));registry=reg2.registry;const m2=reg2.manifest;
   const e2=evaluateCapabilityTrial({manifest:m2,target,baseline_metrics:metrics({quality_score:0.90}),candidate_metrics:metrics({quality_score:0.95}),evidence_refs:['trial:v2'],observed_at:'2026-10-09T12:04:00Z'});
-  const a2=activatePreprodBinding(registry,{manifest:m2,target,evaluation:e2});registry=a2.registry;
+  const a2=activatePreprodBinding(registry,{manifest:m2,target,evaluation:e2,policy_registry:policies});registry=a2.registry;
   assert.equal(registry.bindings[0].capability_version,'1.1.0');
   const rb=rollbackCapabilityBinding(registry,{company_id:'fenix',engine_id:'LRN-001',capability_id:m1.capability_id});
   assert.equal(rb.decision,'ROLLBACK_RESTORED_PREVIOUS_BINDING');
