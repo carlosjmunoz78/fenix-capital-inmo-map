@@ -76,6 +76,12 @@ test('direct PROD capability mutation is denied before trial',()=>{
   assert.equal(plan.human_required,null);
 });
 
+test('manifest rejects customer data, secrets, paid cost and authority expansion flags',()=>{
+  for(const patch of [{contains_customer_data:true},{contains_secrets:true},{prod_authorized:true},{prod_write_authorized:true},{trading_access:true},{additional_cost_eur:0.01}]){
+    assert.throws(()=>normalizeCapabilityManifest(manifest(patch)),/boundary denied|authority/);
+  }
+});
+
 test('zero-cost deterministic existing route wins over paid and weaker free routes',()=>{
   const m=normalizeCapabilityManifest(manifest());
   const route=chooseZeroCostRoute(m);
@@ -149,10 +155,12 @@ test('binding activation requires registered capability, exact evaluation identi
   assert.equal(unregistered.decision,'HOLD_CAPABILITY_NOT_REGISTERED');
   const registered=registerCapability(seed,raw);
   const mismatched=activatePreprodBinding(registered.registry,{manifest:registered.manifest,target,evaluation:{...evaluation,engine_id:'AUTO-001'},policy_registry:policies});
-  assert.equal(mismatched.decision,'HOLD_EVALUATION_SCOPE_MISMATCH');
+  assert.equal(mismatched.decision,'HOLD_EVALUATION_INTEGRITY');
   const badId=activatePreprodBinding(registered.registry,{manifest:registered.manifest,target,evaluation:{...evaluation,evaluation_id:'capeval:000000000000000000000000'},policy_registry:policies});
   assert.equal(badId.decision,'HOLD_EVALUATION_INTEGRITY');
   assert.equal(badId.human_required,'POLICY_CONFLICT');
+  const forgedImprovement=activatePreprodBinding(registered.registry,{manifest:registered.manifest,target,evaluation:{...evaluation,improvements:['FAKE_IMPROVEMENT']},policy_registry:policies});
+  assert.equal(forgedImprovement.decision,'HOLD_EVALUATION_INTEGRITY');
   const seoPolicy=autoTarget('SEO-001');
   const forgedAutoTarget={...seoPolicy,policy_mode:'PREPROD_AUTONOMOUS'};
   const seoRaw=manifest({capability_id:'skill.test.seo',compatible_engine_ids:['SEO-001']});
@@ -161,6 +169,27 @@ test('binding activation requires registered capability, exact evaluation identi
   assert.equal(seoEval.decision,'PREPROD_CANDIDATE_PROMOTION');
   const currentPolicyBlock=activatePreprodBinding(seoRegistered.registry,{manifest:seoRegistered.manifest,target:forgedAutoTarget,evaluation:seoEval,policy_registry:policies});
   assert.equal(currentPolicyBlock.decision,'HOLD_BINDING_NOT_AUTHORIZED');
+});
+
+test('binding activation rejects autonomous engine not declared or inferred compatible by manifest',()=>{
+  const registered=registerCapability(loadCapabilityEvolutionRegistry(),manifest({compatible_engine_ids:['LRN-001'],compatible_domain_ids:[],capability_tags:['analysis-test']}));
+  const target=autoTarget('AUTO-001');
+  assert.equal(target.policy_mode,'PREPROD_AUTONOMOUS');
+  const evaluation=evaluateCapabilityTrial({manifest:registered.manifest,target,baseline_metrics:metrics(),candidate_metrics:metrics({quality_score:0.90}),evidence_refs:['trial:undeclared-target'],observed_at:'2026-10-09T12:02:45Z'});
+  assert.equal(evaluation.decision,'PREPROD_CANDIDATE_PROMOTION');
+  const blocked=activatePreprodBinding(registered.registry,{manifest:registered.manifest,target,evaluation,policy_registry:policies});
+  assert.equal(blocked.decision,'HOLD_TARGET_NOT_COMPATIBLE');
+});
+
+test('binding activation re-normalizes manifest and rejects retained fingerprint after policy-field tampering',()=>{
+  const registered=registerCapability(loadCapabilityEvolutionRegistry(),manifest({risk_class:'HIGH',confidence:0.40}));
+  const target=autoTarget('LRN-001');
+  const tampered={...registered.manifest,risk_class:'LOW',confidence:0.99,manifest_fingerprint:registered.manifest.manifest_fingerprint};
+  const evaluation=evaluateCapabilityTrial({manifest:tampered,target,baseline_metrics:metrics(),candidate_metrics:metrics({quality_score:0.90}),evidence_refs:['trial:tampered-manifest'],observed_at:'2026-10-09T12:02:47Z'});
+  assert.equal(evaluation.decision,'PREPROD_CANDIDATE_PROMOTION');
+  const blocked=activatePreprodBinding(registered.registry,{manifest:tampered,target,evaluation,policy_registry:policies});
+  assert.equal(blocked.decision,'HOLD_MANIFEST_INTEGRITY');
+  assert.equal(blocked.human_required,'POLICY_CONFLICT');
 });
 
 test('repeated identical binding activation is an idempotent no-op and rollback still removes first binding',()=>{
