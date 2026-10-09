@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_CAPABILITY_EVOLUTION_REGISTRY",
+  "environment": "PREPROD_CONTROL_PLANE",
+  "records": [],
+  "bindings": [],
+  "binding_history": [],
+  "multi_company_ready": true,
+  "multicompany_runtime_activation": false,
+  "direct_prod_binding_allowed": false,
+  "engine_creation_directly_authorized": false,
+  "extend_existing_before_create": true,
+  "zero_cost_first": true,
+  "deterministic_first": true,
+  "learning_ingress": "cerebro/runtime/universal-learning-ingress.mjs",
+  "domain_policy_registry": "cerebro/registry/rsi-domain-autonomy-policies.v0.json",
+  "engine_registry": "cerebro/registry/engine-registry.seed.json",
+  "factory_gap_gate": "FACT001_EXISTING_ENGINE_OR_COMPOSITION_REVIEW",
+  "canonical_human_required": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "prod_authorized": false,
+  "prod_write_authorized": false,
+  "trading_access": false,
+  "additional_cost_eur": 0
+}
