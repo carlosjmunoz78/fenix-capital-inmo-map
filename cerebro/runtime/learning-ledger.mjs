@@ -11,8 +11,13 @@ function clone(value){return deserialize(serialize(value));}
 function missing(value){return value===undefined||value===null||value==='';}
 function sameValue(left,right){return stableIdempotencyKey({value:left??null})===stableIdempotencyKey({value:right??null});}
 function differingFields(left,right){
-  return [...new Set([...Object.keys(left??{}),...Object.keys(right??{})])]
-    .filter(field=>!sameValue(left?.[field],right?.[field]))
+  const leftObject=left??{};const rightObject=right??{};
+  return [...new Set([...Object.keys(leftObject),...Object.keys(rightObject)])]
+    .flatMap((field)=>{
+      const leftHas=Object.hasOwn(leftObject,field);const rightHas=Object.hasOwn(rightObject,field);
+      if(leftHas!==rightHas) return [`${field}#presence`];
+      return sameValue(leftObject[field],rightObject[field])?[]:[field];
+    })
     .sort();
 }
 function compatibleRepeat(prior,incoming){
@@ -100,7 +105,7 @@ export const LEARNING_LEDGER_V0_CONTRACT=Object.freeze({
   persistence_scope:PERSISTENCE_SCOPE,
   duplicate_policy:'FIRST_SEEN_IMMUTABLE; OBSERVED_AT_MAY_CHANGE; SIGNAL_ID_AND_SOURCE_ENVIRONMENT_MAY_ONLY_BE_ADDED_TO_LEGACY_RECORDS; ALL_OTHER_SAME_ID_MUTATIONS_FAIL_CLOSED',
   additive_provenance_fields:ADDITIVE_PROVENANCE_FIELDS,
-  conflict_diagnostics:'FIELD_NAMES_ONLY_NO_PAYLOAD_VALUES',
+  conflict_diagnostics:'FIELD_NAMES_AND_PRESENCE_ONLY_NO_PAYLOAD_VALUES',
   supabase_required:false,
   additional_cost_target_eur:0,
   customer_data_required:false,
