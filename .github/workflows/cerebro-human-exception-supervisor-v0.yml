@@ -1,0 +1,172 @@
+name: CEREBRO Human Exception Supervisor V0
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/governance/human-exception-supervisor.mjs'
+      - 'cerebro/tests/human-exception-supervisor-v0.test.mjs'
+      - 'cerebro/docs/CEREBRO_HUMAN_EXCEPTION_SUPERVISOR_V0_2026-10-09.md'
+      - '.github/workflows/cerebro-human-exception-supervisor-v0.yml'
+      - '.github/workflows/cerebro-human-communication-v1.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'cerebro/governance/human-exception-supervisor.mjs'
+      - 'cerebro/tests/human-exception-supervisor-v0.test.mjs'
+      - 'cerebro/docs/CEREBRO_HUMAN_EXCEPTION_SUPERVISOR_V0_2026-10-09.md'
+      - '.github/workflows/cerebro-human-exception-supervisor-v0.yml'
+      - '.github/workflows/cerebro-human-communication-v1.yml'
+  repository_dispatch:
+    types: [cerebro-human-required-v0, cerebro-domain-evidence-v0]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ (github.event_name == 'pull_request' || github.event_name == 'push') && format('cerebro-human-exception-cert-{0}', github.ref) || 'cerebro-human-exception-state-v0' }}
+  cancel-in-progress: false
+
+env:
+  HUMAN_EXCEPTION_STATE_BRANCH: cerebro-human-exception-state-v0
+  HUMAN_EXCEPTION_STATE_PATH: cerebro/runtime/human-exception-supervisor-state.v0.json
+
+jobs:
+  certify-contract:
+    if: github.event_name == 'pull_request' || github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Assert exact PR head checkout when applicable
+        if: github.event_name == 'pull_request'
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+      - name: Test canonical supervisor and existing human communication contracts
+        run: >-
+          node --test
+          cerebro/tests/human-exception-supervisor-v0.test.mjs
+          cerebro/tests/human-communication-v1.test.mjs
+          cerebro/tests/owner-approval-gate-v1.test.mjs
+      - name: Assert canonical reasons are identical to existing communication policy
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import {CANONICAL_HUMAN_REQUIRED,HUMAN_EXCEPTION_SUPERVISOR_V0_CONTRACT} from './cerebro/governance/human-exception-supervisor.mjs';
+          const p=JSON.parse(fs.readFileSync('cerebro/governance/communication-policy.v0.json','utf8'));
+          const expected=[...CANONICAL_HUMAN_REQUIRED].sort();
+          const actual=[...(p.human_required_reasons??[])].sort();
+          if(JSON.stringify(expected)!==JSON.stringify(actual)) throw new Error('human exception policy mismatch');
+          if(HUMAN_EXCEPTION_SUPERVISOR_V0_CONTRACT.engine_id!=='HEX-001'||HUMAN_EXCEPTION_SUPERVISOR_V0_CONTRACT.prod_authorized!==false||HUMAN_EXCEPTION_SUPERVISOR_V0_CONTRACT.trading_access!==false||HUMAN_EXCEPTION_SUPERVISOR_V0_CONTRACT.additional_cost_target_eur!==0) throw new Error('supervisor contract drift');
+          NODE
+      - name: Validate physical persistent supervisor state branch
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin "refs/heads/$HUMAN_EXCEPTION_STATE_BRANCH:refs/remotes/origin/$HUMAN_EXCEPTION_STATE_BRANCH"
+          git show "refs/remotes/origin/$HUMAN_EXCEPTION_STATE_BRANCH:$HUMAN_EXCEPTION_STATE_PATH" > /tmp/human-exception-state.json
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import {validateSupervisorState} from './cerebro/governance/human-exception-supervisor.mjs';
+          validateSupervisorState(JSON.parse(fs.readFileSync('/tmp/human-exception-state.json','utf8')));
+          NODE
+      - name: Assert existing private communication layer is reused not replaced
+        run: |
+          set -euo pipefail
+          grep -F 'CEREBRO Human Communication V1' .github/workflows/cerebro-human-communication-v1.yml
+          grep -F 'HUMAN_EXCEPTION_STATE_BRANCH' .github/workflows/cerebro-human-communication-v1.yml
+          grep -F 'cerebro-human-communication-wake-v0' .github/workflows/cerebro-human-communication-v1.yml
+          grep -F 'CEREBRO_MAIL_USERNAME' .github/workflows/cerebro-human-communication-v1.yml
+          grep -F 'CEREBRO_MAIL_PASSWORD' .github/workflows/cerebro-human-communication-v1.yml
+          grep -F 'CEREBRO_OWNER_EMAIL' .github/workflows/cerebro-human-communication-v1.yml
+
+  ingest-canonical-human-exception:
+    if: github.event_name == 'repository_dispatch'
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout current CEREBRO source authority
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Load persistent human exception state
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/human-exception
+          git fetch --no-tags origin "+refs/heads/$HUMAN_EXCEPTION_STATE_BRANCH:refs/remotes/origin/$HUMAN_EXCEPTION_STATE_BRANCH"
+          git show "refs/remotes/origin/$HUMAN_EXCEPTION_STATE_BRANCH:$HUMAN_EXCEPTION_STATE_PATH" > artifacts/human-exception/state.before.json
+      - name: Build fail-closed sanitized supervisor input
+        id: input
+        run: |
+          set -euo pipefail
+          ACTION="$(jq -r '.action' "$GITHUB_EVENT_PATH")"
+          if [ "$ACTION" = 'cerebro-domain-evidence-v0' ] && [ "$(jq -r '.client_payload.human_required // empty' "$GITHUB_EVENT_PATH")" = '' ]; then
+            echo '[]' > artifacts/human-exception/input.json
+            echo 'has_candidate=false' >> "$GITHUB_OUTPUT"
+          else
+            jq '.client_payload' "$GITHUB_EVENT_PATH" > artifacts/human-exception/input.json
+            echo 'has_candidate=true' >> "$GITHUB_OUTPUT"
+          fi
+      - name: Normalize dedupe and queue only canonical HUMAN_REQUIRED
+        run: |
+          set -euo pipefail
+          node cerebro/governance/human-exception-supervisor.mjs \
+            --state artifacts/human-exception/state.before.json \
+            --input artifacts/human-exception/input.json \
+            --output artifacts/human-exception/state.after.json \
+            --report artifacts/human-exception/report.json
+          jq -e '.prod_authorized == false and .prod_write_authorized == false and .trading_access == false and .multicompany_continuation == false and .additional_cost_eur == 0' artifacts/human-exception/report.json >/dev/null
+          jq -e '.prod_authorized == false and .prod_write_authorized == false and .trading_access == false and .multicompany_continuation == false and .additional_cost_eur == 0' artifacts/human-exception/state.after.json >/dev/null
+      - name: Persist accepted or rejected canonical-ingress decisions without touching business data
+        id: persist
+        run: |
+          set -euo pipefail
+          ACCEPTED="$(jq -r '.accepted_total' artifacts/human-exception/report.json)"
+          REJECTED="$(jq -r '.rejected_total' artifacts/human-exception/report.json)"
+          if [ "$ACCEPTED" = '0' ] && [ "$REJECTED" = '0' ]; then
+            echo 'changed=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          cp artifacts/human-exception/state.after.json /tmp/human-exception-state.json
+          git fetch --no-tags origin "+refs/heads/$HUMAN_EXCEPTION_STATE_BRANCH:refs/remotes/origin/$HUMAN_EXCEPTION_STATE_BRANCH"
+          git checkout --detach "refs/remotes/origin/$HUMAN_EXCEPTION_STATE_BRANCH"
+          cp /tmp/human-exception-state.json "$HUMAN_EXCEPTION_STATE_PATH"
+          git config user.name 'cerebro-human-exception[bot]'
+          git config user.email 'cerebro-human-exception[bot]@users.noreply.github.com'
+          git add "$HUMAN_EXCEPTION_STATE_PATH"
+          if git diff --cached --quiet; then
+            echo 'changed=false' >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "chore(cerebro): advance canonical human exception state from run $GITHUB_RUN_ID"
+            git push origin "HEAD:refs/heads/$HUMAN_EXCEPTION_STATE_BRANCH"
+            echo 'changed=true' >> "$GITHUB_OUTPUT"
+          fi
+      - name: Wake existing Human Communication V1 only when a new canonical exception was accepted
+        if: steps.persist.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          ACCEPTED="$(jq -r '.accepted_total' artifacts/human-exception/report.json)"
+          if [ "$ACCEPTED" != '0' ]; then
+            jq -n '{event_type:"cerebro-human-communication-wake-v0",client_payload:{source:"HUMAN_EXCEPTION_SUPERVISOR_V0"}}' > /tmp/wake.json
+            gh api --method POST "repos/$GITHUB_REPOSITORY/dispatches" --input /tmp/wake.json
+          fi
+      - name: Upload supervisor evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-human-exception-supervisor-v0-${{ github.run_id }}
+          path: artifacts/human-exception/**
+          if-no-files-found: warn
+          retention-days: 30
