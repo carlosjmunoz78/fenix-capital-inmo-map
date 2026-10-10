@@ -23,13 +23,12 @@ jobs:
       VITE_FENIX_ENV: preprod
       VITE_SUPABASE_URL: https://hnqlnvakzaywtafeiybt.supabase.co
       VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_preprod_browser_gate_test_only
-      E2E_NO_WEBSERVER: '1'
-      E2E_BASE_URL: http://127.0.0.1:4173
+      PLAYWRIGHT_EXTERNAL_SERVER: '1'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
 
       - name: Install existing dependencies
@@ -52,8 +51,8 @@ jobs:
           cat /tmp/cerebro-owner-decision-vite.log
           exit 1
 
-      - name: Prove scanner GET cannot submit owner decision
-        run: npx playwright test tests/e2e/cerebro-owner-decision-safe-get.spec.ts
+      - name: Prove scanner GET and explicit-confirmation behavior
+        run: npx playwright test tests/e2e/cerebro-owner-decision-safe-get.spec.ts --project=desktop-chromium
 
       - name: Stop isolated Vite server
         if: always()
