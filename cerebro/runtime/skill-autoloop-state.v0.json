@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-10T12:58:39.719Z",
+  "updated_at": "2026-10-10T13:50:13.678Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -38,42 +38,7 @@
   ],
   "in_flight": {},
   "waiting_human": {},
-  "waiting_safe_handler": {
-    "github-wide-skills:1b9b2f741989b6cc4de2": {
-      "candidate_id": "github-wide-skills:1b9b2f741989b6cc4de2",
-      "name": "eval-driven-agent-dev",
-      "human_alias": "Eval Driven Agent Dev",
-      "wrapper_id": "skillwrap:5ebc651720897a67f747",
-      "domain": "agent-ai-orchestration",
-      "engine_bindings": [
-        "ORCH-001",
-        "ROUTE-001",
-        "FACT-001",
-        "RAG-001",
-        "LRN-001",
-        "ACTGW-001"
-      ],
-      "value_score": 88.88,
-      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
-      "evidence_refs": {
-        "upstream_full_name": "abhishekash/agent-skills",
-        "upstream_head_commit": "49c8b89ff3ea8977da8818855b8c870b57858410",
-        "manifest_sha256": "d0b03d03930789fe48037f25831eb1be554d35154ccebd6a008c422ac639c1dc",
-        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
-      },
-      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
-      "status": "WAITING_SAFE_HANDLER",
-      "source_discovery_run_id": 38046189444,
-      "checkpointed_at": "2026-10-10T10:48:59.010Z",
-      "human_required": null,
-      "external_skill_code_execution": false,
-      "customer_data_used": false,
-      "prod_write": false,
-      "trading_access": false,
-      "paid_fallback": false,
-      "additional_cost_eur": 0
-    }
-  },
+  "waiting_safe_handler": {},
   "completed": {
     "lobehub-skills:9a6e3fac20369220df43": {
       "candidate_id": "lobehub-skills:9a6e3fac20369220df43",
@@ -290,9 +255,55 @@
       },
       "updated_at": "2026-10-09T15:21:10.396Z",
       "prod_authorized": false
+    },
+    "github-wide-skills:1b9b2f741989b6cc4de2": {
+      "candidate_id": "github-wide-skills:1b9b2f741989b6cc4de2",
+      "name": "eval-driven-agent-dev",
+      "human_alias": "Eval Driven Agent Dev",
+      "wrapper_id": "skillwrap:5ebc651720897a67f747",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 88.88,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "abhishekash/agent-skills",
+        "upstream_head_commit": "49c8b89ff3ea8977da8818855b8c870b57858410",
+        "manifest_sha256": "d0b03d03930789fe48037f25831eb1be554d35154ccebd6a008c422ac639c1dc",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "SAFE_HANDLER_TERMINAL_HOLD",
+      "status": "TERMINAL_HOLD",
+      "source_discovery_run_id": 38046189444,
+      "checkpointed_at": "2026-10-10T10:48:59.010Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0,
+      "evidence": {
+        "handler_run_id": 38057243026,
+        "static_status": "STATIC_LAB_HOLD",
+        "external_skill_code_executed": false,
+        "customer_data_used": false,
+        "prod_write": false,
+        "trading_access": false,
+        "paid_fallback": false,
+        "additional_cost_eur": 0
+      },
+      "updated_at": "2026-10-10T13:50:13.678Z",
+      "prod_authorized": false
     }
   },
-  "last_action": "IDLE_NO_NEW_ELIGIBLE_CANDIDATE",
+  "last_action": "TERMINAL_HOLD_CONTINUE_OTHER_SAFE_WORK",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
