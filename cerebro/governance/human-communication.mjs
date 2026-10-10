@@ -133,5 +133,5 @@ export function evaluateStandingAuthorizationCandidate({history=[],request=null,
 export function buildDailyDigestEmail({date,summary={}}={}){
   const day=clean(date) || madridClockParts(new Date()).date;
   const sections={human:list(summary.human),published:list(summary.published),failures:list(summary.failures),seo_web:list(summary.seo_web),app_crm:list(summary.app_crm),automations:list(summary.automations),skills_engines:list(summary.skills_engines),training_learning:list(summary.training_learning),holds_human_required:list(summary.holds_human_required),cost:list(summary.cost),next_safe_work:list(summary.next_safe_work),missing_telemetry:list(summary.missing_telemetry)};
-  return Object.freeze({subject:`CEREBRO · NOVEDADES DEL DÍA · ${day}`,date:day,sections,send_even_without_material_changes:true});
+  return Object.freeze({subject:`CEREBRO · RESUMEN EJECUTIVO · ${day}`,date:day,sections,send_even_without_material_changes:true});
 }
