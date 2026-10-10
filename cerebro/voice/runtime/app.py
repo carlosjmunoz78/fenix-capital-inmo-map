@@ -4,7 +4,7 @@ LAB/PREPROD only. Fail-closed by design:
 - no anonymous synthesis;
 - no public voice upload/cloning route;
 - only bank entries already approved as LAB_READY/PREPROD_READY can synthesize;
-- reference audio lives outside Git;
+- reference audio and consent metadata live outside Git;
 - default bind should be loopback/private network.
 """
 
@@ -28,17 +28,22 @@ APP_DIR = Path(__file__).resolve().parent
 VOICE_DIR = APP_DIR.parent
 BANK_PATH = Path(os.getenv("CEREBRO_VOICE_BANK_PATH", str(VOICE_DIR / "voice-bank.v0.json"))).resolve()
 REF_ROOT = Path(os.getenv("CEREBRO_VOICE_REF_ROOT", str(VOICE_DIR / ".private-refs"))).resolve()
+PRIVATE_REGISTRY_PATH = Path(os.getenv("CEREBRO_VOICE_PRIVATE_REGISTRY", str(REF_ROOT / "registry.private.json"))).resolve()
 ENVIRONMENT = os.getenv("CEREBRO_ENVIRONMENT", "LAB").upper()
 BACKEND = os.getenv("CEREBRO_VOICE_BACKEND", "chatterbox_multilingual")
 DEVICE = os.getenv("CEREBRO_VOICE_DEVICE", "cpu")
 API_TOKEN = os.getenv("CEREBRO_VOICE_RUNTIME_TOKEN", "")
 MAX_TEXT_CHARS = int(os.getenv("CEREBRO_VOICE_MAX_TEXT_CHARS", "1400"))
 ALLOWED_READY_STATES = {"LAB_READY", "PREPROD_READY"}
+PRIVATE_OVERRIDE_FIELDS = {
+    "status", "company_id", "reference_ref", "reference_sha256", "provenance",
+    "consent_ref", "license", "model_version", "qa", "verified_at"
+}
 
 if ENVIRONMENT == "PROD":
     raise RuntimeError("VOICE-001 owned runtime V0 refuses PROD")
 
-app = FastAPI(title="CEREBRO VOICE-001 Owned Runtime", version="0.1.0", docs_url=None, redoc_url=None)
+app = FastAPI(title="CEREBRO VOICE-001 Owned Runtime", version="0.2.0", docs_url=None, redoc_url=None)
 _model = None
 _model_lock = Lock()
 
@@ -58,6 +63,19 @@ def _auth(authorization: str | None = Header(default=None)) -> None:
         raise HTTPException(status_code=401, detail="unauthorized")
 
 
+def _load_private_registry() -> dict[str, dict]:
+    if not PRIVATE_REGISTRY_PATH.is_file():
+        return {}
+    try:
+        raw = json.loads(PRIVATE_REGISTRY_PATH.read_text(encoding="utf-8"))
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail=f"private_registry_unavailable:{type(exc).__name__}") from exc
+    if raw.get("engine_id") != "VOICE-001" or raw.get("environment") == "PROD":
+        raise HTTPException(status_code=503, detail="private_registry_contract_invalid")
+    records = raw.get("voices", [])
+    return {str(item.get("voice_id")): item for item in records if item.get("voice_id")}
+
+
 def _load_bank() -> dict:
     try:
         data = json.loads(BANK_PATH.read_text(encoding="utf-8"))
@@ -65,6 +83,17 @@ def _load_bank() -> dict:
         raise HTTPException(status_code=503, detail=f"voice_bank_unavailable:{type(exc).__name__}") from exc
     if data.get("engine_id") != "VOICE-001" or data.get("locale") != "es-ES" or data.get("prod_enabled") is not False:
         raise HTTPException(status_code=503, detail="voice_bank_contract_invalid")
+
+    private = _load_private_registry()
+    merged = []
+    for public_voice in data.get("voices", []):
+        voice = dict(public_voice)
+        override = private.get(str(voice.get("voice_id")), {})
+        for field in PRIVATE_OVERRIDE_FIELDS:
+            if field in override:
+                voice[field] = override[field]
+        merged.append(voice)
+    data["voices"] = merged
     return data
 
 
@@ -127,6 +156,7 @@ def health() -> dict:
         "voice_slots": len(voices),
         "ready_voices": ready,
         "model_loaded": _model is not None,
+        "private_registry_present": PRIVATE_REGISTRY_PATH.is_file(),
         "public_clone_enabled": False,
         "paid_api_required": False,
     }
@@ -144,6 +174,7 @@ def voices() -> dict:
                 "presentation": voice.get("presentation"),
                 "profile": voice.get("profile"),
                 "status": voice.get("status"),
+                "company_id": voice.get("company_id"),
             }
             for voice in bank.get("voices", [])
         ],
@@ -158,6 +189,8 @@ def synthesize(payload: SynthesisRequest) -> Response:
 
     if voice.get("status") not in ALLOWED_READY_STATES:
         raise HTTPException(status_code=409, detail="voice_not_ready")
+    if voice.get("company_id") != payload.company_id:
+        raise HTTPException(status_code=403, detail="cross_company_voice_denied")
     if not voice.get("consent_ref") and not voice.get("license"):
         raise HTTPException(status_code=409, detail="consent_or_license_missing")
     reference_ref = voice.get("reference_ref")
