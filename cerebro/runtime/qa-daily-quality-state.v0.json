@@ -1,0 +1,41 @@
+{
+  "schema_version": "0.1.0",
+  "state_type": "CEREBRO_CONTINUOUS_HUMAN_QA_STATE_V0",
+  "company_id": "fenix",
+  "engine_id": "QA-001",
+  "environment": "CONTROL_PLANE",
+  "version": "0.1.0",
+  "status": "BOOTSTRAP_UNVERIFIED",
+  "updated_at": null,
+  "quality_score": null,
+  "previous_quality_score": null,
+  "quality_delta": null,
+  "tests": {"executed": 0, "passed": 0, "failed": 0},
+  "targets": {
+    "APP": {"status": "POR_AUDITAR", "executed": 0, "failed": 0, "passed": 0},
+    "WEB": {"status": "POR_AUDITAR", "executed": 0, "failed": 0, "passed": 0},
+    "PRODUCT": {"status": "POR_AUDITAR", "executed": 0, "failed": 0, "passed": 0}
+  },
+  "issues": [],
+  "issue_fingerprints": [],
+  "new_issue_fingerprints": [],
+  "resolved_issue_fingerprints": [],
+  "recurring_issue_fingerprints": [],
+  "new_issues": [],
+  "dispatch_queue": [],
+  "learned_regression_tests": 0,
+  "recurring_issues": 0,
+  "human_required": [],
+  "coverage": {
+    "prod": "READ_ONLY_PUBLIC_SURFACES",
+    "app_authenticated": "POR_AUDITAR_PREPROD_HARNESS",
+    "products": "POR_AUDITAR_CANONICAL_PREPROD_TARGET"
+  },
+  "safety": {
+    "prod_write": false,
+    "customer_data": false,
+    "trading": false,
+    "paid_fallback": false,
+    "additional_subscription_eur": 0
+  }
+}
