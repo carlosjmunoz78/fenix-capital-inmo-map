@@ -1,5 +1,5 @@
 {
-  "schema_version": "0.6.0",
+  "schema_version": "0.7.0",
   "engine_id": "VOICE-001",
   "environment": "LAB",
   "locale": "es-ES",
@@ -70,9 +70,19 @@
     },
     {
       "voice_id": "ESM10",
-      "label": "CEREBRO Native Spain-Spanish Reference-Grounded Assistant",
-      "owner_decision": "SEARCH_AND_ITERATE",
-      "status": "TARGET_DEFINED_NATIVE_ES_ES_REFERENCE_REQUIRED",
+      "label": "CEREBRO Original Synthetic Timbre Bridged to Dedicated Spain-Spanish",
+      "owner_decision": "OWNER_LISTENING_PENDING",
+      "status": "THREE_DEDICATED_ES_ES_CANDIDATES_GENERATED_NOT_ACCEPTED",
+      "pipeline": [
+        "Qwen3-TTS VoiceDesign original synthetic English timbre reference",
+        "ResembleAI Chatterbox dedicated Spanish-Spain single-language finetune"
+      ],
+      "accent_strategy": "synthetic timbre only; Spain-Spanish pronunciation delegated to dedicated es-ES model with low CFG",
+      "candidates": [
+        "ESM10-A_SMOOTH_BARITONE",
+        "ESM10-B_POLISHED_SYSTEM",
+        "ESM10-C_RESONANT_YOUNGER"
+      ],
       "target_age_impression": "mid_30s_to_early_40s",
       "target_traits": [
         "native Spain-Spanish",
@@ -94,7 +104,8 @@
     "Piper_es_ES_catalog_exhausted_for_target_search": true,
     "ESM08_CARLFM_younger_B_is_owner_accepted_but_not_JARVIS": true,
     "Qwen3_VoiceDesign_without_native_reference_failed_es_ES_accent_gate": true,
-    "next_search_requires_native_es_ES_reference_grounding": true,
+    "synthetic_timbre_to_dedicated_es_ES_bridge_succeeded_technically": true,
+    "ESM10_owner_accent_timbre_listening_required": true,
     "preserve_owner_accepted_candidates": true
   },
   "identity_policy": {
