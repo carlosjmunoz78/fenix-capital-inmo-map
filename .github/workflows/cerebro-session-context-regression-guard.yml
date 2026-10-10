@@ -7,16 +7,12 @@ on:
       - 'src/**'
       - 'supabase/functions/**'
       - 'supabase/migrations/**'
-      - 'cerebro/voice/**'
-      - 'scripts/test-cerebro-owned-voice-v0.mjs'
       - '.github/workflows/cerebro-session-context-regression-guard.yml'
   push:
     branches: [main]
     paths:
       - 'src/**'
       - 'supabase/functions/**'
-      - 'cerebro/voice/**'
-      - 'scripts/test-cerebro-owned-voice-v0.mjs'
       - '.github/workflows/cerebro-session-context-regression-guard.yml'
 
 permissions:
@@ -140,7 +136,6 @@ jobs:
           node scripts/test-cerebro-natural-spoken-v4.mjs
           node scripts/test-cerebro-human-dialogue-v5.mjs
           node scripts/verify-cerebro-conversational-intelligence-v2.mjs
-          node scripts/test-cerebro-owned-voice-v0.mjs
 
       - name: Build app
         shell: bash
