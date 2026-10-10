@@ -80,8 +80,8 @@ jobs:
         run: |
           set +e
           npx playwright test tests/cerebro-human-readonly.spec.ts \
-            --project='Desktop Chrome' \
-            --project='Mobile Chrome' \
+            --project='desktop-chromium' \
+            --project='mobile-chromium' \
             --reporter=json \
             > artifacts/qa/playwright-report.json \
             2> artifacts/qa/playwright-stderr.log
