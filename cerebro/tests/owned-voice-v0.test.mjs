@@ -1,11 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
 
-const bank=JSON.parse(fs.readFileSync('cerebro/voice/voice-bank.v0.json','utf8'));
-const runtime=fs.readFileSync('cerebro/voice/runtime/app.py','utf8');
-const register=fs.readFileSync('cerebro/voice/runtime/register_voice_reference.py','utf8');
-const policy=fs.readFileSync('cerebro/voice/VOICE_CLONING_CONSENT_POLICY_V0.md','utf8');
+const TEST_DIR=path.dirname(fileURLToPath(import.meta.url));
+const CEREBRO_ROOT=path.resolve(TEST_DIR,'..');
+const read=(relative)=>fs.readFileSync(path.join(CEREBRO_ROOT,relative),'utf8');
+
+const bank=JSON.parse(read('voice/voice-bank.v0.json'));
+const runtime=read('voice/runtime/app.py');
+const register=read('voice/runtime/register_voice_reference.py');
+const policy=read('voice/VOICE_CLONING_CONSENT_POLICY_V0.md');
 
 test('VOICE-001 owns exactly 20 controlled es-ES slots and fabricates no references',()=>{
  assert.equal(bank.engine_id,'VOICE-001');
