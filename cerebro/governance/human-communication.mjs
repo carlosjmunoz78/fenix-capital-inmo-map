@@ -7,7 +7,8 @@ const EXPLICIT_ALIASES = Object.freeze({
   'supabase-postgres-best-practices': 'Buenas Prácticas Supabase',
   'obsidian': 'Memoria Obsidian',
   'kairos-lite': 'Asistente de Ingeniería Kairos',
-  'reddit-content-ops': 'Operador de Contenido Reddit'
+  'reddit-content-ops': 'Operador de Contenido Reddit',
+  'ai-behavior-trees-utility-ai': 'Árboles de Decisión para Agentes'
 });
 
 const COMMAND_RE = /^(AUTORIZO|NO AUTORIZO|EXPL[IÍ]CAME|APARCO)\s+(APR-\d{8}-[A-F0-9]{8})$/iu;
@@ -130,8 +131,44 @@ export function evaluateStandingAuthorizationCandidate({history=[],request=null,
   return Object.freeze({eligible:true,reason:'PROPOSE_STANDING_AUTHORIZATION_ONCE',scope_fingerprint:scope,approvals:approvals.length,requires_explicit_owner_command:true});
 }
 
+function cleanExecutiveLine(value){
+  return clean(value)
+    .replace(/^RESUMEN DE 20 SEGUNDOS:\s*/i,'')
+    .replace(/\bejecuciónes\b/gi,'ejecuciones')
+    .replace('CEREBRO debe diagnosticarla;','CEREBRO las mantiene en diagnóstico;');
+}
+
+function humanizeSkillCardHeading(card){
+  const value=clean(card); if(!value) return value;
+  const [first,...rest]=value.split('\n');
+  const explicit=EXPLICIT_ALIASES[first.trim().toLowerCase()];
+  return [explicit||first,...rest].join('\n');
+}
+
+function ownerRelevantSkillCards(value){
+  const cards=list(value).map(humanizeSkillCardHeading);
+  return cards.filter(card=>{
+    const parked=/Estado:\s*⏸️\s*APARCADA/i.test(card);
+    const needsOwner=/¿Necesitas hacer algo\?:\s*SÍ/i.test(card)||/NECESITA TU DECISIÓN/i.test(card);
+    return !parked||needsOwner;
+  }).slice(0,5);
+}
+
 export function buildDailyDigestEmail({date,summary={}}={}){
   const day=clean(date) || madridClockParts(new Date()).date;
-  const sections={human:list(summary.human),published:list(summary.published),failures:list(summary.failures),seo_web:list(summary.seo_web),app_crm:list(summary.app_crm),automations:list(summary.automations),skills_engines:list(summary.skills_engines),training_learning:list(summary.training_learning),holds_human_required:list(summary.holds_human_required),cost:list(summary.cost),next_safe_work:list(summary.next_safe_work),missing_telemetry:list(summary.missing_telemetry)};
+  const sections={
+    human:list(summary.human).map(cleanExecutiveLine),
+    published:list(summary.published).map(cleanExecutiveLine),
+    failures:list(summary.failures).map(cleanExecutiveLine),
+    seo_web:list(summary.seo_web).map(cleanExecutiveLine),
+    app_crm:list(summary.app_crm).map(cleanExecutiveLine),
+    automations:list(summary.automations).map(cleanExecutiveLine),
+    skills_engines:ownerRelevantSkillCards(summary.skills_engines),
+    training_learning:list(summary.training_learning).map(cleanExecutiveLine),
+    holds_human_required:list(summary.holds_human_required).map(cleanExecutiveLine),
+    cost:list(summary.cost).map(cleanExecutiveLine),
+    next_safe_work:list(summary.next_safe_work).map(cleanExecutiveLine),
+    missing_telemetry:list(summary.missing_telemetry).map(cleanExecutiveLine)
+  };
   return Object.freeze({subject:`CEREBRO · RESUMEN EJECUTIVO · ${day}`,date:day,sections,send_even_without_material_changes:true});
 }

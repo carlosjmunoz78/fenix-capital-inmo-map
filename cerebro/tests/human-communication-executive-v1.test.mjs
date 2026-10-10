@@ -89,5 +89,29 @@ test('automatic digest keeps the owner-first executive structure',()=>{
   assert.match(prepared.digestMail.text,/SKILLS QUE MERECEN TU ATENCIÓN/);
   assert.match(prepared.digestMail.text,/QUÉ HARÁ CEREBRO AHORA/);
   assert.match(prepared.digestMail.text,/Carlos: NO necesitas hacer nada/);
+  assert.doesNotMatch(prepared.digestMail.text,/RESUMEN DE 20 SEGUNDOS\n- RESUMEN DE 20 SEGUNDOS:/);
   assert.doesNotMatch(prepared.digestMail.text,/[a-f0-9]{40}/i);
+});
+
+test('parked low-value skills are summarized instead of flooding the main body',()=>{
+  const digest=buildDailyDigestEmail({date:'2026-10-10',summary:{
+    skills_engines:[
+      'reddit-content-ops\nEstado: ⏸️ APARCADA\n¿Necesitas hacer algo?: NO.',
+      'Memoria Obsidian\nEstado: 🟢 TERMINADA EN MODO LECTURA\n¿Necesitas hacer algo?: NO.'
+    ],
+    holds_human_required:['1 habilidad está aparcada; no ocupa el correo salvo cambio relevante.']
+  }});
+  assert.equal(digest.sections.skills_engines.length,1);
+  assert.match(digest.sections.skills_engines[0],/Memoria Obsidian/);
+  assert.doesNotMatch(digest.sections.skills_engines.join('\n'),/reddit-content-ops/);
+  assert.match(digest.sections.holds_human_required[0],/aparcada/);
+});
+
+test('executive cleanup fixes known owner-facing wording without changing underlying evidence',()=>{
+  const digest=buildDailyDigestEmail({date:'2026-10-10',summary:{
+    failures:['Hay 18 ejecuciónes con fallo o cancelación. CEREBRO debe diagnosticarla; si requiere tu intervención aparecerá expresamente.']
+  }});
+  assert.match(digest.sections.failures[0],/18 ejecuciones/);
+  assert.match(digest.sections.failures[0],/las mantiene en diagnóstico/);
+  assert.doesNotMatch(digest.sections.failures[0],/ejecuciónes/);
 });
