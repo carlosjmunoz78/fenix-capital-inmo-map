@@ -1,0 +1,92 @@
+name: CEREBRO VOICE-001 Chatterbox V3 Model Smoke
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'cerebro/voice/runtime/app.py'
+      - 'cerebro/voice/runtime/backend_model_smoke.py'
+      - 'cerebro/tests/voice-v3-backend-v0.test.mjs'
+      - '.github/workflows/cerebro-voice-v3-model-smoke.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'cerebro/voice/runtime/app.py'
+      - 'cerebro/voice/runtime/backend_model_smoke.py'
+      - 'cerebro/tests/voice-v3-backend-v0.test.mjs'
+      - '.github/workflows/cerebro-voice-v3-model-smoke.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  v3-model-smoke:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Static V3 safety contract
+        shell: pwsh
+        run: |
+          node --test cerebro/tests/voice-v3-backend-v0.test.mjs
+          if ($LASTEXITCODE -ne 0) { throw 'V3 static contract failed' }
+          python -m py_compile cerebro/voice/runtime/app.py cerebro/voice/runtime/backend_model_smoke.py
+          if ($LASTEXITCODE -ne 0) { throw 'V3 Python parse failed' }
+
+      - name: Install exact VOICE-001 Windows LAB environment
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          & .\cerebro\voice\runtime\windows\Install-VoiceLab.ps1 -RepoRoot $PWD.Path
+
+      - name: Load V3 weights and synthesize Spanish model smoke
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $python = Join-Path $env:LOCALAPPDATA 'CEREBRO\voice-runtime\.venv\Scripts\python.exe'
+          $evidenceRoot = Join-Path $env:LOCALAPPDATA 'CEREBRO\voice-evidence\v3-model-smoke'
+          New-Item -ItemType Directory -Force -Path $evidenceRoot | Out-Null
+          $env:CEREBRO_ENVIRONMENT = 'LAB'
+          $env:CEREBRO_VOICE_DEVICE = 'cpu'
+          $env:CEREBRO_VOICE_T3_MODEL = 'v3'
+          $env:HF_HOME = Join-Path $env:LOCALAPPDATA 'CEREBRO\hf-cache'
+          $evidence = Join-Path $evidenceRoot 'model-smoke.json'
+          $wav = Join-Path $evidenceRoot 'model-smoke.wav'
+          & $python .\cerebro\voice\runtime\backend_model_smoke.py --output $evidence --keep-wav $wav
+          if ($LASTEXITCODE -ne 0) { throw 'Chatterbox V3 model smoke failed' }
+
+      - name: Verify model-smoke evidence boundaries
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $evidence = Join-Path $env:LOCALAPPDATA 'CEREBRO\voice-evidence\v3-model-smoke\model-smoke.json'
+          if (-not (Test-Path $evidence)) { throw 'model-smoke.json missing' }
+          $data = Get-Content -Raw $evidence | ConvertFrom-Json
+          if ($data.status -ne 'GREEN_MODEL_SMOKE_ONLY') { throw "unexpected status: $($data.status)" }
+          if ($data.t3_model -ne 'v3') { throw 'V3 was not the loaded candidate' }
+          if ($data.language_id -ne 'es') { throw 'Spanish language id missing' }
+          if ($data.audio_seconds -le 0.1) { throw 'generated waveform is too short' }
+          if ($data.wav_bytes -le 1024) { throw 'generated waveform is too small' }
+          if ($data.human_reference_used -ne $false) { throw 'human reference unexpectedly used' }
+          if ($data.authority.automatic_promotion -ne $false) { throw 'automatic promotion detected' }
+          if ($data.authority.prod_enabled -ne $false) { throw 'PROD authority detected' }
+          Write-Host "GREEN V3 model smoke: load=$($data.model_load_ms)ms generation=$($data.generation_ms_total)ms audio=$($data.audio_seconds)s"
+
+      - name: Record evidence boundary
+        if: always()
+        shell: pwsh
+        run: |
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value 'VOICE-001 V3 smoke is backend evidence only. It does not approve any human voice, accent, clone, or PROD binding.'
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value 'Browser speechSynthesis remains the rollback/fallback path.'
