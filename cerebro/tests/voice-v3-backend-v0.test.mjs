@@ -20,9 +20,11 @@ test('VOICE-001 defaults Chatterbox multilingual to explicit V3 with bounded rol
   assert.match(app,/"X-Cerebro-T3-Model": T3_MODEL/);
 });
 
-test('V3-capable external dependency is pinned to the reviewed official upstream commit',()=>{
+test('V3 external sources are pinned to reviewed official upstream commits',()=>{
+  assert.match(requirements,/resemble-perth @ git\+https:\/\/github\.com\/resemble-ai\/Perth\.git@ff1c8ac55a976971245cdd53c18d6131ca00d993/);
   assert.match(requirements,/chatterbox-tts @ git\+https:\/\/github\.com\/resemble-ai\/chatterbox\.git@5de7a54aa4e5e2baadb0182dde554908b48b85c2/);
   assert.doesNotMatch(requirements,/^chatterbox-tts\s*$/m);
+  assert.doesNotMatch(requirements,/Perth\.git@master\s*$/m);
 });
 
 test('backend smoke proves only model load and Spanish waveform, never voice acceptance',()=>{
