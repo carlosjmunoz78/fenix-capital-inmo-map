@@ -1,0 +1,77 @@
+name: CEREBRO VOICE-001 Physical LAB Automation Gate
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'cerebro/voice/runtime/**'
+      - 'cerebro/tests/voice-physical-lab-v0.test.mjs'
+      - '.github/workflows/cerebro-voice-physical-lab-preprod.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'cerebro/voice/runtime/**'
+      - 'cerebro/tests/voice-physical-lab-v0.test.mjs'
+      - '.github/workflows/cerebro-voice-physical-lab-preprod.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  physical-lab-automation-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Test physical LAB contract
+        run: node --test cerebro/tests/voice-physical-lab-v0.test.mjs
+
+      - name: Parse Python automation without model download
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            cerebro/voice/runtime/physical_lab_probe.py \
+            cerebro/voice/runtime/physical_lab_benchmark.py \
+            cerebro/voice/runtime/register_voice_reference.py \
+            cerebro/voice/runtime/app.py
+
+      - name: Parse PowerShell automation
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          foreach ($file in @(
+            'cerebro/voice/runtime/windows/Install-VoiceLab.ps1',
+            'cerebro/voice/runtime/windows/Start-VoiceLab.ps1',
+            'cerebro/voice/runtime/windows/Register-And-Benchmark-Voice.ps1'
+          )) {
+            [void][scriptblock]::Create((Get-Content -Raw $file))
+          }
+
+      - name: Assert authority boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -F 'MEASURED_NOT_ACCEPTED' cerebro/voice/runtime/physical_lab_benchmark.py >/dev/null
+          grep -F 'automatic_promotion": False' cerebro/voice/runtime/physical_lab_benchmark.py >/dev/null
+          grep -F -- '--host 127.0.0.1' cerebro/voice/runtime/windows/Start-VoiceLab.ps1 >/dev/null
+          grep -F 'MODEL_NOT_PHYSICALLY_BENCHMARKED' cerebro/voice/runtime/PHYSICAL_LAB_V0.md >/dev/null
+          ! grep -R -n -E 'CEREBRO_ENVIRONMENT[[:space:]]*=[[:space:]]*["'"']PROD|--host[[:space:]]+0\.0\.0\.0' cerebro/voice/runtime/windows cerebro/voice/runtime/physical_lab_*.py
+
+      - name: Record boundary
+        shell: bash
+        run: |
+          echo 'VOICE-001 physical LAB automation is code-gated only; no model/reference/voice quality is claimed by CI.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'PROD false; browser TTS fallback preserved; physical reference + listening QA remain mandatory.' >> "$GITHUB_STEP_SUMMARY"
