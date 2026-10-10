@@ -1,11 +1,11 @@
 {
-  "schema_version": "0.4.0",
+  "schema_version": "0.5.0",
   "engine_id": "VOICE-001",
   "environment": "LAB",
   "locale": "es-ES",
   "owner_selection": {
     "keep_all": ["ESM05", "ESM06", "ESM07", "ESM08-CARLFM"],
-    "primary_direction": "ESM09",
+    "primary_direction": "ESM10",
     "accepted_existing_candidates": ["ESM05", "ESM06", "ESM07"],
     "salvageable_reference_candidates": ["ESM08-CARLFM"],
     "jarvis_style_target_still_open": true
@@ -49,15 +49,29 @@
       "status": "OWNER_REJECTED_TIMBRE"
     },
     {
-      "voice_id": "ESM09",
-      "label": "CEREBRO Original Younger Cinematic AI Assistant",
+      "voice_id": "ESM09-A",
+      "owner_decision": "REJECT_FOR_TARGET",
+      "status": "OWNER_REJECTED_LATAM_ACCENT"
+    },
+    {
+      "voice_id": "ESM09-B",
+      "owner_decision": "REJECT_FOR_TARGET",
+      "status": "OWNER_REJECTED_LATAM_ACCENT"
+    },
+    {
+      "voice_id": "ESM09-C",
+      "owner_decision": "REJECT_FOR_TARGET",
+      "status": "OWNER_REJECTED_LATAM_ACCENT_REDUCED_BUT_STILL_PRESENT"
+    },
+    {
+      "voice_id": "ESM10",
+      "label": "CEREBRO Native Spain-Spanish Reference-Grounded Assistant",
       "owner_decision": "SEARCH_AND_ITERATE",
-      "status": "QWEN3_VOICE_DESIGN_ES_ES_TRIAL_PREPARED",
+      "status": "TARGET_DEFINED_NATIVE_ES_ES_REFERENCE_REQUIRED",
       "target_age_impression": "mid_30s_to_early_40s",
       "target_traits": [
         "native Spain-Spanish",
         "male",
-        "younger-than-ESM08-CARLFM",
         "low-mid baritone",
         "smooth",
         "calm",
@@ -74,7 +88,8 @@
     "same_base_voice_pitch_or_pace_edits_are_insufficient": true,
     "Piper_es_ES_catalog_exhausted_for_target_search": true,
     "ESM08_CARLFM_is_closest_Piper_timbre_but_age_impression_is_too_old": true,
-    "next_search_must_change_synthesis_family_and_support_voice_design": true,
+    "Qwen3_VoiceDesign_without_native_reference_failed_es_ES_accent_gate": true,
+    "next_search_requires_native_es_ES_reference_grounding": true,
     "preserve_ESM05_ESM06_ESM07_and_ESM08_CARLFM": true
   },
   "identity_policy": {
@@ -82,7 +97,7 @@
     "actor_clone": false,
     "character_clone": false,
     "movie_audio_reference": false,
-    "identifiable_person_reference": false
+    "unauthorized_identifiable_person_reference": false
   },
   "authority": {
     "automatic_promotion": false,
