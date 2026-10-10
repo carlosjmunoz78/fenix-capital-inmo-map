@@ -1,0 +1,74 @@
+name: CEREBRO VOICE-001 Reference Capture PREPROD Gate
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'cerebro/voice/capture/**'
+      - 'cerebro/voice/runtime/validate_reference_audio.py'
+      - 'cerebro/voice/runtime/windows/Open-VoiceCapture.ps1'
+      - 'cerebro/voice/runtime/windows/Register-And-Benchmark-Voice.ps1'
+      - 'cerebro/tests/voice-reference-capture-v0.test.mjs'
+      - '.github/workflows/cerebro-voice-reference-capture-preprod.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'cerebro/voice/capture/**'
+      - 'cerebro/voice/runtime/validate_reference_audio.py'
+      - 'cerebro/voice/runtime/windows/Open-VoiceCapture.ps1'
+      - 'cerebro/voice/runtime/windows/Register-And-Benchmark-Voice.ps1'
+      - 'cerebro/tests/voice-reference-capture-v0.test.mjs'
+      - '.github/workflows/cerebro-voice-reference-capture-preprod.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  reference-capture-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Contract tests
+        run: node --test cerebro/tests/voice-reference-capture-v0.test.mjs
+      - name: Parse Python and PowerShell
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          python -m py_compile cerebro/voice/runtime/validate_reference_audio.py
+          foreach ($file in @(
+            'cerebro/voice/runtime/windows/Open-VoiceCapture.ps1',
+            'cerebro/voice/runtime/windows/Register-And-Benchmark-Voice.ps1'
+          )) { [void][scriptblock]::Create((Get-Content -Raw $file)) }
+      - name: Exercise deterministic WAV validator
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import math, struct, wave
+          sr=24000; seconds=45; amp=int(32767*0.08)
+          with wave.open('/tmp/voice-ref.wav','wb') as w:
+              w.setnchannels(1); w.setsampwidth(2); w.setframerate(sr)
+              for i in range(sr*seconds):
+                  x=int(amp*math.sin(2*math.pi*220*i/sr))
+                  w.writeframesraw(struct.pack('<h',x))
+          PY
+          python cerebro/voice/runtime/validate_reference_audio.py /tmp/voice-ref.wav --output /tmp/reference-validation.json
+          grep -F 'TECHNICALLY_ACCEPTABLE_FOR_LAB_REFERENCE' /tmp/reference-validation.json >/dev/null
+          grep -F '"automatic_promotion": false' /tmp/reference-validation.json >/dev/null
+      - name: Assert authority boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -R -n -E '0\.0\.0\.0|public_upload[[:space:]]*:[[:space:]]*true|automatic_promotion[[:space:]]*:[[:space:]]*true' cerebro/voice/capture cerebro/voice/runtime/windows/Open-VoiceCapture.ps1 cerebro/voice/runtime/validate_reference_audio.py
+          grep -F 'MEASURED_NOT_ACCEPTED' cerebro/voice/runtime/windows/Register-And-Benchmark-Voice.ps1 >/dev/null
+      - name: Record boundary
+        run: |
+          echo 'VOICE-001 capture is local-only; this gate does not create, accept or promote any human voice.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Physical microphone capture, consent/provenance and listening QA remain required for a real bank slot.' >> "$GITHUB_STEP_SUMMARY"
