@@ -161,8 +161,6 @@ jobs:
 
       - name: Build compatibility envelope for the unchanged safe handler
         if: steps.active.outputs.has_candidate == 'true' && steps.active.outputs.p0_delegated != 'true'
-        env:
-          CANDIDATE_ID: ${{ fromJson(steps.active.outputs.priority == 'P1' && '"p1"' || '"p2"') }}
         run: |
           set -euo pipefail
           PRIORITY="$(jq -r '.priority|ascii_downcase' artifacts/ladder/active-priority.json)"
