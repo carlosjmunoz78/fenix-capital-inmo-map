@@ -1,0 +1,48 @@
+{
+  "schema_version": "1.0",
+  "engine_id": "MOTION-001",
+  "company_id": "*",
+  "environment": "LAB",
+  "version": "v1",
+  "status": "OWNER_DIRECTION_ACCEPTED_ASSET_SET_REGISTERED_NOT_LIVE_CONNECTED",
+  "generated_at": "2026-10-10",
+  "storage_policy": {
+    "git_binary_commit": false,
+    "reason": "Keep large generated raster assets out of source Git; register immutable SHA-256 evidence and promote binaries to dedicated object/artifact storage later.",
+    "current_binary_state": "CONVERSATION_ARTIFACTS_EXTERNAL_TO_REPO",
+    "promotion_requires": ["stable_asset_storage", "integrity_recheck", "owner_acceptance", "PREPROD"]
+  },
+  "visual_identity": {
+    "brain_outline": "EMERGENT_FROM_NEURON_DENSITY_AND_NEGATIVE_SPACE",
+    "hard_outer_contour": false,
+    "literal_anatomical_surface": false,
+    "primary_palette": ["deep_navy_black", "electric_blue", "cyan", "white"],
+    "style": ["premium", "cinematic", "neural_swarm", "volumetric", "AI_presence"]
+  },
+  "assets": [
+    {"role":"SEED_CANONICAL_V0","file":"a_high_resolution_futuristic_sci_fi_abstract_scene_1.png","sha256":"b2d19d311fc81d3415aaa7a949cfc543da78c7431c8e1e747dc0d8236e22fee1","bytes":2608266,"owner_status":"KEEP_CANONICAL_DIRECTION"},
+    {"role":"MASTER_CANONICAL_V1","file":"a_high_resolution_cinematic_ultra_detailed_sci_f_1.png","sha256":"33cd80dcfeccffb6b00bb31c8e751670f9dc0c1dd91945f382e1037b698e1462","bytes":2594050,"owner_status":"KEEP"},
+    {"role":"VIEW_FRONT","file":"a_highly_detailed_futuristic_sci_fi_digital_illu_2_batch_1.png","sha256":"e31f176bc970db567c103a635cd67563677bea8abb7673b84a6ffd6490c3a32c","bytes":2615463,"owner_status":"KEEP_FAMILY"},
+    {"role":"VIEW_LEFT_LATERAL","file":"a_high_resolution_sci_fi_digital_art_cgi_style_i_3_batch_2.png","sha256":"5f7462511e2b3bfa4a8f27a71aafd472f16a5581a969718fad690a0f0b5c3302","bytes":2571860,"owner_status":"KEEP_FAMILY"},
+    {"role":"VIEW_RIGHT_LATERAL","file":"a_high_resolution_futuristic_sci_fi_digital_illu_4_batch_3.png","sha256":"71677e06278badb7b1d13d59d689aed907ac5caddb464cbd138b2d973d4f394a","bytes":2516945,"owner_status":"KEEP_FAMILY"},
+    {"role":"VIEW_REAR_3Q","file":"wide_cinematic_high_detail_sci_fi_digital_illust_5_batch_4.png","sha256":"36d88d8763cd6774f3b0536da0398312dfbf465b7f26304e120a942251811f06","bytes":2593035,"owner_status":"KEEP_FAMILY"},
+    {"role":"VIEW_TOP","file":"a_high_resolution_ultra_detailed_sci_fi_tech_illu_6_batch_5.png","sha256":"19755e0788b138cc6a4c2afef5920c961276ea92e99ad7be25bb820cda8b63e7","bytes":2654433,"owner_status":"KEEP_FAMILY"},
+    {"role":"STATE_IDLE_V0","file":"a_high_resolution_futuristic_sci_fi_digital_illu_7_batch_6.png","sha256":"28841551dfad31df0dc46542daad1836f17ada9ec3fda6546d4ec4cb74b323df","bytes":2451761,"owner_status":"KEEP_FAMILY"},
+    {"role":"STATE_LISTENING_V0","file":"a_high_tech_futuristic_sci_fi_digital_illustrati_8_batch_7.png","sha256":"6595f76a6dc705ce2f70807cdecf0d18715611903a1910adaf1b19fe5bdcb4f1","bytes":2562918,"owner_status":"KEEP_FAMILY"},
+    {"role":"STATE_PROCESSING_V0","file":"a_high_resolution_futuristic_cinematic_digital_i_9_batch_8.png","sha256":"c04a449cdfe00da8127046e0cc1a6376f319acdd5443c0673023c4ea8daed48f","bytes":2606329,"owner_status":"KEEP_FAMILY"},
+    {"role":"STATE_SPEAKING_V0","file":"a_high_resolution_futuristic_sci_fi_digital_illus_10_batch_9.png","sha256":"74ded3f24098f1a708d352d864263550240dd0f49811ece3396931581ae6f236","bytes":2580214,"owner_status":"KEEP_FAMILY"},
+    {"role":"STATE_IDLE_HERO_V1","file":"a_highly_detailed_glowing_sci_fi_digital_illustra_1_batch_1.png","sha256":"0cef4a7c28425b99eb7bfff18d0a99394e3d344cd6dac82d1900f96cf5a2a8a9","bytes":2612157,"owner_status":"KEEP_FAMILY"},
+    {"role":"STATE_PROCESSING_V1","file":"a_high_detail_cinematic_digital_sci_fi_tech_illus_2_batch_2.png","sha256":"3f93f05b265efced3eddf3ddf64c56782eb9949c58bff1d848dee9b0ab314a2f","bytes":2479537,"owner_status":"KEEP_FAMILY"},
+    {"role":"INSIDE_ENTRY_V1","file":"wide_cinematic_ultra_detailed_sci_fi_abstract_3_batch_3.png","sha256":"256df383b2c701e2ccd3afc2336edb6c0ff88044f19acd6c1a8d5d5247435cea","bytes":2765342,"owner_status":"KEEP_FAMILY"},
+    {"role":"ATLAS_FIVE_CLUSTER_V1","file":"a_high_detail_futuristic_sci_fi_digital_illustra_4_batch_4.png","sha256":"64da6631a1d055c19039c75ec14a74dcc1ed8cffc92ac225a277a49058d41680","bytes":2655987,"owner_status":"KEEP_FAMILY"},
+    {"role":"ORCHESTRATION_MULTI_ENGINE_V1","file":"a_high_tech_sci_fi_neon_glowing_digital_illustra_5_batch_5.png","sha256":"307afc742b49a5c24fab10dd9c083cb57cf4c29d69a3834acbefb0852665697f","bytes":2637970,"owner_status":"KEEP_FAMILY"},
+    {"role":"OPS_ATLAS_TOP_V1","file":"a_highly_detailed_futuristic_sci_fi_digital_illu_6_batch_6.png","sha256":"1d290b152791a79a34a88dc20ebc01202af583eadaf1f6225362793e8ae83304","bytes":2673819,"owner_status":"KEEP_FAMILY"},
+    {"role":"STATE_HUMAN_REQUIRED_V1","file":"ultra_detailed_high_resolution_sci_fi_neon_digit_7_batch_7.png","sha256":"429845e9a28820e8e504c3843a70227e7b79e5537c9a3b59f24e13facde72917","bytes":2568467,"owner_status":"KEEP_FAMILY"}
+  ],
+  "live_authority": {
+    "prod_enabled": false,
+    "prod_write_authorized": false,
+    "automatic_promotion": false,
+    "trading_access": false
+  }
+}
