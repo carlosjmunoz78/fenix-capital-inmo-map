@@ -1,7 +1,7 @@
 # CEREBRO VISUAL SYSTEM V1
 
 Status: ACTIVE_DESIGN / USABLE_BY_PHASE / NOT_LIVE_CONNECTED / PROD_FALSE
-Date: 2026-10-10
+Date: 2026-10-11
 Owner direction: accepted
 Primary engine: MOTION-001
 Related engines: HCI-001, VOICE-001, VOICEUI-001, FACT-001, Supervisor/Tribunal surfaces
@@ -37,17 +37,25 @@ Immediate use:
 
 Status: ASSET FAMILY AVAILABLE / BINARY STORAGE PROMOTION PENDING.
 
-### Phase 1 · State-switched visual presence
+### Phase 1 · Living visual presence
 
-Deliverables:
-- deterministic mapping from MOTION-001 states to approved visual assets
-- crossfade / low-cost transition rules
-- no 3D requirement
-- prefers-reduced-motion hard fallback
+Phase 1 is now an iterative chain, not just image switching:
+
+- V1: deterministic state-switched imagery — usable OLD/fallback.
+- V2: procedural neural presence — usable prototype.
+- V2.1: connected neural areas — usable prototype.
+- V2.2: causal neural network — current candidate for owner visual review.
+
+V2.2 introduces curved filaments, causal cluster activation, inter-area neural highways, foreground/background depth attenuation, node hierarchy (hub / secondary / micro), curved multi-hop pulses and afterglow.
 
 Immediate use:
-- real state-aware visual indicator in PREPROD without waiting for 3D
-- IDLE, LISTENING, PROCESSING, SPEAKING, HUMAN_REQUIRED, DEGRADED, ERROR
+- real-time visual presence in LAB/PREPROD;
+- deterministic representation of IDLE, LISTENING, PROCESSING, SPEAKING, HUMAN_REQUIRED, DEGRADED and ERROR;
+- embeddable event-driven visual component without waiting for true 3D.
+
+Status: V2.2 CODE/ARTIFACT READY / OWNER_VISUAL_ACCEPTANCE_PENDING / NOT_LIVE_CONNECTED / PROD_FALSE.
+
+Phase 1 is NOT final until owner accepts a candidate, target-device performance is checked, reduced-motion is physically validated and OLD vs NEW preference is documented.
 
 ### Phase 2 · CEREBRO Inside / navigable atlas
 
@@ -228,10 +236,8 @@ Atlas regions are logical. Exact engine placement is versioned and may evolve wi
 ### Exception overlays
 - amber/gold: HUMAN_REQUIRED / attention / gated decision
 - red: reserved for confirmed ERROR / security critical only; never routine alert decoration
-- violet: learning/training/replay optional family accent
-- green: accepted completion/recovery optional accent
 
-Colors are semantic aids, not business authority.
+No rainbow engine coding. Normal success/operation remains inside blue/cyan/white.
 
 ### Intensity grammar
 - 0–20%: dormant / background
@@ -244,20 +250,22 @@ Colors are semantic aids, not business authority.
 
 IDLE:
 - slow breathing
-- tiny random micro-pulses
+- tiny local micro-pulses
 - stable silhouette
 
 LISTENING:
 - directional receptive pulses
 - limited regional activation
+- causal convergence toward CORE
 
 PROCESSING:
-- several concurrent regions
-- route pulses
+- several regions activate in a causal sequence
+- visible route propagation between clusters
 - no chaotic flashing
 
 SPEAKING:
 - output-oriented rhythmic pulses
+- output-side regional propagation
 - voice envelope may modulate intensity after VOICE binding
 
 HUMAN_REQUIRED:
@@ -270,7 +278,7 @@ DEGRADED:
 - stable, readable fallback
 
 ERROR:
-- localized broken route or red focal fault
+- localized broken/fault route or red focal area
 - no whole-screen panic unless true system-wide incident
 
 LEARNING:
@@ -310,7 +318,7 @@ No transcript, secret, customer PII or raw payload is required for the visual la
 The system intentionally supports partial deployment:
 
 - Phase 0 usable with static imagery.
-- Phase 1 usable with deterministic state swaps.
+- Phase 1 usable as an external visual-presence prototype while V2.2 is evaluated.
 - Phase 2 usable with mocked/shadow atlas telemetry.
 - Phase 3 usable with 2.5D effects.
 - Phase 4 adds true 3D without blocking earlier use.
@@ -351,29 +359,33 @@ HECHO:
 - owner-approved visual direction
 - canonical seed + master registered by hash
 - multi-angle family generated
-- idle/listening/processing/speaking family generated
-- interior-entry concept generated
-- atlas / cluster / orchestration concepts generated
-- HUMAN_REQUIRED visual concept generated
-- asset evidence manifest registered
+- Phase 1 V1 static/state-switched fallback
+- Phase 1 V2 procedural presence
+- Phase 1 V2.1 neural-area connected filaments
+- Phase 1 V2.2 causal neural network artifact
+- V2.2 JavaScript syntax + structure gates green
+- visual color discipline registered
+- symbolic functional atlas defined
+- visual event envelope defined
 
 DEFINIDO:
 - phase-by-phase usable architecture
-- symbolic functional atlas
-- visual semantics
-- visual event envelope
+- external presence → Inside → ops map → 3D → telemetry → replay → hologram
+- no-fake-cognition rule for future real telemetry binding
 
 PARCIAL:
-- generated binaries are conversation artifacts, not yet promoted to durable asset storage
-- no state-switched PREPROD UI binding yet
+- Phase 1 V2.2 awaits physical owner visual acceptance
+- target-device performance not yet measured
+- generated image binaries remain conversation artifacts / external to source Git
 - no real 3D scene yet
-- no live telemetry binding yet
+- no live engine telemetry binding yet
 
 PLANIFICADO NEXT:
-- generate remaining operational states (DEGRADED, ERROR, LEARNING, RECOVERY, FACTORY/BUILD)
-- complete atlas cluster references
-- build Phase 1 deterministic visual-state adapter in parallel
-- prepare durable asset storage path
+- owner review of V2.2 organicity / causal readability / cleanliness
+- tune density/glow if required
+- profile mobile/desktop performance
+- close Phase 1 only after acceptance gates
+- then reuse the same causal neural graph as the starting point for Phase 2 CEREBRO Inside
 
 NOT AUTHORIZED:
 - PROD
