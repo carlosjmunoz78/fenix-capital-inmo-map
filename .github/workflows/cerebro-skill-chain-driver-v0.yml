@@ -1,0 +1,128 @@
+name: CEREBRO Skill Chain Driver V0
+
+on:
+  workflow_run:
+    workflows:
+      - CEREBRO Skill AutoLoop Safe Handler V0
+      - CEREBRO Skill Priority Ladder V0
+    types:
+      - completed
+  push:
+    branches:
+      - cerebro/skill-chain-driver-v0-20261011
+    paths:
+      - '.github/workflows/cerebro-skill-chain-driver-v0.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: cerebro-skill-chain-driver-v0
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  actions: write
+
+env:
+  AUTOLOOP_STATE_BRANCH: cerebro/skill-autoloop-state-v0
+  AUTOLOOP_STATE_PATH: cerebro/runtime/skill-autoloop-state.v0.json
+  SAFE_HANDLER_WORKFLOW: cerebro-skill-autoloop-safe-handler.yml
+  PRIORITY_LADDER_WORKFLOW: cerebro-skill-priority-ladder-v0.yml
+
+jobs:
+  route-next-safe-skill:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Load and validate canonical AutoLoop state
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/skill-chain
+          git fetch --no-tags origin "refs/heads/$AUTOLOOP_STATE_BRANCH:refs/remotes/origin/$AUTOLOOP_STATE_BRANCH"
+          git show "refs/remotes/origin/$AUTOLOOP_STATE_BRANCH:$AUTOLOOP_STATE_PATH" > artifacts/skill-chain/state.json
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          import {validateSafeAutoloopState} from './cerebro/skills/skill-autoloop-controller.mjs';
+          const s=JSON.parse(fs.readFileSync('artifacts/skill-chain/state.json','utf8'));
+          const v=validateSafeAutoloopState(s);
+          if(!v.green) throw new Error(JSON.stringify(v));
+          if(s.safe_autonomy.prod_write!==false||s.safe_autonomy.external_skill_code_execution!==false||s.safe_autonomy.customer_data!==false||s.safe_autonomy.trading!==false||s.safe_autonomy.paid_fallback!==false||s.safe_autonomy.additional_cost_budget_eur!==0) throw new Error('SKILL_CHAIN_SAFETY_INVARIANT_FAILED');
+          NODE
+
+      - name: Route only the next safe step
+        id: route
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          SOURCE_WORKFLOW: ${{ github.event.workflow_run.name }}
+          SOURCE_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          SOURCE_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          CURRENT_REF: ${{ github.ref }}
+        run: |
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const s=JSON.parse(fs.readFileSync('artifacts/skill-chain/state.json','utf8'));
+          const waitingSafe=Object.keys(s.waiting_safe_handler??{}).length;
+          const inFlight=Object.keys(s.in_flight??{}).length;
+          const event=process.env.EVENT_NAME;
+          const source=process.env.SOURCE_WORKFLOW||'';
+          const sourceBranch=process.env.SOURCE_BRANCH||'';
+          const sourceConclusion=process.env.SOURCE_CONCLUSION||'';
+          let target='NONE';
+          let reason='NO_SAFE_NEXT_STEP';
+          let allowDispatch=false;
+
+          if(event==='workflow_run'){
+            allowDispatch=sourceBranch==='main'&&sourceConclusion==='success';
+            if(source==='CEREBRO Skill AutoLoop Safe Handler V0'){
+              if(waitingSafe===0&&inFlight===0){target='PRIORITY_LADDER';reason='HANDLER_TERMINAL_NEXT_CANDIDATE';}
+              else if(waitingSafe>0){reason='SAFE_HANDLER_RETRY_LEFT_TO_NORMAL_CADENCE';}
+              else {reason='IN_FLIGHT_PRESENT_FAIL_CLOSED';}
+            } else if(source==='CEREBRO Skill Priority Ladder V0'){
+              if(waitingSafe>0&&inFlight===0){target='SAFE_HANDLER';reason='LADDER_CHECKPOINT_READY';}
+              else if(waitingSafe===0){reason='LADDER_EXHAUSTED_NO_ELIGIBLE_CANDIDATE';}
+              else {reason='IN_FLIGHT_PRESENT_FAIL_CLOSED';}
+            }
+          } else if(event==='workflow_dispatch'){
+            allowDispatch=process.env.CURRENT_REF==='refs/heads/main';
+            if(waitingSafe>0&&inFlight===0){target='SAFE_HANDLER';reason='MANUAL_BOOTSTRAP_WAITING_SAFE';}
+            else if(waitingSafe===0&&inFlight===0){target='PRIORITY_LADDER';reason='MANUAL_BOOTSTRAP_DISCOVER_NEXT';}
+            else {reason='MANUAL_BOOTSTRAP_IN_FLIGHT_FAIL_CLOSED';}
+          } else {
+            reason='BRANCH_PUSH_DRY_RUN_ONLY';
+          }
+
+          const out={schema_version:'1.0.0',event,source_workflow:source||null,source_branch:sourceBranch||null,waiting_safe_handler:waitingSafe,in_flight:inFlight,target,reason,allow_dispatch:allowDispatch,prod_authorized:false,prod_write:false,customer_data_used:false,external_skill_code_execution:false,trading_access:false,paid_fallback:false,additional_cost_eur:0};
+          fs.writeFileSync('artifacts/skill-chain/route.json',JSON.stringify(out,null,2)+'\n');
+          fs.appendFileSync(process.env.GITHUB_OUTPUT,`target=${target}\n`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT,`allow_dispatch=${allowDispatch}\n`);
+          console.log(JSON.stringify(out));
+          NODE
+
+      - name: Dispatch exactly one next workflow
+        if: steps.route.outputs.allow_dispatch == 'true' && steps.route.outputs.target != 'NONE'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TARGET: ${{ steps.route.outputs.target }}
+        run: |
+          set -euo pipefail
+          if [ "$TARGET" = SAFE_HANDLER ]; then
+            gh workflow run "$SAFE_HANDLER_WORKFLOW" --repo "$GITHUB_REPOSITORY" --ref main
+          elif [ "$TARGET" = PRIORITY_LADDER ]; then
+            gh workflow run "$PRIORITY_LADDER_WORKFLOW" --repo "$GITHUB_REPOSITORY" --ref main
+          else
+            echo "Unexpected target: $TARGET" >&2
+            exit 1
+          fi
+
+      - name: Upload immutable chain routing evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-skill-chain-driver-${{ github.run_id }}
+          path: artifacts/skill-chain/*.json
+          if-no-files-found: warn
+          retention-days: 30
