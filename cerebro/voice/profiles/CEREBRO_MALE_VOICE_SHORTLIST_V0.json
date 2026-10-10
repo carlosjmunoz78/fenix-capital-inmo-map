@@ -1,13 +1,13 @@
 {
-  "schema_version": "0.1.0",
+  "schema_version": "0.2.0",
   "engine_id": "VOICE-001",
   "environment": "LAB",
   "locale": "es-ES",
   "owner_selection": {
     "keep_all": ["ESM05", "ESM06", "ESM07"],
-    "primary_direction": "ESM07",
-    "accepted_existing_candidate": "ESM05",
-    "secondary_soft_direction": "ESM06"
+    "primary_direction": "ESM08",
+    "accepted_existing_candidates": ["ESM05", "ESM06", "ESM07"],
+    "jarvis_style_target_still_open": true
   },
   "voices": [
     {
@@ -20,15 +20,28 @@
       "voice_id": "ESM06",
       "label": "CEREBRO Soft Executive es-ES",
       "owner_decision": "KEEP",
-      "status": "STYLE_TARGET_ACCEPTED_REFERENCE_REQUIRED"
+      "status": "OWNER_ACCEPTED_SEED_CANDIDATE",
+      "owner_similarity_note": "KEEP_BUT_NOT_JARVIS"
     },
     {
       "voice_id": "ESM07",
-      "label": "CEREBRO Cinematic Assistant es-ES",
-      "owner_decision": "KEEP_AND_PRIORITIZE",
-      "status": "STYLE_TARGET_ACCEPTED_REFERENCE_REQUIRED"
+      "label": "CEREBRO Calm Technical Cinematic es-ES",
+      "owner_decision": "KEEP",
+      "status": "OWNER_ACCEPTED_SEED_CANDIDATE",
+      "owner_similarity_note": "KEEP_BUT_NOT_JARVIS"
+    },
+    {
+      "voice_id": "ESM08",
+      "label": "CEREBRO Original Cinematic AI Assistant Target",
+      "owner_decision": "SEARCH_AND_ITERATE",
+      "status": "TARGET_OPEN_DIFFERENT_BASE_TIMBRE_REQUIRED"
     }
   ],
+  "lessons": {
+    "same_base_voice_pitch_or_pace_edits_are_insufficient": true,
+    "next_search_must_change_source_timbre": true,
+    "preserve_ESM05_ESM06_ESM07": true
+  },
   "identity_policy": {
     "original_cerebro_voices_only": true,
     "actor_clone": false,
