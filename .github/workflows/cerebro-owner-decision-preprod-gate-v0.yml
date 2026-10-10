@@ -1,0 +1,75 @@
+name: CEREBRO Owner Decision PREPROD Gate V0
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - cerebro/email-owner-decision-preprod-v0
+    paths:
+      - 'src/CerebroOwnerDecisionGuard.tsx'
+      - 'src/supabase.ts'
+      - 'cerebro/tests/owner-decision-harness.*'
+      - 'tests/e2e/cerebro-owner-decision-safe-get.spec.ts'
+      - '.github/workflows/cerebro-owner-decision-preprod-gate-v0.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  scanner-safe-get:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      VITE_FENIX_ENV: preprod
+      VITE_SUPABASE_URL: https://hnqlnvakzaywtafeiybt.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_preprod_browser_gate_test_only
+      E2E_NO_WEBSERVER: '1'
+      E2E_BASE_URL: http://127.0.0.1:4173
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install existing dependencies
+        run: npm ci
+
+      - name: Install Chromium for isolated browser proof
+        run: npx playwright install --with-deps chromium
+
+      - name: Start isolated PREPROD Vite server
+        run: |
+          set -euo pipefail
+          npx vite --host 127.0.0.1 --port 4173 >/tmp/cerebro-owner-decision-vite.log 2>&1 &
+          echo $! >/tmp/cerebro-owner-decision-vite.pid
+          for attempt in $(seq 1 45); do
+            if curl -fsS http://127.0.0.1:4173/cerebro/tests/owner-decision-harness.html >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/cerebro-owner-decision-vite.log
+          exit 1
+
+      - name: Prove scanner GET cannot submit owner decision
+        run: npx playwright test tests/e2e/cerebro-owner-decision-safe-get.spec.ts
+
+      - name: Stop isolated Vite server
+        if: always()
+        run: |
+          if [ -f /tmp/cerebro-owner-decision-vite.pid ]; then
+            kill "$(cat /tmp/cerebro-owner-decision-vite.pid)" || true
+          fi
+
+      - name: Upload failure evidence only
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-owner-decision-preprod-gate-${{ github.run_id }}
+          path: |
+            test-results/**
+            playwright-report/**
+            /tmp/cerebro-owner-decision-vite.log
+          if-no-files-found: ignore
+          retention-days: 14
