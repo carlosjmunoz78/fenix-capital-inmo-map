@@ -11,6 +11,8 @@ const read=(p)=>fs.readFileSync(path.join(root,p),'utf8');
 const app=read('cerebro/voice/runtime/app.py');
 const smoke=read('cerebro/voice/runtime/backend_model_smoke.py');
 const requirements=read('cerebro/voice/runtime/requirements.txt');
+const verifier=read('cerebro/voice/runtime/verify_backend_provenance.py');
+const installer=read('cerebro/voice/runtime/windows/Install-VoiceLab.ps1');
 
 test('VOICE-001 defaults Chatterbox multilingual to explicit V3 with bounded rollback to V2',()=>{
   assert.match(app,/CEREBRO_VOICE_T3_MODEL", "v3"/);
@@ -25,6 +27,17 @@ test('V3 external sources are pinned to reviewed official upstream commits',()=>
   assert.match(requirements,/chatterbox-tts @ git\+https:\/\/github\.com\/resemble-ai\/chatterbox\.git@5de7a54aa4e5e2baadb0182dde554908b48b85c2/);
   assert.doesNotMatch(requirements,/^chatterbox-tts\s*$/m);
   assert.doesNotMatch(requirements,/Perth\.git@master\s*$/m);
+});
+
+test('installed VCS provenance is re-verified before Chatterbox import',()=>{
+  assert.match(verifier,/5de7a54aa4e5e2baadb0182dde554908b48b85c2/);
+  assert.match(verifier,/ff1c8ac55a976971245cdd53c18d6131ca00d993/);
+  assert.match(verifier,/direct_url\.json/);
+  assert.match(verifier,/commit_drift/);
+  assert.match(verifier,/repository_drift/);
+  const verifyIndex=installer.indexOf('$ProvenanceVerifier');
+  const importIndex=installer.indexOf('from chatterbox.mtl_tts import ChatterboxMultilingualTTS');
+  assert.ok(verifyIndex>=0 && importIndex>verifyIndex,'provenance must be checked before backend import');
 });
 
 test('backend smoke proves only model load and Spanish waveform, never voice acceptance',()=>{
