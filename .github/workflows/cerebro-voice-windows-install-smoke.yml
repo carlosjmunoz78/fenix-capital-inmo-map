@@ -1,0 +1,64 @@
+name: CEREBRO VOICE-001 Windows Install Smoke
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'cerebro/voice/runtime/**'
+      - '.github/workflows/cerebro-voice-windows-install-smoke.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'cerebro/voice/runtime/**'
+      - '.github/workflows/cerebro-voice-windows-install-smoke.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  windows-install-smoke:
+    runs-on: windows-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Execute real Windows LAB installer without model-weight load
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          & .\cerebro\voice\runtime\windows\Install-VoiceLab.ps1 -RepoRoot $PWD.Path
+
+      - name: Verify physical host probe evidence
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $probePath = Join-Path $env:LOCALAPPDATA 'CEREBRO\voice-evidence\host-probe.json'
+          if (-not (Test-Path $probePath)) { throw 'host-probe.json was not produced' }
+          $probe = Get-Content -Raw $probePath | ConvertFrom-Json
+          if ($probe.status -ne 'GREEN') { throw "host probe is $($probe.status)" }
+          if ($probe.environment -ne 'LAB') { throw 'environment drifted from LAB' }
+          if ($probe.authority.prod_enabled -ne $false) { throw 'PROD authority detected' }
+          if ($probe.authority.public_clone_enabled -ne $false) { throw 'public cloning detected' }
+          if (-not $probe.packages.'chatterbox-tts') { throw 'chatterbox-tts package missing after install' }
+          if (-not $probe.gates.private_root_outside_repo) { throw 'private root entered repository' }
+          if (-not $probe.gates.runtime_token_present) { throw 'runtime token gate not satisfied' }
+          Write-Host "GREEN Windows install smoke: chatterbox=$($probe.packages.'chatterbox-tts') python=$($probe.host.python)"
+
+      - name: Verify multilingual import in installed venv
+        shell: pwsh
+        run: |
+          $python = Join-Path $env:LOCALAPPDATA 'CEREBRO\voice-runtime\.venv\Scripts\python.exe'
+          & $python -c "from chatterbox.mtl_tts import ChatterboxMultilingualTTS; print('GREEN ChatterboxMultilingualTTS import')"
+          if ($LASTEXITCODE -ne 0) { throw 'multilingual import failed' }
+
+      - name: Record evidence boundary
+        shell: pwsh
+        run: |
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value 'VOICE-001 Windows package installation + multilingual import: GREEN.'
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value 'This smoke does not download/load model weights, does not benchmark a real voice, does not authorize PROD, and does not replace browser TTS.'
