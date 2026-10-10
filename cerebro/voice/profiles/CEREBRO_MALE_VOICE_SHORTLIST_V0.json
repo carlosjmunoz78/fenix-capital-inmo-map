@@ -1,0 +1,43 @@
+{
+  "schema_version": "0.1.0",
+  "engine_id": "VOICE-001",
+  "environment": "LAB",
+  "locale": "es-ES",
+  "owner_selection": {
+    "keep_all": ["ESM05", "ESM06", "ESM07"],
+    "primary_direction": "ESM07",
+    "accepted_existing_candidate": "ESM05",
+    "secondary_soft_direction": "ESM06"
+  },
+  "voices": [
+    {
+      "voice_id": "ESM05",
+      "label": "CEREBRO Executive Cinematic V1",
+      "owner_decision": "KEEP",
+      "status": "OWNER_ACCEPTED_SEED_CANDIDATE"
+    },
+    {
+      "voice_id": "ESM06",
+      "label": "CEREBRO Soft Executive es-ES",
+      "owner_decision": "KEEP",
+      "status": "STYLE_TARGET_ACCEPTED_REFERENCE_REQUIRED"
+    },
+    {
+      "voice_id": "ESM07",
+      "label": "CEREBRO Cinematic Assistant es-ES",
+      "owner_decision": "KEEP_AND_PRIORITIZE",
+      "status": "STYLE_TARGET_ACCEPTED_REFERENCE_REQUIRED"
+    }
+  ],
+  "identity_policy": {
+    "original_cerebro_voices_only": true,
+    "actor_clone": false,
+    "character_clone": false,
+    "movie_audio_reference": false
+  },
+  "authority": {
+    "automatic_promotion": false,
+    "prod_enabled": false,
+    "public_clone_enabled": false
+  }
+}
