@@ -1,0 +1,47 @@
+name: CEREBRO VOICE-001 Owned Voice PREPROD Gate
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'cerebro/voice/**'
+      - 'cerebro/tests/owned-voice-v0.test.mjs'
+      - '.github/workflows/cerebro-owned-voice-preprod.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'cerebro/voice/**'
+      - 'cerebro/tests/owned-voice-v0.test.mjs'
+      - '.github/workflows/cerebro-owned-voice-preprod.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  owned-voice-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Test VOICE-001 owned voice contract
+        run: node --test cerebro/tests/owned-voice-v0.test.mjs
+
+      - name: Parse Python runtime without installing model dependencies
+        run: |
+          python -m py_compile cerebro/voice/runtime/app.py
+          python -m py_compile cerebro/voice/runtime/register_voice_reference.py
+
+      - name: Assert no voice recordings or private registry are committed
+        shell: bash
+        run: |
+          set -euo pipefail
+          if find cerebro/voice -type f \( -iname '*.wav' -o -iname '*.mp3' -o -iname '*.flac' -o -name 'registry.private.json' \) | grep -q .; then
+            echo 'Raw/private voice asset committed inside cerebro/voice' >&2
+            exit 1
+          fi
+
+      - name: Record authority boundary
+        run: |
+          echo 'VOICE-001 owned runtime remains LAB/PREPROD only.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'No PROD activation, no public cloning and no paid TTS dependency are authorized.' >> "$GITHUB_STEP_SUMMARY"

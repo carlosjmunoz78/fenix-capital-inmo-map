@@ -1,0 +1,33 @@
+{
+  "schema_version": "0.1.0",
+  "engine_id": "VOICE-001",
+  "environment": "PREPROD",
+  "prod_enabled": false,
+  "public_clone_enabled": false,
+  "locale": "es-ES",
+  "target_count": 20,
+  "required_distribution": {"feminine": 10, "masculine": 10},
+  "reference_storage_policy": "OUTSIDE_GIT_PRIVATE",
+  "voices": [
+    {"voice_id":"ESF01","presentation":"feminine","profile":"warm_close","status":"REFERENCE_REQUIRED","reference_ref":null,"reference_sha256":null,"provenance":null,"consent_ref":null,"license":null,"backend":null,"model_version":null,"qa":{}},
+    {"voice_id":"ESF02","presentation":"feminine","profile":"executive_clear","status":"REFERENCE_REQUIRED","reference_ref":null,"reference_sha256":null,"provenance":null,"consent_ref":null,"license":null,"backend":null,"model_version":null,"qa":{}},
+    {"voice_id":"ESF03","presentation":"feminine","profile":"calm_reassuring","status":"REFERENCE_REQUIRED","reference_ref":null,"reference_sha256":null,"provenance":null,"consent_ref":null,"license":null,"backend":null,"model_version":null,"qa":{}},
+    {"voice_id":"ESF04","presentation":"feminine","profile":"energetic_commercial","status":"REFERENCE_REQUIRED","reference_ref":null,"reference_sha256":null,"provenance":null,"consent_ref":null,"license":null,"backend":null,"model_version":null,"qa":{}},
+    {"voice_id":"ESF05","presentation":"feminine","profile":"mature_authoritative","status":"REFERENCE_REQUIRED","reference_ref":null,"reference_sha256":null,"provenance":null,"consent_ref":null,"license":null,"backend":null,"model_version":null,"qa":{}},
+    {"voice_id":"ESF06","presentation":"feminine","profile":"young_natural","status":"REFERENCE_REQUIRED","reference_ref":null,"reference_sha256":null,"provenance":null,"consent_ref":null,"license":null,"backend":null,"model_version":null,"qa":{}},
+    {"voice_id":"ESF07","presentation":"feminine","profile":"neutral_institutional","status":"REFERENCE_REQUIRED","reference_ref":null,"reference_sha256":null,"provenance":null,"consent_ref":null,"license":null,"backend":null,"model_version":null,"qa":{}},
+    {"voice_id":"ESF08","presentation":"feminine","profile":"storytelling_expressive","status":"REFERENCE_REQUIRED","reference_ref":null,"reference_sha256":null,"provenance":null,"consent_ref":null,"license":null,"backend":null,"model_version":null,"qa":{}},
+    {"voice_id":"ESF09","presentation":"feminine","profile":"fast_precise","status":"REFERENCE_REQUIRED","reference_ref":null,"reference_sha256":null,"provenance":null,"consent_ref":null,"license":null,"backend":null,"model_version":null,"qa":{}},
+    {"voice_id":"ESF10","presentation":"feminine","profile":"soft_support","status":"REFERENCE_REQUIRED","reference_ref":null,"reference_sha256":null,"provenance":null,"consent_ref":null,"license":null,"backend":null,"model_version":null,"qa":{}},
+    {"voice_id":"ESM01","presentation":"masculine","profile":"warm_close","status":"REFERENCE_REQUIRED","reference_ref":null,"reference_sha256":null,"provenance":null,"consent_ref":null,"license":null,"backend":null,"model_version":null,"qa":{}},
+    {"voice_id":"ESM02","presentation":"masculine","profile":"executive_clear","status":"REFERENCE_REQUIRED","reference_ref":null,"reference_sha256":null,"provenance":null,"consent_ref":null,"license":null,"backend":null,"model_version":null,"qa":{}},
+    {"voice_id":"ESM03","presentation":"masculine","profile":"calm_reassuring","status":"REFERENCE_REQUIRED","reference_ref":null,"reference_sha256":null,"provenance":null,"consent_ref":null,"license":null,"backend":null,"model_version":null,"qa":{}},
+    {"voice_id":"ESM04","presentation":"masculine","profile":"energetic_commercial","status":"REFERENCE_REQUIRED","reference_ref":null,"reference_sha256":null,"provenance":null,"consent_ref":null,"license":null,"backend":null,"model_version":null,"qa":{}},
+    {"voice_id":"ESM05","presentation":"masculine","profile":"mature_authoritative","status":"REFERENCE_REQUIRED","reference_ref":null,"reference_sha256":null,"provenance":null,"consent_ref":null,"license":null,"backend":null,"model_version":null,"qa":{}},
+    {"voice_id":"ESM06","presentation":"masculine","profile":"young_natural","status":"REFERENCE_REQUIRED","reference_ref":null,"reference_sha256":null,"provenance":null,"consent_ref":null,"license":null,"backend":null,"model_version":null,"qa":{}},
+    {"voice_id":"ESM07","presentation":"masculine","profile":"neutral_institutional","status":"REFERENCE_REQUIRED","reference_ref":null,"reference_sha256":null,"provenance":null,"consent_ref":null,"license":null,"backend":null,"model_version":null,"qa":{}},
+    {"voice_id":"ESM08","presentation":"masculine","profile":"storytelling_expressive","status":"REFERENCE_REQUIRED","reference_ref":null,"reference_sha256":null,"provenance":null,"consent_ref":null,"license":null,"backend":null,"model_version":null,"qa":{}},
+    {"voice_id":"ESM09","presentation":"masculine","profile":"fast_precise","status":"REFERENCE_REQUIRED","reference_ref":null,"reference_sha256":null,"provenance":null,"consent_ref":null,"license":null,"backend":null,"model_version":null,"qa":{}},
+    {"voice_id":"ESM10","presentation":"masculine","profile":"soft_support","status":"REFERENCE_REQUIRED","reference_ref":null,"reference_sha256":null,"provenance":null,"consent_ref":null,"license":null,"backend":null,"model_version":null,"qa":{}}
+  ]
+}
