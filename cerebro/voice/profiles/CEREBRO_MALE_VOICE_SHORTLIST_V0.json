@@ -1,5 +1,5 @@
 {
-  "schema_version": "0.2.0",
+  "schema_version": "0.3.0",
   "engine_id": "VOICE-001",
   "environment": "LAB",
   "locale": "es-ES",
@@ -34,13 +34,32 @@
       "voice_id": "ESM08",
       "label": "CEREBRO Original Cinematic AI Assistant Target",
       "owner_decision": "SEARCH_AND_ITERATE",
-      "status": "TARGET_OPEN_DIFFERENT_BASE_TIMBRE_REQUIRED"
+      "status": "THREE_DISTINCT_ES_ES_BASE_TIMBRES_GENERATED_OWNER_LISTENING_PENDING",
+      "listening_candidates": [
+        {
+          "candidate_id": "ESM08-CARLFM",
+          "source_family": "es_ES-carlfm-x_low",
+          "declared_dataset_license": "PUBLIC_DOMAIN"
+        },
+        {
+          "candidate_id": "ESM08-MLS10246",
+          "source_family": "es_ES-mls_10246-low",
+          "declared_dataset_license": "CC-BY-4.0"
+        },
+        {
+          "candidate_id": "ESM08-MLS9972",
+          "source_family": "es_ES-mls_9972-low",
+          "declared_dataset_license": "CC-BY-4.0"
+        }
+      ],
+      "owner_listening_required": true
     }
   ],
   "lessons": {
     "same_base_voice_pitch_or_pace_edits_are_insufficient": true,
     "next_search_must_change_source_timbre": true,
-    "preserve_ESM05_ESM06_ESM07": true
+    "preserve_ESM05_ESM06_ESM07": true,
+    "ESM08_uses_three_distinct_source_timbres": true
   },
   "identity_policy": {
     "original_cerebro_voices_only": true,
@@ -50,6 +69,8 @@
   },
   "authority": {
     "automatic_promotion": false,
+    "voice_bank_ready": false,
+    "preprod_ready": false,
     "prod_enabled": false,
     "public_clone_enabled": false
   }
