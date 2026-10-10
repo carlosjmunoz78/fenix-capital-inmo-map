@@ -10,6 +10,7 @@ const read=(p)=>fs.readFileSync(path.join(root,p),'utf8');
 
 const app=read('cerebro/voice/runtime/app.py');
 const smoke=read('cerebro/voice/runtime/backend_model_smoke.py');
+const requirements=read('cerebro/voice/runtime/requirements.txt');
 
 test('VOICE-001 defaults Chatterbox multilingual to explicit V3 with bounded rollback to V2',()=>{
   assert.match(app,/CEREBRO_VOICE_T3_MODEL", "v3"/);
@@ -17,6 +18,11 @@ test('VOICE-001 defaults Chatterbox multilingual to explicit V3 with bounded rol
   assert.match(app,/from_pretrained\(device=DEVICE, t3_model=T3_MODEL\)/);
   assert.match(app,/"t3_model": T3_MODEL/);
   assert.match(app,/"X-Cerebro-T3-Model": T3_MODEL/);
+});
+
+test('V3-capable external dependency is pinned to the reviewed official upstream commit',()=>{
+  assert.match(requirements,/chatterbox-tts @ git\+https:\/\/github\.com\/resemble-ai\/chatterbox\.git@5de7a54aa4e5e2baadb0182dde554908b48b85c2/);
+  assert.doesNotMatch(requirements,/^chatterbox-tts\s*$/m);
 });
 
 test('backend smoke proves only model load and Spanish waveform, never voice acceptance',()=>{
