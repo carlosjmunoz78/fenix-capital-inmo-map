@@ -63,9 +63,11 @@ $TokenFile = Join-Path $PrivateRoot "runtime-token.dpapi"
 $RegistryFile = Join-Path $PrivateRoot "registry.private.json"
 $Requirements = Join-Path $RepoRoot "cerebro\voice\runtime\requirements.txt"
 $Probe = Join-Path $RepoRoot "cerebro\voice\runtime\physical_lab_probe.py"
+$ProvenanceVerifier = Join-Path $RepoRoot "cerebro\voice\runtime\verify_backend_provenance.py"
 
 if (-not (Test-Path $Requirements)) { throw "VOICE-001 requirements not found at $Requirements" }
 if (-not (Test-Path $Probe)) { throw "VOICE-001 physical probe not found at $Probe" }
+if (-not (Test-Path $ProvenanceVerifier)) { throw "VOICE-001 backend provenance verifier not found at $ProvenanceVerifier" }
 
 New-Item -ItemType Directory -Force -Path $RuntimeRoot, $PrivateRoot, $EvidenceRoot | Out-Null
 Protect-PrivateDirectory $PrivateRoot
@@ -82,6 +84,10 @@ if (-not $SkipInstall) {
     & $VenvPython -m pip install --disable-pip-version-check -r $Requirements
     if ($LASTEXITCODE -ne 0) { throw "VOICE-001 dependency installation failed" }
 }
+
+# Fail closed before importing or loading the backend if either reviewed VCS source drifted.
+& $VenvPython $ProvenanceVerifier
+if ($LASTEXITCODE -ne 0) { throw "VOICE-001 backend provenance verification failed" }
 
 if (-not (Test-Path $TokenFile)) {
     $token = New-RuntimeToken
@@ -114,7 +120,7 @@ try {
     $plainToken = $null
 }
 
-Write-Host "GREEN VOICE-001 physical LAB host automation installed."
+Write-Host "GREEN VOICE-001 physical LAB host automation installed with reviewed backend provenance."
 Write-Host "Private references: $PrivateRoot"
 Write-Host "Evidence: $EvidenceRoot"
 Write-Host "Runtime remains LAB-only and loopback-only. No PROD binding was changed."
