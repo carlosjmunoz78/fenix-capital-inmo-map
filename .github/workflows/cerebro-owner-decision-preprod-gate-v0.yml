@@ -7,6 +7,7 @@ on:
       - cerebro/email-owner-decision-preprod-v0
     paths:
       - 'src/CerebroOwnerDecisionGuard.tsx'
+      - 'src/main.tsx'
       - 'src/supabase.ts'
       - 'cerebro/tests/owner-decision-harness.*'
       - 'tests/e2e/cerebro-owner-decision-safe-get.spec.ts'
@@ -18,7 +19,7 @@ permissions:
 jobs:
   scanner-safe-get:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 15
     env:
       VITE_FENIX_ENV: preprod
       VITE_SUPABASE_URL: https://hnqlnvakzaywtafeiybt.supabase.co
@@ -33,6 +34,9 @@ jobs:
 
       - name: Install existing dependencies
         run: npm ci
+
+      - name: Build full PREPROD app without deploy
+        run: npm run build
 
       - name: Install Chromium for isolated browser proof
         run: npx playwright install --with-deps chromium
