@@ -1,0 +1,118 @@
+name: CEREBRO FACT-001 AutoFactory V1
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'cerebro/factory/requests-v1/**.json'
+      - 'cerebro/factory-v1.mjs'
+      - 'cerebro/runtime/fact001-request-runner-v1.mjs'
+      - 'cerebro/registry/engine-registry.v1.json'
+      - 'cerebro/registry/hci-motion-engine-contracts.v0.json'
+      - '.github/workflows/cerebro-fact001-autofactory-v1.yml'
+  workflow_dispatch:
+    inputs:
+      request_path:
+        description: 'Repository request JSON under cerebro/factory/requests-v1/'
+        required: false
+        default: 'cerebro/factory/requests-v1/hci001-human-cerebro-experience.v0.json'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-fact001-autofactory-v1-${{ github.event_name }}-${{ github.sha }}
+  cancel-in-progress: false
+
+env:
+  EXACT_SOURCE_SHA: ${{ github.sha }}
+
+jobs:
+  structural-extension:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.EXACT_SOURCE_SHA }}
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Assert immutable source checkout
+        shell: bash
+        run: test "$(git rev-parse HEAD)" = "$EXACT_SOURCE_SHA"
+
+      - name: Run complete regression suite and V1 registry validation
+        working-directory: cerebro
+        run: |
+          set -euo pipefail
+          npm run validate
+          npm test
+          node factory-v1.mjs validate --registry registry/engine-registry.v1.json
+
+      - name: Resolve bounded V1 request set
+        shell: bash
+        env:
+          REQUEST_PATH: ${{ github.event.inputs.request_path }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/fact001-v1-artifacts
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            case "$REQUEST_PATH" in
+              cerebro/factory/requests-v1/*.json) ;;
+              *) echo 'request_path must remain under cerebro/factory/requests-v1/*.json' >&2; exit 1 ;;
+            esac
+            test -f "$REQUEST_PATH"
+            printf '%s\n' "$REQUEST_PATH" > /tmp/fact001-v1-list.txt
+          else
+            find cerebro/factory/requests-v1 -maxdepth 1 -type f -name '*.json' -print | LC_ALL=C sort > /tmp/fact001-v1-list.txt
+          fi
+          test -s /tmp/fact001-v1-list.txt
+          count="$(wc -l < /tmp/fact001-v1-list.txt | tr -d ' ')"
+          test "$count" -ge 1
+          test "$count" -le 10
+
+      - name: Execute deterministic V1 scaffold requests
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r request; do
+            [ -n "$request" ] || continue
+            name="$(basename "$request" .json | tr -c 'A-Za-z0-9._-' '_')"
+            root="/tmp/fact001-v1-artifacts/$name"
+            mkdir -p "$root"
+            node cerebro/runtime/fact001-request-runner-v1.mjs \
+              --request "$request" \
+              --out "$root/scaffold" \
+              --registry cerebro/registry/engine-registry.v1.json \
+              | tee "$root/runner-result.json"
+          done < /tmp/fact001-v1-list.txt
+
+      - name: Enforce structural and authority boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs'),path=require('path');const root='/tmp/fact001-v1-artifacts';const entries=fs.readdirSync(root).sort();if(entries.length<1)throw new Error('no V1 results');const summary=[];
+          for(const name of entries){const result=JSON.parse(fs.readFileSync(path.join(root,name,'scaffold','fact001-result.json'),'utf8'));if(result.status!=='FACTORY_SCAFFOLD_GREEN')throw new Error(`${name}: not green`);if(!['HCI-001','MOTION-001'].includes(result.engine_id))throw new Error(`${name}: unauthorized extension engine`);if(result.generated_file_count!==18)throw new Error(`${name}: wrong file count`);if(result.environment!=='SCAFFOLD'||result.additional_cost_eur!==0||result.prod_authorized!==false||result.prod_write_authorized!==false||result.trading_access!==false||result.external_code_execution!==false||result.base_registry_preserved!==true)throw new Error(`${name}: authority or preservation boundary failed`);summary.push({engine_id:result.engine_id,bundle_sha256:result.bundle_sha256,structural_evaluation:'GREEN',engine_evaluation:'NOT_RUN_SCAFFOLD_ONLY',tribunal:'NOT_RUN_SCAFFOLD_ONLY',next_gate:result.next_gate});}
+          fs.writeFileSync(path.join(root,'fact001-v1-run-evidence.json'),JSON.stringify({schema_version:'1.1.0',state_type:'CEREBRO_FACT001_V1_RUN_EVIDENCE',source_sha:process.env.EXACT_SOURCE_SHA,github_run_id:process.env.GITHUB_RUN_ID,status:'STRUCTURAL_FACTORY_GREEN',base_registry_preserved:true,base_engine_count:177,canonical_engine_count:179,results:summary,additional_cost_eur:0,prod_authorized:false,prod_write_authorized:false,trading_access:false},null,2)+'\n');
+          NODE
+
+      - name: Upload immutable FACT-001 V1 evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: fact001-v1-autofactory-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/fact001-v1-artifacts
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Record boundary
+        shell: bash
+        run: |
+          echo 'FACT-001 V1 preserves all 177 V0 engines and structurally scaffolds only HCI-001/MOTION-001.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'No engine enabled or promoted. Behavioral evaluation, tribunal and PREPROD remain pending.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Additional cost: 0 EUR. PROD/Trading authority: false.' >> "$GITHUB_STEP_SUMMARY"

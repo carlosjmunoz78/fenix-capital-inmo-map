@@ -1,0 +1,118 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_HCI_MOTION_ENGINE_CONTRACTS",
+  "company_id": "GLOBAL_OR_SCOPED",
+  "environment": "SCAFFOLD",
+  "version": "0.1.0",
+  "additional_cost_eur": 0,
+  "prod_authorized": false,
+  "prod_write_authorized": false,
+  "trading_access": false,
+  "human_required_reasons": ["LEGAL_REQUIRED","SIGNATURE_REQUIRED","LOW_CONFIDENCE","HIGH_RISK","POLICY_CONFLICT","SECURITY_INCIDENT","MONEY_LIMIT","CUSTOMER_HUMAN_REQUEST"],
+  "engines": {
+    "HCI-001": {
+      "name": "Human ↔ CEREBRO Experience Engine",
+      "layer": "L9",
+      "purpose": "Mejorar continuamente la comprensión, claridad, naturalidad, accesibilidad y esfuerzo de la comunicación bidireccional entre humanos y CEREBRO sin conceder autoridad operativa adicional.",
+      "owns": [
+        "interaction quality telemetry",
+        "human comprehension and friction metrics",
+        "modality preference learning",
+        "communication improvement candidate generation",
+        "OLD vs NEW interaction experiments in LAB/PREPROD"
+      ],
+      "does_not_own": [
+        "channel delivery owned by COM-001",
+        "speech synthesis and recognition owned by VOICE-001",
+        "voice surface mechanics owned by VOICEUI-001",
+        "business actions or permissions",
+        "PROD promotion authority"
+      ],
+      "inputs": ["CHAT-001","CONSOLE-001","COM-001","VOICE-001","VOICEUI-001","LRN-001","OBS-001"],
+      "outputs": ["interaction_quality_event","friction_signal","preference_signal","improvement_candidate","evaluation_bundle"],
+      "metrics": [
+        "time_to_understanding_ms",
+        "clarification_rate",
+        "correction_rate",
+        "repetition_rate",
+        "interruption_success_rate",
+        "response_length_fit",
+        "modality_switch_rate",
+        "user_effort_proxy",
+        "explicit_preference_score",
+        "task_completion_understanding_rate"
+      ],
+      "policy": {
+        "no_sensitive_trait_inference": true,
+        "no_dark_patterns_or_manipulation": true,
+        "no_silent_authority_expansion": true,
+        "no_direct_prod_business_writes": true,
+        "old_vs_new_required": true,
+        "independent_evaluation_required": true,
+        "tribunal_required_before_promotion": true,
+        "privacy_minimization": true
+      },
+      "learning": {
+        "continuous": true,
+        "feedback_sources": ["explicit_user_feedback","interaction_outcomes","clarifications","corrections","interruptions","abandonment_signals"],
+        "promotion_path": "LRN-001 -> EVA-001 -> JDG-001 -> PREPROD -> promotion gates",
+        "direct_self_promotion": false
+      },
+      "rollback": "Revert interaction policy/profile to last accepted version; preserve raw evidence and audit trail.",
+      "rebuild": "FACT-001 scaffold + canonical contract + approved interaction policy + evaluation evidence."
+    },
+    "MOTION-001": {
+      "name": "CEREBRO Presence & Motion Engine",
+      "layer": "L9",
+      "purpose": "Crear y mejorar continuamente una presencia visual premium, coherente, accesible y audio-reactiva para CEREBRO en sus interfaces sin convertir la animación en una dependencia funcional.",
+      "owns": [
+        "visual presence state machine",
+        "audio-reactive motion mapping",
+        "motion quality metrics",
+        "reduced-motion and accessibility behavior",
+        "OLD vs NEW motion experiments in LAB/PREPROD"
+      ],
+      "does_not_own": [
+        "speech content",
+        "business decisions",
+        "voice model selection",
+        "authentication or permissions",
+        "PROD promotion authority"
+      ],
+      "states": ["IDLE","LISTENING","PROCESSING","SPEAKING","HUMAN_REQUIRED","DEGRADED","ERROR"],
+      "inputs": ["VOICEUI-001","VOICE-001","HCI-001","OBS-001"],
+      "outputs": ["presence_state","motion_profile","audio_reactivity_signal","motion_quality_event","improvement_candidate"],
+      "metrics": [
+        "input_to_visual_latency_ms",
+        "speech_visual_sync_error_ms",
+        "dropped_frame_rate",
+        "frame_time_p95_ms",
+        "cpu_budget_proxy",
+        "battery_impact_proxy",
+        "reduced_motion_compliance",
+        "visual_state_recognition_rate",
+        "explicit_preference_score"
+      ],
+      "implementation_preference": ["CSS/transforms","Canvas","Web Audio API","WebGL only when justified","existing/local/open-source libraries"],
+      "policy": {
+        "functionality_must_work_without_animation": true,
+        "prefers_reduced_motion_mandatory": true,
+        "avoid_rapid_flashing": true,
+        "no_content_or_secret_leakage_into_visuals": true,
+        "no_paid_animation_dependency_by_default": true,
+        "no_direct_prod_business_writes": true,
+        "old_vs_new_required": true,
+        "independent_evaluation_required": true,
+        "tribunal_required_before_promotion": true
+      },
+      "learning": {
+        "continuous": true,
+        "feedback_sources": ["explicit_user_feedback","performance_telemetry","interaction_outcomes","accessibility_signals"],
+        "promotion_path": "LRN-001 -> EVA-001 -> JDG-001 -> PREPROD -> promotion gates",
+        "direct_self_promotion": false
+      },
+      "rollback": "Return to last accepted motion profile or static fallback; interaction remains functional.",
+      "rebuild": "FACT-001 scaffold + canonical contract + accepted motion profiles + evaluation evidence."
+    }
+  }
+}
