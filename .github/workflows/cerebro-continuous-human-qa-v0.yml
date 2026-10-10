@@ -12,6 +12,7 @@ on:
       - 'cerebro/tests/qa-email-enrichment-v0.test.mjs'
       - 'cerebro/tests/qa-improvement-scout-v0.test.mjs'
       - 'cerebro/tests/qa-autonomous-remediation-loop-v0.test.mjs'
+      - 'cerebro/tests/qa-learning-bridge-v0.test.mjs'
       - '.github/workflows/cerebro-continuous-human-qa-v0.yml'
   pull_request:
     paths:
@@ -23,6 +24,7 @@ on:
       - 'cerebro/tests/qa-email-enrichment-v0.test.mjs'
       - 'cerebro/tests/qa-improvement-scout-v0.test.mjs'
       - 'cerebro/tests/qa-autonomous-remediation-loop-v0.test.mjs'
+      - 'cerebro/tests/qa-learning-bridge-v0.test.mjs'
       - '.github/workflows/cerebro-continuous-human-qa-v0.yml'
       - '.github/workflows/cerebro-human-communication-v1.yml'
   schedule:
@@ -62,12 +64,15 @@ jobs:
       - name: Install existing repository dependencies
         run: npm ci
 
-      - name: Prove QA contracts, improvement routing and daily-email integration
+      - name: Prove QA contracts improvement routing learning bridge and daily-email integration
         run: |
           node --test \
             cerebro/tests/continuous-human-qa-v0.test.mjs \
             cerebro/tests/qa-improvement-scout-v0.test.mjs \
             cerebro/tests/qa-autonomous-remediation-loop-v0.test.mjs \
+            cerebro/tests/qa-learning-bridge-v0.test.mjs \
+            cerebro/tests/universal-learning-ingress.test.mjs \
+            cerebro/tests/improvement-candidate-factory.test.mjs \
             cerebro/tests/qa-email-enrichment-v0.test.mjs
 
       - name: Install Chromium for existing Playwright stack
@@ -125,6 +130,14 @@ jobs:
             --out artifacts/qa/remediation.json
           jq '{status,open_cases,bug_cases,improvement_cases,learning_records_total,candidate_packages_total,human_required,next_gate,authority,safety}' artifacts/qa/remediation.json
 
+      - name: Build bounded QA learning signals for existing universal RSI ingress
+        run: |
+          node cerebro/qa/qa-learning-bridge.mjs \
+            --input artifacts/qa/state.after.json \
+            --output artifacts/qa/learning-signals.json
+          jq -e '.state_type=="CEREBRO_QA_LEARNING_SIGNAL_BATCH_V0" and .prod_authorized==false and .prod_write_authorized==false and .trading_access==false and .contains_customer_data==false and .contains_secrets==false and .additional_cost_eur==0' artifacts/qa/learning-signals.json >/dev/null
+          jq '{signals_total,downstream,repair_semantics}' artifacts/qa/learning-signals.json
+
       - name: Attach improvement and remediation summary to canonical QA state
         run: |
           node --input-type=module <<'NODE'
@@ -132,24 +145,10 @@ jobs:
           const qa=JSON.parse(fs.readFileSync('artifacts/qa/state.after.json','utf8'));
           const improvements=JSON.parse(fs.readFileSync('artifacts/qa/improvements.json','utf8'));
           const remediation=JSON.parse(fs.readFileSync('artifacts/qa/remediation.json','utf8'));
-          qa.improvement_scout={
-            status:improvements.status,
-            observations_total:improvements.observations_total,
-            candidates_total:improvements.candidates_total,
-            top_candidates:(improvements.candidates??[]).slice(0,5),
-            safety:improvements.safety
-          };
-          qa.remediation={
-            status:remediation.status,
-            open_cases:remediation.open_cases,
-            bug_cases:remediation.bug_cases,
-            improvement_cases:remediation.improvement_cases,
-            candidate_packages_total:remediation.candidate_packages_total,
-            human_required:remediation.human_required,
-            next_gate:remediation.next_gate,
-            authority:remediation.authority,
-            safety:remediation.safety
-          };
+          const learning=JSON.parse(fs.readFileSync('artifacts/qa/learning-signals.json','utf8'));
+          qa.improvement_scout={status:improvements.status,observations_total:improvements.observations_total,candidates_total:improvements.candidates_total,top_candidates:(improvements.candidates??[]).slice(0,5),safety:improvements.safety};
+          qa.remediation={status:remediation.status,open_cases:remediation.open_cases,bug_cases:remediation.bug_cases,improvement_cases:remediation.improvement_cases,candidate_packages_total:remediation.candidate_packages_total,human_required:remediation.human_required,next_gate:remediation.next_gate,authority:remediation.authority,safety:remediation.safety};
+          qa.learning_bridge={signals_total:learning.signals_total,downstream:learning.downstream,repair_semantics:learning.repair_semantics,prod_write_authorized:false,additional_cost_eur:0};
           fs.writeFileSync('artifacts/qa/state.after.json',JSON.stringify(qa,null,2)+'\n');
           NODE
 
@@ -159,6 +158,22 @@ jobs:
           jq -e '.targets.PRODUCT.status=="POR_AUDITAR" or .coverage.products=="ENABLED_SYNTHETIC_PREPROD"' artifacts/qa/state.after.json >/dev/null
           jq -e '.safety.prod_write==false and .safety.customer_data==false and .safety.trading==false and .safety.paid_fallback==false and .safety.additional_subscription_eur==0 and ([.candidates[]|select(.prod_write_authorized!=false or .additional_cost_eur!=0)]|length)==0' artifacts/qa/improvements.json >/dev/null
           jq -e '.safety.prod_write==false and .safety.customer_data==false and .safety.trading==false and .safety.paid_fallback==false and .safety.additional_subscription_eur==0 and .authority.app_web_prod_autofix==false and .authority.assisted_owner_engines_preserved==true and .authority.promotion_authorized==false and .authority.prod_write_authorized==false and ([.candidate_packages[]|select(.prod_write_authorized!=false or .additional_cost_eur!=0)]|length)==0' artifacts/qa/remediation.json >/dev/null
+          jq -e '.prod_authorized==false and .prod_write_authorized==false and .trading_access==false and .contains_customer_data==false and .contains_secrets==false and .additional_cost_eur==0' artifacts/qa/learning-signals.json >/dev/null
+
+      - name: Dispatch only new verified QA evidence to existing universal RSI learning ingress
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          COUNT="$(jq -r '.signals_total' artifacts/qa/learning-signals.json)"
+          if [ "$COUNT" = '0' ]; then
+            echo 'No new/resolved/regressed QA evidence; idempotent learning no-op.'
+            exit 0
+          fi
+          jq '{event_type:"cerebro_learning_signal",client_payload:{signal:{signals:.signals}}}' artifacts/qa/learning-signals.json > artifacts/qa/repository-dispatch.json
+          gh api -X POST "repos/$GITHUB_REPOSITORY/dispatches" --input artifacts/qa/repository-dispatch.json
+          echo "Dispatched $COUNT bounded QA learning signal(s) to existing universal RSI ingress."
 
       - name: Persist only QA evidence state on its dedicated branch
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
