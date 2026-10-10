@@ -44,11 +44,25 @@ export function enrichDailySummary(summary, qa) {
   out.app_crm.push(targetLine('Productos', qa.targets?.PRODUCT, qa.coverage?.products));
   out.app_crm.push(`QA aprendizaje: ${qa.learned_regression_tests ?? 0} tests de regresión acumulados`);
 
+  const improvements = qa.improvement_scout?.candidates_total ?? 0;
+  const preprodCandidates = qa.remediation?.candidate_packages_total ?? 0;
+  const routedCases = qa.remediation?.open_cases ?? 0;
+  const humanHolds = qa.remediation?.human_required?.length ?? 0;
+  if (qa.improvement_scout || qa.remediation) {
+    out.human.push(`MEJORA CONTINUA · ${improvements} oportunidades medidas · ${routedCases} casos enrutados · ${preprodCandidates} candidatas PREPROD · ${humanHolds} HUMAN_REQUIRED`);
+  }
+
   for (const issue of qa.new_issues ?? []) {
     out.failures.push(`QA NUEVO · ${issue.kind} · ${issue.severity} · ${issue.owner_engine} · ${issue.title}`);
   }
   for (const item of qa.dispatch_queue ?? []) {
     out.next_safe_work.push(`QA → ${item.owner_engine}: reproducir, corregir o enrutar ${item.fingerprint}`);
+  }
+  for (const item of qa.improvement_scout?.top_candidates ?? []) {
+    out.next_safe_work.push(`MEJORA → ${item.engine_id}: ${item.title} · ${item.next_gate}`);
+  }
+  for (const hold of qa.remediation?.human_required ?? []) {
+    out.failures.push(`QA HUMAN_REQUIRED · ${hold.reason} · ${hold.owner_engine} · ${hold.case_id}`);
   }
   return out;
 }
