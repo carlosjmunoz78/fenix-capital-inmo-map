@@ -93,9 +93,10 @@ jobs:
         id: probe
         run: |
           set +e
-          npx playwright test tests/cerebro-human-readonly.spec.ts \
-            --project='desktop-chromium' \
-            --project='mobile-chromium' \
+          npx playwright test \
+            --config=cerebro/qa/playwright.qa.config.ts \
+            --project='qa-desktop-chromium' \
+            --project='qa-mobile-chromium' \
             --reporter=json \
             > artifacts/qa/playwright-report.json \
             2> artifacts/qa/playwright-stderr.log
