@@ -1,7 +1,12 @@
-# LAB/PREPROD only. Pin exact versions after first physical benchmark before promotion.
+# LAB/PREPROD only. Pin exact runtime versions after first physical user-host benchmark before promotion.
 fastapi>=0.115,<1
 uvicorn[standard]>=0.30,<1
 pydantic>=2.8,<3
-chatterbox-tts
+# PyPI 0.1.7 does not expose the current upstream t3_model=v3 loader yet.
+# Pin the official ResembleAI upstream commit that contains the explicit v2/v3 resolver.
+# That upstream metadata still declares Perth from `master`; Install-VoiceLab.ps1
+# verifies master is the reviewed ff1c8ac... commit BEFORE pip executes, and
+# verify_backend_provenance.py verifies the installed VCS commit again afterward.
+chatterbox-tts @ git+https://github.com/resemble-ai/chatterbox.git@5de7a54aa4e5e2baadb0182dde554908b48b85c2
 soundfile>=0.12,<1
 psutil>=6,<8

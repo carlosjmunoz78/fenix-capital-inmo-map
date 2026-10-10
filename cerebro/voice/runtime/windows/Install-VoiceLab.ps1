@@ -6,6 +6,9 @@ param(
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
+$ExpectedPerthCommit = "ff1c8ac55a976971245cdd53c18d6131ca00d993"
+$PerthRepository = "https://github.com/resemble-ai/Perth.git"
+
 function Resolve-RepoRoot {
     param([string]$Requested)
     if ($Requested) {
@@ -53,6 +56,21 @@ function Protect-PrivateDirectory {
     Set-Acl -Path $Path -AclObject $acl
 }
 
+function Assert-ReviewedPerthMaster {
+    $git = Get-Command git -ErrorAction SilentlyContinue
+    if (-not $git) { throw "Git is required for the pinned VOICE-001 backend source install." }
+
+    $line = (& git ls-remote $PerthRepository refs/heads/master 2>$null | Select-Object -First 1)
+    if ($LASTEXITCODE -ne 0 -or -not $line) {
+        throw "Unable to verify the upstream Perth master commit before dependency installation."
+    }
+    $observed = (($line -split '\s+')[0]).ToLowerInvariant()
+    if ($observed -ne $ExpectedPerthCommit) {
+        throw "VOICE-001 supply-chain HOLD: Perth master moved from the reviewed commit. Review and update provenance before installing."
+    }
+    Write-Host "GREEN Perth upstream preflight: reviewed master commit unchanged."
+}
+
 $RepoRoot = Resolve-RepoRoot $RepoRoot
 $RuntimeRoot = Join-Path $env:LOCALAPPDATA "CEREBRO\voice-runtime"
 $PrivateRoot = Join-Path $env:LOCALAPPDATA "CEREBRO\voice-private"
@@ -63,9 +81,11 @@ $TokenFile = Join-Path $PrivateRoot "runtime-token.dpapi"
 $RegistryFile = Join-Path $PrivateRoot "registry.private.json"
 $Requirements = Join-Path $RepoRoot "cerebro\voice\runtime\requirements.txt"
 $Probe = Join-Path $RepoRoot "cerebro\voice\runtime\physical_lab_probe.py"
+$ProvenanceVerifier = Join-Path $RepoRoot "cerebro\voice\runtime\verify_backend_provenance.py"
 
 if (-not (Test-Path $Requirements)) { throw "VOICE-001 requirements not found at $Requirements" }
 if (-not (Test-Path $Probe)) { throw "VOICE-001 physical probe not found at $Probe" }
+if (-not (Test-Path $ProvenanceVerifier)) { throw "VOICE-001 backend provenance verifier not found at $ProvenanceVerifier" }
 
 New-Item -ItemType Directory -Force -Path $RuntimeRoot, $PrivateRoot, $EvidenceRoot | Out-Null
 Protect-PrivateDirectory $PrivateRoot
@@ -77,11 +97,19 @@ if (-not (Test-Path $VenvPython)) {
 }
 
 if (-not $SkipInstall) {
+    # Chatterbox's reviewed commit still declares Perth by mutable `master`.
+    # Verify that branch resolves to the exact reviewed commit BEFORE pip can build it.
+    Assert-ReviewedPerthMaster
+
     & $VenvPython -m pip install --disable-pip-version-check --upgrade pip
     if ($LASTEXITCODE -ne 0) { throw "pip bootstrap failed" }
     & $VenvPython -m pip install --disable-pip-version-check -r $Requirements
     if ($LASTEXITCODE -ne 0) { throw "VOICE-001 dependency installation failed" }
 }
+
+# Re-verify installed direct-VCS metadata before importing or loading the backend.
+& $VenvPython $ProvenanceVerifier
+if ($LASTEXITCODE -ne 0) { throw "VOICE-001 backend provenance verification failed" }
 
 if (-not (Test-Path $TokenFile)) {
     $token = New-RuntimeToken
@@ -114,7 +142,7 @@ try {
     $plainToken = $null
 }
 
-Write-Host "GREEN VOICE-001 physical LAB host automation installed."
+Write-Host "GREEN VOICE-001 physical LAB host automation installed with reviewed backend provenance."
 Write-Host "Private references: $PrivateRoot"
 Write-Host "Evidence: $EvidenceRoot"
 Write-Host "Runtime remains LAB-only and loopback-only. No PROD binding was changed."

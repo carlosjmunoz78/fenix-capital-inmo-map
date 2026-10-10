@@ -45,6 +45,8 @@ jobs:
           python -m py_compile \
             cerebro/voice/runtime/physical_lab_probe.py \
             cerebro/voice/runtime/physical_lab_benchmark.py \
+            cerebro/voice/runtime/backend_model_smoke.py \
+            cerebro/voice/runtime/verify_backend_provenance.py \
             cerebro/voice/runtime/register_voice_reference.py \
             cerebro/voice/runtime/app.py
 
@@ -66,13 +68,15 @@ jobs:
           set -euo pipefail
           grep -F 'MEASURED_NOT_ACCEPTED' cerebro/voice/runtime/physical_lab_benchmark.py >/dev/null
           grep -F 'automatic_promotion": False' cerebro/voice/runtime/physical_lab_benchmark.py >/dev/null
+          grep -F 'GREEN_MODEL_SMOKE_ONLY' cerebro/voice/runtime/backend_model_smoke.py >/dev/null
+          grep -F 'direct_url.json' cerebro/voice/runtime/verify_backend_provenance.py >/dev/null
           grep -F -- '--host 127.0.0.1' cerebro/voice/runtime/windows/Start-VoiceLab.ps1 >/dev/null
           grep -F 'MODEL_NOT_PHYSICALLY_BENCHMARKED' cerebro/voice/runtime/PHYSICAL_LAB_V0.md >/dev/null
-          ! grep -R -n -F '0.0.0.0' cerebro/voice/runtime/windows cerebro/voice/runtime/physical_lab_*.py
-          ! grep -R -n -E 'CEREBRO_ENVIRONMENT[^\n]*PROD' cerebro/voice/runtime/windows cerebro/voice/runtime/physical_lab_*.py
+          ! grep -R -n -F '0.0.0.0' cerebro/voice/runtime/windows cerebro/voice/runtime/physical_lab_*.py cerebro/voice/runtime/backend_model_smoke.py
+          ! grep -R -n -E 'CEREBRO_ENVIRONMENT[^\n]*PROD' cerebro/voice/runtime/windows cerebro/voice/runtime/physical_lab_*.py cerebro/voice/runtime/backend_model_smoke.py
 
       - name: Record boundary
         shell: bash
         run: |
-          echo 'VOICE-001 physical LAB automation is code-gated only; no model/reference/voice quality is claimed by CI.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'PROD false; browser TTS fallback preserved; physical reference + listening QA remain mandatory.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'VOICE-001 physical LAB automation is code-gated only; no human reference/accent/voice quality is claimed by this gate.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'PROD false; browser TTS fallback preserved; reviewed VCS provenance + physical reference + listening QA remain mandatory.' >> "$GITHUB_STEP_SUMMARY"

@@ -31,10 +31,12 @@ REF_ROOT = Path(os.getenv("CEREBRO_VOICE_REF_ROOT", str(VOICE_DIR / ".private-re
 PRIVATE_REGISTRY_PATH = Path(os.getenv("CEREBRO_VOICE_PRIVATE_REGISTRY", str(REF_ROOT / "registry.private.json"))).resolve()
 ENVIRONMENT = os.getenv("CEREBRO_ENVIRONMENT", "LAB").upper()
 BACKEND = os.getenv("CEREBRO_VOICE_BACKEND", "chatterbox_multilingual")
+T3_MODEL = os.getenv("CEREBRO_VOICE_T3_MODEL", "v3").lower()
 DEVICE = os.getenv("CEREBRO_VOICE_DEVICE", "cpu")
 API_TOKEN = os.getenv("CEREBRO_VOICE_RUNTIME_TOKEN", "")
 MAX_TEXT_CHARS = int(os.getenv("CEREBRO_VOICE_MAX_TEXT_CHARS", "1400"))
 ALLOWED_READY_STATES = {"LAB_READY", "PREPROD_READY"}
+ALLOWED_T3_MODELS = {"v2", "v3"}
 PRIVATE_OVERRIDE_FIELDS = {
     "status", "company_id", "reference_ref", "reference_sha256", "provenance",
     "consent_ref", "license", "model_version", "qa", "verified_at"
@@ -42,8 +44,10 @@ PRIVATE_OVERRIDE_FIELDS = {
 
 if ENVIRONMENT == "PROD":
     raise RuntimeError("VOICE-001 owned runtime V0 refuses PROD")
+if T3_MODEL not in ALLOWED_T3_MODELS:
+    raise RuntimeError("VOICE-001 unsupported Chatterbox multilingual T3 model")
 
-app = FastAPI(title="CEREBRO VOICE-001 Owned Runtime", version="0.2.0", docs_url=None, redoc_url=None)
+app = FastAPI(title="CEREBRO VOICE-001 Owned Runtime", version="0.3.0", docs_url=None, redoc_url=None)
 _model = None
 _model_lock = Lock()
 
@@ -134,7 +138,7 @@ def _get_model():
             raise HTTPException(status_code=503, detail="backend_not_implemented")
         try:
             from chatterbox.mtl_tts import ChatterboxMultilingualTTS
-            _model = ChatterboxMultilingualTTS.from_pretrained(device=DEVICE)
+            _model = ChatterboxMultilingualTTS.from_pretrained(device=DEVICE, t3_model=T3_MODEL)
         except Exception as exc:
             raise HTTPException(status_code=503, detail=f"model_load_failed:{type(exc).__name__}") from exc
     return _model
@@ -151,6 +155,7 @@ def health() -> dict:
         "environment": ENVIRONMENT,
         "prod_enabled": False,
         "backend": BACKEND,
+        "t3_model": T3_MODEL,
         "device": DEVICE,
         "locale": "es-ES",
         "voice_slots": len(voices),
@@ -223,6 +228,7 @@ def synthesize(payload: SynthesisRequest) -> Response:
             "X-Cerebro-Voice": payload.voice_id,
             "X-Cerebro-Locale": "es-ES",
             "X-Cerebro-Backend": BACKEND,
+            "X-Cerebro-T3-Model": T3_MODEL,
             "X-Cerebro-Latency-Ms": str(elapsed_ms),
             "Cache-Control": "no-store",
         },
