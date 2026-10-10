@@ -1,11 +1,11 @@
 {
-  "schema_version": "0.7.0",
+  "schema_version": "0.8.0",
   "engine_id": "VOICE-001",
   "environment": "LAB",
   "locale": "es-ES",
   "owner_selection": {
     "keep_all": ["ESM05", "ESM06", "ESM07", "ESM08-CARLFM-YOUNGER-B"],
-    "primary_direction": "ESM10",
+    "primary_direction": "ESM11",
     "accepted_existing_candidates": ["ESM05", "ESM06", "ESM07", "ESM08-CARLFM-YOUNGER-B"],
     "jarvis_style_target_still_open": true
   },
@@ -69,34 +69,45 @@
       "status": "OWNER_REJECTED_LATAM_ACCENT_REDUCED_BUT_STILL_PRESENT"
     },
     {
-      "voice_id": "ESM10",
-      "label": "CEREBRO Original Synthetic Timbre Bridged to Dedicated Spain-Spanish",
-      "owner_decision": "OWNER_LISTENING_PENDING",
-      "status": "THREE_DEDICATED_ES_ES_CANDIDATES_GENERATED_NOT_ACCEPTED",
-      "pipeline": [
-        "Qwen3-TTS VoiceDesign original synthetic English timbre reference",
-        "ResembleAI Chatterbox dedicated Spanish-Spain single-language finetune"
-      ],
-      "accent_strategy": "synthetic timbre only; Spain-Spanish pronunciation delegated to dedicated es-ES model with low CFG",
-      "candidates": [
-        "ESM10-A_SMOOTH_BARITONE",
-        "ESM10-B_POLISHED_SYSTEM",
-        "ESM10-C_RESONANT_YOUNGER"
-      ],
-      "target_age_impression": "mid_30s_to_early_40s",
+      "voice_id": "ESM10-A",
+      "owner_decision": "REJECT_FOR_TARGET",
+      "status": "OWNER_REJECTED_LATAM_ACCENT"
+    },
+    {
+      "voice_id": "ESM10-B",
+      "owner_decision": "REJECT_FOR_TARGET",
+      "status": "OWNER_REJECTED_LATAM_ACCENT"
+    },
+    {
+      "voice_id": "ESM10-C",
+      "owner_decision": "REJECT_FOR_PRIMARY_TARGET",
+      "status": "OWNER_REJECTED_ROBOTIC_QUALITY",
+      "owner_similarity_note": "LESS_LATAM_DRIFT_THAN_A_B_BUT_TOO_ROBOTIC"
+    },
+    {
+      "voice_id": "ESM11",
+      "label": "CEREBRO Original Peninsular Grave-Serene AI Assistant",
+      "owner_decision": "RESEARCH_AND_BUILD",
+      "status": "FORENSIC_STYLE_TARGET_DEFINED_NOT_GENERATED",
+      "research_ref": "../VOICE_ESM10_JARVIS_STYLE_FORENSIC_RESEARCH_V0.md",
       "target_traits": [
         "native Spain-Spanish",
         "male",
-        "low-mid baritone",
-        "smooth",
-        "calm",
+        "grave-to-medium-low register",
+        "adult but not elderly",
+        "substantial resonance without rasp",
+        "powerful base timbre with restrained delivery",
+        "serene",
         "precise",
-        "restrained",
         "technical",
         "elegant",
         "quiet authority",
+        "low pitch variance",
         "natural conversational delivery"
-      ]
+      ],
+      "fx_policy": "base timbre first; only subtle reversible micro-delay/chorus/short-room after accent and timbre pass",
+      "actor_clone": false,
+      "movie_audio_reference": false
     }
   ],
   "lessons": {
@@ -104,8 +115,11 @@
     "Piper_es_ES_catalog_exhausted_for_target_search": true,
     "ESM08_CARLFM_younger_B_is_owner_accepted_but_not_JARVIS": true,
     "Qwen3_VoiceDesign_without_native_reference_failed_es_ES_accent_gate": true,
-    "synthetic_timbre_to_dedicated_es_ES_bridge_succeeded_technically": true,
-    "ESM10_owner_accent_timbre_listening_required": true,
+    "synthetic_timbre_to_dedicated_es_ES_bridge_succeeded_technically_but_failed_owner_quality_gate": true,
+    "ESM10_A_B_failed_latam_gate": true,
+    "ESM10_C_failed_robotic_quality_gate": true,
+    "recognizable_target_depends_primarily_on_base_timbre_and_performance_not_heavy_fx": true,
+    "next_search_uses_forensic_style_profile_and_subtle_fx_only": true,
     "preserve_owner_accepted_candidates": true
   },
   "identity_policy": {
