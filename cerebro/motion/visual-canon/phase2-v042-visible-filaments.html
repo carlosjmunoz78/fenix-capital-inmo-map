@@ -1,0 +1,742 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>CEREBRO · PHASE 2 V0.4.2 · VISIBLE FILAMENTS</title>
+<style>
+:root{
+  color-scheme:dark;
+  --cyan:#5be0ff; --blue:#2e91ff; --white:#f6fcff; --muted:#7d9eb0;
+  --panel:rgba(3,10,18,.68); --line:rgba(103,208,255,.12)
+}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#00040a;color:#eefaff;
+font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+#gl,#overlay{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#overlay{pointer-events:none}
+.vignette{position:fixed;inset:0;pointer-events:none;background:
+radial-gradient(circle at 50% 50%,transparent 42%,rgba(0,0,0,.18) 70%,rgba(0,0,0,.62) 100%),
+linear-gradient(180deg,rgba(0,0,0,.20),transparent 15%,transparent 85%,rgba(0,0,0,.25))}
+.brand{
+position:fixed;left:18px;top:16px;pointer-events:none;opacity:.55;transition:opacity .3s ease
+}
+.brand:hover{opacity:1}
+.brand .k{font-size:9px;letter-spacing:.24em;text-transform:uppercase;color:#79d7ff}
+.brand .t{font-size:12px;letter-spacing:.12em;font-weight:700;margin-top:4px}
+.status{
+position:fixed;right:18px;top:16px;padding:7px 10px;border:1px solid var(--line);border-radius:999px;
+background:rgba(3,10,18,.42);backdrop-filter:blur(10px);font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:#addff2;opacity:.45
+}
+.operator-toggle{
+position:fixed;right:16px;bottom:16px;width:42px;height:42px;border-radius:50%;border:1px solid rgba(92,205,255,.16);
+background:rgba(3,12,22,.55);backdrop-filter:blur(12px);color:#bdeeff;display:grid;place-items:center;cursor:pointer;
+font-size:15px;z-index:6;transition:.18s ease
+}
+.operator-toggle:hover{border-color:rgba(91,221,255,.50);transform:scale(1.04)}
+.mini-actions{
+position:fixed;left:50%;bottom:14px;transform:translateX(-50%);display:flex;gap:8px;z-index:12;
+opacity:.72;transition:.2s ease;pointer-events:auto
+}
+.mini-actions:hover{opacity:1}
+.mini-actions button{
+min-height:44px;min-width:128px;pointer-events:auto;
+box-shadow:0 8px 28px rgba(0,0,0,.22)
+}
+.mini-actions button,.operator button{pointer-events:auto;position:relative;z-index:13;
+appearance:none;border:1px solid rgba(93,205,255,.12);background:rgba(4,14,24,.60);backdrop-filter:blur(10px);
+color:#dff8ff;border-radius:999px;padding:8px 11px;font:inherit;font-size:8px;letter-spacing:.10em;text-transform:uppercase;cursor:pointer
+}
+.mini-actions button.active,.operator button.active{border-color:rgba(92,220,255,.55);box-shadow:0 0 24px rgba(76,208,255,.08) inset}
+.operator{
+position:fixed;right:16px;bottom:68px;width:340px;max-height:calc(100vh - 100px);overflow:auto;z-index:5;
+border:1px solid var(--line);background:linear-gradient(180deg,rgba(4,14,24,.78),rgba(2,8,15,.88));backdrop-filter:blur(18px);
+border-radius:18px;padding:13px;box-shadow:0 16px 60px rgba(0,0,0,.32);transform:translateX(calc(100% + 30px));opacity:0;transition:.24s ease
+}
+.operator.open{transform:none;opacity:1}
+.operator h2{margin:0 0 8px;font-size:10px;letter-spacing:.16em;text-transform:uppercase}
+.notice{font-size:8px;line-height:1.5;color:#7293a5;padding:8px;border:1px solid rgba(94,200,255,.08);border-radius:10px;background:rgba(0,8,16,.34);margin-bottom:9px}
+.notice b{color:#aeeaff}
+.levels{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:9px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.card{padding:8px;border:1px solid rgba(94,202,255,.08);border-radius:9px;background:rgba(5,14,23,.44);cursor:pointer}
+.card.active{border-color:rgba(87,219,255,.48);box-shadow:0 0 20px rgba(76,208,255,.06) inset}
+.card strong{display:block;font-size:8px;letter-spacing:.04em}
+.card span{display:block;font-size:7px;color:#66889b;margin-top:3px}
+.detail{margin-top:10px;padding-top:9px;border-top:1px solid rgba(96,203,255,.08)}
+.detail h3{font-size:15px;margin:0 0 4px}
+.detail p{font-size:8px;line-height:1.5;color:#8ca9ba;margin:0}
+.engine-list{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.jobline{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid rgba(90,190,255,.05);font-size:7px;color:#688a9e}
+.jobline b{color:#cdeffc}
+.context{
+position:fixed;left:50%;top:16px;transform:translateX(-50%);pointer-events:none;z-index:4;
+padding:7px 10px;border-radius:999px;border:1px solid rgba(94,202,255,.08);background:rgba(3,10,18,.34);
+backdrop-filter:blur(8px);font-size:7px;letter-spacing:.14em;text-transform:uppercase;color:rgba(198,236,251,.48)
+}
+.focus-label{
+position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:none;text-align:center;z-index:3;
+opacity:0;transition:.25s ease;text-shadow:0 0 22px rgba(0,0,0,.8)
+}
+.focus-label.show{opacity:.8}
+.focus-label strong{display:block;font-size:12px;letter-spacing:.16em;text-transform:uppercase}
+.focus-label span{display:block;font-size:8px;letter-spacing:.10em;color:#81a6ba;margin-top:4px}
+body.clean .brand, body.clean .status, body.clean .context, body.clean .operator-toggle, body.clean #depthHint{opacity:0;pointer-events:none}
+body.clean .mini-actions{opacity:.82;pointer-events:auto}
+body.clean .mini-actions button{background:rgba(2,9,16,.50);border-color:rgba(92,220,255,.16)}
+body.clean .operator{display:none}
+@media(max-width:780px){
+.operator{right:8px;bottom:68px;width:min(340px,calc(100vw - 16px));max-height:55vh}
+.operator-toggle{right:9px;bottom:9px}
+.mini-actions{bottom:8px;width:calc(100vw - 20px);justify-content:center}
+.mini-actions button{min-width:0;flex:1;max-width:180px;min-height:46px}
+.brand{left:10px;top:10px}.status{right:10px;top:10px}
+}
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+<canvas id="overlay"></canvas>
+<div class="vignette"></div>
+
+<div class="brand"><div class="k">CEREBRO · MOTION-001</div><div class="t">PHASE 2 V0.4.2 · VISIBLE FILAMENTS</div></div>
+<div class="status">LAB / PREPROD · SHADOW · PROD FALSE</div>
+<div id="runtimeNotice" style="display:none;position:fixed;left:50%;top:54px;transform:translateX(-50%);z-index:20;padding:7px 10px;border:1px solid rgba(255,185,90,.22);border-radius:999px;background:rgba(16,10,2,.62);backdrop-filter:blur(10px);font-size:8px;letter-spacing:.10em;text-transform:uppercase;color:#e6c98f">Modo compatible Canvas · enlaces visibles</div>
+<div class="context" id="context">PRESENCE</div>
+<div id="depthHint" style="position:fixed;left:16px;bottom:16px;font-size:7px;letter-spacing:.11em;text-transform:uppercase;color:rgba(178,224,244,.25);pointer-events:none;z-index:3">WebGL2 · volumetric filaments · shadow</div>
+
+<div class="mini-actions">
+<button id="follow">▶ Seguir señal</button>
+<button id="clean">◉ Solo cerebro</button>
+</div>
+
+<button class="operator-toggle" id="opToggle" aria-label="Abrir modo operador">⌁</button>
+
+<aside class="operator" id="operator">
+<h2>Modo operador</h2>
+<div class="notice"><b>SHADOW:</b> esta actividad es simulada para validar la experiencia visual. No representa pensamiento interno ni telemetría viva.</div>
+<div class="levels">
+<button data-level="PRESENCE">Presence</button>
+<button data-level="INSIDE">Inside</button>
+<button data-level="CLUSTER">Cluster</button>
+<button data-level="ENGINE">Engine</button>
+</div>
+<div class="grid" id="clusterGrid"></div>
+<div class="detail">
+<h3 id="detailName">CORE / ORCHESTRATION</h3>
+<p id="detailDesc">Gateway, Model Router, Event Bus y Engine Registry.</p>
+<div class="engine-list" id="engineGrid"></div>
+<div id="jobs"></div>
+</div>
+</aside>
+
+<div class="focus-label" id="focusLabel"><strong></strong><span></span></div>
+<div id="cleanHint" style="position:fixed;left:50%;bottom:64px;transform:translateX(-50%);font-size:7px;letter-spacing:.12em;text-transform:uppercase;color:rgba(180,225,245,.34);pointer-events:none;z-index:11;opacity:0;transition:.2s ease">Modo limpio · controles mínimos activos</div>
+
+<script>
+(()=>{
+'use strict';
+
+/* ---------- Canonical data ---------- */
+const CLUSTERS=[
+{id:'CORE_ORCHESTRATION',name:'CORE / ORCHESTRATION',short:'CORE',desc:'Gateway, Model Router, Event Bus y Engine Registry.',p:[0,0,0],r:.24,engines:['GATEWAY','MODEL_ROUTER','EVENT_BUS','ENGINE_REGISTRY']},
+{id:'FACTORY_BUILD',name:'FACTORY / BUILD',short:'FACTORY',desc:'FACT-001, contratos, rebuild y promoción.',p:[-.54,.34,-.10],r:.21,engines:['FACT-001','CONTRACTS','REBUILD','PROMOTION']},
+{id:'SUPERVISION_DECISION',name:'SUPERVISION / DECISION',short:'SUPERVISION',desc:'Supervisor, EVA, Tribunal/JDG y human exception.',p:[.49,.39,-.08],r:.21,engines:['SUPERVISOR','EVA-001','JDG-001','HUMAN_REQUIRED']},
+{id:'COMMUNICATION_EXPERIENCE',name:'COMMUNICATION / EXPERIENCE',short:'COMMS',desc:'HCI, Voice, Motion y Console.',p:[-.64,-.04,.14],r:.20,engines:['HCI-001','VOICE-001','MOTION-001','CONSOLE']},
+{id:'KNOWLEDGE_LEARNING',name:'KNOWLEDGE / LEARNING',short:'KNOWLEDGE',desc:'Training, Knowledge y LRN.',p:[.60,-.02,.16],r:.20,engines:['TRAINING','KNOWLEDGE','LRN','DOCS']},
+{id:'GROWTH_INTELLIGENCE',name:'GROWTH / INTELLIGENCE',short:'GROWTH',desc:'SEO, research, mercado y competencia.',p:[-.50,-.41,.10],r:.19,engines:['SEO-001','LOCAL_SEO','RESEARCH','COMPETITOR']},
+{id:'OPERATIONS_BUSINESS',name:'OPERATIONS / BUSINESS',short:'OPS',desc:'CRM, App, procesos y customer flows.',p:[.50,-.41,.10],r:.19,engines:['CRM','APP','PROCESSES','CUSTOMER_FLOWS']},
+{id:'AUTOMATION_JOBS',name:'AUTOMATION / JOBS',short:'AUTOMATION',desc:'Workers, jobs e integraciones.',p:[-.18,.51,.28],r:.18,engines:['WORKERS','JOBS','INTEGRATIONS','AUTOMATION_BOOTSTRAP']},
+{id:'SECURITY_RESILIENCE',name:'SECURITY / RESILIENCE',short:'SECURITY',desc:'Auth, permissions, backup y rollback.',p:[.19,.52,.30],r:.18,engines:['AUTH','PERMISSIONS','BACKUP','ROLLBACK']},
+{id:'FINANCE_RISK',name:'FINANCE / RISK',short:'FINANCE',desc:'Money limits, coste y riesgo.',p:[.02,-.58,.24],r:.18,engines:['FINANCE','MONEY_LIMITS','COST_CONTROL','RISK_GATES']}
+];
+const ROUTES=[
+['COMMUNICATION_EXPERIENCE','CORE_ORCHESTRATION','SUPERVISION_DECISION','GROWTH_INTELLIGENCE'],
+['FACTORY_BUILD','CORE_ORCHESTRATION','SECURITY_RESILIENCE','SUPERVISION_DECISION'],
+['KNOWLEDGE_LEARNING','CORE_ORCHESTRATION','AUTOMATION_JOBS','OPERATIONS_BUSINESS']
+];
+
+/* ---------- UI ---------- */
+const glCanvas=document.getElementById('gl'), over=document.getElementById('overlay'), octx=over.getContext('2d');
+const op=document.getElementById('operator'), opToggle=document.getElementById('opToggle');
+const contextEl=document.getElementById('context'), focusLabel=document.getElementById('focusLabel');
+const clusterGrid=document.getElementById('clusterGrid'), engineGrid=document.getElementById('engineGrid');
+const detailName=document.getElementById('detailName'), detailDesc=document.getElementById('detailDesc'), jobs=document.getElementById('jobs');
+const followBtn=document.getElementById('follow'), cleanBtn=document.getElementById('clean'), cleanHint=document.getElementById('cleanHint'), runtimeNotice=document.getElementById('runtimeNotice');
+
+let selectedCluster=0, selectedEngine=0, level='PRESENCE';
+let targetLevel='PRESENCE', fly=0, flyTarget=0, follow=false, followTimer=null, route=ROUTES[0], routePulse=0;
+let clean=false, operatorOpen=false;
+let yaw=-.20,pitch=.03,targetYaw=yaw,targetPitch=pitch,userZoom=1,drag=false,lx=0,ly=0,px=.5,py=.5;
+
+opToggle.onclick=()=>{operatorOpen=!operatorOpen;op.classList.toggle('open',operatorOpen)};
+cleanBtn.onclick=()=>{
+ clean=!clean;
+ document.body.classList.toggle('clean',clean);
+ cleanBtn.textContent=clean?'◉ Mostrar interfaz':'◉ Solo cerebro';
+ cleanHint.style.opacity=clean?'.7':'0';
+};
+document.addEventListener('keydown',e=>{
+ if(e.key.toLowerCase()==='h'){
+ clean=!clean;document.body.classList.toggle('clean',clean);
+ cleanBtn.textContent=clean?'◉ Mostrar interfaz':'◉ Solo cerebro';
+ cleanHint.style.opacity=clean?'.7':'0';
+}
+ if(e.key.toLowerCase()==='o'){operatorOpen=!operatorOpen;op.classList.toggle('open',operatorOpen)}
+});
+document.querySelectorAll('[data-level]').forEach(b=>b.onclick=()=>setLevel(b.dataset.level));
+
+function renderUI(){
+ const c=CLUSTERS[selectedCluster], engine=c.engines[selectedEngine]||c.engines[0];
+ detailName.textContent=c.name;detailDesc.textContent=c.desc;
+ clusterGrid.innerHTML='';
+ CLUSTERS.forEach((x,i)=>{
+   const el=document.createElement('div'); el.className='card'+(i===selectedCluster?' active':'');
+   el.innerHTML=`<strong>${x.short}</strong><span>${x.id}</span>`;
+   el.onclick=()=>{selectedCluster=i;selectedEngine=0;setLevel('CLUSTER');renderUI()};
+   clusterGrid.appendChild(el);
+ });
+ engineGrid.innerHTML='';
+ c.engines.forEach((x,i)=>{
+   const el=document.createElement('div');el.className='card'+(i===selectedEngine?' active':'');
+   el.innerHTML=`<strong>${x}</strong><span>engine</span>`;
+   el.onclick=()=>{selectedEngine=i;setLevel('ENGINE');renderUI()};
+   engineGrid.appendChild(el);
+ });
+ jobs.innerHTML=[
+  `${engine}:job:01`,
+  `${engine}:event:02`,
+  `${engine}:check:03`
+ ].map((x,i)=>`<div class="jobline"><span>${x}</span><b>${['PROCESSING','ROUTED','SHADOW'][i]}</b></div>`).join('');
+ contextEl.textContent=level==='PRESENCE'?'PRESENCE':
+ level==='INSIDE'?'PRESENCE / INSIDE':
+ level==='CLUSTER'?`PRESENCE / INSIDE / ${c.short}`:
+ `PRESENCE / INSIDE / ${c.short} / ${engine}`;
+}
+function setLevel(v){
+ targetLevel=v;level=v;
+ flyTarget={PRESENCE:0,INSIDE:.34,CLUSTER:.70,ENGINE:1}[v]??0;
+ renderUI();
+}
+followBtn.onclick=()=>{
+ follow=!follow;followBtn.classList.toggle('active',follow);clearTimeout(followTimer);
+ if(!follow){setLevel('PRESENCE');return}
+ let step=0;
+ const seq=[
+  ()=>{selectedCluster=3;selectedEngine=0;route=ROUTES[0];setLevel('PRESENCE');},
+  ()=>setLevel('INSIDE'),
+  ()=>{selectedCluster=0;renderUI();focusPulse('CORE / ORCHESTRATION','routing signal');},
+  ()=>{selectedCluster=5;selectedEngine=0;setLevel('CLUSTER');focusPulse('GROWTH / INTELLIGENCE','family cluster');},
+  ()=>{selectedEngine=0;setLevel('ENGINE');focusPulse('SEO-001','engine micro-network');},
+  ()=>{focusPulse('SEO-001','jobs / events shadow');},
+  ()=>setLevel('INSIDE')
+ ];
+ const run=()=>{if(!follow)return;seq[step++]();if(step<seq.length)followTimer=setTimeout(run,2100);else followTimer=setTimeout(()=>{follow=false;followBtn.classList.remove('active')},2200)};
+ run();
+};
+function focusPulse(a,b){
+ focusLabel.querySelector('strong').textContent=a;focusLabel.querySelector('span').textContent=b;
+ focusLabel.classList.add('show');setTimeout(()=>focusLabel.classList.remove('show'),1200);
+}
+renderUI();
+cleanHint.style.opacity='0';
+
+/* ---------- Interaction ---------- */
+glCanvas.onpointerdown=e=>{drag=true;lx=e.clientX;ly=e.clientY;glCanvas.setPointerCapture(e.pointerId)};
+glCanvas.onpointermove=e=>{px=e.clientX/innerWidth;py=e.clientY/innerHeight;if(drag){const dx=e.clientX-lx,dy=e.clientY-ly;lx=e.clientX;ly=e.clientY;targetYaw+=dx*.004;targetPitch=Math.max(-.55,Math.min(.55,targetPitch+dy*.003))}};
+glCanvas.onpointerup=()=>drag=false;glCanvas.onpointercancel=()=>drag=false;
+glCanvas.onwheel=e=>{e.preventDefault();userZoom=Math.max(.72,Math.min(1.6,userZoom*(e.deltaY>0?.95:1.05)))};
+
+/* ---------- WebGL2 ---------- */
+const gl=glCanvas.getContext('webgl2',{antialias:false,alpha:false,powerPreference:'high-performance'});
+let webglRuntimeOK=false;
+const webglOK=!!gl;
+const rand=mulberry32(0xC3E8F3);
+function mulberry32(a){return function(){let t=a+=0x6D2B79F5;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296}}
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)), lerp=(a,b,t)=>a+(b-a)*t;
+
+let W=1,H=1,DPR=Math.min(2,devicePixelRatio||1);
+function resize(){
+ W=innerWidth;H=innerHeight;DPR=Math.min(2,devicePixelRatio||1);
+ glCanvas.width=Math.round(W*DPR);glCanvas.height=Math.round(H*DPR);
+ over.width=Math.round(W*DPR);over.height=Math.round(H*DPR);
+ glCanvas.style.width=over.style.width=W+'px';glCanvas.style.height=over.style.height=H+'px';
+ octx.setTransform(DPR,0,0,DPR,0,0);
+ if(gl)gl.viewport(0,0,glCanvas.width,glCanvas.height);
+}
+addEventListener('resize',resize,{passive:true});resize();
+
+function brainAccept(p){
+ const ell=(c,r)=>{const x=(p[0]-c[0])/r[0],y=(p[1]-c[1])/r[1],z=(p[2]-c[2])/r[2];return x*x+y*y+z*z<=1};
+ const ok=ell([-.38,.12,0],[.88,.79,.63])||ell([.38,.12,0],[.88,.79,.63])||ell([0,.30,-.16],[1,.70,.58])||ell([0,.10,.30],[.92,.74,.58])||ell([.17,-.42,.18],[.72,.40,.48])||ell([.08,-.82,.12],[.24,.40,.23]);
+ if(!ok)return false;
+ if(Math.abs(p[0])<.045&&p[1]>.15&&rand()<.68)return false;
+ return true;
+}
+const outer=[];
+while(outer.length<3600){
+ const p=[rand()*2.35-1.175,rand()*2.05-1.02,rand()*1.55-.775];
+ if(brainAccept(p))outer.push({p,phase:rand()*6.283,size:.45+rand()*1.5,kind:0});
+}
+const inner=[];
+for(let ci=0;ci<CLUSTERS.length;ci++){
+ const c=CLUSTERS[ci],count=c.id==='CORE_ORCHESTRATION'?260:165;
+ for(let i=0;i<count;i++){
+  let dx,dy,dz;do{dx=(rand()*2-1)*c.r;dy=(rand()*2-1)*c.r;dz=(rand()*2-1)*c.r}while(dx*dx+dy*dy+dz*dz>c.r*c.r);
+  inner.push({p:[c.p[0]+dx,c.p[1]+dy,c.p[2]+dz],phase:rand()*6.283,size:.5+rand()*1.8,kind:1,cluster:ci});
+ }
+}
+const enginePts=[];
+CLUSTERS.forEach((c,ci)=>c.engines.forEach((e,ei)=>{
+ const ang=ei/c.engines.length*Math.PI*2+.35,rad=c.r*.60;
+ enginePts.push({p:[c.p[0]+Math.cos(ang)*rad,c.p[1]+Math.sin(ang)*rad*.76,c.p[2]+Math.sin(ang*1.7)*rad*.25],phase:rand()*6.283,size:3.6,kind:2,cluster:ci,engine:ei});
+}));
+
+const particles=[...outer,...inner,...enginePts];
+
+/* ---------- Sparse 3D neural filaments ---------- */
+function buildSparseEdges(items,{cell=.18,maxDist=.24,maxPerNode=2,sameCluster=false,limit=2800}={}){
+ const buckets=new Map();
+ const key=p=>`${Math.floor(p[0]/cell)},${Math.floor(p[1]/cell)},${Math.floor(p[2]/cell)}`;
+ items.forEach((n,i)=>{const k=key(n.p);if(!buckets.has(k))buckets.set(k,[]);buckets.get(k).push(i)});
+ const edges=[],seen=new Set();
+ for(let i=0;i<items.length&&edges.length<limit;i++){
+   const n=items[i],gx=Math.floor(n.p[0]/cell),gy=Math.floor(n.p[1]/cell),gz=Math.floor(n.p[2]/cell);
+   const cand=[];
+   for(let dx=-1;dx<=1;dx++)for(let dy=-1;dy<=1;dy++)for(let dz=-1;dz<=1;dz++){
+     const arr=buckets.get(`${gx+dx},${gy+dy},${gz+dz}`);
+     if(!arr)continue;
+     for(const j of arr){
+       if(j===i)continue;
+       const m=items[j];
+       if(sameCluster && n.cluster!==m.cluster)continue;
+       const d=Math.hypot(n.p[0]-m.p[0],n.p[1]-m.p[1],n.p[2]-m.p[2]);
+       if(d<=maxDist)cand.push([j,d]);
+     }
+   }
+   cand.sort((a,b)=>a[1]-b[1]);
+   for(let k=0;k<Math.min(maxPerNode,cand.length);k++){
+     const j=cand[k][0],a=Math.min(i,j),b=Math.max(i,j),id=`${a}-${b}`;
+     if(seen.has(id))continue;
+     seen.add(id);edges.push([i,j]);
+     if(edges.length>=limit)break;
+   }
+ }
+ return edges;
+}
+const outerEdges=buildSparseEdges(outer,{cell:.19,maxDist:.23,maxPerNode:1,limit:1650});
+const innerEdges=buildSparseEdges(inner,{cell:.10,maxDist:.145,maxPerNode:2,sameCluster:true,limit:3400});
+
+let prog,vao,bufPos,bufMeta,uTime,uYaw,uPitch,uFly,uSelected,uSelectedEngine,uZoom,uRes;
+let lineProg,lineVao,lineBufPos,lineBufMeta,lineCount=0,luTime,luYaw,luPitch,luFly,luSelected,luZoom,luRes;
+if(gl){
+ try{
+ const lineVs=`#version 300 es
+ precision highp float;
+ layout(location=0) in vec3 aPos;
+ layout(location=1) in vec4 aMeta; // kind, cluster, phase, activeSeed
+ uniform float uTime,uYaw,uPitch,uFly,uSelected,uZoom;
+ uniform vec2 uRes;
+ out float vAlpha;
+ out float vHot;
+ out float vDepth;
+ out float vKind;
+ mat3 rotY(float a){float c=cos(a),s=sin(a);return mat3(c,0.,-s,0.,1.,0.,s,0.,c);}
+ mat3 rotX(float a){float c=cos(a),s=sin(a);return mat3(1.,0.,0.,0.,c,s,0.,-s,c);}
+
+ vec3 centerFor(float cluster){
+   if(cluster<0.5)return vec3(0.,0.,0.);
+   if(cluster<1.5)return vec3(-.54,.34,-.10);
+   if(cluster<2.5)return vec3(.49,.39,-.08);
+   if(cluster<3.5)return vec3(-.64,-.04,.14);
+   if(cluster<4.5)return vec3(.60,-.02,.16);
+   if(cluster<5.5)return vec3(-.50,-.41,.10);
+   if(cluster<6.5)return vec3(.50,-.41,.10);
+   if(cluster<7.5)return vec3(-.18,.51,.28);
+   if(cluster<8.5)return vec3(.19,.52,.30);
+   return vec3(.02,-.58,.24);
+ }
+
+ void main(){
+   vec3 p=aPos;
+   float kind=aMeta.x, cluster=aMeta.y, phase=aMeta.z, seed=aMeta.w;
+   float inside=smoothstep(.10,.42,uFly);
+   float clusterDive=smoothstep(.52,.82,uFly);
+   float selected=1.0;
+   if(kind<.5){
+     vAlpha=(1.0-inside)*(.050+.060*(.5+.5*sin(uTime*.0009+phase)));
+   }else{
+     vec3 c=centerFor(cluster);
+     p-=c*clusterDive;
+     selected=1.0-step(.35,abs(cluster-uSelected));
+     float hideOther=1.0-clusterDive*(1.0-selected)*.96;
+     float pulse=.5+.5*sin(uTime*.0017+phase+seed*4.0);
+     float active=mix(.040,.20,pulse);
+     vAlpha=inside*hideOther*active;
+     if(selected>.5)vAlpha*=2.35;
+   }
+   float sc=mix(1.0,1.0+clusterDive*1.55,uFly);
+   p*=sc*uZoom;
+   p=rotX(uPitch)*rotY(uYaw)*p;
+   float depth=3.8-p.z*.72;
+   vec2 xy=p.xy*(2.8/depth);
+   xy.x/=uRes.x/uRes.y;
+   gl_Position=vec4(xy,0.,1.);
+   vHot=.5+.5*sin(uTime*.0019+phase+seed*6.0);
+   vDepth=clamp((p.z+1.2)/2.4,0.,1.);
+   vKind=kind;
+ }`;
+ const lineFs=`#version 300 es
+ precision highp float;
+ in float vAlpha,vHot,vDepth,vKind;
+ out vec4 outColor;
+ void main(){
+   vec3 blue=vec3(.10,.42,.95);
+   vec3 cyan=vec3(.24,.86,1.0);
+   vec3 white=vec3(.96,.99,1.0);
+   vec3 c=mix(blue,cyan,smoothstep(.35,.86,vHot));
+   c=mix(c,white,smoothstep(.88,1.0,vHot)*.32);
+   float fog=mix(.26,1.0,vDepth);
+   float alpha=vAlpha*fog;
+   outColor=vec4(c,alpha);
+ }`;
+ lineProg=compileProgram(lineVs,lineFs);
+ lineVao=gl.createVertexArray();gl.bindVertexArray(lineVao);
+
+ const linePos=[],lineMeta=[];
+ const pushEdge=(list,edge,kind)=>{
+   for(const idx of edge){
+     const n=list[idx];
+     linePos.push(n.p[0],n.p[1],n.p[2]);
+     lineMeta.push(kind,n.cluster??-1,n.phase,rand());
+   }
+ };
+ outerEdges.forEach(e=>pushEdge(outer,e,0));
+ innerEdges.forEach(e=>pushEdge(inner,e,1));
+ lineCount=linePos.length/3;
+ lineBufPos=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,lineBufPos);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(linePos),gl.STATIC_DRAW);
+ gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,3,gl.FLOAT,false,0,0);
+ lineBufMeta=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,lineBufMeta);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(lineMeta),gl.STATIC_DRAW);
+ gl.enableVertexAttribArray(1);gl.vertexAttribPointer(1,4,gl.FLOAT,false,0,0);
+ luTime=gl.getUniformLocation(lineProg,'uTime');luYaw=gl.getUniformLocation(lineProg,'uYaw');luPitch=gl.getUniformLocation(lineProg,'uPitch');
+ luFly=gl.getUniformLocation(lineProg,'uFly');luSelected=gl.getUniformLocation(lineProg,'uSelected');luZoom=gl.getUniformLocation(lineProg,'uZoom');luRes=gl.getUniformLocation(lineProg,'uRes');
+
+ const vs=`#version 300 es
+ precision highp float;
+ layout(location=0) in vec3 aPos;
+ layout(location=1) in vec4 aMeta;
+ uniform float uTime,uYaw,uPitch,uFly,uSelected,uSelectedEngine,uZoom;
+ uniform vec2 uRes;
+ out float vAlpha;
+ out float vHot;
+ out float vKind;
+ out float vDepth;
+
+ mat3 rotY(float a){float c=cos(a),s=sin(a);return mat3(c,0.,-s,0.,1.,0.,s,0.,c);}
+ mat3 rotX(float a){float c=cos(a),s=sin(a);return mat3(1.,0.,0.,0.,c,s,0.,-s,c);}
+
+ vec3 centerFor(float cluster){
+   if(cluster<0.5)return vec3(0.,0.,0.);
+   if(cluster<1.5)return vec3(-.54,.34,-.10);
+   if(cluster<2.5)return vec3(.49,.39,-.08);
+   if(cluster<3.5)return vec3(-.64,-.04,.14);
+   if(cluster<4.5)return vec3(.60,-.02,.16);
+   if(cluster<5.5)return vec3(-.50,-.41,.10);
+   if(cluster<6.5)return vec3(.50,-.41,.10);
+   if(cluster<7.5)return vec3(-.18,.51,.28);
+   if(cluster<8.5)return vec3(.19,.52,.30);
+   return vec3(.02,-.58,.24);
+ }
+
+ void main(){
+   vec3 p=aPos;
+   float kind=aMeta.x, cluster=aMeta.y, engine=aMeta.z, phase=aMeta.w;
+   float inside=smoothstep(.10,.42,uFly);
+   float clusterDive=smoothstep(.52,.82,uFly);
+   float engineDive=smoothstep(.82,1.0,uFly);
+
+   if(kind<.5){
+     float dissolve=1.0-inside;
+     vAlpha=dissolve*(.12+.35*(.5+.5*sin(uTime*.0015+phase)));
+   }else{
+     vec3 c=centerFor(cluster);
+     p-=c*clusterDive;
+     float isSel=1.0-step(.35,abs(cluster-uSelected));
+     float hideOther=1.0-clusterDive*(1.0-isSel)*.92;
+     vAlpha=inside*hideOther*(.16+.40*(.5+.5*sin(uTime*.0018+phase)));
+     if(kind>1.5){
+       float isEng=isSel*(1.0-step(.35,abs(engine-uSelectedEngine)));
+       vAlpha*=.55+.45*isEng;
+     }
+   }
+
+   float sc=mix(1.0,1.0+clusterDive*1.55+engineDive*.75,uFly);
+   p*=sc*uZoom;
+   p=rotX(uPitch)*rotY(uYaw)*p;
+   float depth=3.8-p.z*.72;
+   vec2 xy=p.xy*(2.8/depth);
+   float aspect=uRes.x/uRes.y;
+   xy.x/=aspect;
+   gl_Position=vec4(xy,0.,1.);
+
+   float pulse=.5+.5*sin(uTime*.0022+phase);
+   float hot=(kind>1.5)?1.0:pulse;
+   gl_PointSize=(aMeta.x>1.5?7.5:2.0+aMeta.x*1.2+aMeta.w*0.0)+(hot*3.0);
+   gl_PointSize*=mix(1.0,1.15,engineDive);
+   vHot=hot;vKind=kind;vDepth=clamp((p.z+1.2)/2.4,0.,1.);
+ }`;
+ const fs=`#version 300 es
+ precision highp float;
+ in float vAlpha,vHot,vKind,vDepth;
+ out vec4 outColor;
+ void main(){
+   vec2 uv=gl_PointCoord*2.-1.;
+   float d=dot(uv,uv);
+   if(d>1.) discard;
+   float core=smoothstep(1.,0.,d);
+   float halo=smoothstep(1.,.1,d);
+   vec3 blue=vec3(.12,.52,1.0);
+   vec3 cyan=vec3(.30,.86,1.0);
+   vec3 white=vec3(.96,.99,1.0);
+   vec3 c=mix(blue,cyan,clamp(vHot,0.,1.));
+   if(vKind>1.5)c=mix(c,white,.72);
+   c=mix(c,white,smoothstep(.82,1.,vHot)*.55);
+   float alpha=vAlpha*(.20*halo+.86*core)*(0.45+0.55*vDepth);
+   outColor=vec4(c,alpha);
+ }`;
+ prog=compileProgram(vs,fs);
+ vao=gl.createVertexArray();gl.bindVertexArray(vao);
+ const pos=new Float32Array(particles.length*3);
+ const meta=new Float32Array(particles.length*4);
+ particles.forEach((n,i)=>{
+  pos.set(n.p,i*3);
+  meta[i*4]=n.kind;
+  meta[i*4+1]=n.cluster??-1;
+  meta[i*4+2]=n.engine??-1;
+  meta[i*4+3]=n.phase;
+ });
+ bufPos=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,bufPos);gl.bufferData(gl.ARRAY_BUFFER,pos,gl.STATIC_DRAW);
+ gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,3,gl.FLOAT,false,0,0);
+ bufMeta=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,bufMeta);gl.bufferData(gl.ARRAY_BUFFER,meta,gl.STATIC_DRAW);
+ gl.enableVertexAttribArray(1);gl.vertexAttribPointer(1,4,gl.FLOAT,false,0,0);
+ uTime=gl.getUniformLocation(prog,'uTime');uYaw=gl.getUniformLocation(prog,'uYaw');uPitch=gl.getUniformLocation(prog,'uPitch');
+ uFly=gl.getUniformLocation(prog,'uFly');uSelected=gl.getUniformLocation(prog,'uSelected');uSelectedEngine=gl.getUniformLocation(prog,'uSelectedEngine');
+ uZoom=gl.getUniformLocation(prog,'uZoom');uRes=gl.getUniformLocation(prog,'uRes');
+ gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE);gl.disable(gl.DEPTH_TEST);
+ webglRuntimeOK=true;
+ }catch(err){
+   console.warn('CEREBRO WebGL fallback:',err);
+   webglRuntimeOK=false;
+   runtimeNotice.style.display='block';
+ }
+}else{
+ runtimeNotice.style.display='block';
+}
+function compileProgram(vs,fs){
+ const V=gl.createShader(gl.VERTEX_SHADER);gl.shaderSource(V,vs);gl.compileShader(V);
+ const F=gl.createShader(gl.FRAGMENT_SHADER);gl.shaderSource(F,fs);gl.compileShader(F);
+ if(!gl.getShaderParameter(V,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(V));
+ if(!gl.getShaderParameter(F,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(F));
+ const P=gl.createProgram();gl.attachShader(P,V);gl.attachShader(P,F);gl.linkProgram(P);
+ if(!gl.getProgramParameter(P,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(P));
+ return P;
+}
+
+/* ---------- 2D semantic overlay ---------- */
+function rot(p,y,pit){
+ const cy=Math.cos(y),sy=Math.sin(y),cp=Math.cos(pit),sp=Math.sin(pit);
+ const x=p[0]*cy-p[2]*sy,z=p[0]*sy+p[2]*cy;
+ return [x,p[1]*cp-z*sp,p[1]*sp+z*cp];
+}
+function projectWorld(p){
+ const clusterDive=Math.max(0,Math.min(1,(fly-.52)/.30));
+ const c=CLUSTERS[selectedCluster];
+ let q=[p[0]-c.p[0]*clusterDive,p[1]-c.p[1]*clusterDive,p[2]-c.p[2]*clusterDive];
+ const sc=(1+clusterDive*1.55+Math.max(0,(fly-.82)/.18)*.75)*userZoom;
+ q=q.map(v=>v*sc);q=rot(q,yaw,pitch);
+ const depth=3.8-q[2]*.72,f=2.8/depth;
+ return [W/2+q[0]*f*H/2,W/2?H/2-q[1]*f*H/2:H/2,q[2]];
+}
+function routeEdgeActive(a,b){
+ for(let i=0;i<route.length-1;i++)if((route[i]===a&&route[i+1]===b)||(route[i]===b&&route[i+1]===a))return i;
+ return -1;
+}
+function projectNodeForOverlay(n){
+ const clusterDive=Math.max(0,Math.min(1,(fly-.52)/.30));
+ const cc=CLUSTERS[selectedCluster];
+ let p=[...n.p];
+ if(n.kind>0){
+   p=[p[0]-cc.p[0]*clusterDive,p[1]-cc.p[1]*clusterDive,p[2]-cc.p[2]*clusterDive];
+ }
+ const sc=(1+clusterDive*1.55+Math.max(0,(fly-.82)/.18)*.75)*userZoom;
+ p=[p[0]*sc,p[1]*sc,p[2]*sc];
+ p=rot(p,yaw,pitch);
+ const depth=3.8-p[2]*.72,f=2.8/depth;
+ return [W/2+p[0]*f*H/2,H/2-p[1]*f*H/2,p[2]];
+}
+function drawVisibleFilaments(now){
+ const inside=Math.max(0,Math.min(1,(fly-.12)/.26));
+ const clusterDive=Math.max(0,Math.min(1,(fly-.52)/.30));
+ const selectedId=CLUSTERS[selectedCluster].id;
+ const routeBoost=route.includes(selectedId)?1.0:.0;
+
+ octx.save();
+ octx.globalCompositeOperation='lighter';
+
+ // Exterior latent links: visible but restrained, never a bright spiderweb.
+ const outerStep=Math.max(1,Math.floor(outerEdges.length/620));
+ for(let ei=0;ei<outerEdges.length;ei+=outerStep){
+   const e=outerEdges[ei],a=outer[e[0]],b=outer[e[1]];
+   const pa=projectNodeForOverlay(a),pb=projectNodeForOverlay(b);
+   const phase=(a.phase+b.phase)*.5;
+   const breathe=.5+.5*Math.sin(now*.0010+phase);
+   const alpha=(1-inside)*(.020+.030*breathe);
+   if(alpha<.006) continue;
+   octx.strokeStyle=`rgba(66,177,255,${alpha})`;
+   octx.lineWidth=.45;
+   octx.beginPath();octx.moveTo(pa[0],pa[1]);octx.lineTo(pb[0],pb[1]);octx.stroke();
+ }
+
+ // Local cluster links: two-pass glow + luminous core with short pseudo-afterglow.
+ if(inside>.05){
+   let shown=0;
+   for(const e of innerEdges){
+     const a=inner[e[0]],b=inner[e[1]];
+     if(a.cluster!==selectedCluster || b.cluster!==selectedCluster) continue;
+     // limit for cleanliness/performance
+     if((shown++ % 2)!==0) continue;
+     const pa=projectNodeForOverlay(a),pb=projectNodeForOverlay(b);
+     const phase=(a.phase+b.phase)*.5;
+     const wave=.5+.5*Math.sin(now*.0020+phase*1.3);
+     const hot=wave>.70;
+     const after=.5+.5*Math.sin(now*.00115+phase*.7+1.2);
+     const baseAlpha=inside*(.055 + .055*after);
+     const activeAlpha=inside*(hot?(.28+.18*routeBoost):.0);
+
+     // glow pass
+     octx.strokeStyle=`rgba(70,214,255,${baseAlpha*.34 + activeAlpha*.42})`;
+     octx.lineWidth=hot?3.0:1.4;
+     octx.beginPath();octx.moveTo(pa[0],pa[1]);
+     const mx=(pa[0]+pb[0])/2 + Math.sin(phase*2.7)*3.5;
+     const my=(pa[1]+pb[1])/2 + Math.cos(phase*2.1)*3.0;
+     octx.quadraticCurveTo(mx,my,pb[0],pb[1]);octx.stroke();
+
+     // core pass
+     octx.strokeStyle=hot
+       ? `rgba(224,249,255,${.34+activeAlpha})`
+       : `rgba(77,184,255,${baseAlpha})`;
+     octx.lineWidth=hot?.95:.55;
+     octx.beginPath();octx.moveTo(pa[0],pa[1]);octx.quadraticCurveTo(mx,my,pb[0],pb[1]);octx.stroke();
+   }
+ }
+ octx.restore();
+}
+
+function drawOverlay(now){
+ octx.clearRect(0,0,W,H);
+ drawVisibleFilaments(now);
+ const inside=Math.max(0,Math.min(1,(fly-.16)/.22));
+ if(inside<=0)return;
+ octx.globalCompositeOperation='lighter';
+
+ // semantic family bridges
+ for(let i=0;i<CLUSTERS.length;i++){
+  for(let j=i+1;j<CLUSTERS.length;j++){
+   const a=CLUSTERS[i],b=CLUSTERS[j];
+   const d=Math.hypot(a.p[0]-b.p[0],a.p[1]-b.p[1],a.p[2]-b.p[2]);
+   if(!(d<.73||a.id==='CORE_ORCHESTRATION'||b.id==='CORE_ORCHESTRATION'))continue;
+   const pa=projectWorld(a.p),pb=projectWorld(b.p),ri=routeEdgeActive(a.id,b.id),active=ri>=0;
+   const mx=(pa[0]+pb[0])/2+(b.p[1]-a.p[1])*26,my=(pa[1]+pb[1])/2-(b.p[0]-a.p[0])*25;
+   octx.strokeStyle=`rgba(77,210,255,${inside*(active?.18:.018)*(1-Math.max(0,(fly-.58)/.42)*.65)})`;
+   octx.lineWidth=active?1.1:.45;octx.beginPath();octx.moveTo(pa[0],pa[1]);octx.quadraticCurveTo(mx,my,pb[0],pb[1]);octx.stroke();
+   if(active){
+    const t=(routePulse+ri*.22)%1,omt=1-t;
+    const x=omt*omt*pa[0]+2*omt*t*mx+t*t*pb[0],y=omt*omt*pa[1]+2*omt*t*my+t*t*pb[1];
+    const g=octx.createRadialGradient(x,y,0,x,y,16);g.addColorStop(0,'rgba(245,252,255,.9)');g.addColorStop(.22,'rgba(84,222,255,.34)');g.addColorStop(1,'rgba(84,222,255,0)');
+    octx.fillStyle=g;octx.beginPath();octx.arc(x,y,16,0,Math.PI*2);octx.fill();
+   }
+  }
+ }
+
+ // engine micro-network at deepest zoom
+ if(fly>.82){
+   const c=CLUSTERS[selectedCluster],eng=c.engines[selectedEngine];
+   const ang=selectedEngine/c.engines.length*Math.PI*2+.35,rad=c.r*.60;
+   const ep=[c.p[0]+Math.cos(ang)*rad,c.p[1]+Math.sin(ang)*rad*.76,c.p[2]+Math.sin(ang*1.7)*rad*.25];
+   const p=projectWorld(ep),deep=Math.max(0,Math.min(1,(fly-.82)/.18));
+   for(let i=0;i<22;i++){
+     const ring=[24,38,56][i%3],aa=i/22*Math.PI*2+now*.00016*(i%2?1:-1),hot=((i+Math.floor(now/420))%5===0||i%7===0);
+     const x=p[0]+Math.cos(aa)*ring,y=p[1]+Math.sin(aa)*ring*.62;
+     const mx=(p[0]+x)/2+Math.sin(i*1.7)*5,my=(p[1]+y)/2+Math.cos(i*1.2)*4;
+     octx.strokeStyle=`rgba(${hot?'116,228,255':'61,157,255'},${deep*(hot?.40:.065)})`;octx.lineWidth=hot?.9:.4;
+     octx.beginPath();octx.moveTo(p[0],p[1]);octx.quadraticCurveTo(mx,my,x,y);octx.stroke();
+     octx.fillStyle=`rgba(${hot?'243,252,255':'77,192,255'},${deep*(hot?.85:.30)})`;octx.beginPath();octx.arc(x,y,hot?2:1.2,0,Math.PI*2);octx.fill();
+   }
+ }
+ octx.globalCompositeOperation='source-over';
+}
+
+/* ---------- Fallback ---------- */
+function drawFallback(now){
+ const c=octx;c.clearRect(0,0,W,H);c.fillStyle='#00040a';c.fillRect(0,0,W,H);
+
+ // Filaments first so nodes remain dominant.
+ drawVisibleFilaments(now);
+
+ c.globalCompositeOperation='lighter';
+ particles.slice(0,Math.min(1400,particles.length)).forEach((n,i)=>{
+  let p=[...n.p],clusterDive=Math.max(0,Math.min(1,(fly-.52)/.30));
+  const cc=CLUSTERS[selectedCluster];
+  if(n.kind>0)p=[p[0]-cc.p[0]*clusterDive,p[1]-cc.p[1]*clusterDive,p[2]-cc.p[2]*clusterDive];
+  p=rot(p,yaw,pitch);const depth=3.8-p[2]*.72,f=2.8/depth,sc=(1+clusterDive*1.5)*userZoom;
+  const x=W/2+p[0]*sc*f*H/2,y=H/2-p[1]*sc*f*H/2,tw=.5+.5*Math.sin(now*.0016+n.phase);
+  c.fillStyle=`rgba(${tw>.75?'238,250,255':'58,165,255'},${.14+.46*tw})`;c.beginPath();c.arc(x,y,.72+tw*1.5,0,Math.PI*2);c.fill();
+ });
+ c.globalCompositeOperation='source-over';
+}
+
+let last=performance.now();
+function frame(now){
+ const dt=Math.min(50,now-last);last=now;
+ targetYaw+=.000028*dt;routePulse=(routePulse+dt*.00018)%1;
+ yaw=lerp(yaw,targetYaw+(px-.5)*.10,.055);pitch=lerp(pitch,targetPitch+(py-.5)*-.06,.055);
+ fly=lerp(fly,flyTarget,.019);
+
+ try{
+ if(gl && webglRuntimeOK){
+  gl.clearColor(.0,.012,.026,1);gl.clear(gl.COLOR_BUFFER_BIT);
+
+  // 3D neural filaments first: latent topology + active local areas.
+  gl.useProgram(lineProg);gl.bindVertexArray(lineVao);
+  gl.uniform1f(luTime,now);gl.uniform1f(luYaw,yaw);gl.uniform1f(luPitch,pitch);gl.uniform1f(luFly,fly);
+  gl.uniform1f(luSelected,selectedCluster);gl.uniform1f(luZoom,userZoom);gl.uniform2f(luRes,W,H);
+  gl.drawArrays(gl.LINES,0,lineCount);
+
+  // Nodes above the filament field.
+  gl.useProgram(prog);gl.bindVertexArray(vao);
+  gl.uniform1f(uTime,now);gl.uniform1f(uYaw,yaw);gl.uniform1f(uPitch,pitch);gl.uniform1f(uFly,fly);
+  gl.uniform1f(uSelected,selectedCluster);gl.uniform1f(uSelectedEngine,selectedEngine);gl.uniform1f(uZoom,userZoom);
+  gl.uniform2f(uRes,W,H);
+  gl.drawArrays(gl.POINTS,0,particles.length);
+  drawOverlay(now);
+ }else drawFallback(now);
+ }catch(err){
+   console.warn('CEREBRO render fallback:',err);
+   webglRuntimeOK=false;
+   runtimeNotice.style.display='block';
+   try{drawFallback(now)}catch(_){}
+ }
+ requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+window.CEREBRO_PHASE2_V042=Object.freeze({
+ version:'v0.4.2',renderer:(webglOK&&webglRuntimeOK)?'WEBGL2_VISIBLE_FILAMENTS':'CANVAS_VISIBLE_FILAMENTS',environment:'LAB_PREPROD',
+ setLevel,focusCluster:id=>{const i=CLUSTERS.findIndex(c=>c.id===id);if(i>=0){selectedCluster=i;selectedEngine=0;setLevel('CLUSTER')}},
+ focusEngine:id=>{const c=CLUSTERS[selectedCluster],i=c.engines.indexOf(id);if(i>=0){selectedEngine=i;setLevel('ENGINE')}},
+ followSignal:()=>followBtn.click(),toggleClean:()=>cleanBtn.click(),filament_edges:lineCount,prod_authorized:false
+});
+})();
+</script>
+</body>
+</html>
