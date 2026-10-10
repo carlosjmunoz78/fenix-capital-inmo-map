@@ -1,4 +1,4 @@
-"""VOICE-001 LAB-only screening of currently available Spain-Spanish male neural voices.
+"""VOICE-001 LAB-only screening of Spain-Spanish male neural voices.
 
 This is a timbre-discovery experiment, not a production dependency and not a
 reference-audio/training source. It uses the same fixed es-ES corpus for every
@@ -26,7 +26,10 @@ TEXT = (
     "Si le parece bien, señor, continuamos."
 )
 
-# Prioritize official es-ES male families known from Microsoft documentation.
+# Current official Microsoft es-ES male families documented by Microsoft.
+# Some may not be returned by the Edge discovery endpoint, so the screen tries
+# every documented short name directly and records unsupported ones without
+# failing the whole experiment.
 PREFERRED_ORDER = [
     "es-ES-AlvaroNeural",
     "es-ES-ArnauNeural",
@@ -53,42 +56,52 @@ async def main_async(output_dir: Path) -> None:
 
     output_dir.mkdir(parents=True, exist_ok=True)
     manager = await VoicesManager.create()
-    male_es = manager.find(Locale="es-ES", Gender="Male")
-    available = {v["ShortName"]: v for v in male_es}
+    discovered = manager.find(Locale="es-ES", Gender="Male")
+    discovered_map = {v["ShortName"]: v for v in discovered}
 
-    ordered = [name for name in PREFERRED_ORDER if name in available]
-    ordered.extend(sorted(name for name in available if name not in ordered))
-    if not ordered:
-        raise RuntimeError("No es-ES male voices returned by the discovery service")
+    ordered = list(PREFERRED_ORDER)
+    ordered.extend(sorted(name for name in discovered_map if name not in ordered))
 
     evidence_voices = []
-    for idx, short_name in enumerate(ordered, start=1):
+    failures = []
+    generated_idx = 0
+    for short_name in ordered:
         safe = short_name.replace("es-ES-", "").replace("Neural", "")
-        out = output_dir / f"ESM12_{idx:02d}_{safe}_RAW_es_ES.mp3"
-        communicate = edge_tts.Communicate(
-            TEXT,
-            short_name,
-            rate="-4%",
-            volume="+0%",
-            pitch="-2Hz",
-        )
-        await communicate.save(str(out))
-        if not out.exists() or out.stat().st_size < 1000:
-            raise RuntimeError(f"Invalid generated file for {short_name}")
-        info = available[short_name]
-        evidence_voices.append({
-            "candidate_number": idx,
-            "short_name": short_name,
-            "friendly_name": info.get("FriendlyName"),
-            "locale": info.get("Locale"),
-            "gender": info.get("Gender"),
-            "mp3": out.name,
-            "mp3_sha256": sha256(out),
-            "mp3_bytes": out.stat().st_size,
-        })
+        try:
+            communicate = edge_tts.Communicate(
+                TEXT,
+                short_name,
+                rate="-4%",
+                volume="+0%",
+                pitch="-2Hz",
+            )
+            tmp = output_dir / f"tmp_{safe}.mp3"
+            await communicate.save(str(tmp))
+            if not tmp.exists() or tmp.stat().st_size < 1000:
+                raise RuntimeError("empty_or_too_small_output")
+            generated_idx += 1
+            out = output_dir / f"ESM12_{generated_idx:02d}_{safe}_RAW_es_ES.mp3"
+            tmp.replace(out)
+            info = discovered_map.get(short_name, {})
+            evidence_voices.append({
+                "candidate_number": generated_idx,
+                "short_name": short_name,
+                "friendly_name": info.get("FriendlyName"),
+                "locale": info.get("Locale", "es-ES"),
+                "gender": info.get("Gender", "Male"),
+                "discovery_endpoint_listed": short_name in discovered_map,
+                "mp3": out.name,
+                "mp3_sha256": sha256(out),
+                "mp3_bytes": out.stat().st_size,
+            })
+        except Exception as exc:
+            failures.append({"short_name": short_name, "error_type": type(exc).__name__, "error": str(exc)[:500]})
+
+    if not evidence_voices:
+        raise RuntimeError(f"No es-ES male voice could be synthesized; failures={failures!r}")
 
     evidence = {
-        "schema_version": "0.1.0",
+        "schema_version": "0.2.0",
         "engine_id": "VOICE-001",
         "voice_target": "ESM12",
         "environment": "LAB",
@@ -97,8 +110,10 @@ async def main_async(output_dir: Path) -> None:
         "purpose": "screen native Spain-Spanish male base timbres before any cinematic FX",
         "fixed_rate": "-4%",
         "fixed_pitch": "-2Hz",
+        "documented_candidates_attempted": ordered,
         "text_sha256": hashlib.sha256(TEXT.encode("utf-8")).hexdigest(),
         "candidates": evidence_voices,
+        "unsupported_or_failed": failures,
         "usage_boundary": {
             "external_lab_discovery_only": True,
             "production_dependency": False,
@@ -123,7 +138,12 @@ async def main_async(output_dir: Path) -> None:
     (output_dir / "ESM12_voicebank_screen_evidence.json").write_text(
         json.dumps(evidence, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
-    print(json.dumps({"status": evidence["status"], "count": len(evidence_voices), "voices": ordered}))
+    print(json.dumps({
+        "status": evidence["status"],
+        "generated_count": len(evidence_voices),
+        "generated": [v["short_name"] for v in evidence_voices],
+        "failed_count": len(failures),
+    }))
 
 
 def main() -> None:
