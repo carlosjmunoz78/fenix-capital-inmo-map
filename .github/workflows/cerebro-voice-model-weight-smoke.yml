@@ -1,0 +1,78 @@
+name: CEREBRO VOICE-001 Model Weight Smoke
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'cerebro/voice/runtime/model_weight_smoke.py'
+      - 'cerebro/voice/runtime/requirements.txt'
+      - 'cerebro/voice/runtime/windows/Install-VoiceLab.ps1'
+      - '.github/workflows/cerebro-voice-model-weight-smoke.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  windows-model-weight-smoke:
+    runs-on: windows-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install reviewed VOICE-001 LAB runtime
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          ./cerebro/voice/runtime/windows/Install-VoiceLab.ps1 -RepoRoot $env:GITHUB_WORKSPACE
+
+      - name: Load real v3 weights and synthesize Spanish smoke
+        shell: pwsh
+        env:
+          CEREBRO_ENVIRONMENT: LAB
+          CEREBRO_VOICE_DEVICE: cpu
+          CEREBRO_VOICE_T3_MODEL: v3
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $python = Join-Path $env:LOCALAPPDATA 'CEREBRO\voice-runtime\.venv\Scripts\python.exe'
+          $out = Join-Path $env:RUNNER_TEMP 'voice001-model-smoke'
+          New-Item -ItemType Directory -Force -Path $out | Out-Null
+          & $python ./cerebro/voice/runtime/model_weight_smoke.py --output-dir $out --t3-model v3 --device cpu
+          if ($LASTEXITCODE -ne 0) { throw 'VOICE-001 model-weight smoke failed' }
+
+      - name: Verify evidence boundary
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $evidencePath = Join-Path $env:RUNNER_TEMP 'voice001-model-smoke\model-weight-smoke.json'
+          if (-not (Test-Path $evidencePath)) { throw 'model-weight evidence missing' }
+          $e = Get-Content -Raw $evidencePath | ConvertFrom-Json
+          if ($e.engine_id -ne 'VOICE-001') { throw 'wrong engine' }
+          if ($e.status -ne 'MODEL_WEIGHT_AND_DEFAULT_ES_SYNTHESIS_SMOKE_ONLY') { throw 'wrong evidence state' }
+          if ($e.t3_model -ne 'v3') { throw 'wrong t3 model' }
+          if ($e.authority.automatic_promotion -ne $false) { throw 'automatic promotion forbidden' }
+          if ($e.authority.prod_enabled -ne $false) { throw 'PROD must remain false' }
+          if ($e.wav_bytes -le 1024) { throw 'generated WAV too small' }
+          Write-Host "GREEN real model weights loaded and Spanish WAV synthesized. model_load_ms=$($e.model_load_ms) generation_ms=$($e.generation_ms) audio_seconds=$($e.audio_seconds)"
+
+      - name: Upload non-promotional smoke evidence
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: voice001-v3-default-es-smoke
+          path: ${{ runner.temp }}\voice001-model-smoke\
+          retention-days: 7
+          compression-level: 0
+          if-no-files-found: error
+
+      - name: Record scope
+        if: success()
+        shell: pwsh
+        run: |
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value 'VOICE-001: real Chatterbox multilingual v3 weights loaded and one Spanish default-voice WAV synthesized on a clean Windows runner.'
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value 'This is NOT acceptance of accent, naturalness, cloning, any of the 20 voice slots, or PROD readiness. Automatic promotion remains false.'
