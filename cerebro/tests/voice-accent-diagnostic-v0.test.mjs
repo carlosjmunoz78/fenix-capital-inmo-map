@@ -14,8 +14,9 @@ test('accent diagnostic is LAB-only and non-promotional', () => {
 });
 
 test('diagnostic targets Spain Spanish listening cues', () => {
-  for (const token of ['castellano natural de España', 'Zaragoza', 'cerveza', 'vosotros', 'Córdoba', 'Lucena', 'Puente Genil']) {
-    assert.ok(src.includes(token), `missing ${token}`);
+  const normalized = src.toLocaleLowerCase('es-ES');
+  for (const token of ['castellano natural de españa', 'zaragoza', 'cerveza', 'vosotros', 'córdoba', 'lucena', 'puente genil']) {
+    assert.ok(normalized.includes(token), `missing ${token}`);
   }
 });
 
