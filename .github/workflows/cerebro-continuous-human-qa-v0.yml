@@ -1,0 +1,135 @@
+name: CEREBRO Continuous Human QA V0
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'cerebro/qa/**'
+      - 'cerebro/tests/continuous-human-qa-v0.test.mjs'
+      - 'cerebro/tests/qa-email-enrichment-v0.test.mjs'
+      - '.github/workflows/cerebro-continuous-human-qa-v0.yml'
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'cerebro/qa/**'
+      - 'cerebro/communication/enrich-daily-summary-with-qa.mjs'
+      - 'cerebro/tests/continuous-human-qa-v0.test.mjs'
+      - 'cerebro/tests/qa-email-enrichment-v0.test.mjs'
+      - '.github/workflows/cerebro-continuous-human-qa-v0.yml'
+      - '.github/workflows/cerebro-human-communication-v1.yml'
+  schedule:
+    - cron: '17 */4 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: cerebro-continuous-human-qa-v0-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  actions: read
+
+env:
+  QA_STATE_BRANCH: cerebro/qa-state-v0
+  QA_STATE_PATH: cerebro/runtime/qa-daily-quality-state.v0.json
+  QA_WEB_URL: https://fenixcapital.es
+  QA_APP_URL: https://app.fenixcapital.es
+
+jobs:
+  continuous-human-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install existing repository dependencies
+        run: npm ci
+
+      - name: Prove QA contracts and daily-email integration
+        run: |
+          node --test \
+            cerebro/tests/continuous-human-qa-v0.test.mjs \
+            cerebro/tests/qa-email-enrichment-v0.test.mjs
+
+      - name: Install Chromium for existing Playwright stack
+        run: npx playwright install --with-deps chromium
+
+      - name: Load previous quality state without touching business PROD
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/qa
+          if git fetch --no-tags origin "refs/heads/$QA_STATE_BRANCH:refs/remotes/origin/$QA_STATE_BRANCH" 2>/dev/null && \
+             git cat-file -e "refs/remotes/origin/$QA_STATE_BRANCH:$QA_STATE_PATH" 2>/dev/null; then
+            git show "refs/remotes/origin/$QA_STATE_BRANCH:$QA_STATE_PATH" > artifacts/qa/state.before.json
+          else
+            echo '{}' > artifacts/qa/state.before.json
+          fi
+
+      - name: Act as a human on public PROD surfaces in strict read-only mode
+        id: probe
+        run: |
+          set +e
+          npx playwright test tests/cerebro-human-readonly.spec.ts \
+            --project='desktop-chromium' \
+            --project='mobile-chromium' \
+            --reporter=json \
+            > artifacts/qa/playwright-report.json \
+            2> artifacts/qa/playwright-stderr.log
+          QA_EXIT=$?
+          set -e
+          echo "exit_code=$QA_EXIT" >> "$GITHUB_OUTPUT"
+          test -s artifacts/qa/playwright-report.json
+          echo "QA product/browser exit=$QA_EXIT (findings are evidence, not controller failure)"
+
+      - name: Build OLD vs NEW quality delta and deterministic owner routing
+        run: |
+          node cerebro/qa/quality-delta.mjs \
+            --report artifacts/qa/playwright-report.json \
+            --previous artifacts/qa/state.before.json \
+            --targets cerebro/qa/targets.v0.json \
+            --out artifacts/qa/state.after.json
+          jq '{status,quality_score,previous_quality_score,quality_delta,tests,targets,new_issues,resolved_issue_fingerprints,recurring_issues,dispatch_queue,coverage,safety}' artifacts/qa/state.after.json
+
+      - name: Enforce immutable safety boundaries
+        run: |
+          jq -e '.company_id=="fenix" and .engine_id=="QA-001" and .safety.prod_write==false and .safety.customer_data==false and .safety.trading==false and .safety.paid_fallback==false and .safety.additional_subscription_eur==0 and (.human_required|length)==0' artifacts/qa/state.after.json >/dev/null
+          jq -e '.targets.PRODUCT.status=="POR_AUDITAR" or .coverage.products=="ENABLED_SYNTHETIC_PREPROD"' artifacts/qa/state.after.json >/dev/null
+
+      - name: Persist only QA evidence state on its dedicated branch
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        run: |
+          set -euo pipefail
+          cp artifacts/qa/state.after.json /tmp/qa-state.json
+          git fetch --no-tags origin "+refs/heads/$QA_STATE_BRANCH:refs/remotes/origin/$QA_STATE_BRANCH"
+          git checkout --detach "refs/remotes/origin/$QA_STATE_BRANCH"
+          mkdir -p "$(dirname "$QA_STATE_PATH")"
+          cp /tmp/qa-state.json "$QA_STATE_PATH"
+          git config user.name 'cerebro-qa[bot]'
+          git config user.email 'cerebro-qa[bot]@users.noreply.github.com'
+          git add "$QA_STATE_PATH"
+          if ! git diff --cached --quiet; then
+            git commit -m 'chore(cerebro): advance continuous human QA evidence state'
+            git push origin "HEAD:refs/heads/$QA_STATE_BRANCH"
+          fi
+
+      - name: Upload QA evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-continuous-human-qa-v0-${{ github.run_id }}
+          path: |
+            artifacts/qa/**
+            playwright-report/**
+            test-results/**
+          if-no-files-found: warn
+          retention-days: 30

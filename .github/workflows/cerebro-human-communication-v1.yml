@@ -12,6 +12,7 @@ on:
       - 'cerebro/tests/human-communication-executive-v1.test.mjs'
       - 'cerebro/tests/repo-daily-summary-human-readable-v1.test.mjs'
       - 'cerebro/tests/owner-approval-gate-v1.test.mjs'
+      - 'cerebro/tests/qa-email-enrichment-v0.test.mjs'
       - 'cerebro/tests/test_mail_bridge.py'
       - '.github/workflows/cerebro-human-communication-v1.yml'
   schedule:
@@ -35,6 +36,8 @@ env:
   SKILL_STATE_PATH: cerebro/runtime/skill-autoloop-state.v0.json
   HUMAN_EXCEPTION_STATE_BRANCH: cerebro-human-exception-state-v0
   HUMAN_EXCEPTION_STATE_PATH: cerebro/runtime/human-exception-supervisor-state.v0.json
+  QA_STATE_BRANCH: cerebro/qa-state-v0
+  QA_STATE_PATH: cerebro/runtime/qa-daily-quality-state.v0.json
 
 jobs:
   communication:
@@ -51,25 +54,28 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Test communication, executive digest and exact owner-approval contracts
+      - name: Test communication executive digest QA delta and exact owner-approval contracts
         run: |
           node --test \
             cerebro/tests/human-communication-v1.test.mjs \
             cerebro/tests/human-communication-executive-v1.test.mjs \
             cerebro/tests/repo-daily-summary-human-readable-v1.test.mjs \
-            cerebro/tests/owner-approval-gate-v1.test.mjs
+            cerebro/tests/owner-approval-gate-v1.test.mjs \
+            cerebro/tests/qa-email-enrichment-v0.test.mjs
           python -m unittest cerebro/tests/test_mail_bridge.py
 
-      - name: Load persistent communication Skill AutoLoop and Human Exception state
+      - name: Load persistent communication Skill AutoLoop Human Exception and QA state
         run: |
           set -euo pipefail
           mkdir -p artifacts/communication
           git fetch --no-tags origin "refs/heads/$COMM_STATE_BRANCH:refs/remotes/origin/$COMM_STATE_BRANCH"
           git fetch --no-tags origin "refs/heads/$SKILL_STATE_BRANCH:refs/remotes/origin/$SKILL_STATE_BRANCH"
           git fetch --no-tags origin "refs/heads/$HUMAN_EXCEPTION_STATE_BRANCH:refs/remotes/origin/$HUMAN_EXCEPTION_STATE_BRANCH"
+          git fetch --no-tags origin "refs/heads/$QA_STATE_BRANCH:refs/remotes/origin/$QA_STATE_BRANCH"
           git show "refs/remotes/origin/$COMM_STATE_BRANCH:$COMM_STATE_PATH" > artifacts/communication/state.before.json
           git show "refs/remotes/origin/$SKILL_STATE_BRANCH:$SKILL_STATE_PATH" > artifacts/communication/skill-state.json
           git show "refs/remotes/origin/$HUMAN_EXCEPTION_STATE_BRANCH:$HUMAN_EXCEPTION_STATE_PATH" > artifacts/communication/human-exception-state.json
+          git show "refs/remotes/origin/$QA_STATE_BRANCH:$QA_STATE_PATH" > artifacts/communication/qa-state.json
 
       - name: Merge canonical supervisor queue into existing communication ingress without changing approval semantics
         run: |
@@ -107,6 +113,9 @@ jobs:
             --skill-state artifacts/communication/human-required-input-state.json \
             --communication-state artifacts/communication/state.before.json \
             --output artifacts/communication/daily-summary.json
+          node cerebro/communication/enrich-daily-summary-with-qa.mjs \
+            --summary artifacts/communication/daily-summary.json \
+            --quality-state artifacts/communication/qa-state.json
 
       - name: Check private mail transport configuration
         id: mail

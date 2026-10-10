@@ -1,0 +1,42 @@
+{
+  "schema_version": "0.1.0",
+  "company_id": "fenix",
+  "engine_id": "QA-001",
+  "environment": "CONTROL_PLANE",
+  "version": "0.1.0",
+  "targets": [
+    {
+      "target_id": "fenix-capital-web-prod-readonly",
+      "kind": "WEB",
+      "name": "Fénix Capital Web",
+      "url": "https://fenixcapital.es",
+      "environment": "PROD",
+      "mode": "READ_ONLY",
+      "enabled": true,
+      "owner_engine": "WEB-001"
+    },
+    {
+      "target_id": "fenix-app-public-shell-prod-readonly",
+      "kind": "APP",
+      "name": "App Fénix · shell público",
+      "url": "https://app.fenixcapital.es",
+      "environment": "PROD",
+      "mode": "READ_ONLY_PUBLIC_SHELL",
+      "enabled": true,
+      "owner_engine": "APP-001",
+      "coverage_note": "No authenticated customer data and no mutation. Existing synthetic application E2E remains separate until its harness is bound to PREPROD."
+    },
+    {
+      "target_id": "digital-products-preprod",
+      "kind": "PRODUCT",
+      "name": "Productos digitales",
+      "url": null,
+      "environment": "PREPROD",
+      "mode": "SYNTHETIC_ONLY",
+      "enabled": false,
+      "owner_engine": "QAB-001",
+      "status": "POR_AUDITAR",
+      "coverage_note": "Exact canonical PREPROD product target must be registered before automated purchase/delivery journeys are enabled."
+    }
+  ]
+}
