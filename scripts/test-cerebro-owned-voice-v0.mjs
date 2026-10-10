@@ -3,6 +3,7 @@ import fs from 'node:fs';
 function assert(condition,message){if(!condition)throw new Error(message)}
 const bank=JSON.parse(fs.readFileSync('cerebro/voice/voice-bank.v0.json','utf8'));
 const runtime=fs.readFileSync('cerebro/voice/runtime/app.py','utf8');
+const register=fs.readFileSync('cerebro/voice/runtime/register_voice_reference.py','utf8');
 const policy=fs.readFileSync('cerebro/voice/VOICE_CLONING_CONSENT_POLICY_V0.md','utf8');
 
 assert(bank.engine_id==='VOICE-001','must extend existing VOICE-001');
@@ -24,13 +25,19 @@ for(const required of [
  'runtime_token_not_configured',
  'consent_or_license_missing',
  'reference_checksum_mismatch',
+ 'cross_company_voice_denied',
+ 'PRIVATE_REGISTRY_PATH',
  'public_clone_enabled',
  'paid_api_required'
 ])assert(runtime.includes(required),`runtime guard missing: ${required}`);
 
 assert(!runtime.includes('@app.post("/clone"'),'must not expose a public clone route');
 assert(!runtime.includes('@app.post("/upload"'),'must not expose a public upload route');
+assert(register.includes('V0 accepts WAV references only'),'registration must constrain reference format');
+assert(register.includes('explicit consent_ref required for a real recorded speaker'),'real recorded speakers require explicit consent');
+assert(register.includes('registry.private.json'),'reference metadata must use the private registry');
+assert(!register.includes('requests.')&&!register.includes('http://')&&!register.includes('https://'),'registration must stay local and make no network calls');
 assert(policy.includes('scraped social/video/audio'),'policy must deny scraped voices');
 assert(policy.includes('Raw reference audio must not be committed to Git.'),'policy must keep references out of Git');
 
-console.log('GREEN CEREBRO owned voice V0: 20 es-ES slots, consent gate, fail-closed runtime, PROD false');
+console.log('GREEN CEREBRO owned voice V0: 20 es-ES slots, private registry, consent gate, fail-closed runtime, PROD false');
