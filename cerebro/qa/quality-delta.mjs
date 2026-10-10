@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import fs from 'node:fs';
+import path from 'node:path';
 import crypto from 'node:crypto';
 
 function arg(name, fallback = null) {
@@ -7,9 +8,9 @@ function arg(name, fallback = null) {
   return i >= 0 && process.argv[i + 1] ? process.argv[i + 1] : fallback;
 }
 
-function readJson(path, fallback = {}) {
-  if (!path || !fs.existsSync(path)) return fallback;
-  return JSON.parse(fs.readFileSync(path, 'utf8'));
+function readJson(filePath, fallback = {}) {
+  if (!filePath || !fs.existsSync(filePath)) return fallback;
+  return JSON.parse(fs.readFileSync(filePath, 'utf8'));
 }
 
 function fp(parts) {
@@ -19,13 +20,13 @@ function fp(parts) {
 function flattenReport(report) {
   const tests = [];
   const walk = (suite, parents = []) => {
-    const path = [...parents, suite.title].filter(Boolean);
+    const suitePath = [...parents, suite.title].filter(Boolean);
     for (const spec of suite.specs ?? []) {
       for (const test of spec.tests ?? []) {
         const result = (test.results ?? []).at(-1) ?? {};
         const status = test.status ?? result.status ?? 'unknown';
         tests.push({
-          title: [...path, spec.title].filter(Boolean).join(' › '),
+          title: [...suitePath, spec.title].filter(Boolean).join(' › '),
           project: test.projectName ?? test.projectId ?? 'unknown',
           status,
           result_status: result.status ?? status,
@@ -34,7 +35,7 @@ function flattenReport(report) {
         });
       }
     }
-    for (const child of suite.suites ?? []) walk(child, path);
+    for (const child of suite.suites ?? []) walk(child, suitePath);
   };
   for (const suite of report.suites ?? []) walk(suite, []);
   return tests;
@@ -147,7 +148,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     previous: readJson(previousPath, {}),
     targetsRegistry: readJson(targetsPath, {})
   });
-  fs.mkdirSync(new URL('.', `file://${outPath.startsWith('/') ? outPath : `${process.cwd()}/${outPath}`}`).pathname, {recursive: true});
+  fs.mkdirSync(path.dirname(outPath), {recursive: true});
   fs.writeFileSync(outPath, JSON.stringify(state, null, 2) + '\n');
   console.log(JSON.stringify({status: state.status, score: state.quality_score, tests: state.tests, new_issues: state.new_issue_fingerprints.length, resolved: state.resolved_issue_fingerprints.length}));
 }
