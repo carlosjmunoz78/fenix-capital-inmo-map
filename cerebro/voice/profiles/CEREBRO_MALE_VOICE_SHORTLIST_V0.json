@@ -1,12 +1,13 @@
 {
-  "schema_version": "0.3.0",
+  "schema_version": "0.4.0",
   "engine_id": "VOICE-001",
   "environment": "LAB",
   "locale": "es-ES",
   "owner_selection": {
-    "keep_all": ["ESM05", "ESM06", "ESM07"],
-    "primary_direction": "ESM08",
+    "keep_all": ["ESM05", "ESM06", "ESM07", "ESM08-CARLFM"],
+    "primary_direction": "ESM09",
     "accepted_existing_candidates": ["ESM05", "ESM06", "ESM07"],
+    "salvageable_reference_candidates": ["ESM08-CARLFM"],
     "jarvis_style_target_still_open": true
   },
   "voices": [
@@ -31,41 +32,57 @@
       "owner_similarity_note": "KEEP_BUT_NOT_JARVIS"
     },
     {
-      "voice_id": "ESM08",
-      "label": "CEREBRO Original Cinematic AI Assistant Target",
+      "voice_id": "ESM08-CARLFM",
+      "label": "CEREBRO Piper Spain-Spanish Timbre A",
+      "owner_decision": "KEEP_AS_SALVAGEABLE_REFERENCE_ONLY",
+      "status": "OWNER_LISTENED_SALVAGEABLE_BUT_TOO_OLD_SOUNDING",
+      "owner_similarity_note": "ONLY_SALVAGEABLE_OF_ESM08_SWEEP_BUT_SOUNDS_LIKE_A_MUCH_OLDER_MAN"
+    },
+    {
+      "voice_id": "ESM08-MLS10246",
+      "owner_decision": "REJECT_FOR_TARGET",
+      "status": "OWNER_REJECTED_TIMBRE"
+    },
+    {
+      "voice_id": "ESM08-MLS9972",
+      "owner_decision": "REJECT_FOR_TARGET",
+      "status": "OWNER_REJECTED_TIMBRE"
+    },
+    {
+      "voice_id": "ESM09",
+      "label": "CEREBRO Original Younger Cinematic AI Assistant",
       "owner_decision": "SEARCH_AND_ITERATE",
-      "status": "THREE_DISTINCT_ES_ES_BASE_TIMBRES_GENERATED_OWNER_LISTENING_PENDING",
-      "listening_candidates": [
-        {
-          "candidate_id": "ESM08-CARLFM",
-          "source_family": "es_ES-carlfm-x_low",
-          "declared_dataset_license": "PUBLIC_DOMAIN"
-        },
-        {
-          "candidate_id": "ESM08-MLS10246",
-          "source_family": "es_ES-mls_10246-low",
-          "declared_dataset_license": "CC-BY-4.0"
-        },
-        {
-          "candidate_id": "ESM08-MLS9972",
-          "source_family": "es_ES-mls_9972-low",
-          "declared_dataset_license": "CC-BY-4.0"
-        }
-      ],
-      "owner_listening_required": true
+      "status": "QWEN3_VOICE_DESIGN_ES_ES_TRIAL_PREPARED",
+      "target_age_impression": "mid_30s_to_early_40s",
+      "target_traits": [
+        "native Spain-Spanish",
+        "male",
+        "younger-than-ESM08-CARLFM",
+        "low-mid baritone",
+        "smooth",
+        "calm",
+        "precise",
+        "restrained",
+        "technical",
+        "elegant",
+        "quiet authority",
+        "natural conversational delivery"
+      ]
     }
   ],
   "lessons": {
     "same_base_voice_pitch_or_pace_edits_are_insufficient": true,
-    "next_search_must_change_source_timbre": true,
-    "preserve_ESM05_ESM06_ESM07": true,
-    "ESM08_uses_three_distinct_source_timbres": true
+    "Piper_es_ES_catalog_exhausted_for_target_search": true,
+    "ESM08_CARLFM_is_closest_Piper_timbre_but_age_impression_is_too_old": true,
+    "next_search_must_change_synthesis_family_and_support_voice_design": true,
+    "preserve_ESM05_ESM06_ESM07_and_ESM08_CARLFM": true
   },
   "identity_policy": {
     "original_cerebro_voices_only": true,
     "actor_clone": false,
     "character_clone": false,
-    "movie_audio_reference": false
+    "movie_audio_reference": false,
+    "identifiable_person_reference": false
   },
   "authority": {
     "automatic_promotion": false,
