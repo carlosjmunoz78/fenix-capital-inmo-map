@@ -2,7 +2,7 @@ name: CEREBRO Human Communication V1
 
 on:
   push:
-    branches: [main, cerebro/human-approval-email-v1-20261008, cerebro/skills-email-human-approval-v0, cerebro/mail-bridge-aparco-v0]
+    branches: [main, cerebro/human-approval-email-v1-20261008, cerebro/skills-email-human-approval-v0, cerebro/mail-bridge-aparco-v0, cerebro/owner-decision-communication-v0]
     paths:
       - 'cerebro/governance/communication-policy.v0.json'
       - 'cerebro/governance/CEREBRO_HUMAN_COMMUNICATION_POLICY_V0.md'
@@ -12,7 +12,10 @@ on:
       - 'cerebro/tests/human-communication-executive-v1.test.mjs'
       - 'cerebro/tests/repo-daily-summary-human-readable-v1.test.mjs'
       - 'cerebro/tests/owner-approval-gate-v1.test.mjs'
+      - 'cerebro/tests/owner-decision-button-contract-v0.test.mjs'
       - 'cerebro/tests/test_mail_bridge.py'
+      - 'supabase/functions/cerebro-owner-decision-gateway-v0/**'
+      - 'supabase/functions/cerebro-owner-decision-worker-v0/**'
       - '.github/workflows/cerebro-human-communication-v1.yml'
   schedule:
     - cron: '*/10 * * * *'
@@ -27,6 +30,7 @@ concurrency:
 permissions:
   contents: write
   actions: read
+  id-token: write
 
 env:
   COMM_STATE_BRANCH: cerebro/communication-state-v1-20261008
@@ -35,6 +39,8 @@ env:
   SKILL_STATE_PATH: cerebro/runtime/skill-autoloop-state.v0.json
   HUMAN_EXCEPTION_STATE_BRANCH: cerebro-human-exception-state-v0
   HUMAN_EXCEPTION_STATE_PATH: cerebro/runtime/human-exception-supervisor-state.v0.json
+  OWNER_DECISION_WORKER_URL: https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-owner-decision-worker-v0
+  OWNER_DECISION_AUDIENCE: cerebro-owner-decision-worker-v0
 
 jobs:
   communication:
@@ -57,7 +63,8 @@ jobs:
             cerebro/tests/human-communication-v1.test.mjs \
             cerebro/tests/human-communication-executive-v1.test.mjs \
             cerebro/tests/repo-daily-summary-human-readable-v1.test.mjs \
-            cerebro/tests/owner-approval-gate-v1.test.mjs
+            cerebro/tests/owner-approval-gate-v1.test.mjs \
+            cerebro/tests/owner-decision-button-contract-v0.test.mjs
           python -m unittest cerebro/tests/test_mail_bridge.py
 
       - name: Load persistent communication Skill AutoLoop and Human Exception state
@@ -136,12 +143,35 @@ jobs:
         if: github.ref != 'refs/heads/main' || steps.mail.outputs.ready != 'true'
         run: echo '[]' > artifacts/communication/messages.json
 
+      - name: Pull authenticated owner button decisions through GitHub OIDC
+        if: github.ref == 'refs/heads/main'
+        run: |
+          set -euo pipefail
+          OIDC_TOKEN="$(curl --fail --silent --show-error -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OWNER_DECISION_AUDIENCE}" | jq -r '.value')"
+          test -n "$OIDC_TOKEN" && test "$OIDC_TOKEN" != "null"
+          curl --fail --silent --show-error \
+            -X POST "$OWNER_DECISION_WORKER_URL" \
+            -H "Authorization: Bearer $OIDC_TOKEN" \
+            -H 'Content-Type: application/json' \
+            --data '{"operation":"pull"}' > artifacts/communication/button-response.json
+          jq '.items // []' artifacts/communication/button-response.json > artifacts/communication/button-messages.json
+          jq '[.items[]?.action_request_id]' artifacts/communication/button-response.json > artifacts/communication/button-ack-ids.json
+
+      - name: Use empty owner button queue for branch validation
+        if: github.ref != 'refs/heads/main'
+        run: |
+          echo '[]' > artifacts/communication/button-messages.json
+          echo '[]' > artifacts/communication/button-ack-ids.json
+
+      - name: Merge email and authenticated app owner decisions
+        run: jq -s '.[0] + .[1]' artifacts/communication/messages.json artifacts/communication/button-messages.json > artifacts/communication/messages.merged.json
+
       - name: Reconcile queue replies quiet hours and daily digest through the existing controller
         run: |
           node cerebro/communication/communication-controller.mjs \
             --state artifacts/communication/state.before.json \
             --skill-state artifacts/communication/human-required-input-state.json \
-            --messages artifacts/communication/messages.json \
+            --messages artifacts/communication/messages.merged.json \
             --summary artifacts/communication/daily-summary.json \
             --output-dir artifacts/communication/out
 
@@ -149,7 +179,7 @@ jobs:
         if: github.ref != 'refs/heads/main'
         run: |
           test -f artifacts/communication/out/state.after.json
-          echo '{"status":"GREEN_DRY_RUN","mail_sent":false,"state_persisted":false,"prod_changed":false}' > artifacts/communication/branch-gate.json
+          echo '{"status":"GREEN_DRY_RUN","mail_sent":false,"state_persisted":false,"owner_button_pull":false,"prod_changed":false}' > artifacts/communication/branch-gate.json
 
       - name: Require private mail transport before any due delivery
         if: github.ref == 'refs/heads/main' && steps.mail.outputs.ready != 'true'
@@ -201,6 +231,23 @@ jobs:
             git commit -m 'chore(cerebro): advance owner communication state'
             git push origin "HEAD:refs/heads/$COMM_STATE_BRANCH"
           fi
+
+      - name: Acknowledge owner button decisions only after controller and state persistence succeed
+        if: github.ref == 'refs/heads/main'
+        run: |
+          set -euo pipefail
+          COUNT="$(jq 'length' artifacts/communication/button-ack-ids.json)"
+          if [ "$COUNT" -eq 0 ]; then
+            echo '{"ok":true,"acknowledged":0,"reason":"no_button_decisions"}' > artifacts/communication/button-ack-response.json
+            exit 0
+          fi
+          OIDC_TOKEN="$(curl --fail --silent --show-error -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OWNER_DECISION_AUDIENCE}" | jq -r '.value')"
+          PAYLOAD="$(jq -c '{operation:"ack",ids:.}' artifacts/communication/button-ack-ids.json)"
+          curl --fail --silent --show-error \
+            -X POST "$OWNER_DECISION_WORKER_URL" \
+            -H "Authorization: Bearer $OIDC_TOKEN" \
+            -H 'Content-Type: application/json' \
+            --data "$PAYLOAD" > artifacts/communication/button-ack-response.json
 
       - name: Upload communication evidence
         if: always()
