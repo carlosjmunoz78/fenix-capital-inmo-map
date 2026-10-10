@@ -1,21 +1,9 @@
-import {expect, test, type Page} from '@playwright/test';
+import {expect, test} from '@playwright/test';
 
 const targets=[
  {kind:'WEB',name:'Fénix Capital Web',url:process.env.QA_WEB_URL||'https://fenixcapital.es',exploreLinks:true},
  {kind:'APP',name:'App Fénix public shell',url:process.env.QA_APP_URL||'https://app.fenixcapital.es',exploreLinks:false}
 ] as const;
-
-async function assertHealthyDocument(page:Page,label:string){
- const pageErrors:string[]=[];
- page.on('pageerror',error=>pageErrors.push(error.message));
- const response=await page.goto(page.url()==='about:blank'?undefined as never:page.url(),{waitUntil:'domcontentloaded'}).catch(()=>null);
- if(response)expect(response.status(),`${label} HTTP status`).toBeLessThan(500);
- await expect(page.locator('body'),`${label} body`).toBeVisible();
- const title=await page.title();expect(title.trim().length,`${label} title`).toBeGreaterThan(0);
- const layout=await page.evaluate(()=>({scrollWidth:document.documentElement.scrollWidth,clientWidth:document.documentElement.clientWidth}));
- expect(layout.scrollWidth,`${label} horizontal overflow`).toBeLessThanOrEqual(layout.clientWidth+4);
- expect(pageErrors,`${label} uncaught page errors`).toEqual([]);
-}
 
 for(const target of targets){
  test(`[${target.kind}] ${target.name} · human read-only journey`,async({page})=>{
