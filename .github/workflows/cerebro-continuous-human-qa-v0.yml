@@ -7,8 +7,11 @@ on:
       - 'src/**'
       - 'tests/**'
       - 'cerebro/qa/**'
+      - 'cerebro/communication/enrich-daily-summary-with-qa.mjs'
       - 'cerebro/tests/continuous-human-qa-v0.test.mjs'
       - 'cerebro/tests/qa-email-enrichment-v0.test.mjs'
+      - 'cerebro/tests/qa-improvement-scout-v0.test.mjs'
+      - 'cerebro/tests/qa-autonomous-remediation-loop-v0.test.mjs'
       - '.github/workflows/cerebro-continuous-human-qa-v0.yml'
   pull_request:
     paths:
@@ -18,6 +21,8 @@ on:
       - 'cerebro/communication/enrich-daily-summary-with-qa.mjs'
       - 'cerebro/tests/continuous-human-qa-v0.test.mjs'
       - 'cerebro/tests/qa-email-enrichment-v0.test.mjs'
+      - 'cerebro/tests/qa-improvement-scout-v0.test.mjs'
+      - 'cerebro/tests/qa-autonomous-remediation-loop-v0.test.mjs'
       - '.github/workflows/cerebro-continuous-human-qa-v0.yml'
       - '.github/workflows/cerebro-human-communication-v1.yml'
   schedule:
@@ -35,6 +40,8 @@ permissions:
 env:
   QA_STATE_BRANCH: cerebro/qa-state-v0
   QA_STATE_PATH: cerebro/runtime/qa-daily-quality-state.v0.json
+  QA_IMPROVEMENT_PATH: cerebro/runtime/qa-improvement-scout.v0.json
+  QA_REMEDIATION_PATH: cerebro/runtime/qa-remediation-state.v0.json
   QA_WEB_URL: https://fenixcapital.es
   QA_APP_URL: https://app.fenixcapital.es
 
@@ -55,10 +62,12 @@ jobs:
       - name: Install existing repository dependencies
         run: npm ci
 
-      - name: Prove QA contracts and daily-email integration
+      - name: Prove QA contracts, improvement routing and daily-email integration
         run: |
           node --test \
             cerebro/tests/continuous-human-qa-v0.test.mjs \
+            cerebro/tests/qa-improvement-scout-v0.test.mjs \
+            cerebro/tests/qa-autonomous-remediation-loop-v0.test.mjs \
             cerebro/tests/qa-email-enrichment-v0.test.mjs
 
       - name: Install Chromium for existing Playwright stack
@@ -100,23 +109,73 @@ jobs:
             --out artifacts/qa/state.after.json
           jq '{status,quality_score,previous_quality_score,quality_delta,tests,targets,new_issues,resolved_issue_fingerprints,recurring_issues,dispatch_queue,coverage,safety}' artifacts/qa/state.after.json
 
+      - name: Discover measured human improvements even when nothing is broken
+        run: |
+          node cerebro/qa/improvement-scout.mjs \
+            --report artifacts/qa/playwright-report.json \
+            --quality artifacts/qa/state.after.json \
+            --out artifacts/qa/improvements.json
+          jq '{status,observations_total,candidates_total,human_required,safety}' artifacts/qa/improvements.json
+
+      - name: Route bugs and improvements into bounded PREPROD candidates
+        run: |
+          node cerebro/qa/autonomous-remediation-loop.mjs \
+            --quality artifacts/qa/state.after.json \
+            --improvements artifacts/qa/improvements.json \
+            --out artifacts/qa/remediation.json
+          jq '{status,open_cases,bug_cases,improvement_cases,learning_records_total,candidate_packages_total,human_required,next_gate,authority,safety}' artifacts/qa/remediation.json
+
+      - name: Attach improvement and remediation summary to canonical QA state
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const qa=JSON.parse(fs.readFileSync('artifacts/qa/state.after.json','utf8'));
+          const improvements=JSON.parse(fs.readFileSync('artifacts/qa/improvements.json','utf8'));
+          const remediation=JSON.parse(fs.readFileSync('artifacts/qa/remediation.json','utf8'));
+          qa.improvement_scout={
+            status:improvements.status,
+            observations_total:improvements.observations_total,
+            candidates_total:improvements.candidates_total,
+            top_candidates:(improvements.candidates??[]).slice(0,5),
+            safety:improvements.safety
+          };
+          qa.remediation={
+            status:remediation.status,
+            open_cases:remediation.open_cases,
+            bug_cases:remediation.bug_cases,
+            improvement_cases:remediation.improvement_cases,
+            candidate_packages_total:remediation.candidate_packages_total,
+            human_required:remediation.human_required,
+            next_gate:remediation.next_gate,
+            authority:remediation.authority,
+            safety:remediation.safety
+          };
+          fs.writeFileSync('artifacts/qa/state.after.json',JSON.stringify(qa,null,2)+'\n');
+          NODE
+
       - name: Enforce immutable safety boundaries
         run: |
           jq -e '.company_id=="fenix" and .engine_id=="QA-001" and .safety.prod_write==false and .safety.customer_data==false and .safety.trading==false and .safety.paid_fallback==false and .safety.additional_subscription_eur==0 and (.human_required|length)==0' artifacts/qa/state.after.json >/dev/null
           jq -e '.targets.PRODUCT.status=="POR_AUDITAR" or .coverage.products=="ENABLED_SYNTHETIC_PREPROD"' artifacts/qa/state.after.json >/dev/null
+          jq -e '.safety.prod_write==false and .safety.customer_data==false and .safety.trading==false and .safety.paid_fallback==false and .safety.additional_subscription_eur==0 and ([.candidates[]|select(.prod_write_authorized!=false or .additional_cost_eur!=0)]|length)==0' artifacts/qa/improvements.json >/dev/null
+          jq -e '.safety.prod_write==false and .safety.customer_data==false and .safety.trading==false and .safety.paid_fallback==false and .safety.additional_subscription_eur==0 and .authority.app_web_prod_autofix==false and .authority.assisted_owner_engines_preserved==true and .authority.promotion_authorized==false and .authority.prod_write_authorized==false and ([.candidate_packages[]|select(.prod_write_authorized!=false or .additional_cost_eur!=0)]|length)==0' artifacts/qa/remediation.json >/dev/null
 
       - name: Persist only QA evidence state on its dedicated branch
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         run: |
           set -euo pipefail
           cp artifacts/qa/state.after.json /tmp/qa-state.json
+          cp artifacts/qa/improvements.json /tmp/qa-improvements.json
+          cp artifacts/qa/remediation.json /tmp/qa-remediation.json
           git fetch --no-tags origin "+refs/heads/$QA_STATE_BRANCH:refs/remotes/origin/$QA_STATE_BRANCH"
           git checkout --detach "refs/remotes/origin/$QA_STATE_BRANCH"
           mkdir -p "$(dirname "$QA_STATE_PATH")"
           cp /tmp/qa-state.json "$QA_STATE_PATH"
+          cp /tmp/qa-improvements.json "$QA_IMPROVEMENT_PATH"
+          cp /tmp/qa-remediation.json "$QA_REMEDIATION_PATH"
           git config user.name 'cerebro-qa[bot]'
           git config user.email 'cerebro-qa[bot]@users.noreply.github.com'
-          git add "$QA_STATE_PATH"
+          git add "$QA_STATE_PATH" "$QA_IMPROVEMENT_PATH" "$QA_REMEDIATION_PATH"
           if ! git diff --cached --quiet; then
             git commit -m 'chore(cerebro): advance continuous human QA evidence state'
             git push origin "HEAD:refs/heads/$QA_STATE_BRANCH"
