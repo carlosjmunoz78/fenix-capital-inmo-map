@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0.0",
+  "engine_id": "MOTION-001",
+  "phase": "PHASE_2",
+  "version": "v0.4.2",
+  "name": "VISIBLE_FILAMENTS",
+  "status": "HOTFIX_VISUAL_READY_FOR_OWNER_RETEST",
+  "environment": [
+    "LAB",
+    "PREPROD"
+  ],
+  "prod_authorized": false,
+  "additional_cost_eur": 0,
+  "preserves": [
+    "PHASE2_V0.4.1",
+    "all_previous_visual_versions"
+  ],
+  "owner_feedback_applied": {
+    "links_were_not_visible": true,
+    "webgl_filament_opacity_increased": true,
+    "selected_cluster_filaments_emphasized": true,
+    "canvas_fallback_now_draws_filaments": true,
+    "active_filaments_have_glow_core": true,
+    "afterglow_simulated": true,
+    "avoid_full_bright_spiderweb": true
+  },
+  "syntax_gate": "GREEN",
+  "artifact": {
+    "file": "CEREBRO_PHASE2_V042_VISIBLE_FILAMENTS.html",
+    "sha256": "9672310baca6f27b34425d33e36c3899c599462dcd044f58b8f3171e2ad1cf78",
+    "bytes": 36187
+  },
+  "authority": {
+    "prod_enabled": false,
+    "automatic_promotion": false
+  }
+}
