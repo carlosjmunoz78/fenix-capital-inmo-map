@@ -2,6 +2,7 @@
 import argparse
 import email
 import hashlib
+import html
 import imaplib
 import json
 import os
@@ -11,8 +12,10 @@ import ssl
 from email.header import decode_header
 from email.message import EmailMessage
 from email.utils import parseaddr
+from urllib.parse import urlencode
 
 COMMAND_RE = re.compile(r"^(AUTORIZO|NO AUTORIZO|EXPLICAME|APARCO)\s+(APR-\d{8}-[A-F0-9]{8})$", re.IGNORECASE)
+APPROVAL_ID_RE = re.compile(r"APR-\d{8}-[A-F0-9]{8}", re.IGNORECASE)
 QUOTED_BOUNDARY_RE = re.compile(r"^(on .+wrote:|el .+escribi[oó]:|from:\s+.+|de:\s+.+|-{2,}\s*(original message|mensaje original)\s*-{2,})$", re.IGNORECASE)
 
 
@@ -78,6 +81,55 @@ def deterministic_message_id(delivery_keys):
     return f"<cerebro-{digest}@owner-communication.local>"
 
 
+def owner_decision_url(approval_id, intent, base_url=None):
+    base = (base_url or env("CEREBRO_OWNER_ACTION_BASE_URL", required=False, default="https://app.fenixcapital.es")).rstrip("/")
+    query = urlencode({"approval_id": approval_id.upper(), "intent": intent.upper()})
+    return f"{base}/cerebro/decision?{query}"
+
+
+def approval_id_from_item(item):
+    explicit = str(item.get("approval_id") or "").strip().upper()
+    if APPROVAL_ID_RE.fullmatch(explicit):
+        return explicit
+    match = APPROVAL_ID_RE.search(str(item.get("text") or ""))
+    return match.group(0).upper() if match else None
+
+
+def approval_batch_html(intro, items, base_url=None):
+    blocks = []
+    labels = [
+        ("AUTORIZO", "Autorizar"),
+        ("NO AUTORIZO", "Rechazar"),
+        ("EXPLICAME", "Explícame"),
+        ("APARCO", "Aparcar"),
+    ]
+    for item in items:
+        approval_id = approval_id_from_item(item)
+        safe_text = html.escape(str(item.get("text") or ""))
+        if not approval_id:
+            blocks.append(f'<div style="padding:16px;border:1px solid #ddd;border-radius:12px;margin:14px 0"><pre style="white-space:pre-wrap;font-family:Arial,sans-serif">{safe_text}</pre></div>')
+            continue
+        buttons = []
+        for intent, label in labels:
+            url = html.escape(owner_decision_url(approval_id, intent, base_url), quote=True)
+            buttons.append(f'<a href="{url}" style="display:inline-block;margin:5px 6px 5px 0;padding:10px 14px;border-radius:9px;background:#111;color:#fff;text-decoration:none;font-family:Arial,sans-serif;font-weight:700">{html.escape(label)}</a>')
+        blocks.append(
+            '<div style="padding:16px;border:1px solid #ddd;border-radius:12px;margin:14px 0">'
+            f'<pre style="white-space:pre-wrap;font-family:Arial,sans-serif">{safe_text}</pre>'
+            f'<div>{"".join(buttons)}</div>'
+            '<p style="font-family:Arial,sans-serif;font-size:12px;color:#666;margin:10px 0 0">'
+            'El enlace solo abre CEREBRO. No autoriza nada hasta que estés autenticado y pulses Confirmar.'
+            '</p></div>'
+        )
+    return (
+        '<!doctype html><html><body style="font-family:Arial,sans-serif;color:#171717;line-height:1.45">'
+        f'<p>{html.escape(intro)}</p>{"".join(blocks)}'
+        '<p style="font-size:12px;color:#666">También puedes responder a este correo con la frase exacta y el APR. '
+        '“sí”, “vale”, “ok”, “procede” o “aparca” por sí solos no ejecutan ninguna decisión.</p>'
+        '</body></html>'
+    )
+
+
 def existing_delivery_keys(keys):
     keys = list(dict.fromkeys(k for k in keys if k))
     if not keys:
@@ -124,7 +176,7 @@ def prepare_delivery(payload):
         text = f"{intro}\n\n" + "\n\n------------------------------\n\n".join(body_items) + "\n\nIMPORTANTE: “sí”, “vale”, “ok”, “procede” o “aparca” no ejecutan ninguna decisión. Solo cuentan las frases exactas con APR.\n"
         subject = payload.get("subject") if count == len(raw_items) else f"CEREBRO · {count} AUTORIZACIÓN{'ES' if count != 1 else ''} PENDIENTE{'S' if count != 1 else ''}"
         keys = [item["delivery_key"] for item in remaining]
-        return {"subject": subject, "text": text, "delivery_keys": keys}, already
+        return {"subject": subject, "text": text, "html": approval_batch_html(intro, remaining), "delivery_keys": keys}, already
 
     key = payload.get("delivery_key") or (f"DIGEST:{payload.get('digest_date')}" if payload.get("digest_date") else None)
     if not key:
@@ -165,6 +217,8 @@ def send_message(input_path):
     msg["X-CEREBRO-Generated"] = "owner-communication-v1"
     msg["Auto-Submitted"] = "auto-generated"
     msg.set_content(prepared["text"], charset="utf-8")
+    if prepared.get("html"):
+        msg.add_alternative(prepared["html"], subtype="html", charset="utf-8")
 
     context = ssl.create_default_context()
     if port == 465:
