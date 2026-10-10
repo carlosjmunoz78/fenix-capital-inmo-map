@@ -1,0 +1,115 @@
+name: CEREBRO Mail Delivery Telemetry Reconcile V0
+
+on:
+  push:
+    branches: [main, cerebro/fix-mail-telemetry-skills-20261011]
+    paths:
+      - 'cerebro/communication/delivery-telemetry-reconcile.py'
+      - 'cerebro/tests/test_delivery_telemetry_reconcile.py'
+      - '.github/workflows/cerebro-mail-delivery-telemetry-v0.yml'
+  schedule:
+    - cron: '7,27,47 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: cerebro-mail-delivery-telemetry-v0
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  actions: read
+
+env:
+  COMM_STATE_BRANCH: cerebro/communication-state-v1-20261008
+  COMM_STATE_PATH: cerebro/runtime/human-communication-state.v1.json
+
+jobs:
+  reconcile-mail-delivery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Prove delivery telemetry is fail-closed
+        run: python -m unittest cerebro/tests/test_delivery_telemetry_reconcile.py
+
+      - name: Branch validation remains dry-run only
+        if: github.ref != 'refs/heads/main'
+        run: |
+          mkdir -p artifacts/mail-telemetry
+          echo '{"status":"GREEN_DRY_RUN","mailbox_read":false,"state_persisted":false,"prod_business_write":false,"additional_cost_eur":0}' > artifacts/mail-telemetry/branch-gate.json
+
+      - name: Check private IMAP configuration
+        if: github.ref == 'refs/heads/main'
+        id: mail
+        env:
+          MAIL_USER: ${{ secrets.CEREBRO_MAIL_USERNAME }}
+          MAIL_PASS: ${{ secrets.CEREBRO_MAIL_PASSWORD }}
+        run: |
+          if [ -n "$MAIL_USER" ] && [ -n "$MAIL_PASS" ]; then
+            echo 'ready=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'ready=false' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Load communication state from dedicated state branch
+        if: github.ref == 'refs/heads/main' && steps.mail.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/mail-telemetry
+          git fetch --no-tags origin "+refs/heads/$COMM_STATE_BRANCH:refs/remotes/origin/$COMM_STATE_BRANCH"
+          git show "refs/remotes/origin/$COMM_STATE_BRANCH:$COMM_STATE_PATH" > artifacts/mail-telemetry/state.before.json
+
+      - name: Verify physical digest delivery by logical delivery key
+        if: github.ref == 'refs/heads/main' && steps.mail.outputs.ready == 'true'
+        env:
+          CEREBRO_MAIL_IMAP_HOST: 'imap.gmail.com'
+          CEREBRO_MAIL_IMAP_PORT: '993'
+          CEREBRO_MAIL_USERNAME: ${{ secrets.CEREBRO_MAIL_USERNAME }}
+          CEREBRO_MAIL_PASSWORD: ${{ secrets.CEREBRO_MAIL_PASSWORD }}
+        run: |
+          python cerebro/communication/delivery-telemetry-reconcile.py \
+            --state artifacts/mail-telemetry/state.before.json \
+            --output artifacts/mail-telemetry/state.after.json \
+            --evidence artifacts/mail-telemetry/evidence.json
+
+      - name: Persist verified delivery telemetry only
+        if: github.ref == 'refs/heads/main' && steps.mail.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          VERIFIED="$(python -c "import json; print(str(json.load(open('artifacts/mail-telemetry/evidence.json'))['verified']).lower())")"
+          if [ "$VERIFIED" != true ]; then
+            echo 'No physical delivery evidence found; state remains unchanged.'
+            exit 0
+          fi
+          cp artifacts/mail-telemetry/state.after.json /tmp/comm-state.json
+          git fetch --no-tags origin "+refs/heads/$COMM_STATE_BRANCH:refs/remotes/origin/$COMM_STATE_BRANCH"
+          git checkout --detach "refs/remotes/origin/$COMM_STATE_BRANCH"
+          cp /tmp/comm-state.json "$COMM_STATE_PATH"
+          git config user.name 'cerebro-communication[bot]'
+          git config user.email 'cerebro-communication[bot]@users.noreply.github.com'
+          git add "$COMM_STATE_PATH"
+          if ! git diff --cached --quiet; then
+            git commit -m 'chore(cerebro): reconcile verified mail delivery telemetry'
+            git push origin "HEAD:refs/heads/$COMM_STATE_BRANCH"
+          fi
+
+      - name: Record unconfigured transport without mutating state
+        if: github.ref == 'refs/heads/main' && steps.mail.outputs.ready != 'true'
+        run: |
+          mkdir -p artifacts/mail-telemetry
+          echo '{"status":"MAIL_TELEMETRY_UNCONFIGURED","state_persisted":false,"prod_business_write":false,"additional_cost_eur":0}' > artifacts/mail-telemetry/evidence.json
+
+      - name: Upload telemetry evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-mail-delivery-telemetry-${{ github.run_id }}
+          path: artifacts/mail-telemetry/**
+          if-no-files-found: warn
+          retention-days: 30
