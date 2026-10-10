@@ -6,6 +6,9 @@ param(
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
+$ExpectedPerthCommit = "ff1c8ac55a976971245cdd53c18d6131ca00d993"
+$PerthRepository = "https://github.com/resemble-ai/Perth.git"
+
 function Resolve-RepoRoot {
     param([string]$Requested)
     if ($Requested) {
@@ -53,6 +56,21 @@ function Protect-PrivateDirectory {
     Set-Acl -Path $Path -AclObject $acl
 }
 
+function Assert-ReviewedPerthMaster {
+    $git = Get-Command git -ErrorAction SilentlyContinue
+    if (-not $git) { throw "Git is required for the pinned VOICE-001 backend source install." }
+
+    $line = (& git ls-remote $PerthRepository refs/heads/master 2>$null | Select-Object -First 1)
+    if ($LASTEXITCODE -ne 0 -or -not $line) {
+        throw "Unable to verify the upstream Perth master commit before dependency installation."
+    }
+    $observed = (($line -split '\s+')[0]).ToLowerInvariant()
+    if ($observed -ne $ExpectedPerthCommit) {
+        throw "VOICE-001 supply-chain HOLD: Perth master moved from the reviewed commit. Review and update provenance before installing."
+    }
+    Write-Host "GREEN Perth upstream preflight: reviewed master commit unchanged."
+}
+
 $RepoRoot = Resolve-RepoRoot $RepoRoot
 $RuntimeRoot = Join-Path $env:LOCALAPPDATA "CEREBRO\voice-runtime"
 $PrivateRoot = Join-Path $env:LOCALAPPDATA "CEREBRO\voice-private"
@@ -79,13 +97,17 @@ if (-not (Test-Path $VenvPython)) {
 }
 
 if (-not $SkipInstall) {
+    # Chatterbox's reviewed commit still declares Perth by mutable `master`.
+    # Verify that branch resolves to the exact reviewed commit BEFORE pip can build it.
+    Assert-ReviewedPerthMaster
+
     & $VenvPython -m pip install --disable-pip-version-check --upgrade pip
     if ($LASTEXITCODE -ne 0) { throw "pip bootstrap failed" }
     & $VenvPython -m pip install --disable-pip-version-check -r $Requirements
     if ($LASTEXITCODE -ne 0) { throw "VOICE-001 dependency installation failed" }
 }
 
-# Fail closed before importing or loading the backend if either reviewed VCS source drifted.
+# Re-verify installed direct-VCS metadata before importing or loading the backend.
 & $VenvPython $ProvenanceVerifier
 if ($LASTEXITCODE -ne 0) { throw "VOICE-001 backend provenance verification failed" }
 
