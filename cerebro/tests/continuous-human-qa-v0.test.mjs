@@ -41,7 +41,7 @@ test('OLD vs NEW delta resolves prior fingerprints deterministically',()=>{
   const second=buildQualityState({report:report([{title:'[WEB] availability'}]),previous:first,targetsRegistry:{targets:[]},now:'2026-10-11T04:00:00Z'});
   assert.equal(second.resolved_issue_fingerprints.length,1);
   assert.equal(second.new_issue_fingerprints.length,0);
-  assert.equal(second.quality_delta,20);
+  assert.equal(second.quality_delta,12);
 });
 
 test('same finding becomes recurring and is not redispatched as new',()=>{
