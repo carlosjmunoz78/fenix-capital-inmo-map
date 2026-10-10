@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {buildHumanRequiredEmailEnvelope,parseApprovalCommands,evaluateStandingAuthorizationCandidate} from '../governance/human-communication.mjs';
+import {buildHumanRequiredEmailEnvelope,buildDailyDigestEmail,parseApprovalCommands,evaluateStandingAuthorizationCandidate} from '../governance/human-communication.mjs';
 import {initialCommunicationState,normalizeCommunicationState,ingestSkillHumanRequired,applyOwnerMessages,prepareOutbound} from '../communication/communication-controller.mjs';
 
 const item={candidate_id:'candidate-park',name:'agent-browser',engine_id:'FACT-001',stage:'PREPROD_PROMOTION_REVIEW',human_required:'HIGH_RISK',updated_at:'2026-10-10T10:00:00Z',rollback_green:true,prod_write:false,customer_data_used:false,external_skill_code_execution:false,trading_access:false,paid_fallback:false,max_money_eur:0};
@@ -61,4 +61,33 @@ test('approval batch exposes all four safe fallback decisions while buttons rema
   assert.match(row.explain_phrase,/^EXPLICAME APR-/);
   assert.match(row.park_phrase,/^APARCO APR-/);
   assert.match(prepared.approvalMail.text,/Para aparcarlo/);
+});
+
+test('daily digest uses the executive subject instead of the old technical novedades subject',()=>{
+  const digest=buildDailyDigestEmail({date:'2026-10-10',summary:{human:['Carlos: NO necesitas hacer nada.']}});
+  assert.equal(digest.subject,'CEREBRO · RESUMEN EJECUTIVO · 2026-10-10');
+  assert.doesNotMatch(digest.subject,/NOVEDADES DEL DÍA/);
+});
+
+test('automatic digest keeps the owner-first executive structure',()=>{
+  const state={...initialCommunicationState('2026-10-10T07:00:00Z'),last_digest_date:'2026-10-09'};
+  const repoSummary={
+    human:['RESUMEN DE 20 SEGUNDOS: CEREBRO ha ganado una capacidad validada.','Carlos: NO necesitas hacer nada por autorizaciones en este momento.'],
+    published:['Se han registrado 2 cambios relevantes.'],
+    failures:['Sin fallos técnicos relevantes registrados en la ventana revisada.'],
+    skills_engines:['Memoria Obsidian\n  Qué es realmente: organiza conocimiento.\n  Estado: 🟢 TERMINADA EN MODO LECTURA\n  ¿Necesitas hacer algo?: NO.'],
+    cost:['Coste adicional registrado: 0.00 €.'],
+    next_safe_work:['CEREBRO continúa automáticamente con el siguiente trabajo seguro.'],
+    missing_telemetry:['El detalle técnico queda guardado para auditoría.']
+  };
+  const prepared=prepareOutbound(state,{now:new Date('2026-10-10T08:30:00+02:00'),repoSummary});
+  assert.ok(prepared.digestMail);
+  assert.equal(prepared.digestMail.subject,'CEREBRO · RESUMEN EJECUTIVO · 2026-10-10');
+  assert.match(prepared.digestMail.text,/CEREBRO · RESUMEN EJECUTIVO DIARIO/);
+  assert.match(prepared.digestMail.text,/RESUMEN DE 20 SEGUNDOS/);
+  assert.match(prepared.digestMail.text,/CAMBIOS RELEVANTES/);
+  assert.match(prepared.digestMail.text,/SKILLS QUE MERECEN TU ATENCIÓN/);
+  assert.match(prepared.digestMail.text,/QUÉ HARÁ CEREBRO AHORA/);
+  assert.match(prepared.digestMail.text,/Carlos: NO necesitas hacer nada/);
+  assert.doesNotMatch(prepared.digestMail.text,/[a-f0-9]{40}/i);
 });
