@@ -1,49 +1,42 @@
 {
-  "schema_version": "0.1.0",
+  "schema_version": "0.2.0",
   "engine_id": "VOICE-001",
   "voice_id": "ESM07",
   "environment": "LAB",
-  "status": "TARGET_DEFINED_REFERENCE_REQUIRED",
+  "status": "OWNER_ACCEPTED_STANDALONE_SEED_CANDIDATE",
   "locale": "es-ES",
   "presentation": "masculine",
-  "profile": "cinematic_ai_assistant",
-  "owner_intent": "KEEP_AS_THIRD_CEREBRO_VOICE_TARGET",
-  "style_target": {
-    "reference_context": "Owner prefers the theatrical Spain-Spanish J.A.R.V.I.S. performance in The Avengers-era films as a stylistic direction only.",
-    "traits": [
-      "Spain-Spanish",
-      "male",
-      "grave",
-      "serene",
-      "powerful-but-controlled",
-      "polite",
-      "precise",
-      "technical",
-      "elegant",
-      "restrained-dry-wit",
-      "cinematic-AI-assistant"
-    ],
-    "forbidden": [
-      "exact Victor Iturrioz identity clone",
-      "exact JARVIS character voice clone",
-      "movie audio as cloning reference",
-      "celebrity or actor reference audio without authorization",
-      "LatAm drift"
-    ]
+  "profile": "calm_technical_cinematic",
+  "owner_intent": "KEEP_AS_DISTINCT_CEREBRO_VOICE",
+  "owner_assessment": {
+    "keep": true,
+    "jarvis_similarity_accepted": false,
+    "note": "Owner explicitly keeps this voice but says it does not sound like the desired Avengers-era JARVIS direction. Preserve it unchanged and continue the search with a different base timbre."
   },
+  "traits": [
+    "Spain-Spanish",
+    "male",
+    "calm",
+    "technical",
+    "precise",
+    "controlled",
+    "polite",
+    "slightly-grave",
+    "cinematic"
+  ],
   "identity_policy": {
     "original_cerebro_voice": true,
     "exact_person_identity_clone": false,
     "exact_character_identity_clone": false,
-    "authorized_reference_required": true
+    "movie_audio_reference": false
   },
   "authority": {
-    "owner_style_target_accepted": true,
+    "owner_seed_accepted": true,
     "voice_bank_ready": false,
     "automatic_promotion": false,
     "preprod_ready": false,
     "prod_enabled": false,
     "public_clone_enabled": false
   },
-  "next_gate": "GENERATE_OR_LICENSE_ORIGINAL_ES_ES_REFERENCE_WITH_MATCHING_TRAITS_AND_RUN_OWNER_LISTENING_QA"
+  "next_gate": "PRESERVE_ESM07_AND_CONTINUE_DIFFERENT_BASE_TIMBRE_SEARCH_UNDER_ESM08"
 }
