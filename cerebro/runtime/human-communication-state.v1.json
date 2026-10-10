@@ -5,7 +5,7 @@
   "engine_id": "HEX-001",
   "environment": "PROD_CONTROL_PLANE",
   "version": "1.1.0",
-  "updated_at": "2026-10-10T04:40:18.255Z",
+  "updated_at": "2026-10-10T08:33:22.581Z",
   "pending": {},
   "authorized_actions": {},
   "decisions": [],
@@ -13,8 +13,53 @@
   "processed_message_ids": [],
   "standing_authorizations": {},
   "standing_policy_proposals": {},
-  "skill_digest_snapshot": {},
-  "last_digest_date": "2026-10-09",
+  "skill_digest_snapshot": {
+    "name:reddit-content-ops": {
+      "kind": "HOLD",
+      "name": "reddit-content-ops",
+      "human_alias": "reddit-content-ops",
+      "status": "TERMINAL_HOLD",
+      "stage": "SAFE_HANDLER_TERMINAL_HOLD",
+      "human_required": "",
+      "updated_at": "2026-10-08T06:23:04.702Z",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
+    "name:kairos-lite": {
+      "kind": "HOLD",
+      "name": "kairos-lite",
+      "human_alias": "kairos-lite",
+      "status": "TERMINAL_HOLD",
+      "stage": "SAFE_HANDLER_TERMINAL_HOLD",
+      "human_required": "",
+      "updated_at": "2026-10-08T14:38:21.469Z",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
+    "name:ai-behavior-trees-utility-ai": {
+      "kind": "HOLD",
+      "name": "ai-behavior-trees-utility-ai",
+      "human_alias": "Ai Behavior Trees Utility Ai",
+      "status": "TERMINAL_HOLD",
+      "stage": "SAFE_HANDLER_TERMINAL_HOLD",
+      "human_required": "",
+      "updated_at": "2026-10-09T15:21:10.396Z",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
+    "name:obsidian": {
+      "kind": "COMPLETED",
+      "name": "obsidian",
+      "human_alias": "Memoria Obsidian",
+      "status": "COMPLETED_READONLY_ADVISORY",
+      "stage": "READONLY_ADVISORY_REGISTERED",
+      "human_required": "",
+      "updated_at": "2026-10-08T06:57:07.273Z",
+      "canary": "GREEN_AUTONOMOUS_PROD_READONLY_CANARY",
+      "additional_cost_eur": 0
+    }
+  },
+  "last_digest_date": "2026-10-10",
   "last_delivery_at": null,
   "mail_transport": {
     "status": "UNVERIFIED",
