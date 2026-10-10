@@ -1,0 +1,59 @@
+{
+  "schema_version": "1.0.0",
+  "engine_id": "MOTION-001",
+  "phase": "PHASE1_V2.2",
+  "version": "v2.2",
+  "status": "PROCEDURAL_PROTOTYPE_READY_FOR_OWNER_VISUAL_REVIEW",
+  "environment": ["LAB", "PREPROD"],
+  "prod_authorized": false,
+  "additional_cost_eur": 0,
+  "preserves": ["PHASE1_V1", "PHASE1_V2", "PHASE1_V2.1"],
+  "features": {
+    "organic_curved_filaments": true,
+    "causal_cluster_activation": true,
+    "depth_attenuation": true,
+    "hierarchical_neurons": ["hub", "secondary", "micro"],
+    "inter_area_bridges": true,
+    "causal_state_sequences": true,
+    "active_afterglow": true,
+    "multi_hop_curved_pulses": true
+  },
+  "palette": ["deep_navy_black", "electric_blue", "cyan", "white"],
+  "exception_accents": {
+    "HUMAN_REQUIRED": "restrained_amber_focal",
+    "ERROR": "restrained_red_focal"
+  },
+  "states": ["IDLE", "LISTENING", "PROCESSING", "SPEAKING", "HUMAN_REQUIRED", "DEGRADED", "ERROR"],
+  "runtime": {
+    "format": "self_contained_html5_canvas",
+    "external_dependencies": [],
+    "node_count": 1250,
+    "api": "CEREBRO_MOTION_PHASE1_V22",
+    "input_event": "cerebro-motion-state"
+  },
+  "artifacts": {
+    "html": {
+      "file": "CEREBRO_MOTION_PHASE1_V22_CAUSAL_NETWORK.html",
+      "sha256": "017f5a0323aa1a1d79627c5f62185d0374e9eca16a0c9951320f810af8822a12",
+      "bytes": 31491
+    },
+    "bundle": {
+      "file": "CEREBRO_MOTION_PHASE1_V22_CAUSAL_NETWORK.zip",
+      "sha256": "96f83116473819e5aefc58c9b9a015cb4077101d5e2363ea111063374f5e44e5"
+    }
+  },
+  "gates": {
+    "javascript_syntax": "GREEN",
+    "structure_contract": "GREEN",
+    "owner_visual_acceptance": "PENDING",
+    "target_device_performance": "PENDING",
+    "live_telemetry_binding": "NOT_STARTED",
+    "prod_promotion": "NOT_AUTHORIZED"
+  },
+  "authority": {
+    "prod_enabled": false,
+    "prod_write_authorized": false,
+    "automatic_promotion": false,
+    "trading_access": false
+  }
+}
