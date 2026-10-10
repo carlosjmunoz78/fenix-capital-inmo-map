@@ -9,6 +9,7 @@ on:
       - 'cerebro/qa/**'
       - 'cerebro/tests/continuous-human-qa-v0.test.mjs'
       - 'cerebro/tests/qa-email-enrichment-v0.test.mjs'
+      - 'cerebro/tests/qa-learning-bridge-v0.test.mjs'
       - '.github/workflows/cerebro-continuous-human-qa-v0.yml'
   pull_request:
     paths:
@@ -18,6 +19,7 @@ on:
       - 'cerebro/communication/enrich-daily-summary-with-qa.mjs'
       - 'cerebro/tests/continuous-human-qa-v0.test.mjs'
       - 'cerebro/tests/qa-email-enrichment-v0.test.mjs'
+      - 'cerebro/tests/qa-learning-bridge-v0.test.mjs'
       - '.github/workflows/cerebro-continuous-human-qa-v0.yml'
       - '.github/workflows/cerebro-human-communication-v1.yml'
   schedule:
@@ -55,11 +57,14 @@ jobs:
       - name: Install existing repository dependencies
         run: npm ci
 
-      - name: Prove QA contracts and daily-email integration
+      - name: Prove QA contracts email and RSI repair bridge
         run: |
           node --test \
             cerebro/tests/continuous-human-qa-v0.test.mjs \
-            cerebro/tests/qa-email-enrichment-v0.test.mjs
+            cerebro/tests/qa-email-enrichment-v0.test.mjs \
+            cerebro/tests/qa-learning-bridge-v0.test.mjs \
+            cerebro/tests/universal-learning-ingress.test.mjs \
+            cerebro/tests/improvement-candidate-factory.test.mjs
 
       - name: Install Chromium for existing Playwright stack
         run: npx playwright install --with-deps chromium
@@ -100,10 +105,33 @@ jobs:
             --out artifacts/qa/state.after.json
           jq '{status,quality_score,previous_quality_score,quality_delta,tests,targets,new_issues,resolved_issue_fingerprints,recurring_issues,dispatch_queue,coverage,safety}' artifacts/qa/state.after.json
 
+      - name: Build bounded learning and repair signals for existing RSI pipeline
+        run: |
+          set -euo pipefail
+          node cerebro/qa/qa-learning-bridge.mjs \
+            --input artifacts/qa/state.after.json \
+            --output artifacts/qa/learning-signals.json
+          jq -e '.state_type=="CEREBRO_QA_LEARNING_SIGNAL_BATCH_V0" and .prod_authorized==false and .prod_write_authorized==false and .trading_access==false and .contains_customer_data==false and .contains_secrets==false and .additional_cost_eur==0' artifacts/qa/learning-signals.json >/dev/null
+
       - name: Enforce immutable safety boundaries
         run: |
           jq -e '.company_id=="fenix" and .engine_id=="QA-001" and .safety.prod_write==false and .safety.customer_data==false and .safety.trading==false and .safety.paid_fallback==false and .safety.additional_subscription_eur==0 and (.human_required|length)==0' artifacts/qa/state.after.json >/dev/null
           jq -e '.targets.PRODUCT.status=="POR_AUDITAR" or .coverage.products=="ENABLED_SYNTHETIC_PREPROD"' artifacts/qa/state.after.json >/dev/null
+
+      - name: Dispatch verified QA learning only when there is something new to learn or repair
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          COUNT="$(jq -r '.signals_total' artifacts/qa/learning-signals.json)"
+          if [ "$COUNT" = '0' ]; then
+            echo 'No new/resolved/regressed QA evidence; idempotent learning no-op.'
+            exit 0
+          fi
+          jq '{event_type:"cerebro_learning_signal",client_payload:{signal:{signals:.signals}}}' artifacts/qa/learning-signals.json > artifacts/qa/repository-dispatch.json
+          gh api -X POST "repos/$GITHUB_REPOSITORY/dispatches" --input artifacts/qa/repository-dispatch.json
+          echo "Dispatched $COUNT bounded QA learning signal(s) to existing universal RSI ingress."
 
       - name: Persist only QA evidence state on its dedicated branch
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
