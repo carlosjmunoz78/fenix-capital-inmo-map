@@ -5,8 +5,8 @@
   "engine_id": "IAM-001",
   "environment": "CONTROL_PLANE",
   "version": "0.1.0",
-  "updated_at": "2026-10-09T18:21:58.940Z",
-  "last_source_run_id": 37972745858,
+  "updated_at": "2026-10-10T05:54:19.998Z",
+  "last_source_run_id": 38029080748,
   "credential_health": {
     "credref:github-actions-token": {
       "credential_ref_id": "credref:github-actions-token",
@@ -14,7 +14,7 @@
       "health_mode": "PROVIDER_MANAGED_EPHEMERAL",
       "status": "HEALTHY_PROVIDER_MANAGED",
       "usable": true,
-      "observed_at": "2026-10-09T18:21:58.940Z",
+      "observed_at": "2026-10-10T05:54:19.998Z",
       "expires_at": null,
       "ttl_seconds": null,
       "secret_value_observed": false
@@ -25,7 +25,7 @@
       "health_mode": "PRESENCE_ONLY",
       "status": "PRESENT_LIFECYCLE_PARTIAL",
       "usable": true,
-      "observed_at": "2026-10-09T18:21:58.940Z",
+      "observed_at": "2026-10-10T05:54:19.998Z",
       "expires_at": null,
       "ttl_seconds": null,
       "secret_value_observed": false
@@ -36,7 +36,7 @@
       "health_mode": "PRESENCE_ONLY",
       "status": "PRESENT_LIFECYCLE_PARTIAL",
       "usable": true,
-      "observed_at": "2026-10-09T18:21:58.940Z",
+      "observed_at": "2026-10-10T05:54:19.998Z",
       "expires_at": null,
       "ttl_seconds": null,
       "secret_value_observed": false
@@ -47,7 +47,7 @@
       "health_mode": "JWT_EXPIRY_METADATA",
       "status": "HOLD_MISSING_REFERENCE",
       "usable": false,
-      "observed_at": "2026-10-09T18:21:58.940Z",
+      "observed_at": "2026-10-10T05:54:19.998Z",
       "expires_at": null,
       "ttl_seconds": null,
       "secret_value_observed": false
@@ -58,7 +58,7 @@
       "health_mode": "PRESENCE_ONLY",
       "status": "PRESENT_LIFECYCLE_PARTIAL",
       "usable": true,
-      "observed_at": "2026-10-09T18:21:58.940Z",
+      "observed_at": "2026-10-10T05:54:19.998Z",
       "expires_at": null,
       "ttl_seconds": null,
       "secret_value_observed": false
@@ -69,7 +69,7 @@
       "health_mode": "PRESENCE_ONLY",
       "status": "PRESENT_LIFECYCLE_PARTIAL",
       "usable": true,
-      "observed_at": "2026-10-09T18:21:58.940Z",
+      "observed_at": "2026-10-10T05:54:19.998Z",
       "expires_at": null,
       "ttl_seconds": null,
       "secret_value_observed": false
@@ -80,7 +80,7 @@
       "health_mode": "PRESENCE_ONLY",
       "status": "PRESENT_LIFECYCLE_PARTIAL",
       "usable": true,
-      "observed_at": "2026-10-09T18:21:58.940Z",
+      "observed_at": "2026-10-10T05:54:19.998Z",
       "expires_at": null,
       "ttl_seconds": null,
       "secret_value_observed": false
@@ -91,7 +91,7 @@
       "health_mode": "PRESENCE_ONLY",
       "status": "PRESENT_LIFECYCLE_PARTIAL",
       "usable": true,
-      "observed_at": "2026-10-09T18:21:58.940Z",
+      "observed_at": "2026-10-10T05:54:19.998Z",
       "expires_at": null,
       "ttl_seconds": null,
       "secret_value_observed": false
@@ -102,7 +102,7 @@
       "health_mode": "PRESENCE_ONLY",
       "status": "PRESENT_LIFECYCLE_PARTIAL",
       "usable": true,
-      "observed_at": "2026-10-09T18:21:58.940Z",
+      "observed_at": "2026-10-10T05:54:19.998Z",
       "expires_at": null,
       "ttl_seconds": null,
       "secret_value_observed": false
