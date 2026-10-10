@@ -1,0 +1,1513 @@
+{
+  "schema_version": "0.1.0",
+  "state_type": "CEREBRO_QA_AUTONOMOUS_REMEDIATION_STATE_V0",
+  "company_id": "fenix",
+  "engine_id": "SELF-001",
+  "environment": "PREPROD_CONTROL_PLANE",
+  "version": "0.1.0",
+  "updated_at": "2026-10-10T23:47:20.145Z",
+  "status": "ROUTED_AUTONOMOUSLY_TO_PREPROD",
+  "open_cases": 12,
+  "bug_cases": 0,
+  "improvement_cases": 12,
+  "learning_records_total": 12,
+  "candidate_packages_total": 12,
+  "cases": [
+    {
+      "case_id": "qa-case:ebbbce81fe2ef00ecd8d1d36",
+      "company_id": "fenix",
+      "owner_engine": "QA-001",
+      "environment": "PREPROD",
+      "source": "IMPROVEMENT",
+      "source_learning_id": "qa-learning:3d7458ff56ec06d09c12edac",
+      "issue_severity": null,
+      "state": "ROUTED_TO_PREPROD_OWNER",
+      "human_required": null,
+      "repair_mode": "VERSIONED_PREPROD_CANDIDATE",
+      "gates": {
+        "reproduce_required": false,
+        "regression_test_required": false,
+        "old_vs_new_required": true,
+        "preprod_required": true,
+        "independent_judge_required": true,
+        "rollback_required": true,
+        "rebuild_required": true
+      },
+      "promotion_authorized": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "customer_data": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "case_id": "qa-case:12b15c473a728aa7f6115a09",
+      "company_id": "fenix",
+      "owner_engine": "QAB-001",
+      "environment": "PREPROD",
+      "source": "IMPROVEMENT",
+      "source_learning_id": "qa-learning:f46576065cbf7d4ebcc93634",
+      "issue_severity": null,
+      "state": "ROUTED_TO_PREPROD_OWNER",
+      "human_required": null,
+      "repair_mode": "VERSIONED_PREPROD_CANDIDATE",
+      "gates": {
+        "reproduce_required": false,
+        "regression_test_required": false,
+        "old_vs_new_required": true,
+        "preprod_required": true,
+        "independent_judge_required": true,
+        "rollback_required": true,
+        "rebuild_required": true
+      },
+      "promotion_authorized": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "customer_data": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "case_id": "qa-case:d0a3c270ed4f82602f786706",
+      "company_id": "fenix",
+      "owner_engine": "HCI-001",
+      "environment": "PREPROD",
+      "source": "IMPROVEMENT",
+      "source_learning_id": "qa-learning:60868d6cb04aa9108f6ec942",
+      "issue_severity": null,
+      "state": "ROUTED_TO_PREPROD_OWNER",
+      "human_required": null,
+      "repair_mode": "VERSIONED_PREPROD_CANDIDATE",
+      "gates": {
+        "reproduce_required": false,
+        "regression_test_required": false,
+        "old_vs_new_required": true,
+        "preprod_required": true,
+        "independent_judge_required": true,
+        "rollback_required": true,
+        "rebuild_required": true
+      },
+      "promotion_authorized": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "customer_data": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "case_id": "qa-case:ad4a970322c7fe155f62d9f8",
+      "company_id": "fenix",
+      "owner_engine": "HCI-001",
+      "environment": "PREPROD",
+      "source": "IMPROVEMENT",
+      "source_learning_id": "qa-learning:af9e51abc95fb9307489078d",
+      "issue_severity": null,
+      "state": "ROUTED_TO_PREPROD_OWNER",
+      "human_required": null,
+      "repair_mode": "VERSIONED_PREPROD_CANDIDATE",
+      "gates": {
+        "reproduce_required": false,
+        "regression_test_required": false,
+        "old_vs_new_required": true,
+        "preprod_required": true,
+        "independent_judge_required": true,
+        "rollback_required": true,
+        "rebuild_required": true
+      },
+      "promotion_authorized": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "customer_data": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "case_id": "qa-case:5aed133e2720f65d70d1c9a5",
+      "company_id": "fenix",
+      "owner_engine": "HCI-001",
+      "environment": "PREPROD",
+      "source": "IMPROVEMENT",
+      "source_learning_id": "qa-learning:df7d01d86dba70010fa11b83",
+      "issue_severity": null,
+      "state": "ROUTED_TO_PREPROD_OWNER",
+      "human_required": null,
+      "repair_mode": "VERSIONED_PREPROD_CANDIDATE",
+      "gates": {
+        "reproduce_required": false,
+        "regression_test_required": false,
+        "old_vs_new_required": true,
+        "preprod_required": true,
+        "independent_judge_required": true,
+        "rollback_required": true,
+        "rebuild_required": true
+      },
+      "promotion_authorized": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "customer_data": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "case_id": "qa-case:a18ab0857f323276a7fbfb6c",
+      "company_id": "fenix",
+      "owner_engine": "HCI-001",
+      "environment": "PREPROD",
+      "source": "IMPROVEMENT",
+      "source_learning_id": "qa-learning:f79da2012c0d9d6a655fb154",
+      "issue_severity": null,
+      "state": "ROUTED_TO_PREPROD_OWNER",
+      "human_required": null,
+      "repair_mode": "VERSIONED_PREPROD_CANDIDATE",
+      "gates": {
+        "reproduce_required": false,
+        "regression_test_required": false,
+        "old_vs_new_required": true,
+        "preprod_required": true,
+        "independent_judge_required": true,
+        "rollback_required": true,
+        "rebuild_required": true
+      },
+      "promotion_authorized": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "customer_data": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "case_id": "qa-case:212743012dd45f072694cec8",
+      "company_id": "fenix",
+      "owner_engine": "HCI-001",
+      "environment": "PREPROD",
+      "source": "IMPROVEMENT",
+      "source_learning_id": "qa-learning:8d10770927b05c3c549b03ec",
+      "issue_severity": null,
+      "state": "ROUTED_TO_PREPROD_OWNER",
+      "human_required": null,
+      "repair_mode": "VERSIONED_PREPROD_CANDIDATE",
+      "gates": {
+        "reproduce_required": false,
+        "regression_test_required": false,
+        "old_vs_new_required": true,
+        "preprod_required": true,
+        "independent_judge_required": true,
+        "rollback_required": true,
+        "rebuild_required": true
+      },
+      "promotion_authorized": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "customer_data": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "case_id": "qa-case:7ead8972bab46c38b5de2398",
+      "company_id": "fenix",
+      "owner_engine": "HCI-001",
+      "environment": "PREPROD",
+      "source": "IMPROVEMENT",
+      "source_learning_id": "qa-learning:db213ba0744836beb266503c",
+      "issue_severity": null,
+      "state": "ROUTED_TO_PREPROD_OWNER",
+      "human_required": null,
+      "repair_mode": "VERSIONED_PREPROD_CANDIDATE",
+      "gates": {
+        "reproduce_required": false,
+        "regression_test_required": false,
+        "old_vs_new_required": true,
+        "preprod_required": true,
+        "independent_judge_required": true,
+        "rollback_required": true,
+        "rebuild_required": true
+      },
+      "promotion_authorized": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "customer_data": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "case_id": "qa-case:847fe5bb0c0423316f260955",
+      "company_id": "fenix",
+      "owner_engine": "HCI-001",
+      "environment": "PREPROD",
+      "source": "IMPROVEMENT",
+      "source_learning_id": "qa-learning:e011b20841a4bf5a25c05052",
+      "issue_severity": null,
+      "state": "ROUTED_TO_PREPROD_OWNER",
+      "human_required": null,
+      "repair_mode": "VERSIONED_PREPROD_CANDIDATE",
+      "gates": {
+        "reproduce_required": false,
+        "regression_test_required": false,
+        "old_vs_new_required": true,
+        "preprod_required": true,
+        "independent_judge_required": true,
+        "rollback_required": true,
+        "rebuild_required": true
+      },
+      "promotion_authorized": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "customer_data": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "case_id": "qa-case:49b4fb420ce1e62eab2e007b",
+      "company_id": "fenix",
+      "owner_engine": "HCI-001",
+      "environment": "PREPROD",
+      "source": "IMPROVEMENT",
+      "source_learning_id": "qa-learning:e6ce05846ac5d5edffbd1513",
+      "issue_severity": null,
+      "state": "ROUTED_TO_PREPROD_OWNER",
+      "human_required": null,
+      "repair_mode": "VERSIONED_PREPROD_CANDIDATE",
+      "gates": {
+        "reproduce_required": false,
+        "regression_test_required": false,
+        "old_vs_new_required": true,
+        "preprod_required": true,
+        "independent_judge_required": true,
+        "rollback_required": true,
+        "rebuild_required": true
+      },
+      "promotion_authorized": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "customer_data": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "case_id": "qa-case:c994ed784e44d84df76aeed4",
+      "company_id": "fenix",
+      "owner_engine": "HCI-001",
+      "environment": "PREPROD",
+      "source": "IMPROVEMENT",
+      "source_learning_id": "qa-learning:52423800ed61b40ef9734fb3",
+      "issue_severity": null,
+      "state": "ROUTED_TO_PREPROD_OWNER",
+      "human_required": null,
+      "repair_mode": "VERSIONED_PREPROD_CANDIDATE",
+      "gates": {
+        "reproduce_required": false,
+        "regression_test_required": false,
+        "old_vs_new_required": true,
+        "preprod_required": true,
+        "independent_judge_required": true,
+        "rollback_required": true,
+        "rebuild_required": true
+      },
+      "promotion_authorized": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "customer_data": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "case_id": "qa-case:a7a121b29ed2c508b6e71d20",
+      "company_id": "fenix",
+      "owner_engine": "HCI-001",
+      "environment": "PREPROD",
+      "source": "IMPROVEMENT",
+      "source_learning_id": "qa-learning:57a0188b6184af2eb6e90df8",
+      "issue_severity": null,
+      "state": "ROUTED_TO_PREPROD_OWNER",
+      "human_required": null,
+      "repair_mode": "VERSIONED_PREPROD_CANDIDATE",
+      "gates": {
+        "reproduce_required": false,
+        "regression_test_required": false,
+        "old_vs_new_required": true,
+        "preprod_required": true,
+        "independent_judge_required": true,
+        "rollback_required": true,
+        "rebuild_required": true
+      },
+      "promotion_authorized": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "customer_data": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    }
+  ],
+  "learning_records": [
+    {
+      "learning_id": "qa-learning:3d7458ff56ec06d09c12edac",
+      "company_id": "fenix",
+      "engine_id": "QA-001",
+      "environment": "PREPROD",
+      "version": "0.1.0",
+      "source_event_ids": [
+        "qa-imp:3d7458ff56ec06d09c12edac"
+      ],
+      "source_type": "METRIC_OBSERVATION",
+      "source_environment": "PROD_READ_ONLY",
+      "observed_at": "2026-10-10T23:47:20.096Z",
+      "hypothesis": "Un usuario sintético autenticado permitirá descubrir regresiones que el shell público no ve.",
+      "expected_metric_delta": {
+        "name": "authenticated_app_coverage",
+        "direction": "HIGHER",
+        "measurement": "CONTROLLED_OLD_VS_NEW"
+      },
+      "confidence": 0.99,
+      "risk_class": "LOW",
+      "evidence_refs": [
+        "qa-improvement:qa-imp:3d7458ff56ec06d09c12edac"
+      ],
+      "promotion_state": "CANDIDATE",
+      "created_by": "QA-001",
+      "reason": "CONTINUOUS_HUMAN_QA_IMPROVEMENT_SCOUT",
+      "persistent_publish_authorized": true,
+      "persistence_scope": "LOCAL_PREPROD_LRN_LEDGER_ONLY",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "learning_id": "qa-learning:f46576065cbf7d4ebcc93634",
+      "company_id": "fenix",
+      "engine_id": "QAB-001",
+      "environment": "PREPROD",
+      "version": "0.1.0",
+      "source_event_ids": [
+        "qa-imp:f46576065cbf7d4ebcc93634"
+      ],
+      "source_type": "METRIC_OBSERVATION",
+      "source_environment": "PROD_READ_ONLY",
+      "observed_at": "2026-10-10T23:47:20.096Z",
+      "hypothesis": "Registrar un target PREPROD sintético permitirá probar generación, entrega y descarga sin tocar clientes.",
+      "expected_metric_delta": {
+        "name": "synthetic_product_coverage",
+        "direction": "HIGHER",
+        "measurement": "CONTROLLED_OLD_VS_NEW"
+      },
+      "confidence": 0.99,
+      "risk_class": "LOW",
+      "evidence_refs": [
+        "qa-improvement:qa-imp:f46576065cbf7d4ebcc93634"
+      ],
+      "promotion_state": "CANDIDATE",
+      "created_by": "QA-001",
+      "reason": "CONTINUOUS_HUMAN_QA_IMPROVEMENT_SCOUT",
+      "persistent_publish_authorized": true,
+      "persistence_scope": "LOCAL_PREPROD_LRN_LEDGER_ONLY",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "learning_id": "qa-learning:60868d6cb04aa9108f6ec942",
+      "company_id": "fenix",
+      "engine_id": "HCI-001",
+      "environment": "PREPROD",
+      "version": "0.1.0",
+      "source_event_ids": [
+        "qa-imp:60868d6cb04aa9108f6ec942"
+      ],
+      "source_type": "METRIC_OBSERVATION",
+      "source_environment": "PROD_READ_ONLY",
+      "observed_at": "2026-10-10T23:47:20.096Z",
+      "hypothesis": "Nombrar controles visibles reduce fricción para tecnologías de asistencia.",
+      "expected_metric_delta": {
+        "name": "unnamed_interactive_count",
+        "direction": "LOWER",
+        "measurement": "CONTROLLED_OLD_VS_NEW"
+      },
+      "confidence": 0.96,
+      "risk_class": "LOW",
+      "evidence_refs": [
+        "qa-improvement:qa-imp:60868d6cb04aa9108f6ec942"
+      ],
+      "promotion_state": "CANDIDATE",
+      "created_by": "QA-001",
+      "reason": "CONTINUOUS_HUMAN_QA_IMPROVEMENT_SCOUT",
+      "persistent_publish_authorized": true,
+      "persistence_scope": "LOCAL_PREPROD_LRN_LEDGER_ONLY",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "learning_id": "qa-learning:af9e51abc95fb9307489078d",
+      "company_id": "fenix",
+      "engine_id": "HCI-001",
+      "environment": "PREPROD",
+      "version": "0.1.0",
+      "source_event_ids": [
+        "qa-imp:af9e51abc95fb9307489078d"
+      ],
+      "source_type": "METRIC_OBSERVATION",
+      "source_environment": "PROD_READ_ONLY",
+      "observed_at": "2026-10-10T23:47:20.096Z",
+      "hypothesis": "Nombrar controles visibles reduce fricción para tecnologías de asistencia.",
+      "expected_metric_delta": {
+        "name": "unnamed_interactive_count",
+        "direction": "LOWER",
+        "measurement": "CONTROLLED_OLD_VS_NEW"
+      },
+      "confidence": 0.96,
+      "risk_class": "LOW",
+      "evidence_refs": [
+        "qa-improvement:qa-imp:af9e51abc95fb9307489078d"
+      ],
+      "promotion_state": "CANDIDATE",
+      "created_by": "QA-001",
+      "reason": "CONTINUOUS_HUMAN_QA_IMPROVEMENT_SCOUT",
+      "persistent_publish_authorized": true,
+      "persistence_scope": "LOCAL_PREPROD_LRN_LEDGER_ONLY",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "learning_id": "qa-learning:df7d01d86dba70010fa11b83",
+      "company_id": "fenix",
+      "engine_id": "HCI-001",
+      "environment": "PREPROD",
+      "version": "0.1.0",
+      "source_event_ids": [
+        "qa-imp:df7d01d86dba70010fa11b83"
+      ],
+      "source_type": "METRIC_OBSERVATION",
+      "source_environment": "PROD_READ_ONLY",
+      "observed_at": "2026-10-10T23:47:20.096Z",
+      "hypothesis": "Nombrar controles visibles reduce fricción para tecnologías de asistencia.",
+      "expected_metric_delta": {
+        "name": "unnamed_interactive_count",
+        "direction": "LOWER",
+        "measurement": "CONTROLLED_OLD_VS_NEW"
+      },
+      "confidence": 0.96,
+      "risk_class": "LOW",
+      "evidence_refs": [
+        "qa-improvement:qa-imp:df7d01d86dba70010fa11b83"
+      ],
+      "promotion_state": "CANDIDATE",
+      "created_by": "QA-001",
+      "reason": "CONTINUOUS_HUMAN_QA_IMPROVEMENT_SCOUT",
+      "persistent_publish_authorized": true,
+      "persistence_scope": "LOCAL_PREPROD_LRN_LEDGER_ONLY",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "learning_id": "qa-learning:f79da2012c0d9d6a655fb154",
+      "company_id": "fenix",
+      "engine_id": "HCI-001",
+      "environment": "PREPROD",
+      "version": "0.1.0",
+      "source_event_ids": [
+        "qa-imp:f79da2012c0d9d6a655fb154"
+      ],
+      "source_type": "METRIC_OBSERVATION",
+      "source_environment": "PROD_READ_ONLY",
+      "observed_at": "2026-10-10T23:47:20.096Z",
+      "hypothesis": "Nombrar controles visibles reduce fricción para tecnologías de asistencia.",
+      "expected_metric_delta": {
+        "name": "unnamed_interactive_count",
+        "direction": "LOWER",
+        "measurement": "CONTROLLED_OLD_VS_NEW"
+      },
+      "confidence": 0.96,
+      "risk_class": "LOW",
+      "evidence_refs": [
+        "qa-improvement:qa-imp:f79da2012c0d9d6a655fb154"
+      ],
+      "promotion_state": "CANDIDATE",
+      "created_by": "QA-001",
+      "reason": "CONTINUOUS_HUMAN_QA_IMPROVEMENT_SCOUT",
+      "persistent_publish_authorized": true,
+      "persistence_scope": "LOCAL_PREPROD_LRN_LEDGER_ONLY",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "learning_id": "qa-learning:8d10770927b05c3c549b03ec",
+      "company_id": "fenix",
+      "engine_id": "HCI-001",
+      "environment": "PREPROD",
+      "version": "0.1.0",
+      "source_event_ids": [
+        "qa-imp:8d10770927b05c3c549b03ec"
+      ],
+      "source_type": "METRIC_OBSERVATION",
+      "source_environment": "PROD_READ_ONLY",
+      "observed_at": "2026-10-10T23:47:20.096Z",
+      "hypothesis": "Añadir una estructura semántica principal puede mejorar navegación asistida sin cambiar la lógica de negocio.",
+      "expected_metric_delta": {
+        "name": "accessible_main_landmark",
+        "direction": "HIGHER",
+        "measurement": "CONTROLLED_OLD_VS_NEW"
+      },
+      "confidence": 0.95,
+      "risk_class": "LOW",
+      "evidence_refs": [
+        "qa-improvement:qa-imp:8d10770927b05c3c549b03ec"
+      ],
+      "promotion_state": "CANDIDATE",
+      "created_by": "QA-001",
+      "reason": "CONTINUOUS_HUMAN_QA_IMPROVEMENT_SCOUT",
+      "persistent_publish_authorized": true,
+      "persistence_scope": "LOCAL_PREPROD_LRN_LEDGER_ONLY",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "learning_id": "qa-learning:db213ba0744836beb266503c",
+      "company_id": "fenix",
+      "engine_id": "HCI-001",
+      "environment": "PREPROD",
+      "version": "0.1.0",
+      "source_event_ids": [
+        "qa-imp:db213ba0744836beb266503c"
+      ],
+      "source_type": "METRIC_OBSERVATION",
+      "source_environment": "PROD_READ_ONLY",
+      "observed_at": "2026-10-10T23:47:20.096Z",
+      "hypothesis": "Añadir una estructura semántica principal puede mejorar navegación asistida sin cambiar la lógica de negocio.",
+      "expected_metric_delta": {
+        "name": "accessible_main_landmark",
+        "direction": "HIGHER",
+        "measurement": "CONTROLLED_OLD_VS_NEW"
+      },
+      "confidence": 0.95,
+      "risk_class": "LOW",
+      "evidence_refs": [
+        "qa-improvement:qa-imp:db213ba0744836beb266503c"
+      ],
+      "promotion_state": "CANDIDATE",
+      "created_by": "QA-001",
+      "reason": "CONTINUOUS_HUMAN_QA_IMPROVEMENT_SCOUT",
+      "persistent_publish_authorized": true,
+      "persistence_scope": "LOCAL_PREPROD_LRN_LEDGER_ONLY",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "learning_id": "qa-learning:e011b20841a4bf5a25c05052",
+      "company_id": "fenix",
+      "engine_id": "HCI-001",
+      "environment": "PREPROD",
+      "version": "0.1.0",
+      "source_event_ids": [
+        "qa-imp:e011b20841a4bf5a25c05052"
+      ],
+      "source_type": "METRIC_OBSERVATION",
+      "source_environment": "PROD_READ_ONLY",
+      "observed_at": "2026-10-10T23:47:20.096Z",
+      "hypothesis": "Añadir una estructura semántica principal puede mejorar navegación asistida sin cambiar la lógica de negocio.",
+      "expected_metric_delta": {
+        "name": "accessible_main_landmark",
+        "direction": "HIGHER",
+        "measurement": "CONTROLLED_OLD_VS_NEW"
+      },
+      "confidence": 0.95,
+      "risk_class": "LOW",
+      "evidence_refs": [
+        "qa-improvement:qa-imp:e011b20841a4bf5a25c05052"
+      ],
+      "promotion_state": "CANDIDATE",
+      "created_by": "QA-001",
+      "reason": "CONTINUOUS_HUMAN_QA_IMPROVEMENT_SCOUT",
+      "persistent_publish_authorized": true,
+      "persistence_scope": "LOCAL_PREPROD_LRN_LEDGER_ONLY",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "learning_id": "qa-learning:e6ce05846ac5d5edffbd1513",
+      "company_id": "fenix",
+      "engine_id": "HCI-001",
+      "environment": "PREPROD",
+      "version": "0.1.0",
+      "source_event_ids": [
+        "qa-imp:e6ce05846ac5d5edffbd1513"
+      ],
+      "source_type": "METRIC_OBSERVATION",
+      "source_environment": "PROD_READ_ONLY",
+      "observed_at": "2026-10-10T23:47:20.096Z",
+      "hypothesis": "Añadir una estructura semántica principal puede mejorar navegación asistida sin cambiar la lógica de negocio.",
+      "expected_metric_delta": {
+        "name": "accessible_main_landmark",
+        "direction": "HIGHER",
+        "measurement": "CONTROLLED_OLD_VS_NEW"
+      },
+      "confidence": 0.95,
+      "risk_class": "LOW",
+      "evidence_refs": [
+        "qa-improvement:qa-imp:e6ce05846ac5d5edffbd1513"
+      ],
+      "promotion_state": "CANDIDATE",
+      "created_by": "QA-001",
+      "reason": "CONTINUOUS_HUMAN_QA_IMPROVEMENT_SCOUT",
+      "persistent_publish_authorized": true,
+      "persistence_scope": "LOCAL_PREPROD_LRN_LEDGER_ONLY",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "learning_id": "qa-learning:52423800ed61b40ef9734fb3",
+      "company_id": "fenix",
+      "engine_id": "HCI-001",
+      "environment": "PREPROD",
+      "version": "0.1.0",
+      "source_event_ids": [
+        "qa-imp:52423800ed61b40ef9734fb3"
+      ],
+      "source_type": "METRIC_OBSERVATION",
+      "source_environment": "PROD_READ_ONLY",
+      "observed_at": "2026-10-10T23:47:20.096Z",
+      "hypothesis": "Aumentar el área táctil de controles pequeños puede reducir pulsaciones fallidas.",
+      "expected_metric_delta": {
+        "name": "small_touch_target_count",
+        "direction": "LOWER",
+        "measurement": "CONTROLLED_OLD_VS_NEW"
+      },
+      "confidence": 0.8,
+      "risk_class": "LOW",
+      "evidence_refs": [
+        "qa-improvement:qa-imp:52423800ed61b40ef9734fb3"
+      ],
+      "promotion_state": "CANDIDATE",
+      "created_by": "QA-001",
+      "reason": "CONTINUOUS_HUMAN_QA_IMPROVEMENT_SCOUT",
+      "persistent_publish_authorized": true,
+      "persistence_scope": "LOCAL_PREPROD_LRN_LEDGER_ONLY",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "learning_id": "qa-learning:57a0188b6184af2eb6e90df8",
+      "company_id": "fenix",
+      "engine_id": "HCI-001",
+      "environment": "PREPROD",
+      "version": "0.1.0",
+      "source_event_ids": [
+        "qa-imp:57a0188b6184af2eb6e90df8"
+      ],
+      "source_type": "METRIC_OBSERVATION",
+      "source_environment": "PROD_READ_ONLY",
+      "observed_at": "2026-10-10T23:47:20.096Z",
+      "hypothesis": "Aumentar el área táctil de controles pequeños puede reducir pulsaciones fallidas.",
+      "expected_metric_delta": {
+        "name": "small_touch_target_count",
+        "direction": "LOWER",
+        "measurement": "CONTROLLED_OLD_VS_NEW"
+      },
+      "confidence": 0.8,
+      "risk_class": "LOW",
+      "evidence_refs": [
+        "qa-improvement:qa-imp:57a0188b6184af2eb6e90df8"
+      ],
+      "promotion_state": "CANDIDATE",
+      "created_by": "QA-001",
+      "reason": "CONTINUOUS_HUMAN_QA_IMPROVEMENT_SCOUT",
+      "persistent_publish_authorized": true,
+      "persistence_scope": "LOCAL_PREPROD_LRN_LEDGER_ONLY",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    }
+  ],
+  "candidate_packages": [
+    {
+      "schema_version": "1.0.0",
+      "state_type": "CEREBRO_VERSIONED_IMPROVEMENT_CANDIDATE",
+      "candidate_id": "cand:01c482eb5d39c80de44fffd6",
+      "company_id": "fenix",
+      "engine_id": "QA-001",
+      "environment": "PREPROD",
+      "baseline_version": "0.1.0",
+      "baseline_version_source": "LEARNING_CONTEXT_VERSION_REQUIRES_OLD_CONTRACT_RESOLUTION",
+      "baseline_verification_required": true,
+      "candidate_version": "0.1.0-rsi-cand.01c482eb",
+      "learning_runtime_version": "0.1.0",
+      "source_learning_id": "qa-learning:3d7458ff56ec06d09c12edac",
+      "source_event_ids": [
+        "qa-imp:3d7458ff56ec06d09c12edac"
+      ],
+      "source_type": "METRIC_OBSERVATION",
+      "source_environment": "PROD_READ_ONLY",
+      "hypothesis": "Un usuario sintético autenticado permitirá descubrir regresiones que el shell público no ve.",
+      "change_intent": "IMPROVE_MEASURED_ENGINE_OUTCOME",
+      "target_metric": {
+        "name": "authenticated_app_coverage",
+        "direction": "HIGHER",
+        "measurement": "CONTROLLED_OLD_VS_NEW"
+      },
+      "confidence": 0.99,
+      "risk_class": "LOW",
+      "evidence_refs": [
+        "qa-improvement:qa-imp:3d7458ff56ec06d09c12edac"
+      ],
+      "created_at": "2026-10-10T23:47:20.096Z",
+      "state": "CANDIDATE",
+      "next_gate": "OLD_VS_NEW_EXPERIMENT",
+      "experiment_contract": {
+        "required": true,
+        "old_version": "0.1.0",
+        "new_version": "0.1.0-rsi-cand.01c482eb",
+        "baseline_resolution_required": true,
+        "dataset_kinds": [
+          "HISTORICAL",
+          "SYNTHETIC"
+        ],
+        "prod_writes": false,
+        "customer_data_required": false
+      },
+      "preservation_contract": {
+        "preserve_existing": true,
+        "contract_resolution_required": true,
+        "rollback_required": true,
+        "rebuild_required": true,
+        "policy_mutation_allowed": false,
+        "permission_elevation_allowed": false,
+        "budget_elevation_allowed": false
+      },
+      "auto_experiment_eligible": true,
+      "promotion_authorized": false,
+      "persistent_publish_authorized": true,
+      "persistence_scope": "LOCAL_PREPROD_IMPROVEMENT_CANDIDATE_LEDGER_ONLY",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "schema_version": "1.0.0",
+      "state_type": "CEREBRO_VERSIONED_IMPROVEMENT_CANDIDATE",
+      "candidate_id": "cand:0cad4cf6040f2ac9ccf95064",
+      "company_id": "fenix",
+      "engine_id": "QAB-001",
+      "environment": "PREPROD",
+      "baseline_version": "0.1.0",
+      "baseline_version_source": "LEARNING_CONTEXT_VERSION_REQUIRES_OLD_CONTRACT_RESOLUTION",
+      "baseline_verification_required": true,
+      "candidate_version": "0.1.0-rsi-cand.0cad4cf6",
+      "learning_runtime_version": "0.1.0",
+      "source_learning_id": "qa-learning:f46576065cbf7d4ebcc93634",
+      "source_event_ids": [
+        "qa-imp:f46576065cbf7d4ebcc93634"
+      ],
+      "source_type": "METRIC_OBSERVATION",
+      "source_environment": "PROD_READ_ONLY",
+      "hypothesis": "Registrar un target PREPROD sintético permitirá probar generación, entrega y descarga sin tocar clientes.",
+      "change_intent": "IMPROVE_MEASURED_ENGINE_OUTCOME",
+      "target_metric": {
+        "name": "synthetic_product_coverage",
+        "direction": "HIGHER",
+        "measurement": "CONTROLLED_OLD_VS_NEW"
+      },
+      "confidence": 0.99,
+      "risk_class": "LOW",
+      "evidence_refs": [
+        "qa-improvement:qa-imp:f46576065cbf7d4ebcc93634"
+      ],
+      "created_at": "2026-10-10T23:47:20.096Z",
+      "state": "CANDIDATE",
+      "next_gate": "OLD_VS_NEW_EXPERIMENT",
+      "experiment_contract": {
+        "required": true,
+        "old_version": "0.1.0",
+        "new_version": "0.1.0-rsi-cand.0cad4cf6",
+        "baseline_resolution_required": true,
+        "dataset_kinds": [
+          "HISTORICAL",
+          "SYNTHETIC"
+        ],
+        "prod_writes": false,
+        "customer_data_required": false
+      },
+      "preservation_contract": {
+        "preserve_existing": true,
+        "contract_resolution_required": true,
+        "rollback_required": true,
+        "rebuild_required": true,
+        "policy_mutation_allowed": false,
+        "permission_elevation_allowed": false,
+        "budget_elevation_allowed": false
+      },
+      "auto_experiment_eligible": true,
+      "promotion_authorized": false,
+      "persistent_publish_authorized": true,
+      "persistence_scope": "LOCAL_PREPROD_IMPROVEMENT_CANDIDATE_LEDGER_ONLY",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "schema_version": "1.0.0",
+      "state_type": "CEREBRO_VERSIONED_IMPROVEMENT_CANDIDATE",
+      "candidate_id": "cand:3fb072a1f7c7f9ca17080728",
+      "company_id": "fenix",
+      "engine_id": "HCI-001",
+      "environment": "PREPROD",
+      "baseline_version": "0.1.0",
+      "baseline_version_source": "LEARNING_CONTEXT_VERSION_REQUIRES_OLD_CONTRACT_RESOLUTION",
+      "baseline_verification_required": true,
+      "candidate_version": "0.1.0-rsi-cand.3fb072a1",
+      "learning_runtime_version": "0.1.0",
+      "source_learning_id": "qa-learning:60868d6cb04aa9108f6ec942",
+      "source_event_ids": [
+        "qa-imp:60868d6cb04aa9108f6ec942"
+      ],
+      "source_type": "METRIC_OBSERVATION",
+      "source_environment": "PROD_READ_ONLY",
+      "hypothesis": "Nombrar controles visibles reduce fricción para tecnologías de asistencia.",
+      "change_intent": "IMPROVE_MEASURED_ENGINE_OUTCOME",
+      "target_metric": {
+        "name": "unnamed_interactive_count",
+        "direction": "LOWER",
+        "measurement": "CONTROLLED_OLD_VS_NEW"
+      },
+      "confidence": 0.96,
+      "risk_class": "LOW",
+      "evidence_refs": [
+        "qa-improvement:qa-imp:60868d6cb04aa9108f6ec942"
+      ],
+      "created_at": "2026-10-10T23:47:20.096Z",
+      "state": "CANDIDATE",
+      "next_gate": "OLD_VS_NEW_EXPERIMENT",
+      "experiment_contract": {
+        "required": true,
+        "old_version": "0.1.0",
+        "new_version": "0.1.0-rsi-cand.3fb072a1",
+        "baseline_resolution_required": true,
+        "dataset_kinds": [
+          "HISTORICAL",
+          "SYNTHETIC"
+        ],
+        "prod_writes": false,
+        "customer_data_required": false
+      },
+      "preservation_contract": {
+        "preserve_existing": true,
+        "contract_resolution_required": true,
+        "rollback_required": true,
+        "rebuild_required": true,
+        "policy_mutation_allowed": false,
+        "permission_elevation_allowed": false,
+        "budget_elevation_allowed": false
+      },
+      "auto_experiment_eligible": true,
+      "promotion_authorized": false,
+      "persistent_publish_authorized": true,
+      "persistence_scope": "LOCAL_PREPROD_IMPROVEMENT_CANDIDATE_LEDGER_ONLY",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "schema_version": "1.0.0",
+      "state_type": "CEREBRO_VERSIONED_IMPROVEMENT_CANDIDATE",
+      "candidate_id": "cand:20132fe159a056fb81be4c41",
+      "company_id": "fenix",
+      "engine_id": "HCI-001",
+      "environment": "PREPROD",
+      "baseline_version": "0.1.0",
+      "baseline_version_source": "LEARNING_CONTEXT_VERSION_REQUIRES_OLD_CONTRACT_RESOLUTION",
+      "baseline_verification_required": true,
+      "candidate_version": "0.1.0-rsi-cand.20132fe1",
+      "learning_runtime_version": "0.1.0",
+      "source_learning_id": "qa-learning:af9e51abc95fb9307489078d",
+      "source_event_ids": [
+        "qa-imp:af9e51abc95fb9307489078d"
+      ],
+      "source_type": "METRIC_OBSERVATION",
+      "source_environment": "PROD_READ_ONLY",
+      "hypothesis": "Nombrar controles visibles reduce fricción para tecnologías de asistencia.",
+      "change_intent": "IMPROVE_MEASURED_ENGINE_OUTCOME",
+      "target_metric": {
+        "name": "unnamed_interactive_count",
+        "direction": "LOWER",
+        "measurement": "CONTROLLED_OLD_VS_NEW"
+      },
+      "confidence": 0.96,
+      "risk_class": "LOW",
+      "evidence_refs": [
+        "qa-improvement:qa-imp:af9e51abc95fb9307489078d"
+      ],
+      "created_at": "2026-10-10T23:47:20.096Z",
+      "state": "CANDIDATE",
+      "next_gate": "OLD_VS_NEW_EXPERIMENT",
+      "experiment_contract": {
+        "required": true,
+        "old_version": "0.1.0",
+        "new_version": "0.1.0-rsi-cand.20132fe1",
+        "baseline_resolution_required": true,
+        "dataset_kinds": [
+          "HISTORICAL",
+          "SYNTHETIC"
+        ],
+        "prod_writes": false,
+        "customer_data_required": false
+      },
+      "preservation_contract": {
+        "preserve_existing": true,
+        "contract_resolution_required": true,
+        "rollback_required": true,
+        "rebuild_required": true,
+        "policy_mutation_allowed": false,
+        "permission_elevation_allowed": false,
+        "budget_elevation_allowed": false
+      },
+      "auto_experiment_eligible": true,
+      "promotion_authorized": false,
+      "persistent_publish_authorized": true,
+      "persistence_scope": "LOCAL_PREPROD_IMPROVEMENT_CANDIDATE_LEDGER_ONLY",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "schema_version": "1.0.0",
+      "state_type": "CEREBRO_VERSIONED_IMPROVEMENT_CANDIDATE",
+      "candidate_id": "cand:f865946cab1763d89b0a314e",
+      "company_id": "fenix",
+      "engine_id": "HCI-001",
+      "environment": "PREPROD",
+      "baseline_version": "0.1.0",
+      "baseline_version_source": "LEARNING_CONTEXT_VERSION_REQUIRES_OLD_CONTRACT_RESOLUTION",
+      "baseline_verification_required": true,
+      "candidate_version": "0.1.0-rsi-cand.f865946c",
+      "learning_runtime_version": "0.1.0",
+      "source_learning_id": "qa-learning:df7d01d86dba70010fa11b83",
+      "source_event_ids": [
+        "qa-imp:df7d01d86dba70010fa11b83"
+      ],
+      "source_type": "METRIC_OBSERVATION",
+      "source_environment": "PROD_READ_ONLY",
+      "hypothesis": "Nombrar controles visibles reduce fricción para tecnologías de asistencia.",
+      "change_intent": "IMPROVE_MEASURED_ENGINE_OUTCOME",
+      "target_metric": {
+        "name": "unnamed_interactive_count",
+        "direction": "LOWER",
+        "measurement": "CONTROLLED_OLD_VS_NEW"
+      },
+      "confidence": 0.96,
+      "risk_class": "LOW",
+      "evidence_refs": [
+        "qa-improvement:qa-imp:df7d01d86dba70010fa11b83"
+      ],
+      "created_at": "2026-10-10T23:47:20.096Z",
+      "state": "CANDIDATE",
+      "next_gate": "OLD_VS_NEW_EXPERIMENT",
+      "experiment_contract": {
+        "required": true,
+        "old_version": "0.1.0",
+        "new_version": "0.1.0-rsi-cand.f865946c",
+        "baseline_resolution_required": true,
+        "dataset_kinds": [
+          "HISTORICAL",
+          "SYNTHETIC"
+        ],
+        "prod_writes": false,
+        "customer_data_required": false
+      },
+      "preservation_contract": {
+        "preserve_existing": true,
+        "contract_resolution_required": true,
+        "rollback_required": true,
+        "rebuild_required": true,
+        "policy_mutation_allowed": false,
+        "permission_elevation_allowed": false,
+        "budget_elevation_allowed": false
+      },
+      "auto_experiment_eligible": true,
+      "promotion_authorized": false,
+      "persistent_publish_authorized": true,
+      "persistence_scope": "LOCAL_PREPROD_IMPROVEMENT_CANDIDATE_LEDGER_ONLY",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "schema_version": "1.0.0",
+      "state_type": "CEREBRO_VERSIONED_IMPROVEMENT_CANDIDATE",
+      "candidate_id": "cand:44172ee1227919eff97a6da2",
+      "company_id": "fenix",
+      "engine_id": "HCI-001",
+      "environment": "PREPROD",
+      "baseline_version": "0.1.0",
+      "baseline_version_source": "LEARNING_CONTEXT_VERSION_REQUIRES_OLD_CONTRACT_RESOLUTION",
+      "baseline_verification_required": true,
+      "candidate_version": "0.1.0-rsi-cand.44172ee1",
+      "learning_runtime_version": "0.1.0",
+      "source_learning_id": "qa-learning:f79da2012c0d9d6a655fb154",
+      "source_event_ids": [
+        "qa-imp:f79da2012c0d9d6a655fb154"
+      ],
+      "source_type": "METRIC_OBSERVATION",
+      "source_environment": "PROD_READ_ONLY",
+      "hypothesis": "Nombrar controles visibles reduce fricción para tecnologías de asistencia.",
+      "change_intent": "IMPROVE_MEASURED_ENGINE_OUTCOME",
+      "target_metric": {
+        "name": "unnamed_interactive_count",
+        "direction": "LOWER",
+        "measurement": "CONTROLLED_OLD_VS_NEW"
+      },
+      "confidence": 0.96,
+      "risk_class": "LOW",
+      "evidence_refs": [
+        "qa-improvement:qa-imp:f79da2012c0d9d6a655fb154"
+      ],
+      "created_at": "2026-10-10T23:47:20.096Z",
+      "state": "CANDIDATE",
+      "next_gate": "OLD_VS_NEW_EXPERIMENT",
+      "experiment_contract": {
+        "required": true,
+        "old_version": "0.1.0",
+        "new_version": "0.1.0-rsi-cand.44172ee1",
+        "baseline_resolution_required": true,
+        "dataset_kinds": [
+          "HISTORICAL",
+          "SYNTHETIC"
+        ],
+        "prod_writes": false,
+        "customer_data_required": false
+      },
+      "preservation_contract": {
+        "preserve_existing": true,
+        "contract_resolution_required": true,
+        "rollback_required": true,
+        "rebuild_required": true,
+        "policy_mutation_allowed": false,
+        "permission_elevation_allowed": false,
+        "budget_elevation_allowed": false
+      },
+      "auto_experiment_eligible": true,
+      "promotion_authorized": false,
+      "persistent_publish_authorized": true,
+      "persistence_scope": "LOCAL_PREPROD_IMPROVEMENT_CANDIDATE_LEDGER_ONLY",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "schema_version": "1.0.0",
+      "state_type": "CEREBRO_VERSIONED_IMPROVEMENT_CANDIDATE",
+      "candidate_id": "cand:eaab67e880b65a8c046bf570",
+      "company_id": "fenix",
+      "engine_id": "HCI-001",
+      "environment": "PREPROD",
+      "baseline_version": "0.1.0",
+      "baseline_version_source": "LEARNING_CONTEXT_VERSION_REQUIRES_OLD_CONTRACT_RESOLUTION",
+      "baseline_verification_required": true,
+      "candidate_version": "0.1.0-rsi-cand.eaab67e8",
+      "learning_runtime_version": "0.1.0",
+      "source_learning_id": "qa-learning:8d10770927b05c3c549b03ec",
+      "source_event_ids": [
+        "qa-imp:8d10770927b05c3c549b03ec"
+      ],
+      "source_type": "METRIC_OBSERVATION",
+      "source_environment": "PROD_READ_ONLY",
+      "hypothesis": "Añadir una estructura semántica principal puede mejorar navegación asistida sin cambiar la lógica de negocio.",
+      "change_intent": "IMPROVE_MEASURED_ENGINE_OUTCOME",
+      "target_metric": {
+        "name": "accessible_main_landmark",
+        "direction": "HIGHER",
+        "measurement": "CONTROLLED_OLD_VS_NEW"
+      },
+      "confidence": 0.95,
+      "risk_class": "LOW",
+      "evidence_refs": [
+        "qa-improvement:qa-imp:8d10770927b05c3c549b03ec"
+      ],
+      "created_at": "2026-10-10T23:47:20.096Z",
+      "state": "CANDIDATE",
+      "next_gate": "OLD_VS_NEW_EXPERIMENT",
+      "experiment_contract": {
+        "required": true,
+        "old_version": "0.1.0",
+        "new_version": "0.1.0-rsi-cand.eaab67e8",
+        "baseline_resolution_required": true,
+        "dataset_kinds": [
+          "HISTORICAL",
+          "SYNTHETIC"
+        ],
+        "prod_writes": false,
+        "customer_data_required": false
+      },
+      "preservation_contract": {
+        "preserve_existing": true,
+        "contract_resolution_required": true,
+        "rollback_required": true,
+        "rebuild_required": true,
+        "policy_mutation_allowed": false,
+        "permission_elevation_allowed": false,
+        "budget_elevation_allowed": false
+      },
+      "auto_experiment_eligible": true,
+      "promotion_authorized": false,
+      "persistent_publish_authorized": true,
+      "persistence_scope": "LOCAL_PREPROD_IMPROVEMENT_CANDIDATE_LEDGER_ONLY",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "schema_version": "1.0.0",
+      "state_type": "CEREBRO_VERSIONED_IMPROVEMENT_CANDIDATE",
+      "candidate_id": "cand:88aed469f3e0be1d4611cf7b",
+      "company_id": "fenix",
+      "engine_id": "HCI-001",
+      "environment": "PREPROD",
+      "baseline_version": "0.1.0",
+      "baseline_version_source": "LEARNING_CONTEXT_VERSION_REQUIRES_OLD_CONTRACT_RESOLUTION",
+      "baseline_verification_required": true,
+      "candidate_version": "0.1.0-rsi-cand.88aed469",
+      "learning_runtime_version": "0.1.0",
+      "source_learning_id": "qa-learning:db213ba0744836beb266503c",
+      "source_event_ids": [
+        "qa-imp:db213ba0744836beb266503c"
+      ],
+      "source_type": "METRIC_OBSERVATION",
+      "source_environment": "PROD_READ_ONLY",
+      "hypothesis": "Añadir una estructura semántica principal puede mejorar navegación asistida sin cambiar la lógica de negocio.",
+      "change_intent": "IMPROVE_MEASURED_ENGINE_OUTCOME",
+      "target_metric": {
+        "name": "accessible_main_landmark",
+        "direction": "HIGHER",
+        "measurement": "CONTROLLED_OLD_VS_NEW"
+      },
+      "confidence": 0.95,
+      "risk_class": "LOW",
+      "evidence_refs": [
+        "qa-improvement:qa-imp:db213ba0744836beb266503c"
+      ],
+      "created_at": "2026-10-10T23:47:20.096Z",
+      "state": "CANDIDATE",
+      "next_gate": "OLD_VS_NEW_EXPERIMENT",
+      "experiment_contract": {
+        "required": true,
+        "old_version": "0.1.0",
+        "new_version": "0.1.0-rsi-cand.88aed469",
+        "baseline_resolution_required": true,
+        "dataset_kinds": [
+          "HISTORICAL",
+          "SYNTHETIC"
+        ],
+        "prod_writes": false,
+        "customer_data_required": false
+      },
+      "preservation_contract": {
+        "preserve_existing": true,
+        "contract_resolution_required": true,
+        "rollback_required": true,
+        "rebuild_required": true,
+        "policy_mutation_allowed": false,
+        "permission_elevation_allowed": false,
+        "budget_elevation_allowed": false
+      },
+      "auto_experiment_eligible": true,
+      "promotion_authorized": false,
+      "persistent_publish_authorized": true,
+      "persistence_scope": "LOCAL_PREPROD_IMPROVEMENT_CANDIDATE_LEDGER_ONLY",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "schema_version": "1.0.0",
+      "state_type": "CEREBRO_VERSIONED_IMPROVEMENT_CANDIDATE",
+      "candidate_id": "cand:6a9a20e6fff6a81044245b83",
+      "company_id": "fenix",
+      "engine_id": "HCI-001",
+      "environment": "PREPROD",
+      "baseline_version": "0.1.0",
+      "baseline_version_source": "LEARNING_CONTEXT_VERSION_REQUIRES_OLD_CONTRACT_RESOLUTION",
+      "baseline_verification_required": true,
+      "candidate_version": "0.1.0-rsi-cand.6a9a20e6",
+      "learning_runtime_version": "0.1.0",
+      "source_learning_id": "qa-learning:e011b20841a4bf5a25c05052",
+      "source_event_ids": [
+        "qa-imp:e011b20841a4bf5a25c05052"
+      ],
+      "source_type": "METRIC_OBSERVATION",
+      "source_environment": "PROD_READ_ONLY",
+      "hypothesis": "Añadir una estructura semántica principal puede mejorar navegación asistida sin cambiar la lógica de negocio.",
+      "change_intent": "IMPROVE_MEASURED_ENGINE_OUTCOME",
+      "target_metric": {
+        "name": "accessible_main_landmark",
+        "direction": "HIGHER",
+        "measurement": "CONTROLLED_OLD_VS_NEW"
+      },
+      "confidence": 0.95,
+      "risk_class": "LOW",
+      "evidence_refs": [
+        "qa-improvement:qa-imp:e011b20841a4bf5a25c05052"
+      ],
+      "created_at": "2026-10-10T23:47:20.096Z",
+      "state": "CANDIDATE",
+      "next_gate": "OLD_VS_NEW_EXPERIMENT",
+      "experiment_contract": {
+        "required": true,
+        "old_version": "0.1.0",
+        "new_version": "0.1.0-rsi-cand.6a9a20e6",
+        "baseline_resolution_required": true,
+        "dataset_kinds": [
+          "HISTORICAL",
+          "SYNTHETIC"
+        ],
+        "prod_writes": false,
+        "customer_data_required": false
+      },
+      "preservation_contract": {
+        "preserve_existing": true,
+        "contract_resolution_required": true,
+        "rollback_required": true,
+        "rebuild_required": true,
+        "policy_mutation_allowed": false,
+        "permission_elevation_allowed": false,
+        "budget_elevation_allowed": false
+      },
+      "auto_experiment_eligible": true,
+      "promotion_authorized": false,
+      "persistent_publish_authorized": true,
+      "persistence_scope": "LOCAL_PREPROD_IMPROVEMENT_CANDIDATE_LEDGER_ONLY",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "schema_version": "1.0.0",
+      "state_type": "CEREBRO_VERSIONED_IMPROVEMENT_CANDIDATE",
+      "candidate_id": "cand:1d922af2ac4db0aa5534aa26",
+      "company_id": "fenix",
+      "engine_id": "HCI-001",
+      "environment": "PREPROD",
+      "baseline_version": "0.1.0",
+      "baseline_version_source": "LEARNING_CONTEXT_VERSION_REQUIRES_OLD_CONTRACT_RESOLUTION",
+      "baseline_verification_required": true,
+      "candidate_version": "0.1.0-rsi-cand.1d922af2",
+      "learning_runtime_version": "0.1.0",
+      "source_learning_id": "qa-learning:e6ce05846ac5d5edffbd1513",
+      "source_event_ids": [
+        "qa-imp:e6ce05846ac5d5edffbd1513"
+      ],
+      "source_type": "METRIC_OBSERVATION",
+      "source_environment": "PROD_READ_ONLY",
+      "hypothesis": "Añadir una estructura semántica principal puede mejorar navegación asistida sin cambiar la lógica de negocio.",
+      "change_intent": "IMPROVE_MEASURED_ENGINE_OUTCOME",
+      "target_metric": {
+        "name": "accessible_main_landmark",
+        "direction": "HIGHER",
+        "measurement": "CONTROLLED_OLD_VS_NEW"
+      },
+      "confidence": 0.95,
+      "risk_class": "LOW",
+      "evidence_refs": [
+        "qa-improvement:qa-imp:e6ce05846ac5d5edffbd1513"
+      ],
+      "created_at": "2026-10-10T23:47:20.096Z",
+      "state": "CANDIDATE",
+      "next_gate": "OLD_VS_NEW_EXPERIMENT",
+      "experiment_contract": {
+        "required": true,
+        "old_version": "0.1.0",
+        "new_version": "0.1.0-rsi-cand.1d922af2",
+        "baseline_resolution_required": true,
+        "dataset_kinds": [
+          "HISTORICAL",
+          "SYNTHETIC"
+        ],
+        "prod_writes": false,
+        "customer_data_required": false
+      },
+      "preservation_contract": {
+        "preserve_existing": true,
+        "contract_resolution_required": true,
+        "rollback_required": true,
+        "rebuild_required": true,
+        "policy_mutation_allowed": false,
+        "permission_elevation_allowed": false,
+        "budget_elevation_allowed": false
+      },
+      "auto_experiment_eligible": true,
+      "promotion_authorized": false,
+      "persistent_publish_authorized": true,
+      "persistence_scope": "LOCAL_PREPROD_IMPROVEMENT_CANDIDATE_LEDGER_ONLY",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "schema_version": "1.0.0",
+      "state_type": "CEREBRO_VERSIONED_IMPROVEMENT_CANDIDATE",
+      "candidate_id": "cand:68939aacfaf7f3488a32365a",
+      "company_id": "fenix",
+      "engine_id": "HCI-001",
+      "environment": "PREPROD",
+      "baseline_version": "0.1.0",
+      "baseline_version_source": "LEARNING_CONTEXT_VERSION_REQUIRES_OLD_CONTRACT_RESOLUTION",
+      "baseline_verification_required": true,
+      "candidate_version": "0.1.0-rsi-cand.68939aac",
+      "learning_runtime_version": "0.1.0",
+      "source_learning_id": "qa-learning:52423800ed61b40ef9734fb3",
+      "source_event_ids": [
+        "qa-imp:52423800ed61b40ef9734fb3"
+      ],
+      "source_type": "METRIC_OBSERVATION",
+      "source_environment": "PROD_READ_ONLY",
+      "hypothesis": "Aumentar el área táctil de controles pequeños puede reducir pulsaciones fallidas.",
+      "change_intent": "IMPROVE_MEASURED_ENGINE_OUTCOME",
+      "target_metric": {
+        "name": "small_touch_target_count",
+        "direction": "LOWER",
+        "measurement": "CONTROLLED_OLD_VS_NEW"
+      },
+      "confidence": 0.8,
+      "risk_class": "LOW",
+      "evidence_refs": [
+        "qa-improvement:qa-imp:52423800ed61b40ef9734fb3"
+      ],
+      "created_at": "2026-10-10T23:47:20.096Z",
+      "state": "CANDIDATE",
+      "next_gate": "OLD_VS_NEW_EXPERIMENT",
+      "experiment_contract": {
+        "required": true,
+        "old_version": "0.1.0",
+        "new_version": "0.1.0-rsi-cand.68939aac",
+        "baseline_resolution_required": true,
+        "dataset_kinds": [
+          "HISTORICAL",
+          "SYNTHETIC"
+        ],
+        "prod_writes": false,
+        "customer_data_required": false
+      },
+      "preservation_contract": {
+        "preserve_existing": true,
+        "contract_resolution_required": true,
+        "rollback_required": true,
+        "rebuild_required": true,
+        "policy_mutation_allowed": false,
+        "permission_elevation_allowed": false,
+        "budget_elevation_allowed": false
+      },
+      "auto_experiment_eligible": true,
+      "promotion_authorized": false,
+      "persistent_publish_authorized": true,
+      "persistence_scope": "LOCAL_PREPROD_IMPROVEMENT_CANDIDATE_LEDGER_ONLY",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "schema_version": "1.0.0",
+      "state_type": "CEREBRO_VERSIONED_IMPROVEMENT_CANDIDATE",
+      "candidate_id": "cand:1cca0c658df94b407c174c06",
+      "company_id": "fenix",
+      "engine_id": "HCI-001",
+      "environment": "PREPROD",
+      "baseline_version": "0.1.0",
+      "baseline_version_source": "LEARNING_CONTEXT_VERSION_REQUIRES_OLD_CONTRACT_RESOLUTION",
+      "baseline_verification_required": true,
+      "candidate_version": "0.1.0-rsi-cand.1cca0c65",
+      "learning_runtime_version": "0.1.0",
+      "source_learning_id": "qa-learning:57a0188b6184af2eb6e90df8",
+      "source_event_ids": [
+        "qa-imp:57a0188b6184af2eb6e90df8"
+      ],
+      "source_type": "METRIC_OBSERVATION",
+      "source_environment": "PROD_READ_ONLY",
+      "hypothesis": "Aumentar el área táctil de controles pequeños puede reducir pulsaciones fallidas.",
+      "change_intent": "IMPROVE_MEASURED_ENGINE_OUTCOME",
+      "target_metric": {
+        "name": "small_touch_target_count",
+        "direction": "LOWER",
+        "measurement": "CONTROLLED_OLD_VS_NEW"
+      },
+      "confidence": 0.8,
+      "risk_class": "LOW",
+      "evidence_refs": [
+        "qa-improvement:qa-imp:57a0188b6184af2eb6e90df8"
+      ],
+      "created_at": "2026-10-10T23:47:20.096Z",
+      "state": "CANDIDATE",
+      "next_gate": "OLD_VS_NEW_EXPERIMENT",
+      "experiment_contract": {
+        "required": true,
+        "old_version": "0.1.0",
+        "new_version": "0.1.0-rsi-cand.1cca0c65",
+        "baseline_resolution_required": true,
+        "dataset_kinds": [
+          "HISTORICAL",
+          "SYNTHETIC"
+        ],
+        "prod_writes": false,
+        "customer_data_required": false
+      },
+      "preservation_contract": {
+        "preserve_existing": true,
+        "contract_resolution_required": true,
+        "rollback_required": true,
+        "rebuild_required": true,
+        "policy_mutation_allowed": false,
+        "permission_elevation_allowed": false,
+        "budget_elevation_allowed": false
+      },
+      "auto_experiment_eligible": true,
+      "promotion_authorized": false,
+      "persistent_publish_authorized": true,
+      "persistence_scope": "LOCAL_PREPROD_IMPROVEMENT_CANDIDATE_LEDGER_ONLY",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    }
+  ],
+  "human_required": [],
+  "next_gate": "OLD_VS_NEW_EXPERIMENT",
+  "authority": {
+    "app_web_prod_autofix": false,
+    "assisted_owner_engines_preserved": true,
+    "promotion_authorized": false,
+    "prod_authorized": false,
+    "prod_write_authorized": false
+  },
+  "safety": {
+    "prod_write": false,
+    "customer_data": false,
+    "trading": false,
+    "paid_fallback": false,
+    "additional_subscription_eur": 0
+  }
+}

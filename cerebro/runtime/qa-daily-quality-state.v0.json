@@ -6,27 +6,27 @@
   "environment": "CONTROL_PLANE",
   "version": "0.1.0",
   "status": "GREEN",
-  "updated_at": "2026-10-10T23:20:43.863Z",
+  "updated_at": "2026-10-10T23:47:20.054Z",
   "quality_score": 100,
-  "previous_quality_score": null,
-  "quality_delta": null,
+  "previous_quality_score": 100,
+  "quality_delta": 0,
   "tests": {
-    "executed": 2,
-    "passed": 2,
+    "executed": 4,
+    "passed": 4,
     "failed": 0
   },
   "targets": {
     "APP": {
       "status": "GREEN",
-      "executed": 1,
+      "executed": 2,
       "failed": 0,
-      "passed": 1
+      "passed": 2
     },
     "WEB": {
       "status": "GREEN",
-      "executed": 1,
+      "executed": 2,
       "failed": 0,
-      "passed": 1
+      "passed": 2
     },
     "PRODUCT": {
       "status": "POR_AUDITAR",
@@ -56,5 +56,189 @@
     "trading": false,
     "paid_fallback": false,
     "additional_subscription_eur": 0
+  },
+  "improvement_scout": {
+    "status": "IMPROVEMENTS_FOUND",
+    "observations_total": 4,
+    "candidates_total": 12,
+    "top_candidates": [
+      {
+        "improvement_id": "qa-imp:3d7458ff56ec06d09c12edac",
+        "company_id": "fenix",
+        "engine_id": "QA-001",
+        "environment": "PREPROD",
+        "version": "0.1.0",
+        "source": "QA-001_HUMAN_READONLY_OBSERVATION",
+        "target": "APP:AUTHENTICATED_PREPROD",
+        "dimension": "qa_coverage",
+        "title": "Cobertura autenticada de App pendiente de harness PREPROD",
+        "hypothesis": "Un usuario sintético autenticado permitirá descubrir regresiones que el shell público no ve.",
+        "evidence": "coverage.app_authenticated=POR_AUDITAR_PREPROD_HARNESS",
+        "confidence": 0.99,
+        "risk_class": "LOW",
+        "expected_metric_delta": {
+          "name": "authenticated_app_coverage",
+          "direction": "HIGHER",
+          "measurement": "CONTROLLED_OLD_VS_NEW"
+        },
+        "next_gate": "OWNER_PREPROD_CANDIDATE",
+        "auto_fix_eligible": false,
+        "promotion_authorized": false,
+        "prod_authorized": false,
+        "prod_write_authorized": false,
+        "customer_data": false,
+        "trading_access": false,
+        "additional_cost_eur": 0
+      },
+      {
+        "improvement_id": "qa-imp:f46576065cbf7d4ebcc93634",
+        "company_id": "fenix",
+        "engine_id": "QAB-001",
+        "environment": "PREPROD",
+        "version": "0.1.0",
+        "source": "QA-001_HUMAN_READONLY_OBSERVATION",
+        "target": "PRODUCT:PREPROD",
+        "dimension": "qa_coverage",
+        "title": "Productos digitales pendientes de objetivo PREPROD canónico",
+        "hypothesis": "Registrar un target PREPROD sintético permitirá probar generación, entrega y descarga sin tocar clientes.",
+        "evidence": "coverage.products=POR_AUDITAR_CANONICAL_PREPROD_TARGET",
+        "confidence": 0.99,
+        "risk_class": "LOW",
+        "expected_metric_delta": {
+          "name": "synthetic_product_coverage",
+          "direction": "HIGHER",
+          "measurement": "CONTROLLED_OLD_VS_NEW"
+        },
+        "next_gate": "OWNER_PREPROD_CANDIDATE",
+        "auto_fix_eligible": false,
+        "promotion_authorized": false,
+        "prod_authorized": false,
+        "prod_write_authorized": false,
+        "customer_data": false,
+        "trading_access": false,
+        "additional_cost_eur": 0
+      },
+      {
+        "improvement_id": "qa-imp:60868d6cb04aa9108f6ec942",
+        "company_id": "fenix",
+        "engine_id": "HCI-001",
+        "environment": "PREPROD",
+        "version": "0.1.0",
+        "source": "QA-001_HUMAN_READONLY_OBSERVATION",
+        "target": "APP:qa-mobile-chromium",
+        "dimension": "accessibility_names",
+        "title": "Controles interactivos visibles sin nombre accesible",
+        "hypothesis": "Nombrar controles visibles reduce fricción para tecnologías de asistencia.",
+        "evidence": "unnamedInteractiveCount=2",
+        "confidence": 0.96,
+        "risk_class": "LOW",
+        "expected_metric_delta": {
+          "name": "unnamed_interactive_count",
+          "direction": "LOWER",
+          "measurement": "CONTROLLED_OLD_VS_NEW"
+        },
+        "next_gate": "OWNER_PREPROD_CANDIDATE",
+        "auto_fix_eligible": false,
+        "promotion_authorized": false,
+        "prod_authorized": false,
+        "prod_write_authorized": false,
+        "customer_data": false,
+        "trading_access": false,
+        "additional_cost_eur": 0
+      },
+      {
+        "improvement_id": "qa-imp:af9e51abc95fb9307489078d",
+        "company_id": "fenix",
+        "engine_id": "HCI-001",
+        "environment": "PREPROD",
+        "version": "0.1.0",
+        "source": "QA-001_HUMAN_READONLY_OBSERVATION",
+        "target": "APP:qa-desktop-chromium",
+        "dimension": "accessibility_names",
+        "title": "Controles interactivos visibles sin nombre accesible",
+        "hypothesis": "Nombrar controles visibles reduce fricción para tecnologías de asistencia.",
+        "evidence": "unnamedInteractiveCount=2",
+        "confidence": 0.96,
+        "risk_class": "LOW",
+        "expected_metric_delta": {
+          "name": "unnamed_interactive_count",
+          "direction": "LOWER",
+          "measurement": "CONTROLLED_OLD_VS_NEW"
+        },
+        "next_gate": "OWNER_PREPROD_CANDIDATE",
+        "auto_fix_eligible": false,
+        "promotion_authorized": false,
+        "prod_authorized": false,
+        "prod_write_authorized": false,
+        "customer_data": false,
+        "trading_access": false,
+        "additional_cost_eur": 0
+      },
+      {
+        "improvement_id": "qa-imp:df7d01d86dba70010fa11b83",
+        "company_id": "fenix",
+        "engine_id": "HCI-001",
+        "environment": "PREPROD",
+        "version": "0.1.0",
+        "source": "QA-001_HUMAN_READONLY_OBSERVATION",
+        "target": "WEB:qa-desktop-chromium",
+        "dimension": "accessibility_names",
+        "title": "Controles interactivos visibles sin nombre accesible",
+        "hypothesis": "Nombrar controles visibles reduce fricción para tecnologías de asistencia.",
+        "evidence": "unnamedInteractiveCount=2",
+        "confidence": 0.96,
+        "risk_class": "LOW",
+        "expected_metric_delta": {
+          "name": "unnamed_interactive_count",
+          "direction": "LOWER",
+          "measurement": "CONTROLLED_OLD_VS_NEW"
+        },
+        "next_gate": "OWNER_PREPROD_CANDIDATE",
+        "auto_fix_eligible": false,
+        "promotion_authorized": false,
+        "prod_authorized": false,
+        "prod_write_authorized": false,
+        "customer_data": false,
+        "trading_access": false,
+        "additional_cost_eur": 0
+      }
+    ],
+    "safety": {
+      "prod_write": false,
+      "customer_data": false,
+      "trading": false,
+      "paid_fallback": false,
+      "additional_subscription_eur": 0
+    }
+  },
+  "remediation": {
+    "status": "ROUTED_AUTONOMOUSLY_TO_PREPROD",
+    "open_cases": 12,
+    "bug_cases": 0,
+    "improvement_cases": 12,
+    "candidate_packages_total": 12,
+    "human_required": [],
+    "next_gate": "OLD_VS_NEW_EXPERIMENT",
+    "authority": {
+      "app_web_prod_autofix": false,
+      "assisted_owner_engines_preserved": true,
+      "promotion_authorized": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false
+    },
+    "safety": {
+      "prod_write": false,
+      "customer_data": false,
+      "trading": false,
+      "paid_fallback": false,
+      "additional_subscription_eur": 0
+    }
+  },
+  "learning_bridge": {
+    "signals_total": 0,
+    "downstream": "CEREBRO_RSI_UNIVERSAL_LEARNING_INGRESS_V0",
+    "repair_semantics": "PREPROD_CANDIDATE_ONLY_UNTIL_EXISTING_PROMOTION_GATES_AUTHORIZE_MORE",
+    "prod_write_authorized": false,
+    "additional_cost_eur": 0
   }
 }
