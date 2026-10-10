@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0.0",
+  "request_id": "hci001-human-cerebro-experience-v0",
+  "company_id": "fenix",
+  "engine_id": "HCI-001",
+  "environment": "SCAFFOLD",
+  "version": "0.1.0",
+  "intent": "CREATE_SCAFFOLD",
+  "additional_cost_eur": 0,
+  "prod_authorized": false,
+  "prod_write_authorized": false,
+  "trading_access": false,
+  "external_code_execution": false
+}
