@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-10T10:48:59.010Z",
+  "updated_at": "2026-10-10T12:58:39.719Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -292,7 +292,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
+  "last_action": "IDLE_NO_NEW_ELIGIBLE_CANDIDATE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -305,5 +305,5 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 38046189444
+  "last_discovery_run_id": 38045703323
 }
