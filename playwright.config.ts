@@ -30,7 +30,7 @@ export default defineConfig({
     },
     {
       name: 'mobile-chromium',
-      testMatch: ['**/ui.spec.ts','**/direction-context-fallback.spec.ts','**/operational-mobile-shell.spec.ts','**/app-real-five-flows.spec.ts'],
+      testMatch: ['**/ui.spec.ts','**/direction-context-fallback.spec.ts','**/operational-mobile-shell.spec.ts','**/app-real-five-flows.spec.ts','**/cerebro-human-readonly.spec.ts'],
       use: { ...devices['Pixel 7'] }
     }
   ]
