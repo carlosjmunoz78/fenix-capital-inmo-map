@@ -22,11 +22,16 @@ test('VOICE-001 defaults Chatterbox multilingual to explicit V3 with bounded rol
   assert.match(app,/"X-Cerebro-T3-Model": T3_MODEL/);
 });
 
-test('V3 external sources are pinned to reviewed official upstream commits',()=>{
-  assert.match(requirements,/resemble-perth @ git\+https:\/\/github\.com\/resemble-ai\/Perth\.git@ff1c8ac55a976971245cdd53c18d6131ca00d993/);
+test('Chatterbox source is pinned and mutable Perth master is guarded before install',()=>{
   assert.match(requirements,/chatterbox-tts @ git\+https:\/\/github\.com\/resemble-ai\/chatterbox\.git@5de7a54aa4e5e2baadb0182dde554908b48b85c2/);
   assert.doesNotMatch(requirements,/^chatterbox-tts\s*$/m);
-  assert.doesNotMatch(requirements,/Perth\.git@master\s*$/m);
+  assert.doesNotMatch(requirements,/^resemble-perth\s+@/m);
+  assert.match(installer,/ExpectedPerthCommit = "ff1c8ac55a976971245cdd53c18d6131ca00d993"/);
+  assert.match(installer,/git ls-remote \$PerthRepository refs\/heads\/master/);
+  assert.match(installer,/supply-chain HOLD/);
+  const preflightIndex=installer.indexOf('Assert-ReviewedPerthMaster');
+  const pipInstallIndex=installer.indexOf('-m pip install --disable-pip-version-check -r');
+  assert.ok(preflightIndex>=0 && pipInstallIndex>preflightIndex,'Perth master must be checked before dependency installation');
 });
 
 test('installed VCS provenance is re-verified before Chatterbox import',()=>{
@@ -35,9 +40,9 @@ test('installed VCS provenance is re-verified before Chatterbox import',()=>{
   assert.match(verifier,/direct_url\.json/);
   assert.match(verifier,/commit_drift/);
   assert.match(verifier,/repository_drift/);
-  const verifyIndex=installer.indexOf('$ProvenanceVerifier');
+  const executeVerifierIndex=installer.indexOf('& $VenvPython $ProvenanceVerifier');
   const importIndex=installer.indexOf('from chatterbox.mtl_tts import ChatterboxMultilingualTTS');
-  assert.ok(verifyIndex>=0 && importIndex>verifyIndex,'provenance must be checked before backend import');
+  assert.ok(executeVerifierIndex>=0 && importIndex>executeVerifierIndex,'installed provenance must be checked before backend import');
 });
 
 test('backend smoke proves only model load and Spanish waveform, never voice acceptance',()=>{
