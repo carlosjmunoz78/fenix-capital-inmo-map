@@ -1,13 +1,12 @@
 {
-  "schema_version": "0.5.0",
+  "schema_version": "0.6.0",
   "engine_id": "VOICE-001",
   "environment": "LAB",
   "locale": "es-ES",
   "owner_selection": {
-    "keep_all": ["ESM05", "ESM06", "ESM07", "ESM08-CARLFM"],
+    "keep_all": ["ESM05", "ESM06", "ESM07", "ESM08-CARLFM-YOUNGER-B"],
     "primary_direction": "ESM10",
-    "accepted_existing_candidates": ["ESM05", "ESM06", "ESM07"],
-    "salvageable_reference_candidates": ["ESM08-CARLFM"],
+    "accepted_existing_candidates": ["ESM05", "ESM06", "ESM07", "ESM08-CARLFM-YOUNGER-B"],
     "jarvis_style_target_still_open": true
   },
   "voices": [
@@ -32,11 +31,17 @@
       "owner_similarity_note": "KEEP_BUT_NOT_JARVIS"
     },
     {
+      "voice_id": "ESM08-CARLFM-YOUNGER-B",
+      "label": "CEREBRO Spain-Spanish Younger B",
+      "owner_decision": "KEEP",
+      "status": "OWNER_ACCEPTED_SEED_CANDIDATE",
+      "owner_similarity_note": "LIKED_AND_KEEP_BUT_NOT_JARVIS"
+    },
+    {
       "voice_id": "ESM08-CARLFM",
-      "label": "CEREBRO Piper Spain-Spanish Timbre A",
-      "owner_decision": "KEEP_AS_SALVAGEABLE_REFERENCE_ONLY",
-      "status": "OWNER_LISTENED_SALVAGEABLE_BUT_TOO_OLD_SOUNDING",
-      "owner_similarity_note": "ONLY_SALVAGEABLE_OF_ESM08_SWEEP_BUT_SOUNDS_LIKE_A_MUCH_OLDER_MAN"
+      "label": "CEREBRO Piper Spain-Spanish Timbre A Original",
+      "owner_decision": "KEEP_AS_SOURCE_REFERENCE_ONLY",
+      "status": "OWNER_LISTENED_SALVAGEABLE_BUT_TOO_OLD_SOUNDING"
     },
     {
       "voice_id": "ESM08-MLS10246",
@@ -87,10 +92,10 @@
   "lessons": {
     "same_base_voice_pitch_or_pace_edits_are_insufficient": true,
     "Piper_es_ES_catalog_exhausted_for_target_search": true,
-    "ESM08_CARLFM_is_closest_Piper_timbre_but_age_impression_is_too_old": true,
+    "ESM08_CARLFM_younger_B_is_owner_accepted_but_not_JARVIS": true,
     "Qwen3_VoiceDesign_without_native_reference_failed_es_ES_accent_gate": true,
     "next_search_requires_native_es_ES_reference_grounding": true,
-    "preserve_ESM05_ESM06_ESM07_and_ESM08_CARLFM": true
+    "preserve_owner_accepted_candidates": true
   },
   "identity_policy": {
     "original_cerebro_voices_only": true,
