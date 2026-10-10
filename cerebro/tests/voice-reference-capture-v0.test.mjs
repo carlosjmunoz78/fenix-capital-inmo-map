@@ -1,11 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const capture = fs.readFileSync('cerebro/voice/capture/voice-capture.html','utf8');
-const launcher = fs.readFileSync('cerebro/voice/runtime/windows/Open-VoiceCapture.ps1','utf8');
-const register = fs.readFileSync('cerebro/voice/runtime/windows/Register-And-Benchmark-Voice.ps1','utf8');
-const validator = fs.readFileSync('cerebro/voice/runtime/validate_reference_audio.py','utf8');
+const here = path.dirname(fileURLToPath(import.meta.url));
+const voiceRoot = path.resolve(here, '../voice');
+const capture = fs.readFileSync(path.join(voiceRoot, 'capture/voice-capture.html'),'utf8');
+const launcher = fs.readFileSync(path.join(voiceRoot, 'runtime/windows/Open-VoiceCapture.ps1'),'utf8');
+const register = fs.readFileSync(path.join(voiceRoot, 'runtime/windows/Register-And-Benchmark-Voice.ps1'),'utf8');
+const validator = fs.readFileSync(path.join(voiceRoot, 'runtime/validate_reference_audio.py'),'utf8');
 
 test('capture UI is loopback-only and does not upload audio', () => {
   assert.match(capture, /127\.0\.0\.1/);
