@@ -7,24 +7,28 @@ on:
       - 'src/**'
       - 'tests/**'
       - 'cerebro/qa/**'
+      - 'cerebro/supervisor/**'
       - 'cerebro/communication/enrich-daily-summary-with-qa.mjs'
       - 'cerebro/tests/continuous-human-qa-v0.test.mjs'
       - 'cerebro/tests/qa-email-enrichment-v0.test.mjs'
       - 'cerebro/tests/qa-improvement-scout-v0.test.mjs'
       - 'cerebro/tests/qa-autonomous-remediation-loop-v0.test.mjs'
       - 'cerebro/tests/qa-learning-bridge-v0.test.mjs'
+      - 'cerebro/tests/self-healing.test.mjs'
       - '.github/workflows/cerebro-continuous-human-qa-v0.yml'
   pull_request:
     paths:
       - 'src/**'
       - 'tests/**'
       - 'cerebro/qa/**'
+      - 'cerebro/supervisor/**'
       - 'cerebro/communication/enrich-daily-summary-with-qa.mjs'
       - 'cerebro/tests/continuous-human-qa-v0.test.mjs'
       - 'cerebro/tests/qa-email-enrichment-v0.test.mjs'
       - 'cerebro/tests/qa-improvement-scout-v0.test.mjs'
       - 'cerebro/tests/qa-autonomous-remediation-loop-v0.test.mjs'
       - 'cerebro/tests/qa-learning-bridge-v0.test.mjs'
+      - 'cerebro/tests/self-healing.test.mjs'
       - '.github/workflows/cerebro-continuous-human-qa-v0.yml'
       - '.github/workflows/cerebro-human-communication-v1.yml'
   schedule:
@@ -44,6 +48,7 @@ env:
   QA_STATE_PATH: cerebro/runtime/qa-daily-quality-state.v0.json
   QA_IMPROVEMENT_PATH: cerebro/runtime/qa-improvement-scout.v0.json
   QA_REMEDIATION_PATH: cerebro/runtime/qa-remediation-state.v0.json
+  QA_HEALING_PATH: cerebro/runtime/qa-healing-plans.v0.json
   QA_WEB_URL: https://fenixcapital.es
   QA_APP_URL: https://app.fenixcapital.es
 
@@ -64,13 +69,14 @@ jobs:
       - name: Install existing repository dependencies
         run: npm ci
 
-      - name: Prove QA contracts improvement routing learning bridge and daily-email integration
+      - name: Prove QA contracts improvement routing SELF-001 planning learning bridge and daily-email integration
         run: |
           node --test \
             cerebro/tests/continuous-human-qa-v0.test.mjs \
             cerebro/tests/qa-improvement-scout-v0.test.mjs \
             cerebro/tests/qa-autonomous-remediation-loop-v0.test.mjs \
             cerebro/tests/qa-learning-bridge-v0.test.mjs \
+            cerebro/tests/self-healing.test.mjs \
             cerebro/tests/universal-learning-ingress.test.mjs \
             cerebro/tests/improvement-candidate-factory.test.mjs \
             cerebro/tests/qa-email-enrichment-v0.test.mjs
@@ -131,6 +137,13 @@ jobs:
             --out artifacts/qa/remediation.json
           jq '{status,open_cases,bug_cases,improvement_cases,learning_records_total,candidate_packages_total,human_required,next_gate,authority,safety}' artifacts/qa/remediation.json
 
+      - name: Plan reversible SELF-001 repair work without granting code or PROD authority
+        run: |
+          node cerebro/supervisor/self-healing.mjs \
+            --input artifacts/qa/remediation.json \
+            --output artifacts/qa/healing-plans.json
+          jq '{status,plans_total,plan_ready,human_required_total,next_gate,execution_authority,safety}' artifacts/qa/healing-plans.json
+
       - name: Build bounded QA learning signals for existing universal RSI ingress
         run: |
           node cerebro/qa/qa-learning-bridge.mjs \
@@ -139,16 +152,18 @@ jobs:
           jq -e '.state_type=="CEREBRO_QA_LEARNING_SIGNAL_BATCH_V0" and .prod_authorized==false and .prod_write_authorized==false and .trading_access==false and .contains_customer_data==false and .contains_secrets==false and .additional_cost_eur==0' artifacts/qa/learning-signals.json >/dev/null
           jq '{signals_total,downstream,repair_semantics}' artifacts/qa/learning-signals.json
 
-      - name: Attach improvement and remediation summary to canonical QA state
+      - name: Attach improvement remediation SELF-001 and learning summary to canonical QA state
         run: |
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
           const qa=JSON.parse(fs.readFileSync('artifacts/qa/state.after.json','utf8'));
           const improvements=JSON.parse(fs.readFileSync('artifacts/qa/improvements.json','utf8'));
           const remediation=JSON.parse(fs.readFileSync('artifacts/qa/remediation.json','utf8'));
+          const healing=JSON.parse(fs.readFileSync('artifacts/qa/healing-plans.json','utf8'));
           const learning=JSON.parse(fs.readFileSync('artifacts/qa/learning-signals.json','utf8'));
           qa.improvement_scout={status:improvements.status,observations_total:improvements.observations_total,candidates_total:improvements.candidates_total,top_candidates:(improvements.candidates??[]).slice(0,5),safety:improvements.safety};
           qa.remediation={status:remediation.status,open_cases:remediation.open_cases,bug_cases:remediation.bug_cases,improvement_cases:remediation.improvement_cases,candidate_packages_total:remediation.candidate_packages_total,human_required:remediation.human_required,next_gate:remediation.next_gate,authority:remediation.authority,safety:remediation.safety};
+          qa.self_healing={status:healing.status,plans_total:healing.plans_total,plan_ready:healing.plan_ready,human_required_total:healing.human_required_total,next_gate:healing.next_gate,execution_authority:healing.execution_authority,safety:healing.safety};
           qa.learning_bridge={signals_total:learning.signals_total,downstream:learning.downstream,repair_semantics:learning.repair_semantics,prod_write_authorized:false,additional_cost_eur:0};
           fs.writeFileSync('artifacts/qa/state.after.json',JSON.stringify(qa,null,2)+'\n');
           NODE
@@ -159,6 +174,7 @@ jobs:
           jq -e '.targets.PRODUCT.status=="POR_AUDITAR" or .coverage.products=="ENABLED_SYNTHETIC_PREPROD"' artifacts/qa/state.after.json >/dev/null
           jq -e '.safety.prod_write==false and .safety.customer_data==false and .safety.trading==false and .safety.paid_fallback==false and .safety.additional_subscription_eur==0 and ([.candidates[]|select(.prod_write_authorized!=false or .additional_cost_eur!=0)]|length)==0' artifacts/qa/improvements.json >/dev/null
           jq -e '.safety.prod_write==false and .safety.customer_data==false and .safety.trading==false and .safety.paid_fallback==false and .safety.additional_subscription_eur==0 and .authority.app_web_prod_autofix==false and .authority.assisted_owner_engines_preserved==true and .authority.promotion_authorized==false and .authority.prod_write_authorized==false and ([.candidate_packages[]|select(.prod_write_authorized!=false or .additional_cost_eur!=0)]|length)==0' artifacts/qa/remediation.json >/dev/null
+          jq -e '.safety.prod_write==false and .safety.customer_data==false and .safety.trading==false and .safety.paid_fallback==false and .safety.additional_subscription_eur==0 and .execution_authority.plan_only==true and .execution_authority.code_mutation_authorized==false and .execution_authority.promotion_authorized==false and .execution_authority.prod_authorized==false and .execution_authority.prod_write_authorized==false and ([.plans[]|select((.prod_write_authorized//false)!=false or (.additional_cost_eur//0)!=0 or (.execute//false)!=false)]|length)==0' artifacts/qa/healing-plans.json >/dev/null
           jq -e '.prod_authorized==false and .prod_write_authorized==false and .trading_access==false and .contains_customer_data==false and .contains_secrets==false and .additional_cost_eur==0' artifacts/qa/learning-signals.json >/dev/null
 
       - name: Dispatch only new verified QA evidence to existing universal RSI learning ingress
@@ -176,24 +192,26 @@ jobs:
           gh api -X POST "repos/$GITHUB_REPOSITORY/dispatches" --input artifacts/qa/repository-dispatch.json
           echo "Dispatched $COUNT bounded QA learning signal(s) to existing universal RSI ingress."
 
-      - name: Persist only QA evidence state on its dedicated branch
+      - name: Persist only QA and SELF-001 evidence state on its dedicated branch
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         run: |
           set -euo pipefail
           cp artifacts/qa/state.after.json /tmp/qa-state.json
           cp artifacts/qa/improvements.json /tmp/qa-improvements.json
           cp artifacts/qa/remediation.json /tmp/qa-remediation.json
+          cp artifacts/qa/healing-plans.json /tmp/qa-healing.json
           git fetch --no-tags origin "+refs/heads/$QA_STATE_BRANCH:refs/remotes/origin/$QA_STATE_BRANCH"
           git checkout --detach "refs/remotes/origin/$QA_STATE_BRANCH"
           mkdir -p "$(dirname "$QA_STATE_PATH")"
           cp /tmp/qa-state.json "$QA_STATE_PATH"
           cp /tmp/qa-improvements.json "$QA_IMPROVEMENT_PATH"
           cp /tmp/qa-remediation.json "$QA_REMEDIATION_PATH"
+          cp /tmp/qa-healing.json "$QA_HEALING_PATH"
           git config user.name 'cerebro-qa[bot]'
           git config user.email 'cerebro-qa[bot]@users.noreply.github.com'
-          git add "$QA_STATE_PATH" "$QA_IMPROVEMENT_PATH" "$QA_REMEDIATION_PATH"
+          git add "$QA_STATE_PATH" "$QA_IMPROVEMENT_PATH" "$QA_REMEDIATION_PATH" "$QA_HEALING_PATH"
           if ! git diff --cached --quiet; then
-            git commit -m 'chore(cerebro): advance continuous human QA evidence state'
+            git commit -m 'chore(cerebro): advance continuous human QA and SELF-001 evidence state'
             git push origin "HEAD:refs/heads/$QA_STATE_BRANCH"
           fi
 
