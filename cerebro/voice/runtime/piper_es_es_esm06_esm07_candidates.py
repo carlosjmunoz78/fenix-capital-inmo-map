@@ -10,7 +10,6 @@ import argparse
 import hashlib
 import json
 import os
-import subprocess
 import wave
 from datetime import datetime, timezone
 from pathlib import Path
@@ -47,28 +46,10 @@ def wav_meta(path: Path) -> tuple[float, int]:
         return (r.getnframes() / r.getframerate(), r.getframerate())
 
 
-def render_variant(voice: PiperVoice, out: Path, voice_id: str, syn: SynthesisConfig, pitch_ratio: float) -> Path:
-    raw = out / f"{voice_id}_raw.wav"
+def render_variant(voice: PiperVoice, out: Path, voice_id: str, syn: SynthesisConfig) -> Path:
     final = out / f"{voice_id}_cerebro_candidate.wav"
-    with wave.open(str(raw), "wb") as wav_file:
+    with wave.open(str(final), "wb") as wav_file:
         voice.synthesize_wav(TEXT, wav_file, syn_config=syn)
-
-    # Small deterministic timbral adjustment only. This does not copy any external identity.
-    if abs(pitch_ratio - 1.0) < 0.0001:
-        final.write_bytes(raw.read_bytes())
-    else:
-        tempo = 1.0 / pitch_ratio
-        subprocess.run(
-            [
-                "ffmpeg", "-y", "-i", str(raw),
-                "-af", f"asetrate=22050*{pitch_ratio:.6f},aresample=22050,atempo={tempo:.6f},highpass=f=65,lowpass=f=9800,alimiter=limit=0.95",
-                "-c:a", "pcm_s16le", str(final),
-            ],
-            check=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-    raw.unlink(missing_ok=True)
     return final
 
 
@@ -96,21 +77,22 @@ def main() -> None:
     voice = PiperVoice.load(str(local_model))
 
     # Male speaker is explicit in the model config: speaker_id 0 == M.
+    # ESM06: softer, slower and warmer delivery.
     esm06 = render_variant(
         voice,
         out,
         "ESM06",
         SynthesisConfig(
             speaker_id=0,
-            volume=0.90,
-            length_scale=1.14,
-            noise_scale=0.42,
-            noise_w_scale=0.45,
+            volume=0.88,
+            length_scale=1.17,
+            noise_scale=0.40,
+            noise_w_scale=0.42,
             normalize_audio=True,
         ),
-        pitch_ratio=1.015,
     )
 
+    # ESM07: calmer, tighter, more technical and restrained delivery.
     esm07 = render_variant(
         voice,
         out,
@@ -119,11 +101,10 @@ def main() -> None:
             speaker_id=0,
             volume=0.93,
             length_scale=1.08,
-            noise_scale=0.30,
-            noise_w_scale=0.30,
+            noise_scale=0.24,
+            noise_w_scale=0.24,
             normalize_audio=True,
         ),
-        pitch_ratio=0.965,
     )
 
     d6, sr6 = wav_meta(esm06)
@@ -158,7 +139,7 @@ def main() -> None:
                 "wav_sha256": sha256(esm07),
                 "audio_seconds": round(d7, 3),
                 "sample_rate": sr7,
-                "traits": ["calm", "technical", "precise", "controlled", "polite", "slightly grave", "Spain-Spanish"],
+                "traits": ["calm", "technical", "precise", "controlled", "polite", "restrained", "Spain-Spanish"],
             },
         },
         "identity_policy": {
