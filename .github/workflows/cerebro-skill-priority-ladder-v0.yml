@@ -1,0 +1,217 @@
+name: CEREBRO Skill Priority Ladder V0
+
+on:
+  push:
+    branches:
+      - main
+      - cerebro/skill-priority-ladder-v0-20261011
+    paths:
+      - 'cerebro/skills/skill-source-evidence-normalizer.mjs'
+      - 'cerebro/tests/skill-source-evidence-normalizer.test.mjs'
+      - '.github/workflows/cerebro-skill-priority-ladder-v0.yml'
+  schedule:
+    - cron: '7 5,11,17,23 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: cerebro-skill-priority-ladder-v0
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  actions: read
+
+env:
+  AUTOLOOP_STATE_BRANCH: cerebro/skill-autoloop-state-v0
+  AUTOLOOP_STATE_PATH: cerebro/runtime/skill-autoloop-state.v0.json
+  DISCOVERY_WORKFLOW: CEREBRO Skill Discovery Scout
+
+jobs:
+  priority-ladder:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Validate priority ladder and existing supply-chain contracts
+        run: node --test cerebro/tests/skill-source-evidence-normalizer.test.mjs cerebro/tests/skill-prelab-admission.test.mjs cerebro/tests/skill-bundle-scanner.test.mjs cerebro/tests/skill-test-only-prelab-review.test.mjs cerebro/tests/skill-wrapper-plan.test.mjs cerebro/tests/skill-value-evaluator.test.mjs cerebro/tests/skill-next-candidate-selector.test.mjs cerebro/tests/skill-autoloop-controller.test.mjs
+
+      - name: Load canonical safe AutoLoop state
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/base artifacts/ladder artifacts/source
+          git fetch --no-tags origin "refs/heads/$AUTOLOOP_STATE_BRANCH:refs/remotes/origin/$AUTOLOOP_STATE_BRANCH"
+          git show "refs/remotes/origin/$AUTOLOOP_STATE_BRANCH:$AUTOLOOP_STATE_PATH" > artifacts/ladder/state.before.json
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          import {validateSafeAutoloopState} from './cerebro/skills/skill-autoloop-controller.mjs';
+          const s=JSON.parse(fs.readFileSync('artifacts/ladder/state.before.json','utf8'));
+          const v=validateSafeAutoloopState(s);
+          if(!v.green) throw new Error(JSON.stringify(v));
+          NODE
+
+      - name: Load latest immutable P0 discovery evidence
+        id: discovery
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          RUN_ID="$(gh run list --repo "$GITHUB_REPOSITORY" --workflow "$DISCOVERY_WORKFLOW" --branch main --status success --limit 1 --json databaseId --jq '.[0].databaseId')"
+          test -n "$RUN_ID" && test "$RUN_ID" != null
+          gh run download "$RUN_ID" --repo "$GITHUB_REPOSITORY" --name "cerebro-skill-discovery-$RUN_ID" --dir artifacts/base
+          for f in cerebro-skill-value-p0.json cerebro-skill-wrapper-plans-p0.json cerebro-skill-manifests.json cerebro-skill-license-evidence.json cerebro-skill-shortlist.json cerebro-skill-upstreams.json cerebro-skill-overlap.json cerebro-skill-prelab-reviewed-p0.json; do test -f "artifacts/base/$f"; done
+          echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Re-check P0 against live anti-loop state
+        id: p0
+        run: |
+          node cerebro/skills/skill-next-candidate-selector.mjs \
+            --value artifacts/base/cerebro-skill-value-p0.json \
+            --registry cerebro/registry/skill-supply-chain-v0.json \
+            --state artifacts/ladder/state.before.json \
+            --output artifacts/ladder/next-p0.json
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const r=JSON.parse(fs.readFileSync('artifacts/ladder/next-p0.json','utf8'));
+          fs.appendFileSync(process.env.GITHUB_OUTPUT,`available=${Boolean(r.selected_candidate_id)}\n`);
+          NODE
+
+      - name: Build P1 static evidence only when P0 is exhausted
+        id: p1
+        if: steps.p0.outputs.available != 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          node cerebro/skills/skill-bundle-scanner.mjs --shortlist artifacts/base/cerebro-skill-shortlist.json --upstreams artifacts/base/cerebro-skill-upstreams.json --manifests artifacts/base/cerebro-skill-manifests.json --priority P1 --output artifacts/source/cerebro-skill-bundles-p1.json
+          node cerebro/skills/skill-prelab-admission.mjs --shortlist artifacts/base/cerebro-skill-shortlist.json --bundles artifacts/source/cerebro-skill-bundles-p1.json --licenses artifacts/base/cerebro-skill-license-evidence.json --priority P1 --output artifacts/source/cerebro-skill-prelab-p1.json
+          node cerebro/skills/skill-test-only-prelab-review.mjs --prelab artifacts/source/cerebro-skill-prelab-p1.json --bundles artifacts/source/cerebro-skill-bundles-p1.json --licenses artifacts/base/cerebro-skill-license-evidence.json --output artifacts/source/cerebro-skill-prelab-reviewed-p1.json
+          node cerebro/skills/skill-wrapper-plan.mjs --prelab artifacts/source/cerebro-skill-prelab-reviewed-p1.json --shortlist artifacts/base/cerebro-skill-shortlist.json --manifests artifacts/base/cerebro-skill-manifests.json --licenses artifacts/base/cerebro-skill-license-evidence.json --output artifacts/source/cerebro-skill-wrapper-plans-p1.json
+          node cerebro/skills/skill-value-evaluator.mjs --wrappers artifacts/source/cerebro-skill-wrapper-plans-p1.json --prelab artifacts/source/cerebro-skill-prelab-reviewed-p1.json --upstreams artifacts/base/cerebro-skill-upstreams.json --overlap artifacts/base/cerebro-skill-overlap.json --licenses artifacts/base/cerebro-skill-license-evidence.json --manifests artifacts/base/cerebro-skill-manifests.json --output artifacts/source/cerebro-skill-value-p1.json
+          node cerebro/skills/skill-next-candidate-selector.mjs --value artifacts/source/cerebro-skill-value-p1.json --registry cerebro/registry/skill-supply-chain-v0.json --state artifacts/ladder/state.before.json --output artifacts/ladder/next-p1.json
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const r=JSON.parse(fs.readFileSync('artifacts/ladder/next-p1.json','utf8'));
+          fs.appendFileSync(process.env.GITHUB_OUTPUT,`available=${Boolean(r.selected_candidate_id)}\n`);
+          NODE
+
+      - name: Build P2 static evidence only when P0 and P1 are exhausted
+        id: p2
+        if: steps.p0.outputs.available != 'true' && steps.p1.outputs.available != 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          node cerebro/skills/skill-bundle-scanner.mjs --shortlist artifacts/base/cerebro-skill-shortlist.json --upstreams artifacts/base/cerebro-skill-upstreams.json --manifests artifacts/base/cerebro-skill-manifests.json --priority P2 --output artifacts/source/cerebro-skill-bundles-p2.json
+          node cerebro/skills/skill-prelab-admission.mjs --shortlist artifacts/base/cerebro-skill-shortlist.json --bundles artifacts/source/cerebro-skill-bundles-p2.json --licenses artifacts/base/cerebro-skill-license-evidence.json --priority P2 --output artifacts/source/cerebro-skill-prelab-p2.json
+          node cerebro/skills/skill-test-only-prelab-review.mjs --prelab artifacts/source/cerebro-skill-prelab-p2.json --bundles artifacts/source/cerebro-skill-bundles-p2.json --licenses artifacts/base/cerebro-skill-license-evidence.json --output artifacts/source/cerebro-skill-prelab-reviewed-p2.json
+          node cerebro/skills/skill-wrapper-plan.mjs --prelab artifacts/source/cerebro-skill-prelab-reviewed-p2.json --shortlist artifacts/base/cerebro-skill-shortlist.json --manifests artifacts/base/cerebro-skill-manifests.json --licenses artifacts/base/cerebro-skill-license-evidence.json --output artifacts/source/cerebro-skill-wrapper-plans-p2.json
+          node cerebro/skills/skill-value-evaluator.mjs --wrappers artifacts/source/cerebro-skill-wrapper-plans-p2.json --prelab artifacts/source/cerebro-skill-prelab-reviewed-p2.json --upstreams artifacts/base/cerebro-skill-upstreams.json --overlap artifacts/base/cerebro-skill-overlap.json --licenses artifacts/base/cerebro-skill-license-evidence.json --manifests artifacts/base/cerebro-skill-manifests.json --output artifacts/source/cerebro-skill-value-p2.json
+          node cerebro/skills/skill-next-candidate-selector.mjs --value artifacts/source/cerebro-skill-value-p2.json --registry cerebro/registry/skill-supply-chain-v0.json --state artifacts/ladder/state.before.json --output artifacts/ladder/next-p2.json
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const r=JSON.parse(fs.readFileSync('artifacts/ladder/next-p2.json','utf8'));
+          fs.appendFileSync(process.env.GITHUB_OUTPUT,`available=${Boolean(r.selected_candidate_id)}\n`);
+          NODE
+
+      - name: Select the first eligible priority without bypassing P0
+        id: active
+        run: |
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const p0=process.env.P0==='true';
+          const p1=process.env.P1==='true';
+          const p2=process.env.P2==='true';
+          let priority=null,file=null;
+          if(p0){priority='P0';file='artifacts/ladder/next-p0.json';}
+          else if(p1){priority='P1';file='artifacts/ladder/next-p1.json';}
+          else if(p2){priority='P2';file='artifacts/ladder/next-p2.json';}
+          const report=file?JSON.parse(fs.readFileSync(file,'utf8')):{schema_version:'0.2.0',selected_candidate_id:null,selected:null,no_candidate_reason:'NO_ELIGIBLE_CANDIDATE_ACROSS_P0_P1_P2',prod_authorized:false,autonomous_prod_promotion_authorized:false};
+          fs.writeFileSync('artifacts/ladder/active-next.json',JSON.stringify(report,null,2)+'\n');
+          fs.writeFileSync('artifacts/ladder/active-priority.json',JSON.stringify({priority,has_candidate:Boolean(report.selected_candidate_id),p0_delegated:p0,prod_authorized:false,prod_write:false,external_skill_code_execution:false,customer_data_used:false,trading_access:false,paid_fallback:false,additional_cost_eur:0},null,2)+'\n');
+          fs.appendFileSync(process.env.GITHUB_OUTPUT,`priority=${priority??'NONE'}\n`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT,`has_candidate=${Boolean(report.selected_candidate_id)}\n`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT,`p0_delegated=${p0}\n`);
+          NODE
+        env:
+          P0: ${{ steps.p0.outputs.available }}
+          P1: ${{ steps.p1.outputs.available }}
+          P2: ${{ steps.p2.outputs.available }}
+
+      - name: Preserve existing P0 AutoLoop when it has work
+        if: steps.active.outputs.p0_delegated == 'true'
+        run: |
+          cp artifacts/ladder/state.before.json artifacts/ladder/state.after.json
+          printf '{"decision":"DEFER_TO_EXISTING_P0_AUTOLOOP","candidate_source":"P0","state_mutated":false,"prod_authorized":false,"prod_write":false,"additional_cost_eur":0}\n' > artifacts/ladder/decision.json
+
+      - name: Checkpoint first safe P1 or P2 candidate
+        if: steps.active.outputs.p0_delegated != 'true'
+        run: |
+          node cerebro/skills/skill-autoloop-controller.mjs \
+            --state artifacts/ladder/state.before.json \
+            --next artifacts/ladder/active-next.json \
+            --source-run-id "${{ github.run_id }}" \
+            --output artifacts/ladder/decision.json \
+            --state-output artifacts/ladder/state.after.json
+
+      - name: Build compatibility envelope for the unchanged safe handler
+        if: steps.active.outputs.has_candidate == 'true' && steps.active.outputs.p0_delegated != 'true'
+        env:
+          CANDIDATE_ID: ${{ fromJson(steps.active.outputs.priority == 'P1' && '"p1"' || '"p2"') }}
+        run: |
+          set -euo pipefail
+          PRIORITY="$(jq -r '.priority|ascii_downcase' artifacts/ladder/active-priority.json)"
+          SELECTED_ID="$(jq -r '.selected_candidate_id' artifacts/ladder/active-next.json)"
+          cp artifacts/base/cerebro-skill-manifests.json artifacts/source/cerebro-skill-manifests.json
+          cp artifacts/base/cerebro-skill-license-evidence.json artifacts/source/cerebro-skill-license-evidence.json
+          cp artifacts/base/cerebro-skill-shortlist.json artifacts/source/cerebro-skill-shortlist.json
+          node cerebro/skills/skill-source-evidence-normalizer.mjs --source artifacts/source --candidate "$SELECTED_ID" --output artifacts/ladder/normalized
+          cp artifacts/ladder/normalized/value.json artifacts/source/cerebro-skill-value-p0.json
+          cp artifacts/ladder/normalized/wrappers.json artifacts/source/cerebro-skill-wrapper-plans-p0.json
+          cp artifacts/ladder/normalized/prelab.json artifacts/source/cerebro-skill-prelab-reviewed-p0.json
+          cp artifacts/ladder/normalized/source-meta.json artifacts/source/cerebro-skill-source-priority.json
+          jq --arg priority "$PRIORITY" '. + {compatibility_projection:"P0_FILENAMES_FOR_EXISTING_SAFE_HANDLER_ONLY",actual_priority:($priority|ascii_upcase)}' artifacts/source/cerebro-skill-source-priority.json > artifacts/source/cerebro-skill-source-priority.tmp.json
+          mv artifacts/source/cerebro-skill-source-priority.tmp.json artifacts/source/cerebro-skill-source-priority.json
+
+      - name: Enforce immutable safety boundaries
+        run: |
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          import {validateSafeAutoloopState} from './cerebro/skills/skill-autoloop-controller.mjs';
+          const s=JSON.parse(fs.readFileSync('artifacts/ladder/state.after.json','utf8'));
+          const v=validateSafeAutoloopState(s);
+          if(!v.green||s.safe_autonomy.prod_write!==false||s.safe_autonomy.external_skill_code_execution!==false||s.safe_autonomy.customer_data!==false||s.safe_autonomy.trading!==false||s.safe_autonomy.paid_fallback!==false||s.safe_autonomy.additional_cost_budget_eur!==0||s.prod_authorized!==false||s.autonomous_prod_promotion_authorized!==false) throw new Error('PRIORITY_LADDER_SAFETY_INVARIANT_FAILED');
+          NODE
+
+      - name: Persist only P1/P2 checkpoint from main
+        if: github.ref == 'refs/heads/main' && steps.active.outputs.p0_delegated != 'true'
+        run: |
+          set -euo pipefail
+          cp artifacts/ladder/state.after.json /tmp/state.json
+          git fetch --no-tags origin "refs/heads/$AUTOLOOP_STATE_BRANCH:refs/remotes/origin/$AUTOLOOP_STATE_BRANCH"
+          git checkout --detach "refs/remotes/origin/$AUTOLOOP_STATE_BRANCH"
+          cp /tmp/state.json "$AUTOLOOP_STATE_PATH"
+          git config user.name 'cerebro-autoloop[bot]'
+          git config user.email 'cerebro-autoloop[bot]@users.noreply.github.com'
+          git add "$AUTOLOOP_STATE_PATH"
+          if ! git diff --cached --quiet; then git commit -m 'chore(cerebro): checkpoint P1 P2 priority ladder'; git push origin "HEAD:refs/heads/$AUTOLOOP_STATE_BRANCH"; fi
+
+      - name: Branch remains a dry-run for canonical state
+        if: github.ref != 'refs/heads/main'
+        run: printf '{"status":"GREEN_DRY_RUN","state_persisted":false,"prod_write":false,"external_skill_code_execution":false,"additional_cost_eur":0}\n' > artifacts/ladder/branch-gate.json
+
+      - name: Upload priority-ladder source evidence for existing safe handler
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-skill-discovery-${{ github.run_id }}
+          path: |
+            artifacts/source/*.json
+            artifacts/ladder/*.json
+          if-no-files-found: warn
+          retention-days: 30
