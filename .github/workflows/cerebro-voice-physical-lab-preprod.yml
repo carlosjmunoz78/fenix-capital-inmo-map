@@ -68,7 +68,8 @@ jobs:
           grep -F 'automatic_promotion": False' cerebro/voice/runtime/physical_lab_benchmark.py >/dev/null
           grep -F -- '--host 127.0.0.1' cerebro/voice/runtime/windows/Start-VoiceLab.ps1 >/dev/null
           grep -F 'MODEL_NOT_PHYSICALLY_BENCHMARKED' cerebro/voice/runtime/PHYSICAL_LAB_V0.md >/dev/null
-          ! grep -R -n -E 'CEREBRO_ENVIRONMENT[[:space:]]*=[[:space:]]*["'"']PROD|--host[[:space:]]+0\.0\.0\.0' cerebro/voice/runtime/windows cerebro/voice/runtime/physical_lab_*.py
+          ! grep -R -n -F '0.0.0.0' cerebro/voice/runtime/windows cerebro/voice/runtime/physical_lab_*.py
+          ! grep -R -n -E 'CEREBRO_ENVIRONMENT[^\n]*PROD' cerebro/voice/runtime/windows cerebro/voice/runtime/physical_lab_*.py
 
       - name: Record boundary
         shell: bash
