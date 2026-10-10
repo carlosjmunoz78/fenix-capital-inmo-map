@@ -6,7 +6,7 @@
   "environment": "CONTROL_PLANE",
   "version": "0.1.0",
   "status": "GREEN",
-  "updated_at": "2026-10-10T23:47:20.054Z",
+  "updated_at": "2026-10-10T23:53:48.965Z",
   "quality_score": 100,
   "previous_quality_score": 100,
   "quality_delta": 0,
@@ -222,6 +222,27 @@
     "authority": {
       "app_web_prod_autofix": false,
       "assisted_owner_engines_preserved": true,
+      "promotion_authorized": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false
+    },
+    "safety": {
+      "prod_write": false,
+      "customer_data": false,
+      "trading": false,
+      "paid_fallback": false,
+      "additional_subscription_eur": 0
+    }
+  },
+  "self_healing": {
+    "status": "PLANS_READY",
+    "plans_total": 12,
+    "plan_ready": 12,
+    "human_required_total": 0,
+    "next_gate": "OWNER_EXECUTOR_CAPABILITY_AUDIT",
+    "execution_authority": {
+      "plan_only": true,
+      "code_mutation_authorized": false,
       "promotion_authorized": false,
       "prod_authorized": false,
       "prod_write_authorized": false
