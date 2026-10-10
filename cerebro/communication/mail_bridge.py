@@ -118,7 +118,8 @@ def approval_batch_html(intro, items, base_url=None):
             f'<pre style="white-space:pre-wrap;font-family:Arial,sans-serif">{safe_text}</pre>'
             f'<div>{"".join(buttons)}</div>'
             '<p style="font-family:Arial,sans-serif;font-size:12px;color:#666;margin:10px 0 0">'
-            'El enlace solo abre CEREBRO. No autoriza nada hasta que estés autenticado y pulses Confirmar.'</n            '</p></div>'
+            'El enlace solo abre CEREBRO. No autoriza nada hasta que estés autenticado y pulses Confirmar.'
+            '</p></div>'
         )
     return (
         '<!doctype html><html><body style="font-family:Arial,sans-serif;color:#171717;line-height:1.45">'
