@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - cerebro/skill-autoloop-safe-handler-v0-20261008
+      - cerebro/fix-skill-handler-nested-artifact-v0-20261011
     paths:
       - 'cerebro/skills/skill-autoloop-safe-handler.mjs'
       - 'cerebro/skills/skill-autoloop-old-vs-new-overlay.mjs'
@@ -125,7 +126,14 @@ jobs:
           ARTIFACT_NAME="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_RUN_ID/artifacts" --jq '.artifacts[].name' | grep -E '^cerebro-skill-(github-wide|discovery)-' | head -n 1)"
           test -n "$ARTIFACT_NAME"
           gh run download "$SOURCE_RUN_ID" --repo "$GITHUB_REPOSITORY" --name "$ARTIFACT_NAME" --dir artifacts/source
-          for f in cerebro-skill-value-p0.json cerebro-skill-wrapper-plans-p0.json cerebro-skill-manifests.json cerebro-skill-license-evidence.json cerebro-skill-shortlist.json cerebro-skill-prelab-reviewed-p0.json; do test -f "artifacts/source/$f"; done
+          for f in cerebro-skill-value-p0.json cerebro-skill-wrapper-plans-p0.json cerebro-skill-manifests.json cerebro-skill-license-evidence.json cerebro-skill-shortlist.json cerebro-skill-prelab-reviewed-p0.json; do
+            if [ ! -f "artifacts/source/$f" ]; then
+              FOUND="$(find artifacts/source -type f -name "$f" | head -n 1)"
+              test -n "$FOUND"
+              cp "$FOUND" "artifacts/source/$f"
+            fi
+            test -f "artifacts/source/$f"
+          done
 
       - name: Freeze selected candidate evidence only
         if: steps.select.outputs.has_candidate == 'true'
