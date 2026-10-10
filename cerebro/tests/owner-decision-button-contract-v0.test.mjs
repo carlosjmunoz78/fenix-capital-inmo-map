@@ -9,17 +9,19 @@ const workflow=fs.readFileSync(new URL('../../.github/workflows/cerebro-human-co
 
 test('GET route never submits an owner decision automatically',()=>{
   assert.match(guard,/onClick=\{confirm\}/);
-  assert.doesNotMatch(guard,/useEffect\([^]*functions\.invoke/);
-  assert.match(gateway,/req\.method!==['"]POST['"]/);
+  const beforeConfirm=guard.split('async function confirm')[0]||'';
+  assert.doesNotMatch(beforeConfirm,/functions\.invoke/);
+  assert.match(guard,/async function confirm\(\)[^]*functions\.invoke\(['"]cerebro-owner-decision-gateway-v0['"]/);
+  assert.match(gateway,/req\.method\s*!==\s*['"]POST['"]/);
   assert.match(gateway,/METHOD_NOT_ALLOWED/);
 });
 
 test('only exact canonical decisions and APR ids reach ingress',()=>{
   for(const command of ['AUTORIZO','NO AUTORIZO','EXPLICAME','APARCO']) assert.match(gateway,new RegExp(command.replace(' ','\\s')));
   assert.match(gateway,/APR-\\d\{8\}-\[A-F0-9\]\{8\}/);
-  assert.match(gateway,/actorContext\.actor_code!==['"]CARLOS-ADMIN['"]/);
+  assert.match(gateway,/actorContext\.actor_code\s*!==\s*['"]CARLOS-ADMIN['"]/);
   assert.match(gateway,/CONTROL_PLANE_INGRESS_ONLY/);
-  assert.match(gateway,/executed:false/);
+  assert.match(gateway,/executed\s*:\s*false/);
 });
 
 test('GitHub worker requires OIDC repo main ref and exact communication workflow',()=>{
