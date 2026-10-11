@@ -1,0 +1,99 @@
+{
+  "schema_version": "0.1.0",
+  "state_type": "CEREBRO_AUTO001_REPAIR_AUTONOMY_STATE_V0",
+  "company_id": "fenix",
+  "engine_id": "AUTO-001",
+  "environment": "PREPROD_CONTROL_PLANE",
+  "version": "0.1.0",
+  "updated_at": "2026-10-11T05:21:13.898Z",
+  "plan_id": "auto001:0503c493b671b33a",
+  "branch": "cerebro/auto001-839fbdc8e1ce0e92",
+  "base_sha": "49dd02aa2ac5d6d18c9125ba65e3ed8623f5db89",
+  "transform_id": "APP_AUTH_SHELL_ROLE_MAIN_V0",
+  "owner_engine": "HCI-001",
+  "target": "APP:qa-mobile-chromium",
+  "preprod_patch_validated": true,
+  "old_vs_new": {
+    "metric": "public_auth_main_landmarks",
+    "measurement": "CONTROLLED_SOURCE_OLD_VS_NEW",
+    "old": 0,
+    "new": 2,
+    "expected_direction": "HIGHER",
+    "improved": true
+  },
+  "regression_passed": true,
+  "rebuild_passed": true,
+  "rollback_passed": true,
+  "tribunal_approved": true,
+  "tribunal_status": "APPROVE_PREPROD_PATCH",
+  "pr_handoff_status": "BLOCKED_REPOSITORY_ACTIONS_POLICY",
+  "promotion_readiness": {
+    "schema_version": "0.1.0",
+    "state_type": "CEREBRO_QA_PROMOTION_READINESS_V0",
+    "company_id": "fenix",
+    "engine_id": "QA-001",
+    "environment": "PREPROD_CONTROL_PLANE",
+    "version": "0.1.0",
+    "updated_at": "2026-10-11T05:21:13.849Z",
+    "status": "HUMAN_REQUIRED",
+    "human_required": {
+      "reason": "POLICY_CONFLICT",
+      "scope": "LOW_RISK_APP_PATCH_PROMOTION",
+      "owner_engine": "HCI-001",
+      "domain_engine": "APP-001",
+      "blockers": [
+        "PR_CREATION_BLOCKED_BY_REPOSITORY_POLICY",
+        "PROMOTION_CARRIER_NOT_AUTONOMOUSLY_AVAILABLE",
+        "DOMAIN_AUTONOMY_MODE_ASSISTED",
+        "DOMAIN_EVIDENCE_DOMAIN_EVIDENCE_WIRING_REQUIRED",
+        "PROD_AUTHORITY_NOT_GRANTED"
+      ]
+    },
+    "owner_engine": "HCI-001",
+    "domain_engine": "APP-001",
+    "evidence": {
+      "tribunal_status": "APPROVE_PREPROD_PATCH",
+      "tribunal_approved": true,
+      "pr_handoff_status": "BLOCKED_REPOSITORY_ACTIONS_POLICY",
+      "preprod_patch_validated": true,
+      "domain_autonomy_mode": "ASSISTED",
+      "domain_evidence_state": "DOMAIN_EVIDENCE_WIRING_REQUIRED",
+      "registry_prod_authorized": false,
+      "registry_prod_write_authorized": false
+    },
+    "blockers": [
+      "PR_CREATION_BLOCKED_BY_REPOSITORY_POLICY",
+      "PROMOTION_CARRIER_NOT_AUTONOMOUSLY_AVAILABLE",
+      "DOMAIN_AUTONOMY_MODE_ASSISTED",
+      "DOMAIN_EVIDENCE_DOMAIN_EVIDENCE_WIRING_REQUIRED",
+      "PROD_AUTHORITY_NOT_GRANTED"
+    ],
+    "authority": {
+      "merge_authorized": false,
+      "promotion_authorized": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false
+    },
+    "next_gate": "POLICY_AND_DOMAIN_EVIDENCE_REQUIRED",
+    "safety": {
+      "prod_write": false,
+      "customer_data": false,
+      "trading": false,
+      "paid_fallback": false,
+      "additional_subscription_eur": 0
+    }
+  },
+  "authority": {
+    "auto_merge": false,
+    "promotion_authorized": false,
+    "prod_authorized": false,
+    "prod_write_authorized": false
+  },
+  "safety": {
+    "prod_write": false,
+    "customer_data": false,
+    "trading": false,
+    "paid_fallback": false,
+    "additional_subscription_eur": 0
+  }
+}
