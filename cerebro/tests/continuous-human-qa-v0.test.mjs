@@ -54,6 +54,33 @@ test('authenticated synthetic failure is routed to APP-001 as a real QA finding'
   assert.equal(state.safety.prod_write,false);
 });
 
+test('Fénix Capital Web does not accidentally match API owner routing',()=>{
+  const state=buildQualityState({report:report([
+    {title:'[WEB] Fénix Capital Web public human read-only journey',status:'unexpected',result:'failed',errors:[{message:'pageerror recaptcha'}]}
+  ]),previous:{issue_fingerprints:[]},targetsRegistry:{targets:[]},now:'2026-10-11T00:00:00Z'});
+  assert.equal(state.new_issues.length,1);
+  assert.equal(state.new_issues[0].kind,'WEB');
+  assert.equal(state.new_issues[0].owner_engine,'WEB-001');
+});
+
+test('explicit API evidence still routes to API-001',()=>{
+  const state=buildQualityState({report:report([
+    {title:'[WEB] [API] lead endpoint smoke',status:'unexpected',result:'failed'}
+  ]),previous:{issue_fingerprints:[]},targetsRegistry:{targets:[]}});
+  assert.equal(state.new_issues[0].owner_engine,'API-001');
+});
+
+test('skipped target rows are excluded from executed target counts',()=>{
+  const state=buildQualityState({report:report([
+    {title:'[WEB] executed journey'},
+    {title:'[WEB] intentionally skipped journey',status:'skipped',result:'skipped'}
+  ]),previous:{},targetsRegistry:{targets:[]}});
+  assert.equal(state.tests.executed,1);
+  assert.equal(state.targets.WEB.executed,1);
+  assert.equal(state.targets.WEB.passed,1);
+  assert.equal(state.targets.WEB.failed,0);
+});
+
 test('new failure is fingerprinted and routed without auto-fix or PROD authority',()=>{
   const state=buildQualityState({report:report([
     {title:'[APP] public shell pageerror',status:'unexpected',result:'failed',errors:[{message:'pageerror crash'}]}
