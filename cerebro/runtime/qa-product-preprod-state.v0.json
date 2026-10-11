@@ -5,12 +5,48 @@
   "engine_id": "QA-001",
   "environment": "PREPROD",
   "version": "0.1.0",
-  "status": "BOOTSTRAP_NO_MEASUREMENT",
-  "updated_at": null,
-  "last_verified_at": {},
-  "products_verified": [],
-  "products_fresh_7d": [],
-  "coverage": {"verified_total": 0, "fresh_7d_total": 0, "total": 5, "all_fresh_7d": false},
-  "authority": {"real_charge_authorized": false, "commercial_evidence": false, "prod_authorized": false, "prod_write_authorized": false},
-  "safety": {"real_charge_eur": 0, "customer_data": false, "trading": false, "paid_fallback": false, "additional_subscription_eur": 0}
+  "updated_at": "2026-10-11T10:42:22.438Z",
+  "status": "PREPROD_GREEN",
+  "current_product": "AION-P003",
+  "tests": {
+    "executed": 1,
+    "passed": 1,
+    "failed": 0
+  },
+  "journey": [
+    "PURCHASE_SIMULATION_ZERO_EUR",
+    "GENERATION",
+    "FULFILLMENT",
+    "TEST_MAILBOX_EMAIL",
+    "PRIVATE_RESULT",
+    "PRIVATE_ARTIFACT"
+  ],
+  "last_verified_at": {
+    "AION-P003": "2026-10-11T10:42:22.438Z"
+  },
+  "products_verified": [
+    "AION-P003"
+  ],
+  "products_fresh_7d": [
+    "AION-P003"
+  ],
+  "coverage": {
+    "verified_total": 1,
+    "fresh_7d_total": 1,
+    "total": 5,
+    "all_fresh_7d": false
+  },
+  "authority": {
+    "real_charge_authorized": false,
+    "commercial_evidence": false,
+    "prod_authorized": false,
+    "prod_write_authorized": false
+  },
+  "safety": {
+    "real_charge_eur": 0,
+    "customer_data": false,
+    "trading": false,
+    "paid_fallback": false,
+    "additional_subscription_eur": 0
+  }
 }
