@@ -5,66 +5,12 @@
   "engine_id": "QA-001",
   "environment": "PREPROD_CONTROL_PLANE",
   "version": "0.1.0",
-  "updated_at": "2026-10-11T18:24:14.734Z",
-  "mappings_total": 10,
-  "verified_repo_hints": 5,
+  "updated_at": "2026-10-11T18:27:19.109Z",
+  "mappings_total": 8,
+  "verified_repo_hints": 3,
   "external_owner_routes": 5,
   "por_auditar": 0,
   "mappings": [
-    {
-      "repair_id": "self:d741606a34bc8e493485e783",
-      "case_id": "qa-case:d0a3c270ed4f82602f786706",
-      "source": "IMPROVEMENT",
-      "owner_engine": "HCI-001",
-      "target": "APP:qa-mobile-chromium",
-      "dimension": "accessibility_names",
-      "resolution": {
-        "status": "SOURCE_HINT_VERIFIED",
-        "surface": "APP",
-        "owner_engine": "HCI-001",
-        "repository": "carlosjmunoz78/fenix-capital-inmo-map",
-        "repository_ref": "main",
-        "file_hints": [
-          "src/App.tsx"
-        ],
-        "mutation_surface": "GIT_PREPROD_BRANCH_ONLY",
-        "exact_symbol": "POR_LOCALIZAR_CON_EVIDENCIA",
-        "prod_write_authorized": false
-      },
-      "execution_authority": {
-        "code_mutation_authorized": false,
-        "preprod_only": true,
-        "auto_merge": false,
-        "prod_write_authorized": false
-      }
-    },
-    {
-      "repair_id": "self:bf4d507105fe9744d23582a6",
-      "case_id": "qa-case:ad4a970322c7fe155f62d9f8",
-      "source": "IMPROVEMENT",
-      "owner_engine": "HCI-001",
-      "target": "APP:qa-desktop-chromium",
-      "dimension": "accessibility_names",
-      "resolution": {
-        "status": "SOURCE_HINT_VERIFIED",
-        "surface": "APP",
-        "owner_engine": "HCI-001",
-        "repository": "carlosjmunoz78/fenix-capital-inmo-map",
-        "repository_ref": "main",
-        "file_hints": [
-          "src/App.tsx"
-        ],
-        "mutation_surface": "GIT_PREPROD_BRANCH_ONLY",
-        "exact_symbol": "POR_LOCALIZAR_CON_EVIDENCIA",
-        "prod_write_authorized": false
-      },
-      "execution_authority": {
-        "code_mutation_authorized": false,
-        "preprod_only": true,
-        "auto_merge": false,
-        "prod_write_authorized": false
-      }
-    },
     {
       "repair_id": "self:039ae28c8c3aa1a127d68771",
       "case_id": "qa-case:5aed133e2720f65d70d1c9a5",
