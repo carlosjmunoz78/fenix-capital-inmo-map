@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: cerebro-owner-executor-capability-audit-v0-${{ github.ref }}
+  group: cerebro-qa-control-state-writer-v0
   cancel-in-progress: false
 
 permissions:
@@ -68,17 +68,27 @@ jobs:
         run: |
           set -euo pipefail
           cp artifacts/executor-audit/audit.json /tmp/executor-audit.json
-          git fetch --no-tags origin "+refs/heads/$QA_STATE_BRANCH:refs/remotes/origin/$QA_STATE_BRANCH"
-          git checkout --detach "refs/remotes/origin/$QA_STATE_BRANCH"
-          mkdir -p "$(dirname "$EXECUTOR_AUDIT_PATH")"
-          cp /tmp/executor-audit.json "$EXECUTOR_AUDIT_PATH"
           git config user.name 'cerebro-qa[bot]'
           git config user.email 'cerebro-qa[bot]@users.noreply.github.com'
-          git add "$EXECUTOR_AUDIT_PATH"
-          if ! git diff --cached --quiet; then
+          for attempt in 1 2 3 4 5; do
+            git fetch --no-tags --force origin "+refs/heads/$QA_STATE_BRANCH:refs/remotes/origin/$QA_STATE_BRANCH"
+            git checkout --detach "refs/remotes/origin/$QA_STATE_BRANCH"
+            mkdir -p "$(dirname "$EXECUTOR_AUDIT_PATH")"
+            cp /tmp/executor-audit.json "$EXECUTOR_AUDIT_PATH"
+            git add "$EXECUTOR_AUDIT_PATH"
+            if git diff --cached --quiet; then
+              echo 'Executor audit evidence already current.'
+              exit 0
+            fi
             git commit -m 'chore(cerebro): persist owner executor capability audit'
-            git push origin "HEAD:refs/heads/$QA_STATE_BRANCH"
-          fi
+            if git push origin "HEAD:refs/heads/$QA_STATE_BRANCH"; then
+              exit 0
+            fi
+            echo "QA state ref moved concurrently; retrying from latest head ($attempt/5)."
+            sleep "$attempt"
+          done
+          echo 'Unable to persist executor audit after bounded retries.' >&2
+          exit 1
 
       - name: Upload immutable audit evidence
         if: always()
