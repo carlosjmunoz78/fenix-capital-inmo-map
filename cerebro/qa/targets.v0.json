@@ -1,12 +1,13 @@
 {
-  "schema_version": "0.2.0",
-  "company_id": "fenix",
+  "schema_version": "0.3.0",
+  "company_id": "GLOBAL_OR_SCOPED",
   "engine_id": "QA-001",
   "environment": "CONTROL_PLANE",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "targets": [
     {
       "target_id": "fenix-capital-web-prod-readonly",
+      "company_id": "fenix",
       "kind": "WEB",
       "name": "Fénix Capital Web",
       "url": "https://fenixcapital.es",
@@ -17,6 +18,7 @@
     },
     {
       "target_id": "fenix-app-public-shell-prod-readonly",
+      "company_id": "fenix",
       "kind": "APP",
       "name": "App Fénix · shell público",
       "url": "https://app.fenixcapital.es",
@@ -28,6 +30,7 @@
     },
     {
       "target_id": "fenix-app-auth-local-isolated-synthetic",
+      "company_id": "fenix",
       "kind": "APP",
       "name": "App Fénix · recorridos autenticados sintéticos aislados",
       "url": "http://127.0.0.1:4173",
@@ -40,16 +43,23 @@
       "coverage_note": "Uses the existing app-real-five-flows Playwright harness with fake session and mocked gateway writes. This is not evidence of a deployed PREPROD target and does not use real credentials or customer data."
     },
     {
-      "target_id": "digital-products-preprod",
+      "target_id": "aion-products-preprod-zero-payment",
+      "company_id": "aion",
       "kind": "PRODUCT",
-      "name": "Productos digitales",
-      "url": null,
+      "name": "AION Product Factory · prueba cliente 0 €",
+      "url": "https://aionoperator.com/aion-prueba-cliente-0-preprod/",
+      "catalog_url": "https://aionoperator.com/aion-productos-v1-preprod/",
       "environment": "PREPROD",
-      "mode": "SYNTHETIC_ONLY",
-      "enabled": false,
+      "mode": "SYNTHETIC_ZERO_PAYMENT_ROTATING",
+      "enabled": true,
       "owner_engine": "QAB-001",
-      "status": "POR_AUDITAR",
-      "coverage_note": "Exact canonical PREPROD product target must be registered before automated purchase/delivery journeys are enabled."
+      "deep_owner_loop": "CEREBRO_AION_CONTINUOUS_PRODUCT_LOOP_V1",
+      "products": ["AION-P001", "AION-P002", "AION-P003", "AION-B005", "AION-B008"],
+      "contains_customer_data": false,
+      "real_charge_allowed": false,
+      "commercial_evidence": false,
+      "prod_allowed": false,
+      "coverage_note": "Canonical live PREPROD surface verified on AION. Public observation is read-only; a separate rotating deep synthetic test may create only PREPROD zero-payment test orders, artifacts and test-mailbox delivery evidence."
     }
   ]
 }
