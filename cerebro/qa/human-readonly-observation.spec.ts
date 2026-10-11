@@ -49,8 +49,13 @@ for(const target of targets){
    };
    const interactive=Array.from(document.querySelectorAll('a[href],button,input,select,textarea,[role="button"],[role="link"]')).filter(visible).slice(0,300) as HTMLElement[];
    const accessibleName=(el:HTMLElement)=>{
-    const htmlInput=el as HTMLInputElement;
-    return [el.getAttribute('aria-label'),el.getAttribute('aria-labelledby'),el.textContent,htmlInput.value,el.getAttribute('alt'),el.getAttribute('title')]
+    const control=el as HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement;
+    const labelText='labels' in control&&control.labels
+     ? Array.from(control.labels).map(label=>(label.textContent||'').trim()).filter(Boolean).join(' ')
+     : '';
+    const labelledByText=(el.getAttribute('aria-labelledby')||'').split(/\s+/).filter(Boolean)
+     .map(id=>(document.getElementById(id)?.textContent||'').trim()).filter(Boolean).join(' ');
+    return [el.getAttribute('aria-label'),labelledByText,labelText,el.textContent,el.getAttribute('alt'),el.getAttribute('title')]
      .map(value=>(value||'').trim()).find(Boolean)||'';
    };
    const descriptor=(el:HTMLElement)=>{
