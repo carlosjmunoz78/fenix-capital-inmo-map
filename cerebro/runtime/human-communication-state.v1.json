@@ -5,7 +5,7 @@
   "engine_id": "HEX-001",
   "environment": "PROD_CONTROL_PLANE",
   "version": "1.1.0",
-  "updated_at": "2026-10-11T07:38:05.982451Z",
+  "updated_at": "2026-10-11T08:44:17.250Z",
   "pending": {},
   "authorized_actions": {},
   "decisions": [],
@@ -47,6 +47,28 @@
       "canary": "",
       "additional_cost_eur": 0
     },
+    "name:eval-driven-agent-dev": {
+      "kind": "HOLD",
+      "name": "eval-driven-agent-dev",
+      "human_alias": "Eval Driven Agent Dev",
+      "status": "TERMINAL_HOLD",
+      "stage": "SAFE_HANDLER_TERMINAL_HOLD",
+      "human_required": "",
+      "updated_at": "2026-10-10T13:50:13.678Z",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
+    "name:copy-editing": {
+      "kind": "HOLD",
+      "name": "copy-editing",
+      "human_alias": "Copy Editing",
+      "status": "TERMINAL_HOLD",
+      "stage": "SAFE_HANDLER_TERMINAL_HOLD",
+      "human_required": "",
+      "updated_at": "2026-10-10T22:40:26.286Z",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
     "name:obsidian": {
       "kind": "COMPLETED",
       "name": "obsidian",
@@ -59,7 +81,7 @@
       "additional_cost_eur": 0
     }
   },
-  "last_digest_date": "2026-10-10",
+  "last_digest_date": "2026-10-11",
   "last_delivery_at": "2026-10-10T08:33:57Z",
   "mail_transport": {
     "status": "VERIFIED",
