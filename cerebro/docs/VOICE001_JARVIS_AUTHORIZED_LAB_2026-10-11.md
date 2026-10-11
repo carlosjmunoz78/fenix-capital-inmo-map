@@ -4,9 +4,10 @@
 - `HECHO`: fuente canónica JARVIS identificada y segmentada por hablante.
 - `HECHO`: corte JARVIS aislado por timestamps.
 - `HECHO`: MP3 y WAV temporales generados por vidIQ.
-- `PARCIAL`: los assets de audio de vidIQ usan URL firmada temporal; pueden regenerarse determinísticamente.
-- `PARCIAL`: clonación iniciada en LAB; primer intento bloqueado por requisito mínimo de 60 s y reembolsado.
-- `EN CURSO`: nuevo intento con referencia larga del mismo actor.
+- `HECHO`: clon LAB V1 creado y guardado en la librería de voces vidIQ.
+- `HECHO`: primera frase nueva sintetizada con el clon.
+- `HECHO`: 73 s adicionales de JARVIS limpio localizados por timestamps para futuras mejoras de prosodia.
+- `POR AUDITAR`: escucha física del propietario de TEST01.
 - `PROD`: `false`.
 
 ## Objetivo
@@ -25,20 +26,18 @@ Construir y evaluar una candidata de voz CEREBRO a partir de una referencia auto
 Corte JARVIS recomendado: `00:04.00–00:07.75`.
 
 ## Evidencia de extracción
-vidIQ confirmó el tramo JARVIS como segmento limpio sin solape de Tony Stark.
-
-Jobs relevantes:
+Jobs:
 - análisis audiovisual: `job_e8cc2662-f793-4143-aac9-0ffd4ba498c3`
-- extracción MP3 JARVIS final: `job_dce92c7d-99a0-44a7-99fd-8fc6efbd510d`
-- extracción WAV JARVIS final: `job_f5123074-3e0c-4bd8-b6df-8cadadc18d87`
+- extracción MP3 JARVIS: `job_dce92c7d-99a0-44a7-99fd-8fc6efbd510d`
+- extracción WAV JARVIS: `job_f5123074-3e0c-4bd8-b6df-8cadadc18d87`
 
-Características del corte final:
+Características:
 - duración: ~3.785 s
 - MP3: 192 kbps, 44.1 kHz, mono
 - WAV: 44.1 kHz, mono
 
-## Regeneración determinista
-Si las URLs firmadas expiran, NO buscar otra escena ni rehacer investigación. Regenerar desde la misma URL de YouTube con:
+## Regeneración determinista de referencia canónica
+Si la URL firmada expira:
 
 ```text
 op=extract_audio
@@ -51,8 +50,7 @@ sampleRateHz=44100
 channels=1
 ```
 
-## Referencias existentes a preservar
-No borrar ni sustituir:
+## Voces KEEP que NO se sustituyen
 - `VOICE001_ESM05_CEREBRO_Executive_Cinematic_V1.mp3`
 - `VOICE001_ESM06_Suave_Ejecutiva_es_ES.mp3`
 - `VOICE001_ESM07_Asistente_Tecnico_Cinematico_es_ES.mp3`
@@ -61,67 +59,95 @@ No borrar ni sustituir:
 - `CEREBRO_VOICE_C_BALANCED_DRY.mp3`
 
 ## Pipeline Seed-VC existente
-Existe pipeline LAB basado en Seed-VC V2:
 - `CEREBRO_VOICE_AUTHORIZED_CLONE_PIPELINE_V1_1.zip`
-- source preparada: `input/source_es.wav`
+- source: `input/source_es.wav`
 
-No promocionar nada a PROD automáticamente.
+Sigue siendo una ruta LAB alternativa; no se ha promovido a PROD.
 
 ## Ruta vidIQ de clonación
-vidIQ dispone de clonación desde YouTube (`vidiq_voiceover_clone_start`) y generación posterior (`vidiq_voiceover_generate`).
 
 ### Intento V0 · muestra corta
+- fuente: `https://www.youtube.com/watch?v=2DXe0h8TnYA`
+- duración efectiva: `24.1 s`
+- job: `job_a6295434-7e06-4b99-9004-79ae0a143a9e`
+- resultado: `REFUNDED_FAILED_MIN_DURATION`
+- requisito descubierto: mínimo `60 s`.
+
+### V1 · referencia larga del actor
 Fuente:
-- `https://www.youtube.com/watch?v=2DXe0h8TnYA`
-- `Doblaje: muestra de voz de Víctor Iturrioz.`
-- duración efectiva recibida por clonador: `24.1 s`
-
-Job:
-- `job_a6295434-7e06-4b99-9004-79ae0a143a9e`
-
-Resultado:
-- `REFUNDED_FAILED_MIN_DURATION`
-- requisito físico descubierto: el clonador necesita al menos `60 s` de audio.
-- créditos: reembolsados.
-
-### Referencia larga V1 · actor único/dominante
-Fuente encontrada:
 - `https://www.youtube.com/watch?v=Ij4opmtUr8k`
 - título: `Operaciones especiales de la Segunda Guerra Mundial (Audiolibro)`
-- narrador declarado en la fuente: Víctor Iturrioz
+- narrador declarado: Víctor Iturrioz
 - duración vídeo: ~`5m25s`
-- idioma: castellano
+- castellano
 
-La transcripción confirma una breve introducción promocional seguida de un fragmento largo de narración del audiolibro. La voz del narrador domina ampliamente el vídeo; se usa para capturar timbre. La prosodia JARVIS se valida SIEMPRE contra el corte canónico de película de 3.785 s.
+La transcripción muestra una breve introducción promocional seguida de un fragmento largo del audiolibro. La voz del narrador domina ampliamente el vídeo; se utiliza como base de timbre. La prosodia JARVIS se valida contra las escenas canónicas de película.
 
-Intento de clonación V1 iniciado:
-- nombre: `CEREBRO_JARVIS_ES_AUTHORIZED_V1`
+Clonación:
 - job: `job_572f8c56-3598-46ce-98ef-8588a26f2c02`
-- estado al registrar: `IN_PROGRESS`
+- resultado: `COMPLETED`
+- nombre persistente en librería: `CEREBRO_JARVIS_ES_AUTHORIZED_V1`
+- `voiceId`: `QGH6KSAXelJsYC43E5xG`
+- librería verificada con `vidiq_voiceover_list_voices`: `isCustom=true`.
 
-## Dataset de prosodia JARVIS adicional
-Se inició análisis de un clip castellano más largo para localizar intervalos limpios JARVIS-only:
-- URL: `https://www.youtube.com/watch?v=MzSKfXG6MXE`
+## TEST01 · primera generación nueva
+Script:
+
+> Señor, CEREBRO está operativo. He revisado los sistemas y no he detectado ninguna incidencia crítica. Todas las funciones están preparadas. Puedo continuar cuando lo indique.
+
+Evidencia:
+- generation job: `job_47e21c2a-010d-4fae-9346-40132470b285`
+- voiceoverId: `2b2fbd2e-5ac4-4acf-8aa6-1812f35a6e29`
+- duración: ~`9.718 s`
+- caracteres: `174`
+- estado: `HECHO_POR_AUDITAR_OWNER`
+
+El URL MP3 de esta generación es firmado/temporal. Puede regenerarse con el mismo `voiceId` y script si expira.
+
+## Dataset adicional de prosodia JARVIS
+Fuente:
+- `https://www.youtube.com/watch?v=MzSKfXG6MXE`
 - título: `Tony Stark creando cosas | Parte 1 | escenas en CASTELLANO HD`
-- job análisis: `job_9b1adac5-506a-45f5-84e2-a6be4db117cb`
-- objetivo: ampliar el banco de prosodia/timbre de JARVIS con segmentos limpios y evitar depender de una única frase.
+- análisis job: `job_9b1adac5-506a-45f5-84e2-a6be4db117cb`
+
+vidIQ localizó `17` intervalos JARVIS-only, aproximadamente `73 s` limpios en total:
+
+```text
+00:05-00:07
+00:12-00:15
+00:21-00:24
+01:43-01:50
+02:00-02:03
+02:18-02:20
+02:35-02:37
+02:40-02:42
+02:47-02:50
+02:53-02:54
+02:57-03:02
+03:10-03:22
+03:35-03:39
+03:44-03:54
+04:01-04:08
+04:09-04:12
+04:18-04:22
+```
+
+Este dataset se reserva para mejorar prosodia/timbre si TEST01 no alcanza el parecido requerido.
 
 ## Criterio de aceptación
-La candidata no se acepta por parecido superficial. Debe cumplir:
 - español de España inequívoco;
-- timbre claramente más cercano a la referencia canónica que ESM05/06/07;
+- timbre claramente cercano a referencia canónica;
 - dicción limpia;
 - sin reverb artificial añadida;
 - sin artefacto metálico dominante;
-- prosodia compatible con el JARVIS castellano canónico;
+- prosodia compatible con JARVIS castellano;
 - revisión física del propietario;
 - `automatic_promotion=false`.
 
-## Reglas de continuidad
-- conservar la fuente canónica y sus timestamps;
-- no usar ESM07 procesada como falso sustituto de JARVIS;
-- no declarar clonación conseguida sin una generación nueva reproducible;
-- documentar cada candidato, motor, parámetros, job y resultado;
-- mantener `company_id`, `engine_id`, `environment`, `version`;
-- conservar rollback y voces KEEP;
-- si el chat se satura, retomar desde esta rama y este STATE, nunca desde memoria informal.
+## Continuidad
+La fuente de verdad para retomar es:
+1. esta documentación;
+2. `cerebro/state/VOICE001_JARVIS_AUTHORIZED_LAB_STATE_2026-10-11.json`;
+3. rama `cerebro/voice001-jarvis-authorized-lab-20261011`.
+
+No reconstruir por memoria informal. No mezclar con PR #572 ni con su rama anterior. No tocar `main` ni PROD sin gates.
