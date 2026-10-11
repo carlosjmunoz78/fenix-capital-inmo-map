@@ -20,7 +20,17 @@ function targetLine(label, target, coverage) {
   return `QA ${label}: ${target.status} · ${target.executed ?? 0} comprobaciones · ${target.failed ?? 0} fallos`;
 }
 
-export function enrichDailySummary(summary, qa) {
+function repairLine(autoState) {
+  if (!autoState || autoState.state_type !== 'CEREBRO_AUTO001_REPAIR_AUTONOMY_STATE_V0') return null;
+  const patch = autoState.preprod_patch_validated === true ? 'PATCH VALIDADO' : 'PATCH NO VALIDADO';
+  const tribunal = autoState.tribunal_approved === true ? 'Tribunal GREEN' : 'Tribunal PENDIENTE/RED';
+  const pr = autoState.pr_handoff_status ?? 'SIN PR';
+  const promotion = autoState.promotion_readiness?.status ?? 'POR AUDITAR';
+  const reason = autoState.promotion_readiness?.human_required?.reason;
+  return `REPARACIÓN AUTÓNOMA · ${patch} · ${tribunal} · PR ${pr} · Promoción ${promotion}${reason ? `/${reason}` : ''}`;
+}
+
+export function enrichDailySummary(summary, qa, autoState = null) {
   const out = structuredClone(summary ?? {});
   out.human = Array.isArray(out.human) ? out.human : [];
   out.app_crm = Array.isArray(out.app_crm) ? out.app_crm : [];
@@ -39,6 +49,9 @@ export function enrichDailySummary(summary, qa) {
     `CALIDAD DIARIA · ${scoreLabel(qa.previous_quality_score)} → ${scoreLabel(qa.quality_score)} · ${deltaLabel(qa.quality_delta)} · ${totalNew} fallos nuevos · ${totalResolved} resueltos · ${qa.recurring_issues ?? 0} reincidentes`
   );
 
+  const autoLine = repairLine(autoState);
+  if (autoLine) out.human.splice(1, 0, autoLine);
+
   out.app_crm.unshift(targetLine('App', qa.targets?.APP, qa.coverage?.app_authenticated));
   out.seo_web.unshift(targetLine('Web', qa.targets?.WEB));
   out.app_crm.push(targetLine('Productos', qa.targets?.PRODUCT, qa.coverage?.products));
@@ -50,6 +63,12 @@ export function enrichDailySummary(summary, qa) {
   const humanHolds = qa.remediation?.human_required?.length ?? 0;
   if (qa.improvement_scout || qa.remediation) {
     out.human.push(`MEJORA CONTINUA · ${improvements} oportunidades medidas · ${routedCases} casos enrutados · ${preprodCandidates} candidatas PREPROD · ${humanHolds} HUMAN_REQUIRED`);
+  }
+
+  if (autoState?.promotion_readiness?.status === 'HUMAN_REQUIRED') {
+    const hold = autoState.promotion_readiness.human_required;
+    out.failures.push(`PROMOCIÓN HUMAN_REQUIRED · ${hold?.reason ?? 'POLICY_CONFLICT'} · ${(hold?.blockers ?? []).join(', ')}`);
+    out.next_safe_work.push('AUTO-001 → mantener parche validado en PREPROD hasta resolver política de promoción; no tocar PROD');
   }
 
   for (const issue of qa.new_issues ?? []) {
@@ -70,9 +89,11 @@ export function enrichDailySummary(summary, qa) {
 if (import.meta.url === `file://${process.argv[1]}`) {
   const summaryPath = arg('--summary');
   const qaPath = arg('--quality-state');
+  const autoPath = arg('--auto-state');
   const outPath = arg('--out') ?? summaryPath;
-  if (!summaryPath || !qaPath || !outPath) throw new Error('usage: enrich-daily-summary-with-qa.mjs --summary <json> --quality-state <json> [--out <json>]');
+  if (!summaryPath || !qaPath || !outPath) throw new Error('usage: enrich-daily-summary-with-qa.mjs --summary <json> --quality-state <json> [--auto-state <json>] [--out <json>]');
   const summary = JSON.parse(fs.readFileSync(summaryPath, 'utf8'));
   const qa = JSON.parse(fs.readFileSync(qaPath, 'utf8'));
-  fs.writeFileSync(outPath, JSON.stringify(enrichDailySummary(summary, qa), null, 2) + '\n');
+  const autoState = autoPath && fs.existsSync(autoPath) ? JSON.parse(fs.readFileSync(autoPath, 'utf8')) : null;
+  fs.writeFileSync(outPath, JSON.stringify(enrichDailySummary(summary, qa, autoState), null, 2) + '\n');
 }
