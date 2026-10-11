@@ -1,0 +1,144 @@
+name: CEREBRO AION Product Deep QA V0
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cerebro/qa/aion-product-zero-payment.spec.ts'
+      - 'cerebro/qa/playwright.product-deep.config.ts'
+      - 'cerebro/qa/product-deep-state.mjs'
+      - 'cerebro/qa/product-readonly-observation.spec.ts'
+      - 'cerebro/qa/targets.v0.json'
+      - 'cerebro/tests/product-deep-state-v0.test.mjs'
+      - '.github/workflows/cerebro-aion-product-deep-qa-v0.yml'
+  pull_request:
+    paths:
+      - 'cerebro/qa/aion-product-zero-payment.spec.ts'
+      - 'cerebro/qa/playwright.product-deep.config.ts'
+      - 'cerebro/qa/product-deep-state.mjs'
+      - 'cerebro/qa/product-readonly-observation.spec.ts'
+      - 'cerebro/qa/targets.v0.json'
+      - 'cerebro/tests/product-deep-state-v0.test.mjs'
+      - '.github/workflows/cerebro-aion-product-deep-qa-v0.yml'
+  schedule:
+    - cron: '37 2 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: cerebro-aion-product-deep-qa-v0
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  actions: read
+
+env:
+  PRODUCT_STATE_BRANCH: cerebro/qa-product-state-v0
+  PRODUCT_STATE_PATH: cerebro/runtime/qa-product-preprod-state.v0.json
+  QA_PRODUCT_URL: https://aionoperator.com/aion-prueba-cliente-0-preprod/
+
+jobs:
+  contract-proof:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Prove product deep-state fail-closed contract
+        run: node --test cerebro/tests/product-deep-state-v0.test.mjs
+
+  deep-zero-payment:
+    needs: contract-proof
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Load previous dedicated product state
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/product-qa
+          if git fetch --no-tags origin "refs/heads/$PRODUCT_STATE_BRANCH:refs/remotes/origin/$PRODUCT_STATE_BRANCH" 2>/dev/null && \
+             git cat-file -e "refs/remotes/origin/$PRODUCT_STATE_BRANCH:$PRODUCT_STATE_PATH" 2>/dev/null; then
+            git show "refs/remotes/origin/$PRODUCT_STATE_BRANCH:$PRODUCT_STATE_PATH" > artifacts/product-qa/state.before.json
+          else
+            echo '{}' > artifacts/product-qa/state.before.json
+          fi
+
+      - name: Select one product deterministically for daily rotating coverage
+        id: select
+        shell: bash
+        run: |
+          set -euo pipefail
+          PRODUCTS=(AION-P001 AION-P002 AION-P003 AION-B005 AION-B008)
+          DAY=$(( $(date -u +%s) / 86400 ))
+          INDEX=$(( DAY % ${#PRODUCTS[@]} ))
+          PRODUCT="${PRODUCTS[$INDEX]}"
+          echo "product=$PRODUCT" >> "$GITHUB_OUTPUT"
+          echo "Selected $PRODUCT for zero-payment PREPROD journey."
+
+      - name: Exercise real AION PREPROD purchase generation delivery and private artifact with 0 euro
+        env:
+          QA_PRODUCT_ID: ${{ steps.select.outputs.product }}
+        run: |
+          set +e
+          npx playwright test \
+            --config=cerebro/qa/playwright.product-deep.config.ts \
+            --project='aion-product-deep-chromium' \
+            --reporter=json \
+            > artifacts/product-qa/playwright-report.json \
+            2> artifacts/product-qa/playwright-stderr.log
+          EXIT=$?
+          set -e
+          test -s artifacts/product-qa/playwright-report.json
+          echo "Playwright exit=$EXIT; state builder will fail closed if the journey is not GREEN."
+
+      - name: Build persistent rotating product evidence
+        env:
+          QA_PRODUCT_ID: ${{ steps.select.outputs.product }}
+        run: |
+          node cerebro/qa/product-deep-state.mjs \
+            --report artifacts/product-qa/playwright-report.json \
+            --previous artifacts/product-qa/state.before.json \
+            --product "$QA_PRODUCT_ID" \
+            --out artifacts/product-qa/state.after.json
+          jq -e '.status=="PREPROD_GREEN" and .safety.real_charge_eur==0 and .safety.customer_data==false and .safety.trading==false and .safety.additional_subscription_eur==0 and .authority.real_charge_authorized==false and .authority.commercial_evidence==false and .authority.prod_authorized==false and .authority.prod_write_authorized==false' artifacts/product-qa/state.after.json >/dev/null
+          jq '{status,current_product,tests,journey,coverage,authority,safety}' artifacts/product-qa/state.after.json
+
+      - name: Persist product QA evidence on isolated state branch
+        run: |
+          set -euo pipefail
+          cp artifacts/product-qa/state.after.json /tmp/product-state.json
+          git fetch --no-tags --force origin "+refs/heads/$PRODUCT_STATE_BRANCH:refs/remotes/origin/$PRODUCT_STATE_BRANCH"
+          git checkout --detach "refs/remotes/origin/$PRODUCT_STATE_BRANCH"
+          mkdir -p "$(dirname "$PRODUCT_STATE_PATH")"
+          cp /tmp/product-state.json "$PRODUCT_STATE_PATH"
+          git config user.name 'cerebro-product-qa[bot]'
+          git config user.email 'cerebro-product-qa[bot]@users.noreply.github.com'
+          git add "$PRODUCT_STATE_PATH"
+          if ! git diff --cached --quiet; then
+            git commit -m 'chore(cerebro): advance rotating AION product PREPROD QA state'
+            git push origin "HEAD:refs/heads/$PRODUCT_STATE_BRANCH"
+          fi
+
+      - name: Upload deep product evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-aion-product-deep-qa-v0-${{ github.run_id }}
+          path: artifacts/product-qa/**
+          if-no-files-found: warn
+          retention-days: 30
