@@ -1,0 +1,121 @@
+name: CEREBRO AUTO-001 PREPROD Patch Executor V0
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/platform/auto001-preprod-patch-planner-v0.mjs'
+      - 'cerebro/platform/patch-transforms/**'
+      - 'cerebro/tests/auto001-preprod-patch-executor-v0.test.mjs'
+      - '.github/workflows/cerebro-auto001-preprod-patch-executor-v0.yml'
+  workflow_run:
+    workflows: ['CEREBRO QA Source Mapping V0']
+    types: [completed]
+  workflow_dispatch:
+
+concurrency:
+  group: cerebro-auto001-preprod-patch-executor-v0-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: read
+
+env:
+  QA_STATE_BRANCH: cerebro/qa-state-v0
+  QA_SOURCE_MAP_PATH: cerebro/runtime/qa-source-mapping.v0.json
+
+jobs:
+  executor:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Prove AUTO-001 executor contracts
+        run: node --test cerebro/tests/auto001-preprod-patch-executor-v0.test.mjs
+      - name: Stop after contract proof on pull requests
+        if: github.event_name == 'pull_request'
+        run: echo 'PR validation only; autonomous branch mutation is disabled for PR events.'
+      - name: Load verified source mapping and build bounded patch plan
+        if: github.event_name != 'pull_request'
+        id: plan
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/auto001
+          git fetch --no-tags origin "+refs/heads/$QA_STATE_BRANCH:refs/remotes/origin/$QA_STATE_BRANCH"
+          git cat-file -e "refs/remotes/origin/$QA_STATE_BRANCH:$QA_SOURCE_MAP_PATH"
+          git show "refs/remotes/origin/$QA_STATE_BRANCH:$QA_SOURCE_MAP_PATH" > artifacts/auto001/source-map.json
+          BASE_SHA="$(git rev-parse HEAD)"
+          node cerebro/platform/auto001-preprod-patch-planner-v0.mjs --input artifacts/auto001/source-map.json --base-sha "$BASE_SHA" --out artifacts/auto001/plan.json
+          STATUS="$(jq -r '.status' artifacts/auto001/plan.json)"
+          echo "status=$STATUS" >> "$GITHUB_OUTPUT"
+          echo "branch=$(jq -r '.branch_name // empty' artifacts/auto001/plan.json)" >> "$GITHUB_OUTPUT"
+          jq '{status,plan_id,owner_engine,target,dimension,transform_id,allowed_files,max_files_changed,max_line_delta,branch_name,auto_merge,prod_write_authorized,rollback}' artifacts/auto001/plan.json
+      - name: Apply certified transform on isolated branch
+        if: github.event_name != 'pull_request' && steps.plan.outputs.status == 'PATCH_PLAN_READY'
+        id: patch
+        run: |
+          set -euo pipefail
+          PLAN='artifacts/auto001/plan.json'
+          BRANCH="$(jq -r '.branch_name' "$PLAN")"
+          BASE_SHA="$(jq -r '.base_sha' "$PLAN")"
+          test "$(git rev-parse HEAD)" = "$BASE_SHA"
+          if git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
+            echo 'Existing deterministic patch branch found; no duplicate mutation.'
+            echo 'existing=true' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git checkout -b "$BRANCH"
+          node cerebro/platform/patch-transforms/app-auth-shell-role-main-v0.mjs --file src/App.tsx --evidence artifacts/auto001/transform-evidence.json
+          test "$(jq -r '.status' artifacts/auto001/transform-evidence.json)" = 'PATCH_APPLIED'
+          CHANGED="$(git diff --name-only | wc -l | tr -d ' ')"
+          test "$CHANGED" -eq 1
+          test "$(git diff --name-only)" = 'src/App.tsx'
+          DELTA="$(git diff --numstat -- src/App.tsx | awk '{print $1+$2}')"
+          test "$DELTA" -le "$(jq -r '.max_line_delta' "$PLAN")"
+          echo 'existing=false' >> "$GITHUB_OUTPUT"
+      - name: Build and targeted-test patched App before any push
+        if: github.event_name != 'pull_request' && steps.plan.outputs.status == 'PATCH_PLAN_READY' && steps.patch.outputs.existing != 'true'
+        run: |
+          set -euo pipefail
+          npm ci
+          npm run build
+          node --test cerebro/tests/auto001-preprod-patch-executor-v0.test.mjs
+      - name: Commit snapshot-bound patch and open PREPROD repair PR
+        if: github.event_name != 'pull_request' && steps.plan.outputs.status == 'PATCH_PLAN_READY' && steps.patch.outputs.existing != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          PLAN='artifacts/auto001/plan.json'
+          BRANCH="$(jq -r '.branch_name' "$PLAN")"
+          PLAN_ID="$(jq -r '.plan_id' "$PLAN")"
+          BASE_SHA="$(jq -r '.base_sha' "$PLAN")"
+          git config user.name 'cerebro-auto001[bot]'
+          git config user.email 'cerebro-auto001[bot]@users.noreply.github.com'
+          git add src/App.tsx
+          git commit -m "fix(AUTO-001): certified HCI main landmark patch"
+          git push origin "HEAD:refs/heads/$BRANCH"
+          if gh pr list --repo "$GITHUB_REPOSITORY" --head "$BRANCH" --state open --json number --jq 'length' | grep -qx '0'; then
+            gh pr create --repo "$GITHUB_REPOSITORY" --base main --head "$BRANCH" \
+              --title 'AUTO-001: certified PREPROD HCI main landmark repair' \
+              --body "Automated bounded PREPROD repair from $PLAN_ID. Base snapshot: $BASE_SHA. Certified transform: APP_AUTH_SHELL_ROLE_MAIN_V0. Files changed: src/App.tsx only. Build and targeted tests passed before push. No PROD write, no customer data, no Trading, cost 0€. AUTO-MERGE DISABLED. Remaining gates: OLD vs NEW, independent tribunal, rollback/rebuild proof, governed promotion."
+          fi
+      - name: Enforce no-op semantics when there is no certified transform
+        if: github.event_name != 'pull_request' && steps.plan.outputs.status == 'NO_ELIGIBLE_PATCH'
+        run: jq -e '.execute==false and .prod_write_authorized==false and .auto_merge==false and .additional_cost_eur==0' artifacts/auto001/plan.json >/dev/null
+      - name: Upload executor evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-auto001-preprod-patch-executor-v0-${{ github.run_id }}
+          path: artifacts/auto001/**
+          if-no-files-found: warn
+          retention-days: 30
