@@ -1,0 +1,151 @@
+{
+  "schema_version": "0.1.0",
+  "state_type": "CEREBRO_OWNER_EXECUTOR_CAPABILITY_REGISTRY_V0",
+  "company_id": "GLOBAL_OR_SCOPED",
+  "engine_id": "AUTO-001",
+  "environment": "CONTROL_PLANE",
+  "version": "0.1.0",
+  "updated_at": "2026-10-11T00:00:00Z",
+  "policy": {
+    "evidence_required": true,
+    "unknown_means_no_authority": true,
+    "historical_branch_does_not_equal_current_runtime": true,
+    "external_assistant_capability_does_not_equal_cerebro_runtime": true,
+    "additional_subscription_eur": 0
+  },
+  "capabilities": [
+    {
+      "engine_id": "SELF-001",
+      "classification": "PLAN_ONLY",
+      "current_main": true,
+      "code_patch_generation": false,
+      "repository_write": false,
+      "branch_creation": false,
+      "pull_request_creation": false,
+      "prod_write": false,
+      "evidence": [
+        "cerebro/supervisor/self-healing.mjs",
+        "cerebro/supervisor/self-healing.contract.v0.json",
+        "PR#583"
+      ]
+    },
+    {
+      "engine_id": "FACT-001",
+      "classification": "SCAFFOLD_GENERATOR_ONLY",
+      "current_main": true,
+      "code_patch_generation": false,
+      "repository_write": false,
+      "branch_creation": false,
+      "pull_request_creation": false,
+      "prod_write": false,
+      "evidence": [
+        "cerebro/factory.mjs"
+      ]
+    },
+    {
+      "engine_id": "AUTO-001",
+      "classification": "DEFINED_CURRENT_HISTORICAL_PLANNER_ONLY",
+      "current_main": false,
+      "code_patch_generation": false,
+      "repository_write": false,
+      "branch_creation": false,
+      "pull_request_creation": false,
+      "prod_write": false,
+      "evidence": [
+        "historical:cerebro-auto001-automation-factory-v0-20260911@60050bec32134e20b62320ff7b6b549f1e307060",
+        "historical:cerebro/platform/automation-factory-engine.mjs",
+        "historical-tests:plan_only=true;executed=false"
+      ]
+    },
+    {
+      "engine_id": "ACTGW-001",
+      "classification": "HISTORICAL_PLAN_ONLY_NOT_CURRENT_RUNTIME",
+      "current_main": false,
+      "code_patch_generation": false,
+      "repository_write": false,
+      "branch_creation": false,
+      "pull_request_creation": false,
+      "prod_write": false,
+      "evidence": [
+        "historical:cerebro-action-gateway-v0-20260911@d5f161381fef430ae56bea281584b7532e57addf",
+        "historical:cerebro/gateway/action-gateway-v0.mjs",
+        "historical:mode=PLAN_ONLY;executed=false"
+      ]
+    },
+    {
+      "engine_id": "APP-001",
+      "classification": "OWNER_ASSISTED_NO_VERIFIED_CODE_EXECUTOR",
+      "current_main": true,
+      "code_patch_generation": false,
+      "repository_write": false,
+      "branch_creation": false,
+      "pull_request_creation": false,
+      "prod_write": false,
+      "evidence": [
+        "engine-registry:APP-001=AUTOMATED_ASSISTED",
+        "no-current-main-owner-code-executor-evidence"
+      ]
+    },
+    {
+      "engine_id": "WEB-001",
+      "classification": "OWNER_ASSISTED_NO_VERIFIED_CODE_EXECUTOR",
+      "current_main": true,
+      "code_patch_generation": false,
+      "repository_write": false,
+      "branch_creation": false,
+      "pull_request_creation": false,
+      "prod_write": false,
+      "evidence": [
+        "engine-registry:WEB-001=AUTOMATED_ASSISTED",
+        "no-current-main-owner-code-executor-evidence"
+      ]
+    },
+    {
+      "engine_id": "HCI-001",
+      "classification": "OWNER_ASSISTED_NO_VERIFIED_CODE_EXECUTOR",
+      "current_main": true,
+      "code_patch_generation": false,
+      "repository_write": false,
+      "branch_creation": false,
+      "pull_request_creation": false,
+      "prod_write": false,
+      "evidence": [
+        "engine-registry:HCI-001=AUTOMATED_ASSISTED",
+        "qa-healing-plans.v0.json:owner_engine=HCI-001;execute=false"
+      ]
+    },
+    {
+      "engine_id": "SEO-001",
+      "classification": "OWNER_CAPABILITY_NOT_CODE_EXECUTOR_VERIFIED",
+      "current_main": true,
+      "code_patch_generation": false,
+      "repository_write": false,
+      "branch_creation": false,
+      "pull_request_creation": false,
+      "prod_write": false,
+      "evidence": [
+        "domain-specific SEO automation exists separately",
+        "no-general-code-executor-authority inferred"
+      ]
+    },
+    {
+      "engine_id": "MKT-001",
+      "classification": "OWNER_CAPABILITY_NOT_CODE_EXECUTOR_VERIFIED",
+      "current_main": true,
+      "code_patch_generation": false,
+      "repository_write": false,
+      "branch_creation": false,
+      "pull_request_creation": false,
+      "prod_write": false,
+      "evidence": [
+        "domain-specific marketing capability does not imply repository code execution"
+      ]
+    }
+  ],
+  "external_capabilities_excluded_from_runtime": [
+    {
+      "name": "ChatGPT GitHub connector",
+      "reason": "Available to the interactive assistant but not evidence of an autonomous CEREBRO runtime executor."
+    }
+  ]
+}
