@@ -70,8 +70,25 @@ function summarizeTarget(kind, tests) {
   return {status: failed ? 'RED' : 'GREEN', executed: matching.length, failed, passed};
 }
 
-export function buildQualityState({report = {}, previous = {}, now = new Date().toISOString(), targetsRegistry = {}} = {}) {
-  const tests = flattenReport(report);
+function summarizeExplicitTests(tests) {
+  const executed = tests.filter(t => t.status !== 'skipped');
+  const failed = executed.filter(isFailure);
+  return {
+    status: executed.length ? (failed.length ? 'RED' : 'GREEN') : 'POR_AUDITAR',
+    executed: executed.length,
+    failed: failed.length,
+    passed: executed.length - failed.length
+  };
+}
+
+export function buildQualityState({report = {}, authenticatedReport = {}, previous = {}, now = new Date().toISOString(), targetsRegistry = {}} = {}) {
+  const publicTests = flattenReport(report);
+  const authenticatedTests = flattenReport(authenticatedReport).map(test => ({
+    ...test,
+    title: `[APP] [AUTH_SYNTHETIC_LOCAL] ${test.title}`,
+    surface: 'APP_AUTH_SYNTHETIC_LOCAL'
+  }));
+  const tests = [...publicTests, ...authenticatedTests];
   const executed = tests.filter(t => t.status !== 'skipped');
   const failed = executed.filter(isFailure);
   const issues = failed.map(test => {
@@ -100,13 +117,14 @@ export function buildQualityState({report = {}, previous = {}, now = new Date().
   const enabledProducts = (targetsRegistry.targets ?? []).some(t => t.kind === 'PRODUCT' && t.enabled);
   const productTarget = summarizeTarget('PRODUCT', tests);
   if (!enabledProducts && productTarget.executed === 0) productTarget.status = 'POR_AUDITAR';
+  const authenticatedTarget = summarizeExplicitTests(authenticatedTests);
   return {
-    schema_version: '0.1.0',
+    schema_version: '0.2.0',
     state_type: 'CEREBRO_CONTINUOUS_HUMAN_QA_STATE_V0',
     company_id: 'fenix',
     engine_id: 'QA-001',
     environment: 'CONTROL_PLANE',
-    version: '0.1.0',
+    version: '0.2.0',
     status: executed.length ? (failed.length ? 'FINDINGS_OPEN' : 'GREEN') : 'NO_MEASUREMENT',
     updated_at: now,
     quality_score: score,
@@ -115,6 +133,7 @@ export function buildQualityState({report = {}, previous = {}, now = new Date().
     tests: {executed: executed.length, passed: executed.length - failed.length, failed: failed.length},
     targets: {
       APP: summarizeTarget('APP', tests),
+      APP_AUTH_SYNTHETIC_LOCAL: authenticatedTarget,
       WEB: summarizeTarget('WEB', tests),
       PRODUCT: productTarget
     },
@@ -130,7 +149,8 @@ export function buildQualityState({report = {}, previous = {}, now = new Date().
     human_required: [],
     coverage: {
       prod: 'READ_ONLY_PUBLIC_SURFACES',
-      app_authenticated: 'POR_AUDITAR_PREPROD_HARNESS',
+      app_authenticated: authenticatedTarget.executed ? 'LOCAL_ISOLATED_SYNTHETIC_NO_CUSTOMER_DATA' : 'POR_AUDITAR_PREPROD_HARNESS',
+      app_authenticated_deployed_preprod: 'POR_AUDITAR_CANONICAL_PREPROD_TARGET',
       products: enabledProducts ? 'ENABLED_SYNTHETIC_PREPROD' : 'POR_AUDITAR_CANONICAL_PREPROD_TARGET'
     },
     safety: {prod_write: false, customer_data: false, trading: false, paid_fallback: false, additional_subscription_eur: 0}
@@ -139,16 +159,18 @@ export function buildQualityState({report = {}, previous = {}, now = new Date().
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   const reportPath = arg('--report');
+  const authenticatedReportPath = arg('--authenticated-report');
   const previousPath = arg('--previous');
   const targetsPath = arg('--targets');
   const outPath = arg('--out');
-  if (!reportPath || !outPath) throw new Error('usage: quality-delta.mjs --report <json> [--previous <json>] [--targets <json>] --out <json>');
+  if (!reportPath || !outPath) throw new Error('usage: quality-delta.mjs --report <json> [--authenticated-report <json>] [--previous <json>] [--targets <json>] --out <json>');
   const state = buildQualityState({
     report: readJson(reportPath, {}),
+    authenticatedReport: readJson(authenticatedReportPath, {}),
     previous: readJson(previousPath, {}),
     targetsRegistry: readJson(targetsPath, {})
   });
   fs.mkdirSync(path.dirname(outPath), {recursive: true});
   fs.writeFileSync(outPath, JSON.stringify(state, null, 2) + '\n');
-  console.log(JSON.stringify({status: state.status, score: state.quality_score, tests: state.tests, new_issues: state.new_issue_fingerprints.length, resolved: state.resolved_issue_fingerprints.length}));
+  console.log(JSON.stringify({status: state.status, score: state.quality_score, tests: state.tests, authenticated: state.targets.APP_AUTH_SYNTHETIC_LOCAL, new_issues: state.new_issue_fingerprints.length, resolved: state.resolved_issue_fingerprints.length}));
 }

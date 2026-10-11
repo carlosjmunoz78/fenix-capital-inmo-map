@@ -55,7 +55,7 @@ env:
 jobs:
   continuous-human-qa:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
         with:
@@ -95,6 +95,26 @@ jobs:
             echo '{}' > artifacts/qa/state.before.json
           fi
 
+      - name: Exercise authenticated App journeys on isolated local synthetic runtime
+        id: auth_probe
+        env:
+          VITE_FENIX_ENV: prod
+          VITE_SUPABASE_URL: http://127.0.0.1:54321
+          VITE_SUPABASE_PUBLISHABLE_KEY: qa-auth-synthetic-not-a-real-key
+        run: |
+          set +e
+          npx playwright test tests/app-real-five-flows.spec.ts \
+            --project='desktop-chromium' \
+            --project='mobile-chromium' \
+            --reporter=json \
+            > artifacts/qa/playwright-auth-synthetic-report.json \
+            2> artifacts/qa/playwright-auth-synthetic-stderr.log
+          AUTH_EXIT=$?
+          set -e
+          echo "exit_code=$AUTH_EXIT" >> "$GITHUB_OUTPUT"
+          test -s artifacts/qa/playwright-auth-synthetic-report.json
+          echo "Authenticated synthetic App exit=$AUTH_EXIT (isolated local harness; no customer data or PROD write)"
+
       - name: Act as a human on public PROD surfaces in strict read-only mode
         id: probe
         run: |
@@ -116,6 +136,7 @@ jobs:
         run: |
           node cerebro/qa/quality-delta.mjs \
             --report artifacts/qa/playwright-report.json \
+            --authenticated-report artifacts/qa/playwright-auth-synthetic-report.json \
             --previous artifacts/qa/state.before.json \
             --targets cerebro/qa/targets.v0.json \
             --out artifacts/qa/state.after.json
@@ -171,6 +192,7 @@ jobs:
       - name: Enforce immutable safety boundaries
         run: |
           jq -e '.company_id=="fenix" and .engine_id=="QA-001" and .safety.prod_write==false and .safety.customer_data==false and .safety.trading==false and .safety.paid_fallback==false and .safety.additional_subscription_eur==0 and (.human_required|length)==0' artifacts/qa/state.after.json >/dev/null
+          jq -e '.coverage.app_authenticated=="LOCAL_ISOLATED_SYNTHETIC_NO_CUSTOMER_DATA" and .coverage.app_authenticated_deployed_preprod=="POR_AUDITAR_CANONICAL_PREPROD_TARGET"' artifacts/qa/state.after.json >/dev/null
           jq -e '.targets.PRODUCT.status=="POR_AUDITAR" or .coverage.products=="ENABLED_SYNTHETIC_PREPROD"' artifacts/qa/state.after.json >/dev/null
           jq -e '.safety.prod_write==false and .safety.customer_data==false and .safety.trading==false and .safety.paid_fallback==false and .safety.additional_subscription_eur==0 and ([.candidates[]|select(.prod_write_authorized!=false or .additional_cost_eur!=0)]|length)==0' artifacts/qa/improvements.json >/dev/null
           jq -e '.safety.prod_write==false and .safety.customer_data==false and .safety.trading==false and .safety.paid_fallback==false and .safety.additional_subscription_eur==0 and .authority.app_web_prod_autofix==false and .authority.assisted_owner_engines_preserved==true and .authority.promotion_authorized==false and .authority.prod_write_authorized==false and ([.candidate_packages[]|select(.prod_write_authorized!=false or .additional_cost_eur!=0)]|length)==0' artifacts/qa/remediation.json >/dev/null
