@@ -5,37 +5,12 @@
   "engine_id": "QA-001",
   "environment": "PREPROD_CONTROL_PLANE",
   "version": "0.1.0",
-  "updated_at": "2026-10-11T08:51:41.042Z",
-  "mappings_total": 12,
+  "updated_at": "2026-10-11T08:54:12.054Z",
+  "mappings_total": 11,
   "verified_repo_hints": 5,
   "external_owner_routes": 5,
-  "por_auditar": 2,
+  "por_auditar": 1,
   "mappings": [
-    {
-      "repair_id": "self:a3df014e9f7f6e2ecc76fc50",
-      "case_id": "qa-case:7c605788e8bb32b5147aca4b",
-      "source": "BUG",
-      "owner_engine": "API-001",
-      "target": "GLOBAL",
-      "dimension": "bug_repair",
-      "resolution": {
-        "status": "POR_AUDITAR",
-        "surface": "GLOBAL",
-        "owner_engine": "API-001",
-        "repository": null,
-        "repository_ref": null,
-        "file_hints": [],
-        "mutation_surface": "NONE",
-        "exact_symbol": null,
-        "prod_write_authorized": false
-      },
-      "execution_authority": {
-        "code_mutation_authorized": false,
-        "preprod_only": true,
-        "auto_merge": false,
-        "prod_write_authorized": false
-      }
-    },
     {
       "repair_id": "self:1e02696e7a3a6a48c6a7f0de",
       "case_id": "qa-case:12b15c473a728aa7f6115a09",
@@ -303,8 +278,8 @@
       }
     },
     {
-      "repair_id": "self:494b8fc28c89ee840ebf8441",
-      "case_id": "qa-case:4f43e15e126b49efc7e8e665",
+      "repair_id": "self:75e56e506a2106eaef6b7520",
+      "case_id": "qa-case:2c68049e858cba076b2408b0",
       "source": "IMPROVEMENT",
       "owner_engine": "WEB-001",
       "target": "WEB:qa-desktop-chromium",
