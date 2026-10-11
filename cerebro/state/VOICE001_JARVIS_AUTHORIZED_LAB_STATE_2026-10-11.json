@@ -2,7 +2,7 @@
   "company_id": "fenix",
   "engine_id": "VOICE-001",
   "environment": "LAB",
-  "version": "v0-jarvis-authorized-20261011-r3",
+  "version": "v0-jarvis-authorized-20261011-r4",
   "prod": false,
   "automatic_promotion": false,
   "objective": "build_and_validate_jarvis_castilian_reference_voice_candidate",
@@ -55,17 +55,31 @@
       [5,7],[12,15],[21,24],[103,110],[120,123],[138,140],[155,157],[160,162],[167,170],[173,174],[177,182],[190,202],[215,219],[224,234],[241,248],[249,252],[258,262]
     ]
   },
-  "first_generated_candidate": {
-    "candidate_id": "CEREBRO_JARVIS_ES_AUTHORIZED_V1_TEST01",
-    "voice_id": "QGH6KSAXelJsYC43E5xG",
-    "generation_job_id": "job_47e21c2a-010d-4fae-9346-40132470b285",
-    "voiceover_id": "2b2fbd2e-5ac4-4acf-8aa6-1812f35a6e29",
-    "status": "HECHO_POR_AUDITAR_OWNER",
-    "duration_seconds": 9.717551020408163,
-    "char_count": 174,
-    "script": "Señor, CEREBRO está operativo. He revisado los sistemas y no he detectado ninguna incidencia crítica. Todas las funciones están preparadas. Puedo continuar cuando lo indique.",
-    "asset_url_is_signed_temporary": true
-  },
+  "generated_candidates": [
+    {
+      "candidate_id": "CEREBRO_JARVIS_ES_AUTHORIZED_V1_TEST01",
+      "voice_id": "QGH6KSAXelJsYC43E5xG",
+      "generation_job_id": "job_47e21c2a-010d-4fae-9346-40132470b285",
+      "voiceover_id": "2b2fbd2e-5ac4-4acf-8aa6-1812f35a6e29",
+      "status": "HECHO_LINK_PRESENTATION_FAILED_SIGNATURE_MUTATION",
+      "duration_seconds": 9.717551020408163,
+      "char_count": 174,
+      "script": "Señor, CEREBRO está operativo. He revisado los sistemas y no he detectado ninguna incidencia crítica. Todas las funciones están preparadas. Puedo continuar cuando lo indique.",
+      "failure_note": "Direct signed S3 URL failed for owner because client appended utm_source, invalidating AWS signature. Do not use signed URL as durable user-facing link."
+    },
+    {
+      "candidate_id": "CEREBRO_JARVIS_ES_AUTHORIZED_V1_TEST01_INLINE_REGEN",
+      "voice_id": "QGH6KSAXelJsYC43E5xG",
+      "generation_job_id": "job_9919900c-b12b-4e76-bd9d-f6923ae621a7",
+      "voiceover_id": "a2d1a031-c966-4b0f-b4ca-92b4859c6482",
+      "status": "HECHO_INLINE_AUDIO_PRESENTED_POR_AUDITAR_OWNER",
+      "duration_seconds": 9.639183673469388,
+      "char_count": 174,
+      "script": "Señor, CEREBRO está operativo. He revisado los sistemas y no he detectado ninguna incidencia crítica. Todas las funciones están preparadas. Puedo continuar cuando lo indique.",
+      "delivery_mode": "url_and_audio_inline",
+      "signed_url_durable": false
+    }
+  ],
   "preserve_keep_voices": [
     "VOICE001_ESM05_CEREBRO_Executive_Cinematic_V1.mp3",
     "VOICE001_ESM06_Suave_Ejecutiva_es_ES.mp3",
@@ -75,17 +89,18 @@
     "CEREBRO_VOICE_C_BALANCED_DRY.mp3"
   ],
   "next_actions": [
-    "owner_physical_listening_gate_for_TEST01",
-    "compare_TEST01_against_canonical_jarvis_reference",
+    "owner_physical_listening_gate_for_inline_TEST01",
+    "compare_inline_TEST01_against_canonical_jarvis_reference",
     "if_needed_build_prosody_enhanced_reference_from_73_seconds_clean_JARVIS_intervals",
     "iterate_candidate_without_touching_KEEP_voices"
   ],
+  "continuity_rule": "For generated audio, prefer inline attachment/player or durable artifact. Never rely on a mutable signed S3 URL in user-facing Markdown.",
   "status_labels": {
     "reference_identified": "HECHO",
     "speaker_isolation": "HECHO",
     "audio_asset_persistence": "PARCIAL_REGENERABLE",
     "voice_clone": "HECHO_LAB",
-    "first_candidate": "HECHO_POR_AUDITAR",
+    "first_candidate": "HECHO_INLINE_POR_AUDITAR",
     "owner_acceptance": "POR_AUDITAR",
     "prod": "FALSE"
   }
