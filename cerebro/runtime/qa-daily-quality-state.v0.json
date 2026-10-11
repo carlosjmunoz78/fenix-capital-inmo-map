@@ -5,20 +5,20 @@
   "engine_id": "QA-001",
   "environment": "CONTROL_PLANE",
   "version": "0.2.0",
-  "status": "FINDINGS_OPEN",
-  "updated_at": "2026-10-11T08:46:22.169Z",
-  "quality_score": 80,
-  "previous_quality_score": 100,
-  "quality_delta": -20,
+  "status": "GREEN",
+  "updated_at": "2026-10-11T08:53:41.634Z",
+  "quality_score": 100,
+  "previous_quality_score": 80,
+  "quality_delta": 20,
   "tests": {
     "executed": 10,
-    "passed": 9,
-    "failed": 1
+    "passed": 10,
+    "failed": 0
   },
   "targets": {
     "APP": {
       "status": "GREEN",
-      "executed": 12,
+      "executed": 8,
       "failed": 0,
       "passed": 8
     },
@@ -29,10 +29,10 @@
       "passed": 6
     },
     "WEB": {
-      "status": "RED",
+      "status": "GREEN",
       "executed": 2,
-      "failed": 1,
-      "passed": 1
+      "failed": 0,
+      "passed": 2
     },
     "PRODUCT": {
       "status": "POR_AUDITAR",
@@ -41,51 +41,15 @@
       "passed": 0
     }
   },
-  "issues": [
-    {
-      "fingerprint": "2bde0086f90207b526542ae3",
-      "severity": "HIGH",
-      "kind": "WEB",
-      "title": "human-readonly-observation.spec.ts › [WEB] Fénix Capital Web · human read-only observation",
-      "project": "qa-desktop-chromium",
-      "owner_engine": "API-001",
-      "evidence": [
-        "Error: Fénix Capital Web uncaught page errors\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"grecaptcha.execute only works with invisible reCAPTCHA.\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n\n  101 |   console.log(`CEREBRO_OBS:${JSON.stringify(observation)}`);\n  102 |   expect(observation.scrollWidth,`${target.name} horizontal overflow`).toBeLessThanOrEqual(observation.clientWidth+4);\n> 103 |   expect(pageErrors,`${target.name} uncaught page errors`).toEqual([]);\n      |                                                            ^\n  104 |\n  105 |   if(target.exploreLinks){\n  106 |    const links=await page.locator('a[href]').evaluateAll((nodes,origin)=>nodes\n    at /home/runner/work/fenix-capital-inmo-map/fenix-capital-inmo-map/cerebro/qa/human-readonly-observation.spec.ts:103:60"
-      ],
-      "next_action": "REPRODUCE_AND_FIX_OR_ROUTE",
-      "auto_fix_eligible": false
-    }
-  ],
-  "issue_fingerprints": [
+  "issues": [],
+  "issue_fingerprints": [],
+  "new_issue_fingerprints": [],
+  "resolved_issue_fingerprints": [
     "2bde0086f90207b526542ae3"
   ],
-  "new_issue_fingerprints": [
-    "2bde0086f90207b526542ae3"
-  ],
-  "resolved_issue_fingerprints": [],
   "recurring_issue_fingerprints": [],
-  "new_issues": [
-    {
-      "fingerprint": "2bde0086f90207b526542ae3",
-      "severity": "HIGH",
-      "kind": "WEB",
-      "title": "human-readonly-observation.spec.ts › [WEB] Fénix Capital Web · human read-only observation",
-      "project": "qa-desktop-chromium",
-      "owner_engine": "API-001",
-      "evidence": [
-        "Error: Fénix Capital Web uncaught page errors\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"grecaptcha.execute only works with invisible reCAPTCHA.\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n\n  101 |   console.log(`CEREBRO_OBS:${JSON.stringify(observation)}`);\n  102 |   expect(observation.scrollWidth,`${target.name} horizontal overflow`).toBeLessThanOrEqual(observation.clientWidth+4);\n> 103 |   expect(pageErrors,`${target.name} uncaught page errors`).toEqual([]);\n      |                                                            ^\n  104 |\n  105 |   if(target.exploreLinks){\n  106 |    const links=await page.locator('a[href]').evaluateAll((nodes,origin)=>nodes\n    at /home/runner/work/fenix-capital-inmo-map/fenix-capital-inmo-map/cerebro/qa/human-readonly-observation.spec.ts:103:60"
-      ],
-      "next_action": "REPRODUCE_AND_FIX_OR_ROUTE",
-      "auto_fix_eligible": false
-    }
-  ],
-  "dispatch_queue": [
-    {
-      "fingerprint": "2bde0086f90207b526542ae3",
-      "owner_engine": "API-001",
-      "action": "REPRODUCE_AND_FIX_OR_ROUTE"
-    }
-  ],
+  "new_issues": [],
+  "dispatch_queue": [],
   "learned_regression_tests": 0,
   "recurring_issues": 0,
   "human_required": [],
@@ -258,10 +222,10 @@
   },
   "remediation": {
     "status": "ROUTED_AUTONOMOUSLY_TO_PREPROD",
-    "open_cases": 12,
-    "bug_cases": 1,
+    "open_cases": 11,
+    "bug_cases": 0,
     "improvement_cases": 11,
-    "candidate_packages_total": 12,
+    "candidate_packages_total": 11,
     "human_required": [],
     "next_gate": "OLD_VS_NEW_EXPERIMENT",
     "authority": {
@@ -281,8 +245,8 @@
   },
   "self_healing": {
     "status": "PLANS_READY",
-    "plans_total": 12,
-    "plan_ready": 12,
+    "plans_total": 11,
+    "plan_ready": 11,
     "human_required_total": 0,
     "next_gate": "OWNER_EXECUTOR_CAPABILITY_AUDIT",
     "execution_authority": {
@@ -301,7 +265,7 @@
     }
   },
   "learning_bridge": {
-    "signals_total": 2,
+    "signals_total": 1,
     "downstream": "CEREBRO_RSI_UNIVERSAL_LEARNING_INGRESS_V0",
     "repair_semantics": "PREPROD_CANDIDATE_ONLY_UNTIL_EXISTING_PROMOTION_GATES_AUTHORIZE_MORE",
     "prod_write_authorized": false,
