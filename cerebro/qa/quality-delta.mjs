@@ -49,9 +49,9 @@ function kindFromTitle(title) {
 }
 
 function ownerFor(kind, title) {
-  if (/seo/i.test(title)) return 'SEO-001';
-  if (/api/i.test(title)) return 'API-001';
-  if (/ux|friction|responsive|visual/i.test(title)) return 'HCI-001';
+  if (/\[SEO\]|\bSEO\b/i.test(title)) return 'SEO-001';
+  if (/\[API\]|\bAPI\b/i.test(title)) return 'API-001';
+  if (/\bUX\b|friction|responsive|visual/i.test(title)) return 'HCI-001';
   if (kind === 'APP') return 'APP-001';
   if (kind === 'WEB') return 'WEB-001';
   if (kind === 'PRODUCT') return 'QAB-001';
@@ -63,10 +63,10 @@ function isFailure(test) {
 }
 
 function summarizeTarget(kind, tests) {
-  const matching = tests.filter(t => kindFromTitle(t.title) === kind);
+  const matching = tests.filter(t => kindFromTitle(t.title) === kind && t.status !== 'skipped');
   if (!matching.length) return {status: 'POR_AUDITAR', executed: 0, failed: 0, passed: 0};
   const failed = matching.filter(isFailure).length;
-  const passed = matching.filter(t => !isFailure(t) && t.status !== 'skipped').length;
+  const passed = matching.filter(t => !isFailure(t)).length;
   return {status: failed ? 'RED' : 'GREEN', executed: matching.length, failed, passed};
 }
 
