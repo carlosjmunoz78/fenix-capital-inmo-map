@@ -2,7 +2,7 @@ import {defineConfig,devices} from '@playwright/test';
 
 export default defineConfig({
   testDir: '.',
-  testMatch: ['human-readonly-observation.spec.ts'],
+  testMatch: ['human-readonly-observation.spec.ts','product-readonly-observation.spec.ts'],
   timeout: 60_000,
   expect: {timeout: 7_500},
   retries: 0,
