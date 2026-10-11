@@ -5,23 +5,13 @@
   "engine_id": "AUTO-001",
   "environment": "PREPROD_CONTROL_PLANE",
   "version": "0.1.0",
-  "updated_at": "2026-10-11T08:51:57.016Z",
-  "source_healing_updated_at": "2026-10-11T08:46:22.819Z",
-  "owners_total": 5,
+  "updated_at": "2026-10-11T08:53:58.130Z",
+  "source_healing_updated_at": "2026-10-11T08:53:41.825Z",
+  "owners_total": 4,
   "verified_code_executors": 0,
-  "owners_without_verified_executor": 5,
+  "owners_without_verified_executor": 4,
   "status": "SAFE_HOLD_NO_VERIFIED_CODE_EXECUTOR",
   "owners": [
-    {
-      "owner_engine": "API-001",
-      "status": "NO_VERIFIED_EXECUTOR",
-      "classification": "UNKNOWN_FAIL_CLOSED",
-      "verified_code_executor": false,
-      "evidence": [
-        "not-present-in-capability-registry"
-      ],
-      "next_action": "KEEP_SELF001_PLAN_ONLY"
-    },
     {
       "owner_engine": "HCI-001",
       "status": "NO_VERIFIED_EXECUTOR",
