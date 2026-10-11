@@ -1,0 +1,16 @@
+{
+  "schema_version": "0.1.0",
+  "state_type": "CEREBRO_QA_PRODUCT_DEEP_STATE_V0",
+  "company_id": "aion",
+  "engine_id": "QA-001",
+  "environment": "PREPROD",
+  "version": "0.1.0",
+  "status": "BOOTSTRAP_NO_MEASUREMENT",
+  "updated_at": null,
+  "last_verified_at": {},
+  "products_verified": [],
+  "products_fresh_7d": [],
+  "coverage": {"verified_total": 0, "fresh_7d_total": 0, "total": 5, "all_fresh_7d": false},
+  "authority": {"real_charge_authorized": false, "commercial_evidence": false, "prod_authorized": false, "prod_write_authorized": false},
+  "safety": {"real_charge_eur": 0, "customer_data": false, "trading": false, "paid_fallback": false, "additional_subscription_eur": 0}
+}
