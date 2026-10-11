@@ -45,7 +45,7 @@ function flattenTests(report) {
   return rows;
 }
 
-function parseObservations(report) {
+export function parseObservations(report) {
   const observations = [];
   for (const test of flattenTests(report)) {
     for (const line of test.stdout.split(/\r?\n/)) {

@@ -1,0 +1,87 @@
+name: CEREBRO QA Source Mapping V0
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/qa/source-resolver-v0.mjs'
+      - 'cerebro/qa/source-mapping-bridge-v0.mjs'
+      - 'cerebro/tests/qa-source-mapping-bridge-v0.test.mjs'
+      - '.github/workflows/cerebro-qa-source-mapping-v0.yml'
+  workflow_run:
+    workflows: ['CEREBRO Continuous Human QA V0']
+    types: [completed]
+  workflow_dispatch:
+
+concurrency:
+  group: cerebro-qa-source-mapping-v0-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  actions: read
+
+env:
+  QA_STATE_BRANCH: cerebro/qa-state-v0
+  QA_IMPROVEMENT_PATH: cerebro/runtime/qa-improvement-scout.v0.json
+  QA_REMEDIATION_PATH: cerebro/runtime/qa-remediation-state.v0.json
+  QA_HEALING_PATH: cerebro/runtime/qa-healing-plans.v0.json
+  QA_SOURCE_MAP_PATH: cerebro/runtime/qa-source-mapping.v0.json
+
+jobs:
+  map-sources:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Prove source mapping contracts
+        run: node --test cerebro/tests/qa-source-mapping-bridge-v0.test.mjs
+      - name: Load verified QA control-plane state
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/qa-source-map
+          git fetch --no-tags origin "+refs/heads/$QA_STATE_BRANCH:refs/remotes/origin/$QA_STATE_BRANCH"
+          for P in "$QA_IMPROVEMENT_PATH" "$QA_REMEDIATION_PATH" "$QA_HEALING_PATH"; do git cat-file -e "refs/remotes/origin/$QA_STATE_BRANCH:$P"; done
+          git show "refs/remotes/origin/$QA_STATE_BRANCH:$QA_IMPROVEMENT_PATH" > artifacts/qa-source-map/improvements.json
+          git show "refs/remotes/origin/$QA_STATE_BRANCH:$QA_REMEDIATION_PATH" > artifacts/qa-source-map/remediation.json
+          git show "refs/remotes/origin/$QA_STATE_BRANCH:$QA_HEALING_PATH" > artifacts/qa-source-map/healing.json
+      - name: Bind QA findings to owner source surfaces
+        run: |
+          node cerebro/qa/source-mapping-bridge-v0.mjs \
+            --improvements artifacts/qa-source-map/improvements.json \
+            --remediation artifacts/qa-source-map/remediation.json \
+            --healing artifacts/qa-source-map/healing.json \
+            --out artifacts/qa-source-map/source-map.json
+          jq '{mappings_total,verified_repo_hints,external_owner_routes,por_auditar,next_gate,safety}' artifacts/qa-source-map/source-map.json
+      - name: Enforce fail-closed boundary
+        run: |
+          jq -e '.safety.prod_write==false and .safety.customer_data==false and .safety.trading==false and .safety.paid_fallback==false and .safety.additional_subscription_eur==0 and ([.mappings[]|select(.execution_authority.code_mutation_authorized!=false or .execution_authority.auto_merge!=false or .execution_authority.prod_write_authorized!=false)]|length)==0' artifacts/qa-source-map/source-map.json >/dev/null
+      - name: Persist source mapping evidence only
+        if: github.event_name != 'pull_request'
+        run: |
+          set -euo pipefail
+          cp artifacts/qa-source-map/source-map.json /tmp/qa-source-map.json
+          git fetch --no-tags origin "+refs/heads/$QA_STATE_BRANCH:refs/remotes/origin/$QA_STATE_BRANCH"
+          git checkout --detach "refs/remotes/origin/$QA_STATE_BRANCH"
+          mkdir -p "$(dirname "$QA_SOURCE_MAP_PATH")"
+          cp /tmp/qa-source-map.json "$QA_SOURCE_MAP_PATH"
+          git config user.name 'cerebro-qa[bot]'
+          git config user.email 'cerebro-qa[bot]@users.noreply.github.com'
+          git add "$QA_SOURCE_MAP_PATH"
+          if ! git diff --cached --quiet; then
+            git commit -m 'chore(cerebro): persist QA source mapping evidence'
+            git push origin "HEAD:refs/heads/$QA_STATE_BRANCH"
+          fi
+      - name: Upload source mapping evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-qa-source-mapping-v0-${{ github.run_id }}
+          path: artifacts/qa-source-map/**
+          if-no-files-found: warn
+          retention-days: 30
