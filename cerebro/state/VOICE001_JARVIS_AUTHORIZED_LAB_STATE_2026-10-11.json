@@ -1,0 +1,56 @@
+{
+  "company_id": "fenix",
+  "engine_id": "VOICE-001",
+  "environment": "LAB",
+  "version": "v0-jarvis-authorized-20261011",
+  "prod": false,
+  "automatic_promotion": false,
+  "objective": "build_and_validate_jarvis_castilian_reference_voice_candidate",
+  "canonical_source": {
+    "youtube_url": "https://www.youtube.com/watch?v=hRtc0N4TxCA",
+    "title": "Iron Man - A veces hay que correr antes que gatear",
+    "speaker_map": [
+      {"speaker": "TONY_STARK", "start": 0.0, "end": 3.95},
+      {"speaker": "JARVIS", "start": 4.05, "end": 7.75},
+      {"speaker": "TONY_STARK", "start": 7.80, "end": 11.80}
+    ],
+    "jarvis_extract_window": {"start": 4.00, "end": 7.75}
+  },
+  "jarvis_reference": {
+    "status": "EXTRACTED_TEMPORARY_ASSET",
+    "duration_seconds": 3.784853,
+    "mp3": {"bitrate_kbps": 192, "sample_rate_hz": 44100, "channels": 1, "job_id": "job_dce92c7d-99a0-44a7-99fd-8fc6efbd510d"},
+    "wav": {"sample_rate_hz": 44100, "channels": 1, "job_id": "job_f5123074-3e0c-4bd8-b6df-8cadadc18d87"},
+    "regeneration_required_if_url_expires": true
+  },
+  "speaker_analysis_job": "job_e8cc2662-f793-4143-aac9-0ffd4ba498c3",
+  "auxiliary_single_speaker_reference": {
+    "youtube_url": "https://www.youtube.com/watch?v=2DXe0h8TnYA",
+    "title": "Doblaje: muestra de voz de Víctor Iturrioz.",
+    "duration_seconds": 25,
+    "purpose": "auxiliary_timbre_reference_only"
+  },
+  "preserve_keep_voices": [
+    "VOICE001_ESM05_CEREBRO_Executive_Cinematic_V1.mp3",
+    "VOICE001_ESM06_Suave_Ejecutiva_es_ES.mp3",
+    "VOICE001_ESM07_Asistente_Tecnico_Cinematico_es_ES.mp3",
+    "CEREBRO_VOICE_A_TECHNICAL_DRY.mp3",
+    "CEREBRO_VOICE_B_EXECUTIVE_DRY.mp3",
+    "CEREBRO_VOICE_C_BALANCED_DRY.mp3"
+  ],
+  "next_actions": [
+    "validate_auxiliary_single_speaker_reference",
+    "attempt_authorized_voice_clone_or_zero_shot_voice_conversion_in_lab",
+    "generate_fixed_test_corpus",
+    "compare_against_canonical_jarvis_reference",
+    "owner_physical_listening_gate"
+  ],
+  "status_labels": {
+    "reference_identified": "HECHO",
+    "speaker_isolation": "HECHO",
+    "audio_asset_persistence": "PARCIAL",
+    "voice_clone": "PLANIFICADO",
+    "owner_acceptance": "POR_AUDITAR",
+    "prod": "FALSE"
+  }
+}
