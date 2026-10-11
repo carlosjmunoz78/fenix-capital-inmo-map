@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import fs from 'node:fs';
+import {execFileSync} from 'node:child_process';
 
 function arg(name) {
   const i = process.argv.indexOf(name);
@@ -28,6 +29,18 @@ function repairLine(autoState) {
   const promotion = autoState.promotion_readiness?.status ?? 'POR AUDITAR';
   const reason = autoState.promotion_readiness?.human_required?.reason;
   return `REPARACIÓN AUTÓNOMA · ${patch} · ${tribunal} · PR ${pr} · Promoción ${promotion}${reason ? `/${reason}` : ''}`;
+}
+
+function loadAutoState(autoPath) {
+  if (autoPath && fs.existsSync(autoPath)) return JSON.parse(fs.readFileSync(autoPath, 'utf8'));
+  const branch = process.env.QA_STATE_BRANCH || 'cerebro/qa-state-v0';
+  const statePath = process.env.AUTO_REPAIR_STATE_PATH || 'cerebro/runtime/auto001-repair-autonomy-state.v0.json';
+  try {
+    const raw = execFileSync('git', ['show', `refs/remotes/origin/${branch}:${statePath}`], {encoding:'utf8', stdio:['ignore','pipe','ignore']});
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
 }
 
 export function enrichDailySummary(summary, qa, autoState = null) {
@@ -94,6 +107,6 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   if (!summaryPath || !qaPath || !outPath) throw new Error('usage: enrich-daily-summary-with-qa.mjs --summary <json> --quality-state <json> [--auto-state <json>] [--out <json>]');
   const summary = JSON.parse(fs.readFileSync(summaryPath, 'utf8'));
   const qa = JSON.parse(fs.readFileSync(qaPath, 'utf8'));
-  const autoState = autoPath && fs.existsSync(autoPath) ? JSON.parse(fs.readFileSync(autoPath, 'utf8')) : null;
+  const autoState = loadAutoState(autoPath);
   fs.writeFileSync(outPath, JSON.stringify(enrichDailySummary(summary, qa, autoState), null, 2) + '\n');
 }
