@@ -2,7 +2,7 @@
   "company_id": "fenix",
   "engine_id": "VOICE-001",
   "environment": "LAB",
-  "version": "v0-jarvis-authorized-20261011",
+  "version": "v0-jarvis-authorized-20261011-r2",
   "prod": false,
   "automatic_promotion": false,
   "objective": "build_and_validate_jarvis_castilian_reference_voice_candidate",
@@ -27,8 +27,33 @@
   "auxiliary_single_speaker_reference": {
     "youtube_url": "https://www.youtube.com/watch?v=2DXe0h8TnYA",
     "title": "Doblaje: muestra de voz de Víctor Iturrioz.",
-    "duration_seconds": 25,
-    "purpose": "auxiliary_timbre_reference_only"
+    "duration_seconds_observed": 24.1,
+    "purpose": "auxiliary_timbre_reference_only",
+    "transcript_verified_single_spanish_speaker": true
+  },
+  "voice_clone_attempts": [
+    {
+      "provider": "vidIQ",
+      "tool": "vidiq_voiceover_clone_start",
+      "job_id": "job_a6295434-7e06-4b99-9004-79ae0a143a9e",
+      "source": "https://www.youtube.com/watch?v=2DXe0h8TnYA",
+      "status": "REFUNDED_FAILED_MIN_DURATION",
+      "reason": "Voice cloning needs at least 60s of audio; source provided 24.1s",
+      "credits_refunded": true
+    }
+  ],
+  "dataset_expansion": {
+    "status": "IN_PROGRESS",
+    "candidate_video": "https://www.youtube.com/watch?v=MzSKfXG6MXE",
+    "candidate_title": "Tony Stark creando cosas | Parte 1 | escenas en CASTELLANO HD",
+    "analysis_job_id": "job_9b1adac5-506a-45f5-84e2-a6be4db117cb",
+    "goal": "locate_clean_jarvis_only_intervals_for_multi_reference_dataset"
+  },
+  "vidiq_credit_snapshot": {
+    "total": 193,
+    "renewable": 73,
+    "addon": 120,
+    "captured_before_dataset_expansion": true
   },
   "preserve_keep_voices": [
     "VOICE001_ESM05_CEREBRO_Executive_Cinematic_V1.mp3",
@@ -39,7 +64,7 @@
     "CEREBRO_VOICE_C_BALANCED_DRY.mp3"
   ],
   "next_actions": [
-    "validate_auxiliary_single_speaker_reference",
+    "complete_dataset_expansion_to_at_least_60_seconds_single_speaker",
     "attempt_authorized_voice_clone_or_zero_shot_voice_conversion_in_lab",
     "generate_fixed_test_corpus",
     "compare_against_canonical_jarvis_reference",
@@ -49,7 +74,8 @@
     "reference_identified": "HECHO",
     "speaker_isolation": "HECHO",
     "audio_asset_persistence": "PARCIAL",
-    "voice_clone": "PLANIFICADO",
+    "voice_clone": "PARCIAL_BLOCKED_BY_60S_DATASET_GATE",
+    "dataset_expansion": "IN_PROGRESS",
     "owner_acceptance": "POR_AUDITAR",
     "prod": "FALSE"
   }
