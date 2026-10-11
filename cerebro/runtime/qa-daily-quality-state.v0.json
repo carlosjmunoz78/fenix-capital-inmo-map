@@ -1,32 +1,38 @@
 {
-  "schema_version": "0.1.0",
+  "schema_version": "0.2.0",
   "state_type": "CEREBRO_CONTINUOUS_HUMAN_QA_STATE_V0",
   "company_id": "fenix",
   "engine_id": "QA-001",
   "environment": "CONTROL_PLANE",
-  "version": "0.1.0",
-  "status": "GREEN",
-  "updated_at": "2026-10-11T05:46:55.501Z",
-  "quality_score": 100,
+  "version": "0.2.0",
+  "status": "FINDINGS_OPEN",
+  "updated_at": "2026-10-11T08:46:22.169Z",
+  "quality_score": 80,
   "previous_quality_score": 100,
-  "quality_delta": 0,
+  "quality_delta": -20,
   "tests": {
-    "executed": 4,
-    "passed": 4,
-    "failed": 0
+    "executed": 10,
+    "passed": 9,
+    "failed": 1
   },
   "targets": {
     "APP": {
       "status": "GREEN",
-      "executed": 2,
+      "executed": 12,
       "failed": 0,
-      "passed": 2
+      "passed": 8
+    },
+    "APP_AUTH_SYNTHETIC_LOCAL": {
+      "status": "GREEN",
+      "executed": 6,
+      "failed": 0,
+      "passed": 6
     },
     "WEB": {
-      "status": "GREEN",
+      "status": "RED",
       "executed": 2,
-      "failed": 0,
-      "passed": 2
+      "failed": 1,
+      "passed": 1
     },
     "PRODUCT": {
       "status": "POR_AUDITAR",
@@ -35,19 +41,58 @@
       "passed": 0
     }
   },
-  "issues": [],
-  "issue_fingerprints": [],
-  "new_issue_fingerprints": [],
+  "issues": [
+    {
+      "fingerprint": "2bde0086f90207b526542ae3",
+      "severity": "HIGH",
+      "kind": "WEB",
+      "title": "human-readonly-observation.spec.ts › [WEB] Fénix Capital Web · human read-only observation",
+      "project": "qa-desktop-chromium",
+      "owner_engine": "API-001",
+      "evidence": [
+        "Error: Fénix Capital Web uncaught page errors\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"grecaptcha.execute only works with invisible reCAPTCHA.\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n\n  101 |   console.log(`CEREBRO_OBS:${JSON.stringify(observation)}`);\n  102 |   expect(observation.scrollWidth,`${target.name} horizontal overflow`).toBeLessThanOrEqual(observation.clientWidth+4);\n> 103 |   expect(pageErrors,`${target.name} uncaught page errors`).toEqual([]);\n      |                                                            ^\n  104 |\n  105 |   if(target.exploreLinks){\n  106 |    const links=await page.locator('a[href]').evaluateAll((nodes,origin)=>nodes\n    at /home/runner/work/fenix-capital-inmo-map/fenix-capital-inmo-map/cerebro/qa/human-readonly-observation.spec.ts:103:60"
+      ],
+      "next_action": "REPRODUCE_AND_FIX_OR_ROUTE",
+      "auto_fix_eligible": false
+    }
+  ],
+  "issue_fingerprints": [
+    "2bde0086f90207b526542ae3"
+  ],
+  "new_issue_fingerprints": [
+    "2bde0086f90207b526542ae3"
+  ],
   "resolved_issue_fingerprints": [],
   "recurring_issue_fingerprints": [],
-  "new_issues": [],
-  "dispatch_queue": [],
+  "new_issues": [
+    {
+      "fingerprint": "2bde0086f90207b526542ae3",
+      "severity": "HIGH",
+      "kind": "WEB",
+      "title": "human-readonly-observation.spec.ts › [WEB] Fénix Capital Web · human read-only observation",
+      "project": "qa-desktop-chromium",
+      "owner_engine": "API-001",
+      "evidence": [
+        "Error: Fénix Capital Web uncaught page errors\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"grecaptcha.execute only works with invisible reCAPTCHA.\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n\n  101 |   console.log(`CEREBRO_OBS:${JSON.stringify(observation)}`);\n  102 |   expect(observation.scrollWidth,`${target.name} horizontal overflow`).toBeLessThanOrEqual(observation.clientWidth+4);\n> 103 |   expect(pageErrors,`${target.name} uncaught page errors`).toEqual([]);\n      |                                                            ^\n  104 |\n  105 |   if(target.exploreLinks){\n  106 |    const links=await page.locator('a[href]').evaluateAll((nodes,origin)=>nodes\n    at /home/runner/work/fenix-capital-inmo-map/fenix-capital-inmo-map/cerebro/qa/human-readonly-observation.spec.ts:103:60"
+      ],
+      "next_action": "REPRODUCE_AND_FIX_OR_ROUTE",
+      "auto_fix_eligible": false
+    }
+  ],
+  "dispatch_queue": [
+    {
+      "fingerprint": "2bde0086f90207b526542ae3",
+      "owner_engine": "API-001",
+      "action": "REPRODUCE_AND_FIX_OR_ROUTE"
+    }
+  ],
   "learned_regression_tests": 0,
   "recurring_issues": 0,
   "human_required": [],
   "coverage": {
     "prod": "READ_ONLY_PUBLIC_SURFACES",
-    "app_authenticated": "POR_AUDITAR_PREPROD_HARNESS",
+    "app_authenticated": "LOCAL_ISOLATED_SYNTHETIC_NO_CUSTOMER_DATA",
+    "app_authenticated_deployed_preprod": "POR_AUDITAR_CANONICAL_PREPROD_TARGET",
     "products": "POR_AUDITAR_CANONICAL_PREPROD_TARGET"
   },
   "safety": {
@@ -60,36 +105,8 @@
   "improvement_scout": {
     "status": "IMPROVEMENTS_FOUND",
     "observations_total": 4,
-    "candidates_total": 12,
+    "candidates_total": 11,
     "top_candidates": [
-      {
-        "improvement_id": "qa-imp:3d7458ff56ec06d09c12edac",
-        "company_id": "fenix",
-        "engine_id": "QA-001",
-        "environment": "PREPROD",
-        "version": "0.1.0",
-        "source": "QA-001_HUMAN_READONLY_OBSERVATION",
-        "target": "APP:AUTHENTICATED_PREPROD",
-        "dimension": "qa_coverage",
-        "title": "Cobertura autenticada de App pendiente de harness PREPROD",
-        "hypothesis": "Un usuario sintético autenticado permitirá descubrir regresiones que el shell público no ve.",
-        "evidence": "coverage.app_authenticated=POR_AUDITAR_PREPROD_HARNESS",
-        "confidence": 0.99,
-        "risk_class": "LOW",
-        "expected_metric_delta": {
-          "name": "authenticated_app_coverage",
-          "direction": "HIGHER",
-          "measurement": "CONTROLLED_OLD_VS_NEW"
-        },
-        "next_gate": "OWNER_PREPROD_CANDIDATE",
-        "auto_fix_eligible": false,
-        "promotion_authorized": false,
-        "prod_authorized": false,
-        "prod_write_authorized": false,
-        "customer_data": false,
-        "trading_access": false,
-        "additional_cost_eur": 0
-      },
       {
         "improvement_id": "qa-imp:f46576065cbf7d4ebcc93634",
         "company_id": "fenix",
@@ -175,22 +192,50 @@
         "additional_cost_eur": 0
       },
       {
-        "improvement_id": "qa-imp:df7d01d86dba70010fa11b83",
+        "improvement_id": "qa-imp:8d10770927b05c3c549b03ec",
         "company_id": "fenix",
         "engine_id": "HCI-001",
         "environment": "PREPROD",
         "version": "0.1.0",
         "source": "QA-001_HUMAN_READONLY_OBSERVATION",
         "target": "WEB:qa-desktop-chromium",
-        "dimension": "accessibility_names",
-        "title": "Controles interactivos visibles sin nombre accesible",
-        "hypothesis": "Nombrar controles visibles reduce fricción para tecnologías de asistencia.",
-        "evidence": "unnamedInteractiveCount=2",
-        "confidence": 0.96,
+        "dimension": "accessibility_semantics",
+        "title": "WEB sin landmark principal detectable",
+        "hypothesis": "Añadir una estructura semántica principal puede mejorar navegación asistida sin cambiar la lógica de negocio.",
+        "evidence": "mainCount=0",
+        "confidence": 0.95,
         "risk_class": "LOW",
         "expected_metric_delta": {
-          "name": "unnamed_interactive_count",
-          "direction": "LOWER",
+          "name": "accessible_main_landmark",
+          "direction": "HIGHER",
+          "measurement": "CONTROLLED_OLD_VS_NEW"
+        },
+        "next_gate": "OWNER_PREPROD_CANDIDATE",
+        "auto_fix_eligible": false,
+        "promotion_authorized": false,
+        "prod_authorized": false,
+        "prod_write_authorized": false,
+        "customer_data": false,
+        "trading_access": false,
+        "additional_cost_eur": 0
+      },
+      {
+        "improvement_id": "qa-imp:db213ba0744836beb266503c",
+        "company_id": "fenix",
+        "engine_id": "HCI-001",
+        "environment": "PREPROD",
+        "version": "0.1.0",
+        "source": "QA-001_HUMAN_READONLY_OBSERVATION",
+        "target": "WEB:qa-mobile-chromium",
+        "dimension": "accessibility_semantics",
+        "title": "WEB sin landmark principal detectable",
+        "hypothesis": "Añadir una estructura semántica principal puede mejorar navegación asistida sin cambiar la lógica de negocio.",
+        "evidence": "mainCount=0",
+        "confidence": 0.95,
+        "risk_class": "LOW",
+        "expected_metric_delta": {
+          "name": "accessible_main_landmark",
+          "direction": "HIGHER",
           "measurement": "CONTROLLED_OLD_VS_NEW"
         },
         "next_gate": "OWNER_PREPROD_CANDIDATE",
@@ -214,8 +259,8 @@
   "remediation": {
     "status": "ROUTED_AUTONOMOUSLY_TO_PREPROD",
     "open_cases": 12,
-    "bug_cases": 0,
-    "improvement_cases": 12,
+    "bug_cases": 1,
+    "improvement_cases": 11,
     "candidate_packages_total": 12,
     "human_required": [],
     "next_gate": "OLD_VS_NEW_EXPERIMENT",
@@ -256,7 +301,7 @@
     }
   },
   "learning_bridge": {
-    "signals_total": 0,
+    "signals_total": 2,
     "downstream": "CEREBRO_RSI_UNIVERSAL_LEARNING_INGRESS_V0",
     "repair_semantics": "PREPROD_CANDIDATE_ONLY_UNTIL_EXISTING_PROMOTION_GATES_AUTHORIZE_MORE",
     "prod_write_authorized": false,
