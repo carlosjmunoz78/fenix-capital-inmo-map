@@ -31,7 +31,10 @@ test(`[PRODUCT] [AION_DEEP_ZERO_PAYMENT] ${product} · purchase → generate →
   expect(result).not.toBeNull();
   if(result) expect(result.status()).toBe(200);
   await expect(page.locator('body')).toContainText('PRUEBA CLIENTE · 0 €');
-  await expect(page.locator('body')).toContainText('no es venta real');
+  const safetyCopy=(await page.locator('body').innerText()).normalize('NFKC').replace(/\s+/g,' ').toLowerCase();
+  expect(safetyCopy).toContain('preprod');
+  expect(safetyCopy).toContain('0 €');
+  expect(safetyCopy).toContain('no es una venta real');
 
   const artifactLinks=page.locator('a[href*="aion_test_view"],a[href*="aion_test_download"]');
   expect(await artifactLinks.count(),'generated delivery artifacts').toBeGreaterThan(0);
