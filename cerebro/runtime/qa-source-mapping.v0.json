@@ -1,0 +1,342 @@
+{
+  "schema_version": "0.1.0",
+  "state_type": "CEREBRO_QA_SOURCE_MAPPING_STATE_V0",
+  "company_id": "fenix",
+  "engine_id": "QA-001",
+  "environment": "PREPROD_CONTROL_PLANE",
+  "version": "0.1.0",
+  "updated_at": "2026-10-11T04:58:12.085Z",
+  "mappings_total": 12,
+  "verified_repo_hints": 6,
+  "external_owner_routes": 5,
+  "por_auditar": 1,
+  "mappings": [
+    {
+      "repair_id": "self:5dfeaf4da1cc838439991995",
+      "case_id": "qa-case:ebbbce81fe2ef00ecd8d1d36",
+      "source": "IMPROVEMENT",
+      "owner_engine": "QA-001",
+      "target": "APP:AUTHENTICATED_PREPROD",
+      "dimension": "qa_coverage",
+      "resolution": {
+        "status": "SOURCE_HINT_VERIFIED",
+        "surface": "APP",
+        "owner_engine": "QA-001",
+        "repository": "carlosjmunoz78/fenix-capital-inmo-map",
+        "repository_ref": "main",
+        "file_hints": [
+          "src/App.tsx"
+        ],
+        "mutation_surface": "GIT_PREPROD_BRANCH_ONLY",
+        "exact_symbol": "POR_LOCALIZAR_CON_EVIDENCIA",
+        "prod_write_authorized": false
+      },
+      "execution_authority": {
+        "code_mutation_authorized": false,
+        "preprod_only": true,
+        "auto_merge": false,
+        "prod_write_authorized": false
+      }
+    },
+    {
+      "repair_id": "self:1e02696e7a3a6a48c6a7f0de",
+      "case_id": "qa-case:12b15c473a728aa7f6115a09",
+      "source": "IMPROVEMENT",
+      "owner_engine": "QAB-001",
+      "target": "PRODUCT:PREPROD",
+      "dimension": "qa_coverage",
+      "resolution": {
+        "status": "POR_AUDITAR_PREPROD_TARGET",
+        "surface": "PRODUCT",
+        "owner_engine": "QAB-001",
+        "repository": null,
+        "repository_ref": null,
+        "file_hints": [],
+        "mutation_surface": "NONE",
+        "exact_symbol": null,
+        "prod_write_authorized": false
+      },
+      "execution_authority": {
+        "code_mutation_authorized": false,
+        "preprod_only": true,
+        "auto_merge": false,
+        "prod_write_authorized": false
+      }
+    },
+    {
+      "repair_id": "self:d741606a34bc8e493485e783",
+      "case_id": "qa-case:d0a3c270ed4f82602f786706",
+      "source": "IMPROVEMENT",
+      "owner_engine": "HCI-001",
+      "target": "APP:qa-mobile-chromium",
+      "dimension": "accessibility_names",
+      "resolution": {
+        "status": "SOURCE_HINT_VERIFIED",
+        "surface": "APP",
+        "owner_engine": "HCI-001",
+        "repository": "carlosjmunoz78/fenix-capital-inmo-map",
+        "repository_ref": "main",
+        "file_hints": [
+          "src/App.tsx"
+        ],
+        "mutation_surface": "GIT_PREPROD_BRANCH_ONLY",
+        "exact_symbol": "POR_LOCALIZAR_CON_EVIDENCIA",
+        "prod_write_authorized": false
+      },
+      "execution_authority": {
+        "code_mutation_authorized": false,
+        "preprod_only": true,
+        "auto_merge": false,
+        "prod_write_authorized": false
+      }
+    },
+    {
+      "repair_id": "self:bf4d507105fe9744d23582a6",
+      "case_id": "qa-case:ad4a970322c7fe155f62d9f8",
+      "source": "IMPROVEMENT",
+      "owner_engine": "HCI-001",
+      "target": "APP:qa-desktop-chromium",
+      "dimension": "accessibility_names",
+      "resolution": {
+        "status": "SOURCE_HINT_VERIFIED",
+        "surface": "APP",
+        "owner_engine": "HCI-001",
+        "repository": "carlosjmunoz78/fenix-capital-inmo-map",
+        "repository_ref": "main",
+        "file_hints": [
+          "src/App.tsx"
+        ],
+        "mutation_surface": "GIT_PREPROD_BRANCH_ONLY",
+        "exact_symbol": "POR_LOCALIZAR_CON_EVIDENCIA",
+        "prod_write_authorized": false
+      },
+      "execution_authority": {
+        "code_mutation_authorized": false,
+        "preprod_only": true,
+        "auto_merge": false,
+        "prod_write_authorized": false
+      }
+    },
+    {
+      "repair_id": "self:039ae28c8c3aa1a127d68771",
+      "case_id": "qa-case:5aed133e2720f65d70d1c9a5",
+      "source": "IMPROVEMENT",
+      "owner_engine": "HCI-001",
+      "target": "WEB:qa-desktop-chromium",
+      "dimension": "accessibility_names",
+      "resolution": {
+        "status": "EXTERNAL_SURFACE_OWNER_VERIFIED",
+        "surface": "WEB",
+        "owner_engine": "HCI-001",
+        "repository": null,
+        "repository_ref": null,
+        "file_hints": [],
+        "external_target": "https://fenixcapital.es",
+        "mutation_surface": "WORDPRESS_PREPROD_ONLY",
+        "exact_symbol": "NO_APLICA_HASTA_MAPEO_WORDPRESS",
+        "prod_write_authorized": false
+      },
+      "execution_authority": {
+        "code_mutation_authorized": false,
+        "preprod_only": true,
+        "auto_merge": false,
+        "prod_write_authorized": false
+      }
+    },
+    {
+      "repair_id": "self:be0f5789e0669710a5e8d85d",
+      "case_id": "qa-case:a18ab0857f323276a7fbfb6c",
+      "source": "IMPROVEMENT",
+      "owner_engine": "HCI-001",
+      "target": "WEB:qa-mobile-chromium",
+      "dimension": "accessibility_names",
+      "resolution": {
+        "status": "EXTERNAL_SURFACE_OWNER_VERIFIED",
+        "surface": "WEB",
+        "owner_engine": "HCI-001",
+        "repository": null,
+        "repository_ref": null,
+        "file_hints": [],
+        "external_target": "https://fenixcapital.es",
+        "mutation_surface": "WORDPRESS_PREPROD_ONLY",
+        "exact_symbol": "NO_APLICA_HASTA_MAPEO_WORDPRESS",
+        "prod_write_authorized": false
+      },
+      "execution_authority": {
+        "code_mutation_authorized": false,
+        "preprod_only": true,
+        "auto_merge": false,
+        "prod_write_authorized": false
+      }
+    },
+    {
+      "repair_id": "self:24112edd0c5e58c3666206e8",
+      "case_id": "qa-case:212743012dd45f072694cec8",
+      "source": "IMPROVEMENT",
+      "owner_engine": "HCI-001",
+      "target": "WEB:qa-desktop-chromium",
+      "dimension": "accessibility_semantics",
+      "resolution": {
+        "status": "EXTERNAL_SURFACE_OWNER_VERIFIED",
+        "surface": "WEB",
+        "owner_engine": "HCI-001",
+        "repository": null,
+        "repository_ref": null,
+        "file_hints": [],
+        "external_target": "https://fenixcapital.es",
+        "mutation_surface": "WORDPRESS_PREPROD_ONLY",
+        "exact_symbol": "NO_APLICA_HASTA_MAPEO_WORDPRESS",
+        "prod_write_authorized": false
+      },
+      "execution_authority": {
+        "code_mutation_authorized": false,
+        "preprod_only": true,
+        "auto_merge": false,
+        "prod_write_authorized": false
+      }
+    },
+    {
+      "repair_id": "self:f30d0c6843ebeb1f32063a0b",
+      "case_id": "qa-case:7ead8972bab46c38b5de2398",
+      "source": "IMPROVEMENT",
+      "owner_engine": "HCI-001",
+      "target": "WEB:qa-mobile-chromium",
+      "dimension": "accessibility_semantics",
+      "resolution": {
+        "status": "EXTERNAL_SURFACE_OWNER_VERIFIED",
+        "surface": "WEB",
+        "owner_engine": "HCI-001",
+        "repository": null,
+        "repository_ref": null,
+        "file_hints": [],
+        "external_target": "https://fenixcapital.es",
+        "mutation_surface": "WORDPRESS_PREPROD_ONLY",
+        "exact_symbol": "NO_APLICA_HASTA_MAPEO_WORDPRESS",
+        "prod_write_authorized": false
+      },
+      "execution_authority": {
+        "code_mutation_authorized": false,
+        "preprod_only": true,
+        "auto_merge": false,
+        "prod_write_authorized": false
+      }
+    },
+    {
+      "repair_id": "self:44350824d2f71f77f0ac848d",
+      "case_id": "qa-case:847fe5bb0c0423316f260955",
+      "source": "IMPROVEMENT",
+      "owner_engine": "HCI-001",
+      "target": "APP:qa-mobile-chromium",
+      "dimension": "accessibility_semantics",
+      "resolution": {
+        "status": "SOURCE_HINT_VERIFIED",
+        "surface": "APP",
+        "owner_engine": "HCI-001",
+        "repository": "carlosjmunoz78/fenix-capital-inmo-map",
+        "repository_ref": "main",
+        "file_hints": [
+          "src/App.tsx"
+        ],
+        "mutation_surface": "GIT_PREPROD_BRANCH_ONLY",
+        "exact_symbol": "POR_LOCALIZAR_CON_EVIDENCIA",
+        "prod_write_authorized": false
+      },
+      "execution_authority": {
+        "code_mutation_authorized": false,
+        "preprod_only": true,
+        "auto_merge": false,
+        "prod_write_authorized": false
+      }
+    },
+    {
+      "repair_id": "self:ef9f55578bf29d0674b176cd",
+      "case_id": "qa-case:49b4fb420ce1e62eab2e007b",
+      "source": "IMPROVEMENT",
+      "owner_engine": "HCI-001",
+      "target": "APP:qa-desktop-chromium",
+      "dimension": "accessibility_semantics",
+      "resolution": {
+        "status": "SOURCE_HINT_VERIFIED",
+        "surface": "APP",
+        "owner_engine": "HCI-001",
+        "repository": "carlosjmunoz78/fenix-capital-inmo-map",
+        "repository_ref": "main",
+        "file_hints": [
+          "src/App.tsx"
+        ],
+        "mutation_surface": "GIT_PREPROD_BRANCH_ONLY",
+        "exact_symbol": "POR_LOCALIZAR_CON_EVIDENCIA",
+        "prod_write_authorized": false
+      },
+      "execution_authority": {
+        "code_mutation_authorized": false,
+        "preprod_only": true,
+        "auto_merge": false,
+        "prod_write_authorized": false
+      }
+    },
+    {
+      "repair_id": "self:db5943e847b5914a376bc084",
+      "case_id": "qa-case:c994ed784e44d84df76aeed4",
+      "source": "IMPROVEMENT",
+      "owner_engine": "HCI-001",
+      "target": "APP:qa-mobile-chromium",
+      "dimension": "mobile_usability",
+      "resolution": {
+        "status": "SOURCE_HINT_VERIFIED",
+        "surface": "APP",
+        "owner_engine": "HCI-001",
+        "repository": "carlosjmunoz78/fenix-capital-inmo-map",
+        "repository_ref": "main",
+        "file_hints": [
+          "src/App.tsx",
+          "src/direction.css",
+          "src/logo.css"
+        ],
+        "mutation_surface": "GIT_PREPROD_BRANCH_ONLY",
+        "exact_symbol": "POR_LOCALIZAR_CON_EVIDENCIA",
+        "prod_write_authorized": false
+      },
+      "execution_authority": {
+        "code_mutation_authorized": false,
+        "preprod_only": true,
+        "auto_merge": false,
+        "prod_write_authorized": false
+      }
+    },
+    {
+      "repair_id": "self:3f02c05acfa9a3f2fdf26df8",
+      "case_id": "qa-case:a7a121b29ed2c508b6e71d20",
+      "source": "IMPROVEMENT",
+      "owner_engine": "HCI-001",
+      "target": "WEB:qa-mobile-chromium",
+      "dimension": "mobile_usability",
+      "resolution": {
+        "status": "EXTERNAL_SURFACE_OWNER_VERIFIED",
+        "surface": "WEB",
+        "owner_engine": "HCI-001",
+        "repository": null,
+        "repository_ref": null,
+        "file_hints": [],
+        "external_target": "https://fenixcapital.es",
+        "mutation_surface": "WORDPRESS_PREPROD_ONLY",
+        "exact_symbol": "NO_APLICA_HASTA_MAPEO_WORDPRESS",
+        "prod_write_authorized": false
+      },
+      "execution_authority": {
+        "code_mutation_authorized": false,
+        "preprod_only": true,
+        "auto_merge": false,
+        "prod_write_authorized": false
+      }
+    }
+  ],
+  "next_gate": "AUTO001_PREPROD_PATCH_EXECUTOR_V0_DESIGN",
+  "safety": {
+    "prod_write": false,
+    "customer_data": false,
+    "trading": false,
+    "paid_fallback": false,
+    "additional_subscription_eur": 0
+  }
+}
