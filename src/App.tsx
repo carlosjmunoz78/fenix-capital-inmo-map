@@ -265,7 +265,7 @@ export default function App(){
   if(!authReady)return <TransitionScreen/>;
   if(session && !passwordRecovery && !workspaceReady)return <TransitionScreen/>;
 
-  if(passwordRecovery)return <div className="auth-shell">
+  if(passwordRecovery)return <div className="auth-shell" role="main">
     <button className="theme-toggle auth-theme" onClick={()=>setTheme(theme==='light'?'dark':'light')} aria-label="Cambiar tema">{theme==='light'?<Moon size={18}/>:<Sun size={18}/>}<span>{theme==='light'?'Oscuro':'Claro'}</span></button>
     <form className="auth-card" onSubmit={saveRecoveredPassword}>
       <div className="brand auth-brand"><div className="brand-mark" role="img" aria-label="Logotipo Fénix Capital"/><div><strong>FÉNIX CAPITAL</strong><span>Área privada</span></div></div>
@@ -281,7 +281,7 @@ export default function App(){
     </form>
   </div>;
 
-  if(!session)return <div className="auth-shell">
+  if(!session)return <div className="auth-shell" role="main">
     <button className="theme-toggle auth-theme" onClick={()=>setTheme(theme==='light'?'dark':'light')} aria-label="Cambiar tema">{theme==='light'?<Moon size={18}/>:<Sun size={18}/>}<span>{theme==='light'?'Oscuro':'Claro'}</span></button>
     <form className="auth-card" onSubmit={login}>
       <div className="brand auth-brand"><div className="brand-mark" role="img" aria-label="Logotipo Fénix Capital"/><div><strong>FÉNIX CAPITAL</strong><span>Área privada</span></div></div>
