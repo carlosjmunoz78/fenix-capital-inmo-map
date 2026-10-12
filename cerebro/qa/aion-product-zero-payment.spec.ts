@@ -16,6 +16,11 @@ test(`[PRODUCT] [AION_DEEP_ZERO_PAYMENT] ${product} · purchase → generate →
 
   const button=page.locator(`[data-product="${product}"]`);
   await expect(button).toBeVisible();
+  // The PREPROD zero-payment endpoint deliberately rejects tokens younger than
+  // one second. Human users naturally satisfy that anti-replay guard, while an
+  // automated browser can click in the same second in which the page token was
+  // issued. Respect the production-like security contract instead of weakening it.
+  await page.waitForTimeout(1_100);
   await button.click();
 
   const status=page.locator('#zt-status');
