@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {buildQualityState} from '../qa/quality-delta.mjs';
+import {applyProductionConversationOverlayV1} from '../human-intelligence/integration/production-conversation-overlay-v1.mjs';
 
 function report(specs) {
   return {suites:[{title:'CEREBRO',specs:specs.map(({title,project='Desktop Chrome',status='expected',result='passed',errors=[]})=>({title,tests:[{projectName:project,status,results:[{status:result,duration:10,errors}]}]}))}]};
@@ -52,6 +53,7 @@ test('authenticated synthetic failure is routed to APP-001 as a real QA finding'
   assert.match(state.new_issues[0].title,/AUTH_SYNTHETIC_LOCAL/);
   assert.equal(state.targets.APP_AUTH_SYNTHETIC_LOCAL.status,'RED');
   assert.equal(state.safety.prod_write,false);
+  assert.equal(state.safety.customer_data,false);
 });
 
 test('Fénix Capital Web does not accidentally match API owner routing',()=>{
@@ -66,7 +68,7 @@ test('Fénix Capital Web does not accidentally match API owner routing',()=>{
 test('explicit API evidence still routes to API-001',()=>{
   const state=buildQualityState({report:report([
     {title:'[WEB] [API] lead endpoint smoke',status:'unexpected',result:'failed'}
-  ]),previous:{issue_fingerprints:[]},targetsRegistry:{targets:[]}});
+  ]),previous:{},targetsRegistry:{targets:[]}});
   assert.equal(state.new_issues[0].owner_engine,'API-001');
 });
 
@@ -108,4 +110,25 @@ test('same finding becomes recurring and is not redispatched as new',()=>{
   assert.equal(second.recurring_issues,1);
   assert.equal(second.new_issue_fingerprints.length,0);
   assert.equal(second.dispatch_queue.length,0);
+});
+
+test('scheduled Continuous Human QA continuously guards Human Intelligence passive reply semantics',()=>{
+  const authoritative='Una cuota mensual existente puede afectar a la capacidad de endeudamiento; el efecto concreto depende del caso.';
+  const out=applyProductionConversationOverlayV1({
+    user_message:'Sigo perdido y además tengo otra financiación mensual',
+    upstream:{status:'OK',intent:'finance_knowledge',executed:false,message:authoritative},
+    history:[]
+  });
+  assert.equal(out.overlay.applied,true);
+  assert.equal(out.overlay.authoritative_preserved,true);
+  assert.equal(out.overlay.questions_added,1);
+  assert.ok(out.response.message.includes(authoritative));
+  assert.equal(out.response.human_intelligence.prod_authority_changed,false);
+});
+
+test('scheduled Continuous Human QA rejects Human Intelligence interference with actions',()=>{
+  const upstream={status:'ACTION_PROPOSAL',intent:'seo_zone_activation',executed:false,action:{action_id:'QA-SYNTHETIC'},message:'Propuesta exacta. ¿Quieres que active exactamente este proceso?'};
+  const out=applyProductionConversationOverlayV1({user_message:'sí',upstream,history:[]});
+  assert.equal(out.overlay.applied,false);
+  assert.deepEqual(out.response,upstream);
 });

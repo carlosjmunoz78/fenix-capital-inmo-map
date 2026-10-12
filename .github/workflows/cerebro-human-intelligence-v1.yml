@@ -1,0 +1,211 @@
+name: CEREBRO Human Intelligence V1 LAB Gate
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/human-intelligence/**'
+      - 'cerebro/tests/human-intelligence-*.test.mjs'
+      - 'supabase/functions/cerebro-human-old-actor-preprod-v0/**'
+      - 'supabase/functions/cerebro-human-new-actor-preprod-v1/**'
+      - '.github/workflows/cerebro-human-intelligence-v1.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: cerebro-human-intelligence-shared-preprod-route-v1
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  BASELINE_SHA: 3b6b3f45fb3eea624b1834d0c592c6b6f6550e1e
+
+jobs:
+  lab-contract-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install existing repository dependencies
+        run: npm ci
+
+      - name: Validate Human Intelligence contracts planner rights HumanProfile hard gates synthetic population conversation gym metrics NEW planner tribunal LRN bridge gateway routing promotion boundaries and real actor boundary
+        run: |
+          node --test \
+            cerebro/tests/human-intelligence-contract-v1.test.mjs \
+            cerebro/tests/human-intelligence-scenario-plan-v1.test.mjs \
+            cerebro/tests/human-intelligence-rights-gate-v1.test.mjs \
+            cerebro/tests/human-intelligence-profile-gates-v1.test.mjs \
+            cerebro/tests/human-intelligence-synthetic-population-v1.test.mjs \
+            cerebro/tests/human-intelligence-conversation-gym-v1.test.mjs \
+            cerebro/tests/human-intelligence-conversation-metrics-v1.test.mjs \
+            cerebro/tests/human-intelligence-new-planner-v1.test.mjs \
+            cerebro/tests/human-intelligence-tribunal-v1.test.mjs \
+            cerebro/tests/human-intelligence-autonomy-bridge-v1.test.mjs \
+            cerebro/tests/human-intelligence-gateway-routing-v1.test.mjs \
+            cerebro/tests/human-intelligence-real-actor-gate-v1.test.mjs \
+            cerebro/tests/universal-learning-ingress.test.mjs \
+            cerebro/tests/promotion-pipeline.test.mjs
+
+      - name: Materialize deterministic 240-episode LAB plan
+        run: |
+          node cerebro/human-intelligence/lab/scenario-plan.mjs \
+            --baseline-sha "$BASELINE_SHA" \
+            --scenario-count 60 \
+            --out artifacts/human-intelligence/scenario-plan.v1.json
+
+      - name: Materialize procedural population coverage evidence
+        run: |
+          node cerebro/human-intelligence/lab/population-manifest.mjs \
+            --count 1000 \
+            --seed-prefix "${BASELINE_SHA}-population-v1" \
+            --out artifacts/human-intelligence/population-manifest.v1.json
+
+      - name: Run physical PREPROD OLD actor preflight and first multi-turn episode
+        run: |
+          node cerebro/human-intelligence/lab/run-real-old-sample.mjs \
+            --out artifacts/human-intelligence/real-old-sample.v1.json
+
+      - name: Run representative physical OLD baseline batch
+        run: |
+          node cerebro/human-intelligence/lab/run-real-old-batch.mjs \
+            --out artifacts/human-intelligence/real-old-batch.v1.json
+
+      - name: Run representative physical paired OLD vs NEW directional gate
+        run: |
+          node cerebro/human-intelligence/lab/run-real-old-vs-new-batch.mjs \
+            --out artifacts/human-intelligence/old-vs-new-batch.v1.json
+
+      - name: Run full canonical 60 x 4 physical paired GOLDEN
+        run: |
+          node cerebro/human-intelligence/lab/run-full-golden-old-vs-new.mjs \
+            --concurrency 12 \
+            --out artifacts/human-intelligence/full-golden-old-vs-new.v1.json
+          jq '{status,pairs_total,physical,candidate_hard_gates:.candidate_hard_gates.summary,deltas}' artifacts/human-intelligence/full-golden-old-vs-new.v1.json
+
+      - name: Run Pareto Tribunal on full GOLDEN
+        run: |
+          node cerebro/human-intelligence/lab/run-tribunal-v1.mjs \
+            --input artifacts/human-intelligence/full-golden-old-vs-new.v1.json \
+            --out artifacts/human-intelligence/tribunal-decision.v1.json
+          jq '{verdict,decision_basis,strict_quality_improvements,hard_gates,comparisons,promotion,learning}' artifacts/human-intelligence/tribunal-decision.v1.json
+
+      - name: Route tribunal evidence through existing LRN-001 and canonical promotion envelope
+        run: |
+          node cerebro/human-intelligence/integration/run-autonomy-bridge-v1.mjs \
+            --golden artifacts/human-intelligence/full-golden-old-vs-new.v1.json \
+            --tribunal artifacts/human-intelligence/tribunal-decision.v1.json \
+            --out-dir artifacts/human-intelligence
+          jq '{state_type,events_total,events:[.events[]|{event_id,source_type,company_id,engine_id,environment,local_validation_required,prod_authorized,prod_write_authorized,trading_access,additional_cost_eur}]}' artifacts/human-intelligence/learning-report.v1.json
+          jq '{state_type,status,learning_event_id,next_gate,authority,rollback:{rollback_id:.rollback.rollback_id,baseline:.rollback.baseline,candidate:.rollback.candidate,physical_rollback_execution_required_before_prod:.rollback.physical_rollback_execution_required_before_prod},plan:{promotion_id:.plan.promotion_id,state:.plan.state,candidate_version:.plan.candidate_version,next_gate:.plan.next_gate,prod_authorized:.plan.prod_authorized,prod_write_authorized:.plan.prod_write_authorized}}' artifacts/human-intelligence/promotion-package.v1.json
+
+      - name: Physically rehearse NEW to OLD fallback selection in PREPROD
+        run: |
+          node cerebro/human-intelligence/lab/run-preprod-rollback-rehearsal-v1.mjs \
+            --out artifacts/human-intelligence/rollback-rehearsal.v1.json
+          jq '{status,semantics,final_selected_actor,route_mutated,prod_invoked,prod_authorized,prod_write_authorized,customer_data,trading_access,additional_cost_eur,next_gate}' artifacts/human-intelligence/rollback-rehearsal.v1.json
+
+      - name: Run shared CEREBRO Gateway PREPROD shadow canary and rollback rehearsal
+        run: |
+          node cerebro/human-intelligence/lab/run-gateway-shadow-canary-v1.mjs \
+            --out artifacts/human-intelligence/gateway-shadow-canary.v1.json
+          jq '{status,environment,route_unit,canary:{old_count:.canary.old_count,new_count:.canary.new_count},gates,safety}' artifacts/human-intelligence/gateway-shadow-canary.v1.json
+
+      - name: Enforce immutable safety boundaries physical evidence learning rollback gateway routing and promotion authority
+        run: |
+          set -euo pipefail
+          jq -e '
+            .state_type=="CEREBRO_HUMAN_INTELLIGENCE_SCENARIO_PLAN_V1" and
+            .engine_id=="SIM-001" and .environment=="LAB" and .episodes_total==240 and
+            .safety.contains_customer_data==false and .safety.contains_secrets==false and
+            .safety.prod_authorized==false and .safety.prod_write_authorized==false and
+            .safety.trading_access==false and .safety.additional_cost_eur==0
+          ' artifacts/human-intelligence/scenario-plan.v1.json >/dev/null
+
+          jq -e '
+            .state_type=="CEREBRO_SYNTHETIC_HUMAN_POPULATION_MANIFEST_V1" and
+            .engine_id=="SIM-001" and .environment=="LAB" and .requested_profiles==1000 and
+            .unique_coverage_signatures>=850 and .private_profiles_persisted==false and
+            .identifiable_customer_data==false and .secrets==false and .prod_authorized==false and
+            .prod_write_authorized==false and .trading_access==false and .additional_cost_eur==0
+          ' artifacts/human-intelligence/population-manifest.v1.json >/dev/null
+
+          jq -e '
+            . as $root |
+            .state_type=="CEREBRO_HUMAN_INTELLIGENCE_FULL_GOLDEN_OLD_VS_NEW_V1" and
+            .status=="GREEN" and .cases_total==60 and .pairs_total==240 and
+            .physical.pairs_total==240 and .physical.old_verified==240 and .physical.new_verified==240 and
+            .physical.all_pairs_real_and_comparable==true and .physical.no_actor_errors==true and .physical.no_ontology_leaks==true and
+            .candidate_hard_gates.summary.episodes_total==240 and .candidate_hard_gates.summary.episodes_green==240 and
+            .candidate_hard_gates.summary.episodes_failed==0 and .candidate_hard_gates.summary.all_green==true and
+            (.candidate_hard_gates.summary.required_gates|length)==10 and
+            (["TRUTH","AUTHORITY","CONTEXT","PERMISSION","ACTION","HUMAN_REQUIRED","PRIVACY","NO_HIDDEN_LEAK","ETHICS","TRACEABILITY"] | all(. as $g | $root.candidate_hard_gates.summary.gate_pass_counts[$g] == 240)) and
+            .safety.prod_invoked==false and .safety.prod_write_authorized==false and .safety.prod_execution_enabled==false and
+            .safety.contains_customer_data==false and .safety.trading_access==false and .safety.additional_cost_eur==0 and
+            .decision.prod_promotion_authorized==false
+          ' artifacts/human-intelligence/full-golden-old-vs-new.v1.json >/dev/null
+
+          jq -e '
+            .state_type=="CEREBRO_HUMAN_INTELLIGENCE_TRIBUNAL_DECISION_V1" and
+            .verdict=="NEW_BETTER" and .decision_basis=="PARETO_NON_REGRESSION_NO_ARBITRARY_WEIGHTED_SCORE" and
+            .hard_gates.declared_episode_hard_gates==true and
+            .promotion.candidate_to_preprod==true and .promotion.prod_authorized==false and .promotion.prod_write_authorized==false and
+            .learning.canonical_rule_auto_promote==false and .safety.customer_data==false and
+            .safety.trading_access==false and .safety.additional_cost_eur==0
+          ' artifacts/human-intelligence/tribunal-decision.v1.json >/dev/null
+
+          jq -e '
+            .state_type=="CEREBRO_RSI_UNIVERSAL_LEARNING_EVENT_REPORT" and .events_total==1 and
+            .events[0].source_type=="TRIBUNAL_DECISION" and .events[0].company_id=="fenix" and .events[0].engine_id=="SIM-001" and
+            .events[0].environment=="PREPROD_CANDIDATE" and .events[0].local_validation_required==true and
+            .events[0].prod_authorized==false and .events[0].prod_write_authorized==false and .events[0].trading_access==false and .events[0].additional_cost_eur==0 and
+            .prod_authorized==false and .prod_write_authorized==false and .trading_access==false and .additional_cost_eur==0
+          ' artifacts/human-intelligence/learning-report.v1.json >/dev/null
+
+          EXPECTED_CANDIDATE="$(jq -r '.new_preflight.actor_evidence.source_version' artifacts/human-intelligence/full-golden-old-vs-new.v1.json)"
+          EXPECTED_BLOB="$(jq -r '.new_preflight.actor_evidence.source_blob_sha' artifacts/human-intelligence/full-golden-old-vs-new.v1.json)"
+          jq -e --arg expected "$EXPECTED_CANDIDATE" --arg blob "$EXPECTED_BLOB" '
+            .state_type=="CEREBRO_HUMAN_INTELLIGENCE_PROMOTION_PACKAGE_V1" and .status=="READY_PREPROD" and
+            .authority.candidate_package_ready==true and .authority.preprod_deploy_authorized==false and
+            .authority.shadow_activation_authorized==false and .authority.canary_activation_authorized==false and
+            .authority.prod_authorized==false and .authority.prod_write_authorized==false and
+            .rollback.environment=="PREPROD" and .rollback.baseline.service=="cerebro-human-old-actor-preprod-v0" and
+            .rollback.candidate.source_version==$expected and .rollback.candidate.source_blob_sha==$blob and
+            .rollback.physical_rollback_execution_required_before_prod==true and
+            .plan.state=="PREPROD" and .plan.candidate_version==$expected and .plan.prod_authorized==false and .plan.prod_write_authorized==false and
+            .safety.contains_customer_data==false and .safety.contains_secrets==false and .safety.trading_access==false and .safety.additional_cost_eur==0
+          ' artifacts/human-intelligence/promotion-package.v1.json >/dev/null
+
+          jq -e '
+            .state_type=="CEREBRO_HUMAN_INTELLIGENCE_PHYSICAL_ROLLBACK_REHEARSAL_V1" and .status=="GREEN" and
+            .final_selected_actor=="cerebro-human-old-actor-preprod-v0" and .route_mutated==false and
+            .prod_invoked==false and .prod_authorized==false and .prod_write_authorized==false and
+            .customer_data==false and .trading_access==false and .additional_cost_eur==0 and
+            .next_gate=="SHARED_PREPROD_ROUTE_SHADOW_AND_ATOMIC_ROLLBACK"
+          ' artifacts/human-intelligence/rollback-rehearsal.v1.json >/dev/null
+
+          jq -e '
+            .state_type=="CEREBRO_HUMAN_GATEWAY_SHADOW_CANARY_V1" and .status=="GREEN" and .environment=="PREPROD" and .route_unit=="SESSION" and
+            .canary.old_count==6 and .canary.new_count==6 and
+            .gates.old_preflight==true and .gates.new_preflight==true and .gates.shadow_primary_old==true and .gates.shadow_new_observed==true and
+            .gates.canary_both_cohorts==true and .gates.canary_session_stable==true and .gates.rollback_old==true and
+            .gates.no_prod_authority==true and .gates.actor_evidence_safe==true and
+            .safety.prod_invoked==false and .safety.prod_authorized==false and .safety.prod_write_authorized==false and
+            .safety.prod_execution_enabled==false and .safety.contains_customer_data==false and .safety.trading_access==false and .safety.additional_cost_eur==0
+          ' artifacts/human-intelligence/gateway-shadow-canary.v1.json >/dev/null
+
+      - name: Upload LAB full-GOLDEN tribunal LRN rollback gateway and promotion evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-human-intelligence-v1-${{ github.run_id }}
+          path: artifacts/human-intelligence/**
+          if-no-files-found: warn
+          retention-days: 30
