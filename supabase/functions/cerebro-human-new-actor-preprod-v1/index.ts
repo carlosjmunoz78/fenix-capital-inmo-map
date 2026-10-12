@@ -3,8 +3,8 @@ import { planHumanResponse, type Turn } from "./planner.ts";
 
 const PREPROD_PROJECT_REF="hnqlnvakzaywtafeiybt";
 const SOURCE_SERVICE="cerebro-human-new-actor-preprod-v1";
-const SOURCE_VERSION="human-intelligence-new-v1";
-const SOURCE_SHA256="4eb5816611dbe738c9588e4d843d921c3f4023dd492c4c49ed45e4b577f691b7";
+const SOURCE_VERSION="human-intelligence-new-v1.1";
+const SOURCE_SHA256="2e000e69ff7002659585e6e903ac706b57404442f76cdb82893dd543fe4d9017";
 const OIDC_ISSUER="https://token.actions.githubusercontent.com";
 const OIDC_AUDIENCE="cerebro-human-new-actor-preprod-v1";
 const REPOSITORY="carlosjmunoz78/fenix-capital-inmo-map";
