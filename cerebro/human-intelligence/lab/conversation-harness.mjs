@@ -1,10 +1,10 @@
-import { generateSyntheticHuman, publicActorView, applyObservableEvent } from './synthetic-human-population.mjs';
+import { generateSyntheticHuman, publicActorView, applyObservableEvent, inferSyntheticScenarioDomain } from './synthetic-human-population.mjs';
 import { nextSyntheticHumanUtterance, assertNoOntologyLeak } from './synthetic-human-utterance.mjs';
 import { verifyRealActorEvidence } from './real-cerebro-actor-adapter.mjs';
 
 function safePublicTranscript(transcript) {
   const text = JSON.stringify(transcript);
-  for (const forbidden of ['private_state','private_goal','hidden_facts','misbeliefs','reveal_rules','internal_state']) {
+  for (const forbidden of ['private_state','private_goal','hidden_facts','misbeliefs','reveal_rules','internal_state','semantic_key','scenario_domain']) {
     if (text.includes(forbidden)) throw new Error(`private_state_leak:${forbidden}`);
   }
   return transcript;
@@ -20,7 +20,8 @@ function actorEvidenceFrom(output) {
 export async function runConversation({seed, scenario={}, actorAdapter, behaviorObserver, outcomeEvaluator, maxTurns=12, actorLabel='DRY_RUN'}) {
   if (typeof actorAdapter !== 'function') throw new Error('actor_adapter_required');
   if (typeof behaviorObserver !== 'function') throw new Error('independent_behavior_observer_required');
-  const initial = generateSyntheticHuman(seed);
+  const scenarioDomain=inferSyntheticScenarioDomain(scenario);
+  const initial = generateSyntheticHuman(seed,{scenario_domain:scenarioDomain});
   let profile = structuredClone(initial);
   const transcript=[];
   const actorEvidence=[];
@@ -47,14 +48,14 @@ export async function runConversation({seed, scenario={}, actorAdapter, behavior
     actorEvidence.push(evidence);
     const actorText=typeof actorOutput==='string' ? actorOutput : String(actorOutput?.text ?? '');
     const event=await behaviorObserver({actor_text:actorText,human_message:humanText,history:structuredClone(transcript),public_profile:publicActorView(profile)});
-    const revealedBefore=profile.observable_state.explicit_facts_revealed.length;
+    const revealedIdsBefore=new Set(profile.private_state.hidden_facts.filter(fact=>fact.revealed).map(fact=>fact.fact_id));
     profile=applyObservableEvent(profile,event);
-    const newlyRevealed=profile.observable_state.explicit_facts_revealed.slice(revealedBefore);
+    const newlyRevealedPrivate=profile.private_state.hidden_facts.filter(fact=>fact.revealed&&!revealedIdsBefore.has(fact.fact_id));
     transcript.push({turn,human:humanText,actor:actorText,observed_event:event,revealed_facts:structuredClone(profile.observable_state.explicit_facts_revealed)});
     safePublicTranscript(transcript);
     const outcome=typeof outcomeEvaluator==='function' ? await outcomeEvaluator({transcript:structuredClone(transcript),public_profile:publicActorView(profile)}) : null;
     if (outcome?.complete) { completion_reason=outcome.reason ?? 'SUCCESS'; break; }
-    humanText=assertNoOntologyLeak(nextSyntheticHumanUtterance({profile,turn:turn+1,newlyRevealedFact:newlyRevealed.at(-1)??null,lastActorText:actorText}));
+    humanText=assertNoOntologyLeak(nextSyntheticHumanUtterance({profile,turn:turn+1,newlyRevealedFact:newlyRevealedPrivate.at(-1)??null,lastActorText:actorText}));
   }
   const completedActorTurns=transcript.filter(turn=>typeof turn.actor==='string').length;
   const realCerebroActor=completedActorTurns>0&&actorEvidence.length===completedActorTurns&&actorEvidence.every(verifyRealActorEvidence);
