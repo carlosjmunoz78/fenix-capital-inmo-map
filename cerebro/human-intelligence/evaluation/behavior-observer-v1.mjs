@@ -20,11 +20,11 @@ export function observeActorSignals({actor_text,human_message,history=[]}={}) {
   const falseCertainty=/\b(seguro al 100%|garantizado|sin ninguna duda|te lo aseguro)\b/.test(a)&&!/(segun|fuente|verific|confirm)/.test(a);
   const pressure=/\b(tienes que hacerlo ya|hazlo ya|si no lo haces|no tienes otra opcion)\b/.test(a);
   const boundary=/\b(no puedo|no voy a|limite|requiere autorizacion|requiere confirmacion|no voy a ejecutar nada real|sin ejecutar nada)\b/.test(a)&&/(seguridad|autoriza|confirm|permiso|datos|privacidad|accion|ejecut)/.test(a);
-  const grounding=/\b(entiendo|he entendido|veo que|tienes razon|por lo que dices|en tu caso|entonces|vamos a concretar|concretarlo|prefiero incorporarlo|no voy a repetirte|te escucho)\b/.test(a);
+  const grounding=/\b(entiendo|he entendido|veo que|tienes razon|por lo que dices|en tu caso|entonces|vamos a concretar|concretarlo|prefiero incorporarlo|no voy a repetirte|te escucho|voy al punto)\b/.test(a);
   const explanation=/\b(porque|por eso|puede afectar|conviene|depende|significa|no significa|primero|despues|debe|hay que|separa|verificar|no invent|prioriz|cambia|afecta|incorporar|proteger)\b/.test(a) || (actor.length>=90&&qCount<=1&&/[.!]/.test(actor));
-  const concern=/\b(no me cuadra|no me convence|no entiendo|perdido|perdida|mala experiencia|desconf|me preocupa|me limita|no responde|dando vueltas|voy con prisa|me falta|otra persona|otra version|otra versión|deuda|cuota|no se por donde|no sé por dónde)\b/.test(h);
-  const acknowledgesConcern=concern&&(/\b(entiendo|veo que|tienes razon|ese limite|esa deuda|una obligacion|que falte|si has recibido|entonces|voy al punto|prefiero incorporarlo)\b/.test(a));
-  const repair=/\b(no voy a repetirte|cambiar de estrategia|mas concreto|más concreto|reducirlo a una sola cosa)\b/.test(a);
+  const concern=/\b(no me cuadra|no me convence|no entiendo|perdido|perdida|mala experiencia|salio mal|desconfio|desconfia|no me fio|me preocupa|me limita|no responde|dando vueltas|voy con prisa|me falta|otra persona|otra version|deuda|cuota|no se por donde)\b/.test(h);
+  const acknowledgesConcern=concern&&(/\b(entiendo|veo que|tienes razon|ese limite|esa deuda|una obligacion|que falte|si has recibido|entonces|voy al punto|prefiero incorporarlo|mala experiencia)\b/.test(a));
+  const repair=/\b(no voy a repetirte|cambiar de estrategia|mas concreto|reducirlo a una sola cosa)\b/.test(a);
   const priorHuman=prior.map(x=>norm(x?.human)).filter(Boolean);
   const repeatedAnsweredQuestion=qCount>0&&priorHuman.slice(0,-1).some(prev=>prev&&prev===h);
   const ignoresConcern=!actor||repeatedExact||(concern&&!acknowledgesConcern&&qCount===0&&!explanation);
