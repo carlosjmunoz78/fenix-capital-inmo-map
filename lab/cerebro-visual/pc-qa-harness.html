@@ -8,7 +8,7 @@ const U={
  INTERACTION:'https://raw.githubusercontent.com/carlosjmunoz78/fenix-capital-inmo-map/42357bfccf2b10e9199e9c337f4b79263049af47/lab/cerebro-visual/cluster-interaction-v2.js',
  VIEWER:'https://raw.githubusercontent.com/carlosjmunoz78/fenix-capital-inmo-map/a2954957152c93e8cba2cf6127fe05e719d04ca3/lab/cerebro-visual/artifact-viewer-v2.js',
  VOICE:'https://raw.githubusercontent.com/carlosjmunoz78/fenix-capital-inmo-map/46438ccda51386f721d4413fd5a2ba3c9ac9abe3/lab/cerebro-visual/voice-001-adapter-v0.js',
- QA:'https://raw.githubusercontent.com/carlosjmunoz78/fenix-capital-inmo-map/2c6d05fa0c6ba1494ee4b2ce69fcb30da3ac04e3/lab/cerebro-visual/pc-qa-v1.js'};
+ QA:'https://raw.githubusercontent.com/carlosjmunoz78/fenix-capital-inmo-map/d4fec64d6e44e620b24335daf5fc410a82a6825e/lab/cerebro-visual/pc-qa-v1.js'};
 Promise.all(Object.entries(U).map(([k,u])=>fetch(u,{cache:'no-store'}).then(r=>{if(!r.ok)throw Error(k+' '+r.status);return r.text()}))).then(([base,signal,motion,affect,conv,interaction,viewer,voice,qa])=>{
  document.open();document.write(base);document.close();
  setTimeout(()=>{try{Function(signal)();Function(motion)();Function(affect)();Function(conv)();Function(interaction)();Function(viewer)();Function(voice)();Function(qa)()}catch(e){const b=document.createElement('div');b.textContent='PC QA EXEC FAIL · '+e.message;Object.assign(b.style,{position:'fixed',right:'18px',bottom:'54px',zIndex:90,color:'#ff9f9f',background:'rgba(20,0,0,.86)',padding:'8px',font:'10px monospace'});document.body.appendChild(b)}},120);
