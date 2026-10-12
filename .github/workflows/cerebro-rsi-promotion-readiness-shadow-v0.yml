@@ -73,7 +73,7 @@ jobs:
           cache: npm
       - name: Assert exact PR head checkout
         run: test "$(git rev-parse HEAD)" = "$EXACT_HEAD"
-      - name: Assert zero App and App-test surface drift
+      - name: Assert zero App drift and only named PREPROD actor Supabase wrappers
         env:
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
         shell: bash
@@ -87,13 +87,24 @@ jobs:
             base="$(git rev-parse FETCH_HEAD)"
           fi
           changed="$(git diff --name-only "$base" HEAD)"
-          protected='^(src/|tests/|supabase/|public/|scripts/|index\.html$|package(-lock)?\.json$|playwright\.config\.(ts|js)$|vite\.config\.(ts|js)$|tsconfig[^/]*\.json$|\.env|\.github/workflows/(preprod-build|app-restoration-build|prod-[^/]+)\.yml$)'
+          protected='^(src/|tests/|public/|scripts/|index\.html$|package(-lock)?\.json$|playwright\.config\.(ts|js)$|vite\.config\.(ts|js)$|tsconfig[^/]*\.json$|\.env|\.github/workflows/(preprod-build|app-restoration-build|prod-[^/]+)\.yml$)'
           if printf '%s\n' "$changed" | grep -Eq "$protected"; then
             echo 'RSI CEREBRO-only scope invalidated: App/App-test/build/deploy surface changed.' >&2
             printf '%s\n' "$changed" >&2
             exit 1
           fi
-          echo 'No App, App-test, Supabase, App build config or App/PROD workflow drift in this PR.' >> "$GITHUB_STEP_SUMMARY"
+          unexpected_supabase="$(printf '%s\n' "$changed" | grep '^supabase/' | grep -Ev '^supabase/functions/(cerebro-human-old-actor-preprod-v0|cerebro-human-new-actor-preprod-v1)/' || true)"
+          if [ -n "$unexpected_supabase" ]; then
+            echo 'Unapproved Supabase surface changed:' >&2
+            printf '%s\n' "$unexpected_supabase" >&2
+            exit 1
+          fi
+          if printf '%s\n' "$changed" | grep -Eq '^supabase/functions/(cerebro-human-old-actor-preprod-v0|cerebro-human-new-actor-preprod-v1)/'; then
+            test -f .github/workflows/cerebro-human-intelligence-v1.yml
+            test -f .github/workflows/cerebro-human-intelligence-promotion-readiness-v1.yml
+            node --test cerebro/tests/human-intelligence-real-actor-gate-v1.test.mjs cerebro/tests/human-intelligence-autonomy-bridge-v1.test.mjs
+          fi
+          echo 'No App/App-test/build/PROD drift; Supabase exception is limited to the two attested Human Intelligence PREPROD actors.' >> "$GITHUB_STEP_SUMMARY"
       - name: Install dependencies reproducibly
         run: |
           set -euo pipefail
@@ -123,8 +134,8 @@ jobs:
       - name: Mark App gate boundary
         run: |
           echo 'This job proves zero App/App-test drift plus exact-head build and existing PREPROD CORS smoke.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'It does NOT claim PRE-PROD App Build GREEN or reactivate the cancelled App PRE-PROD channel.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'Legacy Browser QA debt on unchanged surfaces is recorded in RSI_RECOVERY_010_PROMOTION_READINESS.md.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'The only allowed Supabase drift is the two Human Intelligence PREPROD actor wrappers, guarded by their dedicated tests.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'It does NOT grant PROD authority or mutate App/CRM contracts.' >> "$GITHUB_STEP_SUMMARY"
 
   tribunal-shadow:
     runs-on: ubuntu-latest
@@ -147,7 +158,7 @@ jobs:
           cerebro/tests/promotion-pipeline.test.mjs
           cerebro/tests/rsi-recovery-e2e.test.mjs
           cerebro/tests/bounded-recovery-supervisor.test.mjs
-      - name: Assert PR remains CEREBRO-only and outside production deployment surfaces
+      - name: Assert PR remains bounded and outside production deployment surfaces
         env:
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
         shell: bash
@@ -161,10 +172,16 @@ jobs:
             base="$(git rev-parse FETCH_HEAD)"
           fi
           changed="$(git diff --name-only "$base" HEAD)"
-          protected='^(src/|tests/|supabase/|public/|scripts/|index\.html$|package(-lock)?\.json$|playwright\.config\.(ts|js)$|vite\.config\.(ts|js)$|tsconfig[^/]*\.json$|\.env|\.github/workflows/(preprod-build|app-restoration-build|prod-[^/]+)\.yml$)'
+          protected='^(src/|tests/|public/|scripts/|index\.html$|package(-lock)?\.json$|playwright\.config\.(ts|js)$|vite\.config\.(ts|js)$|tsconfig[^/]*\.json$|\.env|\.github/workflows/(preprod-build|app-restoration-build|prod-[^/]+)\.yml$)'
           if printf '%s\n' "$changed" | grep -Eq "$protected"; then
             echo 'Unexpected App/application/test/production surface changed by RSI recovery.' >&2
             printf '%s\n' "$changed" >&2
             exit 1
           fi
-          echo 'RSI recovery remains additive to cerebro/** and dedicated non-PROD workflows.' >> "$GITHUB_STEP_SUMMARY"
+          unexpected_supabase="$(printf '%s\n' "$changed" | grep '^supabase/' | grep -Ev '^supabase/functions/(cerebro-human-old-actor-preprod-v0|cerebro-human-new-actor-preprod-v1)/' || true)"
+          if [ -n "$unexpected_supabase" ]; then
+            echo 'Unexpected Supabase surface changed by RSI recovery.' >&2
+            printf '%s\n' "$unexpected_supabase" >&2
+            exit 1
+          fi
+          echo 'RSI recovery remains additive; only the two explicitly attested Human Intelligence PREPROD wrappers are excepted.' >> "$GITHUB_STEP_SUMMARY"
