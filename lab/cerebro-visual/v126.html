@@ -1,0 +1,13 @@
+<!doctype html><meta charset="utf-8"><title>CEREBRO V1.2.6 loader</title><body style="margin:0;background:#01060a;color:#7bdfff;font:12px monospace"><div id="m" style="padding:18px">Loading V1.2.6…</div><script>
+const SRC='https://raw.githubusercontent.com/carlosjmunoz78/fenix-capital-inmo-map/d8d5b1b64c31da56e6a817dcb0d30dbfe59ffabd/lab/cerebro-visual/index.html';
+fetch(SRC,{cache:'no-store'}).then(r=>{if(!r.ok)throw Error(r.status);return r.text()}).then(s=>{
+ s=s.replaceAll('V1.2.4','V1.2.6').replace('REFERENCE-MATCH FILAMENTOUS CLUSTERS','FILAMENT BALANCE').replace('FIXED GRAPH · DENSE RACIMOS · FOREGROUND FILAMENTS · CAMERA/LOD · HTTPS QA','V1.2.4 GLOBAL PRESERVED · SELECTED MICROFILAMENTS · CAMERA/LOD · HTTPS QA');
+ const curve=`function curveAB(a,b,alpha,width,color){const p=P(a),q=P(b);if((p[0]<-40&&q[0]<-40)||(p[0]>W+40&&q[0]>W+40)||(p[1]<-40&&q[1]<-40)||(p[1]>H+40&&q[1]>H+40))return;const dx=q[0]-p[0],dy=q[1]-p[1],len=Math.max(1,Math.hypot(dx,dy)),nx=-dy/len,ny=dx/len,seed=((a.x*997+b.y*613)*1000)%1,bend=(seed-.5)*Math.min(12,len*.12);ctx.strokeStyle='rgba('+color+','+alpha+')';ctx.lineWidth=width;ctx.beginPath();ctx.moveTo(p[0],p[1]);ctx.quadraticCurveTo((p[0]+q[0])/2+nx*bend,(p[1]+q[1])/2+ny*bend,q[0],q[1]);ctx.stroke()}`;
+ s=s.replace('function point(n,alpha=1){',curve+'function point(n,alpha=1){');
+ s=s.replace("if(focus&&close>.04){for(const[a,b]of c.subLinks)","if(focus&&close>.04){for(let i=0;i<c.links.length;i++){const ab=c.links[i];curveAB(ab[0],ab[1],.072*close*(.64+.36*deep),.30,'28,184,228')}for(let i=0;i<c.links.length;i+=6){const ab=c.links[i];if(ab[0].h+ab[1].h>.95)curveAB(ab[0],ab[1],.115*close*(.68+.32*deep),.20,'110,229,247')}for(const[a,b]of c.subLinks)");
+ s=s.replace('for(const n of c.nodes)point(n,fade);','for(const n of c.nodes)point(n,fade*(1-.28*close));');
+ s=s.replace('for(const n of c.detail)point(n,.70*close*(.68+.32*deep));','for(const n of c.detail)point(n,.48*close*(.68+.32*deep));');
+ s=s.replace("window.CEREBRO_LAB={version:'v1.2.4'","window.CEREBRO_LAB={version:'v1.2.6'");
+ document.open();document.write(s);document.close();
+}).catch(e=>{document.getElementById('m').textContent='LOAD ERROR '+e.message});
+</script>
