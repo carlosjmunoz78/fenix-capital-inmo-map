@@ -1,4 +1,5 @@
 import { generateSyntheticHuman, publicActorView, applyObservableEvent } from './synthetic-human-population.mjs';
+import { nextSyntheticHumanUtterance, assertNoOntologyLeak } from './synthetic-human-utterance.mjs';
 import { verifyRealActorEvidence } from './real-cerebro-actor-adapter.mjs';
 
 function safePublicTranscript(transcript) {
@@ -12,9 +13,7 @@ function safePublicTranscript(transcript) {
 function actorEvidenceFrom(output) {
   if(!output||typeof output!=='object') return null;
   const evidence=output.actor_evidence??null;
-  if(evidence?.real_cerebro_actor===true&&!verifyRealActorEvidence(evidence)) {
-    throw new Error('unsafe_or_unverified_real_actor_evidence');
-  }
+  if(evidence?.real_cerebro_actor===true&&!verifyRealActorEvidence(evidence)) throw new Error('unsafe_or_unverified_real_actor_evidence');
   return evidence;
 }
 
@@ -25,7 +24,7 @@ export async function runConversation({seed, scenario={}, actorAdapter, behavior
   let profile = structuredClone(initial);
   const transcript=[];
   const actorEvidence=[];
-  let humanText = scenario.initial_human_utterance ?? `Necesito ayuda con ${profile.dimensions.goal_family.toLowerCase()}.`;
+  let humanText = assertNoOntologyLeak(scenario.initial_human_utterance ?? `Necesito ayuda con ${String(profile.dimensions.goal_family).toLowerCase()}.`);
   let completion_reason='MAX_TURNS';
 
   for (let turn=1; turn<=maxTurns; turn++) {
@@ -48,14 +47,14 @@ export async function runConversation({seed, scenario={}, actorAdapter, behavior
     actorEvidence.push(evidence);
     const actorText=typeof actorOutput==='string' ? actorOutput : String(actorOutput?.text ?? '');
     const event=await behaviorObserver({actor_text:actorText,human_message:humanText,history:structuredClone(transcript),public_profile:publicActorView(profile)});
+    const revealedBefore=profile.observable_state.explicit_facts_revealed.length;
     profile=applyObservableEvent(profile,event);
+    const newlyRevealed=profile.observable_state.explicit_facts_revealed.slice(revealedBefore);
     transcript.push({turn,human:humanText,actor:actorText,observed_event:event,revealed_facts:structuredClone(profile.observable_state.explicit_facts_revealed)});
     safePublicTranscript(transcript);
     const outcome=typeof outcomeEvaluator==='function' ? await outcomeEvaluator({transcript:structuredClone(transcript),public_profile:publicActorView(profile)}) : null;
     if (outcome?.complete) { completion_reason=outcome.reason ?? 'SUCCESS'; break; }
-    humanText = profile.observable_state.explicit_facts_revealed.length
-      ? `Hay algo más relevante: ${profile.observable_state.explicit_facts_revealed.at(-1).type}. ¿Cómo seguimos?`
-      : turn % 3 === 0 ? 'Eso no termina de responder a lo que necesito.' : '¿Me lo puedes concretar un poco más?';
+    humanText=assertNoOntologyLeak(nextSyntheticHumanUtterance({profile,turn:turn+1,newlyRevealedFact:newlyRevealed.at(-1)??null,lastActorText:actorText}));
   }
   const completedActorTurns=transcript.filter(turn=>typeof turn.actor==='string').length;
   const realCerebroActor=completedActorTurns>0&&actorEvidence.length===completedActorTurns&&actorEvidence.every(verifyRealActorEvidence);
@@ -63,12 +62,7 @@ export async function runConversation({seed, scenario={}, actorAdapter, behavior
     state_type:'CEREBRO_HUMAN_CONVERSATION_EPISODE_V1', actor_mode:actorLabel, real_cerebro_actor:realCerebroActor,
     seed:String(seed), environment:'LAB', engine_id:'SIM-001', completion_reason,
     turns:transcript.length, transcript:safePublicTranscript(transcript),
-    actor_evidence_summary:{
-      completed_actor_turns:completedActorTurns,
-      verified_real_actor_turns:actorEvidence.filter(verifyRealActorEvidence).length,
-      all_turns_verified:realCerebroActor,
-      actor_environment:realCerebroActor?'PREPROD':null
-    },
+    actor_evidence_summary:{completed_actor_turns:completedActorTurns,verified_real_actor_turns:actorEvidence.filter(verifyRealActorEvidence).length,all_turns_verified:realCerebroActor,actor_environment:realCerebroActor?'PREPROD':null},
     initial_public_profile:publicActorView(initial), final_public_profile:publicActorView(profile),
     safety:{contains_customer_data:false,contains_secrets:false,prod_authorized:false,prod_write_authorized:false,trading_access:false,additional_cost_eur:0}
   };
@@ -79,11 +73,5 @@ export async function runPairedReplay({seed, scenario={}, actorOld, actorNew, be
   const oldEpisode=await runConversation({...common,actorAdapter:actorOld,actorLabel:'OLD'});
   const newEpisode=await runConversation({...common,actorAdapter:actorNew,actorLabel:'NEW'});
   const sameInitial=JSON.stringify(oldEpisode.initial_public_profile)===JSON.stringify(newEpisode.initial_public_profile);
-  return {
-    state_type:'CEREBRO_HUMAN_PAIRED_REPLAY_V1', seed:String(seed), same_seed:true,
-    same_initial_public_profile:sameInitial,
-    real_cerebro_actor:oldEpisode.real_cerebro_actor===true&&newEpisode.real_cerebro_actor===true,
-    comparable:sameInitial&&oldEpisode.turns>0&&newEpisode.turns>0,
-    old:oldEpisode, new:newEpisode
-  };
+  return {state_type:'CEREBRO_HUMAN_PAIRED_REPLAY_V1',seed:String(seed),same_seed:true,same_initial_public_profile:sameInitial,real_cerebro_actor:oldEpisode.real_cerebro_actor===true&&newEpisode.real_cerebro_actor===true,comparable:sameInitial&&oldEpisode.turns>0&&newEpisode.turns>0,old:oldEpisode,new:newEpisode};
 }
