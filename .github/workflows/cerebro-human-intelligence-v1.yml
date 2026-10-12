@@ -33,12 +33,13 @@ jobs:
       - name: Install existing repository dependencies
         run: npm ci
 
-      - name: Validate Human Intelligence contracts and deterministic LAB planner
+      - name: Validate Human Intelligence contracts planner rights HumanProfile and hard gates
         run: |
           node --test \
             cerebro/tests/human-intelligence-contract-v1.test.mjs \
             cerebro/tests/human-intelligence-scenario-plan-v1.test.mjs \
-            cerebro/tests/human-intelligence-rights-gate-v1.test.mjs
+            cerebro/tests/human-intelligence-rights-gate-v1.test.mjs \
+            cerebro/tests/human-intelligence-profile-gates-v1.test.mjs
 
       - name: Materialize deterministic 240-episode LAB plan
         run: |
