@@ -5,13 +5,13 @@
   "engine_id": "SELF-001",
   "environment": "PREPROD_CONTROL_PLANE",
   "version": "0.1.0",
-  "updated_at": "2026-10-12T17:54:53.494Z",
+  "updated_at": "2026-10-12T20:33:12.601Z",
   "status": "ROUTED_AUTONOMOUSLY_TO_PREPROD",
-  "open_cases": 8,
+  "open_cases": 9,
   "bug_cases": 0,
-  "improvement_cases": 8,
-  "learning_records_total": 8,
-  "candidate_packages_total": 8,
+  "improvement_cases": 9,
+  "learning_records_total": 9,
+  "candidate_packages_total": 9,
   "cases": [
     {
       "case_id": "qa-case:5aed133e2720f65d70d1c9a5",
@@ -228,6 +228,33 @@
       "customer_data": false,
       "trading_access": false,
       "additional_cost_eur": 0
+    },
+    {
+      "case_id": "qa-case:076acd37fb958d3cb44d640b",
+      "company_id": "fenix",
+      "owner_engine": "WEB-001",
+      "environment": "PREPROD",
+      "source": "IMPROVEMENT",
+      "source_learning_id": "qa-learning:d71c1df3a79a51ca7953351c",
+      "issue_severity": null,
+      "state": "ROUTED_TO_PREPROD_OWNER",
+      "human_required": null,
+      "repair_mode": "VERSIONED_PREPROD_CANDIDATE",
+      "gates": {
+        "reproduce_required": false,
+        "regression_test_required": false,
+        "old_vs_new_required": true,
+        "preprod_required": true,
+        "independent_judge_required": true,
+        "rollback_required": true,
+        "rebuild_required": true
+      },
+      "promotion_authorized": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "customer_data": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
     }
   ],
   "learning_records": [
@@ -242,7 +269,7 @@
       ],
       "source_type": "METRIC_OBSERVATION",
       "source_environment": "PROD_READ_ONLY",
-      "observed_at": "2026-10-12T17:54:53.424Z",
+      "observed_at": "2026-10-12T20:33:12.538Z",
       "hypothesis": "Nombrar controles visibles reduce fricción para tecnologías de asistencia.",
       "expected_metric_delta": {
         "name": "unnamed_interactive_count",
@@ -275,7 +302,7 @@
       ],
       "source_type": "METRIC_OBSERVATION",
       "source_environment": "PROD_READ_ONLY",
-      "observed_at": "2026-10-12T17:54:53.424Z",
+      "observed_at": "2026-10-12T20:33:12.538Z",
       "hypothesis": "Nombrar controles visibles reduce fricción para tecnologías de asistencia.",
       "expected_metric_delta": {
         "name": "unnamed_interactive_count",
@@ -308,7 +335,7 @@
       ],
       "source_type": "METRIC_OBSERVATION",
       "source_environment": "PROD_READ_ONLY",
-      "observed_at": "2026-10-12T17:54:53.424Z",
+      "observed_at": "2026-10-12T20:33:12.538Z",
       "hypothesis": "Añadir una estructura semántica principal puede mejorar navegación asistida sin cambiar la lógica de negocio.",
       "expected_metric_delta": {
         "name": "accessible_main_landmark",
@@ -341,7 +368,7 @@
       ],
       "source_type": "METRIC_OBSERVATION",
       "source_environment": "PROD_READ_ONLY",
-      "observed_at": "2026-10-12T17:54:53.424Z",
+      "observed_at": "2026-10-12T20:33:12.538Z",
       "hypothesis": "Añadir una estructura semántica principal puede mejorar navegación asistida sin cambiar la lógica de negocio.",
       "expected_metric_delta": {
         "name": "accessible_main_landmark",
@@ -374,7 +401,7 @@
       ],
       "source_type": "METRIC_OBSERVATION",
       "source_environment": "PROD_READ_ONLY",
-      "observed_at": "2026-10-12T17:54:53.424Z",
+      "observed_at": "2026-10-12T20:33:12.538Z",
       "hypothesis": "Añadir una estructura semántica principal puede mejorar navegación asistida sin cambiar la lógica de negocio.",
       "expected_metric_delta": {
         "name": "accessible_main_landmark",
@@ -407,7 +434,7 @@
       ],
       "source_type": "METRIC_OBSERVATION",
       "source_environment": "PROD_READ_ONLY",
-      "observed_at": "2026-10-12T17:54:53.424Z",
+      "observed_at": "2026-10-12T20:33:12.538Z",
       "hypothesis": "Añadir una estructura semántica principal puede mejorar navegación asistida sin cambiar la lógica de negocio.",
       "expected_metric_delta": {
         "name": "accessible_main_landmark",
@@ -440,7 +467,7 @@
       ],
       "source_type": "METRIC_OBSERVATION",
       "source_environment": "PROD_READ_ONLY",
-      "observed_at": "2026-10-12T17:54:53.424Z",
+      "observed_at": "2026-10-12T20:33:12.538Z",
       "hypothesis": "Aumentar el área táctil de controles pequeños puede reducir pulsaciones fallidas.",
       "expected_metric_delta": {
         "name": "small_touch_target_count",
@@ -473,7 +500,7 @@
       ],
       "source_type": "METRIC_OBSERVATION",
       "source_environment": "PROD_READ_ONLY",
-      "observed_at": "2026-10-12T17:54:53.424Z",
+      "observed_at": "2026-10-12T20:33:12.538Z",
       "hypothesis": "Aumentar el área táctil de controles pequeños puede reducir pulsaciones fallidas.",
       "expected_metric_delta": {
         "name": "small_touch_target_count",
@@ -484,6 +511,39 @@
       "risk_class": "LOW",
       "evidence_refs": [
         "qa-improvement:qa-imp:57a0188b6184af2eb6e90df8"
+      ],
+      "promotion_state": "CANDIDATE",
+      "created_by": "QA-001",
+      "reason": "CONTINUOUS_HUMAN_QA_IMPROVEMENT_SCOUT",
+      "persistent_publish_authorized": true,
+      "persistence_scope": "LOCAL_PREPROD_LRN_LEDGER_ONLY",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "learning_id": "qa-learning:d71c1df3a79a51ca7953351c",
+      "company_id": "fenix",
+      "engine_id": "WEB-001",
+      "environment": "PREPROD",
+      "version": "0.1.0",
+      "source_event_ids": [
+        "qa-imp:d71c1df3a79a51ca7953351c"
+      ],
+      "source_type": "METRIC_OBSERVATION",
+      "source_environment": "PROD_READ_ONLY",
+      "observed_at": "2026-10-12T20:33:12.538Z",
+      "hypothesis": "Investigar el recorrido lento puede descubrir una mejora de rendimiento perceptible.",
+      "expected_metric_delta": {
+        "name": "human_journey_duration_ms",
+        "direction": "LOWER",
+        "measurement": "CONTROLLED_OLD_VS_NEW"
+      },
+      "confidence": 0.7,
+      "risk_class": "LOW",
+      "evidence_refs": [
+        "qa-improvement:qa-imp:d71c1df3a79a51ca7953351c"
       ],
       "promotion_state": "CANDIDATE",
       "created_by": "QA-001",
@@ -527,7 +587,7 @@
       "evidence_refs": [
         "qa-improvement:qa-imp:df7d01d86dba70010fa11b83"
       ],
-      "created_at": "2026-10-12T17:54:53.424Z",
+      "created_at": "2026-10-12T20:33:12.538Z",
       "state": "CANDIDATE",
       "next_gate": "OLD_VS_NEW_EXPERIMENT",
       "experiment_contract": {
@@ -590,7 +650,7 @@
       "evidence_refs": [
         "qa-improvement:qa-imp:f79da2012c0d9d6a655fb154"
       ],
-      "created_at": "2026-10-12T17:54:53.424Z",
+      "created_at": "2026-10-12T20:33:12.538Z",
       "state": "CANDIDATE",
       "next_gate": "OLD_VS_NEW_EXPERIMENT",
       "experiment_contract": {
@@ -653,7 +713,7 @@
       "evidence_refs": [
         "qa-improvement:qa-imp:8d10770927b05c3c549b03ec"
       ],
-      "created_at": "2026-10-12T17:54:53.424Z",
+      "created_at": "2026-10-12T20:33:12.538Z",
       "state": "CANDIDATE",
       "next_gate": "OLD_VS_NEW_EXPERIMENT",
       "experiment_contract": {
@@ -716,7 +776,7 @@
       "evidence_refs": [
         "qa-improvement:qa-imp:db213ba0744836beb266503c"
       ],
-      "created_at": "2026-10-12T17:54:53.424Z",
+      "created_at": "2026-10-12T20:33:12.538Z",
       "state": "CANDIDATE",
       "next_gate": "OLD_VS_NEW_EXPERIMENT",
       "experiment_contract": {
@@ -779,7 +839,7 @@
       "evidence_refs": [
         "qa-improvement:qa-imp:e011b20841a4bf5a25c05052"
       ],
-      "created_at": "2026-10-12T17:54:53.424Z",
+      "created_at": "2026-10-12T20:33:12.538Z",
       "state": "CANDIDATE",
       "next_gate": "OLD_VS_NEW_EXPERIMENT",
       "experiment_contract": {
@@ -842,7 +902,7 @@
       "evidence_refs": [
         "qa-improvement:qa-imp:e6ce05846ac5d5edffbd1513"
       ],
-      "created_at": "2026-10-12T17:54:53.424Z",
+      "created_at": "2026-10-12T20:33:12.538Z",
       "state": "CANDIDATE",
       "next_gate": "OLD_VS_NEW_EXPERIMENT",
       "experiment_contract": {
@@ -905,7 +965,7 @@
       "evidence_refs": [
         "qa-improvement:qa-imp:52423800ed61b40ef9734fb3"
       ],
-      "created_at": "2026-10-12T17:54:53.424Z",
+      "created_at": "2026-10-12T20:33:12.538Z",
       "state": "CANDIDATE",
       "next_gate": "OLD_VS_NEW_EXPERIMENT",
       "experiment_contract": {
@@ -968,13 +1028,76 @@
       "evidence_refs": [
         "qa-improvement:qa-imp:57a0188b6184af2eb6e90df8"
       ],
-      "created_at": "2026-10-12T17:54:53.424Z",
+      "created_at": "2026-10-12T20:33:12.538Z",
       "state": "CANDIDATE",
       "next_gate": "OLD_VS_NEW_EXPERIMENT",
       "experiment_contract": {
         "required": true,
         "old_version": "0.1.0",
         "new_version": "0.1.0-rsi-cand.1cca0c65",
+        "baseline_resolution_required": true,
+        "dataset_kinds": [
+          "HISTORICAL",
+          "SYNTHETIC"
+        ],
+        "prod_writes": false,
+        "customer_data_required": false
+      },
+      "preservation_contract": {
+        "preserve_existing": true,
+        "contract_resolution_required": true,
+        "rollback_required": true,
+        "rebuild_required": true,
+        "policy_mutation_allowed": false,
+        "permission_elevation_allowed": false,
+        "budget_elevation_allowed": false
+      },
+      "auto_experiment_eligible": true,
+      "promotion_authorized": false,
+      "persistent_publish_authorized": true,
+      "persistence_scope": "LOCAL_PREPROD_IMPROVEMENT_CANDIDATE_LEDGER_ONLY",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "schema_version": "1.0.0",
+      "state_type": "CEREBRO_VERSIONED_IMPROVEMENT_CANDIDATE",
+      "candidate_id": "cand:623bf2db71fd3995e12dbf25",
+      "company_id": "fenix",
+      "engine_id": "WEB-001",
+      "environment": "PREPROD",
+      "baseline_version": "0.1.0",
+      "baseline_version_source": "LEARNING_CONTEXT_VERSION_REQUIRES_OLD_CONTRACT_RESOLUTION",
+      "baseline_verification_required": true,
+      "candidate_version": "0.1.0-rsi-cand.623bf2db",
+      "learning_runtime_version": "0.1.0",
+      "source_learning_id": "qa-learning:d71c1df3a79a51ca7953351c",
+      "source_event_ids": [
+        "qa-imp:d71c1df3a79a51ca7953351c"
+      ],
+      "source_type": "METRIC_OBSERVATION",
+      "source_environment": "PROD_READ_ONLY",
+      "hypothesis": "Investigar el recorrido lento puede descubrir una mejora de rendimiento perceptible.",
+      "change_intent": "IMPROVE_MEASURED_ENGINE_OUTCOME",
+      "target_metric": {
+        "name": "human_journey_duration_ms",
+        "direction": "LOWER",
+        "measurement": "CONTROLLED_OLD_VS_NEW"
+      },
+      "confidence": 0.7,
+      "risk_class": "LOW",
+      "evidence_refs": [
+        "qa-improvement:qa-imp:d71c1df3a79a51ca7953351c"
+      ],
+      "created_at": "2026-10-12T20:33:12.538Z",
+      "state": "CANDIDATE",
+      "next_gate": "OLD_VS_NEW_EXPERIMENT",
+      "experiment_contract": {
+        "required": true,
+        "old_version": "0.1.0",
+        "new_version": "0.1.0-rsi-cand.623bf2db",
         "baseline_resolution_required": true,
         "dataset_kinds": [
           "HISTORICAL",
