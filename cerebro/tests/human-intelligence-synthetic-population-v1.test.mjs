@@ -44,7 +44,7 @@ test('domain-aware hidden facts are coherent and do not inject finance ontology 
   assert.ok(multi.private_state.hidden_facts.length>=1);
   for(const fact of multi.private_state.hidden_facts){
     assert.match(fact.semantic_key,/^MULTI_/);
-    assert.equal(fact.type,'UNDECLARED_FINANCIAL_OBLIGATION',false);
+    assert.notEqual(fact.type,'UNDECLARED_FINANCIAL_OBLIGATION');
   }
 
   const finance=generateSyntheticHuman('coherent-finance',{scenario_domain:'finance'});
