@@ -1,0 +1,14 @@
+<!doctype html><html><head><meta charset="utf-8"><title>CEREBRO Voice Adapter QA</title><style>html,body{margin:0;width:100%;height:100%;background:#01060a;color:#7fdff8;font:11px monospace}#m{padding:10px}</style></head><body><div id="m">VOICE ADAPTER QA BOOT…</div><script>'use strict';
+const U={
+ BASE:'https://raw.githubusercontent.com/carlosjmunoz78/fenix-capital-inmo-map/76a19de070a1af5c197557a79acec2c51227507e/lab/cerebro-visual/index.html',
+ SIGNAL:'https://raw.githubusercontent.com/carlosjmunoz78/fenix-capital-inmo-map/543a5f007c6dc4e82d75693827be7ee37b3189df/lab/cerebro-visual/signal-propagation-v1.js',
+ MOTION:'https://raw.githubusercontent.com/carlosjmunoz78/fenix-capital-inmo-map/868dbeb728fe46fe7154be54bdb7f2e4e484f79b/lab/cerebro-visual/motion-controller-v1.js',
+ AFFECT:'https://raw.githubusercontent.com/carlosjmunoz78/fenix-capital-inmo-map/a38e6b83adff7eaf5bc1a3de85b768cb3ca068d8/lab/cerebro-visual/affect-controller-v1.js',
+ CONV:'https://raw.githubusercontent.com/carlosjmunoz78/fenix-capital-inmo-map/64aa19b88d61e2be62c8d0fc7ddc23258f860bd3/lab/cerebro-visual/conversation-motion-v1.js',
+ VIEWER:'https://raw.githubusercontent.com/carlosjmunoz78/fenix-capital-inmo-map/a2954957152c93e8cba2cf6127fe05e719d04ca3/lab/cerebro-visual/artifact-viewer-v2.js',
+ VOICE:'https://raw.githubusercontent.com/carlosjmunoz78/fenix-capital-inmo-map/46438ccda51386f721d4413fd5a2ba3c9ac9abe3/lab/cerebro-visual/voice-001-adapter-v0.js'};
+Promise.all(Object.entries(U).map(([k,u])=>fetch(u,{cache:'no-store'}).then(r=>{if(!r.ok)throw Error(k+' '+r.status);return r.text()}))).then(([base,signal,motion,affect,conv,viewer,voice])=>{
+ document.open();document.write(base);document.close();
+ setTimeout(()=>{try{Function(signal)();Function(motion)();Function(affect)();Function(conv)();Function(viewer)();Function(voice)()}catch(e){const b=document.createElement('div');b.textContent='VOICE STACK EXEC FAIL · '+e.message;Object.assign(b.style,{position:'fixed',right:'18px',top:'152px',zIndex:60,color:'#ff9f9f',background:'rgba(20,0,0,.86)',padding:'8px',font:'10px monospace'});document.body.appendChild(b)}},110);
+}).catch(e=>{document.getElementById('m').textContent='VOICE STACK QA FAIL · '+e.message});
+</script></body></html>
