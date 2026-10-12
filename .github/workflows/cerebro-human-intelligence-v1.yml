@@ -23,7 +23,7 @@ env:
 jobs:
   lab-contract-gate:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
 
@@ -35,7 +35,7 @@ jobs:
       - name: Install existing repository dependencies
         run: npm ci
 
-      - name: Validate Human Intelligence contracts planner rights HumanProfile hard gates synthetic population conversation gym and real actor boundary
+      - name: Validate Human Intelligence contracts planner rights HumanProfile hard gates synthetic population conversation gym metrics and real actor boundary
         run: |
           node --test \
             cerebro/tests/human-intelligence-contract-v1.test.mjs \
@@ -44,6 +44,7 @@ jobs:
             cerebro/tests/human-intelligence-profile-gates-v1.test.mjs \
             cerebro/tests/human-intelligence-synthetic-population-v1.test.mjs \
             cerebro/tests/human-intelligence-conversation-gym-v1.test.mjs \
+            cerebro/tests/human-intelligence-conversation-metrics-v1.test.mjs \
             cerebro/tests/human-intelligence-real-actor-gate-v1.test.mjs
 
       - name: Materialize deterministic 240-episode LAB plan
@@ -64,6 +65,12 @@ jobs:
         run: |
           node cerebro/human-intelligence/lab/run-real-old-sample.mjs \
             --out artifacts/human-intelligence/real-old-sample.v1.json
+
+      - name: Run representative physical OLD baseline batch
+        run: |
+          node cerebro/human-intelligence/lab/run-real-old-batch.mjs \
+            --out artifacts/human-intelligence/real-old-batch.v1.json
+          jq '{status,scope,cases_total,metrics:{episodes_verified_real_actor,actor_turns_total,duplicate_reply_rate,useful_question_rate,ignored_concern_rate,grounding_rate,clear_explanation_rate,hidden_facts_revealed_total,ontology_leaks_total,actor_errors_total}}' artifacts/human-intelligence/real-old-batch.v1.json
 
       - name: Enforce immutable safety boundaries and physical actor evidence
         run: |
@@ -112,6 +119,23 @@ jobs:
             .safety.trading_access==false and
             .safety.additional_cost_eur==0
           ' artifacts/human-intelligence/real-old-sample.v1.json >/dev/null
+
+          jq -e '
+            .state_type=="CEREBRO_REAL_OLD_BASELINE_BATCH_V1" and
+            .status=="GREEN" and
+            .cases_total==12 and
+            .metrics.episodes_verified_real_actor==12 and
+            .metrics.verified_real_actor_rate==1 and
+            .metrics.actor_errors_total==0 and
+            .metrics.ontology_leaks_total==0 and
+            .safety.prod_invoked==false and
+            .safety.prod_write_authorized==false and
+            .safety.prod_execution_enabled==false and
+            .safety.contains_customer_data==false and
+            .safety.trading_access==false and
+            .safety.additional_cost_eur==0 and
+            .safety.learning_dispatch_authorized==false
+          ' artifacts/human-intelligence/real-old-batch.v1.json >/dev/null
 
       - name: Upload LAB planning population and physical actor evidence
         if: always()
