@@ -6,24 +6,31 @@ const OLD=Object.freeze({
   source_sha256:'a32fc26e4b328d0477bc53f0ae9085c0d5d280703779db5ac8593fd9b718553a',
   source_ref:'supabase/functions/cerebro-human-old-actor-preprod-v0/index.ts'
 });
-const NEW=Object.freeze({
-  service:'cerebro-human-new-actor-preprod-v1',
-  source_version:'human-intelligence-new-v1.1',
-  source_ref:'supabase/functions/cerebro-human-new-actor-preprod-v1/'
-});
+const NEW_SERVICE='cerebro-human-new-actor-preprod-v1';
+const NEW_SOURCE_REF='supabase/functions/cerebro-human-new-actor-preprod-v1/';
+
+function candidateFromGolden(golden){
+  const evidence=golden?.new_preflight?.actor_evidence;
+  if(!evidence||evidence.source_service!==NEW_SERVICE)throw new Error('attested_new_actor_required');
+  if(typeof evidence.source_version!=='string'||!/^human-intelligence-new-v1\.2@[a-f0-9]{40}$/i.test(evidence.source_version))throw new Error('attested_candidate_version_required');
+  if(evidence.provenance_kind!=='GIT_COMMIT_BLOB'||!/^[a-f0-9]{40}$/i.test(String(evidence.source_commit_sha??''))||!/^[a-f0-9]{40}$/i.test(String(evidence.source_blob_sha??'')))throw new Error('attested_candidate_provenance_required');
+  if(!evidence.source_version.endsWith(`@${evidence.source_commit_sha}`))throw new Error('candidate_commit_mismatch');
+  return Object.freeze({service:NEW_SERVICE,source_version:evidence.source_version,provenance_kind:'GIT_COMMIT_BLOB',source_commit_sha:evidence.source_commit_sha,source_blob_sha:evidence.source_blob_sha,source_ref:NEW_SOURCE_REF});
+}
 
 export function buildHumanIntelligenceRollbackManifest({decision,golden}={}){
-  if(decision?.verdict!=='NEW_BETTER')throw new Error('new_better_required');
-  if(golden?.status!=='GREEN'||golden?.pairs_total!==240)throw new Error('green_full_golden_required');
+  if(decision?.verdict!=='NEW_BETTER'||decision?.hard_gates?.declared_episode_hard_gates!==true)throw new Error('new_better_with_hard_gates_required');
+  if(golden?.status!=='GREEN'||golden?.pairs_total!==240||golden?.candidate_hard_gates?.summary?.all_green!==true)throw new Error('green_full_golden_required');
+  const candidate=candidateFromGolden(golden);
   return Object.freeze({
     state_type:'CEREBRO_HUMAN_INTELLIGENCE_ROLLBACK_MANIFEST_V1',
     company_id:'fenix',engine_id:'SIM-001',environment:'PREPROD',version:'1.0.0',
     rollback_id:`hi:rollback:${OLD.source_sha256.slice(0,16)}`,
-    baseline:OLD,candidate:NEW,
+    baseline:OLD,candidate,
     trigger_policy:'ANY_CRITICAL_GATE_OR_CERTIFIED_METRIC_REGRESSION',
     rollback_action:'RESTORE_OLD_PREPROD_ACTOR_ROUTE',
     verification:['OLD_HEALTH_ATTESTED','OLD_MULTI_TURN_GREEN','NO_PROD_INVOCATION','NO_CUSTOMER_DATA','NO_TRADING'],
-    rebuild:{old_source_ref:OLD.source_ref,new_source_ref:NEW.source_ref,deterministic_from_git:true},
+    rebuild:{old_source_ref:OLD.source_ref,new_source_ref:candidate.source_ref,deterministic_from_git:true},
     tested_contractually:true,physical_rollback_execution_required_before_prod:true,
     prod_authorized:false,prod_write_authorized:false,trading_access:false,additional_cost_eur:0
   });
@@ -52,9 +59,9 @@ export function buildHumanIntelligencePromotionPackage({decision,golden,learning
   const post=deterministicPostMetrics(golden);
   const plan=createPromotionPlan({
     company_id:'fenix',engine_id:'SIM-001',environment:'PREPROD',version:'1.0.0',
-    baseline_version:OLD.source_version,candidate_version:NEW.source_version,
+    baseline_version:OLD.source_version,candidate_version:rollback.candidate.source_version,
     judge_decision:'PASS',tribunal_decision:'GREEN',
-    rollback_ref:rollback.rollback_id,rebuild_ref:'git:cerebro/human-intelligence:v1',
+    rollback_ref:rollback.rollback_id,rebuild_ref:`git:${rollback.candidate.source_commit_sha}:${rollback.candidate.source_blob_sha}`,
     post_metrics:post,canary_percent:5
   });
   return Object.freeze({
