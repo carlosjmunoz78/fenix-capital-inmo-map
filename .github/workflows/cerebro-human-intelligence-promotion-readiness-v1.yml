@@ -57,7 +57,10 @@ jobs:
             printf '%s\n' "$bad" >&2
             exit 1
           fi
-          test -z "$(printf '%s\n' "$changed" | grep -E '^(src/|tests/|public/|scripts/|supabase/migrations/|supabase/functions/(?!cerebro-human-old-actor-preprod-v0|cerebro-human-new-actor-preprod-v1))' || true)"
+          if printf '%s\n' "$changed" | grep -Eq '^(src/|tests/|public/|scripts/|supabase/migrations/|\.github/workflows/(preprod-build|app-restoration-build|prod-[^/]+)\.yml$)'; then
+            echo 'Protected App/PROD surface changed.' >&2
+            exit 1
+          fi
 
       - name: Install dependencies reproducibly
         run: npm ci
