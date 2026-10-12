@@ -1,7 +1,7 @@
 <!doctype html><html><head><meta charset="utf-8"><title>CEREBRO Signal QA Harness</title><style>html,body{margin:0;width:100%;height:100%;background:#01060a;color:#7fdff8;font:11px monospace}#m{padding:10px}</style></head><body><div id="m">SIGNAL QA BOOT…</div><script>'use strict';
 const BASE='https://raw.githubusercontent.com/carlosjmunoz78/fenix-capital-inmo-map/76a19de070a1af5c197557a79acec2c51227507e/lab/cerebro-visual/index.html';
 const SIGNAL='https://raw.githubusercontent.com/carlosjmunoz78/fenix-capital-inmo-map/55b51aaa95a3ce4ce45658b4844bfb8ebf265fbb/lab/cerebro-visual/signal-propagation-v1.js';
-const POLISH='https://raw.githubusercontent.com/carlosjmunoz78/fenix-capital-inmo-map/401e52829a2373029a269ae1e77d85ba37bb400e/lab/cerebro-visual/reference-polish-v1.js';
+const POLISH='https://raw.githubusercontent.com/carlosjmunoz78/fenix-capital-inmo-map/fc0809de087d8d27881988cd04b9fe1d47dc6a99/lab/cerebro-visual/reference-polish-v1.js';
 Promise.all([
  fetch(BASE,{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('BASE '+r.status);return r.text()}),
  fetch(SIGNAL,{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('SIGNAL '+r.status);return r.text()}),
