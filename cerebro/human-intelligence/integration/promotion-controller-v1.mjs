@@ -1,5 +1,7 @@
 import { createPromotionPlan, advancePromotion, postMonitor } from '../../runtime/promotion-pipeline.mjs';
 
+const EVIDENCE_ENGINE_ID='SIM-001';
+const PROMOTION_TARGET_ENGINE_ID='CHAT-001';
 const OLD=Object.freeze({
   service:'cerebro-human-old-actor-preprod-v0',
   source_version:'prod-v33-frozen-old',
@@ -24,7 +26,7 @@ export function buildHumanIntelligenceRollbackManifest({decision,golden}={}){
   const candidate=candidateFromGolden(golden);
   return Object.freeze({
     state_type:'CEREBRO_HUMAN_INTELLIGENCE_ROLLBACK_MANIFEST_V1',
-    company_id:'fenix',engine_id:'SIM-001',environment:'PREPROD',version:'1.0.0',
+    company_id:'fenix',engine_id:EVIDENCE_ENGINE_ID,environment:'PREPROD',version:'1.0.0',
     rollback_id:`hi:rollback:${OLD.source_sha256.slice(0,16)}`,
     baseline:OLD,candidate,
     trigger_policy:'ANY_CRITICAL_GATE_OR_CERTIFIED_METRIC_REGRESSION',
@@ -56,9 +58,10 @@ export function buildHumanIntelligencePromotionPackage({decision,golden,learning
   if(learningReport?.state_type!=='CEREBRO_RSI_UNIVERSAL_LEARNING_EVENT_REPORT'||learningReport.events_total!==1)throw new Error('canonical_learning_report_required');
   const event=learningReport.events[0];
   if(event.source_type!=='TRIBUNAL_DECISION'||event.environment!=='PREPROD_CANDIDATE'||event.prod_authorized!==false)throw new Error('canonical_tribunal_learning_event_required');
+  if(event.engine_id!==EVIDENCE_ENGINE_ID)throw new Error('simulation_evidence_engine_required');
   const post=deterministicPostMetrics(golden);
   const plan=createPromotionPlan({
-    company_id:'fenix',engine_id:'SIM-001',environment:'PREPROD',version:'1.0.0',
+    company_id:'fenix',engine_id:PROMOTION_TARGET_ENGINE_ID,environment:'PREPROD',version:'1.0.0',
     baseline_version:OLD.source_version,candidate_version:rollback.candidate.source_version,
     judge_decision:'PASS',tribunal_decision:'GREEN',
     rollback_ref:rollback.rollback_id,rebuild_ref:`git:${rollback.candidate.source_commit_sha}:${rollback.candidate.source_blob_sha}`,
@@ -66,7 +69,10 @@ export function buildHumanIntelligencePromotionPackage({decision,golden,learning
   });
   return Object.freeze({
     state_type:'CEREBRO_HUMAN_INTELLIGENCE_PROMOTION_PACKAGE_V1',status:'READY_PREPROD',
-    learning_event_id:event.event_id,rollback,plan,
+    learning_event_id:event.event_id,
+    evidence_source:{engine_id:EVIDENCE_ENGINE_ID,kind:'SIMULATION_AND_PHYSICAL_OLD_VS_NEW'},
+    promotion_target:{engine_id:PROMOTION_TARGET_ENGINE_ID,capability:'HUMAN_CONVERSATION',authority_gateway:'cerebro-console-gateway-v0',candidate_overlay:'cerebro-console-gateway-human-v1-canary'},
+    rollback,plan,
     authority:{candidate_package_ready:true,preprod_deploy_authorized:false,shadow_activation_authorized:false,canary_activation_authorized:false,prod_authorized:false,prod_write_authorized:false},
     next_gate:'PHYSICAL_PREPROD_ROLLBACK_REHEARSAL_AND_SHADOW',
     safety:{contains_customer_data:false,contains_secrets:false,trading_access:false,additional_cost_eur:0}
