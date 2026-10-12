@@ -5,6 +5,7 @@ on:
     paths:
       - 'cerebro/human-intelligence/**'
       - 'cerebro/tests/human-intelligence-*.test.mjs'
+      - 'supabase/functions/cerebro-human-old-actor-preprod-v0/**'
       - '.github/workflows/cerebro-human-intelligence-v1.yml'
   workflow_dispatch:
 
@@ -14,6 +15,7 @@ concurrency:
 
 permissions:
   contents: read
+  id-token: write
 
 env:
   BASELINE_SHA: 3b6b3f45fb3eea624b1834d0c592c6b6f6550e1e
@@ -57,35 +59,12 @@ jobs:
             --seed-prefix "${BASELINE_SHA}-population-v1" \
             --out artifacts/human-intelligence/population-manifest.v1.json
 
-      - name: Record physical OLD actor snapshot and current executable gate
+      - name: Run physical PREPROD OLD actor preflight and first multi-turn episode
         run: |
-          mkdir -p artifacts/human-intelligence
-          cat > artifacts/human-intelligence/real-actor-preflight.v1.json <<'JSON'
-          {
-            "state_type": "CEREBRO_REAL_ACTOR_PREFLIGHT_V1",
-            "old_actor": {
-              "service": "cerebro-console-gateway-v0",
-              "prod_project_ref": "cluhljgonannaafpmblx",
-              "deployed_version": 33,
-              "deployed_sha256": "a32fc26e4b328d0477bc53f0ae9085c0d5d280703779db5ac8593fd9b718553a",
-              "invocation_for_gym": "FORBIDDEN"
-            },
-            "required_safe_actor": {
-              "service": "cerebro-human-old-actor-preprod-v0",
-              "project_ref": "hnqlnvakzaywtafeiybt",
-              "environment": "PREPROD"
-            },
-            "status": "REAL_CEREBRO_ACTOR_UNAVAILABLE",
-            "reason": "SAFE_PREPROD_ACTOR_NOT_YET_PHYSICALLY_ATTESTED",
-            "prod_write_authorized": false,
-            "prod_execution_enabled": false,
-            "customer_data": false,
-            "trading_access": false,
-            "additional_cost_eur": 0
-          }
-          JSON
+          node cerebro/human-intelligence/lab/run-real-old-sample.mjs \
+            --out artifacts/human-intelligence/real-old-sample.v1.json
 
-      - name: Enforce immutable safety boundaries
+      - name: Enforce immutable safety boundaries and physical actor evidence
         run: |
           jq -e '
             .state_type=="CEREBRO_HUMAN_INTELLIGENCE_SCENARIO_PLAN_V1" and
@@ -117,17 +96,23 @@ jobs:
           ' artifacts/human-intelligence/population-manifest.v1.json >/dev/null
 
           jq -e '
-            .state_type=="CEREBRO_REAL_ACTOR_PREFLIGHT_V1" and
-            .old_actor.invocation_for_gym=="FORBIDDEN" and
-            .required_safe_actor.environment=="PREPROD" and
-            .prod_write_authorized==false and
-            .prod_execution_enabled==false and
-            .customer_data==false and
-            .trading_access==false and
-            .additional_cost_eur==0
-          ' artifacts/human-intelligence/real-actor-preflight.v1.json >/dev/null
+            .state_type=="CEREBRO_REAL_OLD_ACTOR_PHYSICAL_SAMPLE_V1" and
+            .status=="GREEN" and
+            .preflight.ok==true and
+            .preflight.actor_evidence.environment=="PREPROD" and
+            .preflight.actor_evidence.source_mode=="FROZEN_PROD_V33_SANDBOX" and
+            .episode.real_cerebro_actor==true and
+            .episode.turns>=3 and
+            .episode.completion_reason=="PREPROD_MULTI_TURN_CONNECTIVITY_CONFIRMED" and
+            .safety.prod_invoked==false and
+            .safety.prod_write_authorized==false and
+            .safety.prod_execution_enabled==false and
+            .safety.contains_customer_data==false and
+            .safety.trading_access==false and
+            .safety.additional_cost_eur==0
+          ' artifacts/human-intelligence/real-old-sample.v1.json >/dev/null
 
-      - name: Upload LAB planning population and actor-gate evidence
+      - name: Upload LAB planning population and physical actor evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
