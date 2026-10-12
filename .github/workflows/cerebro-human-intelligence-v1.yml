@@ -36,7 +36,7 @@ jobs:
       - name: Install existing repository dependencies
         run: npm ci
 
-      - name: Validate Human Intelligence contracts planner rights HumanProfile hard gates synthetic population conversation gym metrics NEW planner and real actor boundary
+      - name: Validate Human Intelligence contracts planner rights HumanProfile hard gates synthetic population conversation gym multi-signal metrics NEW planner and real actor boundary
         run: |
           node --test \
             cerebro/tests/human-intelligence-contract-v1.test.mjs \
@@ -72,13 +72,13 @@ jobs:
         run: |
           node cerebro/human-intelligence/lab/run-real-old-batch.mjs \
             --out artifacts/human-intelligence/real-old-batch.v1.json
-          jq '{status,scope,cases_total,metrics:{episodes_verified_real_actor,actor_turns_total,duplicate_reply_rate,useful_question_rate,ignored_concern_rate,grounding_rate,clear_explanation_rate,hidden_facts_revealed_total,ontology_leaks_total,actor_errors_total}}' artifacts/human-intelligence/real-old-batch.v1.json
+          jq '{status,scope,cases_total,metrics:{episodes_verified_real_actor,actor_turns_total,duplicate_reply_rate,signal_question_rate,signal_ignored_concern_rate,signal_acknowledged_concern_rate,signal_grounding_rate,signal_clear_explanation_rate,signal_question_budget_ok_rate,hidden_facts_revealed_total,ontology_leaks_total,actor_errors_total}}' artifacts/human-intelligence/real-old-batch.v1.json
 
-      - name: Run physical paired OLD vs NEW directional gate
+      - name: Run physical paired OLD vs NEW multi-signal directional gate
         run: |
           node cerebro/human-intelligence/lab/run-real-old-vs-new-batch.mjs \
             --out artifacts/human-intelligence/old-vs-new-batch.v1.json
-          jq '{status,scope,cases_total,old:{duplicate_reply_rate:.old_metrics.duplicate_reply_rate,useful_question_rate:.old_metrics.useful_question_rate,ignored_concern_rate:.old_metrics.ignored_concern_rate},new:{duplicate_reply_rate:.new_metrics.duplicate_reply_rate,useful_question_rate:.new_metrics.useful_question_rate,ignored_concern_rate:.new_metrics.ignored_concern_rate},deltas,gates,decision}' artifacts/human-intelligence/old-vs-new-batch.v1.json
+          jq '{status,scope,cases_total,old:{duplicate_reply_rate:.old_metrics.duplicate_reply_rate,question_rate:.old_metrics.signal_question_rate,ignored_concern_rate:.old_metrics.signal_ignored_concern_rate,acknowledged_concern_rate:.old_metrics.signal_acknowledged_concern_rate,grounding_rate:.old_metrics.signal_grounding_rate,clear_explanation_rate:.old_metrics.signal_clear_explanation_rate},new:{duplicate_reply_rate:.new_metrics.duplicate_reply_rate,question_rate:.new_metrics.signal_question_rate,ignored_concern_rate:.new_metrics.signal_ignored_concern_rate,acknowledged_concern_rate:.new_metrics.signal_acknowledged_concern_rate,grounding_rate:.new_metrics.signal_grounding_rate,clear_explanation_rate:.new_metrics.signal_clear_explanation_rate,question_budget_ok_rate:.new_metrics.signal_question_budget_ok_rate},deltas,gates,decision}' artifacts/human-intelligence/old-vs-new-batch.v1.json
 
       - name: Enforce immutable safety boundaries and physical actor evidence
         run: |
@@ -160,6 +160,13 @@ jobs:
             .gates.duplicate_replies_improve==true and
             .gates.useful_questions_improve==true and
             .gates.ignored_concern_improves_or_holds==true and
+            .gates.concern_acknowledgement_improves_or_holds==true and
+            .gates.grounding_non_regression==true and
+            .gates.clear_explanation_non_regression==true and
+            .gates.question_budget_controlled==true and
+            .gates.no_false_certainty_regression==true and
+            .gates.no_pressure_regression==true and
+            .gates.no_excessive_detail_regression==true and
             .decision.candidate_advances_to_next_lab_gate==true and
             .decision.prod_promotion_authorized==false and
             .decision.preprod_promotion_authorized==false and
