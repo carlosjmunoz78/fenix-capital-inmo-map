@@ -35,6 +35,16 @@ function assertSafeActorInput(input) {
   }
 }
 
+function validSourceProvenance(evidence){
+  if(evidence?.provenance_kind==='GIT_COMMIT_BLOB'){
+    if(typeof evidence.source_commit_sha!=='string'||!/^[a-f0-9]{40}$/i.test(evidence.source_commit_sha))return false;
+    if(typeof evidence.source_blob_sha!=='string'||!/^[a-f0-9]{40}$/i.test(evidence.source_blob_sha))return false;
+    if(typeof evidence.source_version!=='string'||!evidence.source_version.endsWith(`@${evidence.source_commit_sha}`))return false;
+    return true;
+  }
+  return typeof evidence?.source_sha256==='string'&&/^[a-f0-9]{64}$/i.test(evidence.source_sha256);
+}
+
 export function verifyRealActorEvidence(evidence,{allowedSourceModes=ALLOWED_SOURCE_MODES}={}) {
   if(!evidence||typeof evidence!=='object') return false;
   if(evidence.real_cerebro_actor!==true) return false;
@@ -47,7 +57,7 @@ export function verifyRealActorEvidence(evidence,{allowedSourceModes=ALLOWED_SOU
   if(evidence.source_scope!=='SAFE_CONVERSATIONAL_CORE') return false;
   if(evidence.auth_mode!=='GITHUB_OIDC') return false;
   if(typeof evidence.source_version!=='string'||!evidence.source_version) return false;
-  if(typeof evidence.source_sha256!=='string'||!/^[a-f0-9]{64}$/i.test(evidence.source_sha256)) return false;
+  if(!validSourceProvenance(evidence)) return false;
   return true;
 }
 
@@ -110,7 +120,16 @@ export function createRealCerebroActorAdapter({url,accessToken,anonKey,authMode=
     if(!verifyRealActorEvidence(body?.actor_evidence,{allowedSourceModes})) throw new RealCerebroActorUnavailable('UNVERIFIED_ACTOR_EVIDENCE');
     const text=String(body?.message??body?.text??'').trim();
     if(!text) throw new RealCerebroActorUnavailable('EMPTY_ACTOR_RESPONSE');
-    return {text,actor_evidence:body.actor_evidence,actor_status:String(body?.status??'OK'),actor_intent:body?.intent??null};
+    return {
+      text,
+      actor_evidence:body.actor_evidence,
+      actor_status:String(body?.status??'OK'),
+      actor_intent:body?.intent??null,
+      actor_executed:body?.executed===true,
+      actor_epistemic_state:body?.epistemic_state??null,
+      actor_truth_basis:body?.truth_basis??null,
+      actor_context_applied:body?.context_applied===true
+    };
   };
 }
 
