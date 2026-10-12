@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { buildUniversalLearningEventReport } from '../../runtime/universal-learning-ingress.mjs';
 
 function finite(value,label){const n=Number(value);if(!Number.isFinite(n))throw new Error(`${label}_required`);return n;}
@@ -5,6 +6,8 @@ function assertSafe(decision,golden){
   if(decision?.state_type!=='CEREBRO_HUMAN_INTELLIGENCE_TRIBUNAL_DECISION_V1')throw new Error('tribunal_decision_required');
   if(golden?.state_type!=='CEREBRO_HUMAN_INTELLIGENCE_FULL_GOLDEN_OLD_VS_NEW_V1')throw new Error('full_golden_required');
   if(decision.verdict!=='NEW_BETTER')throw new Error('new_better_required');
+  if(decision.hard_gates?.declared_episode_hard_gates!==true)throw new Error('declared_episode_hard_gates_required');
+  if(golden.candidate_hard_gates?.summary?.all_green!==true||golden.candidate_hard_gates?.summary?.episodes_green!==240)throw new Error('green_candidate_hard_gates_required');
   if(decision.promotion?.prod_authorized!==false||decision.promotion?.prod_write_authorized!==false)throw new Error('authority_expansion_forbidden');
   if(golden.safety?.contains_customer_data!==false||golden.safety?.prod_write_authorized!==false||golden.safety?.trading_access!==false||Number(golden.safety?.additional_cost_eur)!==0)throw new Error('unsafe_golden_evidence');
 }
@@ -29,8 +32,11 @@ export function buildHumanIntelligenceLearningSignal({decision,golden,version='1
     summary.new.duplicate_reply_rate,summary.new.question_rate,summary.new.ignored_concern_rate,summary.new.acknowledged_concern_rate,summary.new.grounding_rate,
     summary.strict_quality_improvements.join(',')
   ].join(':');
+  const evidenceDigest=createHash('sha256').update(evidenceIdentity,'utf8').digest('hex');
+  const signalId=`human-intelligence-tribunal:${version}:${decision.verdict}:${evidenceDigest}`;
+  if(signalId.length>240)throw new Error('signal_id_length_guard');
   return Object.freeze({
-    signal_id:`human-intelligence-tribunal:${version}:${decision.verdict}:${evidenceIdentity}`,
+    signal_id:signalId,
     signal_type:'TRIBUNAL_DECISION',
     company_id:'fenix',engine_id:'SIM-001',source_environment:'PREPROD',version,
     observed_at:new Date(observedAt).toISOString(),severity:'LOW',confidence:.99,risk_class:'LOW',
@@ -38,7 +44,7 @@ export function buildHumanIntelligenceLearningSignal({decision,golden,version='1
     hypothesis:'NEW conversational behavior should remain a bounded PREPROD learning candidate and be promoted only through existing regression, rollback and promotion gates.',
     metric:{name:'human_conversation_quality',direction:'HIGHER',measurement:'FULL_240_PAIRED_GOLDEN_AND_POST_PROMOTION_MONITORING'},
     evidence_refs:['artifact:full-golden-old-vs-new.v1.json','artifact:tribunal-decision.v1.json'],
-    payload:{...summary,evidence_identity:evidenceIdentity},
+    payload:{...summary,evidence_identity:evidenceIdentity,evidence_sha256:evidenceDigest},
     contains_customer_data:false,contains_secrets:false,additional_cost_eur:0,
     prod_authorized:false,prod_write_authorized:false,trading_access:false
   });
