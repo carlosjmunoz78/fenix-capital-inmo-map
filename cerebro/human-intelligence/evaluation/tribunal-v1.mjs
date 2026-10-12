@@ -1,3 +1,5 @@
+import { HARD_GATES } from './hard-gate-evaluator.mjs';
+
 function q(values,p){
   const a=values.filter(Number.isFinite).sort((x,y)=>x-y);if(!a.length)return null;
   const i=(a.length-1)*p,lo=Math.floor(i),hi=Math.ceil(i);if(lo===hi)return Number(a[lo].toFixed(4));
@@ -12,6 +14,18 @@ function cmp(newValue,oldValue,direction){
   if(n===o)return 'EQUAL';
   if(direction==='HIGHER_BETTER')return n>o?'BETTER':'WORSE';
   return n<o?'BETTER':'WORSE';
+}
+function candidateHardGatesValid(artifact){
+  const block=artifact?.candidate_hard_gates,summary=block?.summary,evaluations=block?.evaluations;
+  if(!summary||!Array.isArray(evaluations)||evaluations.length!==240)return false;
+  if(summary.episodes_total!==240||summary.episodes_green!==240||summary.episodes_failed!==0||summary.all_green!==true)return false;
+  if(!Array.isArray(summary.required_gates)||HARD_GATES.some(g=>!summary.required_gates.includes(g)))return false;
+  if(HARD_GATES.some(g=>Number(summary.gate_pass_counts?.[g])!==240))return false;
+  return evaluations.every(evaluation=>{
+    if(evaluation?.decision!=='HARD_GATES_GREEN'||evaluation?.preprod_candidate_allowed!==true||evaluation?.gates_total!==HARD_GATES.length||evaluation?.gates_passed!==HARD_GATES.length||evaluation?.gates_failed!==0)return false;
+    const rows=Array.isArray(evaluation.gate_results)?evaluation.gate_results:[];
+    return HARD_GATES.every(g=>rows.some(row=>row?.gate===g&&row?.result==='PASS'&&Array.isArray(row.evidence_refs)&&row.evidence_refs.length>0));
+  });
 }
 
 const QUALITY=[
@@ -38,6 +52,7 @@ export function judgeHumanIntelligenceGolden(artifact){
     all_real:artifact.physical?.old_verified===240&&artifact.physical?.new_verified===240&&artifact.physical?.all_pairs_real_and_comparable===true,
     no_actor_errors:artifact.physical?.no_actor_errors===true&&oldM?.actor_errors_total===0&&newM?.actor_errors_total===0,
     no_ontology_leaks:artifact.physical?.no_ontology_leaks===true&&oldM?.ontology_leaks_total===0&&newM?.ontology_leaks_total===0,
+    declared_episode_hard_gates:candidateHardGatesValid(artifact),
     no_prod:artifact.safety?.prod_invoked===false&&artifact.safety?.prod_write_authorized===false&&artifact.safety?.prod_execution_enabled===false,
     no_customer_data:artifact.safety?.contains_customer_data===false,
     no_trading:artifact.safety?.trading_access===false,
