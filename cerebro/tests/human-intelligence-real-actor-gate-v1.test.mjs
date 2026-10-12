@@ -21,11 +21,13 @@ const EVIDENCE={
   trading_access:false,
   additional_cost_eur:0,
   source_version:'prod-v33-frozen-old',
-  source_sha256:'a32fc26e4b328d0477bc53f0ae9085c0d5d280703779db5ac8593fd9b718553a'
+  source_sha256:'a32fc26e4b328d0477bc53f0ae9085c0d5d280703779db5ac8593fd9b718553a',
+  source_mode:'FROZEN_PROD_V33_SANDBOX',
+  source_scope:'SAFE_CONVERSATIONAL_CORE',
+  auth_mode:'GITHUB_OIDC'
 };
 
 function response(body,status=200){return {ok:status>=200&&status<300,status,json:async()=>body};}
-
 const observer=async()=> 'GROUNDING_CONFIRMATION';
 const evaluator=async({transcript})=>({complete:transcript.length>=1,reason:'TEST_COMPLETE'});
 
@@ -36,27 +38,31 @@ test('real actor target rejects PROD and non-PREPROD routes',()=>{
   assert.equal(validateRealActorTarget(PREPROD),PREPROD);
 });
 
-test('real actor evidence is fail-closed',()=>{
+test('real actor evidence is fail-closed and requires frozen OLD lineage',()=>{
   assert.equal(verifyRealActorEvidence(EVIDENCE),true);
   assert.equal(verifyRealActorEvidence({...EVIDENCE,environment:'PROD'}),false);
   assert.equal(verifyRealActorEvidence({...EVIDENCE,prod_write_authorized:true}),false);
   assert.equal(verifyRealActorEvidence({...EVIDENCE,customer_data:true}),false);
+  assert.equal(verifyRealActorEvidence({...EVIDENCE,source_mode:'UNKNOWN'}),false);
   assert.equal(verifyRealActorEvidence({...EVIDENCE,source_sha256:'bad'}),false);
 });
 
-test('adapter requires credentials before any network call',()=>{
-  assert.throws(()=>createRealCerebroActorAdapter({url:PREPROD,anonKey:'anon'}),/ACCESS_TOKEN_MISSING/);
-  assert.throws(()=>createRealCerebroActorAdapter({url:PREPROD,accessToken:'jwt'}),/ANON_KEY_MISSING/);
+test('OIDC adapter requires token but no static secret or anon key',()=>{
+  assert.throws(()=>createRealCerebroActorAdapter({url:PREPROD}),/ACCESS_TOKEN_MISSING/);
+  assert.doesNotThrow(()=>createRealCerebroActorAdapter({url:PREPROD,accessToken:'github-oidc',fetchImpl:async()=>response({})}));
+  assert.throws(()=>createRealCerebroActorAdapter({url:PREPROD,accessToken:'jwt',authMode:'supabase_jwt'}),/ANON_KEY_MISSING/);
 });
 
 test('preflight accepts only attested PREPROD actor',async()=>{
   const calls=[];
   const fetchImpl=async(url,init)=>{calls.push({url,init});return response({status:'ok',actor_evidence:EVIDENCE});};
-  const out=await preflightRealCerebroActor({url:PREPROD,accessToken:'jwt',anonKey:'anon',fetchImpl});
+  const out=await preflightRealCerebroActor({url:PREPROD,accessToken:'github-oidc',fetchImpl});
   assert.equal(out.ok,true);
+  assert.equal(out.auth_mode,'github_oidc');
   assert.equal(out.actor_evidence.environment,'PREPROD');
   assert.equal(calls.length,1);
   assert.match(calls[0].url,/\/health$/);
+  assert.equal('apikey' in calls[0].init.headers,false);
 });
 
 test('harness marks actor real only when every completed actor turn is attested',async()=>{
@@ -79,7 +85,7 @@ test('harness refuses forged unsafe real-actor evidence',async()=>{
 test('network adapter never sends simulator private state and carries only LAB context',async()=>{
   let captured;
   const fetchImpl=async(_url,init)=>{captured=JSON.parse(init.body);return response({status:'OK',message:'Respuesta OLD segura.',actor_evidence:EVIDENCE});};
-  const adapter=createRealCerebroActorAdapter({url:PREPROD,accessToken:'jwt',anonKey:'anon',fetchImpl});
+  const adapter=createRealCerebroActorAdapter({url:PREPROD,accessToken:'github-oidc',fetchImpl});
   const output=await adapter({seed:'1',scenario_id:'S1',turn:1,human_message:'Hola',history:[],human_profile:{role:'CLIENT'},environment:'LAB',prod_write_authorized:false,trading_access:false});
   assert.equal(output.text,'Respuesta OLD segura.');
   assert.equal(output.actor_evidence.real_cerebro_actor,true);
