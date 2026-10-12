@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { applyProductionConversationOverlayV1,PRODUCTION_CONVERSATION_OVERLAY_V1_CONTRACT } from '../human-intelligence/integration/production-conversation-overlay-v1.mjs';
 
 test('action and confirmation semantics pass through byte-for-byte logically unchanged',()=>{
@@ -60,4 +61,17 @@ test('contract changes no authority and adds no paid dependency',()=>{
   assert.equal(PRODUCTION_CONVERSATION_OVERLAY_V1_CONTRACT.max_added_questions,1);
   assert.equal(PRODUCTION_CONVERSATION_OVERLAY_V1_CONTRACT.prod_authority_changed,false);
   assert.equal(PRODUCTION_CONVERSATION_OVERLAY_V1_CONTRACT.additional_cost_eur,0);
+});
+
+test('scheduled canary OIDC and rewritten body headers are fail-safe',()=>{
+  const source=readFileSync(new URL('../../supabase/functions/cerebro-console-gateway-human-v1-canary/index.ts',import.meta.url),'utf8');
+  assert.match(source,/\['pull_request','workflow_dispatch','schedule'\]/);
+  assert.match(source,/h\.delete\(name\)/);
+  for(const header of ['content-length','content-encoding','etag','content-md5'])assert.ok(source.includes(`'${header}'`));
+});
+
+test('shared PREPROD route rehearsal uses one repository-wide concurrency lock',()=>{
+  const workflow=readFileSync(new URL('../../.github/workflows/cerebro-human-intelligence-v1.yml',import.meta.url),'utf8');
+  assert.match(workflow,/group:\s+cerebro-human-intelligence-shared-preprod-route-v1/);
+  assert.doesNotMatch(workflow,/group:\s+cerebro-human-intelligence-v1-\$\{\{\s*github\.ref\s*\}\}/);
 });
