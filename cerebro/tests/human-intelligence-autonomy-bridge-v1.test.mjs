@@ -36,6 +36,14 @@ test('learning bridge is deterministic/idempotent for identical evidence',()=>{
   assert.equal(a.events[0].event_id,b.events[0].event_id);
 });
 
+test('learning bridge distinguishes materially different evidence even with same timestamp',()=>{
+  const changed=structuredClone(golden);
+  changed.new_metrics={...changed.new_metrics,signal_grounding_rate:.69};
+  const a=buildHumanIntelligenceLearningReport({decision,golden,version:'1.0.0'});
+  const b=buildHumanIntelligenceLearningReport({decision,golden:changed,version:'1.0.0'});
+  assert.notEqual(a.events[0].event_id,b.events[0].event_id);
+});
+
 test('rollback manifest preserves physical OLD and never grants PROD',()=>{
   const rb=buildHumanIntelligenceRollbackManifest({decision,golden});
   assert.equal(rb.environment,'PREPROD');
