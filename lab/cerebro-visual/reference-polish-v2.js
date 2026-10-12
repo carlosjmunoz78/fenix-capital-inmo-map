@@ -11,7 +11,7 @@
     for(let ci=0;ci<clusters.length;ci++){
       const arr=(clusters[ci].pearls&&clusters[ci].pearls.length)?clusters[ci].pearls:clusters[ci].nodes;
       const ps=[];
-      for(let i=0;i<92;i++){
+      for(let i=0;i<112;i++){
         const a=arr[(R()*arr.length)|0],b=arr[(R()*arr.length)|0];
         if(!a||!b||a===b)continue;
         const d=Math.hypot(a.x-b.x,a.y-b.y);
@@ -29,17 +29,18 @@
     const c1x=p[0]+dx*.34+nx*amp,c1y=p[1]+dy*.34+ny*amp;
     const c2x=p[0]+dx*.67-nx*amp*.52,c2y=p[1]+dy*.67-ny*amp*.52;
     ctx.beginPath();ctx.moveTo(p[0],p[1]);ctx.bezierCurveTo(c1x,c1y,c2x,c2y,q[0],q[1]);
-    ctx.strokeStyle=`rgba(12,100,193,${alpha*.36})`;ctx.lineWidth=width*2.0;ctx.stroke();
+    ctx.strokeStyle=`rgba(6,86,182,${alpha*.42})`;ctx.lineWidth=width*2.15;ctx.stroke();
     ctx.beginPath();ctx.moveTo(p[0],p[1]);ctx.bezierCurveTo(c1x,c1y,c2x,c2y,q[0],q[1]);
-    ctx.strokeStyle=`rgba(79,217,250,${alpha})`;ctx.lineWidth=width;ctx.stroke();
+    ctx.strokeStyle=`rgba(90,224,252,${alpha})`;ctx.lineWidth=width;ctx.stroke();
+    if(alpha>.11){ctx.beginPath();ctx.moveTo(p[0],p[1]);ctx.bezierCurveTo(c1x,c1y,c2x,c2y,q[0],q[1]);ctx.strokeStyle=`rgba(228,253,255,${alpha*.22})`;ctx.lineWidth=Math.max(.16,width*.34);ctx.stroke()}
   }
   function pearl(n,alpha,rad){
     const p=P(n);if(p[0]<-30||p[0]>W+30||p[1]<-30||p[1]>H+30)return;
     ctx.globalCompositeOperation='lighter';
-    ctx.globalAlpha=alpha*.18;ctx.fillStyle='#25c9f2';ctx.beginPath();ctx.arc(p[0],p[1],rad*2.55,0,Math.PI*2);ctx.fill();
+    ctx.globalAlpha=alpha*.24;ctx.fillStyle='#20c9f3';ctx.beginPath();ctx.arc(p[0],p[1],rad*2.65,0,Math.PI*2);ctx.fill();
     ctx.globalCompositeOperation='source-over';
-    ctx.globalAlpha=alpha*.92;ctx.fillStyle='#f3feff';ctx.beginPath();ctx.arc(p[0],p[1],rad,0,Math.PI*2);ctx.fill();
-    ctx.globalAlpha=alpha*.82;ctx.fillStyle='#9df7ff';ctx.beginPath();ctx.arc(p[0]-rad*.24,p[1]-rad*.22,Math.max(.45,rad*.36),0,Math.PI*2);ctx.fill();
+    ctx.globalAlpha=Math.min(1,alpha);ctx.fillStyle='#f6feff';ctx.beginPath();ctx.arc(p[0],p[1],rad,0,Math.PI*2);ctx.fill();
+    ctx.globalAlpha=Math.min(1,alpha*.86);ctx.fillStyle='#aaf9ff';ctx.beginPath();ctx.arc(p[0]-rad*.24,p[1]-rad*.22,Math.max(.50,rad*.38),0,Math.PI*2);ctx.fill();
   }
 
   function frame(){
@@ -49,18 +50,18 @@
     const c=clusters[selected];if(!c)return;
     ctx.save();
     ctx.globalCompositeOperation='source-over';
-    ctx.globalAlpha=.012+.024*close+.014*deep;ctx.fillStyle='#00070c';ctx.fillRect(0,0,W,H);
+    ctx.globalAlpha=.006+.012*close+.006*deep;ctx.fillStyle='#00070c';ctx.fillRect(0,0,W,H);
 
     const ps=pairs[selected]||[];
     ctx.globalCompositeOperation='source-over';
-    const step=deep>.42?1:2;
-    for(let i=0;i<ps.length;i+=step){const [a,b,s]=ps[i];curved(a,b,(.035+.070*close+.032*deep),.24+.12*close+.08*deep,s)}
+    const step=deep>.32?1:2;
+    for(let i=0;i<ps.length;i+=step){const [a,b,s]=ps[i];curved(a,b,(.055+.105*close+.048*deep),.28+.15*close+.09*deep,s)}
 
     const pearls=c.pearls||[];
-    const stride=deep>.40?4:6;
+    const stride=deep>.32?4:6;
     for(let i=0;i<pearls.length;i+=stride){
-      const n=pearls[i],r=(.88+(n.s||1)*.54)*(1+.43*close+.20*deep);
-      pearl(n,.24+.34*close+.12*deep,r);
+      const n=pearls[i],r=(.98+(n.s||1)*.59)*(1+.48*close+.24*deep);
+      pearl(n,.28+.39*close+.16*deep,r);
     }
     ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';ctx.restore();
   }
