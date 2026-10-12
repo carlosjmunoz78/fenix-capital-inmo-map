@@ -105,7 +105,13 @@ jobs:
           jq '{state_type,events_total,events:[.events[]|{event_id,source_type,company_id,engine_id,environment,local_validation_required,prod_authorized,prod_write_authorized,trading_access,additional_cost_eur}]}' artifacts/human-intelligence/learning-report.v1.json
           jq '{state_type,status,learning_event_id,next_gate,authority,rollback:{rollback_id:.rollback.rollback_id,baseline:.rollback.baseline,candidate:.rollback.candidate,physical_rollback_execution_required_before_prod:.rollback.physical_rollback_execution_required_before_prod},plan:{promotion_id:.plan.promotion_id,state:.plan.state,next_gate:.plan.next_gate,prod_authorized:.plan.prod_authorized,prod_write_authorized:.plan.prod_write_authorized}}' artifacts/human-intelligence/promotion-package.v1.json
 
-      - name: Enforce immutable safety boundaries physical evidence learning and promotion authority
+      - name: Physically rehearse NEW to OLD fallback selection in PREPROD
+        run: |
+          node cerebro/human-intelligence/lab/run-preprod-rollback-rehearsal-v1.mjs \
+            --out artifacts/human-intelligence/rollback-rehearsal.v1.json
+          jq '{status,semantics,final_selected_actor,route_mutated,prod_invoked,prod_authorized,prod_write_authorized,customer_data,trading_access,additional_cost_eur,next_gate}' artifacts/human-intelligence/rollback-rehearsal.v1.json
+
+      - name: Enforce immutable safety boundaries physical evidence learning rollback and promotion authority
         run: |
           jq -e '
             .state_type=="CEREBRO_HUMAN_INTELLIGENCE_SCENARIO_PLAN_V1" and
@@ -160,7 +166,15 @@ jobs:
             .safety.contains_customer_data==false and .safety.contains_secrets==false and .safety.trading_access==false and .safety.additional_cost_eur==0
           ' artifacts/human-intelligence/promotion-package.v1.json >/dev/null
 
-      - name: Upload LAB full-GOLDEN tribunal LRN and promotion evidence
+          jq -e '
+            .state_type=="CEREBRO_HUMAN_INTELLIGENCE_PHYSICAL_ROLLBACK_REHEARSAL_V1" and .status=="GREEN" and
+            .final_selected_actor=="cerebro-human-old-actor-preprod-v0" and .route_mutated==false and
+            .prod_invoked==false and .prod_authorized==false and .prod_write_authorized==false and
+            .customer_data==false and .trading_access==false and .additional_cost_eur==0 and
+            .next_gate=="SHARED_PREPROD_ROUTE_SHADOW_AND_ATOMIC_ROLLBACK"
+          ' artifacts/human-intelligence/rollback-rehearsal.v1.json >/dev/null
+
+      - name: Upload LAB full-GOLDEN tribunal LRN rollback and promotion evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
