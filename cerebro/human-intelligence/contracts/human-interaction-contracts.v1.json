@@ -1,0 +1,142 @@
+{
+  "schema_version": "1.0.0",
+  "system_id": "CEREBRO_HUMAN_INTELLIGENCE_SYSTEM",
+  "status": "DEFINED_PREPROD_CONTRACT",
+  "company_scope": "GLOBAL_OR_SCOPED",
+  "owners": {
+    "conversation_gateway": "CHAT-001",
+    "context": "CTX-001",
+    "learning": "LRN-001",
+    "training": "TRN-001",
+    "evaluation": "EVA-001",
+    "tribunal": "JDG-001",
+    "simulation": "SIM-001",
+    "red_team": "RED-001",
+    "regression": "REG-001",
+    "communication": "COM-001",
+    "customer_experience": "CX-001",
+    "voice": "VOICE-001",
+    "policy": "POL-001",
+    "human_exception": "HEX-001"
+  },
+  "invariants": {
+    "new_engine_id_authorized": false,
+    "new_parallel_chat_store_authorized": false,
+    "new_parallel_learning_store_authorized": false,
+    "prod_write_authorized": false,
+    "prod_promotion_authorized": false,
+    "trading_access": false,
+    "customer_data_in_lab": false,
+    "secrets_in_lab": false,
+    "additional_cost_eur": 0,
+    "human_required_reasons": [
+      "LEGAL_REQUIRED",
+      "SIGNATURE_REQUIRED",
+      "LOW_CONFIDENCE",
+      "HIGH_RISK",
+      "POLICY_CONFLICT",
+      "SECURITY_INCIDENT",
+      "MONEY_LIMIT",
+      "CUSTOMER_HUMAN_REQUEST"
+    ]
+  },
+  "contracts": {
+    "ConversationEnvelope": {
+      "required": ["conversation_id", "turn_id", "company_id", "engine_id", "environment", "version", "actor_ref", "channel", "message", "idempotency_key", "received_at"],
+      "fields": {
+        "conversation_id": "string",
+        "turn_id": "string",
+        "company_id": "string",
+        "engine_id": "CHAT-001",
+        "environment": ["LAB", "PREPROD", "PROD"],
+        "version": "string",
+        "actor_ref": "string",
+        "channel": ["CONSOLE", "APP", "EMAIL", "WHATSAPP_PREP", "VOICE", "OTHER"],
+        "message": "string",
+        "context_type": "string|null",
+        "context_id": "string|null",
+        "attachment_refs": "array<string>",
+        "permission_context": "object",
+        "data_classification": ["PUBLIC", "INTERNAL", "CONFIDENTIAL", "RESTRICTED"],
+        "idempotency_key": "string",
+        "received_at": "iso8601"
+      },
+      "persistence": "EXISTING_CHAT_OR_TRANSIENT"
+    },
+    "ConversationState": {
+      "required": ["company_id", "conversation_id", "current_context", "confidence"],
+      "fields": {
+        "company_id": "string",
+        "conversation_id": "string",
+        "current_context": "object",
+        "short_history_refs": "array<string>",
+        "explicit_preference_refs": "array<string>",
+        "episodic_memory_refs": "array<string>",
+        "canonical_knowledge_refs": "array<string>",
+        "open_questions": "array<string>",
+        "commitments": "array<object>",
+        "pending_actions": "array<object>",
+        "known_uncertainties": "array<object>",
+        "last_human_signals": "array<string>",
+        "confidence": "number[0,1]"
+      },
+      "persistence": "COMPOSED_NOT_MONOLITHIC"
+    },
+    "HumanSignal": {
+      "required": ["signal_id", "company_id", "conversation_id", "turn_id", "signal_type", "evidence_ref", "observed_feature", "confidence", "created_at"],
+      "signal_types": ["CORRECTION", "CLARIFICATION", "REPEAT_REQUEST", "CONTRADICTION", "INTERRUPTION", "SILENCE_OR_NO_RESPONSE", "ACCEPTANCE", "REJECTION", "FRICTION", "TOPIC_SHIFT", "UNCERTAINTY_EXPLICIT", "REQUEST_FOR_HUMAN", "OUTCOME"],
+      "rules": {
+        "observable_only": true,
+        "psychological_diagnosis_forbidden": true,
+        "isolated_signal_auto_promotes_rule": false
+      }
+    },
+    "ResponsePlan": {
+      "required": ["objective", "facts_to_preserve", "uncertainties_to_state", "microbehaviors", "proposed_next_step", "policy_result", "human_required", "confidence"],
+      "microbehaviors": ["ACKNOWLEDGE", "REFLECT", "CLARIFY", "ASK", "STATE_UNCERTAINTY", "ADMIT_ERROR", "DISAGREE_WITHOUT_ATTACK", "SET_BOUNDARY", "DEESCALATE", "EXPLAIN", "CONFIRM", "SUMMARIZE", "PROPOSE", "REQUEST_ACTION", "CLOSE_LOOP"],
+      "rules": {
+        "private_chain_of_thought_persistence": false,
+        "facts_must_be_sourced": true,
+        "material_action_requires_policy": true
+      }
+    },
+    "LearningEvent": {
+      "downstream": "UNIVERSAL_LEARNING_INGRESS",
+      "signal_types": ["ENGINE_RESULT", "ENGINE_ERROR", "ENGINE_EVENT", "METRIC_OBSERVATION", "COST_OBSERVATION", "HUMAN_CORRECTION", "TRIBUNAL_DECISION", "OBSERVABILITY_ALERT"],
+      "forced_defaults": {
+        "prod_authorized": false,
+        "prod_write_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": 0
+      }
+    },
+    "SimulationEpisode": {
+      "required": ["episode_id", "company_id", "environment", "scenario_id", "scenario_version", "human_profile", "hidden_state", "actor_variant", "baseline_variant", "seed", "conversation", "outcome", "created_at"],
+      "forced_defaults": {
+        "environment": "LAB",
+        "contains_customer_data": false,
+        "contains_secrets": false,
+        "prod_write_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": 0
+      },
+      "rules": {
+        "hidden_state_visible_to_actor": false,
+        "mass_storage": "OFFLOAD_NOT_SUPABASE_BY_DEFAULT"
+      }
+    },
+    "ConversationEvaluation": {
+      "required": ["evaluation_id", "episode_id", "old_variant", "new_variant", "hard_gates", "human_quality_scores", "outcomes", "regressions", "judge_votes", "decision", "evidence_refs", "created_at"],
+      "decisions": ["REJECT", "HOLD", "PREPROD_CANDIDATE"],
+      "forbidden_decisions": ["PROD_AUTHORIZED", "AUTONOMOUS_PROD"],
+      "hard_gate_failure_policy": "REJECT"
+    }
+  },
+  "physical_mapping": {
+    "explicit_preferences": "fenix_prod.cerebro_user_preferences",
+    "conversation_memory": "fenix_prod.cerebro_conversation_memory",
+    "learning": "cerebro/runtime/universal-learning-ingress.mjs",
+    "mass_simulation": "LAB_OFFLOAD",
+    "mass_evaluation": "LAB_OFFLOAD"
+  }
+}
