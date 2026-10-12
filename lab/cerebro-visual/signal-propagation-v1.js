@@ -7,6 +7,14 @@
     return;
   }
 
+  const qaMode=location.hash.includes('signalqa=1');
+  if(qaMode){
+    const badge=document.createElement('div');
+    badge.id='signal-qa-badge';badge.textContent='SIGNAL V1 · ARMED';
+    Object.assign(badge.style,{position:'fixed',right:'18px',top:'62px',zIndex:'20',padding:'6px 9px',border:'1px solid rgba(74,214,248,.28)',borderRadius:'8px',background:'rgba(0,10,15,.72)',color:'#77def4',font:'9px monospace',letterSpacing:'.08em',pointerEvents:'none'});
+    document.body.appendChild(badge);
+  }
+
   const overlay=document.createElement('canvas');
   overlay.id='signal-overlay';
   Object.assign(overlay.style,{position:'fixed',inset:'0',width:'100%',height:'100%',pointerEvents:'none',zIndex:'6'});
@@ -90,14 +98,17 @@
     ox.restore();
   }
 
+  function setBadge(text){const b=document.getElementById('signal-qa-badge');if(b)b.textContent=text}
+
   function finishSignal(now){
     if(!signal.active)return;
     signal.active=false;
     selected=signal.to;
     reactionCluster=signal.to;
     reactionStart=now;
-    reactionUntil=now+(location.hash.includes('signalqa=1')?1600:900);
+    reactionUntil=now+(qaMode?1600:900);
     setStage(stage);
+    setBadge('SIGNAL V1 · ARRIVED · '+names[signal.to]);
   }
 
   function triggerSignal(to=(selected+1)%centers.length){
@@ -107,9 +118,10 @@
     signal.from=selected;
     signal.to=target;
     signal.start=performance.now();
-    signal.duration=location.hash.includes('signalqa=1')?2600:760;
+    signal.duration=qaMode?2600:760;
     reactionCluster=-1;
     state.textContent='SIGNAL · '+names[signal.from]+' → '+names[signal.to];
+    setBadge('SIGNAL V1 · ACTIVE · '+names[signal.from]+' → '+names[signal.to]);
     return true;
   }
 
@@ -146,6 +158,6 @@
     getState:()=>({active:signal.active,from:names[signal.from],to:names[signal.to],reaction:reactionCluster>=0?names[reactionCluster]:null})
   });
 
-  if(location.hash.includes('signal=1'))setTimeout(()=>triggerSignal((selected+1)%centers.length),location.hash.includes('signalqa=1')?1200:550);
+  if(location.hash.includes('signal=1'))setTimeout(()=>triggerSignal((selected+1)%centers.length),qaMode?1200:550);
   requestAnimationFrame(renderSignal);
 })();
