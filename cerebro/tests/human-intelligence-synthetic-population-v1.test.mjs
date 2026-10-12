@@ -7,6 +7,7 @@ import {
   contract,
   coverageSignature,
   generateSyntheticHuman,
+  inferSyntheticScenarioDomain,
   publicActorView
 } from '../human-intelligence/lab/synthetic-human-population.mjs';
 import {
@@ -29,13 +30,34 @@ test('population is procedural rather than a fixed archetype list', () => {
   assert.equal(contract().raw_cartesian_space_minimum, 3600000000);
 });
 
-test('actor view cannot read private goals hidden facts misbeliefs reveal rules or internal state', () => {
-  const profile = generateSyntheticHuman('secret-separation');
+test('scenario domain inference keeps finance legal SEO platform and multiempresa distinct', () => {
+  assert.equal(inferSyntheticScenarioDomain({scenario_id:'FIN-DEBT',initial_human_utterance:'Tengo otra cuota de un préstamo.'}),'finance');
+  assert.equal(inferSyntheticScenarioDomain({scenario_id:'LEGAL-ARRAS',initial_human_utterance:'Voy a firmar arras.'}),'legal');
+  assert.equal(inferSyntheticScenarioDomain({scenario_id:'SEO-START',initial_human_utterance:'Quiero revisar la indexación.'}),'seo');
+  assert.equal(inferSyntheticScenarioDomain({scenario_id:'PLATFORM-ARCH',initial_human_utterance:'No quiero meter todo en Supabase.'}),'platform');
+  assert.equal(inferSyntheticScenarioDomain({scenario_id:'MULTI-COMPANY',initial_human_utterance:'Vamos a dar de alta una empresa nueva.'}),'multiempresa');
+});
+
+test('domain-aware hidden facts are coherent and do not inject finance ontology into multiempresa', () => {
+  const multi=generateSyntheticHuman('coherent-multi',{scenario_domain:'multiempresa'});
+  assert.equal(multi.private_state.scenario_domain,'multiempresa');
+  assert.ok(multi.private_state.hidden_facts.length>=1);
+  for(const fact of multi.private_state.hidden_facts){
+    assert.match(fact.semantic_key,/^MULTI_/);
+    assert.equal(fact.type,'UNDECLARED_FINANCIAL_OBLIGATION',false);
+  }
+
+  const finance=generateSyntheticHuman('coherent-finance',{scenario_domain:'finance'});
+  for(const fact of finance.private_state.hidden_facts) assert.match(fact.semantic_key,/^FIN_/);
+});
+
+test('actor view cannot read private goals hidden facts semantic keys scenario domain misbeliefs reveal rules or internal state', () => {
+  const profile = generateSyntheticHuman('secret-separation',{scenario_domain:'finance'});
   const actor = publicActorView(profile);
   const serialized = JSON.stringify(actor);
 
   assert.equal('private_state' in actor, false);
-  for (const forbidden of ['private_goal', 'hidden_facts', 'misbeliefs', 'reveal_rules', 'internal_state']) {
+  for (const forbidden of ['private_goal', 'hidden_facts', 'semantic_key', 'scenario_domain', 'misbeliefs', 'reveal_rules', 'internal_state']) {
     assert.equal(serialized.includes(forbidden), false, `${forbidden} leaked into actor view`);
   }
 });
