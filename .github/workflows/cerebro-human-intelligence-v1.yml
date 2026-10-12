@@ -36,7 +36,7 @@ jobs:
       - name: Install existing repository dependencies
         run: npm ci
 
-      - name: Validate Human Intelligence contracts planner rights HumanProfile hard gates synthetic population conversation gym metrics NEW planner tribunal and real actor boundary
+      - name: Validate Human Intelligence contracts planner rights HumanProfile hard gates synthetic population conversation gym metrics NEW planner tribunal LRN bridge promotion boundaries and real actor boundary
         run: |
           node --test \
             cerebro/tests/human-intelligence-contract-v1.test.mjs \
@@ -48,7 +48,10 @@ jobs:
             cerebro/tests/human-intelligence-conversation-metrics-v1.test.mjs \
             cerebro/tests/human-intelligence-new-planner-v1.test.mjs \
             cerebro/tests/human-intelligence-tribunal-v1.test.mjs \
-            cerebro/tests/human-intelligence-real-actor-gate-v1.test.mjs
+            cerebro/tests/human-intelligence-autonomy-bridge-v1.test.mjs \
+            cerebro/tests/human-intelligence-real-actor-gate-v1.test.mjs \
+            cerebro/tests/universal-learning-ingress.test.mjs \
+            cerebro/tests/promotion-pipeline.test.mjs
 
       - name: Materialize deterministic 240-episode LAB plan
         run: |
@@ -93,7 +96,16 @@ jobs:
             --out artifacts/human-intelligence/tribunal-decision.v1.json
           jq '{verdict,decision_basis,strict_quality_improvements,hard_gates,comparisons,promotion,learning}' artifacts/human-intelligence/tribunal-decision.v1.json
 
-      - name: Enforce immutable safety boundaries and physical evidence
+      - name: Route tribunal evidence through existing LRN-001 and canonical promotion envelope
+        run: |
+          node cerebro/human-intelligence/integration/run-autonomy-bridge-v1.mjs \
+            --golden artifacts/human-intelligence/full-golden-old-vs-new.v1.json \
+            --tribunal artifacts/human-intelligence/tribunal-decision.v1.json \
+            --out-dir artifacts/human-intelligence
+          jq '{state_type,events_total,events:[.events[]|{event_id,source_type,company_id,engine_id,environment,local_validation_required,prod_authorized,prod_write_authorized,trading_access,additional_cost_eur}]}' artifacts/human-intelligence/learning-report.v1.json
+          jq '{state_type,status,learning_event_id,next_gate,authority,rollback:{rollback_id:.rollback.rollback_id,baseline:.rollback.baseline,candidate:.rollback.candidate,physical_rollback_execution_required_before_prod:.rollback.physical_rollback_execution_required_before_prod},plan:{promotion_id:.plan.promotion_id,state:.plan.state,next_gate:.plan.next_gate,prod_authorized:.plan.prod_authorized,prod_write_authorized:.plan.prod_write_authorized}}' artifacts/human-intelligence/promotion-package.v1.json
+
+      - name: Enforce immutable safety boundaries physical evidence learning and promotion authority
         run: |
           jq -e '
             .state_type=="CEREBRO_HUMAN_INTELLIGENCE_SCENARIO_PLAN_V1" and
@@ -129,7 +141,26 @@ jobs:
             .safety.trading_access==false and .safety.additional_cost_eur==0
           ' artifacts/human-intelligence/tribunal-decision.v1.json >/dev/null
 
-      - name: Upload LAB full-GOLDEN and tribunal evidence
+          jq -e '
+            .state_type=="CEREBRO_RSI_UNIVERSAL_LEARNING_EVENT_REPORT" and .events_total==1 and
+            .events[0].source_type=="TRIBUNAL_DECISION" and .events[0].company_id=="fenix" and .events[0].engine_id=="SIM-001" and
+            .events[0].environment=="PREPROD_CANDIDATE" and .events[0].local_validation_required==true and
+            .events[0].prod_authorized==false and .events[0].prod_write_authorized==false and .events[0].trading_access==false and .events[0].additional_cost_eur==0 and
+            .prod_authorized==false and .prod_write_authorized==false and .trading_access==false and .additional_cost_eur==0
+          ' artifacts/human-intelligence/learning-report.v1.json >/dev/null
+
+          jq -e '
+            .state_type=="CEREBRO_HUMAN_INTELLIGENCE_PROMOTION_PACKAGE_V1" and .status=="READY_PREPROD" and
+            .authority.candidate_package_ready==true and .authority.preprod_deploy_authorized==false and
+            .authority.shadow_activation_authorized==false and .authority.canary_activation_authorized==false and
+            .authority.prod_authorized==false and .authority.prod_write_authorized==false and
+            .rollback.environment=="PREPROD" and .rollback.baseline.service=="cerebro-human-old-actor-preprod-v0" and
+            .rollback.physical_rollback_execution_required_before_prod==true and
+            .plan.state=="PREPROD" and .plan.prod_authorized==false and .plan.prod_write_authorized==false and
+            .safety.contains_customer_data==false and .safety.contains_secrets==false and .safety.trading_access==false and .safety.additional_cost_eur==0
+          ' artifacts/human-intelligence/promotion-package.v1.json >/dev/null
+
+      - name: Upload LAB full-GOLDEN tribunal LRN and promotion evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
