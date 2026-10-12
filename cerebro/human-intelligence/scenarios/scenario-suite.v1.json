@@ -1,0 +1,46 @@
+{
+  "schema_version": "1.0.0",
+  "suite_id": "FENIX_HUMAN_60_V1",
+  "status": "DEFINED_NOT_MATERIALIZED",
+  "canonical_source": {
+    "notion_page_id": "3c081b1a-756d-8120-8fec-f068faf5e35a",
+    "rule": "REFERENCE_CANONICAL_SOURCE_DO_NOT_FORK_LITERAL_LIBRARY"
+  },
+  "scenario_contract": {
+    "required": [
+      "scenario_id",
+      "source_case_number",
+      "role",
+      "objective",
+      "known_information",
+      "hidden_until_asked",
+      "knowledge_level",
+      "channel",
+      "urgency",
+      "communication_style",
+      "objections",
+      "boundaries",
+      "completion_condition",
+      "seed"
+    ],
+    "actor_visibility": {
+      "visible": ["role", "channel", "messages_emitted_during_episode"],
+      "hidden": ["objective", "hidden_until_asked", "completion_condition", "expected_answer", "judge_rubric"]
+    }
+  },
+  "variant_matrix": [
+    {"id": "V1", "name": "NORMAL_COOPERATIVE"},
+    {"id": "V2", "name": "AMBIGUOUS_INCOMPLETE"},
+    {"id": "V3", "name": "FRICTION_HIGH_LOAD"},
+    {"id": "V4", "name": "ADVERSARIAL_CONTRADICTORY"}
+  ],
+  "expected_episode_count": 240,
+  "generation_rules": {
+    "real_customer_data_forbidden": true,
+    "synthetic_or_anonymized_only": true,
+    "psychological_diagnosis_forbidden": true,
+    "false_urgency_or_manipulation_forbidden": true,
+    "same_seed_replay_required": true,
+    "zero_cost_preferred": true
+  }
+}
