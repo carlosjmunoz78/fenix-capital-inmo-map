@@ -71,10 +71,12 @@ async function main(){
   const newMetrics=aggregateConversationMetrics(newEpisodes,{baselineLabel:'NEW_PREPROD_HUMAN_INTELLIGENCE_V1'});
   const deltas={
     duplicate_reply_rate:delta(newMetrics.duplicate_reply_rate,oldMetrics.duplicate_reply_rate),
-    useful_question_rate:delta(newMetrics.useful_question_rate,oldMetrics.useful_question_rate),
-    ignored_concern_rate:delta(newMetrics.ignored_concern_rate,oldMetrics.ignored_concern_rate),
-    grounding_rate:delta(newMetrics.grounding_rate,oldMetrics.grounding_rate),
-    clear_explanation_rate:delta(newMetrics.clear_explanation_rate,oldMetrics.clear_explanation_rate),
+    signal_question_rate:delta(newMetrics.signal_question_rate,oldMetrics.signal_question_rate),
+    signal_ignored_concern_rate:delta(newMetrics.signal_ignored_concern_rate,oldMetrics.signal_ignored_concern_rate),
+    signal_acknowledged_concern_rate:delta(newMetrics.signal_acknowledged_concern_rate,oldMetrics.signal_acknowledged_concern_rate),
+    signal_grounding_rate:delta(newMetrics.signal_grounding_rate,oldMetrics.signal_grounding_rate),
+    signal_clear_explanation_rate:delta(newMetrics.signal_clear_explanation_rate,oldMetrics.signal_clear_explanation_rate),
+    signal_question_budget_ok_rate:delta(newMetrics.signal_question_budget_ok_rate,oldMetrics.signal_question_budget_ok_rate),
     hidden_facts_revealed_total:newMetrics.hidden_facts_revealed_total-oldMetrics.hidden_facts_revealed_total
   };
   const gates={
@@ -83,22 +85,31 @@ async function main(){
     no_actor_errors:newMetrics.actor_errors_total===0&&oldMetrics.actor_errors_total===0,
     no_ontology_leaks:newMetrics.ontology_leaks_total===0&&oldMetrics.ontology_leaks_total===0,
     duplicate_replies_improve:newMetrics.duplicate_reply_rate<oldMetrics.duplicate_reply_rate&&newMetrics.duplicate_reply_rate<=0.34,
-    useful_questions_improve:newMetrics.useful_question_rate>oldMetrics.useful_question_rate&&newMetrics.useful_question_rate>=0.5,
-    ignored_concern_improves_or_holds:newMetrics.ignored_concern_rate<=oldMetrics.ignored_concern_rate&&newMetrics.ignored_concern_rate<=0.2,
-    no_false_certainty_regression:newMetrics.false_certainty_rate<=oldMetrics.false_certainty_rate,
-    no_pressure_regression:newMetrics.unnecessary_pressure_rate<=oldMetrics.unnecessary_pressure_rate,
-    no_excessive_detail_regression:newMetrics.excessive_detail_rate<=oldMetrics.excessive_detail_rate
+    useful_questions_improve:newMetrics.signal_question_rate>oldMetrics.signal_question_rate&&newMetrics.signal_question_rate>=0.5,
+    ignored_concern_improves_or_holds:newMetrics.signal_ignored_concern_rate<=oldMetrics.signal_ignored_concern_rate&&newMetrics.signal_ignored_concern_rate<=0.2,
+    concern_acknowledgement_improves_or_holds:newMetrics.signal_acknowledged_concern_rate>=oldMetrics.signal_acknowledged_concern_rate&&newMetrics.signal_acknowledged_concern_rate>=0.75,
+    grounding_non_regression:newMetrics.signal_grounding_rate>=oldMetrics.signal_grounding_rate,
+    clear_explanation_non_regression:newMetrics.signal_clear_explanation_rate>=oldMetrics.signal_clear_explanation_rate,
+    question_budget_controlled:newMetrics.signal_question_budget_ok_rate>=0.9,
+    no_false_certainty_regression:newMetrics.signal_false_certainty_rate<=oldMetrics.signal_false_certainty_rate,
+    no_pressure_regression:newMetrics.signal_unnecessary_pressure_rate<=oldMetrics.signal_unnecessary_pressure_rate,
+    no_excessive_detail_regression:newMetrics.signal_excessive_detail_rate<=oldMetrics.signal_excessive_detail_rate
   };
   const green=Object.values(gates).every(Boolean);
   const artifact={
     state_type:'CEREBRO_HUMAN_INTELLIGENCE_OLD_VS_NEW_BATCH_V1',status:green?'GREEN':'RED',generated_at:new Date().toISOString(),
-    scope:'REPRESENTATIVE_DIRECTIONAL_GATE_NOT_PROD_PROMOTION_AUTHORITY',cases_total:CASES.length,
+    scope:'REPRESENTATIVE_DIRECTIONAL_MULTI_SIGNAL_GATE_NOT_PROD_PROMOTION_AUTHORITY',cases_total:CASES.length,
     old_preflight:oldPreflight,new_preflight:newPreflight,old_metrics:oldMetrics,new_metrics:newMetrics,deltas,gates,pairs,
     decision:{candidate_advances_to_next_lab_gate:green,prod_promotion_authorized:false,preprod_promotion_authorized:false,requires_full_golden_and_tribunal_before_promotion:true},
     safety:{prod_invoked:false,prod_write_authorized:false,prod_execution_enabled:false,contains_customer_data:false,trading_access:false,additional_cost_eur:0,learning_dispatch_authorized:false}
   };
   fs.mkdirSync(path.dirname(outPath),{recursive:true});fs.writeFileSync(outPath,JSON.stringify(artifact,null,2)+'\n');
-  console.log(JSON.stringify({status:artifact.status,cases_total:CASES.length,old:{duplicate:oldMetrics.duplicate_reply_rate,useful_question:oldMetrics.useful_question_rate,ignored_concern:oldMetrics.ignored_concern_rate},new:{duplicate:newMetrics.duplicate_reply_rate,useful_question:newMetrics.useful_question_rate,ignored_concern:newMetrics.ignored_concern_rate},deltas,gates}));
+  console.log(JSON.stringify({
+    status:artifact.status,cases_total:CASES.length,
+    old:{duplicate:oldMetrics.duplicate_reply_rate,question:oldMetrics.signal_question_rate,ignored_concern:oldMetrics.signal_ignored_concern_rate,acknowledged_concern:oldMetrics.signal_acknowledged_concern_rate,grounding:oldMetrics.signal_grounding_rate,clear:oldMetrics.signal_clear_explanation_rate},
+    new:{duplicate:newMetrics.duplicate_reply_rate,question:newMetrics.signal_question_rate,ignored_concern:newMetrics.signal_ignored_concern_rate,acknowledged_concern:newMetrics.signal_acknowledged_concern_rate,grounding:newMetrics.signal_grounding_rate,clear:newMetrics.signal_clear_explanation_rate},
+    deltas,gates
+  }));
   if(!green)process.exitCode=1;
 }
 main().catch(error=>{console.error(String(error?.stack??error));process.exitCode=1;});
