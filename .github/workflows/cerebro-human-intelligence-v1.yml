@@ -138,6 +138,7 @@ jobs:
           ' artifacts/human-intelligence/population-manifest.v1.json >/dev/null
 
           jq -e '
+            . as $root |
             .state_type=="CEREBRO_HUMAN_INTELLIGENCE_FULL_GOLDEN_OLD_VS_NEW_V1" and
             .status=="GREEN" and .cases_total==60 and .pairs_total==240 and
             .physical.pairs_total==240 and .physical.old_verified==240 and .physical.new_verified==240 and
@@ -145,7 +146,7 @@ jobs:
             .candidate_hard_gates.summary.episodes_total==240 and .candidate_hard_gates.summary.episodes_green==240 and
             .candidate_hard_gates.summary.episodes_failed==0 and .candidate_hard_gates.summary.all_green==true and
             (.candidate_hard_gates.summary.required_gates|length)==10 and
-            (["TRUTH","AUTHORITY","CONTEXT","PERMISSION","ACTION","HUMAN_REQUIRED","PRIVACY","NO_HIDDEN_LEAK","ETHICS","TRACEABILITY"] | all(. as $g | .candidate_hard_gates.summary.gate_pass_counts[$g] == 240)) and
+            (["TRUTH","AUTHORITY","CONTEXT","PERMISSION","ACTION","HUMAN_REQUIRED","PRIVACY","NO_HIDDEN_LEAK","ETHICS","TRACEABILITY"] | all(. as $g | $root.candidate_hard_gates.summary.gate_pass_counts[$g] == 240)) and
             .safety.prod_invoked==false and .safety.prod_write_authorized==false and .safety.prod_execution_enabled==false and
             .safety.contains_customer_data==false and .safety.trading_access==false and .safety.additional_cost_eur==0 and
             .decision.prod_promotion_authorized==false
