@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: cerebro-human-intelligence-v1-${{ github.ref }}
+  group: cerebro-human-intelligence-shared-preprod-route-v1
   cancel-in-progress: false
 
 permissions:
