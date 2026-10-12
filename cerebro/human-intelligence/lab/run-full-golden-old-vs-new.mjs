@@ -4,6 +4,7 @@ import { createRealCerebroActorAdapter, preflightRealCerebroActor } from './real
 import { runPairedReplay } from './conversation-harness.mjs';
 import { observeActorBehavior, assertObserverEvent } from '../evaluation/behavior-observer-v1.mjs';
 import { aggregateConversationMetrics } from '../evaluation/conversation-metrics-v1.mjs';
+import { evaluateEpisodeHardGates, summarizeEpisodeHardGates } from '../evaluation/hard-gate-evaluator.mjs';
 
 const PREPROD_BASE='https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1';
 const OLD_FUNCTION='cerebro-human-old-actor-preprod-v0';
@@ -86,6 +87,8 @@ async function main(){
   const oldEpisodes=pairs.map(x=>x.pair.old),newEpisodes=pairs.map(x=>x.pair.new);
   const oldMetrics=aggregateConversationMetrics(oldEpisodes,{baselineLabel:'OLD_PREPROD_FROZEN_PROD_V33_FULL_GOLDEN'});
   const newMetrics=aggregateConversationMetrics(newEpisodes,{baselineLabel:'NEW_PREPROD_HUMAN_INTELLIGENCE_V1_FULL_GOLDEN'});
+  const candidateHardGateEvaluations=pairs.map((entry,index)=>evaluateEpisodeHardGates({episode_id:entry.scenario_id,episode:newEpisodes[index]}));
+  const candidateHardGateSummary=summarizeEpisodeHardGates(candidateHardGateEvaluations);
   const deltas={
     duplicate_reply_rate:delta(newMetrics.duplicate_reply_rate,oldMetrics.duplicate_reply_rate),
     signal_question_rate:delta(newMetrics.signal_question_rate,oldMetrics.signal_question_rate),
@@ -105,16 +108,17 @@ async function main(){
     no_actor_errors:oldMetrics.actor_errors_total===0&&newMetrics.actor_errors_total===0,
     no_ontology_leaks:oldMetrics.ontology_leaks_total===0&&newMetrics.ontology_leaks_total===0
   };
-  const green=oldPreflight.ok===true&&newPreflight.ok===true&&physical.pairs_total===240&&physical.old_verified===240&&physical.new_verified===240&&physical.all_pairs_real_and_comparable&&physical.no_actor_errors&&physical.no_ontology_leaks;
+  const green=oldPreflight.ok===true&&newPreflight.ok===true&&physical.pairs_total===240&&physical.old_verified===240&&physical.new_verified===240&&physical.all_pairs_real_and_comparable&&physical.no_actor_errors&&physical.no_ontology_leaks&&candidateHardGateSummary.episodes_total===240&&candidateHardGateSummary.all_green===true;
   const artifact={
     state_type:'CEREBRO_HUMAN_INTELLIGENCE_FULL_GOLDEN_OLD_VS_NEW_V1',status:green?'GREEN':'RED',generated_at:new Date().toISOString(),
     scope:'FULL_CANONICAL_60_X_4_PHYSICAL_PAIRED_GOLDEN',library_id:lib.library_id,cases_total:60,variants:VARIANTS,pairs_total:240,
     old_preflight:oldPreflight,new_preflight:newPreflight,physical,old_metrics:oldMetrics,new_metrics:newMetrics,deltas,pairs,
+    candidate_hard_gates:{summary:candidateHardGateSummary,evaluations:candidateHardGateEvaluations},
     decision:{tribunal_required:true,prod_promotion_authorized:false,preprod_promotion_authorized:false},
     safety:{prod_invoked:false,prod_write_authorized:false,prod_execution_enabled:false,contains_customer_data:false,trading_access:false,additional_cost_eur:0,learning_dispatch_authorized:false}
   };
   fs.mkdirSync(path.dirname(outPath),{recursive:true});fs.writeFileSync(outPath,JSON.stringify(artifact,null,2)+'\n');
-  console.log(JSON.stringify({status:artifact.status,pairs:240,old_verified:physical.old_verified,new_verified:physical.new_verified,deltas}));
+  console.log(JSON.stringify({status:artifact.status,pairs:240,old_verified:physical.old_verified,new_verified:physical.new_verified,hard_gates:candidateHardGateSummary,deltas}));
   if(!green)process.exitCode=1;
 }
 main().catch(error=>{console.error(String(error?.stack??error));process.exitCode=1;});
