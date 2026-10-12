@@ -13,12 +13,13 @@ function domainFrom(text:string){
   if(/\b(newsletter|brevo|email marketing)\b/.test(t))return "newsletter";
   if(/\b(supabase|gateway|console|runtime|worker|arquitectura|motor)\b/.test(t))return "platform";
   if(/\b(trading|watchdog|kill switch)\b/.test(t))return "trading";
-  if(/\b(multiempresa|nueva empresa|onboarding|company registry)\b/.test(t))return "multiempresa";
+  if(/\b(multiempresa|nueva empresa|empresa nueva|dar de alta una empresa|alta de una empresa|onboarding|company registry)\b/.test(t))return "multiempresa";
   return null;
 }
 function contextDomain(message:string,context:Turn[]){
   const explicit=domainFrom(message); if(explicit)return explicit;
-  for(let i=context.length-1;i>=0;i--){const d=domainFrom(context[i].text);if(d)return d;}
+  for(let i=context.length-1;i>=0;i--)if(context[i]?.role==="user"){const d=domainFrom(context[i].text);if(d)return d;}
+  for(let i=context.length-1;i>=0;i--)if(context[i]?.role==="cerebro"){const d=domainFrom(context[i].text);if(d)return d;}
   return null;
 }
 function oneQuestion(prefix:string,question:string){return `${prefix.trim().replace(/[?¿]+$/,"").trim()} ${question.trim().replace(/^¿?/,"¿").replace(/[?.!]+$/,"?")}`.trim();}
@@ -29,6 +30,14 @@ function repeated(candidate:string,context:Turn[]){
   if(!wa.size||!wb.size)return false;
   const common=[...wa].filter(x=>wb.has(x)).length;
   return common/Math.max(wa.size,wb.size)>=0.82;
+}
+function actionThread(context:Turn[]){
+  for(let i=context.length-1;i>=0;i--){
+    if(context[i]?.role!=="user")continue;
+    const t=clean(context[i].text);
+    if(/\b(prepara|activa|activar|crea|publica|lanza|ejecuta|inicia|configura|modifica|borra|envia|envía|paga|firma)\b/.test(t))return t;
+  }
+  return "";
 }
 function domainFirstTurn(domain:string|null){
   const map:Record<string,{answer:string;question:string}>={
@@ -45,13 +54,9 @@ function domainFirstTurn(domain:string|null){
   return domain?map[domain]??null:null;
 }
 function responseForConcern(message:string,context:Turn[],domain:string|null){
-  const t=clean(message);
+  const t=clean(message); const hasPriorActor=context.some(turn=>turn.role==="cerebro");
   if(/\b(mala experiencia|salio mal|salió mal|desconfio|desconfío|no me fio|no me fío|antes me fue mal)\b/.test(t))
     return oneQuestion("Entiendo que vayas con cuidado; una mala experiencia anterior cambia el nivel de detalle que necesitas antes de confiar en el siguiente paso.","¿Qué fue exactamente lo que salió mal la otra vez y qué quieres evitar ahora?");
-  if(/\b(no responde|no me estas resolviendo|no me estás resolviendo|dando vueltas|eso suena general|no me convence)\b/.test(t))
-    return oneQuestion("Tienes razón en pedir algo más concreto. No voy a repetirte la explicación general.","¿Qué punto exacto necesitas resolver ahora: el dato que falta, el criterio que aplico o el siguiente paso?");
-  if(/\b(perdido|perdida|no entiendo|no se por donde|no sé por dónde|no me cuadra|sigo dudando|no tengo claro)\b/.test(t))
-    return oneQuestion("Veo que la explicación anterior no te ha dejado una decisión clara. Vamos a reducirlo a una sola cosa cada vez.","¿Qué te preocupa más ahora mismo: entender el criterio, saber qué dato falta o decidir qué hacer después?");
   if(/\b(otra financiacion|otra financiación|otro prestamo|otro préstamo|cuota mensual|deuda que pago|deuda)\b/.test(t))
     return oneQuestion("Sí, una obligación mensual puede afectar a la capacidad de endeudamiento y por eso conviene incorporarla al análisis en lugar de ignorarla.","¿Cuál es la cuota mensual aproximada y queda alguna otra financiación relevante por revisar?");
   if(/\b(documento que.*no tengo|me falta.*papel|me falta.*documento|no tengo.*documento)\b/.test(t))
@@ -62,9 +67,15 @@ function responseForConcern(message:string,context:Turn[],domain:string|null){
     return oneQuestion("Entonces la decisión no es solo individual y conviene incluir esa dependencia antes de proponerte un siguiente paso.","¿Qué decisión o condición depende de esa otra persona?");
   if(/\b(condicion importante|condición importante|limite que no|límite que no|me limita)\b/.test(t))
     return oneQuestion("Ese límite puede cambiar la recomendación, así que prefiero incorporarlo antes de seguir suponiendo.","¿Qué condición concreta te limita y qué no estarías dispuesto a asumir?");
+  if(/\b(no responde|no me estas resolviendo|no me estás resolviendo|dando vueltas|eso suena general|no me convence)\b/.test(t))
+    return oneQuestion("Tienes razón en pedir algo más concreto. No voy a repetirte la explicación general.","¿Qué punto exacto necesitas resolver ahora: el dato que falta, el criterio que aplico o el siguiente paso?");
+  if(hasPriorActor&&/\b(perdido|perdida|no entiendo|no se por donde|no sé por dónde|no me cuadra|sigo dudando|no tengo claro)\b/.test(t))
+    return oneQuestion("Veo que la explicación anterior no te ha dejado una decisión clara. Vamos a reducirlo a una sola cosa cada vez.","¿Qué te preocupa más ahora mismo: entender el criterio, saber qué dato falta o decidir qué hacer después?");
   if(/\b(voy con prisa|vamos al grano|al grano|respuesta mas concreta|respuesta más concreta)\b/.test(t))
     return oneQuestion("Voy al punto y sin añadir teoría innecesaria.","¿Necesitas que te diga el siguiente paso, el dato que falta o una decisión entre opciones?");
   if(/\b(que necesitas saber de mi|qué necesitas saber de mí|que dato necesitas|qué dato necesitas|siguiente paso|que hago ahora|qué hago ahora)\b/.test(t)){
+    const action=actionThread(context);
+    if(action)return oneQuestion("Vamos a concretar el alcance sin ejecutar nada todavía.","¿Qué campaña o acción quieres preparar, para qué audiencia autorizada y con qué objetivo?");
     const qs:Record<string,string>={
       finance:"¿Cuál es el dato que más puede cambiar la viabilidad ahora: ingresos netos, cuotas/deudas existentes, ahorro disponible o precio de compra?",
       legal:"¿Qué documento o compromiso vas a firmar o revisar y en qué fecha?",
