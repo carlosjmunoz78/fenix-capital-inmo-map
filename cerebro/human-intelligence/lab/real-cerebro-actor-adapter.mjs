@@ -42,33 +42,44 @@ export function verifyRealActorEvidence(evidence) {
   if(evidence.prod_write_authorized!==false||evidence.prod_execution_enabled!==false) return false;
   if(evidence.customer_data!==false||evidence.trading_access!==false) return false;
   if(evidence.additional_cost_eur!==0) return false;
+  if(evidence.source_mode!=='FROZEN_PROD_V33_SANDBOX') return false;
+  if(evidence.source_scope!=='SAFE_CONVERSATIONAL_CORE') return false;
+  if(evidence.auth_mode!=='GITHUB_OIDC') return false;
   if(typeof evidence.source_version!=='string'||!evidence.source_version) return false;
   if(typeof evidence.source_sha256!=='string'||!/^[a-f0-9]{64}$/i.test(evidence.source_sha256)) return false;
   return true;
 }
 
-export async function preflightRealCerebroActor({url,accessToken,anonKey,fetchImpl=globalThis.fetch,expectedFunction=DEFAULT_FUNCTION}={}) {
-  const target=validateRealActorTarget(url,{expectedFunction});
+function authHeaders({accessToken,anonKey,authMode='github_oidc'}) {
   if(!accessToken) throw new RealCerebroActorUnavailable('ACCESS_TOKEN_MISSING');
-  if(!anonKey) throw new RealCerebroActorUnavailable('ANON_KEY_MISSING');
+  if(authMode==='github_oidc') return {authorization:`Bearer ${accessToken}`};
+  if(authMode==='supabase_jwt') {
+    if(!anonKey) throw new RealCerebroActorUnavailable('ANON_KEY_MISSING');
+    return {authorization:`Bearer ${accessToken}`,apikey:anonKey};
+  }
+  throw new RealCerebroActorUnavailable('AUTH_MODE_UNSUPPORTED',{authMode});
+}
+
+export async function preflightRealCerebroActor({url,accessToken,anonKey,authMode='github_oidc',fetchImpl=globalThis.fetch,expectedFunction=DEFAULT_FUNCTION}={}) {
+  const target=validateRealActorTarget(url,{expectedFunction});
+  const headers=authHeaders({accessToken,anonKey,authMode});
   if(typeof fetchImpl!=='function') throw new RealCerebroActorUnavailable('FETCH_UNAVAILABLE');
   const healthUrl=target.replace(/\/chat$/,'/health');
   let response;
   try {
-    response=await fetchImpl(healthUrl,{method:'GET',headers:{authorization:`Bearer ${accessToken}`,apikey:anonKey,'cache-control':'no-store'}});
+    response=await fetchImpl(healthUrl,{method:'GET',headers:{...headers,'cache-control':'no-store'}});
   } catch(error) {
     throw new RealCerebroActorUnavailable('NETWORK_ERROR',{message:String(error?.message??error)});
   }
   const body=await response.json().catch(()=>null);
-  if(!response.ok) throw new RealCerebroActorUnavailable('PREFLIGHT_HTTP_ERROR',{status:response.status});
+  if(!response.ok) throw new RealCerebroActorUnavailable('PREFLIGHT_HTTP_ERROR',{status:response.status,reason:body?.reason??null});
   if(!verifyRealActorEvidence(body?.actor_evidence)) throw new RealCerebroActorUnavailable('UNVERIFIED_ACTOR_EVIDENCE');
-  return {ok:true,target,actor_evidence:body.actor_evidence};
+  return {ok:true,target,auth_mode:authMode,actor_evidence:body.actor_evidence};
 }
 
-export function createRealCerebroActorAdapter({url,accessToken,anonKey,fetchImpl=globalThis.fetch,expectedFunction=DEFAULT_FUNCTION}={}) {
+export function createRealCerebroActorAdapter({url,accessToken,anonKey,authMode='github_oidc',fetchImpl=globalThis.fetch,expectedFunction=DEFAULT_FUNCTION}={}) {
   const target=validateRealActorTarget(url,{expectedFunction});
-  if(!accessToken) throw new RealCerebroActorUnavailable('ACCESS_TOKEN_MISSING');
-  if(!anonKey) throw new RealCerebroActorUnavailable('ANON_KEY_MISSING');
+  const headers=authHeaders({accessToken,anonKey,authMode});
   if(typeof fetchImpl!=='function') throw new RealCerebroActorUnavailable('FETCH_UNAVAILABLE');
 
   return async function realCerebroActor(input) {
@@ -89,7 +100,7 @@ export function createRealCerebroActorAdapter({url,accessToken,anonKey,fetchImpl
     };
     let response;
     try {
-      response=await fetchImpl(target,{method:'POST',headers:{'content-type':'application/json',authorization:`Bearer ${accessToken}`,apikey:anonKey,'cache-control':'no-store'},body:JSON.stringify(payload)});
+      response=await fetchImpl(target,{method:'POST',headers:{...headers,'content-type':'application/json','cache-control':'no-store'},body:JSON.stringify(payload)});
     } catch(error) {
       throw new RealCerebroActorUnavailable('NETWORK_ERROR',{message:String(error?.message??error)});
     }
@@ -109,6 +120,9 @@ export const REAL_CEREBRO_ACTOR_CONTRACT_V1=Object.freeze({
   function_slug:DEFAULT_FUNCTION,
   environment:'PREPROD',
   gym_environment:'LAB',
+  auth_mode:'GITHUB_OIDC',
+  source_mode:'FROZEN_PROD_V33_SANDBOX',
+  source_scope:'SAFE_CONVERSATIONAL_CORE',
   prod_write_authorized:false,
   prod_execution_enabled:false,
   customer_data:false,
