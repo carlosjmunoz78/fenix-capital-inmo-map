@@ -1,0 +1,76 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_RSI_LRN_EVENT_BATCH",
+  "batch_id": "lrn-batch:40944dce725d87fcbaede80e",
+  "company_id": "fenix",
+  "engine_id": "LRN-001",
+  "environment": "PREPROD",
+  "version": "0.5.0",
+  "source": {
+    "workflow": "CEREBRO RSI Learning Outbox Publisher V0",
+    "run_id": 38247223792,
+    "head_sha": "3b6b3f45fb3eea624b1834d0c592c6b6f6550e1e"
+  },
+  "source_event_count": 1,
+  "events_total": 1,
+  "events": [
+    {
+      "schema_version": "1.0.0",
+      "event_id": "evt:lrn:33e09301a5f902afff5dfeae",
+      "event_type": "CEREBRO_ENGINE_RESULT",
+      "signal_id": "domain:AUTO-001:38247223792:1",
+      "source_type": "ENGINE_RESULT",
+      "company_id": "fenix",
+      "engine_id": "AUTO-001",
+      "environment": "PREPROD_CANDIDATE",
+      "source_environment": "PREPROD",
+      "version": "git-3b6b3f45fb3e",
+      "observed_at": "2026-10-12T12:09:30.000Z",
+      "severity": "INFO",
+      "confidence": 0.9,
+      "risk_class": "LOW",
+      "reason": "GitHub workflow CEREBRO RSI Learning Outbox Publisher V0 completed with conclusion success.",
+      "learning_hypothesis": "Real evidence for fenix.automation should be evaluated against prior evidence before any controlled improvement candidate is allowed to advance.",
+      "expected_metric_delta": {
+        "name": "workflow_success",
+        "direction": "HIGHER",
+        "measurement": "IMMUTABLE_GITHUB_WORKFLOW_RUN_CONCLUSION"
+      },
+      "evidence_refs": [
+        "git:3b6b3f45fb3eea624b1834d0c592c6b6f6550e1e",
+        "github-actions-run:38247223792"
+      ],
+      "payload": {
+        "source_id": "github:learning-control-plane:automation",
+        "domain_id": "fenix.automation",
+        "evidence_depth": "LIVE_AUTOMATION_CONTROL_PLANE",
+        "workflow_name": "CEREBRO RSI Learning Outbox Publisher V0",
+        "run_id": 38247223792,
+        "run_attempt": 1,
+        "conclusion": "success",
+        "head_sha": "3b6b3f45fb3eea624b1834d0c592c6b6f6550e1e",
+        "head_branch": "main",
+        "event": "workflow_run"
+      },
+      "local_validation_required": true,
+      "publish_authorized": false,
+      "persistent_publish_authorized": false,
+      "rsi_publish_authorized": false,
+      "contains_customer_data": false,
+      "contains_secrets": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "origin_event_id": "evt:universal:69361690560228f32060af8d",
+      "origin_company_id": "fenix"
+    }
+  ],
+  "local_validation_required": true,
+  "persistent_publish_authorized": false,
+  "rsi_publish_authorized": false,
+  "prod_authorized": false,
+  "prod_write_authorized": false,
+  "trading_access": false,
+  "additional_cost_eur": 0
+}
