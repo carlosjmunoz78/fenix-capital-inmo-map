@@ -12,7 +12,7 @@ on:
       - 'cerebro/tests/owner-approval-gate-v1.test.mjs'
       - '.github/workflows/cerebro-skill-autonomy-readonly-v1.yml'
   schedule:
-    - cron: '5-55/10 * * * *'
+    - cron: '5 * * * *'
   workflow_dispatch:
 
 concurrency:
