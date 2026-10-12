@@ -9,6 +9,7 @@ on:
       - 'supabase/functions/cerebro-human-old-actor-preprod-v0/**'
       - 'supabase/functions/cerebro-human-new-actor-preprod-v1/**'
       - 'supabase/functions/cerebro-human-route-control-preprod-v1/**'
+      - 'supabase/functions/cerebro-console-gateway-human-v1-canary/**'
       - 'supabase/migrations/20261012132000_cerebro_human_route_control_preprod_v1.sql'
       - '.github/workflows/cerebro-human-intelligence-*.yml'
       - '.github/workflows/cerebro-rsi-promotion-readiness-shadow-v0.yml'
@@ -54,7 +55,7 @@ jobs:
             base="$(git rev-parse FETCH_HEAD)"
           fi
           changed="$(git diff --name-only "$base" HEAD)"
-          bad="$(printf '%s\n' "$changed" | grep -Ev '^(cerebro/human-intelligence/|cerebro/tests/human-intelligence-[^/]+\.test\.mjs$|supabase/functions/cerebro-human-old-actor-preprod-v0/|supabase/functions/cerebro-human-new-actor-preprod-v1/|supabase/functions/cerebro-human-route-control-preprod-v1/|supabase/migrations/20261012132000_cerebro_human_route_control_preprod_v1\.sql$|\.github/workflows/cerebro-human-intelligence-[^/]+\.yml$|\.github/workflows/cerebro-rsi-promotion-readiness-shadow-v0\.yml$)' || true)"
+          bad="$(printf '%s\n' "$changed" | grep -Ev '^(cerebro/human-intelligence/|cerebro/tests/human-intelligence-[^/]+\.test\.mjs$|supabase/functions/cerebro-human-old-actor-preprod-v0/|supabase/functions/cerebro-human-new-actor-preprod-v1/|supabase/functions/cerebro-human-route-control-preprod-v1/|supabase/functions/cerebro-console-gateway-human-v1-canary/|supabase/migrations/20261012132000_cerebro_human_route_control_preprod_v1\.sql$|\.github/workflows/cerebro-human-intelligence-[^/]+\.yml$|\.github/workflows/cerebro-rsi-promotion-readiness-shadow-v0\.yml$)' || true)"
           if [ -n "$bad" ]; then
             echo 'Human Intelligence PR crossed its isolated surface:' >&2
             printf '%s\n' "$bad" >&2
@@ -83,7 +84,8 @@ jobs:
             cerebro/tests/bounded-recovery-supervisor.test.mjs \
             cerebro/tests/human-intelligence-tribunal-v1.test.mjs \
             cerebro/tests/human-intelligence-autonomy-bridge-v1.test.mjs \
-            cerebro/tests/human-intelligence-gateway-routing-v1.test.mjs
+            cerebro/tests/human-intelligence-gateway-routing-v1.test.mjs \
+            cerebro/tests/human-intelligence-production-overlay-v1.test.mjs
 
       - name: Assert PREPROD Human Intelligence functions remain fail-closed and PROD-free
         shell: bash
@@ -115,6 +117,20 @@ jobs:
             exit 1
           fi
 
+      - name: Assert additive PROD canary is unrouted no-write and preserves the current gateway
+        shell: bash
+        run: |
+          set -euo pipefail
+          f='supabase/functions/cerebro-console-gateway-human-v1-canary/index.ts'
+          test -f "$f"
+          grep -F 'cerebro-console-gateway-v0' "$f"
+          grep -F 'PROD_CANARY_UNROUTED' "$f"
+          grep -F 'live_chat_invoked:false' "$f"
+          grep -F 'prod_write_authorized:false' "$f"
+          grep -F '/canary/rehearsal' "$f"
+          ! grep -F 'SUPABASE_SERVICE_ROLE_KEY' "$f"
+          ! git diff --name-only "${{ github.event.pull_request.base.sha }}" HEAD | grep -Eq '^supabase/functions/cerebro-console-gateway-v0/'
+
       - name: Assert exact PREPROD route-control migration is additive service-role only
         shell: bash
         run: |
@@ -132,6 +148,6 @@ jobs:
 
       - name: Mark strict boundary
         run: |
-          echo 'Human Intelligence promotion readiness is PREPROD-scoped.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'Only the two named PREPROD actors, the exact route-control function and one exact additive PREPROD route-control migration are allowed outside cerebro/human-intelligence.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'No PROD deployment, App mutation, customer data, Trading authority or paid dependency is granted.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Human Intelligence promotion readiness is PREPROD plus one additive unrouted PROD canary.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'The current production gateway source is immutable in this PR.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'No real user is routed to the canary; no PROD /chat is called by the canary gate; no new PROD write authority is granted.' >> "$GITHUB_STEP_SUMMARY"
