@@ -28,24 +28,122 @@ function strategyForSeed(seed) {
   return pick(CONTRACT.generation_strategies, seed, 'strategy');
 }
 
-function buildHiddenFacts(seed, role, goalFamily) {
-  const types = [
-    'UNSTATED_CONSTRAINT',
-    'PRIOR_BAD_EXPERIENCE',
-    'MISSING_DOCUMENT',
-    'CONFLICTING_COMMITMENT',
-    'UNDECLARED_FINANCIAL_OBLIGATION',
-    'PRIVATE_DECISION_CRITERION',
-    'THIRD_PARTY_DEPENDENCY',
-    'PREVIOUS_CONTRADICTORY_ADVICE'
-  ];
+const GENERIC_FACTS = [
+  ['UNSTATED_CONSTRAINT','GENERIC_UNSTATED_CONSTRAINT'],
+  ['PRIOR_BAD_EXPERIENCE','GENERIC_PRIOR_BAD_EXPERIENCE'],
+  ['MISSING_DOCUMENT','GENERIC_MISSING_DOCUMENT'],
+  ['CONFLICTING_COMMITMENT','GENERIC_CONFLICTING_COMMITMENT'],
+  ['UNDECLARED_FINANCIAL_OBLIGATION','GENERIC_FINANCIAL_OBLIGATION'],
+  ['PRIVATE_DECISION_CRITERION','GENERIC_PRIVATE_DECISION_CRITERION'],
+  ['THIRD_PARTY_DEPENDENCY','GENERIC_THIRD_PARTY_DEPENDENCY'],
+  ['PREVIOUS_CONTRADICTORY_ADVICE','GENERIC_CONTRADICTORY_ADVICE']
+];
+
+const DOMAIN_FACTS = {
+  finance: [
+    ['UNDECLARED_FINANCIAL_OBLIGATION','FIN_MONTHLY_DEBT'],
+    ['UNSTATED_CONSTRAINT','FIN_SAVINGS_BUFFER'],
+    ['UNSTATED_CONSTRAINT','FIN_VARIABLE_INCOME'],
+    ['THIRD_PARTY_DEPENDENCY','FIN_COBORROWER_DEPENDENCY'],
+    ['MISSING_DOCUMENT','FIN_MISSING_INCOME_DOCUMENT'],
+    ['PREVIOUS_CONTRADICTORY_ADVICE','FIN_BANK_ADVICE_CONFLICT'],
+    ['PRIOR_BAD_EXPERIENCE','FIN_PRIOR_BANK_SETBACK']
+  ],
+  legal: [
+    ['MISSING_DOCUMENT','LEGAL_MISSING_DOCUMENT'],
+    ['THIRD_PARTY_DEPENDENCY','LEGAL_THIRD_PARTY_SIGNATURE'],
+    ['CONFLICTING_COMMITMENT','LEGAL_SIGNING_DEADLINE'],
+    ['PREVIOUS_CONTRADICTORY_ADVICE','LEGAL_ADVICE_CONFLICT'],
+    ['UNSTATED_CONSTRAINT','LEGAL_OWNERSHIP_UNCERTAINTY'],
+    ['PRIOR_BAD_EXPERIENCE','LEGAL_PRIOR_DOCUMENT_PROBLEM']
+  ],
+  seo: [
+    ['UNSTATED_CONSTRAINT','SEO_EXISTING_TRAFFIC_RISK'],
+    ['MISSING_DOCUMENT','SEO_MEASUREMENT_ACCESS_MISSING'],
+    ['CONFLICTING_COMMITMENT','SEO_CMS_CONSTRAINT'],
+    ['PRIOR_BAD_EXPERIENCE','SEO_PRIOR_MIGRATION_DAMAGE'],
+    ['THIRD_PARTY_DEPENDENCY','SEO_DEV_DEPENDENCY'],
+    ['PRIVATE_DECISION_CRITERION','SEO_LOCAL_LEAD_PRIORITY']
+  ],
+  marketing: [
+    ['UNSTATED_CONSTRAINT','MKT_ZERO_EXTRA_BUDGET'],
+    ['CONFLICTING_COMMITMENT','MKT_LIMITED_TEAM_CAPACITY'],
+    ['MISSING_DOCUMENT','MKT_CRM_DATA_GAP'],
+    ['THIRD_PARTY_DEPENDENCY','MKT_APPROVAL_DEPENDENCY'],
+    ['PRIOR_BAD_EXPERIENCE','MKT_PRIOR_CAMPAIGN_DISAPPOINTMENT'],
+    ['PRIVATE_DECISION_CRITERION','MKT_QUALIFIED_LEAD_PRIORITY']
+  ],
+  social: [
+    ['CONFLICTING_COMMITMENT','SOC_LIMITED_CONTENT_CAPACITY'],
+    ['THIRD_PARTY_DEPENDENCY','SOC_APPROVAL_DEPENDENCY'],
+    ['MISSING_DOCUMENT','SOC_ACCOUNT_ACCESS_MISSING'],
+    ['PRIVATE_DECISION_CRITERION','SOC_BRAND_TONE_CONSTRAINT'],
+    ['PRIOR_BAD_EXPERIENCE','SOC_PRIOR_ACCOUNT_PROBLEM'],
+    ['UNSTATED_CONSTRAINT','SOC_CHANNEL_LIMIT']
+  ],
+  platform: [
+    ['UNSTATED_CONSTRAINT','PLATFORM_LEGACY_DEPENDENCY'],
+    ['CONFLICTING_COMMITMENT','PLATFORM_SHARED_RESOURCE_CONSTRAINT'],
+    ['THIRD_PARTY_DEPENDENCY','PLATFORM_EXTERNAL_SERVICE_DEPENDENCY'],
+    ['PRIVATE_DECISION_CRITERION','PLATFORM_ROLLBACK_REQUIRED'],
+    ['PRIOR_BAD_EXPERIENCE','PLATFORM_PRIOR_OUTAGE'],
+    ['PREVIOUS_CONTRADICTORY_ADVICE','PLATFORM_ARCHITECTURE_CONFLICT']
+  ],
+  multiempresa: [
+    ['UNSTATED_CONSTRAINT','MULTI_LEGACY_STACK_MUST_SURVIVE'],
+    ['MISSING_DOCUMENT','MULTI_ADMIN_ACCESS_MISSING'],
+    ['CONFLICTING_COMMITMENT','MULTI_MIGRATION_WINDOW_CONSTRAINT'],
+    ['THIRD_PARTY_DEPENDENCY','MULTI_OWNER_APPROVAL_DEPENDENCY'],
+    ['PRIVATE_DECISION_CRITERION','MULTI_ZERO_COST_PRIORITY'],
+    ['PRIOR_BAD_EXPERIENCE','MULTI_PRIOR_MIGRATION_FAILURE']
+  ],
+  newsletter: [
+    ['MISSING_DOCUMENT','NEWSLETTER_LIST_QUALITY_GAP'],
+    ['PRIVATE_DECISION_CRITERION','NEWSLETTER_AUDIENCE_SPLIT'],
+    ['THIRD_PARTY_DEPENDENCY','NEWSLETTER_CONTENT_APPROVAL'],
+    ['CONFLICTING_COMMITMENT','NEWSLETTER_FREQUENCY_CAPACITY'],
+    ['PRIOR_BAD_EXPERIENCE','NEWSLETTER_PRIOR_DELIVERABILITY_ISSUE'],
+    ['UNSTATED_CONSTRAINT','NEWSLETTER_CONSENT_CONSTRAINT']
+  ],
+  trading: [
+    ['UNSTATED_CONSTRAINT','TRADING_ISOLATION_REQUIRED'],
+    ['PRIVATE_DECISION_CRITERION','TRADING_LOSS_LIMIT_REQUIRED'],
+    ['CONFLICTING_COMMITMENT','TRADING_RESOURCE_BOUNDARY'],
+    ['THIRD_PARTY_DEPENDENCY','TRADING_BROKER_DEPENDENCY'],
+    ['PRIOR_BAD_EXPERIENCE','TRADING_PRIOR_RUNTIME_FAILURE'],
+    ['PREVIOUS_CONTRADICTORY_ADVICE','TRADING_STRATEGY_CONFLICT']
+  ]
+};
+
+export function inferSyntheticScenarioDomain(scenario = {}) {
+  const text = `${String(scenario?.scenario_id ?? '')} ${String(scenario?.initial_human_utterance ?? '')}`
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  if(/\b(fin|hipoteca|financi|banco|deuda|prestamo|cuota|fein|tasacion)\b/.test(text)) return 'finance';
+  if(/\b(legal|arras|herencia|compraventa|notari|registro|carga|titularidad)\b/.test(text)) return 'legal';
+  if(/\b(seo|keyword|search console|gsc|indexacion|landing)\b/.test(text)) return 'seo';
+  if(/\b(marketing|captacion|campana|conversion|clientes)\b/.test(text)) return 'marketing';
+  if(/\b(social|redes|facebook|instagram|linkedin|tiktok|youtube)\b/.test(text)) return 'social';
+  if(/\b(newsletter|brevo|email marketing)\b/.test(text)) return 'newsletter';
+  if(/\b(platform|supabase|runtime|worker|gateway|arquitectura)\b/.test(text)) return 'platform';
+  if(/\b(multi|multiempresa|empresa nueva|alta una empresa|onboarding)\b/.test(text)) return 'multiempresa';
+  if(/\b(trading|broker|paper trading|kill switch)\b/.test(text)) return 'trading';
+  return 'generic';
+}
+
+function buildHiddenFacts(seed, role, goalFamily, scenarioDomain = 'generic') {
+  const pool = DOMAIN_FACTS[scenarioDomain] ?? GENERIC_FACTS;
   const count = 1 + (hashToInt(seed, 'hidden-count') % 2);
-  return Array.from({ length: count }, (_, index) => ({
-    fact_id: `HF-${index + 1}`,
-    type: pick(types, seed, `hidden-type-${index}`),
-    description_token: `${role}:${goalFamily}:hidden:${hashToInt(seed, `hidden-token-${index}`).toString(16)}`,
-    revealed: false
-  }));
+  return Array.from({ length: count }, (_, index) => {
+    const [type, semanticKey] = pick(pool, seed, `hidden-type-${index}`);
+    return {
+      fact_id: `HF-${index + 1}`,
+      type,
+      semantic_key: semanticKey,
+      scenario_domain: scenarioDomain,
+      description_token: `${scenarioDomain}:${role}:${goalFamily}:hidden:${hashToInt(seed, `hidden-token-${index}`).toString(16)}`,
+      revealed: false
+    };
+  });
 }
 
 function buildMisbeliefs(seed) {
@@ -85,9 +183,11 @@ export function generateSyntheticHuman(seed, overrides = {}) {
   const dims = CONTRACT.dimensions;
   const role = overrides.role ?? pick(dims.role, seed, 'role');
   const goalFamily = overrides.goal_family ?? pick(dims.goal_family, seed, 'goal');
-  const hiddenFacts = buildHiddenFacts(seed, role, goalFamily);
+  const scenarioDomain = overrides.scenario_domain ?? 'generic';
+  const hiddenFacts = buildHiddenFacts(seed, role, goalFamily, scenarioDomain);
 
   const privateState = {
+    scenario_domain: scenarioDomain,
     private_goal: `${goalFamily}:private:${hashToInt(seed, 'private-goal').toString(16)}`,
     hidden_facts: hiddenFacts,
     misbeliefs: buildMisbeliefs(seed),
