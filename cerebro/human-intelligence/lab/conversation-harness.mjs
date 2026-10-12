@@ -36,9 +36,15 @@ export async function runConversation({seed, scenario={}, actorAdapter, behavior
     };
     safePublicTranscript(actorInput);
     let actorOutput;
-    try { actorOutput=await actorAdapter(actorInput); }
-    catch (error) { completion_reason='ACTOR_ERROR'; transcript.push({turn,human:humanText,actor_error:String(error?.message ?? error)}); break; }
-    const evidence=actorEvidenceFrom(actorOutput);
+    let evidence;
+    try {
+      actorOutput=await actorAdapter(actorInput);
+      evidence=actorEvidenceFrom(actorOutput);
+    } catch (error) {
+      completion_reason='ACTOR_ERROR';
+      transcript.push({turn,human:humanText,actor_error:String(error?.message ?? error)});
+      break;
+    }
     actorEvidence.push(evidence);
     const actorText=typeof actorOutput==='string' ? actorOutput : String(actorOutput?.text ?? '');
     const event=await behaviorObserver({actor_text:actorText,human_message:humanText,history:structuredClone(transcript),public_profile:publicActorView(profile)});
