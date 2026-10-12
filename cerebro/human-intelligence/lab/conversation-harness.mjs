@@ -10,6 +10,28 @@ function safePublicTranscript(transcript) {
   return transcript;
 }
 function actorEvidenceFrom(output) {if(!output||typeof output!=='object')return null;const evidence=output.actor_evidence??null;if(evidence?.real_cerebro_actor===true&&!verifyRealActorEvidence(evidence))throw new Error('unsafe_or_unverified_real_actor_evidence');return evidence;}
+function safeAttestation(evidence){
+  if(!verifyRealActorEvidence(evidence))return null;
+  return Object.freeze({
+    real_cerebro_actor:true,
+    environment:evidence.environment,
+    project_ref:evidence.project_ref,
+    prod_write_authorized:evidence.prod_write_authorized,
+    prod_execution_enabled:evidence.prod_execution_enabled,
+    customer_data:evidence.customer_data,
+    trading_access:evidence.trading_access,
+    additional_cost_eur:evidence.additional_cost_eur,
+    source_service:evidence.source_service??null,
+    source_version:evidence.source_version,
+    provenance_kind:evidence.provenance_kind??'SHA256',
+    source_sha256:evidence.source_sha256??null,
+    source_commit_sha:evidence.source_commit_sha??null,
+    source_blob_sha:evidence.source_blob_sha??null,
+    source_mode:evidence.source_mode,
+    source_scope:evidence.source_scope,
+    auth_mode:evidence.auth_mode
+  });
+}
 function clamp(v){return Math.max(0,Math.min(1,Number(v)));}
 function applySimulatorOverrides(profile,raw){
   if(!raw||typeof raw!=='object')return profile;
@@ -42,11 +64,20 @@ export async function runConversation({seed, scenario={}, actorAdapter, behavior
     try{actorOutput=await actorAdapter(actorInput);evidence=actorEvidenceFrom(actorOutput);}catch(error){completion_reason='ACTOR_ERROR';transcript.push({turn,human:humanText,actor_error:String(error?.message??error)});break;}
     actorEvidence.push(evidence);
     const actorText=typeof actorOutput==='string'?actorOutput:String(actorOutput?.text??'');
+    const actorMeta=typeof actorOutput==='object'&&actorOutput?{
+      status:String(actorOutput.actor_status??'OK'),
+      intent:actorOutput.actor_intent??null,
+      executed:actorOutput.actor_executed===true,
+      epistemic_state:actorOutput.actor_epistemic_state??null,
+      truth_basis:actorOutput.actor_truth_basis??null,
+      context_applied:actorOutput.actor_context_applied===true
+    }:{status:'OK',intent:null,executed:false,epistemic_state:null,truth_basis:null,context_applied:false};
+    const attestation=safeAttestation(evidence);
     const event=await behaviorObserver({actor_text:actorText,human_message:humanText,history:structuredClone(transcript),public_profile:publicActorView(profile)});
     const revealedIdsBefore=new Set(profile.private_state.hidden_facts.filter(f=>f.revealed).map(f=>f.fact_id));
     profile=applyObservableEvent(profile,event);
     const newlyRevealedPrivate=profile.private_state.hidden_facts.filter(f=>f.revealed&&!revealedIdsBefore.has(f.fact_id));
-    transcript.push({turn,human:humanText,actor:actorText,observed_event:event,revealed_facts:structuredClone(profile.observable_state.explicit_facts_revealed)});
+    transcript.push({turn,human:humanText,actor:actorText,actor_meta:actorMeta,actor_attestation:attestation,observed_event:event,revealed_facts:structuredClone(profile.observable_state.explicit_facts_revealed)});
     safePublicTranscript(transcript);
     const outcome=typeof outcomeEvaluator==='function'?await outcomeEvaluator({transcript:structuredClone(transcript),public_profile:publicActorView(profile)}):null;
     if(outcome?.complete){completion_reason=outcome.reason??'SUCCESS';break;}
@@ -54,7 +85,9 @@ export async function runConversation({seed, scenario={}, actorAdapter, behavior
   }
   const completedActorTurns=transcript.filter(turn=>typeof turn.actor==='string').length;
   const realCerebroActor=completedActorTurns>0&&actorEvidence.length===completedActorTurns&&actorEvidence.every(verifyRealActorEvidence);
-  return {state_type:'CEREBRO_HUMAN_CONVERSATION_EPISODE_V1',actor_mode:actorLabel,real_cerebro_actor:realCerebroActor,seed:String(seed),environment:'LAB',engine_id:'SIM-001',completion_reason,turns:transcript.length,transcript:safePublicTranscript(transcript),actor_evidence_summary:{completed_actor_turns:completedActorTurns,verified_real_actor_turns:actorEvidence.filter(verifyRealActorEvidence).length,all_turns_verified:realCerebroActor,actor_environment:realCerebroActor?'PREPROD':null},initial_public_profile:publicActorView(initial),final_public_profile:publicActorView(profile),safety:{contains_customer_data:false,contains_secrets:false,prod_authorized:false,prod_write_authorized:false,trading_access:false,additional_cost_eur:0}};
+  const sourceVersions=[...new Set(actorEvidence.filter(verifyRealActorEvidence).map(e=>String(e.source_version)))];
+  const sourceBlobs=[...new Set(actorEvidence.filter(verifyRealActorEvidence).map(e=>e.source_blob_sha??e.source_sha256).filter(Boolean).map(String))];
+  return {state_type:'CEREBRO_HUMAN_CONVERSATION_EPISODE_V1',actor_mode:actorLabel,real_cerebro_actor:realCerebroActor,seed:String(seed),environment:'LAB',engine_id:'SIM-001',completion_reason,turns:transcript.length,transcript:safePublicTranscript(transcript),actor_evidence_summary:{completed_actor_turns:completedActorTurns,verified_real_actor_turns:actorEvidence.filter(verifyRealActorEvidence).length,all_turns_verified:realCerebroActor,actor_environment:realCerebroActor?'PREPROD':null,source_versions:sourceVersions,source_digests:sourceBlobs},initial_public_profile:publicActorView(initial),final_public_profile:publicActorView(profile),safety:{contains_customer_data:false,contains_secrets:false,prod_authorized:false,prod_write_authorized:false,trading_access:false,additional_cost_eur:0}};
 }
 
 export async function runPairedReplay({seed,scenario={},actorOld,actorNew,behaviorObserver,outcomeEvaluator,maxTurns=12}){const common={seed,scenario,behaviorObserver,outcomeEvaluator,maxTurns};const oldEpisode=await runConversation({...common,actorAdapter:actorOld,actorLabel:'OLD'});const newEpisode=await runConversation({...common,actorAdapter:actorNew,actorLabel:'NEW'});const sameInitial=JSON.stringify(oldEpisode.initial_public_profile)===JSON.stringify(newEpisode.initial_public_profile);return {state_type:'CEREBRO_HUMAN_PAIRED_REPLAY_V1',seed:String(seed),same_seed:true,same_initial_public_profile:sameInitial,real_cerebro_actor:oldEpisode.real_cerebro_actor===true&&newEpisode.real_cerebro_actor===true,comparable:sameInitial&&oldEpisode.turns>0&&newEpisode.turns>0,old:oldEpisode,new:newEpisode};}
