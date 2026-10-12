@@ -32,7 +32,15 @@
   addEventListener('pointerdown',human,{capture:true,passive:true});
   addEventListener('touchstart',human,{capture:true,passive:true});
   addEventListener('keydown',e=>{if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','PageUp','PageDown','Home','End'].includes(e.key))human()},{capture:true});
-  window.CEREBRO_MOTION_V1=Object.freeze({version:'motion-controller-v1',prod_authorized:false,getMode:()=>mode,go,sequence,cancel,setMode});
+  window.CEREBRO_MOTION_V1=Object.freeze({version:'motion-controller-v1.1',prod_authorized:false,getMode:()=>mode,go,sequence,cancel,setMode});
   show();
-  if(qa&&location.hash.includes('motion=1'))setTimeout(()=>sequence([1,2,3], 'CONVERSATIONAL'),650);
+  if(qa&&location.hash.includes('motion=1')){
+    setTimeout(()=>sequence([1,2,3], 'CONVERSATIONAL'),650);
+    setTimeout(()=>{
+      try{
+        const evt=new WheelEvent('wheel',{deltaY:160,bubbles:true,cancelable:true});
+        (canvas||window).dispatchEvent(evt);
+      }catch(e){human()}
+    },5200);
+  }
 })();
