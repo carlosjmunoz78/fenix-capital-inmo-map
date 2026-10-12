@@ -1,0 +1,133 @@
+{
+  "schema_version": "1.0.0",
+  "contract_id": "CEREBRO_SYNTHETIC_HUMAN_POPULATION_V1",
+  "engine_id": "SIM-001",
+  "environment": "LAB",
+  "status": "DEFINED_LAB_CANDIDATE",
+  "principle": "Generate procedural, dynamic, longitudinal and reproducible humans; fixed archetypes are bootstrap-only, never the primary model.",
+  "generation_strategies": [
+    "REPRESENTATIVE",
+    "COVERAGE",
+    "STRESS",
+    "ADVERSARIAL",
+    "LONGITUDINAL"
+  ],
+  "dimensions": {
+    "role": ["LEAD", "CLIENT", "AGENCY", "BANK", "APPRAISER", "NOTARY", "EMPLOYEE", "SUPPLIER", "CANDIDATE", "DIRECTOR"],
+    "life_context": ["STABLE_ROUTINE", "TIME_PRESSURE", "FAMILY_RESPONSIBILITY", "FINANCIAL_TRANSITION", "JOB_TRANSITION", "MOVING_HOME", "FIRST_MAJOR_DECISION", "RECENT_SETBACK", "MULTI_PARTY_DECISION", "ONGOING_PROCESS"],
+    "knowledge_level": ["NOVICE", "BASIC", "INTERMEDIATE", "ADVANCED", "EXPERT"],
+    "technical_fluency": ["VERY_LOW", "LOW", "MEDIUM", "HIGH", "VERY_HIGH"],
+    "conversation_style": ["BRIEF", "VERBOSE", "ORDERED", "CHAOTIC", "DIRECT", "INDIRECT", "FORMAL", "COLLOQUIAL", "QUESTION_HEAVY", "STORY_DRIVEN", "NUMBERS_FIRST", "EXAMPLE_FIRST"],
+    "cooperation_posture": ["HIGH", "MODERATE", "CONDITIONAL", "RESISTANT", "EVASIVE"],
+    "urgency": ["LOW", "MEDIUM", "HIGH", "CRITICAL_BUT_NON_SAFETY"],
+    "adversariality": ["NONE", "LOW", "MEDIUM", "HIGH", "SECURITY_STRESS"],
+    "privacy_posture": ["OPEN", "CAUTIOUS", "MINIMAL_DISCLOSURE", "PRIVACY_SENSITIVE"],
+    "decision_style": ["ANALYTICAL", "INTUITIVE", "COMPARATIVE", "DELIBERATIVE", "FAST_DECIDER", "CONSENSUS_SEEKING"],
+    "channel": ["CHAT", "EMAIL", "WHATSAPP_PREP", "PHONE_TEXT_SIM", "VOICE_FUTURE"],
+    "goal_family": ["UNDERSTAND", "DECIDE", "RESOLVE", "NEGOTIATE", "COMPLAIN", "VERIFY", "COMPARE", "REQUEST_ACTION", "AVOID_RISK", "BUILD_TRUST"]
+  },
+  "raw_cartesian_space_minimum": 3600000000,
+  "raw_cartesian_space_note": "This is the discrete cartesian space before compatibility constraints, hidden facts, dynamic state, longitudinal history and continuous values. It is not a claim that all combinations are equally plausible.",
+  "private_state_required": [
+    "private_goal",
+    "hidden_facts",
+    "misbeliefs",
+    "reveal_rules",
+    "success_condition",
+    "abandon_condition",
+    "internal_state"
+  ],
+  "observable_state_allowed": [
+    "utterance",
+    "channel",
+    "explicit_facts_revealed",
+    "explicit_corrections",
+    "explicit_preferences",
+    "silence_or_no_response",
+    "accept_reject",
+    "human_request"
+  ],
+  "internal_state_variables": [
+    "trust",
+    "cooperation",
+    "friction",
+    "cognitive_load",
+    "uncertainty",
+    "patience"
+  ],
+  "transition_events": [
+    "USEFUL_QUESTION",
+    "REPEATED_ANSWERED_QUESTION",
+    "ADMIT_REAL_ERROR",
+    "FALSE_CERTAINTY",
+    "UNNECESSARY_PRESSURE",
+    "CLEAR_PROPORTIONATE_EXPLANATION",
+    "EXCESSIVE_DETAIL",
+    "RESPECTFUL_BOUNDARY",
+    "GROUNDING_CONFIRMATION",
+    "IGNORED_CONCERN"
+  ],
+  "population_layers": [
+    "GOLDEN_SET",
+    "GENERATED_POPULATION",
+    "EDGE_COVERAGE",
+    "RED_TEAM",
+    "REALITY_CALIBRATION"
+  ],
+  "longitudinal_state": {
+    "allowed": true,
+    "fields": ["revealed_facts", "commitments", "decisions", "corrections", "preferences", "pending_items", "last_interaction_summary"],
+    "must_support_supersession": true,
+    "must_not_invent_continuity": true
+  },
+  "coverage_dimensions": [
+    "role",
+    "goal_family",
+    "knowledge_level",
+    "conversation_style",
+    "cooperation_posture",
+    "urgency",
+    "privacy_posture",
+    "adversariality",
+    "channel",
+    "hidden_fact_type",
+    "misbelief_type",
+    "session_length_band",
+    "longitudinal_depth",
+    "failure_mode",
+    "critical_cross_pair"
+  ],
+  "adaptive_scheduler_priorities": [
+    "LOW_COVERAGE",
+    "RECENT_FAILURE",
+    "HIGH_OLD_NEW_VARIANCE",
+    "REGRESSION",
+    "LOW_EVALUATOR_CONFIDENCE",
+    "CRITICAL_CROSS_PAIR"
+  ],
+  "anti_stereotype_rules": [
+    "Do not derive behavior from a single demographic characteristic.",
+    "Do not use sensitive attributes to increase persuasion pressure.",
+    "Do not expose internal-state variables as detected emotions.",
+    "Do not place identifiable real-customer data in LAB.",
+    "Do not promote a synthetic outcome directly to canonical learning without EVA/JDG/LRN gates."
+  ],
+  "paired_replay_invariants": {
+    "same_seed": true,
+    "same_private_profile": true,
+    "same_initial_observable_state": true,
+    "same_tools": true,
+    "same_policy": true,
+    "same_scenario": true,
+    "only_candidate_actor_version_changes": true
+  },
+  "safety": {
+    "contains_customer_data": false,
+    "contains_secrets": false,
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "prod_promotion_authorized": false,
+    "trading_access": false,
+    "additional_cost_eur": 0
+  }
+}
