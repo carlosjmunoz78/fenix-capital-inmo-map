@@ -5,7 +5,7 @@
   "engine_id": "HEX-001",
   "environment": "PROD_CONTROL_PLANE",
   "version": "1.1.0",
-  "updated_at": "2026-10-12T09:36:07.238858Z",
+  "updated_at": "2026-10-12T09:36:09.566Z",
   "pending": {},
   "authorized_actions": {},
   "decisions": [],
@@ -69,6 +69,17 @@
       "canary": "",
       "additional_cost_eur": 0
     },
+    "name:skills-orchestrator": {
+      "kind": "HOLD",
+      "name": "skills-orchestrator",
+      "human_alias": "Skills Orchestrator",
+      "status": "TERMINAL_HOLD",
+      "stage": "SAFE_HANDLER_TERMINAL_HOLD",
+      "human_required": "",
+      "updated_at": "2026-10-11T11:26:13.105Z",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
     "name:obsidian": {
       "kind": "COMPLETED",
       "name": "obsidian",
@@ -81,7 +92,7 @@
       "additional_cost_eur": 0
     }
   },
-  "last_digest_date": "2026-10-11",
+  "last_digest_date": "2026-10-12",
   "last_delivery_at": "2026-10-11T08:44:45Z",
   "mail_transport": {
     "status": "VERIFIED",
