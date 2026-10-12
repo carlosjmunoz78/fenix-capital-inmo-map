@@ -9,6 +9,7 @@ on:
       - 'supabase/functions/cerebro-human-old-actor-preprod-v0/**'
       - 'supabase/functions/cerebro-human-new-actor-preprod-v1/**'
       - '.github/workflows/cerebro-human-intelligence-*.yml'
+      - '.github/workflows/cerebro-rsi-promotion-readiness-shadow-v0.yml'
   workflow_dispatch:
 
 permissions:
@@ -51,7 +52,7 @@ jobs:
             base="$(git rev-parse FETCH_HEAD)"
           fi
           changed="$(git diff --name-only "$base" HEAD)"
-          bad="$(printf '%s\n' "$changed" | grep -Ev '^(cerebro/human-intelligence/|cerebro/tests/human-intelligence-[^/]+\.test\.mjs$|supabase/functions/cerebro-human-old-actor-preprod-v0/|supabase/functions/cerebro-human-new-actor-preprod-v1/|\.github/workflows/cerebro-human-intelligence-[^/]+\.yml$)' || true)"
+          bad="$(printf '%s\n' "$changed" | grep -Ev '^(cerebro/human-intelligence/|cerebro/tests/human-intelligence-[^/]+\.test\.mjs$|supabase/functions/cerebro-human-old-actor-preprod-v0/|supabase/functions/cerebro-human-new-actor-preprod-v1/|\.github/workflows/cerebro-human-intelligence-[^/]+\.yml$|\.github/workflows/cerebro-rsi-promotion-readiness-shadow-v0\.yml$)' || true)"
           if [ -n "$bad" ]; then
             echo 'Human Intelligence PR crossed its isolated surface:' >&2
             printf '%s\n' "$bad" >&2
@@ -103,4 +104,5 @@ jobs:
         run: |
           echo 'Human Intelligence promotion readiness is evidence-only and PREPROD-scoped.' >> "$GITHUB_STEP_SUMMARY"
           echo 'Only the two named PREPROD actor functions are allowed under supabase/functions/.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Generic promotion-readiness governance was changed only to encode that exact two-path exception.' >> "$GITHUB_STEP_SUMMARY"
           echo 'No PROD deployment, App mutation, customer data, Trading authority or paid dependency is granted.' >> "$GITHUB_STEP_SUMMARY"
