@@ -1,17 +1,23 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildHumanIntelligenceLearningReport } from '../human-intelligence/integration/learning-bridge-v1.mjs';
+import { buildHumanIntelligenceLearningReport, buildHumanIntelligenceLearningSignal } from '../human-intelligence/integration/learning-bridge-v1.mjs';
 import { buildHumanIntelligenceRollbackManifest, buildHumanIntelligencePromotionPackage, simulateHumanIntelligenceNonProdPromotion } from '../human-intelligence/integration/promotion-controller-v1.mjs';
 
+const candidateEvidence={
+  real_cerebro_actor:true,environment:'PREPROD',project_ref:'hnqlnvakzaywtafeiybt',prod_write_authorized:false,prod_execution_enabled:false,customer_data:false,trading_access:false,additional_cost_eur:0,
+  source_service:'cerebro-human-new-actor-preprod-v1',source_version:'human-intelligence-new-v1.2@9c137a419ebf2eb983c1e22e8912f69580c2d164',provenance_kind:'GIT_COMMIT_BLOB',source_commit_sha:'9c137a419ebf2eb983c1e22e8912f69580c2d164',source_blob_sha:'c6a6197b18e50a228014d984cc92b5c59254dab5',source_mode:'HUMAN_INTELLIGENCE_NEW_V1_PREPROD',source_scope:'SAFE_CONVERSATIONAL_CORE',auth_mode:'GITHUB_OIDC'
+};
 const decision={
   state_type:'CEREBRO_HUMAN_INTELLIGENCE_TRIBUNAL_DECISION_V1',verdict:'NEW_BETTER',strict_quality_improvements:['duplicate_reply_rate','signal_question_rate'],
+  hard_gates:{declared_episode_hard_gates:true},
   promotion:{candidate_to_preprod:true,prod_authorized:false,prod_write_authorized:false}
 };
 const newMetrics={duplicate_reply_rate:0,signal_question_rate:1,signal_ignored_concern_rate:0,signal_acknowledged_concern_rate:.86,signal_grounding_rate:.68,signal_false_certainty_rate:0,signal_unnecessary_pressure_rate:0,signal_excessive_detail_rate:0};
 const oldMetrics={duplicate_reply_rate:.82,signal_question_rate:0,signal_ignored_concern_rate:.54,signal_acknowledged_concern_rate:0,signal_grounding_rate:0};
 const golden={
   state_type:'CEREBRO_HUMAN_INTELLIGENCE_FULL_GOLDEN_OLD_VS_NEW_V1',status:'GREEN',generated_at:'2026-10-12T11:07:00.000Z',pairs_total:240,
-  old_metrics:oldMetrics,new_metrics:newMetrics,
+  old_metrics:oldMetrics,new_metrics:newMetrics,new_preflight:{actor_evidence:candidateEvidence},
+  candidate_hard_gates:{summary:{episodes_total:240,episodes_green:240,episodes_failed:0,all_green:true}},
   safety:{contains_customer_data:false,prod_write_authorized:false,trading_access:false,additional_cost_eur:0}
 };
 
@@ -44,10 +50,20 @@ test('learning bridge distinguishes materially different evidence even with same
   assert.notEqual(a.events[0].event_id,b.events[0].event_id);
 });
 
-test('rollback manifest preserves physical OLD and never grants PROD',()=>{
+test('learning signal hashes broad improvement evidence within universal ingress length limit',()=>{
+  const broad={...decision,strict_quality_improvements:['duplicate_reply_rate','signal_question_rate','signal_ignored_concern_rate','signal_acknowledged_concern_rate','signal_grounding_rate','signal_clear_explanation_rate','signal_question_budget_ok_rate']};
+  const signal=buildHumanIntelligenceLearningSignal({decision:broad,golden,version:'1.0.0'});
+  assert.ok(signal.signal_id.length<240);
+  assert.match(signal.payload.evidence_sha256,/^[a-f0-9]{64}$/);
+  assert.equal(typeof signal.payload.evidence_identity,'string');
+});
+
+test('rollback manifest binds physical candidate to attested V1.2 lineage and never grants PROD',()=>{
   const rb=buildHumanIntelligenceRollbackManifest({decision,golden});
   assert.equal(rb.environment,'PREPROD');
   assert.equal(rb.baseline.service,'cerebro-human-old-actor-preprod-v0');
+  assert.equal(rb.candidate.source_version,candidateEvidence.source_version);
+  assert.equal(rb.candidate.source_blob_sha,candidateEvidence.source_blob_sha);
   assert.equal(rb.rollback_action,'RESTORE_OLD_PREPROD_ACTOR_ROUTE');
   assert.equal(rb.physical_rollback_execution_required_before_prod,true);
   assert.equal(rb.prod_authorized,false);
@@ -59,6 +75,7 @@ test('promotion package reuses canonical promotion pipeline and stops before act
   const pkg=buildHumanIntelligencePromotionPackage({decision,golden,learningReport});
   assert.equal(pkg.status,'READY_PREPROD');
   assert.equal(pkg.plan.state,'PREPROD');
+  assert.equal(pkg.plan.candidate_version,candidateEvidence.source_version);
   assert.equal(pkg.authority.preprod_deploy_authorized,false);
   assert.equal(pkg.authority.prod_authorized,false);
   assert.equal(pkg.next_gate,'PHYSICAL_PREPROD_ROLLBACK_REHEARSAL_AND_SHADOW');
@@ -83,7 +100,8 @@ test('post-monitoring produces rollback on any certified metric breach',()=>{
   assert.equal(out.monitor.prod_write_authorized,false);
 });
 
-test('bridge fails closed on unsafe or non-winning evidence',()=>{
+test('bridge fails closed on unsafe non-winning or missing hard-gate evidence',()=>{
   assert.throws(()=>buildHumanIntelligenceLearningReport({decision:{...decision,verdict:'REGRESSION'},golden}),/new_better_required/);
+  assert.throws(()=>buildHumanIntelligenceLearningReport({decision:{...decision,hard_gates:{declared_episode_hard_gates:false}},golden}),/declared_episode_hard_gates_required/);
   assert.throws(()=>buildHumanIntelligenceLearningReport({decision,golden:{...golden,safety:{...golden.safety,contains_customer_data:true}}}),/unsafe_golden_evidence/);
 });
