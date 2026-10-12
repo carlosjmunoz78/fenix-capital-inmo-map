@@ -35,7 +35,7 @@ jobs:
       - name: Install existing repository dependencies
         run: npm ci
 
-      - name: Validate Human Intelligence contracts planner rights HumanProfile hard gates synthetic population and real actor boundary
+      - name: Validate Human Intelligence contracts planner rights HumanProfile hard gates synthetic population conversation gym and real actor boundary
         run: |
           node --test \
             cerebro/tests/human-intelligence-contract-v1.test.mjs \
@@ -43,6 +43,7 @@ jobs:
             cerebro/tests/human-intelligence-rights-gate-v1.test.mjs \
             cerebro/tests/human-intelligence-profile-gates-v1.test.mjs \
             cerebro/tests/human-intelligence-synthetic-population-v1.test.mjs \
+            cerebro/tests/human-intelligence-conversation-gym-v1.test.mjs \
             cerebro/tests/human-intelligence-real-actor-gate-v1.test.mjs
 
       - name: Materialize deterministic 240-episode LAB plan
