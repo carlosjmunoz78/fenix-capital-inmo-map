@@ -33,13 +33,14 @@ jobs:
       - name: Install existing repository dependencies
         run: npm ci
 
-      - name: Validate Human Intelligence contracts planner rights HumanProfile and hard gates
+      - name: Validate Human Intelligence contracts planner rights HumanProfile hard gates and synthetic population
         run: |
           node --test \
             cerebro/tests/human-intelligence-contract-v1.test.mjs \
             cerebro/tests/human-intelligence-scenario-plan-v1.test.mjs \
             cerebro/tests/human-intelligence-rights-gate-v1.test.mjs \
-            cerebro/tests/human-intelligence-profile-gates-v1.test.mjs
+            cerebro/tests/human-intelligence-profile-gates-v1.test.mjs \
+            cerebro/tests/human-intelligence-synthetic-population-v1.test.mjs
 
       - name: Materialize deterministic 240-episode LAB plan
         run: |
@@ -47,6 +48,13 @@ jobs:
             --baseline-sha "$BASELINE_SHA" \
             --scenario-count 60 \
             --out artifacts/human-intelligence/scenario-plan.v1.json
+
+      - name: Materialize procedural population coverage evidence
+        run: |
+          node cerebro/human-intelligence/lab/population-manifest.mjs \
+            --count 1000 \
+            --seed-prefix "${BASELINE_SHA}-population-v1" \
+            --out artifacts/human-intelligence/population-manifest.v1.json
 
       - name: Enforce immutable safety boundaries
         run: |
@@ -64,7 +72,22 @@ jobs:
             ([.episodes[] | select(.environment!="LAB" or .prod_authorized!=false or .prod_write_authorized!=false or .trading_access!=false or .contains_customer_data!=false or .contains_secrets!=false or .additional_cost_eur!=0)] | length)==0
           ' artifacts/human-intelligence/scenario-plan.v1.json >/dev/null
 
-      - name: Upload LAB planning evidence
+          jq -e '
+            .state_type=="CEREBRO_SYNTHETIC_HUMAN_POPULATION_MANIFEST_V1" and
+            .engine_id=="SIM-001" and
+            .environment=="LAB" and
+            .requested_profiles==1000 and
+            .unique_coverage_signatures>=850 and
+            .private_profiles_persisted==false and
+            .identifiable_customer_data==false and
+            .secrets==false and
+            .prod_authorized==false and
+            .prod_write_authorized==false and
+            .trading_access==false and
+            .additional_cost_eur==0
+          ' artifacts/human-intelligence/population-manifest.v1.json >/dev/null
+
+      - name: Upload LAB planning and population evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
