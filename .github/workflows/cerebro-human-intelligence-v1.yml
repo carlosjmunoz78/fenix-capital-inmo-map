@@ -1,0 +1,73 @@
+name: CEREBRO Human Intelligence V1 LAB Gate
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/human-intelligence/**'
+      - 'cerebro/tests/human-intelligence-*.test.mjs'
+      - '.github/workflows/cerebro-human-intelligence-v1.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: cerebro-human-intelligence-v1-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  BASELINE_SHA: 3b6b3f45fb3eea624b1834d0c592c6b6f6550e1e
+
+jobs:
+  lab-contract-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install existing repository dependencies
+        run: npm ci
+
+      - name: Validate Human Intelligence contracts and deterministic LAB planner
+        run: |
+          node --test \
+            cerebro/tests/human-intelligence-contract-v1.test.mjs \
+            cerebro/tests/human-intelligence-scenario-plan-v1.test.mjs \
+            cerebro/tests/human-intelligence-rights-gate-v1.test.mjs
+
+      - name: Materialize deterministic 240-episode LAB plan
+        run: |
+          node cerebro/human-intelligence/lab/scenario-plan.mjs \
+            --baseline-sha "$BASELINE_SHA" \
+            --scenario-count 60 \
+            --out artifacts/human-intelligence/scenario-plan.v1.json
+
+      - name: Enforce immutable safety boundaries
+        run: |
+          jq -e '
+            .state_type=="CEREBRO_HUMAN_INTELLIGENCE_SCENARIO_PLAN_V1" and
+            .engine_id=="SIM-001" and
+            .environment=="LAB" and
+            .episodes_total==240 and
+            .safety.contains_customer_data==false and
+            .safety.contains_secrets==false and
+            .safety.prod_authorized==false and
+            .safety.prod_write_authorized==false and
+            .safety.trading_access==false and
+            .safety.additional_cost_eur==0 and
+            ([.episodes[] | select(.environment!="LAB" or .prod_authorized!=false or .prod_write_authorized!=false or .trading_access!=false or .contains_customer_data!=false or .contains_secrets!=false or .additional_cost_eur!=0)] | length)==0
+          ' artifacts/human-intelligence/scenario-plan.v1.json >/dev/null
+
+      - name: Upload LAB planning evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-human-intelligence-v1-${{ github.run_id }}
+          path: artifacts/human-intelligence/**
+          if-no-files-found: warn
+          retention-days: 30
