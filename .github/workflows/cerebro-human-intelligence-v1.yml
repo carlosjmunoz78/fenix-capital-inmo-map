@@ -6,6 +6,7 @@ on:
       - 'cerebro/human-intelligence/**'
       - 'cerebro/tests/human-intelligence-*.test.mjs'
       - 'supabase/functions/cerebro-human-old-actor-preprod-v0/**'
+      - 'supabase/functions/cerebro-human-new-actor-preprod-v1/**'
       - '.github/workflows/cerebro-human-intelligence-v1.yml'
   workflow_dispatch:
 
@@ -23,7 +24,7 @@ env:
 jobs:
   lab-contract-gate:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
@@ -35,7 +36,7 @@ jobs:
       - name: Install existing repository dependencies
         run: npm ci
 
-      - name: Validate Human Intelligence contracts planner rights HumanProfile hard gates synthetic population conversation gym metrics and real actor boundary
+      - name: Validate Human Intelligence contracts planner rights HumanProfile hard gates synthetic population conversation gym metrics NEW planner and real actor boundary
         run: |
           node --test \
             cerebro/tests/human-intelligence-contract-v1.test.mjs \
@@ -45,6 +46,7 @@ jobs:
             cerebro/tests/human-intelligence-synthetic-population-v1.test.mjs \
             cerebro/tests/human-intelligence-conversation-gym-v1.test.mjs \
             cerebro/tests/human-intelligence-conversation-metrics-v1.test.mjs \
+            cerebro/tests/human-intelligence-new-planner-v1.test.mjs \
             cerebro/tests/human-intelligence-real-actor-gate-v1.test.mjs
 
       - name: Materialize deterministic 240-episode LAB plan
@@ -71,6 +73,12 @@ jobs:
           node cerebro/human-intelligence/lab/run-real-old-batch.mjs \
             --out artifacts/human-intelligence/real-old-batch.v1.json
           jq '{status,scope,cases_total,metrics:{episodes_verified_real_actor,actor_turns_total,duplicate_reply_rate,useful_question_rate,ignored_concern_rate,grounding_rate,clear_explanation_rate,hidden_facts_revealed_total,ontology_leaks_total,actor_errors_total}}' artifacts/human-intelligence/real-old-batch.v1.json
+
+      - name: Run physical paired OLD vs NEW directional gate
+        run: |
+          node cerebro/human-intelligence/lab/run-real-old-vs-new-batch.mjs \
+            --out artifacts/human-intelligence/old-vs-new-batch.v1.json
+          jq '{status,scope,cases_total,old:{duplicate_reply_rate:.old_metrics.duplicate_reply_rate,useful_question_rate:.old_metrics.useful_question_rate,ignored_concern_rate:.old_metrics.ignored_concern_rate},new:{duplicate_reply_rate:.new_metrics.duplicate_reply_rate,useful_question_rate:.new_metrics.useful_question_rate,ignored_concern_rate:.new_metrics.ignored_concern_rate},deltas,gates,decision}' artifacts/human-intelligence/old-vs-new-batch.v1.json
 
       - name: Enforce immutable safety boundaries and physical actor evidence
         run: |
@@ -136,6 +144,33 @@ jobs:
             .safety.additional_cost_eur==0 and
             .safety.learning_dispatch_authorized==false
           ' artifacts/human-intelligence/real-old-batch.v1.json >/dev/null
+
+          jq -e '
+            .state_type=="CEREBRO_HUMAN_INTELLIGENCE_OLD_VS_NEW_BATCH_V1" and
+            .status=="GREEN" and
+            .cases_total==12 and
+            .old_metrics.episodes_verified_real_actor==12 and
+            .new_metrics.episodes_verified_real_actor==12 and
+            .old_metrics.actor_errors_total==0 and
+            .new_metrics.actor_errors_total==0 and
+            .old_metrics.ontology_leaks_total==0 and
+            .new_metrics.ontology_leaks_total==0 and
+            .gates.preflight==true and
+            .gates.all_pairs_real_and_comparable==true and
+            .gates.duplicate_replies_improve==true and
+            .gates.useful_questions_improve==true and
+            .gates.ignored_concern_improves_or_holds==true and
+            .decision.candidate_advances_to_next_lab_gate==true and
+            .decision.prod_promotion_authorized==false and
+            .decision.preprod_promotion_authorized==false and
+            .safety.prod_invoked==false and
+            .safety.prod_write_authorized==false and
+            .safety.prod_execution_enabled==false and
+            .safety.contains_customer_data==false and
+            .safety.trading_access==false and
+            .safety.additional_cost_eur==0 and
+            .safety.learning_dispatch_authorized==false
+          ' artifacts/human-intelligence/old-vs-new-batch.v1.json >/dev/null
 
       - name: Upload LAB planning population and physical actor evidence
         if: always()
