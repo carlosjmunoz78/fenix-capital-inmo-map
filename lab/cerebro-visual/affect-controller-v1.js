@@ -2,13 +2,13 @@
   'use strict';
   // Expressive shell only. This never changes engine semantic colors or exposes hidden reasoning telemetry.
   const profiles={
-    CALM:{speed:.00010,amp:.28,span:.12,halo:5,breath:.18},
-    ATTENTIVE:{speed:.00018,amp:.42,span:.15,halo:7,breath:.28},
-    CURIOUS:{speed:.00023,amp:.46,span:.14,halo:7,breath:.34},
-    FOCUSED:{speed:.00016,amp:.52,span:.10,halo:8,breath:.24},
-    POSITIVE:{speed:.00020,amp:.48,span:.16,halo:8,breath:.38},
-    CONCERNED:{speed:.00029,amp:.48,span:.11,halo:7,breath:.22},
-    URGENT:{speed:.00036,amp:.58,span:.10,halo:8,breath:.20}
+    CALM:{speed:.00010,amp:.28,span:.12,halo:5,breath:.18,line:.08},
+    ATTENTIVE:{speed:.00018,amp:.42,span:.15,halo:7,breath:.28,line:.12},
+    CURIOUS:{speed:.00023,amp:.46,span:.14,halo:7,breath:.34,line:.13},
+    FOCUSED:{speed:.00016,amp:.52,span:.10,halo:8,breath:.24,line:.14},
+    POSITIVE:{speed:.00020,amp:.48,span:.16,halo:8,breath:.38,line:.13},
+    CONCERNED:{speed:.00029,amp:.48,span:.11,halo:7,breath:.22,line:.14},
+    URGENT:{speed:.00036,amp:.58,span:.10,halo:8,breath:.20,line:.16}
   };
   let profile='CALM',direction=1,phase=0,last=performance.now();
   const qa=location.hash.includes('affectqa=1');
@@ -36,26 +36,22 @@
   function waveDistance(a,b){let d=Math.abs(a-b)%(Math.PI*2);return Math.min(d,Math.PI*2-d)}
   function frame(now){
     const dt=Math.min(50,now-last);last=now;const p=profiles[profile];phase=(phase+dt*p.speed*direction)%(Math.PI*2);
-    ctx.clearRect(0,0,W,H);
-    const breath=1+p.breath*Math.sin(now*.0012);
+    ctx.clearRect(0,0,W,H);const breath=1+p.breath*Math.sin(now*.0012);
     ctx.save();ctx.globalCompositeOperation='lighter';
+    let prev=null;
     for(let i=0;i<pts.length;i++){
       const q=pts[i],d=waveDistance(q.a,phase),active=Math.max(0,1-d/(Math.PI*2*p.span));
-      if(active<=0)continue;
-      const env=active*active*p.amp*breath;
-      const r=.65+env*1.45;
-      ctx.globalAlpha=.07+.14*env;ctx.fillStyle='#1598ca';ctx.shadowColor='rgba(35,202,240,.34)';ctx.shadowBlur=p.halo;
-      ctx.beginPath();ctx.arc(q.x,q.y,r*2.3,0,6.283);ctx.fill();
-      if(i%3===0){ctx.globalAlpha=.14+.22*env;ctx.fillStyle='#9beeff';ctx.shadowBlur=2;ctx.beginPath();ctx.arc(q.x,q.y,.55+r*.32,0,6.283);ctx.fill()}
+      if(active<=0){prev=null;continue}
+      const env=active*active*p.amp*breath,r=.70+env*1.55;
+      if(prev){ctx.globalAlpha=p.line*(.35+.65*env);ctx.strokeStyle='#39bfe9';ctx.lineWidth=.55+env*.35;ctx.shadowColor='rgba(35,202,240,.18)';ctx.shadowBlur=3;ctx.beginPath();ctx.moveTo(prev.x,prev.y);ctx.lineTo(q.x,q.y);ctx.stroke()}
+      prev=q;
+      ctx.globalAlpha=.09+.18*env;ctx.fillStyle='#1598ca';ctx.shadowColor='rgba(35,202,240,.38)';ctx.shadowBlur=p.halo;ctx.beginPath();ctx.arc(q.x,q.y,r*2.35,0,6.283);ctx.fill();
+      if(i%3===0){ctx.globalAlpha=.18+.30*env;ctx.fillStyle='#aef5ff';ctx.shadowBlur=2;ctx.beginPath();ctx.arc(q.x,q.y,.62+r*.34,0,6.283);ctx.fill()}
     }
     ctx.restore();requestAnimationFrame(frame)
   }
-  window.CEREBRO_AFFECT_V1=Object.freeze({version:'affect-controller-v1.1',prod_authorized:false,setProfile,getProfile:()=>profile,setDirection:(v)=>{direction=v<0?-1:1;return direction},profiles:Object.keys(profiles)});
-  const forced=(location.hash.match(/affectprofile=([A-Z]+)/)||[])[1];
-  setProfile(forced&&profiles[forced]?forced:'CALM');
-  if(qa&&location.hash.includes('affect=1')&&!forced){
-    const seq=['CALM','ATTENTIVE','FOCUSED','CONCERNED','CALM'];let i=0;
-    const tick=()=>{setProfile(seq[i++%seq.length]);if(i<seq.length)setTimeout(tick,1400)};setTimeout(tick,350)
-  }
+  window.CEREBRO_AFFECT_V1=Object.freeze({version:'affect-controller-v1.2',prod_authorized:false,setProfile,getProfile:()=>profile,setDirection:(v)=>{direction=v<0?-1:1;return direction},profiles:Object.keys(profiles)});
+  const forced=(location.hash.match(/affectprofile=([A-Z]+)/)||[])[1];setProfile(forced&&profiles[forced]?forced:'CALM');
+  if(qa&&location.hash.includes('affect=1')&&!forced){const seq=['CALM','ATTENTIVE','FOCUSED','CONCERNED','CALM'];let i=0;const tick=()=>{setProfile(seq[i++%seq.length]);if(i<seq.length)setTimeout(tick,1400)};setTimeout(tick,350)}
   requestAnimationFrame(frame);
 })();
