@@ -30,6 +30,8 @@ jobs:
     timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -42,6 +44,8 @@ jobs:
 
       - name: Assert stable authority is untouched and router is compiled to zero
         shell: bash
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           set -euo pipefail
           d='supabase/functions/cerebro-console-human-router-zero-v1'
@@ -56,10 +60,10 @@ jobs:
           grep -F "consumer_routing_enabled:false" "$r"
           ! grep -F 'SUPABASE_SERVICE_ROLE_KEY' "$r" "$s" "$a"
           ! grep -Eq 'prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true' "$r" "$s" "$a"
-          git diff --exit-code origin/main...HEAD -- supabase/functions/cerebro-console-gateway-v0 || {
-            echo 'Stable Console authority was modified' >&2
-            exit 1
-          }
+          base="${PR_BASE_SHA:-}"
+          if [ -z "$base" ]; then base="$(git rev-parse origin/main)"; fi
+          git cat-file -e "${base}^{commit}"
+          git diff --exit-code "${base}"...HEAD -- supabase/functions/cerebro-console-gateway-v0
 
       - name: Acquire short-lived GitHub OIDC token
         shell: bash
