@@ -96,7 +96,7 @@
     selected=signal.to;
     reactionCluster=signal.to;
     reactionStart=now;
-    reactionUntil=now+900;
+    reactionUntil=now+(location.hash.includes('signalqa=1')?1600:900);
     setStage(stage);
   }
 
@@ -107,7 +107,7 @@
     signal.from=selected;
     signal.to=target;
     signal.start=performance.now();
-    signal.duration=760;
+    signal.duration=location.hash.includes('signalqa=1')?2600:760;
     reactionCluster=-1;
     state.textContent='SIGNAL · '+names[signal.from]+' → '+names[signal.to];
     return true;
@@ -146,6 +146,6 @@
     getState:()=>({active:signal.active,from:names[signal.from],to:names[signal.to],reaction:reactionCluster>=0?names[reactionCluster]:null})
   });
 
-  if(location.hash.includes('signal=1'))setTimeout(()=>triggerSignal((selected+1)%centers.length),550);
+  if(location.hash.includes('signal=1'))setTimeout(()=>triggerSignal((selected+1)%centers.length),location.hash.includes('signalqa=1')?1200:550);
   requestAnimationFrame(renderSignal);
 })();
