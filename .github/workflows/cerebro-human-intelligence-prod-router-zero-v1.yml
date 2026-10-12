@@ -44,15 +44,18 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          r='supabase/functions/cerebro-console-human-router-zero-v1/index.ts'
-          test -f "$r"
-          grep -F "const LIVE_CANARY_PERCENT=0;" "$r"
+          d='supabase/functions/cerebro-console-human-router-zero-v1'
+          r="$d/index.ts"
+          s="$d/router.ts"
+          a="$d/auth.ts"
+          test -f "$r" && test -f "$s" && test -f "$a"
+          grep -F "export const LIVE_CANARY_PERCENT=0;" "$s"
           grep -F "cerebro-console-gateway-v0" "$r"
           grep -F "cerebro-console-gateway-human-v1-canary" "$r"
           grep -F "PREPROD_NORMAL_ROUTING_DISABLED" "$r"
           grep -F "consumer_routing_enabled:false" "$r"
-          ! grep -F 'SUPABASE_SERVICE_ROLE_KEY' "$r"
-          ! grep -Eq 'prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true' "$r"
+          ! grep -F 'SUPABASE_SERVICE_ROLE_KEY' "$r" "$s" "$a"
+          ! grep -Eq 'prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true' "$r" "$s" "$a"
           git diff --exit-code origin/main...HEAD -- supabase/functions/cerebro-console-gateway-v0 || {
             echo 'Stable Console authority was modified' >&2
             exit 1
