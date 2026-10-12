@@ -50,9 +50,10 @@
     }
     ctx.restore();requestAnimationFrame(frame)
   }
-  window.CEREBRO_AFFECT_V1=Object.freeze({version:'affect-controller-v1',prod_authorized:false,setProfile,getProfile:()=>profile,setDirection:(v)=>{direction=v<0?-1:1;return direction},profiles:Object.keys(profiles)});
-  setProfile('CALM');
-  if(qa&&location.hash.includes('affect=1')){
+  window.CEREBRO_AFFECT_V1=Object.freeze({version:'affect-controller-v1.1',prod_authorized:false,setProfile,getProfile:()=>profile,setDirection:(v)=>{direction=v<0?-1:1;return direction},profiles:Object.keys(profiles)});
+  const forced=(location.hash.match(/affectprofile=([A-Z]+)/)||[])[1];
+  setProfile(forced&&profiles[forced]?forced:'CALM');
+  if(qa&&location.hash.includes('affect=1')&&!forced){
     const seq=['CALM','ATTENTIVE','FOCUSED','CONCERNED','CALM'];let i=0;
     const tick=()=>{setProfile(seq[i++%seq.length]);if(i<seq.length)setTimeout(tick,1400)};setTimeout(tick,350)
   }
