@@ -10,6 +10,7 @@ on:
       - 'supabase/migrations/20261013010500_cerebro_multichannel_ana_overlay_v1.sql'
       - 'cerebro/multichannel/**'
       - 'cerebro/tests/multichannel-conversation-policy-v1.test.mjs'
+      - 'cerebro/tests/multichannel-conversation-old-vs-new-v1.test.mjs'
       - '.github/workflows/cerebro-multichannel-conversation-unification-v1.yml'
   workflow_dispatch:
 
@@ -30,8 +31,12 @@ jobs:
           cache: npm
       - name: Install dependencies reproducibly
         run: npm ci
-      - name: Test common CHAT-001 and VOICE-001 policy
-        run: node --test cerebro/tests/multichannel-conversation-policy-v1.test.mjs cerebro/tests/universal-learning-ingress.test.mjs
+      - name: Test common policy universal LRN boundary and OLD vs NEW tribunal evidence
+        run: |
+          node --test \
+            cerebro/tests/multichannel-conversation-policy-v1.test.mjs \
+            cerebro/tests/multichannel-conversation-old-vs-new-v1.test.mjs \
+            cerebro/tests/universal-learning-ingress.test.mjs
       - name: Assert channel adapters preserve existing authority boundaries
         shell: bash
         run: |
@@ -40,7 +45,8 @@ jobs:
           text='supabase/functions/cerebro-telegram-gateway-v0/index.ts'
           voice='supabase/functions/cerebro-telegram-voice-v1/index.ts'
           ana='supabase/migrations/20261013010500_cerebro_multichannel_ana_overlay_v1.sql'
-          test -f "$policy" && test -f "$text" && test -f "$voice" && test -f "$ana"
+          rollback='cerebro/multichannel/rollback/telegram-rollback-manifest.v1.json'
+          test -f "$policy" && test -f "$text" && test -f "$voice" && test -f "$ana" && test -f "$rollback"
           grep -F "TELEGRAM_TEXT" "$text"
           grep -F "TELEGRAM_VOICE" "$voice"
           grep -F "VOICE-001" "$policy"
@@ -50,7 +56,8 @@ jobs:
           grep -F "HUMAN_REQUIRED" "$policy"
           grep -F "fenix_prod_ana_knowledge_answer_user(p_question)" "$ana"
           grep -F "APP_ANA_TEXT" "$ana"
-          ! grep -Eqi '\b(drop|truncate)\b|\bdelete\s+from\b' "$ana"
+          jq -e '.telegram_text.baseline_version==4 and .telegram_voice.baseline_version==1 and .authority.prod_action_expansion==false and .authority.prod_write_expansion==false and .authority.trading_access==false and .additional_cost_eur==0' "$rollback" >/dev/null
+          ! grep -Eqi '\b(truncate)\b|\bdelete\s+from\b' "$ana"
       - name: Assert stable Console and unrelated App gateway are untouched
         shell: bash
         env:
@@ -73,5 +80,5 @@ jobs:
           grep -F "additional_cost_eur:0" supabase/functions/_shared/cerebro-conversation-policy-v1.ts
       - name: Record boundary
         run: |
-          echo 'GREEN proves one conservative conversation policy across Console/Ana/Telegram text and VOICE-001 voice adapters without changing channel authority.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'GREEN proves one conservative conversation policy across Console/Ana/Telegram text and VOICE-001 voice adapters, bounded OLD vs NEW non-regression evidence, and exact rollback evidence without changing channel authority.' >> "$GITHUB_STEP_SUMMARY"
           echo 'This gate does not authorize new PROD actions or Trading, and learning remains observation-only through the existing LRN-001 path.' >> "$GITHUB_STEP_SUMMARY"
