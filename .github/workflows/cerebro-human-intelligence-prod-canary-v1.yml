@@ -43,14 +43,17 @@ jobs:
           set -euo pipefail
           f='supabase/functions/cerebro-console-gateway-human-v1-canary/index.ts'
           o='supabase/functions/cerebro-console-gateway-human-v1-canary/overlay.ts'
-          test -f "$f" && test -f "$o"
+          r='supabase/functions/cerebro-console-gateway-human-v1-canary/router.ts'
+          test -f "$f" && test -f "$o" && test -f "$r"
           grep -F 'cerebro-console-gateway-v0' "$f"
           grep -F 'cluhljgonannaafpmblx' "$f"
           grep -F '/canary/rehearsal' "$f"
+          grep -F '/canary/router-rehearsal' "$f"
           grep -F 'live_chat_invoked:false' "$f"
           grep -F 'prod_write_authorized:false' "$f"
+          grep -F 'LIVE_CANARY_PERCENT=0' "$r"
           ! grep -F 'SUPABASE_SERVICE_ROLE_KEY' "$f"
-          ! grep -Eq 'trading_access[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true' "$f" "$o"
+          ! grep -Eq 'trading_access[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true' "$f" "$o" "$r"
           grep -F 'PASS_THROUGH_UNCHANGED' cerebro/human-intelligence/integration/production-conversation-overlay-v1.mjs
 
       - name: Acquire short-lived GitHub OIDC token for unrouted canary only
@@ -64,7 +67,7 @@ jobs:
           test -s /tmp/cerebro-human-canary-oidc
           chmod 600 /tmp/cerebro-human-canary-oidc
 
-      - name: Physical PROD-project canary health without live gateway invocation
+      - name: Physical PROD-project canary health proves ZERO routing
         shell: bash
         run: |
           set -euo pipefail
@@ -72,7 +75,26 @@ jobs:
           curl --fail --silent --show-error \
             -H "Authorization: Bearer ${token}" \
             "${CANARY_URL}/canary/health" > /tmp/health.json
-          jq -e '.ok==true and .environment=="PROD_CANARY_UNROUTED" and .traffic_enabled==false and .live_chat_invoked==false and .prod_write_authorized==false and .trading_access==false and .additional_cost_eur==0' /tmp/health.json >/dev/null
+          jq -e '.ok==true and .environment=="PROD_CANARY_UNROUTED" and .traffic_enabled==false and .consumer_routing_enabled==false and .live_canary_percent==0 and .fail_closed_target=="OLD" and .live_chat_invoked==false and .prod_write_authorized==false and .trading_access==false and .additional_cost_eur==0' /tmp/health.json >/dev/null
+
+      - name: Physical ZERO router rehearsal never calls PROD upstream
+        shell: bash
+        run: |
+          set -euo pipefail
+          token="$(cat /tmp/cerebro-human-canary-oidc)"
+          cat > /tmp/router-rehearsal.json <<'JSON'
+          {
+            "requested_percent": 5,
+            "cohort_keys": ["synthetic-a","synthetic-b","synthetic-c","synthetic-d"]
+          }
+          JSON
+          curl --fail --silent --show-error \
+            -X POST \
+            -H "Authorization: Bearer ${token}" \
+            -H 'Content-Type: application/json' \
+            --data-binary @/tmp/router-rehearsal.json \
+            "${CANARY_URL}/canary/router-rehearsal" > /tmp/router-rehearsal-out.json
+          jq -e '.ok==true and .environment=="PROD_CANARY_UNROUTED" and .live_canary_percent==0 and .requested_rehearsal_percent==5 and .safety.synthetic_only==true and .safety.upstream_prod_chat_called==false and .safety.route_state_mutated==false and .safety.consumer_routing_enabled==false and .safety.prod_write_authorized==false and .safety.trading_access==false and .safety.customer_data==false and .safety.additional_cost_eur==0' /tmp/router-rehearsal-out.json >/dev/null
 
       - name: Physical synthetic overlay rehearsal with zero PROD chat writes
         shell: bash
@@ -92,7 +114,7 @@ jobs:
             -H 'Content-Type: application/json' \
             --data-binary @/tmp/rehearsal.json \
             "${CANARY_URL}/canary/rehearsal" > /tmp/rehearsal-out.json
-          jq -e '.ok==true and .environment=="PROD_CANARY_UNROUTED" and .traffic_enabled==false and .live_chat_invoked==false and .safety.upstream_prod_chat_called==false and .safety.prod_write_authorized==false and .safety.trading_access==false and .safety.customer_data==false and .safety.additional_cost_eur==0 and .result.overlay.applied==true and .result.overlay.authoritative_preserved==true and .result.overlay.questions_added<=1' /tmp/rehearsal-out.json >/dev/null
+          jq -e '.ok==true and .environment=="PROD_CANARY_UNROUTED" and .traffic_enabled==false and .consumer_routing_enabled==false and .live_canary_percent==0 and .live_chat_invoked==false and .safety.upstream_prod_chat_called==false and .safety.prod_write_authorized==false and .safety.trading_access==false and .safety.customer_data==false and .safety.additional_cost_eur==0 and .result.overlay.applied==true and .result.overlay.authoritative_preserved==true and .result.overlay.questions_added<=1' /tmp/rehearsal-out.json >/dev/null
 
       - name: Verify action semantics remain untouched in physical canary
         shell: bash
@@ -113,5 +135,5 @@ jobs:
 
       - name: Record boundary
         run: |
-          echo 'GREEN here proves an additive unrouted function in the PROD Supabase project plus synthetic no-write rehearsal.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'It does NOT route real users, call PROD /chat, authorize PROD writes, or replace cerebro-console-gateway-v0.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'GREEN here proves the deployed PROD canary is physically fail-closed at NEW 0%, plus synthetic no-write router and overlay rehearsals.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'It does NOT route real users, call PROD /chat in rehearsal, authorize PROD writes, or replace cerebro-console-gateway-v0.' >> "$GITHUB_STEP_SUMMARY"

@@ -61,6 +61,7 @@ test('learning signal hashes broad improvement evidence within universal ingress
 test('rollback manifest binds physical candidate to attested V1.2 lineage and never grants PROD',()=>{
   const rb=buildHumanIntelligenceRollbackManifest({decision,golden});
   assert.equal(rb.environment,'PREPROD');
+  assert.equal(rb.engine_id,'SIM-001');
   assert.equal(rb.baseline.service,'cerebro-human-old-actor-preprod-v0');
   assert.equal(rb.candidate.source_version,candidateEvidence.source_version);
   assert.equal(rb.candidate.source_blob_sha,candidateEvidence.source_blob_sha);
@@ -70,10 +71,15 @@ test('rollback manifest binds physical candidate to attested V1.2 lineage and ne
   assert.equal(rb.prod_write_authorized,false);
 });
 
-test('promotion package reuses canonical promotion pipeline and stops before activation',()=>{
+test('promotion package separates SIM evidence source from CHAT live target and stops before activation',()=>{
   const learningReport=buildHumanIntelligenceLearningReport({decision,golden});
   const pkg=buildHumanIntelligencePromotionPackage({decision,golden,learningReport});
   assert.equal(pkg.status,'READY_PREPROD');
+  assert.equal(pkg.evidence_source.engine_id,'SIM-001');
+  assert.equal(pkg.promotion_target.engine_id,'CHAT-001');
+  assert.equal(pkg.promotion_target.authority_gateway,'cerebro-console-gateway-v0');
+  assert.equal(pkg.promotion_target.candidate_overlay,'cerebro-console-gateway-human-v1-canary');
+  assert.equal(pkg.plan.engine_id,'CHAT-001');
   assert.equal(pkg.plan.state,'PREPROD');
   assert.equal(pkg.plan.candidate_version,candidateEvidence.source_version);
   assert.equal(pkg.authority.preprod_deploy_authorized,false);
@@ -85,6 +91,7 @@ test('canonical non-PROD pipeline reaches CANARY but cannot cross current author
   const learningReport=buildHumanIntelligenceLearningReport({decision,golden});
   const pkg=buildHumanIntelligencePromotionPackage({decision,golden,learningReport});
   const out=simulateHumanIntelligenceNonProdPromotion({promotionPackage:pkg,shadowPass:true,canaryPass:true});
+  assert.equal(out.plan.engine_id,'CHAT-001');
   assert.equal(out.plan.state,'CANARY');
   assert.equal(out.plan.next_gate,'CURRENT_PROMOTION_AUTHORITY_REQUIRED');
   assert.equal(out.prod_authorized,false);

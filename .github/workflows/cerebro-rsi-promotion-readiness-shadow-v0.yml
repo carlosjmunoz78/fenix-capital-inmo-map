@@ -10,6 +10,7 @@ on:
       - 'supabase/functions/cerebro-human-new-actor-preprod-v1/**'
       - 'supabase/functions/cerebro-human-route-control-preprod-v1/**'
       - 'supabase/functions/cerebro-console-gateway-human-v1-canary/**'
+      - 'supabase/functions/cerebro-console-human-router-zero-v1/**'
       - 'supabase/migrations/20261012132000_cerebro_human_route_control_preprod_v1.sql'
       - '.github/workflows/cerebro-rsi-*.yml'
       - '.github/workflows/cerebro-hygiene-audit-v0.yml'
@@ -99,21 +100,23 @@ jobs:
             printf '%s\n' "$changed" >&2
             exit 1
           fi
-          unexpected_supabase="$(printf '%s\n' "$changed" | grep '^supabase/' | grep -Ev '^(supabase/functions/(cerebro-human-old-actor-preprod-v0|cerebro-human-new-actor-preprod-v1|cerebro-human-route-control-preprod-v1|cerebro-console-gateway-human-v1-canary)/|supabase/migrations/20261012132000_cerebro_human_route_control_preprod_v1\.sql$)' || true)"
+          unexpected_supabase="$(printf '%s\n' "$changed" | grep '^supabase/' | grep -Ev '^(supabase/functions/(cerebro-human-old-actor-preprod-v0|cerebro-human-new-actor-preprod-v1|cerebro-human-route-control-preprod-v1|cerebro-console-gateway-human-v1-canary|cerebro-console-human-router-zero-v1)/|supabase/migrations/20261012132000_cerebro_human_route_control_preprod_v1\.sql$)' || true)"
           if [ -n "$unexpected_supabase" ]; then
             echo 'Unapproved Supabase surface changed:' >&2
             printf '%s\n' "$unexpected_supabase" >&2
             exit 1
           fi
-          if printf '%s\n' "$changed" | grep -Eq '^(supabase/functions/(cerebro-human-old-actor-preprod-v0|cerebro-human-new-actor-preprod-v1|cerebro-human-route-control-preprod-v1|cerebro-console-gateway-human-v1-canary)/|supabase/migrations/20261012132000_cerebro_human_route_control_preprod_v1\.sql$)'; then
+          if printf '%s\n' "$changed" | grep -Eq '^(supabase/functions/(cerebro-human-old-actor-preprod-v0|cerebro-human-new-actor-preprod-v1|cerebro-human-route-control-preprod-v1|cerebro-console-gateway-human-v1-canary|cerebro-console-human-router-zero-v1)/|supabase/migrations/20261012132000_cerebro_human_route_control_preprod_v1\.sql$)'; then
             test -f .github/workflows/cerebro-human-intelligence-v1.yml
             test -f .github/workflows/cerebro-human-intelligence-promotion-readiness-v1.yml
             test -f .github/workflows/cerebro-human-intelligence-prod-canary-v1.yml
+            test -f .github/workflows/cerebro-human-intelligence-prod-router-zero-v1.yml
             node --test \
               cerebro/tests/human-intelligence-real-actor-gate-v1.test.mjs \
               cerebro/tests/human-intelligence-autonomy-bridge-v1.test.mjs \
               cerebro/tests/human-intelligence-gateway-routing-v1.test.mjs \
-              cerebro/tests/human-intelligence-production-overlay-v1.test.mjs
+              cerebro/tests/human-intelligence-production-overlay-v1.test.mjs \
+              cerebro/tests/human-intelligence-prod-router-zero-v1.test.mjs
           fi
           if printf '%s\n' "$changed" | grep -q '^supabase/functions/cerebro-console-gateway-human-v1-canary/'; then
             grep -F 'PROD_CANARY_UNROUTED' supabase/functions/cerebro-console-gateway-human-v1-canary/index.ts
@@ -121,7 +124,16 @@ jobs:
             ! grep -F 'SUPABASE_SERVICE_ROLE_KEY' supabase/functions/cerebro-console-gateway-human-v1-canary/index.ts
             ! printf '%s\n' "$changed" | grep -q '^supabase/functions/cerebro-console-gateway-v0/'
           fi
-          echo 'No App/App-test/build/current-PROD-gateway drift. Allowed Supabase drift is limited to the attested Human Intelligence PREPROD functions, route migration, and one additive unrouted PROD canary.' >> "$GITHUB_STEP_SUMMARY"
+          if printf '%s\n' "$changed" | grep -q '^supabase/functions/cerebro-console-human-router-zero-v1/'; then
+            d='supabase/functions/cerebro-console-human-router-zero-v1'
+            grep -F 'export const LIVE_CANARY_PERCENT=0;' "$d/router.ts"
+            grep -F 'PREPROD_NORMAL_ROUTING_DISABLED' "$d/index.ts"
+            grep -F 'consumer_routing_enabled:false' "$d/index.ts"
+            ! grep -R -F 'SUPABASE_SERVICE_ROLE_KEY' "$d"
+            ! grep -R -Eq 'prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true' "$d"
+            ! printf '%s\n' "$changed" | grep -q '^supabase/functions/cerebro-console-gateway-v0/'
+          fi
+          echo 'No App/App-test/build/current-PROD-gateway drift. Allowed Supabase drift is limited to attested Human Intelligence PREPROD functions, route migration, the unrouted overlay canary, and a disconnected router compiled to NEW 0%.' >> "$GITHUB_STEP_SUMMARY"
       - name: Install dependencies reproducibly
         run: |
           set -euo pipefail
@@ -151,8 +163,8 @@ jobs:
       - name: Mark App gate boundary
         run: |
           echo 'This job proves zero App/App-test/current PROD gateway drift plus exact-head build and PREPROD CORS smoke.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'The additive Human Intelligence PROD canary is explicitly unrouted and separately gated.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'It does NOT grant PROD write authority or mutate App/CRM contracts.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Human Intelligence production additions remain disconnected/unrouted; the router is compiled to NEW 0%.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'It does NOT grant PROD write authority, change consumer URLs, or mutate App/CRM contracts.' >> "$GITHUB_STEP_SUMMARY"
 
   tribunal-shadow:
     runs-on: ubuntu-latest
@@ -195,7 +207,7 @@ jobs:
             printf '%s\n' "$changed" >&2
             exit 1
           fi
-          unexpected_supabase="$(printf '%s\n' "$changed" | grep '^supabase/' | grep -Ev '^(supabase/functions/(cerebro-human-old-actor-preprod-v0|cerebro-human-new-actor-preprod-v1|cerebro-human-route-control-preprod-v1|cerebro-console-gateway-human-v1-canary)/|supabase/migrations/20261012132000_cerebro_human_route_control_preprod_v1\.sql$)' || true)"
+          unexpected_supabase="$(printf '%s\n' "$changed" | grep '^supabase/' | grep -Ev '^(supabase/functions/(cerebro-human-old-actor-preprod-v0|cerebro-human-new-actor-preprod-v1|cerebro-human-route-control-preprod-v1|cerebro-console-gateway-human-v1-canary|cerebro-console-human-router-zero-v1)/|supabase/migrations/20261012132000_cerebro_human_route_control_preprod_v1\.sql$)' || true)"
           if [ -n "$unexpected_supabase" ]; then
             echo 'Unexpected Supabase surface changed by RSI recovery.' >&2
             printf '%s\n' "$unexpected_supabase" >&2
@@ -204,4 +216,13 @@ jobs:
           if printf '%s\n' "$changed" | grep -q '^supabase/functions/cerebro-console-gateway-human-v1-canary/'; then
             ! printf '%s\n' "$changed" | grep -q '^supabase/functions/cerebro-console-gateway-v0/'
           fi
-          echo 'RSI recovery remains additive; the only PROD-project exception is one unrouted Human Intelligence canary that preserves the current gateway.' >> "$GITHUB_STEP_SUMMARY"
+          if printf '%s\n' "$changed" | grep -q '^supabase/functions/cerebro-console-human-router-zero-v1/'; then
+            d='supabase/functions/cerebro-console-human-router-zero-v1'
+            grep -F 'export const LIVE_CANARY_PERCENT=0;' "$d/router.ts"
+            grep -F 'PREPROD_NORMAL_ROUTING_DISABLED' "$d/index.ts"
+            grep -F 'consumer_routing_enabled:false' "$d/index.ts"
+            ! grep -R -F 'SUPABASE_SERVICE_ROLE_KEY' "$d"
+            ! grep -R -Eq 'prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true' "$d"
+            ! printf '%s\n' "$changed" | grep -q '^supabase/functions/cerebro-console-gateway-v0/'
+          fi
+          echo 'RSI recovery remains additive; production additions are unrouted/disconnected and the Human Intelligence router remains compiled to NEW 0%.' >> "$GITHUB_STEP_SUMMARY"
