@@ -33,14 +33,15 @@ jobs:
       - name: Install existing repository dependencies
         run: npm ci
 
-      - name: Validate Human Intelligence contracts planner rights HumanProfile hard gates and synthetic population
+      - name: Validate Human Intelligence contracts planner rights HumanProfile hard gates synthetic population and real actor boundary
         run: |
           node --test \
             cerebro/tests/human-intelligence-contract-v1.test.mjs \
             cerebro/tests/human-intelligence-scenario-plan-v1.test.mjs \
             cerebro/tests/human-intelligence-rights-gate-v1.test.mjs \
             cerebro/tests/human-intelligence-profile-gates-v1.test.mjs \
-            cerebro/tests/human-intelligence-synthetic-population-v1.test.mjs
+            cerebro/tests/human-intelligence-synthetic-population-v1.test.mjs \
+            cerebro/tests/human-intelligence-real-actor-gate-v1.test.mjs
 
       - name: Materialize deterministic 240-episode LAB plan
         run: |
@@ -55,6 +56,34 @@ jobs:
             --count 1000 \
             --seed-prefix "${BASELINE_SHA}-population-v1" \
             --out artifacts/human-intelligence/population-manifest.v1.json
+
+      - name: Record physical OLD actor snapshot and current executable gate
+        run: |
+          mkdir -p artifacts/human-intelligence
+          cat > artifacts/human-intelligence/real-actor-preflight.v1.json <<'JSON'
+          {
+            "state_type": "CEREBRO_REAL_ACTOR_PREFLIGHT_V1",
+            "old_actor": {
+              "service": "cerebro-console-gateway-v0",
+              "prod_project_ref": "cluhljgonannaafpmblx",
+              "deployed_version": 33,
+              "deployed_sha256": "a32fc26e4b328d0477bc53f0ae9085c0d5d280703779db5ac8593fd9b718553a",
+              "invocation_for_gym": "FORBIDDEN"
+            },
+            "required_safe_actor": {
+              "service": "cerebro-human-old-actor-preprod-v0",
+              "project_ref": "hnqlnvakzaywtafeiybt",
+              "environment": "PREPROD"
+            },
+            "status": "REAL_CEREBRO_ACTOR_UNAVAILABLE",
+            "reason": "SAFE_PREPROD_ACTOR_NOT_YET_PHYSICALLY_ATTESTED",
+            "prod_write_authorized": false,
+            "prod_execution_enabled": false,
+            "customer_data": false,
+            "trading_access": false,
+            "additional_cost_eur": 0
+          }
+          JSON
 
       - name: Enforce immutable safety boundaries
         run: |
@@ -87,7 +116,18 @@ jobs:
             .additional_cost_eur==0
           ' artifacts/human-intelligence/population-manifest.v1.json >/dev/null
 
-      - name: Upload LAB planning and population evidence
+          jq -e '
+            .state_type=="CEREBRO_REAL_ACTOR_PREFLIGHT_V1" and
+            .old_actor.invocation_for_gym=="FORBIDDEN" and
+            .required_safe_actor.environment=="PREPROD" and
+            .prod_write_authorized==false and
+            .prod_execution_enabled==false and
+            .customer_data==false and
+            .trading_access==false and
+            .additional_cost_eur==0
+          ' artifacts/human-intelligence/real-actor-preflight.v1.json >/dev/null
+
+      - name: Upload LAB planning population and actor-gate evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
