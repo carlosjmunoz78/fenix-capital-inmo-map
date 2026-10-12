@@ -1,0 +1,103 @@
+name: CEREBRO Human Intelligence Promotion Readiness V1
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'cerebro/human-intelligence/**'
+      - 'cerebro/tests/human-intelligence-*.test.mjs'
+      - 'supabase/functions/cerebro-human-old-actor-preprod-v0/**'
+      - 'supabase/functions/cerebro-human-new-actor-preprod-v1/**'
+      - '.github/workflows/cerebro-human-intelligence-*.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-human-intelligence-promotion-readiness-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: true
+
+env:
+  EXACT_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+
+jobs:
+  scoped-readiness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.EXACT_HEAD }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Assert exact PR head and strict Human Intelligence surface
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXACT_HEAD"
+          if [ -n "${PR_BASE_SHA:-}" ]; then
+            git fetch origin "$PR_BASE_SHA" --depth=1
+            base="$PR_BASE_SHA"
+          else
+            git fetch origin main --depth=1
+            base="$(git rev-parse FETCH_HEAD)"
+          fi
+          changed="$(git diff --name-only "$base" HEAD)"
+          bad="$(printf '%s\n' "$changed" | grep -Ev '^(cerebro/human-intelligence/|cerebro/tests/human-intelligence-[^/]+\.test\.mjs$|supabase/functions/cerebro-human-old-actor-preprod-v0/|supabase/functions/cerebro-human-new-actor-preprod-v1/|\.github/workflows/cerebro-human-intelligence-[^/]+\.yml$)' || true)"
+          if [ -n "$bad" ]; then
+            echo 'Human Intelligence PR crossed its isolated surface:' >&2
+            printf '%s\n' "$bad" >&2
+            exit 1
+          fi
+          test -z "$(printf '%s\n' "$changed" | grep -E '^(src/|tests/|public/|scripts/|supabase/migrations/|supabase/functions/(?!cerebro-human-old-actor-preprod-v0|cerebro-human-new-actor-preprod-v1))' || true)"
+
+      - name: Install dependencies reproducibly
+        run: npm ci
+
+      - name: Prove canonical LRN promotion recovery and Human Intelligence integration contracts
+        run: |
+          node --test \
+            cerebro/tests/universal-learning-ingress.test.mjs \
+            cerebro/tests/rsi-event-outbox.test.mjs \
+            cerebro/tests/rsi-learning-worker.test.mjs \
+            cerebro/tests/evaluation-tribunal.test.mjs \
+            cerebro/tests/experiment-pipeline.test.mjs \
+            cerebro/tests/promotion-pipeline.test.mjs \
+            cerebro/tests/rsi-recovery-e2e.test.mjs \
+            cerebro/tests/bounded-recovery-supervisor.test.mjs \
+            cerebro/tests/human-intelligence-tribunal-v1.test.mjs \
+            cerebro/tests/human-intelligence-autonomy-bridge-v1.test.mjs
+
+      - name: Assert PREPROD actor functions remain fail-closed and PROD-free
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in \
+            supabase/functions/cerebro-human-old-actor-preprod-v0/index.ts \
+            supabase/functions/cerebro-human-new-actor-preprod-v1/index.ts; do
+            test -f "$f"
+            grep -q 'hnqlnvakzaywtafeiybt' "$f"
+            grep -q 'prod_write_authorized:false' "$f"
+            grep -q 'prod_execution_enabled:false' "$f"
+            grep -q 'customer_data:false' "$f"
+            grep -q 'trading_access:false' "$f"
+            grep -q 'GITHUB_OIDC' "$f"
+          done
+          if grep -R -n 'cluhljgonannaafpmblx' supabase/functions/cerebro-human-old-actor-preprod-v0 supabase/functions/cerebro-human-new-actor-preprod-v1; then
+            echo 'PROD project reference forbidden inside isolated PREPROD actors.' >&2
+            exit 1
+          fi
+
+      - name: Mark strict boundary
+        run: |
+          echo 'Human Intelligence promotion readiness is evidence-only and PREPROD-scoped.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Only the two named PREPROD actor functions are allowed under supabase/functions/.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'No PROD deployment, App mutation, customer data, Trading authority or paid dependency is granted.' >> "$GITHUB_STEP_SUMMARY"
