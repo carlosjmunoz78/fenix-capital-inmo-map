@@ -36,7 +36,7 @@ jobs:
       - name: Install existing repository dependencies
         run: npm ci
 
-      - name: Validate Human Intelligence contracts planner rights HumanProfile hard gates synthetic population conversation gym metrics NEW planner tribunal LRN bridge promotion boundaries and real actor boundary
+      - name: Validate Human Intelligence contracts planner rights HumanProfile hard gates synthetic population conversation gym metrics NEW planner tribunal LRN bridge gateway routing promotion boundaries and real actor boundary
         run: |
           node --test \
             cerebro/tests/human-intelligence-contract-v1.test.mjs \
@@ -49,6 +49,7 @@ jobs:
             cerebro/tests/human-intelligence-new-planner-v1.test.mjs \
             cerebro/tests/human-intelligence-tribunal-v1.test.mjs \
             cerebro/tests/human-intelligence-autonomy-bridge-v1.test.mjs \
+            cerebro/tests/human-intelligence-gateway-routing-v1.test.mjs \
             cerebro/tests/human-intelligence-real-actor-gate-v1.test.mjs \
             cerebro/tests/universal-learning-ingress.test.mjs \
             cerebro/tests/promotion-pipeline.test.mjs
@@ -111,7 +112,13 @@ jobs:
             --out artifacts/human-intelligence/rollback-rehearsal.v1.json
           jq '{status,semantics,final_selected_actor,route_mutated,prod_invoked,prod_authorized,prod_write_authorized,customer_data,trading_access,additional_cost_eur,next_gate}' artifacts/human-intelligence/rollback-rehearsal.v1.json
 
-      - name: Enforce immutable safety boundaries physical evidence learning rollback and promotion authority
+      - name: Run shared CEREBRO Gateway PREPROD shadow canary and rollback rehearsal
+        run: |
+          node cerebro/human-intelligence/lab/run-gateway-shadow-canary-v1.mjs \
+            --out artifacts/human-intelligence/gateway-shadow-canary.v1.json
+          jq '{status,environment,route_unit,canary:{old_count:.canary.old_count,new_count:.canary.new_count},gates,safety}' artifacts/human-intelligence/gateway-shadow-canary.v1.json
+
+      - name: Enforce immutable safety boundaries physical evidence learning rollback gateway routing and promotion authority
         run: |
           jq -e '
             .state_type=="CEREBRO_HUMAN_INTELLIGENCE_SCENARIO_PLAN_V1" and
@@ -174,7 +181,17 @@ jobs:
             .next_gate=="SHARED_PREPROD_ROUTE_SHADOW_AND_ATOMIC_ROLLBACK"
           ' artifacts/human-intelligence/rollback-rehearsal.v1.json >/dev/null
 
-      - name: Upload LAB full-GOLDEN tribunal LRN rollback and promotion evidence
+          jq -e '
+            .state_type=="CEREBRO_HUMAN_GATEWAY_SHADOW_CANARY_V1" and .status=="GREEN" and .environment=="PREPROD" and .route_unit=="SESSION" and
+            .canary.old_count==6 and .canary.new_count==6 and
+            .gates.old_preflight==true and .gates.new_preflight==true and .gates.shadow_primary_old==true and .gates.shadow_new_observed==true and
+            .gates.canary_both_cohorts==true and .gates.canary_session_stable==true and .gates.rollback_old==true and
+            .gates.no_prod_authority==true and .gates.actor_evidence_safe==true and
+            .safety.prod_invoked==false and .safety.prod_authorized==false and .safety.prod_write_authorized==false and
+            .safety.prod_execution_enabled==false and .safety.contains_customer_data==false and .safety.trading_access==false and .safety.additional_cost_eur==0
+          ' artifacts/human-intelligence/gateway-shadow-canary.v1.json >/dev/null
+
+      - name: Upload LAB full-GOLDEN tribunal LRN rollback gateway and promotion evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
