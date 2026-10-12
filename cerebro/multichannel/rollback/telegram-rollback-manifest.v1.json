@@ -1,0 +1,11 @@
+{
+  "schema_version":"1.0.0",
+  "state_type":"CEREBRO_MULTICHANNEL_TELEGRAM_ROLLBACK_V1",
+  "company_id":"fenix",
+  "environment":"PROD",
+  "telegram_text":{"function":"cerebro-telegram-gateway-v0","baseline_version":4,"baseline_ezbr_sha256":"705cd600dc0272f67066f967c1985489d382e73391438844539b0753e1bdab7a","baseline_source_path":"cerebro/multichannel/snapshots/cerebro-telegram-gateway-v0-v4/index.ts"},
+  "telegram_voice":{"function":"cerebro-telegram-voice-v1","baseline_version":1,"baseline_ezbr_sha256":"52063ac39821bfb36331774b4ba8e15129b399e46645abd781e4c42e938cc788","baseline_git_commit":"de2cd0efbc04b5e75deb0e4b714982cc09f137f8","baseline_source_path":"supabase/functions/cerebro-telegram-voice-v1/index.ts"},
+  "rollback_semantics":"REDEPLOY_EXACT_BASELINE_SOURCE_TO_EXISTING_SLUG",
+  "authority":{"prod_action_expansion":false,"prod_write_expansion":false,"trading_access":false},
+  "additional_cost_eur":0
+}
