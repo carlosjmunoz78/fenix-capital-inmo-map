@@ -6,6 +6,7 @@ on:
     paths:
       - 'cerebro/human-intelligence/**'
       - 'cerebro/tests/human-intelligence-*.test.mjs'
+      - 'cerebro/tests/continuous-human-qa-v0.test.mjs'
       - 'supabase/functions/cerebro-human-old-actor-preprod-v0/**'
       - 'supabase/functions/cerebro-human-new-actor-preprod-v1/**'
       - 'supabase/functions/cerebro-human-route-control-preprod-v1/**'
@@ -55,7 +56,7 @@ jobs:
             base="$(git rev-parse FETCH_HEAD)"
           fi
           changed="$(git diff --name-only "$base" HEAD)"
-          bad="$(printf '%s\n' "$changed" | grep -Ev '^(cerebro/human-intelligence/|cerebro/tests/human-intelligence-[^/]+\.test\.mjs$|supabase/functions/cerebro-human-old-actor-preprod-v0/|supabase/functions/cerebro-human-new-actor-preprod-v1/|supabase/functions/cerebro-human-route-control-preprod-v1/|supabase/functions/cerebro-console-gateway-human-v1-canary/|supabase/migrations/20261012132000_cerebro_human_route_control_preprod_v1\.sql$|\.github/workflows/cerebro-human-intelligence-[^/]+\.yml$|\.github/workflows/cerebro-rsi-promotion-readiness-shadow-v0\.yml$)' || true)"
+          bad="$(printf '%s\n' "$changed" | grep -Ev '^(cerebro/human-intelligence/|cerebro/tests/human-intelligence-[^/]+\.test\.mjs$|cerebro/tests/continuous-human-qa-v0\.test\.mjs$|supabase/functions/cerebro-human-old-actor-preprod-v0/|supabase/functions/cerebro-human-new-actor-preprod-v1/|supabase/functions/cerebro-human-route-control-preprod-v1/|supabase/functions/cerebro-console-gateway-human-v1-canary/|supabase/migrations/20261012132000_cerebro_human_route_control_preprod_v1\.sql$|\.github/workflows/cerebro-human-intelligence-[^/]+\.yml$|\.github/workflows/cerebro-rsi-promotion-readiness-shadow-v0\.yml$)' || true)"
           if [ -n "$bad" ]; then
             echo 'Human Intelligence PR crossed its isolated surface:' >&2
             printf '%s\n' "$bad" >&2
@@ -71,7 +72,7 @@ jobs:
       - name: Install dependencies reproducibly
         run: npm ci
 
-      - name: Prove canonical LRN promotion recovery and Human Intelligence integration contracts
+      - name: Prove canonical LRN promotion recovery continuous QA and Human Intelligence integration contracts
         run: |
           node --test \
             cerebro/tests/universal-learning-ingress.test.mjs \
@@ -85,7 +86,8 @@ jobs:
             cerebro/tests/human-intelligence-tribunal-v1.test.mjs \
             cerebro/tests/human-intelligence-autonomy-bridge-v1.test.mjs \
             cerebro/tests/human-intelligence-gateway-routing-v1.test.mjs \
-            cerebro/tests/human-intelligence-production-overlay-v1.test.mjs
+            cerebro/tests/human-intelligence-production-overlay-v1.test.mjs \
+            cerebro/tests/continuous-human-qa-v0.test.mjs
 
       - name: Assert PREPROD Human Intelligence functions remain fail-closed and PROD-free
         shell: bash
@@ -148,6 +150,6 @@ jobs:
 
       - name: Mark strict boundary
         run: |
-          echo 'Human Intelligence promotion readiness is PREPROD plus one additive unrouted PROD canary.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'The current production gateway source is immutable in this PR.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Human Intelligence promotion readiness reuses existing scheduled Continuous Human QA instead of creating a second learning controller.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Production scope remains one additive unrouted canary; current production gateway source is immutable in this PR.' >> "$GITHUB_STEP_SUMMARY"
           echo 'No real user is routed to the canary; no PROD /chat is called by the canary gate; no new PROD write authority is granted.' >> "$GITHUB_STEP_SUMMARY"
