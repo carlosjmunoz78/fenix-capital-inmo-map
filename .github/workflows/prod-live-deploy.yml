@@ -27,7 +27,7 @@ jobs:
       VITE_FENIX_ENV: prod
       VITE_SUPABASE_URL: https://cluhljgonannaafpmblx.supabase.co
       VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
-      VITE_CEREBRO_CONSOLE_URL: https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-gateway-human-v1-owner100/
+      VITE_CEREBRO_CONSOLE_URL: https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-gateway-human-v1-live5/
     steps:
       - name: Checkout main
         uses: actions/checkout@v4
@@ -71,16 +71,15 @@ jobs:
       - name: Build canonical production app
         run: npx vite build --base=/ --outDir dist-live
 
-      - name: Assert production bundle uses isolated FULL_OWNER 100 surface
+      - name: Assert production bundle uses bounded Human Intelligence live5 surface
         shell: bash
         run: |
           set -euo pipefail
           ! grep -R -F 'hnqlnvakzaywtafeiybt.supabase.co' dist-live
           grep -R -F 'cluhljgonannaafpmblx.supabase.co' dist-live >/dev/null
-          grep -R -F 'cerebro-console-gateway-human-v1-owner100' dist-live >/dev/null
+          grep -R -F 'cerebro-console-gateway-human-v1-live5' dist-live >/dev/null
           ! grep -R -F 'cerebro-console-gateway-human-v1-canary/' dist-live
           ! grep -R -F 'cerebro-console-human-router-zero-v1/' dist-live
-          ! grep -R -F 'cerebro-console-gateway-human-v1-live5/' dist-live
 
       - name: Prepare static branch consumed by live hosting
         shell: bash
