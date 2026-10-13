@@ -166,8 +166,9 @@ test('fair round enforces global and per-company concurrency while serving anoth
   });
 
   const first = await worker.runFairRound({ contexts: [FENIX_A, FENIX_B, ACME] });
-  assert.equal(first.length, 2);
+  assert.equal(first.length, 3);
   assert.equal(first.filter(x => x.status === 'SUCCEEDED').length, 2);
+  assert.equal(first.filter(x => x.status === 'SATURATED' && x.reason === 'COMPANY_CONCURRENCY_LIMIT').length, 1);
   assert.equal(seen.some(x => x.startsWith('fenix:')), true);
   assert.equal(seen.some(x => x.startsWith('acme:')), true);
   assert.equal(queue.listForContext(FENIX_A).filter(j => j.status === 'SUCCEEDED').length + queue.listForContext(FENIX_B).filter(j => j.status === 'SUCCEEDED').length, 1);
