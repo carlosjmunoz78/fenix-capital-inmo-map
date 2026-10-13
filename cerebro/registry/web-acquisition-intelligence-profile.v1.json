@@ -16,11 +16,11 @@
     "54": {"name":"Apify Free","status":"HOLD_RUNTIME","implementation":"free-tier-only provider fallback; no spend and no subscription introduced by this profile"},
     "55": {"name":"Agent-Reach","status":"LAB_REFERENCE","implementation":"Panniantong/Agent-Reach MIT; research/source adapter candidate only"},
     "56": {"name":"Technology Scout","status":"PARCIAL","implementation":"modernized deterministic zero-cost/evidence-first scoring ported from legacy open PR #201 without merging stale stack"},
-    "57": {"name":"COMPET continuo","status":"EXISTENTE","implementation":"COMPET-001 deterministic public-evidence runtime already merged; continuous scheduling remains governed separately"},
-    "58": {"name":"WAUD","status":"EXISTENTE","implementation":"WAUD-001 shared PREPROD post-SCAN runtime already merged"},
-    "59": {"name":"KW","status":"EXISTENTE","implementation":"KW-001 shared PREPROD post-SCAN runtime already merged"},
-    "60": {"name":"SOCAUD","status":"EXISTENTE","implementation":"SOCAUD-001 shared PREPROD post-SCAN runtime already merged"},
-    "61": {"name":"LOCALP","status":"EXISTENTE","implementation":"LOCALP-001 shared PREPROD post-SCAN runtime already merged"}
+    "57": {"name":"COMPET continuo","status":"PARCIAL","implementation":"canonical COMPET-001 id exists and historical PR #159 provides prior implementation evidence, but its runtime path is not present on current main; continuous execution is not claimed"},
+    "58": {"name":"WAUD","status":"EXISTENTE","implementation":"WAUD-001 shared PREPROD post-SCAN runtime already merged on current main"},
+    "59": {"name":"KW","status":"EXISTENTE","implementation":"KW-001 shared PREPROD post-SCAN runtime already merged on current main"},
+    "60": {"name":"SOCAUD","status":"EXISTENTE","implementation":"SOCAUD-001 shared PREPROD post-SCAN runtime already merged on current main"},
+    "61": {"name":"LOCALP","status":"EXISTENTE","implementation":"LOCALP-001 shared PREPROD post-SCAN runtime already merged on current main"}
   },
   "route_order": ["OFFICIAL_API_FEED_SITEMAP", "SCRAPLING", "CRAWLEE", "APIFY_FREE", "BROWSER_FALLBACK"],
   "human_required_codes": ["LEGAL_REQUIRED", "SIGNATURE_REQUIRED", "LOW_CONFIDENCE", "HIGH_RISK", "POLICY_CONFLICT", "SECURITY_INCIDENT", "MONEY_LIMIT", "CUSTOMER_HUMAN_REQUEST"],
@@ -41,12 +41,12 @@
   "dependency_map": {
     "preserve": [
       "cerebro/multicompany/post-scan-parallel-v1.mjs",
-      "cerebro/runtime/competitor_intelligence.py",
       "cerebro/runtime/authorized-execution-device-profile-v1.mjs",
       "cerebro/router/execution-model-router.mjs"
     ],
+    "historical_not_in_current_main": ["PR #159 COMPET-001 runtime", "PR #201 Technology Scout V0"],
     "extend": ["cerebro/runtime/web-acquisition-intelligence-profile-v1.mjs"],
-    "legacy_reference": ["PR #201 Technology Scout V0", "PR #640 rollout queue"],
+    "legacy_reference": ["PR #640 rollout queue"],
     "replace": []
   },
   "verification": {
@@ -57,7 +57,7 @@
     "candidate_full_suite": "PENDING",
     "base_full_suite": "PENDING"
   },
-  "rollback": {"method":"revert profile PR; existing COMPET/post-SCAN runtimes remain canonical"},
+  "rollback": {"method":"revert profile PR; existing post-SCAN runtime remains canonical"},
   "rebuild": {"method":"recreate from registry + runtime contract + tests + source dispositions"},
   "next_gate": "EXACT_HEAD_PREMERGE_AND_OLD_VS_NEW",
   "prod_authorized": false,
