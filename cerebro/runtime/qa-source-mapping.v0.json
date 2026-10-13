@@ -5,7 +5,7 @@
   "engine_id": "QA-001",
   "environment": "PREPROD_CONTROL_PLANE",
   "version": "0.1.0",
-  "updated_at": "2026-10-13T00:51:19.668Z",
+  "updated_at": "2026-10-13T00:52:18.606Z",
   "mappings_total": 9,
   "verified_repo_hints": 3,
   "external_owner_routes": 6,
