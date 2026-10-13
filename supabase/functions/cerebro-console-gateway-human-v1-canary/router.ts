@@ -1,4 +1,4 @@
-export const LIVE_CANARY_PERCENT=0;
+export const LIVE_CANARY_PERCENT=5;
 
 function b64urlJson(value:string){
   const normalized=value.replace(/-/g,'+').replace(/_/g,'/')+'='.repeat((4-value.length%4)%4);
