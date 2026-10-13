@@ -1,0 +1,60 @@
+name: CEREBRO Visual Motion V2 PREPROD
+
+on:
+  pull_request:
+    branches: [cerebro-visual-lab]
+    paths:
+      - 'lab/cerebro-visual/**'
+      - 'tests/cerebro-visual-motion-v2.spec.ts'
+      - '.github/workflows/cerebro-visual-motion-v2-preprod.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  visual-motion-v2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Assert isolated PREPROD surface and preserved baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f lab/cerebro-visual/index.html
+          grep -F "LAB V1.4.7" lab/cerebro-visual/index.html >/dev/null
+          grep -F "prod_authorized:false" lab/cerebro-visual/motion-controller-v2.js >/dev/null
+          grep -F "prod_authorized:false" lab/cerebro-visual/conversation-motion-v2.js >/dev/null
+          grep -F "visual_base:'v1.4.25'" lab/cerebro-visual/candidate-v1426-motion.html >/dev/null
+          grep -F "additional_cost_eur:0" lab/cerebro-visual/candidate-v1426-motion.html >/dev/null
+          echo 'BASELINE_V147_PRESERVED=GREEN'
+          echo 'PROD_AUTHORIZED=false'
+      - name: Install existing project dependencies
+        run: npm ci
+      - name: Install Chromium for isolated browser QA
+        run: npx playwright install --with-deps chromium
+      - name: Start zero-cost local static PREPROD harness
+        shell: bash
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/cerebro-visual-http.log 2>&1 &
+          for i in {1..20}; do curl -fsS http://127.0.0.1:4173/lab/cerebro-visual/candidate-v1426-motion.html >/dev/null && exit 0; sleep 1; done
+          cat /tmp/cerebro-visual-http.log
+          exit 1
+      - name: Run motion signal browser contract
+        env:
+          PLAYWRIGHT_EXTERNAL_SERVER: '1'
+        run: npx playwright test tests/cerebro-visual-motion-v2.spec.ts --project=desktop-chromium --reporter=list
+      - name: Classify PREPROD gate
+        run: |
+          echo 'CEREBRO_VISUAL_MOTION_V2=GREEN_PREPROD'
+          echo 'VISUAL_BASE=v1.4.25'
+          echo 'ROLLBACK_BASE=v1.4.7'
+          echo 'PROD_AUTHORIZED=false'
+          echo 'ADDITIONAL_COST_EUR=0'
