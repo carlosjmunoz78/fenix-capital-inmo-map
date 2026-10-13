@@ -15,7 +15,7 @@ export const WEB_ACQUISITION_SOURCE_DISPOSITIONS=Object.freeze([
 ]);
 
 const DOWNSTREAM=Object.freeze({
-  'COMPET-001':Object.freeze({status:'EXISTENTE',path:'cerebro/runtime/competitor_intelligence.py',evidence:'merged deterministic public-evidence competitor intelligence'}),
+  'COMPET-001':Object.freeze({status:'PARCIAL',path:null,evidence:'historical implementation merged outside current main in PR #159; current main has canonical engine id but no competitor runtime path, so no false operational claim'}),
   'WAUD-001':Object.freeze({status:'EXISTENTE',path:'cerebro/multicompany/post-scan-parallel-v1.mjs',evidence:'merged shared PREPROD runtime'}),
   'KW-001':Object.freeze({status:'EXISTENTE',path:'cerebro/multicompany/post-scan-parallel-v1.mjs',evidence:'merged shared PREPROD runtime'}),
   'SOCAUD-001':Object.freeze({status:'EXISTENTE',path:'cerebro/multicompany/post-scan-parallel-v1.mjs',evidence:'merged shared PREPROD runtime'}),
