@@ -7,7 +7,9 @@ on:
       - 'cerebro/runtime/skill-capability-evolution.mjs'
       - 'cerebro/tests/cerebro-safe-engineering-profile-v1.test.mjs'
       - 'cerebro/tests/skill-capability-evolution-v0.test.mjs'
+      - 'cerebro/registry/safe-engineering-profile.v1.json'
       - 'cerebro/skills/SAFE_ENGINEERING_PROFILE_ROLLOUT_V1.md'
+      - 'cerebro/docs/CEREBRO_SAFE_ENGINEERING_PROFILE_V1_2026-10-13.md'
       - '.github/workflows/cerebro-safe-engineering-profile-v1.yml'
   workflow_dispatch:
 
@@ -86,38 +88,3 @@ jobs:
         with:
           node-version: 24
       - run: node --test cerebro/tests/*.test.mjs
-
-  discover-tests:
-    name: safe-engineering-discover-tests
-    runs-on: ubuntu-latest
-    outputs:
-      tests: ${{ steps.tests.outputs.tests }}
-    steps:
-      - uses: actions/checkout@v4
-      - id: tests
-        run: |
-          tests=$(find cerebro/tests -maxdepth 1 -type f -name '*.test.mjs' -printf '%f\n' | sort | jq -R -s -c 'split("\n")[:-1]')
-          count=$(jq 'length' <<< "$tests")
-          echo "Discovered $count CEREBRO test files"
-          if [ "$count" -eq 0 ] || [ "$count" -gt 240 ]; then
-            echo "Unsafe diagnostic matrix size: $count" >&2
-            exit 1
-          fi
-          echo "tests=$tests" >> "$GITHUB_OUTPUT"
-
-  per-file-diagnostic:
-    name: cerebro-test · ${{ matrix.test }}
-    needs: discover-tests
-    runs-on: ubuntu-latest
-    timeout-minutes: 6
-    strategy:
-      fail-fast: false
-      max-parallel: 12
-      matrix:
-        test: ${{ fromJson(needs.discover-tests.outputs.tests) }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-      - run: node --test "cerebro/tests/${{ matrix.test }}"
