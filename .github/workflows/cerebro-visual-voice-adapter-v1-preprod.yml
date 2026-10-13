@@ -1,0 +1,60 @@
+name: CEREBRO Visual VOICE-001 Adapter V1 PREPROD
+
+on:
+  pull_request:
+    branches: [cerebro-visual-lab]
+    paths:
+      - 'lab/cerebro-visual/voice-001-adapter-v1.js'
+      - 'lab/cerebro-visual/candidate-v1427-voice.html'
+      - 'tests/cerebro-visual-voice-adapter-v1.spec.ts'
+      - '.github/workflows/cerebro-visual-voice-adapter-v1-preprod.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  visual-voice-adapter-v1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Assert consumer-only PREPROD boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -F "authority:'VISUAL_CONSUMER_ONLY'" lab/cerebro-visual/voice-001-adapter-v1.js >/dev/null
+          grep -F "prod_authorized:false" lab/cerebro-visual/voice-001-adapter-v1.js >/dev/null
+          grep -F "live_source_contract:LIVE_SOURCE" lab/cerebro-visual/voice-001-adapter-v1.js >/dev/null
+          ! grep -E 'fetch\(|supabase|execute|credential|service_role|Authorization' lab/cerebro-visual/voice-001-adapter-v1.js
+          grep -F "visual_base:'v1.4.25'" lab/cerebro-visual/candidate-v1427-voice.html >/dev/null
+          grep -F "motion_base:'v1.4.26-motion'" lab/cerebro-visual/candidate-v1427-voice.html >/dev/null
+          echo 'VOICE_VISUAL_ADAPTER_AUTHORITY=VISUAL_CONSUMER_ONLY'
+          echo 'PROD_AUTHORIZED=false'
+      - name: Install existing dependencies
+        run: npm ci
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Start zero-cost local static PREPROD harness
+        shell: bash
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/cerebro-voice-visual-http.log 2>&1 &
+          for i in {1..20}; do curl -fsS http://127.0.0.1:4173/lab/cerebro-visual/candidate-v1427-voice.html >/dev/null && exit 0; sleep 1; done
+          cat /tmp/cerebro-voice-visual-http.log
+          exit 1
+      - name: Prove VOICE-001 contract drives Motion V2 safely
+        env:
+          PLAYWRIGHT_EXTERNAL_SERVER: '1'
+        run: npx playwright test tests/cerebro-visual-voice-adapter-v1.spec.ts --project=desktop-chromium --reporter=list
+      - name: Classify gate
+        run: |
+          echo 'CEREBRO_VISUAL_VOICE_ADAPTER_V1=GREEN_PREPROD_CONTRACT'
+          echo 'VOICE_SOURCE_CONTRACT=CEREBRO_CONSOLE_DOM_V1'
+          echo 'MOTION_BASE=v1.4.26-motion'
+          echo 'VISUAL_BASE=v1.4.25'
+          echo 'PROD_AUTHORIZED=false'
+          echo 'ADDITIONAL_COST_EUR=0'
