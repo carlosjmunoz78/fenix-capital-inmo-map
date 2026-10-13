@@ -1,0 +1,39 @@
+name: CEREBRO Safe Engineering Profile V1
+
+on:
+  push:
+    paths:
+      - 'cerebro/runtime/cerebro-safe-engineering-profile-v1.mjs'
+      - 'cerebro/tests/cerebro-safe-engineering-profile-v1.test.mjs'
+      - 'cerebro/skills/SAFE_ENGINEERING_PROFILE_ROLLOUT_V1.md'
+      - '.github/workflows/cerebro-safe-engineering-profile-v1.yml'
+  pull_request:
+    paths:
+      - 'cerebro/runtime/cerebro-safe-engineering-profile-v1.mjs'
+      - 'cerebro/tests/cerebro-safe-engineering-profile-v1.test.mjs'
+      - 'cerebro/skills/SAFE_ENGINEERING_PROFILE_ROLLOUT_V1.md'
+      - '.github/workflows/cerebro-safe-engineering-profile-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  safe-engineering-profile-v1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Focused Safe Engineering Profile contract and adversarial gates
+        run: node --test cerebro/tests/cerebro-safe-engineering-profile-v1.test.mjs
+      - name: Existing AUTO-001 mutation boundary regression
+        run: node --test cerebro/tests/auto001-preprod-patch-executor-v0.test.mjs
+      - name: Skill capability evolution regression
+        run: node --test cerebro/tests/skill-capability-evolution-v0.test.mjs
+      - name: Evaluation tribunal regression
+        run: node --test cerebro/tests/evaluation-tribunal.test.mjs
+      - name: Full CEREBRO regression suite
+        run: node --test cerebro/tests/*.test.mjs
