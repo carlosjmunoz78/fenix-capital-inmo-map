@@ -1,0 +1,20 @@
+{
+  "schema_version":"1.0.0",
+  "state_type":"CEREBRO_CHANNEL_ACCESS_CANARY_ROLLBACK",
+  "project_id":"cluhljgonannaafpmblx",
+  "function_slug":"cerebro-console-gateway-human-v1-canary",
+  "baseline_deployed_version":2,
+  "baseline_ezbr_sha256":"a266f4ed51b41a3f833b4130c4bfeb88ba92eede5098355ec54a4b9ad2771e4d",
+  "baseline_repo_sha":"bdc9516231eb2f372ade27384405035bcc5fb8dd",
+  "baseline_files":[
+    "supabase/functions/cerebro-console-gateway-human-v1-canary/index.ts",
+    "supabase/functions/cerebro-console-gateway-human-v1-canary/overlay.ts",
+    "supabase/functions/cerebro-console-gateway-human-v1-canary/router.ts"
+  ],
+  "rollback_action":"Redeploy baseline_repo_sha files to the same function slug with verify_jwt=false; preserve OIDC custom authentication and LIVE_CANARY_PERCENT=0.",
+  "consumer_routing_enabled":false,
+  "live_canary_percent":0,
+  "prod_write_authorized":false,
+  "trading_access":false,
+  "additional_cost_eur":0
+}
