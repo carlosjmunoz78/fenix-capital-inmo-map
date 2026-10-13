@@ -1,6 +1,18 @@
 name: CEREBRO Safe Engineering Profile V1
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'cerebro/runtime/cerebro-safe-engineering-profile-v1.mjs'
+      - 'cerebro/runtime/skill-capability-evolution.mjs'
+      - 'cerebro/tests/cerebro-safe-engineering-profile-v1.test.mjs'
+      - 'cerebro/tests/skill-capability-evolution-v0.test.mjs'
+      - 'cerebro/registry/safe-engineering-profile.v1.json'
+      - 'cerebro/skills/SAFE_ENGINEERING_PROFILE_ROLLOUT_V1.md'
+      - 'cerebro/docs/CEREBRO_SAFE_ENGINEERING_PROFILE_V1_2026-10-13.md'
+      - '.github/workflows/cerebro-safe-engineering-profile-v1.yml'
   pull_request:
     paths:
       - 'cerebro/runtime/cerebro-safe-engineering-profile-v1.mjs'
@@ -15,6 +27,10 @@ on:
 
 permissions:
   contents: read
+
+concurrency:
+  group: safe-engineering-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 defaults:
   run:
