@@ -13,6 +13,12 @@ function req(v,label,max=1000){if(typeof v!=='string'||!v.trim())throw new Error
 function finite(v,label){const n=Number(v);if(!Number.isFinite(n))throw new Error(`${label} must be finite`);return n;}
 function iso(v,label){const s=req(v,label,100);if(Number.isNaN(Date.parse(s)))throw new Error(`${label} invalid`);return new Date(s).toISOString();}
 function readJson(file,label){let v;try{v=JSON.parse(fs.readFileSync(file,'utf8'));}catch(e){throw new Error(`${label} unreadable:${e.message}`);}if(!v||typeof v!=='object'||Array.isArray(v))throw new Error(`${label} invalid`);return v;}
+function readEvidenceInput(file,mode){
+  if(mode!=='public_probe') return readJson(file,'evidence input');
+  let v;try{v=JSON.parse(fs.readFileSync(file,'utf8'));}catch(e){throw new Error(`evidence input unreadable:${e.message}`);}
+  if(!Array.isArray(v)||v.length===0) throw new Error('evidence input public probes invalid');
+  return v;
+}
 function frozen(v){return Object.freeze({...v,prod_authorized:false,prod_write_authorized:false,trading_access:false,additional_cost_eur:0,multicompany_continuation:false});}
 function tuple(x){return `${x.company_id}::${x.engine_id}::${x.domain_id}`;}
 
@@ -144,7 +150,7 @@ const isEntrypoint=Boolean(process.argv[1])&&path.resolve(process.argv[1])===fil
 if(isEntrypoint){
   try{
     const mode=req(arg('--mode'),'--mode',40);
-    const input=readJson(path.resolve(req(arg('--input'),'--input',1000)),'evidence input');
+    const input=readEvidenceInput(path.resolve(req(arg('--input'),'--input',1000)),mode);
     const output=path.resolve(req(arg('--output'),'--output',1000));
     const report=buildRealDomainEvidenceReport({mode,input});
     fs.mkdirSync(path.dirname(output),{recursive:true});

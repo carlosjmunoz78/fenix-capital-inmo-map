@@ -1,5 +1,41 @@
 # CEREBRO OS · CHANGELOG
 
+## 2026-10-13 · COM-001 governed customer delivery router V1
+
+- Added PREPROD `COM-001` delivery routing on the existing canonical engine ID; no new engine ID was introduced.
+- `COM-001` consumes `SALE-001 delivery_intent` and applies exact-company isolation, contact permission, suppression/opt-out, dedupe, quiet-hours, channel preference and binding capability checks before any adapter may be selected.
+- Only bindings with `environment=PREPROD`, `status=PREPROD_AUTHORIZED`, `access_profile=CUSTOMER_OPERATIONAL`, `customer_scope=true` and exact action support are eligible.
+- Even with an eligible binding the output remains `dispatch_authorized=false`, `adapter_dispatch_authorized=false` and `external_side_effect_executed=false`; this block does not contact customers.
+- The existing owner `mail_bridge.py` remains owner-only and is explicitly not reused as a customer transport.
+- Current channel authority remains unchanged: customer WHATSAPP/PHONE/WEB_WIDGET/MOBILE/OTHER are future adapters until separately contracted/tested/authorized.
+- Raw PII, secrets and message bodies are rejected; cost target remains 0 EUR; PROD writes false; Trading access false.
+- Added revenue autonomy registry extension `cerebro/registry/revenue-engine-autonomy-state.v1.json` and dedicated contract/dependency/runbook/rollback/rebuild document `cerebro/docs/CEREBRO_REVENUE_COM_DELIVERY_ROUTER_V1_2026-10-13.md`.
+
+## 2026-10-13 · SALE-001 deterministic commercial action V1
+
+- Added PREPROD `SALE-001` deterministic commercial-state V1 on the existing canonical engine ID; no new engine was introduced.
+- SALE-001 consumes governed `LEAD-001/NBA-001` decisions, enforces same-company PREPROD boundaries and preserves an explicit contact-permission snapshot before any commercial action.
+- Added bounded commercial progression for contact SLA, follow-up, objections, no-show recovery, permission revocation, customer human request, WON/LOST and cooldown; event IDs are idempotent and terminal states cannot be silently reactivated.
+- Any customer-contact action produces only a `delivery_intent` targeting `COM-001` with `dispatch_authorized=false`, `channel_binding_required=true` and no external side effect. WhatsApp/PHONE/WEB_WIDGET authority is not claimed by this block.
+- Raw PII, secrets and raw message text are rejected from SALE-001 durable payload/state; only opaque references are accepted.
+- `sale.plan-action` reuses `JOB-001` durable V1 + durable worker runner V1; no bespoke scheduler, paid service or Supabase dependency was introduced.
+- Dedicated SALE gate covers focused revenue tests, canonical Engine Registry validation and full CEREBRO regression. Promotion remains PREPROD-only pending OLD vs NEW, tribunal and COM/channel-adapter gates.
+- Cost target remains 0 EUR; PROD writes false; Trading access false.
+- Dedicated state/runbook/dependency/rollback document: `cerebro/docs/CEREBRO_REVENUE_SALE_V1_2026-10-13.md`.
+
+## 2026-10-13 · Durable JOB runtime + worker runner + LEAD-001/NBA-001 revenue V1
+
+- PR #645 merged `JOB-001` durable V1 additively over the existing persistent runtime: context idempotency, exponential retry with deterministic jitter, worker leases, heartbeat, checkpoint/resume, watchdog, dead-letter and cancellation. Existing V0 remains preserved.
+- PR #647 merged the bounded durable worker runner V1: registered handlers, timeout + AbortSignal, automatic heartbeat, checkpoint resume, fail-closed stale leases, global/per-company concurrency and fair multi-context dispatch. It explicitly does not claim distributed multi-writer semantics.
+- Both runtime blocks passed dedicated focused tests, full CEREBRO regression, governed-main contract proof and RSI promotion/readiness shadows before merge.
+- Added PREPROD `LEAD-001 + NBA-001` deterministic scoring/next-best-action V1 on canonical engine IDs already present in the Engine Registry; no new engine ID is introduced.
+- Revenue scoring rejects raw PII/secrets, requires opaque evidence references, gates contact permission before commercial priority and propagates only the eight canonical HUMAN_REQUIRED reasons.
+- `conversion_propensity_score` is explicitly uncalibrated heuristic output and is not represented as statistical probability.
+- `lead.score-and-route` executes through the existing `JOB-001` durable V1 + worker runner V1; the capability performs no external contact and no PROD writes.
+- Cost target remains 0 EUR; Supabase is not required by these local PREPROD capabilities; Trading remains isolated.
+- Current commercial boundary: `LEAD-001/NBA-001 = PARCIAL / PREPROD IMPLEMENTADO`; `SALE-001 = next consumer block`; `CAP-001 = POR AUDITAR implementation evidence`.
+- Dedicated technical/runbook/dependency/rollback state: `cerebro/docs/CEREBRO_REVENUE_LEAD_NBA_V1_2026-10-13.md`.
+
 ## 2026-10-08 · COMP-REG-001 + TENANT-001 PREPROD reference execution accepted
 
 - PR #511 merged the additive hostless reference executor to `main` as `6710067e0f1beb28f930c038aceebfb9168f965a` after exact-head promotion/readiness gates passed.
@@ -71,7 +107,7 @@
 - PR #167 merged as `c523da8f11dbf1a2618982aeeb5940670317bb6e`.
 - `POL-001` and `HEX-001` structural/reference V0 completed with deterministic PREPROD-only policy evaluation and canonical HUMAN_REQUIRED exception routing.
 - Hardened fail-closed policy inputs, isolation, priority/tie semantics, stable exception event identity and replay/idempotency behavior through iterative exact-head review.
-- PROD Live Deploy `34330670776` and PROD Runtime Smoke `34330670550` success on exact merge SHA.
+- PROD Live Deploy `34330670776` and PROD Runtime Smoke `34330670550` success on merge SHA.
 - No autonomous PROD promotion was enabled.
 
 ## 2026-09-09 · Phase 2 read-only evidence audit V0
@@ -88,7 +124,7 @@
 - PR #165 merged as `6bf6af92c1106884da87fb9a659f807093d47e0a`.
 - Canonical state, dependency map, runbook, evidence, changelog, backup/rebuild and autonomy documentation aligned with Phase 4/5 evidence.
 - Added explicit emergency rollback procedure tied to `docs/PROD_ROLLBACK_RUNBOOK.md`.
-- PROD Live Deploy `34293941974` and PROD Runtime Smoke `34293942069` success on exact merge SHA.
+- PROD Live Deploy `34293941974` and PROD Runtime Smoke `34293941922` success on exact merge SHA.
 
 ## 2026-09-09 · Phase 5 Console/Gateway V0
 
