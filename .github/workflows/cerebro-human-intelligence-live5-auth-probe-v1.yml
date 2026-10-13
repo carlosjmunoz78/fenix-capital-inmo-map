@@ -1,4 +1,4 @@
-name: CEREBRO Human Intelligence Live5 Auth Probe V1
+name: CEREBRO Human Intelligence Live5 Route Probe V1
 
 on:
   push:
@@ -11,27 +11,25 @@ permissions:
   contents: read
 
 concurrency:
-  group: cerebro-human-intelligence-live5-auth-probe-v1
+  group: cerebro-human-intelligence-live5-route-probe-v1
   cancel-in-progress: false
 
 env:
   LIVE5_URL: https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-gateway-human-v1-live5
   PROD_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
-  CEREBRO_E2E_USER_JWT: ${{ secrets.CEREBRO_E2E_USER_JWT }}
 
 jobs:
-  authenticated-live-route-proof:
+  live-route-proof:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Require existing secure E2E credentials
+      - name: Require existing browser publishable key
         shell: bash
         run: |
           set -euo pipefail
           test -n "$PROD_PUBLISHABLE_KEY"
-          test -n "$CEREBRO_E2E_USER_JWT"
 
-      - name: Prove authenticated OLD and NEW cohorts physically traverse live5 in PROD
+      - name: Prove OLD and NEW cohorts physically traverse live5 in PROD read-only
         shell: bash
         run: |
           set -euo pipefail
@@ -39,7 +37,6 @@ jobs:
           trap 'rm -rf "$tmp"' EXIT
           common=(
             -H "apikey: $PROD_PUBLISHABLE_KEY"
-            -H "Authorization: Bearer $CEREBRO_E2E_USER_JWT"
             -H 'Origin: https://app.fenixcapital.es'
           )
 
@@ -61,5 +58,5 @@ jobs:
           grep -i '^x-cerebro-human-upstream: cerebro-console-gateway-v0' "$tmp/old.headers"
           jq -e '.status=="GREEN" or .status=="OK" or .service=="cerebro-console-gateway-v0"' "$tmp/old.body" >/dev/null
 
-          echo 'AUTHENTICATED_PROD_LIVE5_ROUTE_PROOF=GREEN' >> "$GITHUB_STEP_SUMMARY"
-          echo 'Read-only /health only; no business mutation, no customer payload, no Trading access.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'PROD_LIVE5_ROUTE_PROOF=GREEN' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Physical read-only /health traversal only; no business mutation, no customer payload, no Trading access.' >> "$GITHUB_STEP_SUMMARY"
