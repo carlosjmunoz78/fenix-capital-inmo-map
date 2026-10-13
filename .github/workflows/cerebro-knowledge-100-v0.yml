@@ -1,0 +1,173 @@
+name: CEREBRO Knowledge 100 Gate V0
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'cerebro/qa/knowledge-100-v0.mjs'
+      - 'cerebro/qa/evidence/knowledge-100-live-evidence.v0.json'
+      - 'cerebro/human-intelligence/**'
+      - 'cerebro/multichannel/**'
+      - '.github/workflows/cerebro-knowledge-100-v0.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'cerebro/qa/knowledge-100-v0.mjs'
+      - 'cerebro/qa/evidence/knowledge-100-live-evidence.v0.json'
+      - 'cerebro/human-intelligence/**'
+      - 'cerebro/multichannel/**'
+      - '.github/workflows/cerebro-knowledge-100-v0.yml'
+  workflow_run:
+    workflows:
+      - 'CEREBRO Continuous Human QA V0'
+      - 'PROD Runtime Smoke'
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: cerebro-knowledge-100-v0-${{ github.event.workflow_run.head_sha || github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  knowledge-100:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+      TARGET_SHA: ${{ github.event.workflow_run.head_sha || github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install existing repository dependencies reproducibly
+        run: npm ci
+
+      - name: Build current-SHA live read-only and rollback evidence pack
+        shell: bash
+        env:
+          PROD_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          set -u
+          mkdir -p artifacts/knowledge-100
+          REAL_DOMAIN_CONTRACT=false
+          REAL_DOMAIN_PROBE=false
+          OLD_NEW_TRIBUNAL=false
+          ROLLBACK_REHEARSAL=false
+
+          if node --test \
+            cerebro/tests/universal-learning-ingress.test.mjs \
+            cerebro/tests/rsi-real-domain-evidence-wiring.test.mjs \
+            > artifacts/knowledge-100/real-domain-contract.log 2>&1 && \
+            node --input-type=module -e "import {realDomainEvidenceCoverage} from './cerebro/runtime/rsi-real-domain-evidence-wiring.mjs'; import {loadDomainPolicyRegistry} from './cerebro/runtime/rsi-domain-policy-registry.mjs'; const c=realDomainEvidenceCoverage(); const p=loadDomainPolicyRegistry(); if(!c.coverage_complete||c.covered_domain_count!==p.policy_count||c.prod_authorized!==false||c.prod_write_authorized!==false||c.trading_access!==false||c.additional_cost_eur!==0) process.exit(1);" \
+            >> artifacts/knowledge-100/real-domain-contract.log 2>&1; then
+            REAL_DOMAIN_CONTRACT=true
+          fi
+
+          NOW="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          HTTP_STATUS="$(curl -L -sS -o /dev/null --max-time 20 -w '%{http_code}' https://fenixcapital.es/ || true)"
+          [[ "$HTTP_STATUS" =~ ^[0-9]{3}$ ]] || HTTP_STATUS=0
+          jq -n --arg observed "$NOW" --argjson status "$HTTP_STATUS" '[{url:"https://fenixcapital.es/",http_status:$status,latency_ms:0,observed_at:$observed}]' > /tmp/knowledge100-domain-probe.json
+          if node cerebro/runtime/rsi-real-domain-evidence-wiring.mjs \
+              --mode public_probe \
+              --input /tmp/knowledge100-domain-probe.json \
+              --output /tmp/knowledge100-domain-report.json \
+              > artifacts/knowledge-100/real-domain-probe.log 2>&1 && \
+            jq -e '.prod_authorized==false and .prod_write_authorized==false and .trading_access==false and .additional_cost_eur==0 and (.events|type=="array")' /tmp/knowledge100-domain-report.json >/dev/null; then
+            REAL_DOMAIN_PROBE=true
+          fi
+
+          if node --test \
+            cerebro/tests/experiment-pipeline.test.mjs \
+            cerebro/tests/evaluation-tribunal.test.mjs \
+            cerebro/tests/promotion-pipeline.test.mjs \
+            cerebro/tests/rsi-old-new-evaluation-tribunal-gate.test.mjs \
+            > artifacts/knowledge-100/old-new-tribunal.log 2>&1; then
+            OLD_NEW_TRIBUNAL=true
+          fi
+
+          if [[ "${PROD_SUPABASE_PUBLISHABLE_KEY:-}" == sb_publishable_* ]]; then
+            rm -rf dist-knowledge100-rollback
+            if VITE_FENIX_ENV=prod \
+              VITE_SUPABASE_URL=https://cluhljgonannaafpmblx.supabase.co \
+              VITE_SUPABASE_PUBLISHABLE_KEY="$PROD_SUPABASE_PUBLISHABLE_KEY" \
+              npx vite build --base=/ --outDir dist-knowledge100-rollback \
+              > artifacts/knowledge-100/rollback-rehearsal.log 2>&1 && \
+              ! grep -R -F 'hnqlnvakzaywtafeiybt.supabase.co' dist-knowledge100-rollback >/dev/null 2>&1 && \
+              grep -R -F 'cluhljgonannaafpmblx.supabase.co' dist-knowledge100-rollback >/dev/null 2>&1; then
+              cp dist-knowledge100-rollback/index.html dist-knowledge100-rollback/404.html
+              touch dist-knowledge100-rollback/.nojekyll
+              printf '%s\n' "$TARGET_SHA" > dist-knowledge100-rollback/ROLLBACK_CANDIDATE_SHA.txt
+              printf '%s\n' 'app.fenixcapital.es' > dist-knowledge100-rollback/CNAME
+              if [[ "$(cat dist-knowledge100-rollback/ROLLBACK_CANDIDATE_SHA.txt)" == "$TARGET_SHA" && "$(cat dist-knowledge100-rollback/CNAME)" == 'app.fenixcapital.es' ]]; then
+                ROLLBACK_REHEARSAL=true
+              fi
+            fi
+            rm -rf dist-knowledge100-rollback
+          else
+            echo 'Rollback rehearsal HOLD: repository publishable key unavailable or invalid; no secret value logged.' > artifacts/knowledge-100/rollback-rehearsal.log
+          fi
+
+          jq -n \
+            --arg observed_at "$NOW" \
+            --arg target_sha "$TARGET_SHA" \
+            --argjson real_domain_contract "$REAL_DOMAIN_CONTRACT" \
+            --argjson real_domain_probe "$REAL_DOMAIN_PROBE" \
+            --argjson old_new_tribunal "$OLD_NEW_TRIBUNAL" \
+            --argjson rollback_rehearsal "$ROLLBACK_REHEARSAL" \
+            '{schema_version:"1.0.0",state_type:"CEREBRO_KNOWLEDGE_100_CURRENT_SHA_EVIDENCE",observed_at:$observed_at,target_sha:$target_sha,real_domain_contract:{accepted:$real_domain_contract,evidence_scope:"EXACT_TARGET_SHA_CONTRACT"},real_domain_probe:{accepted:$real_domain_probe,evidence_scope:"LIVE_PUBLIC_READ_ONLY"},old_new_tribunal:{accepted:$old_new_tribunal,evidence_scope:"EXACT_TARGET_SHA_CONTRACT"},rollback_rehearsal:{accepted:$rollback_rehearsal,evidence_scope:"EXACT_TARGET_SHA_NO_DEPLOY"},safety:{prod_write_authorized:false,permission_expansion_authorized:false,trading_access:false,contains_customer_data:false,contains_secrets:false,additional_cost_eur:0}}' \
+            > artifacts/knowledge-100/current-sha-evidence.json
+
+      - name: Measure canonical 12-front conversational and knowledge coverage
+        run: |
+          node cerebro/qa/knowledge-100-v0.mjs --out artifacts/knowledge-100/report.json
+
+      - name: Publish measured coverage summary
+        if: always()
+        shell: bash
+        run: |
+          if [ ! -s artifacts/knowledge-100/report.json ]; then
+            echo 'Knowledge 100 report missing' >&2
+            exit 1
+          fi
+          numerator="$(jq -r '.numerator_green' artifacts/knowledge-100/report.json)"
+          denominator="$(jq -r '.denominator' artifacts/knowledge-100/report.json)"
+          percentage="$(jq -r '.percentage' artifacts/knowledge-100/report.json)"
+          decision="$(jq -r '.decision' artifacts/knowledge-100/report.json)"
+          {
+            echo '## CEREBRO Knowledge 100 V0'
+            echo
+            echo "- SHA: $TARGET_SHA"
+            echo "- Coverage: ${numerator}/${denominator} = ${percentage}%"
+            echo "- Decision: ${decision}"
+            echo '- Coste adicional: 0 EUR'
+            echo '- PROD write: false'
+            echo '- Trading: false'
+            echo
+            echo '### Fronts'
+            jq -r '.fronts[] | "- [" + .status + "] " + (.id|tostring) + ". " + .name' artifacts/knowledge-100/report.json
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Enforce fail-closed safety invariants
+        run: |
+          jq -e '.denominator==12 and .safety.prod_write_authorized==false and .safety.permission_expansion_authorized==false and .safety.trading_access==false and .safety.contains_customer_data==false and .safety.contains_secrets==false and .safety.additional_cost_eur==0 and .safety.canonical_learning_single_conversation_promotion==false' artifacts/knowledge-100/report.json >/dev/null
+          test "$(jq '[.fronts[]|select(.status=="FAIL_STATIC_INVARIANT")]|length' artifacts/knowledge-100/report.json)" = '0'
+
+      - name: Upload Knowledge 100 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-knowledge-100-v0-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/knowledge-100/**
+          if-no-files-found: error
+          retention-days: 30

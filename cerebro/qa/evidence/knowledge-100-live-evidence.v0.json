@@ -1,0 +1,46 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_KNOWLEDGE_100_LIVE_EVIDENCE_V0",
+  "company_id": "fenix",
+  "engine_id": "KNOWLEDGE-100-GATE",
+  "environment": "PROD_READ_ONLY_ACCEPTANCE",
+  "version": "v0",
+  "observed_at": "2026-10-13T19:10:15+02:00",
+  "observed_repo_sha": "9599d68c6d820932ba44c300ecea0de26416351e",
+  "evidence_method": "AUTHORIZED_CONNECTOR_READ_ONLY",
+  "notion_sources": [
+    {
+      "id": "3f781b1a-756d-8165-8d6d-e8853d3c41e3",
+      "title": "CEREBRO HUMAN INTELLIGENCE SYSTEM · Contrato maestro y plan total V1",
+      "purpose": "master_human_intelligence_contract"
+    },
+    {
+      "id": "3f781b1a-756d-81ad-8a1d-cc9c33fff720",
+      "title": "F2 · Knowledge Foundry · Ingestión científica y compilador de reglas V1",
+      "purpose": "knowledge_foundry"
+    },
+    {
+      "id": "3c081b1a-756d-813c-ac45-f9186c20b251",
+      "title": "CEREBRO · Router maestro de conocimiento comercial y relacional",
+      "purpose": "knowledge_router"
+    },
+    {
+      "id": "3f781b1a-756d-8119-93c9-da74aec6855d",
+      "title": "F5 · Synthetic Human Population Engine · SIM-001 · V1",
+      "purpose": "synthetic_human_validation"
+    }
+  ],
+  "assertions": {
+    "notion_live_search_available": true,
+    "human_intelligence_master_found": true,
+    "knowledge_foundry_found": true,
+    "knowledge_router_found": true,
+    "synthetic_human_population_found": true
+  },
+  "contains_customer_data": false,
+  "contains_secrets": false,
+  "prod_write_authorized": false,
+  "trading_access": false,
+  "permission_expansion_authorized": false,
+  "additional_cost_eur": 0
+}
