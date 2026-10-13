@@ -5,12 +5,16 @@ on:
     branches: [main]
     paths:
       - 'supabase/functions/_shared/cerebro-conversation-policy-v1.ts'
+      - 'supabase/functions/_shared/cerebro-channel-access-policy-v1.ts'
       - 'supabase/functions/cerebro-telegram-gateway-v0/**'
       - 'supabase/functions/cerebro-telegram-voice-v1/**'
       - 'supabase/migrations/20261013010500_cerebro_multichannel_ana_overlay_v1.sql'
+      - 'supabase/migrations/20261013042000_cerebro_channel_access_profiles_v1.sql'
       - 'cerebro/multichannel/**'
+      - 'cerebro/registry/rsi-learning-subscribers.v0.json'
       - 'cerebro/tests/multichannel-conversation-policy-v1.test.mjs'
       - 'cerebro/tests/multichannel-conversation-old-vs-new-v1.test.mjs'
+      - 'cerebro/tests/channel-access-profiles-v1.test.mjs'
       - '.github/workflows/cerebro-multichannel-conversation-unification-v1.yml'
   workflow_dispatch:
 
@@ -31,22 +35,25 @@ jobs:
           cache: npm
       - name: Install dependencies reproducibly
         run: npm ci
-      - name: Test common policy universal LRN boundary and OLD vs NEW tribunal evidence
+      - name: Test common policy universal LRN boundary OLD vs NEW and access profiles
         run: |
           node --test \
             cerebro/tests/multichannel-conversation-policy-v1.test.mjs \
             cerebro/tests/multichannel-conversation-old-vs-new-v1.test.mjs \
+            cerebro/tests/channel-access-profiles-v1.test.mjs \
             cerebro/tests/universal-learning-ingress.test.mjs
       - name: Assert channel adapters preserve existing authority boundaries
         shell: bash
         run: |
           set -euo pipefail
           policy='supabase/functions/_shared/cerebro-conversation-policy-v1.ts'
+          access='supabase/functions/_shared/cerebro-channel-access-policy-v1.ts'
           text='supabase/functions/cerebro-telegram-gateway-v0/index.ts'
           voice='supabase/functions/cerebro-telegram-voice-v1/index.ts'
           ana='supabase/migrations/20261013010500_cerebro_multichannel_ana_overlay_v1.sql'
-          rollback='cerebro/multichannel/rollback/telegram-rollback-manifest.v1.json'
-          test -f "$policy" && test -f "$text" && test -f "$voice" && test -f "$ana" && test -f "$rollback"
+          scope='supabase/migrations/20261013042000_cerebro_channel_access_profiles_v1.sql'
+          rollback='cerebro/multichannel/rollback/channel-access-profiles-v1.rollback.sql'
+          test -f "$policy" && test -f "$access" && test -f "$text" && test -f "$voice" && test -f "$ana" && test -f "$scope" && test -f "$rollback"
           grep -F "TELEGRAM_TEXT" "$text"
           grep -F "TELEGRAM_VOICE" "$voice"
           grep -F "VOICE-001" "$policy"
@@ -54,10 +61,23 @@ jobs:
           grep -F "CONSOLE_VOICE" "$policy"
           grep -F "prod_authority_changed:false" "$policy"
           grep -F "HUMAN_REQUIRED" "$policy"
-          grep -F "fenix_prod_ana_knowledge_answer_user(p_question)" "$ana"
-          grep -F "APP_ANA_TEXT" "$ana"
-          jq -e '.telegram_text.baseline_version==4 and .telegram_voice.baseline_version==1 and .authority.prod_action_expansion==false and .authority.prod_write_expansion==false and .authority.trading_access==false and .additional_cost_eur==0' "$rollback" >/dev/null
-          ! grep -Eqi '\b(truncate)\b|\bdelete\s+from\b' "$ana"
+          grep -F "FULL_OWNER" "$access"
+          grep -F "FENIX_OPERATIONAL" "$access"
+          grep -F "fenix_prod_ana_channel_scope_guard_v1" "$scope"
+          grep -F "channel_scope_denied" "$scope"
+          grep -F "fenix_prod_ana_knowledge_answer_user(p_question)" "$rollback"
+          ! grep -Eqi '\b(truncate)\b|\bdelete\s+from\b' "$scope" "$rollback"
+      - name: Assert profile registry and LRN-001 contract are fail-closed
+        shell: bash
+        run: |
+          set -euo pipefail
+          registry='cerebro/multichannel/channel-registry.v1.json'
+          lrn='cerebro/registry/rsi-learning-subscribers.v0.json'
+          jq -e '[.channels[]|select(.access_profile=="FULL_OWNER")|.channel_id] | sort == ["CONSOLE_TEXT","CONSOLE_VOICE","TELEGRAM_TEXT","TELEGRAM_VOICE"]' "$registry" >/dev/null
+          jq -e '[.channels[]|select(.access_profile=="FENIX_OPERATIONAL")|.channel_id] | sort == ["APP_ANA_TEXT","APP_ANA_VOICE"]' "$registry" >/dev/null
+          jq -e '.access_profiles.FENIX_OPERATIONAL.denied_scopes|sort == ["CROSS_COMPANY_PRIVATE","MULTICOMPANY_CONTROL","OWNER_PRIVATE","SECRETS_CREDENTIALS","TRADING_ISOLATED"]' "$registry" >/dev/null
+          jq -e '.safety.prod_authority_expansion==false and .safety.prod_write_authority_expansion==false and .safety.trading_access==false and .safety.secrets_disclosure==false and .safety.cross_company_leakage==false and .safety.additional_cost_eur==0' "$registry" >/dev/null
+          jq -e '.engine_id=="LRN-001" and .environment=="PREPROD" and .prod_authorized==false and .trading_access==false and (.accepted_signal_families|index("METRIC_OBSERVATION")!=null) and ([.subscribers[]|select(.company_id=="fenix" and .enabled==true and .local_validation_required==true and .prod_authorized==false and .prod_write_authorized==false)]|length==1)' "$lrn" >/dev/null
       - name: Assert stable Console and unrelated App gateway are untouched
         shell: bash
         env:
@@ -74,11 +94,12 @@ jobs:
         run: |
           set -euo pipefail
           grep -F "signal_type:'METRIC_OBSERVATION'" supabase/functions/_shared/cerebro-conversation-policy-v1.ts
-          grep -F "prod_authorized:false" supabase/functions/_shared/cerebro-conversation-policy-v1.ts
-          grep -F "prod_write_authorized:false" supabase/functions/_shared/cerebro-conversation-policy-v1.ts
-          grep -F "trading_access:false" supabase/functions/_shared/cerebro-conversation-policy-v1.ts
-          grep -F "additional_cost_eur:0" supabase/functions/_shared/cerebro-conversation-policy-v1.ts
+          grep -F "signal_type:'METRIC_OBSERVATION'" supabase/functions/_shared/cerebro-channel-access-policy-v1.ts
+          grep -F "prod_authorized:false" supabase/functions/_shared/cerebro-channel-access-policy-v1.ts
+          grep -F "prod_write_authorized:false" supabase/functions/_shared/cerebro-channel-access-policy-v1.ts
+          grep -F "trading_access:false" supabase/functions/_shared/cerebro-channel-access-policy-v1.ts
+          grep -F "additional_cost_eur:0" supabase/functions/_shared/cerebro-channel-access-policy-v1.ts
       - name: Record boundary
         run: |
-          echo 'GREEN proves one conservative conversation policy across Console/Ana/Telegram text and VOICE-001 voice adapters, bounded OLD vs NEW non-regression evidence, and exact rollback evidence without changing channel authority.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'This gate does not authorize new PROD actions or Trading, and learning remains observation-only through the existing LRN-001 path.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'GREEN proves PR #605 conversation behavior is preserved while FULL_OWNER/FENIX_OPERATIONAL profiles are explicit, Ana is fail-closed server-side for privileged scopes, and LRN-001 remains observation-only PREPROD.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'This gate does not authorize new PROD actions, reveal secrets, bridge Trading, or let a conversation auto-promote a learning.' >> "$GITHUB_STEP_SUMMARY"
