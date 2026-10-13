@@ -6,6 +6,7 @@ import {fetchAppApi} from './supabase';
 import {normalizeNavigation,type NavItem} from './masterNavigation';
 import OperationalSidebar from './OperationalSidebar';
 import UniversalTaskActionStrip from './UniversalTaskActionStrip';
+import CerebroVisualConsole from './CerebroVisualConsole';
 import './operational-uniformity.css';
 
 type Ctx={role?:string};
@@ -131,6 +132,7 @@ export default function OperationalUniformityGuard(){
  },[location.pathname]);
 
  return <>
+  <CerebroVisualConsole/>
   <style>{`.${VISUAL_DEDUP_CLASS}{display:none!important}`}</style>
   <UniversalTaskActionStrip/>
   {sidebarHost&&createPortal(<OperationalSidebar navigation={navigation} activeRoute={activeRoute}/>,sidebarHost)}
