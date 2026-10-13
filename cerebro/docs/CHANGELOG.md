@@ -1,5 +1,16 @@
 # CEREBRO OS · CHANGELOG
 
+## 2026-10-13 · COM-001 governed customer delivery router V1
+
+- Added PREPROD `COM-001` delivery routing on the existing canonical engine ID; no new engine ID was introduced.
+- `COM-001` consumes `SALE-001 delivery_intent` and applies exact-company isolation, contact permission, suppression/opt-out, dedupe, quiet-hours, channel preference and binding capability checks before any adapter may be selected.
+- Only bindings with `environment=PREPROD`, `status=PREPROD_AUTHORIZED`, `access_profile=CUSTOMER_OPERATIONAL`, `customer_scope=true` and exact action support are eligible.
+- Even with an eligible binding the output remains `dispatch_authorized=false`, `adapter_dispatch_authorized=false` and `external_side_effect_executed=false`; this block does not contact customers.
+- The existing owner `mail_bridge.py` remains owner-only and is explicitly not reused as a customer transport.
+- Current channel authority remains unchanged: customer WHATSAPP/PHONE/WEB_WIDGET/MOBILE/OTHER are future adapters until separately contracted/tested/authorized.
+- Raw PII, secrets and message bodies are rejected; cost target remains 0 EUR; PROD writes false; Trading access false.
+- Added revenue autonomy registry extension `cerebro/registry/revenue-engine-autonomy-state.v1.json` and dedicated contract/dependency/runbook/rollback/rebuild document `cerebro/docs/CEREBRO_REVENUE_COM_DELIVERY_ROUTER_V1_2026-10-13.md`.
+
 ## 2026-10-13 · SALE-001 deterministic commercial action V1
 
 - Added PREPROD `SALE-001` deterministic commercial-state V1 on the existing canonical engine ID; no new engine was introduced.
@@ -41,7 +52,7 @@
 - Added an additive multi-company structural adapter that composes the existing Phase 4 dependency graph with verified FACT-001 AutoFactory; no new canonical engine ID is introduced.
 - A bounded new-company structural request prepares the 17 canonical Phase 4 engine scaffolds in tenant-scoped evidence while preserving the generic 18-file FACT scaffold bytes: 17 × 18 = 306 files.
 - PR #509 merged additively to `main` as `cb46c0c95b4e628608990404e4c1ac38e889b79e` after exact-head promotion/readiness gates passed.
-- Automatic `main` run `37833181826` attempt 1 completed SUCCESS; deterministic attempt 2 also completed SUCCESS against the same immutable source/request.
+- Automatic `main` push run `37833181826` attempt 1 completed SUCCESS; deterministic attempt 2 also completed SUCCESS against the same immutable source/request.
 - Both attempts ran 643 CEREBRO regression tests with 643 passed / 0 failed and produced the same structural aggregate SHA-256 `295be8b701fe80ea57b034e882da1698def79a97502b9831e9453871c7fc1ed6`.
 - Both attempts produced `STRUCTURAL_BOOTSTRAP_GREEN`, 17 Phase 4 engines and 306 structural files, while preserving zero business engines GREEN from scaffold generation.
 - COMP-ONB-001 autonomy state is promoted to `AUTOMATIC_COMPANY_SCAFFOLD_VERIFIED` for structural PREPROD/SCAFFOLD generation only.
