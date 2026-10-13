@@ -27,7 +27,7 @@ jobs:
       VITE_FENIX_ENV: prod
       VITE_SUPABASE_URL: https://cluhljgonannaafpmblx.supabase.co
       VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
-      VITE_CEREBRO_CONSOLE_URL: https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-gateway-v0/
+      VITE_CEREBRO_CONSOLE_URL: https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-human-router-zero-v1/
     steps:
       - name: Checkout main
         uses: actions/checkout@v4
@@ -71,13 +71,14 @@ jobs:
       - name: Build canonical production app
         run: npx vite build --base=/ --outDir dist-live
 
-      - name: Assert production bundle contains no PRE-PROD backend
+      - name: Assert production bundle uses only the fail-closed 0% Human router
         shell: bash
         run: |
           set -euo pipefail
           ! grep -R -F 'hnqlnvakzaywtafeiybt.supabase.co' dist-live
           grep -R -F 'cluhljgonannaafpmblx.supabase.co' dist-live >/dev/null
-          grep -R -F 'cerebro-console-gateway-v0' dist-live >/dev/null
+          grep -R -F 'cerebro-console-human-router-zero-v1' dist-live >/dev/null
+          ! grep -R -F 'cerebro-console-gateway-human-v1-canary' dist-live
 
       - name: Prepare static branch consumed by live hosting
         shell: bash
