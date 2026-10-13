@@ -6,10 +6,10 @@ on:
     paths:
       - 'cerebro/voice/**'
       - 'cerebro/tests/owned-voice-v0.test.mjs'
-      - 'src/AnaVoiceQueryBlock.tsx'
+      - 'src/AnaChatBlock.tsx'
       - 'src/CerebroConsoleBlock.tsx'
       - 'src/OperationalShellGate.tsx'
-      - 'src/VoiceChannelAdapter.ts'
+      - 'src/cerebroVoice.ts'
       - 'tests/voice-ui-ana-console.spec.ts'
       - '.github/workflows/cerebro-owned-voice-preprod.yml'
   push:
@@ -17,10 +17,10 @@ on:
     paths:
       - 'cerebro/voice/**'
       - 'cerebro/tests/owned-voice-v0.test.mjs'
-      - 'src/AnaVoiceQueryBlock.tsx'
+      - 'src/AnaChatBlock.tsx'
       - 'src/CerebroConsoleBlock.tsx'
       - 'src/OperationalShellGate.tsx'
-      - 'src/VoiceChannelAdapter.ts'
+      - 'src/cerebroVoice.ts'
       - 'tests/voice-ui-ana-console.spec.ts'
       - '.github/workflows/cerebro-owned-voice-preprod.yml'
 
@@ -66,9 +66,15 @@ jobs:
           set -euo pipefail
           grep -F "voice_is_transport_not_authority" cerebro/voice/channel-registry.v1.json
           grep -F '"audio_persistence": false' cerebro/voice/channel-registry.v1.json
-          grep -F "'/v2/ana/knowledge/answer'" src/AnaVoiceQueryBlock.tsx
+          grep -F "fenix_prod_chat_send_user" src/AnaChatBlock.tsx
+          grep -F "from './cerebroVoice'" src/AnaChatBlock.tsx
           grep -F "cerebro-console-gateway-v0" src/CerebroConsoleBlock.tsx
-          ! grep -R -F 'SUPABASE_SERVICE_ROLE_KEY' src/AnaVoiceQueryBlock.tsx src/CerebroConsoleBlock.tsx src/VoiceChannelAdapter.ts
+          grep -F "from './cerebroVoice'" src/CerebroConsoleBlock.tsx
+          grep -F "voiceNeedsClarification" src/AnaChatBlock.tsx src/CerebroConsoleBlock.tsx
+          grep -F "voiceNeedsManualConfirmation" src/CerebroConsoleBlock.tsx
+          test ! -e src/AnaVoiceQueryBlock.tsx
+          test ! -e src/VoiceChannelAdapter.ts
+          ! grep -R -F 'SUPABASE_SERVICE_ROLE_KEY' src/AnaChatBlock.tsx src/CerebroConsoleBlock.tsx src/cerebroVoice.ts
           ! git diff --name-only origin/main...HEAD 2>/dev/null | grep -Eq '^supabase/functions/(fenix-app-gateway|cerebro-console-gateway-v0)/'
 
       - name: Install dependencies reproducibly
@@ -86,4 +92,5 @@ jobs:
       - name: Record authority boundary
         run: |
           echo 'VOICE-001 browser UI is transport only: no new authority, DB, Edge Function, RPC, paid TTS or audio persistence.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'Ana Voice and Console Voice must reuse their existing text contracts; keyboard remains the fallback.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Ana Voice reuses fenix_prod_chat_send_user; Console Voice reuses its existing /chat; keyboard remains the fallback.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Low-confidence voice is held for review and sensitive confirmations never bypass the existing Gateway.' >> "$GITHUB_STEP_SUMMARY"
