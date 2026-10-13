@@ -11,7 +11,6 @@ on:
       - 'cerebro/tests/human-intelligence-autonomy-bridge-v1.test.mjs'
       - 'supabase/functions/cerebro-console-human-router-zero-v1/**'
       - '.github/workflows/cerebro-human-intelligence-prod-router-zero-v1.yml'
-      - '.github/workflows/prod-live-deploy.yml'
   workflow_dispatch:
 
 permissions:
@@ -68,17 +67,15 @@ jobs:
           git cat-file -e "${base}^{commit}"
           git diff --exit-code "${base}"...HEAD -- supabase/functions/cerebro-console-gateway-v0
 
-      - name: Assert owner authorization and consumer zero-router cutover contract
+      - name: Assert owner authorization for phased PROD promotion
         shell: bash
         run: |
           set -euo pipefail
           auth='cerebro/human-intelligence/PROD_GRADUAL_PROMOTION_AUTHORIZATION_2026-10-13.md'
-          deploy='.github/workflows/prod-live-deploy.yml'
-          test -f "$auth" && test -f "$deploy"
+          test -f "$auth"
           grep -F 'promoción gradual del gran motor conversacional hasta el 100% en PROD' "$auth"
-          grep -F 'cerebro-console-human-router-zero-v1/' "$deploy"
-          ! grep -F 'VITE_CEREBRO_CONSOLE_URL: https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-gateway-human-v1-canary/' "$deploy"
-          grep -F 'cerebro-console-human-router-zero-v1' "$deploy"
+          grep -F 'No big-bang.' "$auth"
+          grep -F 'OLD `cerebro-console-gateway-v0` permanece disponible como rollback' "$auth"
 
       - name: Acquire short-lived GitHub OIDC token
         shell: bash
@@ -135,5 +132,5 @@ jobs:
 
       - name: Record gate boundary
         run: |
-          echo 'GREEN proves the ZERO router is physically deployed in PREPROD and PROD, compiled to NEW=0%, fail-closed to OLD and without new PROD/Trading authority.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'The consumer cutover may point the Console at this router only because effective traffic remains 100% OLD until a later, separately gated canary promotion.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'GREEN proves phase 0 only: the ZERO router is physically deployed in PREPROD and PROD, compiled to NEW=0%, fail-closed to OLD and without new PROD/Trading authority.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'No consumer URL changes in this PR. Consumer cutover remains a separate governed App/PROD change.' >> "$GITHUB_STEP_SUMMARY"
