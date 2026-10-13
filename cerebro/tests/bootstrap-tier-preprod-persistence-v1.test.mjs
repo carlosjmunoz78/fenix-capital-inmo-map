@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-const migration=fs.readFileSync(new URL('../../supabase/migrations/20261013133000_cerebro_bootstrap_tier_preprod_v1.sql',import.meta.url),'utf8');
+const migration=fs.readFileSync(new URL('../multicompany/sql/bootstrap-tier-preprod-v1.sql',import.meta.url),'utf8');
 const rollback=fs.readFileSync(new URL('../multicompany/rollback/bootstrap-tier-preprod-v1.rollback.sql',import.meta.url),'utf8');
 const registry=JSON.parse(fs.readFileSync(new URL('../registry/multicompany-bootstrap.json',import.meta.url),'utf8'));
 
