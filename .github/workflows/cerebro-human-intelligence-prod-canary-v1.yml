@@ -6,6 +6,8 @@ on:
     paths:
       - 'cerebro/human-intelligence/integration/production-conversation-overlay-v1.mjs'
       - 'cerebro/tests/human-intelligence-production-overlay-v1.test.mjs'
+      - 'cerebro/tests/channel-access-profiles-v1.test.mjs'
+      - 'supabase/functions/_shared/cerebro-channel-access-policy-v1.ts'
       - 'supabase/functions/cerebro-console-gateway-human-v1-canary/**'
       - '.github/workflows/cerebro-human-intelligence-prod-canary-v1.yml'
   schedule:
@@ -34,8 +36,11 @@ jobs:
         with:
           node-version: 24
 
-      - name: Test conservative production overlay
-        run: node --test cerebro/tests/human-intelligence-production-overlay-v1.test.mjs
+      - name: Test conservative production overlay and channel profiles
+        run: |
+          node --test \
+            cerebro/tests/human-intelligence-production-overlay-v1.test.mjs \
+            cerebro/tests/channel-access-profiles-v1.test.mjs
 
       - name: Assert additive canary cannot replace operational authority
         shell: bash
@@ -44,16 +49,21 @@ jobs:
           f='supabase/functions/cerebro-console-gateway-human-v1-canary/index.ts'
           o='supabase/functions/cerebro-console-gateway-human-v1-canary/overlay.ts'
           r='supabase/functions/cerebro-console-gateway-human-v1-canary/router.ts'
-          test -f "$f" && test -f "$o" && test -f "$r"
+          p='supabase/functions/_shared/cerebro-channel-access-policy-v1.ts'
+          test -f "$f" && test -f "$o" && test -f "$r" && test -f "$p"
           grep -F 'cerebro-console-gateway-v0' "$f"
           grep -F 'cluhljgonannaafpmblx' "$f"
           grep -F '/canary/rehearsal' "$f"
           grep -F '/canary/router-rehearsal' "$f"
+          grep -F '/canary/access-profile-rehearsal' "$f"
+          grep -F 'evaluateChannelAccess' "$f"
+          grep -F 'FULL_OWNER' "$p"
+          grep -F 'FENIX_OPERATIONAL' "$p"
           grep -F 'live_chat_invoked:false' "$f"
           grep -F 'prod_write_authorized:false' "$f"
           grep -F 'LIVE_CANARY_PERCENT=0' "$r"
           ! grep -F 'SUPABASE_SERVICE_ROLE_KEY' "$f"
-          ! grep -Eq 'trading_access[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true' "$f" "$o" "$r"
+          ! grep -Eq 'trading_access[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|secrets_disclosure_authorized[[:space:]]*:[[:space:]]*true' "$f" "$o" "$r" "$p"
           grep -F 'PASS_THROUGH_UNCHANGED' cerebro/human-intelligence/integration/production-conversation-overlay-v1.mjs
 
       - name: Acquire short-lived GitHub OIDC token for unrouted canary only
@@ -75,7 +85,7 @@ jobs:
           curl --fail --silent --show-error \
             -H "Authorization: Bearer ${token}" \
             "${CANARY_URL}/canary/health" > /tmp/health.json
-          jq -e '.ok==true and .environment=="PROD_CANARY_UNROUTED" and .traffic_enabled==false and .consumer_routing_enabled==false and .live_canary_percent==0 and .fail_closed_target=="OLD" and .live_chat_invoked==false and .prod_write_authorized==false and .trading_access==false and .additional_cost_eur==0' /tmp/health.json >/dev/null
+          jq -e '.ok==true and .environment=="PROD_CANARY_UNROUTED" and .traffic_enabled==false and .consumer_routing_enabled==false and .live_canary_percent==0 and .fail_closed_target=="OLD" and .live_chat_invoked==false and .access_profile_rehearsal==true and .prod_write_authorized==false and .trading_access==false and .additional_cost_eur==0' /tmp/health.json >/dev/null
 
       - name: Physical ZERO router rehearsal never calls PROD upstream
         shell: bash
@@ -95,6 +105,27 @@ jobs:
             --data-binary @/tmp/router-rehearsal.json \
             "${CANARY_URL}/canary/router-rehearsal" > /tmp/router-rehearsal-out.json
           jq -e '.ok==true and .environment=="PROD_CANARY_UNROUTED" and .live_canary_percent==0 and .requested_rehearsal_percent==5 and .safety.synthetic_only==true and .safety.upstream_prod_chat_called==false and .safety.route_state_mutated==false and .safety.consumer_routing_enabled==false and .safety.prod_write_authorized==false and .safety.trading_access==false and .safety.customer_data==false and .safety.additional_cost_eur==0' /tmp/router-rehearsal-out.json >/dev/null
+
+      - name: Physical FULL_OWNER and FENIX_OPERATIONAL access-profile rehearsal
+        shell: bash
+        run: |
+          set -euo pipefail
+          token="$(cat /tmp/cerebro-human-canary-oidc)"
+          exercise(){
+            local channel="$1" message="$2" outfile="$3"
+            jq -n --arg channel "$channel" --arg message "$message" '{channel_id:$channel,user_message:$message}' > /tmp/access-in.json
+            curl --fail --silent --show-error -X POST \
+              -H "Authorization: Bearer ${token}" -H 'Content-Type: application/json' \
+              --data-binary @/tmp/access-in.json "${CANARY_URL}/canary/access-profile-rehearsal" > "$outfile"
+          }
+          exercise APP_ANA_TEXT 'Activa una nueva empresa en Company Registry' /tmp/ana-multi.json
+          jq -e '.decision.access_profile=="FENIX_OPERATIONAL" and .decision.requested_scope=="MULTICOMPANY_CONTROL" and .decision.allowed==false and .decision.human_required==false and .decision.prod_write_authorized==false and .safety.upstream_prod_chat_called==false and .safety.customer_data==false and .safety.secrets==false' /tmp/ana-multi.json >/dev/null
+          exercise APP_ANA_VOICE 'Muéstrame el access token del vault' /tmp/ana-secret.json
+          jq -e '.decision.access_profile=="FENIX_OPERATIONAL" and .decision.requested_scope=="SECRETS_CREDENTIALS" and .decision.allowed==false and .decision.secrets_disclosure_authorized==false and .safety.upstream_prod_chat_called==false' /tmp/ana-secret.json >/dev/null
+          exercise CONSOLE_TEXT 'Activa una nueva empresa en Company Registry' /tmp/console-owner.json
+          jq -e '.decision.access_profile=="FULL_OWNER" and .decision.requested_scope=="MULTICOMPANY_CONTROL" and .decision.allowed==true and .decision.authority_expanded==false and .decision.prod_write_authorized==false and .safety.upstream_prod_chat_called==false' /tmp/console-owner.json >/dev/null
+          exercise TELEGRAM_VOICE 'Revisa Trading LAB' /tmp/tg-trading.json
+          jq -e '.decision.access_profile=="FULL_OWNER" and .decision.requested_scope=="TRADING_ISOLATED" and .decision.allowed==true and .decision.trading_bridge_authorized==false and .decision.prod_write_authorized==false and .safety.upstream_prod_chat_called==false and .safety.trading_access==false' /tmp/tg-trading.json >/dev/null
 
       - name: Physical synthetic overlay rehearsal with zero PROD chat writes
         shell: bash
@@ -135,5 +166,5 @@ jobs:
 
       - name: Record boundary
         run: |
-          echo 'GREEN here proves the deployed PROD canary is physically fail-closed at NEW 0%, plus synthetic no-write router and overlay rehearsals.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'It does NOT route real users, call PROD /chat in rehearsal, authorize PROD writes, or replace cerebro-console-gateway-v0.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'GREEN proves the deployed PROD canary remains physically fail-closed at NEW 0% and also evaluates FULL_OWNER/FENIX_OPERATIONAL synthetic scope decisions without calling PROD /chat.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'It does NOT route real users, authorize PROD writes, disclose secrets, bridge Trading, or replace cerebro-console-gateway-v0.' >> "$GITHUB_STEP_SUMMARY"
