@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_KNOWLEDGE_SURFACE_MAP_V1",
+  "company_id": "fenix",
+  "version": "1.0.0",
+  "objective": "Mantener una única arquitectura de conocimiento para todas las superficies conversacionales de CEREBRO sin duplicar fuentes de verdad.",
+  "canonical_owners": {
+    "structural_knowledge": ["KNW-001", "RAG-001", "PRV-001", "UPD-001"],
+    "context": ["CTX-001"],
+    "conversation": ["CHAT-001", "VOICE-001"],
+    "learning": ["LRN-001", "TRN-001"],
+    "evaluation": ["SIM-001", "EVA-001", "JDG-001", "REG-001"]
+  },
+  "physical_reuse": {
+    "user_preferences": "fenix_prod.cerebro_user_preferences",
+    "conversation_memory": "fenix_prod.cerebro_conversation_memory",
+    "chat_persistence": "EXISTING_CHAT_CONVERSATION_PERSISTENCE",
+    "learning_ingress": "cerebro/runtime/universal-learning-ingress.mjs",
+    "learning_subscriber_contract": "cerebro/registry/rsi-learning-subscribers.v0.json"
+  },
+  "knowledge_classes": {
+    "CANONICAL_STRUCTURAL": {
+      "description": "Reglas, contratos, precedentes, documentación y conocimiento aprobado con procedencia y versión.",
+      "authority": "KNW_RAG_PRV_UPD",
+      "channel_copy_forbidden": true
+    },
+    "LIVE_OPERATIONAL": {
+      "description": "Datos vivos de App/CRM/Supabase/servicios existentes consultados mediante sus backends autoritativos.",
+      "authority": "EXISTING_OPERATIONAL_BACKENDS",
+      "channel_copy_forbidden": true
+    },
+    "EPISODIC_MEMORY": {
+      "description": "Preferencias y memoria conversacional existente, versionable, supersedible y sujeta a permisos.",
+      "authority": "EXISTING_MEMORY_STORES",
+      "channel_copy_forbidden": true
+    },
+    "LEARNING_CANDIDATE": {
+      "description": "Hipótesis derivadas de evidencia real; nunca equivalen a conocimiento canónico antes de evaluación y promoción.",
+      "authority": "LRN-001_PREPROD",
+      "direct_prod_truth_write": false
+    },
+    "SYNTHETIC_EVALUATION": {
+      "description": "Episodios sintéticos y replays para evaluación OLD vs NEW; no sustituyen hechos reales ni se promocionan por sí solos.",
+      "authority": "SIM_EVA_JDG_REG",
+      "direct_prod_truth_write": false
+    }
+  },
+  "channel_surfaces": [
+    {"channel_id": "CONSOLE_TEXT", "modality": "TEXT", "access_profile": "FULL_OWNER", "conversation_owner": "CHAT-001"},
+    {"channel_id": "CONSOLE_VOICE", "modality": "VOICE", "access_profile": "FULL_OWNER", "conversation_owner": "VOICE-001"},
+    {"channel_id": "TELEGRAM_TEXT", "modality": "TEXT", "access_profile": "FULL_OWNER", "conversation_owner": "CHAT-001"},
+    {"channel_id": "TELEGRAM_VOICE", "modality": "VOICE", "access_profile": "FULL_OWNER", "conversation_owner": "VOICE-001"},
+    {"channel_id": "APP_ANA_TEXT", "modality": "TEXT", "access_profile": "FENIX_OPERATIONAL", "conversation_owner": "CHAT-001"},
+    {"channel_id": "APP_ANA_VOICE", "modality": "VOICE", "access_profile": "FENIX_OPERATIONAL", "conversation_owner": "VOICE-001"}
+  ],
+  "access_policy": {
+    "FULL_OWNER": {
+      "authorized_knowledge_scope": "OWNER_AUTHORIZED_SCOPE",
+      "preserve_rbac": true,
+      "preserve_action_gates": true,
+      "secrets_disclosure_authorized": false,
+      "trading_bridge_authorized": false
+    },
+    "FENIX_OPERATIONAL": {
+      "authorized_knowledge_scope": "FENIX_OPERATIONAL",
+      "denied_scopes": ["MULTICOMPANY_CONTROL", "OWNER_PRIVATE", "SECRETS_CREDENTIALS", "TRADING_ISOLATED", "CROSS_COMPANY_PRIVATE"],
+      "fail_closed": true
+    }
+  },
+  "canonicality_rules": [
+    "A channel is a surface, never a source of truth.",
+    "Text and voice for the same access profile resolve knowledge through the same context, provenance and permission policy.",
+    "Do not copy canonical knowledge into channel-specific stores for convenience.",
+    "Live operational facts remain owned by their existing authoritative backend.",
+    "Memory does not silently become a global rule.",
+    "A real conversation may emit only derived safe learning observations/corrections into LRN-001; raw conversation content is not copied to the learning ledger.",
+    "Synthetic conversations are evaluation evidence only until OLD vs NEW, tribunal, PREPROD and rollback gates pass.",
+    "No single real or synthetic conversation can auto-promote canonical knowledge."
+  ],
+  "learning_convergence": {
+    "module": "cerebro/human-intelligence/integration/conversation-learning-convergence-v1.mjs",
+    "real_conversations": {
+      "signal_types": ["METRIC_OBSERVATION", "HUMAN_CORRECTION"],
+      "raw_content_to_lrn": false,
+      "direct_canonical_write": false
+    },
+    "synthetic_conversations": {
+      "scenario_source": "cerebro/human-intelligence/scenarios/fenix-human-60.v1.json",
+      "expected_base_scenarios": 60,
+      "variants_per_scenario": 4,
+      "expected_episode_pairs": 240,
+      "signal_types": ["METRIC_OBSERVATION", "TRIBUNAL_DECISION"],
+      "direct_canonical_write": false
+    },
+    "promotion_chain": ["LRN-001", "OLD_VS_NEW", "EVA/JDG", "PREPROD", "REGRESSION", "ROLLBACK_READY", "UPD/KNW/RAG"],
+    "provenance_required": true
+  },
+  "safety": {
+    "prod_authority_expansion": false,
+    "prod_write_authority_expansion": false,
+    "trading_access": false,
+    "secrets_disclosure": false,
+    "cross_company_leakage": false,
+    "additional_cost_eur": 0
+  }
+}
