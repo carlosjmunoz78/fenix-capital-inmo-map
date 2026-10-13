@@ -1,20 +1,53 @@
-# CEREBRO VOICE-001 · Owned Voice Runtime V0
+# CEREBRO VOICE-001 · Voice Layer
 
-Status: `PREPROD_CODE_ONLY / MODEL_NOT_DEPLOYED / PROD_FALSE`
+VOICE-001 is the common voice capability for CEREBRO. **Voice is transport/presentation, never a second authority layer.** Every voice adapter must reuse the authoritative text/action contract of its channel and inherit authentication, RBAC, context, memory, HUMAN_REQUIRED and governed learning.
 
-This module extends the existing canonical `VOICE-001`. It does **not** create a new engine ID and does not replace the current browser TTS path yet.
+## Current state · 2026-10-13
 
-## Objective
+### Browser/channel adapters
+
+- **CEREBRO Console Voice:** `PROD_DEPLOYED`. Owner: existing `CerebroConsoleShell`. Authority: `cerebro-console-gateway-v0:/chat`.
+- **Ana Voice:** `PROD_DEPLOYED`. Owner: `AnaVoiceQueryBlock`. Authority: `fenix-app-gateway:/v2/ana/knowledge/answer`.
+- **Telegram Voice:** existing PROD backend remains independent in transport/permissions and uses the common multichannel conversation policy.
+- **WhatsApp Voice / Phone Voice / Web Widget Voice:** `PLANNED_ADAPTER`; not active and not authorized merely by appearing in the registry.
+
+The production frontend source for the Ana/Console voice UI after deduplication is recorded in `channel-registry.v1.json`. The duplicate Console implementation was removed; the pre-existing canonical Console is the only `/cerebro` voice UI.
+
+### Owned/self-hosted TTS runtime
+
+Status remains: `PREPROD_CODE_ONLY / MODEL_NOT_DEPLOYED / PROD_FALSE`.
+
+The owned TTS runtime is a future output backend for VOICE-001. It does **not** create a new engine ID and does not replace browser speech synthesis until quality, provenance, cost, rollback and promotion gates pass.
+
+## Authority contract
+
+For every adapter:
+
+`voice/audio -> transcription -> existing authoritative text/action contract -> existing policy/permissions/context/memory/learning -> response -> optional speech output`
+
+Rules:
+
+- audio is not persisted by default;
+- low-confidence transcription must be reviewed rather than silently executed;
+- sensitive confirmations never bypass the existing action/policy gate;
+- no voice channel grants new permissions;
+- no channel creates a parallel memory or learning system;
+- text fallback remains available where the UI supports it;
+- adding a new channel means adding an adapter, not another CEREBRO.
+
+See `channel-registry.v1.json` for current and planned adapters.
+
+## Owned TTS objective
 
 Make CEREBRO independent from whichever voices a browser/device happens to expose while preserving a zero-additional-cost path:
 
-`CEREBRO text -> VOICE-001 -> owned/self-hosted TTS -> audio -> Console/App/Telegram`
+`CEREBRO text -> VOICE-001 -> owned/self-hosted TTS -> audio -> Console/App/Telegram/...`
 
 Fallback remains:
 
 `owned TTS unavailable -> browser speechSynthesis`
 
-## V0 target
+## Owned TTS V0 target
 
 - 20 controlled `es-ES` voice slots: 10 feminine + 10 masculine.
 - Authorized voice cloning from reference audio.
@@ -25,7 +58,7 @@ Fallback remains:
 - No cross-company voice references.
 - No voice is considered usable until reference provenance, consent/license, checksum and quality gates are present.
 
-## Non-negotiable gates
+## Non-negotiable voice-model gates
 
 A cloned or imported voice is `READY` only if all are true:
 
@@ -46,7 +79,7 @@ A cloned or imported voice is `READY` only if all are true:
 
 ## Runtime boundary
 
-The runtime is LAB/PREPROD only by default. The service must bind to loopback/private network unless explicitly placed behind the CEREBRO Gateway. It must not expose raw reference audio or accept anonymous public uploads.
+The owned model runtime is LAB/PREPROD only by default. It must bind to loopback/private network unless explicitly placed behind the CEREBRO Gateway. It must not expose raw reference audio or accept anonymous public uploads.
 
 ## Cost policy
 
@@ -56,6 +89,12 @@ Compute, electricity, storage and hardware are still resources and must be measu
 
 ## Promotion path
 
+Owned TTS:
+
 `CODE -> LOCAL_LAB -> 20-VOICE QA -> CLONE QA -> PREPROD SHADOW -> OLD vs NEW -> EVA-001 -> JDG-001 -> gradual binding`
+
+New channel adapter:
+
+`REGISTER -> IDENTIFY EXISTING AUTHORITY -> CONTRACT TEST -> PREPROD -> E2E -> ROLLBACK -> GRADUAL ACTIVATION -> OBSERVABILITY`
 
 Browser TTS remains intact until the owned path proves equal or better and rollback is tested.
