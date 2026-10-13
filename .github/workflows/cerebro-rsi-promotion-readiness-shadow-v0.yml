@@ -19,6 +19,7 @@ on:
       - 'supabase/migrations/20261013010500_cerebro_multichannel_ana_overlay_v1.sql'
       - 'supabase/migrations/20261013042000_cerebro_channel_access_profiles_v1.sql'
       - 'supabase/migrations/20261013075000_cerebro_company_registry_preprod_persistence_v1.sql'
+      - 'supabase/migrations/20261013083000_cerebro_company_onboarding_preprod_persistence_v1.sql'
       - '.github/workflows/cerebro-rsi-*.yml'
       - '.github/workflows/cerebro-hygiene-audit-v0.yml'
       - '.github/workflows/cerebro-human-intelligence-*.yml'
@@ -108,7 +109,7 @@ jobs:
             printf '%s\n' "$changed" >&2
             exit 1
           fi
-          allowed='^(supabase/functions/(cerebro-human-old-actor-preprod-v0|cerebro-human-new-actor-preprod-v1|cerebro-human-route-control-preprod-v1|cerebro-console-gateway-human-v1-canary|cerebro-console-human-router-zero-v1|cerebro-telegram-gateway-v0|cerebro-telegram-voice-v1)/|supabase/functions/_shared/cerebro-(conversation|channel-access)-policy-v1\.ts$|supabase/migrations/(20261012132000_cerebro_human_route_control_preprod_v1|20261013010500_cerebro_multichannel_ana_overlay_v1|20261013042000_cerebro_channel_access_profiles_v1|20261013075000_cerebro_company_registry_preprod_persistence_v1)\.sql$)'
+          allowed='^(supabase/functions/(cerebro-human-old-actor-preprod-v0|cerebro-human-new-actor-preprod-v1|cerebro-human-route-control-preprod-v1|cerebro-console-gateway-human-v1-canary|cerebro-console-human-router-zero-v1|cerebro-telegram-gateway-v0|cerebro-telegram-voice-v1)/|supabase/functions/_shared/cerebro-(conversation|channel-access)-policy-v1\.ts$|supabase/migrations/(20261012132000_cerebro_human_route_control_preprod_v1|20261013010500_cerebro_multichannel_ana_overlay_v1|20261013042000_cerebro_channel_access_profiles_v1|20261013075000_cerebro_company_registry_preprod_persistence_v1|20261013083000_cerebro_company_onboarding_preprod_persistence_v1)\.sql$)'
           unexpected_supabase="$(printf '%s\n' "$changed" | grep '^supabase/' | grep -Ev "$allowed" || true)"
           if [ -n "$unexpected_supabase" ]; then
             echo 'Unapproved Supabase surface changed:' >&2
@@ -151,6 +152,20 @@ jobs:
             ! grep -F 'cluhljgonannaafpmblx' "$m"
             ! grep -F 'fenix_prod.' "$m"
           fi
+          if printf '%s\n' "$changed" | grep -q '^supabase/migrations/20261013083000_cerebro_company_onboarding_preprod_persistence_v1\.sql$'; then
+            node --test cerebro/tests/company-onboarding-preprod-persistence-v1.test.mjs
+            m='supabase/migrations/20261013083000_cerebro_company_onboarding_preprod_persistence_v1.sql'
+            grep -F 'cerebro_company_onboarding_start_preprod' "$m"
+            grep -F 'cerebro_company_engine_state_preprod' "$m"
+            grep -F 'DENY_CROSS_COMPANY' "$m"
+            grep -F "'next_gate','SCAN_001_DURABLE_EXECUTION_REQUIRED'" "$m"
+            grep -F 'enable row level security' "$m"
+            grep -F 'to service_role' "$m"
+            grep -F "'prod_write_authorized',false" "$m"
+            grep -F "'trading_access',false" "$m"
+            ! grep -F 'cluhljgonannaafpmblx' "$m"
+            ! grep -F 'fenix_prod.' "$m"
+          fi
           if printf '%s\n' "$changed" | grep -q '^supabase/functions/cerebro-console-gateway-human-v1-canary/'; then
             grep -F 'PROD_CANARY_UNROUTED' supabase/functions/cerebro-console-gateway-human-v1-canary/index.ts
             grep -F 'live_chat_invoked:false' supabase/functions/cerebro-console-gateway-human-v1-canary/index.ts
@@ -166,7 +181,7 @@ jobs:
             ! grep -R -Eq 'prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true' "$d"
             ! printf '%s\n' "$changed" | grep -q '^supabase/functions/cerebro-console-gateway-v0/'
           fi
-          echo 'No App UI/build/current Console authority drift. Exact governed PREPROD persistence and multichannel adapters preserve authority boundaries.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'No App UI/build/current Console authority drift. Exact governed PREPROD registry/onboarding persistence and multichannel adapters preserve authority boundaries.' >> "$GITHUB_STEP_SUMMARY"
       - name: Install dependencies reproducibly
         run: |
           set -euo pipefail
@@ -196,7 +211,7 @@ jobs:
       - name: Mark App gate boundary
         run: |
           echo 'This job proves zero App UI/build/current Console gateway drift plus exact-head build and PREPROD CORS smoke.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'Governed PREPROD Company Registry persistence is service-role only and fail-closed; no new PROD actions or Trading.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Governed PREPROD Company Registry and COMP-ONB persistence are service-role only and fail-closed; no new PROD actions or Trading.' >> "$GITHUB_STEP_SUMMARY"
 
   tribunal-shadow:
     runs-on: ubuntu-latest
@@ -239,7 +254,7 @@ jobs:
             printf '%s\n' "$changed" >&2
             exit 1
           fi
-          allowed='^(supabase/functions/(cerebro-human-old-actor-preprod-v0|cerebro-human-new-actor-preprod-v1|cerebro-human-route-control-preprod-v1|cerebro-console-gateway-human-v1-canary|cerebro-console-human-router-zero-v1|cerebro-telegram-gateway-v0|cerebro-telegram-voice-v1)/|supabase/functions/_shared/cerebro-(conversation|channel-access)-policy-v1\.ts$|supabase/migrations/(20261012132000_cerebro_human_route_control_preprod_v1|20261013010500_cerebro_multichannel_ana_overlay_v1|20261013042000_cerebro_channel_access_profiles_v1|20261013075000_cerebro_company_registry_preprod_persistence_v1)\.sql$)'
+          allowed='^(supabase/functions/(cerebro-human-old-actor-preprod-v0|cerebro-human-new-actor-preprod-v1|cerebro-human-route-control-preprod-v1|cerebro-console-gateway-human-v1-canary|cerebro-console-human-router-zero-v1|cerebro-telegram-gateway-v0|cerebro-telegram-voice-v1)/|supabase/functions/_shared/cerebro-(conversation|channel-access)-policy-v1\.ts$|supabase/migrations/(20261012132000_cerebro_human_route_control_preprod_v1|20261013010500_cerebro_multichannel_ana_overlay_v1|20261013042000_cerebro_channel_access_profiles_v1|20261013075000_cerebro_company_registry_preprod_persistence_v1|20261013083000_cerebro_company_onboarding_preprod_persistence_v1)\.sql$)'
           unexpected_supabase="$(printf '%s\n' "$changed" | grep '^supabase/' | grep -Ev "$allowed" || true)"
           if [ -n "$unexpected_supabase" ]; then
             echo 'Unexpected Supabase surface changed by RSI recovery.' >&2
@@ -264,6 +279,18 @@ jobs:
             ! grep -F 'cluhljgonannaafpmblx' "$m"
             ! grep -F 'fenix_prod.' "$m"
           fi
+          if printf '%s\n' "$changed" | grep -q '^supabase/migrations/20261013083000_cerebro_company_onboarding_preprod_persistence_v1\.sql$'; then
+            node --test cerebro/tests/company-onboarding-preprod-persistence-v1.test.mjs
+            m='supabase/migrations/20261013083000_cerebro_company_onboarding_preprod_persistence_v1.sql'
+            grep -F 'cerebro_company_onboarding_start_preprod' "$m"
+            grep -F 'cerebro_company_engine_state_preprod' "$m"
+            grep -F 'DENY_CROSS_COMPANY' "$m"
+            grep -F "'next_gate','SCAN_001_DURABLE_EXECUTION_REQUIRED'" "$m"
+            grep -F 'enable row level security' "$m"
+            grep -F 'to service_role' "$m"
+            ! grep -F 'cluhljgonannaafpmblx' "$m"
+            ! grep -F 'fenix_prod.' "$m"
+          fi
           if printf '%s\n' "$changed" | grep -q '^supabase/functions/cerebro-console-gateway-human-v1-canary/'; then
             ! printf '%s\n' "$changed" | grep -q '^supabase/functions/cerebro-console-gateway-v0/'
           fi
@@ -276,4 +303,4 @@ jobs:
             ! grep -R -Eq 'prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true' "$d"
             ! printf '%s\n' "$changed" | grep -q '^supabase/functions/cerebro-console-gateway-v0/'
           fi
-          echo 'RSI remains bounded: exact governed PREPROD persistence and multichannel adapters cannot expand authority, writes, Trading, or bypass OLD-vs-NEW/Tribunal promotion.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'RSI remains bounded: exact governed PREPROD registry/onboarding persistence and multichannel adapters cannot expand authority, writes, Trading, or bypass OLD-vs-NEW/Tribunal promotion.' >> "$GITHUB_STEP_SUMMARY"
