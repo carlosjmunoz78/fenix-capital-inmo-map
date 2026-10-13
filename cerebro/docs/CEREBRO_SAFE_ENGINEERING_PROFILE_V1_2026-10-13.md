@@ -2,7 +2,7 @@
 
 ## Estado
 
-**PARCIAL / PREPROD VALIDADO SOBRE IMPLEMENTACIÓN.** El perfil transversal 25-37 existe y ha pasado sus gates de implementación. Aún no está fusionado en `main`, no tiene autoridad PROD y no autoriza Trading.
+**HECHO / INTEGRADO Y VALIDADO EN `main`.** El bloque 25-37 quedó consolidado como un único perfil transversal de ingeniería segura. Esto no equivale a promoción autónoma a PROD: `prod_authorized=false`, `prod_write_authorized=false` y `trading_access=false` siguen siendo fronteras explícitas.
 
 ## Objetivo
 
@@ -18,11 +18,15 @@ La planificación falla cerrada si faltan inventario, mapa de dependencias, revi
 
 Valores por defecto y fronteras: `new_engine_required=false`, `paid_model_required=false`, `additional_cost_eur=0`, `prod_authorized=false`, `prod_write_authorized=false`, `trading_access=false`, `external_skill_code_execution=false`.
 
-## Evidencia CI
+## Evidencia CI y promoción gobernada
 
 Implementación validada: `1d4789d77ce875dcfa3ff49f4136a44f9cf71e01`.
 
-Workflow `CEREBRO Safe Engineering Profile V1`, run `38471616695`, Node 24:
+PR de feature: `#637`; merge gobernado en `main`: `6db0cdd4dea493bacacd7d877558509efbd838fe`.
+
+Hardening del gate post-merge: PR `#652`; merge en `main`: `30db184b8e3fac433af9dbad7f2f96f88594eda1`.
+
+Validación exact-head previa al merge, workflow `CEREBRO Safe Engineering Profile V1`, run `38472053955`, Node 24:
 
 - focused Safe Engineering contract: PASS;
 - AUTO-001 regression: PASS;
@@ -31,15 +35,26 @@ Workflow `CEREBRO Safe Engineering Profile V1`, run `38471616695`, Node 24:
 - `main` baseline full CEREBRO regression: PASS;
 - candidate full CEREBRO regression: PASS.
 
-La primera ejecución diagnóstica con Node 20 falló en `channel-access-profiles-v1.test.mjs` al intentar importar TypeScript directamente. El repositorio declara Node `24.x`; al alinear este gate con Node 24, tanto el baseline de `main` como el candidato pasaron completos. No se modificó ese contrato funcional para ocultar el fallo.
+Validación post-merge real sobre `main`, run `38473230754`:
+
+- focused Safe Engineering contract: PASS;
+- AUTO-001 regression: PASS;
+- Skill Evolution regression: PASS;
+- Evaluation Tribunal regression: PASS;
+- full CEREBRO regression sobre `main`: PASS;
+- main baseline full CEREBRO: PASS.
+
+El `PROD Runtime Smoke` asociado al mismo HEAD de `main` también terminó PASS. `PROD Live Deploy` quedó SKIPPED; este bloque no autoriza ni necesita despliegue PROD.
+
+La primera ejecución diagnóstica con Node 20 falló en `channel-access-profiles-v1.test.mjs` al intentar importar TypeScript directamente. El repositorio declara Node `24.x`; al alinear el gate con Node 24, tanto baseline como candidato pasaron completos. No se modificó ese contrato funcional para ocultar el fallo.
 
 ## OLD vs NEW
 
-Baseline OLD: no contiene `CEREBRO_SAFE_ENGINEERING_PROFILE_V1`; full regression CEREBRO = PASS.
+Baseline OLD: no contenía `CEREBRO_SAFE_ENGINEERING_PROFILE_V1`; full regression CEREBRO = PASS.
 
-Candidate NEW: añade el perfil y el gate Skill Evolution; full regression CEREBRO = PASS; regresiones de seguridad/política = 0 observadas por los gates; coste adicional = 0 €; autoridad PROD no aumenta; Trading no aumenta.
+NEW integrado: añade el perfil y el gate Skill Evolution; full regression CEREBRO = PASS antes y después del merge; regresiones de seguridad/política observadas = 0; coste adicional = 0 €; autoridad PROD no aumenta; Trading no aumenta.
 
-Veredicto: **NEW_BETTER** por cobertura de la nueva capacidad requerida sin regresión observable en la suite completa. El registro `cerebro/registry/safe-engineering-profile.v1.json` conserva esta evidencia y el criterio de calidad utilizado.
+Veredicto: **NEW_BETTER** por cobertura de la nueva capacidad requerida sin regresión observable en la suite completa.
 
 ## Provenance / licencia
 
@@ -47,12 +62,12 @@ Las 13 disposiciones están registradas en `cerebro/registry/safe-engineering-pr
 
 ## Backup / rollback / rebuild
 
-Backup lógico: Git SHA de `main` + rama aislada + PR. Antes de merge, rollback = cerrar PR y borrar/resetear la rama. Después de merge gobernado, rollback = revertir el merge. No existen side effects PROD de este bloque que deban deshacerse.
+Backup lógico: historial Git + SHAs de `main` + PRs gobernados. Rollback del bloque = revertir, en orden inverso, el hardening post-merge `30db184b8e3fac433af9dbad7f2f96f88594eda1` y, si fuera necesario, el merge funcional `6db0cdd4dea493bacacd7d877558509efbd838fe`. No existen side effects PROD de este bloque que deban deshacerse.
 
 Rebuild = restaurar runtime, tests, registry, documentación y workflow desde Git y volver a ejecutar el gate con Node 24. No requiere servicio de pago ni runtime externo nuevo.
 
-## Promoción
+## Cierre y siguiente bloque
 
-Faltan únicamente los gates de cierre sobre el HEAD final del PR y, después del merge gobernado, la regresión post-merge en `main`. Hasta entonces el estado correcto sigue siendo PREPROD y no HECHO.
+Items 25-37: **HECHO** como integración de arquitectura/capacidad en `main`, con post-merge GREEN y sin expansión de autoridad.
 
-Siguiente bloque autorizado solo tras cierre: items 38-50 (IAM, Vault/secrets, standing permissions, renovación de sesión/tokens, routing API/MCP/script/browser, Browser Bridge, GenericAgent LAB, Camoufox LAB autorizado, NeuralAgent patterns, Watch & Learn, Android Device Worker, Jarvis OSS Android y Archer benchmark).
+Siguiente bloque autorizado: items 38-50 (IAM, Vault/secrets, standing permissions, renovación de sesión/tokens, routing API/MCP/script/browser, Browser Bridge, GenericAgent LAB, Camoufox LAB autorizado, NeuralAgent patterns, Watch & Learn, Android Device Worker, Jarvis OSS Android y Archer benchmark).

@@ -6,7 +6,8 @@
   "engine_id": "AUTO-001",
   "environment": "PREPROD",
   "version": "1.0.0",
-  "state": "PREPROD_VALIDATED_IMPLEMENTATION",
+  "state": "INTEGRATED_MAIN_VALIDATED",
+  "block_status": "HECHO",
   "new_engine_required": false,
   "paid_model_required": false,
   "additional_cost_eur": 0,
@@ -54,14 +55,21 @@
   ],
   "validation_evidence": {
     "implementation_sha": "1d4789d77ce875dcfa3ff49f4136a44f9cf71e01",
-    "workflow_run_id": 38471616695,
+    "feature_pr": 637,
+    "feature_merge_sha": "6db0cdd4dea493bacacd7d877558509efbd838fe",
+    "postmerge_gate_pr": 652,
+    "postmerge_gate_merge_sha": "30db184b8e3fac433af9dbad7f2f96f88594eda1",
+    "premerge_workflow_run_id": 38472053955,
+    "postmerge_workflow_run_id": 38473230754,
     "node_version": 24,
     "focused_contract": "PASS",
     "auto001_regression": "PASS",
     "skill_evolution_regression": "PASS",
     "evaluation_tribunal_regression": "PASS",
     "main_baseline_full_cerebro": "PASS",
-    "candidate_full_cerebro": "PASS"
+    "candidate_full_cerebro": "PASS",
+    "postmerge_main_full_cerebro": "PASS",
+    "postmerge_runtime_smoke": "PASS"
   },
   "old_vs_new": {
     "decision": "NEW_BETTER",
@@ -79,7 +87,9 @@
   },
   "rollback": {
     "pre_merge": "close PR and delete/reset isolated branch",
-    "post_merge": "revert the governed merge commit",
+    "post_merge": "revert the governed merge commit(s) in reverse order",
+    "feature_merge_sha": "6db0cdd4dea493bacacd7d877558509efbd838fe",
+    "verification_merge_sha": "30db184b8e3fac433af9dbad7f2f96f88594eda1",
     "prod_side_effects_to_undo": false
   },
   "rebuild": {
@@ -87,12 +97,14 @@
     "external_runtime_dependency_required": false
   },
   "promotion": {
+    "main_integration_complete": true,
+    "post_merge_main_regression_complete": true,
     "prod_promotion_authorized": false,
-    "final_head_ci_required": true,
-    "post_merge_main_regression_required": true
+    "prod_write_authorized": false,
+    "trading_access": false
   },
   "next_block": {
     "items": "38-50",
-    "start_only_after_merge_and_postmerge_green": true
+    "authorized_to_start": true
   }
 }
