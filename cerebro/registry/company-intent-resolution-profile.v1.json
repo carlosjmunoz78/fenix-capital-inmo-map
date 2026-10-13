@@ -1,0 +1,78 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_COMPANY_INTENT_RESOLUTION_PROFILE_REGISTRY_V1",
+  "company_id": "fenix",
+  "engine_id": "LEAD-001",
+  "environment": "PREPROD",
+  "version": "1.0.0",
+  "block": "69-73",
+  "state": "CANDIDATE_PREPROD",
+  "block_status": "PARCIAL",
+  "profile_kind": "TRANSVERSAL_COMPANY_INTENT_PROFILE_NOT_NEW_ENGINE",
+  "items": {
+    "69": {"name":"Sales Navigator optional ROI","status":"HOLD","implementation":"optional existing-license source only when incremental cost is 0 and ROI evidence exists; never a mandatory dependency"},
+    "70": {"name":"Gojiberry patterns","status":"DEFINIDO","implementation":"extract buying-signal, ICP and prioritization patterns into deterministic zero-cost company-level logic; paid provider/outreach runtime not imported"},
+    "71": {"name":"MasLeads concept","status":"DEFINIDO","implementation":"extract company-visitor intent and target-fit concepts only; no provider dependency or automatic contact enrichment"},
+    "72": {"name":"Pearl Diver concept","status":"HOLD","implementation":"company-level explicit/first-party resolution patterns only; person/cross-device/anonymous third-party resolution requires legal/privacy review and covert fingerprinting is denied"},
+    "73": {"name":"Beton Inspector LAB","status":"LAB_REFERENCE","implementation":"getbeton/inspector AGPL-3.0 benchmark for account signals/scoring; no code imported or executed and no PostHog/CRM dependency activated"}
+  },
+  "source_order": ["FIRST_PARTY_AGGREGATED_ACCOUNT_SIGNALS", "EXISTING_CRM_SIGNALS", "PUBLIC_BUSINESS_SIGNALS", "OPTIONAL_SALES_NAVIGATOR"],
+  "intent_signal_weights": {
+    "company_website_visit": 15,
+    "repeat_company_visit": 25,
+    "pricing_page_company_visit": 35,
+    "public_hiring_signal": 15,
+    "public_funding_signal": 10
+  },
+  "human_required_codes": ["LEGAL_REQUIRED", "SIGNATURE_REQUIRED", "LOW_CONFIDENCE", "HIGH_RISK", "POLICY_CONFLICT", "SECURITY_INCIDENT", "MONEY_LIMIT", "CUSTOMER_HUMAN_REQUEST"],
+  "invariants": {
+    "company_level_default": true,
+    "person_resolution_default": false,
+    "device_fingerprinting_allowed": false,
+    "cross_device_identity_graph_allowed": false,
+    "covert_deanonymization_allowed": false,
+    "person_level_third_party_resolution_requires_legal_review": true,
+    "outreach_authorized": false,
+    "crm_write_authorized": false,
+    "automatic_paid_fallback": false,
+    "silent_spend_allowed": false,
+    "external_provider_runtime_required": false,
+    "phase_74_event_capture_not_preempted": true
+  },
+  "external_evidence": {
+    "observed_at": "2026-10-14",
+    "sales_navigator": "official LinkedIn documentation: Buyer Intent is available to Sales Navigator Advanced and Advanced Plus; optional only in this profile",
+    "gojiberry": "official product/help: intent signals, ICP scoring, company visitor identification and outreach; pricing is paid, so patterns only",
+    "masleads": "official Website Visitors/Copilot pages: company visitor identification and intent-based prioritization; concept only",
+    "pearl_diver": "official Prospect Resolution page describes person/company resolution across identifiers/devices; privacy-gated concept only",
+    "beton": "getbeton/inspector is an AGPL-3.0 self-hostable revenue-intelligence project using PostHog/CRM account signals; LAB benchmark only"
+  },
+  "dependency_map": {
+    "preserve": [
+      "cerebro/runtime/lead-discovery-enrichment-profile-v1.mjs",
+      "cerebro/runtime/web-acquisition-intelligence-profile-v1.mjs",
+      "cerebro/router/execution-model-router.mjs",
+      "cerebro/registry/engine-registry.seed.json"
+    ],
+    "extend": ["cerebro/runtime/company-intent-resolution-profile-v1.mjs"],
+    "replace": [],
+    "defer_to_next_block": ["first-party event capture", "PostHog activation", "website tracking runtime"]
+  },
+  "verification": {
+    "status": "PENDING_EXACT_HEAD_CI",
+    "focused_profile": "PENDING",
+    "lead_profile_regression": "PENDING",
+    "candidate_full_suite": "PENDING",
+    "base_full_suite": "PENDING",
+    "old_vs_new": "PENDING"
+  },
+  "rollback": {"method":"revert candidate PR; lead discovery and web acquisition profiles remain canonical"},
+  "rebuild": {"method":"recreate from runtime contract + registry + tests + source dispositions on current main"},
+  "next_gate": "EXACT_HEAD_PREMERGE_AND_OLD_VS_NEW",
+  "prod_authorized": false,
+  "prod_write_authorized": false,
+  "execution_authorized": false,
+  "outreach_authorized": false,
+  "trading_access": false,
+  "additional_cost_eur": 0
+}
