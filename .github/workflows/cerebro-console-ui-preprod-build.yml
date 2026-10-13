@@ -57,14 +57,30 @@ jobs:
           node --input-type=module <<'NODE'
           import {chromium} from '@playwright/test';
           const browser=await chromium.launch({headless:true});
+          const direct=await browser.newPage({viewport:{width:1440,height:1000}});
+          const directErrors=[];
+          direct.on('pageerror',error=>directErrors.push(error.message));
+          await direct.goto('http://127.0.0.1:4173/cerebro-visual/runtime/base-v147.html',{waitUntil:'domcontentloaded'});
+          await direct.waitForTimeout(250);
+          const directProof=await direct.evaluate(()=>({canvas:Boolean(document.querySelector('canvas')),baseReady:Boolean(window.CEREBRO_LAB?.setStage),title:document.title}));
+          await direct.close();
+
           const page=await browser.newPage({viewport:{width:1440,height:1000}});
           const external=[];
+          const failures=[];
+          const errors=[];
+          const consoleErrors=[];
           page.on('request',request=>{
             const url=new URL(request.url());
             if(url.hostname!=='127.0.0.1')external.push(request.url());
           });
+          page.on('requestfailed',request=>failures.push({url:request.url(),error:request.failure()?.errorText||'failed'}));
+          page.on('response',response=>{if(response.status()>=400)failures.push({url:response.url(),status:response.status()})});
+          page.on('pageerror',error=>errors.push(error.message));
+          page.on('console',message=>{if(message.type()==='error')consoleErrors.push(message.text())});
           await page.goto('http://127.0.0.1:4173/cerebro-visual/candidate-v1425.html',{waitUntil:'domcontentloaded'});
           await page.waitForFunction(()=>window.CEREBRO_V1425?.runtime==='LOCAL_VENDORED',{timeout:15000});
+          await page.waitForTimeout(250);
           const proof=await page.evaluate(()=>({
             version:window.CEREBRO_V1425?.version,
             environment:window.CEREBRO_V1425?.environment,
@@ -72,14 +88,21 @@ jobs:
             runtime:window.CEREBRO_V1425?.runtime,
             rollback:window.CEREBRO_V1425?.rollback,
             canvas:Boolean(document.querySelector('canvas')),
-            baseReady:Boolean(window.CEREBRO_LAB?.setStage)
+            baseReady:Boolean(window.CEREBRO_LAB?.setStage),
+            title:document.title,
+            bootError:document.querySelector('.boot-error')?.textContent||''
           }));
-          if(proof.version!=='v1.4.25'||proof.environment!=='LAB_PREPROD'||proof.prodAuthorized!==false||proof.runtime!=='LOCAL_VENDORED'||proof.rollback!=='v1.4.7'||!proof.canvas||!proof.baseReady){
-            throw new Error('CEREBRO visual proof failed: '+JSON.stringify(proof));
+          const diagnostic={directProof,directErrors,proof,errors,consoleErrors,failures,external};
+          if(!directProof.canvas||!directProof.baseReady||directErrors.length){
+            throw new Error('Vendored V1.4.7 base failed directly: '+JSON.stringify(diagnostic));
           }
-          if(external.length)throw new Error('Unexpected external visual requests: '+JSON.stringify(external));
+          if(proof.version!=='v1.4.25'||proof.environment!=='LAB_PREPROD'||proof.prodAuthorized!==false||proof.runtime!=='LOCAL_VENDORED'||proof.rollback!=='v1.4.7'||!proof.canvas||!proof.baseReady||proof.bootError){
+            throw new Error('CEREBRO visual proof failed: '+JSON.stringify(diagnostic));
+          }
+          if(errors.length||consoleErrors.length||failures.length)throw new Error('Visual runtime emitted errors: '+JSON.stringify(diagnostic));
+          if(external.length)throw new Error('Unexpected external visual requests: '+JSON.stringify(diagnostic));
           await page.evaluate(()=>window.CEREBRO_LAB.setStage(3));
           await page.waitForTimeout(250);
           await browser.close();
-          console.log(JSON.stringify({status:'GREEN',...proof,externalRequests:0,stage3:true}));
+          console.log(JSON.stringify({status:'GREEN',...proof,externalRequests:0,stage3:true,directBase:'GREEN'}));
           NODE
