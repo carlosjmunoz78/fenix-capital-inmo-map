@@ -6,10 +6,10 @@ on:
       - main
     paths:
       - 'cerebro/**'
-      - 'src/AnaVoiceQueryBlock.tsx'
+      - 'src/AnaChatBlock.tsx'
       - 'src/CerebroConsoleBlock.tsx'
       - 'src/OperationalShellGate.tsx'
-      - 'src/VoiceChannelAdapter.ts'
+      - 'src/cerebroVoice.ts'
       - 'tests/voice-ui-ana-console.spec.ts'
       - 'supabase/functions/cerebro-human-old-actor-preprod-v0/**'
       - 'supabase/functions/cerebro-human-new-actor-preprod-v1/**'
@@ -106,7 +106,7 @@ jobs:
           fi
           changed="$(git diff --name-only "$base" HEAD)"
           protected='^(src/|tests/|public/|scripts/|index\.html$|package(-lock)?\.json$|playwright\.config\.(ts|js)$|vite\.config\.(ts|js)$|tsconfig[^/]*\.json$|\.env|\.github/workflows/(preprod-build|app-restoration-build|prod-[^/]+)\.yml$)'
-          voice_ui='^(src/(AnaVoiceQueryBlock|CerebroConsoleBlock|OperationalShellGate)\.tsx$|src/VoiceChannelAdapter\.ts$|tests/voice-ui-ana-console\.spec\.ts$)'
+          voice_ui='^(src/(AnaChatBlock|CerebroConsoleBlock|OperationalShellGate|cerebroVoice)\.tsx?$|tests/voice-ui-ana-console\.spec\.ts$)'
           protected_changed="$(printf '%s\n' "$changed" | grep -E "$protected" | grep -Ev "$voice_ui" || true)"
           if [ -n "$protected_changed" ]; then
             echo 'RSI scope invalidated: unexpected App UI/App-test/build/deploy surface changed.' >&2
@@ -127,10 +127,16 @@ jobs:
             test -f tests/voice-ui-ana-console.spec.ts
             grep -F "voice_is_transport_not_authority" cerebro/voice/channel-registry.v1.json
             grep -F '"audio_persistence": false' cerebro/voice/channel-registry.v1.json
-            grep -F "'/v2/ana/knowledge/answer'" src/AnaVoiceQueryBlock.tsx
+            grep -F "fenix_prod_chat_send_user" src/AnaChatBlock.tsx
+            grep -F "from './cerebroVoice'" src/AnaChatBlock.tsx
             grep -F "cerebro-console-gateway-v0" src/CerebroConsoleBlock.tsx
             grep -F "actor_code==='CARLOS-ADMIN'" src/CerebroConsoleBlock.tsx
-            ! grep -R -F 'SUPABASE_SERVICE_ROLE_KEY' src/AnaVoiceQueryBlock.tsx src/CerebroConsoleBlock.tsx src/VoiceChannelAdapter.ts
+            grep -F "from './cerebroVoice'" src/CerebroConsoleBlock.tsx
+            grep -F "voiceNeedsClarification" src/AnaChatBlock.tsx src/CerebroConsoleBlock.tsx
+            grep -F "voiceNeedsManualConfirmation" src/CerebroConsoleBlock.tsx
+            test ! -e src/AnaVoiceQueryBlock.tsx
+            test ! -e src/VoiceChannelAdapter.ts
+            ! grep -R -F 'SUPABASE_SERVICE_ROLE_KEY' src/AnaChatBlock.tsx src/CerebroConsoleBlock.tsx src/cerebroVoice.ts
             ! printf '%s\n' "$changed" | grep -q '^supabase/functions/fenix-app-gateway/'
             ! printf '%s\n' "$changed" | grep -q '^supabase/functions/cerebro-console-gateway-v0/'
           fi
@@ -170,7 +176,7 @@ jobs:
             ! grep -R -Eq 'prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true' "$d"
             ! printf '%s\n' "$changed" | grep -q '^supabase/functions/cerebro-console-gateway-v0/'
           fi
-          echo 'No unapproved App/backend authority drift. Exact VOICE-001 UI adapters are allowed only with their dedicated build/E2E gate.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'No unapproved App/backend authority drift. Exact VOICE-001 UI surfaces are allowed only with their dedicated build/E2E gate.' >> "$GITHUB_STEP_SUMMARY"
       - name: Install dependencies reproducibly
         run: npm ci
       - name: Build exact head
@@ -236,7 +242,7 @@ jobs:
           fi
           changed="$(git diff --name-only "$base" HEAD)"
           protected='^(src/|tests/|public/|scripts/|index\.html$|package(-lock)?\.json$|playwright\.config\.(ts|js)$|vite\.config\.(ts|js)$|tsconfig[^/]*\.json$|\.env|\.github/workflows/(preprod-build|app-restoration-build|prod-[^/]+)\.yml$)'
-          voice_ui='^(src/(AnaVoiceQueryBlock|CerebroConsoleBlock|OperationalShellGate)\.tsx$|src/VoiceChannelAdapter\.ts$|tests/voice-ui-ana-console\.spec\.ts$)'
+          voice_ui='^(src/(AnaChatBlock|CerebroConsoleBlock|OperationalShellGate|cerebroVoice)\.tsx?$|tests/voice-ui-ana-console\.spec\.ts$)'
           protected_changed="$(printf '%s\n' "$changed" | grep -E "$protected" | grep -Ev "$voice_ui" || true)"
           if [ -n "$protected_changed" ]; then
             echo 'Unexpected App/application/test/production surface changed by RSI recovery.' >&2
@@ -254,9 +260,16 @@ jobs:
             test -f .github/workflows/cerebro-owned-voice-preprod.yml
             grep -F "voice_is_transport_not_authority" cerebro/voice/channel-registry.v1.json
             grep -F '"audio_persistence": false' cerebro/voice/channel-registry.v1.json
-            grep -F "'/v2/ana/knowledge/answer'" src/AnaVoiceQueryBlock.tsx
+            grep -F "fenix_prod_chat_send_user" src/AnaChatBlock.tsx
+            grep -F "from './cerebroVoice'" src/AnaChatBlock.tsx
             grep -F "cerebro-console-gateway-v0" src/CerebroConsoleBlock.tsx
-            ! grep -R -F 'SUPABASE_SERVICE_ROLE_KEY' src/AnaVoiceQueryBlock.tsx src/CerebroConsoleBlock.tsx src/VoiceChannelAdapter.ts
+            grep -F "actor_code==='CARLOS-ADMIN'" src/CerebroConsoleBlock.tsx
+            grep -F "from './cerebroVoice'" src/CerebroConsoleBlock.tsx
+            grep -F "voiceNeedsClarification" src/AnaChatBlock.tsx src/CerebroConsoleBlock.tsx
+            grep -F "voiceNeedsManualConfirmation" src/CerebroConsoleBlock.tsx
+            test ! -e src/AnaVoiceQueryBlock.tsx
+            test ! -e src/VoiceChannelAdapter.ts
+            ! grep -R -F 'SUPABASE_SERVICE_ROLE_KEY' src/AnaChatBlock.tsx src/CerebroConsoleBlock.tsx src/cerebroVoice.ts
             ! printf '%s\n' "$changed" | grep -q '^supabase/functions/fenix-app-gateway/'
             ! printf '%s\n' "$changed" | grep -q '^supabase/functions/cerebro-console-gateway-v0/'
           fi
@@ -280,4 +293,4 @@ jobs:
             ! grep -R -Eq 'prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true' "$d"
             ! printf '%s\n' "$changed" | grep -q '^supabase/functions/cerebro-console-gateway-v0/'
           fi
-          echo 'RSI remains bounded: exact VOICE-001 UI adapters may change transport/presentation only; they cannot expand authority, writes, Trading, or bypass governed promotion.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'RSI remains bounded: exact VOICE-001 UI surfaces may change transport/presentation only; they cannot expand authority, writes, Trading, or bypass governed promotion.' >> "$GITHUB_STEP_SUMMARY"
