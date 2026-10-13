@@ -1,6 +1,10 @@
 name: CEREBRO Human Intelligence Live5 Route Probe V1
 
 on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/cerebro-human-intelligence-live5-auth-probe-v1.yml'
   push:
     branches: [main]
     paths:
@@ -11,23 +15,25 @@ permissions:
   contents: read
 
 concurrency:
-  group: cerebro-human-intelligence-live5-route-probe-v1
+  group: cerebro-human-intelligence-live5-route-probe-v1-${{ github.ref }}
   cancel-in-progress: false
 
 env:
   LIVE5_URL: https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-gateway-human-v1-live5
   PROD_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
+  PROD_LEGACY_ANON_JWT: ${{ secrets.PROD_SUPABASE_LEGACY_ANON_JWT }}
 
 jobs:
   live-route-proof:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Require existing browser publishable key
+      - name: Require existing zero-cost gateway credentials
         shell: bash
         run: |
           set -euo pipefail
           test -n "$PROD_PUBLISHABLE_KEY"
+          test -n "$PROD_LEGACY_ANON_JWT"
 
       - name: Prove OLD and NEW cohorts physically traverse live5 in PROD read-only
         shell: bash
@@ -37,6 +43,7 @@ jobs:
           trap 'rm -rf "$tmp"' EXIT
           common=(
             -H "apikey: $PROD_PUBLISHABLE_KEY"
+            -H "Authorization: Bearer $PROD_LEGACY_ANON_JWT"
             -H 'Origin: https://app.fenixcapital.es'
           )
 
@@ -59,4 +66,4 @@ jobs:
           jq -e '.status=="GREEN" or .status=="OK" or .service=="cerebro-console-gateway-v0"' "$tmp/old.body" >/dev/null
 
           echo 'PROD_LIVE5_ROUTE_PROOF=GREEN' >> "$GITHUB_STEP_SUMMARY"
-          echo 'Physical read-only /health traversal only; no business mutation, no customer payload, no Trading access.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Gateway authentication uses the existing long-lived anon JWT only for read-only /health traversal; no user session impersonation, no business mutation, no customer payload, no Trading access.' >> "$GITHUB_STEP_SUMMARY"
