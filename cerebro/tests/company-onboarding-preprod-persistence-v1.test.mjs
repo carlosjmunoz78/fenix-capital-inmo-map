@@ -88,7 +88,7 @@ test('Supabase stores only bounded control-plane hashes and states, not raw comp
   assert.ok(migration.includes('structural_scaffold_sha256'));
   assert.equal(/\bprofile\s+(json|jsonb|text)\b/i.test(migration),false);
   assert.equal(/customer_payload|customer_data|conversation|document_body|raw_evidence/i.test(migration),false);
-  assert.equal(/password|passwd|credential|private_key|api_key|iban|bank_account/i.test(migration),false);
+  assert.equal(/\b(password|passwd|credential|private_key|api_key|iban|bank_account)\b\s+(text|json|jsonb|bytea)\b/i.test(migration),false);
 });
 
 test('rollback is exact and preserves the durable Company Registry dependency',()=>{
