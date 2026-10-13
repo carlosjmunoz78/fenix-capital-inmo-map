@@ -8,7 +8,6 @@ test('V1.4.25 visual composition keeps signal and arrival-aware motion coherent'
 
   const metadata=await page.evaluate(() => ({
     composed:(window as any).CEREBRO_V1426_MOTION,
-    visual:(window as any).CEREBRO_V1425,
     signal:(window as any).CEREBRO_SIGNAL_V2,
     motion:(window as any).CEREBRO_MOTION_V2,
     conversation:(window as any).CEREBRO_CONVERSATION_MOTION_V2,
@@ -17,8 +16,10 @@ test('V1.4.25 visual composition keeps signal and arrival-aware motion coherent'
   expect(metadata.failed).toBeFalsy();
   expect(metadata.composed.environment).toBe('LAB_PREPROD');
   expect(metadata.composed.visual_base).toBe('v1.4.25');
+  expect(metadata.composed.rollback_visual).toBe('v1.4.25');
+  expect(metadata.composed.rollback_base).toBe('v1.4.7');
   expect(metadata.composed.additional_cost_eur).toBe(0);
-  for(const module of [metadata.composed, metadata.visual, metadata.signal, metadata.motion, metadata.conversation]) expect(module.prod_authorized).toBe(false);
+  for(const module of [metadata.composed, metadata.signal, metadata.motion, metadata.conversation]) expect(module.prod_authorized).toBe(false);
 
   const deep=await page.evaluate(async () => {
     const motion=(window as any).CEREBRO_MOTION_V2;
