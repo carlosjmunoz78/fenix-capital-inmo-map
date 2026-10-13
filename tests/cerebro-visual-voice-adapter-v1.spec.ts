@@ -28,6 +28,7 @@ test('VOICE-001 live-source contract drives Motion V2 and arrival-gated artifact
  await page.waitForFunction(()=>Boolean((window as any).CEREBRO_VOICE_001_ADAPTER_V1.getState().lastArtifactGate?.revealed),null,{timeout:8_000});
  const state=await page.evaluate(()=>({
   adapter:(window as any).CEREBRO_VOICE_001_ADAPTER_V1.getState(),
+  live:(window as any).CEREBRO_VOICE_001_ADAPTER_V1.live_connected(),
   motion:{mode:(window as any).CEREBRO_MOTION_V2.getMode(),stage:(window as any).CEREBRO_MOTION_V2.getStage(),settled:(window as any).CEREBRO_MOTION_V2.isSettled()},
   conversation:{phase:(window as any).CEREBRO_CONVERSATION_MOTION_V2.getPhase(),gate:(window as any).CEREBRO_CONVERSATION_MOTION_V2.getLastArtifactGate()},
   affect:(window as any).CEREBRO_AFFECT_V1.getProfile(),
@@ -36,7 +37,7 @@ test('VOICE-001 live-source contract drives Motion V2 and arrival-gated artifact
  expect(state.adapter.source).toBe('LIVE_CONTRACT_EVENT');
  expect(state.adapter.phase).toBe('RESPOND');
  expect(state.adapter.eventsSeen).toBeGreaterThanOrEqual(5);
- expect(state.adapter.live_connected??true).toBeTruthy();
+ expect(state.live).toBeTruthy();
  expect(state.motion.mode).toBe('CONVERSATIONAL');
  expect(state.motion.stage).toBe(3);
  expect(state.motion.settled).toBeTruthy();
