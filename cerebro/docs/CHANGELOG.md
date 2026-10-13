@@ -1,5 +1,17 @@
 # CEREBRO OS · CHANGELOG
 
+## 2026-10-13 · SALE-001 deterministic commercial action V1
+
+- Added PREPROD `SALE-001` deterministic commercial-state V1 on the existing canonical engine ID; no new engine was introduced.
+- SALE-001 consumes governed `LEAD-001/NBA-001` decisions, enforces same-company PREPROD boundaries and preserves an explicit contact-permission snapshot before any commercial action.
+- Added bounded commercial progression for contact SLA, follow-up, objections, no-show recovery, permission revocation, customer human request, WON/LOST and cooldown; event IDs are idempotent and terminal states cannot be silently reactivated.
+- Any customer-contact action produces only a `delivery_intent` targeting `COM-001` with `dispatch_authorized=false`, `channel_binding_required=true` and no external side effect. WhatsApp/PHONE/WEB_WIDGET authority is not claimed by this block.
+- Raw PII, secrets and raw message text are rejected from SALE-001 durable payload/state; only opaque references are accepted.
+- `sale.plan-action` reuses `JOB-001` durable V1 + durable worker runner V1; no bespoke scheduler, paid service or Supabase dependency was introduced.
+- Dedicated SALE gate covers focused revenue tests, canonical Engine Registry validation and full CEREBRO regression. Promotion remains PREPROD-only pending OLD vs NEW, tribunal and COM/channel-adapter gates.
+- Cost target remains 0 EUR; PROD writes false; Trading access false.
+- Dedicated state/runbook/dependency/rollback document: `cerebro/docs/CEREBRO_REVENUE_SALE_V1_2026-10-13.md`.
+
 ## 2026-10-13 · Durable JOB runtime + worker runner + LEAD-001/NBA-001 revenue V1
 
 - PR #645 merged `JOB-001` durable V1 additively over the existing persistent runtime: context idempotency, exponential retry with deterministic jitter, worker leases, heartbeat, checkpoint/resume, watchdog, dead-letter and cancellation. Existing V0 remains preserved.
@@ -29,7 +41,7 @@
 - Added an additive multi-company structural adapter that composes the existing Phase 4 dependency graph with verified FACT-001 AutoFactory; no new canonical engine ID is introduced.
 - A bounded new-company structural request prepares the 17 canonical Phase 4 engine scaffolds in tenant-scoped evidence while preserving the generic 18-file FACT scaffold bytes: 17 × 18 = 306 files.
 - PR #509 merged additively to `main` as `cb46c0c95b4e628608990404e4c1ac38e889b79e` after exact-head promotion/readiness gates passed.
-- Automatic `main` push run `37833181826` attempt 1 completed SUCCESS; deterministic attempt 2 also completed SUCCESS against the same immutable source/request.
+- Automatic `main` run `37833181826` attempt 1 completed SUCCESS; deterministic attempt 2 also completed SUCCESS against the same immutable source/request.
 - Both attempts ran 643 CEREBRO regression tests with 643 passed / 0 failed and produced the same structural aggregate SHA-256 `295be8b701fe80ea57b034e882da1698def79a97502b9831e9453871c7fc1ed6`.
 - Both attempts produced `STRUCTURAL_BOOTSTRAP_GREEN`, 17 Phase 4 engines and 306 structural files, while preserving zero business engines GREEN from scaffold generation.
 - COMP-ONB-001 autonomy state is promoted to `AUTOMATIC_COMPANY_SCAFFOLD_VERIFIED` for structural PREPROD/SCAFFOLD generation only.
@@ -101,7 +113,7 @@
 - PR #165 merged as `6bf6af92c1106884da87fb9a659f807093d47e0a`.
 - Canonical state, dependency map, runbook, evidence, changelog, backup/rebuild and autonomy documentation aligned with Phase 4/5 evidence.
 - Added explicit emergency rollback procedure tied to `docs/PROD_ROLLBACK_RUNBOOK.md`.
-- PROD Live Deploy `34293941974` and PROD Runtime Smoke `34293942069` success on exact merge SHA.
+- PROD Live Deploy `34293941974` and PROD Runtime Smoke `34293941922` success on exact merge SHA.
 
 ## 2026-09-09 · Phase 5 Console/Gateway V0
 
