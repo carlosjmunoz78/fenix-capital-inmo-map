@@ -1,0 +1,32 @@
+{
+  "project": "CEREBRO OS · VISUAL PRESENCE / MOTION-001",
+  "date": "2026-10-13",
+  "environment": "LAB_PREPROD",
+  "prod": false,
+  "status": "VISUAL_BASE_PC_GREEN_PREPROD",
+  "repository": "carlosjmunoz78/fenix-capital-inmo-map",
+  "branch_candidate": "cerebro-visual-lab-v116",
+  "candidate": {
+    "version": "V1.4.25",
+    "file": "lab/cerebro-visual/candidate-v1425.html",
+    "global": "GREEN",
+    "active_region": "GREEN",
+    "neural_cluster": "GREEN",
+    "deep": "GREEN",
+    "global_reference_score": 86.1,
+    "deep_reference_score": 85.2
+  },
+  "rollback": {
+    "version": "V1.4.7",
+    "commit": "76a19de070a1af5c197557a79acec2c51227507e",
+    "index_preserved": true
+  },
+  "controls": {
+    "prod_authorized": false,
+    "cost_added_eur": 0,
+    "human_required": false,
+    "move_camera_never_graph": true,
+    "pc_first": true
+  },
+  "next_block": "RESUME_LIVE_MOTION_SIGNAL_TRACK_WITHOUT_REBUILDING_VISUAL_BASE"
+}
