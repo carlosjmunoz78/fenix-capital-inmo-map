@@ -7,9 +7,9 @@ on:
       - 'cerebro/voice/**'
       - 'cerebro/tests/owned-voice-v0.test.mjs'
       - 'src/AnaVoiceQueryBlock.tsx'
-      - 'src/CerebroConsoleBlock.tsx'
       - 'src/OperationalShellGate.tsx'
       - 'src/cerebroVoice.ts'
+      - 'src/CerebroConsoleShell.tsx'
       - 'tests/voice-ui-ana-console.spec.ts'
       - '.github/workflows/cerebro-owned-voice-preprod.yml'
   push:
@@ -18,9 +18,9 @@ on:
       - 'cerebro/voice/**'
       - 'cerebro/tests/owned-voice-v0.test.mjs'
       - 'src/AnaVoiceQueryBlock.tsx'
-      - 'src/CerebroConsoleBlock.tsx'
       - 'src/OperationalShellGate.tsx'
       - 'src/cerebroVoice.ts'
+      - 'src/CerebroConsoleShell.tsx'
       - 'tests/voice-ui-ana-console.spec.ts'
       - '.github/workflows/cerebro-owned-voice-preprod.yml'
 
@@ -38,6 +38,7 @@ jobs:
       VITE_FENIX_ENV: preprod
       VITE_SUPABASE_URL: https://hnqlnvakzaywtafeiybt.supabase.co
       VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_uvtiidkBBkFRt2K34so27g_JpCbMUZw
+      VITE_CEREBRO_CONSOLE_URL: https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-gateway-v0/
     steps:
       - uses: actions/checkout@v4
         with:
@@ -56,20 +57,25 @@ jobs:
         run: |
           set -euo pipefail
           if find cerebro/voice -type f \( -iname '*.wav' -o -iname '*.mp3' -o -iname '*.flac' -o -name 'registry.private.json' \) | grep -q .; then exit 1; fi
-      - name: Assert UI reuses existing authority
+      - name: Assert Ana augments existing app and Console remains canonical
         shell: bash
         run: |
           set -euo pipefail
           grep -F "'/v2/ana/knowledge/answer'" src/AnaVoiceQueryBlock.tsx
-          grep -F "cerebro-console-gateway-v0" src/CerebroConsoleBlock.tsx
-          grep -F "voiceNeedsClarification" src/AnaVoiceQueryBlock.tsx src/CerebroConsoleBlock.tsx
-          grep -F "voiceNeedsManualConfirmation" src/CerebroConsoleBlock.tsx
-          ! grep -R -F 'SUPABASE_SERVICE_ROLE_KEY' src/AnaVoiceQueryBlock.tsx src/CerebroConsoleBlock.tsx src/cerebroVoice.ts
+          grep -F "voiceNeedsClarification" src/AnaVoiceQueryBlock.tsx
+          grep -F "function toggleVoiceSession" src/CerebroConsoleShell.tsx
+          grep -F "postCerebroConsoleChat" src/CerebroConsoleShell.tsx
+          grep -F "voiceNeedsClarification" src/CerebroConsoleShell.tsx
+          grep -F "voiceNeedsManualConfirmation" src/CerebroConsoleShell.tsx
+          grep -F "Hablar con CEREBRO" src/CerebroConsoleShell.tsx
+          ! test -f src/CerebroConsoleBlock.tsx
+          ! grep -R -F 'SUPABASE_SERVICE_ROLE_KEY' src/AnaVoiceQueryBlock.tsx src/CerebroConsoleShell.tsx src/cerebroVoice.ts
           git fetch origin main --depth=1
           base="$(git rev-parse FETCH_HEAD)"
           changed="$(git diff --name-only "$base" HEAD)"
           ! printf '%s\n' "$changed" | grep -Eq '^supabase/'
           ! printf '%s\n' "$changed" | grep -q '^src/AnaChatBlock.tsx$'
+          ! printf '%s\n' "$changed" | grep -q '^src/CerebroConsoleShell.tsx$'
       - name: Install dependencies reproducibly
         run: npm ci
       - name: Build exact head
@@ -81,4 +87,4 @@ jobs:
       - name: Record boundary
         run: |
           echo 'VOICE-001 UI is transport only: no new backend, DB, permission, action authority, paid TTS or audio persistence.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'Ana Voice reuses /v2/ana/knowledge/answer; Console Voice reuses /chat; text remains the fallback.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Ana Voice reuses /v2/ana/knowledge/answer; the pre-existing canonical Console Voice reuses /chat; duplicate Console removed.' >> "$GITHUB_STEP_SUMMARY"
