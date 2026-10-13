@@ -1,0 +1,40 @@
+name: CEREBRO Console UI PREPROD Build
+
+on:
+  push:
+    branches:
+      - cerebro-console-ui-v0
+  pull_request:
+    branches:
+      - cerebro-visual-lab
+    paths:
+      - 'src/CerebroVisualConsole.tsx'
+      - 'src/CerebroConsoleShell.tsx'
+      - 'src/cerebro-visual-console.css'
+      - 'src/cerebroVoice.ts'
+      - 'src/RouteAccessGuard.tsx'
+      - 'public/cerebro-visual/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/cerebro-console-ui-preprod-build.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: typecheck-and-vite-build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout candidate
+        uses: actions/checkout@v4
+      - name: Use repository Node version
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.x'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Typecheck and build
+        run: npm run build
