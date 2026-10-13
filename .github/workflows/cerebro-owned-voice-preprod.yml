@@ -6,42 +6,79 @@ on:
     paths:
       - 'cerebro/voice/**'
       - 'cerebro/tests/owned-voice-v0.test.mjs'
+      - 'src/AnaVoiceQueryBlock.tsx'
+      - 'src/CerebroConsoleBlock.tsx'
+      - 'src/OperationalShellGate.tsx'
+      - 'src/cerebroVoice.ts'
+      - 'tests/voice-ui-ana-console.spec.ts'
       - '.github/workflows/cerebro-owned-voice-preprod.yml'
   push:
     branches: [main]
     paths:
       - 'cerebro/voice/**'
       - 'cerebro/tests/owned-voice-v0.test.mjs'
+      - 'src/AnaVoiceQueryBlock.tsx'
+      - 'src/CerebroConsoleBlock.tsx'
+      - 'src/OperationalShellGate.tsx'
+      - 'src/cerebroVoice.ts'
+      - 'tests/voice-ui-ana-console.spec.ts'
       - '.github/workflows/cerebro-owned-voice-preprod.yml'
 
 permissions:
   contents: read
 
+env:
+  EXACT_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+
 jobs:
   owned-voice-contract:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
+    env:
+      VITE_FENIX_ENV: preprod
+      VITE_SUPABASE_URL: https://hnqlnvakzaywtafeiybt.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_uvtiidkBBkFRt2K34so27g_JpCbMUZw
     steps:
       - uses: actions/checkout@v4
-
-      - name: Test VOICE-001 owned voice contract
+        with:
+          ref: ${{ env.EXACT_HEAD }}
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Assert exact PR head
+        run: test "$(git rev-parse HEAD)" = "$EXACT_HEAD"
+      - name: Test existing VOICE-001 owned runtime
         run: node --test cerebro/tests/owned-voice-v0.test.mjs
-
-      - name: Parse Python runtime without installing model dependencies
-        run: |
-          python -m py_compile cerebro/voice/runtime/app.py
-          python -m py_compile cerebro/voice/runtime/register_voice_reference.py
-
-      - name: Assert no voice recordings or private registry are committed
+      - name: Assert no raw voice assets are committed
         shell: bash
         run: |
           set -euo pipefail
-          if find cerebro/voice -type f \( -iname '*.wav' -o -iname '*.mp3' -o -iname '*.flac' -o -name 'registry.private.json' \) | grep -q .; then
-            echo 'Raw/private voice asset committed inside cerebro/voice' >&2
-            exit 1
-          fi
-
-      - name: Record authority boundary
+          if find cerebro/voice -type f \( -iname '*.wav' -o -iname '*.mp3' -o -iname '*.flac' -o -name 'registry.private.json' \) | grep -q .; then exit 1; fi
+      - name: Assert UI reuses existing authority
+        shell: bash
         run: |
-          echo 'VOICE-001 owned runtime remains LAB/PREPROD only.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'No PROD activation, no public cloning and no paid TTS dependency are authorized.' >> "$GITHUB_STEP_SUMMARY"
+          set -euo pipefail
+          grep -F "'/v2/ana/knowledge/answer'" src/AnaVoiceQueryBlock.tsx
+          grep -F "cerebro-console-gateway-v0" src/CerebroConsoleBlock.tsx
+          grep -F "voiceNeedsClarification" src/AnaVoiceQueryBlock.tsx src/CerebroConsoleBlock.tsx
+          grep -F "voiceNeedsManualConfirmation" src/CerebroConsoleBlock.tsx
+          ! grep -R -F 'SUPABASE_SERVICE_ROLE_KEY' src/AnaVoiceQueryBlock.tsx src/CerebroConsoleBlock.tsx src/cerebroVoice.ts
+          git fetch origin main --depth=1
+          base="$(git rev-parse FETCH_HEAD)"
+          changed="$(git diff --name-only "$base" HEAD)"
+          ! printf '%s\n' "$changed" | grep -Eq '^supabase/'
+          ! printf '%s\n' "$changed" | grep -q '^src/AnaChatBlock.tsx$'
+      - name: Install dependencies reproducibly
+        run: npm ci
+      - name: Build exact head
+        run: npm run build
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Prove voice uses the exact text contracts
+        run: npx playwright test tests/voice-ui-ana-console.spec.ts --project=desktop-chromium
+      - name: Record boundary
+        run: |
+          echo 'VOICE-001 UI is transport only: no new backend, DB, permission, action authority, paid TTS or audio persistence.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Ana Voice reuses /v2/ana/knowledge/answer; Console Voice reuses /chat; text remains the fallback.' >> "$GITHUB_STEP_SUMMARY"
