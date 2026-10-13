@@ -12,7 +12,7 @@ on:
       - 'cerebro/tests/skill-discovery-merge.test.mjs'
       - '.github/workflows/cerebro-skill-github-wide-scout.yml'
   schedule:
-    - cron: '47 4 * * *'
+    - cron: '47 * * * *'
   workflow_dispatch:
 
 concurrency:
@@ -26,7 +26,7 @@ permissions:
 env:
   AUTOLOOP_STATE_BRANCH: cerebro/skill-autoloop-state-v0
   AUTOLOOP_STATE_PATH: cerebro/runtime/skill-autoloop-state.v0.json
-  CEREBRO_UPSTREAM_MAX_REPOS: '8'
+  CEREBRO_UPSTREAM_MAX_REPOS: '16'
 
 jobs:
   github-wide-readonly-scout:
