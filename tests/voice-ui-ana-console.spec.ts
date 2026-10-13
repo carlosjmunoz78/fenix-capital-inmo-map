@@ -7,36 +7,38 @@ async function boot(page:any){
    localStorage.setItem('fenix-preprod-auth',JSON.stringify(session));
    localStorage.setItem('fenix-remember-device','true');
    class FakeRecognition{
-     lang='';continuous=false;interimResults=false;onresult:any=null;onerror:any=null;onend:any=null;
-     start(){setTimeout(()=>{this.onresult?.({resultIndex:0,results:[{isFinal:true,0:{transcript:'consulta hablada exacta'}}]});this.onend?.();},5)}
-     stop(){this.onend?.()} abort(){}
+     lang='';continuous=false;interimResults=false;maxAlternatives=1;phrases:any[]=[];onstart:any=null;onresult:any=null;onerror:any=null;onend:any=null;
+     start(){this.onstart?.({});setTimeout(()=>{this.onresult?.({results:{length:1,0:{length:1,isFinal:true,0:{transcript:'consulta hablada exacta',confidence:.99}}}});this.onend?.({});},5)}
+     stop(){this.onend?.({})} abort(){}
    }
    ;(window as any).SpeechRecognition=FakeRecognition;(window as any).webkitSpeechRecognition=FakeRecognition;
  },fakeSession);
  await page.route('**/functions/v1/fenix-app-gateway-test/**',async r=>{
-   const url=r.request().url();
+   const url=r.request().url(),method=r.request().method();
    if(url.endsWith('/session/context'))return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({actor_code:'CARLOS-ADMIN',role:'Direccion'})});
    if(url.endsWith('/navigation'))return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[{label:'Inicio',route:'/inicio'},{label:'Ana',route:'/ana'},{label:'CEREBRO',route:'/cerebro'}]})});
-   if(url.endsWith('/v2/ana/knowledge/answer'))return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,status:200,message:'respuesta de Ana por el contrato textual'})});
+   if(url.includes('/chat?limit=')&&method==='GET')return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({status:200,items:[]})});
+   if(url.endsWith('/chat')&&method==='POST')return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({status:200,item:{message_code:'M-VOICE-1',sender_actor_code:'CARLOS-ADMIN',sender_name:'Carlos',sender_role:'Direccion',body:'consulta hablada exacta',created_at:new Date().toISOString()}})});
    return r.fulfill({status:404,contentType:'application/json',body:'{}'});
  });
  await page.route('**/functions/v1/fenix-ana-api-test/**',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({capabilities:{can_ana_help:true,can_manual_execute:true,can_upload_evidence:false,can_correct_ana:true,can_view_learning_inbox:false,can_decide_learning:false,ana_execute_requires_action_context:true}})}));
+ await page.route('**/functions/v1/cerebro-console-gateway-v0/preferences',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({status:'OK',preferences:{speech_rate:'1.08',speech_pitch:'1.04'}})}));
  await page.route('**/functions/v1/cerebro-console-gateway-v0/chat',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({status:'OK',message:'respuesta de CEREBRO por el contrato textual',executed:false})}));
 }
 
 test.describe('CEREBRO · VOICE-001 · Ana + Console',()=>{
- test('Ana voz envía la misma pregunta al endpoint textual existente',async({page},testInfo)=>{
+ test('Ana voz usa exactamente el mismo /chat persistente que Ana texto',async({page},testInfo)=>{
    if(!testInfo.project.name.includes('desktop'))test.skip();
    await boot(page);
-   const requests:any[]=[];
-   page.on('request',request=>{if(request.url().includes('/v2/ana/knowledge/answer'))requests.push(request)});
+   const bodies:any[]=[];
+   page.on('request',request=>{if(request.url().includes('/fenix-app-gateway-test/chat')&&request.method()==='POST')bodies.push(request.postDataJSON())});
    await page.goto('/ana');
-   const card=page.getByTestId('ana-voice-query');
+   const card=page.getByTestId('ana-chat-block');
    await expect(card).toBeVisible();
    await card.getByRole('button',{name:'Hablar'}).click();
-   await expect(card).toContainText('respuesta de Ana por el contrato textual');
-   expect(requests).toHaveLength(1);
-   expect(requests[0].postDataJSON()).toEqual({question:'consulta hablada exacta'});
+   await expect.poll(()=>bodies.length).toBe(1);
+   expect(bodies[0].body).toBe('consulta hablada exacta');
+   expect(String(bodies[0].idempotency_key)).toMatch(/^ana-chat-/);
  });
 
  test('Console voz reutiliza /chat y conserva el contexto conversacional textual',async({page},testInfo)=>{
@@ -63,5 +65,10 @@ test.describe('CEREBRO · VOICE-001 · Ana + Console',()=>{
    await consoleUi.getByLabel('Mensaje para CEREBRO').fill('consulta escrita exacta');
    await consoleUi.getByRole('button',{name:'Enviar'}).click();
    await expect(consoleUi).toContainText('respuesta de CEREBRO por el contrato textual');
+   await page.goto('/ana');
+   const ana=page.getByTestId('ana-chat-block');
+   await expect(ana.getByRole('button',{name:'Hablar'})).toBeDisabled();
+   await ana.getByLabel('Mensaje para Ana').fill('mensaje escrito intacto');
+   await expect(ana.getByRole('button',{name:'Enviar'})).toBeEnabled();
  });
 });
