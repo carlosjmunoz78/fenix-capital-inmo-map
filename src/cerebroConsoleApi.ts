@@ -1,6 +1,38 @@
 import {SUPABASE_PUBLISHABLE_KEY,supabase} from './supabase';
 import {cerebroConsoleEndpoint} from './cerebroConsoleAccess';
 
+const CEREBRO_SESSION_STORAGE_KEY='cerebro_console_session_id_v1';
+let cerebroSessionIdMemory:string|null=null;
+
+function createCerebroSessionId(){
+  if(typeof crypto!=='undefined'&&typeof crypto.randomUUID==='function')return crypto.randomUUID();
+  if(typeof crypto!=='undefined'&&typeof crypto.getRandomValues==='function'){
+    const bytes=new Uint8Array(16);
+    crypto.getRandomValues(bytes);
+    return Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join('');
+  }
+  return `fallback-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,14)}`;
+}
+
+function cerebroConsoleSessionId(){
+  if(cerebroSessionIdMemory)return cerebroSessionIdMemory;
+  if(typeof window!=='undefined'){
+    try{
+      const existing=window.sessionStorage.getItem(CEREBRO_SESSION_STORAGE_KEY);
+      if(existing&&existing.length>=16&&existing.length<=128){
+        cerebroSessionIdMemory=existing;
+        return existing;
+      }
+      const created=createCerebroSessionId();
+      window.sessionStorage.setItem(CEREBRO_SESSION_STORAGE_KEY,created);
+      cerebroSessionIdMemory=created;
+      return created;
+    }catch{/* fall through to in-memory id */}
+  }
+  cerebroSessionIdMemory=createCerebroSessionId();
+  return cerebroSessionIdMemory;
+}
+
 export type CerebroConsoleHealth={
   status?:string;
   service?:string;
@@ -66,7 +98,8 @@ async function authHeaders(){
   return{
     Authorization:`Bearer ${token}`,
     apikey:SUPABASE_PUBLISHABLE_KEY,
-    'content-type':'application/json'
+    'content-type':'application/json',
+    'x-cerebro-session-id':cerebroConsoleSessionId()
   };
 }
 
