@@ -1,0 +1,72 @@
+name: CEREBRO Web Acquisition Intelligence Profile V1
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/runtime/web-acquisition-intelligence-profile-v1.mjs'
+      - 'cerebro/tests/web-acquisition-intelligence-profile-v1.test.mjs'
+      - 'cerebro/registry/web-acquisition-intelligence-profile.v1.json'
+      - 'cerebro/docs/CEREBRO_WEB_ACQUISITION_INTELLIGENCE_PROFILE_V1_2026-10-14.md'
+      - 'cerebro/multicompany/post-scan-parallel-v1.mjs'
+      - 'cerebro/runtime/authorized-execution-device-profile-v1.mjs'
+      - 'cerebro/router/execution-model-router.mjs'
+      - '.github/workflows/cerebro-web-acquisition-intelligence-profile-v1.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'cerebro/runtime/web-acquisition-intelligence-profile-v1.mjs'
+      - 'cerebro/tests/web-acquisition-intelligence-profile-v1.test.mjs'
+      - 'cerebro/registry/web-acquisition-intelligence-profile.v1.json'
+      - 'cerebro/docs/CEREBRO_WEB_ACQUISITION_INTELLIGENCE_PROFILE_V1_2026-10-14.md'
+      - 'cerebro/multicompany/post-scan-parallel-v1.mjs'
+      - 'cerebro/runtime/authorized-execution-device-profile-v1.mjs'
+      - 'cerebro/router/execution-model-router.mjs'
+      - '.github/workflows/cerebro-web-acquisition-intelligence-profile-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-web-acquisition-intelligence-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  focused-profile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node --test cerebro/tests/web-acquisition-intelligence-profile-v1.test.mjs
+
+  existing-post-scan-regressions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node --test cerebro/tests/post-scan-parallel-v1.test.mjs cerebro/tests/post-scan-parallel-preprod-persistence-v1.test.mjs cerebro/tests/authorized-execution-device-profile-v1.test.mjs
+
+  candidate-full-suite:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node --test cerebro/tests/*.test.mjs
+
+  base-full-suite:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node --test cerebro/tests/*.test.mjs
