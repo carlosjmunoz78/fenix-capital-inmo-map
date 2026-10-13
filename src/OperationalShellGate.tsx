@@ -3,6 +3,8 @@ import OperationalShellV2 from './OperationalShellV2';
 import ExpedientesSharedShell from './ExpedientesSharedShell';
 import FirmaCreateShell from './FirmaCreateShell';
 import DocumentCreateShell from './DocumentCreateShell';
+import AnaVoiceQueryBlock from './AnaVoiceQueryBlock';
+import CerebroConsoleBlock from './CerebroConsoleBlock';
 
 const dedicatedExact=new Set([
  '/contactos','/contactos/nuevo',
@@ -14,6 +16,8 @@ const dedicatedExact=new Set([
 
 export default function OperationalShellGate(){
  const {pathname}=useLocation();
+ if(pathname==='/cerebro')return <CerebroConsoleBlock/>;
+ if(pathname==='/ana')return <><OperationalShellV2/><AnaVoiceQueryBlock/></>;
  if(pathname==='/expedientes')return <ExpedientesSharedShell/>;
  if(pathname==='/firmas/nuevo'||pathname==='/firmas/nueva')return <FirmaCreateShell/>;
  if(pathname==='/documentacion/nuevo')return <DocumentCreateShell/>;
