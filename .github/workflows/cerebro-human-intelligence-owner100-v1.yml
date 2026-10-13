@@ -1,0 +1,169 @@
+name: CEREBRO Human Intelligence FULL_OWNER 100 V1
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'supabase/functions/cerebro-console-gateway-human-v1-canary/owner100.ts'
+      - 'supabase/functions/cerebro-console-gateway-human-v1-canary/overlay.ts'
+      - 'cerebro/human-intelligence/FULL_OWNER_100_V1.md'
+      - '.github/workflows/cerebro-human-intelligence-owner100-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: cerebro-human-intelligence-owner100-v1-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  OWNER_URL: https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-gateway-human-v1-owner100
+  OWNER_AUDIENCE: cerebro-console-gateway-human-v1-owner100
+  PROD_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
+
+jobs:
+  full-owner-100-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Assert owner100 is additive and OLD remains authoritative
+        shell: bash
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          f='supabase/functions/cerebro-console-gateway-human-v1-canary/owner100.ts'
+          o='supabase/functions/cerebro-console-gateway-human-v1-canary/overlay.ts'
+          test -f "$f" && test -f "$o"
+          grep -F 'PROD_FULL_OWNER_100' "$f"
+          grep -F 'cerebro-console-gateway-v0' "$f"
+          grep -F "x-cerebro-human-live-percent','100'" "$f"
+          grep -F "scope:'FULL_OWNER_ONLY_VIA_UPSTREAM_AUTH'" "$f"
+          grep -F "auth_authority:'cerebro-console-gateway-v0'" "$f"
+          grep -F "prod_write_authorized:false" "$f"
+          grep -F "trading_access:false" "$f"
+          grep -F 'OVERLAY_FAIL_SAFE' "$f"
+          grep -F 'PROTECTED_STATUSES' "$o"
+          grep -F 'BODYLESS_STATUSES' "$f"
+          ! grep -F 'SUPABASE_SERVICE_ROLE_KEY' "$f" "$o"
+          ! grep -Eq 'prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true' "$f" "$o"
+          base="${PR_BASE_SHA:-}"
+          if [ -n "$base" ]; then
+            git cat-file -e "${base}^{commit}"
+            git diff --exit-code "$base"...HEAD -- \
+              supabase/functions/cerebro-console-gateway-v0 \
+              supabase/functions/cerebro-console-human-router-zero-v1 \
+              supabase/functions/cerebro-console-gateway-human-v1-canary/live5.ts \
+              supabase/functions/cerebro-console-gateway-human-v1-canary/router-live5.ts \
+              supabase/functions/cerebro-console-gateway-human-v1-canary/overlay.ts
+          fi
+
+      - name: Re-run conversational contracts
+        run: |
+          node --test \
+            cerebro/tests/human-intelligence-prod-live5-v1.test.mjs \
+            cerebro/tests/human-intelligence-production-overlay-v1.test.mjs \
+            cerebro/tests/channel-access-profiles-v1.test.mjs
+
+      - name: Require browser publishable key
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$PROD_PUBLISHABLE_KEY"
+          case "$PROD_PUBLISHABLE_KEY" in
+            sb_publishable_*) ;;
+            *) echo 'Expected sb_publishable_* PROD key' >&2; exit 1 ;;
+          esac
+
+      - name: Physical CORS preflight remains bodyless and traverses OLD
+        shell: bash
+        run: |
+          set -euo pipefail
+          code="$(curl --silent --show-error --output /tmp/options.body --dump-header /tmp/options.headers --write-out '%{http_code}' \
+            -X OPTIONS \
+            -H 'Origin: https://app.fenixcapital.es' \
+            -H 'Access-Control-Request-Method: POST' \
+            -H 'Access-Control-Request-Headers: authorization,apikey,content-type,x-cerebro-session-id' \
+            "$OWNER_URL/chat")"
+          test "$code" = '204'
+          test ! -s /tmp/options.body
+          grep -i '^x-cerebro-human-upstream: cerebro-console-gateway-v0' /tmp/options.headers
+          grep -i '^x-cerebro-human-live-percent: 100' /tmp/options.headers
+
+      - name: Prove normal owner route fails closed without a Supabase user session
+        shell: bash
+        run: |
+          set -euo pipefail
+          code="$(curl --silent --show-error --output /tmp/noauth.body --dump-header /tmp/noauth.headers --write-out '%{http_code}' \
+            -H "apikey: $PROD_PUBLISHABLE_KEY" \
+            -H 'Origin: https://app.fenixcapital.es' \
+            "$OWNER_URL/health")"
+          case "$code" in 401|403) ;; *) echo "Expected 401/403, got $code" >&2; cat /tmp/noauth.body >&2; exit 1 ;; esac
+          grep -i '^x-cerebro-human-upstream: cerebro-console-gateway-v0' /tmp/noauth.headers
+          grep -i '^x-cerebro-human-live-percent: 100' /tmp/noauth.headers
+
+      - name: Acquire short-lived GitHub OIDC token
+        shell: bash
+        run: |
+          set -euo pipefail
+          url="${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OWNER_AUDIENCE}"
+          curl --fail --silent --show-error \
+            -H "Authorization: Bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
+            "$url" | jq -r '.value' > /tmp/cerebro-owner100-oidc
+          test -s /tmp/cerebro-owner100-oidc
+          chmod 600 /tmp/cerebro-owner100-oidc
+
+      - name: Physical PROD owner100 health proves 100 percent additive wrapper
+        shell: bash
+        run: |
+          set -euo pipefail
+          token="$(cat /tmp/cerebro-owner100-oidc)"
+          curl --fail --silent --show-error \
+            -H "Authorization: Bearer ${token}" \
+            "$OWNER_URL/canary/health" > /tmp/owner100-health.json
+          jq -e '.ok==true and .environment=="PROD_FULL_OWNER_100" and .upstream=="cerebro-console-gateway-v0" and .live_percent==100 and .scope=="FULL_OWNER_ONLY_VIA_UPSTREAM_AUTH" and .auth_authority=="cerebro-console-gateway-v0" and .fail_closed_target=="OLD" and .overlay_mode=="CONSERVATIVE_AUTHORITATIVE_PRESERVING" and .privacy_safe_route_logging==true and .prod_write_authorized==false and .trading_access==false and .additional_cost_eur==0' /tmp/owner100-health.json >/dev/null
+
+      - name: GitHub OIDC cannot become a business-session bypass
+        shell: bash
+        run: |
+          set -euo pipefail
+          token="$(cat /tmp/cerebro-owner100-oidc)"
+          code="$(curl --silent --show-error --output /tmp/oidc-business.body --dump-header /tmp/oidc-business.headers --write-out '%{http_code}' \
+            -H "Authorization: Bearer ${token}" \
+            -H "apikey: $PROD_PUBLISHABLE_KEY" \
+            -H 'Origin: https://app.fenixcapital.es' \
+            "$OWNER_URL/health")"
+          case "$code" in 401|403) ;; *) echo "OIDC unexpectedly authorized business route: $code" >&2; cat /tmp/oidc-business.body >&2; exit 1 ;; esac
+
+      - name: Physical synthetic overlay preserves authority and protected outcomes
+        shell: bash
+        run: |
+          set -euo pipefail
+          token="$(cat /tmp/cerebro-owner100-oidc)"
+          cat > /tmp/owner-overlay.json <<'JSON'
+          {"user_message":"Sigo perdido con la hipoteca","upstream":{"status":"OK","intent":"finance_knowledge","executed":false,"message":"Para valorar la operación hay que revisar ingresos, obligaciones, ahorro y precio de compra."},"history":[]}
+          JSON
+          curl --fail --silent --show-error -X POST \
+            -H "Authorization: Bearer ${token}" -H 'Content-Type: application/json' \
+            --data-binary @/tmp/owner-overlay.json "$OWNER_URL/canary/rehearsal" > /tmp/owner-overlay-out.json
+          jq -e '.ok==true and .live_percent==100 and .result.overlay.applied==true and .result.overlay.authoritative_preserved==true and .result.overlay.questions_added<=1 and .safety.auth_bypassed==false and .safety.upstream_prod_chat_called==false and .safety.prod_write_authorized==false and .safety.trading_access==false' /tmp/owner-overlay-out.json >/dev/null
+          cat > /tmp/owner-action.json <<'JSON'
+          {"user_message":"actívalo","upstream":{"status":"ACTION_PROPOSAL","intent":"seo_zone_activation","executed":false,"action":{"action_id":"SYNTHETIC"},"message":"Propuesta exacta. ¿Quieres que active exactamente este proceso?"},"history":[]}
+          JSON
+          curl --fail --silent --show-error -X POST \
+            -H "Authorization: Bearer ${token}" -H 'Content-Type: application/json' \
+            --data-binary @/tmp/owner-action.json "$OWNER_URL/canary/rehearsal" > /tmp/owner-action-out.json
+          jq -e '.result.overlay.applied==false and .result.overlay.reason=="PROTECTED_OR_NONPASSIVE" and .result.response.status=="ACTION_PROPOSAL" and .result.response.action.action_id=="SYNTHETIC"' /tmp/owner-action-out.json >/dev/null
+
+      - name: Record owner-only boundary
+        run: |
+          echo 'OWNER100_GATE=GREEN' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Physical PROD wrapper exists at 100% NEW for authenticated FULL_OWNER traffic while OLD remains the auth/knowledge/action authority.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'CORS preflight is bodyless and browser-compatible. No unauthenticated route is opened. GitHub OIDC is limited to synthetic canary endpoints and cannot authorize business routes.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'OLD, zero router and live5 remain rollback surfaces. No new PROD write or Trading authority; additional cost 0 EUR.' >> "$GITHUB_STEP_SUMMARY"
