@@ -6,6 +6,7 @@ on:
     paths:
       - 'cerebro/human-intelligence/integration/prod-router-zero-v1.mjs'
       - 'cerebro/human-intelligence/integration/promotion-controller-v1.mjs'
+      - 'cerebro/human-intelligence/PROD_GRADUAL_PROMOTION_AUTHORIZATION_2026-10-13.md'
       - 'cerebro/tests/human-intelligence-prod-router-zero-v1.test.mjs'
       - 'cerebro/tests/human-intelligence-autonomy-bridge-v1.test.mjs'
       - 'supabase/functions/cerebro-console-human-router-zero-v1/**'
@@ -23,6 +24,7 @@ concurrency:
 env:
   ROUTER_AUDIENCE: cerebro-console-human-router-zero-v1
   PREPROD_ROUTER_URL: https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-console-human-router-zero-v1
+  PROD_ROUTER_URL: https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-human-router-zero-v1
 
 jobs:
   zero-router-preprod-gate:
@@ -65,6 +67,16 @@ jobs:
           git cat-file -e "${base}^{commit}"
           git diff --exit-code "${base}"...HEAD -- supabase/functions/cerebro-console-gateway-v0
 
+      - name: Assert owner authorization for phased PROD promotion
+        shell: bash
+        run: |
+          set -euo pipefail
+          auth='cerebro/human-intelligence/PROD_GRADUAL_PROMOTION_AUTHORIZATION_2026-10-13.md'
+          test -f "$auth"
+          grep -F 'promoción gradual del gran motor conversacional hasta el 100% en PROD' "$auth"
+          grep -F 'No big-bang.' "$auth"
+          grep -F 'OLD `cerebro-console-gateway-v0` permanece disponible como rollback' "$auth"
+
       - name: Acquire short-lived GitHub OIDC token
         shell: bash
         run: |
@@ -85,6 +97,16 @@ jobs:
             -H "Authorization: Bearer ${token}" \
             "${PREPROD_ROUTER_URL}/router/health" > /tmp/health.json
           jq -e '.ok==true and .environment=="PREPROD_ROUTER_ZERO_TEST" and .stable_authority=="cerebro-console-gateway-v0" and .candidate_overlay=="cerebro-console-gateway-human-v1-canary" and .live_canary_percent==0 and .consumer_routing_enabled==false and .fail_closed_target=="OLD" and .live_upstream_called==false and .prod_write_authorized==false and .trading_access==false and .additional_cost_eur==0' /tmp/health.json >/dev/null
+
+      - name: Physical PROD router health proves deployed ZERO and fail-closed OLD
+        shell: bash
+        run: |
+          set -euo pipefail
+          token="$(cat /tmp/cerebro-human-router-oidc)"
+          curl --fail --silent --show-error \
+            -H "Authorization: Bearer ${token}" \
+            "${PROD_ROUTER_URL}/router/health" > /tmp/prod-health.json
+          jq -e '.ok==true and .environment=="PROD_ROUTER_ZERO_UNROUTED" and .stable_authority=="cerebro-console-gateway-v0" and .candidate_overlay=="cerebro-console-gateway-human-v1-canary" and .live_canary_percent==0 and .consumer_routing_enabled==false and .fail_closed_target=="OLD" and .live_upstream_called==false and .prod_write_authorized==false and .trading_access==false and .additional_cost_eur==0' /tmp/prod-health.json >/dev/null
 
       - name: Physical PREPROD synthetic cohort rehearsal never calls upstream or mutates route
         shell: bash
@@ -110,5 +132,5 @@ jobs:
 
       - name: Record gate boundary
         run: |
-          echo 'GREEN proves the new router exists only as an additive PREPROD-tested ZERO router.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'It does not change any existing consumer URL, route real users, authorize PROD writes, access Trading, or send any live request to OLD/NEW.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'GREEN proves phase 0 only: the ZERO router is physically deployed in PREPROD and PROD, compiled to NEW=0%, fail-closed to OLD and without new PROD/Trading authority.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'No consumer URL changes in this PR. Consumer cutover remains a separate governed App/PROD change.' >> "$GITHUB_STEP_SUMMARY"
