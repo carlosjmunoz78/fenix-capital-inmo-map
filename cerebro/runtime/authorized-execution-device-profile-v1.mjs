@@ -59,6 +59,10 @@ function validateZeroCostRoutes(routes,order){
   eligible.sort((a,b)=>a.rank-b.rank||a.route_class.localeCompare(b.route_class));
   return {eligible,diagnostics};
 }
+function paidFallbackCost(routes){
+  const costs=(Array.isArray(routes)?routes:[]).filter(route=>route?.available===true).map(routeCost).filter(cost=>Number.isFinite(cost)&&cost>0);
+  return costs.length?Math.min(...costs):null;
+}
 
 export function authorizedExecutionDeviceProfile(){
   return Object.freeze({
@@ -98,10 +102,12 @@ export function planAuthorizedExecution(input={},options={}){
   if(confidence<0.6) return human('LOW_CONFIDENCE',{...context,confidence});
 
   const routes=Array.isArray(input.routes)?input.routes:[];
-  const positiveCost=routes.map(routeCost).filter(Number.isFinite).find(cost=>cost>0);
-  if(positiveCost!=null) return human('MONEY_LIMIT',{...context,estimated_incremental_cost_eur:positiveCost});
   const {eligible,diagnostics}=validateZeroCostRoutes(routes,EXECUTION_ROUTE_ORDER);
-  if(!eligible.length) return hold('HOLD_NO_ZERO_COST_ROUTE',{...context,diagnostics:Object.freeze(diagnostics)});
+  if(!eligible.length){
+    const paidCost=paidFallbackCost(routes);
+    if(paidCost!=null) return human('MONEY_LIMIT',{...context,estimated_incremental_cost_eur:paidCost,diagnostics:Object.freeze(diagnostics)});
+    return hold('HOLD_NO_ZERO_COST_ROUTE',{...context,diagnostics:Object.freeze(diagnostics)});
+  }
 
   const browserClasses=new Set(['BROWSER_BRIDGE','COMPUTER_USE','VISION_FALLBACK']);
   const filtered=[];let browserStatus=null;
@@ -133,10 +139,12 @@ export function planDeviceExecution(input={}){
   if(blockers.length) return safe({...context,decision:'HOLD',blockers:unique(blockers),human_required:null});
   if(String(input.risk??'LOW').toUpperCase()==='HIGH') return human('HIGH_RISK',context);
   const routes=Array.isArray(input.routes)?input.routes:[];
-  const positiveCost=routes.map(routeCost).filter(Number.isFinite).find(cost=>cost>0);
-  if(positiveCost!=null) return human('MONEY_LIMIT',{...context,estimated_incremental_cost_eur:positiveCost});
   const {eligible,diagnostics}=validateZeroCostRoutes(routes,DEVICE_ROUTE_ORDER);
-  if(!eligible.length) return hold('HOLD_NO_ZERO_COST_DEVICE_ROUTE',{...context,diagnostics:Object.freeze(diagnostics)});
+  if(!eligible.length){
+    const paidCost=paidFallbackCost(routes);
+    if(paidCost!=null) return human('MONEY_LIMIT',{...context,estimated_incremental_cost_eur:paidCost,diagnostics:Object.freeze(diagnostics)});
+    return hold('HOLD_NO_ZERO_COST_DEVICE_ROUTE',{...context,diagnostics:Object.freeze(diagnostics)});
+  }
   const selected=eligible[0];const result={...context,decision:'ROUTE',human_required:null,device_platform:'ANDROID',
     selected_route_class:selected.route_class,fallback_chain:Object.freeze(eligible.slice(1).map(x=>x.route_class)),
     diagnostics:Object.freeze(diagnostics),selection_reason:'FIRST_ELIGIBLE_ZERO_COST_DEVICE_ROUTE'};
