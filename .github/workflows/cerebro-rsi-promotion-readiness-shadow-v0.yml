@@ -7,8 +7,10 @@ on:
     paths:
       - 'cerebro/**'
       - 'src/AnaChatBlock.tsx'
+      - 'src/AnaVoiceQueryBlock.tsx'
       - 'src/CerebroConsoleBlock.tsx'
       - 'src/OperationalShellGate.tsx'
+      - 'src/VoiceChannelAdapter.ts'
       - 'src/cerebroVoice.ts'
       - 'tests/voice-ui-ana-console.spec.ts'
       - 'supabase/functions/cerebro-human-old-actor-preprod-v0/**'
@@ -106,7 +108,7 @@ jobs:
           fi
           changed="$(git diff --name-only "$base" HEAD)"
           protected='^(src/|tests/|public/|scripts/|index\.html$|package(-lock)?\.json$|playwright\.config\.(ts|js)$|vite\.config\.(ts|js)$|tsconfig[^/]*\.json$|\.env|\.github/workflows/(preprod-build|app-restoration-build|prod-[^/]+)\.yml$)'
-          voice_ui='^(src/(AnaChatBlock|CerebroConsoleBlock|OperationalShellGate|cerebroVoice)\.tsx?$|tests/voice-ui-ana-console\.spec\.ts$)'
+          voice_ui='^(src/(AnaChatBlock|AnaVoiceQueryBlock|CerebroConsoleBlock|OperationalShellGate|cerebroVoice)\.tsx?$|src/VoiceChannelAdapter\.ts$|tests/voice-ui-ana-console\.spec\.ts$)'
           protected_changed="$(printf '%s\n' "$changed" | grep -E "$protected" | grep -Ev "$voice_ui" || true)"
           if [ -n "$protected_changed" ]; then
             echo 'RSI scope invalidated: unexpected App UI/App-test/build/deploy surface changed.' >&2
@@ -242,7 +244,7 @@ jobs:
           fi
           changed="$(git diff --name-only "$base" HEAD)"
           protected='^(src/|tests/|public/|scripts/|index\.html$|package(-lock)?\.json$|playwright\.config\.(ts|js)$|vite\.config\.(ts|js)$|tsconfig[^/]*\.json$|\.env|\.github/workflows/(preprod-build|app-restoration-build|prod-[^/]+)\.yml$)'
-          voice_ui='^(src/(AnaChatBlock|CerebroConsoleBlock|OperationalShellGate|cerebroVoice)\.tsx?$|tests/voice-ui-ana-console\.spec\.ts$)'
+          voice_ui='^(src/(AnaChatBlock|AnaVoiceQueryBlock|CerebroConsoleBlock|OperationalShellGate|cerebroVoice)\.tsx?$|src/VoiceChannelAdapter\.ts$|tests/voice-ui-ana-console\.spec\.ts$)'
           protected_changed="$(printf '%s\n' "$changed" | grep -E "$protected" | grep -Ev "$voice_ui" || true)"
           if [ -n "$protected_changed" ]; then
             echo 'Unexpected App/application/test/production surface changed by RSI recovery.' >&2
