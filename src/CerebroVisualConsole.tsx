@@ -2,13 +2,18 @@ import {useEffect,useRef,useState} from 'react';
 import {useLocation,useNavigate} from 'react-router-dom';
 import {ArrowLeft,Maximize2,Minimize2} from 'lucide-react';
 import CerebroConsoleShell from './CerebroConsoleShell';
+import {fetchAppApi,supabase} from './supabase';
 import './cerebro-visual-console.css';
+
+type SessionContext={actor_code?:string};
+type AccessState='checking'|'allowed'|'denied';
 
 export default function CerebroVisualConsole(){
  const location=useLocation();
  const navigate=useNavigate();
  const hostRef=useRef<HTMLDivElement|null>(null);
  const [isFullscreen,setIsFullscreen]=useState(false);
+ const [ownerAccess,setOwnerAccess]=useState<AccessState>('checking');
  const isCerebroPath=location.pathname.replace(/\/+$/,'')==='/cerebro';
 
  useEffect(()=>{
@@ -18,12 +23,29 @@ export default function CerebroVisualConsole(){
  },[]);
 
  useEffect(()=>{
-  if(!isCerebroPath&&document.fullscreenElement===hostRef.current){
-   void document.exitFullscreen().catch(()=>{});
+  if(!isCerebroPath){
+   setOwnerAccess('checking');
+   if(document.fullscreenElement===hostRef.current)void document.exitFullscreen().catch(()=>{});
+   return;
   }
- },[isCerebroPath]);
+  let cancelled=false;
+  const check=async()=>{
+   const {data:{session}}=await supabase.auth.getSession();
+   if(cancelled)return;
+   if(!session){setOwnerAccess('denied');return;}
+   const {status,data}=await fetchAppApi<SessionContext>('/session/context');
+   if(cancelled)return;
+   const allowed=Boolean(status===200&&data?.actor_code==='CARLOS-ADMIN');
+   setOwnerAccess(allowed?'allowed':'denied');
+   if(!allowed)navigate('/inicio',{replace:true});
+  };
+  setOwnerAccess('checking');
+  void check();
+  const {data:{subscription}}=supabase.auth.onAuthStateChange(()=>{void check()});
+  return()=>{cancelled=true;subscription.unsubscribe();};
+ },[isCerebroPath,navigate]);
 
- if(!isCerebroPath)return null;
+ if(!isCerebroPath||ownerAccess!=='allowed')return null;
 
  async function toggleFullscreen(){
   const host=hostRef.current;
