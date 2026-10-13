@@ -1,0 +1,78 @@
+{
+  "contract_version": "1.0.0",
+  "engine_id": "VOICE-001",
+  "company_id": "fenix",
+  "environment": "MULTI_ENV",
+  "principle": "voice_is_transport_not_authority",
+  "audio_persistence_default": false,
+  "permissions_inherited_from_authoritative_text_channel": true,
+  "human_required_inherited": true,
+  "learning_inherited": true,
+  "channels": [
+    {
+      "channel_id": "console_voice",
+      "state": "PROD_DEPLOYED",
+      "ui_owner": "CerebroConsoleShell",
+      "authority_contract": "cerebro-console-gateway-v0:/chat",
+      "input": "browser_speech_recognition",
+      "output": "browser_speech_synthesis_or_owned_voice_future",
+      "notes": "Owner-only Console; keeps context, pending_action, read_context, learning_candidate and conversation_context."
+    },
+    {
+      "channel_id": "ana_voice",
+      "state": "PROD_DEPLOYED",
+      "ui_owner": "AnaVoiceQueryBlock",
+      "authority_contract": "fenix-app-gateway:/v2/ana/knowledge/answer",
+      "input": "browser_speech_recognition",
+      "output": "browser_speech_synthesis_or_owned_voice_future",
+      "notes": "Augments the existing Ana screen and does not replace the persistent internal chat."
+    },
+    {
+      "channel_id": "telegram_voice",
+      "state": "EXISTING_PROD_BACKEND",
+      "ui_owner": "Telegram",
+      "authority_contract": "cerebro-telegram-voice-v1",
+      "input": "existing_adapter",
+      "output": "existing_adapter",
+      "notes": "Existing multichannel backend; permissions remain channel-specific."
+    },
+    {
+      "channel_id": "whatsapp_voice",
+      "state": "PLANNED_ADAPTER",
+      "ui_owner": null,
+      "authority_contract": null,
+      "input": null,
+      "output": null
+    },
+    {
+      "channel_id": "phone_voice",
+      "state": "PLANNED_ADAPTER",
+      "ui_owner": null,
+      "authority_contract": null,
+      "input": null,
+      "output": null
+    },
+    {
+      "channel_id": "web_widget_voice",
+      "state": "PLANNED_ADAPTER",
+      "ui_owner": null,
+      "authority_contract": null,
+      "input": null,
+      "output": null
+    }
+  ],
+  "mandatory_adapter_gates": [
+    "identify_existing_authoritative_text_or_action_contract",
+    "reuse_existing_authentication_and_rbac",
+    "do_not_expand_action_authority",
+    "preserve_human_required",
+    "preserve_context_memory_and_learning",
+    "low_confidence_requires_review",
+    "audio_not_persisted_by_default",
+    "text_fallback_available_when_applicable",
+    "preprod_old_vs_new_when_behavior_changes",
+    "rollback_available",
+    "post_deploy_observability"
+  ],
+  "last_prod_source_sha": "c07e493d9d15f347d99c09dc8dd18505105550eb"
+}
