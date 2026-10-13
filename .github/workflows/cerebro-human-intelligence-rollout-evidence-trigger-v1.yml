@@ -1,0 +1,33 @@
+name: CEREBRO Human Intelligence Rollout Evidence Trigger V1
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/cerebro-human-intelligence-rollout-evidence-trigger-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  dispatch-current-stage-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Dispatch canonical live5 physical gate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api -X POST "repos/$GITHUB_REPOSITORY/actions/workflows/cerebro-human-intelligence-prod-live5-v1.yml/dispatches" -f ref=main
+          echo 'Dispatched CEREBRO Human Intelligence PROD Live5 V1 on main.'
+
+      - name: Dispatch promotion readiness gate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api -X POST "repos/$GITHUB_REPOSITORY/actions/workflows/cerebro-human-intelligence-promotion-readiness-v1.yml/dispatches" -f ref=main
+          echo 'Dispatched CEREBRO Human Intelligence Promotion Readiness V1 on main.'
