@@ -5,7 +5,7 @@
   "engine_id": "HEX-001",
   "environment": "PROD_CONTROL_PLANE",
   "version": "1.1.0",
-  "updated_at": "2026-10-13T01:34:12.431316Z",
+  "updated_at": "2026-10-13T08:19:30.897Z",
   "pending": {},
   "authorized_actions": {},
   "decisions": [],
@@ -92,7 +92,7 @@
       "additional_cost_eur": 0
     }
   },
-  "last_digest_date": "2026-10-12",
+  "last_digest_date": "2026-10-13",
   "last_delivery_at": "2026-10-12T09:36:38Z",
   "mail_transport": {
     "status": "VERIFIED",
