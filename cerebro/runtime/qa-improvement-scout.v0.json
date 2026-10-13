@@ -5,7 +5,7 @@
   "engine_id": "QA-001",
   "environment": "CONTROL_PLANE",
   "version": "0.1.0",
-  "updated_at": "2026-10-13T18:20:16.358Z",
+  "updated_at": "2026-10-13T19:18:17.091Z",
   "status": "IMPROVEMENTS_FOUND",
   "observations_total": 6,
   "candidates_total": 7,
@@ -179,7 +179,7 @@
       "additional_cost_eur": 0
     },
     {
-      "improvement_id": "qa-imp:d5a7ba4a41850d1269f2cecd",
+      "improvement_id": "qa-imp:6f7a2a36307894294856120e",
       "company_id": "fenix",
       "engine_id": "WEB-001",
       "environment": "PREPROD",
@@ -189,7 +189,7 @@
       "dimension": "perceived_performance",
       "title": "Recorrido humano read-only con duración elevada",
       "hypothesis": "Investigar el recorrido lento puede descubrir una mejora de rendimiento perceptible.",
-      "evidence": "duration_ms=9042",
+      "evidence": "duration_ms=8322",
       "confidence": 0.7,
       "risk_class": "LOW",
       "expected_metric_delta": {
