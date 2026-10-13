@@ -46,6 +46,46 @@ const token = process.env.GITHUB_TOKEN ?? '';
 const targetSha = process.env.TARGET_SHA || process.env.GITHUB_SHA || '';
 let runs = [];
 
+const currentShaEvidencePath = 'artifacts/knowledge-100/current-sha-evidence.json';
+let currentShaEvidence = null;
+try { currentShaEvidence = readJson(currentShaEvidencePath); } catch { currentShaEvidence = null; }
+const currentShaEvidenceValid = Boolean(
+  currentShaEvidence &&
+  currentShaEvidence.state_type === 'CEREBRO_KNOWLEDGE_100_CURRENT_SHA_EVIDENCE' &&
+  currentShaEvidence.target_sha === targetSha &&
+  freshIso(currentShaEvidence.observed_at, 24 * HOUR) &&
+  currentShaEvidence?.safety?.prod_write_authorized === false &&
+  currentShaEvidence?.safety?.permission_expansion_authorized === false &&
+  currentShaEvidence?.safety?.trading_access === false &&
+  currentShaEvidence?.safety?.contains_customer_data === false &&
+  currentShaEvidence?.safety?.contains_secrets === false &&
+  currentShaEvidence?.safety?.additional_cost_eur === 0
+);
+function exactCurrentEvidence(key) {
+  const item = currentShaEvidenceValid ? currentShaEvidence?.[key] : null;
+  if (!item || item.accepted !== true) return null;
+  return Object.freeze({
+    accepted: true,
+    evidence_scope: item.evidence_scope ?? 'EXACT_TARGET_SHA',
+    target_sha: targetSha,
+    observed_at: currentShaEvidence.observed_at
+  });
+}
+const currentEvidence = Object.freeze({
+  real_domain_contract: exactCurrentEvidence('real_domain_contract'),
+  real_domain_probe: exactCurrentEvidence('real_domain_probe'),
+  old_new_tribunal: exactCurrentEvidence('old_new_tribunal'),
+  rollback_rehearsal: exactCurrentEvidence('rollback_rehearsal')
+});
+const currentRealDomain = accepted(currentEvidence.real_domain_contract) && accepted(currentEvidence.real_domain_probe)
+  ? Object.freeze({
+      accepted: true,
+      evidence_scope: 'EXACT_TARGET_SHA_CONTRACT_PLUS_LIVE_PUBLIC_READ_ONLY',
+      target_sha: targetSha,
+      observed_at: currentShaEvidence.observed_at
+    })
+  : null;
+
 async function loadRuns({ maxPages = 5 } = {}) {
   if (!repo || !token) return;
   const headers = {
@@ -77,12 +117,14 @@ function workflowMatches(run, spec) {
 function latestWorkflowEvidence(spec, {
   exactSha = false,
   maxAgeMs = 7 * DAY,
-  evidenceScope = exactSha ? 'EXACT_TARGET_SHA' : 'RECENT_CANONICAL_GATE'
+  evidenceScope = exactSha ? 'EXACT_TARGET_SHA' : 'RECENT_CANONICAL_GATE',
+  ignoreSkipped = false
 } = {}) {
   const candidates = runs
     .filter((run) => workflowMatches(run, spec))
     .filter((run) => !exactSha || !targetSha || run.head_sha === targetSha)
     .filter((run) => freshIso(run.updated_at || run.created_at, maxAgeMs))
+    .filter((run) => !ignoreSkipped || run.conclusion !== 'skipped')
     .sort((a, b) => Date.parse(b.updated_at || b.created_at || 0) - Date.parse(a.updated_at || a.created_at || 0));
   const hit = candidates[0];
   if (!hit) return null;
@@ -114,11 +156,11 @@ const WF = Object.freeze({
   promotionReadiness: { names: ['CEREBRO Human Intelligence Promotion Readiness V1'], paths: ['.github/workflows/cerebro-human-intelligence-promotion-readiness-v1.yml'] },
   sessionRegression: { names: ['CEREBRO Session Context Regression Guard'], paths: ['.github/workflows/cerebro-session-context-regression-guard.yml'] },
   multichannel: { names: ['CEREBRO Multichannel Conversation Unification V1'], paths: ['.github/workflows/cerebro-multichannel-conversation-unification-v1.yml'] },
-  learningIngress: { paths: ['.github/workflows/cerebro-rsi-universal-learning-ingress-v0.yml'] },
-  learningControlPlane: { paths: ['.github/workflows/cerebro-rsi-learning-control-plane-v0.yml'] },
-  realDomainEvidence: { paths: ['.github/workflows/cerebro-rsi-real-domain-evidence-wiring-v0.yml'] },
-  tribunal: { paths: ['.github/workflows/cerebro-rsi-b3-old-new-evaluation-tribunal-v0.yml'] },
-  rollbackRehearsal: { paths: ['.github/workflows/prod-rollback-rehearsal.yml'] }
+  learningIngress: { names: ['CEREBRO RSI Universal Learning Ingress V0'], paths: ['.github/workflows/cerebro-rsi-universal-learning-ingress-v0.yml'] },
+  learningControlPlane: { names: ['CEREBRO RSI Learning Control Plane V0'], paths: ['.github/workflows/cerebro-rsi-learning-control-plane-v0.yml'] },
+  realDomainEvidence: { names: ['CEREBRO RSI Real Domain Evidence Wiring V0'], paths: ['.github/workflows/cerebro-rsi-real-domain-evidence-wiring-v0.yml'] },
+  tribunal: { names: ['CEREBRO RSI B3 OLD NEW Evaluation Tribunal V0'], paths: ['.github/workflows/cerebro-rsi-b3-old-new-evaluation-tribunal-v0.yml'] },
+  rollbackRehearsal: { names: ['PROD Rollback Rehearsal'], paths: ['.github/workflows/prod-rollback-rehearsal.yml'] }
 });
 
 const workflowEvidence = Object.freeze({
@@ -129,8 +171,8 @@ const workflowEvidence = Object.freeze({
   session_context_regression: latestWorkflowEvidence(WF.sessionRegression, { maxAgeMs: 7 * DAY, evidenceScope: 'RECENT_CANONICAL_GATE' }),
   multichannel_unification: latestWorkflowEvidence(WF.multichannel, { maxAgeMs: 7 * DAY, evidenceScope: 'RECENT_CANONICAL_GATE' }),
   lrn001_ingress: latestWorkflowEvidence(WF.learningIngress, { maxAgeMs: 7 * DAY, evidenceScope: 'RECENT_CANONICAL_GATE' }),
-  lrn001_control_plane: latestWorkflowEvidence(WF.learningControlPlane, { maxAgeMs: 7 * DAY, evidenceScope: 'RECENT_CANONICAL_GATE' }),
-  lrn001_real_domain: latestWorkflowEvidence(WF.realDomainEvidence, { maxAgeMs: 7 * DAY, evidenceScope: 'RECENT_CANONICAL_GATE' }),
+  lrn001_control_plane: latestWorkflowEvidence(WF.learningControlPlane, { maxAgeMs: 7 * DAY, evidenceScope: 'RECENT_CANONICAL_GATE', ignoreSkipped: true }),
+  lrn001_real_domain: latestWorkflowEvidence(WF.realDomainEvidence, { maxAgeMs: 7 * DAY, evidenceScope: 'RECENT_CANONICAL_GATE', ignoreSkipped: true }),
   old_new_tribunal: latestWorkflowEvidence(WF.tribunal, { maxAgeMs: 7 * DAY, evidenceScope: 'RECENT_CANONICAL_GATE' }),
   prod_rollback_rehearsal: latestWorkflowEvidence(WF.rollbackRehearsal, { maxAgeMs: 7 * DAY, evidenceScope: 'RECENT_PROD_ENVIRONMENT' })
 });
@@ -242,17 +284,17 @@ const liveRequirements = {
   ],
   learning: [
     ['lrn001_ingress', workflowEvidence.lrn001_ingress],
-    ['lrn001_real_domain', workflowEvidence.lrn001_real_domain]
+    ['current_sha_real_domain', currentRealDomain]
   ],
   provenance: [
     ['notion_authorized_snapshot', notionSnapshot]
   ],
   evaluationTribunal: [
-    ['old_new_tribunal', workflowEvidence.old_new_tribunal],
+    ['current_sha_old_new_tribunal', currentEvidence.old_new_tribunal],
     ['promotion_readiness', workflowEvidence.promotion_readiness]
   ],
   rollback: [
-    ['prod_rollback_rehearsal', workflowEvidence.prod_rollback_rehearsal],
+    ['current_sha_rollback_rehearsal', currentEvidence.rollback_rehearsal],
     ['full_owner_100', workflowEvidence.full_owner_100]
   ]
 };
@@ -295,12 +337,12 @@ const fronts = frontDefinitions.map(([id, key, name]) => {
 const green = fronts.filter((front) => front.status === 'GREEN').length;
 const failed = fronts.filter((front) => front.status === 'FAIL_STATIC_INVARIANT').length;
 const report = {
-  schema_version: '1.1.0',
+  schema_version: '1.2.0',
   state_type: 'CEREBRO_CONVERSATIONAL_KNOWLEDGE_100_ACCEPTANCE_V0',
   company_id: 'fenix',
   engine_id: 'KNOWLEDGE-100-GATE',
   environment: 'PROD_READ_ONLY_ACCEPTANCE',
-  version: 'v0.2',
+  version: 'v0.3',
   generated_at: now.toISOString(),
   target_sha: targetSha || null,
   actions_runs_scanned: runs.length,
@@ -311,16 +353,22 @@ const report = {
   fronts,
   live_evidence: {
     notion_snapshot: notionSnapshot,
+    current_sha: currentShaEvidenceValid ? currentShaEvidence : null,
     workflows: workflowEvidence
   },
   evidence_policy: {
     latest_matching_run_wins: true,
-    stale_success_cannot_mask_newer_regression: true,
-    exact_target_sha_required_for: ['continuous_human_qa'],
-    recent_prod_environment_allowed_for: ['prod_runtime_smoke', 'prod_rollback_rehearsal'],
+    skipped_wrapper_runs_are_non_evidence_not_regressions: true,
+    stale_success_cannot_mask_newer_completed_failure: true,
+    exact_target_sha_required_for: [
+      'continuous_human_qa',
+      'real_domain_contract_and_live_readonly_probe',
+      'old_new_tribunal_contract',
+      'rollback_no_deploy_rehearsal'
+    ],
+    recent_prod_environment_allowed_for: ['prod_runtime_smoke'],
     recent_canonical_gate_allowed_for: [
-      'full_owner_100', 'promotion_readiness', 'session_context_regression', 'multichannel_unification',
-      'lrn001_ingress', 'lrn001_control_plane', 'lrn001_real_domain', 'old_new_tribunal'
+      'full_owner_100', 'promotion_readiness', 'session_context_regression', 'multichannel_unification', 'lrn001_ingress'
     ]
   },
   safety: {
