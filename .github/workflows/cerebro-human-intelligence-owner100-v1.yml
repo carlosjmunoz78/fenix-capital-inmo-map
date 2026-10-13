@@ -50,6 +50,7 @@ jobs:
           grep -F "trading_access:false" "$f"
           grep -F 'OVERLAY_FAIL_SAFE' "$f"
           grep -F 'PROTECTED_STATUSES' "$o"
+          grep -F 'BODYLESS_STATUSES' "$f"
           ! grep -F 'SUPABASE_SERVICE_ROLE_KEY' "$f" "$o"
           ! grep -Eq 'prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true' "$f" "$o"
           base="${PR_BASE_SHA:-}"
@@ -79,6 +80,21 @@ jobs:
             sb_publishable_*) ;;
             *) echo 'Expected sb_publishable_* PROD key' >&2; exit 1 ;;
           esac
+
+      - name: Physical CORS preflight remains bodyless and traverses OLD
+        shell: bash
+        run: |
+          set -euo pipefail
+          code="$(curl --silent --show-error --output /tmp/options.body --dump-header /tmp/options.headers --write-out '%{http_code}' \
+            -X OPTIONS \
+            -H 'Origin: https://app.fenixcapital.es' \
+            -H 'Access-Control-Request-Method: POST' \
+            -H 'Access-Control-Request-Headers: authorization,apikey,content-type,x-cerebro-session-id' \
+            "$OWNER_URL/chat")"
+          test "$code" = '204'
+          test ! -s /tmp/options.body
+          grep -i '^x-cerebro-human-upstream: cerebro-console-gateway-v0' /tmp/options.headers
+          grep -i '^x-cerebro-human-live-percent: 100' /tmp/options.headers
 
       - name: Prove normal owner route fails closed without a Supabase user session
         shell: bash
@@ -149,5 +165,5 @@ jobs:
         run: |
           echo 'OWNER100_GATE=GREEN' >> "$GITHUB_STEP_SUMMARY"
           echo 'Physical PROD wrapper exists at 100% NEW for authenticated FULL_OWNER traffic while OLD remains the auth/knowledge/action authority.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'No unauthenticated route is opened. GitHub OIDC is limited to synthetic canary endpoints and cannot authorize business routes.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'CORS preflight is bodyless and browser-compatible. No unauthenticated route is opened. GitHub OIDC is limited to synthetic canary endpoints and cannot authorize business routes.' >> "$GITHUB_STEP_SUMMARY"
           echo 'OLD, zero router and live5 remain rollback surfaces. No new PROD write or Trading authority; additional cost 0 EUR.' >> "$GITHUB_STEP_SUMMARY"
