@@ -105,32 +105,38 @@ export class DurableWorkerRunnerV1 {
     });
   }
 
-  async runOne({ context: rawContext }) {
-    const context = safeContext(rawContext);
-    if (this.#active.size >= this.#maxConcurrency) return { status: 'SATURATED', reason: 'GLOBAL_CONCURRENCY_LIMIT' };
+  #begin(context) {
+    if (this.#active.size >= this.#maxConcurrency) return { started: false, outcome: { status: 'SATURATED', reason: 'GLOBAL_CONCURRENCY_LIMIT' } };
     const companyCount = this.#companyActive.get(context.company_id) ?? 0;
-    if (companyCount >= this.#maxPerCompany) return { status: 'SATURATED', reason: 'COMPANY_CONCURRENCY_LIMIT', company_id: context.company_id };
+    if (companyCount >= this.#maxPerCompany) {
+      return { started: false, outcome: { status: 'SATURATED', reason: 'COMPANY_CONCURRENCY_LIMIT', company_id: context.company_id } };
+    }
 
     const claimed = this.#runtime.claim({ context, worker_id: this.#workerId, now_ms: Date.now(), lease_ms: this.#leaseMs });
-    if (!claimed) return { status: 'IDLE', context };
+    if (!claimed) return { started: false, outcome: { status: 'IDLE', context } };
 
     const handler = this.#handlers.get(claimed.name);
     if (!handler) {
       const failed = this.#runtime.fail({ job_id: claimed.job_id, worker_id: this.#workerId, error: `HANDLER_NOT_REGISTERED:${claimed.name}`, now_ms: Date.now() });
-      return { status: 'DISPATCH_FAILED', reason: 'HANDLER_NOT_REGISTERED', job: failed };
+      return { started: false, outcome: { status: 'DISPATCH_FAILED', reason: 'HANDLER_NOT_REGISTERED', job: failed } };
     }
 
     const controller = new AbortController();
     this.#active.set(claimed.job_id, { controller, context, started_at_ms: Date.now() });
     this.#companyActive.set(context.company_id, companyCount + 1);
-    try {
-      return await this.#execute({ job: claimed, handler, controller });
-    } finally {
+    const promise = this.#execute({ job: claimed, handler, controller }).finally(() => {
       this.#active.delete(claimed.job_id);
       const remaining = (this.#companyActive.get(context.company_id) ?? 1) - 1;
       if (remaining <= 0) this.#companyActive.delete(context.company_id);
       else this.#companyActive.set(context.company_id, remaining);
-    }
+    });
+    return { started: true, job_id: claimed.job_id, promise };
+  }
+
+  async runOne({ context: rawContext }) {
+    const context = safeContext(rawContext);
+    const begun = this.#begin(context);
+    return begun.started ? begun.promise : begun.outcome;
   }
 
   async #execute({ job, handler, controller }) {
@@ -160,7 +166,6 @@ export class DurableWorkerRunnerV1 {
         if (!controller.signal.aborted) controller.abort('HEARTBEAT_OR_LEASE_FAILURE');
       }
     }, this.#heartbeatMs);
-    heartbeatTimer.unref?.();
 
     const timeoutPromise = new Promise((_, reject) => {
       timeoutTimer = setTimeout(() => {
@@ -168,7 +173,6 @@ export class DurableWorkerRunnerV1 {
         if (!controller.signal.aborted) controller.abort('JOB_TIMEOUT');
         reject(new Error('JOB_TIMEOUT'));
       }, job.timeout_ms);
-      timeoutTimer.unref?.();
     });
 
     const abortPromise = new Promise((_, reject) => {
@@ -230,18 +234,17 @@ export class DurableWorkerRunnerV1 {
     if (capacity === 0) return [];
 
     const rotated = normalized.map((_, index) => normalized[(this.#fairCursor + index) % normalized.length]);
-    this.#fairCursor = (this.#fairCursor + Math.min(capacity, normalized.length)) % normalized.length;
-    const companySlots = new Map();
-    const selected = [];
+    this.#fairCursor = (this.#fairCursor + 1) % normalized.length;
+    const immediate = [];
+    const running = [];
     for (const context of rotated) {
-      if (selected.length >= capacity) break;
-      const alreadyActive = this.#companyActive.get(context.company_id) ?? 0;
-      const inRound = companySlots.get(context.company_id) ?? 0;
-      if (alreadyActive + inRound >= this.#maxPerCompany) continue;
-      companySlots.set(context.company_id, inRound + 1);
-      selected.push(context);
+      if (running.length >= capacity) break;
+      const begun = this.#begin(context);
+      if (begun.started) running.push(begun.promise);
+      else immediate.push(begun.outcome);
     }
-    return Promise.all(selected.map(context => this.runOne({ context })));
+    const completed = await Promise.all(running);
+    return [...immediate, ...completed];
   }
 
   async drainFair({ contexts, max_rounds = 100, idle_delay_ms = 0 }) {
@@ -251,7 +254,7 @@ export class DurableWorkerRunnerV1 {
     for (let round = 0; round < max_rounds; round += 1) {
       const batch = await this.runFairRound({ contexts });
       outcomes.push(...batch);
-      if (batch.length === 0 || batch.every(item => item.status === 'IDLE')) break;
+      if (batch.length === 0 || batch.every(item => item.status === 'IDLE' || item.status === 'SATURATED')) break;
       if (idle_delay_ms > 0) await sleep(idle_delay_ms);
     }
     return outcomes;
@@ -265,6 +268,7 @@ export const DURABLE_WORKER_RUNNER_V1_CONTRACT = Object.freeze({
   bounded_concurrency: true,
   per_company_concurrency: true,
   fair_round_robin_contexts: true,
+  scans_past_idle_contexts: true,
   timeout_abort_signal: true,
   heartbeat_lease_extension: true,
   checkpoint_resume: true,
