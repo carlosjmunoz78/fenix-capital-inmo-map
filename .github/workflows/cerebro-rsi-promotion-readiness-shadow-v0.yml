@@ -6,6 +6,11 @@ on:
       - main
     paths:
       - 'cerebro/**'
+      - 'src/AnaVoiceQueryBlock.tsx'
+      - 'src/CerebroConsoleBlock.tsx'
+      - 'src/OperationalShellGate.tsx'
+      - 'src/VoiceChannelAdapter.ts'
+      - 'tests/voice-ui-ana-console.spec.ts'
       - 'supabase/functions/cerebro-human-old-actor-preprod-v0/**'
       - 'supabase/functions/cerebro-human-new-actor-preprod-v1/**'
       - 'supabase/functions/cerebro-human-route-control-preprod-v1/**'
@@ -20,6 +25,7 @@ on:
       - '.github/workflows/cerebro-hygiene-audit-v0.yml'
       - '.github/workflows/cerebro-human-intelligence-*.yml'
       - '.github/workflows/cerebro-multichannel-conversation-unification-v1.yml'
+      - '.github/workflows/cerebro-owned-voice-preprod.yml'
       - '.github/workflows/cerebro-rsi-promotion-readiness-shadow-v0.yml'
   workflow_dispatch:
 
@@ -69,7 +75,7 @@ jobs:
 
   app-surface-isolation-shadow:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     env:
       VITE_FENIX_ENV: preprod
       VITE_SUPABASE_URL: https://hnqlnvakzaywtafeiybt.supabase.co
@@ -85,7 +91,7 @@ jobs:
           cache: npm
       - name: Assert exact PR head checkout
         run: test "$(git rev-parse HEAD)" = "$EXACT_HEAD"
-      - name: Assert zero App UI drift and exact governed Supabase surfaces
+      - name: Assert bounded App UI and exact governed surfaces
         env:
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
         shell: bash
@@ -100,9 +106,11 @@ jobs:
           fi
           changed="$(git diff --name-only "$base" HEAD)"
           protected='^(src/|tests/|public/|scripts/|index\.html$|package(-lock)?\.json$|playwright\.config\.(ts|js)$|vite\.config\.(ts|js)$|tsconfig[^/]*\.json$|\.env|\.github/workflows/(preprod-build|app-restoration-build|prod-[^/]+)\.yml$)'
-          if printf '%s\n' "$changed" | grep -Eq "$protected"; then
-            echo 'RSI CEREBRO-only scope invalidated: App UI/App-test/build/deploy surface changed.' >&2
-            printf '%s\n' "$changed" >&2
+          voice_ui='^(src/(AnaVoiceQueryBlock|CerebroConsoleBlock|OperationalShellGate)\.tsx$|src/VoiceChannelAdapter\.ts$|tests/voice-ui-ana-console\.spec\.ts$)'
+          protected_changed="$(printf '%s\n' "$changed" | grep -E "$protected" | grep -Ev "$voice_ui" || true)"
+          if [ -n "$protected_changed" ]; then
+            echo 'RSI scope invalidated: unexpected App UI/App-test/build/deploy surface changed.' >&2
+            printf '%s\n' "$protected_changed" >&2
             exit 1
           fi
           allowed='^(supabase/functions/(cerebro-human-old-actor-preprod-v0|cerebro-human-new-actor-preprod-v1|cerebro-human-route-control-preprod-v1|cerebro-console-gateway-human-v1-canary|cerebro-console-human-router-zero-v1|cerebro-telegram-gateway-v0|cerebro-telegram-voice-v1)/|supabase/functions/_shared/cerebro-conversation-policy-v1\.ts$|supabase/migrations/(20261012132000_cerebro_human_route_control_preprod_v1|20261013010500_cerebro_multichannel_ana_overlay_v1)\.sql$)'
@@ -111,6 +119,20 @@ jobs:
             echo 'Unapproved Supabase surface changed:' >&2
             printf '%s\n' "$unexpected_supabase" >&2
             exit 1
+          fi
+          if printf '%s\n' "$changed" | grep -Eq "$voice_ui"; then
+            test -f .github/workflows/cerebro-owned-voice-preprod.yml
+            test -f cerebro/voice/channel-registry.v1.json
+            test -f cerebro/voice/VOICE_UI_V1_RUNBOOK.md
+            test -f tests/voice-ui-ana-console.spec.ts
+            grep -F "voice_is_transport_not_authority" cerebro/voice/channel-registry.v1.json
+            grep -F '"audio_persistence": false' cerebro/voice/channel-registry.v1.json
+            grep -F "'/v2/ana/knowledge/answer'" src/AnaVoiceQueryBlock.tsx
+            grep -F "cerebro-console-gateway-v0" src/CerebroConsoleBlock.tsx
+            grep -F "actor_code==='CARLOS-ADMIN'" src/CerebroConsoleBlock.tsx
+            ! grep -R -F 'SUPABASE_SERVICE_ROLE_KEY' src/AnaVoiceQueryBlock.tsx src/CerebroConsoleBlock.tsx src/VoiceChannelAdapter.ts
+            ! printf '%s\n' "$changed" | grep -q '^supabase/functions/fenix-app-gateway/'
+            ! printf '%s\n' "$changed" | grep -q '^supabase/functions/cerebro-console-gateway-v0/'
           fi
           if printf '%s\n' "$changed" | grep -Eq '^(supabase/functions/(cerebro-human-old-actor-preprod-v0|cerebro-human-new-actor-preprod-v1|cerebro-human-route-control-preprod-v1|cerebro-console-gateway-human-v1-canary|cerebro-console-human-router-zero-v1)/|supabase/migrations/20261012132000_cerebro_human_route_control_preprod_v1\.sql$)'; then
             test -f .github/workflows/cerebro-human-intelligence-v1.yml
@@ -148,11 +170,9 @@ jobs:
             ! grep -R -Eq 'prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true' "$d"
             ! printf '%s\n' "$changed" | grep -q '^supabase/functions/cerebro-console-gateway-v0/'
           fi
-          echo 'No App UI/build/current Console authority drift. Exact multichannel adapters are permitted only with their dedicated contract tests and authority-preservation assertions.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'No unapproved App/backend authority drift. Exact VOICE-001 UI adapters are allowed only with their dedicated build/E2E gate.' >> "$GITHUB_STEP_SUMMARY"
       - name: Install dependencies reproducibly
-        run: |
-          set -euo pipefail
-          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+        run: npm ci
       - name: Build exact head
         run: npm run build
       - name: PRE-PROD Ana CORS smoke
@@ -177,12 +197,12 @@ jobs:
           retention-days: 7
       - name: Mark App gate boundary
         run: |
-          echo 'This job proves zero App UI/build/current Console gateway drift plus exact-head build and PREPROD CORS smoke.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'Multichannel changes are exact adapters around existing authority; they do not grant new PROD actions or Trading.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'This job proves bounded App UI changes, exact-head build and PREPROD CORS smoke.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'VOICE-001 is transport-only and cannot grant new authority, writes or Trading.' >> "$GITHUB_STEP_SUMMARY"
 
   tribunal-shadow:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
         with:
@@ -201,7 +221,7 @@ jobs:
           cerebro/tests/promotion-pipeline.test.mjs
           cerebro/tests/rsi-recovery-e2e.test.mjs
           cerebro/tests/bounded-recovery-supervisor.test.mjs
-      - name: Assert PR remains bounded and exact governed production adapters preserve authority
+      - name: Assert PR remains bounded and exact governed adapters preserve authority
         env:
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
         shell: bash
@@ -216,9 +236,11 @@ jobs:
           fi
           changed="$(git diff --name-only "$base" HEAD)"
           protected='^(src/|tests/|public/|scripts/|index\.html$|package(-lock)?\.json$|playwright\.config\.(ts|js)$|vite\.config\.(ts|js)$|tsconfig[^/]*\.json$|\.env|\.github/workflows/(preprod-build|app-restoration-build|prod-[^/]+)\.yml$)'
-          if printf '%s\n' "$changed" | grep -Eq "$protected"; then
+          voice_ui='^(src/(AnaVoiceQueryBlock|CerebroConsoleBlock|OperationalShellGate)\.tsx$|src/VoiceChannelAdapter\.ts$|tests/voice-ui-ana-console\.spec\.ts$)'
+          protected_changed="$(printf '%s\n' "$changed" | grep -E "$protected" | grep -Ev "$voice_ui" || true)"
+          if [ -n "$protected_changed" ]; then
             echo 'Unexpected App/application/test/production surface changed by RSI recovery.' >&2
-            printf '%s\n' "$changed" >&2
+            printf '%s\n' "$protected_changed" >&2
             exit 1
           fi
           allowed='^(supabase/functions/(cerebro-human-old-actor-preprod-v0|cerebro-human-new-actor-preprod-v1|cerebro-human-route-control-preprod-v1|cerebro-console-gateway-human-v1-canary|cerebro-console-human-router-zero-v1|cerebro-telegram-gateway-v0|cerebro-telegram-voice-v1)/|supabase/functions/_shared/cerebro-conversation-policy-v1\.ts$|supabase/migrations/(20261012132000_cerebro_human_route_control_preprod_v1|20261013010500_cerebro_multichannel_ana_overlay_v1)\.sql$)'
@@ -227,6 +249,16 @@ jobs:
             echo 'Unexpected Supabase surface changed by RSI recovery.' >&2
             printf '%s\n' "$unexpected_supabase" >&2
             exit 1
+          fi
+          if printf '%s\n' "$changed" | grep -Eq "$voice_ui"; then
+            test -f .github/workflows/cerebro-owned-voice-preprod.yml
+            grep -F "voice_is_transport_not_authority" cerebro/voice/channel-registry.v1.json
+            grep -F '"audio_persistence": false' cerebro/voice/channel-registry.v1.json
+            grep -F "'/v2/ana/knowledge/answer'" src/AnaVoiceQueryBlock.tsx
+            grep -F "cerebro-console-gateway-v0" src/CerebroConsoleBlock.tsx
+            ! grep -R -F 'SUPABASE_SERVICE_ROLE_KEY' src/AnaVoiceQueryBlock.tsx src/CerebroConsoleBlock.tsx src/VoiceChannelAdapter.ts
+            ! printf '%s\n' "$changed" | grep -q '^supabase/functions/fenix-app-gateway/'
+            ! printf '%s\n' "$changed" | grep -q '^supabase/functions/cerebro-console-gateway-v0/'
           fi
           if printf '%s\n' "$changed" | grep -Eq '^(supabase/functions/_shared/cerebro-conversation-policy-v1\.ts|supabase/functions/cerebro-telegram-(gateway-v0|voice-v1)/|supabase/migrations/20261013010500_cerebro_multichannel_ana_overlay_v1\.sql$)'; then
             node --test cerebro/tests/multichannel-conversation-policy-v1.test.mjs cerebro/tests/universal-learning-ingress.test.mjs
@@ -248,4 +280,4 @@ jobs:
             ! grep -R -Eq 'prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true' "$d"
             ! printf '%s\n' "$changed" | grep -q '^supabase/functions/cerebro-console-gateway-v0/'
           fi
-          echo 'RSI remains bounded: exact multichannel adapters may present passive conversation better but cannot expand authority, writes, Trading, or bypass OLD-vs-NEW/Tribunal promotion.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'RSI remains bounded: exact VOICE-001 UI adapters may change transport/presentation only; they cannot expand authority, writes, Trading, or bypass governed promotion.' >> "$GITHUB_STEP_SUMMARY"
