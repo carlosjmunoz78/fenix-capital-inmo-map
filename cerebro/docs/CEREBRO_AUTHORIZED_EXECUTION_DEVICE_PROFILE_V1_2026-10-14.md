@@ -9,7 +9,7 @@ Trading: isolated / not authorized
 
 ## Decision
 
-Block 38-50 is implemented as one transversal policy profile, not as thirteen new engines. Existing IAM-001 and ROUTE-001 remain canonical. The new profile wraps their contracts and adds only the missing fine-grained execution/device ladders, source dispositions and safety gates.
+Block 38-50 is implemented as one transversal policy profile, not as thirteen new engines. Existing IAM-001 and ROUTE-001 remain canonical. The profile wraps their contracts and adds only the missing fine-grained execution/device ladders, source dispositions and safety gates.
 
 This follows CONSERVAR -> ENTENDER -> ENVOLVER -> PROBAR -> MEJORAR -> MIGRAR. No existing App, CRM, Supabase, WordPress, SEO, Training, Trading, PROD or connector runtime is replaced.
 
@@ -19,8 +19,8 @@ This follows CONSERVAR -> ENTENDER -> ENVOLVER -> PROBAR -> MEJORAR -> MIGRAR. N
 - Secret handling: PARCIAL by design. CEREBRO stores symbolic/external secret references and metadata, not raw credential material. No new paid vault is required.
 - Standing permissions: EXISTENTE as fail-closed company/environment/consumer scopes.
 - Session/token lifecycle: EXISTENTE as lifecycle metadata, expiry health and consumer-local HOLD behavior. Raw tokens are not accepted by lifecycle state.
-- Execution router: EXISTENTE. ROUTE-001 remains the canonical resource/model router. The profile adds the required explicit order `OFFICIAL_API -> AUTHORIZED_MCP -> LOCAL_SCRIPT -> BROWSER_BRIDGE -> COMPUTER_USE -> VISION_FALLBACK` without replacing ROUTE-001.
-- Browser Bridge: PARCIAL. The repository already has fresh-attestation semantics (`paired`, `online`, kill switch, transport, browser running, bounded age), but a real physical session must present fresh execution-time evidence. Missing/stale evidence is HOLD, not a fabricated human exception.
+- Execution router: EXISTENTE. ROUTE-001 remains the canonical resource/model router. The profile adds the explicit order `OFFICIAL_API -> AUTHORIZED_MCP -> LOCAL_SCRIPT -> BROWSER_BRIDGE -> COMPUTER_USE -> VISION_FALLBACK` without replacing ROUTE-001.
+- Browser Bridge: PARCIAL. The repository has fresh-attestation semantics (`paired`, `online`, kill switch, transport, browser running, bounded age), but a real physical session must present fresh execution-time evidence. Missing/stale evidence is HOLD, not a fabricated human exception.
 - Android Device Worker: DEFINIDO as a logical worker contract using shared runtime principles. Route order is `ANDROID_INTENT_API -> ACCESSIBILITY_SEMANTIC -> DEVICE_BRIDGE -> DETERMINISTIC_REPLAY -> VISION_FALLBACK`. No dedicated new server is introduced.
 
 ## Human-exception boundary
@@ -76,23 +76,24 @@ Added overlay:
 
 No canonical module is deleted or replaced.
 
-## Verification gate
+## Verification and OLD-vs-NEW
 
-Candidate promotion requires Node 24 and all of the following GREEN on the exact candidate head:
+Feature PR: #655. Exact candidate head: `143be0e3cc984b2d2322ea2ef4d8d895756fce27`.
 
-1. Authorized Execution & Device Profile focused tests.
-2. IAM credential broker regression tests.
-3. IAM session lifecycle regression tests.
-4. Execution model router regression tests.
-5. Full `cerebro/tests/*.test.mjs` candidate suite.
-6. Full main/base suite for OLD-vs-NEW comparison.
-7. Security/policy/cost review showing no authority, Trading, secret or cost regression.
-8. Post-merge main verification.
+Pre-merge Node 24 run `38480392911`: GREEN. Focused profile, IAM broker/lifecycle/router regressions, full candidate suite and exact base full suite all passed.
 
-Until those gates are evidenced, registry state remains `CANDIDATE_PREPROD`; operational/physical Browser Bridge or Android capability is not claimed merely from the policy profile.
+Feature merge SHA: `a5bb1d86032c986e26b37f386bd3c426a80ff0d7`.
+
+Post-merge main run `38480583353`: GREEN. Focused profile, existing control-plane regressions and full main suite passed; base-only comparison job was correctly skipped on push. PROD Runtime Smoke `38480583380`: GREEN. PROD Live Deploy `38480583377`: SKIPPED. No PROD deployment was authorized by this block.
+
+OLD-vs-NEW result: `NEW_BETTER_NO_REGRESSION_WITH_ADDED_POLICY_COVERAGE`. The old main full suite remained GREEN, the candidate full suite remained GREEN, existing IAM/ROUTE contracts stayed untouched, and the new profile added deterministic safety coverage without observed security, policy, cost, PROD-authority or Trading regression.
+
+Block-level state: `INTEGRATED_MAIN_VALIDATED` / `HECHO`.
+
+Individual capability status remains evidence-based: Browser Bridge is PARCIAL until a fresh physical binding is presented at execution time; Android Device Worker is DEFINIDO until a real worker is deployed; external projects remain LAB_REFERENCE/HOLD_RUNTIME. These statuses are not upgraded merely because the transversal profile is validated.
 
 ## Rollback and rebuild
 
-Rollback: revert the profile PR/commits. IAM-001 and ROUTE-001 are preserved, so rollback does not require reconstructing the pre-existing control plane.
+Rollback: revert the profile/closure PRs. IAM-001 and ROUTE-001 are preserved, so rollback does not require reconstructing the pre-existing control plane.
 
 Rebuild: recreate the profile from the registry, runtime contract, tests and this document, then re-run the same Node 24 gates. No external paid service, new secret store or external agent code is required.
