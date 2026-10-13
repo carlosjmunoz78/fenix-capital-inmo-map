@@ -5,19 +5,19 @@ on:
     branches: [main]
     paths:
       - 'cerebro/multicompany/bootstrap-tier-v1.mjs'
+      - 'cerebro/multicompany/sql/bootstrap-tier-preprod-v1.sql'
       - 'cerebro/multicompany/rollback/bootstrap-tier-preprod-v1.rollback.sql'
       - 'cerebro/tests/bootstrap-tier-v1.test.mjs'
       - 'cerebro/tests/bootstrap-tier-preprod-persistence-v1.test.mjs'
-      - 'supabase/migrations/20261013133000_cerebro_bootstrap_tier_preprod_v1.sql'
       - '.github/workflows/cerebro-bootstrap-tier-preprod-v1.yml'
   push:
     branches: [main]
     paths:
       - 'cerebro/multicompany/bootstrap-tier-v1.mjs'
+      - 'cerebro/multicompany/sql/bootstrap-tier-preprod-v1.sql'
       - 'cerebro/multicompany/rollback/bootstrap-tier-preprod-v1.rollback.sql'
       - 'cerebro/tests/bootstrap-tier-v1.test.mjs'
       - 'cerebro/tests/bootstrap-tier-preprod-persistence-v1.test.mjs'
-      - 'supabase/migrations/20261013133000_cerebro_bootstrap_tier_preprod_v1.sql'
       - '.github/workflows/cerebro-bootstrap-tier-preprod-v1.yml'
 
 permissions:
@@ -59,7 +59,7 @@ jobs:
         run: |
           set -euo pipefail
           runtime='cerebro/multicompany/bootstrap-tier-v1.mjs'
-          m='supabase/migrations/20261013133000_cerebro_bootstrap_tier_preprod_v1.sql'
+          m='cerebro/multicompany/sql/bootstrap-tier-preprod-v1.sql'
           r='cerebro/multicompany/rollback/bootstrap-tier-preprod-v1.rollback.sql'
           test -f "$runtime" && test -f "$m" && test -f "$r"
           grep -F "BOOTSTRAP_TIER_ENGINE_IDS=Object.freeze(['KBOOT-001','SEOBOOT-001','SOCBOOT-001'])" "$runtime"
