@@ -9,7 +9,7 @@
   const badge=document.createElement('div');
   Object.assign(badge.style,{position:'fixed',left:'18px',top:'92px',zIndex:'22',padding:'6px 9px',border:'1px solid rgba(74,214,248,.20)',borderRadius:'8px',background:'rgba(0,10,15,.68)',color:'#8ae6f8',font:'9px monospace',letterSpacing:'.08em',pointerEvents:'none'});
   if(qa)document.body.appendChild(badge);
-  function show(extra=''){if(qa)badge.textContent='CONV MOTION V2 · '+phase+(extra?' · '+extra:'')}
+  function show(extra=''){if(qa)badge.textContent='CONV MOTION V2.1 · '+phase+(extra?' · '+extra:'')}
   function setPhase(next,extra=''){phase=next;show(extra);return phase}
   function cancel(){runToken++;phase='CANCELLED';pendingArrival=Promise.resolve(false);motion.cancel();show('HUMAN OVERRIDE');return true}
   function beginListen(){
@@ -21,12 +21,29 @@
     if(signal&&typeof signal.trigger==='function')signal.trigger(lastTarget);
     return token
   }
+  function waitSignalDestination(token,maxSafetyMs=3200){
+    if(!signal||typeof signal.getState!=='function'||!signal.getState().active)return Promise.resolve(true);
+    const started=performance.now();show('WAITING SIGNAL DESTINATION');
+    return new Promise(resolve=>{
+      const tick=now=>{
+        if(token!==runToken||motion.getMode()==='MANUAL'){resolve(false);return}
+        if(!signal.getState().active){resolve(true);return}
+        if(now-started>=maxSafetyMs){resolve(false);return}
+        requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    });
+  }
   function onResponseStart(){
-    const token=runToken||++runToken;setPhase('RESPOND','CAMERA MOVING');
-    pendingArrival=motion.goAndWait(3,'CONVERSATIONAL').then(ok=>{
+    const token=runToken||++runToken;setPhase('RESPOND','DESTINATION SYNC');
+    pendingArrival=waitSignalDestination(token).then(signalReady=>{
+      if(!signalReady||token!==runToken||motion.getMode()==='MANUAL')return false;
+      setPhase('RESPOND','CAMERA MOVING');
+      return motion.goAndWait(3,'CONVERSATIONAL');
+    }).then(ok=>{
       if(token!==runToken||motion.getMode()==='MANUAL')return false;
       if(ok)setPhase('RESPOND','CAMERA ARRIVED');else show('ARRIVAL NOT PROVEN');
-      return ok;
+      return Boolean(ok);
     });
     return pendingArrival
   }
@@ -50,7 +67,7 @@
   addEventListener('pointerdown',human,{capture:true,passive:true});
   addEventListener('touchstart',human,{capture:true,passive:true});
   window.CEREBRO_CONVERSATION_MOTION_V2=Object.freeze({
-    version:'conversation-motion-v2',environment:'LAB_PREPROD',prod_authorized:false,
+    version:'conversation-motion-v2.1',environment:'LAB_PREPROD',prod_authorized:false,
     beginListen,onIntent,onResponseStart,onArtifactReady,end,run:runScenario,cancel,
     getPhase:()=>phase,getPendingArrival:()=>pendingArrival,getLastTarget:()=>lastTarget,getLastArtifactGate:()=>lastArtifactGate?{...lastArtifactGate}:null
   });
