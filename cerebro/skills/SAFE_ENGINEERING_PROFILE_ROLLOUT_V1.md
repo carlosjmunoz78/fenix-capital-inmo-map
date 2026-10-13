@@ -38,12 +38,15 @@ Target: one transversal CEREBRO Safe Engineering Profile, not separate agent sil
 ## Current state
 
 - Items 1-12: GREEN PREPROD / integrated foundation.
-- Items 25-37: `CEREBRO_SAFE_ENGINEERING_PROFILE_V1` implementado y validado en PREPROD sobre la implementación `1d4789d77ce875dcfa3ff49f4136a44f9cf71e01`.
-- Gates validados: focused contract, AUTO-001, Skill Evolution, Evaluation Tribunal, full CEREBRO candidate y full CEREBRO baseline `main` = PASS con Node 24.
+- Items 25-37: **HECHO / INTEGRATED_MAIN_VALIDATED** como `CEREBRO_SAFE_ENGINEERING_PROFILE_V1`.
+- Feature PR `#637` merged in `main` at `6db0cdd4dea493bacacd7d877558509efbd838fe`.
+- Post-merge gate hardening PR `#652` merged at `30db184b8e3fac433af9dbad7f2f96f88594eda1`.
+- Post-merge Safe Engineering run `38473230754`: focused contract, AUTO-001, Skill Evolution, Evaluation Tribunal, full CEREBRO y main baseline = PASS con Node 24.
+- Runtime smoke sobre el mismo HEAD de `main` = PASS; `PROD Live Deploy` = SKIPPED y no forma parte de la autorización de este bloque.
 - OLD vs NEW: NEW_BETTER por añadir la capacidad requerida sin regresión observable de tests, seguridad, política, coste, autoridad PROD o Trading.
 - Registro de provenance/licencia/estado: `cerebro/registry/safe-engineering-profile.v1.json`.
-- Evidencia y runbook de cierre: `cerebro/docs/CEREBRO_SAFE_ENGINEERING_PROFILE_V1_2026-10-13.md`.
+- Evidencia, rollback y rebuild: `cerebro/docs/CEREBRO_SAFE_ENGINEERING_PROFILE_V1_2026-10-13.md`.
 - External source identity/license blockers: ninguno para las disposiciones seleccionadas.
 - Evolver permanece patterns-only por política; Claude-Mem permanece LAB memory only; no se instala ninguna dependencia de pago.
-- Estado de promoción: PREPROD. Falta CI sobre el HEAD final del PR, merge gobernado y regresión post-merge en `main`; hasta entonces no declarar HECHO ni PROD.
-- Siguiente bloque, solo tras cierre verde: items 38-50.
+- Autoridad permanece limitada: `prod_authorized=false`, `prod_write_authorized=false`, `trading_access=false`.
+- Siguiente bloque autorizado: items 38-50.
