@@ -4,9 +4,10 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - 'supabase/functions/cerebro-console-gateway-human-v1-owner100/**'
+      - 'supabase/functions/cerebro-console-gateway-human-v1-canary/owner100.ts'
+      - 'supabase/functions/cerebro-console-gateway-human-v1-canary/overlay.ts'
+      - 'cerebro/human-intelligence/FULL_OWNER_100_V1.md'
       - '.github/workflows/cerebro-human-intelligence-owner100-v1.yml'
-      - '.github/workflows/prod-live-deploy.yml'
   workflow_dispatch:
 
 permissions:
@@ -37,8 +38,8 @@ jobs:
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           set -euo pipefail
-          f='supabase/functions/cerebro-console-gateway-human-v1-owner100/index.ts'
-          o='supabase/functions/cerebro-console-gateway-human-v1-owner100/overlay.ts'
+          f='supabase/functions/cerebro-console-gateway-human-v1-canary/owner100.ts'
+          o='supabase/functions/cerebro-console-gateway-human-v1-canary/overlay.ts'
           test -f "$f" && test -f "$o"
           grep -F 'PROD_FULL_OWNER_100' "$f"
           grep -F 'cerebro-console-gateway-v0' "$f"
@@ -58,7 +59,8 @@ jobs:
               supabase/functions/cerebro-console-gateway-v0 \
               supabase/functions/cerebro-console-human-router-zero-v1 \
               supabase/functions/cerebro-console-gateway-human-v1-canary/live5.ts \
-              supabase/functions/cerebro-console-gateway-human-v1-canary/router-live5.ts
+              supabase/functions/cerebro-console-gateway-human-v1-canary/router-live5.ts \
+              supabase/functions/cerebro-console-gateway-human-v1-canary/overlay.ts
           fi
 
       - name: Re-run conversational contracts
