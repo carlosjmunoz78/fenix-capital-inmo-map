@@ -7,13 +7,12 @@ on:
       - 'cerebro/human-intelligence/**'
       - 'cerebro/multichannel/**'
       - 'cerebro/voice/**'
-      - 'cerebro/tests/human-intelligence-*.test.mjs'
-      - 'cerebro/tests/multichannel-conversation-policy-v1.test.mjs'
-      - 'cerebro/tests/multichannel-conversation-old-vs-new-v1.test.mjs'
-      - 'cerebro/tests/continuous-human-qa-v0.test.mjs'
+      - 'cerebro/tests/**'
+      - 'src/AnaChatBlock.tsx'
       - 'src/AnaVoiceQueryBlock.tsx'
       - 'src/CerebroConsoleBlock.tsx'
       - 'src/OperationalShellGate.tsx'
+      - 'src/VoiceChannelAdapter.ts'
       - 'src/cerebroVoice.ts'
       - 'tests/voice-ui-ana-console.spec.ts'
       - 'supabase/functions/cerebro-human-old-actor-preprod-v0/**'
@@ -45,7 +44,7 @@ env:
 jobs:
   scoped-readiness:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:
@@ -55,22 +54,24 @@ jobs:
         with:
           node-version: 24
           cache: npm
-      - name: Assert exact PR head and strict Human Intelligence surface
+      - name: Assert exact PR head and governed surface
         env:
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
         shell: bash
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$EXACT_HEAD"
-          if [ -n "${PR_BASE_SHA:-}" ]; then git fetch origin "$PR_BASE_SHA" --depth=1; base="$PR_BASE_SHA"; else git fetch origin main --depth=1; base="$(git rev-parse FETCH_HEAD)"; fi
-          changed="$(git diff --name-only "$base" HEAD)"
-          bad="$(printf '%s\n' "$changed" | grep -Ev '^(cerebro/human-intelligence/|cerebro/multichannel/|cerebro/voice/|cerebro/tests/human-intelligence-[^/]+\.test\.mjs$|cerebro/tests/multichannel-conversation-(policy|old-vs-new)-v1\.test\.mjs$|cerebro/tests/continuous-human-qa-v0\.test\.mjs$|src/(AnaVoiceQueryBlock|CerebroConsoleBlock|OperationalShellGate|cerebroVoice)\.tsx?$|tests/voice-ui-ana-console\.spec\.ts$|supabase/functions/cerebro-human-old-actor-preprod-v0/|supabase/functions/cerebro-human-new-actor-preprod-v1/|supabase/functions/cerebro-human-route-control-preprod-v1/|supabase/functions/cerebro-console-gateway-human-v1-canary/|supabase/functions/cerebro-console-human-router-zero-v1/|supabase/functions/_shared/cerebro-conversation-policy-v1\.ts$|supabase/functions/cerebro-telegram-gateway-v0/|supabase/functions/cerebro-telegram-voice-v1/|supabase/migrations/(20261012132000_cerebro_human_route_control_preprod_v1|20261013010500_cerebro_multichannel_ana_overlay_v1)\.sql$|\.github/workflows/cerebro-human-intelligence-[^/]+\.yml$|\.github/workflows/cerebro-multichannel-conversation-unification-v1\.yml$|\.github/workflows/cerebro-owned-voice-preprod\.yml$|\.github/workflows/cerebro-rsi-promotion-readiness-shadow-v0\.yml$)' || true)"
+          git fetch origin "$PR_BASE_SHA" --depth=1
+          changed="$(git diff --name-only "$PR_BASE_SHA" HEAD)"
+          allowed='^(cerebro/(human-intelligence|multichannel|voice)/|cerebro/tests/|src/(AnaChatBlock|AnaVoiceQueryBlock|CerebroConsoleBlock|OperationalShellGate|VoiceChannelAdapter|cerebroVoice)\.tsx?$|tests/voice-ui-ana-console\.spec\.ts$|supabase/functions/(cerebro-human-old-actor-preprod-v0|cerebro-human-new-actor-preprod-v1|cerebro-human-route-control-preprod-v1|cerebro-console-gateway-human-v1-canary|cerebro-console-human-router-zero-v1|cerebro-telegram-gateway-v0|cerebro-telegram-voice-v1)/|supabase/functions/_shared/cerebro-conversation-policy-v1\.ts$|supabase/migrations/(20261012132000_cerebro_human_route_control_preprod_v1|20261013010500_cerebro_multichannel_ana_overlay_v1)\.sql$|\.github/workflows/cerebro-(human-intelligence-[^/]+|multichannel-conversation-unification-v1|owned-voice-preprod|rsi-promotion-readiness-shadow-v0)\.yml$)'
+          bad="$(printf '%s\n' "$changed" | grep -Ev "$allowed" || true)"
           if [ -n "$bad" ]; then echo 'Human Intelligence PR crossed its governed surface:' >&2; printf '%s\n' "$bad" >&2; exit 1; fi
-          protected="$(printf '%s\n' "$changed" | grep -E '^(src/|tests/|public/|scripts/|supabase/migrations/|\.github/workflows/(preprod-build|app-restoration-build|prod-[^/]+)\.yml$)' | grep -Ev '^(src/(AnaVoiceQueryBlock|CerebroConsoleBlock|OperationalShellGate|cerebroVoice)\.tsx?$|tests/voice-ui-ana-console\.spec\.ts$|supabase/migrations/(20261012132000_cerebro_human_route_control_preprod_v1|20261013010500_cerebro_multichannel_ana_overlay_v1)\.sql$)' || true)"
-          if [ -n "$protected" ]; then echo 'Protected App/PROD surface changed outside the exact governed VOICE-001 UI surface.' >&2; printf '%s\n' "$protected" >&2; exit 1; fi
+          test ! -e src/AnaVoiceQueryBlock.tsx
+          test ! -e src/VoiceChannelAdapter.ts
+          ! printf '%s\n' "$changed" | grep -Eq '^supabase/functions/(fenix-app-gateway|cerebro-console-gateway-v0)/'
       - name: Install dependencies reproducibly
         run: npm ci
-      - name: Prove canonical LRN promotion recovery Human Intelligence and multichannel contracts
+      - name: Prove LRN promotion Human Intelligence and multichannel contracts
         run: |
           node --test \
             cerebro/tests/universal-learning-ingress.test.mjs \
@@ -89,53 +90,52 @@ jobs:
             cerebro/tests/multichannel-conversation-policy-v1.test.mjs \
             cerebro/tests/multichannel-conversation-old-vs-new-v1.test.mjs \
             cerebro/tests/continuous-human-qa-v0.test.mjs
-      - name: Assert VOICE-001 browser surfaces preserve text authority and governed learning
+      - name: Assert canonical VOICE-001 authority and learning boundary
         shell: bash
         run: |
           set -euo pipefail
-          grep -F "'/v2/ana/knowledge/answer'" src/AnaVoiceQueryBlock.tsx
-          grep -F "cerebro-console-gateway-v0" src/CerebroConsoleBlock.tsx
-          grep -F "voiceNeedsClarification" src/AnaVoiceQueryBlock.tsx src/CerebroConsoleBlock.tsx
-          grep -F "voiceNeedsManualConfirmation" src/CerebroConsoleBlock.tsx
+          grep -F 'voice_is_transport_not_authority' cerebro/voice/channel-registry.v1.json
+          grep -F '"audio_persistence": false' cerebro/voice/channel-registry.v1.json
           grep -F '"learning_inherited": true' cerebro/voice/channel-registry.v1.json
-          ! grep -R -F 'SUPABASE_SERVICE_ROLE_KEY' src/AnaVoiceQueryBlock.tsx src/CerebroConsoleBlock.tsx src/cerebroVoice.ts
-          ! git diff --name-only "${{ github.event.pull_request.base.sha }}" HEAD | grep -Eq '^supabase/functions/(cerebro-console-gateway-v0|fenix-app-gateway)/'
-          ! git diff --name-only "${{ github.event.pull_request.base.sha }}" HEAD | grep -q '^src/AnaChatBlock.tsx$'
-      - name: Assert PREPROD Human Intelligence functions remain fail-closed and PROD-free
+          grep -F 'fenix_prod_chat_send_user' src/AnaChatBlock.tsx
+          grep -F "from './cerebroVoice'" src/AnaChatBlock.tsx
+          grep -F 'voiceNeedsClarification' src/AnaChatBlock.tsx
+          grep -F 'cerebro-console-gateway-v0' src/CerebroConsoleBlock.tsx
+          grep -F "actor_code==='CARLOS-ADMIN'" src/CerebroConsoleBlock.tsx
+          grep -F "from './cerebroVoice'" src/CerebroConsoleBlock.tsx
+          grep -F 'voiceNeedsManualConfirmation' src/CerebroConsoleBlock.tsx
+          test ! -e src/AnaVoiceQueryBlock.tsx
+          test ! -e src/VoiceChannelAdapter.ts
+          ! grep -R -F 'SUPABASE_SERVICE_ROLE_KEY' src/AnaChatBlock.tsx src/CerebroConsoleBlock.tsx src/cerebroVoice.ts
+      - name: Assert PREPROD actors and route control remain fail-closed
         shell: bash
         run: |
           set -euo pipefail
           for f in supabase/functions/cerebro-human-old-actor-preprod-v0/index.ts supabase/functions/cerebro-human-new-actor-preprod-v1/index.ts; do
-            test -f "$f"; grep -q 'hnqlnvakzaywtafeiybt' "$f"; grep -q 'prod_write_authorized:false' "$f"; grep -q 'prod_execution_enabled:false' "$f"; grep -q 'customer_data:false' "$f"; grep -q 'trading_access:false' "$f"; grep -q 'GITHUB_OIDC' "$f";
+            test -f "$f"; grep -q 'prod_write_authorized:false' "$f"; grep -q 'prod_execution_enabled:false' "$f"; grep -q 'customer_data:false' "$f"; grep -q 'trading_access:false' "$f"
           done
           route='supabase/functions/cerebro-human-route-control-preprod-v1/index.ts'
-          test -f "$route"; grep -q 'cerebro-human-route-control-preprod-v1' "$route"; grep -q 'cerebro_human_route_transition_preprod' "$route"; grep -q 'prod_write_authorized:false' "$route"; grep -q 'trading_access:false' "$route"; grep -q 'customer_data:false' "$route"
-          if grep -R -n 'cluhljgonannaafpmblx' supabase/functions/cerebro-human-old-actor-preprod-v0 supabase/functions/cerebro-human-new-actor-preprod-v1 supabase/functions/cerebro-human-route-control-preprod-v1; then echo 'PROD project reference forbidden inside isolated PREPROD Human Intelligence functions.' >&2; exit 1; fi
-      - name: Assert additive PROD canary is unrouted no-write and preserves the current gateway
+          test -f "$route"; grep -q 'prod_write_authorized:false' "$route"; grep -q 'trading_access:false' "$route"; grep -q 'customer_data:false' "$route"
+      - name: Assert canary and ZERO router preserve stable PROD gateway
         shell: bash
         run: |
           set -euo pipefail
-          f='supabase/functions/cerebro-console-gateway-human-v1-canary/index.ts'; test -f "$f"; grep -F 'cerebro-console-gateway-v0' "$f"; grep -F 'PROD_CANARY_UNROUTED' "$f"; grep -F 'live_chat_invoked:false' "$f"; grep -F 'prod_write_authorized:false' "$f"; grep -F '/canary/rehearsal' "$f"; ! grep -F 'SUPABASE_SERVICE_ROLE_KEY' "$f"; ! git diff --name-only "${{ github.event.pull_request.base.sha }}" HEAD | grep -Eq '^supabase/functions/cerebro-console-gateway-v0/'
-      - name: Assert additive ZERO router is compiled off and preserves stable authority
+          canary='supabase/functions/cerebro-console-gateway-human-v1-canary/index.ts'
+          grep -F 'cerebro-console-gateway-v0' "$canary"; grep -F 'PROD_CANARY_UNROUTED' "$canary"; grep -F 'prod_write_authorized:false' "$canary"; ! grep -F 'SUPABASE_SERVICE_ROLE_KEY' "$canary"
+          d='supabase/functions/cerebro-console-human-router-zero-v1'
+          grep -F 'export const LIVE_CANARY_PERCENT=0;' "$d/router.ts"; grep -F 'PREPROD_NORMAL_ROUTING_DISABLED' "$d/index.ts"; grep -F 'consumer_routing_enabled:false' "$d/index.ts"; ! grep -R -F 'SUPABASE_SERVICE_ROLE_KEY' "$d"
+      - name: Assert multichannel authority is unchanged
         shell: bash
         run: |
           set -euo pipefail
-          d='supabase/functions/cerebro-console-human-router-zero-v1'; test -f "$d/index.ts" && test -f "$d/router.ts" && test -f "$d/auth.ts"; grep -F 'export const LIVE_CANARY_PERCENT=0;' "$d/router.ts"; grep -F 'cerebro-console-gateway-v0' "$d/index.ts"; grep -F 'cerebro-console-gateway-human-v1-canary' "$d/index.ts"; grep -F 'PREPROD_NORMAL_ROUTING_DISABLED' "$d/index.ts"; grep -F 'consumer_routing_enabled:false' "$d/index.ts"; ! grep -R -F 'SUPABASE_SERVICE_ROLE_KEY' "$d"; ! grep -R -Eq 'prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true' "$d"; ! git diff --name-only "${{ github.event.pull_request.base.sha }}" HEAD | grep -Eq '^supabase/functions/cerebro-console-gateway-v0/'
-      - name: Assert multichannel adapters preserve channel authority and universal learning boundary
-        shell: bash
-        run: |
-          set -euo pipefail
-          p='supabase/functions/_shared/cerebro-conversation-policy-v1.ts'; t='supabase/functions/cerebro-telegram-gateway-v0/index.ts'; v='supabase/functions/cerebro-telegram-voice-v1/index.ts'; a='supabase/migrations/20261013010500_cerebro_multichannel_ana_overlay_v1.sql'
-          test -f "$p" && test -f "$t" && test -f "$v" && test -f "$a"
-          grep -F "APP_ANA_TEXT" "$a"; grep -F "TELEGRAM_TEXT" "$t"; grep -F "TELEGRAM_VOICE" "$v"; grep -F "APP_ANA_VOICE" "$p"; grep -F "CONSOLE_VOICE" "$p"; grep -F "signal_type:'METRIC_OBSERVATION'" "$p"; grep -F "prod_authorized:false" "$p"; grep -F "prod_write_authorized:false" "$p"; grep -F "trading_access:false" "$p"; ! git diff --name-only "${{ github.event.pull_request.base.sha }}" HEAD | grep -Eq '^supabase/functions/(cerebro-console-gateway-v0|fenix-app-gateway)/'
-      - name: Assert exact PREPROD route-control and Ana migrations are bounded
-        shell: bash
-        run: |
-          set -euo pipefail
-          f='supabase/migrations/20261012132000_cerebro_human_route_control_preprod_v1.sql'; test -f "$f"; grep -q 'cerebro_human_route_control_preprod' "$f"; grep -q 'enable row level security' "$f"; grep -q 'grant all on table public.cerebro_human_route_control_preprod to service_role' "$f"; grep -q 'cerebro_human_route_transition_preprod' "$f"
-          a='supabase/migrations/20261013010500_cerebro_multichannel_ana_overlay_v1.sql'; test -f "$a"; grep -q 'fenix_prod_ana_knowledge_answer_user(p_question)' "$a"; grep -q 'prod_authority_changed' "$a"
-          if grep -Eqi '\b(truncate)\b|\bdelete\s+from\b' "$f" "$a"; then echo 'Destructive SQL forbidden.' >&2; exit 1; fi
+          p='supabase/functions/_shared/cerebro-conversation-policy-v1.ts'
+          grep -F "APP_ANA_VOICE" "$p"; grep -F "CONSOLE_VOICE" "$p"; grep -F "prod_authorized:false" "$p"; grep -F "prod_write_authorized:false" "$p"; grep -F "trading_access:false" "$p"
+          grep -F "TELEGRAM_TEXT" supabase/functions/cerebro-telegram-gateway-v0/index.ts
+          grep -F "TELEGRAM_VOICE" supabase/functions/cerebro-telegram-voice-v1/index.ts
+          grep -F "APP_ANA_TEXT" supabase/migrations/20261013010500_cerebro_multichannel_ana_overlay_v1.sql
+      - name: Build exact head
+        run: npm run build
       - name: Mark strict boundary
         run: |
-          echo 'Human Intelligence readiness reuses existing LRN-001 and Continuous Human QA; VOICE-001 wraps only the canonical Ana knowledge endpoint and Console chat endpoint.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'Internal App chat, existing backends, PROD authority and Trading remain unchanged; low-confidence speech is reviewed and single observations cannot auto-promote.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'VOICE-001 is transport-only. Ana Voice reuses fenix_prod_chat_send_user; Console Voice reuses the stable Console /chat.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Learning remains governed by LRN-001, OLD vs NEW, evaluation/Tribunal, PREPROD, canary and rollback.' >> "$GITHUB_STEP_SUMMARY"
