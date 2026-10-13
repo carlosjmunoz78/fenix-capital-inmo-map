@@ -1,0 +1,68 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_WEB_ACQUISITION_INTELLIGENCE_PROFILE_REGISTRY_V1",
+  "company_id": "fenix",
+  "engine_id": "RSH-001",
+  "environment": "PREPROD",
+  "version": "1.0.0",
+  "block": "51-61",
+  "state": "CANDIDATE_PREPROD",
+  "block_status": "PARCIAL",
+  "profile_kind": "TRANSVERSAL_POLICY_PROFILE_NOT_NEW_ENGINE",
+  "items": {
+    "51": {"name":"Web Acquisition Layer","status":"DEFINIDO","implementation":"deterministic public-source acquisition router overlay"},
+    "52": {"name":"Scrapling","status":"LAB_REFERENCE","implementation":"D4Vinci/Scrapling BSD-3-Clause; local OSS adapter candidate; no automatic external code execution"},
+    "53": {"name":"Crawlee","status":"LAB_REFERENCE","implementation":"apify/crawlee Apache-2.0; local OSS adapter candidate; no automatic external code execution"},
+    "54": {"name":"Apify Free","status":"HOLD_RUNTIME","implementation":"free-tier-only provider fallback; no spend and no subscription introduced by this profile"},
+    "55": {"name":"Agent-Reach","status":"LAB_REFERENCE","implementation":"Panniantong/Agent-Reach MIT; research/source adapter candidate only"},
+    "56": {"name":"Technology Scout","status":"PARCIAL","implementation":"modernized deterministic zero-cost/evidence-first scoring ported from legacy open PR #201 without merging stale stack"},
+    "57": {"name":"COMPET continuo","status":"PARCIAL","implementation":"canonical COMPET-001 id exists and historical PR #159 provides prior implementation evidence, but its runtime path is not present on current main; continuous execution is not claimed"},
+    "58": {"name":"WAUD","status":"EXISTENTE","implementation":"WAUD-001 shared PREPROD post-SCAN runtime already merged on current main"},
+    "59": {"name":"KW","status":"EXISTENTE","implementation":"KW-001 shared PREPROD post-SCAN runtime already merged on current main"},
+    "60": {"name":"SOCAUD","status":"EXISTENTE","implementation":"SOCAUD-001 shared PREPROD post-SCAN runtime already merged on current main"},
+    "61": {"name":"LOCALP","status":"EXISTENTE","implementation":"LOCALP-001 shared PREPROD post-SCAN runtime already merged on current main"}
+  },
+  "route_order": ["OFFICIAL_API_FEED_SITEMAP", "SCRAPLING", "CRAWLEE", "APIFY_FREE", "BROWSER_FALLBACK"],
+  "human_required_codes": ["LEGAL_REQUIRED", "SIGNATURE_REQUIRED", "LOW_CONFIDENCE", "HIGH_RISK", "POLICY_CONFLICT", "SECURITY_INCIDENT", "MONEY_LIMIT", "CUSTOMER_HUMAN_REQUEST"],
+  "invariants": {
+    "public_evidence_only": true,
+    "robots_policy_required": true,
+    "legal_terms_gate_required": true,
+    "captcha_bypass_allowed": false,
+    "auth_bypass_allowed": false,
+    "mfa_bypass_allowed": false,
+    "anti_abuse_evasion_allowed": false,
+    "browser_fallback_only": true,
+    "silent_spend_allowed": false,
+    "external_code_execution": false,
+    "new_paid_subscription_required": false,
+    "new_engine_per_provider": false
+  },
+  "dependency_map": {
+    "preserve": [
+      "cerebro/multicompany/post-scan-parallel-v1.mjs",
+      "cerebro/runtime/authorized-execution-device-profile-v1.mjs",
+      "cerebro/router/execution-model-router.mjs"
+    ],
+    "historical_not_in_current_main": ["PR #159 COMPET-001 runtime", "PR #201 Technology Scout V0"],
+    "extend": ["cerebro/runtime/web-acquisition-intelligence-profile-v1.mjs"],
+    "legacy_reference": ["PR #640 rollout queue"],
+    "replace": []
+  },
+  "verification": {
+    "status": "PENDING_EXACT_HEAD_CI",
+    "old_vs_new": "PENDING",
+    "focused_profile": "PENDING",
+    "existing_post_scan_regressions": "PENDING",
+    "candidate_full_suite": "PENDING",
+    "base_full_suite": "PENDING"
+  },
+  "rollback": {"method":"revert profile PR; existing post-SCAN runtime remains canonical"},
+  "rebuild": {"method":"recreate from registry + runtime contract + tests + source dispositions"},
+  "next_gate": "EXACT_HEAD_PREMERGE_AND_OLD_VS_NEW",
+  "prod_authorized": false,
+  "prod_write_authorized": false,
+  "execution_authorized": false,
+  "trading_access": false,
+  "additional_cost_eur": 0
+}
