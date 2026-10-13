@@ -1,0 +1,23 @@
+{
+  "schema_version":"1.0.0",
+  "rollout":"CEREBRO_184",
+  "phase":"1",
+  "environment":"PREPROD",
+  "source_policy":"LIVE_REPO_EVIDENCE_ONLY",
+  "items":[
+    {"id":13,"name":"Shared runtime","status":"PARTIAL_RECONCILING"},
+    {"id":14,"name":"Central queue / scheduler","status":"PARTIAL_RECONCILING"},
+    {"id":15,"name":"DBOS durable workflows","status":"CANDIDATE_NOT_YET_INTEGRATED"},
+    {"id":16,"name":"Automatic retries","status":"PARTIAL_RECONCILING"},
+    {"id":17,"name":"Universal idempotency","status":"PARTIAL_RECONCILING"},
+    {"id":18,"name":"Resume after failure","status":"PARTIAL_RECONCILING"},
+    {"id":19,"name":"Watchdog / health supervisor","status":"PARTIAL_RECONCILING"},
+    {"id":20,"name":"Model Router","status":"PARTIAL_RECONCILING"},
+    {"id":21,"name":"Free/local provider catalog","status":"PARTIAL_RECONCILING"},
+    {"id":22,"name":"Automatic provider fallback","status":"PARTIAL_RECONCILING"},
+    {"id":23,"name":"FinOps hard-cost guard","status":"PARTIAL_RECONCILING"},
+    {"id":24,"name":"Universal provenance/evidence","status":"PARTIAL_RECONCILING"}
+  ],
+  "rules":{"additional_cost_budget_eur":0,"prod_claim_requires_prod_evidence":true,"trading_isolated":true},
+  "next_action":"RECONCILE_EXISTING_JOB_RUNTIME_ROUTER_FINOPS_PROVENANCE_BEFORE_IMPORTING_DBOS"
+}
