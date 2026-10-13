@@ -6,9 +6,11 @@ on:
     paths:
       - 'cerebro/voice/**'
       - 'cerebro/tests/owned-voice-v0.test.mjs'
+      - 'src/AnaChatBlock.tsx'
       - 'src/AnaVoiceQueryBlock.tsx'
       - 'src/CerebroConsoleBlock.tsx'
       - 'src/OperationalShellGate.tsx'
+      - 'src/VoiceChannelAdapter.ts'
       - 'src/cerebroVoice.ts'
       - 'tests/voice-ui-ana-console.spec.ts'
       - '.github/workflows/cerebro-owned-voice-preprod.yml'
@@ -17,9 +19,11 @@ on:
     paths:
       - 'cerebro/voice/**'
       - 'cerebro/tests/owned-voice-v0.test.mjs'
+      - 'src/AnaChatBlock.tsx'
       - 'src/AnaVoiceQueryBlock.tsx'
       - 'src/CerebroConsoleBlock.tsx'
       - 'src/OperationalShellGate.tsx'
+      - 'src/VoiceChannelAdapter.ts'
       - 'src/cerebroVoice.ts'
       - 'tests/voice-ui-ana-console.spec.ts'
       - '.github/workflows/cerebro-owned-voice-preprod.yml'
@@ -77,18 +81,22 @@ jobs:
           set -euo pipefail
           grep -F "voice_is_transport_not_authority" cerebro/voice/channel-registry.v1.json
           grep -F '"audio_persistence": false' cerebro/voice/channel-registry.v1.json
-          grep -F "'/v2/ana/knowledge/answer'" src/AnaVoiceQueryBlock.tsx
-          grep -F "from './cerebroVoice'" src/AnaVoiceQueryBlock.tsx
+          grep -F '"learning_inherited": true' cerebro/voice/channel-registry.v1.json
+          grep -F "fenix_prod_chat_send_user" src/AnaChatBlock.tsx
+          grep -F "from './cerebroVoice'" src/AnaChatBlock.tsx
+          grep -F "voiceNeedsClarification" src/AnaChatBlock.tsx
           grep -F "cerebro-console-gateway-v0" src/CerebroConsoleBlock.tsx
           grep -F "from './cerebroVoice'" src/CerebroConsoleBlock.tsx
-          grep -F "voiceNeedsClarification" src/AnaVoiceQueryBlock.tsx src/CerebroConsoleBlock.tsx
+          grep -F "voiceNeedsClarification" src/CerebroConsoleBlock.tsx
           grep -F "voiceNeedsManualConfirmation" src/CerebroConsoleBlock.tsx
-          ! grep -R -F 'SUPABASE_SERVICE_ROLE_KEY' src/AnaVoiceQueryBlock.tsx src/CerebroConsoleBlock.tsx src/cerebroVoice.ts
+          grep -F "actor_code==='CARLOS-ADMIN'" src/CerebroConsoleBlock.tsx
+          test ! -e src/AnaVoiceQueryBlock.tsx
+          test ! -e src/VoiceChannelAdapter.ts
+          ! grep -R -F 'SUPABASE_SERVICE_ROLE_KEY' src/AnaChatBlock.tsx src/CerebroConsoleBlock.tsx src/cerebroVoice.ts
           if [ -n "${PR_BASE_SHA:-}" ]; then
             git fetch origin "$PR_BASE_SHA" --depth=1
             changed="$(git diff --name-only "$PR_BASE_SHA" HEAD)"
             ! printf '%s\n' "$changed" | grep -Eq '^supabase/functions/(fenix-app-gateway|cerebro-console-gateway-v0)/'
-            ! printf '%s\n' "$changed" | grep -q '^src/AnaChatBlock.tsx$'
           fi
 
       - name: Install dependencies reproducibly
@@ -106,5 +114,5 @@ jobs:
       - name: Record authority boundary
         run: |
           echo 'VOICE-001 browser UI is transport only: no new authority, DB, Edge Function, RPC, paid TTS or audio persistence.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'Ana Voice reuses /v2/ana/knowledge/answer; Console Voice reuses its existing /chat; keyboard remains the fallback.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'Internal App chat is preserved unchanged. Low-confidence voice is held for review and sensitive confirmations never bypass the existing Gateway.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Ana Voice reuses fenix_prod_chat_send_user; Console Voice reuses its existing /chat; keyboard remains the fallback.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Low-confidence speech is held for review and sensitive confirmations never bypass the existing Gateway.' >> "$GITHUB_STEP_SUMMARY"
