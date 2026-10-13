@@ -110,13 +110,13 @@ test('Technology Scout scoring is deterministic, evidence-first and zero-cost-fi
   assert.equal(incomplete.reason,'TECHNOLOGY_EVIDENCE_INCOMPLETE');
 });
 
-test('existing intelligence engines are reused, not recreated',()=>{
+test('live-main intelligence evidence is reused without false status upgrades',()=>{
   const expected={
-    'COMPET-001':'EXISTENTE','WAUD-001':'EXISTENTE','KW-001':'EXISTENTE','SOCAUD-001':'EXISTENTE','LOCALP-001':'EXISTENTE'
+    'COMPET-001':'PARCIAL','WAUD-001':'EXISTENTE','KW-001':'EXISTENTE','SOCAUD-001':'EXISTENTE','LOCALP-001':'EXISTENTE'
   };
   for(const [engine,status] of Object.entries(expected)) assert.equal(downstreamIntelligenceStatus(engine).status,status);
   assert.equal(fs.existsSync(new URL('../multicompany/post-scan-parallel-v1.mjs',import.meta.url)),true);
-  assert.equal(fs.existsSync(new URL('../runtime/competitor_intelligence.py',import.meta.url)),true);
+  assert.equal(fs.existsSync(new URL('../runtime/competitor_intelligence.py',import.meta.url)),false);
 });
 
 test('profile keeps exact human-exception vocabulary and no PROD/Trading authority',()=>{
