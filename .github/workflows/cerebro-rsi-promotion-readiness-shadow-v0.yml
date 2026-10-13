@@ -6,11 +6,9 @@ on:
       - main
     paths:
       - 'cerebro/**'
-      - 'src/AnaChatBlock.tsx'
       - 'src/AnaVoiceQueryBlock.tsx'
       - 'src/CerebroConsoleBlock.tsx'
       - 'src/OperationalShellGate.tsx'
-      - 'src/VoiceChannelAdapter.ts'
       - 'src/cerebroVoice.ts'
       - 'tests/voice-ui-ana-console.spec.ts'
       - 'supabase/functions/cerebro-human-old-actor-preprod-v0/**'
@@ -108,7 +106,7 @@ jobs:
           fi
           changed="$(git diff --name-only "$base" HEAD)"
           protected='^(src/|tests/|public/|scripts/|index\.html$|package(-lock)?\.json$|playwright\.config\.(ts|js)$|vite\.config\.(ts|js)$|tsconfig[^/]*\.json$|\.env|\.github/workflows/(preprod-build|app-restoration-build|prod-[^/]+)\.yml$)'
-          voice_ui='^(src/(AnaChatBlock|AnaVoiceQueryBlock|CerebroConsoleBlock|OperationalShellGate|cerebroVoice)\.tsx?$|src/VoiceChannelAdapter\.ts$|tests/voice-ui-ana-console\.spec\.ts$)'
+          voice_ui='^(src/(AnaVoiceQueryBlock|CerebroConsoleBlock|OperationalShellGate|cerebroVoice)\.tsx?$|tests/voice-ui-ana-console\.spec\.ts$)'
           protected_changed="$(printf '%s\n' "$changed" | grep -E "$protected" | grep -Ev "$voice_ui" || true)"
           if [ -n "$protected_changed" ]; then
             echo 'RSI scope invalidated: unexpected App UI/App-test/build/deploy surface changed.' >&2
@@ -129,18 +127,17 @@ jobs:
             test -f tests/voice-ui-ana-console.spec.ts
             grep -F "voice_is_transport_not_authority" cerebro/voice/channel-registry.v1.json
             grep -F '"audio_persistence": false' cerebro/voice/channel-registry.v1.json
-            grep -F "fenix_prod_chat_send_user" src/AnaChatBlock.tsx
-            grep -F "from './cerebroVoice'" src/AnaChatBlock.tsx
+            grep -F "'/v2/ana/knowledge/answer'" src/AnaVoiceQueryBlock.tsx
+            grep -F "from './cerebroVoice'" src/AnaVoiceQueryBlock.tsx
             grep -F "cerebro-console-gateway-v0" src/CerebroConsoleBlock.tsx
             grep -F "actor_code==='CARLOS-ADMIN'" src/CerebroConsoleBlock.tsx
             grep -F "from './cerebroVoice'" src/CerebroConsoleBlock.tsx
-            grep -F "voiceNeedsClarification" src/AnaChatBlock.tsx src/CerebroConsoleBlock.tsx
+            grep -F "voiceNeedsClarification" src/AnaVoiceQueryBlock.tsx src/CerebroConsoleBlock.tsx
             grep -F "voiceNeedsManualConfirmation" src/CerebroConsoleBlock.tsx
-            test ! -e src/AnaVoiceQueryBlock.tsx
-            test ! -e src/VoiceChannelAdapter.ts
-            ! grep -R -F 'SUPABASE_SERVICE_ROLE_KEY' src/AnaChatBlock.tsx src/CerebroConsoleBlock.tsx src/cerebroVoice.ts
+            ! grep -R -F 'SUPABASE_SERVICE_ROLE_KEY' src/AnaVoiceQueryBlock.tsx src/CerebroConsoleBlock.tsx src/cerebroVoice.ts
             ! printf '%s\n' "$changed" | grep -q '^supabase/functions/fenix-app-gateway/'
             ! printf '%s\n' "$changed" | grep -q '^supabase/functions/cerebro-console-gateway-v0/'
+            ! printf '%s\n' "$changed" | grep -q '^src/AnaChatBlock.tsx$'
           fi
           if printf '%s\n' "$changed" | grep -Eq '^(supabase/functions/(cerebro-human-old-actor-preprod-v0|cerebro-human-new-actor-preprod-v1|cerebro-human-route-control-preprod-v1|cerebro-console-gateway-human-v1-canary|cerebro-console-human-router-zero-v1)/|supabase/migrations/20261012132000_cerebro_human_route_control_preprod_v1\.sql$)'; then
             test -f .github/workflows/cerebro-human-intelligence-v1.yml
@@ -244,7 +241,7 @@ jobs:
           fi
           changed="$(git diff --name-only "$base" HEAD)"
           protected='^(src/|tests/|public/|scripts/|index\.html$|package(-lock)?\.json$|playwright\.config\.(ts|js)$|vite\.config\.(ts|js)$|tsconfig[^/]*\.json$|\.env|\.github/workflows/(preprod-build|app-restoration-build|prod-[^/]+)\.yml$)'
-          voice_ui='^(src/(AnaChatBlock|AnaVoiceQueryBlock|CerebroConsoleBlock|OperationalShellGate|cerebroVoice)\.tsx?$|src/VoiceChannelAdapter\.ts$|tests/voice-ui-ana-console\.spec\.ts$)'
+          voice_ui='^(src/(AnaVoiceQueryBlock|CerebroConsoleBlock|OperationalShellGate|cerebroVoice)\.tsx?$|tests/voice-ui-ana-console\.spec\.ts$)'
           protected_changed="$(printf '%s\n' "$changed" | grep -E "$protected" | grep -Ev "$voice_ui" || true)"
           if [ -n "$protected_changed" ]; then
             echo 'Unexpected App/application/test/production surface changed by RSI recovery.' >&2
@@ -262,18 +259,17 @@ jobs:
             test -f .github/workflows/cerebro-owned-voice-preprod.yml
             grep -F "voice_is_transport_not_authority" cerebro/voice/channel-registry.v1.json
             grep -F '"audio_persistence": false' cerebro/voice/channel-registry.v1.json
-            grep -F "fenix_prod_chat_send_user" src/AnaChatBlock.tsx
-            grep -F "from './cerebroVoice'" src/AnaChatBlock.tsx
+            grep -F "'/v2/ana/knowledge/answer'" src/AnaVoiceQueryBlock.tsx
+            grep -F "from './cerebroVoice'" src/AnaVoiceQueryBlock.tsx
             grep -F "cerebro-console-gateway-v0" src/CerebroConsoleBlock.tsx
             grep -F "actor_code==='CARLOS-ADMIN'" src/CerebroConsoleBlock.tsx
             grep -F "from './cerebroVoice'" src/CerebroConsoleBlock.tsx
-            grep -F "voiceNeedsClarification" src/AnaChatBlock.tsx src/CerebroConsoleBlock.tsx
+            grep -F "voiceNeedsClarification" src/AnaVoiceQueryBlock.tsx src/CerebroConsoleBlock.tsx
             grep -F "voiceNeedsManualConfirmation" src/CerebroConsoleBlock.tsx
-            test ! -e src/AnaVoiceQueryBlock.tsx
-            test ! -e src/VoiceChannelAdapter.ts
-            ! grep -R -F 'SUPABASE_SERVICE_ROLE_KEY' src/AnaChatBlock.tsx src/CerebroConsoleBlock.tsx src/cerebroVoice.ts
+            ! grep -R -F 'SUPABASE_SERVICE_ROLE_KEY' src/AnaVoiceQueryBlock.tsx src/CerebroConsoleBlock.tsx src/cerebroVoice.ts
             ! printf '%s\n' "$changed" | grep -q '^supabase/functions/fenix-app-gateway/'
             ! printf '%s\n' "$changed" | grep -q '^supabase/functions/cerebro-console-gateway-v0/'
+            ! printf '%s\n' "$changed" | grep -q '^src/AnaChatBlock.tsx$'
           fi
           if printf '%s\n' "$changed" | grep -Eq '^(supabase/functions/_shared/cerebro-conversation-policy-v1\.ts|supabase/functions/cerebro-telegram-(gateway-v0|voice-v1)/|supabase/migrations/20261013010500_cerebro_multichannel_ana_overlay_v1\.sql$)'; then
             node --test cerebro/tests/multichannel-conversation-policy-v1.test.mjs cerebro/tests/universal-learning-ingress.test.mjs
