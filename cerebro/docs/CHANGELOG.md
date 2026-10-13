@@ -1,5 +1,18 @@
 # CEREBRO OS · CHANGELOG
 
+## 2026-10-13 · Durable JOB runtime + worker runner + LEAD-001/NBA-001 revenue V1
+
+- PR #645 merged `JOB-001` durable V1 additively over the existing persistent runtime: context idempotency, exponential retry with deterministic jitter, worker leases, heartbeat, checkpoint/resume, watchdog, dead-letter and cancellation. Existing V0 remains preserved.
+- PR #647 merged the bounded durable worker runner V1: registered handlers, timeout + AbortSignal, automatic heartbeat, checkpoint resume, fail-closed stale leases, global/per-company concurrency and fair multi-context dispatch. It explicitly does not claim distributed multi-writer semantics.
+- Both runtime blocks passed dedicated focused tests, full CEREBRO regression, governed-main contract proof and RSI promotion/readiness shadows before merge.
+- Added PREPROD `LEAD-001 + NBA-001` deterministic scoring/next-best-action V1 on canonical engine IDs already present in the Engine Registry; no new engine ID is introduced.
+- Revenue scoring rejects raw PII/secrets, requires opaque evidence references, gates contact permission before commercial priority and propagates only the eight canonical HUMAN_REQUIRED reasons.
+- `conversion_propensity_score` is explicitly uncalibrated heuristic output and is not represented as statistical probability.
+- `lead.score-and-route` executes through the existing `JOB-001` durable V1 + worker runner V1; the capability performs no external contact and no PROD writes.
+- Cost target remains 0 EUR; Supabase is not required by these local PREPROD capabilities; Trading remains isolated.
+- Current commercial boundary: `LEAD-001/NBA-001 = PARCIAL / PREPROD IMPLEMENTADO`; `SALE-001 = next consumer block`; `CAP-001 = POR AUDITAR implementation evidence`.
+- Dedicated technical/runbook/dependency/rollback state: `cerebro/docs/CEREBRO_REVENUE_LEAD_NBA_V1_2026-10-13.md`.
+
 ## 2026-10-08 · COMP-REG-001 + TENANT-001 PREPROD reference execution accepted
 
 - PR #511 merged the additive hostless reference executor to `main` as `6710067e0f1beb28f930c038aceebfb9168f965a` after exact-head promotion/readiness gates passed.
@@ -71,7 +84,7 @@
 - PR #167 merged as `c523da8f11dbf1a2618982aeeb5940670317bb6e`.
 - `POL-001` and `HEX-001` structural/reference V0 completed with deterministic PREPROD-only policy evaluation and canonical HUMAN_REQUIRED exception routing.
 - Hardened fail-closed policy inputs, isolation, priority/tie semantics, stable exception event identity and replay/idempotency behavior through iterative exact-head review.
-- PROD Live Deploy `34330670776` and PROD Runtime Smoke `34330670550` success on exact merge SHA.
+- PROD Live Deploy `34330670776` and PROD Runtime Smoke `34330670550` success on merge SHA.
 - No autonomous PROD promotion was enabled.
 
 ## 2026-09-09 · Phase 2 read-only evidence audit V0
