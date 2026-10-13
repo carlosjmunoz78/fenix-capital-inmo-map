@@ -1,14 +1,28 @@
 name: CEREBRO Company Registry Tenant PREPROD V0
 
 on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'cerebro/multicompany/company-reg-tenant-preprod.mjs'
+      - 'cerebro/multicompany/bootstrap.mjs'
+      - 'cerebro/multicompany/rollback/company-registry-preprod-persistence-v1.rollback.sql'
+      - 'cerebro/multicompany/requests/company-reg-tenant-selfcheck.v0.json'
+      - 'cerebro/registry/multicompany-bootstrap.json'
+      - 'cerebro/tests/company-registry-preprod-persistence-v1.test.mjs'
+      - 'supabase/migrations/20261013075000_cerebro_company_registry_preprod_persistence_v1.sql'
+      - '.github/workflows/cerebro-company-reg-tenant-preprod-v0.yml'
   push:
     branches:
       - main
     paths:
       - 'cerebro/multicompany/company-reg-tenant-preprod.mjs'
       - 'cerebro/multicompany/bootstrap.mjs'
+      - 'cerebro/multicompany/rollback/company-registry-preprod-persistence-v1.rollback.sql'
       - 'cerebro/multicompany/requests/company-reg-tenant-selfcheck.v0.json'
       - 'cerebro/registry/multicompany-bootstrap.json'
+      - 'cerebro/tests/company-registry-preprod-persistence-v1.test.mjs'
+      - 'supabase/migrations/20261013075000_cerebro_company_registry_preprod_persistence_v1.sql'
       - '.github/workflows/cerebro-company-reg-tenant-preprod-v0.yml'
   workflow_dispatch:
     inputs:
@@ -24,11 +38,11 @@ permissions:
   contents: read
 
 concurrency:
-  group: cerebro-company-reg-tenant-${{ github.event_name }}-${{ github.sha }}
+  group: cerebro-company-reg-tenant-${{ github.event_name }}-${{ github.event.pull_request.head.sha || github.sha }}
   cancel-in-progress: false
 
 env:
-  EXACT_SOURCE_SHA: ${{ github.sha }}
+  EXACT_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
   DISPATCH_REQUEST_JSON: ${{ toJson(github.event.client_payload.request) }}
 
 jobs:
@@ -55,6 +69,26 @@ jobs:
           set -euo pipefail
           npm run validate
           npm test
+
+      - name: Assert durable Company Registry persistence contract is bounded
+        shell: bash
+        run: |
+          set -euo pipefail
+          m='supabase/migrations/20261013075000_cerebro_company_registry_preprod_persistence_v1.sql'
+          r='cerebro/multicompany/rollback/company-registry-preprod-persistence-v1.rollback.sql'
+          test -f "$m" && test -f "$r"
+          grep -F 'cerebro_company_registry_preprod' "$m"
+          grep -F 'cerebro_company_registry_history_preprod' "$m"
+          grep -F 'cerebro_company_register_preprod' "$m"
+          grep -F 'cerebro_company_tenant_boundary_check_preprod' "$m"
+          grep -F 'DENY_CROSS_COMPANY' "$m"
+          grep -F "'next_gate','COMP_ONB_DURABLE_EXECUTION_REQUIRED'" "$m"
+          grep -F 'enable row level security' "$m"
+          grep -F 'to service_role' "$m"
+          ! grep -F 'cluhljgonannaafpmblx' "$m"
+          ! grep -F 'fenix_prod.' "$m"
+          ! grep -Eqi '\btruncate\b|\bdelete[[:space:]]+from\b' "$m"
+          ! grep -Fi 'cascade' "$r"
 
       - name: Resolve one bounded PREPROD request
         id: request
@@ -150,5 +184,5 @@ jobs:
         shell: bash
         run: |
           echo 'COMP-REG-001 + TENANT-001 deterministic PREPROD reference execution completed.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'Tenant isolation and dependency progression are verified; no business chain or PROD promotion authority is granted.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'Durability remains IN_MEMORY_REFERENCE_ONLY. Next gate: durable Company Registry PREPROD persistence contract/audit.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Durable Company Registry persistence contract is present, service-role only, RLS protected, tenant fail-closed and rollback-bounded.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Physical PREPROD DB deployment remains independently governed; no business chain or PROD/Trading authority is granted.' >> "$GITHUB_STEP_SUMMARY"
