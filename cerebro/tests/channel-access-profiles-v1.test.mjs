@@ -148,3 +148,29 @@ test('Ana SQL guard is evaluated before knowledge lookup and rollback restores P
   assert.equal(/\btruncate\b|\bdelete\s+from\b/i.test(migration),false);
   assert.equal(/\btruncate\b|\bdelete\s+from\b/i.test(rollback),false);
 });
+
+test('PREPROD contract parity is additive isolated rollback-complete and aligned with PR 605 plus 616',()=>{
+  const preprod=fs.readFileSync(new URL('../multichannel/preprod/preprod-channel-contract-parity-v1.sql',import.meta.url),'utf8');
+  const preprodRollback=fs.readFileSync(new URL('../multichannel/preprod/preprod-channel-contract-parity-v1.rollback.sql',import.meta.url),'utf8');
+  const prodOverlay=fs.readFileSync(new URL('../../supabase/migrations/20261013010500_cerebro_multichannel_ana_overlay_v1.sql',import.meta.url),'utf8');
+  const prodScope=fs.readFileSync(new URL('../../supabase/migrations/20261013042000_cerebro_channel_access_profiles_v1.sql',import.meta.url),'utf8');
+
+  for(const fn of ['preprod_test_channel_access_decision_v1','preprod_test_apply_conversation_overlay_v1','preprod_test_multichannel_contract_v1']){
+    assert.ok(preprod.includes(`function public.${fn}`),fn);
+    assert.ok(preprodRollback.includes(`drop function if exists public.${fn}`),fn);
+  }
+  for(const phrase of ['CONSERVATIVE_OVERLAY','OBSERVABLE_CONCERN','authoritative_answer','authoritative_preserved','questions_added','prod_authority_changed']){
+    assert.ok(prodOverlay.includes(phrase),`PR605 missing ${phrase}`);
+    assert.ok(preprod.includes(phrase),`PREPROD missing ${phrase}`);
+  }
+  for(const phrase of ['FULL_OWNER','FENIX_OPERATIONAL','MULTICOMPANY_CONTROL','OWNER_PRIVATE','SECRETS_CREDENTIALS','TRADING_ISOLATED','CROSS_COMPANY_PRIVATE','CHANNEL_PROFILE_SCOPE_DENIED']){
+    assert.ok(preprod.includes(phrase),phrase);
+  }
+  assert.ok(prodScope.includes('fenix_prod_ana_channel_scope_guard_v1'));
+  assert.ok(preprod.includes("v_profile='FULL_OWNER' or v_scope='FENIX_OPERATIONAL'"));
+  assert.equal(/\btruncate\b|\bdelete\s+from\b/i.test(preprod),false);
+  assert.equal(/\btruncate\b|\bdelete\s+from\b/i.test(preprodRollback),false);
+  assert.equal(preprod.includes('cluhljgonannaafpmblx'),false);
+  assert.equal(preprod.includes('fenix_prod.'),false);
+  assert.equal(preprod.includes('service_role'),false);
+});
