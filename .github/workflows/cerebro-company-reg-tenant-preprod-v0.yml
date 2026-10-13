@@ -6,14 +6,19 @@ on:
     paths:
       - 'cerebro/multicompany/company-reg-tenant-preprod.mjs'
       - 'cerebro/multicompany/bootstrap.mjs'
+      - 'cerebro/multicompany/digital-footprint-scanner-v1.mjs'
       - 'cerebro/multicompany/rollback/company-registry-preprod-persistence-v1.rollback.sql'
       - 'cerebro/multicompany/rollback/company-onboarding-preprod-persistence-v1.rollback.sql'
+      - 'cerebro/multicompany/rollback/scan001-preprod-persistence-v1.rollback.sql'
       - 'cerebro/multicompany/requests/company-reg-tenant-selfcheck.v0.json'
       - 'cerebro/registry/multicompany-bootstrap.json'
       - 'cerebro/tests/company-registry-preprod-persistence-v1.test.mjs'
       - 'cerebro/tests/company-onboarding-preprod-persistence-v1.test.mjs'
+      - 'cerebro/tests/scan001-digital-footprint-v1.test.mjs'
+      - 'cerebro/tests/scan001-preprod-persistence-v1.test.mjs'
       - 'supabase/migrations/20261013075000_cerebro_company_registry_preprod_persistence_v1.sql'
       - 'supabase/migrations/20261013083000_cerebro_company_onboarding_preprod_persistence_v1.sql'
+      - 'supabase/migrations/20261013093000_cerebro_scan001_preprod_persistence_v1.sql'
       - '.github/workflows/cerebro-company-reg-tenant-preprod-v0.yml'
   push:
     branches:
@@ -21,14 +26,19 @@ on:
     paths:
       - 'cerebro/multicompany/company-reg-tenant-preprod.mjs'
       - 'cerebro/multicompany/bootstrap.mjs'
+      - 'cerebro/multicompany/digital-footprint-scanner-v1.mjs'
       - 'cerebro/multicompany/rollback/company-registry-preprod-persistence-v1.rollback.sql'
       - 'cerebro/multicompany/rollback/company-onboarding-preprod-persistence-v1.rollback.sql'
+      - 'cerebro/multicompany/rollback/scan001-preprod-persistence-v1.rollback.sql'
       - 'cerebro/multicompany/requests/company-reg-tenant-selfcheck.v0.json'
       - 'cerebro/registry/multicompany-bootstrap.json'
       - 'cerebro/tests/company-registry-preprod-persistence-v1.test.mjs'
       - 'cerebro/tests/company-onboarding-preprod-persistence-v1.test.mjs'
+      - 'cerebro/tests/scan001-digital-footprint-v1.test.mjs'
+      - 'cerebro/tests/scan001-preprod-persistence-v1.test.mjs'
       - 'supabase/migrations/20261013075000_cerebro_company_registry_preprod_persistence_v1.sql'
       - 'supabase/migrations/20261013083000_cerebro_company_onboarding_preprod_persistence_v1.sql'
+      - 'supabase/migrations/20261013093000_cerebro_scan001_preprod_persistence_v1.sql'
       - '.github/workflows/cerebro-company-reg-tenant-preprod-v0.yml'
   workflow_dispatch:
     inputs:
@@ -112,6 +122,29 @@ jobs:
           grep -F "'next_ready',jsonb_build_array('SCAN-001')" "$m"
           grep -F 'canonical_engine_count = 17' "$m"
           grep -F 'downstream_auto_execute = false' "$m"
+          grep -F 'enable row level security' "$m"
+          grep -F 'to service_role' "$m"
+          ! grep -F 'cluhljgonannaafpmblx' "$m"
+          ! grep -F 'fenix_prod.' "$m"
+          ! grep -Eqi '\btruncate\b|\bdelete[[:space:]]+from\b' "$m"
+          ! grep -Fi 'cascade' "$r"
+
+      - name: Assert durable SCAN-001 persistence contract is bounded
+        shell: bash
+        run: |
+          set -euo pipefail
+          runtime='cerebro/multicompany/digital-footprint-scanner-v1.mjs'
+          m='supabase/migrations/20261013093000_cerebro_scan001_preprod_persistence_v1.sql'
+          r='cerebro/multicompany/rollback/scan001-preprod-persistence-v1.rollback.sql'
+          test -f "$runtime" && test -f "$m" && test -f "$r"
+          grep -F "SCAN001_ENGINE_ID='SCAN-001'" "$runtime"
+          grep -F "SCAN001_ENVIRONMENT='PREPROD'" "$runtime"
+          grep -F 'read_only:true' "$runtime"
+          grep -F 'cerebro_scan001_run_preprod' "$m"
+          grep -F 'cerebro_scan001_record_success_preprod' "$m"
+          grep -F 'cerebro_company_engine_state_preprod' "$m"
+          grep -F "engine_id in ('KW-001','WAUD-001','SOCAUD-001','LOCALP-001')" "$m"
+          grep -F "'next_gate','POST_SCAN_PARALLEL_DURABLE_EXECUTION_REQUIRED'" "$m"
           grep -F 'enable row level security' "$m"
           grep -F 'to service_role' "$m"
           ! grep -F 'cluhljgonannaafpmblx' "$m"
@@ -213,5 +246,5 @@ jobs:
         shell: bash
         run: |
           echo 'COMP-REG-001 + TENANT-001 deterministic PREPROD reference execution completed.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'Durable Company Registry and COMP-ONB persistence contracts are service-role only, RLS protected, tenant fail-closed and rollback-bounded.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'COMP-ONB durable start unlocks SCAN-001 only; no downstream auto-execution, PROD/Trading authority or paid dependency.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Durable Company Registry, COMP-ONB and SCAN-001 contracts are service-role only, RLS protected, tenant fail-closed and rollback-bounded.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'SCAN-001 remains read-only and only unlocks KW/WAUD/SOCAUD/LOCALP; no downstream auto-execution, PROD/Trading authority or paid dependency.' >> "$GITHUB_STEP_SUMMARY"
