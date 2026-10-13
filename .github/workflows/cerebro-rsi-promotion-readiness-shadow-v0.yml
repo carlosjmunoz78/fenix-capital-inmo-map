@@ -2,29 +2,15 @@ name: CEREBRO RSI Promotion Readiness Shadow V0
 
 on:
   pull_request:
-    branches:
-      - main
+    branches: [main]
     paths:
       - 'cerebro/**'
-      - 'src/AnaVoiceQueryBlock.tsx'
+      - 'src/AnaChatBlock.tsx'
       - 'src/CerebroConsoleBlock.tsx'
       - 'src/OperationalShellGate.tsx'
       - 'src/cerebroVoice.ts'
       - 'tests/voice-ui-ana-console.spec.ts'
-      - 'supabase/functions/cerebro-human-old-actor-preprod-v0/**'
-      - 'supabase/functions/cerebro-human-new-actor-preprod-v1/**'
-      - 'supabase/functions/cerebro-human-route-control-preprod-v1/**'
-      - 'supabase/functions/cerebro-console-gateway-human-v1-canary/**'
-      - 'supabase/functions/cerebro-console-human-router-zero-v1/**'
-      - 'supabase/functions/_shared/cerebro-conversation-policy-v1.ts'
-      - 'supabase/functions/cerebro-telegram-gateway-v0/**'
-      - 'supabase/functions/cerebro-telegram-voice-v1/**'
-      - 'supabase/migrations/20261012132000_cerebro_human_route_control_preprod_v1.sql'
-      - 'supabase/migrations/20261013010500_cerebro_multichannel_ana_overlay_v1.sql'
-      - '.github/workflows/cerebro-rsi-*.yml'
-      - '.github/workflows/cerebro-hygiene-audit-v0.yml'
-      - '.github/workflows/cerebro-human-intelligence-*.yml'
-      - '.github/workflows/cerebro-multichannel-conversation-unification-v1.yml'
+      - '.github/workflows/cerebro-human-intelligence-promotion-readiness-v1.yml'
       - '.github/workflows/cerebro-owned-voice-preprod.yml'
       - '.github/workflows/cerebro-rsi-promotion-readiness-shadow-v0.yml'
   workflow_dispatch:
@@ -51,31 +37,25 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Assert exact PR head checkout
+      - name: Assert exact PR head
         run: test "$(git rev-parse HEAD)" = "$EXACT_HEAD"
-      - name: Validate canonical engine registry
+      - name: Validate canonical Factory and Registry
         working-directory: cerebro
-        run: npm run validate
-      - name: Test FACT-001 and GOV-001 contracts
-        working-directory: cerebro
-        run: npm test
-      - name: Generate all engine skeletons
-        working-directory: cerebro
-        run: npm run generate -- --out /tmp/cerebro-generated
+        run: |
+          npm run validate
+          npm test
+          npm run generate -- --out /tmp/cerebro-generated
       - name: Assert canonical engine count and no repo mutation
+        shell: bash
         run: |
           set -euo pipefail
-          EXPECTED_COUNT="$(node -e "const x=require('./cerebro/registry/engine-registry.seed.json'); console.log(Array.isArray(x)?x.length:(x.engines?.length ?? x.engine_count ?? x.count ?? ''))")"
-          GENERATED_COUNT="$(node -e "const x=require('/tmp/cerebro-generated/skeleton-index.json'); console.log(x.engine_count)")"
-          test -n "$EXPECTED_COUNT"
-          test "$GENERATED_COUNT" = "$EXPECTED_COUNT"
-          git diff --exit-code
-      - name: Mark equivalence boundary
-        run: echo 'This job executes the validation body of CEREBRO Factory PREPROD on the exact PR head; it does not claim the named manual gate ran.' >> "$GITHUB_STEP_SUMMARY"
+          expected="$(node -e "const x=require('./cerebro/registry/engine-registry.seed.json'); console.log(Array.isArray(x)?x.length:(x.engines?.length ?? x.engine_count ?? x.count ?? ''))")"
+          generated="$(node -e "const x=require('/tmp/cerebro-generated/skeleton-index.json'); console.log(x.engine_count)")"
+          test -n "$expected"; test "$generated" = "$expected"; git diff --exit-code
 
   app-surface-isolation-shadow:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     env:
       VITE_FENIX_ENV: preprod
       VITE_SUPABASE_URL: https://hnqlnvakzaywtafeiybt.supabase.co
@@ -89,125 +69,56 @@ jobs:
         with:
           node-version: 24
           cache: npm
-      - name: Assert exact PR head checkout
-        run: test "$(git rev-parse HEAD)" = "$EXACT_HEAD"
-      - name: Assert bounded App UI and exact governed surfaces
+      - name: Assert exact bounded VOICE-001 UI surface
         env:
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
         shell: bash
         run: |
           set -euo pipefail
-          if [ -n "${PR_BASE_SHA:-}" ]; then
-            git fetch origin "$PR_BASE_SHA" --depth=1
-            base="$PR_BASE_SHA"
-          else
-            git fetch origin main --depth=1
-            base="$(git rev-parse FETCH_HEAD)"
-          fi
-          changed="$(git diff --name-only "$base" HEAD)"
-          protected='^(src/|tests/|public/|scripts/|index\.html$|package(-lock)?\.json$|playwright\.config\.(ts|js)$|vite\.config\.(ts|js)$|tsconfig[^/]*\.json$|\.env|\.github/workflows/(preprod-build|app-restoration-build|prod-[^/]+)\.yml$)'
-          voice_ui='^(src/(AnaVoiceQueryBlock|CerebroConsoleBlock|OperationalShellGate|cerebroVoice)\.tsx?$|tests/voice-ui-ana-console\.spec\.ts$)'
-          protected_changed="$(printf '%s\n' "$changed" | grep -E "$protected" | grep -Ev "$voice_ui" || true)"
-          if [ -n "$protected_changed" ]; then
-            echo 'RSI scope invalidated: unexpected App UI/App-test/build/deploy surface changed.' >&2
-            printf '%s\n' "$protected_changed" >&2
-            exit 1
-          fi
-          allowed='^(supabase/functions/(cerebro-human-old-actor-preprod-v0|cerebro-human-new-actor-preprod-v1|cerebro-human-route-control-preprod-v1|cerebro-console-gateway-human-v1-canary|cerebro-console-human-router-zero-v1|cerebro-telegram-gateway-v0|cerebro-telegram-voice-v1)/|supabase/functions/_shared/cerebro-conversation-policy-v1\.ts$|supabase/migrations/(20261012132000_cerebro_human_route_control_preprod_v1|20261013010500_cerebro_multichannel_ana_overlay_v1)\.sql$)'
-          unexpected_supabase="$(printf '%s\n' "$changed" | grep '^supabase/' | grep -Ev "$allowed" || true)"
-          if [ -n "$unexpected_supabase" ]; then
-            echo 'Unapproved Supabase surface changed:' >&2
-            printf '%s\n' "$unexpected_supabase" >&2
-            exit 1
-          fi
-          if printf '%s\n' "$changed" | grep -Eq "$voice_ui"; then
-            test -f .github/workflows/cerebro-owned-voice-preprod.yml
-            test -f cerebro/voice/channel-registry.v1.json
-            test -f cerebro/voice/VOICE_UI_V1_RUNBOOK.md
-            test -f tests/voice-ui-ana-console.spec.ts
-            grep -F "voice_is_transport_not_authority" cerebro/voice/channel-registry.v1.json
-            grep -F '"audio_persistence": false' cerebro/voice/channel-registry.v1.json
-            grep -F "'/v2/ana/knowledge/answer'" src/AnaVoiceQueryBlock.tsx
-            grep -F "from './cerebroVoice'" src/AnaVoiceQueryBlock.tsx
-            grep -F "cerebro-console-gateway-v0" src/CerebroConsoleBlock.tsx
-            grep -F "actor_code==='CARLOS-ADMIN'" src/CerebroConsoleBlock.tsx
-            grep -F "from './cerebroVoice'" src/CerebroConsoleBlock.tsx
-            grep -F "voiceNeedsClarification" src/AnaVoiceQueryBlock.tsx src/CerebroConsoleBlock.tsx
-            grep -F "voiceNeedsManualConfirmation" src/CerebroConsoleBlock.tsx
-            ! grep -R -F 'SUPABASE_SERVICE_ROLE_KEY' src/AnaVoiceQueryBlock.tsx src/CerebroConsoleBlock.tsx src/cerebroVoice.ts
-            ! printf '%s\n' "$changed" | grep -q '^supabase/functions/fenix-app-gateway/'
-            ! printf '%s\n' "$changed" | grep -q '^supabase/functions/cerebro-console-gateway-v0/'
-            ! printf '%s\n' "$changed" | grep -q '^src/AnaChatBlock.tsx$'
-          fi
-          if printf '%s\n' "$changed" | grep -Eq '^(supabase/functions/(cerebro-human-old-actor-preprod-v0|cerebro-human-new-actor-preprod-v1|cerebro-human-route-control-preprod-v1|cerebro-console-gateway-human-v1-canary|cerebro-console-human-router-zero-v1)/|supabase/migrations/20261012132000_cerebro_human_route_control_preprod_v1\.sql$)'; then
-            test -f .github/workflows/cerebro-human-intelligence-v1.yml
-            test -f .github/workflows/cerebro-human-intelligence-promotion-readiness-v1.yml
-            test -f .github/workflows/cerebro-human-intelligence-prod-canary-v1.yml
-            test -f .github/workflows/cerebro-human-intelligence-prod-router-zero-v1.yml
-            node --test \
-              cerebro/tests/human-intelligence-real-actor-gate-v1.test.mjs \
-              cerebro/tests/human-intelligence-autonomy-bridge-v1.test.mjs \
-              cerebro/tests/human-intelligence-gateway-routing-v1.test.mjs \
-              cerebro/tests/human-intelligence-production-overlay-v1.test.mjs \
-              cerebro/tests/human-intelligence-prod-router-zero-v1.test.mjs
-          fi
-          if printf '%s\n' "$changed" | grep -Eq '^(supabase/functions/_shared/cerebro-conversation-policy-v1\.ts|supabase/functions/cerebro-telegram-(gateway-v0|voice-v1)/|supabase/migrations/20261013010500_cerebro_multichannel_ana_overlay_v1\.sql$)'; then
-            test -f .github/workflows/cerebro-multichannel-conversation-unification-v1.yml
-            node --test cerebro/tests/multichannel-conversation-policy-v1.test.mjs cerebro/tests/universal-learning-ingress.test.mjs
-            grep -F "APP_ANA_TEXT" supabase/migrations/20261013010500_cerebro_multichannel_ana_overlay_v1.sql
-            grep -F "TELEGRAM_TEXT" supabase/functions/cerebro-telegram-gateway-v0/index.ts
-            grep -F "TELEGRAM_VOICE" supabase/functions/cerebro-telegram-voice-v1/index.ts
-            ! printf '%s\n' "$changed" | grep -q '^supabase/functions/fenix-app-gateway/'
-            ! printf '%s\n' "$changed" | grep -q '^supabase/functions/cerebro-console-gateway-v0/'
-          fi
-          if printf '%s\n' "$changed" | grep -q '^supabase/functions/cerebro-console-gateway-human-v1-canary/'; then
-            grep -F 'PROD_CANARY_UNROUTED' supabase/functions/cerebro-console-gateway-human-v1-canary/index.ts
-            grep -F 'live_chat_invoked:false' supabase/functions/cerebro-console-gateway-human-v1-canary/index.ts
-            ! grep -F 'SUPABASE_SERVICE_ROLE_KEY' supabase/functions/cerebro-console-gateway-human-v1-canary/index.ts
-            ! printf '%s\n' "$changed" | grep -q '^supabase/functions/cerebro-console-gateway-v0/'
-          fi
-          if printf '%s\n' "$changed" | grep -q '^supabase/functions/cerebro-console-human-router-zero-v1/'; then
-            d='supabase/functions/cerebro-console-human-router-zero-v1'
-            grep -F 'export const LIVE_CANARY_PERCENT=0;' "$d/router.ts"
-            grep -F 'PREPROD_NORMAL_ROUTING_DISABLED' "$d/index.ts"
-            grep -F 'consumer_routing_enabled:false' "$d/index.ts"
-            ! grep -R -F 'SUPABASE_SERVICE_ROLE_KEY' "$d"
-            ! grep -R -Eq 'prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true' "$d"
-            ! printf '%s\n' "$changed" | grep -q '^supabase/functions/cerebro-console-gateway-v0/'
-          fi
-          echo 'No unapproved App/backend authority drift. Exact VOICE-001 UI surfaces are allowed only with their dedicated build/E2E gate.' >> "$GITHUB_STEP_SUMMARY"
+          test "$(git rev-parse HEAD)" = "$EXACT_HEAD"
+          git fetch origin "$PR_BASE_SHA" --depth=1
+          changed="$(git diff --name-only "$PR_BASE_SHA" HEAD)"
+          allowed='^(\.github/workflows/cerebro-(human-intelligence-promotion-readiness-v1|owned-voice-preprod|rsi-promotion-readiness-shadow-v0)\.yml$|cerebro/voice/(VOICE_UI_V1_RUNBOOK\.md|channel-registry\.v1\.json)$|src/(AnaChatBlock|CerebroConsoleBlock|OperationalShellGate)\.tsx$|tests/voice-ui-ana-console\.spec\.ts$)'
+          bad="$(printf '%s\n' "$changed" | grep -Ev "$allowed" || true)"
+          if [ -n "$bad" ]; then echo 'RSI scope invalidated by unexpected surface:' >&2; printf '%s\n' "$bad" >&2; exit 1; fi
+          if printf '%s\n' "$changed" | grep -q '^supabase/'; then echo 'VOICE-001 UI PR must not mutate Supabase/backend.' >&2; exit 1; fi
+          grep -F 'voice_is_transport_not_authority' cerebro/voice/channel-registry.v1.json
+          grep -F '"audio_persistence": false' cerebro/voice/channel-registry.v1.json
+          grep -F '"learning_inherited": true' cerebro/voice/channel-registry.v1.json
+          grep -F 'fenix_prod_chat_send_user' src/AnaChatBlock.tsx
+          grep -F "from './cerebroVoice'" src/AnaChatBlock.tsx
+          grep -F 'voiceNeedsClarification' src/AnaChatBlock.tsx
+          grep -F 'cerebro-console-gateway-v0' src/CerebroConsoleBlock.tsx
+          grep -F "actor_code==='CARLOS-ADMIN'" src/CerebroConsoleBlock.tsx
+          grep -F "from './cerebroVoice'" src/CerebroConsoleBlock.tsx
+          grep -F 'voiceNeedsManualConfirmation' src/CerebroConsoleBlock.tsx
+          ! grep -R -F 'SUPABASE_SERVICE_ROLE_KEY' src/AnaChatBlock.tsx src/CerebroConsoleBlock.tsx src/cerebroVoice.ts
       - name: Install dependencies reproducibly
         run: npm ci
       - name: Build exact head
         run: npm run build
-      - name: PRE-PROD Ana CORS smoke
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Prove Ana and Console voice reuse exact text contracts
+        run: npx playwright test tests/voice-ui-ana-console.spec.ts --project=desktop-chromium
+      - name: PREPROD Ana CORS smoke
         shell: bash
         run: |
           set -euo pipefail
           headers="$(mktemp)"
-          status="$(curl --silent --show-error --output /dev/null --dump-header "$headers" --write-out '%{http_code}' --max-time 20 \
-            -X OPTIONS \
-            -H 'Origin: https://carlosjmunoz78.github.io' \
-            -H 'Access-Control-Request-Method: GET' \
-            -H 'Access-Control-Request-Headers: authorization,apikey' \
-            'https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/fenix-ana-api-test/capabilities')"
-          test "$status" = "204"
-          grep -qi '^access-control-allow-origin:' "$headers"
+          status="$(curl --silent --show-error --output /dev/null --dump-header "$headers" --write-out '%{http_code}' --max-time 20 -X OPTIONS -H 'Origin: https://carlosjmunoz78.github.io' -H 'Access-Control-Request-Method: GET' -H 'Access-Control-Request-Headers: authorization,apikey' 'https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/fenix-ana-api-test/capabilities')"
+          test "$status" = "204"; grep -qi '^access-control-allow-origin:' "$headers"
       - name: Archive exact-head build evidence
         uses: actions/upload-artifact@v4
         with:
-          name: rsi-promotion-readiness-build-${{ env.EXACT_HEAD }}
+          name: rsi-voice-ui-readiness-${{ env.EXACT_HEAD }}
           path: dist
           if-no-files-found: error
           retention-days: 7
-      - name: Mark App gate boundary
-        run: |
-          echo 'This job proves bounded App UI changes, exact-head build and PREPROD CORS smoke.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'VOICE-001 is transport-only and cannot grant new authority, writes or Trading.' >> "$GITHUB_STEP_SUMMARY"
 
   tribunal-shadow:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
         with:
@@ -216,79 +127,31 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Assert exact PR head checkout
+      - name: Assert exact PR head
         run: test "$(git rev-parse HEAD)" = "$EXACT_HEAD"
-      - name: Independent-evaluation and promotion safety contracts
-        run: >-
-          node --test
-          cerebro/tests/evaluation-tribunal.test.mjs
-          cerebro/tests/experiment-pipeline.test.mjs
-          cerebro/tests/promotion-pipeline.test.mjs
-          cerebro/tests/rsi-recovery-e2e.test.mjs
-          cerebro/tests/bounded-recovery-supervisor.test.mjs
-      - name: Assert PR remains bounded and exact governed adapters preserve authority
-        env:
-          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+      - name: Independent evaluation promotion and rollback contracts
+        run: |
+          node --test \
+            cerebro/tests/evaluation-tribunal.test.mjs \
+            cerebro/tests/experiment-pipeline.test.mjs \
+            cerebro/tests/promotion-pipeline.test.mjs \
+            cerebro/tests/rsi-recovery-e2e.test.mjs \
+            cerebro/tests/bounded-recovery-supervisor.test.mjs \
+            cerebro/tests/universal-learning-ingress.test.mjs \
+            cerebro/tests/multichannel-conversation-old-vs-new-v1.test.mjs
+      - name: Assert no authority or learning bypass
         shell: bash
         run: |
           set -euo pipefail
-          if [ -n "${PR_BASE_SHA:-}" ]; then
-            git fetch origin "$PR_BASE_SHA" --depth=1
-            base="$PR_BASE_SHA"
-          else
-            git fetch origin main --depth=1
-            base="$(git rev-parse FETCH_HEAD)"
-          fi
-          changed="$(git diff --name-only "$base" HEAD)"
-          protected='^(src/|tests/|public/|scripts/|index\.html$|package(-lock)?\.json$|playwright\.config\.(ts|js)$|vite\.config\.(ts|js)$|tsconfig[^/]*\.json$|\.env|\.github/workflows/(preprod-build|app-restoration-build|prod-[^/]+)\.yml$)'
-          voice_ui='^(src/(AnaVoiceQueryBlock|CerebroConsoleBlock|OperationalShellGate|cerebroVoice)\.tsx?$|tests/voice-ui-ana-console\.spec\.ts$)'
-          protected_changed="$(printf '%s\n' "$changed" | grep -E "$protected" | grep -Ev "$voice_ui" || true)"
-          if [ -n "$protected_changed" ]; then
-            echo 'Unexpected App/application/test/production surface changed by RSI recovery.' >&2
-            printf '%s\n' "$protected_changed" >&2
-            exit 1
-          fi
-          allowed='^(supabase/functions/(cerebro-human-old-actor-preprod-v0|cerebro-human-new-actor-preprod-v1|cerebro-human-route-control-preprod-v1|cerebro-console-gateway-human-v1-canary|cerebro-console-human-router-zero-v1|cerebro-telegram-gateway-v0|cerebro-telegram-voice-v1)/|supabase/functions/_shared/cerebro-conversation-policy-v1\.ts$|supabase/migrations/(20261012132000_cerebro_human_route_control_preprod_v1|20261013010500_cerebro_multichannel_ana_overlay_v1)\.sql$)'
-          unexpected_supabase="$(printf '%s\n' "$changed" | grep '^supabase/' | grep -Ev "$allowed" || true)"
-          if [ -n "$unexpected_supabase" ]; then
-            echo 'Unexpected Supabase surface changed by RSI recovery.' >&2
-            printf '%s\n' "$unexpected_supabase" >&2
-            exit 1
-          fi
-          if printf '%s\n' "$changed" | grep -Eq "$voice_ui"; then
-            test -f .github/workflows/cerebro-owned-voice-preprod.yml
-            grep -F "voice_is_transport_not_authority" cerebro/voice/channel-registry.v1.json
-            grep -F '"audio_persistence": false' cerebro/voice/channel-registry.v1.json
-            grep -F "'/v2/ana/knowledge/answer'" src/AnaVoiceQueryBlock.tsx
-            grep -F "from './cerebroVoice'" src/AnaVoiceQueryBlock.tsx
-            grep -F "cerebro-console-gateway-v0" src/CerebroConsoleBlock.tsx
-            grep -F "actor_code==='CARLOS-ADMIN'" src/CerebroConsoleBlock.tsx
-            grep -F "from './cerebroVoice'" src/CerebroConsoleBlock.tsx
-            grep -F "voiceNeedsClarification" src/AnaVoiceQueryBlock.tsx src/CerebroConsoleBlock.tsx
-            grep -F "voiceNeedsManualConfirmation" src/CerebroConsoleBlock.tsx
-            ! grep -R -F 'SUPABASE_SERVICE_ROLE_KEY' src/AnaVoiceQueryBlock.tsx src/CerebroConsoleBlock.tsx src/cerebroVoice.ts
-            ! printf '%s\n' "$changed" | grep -q '^supabase/functions/fenix-app-gateway/'
-            ! printf '%s\n' "$changed" | grep -q '^supabase/functions/cerebro-console-gateway-v0/'
-            ! printf '%s\n' "$changed" | grep -q '^src/AnaChatBlock.tsx$'
-          fi
-          if printf '%s\n' "$changed" | grep -Eq '^(supabase/functions/_shared/cerebro-conversation-policy-v1\.ts|supabase/functions/cerebro-telegram-(gateway-v0|voice-v1)/|supabase/migrations/20261013010500_cerebro_multichannel_ana_overlay_v1\.sql$)'; then
-            node --test cerebro/tests/multichannel-conversation-policy-v1.test.mjs cerebro/tests/universal-learning-ingress.test.mjs
-            grep -F "prod_authority_changed:false" supabase/functions/_shared/cerebro-conversation-policy-v1.ts
-            grep -F "prod_authorized:false" supabase/functions/_shared/cerebro-conversation-policy-v1.ts
-            grep -F "trading_access:false" supabase/functions/_shared/cerebro-conversation-policy-v1.ts
-            ! printf '%s\n' "$changed" | grep -q '^supabase/functions/cerebro-console-gateway-v0/'
-            ! printf '%s\n' "$changed" | grep -q '^supabase/functions/fenix-app-gateway/'
-          fi
-          if printf '%s\n' "$changed" | grep -q '^supabase/functions/cerebro-console-gateway-human-v1-canary/'; then
-            ! printf '%s\n' "$changed" | grep -q '^supabase/functions/cerebro-console-gateway-v0/'
-          fi
-          if printf '%s\n' "$changed" | grep -q '^supabase/functions/cerebro-console-human-router-zero-v1/'; then
-            d='supabase/functions/cerebro-console-human-router-zero-v1'
-            grep -F 'export const LIVE_CANARY_PERCENT=0;' "$d/router.ts"
-            grep -F 'PREPROD_NORMAL_ROUTING_DISABLED' "$d/index.ts"
-            grep -F 'consumer_routing_enabled:false' "$d/index.ts"
-            ! grep -R -F 'SUPABASE_SERVICE_ROLE_KEY' "$d"
-            ! grep -R -Eq 'prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true' "$d"
-            ! printf '%s\n' "$changed" | grep -q '^supabase/functions/cerebro-console-gateway-v0/'
-          fi
-          echo 'RSI remains bounded: exact VOICE-001 UI surfaces may change transport/presentation only; they cannot expand authority, writes, Trading, or bypass governed promotion.' >> "$GITHUB_STEP_SUMMARY"
+          test ! -e src/AnaVoiceQueryBlock.tsx
+          test ! -e src/VoiceChannelAdapter.ts
+          grep -F 'fenix_prod_chat_send_user' src/AnaChatBlock.tsx
+          grep -F 'cerebro-console-gateway-v0' src/CerebroConsoleBlock.tsx
+          grep -F '"human_required_inherited": true' cerebro/voice/channel-registry.v1.json
+          grep -F '"learning_inherited": true' cerebro/voice/channel-registry.v1.json
+          grep -F 'LRN-001' cerebro/voice/VOICE_UI_V1_RUNBOOK.md
+          ! grep -R -F 'SUPABASE_SERVICE_ROLE_KEY' src/AnaChatBlock.tsx src/CerebroConsoleBlock.tsx src/cerebroVoice.ts
+      - name: Mark bounded shadow result
+        run: |
+          echo 'RSI shadow preserves Factory, Tribunal, rollback and governed LRN-001 while allowing only the exact VOICE-001 UI surface.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'No backend, Supabase authority, Trading or stable gateway mutation is permitted by this PR.' >> "$GITHUB_STEP_SUMMARY"
