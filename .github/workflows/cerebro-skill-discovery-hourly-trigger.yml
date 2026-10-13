@@ -1,0 +1,25 @@
+name: CEREBRO Skill Discovery Hourly Trigger
+
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: cerebro-skill-discovery-hourly-trigger
+  cancel-in-progress: true
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  trigger-discovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Dispatch canonical Skill Discovery Scout
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: gh workflow run cerebro-skill-discovery-scout.yml --ref main
