@@ -38,7 +38,12 @@ Target: one transversal CEREBRO Safe Engineering Profile, not separate agent sil
 ## Current state
 
 - Items 1-12: GREEN PREPROD / integrated foundation.
-- Items 25-37: SOURCE_LICENSE_OVERLAP_AUDIT_GREEN; runtime integration not yet GREEN.
-- External source identity/license blockers: none remaining for the selected dispositions.
-- Evolver remains patterns-only by policy because copyleft/source-available direction is not suitable for casual proprietary-core reuse.
-- Next action: build one deterministic `CEREBRO_SAFE_ENGINEERING_PROFILE_V1` contract that composes only the accepted behaviors, then run overlap + adversarial + regression + OLD-vs-NEW gates before merge/promotion.
+- Items 25-37: `CEREBRO_SAFE_ENGINEERING_PROFILE_V1` implementado y validado en PREPROD sobre la implementación `1d4789d77ce875dcfa3ff49f4136a44f9cf71e01`.
+- Gates validados: focused contract, AUTO-001, Skill Evolution, Evaluation Tribunal, full CEREBRO candidate y full CEREBRO baseline `main` = PASS con Node 24.
+- OLD vs NEW: NEW_BETTER por añadir la capacidad requerida sin regresión observable de tests, seguridad, política, coste, autoridad PROD o Trading.
+- Registro de provenance/licencia/estado: `cerebro/registry/safe-engineering-profile.v1.json`.
+- Evidencia y runbook de cierre: `cerebro/docs/CEREBRO_SAFE_ENGINEERING_PROFILE_V1_2026-10-13.md`.
+- External source identity/license blockers: ninguno para las disposiciones seleccionadas.
+- Evolver permanece patterns-only por política; Claude-Mem permanece LAB memory only; no se instala ninguna dependencia de pago.
+- Estado de promoción: PREPROD. Falta CI sobre el HEAD final del PR, merge gobernado y regresión post-merge en `main`; hasta entonces no declarar HECHO ni PROD.
+- Siguiente bloque, solo tras cierre verde: items 38-50.
