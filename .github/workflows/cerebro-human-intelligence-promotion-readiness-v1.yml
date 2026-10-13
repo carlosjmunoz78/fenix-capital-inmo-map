@@ -9,6 +9,7 @@ on:
       - 'cerebro/tests/human-intelligence-*.test.mjs'
       - 'cerebro/tests/multichannel-conversation-policy-v1.test.mjs'
       - 'cerebro/tests/multichannel-conversation-old-vs-new-v1.test.mjs'
+      - 'cerebro/tests/channel-access-profiles-v1.test.mjs'
       - 'cerebro/tests/continuous-human-qa-v0.test.mjs'
       - 'supabase/functions/cerebro-human-old-actor-preprod-v0/**'
       - 'supabase/functions/cerebro-human-new-actor-preprod-v1/**'
@@ -16,10 +17,12 @@ on:
       - 'supabase/functions/cerebro-console-gateway-human-v1-canary/**'
       - 'supabase/functions/cerebro-console-human-router-zero-v1/**'
       - 'supabase/functions/_shared/cerebro-conversation-policy-v1.ts'
+      - 'supabase/functions/_shared/cerebro-channel-access-policy-v1.ts'
       - 'supabase/functions/cerebro-telegram-gateway-v0/**'
       - 'supabase/functions/cerebro-telegram-voice-v1/**'
       - 'supabase/migrations/20261012132000_cerebro_human_route_control_preprod_v1.sql'
       - 'supabase/migrations/20261013010500_cerebro_multichannel_ana_overlay_v1.sql'
+      - 'supabase/migrations/20261013042000_cerebro_channel_access_profiles_v1.sql'
       - '.github/workflows/cerebro-human-intelligence-*.yml'
       - '.github/workflows/cerebro-multichannel-conversation-unification-v1.yml'
       - '.github/workflows/cerebro-rsi-promotion-readiness-shadow-v0.yml'
@@ -57,9 +60,9 @@ jobs:
           test "$(git rev-parse HEAD)" = "$EXACT_HEAD"
           if [ -n "${PR_BASE_SHA:-}" ]; then git fetch origin "$PR_BASE_SHA" --depth=1; base="$PR_BASE_SHA"; else git fetch origin main --depth=1; base="$(git rev-parse FETCH_HEAD)"; fi
           changed="$(git diff --name-only "$base" HEAD)"
-          bad="$(printf '%s\n' "$changed" | grep -Ev '^(cerebro/human-intelligence/|cerebro/multichannel/|cerebro/tests/human-intelligence-[^/]+\.test\.mjs$|cerebro/tests/multichannel-conversation-(policy|old-vs-new)-v1\.test\.mjs$|cerebro/tests/continuous-human-qa-v0\.test\.mjs$|supabase/functions/cerebro-human-old-actor-preprod-v0/|supabase/functions/cerebro-human-new-actor-preprod-v1/|supabase/functions/cerebro-human-route-control-preprod-v1/|supabase/functions/cerebro-console-gateway-human-v1-canary/|supabase/functions/cerebro-console-human-router-zero-v1/|supabase/functions/_shared/cerebro-conversation-policy-v1\.ts$|supabase/functions/cerebro-telegram-gateway-v0/|supabase/functions/cerebro-telegram-voice-v1/|supabase/migrations/(20261012132000_cerebro_human_route_control_preprod_v1|20261013010500_cerebro_multichannel_ana_overlay_v1)\.sql$|\.github/workflows/cerebro-human-intelligence-[^/]+\.yml$|\.github/workflows/cerebro-multichannel-conversation-unification-v1\.yml$|\.github/workflows/cerebro-rsi-promotion-readiness-shadow-v0\.yml$)' || true)"
+          bad="$(printf '%s\n' "$changed" | grep -Ev '^(cerebro/human-intelligence/|cerebro/multichannel/|cerebro/tests/human-intelligence-[^/]+\.test\.mjs$|cerebro/tests/multichannel-conversation-(policy|old-vs-new)-v1\.test\.mjs$|cerebro/tests/channel-access-profiles-v1\.test\.mjs$|cerebro/tests/continuous-human-qa-v0\.test\.mjs$|supabase/functions/cerebro-human-old-actor-preprod-v0/|supabase/functions/cerebro-human-new-actor-preprod-v1/|supabase/functions/cerebro-human-route-control-preprod-v1/|supabase/functions/cerebro-console-gateway-human-v1-canary/|supabase/functions/cerebro-console-human-router-zero-v1/|supabase/functions/_shared/cerebro-(conversation|channel-access)-policy-v1\.ts$|supabase/functions/cerebro-telegram-gateway-v0/|supabase/functions/cerebro-telegram-voice-v1/|supabase/migrations/(20261012132000_cerebro_human_route_control_preprod_v1|20261013010500_cerebro_multichannel_ana_overlay_v1|20261013042000_cerebro_channel_access_profiles_v1)\.sql$|\.github/workflows/cerebro-human-intelligence-[^/]+\.yml$|\.github/workflows/cerebro-multichannel-conversation-unification-v1\.yml$|\.github/workflows/cerebro-rsi-promotion-readiness-shadow-v0\.yml$)' || true)"
           if [ -n "$bad" ]; then echo 'Human Intelligence PR crossed its governed surface:' >&2; printf '%s\n' "$bad" >&2; exit 1; fi
-          protected="$(printf '%s\n' "$changed" | grep -E '^(src/|tests/|public/|scripts/|supabase/migrations/|\.github/workflows/(preprod-build|app-restoration-build|prod-[^/]+)\.yml$)' | grep -Ev '^supabase/migrations/(20261012132000_cerebro_human_route_control_preprod_v1|20261013010500_cerebro_multichannel_ana_overlay_v1)\.sql$' || true)"
+          protected="$(printf '%s\n' "$changed" | grep -E '^(src/|tests/|public/|scripts/|supabase/migrations/|\.github/workflows/(preprod-build|app-restoration-build|prod-[^/]+)\.yml$)' | grep -Ev '^supabase/migrations/(20261012132000_cerebro_human_route_control_preprod_v1|20261013010500_cerebro_multichannel_ana_overlay_v1|20261013042000_cerebro_channel_access_profiles_v1)\.sql$' || true)"
           if [ -n "$protected" ]; then echo 'Protected App/PROD surface changed.' >&2; printf '%s\n' "$protected" >&2; exit 1; fi
       - name: Install dependencies reproducibly
         run: npm ci
@@ -81,6 +84,7 @@ jobs:
             cerebro/tests/human-intelligence-prod-router-zero-v1.test.mjs \
             cerebro/tests/multichannel-conversation-policy-v1.test.mjs \
             cerebro/tests/multichannel-conversation-old-vs-new-v1.test.mjs \
+            cerebro/tests/channel-access-profiles-v1.test.mjs \
             cerebro/tests/continuous-human-qa-v0.test.mjs
       - name: Assert PREPROD Human Intelligence functions remain fail-closed and PROD-free
         shell: bash
@@ -96,7 +100,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          f='supabase/functions/cerebro-console-gateway-human-v1-canary/index.ts'; test -f "$f"; grep -F 'cerebro-console-gateway-v0' "$f"; grep -F 'PROD_CANARY_UNROUTED' "$f"; grep -F 'live_chat_invoked:false' "$f"; grep -F 'prod_write_authorized:false' "$f"; grep -F '/canary/rehearsal' "$f"; ! grep -F 'SUPABASE_SERVICE_ROLE_KEY' "$f"; ! git diff --name-only "${{ github.event.pull_request.base.sha }}" HEAD | grep -Eq '^supabase/functions/cerebro-console-gateway-v0/'
+          f='supabase/functions/cerebro-console-gateway-human-v1-canary/index.ts'; test -f "$f"; grep -F 'cerebro-console-gateway-v0' "$f"; grep -F 'PROD_CANARY_UNROUTED' "$f"; grep -F 'live_chat_invoked:false' "$f"; grep -F 'prod_write_authorized:false' "$f"; grep -F '/canary/rehearsal' "$f"; grep -F '/canary/access-profile-rehearsal' "$f"; ! grep -F 'SUPABASE_SERVICE_ROLE_KEY' "$f"; ! git diff --name-only "${{ github.event.pull_request.base.sha }}" HEAD | grep -Eq '^supabase/functions/cerebro-console-gateway-v0/'
       - name: Assert additive ZERO router is compiled off and preserves stable authority
         shell: bash
         run: |
@@ -106,17 +110,18 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          p='supabase/functions/_shared/cerebro-conversation-policy-v1.ts'; t='supabase/functions/cerebro-telegram-gateway-v0/index.ts'; v='supabase/functions/cerebro-telegram-voice-v1/index.ts'; a='supabase/migrations/20261013010500_cerebro_multichannel_ana_overlay_v1.sql'
-          test -f "$p" && test -f "$t" && test -f "$v" && test -f "$a"
-          grep -F "APP_ANA_TEXT" "$a"; grep -F "TELEGRAM_TEXT" "$t"; grep -F "TELEGRAM_VOICE" "$v"; grep -F "APP_ANA_VOICE" "$p"; grep -F "CONSOLE_VOICE" "$p"; grep -F "signal_type:'METRIC_OBSERVATION'" "$p"; grep -F "prod_authorized:false" "$p"; grep -F "prod_write_authorized:false" "$p"; grep -F "trading_access:false" "$p"; ! git diff --name-only "${{ github.event.pull_request.base.sha }}" HEAD | grep -Eq '^supabase/functions/(cerebro-console-gateway-v0|fenix-app-gateway)/'
+          p='supabase/functions/_shared/cerebro-conversation-policy-v1.ts'; c='supabase/functions/_shared/cerebro-channel-access-policy-v1.ts'; t='supabase/functions/cerebro-telegram-gateway-v0/index.ts'; v='supabase/functions/cerebro-telegram-voice-v1/index.ts'; a='supabase/migrations/20261013010500_cerebro_multichannel_ana_overlay_v1.sql'; s='supabase/migrations/20261013042000_cerebro_channel_access_profiles_v1.sql'
+          test -f "$p" && test -f "$c" && test -f "$t" && test -f "$v" && test -f "$a" && test -f "$s"
+          grep -F "APP_ANA_TEXT" "$a"; grep -F "TELEGRAM_TEXT" "$t"; grep -F "TELEGRAM_VOICE" "$v"; grep -F "APP_ANA_VOICE" "$p"; grep -F "CONSOLE_VOICE" "$p"; grep -F "signal_type:'METRIC_OBSERVATION'" "$p"; grep -F "FULL_OWNER" "$c"; grep -F "FENIX_OPERATIONAL" "$c"; grep -F "prod_authorized:false" "$c"; grep -F "prod_write_authorized:false" "$c"; grep -F "trading_access:false" "$c"; grep -F "fenix_prod_ana_channel_scope_guard_v1" "$s"; ! git diff --name-only "${{ github.event.pull_request.base.sha }}" HEAD | grep -Eq '^supabase/functions/(cerebro-console-gateway-v0|fenix-app-gateway)/'
       - name: Assert exact PREPROD route-control and Ana migrations are bounded
         shell: bash
         run: |
           set -euo pipefail
           f='supabase/migrations/20261012132000_cerebro_human_route_control_preprod_v1.sql'; test -f "$f"; grep -q 'cerebro_human_route_control_preprod' "$f"; grep -q 'enable row level security' "$f"; grep -q 'grant all on table public.cerebro_human_route_control_preprod to service_role' "$f"; grep -q 'cerebro_human_route_transition_preprod' "$f"
           a='supabase/migrations/20261013010500_cerebro_multichannel_ana_overlay_v1.sql'; test -f "$a"; grep -q 'fenix_prod_ana_knowledge_answer_user(p_question)' "$a"; grep -q 'prod_authority_changed' "$a"
-          if grep -Eqi '\b(truncate)\b|\bdelete\s+from\b' "$f" "$a"; then echo 'Destructive SQL forbidden.' >&2; exit 1; fi
+          s='supabase/migrations/20261013042000_cerebro_channel_access_profiles_v1.sql'; test -f "$s"; grep -q 'fenix_prod_ana_channel_scope_guard_v1' "$s"; grep -q 'channel_scope_denied' "$s"; grep -q "'human_required',false" "$s"
+          if grep -Eqi '\b(truncate)\b|\bdelete\s+from\b' "$f" "$a" "$s"; then echo 'Destructive SQL forbidden.' >&2; exit 1; fi
       - name: Mark strict boundary
         run: |
           echo 'Human Intelligence readiness reuses existing LRN-001 and Continuous Human QA; multichannel surfaces only wrap passive conversation, require OLD-vs-NEW non-regression evidence, and preserve each channel authority.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'No existing consumer URL changes; no new PROD action authority or Trading access is granted; single observations cannot auto-promote.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'FULL_OWNER/FENIX_OPERATIONAL is explicit and fail-closed without granting new PROD writes, secrets disclosure or Trading access; single observations cannot auto-promote.' >> "$GITHUB_STEP_SUMMARY"
