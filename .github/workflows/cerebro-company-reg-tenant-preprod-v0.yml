@@ -1,4 +1,4 @@
-name: CEREBRO Company Registry Tenant PREPROD V1
+name: CEREBRO Company Registry Tenant PREPROD V0
 
 on:
   pull_request:
