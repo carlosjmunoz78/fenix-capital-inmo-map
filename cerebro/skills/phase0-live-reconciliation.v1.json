@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0.0",
+  "rollout": "CEREBRO_184",
+  "phase": "0",
+  "environment": "PREPROD",
+  "generated_at": "2026-10-13",
+  "source_policy": "LIVE_REPO_EVIDENCE_ONLY",
+  "items": [
+    {"id":1,"name":"FACT-001 Engine/Skill Factory V0 real","status":"PARTIAL_RECONCILING"},
+    {"id":2,"name":"Skill auto-registration + versioning","status":"EVIDENCED_PREPROD"},
+    {"id":3,"name":"Impact analysis of new skill","status":"EVIDENCED_PREPROD"},
+    {"id":4,"name":"Automatic OLD vs NEW","status":"EVIDENCED_PREPROD"},
+    {"id":5,"name":"Shadow / real-world testing","status":"EVIDENCED_PREPROD"},
+    {"id":6,"name":"Auto-promotion / rollback of skills","status":"EVIDENCED_PREPROD"},
+    {"id":7,"name":"agent-eval-loop patterns","status":"CANDIDATE_NOT_YET_INTEGRATED"},
+    {"id":8,"name":"Skill-RSI / self-evolve patterns","status":"CANDIDATE_NOT_YET_INTEGRATED"},
+    {"id":9,"name":"rooftop-Owl Skill Factory scout/importer","status":"CANDIDATE_NOT_YET_INTEGRATED"},
+    {"id":10,"name":"Common QA","status":"PARTIAL_RECONCILING"},
+    {"id":11,"name":"Cross-cutting Evaluation / Tribunal","status":"PARTIAL_RECONCILING"},
+    {"id":12,"name":"Learning loop event->result->rule->validation","status":"EVIDENCED_PREPROD"}
+  ],
+  "evidence": {
+    "skill_capability_evolution_pr": 537,
+    "skill_auto_hook_pr": 539,
+    "continuous_learning_closeout_pr": 545,
+    "safe_skill_chain_driver_pr": 577
+  },
+  "rules": {
+    "full_requires_live_evidence": true,
+    "no_prod_claim_without_prod_evidence": true,
+    "extend_before_new_engine": true,
+    "additional_cost_budget_eur": 0,
+    "trading_isolated": true
+  },
+  "next_action": "RECONCILE_ITEMS_1_12_AND_CLOSE_ONLY_TRUE_GAPS"
+}
