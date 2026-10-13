@@ -5,15 +5,23 @@ on:
     branches: [main]
     paths:
       - 'cerebro/human-intelligence/**'
+      - 'cerebro/multichannel/**'
       - 'cerebro/tests/human-intelligence-*.test.mjs'
+      - 'cerebro/tests/multichannel-conversation-policy-v1.test.mjs'
+      - 'cerebro/tests/multichannel-conversation-old-vs-new-v1.test.mjs'
       - 'cerebro/tests/continuous-human-qa-v0.test.mjs'
       - 'supabase/functions/cerebro-human-old-actor-preprod-v0/**'
       - 'supabase/functions/cerebro-human-new-actor-preprod-v1/**'
       - 'supabase/functions/cerebro-human-route-control-preprod-v1/**'
       - 'supabase/functions/cerebro-console-gateway-human-v1-canary/**'
       - 'supabase/functions/cerebro-console-human-router-zero-v1/**'
+      - 'supabase/functions/_shared/cerebro-conversation-policy-v1.ts'
+      - 'supabase/functions/cerebro-telegram-gateway-v0/**'
+      - 'supabase/functions/cerebro-telegram-voice-v1/**'
       - 'supabase/migrations/20261012132000_cerebro_human_route_control_preprod_v1.sql'
+      - 'supabase/migrations/20261013010500_cerebro_multichannel_ana_overlay_v1.sql'
       - '.github/workflows/cerebro-human-intelligence-*.yml'
+      - '.github/workflows/cerebro-multichannel-conversation-unification-v1.yml'
       - '.github/workflows/cerebro-rsi-promotion-readiness-shadow-v0.yml'
   workflow_dispatch:
 
@@ -36,12 +44,10 @@ jobs:
         with:
           ref: ${{ env.EXACT_HEAD }}
           fetch-depth: 0
-
       - uses: actions/setup-node@v4
         with:
           node-version: 24
           cache: npm
-
       - name: Assert exact PR head and strict Human Intelligence surface
         env:
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
@@ -49,31 +55,15 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$EXACT_HEAD"
-          if [ -n "${PR_BASE_SHA:-}" ]; then
-            git fetch origin "$PR_BASE_SHA" --depth=1
-            base="$PR_BASE_SHA"
-          else
-            git fetch origin main --depth=1
-            base="$(git rev-parse FETCH_HEAD)"
-          fi
+          if [ -n "${PR_BASE_SHA:-}" ]; then git fetch origin "$PR_BASE_SHA" --depth=1; base="$PR_BASE_SHA"; else git fetch origin main --depth=1; base="$(git rev-parse FETCH_HEAD)"; fi
           changed="$(git diff --name-only "$base" HEAD)"
-          bad="$(printf '%s\n' "$changed" | grep -Ev '^(cerebro/human-intelligence/|cerebro/tests/human-intelligence-[^/]+\.test\.mjs$|cerebro/tests/continuous-human-qa-v0\.test\.mjs$|supabase/functions/cerebro-human-old-actor-preprod-v0/|supabase/functions/cerebro-human-new-actor-preprod-v1/|supabase/functions/cerebro-human-route-control-preprod-v1/|supabase/functions/cerebro-console-gateway-human-v1-canary/|supabase/functions/cerebro-console-human-router-zero-v1/|supabase/migrations/20261012132000_cerebro_human_route_control_preprod_v1\.sql$|\.github/workflows/cerebro-human-intelligence-[^/]+\.yml$|\.github/workflows/cerebro-rsi-promotion-readiness-shadow-v0\.yml$)' || true)"
-          if [ -n "$bad" ]; then
-            echo 'Human Intelligence PR crossed its isolated surface:' >&2
-            printf '%s\n' "$bad" >&2
-            exit 1
-          fi
-          protected="$(printf '%s\n' "$changed" | grep -E '^(src/|tests/|public/|scripts/|supabase/migrations/|\.github/workflows/(preprod-build|app-restoration-build|prod-[^/]+)\.yml$)' | grep -v '^supabase/migrations/20261012132000_cerebro_human_route_control_preprod_v1\.sql$' || true)"
-          if [ -n "$protected" ]; then
-            echo 'Protected App/PROD surface changed.' >&2
-            printf '%s\n' "$protected" >&2
-            exit 1
-          fi
-
+          bad="$(printf '%s\n' "$changed" | grep -Ev '^(cerebro/human-intelligence/|cerebro/multichannel/|cerebro/tests/human-intelligence-[^/]+\.test\.mjs$|cerebro/tests/multichannel-conversation-(policy|old-vs-new)-v1\.test\.mjs$|cerebro/tests/continuous-human-qa-v0\.test\.mjs$|supabase/functions/cerebro-human-old-actor-preprod-v0/|supabase/functions/cerebro-human-new-actor-preprod-v1/|supabase/functions/cerebro-human-route-control-preprod-v1/|supabase/functions/cerebro-console-gateway-human-v1-canary/|supabase/functions/cerebro-console-human-router-zero-v1/|supabase/functions/_shared/cerebro-conversation-policy-v1\.ts$|supabase/functions/cerebro-telegram-gateway-v0/|supabase/functions/cerebro-telegram-voice-v1/|supabase/migrations/(20261012132000_cerebro_human_route_control_preprod_v1|20261013010500_cerebro_multichannel_ana_overlay_v1)\.sql$|\.github/workflows/cerebro-human-intelligence-[^/]+\.yml$|\.github/workflows/cerebro-multichannel-conversation-unification-v1\.yml$|\.github/workflows/cerebro-rsi-promotion-readiness-shadow-v0\.yml$)' || true)"
+          if [ -n "$bad" ]; then echo 'Human Intelligence PR crossed its governed surface:' >&2; printf '%s\n' "$bad" >&2; exit 1; fi
+          protected="$(printf '%s\n' "$changed" | grep -E '^(src/|tests/|public/|scripts/|supabase/migrations/|\.github/workflows/(preprod-build|app-restoration-build|prod-[^/]+)\.yml$)' | grep -Ev '^supabase/migrations/(20261012132000_cerebro_human_route_control_preprod_v1|20261013010500_cerebro_multichannel_ana_overlay_v1)\.sql$' || true)"
+          if [ -n "$protected" ]; then echo 'Protected App/PROD surface changed.' >&2; printf '%s\n' "$protected" >&2; exit 1; fi
       - name: Install dependencies reproducibly
         run: npm ci
-
-      - name: Prove canonical LRN promotion recovery continuous QA and Human Intelligence integration contracts
+      - name: Prove canonical LRN promotion recovery Human Intelligence and multichannel contracts
         run: |
           node --test \
             cerebro/tests/universal-learning-ingress.test.mjs \
@@ -89,84 +79,44 @@ jobs:
             cerebro/tests/human-intelligence-gateway-routing-v1.test.mjs \
             cerebro/tests/human-intelligence-production-overlay-v1.test.mjs \
             cerebro/tests/human-intelligence-prod-router-zero-v1.test.mjs \
+            cerebro/tests/multichannel-conversation-policy-v1.test.mjs \
+            cerebro/tests/multichannel-conversation-old-vs-new-v1.test.mjs \
             cerebro/tests/continuous-human-qa-v0.test.mjs
-
       - name: Assert PREPROD Human Intelligence functions remain fail-closed and PROD-free
         shell: bash
         run: |
           set -euo pipefail
-          for f in \
-            supabase/functions/cerebro-human-old-actor-preprod-v0/index.ts \
-            supabase/functions/cerebro-human-new-actor-preprod-v1/index.ts; do
-            test -f "$f"
-            grep -q 'hnqlnvakzaywtafeiybt' "$f"
-            grep -q 'prod_write_authorized:false' "$f"
-            grep -q 'prod_execution_enabled:false' "$f"
-            grep -q 'customer_data:false' "$f"
-            grep -q 'trading_access:false' "$f"
-            grep -q 'GITHUB_OIDC' "$f"
+          for f in supabase/functions/cerebro-human-old-actor-preprod-v0/index.ts supabase/functions/cerebro-human-new-actor-preprod-v1/index.ts; do
+            test -f "$f"; grep -q 'hnqlnvakzaywtafeiybt' "$f"; grep -q 'prod_write_authorized:false' "$f"; grep -q 'prod_execution_enabled:false' "$f"; grep -q 'customer_data:false' "$f"; grep -q 'trading_access:false' "$f"; grep -q 'GITHUB_OIDC' "$f";
           done
           route='supabase/functions/cerebro-human-route-control-preprod-v1/index.ts'
-          test -f "$route"
-          grep -q 'cerebro-human-route-control-preprod-v1' "$route"
-          grep -q 'cerebro_human_route_transition_preprod' "$route"
-          grep -q 'prod_write_authorized:false' "$route"
-          grep -q 'trading_access:false' "$route"
-          grep -q 'customer_data:false' "$route"
-          if grep -R -n 'cluhljgonannaafpmblx' \
-            supabase/functions/cerebro-human-old-actor-preprod-v0 \
-            supabase/functions/cerebro-human-new-actor-preprod-v1 \
-            supabase/functions/cerebro-human-route-control-preprod-v1; then
-            echo 'PROD project reference forbidden inside isolated PREPROD Human Intelligence functions.' >&2
-            exit 1
-          fi
-
+          test -f "$route"; grep -q 'cerebro-human-route-control-preprod-v1' "$route"; grep -q 'cerebro_human_route_transition_preprod' "$route"; grep -q 'prod_write_authorized:false' "$route"; grep -q 'trading_access:false' "$route"; grep -q 'customer_data:false' "$route"
+          if grep -R -n 'cluhljgonannaafpmblx' supabase/functions/cerebro-human-old-actor-preprod-v0 supabase/functions/cerebro-human-new-actor-preprod-v1 supabase/functions/cerebro-human-route-control-preprod-v1; then echo 'PROD project reference forbidden inside isolated PREPROD Human Intelligence functions.' >&2; exit 1; fi
       - name: Assert additive PROD canary is unrouted no-write and preserves the current gateway
         shell: bash
         run: |
           set -euo pipefail
-          f='supabase/functions/cerebro-console-gateway-human-v1-canary/index.ts'
-          test -f "$f"
-          grep -F 'cerebro-console-gateway-v0' "$f"
-          grep -F 'PROD_CANARY_UNROUTED' "$f"
-          grep -F 'live_chat_invoked:false' "$f"
-          grep -F 'prod_write_authorized:false' "$f"
-          grep -F '/canary/rehearsal' "$f"
-          ! grep -F 'SUPABASE_SERVICE_ROLE_KEY' "$f"
-          ! git diff --name-only "${{ github.event.pull_request.base.sha }}" HEAD | grep -Eq '^supabase/functions/cerebro-console-gateway-v0/'
-
+          f='supabase/functions/cerebro-console-gateway-human-v1-canary/index.ts'; test -f "$f"; grep -F 'cerebro-console-gateway-v0' "$f"; grep -F 'PROD_CANARY_UNROUTED' "$f"; grep -F 'live_chat_invoked:false' "$f"; grep -F 'prod_write_authorized:false' "$f"; grep -F '/canary/rehearsal' "$f"; ! grep -F 'SUPABASE_SERVICE_ROLE_KEY' "$f"; ! git diff --name-only "${{ github.event.pull_request.base.sha }}" HEAD | grep -Eq '^supabase/functions/cerebro-console-gateway-v0/'
       - name: Assert additive ZERO router is compiled off and preserves stable authority
         shell: bash
         run: |
           set -euo pipefail
-          d='supabase/functions/cerebro-console-human-router-zero-v1'
-          test -f "$d/index.ts" && test -f "$d/router.ts" && test -f "$d/auth.ts"
-          grep -F 'export const LIVE_CANARY_PERCENT=0;' "$d/router.ts"
-          grep -F 'cerebro-console-gateway-v0' "$d/index.ts"
-          grep -F 'cerebro-console-gateway-human-v1-canary' "$d/index.ts"
-          grep -F 'PREPROD_NORMAL_ROUTING_DISABLED' "$d/index.ts"
-          grep -F 'consumer_routing_enabled:false' "$d/index.ts"
-          ! grep -R -F 'SUPABASE_SERVICE_ROLE_KEY' "$d"
-          ! grep -R -Eq 'prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true' "$d"
-          ! git diff --name-only "${{ github.event.pull_request.base.sha }}" HEAD | grep -Eq '^supabase/functions/cerebro-console-gateway-v0/'
-
-      - name: Assert exact PREPROD route-control migration is additive service-role only
+          d='supabase/functions/cerebro-console-human-router-zero-v1'; test -f "$d/index.ts" && test -f "$d/router.ts" && test -f "$d/auth.ts"; grep -F 'export const LIVE_CANARY_PERCENT=0;' "$d/router.ts"; grep -F 'cerebro-console-gateway-v0' "$d/index.ts"; grep -F 'cerebro-console-gateway-human-v1-canary' "$d/index.ts"; grep -F 'PREPROD_NORMAL_ROUTING_DISABLED' "$d/index.ts"; grep -F 'consumer_routing_enabled:false' "$d/index.ts"; ! grep -R -F 'SUPABASE_SERVICE_ROLE_KEY' "$d"; ! grep -R -Eq 'prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true' "$d"; ! git diff --name-only "${{ github.event.pull_request.base.sha }}" HEAD | grep -Eq '^supabase/functions/cerebro-console-gateway-v0/'
+      - name: Assert multichannel adapters preserve channel authority and universal learning boundary
         shell: bash
         run: |
           set -euo pipefail
-          f='supabase/migrations/20261012132000_cerebro_human_route_control_preprod_v1.sql'
-          test -f "$f"
-          grep -q 'cerebro_human_route_control_preprod' "$f"
-          grep -q 'enable row level security' "$f"
-          grep -q 'grant all on table public.cerebro_human_route_control_preprod to service_role' "$f"
-          grep -q 'cerebro_human_route_transition_preprod' "$f"
-          if grep -Eqi '\b(drop|truncate)\b|\bdelete\s+from\b' "$f"; then
-            echo 'Destructive SQL forbidden in Human Intelligence route-control migration.' >&2
-            exit 1
-          fi
-
+          p='supabase/functions/_shared/cerebro-conversation-policy-v1.ts'; t='supabase/functions/cerebro-telegram-gateway-v0/index.ts'; v='supabase/functions/cerebro-telegram-voice-v1/index.ts'; a='supabase/migrations/20261013010500_cerebro_multichannel_ana_overlay_v1.sql'
+          test -f "$p" && test -f "$t" && test -f "$v" && test -f "$a"
+          grep -F "APP_ANA_TEXT" "$a"; grep -F "TELEGRAM_TEXT" "$t"; grep -F "TELEGRAM_VOICE" "$v"; grep -F "APP_ANA_VOICE" "$p"; grep -F "CONSOLE_VOICE" "$p"; grep -F "signal_type:'METRIC_OBSERVATION'" "$p"; grep -F "prod_authorized:false" "$p"; grep -F "prod_write_authorized:false" "$p"; grep -F "trading_access:false" "$p"; ! git diff --name-only "${{ github.event.pull_request.base.sha }}" HEAD | grep -Eq '^supabase/functions/(cerebro-console-gateway-v0|fenix-app-gateway)/'
+      - name: Assert exact PREPROD route-control and Ana migrations are bounded
+        shell: bash
+        run: |
+          set -euo pipefail
+          f='supabase/migrations/20261012132000_cerebro_human_route_control_preprod_v1.sql'; test -f "$f"; grep -q 'cerebro_human_route_control_preprod' "$f"; grep -q 'enable row level security' "$f"; grep -q 'grant all on table public.cerebro_human_route_control_preprod to service_role' "$f"; grep -q 'cerebro_human_route_transition_preprod' "$f"
+          a='supabase/migrations/20261013010500_cerebro_multichannel_ana_overlay_v1.sql'; test -f "$a"; grep -q 'fenix_prod_ana_knowledge_answer_user(p_question)' "$a"; grep -q 'prod_authority_changed' "$a"
+          if grep -Eqi '\b(truncate)\b|\bdelete\s+from\b' "$f" "$a"; then echo 'Destructive SQL forbidden.' >&2; exit 1; fi
       - name: Mark strict boundary
         run: |
-          echo 'Human Intelligence promotion readiness reuses existing scheduled Continuous Human QA instead of creating a second learning controller.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'Production scope remains additive only: one unrouted overlay canary plus one disconnected router compiled to NEW 0%; current production gateway source is immutable in this PR.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'No existing consumer URL changes; no real user is routed to NEW; no PROD write authority or Trading access is granted.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Human Intelligence readiness reuses existing LRN-001 and Continuous Human QA; multichannel surfaces only wrap passive conversation, require OLD-vs-NEW non-regression evidence, and preserve each channel authority.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'No existing consumer URL changes; no new PROD action authority or Trading access is granted; single observations cannot auto-promote.' >> "$GITHUB_STEP_SUMMARY"

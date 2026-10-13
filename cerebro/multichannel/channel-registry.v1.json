@@ -1,0 +1,17 @@
+{
+  "schema_version":"1.0.0",
+  "state_type":"CEREBRO_CHANNEL_REGISTRY_V1",
+  "company_id":"fenix",
+  "policy_version":"1.0.0",
+  "channels":[
+    {"channel_id":"CONSOLE_TEXT","owner":"CHAT-001","authority_source":"cerebro-console-gateway-v0","human_intelligence":"cerebro-console-gateway-human-v1-canary","status":"EXISTING_CANARY_ZERO"},
+    {"channel_id":"APP_ANA_TEXT","owner":"CHAT-001","authority_source":"fenix-app-gateway/fenix_prod_ana_knowledge_answer_server","status":"CANDIDATE_WRAPPED"},
+    {"channel_id":"TELEGRAM_TEXT","owner":"CHAT-001","authority_source":"cerebro-telegram-gateway-v0","status":"CANDIDATE_WRAPPED"},
+    {"channel_id":"TELEGRAM_VOICE","owner":"VOICE-001","authority_source":"cerebro-telegram-voice-v1","status":"CANDIDATE_WRAPPED"},
+    {"channel_id":"APP_ANA_VOICE","owner":"VOICE-001","authority_source":"fenix-app-gateway:/v2/ana/voice/transcribe","status":"ADAPTER_RESERVED_TRANSCRIPTION_ONLY_NO_INVENTED_ANSWER_ROUTE"},
+    {"channel_id":"CONSOLE_VOICE","owner":"VOICE-001","authority_source":"FUTURE_ADAPTER","status":"RESERVED"}
+  ],
+  "future_adapter_contract":{"enabled":true,"channels":["WHATSAPP","PHONE","WEB_WIDGET","MOBILE","OTHER"],"new_brain_required":false,"new_router_required":false,"preserve_channel_auth":true,"preserve_channel_authority":true},
+  "learning":{"owner":"LRN-001","signals":"OBSERVATION_ONLY","auto_promote_single_conversation":false,"old_vs_new_required":true,"tribunal_required":true,"preprod_required":true,"rollback_required":true},
+  "safety":{"prod_authority_expansion":false,"prod_write_authority_expansion":false,"trading_access":false,"additional_cost_eur":0}
+}
