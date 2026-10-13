@@ -1,0 +1,82 @@
+name: CEREBRO Bootstrap Tier PREPROD V1
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'cerebro/multicompany/bootstrap-tier-v1.mjs'
+      - 'cerebro/multicompany/sql/bootstrap-tier-preprod-v1.sql'
+      - 'cerebro/multicompany/rollback/bootstrap-tier-preprod-v1.rollback.sql'
+      - 'cerebro/tests/bootstrap-tier-v1.test.mjs'
+      - 'cerebro/tests/bootstrap-tier-preprod-persistence-v1.test.mjs'
+      - '.github/workflows/cerebro-bootstrap-tier-preprod-v1.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'cerebro/multicompany/bootstrap-tier-v1.mjs'
+      - 'cerebro/multicompany/sql/bootstrap-tier-preprod-v1.sql'
+      - 'cerebro/multicompany/rollback/bootstrap-tier-preprod-v1.rollback.sql'
+      - 'cerebro/tests/bootstrap-tier-v1.test.mjs'
+      - 'cerebro/tests/bootstrap-tier-preprod-persistence-v1.test.mjs'
+      - '.github/workflows/cerebro-bootstrap-tier-preprod-v1.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-bootstrap-tier-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: true
+
+env:
+  EXACT_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+
+jobs:
+  bootstrap-tier-preprod:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.EXACT_HEAD }}
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Assert exact PR head
+        run: test "$(git rev-parse HEAD)" = "$EXACT_HEAD"
+      - name: Validate canonical CEREBRO contracts
+        working-directory: cerebro
+        run: |
+          npm run validate
+          npm test
+      - name: Prove bootstrap tier runtime and persistence contract
+        run: |
+          node --test \
+            cerebro/tests/bootstrap-tier-v1.test.mjs \
+            cerebro/tests/bootstrap-tier-preprod-persistence-v1.test.mjs
+      - name: Assert strict PREPROD and publication boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          runtime='cerebro/multicompany/bootstrap-tier-v1.mjs'
+          m='cerebro/multicompany/sql/bootstrap-tier-preprod-v1.sql'
+          r='cerebro/multicompany/rollback/bootstrap-tier-preprod-v1.rollback.sql'
+          test -f "$runtime" && test -f "$m" && test -f "$r"
+          grep -F "BOOTSTRAP_TIER_ENGINE_IDS=Object.freeze(['KBOOT-001','SEOBOOT-001','SOCBOOT-001'])" "$runtime"
+          grep -F "BOOTSTRAP_TIER_ENVIRONMENT='PREPROD'" "$runtime"
+          grep -F 'publish_authorized:false' "$runtime"
+          grep -F 'cerebro_bootstrap_tier_record_preprod' "$m"
+          grep -F "engine_id in ('KBOOT-001','SEOBOOT-001','SOCBOOT-001')" "$m"
+          grep -F "engine_id='CRMBOOT-001' and state='BLOCKED'" "$m"
+          grep -F "engine_id='MKTBOOT-001' and state='BLOCKED'" "$m"
+          grep -F "'MARKETING_CRM_BOOTSTRAP_DURABLE_EXECUTION_REQUIRED'" "$m"
+          grep -F 'enable row level security' "$m"
+          grep -F 'to service_role' "$m"
+          ! grep -F 'cluhljgonannaafpmblx' "$m"
+          ! grep -F 'fenix_prod.' "$m"
+          ! grep -Eqi '\btruncate\b|\bdelete[[:space:]]+from\b' "$m"
+          ! grep -Fi 'cascade' "$r"
+      - name: Record boundary
+        run: |
+          echo 'KBOOT-001 / SEOBOOT-001 / SOCBOOT-001 share one deterministic PREPROD bootstrap runtime and receipt layer.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Knowledge keeps provenance, SEO/social remain publication-gated, and no PROD/Trading authority or paid dependency is introduced.' >> "$GITHUB_STEP_SUMMARY"
