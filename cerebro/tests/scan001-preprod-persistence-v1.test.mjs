@@ -52,7 +52,7 @@ test('record-success requires current SCAN state and unlocks only canonical post
   const expected=['KW-001','WAUD-001','SOCAUD-001','LOCALP-001'];
   const scan=registry.engines.find(e=>e.engine_id==='SCAN-001');
   assert.ok(scan);
-  for(const id of expected) assert.ok(registry.engines.find(e=>e.engine_id===id)?.dependencies.includes('SCAN-001'),id);
+  for(const id of expected) assert.ok(registry.engines.find(e=>e.engine_id===id)?.depends_on.includes('SCAN-001'),id);
 });
 
 test('SCAN-001 remains idempotent zero-cost with no PROD or Trading authority',()=>{
