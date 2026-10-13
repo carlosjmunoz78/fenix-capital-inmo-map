@@ -1,0 +1,31 @@
+{
+  "contract_version": "1.0.0",
+  "engine_id": "VOICE-001",
+  "company_id": "fenix",
+  "environment": "MULTI_ENV",
+  "principle": "voice_is_transport_not_authority",
+  "audio_persistence": false,
+  "text_contract_reuse_required": true,
+  "permissions_inherited_from_text_channel": true,
+  "human_required_inherited": true,
+  "learning_inherited": true,
+  "channels": [
+    {"channel_id":"ana_voice","state":"ACTIVE_CANDIDATE","text_contract":"fenix-app-gateway:/v2/ana/knowledge/answer","input":"browser_speech_recognition","output":"browser_speech_synthesis"},
+    {"channel_id":"console_voice","state":"ACTIVE_CANDIDATE","text_contract":"cerebro-console-gateway-v0:/chat","input":"browser_speech_recognition","output":"browser_speech_synthesis"},
+    {"channel_id":"telegram_voice","state":"EXISTING_BACKEND","text_contract":"cerebro-telegram-voice-v1","input":"existing_adapter","output":"existing_adapter"},
+    {"channel_id":"whatsapp_voice","state":"PLANNED_ADAPTER","text_contract":null,"input":null,"output":null},
+    {"channel_id":"phone_voice","state":"PLANNED_ADAPTER","text_contract":null,"input":null,"output":null},
+    {"channel_id":"web_widget_voice","state":"PLANNED_ADAPTER","text_contract":null,"input":null,"output":null}
+  ],
+  "hard_gates": [
+    "same_text_payload",
+    "same_authentication",
+    "same_rbac",
+    "same_action_confirmation",
+    "same_human_required",
+    "same_learning_path",
+    "no_audio_storage",
+    "text_fallback_always_available",
+    "rollback_available"
+  ]
+}
