@@ -8,6 +8,13 @@ on:
       - 'cerebro/multichannel/**'
       - 'cerebro/tests/human-intelligence-conversation-learning-convergence-v1.test.mjs'
       - '.github/workflows/cerebro-human-intelligence-knowledge-convergence-v1.yml'
+  push:
+    branches: ['cerebro/knowledge-convergence-v1-20261014']
+    paths:
+      - 'cerebro/human-intelligence/**'
+      - 'cerebro/multichannel/**'
+      - 'cerebro/tests/human-intelligence-conversation-learning-convergence-v1.test.mjs'
+      - '.github/workflows/cerebro-human-intelligence-knowledge-convergence-v1.yml'
   workflow_dispatch:
 
 permissions:
