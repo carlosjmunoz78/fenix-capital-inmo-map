@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.2.0",
+  "schema_version": "1.1.0",
   "state_type": "CEREBRO_RSI_LEARNING_SUBSCRIBERS",
   "environment": "PREPROD",
   "engine_id": "LRN-001",
@@ -18,35 +18,13 @@
     "TRIBUNAL_DECISION",
     "OBSERVABILITY_ALERT"
   ],
-  "conversation_learning": {
-    "module": "cerebro/human-intelligence/integration/conversation-learning-convergence-v1.mjs",
-    "knowledge_surface_map": "cerebro/registry/knowledge-surface-map.v1.json",
-    "real_channels": [
-      "CONSOLE_TEXT",
-      "CONSOLE_VOICE",
-      "TELEGRAM_TEXT",
-      "TELEGRAM_VOICE",
-      "APP_ANA_TEXT",
-      "APP_ANA_VOICE"
-    ],
-    "real_signal_mapping": ["METRIC_OBSERVATION", "HUMAN_CORRECTION"],
-    "synthetic_suite": "cerebro/human-intelligence/scenarios/fenix-human-60.v1.json",
-    "synthetic_base_scenarios": 60,
-    "synthetic_variants_per_scenario": 4,
-    "synthetic_expected_episode_pairs": 240,
-    "synthetic_signal_mapping": ["METRIC_OBSERVATION", "TRIBUNAL_DECISION"],
-    "raw_conversation_content_persisted_to_lrn": false,
-    "direct_canonical_knowledge_write": false,
-    "single_conversation_auto_promote": false,
-    "promotion_requires": ["OLD_VS_NEW", "TRIBUNAL", "PREPROD", "ROLLBACK", "PROVENANCE"]
-  },
   "subscribers": [
     {
       "company_id": "fenix",
       "enabled": true,
       "environment": "PREPROD",
-      "version": "0.6.0",
-      "source_scope": "GLOBAL_TENANT_OPERATIONAL_AND_CONVERSATION_DERIVED_LEARNING_SIGNALS_V1",
+      "version": "0.5.0",
+      "source_scope": "GLOBAL_AND_TENANT_OPERATIONAL_LEARNING_SIGNALS_V0",
       "local_validation_required": true,
       "local_persistence_scope": "LOCAL_PREPROD_LRN_LEDGER_ONLY",
       "prod_authorized": false,

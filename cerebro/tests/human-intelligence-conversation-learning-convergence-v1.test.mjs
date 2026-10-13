@@ -16,12 +16,10 @@ function real(channel_id,index=1,extra={}){
 }
 
 test('knowledge surface map covers all six voice/text surfaces without making a channel a source of truth',()=>{
-  const map=JSON.parse(fs.readFileSync(new URL('../registry/knowledge-surface-map.v1.json',import.meta.url),'utf8'));
+  const map=JSON.parse(fs.readFileSync(new URL('../human-intelligence/knowledge/knowledge-surface-map.v1.json',import.meta.url),'utf8'));
   assert.equal(map.state_type,'CEREBRO_KNOWLEDGE_SURFACE_MAP_V1');
   assert.deepEqual(new Set(map.channel_surfaces.map(x=>x.channel_id)),new Set(CHANNELS));
-  for(const surface of map.channel_surfaces){
-    assert.equal(surface.access_profile,OWNER.has(surface.channel_id)?'FULL_OWNER':'FENIX_OPERATIONAL');
-  }
+  for(const surface of map.channel_surfaces)assert.equal(surface.access_profile,OWNER.has(surface.channel_id)?'FULL_OWNER':'FENIX_OPERATIONAL');
   assert.ok(map.canonicality_rules.some(x=>x.includes('surface, never a source of truth')));
   assert.equal(map.learning_convergence.real_conversations.raw_content_to_lrn,false);
   assert.equal(map.learning_convergence.synthetic_conversations.direct_canonical_write,false);
@@ -86,24 +84,21 @@ test('real plus synthetic convergence normalizes only to PREPROD_CANDIDATE and n
   }
 });
 
-test('LRN subscriber contract explicitly converges real and synthetic conversation learning without direct truth writes',()=>{
+test('existing LRN subscriber already accepts the required real and synthetic signal families and remains PREPROD only',()=>{
   const registry=JSON.parse(fs.readFileSync(new URL('../registry/rsi-learning-subscribers.v0.json',import.meta.url),'utf8'));
-  const c=registry.conversation_learning;
-  assert.equal(c.module,'cerebro/human-intelligence/integration/conversation-learning-convergence-v1.mjs');
-  assert.deepEqual(new Set(c.real_channels),new Set(CHANNELS));
-  assert.equal(c.raw_conversation_content_persisted_to_lrn,false);
-  assert.equal(c.direct_canonical_knowledge_write,false);
-  assert.ok(c.promotion_requires.includes('OLD_VS_NEW'));
-  assert.ok(c.promotion_requires.includes('TRIBUNAL'));
-  assert.ok(c.promotion_requires.includes('PREPROD'));
-  assert.ok(c.promotion_requires.includes('ROLLBACK'));
-  assert.ok(c.promotion_requires.includes('PROVENANCE'));
+  for(const type of ['METRIC_OBSERVATION','HUMAN_CORRECTION','TRIBUNAL_DECISION'])assert.ok(registry.accepted_signal_families.includes(type));
+  const fenix=registry.subscribers.find(x=>x.company_id==='fenix');
+  assert.equal(fenix.enabled,true);
+  assert.equal(fenix.environment,'PREPROD');
+  assert.equal(fenix.prod_authorized,false);
+  assert.equal(fenix.prod_write_authorized,false);
+  assert.equal(fenix.trading_access,false);
 });
 
 test('channel registry points all six surfaces at the same knowledge/learning convergence contract while preserving access profiles',()=>{
   const registry=JSON.parse(fs.readFileSync(new URL('../multichannel/channel-registry.v1.json',import.meta.url),'utf8'));
   assert.deepEqual(new Set(registry.learning.channels_observed),new Set(CHANNELS));
-  assert.equal(registry.learning.knowledge_surface_map,'cerebro/registry/knowledge-surface-map.v1.json');
+  assert.equal(registry.learning.knowledge_surface_map,'cerebro/human-intelligence/knowledge/knowledge-surface-map.v1.json');
   assert.equal(registry.learning.convergence_module,'cerebro/human-intelligence/integration/conversation-learning-convergence-v1.mjs');
   assert.equal(registry.learning.real_conversation_raw_text_to_lrn,false);
   assert.equal(registry.learning.synthetic_direct_truth_promotion,false);

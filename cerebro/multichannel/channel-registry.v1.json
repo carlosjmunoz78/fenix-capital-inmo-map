@@ -37,7 +37,7 @@
     "owner":"LRN-001",
     "signals":"REAL_AND_SYNTHETIC_OBSERVATION_ONLY",
     "subscriber_contract":"cerebro/registry/rsi-learning-subscribers.v0.json",
-    "knowledge_surface_map":"cerebro/registry/knowledge-surface-map.v1.json",
+    "knowledge_surface_map":"cerebro/human-intelligence/knowledge/knowledge-surface-map.v1.json",
     "convergence_module":"cerebro/human-intelligence/integration/conversation-learning-convergence-v1.mjs",
     "channels_observed":["CONSOLE_TEXT","CONSOLE_VOICE","TELEGRAM_TEXT","TELEGRAM_VOICE","APP_ANA_TEXT","APP_ANA_VOICE"],
     "real_conversation_raw_text_to_lrn":false,
