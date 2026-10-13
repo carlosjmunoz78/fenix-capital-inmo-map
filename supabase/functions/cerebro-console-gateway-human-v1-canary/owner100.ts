@@ -10,6 +10,7 @@ const OIDC_AUDIENCE=SLUG;
 const REPOSITORY="carlosjmunoz78/fenix-capital-inmo-map";
 const WORKFLOW_PATH=".github/workflows/cerebro-human-intelligence-owner100-v1.yml";
 const FORWARD_HEADERS=['authorization','apikey','content-type','x-cerebro-key','x-cerebro-actor','x-cerebro-session-id','idempotency-key','x-client-info','origin'];
+const BODYLESS_STATUSES=new Set([101,204,205,304]);
 
 type Claims={iss?:string;aud?:string|string[];exp?:number;nbf?:number;repository?:string;event_name?:string;workflow_ref?:string;[key:string]:unknown};
 function json(status:number,body:unknown){return new Response(JSON.stringify(body),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-cerebro-human-owner100':'v1'}});}
@@ -22,6 +23,7 @@ function suffix(req:Request){const u=new URL(req.url),marker=`/${SLUG}`,i=u.path
 function forwardedHeaders(req:Request){const h=new Headers();for(const name of FORWARD_HEADERS){const value=req.headers.get(name);if(value)h.set(name,value);}return h;}
 function responseHeaders(upstream:Response,overlayState:string){const h=new Headers(upstream.headers);h.set('cache-control','no-store');h.set('x-cerebro-human-owner100','v1');h.set('x-cerebro-human-upstream','cerebro-console-gateway-v0');h.set('x-cerebro-human-route','new');h.set('x-cerebro-human-live-percent','100');h.set('x-cerebro-human-overlay',overlayState);return h;}
 function rewrittenResponseHeaders(upstream:Response,overlayState:string){const h=responseHeaders(upstream,overlayState);for(const name of ['content-length','content-encoding','etag','content-md5'])h.delete(name);h.set('content-type','application/json; charset=utf-8');return h;}
+function passthroughBody(req:Request,upstream:Response,raw:ArrayBuffer){return req.method==='HEAD'||BODYLESS_STATUSES.has(upstream.status)?null:raw;}
 function audit(httpStatus:number,overlayApplied:boolean,reason:string){console.log(JSON.stringify({event:'CEREBRO_HI_OWNER100_ROUTE_V1',version:'owner100-v1',route:'NEW',http_status:httpStatus,overlay_applied:overlayApplied,reason:String(reason||'').slice(0,80),prod_write_authorized:false,trading_access:false,contains_user_data:false}));}
 
 Deno.serve(async(req:Request)=>{
@@ -45,11 +47,11 @@ Deno.serve(async(req:Request)=>{
   let upstream:Response;
   try{upstream=await fetch(target,{method:req.method,headers,body:requestBody});}catch{audit(503,false,'UPSTREAM_UNAVAILABLE');return json(503,{ok:false,status:503,error:'UPSTREAM_UNAVAILABLE',fail_closed:true});}
   const raw=await upstream.arrayBuffer();
-  if(req.method!=='POST'||route.path!=='/chat'||!upstream.ok||!parsedChatBody){audit(upstream.status,false,'NON_CHAT_OR_UPSTREAM_NOT_OK');return new Response(raw,{status:upstream.status,headers:responseHeaders(upstream,'pass-through')});}
-  let data:any;try{data=JSON.parse(new TextDecoder().decode(raw));}catch{audit(upstream.status,false,'UPSTREAM_JSON_FAIL_SAFE');return new Response(raw,{status:upstream.status,headers:responseHeaders(upstream,'pass-through')});}
+  if(req.method!=='POST'||route.path!=='/chat'||!upstream.ok||!parsedChatBody){audit(upstream.status,false,'NON_CHAT_OR_UPSTREAM_NOT_OK');return new Response(passthroughBody(req,upstream,raw),{status:upstream.status,headers:responseHeaders(upstream,'pass-through')});}
+  let data:any;try{data=JSON.parse(new TextDecoder().decode(raw));}catch{audit(upstream.status,false,'UPSTREAM_JSON_FAIL_SAFE');return new Response(passthroughBody(req,upstream,raw),{status:upstream.status,headers:responseHeaders(upstream,'pass-through')});}
   let overlaid;
   try{overlaid=applyOverlay({user_message:String(parsedChatBody?.message??''),upstream:data,history:Array.isArray(parsedChatBody?.conversation_context)?parsedChatBody.conversation_context:[]});}
-  catch{const out=responseHeaders(upstream,'fail-safe-old');audit(upstream.status,false,'OVERLAY_FAIL_SAFE');return new Response(raw,{status:upstream.status,headers:out});}
+  catch{const out=responseHeaders(upstream,'fail-safe-old');audit(upstream.status,false,'OVERLAY_FAIL_SAFE');return new Response(passthroughBody(req,upstream,raw),{status:upstream.status,headers:out});}
   const outHeaders=rewrittenResponseHeaders(upstream,overlaid.overlay.applied?'applied':'pass-through');
   audit(upstream.status,overlaid.overlay.applied,overlaid.overlay.reason);
   return new Response(JSON.stringify(overlaid.response),{status:upstream.status,headers:outHeaders});
