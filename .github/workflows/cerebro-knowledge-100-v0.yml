@@ -1,0 +1,95 @@
+name: CEREBRO Knowledge 100 Gate V0
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'cerebro/qa/knowledge-100-v0.mjs'
+      - 'cerebro/qa/evidence/knowledge-100-live-evidence.v0.json'
+      - 'cerebro/human-intelligence/**'
+      - 'cerebro/multichannel/**'
+      - '.github/workflows/cerebro-knowledge-100-v0.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'cerebro/qa/knowledge-100-v0.mjs'
+      - 'cerebro/qa/evidence/knowledge-100-live-evidence.v0.json'
+      - 'cerebro/human-intelligence/**'
+      - 'cerebro/multichannel/**'
+      - '.github/workflows/cerebro-knowledge-100-v0.yml'
+  workflow_run:
+    workflows:
+      - 'CEREBRO Continuous Human QA V0'
+      - 'PROD Runtime Smoke'
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: cerebro-knowledge-100-v0-${{ github.event.workflow_run.head_sha || github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  knowledge-100:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+      TARGET_SHA: ${{ github.event.workflow_run.head_sha || github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Measure canonical 12-front conversational and knowledge coverage
+        run: |
+          mkdir -p artifacts/knowledge-100
+          node cerebro/qa/knowledge-100-v0.mjs --out artifacts/knowledge-100/report.json
+
+      - name: Publish measured coverage summary
+        if: always()
+        shell: bash
+        run: |
+          if [ ! -s artifacts/knowledge-100/report.json ]; then
+            echo 'Knowledge 100 report missing' >&2
+            exit 1
+          fi
+          numerator="$(jq -r '.numerator_green' artifacts/knowledge-100/report.json)"
+          denominator="$(jq -r '.denominator' artifacts/knowledge-100/report.json)"
+          percentage="$(jq -r '.percentage' artifacts/knowledge-100/report.json)"
+          decision="$(jq -r '.decision' artifacts/knowledge-100/report.json)"
+          {
+            echo '## CEREBRO Knowledge 100 V0'
+            echo
+            echo "- SHA: $TARGET_SHA"
+            echo "- Coverage: ${numerator}/${denominator} = ${percentage}%"
+            echo "- Decision: ${decision}"
+            echo '- Coste adicional: 0 EUR'
+            echo '- PROD write: false'
+            echo '- Trading: false'
+            echo
+            echo '### Fronts'
+            jq -r '.fronts[] | "- [" + .status + "] " + (.id|tostring) + ". " + .name' artifacts/knowledge-100/report.json
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Enforce fail-closed safety invariants
+        run: |
+          jq -e '.denominator==12 and .safety.prod_write_authorized==false and .safety.permission_expansion_authorized==false and .safety.trading_access==false and .safety.contains_customer_data==false and .safety.contains_secrets==false and .safety.additional_cost_eur==0 and .safety.canonical_learning_single_conversation_promotion==false' artifacts/knowledge-100/report.json >/dev/null
+          test "$(jq '[.fronts[]|select(.status=="FAIL_STATIC_INVARIANT")]|length' artifacts/knowledge-100/report.json)" = '0'
+
+      - name: Upload Knowledge 100 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-knowledge-100-v0-${{ github.run_id }}
+          path: artifacts/knowledge-100/**
+          if-no-files-found: error
+          retention-days: 30
