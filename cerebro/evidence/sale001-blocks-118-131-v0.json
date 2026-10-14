@@ -1,0 +1,74 @@
+{
+  "schema_version": "1.0.0",
+  "evidence_type": "CEREBRO_SALE001_BLOCKS_118_131_V0",
+  "date": "2026-10-14",
+  "engine_id": "SALE-001",
+  "company_id": "fenix",
+  "environment": "PREPROD",
+  "version": "0.1.0",
+  "base_main_sha": "218b88755ad51d869796163d4ea3db2eb290b536",
+  "base_tree_sha": "fab2259c10b6572a3d2b46b5bbe98e03bd2d1049",
+  "inventory_evidence": {
+    "sale_action_runtime": "cerebro/revenue/sale-action-v1.mjs",
+    "durable_job_runtime": "cerebro/runtime/durable-job-runtime-v1.mjs",
+    "communication_router": "cerebro/communication/com-delivery-router-v1.mjs",
+    "communication_controller": "cerebro/communication/communication-controller.mjs",
+    "canonical_registry": "cerebro/registry/engine-registry.v1.json",
+    "canonical_ids_reused": ["SALE-001","AGD-001","JOB-001","COM-001","RET-001","DOC-001","PAY-001","INV-001","ACC-001"]
+  },
+  "files_added": {
+    "runtime": "cerebro/revenue/sale001-agenda-commerce-runtime-v0.mjs",
+    "contract": "cerebro/registry/sale001-agenda-commerce-profile.v0.json",
+    "tests": "cerebro/tests/sale001-agenda-commerce-runtime-v0.test.mjs",
+    "docs": "cerebro/docs/CEREBRO_SALE001_BLOCKS_118_131_V0_2026-10-14.md",
+    "workflow": ".github/workflows/cerebro-sale001-agenda-commerce-v0.yml"
+  },
+  "preservation": {
+    "existing_sale_state_machine_replaced": false,
+    "existing_job_runtime_replaced": false,
+    "existing_communication_router_replaced": false,
+    "second_product_factory_created": false,
+    "new_payment_system_created": false
+  },
+  "claims": {
+    "blocks_covered": [118,119,120,121,122,123,124,125,126,127,128,129,130,131],
+    "no_show_reuses_existing_sale001_transition": true,
+    "stripe_policy": "EXISTING_WRAP_ONLY",
+    "product_factory_policy": "REUSE_EXISTING_AION_CAPABILITY_ADAPTER_SEAM_LIVE_AUDIT_REQUIRED",
+    "calendar_write_authorized": false,
+    "message_dispatch_authorized": false,
+    "signature_execution_authorized": false,
+    "payment_execution_authorized": false,
+    "invoice_issue_authorized": false,
+    "product_delivery_authorized": false,
+    "prod_authorized": false,
+    "trading_access": false,
+    "additional_cost_eur": 0
+  },
+  "provider_states": {
+    "CALNODE": "LAB_BENCHMARK",
+    "SOLIVIO": "LAB_PATTERN_ONLY",
+    "DOCUSEAL": "LAB_BENCHMARK",
+    "OREKO": "LAB_BENCHMARK",
+    "STRIPE": "EXISTING_WRAP_ONLY"
+  },
+  "live_evidence": {
+    "calendar_adapter_verified": false,
+    "stripe_charge_verified": false,
+    "docuseal_signature_verified": false,
+    "oreko_execution_verified": false,
+    "calnode_execution_verified": false,
+    "solivio_execution_verified": false,
+    "product_factory_repository_adapter_verified": false,
+    "customer_message_dispatch_verified": false
+  },
+  "verification": {
+    "focused_test_command": "node --test cerebro/tests/sale001-agenda-commerce-runtime-v0.test.mjs",
+    "registry_validation_command": "cd cerebro && npm run validate",
+    "full_regression_command": "cd cerebro && npm test",
+    "ci_workflow": "CEREBRO SALE-001 Agenda Commerce V0",
+    "ci_status": "PENDING_UNTIL_PR_RUN"
+  },
+  "promotion_state": "PREPROD_PLAN_ONLY_PENDING_CI",
+  "next_gate": "FOCUSED_CI_AND_FULL_REGRESSION_THEN_LIVE_ADAPTER_AUDIT_AND_EVA001_JDG001_BEFORE_ANY_SIDE_EFFECT"
+}
