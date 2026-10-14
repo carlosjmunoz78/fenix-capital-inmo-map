@@ -1,0 +1,42 @@
+name: CEREBRO EVT001 Browser Staging E2E V0
+
+on:
+  push:
+    paths:
+      - 'cerebro/registry/evt001-browser-staging-e2e.v0.json'
+      - 'cerebro/tests/evt001-browser-staging-e2e-v0.test.mjs'
+      - 'cerebro/skills/cerebro-184-live-convergence.v2.json'
+      - 'cerebro/tests/cerebro-184-live-convergence-controller-v1.test.mjs'
+      - '.github/workflows/cerebro-evt001-browser-staging-e2e-v0.yml'
+  pull_request:
+    paths:
+      - 'cerebro/registry/evt001-browser-staging-e2e.v0.json'
+      - 'cerebro/tests/evt001-browser-staging-e2e-v0.test.mjs'
+      - 'cerebro/skills/cerebro-184-live-convergence.v2.json'
+      - 'cerebro/tests/cerebro-184-live-convergence-controller-v1.test.mjs'
+      - '.github/workflows/cerebro-evt001-browser-staging-e2e-v0.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  browser-staging-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: EVT-001 browser evidence contracts
+        run: node --test cerebro/tests/evt001-browser-staging-e2e-v0.test.mjs
+      - name: Enforce fail-closed server journal boundary
+        run: >-
+          node -e "const e=require('./cerebro/registry/evt001-browser-staging-e2e.v0.json'); if(e.status!=='VERIFIED_BROWSER_FIRST_PARTY_EMITTER_PERSISTENCE_IDEMPOTENCY_GREEN_SERVER_JOURNAL_BINDING_PENDING') process.exit(1); if(e.physical_evidence.server_side_event_persistence_claimed||e.server_binding_audit.server_journal_binding_verified||e.server_binding_audit.current_connected_mcp_get_observe_granted||e.server_binding_audit.permission_weakened_or_bypassed) process.exit(1); const a=e.authority; if(a.prod_authorized||a.prod_write_authorized||a.public_publish_authorized||a.customer_data_authorized||a.third_party_tracking_authorized||a.trading_access||a.automatic_paid_fallback||a.additional_cost_eur!==0) process.exit(1); if(e.wordpress_staging.page_status!=='draft'||!e.wordpress_staging.robots_noindex||!e.wordpress_staging.robots_nofollow||e.wordpress_staging.public_publish_performed) process.exit(1); console.log('EVT-001 browser STAGING E2E GREEN; server journal binding remains fail-closed');"
+      - name: Canonical registry validation
+        working-directory: cerebro
+        run: npm run validate
+      - name: Full CEREBRO regression
+        working-directory: cerebro
+        run: npm test
