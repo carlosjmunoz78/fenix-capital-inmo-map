@@ -1,0 +1,47 @@
+{
+  "schema_version": "1.0.0",
+  "phase": 15,
+  "blocks": [176,177,178,179,180,181,182,183,184],
+  "date": "2026-10-14",
+  "environment": "PREPROD",
+  "state": "PREPROD_CODE_PENDING_CI",
+  "source_contract": "FASE 15 · Marca, apps y commerce",
+  "owner_engine_id": "FACT-001",
+  "capability_id": "BRAND-COMMERCE-APPFACTORY",
+  "main_base_sha": "218b88755ad51d869796163d4ea3db2eb290b536",
+  "facts": [
+    "BRANDBOOT-001 already exists as a governed LAB candidate and is not rebuilt here.",
+    "Canonical main remains at 177 engines in this branch; no registry-count migration is performed.",
+    "Brand token generation is deterministic and local.",
+    "Commerce capabilities compose existing SALE-001/PAY-001/INV-001/COM-001 interfaces as plans only.",
+    "App Factory composes FACT-001 and APPBOOT-001 and emits scaffold plans only.",
+    "Blink is reference-only and text-to-CAD is catalog-only.",
+    "No external provider, installation, deployment, publication, payment mutation or subscription is enabled.",
+    "Additional runtime cost target is 0 EUR."
+  ],
+  "preservation": {
+    "canonical_registry_modified": false,
+    "existing_app_replaced": false,
+    "existing_crm_replaced": false,
+    "supabase_modified": false,
+    "wordpress_modified": false,
+    "prod_modified": false,
+    "trading_touched": false
+  },
+  "promotion": {
+    "focused_tests_required": true,
+    "registry_validation_required": true,
+    "full_regression_required": true,
+    "tribunal_shadow_required": true,
+    "factory_shadow_required": true,
+    "rollback_documented": true,
+    "merge_authorized": false,
+    "prod_authorized": false
+  },
+  "known_separate_dependency": {
+    "item": "BRANDBOOT-001 canonical 177-to-178 registry migration",
+    "vehicle": "separate governed draft candidate",
+    "required_for_this_phase_ci": false,
+    "required_before claiming canonical BRANDBOOT production availability": true
+  }
+}
