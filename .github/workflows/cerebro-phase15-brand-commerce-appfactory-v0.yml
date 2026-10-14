@@ -1,0 +1,44 @@
+name: CEREBRO Phase 15 Brand Commerce App Factory V0
+
+on:
+  push:
+    paths:
+      - 'cerebro/digital-build/brand-commerce-appfactory-runtime-v0.mjs'
+      - 'cerebro/tests/brand-commerce-appfactory-runtime-v0.test.mjs'
+      - 'cerebro/registry/brand-commerce-appfactory-profile.v0.json'
+      - 'cerebro/docs/CEREBRO_PHASE15_BRAND_COMMERCE_APPFACTORY_BLOCKS_176_184_V0_2026-10-14.md'
+      - 'cerebro/evidence/phase15-brand-commerce-appfactory-blocks-176-184-v0.json'
+      - '.github/workflows/cerebro-phase15-brand-commerce-appfactory-v0.yml'
+  pull_request:
+    paths:
+      - 'cerebro/digital-build/brand-commerce-appfactory-runtime-v0.mjs'
+      - 'cerebro/tests/brand-commerce-appfactory-runtime-v0.test.mjs'
+      - 'cerebro/registry/brand-commerce-appfactory-profile.v0.json'
+      - 'cerebro/docs/CEREBRO_PHASE15_BRAND_COMMERCE_APPFACTORY_BLOCKS_176_184_V0_2026-10-14.md'
+      - 'cerebro/evidence/phase15-brand-commerce-appfactory-blocks-176-184-v0.json'
+      - '.github/workflows/cerebro-phase15-brand-commerce-appfactory-v0.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  phase15-brand-commerce-appfactory-v0:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Phase 15 focused contract tests
+        run: node --test cerebro/tests/brand-commerce-appfactory-runtime-v0.test.mjs
+      - name: Validate profile and evidence JSON
+        run: >-
+          node -e "for (const f of ['cerebro/registry/brand-commerce-appfactory-profile.v0.json','cerebro/evidence/phase15-brand-commerce-appfactory-blocks-176-184-v0.json']) JSON.parse(require('fs').readFileSync(f,'utf8')); console.log('phase15-json GREEN')"
+      - name: Validate canonical engine registry
+        working-directory: cerebro
+        run: npm run validate
+      - name: Full CEREBRO regression suite
+        working-directory: cerebro
+        run: npm test
