@@ -1,0 +1,59 @@
+{
+  "schema_version": "1.1.0",
+  "phase": 15,
+  "blocks": [176,177,178,179,180,181,182,183,184],
+  "date": "2026-10-14",
+  "environment": "PREPROD",
+  "state": "PREPROD_CODE_TESTED_PLAN_ONLY",
+  "source_contract": "FASE 15 · Marca, apps y commerce",
+  "owner_engine_id": "FACT-001",
+  "capability_id": "BRAND-COMMERCE-APPFACTORY",
+  "context_version": "v0",
+  "main_base_sha": "6d001f17f09c3816ff1af71bc8740e77cbfc037e",
+  "canonical_registry_count": 179,
+  "canonical_registry_extension": ["HCI-001","MOTION-001"],
+  "validated_code_head_sha": "ff1d9a978eeac115157ea4072aa38af856e1bbc2",
+  "validated_runs": {
+    "phase15": {"run_id": 38553271902, "conclusion": "success"},
+    "governed_main_integration": {"run_id": 38553271887, "conclusion": "success"},
+    "rsi_promotion_readiness_shadow": {"run_id": 38553271836, "conclusion": "success"}
+  },
+  "facts": [
+    "BRANDBOOT-001 exists as a governed LAB candidate outside the current canonical 179-engine registry and is not rebuilt or promoted here.",
+    "Canonical main is already at 179 engines because HCI-001 and MOTION-001 were added independently over the historical base of 177; this PR performs no registry-count migration.",
+    "Brand token generation is deterministic and local.",
+    "Phase15 validates exact FACT-001 + BRAND-COMMERCE-APPFACTORY + PREPROD + v0 execution identity.",
+    "Block 178 is explicitly represented as a reference-only commerce plan with no provider binding.",
+    "Commerce capabilities compose existing SALE-001/PAY-001/INV-001/COM-001 interfaces as plans only.",
+    "App Factory is block 181 and composes FACT-001/APPBOOT-001 while block 183 remains the template capability.",
+    "Blink is reference-only and text-to-CAD is catalog-only.",
+    "No external provider, installation, deployment, publication, payment mutation or subscription is enabled.",
+    "Additional runtime cost target is 0 EUR."
+  ],
+  "preservation": {
+    "canonical_registry_modified": false,
+    "existing_app_replaced": false,
+    "existing_crm_replaced": false,
+    "supabase_modified": false,
+    "wordpress_modified": false,
+    "prod_modified": false,
+    "trading_touched": false
+  },
+  "promotion": {
+    "focused_tests_required": true,
+    "registry_validation_required": true,
+    "full_regression_required": true,
+    "tribunal_shadow_required": true,
+    "factory_shadow_required": true,
+    "rollback_documented": true,
+    "merge_authorized": false,
+    "prod_authorized": false,
+    "merge_rule": "Only merge after required checks are green on the exact candidate head, including any documentation/evidence-only commits after the validated code head."
+  },
+  "known_separate_dependency": {
+    "item": "BRANDBOOT-001 canonicalization/promotion",
+    "vehicle": "separate governed candidate",
+    "required_for_this_phase_ci": false,
+    "required_before_claiming_canonical_or_production_BRANDBOOT_availability": true
+  }
+}
