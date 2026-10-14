@@ -1,18 +1,33 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "state_type": "CEREBRO_WATCH_LEARN_REMOTE_OBSERVATION_V0",
   "company_id": "fenix",
   "engine_id": "LRN-001",
   "environment": "PREPROD",
   "version": "0.1.0",
   "rollout_item": 47,
-  "status": "CANDIDATE_PENDING_REMOTE_CI",
+  "status": "VERIFIED_REMOTE_OBSERVATION_REPLAY_GREEN",
   "source_main_sha": "05f86970a94350628ecfb3511573a0eff333e51b",
+  "validated_head_sha": "dac341399e350f046b7d0cc01a05f72593fbf23e",
   "purpose": "Bind the verified deterministic replay core to a real authorized public PREPROD observation without writes or credentials.",
   "implementation": {
     "runner": "cerebro/runtime/watch-learn-remote-observation-v0.mjs",
     "source_adapter": "cerebro/runtime/public-source-adapter-v0.mjs",
-    "replay_core": "cerebro/runtime/fact001-gap-capabilities-v0.mjs"
+    "replay_core": "cerebro/runtime/fact001-gap-capabilities-v0.mjs",
+    "workflow": ".github/workflows/cerebro-watch-learn-remote-observation-v0.yml"
+  },
+  "verification": {
+    "workflow_run_id": 38647871977,
+    "workflow_conclusion": "success",
+    "public_source_security_contracts": "PASS",
+    "authorized_remote_observation": "PASS",
+    "deterministic_replay": "PASS",
+    "canonical_registry_validation": "PASS",
+    "full_cerebro_regression": "PASS",
+    "artifact_id": 11932709083,
+    "artifact_digest": "sha256:6848a3f0699aa7b9f14342550992e0722650b5e80c458a97f9911a644ce0a271",
+    "governed_main_integration_run_id": 38647871311,
+    "governed_main_integration": "PASS"
   },
   "acceptance": {
     "target_class": "USER_OWNED_PUBLIC_PREPROD_WORDPRESS_REST_API",
@@ -36,5 +51,6 @@
   },
   "rollback": "Revert the additive observation adapter PR; no remote mutation exists.",
   "rebuild": "Recreate from public-source-adapter-v0 + deterministic Watch & Learn replay core.",
-  "next_gate": "REMOTE_OBSERVATION_CI"
+  "remaining_gate": "CONTINUOUS_AUTHORIZED_OBSERVATION_POLICY_AND_JOB_SCHEDULER",
+  "next_gate": "CONTINUOUS_AUTHORIZED_OBSERVATION_POLICY_AND_JOB_SCHEDULER"
 }
