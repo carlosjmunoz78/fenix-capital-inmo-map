@@ -5,7 +5,7 @@
   "engine_id": "HEX-001",
   "environment": "PROD_CONTROL_PLANE",
   "version": "1.1.0",
-  "updated_at": "2026-10-14T05:30:11.432896Z",
+  "updated_at": "2026-10-14T10:19:10.732Z",
   "pending": {},
   "authorized_actions": {},
   "decisions": [],
@@ -80,6 +80,50 @@
       "canary": "",
       "additional_cost_eur": 0
     },
+    "name:create-report": {
+      "kind": "HOLD",
+      "name": "create-report",
+      "human_alias": "Create Report",
+      "status": "TERMINAL_HOLD",
+      "stage": "SAFE_HANDLER_TERMINAL_HOLD",
+      "human_required": "",
+      "updated_at": "2026-10-13T12:38:39.432Z",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
+    "name:ai-tools-engineering-principles": {
+      "kind": "HOLD",
+      "name": "ai-tools-engineering-principles",
+      "human_alias": "Ai Tools Engineering Principles",
+      "status": "TERMINAL_HOLD",
+      "stage": "SAFE_HANDLER_TERMINAL_HOLD",
+      "human_required": "",
+      "updated_at": "2026-10-13T22:04:31.255Z",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
+    "name:ai-tools-agent-governance": {
+      "kind": "HOLD",
+      "name": "ai-tools-agent-governance",
+      "human_alias": "Ai Tools Agent Governance",
+      "status": "TERMINAL_HOLD",
+      "stage": "SAFE_HANDLER_TERMINAL_HOLD",
+      "human_required": "",
+      "updated_at": "2026-10-14T01:16:26.366Z",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
+    "name:blender": {
+      "kind": "HOLD",
+      "name": "blender",
+      "human_alias": "Blender",
+      "status": "TERMINAL_HOLD",
+      "stage": "SAFE_HANDLER_TERMINAL_HOLD",
+      "human_required": "",
+      "updated_at": "2026-10-14T06:15:30.480Z",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
     "name:obsidian": {
       "kind": "COMPLETED",
       "name": "obsidian",
@@ -92,7 +136,7 @@
       "additional_cost_eur": 0
     }
   },
-  "last_digest_date": "2026-10-13",
+  "last_digest_date": "2026-10-14",
   "last_delivery_at": "2026-10-13T08:20:05Z",
   "mail_transport": {
     "status": "VERIFIED",
