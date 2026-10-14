@@ -2,13 +2,13 @@
 
 Fecha: 2026-10-14  
 Entorno: `PREPROD`  
-Estado inicial del documento: `PREPROD_CODE_PENDING_CI`
+Estado del documento: `PREPROD_CODE_HARDENED_PENDING_HEAD_CI`
 
 ## 1. Contrato canónico
 
 Esta fase cubre exactamente:
 
-- 176 · `BRANDBOOT-001` · reutilizar candidato LAB existente.
+- 176 · `BRANDBOOT-001` · reutilizar candidato LAB gobernado existente.
 - 177 · brand tokens automatizados.
 - 178 · Claude Commerce Agents · patrón de referencia, no dependencia.
 - 179 · Shopping Agent capability.
@@ -22,21 +22,24 @@ No se crean nueve motores. La implementación física V0 vive como capability co
 
 ## 2. Conservación y dependencia BRANDBOOT
 
-`BRANDBOOT-001` ya existe como candidato LAB gobernado en un vehículo separado. Esta fase **no lo reescribe** y **no cambia el registro canónico de main de 177 motores**. La migración 177→178 permanece separada, reversible y sujeta a GOV/FACT.
+`BRANDBOOT-001` existe como candidato LAB gobernado en un vehículo separado. Esta fase **no lo reescribe**, **no lo promociona a PROD** y **no modifica el registro canónico**.
 
-Esta rama consume el concepto contractual de `BRANDBOOT-001` únicamente como fuente de un `brand_contract_ref` opaco. No afirma que BRANDBOOT esté promocionado a PROD ni que esté en el registry canónico actual.
+El registro canónico de `main` ya contiene **179 motores** por una extensión independiente que añadió `HCI-001` y `MOTION-001` sobre la base histórica de 177. `BRANDBOOT-001` no forma parte de esos 179 y esta PR no altera ese hecho.
+
+Esta rama consume el contrato de `BRANDBOOT-001` únicamente como fuente de un `brand_contract_ref` opaco. No afirma disponibilidad canónica o productiva de BRANDBOOT.
 
 ## 3. Automatización ordinaria V0
 
 El runtime `brand-commerce-appfactory-runtime-v0.mjs` automatiza en PREPROD el trabajo ordinario de planificación:
 
-1. valida `company_id + engine_id + capability_id + environment + version`;
+1. valida de forma exacta `company_id + engine_id + capability_id + environment + version` (`FACT-001`, `BRAND-COMMERCE-APPFACTORY`, `PREPROD`, `v0`);
 2. consume un contrato de marca gobernado;
 3. genera `design-tokens.json` / `brand.css` de forma determinista;
-4. prepara planes de Shopping/Merchant sobre `SALE-001`, `PAY-001`, `INV-001`, `COM-001` sin mutaciones reales;
-5. prepara App Factory sobre `FACT-001 + APPBOOT-001` con artifacts de tests/rollback/rebuild;
-6. cataloga Blink y text-to-CAD sin instalación;
-7. emite clave de idempotencia y telemetría metadata-only.
+4. materializa explícitamente el bloque 178 como referencia de patrón sin provider binding;
+5. prepara planes de Shopping/Merchant sobre `SALE-001`, `PAY-001`, `INV-001`, `COM-001` sin mutaciones reales;
+6. prepara App Factory en bloque 181 sobre `FACT-001 + APPBOOT-001` y referencia los templates del bloque 183;
+7. cataloga Blink y text-to-CAD sin instalación;
+8. emite clave de idempotencia y telemetría metadata-only.
 
 El flujo ordinario no requiere intervención humana mientras cumpla contrato y políticas. Los límites físicos siguen cerrados.
 
@@ -65,7 +68,7 @@ Claude Commerce, Blink y cualquier proveedor externo se tratan como referencia/p
 
 ## 6. Tests y aceptación
 
-Gate requerido:
+Gate requerido sobre el **head exacto** antes de merge:
 
 - focused contract tests de FASE 15;
 - JSON profile/evidence parseable;
@@ -73,7 +76,7 @@ Gate requerido:
 - `npm test` completo;
 - Tribunal/Factory/Promotion shadow del repositorio cuando apliquen.
 
-No promover ni fusionar solo porque el código compile. El estado se actualiza a `PREPROD_CODE_TESTED_PLAN_ONLY` únicamente tras CI verde sobre el head exacto.
+No promover ni fusionar solo porque el código compile. El estado `PREPROD_CODE_TESTED_PLAN_ONLY` solo es válido cuando los checks del head candidato a merge están verdes.
 
 ## 7. Rollback y rebuild
 
@@ -85,9 +88,10 @@ Rebuild: regenerar runtime/profile/tests/docs/evidence desde el contrato de bloq
 
 - planificación PREPROD: automática;
 - brand tokens deterministas: automática;
+- referencia commerce 178: automática y sin proveedor;
 - app scaffold plan: automático;
 - commerce plan: automático;
 - ejecución externa: deshabilitada;
 - publicación/despliegue: deshabilitado;
 - PROD autónomo: no autorizado;
-- BRANDBOOT registry migration: gobernada por separado.
+- BRANDBOOT: candidato separado, sin promoción implícita.
