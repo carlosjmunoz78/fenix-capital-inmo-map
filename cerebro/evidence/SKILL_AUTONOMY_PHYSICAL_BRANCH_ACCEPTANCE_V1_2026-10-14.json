@@ -1,0 +1,49 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_SKILL_AUTONOMY_PHYSICAL_BRANCH_ACCEPTANCE_V1",
+  "observed_at": "2026-10-14T17:00:00Z",
+  "status": "GREEN_PHYSICAL_BRANCH_ACCEPTANCE",
+  "repository": "carlosjmunoz78/fenix-capital-inmo-map",
+  "branch": "cerebro/skill-autonomy-action-application-v1-20261014",
+  "head_sha": "f185888b81fd34c3fdce8a47707b7ae90cfd133f",
+  "pull_request": 684,
+  "workflow": "CEREBRO Skill Autonomy Physical Branch Acceptance V1",
+  "run_id": 38602839441,
+  "job_id": 115986155131,
+  "artifact_id": 11914536048,
+  "artifact_zip_sha256": "13c45eaac1ae56b30db11409b87e22f805fb6ef2c0f1a9971372ccb626e00fa0",
+  "focused_tests": {
+    "passed": 15,
+    "failed": 0
+  },
+  "physical_runtime_handoff": {
+    "company_id": "fenix",
+    "skill_id": "physical-skill-acceptance",
+    "decision": "ENVOLVER",
+    "target_engine_ids": ["SEO-001"],
+    "handoff_type": "CEREBRO_SKILL_ENGINE_EXTENSION_HANDOFF",
+    "next_gate": "SKILL_CAPABILITY_EVOLUTION_EXISTING_ENGINE",
+    "queue_consumed": true,
+    "completion_recorded": true
+  },
+  "authority_boundary": {
+    "environment": "PREPROD_BRANCH_ACCEPTANCE",
+    "customer_data_used": false,
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "trading_access": false,
+    "external_skill_code_execution_authorized": false,
+    "paid_activation_authorized": false,
+    "additional_cost_eur": 0
+  },
+  "promotion_boundary": {
+    "main_merge_authorized_by_this_evidence": false,
+    "reason": "EXTERNAL_CLOUDFLARE_GIT_DEPLOYMENT_SIDE_EFFECT_NOT_YET_ISOLATED",
+    "required_before_merge": [
+      "identify inherited Cloudflare Git integration trigger",
+      "isolate or govern production deployment side effect",
+      "prove no unintended PROD deployment from skills-only main merge",
+      "retain rollback path"
+    ]
+  }
+}
