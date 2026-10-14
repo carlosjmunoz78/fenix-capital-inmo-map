@@ -7,6 +7,10 @@ on:
       - 'cerebro/skills/cerebro-184-live-convergence-controller-v1.mjs'
       - 'cerebro/skills/cerebro-184-fact001-gap-routing.v1.json'
       - 'cerebro/runtime/cerebro-184-fact001-gap-router-v1.mjs'
+      - 'cerebro/runtime/fact001-gap-capabilities-v0.mjs'
+      - 'cerebro/registry/fact001-gap-capabilities.v0.json'
+      - 'cerebro/registry/fact001-six-gap-old-vs-new.v0.json'
+      - 'cerebro/tests/fact001-gap-capabilities-v0.test.mjs'
       - 'cerebro/skills/cerebro-184-items-1-24-live-reconciliation.v2.json'
       - 'cerebro/skills/cerebro-184-items-25-37-live-reconciliation.v2.json'
       - 'cerebro/skills/cerebro-184-items-38-50-live-reconciliation.v2.json'
@@ -38,6 +42,10 @@ on:
       - 'cerebro/skills/cerebro-184-live-convergence-controller-v1.mjs'
       - 'cerebro/skills/cerebro-184-fact001-gap-routing.v1.json'
       - 'cerebro/runtime/cerebro-184-fact001-gap-router-v1.mjs'
+      - 'cerebro/runtime/fact001-gap-capabilities-v0.mjs'
+      - 'cerebro/registry/fact001-gap-capabilities.v0.json'
+      - 'cerebro/registry/fact001-six-gap-old-vs-new.v0.json'
+      - 'cerebro/tests/fact001-gap-capabilities-v0.test.mjs'
       - 'cerebro/skills/cerebro-184-items-1-24-live-reconciliation.v2.json'
       - 'cerebro/skills/cerebro-184-items-25-37-live-reconciliation.v2.json'
       - 'cerebro/skills/cerebro-184-items-38-50-live-reconciliation.v2.json'
@@ -82,6 +90,7 @@ jobs:
           node --test
           cerebro/tests/cerebro-184-live-convergence-controller-v1.test.mjs
           cerebro/tests/cerebro-184-fact001-gap-router-v1.test.mjs
+          cerebro/tests/fact001-gap-capabilities-v0.test.mjs
           cerebro/tests/cerebro-184-items-1-24-live-reconciliation-v2.test.mjs
           cerebro/tests/cerebro-184-items-25-50-live-reconciliation-v2.test.mjs
           cerebro/tests/cerebro-184-items-51-61-live-reconciliation-v2.test.mjs
@@ -98,9 +107,9 @@ jobs:
       - name: Full CEREBRO OLD-vs-NEW regression baseline
         working-directory: cerebro
         run: npm test
-      - name: Enforce authority boundary
+      - name: Enforce authority boundary and six-gap build evidence
         run: >-
-          node -e "const s=require('./cerebro/skills/cerebro-184-live-convergence.v2.json'); const g=require('./cerebro/skills/cerebro-184-fact001-gap-routing.v1.json'); const names=['1-24','25-37','38-50','51-61','62-68','69-73','74-82','83-92','93-104','105-117','118-131','132-142','143-151','152-161','162-175','176-184']; const files=names.map(x=>require('./cerebro/skills/cerebro-184-items-'+x+'-live-reconciliation.v2.json')); const a=s.authority; const denied=x=>x.prod_authorized||x.prod_write_authorized||x.auto_merge_authorized||x.external_skill_code_execution_authorized||x.external_dependency_install_authorized||x.customer_data_authorized||x.trading_access||x.automatic_paid_fallback||x.additional_cost_eur!==0; if(a.prod_authorized||a.prod_write_authorized||a.auto_merge_authorized||a.external_skill_code_execution_authorized||a.customer_data_authorized||a.trading_access||a.automatic_paid_fallback||a.additional_cost_eur!==0) process.exit(1); if(files.some(x=>denied(x.authority))||denied(g.policy)) process.exit(1); if(s.normalized_item_count!==184||s.remaining_item_normalization_count!==0) process.exit(1); if(files.some(x=>x.summary.additional_cost_eur!==0||x.items.some(i=>i.disposition==='PAGO_JUSTIFICADO'))) process.exit(1); const byId=id=>files.flatMap(x=>x.items).find(i=>i.id===id); for(const id of [47,48,57,62,74,183]) if(byId(id)?.disposition!=='FABRICAR_GRATIS') process.exit(1); if(JSON.stringify(g.summary.item_ids)!==JSON.stringify([47,48,57,62,74,183])||g.summary.new_engine_ids_created.length!==0||g.summary.additional_cost_eur!==0) process.exit(1); for(const id of [45,54,69,72,76,78,90,109,110,171,172,173,174]) if(byId(id)?.disposition!=='HOLD') process.exit(1); if(byId(177)?.state!=='FULL_PREPROD_DETERMINISTIC_LOCAL') process.exit(1); if(s.deployment_boundary.main_is_cloudflare_production_branch!==false||s.deployment_boundary.cloudflare_production_branch!=='deploy/cloudflare-prod') process.exit(1); console.log('184 authority, 1-184 reconciliation and six-gap FACT-001 routing GREEN')"
+          node -e "const s=require('./cerebro/skills/cerebro-184-live-convergence.v2.json'); const g=require('./cerebro/skills/cerebro-184-fact001-gap-routing.v1.json'); const p=require('./cerebro/registry/fact001-gap-capabilities.v0.json'); const e=require('./cerebro/registry/fact001-six-gap-old-vs-new.v0.json'); const names=['1-24','25-37','38-50','51-61','62-68','69-73','74-82','83-92','93-104','105-117','118-131','132-142','143-151','152-161','162-175','176-184']; const files=names.map(x=>require('./cerebro/skills/cerebro-184-items-'+x+'-live-reconciliation.v2.json')); const a=s.authority; const denied=x=>x.prod_authorized||x.prod_write_authorized||x.auto_merge_authorized||x.external_skill_code_execution_authorized||x.external_dependency_install_authorized||x.customer_data_authorized||x.trading_access||x.automatic_paid_fallback||x.additional_cost_eur!==0; if(a.prod_authorized||a.prod_write_authorized||a.auto_merge_authorized||a.external_skill_code_execution_authorized||a.customer_data_authorized||a.trading_access||a.automatic_paid_fallback||a.additional_cost_eur!==0) process.exit(1); if(files.some(x=>denied(x.authority))||denied(g.policy)||denied(p.authority)||denied(e.authority)) process.exit(1); if(s.normalized_item_count!==184||s.remaining_item_normalization_count!==0) process.exit(1); if(files.some(x=>x.summary.additional_cost_eur!==0||x.items.some(i=>i.disposition==='PAGO_JUSTIFICADO'))) process.exit(1); const byId=id=>files.flatMap(x=>x.items).find(i=>i.id===id); for(const id of [47,48,57,62,74,183]) if(byId(id)?.disposition!=='FABRICAR_GRATIS') process.exit(1); if(JSON.stringify(g.summary.item_ids)!==JSON.stringify([47,48,57,62,74,183])||g.summary.new_engine_ids_created.length!==0||g.summary.additional_cost_eur!==0) process.exit(1); if(p.status!=='VERIFIED_PREPROD_CORE_PHYSICAL_BINDINGS_PENDING'||e.global_decision!=='NEW_BETTER_NO_REGRESSION_AT_PREPROD_CORE_SCOPE') process.exit(1); for(const id of [45,54,69,72,76,78,90,109,110,171,172,173,174]) if(byId(id)?.disposition!=='HOLD') process.exit(1); if(byId(177)?.state!=='FULL_PREPROD_DETERMINISTIC_LOCAL') process.exit(1); if(s.deployment_boundary.main_is_cloudflare_production_branch!==false||s.deployment_boundary.cloudflare_production_branch!=='deploy/cloudflare-prod') process.exit(1); console.log('184 authority, six-gap routing, PREPROD core build and OLD-vs-NEW evidence GREEN')"
       - name: Upload convergence reports
         uses: actions/upload-artifact@v4
         with:
