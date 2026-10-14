@@ -34,16 +34,18 @@ export function assessPromotionReadiness({staticLab,oldVsNew,routeAudit,quotaPla
 
   const ready=blockers.length===0;
   return Object.freeze({
-    schema_version:'0.2.2',
+    schema_version:'0.3.0',
     execution_mode:'PROMOTION_READINESS_EVIDENCE_ONLY',
     ready,
     status:ready?'READY_FOR_PREPROD_PROMOTION_REVIEW':'NOT_READY',
     blockers,
     evidence,
+    decision_gate:'SKILL_CAPABILITY_AUTONOMY_CLOSURE_V1',
+    autonomous_preprod_decision_authorized:ready,
     merge_authorized:false,
     prod_authorized:false,
     autonomous_promotion_authorized:false,
-    human_required:ready?'HIGH_RISK':null
+    human_required:null
   });
 }
 
@@ -80,5 +82,5 @@ if(import.meta.url===`file://${process.argv[1]}`){
   const report=assessPromotionReadiness({staticLab,oldVsNew,routeAudit,quotaPlan,behavioralGate,rsiShadow,behavioralResults,independentJudge,tribunal,rollback});
   fs.mkdirSync(path.dirname(output),{recursive:true});
   fs.writeFileSync(output,`${JSON.stringify(report,null,2)}\n`,'utf8');
-  console.log(JSON.stringify({output,status:report.status,ready:report.ready,blockers:report.blockers,evidence:report.evidence,tribunal_decision:tribunal?.decision??'MISSING',merge_authorized:false,prod_authorized:false}));
+  console.log(JSON.stringify({output,status:report.status,ready:report.ready,blockers:report.blockers,evidence:report.evidence,tribunal_decision:tribunal?.decision??'MISSING',decision_gate:report.decision_gate,autonomous_preprod_decision_authorized:report.autonomous_preprod_decision_authorized,human_required:null,merge_authorized:false,prod_authorized:false}));
 }

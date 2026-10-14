@@ -17,14 +17,16 @@ function base(){
   };
 }
 
-test('complete evidence can only reach PREPROD promotion review, never auto-merge',()=>{
+test('complete evidence reaches autonomous PREPROD decision gate, never PROD or auto-merge',()=>{
   const report=assessPromotionReadiness(base());
   assert.equal(report.ready,true);
   assert.equal(report.status,'READY_FOR_PREPROD_PROMOTION_REVIEW');
+  assert.equal(report.decision_gate,'SKILL_CAPABILITY_AUTONOMY_CLOSURE_V1');
+  assert.equal(report.autonomous_preprod_decision_authorized,true);
   assert.equal(report.merge_authorized,false);
   assert.equal(report.prod_authorized,false);
   assert.equal(report.autonomous_promotion_authorized,false);
-  assert.equal(report.human_required,'HIGH_RISK');
+  assert.equal(report.human_required,null);
 });
 
 test('missing behavioral, judge, tribunal and rollback evidence remains not ready',()=>{
@@ -35,6 +37,7 @@ test('missing behavioral, judge, tribunal and rollback evidence remains not read
   input.rollback=null;
   const report=assessPromotionReadiness(input);
   assert.equal(report.ready,false);
+  assert.equal(report.autonomous_preprod_decision_authorized,false);
   assert.ok(report.blockers.includes('BEHAVIORAL_OLD_VS_NEW_NOT_EXECUTED'));
   assert.ok(report.blockers.includes('INDEPENDENT_JUDGE_NOT_GREEN'));
   assert.ok(report.blockers.includes('TRIBUNAL_NOT_GREEN'));
@@ -51,4 +54,5 @@ test('unbound zero-cost route and closed gate are explicit blockers',()=>{
   assert.ok(report.blockers.includes('ZERO_COST_ROUTE_NOT_READY'));
   assert.ok(report.blockers.includes('FREE_QUOTA_PLAN_NOT_EXECUTABLE'));
   assert.ok(report.blockers.includes('BEHAVIORAL_EXECUTION_GATE_CLOSED'));
+  assert.equal(report.autonomous_preprod_decision_authorized,false);
 });

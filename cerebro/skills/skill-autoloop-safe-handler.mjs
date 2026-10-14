@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import {validateSafeAutoloopState} from './skill-autoloop-controller.mjs';
+import {validateSafeAutoloopState,moveCandidateToHumanGate} from './skill-autoloop-controller.mjs';
+import {SKILL_AUTONOMY_DECISIONS} from '../runtime/skill-capability-autonomy-closure-v1.mjs';
 
 function clone(value){return JSON.parse(JSON.stringify(value??{}));}
 function iso(value){return typeof value==='string'&&value?value:'9999-12-31T23:59:59.999Z';}
@@ -20,6 +21,16 @@ export function reconcileSafeHandlerResult(state,candidateId,{outcome,evidence={
   if(!safety.green) throw new Error(`AUTOLOOP_STATE_UNSAFE:${safety.errors.join(',')}`);
   const current=out.waiting_safe_handler?.[candidateId]??out.in_flight?.[candidateId];
   if(!current) throw new Error('CANDIDATE_NOT_FOUND_IN_SAFE_HANDLER_LANES');
+
+  if(outcome==='HUMAN_REQUIRED'){
+    return moveCandidateToHumanGate(out,candidateId,{
+      human_required:evidence?.human_required,
+      stage:'SKILL_AUTONOMY_HUMAN_EXCEPTION',
+      evidence,
+      now
+    });
+  }
+
   out.waiting_safe_handler=out.waiting_safe_handler??{};
   out.in_flight=out.in_flight??{};
   out.waiting_human=out.waiting_human??{};
@@ -29,13 +40,17 @@ export function reconcileSafeHandlerResult(state,candidateId,{outcome,evidence={
   delete out.in_flight[candidateId];
   out.updated_at=now;
 
-  if(outcome==='READY_FOR_PREPROD_PROMOTION_REVIEW'){
-    out.waiting_human[candidateId]={
+  if(outcome==='AUTONOMOUS_PREPROD_DECISION'){
+    const disposition=evidence?.decision;
+    if(!SKILL_AUTONOMY_DECISIONS.includes(disposition)) throw new Error('INVALID_SKILL_AUTONOMY_DECISION');
+    if(evidence?.human_required!=null) throw new Error('AUTONOMOUS_DECISION_MUST_NOT_REQUIRE_HUMAN');
+    out.completed[candidateId]={
       ...current,
       candidate_id:candidateId,
-      stage:'PREPROD_PROMOTION_REVIEW',
-      status:'WAITING_HUMAN',
-      human_required:'HIGH_RISK',
+      stage:'SKILL_AUTONOMY_DECISION_RECORDED',
+      status:'COMPLETED',
+      disposition,
+      human_required:null,
       evidence,
       updated_at:now,
       prod_authorized:false,
@@ -47,7 +62,26 @@ export function reconcileSafeHandlerResult(state,candidateId,{outcome,evidence={
       paid_fallback:false,
       additional_cost_eur:0
     };
-    out.last_action='HUMAN_REQUIRED_HIGH_RISK_CONTINUE_OTHER_SAFE_WORK';
+    out.last_action=`AUTONOMOUS_PREPROD_DECISION_${disposition}_CONTINUE_OTHER_SAFE_WORK`;
+  } else if(outcome==='READY_FOR_PREPROD_PROMOTION_REVIEW'){
+    out.waiting_human[candidateId]={
+      ...current,
+      candidate_id:candidateId,
+      stage:'PREPROD_PROMOTION_REVIEW_LEGACY',
+      status:'WAITING_HUMAN',
+      human_required:'HIGH_RISK',
+      evidence:{...evidence,legacy_generic_high_risk_gate:true},
+      updated_at:now,
+      prod_authorized:false,
+      prod_write:false,
+      autonomous_promotion_authorized:false,
+      external_skill_code_execution:false,
+      customer_data_used:false,
+      trading_access:false,
+      paid_fallback:false,
+      additional_cost_eur:0
+    };
+    out.last_action='LEGACY_HUMAN_REQUIRED_HIGH_RISK_CONTINUE_OTHER_SAFE_WORK';
   } else if(outcome==='TERMINAL_HOLD'){
     out.terminal_hold[candidateId]={
       ...current,
@@ -102,6 +136,6 @@ if(import.meta.url===`file://${process.argv[1]}`){
   const state=JSON.parse(fs.readFileSync(statePath,'utf8'));
   const selected=selectWaitingSafeCandidate(state);
   fs.mkdirSync(path.dirname(output),{recursive:true});
-  fs.writeFileSync(output,`${JSON.stringify({schema_version:'0.1.0',selected,prod_authorized:false,external_skill_code_execution:false,additional_cost_eur:0},null,2)}\n`,'utf8');
+  fs.writeFileSync(output,`${JSON.stringify({schema_version:'0.2.0',selected,prod_authorized:false,external_skill_code_execution:false,additional_cost_eur:0},null,2)}\n`,'utf8');
   console.log(JSON.stringify({selected_candidate_id:selected?.candidate_id??null,selected_name:selected?.name??null,prod_authorized:false,external_skill_code_execution:false,additional_cost_eur:0}));
 }

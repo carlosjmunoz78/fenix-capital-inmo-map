@@ -8,9 +8,15 @@ on:
       - cerebro/fix-skill-handler-nested-artifact-v0-20261011
     paths:
       - 'cerebro/skills/skill-autoloop-safe-handler.mjs'
+      - 'cerebro/skills/skill-autoloop-autonomy-decision.mjs'
       - 'cerebro/skills/skill-autoloop-old-vs-new-overlay.mjs'
+      - 'cerebro/skills/skill-promotion-readiness.mjs'
+      - 'cerebro/runtime/skill-capability-autonomy-closure-v1.mjs'
       - 'cerebro/tests/skill-autoloop-safe-handler.test.mjs'
+      - 'cerebro/tests/skill-autoloop-autonomy-decision.test.mjs'
       - 'cerebro/tests/skill-autoloop-old-vs-new-overlay.test.mjs'
+      - 'cerebro/tests/skill-promotion-readiness.test.mjs'
+      - 'cerebro/tests/skill-capability-autonomy-closure-v1.test.mjs'
       - '.github/workflows/cerebro-skill-autoloop-safe-handler.yml'
   schedule:
     - cron: '17 * * * *'
@@ -45,7 +51,7 @@ jobs:
           node-version: 20
 
       - name: Run AutoLoop safe-handler contracts
-        run: node --test cerebro/tests/skill-autoloop-controller.test.mjs cerebro/tests/skill-autoloop-safe-handler.test.mjs cerebro/tests/skill-autoloop-old-vs-new-overlay.test.mjs cerebro/tests/skill-old-vs-new-contract.test.mjs cerebro/tests/skill-static-lab-benchmark.test.mjs cerebro/tests/skill-behavioral-execution-gate.test.mjs cerebro/tests/skill-independent-judge.test.mjs
+        run: node --test cerebro/tests/skill-autoloop-controller.test.mjs cerebro/tests/skill-autoloop-safe-handler.test.mjs cerebro/tests/skill-autoloop-autonomy-decision.test.mjs cerebro/tests/skill-autoloop-old-vs-new-overlay.test.mjs cerebro/tests/skill-old-vs-new-contract.test.mjs cerebro/tests/skill-static-lab-benchmark.test.mjs cerebro/tests/skill-behavioral-execution-gate.test.mjs cerebro/tests/skill-independent-judge.test.mjs cerebro/tests/skill-promotion-readiness.test.mjs cerebro/tests/skill-capability-autonomy-closure-v1.test.mjs
 
       - name: Load and validate dedicated AutoLoop state
         run: |
@@ -219,6 +225,22 @@ jobs:
           node cerebro/skills/skill-tribunal.mjs --static-lab artifacts/handler/static-lab.json --licenses artifacts/handler/licenses.json --behavioral-results artifacts/handler/behavioral.json --independent-judge artifacts/handler/judge.json --rollback artifacts/handler/rollback.json --route artifacts/handler/route.json --rsi-shadow artifacts/handler/rsi-shadow.json --output artifacts/handler/tribunal.json
           node cerebro/skills/skill-promotion-readiness.mjs --static-lab artifacts/handler/static-lab.json --oldnew artifacts/handler/old-vs-new.json --route artifacts/handler/route.json --quota artifacts/handler/quota.json --behavioral-gate artifacts/handler/behavioral-gate.json --rsi-shadow artifacts/handler/rsi-shadow.json --behavioral-results artifacts/handler/behavioral.json --independent-judge artifacts/handler/judge.json --rollback artifacts/handler/rollback.json --tribunal artifacts/handler/tribunal.json --output artifacts/handler/promotion-readiness.json
 
+      - name: Build canonical Skill Autonomy decision from governed evidence
+        if: steps.select.outputs.has_candidate == 'true' && steps.static.outputs.green == 'true'
+        run: |
+          node cerebro/skills/skill-autoloop-autonomy-decision.mjs \
+            --selection artifacts/autoloop/selection.json \
+            --wrappers artifacts/handler/wrappers.json \
+            --manifests artifacts/handler/manifests.json \
+            --static-lab artifacts/handler/static-lab.json \
+            --licenses artifacts/handler/licenses.json \
+            --behavioral artifacts/handler/behavioral.json \
+            --tribunal artifacts/handler/tribunal.json \
+            --rollback artifacts/handler/rollback.json \
+            --readiness artifacts/handler/promotion-readiness.json \
+            --run-id "$GITHUB_RUN_ID" \
+            --output artifacts/handler/autonomy-decision.json
+
       - name: Reconcile selected candidate outcome and preserve human-by-exception gate
         if: steps.select.outputs.has_candidate == 'true'
         env:
@@ -237,17 +259,27 @@ jobs:
           if(process.env.STATIC_GREEN==='true'){
             const behavior=JSON.parse(fs.readFileSync('artifacts/handler/behavioral.json','utf8'));
             const readiness=JSON.parse(fs.readFileSync('artifacts/handler/promotion-readiness.json','utf8'));
+            const decision=JSON.parse(fs.readFileSync('artifacts/handler/autonomy-decision.json','utf8'));
             evidence.behavioral_status=behavior.status;
             evidence.calls_executed=behavior.calls_executed;
             evidence.stop_reason=behavior.stop_reason??null;
             evidence.promotion_readiness_status=readiness.status;
             evidence.tribunal_decision=readiness.evidence?.tribunal_decision??null;
-            if(readiness.ready===true&&readiness.status==='READY_FOR_PREPROD_PROMOTION_REVIEW'&&readiness.human_required==='HIGH_RISK') outcome='READY_FOR_PREPROD_PROMOTION_REVIEW';
-            else if(['HTTP_429','FREE_QUOTA_EXHAUSTED','PROVIDER_BILLING_REQUIRED','PROVIDER_PERMISSION_OR_BILLING_REQUIRED','PROVIDER_PERMISSION_DENIED','PROVIDER_TIMEOUT','PROVIDER_TRANSPORT_ERROR'].includes(behavior.stop_reason)) outcome='RETRY_SAFE_HANDLER';
+            evidence.decision=decision.decision;
+            evidence.decision_id=decision.decision_id;
+            evidence.decision_next_gate=decision.next_gate;
+            evidence.human_required=decision.human_required??null;
+            evidence.preprod_internal_wrapper_activation_authorized=decision.preprod_internal_wrapper_activation_authorized===true;
+            evidence.factory_candidate_authorized=decision.factory_candidate_authorized===true;
+            const transient=['HTTP_429','FREE_QUOTA_EXHAUSTED','PROVIDER_BILLING_REQUIRED','PROVIDER_PERMISSION_OR_BILLING_REQUIRED','PROVIDER_PERMISSION_DENIED','PROVIDER_TIMEOUT','PROVIDER_TRANSPORT_ERROR'].includes(behavior.stop_reason);
+            if(transient) outcome='RETRY_SAFE_HANDLER';
+            else if(decision.human_required) outcome='HUMAN_REQUIRED';
+            else if(decision.decision==='HOLD') outcome='TERMINAL_HOLD';
+            else if(readiness.ready===true&&readiness.autonomous_preprod_decision_authorized===true) outcome='AUTONOMOUS_PREPROD_DECISION';
           }
           state=reconcileSafeHandlerResult(state,process.env.CANDIDATE_ID,{outcome,evidence});
           fs.writeFileSync('artifacts/autoloop/state.after.json',JSON.stringify(state,null,2)+'\n');
-          fs.writeFileSync('artifacts/autoloop/handler-outcome.json',JSON.stringify({candidate_id:process.env.CANDIDATE_ID,outcome,evidence,human_required:outcome==='READY_FOR_PREPROD_PROMOTION_REVIEW'?'HIGH_RISK':null,prod_authorized:false,autonomous_prod_promotion_authorized:false},null,2)+'\n');
+          fs.writeFileSync('artifacts/autoloop/handler-outcome.json',JSON.stringify({candidate_id:process.env.CANDIDATE_ID,outcome,evidence,human_required:evidence.human_required??null,prod_authorized:false,autonomous_prod_promotion_authorized:false},null,2)+'\n');
           NODE
 
       - name: Preserve reconciled state when queue is empty
@@ -263,7 +295,7 @@ jobs:
           const v=validateSafeAutoloopState(s);
           if(!v.green) throw new Error(JSON.stringify(v));
           if(s.safe_autonomy.prod_write!==false||s.safe_autonomy.auto_merge!==false||s.safe_autonomy.preprod_promotion!==false||s.safe_autonomy.prod_readonly_canary!==false||s.safe_autonomy.customer_data!==false||s.safe_autonomy.external_skill_code_execution!==false||s.safe_autonomy.trading!==false||s.safe_autonomy.paid_fallback!==false||s.safe_autonomy.additional_cost_budget_eur!==0||s.prod_authorized!==false||s.autonomous_prod_promotion_authorized!==false) throw new Error('AUTOLOOP_FINAL_SAFETY_INVARIANT_FAILED');
-          console.log(JSON.stringify({safety:'GREEN',waiting_safe_handler:Object.keys(s.waiting_safe_handler??{}).length,waiting_human:Object.keys(s.waiting_human??{}).length,terminal_hold:Object.keys(s.terminal_hold??{}).length,prod_authorized:false,auto_merge:false,cost_eur:0}));
+          console.log(JSON.stringify({safety:'GREEN',waiting_safe_handler:Object.keys(s.waiting_safe_handler??{}).length,waiting_human:Object.keys(s.waiting_human??{}).length,completed:Object.keys(s.completed??{}).length,terminal_hold:Object.keys(s.terminal_hold??{}).length,prod_authorized:false,auto_merge:false,cost_eur:0}));
           NODE
 
       - name: Persist state only from main

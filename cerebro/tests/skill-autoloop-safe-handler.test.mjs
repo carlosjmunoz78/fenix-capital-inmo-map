@@ -15,14 +15,35 @@ test('highest value waiting safe candidate is selected deterministically',()=>{
   assert.equal(selectWaitingSafeCandidate(baseState()).candidate_id,'b');
 });
 
-test('GREEN safe handler evidence stops at HIGH_RISK PREPROD gate and keeps queue enabled',()=>{
-  const s=reconcileSafeHandlerResult(baseState(),'b',{outcome:'READY_FOR_PREPROD_PROMOTION_REVIEW',evidence:{run_id:7},now:'2026-10-08T03:00:00Z'});
+test('canonical safe PREPROD decision completes queue stage without generic human gate',()=>{
+  const s=reconcileSafeHandlerResult(baseState(),'b',{outcome:'AUTONOMOUS_PREPROD_DECISION',evidence:{decision:'FABRICAR_GRATIS',decision_id:'skill-autonomy:123'},now:'2026-10-08T03:00:00Z'});
   assert.equal(s.waiting_safe_handler.b,undefined);
-  assert.equal(s.waiting_human.b.human_required,'HIGH_RISK');
-  assert.equal(s.waiting_human.b.stage,'PREPROD_PROMOTION_REVIEW');
-  assert.equal(s.waiting_human.b.prod_authorized,false);
+  assert.equal(s.waiting_human.b,undefined);
+  assert.equal(s.completed.b.status,'COMPLETED');
+  assert.equal(s.completed.b.disposition,'FABRICAR_GRATIS');
+  assert.equal(s.completed.b.human_required,null);
+  assert.equal(s.completed.b.prod_authorized,false);
   assert.equal(s.enabled,true);
   assert.ok(s.waiting_safe_handler.a);
+});
+
+test('real canonical human exception is routed to waiting_human with exact reason',()=>{
+  const s=reconcileSafeHandlerResult(baseState(),'b',{outcome:'HUMAN_REQUIRED',evidence:{human_required:'POLICY_CONFLICT',decision:'HOLD'},now:'2026-10-08T03:00:00Z'});
+  assert.equal(s.waiting_safe_handler.b,undefined);
+  assert.equal(s.waiting_human.b.human_required,'POLICY_CONFLICT');
+  assert.equal(s.waiting_human.b.stage,'SKILL_AUTONOMY_HUMAN_EXCEPTION');
+  assert.equal(s.waiting_human.b.prod_authorized,false);
+});
+
+test('non-canonical human exception is rejected',()=>{
+  assert.throws(()=>reconcileSafeHandlerResult(baseState(),'b',{outcome:'HUMAN_REQUIRED',evidence:{human_required:'OTHER'}}),/INVALID_HUMAN_EXCEPTION/);
+});
+
+test('legacy GREEN handler route remains fail-closed behind HIGH_RISK for old artifacts only',()=>{
+  const s=reconcileSafeHandlerResult(baseState(),'b',{outcome:'READY_FOR_PREPROD_PROMOTION_REVIEW',evidence:{run_id:7},now:'2026-10-08T03:00:00Z'});
+  assert.equal(s.waiting_human.b.human_required,'HIGH_RISK');
+  assert.equal(s.waiting_human.b.stage,'PREPROD_PROMOTION_REVIEW_LEGACY');
+  assert.equal(s.waiting_human.b.evidence.legacy_generic_high_risk_gate,true);
 });
 
 test('terminal hold does not ask human and preserves zero-cost safety',()=>{
@@ -38,6 +59,11 @@ test('transient failure retries same safe handler without crossing a human gate'
   assert.equal(s.waiting_safe_handler.b.status,'WAITING_SAFE_HANDLER');
   assert.equal(s.waiting_safe_handler.b.retry_count,1);
   assert.equal(s.waiting_safe_handler.b.human_required,null);
+});
+
+test('autonomous PREPROD decision requires one of the seven canonical dispositions',()=>{
+  assert.throws(()=>reconcileSafeHandlerResult(baseState(),'b',{outcome:'AUTONOMOUS_PREPROD_DECISION',evidence:{decision:'OTHER'}}),/INVALID_SKILL_AUTONOMY_DECISION/);
+  assert.throws(()=>reconcileSafeHandlerResult(baseState(),'b',{outcome:'AUTONOMOUS_PREPROD_DECISION',evidence:{decision:'ENVOLVER',human_required:'HIGH_RISK'}}),/MUST_NOT_REQUIRE_HUMAN/);
 });
 
 test('unsafe state is rejected before selection or reconciliation',()=>{
