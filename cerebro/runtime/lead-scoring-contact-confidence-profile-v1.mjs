@@ -124,16 +124,19 @@ function contactGate(input,scope){
   validateContext(input);
   const gate=prodOrPolicyGate(input,scope);if(gate)return gate;
   const cost=finiteNonNegative(input.estimated_incremental_cost_eur,'estimated_incremental_cost_eur',0);if(cost>0)return human('MONEY_LIMIT',{estimated_incremental_cost_eur:cost});
-  if(input.person_level_contact===true)return human('LEGAL_REQUIRED',{decision:'PERSON_LEVEL_CONTACT_REQUIRES_LEGAL_BASIS_REVIEW'});
   const basis=String(input.source_basis??'').trim();
   if(!APPROVED_CONTACT_BASES.has(basis))return human('LEGAL_REQUIRED',{decision:'APPROVED_CONTACT_SOURCE_BASIS_REQUIRED'});
+  if(input.person_level_contact===true&&basis==='PUBLIC_BUSINESS_CONTACT'&&input.lawful_person_contact_basis!==true)return human('LEGAL_REQUIRED',{decision:'PERSON_LEVEL_PUBLIC_CONTACT_REQUIRES_EXPLICIT_LAWFUL_BASIS'});
   return null;
 }
 function basicEmail(email){
   const raw=String(email??'').trim().toLowerCase();
   if(raw.length<3||raw.length>254||raw.includes(' ')||raw.split('@').length!==2)return {email:raw,valid:false,domain:null};
   const [local,domain]=raw.split('@');
-  const valid=local.length>0&&local.length<=64&&domain.length>3&&domain.includes('.')&&!domain.startsWith('.')&&!domain.endsWith('.')&&!domain.includes('..')&&/^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+$/i.test(local)&&/^[a-z0-9.-]+$/i.test(domain);
+  const labels=domain.split('.');
+  const validLocal=local.length>0&&local.length<=64&&!local.startsWith('.')&&!local.endsWith('.')&&!local.includes('..')&&/^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+$/i.test(local);
+  const validDomain=domain.length<=253&&labels.length>=2&&labels.every(label=>label.length>0&&label.length<=63&&!label.startsWith('-')&&!label.endsWith('-')&&/^[a-z0-9-]+$/i.test(label));
+  const valid=validLocal&&validDomain;
   return {email:raw,valid,domain:valid?domain:null};
 }
 
@@ -144,7 +147,8 @@ export function scoreEmailContactConfidence(input={}){
   const parsed=basicEmail(input.email);
   if(!parsed.valid)return safe({status:'SCORED',human_required:null,email:parsed.email,domain:null,syntax_valid:false,mx_present:false,catch_all:null,confidence_score:0,classification:'INVALID_FORMAT',evidence_refs:Object.freeze([evidenceRef]),deliverability_guaranteed:false,email_sent:false,smtp_probe_executed:false});
   const mx=uniq(input.mx_records);
-  const domainExists=input.domain_exists===true;
+  if(input.domain_exists===false&&mx.length)return hold('EMAIL_SIGNAL_CONFLICT',{email_sent:false,smtp_probe_executed:false});
+  const domainExists=input.domain_exists===true||mx.length>0;
   const catchAll=input.catch_all===true?true:input.catch_all===false?false:null;
   const smtp=String(input.smtp_status??'UNKNOWN').toUpperCase();
   if(!ALLOWED_SMTP_EVIDENCE.has(smtp))throw new Error('smtp_status invalid');
