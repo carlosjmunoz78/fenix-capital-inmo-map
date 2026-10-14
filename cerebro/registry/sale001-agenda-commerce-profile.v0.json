@@ -1,0 +1,122 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_SALE001_AGENDA_COMMERCE_PROFILE_V0",
+  "canonical_engine_id": "SALE-001",
+  "company_id": "fenix",
+  "environment_scope": "PREPROD",
+  "version": "0.1.0",
+  "updated_at": "2026-10-14",
+  "source_blocks": [118,119,120,121,122,123,124,125,126,127,128,129,130,131],
+  "architectural_decision": "Compose existing canonical engines and capabilities. Do not create duplicate agenda, payment, invoice, communication or Product Factory systems.",
+  "canonical_engine_reuse": {
+    "sales": "SALE-001",
+    "agenda": "AGD-001",
+    "durable_jobs": "JOB-001",
+    "communication": "COM-001",
+    "retention": "RET-001",
+    "documents": "DOC-001",
+    "payments": "PAY-001",
+    "invoicing": "INV-001",
+    "accounting": "ACC-001"
+  },
+  "capabilities": {
+    "118_calnode": "LAB_BENCHMARK",
+    "119_booking": "PREPROD_PLAN_ONLY",
+    "120_reminder": "PREPROD_PLAN_ONLY",
+    "121_reschedule": "PREPROD_PLAN_ONLY",
+    "122_no_show_recovery": "REUSE_EXISTING_SALE001_TRANSITION",
+    "123_solivio_pattern": "LAB_PATTERN_ONLY",
+    "124_auto_proposal": "PREPROD_PLAN_ONLY",
+    "125_auto_budget": "PREPROD_PLAN_ONLY",
+    "126_docuseal": "LAB_BENCHMARK_SIGNATURE_EXECUTION_HUMAN_REQUIRED",
+    "127_oreko": "LAB_BENCHMARK",
+    "128_stripe": "EXISTING_WRAP_ONLY_NO_CHARGE",
+    "129_invoice_receipt": "PREPROD_PLAN_ONLY_LEGAL_GATE_FOR_ISSUE",
+    "130_product_delivery": "REUSE_EXISTING_AION_PRODUCT_FACTORY_ADAPTER_SEAM_LIVE_AUDIT_REQUIRED",
+    "131_post_purchase_email": "COM001_INTENT_ONLY_NO_DISPATCH"
+  },
+  "defaults": {
+    "calendar_write_authorized": false,
+    "communication_dispatch_authorized": false,
+    "signature_execution_authorized": false,
+    "payment_execution_authorized": false,
+    "invoice_issue_authorized": false,
+    "product_delivery_authorized": false,
+    "crm_write_authorized": false,
+    "external_side_effect_authorized": false,
+    "external_side_effect_executed": false,
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "trading_access": false,
+    "additional_cost_eur": 0,
+    "supabase_required": false
+  },
+  "provider_policy": {
+    "CALNODE": "LAB_BENCHMARK_NO_EXTERNAL_CALL",
+    "SOLIVIO": "LAB_PATTERN_ONLY_NO_EXTERNAL_CALL",
+    "DOCUSEAL": "LAB_BENCHMARK_NO_EXTERNAL_CALL",
+    "OREKO": "LAB_BENCHMARK_NO_EXTERNAL_CALL",
+    "STRIPE": "WRAP_EXISTING_ONLY_NO_CREDENTIAL_OR_CHARGE_ACCESS"
+  },
+  "product_factory_policy": {
+    "create_second_factory": false,
+    "reuse_existing": true,
+    "known_source_state": "AION/Product Factory capability is documented as existing",
+    "repository_live_adapter_state": "POR_AUDITAR",
+    "v0_behavior": "adapter seam only; no delivery side effect"
+  },
+  "human_required_reasons": [
+    "LEGAL_REQUIRED","SIGNATURE_REQUIRED","LOW_CONFIDENCE","HIGH_RISK",
+    "POLICY_CONFLICT","SECURITY_INCIDENT","MONEY_LIMIT","CUSTOMER_HUMAN_REQUEST"
+  ],
+  "side_effect_gates": {
+    "signature": "SIGNATURE_REQUIRED",
+    "payment": "MONEY_LIMIT",
+    "invoice_issue": "LEGAL_REQUIRED",
+    "cross_company": "SECURITY_INCIDENT",
+    "calendar_write": "POLICY_CONFLICT",
+    "message_dispatch": "POLICY_CONFLICT",
+    "product_delivery": "POLICY_CONFLICT"
+  },
+  "idempotency": {
+    "runtime_key": "company_id|SALE-001|request_id|scenario",
+    "same_key_same_fingerprint": "RETURN_DUPLICATE",
+    "same_key_changed_fingerprint": "BLOCK_POLICY_CONFLICT",
+    "durable_execution_target": "JOB-001"
+  },
+  "privacy": {
+    "raw_pii": false,
+    "raw_credentials": false,
+    "raw_message_bodies": false,
+    "raw_documents": false,
+    "opaque_refs_only": true
+  },
+  "promotion_gates": {
+    "contracts": true,
+    "permissions": true,
+    "focused_tests": "REQUIRED",
+    "full_regression": "REQUIRED",
+    "evaluation": "REQUIRED_BEFORE_ANY_LIVE_SIDE_EFFECT",
+    "tribunal": "REQUIRED_BEFORE_ANY_LIVE_SIDE_EFFECT",
+    "observability": "PLAN_METADATA_ONLY_V0",
+    "rollback": true,
+    "backup": "git commit/branch",
+    "rebuild": true,
+    "cost_measured": true,
+    "policy": true,
+    "preprod": true,
+    "live_side_effects": false,
+    "autonomous_prod": false
+  },
+  "rollback": {
+    "strategy": "Revert the agenda-commerce V0 commit/PR. V0 contains no data migration, real charge, fiscal issue, calendar write, customer message or product delivery."
+  },
+  "rebuild": {
+    "source_of_truth": [
+      "cerebro/registry/engine-registry.v1.json",
+      "cerebro/registry/sale001-agenda-commerce-profile.v0.json",
+      "cerebro/revenue/sale001-agenda-commerce-runtime-v0.mjs",
+      "cerebro/revenue/sale-action-v1.mjs"
+    ]
+  }
+}
