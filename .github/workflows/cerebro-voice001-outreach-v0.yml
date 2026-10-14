@@ -1,0 +1,44 @@
+name: CEREBRO VOICE-001 Outreach V0
+
+on:
+  push:
+    paths:
+      - 'cerebro/voice/voice001-outreach-runtime-v0.mjs'
+      - 'cerebro/tests/voice001-outreach-runtime-v0.test.mjs'
+      - 'cerebro/registry/voice001-outreach-profile.v0.json'
+      - 'cerebro/docs/CEREBRO_VOICE001_BLOCKS_105_117_V0_2026-10-14.md'
+      - 'cerebro/evidence/voice001-blocks-105-117-v0.json'
+      - '.github/workflows/cerebro-voice001-outreach-v0.yml'
+  pull_request:
+    paths:
+      - 'cerebro/voice/voice001-outreach-runtime-v0.mjs'
+      - 'cerebro/tests/voice001-outreach-runtime-v0.test.mjs'
+      - 'cerebro/registry/voice001-outreach-profile.v0.json'
+      - 'cerebro/docs/CEREBRO_VOICE001_BLOCKS_105_117_V0_2026-10-14.md'
+      - 'cerebro/evidence/voice001-blocks-105-117-v0.json'
+      - '.github/workflows/cerebro-voice001-outreach-v0.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  voice001-outreach-v0:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: VOICE-001 focused contract tests
+        run: node --test cerebro/tests/voice001-outreach-runtime-v0.test.mjs
+      - name: Validate VOICE-001 profile and evidence JSON
+        run: >-
+          node -e "for (const f of ['cerebro/registry/voice001-outreach-profile.v0.json','cerebro/evidence/voice001-blocks-105-117-v0.json']) JSON.parse(require('fs').readFileSync(f,'utf8')); console.log('voice001-json GREEN')"
+      - name: Validate canonical engine registry
+        working-directory: cerebro
+        run: npm run validate
+      - name: Full CEREBRO regression suite
+        working-directory: cerebro
+        run: npm test
