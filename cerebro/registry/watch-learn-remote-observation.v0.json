@@ -1,0 +1,40 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_WATCH_LEARN_REMOTE_OBSERVATION_V0",
+  "company_id": "fenix",
+  "engine_id": "LRN-001",
+  "environment": "PREPROD",
+  "version": "0.1.0",
+  "rollout_item": 47,
+  "status": "CANDIDATE_PENDING_REMOTE_CI",
+  "source_main_sha": "05f86970a94350628ecfb3511573a0eff333e51b",
+  "purpose": "Bind the verified deterministic replay core to a real authorized public PREPROD observation without writes or credentials.",
+  "implementation": {
+    "runner": "cerebro/runtime/watch-learn-remote-observation-v0.mjs",
+    "source_adapter": "cerebro/runtime/public-source-adapter-v0.mjs",
+    "replay_core": "cerebro/runtime/fact001-gap-capabilities-v0.mjs"
+  },
+  "acceptance": {
+    "target_class": "USER_OWNED_PUBLIC_PREPROD_WORDPRESS_REST_API",
+    "reads_per_run": 2,
+    "stable_semantic_and_body_evidence_required": true,
+    "replay_match_required": true,
+    "auth": false,
+    "cookies": false,
+    "writes": false,
+    "customer_data": false
+  },
+  "authority": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "provider_write_authorized": false,
+    "customer_data_authorized": false,
+    "external_dependency_install_authorized": false,
+    "trading_access": false,
+    "automatic_paid_fallback": false,
+    "additional_cost_eur": 0
+  },
+  "rollback": "Revert the additive observation adapter PR; no remote mutation exists.",
+  "rebuild": "Recreate from public-source-adapter-v0 + deterministic Watch & Learn replay core.",
+  "next_gate": "REMOTE_OBSERVATION_CI"
+}
