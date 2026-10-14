@@ -6,10 +6,25 @@ const KIND='LRN-001';
 const PREPROD='PREPROD';
 const PERSISTENCE_SCOPE='LOCAL_PREPROD_LRN_LEDGER_ONLY';
 const ADDITIVE_PROVENANCE_FIELDS=Object.freeze(['signal_id','source_environment']);
+const SET_PROVENANCE_FIELDS=Object.freeze(['evidence_refs']);
 
 function clone(value){return deserialize(serialize(value));}
 function missing(value){return value===undefined||value===null||value==='';}
 function sameValue(left,right){return stableIdempotencyKey({value:left??null})===stableIdempotencyKey({value:right??null});}
+function canonicalStringSet(value){
+  if(!Array.isArray(value)) return null;
+  if(value.some((item)=>typeof item!=='string')) return null;
+  return [...new Set(value)].sort();
+}
+function compatibleSetReplay(before,after){
+  const left=canonicalStringSet(before);const right=canonicalStringSet(after);
+  if(!left||!right) return false;
+  if(sameValue(left,right)) return true;
+  const leftSet=new Set(left);const rightSet=new Set(right);
+  const leftSubset=left.every((item)=>rightSet.has(item));
+  const rightSubset=right.every((item)=>leftSet.has(item));
+  return leftSubset||rightSubset;
+}
 function differingFields(left,right){
   const leftObject=left??{};const rightObject=right??{};
   return [...new Set([...Object.keys(leftObject),...Object.keys(rightObject)])]
@@ -24,6 +39,15 @@ function compatibleRepeat(prior,incoming){
   const left=clone(prior);const right=clone(incoming);const compatibilityFields=[];
   if(left.observed_at!==right.observed_at) compatibilityFields.push('observed_at');
   delete left.observed_at;delete right.observed_at;
+  for(const field of SET_PROVENANCE_FIELDS){
+    const before=left[field];const after=right[field];
+    if(sameValue(before,after)) continue;
+    if(!compatibleSetReplay(before,after)){
+      return Object.freeze({ok:false,compatibility_fields:[],conflict_fields:differingFields(prior,incoming)});
+    }
+    compatibilityFields.push(field);
+    delete left[field];delete right[field];
+  }
   for(const field of ADDITIVE_PROVENANCE_FIELDS){
     const before=left[field];const after=right[field];
     const beforeMissing=missing(before);const afterMissing=missing(after);
@@ -105,8 +129,9 @@ export const LEARNING_LEDGER_V0_CONTRACT=Object.freeze({
   environment:PREPROD,
   persistence:'local-atomic-v8-journal',
   persistence_scope:PERSISTENCE_SCOPE,
-  duplicate_policy:'FIRST_SEEN_IMMUTABLE; OBSERVED_AT_MAY_CHANGE; SIGNAL_ID_AND_SOURCE_ENVIRONMENT_MAY_DIFFER ONLY BY LEGACY MISSING_FORMS_OR_PRESENCE_ABSENCE; NONEMPTY_PROVENANCE_VALUE_CHANGES_AND_ALL_OTHER_SAME_ID_MUTATIONS_FAIL_CLOSED',
+  duplicate_policy:'FIRST_SEEN_IMMUTABLE; OBSERVED_AT_MAY_CHANGE; EVIDENCE_REFS MAY REPLAY AS THE SAME SET OR A STRICT SUBSET/SUPERSET WHILE FIRST_SEEN EVIDENCE REMAINS IMMUTABLE; SIGNAL_ID_AND_SOURCE_ENVIRONMENT MAY DIFFER ONLY BY LEGACY MISSING_FORMS_OR_PRESENCE_ABSENCE; INCOMPARABLE EVIDENCE SETS, NONEMPTY PROVENANCE VALUE CHANGES AND ALL OTHER SAME_ID MUTATIONS FAIL_CLOSED',
   additive_provenance_fields:ADDITIVE_PROVENANCE_FIELDS,
+  set_provenance_fields:SET_PROVENANCE_FIELDS,
   conflict_diagnostics:'FIELD_NAMES_AND_PRESENCE_ONLY_NO_PAYLOAD_VALUES',
   supabase_required:false,
   additional_cost_target_eur:0,
