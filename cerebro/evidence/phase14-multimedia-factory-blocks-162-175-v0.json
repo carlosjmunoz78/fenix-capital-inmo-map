@@ -1,0 +1,66 @@
+{
+  "schema_version": "1.0.0",
+  "evidence_type": "CEREBRO_PHASE14_MULTIMEDIA_FACTORY_BLOCKS_162_175_V0",
+  "date": "2026-10-14",
+  "company_id": "fenix",
+  "environment": "PREPROD",
+  "version": "0.1.0",
+  "base_main_sha": "218b88755ad51d869796163d4ea3db2eb290b536",
+  "base_tree_sha": "fab2259c10b6572a3d2b46b5bbe98e03bd2d1049",
+  "owner_engine_id": "FACT-001",
+  "capability_id": "DIGITAL-BUILD-MULTIMEDIA",
+  "source_blocks": [162,163,164,165,166,167,168,169,170,171,172,173,174,175],
+  "new_engines_created": 0,
+  "files_added": {
+    "runtime": "cerebro/digital-build/multimedia-factory-runtime-v0.mjs",
+    "tests": "cerebro/tests/multimedia-factory-runtime-v0.test.mjs",
+    "profile": "cerebro/registry/multimedia-factory-profile.v0.json",
+    "docs": "cerebro/docs/CEREBRO_PHASE14_MULTIMEDIA_FACTORY_BLOCKS_162_175_V0_2026-10-14.md",
+    "workflow": ".github/workflows/cerebro-phase14-multimedia-factory-v0.yml"
+  },
+  "repository_audit": {
+    "named_multimedia_binding_search": "NO_MATCHES_FOUND_ON_MAIN",
+    "physical_installation_verified": false,
+    "ffmpeg_binary_verified": false,
+    "provider_accounts_verified": false
+  },
+  "adapter_states": {
+    "COMFYUI": "P1_ADAPTER_SEAM_ONLY",
+    "Z_IMAGE_TURBO": "LAB_SEAM_ONLY",
+    "QWEN3_TTS": "P1_ADAPTER_SEAM_ONLY",
+    "HYPERFRAMES": "P1_ADAPTER_SEAM_ONLY",
+    "PROCEDURAL_FILM": "P1_ADAPTER_SEAM_ONLY",
+    "OPENMONTAGE": "LAB_SEAM_ONLY",
+    "LTX_VIDEO": "LAB_SEAM_ONLY",
+    "WATCH": "P1_ADAPTER_SEAM_ONLY",
+    "FFMPEG": "REUSE_IF_PRESENT_NOT_VERIFIED",
+    "OPEN_SORA": "HOLD_HARDWARE",
+    "REMOTION": "HOLD_LICENSE",
+    "FISH_AUDIO": "HOLD_COMMERCIAL",
+    "ELEVENLABS": "HOLD_COMMERCIAL",
+    "OPEN_GENERATIVE_AI": "CATALOG_ONLY"
+  },
+  "safety": {
+    "install_authorized": false,
+    "model_download_authorized": false,
+    "external_process_authorized": false,
+    "network_call_authorized": false,
+    "paid_provider_call_authorized": false,
+    "artifact_publish_authorized": false,
+    "prod_authorized": false,
+    "trading_access": false,
+    "raw_media_persisted": false,
+    "raw_pii_persisted": false,
+    "additional_cost_eur": 0
+  },
+  "verification": {
+    "focused_test_command": "node --test cerebro/tests/multimedia-factory-runtime-v0.test.mjs",
+    "registry_validation_command": "cd cerebro && npm run validate",
+    "full_regression_command": "cd cerebro && npm test",
+    "ci_workflow": "CEREBRO Phase 14 Multimedia Factory V0",
+    "ci_status": "PENDING_UNTIL_PR_RUN"
+  },
+  "promotion_state": "PREPROD_PLAN_ONLY_PENDING_CI",
+  "rollback": "revert phase-14 PR/commit; no installation, provider call, model download or artifact publication exists in V0",
+  "next_gate": "FOCUSED_CI_FULL_REGRESSION_THEN_PER_ADAPTER_LICENSE_HARDWARE_ZERO_COST_AUDIT_EVA001_JDG001"
+}
