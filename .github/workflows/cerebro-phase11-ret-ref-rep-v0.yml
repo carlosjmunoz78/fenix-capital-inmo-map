@@ -1,0 +1,44 @@
+name: CEREBRO Phase 11 RET REF REP V0
+
+on:
+  push:
+    paths:
+      - 'cerebro/customer/ret-ref-rep-runtime-v0.mjs'
+      - 'cerebro/tests/ret-ref-rep-runtime-v0.test.mjs'
+      - 'cerebro/registry/ret-ref-rep-profile.v0.json'
+      - 'cerebro/docs/CEREBRO_PHASE11_RET_REF_REP_BLOCKS_132_142_V0_2026-10-14.md'
+      - 'cerebro/evidence/phase11-ret-ref-rep-blocks-132-142-v0.json'
+      - '.github/workflows/cerebro-phase11-ret-ref-rep-v0.yml'
+  pull_request:
+    paths:
+      - 'cerebro/customer/ret-ref-rep-runtime-v0.mjs'
+      - 'cerebro/tests/ret-ref-rep-runtime-v0.test.mjs'
+      - 'cerebro/registry/ret-ref-rep-profile.v0.json'
+      - 'cerebro/docs/CEREBRO_PHASE11_RET_REF_REP_BLOCKS_132_142_V0_2026-10-14.md'
+      - 'cerebro/evidence/phase11-ret-ref-rep-blocks-132-142-v0.json'
+      - '.github/workflows/cerebro-phase11-ret-ref-rep-v0.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  phase11-ret-ref-rep-v0:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Phase 11 focused contract tests
+        run: node --test cerebro/tests/ret-ref-rep-runtime-v0.test.mjs
+      - name: Validate profile and evidence JSON
+        run: >-
+          node -e "for (const f of ['cerebro/registry/ret-ref-rep-profile.v0.json','cerebro/evidence/phase11-ret-ref-rep-blocks-132-142-v0.json']) JSON.parse(require('fs').readFileSync(f,'utf8')); console.log('phase11-ret-ref-rep-json GREEN')"
+      - name: Validate canonical engine registry
+        working-directory: cerebro
+        run: npm run validate
+      - name: Full CEREBRO regression suite
+        working-directory: cerebro
+        run: npm test
