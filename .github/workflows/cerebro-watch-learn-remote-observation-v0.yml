@@ -30,14 +30,16 @@ jobs:
           node-version: 24
       - name: Public source security contracts
         run: node --test cerebro/tests/public-source-adapter-v0.test.mjs
-      - name: Run authorized remote observation and deterministic replay
+      - name: Run durable authorized remote observation cycle
         run: >-
           node cerebro/runtime/watch-learn-remote-observation-v0.mjs
           --url "$CEREBRO_WATCH_TARGET_URL"
+          --cycle-anchor '2026-10-15T00:00:00Z'
+          --cadence-hours 24
           --out /tmp/watch-learn-remote-observation-report.json
-      - name: Validate observation evidence and authority
+      - name: Validate durable observation evidence and authority
         run: >-
-          node -e "const fs=require('fs'); const r=JSON.parse(fs.readFileSync('/tmp/watch-learn-remote-observation-report.json','utf8')); const p=require('./cerebro/registry/watch-learn-remote-observation.v0.json'); if(r.status!=='REMOTE_OBSERVATION_REPLAY_GREEN'||r.replay_status!=='REPLAY_MATCH'||r.stable!==true||r.network_reads!==2) process.exit(1); if(r.external_writes!==0||r.auth_used||r.cookies_used||r.customer_data_used||r.prod_authorized||r.prod_write_authorized||r.trading_access||r.additional_cost_eur!==0) process.exit(1); if(p.rollout_item!==47||p.environment!=='PREPROD'||p.authority.prod_authorized||p.authority.prod_write_authorized||p.authority.provider_write_authorized||p.authority.customer_data_authorized||p.authority.external_dependency_install_authorized||p.authority.trading_access||p.authority.automatic_paid_fallback||p.authority.additional_cost_eur!==0) process.exit(1); console.log('Watch & Learn remote PREPROD observation/replay GREEN');"
+          node -e "const fs=require('fs'); const r=JSON.parse(fs.readFileSync('/tmp/watch-learn-remote-observation-report.json','utf8')); const p=require('./cerebro/registry/watch-learn-remote-observation.v0.json'); if(r.status!=='REMOTE_OBSERVATION_DURABLE_CYCLE_GREEN'||r.job_status!=='SUCCEEDED'||!r.next_job||r.observation?.status!=='REMOTE_OBSERVATION_REPLAY_GREEN'||r.observation?.replay_status!=='REPLAY_MATCH'||r.observation?.stable!==true||r.observation?.network_reads!==2) process.exit(1); if(r.external_writes!==0||r.provider_write||r.customer_data_used||r.prod_authorized||r.prod_write_authorized||r.trading_access||r.additional_cost_eur!==0) process.exit(1); if(p.rollout_item!==47||p.environment!=='PREPROD'||p.authority.prod_authorized||p.authority.prod_write_authorized||p.authority.provider_write_authorized||p.authority.customer_data_authorized||p.authority.external_dependency_install_authorized||p.authority.trading_access||p.authority.automatic_paid_fallback||p.authority.additional_cost_eur!==0) process.exit(1); console.log('Watch & Learn durable remote PREPROD observation cycle GREEN');"
       - name: Canonical registry validation
         working-directory: cerebro
         run: npm run validate
