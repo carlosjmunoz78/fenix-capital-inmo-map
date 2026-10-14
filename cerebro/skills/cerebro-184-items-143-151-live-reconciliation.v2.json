@@ -1,0 +1,25 @@
+{
+  "schema_version":"2.0.0",
+  "state_type":"CEREBRO_184_ITEMS_143_151_LIVE_RECONCILIATION_V2",
+  "generated_at":"2026-10-14",
+  "company_id":"GLOBAL",
+  "engine_id":"FACT-001",
+  "environment":"PREPROD",
+  "version":"v2",
+  "base_main_sha":"cd6e8db6c2e024ffabb2ef853cd35d2013c13df5",
+  "status":"ITEM_LEVEL_RECONCILED_CURRENT_MAIN",
+  "catalog_range":"143-151",
+  "authority":{"prod_authorized":false,"prod_write_authorized":false,"auto_merge_authorized":false,"external_skill_code_execution_authorized":false,"external_dependency_install_authorized":false,"customer_data_authorized":false,"trading_access":false,"automatic_paid_fallback":false,"additional_cost_eur":0},
+  "items":[
+    {"id":143,"name":"revenue attribution","disposition":"REUTILIZAR","state":"PARTIAL_PREPROD_ANALYTICAL_ONLY","owner_engine_ids":["LRN-001","MKT-001","CRM-001","OBSERV-001"],"evidence":["cerebro/registry/phase12-economic-learning-profile.v0.json","cerebro/economics/phase12-economic-learning-runtime-v0.mjs"],"reason":"Closed-loop contribution-margin attribution is implemented as a shared analytical capability over existing engines; no new attribution engine or live business mutation is required."},
+    {"id":144,"name":"source → lead → meeting → sale → margin","disposition":"REUTILIZAR","state":"PARTIAL_PREPROD_ANALYTICAL_ONLY","owner_engine_ids":["CRM-001","LRN-001"],"evidence":["cerebro/registry/phase12-economic-learning-profile.v0.json","cerebro/economics/phase12-economic-learning-runtime-v0.mjs"],"reason":"The funnel-to-margin chain uses opaque CRM references and preserves CRM as source of truth. It is analytical/read-only in this scope."},
+    {"id":145,"name":"campaign ROI","disposition":"REUTILIZAR","state":"PARTIAL_PREPROD_ANALYTICAL_ONLY","owner_engine_ids":["MKT-001","LRN-001","FINOPS-001"],"evidence":["cerebro/registry/phase12-economic-learning-profile.v0.json","cerebro/economics/phase12-economic-learning-runtime-v0.mjs"],"reason":"Contribution-margin-first campaign ROI is implemented without ad-spend mutation, budget changes or provider writes."},
+    {"id":146,"name":"agent action ROI","disposition":"REUTILIZAR","state":"PARTIAL_PREPROD_ANALYTICAL_ONLY","owner_engine_ids":["LRN-001","OBSERV-001"],"evidence":["cerebro/registry/phase12-economic-learning-profile.v0.json","cerebro/economics/phase12-economic-learning-runtime-v0.mjs"],"reason":"Opaque agent-action references can be evaluated economically without storing sensitive worker attributes or granting execution authority."},
+    {"id":147,"name":"channel ROI","disposition":"REUTILIZAR","state":"PARTIAL_PREPROD_ANALYTICAL_ONLY","owner_engine_ids":["LRN-001","MKT-001","FINOPS-001"],"evidence":["cerebro/registry/phase12-economic-learning-profile.v0.json","cerebro/economics/phase12-economic-learning-runtime-v0.mjs"],"reason":"Channel ROI uses contribution margin rather than vanity metrics and remains an analytical decision input only."},
+    {"id":148,"name":"WTP real","disposition":"REUTILIZAR","state":"PARTIAL_PREPROD_EVIDENCE_ONLY","owner_engine_ids":["EXP-001","LRN-001"],"evidence":["cerebro/registry/phase12-economic-learning-profile.v0.json","cerebro/economics/phase12-economic-learning-runtime-v0.mjs"],"reason":"Observed aggregate willingness-to-pay evidence is supported through the common experiment contract, with individualized/sensitive pricing forbidden and no live price mutation."},
+    {"id":149,"name":"pricing experiments","disposition":"REUTILIZAR","state":"PARTIAL_PREPROD_PLAN_ONLY","owner_engine_ids":["EXP-001","LRN-001"],"evidence":["cerebro/registry/phase12-economic-learning-profile.v0.json","cerebro/economics/phase12-economic-learning-runtime-v0.mjs"],"reason":"Pricing experiments reuse EXP-001 hypothesis/control/metric/decision planning; no live price, checkout or customer-specific mutation is authorized."},
+    {"id":150,"name":"FREE_PARITY gate","disposition":"REUTILIZAR","state":"PARTIAL_PREPROD_DECISION_ONLY","owner_engine_ids":["FREE-001","FINOPS-001","OBSERV-001"],"evidence":["cerebro/registry/phase12-economic-learning-profile.v0.json","cerebro/economics/phase12-economic-learning-runtime-v0.mjs"],"reason":"The deterministic HOLD/BUILD/PAY recommendation gate exists and enforces free/local parity first. Purchase or subscription execution remains disabled and MONEY_LIMIT gated."},
+    {"id":151,"name":"automatic stop / scale","disposition":"REUTILIZAR","state":"PARTIAL_PREPROD_DECISION_ONLY","owner_engine_ids":["CAP-001","LRN-001","FINOPS-001"],"evidence":["cerebro/registry/phase12-economic-learning-profile.v0.json","cerebro/economics/phase12-economic-learning-runtime-v0.mjs"],"reason":"Deterministic margin/ROI stop-scale recommendations exist, while actual budget, campaign or spend mutation remains disabled."}
+  ],
+  "summary":{"items_total":9,"partial_active":9,"reference_only":0,"fabricate_free":0,"terminal_hold":0,"human_required":[],"additional_cost_eur":0,"prod_authorized":false,"next_gate":"NORMALIZE_ITEMS_152_161"}
+}
