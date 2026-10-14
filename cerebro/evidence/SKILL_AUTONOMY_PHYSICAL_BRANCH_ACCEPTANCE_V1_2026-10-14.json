@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.1.0",
+  "schema_version": "1.2.0",
   "state_type": "CEREBRO_SKILL_AUTONOMY_PHYSICAL_BRANCH_ACCEPTANCE_V1",
   "observed_at": "2026-10-14T17:03:10Z",
   "status": "GREEN_DECISION_TO_ENGINE_PHYSICAL_BRANCH_ACCEPTANCE",
@@ -44,15 +44,45 @@
     "paid_activation_authorized": false,
     "additional_cost_eur": 0
   },
+  "cloudflare_git_trigger": {
+    "identified": true,
+    "source": "EXTERNAL_GITHUB_APP",
+    "github_app_slug": "cloudflare-workers-and-pages",
+    "github_app_id": 85455,
+    "main_commit_observed": "8a66eda92078e2fe55ce0c545794f4e583df8ef8",
+    "repo_local_config_found": false,
+    "linked_targets_observed": [
+      {
+        "type": "WORKER",
+        "name": "fenix-capital-inmo-map",
+        "build_id": "362111ed-bb4e-4407-88ba-512e0d95f3b2",
+        "version_id": "a2574a2d-22ef-426f-b171-b1dc036774ee",
+        "result": "SUCCESS"
+      },
+      {
+        "type": "WORKER",
+        "name": "fenix-capital-inmo-maps",
+        "build_id": "32c0ce5a-efea-4d2f-b472-e8c0ede69188",
+        "version_id": "38343b70-25f2-4476-996b-df62a4569ce8",
+        "result": "SUCCESS"
+      },
+      {
+        "type": "PAGES",
+        "name": "fenix-capital-inmo-map",
+        "result": "BUILD_FAILED_BUT_TRIGGERED"
+      }
+    ]
+  },
   "promotion_boundary": {
     "main_merge_authorized_by_this_evidence": false,
-    "reason": "EXTERNAL_CLOUDFLARE_GIT_DEPLOYMENT_SIDE_EFFECT_NOT_YET_ISOLATED",
-    "repo_cloudflare_config_found": false,
+    "reason": "EXTERNAL_CLOUDFLARE_GIT_DEPLOYMENT_SIDE_EFFECT_IDENTIFIED_NOT_YET_ISOLATED",
+    "preferred_isolation": "MOVE_CLOUDFLARE_PRODUCTION_BRANCH_TO_DEPLOY_CLOUDFLARE_PROD",
+    "runbook": "cerebro/runbooks/CLOUDFLARE_GIT_DEPLOYMENT_ISOLATION_V1_2026-10-14.md",
     "required_before_merge": [
-      "identify inherited Cloudflare Git integration trigger",
-      "isolate or govern production deployment side effect",
-      "prove no unintended PROD deployment from skills-only main merge",
-      "retain rollback path"
+      "record current Cloudflare branch/build settings for all linked targets",
+      "move production deployment trigger away from main or disable automatic production deployments where appropriate",
+      "prove a harmless main-only test commit creates no active production deployment/version",
+      "retain tested rollback path"
     ]
   }
 }
