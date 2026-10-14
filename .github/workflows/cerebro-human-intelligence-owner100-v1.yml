@@ -8,6 +8,8 @@ on:
       - 'supabase/functions/cerebro-console-gateway-human-v1-canary/overlay.ts'
       - 'cerebro/human-intelligence/FULL_OWNER_100_V1.md'
       - '.github/workflows/cerebro-human-intelligence-owner100-v1.yml'
+  schedule:
+    - cron: '23 5 * * 1,4'
   workflow_dispatch:
 
 permissions:
