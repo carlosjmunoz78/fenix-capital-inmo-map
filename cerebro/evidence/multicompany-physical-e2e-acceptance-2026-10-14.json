@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_MULTICOMPANY_CONTROL_PLANE_PHYSICAL_E2E_ACCEPTANCE",
+  "observed_at": "2026-10-14T13:58:19.4482Z",
+  "source_main_sha": "e669c9b4b366a126a521f7e4adad4b42db818bcc",
+  "project_id": "cluhljgonannaafpmblx",
+  "environment": "PREPROD_CONTROL_PLANE_ON_EXISTING_SUPABASE_PROJECT",
+  "state": "MULTICOMPANY_CONTROL_PLANE_PHYSICAL_E2E_GREEN",
+  "scope": "SYNTHETIC_NEW_COMPANY_DURABLE_CONTROL_PLANE",
+  "happy_path": {
+    "company_id": "zze2e001",
+    "stages": [
+      "COMP-REG-001",
+      "COMP-ONB-001",
+      "SCAN-001",
+      "KW-001",
+      "WAUD-001",
+      "SOCAUD-001",
+      "LOCALP-001",
+      "KBOOT-001",
+      "SEOBOOT-001",
+      "SOCBOOT-001",
+      "MKTBOOT-001",
+      "CRMBOOT-001",
+      "APPBOOT-001",
+      "AUTBOOT-001",
+      "TRNBOOT-001",
+      "ENGACT-001",
+      "LRN-001"
+    ],
+    "durable_functions_executed": [
+      "cerebro_company_register_preprod",
+      "cerebro_company_onboarding_start_preprod",
+      "cerebro_scan001_record_success_preprod",
+      "cerebro_post_scan_audit_record_preprod",
+      "cerebro_bootstrap_tier_record_preprod",
+      "cerebro_marketing_crm_bootstrap_record_preprod",
+      "cerebro_final_onboarding_record_preprod",
+      "cerebro_lrn001_record_preprod"
+    ],
+    "seventeen_onboarding_engines_green": true,
+    "lrn_old_score": 0.71,
+    "lrn_new_score": 0.86,
+    "hard_gates_green": true,
+    "tribunal_verdict": "NEW_BETTER",
+    "rollback_ref_present": true,
+    "lrn_continuation_eligible": true,
+    "registration_retry_idempotent": true,
+    "lrn_retry_idempotent": true
+  },
+  "human_exception_path": {
+    "company_id": "zze2e002",
+    "reason": "LOW_CONFIDENCE",
+    "engine": "KW-001",
+    "engine_state": "HUMAN_REQUIRED",
+    "dependent_engine": "KBOOT-001",
+    "dependent_state": "BLOCKED",
+    "silent_downstream_unlock": false
+  },
+  "tenant_isolation": {
+    "cross_company_access_allowed": false,
+    "tenant_boundary": "DENY_CROSS_COMPANY"
+  },
+  "security": {
+    "durable_record_functions_checked": 8,
+    "anon_execute_all": false,
+    "authenticated_execute_all": false,
+    "service_role_execute_all": true,
+    "durable_tables_checked": 11,
+    "rls_enabled_all": true,
+    "anon_select_all": false,
+    "authenticated_select_all": false,
+    "service_role_select_all": true,
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "trading_access": false,
+    "additional_cost_eur": 0
+  },
+  "post_transaction_rollback": {
+    "registry_rows": 0,
+    "registry_history_rows": 0,
+    "onboarding_rows": 0,
+    "onboarding_history_rows": 0,
+    "engine_state_rows": 0,
+    "scan_rows": 0,
+    "post_scan_rows": 0,
+    "bootstrap_rows": 0,
+    "marketing_crm_rows": 0,
+    "final_onboarding_rows": 0,
+    "lrn_rows": 0
+  },
+  "gate_closed": "MULTICOMPANY_PHYSICAL_E2E_ACCEPTANCE_REQUIRED",
+  "next_required_work": [
+    "AUTHENTICATED_REAL_ACTION_AND_CHANNEL_E2E",
+    "GLOBAL_HUMAN_BY_EXCEPTION_AUTONOMY_AUDIT",
+    "GRADUAL_PROD_PROMOTION_WITH_SHADOW_OLD_VS_NEW_TRIBUNAL_CANARY_ROLLBACK"
+  ],
+  "not_claimed": [
+    "REAL_EXTERNAL_WEB_SCAN_EXECUTED_IN_THIS_ACCEPTANCE",
+    "REAL_CUSTOMER_DATA_USED",
+    "ALL_REAL_ACTION_CHANNELS_E2E_GREEN",
+    "PROD_AUTONOMY",
+    "PROD_WRITE_AUTHORITY",
+    "TRADING_ACCESS"
+  ]
+}
