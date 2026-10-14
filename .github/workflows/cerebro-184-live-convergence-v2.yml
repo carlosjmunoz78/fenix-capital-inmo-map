@@ -1,0 +1,48 @@
+name: CEREBRO 184 Live Convergence V2
+
+on:
+  push:
+    paths:
+      - 'cerebro/skills/cerebro-184-live-convergence.v2.json'
+      - 'cerebro/skills/cerebro-184-live-convergence-controller-v1.mjs'
+      - 'cerebro/tests/cerebro-184-live-convergence-controller-v1.test.mjs'
+      - '.github/workflows/cerebro-184-live-convergence-v2.yml'
+  pull_request:
+    paths:
+      - 'cerebro/skills/cerebro-184-live-convergence.v2.json'
+      - 'cerebro/skills/cerebro-184-live-convergence-controller-v1.mjs'
+      - 'cerebro/tests/cerebro-184-live-convergence-controller-v1.test.mjs'
+      - '.github/workflows/cerebro-184-live-convergence-v2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  live-convergence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Focused 184 convergence contracts
+        run: node --test cerebro/tests/cerebro-184-live-convergence-controller-v1.test.mjs
+      - name: Generate fail-closed convergence report
+        run: node cerebro/skills/cerebro-184-live-convergence-controller-v1.mjs | tee /tmp/cerebro-184-live-convergence-report.json
+      - name: Validate canonical engine registry
+        working-directory: cerebro
+        run: npm run validate
+      - name: Full CEREBRO OLD-vs-NEW regression baseline
+        working-directory: cerebro
+        run: npm test
+      - name: Enforce authority boundary
+        run: >-
+          node -e "const s=require('./cerebro/skills/cerebro-184-live-convergence.v2.json'); const a=s.authority; if(a.prod_authorized||a.prod_write_authorized||a.auto_merge_authorized||a.external_skill_code_execution_authorized||a.customer_data_authorized||a.trading_access||a.automatic_paid_fallback||a.additional_cost_eur!==0) process.exit(1); if(s.deployment_boundary.main_is_cloudflare_production_branch!==false||s.deployment_boundary.cloudflare_production_branch!=='deploy/cloudflare-prod') process.exit(1); console.log('184 authority boundary GREEN')"
+      - name: Upload convergence report
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-184-live-convergence-report
+          path: /tmp/cerebro-184-live-convergence-report.json
+          retention-days: 14
