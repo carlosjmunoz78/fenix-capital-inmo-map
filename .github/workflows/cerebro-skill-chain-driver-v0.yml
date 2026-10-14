@@ -137,15 +137,7 @@ jobs:
 
           load_state() {
             git show "refs/remotes/origin/$AUTOLOOP_STATE_BRANCH:$AUTOLOOP_STATE_PATH" > artifacts/skill-chain/state.json
-            node --input-type=module - <<'NODE'
-            import fs from 'node:fs';
-            import {validateSafeAutoloopState} from './cerebro/skills/skill-autoloop-controller.mjs';
-            const s=JSON.parse(fs.readFileSync('artifacts/skill-chain/state.json','utf8'));
-            const v=validateSafeAutoloopState(s);
-            if(!v.green) throw new Error(JSON.stringify(v));
-            const a=s.safe_autonomy??{};
-            if(a.prod_write!==false||a.external_skill_code_execution!==false||a.customer_data!==false||a.trading!==false||a.paid_fallback!==false||a.additional_cost_budget_eur!==0) throw new Error('SKILL_CHAIN_SAFETY_INVARIANT_FAILED');
-            NODE
+            node --input-type=module -e "import fs from 'node:fs'; import {validateSafeAutoloopState} from './cerebro/skills/skill-autoloop-controller.mjs'; const s=JSON.parse(fs.readFileSync('artifacts/skill-chain/state.json','utf8')); const v=validateSafeAutoloopState(s); if(!v.green) throw new Error(JSON.stringify(v)); const a=s.safe_autonomy??{}; if(a.prod_write!==false||a.external_skill_code_execution!==false||a.customer_data!==false||a.trading!==false||a.paid_fallback!==false||a.additional_cost_budget_eur!==0) throw new Error('SKILL_CHAIN_SAFETY_INVARIANT_FAILED');"
           }
 
           child_workflow() {
@@ -181,7 +173,7 @@ jobs:
               return 1
             fi
             echo "$run_id" > "artifacts/skill-chain/children/${step}-${logical}.run_id"
-            gh run watch "$run_id" --repo "$GITHUB_REPOSITORY" --exit-status --interval 3
+            gh run watch "$run_id" --repo "$GITHUB_REPOSITORY" --exit-status --interval 3 >&2
             echo "$run_id"
           }
 
@@ -202,7 +194,7 @@ jobs:
             seen="${seen}${signature}|"
 
             logical="$target"
-            run_id="$(dispatch_and_wait "$logical" | tail -n 1)"
+            run_id="$(dispatch_and_wait "$logical")"
             priority_decision=""
             if [ "$logical" = "PRIORITY_LADDER" ]; then
               rm -rf artifacts/skill-chain/priority/current
@@ -219,12 +211,7 @@ jobs:
 
             after_state_sha="$(state_sha)"
             load_state
-            read -r waiting in_flight processed <<< "$(node --input-type=module - <<'NODE'
-            import fs from 'node:fs';
-            const s=JSON.parse(fs.readFileSync('artifacts/skill-chain/state.json','utf8'));
-            process.stdout.write(`${Object.keys(s.waiting_safe_handler??{}).length} ${Object.keys(s.in_flight??{}).length} ${(s.processed_candidate_ids??[]).length}`);
-            NODE
-            )"
+            read -r waiting in_flight processed <<< "$(node -e "const fs=require('fs'); const s=JSON.parse(fs.readFileSync('artifacts/skill-chain/state.json','utf8')); process.stdout.write([Object.keys(s.waiting_safe_handler||{}).length,Object.keys(s.in_flight||{}).length,(s.processed_candidate_ids||[]).length].join(' '));")"
 
             next="NONE"
             reason="TERMINAL_OR_NO_ELIGIBLE_CANDIDATE"
@@ -244,10 +231,7 @@ jobs:
               fi
             fi
 
-            node --input-type=module - "$step" "$logical" "$run_id" "$before_state_sha" "$after_state_sha" "$waiting" "$in_flight" "$processed" "$priority_decision" "$next" "$reason" <<'NODE' >> artifacts/skill-chain/chain.jsonl
-            const [step,logical,runId,beforeSha,afterSha,waiting,inFlight,processed,priorityDecision,next,reason]=process.argv.slice(2);
-            console.log(JSON.stringify({step:Number(step),logical_target:logical,child_run_id:Number(runId),before_state_sha:beforeSha,after_state_sha:afterSha,state_mutated:beforeSha!==afterSha,waiting_safe_handler:Number(waiting),in_flight:Number(inFlight),processed_candidate_count:Number(processed),priority_decision:priorityDecision||null,next_target:next,reason,prod_authorized:false,prod_write:false,customer_data_used:false,external_skill_code_execution:false,trading_access:false,paid_fallback:false,additional_cost_eur:0}));
-            NODE
+            jq -nc --argjson step "$step" --arg logical "$logical" --argjson run_id "$run_id" --arg before_state_sha "$before_state_sha" --arg after_state_sha "$after_state_sha" --argjson waiting "$waiting" --argjson in_flight "$in_flight" --argjson processed "$processed" --arg priority_decision "$priority_decision" --arg next "$next" --arg reason "$reason" '{step:$step,logical_target:$logical,child_run_id:$run_id,before_state_sha:$before_state_sha,after_state_sha:$after_state_sha,state_mutated:($before_state_sha!=$after_state_sha),waiting_safe_handler:$waiting,in_flight:$in_flight,processed_candidate_count:$processed,priority_decision:(if $priority_decision=="" then null else $priority_decision end),next_target:$next,reason:$reason,prod_authorized:false,prod_write:false,customer_data_used:false,external_skill_code_execution:false,trading_access:false,paid_fallback:false,additional_cost_eur:0}' >> artifacts/skill-chain/chain.jsonl
             target="$next"
             stop_reason="$reason"
           done
@@ -267,12 +251,7 @@ jobs:
         run: |
           set -euo pipefail
           if [ -f artifacts/skill-chain/state.json ]; then
-            node --input-type=module - <<'NODE'
-            import fs from 'node:fs';
-            const s=JSON.parse(fs.readFileSync('artifacts/skill-chain/state.json','utf8'));
-            const a=s.safe_autonomy??{};
-            if(a.prod_write!==false||a.external_skill_code_execution!==false||a.customer_data!==false||a.trading!==false||a.paid_fallback!==false||a.additional_cost_budget_eur!==0) throw new Error('FINAL_SKILL_CHAIN_SAFETY_INVARIANT_FAILED');
-            NODE
+            node -e "const fs=require('fs'); const s=JSON.parse(fs.readFileSync('artifacts/skill-chain/state.json','utf8')); const a=s.safe_autonomy||{}; if(a.prod_write!==false||a.external_skill_code_execution!==false||a.customer_data!==false||a.trading!==false||a.paid_fallback!==false||a.additional_cost_budget_eur!==0) throw new Error('FINAL_SKILL_CHAIN_SAFETY_INVARIANT_FAILED');"
           fi
 
       - name: Upload immutable chain routing evidence
