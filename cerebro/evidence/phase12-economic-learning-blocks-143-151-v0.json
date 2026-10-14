@@ -74,9 +74,16 @@
     "registry_validation_command": "cd cerebro && npm run validate",
     "full_regression_command": "cd cerebro && npm test",
     "ci_workflow": "CEREBRO Phase 12 Economic Learning V0",
-    "ci_status": "PENDING_UNTIL_PR_RUN"
+    "verified_commit_sha": "025d50e0853c62b5491e82df03d92a21e670d789",
+    "focused_and_full_regression_run_id": 38538068325,
+    "focused_and_full_regression_status": "GREEN",
+    "governed_integration_run_id": 38538068465,
+    "governed_integration_status": "GREEN",
+    "promotion_readiness_shadow_run_id": 38538068451,
+    "promotion_readiness_shadow_status": "GREEN",
+    "ci_status": "GREEN_REVERIFY_CURRENT_HEAD_AFTER_EVIDENCE_ONLY_UPDATE"
   },
-  "promotion_state": "PREPROD_PLAN_ONLY_PENDING_CI",
+  "promotion_state": "PREPROD_CODE_TESTED_PLAN_ONLY",
   "rollback": "revert phase-12 PR/commit; no migration or external economic side effect exists in V0",
-  "next_gate": "FOCUSED_CI_FULL_REGRESSION_THEN_LIVE_DATA_ADAPTER_AUDIT_EVA001_JDG001_BEFORE_ANY_SPEND_PRICE_OR_PROD_MUTATION"
+  "next_gate": "LIVE_DATA_ADAPTER_AUDIT_EVA001_JDG001_BEFORE_ANY_SPEND_PRICE_OR_PROD_MUTATION"
 }
