@@ -73,6 +73,34 @@ export function buildSkillAutonomyActionReceipt(decision,{observed_at=null}={}){
   });
 }
 
+export function buildSafeHandlerAutonomyActionReceipt({candidate,evidence,state_company_id='GLOBAL'}={}){
+  if(!candidate?.candidate_id) throw new Error('safe-handler candidate required');
+  if(!SKILL_AUTONOMY_DECISIONS.includes(evidence?.decision)) throw new Error('safe-handler canonical decision required');
+  if(!text(evidence?.decision_id)) throw new Error('safe-handler decision_id required');
+  if(evidence?.human_required!=null) throw new Error('human-required decision cannot be routed autonomously');
+  const disposition=evidence.decision;
+  const bindings=uniq(candidate.engine_bindings);
+  const syntheticDecision={
+    decision_id:evidence.decision_id,
+    company_id:text(candidate.company_id)??text(state_company_id)??'GLOBAL',
+    environment:PREPROD,
+    skill_id:candidate.candidate_id,
+    skill_version:text(evidence.skill_version)??text(candidate.wrapper_id)??evidence.decision_id,
+    decision:disposition,
+    human_required:null,
+    existing_engine_bindings:bindings,
+    preprod_internal_wrapper_activation_authorized:evidence.preprod_internal_wrapper_activation_authorized===true,
+    factory_candidate_authorized:evidence.factory_candidate_authorized===true,
+    factory_create_authorized:false,
+    prod_authorized:false,
+    prod_write_authorized:false,
+    trading_access:false,
+    external_code_execution_authorized:false,
+    additional_cost_eur:Number(evidence.additional_cost_eur??0)
+  };
+  return buildSkillAutonomyActionReceipt(syntheticDecision);
+}
+
 export function applySkillAutonomyActionReceipt(state,receipt,{now=new Date().toISOString()}={}){
   const out=clone(state);
   const safety=validateSafeAutoloopState(out);
