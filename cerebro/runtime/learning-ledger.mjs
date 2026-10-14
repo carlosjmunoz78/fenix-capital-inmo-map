@@ -16,14 +16,23 @@ function canonicalStringSet(value){
   if(value.some((item)=>typeof item!=='string')) return null;
   return [...new Set(value)].sort();
 }
-function compatibleSetReplay(before,after){
+function stableEvidenceAnchor(left,right){
+  const leftSource=left?.source_learning_id;
+  const rightSource=right?.source_learning_id;
+  if(typeof leftSource!=='string'||!leftSource.trim()) return null;
+  if(typeof rightSource!=='string'||!rightSource.trim()) return null;
+  if(leftSource!==rightSource) return null;
+  return `shadow-learning:${leftSource}`;
+}
+function compatibleSetReplay(before,after,{stable_anchor=null}={}){
   const left=canonicalStringSet(before);const right=canonicalStringSet(after);
   if(!left||!right) return false;
   if(sameValue(left,right)) return true;
   const leftSet=new Set(left);const rightSet=new Set(right);
   const leftSubset=left.every((item)=>rightSet.has(item));
   const rightSubset=right.every((item)=>leftSet.has(item));
-  return leftSubset||rightSubset;
+  if(leftSubset||rightSubset) return true;
+  return typeof stable_anchor==='string'&&stable_anchor.length>0&&leftSet.has(stable_anchor)&&rightSet.has(stable_anchor);
 }
 function differingFields(left,right){
   const leftObject=left??{};const rightObject=right??{};
@@ -37,12 +46,13 @@ function differingFields(left,right){
 }
 function compatibleRepeat(prior,incoming){
   const left=clone(prior);const right=clone(incoming);const compatibilityFields=[];
+  const evidenceAnchor=stableEvidenceAnchor(prior,incoming);
   if(left.observed_at!==right.observed_at) compatibilityFields.push('observed_at');
   delete left.observed_at;delete right.observed_at;
   for(const field of SET_PROVENANCE_FIELDS){
     const before=left[field];const after=right[field];
     if(sameValue(before,after)) continue;
-    if(!compatibleSetReplay(before,after)){
+    if(!compatibleSetReplay(before,after,{stable_anchor:field==='evidence_refs'?evidenceAnchor:null})){
       return Object.freeze({ok:false,compatibility_fields:[],conflict_fields:differingFields(prior,incoming)});
     }
     compatibilityFields.push(field);
@@ -129,9 +139,10 @@ export const LEARNING_LEDGER_V0_CONTRACT=Object.freeze({
   environment:PREPROD,
   persistence:'local-atomic-v8-journal',
   persistence_scope:PERSISTENCE_SCOPE,
-  duplicate_policy:'FIRST_SEEN_IMMUTABLE; OBSERVED_AT_MAY_CHANGE; EVIDENCE_REFS MAY REPLAY AS THE SAME SET OR A STRICT SUBSET/SUPERSET WHILE FIRST_SEEN EVIDENCE REMAINS IMMUTABLE; SIGNAL_ID_AND_SOURCE_ENVIRONMENT MAY DIFFER ONLY BY LEGACY MISSING_FORMS_OR_PRESENCE_ABSENCE; INCOMPARABLE EVIDENCE SETS, NONEMPTY PROVENANCE VALUE CHANGES AND ALL OTHER SAME_ID MUTATIONS FAIL_CLOSED',
+  duplicate_policy:'FIRST_SEEN_IMMUTABLE; OBSERVED_AT MAY CHANGE; EVIDENCE_REFS MAY REPLAY AS AN EQUIVALENT SET, STRICT SUBSET/SUPERSET, OR SAME-SOURCE ANCHORED PROVENANCE WHEN BOTH SETS CONTAIN shadow-learning:<source_learning_id>; FIRST_SEEN EVIDENCE REMAINS IMMUTABLE; SIGNAL_ID_AND_SOURCE_ENVIRONMENT MAY DIFFER ONLY BY LEGACY MISSING_FORMS_OR PRESENCE_ABSENCE; UNANCHORED INCOMPARABLE EVIDENCE SETS, NONEMPTY PROVENANCE VALUE CHANGES AND ALL OTHER SAME_ID MUTATIONS FAIL_CLOSED',
   additive_provenance_fields:ADDITIVE_PROVENANCE_FIELDS,
   set_provenance_fields:SET_PROVENANCE_FIELDS,
+  evidence_anchor:'shadow-learning:<source_learning_id>',
   conflict_diagnostics:'FIELD_NAMES_AND_PRESENCE_ONLY_NO_PAYLOAD_VALUES',
   supabase_required:false,
   additional_cost_target_eur:0,
