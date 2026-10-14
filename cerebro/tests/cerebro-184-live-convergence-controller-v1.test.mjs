@@ -49,26 +49,28 @@ test('main remains integration-only and Cloudflare production branch remains iso
   assert.equal(report.prod.main_is_production_branch, false);
 });
 
-test('all declared current-main registry evidence files physically exist', () => {
+test('all declared current-main evidence files physically exist', () => {
   const ledger = loadLedger();
   for (const block of ledger.blocks) {
-    if (!block.registry) continue;
-    assert.equal(fs.existsSync(path.join(repoRoot, block.registry)), true, block.registry);
+    for (const relative of [block.registry, block.item_level_reconciliation].filter(Boolean)) {
+      assert.equal(fs.existsSync(path.join(repoRoot, relative)), true, relative);
+    }
   }
 });
 
-test('item-level FULL/REMAINING are not fabricated from block-level integration', () => {
+test('item-level FULL/REMAINING advance only from explicit normalized counts', () => {
   const report = runConvergenceController({ ledgerPath, repoRoot });
-  assert.equal(report.full_item_count, null);
-  assert.equal(report.remaining_item_count, null);
-  assert.match(report.item_count_reason, /item by item/i);
+  assert.equal(report.full_item_count, 24);
+  assert.equal(report.remaining_item_count, 160);
+  assert.match(report.item_count_reason, /normalized/i);
 });
 
-test('items 1-24 remain first priority until reconciled against current main', () => {
+test('items 1-24 are terminal at their justified scope and next is 25-184 normalization', () => {
   const report = runConvergenceController({ ledgerPath, repoRoot });
-  assert.equal(report.next, 'RECONCILE_1_12_AGAINST_CURRENT_MAIN');
-  assert.equal(report.blocks_active_or_partial[0].range, '1-12');
-  assert.equal(report.blocks_active_or_partial[1].range, '13-24');
+  assert.equal(report.next, 'NORMALIZE_PER_ITEM_STATUS_25_184_FROM_CURRENT_REGISTRY_EVIDENCE');
+  assert.deepEqual(report.blocks_terminal_at_declared_scope.slice(0, 3), ['1-12', '13-24', '25-37']);
+  assert.notEqual(report.blocks_active_or_partial[0]?.range, '1-12');
+  assert.notEqual(report.blocks_active_or_partial[0]?.range, '13-24');
 });
 
 test('range parser fails closed on malformed ranges', () => {
@@ -83,6 +85,15 @@ test('coverage validation fails closed if an item range is removed', () => {
   assert.throws(
     () => validateConvergenceLedger(ledger, { repoRoot, checkFiles: false }),
     /MISSING_ITEMS/
+  );
+});
+
+test('normalization counts fail closed if they do not sum to 184', () => {
+  const ledger = loadLedger();
+  ledger.remaining_item_normalization_count = 159;
+  assert.throws(
+    () => validateConvergenceLedger(ledger, { repoRoot, checkFiles: false }),
+    /ITEM_NORMALIZATION_COUNTS_MUST_SUM_TO_CATALOG/
   );
 });
 

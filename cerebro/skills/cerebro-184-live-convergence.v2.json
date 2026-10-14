@@ -1,14 +1,16 @@
 {
-  "schema_version": "2.0.0",
+  "schema_version": "2.1.0",
   "state_type": "CEREBRO_184_LIVE_CONVERGENCE_V2",
   "generated_at": "2026-10-14",
   "company_id": "GLOBAL",
   "engine_id": "FACT-001",
   "environment": "PREPROD",
   "version": "v2",
-  "base_main_sha": "34a8003edaa4828318045b08e842bd58f6bc51b9",
+  "base_main_sha": "5f8bd4c50e354d3de7fb708bb669519f3bdaa9e5",
   "status": "ACTIVE_LIVE_CONVERGENCE",
   "catalog_size": 184,
+  "normalized_item_count": 24,
+  "remaining_item_normalization_count": 160,
   "source_policy": "CURRENT_MAIN_EVIDENCE_FIRST",
   "principles": {
     "preserve_existing": true,
@@ -42,19 +44,21 @@
       "range": "1-12",
       "count": 12,
       "domain": "FACT/LRN/QA/EVA",
-      "state": "ACTIVE_LIVE_REAUDIT_REQUIRED",
-      "reason": "Historical reconciliation PR #633 is an unmerged draft based on stale main; later FACT/LRN/Knowledge/Skill-Autonomy work must be reconciled against current main before terminal claims.",
+      "state": "INTEGRATED_MAIN_ITEM_LEVEL_RECONCILED",
+      "reason": "Reconciled item by item against current main. Existing governed FACT/LRN/QA/EVA capabilities are reused; unresolved external patterns are terminal HOLD or reference-only rather than imported blindly.",
       "historical_pr": 633,
-      "next_gate": "CURRENT_MAIN_ITEM_LEVEL_RECONCILIATION"
+      "item_level_reconciliation": "cerebro/skills/cerebro-184-items-1-24-live-reconciliation.v2.json",
+      "next_gate": "NORMALIZED_TERMINAL_OR_INTEGRATED"
     },
     {
       "range": "13-24",
       "count": 12,
       "domain": "Runtime/JOB/Router/FinOps/Provenance",
-      "state": "ACTIVE_LIVE_REAUDIT_REQUIRED",
-      "reason": "Historical reconciliation PR #636 is an unmerged draft based on stale main; current JOB/Router/FinOps/provenance implementations must be reconciled before importing or duplicating DBOS-like capability.",
+      "state": "INTEGRATED_MAIN_ITEM_LEVEL_RECONCILED",
+      "reason": "Reconciled item by item against current main. Durable jobs, retry/idempotency/restart/watchdog, Model Router, zero-cost fallback, FinOps and provenance are reused; DBOS stays reference-only because internal parity exists.",
       "historical_pr": 636,
-      "next_gate": "CURRENT_MAIN_ITEM_LEVEL_RECONCILIATION"
+      "item_level_reconciliation": "cerebro/skills/cerebro-184-items-1-24-live-reconciliation.v2.json",
+      "next_gate": "NORMALIZED_TERMINAL_OR_INTEGRATED"
     },
     {
       "range": "25-37",
@@ -214,8 +218,6 @@
     }
   ],
   "priority_queue": [
-    "RECONCILE_1_12_AGAINST_CURRENT_MAIN",
-    "RECONCILE_13_24_AGAINST_CURRENT_MAIN",
     "NORMALIZE_PER_ITEM_STATUS_25_184_FROM_CURRENT_REGISTRY_EVIDENCE",
     "ROUTE_ONLY_REAL_GAPS_TO_EXISTING_ENGINE_OR_FACT001",
     "RUN_OLD_VS_NEW_TRIBUNAL_PREPROD_ROLLBACK_REBUILD",

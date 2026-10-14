@@ -28,6 +28,18 @@ export function validateConvergenceLedger(ledger, { repoRoot = REPO_ROOT, checkF
   }
   if (ledger.environment !== 'PREPROD') throw new Error('PREPROD_ONLY');
 
+  const normalizedItemCount = Number(ledger.normalized_item_count ?? 0);
+  const remainingItemCount = Number(ledger.remaining_item_normalization_count ?? ledger.catalog_size);
+  if (!Number.isInteger(normalizedItemCount) || normalizedItemCount < 0 || normalizedItemCount > ledger.catalog_size) {
+    throw new Error('NORMALIZED_ITEM_COUNT_INVALID');
+  }
+  if (!Number.isInteger(remainingItemCount) || remainingItemCount < 0 || remainingItemCount > ledger.catalog_size) {
+    throw new Error('REMAINING_ITEM_COUNT_INVALID');
+  }
+  if (normalizedItemCount + remainingItemCount !== ledger.catalog_size) {
+    throw new Error('ITEM_NORMALIZATION_COUNTS_MUST_SUM_TO_CATALOG');
+  }
+
   const authority = ledger.authority || {};
   const deniedAuthority = [
     'prod_authorized',
@@ -51,7 +63,7 @@ export function validateConvergenceLedger(ledger, { repoRoot = REPO_ROOT, checkF
   }
 
   const coverage = new Map();
-  const missingRegistryFiles = [];
+  const missingEvidenceFiles = [];
   const blocks = Array.isArray(ledger.blocks) ? ledger.blocks : [];
   if (blocks.length === 0) throw new Error('NO_BLOCKS');
 
@@ -66,9 +78,8 @@ export function validateConvergenceLedger(ledger, { repoRoot = REPO_ROOT, checkF
       coverage.set(item, block.range);
     }
 
-    if (block.registry && checkFiles) {
-      const absolute = path.join(repoRoot, block.registry);
-      if (!fs.existsSync(absolute)) missingRegistryFiles.push(block.registry);
+    for (const relative of [block.registry, block.item_level_reconciliation].filter(Boolean)) {
+      if (checkFiles && !fs.existsSync(path.join(repoRoot, relative))) missingEvidenceFiles.push(relative);
     }
   }
 
@@ -78,8 +89,8 @@ export function validateConvergenceLedger(ledger, { repoRoot = REPO_ROOT, checkF
   }
   if (missingItems.length) throw new Error(`MISSING_ITEMS:${missingItems.join(',')}`);
   if (coverage.size !== ledger.catalog_size) throw new Error('COVERAGE_SIZE_MISMATCH');
-  if (missingRegistryFiles.length) {
-    throw new Error(`MISSING_REGISTRY_FILES:${missingRegistryFiles.join(',')}`);
+  if (missingEvidenceFiles.length) {
+    throw new Error(`MISSING_EVIDENCE_FILES:${[...new Set(missingEvidenceFiles)].join(',')}`);
   }
 
   const active = blocks.filter((block) =>
@@ -90,12 +101,13 @@ export function validateConvergenceLedger(ledger, { repoRoot = REPO_ROOT, checkF
     block.state.includes('CATALOG_ONLY') ||
     block.state.includes('SIDE_EFFECTS_DISABLED')
   );
-  const terminalAtDeclaredScope = blocks.filter(
-    (block) => block.state === 'INTEGRATED_MAIN_VALIDATED_TRANSVERSAL'
+  const terminalAtDeclaredScope = blocks.filter((block) =>
+    block.state === 'INTEGRATED_MAIN_VALIDATED_TRANSVERSAL' ||
+    block.state === 'INTEGRATED_MAIN_ITEM_LEVEL_RECONCILED'
   );
 
   return {
-    schema_version: '1.0.0',
+    schema_version: '1.1.0',
     state_type: 'CEREBRO_184_LIVE_CONVERGENCE_REPORT_V1',
     status: active.length ? 'GREEN_COVERAGE_ACTIVE_CONVERGENCE' : 'GREEN_TERMINAL',
     company_id: ledger.company_id,
@@ -114,9 +126,9 @@ export function validateConvergenceLedger(ledger, { repoRoot = REPO_ROOT, checkF
       next_gate: block.next_gate
     })),
     next: ledger.priority_queue?.[0] || null,
-    full_item_count: null,
-    remaining_item_count: null,
-    item_count_reason: 'Per-item terminal counts stay null until current-main evidence is normalized item by item; block integration is not misreported as physical child activation.',
+    full_item_count: normalizedItemCount,
+    remaining_item_count: remainingItemCount,
+    item_count_reason: 'FULL counts item-level rollout entries normalized to their justified terminal/integrated state; it does not mean every child capability is physically live or PROD-authorized.',
     human_required: [],
     prod: {
       authorized: false,
