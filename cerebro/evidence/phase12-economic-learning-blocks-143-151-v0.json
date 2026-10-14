@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.0.0",
+  "evidence_type": "CEREBRO_PHASE12_ECONOMIC_LEARNING_BLOCKS_143_151_V0",
+  "date": "2026-10-14",
+  "company_id": "fenix",
+  "environment": "PREPROD",
+  "version": "0.1.0",
+  "base_main_sha": "218b88755ad51d869796163d4ea3db2eb290b536",
+  "base_tree_sha": "fab2259c10b6572a3d2b46b5bbe98e03bd2d1049",
+  "source_blocks": [143,144,145,146,147,148,149,150,151],
+  "new_engine_created": false,
+  "canonical_engines_reused": ["LRN-001","MKT-001","CRM-001","OBSERV-001","FINOPS-001","EXP-001","FREE-001","CAP-001"],
+  "source_alignment": {
+    "143": "revenue attribution -> OBS/LRN/Marketing",
+    "144": "source->lead->meeting->sale->margin -> CRM/LRN",
+    "145": "campaign ROI -> Marketing/LRN",
+    "146": "agent/action ROI -> LRN",
+    "147": "channel ROI -> LRN",
+    "148": "WTP real -> Product Factory capability",
+    "149": "pricing experiments -> Product/LRN",
+    "150": "FREE_PARITY_GATE -> existing Product Factory capability",
+    "151": "automatic stop/scale -> CAP/LRN"
+  },
+  "ambiguity_resolution": {
+    "OBS-001": "obsolescence/unlearning engine",
+    "OBSERV-001": "observability engine used by phase 12"
+  },
+  "files_added": {
+    "runtime": "cerebro/economics/phase12-economic-learning-runtime-v0.mjs",
+    "tests": "cerebro/tests/phase12-economic-learning-runtime-v0.test.mjs",
+    "profile": "cerebro/registry/phase12-economic-learning-profile.v0.json",
+    "docs": "cerebro/docs/CEREBRO_PHASE12_ECONOMIC_LEARNING_BLOCKS_143_151_V0_2026-10-14.md",
+    "workflow": ".github/workflows/cerebro-phase12-economic-learning-v0.yml"
+  },
+  "claims": {
+    "attribution_target": "source->lead->meeting->sale->margin",
+    "primary_metric": "CONTRIBUTION_MARGIN",
+    "campaign_roi": "DETERMINISTIC_PLAN_ONLY",
+    "agent_action_roi": "DETERMINISTIC_NO_SENSITIVE_WORKER_ATTRIBUTES",
+    "channel_roi": "DETERMINISTIC_PLAN_ONLY",
+    "wtp": "AGGREGATE_OBSERVED_EVIDENCE_ONLY",
+    "pricing": "EXP001_PLAN_ONLY_NO_LIVE_PRICE_MUTATION",
+    "free_parity_decisions": ["HOLD","BUILD","PAY"],
+    "stop_scale_decisions": ["STOP","HOLD","SCALE"]
+  },
+  "safety": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "real_ad_spend_authorized": false,
+    "campaign_budget_mutation_authorized": false,
+    "live_price_mutation_authorized": false,
+    "paid_purchase_authorized": false,
+    "subscription_authorized": false,
+    "crm_write_authorized": false,
+    "external_side_effect_authorized": false,
+    "trading_access": false,
+    "raw_pii_persisted": false,
+    "raw_sensitive_attributes_persisted": false,
+    "individualized_pricing": false,
+    "additional_cost_eur": 0
+  },
+  "live_evidence": {
+    "crm_revenue_attribution_adapter_verified": false,
+    "marketing_campaign_adapter_verified": false,
+    "finops_cost_events_adapter_verified": false,
+    "observability_sink_verified": false,
+    "product_factory_pricing_adapter_verified": false,
+    "live_wtp_experiment_verified": false,
+    "live_campaign_stop_scale_verified": false,
+    "live_paid_purchase_verified": false
+  },
+  "verification": {
+    "focused_test_command": "node --test cerebro/tests/phase12-economic-learning-runtime-v0.test.mjs",
+    "registry_validation_command": "cd cerebro && npm run validate",
+    "full_regression_command": "cd cerebro && npm test",
+    "ci_workflow": "CEREBRO Phase 12 Economic Learning V0",
+    "verified_commit_sha": "025d50e0853c62b5491e82df03d92a21e670d789",
+    "focused_and_full_regression_run_id": 38538068325,
+    "focused_and_full_regression_status": "GREEN",
+    "governed_integration_run_id": 38538068465,
+    "governed_integration_status": "GREEN",
+    "promotion_readiness_shadow_run_id": 38538068451,
+    "promotion_readiness_shadow_status": "GREEN",
+    "ci_status": "GREEN_REVERIFY_CURRENT_HEAD_AFTER_EVIDENCE_ONLY_UPDATE"
+  },
+  "promotion_state": "PREPROD_CODE_TESTED_PLAN_ONLY",
+  "rollback": "revert phase-12 PR/commit; no migration or external economic side effect exists in V0",
+  "next_gate": "LIVE_DATA_ADAPTER_AUDIT_EVA001_JDG001_BEFORE_ANY_SPEND_PRICE_OR_PROD_MUTATION"
+}
