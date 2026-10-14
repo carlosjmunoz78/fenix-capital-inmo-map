@@ -2,7 +2,7 @@
 
 Fecha: 2026-10-14  
 Entorno: `PREPROD`  
-Estado del documento: `PREPROD_CODE_HARDENED_PENDING_HEAD_CI`
+Estado del documento: `PREPROD_CODE_TESTED_PLAN_ONLY`
 
 ## 1. Contrato canónico
 
@@ -68,15 +68,15 @@ Claude Commerce, Blink y cualquier proveedor externo se tratan como referencia/p
 
 ## 6. Tests y aceptación
 
-Gate requerido sobre el **head exacto** antes de merge:
+El hardening de código quedó validado en el head `ff1d9a978eeac115157ea4072aa38af856e1bbc2` con los tres workflows requeridos en verde:
 
-- focused contract tests de FASE 15;
-- JSON profile/evidence parseable;
-- `npm run validate` del registry existente;
-- `npm test` completo;
-- Tribunal/Factory/Promotion shadow del repositorio cuando apliquen.
+- `CEREBRO Phase 15 Brand Commerce App Factory V0` · run `38553271902` · success;
+- `CEREBRO Governed Main Integration V0` · run `38553271887` · success;
+- `CEREBRO RSI Promotion Readiness Shadow V0` · run `38553271836` · success.
 
-No promover ni fusionar solo porque el código compile. El estado `PREPROD_CODE_TESTED_PLAN_ONLY` solo es válido cuando los checks del head candidato a merge están verdes.
+El workflow específico confirmó focused tests, profile/evidence JSON, validación del registry canónico y regresión completa.
+
+Cualquier commit posterior de documentación/evidence debe volver a pasar los checks del head exacto antes de merge. No se autoriza PROD por este estado.
 
 ## 7. Rollback y rebuild
 
