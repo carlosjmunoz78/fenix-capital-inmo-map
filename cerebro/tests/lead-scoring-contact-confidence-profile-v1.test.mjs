@@ -70,6 +70,29 @@ test('lead decision degrades safely when score evidence is missing',()=>{
   assert.equal(result.human_required,null);
 });
 
+test('claimed SCORED inputs without evidence are rejected as unevidenced',()=>{
+  const result=scoreLeadDecision({
+    ...ctx,now:'2026-10-14T06:00:00Z',business_value_eur:2500,
+    icp_score_result:{status:'SCORED',score:99,evidence_refs:[]},
+    company_intent_result:{status:'SCORED',score:99},
+    page_intent_result:{status:'SCORED',score:99,evidence_refs:['']}
+  });
+  assert.equal(result.status,'HOLD');
+  assert.equal(result.reason,'EVIDENCED_LEAD_SCORES_REQUIRED');
+  assert.equal(result.human_required,null);
+});
+
+test('unevidenced contact score cannot upgrade next-best-action',()=>{
+  const result=scoreLeadDecision({
+    ...ctx,now:'2026-10-14T06:00:00Z',icp_score_result:icp,company_intent_result:intent,page_intent_result:page,
+    business_events:[],business_value_eur:5000,
+    email_confidence_result:{status:'SCORED',confidence_score:99,evidence_refs:[]}
+  });
+  assert.equal(result.status,'SCORED');
+  assert.equal(result.contact_confidence_score,null);
+  assert.notEqual(result.next_best_action,'PREPARE_SALES_REVIEW_PACKET');
+});
+
 test('expected value is analytically bounded and cannot authorize spend',()=>{
   const result=scoreLeadDecision({
     ...ctx,now:'2026-10-14T06:00:00Z',icp_score_result:icp,company_intent_result:intent,page_intent_result:page,
