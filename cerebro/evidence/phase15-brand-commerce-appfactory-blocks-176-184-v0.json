@@ -4,7 +4,7 @@
   "blocks": [176,177,178,179,180,181,182,183,184],
   "date": "2026-10-14",
   "environment": "PREPROD",
-  "state": "PREPROD_CODE_HARDENED_PENDING_HEAD_CI",
+  "state": "PREPROD_CODE_TESTED_PLAN_ONLY",
   "source_contract": "FASE 15 · Marca, apps y commerce",
   "owner_engine_id": "FACT-001",
   "capability_id": "BRAND-COMMERCE-APPFACTORY",
@@ -12,6 +12,12 @@
   "main_base_sha": "6d001f17f09c3816ff1af71bc8740e77cbfc037e",
   "canonical_registry_count": 179,
   "canonical_registry_extension": ["HCI-001","MOTION-001"],
+  "validated_code_head_sha": "ff1d9a978eeac115157ea4072aa38af856e1bbc2",
+  "validated_runs": {
+    "phase15": {"run_id": 38553271902, "conclusion": "success"},
+    "governed_main_integration": {"run_id": 38553271887, "conclusion": "success"},
+    "rsi_promotion_readiness_shadow": {"run_id": 38553271836, "conclusion": "success"}
+  },
   "facts": [
     "BRANDBOOT-001 exists as a governed LAB candidate outside the current canonical 179-engine registry and is not rebuilt or promoted here.",
     "Canonical main is already at 179 engines because HCI-001 and MOTION-001 were added independently over the historical base of 177; this PR performs no registry-count migration.",
@@ -42,7 +48,7 @@
     "rollback_documented": true,
     "merge_authorized": false,
     "prod_authorized": false,
-    "merge_rule": "Only merge after required checks are green on the exact candidate head."
+    "merge_rule": "Only merge after required checks are green on the exact candidate head, including any documentation/evidence-only commits after the validated code head."
   },
   "known_separate_dependency": {
     "item": "BRANDBOOT-001 canonicalization/promotion",
