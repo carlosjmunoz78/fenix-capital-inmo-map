@@ -23,6 +23,7 @@ test('ledger is local PREPROD only, zero-cost and not Supabase-backed',()=>{
   assert.match(LEARNING_LEDGER_V0_CONTRACT.duplicate_policy,/FIRST_SEEN_IMMUTABLE/);
   assert.deepEqual(LEARNING_LEDGER_V0_CONTRACT.additive_provenance_fields,['signal_id','source_environment']);
   assert.deepEqual(LEARNING_LEDGER_V0_CONTRACT.set_provenance_fields,['evidence_refs']);
+  assert.equal(LEARNING_LEDGER_V0_CONTRACT.evidence_anchor,'shadow-learning:<source_learning_id>');
   assert.equal(LEARNING_LEDGER_V0_CONTRACT.conflict_diagnostics,'FIELD_NAMES_AND_PRESENCE_ONLY_NO_PAYLOAD_VALUES');
 });
 
@@ -107,6 +108,53 @@ test('legacy replay with an evidence subset cannot weaken stored first-seen prov
     assert.deepEqual(replay.compatibility_fields,['evidence_refs','observed_at']);
     assert.equal(replay.record_hash,first.record_hash);
     assert.deepEqual(ledger.list()[0].evidence_refs,['e:1','e:2']);
+    assert.equal(ledger.operation_count,1);
+  }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
+
+test('same-source anchored incomparable evidence replay is idempotent and preserves first-seen provenance',()=>{
+  const {dir,file}=tempFile();
+  try{
+    const ledger=new LearningLedgerV0({file_path:file});
+    const source='learn:source:stable';
+    const anchor=`shadow-learning:${source}`;
+    const firstRecord={...candidate(),source_learning_id:source,evidence_refs:['source:repo@old',anchor]};
+    const first=ledger.persist(firstRecord);
+    const replay=ledger.persist({...firstRecord,observed_at:'2026-10-08T22:10:00Z',evidence_refs:['manifest:path#new',anchor]});
+    assert.equal(replay.accepted,false);
+    assert.equal(replay.duplicate,true);
+    assert.equal(replay.semantic_duplicate,true);
+    assert.deepEqual(replay.compatibility_fields,['evidence_refs','observed_at']);
+    assert.equal(replay.record_hash,first.record_hash);
+    assert.deepEqual(ledger.list()[0].evidence_refs,['source:repo@old',anchor]);
+    assert.equal(ledger.operation_count,1);
+  }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
+
+test('incomparable evidence replacement still fails closed without the deterministic source anchor',()=>{
+  const {dir,file}=tempFile();
+  try{
+    const ledger=new LearningLedgerV0({file_path:file});
+    ledger.persist({...candidate(),source_learning_id:'learn:source:stable',evidence_refs:['e:1','e:2']});
+    assert.throws(
+      ()=>ledger.persist({...candidate(),source_learning_id:'learn:source:stable',observed_at:'2026-10-08T22:10:00Z',evidence_refs:['e:1','e:3']}),
+      /learning_id conflict with different payload fields:evidence_refs,observed_at/
+    );
+    assert.equal(ledger.operation_count,1);
+  }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
+
+test('mismatched source identity cannot authorize incomparable evidence replay',()=>{
+  const {dir,file}=tempFile();
+  try{
+    const ledger=new LearningLedgerV0({file_path:file});
+    const firstSource='learn:source:first';
+    const secondSource='learn:source:second';
+    ledger.persist({...candidate(),source_learning_id:firstSource,evidence_refs:['source:a',`shadow-learning:${firstSource}`]});
+    assert.throws(
+      ()=>ledger.persist({...candidate(),source_learning_id:secondSource,observed_at:'2026-10-08T22:10:00Z',evidence_refs:['manifest:b',`shadow-learning:${secondSource}`]}),
+      /learning_id conflict/
+    );
     assert.equal(ledger.operation_count,1);
   }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });
