@@ -1,14 +1,16 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "state_type": "CEREBRO_FACT001_ANDROID_STAGING_48_183_V0",
   "company_id": "fenix",
   "engine_id": "FACT-001",
   "environment": "PREPROD",
   "version": "0.1.0",
-  "status": "ANDROID_BUILD_CANDIDATE_STAGING_DRAFT_PREVIEW_VERIFIED",
+  "status": "VERIFIED_SIGNED_APK_BUILD_AND_STAGING_DRAFT_PREVIEW_GREEN",
   "source_main_sha": "623329c8d20ac0a6ef19425fc4a6114970f77a5d",
+  "validated_head_sha": "9378d625767a6550438762ad9370efab5829fae0",
   "item_48": {
     "owner_engines": ["AUTO-001", "ACTGW-001", "IAM-001", "FACT-001"],
+    "verified_state": "SIGNED_PREPROD_APK_BUILD_GREEN_NO_DEVICE_BOUND",
     "build_target": "SIGNED_PREPROD_APK_NO_NETWORK_DOWNLOADS",
     "kill_switch_default": true,
     "physical_device_bound": false,
@@ -16,6 +18,7 @@
   },
   "item_183": {
     "owner_engines": ["APPBOOT-001", "FACT-001"],
+    "verified_state": "STAGING_DRAFT_RENDER_PLUS_SIGNED_ANDROID_APK_BUILD_GREEN",
     "web_staging_acceptance": {
       "wordpress_site": "staging.fenixcapital.es",
       "page_id": 54763,
@@ -38,10 +41,27 @@
   },
   "implementation": {
     "android_build_runner": "cerebro/runtime/build-android-preprod-v0.sh",
+    "workflow": ".github/workflows/cerebro-fact001-android-staging-48-183-v0.yml",
     "build_strategy": "PREINSTALLED_GITHUB_RUNNER_ANDROID_SDK_TOOLS_ONLY",
     "gradle": false,
     "maven": false,
     "external_dependency_install": false
+  },
+  "verification": {
+    "workflow_run_id": 38650049139,
+    "workflow_conclusion": "success",
+    "no_dependency_installer_gate": "PASS",
+    "signed_worker_apk_build": "PASS",
+    "signed_template_apk_build": "PASS",
+    "apksigner_verification": "PASS",
+    "canonical_registry_validation": "PASS",
+    "full_cerebro_regression": "PASS",
+    "governed_main_integration_run_id": 38650049191,
+    "governed_main_integration": "PASS",
+    "rsi_promotion_readiness_shadow_run_id": 38650049140,
+    "rsi_promotion_readiness_shadow": "PASS",
+    "artifact_id": 11934097600,
+    "artifact_digest": "sha256:23b70456ee2d600fc7227702f1d7bae7e543d7ce5861370486aa847d27f1d820"
   },
   "authority": {
     "prod_authorized": false,
@@ -57,5 +77,5 @@
     "github": "Revert the additive 48/183 build/acceptance PR."
   },
   "rebuild": "Run build-android-preprod-v0.sh on a governed runner with preinstalled Android SDK; recreate WordPress synthetic draft through the existing PREPROD connector and verify the acceptance marker in authenticated preview.",
-  "next_gate": "ANDROID_CI_BUILD_THEN_AUTHORIZED_PHYSICAL_DEVICE_E2E"
+  "next_gate": "AUTHORIZED_PHYSICAL_ANDROID_DEVICE_E2E_48_183"
 }
