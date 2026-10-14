@@ -1,48 +1,71 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "state_type": "CEREBRO_FACT001_SIX_GAP_PHYSICAL_E2E_PROFILE_V0",
   "company_id": "GLOBAL",
   "engine_id": "FACT-001",
   "environment": "PREPROD",
   "version": "0.1.0",
-  "status": "CANDIDATE_PENDING_CI",
+  "status": "VERIFIED_LOCAL_E2E_EXTERNAL_BINDINGS_PENDING",
   "source_merge_sha": "cc52f8a956d4ca06160c98febbe6c6644d52a9fd",
+  "validated_head_sha": "8e2082b52f208df029257fdbf306724faf91d092",
   "items": {
     "47": {
       "name": "Watch & Learn / deterministic replay",
-      "target_acceptance": "LOCAL_E2E_GREEN",
-      "remaining_after_target": "AUTHORIZED_REAL_OBSERVATION_ADAPTER_E2E"
+      "verified_state": "LOCAL_E2E_GREEN",
+      "evidence": "deterministic procedure learn -> replay -> semantic match with checksum integrity",
+      "remaining_gate": "AUTHORIZED_REAL_OBSERVATION_ADAPTER_E2E"
     },
     "48": {
       "name": "Android Device Worker",
-      "target_acceptance": "GOVERNED_SHELL_GREEN_PHYSICAL_DEVICE_PENDING",
-      "remaining_after_target": "AUTHORIZED_DEVICE_ATTESTATION_AND_PHYSICAL_BINDING"
+      "verified_state": "GOVERNED_SHELL_GREEN_PHYSICAL_DEVICE_PENDING",
+      "evidence": "shell artifacts generated and command path proven fail-closed with kill switch enabled",
+      "remaining_gate": "AUTHORIZED_DEVICE_ATTESTATION_AND_PHYSICAL_BINDING"
     },
     "57": {
       "name": "COMPET-001 continuous runtime",
-      "target_acceptance": "DURABLE_SCHEDULER_E2E_GREEN_SOURCE_ADAPTER_PENDING",
-      "remaining_after_target": "PHYSICAL_PUBLIC_OR_AUTHORIZED_SOURCE_ADAPTER_E2E"
+      "verified_state": "DURABLE_SCHEDULER_E2E_GREEN_SOURCE_ADAPTER_PENDING",
+      "evidence": "Persistent JOB-001 enqueue -> claim -> comparison -> complete -> reopen/idempotency",
+      "remaining_gate": "PHYSICAL_PUBLIC_OR_AUTHORIZED_SOURCE_ADAPTER_E2E"
     },
     "62": {
       "name": "CAP-001 autonomous company discovery",
-      "target_acceptance": "DURABLE_SCHEDULER_E2E_GREEN_SOURCE_ADAPTER_PENDING",
-      "remaining_after_target": "PHYSICAL_ZERO_COST_PUBLIC_OR_AUTHORIZED_SOURCE_ADAPTER_E2E"
+      "verified_state": "DURABLE_SCHEDULER_E2E_GREEN_SOURCE_ADAPTER_PENDING",
+      "evidence": "Persistent JOB-001 enqueue -> claim -> company-first discovery/ICP scoring -> complete with zero outreach/CRM writes",
+      "remaining_gate": "PHYSICAL_ZERO_COST_PUBLIC_OR_AUTHORIZED_SOURCE_ADAPTER_E2E"
     },
     "74": {
       "name": "EVT-001 first-party capture",
-      "target_acceptance": "LOCAL_HTTP_EMITTER_CAPTURE_E2E_GREEN_STAGING_BINDING_PENDING",
-      "remaining_after_target": "CONSENTED_REAL_PREPROD_WEBSITE_EMITTER_BINDING_AND_REMOTE_E2E"
+      "verified_state": "LOCAL_HTTP_EMITTER_CAPTURE_E2E_GREEN_STAGING_BINDING_PENDING",
+      "evidence": "real loopback HTTP POST -> consent-gated capture -> atomic persistence -> reopen verification",
+      "remaining_gate": "CONSENTED_REAL_PREPROD_WEBSITE_EMITTER_BINDING_AND_REMOTE_E2E"
     },
     "183": {
       "name": "Reusable web/PWA/mobile template packs",
-      "target_acceptance": "LOCAL_PWA_SERVE_E2E_GREEN_MOBILE_BUILD_DEPLOY_PENDING",
-      "remaining_after_target": "GOVERNED_PREPROD_DEPLOY_ADAPTER_AND_ANDROID_BUILD_PHYSICAL_ACCEPTANCE"
+      "verified_state": "LOCAL_PWA_SERVE_E2E_GREEN_MOBILE_BUILD_DEPLOY_PENDING",
+      "evidence": "deterministic PWA generation -> filesystem materialization -> local HTTP serve/fetch plus mobile artifact presence",
+      "remaining_gate": "GOVERNED_PREPROD_DEPLOY_ADAPTER_AND_ANDROID_BUILD_PHYSICAL_ACCEPTANCE"
     }
   },
   "implementation": {
     "runner": "cerebro/runtime/fact001-six-gap-physical-e2e-v0.mjs",
     "tests": "cerebro/tests/fact001-six-gap-physical-e2e-v0.test.mjs",
-    "evidence_artifact": "fact001-six-gap-physical-e2e-report.json"
+    "workflow": ".github/workflows/cerebro-fact001-six-gap-physical-e2e-v0.yml",
+    "evidence_artifact": "fact001-six-gap-physical-e2e-report"
+  },
+  "verification": {
+    "workflow_run_id": 38646265859,
+    "workflow_conclusion": "success",
+    "focused_physical_e2e_tests": "PASS",
+    "evidence_generation": "PASS",
+    "authority_boundary": "PASS",
+    "canonical_registry_validation": "PASS",
+    "full_cerebro_regression": "PASS",
+    "artifact_id": 11931729437,
+    "artifact_digest": "sha256:5e0a2b6d9b0fedfe3805afb3fd7191849fb8ef07457b6053c45ec12d08888615",
+    "governed_main_integration_run_id": 38646265843,
+    "governed_main_integration": "PASS",
+    "rsi_promotion_readiness_shadow_run_id": 38646265938,
+    "rsi_promotion_readiness_shadow": "PASS"
   },
   "acceptance_policy": {
     "do_not_overclaim_external_binding": true,
@@ -64,5 +87,5 @@
   },
   "rollback": "Revert the additive physical-E2E PR; no PROD mutation, provider write, device binding or public deployment is performed by this profile.",
   "rebuild": "Re-run the deterministic E2E runner from the verified six-gap core merge and recreate evidence from scratch.",
-  "next_gate": "CI_PHYSICAL_E2E_THEN_EXTERNAL_PREPROD_BINDINGS_ONLY"
+  "next_gate": "EXTERNAL_PREPROD_BINDINGS_47_48_57_62_74_183_ONLY_WITHOUT_PROD_MUTATION"
 }
