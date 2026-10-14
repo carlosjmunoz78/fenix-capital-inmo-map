@@ -1,0 +1,107 @@
+name: CEREBRO Skill Autonomy Physical Branch Acceptance V1
+
+on:
+  push:
+    branches:
+      - cerebro/skill-autonomy-action-application-v1-20261014
+    paths:
+      - 'cerebro/skills/skill-autonomy-action-application-v1.mjs'
+      - 'cerebro/skills/skill-autonomy-safe-action-worker-v1.mjs'
+      - 'cerebro/tests/skill-autonomy-action-application-v1.test.mjs'
+      - 'cerebro/tests/skill-autonomy-safe-action-worker-v1.test.mjs'
+      - '.github/workflows/cerebro-skill-autonomy-physical-branch-acceptance-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  physical-branch-acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Run focused contracts
+        run: node --test cerebro/tests/skill-autonomy-action-application-v1.test.mjs cerebro/tests/skill-autonomy-safe-action-worker-v1.test.mjs
+
+      - name: Execute one real runtime handoff in isolated branch acceptance
+        run: |
+          mkdir -p artifacts/skill-autonomy-physical
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          import {routeNextSkillAutonomyAction} from './cerebro/skills/skill-autonomy-safe-action-worker-v1.mjs';
+
+          const action={
+            schema_version:'1.0.0',state_type:'CEREBRO_SKILL_AUTONOMY_ACTION_RECEIPT',
+            action_id:'skill-action:physical-acceptance',decision_id:'skill-autonomy:physical-acceptance',
+            company_id:'fenix',engine_id:'SKILL-AUTONOMY-ACTION',environment:'PREPROD',version:'1.0.0',
+            skill_id:'physical-skill-acceptance',skill_version:'v1',decision:'ENVOLVER',
+            action_type:'BUILD_INTERNAL_WRAPPER_PLAN',status:'WAITING_SAFE_ACTION_WORKER',
+            next_gate:'INTERNAL_WRAPPER_BUILD_AND_REEVALUATE',target_engine_ids:['SEO-001'],
+            queueable_safe_work:true,terminal_metadata_only:false,mutation_authorized:false,
+            internal_wrapper_shadow_authorized:false,fact001_gap_candidate_authorized:false,
+            fact001_create_authorized:false,paid_activation_authorized:false,
+            prod_authorized:false,prod_write_authorized:false,trading_access:false,
+            external_skill_code_execution_authorized:false,additional_cost_eur:0,
+            recorded_at:new Date().toISOString()
+          };
+
+          const state={
+            schema_version:'0.1.0',state_type:'CEREBRO_SKILL_AUTOLOOP_SAFE_STATE',
+            company_id:'GLOBAL',engine_id:'FACT-001',environment:'LAB',version:'0.1.0',enabled:true,mode:'SAFE_AUTONOMY_V0',
+            safe_autonomy:{
+              discovery:true,license_evidence:true,risk_and_overlap:true,static_lab:true,disabled_wrapper_plans:true,
+              old_vs_new_synthetic_contracts:true,judge_and_tribunal_evidence:true,rollback_and_rebuild_proof:true,
+              synthetic_behavioral_when_candidate_handler_is_green:true,preprod_promotion:false,prod_readonly_canary:false,
+              prod_write:false,auto_merge:false,customer_data:false,external_skill_code_execution:false,trading:false,
+              paid_fallback:false,additional_cost_budget_eur:0
+            },
+            processed_candidate_ids:['physical-skill-acceptance'],in_flight:{},waiting_human:{},waiting_safe_handler:{},terminal_hold:{},
+            completed:{
+              'physical-skill-acceptance':{
+                candidate_id:'physical-skill-acceptance',wrapper_id:'wrapper-physical-acceptance',domain:'seo',source_discovery_run_id:null,
+                stage:'SKILL_AUTONOMY_DECISION_RECORDED',status:'COMPLETED',disposition:'ENVOLVER',
+                evidence:{decision_id:'skill-autonomy:physical-acceptance'},action_id:'skill-action:physical-acceptance',
+                prod_authorized:false,prod_write:false,trading_access:false,additional_cost_eur:0
+              }
+            },
+            autonomy_action_ledger:{'physical-skill-acceptance':action},
+            autonomy_action_queue:{'physical-skill-acceptance':action},
+            prod_authorized:false,autonomous_prod_promotion_authorized:false
+          };
+
+          const result=routeNextSkillAutonomyAction(state,{now:new Date().toISOString()});
+          const h=result.handoff;
+          if(result.status!=='ROUTED') throw new Error('PHYSICAL_ACCEPTANCE_NOT_ROUTED');
+          if(h?.state_type!=='CEREBRO_SKILL_ENGINE_EXTENSION_HANDOFF') throw new Error('PHYSICAL_ACCEPTANCE_WRONG_HANDOFF');
+          if(h?.next_gate!=='SKILL_CAPABILITY_EVOLUTION_EXISTING_ENGINE') throw new Error('PHYSICAL_ACCEPTANCE_WRONG_GATE');
+          if(h?.target_engine_ids?.length!==1||h.target_engine_ids[0]!=='SEO-001') throw new Error('PHYSICAL_ACCEPTANCE_WRONG_TARGET');
+          if(h.prod_authorized!==false||h.prod_write_authorized!==false||h.trading_access!==false||h.external_skill_code_execution_authorized!==false||h.paid_activation_authorized!==false||h.auto_merge_authorized!==false||Number(h.additional_cost_eur)!==0) throw new Error('PHYSICAL_ACCEPTANCE_AUTHORITY_EXPANSION');
+          if(result.state.autonomy_action_queue['physical-skill-acceptance']!==undefined) throw new Error('PHYSICAL_ACCEPTANCE_QUEUE_NOT_CONSUMED');
+          if(result.state.completed['physical-skill-acceptance'].action_status!=='ROUTED_TO_EXISTING_GOVERNED_PIPELINE') throw new Error('PHYSICAL_ACCEPTANCE_COMPLETION_NOT_RECORDED');
+
+          const evidence={
+            schema_version:'1.0.0',status:'GREEN_PHYSICAL_BRANCH_ACCEPTANCE',
+            branch:process.env.GITHUB_REF_NAME,head_sha:process.env.GITHUB_SHA,
+            company_id:'fenix',skill_id:'physical-skill-acceptance',decision:'ENVOLVER',
+            target_engine_ids:h.target_engine_ids,handoff_type:h.state_type,next_gate:h.next_gate,
+            queue_consumed:true,completion_recorded:true,
+            prod_authorized:false,prod_write_authorized:false,trading_access:false,
+            external_skill_code_execution_authorized:false,paid_activation_authorized:false,
+            additional_cost_eur:0,customer_data_used:false
+          };
+          fs.writeFileSync('artifacts/skill-autonomy-physical/evidence.json',JSON.stringify(evidence,null,2)+'\n');
+          console.log(JSON.stringify(evidence));
+          NODE
+
+      - name: Upload immutable physical acceptance evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-skill-autonomy-physical-branch-${{ github.run_id }}
+          path: artifacts/skill-autonomy-physical/evidence.json
+          if-no-files-found: error
+          retention-days: 30
