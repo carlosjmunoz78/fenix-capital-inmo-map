@@ -72,6 +72,9 @@ function finite(value, label, { min = -Infinity, max = Infinity } = {}) {
   if (!Number.isFinite(out) || out < min || out > max) throw new TypeError(`${label} invalid`);
   return out;
 }
+function stableHash(value, size = 32) {
+  return crypto.createHash('sha256').update(JSON.stringify(value)).digest('hex').slice(0, size);
+}
 function assertPlainData(value, label = 'input', seen = new WeakSet()) {
   if (value === null || ['string','boolean','undefined'].includes(typeof value)) return;
   if (typeof value === 'number') {
