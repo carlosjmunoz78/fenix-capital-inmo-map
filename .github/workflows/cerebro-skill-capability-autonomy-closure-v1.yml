@@ -1,0 +1,95 @@
+name: CEREBRO Skill Capability Autonomy Closure V1
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'cerebro/runtime/skill-capability-autonomy-closure-v1.mjs'
+      - 'cerebro/runtime/skill-capability-evolution.mjs'
+      - 'cerebro/skills/skill-capability-evolution-bridge.mjs'
+      - 'cerebro/tests/skill-capability-autonomy-closure-v1.test.mjs'
+      - 'cerebro/tests/skill-capability-evolution*.test.mjs'
+      - 'cerebro/tests/evaluation-tribunal.test.mjs'
+      - 'cerebro/docs/CEREBRO_SKILL_CAPABILITY_AUTONOMY_CLOSURE_V1_2026-10-14.md'
+      - '.github/workflows/cerebro-skill-capability-autonomy-closure-v1.yml'
+  pull_request:
+    paths:
+      - 'cerebro/runtime/skill-capability-autonomy-closure-v1.mjs'
+      - 'cerebro/runtime/skill-capability-evolution.mjs'
+      - 'cerebro/skills/skill-capability-evolution-bridge.mjs'
+      - 'cerebro/tests/skill-capability-autonomy-closure-v1.test.mjs'
+      - 'cerebro/tests/skill-capability-evolution*.test.mjs'
+      - 'cerebro/tests/evaluation-tribunal.test.mjs'
+      - 'cerebro/docs/CEREBRO_SKILL_CAPABILITY_AUTONOMY_CLOSURE_V1_2026-10-14.md'
+      - '.github/workflows/cerebro-skill-capability-autonomy-closure-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: skill-autonomy-closure-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  focused-contract:
+    name: skill-autonomy-focused-contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node --test cerebro/tests/skill-capability-autonomy-closure-v1.test.mjs
+
+  existing-skill-evolution-regression:
+    name: skill-autonomy-existing-evolution-regression
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node --test cerebro/tests/skill-capability-evolution.test.mjs cerebro/tests/skill-capability-evolution-v0.test.mjs cerebro/tests/skill-capability-evolution-bridge.test.mjs
+
+  tribunal-regression:
+    name: skill-autonomy-tribunal-regression
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node --test cerebro/tests/evaluation-tribunal.test.mjs
+
+  full-cerebro-regression:
+    name: skill-autonomy-full-cerebro-regression
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node --test cerebro/tests/*.test.mjs
+
+  main-baseline-full-cerebro:
+    name: skill-autonomy-main-baseline-full-cerebro
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node --test cerebro/tests/*.test.mjs
