@@ -1,79 +1,81 @@
 # CEREBRO OS · Multiempresa · Durable PREPROD Live Acceptance
 
 Fecha: 2026-10-14  
-Estado: `DURABLE_PREPROD_CONTROL_PLANE_PARTIAL`  
+Estado: `DURABLE_PREPROD_POST_SCAN_GREEN`  
 Coste adicional: `0 EUR`
 
 ## HECHO
 
-Se ha cerrado físicamente el gate de persistencia PREPROD para el primer tramo multiempresa usando el proyecto Supabase existente y exclusivamente como **control plane transaccional ligero**.
+Se ha cerrado físicamente en el proyecto Supabase existente el tramo PREPROD:
 
-Aplicadas de forma aditiva las migraciones versionadas existentes para:
+`COMP-REG-001 -> TENANT-001 -> COMP-ONB-001 -> SCAN-001 -> [KW-001 + WAUD-001 + SOCAUD-001 + LOCALP-001]`
 
-- `COMP-REG-001` · Company Registry;
-- `TENANT-001` · Tenant Boundary Guard;
-- `COMP-ONB-001` · Company Onboarding;
-- `SCAN-001` · receipt durable de escaneo read-only.
+Se reutilizaron sin rediseño los runtimes, migraciones y rollback ya versionados. Supabase actúa exclusivamente como **control plane transaccional ligero**.
 
-Antes de aplicar las migraciones se verificó que ninguno de los objetos objetivo existía. Los rollback exactos ya estaban versionados en el repositorio.
-
-## VERIFICACIÓN FÍSICA
-
-Las seis tablas PREPROD creadas tienen RLS activado. `anon` y `authenticated` no tienen acceso SELECT. Las ocho funciones de control plane no son ejecutables por `anon` ni `authenticated`; `service_role` conserva únicamente la autoridad prevista por contrato.
-
-Se ejecutó además un self-check transaccional completo con una empresa sintética:
-
-`COMP-REG-001 -> TENANT-001 -> COMP-ONB-001 -> SCAN-001`
-
-El flujo dejó GREEN los cuatro motores anteriores y READY `KW-001`, `WAUD-001`, `SOCAUD-001` y `LOCALP-001`. El acceso cross-company devolvió denegación fail-closed. Toda la prueba se ejecutó dentro de una transacción y se hizo `ROLLBACK`; después se verificaron **0 filas persistidas** para la empresa de self-check.
-
-## SUPABASE NO SOPORTA LO PESADO
-
-Supabase solo persiste aquí estado transaccional mínimo, hashes, contadores y receipts. No se guardan cuerpos de páginas, evidencias pesadas, logs masivos, credenciales ni payloads de cliente.
-
-Esto conserva el principio de arquitectura: App/CRM/Auth/datos críticos + control plane ligero en Supabase; investigación y trabajos pesados fuera.
-
-## EXISTENTE / CONSERVADO
-
-No se modifica App Fénix, CRM, tablas de negocio `fenix_prod`, WordPress, SEO, Notion, Training, Trading ni gateways PROD. No se crea una segunda arquitectura de onboarding.
-
-Se reutilizan exactamente los contratos y rollback ya versionados:
+Migraciones aplicadas de forma aditiva:
 
 - `20261013075000_cerebro_company_registry_preprod_persistence_v1.sql`;
 - `20261013083000_cerebro_company_onboarding_preprod_persistence_v1.sql`;
 - `20261013093000_cerebro_scan001_preprod_persistence_v1.sql`;
-- sus tres rollback correspondientes.
+- `20261013101500_cerebro_post_scan_parallel_preprod_v1.sql`.
+
+## VERIFICACIÓN FÍSICA
+
+Los objetos PREPROD tienen RLS y acceso acotado a `service_role`; `anon` y `authenticated` no tienen SELECT sobre las tablas ni EXECUTE sobre las funciones de control plane auditadas.
+
+Self-check GREEN transaccional, completamente revertido después:
+
+- 8 motores GREEN: `TENANT-001`, `COMP-REG-001`, `COMP-ONB-001`, `SCAN-001`, `KW-001`, `WAUD-001`, `SOCAUD-001`, `LOCALP-001`;
+- 3 motores READY: `KBOOT-001`, `SEOBOOT-001`, `SOCBOOT-001`;
+- 6 motores todavía BLOCKED;
+- 4 receipts post-SCAN;
+- cross-company = `403 cross_company_access_denied`;
+- siguiente gate = `BOOTSTRAP_TIER_DURABLE_EXECUTION_REQUIRED`.
+
+Se probó además el camino de excepción canónico: `KW-001` con `LOW_CONFIDENCE` pasa a `HUMAN_REQUIRED`, mientras `KBOOT-001` y `SEOBOOT-001` permanecen bloqueados. No existe desbloqueo silencioso.
+
+Todas las empresas sintéticas se ejecutaron dentro de una transacción con `ROLLBACK`. Verificación posterior: **0 filas sintéticas** en engine state y receipts post-SCAN.
+
+## SUPABASE NO SOPORTA LO PESADO
+
+Supabase solo persiste estado transaccional mínimo, hashes, contadores y receipts. No se guardan cuerpos web, señales sociales crudas, resultados extensos de keywords, evidencias locales pesadas, logs masivos, credenciales ni payloads de cliente.
+
+Los runtimes de auditoría producen evidencia fuera del control plane; únicamente el resumen gobernado entra en Supabase.
+
+## EXISTENTE / CONSERVADO
+
+No se modifica App Fénix, CRM, datos de negocio `fenix_prod`, WordPress, SEO productivo, Notion, Training, Trading ni gateways PROD. No se crea un servidor por motor: `KW/WAUD/SOCAUD/LOCALP` comparten runtime y persistencia gobernada.
+
+Los rollback exactos ya versionados permanecen disponibles, incluido `post-scan-parallel-preprod-v1.rollback.sql`.
 
 ## PARCIAL
 
-Esto **no** significa que los 17 motores de onboarding multiempresa estén operativos de extremo a extremo.
+Esto todavía **no** significa que los 17 motores de onboarding estén operativos de extremo a extremo.
 
-Estado físico probado:
+Estado probado ahora:
 
-- `TENANT-001`: LIVE PREPROD fail-closed;
-- `COMP-REG-001`: LIVE PREPROD durable;
-- `COMP-ONB-001`: LIVE PREPROD durable;
-- `SCAN-001`: LIVE PREPROD durable receipt;
-- `KW-001`, `WAUD-001`, `SOCAUD-001`, `LOCALP-001`: READY tras SCAN, ejecución durable todavía pendiente;
-- resto de bootstrap: BLOCKED hasta cerrar dependencias.
+- stages 0–7: durable PREPROD verificado;
+- stages 8–10 (`KBOOT/SEOBOOT/SOCBOOT`): READY y siguiente bloque a cerrar;
+- stages 11–16: bloqueados por dependencias canónicas.
 
-Tampoco se declara todavía continuación multiempresa autónoma de `LRN-001`.
+Tampoco se declara aún continuación multiempresa autónoma de `LRN-001` ni autonomía PROD.
 
 ## SIGUIENTE GATE
 
-`POST_SCAN_PARALLEL_DURABLE_EXECUTION_REQUIRED`
+`BOOTSTRAP_TIER_DURABLE_EXECUTION_REQUIRED`
 
-El siguiente bloque debe conservar los motores existentes y cerrar en paralelo `KW-001 + WAUD-001 + SOCAUD-001 + LOCALP-001`, con evidencias fuera de Supabase cuando sean pesadas y solo receipts/hashes ligeros en el control plane.
+Debe reutilizar `bootstrap-tier-v1.mjs` y su SQL/rollback existentes, probar OLD/current contract, idempotencia, HUMAN_REQUIRED, tenant isolation y desbloqueos canónicos. No crear motores duplicados.
 
 ## ROLLBACK
 
-Orden inverso:
+Orden inverso del tramo actualmente instalado:
 
-1. `scan001-preprod-persistence-v1.rollback.sql`;
-2. `company-onboarding-preprod-persistence-v1.rollback.sql`;
-3. `company-registry-preprod-persistence-v1.rollback.sql`.
+1. `post-scan-parallel-preprod-v1.rollback.sql`;
+2. `scan001-preprod-persistence-v1.rollback.sql`;
+3. `company-onboarding-preprod-persistence-v1.rollback.sql`;
+4. `company-registry-preprod-persistence-v1.rollback.sql`.
 
-No se ejecutó rollback porque la aceptación fue GREEN. Los scripts permanecen preparados y acotados a los objetos creados por estas migraciones.
+No se dejó ninguna mutación destructiva ni dato de self-check persistido.
 
 ## AUTORIDAD
 
