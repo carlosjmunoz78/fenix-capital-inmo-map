@@ -3,13 +3,17 @@ name: CEREBRO Skill Chain Driver V0
 on:
   workflow_run:
     workflows:
+      - CEREBRO Skill Discovery Scout
+      - CEREBRO Skill AutoLoop Safe V0
       - CEREBRO Skill AutoLoop Safe Handler V0
       - CEREBRO Skill Priority Ladder V0
     types:
       - completed
   push:
     branches:
+      - main
       - cerebro/skill-chain-driver-v0-20261011
+      - cerebro/skill-chain-autonomous-bootstrap-v1-20261014
     paths:
       - '.github/workflows/cerebro-skill-chain-driver-v0.yml'
   workflow_dispatch:
@@ -25,6 +29,7 @@ permissions:
 env:
   AUTOLOOP_STATE_BRANCH: cerebro/skill-autoloop-state-v0
   AUTOLOOP_STATE_PATH: cerebro/runtime/skill-autoloop-state.v0.json
+  AUTOLOOP_WORKFLOW: cerebro-skill-autoloop-safe.yml
   SAFE_HANDLER_WORKFLOW: cerebro-skill-autoloop-safe-handler.yml
   PRIORITY_LADDER_WORKFLOW: cerebro-skill-priority-ladder-v0.yml
 
@@ -53,6 +58,19 @@ jobs:
           if(s.safe_autonomy.prod_write!==false||s.safe_autonomy.external_skill_code_execution!==false||s.safe_autonomy.customer_data!==false||s.safe_autonomy.trading!==false||s.safe_autonomy.paid_fallback!==false||s.safe_autonomy.additional_cost_budget_eur!==0) throw new Error('SKILL_CHAIN_SAFETY_INVARIANT_FAILED');
           NODE
 
+      - name: Load Priority Ladder terminal evidence when it is the source
+        if: github.event_name == 'workflow_run' && github.event.workflow_run.name == 'CEREBRO Skill Priority Ladder V0' && github.event.workflow_run.conclusion == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/skill-chain/source
+          gh run download "$SOURCE_RUN_ID" --repo "$GITHUB_REPOSITORY" --name "cerebro-skill-discovery-$SOURCE_RUN_ID" --dir artifacts/skill-chain/source
+          DECISION_FILE="$(find artifacts/skill-chain/source -type f -name 'decision.json' | head -n 1)"
+          test -n "$DECISION_FILE"
+          cp "$DECISION_FILE" artifacts/skill-chain/priority-decision.json
+
       - name: Route only the next safe step
         id: route
         env:
@@ -67,39 +85,91 @@ jobs:
           const s=JSON.parse(fs.readFileSync('artifacts/skill-chain/state.json','utf8'));
           const waitingSafe=Object.keys(s.waiting_safe_handler??{}).length;
           const inFlight=Object.keys(s.in_flight??{}).length;
-          const event=process.env.EVENT_NAME;
-          const source=process.env.SOURCE_WORKFLOW||'';
-          const sourceBranch=process.env.SOURCE_BRANCH||'';
-          const sourceConclusion=process.env.SOURCE_CONCLUSION||'';
-          let target='NONE';
-          let reason='NO_SAFE_NEXT_STEP';
-          let allowDispatch=false;
+          const priorityDecision=fs.existsSync('artifacts/skill-chain/priority-decision.json')
+            ? JSON.parse(fs.readFileSync('artifacts/skill-chain/priority-decision.json','utf8')).decision ?? null
+            : null;
 
-          if(event==='workflow_run'){
-            allowDispatch=sourceBranch==='main'&&sourceConclusion==='success';
-            if(source==='CEREBRO Skill AutoLoop Safe Handler V0'){
-              if(waitingSafe===0&&inFlight===0){target='PRIORITY_LADDER';reason='HANDLER_TERMINAL_NEXT_CANDIDATE';}
-              else if(waitingSafe>0){reason='SAFE_HANDLER_RETRY_LEFT_TO_NORMAL_CADENCE';}
-              else {reason='IN_FLIGHT_PRESENT_FAIL_CLOSED';}
-            } else if(source==='CEREBRO Skill Priority Ladder V0'){
-              if(waitingSafe>0&&inFlight===0){target='SAFE_HANDLER';reason='LADDER_CHECKPOINT_READY';}
-              else if(waitingSafe===0){reason='LADDER_EXHAUSTED_NO_ELIGIBLE_CANDIDATE';}
-              else {reason='IN_FLIGHT_PRESENT_FAIL_CLOSED';}
+          function decideRoute({event,source='',sourceBranch='',sourceConclusion='',currentRef='',waitingSafe=0,inFlight=0,priorityDecision=null}){
+            let target='NONE';
+            let reason='NO_SAFE_NEXT_STEP';
+            let allowDispatch=false;
+
+            if(event==='workflow_run'){
+              allowDispatch=sourceBranch==='main'&&sourceConclusion==='success';
+              if(!allowDispatch) return {target,reason:'SOURCE_NOT_AUTHORIZED_FOR_CHAIN',allowDispatch};
+
+              if(source==='CEREBRO Skill Discovery Scout'){
+                if(inFlight>0){reason='DISCOVERY_IN_FLIGHT_PRESENT_FAIL_CLOSED';}
+                else if(waitingSafe>0){target='SAFE_HANDLER';reason='DISCOVERY_FOUND_EXISTING_WAITING_SAFE';}
+                else {target='AUTOLOOP_SAFE';reason='DISCOVERY_BOOTSTRAP_P0_AUTOLOOP';}
+              } else if(source==='CEREBRO Skill AutoLoop Safe V0'){
+                if(inFlight>0){reason='AUTOLOOP_IN_FLIGHT_PRESENT_FAIL_CLOSED';}
+                else if(waitingSafe>0){target='SAFE_HANDLER';reason='AUTOLOOP_CHECKPOINT_READY';}
+                else {target='PRIORITY_LADDER';reason='P0_EXHAUSTED_TRY_P1_P2';}
+              } else if(source==='CEREBRO Skill AutoLoop Safe Handler V0'){
+                if(waitingSafe===0&&inFlight===0){target='PRIORITY_LADDER';reason='HANDLER_TERMINAL_NEXT_CANDIDATE';}
+                else if(waitingSafe>0){reason='SAFE_HANDLER_RETRY_LEFT_TO_NORMAL_CADENCE';}
+                else {reason='IN_FLIGHT_PRESENT_FAIL_CLOSED';}
+              } else if(source==='CEREBRO Skill Priority Ladder V0'){
+                if(inFlight>0){reason='LADDER_IN_FLIGHT_PRESENT_FAIL_CLOSED';}
+                else if(waitingSafe>0){target='SAFE_HANDLER';reason='LADDER_CHECKPOINT_READY';}
+                else if(priorityDecision==='DEFER_TO_EXISTING_P0_AUTOLOOP'){
+                  target='AUTOLOOP_SAFE';reason='LADDER_DEFERRED_TO_P0_AUTOLOOP';
+                } else if(priorityDecision===null){
+                  reason='LADDER_EVIDENCE_MISSING_FAIL_CLOSED';
+                } else {
+                  reason='LADDER_TERMINAL_OR_NO_ELIGIBLE_CANDIDATE';
+                }
+              }
+            } else if(event==='workflow_dispatch'){
+              allowDispatch=currentRef==='refs/heads/main';
+              if(!allowDispatch){reason='MANUAL_BOOTSTRAP_NON_MAIN_DRY_RUN';}
+              else if(inFlight>0){reason='MANUAL_BOOTSTRAP_IN_FLIGHT_FAIL_CLOSED';}
+              else if(waitingSafe>0){target='SAFE_HANDLER';reason='MANUAL_BOOTSTRAP_WAITING_SAFE';}
+              else {target='AUTOLOOP_SAFE';reason='MANUAL_BOOTSTRAP_P0_FIRST';}
+            } else if(event==='push'){
+              allowDispatch=currentRef==='refs/heads/main';
+              if(!allowDispatch){reason='BRANCH_PUSH_DRY_RUN_ONLY';}
+              else if(inFlight>0){reason='MAIN_PUSH_IN_FLIGHT_FAIL_CLOSED';}
+              else if(waitingSafe>0){target='SAFE_HANDLER';reason='MAIN_PUSH_RESUME_WAITING_SAFE';}
+              else {target='AUTOLOOP_SAFE';reason='MAIN_PUSH_BOOTSTRAP_P0_AUTOLOOP';}
             }
-          } else if(event==='workflow_dispatch'){
-            allowDispatch=process.env.CURRENT_REF==='refs/heads/main';
-            if(waitingSafe>0&&inFlight===0){target='SAFE_HANDLER';reason='MANUAL_BOOTSTRAP_WAITING_SAFE';}
-            else if(waitingSafe===0&&inFlight===0){target='PRIORITY_LADDER';reason='MANUAL_BOOTSTRAP_DISCOVER_NEXT';}
-            else {reason='MANUAL_BOOTSTRAP_IN_FLIGHT_FAIL_CLOSED';}
-          } else {
-            reason='BRANCH_PUSH_DRY_RUN_ONLY';
+            return {target,reason,allowDispatch};
           }
 
-          const out={schema_version:'1.0.0',event,source_workflow:source||null,source_branch:sourceBranch||null,waiting_safe_handler:waitingSafe,in_flight:inFlight,target,reason,allow_dispatch:allowDispatch,prod_authorized:false,prod_write:false,customer_data_used:false,external_skill_code_execution:false,trading_access:false,paid_fallback:false,additional_cost_eur:0};
-          fs.writeFileSync('artifacts/skill-chain/route.json',JSON.stringify(out,null,2)+'\n');
-          fs.appendFileSync(process.env.GITHUB_OUTPUT,`target=${target}\n`);
-          fs.appendFileSync(process.env.GITHUB_OUTPUT,`allow_dispatch=${allowDispatch}\n`);
-          console.log(JSON.stringify(out));
+          const cases=[
+            [{event:'workflow_run',source:'CEREBRO Skill Discovery Scout',sourceBranch:'main',sourceConclusion:'success'},'AUTOLOOP_SAFE'],
+            [{event:'workflow_run',source:'CEREBRO Skill Discovery Scout',sourceBranch:'main',sourceConclusion:'success',waitingSafe:1},'SAFE_HANDLER'],
+            [{event:'workflow_run',source:'CEREBRO Skill AutoLoop Safe V0',sourceBranch:'main',sourceConclusion:'success',waitingSafe:1},'SAFE_HANDLER'],
+            [{event:'workflow_run',source:'CEREBRO Skill AutoLoop Safe V0',sourceBranch:'main',sourceConclusion:'success'},'PRIORITY_LADDER'],
+            [{event:'workflow_run',source:'CEREBRO Skill AutoLoop Safe Handler V0',sourceBranch:'main',sourceConclusion:'success'},'PRIORITY_LADDER'],
+            [{event:'workflow_run',source:'CEREBRO Skill Priority Ladder V0',sourceBranch:'main',sourceConclusion:'success',waitingSafe:1},'SAFE_HANDLER'],
+            [{event:'workflow_run',source:'CEREBRO Skill Priority Ladder V0',sourceBranch:'main',sourceConclusion:'success',priorityDecision:'DEFER_TO_EXISTING_P0_AUTOLOOP'},'AUTOLOOP_SAFE'],
+            [{event:'workflow_run',source:'CEREBRO Skill Priority Ladder V0',sourceBranch:'main',sourceConclusion:'success',priorityDecision:'NO_ELIGIBLE_CANDIDATE'},'NONE'],
+            [{event:'workflow_dispatch',currentRef:'refs/heads/main'},'AUTOLOOP_SAFE'],
+            [{event:'push',currentRef:'refs/heads/main'},'AUTOLOOP_SAFE'],
+            [{event:'push',currentRef:'refs/heads/cerebro/test'},'NONE']
+          ];
+          for(const [input,expected] of cases){
+            const actual=decideRoute(input);
+            if(actual.target!==expected) throw new Error(`ROUTING_MATRIX_FAILED expected=${expected} actual=${actual.target} input=${JSON.stringify(input)}`);
+          }
+
+          const out=decideRoute({
+            event:process.env.EVENT_NAME,
+            source:process.env.SOURCE_WORKFLOW||'',
+            sourceBranch:process.env.SOURCE_BRANCH||'',
+            sourceConclusion:process.env.SOURCE_CONCLUSION||'',
+            currentRef:process.env.CURRENT_REF||'',
+            waitingSafe,
+            inFlight,
+            priorityDecision
+          });
+          const report={schema_version:'1.1.0',event:process.env.EVENT_NAME,source_workflow:process.env.SOURCE_WORKFLOW||null,source_branch:process.env.SOURCE_BRANCH||null,waiting_safe_handler:waitingSafe,in_flight:inFlight,priority_decision:priorityDecision,target:out.target,reason:out.reason,allow_dispatch:out.allowDispatch,routing_matrix_passed:true,prod_authorized:false,prod_write:false,customer_data_used:false,external_skill_code_execution:false,trading_access:false,paid_fallback:false,additional_cost_eur:0};
+          fs.writeFileSync('artifacts/skill-chain/route.json',JSON.stringify(report,null,2)+'\n');
+          fs.appendFileSync(process.env.GITHUB_OUTPUT,`target=${out.target}\n`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT,`allow_dispatch=${out.allowDispatch}\n`);
+          console.log(JSON.stringify(report));
           NODE
 
       - name: Dispatch exactly one next workflow
@@ -109,7 +179,9 @@ jobs:
           TARGET: ${{ steps.route.outputs.target }}
         run: |
           set -euo pipefail
-          if [ "$TARGET" = SAFE_HANDLER ]; then
+          if [ "$TARGET" = AUTOLOOP_SAFE ]; then
+            gh workflow run "$AUTOLOOP_WORKFLOW" --repo "$GITHUB_REPOSITORY" --ref main
+          elif [ "$TARGET" = SAFE_HANDLER ]; then
             gh workflow run "$SAFE_HANDLER_WORKFLOW" --repo "$GITHUB_REPOSITORY" --ref main
           elif [ "$TARGET" = PRIORITY_LADDER ]; then
             gh workflow run "$PRIORITY_LADDER_WORKFLOW" --repo "$GITHUB_REPOSITORY" --ref main
