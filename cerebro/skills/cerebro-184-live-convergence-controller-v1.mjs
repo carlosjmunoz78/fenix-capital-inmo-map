@@ -96,6 +96,7 @@ export function validateConvergenceLedger(ledger, { repoRoot = REPO_ROOT, checkF
   const active = blocks.filter((block) =>
     block.state.includes('REAUDIT') ||
     block.state.includes('CHILD_GAPS') ||
+    block.state.includes('WITH_GAPS') ||
     block.state.includes('PLAN_ONLY') ||
     block.state.includes('SIMULATION_ONLY') ||
     block.state.includes('CATALOG_ONLY') ||

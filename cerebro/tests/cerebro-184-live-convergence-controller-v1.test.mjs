@@ -60,15 +60,17 @@ test('all declared current-main evidence files physically exist', () => {
 
 test('item-level FULL/REMAINING advance only from explicit normalized counts', () => {
   const report = runConvergenceController({ ledgerPath, repoRoot });
-  assert.equal(report.full_item_count, 24);
-  assert.equal(report.remaining_item_count, 160);
+  assert.equal(report.full_item_count, 50);
+  assert.equal(report.remaining_item_count, 134);
   assert.match(report.item_count_reason, /normalized/i);
 });
 
-test('items 1-24 are terminal at their justified scope and next is 25-184 normalization', () => {
+test('items 1-50 are normalized at justified scope and next is 51-184 normalization', () => {
   const report = runConvergenceController({ ledgerPath, repoRoot });
-  assert.equal(report.next, 'NORMALIZE_PER_ITEM_STATUS_25_184_FROM_CURRENT_REGISTRY_EVIDENCE');
-  assert.deepEqual(report.blocks_terminal_at_declared_scope.slice(0, 3), ['1-12', '13-24', '25-37']);
+  assert.equal(report.next, 'NORMALIZE_PER_ITEM_STATUS_51_184_FROM_CURRENT_REGISTRY_EVIDENCE');
+  assert.deepEqual(report.blocks_terminal_at_declared_scope.slice(0, 2), ['1-12', '13-24']);
+  assert.equal(report.blocks_active_or_partial.some((block) => block.range === '25-37'), true);
+  assert.equal(report.blocks_active_or_partial.some((block) => block.range === '38-50'), true);
   assert.notEqual(report.blocks_active_or_partial[0]?.range, '1-12');
   assert.notEqual(report.blocks_active_or_partial[0]?.range, '13-24');
 });
@@ -90,7 +92,7 @@ test('coverage validation fails closed if an item range is removed', () => {
 
 test('normalization counts fail closed if they do not sum to 184', () => {
   const ledger = loadLedger();
-  ledger.remaining_item_normalization_count = 159;
+  ledger.remaining_item_normalization_count = 133;
   assert.throws(
     () => validateConvergenceLedger(ledger, { repoRoot, checkFiles: false }),
     /ITEM_NORMALIZATION_COUNTS_MUST_SUM_TO_CATALOG/

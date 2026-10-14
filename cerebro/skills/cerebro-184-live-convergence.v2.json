@@ -1,16 +1,16 @@
 {
-  "schema_version": "2.1.0",
+  "schema_version": "2.2.0",
   "state_type": "CEREBRO_184_LIVE_CONVERGENCE_V2",
   "generated_at": "2026-10-14",
   "company_id": "GLOBAL",
   "engine_id": "FACT-001",
   "environment": "PREPROD",
   "version": "v2",
-  "base_main_sha": "5f8bd4c50e354d3de7fb708bb669519f3bdaa9e5",
+  "base_main_sha": "da47fc48eb4ccd35a7a2eb1b566a344a77e46c34",
   "status": "ACTIVE_LIVE_CONVERGENCE",
   "catalog_size": 184,
-  "normalized_item_count": 24,
-  "remaining_item_normalization_count": 160,
+  "normalized_item_count": 50,
+  "remaining_item_normalization_count": 134,
   "source_policy": "CURRENT_MAIN_EVIDENCE_FIRST",
   "principles": {
     "preserve_existing": true,
@@ -38,7 +38,11 @@
     "cloudflare_production_branch": "deploy/cloudflare-prod",
     "main_is_cloudflare_production_branch": false
   },
-  "historical_drafts_superseded_for_live_state": [631, 633, 636],
+  "historical_drafts_superseded_for_live_state": [
+    631,
+    633,
+    636
+  ],
   "blocks": [
     {
       "range": "1-12",
@@ -64,22 +68,25 @@
       "range": "25-37",
       "count": 13,
       "domain": "Safe Engineering Profile",
-      "state": "INTEGRATED_MAIN_VALIDATED_TRANSVERSAL",
+      "state": "INTEGRATED_MAIN_ITEM_LEVEL_RECONCILED_WITH_GAPS",
       "registry": "cerebro/registry/safe-engineering-profile.v1.json",
       "feature_pr": 637,
       "closeout_pr": 653,
-      "next_gate": "CHILD_CAPABILITY_PHYSICAL_GAPS_ONLY"
+      "item_level_reconciliation": "cerebro/skills/cerebro-184-items-25-37-live-reconciliation.v2.json",
+      "known_boundary": "6 FULL_PREPROD; OpenCode wrapper remains PARTIAL policy-only; external benchmarks/reference sources are catalogued rather than executed; no new engine or paid dependency.",
+      "next_gate": "PHYSICAL_WRAPPER_ONLY_IF_MEASURED_GAP"
     },
     {
       "range": "38-50",
       "count": 13,
       "domain": "IAM/Computer Use/Mobile Worker",
-      "state": "INTEGRATED_MAIN_VALIDATED_WITH_CHILD_GAPS",
+      "state": "INTEGRATED_MAIN_ITEM_LEVEL_RECONCILED_WITH_GAPS",
       "registry": "cerebro/registry/authorized-execution-device-profile.v1.json",
       "feature_pr": 655,
       "closeout_pr": 656,
-      "known_boundary": "Browser Bridge PARCIAL; Android Device Worker DEFINIDO; external references remain LAB/HOLD where not physically proven.",
-      "next_gate": "PHYSICAL_AUTHORIZED_EXECUTION_GAPS"
+      "item_level_reconciliation": "cerebro/skills/cerebro-184-items-38-50-live-reconciliation.v2.json",
+      "known_boundary": "4 FULL_PREPROD; vault binding and Browser Bridge remain physical gaps; Watch & Learn and Android Device Worker are zero-cost build gaps routed to existing engines/FACT-001; Camoufox is terminal HOLD; external projects remain reference-only.",
+      "next_gate": "FACT001_GAPS_47_48_AND_PHYSICAL_AUTHORIZED_EXECUTION_GAPS"
     },
     {
       "range": "51-61",
@@ -218,13 +225,21 @@
     }
   ],
   "priority_queue": [
-    "NORMALIZE_PER_ITEM_STATUS_25_184_FROM_CURRENT_REGISTRY_EVIDENCE",
+    "NORMALIZE_PER_ITEM_STATUS_51_184_FROM_CURRENT_REGISTRY_EVIDENCE",
+    "ROUTE_FACT001_CAPABILITY_GAPS_47_48_PREPROD_ONLY",
     "ROUTE_ONLY_REAL_GAPS_TO_EXISTING_ENGINE_OR_FACT001",
     "RUN_OLD_VS_NEW_TRIBUNAL_PREPROD_ROLLBACK_REBUILD",
     "PROMOTE_ONLY_GOVERNED_CAPABILITIES"
   ],
   "reporting_contract": {
-    "required": ["FULL", "ACTIVE", "NEXT", "REMAINING", "HUMAN_REQUIRED", "PROD"],
+    "required": [
+      "FULL",
+      "ACTIVE",
+      "NEXT",
+      "REMAINING",
+      "HUMAN_REQUIRED",
+      "PROD"
+    ],
     "do_not_count_block_integration_as_physical_child_activation": true,
     "do_not_count_184_capabilities_as_184_engines": true
   }

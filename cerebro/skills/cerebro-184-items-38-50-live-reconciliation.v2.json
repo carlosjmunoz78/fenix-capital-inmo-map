@@ -1,0 +1,170 @@
+{
+  "schema_version": "2.0.0",
+  "state_type": "CEREBRO_184_ITEMS_38_50_LIVE_RECONCILIATION_V2",
+  "generated_at": "2026-10-14",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v2",
+  "base_main_sha": "da47fc48eb4ccd35a7a2eb1b566a344a77e46c34",
+  "status": "ITEM_LEVEL_RECONCILED_CURRENT_MAIN",
+  "catalog_range": "38-50",
+  "canonical_dispositions": [
+    "REUTILIZAR",
+    "ENVOLVER",
+    "CATALOGAR",
+    "FABRICAR_GRATIS",
+    "HOLD",
+    "DESCARTAR",
+    "PAGO_JUSTIFICADO"
+  ],
+  "authority": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "auto_merge_authorized": false,
+    "external_skill_code_execution_authorized": false,
+    "external_dependency_install_authorized": false,
+    "customer_data_authorized": false,
+    "trading_access": false,
+    "automatic_paid_fallback": false,
+    "additional_cost_eur": 0
+  },
+  "items": [
+    {
+      "id": 38,
+      "name": "IAM identities/service accounts/scopes",
+      "disposition": "REUTILIZAR",
+      "state": "FULL_PREPROD",
+      "owner_engine_ids": ["IAM-001"],
+      "evidence": ["cerebro/registry/authorized-execution-device-profile.v1.json", "cerebro/governance/identity-credential-broker.mjs", "cerebro/governance/identity-session-lifecycle.mjs"],
+      "reason": "IAM metadata/reference foundations already exist and are the canonical owner for agent/service-account identity and scopes. No parallel identity engine is justified."
+    },
+    {
+      "id": 39,
+      "name": "Vault / secret handling",
+      "disposition": "REUTILIZAR",
+      "state": "PARTIAL_EXTERNAL_SECRET_STORE_BINDING",
+      "owner_engine_ids": ["SEC-002", "IAM-001"],
+      "evidence": ["cerebro/registry/authorized-execution-device-profile.v1.json", "cerebro/governance/identity-credential-broker.mjs"],
+      "reason": "CEREBRO already uses secret references and forbids secret values in general registries. The remaining gap is physical binding to authorized secret stores/providers where required; no new paid vault is justified by default.",
+      "next_gate": "PHYSICAL_SECRET_STORE_REFERENCE_AUDIT"
+    },
+    {
+      "id": 40,
+      "name": "Standing permissions",
+      "disposition": "REUTILIZAR",
+      "state": "FULL_PREPROD",
+      "owner_engine_ids": ["POL-001", "IAM-001"],
+      "evidence": ["cerebro/registry/authorized-execution-device-profile.v1.json", "cerebro/runtime/continuous-improvement-contract.mjs"],
+      "reason": "Company/environment/consumer-scoped fail-closed policies already provide standing authorization boundaries for ordinary work."
+    },
+    {
+      "id": 41,
+      "name": "Auto-renew session/token",
+      "disposition": "REUTILIZAR",
+      "state": "FULL_PREPROD",
+      "owner_engine_ids": ["IAM-001", "INT-001"],
+      "evidence": ["cerebro/registry/authorized-execution-device-profile.v1.json", "cerebro/governance/identity-session-lifecycle.mjs"],
+      "reason": "Lifecycle health, expiry metadata and consumer-local holds exist. Physical provider-specific renewals remain subject to each provider's supported flow and real credentials."
+    },
+    {
+      "id": 42,
+      "name": "Tool routing API→MCP→script→browser",
+      "disposition": "REUTILIZAR",
+      "state": "FULL_PREPROD",
+      "owner_engine_ids": ["ROUTE-001", "ACTGW-001", "INT-001"],
+      "evidence": ["cerebro/registry/authorized-execution-device-profile.v1.json", "cerebro/router/execution-model-router.mjs"],
+      "reason": "The canonical execution ladder already prefers official API, authorized MCP, local script and only then browser/computer-use fallback."
+    },
+    {
+      "id": 43,
+      "name": "Browser Bridge existente",
+      "disposition": "ENVOLVER",
+      "state": "PARTIAL_PHYSICAL_BINDING_REQUIRED",
+      "owner_engine_ids": ["AUTO-001", "ACTGW-001", "IAM-001"],
+      "evidence": ["cerebro/registry/authorized-execution-device-profile.v1.json"],
+      "reason": "The bridge contract exists and should be preserved/wrapped, not replaced. A fresh real device/session binding is still required at execution time before claiming physical operation.",
+      "next_gate": "FRESH_BROWSER_BRIDGE_ATTESTATION_AND_REAL_BINDING"
+    },
+    {
+      "id": 44,
+      "name": "GenericAgent",
+      "disposition": "CATALOGAR",
+      "state": "TERMINAL_REFERENCE_ONLY",
+      "owner_engine_ids": ["AUTO-001", "RUNTIME-001"],
+      "evidence": ["cerebro/registry/authorized-execution-device-profile.v1.json"],
+      "reason": "MIT benchmark/pattern source only. External code execution remains disabled and no new runtime is justified."
+    },
+    {
+      "id": 45,
+      "name": "Camoufox",
+      "disposition": "HOLD",
+      "state": "TERMINAL_HOLD",
+      "owner_engine_ids": ["AUTO-001", "ACTGW-001"],
+      "evidence": ["cerebro/registry/authorized-execution-device-profile.v1.json"],
+      "reason": "Compatibility research may be useful, but anti-abuse/CAPTCHA/MFA evasion is forbidden. No runtime activation is justified without a concrete authorized use case that preserves platform controls."
+    },
+    {
+      "id": 46,
+      "name": "NeuralAgent patterns",
+      "disposition": "CATALOGAR",
+      "state": "TERMINAL_REFERENCE_ONLY",
+      "owner_engine_ids": ["LRN-001", "AUTO-001"],
+      "evidence": ["cerebro/registry/authorized-execution-device-profile.v1.json"],
+      "reason": "Watch/Learn/Replay design patterns are useful reference material; no external runtime dependency is required."
+    },
+    {
+      "id": 47,
+      "name": "Watch & Learn / deterministic replay",
+      "disposition": "FABRICAR_GRATIS",
+      "state": "DEFINED_NOT_BUILT",
+      "owner_engine_ids": ["LRN-001", "QA-001", "AUTO-001", "FACT-001"],
+      "evidence": ["cerebro/registry/authorized-execution-device-profile.v1.json"],
+      "reason": "The demonstrate→verify→freeze→replay policy is defined but not evidenced as a complete physical capability. This is a real zero-cost gap to extend existing LRN/QA/AUTO through FACT-001, not a new engine.",
+      "next_gate": "FACT001_CAPABILITY_CANDIDATE_EXISTING_ENGINES_ONLY"
+    },
+    {
+      "id": 48,
+      "name": "CEREBRO Android Device Worker",
+      "disposition": "FABRICAR_GRATIS",
+      "state": "DEFINED_NOT_BUILT",
+      "owner_engine_ids": ["AUTO-001", "ACTGW-001", "IAM-001", "FACT-001"],
+      "evidence": ["cerebro/registry/authorized-execution-device-profile.v1.json"],
+      "reason": "The logical device route exists, but no real Android worker is deployed. Build as a reusable capability/app bound to existing engines; do not create a new server/engine by default.",
+      "next_gate": "FACT001_ANDROID_CAPABILITY_CANDIDATE_PREPROD_ONLY"
+    },
+    {
+      "id": 49,
+      "name": "Jarvis OSS Android",
+      "disposition": "CATALOGAR",
+      "state": "TERMINAL_REFERENCE_ONLY",
+      "owner_engine_ids": ["AUTO-001"],
+      "evidence": ["cerebro/registry/authorized-execution-device-profile.v1.json"],
+      "external_reference": {"repository": "tokenarc/open-jarvis", "license": "MIT", "external_code_executed": false},
+      "reason": "Useful benchmark for the Android worker only. Do not add a second Android runtime or dependency before the native CEREBRO worker gap is built and measured."
+    },
+    {
+      "id": 50,
+      "name": "ArCHer benchmark",
+      "disposition": "CATALOGAR",
+      "state": "TERMINAL_REFERENCE_ONLY",
+      "owner_engine_ids": ["EVA-001", "AUTO-001"],
+      "evidence": ["cerebro/registry/authorized-execution-device-profile.v1.json"],
+      "external_reference": {"repository": "YifeiZhou02/ArCHer", "license": "MIT", "external_code_executed": false},
+      "reason": "Research benchmark only; not a production dependency and not a reason to create another engine."
+    }
+  ],
+  "summary": {
+    "items_total": 13,
+    "full_preprod": 4,
+    "partial_active": 2,
+    "defined_not_built": 2,
+    "reference_only": 4,
+    "terminal_hold": 1,
+    "fabricate_free": 2,
+    "human_required": [],
+    "additional_cost_eur": 0,
+    "prod_authorized": false,
+    "next_gate": "FACT001_ROUTE_REAL_GAPS_47_48_AND_NORMALIZE_ITEMS_51_61"
+  }
+}
