@@ -50,7 +50,9 @@ function prodOrPolicyGate(input,scope){
 function scoreResult(value,label){
   if(value==null)return null;
   if(typeof value!=='object'||Array.isArray(value)||value.status!=='SCORED')return null;
-  return {score:boundedScore(value.score,label),evidence_refs:uniq(value.evidence_refs)};
+  const evidence_refs=uniq(value.evidence_refs);
+  if(!evidence_refs.length)return null;
+  return {score:boundedScore(value.score,label),evidence_refs};
 }
 function urgencyFreshness(observedAt,now){const age=(Date.parse(now)-Date.parse(observedAt))/86400000;if(age<0||age>30)return 0;if(age<=3)return 1;if(age<=14)return 0.6;return 0.3;}
 function computeUrgency(events,now){
@@ -72,7 +74,8 @@ function computeUrgency(events,now){
 function contactConfidence(input){
   const scores=[];
   for(const row of [input.email_confidence_result,input.phone_confidence_result]){
-    if(row?.status==='SCORED'&&Number.isFinite(Number(row.confidence_score)))scores.push(Math.max(0,Math.min(100,Number(row.confidence_score))));
+    const evidence_refs=uniq(row?.evidence_refs);
+    if(row?.status==='SCORED'&&evidence_refs.length&&Number.isFinite(Number(row.confidence_score)))scores.push(Math.max(0,Math.min(100,Number(row.confidence_score))));
   }
   return scores.length?Math.max(...scores):null;
 }
