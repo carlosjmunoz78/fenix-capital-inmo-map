@@ -22,6 +22,7 @@ test('ledger is local PREPROD only, zero-cost and not Supabase-backed',()=>{
   assert.equal(LEARNING_LEDGER_V0_CONTRACT.prod_writes,false);
   assert.match(LEARNING_LEDGER_V0_CONTRACT.duplicate_policy,/FIRST_SEEN_IMMUTABLE/);
   assert.deepEqual(LEARNING_LEDGER_V0_CONTRACT.additive_provenance_fields,['signal_id','source_environment']);
+  assert.deepEqual(LEARNING_LEDGER_V0_CONTRACT.set_provenance_fields,['evidence_refs']);
   assert.equal(LEARNING_LEDGER_V0_CONTRACT.conflict_diagnostics,'FIELD_NAMES_AND_PRESENCE_ONLY_NO_PAYLOAD_VALUES');
 });
 
@@ -57,6 +58,70 @@ test('same deterministic learning re-observed later is an idempotent semantic du
     assert.equal(later.record_hash,first.record_hash);
     assert.equal(ledger.operation_count,1);
     assert.equal(ledger.list()[0].observed_at,'2026-10-08T12:00:00Z');
+  }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
+
+test('same evidence set in a different order is an idempotent provenance replay',()=>{
+  const {dir,file}=tempFile();
+  try{
+    const ledger=new LearningLedgerV0({file_path:file});
+    const firstRecord={...candidate(),evidence_refs:['e:1','e:2']};
+    const first=ledger.persist(firstRecord);
+    const replay=ledger.persist({...firstRecord,observed_at:'2026-10-08T22:10:00Z',evidence_refs:['e:2','e:1','e:1']});
+    assert.equal(replay.accepted,false);
+    assert.equal(replay.duplicate,true);
+    assert.equal(replay.semantic_duplicate,true);
+    assert.deepEqual(replay.compatibility_fields,['evidence_refs','observed_at']);
+    assert.equal(replay.record_hash,first.record_hash);
+    assert.deepEqual(ledger.list()[0].evidence_refs,['e:1','e:2']);
+    assert.equal(ledger.operation_count,1);
+  }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
+
+test('monotonic evidence superset replay is idempotent while first-seen evidence remains immutable',()=>{
+  const {dir,file}=tempFile();
+  try{
+    const ledger=new LearningLedgerV0({file_path:file});
+    const first=ledger.persist(candidate());
+    const replay=ledger.persist({...candidate(),observed_at:'2026-10-08T22:10:00Z',evidence_refs:['e:1','e:2']});
+    assert.equal(replay.accepted,false);
+    assert.equal(replay.duplicate,true);
+    assert.equal(replay.semantic_duplicate,true);
+    assert.deepEqual(replay.compatibility_fields,['evidence_refs','observed_at']);
+    assert.equal(replay.record_hash,first.record_hash);
+    assert.deepEqual(ledger.list()[0].evidence_refs,['e:1']);
+    assert.equal(ledger.operation_count,1);
+  }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
+
+test('legacy replay with an evidence subset cannot weaken stored first-seen provenance',()=>{
+  const {dir,file}=tempFile();
+  try{
+    const ledger=new LearningLedgerV0({file_path:file});
+    const firstRecord={...candidate(),evidence_refs:['e:1','e:2']};
+    const first=ledger.persist(firstRecord);
+    const replay=ledger.persist({...candidate(),observed_at:'2026-10-08T22:10:00Z',evidence_refs:['e:1']});
+    assert.equal(replay.accepted,false);
+    assert.equal(replay.duplicate,true);
+    assert.equal(replay.semantic_duplicate,true);
+    assert.deepEqual(replay.compatibility_fields,['evidence_refs','observed_at']);
+    assert.equal(replay.record_hash,first.record_hash);
+    assert.deepEqual(ledger.list()[0].evidence_refs,['e:1','e:2']);
+    assert.equal(ledger.operation_count,1);
+  }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
+
+test('incomparable evidence replacement still fails closed',()=>{
+  const {dir,file}=tempFile();
+  try{
+    const ledger=new LearningLedgerV0({file_path:file});
+    ledger.persist({...candidate(),evidence_refs:['e:1','e:2']});
+    assert.throws(
+      ()=>ledger.persist({...candidate(),observed_at:'2026-10-08T22:10:00Z',evidence_refs:['e:1','e:3']}),
+      /learning_id conflict with different payload fields:evidence_refs,observed_at/
+    );
+    assert.equal(ledger.operation_count,1);
+    assert.deepEqual(ledger.list()[0].evidence_refs,['e:1','e:2']);
   }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });
 
