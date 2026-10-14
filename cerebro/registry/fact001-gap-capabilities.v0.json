@@ -1,0 +1,100 @@
+{
+  "schema_version": "0.1.0",
+  "state_type": "CEREBRO_FACT001_SIX_GAP_CAPABILITIES_V0",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "0.1.0",
+  "status": "PREPROD_CANDIDATE_PENDING_CI",
+  "source_rollout_items": [47, 48, 57, 62, 74, 183],
+  "architectural_decision": "Extend existing canonical engines only; do not create new engine IDs for these capability gaps.",
+  "capabilities": {
+    "47": {
+      "name": "Watch & Learn / deterministic replay",
+      "owner_engines": ["LRN-001", "QA-001", "AUTO-001", "FACT-001"],
+      "candidate_state": "PREPROD_CORE_BUILT",
+      "physical_state": "LOCAL_DETERMINISTIC_REPLAY_ONLY",
+      "remaining_gate": "REAL_AUTHORIZED_OBSERVATION_INPUT_AND_OLD_VS_NEW_EVIDENCE"
+    },
+    "48": {
+      "name": "Android Device Worker",
+      "owner_engines": ["AUTO-001", "ACTGW-001", "IAM-001", "FACT-001"],
+      "candidate_state": "PREPROD_SHELL_BUILT",
+      "physical_state": "KILL_SWITCH_ON_NO_DEVICE_BINDING",
+      "remaining_gate": "AUTHORIZED_DEVICE_ATTESTATION_AND_PHYSICAL_BINDING"
+    },
+    "57": {
+      "name": "COMPET-001 continuous runtime",
+      "owner_engines": ["COMPET-001", "RSH-001", "JOB-001", "FACT-001"],
+      "candidate_state": "PREPROD_CORE_BUILT",
+      "physical_state": "SUPPLIED_PUBLIC_OR_AUTHORIZED_EVIDENCE_ONLY",
+      "remaining_gate": "PHYSICAL_SOURCE_ADAPTER_AND_DURABLE_SCHEDULER_E2E"
+    },
+    "62": {
+      "name": "CAP-001 autonomous company discovery",
+      "owner_engines": ["CAP-001", "RSH-001", "JOB-001", "FACT-001"],
+      "candidate_state": "PREPROD_CORE_BUILT",
+      "physical_state": "COMPANY_FIRST_SUPPLIED_EVIDENCE_ONLY",
+      "remaining_gate": "PHYSICAL_ZERO_COST_SOURCE_ADAPTER_AND_DURABLE_SCHEDULER_E2E"
+    },
+    "74": {
+      "name": "EVT-001 first-party capture",
+      "owner_engines": ["EVT-001", "OBSERV-001", "JOB-001", "FACT-001"],
+      "candidate_state": "PREPROD_LOCAL_PERSISTENCE_BUILT",
+      "physical_state": "LOCAL_ATOMIC_JOURNAL_NO_WEBSITE_EMITTER_BOUND",
+      "remaining_gate": "CONSENTED_WEBSITE_EVENT_EMITTER_AND_END_TO_END_CAPTURE"
+    },
+    "183": {
+      "name": "Reusable web/PWA/mobile template packs",
+      "owner_engines": ["APPBOOT-001", "FACT-001"],
+      "candidate_state": "PREPROD_DETERMINISTIC_GENERATOR_BUILT",
+      "physical_state": "ARTIFACT_GENERATION_ONLY_NO_DEPLOY",
+      "remaining_gate": "OLD_VS_NEW_TEMPLATE_EVALUATION_AND_GOVERNED_DEPLOY_ADAPTER"
+    }
+  },
+  "runtime": "cerebro/runtime/fact001-gap-capabilities-v0.mjs",
+  "tests": "cerebro/tests/fact001-gap-capabilities-v0.test.mjs",
+  "authority": {
+    "new_engine_ids_created": [],
+    "external_dependency_install_authorized": false,
+    "external_code_execution_authorized": false,
+    "customer_data_authorized": false,
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "trading_access": false,
+    "automatic_paid_fallback": false,
+    "additional_cost_eur": 0
+  },
+  "privacy_and_security": {
+    "secret_bearing_keys_rejected": true,
+    "person_level_contact_data_rejected": true,
+    "company_first_discovery": true,
+    "analytics_consent_required": true,
+    "android_kill_switch_default": true,
+    "android_physical_execution_authorized": false
+  },
+  "persistence": {
+    "evt001": "LOCAL_ATOMIC_V8_JOURNAL_PREPROD_ONLY",
+    "supabase_required": false,
+    "heavy_runtime_off_supabase": true
+  },
+  "rollback": {
+    "method": "Revert the additive FACT-001 six-gap candidate PR; no PROD deployment, external provider binding, customer-data migration or Trading mutation exists in V0."
+  },
+  "rebuild": {
+    "method": "Recreate from canonical engine registry + 184 reconciliation + gap routing registry + fact001-gap-capabilities-v0 runtime and tests."
+  },
+  "promotion_gate": {
+    "focused_tests": "REQUIRED",
+    "canonical_registry_validation": "REQUIRED",
+    "full_regression": "REQUIRED",
+    "old_vs_new": "REQUIRED",
+    "evaluation_tribunal": "REQUIRED",
+    "observability": "REQUIRED",
+    "rollback": "REQUIRED",
+    "rebuild": "REQUIRED",
+    "physical_acceptance": "REQUIRED_PER_CAPABILITY",
+    "prod": false
+  },
+  "next_gate": "FACT001_SIX_GAP_PREPROD_CI_AND_OLD_VS_NEW"
+}
