@@ -5,7 +5,7 @@ export const FINAL_ONBOARDING_ENGINE_IDS=Object.freeze(['APPBOOT-001','AUTBOOT-0
 export const FINAL_ONBOARDING_ENVIRONMENT='PREPROD';
 export const FINAL_ONBOARDING_VERSION='1.0.0';
 const HUMAN_REQUIRED=new Set(['LEGAL_REQUIRED','SIGNATURE_REQUIRED','LOW_CONFIDENCE','HIGH_RISK','POLICY_CONFLICT','SECURITY_INCIDENT','MONEY_LIMIT','CUSTOMER_HUMAN_REQUEST']);
-const FORBIDDEN_KEYS=['token','secret','password','api_key','apikey','authorization','credential','private_key','email','phone','mobile','iban','dni','nif','raw_customer','raw_message','message_body'];
+const FORBIDDEN_KEYS=new Set(['token','secret','password','api_key','apikey','authorization','credential','private_key','email','phone','mobile','iban','dni','nif','raw_customer','raw_message','message_body']);
 
 function sha256(value){return createHash('sha256').update(typeof value==='string'?value:JSON.stringify(value),'utf8').digest('hex');}
 function norm(value){return String(value??'').trim().replace(/\s+/g,' ');}
@@ -18,7 +18,7 @@ function assertBase({company_id,evidence_at,environment='PREPROD'}){
 function rejectForbidden(value,path='root'){
   if(Array.isArray(value)){value.forEach((x,i)=>rejectForbidden(x,`${path}[${i}]`));return;}
   if(value&&typeof value==='object') for(const [k,v] of Object.entries(value)){
-    if(FORBIDDEN_KEYS.some(s=>String(k).toLowerCase().includes(s))) throw new Error(`SECURITY_INCIDENT:${path}.${k}`);
+    if(FORBIDDEN_KEYS.has(String(k).toLowerCase())) throw new Error(`SECURITY_INCIDENT:${path}.${k}`);
     rejectForbidden(v,`${path}.${k}`);
   }
 }
