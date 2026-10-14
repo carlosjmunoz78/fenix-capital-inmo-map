@@ -1,0 +1,64 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_MULTICOMPANY_LRN001_PHYSICAL_PREPROD_ACCEPTANCE",
+  "observed_at": "2026-10-14T13:49:00Z",
+  "source_main_sha": "1af66c765f7beced3075438d929a611903fe8096",
+  "candidate_head_sha": "70b70d61617d4a7e6d638f094da7faa1f775d05f",
+  "project_id": "cluhljgonannaafpmblx",
+  "environment": "PREPROD_CONTROL_PLANE_ON_EXISTING_SUPABASE_PROJECT",
+  "engine_id": "LRN-001",
+  "state": "MULTICOMPANY_LRN001_AUTONOMOUS_CONTINUATION_GREEN",
+  "migration": "cerebro_lrn001_multicompany_autonomous_continuation_preprod_v1",
+  "physical_acceptance": {
+    "migration_applied": true,
+    "synthetic_companies": 2,
+    "full_17_engine_green_precondition_verified": true,
+    "eligible_new_better_path_verified": true,
+    "old_vs_new_required": true,
+    "hard_gates_required": true,
+    "tribunal_new_better_required": true,
+    "rollback_reference_required": true,
+    "idempotency_verified": true,
+    "cross_company_idempotency_denied": true,
+    "cross_company_tenant_boundary_denied": true,
+    "low_confidence_human_required_verified": true,
+    "missing_evaluation_evidence_fails_closed": true,
+    "status_reports_17_green_and_continuation_eligible": true,
+    "transaction_rolled_back": true
+  },
+  "post_rollback": {
+    "synthetic_registry_rows": 0,
+    "synthetic_onboarding_rows": 0,
+    "synthetic_engine_rows": 0,
+    "synthetic_lrn_rows": 0
+  },
+  "security": {
+    "rls_enabled": true,
+    "anon_table_select": false,
+    "authenticated_table_select": false,
+    "anon_record_execute": false,
+    "authenticated_record_execute": false,
+    "service_role_record_execute": true,
+    "raw_learning_payload_persisted": false,
+    "customer_payload_persisted": false,
+    "canonical_knowledge_auto_write": false,
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "trading_access": false,
+    "additional_cost_eur": 0
+  },
+  "ci": {
+    "workflow": "CEREBRO Multi-company LRN-001 Continuation PREPROD V1",
+    "first_exact_head_sha": "70b70d61617d4a7e6d638f094da7faa1f775d05f",
+    "first_exact_head_conclusion": "success"
+  },
+  "rollback": "cerebro/multicompany/rollback/lrn001-autonomous-continuation-preprod-v1.rollback.sql",
+  "next_gate": "MULTICOMPANY_PHYSICAL_E2E_ACCEPTANCE_REQUIRED",
+  "not_claimed": [
+    "PROD_AUTONOMY",
+    "PROD_WRITE_AUTHORITY",
+    "AUTOMATIC_CANONICAL_KNOWLEDGE_WRITE",
+    "TRADING_ACCESS",
+    "FULL_REAL_CHANNEL_E2E"
+  ]
+}
