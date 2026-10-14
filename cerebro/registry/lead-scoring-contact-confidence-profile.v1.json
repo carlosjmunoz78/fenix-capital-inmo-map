@@ -6,21 +6,21 @@
   "environment": "PREPROD",
   "version": "1.0.0",
   "block": "83-92",
-  "state": "CANDIDATE_PREMERGE",
-  "block_status": "PARCIAL",
+  "state": "INTEGRATED_MAIN_VALIDATED",
+  "block_status": "HECHO",
   "closure_scope": "TRANSVERSAL_LEAD_SCORING_AND_CONTACT_CONFIDENCE_PROFILE_NOT_PROVIDER_ACTIVATION_OR_OUTREACH",
   "profile_kind": "TRANSVERSAL_PROFILE_NOT_NEW_ENGINE",
   "items": {
     "83": {"name":"LEAD-001","status":"PARCIAL","implementation":"existing LEAD-001 scope extended additively with deterministic scoring/contact-confidence profile; no PROD, CRM-write or outreach activation"},
-    "84": {"name":"fit_score","status":"PARCIAL","implementation":"reuses evidenced ICP score output from Lead Discovery & Enrichment; deterministic bounded 0-100"},
-    "85": {"name":"intent_score","status":"PARCIAL","implementation":"reuses Company Intent and First-Party page-intent outputs; deterministic weighted merge without a parallel intent engine"},
-    "86": {"name":"urgency_score","status":"PARCIAL","implementation":"freshness-weighted explicit business-event score; protected/personal attributes excluded"},
-    "87": {"name":"conversion_probability","status":"PARCIAL","implementation":"deterministic heuristic V0 for prioritization; explicitly not statistically calibrated"},
-    "88": {"name":"expected_value","status":"PARCIAL","implementation":"bounded analytical probability x business value only; no money action authority"},
-    "89": {"name":"next_best_action","status":"PARCIAL","implementation":"plan-only prioritization/research/review action; no outreach execution or CRM mutation"},
+    "84": {"name":"fit_score","status":"PARCIAL","implementation":"verified deterministic reuse of evidenced ICP score output from Lead Discovery & Enrichment; bounded 0-100; not independently activated in PROD"},
+    "85": {"name":"intent_score","status":"PARCIAL","implementation":"verified deterministic reuse of Company Intent and First-Party page-intent outputs; no parallel intent engine; not independently activated in PROD"},
+    "86": {"name":"urgency_score","status":"PARCIAL","implementation":"verified freshness-weighted explicit business-event score; protected/personal attributes excluded; no PROD activation"},
+    "87": {"name":"conversion_probability","status":"PARCIAL","implementation":"verified deterministic heuristic V0 for prioritization; explicitly not statistically calibrated and not a deployed ML model"},
+    "88": {"name":"expected_value","status":"PARCIAL","implementation":"verified bounded analytical probability x business value only; no money action authority"},
+    "89": {"name":"next_best_action","status":"PARCIAL","implementation":"verified plan-only prioritization/research/review action; no outreach execution or CRM mutation"},
     "90": {"name":"Verifio","status":"HOLD","implementation":"exact upstream identified as verifio-email/verifio; README claims MIT while repository LICENSE contains Apache-2.0 wording plus additional commercial/hosting restrictions, so no code copy/execution pending license reconciliation"},
-    "91": {"name":"email/MX/SMTP/catch-all confidence","status":"PARCIAL","implementation":"local passive syntax/domain/MX plus authorized pre-existing SMTP evidence scoring; catch-all is uncertainty, active SMTP probing and email sending remain disabled"},
-    "92": {"name":"phone/contact confidence","status":"PARCIAL","implementation":"lawful-source normalization and format plausibility only; no carrier/person lookup or paid service"}
+    "91": {"name":"email/MX/SMTP/catch-all confidence","status":"PARCIAL","implementation":"verified local passive syntax/domain/MX plus authorized pre-existing SMTP evidence scoring; catch-all remains uncertainty, active SMTP probing and email sending disabled"},
+    "92": {"name":"phone/contact confidence","status":"PARCIAL","implementation":"verified lawful-source normalization and structural plausibility only; no carrier/person lookup or paid service"}
   },
   "human_required_codes": ["LEGAL_REQUIRED", "SIGNATURE_REQUIRED", "LOW_CONFIDENCE", "HIGH_RISK", "POLICY_CONFLICT", "SECURITY_INCIDENT", "MONEY_LIMIT", "CUSTOMER_HUMAN_REQUEST"],
   "invariants": {
@@ -66,14 +66,30 @@
     "next_best_action_mode": "PLAN_ONLY_READ_ONLY"
   },
   "verification": {
-    "status": "PENDING_EXACT_HEAD_CI",
+    "status": "VERIFIED_MAIN_POSTMERGE",
     "base_main_sha": "88c7b75f93f8c17b9267c0158f4fe9f626632293",
-    "old_vs_new": "PENDING"
+    "feature_pr": 665,
+    "feature_head_sha": "0c65b0e526e3032a8d870e06c00010b3633dbf0a",
+    "feature_merge_sha": "15312fe2383372a5b160264f9664eebd6c78d71a",
+    "premerge_profile_run": {"id":38517314398,"conclusion":"success","node":"24","jobs":["focused-profile","lead-intent-signal-web-regressions","candidate-full-suite","base-full-suite"]},
+    "governed_main_integration_run": {"id":38517314283,"conclusion":"success"},
+    "rsi_promotion_readiness_shadow_run": {"id":38517314242,"conclusion":"success"},
+    "postmerge_profile_run": {"id":38517412390,"conclusion":"success"},
+    "prod_runtime_smoke_run": {"id":38517412433,"conclusion":"success"},
+    "prod_live_deploy_run": {"id":38517412401,"conclusion":"skipped"},
+    "old_vs_new": "NEW_BETTER_NO_REGRESSION_WITH_ADDED_DETERMINISTIC_LEAD_SCORING_CONTACT_CONFIDENCE_AND_LICENSE_GUARDS"
   },
-  "rollback": {"method":"revert feature PR once created; prior Lead Discovery, Company Intent and First-Party Account Signals profiles remain canonical and untouched"},
-  "rebuild": {"method":"recreate additively from runtime contract + registry + tests + documented upstream evidence on current main"},
+  "review_hardening": [
+    "claimed SCORED upstream inputs require non-empty evidence_refs",
+    "contact-confidence results cannot upgrade next-best-action without evidence_refs",
+    "first-party/existing-CRM person contact with established basis remains read-only autonomous while public person-level contact requires explicit lawful basis",
+    "email syntax rejects malformed local/domain forms and contradictory explicit DNS/MX evidence fails closed"
+  ],
+  "rollback": {"method":"revert PR #665 / merge 15312fe2383372a5b160264f9664eebd6c78d71a; prior Lead Discovery, Company Intent and First-Party Account Signals profiles remain canonical and untouched"},
+  "rebuild": {"method":"recreate additively from runtime contract + tests + registry + documentation + recorded Verifio provenance/license audit on current main"},
   "next_block_after_verified_closure": {
     "range": "93-104",
+    "status": "AUTHORIZED_FOR_AUDIT_AND_SAFE_IMPLEMENTATION",
     "items": ["SALE-001 completo", "Linki patterns", "Mautic patterns", "Dittofeed", "listmonk", "Posta", "email cadence", "WhatsApp cadence", "call cadence", "automatic recheck", "Comp AI CRM patterns", "Agent Inbox"]
   },
   "prod_authorized": false,
