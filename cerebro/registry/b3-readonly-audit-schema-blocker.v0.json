@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_B3_READONLY_AUDIT_SCHEMA_BLOCKER_V0",
+  "company_id": "fenix",
+  "engine_id": "EVT-001",
+  "environment": "PREPROD",
+  "version": "0.1.0",
+  "status": "READ_ONLY_SERVER_JOURNAL_AUDIT_GREEN_WRITE_BINDING_BLOCKED_BY_CORE_GUARD_READINESS",
+  "source_main_sha": "697eadc2f4e757b10dd8fcd53d395428ef05a8fa",
+  "wordpress_staging": {
+    "site": "staging.fenixcapital.es",
+    "audit_page_id": 54769,
+    "audit_page_status": "draft",
+    "rollback_snapshot_id": 588,
+    "robots_noindex": true,
+    "robots_nofollow": true,
+    "authenticated_admin_context": true,
+    "script_transport": "window.parent/wp.apiFetch GET-only",
+    "post_requests": 0,
+    "writes_performed_by_script": false,
+    "permission_changes": 0,
+    "public_publish_performed": false
+  },
+  "live_universal_status": {
+    "ok": true,
+    "version": "0.1.7-rc8",
+    "scope": {
+      "company_id": "fenix",
+      "engine_id": "SEO-001",
+      "environment": "PREPROD",
+      "version": "v0",
+      "site_host": "staging.fenixcapital.es"
+    },
+    "writes_flag": true,
+    "core_guard_flag": true,
+    "allowed_post_ids": [52287, 52295],
+    "approved_draft_creation": true
+  },
+  "live_core_guard": {
+    "plugin_version": "1.0.0-rc12",
+    "health_score": 100,
+    "mode": "observer",
+    "environment_type": "staging",
+    "declared_environment_type": "production",
+    "known_preprod_host_override": true,
+    "build_channel": "preprod",
+    "operations_gate": false,
+    "runtime_gate_active": false,
+    "operational_writes_allowed": false,
+    "safe_default": true,
+    "readiness": {
+      "ready_for_preprod_observer": false,
+      "production_approved": false,
+      "blocking_failures": ["schema_version"],
+      "schema_version": {
+        "status": "fail",
+        "detail": "missing"
+      },
+      "other_checks_pass": [
+        "environment_is_preprod",
+        "php_supported",
+        "wordpress_supported",
+        "database_tables",
+        "observer_mode",
+        "dom_extension",
+        "job_cron",
+        "maintenance_cron",
+        "cache_conflict",
+        "production_operations_lock"
+      ]
+    }
+  },
+  "live_b3_journal_observe": {
+    "route": "/cerebro-b3-journal-lab/v1/observe",
+    "transport": "authenticated WordPress admin wp.apiFetch",
+    "method": "GET",
+    "ok": true,
+    "kind": "INSTALLED_B3_JOURNAL_LAB_READINESS",
+    "sources_sha256_match": true,
+    "innodb_unique_index": true,
+    "writes_performed": 0,
+    "mcp_direct_grant_required_for_this_read": false,
+    "mcp_permissions_changed": false
+  },
+  "b3_preflight": {
+    "route": "/cerebro-universal/v1/b3/preflight",
+    "current_result": "REST_NO_ROUTE",
+    "interpretation": "optional historical preflight route is not registered in the current live operator; this does not invalidate the installed journal observe evidence"
+  },
+  "historical_contract_alignment": {
+    "historical_readonly_pattern": "authenticated wp-admin wp.apiFetch GET-only",
+    "historical_requirement_before_physical_write": "backup + rollback + Core Guard live authorization + real MariaDB/CAS verification + gate closure in finally",
+    "reactivate_core_guard_to_restore_schema_version": "NOT_REPEATED",
+    "reason": "historical continuity explicitly records that reactivation was used once and should not be repeated blindly; current rc12 schema_version missing is a live blocker that must be reconciled against the installed baseline before any write gate opens"
+  },
+  "decision": {
+    "read_only_server_journal_transport": "VERIFIED",
+    "journal_source_integrity": "VERIFIED",
+    "innodb_unique_index": "VERIFIED",
+    "server_write_binding": "NOT_AUTHORIZED",
+    "permission_bypass": "NONE",
+    "core_guard_schema_repair": "POR_AUDITAR_AGAINST_INSTALLED_RC12_BASELINE",
+    "prod": false
+  },
+  "authority": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "server_journal_write_authorized": false,
+    "core_guard_gate_open_authorized": false,
+    "mcp_permission_expansion_authorized": false,
+    "customer_data_authorized": false,
+    "trading_access": false,
+    "automatic_paid_fallback": false,
+    "additional_cost_eur": 0
+  },
+  "rollback": {
+    "wordpress": "Restore Core Guard snapshot 588 or delete the synthetic draft after evidence retention; the audit performed GET-only requests and no server journal writes.",
+    "github": "Revert this additive evidence PR."
+  },
+  "next_gate": "RECONCILE_CORE_GUARD_RC12_SCHEMA_VERSION_MISSING_WITHOUT_REACTIVATION_OR_PROD_MUTATION_THEN_REASSESS_B3_WRITE_BINDING"
+}
