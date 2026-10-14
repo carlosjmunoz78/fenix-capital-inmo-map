@@ -1,0 +1,74 @@
+name: CEREBRO Lead Scoring Contact Confidence Profile V1
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/runtime/lead-scoring-contact-confidence-profile-v1.mjs'
+      - 'cerebro/tests/lead-scoring-contact-confidence-profile-v1.test.mjs'
+      - 'cerebro/registry/lead-scoring-contact-confidence-profile.v1.json'
+      - 'cerebro/docs/CEREBRO_LEAD_SCORING_CONTACT_CONFIDENCE_PROFILE_V1_2026-10-14.md'
+      - 'cerebro/runtime/lead-discovery-enrichment-profile-v1.mjs'
+      - 'cerebro/runtime/company-intent-resolution-profile-v1.mjs'
+      - 'cerebro/runtime/first-party-account-signals-profile-v1.mjs'
+      - 'cerebro/runtime/web-acquisition-intelligence-profile-v1.mjs'
+      - '.github/workflows/cerebro-lead-scoring-contact-confidence-profile-v1.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'cerebro/runtime/lead-scoring-contact-confidence-profile-v1.mjs'
+      - 'cerebro/tests/lead-scoring-contact-confidence-profile-v1.test.mjs'
+      - 'cerebro/registry/lead-scoring-contact-confidence-profile.v1.json'
+      - 'cerebro/docs/CEREBRO_LEAD_SCORING_CONTACT_CONFIDENCE_PROFILE_V1_2026-10-14.md'
+      - 'cerebro/runtime/lead-discovery-enrichment-profile-v1.mjs'
+      - 'cerebro/runtime/company-intent-resolution-profile-v1.mjs'
+      - 'cerebro/runtime/first-party-account-signals-profile-v1.mjs'
+      - 'cerebro/runtime/web-acquisition-intelligence-profile-v1.mjs'
+      - '.github/workflows/cerebro-lead-scoring-contact-confidence-profile-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-lead-scoring-contact-confidence-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  focused-profile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node --test cerebro/tests/lead-scoring-contact-confidence-profile-v1.test.mjs
+
+  lead-intent-signal-web-regressions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node --test cerebro/tests/lead-discovery-enrichment-profile-v1.test.mjs cerebro/tests/company-intent-resolution-profile-v1.test.mjs cerebro/tests/first-party-account-signals-profile-v1.test.mjs cerebro/tests/web-acquisition-intelligence-profile-v1.test.mjs
+
+  candidate-full-suite:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node --test cerebro/tests/*.test.mjs
+
+  base-full-suite:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node --test cerebro/tests/*.test.mjs
