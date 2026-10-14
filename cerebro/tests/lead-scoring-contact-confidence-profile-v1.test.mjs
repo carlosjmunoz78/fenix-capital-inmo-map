@@ -121,6 +121,21 @@ test('email confidence is passive, explainable and catch-all stays uncertain',()
   assert.equal(result.smtp_probe_executed,false);
 });
 
+test('malformed local-part and contradictory DNS/MX evidence fail safely',()=>{
+  const malformed=scoreEmailContactConfidence({
+    ...ctx,email:'first..last@example.com',source_basis:'PUBLIC_BUSINESS_CONTACT',evidence_ref:'web:bad'
+  });
+  assert.equal(malformed.status,'SCORED');
+  assert.equal(malformed.syntax_valid,false);
+  assert.equal(malformed.confidence_score,0);
+
+  const conflict=scoreEmailContactConfidence({
+    ...ctx,email:'info@example.com',source_basis:'PUBLIC_BUSINESS_CONTACT',evidence_ref:'dns:conflict',domain_exists:false,mx_records:['mx.example.com']
+  });
+  assert.equal(conflict.status,'HOLD');
+  assert.equal(conflict.reason,'EMAIL_SIGNAL_CONFLICT');
+});
+
 test('active SMTP probing is not silently executed',()=>{
   const result=scoreEmailContactConfidence({
     ...ctx,email:'info@example.com',source_basis:'PUBLIC_BUSINESS_CONTACT',evidence_ref:'web:contact',smtp_probe_requested:true
@@ -143,7 +158,26 @@ test('phone confidence only normalizes and scores lawful supplied contact eviden
   assert.equal(result.person_lookup_executed,false);
 });
 
-test('personal contact without approved basis escalates only through canonical LEGAL_REQUIRED',()=>{
+test('first-party person contact with established basis stays autonomous and read-only',()=>{
+  const result=scorePhoneContactConfidence({
+    ...ctx,phone:'+34957123456',source_basis:'FIRST_PARTY_EXPLICIT',person_level_contact:true,evidence_ref:'form:consented-phone'
+  });
+  assert.equal(result.status,'SCORED');
+  assert.equal(result.human_required,null);
+  assert.equal(result.outreach_authorized,false);
+  assert.equal(result.crm_write_authorized,false);
+});
+
+test('public person-level contact without explicit lawful basis escalates LEGAL_REQUIRED',()=>{
+  const result=scoreEmailContactConfidence({
+    ...ctx,email:'person@example.com',source_basis:'PUBLIC_BUSINESS_CONTACT',person_level_contact:true,evidence_ref:'web:person'
+  });
+  assert.equal(result.status,'HUMAN_REQUIRED');
+  assert.equal(result.human_required,'LEGAL_REQUIRED');
+  assert.ok(canonicalHuman.has(result.human_required));
+});
+
+test('contact without approved basis escalates only through canonical LEGAL_REQUIRED',()=>{
   const result=scoreEmailContactConfidence({...ctx,email:'person@example.com',source_basis:'UNKNOWN',person_level_contact:true,evidence_ref:'x'});
   assert.equal(result.status,'HUMAN_REQUIRED');
   assert.equal(result.human_required,'LEGAL_REQUIRED');
