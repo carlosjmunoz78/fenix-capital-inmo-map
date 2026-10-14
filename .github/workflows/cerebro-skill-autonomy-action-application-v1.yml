@@ -4,19 +4,25 @@ on:
   pull_request:
     paths:
       - 'cerebro/skills/skill-autonomy-action-application-v1.mjs'
+      - 'cerebro/skills/skill-autonomy-safe-action-worker-v1.mjs'
       - 'cerebro/skills/skill-autoloop-safe-handler.mjs'
       - 'cerebro/tests/skill-autonomy-action-application-v1.test.mjs'
+      - 'cerebro/tests/skill-autonomy-safe-action-worker-v1.test.mjs'
       - 'cerebro/tests/skill-autoloop-safe-handler.test.mjs'
       - '.github/workflows/cerebro-skill-autonomy-action-application-v1.yml'
+      - '.github/workflows/cerebro-skill-autonomy-safe-action-worker-v1.yml'
   push:
     branches:
       - main
     paths:
       - 'cerebro/skills/skill-autonomy-action-application-v1.mjs'
+      - 'cerebro/skills/skill-autonomy-safe-action-worker-v1.mjs'
       - 'cerebro/skills/skill-autoloop-safe-handler.mjs'
       - 'cerebro/tests/skill-autonomy-action-application-v1.test.mjs'
+      - 'cerebro/tests/skill-autonomy-safe-action-worker-v1.test.mjs'
       - 'cerebro/tests/skill-autoloop-safe-handler.test.mjs'
       - '.github/workflows/cerebro-skill-autonomy-action-application-v1.yml'
+      - '.github/workflows/cerebro-skill-autonomy-safe-action-worker-v1.yml'
   workflow_dispatch:
 
 permissions:
@@ -35,7 +41,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - run: node --test cerebro/tests/skill-autonomy-action-application-v1.test.mjs cerebro/tests/skill-autoloop-safe-handler.test.mjs cerebro/tests/skill-capability-autonomy-closure-v1.test.mjs cerebro/tests/skill-autoloop-autonomy-decision.test.mjs cerebro/tests/skill-promotion-readiness.test.mjs
+      - run: node --test cerebro/tests/skill-autonomy-action-application-v1.test.mjs cerebro/tests/skill-autonomy-safe-action-worker-v1.test.mjs cerebro/tests/skill-autoloop-safe-handler.test.mjs cerebro/tests/skill-capability-autonomy-closure-v1.test.mjs cerebro/tests/skill-autoloop-autonomy-decision.test.mjs cerebro/tests/skill-promotion-readiness.test.mjs
 
   existing-factory-and-evolution-regression:
     runs-on: ubuntu-latest
