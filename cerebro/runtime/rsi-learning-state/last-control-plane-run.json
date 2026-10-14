@@ -2,10 +2,10 @@
   "status": "GREEN",
   "remote_outbox": {
     "status": "REMOTE_OUTBOX_GREEN",
-    "downloaded_total": 3,
-    "skipped_total": 254,
+    "downloaded_total": 2,
+    "skipped_total": 257,
     "legacy_checksum_total": 0,
-    "index_batches_total": 257,
+    "index_batches_total": 259,
     "credentials_required": false,
     "additional_cost_eur": 0,
     "prod_authorized": false,
@@ -18,15 +18,15 @@
     "environment": "PREPROD",
     "version": "0.5.0",
     "status": "GREEN",
-    "cycle_started_at": "2026-10-14T19:56:10.805Z",
-    "cycle_finished_at": "2026-10-14T19:56:10.805Z",
-    "last_success_at": "2026-10-14T19:56:10.805Z",
-    "last_batch_ref": "sha256:c62aae8f830c32bafc6dfb1457615bf65ba77609f1dd4d125eb2b2990de23d6e",
+    "cycle_started_at": "2026-10-14T20:52:29.622Z",
+    "cycle_finished_at": "2026-10-14T20:52:29.622Z",
+    "last_success_at": "2026-10-14T20:52:29.622Z",
+    "last_batch_ref": "sha256:3bf34d05ca42408b558422739cfbf99811f8461e58887152749a51a2bff4eba3",
     "last_result": {
-      "processed_batches": 3,
-      "skipped_receipts": 254,
-      "persisted_total": 14,
-      "duplicates_total": 8,
+      "processed_batches": 2,
+      "skipped_receipts": 257,
+      "persisted_total": 4,
+      "duplicates_total": 0,
       "held_total": 0,
       "human_required": [],
       "ledger_exists": true
@@ -43,15 +43,15 @@
   },
   "candidates": {
     "status": "CANDIDATES_GREEN",
-    "source_learning_total": 978,
-    "persisted_total": 14,
-    "duplicates_total": 964,
+    "source_learning_total": 982,
+    "persisted_total": 4,
+    "duplicates_total": 978,
     "held_total": 0,
     "human_required": [],
     "held": [],
     "skipped_cross_company": 0,
     "candidate_ledger_file": "/tmp/cerebro-rsi-learning-state/cerebro/runtime/rsi-learning-state/data/fenix/LRN-001/improvement-candidates.v8",
-    "candidate_total": 978,
+    "candidate_total": 982,
     "next_gate": "OLD_VS_NEW_EXPERIMENT",
     "prod_authorized": false,
     "prod_write_authorized": false,
@@ -80,7 +80,7 @@
       "prod_authorized": false,
       "prod_write_authorized": false,
       "trading_access": false,
-      "last_planned_at": "2026-10-14T19:56:10.805Z",
+      "last_planned_at": "2026-10-14T20:52:29.622Z",
       "last_result": {
         "cadence": "DAILY",
         "status": "GREEN",
@@ -104,27 +104,27 @@
   },
   "meta_observability": {
     "status": "META_METRICS_GREEN",
-    "accepted": false,
-    "not_due": true,
-    "samples_total": 31,
+    "accepted": true,
+    "not_due": false,
+    "samples_total": 32,
     "stage_metrics": {
       "collect": {
-        "mean_ms": 1278.7259937419356,
+        "mean_ms": 1256.017355125,
         "p95_ms": 4594.643951,
         "max_ms": 4768.887126,
-        "samples": 31
+        "samples": 32
       },
       "learn": {
-        "mean_ms": 606.4065350967743,
+        "mean_ms": 595.72712265625,
         "p95_ms": 3210.9749110000002,
         "max_ms": 5285.334966,
-        "samples": 31
+        "samples": 32
       },
       "evaluate": {
-        "mean_ms": 245.3502206774193,
+        "mean_ms": 243.03302521874994,
         "p95_ms": 1019.9907479999999,
         "max_ms": 1113.5637119999992,
-        "samples": 31
+        "samples": 32
       }
     },
     "prod_authorized": false,
@@ -139,7 +139,7 @@
     "engine_id": "LRN-001",
     "environment": "PREPROD",
     "version": "0.5.0",
-    "github_run_id": "38627790998",
+    "github_run_id": "38635701478",
     "source_head_sha": "da47fc48eb4ccd35a7a2eb1b566a344a77e46c34",
     "execution_model": "HOSTLESS_BOUNDED_ITERATION",
     "schedule_semantics": "BEST_EFFORT_15_MINUTE_PLUS_EVENT",
