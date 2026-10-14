@@ -56,7 +56,7 @@ export function buildAutoloopAutonomyDecision({selection,wrappers,manifests,stat
       incident:false,
       legal_required:false
     },
-    evidence:{complete:evidenceComplete,confidence:evidenceComplete?1:0},
+    evidence:{complete:evidenceComplete,confidence:1},
     policy_locked:staticGreen&&wrapperSafe,
     permissions_locked:wrapperSafe,
     rollback_ready:rollbackGreen,
