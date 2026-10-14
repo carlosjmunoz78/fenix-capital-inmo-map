@@ -7,6 +7,8 @@ on:
       - 'cerebro/runtime/fact001-remote-source-bindings-57-62-v0.mjs'
       - 'cerebro/tests/public-source-adapter-v0.test.mjs'
       - 'cerebro/registry/fact001-remote-source-bindings-57-62.v0.json'
+      - 'cerebro/skills/cerebro-184-live-convergence.v2.json'
+      - 'cerebro/tests/cerebro-184-live-convergence-controller-v1.test.mjs'
       - '.github/workflows/cerebro-fact001-remote-source-bindings-57-62-v0.yml'
   pull_request:
     paths:
@@ -14,6 +16,8 @@ on:
       - 'cerebro/runtime/fact001-remote-source-bindings-57-62-v0.mjs'
       - 'cerebro/tests/public-source-adapter-v0.test.mjs'
       - 'cerebro/registry/fact001-remote-source-bindings-57-62.v0.json'
+      - 'cerebro/skills/cerebro-184-live-convergence.v2.json'
+      - 'cerebro/tests/cerebro-184-live-convergence-controller-v1.test.mjs'
       - '.github/workflows/cerebro-fact001-remote-source-bindings-57-62-v0.yml'
   workflow_dispatch:
 
@@ -42,10 +46,12 @@ jobs:
           --out /tmp/fact001-remote-source-bindings-57-62-report.json
       - name: Validate remote evidence and authority
         run: >-
-          node -e "const fs=require('fs'); const r=JSON.parse(fs.readFileSync('/tmp/fact001-remote-source-bindings-57-62-report.json','utf8')); const p=require('./cerebro/registry/fact001-remote-source-bindings-57-62.v0.json'); if(r.status!=='REMOTE_SOURCE_BINDINGS_57_62_GREEN') process.exit(1); if(r.source_evidence.http_status!==200||r.source_evidence.read_only!==true||r.source_evidence.auth_used!==false||r.source_evidence.cookies_used!==false) process.exit(1); if(r.item_57.state!=='REMOTE_READ_PLUS_DURABLE_JOB_E2E_GREEN'||r.item_62.state!=='REMOTE_READ_PLUS_DURABLE_JOB_E2E_GREEN') process.exit(1); if(r.item_57.job_status!=='SUCCEEDED'||r.item_62.job_status!=='SUCCEEDED'||r.item_62.company_count!==1) process.exit(1); if(r.provider_write||r.customer_data_used||r.prod_authorized||r.prod_write_authorized||r.trading_access||r.additional_cost_eur!==0) process.exit(1); if(p.authority.prod_authorized||p.authority.prod_write_authorized||p.authority.provider_write_authorized||p.authority.customer_data_authorized||p.authority.external_dependency_install_authorized||p.authority.trading_access||p.authority.automatic_paid_fallback||p.authority.additional_cost_eur!==0) process.exit(1); console.log('remote source bindings 57/62 GREEN, GET-only PREPROD, zero cost');"
+          node -e "const fs=require('fs'); const r=JSON.parse(fs.readFileSync('/tmp/fact001-remote-source-bindings-57-62-report.json','utf8')); const p=require('./cerebro/registry/fact001-remote-source-bindings-57-62.v0.json'); if(r.status!=='REMOTE_SOURCE_BINDINGS_57_62_GREEN') process.exit(1); if(r.source_evidence.http_status!==200||r.source_evidence.read_only!==true||r.source_evidence.auth_used!==false||r.source_evidence.cookies_used!==false) process.exit(1); if(r.item_57.state!=='REMOTE_READ_PLUS_DURABLE_JOB_E2E_GREEN'||r.item_62.state!=='REMOTE_READ_PLUS_DURABLE_JOB_E2E_GREEN') process.exit(1); if(r.item_57.job_status!=='SUCCEEDED'||r.item_62.job_status!=='SUCCEEDED'||r.item_62.company_count!==1) process.exit(1); if(r.provider_write||r.customer_data_used||r.prod_authorized||r.prod_write_authorized||r.trading_access||r.additional_cost_eur!==0) process.exit(1); if(p.status!=='VERIFIED_REMOTE_PREPROD_SOURCE_BINDINGS_GREEN'||Object.values(p.items).some(x=>x.verified_state!=='REMOTE_READ_PLUS_DURABLE_JOB_E2E_GREEN'||!x.remaining_gate)) process.exit(1); if(p.authority.prod_authorized||p.authority.prod_write_authorized||p.authority.provider_write_authorized||p.authority.customer_data_authorized||p.authority.external_dependency_install_authorized||p.authority.trading_access||p.authority.automatic_paid_fallback||p.authority.additional_cost_eur!==0) process.exit(1); console.log('remote source bindings 57/62 GREEN, GET-only PREPROD, zero cost');"
       - name: Canonical registry validation
         working-directory: cerebro
         run: npm run validate
+      - name: Convergence state contract
+        run: node --test cerebro/tests/cerebro-184-live-convergence-controller-v1.test.mjs
       - name: Full CEREBRO regression
         working-directory: cerebro
         run: npm test
