@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {validateSafeAutoloopState,moveCandidateToHumanGate} from './skill-autoloop-controller.mjs';
 import {SKILL_AUTONOMY_DECISIONS} from '../runtime/skill-capability-autonomy-closure-v1.mjs';
+import {buildSafeHandlerAutonomyActionReceipt,applySkillAutonomyActionReceipt} from './skill-autonomy-action-application-v1.mjs';
 
 function clone(value){return JSON.parse(JSON.stringify(value??{}));}
 function iso(value){return typeof value==='string'&&value?value:'9999-12-31T23:59:59.999Z';}
@@ -62,7 +63,11 @@ export function reconcileSafeHandlerResult(state,candidateId,{outcome,evidence={
       paid_fallback:false,
       additional_cost_eur:0
     };
-    out.last_action=`AUTONOMOUS_PREPROD_DECISION_${disposition}_CONTINUE_OTHER_SAFE_WORK`;
+    const actionReceipt=buildSafeHandlerAutonomyActionReceipt({candidate:current,evidence,state_company_id:out.company_id});
+    const routed=applySkillAutonomyActionReceipt(out,actionReceipt,{now});
+    const routedSafety=validateSafeAutoloopState(routed);
+    if(!routedSafety.green) throw new Error(`AUTOLOOP_STATE_UNSAFE_AFTER_ACTION_ROUTE:${routedSafety.errors.join(',')}`);
+    return routed;
   } else if(outcome==='READY_FOR_PREPROD_PROMOTION_REVIEW'){
     out.waiting_human[candidateId]={
       ...current,
@@ -136,6 +141,6 @@ if(import.meta.url===`file://${process.argv[1]}`){
   const state=JSON.parse(fs.readFileSync(statePath,'utf8'));
   const selected=selectWaitingSafeCandidate(state);
   fs.mkdirSync(path.dirname(output),{recursive:true});
-  fs.writeFileSync(output,`${JSON.stringify({schema_version:'0.2.0',selected,prod_authorized:false,external_skill_code_execution:false,additional_cost_eur:0},null,2)}\n`,'utf8');
-  console.log(JSON.stringify({selected_candidate_id:selected?.candidate_id??null,selected_name:selected?.name??null,prod_authorized:false,external_skill_code_execution:false,additional_cost_eur:0}));
+  fs.writeFileSync(output,`${JSON.stringify({schema_version:'0.3.0',selected,autonomy_action_queue_depth:Object.keys(state?.autonomy_action_queue??{}).length,prod_authorized:false,external_skill_code_execution:false,additional_cost_eur:0},null,2)}\n`,'utf8');
+  console.log(JSON.stringify({selected_candidate_id:selected?.candidate_id??null,selected_name:selected?.name??null,autonomy_action_queue_depth:Object.keys(state?.autonomy_action_queue??{}).length,prod_authorized:false,external_skill_code_execution:false,additional_cost_eur:0}));
 }
