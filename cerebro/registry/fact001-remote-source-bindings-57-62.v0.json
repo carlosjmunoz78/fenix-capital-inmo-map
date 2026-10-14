@@ -1,0 +1,56 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_FACT001_REMOTE_SOURCE_BINDINGS_57_62_V0",
+  "company_id": "fenix",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "0.1.0",
+  "status": "CANDIDATE_PENDING_REMOTE_CI",
+  "source_main_sha": "b0f47f79bcabf59796f3d63266c7c1e9e4f075a8",
+  "items": {
+    "57": {
+      "engine_id": "COMPET-001",
+      "target": "REMOTE_READ_PLUS_DURABLE_JOB_E2E_GREEN",
+      "source_route": "OFFICIAL_API_FEED_SITEMAP",
+      "remaining_after_target": "REAL_COMPETITOR_TARGET_CONFIGURATION_AND_CONTINUOUS_PREPROD_RUN"
+    },
+    "62": {
+      "engine_id": "CAP-001",
+      "target": "REMOTE_READ_PLUS_DURABLE_JOB_E2E_GREEN",
+      "source_route": "OFFICIAL_API_FEED_SITEMAP",
+      "remaining_after_target": "REAL_CAP_ACQUISITION_SOURCE_CONFIGURATION_AND_CONTINUOUS_PREPROD_RUN"
+    }
+  },
+  "implementation": {
+    "source_adapter": "cerebro/runtime/public-source-adapter-v0.mjs",
+    "runner": "cerebro/runtime/fact001-remote-source-bindings-57-62-v0.mjs",
+    "security_tests": "cerebro/tests/public-source-adapter-v0.test.mjs"
+  },
+  "remote_acceptance": {
+    "target_class": "USER_OWNED_PUBLIC_PREPROD_WORDPRESS_REST_API",
+    "method": "HTTPS_GET_ONLY",
+    "auth": false,
+    "cookies": false,
+    "provider_write": false,
+    "dns_public_ip_required": true,
+    "redirects_revalidated": true,
+    "max_redirects": 3,
+    "bounded_response_bytes": true,
+    "synthetic_control_baseline_for_compet": true,
+    "declared_business_semantics_for_cap": true,
+    "no_person_contact_generation": true
+  },
+  "authority": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "provider_write_authorized": false,
+    "customer_data_authorized": false,
+    "external_dependency_install_authorized": false,
+    "trading_access": false,
+    "automatic_paid_fallback": false,
+    "additional_cost_eur": 0
+  },
+  "rollback": "Revert this additive remote-source adapter PR; it performs GET-only PREPROD reads and no provider mutation.",
+  "rebuild": "Recreate from public-source-adapter-v0 + remote 57/62 runner + canonical persistent JOB-001 runtime.",
+  "next_gate": "REMOTE_CI_ON_USER_OWNED_PREPROD_SOURCE"
+}
