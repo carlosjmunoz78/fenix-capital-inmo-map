@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-14T05:26:30.258Z",
+  "updated_at": "2026-10-14T06:15:30.480Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -44,42 +44,7 @@
   ],
   "in_flight": {},
   "waiting_human": {},
-  "waiting_safe_handler": {
-    "github-wide-skills:c2f51d66616db9bb1d7a": {
-      "candidate_id": "github-wide-skills:c2f51d66616db9bb1d7a",
-      "name": "blender",
-      "human_alias": "Blender",
-      "wrapper_id": "skillwrap:9df466ce0716474121d4",
-      "domain": "agent-ai-orchestration",
-      "engine_bindings": [
-        "ORCH-001",
-        "ROUTE-001",
-        "FACT-001",
-        "RAG-001",
-        "LRN-001",
-        "ACTGW-001"
-      ],
-      "value_score": 86.38,
-      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
-      "evidence_refs": {
-        "upstream_full_name": "alivirgo/Major-AI-Skills",
-        "upstream_head_commit": "2e920f6c69103f5ab2d261a37bfd2bb51540a7f0",
-        "manifest_sha256": "31055315b673b584065b7bdde5dceae1d9c1d93c6f5f74faaa1da195ff89cf7c",
-        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
-      },
-      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
-      "status": "WAITING_SAFE_HANDLER",
-      "source_discovery_run_id": 38516596475,
-      "checkpointed_at": "2026-10-14T05:26:30.258Z",
-      "human_required": null,
-      "external_skill_code_execution": false,
-      "customer_data_used": false,
-      "prod_write": false,
-      "trading_access": false,
-      "paid_fallback": false,
-      "additional_cost_eur": 0
-    }
-  },
+  "waiting_safe_handler": {},
   "completed": {
     "lobehub-skills:9a6e3fac20369220df43": {
       "candidate_id": "lobehub-skills:9a6e3fac20369220df43",
@@ -587,9 +552,55 @@
       },
       "updated_at": "2026-10-14T01:16:26.366Z",
       "prod_authorized": false
+    },
+    "github-wide-skills:c2f51d66616db9bb1d7a": {
+      "candidate_id": "github-wide-skills:c2f51d66616db9bb1d7a",
+      "name": "blender",
+      "human_alias": "Blender",
+      "wrapper_id": "skillwrap:9df466ce0716474121d4",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 86.38,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "alivirgo/Major-AI-Skills",
+        "upstream_head_commit": "2e920f6c69103f5ab2d261a37bfd2bb51540a7f0",
+        "manifest_sha256": "31055315b673b584065b7bdde5dceae1d9c1d93c6f5f74faaa1da195ff89cf7c",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "SAFE_HANDLER_TERMINAL_HOLD",
+      "status": "TERMINAL_HOLD",
+      "source_discovery_run_id": 38516596475,
+      "checkpointed_at": "2026-10-14T05:26:30.258Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0,
+      "evidence": {
+        "handler_run_id": 38521123860,
+        "static_status": "STATIC_LAB_HOLD",
+        "external_skill_code_executed": false,
+        "customer_data_used": false,
+        "prod_write": false,
+        "trading_access": false,
+        "paid_fallback": false,
+        "additional_cost_eur": 0
+      },
+      "updated_at": "2026-10-14T06:15:30.480Z",
+      "prod_authorized": false
     }
   },
-  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
+  "last_action": "TERMINAL_HOLD_CONTINUE_OTHER_SAFE_WORK",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
