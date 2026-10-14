@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_MULTICOMPANY_DURABLE_PREPROD_LIVE_EVIDENCE",
+  "observed_at": "2026-10-14T11:17:00Z",
+  "source_main_sha": "eef85bc5d16540209d90d122b15758be357fe304",
+  "project_id": "cluhljgonannaafpmblx",
+  "environment": "PREPROD_CONTROL_PLANE_ON_EXISTING_SUPABASE_PROJECT",
+  "additional_cost_eur": 0,
+  "pre_deploy_snapshot": {
+    "target_objects_present": false,
+    "rollback_contracts_present": true
+  },
+  "applied_migrations": [
+    "cerebro_company_registry_preprod_persistence_v1",
+    "cerebro_company_onboarding_preprod_persistence_v1",
+    "cerebro_scan001_preprod_persistence_v1"
+  ],
+  "objects": {
+    "tables": [
+      "public.cerebro_company_registry_preprod",
+      "public.cerebro_company_registry_history_preprod",
+      "public.cerebro_company_onboarding_preprod",
+      "public.cerebro_company_engine_state_preprod",
+      "public.cerebro_company_onboarding_history_preprod",
+      "public.cerebro_scan001_run_preprod"
+    ],
+    "service_role_functions": [
+      "public.cerebro_company_register_preprod",
+      "public.cerebro_company_registry_get_preprod",
+      "public.cerebro_company_tenant_boundary_check_preprod",
+      "public.cerebro_company_onboarding_start_preprod",
+      "public.cerebro_company_onboarding_get_preprod",
+      "public.cerebro_company_engine_states_get_preprod",
+      "public.cerebro_scan001_record_success_preprod",
+      "public.cerebro_scan001_latest_get_preprod"
+    ]
+  },
+  "security_evidence": {
+    "all_tables_rls_enabled": true,
+    "anon_select": false,
+    "authenticated_select": false,
+    "service_role_crud": true,
+    "anon_function_execute": false,
+    "authenticated_function_execute": false,
+    "service_role_function_execute": true,
+    "cross_company_access_denied": true,
+    "tenant_boundary": "DENY_CROSS_COMPANY"
+  },
+  "transactional_selfcheck": {
+    "company_id": "zz-selfcheck-20261014",
+    "transaction_rolled_back": true,
+    "post_rollback_rows": {
+      "registry": 0,
+      "onboarding": 0,
+      "engine_state": 0,
+      "scan": 0
+    },
+    "green_engines_after_scan_inside_transaction": ["TENANT-001","COMP-REG-001","COMP-ONB-001","SCAN-001"],
+    "ready_engines_after_scan_inside_transaction": ["KW-001","WAUD-001","SOCAUD-001","LOCALP-001"],
+    "remaining_downstream_state": "BLOCKED",
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "trading_access": false,
+    "additional_cost_eur": 0
+  },
+  "storage_boundary": {
+    "supabase_scope": "LIGHTWEIGHT_TRANSACTIONAL_CONTROL_PLANE_ONLY",
+    "raw_scan_payloads": false,
+    "heavy_logs": false,
+    "raw_page_bodies": false,
+    "credentials": false,
+    "customer_payloads": false
+  },
+  "rollback_refs": [
+    "cerebro/multicompany/rollback/scan001-preprod-persistence-v1.rollback.sql",
+    "cerebro/multicompany/rollback/company-onboarding-preprod-persistence-v1.rollback.sql",
+    "cerebro/multicompany/rollback/company-registry-preprod-persistence-v1.rollback.sql"
+  ],
+  "next_gate": "POST_SCAN_PARALLEL_DURABLE_EXECUTION_REQUIRED",
+  "not_claimed": [
+    "FULL_17_ENGINE_ONBOARDING_AUTONOMY",
+    "MULTICOMPANY_LRN001_AUTONOMOUS_CONTINUATION",
+    "PROD_AUTONOMY",
+    "PROD_WRITE_AUTHORITY"
+  ]
+}
