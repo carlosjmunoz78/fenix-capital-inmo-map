@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_VOICE001_OUTREACH_PROFILE_V0",
+  "canonical_engine_id": "VOICE-001",
+  "company_id": "fenix",
+  "environment_scope": "PREPROD",
+  "version": "0.1.0",
+  "updated_at": "2026-10-14",
+  "source_blocks": [105,106,107,108,109,110,111,112,113,114,115,116,117],
+  "architectural_decision": "One canonical VOICE-001 with capabilities/adapters; do not create thirteen engines.",
+  "preserve_existing_voice_ui": true,
+  "composition": {
+    "sales_engine": "SALE-001",
+    "communication_router": "COM-001",
+    "lead_context": ["LEAD-001","NBA-001","C360-001"],
+    "property_context": ["PROP-001"],
+    "financial_context": ["BNK-001"],
+    "human_control": ["HEX-001","CONSOLE-001"],
+    "durable_job_idempotency": "JOB-001"
+  },
+  "capabilities": {
+    "105_livekit_agents": "OPTIONAL_SIMULATION_ADAPTER_SEAM_NOT_LIVE_BOUND",
+    "106_pipecat": "OPTIONAL_SIMULATION_ADAPTER_SEAM_NOT_LIVE_BOUND",
+    "107_faster_whisper": "LOCAL_STT_REFERENCE",
+    "108_piper_tts": "LOCAL_TTS_REFERENCE",
+    "109_retell": "HOLD_COMMERCIAL",
+    "110_dapta": "HOLD_COMMERCIAL",
+    "111_lead_rescue": "SIMULATION_PLAN",
+    "112_inbound_qualification_calling": "SIMULATION_PLAN",
+    "113_outbound_qualification_calling": "SIMULATION_PLAN",
+    "114_voice_follow_up": "SIMULATION_PLAN",
+    "115_voice_objection_handling": "SIMULATION_PLAN",
+    "116_property_voice_closer": "SIMULATION_PLAN",
+    "117_financial_voice_closer": "SIMULATION_PLAN"
+  },
+  "defaults": {
+    "real_call_authorized": false,
+    "recording_enabled": false,
+    "crm_write_authorized": false,
+    "delivery_dispatch_authorized": false,
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "external_side_effect_authorized": false,
+    "transcript_persistence": false,
+    "raw_audio_persistence": false,
+    "pii_persistence": false,
+    "trading_access": false,
+    "additional_cost_eur": 0
+  },
+  "consent_policy": {
+    "fail_closed": true,
+    "outbound_allowed_states_for_simulation": ["EXPLICIT","CUSTOMER_REQUESTED_CONTACT"],
+    "denied_or_opted_out": "BLOCK",
+    "unknown_outbound": "HUMAN_REQUIRED:LEGAL_REQUIRED"
+  },
+  "human_required_reasons": [
+    "LEGAL_REQUIRED","SIGNATURE_REQUIRED","LOW_CONFIDENCE","HIGH_RISK",
+    "POLICY_CONFLICT","SECURITY_INCIDENT","MONEY_LIMIT","CUSTOMER_HUMAN_REQUEST"
+  ],
+  "idempotency": {
+    "runtime_key": "company_id|VOICE-001|request_id|scenario|direction",
+    "same_key_same_fingerprint": "RETURN_DUPLICATE",
+    "same_key_changed_fingerprint": "BLOCK_POLICY_CONFLICT",
+    "durable_execution_target": "JOB-001 before any future live side effect"
+  },
+  "privacy": {
+    "forbidden_state": ["raw phone","raw email","DNI/NIE/NIF","IBAN","credentials","raw audio","raw transcript"],
+    "telemetry": "metadata and hashed request identifiers only",
+    "recording": "OFF"
+  },
+  "promotion_gates": {
+    "contracts": true,
+    "permissions": true,
+    "focused_tests": "REQUIRED",
+    "full_regression": "REQUIRED",
+    "evaluation": "REQUIRED_BEFORE_LIVE",
+    "tribunal": "REQUIRED_BEFORE_LIVE",
+    "observability": "METADATA_ONLY_V0",
+    "rollback": true,
+    "backup": "git commit/branch",
+    "rebuild": true,
+    "cost_measured": true,
+    "policy": true,
+    "preprod": true,
+    "live_telephony": false,
+    "autonomous_prod": false
+  },
+  "rollback": {
+    "strategy": "revert the VOICE-001 outreach commit/PR; no data migration and no external side effects exist in V0"
+  },
+  "rebuild": {
+    "source_of_truth": [
+      "cerebro/registry/engine-registry.v1.json",
+      "cerebro/registry/voice001-outreach-profile.v0.json",
+      "cerebro/voice/voice001-outreach-runtime-v0.mjs"
+    ]
+  },
+  "training_hooks": {
+    "enabled": false,
+    "raw_transcript_allowed": false,
+    "future_signal_contract": "metadata-only; requires separate LRN-001/TRN-001 review"
+  }
+}
