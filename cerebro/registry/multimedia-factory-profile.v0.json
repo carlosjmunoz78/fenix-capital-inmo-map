@@ -1,0 +1,102 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_DIGITAL_BUILD_MULTIMEDIA_PROFILE_V0",
+  "company_id": "fenix",
+  "environment_scope": "PREPROD",
+  "version": "0.1.0",
+  "updated_at": "2026-10-14",
+  "source_blocks": [162,163,164,165,166,167,168,169,170,171,172,173,174,175],
+  "owner_engine_id": "FACT-001",
+  "capability_id": "DIGITAL-BUILD-MULTIMEDIA",
+  "create_new_engines": false,
+  "architectural_decision": "Digital Build already owns multimedia pipelines. Tools/models are adapters/providers/capabilities, not one engine each.",
+  "dependencies": ["FACT-001","ROUTE-001","FREE-001","EVA-001","OBSERV-001","FINOPS-001"],
+  "adapter_catalog": {
+    "162_COMFYUI": "P1_ADAPTER_SEAM_ONLY",
+    "163_Z_IMAGE_TURBO": "LAB_SEAM_ONLY",
+    "164_QWEN3_TTS": "P1_ADAPTER_SEAM_ONLY",
+    "165_HYPERFRAMES": "P1_ADAPTER_SEAM_ONLY",
+    "166_PROCEDURAL_FILM": "P1_ADAPTER_SEAM_ONLY",
+    "167_OPENMONTAGE": "LAB_SEAM_ONLY",
+    "168_LTX_VIDEO": "LAB_SEAM_ONLY",
+    "169_WATCH": "P1_ADAPTER_SEAM_ONLY",
+    "170_FFMPEG": "REUSE_IF_PRESENT_NO_AUTO_INSTALL",
+    "171_OPEN_SORA": "HOLD_HARDWARE",
+    "172_REMOTION": "HOLD_LICENSE",
+    "173_FISH_AUDIO": "HOLD_COMMERCIAL",
+    "174_ELEVENLABS": "HOLD_COMMERCIAL",
+    "175_OPEN_GENERATIVE_AI": "CATALOG_ONLY"
+  },
+  "repository_audit": {
+    "main_search_for_named_multimedia_tools": "NO_MATCHES_FOUND",
+    "physical_installation_verified": false,
+    "repository_binding_verified": false,
+    "ffmpeg_binary_verified": false,
+    "conclusion": "V0 creates governed contracts/seams only; it does not claim any provider/tool is physically installed or integrated."
+  },
+  "routing_policy": {
+    "execution_router": "ROUTE-001",
+    "zero_cost_broker": "FREE-001",
+    "quality_evaluation": "EVA-001",
+    "observability": "OBSERV-001",
+    "cost_authority": "FINOPS-001",
+    "preference": "deterministic/existing/open-source/local before paid provider"
+  },
+  "defaults": {
+    "install_authorized": false,
+    "model_download_authorized": false,
+    "external_process_authorized": false,
+    "network_call_authorized": false,
+    "paid_provider_call_authorized": false,
+    "artifact_publish_authorized": false,
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "trading_access": false,
+    "additional_cost_eur": 0,
+    "supabase_required_for_v0_runtime": false,
+    "raw_media_persistence": false,
+    "raw_pii_persistence": false
+  },
+  "hold_policy": {
+    "hardware_gap": "POLICY_CONFLICT",
+    "license_unverified": "LEGAL_REQUIRED",
+    "commercial_provider": "MONEY_LIMIT",
+    "catalog_only": "POLICY_CONFLICT"
+  },
+  "human_required_reasons": [
+    "LEGAL_REQUIRED","SIGNATURE_REQUIRED","LOW_CONFIDENCE","HIGH_RISK",
+    "POLICY_CONFLICT","SECURITY_INCIDENT","MONEY_LIMIT","CUSTOMER_HUMAN_REQUEST"
+  ],
+  "idempotency": {
+    "runtime_key": "company_id|capability_id|request_id|adapter|task_type",
+    "same_key_same_fingerprint": "RETURN_DUPLICATE",
+    "same_key_changed_fingerprint": "BLOCK_POLICY_CONFLICT"
+  },
+  "promotion_gates": {
+    "inventory": true,
+    "contracts": true,
+    "focused_tests": "REQUIRED",
+    "full_regression": "REQUIRED",
+    "license_review": "REQUIRED_PER_ADAPTER",
+    "hardware_fit": "REQUIRED_PER_LOCAL_MODEL",
+    "zero_cost_verification": "REQUIRED_PER_ADAPTER",
+    "evaluation": "REQUIRED_BEFORE_PHYSICAL_EXECUTION",
+    "tribunal": "REQUIRED_BEFORE_PROMOTION",
+    "observability": "METADATA_ONLY_V0",
+    "rollback": true,
+    "backup": "git branch/commit",
+    "rebuild": true,
+    "preprod": true,
+    "physical_execution": false,
+    "autonomous_prod": false
+  },
+  "rollback": {
+    "strategy": "Revert the multimedia V0 PR/commit. No installation, model download, provider call, artifact publish, migration or PROD write exists in V0."
+  },
+  "rebuild": {
+    "source_of_truth": [
+      "cerebro/registry/multimedia-factory-profile.v0.json",
+      "cerebro/digital-build/multimedia-factory-runtime-v0.mjs"
+    ]
+  }
+}

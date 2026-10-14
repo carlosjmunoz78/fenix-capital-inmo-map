@@ -1,0 +1,44 @@
+name: CEREBRO SALE-001 Agenda Commerce V0
+
+on:
+  push:
+    paths:
+      - 'cerebro/revenue/sale001-agenda-commerce-runtime-v0.mjs'
+      - 'cerebro/tests/sale001-agenda-commerce-runtime-v0.test.mjs'
+      - 'cerebro/registry/sale001-agenda-commerce-profile.v0.json'
+      - 'cerebro/docs/CEREBRO_SALE001_BLOCKS_118_131_V0_2026-10-14.md'
+      - 'cerebro/evidence/sale001-blocks-118-131-v0.json'
+      - '.github/workflows/cerebro-sale001-agenda-commerce-v0.yml'
+  pull_request:
+    paths:
+      - 'cerebro/revenue/sale001-agenda-commerce-runtime-v0.mjs'
+      - 'cerebro/tests/sale001-agenda-commerce-runtime-v0.test.mjs'
+      - 'cerebro/registry/sale001-agenda-commerce-profile.v0.json'
+      - 'cerebro/docs/CEREBRO_SALE001_BLOCKS_118_131_V0_2026-10-14.md'
+      - 'cerebro/evidence/sale001-blocks-118-131-v0.json'
+      - '.github/workflows/cerebro-sale001-agenda-commerce-v0.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sale001-agenda-commerce-v0:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: SALE-001 agenda-commerce focused tests
+        run: node --test cerebro/tests/sale001-agenda-commerce-runtime-v0.test.mjs
+      - name: Validate profile and evidence JSON
+        run: >-
+          node -e "for (const f of ['cerebro/registry/sale001-agenda-commerce-profile.v0.json','cerebro/evidence/sale001-blocks-118-131-v0.json']) JSON.parse(require('fs').readFileSync(f,'utf8')); console.log('sale001-agenda-commerce-json GREEN')"
+      - name: Validate canonical engine registry
+        working-directory: cerebro
+        run: npm run validate
+      - name: Full CEREBRO regression suite
+        working-directory: cerebro
+        run: npm test
