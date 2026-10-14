@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_EVT001_BROWSER_STAGING_E2E_V0",
+  "company_id": "fenix",
+  "engine_id": "EVT-001",
+  "environment": "PREPROD",
+  "version": "0.1.0",
+  "rollout_item": 74,
+  "status": "VERIFIED_BROWSER_FIRST_PARTY_EMITTER_PERSISTENCE_IDEMPOTENCY_GREEN_SERVER_JOURNAL_BINDING_PENDING",
+  "source_main_sha": "6010f47f2718700a18ce09b2ac211c05a5be684a",
+  "wordpress_staging": {
+    "site": "staging.fenixcapital.es",
+    "page_id": 54765,
+    "page_status": "draft",
+    "slug": "cerebro-preprod-evt001-browser-event-e2e",
+    "rollback_snapshot_id": 585,
+    "robots_noindex": true,
+    "robots_nofollow": true,
+    "elementor_version": "4.3.5",
+    "elementor_widget": "html",
+    "elementor_widget_setting": "html",
+    "authenticated_editor_preview_only": true,
+    "public_publish_performed": false,
+    "homepage_changed": false,
+    "navigation_changed": false,
+    "theme_changed": false
+  },
+  "event_contract": {
+    "schema_version": "1.0.0",
+    "event_id": "evt_preprod_54765_v0",
+    "company_id": "fenix",
+    "engine_id": "EVT-001",
+    "environment": "PREPROD",
+    "version": "v0",
+    "event_type": "PAGE_VIEW_SYNTHETIC",
+    "page_path": "/cerebro-preprod-evt001-browser-event-e2e/",
+    "consent": {
+      "analytics": true
+    },
+    "properties": {
+      "page_category": "CEREBRO_PREPROD_E2E",
+      "campaign_ref": "fact001-item74"
+    },
+    "idempotency_key": "evt001-browser-54765-v0",
+    "personal_data": false,
+    "third_party_network": false,
+    "prod_authorized": false
+  },
+  "physical_evidence": {
+    "stored_elementor_markup_rendered": true,
+    "browser_script_executed": true,
+    "browser_local_storage_key": "cerebro:evt001:preprod:e2e:v0",
+    "first_load_marker_observed": "CEREBRO_EVT001_BROWSER_STORAGE_GREEN",
+    "first_load_mode_visual_prefix": "EVENT_P",
+    "second_load_marker": "CEREBRO_EVT001_BROWSER_STORAGE_GREEN",
+    "second_load_mode": "EVENT_REPLAY_IDEMPOTENT",
+    "second_load_readback": {
+      "status": "GREEN",
+      "event_id": "evt_preprod_54765_v0",
+      "idempotency_key": "evt001-browser-54765-v0",
+      "company_id": "fenix",
+      "engine_id": "EVT-001",
+      "environment": "PREPROD",
+      "consent_analytics": true,
+      "personal_data": false,
+      "third_party_network": false,
+      "prod_authorized": false
+    },
+    "browser_scope": "REAL_AUTHENTICATED_STAGING_ELEMENTOR_PREVIEW",
+    "server_side_event_persistence_claimed": false
+  },
+  "server_binding_audit": {
+    "existing_guarded_routes_detected": [
+      "/cerebro-b3-journal-lab/v1/observe",
+      "/cerebro-b3-journal-lab/v1/prepare",
+      "/cerebro-b3-journal-lab/v1/replay",
+      "/cerebro-b3-journal-lab/v1/claim",
+      "/cerebro-b3-journal-lab/v1/inspect",
+      "/cerebro-b3-journal-lab/v1/cleanup",
+      "/cerebro-universal/v1/b3/storage-observer"
+    ],
+    "current_connected_mcp_get_observe_granted": false,
+    "permission_weakened_or_bypassed": false,
+    "server_journal_binding_verified": false,
+    "remaining_gate": "CONSENTED_BROWSER_EMITTER_TO_EXISTING_GUARDED_SERVER_JOURNAL_E2E_WITH_EXPLICIT_MINIMUM_REQUIRED_GRANT"
+  },
+  "authority": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "public_publish_authorized": false,
+    "customer_data_authorized": false,
+    "third_party_tracking_authorized": false,
+    "trading_access": false,
+    "automatic_paid_fallback": false,
+    "additional_cost_eur": 0
+  },
+  "rollback": {
+    "wordpress": "Restore Core Guard snapshot 585 and keep/delete the synthetic draft only after evidence is no longer needed. No public page, homepage, navigation or theme mutation was made.",
+    "github": "Revert the additive EVT-001 browser-evidence PR."
+  },
+  "rebuild": "Recreate a noindex/nofollow synthetic draft, write a single Elementor HTML widget using the canonical 'html' control, run the consent-gated synthetic event in authenticated STAGING preview, reload once to prove idempotent browser persistence, and keep server journal binding fail-closed until a minimum explicit grant exists.",
+  "next_gate": "CONSENTED_BROWSER_EMITTER_TO_EXISTING_GUARDED_SERVER_JOURNAL_E2E_WITH_EXPLICIT_MINIMUM_REQUIRED_GRANT"
+}
