@@ -5,8 +5,8 @@
   "engine_id": "KNOWLEDGE-100-GATE",
   "environment": "PROD_READ_ONLY_ACCEPTANCE",
   "version": "v0",
-  "observed_at": "2026-10-14T18:13:52Z",
-  "observed_repo_sha": "232ae0b683e75d2e8856952eb7ec37d43eb25c8b",
+  "observed_at": "2026-10-13T19:10:15+02:00",
+  "observed_repo_sha": "9599d68c6d820932ba44c300ecea0de26416351e",
   "evidence_method": "AUTHORIZED_CONNECTOR_READ_ONLY",
   "notion_sources": [
     {
@@ -20,7 +20,7 @@
       "purpose": "knowledge_foundry"
     },
     {
-      "id": "3c081b1a-756d-810e-8361-c19b018761fa",
+      "id": "3c081b1a-756d-813c-ac45-f9186c20b251",
       "title": "CEREBRO · Router maestro de conocimiento comercial y relacional",
       "purpose": "knowledge_router"
     },
