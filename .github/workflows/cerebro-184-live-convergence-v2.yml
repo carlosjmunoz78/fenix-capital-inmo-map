@@ -5,13 +5,17 @@ on:
     paths:
       - 'cerebro/skills/cerebro-184-live-convergence.v2.json'
       - 'cerebro/skills/cerebro-184-live-convergence-controller-v1.mjs'
+      - 'cerebro/skills/cerebro-184-items-1-24-live-reconciliation.v2.json'
       - 'cerebro/tests/cerebro-184-live-convergence-controller-v1.test.mjs'
+      - 'cerebro/tests/cerebro-184-items-1-24-live-reconciliation-v2.test.mjs'
       - '.github/workflows/cerebro-184-live-convergence-v2.yml'
   pull_request:
     paths:
       - 'cerebro/skills/cerebro-184-live-convergence.v2.json'
       - 'cerebro/skills/cerebro-184-live-convergence-controller-v1.mjs'
+      - 'cerebro/skills/cerebro-184-items-1-24-live-reconciliation.v2.json'
       - 'cerebro/tests/cerebro-184-live-convergence-controller-v1.test.mjs'
+      - 'cerebro/tests/cerebro-184-items-1-24-live-reconciliation-v2.test.mjs'
       - '.github/workflows/cerebro-184-live-convergence-v2.yml'
   workflow_dispatch:
 
@@ -28,7 +32,10 @@ jobs:
         with:
           node-version: 24
       - name: Focused 184 convergence contracts
-        run: node --test cerebro/tests/cerebro-184-live-convergence-controller-v1.test.mjs
+        run: >-
+          node --test
+          cerebro/tests/cerebro-184-live-convergence-controller-v1.test.mjs
+          cerebro/tests/cerebro-184-items-1-24-live-reconciliation-v2.test.mjs
       - name: Generate fail-closed convergence report
         run: node cerebro/skills/cerebro-184-live-convergence-controller-v1.mjs | tee /tmp/cerebro-184-live-convergence-report.json
       - name: Validate canonical engine registry
@@ -39,7 +46,7 @@ jobs:
         run: npm test
       - name: Enforce authority boundary
         run: >-
-          node -e "const s=require('./cerebro/skills/cerebro-184-live-convergence.v2.json'); const a=s.authority; if(a.prod_authorized||a.prod_write_authorized||a.auto_merge_authorized||a.external_skill_code_execution_authorized||a.customer_data_authorized||a.trading_access||a.automatic_paid_fallback||a.additional_cost_eur!==0) process.exit(1); if(s.deployment_boundary.main_is_cloudflare_production_branch!==false||s.deployment_boundary.cloudflare_production_branch!=='deploy/cloudflare-prod') process.exit(1); console.log('184 authority boundary GREEN')"
+          node -e "const s=require('./cerebro/skills/cerebro-184-live-convergence.v2.json'); const r=require('./cerebro/skills/cerebro-184-items-1-24-live-reconciliation.v2.json'); const a=s.authority; const ra=r.authority; if(a.prod_authorized||a.prod_write_authorized||a.auto_merge_authorized||a.external_skill_code_execution_authorized||a.customer_data_authorized||a.trading_access||a.automatic_paid_fallback||a.additional_cost_eur!==0) process.exit(1); if(ra.prod_authorized||ra.prod_write_authorized||ra.auto_merge_authorized||ra.external_skill_code_execution_authorized||ra.external_dependency_install_authorized||ra.customer_data_authorized||ra.trading_access||ra.automatic_paid_fallback||ra.additional_cost_eur!==0) process.exit(1); if(s.normalized_item_count!==24||s.remaining_item_normalization_count!==160) process.exit(1); if(r.summary.active_unresolved!==0||r.summary.additional_cost_eur!==0||r.summary.external_code_executed!==false||r.summary.external_dependencies_installed.length!==0||r.summary.new_engine_ids_created.length!==0) process.exit(1); if(s.deployment_boundary.main_is_cloudflare_production_branch!==false||s.deployment_boundary.cloudflare_production_branch!=='deploy/cloudflare-prod') process.exit(1); console.log('184 authority and 1-24 reconciliation boundary GREEN')"
       - name: Upload convergence report
         uses: actions/upload-artifact@v4
         with:
