@@ -1,0 +1,21 @@
+{
+  "schema_version": "2.0.0",
+  "state_type": "CEREBRO_184_ITEMS_69_73_LIVE_RECONCILIATION_V2",
+  "generated_at": "2026-10-14",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v2",
+  "base_main_sha": "a90a27b88e9d335bc91817f2ffc597e394c5717f",
+  "status": "ITEM_LEVEL_RECONCILED_CURRENT_MAIN",
+  "catalog_range": "69-73",
+  "authority": {"prod_authorized":false,"prod_write_authorized":false,"auto_merge_authorized":false,"external_skill_code_execution_authorized":false,"external_dependency_install_authorized":false,"customer_data_authorized":false,"trading_access":false,"automatic_paid_fallback":false,"additional_cost_eur":0},
+  "items": [
+    {"id":69,"name":"Sales Navigator optional ROI","disposition":"HOLD","state":"TERMINAL_HOLD","owner_engine_ids":["LEAD-001","RSH-001","FINOPS-001"],"evidence":["cerebro/registry/company-intent-resolution-profile.v1.json"],"reason":"Optional existing-license signal source only when incremental cost is zero and measured ROI evidence exists. It is not a mandatory dependency and no new subscription is justified by this block."},
+    {"id":70,"name":"Gojiberry patterns","disposition":"REUTILIZAR","state":"PARTIAL_PREPROD_PATTERN_ONLY","owner_engine_ids":["LEAD-001","CAP-001"],"evidence":["cerebro/registry/company-intent-resolution-profile.v1.json"],"reason":"Deterministic zero-cost company-level intent and ICP prioritization patterns are already integrated locally. The paid provider/outreach runtime is deliberately not imported."},
+    {"id":71,"name":"MasLeads concept","disposition":"REUTILIZAR","state":"PARTIAL_PREPROD_POLICY_ONLY","owner_engine_ids":["LEAD-001","CAP-001"],"evidence":["cerebro/registry/company-intent-resolution-profile.v1.json"],"reason":"Company-visitor intent/fit concepts are represented as deterministic local policy. No external provider dependency, person-level enrichment or outreach is activated."},
+    {"id":72,"name":"Pearl Diver concept","disposition":"HOLD","state":"TERMINAL_HOLD","owner_engine_ids":["LEAD-001","EVT-001","POL-001"],"evidence":["cerebro/registry/company-intent-resolution-profile.v1.json"],"reason":"Company-level first-party resolution can be planned, but person/cross-device/anonymous third-party resolution is privacy-sensitive, requires legal review and cannot use fingerprinting or covert deanonymization. The external concept remains held."},
+    {"id":73,"name":"Beton Inspector LAB","disposition":"CATALOGAR","state":"LAB_REFERENCE_ONLY","owner_engine_ids":["LEAD-001","EVT-001","EVA-001"],"evidence":["cerebro/registry/company-intent-resolution-profile.v1.json"],"external_reference":{"repository":"getbeton/inspector","license":"AGPL-3.0","external_code_executed":false,"dependency_installed":false},"reason":"Self-hostable revenue-intelligence benchmark only. No code is imported or executed and no PostHog/CRM dependency is activated."}
+  ],
+  "summary":{"items_total":5,"full_preprod":0,"partial_active":2,"reference_only":1,"terminal_hold":2,"fabricate_free":0,"human_required":[],"additional_cost_eur":0,"prod_authorized":false,"next_gate":"NORMALIZE_ITEMS_74_82"}
+}
