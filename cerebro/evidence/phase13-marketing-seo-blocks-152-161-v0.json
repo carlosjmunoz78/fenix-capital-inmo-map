@@ -70,9 +70,16 @@
     "registry_validation_command": "cd cerebro && npm run validate",
     "full_regression_command": "cd cerebro && npm test",
     "ci_workflow": "CEREBRO Phase 13 Marketing SEO V0",
-    "ci_status": "PENDING_UNTIL_PR_RUN"
+    "verified_commit_sha": "73a4b63728c28bd0d2198144c5b8c61aff8d474e",
+    "focused_and_full_regression_run_id": 38539270188,
+    "focused_and_full_regression_status": "GREEN",
+    "governed_integration_run_id": 38539270168,
+    "governed_integration_status": "GREEN",
+    "promotion_readiness_shadow_run_id": 38539270102,
+    "promotion_readiness_shadow_status": "GREEN",
+    "ci_status": "GREEN_REVERIFY_CURRENT_HEAD_AFTER_EVIDENCE_ONLY_UPDATE"
   },
-  "promotion_state": "PREPROD_PLAN_ONLY_PENDING_CI",
+  "promotion_state": "PREPROD_CODE_TESTED_PLAN_ONLY",
   "rollback": "revert phase-13 PR/commit; V0 has no migrations or external marketing/SEO side effects",
-  "next_gate": "FOCUSED_CI_FULL_REGRESSION_THEN_LIVE_ADAPTER_AUDIT_EVA001_JDG001_BEFORE_ANY_PUBLISH_SPEND_WRITE_UPLOAD_OR_INSTALL"
+  "next_gate": "LIVE_ADAPTER_AUDIT_EVA001_JDG001_BEFORE_ANY_PUBLISH_SPEND_WRITE_UPLOAD_OR_INSTALL"
 }
