@@ -1,16 +1,16 @@
 {
-  "schema_version": "2.2.0",
+  "schema_version": "2.3.0",
   "state_type": "CEREBRO_184_LIVE_CONVERGENCE_V2",
   "generated_at": "2026-10-14",
   "company_id": "GLOBAL",
   "engine_id": "FACT-001",
   "environment": "PREPROD",
   "version": "v2",
-  "base_main_sha": "da47fc48eb4ccd35a7a2eb1b566a344a77e46c34",
+  "base_main_sha": "1a0411702aea63a6e9c7c3999388efd282243e48",
   "status": "ACTIVE_LIVE_CONVERGENCE",
   "catalog_size": 184,
-  "normalized_item_count": 50,
-  "remaining_item_normalization_count": 134,
+  "normalized_item_count": 61,
+  "remaining_item_normalization_count": 123,
   "source_policy": "CURRENT_MAIN_EVIDENCE_FIRST",
   "principles": {
     "preserve_existing": true,
@@ -38,11 +38,7 @@
     "cloudflare_production_branch": "deploy/cloudflare-prod",
     "main_is_cloudflare_production_branch": false
   },
-  "historical_drafts_superseded_for_live_state": [
-    631,
-    633,
-    636
-  ],
+  "historical_drafts_superseded_for_live_state": [631, 633, 636],
   "blocks": [
     {
       "range": "1-12",
@@ -92,12 +88,13 @@
       "range": "51-61",
       "count": 11,
       "domain": "Web Acquisition/Research/Competitor Intelligence",
-      "state": "INTEGRATED_MAIN_VALIDATED_WITH_CHILD_GAPS",
+      "state": "INTEGRATED_MAIN_ITEM_LEVEL_RECONCILED_WITH_GAPS",
       "registry": "cerebro/registry/web-acquisition-intelligence-profile.v1.json",
       "feature_pr": 657,
       "closeout_pr": 658,
-      "known_boundary": "WAUD/KW/SOCAUD/LOCALP existing; COMPET/Technology Scout partial; provider adapters are not falsely claimed live; Apify held.",
-      "next_gate": "PHYSICAL_PROVIDER_AND_COMPET_GAPS"
+      "item_level_reconciliation": "cerebro/skills/cerebro-184-items-51-61-live-reconciliation.v2.json",
+      "known_boundary": "WAUD/KW/SOCAUD/LOCALP are FULL_PREPROD; Web Acquisition and Technology Scout are partial governed surfaces; Scrapling/Crawlee/Agent-Reach remain catalogued candidates; Apify is terminal HOLD; COMPET-001 current-main runtime is a zero-cost FACT-001 gap.",
+      "next_gate": "FACT001_COMPET001_RUNTIME_AND_PHYSICAL_PROVIDER_GAPS"
     },
     {
       "range": "62-68",
@@ -225,21 +222,14 @@
     }
   ],
   "priority_queue": [
-    "NORMALIZE_PER_ITEM_STATUS_51_184_FROM_CURRENT_REGISTRY_EVIDENCE",
-    "ROUTE_FACT001_CAPABILITY_GAPS_47_48_PREPROD_ONLY",
+    "NORMALIZE_PER_ITEM_STATUS_62_184_FROM_CURRENT_REGISTRY_EVIDENCE",
+    "ROUTE_FACT001_CAPABILITY_GAPS_47_48_57_PREPROD_ONLY",
     "ROUTE_ONLY_REAL_GAPS_TO_EXISTING_ENGINE_OR_FACT001",
     "RUN_OLD_VS_NEW_TRIBUNAL_PREPROD_ROLLBACK_REBUILD",
     "PROMOTE_ONLY_GOVERNED_CAPABILITIES"
   ],
   "reporting_contract": {
-    "required": [
-      "FULL",
-      "ACTIVE",
-      "NEXT",
-      "REMAINING",
-      "HUMAN_REQUIRED",
-      "PROD"
-    ],
+    "required": ["FULL", "ACTIVE", "NEXT", "REMAINING", "HUMAN_REQUIRED", "PROD"],
     "do_not_count_block_integration_as_physical_child_activation": true,
     "do_not_count_184_capabilities_as_184_engines": true
   }
