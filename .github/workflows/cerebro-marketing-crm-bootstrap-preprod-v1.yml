@@ -1,0 +1,79 @@
+name: CEREBRO Marketing CRM Bootstrap PREPROD V1
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'cerebro/multicompany/marketing-crm-bootstrap-v1.mjs'
+      - 'cerebro/multicompany/sql/marketing-crm-bootstrap-preprod-v1.sql'
+      - 'cerebro/multicompany/rollback/marketing-crm-bootstrap-preprod-v1.rollback.sql'
+      - 'cerebro/tests/marketing-crm-bootstrap-v1.test.mjs'
+      - 'cerebro/tests/marketing-crm-bootstrap-preprod-persistence-v1.test.mjs'
+      - '.github/workflows/cerebro-marketing-crm-bootstrap-preprod-v1.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'cerebro/multicompany/marketing-crm-bootstrap-v1.mjs'
+      - 'cerebro/multicompany/sql/marketing-crm-bootstrap-preprod-v1.sql'
+      - 'cerebro/multicompany/rollback/marketing-crm-bootstrap-preprod-v1.rollback.sql'
+      - 'cerebro/tests/marketing-crm-bootstrap-v1.test.mjs'
+      - 'cerebro/tests/marketing-crm-bootstrap-preprod-persistence-v1.test.mjs'
+      - '.github/workflows/cerebro-marketing-crm-bootstrap-preprod-v1.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-marketing-crm-bootstrap-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: true
+
+env:
+  EXACT_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+
+jobs:
+  marketing-crm-bootstrap-preprod:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.EXACT_HEAD }}
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Assert exact PR head
+        run: test "$(git rev-parse HEAD)" = "$EXACT_HEAD"
+      - name: Validate canonical CEREBRO contracts
+        working-directory: cerebro
+        run: |
+          npm run validate
+          npm test
+      - name: Prove marketing CRM runtime and persistence contract
+        run: |
+          node --test \
+            cerebro/tests/marketing-crm-bootstrap-v1.test.mjs \
+            cerebro/tests/marketing-crm-bootstrap-preprod-persistence-v1.test.mjs
+      - name: Assert preservation and authority boundaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          runtime='cerebro/multicompany/marketing-crm-bootstrap-v1.mjs'
+          sql='cerebro/multicompany/sql/marketing-crm-bootstrap-preprod-v1.sql'
+          rollback='cerebro/multicompany/rollback/marketing-crm-bootstrap-preprod-v1.rollback.sql'
+          grep -F "MARKETING_CRM_ENGINE_IDS=Object.freeze(['MKTBOOT-001','CRMBOOT-001'])" "$runtime"
+          grep -F "MARKETING_CRM_ENVIRONMENT='PREPROD'" "$runtime"
+          grep -F "mode=existingRef?'WRAP_EXISTING':'TEMPLATE_ONLY'" "$runtime"
+          grep -F "paid_media_authorized:false" "$runtime"
+          grep -F "customer_data_copy_authorized:false" "$runtime"
+          grep -F "engine_id='APPBOOT-001' and state='BLOCKED'" "$sql"
+          grep -F "if v_kboot='GREEN' and v_crm='GREEN' then" "$sql"
+          grep -F 'enable row level security' "$sql"
+          grep -F 'to service_role' "$sql"
+          ! grep -F 'fenix_prod.' "$sql"
+          ! grep -Eqi '\btruncate\b|\bdelete[[:space:]]+from\b' "$sql"
+          ! grep -Fi 'cascade' "$rollback"
+      - name: Record boundary
+        run: |
+          echo 'MKTBOOT-001 is organic-first PLAN_ONLY with publication and paid media denied.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'CRMBOOT-001 wraps the existing CRM contract; schema writes, customer-data copy, destructive migration, PROD and Trading are denied.' >> "$GITHUB_STEP_SUMMARY"
