@@ -1,0 +1,143 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_PHASE13_MARKETING_SEO_FEEDBACK_PROFILE_V0",
+  "company_id": "fenix",
+  "environment_scope": "PREPROD",
+  "version": "0.1.0",
+  "updated_at": "2026-10-14",
+  "source_blocks": [152,153,154,155,156,157,158,159,160,161],
+  "create_new_engine": false,
+  "architectural_decision": "Compose existing canonical marketing, competition, evaluation, acquisition, SEO, local-presence, social-audit, web, learning and observability engines. Existing SEO-001 must be wrapped, not replaced.",
+  "canonical_engine_reuse": {
+    "marketing": "MKT-001",
+    "competitor_intelligence": "COMPET-001",
+    "evaluation": "EVA-001",
+    "acquisition": "CAP-001",
+    "seo": "SEO-001",
+    "local_presence": "LOCALP-001",
+    "social_audit": "SOCAUD-001",
+    "web": "WEB-001",
+    "learning": "LRN-001",
+    "observability": "OBSERV-001"
+  },
+  "source_contract": {
+    "152_claude_ads_patterns": "port patterns to provider-neutral Marketing/Ads skills; no Claude runtime dependency",
+    "153_ads_audit": "MKT-001 capability",
+    "154_competitor_ads_scan": "COMPET-001 capability using public/authorized evidence",
+    "155_creative_testing": "MKT-001 + EVA-001",
+    "156_landing_experimentation": "MKT-001 + CAP-001 + EVA-001",
+    "157_existing_seo": "wrap SEO-001; never replace",
+    "158_local_seo": "SEO-001 + LOCALP-001; no new engine unless audited gap",
+    "159_social_audit": "SOCAUD-001 + MKT-001 capability",
+    "160_c15t_libreconsent": "WEB/compliance LAB benchmark only",
+    "161_google_meta_offline_conversion_feedback": "CAP-001 + LRN-001 feedback seam"
+  },
+  "capabilities": {
+    "152": "PROVIDER_NEUTRAL_ADS_PATTERN_PLAN",
+    "153": "DETERMINISTIC_ADS_READINESS_AUDIT",
+    "154": "PUBLIC_OR_AUTHORIZED_COMPETITOR_ADS_SCAN_PLAN",
+    "155": "CREATIVE_EXPERIMENT_PLAN_NO_PUBLISH",
+    "156": "LANDING_EXPERIMENT_PLAN_NO_WEB_WRITE",
+    "157": "SEO001_EXISTING_WRAP_NO_REPLACEMENT",
+    "158": "LOCAL_SEO_GAP_PLAN_NO_GBP_WRITE",
+    "159": "SOCIAL_AUDIT_PUBLIC_OR_AUTHORIZED_NO_WRITE",
+    "160": "C15T_LIBRECONSENT_LAB_BENCHMARK_NO_INSTALL",
+    "161": "GOOGLE_META_OFFLINE_CONVERSION_FEEDBACK_PLAN_NO_UPLOAD"
+  },
+  "existing_seo_policy": {
+    "engine_id": "SEO-001",
+    "source_state": "OPERATIVO according to canonical master snapshot",
+    "replace_existing": false,
+    "wrap_existing": true,
+    "wordpress_write_authorized": false,
+    "gsc_write_authorized": false,
+    "seo_mutation_authorized": false,
+    "future_improvement_seams": ["RESEARCH","CONTENT","TECHNICAL","INTERNAL_LINKING","GSC_FEEDBACK","REFRESH"]
+  },
+  "source_access_policy": {
+    "competitor_and_social_scan": ["PUBLIC_WEB","AUTHORIZED_CONNECTOR","PUBLIC_OR_AUTHORIZED"],
+    "prohibited_scraping": false,
+    "provider_credentials_in_runtime": false
+  },
+  "consent_benchmark_policy": {
+    "tools": ["C15T","LIBRECONSENT"],
+    "mode": "LAB_ONLY",
+    "install_authorized": false,
+    "config_mutation_authorized": false,
+    "subscription_authorized": false,
+    "claimed_as_CONS-001_implementation": false
+  },
+  "offline_feedback_policy": {
+    "platforms": ["GOOGLE_ADS","META"],
+    "owner": "CAP-001",
+    "learning_target": "LRN-001",
+    "observability_target": "OBSERV-001",
+    "opaque_refs_only": true,
+    "upload_authorized": false,
+    "unknown_or_denied_consent_on_execution": "HUMAN_REQUIRED:LEGAL_REQUIRED"
+  },
+  "defaults": {
+    "ad_spend_authorized": false,
+    "budget_mutation_authorized": false,
+    "platform_publish_authorized": false,
+    "website_write_authorized": false,
+    "seo_write_authorized": false,
+    "gbp_write_authorized": false,
+    "social_write_authorized": false,
+    "offline_conversion_upload_authorized": false,
+    "consent_tool_install_authorized": false,
+    "crm_write_authorized": false,
+    "external_side_effect_authorized": false,
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "trading_access": false,
+    "additional_cost_eur": 0,
+    "supabase_required_for_v0_runtime": false,
+    "raw_pii_persistence": false,
+    "raw_platform_payload_persistence": false
+  },
+  "human_required_reasons": [
+    "LEGAL_REQUIRED","SIGNATURE_REQUIRED","LOW_CONFIDENCE","HIGH_RISK",
+    "POLICY_CONFLICT","SECURITY_INCIDENT","MONEY_LIMIT","CUSTOMER_HUMAN_REQUEST"
+  ],
+  "side_effect_gates": {
+    "spend_or_budget_increase": "MONEY_LIMIT",
+    "publish_write_upload_install": "POLICY_CONFLICT",
+    "offline_upload_without_validated_consent": "LEGAL_REQUIRED",
+    "cross_company": "SECURITY_INCIDENT",
+    "low_confidence": "LOW_CONFIDENCE",
+    "high_risk": "HIGH_RISK"
+  },
+  "idempotency": {
+    "runtime_key": "company_id|engine_id|request_id|operation",
+    "same_key_same_fingerprint": "RETURN_DUPLICATE",
+    "same_key_changed_fingerprint": "BLOCK_POLICY_CONFLICT"
+  },
+  "promotion_gates": {
+    "contracts": true,
+    "permissions": true,
+    "focused_tests": "REQUIRED",
+    "full_regression": "REQUIRED",
+    "evaluation": "REQUIRED_BEFORE_LIVE_PUBLISH_WRITE_OR_SPEND",
+    "tribunal": "REQUIRED_BEFORE_LIVE_PUBLISH_WRITE_OR_SPEND",
+    "observability": "METADATA_ONLY_V0",
+    "rollback": true,
+    "backup": "git branch/commit",
+    "rebuild": true,
+    "cost_measured": true,
+    "policy": true,
+    "preprod": true,
+    "live_marketing_mutation": false,
+    "autonomous_prod": false
+  },
+  "rollback": {
+    "strategy": "Revert the phase-13 commit/PR. V0 has no data migration, ad spend, publish, website/SEO/GBP/social write, consent-tool installation or offline-conversion upload."
+  },
+  "rebuild": {
+    "source_of_truth": [
+      "cerebro/registry/engine-registry.v1.json",
+      "cerebro/registry/phase13-marketing-seo-feedback-profile.v0.json",
+      "cerebro/marketing/phase13-marketing-seo-feedback-runtime-v0.mjs"
+    ]
+  }
+}
