@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 
 const ENVIRONMENT = 'PREPROD';
+const CONTEXT_VERSION = 'v0';
 const VERSION = 'brand-commerce-appfactory-v0';
 const OWNER_ENGINE = 'FACT-001';
 const CAPABILITY_ID = 'BRAND-COMMERCE-APPFACTORY';
@@ -117,6 +118,7 @@ function normalizeContext(raw) {
   if (context.engine_id !== OWNER_ENGINE) throw new Error(`context.engine_id must be ${OWNER_ENGINE}`);
   if (context.capability_id !== CAPABILITY_ID) throw new Error(`context.capability_id must be ${CAPABILITY_ID}`);
   if (context.environment !== ENVIRONMENT) throw new Error('phase15 V0 accepts exact PREPROD only');
+  if (context.version !== CONTEXT_VERSION) throw new Error(`context.version must be exact ${CONTEXT_VERSION}`);
   return context;
 }
 function commonGate(raw) {
@@ -131,7 +133,8 @@ function commonGate(raw) {
   if (raw.prod_write_requested === true || raw.publish_requested === true || raw.deploy_requested === true) {
     return blocked('PROD_OR_PUBLIC_WRITE_DISABLED', 'POLICY_CONFLICT', 'Phase15 V0 cannot deploy, publish or write PROD.');
   }
-  if (raw.purchase_requested === true || raw.subscription_requested === true || Number(raw.spend_cents ?? 0) > 0) {
+  const spendCents = finite(raw.spend_cents ?? 0, 'spend_cents', { min: 0, max: Number.MAX_SAFE_INTEGER });
+  if (raw.purchase_requested === true || raw.subscription_requested === true || spendCents > 0) {
     return blocked('SPEND_DISABLED', 'MONEY_LIMIT', 'Additional spend is disabled in V0.');
   }
   if (raw.network_call_requested === true || raw.install_requested === true || raw.external_provider_requested === true) {
@@ -206,7 +209,11 @@ export function buildCommerceAgentPlan(raw) {
     : mode === 'MERCHANT_AGENT'
       ? ['SALE-001','PAY-001','INV-001','COM-001']
       : ['SALE-001','PAY-001','INV-001'];
-  const block = mode === 'SHOPPING_AGENT' ? 179 : mode === 'MERCHANT_AGENT' ? 180 : 178;
+  const block = mode === 'SHOPPING_AGENT'
+    ? PHASE15_BLOCKS.SHOPPING_AGENT
+    : mode === 'MERCHANT_AGENT'
+      ? PHASE15_BLOCKS.MERCHANT_AGENT
+      : PHASE15_BLOCKS.CLAUDE_COMMERCE_AGENTS;
   return Object.freeze({
     allowed: true,
     status: 'PLAN_ONLY',
@@ -247,13 +254,14 @@ export function buildAppFactoryPlan(raw) {
   return Object.freeze({
     allowed: true,
     status: 'SCAFFOLD_PLAN_ONLY',
-    block: surface === 'WEB_APP' || surface === 'PWA' || surface === 'MOBILE_TEMPLATE' ? 183 : 181,
-    app_factory_block: 181,
-    templates_block: 183,
+    block: PHASE15_BLOCKS.APP_FACTORY,
+    app_factory_block: PHASE15_BLOCKS.APP_FACTORY,
+    templates_block: PHASE15_BLOCKS.APP_TEMPLATES,
     company_id: gate.context.company_id,
     plan,
     plan_hash: stableHash(plan),
     external_side_effect_executed: false,
+    prod_authorized: false,
     additional_cost_cents: 0
   });
 }
@@ -266,12 +274,13 @@ export function catalogSpecializedCapability(raw) {
   return Object.freeze({
     allowed: true,
     status: 'CATALOG_ONLY',
-    block: capability === 'BLINK' ? 182 : 184,
+    block: capability === 'BLINK' ? PHASE15_BLOCKS.BLINK : PHASE15_BLOCKS.TEXT_TO_CAD,
     capability,
     decision: capability === 'BLINK' ? 'REFERENCE_NO_INSTALL' : 'CATALOG_SPECIALIZED',
     install_authorized: false,
     provider_binding: false,
     external_side_effect_executed: false,
+    prod_authorized: false,
     additional_cost_cents: 0
   });
 }
@@ -279,8 +288,25 @@ export function catalogSpecializedCapability(raw) {
 export function phase15AutoPlan(raw) {
   const gate = commonGate(raw);
   if (!gate.allowed) return gate;
+
+  const brandboot = Object.freeze({
+    allowed: true,
+    status: 'REUSED_CONTRACT_SOURCE',
+    block: PHASE15_BLOCKS.BRANDBOOT,
+    capability: 'BRANDBOOT-001',
+    canonical_registry_promotion_claimed: false,
+    external_side_effect_executed: false,
+    prod_authorized: false,
+    additional_cost_cents: 0
+  });
+
   const brand = buildBrandTokens(raw.brand);
   if (!brand.allowed) return brand;
+
+  const claudeInput = raw.claude_commerce ?? { ...raw.shopping, mode: 'CLAUDE_COMMERCE_REFERENCE' };
+  const claudeReference = buildCommerceAgentPlan(claudeInput);
+  if (!claudeReference.allowed) return claudeReference;
+
   const shopping = buildCommerceAgentPlan(raw.shopping);
   if (!shopping.allowed) return shopping;
   const merchant = buildCommerceAgentPlan(raw.merchant);
@@ -291,17 +317,29 @@ export function phase15AutoPlan(raw) {
   if (!blink.allowed) return blink;
   const cad = catalogSpecializedCapability(raw.text_to_cad);
   if (!cad.allowed) return cad;
-  const fingerprint = stableHash({ company_id: gate.context.company_id, brand: brand.tokens_hash, shopping, merchant, app: app.plan_hash, blink: blink.block, cad: cad.block });
+
+  const fingerprint = stableHash({
+    company_id: gate.context.company_id,
+    brand: brand.tokens_hash,
+    claude_reference: claudeReference,
+    shopping,
+    merchant,
+    app: app.plan_hash,
+    blink: blink.block,
+    cad: cad.block
+  });
+
   return Object.freeze({
     allowed: true,
     status: 'PREPROD_AUTOMATION_PLAN_READY',
     version: VERSION,
+    context_version: CONTEXT_VERSION,
     company_id: gate.context.company_id,
-    blocks: Object.freeze([176,177,178,179,180,181,182,183,184]),
+    blocks: Object.freeze(Object.values(PHASE15_BLOCKS)),
     brandboot_state: 'EXISTING_LAB_CANDIDATE_NOT_PROMOTED_BY_THIS_RUNTIME',
-    steps: Object.freeze([brand, shopping, merchant, app, blink, cad]),
+    steps: Object.freeze([brandboot, brand, claudeReference, shopping, merchant, app, blink, cad]),
     idempotency_key: `phase15:${gate.context.company_id}:${fingerprint}`,
-    observable_metadata: Object.freeze({ capability_id: CAPABILITY_ID, environment: ENVIRONMENT, version: VERSION, fingerprint }),
+    observable_metadata: Object.freeze({ capability_id: CAPABILITY_ID, environment: ENVIRONMENT, version: VERSION, context_version: CONTEXT_VERSION, fingerprint }),
     automatic_ordinary_flow: true,
     external_side_effect_executed: false,
     prod_authorized: false,
@@ -311,6 +349,7 @@ export function phase15AutoPlan(raw) {
 
 export const PHASE15_RUNTIME = Object.freeze({
   environment: ENVIRONMENT,
+  context_version: CONTEXT_VERSION,
   version: VERSION,
   owner_engine: OWNER_ENGINE,
   capability_id: CAPABILITY_ID,
