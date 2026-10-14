@@ -1,0 +1,94 @@
+name: CEREBRO Skill Autonomy Safe Action Worker V1
+
+on:
+  workflow_run:
+    workflows:
+      - CEREBRO Skill AutoLoop Safe Handler V0
+    types:
+      - completed
+  schedule:
+    - cron: '47 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: cerebro-skill-autonomy-safe-action-worker-v1
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  actions: read
+
+env:
+  AUTOLOOP_STATE_BRANCH: cerebro/skill-autoloop-state-v0
+  AUTOLOOP_STATE_PATH: cerebro/runtime/skill-autoloop-state.v0.json
+
+jobs:
+  route-safe-action:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Run safe action worker contracts
+        run: node --test cerebro/tests/skill-autonomy-action-application-v1.test.mjs cerebro/tests/skill-autonomy-safe-action-worker-v1.test.mjs cerebro/tests/skill-autoloop-safe-handler.test.mjs cerebro/tests/skill-capability-evolution.test.mjs cerebro/tests/skill-capability-evolution-bridge.test.mjs cerebro/tests/fact001-request-runner.test.mjs
+
+      - name: Load durable Skill AutoLoop state
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/autoloop
+          git fetch --no-tags origin "refs/heads/$AUTOLOOP_STATE_BRANCH:refs/remotes/origin/$AUTOLOOP_STATE_BRANCH"
+          git show "refs/remotes/origin/$AUTOLOOP_STATE_BRANCH:$AUTOLOOP_STATE_PATH" > artifacts/autoloop/state.before-action-worker.json
+
+      - name: Route one safe queued action to the existing governed pipeline
+        run: |
+          node cerebro/skills/skill-autonomy-safe-action-worker-v1.mjs \
+            --state artifacts/autoloop/state.before-action-worker.json \
+            --output artifacts/autoloop/state.after-action-worker.json \
+            --handoff-output artifacts/autoloop/action-handoff.json
+
+      - name: Enforce no-PROD no-Trading zero-cost action-worker boundary
+        run: |
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          import {validateSafeAutoloopState} from './cerebro/skills/skill-autoloop-controller.mjs';
+          const state=JSON.parse(fs.readFileSync('artifacts/autoloop/state.after-action-worker.json','utf8'));
+          const evidence=JSON.parse(fs.readFileSync('artifacts/autoloop/action-handoff.json','utf8'));
+          const safety=validateSafeAutoloopState(state);
+          if(!safety.green) throw new Error(JSON.stringify(safety));
+          if(evidence.prod_authorized!==false||evidence.prod_write_authorized!==false||evidence.trading_access!==false||Number(evidence.additional_cost_eur)!==0) throw new Error('SAFE_ACTION_WORKER_AUTHORITY_EXPANSION');
+          if(evidence.handoff){
+            const h=evidence.handoff;
+            if(h.prod_authorized!==false||h.prod_write_authorized!==false||h.trading_access!==false||h.external_skill_code_execution_authorized!==false||h.paid_activation_authorized!==false||h.auto_merge_authorized!==false||Number(h.additional_cost_eur)!==0) throw new Error('HANDOFF_AUTHORITY_EXPANSION');
+            if(h.state_type==='CEREBRO_FACT001_CAPABILITY_GAP_HANDOFF'&&(h.factory_create_authorized!==false||h.registry_change_authorized!==false||h.new_engine_id!==null)) throw new Error('FACT001_GAP_DIRECT_CREATION_FORBIDDEN');
+          }
+          console.log(JSON.stringify({status:evidence.status,handoff_type:evidence.handoff?.state_type??null,next_gate:evidence.handoff?.next_gate??null,queue_depth:Object.keys(state.autonomy_action_queue??{}).length,prod_authorized:false,trading_access:false,additional_cost_eur:0}));
+          NODE
+
+      - name: Persist action routing state only from default branch execution
+        if: github.ref == 'refs/heads/main'
+        run: |
+          set -euo pipefail
+          cp artifacts/autoloop/state.after-action-worker.json /tmp/state.json
+          git fetch --no-tags origin "refs/heads/$AUTOLOOP_STATE_BRANCH:refs/remotes/origin/$AUTOLOOP_STATE_BRANCH"
+          git checkout --detach "refs/remotes/origin/$AUTOLOOP_STATE_BRANCH"
+          cp /tmp/state.json "$AUTOLOOP_STATE_PATH"
+          git config user.name "cerebro-autoloop[bot]"
+          git config user.email "cerebro-autoloop[bot]@users.noreply.github.com"
+          git add "$AUTOLOOP_STATE_PATH"
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(cerebro): route one safe Skill autonomy action"
+            git push origin "HEAD:refs/heads/$AUTOLOOP_STATE_BRANCH"
+          fi
+
+      - name: Upload immutable action handoff evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-skill-autonomy-action-worker-${{ github.run_id }}
+          path: artifacts/autoloop/*.json
+          if-no-files-found: error
+          retention-days: 30
