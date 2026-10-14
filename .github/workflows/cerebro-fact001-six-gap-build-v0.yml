@@ -6,12 +6,16 @@ on:
       - 'cerebro/runtime/fact001-gap-capabilities-v0.mjs'
       - 'cerebro/tests/fact001-gap-capabilities-v0.test.mjs'
       - 'cerebro/registry/fact001-gap-capabilities.v0.json'
+      - 'cerebro/registry/fact001-six-gap-old-vs-new.v0.json'
+      - 'cerebro/skills/cerebro-184-live-convergence.v2.json'
       - '.github/workflows/cerebro-fact001-six-gap-build-v0.yml'
   pull_request:
     paths:
       - 'cerebro/runtime/fact001-gap-capabilities-v0.mjs'
       - 'cerebro/tests/fact001-gap-capabilities-v0.test.mjs'
       - 'cerebro/registry/fact001-gap-capabilities.v0.json'
+      - 'cerebro/registry/fact001-six-gap-old-vs-new.v0.json'
+      - 'cerebro/skills/cerebro-184-live-convergence.v2.json'
       - '.github/workflows/cerebro-fact001-six-gap-build-v0.yml'
   workflow_dispatch:
 
@@ -37,7 +41,7 @@ jobs:
         run: npm test
       - name: Enforce zero-cost authority boundary
         run: >-
-          node --input-type=module -e "import {FACT001_GAP_CAPABILITIES_V0_CONTRACT as c} from './cerebro/runtime/fact001-gap-capabilities-v0.mjs'; import fs from 'node:fs'; const p=JSON.parse(fs.readFileSync('./cerebro/registry/fact001-gap-capabilities.v0.json','utf8')); const exact=JSON.stringify(c.item_ids)===JSON.stringify([47,48,57,62,74,183]); const denied=c.prod_authorized||c.prod_write_authorized||c.trading_access||c.external_dependency_install||c.external_network_execution||c.additional_cost_eur!==0||c.new_engine_ids_created.length!==0||p.authority.prod_authorized||p.authority.prod_write_authorized||p.authority.trading_access||p.authority.external_dependency_install_authorized||p.authority.external_code_execution_authorized||p.authority.customer_data_authorized||p.authority.automatic_paid_fallback||p.authority.additional_cost_eur!==0; if(!exact||denied) process.exit(1); console.log(JSON.stringify({status:'GREEN',items:c.item_ids,cost_eur:0,prod:false,trading:false,new_engine_ids:0}));"
-      - name: Assert physical gaps remain explicit
+          node --input-type=module -e "import {FACT001_GAP_CAPABILITIES_V0_CONTRACT as c} from './cerebro/runtime/fact001-gap-capabilities-v0.mjs'; import fs from 'node:fs'; const p=JSON.parse(fs.readFileSync('./cerebro/registry/fact001-gap-capabilities.v0.json','utf8')); const e=JSON.parse(fs.readFileSync('./cerebro/registry/fact001-six-gap-old-vs-new.v0.json','utf8')); const exact=JSON.stringify(c.item_ids)===JSON.stringify([47,48,57,62,74,183]); const denied=c.prod_authorized||c.prod_write_authorized||c.trading_access||c.external_dependency_install||c.external_network_execution||c.additional_cost_eur!==0||c.new_engine_ids_created.length!==0||p.authority.prod_authorized||p.authority.prod_write_authorized||p.authority.trading_access||p.authority.external_dependency_install_authorized||p.authority.external_code_execution_authorized||p.authority.customer_data_authorized||p.authority.automatic_paid_fallback||p.authority.additional_cost_eur!==0||e.authority.prod_authorized||e.authority.prod_write_authorized||e.authority.trading_access||e.authority.external_dependency_install_authorized||e.authority.external_code_execution_authorized||e.authority.automatic_paid_fallback||e.authority.additional_cost_eur!==0; if(!exact||denied) process.exit(1); console.log(JSON.stringify({status:'GREEN',items:c.item_ids,cost_eur:0,prod:false,trading:false,new_engine_ids:0}));"
+      - name: Assert OLD vs NEW evidence and physical gaps remain explicit
         run: >-
-          node -e "const p=require('./cerebro/registry/fact001-gap-capabilities.v0.json'); const rows=Object.values(p.capabilities); if(rows.length!==6||rows.some(x=>!x.remaining_gate||!x.physical_state)) process.exit(1); if(p.status!=='PREPROD_CANDIDATE_PENDING_CI') process.exit(1); console.log('physical gaps explicit and fail-closed');"
+          node -e "const p=require('./cerebro/registry/fact001-gap-capabilities.v0.json'); const e=require('./cerebro/registry/fact001-six-gap-old-vs-new.v0.json'); const rows=Object.values(p.capabilities); if(rows.length!==6||rows.some(x=>!x.remaining_gate||!x.physical_state)) process.exit(1); if(p.status!=='VERIFIED_PREPROD_CORE_PHYSICAL_BINDINGS_PENDING') process.exit(1); if(e.global_decision!=='NEW_BETTER_NO_REGRESSION_AT_PREPROD_CORE_SCOPE') process.exit(1); if(Object.keys(e.item_decisions).length!==6||Object.values(e.item_decisions).some(x=>!x.remaining||x.decision!=='NEW_BETTER_AT_DECLARED_PREPROD_SCOPE')) process.exit(1); console.log('OLD vs NEW green at PREPROD core scope; physical gaps explicit and fail-closed');"
