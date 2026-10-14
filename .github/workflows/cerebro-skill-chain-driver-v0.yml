@@ -4,16 +4,14 @@ on:
   workflow_run:
     workflows:
       - CEREBRO Skill Discovery Scout
-      - CEREBRO Skill AutoLoop Safe V0
-      - CEREBRO Skill AutoLoop Safe Handler V0
-      - CEREBRO Skill Priority Ladder V0
     types:
       - completed
+  schedule:
+    - cron: '29 * * * *'
   push:
     branches:
       - main
-      - cerebro/skill-chain-driver-v0-20261011
-      - cerebro/skill-chain-autonomous-bootstrap-v1-20261014
+      - cerebro/skill-chain-supervisor-v1-20261014
     paths:
       - '.github/workflows/cerebro-skill-chain-driver-v0.yml'
   workflow_dispatch:
@@ -32,12 +30,13 @@ env:
   AUTOLOOP_WORKFLOW: cerebro-skill-autoloop-safe.yml
   SAFE_HANDLER_WORKFLOW: cerebro-skill-autoloop-safe-handler.yml
   PRIORITY_LADDER_WORKFLOW: cerebro-skill-priority-ladder-v0.yml
+  MAX_CHAIN_STEPS: '40'
 
 jobs:
   route-next-safe-skill:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
         with:
@@ -47,7 +46,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p artifacts/skill-chain
-          git fetch --no-tags origin "refs/heads/$AUTOLOOP_STATE_BRANCH:refs/remotes/origin/$AUTOLOOP_STATE_BRANCH"
+          git fetch --force --no-tags origin "refs/heads/$AUTOLOOP_STATE_BRANCH:refs/remotes/origin/$AUTOLOOP_STATE_BRANCH"
           git show "refs/remotes/origin/$AUTOLOOP_STATE_BRANCH:$AUTOLOOP_STATE_PATH" > artifacts/skill-chain/state.json
           node --input-type=module - <<'NODE'
           import fs from 'node:fs';
@@ -55,27 +54,14 @@ jobs:
           const s=JSON.parse(fs.readFileSync('artifacts/skill-chain/state.json','utf8'));
           const v=validateSafeAutoloopState(s);
           if(!v.green) throw new Error(JSON.stringify(v));
-          if(s.safe_autonomy.prod_write!==false||s.safe_autonomy.external_skill_code_execution!==false||s.safe_autonomy.customer_data!==false||s.safe_autonomy.trading!==false||s.safe_autonomy.paid_fallback!==false||s.safe_autonomy.additional_cost_budget_eur!==0) throw new Error('SKILL_CHAIN_SAFETY_INVARIANT_FAILED');
+          const a=s.safe_autonomy??{};
+          if(a.prod_write!==false||a.external_skill_code_execution!==false||a.customer_data!==false||a.trading!==false||a.paid_fallback!==false||a.additional_cost_budget_eur!==0) throw new Error('SKILL_CHAIN_SAFETY_INVARIANT_FAILED');
           NODE
 
-      - name: Load Priority Ladder terminal evidence when it is the source
-        if: github.event_name == 'workflow_run' && github.event.workflow_run.name == 'CEREBRO Skill Priority Ladder V0' && github.event.workflow_run.conclusion == 'success'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          SOURCE_RUN_ID: ${{ github.event.workflow_run.id }}
-        run: |
-          set -euo pipefail
-          mkdir -p artifacts/skill-chain/source
-          gh run download "$SOURCE_RUN_ID" --repo "$GITHUB_REPOSITORY" --name "cerebro-skill-discovery-$SOURCE_RUN_ID" --dir artifacts/skill-chain/source
-          DECISION_FILE="$(find artifacts/skill-chain/source -type f -name 'decision.json' | head -n 1)"
-          test -n "$DECISION_FILE"
-          cp "$DECISION_FILE" artifacts/skill-chain/priority-decision.json
-
-      - name: Route only the next safe step
+      - name: Route bootstrap safely
         id: route
         env:
           EVENT_NAME: ${{ github.event_name }}
-          SOURCE_WORKFLOW: ${{ github.event.workflow_run.name }}
           SOURCE_BRANCH: ${{ github.event.workflow_run.head_branch }}
           SOURCE_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
           CURRENT_REF: ${{ github.ref }}
@@ -85,109 +71,187 @@ jobs:
           const s=JSON.parse(fs.readFileSync('artifacts/skill-chain/state.json','utf8'));
           const waitingSafe=Object.keys(s.waiting_safe_handler??{}).length;
           const inFlight=Object.keys(s.in_flight??{}).length;
-          const priorityDecision=fs.existsSync('artifacts/skill-chain/priority-decision.json')
-            ? JSON.parse(fs.readFileSync('artifacts/skill-chain/priority-decision.json','utf8')).decision ?? null
-            : null;
 
-          function decideRoute({event,source='',sourceBranch='',sourceConclusion='',currentRef='',waitingSafe=0,inFlight=0,priorityDecision=null}){
+          function bootstrapRoute({event,sourceBranch='',sourceConclusion='',currentRef='',waitingSafe=0,inFlight=0}){
             let target='NONE';
-            let reason='NO_SAFE_NEXT_STEP';
+            let reason='NO_SAFE_BOOTSTRAP';
             let allowDispatch=false;
-
             if(event==='workflow_run'){
               allowDispatch=sourceBranch==='main'&&sourceConclusion==='success';
-              if(!allowDispatch) return {target,reason:'SOURCE_NOT_AUTHORIZED_FOR_CHAIN',allowDispatch};
-
-              if(source==='CEREBRO Skill Discovery Scout'){
-                if(inFlight>0){reason='DISCOVERY_IN_FLIGHT_PRESENT_FAIL_CLOSED';}
-                else if(waitingSafe>0){target='SAFE_HANDLER';reason='DISCOVERY_FOUND_EXISTING_WAITING_SAFE';}
-                else {target='AUTOLOOP_SAFE';reason='DISCOVERY_BOOTSTRAP_P0_AUTOLOOP';}
-              } else if(source==='CEREBRO Skill AutoLoop Safe V0'){
-                if(inFlight>0){reason='AUTOLOOP_IN_FLIGHT_PRESENT_FAIL_CLOSED';}
-                else if(waitingSafe>0){target='SAFE_HANDLER';reason='AUTOLOOP_CHECKPOINT_READY';}
-                else {target='PRIORITY_LADDER';reason='P0_EXHAUSTED_TRY_P1_P2';}
-              } else if(source==='CEREBRO Skill AutoLoop Safe Handler V0'){
-                if(waitingSafe===0&&inFlight===0){target='PRIORITY_LADDER';reason='HANDLER_TERMINAL_NEXT_CANDIDATE';}
-                else if(waitingSafe>0){reason='SAFE_HANDLER_RETRY_LEFT_TO_NORMAL_CADENCE';}
-                else {reason='IN_FLIGHT_PRESENT_FAIL_CLOSED';}
-              } else if(source==='CEREBRO Skill Priority Ladder V0'){
-                if(inFlight>0){reason='LADDER_IN_FLIGHT_PRESENT_FAIL_CLOSED';}
-                else if(waitingSafe>0){target='SAFE_HANDLER';reason='LADDER_CHECKPOINT_READY';}
-                else if(priorityDecision==='DEFER_TO_EXISTING_P0_AUTOLOOP'){
-                  target='AUTOLOOP_SAFE';reason='LADDER_DEFERRED_TO_P0_AUTOLOOP';
-                } else if(priorityDecision===null){
-                  reason='LADDER_EVIDENCE_MISSING_FAIL_CLOSED';
-                } else {
-                  reason='LADDER_TERMINAL_OR_NO_ELIGIBLE_CANDIDATE';
-                }
-              }
-            } else if(event==='workflow_dispatch'){
+              if(!allowDispatch) return {target,reason:'DISCOVERY_SOURCE_NOT_AUTHORIZED',allowDispatch};
+            } else if(event==='schedule') {
+              allowDispatch=true;
+            } else if(event==='workflow_dispatch') {
               allowDispatch=currentRef==='refs/heads/main';
-              if(!allowDispatch){reason='MANUAL_BOOTSTRAP_NON_MAIN_DRY_RUN';}
-              else if(inFlight>0){reason='MANUAL_BOOTSTRAP_IN_FLIGHT_FAIL_CLOSED';}
-              else if(waitingSafe>0){target='SAFE_HANDLER';reason='MANUAL_BOOTSTRAP_WAITING_SAFE';}
-              else {target='AUTOLOOP_SAFE';reason='MANUAL_BOOTSTRAP_P0_FIRST';}
-            } else if(event==='push'){
+              if(!allowDispatch) return {target,reason:'MANUAL_BOOTSTRAP_NON_MAIN_DRY_RUN',allowDispatch};
+            } else if(event==='push') {
               allowDispatch=currentRef==='refs/heads/main';
-              if(!allowDispatch){reason='BRANCH_PUSH_DRY_RUN_ONLY';}
-              else if(inFlight>0){reason='MAIN_PUSH_IN_FLIGHT_FAIL_CLOSED';}
-              else if(waitingSafe>0){target='SAFE_HANDLER';reason='MAIN_PUSH_RESUME_WAITING_SAFE';}
-              else {target='AUTOLOOP_SAFE';reason='MAIN_PUSH_BOOTSTRAP_P0_AUTOLOOP';}
+              if(!allowDispatch) return {target,reason:'BRANCH_PUSH_DRY_RUN_ONLY',allowDispatch};
             }
-            return {target,reason,allowDispatch};
+            if(!allowDispatch) return {target,reason,allowDispatch};
+            if(inFlight>0) return {target,reason:'IN_FLIGHT_PRESENT_FAIL_CLOSED',allowDispatch};
+            if(waitingSafe>0) return {target:'SAFE_HANDLER',reason:'RESUME_WAITING_SAFE',allowDispatch};
+            return {target:'AUTOLOOP_SAFE',reason:'BOOTSTRAP_P0_AUTOLOOP',allowDispatch};
           }
 
-          const cases=[
-            [{event:'workflow_run',source:'CEREBRO Skill Discovery Scout',sourceBranch:'main',sourceConclusion:'success'},'AUTOLOOP_SAFE'],
-            [{event:'workflow_run',source:'CEREBRO Skill Discovery Scout',sourceBranch:'main',sourceConclusion:'success',waitingSafe:1},'SAFE_HANDLER'],
-            [{event:'workflow_run',source:'CEREBRO Skill AutoLoop Safe V0',sourceBranch:'main',sourceConclusion:'success',waitingSafe:1},'SAFE_HANDLER'],
-            [{event:'workflow_run',source:'CEREBRO Skill AutoLoop Safe V0',sourceBranch:'main',sourceConclusion:'success'},'PRIORITY_LADDER'],
-            [{event:'workflow_run',source:'CEREBRO Skill AutoLoop Safe Handler V0',sourceBranch:'main',sourceConclusion:'success'},'PRIORITY_LADDER'],
-            [{event:'workflow_run',source:'CEREBRO Skill Priority Ladder V0',sourceBranch:'main',sourceConclusion:'success',waitingSafe:1},'SAFE_HANDLER'],
-            [{event:'workflow_run',source:'CEREBRO Skill Priority Ladder V0',sourceBranch:'main',sourceConclusion:'success',priorityDecision:'DEFER_TO_EXISTING_P0_AUTOLOOP'},'AUTOLOOP_SAFE'],
-            [{event:'workflow_run',source:'CEREBRO Skill Priority Ladder V0',sourceBranch:'main',sourceConclusion:'success',priorityDecision:'NO_ELIGIBLE_CANDIDATE'},'NONE'],
+          const matrix=[
+            [{event:'workflow_run',sourceBranch:'main',sourceConclusion:'success'},'AUTOLOOP_SAFE'],
+            [{event:'workflow_run',sourceBranch:'main',sourceConclusion:'success',waitingSafe:1},'SAFE_HANDLER'],
+            [{event:'workflow_run',sourceBranch:'dev',sourceConclusion:'success'},'NONE'],
+            [{event:'schedule'},'AUTOLOOP_SAFE'],
+            [{event:'schedule',waitingSafe:1},'SAFE_HANDLER'],
             [{event:'workflow_dispatch',currentRef:'refs/heads/main'},'AUTOLOOP_SAFE'],
             [{event:'push',currentRef:'refs/heads/main'},'AUTOLOOP_SAFE'],
-            [{event:'push',currentRef:'refs/heads/cerebro/test'},'NONE']
+            [{event:'push',currentRef:'refs/heads/cerebro/test'},'NONE'],
+            [{event:'schedule',inFlight:1},'NONE']
           ];
-          for(const [input,expected] of cases){
-            const actual=decideRoute(input);
-            if(actual.target!==expected) throw new Error(`ROUTING_MATRIX_FAILED expected=${expected} actual=${actual.target} input=${JSON.stringify(input)}`);
+          for(const [input,expected] of matrix){
+            const actual=bootstrapRoute(input);
+            if(actual.target!==expected) throw new Error(`BOOTSTRAP_MATRIX_FAILED expected=${expected} actual=${actual.target} input=${JSON.stringify(input)}`);
           }
 
-          const out=decideRoute({
-            event:process.env.EVENT_NAME,
-            source:process.env.SOURCE_WORKFLOW||'',
-            sourceBranch:process.env.SOURCE_BRANCH||'',
-            sourceConclusion:process.env.SOURCE_CONCLUSION||'',
-            currentRef:process.env.CURRENT_REF||'',
-            waitingSafe,
-            inFlight,
-            priorityDecision
-          });
-          const report={schema_version:'1.1.0',event:process.env.EVENT_NAME,source_workflow:process.env.SOURCE_WORKFLOW||null,source_branch:process.env.SOURCE_BRANCH||null,waiting_safe_handler:waitingSafe,in_flight:inFlight,priority_decision:priorityDecision,target:out.target,reason:out.reason,allow_dispatch:out.allowDispatch,routing_matrix_passed:true,prod_authorized:false,prod_write:false,customer_data_used:false,external_skill_code_execution:false,trading_access:false,paid_fallback:false,additional_cost_eur:0};
+          const out=bootstrapRoute({event:process.env.EVENT_NAME,sourceBranch:process.env.SOURCE_BRANCH||'',sourceConclusion:process.env.SOURCE_CONCLUSION||'',currentRef:process.env.CURRENT_REF||'',waitingSafe,inFlight});
+          const report={schema_version:'2.0.0',event:process.env.EVENT_NAME,source_branch:process.env.SOURCE_BRANCH||null,waiting_safe_handler:waitingSafe,in_flight:inFlight,target:out.target,reason:out.reason,allow_dispatch:out.allowDispatch,bootstrap_matrix_passed:true,prod_authorized:false,prod_write:false,customer_data_used:false,external_skill_code_execution:false,trading_access:false,paid_fallback:false,additional_cost_eur:0};
           fs.writeFileSync('artifacts/skill-chain/route.json',JSON.stringify(report,null,2)+'\n');
           fs.appendFileSync(process.env.GITHUB_OUTPUT,`target=${out.target}\n`);
           fs.appendFileSync(process.env.GITHUB_OUTPUT,`allow_dispatch=${out.allowDispatch}\n`);
           console.log(JSON.stringify(report));
           NODE
 
-      - name: Dispatch exactly one next workflow
+      - name: Run bounded autonomous safe chain
         if: steps.route.outputs.allow_dispatch == 'true' && steps.route.outputs.target != 'NONE'
         env:
           GH_TOKEN: ${{ github.token }}
-          TARGET: ${{ steps.route.outputs.target }}
+          INITIAL_TARGET: ${{ steps.route.outputs.target }}
         run: |
           set -euo pipefail
-          if [ "$TARGET" = AUTOLOOP_SAFE ]; then
-            gh workflow run "$AUTOLOOP_WORKFLOW" --repo "$GITHUB_REPOSITORY" --ref main
-          elif [ "$TARGET" = SAFE_HANDLER ]; then
-            gh workflow run "$SAFE_HANDLER_WORKFLOW" --repo "$GITHUB_REPOSITORY" --ref main
-          elif [ "$TARGET" = PRIORITY_LADDER ]; then
-            gh workflow run "$PRIORITY_LADDER_WORKFLOW" --repo "$GITHUB_REPOSITORY" --ref main
-          else
-            echo "Unexpected target: $TARGET" >&2
-            exit 1
+          target="$INITIAL_TARGET"
+          step=0
+          mkdir -p artifacts/skill-chain/children artifacts/skill-chain/priority
+          : > artifacts/skill-chain/chain.jsonl
+
+          state_sha() {
+            git fetch --force --no-tags origin "refs/heads/$AUTOLOOP_STATE_BRANCH:refs/remotes/origin/$AUTOLOOP_STATE_BRANCH" >/dev/null 2>&1
+            git rev-parse "refs/remotes/origin/$AUTOLOOP_STATE_BRANCH"
+          }
+
+          load_state() {
+            git show "refs/remotes/origin/$AUTOLOOP_STATE_BRANCH:$AUTOLOOP_STATE_PATH" > artifacts/skill-chain/state.json
+            node --input-type=module -e "import fs from 'node:fs'; import {validateSafeAutoloopState} from './cerebro/skills/skill-autoloop-controller.mjs'; const s=JSON.parse(fs.readFileSync('artifacts/skill-chain/state.json','utf8')); const v=validateSafeAutoloopState(s); if(!v.green) throw new Error(JSON.stringify(v)); const a=s.safe_autonomy??{}; if(a.prod_write!==false||a.external_skill_code_execution!==false||a.customer_data!==false||a.trading!==false||a.paid_fallback!==false||a.additional_cost_budget_eur!==0) throw new Error('SKILL_CHAIN_SAFETY_INVARIANT_FAILED');"
+          }
+
+          child_workflow() {
+            case "$1" in
+              AUTOLOOP_SAFE) echo "$AUTOLOOP_WORKFLOW" ;;
+              SAFE_HANDLER) echo "$SAFE_HANDLER_WORKFLOW" ;;
+              PRIORITY_LADDER) echo "$PRIORITY_LADDER_WORKFLOW" ;;
+              *) return 1 ;;
+            esac
+          }
+
+          dispatch_and_wait() {
+            local logical="$1"
+            local wf before ids run_id attempt
+            wf="$(child_workflow "$logical")"
+            before="$(gh run list --repo "$GITHUB_REPOSITORY" --workflow "$wf" --event workflow_dispatch --branch main --limit 30 --json databaseId --jq '.[].databaseId' | tr '\n' ' ')"
+            gh workflow run "$wf" --repo "$GITHUB_REPOSITORY" --ref main
+            run_id=""
+            for attempt in $(seq 1 30); do
+              ids="$(gh run list --repo "$GITHUB_REPOSITORY" --workflow "$wf" --event workflow_dispatch --branch main --limit 30 --json databaseId --jq '.[].databaseId')"
+              while IFS= read -r candidate; do
+                [ -z "$candidate" ] && continue
+                case " $before " in
+                  *" $candidate "*) ;;
+                  *) run_id="$candidate"; break ;;
+                esac
+              done <<< "$ids"
+              [ -n "$run_id" ] && break
+              sleep 2
+            done
+            if [ -z "$run_id" ]; then
+              echo "Unable to resolve child run for $logical" >&2
+              return 1
+            fi
+            echo "$run_id" > "artifacts/skill-chain/children/${step}-${logical}.run_id"
+            gh run watch "$run_id" --repo "$GITHUB_REPOSITORY" --exit-status --interval 3 >&2
+            echo "$run_id"
+          }
+
+          seen="|"
+          stop_reason="MAX_CHAIN_STEPS_REACHED"
+          while [ "$target" != "NONE" ] && [ "$step" -lt "$MAX_CHAIN_STEPS" ]; do
+            step=$((step+1))
+            before_state_sha="$(state_sha)"
+            load_state
+            signature="${target}:${before_state_sha}"
+            case "$seen" in
+              *"|${signature}|"*)
+                stop_reason="STATE_ROUTE_CYCLE_DETECTED_FAIL_CLOSED"
+                target="NONE"
+                break
+                ;;
+            esac
+            seen="${seen}${signature}|"
+
+            logical="$target"
+            run_id="$(dispatch_and_wait "$logical")"
+            priority_decision=""
+            if [ "$logical" = "PRIORITY_LADDER" ]; then
+              rm -rf artifacts/skill-chain/priority/current
+              mkdir -p artifacts/skill-chain/priority/current
+              gh run download "$run_id" --repo "$GITHUB_REPOSITORY" --name "cerebro-skill-discovery-$run_id" --dir artifacts/skill-chain/priority/current
+              decision_file="$(find artifacts/skill-chain/priority/current -type f -name 'decision.json' | head -n 1)"
+              if [ -z "$decision_file" ]; then
+                echo "Priority Ladder decision evidence missing" >&2
+                exit 1
+              fi
+              priority_decision="$(node -e "const d=require('./$decision_file'); process.stdout.write(String(d.decision||''))")"
+              cp "$decision_file" "artifacts/skill-chain/priority/${step}-${run_id}-decision.json"
+            fi
+
+            after_state_sha="$(state_sha)"
+            load_state
+            read -r waiting in_flight processed <<< "$(node -e "const fs=require('fs'); const s=JSON.parse(fs.readFileSync('artifacts/skill-chain/state.json','utf8')); process.stdout.write([Object.keys(s.waiting_safe_handler||{}).length,Object.keys(s.in_flight||{}).length,(s.processed_candidate_ids||[]).length].join(' '));")"
+
+            next="NONE"
+            reason="TERMINAL_OR_NO_ELIGIBLE_CANDIDATE"
+            if [ "$in_flight" -gt 0 ]; then
+              next="NONE"; reason="IN_FLIGHT_PRESENT_FAIL_CLOSED"
+            elif [ "$logical" = "AUTOLOOP_SAFE" ]; then
+              if [ "$waiting" -gt 0 ]; then next="SAFE_HANDLER"; reason="AUTOLOOP_CHECKPOINT_READY"; else next="PRIORITY_LADDER"; reason="P0_EXHAUSTED_TRY_P1_P2"; fi
+            elif [ "$logical" = "SAFE_HANDLER" ]; then
+              if [ "$waiting" -gt 0 ]; then next="NONE"; reason="SAFE_HANDLER_RETRY_LEFT_TO_NORMAL_CADENCE"; else next="PRIORITY_LADDER"; reason="HANDLER_TERMINAL_NEXT_CANDIDATE"; fi
+            elif [ "$logical" = "PRIORITY_LADDER" ]; then
+              if [ "$waiting" -gt 0 ]; then
+                next="SAFE_HANDLER"; reason="LADDER_CHECKPOINT_READY"
+              elif [ "$priority_decision" = "DEFER_TO_EXISTING_P0_AUTOLOOP" ]; then
+                next="AUTOLOOP_SAFE"; reason="LADDER_DEFERRED_TO_P0_AUTOLOOP"
+              else
+                next="NONE"; reason="LADDER_TERMINAL_OR_NO_ELIGIBLE_CANDIDATE"
+              fi
+            fi
+
+            jq -nc --argjson step "$step" --arg logical "$logical" --argjson run_id "$run_id" --arg before_state_sha "$before_state_sha" --arg after_state_sha "$after_state_sha" --argjson waiting "$waiting" --argjson in_flight "$in_flight" --argjson processed "$processed" --arg priority_decision "$priority_decision" --arg next "$next" --arg reason "$reason" '{step:$step,logical_target:$logical,child_run_id:$run_id,before_state_sha:$before_state_sha,after_state_sha:$after_state_sha,state_mutated:($before_state_sha!=$after_state_sha),waiting_safe_handler:$waiting,in_flight:$in_flight,processed_candidate_count:$processed,priority_decision:(if $priority_decision=="" then null else $priority_decision end),next_target:$next,reason:$reason,prod_authorized:false,prod_write:false,customer_data_used:false,external_skill_code_execution:false,trading_access:false,paid_fallback:false,additional_cost_eur:0}' >> artifacts/skill-chain/chain.jsonl
+            target="$next"
+            stop_reason="$reason"
+          done
+
+          node --input-type=module - "$step" "$stop_reason" "$target" <<'NODE'
+          import fs from 'node:fs';
+          const [steps,stopReason,target]=process.argv.slice(2);
+          const rows=fs.readFileSync('artifacts/skill-chain/chain.jsonl','utf8').trim().split('\n').filter(Boolean).map(JSON.parse);
+          const finalState=JSON.parse(fs.readFileSync('artifacts/skill-chain/state.json','utf8'));
+          const report={schema_version:'2.0.0',status:'BOUNDED_SAFE_CHAIN_COMPLETE',steps_executed:Number(steps),stop_reason:stopReason,remaining_target:target,processed_candidate_count:(finalState.processed_candidate_ids??[]).length,waiting_safe_handler:Object.keys(finalState.waiting_safe_handler??{}).length,in_flight:Object.keys(finalState.in_flight??{}).length,human_required:Object.keys(finalState.waiting_human??{}).length,child_runs:rows,prod_authorized:false,prod_write:false,customer_data_used:false,external_skill_code_execution:false,trading_access:false,paid_fallback:false,additional_cost_eur:0};
+          fs.writeFileSync('artifacts/skill-chain/summary.json',JSON.stringify(report,null,2)+'\n');
+          console.log(JSON.stringify(report));
+          NODE
+
+      - name: Enforce immutable final safety boundary
+        if: always()
+        run: |
+          set -euo pipefail
+          if [ -f artifacts/skill-chain/state.json ]; then
+            node -e "const fs=require('fs'); const s=JSON.parse(fs.readFileSync('artifacts/skill-chain/state.json','utf8')); const a=s.safe_autonomy||{}; if(a.prod_write!==false||a.external_skill_code_execution!==false||a.customer_data!==false||a.trading!==false||a.paid_fallback!==false||a.additional_cost_budget_eur!==0) throw new Error('FINAL_SKILL_CHAIN_SAFETY_INVARIANT_FAILED');"
           fi
 
       - name: Upload immutable chain routing evidence
@@ -195,6 +259,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: cerebro-skill-chain-driver-${{ github.run_id }}
-          path: artifacts/skill-chain/*.json
+          path: artifacts/skill-chain/**
           if-no-files-found: warn
           retention-days: 30
