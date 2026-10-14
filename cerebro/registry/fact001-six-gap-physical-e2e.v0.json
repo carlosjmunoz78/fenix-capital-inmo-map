@@ -1,0 +1,68 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_FACT001_SIX_GAP_PHYSICAL_E2E_PROFILE_V0",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "0.1.0",
+  "status": "CANDIDATE_PENDING_CI",
+  "source_merge_sha": "cc52f8a956d4ca06160c98febbe6c6644d52a9fd",
+  "items": {
+    "47": {
+      "name": "Watch & Learn / deterministic replay",
+      "target_acceptance": "LOCAL_E2E_GREEN",
+      "remaining_after_target": "AUTHORIZED_REAL_OBSERVATION_ADAPTER_E2E"
+    },
+    "48": {
+      "name": "Android Device Worker",
+      "target_acceptance": "GOVERNED_SHELL_GREEN_PHYSICAL_DEVICE_PENDING",
+      "remaining_after_target": "AUTHORIZED_DEVICE_ATTESTATION_AND_PHYSICAL_BINDING"
+    },
+    "57": {
+      "name": "COMPET-001 continuous runtime",
+      "target_acceptance": "DURABLE_SCHEDULER_E2E_GREEN_SOURCE_ADAPTER_PENDING",
+      "remaining_after_target": "PHYSICAL_PUBLIC_OR_AUTHORIZED_SOURCE_ADAPTER_E2E"
+    },
+    "62": {
+      "name": "CAP-001 autonomous company discovery",
+      "target_acceptance": "DURABLE_SCHEDULER_E2E_GREEN_SOURCE_ADAPTER_PENDING",
+      "remaining_after_target": "PHYSICAL_ZERO_COST_PUBLIC_OR_AUTHORIZED_SOURCE_ADAPTER_E2E"
+    },
+    "74": {
+      "name": "EVT-001 first-party capture",
+      "target_acceptance": "LOCAL_HTTP_EMITTER_CAPTURE_E2E_GREEN_STAGING_BINDING_PENDING",
+      "remaining_after_target": "CONSENTED_REAL_PREPROD_WEBSITE_EMITTER_BINDING_AND_REMOTE_E2E"
+    },
+    "183": {
+      "name": "Reusable web/PWA/mobile template packs",
+      "target_acceptance": "LOCAL_PWA_SERVE_E2E_GREEN_MOBILE_BUILD_DEPLOY_PENDING",
+      "remaining_after_target": "GOVERNED_PREPROD_DEPLOY_ADAPTER_AND_ANDROID_BUILD_PHYSICAL_ACCEPTANCE"
+    }
+  },
+  "implementation": {
+    "runner": "cerebro/runtime/fact001-six-gap-physical-e2e-v0.mjs",
+    "tests": "cerebro/tests/fact001-six-gap-physical-e2e-v0.test.mjs",
+    "evidence_artifact": "fact001-six-gap-physical-e2e-report.json"
+  },
+  "acceptance_policy": {
+    "do_not_overclaim_external_binding": true,
+    "local_http_service_counts_only_as_local_transport_evidence": true,
+    "durable_job_replay_counts_only_as_scheduler_runtime_evidence": true,
+    "android_shell_does_not_count_as_bound_device": true,
+    "template_local_serve_does_not_count_as_prod_or_public_deploy": true,
+    "real_remote_binding_required_before_confirmed_operational": true
+  },
+  "authority": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "external_dependency_install_authorized": false,
+    "external_provider_write_authorized": false,
+    "customer_data_authorized": false,
+    "trading_access": false,
+    "automatic_paid_fallback": false,
+    "additional_cost_eur": 0
+  },
+  "rollback": "Revert the additive physical-E2E PR; no PROD mutation, provider write, device binding or public deployment is performed by this profile.",
+  "rebuild": "Re-run the deterministic E2E runner from the verified six-gap core merge and recreate evidence from scratch.",
+  "next_gate": "CI_PHYSICAL_E2E_THEN_EXTERNAL_PREPROD_BINDINGS_ONLY"
+}
