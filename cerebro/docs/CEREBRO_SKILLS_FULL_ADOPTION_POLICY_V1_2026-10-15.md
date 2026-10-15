@@ -19,7 +19,20 @@ Una skill que CEREBRO decida conservar no se considera terminada por estar descu
 2. **Manejo seguro de GitHub** (`github`). Segundo porque mejora el plano de control de ingeniería, auditoría, pruebas y automatización del repositorio.
 3. **Optimización y seguridad de bases de datos** (`supabase-postgres-best-practices`). Tercero por impacto transversal en seguridad, fiabilidad y rendimiento de los motores que trabajan con datos, preservando Supabase como core transaccional.
 4. **Control avanzado del navegador** (`agent-browser`). Cuarto como skill externa a evaluar; la autonomía web interna de CEREBRO queda separada de esta skill y no depende de ejecutar su código.
-5. Las siguientes skills admitidas se ordenarán por **beneficio medido, alcance transversal, reducción de trabajo humano, riesgo, coste 0 € y facilidad de rollback**, no por novedad.
+5. **Asistente seguro de conocimiento en Obsidian** (`obsidian`). Quinto en la cola histórica y ejecutado antes que los bloqueos humanos anteriores porque no tenía excepción humana activa y aportaba mejora medida sobre seis motores existentes.
+6. Las siguientes skills admitidas se ordenarán por **beneficio medido, alcance transversal, reducción de trabajo humano, riesgo, coste 0 € y facilidad de rollback**, no por novedad.
+
+## Estado FULL cerrado
+
+A fecha de esta versión han alcanzado `FULL_SAFE_PREPROD` con evidencia CI gobernada:
+
+- **Fábrica inteligente de skills**.
+- **Manejo seguro de GitHub**.
+- **Asistente seguro de conocimiento en Obsidian**.
+
+El **Asistente seguro de conocimiento en Obsidian** queda ligado únicamente a Investigación, Conocimiento y fuente de verdad, Entrenamiento, Arranque de entrenamiento de empresa, Búsqueda y RAG con permisos, y Procedencia y evidencia. Su cierre reutiliza los buses compartidos de observabilidad, auditoría, FinOps y aprendizaje continuo; prueba persistencia e idempotencia y conserva rollback/rebuild. Permanece shadow-only: no ejecuta código externo ni CLI real de Obsidian, no escribe en un vault, no sustituye Notion/RAG ni migra conocimiento canónico, no obtiene autoridad PROD y mantiene coste adicional 0 €.
+
+Evidencia de cierre: `cerebro/registry/skill-obsidian-full-safe-preprod.v1.json`. Validación técnica exacta: workflow **CEREBRO Skill Full Adoption V1**, run `38816308057`, HEAD `25decec4526e2c1059146b1092b8f03fe58c07be`, GREEN; los gates transversales de integración gobernada, cadena de suministro y preparación RSI también quedaron GREEN sobre ese mismo HEAD.
 
 ## Flujo obligatorio para cada skill
 

@@ -1,11 +1,11 @@
 {
-  "schema_version": "1.4.0",
+  "schema_version": "1.5.0",
   "state_type": "CEREBRO_SKILL_FULL_ADOPTION_QUEUE",
   "generated_at": "2026-10-15",
   "company_id": "GLOBAL",
   "engine_id": "FACT-001",
   "environment": "PREPROD",
-  "version": "v1.4",
+  "version": "v1.5",
   "source_of_truth": [
     "cerebro/registry/skill-supply-chain-v0.json",
     "cerebro/skills/cerebro-184-live-convergence.v3.json",
@@ -16,6 +16,9 @@
     "cerebro/skills/skill-obsidian-old-vs-new-v1.mjs",
     "cerebro/skills/skill-obsidian-admission-judge-v1.mjs",
     "cerebro/skills/skill-obsidian-admission-tribunal-v1.mjs",
+    "cerebro/skills/skill-obsidian-full-preprod-integration-v1.mjs",
+    "cerebro/skills/skill-obsidian-full-closure-validator-v1.mjs",
+    "cerebro/registry/skill-obsidian-full-safe-preprod.v1.json",
     "cerebro/registry/browser-transversal-autonomy-policy.v1.json",
     "cerebro/runtime/browser-transversal-autonomy-v1.mjs"
   ],
@@ -114,6 +117,7 @@
     "specialized_cerebro_wrappers_observed": 5,
     "admitted_full_queue_count": 5,
     "observed_not_admitted_count": 0,
+    "full_safe_preprod_count": 3,
     "rule": "WRAPPER_EXISTENCE_DOES_NOT_EQUAL_ADMISSION; OBSIDIAN_ADMITTED_ONLY_AFTER_SYNTHETIC_OLD_VS_NEW_PLUS_INDEPENDENT_JUDGE_AND_TRIBUNAL",
     "complete_for_specialized_wrappers_observed_on_2026_10_15": true
   },
@@ -192,12 +196,12 @@
       "technical_name": "obsidian",
       "upstream": "openclaw/openclaw",
       "wrapper_id": "skillwrap:cerebro-obsidian-v0.1.0",
-      "current_evidence": "GREEN_SYNTHETIC_OLD_VS_NEW_INDEPENDENT_JUDGE_AND_ADMISSION_TRIBUNAL",
-      "current_scope": "ADMITTED_TO_FULL_DEBT_QUEUE_NON_EXECUTING",
+      "current_evidence": "FULL_SAFE_PREPROD_CI_GREEN_OBSERVABILITY_AUDIT_FINOPS_LRN_IDEMPOTENT",
+      "current_scope": "SAFE_INTERNAL_SHADOW_ONLY_REQUEST_DRIVEN_NO_REAL_VAULT_NO_EXTERNAL_EXECUTION",
       "benefit_reason": "Añade búsqueda con ámbito explícito, evidencia de relaciones entre notas y planificación de cambios con rollback sin sustituir los owners canónicos KNW/RAG/PRV/UPD.",
       "target_engine_bindings": ["RSH-001","KNW-001","TRN-001","TRNBOOT-001","RAG-001","PRV-001"],
       "target_status": "FULL_SAFE_PREPROD",
-      "status": "ADMITTED_INCOMPLETE",
+      "status": "FULL_SAFE_PREPROD",
       "admitted": true,
       "install_authorized": false,
       "execution_authorized": false,
@@ -214,6 +218,17 @@
         "cerebro/skills/skill-obsidian-admission-judge-v1.mjs",
         "cerebro/skills/skill-obsidian-admission-tribunal-v1.mjs"
       ],
+      "full_evidence": [
+        "cerebro/skills/skill-obsidian-preprod-bindings-v1.mjs",
+        "cerebro/skills/skill-obsidian-preprod-binding-judge-v1.mjs",
+        "cerebro/skills/skill-obsidian-preprod-binding-tribunal-v1.mjs",
+        "cerebro/skills/skill-obsidian-full-preprod-integration-v1.mjs",
+        "cerebro/skills/skill-obsidian-full-closure-validator-v1.mjs",
+        "cerebro/registry/skill-obsidian-full-safe-preprod.v1.json"
+      ],
+      "closure_evidence": "cerebro/registry/skill-obsidian-full-safe-preprod.v1.json",
+      "validated_by_workflow_run": 38816308057,
+      "validated_head_sha": "25decec4526e2c1059146b1092b8f03fe58c07be",
       "admission_validation_head_sha": "c5500917748524314c414b48ed5cdf5cbd262fc8",
       "admission_validation_workflows": {
         "governed_main_integration": 38812318689,
@@ -221,9 +236,15 @@
         "rsi_promotion_readiness": 38812318695,
         "skill_full_adoption": 38812318697
       },
+      "full_validation_workflows": {
+        "governed_main_integration": 38816307943,
+        "skill_supply_chain_gate": 38816308201,
+        "rsi_promotion_readiness": 38816308088,
+        "skill_full_adoption": 38816308057
+      },
       "human_required": null,
       "autonomous_ceiling": "FULL_SAFE_PREPROD",
-      "next_gate": "PREPROD_BINDING_OLD_VS_NEW_PER_RELEVANT_ENGINE"
+      "next_gate": "REGRESSION_MONITORING_NO_PROD_AUTHORITY"
     }
   ],
   "observed_not_admitted": [],
