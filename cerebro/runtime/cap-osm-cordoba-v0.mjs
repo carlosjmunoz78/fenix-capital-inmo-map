@@ -8,14 +8,11 @@ import { PersistentJobQueue } from './persistent-runtime.mjs';
 import { runCapDiscoveryV0 } from './fact001-gap-capabilities-v0.mjs';
 
 const PREPROD='PREPROD';
-const ENDPOINTS=Object.freeze([
-  'https://overpass.kumi.systems/api/interpreter',
-  'https://lz4.overpass-api.de/api/interpreter'
-]);
+const ENDPOINTS=Object.freeze(['https://overpass.kumi.systems/api/interpreter','https://lz4.overpass-api.de/api/interpreter']);
 const BBOX='37.79,-4.93,37.96,-4.65';
-const USER_AGENT='CEREBRO-PREPROD-CAP/0.2 (company discovery; Fenix Capital)';
+const USER_AGENT='CEREBRO-PREPROD-CAP/0.3 (company discovery; Fenix Capital)';
 const SOCIAL_HOSTS=new Set(['facebook.com','instagram.com','linkedin.com','twitter.com','x.com','youtube.com','tiktok.com']);
-const QUERY=`[out:json][timeout:10];(nwr["office"="estate_agent"](${BBOX});nwr["shop"="estate_agent"](${BBOX}););out tags;`;
+const QUERY=`[out:json][timeout:10];(node["office"="estate_agent"](${BBOX});way["office"="estate_agent"](${BBOX});relation["office"="estate_agent"](${BBOX});node["shop"="estate_agent"](${BBOX});way["shop"="estate_agent"](${BBOX});relation["shop"="estate_agent"](${BBOX}););out body;`;
 
 function sha(value){return crypto.createHash('sha256').update(typeof value==='string'?value:JSON.stringify(value)).digest('hex');}
 function domainFromWebsite(value){if(typeof value!=='string'||!value.trim())return null;let raw=value.trim();if(!/^https?:\/\//i.test(raw))raw=`https://${raw}`;let u;try{u=new URL(raw);}catch{return null;}let host=u.hostname.toLowerCase().replace(/^www\./,'');if(!/^[a-z0-9.-]+\.[a-z]{2,}$/i.test(host))return null;if(SOCIAL_HOSTS.has(host)||[...SOCIAL_HOSTS].some(x=>host.endsWith(`.${x}`)))return null;return host;}
@@ -57,10 +54,7 @@ export async function fetchOverpassCompanyRecordsV0({observed_at='2026-10-15T00:
   if(!Number.isSafeInteger(timeout_ms)||timeout_ms<1000||timeout_ms>15000)throw new TypeError('timeout_ms invalid');
   if(!Number.isSafeInteger(max_bytes)||max_bytes<1||max_bytes>5_000_000)throw new TypeError('max_bytes invalid');
   const failures=[];
-  for(const endpoint of ENDPOINTS){
-    try{return await fetchOne(endpoint,{observed_at,timeout_ms,max_bytes});}
-    catch(error){failures.push({endpoint,error_class:error?.name==='AbortError'?'TIMEOUT':String(error?.message??'ERROR').slice(0,80)});}
-  }
+  for(const endpoint of ENDPOINTS){try{return await fetchOne(endpoint,{observed_at,timeout_ms,max_bytes});}catch(error){failures.push({endpoint,error_class:error?.name==='AbortError'?'TIMEOUT':String(error?.message??'ERROR').slice(0,80)});}}
   const err=new Error('OVERPASS_PUBLIC_ENDPOINTS_UNAVAILABLE');err.failures=failures;throw err;
 }
 
@@ -74,8 +68,7 @@ export async function runCapOsmCordobaV0({observed_at='2026-10-15T00:00:00Z',wor
     const context={company_id:'fenix',engine_id:'CAP-001',environment:PREPROD,version:'v0'};
     const payload={source_records:source.records,icp:{sectors:['real_estate_agency'],geographies:['cordoba'],signals:['public_osm_estate_agent']}};
     const semanticHash=sha(source.records.map(r=>({company_name:r.company_name,domain:r.domain,source_url:r.source_url})));
-    const queuePath=path.join(root,'cap-osm-jobs.v8journal');
-    const queue=new PersistentJobQueue({file_path:queuePath,environment:PREPROD});
+    const queue=new PersistentJobQueue({file_path:path.join(root,'cap-osm-jobs.v8journal'),environment:PREPROD});
     const enqueue=queue.enqueue({name:'CAP-001_OSM_CORDOBA_DISCOVERY',context,payload,idempotency_key:`cap-osm-cordoba:${semanticHash.slice(0,32)}`});
     if(!enqueue.accepted)throw new Error('CAP OSM job enqueue failed');
     const claim=queue.claimContext(context);if(!claim)throw new Error('CAP OSM job claim failed');
