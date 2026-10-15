@@ -4,10 +4,13 @@ on:
   pull_request:
     paths:
       - 'cerebro/registry/skill-full-adoption-v1.json'
+      - 'cerebro/registry/skill-creator-full-safe-preprod.v1.json'
       - 'cerebro/skills/skill-full-adoption-selector-v1.mjs'
       - 'cerebro/skills/skill-full-adoption-learning-ingress-v1.mjs'
+      - 'cerebro/skills/skill-full-closure-validator-v1.mjs'
       - 'cerebro/tests/skill-full-adoption-selector-v1.test.mjs'
       - 'cerebro/tests/skill-full-adoption-learning-ingress-v1.test.mjs'
+      - 'cerebro/tests/skill-full-closure-validator-v1.test.mjs'
       - 'cerebro/docs/CEREBRO_SKILLS_FULL_ADOPTION_POLICY_V1_2026-10-15.md'
       - '.github/workflows/cerebro-skill-full-adoption-v1.yml'
   push:
@@ -15,10 +18,13 @@ on:
       - cerebro/skills-full-admitted-first-v1-20261015
     paths:
       - 'cerebro/registry/skill-full-adoption-v1.json'
+      - 'cerebro/registry/skill-creator-full-safe-preprod.v1.json'
       - 'cerebro/skills/skill-full-adoption-selector-v1.mjs'
       - 'cerebro/skills/skill-full-adoption-learning-ingress-v1.mjs'
+      - 'cerebro/skills/skill-full-closure-validator-v1.mjs'
       - 'cerebro/tests/skill-full-adoption-selector-v1.test.mjs'
       - 'cerebro/tests/skill-full-adoption-learning-ingress-v1.test.mjs'
+      - 'cerebro/tests/skill-full-closure-validator-v1.test.mjs'
       - 'cerebro/docs/CEREBRO_SKILLS_FULL_ADOPTION_POLICY_V1_2026-10-15.md'
       - '.github/workflows/cerebro-skill-full-adoption-v1.yml'
   workflow_dispatch:
@@ -44,8 +50,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Prove selector, aliases and persistent learning contract
-        run: node --test cerebro/tests/skill-full-adoption-selector-v1.test.mjs cerebro/tests/skill-full-adoption-learning-ingress-v1.test.mjs
+      - name: Prove selector, aliases, closure and persistent learning contract
+        run: node --test cerebro/tests/skill-full-adoption-selector-v1.test.mjs cerebro/tests/skill-full-adoption-learning-ingress-v1.test.mjs cerebro/tests/skill-full-closure-validator-v1.test.mjs
       - name: Resolve current highest-benefit safe work
         run: |
           node cerebro/skills/skill-full-adoption-selector-v1.mjs \
@@ -54,12 +60,31 @@ jobs:
           node --input-type=module - <<'NODE'
           import fs from 'node:fs';
           const r=JSON.parse(fs.readFileSync('artifacts/skills-full/selection.json','utf8'));
+          const registry=JSON.parse(fs.readFileSync('cerebro/registry/skill-full-adoption-v1.json','utf8'));
           if(r.prod_write_authorized!==false||r.prod_mutation_authorized!==false||r.auto_merge_authorized!==false||r.customer_data_authorized!==false||r.external_skill_code_execution_authorized!==false||r.trading_access!==false||r.paid_fallback!==false||r.additional_cost_eur!==0) throw new Error('SKILL_FULL_ADOPTION_SAFETY_BOUNDARY_FAILED');
-          if(r.status!=='SAFE_WORK_AVAILABLE') throw new Error(`EXPECTED_SAFE_WORK_AVAILABLE:${r.status}`);
-          if(r.selected?.alias_es!=='Fábrica inteligente de skills') throw new Error('FACTORY_FIRST_PRIORITY_NOT_RESPECTED');
-          console.log(JSON.stringify({status:r.status,next:r.selected.alias_es,technical_name:r.selected.technical_name,prod_write:false,trading:false,cost_eur:0}));
+          const terminal=new Set(['FULL_SAFE_PREPROD','REJECTED','DESCARTAR']);
+          const expected=[...registry.queue].sort((a,b)=>a.priority-b.priority).find((x)=>!terminal.has(x.status)&&x.human_required==null&&x.autonomous_ceiling==='FULL_SAFE_PREPROD')??null;
+          if(expected){
+            if(r.status!=='SAFE_WORK_AVAILABLE') throw new Error(`EXPECTED_SAFE_WORK_AVAILABLE:${r.status}`);
+            if(r.selected?.candidate_id!==expected.candidate_id) throw new Error(`PRIORITY_NOT_RESPECTED:${r.selected?.candidate_id}:${expected.candidate_id}`);
+          } else if(r.status==='SAFE_WORK_AVAILABLE') throw new Error('UNEXPECTED_SAFE_WORK_AVAILABLE');
+          console.log(JSON.stringify({status:r.status,next:r.selected?.alias_es??null,technical_name:r.selected?.technical_name??null,prod_write:false,trading:false,cost_eur:0}));
           NODE
-      - name: Upload immutable selection evidence
+      - name: Execute real PREPROD FACT-001 binding OLD vs NEW with rollback
+        run: |
+          mkdir -p artifacts/skills-full/closure
+          node cerebro/skills/skill-creator-preprod-integration.mjs \
+            --output artifacts/skills-full/closure/skill-creator-preprod-integration.json \
+            --state-root artifacts/skills-full/closure/skill-creator-preprod-state
+      - name: Validate skill-creator FULL closure fail closed
+        run: |
+          node cerebro/skills/skill-full-closure-validator-v1.mjs \
+            --closure cerebro/registry/skill-creator-full-safe-preprod.v1.json \
+            --registry cerebro/registry/skill-full-adoption-v1.json \
+            --static-lab cerebro/skills/skill-creator-static-lab.v0.json \
+            --preprod-report artifacts/skills-full/closure/skill-creator-preprod-integration.json \
+            --output artifacts/skills-full/closure/skill-creator-closure-validation.json
+      - name: Upload immutable selection and closure evidence
         uses: actions/upload-artifact@v4
         with:
           name: cerebro-skill-full-adoption-${{ github.run_id }}
