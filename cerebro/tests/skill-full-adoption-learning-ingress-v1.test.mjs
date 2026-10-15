@@ -7,6 +7,7 @@ import {runAdmittedSkillLearningIngress} from '../skills/skill-full-adoption-lea
 
 const registry=()=>JSON.parse(fs.readFileSync(new URL('../registry/skill-full-adoption-v1.json',import.meta.url),'utf8'));
 const fixedObservedAt='2026-10-15T20:00:00.000Z';
+const UNADMITTED_SYNTHETIC_CANDIDATE='synthetic-test:unadmitted-skill-v1';
 
 function event({candidate_id,event_id,event_type='SKILL_CANDIDATE_STATIC_LAB_GREEN',severity='INFO',bindings=['FACT-001'],risk_class}){
   return {
@@ -73,11 +74,14 @@ test('canonical HIGH_RISK admitted evidence is held and never persisted',()=>{
 test('observed wrapper without governed admission is ignored, not promoted to learning debt',()=>{
   const tmp=tmpLedger();
   try{
-    const e=event({candidate_id:'lobehub-skills:9a6e3fac20369220df43',event_id:'evt:test:obsidian-static',bindings:['RSH-001','KNW-001']});
+    assert.equal(registry().queue.some((item)=>item.candidate_id===UNADMITTED_SYNTHETIC_CANDIDATE),false);
+    const e=event({candidate_id:UNADMITTED_SYNTHETIC_CANDIDATE,event_id:'evt:test:unadmitted-static',bindings:['RSH-001','KNW-001']});
     const out=run({events:[e],ledger:tmp.file});
     assert.equal(out.status,'NO_ADMITTED_EVENTS');
     assert.equal(out.admitted_events_total,0);
     assert.equal(out.ignored_not_admitted_total,1);
+    assert.equal(out.ignored[0].candidate_id,UNADMITTED_SYNTHETIC_CANDIDATE);
+    assert.equal(out.ignored[0].reason,'CANDIDATE_NOT_IN_ADMITTED_FULL_QUEUE');
     assert.equal(out.persisted_total,0);
     assert.equal(fs.existsSync(tmp.file),false);
   }finally{fs.rmSync(tmp.dir,{recursive:true,force:true});}
@@ -87,12 +91,13 @@ test('mixed admitted and non-admitted events persist only admitted evidence',()=
   const tmp=tmpLedger();
   try{
     const good=event({candidate_id:'lobehub-skills:52441cd3d76607ffffab',event_id:'evt:test:github-green'});
-    const ignored=event({candidate_id:'lobehub-skills:9a6e3fac20369220df43',event_id:'evt:test:obsidian-green',bindings:['RSH-001']});
+    const ignored=event({candidate_id:UNADMITTED_SYNTHETIC_CANDIDATE,event_id:'evt:test:unadmitted-green',bindings:['RSH-001']});
     const out=run({events:[good,ignored],ledger:tmp.file});
     assert.equal(out.status,'GREEN_PERSISTENT_PREPROD_LEARNING');
     assert.equal(out.source_events_total,2);
     assert.equal(out.admitted_events_total,1);
     assert.equal(out.ignored_not_admitted_total,1);
+    assert.equal(out.ignored[0].candidate_id,UNADMITTED_SYNTHETIC_CANDIDATE);
     assert.equal(out.persisted_total,1);
     assert.equal(out.ledger_operation_count,1);
   }finally{fs.rmSync(tmp.dir,{recursive:true,force:true});}
