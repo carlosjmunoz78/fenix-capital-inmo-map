@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-15T20:23:24.008Z",
+  "updated_at": "2026-10-15T20:33:18.438Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -50,7 +50,8 @@
     "github-wide-skills:d6d5d8a8158a133ae715",
     "github-wide-skills:481a37f8c9ed473d71b4",
     "github-wide-skills:0210638a71cef7a51e3f",
-    "github-wide-skills:28b33318e96c4dcfb74a"
+    "github-wide-skills:28b33318e96c4dcfb74a",
+    "github-wide-skills:a9a119525d9fa0654756"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -119,6 +120,42 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 38801452751,
       "checkpointed_at": "2026-10-15T20:23:24.008Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:a9a119525d9fa0654756": {
+      "candidate_id": "github-wide-skills:a9a119525d9fa0654756",
+      "name": "watchfor-reliability-reports",
+      "human_alias": "Watchfor Reliability Reports",
+      "wrapper_id": "skillwrap:da6edc93cd7ba1cb512c",
+      "domain": "observability-quality-resilience",
+      "engine_bindings": [
+        "OBSERV-001",
+        "INC-001",
+        "SUP-001",
+        "QA-001",
+        "REG-001",
+        "DR-001",
+        "RBLD-001",
+        "BCP-001"
+      ],
+      "value_score": 88.41,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "watchfor-io/agent-toolkit",
+        "upstream_head_commit": "9b054bcf172713c36c32638b93e9a57ec32062a7",
+        "manifest_sha256": "3afb1fa858e8001fe02f301ce9a7b64eea1a1ac3ea092c144ab245018d34d7a3",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 38802825358,
+      "checkpointed_at": "2026-10-15T20:33:18.438Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -1091,5 +1128,5 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 38801452751
+  "last_discovery_run_id": 38802825358
 }
