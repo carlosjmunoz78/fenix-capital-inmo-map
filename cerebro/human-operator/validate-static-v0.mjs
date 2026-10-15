@@ -9,6 +9,7 @@ const JSON_FILES=[
   'contracts/adaptive-conversation-lab.v0.json',
   'contracts/operator-evidence.v0.json',
   'contracts/morning-report.v0.json',
+  'contracts/finding-routing.v0.json',
   'scenarios/human-operator-scenario-suite.v0.json'
 ];
 const DOC_FILES=[
@@ -16,6 +17,7 @@ const DOC_FILES=[
   'BROWSER_ADAPTER_DECISION_V0.md',
   'CREDENTIAL_SESSION_POLICY_V0.md',
   'PHYSICAL_ACCEPTANCE_PLAN_V0.md',
+  'PHYSICAL_CUTOVER_CHECKLIST_V0.md',
   'DEPENDENCY_MAP_V0.md',
   'RUNBOOK_V0.md',
   'BACKUP_REBUILD_V0.md',
@@ -43,6 +45,7 @@ function assertSafety(object,file){
   if('prod_write_authorized' in s)assert(s.prod_write_authorized===false,`${file}:prod_write_authorized_must_be_false`);
   if('trading_access' in s)assert(s.trading_access===false,`${file}:trading_access_must_be_false`);
   if('additional_cost_eur' in s)assert(Number(s.additional_cost_eur)===0,`${file}:cost_must_be_zero`);
+  if('additional_cost_target_eur' in s)assert(Number(s.additional_cost_target_eur)===0,`${file}:target_cost_must_be_zero`);
   if('additional_cost_target_eur' in object)assert(Number(object.additional_cost_target_eur)===0,`${file}:target_cost_must_be_zero`);
 }
 
@@ -70,7 +73,17 @@ assert(conversation.limits?.fixed_application_turn_cap===null,'fixed_application
 
 const evidence=JSON.parse(read('contracts/operator-evidence.v0.json'));
 assert(evidence.measurement_rules?.not_measured_may_resolve_previous_failure===false,'no_measurement_resolution_forbidden');
+assert(evidence.measurement_rules?.resolved_requires_measured_retest===true,'measured_retest_required');
 assert(evidence.redaction?.credential_ref_allowed===true,'credential_refs_must_be_allowed');
+
+const report=JSON.parse(read('contracts/morning-report.v0.json'));
+assert(report.truth_rules?.no_test_run_no_resolution_claim===true,'morning_report_false_resolution_guard_required');
+assert(report.truth_rules?.no_physical_evidence_no_operational_claim===true,'physical_evidence_truth_guard_required');
+
+const routing=JSON.parse(read('contracts/finding-routing.v0.json'));
+assert(routing.learning_gate?.direct_human_operator_to_lrn_allowed===false,'direct_operator_to_lrn_forbidden');
+assert(routing.learning_gate?.resolved_without_measured_retest===false,'routing_measured_retest_required');
+assert(routing.repair_gate?.human_operator_may_repair_prod===false,'prod_repair_forbidden');
 
 const scenarios=JSON.parse(read('scenarios/human-operator-scenario-suite.v0.json'));
 assert(scenarios.do_not_create_parallel_persona_engine===true,'scenario_parallel_persona_engine_forbidden');
