@@ -19,11 +19,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Probe IECA ESPAND WFS schema
+      - name: Probe IECA ESPAND WFS schema and Córdoba activity taxonomy
         run: node cerebro/runtime/cap-ieca-espand-probe-v0.mjs --out /tmp/cap-ieca-espand-probe.json
       - name: Validate safety boundary
         run: >-
-          node -e "const r=require('/tmp/cap-ieca-espand-probe.json'); if(r.status!=='OFFICIAL_PUBLIC_WFS_PROBE_GREEN'||r.feature_count<1||r.source.http_status!==200||r.source.method!=='GET_ONLY'||r.source.provider_writes!==0||r.raw_feature_values_persisted!==false||r.customer_data_used||r.personal_data_persisted||r.prod_authorized||r.prod_write_authorized||r.trading_access||r.additional_cost_eur!==0)process.exit(1); console.log('IECA ESPAND official public source probe GREEN; keys='+r.property_keys.join(','));"
+          node -e "const r=require('/tmp/cap-ieca-espand-probe.json'); if(r.status!=='OFFICIAL_PUBLIC_WFS_PROBE_GREEN'||r.schema_probe.feature_count<1||r.cordoba_activity_probe.feature_count<1||!Array.isArray(r.cordoba_activity_probe.activity_counts)||r.cordoba_activity_probe.activity_counts.length<1||r.source.http_status!==200||r.source.method!=='GET_ONLY'||r.source.provider_writes!==0||r.raw_company_names_persisted!==false||r.raw_addresses_persisted!==false||r.customer_data_used||r.personal_data_persisted||r.prod_authorized||r.prod_write_authorized||r.trading_access||r.additional_cost_eur!==0)process.exit(1); console.log('IECA ESPAND official public source probe GREEN; activities='+r.cordoba_activity_probe.activity_counts.length);"
       - uses: actions/upload-artifact@v4
         with:
           name: cap-ieca-espand-probe
