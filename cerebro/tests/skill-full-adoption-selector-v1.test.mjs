@@ -18,13 +18,28 @@ test('priority strategy keeps the compounding factory skill first before its FUL
   assert.equal(out.additional_cost_eur,0);
 });
 
-test('canonical queue advances to safe GitHub capability after factory skill is FULL',()=>{
+test('queue advances to safe GitHub capability after factory skill is FULL while GitHub remains incomplete',()=>{
   const q=registry();
   assert.equal(q.queue[0].status,'FULL_SAFE_PREPROD');
+  q.queue[1].status='ADMITTED_INCOMPLETE';
+  delete q.queue[1].closure_evidence;
+  delete q.queue[1].validated_by_workflow_run;
+  delete q.queue[1].validated_head_sha;
   const out=selectNextSkillFullAdoption(q);
   assert.equal(out.status,'SAFE_WORK_AVAILABLE');
   assert.equal(out.selected.alias_es,'Manejo seguro de GitHub');
   assert.equal(out.selected.candidate_id,'lobehub-skills:52441cd3d76607ffffab');
+});
+
+test('canonical queue reaches HUMAN_REQUIRED only after both safe capabilities are FULL',()=>{
+  const q=registry();
+  assert.equal(q.queue[0].status,'FULL_SAFE_PREPROD');
+  assert.equal(q.queue[1].status,'FULL_SAFE_PREPROD');
+  const out=selectNextSkillFullAdoption(q);
+  assert.equal(out.status,'HUMAN_REQUIRED_PENDING');
+  assert.equal(out.selected,null);
+  assert.deepEqual(out.blocked.map(x=>x.alias_es),['Optimización y seguridad de bases de datos','Control avanzado del navegador']);
+  assert.ok(out.blocked.every(x=>x.human_required==='HIGH_RISK'));
 });
 
 test('HIGH_RISK candidates are never crossed automatically',()=>{
