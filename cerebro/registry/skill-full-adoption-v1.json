@@ -1,18 +1,20 @@
 {
-  "schema_version": "1.2.0",
+  "schema_version": "1.3.0",
   "state_type": "CEREBRO_SKILL_FULL_ADOPTION_QUEUE",
   "generated_at": "2026-10-15",
   "company_id": "GLOBAL",
   "engine_id": "FACT-001",
   "environment": "PREPROD",
-  "version": "v1.2",
+  "version": "v1.3",
   "source_of_truth": [
     "cerebro/registry/skill-supply-chain-v0.json",
     "cerebro/skills/cerebro-184-live-convergence.v3.json",
     "cerebro/runtime/skill-capability-autonomy-closure-v1.mjs",
     "cerebro/skills/skill-capability-evolution-bridge.mjs",
     "cerebro/skills/skill-cerebro-obsidian-wrapper.mjs",
-    "cerebro/skills/skill-obsidian-normalized-wrapper-review.mjs"
+    "cerebro/skills/skill-obsidian-normalized-wrapper-review.mjs",
+    "cerebro/registry/browser-transversal-autonomy-policy.v1.json",
+    "cerebro/runtime/browser-transversal-autonomy-v1.mjs"
   ],
   "policy": {
     "human_alias_first": true,
@@ -31,6 +33,9 @@
     "rollback_required": true,
     "rebuild_required": true,
     "reject_regressions": true,
+    "browser_is_transversal_tool_not_authority": true,
+    "browser_use_requires_separate_human_approval": false,
+    "browser_action_authority_source": "ORIGIN_ENGINE_POLICY_AND_GOVERNED_ACTION_CONTRACT",
     "additional_cost_budget_eur": 0,
     "prod_write": false,
     "prod_mutation": false,
@@ -69,6 +74,32 @@
       "TRADING_ACCESS"
     ]
   },
+  "transversal_browser_capability": {
+    "alias_es": "Navegación autónoma transversal",
+    "capability_kind": "INTERNAL_TRANSVERSAL_TOOLING_POLICY_NOT_NEW_ENGINE",
+    "eligible_engine_scope": "ANY_CANONICAL_ENGINE_ID",
+    "browser_is_tool_not_authority": true,
+    "browser_use_requires_separate_human_approval": false,
+    "authority_source": "ORIGIN_ENGINE_POLICY_AND_GOVERNED_ACTION_CONTRACT",
+    "authenticated_sessions": "ALLOWED_WHEN_REGISTERED_HEALTHY_AND_FRESH",
+    "prod_observation": "ALLOWED_WHEN_ORIGIN_ENGINE_POLICY_ALLOWS",
+    "prod_mutation": "ONLY_WHEN_ORIGIN_ENGINE_HAS_GOVERNED_PROD_MUTATION_AUTHORITY_AND_PROMOTION_EVIDENCE",
+    "incremental_spend": "HUMAN_REQUIRED_MONEY_LIMIT",
+    "physical_binding": "FRESH_AT_EXECUTION_TIME_WITH_KILL_SWITCH",
+    "external_agent_browser_code_required": false,
+    "trading": "SEPARATE_ISOLATED_RUNTIME_CREDENTIALS_AND_AUTHORITY_REQUIRED",
+    "status": "POLICY_GREEN_CI_PHYSICAL_BINDING_PER_EXECUTION",
+    "validation": {
+      "head_sha": "457f921842b31ab566616f38e19e6c3c7f4c3c5d",
+      "skill_supply_chain_gate_run": 38810690885,
+      "governed_main_integration_run": 38810690845,
+      "rsi_promotion_readiness_run": 38810690899,
+      "skill_full_adoption_run": 38810690869,
+      "all_green": true
+    },
+    "human_required_for_browser_use_itself": null,
+    "next_gate": "FRESH_PHYSICAL_BROWSER_BINDING_PER_EXECUTION_AND_ENGINE_SCOPED_ACTION_GATES"
+  },
   "priority_strategy": [
     "COMPOUNDING_FACTORY_CAPABILITY_FIRST",
     "CONTROL_PLANE_ENGINEERING_CAPABILITY_SECOND",
@@ -93,9 +124,7 @@
       "current_evidence": "GREEN_SKILL_CREATOR_PROD_READONLY_CANARY",
       "current_scope": "READONLY_ADVISORY_ALREADY_PROVEN_NO_NEW_PROD_ACTION",
       "benefit_reason": "Acelera la creación y mejora gobernada de las demás skills y refuerza FACTORY FIRST.",
-      "target_engine_bindings": [
-        "FACT-001"
-      ],
+      "target_engine_bindings": ["FACT-001"],
       "target_status": "FULL_SAFE_PREPROD",
       "status": "FULL_SAFE_PREPROD",
       "closure_evidence": "cerebro/registry/skill-creator-full-safe-preprod.v1.json",
@@ -113,9 +142,7 @@
       "current_evidence": "GREEN_GITHUB_PROD_READONLY_CANARY",
       "current_scope": "READONLY_REPOSITORY_OBSERVATION_ALREADY_PROVEN_NO_NEW_PROD_ACTION",
       "benefit_reason": "Mejora el plano de control de ingeniería, auditoría y automatización de repositorios sin ampliar permisos.",
-      "target_engine_bindings": [
-        "FACT-001"
-      ],
+      "target_engine_bindings": ["FACT-001"],
       "target_status": "FULL_SAFE_PREPROD",
       "status": "FULL_SAFE_PREPROD",
       "closure_evidence": "cerebro/registry/skill-github-full-safe-preprod.v1.json",
@@ -147,13 +174,13 @@
       "technical_name": "agent-browser",
       "current_evidence": "NORMALIZED_WRAPPER_GREEN_FOR_BEHAVIORAL_EVAL",
       "current_scope": "RAW_STATIC_LAB_HOLD_PRESERVED_NORMALIZED_WRAPPER_EVALUABLE",
-      "benefit_reason": "Amplía automatización web y UI, pero se deja detrás de datos por su mayor superficie física y de permisos.",
-      "target_engine_bindings": "RESOLVE_FROM_EXISTING_GOVERNED_EVIDENCE",
+      "benefit_reason": "La skill externa puede aportar patrones adicionales, pero CEREBRO ya dispone de una política interna de navegación transversal y no depende de ejecutar su código para tener autonomía web.",
+      "target_engine_bindings": "TRANSVERSAL_INTERNAL_POLICY_RESOLVES_TOOL_ACCESS_EXTERNAL_SKILL_REMAINS_SEPARATELY_GOVERNED",
       "target_status": "FULL_SAFE_PREPROD",
-      "status": "REVIEW_READY_HIGH_RISK",
+      "status": "EXTERNAL_SKILL_REVIEW_READY_HIGH_RISK_INTERNAL_BROWSER_POLICY_GREEN",
       "human_required": "HIGH_RISK",
-      "autonomous_ceiling": "EVIDENCE_ONLY_UNTIL_CANONICAL_HIGH_RISK_GATE_RESOLVED",
-      "next_gate": "HIGH_RISK_REVIEW_AFTER_ALL_NON_MUTATING_EVIDENCE_IS_COMPLETE"
+      "autonomous_ceiling": "INTERNAL_TRANSVERSAL_BROWSER_POLICY_GREEN_EXTERNAL_SKILL_EVIDENCE_ONLY_UNTIL_CANONICAL_GATE_RESOLVED",
+      "next_gate": "EXTERNAL_SKILL_HIGH_RISK_REVIEW_INDEPENDENT_FROM_INTERNAL_BROWSER_AUTONOMY"
     }
   ],
   "observed_not_admitted": [
@@ -163,14 +190,7 @@
       "technical_name": "obsidian",
       "upstream": "openclaw/openclaw",
       "wrapper_id": "skillwrap:cerebro-obsidian-v0.1.0",
-      "engine_bindings_observed": [
-        "RSH-001",
-        "KNW-001",
-        "TRN-001",
-        "TRNBOOT-001",
-        "RAG-001",
-        "PRV-001"
-      ],
+      "engine_bindings_observed": ["RSH-001","KNW-001","TRN-001","TRNBOOT-001","RAG-001","PRV-001"],
       "current_evidence": "STATIC_WRAPPER_IMPLEMENTED_REVIEW_CODE_PRESENT",
       "current_scope": "LAB_STATIC_REVIEW_ONLY",
       "admitted": false,
@@ -188,26 +208,10 @@
     }
   ],
   "parallel_nonblocking_work": [
-    {
-      "alias_es": "Aprendizaje continuo",
-      "gate": "THREE_GENUINE_SCHEDULED_RUNS_GREEN",
-      "policy": "ACCUMULATE_GENUINE_SCHEDULED_EVIDENCE_DO_NOT_FAKE_SOAK"
-    },
-    {
-      "alias_es": "Vigilancia de competencia",
-      "gate": "REAL_TARGETS_AND_CONTINUOUS_PREPROD_RUN",
-      "policy": "GET_ONLY_PREPROD_CONTINUOUS_EVIDENCE"
-    },
-    {
-      "alias_es": "Búsqueda de oportunidades",
-      "gate": "REAL_SOURCES_AND_CONTINUOUS_PREPROD_RUN",
-      "policy": "PUBLIC_SOURCE_PREPROD_CONTINUOUS_EVIDENCE"
-    },
-    {
-      "alias_es": "CEREBRO en Android",
-      "gate": "AUTHORIZED_PHYSICAL_ANDROID_DEVICE_E2E",
-      "policy": "WAIT_FOR_DATA_CABLE_WITHOUT_BLOCKING_OTHER_WORK"
-    }
+    {"alias_es":"Aprendizaje continuo","gate":"THREE_GENUINE_SCHEDULED_RUNS_GREEN","policy":"ACCUMULATE_GENUINE_SCHEDULED_EVIDENCE_DO_NOT_FAKE_SOAK"},
+    {"alias_es":"Vigilancia de competencia","gate":"REAL_TARGETS_AND_CONTINUOUS_PREPROD_RUN","policy":"GET_ONLY_PREPROD_CONTINUOUS_EVIDENCE"},
+    {"alias_es":"Búsqueda de oportunidades","gate":"REAL_SOURCES_AND_CONTINUOUS_PREPROD_RUN","policy":"PUBLIC_SOURCE_PREPROD_CONTINUOUS_EVIDENCE"},
+    {"alias_es":"CEREBRO en Android","gate":"AUTHORIZED_PHYSICAL_ANDROID_DEVICE_E2E","policy":"WAIT_FOR_DATA_CABLE_WITHOUT_BLOCKING_OTHER_WORK"}
   ],
   "reporting_contract": {
     "use_alias_es_first": true,
