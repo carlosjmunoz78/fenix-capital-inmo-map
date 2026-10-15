@@ -1,0 +1,76 @@
+{
+  "schema_version": "0.1.0",
+  "contract_id": "CEREBRO_NIGHT_RUNNER_V0",
+  "state_type": "HUMAN_OPERATOR_NIGHT_RUNNER",
+  "status": "DEFINED_NOT_BOUND",
+  "purpose": "Persist long-running browser jobs across transient failures without requiring continuous human supervision.",
+  "runtime_requirements": {
+    "durable_job_queue": true,
+    "heartbeat": true,
+    "watchdog": true,
+    "checkpointing": true,
+    "browser_reconnect": true,
+    "browser_restart": true,
+    "reboot_resume_when_safe": true,
+    "tab_pinning": true,
+    "bounded_navigation_retries": true,
+    "loop_circuit_breaker": true,
+    "logical_kill_switch": true,
+    "physical_kill_switch": true,
+    "morning_report": true
+  },
+  "checkpoint": {
+    "write_after_every_click": false,
+    "write_on_major_milestone": true,
+    "minimum_fields": [
+      "job_id",
+      "company_id",
+      "environment",
+      "identity_id",
+      "browser_profile_id",
+      "surface",
+      "scenario_id",
+      "step_id",
+      "last_verified_state",
+      "resume_hint",
+      "evidence_refs",
+      "updated_at"
+    ],
+    "forbidden_fields": [
+      "password",
+      "secret",
+      "access_token",
+      "refresh_token",
+      "jwt",
+      "api_key",
+      "totp_seed",
+      "cookie_value"
+    ]
+  },
+  "recovery": {
+    "navigation_timeout": {"max_attempts": 3, "action": "RETRY_THEN_HOLD"},
+    "tab_closed": {"max_attempts": 2, "action": "REOPEN_FROM_CHECKPOINT"},
+    "chrome_crash": {"max_attempts": 2, "action": "RESTART_AND_RESUME"},
+    "bridge_disconnect": {"max_attempts": 3, "action": "RECONNECT_THEN_HOLD"},
+    "session_expired": {"action": "REQUEST_CREDENTIAL_SESSION_RESOLUTION"},
+    "unknown_ui_state": {"action": "CAPTURE_EVIDENCE_AND_HOLD_OR_REPLAN"},
+    "repeated_identical_state": {"threshold": 5, "action": "CIRCUIT_BREAK"}
+  },
+  "safety": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "trading_access": false,
+    "paid_fallback": false,
+    "customer_data_in_lab": false,
+    "secret_values_in_state": false,
+    "additional_cost_eur": 0
+  },
+  "acceptance": [
+    "30_MIN_SOAK_GREEN",
+    "2_HOUR_SOAK_GREEN",
+    "FULL_NIGHT_SOAK_GREEN",
+    "CRASH_RECOVERY_GREEN",
+    "SESSION_REUSE_GREEN",
+    "MORNING_REPORT_COMPLETE"
+  ]
+}
