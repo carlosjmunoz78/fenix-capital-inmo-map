@@ -6,6 +6,7 @@ on:
       - 'cerebro/registry/skill-full-adoption-v1.json'
       - 'cerebro/registry/skill-creator-full-safe-preprod.v1.json'
       - 'cerebro/registry/skill-github-full-safe-preprod.v1.json'
+      - 'cerebro/registry/skill-obsidian-full-safe-preprod.v1.json'
       - 'cerebro/registry/skill-supply-chain-v0.json'
       - 'cerebro/skills/skill-full-adoption-selector-v1.mjs'
       - 'cerebro/skills/skill-full-adoption-learning-ingress-v1.mjs'
@@ -13,10 +14,18 @@ on:
       - 'cerebro/skills/skill-github-full-closure-validator-v1.mjs'
       - 'cerebro/skills/skill-cerebro-github-wrapper.mjs'
       - 'cerebro/skills/skill-github-preprod-integration.mjs'
+      - 'cerebro/skills/skill-obsidian-preprod-bindings-v1.mjs'
+      - 'cerebro/skills/skill-obsidian-preprod-binding-judge-v1.mjs'
+      - 'cerebro/skills/skill-obsidian-preprod-binding-tribunal-v1.mjs'
+      - 'cerebro/skills/skill-obsidian-full-preprod-integration-v1.mjs'
+      - 'cerebro/skills/skill-obsidian-full-closure-validator-v1.mjs'
       - 'cerebro/tests/skill-full-adoption-selector-v1.test.mjs'
       - 'cerebro/tests/skill-full-adoption-learning-ingress-v1.test.mjs'
       - 'cerebro/tests/skill-full-closure-validator-v1.test.mjs'
       - 'cerebro/tests/skill-github-full-closure-validator-v1.test.mjs'
+      - 'cerebro/tests/skill-obsidian-preprod-bindings-v1.test.mjs'
+      - 'cerebro/tests/skill-obsidian-full-preprod-integration-v1.test.mjs'
+      - 'cerebro/tests/skill-obsidian-full-closure-validator-v1.test.mjs'
       - 'cerebro/docs/CEREBRO_SKILLS_FULL_ADOPTION_POLICY_V1_2026-10-15.md'
       - '.github/workflows/cerebro-skill-full-adoption-v1.yml'
   push:
@@ -26,6 +35,7 @@ on:
       - 'cerebro/registry/skill-full-adoption-v1.json'
       - 'cerebro/registry/skill-creator-full-safe-preprod.v1.json'
       - 'cerebro/registry/skill-github-full-safe-preprod.v1.json'
+      - 'cerebro/registry/skill-obsidian-full-safe-preprod.v1.json'
       - 'cerebro/registry/skill-supply-chain-v0.json'
       - 'cerebro/skills/skill-full-adoption-selector-v1.mjs'
       - 'cerebro/skills/skill-full-adoption-learning-ingress-v1.mjs'
@@ -33,10 +43,18 @@ on:
       - 'cerebro/skills/skill-github-full-closure-validator-v1.mjs'
       - 'cerebro/skills/skill-cerebro-github-wrapper.mjs'
       - 'cerebro/skills/skill-github-preprod-integration.mjs'
+      - 'cerebro/skills/skill-obsidian-preprod-bindings-v1.mjs'
+      - 'cerebro/skills/skill-obsidian-preprod-binding-judge-v1.mjs'
+      - 'cerebro/skills/skill-obsidian-preprod-binding-tribunal-v1.mjs'
+      - 'cerebro/skills/skill-obsidian-full-preprod-integration-v1.mjs'
+      - 'cerebro/skills/skill-obsidian-full-closure-validator-v1.mjs'
       - 'cerebro/tests/skill-full-adoption-selector-v1.test.mjs'
       - 'cerebro/tests/skill-full-adoption-learning-ingress-v1.test.mjs'
       - 'cerebro/tests/skill-full-closure-validator-v1.test.mjs'
       - 'cerebro/tests/skill-github-full-closure-validator-v1.test.mjs'
+      - 'cerebro/tests/skill-obsidian-preprod-bindings-v1.test.mjs'
+      - 'cerebro/tests/skill-obsidian-full-preprod-integration-v1.test.mjs'
+      - 'cerebro/tests/skill-obsidian-full-closure-validator-v1.test.mjs'
       - 'cerebro/docs/CEREBRO_SKILLS_FULL_ADOPTION_POLICY_V1_2026-10-15.md'
       - '.github/workflows/cerebro-skill-full-adoption-v1.yml'
   workflow_dispatch:
@@ -56,14 +74,14 @@ jobs:
   admitted-first-contract:
     name: admitted-first-contract
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 24
       - name: Prove selector, aliases, FULL closures and persistent learning contract
-        run: node --test cerebro/tests/skill-full-adoption-selector-v1.test.mjs cerebro/tests/skill-full-adoption-learning-ingress-v1.test.mjs cerebro/tests/skill-full-closure-validator-v1.test.mjs cerebro/tests/skill-github-full-closure-validator-v1.test.mjs
+        run: node --test cerebro/tests/skill-full-adoption-selector-v1.test.mjs cerebro/tests/skill-full-adoption-learning-ingress-v1.test.mjs cerebro/tests/skill-full-closure-validator-v1.test.mjs cerebro/tests/skill-github-full-closure-validator-v1.test.mjs cerebro/tests/skill-obsidian-preprod-bindings-v1.test.mjs cerebro/tests/skill-obsidian-full-preprod-integration-v1.test.mjs cerebro/tests/skill-obsidian-full-closure-validator-v1.test.mjs
       - name: Resolve current highest-benefit safe work
         run: |
           node cerebro/skills/skill-full-adoption-selector-v1.mjs \
@@ -110,6 +128,21 @@ jobs:
             --supply-chain cerebro/registry/skill-supply-chain-v0.json \
             --preprod-report artifacts/skills-full/github/preprod-integration.json \
             --output artifacts/skills-full/github/closure-validation.json
+      - name: Execute Obsidian six-engine FULL SAFE PREPROD integration
+        run: |
+          mkdir -p artifacts/skills-full/obsidian
+          node cerebro/skills/skill-obsidian-full-preprod-integration-v1.mjs \
+            --registry cerebro/registry/skill-full-adoption-v1.json \
+            --knowledge-surface cerebro/human-intelligence/knowledge/knowledge-surface-map.v1.json \
+            --state-root artifacts/skills-full/obsidian/preprod-state \
+            --output artifacts/skills-full/obsidian/preprod-integration.json
+      - name: Validate Obsidian FULL closure fail closed
+        run: |
+          node cerebro/skills/skill-obsidian-full-closure-validator-v1.mjs \
+            --closure cerebro/registry/skill-obsidian-full-safe-preprod.v1.json \
+            --registry cerebro/registry/skill-full-adoption-v1.json \
+            --preprod-report artifacts/skills-full/obsidian/preprod-integration.json \
+            --output artifacts/skills-full/obsidian/closure-validation.json
       - name: Upload immutable selection and FULL closure evidence
         uses: actions/upload-artifact@v4
         with:
