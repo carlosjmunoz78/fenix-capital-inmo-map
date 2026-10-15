@@ -41,6 +41,23 @@ jobs:
         with:
           node-version: 24
 
+      - name: Resolve exact protected base SHA
+        shell: bash
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          base_sha="$PR_BASE_SHA"
+          if [ -z "$base_sha" ]; then
+            git fetch origin main --no-tags
+            base_sha="$(git rev-parse origin/main)"
+          fi
+          case "$base_sha" in
+            [0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]) ;;
+            *) echo 'Protected base SHA is not a 40-hex commit.' >&2; exit 1 ;;
+          esac
+          echo "GOVERNED_BASE_SHA=$base_sha" >> "$GITHUB_ENV"
+
       - name: Run fail-closed governed-write contracts
         run: node --test cerebro/tests/skill-governed-write-guard-v1.test.mjs
 
@@ -66,9 +83,11 @@ jobs:
           import fs from 'node:fs';
           import {evaluateGovernedWriteRequest} from './cerebro/skills/skill-governed-write-guard-v1.mjs';
 
+          const baseSha=process.env.GOVERNED_BASE_SHA;
+          if(!/^[0-9a-f]{40}$/i.test(baseSha ?? '')) throw new Error('INVALID_GOVERNED_BASE_SHA');
           const base={
             company_id:'GLOBAL',engine_id:'FACT-001',environment:'PROD_CONTROL_PLANE',version:'1.0.0',
-            base_ref:'main',base_sha:'48eef7bdeec05237e7fdb35d04a4502639599901',
+            base_ref:'main',base_sha:baseSha,
             branch:'cerebro/governed-write/canary-v1',
             safety:{direct_main_write:false,force_push:false,auto_merge:false,merge:false,workflow_mutation:false,governance_self_mutation:false,customer_data:false,prod_business_data:false,external_skill_code_execution:false,trading:false,paid_fallback:false,new_credentials:false,app_fenix_deploy:false,additional_cost_eur:0}
           };
@@ -80,7 +99,7 @@ jobs:
           const decisions=cases.map((request)=>evaluateGovernedWriteRequest(request,{activation_mode:'CANARY'}));
           if(decisions.some((d)=>!d.authorized)) throw new Error(JSON.stringify(decisions));
           if(decisions.some((d)=>d.authority.direct_main_write||d.authority.auto_merge||d.authority.merge||d.authority.workflow_mutation||d.authority.governance_self_mutation||d.authority.customer_data||d.authority.external_skill_code_execution||d.authority.trading||d.authority.paid_fallback||d.authority.app_fenix_deploy||Number(d.authority.additional_cost_eur)!==0)) throw new Error('AUTHORITY_CEILING_BREACH');
-          const evidence={schema_version:'1.0.0',status:'GREEN_SYNTHETIC_GOVERNED_WRITE_GUARD_CANARY',company_id:'GLOBAL',engine_id:'FACT-001',environment:'PROD_CONTROL_PLANE',version:'1.0.0',head_sha:process.env.GITHUB_SHA,branch:process.env.GITHUB_REF_NAME,decisions:decisions.map(({candidate_id,operation,status,authorized,authority})=>({candidate_id,operation,status,authorized,authority})),direct_main_write:false,auto_merge:false,merge:false,readonly_fallback_preserved:true,additional_cost_eur:0};
+          const evidence={schema_version:'1.0.0',status:'GREEN_SYNTHETIC_GOVERNED_WRITE_GUARD_CANARY',company_id:'GLOBAL',engine_id:'FACT-001',environment:'PROD_CONTROL_PLANE',version:'1.0.0',head_sha:process.env.GITHUB_SHA,branch:process.env.GITHUB_REF_NAME,base_sha:baseSha,decisions:decisions.map(({candidate_id,operation,status,authorized,authority})=>({candidate_id,operation,status,authorized,authority})),direct_main_write:false,auto_merge:false,merge:false,readonly_fallback_preserved:true,additional_cost_eur:0};
           fs.writeFileSync('artifacts/governed-write/evidence.json',JSON.stringify(evidence,null,2)+'\n');
           console.log(JSON.stringify(evidence));
           NODE
