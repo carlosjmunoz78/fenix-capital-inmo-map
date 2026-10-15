@@ -9,8 +9,14 @@
   "candidate_id": "lobehub-skills:950cf07380d1daa6de69",
   "alias_es": "Fábrica inteligente de skills",
   "technical_name": "skill-creator",
-  "status": "READY_FOR_FULL_SAFE_PREPROD_VALIDATION",
-  "validation_status": "PENDING_CURRENT_HEAD_CI",
+  "status": "FULL_SAFE_PREPROD",
+  "validation_status": "CI_GREEN",
+  "validated_by": {
+    "workflow": "CEREBRO Skill Full Adoption V1",
+    "run_id": 38805648804,
+    "head_sha": "540333f2bf9db6ed06f53a60f6f8325b7df67cc4",
+    "conclusion": "success"
+  },
   "provenance": {
     "upstream_repository": "openclaw/openclaw",
     "pinned_commit": "dc26366b07e7d08395b83de0d767150ffcb6ad50",
@@ -45,7 +51,8 @@
     "supply_chain_registry": "cerebro/registry/skill-supply-chain-v0.json",
     "learning_ingress": "cerebro/skills/skill-full-adoption-learning-ingress-v1.mjs",
     "learning_test": "cerebro/tests/skill-full-adoption-learning-ingress-v1.test.mjs",
-    "full_adoption_policy": "cerebro/registry/skill-full-adoption-v1.json"
+    "full_adoption_policy": "cerebro/registry/skill-full-adoption-v1.json",
+    "ci_run": "github-actions:38805648804"
   },
   "required_closure": {
     "provenance_and_license_green": true,
@@ -79,5 +86,5 @@
   },
   "promotion_authorized": false,
   "prod_authorized": false,
-  "next_gate": "CURRENT_HEAD_CI_VALIDATE_DYNAMIC_PREPROD_RUNTIME_AND_CLOSURE_CONTRACT"
+  "next_gate": "REGRESSION_MONITORING_NO_PROD_AUTHORITY"
 }
