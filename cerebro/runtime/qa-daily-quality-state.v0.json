@@ -5,15 +5,15 @@
   "engine_id": "QA-001",
   "environment": "CONTROL_PLANE",
   "version": "0.2.0",
-  "status": "GREEN",
-  "updated_at": "2026-10-15T01:30:35.455Z",
-  "quality_score": 100,
+  "status": "FINDINGS_OPEN",
+  "updated_at": "2026-10-15T04:40:27.282Z",
+  "quality_score": 60,
   "previous_quality_score": 100,
-  "quality_delta": 0,
+  "quality_delta": -40,
   "tests": {
     "executed": 12,
-    "passed": 12,
-    "failed": 0
+    "passed": 10,
+    "failed": 2
   },
   "targets": {
     "APP": {
@@ -35,19 +35,90 @@
       "passed": 2
     },
     "PRODUCT": {
-      "status": "GREEN",
+      "status": "RED",
       "executed": 2,
-      "failed": 0,
-      "passed": 2
+      "failed": 2,
+      "passed": 0
     }
   },
-  "issues": [],
-  "issue_fingerprints": [],
-  "new_issue_fingerprints": [],
+  "issues": [
+    {
+      "fingerprint": "57076bcd76dda8e6642db6ab",
+      "severity": "HIGH",
+      "kind": "PRODUCT",
+      "title": "product-readonly-observation.spec.ts › [PRODUCT] AION Product Factory PREPROD · human read-only observation",
+      "project": "qa-desktop-chromium",
+      "owner_engine": "QAB-001",
+      "evidence": [
+        "TimeoutError: page.goto: Timeout 45000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"https://aionoperator.com/aion-prueba-cliente-0-preprod/\", waiting until \"domcontentloaded\"\u001b[22m\n\n\n   7 |   const pageErrors:string[]=[];\n   8 |   page.on('pageerror',error=>pageErrors.push(error.message));\n>  9 |   const response=await page.goto(productUrl,{waitUntil:'domcontentloaded',timeout:45000});\n     |                             ^\n  10 |   expect(response,'AION product PREPROD response').not.toBeNull();\n  11 |   if(response) expect(response.status()).toBeLessThan(500);\n  12 |   await expect(page.locator('body')).toBeVisible();\n    at /home/runner/work/fenix-capital-inmo-map/fenix-capital-inmo-map/cerebro/qa/product-readonly-observation.spec.ts:9:29"
+      ],
+      "next_action": "REPRODUCE_AND_FIX_OR_ROUTE",
+      "auto_fix_eligible": false
+    },
+    {
+      "fingerprint": "1376f912951f14516044f089",
+      "severity": "HIGH",
+      "kind": "PRODUCT",
+      "title": "product-readonly-observation.spec.ts › [PRODUCT] AION Product Factory PREPROD · human read-only observation",
+      "project": "qa-mobile-chromium",
+      "owner_engine": "QAB-001",
+      "evidence": [
+        "TimeoutError: page.goto: Timeout 45000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"https://aionoperator.com/aion-prueba-cliente-0-preprod/\", waiting until \"domcontentloaded\"\u001b[22m\n\n\n   7 |   const pageErrors:string[]=[];\n   8 |   page.on('pageerror',error=>pageErrors.push(error.message));\n>  9 |   const response=await page.goto(productUrl,{waitUntil:'domcontentloaded',timeout:45000});\n     |                             ^\n  10 |   expect(response,'AION product PREPROD response').not.toBeNull();\n  11 |   if(response) expect(response.status()).toBeLessThan(500);\n  12 |   await expect(page.locator('body')).toBeVisible();\n    at /home/runner/work/fenix-capital-inmo-map/fenix-capital-inmo-map/cerebro/qa/product-readonly-observation.spec.ts:9:29"
+      ],
+      "next_action": "REPRODUCE_AND_FIX_OR_ROUTE",
+      "auto_fix_eligible": false
+    }
+  ],
+  "issue_fingerprints": [
+    "57076bcd76dda8e6642db6ab",
+    "1376f912951f14516044f089"
+  ],
+  "new_issue_fingerprints": [
+    "57076bcd76dda8e6642db6ab",
+    "1376f912951f14516044f089"
+  ],
   "resolved_issue_fingerprints": [],
   "recurring_issue_fingerprints": [],
-  "new_issues": [],
-  "dispatch_queue": [],
+  "new_issues": [
+    {
+      "fingerprint": "57076bcd76dda8e6642db6ab",
+      "severity": "HIGH",
+      "kind": "PRODUCT",
+      "title": "product-readonly-observation.spec.ts › [PRODUCT] AION Product Factory PREPROD · human read-only observation",
+      "project": "qa-desktop-chromium",
+      "owner_engine": "QAB-001",
+      "evidence": [
+        "TimeoutError: page.goto: Timeout 45000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"https://aionoperator.com/aion-prueba-cliente-0-preprod/\", waiting until \"domcontentloaded\"\u001b[22m\n\n\n   7 |   const pageErrors:string[]=[];\n   8 |   page.on('pageerror',error=>pageErrors.push(error.message));\n>  9 |   const response=await page.goto(productUrl,{waitUntil:'domcontentloaded',timeout:45000});\n     |                             ^\n  10 |   expect(response,'AION product PREPROD response').not.toBeNull();\n  11 |   if(response) expect(response.status()).toBeLessThan(500);\n  12 |   await expect(page.locator('body')).toBeVisible();\n    at /home/runner/work/fenix-capital-inmo-map/fenix-capital-inmo-map/cerebro/qa/product-readonly-observation.spec.ts:9:29"
+      ],
+      "next_action": "REPRODUCE_AND_FIX_OR_ROUTE",
+      "auto_fix_eligible": false
+    },
+    {
+      "fingerprint": "1376f912951f14516044f089",
+      "severity": "HIGH",
+      "kind": "PRODUCT",
+      "title": "product-readonly-observation.spec.ts › [PRODUCT] AION Product Factory PREPROD · human read-only observation",
+      "project": "qa-mobile-chromium",
+      "owner_engine": "QAB-001",
+      "evidence": [
+        "TimeoutError: page.goto: Timeout 45000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"https://aionoperator.com/aion-prueba-cliente-0-preprod/\", waiting until \"domcontentloaded\"\u001b[22m\n\n\n   7 |   const pageErrors:string[]=[];\n   8 |   page.on('pageerror',error=>pageErrors.push(error.message));\n>  9 |   const response=await page.goto(productUrl,{waitUntil:'domcontentloaded',timeout:45000});\n     |                             ^\n  10 |   expect(response,'AION product PREPROD response').not.toBeNull();\n  11 |   if(response) expect(response.status()).toBeLessThan(500);\n  12 |   await expect(page.locator('body')).toBeVisible();\n    at /home/runner/work/fenix-capital-inmo-map/fenix-capital-inmo-map/cerebro/qa/product-readonly-observation.spec.ts:9:29"
+      ],
+      "next_action": "REPRODUCE_AND_FIX_OR_ROUTE",
+      "auto_fix_eligible": false
+    }
+  ],
+  "dispatch_queue": [
+    {
+      "fingerprint": "57076bcd76dda8e6642db6ab",
+      "owner_engine": "QAB-001",
+      "action": "REPRODUCE_AND_FIX_OR_ROUTE"
+    },
+    {
+      "fingerprint": "1376f912951f14516044f089",
+      "owner_engine": "QAB-001",
+      "action": "REPRODUCE_AND_FIX_OR_ROUTE"
+    }
+  ],
   "learned_regression_tests": 0,
   "recurring_issues": 0,
   "human_required": [],
@@ -66,65 +137,9 @@
   },
   "improvement_scout": {
     "status": "IMPROVEMENTS_FOUND",
-    "observations_total": 6,
+    "observations_total": 4,
     "candidates_total": 6,
     "top_candidates": [
-      {
-        "improvement_id": "qa-imp:df7d01d86dba70010fa11b83",
-        "company_id": "fenix",
-        "engine_id": "HCI-001",
-        "environment": "PREPROD",
-        "version": "0.1.0",
-        "source": "QA-001_HUMAN_READONLY_OBSERVATION",
-        "target": "WEB:qa-desktop-chromium",
-        "dimension": "accessibility_names",
-        "title": "Controles interactivos visibles sin nombre accesible",
-        "hypothesis": "Nombrar controles visibles reduce fricción para tecnologías de asistencia.",
-        "evidence": "unnamedInteractiveCount=2",
-        "confidence": 0.96,
-        "risk_class": "LOW",
-        "expected_metric_delta": {
-          "name": "unnamed_interactive_count",
-          "direction": "LOWER",
-          "measurement": "CONTROLLED_OLD_VS_NEW"
-        },
-        "next_gate": "OWNER_PREPROD_CANDIDATE",
-        "auto_fix_eligible": false,
-        "promotion_authorized": false,
-        "prod_authorized": false,
-        "prod_write_authorized": false,
-        "customer_data": false,
-        "trading_access": false,
-        "additional_cost_eur": 0
-      },
-      {
-        "improvement_id": "qa-imp:f79da2012c0d9d6a655fb154",
-        "company_id": "fenix",
-        "engine_id": "HCI-001",
-        "environment": "PREPROD",
-        "version": "0.1.0",
-        "source": "QA-001_HUMAN_READONLY_OBSERVATION",
-        "target": "WEB:qa-mobile-chromium",
-        "dimension": "accessibility_names",
-        "title": "Controles interactivos visibles sin nombre accesible",
-        "hypothesis": "Nombrar controles visibles reduce fricción para tecnologías de asistencia.",
-        "evidence": "unnamedInteractiveCount=2",
-        "confidence": 0.96,
-        "risk_class": "LOW",
-        "expected_metric_delta": {
-          "name": "unnamed_interactive_count",
-          "direction": "LOWER",
-          "measurement": "CONTROLLED_OLD_VS_NEW"
-        },
-        "next_gate": "OWNER_PREPROD_CANDIDATE",
-        "auto_fix_eligible": false,
-        "promotion_authorized": false,
-        "prod_authorized": false,
-        "prod_write_authorized": false,
-        "customer_data": false,
-        "trading_access": false,
-        "additional_cost_eur": 0
-      },
       {
         "improvement_id": "qa-imp:8d10770927b05c3c549b03ec",
         "company_id": "fenix",
@@ -182,6 +197,62 @@
         "additional_cost_eur": 0
       },
       {
+        "improvement_id": "qa-imp:6aa1f568984da8a6bbf48d22",
+        "company_id": "fenix",
+        "engine_id": "SEO-001",
+        "environment": "PREPROD",
+        "version": "0.1.0",
+        "source": "QA-001_HUMAN_READONLY_OBSERVATION",
+        "target": "WEB:qa-desktop-chromium",
+        "dimension": "information_architecture",
+        "title": "Jerarquía H1 revisable en https://fenixcapital.es/",
+        "hypothesis": "Una jerarquía H1 inequívoca puede mejorar comprensión humana y estructura SEO.",
+        "evidence": "h1Count=0",
+        "confidence": 0.9,
+        "risk_class": "LOW",
+        "expected_metric_delta": {
+          "name": "single_primary_h1",
+          "direction": "HIGHER",
+          "measurement": "CONTROLLED_OLD_VS_NEW"
+        },
+        "next_gate": "OWNER_PREPROD_CANDIDATE",
+        "auto_fix_eligible": false,
+        "promotion_authorized": false,
+        "prod_authorized": false,
+        "prod_write_authorized": false,
+        "customer_data": false,
+        "trading_access": false,
+        "additional_cost_eur": 0
+      },
+      {
+        "improvement_id": "qa-imp:88077d0de23310cd55fd47b3",
+        "company_id": "fenix",
+        "engine_id": "SEO-001",
+        "environment": "PREPROD",
+        "version": "0.1.0",
+        "source": "QA-001_HUMAN_READONLY_OBSERVATION",
+        "target": "WEB:qa-mobile-chromium",
+        "dimension": "information_architecture",
+        "title": "Jerarquía H1 revisable en https://fenixcapital.es/",
+        "hypothesis": "Una jerarquía H1 inequívoca puede mejorar comprensión humana y estructura SEO.",
+        "evidence": "h1Count=0",
+        "confidence": 0.9,
+        "risk_class": "LOW",
+        "expected_metric_delta": {
+          "name": "single_primary_h1",
+          "direction": "HIGHER",
+          "measurement": "CONTROLLED_OLD_VS_NEW"
+        },
+        "next_gate": "OWNER_PREPROD_CANDIDATE",
+        "auto_fix_eligible": false,
+        "promotion_authorized": false,
+        "prod_authorized": false,
+        "prod_write_authorized": false,
+        "customer_data": false,
+        "trading_access": false,
+        "additional_cost_eur": 0
+      },
+      {
         "improvement_id": "qa-imp:52423800ed61b40ef9734fb3",
         "company_id": "fenix",
         "engine_id": "HCI-001",
@@ -220,10 +291,10 @@
   },
   "remediation": {
     "status": "ROUTED_AUTONOMOUSLY_TO_PREPROD",
-    "open_cases": 6,
-    "bug_cases": 0,
+    "open_cases": 8,
+    "bug_cases": 2,
     "improvement_cases": 6,
-    "candidate_packages_total": 6,
+    "candidate_packages_total": 8,
     "human_required": [],
     "next_gate": "OLD_VS_NEW_EXPERIMENT",
     "authority": {
@@ -243,8 +314,8 @@
   },
   "self_healing": {
     "status": "PLANS_READY",
-    "plans_total": 6,
-    "plan_ready": 6,
+    "plans_total": 8,
+    "plan_ready": 8,
     "human_required_total": 0,
     "next_gate": "OWNER_EXECUTOR_CAPABILITY_AUDIT",
     "execution_authority": {
@@ -263,7 +334,7 @@
     }
   },
   "learning_bridge": {
-    "signals_total": 0,
+    "signals_total": 3,
     "downstream": "CEREBRO_RSI_UNIVERSAL_LEARNING_INGRESS_V0",
     "repair_semantics": "PREPROD_CANDIDATE_ONLY_UNTIL_EXISTING_PROMOTION_GATES_AUTHORIZE_MORE",
     "prod_write_authorized": false,
