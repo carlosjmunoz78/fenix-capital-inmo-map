@@ -93,12 +93,16 @@
       "current_evidence": "GREEN_SKILL_CREATOR_PROD_READONLY_CANARY",
       "current_scope": "READONLY_ADVISORY_ALREADY_PROVEN_NO_NEW_PROD_ACTION",
       "benefit_reason": "Acelera la creación y mejora gobernada de las demás skills y refuerza FACTORY FIRST.",
-      "target_engine_bindings": "RESOLVE_FROM_EXISTING_GOVERNED_EVIDENCE",
+      "target_engine_bindings": [
+        "FACT-001"
+      ],
       "target_status": "FULL_SAFE_PREPROD",
-      "status": "ADMITTED_INCOMPLETE",
+      "status": "FULL_SAFE_PREPROD",
+      "closure_evidence": "cerebro/registry/skill-creator-full-safe-preprod.v1.json",
+      "validated_by_workflow_run": 38805648804,
       "human_required": null,
       "autonomous_ceiling": "FULL_SAFE_PREPROD",
-      "next_gate": "RESOLVE_RELEVANT_ENGINE_BINDINGS_AND_RUN_OLD_VS_NEW"
+      "next_gate": "REGRESSION_MONITORING_NO_PROD_AUTHORITY"
     },
     {
       "priority": 2,
