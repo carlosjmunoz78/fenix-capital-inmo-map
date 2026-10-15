@@ -1,10 +1,10 @@
 {
-  "schema_version": "1.1.0",
+  "schema_version": "1.2.0",
   "registry_type": "CEREBRO_AUTONOMOUS_READONLY_SKILL_ADVISORY_REGISTRY",
   "company_id": "GLOBAL",
   "engine_id": "FACT-001",
   "environment": "PROD_READONLY_ADVISORY",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "status": "ACTIVE",
   "policy_ref": "CEREBRO-SKILL-AUTONOMY-STANDING-AUTH-001",
   "entries": {
@@ -86,6 +86,92 @@
         "rebuild_default": "DISABLED",
         "prod_write_authorized": false,
         "canonical_knowledge_migration_authorized": false,
+        "human_required_for_mutation": "HIGH_RISK"
+      }
+    },
+    "skill-creator": {
+      "alias_es": "Fábrica inteligente de skills",
+      "technical_id": "skill-creator",
+      "candidate_id": "lobehub-skills:950cf07380d1daa6de69",
+      "wrapper_id": "skillwrap:cerebro-skill-creator-v0.1.0",
+      "status": "ACTIVE_READONLY_ADVISORY",
+      "execution_mode": "PROD_READONLY_ADVISORY",
+      "company_id": "GLOBAL",
+      "engine_id": "FACT-001",
+      "environment": "PROD_READONLY_ADVISORY",
+      "version": "skill-creator-prod-readonly-advisory-v1.0.0",
+      "approved_upstream_full_name": "openclaw/openclaw",
+      "approved_manifest_path": "skills/skill-creator/SKILL.md",
+      "approved_upstream_commit": "dc26366b07e7d08395b83de0d767150ffcb6ad50",
+      "approved_manifest_sha256": "3b7b93823a496cedc957fc91bbc8f8be132f2edd095dcaa46cee5394c742f0e4",
+      "target_engine_bindings": [
+        "FACT-001"
+      ],
+      "allowed_capabilities": [
+        "SKILL_CREATION_DESIGN_ADVISORY",
+        "SKILL_REPAIR_DESIGN_ADVISORY"
+      ],
+      "capability_evidence": {
+        "SKILL_CREATION_DESIGN_ADVISORY": "create-safe-skill",
+        "SKILL_REPAIR_DESIGN_ADVISORY": "repair-existing-skill"
+      },
+      "mutation_gate": "HIGH_RISK",
+      "registration_basis": {
+        "policy_id": "CEREBRO-SKILL-AUTONOMY-STANDING-AUTH-001",
+        "scope": "autonomous_readonly_advisory_registration",
+        "exact_scope_only": true
+      },
+      "safety": {
+        "prod_write": false,
+        "github_write": false,
+        "merge": false,
+        "push": false,
+        "issue_or_pr_mutation": false,
+        "workflow_dispatch": false,
+        "direct_tool_execution": false,
+        "customer_data": false,
+        "prod_data": false,
+        "external_skill_code_execution": false,
+        "trading": false,
+        "paid_fallback": false,
+        "permission_expansion": false,
+        "autonomous_business_prod_write": false,
+        "additional_cost_eur": 0
+      },
+      "preprod_evidence": {
+        "workflow": "CEREBRO Skill Full Adoption V1",
+        "run_id": 38805648804,
+        "head_sha": "540333f2bf9db6ed06f53a60f6f8325b7df67cc4",
+        "artifact_id": 12005049041,
+        "artifact_digest": "sha256:2958627c76013d0292a46eac5fdc188d114b3166ea46b7885f5ef768cd070050",
+        "status": "FULL_SAFE_PREPROD_GREEN"
+      },
+      "prod_canary_evidence": {
+        "workflow": "CEREBRO Skill Creator PROD Read-only Canary",
+        "run_id": 37698393553,
+        "head_sha": "5493cf3d120c5bec89261512a9097a97f167c198",
+        "artifact_id": 11516252090,
+        "artifact_digest": "sha256:27658b395b51b8696dc329075c84a5b27ca391276b884d030fb916da4d80e679",
+        "status": "GREEN_SKILL_CREATOR_PROD_READONLY_CANARY",
+        "tribunal_decision": "GREEN_FOR_CONTROLLED_READONLY_ADVISORY_PROMOTION_REVIEW",
+        "observed_main_sha": "df3f8b5eebe70cec9e6ffa17f10a7383a4b91468",
+        "live_requests": 2,
+        "allowed_http_methods": [
+          "GET"
+        ],
+        "audit_chain_valid": true,
+        "rollback_proven": true,
+        "rebuild_proven": true,
+        "measured_additional_cost_eur": 0
+      },
+      "activation": {
+        "registry_authority": "READONLY_ADVISORY_ONLY",
+        "fail_closed": true,
+        "rollback_state": "DISABLED",
+        "rebuild_default": "DISABLED",
+        "prod_write_authorized": false,
+        "github_write_authorized": false,
+        "direct_tool_execution_authorized": false,
         "human_required_for_mutation": "HIGH_RISK"
       }
     }
