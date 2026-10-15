@@ -9,38 +9,9 @@
   "status": "HOLD_EXTERNAL_SOURCE_UNRELIABLE",
   "candidate_source": "OPENSTREETMAP_OVERPASS_PUBLIC",
   "decision": "DO_NOT_PROMOTE_OR_RETRY_BLINDLY",
-  "evidence": {
-    "offline_contract_tests": "GREEN",
-    "governed_main_integration": "GREEN",
-    "rsi_shadow": "GREEN",
-    "physical_public_source_run": "RED",
-    "failure_stage": "DISCOVER_REAL_PUBLIC_CORDOBA_COMPANIES",
-    "provider_writes": 0,
-    "crm_writes": 0,
-    "outreach_actions": 0,
-    "customer_data_used": false,
-    "personal_data_persisted": false,
-    "prod_authorized": false,
-    "trading_access": false,
-    "additional_cost_eur": 0
-  },
-  "anti_loop": {
-    "same_provider_family_retries_allowed": false,
-    "reason": "Public Overpass transport did not provide a reliable physical run; re-evaluate source strategy instead of repeated retries.",
-    "preferred_next_sources": [
-      "EXISTING_AUTHORIZED_FIRST_PARTY_COMPANY_DIRECTORY",
-      "EXISTING_CEREBRO_WEB_ACQUISITION_ADAPTER",
-      "ZERO_COST_PUBLIC_SOURCE_WITH_STABLE_CONTRACT"
-    ]
-  },
-  "authority": {
-    "method": "GET_ONLY",
-    "provider_write_authorized": false,
-    "crm_write_authorized": false,
-    "outreach_authorized": false,
-    "prod_write_authorized": false,
-    "trading_authorized": false
-  },
+  "evidence": {"offline_contract_tests":"GREEN","governed_main_integration":"GREEN","rsi_shadow":"GREEN","physical_public_source_run":"RED","failure_stage":"DISCOVER_REAL_PUBLIC_CORDOBA_COMPANIES","provider_writes":0,"crm_writes":0,"outreach_actions":0,"customer_data_used":false,"personal_data_persisted":false,"prod_authorized":false,"trading_access":false,"additional_cost_eur":0},
+  "anti_loop": {"same_provider_family_retries_allowed":false,"reason":"Public Overpass transport did not provide a reliable physical run; re-evaluate source strategy instead of repeated retries.","preferred_next_sources":["EXISTING_AUTHORIZED_FIRST_PARTY_COMPANY_DIRECTORY","EXISTING_CEREBRO_WEB_ACQUISITION_ADAPTER","ZERO_COST_PUBLIC_SOURCE_WITH_STABLE_CONTRACT"]},
+  "authority": {"method":"GET_ONLY","provider_write_authorized":false,"crm_write_authorized":false,"outreach_authorized":false,"prod_write_authorized":false,"trading_authorized":false},
   "rollback": "Candidate is not promoted. Closing the PR leaves main unchanged.",
   "next_gate": "SELECT_RELIABLE_ZERO_COST_AUTHORIZED_COMPANY_SOURCE_THEN_NEW_PHYSICAL_PREPROD_RUN"
 }
