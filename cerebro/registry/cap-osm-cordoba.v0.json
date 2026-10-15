@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_CAP_OSM_CORDOBA_V0",
+  "company_id": "fenix",
+  "engine_id": "CAP-001",
+  "environment": "PREPROD",
+  "version": "0.1.0",
+  "rollout_item": 62,
+  "status": "REAL_PUBLIC_SOURCE_CONFIGURED_BASELINE_RUN_PENDING",
+  "source": {
+    "provider": "OpenStreetMap Overpass API",
+    "endpoint": "https://overpass-api.de/api/interpreter",
+    "geography": "cordoba",
+    "business_scope": "real_estate_agencies_for_b2b_partner_discovery",
+    "method": "GET_ONLY",
+    "cadence_hours": 24,
+    "attribution": "© OpenStreetMap contributors, ODbL",
+    "raw_body_persisted": false,
+    "company_fields_only": true,
+    "personal_contacts_persisted": false
+  },
+  "pipeline": [
+    "PUBLIC_OSM_OVERPASS_READ",
+    "ALLOWLIST_NAME_AND_WEBSITE_ONLY",
+    "DROP_SOCIAL_ONLY_OR_MISSING_DOMAIN",
+    "CAP_001_COMPANY_FIRST_DEDUPE_AND_ICP_SCORE",
+    "JOB_001_DURABLE_LOCAL_EXECUTION",
+    "EVIDENCE_ARTIFACT"
+  ],
+  "authority": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "provider_write_authorized": false,
+    "crm_write_authorized": false,
+    "outreach_authorized": false,
+    "customer_data_authorized": false,
+    "personal_contact_generation_authorized": false,
+    "external_dependency_install_authorized": false,
+    "trading_access": false,
+    "automatic_paid_fallback": false,
+    "additional_cost_eur": 0
+  },
+  "acceptance": {
+    "minimum_eligible_company_records": 1,
+    "provider_writes": 0,
+    "personal_contacts_generated": 0,
+    "outreach_actions": 0,
+    "crm_writes": 0,
+    "scheduled_real_runs_required": 3,
+    "current_scheduled_real_runs_verified": 0
+  },
+  "rollback": "Remove/revert this additive CAP source binding and scheduled workflow. No provider, CRM or customer mutation exists.",
+  "rebuild": "Recreate the PREPROD GET-only OSM Overpass adapter, whitelist company name/website only, feed company-level records into existing CAP-001 through JOB-001, run tests, capture a real baseline, then accumulate three genuine scheduled runs.",
+  "next_gate": "CAPTURE_REAL_OSM_BASELINE_THEN_THREE_SCHEDULED_REAL_CAP_RUNS_GREEN"
+}
