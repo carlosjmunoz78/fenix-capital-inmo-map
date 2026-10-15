@@ -6,7 +6,7 @@
   "environment": "PREPROD",
   "version": "0.2.0",
   "rollout_item": 47,
-  "status": "VERIFIED_DURABLE_REMOTE_OBSERVATION_SCHEDULER_CONFIGURED_SOAK_PENDING",
+  "status": "VERIFIED_REMOTE_OBSERVATION_REPLAY_GREEN",
   "source_main_sha": "76ca57a7ac8666d82b2628182aed58b703974faf",
   "purpose": "Run a governed continuous Watch & Learn observation loop against a user-owned public PREPROD source with deterministic replay, durable in-run JOB-001 evidence and a zero-cost external scheduler.",
   "implementation": {
