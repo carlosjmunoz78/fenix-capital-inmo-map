@@ -1,11 +1,11 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "state_type": "CEREBRO_CAP_IECA_CORDOBA_V0",
   "company_id": "fenix",
   "engine_id": "CAP-001",
   "environment": "PREPROD",
   "version": "v0",
-  "status": "PHYSICAL_PREPROD_GATE_PENDING",
+  "status": "REAL_OFFICIAL_COMPANY_DISCOVERY_GREEN_SCHEDULED_SOAK_PENDING",
   "source": {
     "publisher": "Instituto de Estadística y Cartografía de Andalucía",
     "dataset": "ESPAND directorio_establecimientos",
@@ -23,15 +23,31 @@
     "http_status": 200,
     "cordoba_feature_count": 2365,
     "broad_activity_feature_count": 266,
-    "deterministic_real_estate_candidate_count": 7,
+    "deterministic_real_estate_candidate_count_before_dedupe": 7,
     "provider_writes": 0
+  },
+  "physical_preprod_evidence": {
+    "workflow_run_id": 38713703960,
+    "workflow_conclusion": "success",
+    "artifact_id": 11961890425,
+    "artifact_digest": "sha256:659ab1749b3f8675f19c9abe486480d753a4bd7f1b264db64aeaa0139c726359",
+    "http_status": 200,
+    "broad_feature_count": 266,
+    "candidate_count_after_dedupe": 5,
+    "strong_match_count": 5,
+    "candidate_set_sha256": "b016c4abe8585fa9bdf15211631655efaa9d0323518665d193aaf4491224c061",
+    "job_status": "SUCCEEDED",
+    "canonical_registry_validation": "PASS",
+    "full_cerebro_regression": "PASS"
   },
   "implementation": {
     "runtime": "cerebro/runtime/cap-ieca-cordoba-v0.mjs",
     "tests": "cerebro/tests/cap-ieca-cordoba-v0.test.mjs",
+    "workflow": ".github/workflows/cerebro-cap-ieca-cordoba-v0.yml",
     "identity": "IECA id_directo + deterministic lead_key",
     "scoring": "existing CAP-001 lead discovery/ICP profile",
-    "durable_job": "JOB-001 PersistentJobQueue"
+    "durable_job": "JOB-001 PersistentJobQueue",
+    "cadence": "DAILY_05_47_UTC"
   },
   "authority": {
     "provider_write_authorized": false,
@@ -47,5 +63,5 @@
   },
   "rollback": "Revert additive CAP IECA PR; source access is GET-only and creates no provider/CRM/PROD mutation.",
   "rebuild": "Recreate from the fixed official IECA WFS source contract + CAP lead discovery profile + JOB-001 persistent runtime.",
-  "next_gate": "REAL_IECA_PREPROD_RUN_GREEN_THEN_SCHEDULED_SOAK"
+  "next_gate": "THREE_GENUINE_SCHEDULED_PREPROD_RUNS_GREEN"
 }
