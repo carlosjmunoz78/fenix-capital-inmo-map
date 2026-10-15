@@ -57,6 +57,17 @@ function activeOptions() {
   return { policy, registry, activation_mode: 'ACTIVE' };
 }
 
+function pendingRegistryOptions() {
+  const policy = structuredClone(loadGovernedWritePolicy());
+  const registry = structuredClone(loadGovernedWriteRegistry());
+  policy.status = 'ACTIVE_GOVERNED_WRITE_AUTHORIZATION';
+  registry.status = 'PREPARED_PENDING_PHYSICAL_CANARY';
+  for (const entry of Object.values(registry.entries)) {
+    entry.status = 'PREPARED_GOVERNED_WRITE_PENDING_CANARY';
+  }
+  return { policy, registry, activation_mode: 'ACTIVE' };
+}
+
 test('CANARY authorizes Skill Creator write only inside generated governed path', () => {
   const decision = evaluateGovernedWriteRequest(request(), { activation_mode: 'CANARY' });
   assert.equal(decision.authorized, true);
@@ -71,11 +82,11 @@ test('ACTIVE mode authorizes exact bounded request only after policy and registr
   assert.equal(decision.authorized, true);
 });
 
-test('pending registry fails closed in ACTIVE mode', () => {
-  const decision = evaluateGovernedWriteRequest(request());
+test('pending registry fails closed in ACTIVE mode even when policy is active', () => {
+  const decision = evaluateGovernedWriteRequest(request(), pendingRegistryOptions());
   assert.equal(decision.authorized, false);
-  assert.ok(decision.reasons.includes('POLICY_NOT_ACTIVE'));
   assert.ok(decision.reasons.includes('REGISTRY_NOT_ACTIVE'));
+  assert.ok(decision.reasons.includes('CANDIDATE_NOT_ACTIVE'));
 });
 
 test('GitHub candidate may create governed branch in canary envelope', () => {
