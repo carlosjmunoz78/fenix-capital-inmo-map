@@ -38,8 +38,19 @@ test('journey keeps stage pending until explicit save and routes the write to th
  expect(journey).toContain("r.status===409");
  expect(journey).toContain('He recargado el estado actual sin sobrescribirlo.');
  expect(journey).toMatch(/if\(r\.status>=200&&r\.status<300\)\{await refresh\(\);setMsg/);
- expect(css).toContain('grid-template-columns:minmax(0,6fr) minmax(132px,1fr)');
+ expect(css).toContain('grid-template-columns:minmax(0,6fr) minmax(150px,1fr)');
  expect(css).toContain('@media(max-width:1100px)');
+});
+
+test('journey phase labels stay separated and readable in dark and light themes',()=>{
+ const css=fs.readFileSync('src/expediente-journey-guard.css','utf8');
+ expect(css).toContain('>div{flex:1 1 0;min-width:0;display:grid;justify-items:center');
+ expect(css).toContain('>div>small{display:block;width:100%;max-width:100%;font-size:11px');
+ expect(css).toContain('white-space:nowrap;color:var(--dx-text);opacity:.82;text-align:center');
+ expect(css).toContain('>div.current>small{color:var(--dx-orange);opacity:1;font-weight:900}');
+ expect(css).toContain('.exp-stage-save-button:disabled{opacity:.72');
+ expect(css).toContain('border-color:rgba(255,90,0,.34);color:var(--dx-text)');
+ expect(css).toContain('@media(max-width:1380px)');
 });
 
 test('manual stage backend is authenticated, versioned and audited',()=>{
