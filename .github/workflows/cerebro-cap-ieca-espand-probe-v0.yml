@@ -1,0 +1,31 @@
+name: CEREBRO CAP IECA ESPAND Probe V0
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/runtime/cap-ieca-espand-probe-v0.mjs'
+      - '.github/workflows/cerebro-cap-ieca-espand-probe-v0.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  official-public-source-probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Probe IECA ESPAND WFS schema
+        run: node cerebro/runtime/cap-ieca-espand-probe-v0.mjs --out /tmp/cap-ieca-espand-probe.json
+      - name: Validate safety boundary
+        run: >-
+          node -e "const r=require('/tmp/cap-ieca-espand-probe.json'); if(r.status!=='OFFICIAL_PUBLIC_WFS_PROBE_GREEN'||r.feature_count<1||r.source.http_status!==200||r.source.method!=='GET_ONLY'||r.source.provider_writes!==0||r.raw_feature_values_persisted!==false||r.customer_data_used||r.personal_data_persisted||r.prod_authorized||r.prod_write_authorized||r.trading_access||r.additional_cost_eur!==0)process.exit(1); console.log('IECA ESPAND official public source probe GREEN; keys='+r.property_keys.join(','));"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cap-ieca-espand-probe
+          path: /tmp/cap-ieca-espand-probe.json
+          retention-days: 7
