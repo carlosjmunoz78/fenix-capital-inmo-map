@@ -1,16 +1,18 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "state_type": "CEREBRO_SKILL_FULL_ADOPTION_QUEUE",
   "generated_at": "2026-10-15",
   "company_id": "GLOBAL",
   "engine_id": "FACT-001",
   "environment": "PREPROD",
-  "version": "v1",
+  "version": "v1.1",
   "source_of_truth": [
     "cerebro/registry/skill-supply-chain-v0.json",
     "cerebro/skills/cerebro-184-live-convergence.v3.json",
     "cerebro/runtime/skill-capability-autonomy-closure-v1.mjs",
-    "cerebro/skills/skill-capability-evolution-bridge.mjs"
+    "cerebro/skills/skill-capability-evolution-bridge.mjs",
+    "cerebro/skills/skill-cerebro-obsidian-wrapper.mjs",
+    "cerebro/skills/skill-obsidian-normalized-wrapper-review.mjs"
   ],
   "policy": {
     "human_alias_first": true,
@@ -74,6 +76,13 @@
     "BROWSER_AND_UI_AUTOMATION_FOURTH",
     "THEN_REMAINING_ADMITTED_SKILLS_BY_MEASURED_BENEFIT_RISK_AND_ZERO_COST"
   ],
+  "inventory_audit": {
+    "specialized_cerebro_wrappers_observed": 5,
+    "admitted_full_queue_count": 4,
+    "observed_not_admitted_count": 1,
+    "rule": "WRAPPER_EXISTENCE_DOES_NOT_EQUAL_ADMISSION",
+    "complete_for_specialized_wrappers_observed_on_2026_10_15": true
+  },
   "queue": [
     {
       "priority": 1,
@@ -136,6 +145,37 @@
       "human_required": "HIGH_RISK",
       "autonomous_ceiling": "EVIDENCE_ONLY_UNTIL_CANONICAL_HIGH_RISK_GATE_RESOLVED",
       "next_gate": "HIGH_RISK_REVIEW_AFTER_ALL_NON_MUTATING_EVIDENCE_IS_COMPLETE"
+    }
+  ],
+  "observed_not_admitted": [
+    {
+      "candidate_id": "lobehub-skills:9a6e3fac20369220df43",
+      "alias_es": "Asistente seguro de conocimiento en Obsidian",
+      "technical_name": "obsidian",
+      "upstream": "openclaw/openclaw",
+      "wrapper_id": "skillwrap:cerebro-obsidian-v0.1.0",
+      "engine_bindings_observed": [
+        "RSH-001",
+        "KNW-001",
+        "TRN-001",
+        "TRNBOOT-001",
+        "RAG-001",
+        "PRV-001"
+      ],
+      "current_evidence": "STATIC_WRAPPER_IMPLEMENTED_REVIEW_CODE_PRESENT",
+      "current_scope": "LAB_STATIC_REVIEW_ONLY",
+      "admitted": false,
+      "install_authorized": false,
+      "behavioral_eval_authorized": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "external_skill_code_execution": false,
+      "live_obsidian_cli_execution": false,
+      "canonical_knowledge_migration_authorized": false,
+      "additional_cost_eur": 0,
+      "status": "CANDIDATE_NOT_ADMITTED",
+      "next_gate": "SYNTHETIC_BEHAVIORAL_OLD_VS_NEW_REVIEW_IF_STATIC_REVIEW_GREEN",
+      "admission_rule": "DO_NOT_ADD_TO_FULL_DEBT_QUEUE_UNTIL_GOVERNED_ADMISSION_EVIDENCE_EXISTS"
     }
   ],
   "parallel_nonblocking_work": [
