@@ -1,0 +1,42 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_FACT001_REAL_SOURCE_ROLLOUT_57_62_V0",
+  "company_id": "fenix",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "0.1.0",
+  "status": "REAL_SOURCE_ROLLOUT_PARTIAL",
+  "depends_on": "cerebro/registry/fact001-remote-source-bindings-57-62.v0.json",
+  "items": {
+    "57": {
+      "engine_id": "COMPET-001",
+      "state": "REAL_PUBLIC_CORDOBA_TARGETS_CONFIGURED_AND_SCHEDULED",
+      "evidence": "PR #707 merged with real public Córdoba targets, frozen baselines and scheduled PREPROD scan.",
+      "remaining_gate": "THREE_GENUINE_SCHEDULED_PREPROD_RUNS_GREEN"
+    },
+    "62": {
+      "engine_id": "CAP-001",
+      "state": "REAL_SOURCE_PENDING",
+      "verified_transport": "REMOTE_READ_PLUS_DURABLE_JOB_E2E_GREEN",
+      "candidate": "OPENSTREETMAP_OVERPASS_PUBLIC",
+      "candidate_disposition": "HOLD_EXTERNAL_SOURCE_UNRELIABLE",
+      "evidence": "PR #708 physical public-source run failed at company discovery and was closed without merge. No provider/CRM/outreach/customer/PROD/Trading mutation occurred.",
+      "anti_loop": "DO_NOT_RETRY_SAME_PROVIDER_FAMILY_BLINDLY",
+      "remaining_gate": "SELECT_RELIABLE_ZERO_COST_AUTHORIZED_COMPANY_SOURCE_THEN_RUN_REAL_CONTINUOUS_PREPROD"
+    }
+  },
+  "authority": {
+    "provider_write_authorized": false,
+    "crm_write_authorized": false,
+    "outreach_authorized": false,
+    "customer_data_authorized": false,
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "trading_access": false,
+    "automatic_paid_fallback": false,
+    "additional_cost_eur": 0
+  },
+  "rollback": "Registry-only overlay. Revert this file; the verified 57/62 transport contract remains unchanged.",
+  "rebuild": "Reuse the existing guarded public-source adapter and durable JOB-001 runtime. Bind CAP only to a stable zero-cost authorized company-level source and rerun physical PREPROD acceptance.",
+  "next_gate": "SOAK_57_AND_REBIND_62_WITH_STABLE_ZERO_COST_SOURCE"
+}
