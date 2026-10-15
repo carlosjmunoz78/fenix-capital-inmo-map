@@ -1,0 +1,56 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_COMPET_REAL_TARGETS_V0",
+  "company_id": "fenix",
+  "engine_id": "COMPET-001",
+  "environment": "PREPROD",
+  "version": "0.1.0",
+  "status": "REAL_TARGETS_CONFIGURED_BASELINE_CAPTURE_PENDING",
+  "source_policy": "PUBLIC_OFFICIAL_COMPETITOR_WEBSITE_GET_ONLY",
+  "cadence_hours": 24,
+  "targets": [
+    {
+      "competitor_id": "kiron-cordoba",
+      "name": "Kìron Córdoba",
+      "url": "https://cordoba1.kiron.es/hipotecas",
+      "geography": "cordoba",
+      "business_relevance": "mortgage_intermediation_high_financing",
+      "baseline": null
+    },
+    {
+      "competitor_id": "grupo-negociador-cordoba",
+      "name": "Grupo Negociador",
+      "url": "https://gruponegociador.es/product-landing-page/",
+      "geography": "cordoba",
+      "business_relevance": "mortgage_intermediation_100_percent",
+      "baseline": null
+    },
+    {
+      "competitor_id": "bimaik-cordoba",
+      "name": "Bimaik Córdoba",
+      "url": "https://bimaik.com/broker-hipotecario-cordoba-bimaik/",
+      "geography": "cordoba",
+      "business_relevance": "mortgage_broker_100_percent_plus_costs",
+      "baseline": null
+    }
+  ],
+  "data_minimization": {
+    "personal_data": false,
+    "customer_data": false,
+    "body_persisted": false,
+    "stored_fields": ["competitor_id", "url", "title", "body_sha256", "body_bytes", "observed_at"],
+    "contacts_extracted": false
+  },
+  "authority": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "provider_write_authorized": false,
+    "customer_data_authorized": false,
+    "external_dependency_install_authorized": false,
+    "trading_access": false,
+    "automatic_paid_fallback": false,
+    "additional_cost_eur": 0
+  },
+  "rollback": "Revert/remove this additive target registry and scheduled scan; no provider mutation exists.",
+  "next_gate": "CAPTURE_AND_FREEZE_INITIAL_REAL_TARGET_BASELINES_THEN_ENABLE_CONTINUOUS_PREPROD_SCAN"
+}
