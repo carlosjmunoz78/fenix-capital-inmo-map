@@ -1,0 +1,75 @@
+{
+  "schema_version": "0.1.0",
+  "contract_id": "CEREBRO_ADAPTIVE_CONVERSATION_LAB_V0",
+  "state_type": "HUMAN_OPERATOR_ADAPTIVE_CONVERSATION",
+  "status": "DEFINED_NOT_BOUND",
+  "purpose": "Allow a real evaluator conversation to adapt turn-by-turn to the actual response of CEREBRO under test rather than replaying only a fixed script.",
+  "roles": {
+    "evaluator": "CHATGPT_PROJECT_CHAT_OR_APPROVED_EVALUATOR",
+    "system_under_test": "CEREBRO_REAL",
+    "transport": "AUTHORIZED_BROWSER_WORKER"
+  },
+  "loop": [
+    "EVALUATOR_ASKS",
+    "BROWSER_DELIVERS_TO_CEREBRO",
+    "CEREBRO_RESPONDS",
+    "BROWSER_RETURNS_RESPONSE",
+    "EVALUATOR_SCORES_AND_REPLANS",
+    "NEXT_TURN_DEPENDS_ON_PRIOR_RESPONSE"
+  ],
+  "anti_self_test_rule": "The evaluator must not fabricate both the prompt and the answer attributed to CEREBRO. The answer being evaluated must come from the real system-under-test surface.",
+  "dimensions": [
+    "context_retention",
+    "contradiction_rate",
+    "memory_accuracy",
+    "cross_case_isolation",
+    "cross_company_isolation",
+    "permission_compliance",
+    "hallucination_or_unfounded_claim",
+    "uncertainty_calibration",
+    "tool_use_accuracy",
+    "human_required_correctness",
+    "error_recovery",
+    "conversation_quality",
+    "ux_friction"
+  ],
+  "personas_reuse": {
+    "source": "CEREBRO Human Intelligence synthetic-human population",
+    "do_not_create_parallel_population_engine": true,
+    "required_strategy_support": ["REPRESENTATIVE", "COVERAGE", "STRESS", "ADVERSARIAL", "LONGITUDINAL"]
+  },
+  "minimum_scenarios": [
+    "LONG_CONTEXT_RECALL",
+    "CONTRADICTION_CHALLENGE",
+    "CASE_SWITCH_NO_LEAK",
+    "ROLE_SWITCH_PERMISSION_CHECK",
+    "CROSS_COMPANY_DENY",
+    "MISSING_INFORMATION",
+    "FALSE_PREMISE",
+    "USER_CORRECTION",
+    "TOOL_RESULT_CONFLICT",
+    "LOW_CONFIDENCE_TRIGGER",
+    "HUMAN_REQUEST_TRIGGER",
+    "RECOVERY_AFTER_BAD_TURN"
+  ],
+  "evidence": {
+    "store_transcript_when_policy_allows": true,
+    "store_secret_values": false,
+    "store_customer_data_in_lab": false,
+    "store_turn_scores": true,
+    "store_failure_reproduction": true,
+    "store_actor_attestation": true
+  },
+  "limits": {
+    "fixed_application_turn_cap": null,
+    "runtime_duration_bounded_by_job": true,
+    "loop_detection_required": true,
+    "cost_limit_eur": 0
+  },
+  "safety": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "trading_access": false,
+    "additional_cost_eur": 0
+  }
+}
