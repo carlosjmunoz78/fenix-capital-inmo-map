@@ -1,11 +1,11 @@
 {
-  "schema_version": "1.3.0",
+  "schema_version": "1.4.0",
   "state_type": "CEREBRO_SKILL_FULL_ADOPTION_QUEUE",
   "generated_at": "2026-10-15",
   "company_id": "GLOBAL",
   "engine_id": "FACT-001",
   "environment": "PREPROD",
-  "version": "v1.3",
+  "version": "v1.4",
   "source_of_truth": [
     "cerebro/registry/skill-supply-chain-v0.json",
     "cerebro/skills/cerebro-184-live-convergence.v3.json",
@@ -13,6 +13,9 @@
     "cerebro/skills/skill-capability-evolution-bridge.mjs",
     "cerebro/skills/skill-cerebro-obsidian-wrapper.mjs",
     "cerebro/skills/skill-obsidian-normalized-wrapper-review.mjs",
+    "cerebro/skills/skill-obsidian-old-vs-new-v1.mjs",
+    "cerebro/skills/skill-obsidian-admission-judge-v1.mjs",
+    "cerebro/skills/skill-obsidian-admission-tribunal-v1.mjs",
     "cerebro/registry/browser-transversal-autonomy-policy.v1.json",
     "cerebro/runtime/browser-transversal-autonomy-v1.mjs"
   ],
@@ -109,9 +112,9 @@
   ],
   "inventory_audit": {
     "specialized_cerebro_wrappers_observed": 5,
-    "admitted_full_queue_count": 4,
-    "observed_not_admitted_count": 1,
-    "rule": "WRAPPER_EXISTENCE_DOES_NOT_EQUAL_ADMISSION",
+    "admitted_full_queue_count": 5,
+    "observed_not_admitted_count": 0,
+    "rule": "WRAPPER_EXISTENCE_DOES_NOT_EQUAL_ADMISSION; OBSIDIAN_ADMITTED_ONLY_AFTER_SYNTHETIC_OLD_VS_NEW_PLUS_INDEPENDENT_JUDGE_AND_TRIBUNAL",
     "complete_for_specialized_wrappers_observed_on_2026_10_15": true
   },
   "queue": [
@@ -181,32 +184,49 @@
       "human_required": "HIGH_RISK",
       "autonomous_ceiling": "INTERNAL_TRANSVERSAL_BROWSER_POLICY_GREEN_EXTERNAL_SKILL_EVIDENCE_ONLY_UNTIL_CANONICAL_GATE_RESOLVED",
       "next_gate": "EXTERNAL_SKILL_HIGH_RISK_REVIEW_INDEPENDENT_FROM_INTERNAL_BROWSER_AUTONOMY"
-    }
-  ],
-  "observed_not_admitted": [
+    },
     {
+      "priority": 5,
       "candidate_id": "lobehub-skills:9a6e3fac20369220df43",
       "alias_es": "Asistente seguro de conocimiento en Obsidian",
       "technical_name": "obsidian",
       "upstream": "openclaw/openclaw",
       "wrapper_id": "skillwrap:cerebro-obsidian-v0.1.0",
-      "engine_bindings_observed": ["RSH-001","KNW-001","TRN-001","TRNBOOT-001","RAG-001","PRV-001"],
-      "current_evidence": "STATIC_WRAPPER_IMPLEMENTED_REVIEW_CODE_PRESENT",
-      "current_scope": "LAB_STATIC_REVIEW_ONLY",
-      "admitted": false,
+      "current_evidence": "GREEN_SYNTHETIC_OLD_VS_NEW_INDEPENDENT_JUDGE_AND_ADMISSION_TRIBUNAL",
+      "current_scope": "ADMITTED_TO_FULL_DEBT_QUEUE_NON_EXECUTING",
+      "benefit_reason": "Añade búsqueda con ámbito explícito, evidencia de relaciones entre notas y planificación de cambios con rollback sin sustituir los owners canónicos KNW/RAG/PRV/UPD.",
+      "target_engine_bindings": ["RSH-001","KNW-001","TRN-001","TRNBOOT-001","RAG-001","PRV-001"],
+      "target_status": "FULL_SAFE_PREPROD",
+      "status": "ADMITTED_INCOMPLETE",
+      "admitted": true,
       "install_authorized": false,
-      "behavioral_eval_authorized": false,
-      "prod_authorized": false,
-      "prod_write_authorized": false,
-      "external_skill_code_execution": false,
+      "execution_authorized": false,
       "live_obsidian_cli_execution": false,
       "canonical_knowledge_migration_authorized": false,
+      "external_skill_code_execution": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
       "additional_cost_eur": 0,
-      "status": "CANDIDATE_NOT_ADMITTED",
-      "next_gate": "SYNTHETIC_BEHAVIORAL_OLD_VS_NEW_REVIEW_IF_STATIC_REVIEW_GREEN",
-      "admission_rule": "DO_NOT_ADD_TO_FULL_DEBT_QUEUE_UNTIL_GOVERNED_ADMISSION_EVIDENCE_EXISTS"
+      "admission_evidence": [
+        "cerebro/skills/skill-obsidian-normalized-wrapper-review.mjs",
+        "cerebro/skills/skill-obsidian-old-vs-new-v1.mjs",
+        "cerebro/skills/skill-obsidian-admission-judge-v1.mjs",
+        "cerebro/skills/skill-obsidian-admission-tribunal-v1.mjs"
+      ],
+      "admission_validation_head_sha": "c5500917748524314c414b48ed5cdf5cbd262fc8",
+      "admission_validation_workflows": {
+        "governed_main_integration": 38812318689,
+        "skill_supply_chain_gate": 38812318694,
+        "rsi_promotion_readiness": 38812318695,
+        "skill_full_adoption": 38812318697
+      },
+      "human_required": null,
+      "autonomous_ceiling": "FULL_SAFE_PREPROD",
+      "next_gate": "PREPROD_BINDING_OLD_VS_NEW_PER_RELEVANT_ENGINE"
     }
   ],
+  "observed_not_admitted": [],
   "parallel_nonblocking_work": [
     {"alias_es":"Aprendizaje continuo","gate":"THREE_GENUINE_SCHEDULED_RUNS_GREEN","policy":"ACCUMULATE_GENUINE_SCHEDULED_EVIDENCE_DO_NOT_FAKE_SOAK"},
     {"alias_es":"Vigilancia de competencia","gate":"REAL_TARGETS_AND_CONTINUOUS_PREPROD_RUN","policy":"GET_ONLY_PREPROD_CONTINUOUS_EVIDENCE"},
