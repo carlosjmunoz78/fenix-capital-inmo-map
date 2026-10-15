@@ -1,29 +1,27 @@
 {
-  "schema_version": "1.2.0",
+  "schema_version": "1.1.0",
   "state_type": "CEREBRO_FACT001_REMOTE_SOURCE_BINDINGS_57_62_V0",
   "company_id": "fenix",
   "engine_id": "FACT-001",
   "environment": "PREPROD",
-  "version": "0.2.0",
-  "status": "REMOTE_TRANSPORT_GREEN_REAL_SOURCE_ROLLOUT_PARTIAL",
+  "version": "0.1.0",
+  "status": "VERIFIED_REMOTE_PREPROD_SOURCE_BINDINGS_GREEN",
   "source_main_sha": "b0f47f79bcabf59796f3d63266c7c1e9e4f075a8",
   "validated_head_sha": "1661f73300536131c7eb731b0b23a609798ba246",
   "items": {
     "57": {
       "engine_id": "COMPET-001",
-      "verified_state": "REAL_PUBLIC_CORDOBA_TARGETS_CONFIGURED_AND_SCHEDULED",
-      "source_route": "PUBLIC_AUTHORIZED_HTTPS_GET_ONLY",
-      "evidence": "Real Córdoba competitor targets and frozen baselines are bound to COMPET-001; scheduled PREPROD scanning is merged in PR #707.",
-      "remaining_gate": "THREE_GENUINE_SCHEDULED_PREPROD_RUNS_GREEN"
+      "verified_state": "REMOTE_READ_PLUS_DURABLE_JOB_E2E_GREEN",
+      "source_route": "OFFICIAL_API_FEED_SITEMAP",
+      "evidence": "real HTTPS GET to user-owned staging REST API -> guarded evidence -> durable JOB-001 -> COMPET deterministic comparison -> success",
+      "remaining_gate": "REAL_COMPETITOR_TARGET_CONFIGURATION_AND_CONTINUOUS_PREPROD_RUN"
     },
     "62": {
       "engine_id": "CAP-001",
-      "verified_state": "REMOTE_READ_PLUS_DURABLE_JOB_E2E_GREEN_REAL_SOURCE_PENDING",
-      "source_route": "REAL_SOURCE_CANDIDATE_REEVALUATION",
-      "evidence": "Guarded remote transport and durable JOB-001 CAP path are GREEN from the existing user-owned PREPROD source test. The first real public company-source candidate (OpenStreetMap Overpass) failed its physical provider run and PR #708 was closed without merge.",
-      "candidate_disposition": "HOLD_EXTERNAL_SOURCE_UNRELIABLE",
-      "anti_loop": "DO_NOT_RETRY_SAME_PROVIDER_FAMILY_BLINDLY",
-      "remaining_gate": "SELECT_RELIABLE_ZERO_COST_AUTHORIZED_COMPANY_SOURCE_THEN_RUN_REAL_CONTINUOUS_PREPROD"
+      "verified_state": "REMOTE_READ_PLUS_DURABLE_JOB_E2E_GREEN",
+      "source_route": "OFFICIAL_API_FEED_SITEMAP",
+      "evidence": "real HTTPS GET to user-owned staging REST API -> guarded evidence -> durable JOB-001 -> company-first CAP discovery/ICP scoring -> success",
+      "remaining_gate": "REAL_CAP_ACQUISITION_SOURCE_CONFIGURATION_AND_CONTINUOUS_PREPROD_RUN"
     }
   },
   "implementation": {
@@ -33,40 +31,45 @@
     "workflow": ".github/workflows/cerebro-fact001-remote-source-bindings-57-62-v0.yml"
   },
   "verification": {
-    "remote_transport_workflow_run_id": 38647246947,
-    "remote_transport_workflow_conclusion": "success",
+    "workflow_run_id": 38647246947,
+    "workflow_conclusion": "success",
     "source_adapter_security_contracts": "PASS",
     "remote_preprod_binding_e2e": "PASS",
     "remote_evidence_authority_gate": "PASS",
     "canonical_registry_validation": "PASS",
     "full_cerebro_regression": "PASS",
-    "compet_real_target_pr": 707,
-    "compet_real_target_state": "MERGED",
-    "cap_real_source_candidate_pr": 708,
-    "cap_real_source_candidate_state": "CLOSED_NOT_MERGED_HOLD"
+    "artifact_id": 11932363634,
+    "artifact_digest": "sha256:b997b576a7418e633763a64140aa4630bcf55e97f0dabadb288fe98aadb7384b",
+    "governed_main_integration_run_id": 38647246744,
+    "governed_main_integration": "PASS",
+    "rsi_promotion_readiness_shadow_run_id": 38647246897,
+    "rsi_promotion_readiness_shadow": "PASS"
   },
   "remote_acceptance": {
+    "target_class": "USER_OWNED_PUBLIC_PREPROD_WORDPRESS_REST_API",
     "method": "HTTPS_GET_ONLY",
+    "auth": false,
+    "cookies": false,
     "provider_write": false,
     "dns_public_ip_required": true,
     "redirects_revalidated": true,
     "max_redirects": 3,
     "bounded_response_bytes": true,
+    "synthetic_control_baseline_for_compet": true,
+    "declared_business_semantics_for_cap": true,
     "no_person_contact_generation": true
   },
   "authority": {
     "prod_authorized": false,
     "prod_write_authorized": false,
     "provider_write_authorized": false,
-    "crm_write_authorized": false,
-    "outreach_authorized": false,
     "customer_data_authorized": false,
     "external_dependency_install_authorized": false,
     "trading_access": false,
     "automatic_paid_fallback": false,
     "additional_cost_eur": 0
   },
-  "rollback": "Registry-only reconciliation. Revert this commit to restore the previous state record; no provider, CRM, PROD or customer mutation is performed.",
-  "rebuild": "Reuse the existing guarded public-source adapter and durable JOB-001 runtime. For CAP, bind a different stable zero-cost authorized company-level source and rerun physical PREPROD acceptance before scheduling.",
-  "next_gate": "SOAK_57_AND_REBIND_62_WITH_STABLE_ZERO_COST_SOURCE"
+  "rollback": "Revert this additive remote-source adapter PR; it performs GET-only PREPROD reads and no provider mutation.",
+  "rebuild": "Recreate from public-source-adapter-v0 + remote 57/62 runner + canonical persistent JOB-001 runtime.",
+  "next_gate": "CONFIGURE_REAL_57_62_SOURCE_TARGETS_AND_CONTINUOUS_PREPROD_RUNS"
 }
