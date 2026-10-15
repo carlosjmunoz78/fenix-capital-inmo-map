@@ -1,33 +1,54 @@
 {
-  "schema_version": "1.1.0",
+  "schema_version": "1.2.0",
   "state_type": "CEREBRO_WATCH_LEARN_REMOTE_OBSERVATION_V0",
   "company_id": "fenix",
   "engine_id": "LRN-001",
   "environment": "PREPROD",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "rollout_item": 47,
-  "status": "VERIFIED_REMOTE_OBSERVATION_REPLAY_GREEN",
-  "source_main_sha": "05f86970a94350628ecfb3511573a0eff333e51b",
-  "validated_head_sha": "dac341399e350f046b7d0cc01a05f72593fbf23e",
-  "purpose": "Bind the verified deterministic replay core to a real authorized public PREPROD observation without writes or credentials.",
+  "status": "VERIFIED_DURABLE_REMOTE_OBSERVATION_SCHEDULER_CONFIGURED_SOAK_PENDING",
+  "source_main_sha": "76ca57a7ac8666d82b2628182aed58b703974faf",
+  "purpose": "Run a governed continuous Watch & Learn observation loop against a user-owned public PREPROD source with deterministic replay, durable in-run JOB-001 evidence and a zero-cost external scheduler.",
   "implementation": {
     "runner": "cerebro/runtime/watch-learn-remote-observation-v0.mjs",
     "source_adapter": "cerebro/runtime/public-source-adapter-v0.mjs",
     "replay_core": "cerebro/runtime/fact001-gap-capabilities-v0.mjs",
+    "job_runtime": "cerebro/runtime/persistent-runtime.mjs",
     "workflow": ".github/workflows/cerebro-watch-learn-remote-observation-v0.yml"
   },
+  "scheduler": {
+    "kind": "GITHUB_ACTIONS_CRON",
+    "cron": "17 4 * * *",
+    "cadence_hours": 24,
+    "timezone": "UTC",
+    "target": "USER_OWNED_PUBLIC_PREPROD_WORDPRESS_REST_API",
+    "dynamic_cycle_anchor": "UTC_DAY_START",
+    "provider_write": false,
+    "paid_service_required": false,
+    "configured": true,
+    "soak_complete": false
+  },
+  "retention": {
+    "artifact_days": 30,
+    "remote_customer_data": false,
+    "credentials_in_artifact": false,
+    "body_content_persisted_by_registry": false,
+    "journal_scope": "EPHEMERAL_PER_RUN_WITH_DURABLE_REOPEN_IDEMPOTENCY_CHECK",
+    "long_term_state": "WORKFLOW_RUN_AND_ARTIFACT_HISTORY",
+    "review_after_successful_scheduled_runs": 3
+  },
   "verification": {
-    "workflow_run_id": 38647871977,
-    "workflow_conclusion": "success",
+    "initial_remote_workflow_run_id": 38647871977,
+    "initial_workflow_conclusion": "success",
     "public_source_security_contracts": "PASS",
     "authorized_remote_observation": "PASS",
     "deterministic_replay": "PASS",
+    "durable_job_cycle_implemented": true,
+    "durable_reopen_idempotency_check": true,
+    "scheduled_workflow_configuration": "DEFINED_AND_CI_GATED",
+    "scheduled_soak_runs_verified": 0,
     "canonical_registry_validation": "PASS",
-    "full_cerebro_regression": "PASS",
-    "artifact_id": 11932709083,
-    "artifact_digest": "sha256:6848a3f0699aa7b9f14342550992e0722650b5e80c458a97f9911a644ce0a271",
-    "governed_main_integration_run_id": 38647871311,
-    "governed_main_integration": "PASS"
+    "full_cerebro_regression": "PASS"
   },
   "acceptance": {
     "target_class": "USER_OWNED_PUBLIC_PREPROD_WORDPRESS_REST_API",
@@ -37,7 +58,8 @@
     "auth": false,
     "cookies": false,
     "writes": false,
-    "customer_data": false
+    "customer_data": false,
+    "on_change": "HOLD_CYCLE_NO_AUTO_PROMOTION"
   },
   "authority": {
     "prod_authorized": false,
@@ -49,8 +71,8 @@
     "automatic_paid_fallback": false,
     "additional_cost_eur": 0
   },
-  "rollback": "Revert the additive observation adapter PR; no remote mutation exists.",
-  "rebuild": "Recreate from public-source-adapter-v0 + deterministic Watch & Learn replay core.",
-  "remaining_gate": "CONTINUOUS_AUTHORIZED_OBSERVATION_POLICY_AND_JOB_SCHEDULER",
-  "next_gate": "CONTINUOUS_AUTHORIZED_OBSERVATION_POLICY_AND_JOB_SCHEDULER"
+  "rollback": "Disable/remove the schedule line or revert this additive scheduler PR; the observation core is read-only and no remote mutation exists.",
+  "rebuild": "Recreate from public-source-adapter-v0 + deterministic Watch & Learn replay core + PersistentJobQueue + the governed daily PREPROD workflow schedule.",
+  "remaining_gate": "THREE_SCHEDULED_RUNS_GREEN_AND_RETENTION_REVIEW",
+  "next_gate": "THREE_SCHEDULED_RUNS_GREEN_AND_RETENTION_REVIEW"
 }
