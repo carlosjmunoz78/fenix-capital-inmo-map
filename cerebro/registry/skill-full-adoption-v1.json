@@ -1,0 +1,169 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_SKILL_FULL_ADOPTION_QUEUE",
+  "generated_at": "2026-10-15",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "source_of_truth": [
+    "cerebro/registry/skill-supply-chain-v0.json",
+    "cerebro/skills/cerebro-184-live-convergence.v3.json",
+    "cerebro/runtime/skill-capability-autonomy-closure-v1.mjs",
+    "cerebro/skills/skill-capability-evolution-bridge.mjs"
+  ],
+  "policy": {
+    "human_alias_first": true,
+    "conversation_alias_language": "es",
+    "admitted_skill_is_debt_until_full": true,
+    "factory_first": true,
+    "existing_engine_first": true,
+    "do_not_force_skill_into_every_engine": true,
+    "target_engine_binding_source": "EXISTING_GOVERNED_WRAPPER_AND_CAPABILITY_EVOLUTION_EVIDENCE_ONLY",
+    "old_vs_new_required_per_relevant_binding": true,
+    "tribunal_required": true,
+    "learning_feedback_required": true,
+    "observability_required": true,
+    "audit_required": true,
+    "finops_required": true,
+    "rollback_required": true,
+    "rebuild_required": true,
+    "reject_regressions": true,
+    "additional_cost_budget_eur": 0,
+    "prod_write": false,
+    "prod_mutation": false,
+    "auto_merge": false,
+    "customer_data": false,
+    "external_skill_code_execution": false,
+    "trading": false,
+    "paid_fallback": false,
+    "permission_expansion": false,
+    "autonomous_prod_promotion": false
+  },
+  "full_definition": {
+    "status": "FULL_SAFE_PREPROD",
+    "required": [
+      "PROVENANCE_AND_LICENSE_GREEN",
+      "SAFE_INTERNAL_WRAPPER_OR_REUSE_PATH",
+      "RELEVANT_ENGINE_BINDINGS_RESOLVED_FROM_GOVERNED_EVIDENCE",
+      "OLD_VS_NEW_PASS_FOR_EACH_ACTIVATED_BINDING",
+      "TRIBUNAL_PASS",
+      "NO_REGRESSION",
+      "ROLLBACK_PROVEN",
+      "REBUILD_PROVEN",
+      "OBSERVABILITY_CONNECTED",
+      "AUDIT_CHAIN_CONNECTED",
+      "FINOPS_CONNECTED",
+      "LRN001_FEEDBACK_CONNECTED",
+      "IDEMPOTENCY_PROVEN",
+      "ZERO_ADDITIONAL_COST_OR_APPROVED_EXCEPTION",
+      "PREPROD_CONTINUOUS_EVIDENCE_WHERE_RUNTIME_CADENCE_APPLIES"
+    ],
+    "does_not_mean": [
+      "PROD_WRITE_AUTHORIZED",
+      "UNLIMITED_PERMISSIONS",
+      "FORCED_BINDING_TO_ALL_ENGINES",
+      "EXTERNAL_SKILL_CODE_EXECUTION",
+      "TRADING_ACCESS"
+    ]
+  },
+  "priority_strategy": [
+    "COMPOUNDING_FACTORY_CAPABILITY_FIRST",
+    "CONTROL_PLANE_ENGINEERING_CAPABILITY_SECOND",
+    "DATA_SAFETY_AND_DATABASE_CAPABILITY_THIRD",
+    "BROWSER_AND_UI_AUTOMATION_FOURTH",
+    "THEN_REMAINING_ADMITTED_SKILLS_BY_MEASURED_BENEFIT_RISK_AND_ZERO_COST"
+  ],
+  "queue": [
+    {
+      "priority": 1,
+      "candidate_id": "lobehub-skills:950cf07380d1daa6de69",
+      "alias_es": "Fábrica inteligente de skills",
+      "technical_name": "skill-creator",
+      "upstream": "openclaw/openclaw",
+      "current_evidence": "GREEN_SKILL_CREATOR_PROD_READONLY_CANARY",
+      "current_scope": "READONLY_ADVISORY_ALREADY_PROVEN_NO_NEW_PROD_ACTION",
+      "benefit_reason": "Acelera la creación y mejora gobernada de las demás skills y refuerza FACTORY FIRST.",
+      "target_engine_bindings": "RESOLVE_FROM_EXISTING_GOVERNED_EVIDENCE",
+      "target_status": "FULL_SAFE_PREPROD",
+      "status": "ADMITTED_INCOMPLETE",
+      "human_required": null,
+      "autonomous_ceiling": "FULL_SAFE_PREPROD",
+      "next_gate": "RESOLVE_RELEVANT_ENGINE_BINDINGS_AND_RUN_OLD_VS_NEW"
+    },
+    {
+      "priority": 2,
+      "candidate_id": "lobehub-skills:52441cd3d76607ffffab",
+      "alias_es": "Manejo seguro de GitHub",
+      "technical_name": "github",
+      "upstream": "openclaw/openclaw",
+      "current_evidence": "GREEN_GITHUB_PROD_READONLY_CANARY",
+      "current_scope": "READONLY_REPOSITORY_OBSERVATION_ALREADY_PROVEN_NO_NEW_PROD_ACTION",
+      "benefit_reason": "Mejora el plano de control de ingeniería, auditoría y automatización de repositorios sin ampliar permisos.",
+      "target_engine_bindings": "RESOLVE_FROM_EXISTING_GOVERNED_EVIDENCE",
+      "target_status": "FULL_SAFE_PREPROD",
+      "status": "ADMITTED_INCOMPLETE",
+      "human_required": null,
+      "autonomous_ceiling": "FULL_SAFE_PREPROD",
+      "next_gate": "RESOLVE_RELEVANT_ENGINE_BINDINGS_AND_RUN_OLD_VS_NEW"
+    },
+    {
+      "priority": 3,
+      "candidate_id": "mcpservers-agent-skills:4c2b2478f8fe3bed14df",
+      "alias_es": "Optimización y seguridad de bases de datos",
+      "technical_name": "supabase-postgres-best-practices",
+      "current_evidence": "READY_FOR_PREPROD_PROMOTION_REVIEW",
+      "current_scope": "BEHAVIORAL_EVIDENCE_READY",
+      "benefit_reason": "Puede elevar seguridad, rendimiento y fiabilidad de los motores que trabajan con datos, preservando Supabase como core transaccional.",
+      "target_engine_bindings": "RESOLVE_FROM_EXISTING_GOVERNED_EVIDENCE",
+      "target_status": "FULL_SAFE_PREPROD",
+      "status": "REVIEW_READY_HIGH_RISK",
+      "human_required": "HIGH_RISK",
+      "autonomous_ceiling": "EVIDENCE_ONLY_UNTIL_CANONICAL_HIGH_RISK_GATE_RESOLVED",
+      "next_gate": "HIGH_RISK_REVIEW_AFTER_ALL_NON_MUTATING_EVIDENCE_IS_COMPLETE"
+    },
+    {
+      "priority": 4,
+      "candidate_id": "mcpservers-agent-skills:157e52d4ac5038d53c1a",
+      "alias_es": "Control avanzado del navegador",
+      "technical_name": "agent-browser",
+      "current_evidence": "NORMALIZED_WRAPPER_GREEN_FOR_BEHAVIORAL_EVAL",
+      "current_scope": "RAW_STATIC_LAB_HOLD_PRESERVED_NORMALIZED_WRAPPER_EVALUABLE",
+      "benefit_reason": "Amplía automatización web y UI, pero se deja detrás de datos por su mayor superficie física y de permisos.",
+      "target_engine_bindings": "RESOLVE_FROM_EXISTING_GOVERNED_EVIDENCE",
+      "target_status": "FULL_SAFE_PREPROD",
+      "status": "REVIEW_READY_HIGH_RISK",
+      "human_required": "HIGH_RISK",
+      "autonomous_ceiling": "EVIDENCE_ONLY_UNTIL_CANONICAL_HIGH_RISK_GATE_RESOLVED",
+      "next_gate": "HIGH_RISK_REVIEW_AFTER_ALL_NON_MUTATING_EVIDENCE_IS_COMPLETE"
+    }
+  ],
+  "parallel_nonblocking_work": [
+    {
+      "alias_es": "Aprendizaje continuo",
+      "gate": "THREE_GENUINE_SCHEDULED_RUNS_GREEN",
+      "policy": "ACCUMULATE_GENUINE_SCHEDULED_EVIDENCE_DO_NOT_FAKE_SOAK"
+    },
+    {
+      "alias_es": "Vigilancia de competencia",
+      "gate": "REAL_TARGETS_AND_CONTINUOUS_PREPROD_RUN",
+      "policy": "GET_ONLY_PREPROD_CONTINUOUS_EVIDENCE"
+    },
+    {
+      "alias_es": "Búsqueda de oportunidades",
+      "gate": "REAL_SOURCES_AND_CONTINUOUS_PREPROD_RUN",
+      "policy": "PUBLIC_SOURCE_PREPROD_CONTINUOUS_EVIDENCE"
+    },
+    {
+      "alias_es": "CEREBRO en Android",
+      "gate": "AUTHORIZED_PHYSICAL_ANDROID_DEVICE_E2E",
+      "policy": "WAIT_FOR_DATA_CABLE_WITHOUT_BLOCKING_OTHER_WORK"
+    }
+  ],
+  "reporting_contract": {
+    "use_alias_es_first": true,
+    "show_technical_id_only_when_audit_or_debug_requires_it": true,
+    "never_claim_full_without_all_full_definition_evidence": true,
+    "never_claim_prod_write_authority": true
+  }
+}
