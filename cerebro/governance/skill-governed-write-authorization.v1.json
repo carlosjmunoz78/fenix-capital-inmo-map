@@ -5,9 +5,10 @@
   "engine_id": "FACT-001",
   "environment": "PROD_CONTROL_PLANE",
   "version": "1.0.0",
-  "status": "ACTIVE_OWNER_AUTHORIZATION_PENDING_TECHNICAL_CANARY",
+  "status": "ACTIVE_GOVERNED_WRITE_AUTHORIZATION",
   "authorization_basis": "explicit_owner_instruction_current_chat_2026-10-16_expand_skill_creator_and_github_to_governed_write",
   "granted_at": "2026-10-16",
+  "activated_at": "2026-10-16",
   "revocable": true,
   "readonly_fallback_policy_ref": "CEREBRO-SKILL-AUTONOMY-STANDING-AUTH-001",
   "exact_candidate_allowlist": [
@@ -101,6 +102,25 @@
     "trading": false,
     "paid_fallback": false,
     "app_fenix_deploy": false
+  },
+  "activation_evidence": {
+    "pull_request": 730,
+    "tested_head_sha": "5c6aa0ec68286bb3452aef2431568df60ca12f4a",
+    "focused_workflow": "CEREBRO Skill Governed Write V1",
+    "focused_run_id": 38823834023,
+    "focused_artifact_id": 12014126377,
+    "focused_artifact_digest": "sha256:8ecca4d279386acfab93e2e1d2855c6cfa2e887011838b17f5f0664810edf47a",
+    "governed_main_integration_run_id": 38823834008,
+    "supply_chain_run_id": 38823834028,
+    "rsi_readiness_run_id": 38823834082,
+    "all_observed_conclusions": "success",
+    "physical_governed_branch_created": true,
+    "physical_allowlisted_file_committed": true,
+    "physical_pull_request_created": true,
+    "direct_main_write_used": false,
+    "auto_merge_used": false,
+    "readonly_fallback_preserved": true,
+    "additional_cost_eur": 0
   },
   "rollback": {
     "method": "disable_governed_write_registry_and_policy",
