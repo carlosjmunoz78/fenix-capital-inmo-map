@@ -53,7 +53,15 @@ export function validateSkillFullClosure({closure,adoptionRegistry,staticLab,pre
   assert(errors,staticLab?.upstream_head_commit===EXPECTED.pinned_commit,'STATIC_LAB_PIN_MISMATCH');
   assert(errors,staticLab?.manifest_path===EXPECTED.manifest_path,'STATIC_LAB_MANIFEST_PATH_MISMATCH');
   assert(errors,staticLab?.manifest_sha256===EXPECTED.manifest_sha256,'STATIC_LAB_MANIFEST_HASH_MISMATCH');
-  assert(errors,staticLab?.provenance_exact===true,'STATIC_LAB_PROVENANCE_NOT_EXACT');
+  assert(errors,staticLab?.external_code_execution_authorized===false,'STATIC_LAB_EXTERNAL_EXECUTION_AUTHORIZED');
+  assert(errors,staticLab?.sandbox_authorized===false,'STATIC_LAB_SANDBOX_AUTHORIZED');
+  assert(errors,staticLab?.install_authorized===false,'STATIC_LAB_INSTALL_AUTHORIZED');
+  assert(errors,staticLab?.prod_authorized===false,'STATIC_LAB_PROD_AUTHORIZED');
+  assert(errors,staticLab?.prod_write_authorized===false,'STATIC_LAB_PROD_WRITE_AUTHORIZED');
+  assert(errors,staticLab?.trading_access===false,'STATIC_LAB_TRADING_AUTHORIZED');
+  assert(errors,staticLab?.customer_data_allowed===false,'STATIC_LAB_CUSTOMER_DATA_ALLOWED');
+  assert(errors,staticLab?.prod_data_allowed===false,'STATIC_LAB_PROD_DATA_ALLOWED');
+  assert(errors,Number(staticLab?.additional_cost_target_eur)===0,'STATIC_LAB_NONZERO_COST');
 
   const queue=Array.isArray(adoptionRegistry?.queue)?adoptionRegistry.queue:[];
   const item=queue.find((x)=>x?.candidate_id===EXPECTED.candidate_id);
