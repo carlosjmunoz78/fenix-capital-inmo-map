@@ -1,0 +1,54 @@
+name: CEREBRO CAP IECA Córdoba V0
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/runtime/cap-ieca-cordoba-v0.mjs'
+      - 'cerebro/tests/cap-ieca-cordoba-v0.test.mjs'
+      - 'cerebro/registry/cap-ieca-cordoba.v0.json'
+      - '.github/workflows/cerebro-cap-ieca-cordoba-v0.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'cerebro/runtime/cap-ieca-cordoba-v0.mjs'
+      - 'cerebro/tests/cap-ieca-cordoba-v0.test.mjs'
+      - 'cerebro/registry/cap-ieca-cordoba.v0.json'
+      - '.github/workflows/cerebro-cap-ieca-cordoba-v0.yml'
+  schedule:
+    - cron: '47 5 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  real-official-company-discovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Offline IECA source contracts
+        run: node --test cerebro/tests/cap-ieca-cordoba-v0.test.mjs
+      - name: Run real official Córdoba company discovery
+        run: >-
+          node cerebro/runtime/cap-ieca-cordoba-v0.mjs
+          --observed-at "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          --out /tmp/cap-ieca-cordoba-report.json
+      - name: Validate discovery and authority
+        run: >-
+          node -e "const r=require('/tmp/cap-ieca-cordoba-report.json'); if(r.status!=='REAL_OFFICIAL_COMPANY_DISCOVERY_GREEN'||r.source.http_status!==200||r.source.method!=='GET_ONLY'||r.source.provider_writes!==0||r.result.candidate_count<1||r.result.strong_match_count<1||r.job.status!=='SUCCEEDED'||r.personal_contacts_generated!==0||r.outreach_actions!==0||r.crm_writes!==0||r.customer_data_used||r.personal_data_enriched||r.raw_source_body_persisted||r.prod_authorized||r.prod_write_authorized||r.trading_access||r.additional_cost_eur!==0)process.exit(1); console.log('CAP IECA Córdoba GREEN; candidates='+r.result.candidate_count)"
+      - name: Canonical registry validation
+        working-directory: cerebro
+        run: npm run validate
+      - name: Full CEREBRO regression
+        working-directory: cerebro
+        run: npm test
+      - name: Upload CAP evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: cap-ieca-cordoba-real-discovery
+          path: /tmp/cap-ieca-cordoba-report.json
+          retention-days: 30
