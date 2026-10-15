@@ -5,7 +5,7 @@
   "engine_id": "HEX-001",
   "environment": "PROD_CONTROL_PLANE",
   "version": "1.1.0",
-  "updated_at": "2026-10-15T05:52:39.082840Z",
+  "updated_at": "2026-10-15T10:11:35.651Z",
   "pending": {},
   "authorized_actions": {},
   "decisions": [],
@@ -124,6 +124,61 @@
       "canary": "",
       "additional_cost_eur": 0
     },
+    "name:lead-competitor-analysis": {
+      "kind": "HOLD",
+      "name": "lead-competitor-analysis",
+      "human_alias": "Lead Competitor Analysis",
+      "status": "TERMINAL_HOLD",
+      "stage": "SAFE_HANDLER_TERMINAL_HOLD",
+      "human_required": "",
+      "updated_at": "2026-10-14T12:06:54.776Z",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
+    "name:database": {
+      "kind": "HOLD",
+      "name": "database",
+      "human_alias": "Database",
+      "status": "TERMINAL_HOLD",
+      "stage": "SAFE_HANDLER_TERMINAL_HOLD",
+      "human_required": "",
+      "updated_at": "2026-10-14T19:56:05.842Z",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
+    "name:agents-workflow": {
+      "kind": "HOLD",
+      "name": "agents-workflow",
+      "human_alias": "Agents Workflow",
+      "status": "TERMINAL_HOLD",
+      "stage": "SAFE_HANDLER_TERMINAL_HOLD",
+      "human_required": "",
+      "updated_at": "2026-10-14T22:54:09.124Z",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
+    "name:code-review": {
+      "kind": "HOLD",
+      "name": "code-review",
+      "human_alias": "Code Review",
+      "status": "TERMINAL_HOLD",
+      "stage": "SAFE_HANDLER_TERMINAL_HOLD",
+      "human_required": "",
+      "updated_at": "2026-10-15T01:48:13.549Z",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
+    "name:chat-and-bots": {
+      "kind": "HOLD",
+      "name": "chat-and-bots",
+      "human_alias": "Chat And Bots",
+      "status": "TERMINAL_HOLD",
+      "stage": "SAFE_HANDLER_TERMINAL_HOLD",
+      "human_required": "",
+      "updated_at": "2026-10-15T07:42:36.093Z",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
     "name:obsidian": {
       "kind": "COMPLETED",
       "name": "obsidian",
@@ -136,7 +191,7 @@
       "additional_cost_eur": 0
     }
   },
-  "last_digest_date": "2026-10-14",
+  "last_digest_date": "2026-10-15",
   "last_delivery_at": "2026-10-14T10:19:50Z",
   "mail_transport": {
     "status": "VERIFIED",
