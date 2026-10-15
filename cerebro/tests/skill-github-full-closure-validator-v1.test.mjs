@@ -80,7 +80,11 @@ test('GitHub queue cannot claim FULL before closure has current-head CI GREEN ma
   const item=q.queue.find((x)=>x.candidate_id===closure.candidate_id);
   item.status='FULL_SAFE_PREPROD';
   item.target_engine_bindings=['FACT-001'];
-  const report=validate({registry:q});
+  const prePromotionClosure=structuredClone(closure);
+  prePromotionClosure.status='READY_FOR_FULL_SAFE_PREPROD_VALIDATION';
+  prePromotionClosure.validation_status='PENDING_CURRENT_HEAD_CI';
+  delete prePromotionClosure.validated_by;
+  const report=validate({registry:q,closure:prePromotionClosure});
   assert.equal(report.status,'HOLD');
   assert.ok(report.errors.includes('QUEUE_FULL_REQUIRES_FULL_CLOSURE_STATUS'));
   assert.ok(report.errors.includes('QUEUE_FULL_REQUIRES_CI_GREEN_MARKER'));
