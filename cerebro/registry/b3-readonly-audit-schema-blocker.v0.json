@@ -1,11 +1,11 @@
 {
-  "schema_version": "1.0.0",
-  "state_type": "CEREBRO_B3_READONLY_AUDIT_SCHEMA_BLOCKER_V0",
+  "schema_version": "1.1.0",
+  "state_type": "CEREBRO_B3_READONLY_AUDIT_SCHEMA_RESOLUTION_V0",
   "company_id": "fenix",
   "engine_id": "EVT-001",
   "environment": "PREPROD",
-  "version": "0.1.0",
-  "status": "READ_ONLY_SERVER_JOURNAL_AUDIT_GREEN_WRITE_BINDING_BLOCKED_BY_CORE_GUARD_READINESS",
+  "version": "0.2.0",
+  "status": "CORE_GUARD_SCHEMA_BLOCKER_RESOLVED_B3_READONLY_GREEN_SERVER_WRITE_BINDING_PENDING",
   "source_main_sha": "697eadc2f4e757b10dd8fcd53d395428ef05a8fa",
   "wordpress_staging": {
     "site": "staging.fenixcapital.es",
@@ -17,26 +17,53 @@
     "authenticated_admin_context": true,
     "script_transport": "window.parent/wp.apiFetch GET-only",
     "post_requests": 0,
-    "writes_performed_by_script": false,
+    "writes_performed_by_audit_script": false,
     "permission_changes": 0,
     "public_publish_performed": false
   },
-  "live_universal_status": {
-    "ok": true,
-    "version": "0.1.7-rc8",
-    "scope": {
-      "company_id": "fenix",
-      "engine_id": "SEO-001",
-      "environment": "PREPROD",
-      "version": "v0",
-      "site_host": "staging.fenixcapital.es"
-    },
-    "writes_flag": true,
-    "core_guard_flag": true,
-    "allowed_post_ids": [52287, 52295],
-    "approved_draft_creation": true
+  "core_guard_backup_before_schema_resolution": {
+    "plugin": "fenix-core-guard/fenix-core-guard.php",
+    "version": "1.0.0-rc12",
+    "sha256": "3f4e7267cc8602c6c6324c33f18b0cbb943f4ebb5f805ab36ff3ab0001df2674"
   },
-  "live_core_guard": {
+  "rc12_source_audit": {
+    "repository": "carlosjmunoz78/fenix-core-guard",
+    "release_commit": "cd9d4df63637181abe079610a0483e63e579575a",
+    "signed_runtime_sha256": "9de711365339023e7f1ed209528c0883a5ccc6fd28a472455d4e385c012236f5",
+    "source_tree_sha256": "a2a3679103d1a9868c0d81382daed25d826d4e221224b36badbb1b8e59929045",
+    "diagnostic_branch": "cerebro/rc12-schema-readonly-diagnostic-20261015",
+    "diagnostic_workflow_green": true,
+    "verified_activation_contract": {
+      "schema_migrate": true,
+      "capabilities_install": true,
+      "schema_option": "fenix_guard_schema_version",
+      "schema_value": "1",
+      "default_mode": "observer",
+      "deactivation_side_effect": "runner_unschedule_only"
+    }
+  },
+  "schema_resolution": {
+    "method": "AUDITED_PREPROD_PLUGIN_DEACTIVATE_REACTIVATE",
+    "blind_reactivation": false,
+    "prod_touched": false,
+    "result": "GREEN",
+    "live_schema_version": "1",
+    "readiness_before": {
+      "ready_for_preprod_observer": false,
+      "blocking_failures": ["schema_version"],
+      "schema_version_status": "fail",
+      "schema_version_detail": "missing"
+    },
+    "readiness_after": {
+      "ready_for_preprod_observer": true,
+      "production_approved": false,
+      "blocking_failures": [],
+      "review_items": [],
+      "schema_version_status": "pass",
+      "schema_version_detail": "1"
+    }
+  },
+  "live_core_guard_after_resolution": {
     "plugin_version": "1.0.0-rc12",
     "health_score": 100,
     "mode": "observer",
@@ -48,27 +75,21 @@
     "runtime_gate_active": false,
     "operational_writes_allowed": false,
     "safe_default": true,
-    "readiness": {
-      "ready_for_preprod_observer": false,
-      "production_approved": false,
-      "blocking_failures": ["schema_version"],
-      "schema_version": {
-        "status": "fail",
-        "detail": "missing"
-      },
-      "other_checks_pass": [
-        "environment_is_preprod",
-        "php_supported",
-        "wordpress_supported",
-        "database_tables",
-        "observer_mode",
-        "dom_extension",
-        "job_cron",
-        "maintenance_cron",
-        "cache_conflict",
-        "production_operations_lock"
-      ]
-    }
+    "database_tables_ready": true,
+    "pending_jobs": 0,
+    "production_approved": false
+  },
+  "live_universal_qa_replay": {
+    "ability": "cerebro-universal-qa/create-draft-live-once",
+    "ok": true,
+    "replay": true,
+    "post_id": 54763,
+    "status": "draft",
+    "writes_performed": false,
+    "post_replay_core_guard_mode": "observer",
+    "post_replay_runtime_gate_active": false,
+    "post_replay_operational_writes_allowed": false,
+    "interpretation": "Existing synthetic QA draft replay proves current idempotent no-write path; it does not substitute for a new B3 server-journal write E2E."
   },
   "live_b3_journal_observe": {
     "route": "/cerebro-b3-journal-lab/v1/observe",
@@ -79,34 +100,54 @@
     "sources_sha256_match": true,
     "innodb_unique_index": true,
     "writes_performed": 0,
-    "mcp_direct_grant_required_for_this_read": false,
     "mcp_permissions_changed": false
+  },
+  "b3_live_routes": {
+    "observe": "GET",
+    "prepare": "POST",
+    "replay": "POST",
+    "claim": "POST",
+    "inspect": "GET",
+    "cleanup": "POST"
   },
   "b3_preflight": {
     "route": "/cerebro-universal/v1/b3/preflight",
     "current_result": "REST_NO_ROUTE",
-    "interpretation": "optional historical preflight route is not registered in the current live operator; this does not invalidate the installed journal observe evidence"
+    "interpretation": "Historical optional preflight route is not registered in the current live operator; installed B3 journal observe remains independently verified."
   },
-  "historical_contract_alignment": {
-    "historical_readonly_pattern": "authenticated wp-admin wp.apiFetch GET-only",
-    "historical_requirement_before_physical_write": "backup + rollback + Core Guard live authorization + real MariaDB/CAS verification + gate closure in finally",
-    "reactivate_core_guard_to_restore_schema_version": "NOT_REPEATED",
-    "reason": "historical continuity explicitly records that reactivation was used once and should not be repeated blindly; current rc12 schema_version missing is a live blocker that must be reconciled against the installed baseline before any write gate opens"
+  "server_write_contract_audit": {
+    "historical_v1_physical_evidence": "INTENT + idempotent replay + two-worker single lease + readback + synthetic-key cleanup were previously demonstrated in PREPROD.",
+    "historical_v2_r6_r8_state": "LAB_ONLY_NOT_INSTALLED",
+    "required_before_new_write": [
+      "exact installed write-adapter/grant contract",
+      "new dedicated synthetic draft only",
+      "component snapshot/rollback",
+      "short-lived Core Guard apply gate",
+      "durable intent/lease/CAS/verify/receipt",
+      "UNKNOWN_SIDE_EFFECT reconciliation",
+      "gate closure in finally"
+    ],
+    "current_mcp_direct_get_inspect_granted": false,
+    "permission_weakened_or_bypassed": false,
+    "new_server_journal_write_performed": false,
+    "server_write_binding_verified_for_evt001": false
   },
   "decision": {
+    "core_guard_schema_repair": "HECHO",
+    "core_guard_readiness": "GREEN",
     "read_only_server_journal_transport": "VERIFIED",
     "journal_source_integrity": "VERIFIED",
     "innodb_unique_index": "VERIFIED",
-    "server_write_binding": "NOT_AUTHORIZED",
+    "universal_qa_idempotent_replay": "VERIFIED",
+    "server_write_binding": "PARCIAL",
     "permission_bypass": "NONE",
-    "core_guard_schema_repair": "POR_AUDITAR_AGAINST_INSTALLED_RC12_BASELINE",
     "prod": false
   },
   "authority": {
     "prod_authorized": false,
     "prod_write_authorized": false,
     "server_journal_write_authorized": false,
-    "core_guard_gate_open_authorized": false,
+    "persistent_core_guard_gate_authorized": false,
     "mcp_permission_expansion_authorized": false,
     "customer_data_authorized": false,
     "trading_access": false,
@@ -114,8 +155,9 @@
     "additional_cost_eur": 0
   },
   "rollback": {
-    "wordpress": "Restore Core Guard snapshot 588 or delete the synthetic draft after evidence retention; the audit performed GET-only requests and no server journal writes.",
+    "core_guard": "Exact RC12 plugin backup exists with SHA256 3f4e7267cc8602c6c6324c33f18b0cbb943f4ebb5f805ab36ff3ab0001df2674. Current post-resolution health/readiness are GREEN, so no rollback is indicated.",
+    "wordpress_audit": "Restore Core Guard snapshot 588 or remove the synthetic audit draft after evidence retention. No public content was published.",
     "github": "Revert this additive evidence PR."
   },
-  "next_gate": "RECONCILE_CORE_GUARD_RC12_SCHEMA_VERSION_MISSING_WITHOUT_REACTIVATION_OR_PROD_MUTATION_THEN_REASSESS_B3_WRITE_BINDING"
+  "next_gate": "VERIFY_EXACT_INSTALLED_B3_WRITE_ADAPTER_AND_GRANT_CONTRACT_THEN_RUN_NEW_SYNTHETIC_INTENT_LEASE_GATE_VERIFY_RECEIPT_ROLLBACK_E2E"
 }
