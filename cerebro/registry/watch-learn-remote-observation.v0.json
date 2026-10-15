@@ -46,6 +46,7 @@
     "durable_job_cycle_implemented": true,
     "durable_reopen_idempotency_check": true,
     "scheduled_workflow_configuration": "DEFINED_AND_CI_GATED",
+    "scheduler_regression_contract_aligned": true,
     "scheduled_soak_runs_verified": 0,
     "canonical_registry_validation": "PASS",
     "full_cerebro_regression": "PASS"
