@@ -1,0 +1,116 @@
+{
+  "schema_version": "0.1.0",
+  "suite_id": "CEREBRO_HUMAN_OPERATOR_SCENARIO_SUITE_V0",
+  "status": "DEFINED_NOT_EXECUTED",
+  "population_source": "CEREBRO_SYNTHETIC_HUMAN_POPULATION_V1",
+  "do_not_create_parallel_persona_engine": true,
+  "environment": "LAB_PREPROD_ONLY",
+  "scenario_groups": [
+    {
+      "group_id": "AUTH_SESSION",
+      "cases": [
+        "SESSION_REUSE_AFTER_CONTROLLER_RESTART",
+        "SESSION_REUSE_AFTER_CHROME_RESTART",
+        "EXPIRED_SESSION_REAUTH",
+        "WRONG_IDENTITY_DENY",
+        "KILL_SWITCH_DENY",
+        "CREDENTIAL_REF_MISSING_HOLD"
+      ]
+    },
+    {
+      "group_id": "APP_HUMAN_FLOW",
+      "cases": [
+        "CREATE_SYNTHETIC_CASE",
+        "NAVIGATE_CASE_SECTIONS",
+        "EDIT_AND_VERIFY_PERSISTENCE",
+        "BACK_FORWARD_STATE_RETENTION",
+        "INVALID_INPUT_RECOVERY",
+        "DUPLICATE_ACTION_IDEMPOTENCY",
+        "UPLOAD_VALID_SYNTHETIC_DOCUMENT",
+        "UPLOAD_INVALID_DOCUMENT",
+        "ROLE_FORBIDDEN_SCREEN_DENY",
+        "LONG_MULTI_STEP_TASK"
+      ]
+    },
+    {
+      "group_id": "CONVERSATION",
+      "cases": [
+        "LONG_CONTEXT_RECALL",
+        "CONTRADICTION_CHALLENGE",
+        "CASE_SWITCH_NO_LEAK",
+        "ROLE_SWITCH_PERMISSION_CHECK",
+        "CROSS_COMPANY_NO_LEAK",
+        "FALSE_PREMISE",
+        "MISSING_INFORMATION",
+        "USER_CORRECTION_PERSISTS",
+        "TOOL_RESULT_CONFLICT",
+        "LOW_CONFIDENCE_TRIGGER",
+        "CUSTOMER_HUMAN_REQUEST_TRIGGER",
+        "RECOVERY_AFTER_BAD_TURN",
+        "NO_APPLICATION_TURN_CAP"
+      ]
+    },
+    {
+      "group_id": "UX_STRESS",
+      "cases": [
+        "NOVICE_USER_FIND_NEXT_ACTION",
+        "CHAOTIC_USER_FLOW",
+        "EXPERT_MINIMUM_STEPS",
+        "BACK_BUTTON_STRESS",
+        "MULTI_TAB_CONTEXT",
+        "SLOW_NETWORK_RECOVERY",
+        "PAGE_TIMEOUT_RECOVERY",
+        "POPUP_OR_MODAL_RECOVERY",
+        "RESPONSIVE_VIEWPORT",
+        "REPEATED_IDENTICAL_STATE_CIRCUIT_BREAK"
+      ]
+    },
+    {
+      "group_id": "NIGHT_RUNNER",
+      "cases": [
+        "TAB_CLOSED_RECOVERY",
+        "CONTROLLER_RESTART_RECOVERY",
+        "CHROME_CRASH_RECOVERY",
+        "BRIDGE_DISCONNECT_RECOVERY",
+        "CHECKPOINT_RESUME",
+        "30_MIN_SOAK",
+        "2_HOUR_SOAK",
+        "FULL_NIGHT_SOAK",
+        "MORNING_REPORT_TRUTHFULNESS"
+      ]
+    }
+  ],
+  "role_overlays": [
+    "CARLOS_ADMIN",
+    "BELEN_OPERATIONAL",
+    "FINANCIERO",
+    "VISITADOR"
+  ],
+  "synthetic_population_strategies": [
+    "REPRESENTATIVE",
+    "COVERAGE",
+    "STRESS",
+    "ADVERSARIAL",
+    "LONGITUDINAL"
+  ],
+  "minimum_acceptance_dimensions": [
+    "task_success",
+    "context_retention",
+    "permission_compliance",
+    "session_reuse",
+    "navigation_recovery",
+    "ux_friction",
+    "conversation_quality",
+    "cross_case_isolation",
+    "cross_company_isolation"
+  ],
+  "safety": {
+    "customer_data_in_lab": false,
+    "synthetic_accounts_required_for_mutation": true,
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "trading_access": false,
+    "paid_fallback": false,
+    "additional_cost_eur": 0
+  }
+}
