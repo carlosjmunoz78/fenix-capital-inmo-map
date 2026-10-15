@@ -1,7 +1,7 @@
 import {useEffect,useMemo,useState} from 'react';
 import {createPortal} from 'react-dom';
 import {useLocation} from 'react-router-dom';
-import {IS_PRODUCTION,SUPABASE_PUBLISHABLE_KEY,SUPABASE_URL,fetchAppApi,supabase} from './supabase';
+import {fetchAppApi,fetchEnvironmentApi} from './supabase';
 import './expediente-journey-guard.css';
 
 const PHASES=['Entrada','Documentación','Análisis','Banco','Tasación','Oferta','FEIN','Notaría','Firma','Cierre'];
@@ -28,7 +28,7 @@ function idxFor(stage:string){
 function evidenceIdx(w:Workspace|null){const c=w?.counts;if(!c)return-1;if(Number(c.firma||0)>0)return 8;if(Number(c.ofertas||0)>0)return 5;if(Number(c.tasaciones||0)>0)return 4;if(Number(c.envios_banco||0)>0)return 3;if(Number(c.documentos||0)>0)return 1;return-1;}
 function stringifyIssue(v:unknown){if(typeof v==='string')return v;if(v&&typeof v==='object'){const x=v as Record<string,unknown>;return String(x.message||x.detail||x.error||x.code||'').trim();}return'';}
 function nextRecommendation(index:number,stage:string){const s=lower(stage);if(s.includes('perdido'))return 'El expediente está marcado como perdido. Solo debe reactivarse si existe una causa real para retomarlo.';if(index<0)return 'Primero hay que resolver el estado real del expediente; no voy a inventar el siguiente paso.';if(index===0)return 'Completar datos iniciales y documentación mínima.';if(index===1)return 'Completar la documentación pendiente y validar que el expediente pueda pasar a análisis.';if(index===2)return 'Cerrar el análisis y preparar la estrategia bancaria / Pre-OK.';if(index===3)return 'Trabajar el banco objetivo y dejar preparada la siguiente decisión.';if(index===4)return 'Revisar la tasación y confirmar que permite continuar la operación.';if(index===5)return 'Comparar o validar la oferta y preparar FEIN.';if(index===6)return 'Revisar FEIN, plazos y requisitos previos a notaría.';if(index===7)return 'Coordinar notaría y dejar la firma lista.';if(index===8)return 'Confirmar firma y cerrar el expediente con su trazabilidad.';return 'Expediente finalizado. No hay una fase posterior automática.';}
-async function changeStage(code:string,version:number,stage:string){const {data:{session}}=await supabase.auth.getSession();if(!session?.access_token)return{status:401,data:null as any};const r=await fetch(`${SUPABASE_URL}/functions/v1/fenix-expediente-stage`,{method:'POST',headers:{'content-type':'application/json',Authorization:`Bearer ${session.access_token}`,apikey:SUPABASE_PUBLISHABLE_KEY},body:JSON.stringify({expediente_code:code,expected_version:version,stage})});let data:any=null;try{data=await r.json()}catch{}return{status:r.status,data};}
+async function changeStage(code:string,version:number,stage:string){return fetchEnvironmentApi<any>('fenix-expediente-stage','',{method:'POST',body:JSON.stringify({expediente_code:code,expected_version:version,stage})});}
 
 export default function ExpedienteJourneyGuard(){
  const {pathname}=useLocation();
@@ -61,13 +61,19 @@ export default function ExpedienteJourneyGuard(){
  const blockers=(workspace?.qa?.blockers??[]).map(stringifyIssue).filter(Boolean);const warnings=(workspace?.qa?.warnings??[]).map(stringifyIssue).filter(Boolean);
  const missing=blockers[0]||(lower(rawStage).includes('incompleta')?'Falta completar documentación antes de avanzar.':lower(rawStage).includes('revisión legado')||lower(rawStage).includes('revision legado')?'Este expediente necesita revisión y normalización de datos heredados.':'No hay un faltante crítico registrado por el backend.');
  const recommendation=nextRecommendation(phaseIndex,rawStage);
- async function saveManualStage(){const version=Number(workspace?.expediente?.version||0);if(!version||!selected||busy)return;setBusy(true);setMsg('');const r=await changeStage(code,version,selected);setBusy(false);if(r.status===200){setMsg('Estado actualizado y registrado en el histórico.');await refresh();}else if(r.status===409){setMsg('El expediente cambió mientras lo editabas. He recargado el estado actual.');await refresh();}else setMsg('No se pudo cambiar el estado. No se ha aplicado ningún cambio.');}
+ const version=Number(workspace?.expediente?.version||0);
+ const persistedStage=recordedStage||rawStage;
+ const hasPendingChange=Boolean(version&&persistedStage&&selected&&lower(selected)!==lower(persistedStage));
+ async function saveManualStage(){if(!hasPendingChange||busy)return;const nextStage=selected;setBusy(true);setMsg('');try{const r=await changeStage(code,version,nextStage);if(r.status>=200&&r.status<300){await refresh();setMsg(`Estado actualizado a ${nextStage} y registrado en el histórico.`);}else if(r.status===409){await refresh();setMsg('El expediente cambió mientras lo editabas. He recargado el estado actual sin sobrescribirlo.');}else setMsg('No se pudo cambiar el estado. No se ha aplicado ningún cambio.');}finally{setBusy(false);}}
 
  if(!active||!host)return null;
  return createPortal(<section className="detail-journey exp-live-journey-section" data-testid="expediente-journey">
   <div className="detail-section-label">{phaseIndex>=0?`RECORRIDO DEL EXPEDIENTE · ESTADO REAL: ${stage}`:FALLBACK_LABEL}</div>
   <div className="exp-journey-guidance" data-testid="expediente-journey-guidance"><strong>ANA · {phaseIndex>=0?`Estamos en ${stage}.`:'Estoy comprobando el estado real del expediente.'}</strong>{phaseIndex>=0?<><span><b>Qué falta:</b> {missing}</span><span><b>Qué toca ahora:</b> {recommendation}</span>{rawStage&&rawStage!==stage&&<span><b>Estado registrado:</b> {rawStage}. El recorrido se ha adelantado por evidencia operativa real.</span>}</>:<span>{FALLBACK_GUIDE}</span>}{warnings[0]&&<span><b>Aviso:</b> {warnings[0]}</span>}{workspace?.lifecycle?.stage_inconsistent&&<span><b>Control:</b> el backend detecta diferencia entre estado efectivo y registrado ({recordedStage}).</span>}</div>
-  <div className="detail-phase-track" aria-label="Fases del expediente">{PHASES.map((phase,i)=><div key={phase} className={phaseIndex>=0?(i<phaseIndex?'done':i===phaseIndex?'current':''):''} aria-current={phaseIndex>=0&&i===phaseIndex?'step':undefined}><span>{phaseIndex>=0&&i<phaseIndex?'✓':i+1}</span><small>{phase}</small></div>)}</div>
-  {IS_PRODUCTION&&<div className="exp-stage-manual" data-testid="expediente-stage-manual-host"><label>Cambiar estado manualmente<select data-testid="expediente-stage-select" value={selected||recordedStage||rawStage||MANUAL_STAGES[0]} onChange={e=>setSelected(e.target.value)}>{selected&&!MANUAL_STAGES.includes(selected)&&<option value={selected}>{selected}</option>}{MANUAL_STAGES.map(st=><option key={st} value={st}>{st}</option>)}</select></label><button type="button" onClick={()=>void saveManualStage()} disabled={busy||!workspace?.expediente?.version}>{busy?'Guardando…':'Guardar cambio'}</button>{msg&&<span role="status">{msg}</span>}</div>}
+  <div className="exp-journey-track-actions">
+   <div className="detail-phase-track" aria-label="Fases del expediente">{PHASES.map((phase,i)=><div key={phase} className={phaseIndex>=0?(i<phaseIndex?'done':i===phaseIndex?'current':''):''} aria-current={phaseIndex>=0&&i===phaseIndex?'step':undefined}><span>{phaseIndex>=0&&i<phaseIndex?'✓':i+1}</span><small>{phase}</small></div>)}</div>
+   <button className="exp-stage-save-button" data-testid="expediente-stage-save" type="button" onClick={()=>void saveManualStage()} disabled={busy||!hasPendingChange}>{busy?'Guardando…':'Guardar cambio'}</button>
+  </div>
+  <div className="exp-stage-manual" data-testid="expediente-stage-manual-host"><label>Cambiar estado manualmente<select data-testid="expediente-stage-select" value={selected||recordedStage||rawStage||MANUAL_STAGES[0]} onChange={e=>{setSelected(e.target.value);setMsg('');}}>{selected&&!MANUAL_STAGES.includes(selected)&&<option value={selected}>{selected}</option>}{MANUAL_STAGES.map(st=><option key={st} value={st}>{st}</option>)}</select></label>{msg&&<span role="status">{msg}</span>}</div>
  </section>,host);
 }
