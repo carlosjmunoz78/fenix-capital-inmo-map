@@ -2,20 +2,26 @@ name: CEREBRO COMPET Real Targets V0
 
 on:
   push:
-    branches:
-      - cerebro/compet-real-targets-v0-20261015
     paths:
       - 'cerebro/runtime/compet-real-targets-v0.mjs'
       - 'cerebro/registry/compet-real-targets.v0.json'
       - 'cerebro/tests/compet-real-targets-v0.test.mjs'
       - '.github/workflows/cerebro-compet-real-targets-v0.yml'
+  pull_request:
+    paths:
+      - 'cerebro/runtime/compet-real-targets-v0.mjs'
+      - 'cerebro/registry/compet-real-targets.v0.json'
+      - 'cerebro/tests/compet-real-targets-v0.test.mjs'
+      - '.github/workflows/cerebro-compet-real-targets-v0.yml'
+  schedule:
+    - cron: '43 5 * * *'
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  real-competitor-baseline:
+  real-competitor-continuous-scan:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -25,20 +31,23 @@ jobs:
           node-version: 24
       - name: Offline target and authority contracts
         run: node --test cerebro/tests/compet-real-targets-v0.test.mjs cerebro/tests/public-source-adapter-v0.test.mjs
-      - name: Capture real public competitor snapshot
+      - name: Scan real public competitor targets
         run: >-
           node cerebro/runtime/compet-real-targets-v0.mjs
           --observed-at "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
           --out /tmp/compet-real-targets-report.json
-      - name: Validate baseline capture boundary
+      - name: Validate continuous scan boundary
         run: >-
-          node -e "const fs=require('fs');const r=JSON.parse(fs.readFileSync('/tmp/compet-real-targets-report.json','utf8'));if(r.status!=='REAL_COMPETITOR_BASELINE_CAPTURE_GREEN'||r.target_count!==3||r.snapshots.length!==3||r.baseline_complete!==false||r.job_status!=='SUCCEEDED'||r.network_reads!==3||r.provider_writes!==0||r.customer_data_used||r.personal_data_extracted||r.prod_authorized||r.prod_write_authorized||r.trading_access||r.additional_cost_eur!==0)process.exit(1);for(const s of r.snapshots){if(s.http_status!==200||s.read_only!==true||!s.body_sha256||s.body_sha256.length!==64)process.exit(1)}console.log('COMPET real Córdoba baseline capture GREEN')"
+          node -e "const fs=require('fs');const r=JSON.parse(fs.readFileSync('/tmp/compet-real-targets-report.json','utf8'));if(r.status!=='REAL_COMPETITOR_CONTINUOUS_SCAN_GREEN'||r.target_count!==3||r.snapshots.length!==3||r.baseline_complete!==true||r.job_status!=='SUCCEEDED'||r.network_reads!==3||r.provider_writes!==0||r.customer_data_used||r.personal_data_extracted||r.prod_authorized||r.prod_write_authorized||r.trading_access||r.additional_cost_eur!==0)process.exit(1);for(const s of r.snapshots){if(s.http_status!==200||s.read_only!==true||!s.body_sha256||s.body_sha256.length!==64)process.exit(1)}for(const c of r.changes){if(!['public_page_sha256','public_page_title'].includes(c.dimension))process.exit(1)}console.log('COMPET real Córdoba continuous scan GREEN; changes='+r.change_count)"
       - name: Canonical registry validation
         working-directory: cerebro
         run: npm run validate
-      - name: Upload baseline evidence
+      - name: Full CEREBRO regression
+        working-directory: cerebro
+        run: npm test
+      - name: Upload continuous scan evidence
         uses: actions/upload-artifact@v4
         with:
-          name: compet-real-targets-baseline
+          name: compet-real-targets-continuous-scan
           path: /tmp/compet-real-targets-report.json
           retention-days: 30
