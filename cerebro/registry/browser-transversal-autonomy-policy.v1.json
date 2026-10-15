@@ -1,0 +1,77 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_BROWSER_TRANSVERSAL_AUTONOMY_POLICY",
+  "company_id": "GLOBAL",
+  "engine_id": "AUTO-001",
+  "environment": "MULTI_ENV_GOVERNED",
+  "version": "1.0.0",
+  "alias_es": "Navegación autónoma transversal",
+  "policy_statement_es": "El navegador es una herramienta transversal disponible para cualquier motor canónico. Usar el navegador no constituye por sí mismo una ampliación de autoridad ni requiere autorización humana. La autorización se decide por la acción solicitada, su riesgo, coste, entorno y permisos del motor que la origina.",
+  "eligible_engine_scope": "ANY_CANONICAL_ENGINE_ID",
+  "routing_preference": [
+    "OFFICIAL_API",
+    "AUTHORIZED_MCP",
+    "LOCAL_SCRIPT",
+    "BROWSER_BRIDGE",
+    "COMPUTER_USE",
+    "VISION_FALLBACK"
+  ],
+  "browser_is_tool_not_authority": true,
+  "browser_use_requires_separate_human_approval": false,
+  "authenticated_sessions_allowed_when_registered_and_healthy": true,
+  "routine_side_effects_allowed_only_when_origin_engine_action_is_already_authorized": true,
+  "prod_browser_observation_allowed_when_origin_engine_policy_allows": true,
+  "prod_browser_mutation_allowed_only_with_origin_engine_prod_authority_and_promotion_evidence": true,
+  "external_skill_code_execution_required": false,
+  "upstream_agent_browser_role": "PATTERN_AND_NORMALIZED_WRAPPER_SOURCE_ONLY_UNLESS_SEPARATELY_GOVERNED",
+  "money_policy": {
+    "incremental_spend_requires_human": true,
+    "human_reason": "MONEY_LIMIT",
+    "zero_cost_preferred": true
+  },
+  "canonical_human_required": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "physical_resource_policy": {
+    "browser_pool_supported": true,
+    "scheduled_device_windows_supported": true,
+    "fresh_binding_attestation_required_at_execution_time": true,
+    "kill_switch_required": true,
+    "raw_credentials_in_registry_forbidden": true,
+    "captcha_mfa_antibot_bypass_forbidden": true
+  },
+  "trading_isolation": {
+    "browser_capability_may_exist": true,
+    "shared_credentials_with_general_cerebro_forbidden": true,
+    "shared_critical_runtime_forbidden": true,
+    "trading_action_requires_isolated_trading_authority": true
+  },
+  "authority_source": "ORIGIN_ENGINE_POLICY_AND_GOVERNED_ACTION_CONTRACT",
+  "browser_never_grants": [
+    "NEW_ENGINE_AUTHORITY",
+    "PROD_WRITE_BY_ITSELF",
+    "SPEND_BY_ITSELF",
+    "SIGNATURE_BY_ITSELF",
+    "LEGAL_APPROVAL_BY_ITSELF",
+    "TRADING_AUTHORITY_BY_ITSELF",
+    "CREDENTIAL_DISCLOSURE",
+    "ANTI_ABUSE_BYPASS"
+  ],
+  "dependencies": [
+    "cerebro/registry/engine-registry.v1.json",
+    "cerebro/registry/authorized-execution-device-profile.v1.json",
+    "cerebro/registry/identity-access-registry.v0.json",
+    "cerebro/registry/credential-lifecycle-policy.v0.json",
+    "cerebro/registry/execution-model-router-policy.v0.json"
+  ],
+  "status": "DEFINED_FOR_PREPROD_VALIDATION",
+  "next_gate": "TRANSVERSAL_BROWSER_POLICY_TESTS_GREEN",
+  "additional_cost_eur": 0
+}

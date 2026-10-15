@@ -1,0 +1,90 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_SKILL_FULL_SAFE_PREPROD_CLOSURE",
+  "generated_at": "2026-10-15",
+  "company_id": "fenix",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "skill-creator-full-safe-preprod-v1",
+  "candidate_id": "lobehub-skills:950cf07380d1daa6de69",
+  "alias_es": "Fábrica inteligente de skills",
+  "technical_name": "skill-creator",
+  "status": "FULL_SAFE_PREPROD",
+  "validation_status": "CI_GREEN",
+  "validated_by": {
+    "workflow": "CEREBRO Skill Full Adoption V1",
+    "run_id": 38805648804,
+    "head_sha": "540333f2bf9db6ed06f53a60f6f8325b7df67cc4",
+    "conclusion": "success"
+  },
+  "provenance": {
+    "upstream_repository": "openclaw/openclaw",
+    "pinned_commit": "dc26366b07e7d08395b83de0d767150ffcb6ad50",
+    "manifest_path": "skills/skill-creator/SKILL.md",
+    "expected_manifest_sha256": "3b7b93823a496cedc957fc91bbc8f8be132f2edd095dcaa46cee5394c742f0e4",
+    "observed_manifest_sha256": "3b7b93823a496cedc957fc91bbc8f8be132f2edd095dcaa46cee5394c742f0e4",
+    "manifest_hash_verified": true,
+    "license_path": "LICENSE",
+    "license_spdx": "MIT",
+    "license_observed_directly_at_pinned_commit": true,
+    "provenance_and_license_status": "GREEN"
+  },
+  "safe_internal_wrapper": {
+    "wrapper_id": "skillwrap:cerebro-skill-creator-v0.1.0",
+    "path": "cerebro/skills/skill-cerebro-skill-creator-wrapper.mjs",
+    "external_upstream_code_execution": false,
+    "policy_precedence": "CEREBRO_POLICY_WINS"
+  },
+  "target_engine_bindings": [
+    "FACT-001"
+  ],
+  "binding_basis": "EXISTING_GOVERNED_PREPROD_INTEGRATION_ENGINE_ID",
+  "runtime_cadence": {
+    "cadence_applicable": false,
+    "reason": "REQUEST_DRIVEN_FACTORY_CAPABILITY"
+  },
+  "evidence_refs": {
+    "static_lab": "cerebro/skills/skill-creator-static-lab.v0.json",
+    "wrapper": "cerebro/skills/skill-cerebro-skill-creator-wrapper.mjs",
+    "old_vs_new": "cerebro/skills/skill-creator-old-vs-new.mjs",
+    "preprod_integration": "cerebro/skills/skill-creator-preprod-integration.mjs",
+    "supply_chain_registry": "cerebro/registry/skill-supply-chain-v0.json",
+    "learning_ingress": "cerebro/skills/skill-full-adoption-learning-ingress-v1.mjs",
+    "learning_test": "cerebro/tests/skill-full-adoption-learning-ingress-v1.test.mjs",
+    "full_adoption_policy": "cerebro/registry/skill-full-adoption-v1.json",
+    "ci_run": "github-actions:38805648804"
+  },
+  "required_closure": {
+    "provenance_and_license_green": true,
+    "safe_internal_wrapper_or_reuse_path": true,
+    "relevant_engine_bindings_resolved": true,
+    "old_vs_new_pass_for_each_activated_binding": true,
+    "tribunal_pass": true,
+    "no_regression": true,
+    "rollback_proven": true,
+    "rebuild_proven": true,
+    "observability_connected": true,
+    "audit_chain_connected": true,
+    "finops_connected": true,
+    "lrn001_feedback_connected": true,
+    "idempotency_proven": true,
+    "zero_additional_cost": true,
+    "preprod_continuous_evidence_where_cadence_applies": true
+  },
+  "human_required": null,
+  "additional_cost_eur": 0,
+  "safety": {
+    "prod_write": false,
+    "prod_mutation": false,
+    "auto_merge": false,
+    "customer_data": false,
+    "external_skill_code_execution": false,
+    "trading": false,
+    "paid_fallback": false,
+    "permission_expansion": false,
+    "autonomous_prod_promotion": false
+  },
+  "promotion_authorized": false,
+  "prod_authorized": false,
+  "next_gate": "REGRESSION_MONITORING_NO_PROD_AUTHORITY"
+}

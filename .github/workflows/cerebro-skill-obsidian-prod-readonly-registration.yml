@@ -1,0 +1,156 @@
+name: CEREBRO Obsidian PROD Read-only Registration
+
+on:
+  push:
+    branches:
+      - cerebro/skills-full-admitted-first-v1-20261015
+    paths:
+      - 'cerebro/registry/autonomous-readonly-skills.v1.json'
+      - 'cerebro/skills/skill-obsidian-prod-readonly-registration-validator-v1.mjs'
+      - 'cerebro/tests/skill-obsidian-prod-readonly-registration-validator-v1.test.mjs'
+      - '.github/workflows/cerebro-skill-obsidian-prod-readonly-registration.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: cerebro-obsidian-prod-readonly-registration
+  cancel-in-progress: false
+
+env:
+  CEREBRO_ENVIRONMENT: PROD_READONLY_ADVISORY
+  CEREBRO_ALLOW_PROD_WRITE: 'false'
+  CEREBRO_ALLOW_CUSTOMER_DATA: 'false'
+  CEREBRO_ALLOW_EXTERNAL_SKILL_CODE: 'false'
+  CEREBRO_ALLOW_LIVE_OBSIDIAN_CLI: 'false'
+  CEREBRO_ALLOW_CANONICAL_KNOWLEDGE_MIGRATION: 'false'
+  CEREBRO_ALLOW_TRADING: 'false'
+  CEREBRO_PAID_FALLBACK: 'false'
+
+jobs:
+  obsidian-prod-readonly-registration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Validate canonical Obsidian PROD read-only advisory registration
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/obsidian-prod-registration
+          node cerebro/skills/skill-obsidian-prod-readonly-registration-validator-v1.mjs \
+            --output artifacts/obsidian-prod-registration/registration-validation.json
+          node --test cerebro/tests/skill-obsidian-prod-readonly-registration-validator-v1.test.mjs
+
+      - name: Verify immutable successful PROD canary evidence
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/obsidian-prod-registration/canary
+          RUN_ID=38819180037
+          SHA=7ac4aa8bf266e9b60f3aba7d98e044f69454b5af
+          ARTIFACT_ID=12012247140
+          ARTIFACT_DIGEST='sha256:529bd5dc087bb291bae187397541cea3cbbc4bad90e60831801a0687b0e52f56'
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID" --jq '.head_sha')" = "$SHA"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID" --jq '.status')" = 'completed'
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID" --jq '.conclusion')" = 'success'
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID" --jq '.name')" = 'CEREBRO Obsidian PROD Read-only Canary'
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID/artifacts" --jq ".artifacts[] | select(.id == $ARTIFACT_ID) | .id")" = "$ARTIFACT_ID"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID/artifacts" --jq ".artifacts[] | select(.id == $ARTIFACT_ID) | .digest")" = "$ARTIFACT_DIGEST"
+          gh run download "$RUN_ID" --repo "$GITHUB_REPOSITORY" --name "cerebro-obsidian-prod-readonly-canary-$RUN_ID" --dir artifacts/obsidian-prod-registration/canary
+          REPORT="$(find artifacts/obsidian-prod-registration/canary -type f -name 'cerebro-obsidian-prod-readonly-canary.json' -print -quit)"
+          TRIBUNAL="$(find artifacts/obsidian-prod-registration/canary -type f -name 'cerebro-obsidian-prod-readonly-canary-tribunal.json' -print -quit)"
+          test -n "$REPORT"; test -n "$TRIBUNAL"
+          node - "$REPORT" "$TRIBUNAL" <<'NODE'
+          const fs=require('fs');const [rPath,tPath]=process.argv.slice(2);
+          const r=JSON.parse(fs.readFileSync(rPath,'utf8'));const t=JSON.parse(fs.readFileSync(tPath,'utf8'));
+          const bindings=['RSH-001','KNW-001','TRN-001','TRNBOOT-001','RAG-001','PRV-001'];
+          const ok=r.status==='GREEN_OBSIDIAN_PROD_READONLY_CANARY'&&r.target_candidate==='obsidian'&&
+            r.target_candidate_id==='lobehub-skills:9a6e3fac20369220df43'&&r.wrapper_id==='skillwrap:cerebro-obsidian-v0.1.0'&&
+            JSON.stringify(r.target_engine_bindings)===JSON.stringify(bindings)&&r.live_requests===2&&JSON.stringify(r.methods_used)===JSON.stringify(['GET'])&&
+            r.audit_chain_valid===true&&r.measured_additional_cost_eur===0&&r.prod_write===false&&r.filesystem_write===false&&r.live_obsidian_cli_execution===false&&
+            r.real_vault_used===false&&r.canonical_knowledge_replaced===false&&r.notion_or_rag_migration_authorized===false&&r.customer_data_used===false&&
+            r.prod_data_used===false&&r.external_skill_code_executed===false&&r.trading_access===false&&r.paid_fallback===false&&
+            r.rollback_proven===true&&r.rebuild_proven===true&&r.binding_after==='DISABLED'&&
+            t.green===true&&t.decision==='GREEN_FOR_OBSIDIAN_PROD_READONLY_ADVISORY_REGISTRATION'&&t.human_required===null&&
+            t.authorization_consumed===true&&t.registration_scope==='PROD_READONLY_ADVISORY_METADATA_ONLY'&&t.prod_write_authorized===false&&
+            t.filesystem_write_authorized===false&&t.canonical_knowledge_migration_authorized===false&&t.autonomous_business_prod_write_authorized===false;
+          if(!ok){console.error('Immutable Obsidian PROD canary or tribunal evidence is not registration-safe');process.exit(1)}
+          console.log(JSON.stringify({canary:'GREEN',tribunal:'GREEN',bindings:bindings.length,prod_write:false,real_vault:false,cost_eur:0,rollback:true,rebuild:true}));
+          NODE
+
+      - name: Verify immutable successful FULL SAFE PREPROD evidence
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          RUN_ID=38816670501
+          SHA=8cafae8088c60c90582a2a271a8b88997ee7b3f0
+          ARTIFACT_ID=12010728219
+          ARTIFACT_DIGEST='sha256:40c012ea12b5b39db4f6965b47a5e7ad12edc80ac6244653ca3ca83da1011bcb'
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID" --jq '.head_sha')" = "$SHA"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID" --jq '.conclusion')" = 'success'
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID/artifacts" --jq ".artifacts[] | select(.id == $ARTIFACT_ID) | .digest")" = "$ARTIFACT_DIGEST"
+
+      - name: Assert registration remains bounded to read-only advisory
+        shell: bash
+        run: |
+          set -euo pipefail
+          R='cerebro/registry/autonomous-readonly-skills.v1.json'
+          test "$(jq -r '.status' "$R")" = 'ACTIVE'
+          test "$(jq -r '.environment' "$R")" = 'PROD_READONLY_ADVISORY'
+          test "$(jq -r '.entries.obsidian.status' "$R")" = 'ACTIVE_READONLY_ADVISORY'
+          test "$(jq -r '.entries.obsidian.execution_mode' "$R")" = 'PROD_READONLY_ADVISORY'
+          test "$(jq -r '.entries.obsidian.target_engine_bindings | length' "$R")" = '6'
+          test "$(jq -r '.entries.obsidian.allowed_capabilities | length' "$R")" = '2'
+          test "$(jq -r '.entries.obsidian.mutation_gate' "$R")" = 'HIGH_RISK'
+          for key in prod_write filesystem_write live_obsidian_cli_execution real_vault_used canonical_knowledge_migration notion_or_rag_replacement customer_data prod_data external_skill_code_execution github_business_mutation trading paid_fallback permission_expansion autonomous_business_prod_write; do
+            test "$(jq -r ".entries.obsidian.safety.$key" "$R")" = 'false'
+          done
+          test "$(jq -r '.entries.obsidian.safety.additional_cost_eur' "$R")" = '0'
+          test "$(jq -r '.entries.obsidian.activation.fail_closed' "$R")" = 'true'
+          test "$(jq -r '.entries.obsidian.activation.rollback_state' "$R")" = 'DISABLED'
+          test "$(jq -r '.entries.obsidian.activation.rebuild_default' "$R")" = 'DISABLED'
+          test "$(jq -r '.entries.obsidian.activation.prod_write_authorized' "$R")" = 'false'
+          test "$(jq -r '.entries.obsidian.activation.canonical_knowledge_migration_authorized' "$R")" = 'false'
+
+      - name: Upload immutable registration validation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-obsidian-prod-readonly-registration-${{ github.run_id }}
+          path: artifacts/obsidian-prod-registration/**
+          if-no-files-found: warn
+          retention-days: 30
+
+  full-cerebro-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node --test cerebro/tests/*.test.mjs
+
+  main-baseline-full-cerebro:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node --test cerebro/tests/*.test.mjs
