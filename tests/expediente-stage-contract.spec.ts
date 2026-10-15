@@ -25,6 +25,23 @@ test('expediente journey reads live workspace and supports audited manual stage'
  expect(journey).toContain('section.remove()');
 });
 
+test('journey keeps stage pending until explicit save and routes the write to the current environment',()=>{
+ const journey=fs.readFileSync('src/ExpedienteJourneyGuard.tsx','utf8');
+ const css=fs.readFileSync('src/expediente-journey-guard.css','utf8');
+ expect(journey).toContain("fetchEnvironmentApi<any>('fenix-expediente-stage'");
+ expect(journey).toContain('const hasPendingChange=Boolean');
+ expect(journey).toContain('disabled={busy||!hasPendingChange}');
+ expect(journey).toContain("onChange={e=>{setSelected(e.target.value);setMsg('');}}");
+ expect(journey).toContain("'Guardar cambio'");
+ expect(journey).not.toContain('IS_PRODUCTION&&');
+ expect(journey).not.toContain('SUPABASE_URL}/functions/v1/fenix-expediente-stage');
+ expect(journey).toContain("r.status===409");
+ expect(journey).toContain('He recargado el estado actual sin sobrescribirlo.');
+ expect(journey).toMatch(/if\(r\.status>=200&&r\.status<300\)\{await refresh\(\);setMsg/);
+ expect(css).toContain('grid-template-columns:minmax(0,6fr) minmax(132px,1fr)');
+ expect(css).toContain('@media(max-width:1100px)');
+});
+
 test('manual stage backend is authenticated, versioned and audited',()=>{
  const edge=fs.readFileSync('supabase/functions/fenix-expediente-stage/index.ts','utf8');
  const sql=fs.readFileSync('supabase/migrations/20260901_exp_stage_control.sql','utf8');
