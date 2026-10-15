@@ -1,0 +1,68 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_GOVERNED_WRITE_ACTIVATION_EVIDENCE",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PROD_CONTROL_PLANE",
+  "version": "1.0.0",
+  "status": "GREEN_GOVERNED_WRITE_ACTIVATION_EVIDENCE",
+  "scope": [
+    "skill-creator",
+    "github"
+  ],
+  "implementation_branch": "cerebro/governed-write-v1-20261016",
+  "base_main_sha": "48eef7bdeec05237e7fdb35d04a4502639599901",
+  "tested_head_sha": "5c6aa0ec68286bb3452aef2431568df60ca12f4a",
+  "pull_request": 730,
+  "physical_canary": {
+    "governed_branch_created": true,
+    "generated_file_path": "cerebro/generated/skills/governed-write-canary-v1/SKILL.md",
+    "generated_file_committed": true,
+    "pull_request_created_to_main": true,
+    "direct_main_write_used": false,
+    "auto_merge_used": false
+  },
+  "ci": {
+    "focused": {
+      "workflow": "CEREBRO Skill Governed Write V1",
+      "run_id": 38823834023,
+      "conclusion": "success",
+      "artifact_id": 12014126377,
+      "artifact_digest": "sha256:8ecca4d279386acfab93e2e1d2855c6cfa2e887011838b17f5f0664810edf47a"
+    },
+    "governed_main_integration": {
+      "run_id": 38823834008,
+      "conclusion": "success"
+    },
+    "skill_supply_chain": {
+      "run_id": 38823834028,
+      "conclusion": "success"
+    },
+    "rsi_promotion_readiness": {
+      "run_id": 38823834082,
+      "conclusion": "success"
+    }
+  },
+  "authority_ceiling": {
+    "direct_main_write": false,
+    "force_push": false,
+    "auto_merge": false,
+    "merge": false,
+    "workflow_mutation": false,
+    "governance_self_mutation": false,
+    "new_credentials": false,
+    "customer_data": false,
+    "prod_business_data": false,
+    "external_skill_code_execution": false,
+    "trading": false,
+    "paid_fallback": false,
+    "app_fenix_deploy": false,
+    "additional_cost_eur": 0
+  },
+  "rollback": {
+    "readonly_fallback_registry_preserved": true,
+    "fallback_registry": "cerebro/registry/autonomous-readonly-skills.v1.json",
+    "fallback_mode": "PROD_READONLY_ADVISORY",
+    "history_rewrite_required": false
+  }
+}
