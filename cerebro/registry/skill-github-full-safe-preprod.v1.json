@@ -9,8 +9,14 @@
   "candidate_id": "lobehub-skills:52441cd3d76607ffffab",
   "alias_es": "Manejo seguro de GitHub",
   "technical_name": "github",
-  "status": "READY_FOR_FULL_SAFE_PREPROD_VALIDATION",
-  "validation_status": "PENDING_CURRENT_HEAD_CI",
+  "status": "FULL_SAFE_PREPROD",
+  "validation_status": "CI_GREEN",
+  "validated_by": {
+    "workflow": "CEREBRO Skill Full Adoption V1",
+    "run_id": 38807362064,
+    "head_sha": "68e3662b3d02c06fcb4381d56d5f1397bfb8341d",
+    "conclusion": "success"
+  },
   "scope": "SAFE_INTERNAL_READONLY_AND_SYNTHETIC_PREPROD_CONTROL_PLANE",
   "provenance": {
     "upstream_repository": "openclaw/openclaw",
@@ -66,7 +72,8 @@
     "supply_chain_registry": "cerebro/registry/skill-supply-chain-v0.json",
     "learning_ingress": "cerebro/skills/skill-full-adoption-learning-ingress-v1.mjs",
     "learning_test": "cerebro/tests/skill-full-adoption-learning-ingress-v1.test.mjs",
-    "full_adoption_policy": "cerebro/registry/skill-full-adoption-v1.json"
+    "full_adoption_policy": "cerebro/registry/skill-full-adoption-v1.json",
+    "ci_run": "github-actions:38807362064"
   },
   "required_closure": {
     "provenance_and_license_green": true,
@@ -100,5 +107,5 @@
   },
   "promotion_authorized": false,
   "prod_authorized": false,
-  "next_gate": "CURRENT_HEAD_CI_VALIDATE_GITHUB_PREPROD_RUNTIME_AND_FROZEN_TRIBUNAL_EVIDENCE"
+  "next_gate": "REGRESSION_MONITORING_NO_PROD_AUTHORITY"
 }
