@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_RSI_LRN_EVENT_BATCH",
+  "batch_id": "lrn-batch:95995eada754faf5a4b1fe6c",
+  "company_id": "fenix",
+  "engine_id": "LRN-001",
+  "environment": "PREPROD",
+  "version": "0.5.0",
+  "source": {
+    "workflow": "CEREBRO RSI Universal Learning Ingress V0",
+    "run_id": 38699109949,
+    "head_sha": "7d5e9cf3b7d0e6348ba4a2a0b29d2efa2908ce7e"
+  },
+  "source_event_count": 2,
+  "events_total": 2,
+  "events": [
+    {
+      "schema_version": "1.0.0",
+      "event_id": "evt:lrn:77a01ccf727a8b9ef2627dbd",
+      "event_type": "CEREBRO_ENGINE_RESULT",
+      "signal_id": "qa:1376f912951f14516044f089:resolved:2026-10-15T07:29:33.542Z",
+      "source_type": "ENGINE_RESULT",
+      "company_id": "fenix",
+      "engine_id": "QA-001",
+      "environment": "PREPROD_CANDIDATE",
+      "source_environment": "PROD",
+      "version": "0.2.0",
+      "observed_at": "2026-10-15T07:29:33.542Z",
+      "severity": "INFO",
+      "confidence": 0.9,
+      "risk_class": "LOW",
+      "reason": "QA-001 no longer reproduces finding 1376f912951f14516044f089 in the current read-only verification cycle.",
+      "learning_hypothesis": "Resolved QA evidence should reinforce regression coverage so finding 1376f912951f14516044f089 remains absent.",
+      "expected_metric_delta": {
+        "name": "regression_escape_rate",
+        "direction": "LOWER",
+        "measurement": "FUTURE_QA_RETESTS"
+      },
+      "evidence_refs": [
+        "qa-resolved:1376f912951f14516044f089",
+        "qa-state:2026-10-15T07:29:33.542Z"
+      ],
+      "payload": {
+        "outcome": "NOT_REPRODUCED_CURRENT_CYCLE",
+        "qa_fingerprint": "1376f912951f14516044f089",
+        "required_path": [
+          "BIND_OR_CREATE_REGRESSION_TEST",
+          "RETEST"
+        ]
+      },
+      "local_validation_required": true,
+      "publish_authorized": false,
+      "persistent_publish_authorized": false,
+      "rsi_publish_authorized": false,
+      "contains_customer_data": false,
+      "contains_secrets": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "origin_event_id": "evt:universal:afb4d909101fc5b6403f981e",
+      "origin_company_id": "fenix"
+    },
+    {
+      "schema_version": "1.0.0",
+      "event_id": "evt:lrn:a25532f5ea26923f6f440d97",
+      "event_type": "CEREBRO_ENGINE_RESULT",
+      "signal_id": "qa:57076bcd76dda8e6642db6ab:resolved:2026-10-15T07:29:33.542Z",
+      "source_type": "ENGINE_RESULT",
+      "company_id": "fenix",
+      "engine_id": "QA-001",
+      "environment": "PREPROD_CANDIDATE",
+      "source_environment": "PROD",
+      "version": "0.2.0",
+      "observed_at": "2026-10-15T07:29:33.542Z",
+      "severity": "INFO",
+      "confidence": 0.9,
+      "risk_class": "LOW",
+      "reason": "QA-001 no longer reproduces finding 57076bcd76dda8e6642db6ab in the current read-only verification cycle.",
+      "learning_hypothesis": "Resolved QA evidence should reinforce regression coverage so finding 57076bcd76dda8e6642db6ab remains absent.",
+      "expected_metric_delta": {
+        "name": "regression_escape_rate",
+        "direction": "LOWER",
+        "measurement": "FUTURE_QA_RETESTS"
+      },
+      "evidence_refs": [
+        "qa-resolved:57076bcd76dda8e6642db6ab",
+        "qa-state:2026-10-15T07:29:33.542Z"
+      ],
+      "payload": {
+        "outcome": "NOT_REPRODUCED_CURRENT_CYCLE",
+        "qa_fingerprint": "57076bcd76dda8e6642db6ab",
+        "required_path": [
+          "BIND_OR_CREATE_REGRESSION_TEST",
+          "RETEST"
+        ]
+      },
+      "local_validation_required": true,
+      "publish_authorized": false,
+      "persistent_publish_authorized": false,
+      "rsi_publish_authorized": false,
+      "contains_customer_data": false,
+      "contains_secrets": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "origin_event_id": "evt:universal:2b3f952fc7c8f5628cfbb588",
+      "origin_company_id": "fenix"
+    }
+  ],
+  "local_validation_required": true,
+  "persistent_publish_authorized": false,
+  "rsi_publish_authorized": false,
+  "prod_authorized": false,
+  "prod_write_authorized": false,
+  "trading_access": false,
+  "additional_cost_eur": 0
+}
