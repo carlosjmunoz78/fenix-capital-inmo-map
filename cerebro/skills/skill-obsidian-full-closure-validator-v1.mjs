@@ -1,6 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import {fileURLToPath} from 'node:url';
 
+const REPO_ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
 const EXPECTED=Object.freeze({
   candidate_id:'lobehub-skills:9a6e3fac20369220df43',technical_name:'obsidian',company_id:'GLOBAL',engine_id:'FACT-001',environment:'PREPROD',
   upstream_repository:'openclaw/openclaw',pinned_commit:'b300e0edea5e3e1b0aee58a33e188711380d8e22',manifest_path:'skills/obsidian/SKILL.md',manifest_sha256:'d4ed3ce53146bd6538c47f81da2382fc790598ec1400d34b7d1f73a8839053b4',
@@ -11,8 +13,13 @@ const SAFETY_FALSE=Object.freeze(['prod_write','prod_mutation','auto_merge','cus
 function push(errors,condition,message){if(!condition) errors.push(message);}
 function exact(value,expected){return Array.isArray(value)&&value.length===expected.length&&value.every((item,index)=>item===expected[index]);}
 function load(file){return JSON.parse(fs.readFileSync(file,'utf8'));}
+function repositoryFileExists(value){
+  if(typeof value!=='string'||!value.trim()) return false;
+  const resolved=path.isAbsolute(value)?value:path.resolve(REPO_ROOT,value);
+  return fs.existsSync(resolved);
+}
 
-export function validateObsidianFullClosure({closure,adoptionRegistry,integrationReport,fileExists=(value)=>fs.existsSync(value)}={}){
+export function validateObsidianFullClosure({closure,adoptionRegistry,integrationReport,fileExists=repositoryFileExists}={}){
   const errors=[];
   push(errors,closure?.state_type==='CEREBRO_SKILL_FULL_SAFE_PREPROD_CLOSURE','INVALID_CLOSURE_STATE_TYPE');
   push(errors,closure?.candidate_id===EXPECTED.candidate_id,'CANDIDATE_MISMATCH');
