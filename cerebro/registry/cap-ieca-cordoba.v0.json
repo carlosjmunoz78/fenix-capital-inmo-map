@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_CAP_IECA_CORDOBA_V0",
+  "company_id": "fenix",
+  "engine_id": "CAP-001",
+  "environment": "PREPROD",
+  "version": "v0",
+  "status": "PHYSICAL_PREPROD_GATE_PENDING",
+  "source": {
+    "publisher": "Instituto de Estadística y Cartografía de Andalucía",
+    "dataset": "ESPAND directorio_establecimientos",
+    "license": "CC-BY-4.0",
+    "method": "GET_ONLY",
+    "municipality_code": "14021",
+    "activity_filter": "Actividades Administrativas, Financieras y de Seguros",
+    "source_class": "OFFICIAL_PUBLIC_BUSINESS_SOURCE"
+  },
+  "probe_evidence": {
+    "pr": 710,
+    "merged": false,
+    "workflow_run_id": 38713329855,
+    "workflow_conclusion": "success",
+    "http_status": 200,
+    "cordoba_feature_count": 2365,
+    "broad_activity_feature_count": 266,
+    "deterministic_real_estate_candidate_count": 7,
+    "provider_writes": 0
+  },
+  "implementation": {
+    "runtime": "cerebro/runtime/cap-ieca-cordoba-v0.mjs",
+    "tests": "cerebro/tests/cap-ieca-cordoba-v0.test.mjs",
+    "identity": "IECA id_directo + deterministic lead_key",
+    "scoring": "existing CAP-001 lead discovery/ICP profile",
+    "durable_job": "JOB-001 PersistentJobQueue"
+  },
+  "authority": {
+    "provider_write_authorized": false,
+    "crm_write_authorized": false,
+    "outreach_authorized": false,
+    "customer_data_authorized": false,
+    "person_level_enrichment_authorized": false,
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "trading_access": false,
+    "automatic_paid_fallback": false,
+    "additional_cost_eur": 0
+  },
+  "rollback": "Revert additive CAP IECA PR; source access is GET-only and creates no provider/CRM/PROD mutation.",
+  "rebuild": "Recreate from the fixed official IECA WFS source contract + CAP lead discovery profile + JOB-001 persistent runtime.",
+  "next_gate": "REAL_IECA_PREPROD_RUN_GREEN_THEN_SCHEDULED_SOAK"
+}
