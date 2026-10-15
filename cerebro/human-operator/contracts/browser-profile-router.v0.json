@@ -1,0 +1,75 @@
+{
+  "schema_version": "0.1.0",
+  "contract_id": "CEREBRO_BROWSER_PROFILE_ROUTER_V0",
+  "status": "DEFINED_NOT_BOUND",
+  "extends_engine": "ROUTE-001",
+  "new_engine_id": false,
+  "profiles": [
+    {
+      "profile_id": "CEREBRO_LAB",
+      "purpose": "synthetic/stress/soak testing",
+      "allowed_environments": ["LAB", "PREPROD"],
+      "persistent_session": true,
+      "customer_data_allowed": false,
+      "destructive_prod_actions": false
+    },
+    {
+      "profile_id": "CEREBRO_FENIX",
+      "purpose": "authorized Fenix work sessions after PREPROD acceptance",
+      "allowed_environments": ["LAB", "PREPROD"],
+      "persistent_session": true,
+      "customer_data_allowed": false,
+      "destructive_prod_actions": false
+    },
+    {
+      "profile_id": "CARLOS_PERSONAL",
+      "purpose": "owner personal browser profile",
+      "allowed_environments": [],
+      "persistent_session": true,
+      "automation_allowed": false,
+      "deny_reason": "PERSONAL_PROFILE_EXCLUDED"
+    }
+  ],
+  "routing_inputs": [
+    "company_id",
+    "identity_id",
+    "environment",
+    "job_type",
+    "surface",
+    "risk_class",
+    "required_session",
+    "browser_attestation"
+  ],
+  "selection_rules": [
+    "DENY_PERSONAL_PROFILE",
+    "MATCH_COMPANY_IDENTITY_ENVIRONMENT",
+    "PREFER_EXISTING_VALID_SESSION",
+    "REQUIRE_FRESH_BROWSER_ATTESTATION",
+    "PIN_INTENDED_TAB",
+    "FAIL_CLOSED_ON_PROFILE_DRIFT"
+  ],
+  "session_state_strategy": {
+    "prefer_persistent_chrome_profile": true,
+    "explicit_cookie_export_default": false,
+    "local_storage_persistence": "browser_profile_native",
+    "indexeddb_persistence": "browser_profile_native",
+    "service_worker_persistence": "browser_profile_native",
+    "session_refresh": "IAM001_LOCAL_SECRET_RESOLVER_WHEN_REQUIRED"
+  },
+  "adapter_order_provisional": [
+    "PLAYWRIGHT_CHROME_BASELINE",
+    "AGENT_BROWSER_CANDIDATE",
+    "BROWSER_HARNESS_CANDIDATE",
+    "REAL_BROWSER_MCP_EXISTING_TAB_FALLBACK"
+  ],
+  "invariants": {
+    "profile_cross_company_reuse_without_explicit_scope": false,
+    "personal_profile_automation_allowed": false,
+    "fresh_attestation_required": true,
+    "tab_pinning_required_for_unattended_run": true,
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "trading_access": false,
+    "additional_cost_eur": 0
+  }
+}
