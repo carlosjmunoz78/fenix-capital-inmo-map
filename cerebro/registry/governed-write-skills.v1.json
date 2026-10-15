@@ -5,7 +5,7 @@
   "engine_id": "FACT-001",
   "environment": "PROD_CONTROL_PLANE",
   "version": "1.0.0",
-  "status": "PREPARED_PENDING_PHYSICAL_CANARY",
+  "status": "ACTIVE_GOVERNED_WRITE",
   "policy_ref": "CEREBRO-SKILL-GOVERNED-WRITE-AUTH-001",
   "readonly_fallback_registry": "cerebro/registry/autonomous-readonly-skills.v1.json",
   "entries": {
@@ -14,7 +14,7 @@
       "technical_id": "skill-creator",
       "candidate_id": "lobehub-skills:950cf07380d1daa6de69",
       "wrapper_id": "skillwrap:cerebro-skill-creator-v0.1.0",
-      "status": "PREPARED_GOVERNED_WRITE_PENDING_CANARY",
+      "status": "ACTIVE_GOVERNED_WRITE",
       "execution_mode": "PROD_GOVERNED_WRITE",
       "company_id": "GLOBAL",
       "engine_id": "FACT-001",
@@ -50,7 +50,7 @@
       "technical_id": "github",
       "candidate_id": "lobehub-skills:52441cd3d76607ffffab",
       "wrapper_id": "skillwrap:cerebro-github-v0.1.0",
-      "status": "PREPARED_GOVERNED_WRITE_PENDING_CANARY",
+      "status": "ACTIVE_GOVERNED_WRITE",
       "execution_mode": "PROD_GOVERNED_WRITE",
       "company_id": "GLOBAL",
       "engine_id": "FACT-001",
@@ -83,16 +83,32 @@
     }
   },
   "physical_canary": {
-    "status": "PENDING",
-    "required_proofs": [
-      "GOVERNED_BRANCH_CREATED",
-      "GOVERNED_PATH_FILE_COMMITTED",
-      "PULL_REQUEST_CREATED_TO_MAIN",
-      "FOCUSED_GUARD_TEST_GREEN",
-      "DIRECT_MAIN_WRITE_NOT_USED",
-      "AUTO_MERGE_NOT_USED",
-      "ROLLBACK_FALLBACK_PRESERVED"
-    ]
+    "status": "GREEN_GOVERNED_WRITE_PHYSICAL_CANARY",
+    "pull_request": 730,
+    "tested_head_sha": "5c6aa0ec68286bb3452aef2431568df60ca12f4a",
+    "generated_artifact_path": "cerebro/generated/skills/governed-write-canary-v1/SKILL.md",
+    "focused_workflow": "CEREBRO Skill Governed Write V1",
+    "focused_run_id": 38823834023,
+    "artifact_id": 12014126377,
+    "artifact_digest": "sha256:8ecca4d279386acfab93e2e1d2855c6cfa2e887011838b17f5f0664810edf47a",
+    "governed_main_integration_run_id": 38823834008,
+    "supply_chain_run_id": 38823834028,
+    "rsi_readiness_run_id": 38823834082,
+    "governed_branch_created": true,
+    "governed_path_file_committed": true,
+    "pull_request_created_to_main": true,
+    "focused_guard_test_green": true,
+    "direct_main_write_not_used": true,
+    "auto_merge_not_used": true,
+    "readonly_fallback_preserved": true,
+    "additional_cost_eur": 0
+  },
+  "rollback": {
+    "status": "PROVEN_BY_SEPARATE_FALLBACK_LANE",
+    "method": "disable_governed_write_registry_and_policy",
+    "fallback_registry": "cerebro/registry/autonomous-readonly-skills.v1.json",
+    "fallback_mode": "PROD_READONLY_ADVISORY",
+    "main_history_rewrite_required": false
   },
   "safety": {
     "business_prod_side_effects": false,
