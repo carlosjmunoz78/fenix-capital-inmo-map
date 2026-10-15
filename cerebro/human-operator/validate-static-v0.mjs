@@ -6,10 +6,13 @@ const HERE=path.dirname(fileURLToPath(import.meta.url));
 const JSON_FILES=[
   'contracts/human-operator-job.v0.json',
   'contracts/night-runner.v0.json',
+  'contracts/night-runner-state-machine.v0.json',
   'contracts/adaptive-conversation-lab.v0.json',
   'contracts/operator-evidence.v0.json',
   'contracts/morning-report.v0.json',
   'contracts/finding-routing.v0.json',
+  'contracts/local-secret-resolver.v0.json',
+  'contracts/browser-profile-router.v0.json',
   'scenarios/human-operator-scenario-suite.v0.json'
 ];
 const DOC_FILES=[
@@ -66,6 +69,11 @@ assert(runner.runtime_requirements?.checkpointing===true,'checkpointing_required
 assert(runner.runtime_requirements?.loop_circuit_breaker===true,'loop_circuit_breaker_required');
 assert(runner.checkpoint?.write_after_every_click===false,'checkpoint_per_click_forbidden');
 
+const stateMachine=JSON.parse(read('contracts/night-runner-state-machine.v0.json'));
+assert(stateMachine.invariants?.unknown_transition==='DENY','unknown_state_transition_must_deny');
+assert(stateMachine.invariants?.hold_is_not_human_required===true,'hold_must_not_be_human_required');
+assert(stateMachine.invariants?.completed_requires_final_verification===true,'completion_verification_required');
+
 const conversation=JSON.parse(read('contracts/adaptive-conversation-lab.v0.json'));
 assert(conversation.roles?.system_under_test==='CEREBRO_REAL','real_cerebro_system_under_test_required');
 assert(conversation.personas_reuse?.do_not_create_parallel_population_engine===true,'parallel_persona_engine_forbidden');
@@ -84,6 +92,20 @@ const routing=JSON.parse(read('contracts/finding-routing.v0.json'));
 assert(routing.learning_gate?.direct_human_operator_to_lrn_allowed===false,'direct_operator_to_lrn_forbidden');
 assert(routing.learning_gate?.resolved_without_measured_retest===false,'routing_measured_retest_required');
 assert(routing.repair_gate?.human_operator_may_repair_prod===false,'prod_repair_forbidden');
+
+const resolver=JSON.parse(read('contracts/local-secret-resolver.v0.json'));
+assert(resolver.extends_engine==='IAM-001','secret_resolver_must_extend_iam001');
+assert(resolver.new_engine_id===false,'secret_resolver_new_engine_forbidden');
+assert(resolver.invariants?.raw_secret_in_registry===false,'raw_secret_registry_forbidden');
+assert(resolver.invariants?.metadata_api_returns_secret===false,'secret_metadata_return_forbidden');
+assert(resolver.invariants?.backup_recovery_test_required_before_sole_copy===true,'vault_recovery_test_required');
+
+const profileRouter=JSON.parse(read('contracts/browser-profile-router.v0.json'));
+assert(profileRouter.extends_engine==='ROUTE-001','profile_router_must_extend_route001');
+assert(profileRouter.new_engine_id===false,'profile_router_new_engine_forbidden');
+assert(profileRouter.invariants?.personal_profile_automation_allowed===false,'personal_profile_route_forbidden');
+assert(profileRouter.invariants?.fresh_attestation_required===true,'fresh_browser_attestation_required');
+assert(profileRouter.invariants?.tab_pinning_required_for_unattended_run===true,'unattended_tab_pinning_required');
 
 const scenarios=JSON.parse(read('scenarios/human-operator-scenario-suite.v0.json'));
 assert(scenarios.do_not_create_parallel_persona_engine===true,'scenario_parallel_persona_engine_forbidden');
