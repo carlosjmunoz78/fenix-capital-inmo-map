@@ -3,9 +3,9 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {validateSkillFullClosure} from '../skills/skill-full-closure-validator-v1.mjs';
 
-const closure=JSON.parse(fs.readFileSync('cerebro/registry/skill-creator-full-safe-preprod.v1.json','utf8'));
-const registry=JSON.parse(fs.readFileSync('cerebro/registry/skill-full-adoption-v1.json','utf8'));
-const staticLab=JSON.parse(fs.readFileSync('cerebro/skills/skill-creator-static-lab.v0.json','utf8'));
+const closure=JSON.parse(fs.readFileSync(new URL('../registry/skill-creator-full-safe-preprod.v1.json',import.meta.url),'utf8'));
+const registry=JSON.parse(fs.readFileSync(new URL('../registry/skill-full-adoption-v1.json',import.meta.url),'utf8'));
+const staticLab=JSON.parse(fs.readFileSync(new URL('../skills/skill-creator-static-lab.v0.json',import.meta.url),'utf8'));
 
 function preprodReport(){
   return {
