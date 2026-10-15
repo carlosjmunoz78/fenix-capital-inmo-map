@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0.0",
+  "registry_type": "CEREBRO_GOVERNED_WRITE_SKILL_REGISTRY",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PROD_CONTROL_PLANE",
+  "version": "1.0.0",
+  "status": "PREPARED_PENDING_PHYSICAL_CANARY",
+  "policy_ref": "CEREBRO-SKILL-GOVERNED-WRITE-AUTH-001",
+  "readonly_fallback_registry": "cerebro/registry/autonomous-readonly-skills.v1.json",
+  "entries": {
+    "skill-creator": {
+      "alias_es": "Fábrica inteligente de skills",
+      "technical_id": "skill-creator",
+      "candidate_id": "lobehub-skills:950cf07380d1daa6de69",
+      "wrapper_id": "skillwrap:cerebro-skill-creator-v0.1.0",
+      "status": "PREPARED_GOVERNED_WRITE_PENDING_CANARY",
+      "execution_mode": "PROD_GOVERNED_WRITE",
+      "company_id": "GLOBAL",
+      "engine_id": "FACT-001",
+      "environment": "PROD_CONTROL_PLANE",
+      "version": "skill-creator-governed-write-v1.0.0",
+      "target_engine_bindings": ["FACT-001"],
+      "allowed_capabilities": [
+        "CREATE_SKILL_ARTIFACTS_ON_GOVERNED_BRANCH",
+        "REPAIR_SKILL_ARTIFACTS_ON_GOVERNED_BRANCH"
+      ],
+      "allowed_output_prefixes": [
+        "cerebro/generated/skills/",
+        "cerebro/generated/tests/",
+        "cerebro/registry/proposals/",
+        "cerebro/evidence/governed-write/",
+        "docs/cerebro/generated/"
+      ],
+      "activation": {
+        "fail_closed": true,
+        "direct_main_write_authorized": false,
+        "auto_merge_authorized": false,
+        "workflow_mutation_authorized": false,
+        "governance_self_mutation_authorized": false,
+        "customer_data_authorized": false,
+        "external_skill_code_execution_authorized": false,
+        "trading_authorized": false,
+        "paid_fallback_authorized": false,
+        "additional_cost_eur": 0
+      }
+    },
+    "github": {
+      "alias_es": "Manejo seguro de GitHub",
+      "technical_id": "github",
+      "candidate_id": "lobehub-skills:52441cd3d76607ffffab",
+      "wrapper_id": "skillwrap:cerebro-github-v0.1.0",
+      "status": "PREPARED_GOVERNED_WRITE_PENDING_CANARY",
+      "execution_mode": "PROD_GOVERNED_WRITE",
+      "company_id": "GLOBAL",
+      "engine_id": "FACT-001",
+      "environment": "PROD_CONTROL_PLANE",
+      "version": "github-governed-write-v1.0.0",
+      "target_engine_bindings": ["FACT-001"],
+      "allowed_capabilities": [
+        "CREATE_GOVERNED_BRANCH",
+        "CREATE_OR_UPDATE_GOVERNED_BRANCH_FILE",
+        "CREATE_GOVERNED_PULL_REQUEST",
+        "UPDATE_GOVERNED_PULL_REQUEST_METADATA"
+      ],
+      "activation": {
+        "fail_closed": true,
+        "direct_main_write_authorized": false,
+        "force_push_authorized": false,
+        "auto_merge_authorized": false,
+        "merge_authorized": false,
+        "branch_protection_mutation_authorized": false,
+        "workflow_dispatch_authorized": false,
+        "workflow_mutation_authorized": false,
+        "governance_self_mutation_authorized": false,
+        "new_credentials_authorized": false,
+        "customer_data_authorized": false,
+        "external_skill_code_execution_authorized": false,
+        "trading_authorized": false,
+        "paid_fallback_authorized": false,
+        "additional_cost_eur": 0
+      }
+    }
+  },
+  "physical_canary": {
+    "status": "PENDING",
+    "required_proofs": [
+      "GOVERNED_BRANCH_CREATED",
+      "GOVERNED_PATH_FILE_COMMITTED",
+      "PULL_REQUEST_CREATED_TO_MAIN",
+      "FOCUSED_GUARD_TEST_GREEN",
+      "DIRECT_MAIN_WRITE_NOT_USED",
+      "AUTO_MERGE_NOT_USED",
+      "ROLLBACK_FALLBACK_PRESERVED"
+    ]
+  },
+  "safety": {
+    "business_prod_side_effects": false,
+    "direct_main_write": false,
+    "auto_merge": false,
+    "customer_data": false,
+    "external_skill_code_execution": false,
+    "trading": false,
+    "paid_fallback": false,
+    "app_fenix_deploy": false,
+    "additional_cost_eur": 0
+  }
+}
