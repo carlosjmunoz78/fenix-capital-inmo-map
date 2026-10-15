@@ -22,10 +22,16 @@ test('COMPET real targets remain PREPROD, public and company scoped',()=>{
   }
 });
 
-test('baseline capture does not pretend continuous validation is already complete',()=>{
-  assert.equal(config.status,'REAL_TARGETS_CONFIGURED_BASELINE_CAPTURE_PENDING');
-  assert.equal(config.targets.every(t=>t.baseline===null),true);
-  assert.equal(config.next_gate,'CAPTURE_AND_FREEZE_INITIAL_REAL_TARGET_BASELINES_THEN_ENABLE_CONTINUOUS_PREPROD_SCAN');
+test('real baselines are frozen but scheduled soak is not overclaimed',()=>{
+  assert.equal(config.status,'REAL_TARGETS_BASELINE_FROZEN_CONTINUOUS_PREPROD');
+  assert.equal(config.baseline_capture.result,'GREEN');
+  assert.equal(config.targets.every(t=>t.baseline&&typeof t.baseline.body_sha256==='string'&&t.baseline.body_sha256.length===64),true);
+  assert.equal(config.scheduler.configured,true);
+  assert.equal(config.scheduler.kind,'GITHUB_ACTIONS_CRON');
+  assert.equal(config.scheduler.cron,'43 5 * * *');
+  assert.equal(config.scheduler.soak_complete,false);
+  assert.equal(config.scheduler.required_scheduled_green_runs,3);
+  assert.equal(config.next_gate,'THREE_CONTINUOUS_REAL_COMPETITOR_SCHEDULED_RUNS_GREEN');
 });
 
 test('data minimization and authority are fail closed',()=>{
