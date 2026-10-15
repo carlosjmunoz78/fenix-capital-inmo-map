@@ -5,9 +5,10 @@ import {selectNextSkillFullAdoption,validateSkillFullAdoptionQueue} from '../ski
 
 const registry=()=>JSON.parse(fs.readFileSync(new URL('../registry/skill-full-adoption-v1.json',import.meta.url),'utf8'));
 
-test('canonical queue is safe and chooses the compounding factory skill first',()=>{
+test('priority strategy keeps the compounding factory skill first before its FULL closure',()=>{
   const q=registry();
   assert.equal(validateSkillFullAdoptionQueue(q).green,true);
+  q.queue[0].status='ADMITTED_INCOMPLETE';
   const out=selectNextSkillFullAdoption(q);
   assert.equal(out.status,'SAFE_WORK_AVAILABLE');
   assert.equal(out.selected.alias_es,'Fábrica inteligente de skills');
@@ -17,11 +18,13 @@ test('canonical queue is safe and chooses the compounding factory skill first',(
   assert.equal(out.additional_cost_eur,0);
 });
 
-test('after factory skill is FULL, safe GitHub capability is next',()=>{
+test('canonical queue advances to safe GitHub capability after factory skill is FULL',()=>{
   const q=registry();
-  q.queue[0].status='FULL_SAFE_PREPROD';
+  assert.equal(q.queue[0].status,'FULL_SAFE_PREPROD');
   const out=selectNextSkillFullAdoption(q);
+  assert.equal(out.status,'SAFE_WORK_AVAILABLE');
   assert.equal(out.selected.alias_es,'Manejo seguro de GitHub');
+  assert.equal(out.selected.candidate_id,'lobehub-skills:52441cd3d76607ffffab');
 });
 
 test('HIGH_RISK candidates are never crossed automatically',()=>{
