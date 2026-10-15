@@ -1,0 +1,49 @@
+{
+  "schema_version": "0.1.0",
+  "contract_id": "CEREBRO_NIGHT_RUNNER_STATE_MACHINE_V0",
+  "status": "DEFINED_NOT_BOUND",
+  "states": [
+    "QUEUED",
+    "PREFLIGHT",
+    "BROWSER_CONNECTING",
+    "SESSION_RESOLVING",
+    "RUNNING",
+    "VERIFYING",
+    "CHECKPOINTING",
+    "RECOVERING",
+    "HOLD",
+    "HUMAN_REQUIRED",
+    "COMPLETED",
+    "FAILED_SAFE",
+    "KILLED"
+  ],
+  "allowed_transitions": {
+    "QUEUED": ["PREFLIGHT", "KILLED"],
+    "PREFLIGHT": ["BROWSER_CONNECTING", "HOLD", "HUMAN_REQUIRED", "FAILED_SAFE", "KILLED"],
+    "BROWSER_CONNECTING": ["SESSION_RESOLVING", "RECOVERING", "HOLD", "FAILED_SAFE", "KILLED"],
+    "SESSION_RESOLVING": ["RUNNING", "RECOVERING", "HOLD", "HUMAN_REQUIRED", "FAILED_SAFE", "KILLED"],
+    "RUNNING": ["VERIFYING", "CHECKPOINTING", "RECOVERING", "HOLD", "HUMAN_REQUIRED", "COMPLETED", "FAILED_SAFE", "KILLED"],
+    "VERIFYING": ["RUNNING", "CHECKPOINTING", "RECOVERING", "HOLD", "COMPLETED", "FAILED_SAFE", "KILLED"],
+    "CHECKPOINTING": ["RUNNING", "RECOVERING", "HOLD", "FAILED_SAFE", "KILLED"],
+    "RECOVERING": ["BROWSER_CONNECTING", "SESSION_RESOLVING", "RUNNING", "HOLD", "FAILED_SAFE", "KILLED"],
+    "HOLD": ["PREFLIGHT", "KILLED"],
+    "HUMAN_REQUIRED": ["PREFLIGHT", "KILLED"],
+    "COMPLETED": [],
+    "FAILED_SAFE": [],
+    "KILLED": []
+  },
+  "invariants": {
+    "unknown_transition": "DENY",
+    "resume_requires_last_verified_checkpoint": true,
+    "recovery_attempts_bounded": true,
+    "kill_switch_terminal_for_current_run": true,
+    "human_required_must_be_canonical": true,
+    "hold_is_not_human_required": true,
+    "failed_safe_must_preserve_evidence": true,
+    "completed_requires_final_verification": true,
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "trading_access": false,
+    "additional_cost_eur": 0
+  }
+}
