@@ -1,0 +1,30 @@
+name: TEMP PROD Expediente Journey Readability
+
+on:
+  push:
+    branches:
+      - prod/expediente-journey-readability-2026-10-15
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: PROD build
+        run: npm run build
+      - name: Readability regression contract
+        env:
+          PLAYWRIGHT_SKIP_BUILD: '1'
+        run: npx playwright test tests/expediente-manual-phase-readability.spec.ts --project=desktop-chromium --workers=1
