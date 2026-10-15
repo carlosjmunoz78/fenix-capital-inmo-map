@@ -35,6 +35,13 @@ test('queue advances to admitted Obsidian while earlier safe capabilities are FU
   const q=registry();
   assert.equal(q.queue[0].status,'FULL_SAFE_PREPROD');
   assert.equal(q.queue[1].status,'FULL_SAFE_PREPROD');
+  const obsidian=q.queue.find(x=>x.technical_name==='obsidian');
+  assert.ok(obsidian);
+  obsidian.status='ADMITTED_INCOMPLETE';
+  delete obsidian.closure_evidence;
+  delete obsidian.validated_by_workflow_run;
+  delete obsidian.validated_head_sha;
+  delete obsidian.full_validation_workflows;
   const out=selectNextSkillFullAdoption(q);
   assert.equal(out.status,'SAFE_WORK_AVAILABLE');
   assert.equal(out.selected.alias_es,'Asistente seguro de conocimiento en Obsidian');
@@ -71,9 +78,11 @@ test('specialized wrapper inventory is reconciled with Obsidian admitted only af
   assert.equal(q.inventory_audit.specialized_cerebro_wrappers_observed,5);
   assert.equal(q.inventory_audit.admitted_full_queue_count,5);
   assert.equal(q.inventory_audit.observed_not_admitted_count,0);
+  assert.equal(q.inventory_audit.full_safe_preprod_count,3);
   const obsidian=q.queue.find(x=>x.technical_name==='obsidian');
   assert.ok(obsidian);
   assert.equal(obsidian.alias_es,'Asistente seguro de conocimiento en Obsidian');
+  assert.equal(obsidian.status,'FULL_SAFE_PREPROD');
   assert.equal(obsidian.admitted,true);
   assert.equal(obsidian.install_authorized,false);
   assert.equal(obsidian.execution_authorized,false);
