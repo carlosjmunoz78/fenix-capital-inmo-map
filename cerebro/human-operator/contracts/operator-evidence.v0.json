@@ -1,0 +1,95 @@
+{
+  "schema_version": "0.1.0",
+  "contract_id": "CEREBRO_HUMAN_OPERATOR_EVIDENCE_V0",
+  "state_type": "HUMAN_OPERATOR_EVIDENCE",
+  "status": "DEFINED_NOT_BOUND",
+  "required": [
+    "run_id",
+    "job_id",
+    "case_id",
+    "step_id",
+    "company_id",
+    "engine_id",
+    "environment",
+    "version",
+    "observed_at",
+    "surface",
+    "identity_alias",
+    "action",
+    "expected",
+    "observed",
+    "result",
+    "confidence",
+    "reproducibility",
+    "owning_engine"
+  ],
+  "result_values": ["PASS", "FAIL", "HOLD", "HUMAN_REQUIRED", "NOT_MEASURED"],
+  "evidence_refs": {
+    "screenshot_ref": "string|null",
+    "video_ref": "string|null",
+    "dom_snapshot_ref": "string|null",
+    "console_ref": "string|null",
+    "network_ref": "string|null",
+    "checkpoint_ref": "string|null"
+  },
+  "quality_dimensions": [
+    "task_success",
+    "functional",
+    "visual",
+    "responsive",
+    "ux_friction",
+    "context_retention",
+    "permission_compliance",
+    "cross_case_isolation",
+    "cross_company_isolation",
+    "session_reuse",
+    "navigation_recovery",
+    "crash_recovery",
+    "tool_accuracy",
+    "conversation_quality"
+  ],
+  "measurement_rules": {
+    "not_measured_may_resolve_previous_failure": false,
+    "pass_requires_observation": true,
+    "failure_requires_reproduction_attempt": true,
+    "resolved_requires_measured_retest": true,
+    "credential_failure_is_not_automatically_human_required": true,
+    "severity_does_not_grant_change_authority": true
+  },
+  "redaction": {
+    "forbidden_keys": [
+      "password",
+      "secret",
+      "access_token",
+      "refresh_token",
+      "jwt",
+      "api_key",
+      "totp_seed",
+      "otp",
+      "cookie_value",
+      "recovery_code",
+      "private_key"
+    ],
+    "credential_ref_allowed": true,
+    "account_alias_allowed": true,
+    "raw_customer_data_in_lab": false,
+    "raw_auth_headers": false
+  },
+  "routing": {
+    "APP": "APP-001",
+    "WEB": "WEB-001",
+    "UX": "HCI-001",
+    "CONVERSATION": "HCI-001",
+    "AUTH": "IAM-001",
+    "AUTOMATION": "AUTO-001",
+    "REGRESSION": "REG-001",
+    "PROCESS": "QAB-001",
+    "INCIDENT": "INC-001"
+  },
+  "safety": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "trading_access": false,
+    "additional_cost_eur": 0
+  }
+}
