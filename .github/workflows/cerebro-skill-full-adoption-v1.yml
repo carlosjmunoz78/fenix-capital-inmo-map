@@ -1,0 +1,99 @@
+name: CEREBRO Skill Full Adoption V1
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/registry/skill-full-adoption-v1.json'
+      - 'cerebro/skills/skill-full-adoption-selector-v1.mjs'
+      - 'cerebro/tests/skill-full-adoption-selector-v1.test.mjs'
+      - 'cerebro/docs/CEREBRO_SKILLS_FULL_ADOPTION_POLICY_V1_2026-10-15.md'
+      - '.github/workflows/cerebro-skill-full-adoption-v1.yml'
+  push:
+    branches:
+      - cerebro/skills-full-admitted-first-v1-20261015
+    paths:
+      - 'cerebro/registry/skill-full-adoption-v1.json'
+      - 'cerebro/skills/skill-full-adoption-selector-v1.mjs'
+      - 'cerebro/tests/skill-full-adoption-selector-v1.test.mjs'
+      - 'cerebro/docs/CEREBRO_SKILLS_FULL_ADOPTION_POLICY_V1_2026-10-15.md'
+      - '.github/workflows/cerebro-skill-full-adoption-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-skill-full-adoption-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  admitted-first-contract:
+    name: admitted-first-contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Prove selector and safety contract
+        run: node --test cerebro/tests/skill-full-adoption-selector-v1.test.mjs
+      - name: Resolve current highest-benefit safe work
+        run: |
+          node cerebro/skills/skill-full-adoption-selector-v1.mjs \
+            --registry cerebro/registry/skill-full-adoption-v1.json \
+            --output artifacts/skills-full/selection.json
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const r=JSON.parse(fs.readFileSync('artifacts/skills-full/selection.json','utf8'));
+          if(r.prod_write_authorized!==false||r.prod_mutation_authorized!==false||r.auto_merge_authorized!==false||r.customer_data_authorized!==false||r.external_skill_code_execution_authorized!==false||r.trading_access!==false||r.paid_fallback!==false||r.additional_cost_eur!==0) throw new Error('SKILL_FULL_ADOPTION_SAFETY_BOUNDARY_FAILED');
+          if(r.status!=='SAFE_WORK_AVAILABLE') throw new Error(`EXPECTED_SAFE_WORK_AVAILABLE:${r.status}`);
+          if(r.selected?.alias_es!=='Fábrica inteligente de skills') throw new Error('FACTORY_FIRST_PRIORITY_NOT_RESPECTED');
+          console.log(JSON.stringify({status:r.status,next:r.selected.alias_es,technical_name:r.selected.technical_name,prod_write:false,trading:false,cost_eur:0}));
+          NODE
+      - name: Upload immutable selection evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-skill-full-adoption-${{ github.run_id }}
+          path: artifacts/skills-full/**
+          if-no-files-found: error
+          retention-days: 30
+
+  existing-governance-regression:
+    name: existing-governance-regression
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node --test cerebro/tests/skill-capability-autonomy-closure-v1.test.mjs cerebro/tests/skill-capability-evolution.test.mjs cerebro/tests/skill-capability-evolution-bridge.test.mjs cerebro/tests/skill-autonomy-action-application-v1.test.mjs cerebro/tests/skill-autonomy-safe-action-worker-v1.test.mjs cerebro/tests/evaluation-tribunal.test.mjs
+
+  full-cerebro-regression:
+    name: full-cerebro-regression
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node --test cerebro/tests/*.test.mjs
+
+  main-baseline-full-cerebro:
+    name: main-baseline-full-cerebro
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node --test cerebro/tests/*.test.mjs
