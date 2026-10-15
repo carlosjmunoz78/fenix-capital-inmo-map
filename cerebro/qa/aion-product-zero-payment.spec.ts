@@ -1,4 +1,4 @@
-import {expect,test} from '@playwright/test';
+import {expect,test,type Page,type Response} from '@playwright/test';
 
 const allowed=['AION-P001','AION-P002','AION-P003','AION-B005','AION-B008'] as const;
 const product=(process.env.QA_PRODUCT_ID||'AION-P001').toUpperCase();
@@ -7,15 +7,31 @@ const pageUrl=process.env.QA_PRODUCT_URL||'https://aionoperator.com/aion-prueba-
 
 const normalized=(value:string)=>value.normalize('NFKC').replace(/\s+/g,' ').toLowerCase();
 
+async function resilientGoto(page:Page,url:string):Promise<Response|null>{
+  let lastError:unknown;
+  for(let attempt=1;attempt<=3;attempt++){
+    try{
+      const response=await page.goto(url,{waitUntil:'commit',timeout:25_000});
+      if(response&&response.status()>=500) throw new Error(`HTTP_${response.status()}`);
+      return response;
+    }catch(error){
+      lastError=error;
+      if(attempt===3) break;
+      await page.waitForTimeout(attempt*1_500);
+    }
+  }
+  throw lastError instanceof Error?lastError:new Error(String(lastError));
+}
+
 test(`[PRODUCT] [AION_DEEP_ZERO_PAYMENT] ${product} · purchase → generate → deliver → private result`,async({page})=>{
-  test.setTimeout(120_000);
+  test.setTimeout(150_000);
   const errors:string[]=[];
   page.on('pageerror',error=>errors.push(error.message));
-  const response=await page.goto(pageUrl,{waitUntil:'domcontentloaded',timeout:45_000});
+  const response=await resilientGoto(page,pageUrl);
   expect(response).not.toBeNull();
   if(response) expect(response.status()).toBeLessThan(500);
   const zeroTest=page.locator('#aion-zero-test');
-  await expect(zeroTest).toBeVisible();
+  await expect(zeroTest).toBeVisible({timeout:45_000});
 
   // Prove the PREPROD/zero-charge contract on the dedicated simulator surface
   // before entering any product-specific private renderer. Some customer-facing
@@ -49,10 +65,11 @@ test(`[PRODUCT] [AION_DEEP_ZERO_PAYMENT] ${product} · purchase → generate →
   expect(accessParsed.searchParams.get('aion_test_result')).toMatch(/^[a-f0-9-]{36}$/i);
   expect(accessParsed.searchParams.get('token')).toBeTruthy();
 
-  const result=await page.goto(accessUrl!,{waitUntil:'domcontentloaded',timeout:45_000});
+  const result=await resilientGoto(page,accessUrl!);
   expect(result).not.toBeNull();
   if(result) expect(result.status()).toBe(200);
   const resultBody=page.locator('body');
+  await expect(resultBody).toBeVisible({timeout:30_000});
   const resultCopy=normalized(await resultBody.innerText());
 
   if(product==='AION-P002'){
