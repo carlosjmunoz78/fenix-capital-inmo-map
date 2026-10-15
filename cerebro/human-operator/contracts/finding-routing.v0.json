@@ -1,0 +1,39 @@
+{
+  "schema_version": "0.1.0",
+  "contract_id": "CEREBRO_HUMAN_OPERATOR_FINDING_ROUTING_V0",
+  "status": "DEFINED_NOT_BOUND",
+  "principle": "Human Operator observes and evidences; existing canonical engines retain ownership of diagnosis, repair, learning and promotion.",
+  "routes": [
+    {"finding_family":"APP_FUNCTIONAL","owner_engine":"APP-001","via":"QA-001","regression_owner":"REG-001"},
+    {"finding_family":"WEB_FUNCTIONAL","owner_engine":"WEB-001","via":"QA-001","regression_owner":"REG-001"},
+    {"finding_family":"UX_FRICTION","owner_engine":"HCI-001","via":"QA-001","regression_owner":"REG-001"},
+    {"finding_family":"CONVERSATION_QUALITY","owner_engine":"HCI-001","via":"QA-001","regression_owner":"REG-001"},
+    {"finding_family":"IDENTITY_AUTH_SESSION","owner_engine":"IAM-001","via":"QA-001","regression_owner":"REG-001"},
+    {"finding_family":"ROUTING_EXECUTION","owner_engine":"ROUTE-001","via":"QA-001","regression_owner":"REG-001"},
+    {"finding_family":"AUTOMATION_JOB_RECOVERY","owner_engine":"AUTO-001","via":"QA-001","regression_owner":"REG-001"},
+    {"finding_family":"VOICE_INTERACTION","owner_engine":"VOICE-001","via":"QA-001","regression_owner":"REG-001"},
+    {"finding_family":"PROCESS_GAP","owner_engine":"QAB-001","via":"QA-001","regression_owner":"REG-001"},
+    {"finding_family":"SECURITY_INCIDENT","owner_engine":"INC-001","via":"QA-001","human_required":"SECURITY_INCIDENT"},
+    {"finding_family":"CROSS_COMPANY_LEAK","owner_engine":"INC-001","via":"QA-001","human_required":"SECURITY_INCIDENT"},
+    {"finding_family":"PROD_AUTHORITY_DRIFT","owner_engine":"INC-001","via":"QA-001","human_required":"HIGH_RISK"}
+  ],
+  "learning_gate": {
+    "direct_human_operator_to_lrn_allowed": false,
+    "required_path": ["HUMAN_OPERATOR_EVIDENCE", "QA-001_VERIFY", "OWNER_ENGINE", "REGRESSION_TEST", "LRN-001_CANONICAL_INGRESS"],
+    "unreproduced_transient_noise_to_learning": false,
+    "resolved_without_measured_retest": false
+  },
+  "repair_gate": {
+    "human_operator_may_repair_prod": false,
+    "preprod_repair_requires_explicit_authority": true,
+    "old_vs_new_required": true,
+    "judge_required": true,
+    "rollback_required": true
+  },
+  "safety": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "trading_access": false,
+    "additional_cost_eur": 0
+  }
+}
