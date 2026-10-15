@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.1.0",
+  "state_type": "CEREBRO_COMPET_REAL_TARGETS_V0",
+  "company_id": "fenix",
+  "engine_id": "COMPET-001",
+  "environment": "PREPROD",
+  "version": "0.2.0",
+  "status": "REAL_TARGETS_BASELINE_FROZEN_CONTINUOUS_PREPROD",
+  "source_policy": "PUBLIC_OFFICIAL_COMPETITOR_WEBSITE_GET_ONLY",
+  "cadence_hours": 24,
+  "scheduler": {
+    "kind": "GITHUB_ACTIONS_CRON",
+    "cron": "43 5 * * *",
+    "timezone": "UTC",
+    "configured": true,
+    "soak_complete": false,
+    "required_scheduled_green_runs": 3
+  },
+  "baseline_capture": {
+    "workflow_run_id": 38699175484,
+    "artifact_id": 11955359340,
+    "artifact_digest": "sha256:b34fa789a5c2af89d090ac78d2d04fc7565df186737f2e9446751e1e22e4fe64",
+    "captured_at": "2026-10-15T07:30:16.000Z",
+    "result": "GREEN"
+  },
+  "targets": [
+    {
+      "competitor_id": "kiron-cordoba",
+      "name": "Kìron Córdoba",
+      "url": "https://cordoba1.kiron.es/hipotecas",
+      "geography": "cordoba",
+      "business_relevance": "mortgage_intermediation_high_financing",
+      "baseline": {
+        "title": "Hipoteca hasta el 100%. ¿Quieres ser propietario? - Kìron CÓRDOBA - CORDOBA",
+        "body_sha256": "e4f842f8e01200310ada68cb7c0aebb763b6521dee570182777586d3d19276d4",
+        "body_bytes": 30592,
+        "observed_at": "2026-10-15T07:30:16.000Z"
+      }
+    },
+    {
+      "competitor_id": "grupo-negociador-cordoba",
+      "name": "Grupo Negociador",
+      "url": "https://gruponegociador.es/product-landing-page/",
+      "geography": "cordoba",
+      "business_relevance": "mortgage_intermediation_100_percent",
+      "baseline": {
+        "title": "Inicio &#8211; Grupo Negociador",
+        "body_sha256": "69874023408fe4d735c3f36e0e39aef979c0e8cb713e966be288cccaca9bb94a",
+        "body_bytes": 159387,
+        "observed_at": "2026-10-15T07:30:16.000Z"
+      }
+    },
+    {
+      "competitor_id": "bimaik-cordoba",
+      "name": "Bimaik Córdoba",
+      "url": "https://bimaik.com/broker-hipotecario-cordoba-bimaik/",
+      "geography": "cordoba",
+      "business_relevance": "mortgage_broker_100_percent_plus_costs",
+      "baseline": {
+        "title": "Bróker Hipotecario en Córdoba: 20+ Bancos · Bimaik",
+        "body_sha256": "4d6413319d8f7c87ef854840bd5b5c1b6fd9ffecf3932c9ad8f4c790df025670",
+        "body_bytes": 267360,
+        "observed_at": "2026-10-15T07:30:16.000Z"
+      }
+    }
+  ],
+  "data_minimization": {
+    "personal_data": false,
+    "customer_data": false,
+    "body_persisted": false,
+    "stored_fields": ["competitor_id", "url", "title", "body_sha256", "body_bytes", "observed_at"],
+    "contacts_extracted": false
+  },
+  "authority": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "provider_write_authorized": false,
+    "customer_data_authorized": false,
+    "external_dependency_install_authorized": false,
+    "trading_access": false,
+    "automatic_paid_fallback": false,
+    "additional_cost_eur": 0
+  },
+  "rollback": "Revert/remove this additive target registry and scheduled scan; no provider mutation exists.",
+  "next_gate": "THREE_CONTINUOUS_REAL_COMPETITOR_SCHEDULED_RUNS_GREEN"
+}
