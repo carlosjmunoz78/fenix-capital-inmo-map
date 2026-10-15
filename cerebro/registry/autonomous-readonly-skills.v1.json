@@ -1,10 +1,10 @@
 {
-  "schema_version": "1.2.0",
+  "schema_version": "1.3.0",
   "registry_type": "CEREBRO_AUTONOMOUS_READONLY_SKILL_ADVISORY_REGISTRY",
   "company_id": "GLOBAL",
   "engine_id": "FACT-001",
   "environment": "PROD_READONLY_ADVISORY",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "status": "ACTIVE",
   "policy_ref": "CEREBRO-SKILL-AUTONOMY-STANDING-AUTH-001",
   "entries": {
@@ -163,6 +163,103 @@
         "rollback_proven": true,
         "rebuild_proven": true,
         "measured_additional_cost_eur": 0
+      },
+      "activation": {
+        "registry_authority": "READONLY_ADVISORY_ONLY",
+        "fail_closed": true,
+        "rollback_state": "DISABLED",
+        "rebuild_default": "DISABLED",
+        "prod_write_authorized": false,
+        "github_write_authorized": false,
+        "direct_tool_execution_authorized": false,
+        "human_required_for_mutation": "HIGH_RISK"
+      }
+    },
+    "github": {
+      "alias_es": "Manejo seguro de GitHub",
+      "technical_id": "github",
+      "candidate_id": "lobehub-skills:52441cd3d76607ffffab",
+      "wrapper_id": "skillwrap:cerebro-github-v0.1.0",
+      "status": "ACTIVE_READONLY_ADVISORY",
+      "execution_mode": "PROD_READONLY_ADVISORY",
+      "company_id": "GLOBAL",
+      "engine_id": "FACT-001",
+      "environment": "PROD_READONLY_ADVISORY",
+      "version": "github-prod-readonly-advisory-v1.0.0",
+      "approved_upstream_full_name": "openclaw/openclaw",
+      "approved_manifest_path": "skills/github/SKILL.md",
+      "approved_upstream_commit": "e73b64b7f620e79844064a945447bbbb2a1f15d8",
+      "approved_manifest_sha256": "04d13709b66a75f73774d47c1fb8446669623c8326c2d0af4e7d01017e2f29dc",
+      "target_engine_bindings": [
+        "FACT-001"
+      ],
+      "allowed_capabilities": [
+        "REPOSITORY_METADATA_READ_ADVISORY",
+        "MAIN_REF_READ_ADVISORY"
+      ],
+      "capability_evidence": {
+        "REPOSITORY_METADATA_READ_ADVISORY": "GET_REPOSITORY_METADATA",
+        "MAIN_REF_READ_ADVISORY": "GET_MAIN_GIT_REF"
+      },
+      "mutation_gate": "HIGH_RISK",
+      "registration_basis": {
+        "policy_id": "CEREBRO-SKILL-AUTONOMY-STANDING-AUTH-001",
+        "scope": "autonomous_readonly_advisory_registration",
+        "exact_scope_only": true
+      },
+      "safety": {
+        "prod_write": false,
+        "github_write": false,
+        "merge": false,
+        "push": false,
+        "issue_or_pr_mutation": false,
+        "workflow_dispatch": false,
+        "direct_tool_execution": false,
+        "customer_data": false,
+        "prod_data": false,
+        "credentials_exposed": false,
+        "external_skill_code_execution": false,
+        "trading": false,
+        "paid_fallback": false,
+        "permission_expansion": false,
+        "autonomous_business_prod_write": false,
+        "additional_cost_eur": 0
+      },
+      "full_safe_preprod_evidence": {
+        "workflow": "CEREBRO Skill Full Adoption V1",
+        "run_id": 38807362064,
+        "head_sha": "68e3662b3d02c06fcb4381d56d5f1397bfb8341d",
+        "artifact_id": 12006658643,
+        "artifact_digest": "sha256:9a924cc9b6becde9074f757c1cd70aa4114c09be26dd72e255956bb3233eabfc",
+        "status": "FULL_SAFE_PREPROD_GREEN",
+        "rollback_proven": true,
+        "rebuild_proven": true,
+        "observability_connected": true,
+        "audit_chain_connected": true,
+        "finops_connected": true,
+        "lrn001_feedback_connected": true,
+        "idempotency_proven": true
+      },
+      "prod_canary_evidence": {
+        "workflow": "CEREBRO Skill GitHub PROD Read-only Canary",
+        "run_id": 37670597824,
+        "head_sha": "7ee76db7a44b7e3c1153fd3b35365fc2e2ca5554",
+        "artifact_id": 11505096443,
+        "artifact_digest": "sha256:7837d90b4a12c2b1d61faf9db1ac2c3300fc166a554d8b2e3057098c08acf387",
+        "status": "GREEN_GITHUB_PROD_READONLY_CANARY",
+        "observed_main_sha": "3304c93b3aceed338fc2bb7d377c4d562d2d18b2",
+        "live_requests": 2,
+        "allowed_http_methods": [
+          "GET"
+        ],
+        "allowed_observations": [
+          "REPOSITORY_METADATA",
+          "MAIN_GIT_REF"
+        ],
+        "rollback_proven": true,
+        "binding_after": "DISABLED",
+        "measured_additional_cost_eur": 0,
+        "next_state_if_green": "PROD_READONLY_ADVISORY_ELIGIBLE"
       },
       "activation": {
         "registry_authority": "READONLY_ADVISORY_ONLY",
