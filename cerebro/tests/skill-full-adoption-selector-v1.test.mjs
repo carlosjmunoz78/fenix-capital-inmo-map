@@ -46,3 +46,17 @@ test('every queued skill must have a Spanish alias',()=>{
   q.queue[0].alias_es='';
   assert.throws(()=>validateSkillFullAdoptionQueue(q),/alias_es required/);
 });
+
+test('specialized wrapper inventory is reconciled without treating wrapper existence as admission',()=>{
+  const q=registry();
+  assert.equal(q.inventory_audit.specialized_cerebro_wrappers_observed,5);
+  assert.equal(q.inventory_audit.admitted_full_queue_count,4);
+  assert.equal(q.inventory_audit.observed_not_admitted_count,1);
+  const obsidian=q.observed_not_admitted.find(x=>x.technical_name==='obsidian');
+  assert.ok(obsidian);
+  assert.equal(obsidian.alias_es,'Asistente seguro de conocimiento en Obsidian');
+  assert.equal(obsidian.admitted,false);
+  assert.equal(obsidian.install_authorized,false);
+  assert.equal(obsidian.behavioral_eval_authorized,false);
+  assert.ok(!q.queue.some(x=>x.candidate_id===obsidian.candidate_id));
+});
