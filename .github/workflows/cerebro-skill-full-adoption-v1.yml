@@ -67,6 +67,60 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+  admitted-skill-learning-evidence:
+    name: admitted-skill-learning-evidence
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Build synthetic governed improvement evidence for admitted skills
+        run: |
+          mkdir -p artifacts/skills-full/learning
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const base={company_id:'GLOBAL_ONLY',engine_id:'FACT-001',environment:'PREPROD_CANDIDATE',version:'0.1.0',reason:'CI_GOVERNED_ADMITTED_SKILL_LEARNING_EVIDENCE',payload:{domain:'agent-ai-orchestration'},publish_authorized:false,prod_authorized:false};
+          const events=[
+            {...base,event_id:`evt:${process.env.GITHUB_RUN_ID}:skill-creator`,event_type:'SKILL_CANDIDATE_STATIC_LAB_GREEN',severity:'INFO',candidate_id:'lobehub-skills:950cf07380d1daa6de69',target_engine_bindings:['FACT-001'],evidence_refs:[`run:${process.env.GITHUB_RUN_ID}`,'candidate:skill-creator']},
+            {...base,event_id:`evt:${process.env.GITHUB_RUN_ID}:github`,event_type:'SKILL_CANDIDATE_STATIC_LAB_GREEN',severity:'INFO',candidate_id:'lobehub-skills:52441cd3d76607ffffab',target_engine_bindings:['FACT-001'],evidence_refs:[`run:${process.env.GITHUB_RUN_ID}`,'candidate:github']}
+          ];
+          fs.writeFileSync('artifacts/skills-full/learning/events.json',JSON.stringify({schema_version:'1.0.0',events},null,2)+'\n');
+          NODE
+      - name: Persist admitted skill learning once
+        run: |
+          node cerebro/skills/skill-full-adoption-learning-ingress-v1.mjs \
+            --events artifacts/skills-full/learning/events.json \
+            --ledger artifacts/skills-full/learning/learning-ledger.v8 \
+            --version "skill-full-ci-${GITHUB_SHA}" \
+            --policy-pass --security-pass --enable-local-persistence \
+            --output artifacts/skills-full/learning/first-pass.json
+      - name: Replay exact evidence and prove idempotency
+        run: |
+          node cerebro/skills/skill-full-adoption-learning-ingress-v1.mjs \
+            --events artifacts/skills-full/learning/events.json \
+            --ledger artifacts/skills-full/learning/learning-ledger.v8 \
+            --version "skill-full-ci-${GITHUB_SHA}" \
+            --policy-pass --security-pass --enable-local-persistence \
+            --output artifacts/skills-full/learning/replay.json
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const first=JSON.parse(fs.readFileSync('artifacts/skills-full/learning/first-pass.json','utf8'));
+          const replay=JSON.parse(fs.readFileSync('artifacts/skills-full/learning/replay.json','utf8'));
+          if(first.status!=='GREEN_PERSISTENT_PREPROD_LEARNING'||first.persisted_total!==2||first.duplicates_total!==0) throw new Error('FIRST_PASS_PERSISTENCE_NOT_PROVEN');
+          if(replay.status!=='GREEN_PERSISTENT_PREPROD_LEARNING'||replay.persisted_total!==0||replay.duplicates_total!==2) throw new Error('IDEMPOTENT_REPLAY_NOT_PROVEN');
+          if(first.prod_write_authorized!==false||replay.prod_write_authorized!==false||first.trading_access!==false||replay.trading_access!==false||first.additional_cost_eur!==0||replay.additional_cost_eur!==0) throw new Error('LEARNING_EVIDENCE_SAFETY_BOUNDARY_FAILED');
+          console.log(JSON.stringify({state:'GREEN_PERSISTENT_PREPROD_LEARNING',first_persisted:first.persisted_total,replay_duplicates:replay.duplicates_total,scope:first.persistence_scope,supabase_required:first.supabase_required,prod_write:false,trading:false,cost_eur:0}));
+          NODE
+      - name: Upload immutable persistent-learning evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-admitted-skill-learning-${{ github.run_id }}
+          path: artifacts/skills-full/learning/**
+          if-no-files-found: error
+          retention-days: 30
+
   existing-governance-regression:
     name: existing-governance-regression
     runs-on: ubuntu-latest
