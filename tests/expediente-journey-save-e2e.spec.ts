@@ -82,7 +82,7 @@ test.describe('Fénix PRE-PROD · recorrido del expediente',()=>{
 
   await save.click();
   await expect.poll(()=>writes.length).toBe(1);
-  await expect(page.getByRole('status')).toContainText('sin sobrescribirlo');
+  await expect(journey.getByRole('status')).toContainText('sin sobrescribirlo');
   await expect(select).toHaveValue('FEIN');
   await expect(journey.locator('[aria-current="step"] small')).toHaveText('FEIN');
   await expect(save).toBeDisabled();
@@ -90,14 +90,14 @@ test.describe('Fénix PRE-PROD · recorrido del expediente',()=>{
   await select.selectOption('Notaría');
   await save.click();
   await expect.poll(()=>writes.length).toBe(2);
-  await expect(page.getByRole('status')).toHaveText('No se pudo cambiar el estado. No se ha aplicado ningún cambio.');
+  await expect(journey.getByRole('status')).toHaveText('No se pudo cambiar el estado. No se ha aplicado ningún cambio.');
   await expect(journey.locator('[aria-current="step"] small')).toHaveText('FEIN');
   await expect(select).toHaveValue('Notaría');
   await expect(save).toBeEnabled();
 
   await save.click();
   await expect.poll(()=>writes.length).toBe(3);
-  await expect(page.getByRole('status')).toContainText('Estado actualizado a Notaría');
+  await expect(journey.getByRole('status')).toContainText('Estado actualizado a Notaría');
   await expect(select).toHaveValue('Notaría');
   await expect(journey.locator('[aria-current="step"] small')).toHaveText('Notaría');
   await expect(save).toBeDisabled();
