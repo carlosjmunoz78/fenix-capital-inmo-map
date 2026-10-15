@@ -1,0 +1,69 @@
+name: CEREBRO Android Full Control PREPROD V1
+
+on:
+  push:
+    branches: ['cerebro/android-full-control-preprod-v1']
+    paths:
+      - 'cerebro/android-worker-preprod-v1/**'
+      - 'cerebro/runtime/build-android-full-control-preprod-v1.sh'
+      - 'cerebro/registry/fact001-android-staging-48-183.v0.json'
+      - '.github/workflows/cerebro-android-full-control-preprod-v1.yml'
+  pull_request:
+    paths:
+      - 'cerebro/android-worker-preprod-v1/**'
+      - 'cerebro/runtime/build-android-full-control-preprod-v1.sh'
+      - 'cerebro/registry/fact001-android-staging-48-183.v0.json'
+      - '.github/workflows/cerebro-android-full-control-preprod-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-govern:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Assert zero-download build path
+        run: |
+          if grep -Eiq 'sdkmanager|gradle |gradlew|mvn |npm (install|ci)|apt(-get)? install|curl .*[|].*(sh|bash)|wget .*[|].*(sh|bash)' cerebro/runtime/build-android-full-control-preprod-v1.sh; then
+            echo 'External dependency install path detected'; exit 1
+          fi
+      - name: Build signed PREPROD worker
+        run: bash cerebro/runtime/build-android-full-control-preprod-v1.sh /tmp/cerebro-android-full-control-preprod-v1
+      - name: Verify governance and manifest capabilities
+        run: |
+          BT="$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)"
+          "$BT/apksigner" verify --verbose /tmp/cerebro-android-full-control-preprod-v1/cerebro-android-worker-preprod-v1.apk
+          "$BT/aapt2" dump permissions /tmp/cerebro-android-full-control-preprod-v1/cerebro-android-worker-preprod-v1.apk | tee /tmp/permissions.txt
+          grep -q 'android.permission.INTERNET' /tmp/permissions.txt
+          grep -q 'android.permission.FOREGROUND_SERVICE' /tmp/permissions.txt
+          ! grep -q 'REQUEST_INSTALL_PACKAGES' /tmp/permissions.txt
+          ! grep -q 'READ_SMS' /tmp/permissions.txt
+          ! grep -q 'READ_CONTACTS' /tmp/permissions.txt
+          node - <<'NODE'
+          const fs=require('fs');
+          const p=JSON.parse(fs.readFileSync('/tmp/cerebro-android-full-control-preprod-v1/android-full-control-preprod-v1-evidence.json','utf8'));
+          if(p.environment!=='PREPROD'||p.prod_authorized||p.trading_access||p.additional_cost_eur!==0||p.physical_device_attested) process.exit(1);
+          if(!p.capabilities.includes('LOCAL_KILL_SWITCH')||!p.capabilities.includes('IDEMPOTENT_LOCAL_RECEIPTS')||!p.capabilities.includes('OWNER_APPROVED_ENROLLMENT')) process.exit(1);
+          console.log(JSON.stringify({status:'GREEN',sha256:p.apk_sha256,prod:false,cost_eur:0}));
+          NODE
+      - name: Canonical registry validation
+        working-directory: cerebro
+        run: npm run validate
+      - name: Full CEREBRO regression
+        working-directory: cerebro
+        run: npm test
+      - name: Upload governed APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-android-full-control-preprod-v1
+          path: |
+            /tmp/cerebro-android-full-control-preprod-v1/cerebro-android-worker-preprod-v1.apk
+            /tmp/cerebro-android-full-control-preprod-v1/apksigner-verify.txt
+            /tmp/cerebro-android-full-control-preprod-v1/android-full-control-preprod-v1-evidence.json
+          retention-days: 14
