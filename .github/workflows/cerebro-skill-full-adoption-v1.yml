@@ -5,7 +5,9 @@ on:
     paths:
       - 'cerebro/registry/skill-full-adoption-v1.json'
       - 'cerebro/skills/skill-full-adoption-selector-v1.mjs'
+      - 'cerebro/skills/skill-full-adoption-learning-ingress-v1.mjs'
       - 'cerebro/tests/skill-full-adoption-selector-v1.test.mjs'
+      - 'cerebro/tests/skill-full-adoption-learning-ingress-v1.test.mjs'
       - 'cerebro/docs/CEREBRO_SKILLS_FULL_ADOPTION_POLICY_V1_2026-10-15.md'
       - '.github/workflows/cerebro-skill-full-adoption-v1.yml'
   push:
@@ -14,7 +16,9 @@ on:
     paths:
       - 'cerebro/registry/skill-full-adoption-v1.json'
       - 'cerebro/skills/skill-full-adoption-selector-v1.mjs'
+      - 'cerebro/skills/skill-full-adoption-learning-ingress-v1.mjs'
       - 'cerebro/tests/skill-full-adoption-selector-v1.test.mjs'
+      - 'cerebro/tests/skill-full-adoption-learning-ingress-v1.test.mjs'
       - 'cerebro/docs/CEREBRO_SKILLS_FULL_ADOPTION_POLICY_V1_2026-10-15.md'
       - '.github/workflows/cerebro-skill-full-adoption-v1.yml'
   workflow_dispatch:
@@ -40,8 +44,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Prove selector and safety contract
-        run: node --test cerebro/tests/skill-full-adoption-selector-v1.test.mjs
+      - name: Prove selector, aliases and persistent learning contract
+        run: node --test cerebro/tests/skill-full-adoption-selector-v1.test.mjs cerebro/tests/skill-full-adoption-learning-ingress-v1.test.mjs
       - name: Resolve current highest-benefit safe work
         run: |
           node cerebro/skills/skill-full-adoption-selector-v1.mjs \
@@ -72,7 +76,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - run: node --test cerebro/tests/skill-capability-autonomy-closure-v1.test.mjs cerebro/tests/skill-capability-evolution.test.mjs cerebro/tests/skill-capability-evolution-bridge.test.mjs cerebro/tests/skill-autonomy-action-application-v1.test.mjs cerebro/tests/skill-autonomy-safe-action-worker-v1.test.mjs cerebro/tests/evaluation-tribunal.test.mjs
+      - run: node --test cerebro/tests/skill-capability-autonomy-closure-v1.test.mjs cerebro/tests/skill-capability-evolution.test.mjs cerebro/tests/skill-capability-evolution-bridge.test.mjs cerebro/tests/skill-autonomy-action-application-v1.test.mjs cerebro/tests/skill-autonomy-safe-action-worker-v1.test.mjs cerebro/tests/evaluation-tribunal.test.mjs cerebro/tests/rsi-learning-worker.test.mjs cerebro/tests/learning-preprod-pipeline.test.mjs
 
   full-cerebro-regression:
     name: full-cerebro-regression
