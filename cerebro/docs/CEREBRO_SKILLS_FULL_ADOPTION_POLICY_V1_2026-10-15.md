@@ -18,7 +18,7 @@ Una skill que CEREBRO decida conservar no se considera terminada por estar descu
 1. **Fábrica inteligente de skills** (`skill-creator`). Primero porque es multiplicadora: mejora la capacidad de fabricar, adaptar y mantener las siguientes skills y refuerza FACTORY FIRST.
 2. **Manejo seguro de GitHub** (`github`). Segundo porque mejora el plano de control de ingeniería, auditoría, pruebas y automatización del repositorio.
 3. **Optimización y seguridad de bases de datos** (`supabase-postgres-best-practices`). Tercero por impacto transversal en seguridad, fiabilidad y rendimiento de los motores que trabajan con datos, preservando Supabase como core transaccional.
-4. **Control avanzado del navegador** (`agent-browser`). Cuarto por gran valor operativo pero mayor superficie física, de UI y permisos; se mantiene detrás de los anteriores hasta resolver sus gates.
+4. **Control avanzado del navegador** (`agent-browser`). Cuarto como skill externa a evaluar; la autonomía web interna de CEREBRO queda separada de esta skill y no depende de ejecutar su código.
 5. Las siguientes skills admitidas se ordenarán por **beneficio medido, alcance transversal, reducción de trabajo humano, riesgo, coste 0 € y facilidad de rollback**, no por novedad.
 
 ## Flujo obligatorio para cada skill
@@ -51,6 +51,27 @@ Todas deben ser verdaderas:
 
 Nunca se interpreta una orden general de «llevar todo a FULL» como autorización para saltar una excepción humana canónica. Si aparece `LEGAL_REQUIRED`, `SIGNATURE_REQUIRED`, `LOW_CONFIDENCE`, `HIGH_RISK`, `POLICY_CONFLICT`, `SECURITY_INCIDENT`, `MONEY_LIMIT` o `CUSTOMER_HUMAN_REQUEST`, el candidato se detiene en ese gate y CEREBRO continúa automáticamente con el siguiente trabajo seguro no bloqueado.
 
+## Navegación autónoma transversal
+
+**El navegador es una herramienta, no una autoridad.**
+
+Cualquier motor canónico puede solicitar navegación web cuando sea la ruta adecuada. El simple uso del navegador no requiere una autorización humana separada. La autoridad de la acción procede siempre del motor que origina el trabajo y de su contrato gobernado.
+
+Esto permite a CEREBRO usar navegador para SEO, redes, App, formación, investigación, competencia, captación, nuevas empresas, WordPress, QA, conocimiento y demás ámbitos sin crear permisos nuevos por el mero hecho de navegar.
+
+Las sesiones autenticadas se permiten únicamente cuando estén registradas, saludables y con binding fresco. Las acciones rutinarias con efectos reales solo se ejecutan si el motor de origen ya tiene autorizada esa acción. En PROD, una mutación exige además promoción, rollback, observabilidad, auditoría e idempotencia verdes.
+
+El gasto incremental se detiene en `MONEY_LIMIT`. Los límites legales, firma, riesgo alto, seguridad, conflicto de política, baja confianza y petición humana siguen usando las excepciones canónicas. Trading puede usar navegador únicamente dentro de su runtime, credenciales y autoridad aislados.
+
+La skill externa **Control avanzado del navegador** permanece separada: se puede estudiar y aprovechar como patrón, pero la navegación transversal de CEREBRO no depende de ejecutar código externo de esa skill.
+
+Fuente de verdad específica:
+
+- `cerebro/registry/browser-transversal-autonomy-policy.v1.json`
+- `cerebro/runtime/browser-transversal-autonomy-v1.mjs`
+- `cerebro/tests/browser-transversal-autonomy-v1.test.mjs`
+- `cerebro/docs/CEREBRO_NAVEGACION_AUTONOMA_TRANSVERSAL_V1_2026-10-15.md`
+
 ## Política de aliases
 
 Toda comunicación con Carlos debe utilizar primero el alias entendible en español. El nombre técnico/ID se añade solo cuando sea necesario para auditoría, depuración o trazabilidad.
@@ -79,14 +100,14 @@ Mientras una skill espera un gate físico o humano, CEREBRO continúa con otras 
 
 ## Invariantes no negociables
 
-- `prod_write=false`
-- `prod_mutation=false`
+- `prod_write=false` por defecto hasta promoción gobernada del motor de origen
+- `prod_mutation=false` por defecto hasta promoción gobernada del motor de origen
 - `auto_merge=false`
-- `customer_data=false`
-- `external_skill_code_execution=false`
-- `trading=false`
+- `customer_data=false` salvo contrato específico autorizado del motor de origen
+- `external_skill_code_execution=false` por defecto
+- `trading=false` fuera del runtime aislado de Trading
 - `paid_fallback=false`
-- `additional_cost_eur=0`
+- `additional_cost_eur=0` por defecto
 - `permission_expansion=false`
 - `autonomous_prod_promotion=false`
 
