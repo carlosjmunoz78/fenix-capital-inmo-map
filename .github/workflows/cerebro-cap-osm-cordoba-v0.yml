@@ -1,0 +1,55 @@
+name: CEREBRO CAP OSM Córdoba V0
+
+on:
+  push:
+    branches:
+      - cerebro/cap-osm-cordoba-v0-20261015
+    paths:
+      - 'cerebro/runtime/cap-osm-cordoba-v0.mjs'
+      - 'cerebro/registry/cap-osm-cordoba.v0.json'
+      - 'cerebro/tests/cap-osm-cordoba-v0.test.mjs'
+      - '.github/workflows/cerebro-cap-osm-cordoba-v0.yml'
+  pull_request:
+    paths:
+      - 'cerebro/runtime/cap-osm-cordoba-v0.mjs'
+      - 'cerebro/registry/cap-osm-cordoba.v0.json'
+      - 'cerebro/tests/cap-osm-cordoba-v0.test.mjs'
+      - '.github/workflows/cerebro-cap-osm-cordoba-v0.yml'
+  schedule:
+    - cron: '37 5 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  real-cap-company-discovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Offline CAP source contracts
+        run: node --test cerebro/tests/cap-osm-cordoba-v0.test.mjs
+      - name: Discover real public Córdoba companies
+        run: >-
+          node cerebro/runtime/cap-osm-cordoba-v0.mjs
+          --observed-at "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          --out /tmp/cap-osm-cordoba-report.json
+      - name: Validate real CAP boundary
+        run: >-
+          node -e "const fs=require('fs');const r=JSON.parse(fs.readFileSync('/tmp/cap-osm-cordoba-report.json','utf8'));if(r.status!=='REAL_PUBLIC_COMPANY_DISCOVERY_GREEN'||r.company_count<1||r.job_status!=='SUCCEEDED'||r.source.http_status!==200||r.source.read_only!==true||r.source.provider_writes!==0||r.source.raw_body_persisted!==false||r.personal_contacts_generated!==0||r.outreach_actions!==0||r.crm_writes!==0||r.customer_data_used||r.personal_data_persisted||r.prod_authorized||r.prod_write_authorized||r.trading_access||r.additional_cost_eur!==0)process.exit(1);console.log('CAP real Córdoba discovery GREEN; companies='+r.company_count)"
+      - name: Canonical registry validation
+        working-directory: cerebro
+        run: npm run validate
+      - name: Full CEREBRO regression
+        working-directory: cerebro
+        run: npm test
+      - name: Upload CAP evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: cap-osm-cordoba-real-discovery
+          path: /tmp/cap-osm-cordoba-report.json
+          retention-days: 30
