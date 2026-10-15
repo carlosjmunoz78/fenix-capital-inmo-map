@@ -1,0 +1,71 @@
+{
+  "schema_version": "0.1.0",
+  "contract_id": "CEREBRO_HUMAN_OPERATOR_MORNING_REPORT_V0",
+  "state_type": "HUMAN_OPERATOR_MORNING_REPORT",
+  "status": "DEFINED_NOT_BOUND",
+  "required": [
+    "run_id",
+    "company_id",
+    "environment",
+    "started_at",
+    "ended_at",
+    "duration_seconds",
+    "jobs_total",
+    "jobs_completed",
+    "jobs_failed",
+    "interactions_total",
+    "scenarios_total",
+    "findings_total",
+    "new_findings",
+    "reproduced_findings",
+    "resolved_findings",
+    "regressions",
+    "human_required_count",
+    "browser_restarts",
+    "recovery_success_rate",
+    "session_reuse_rate",
+    "incremental_cost_eur",
+    "next_actions"
+  ],
+  "finding_summary": {
+    "severity_buckets": ["CRITICAL", "HIGH", "MEDIUM", "LOW", "INFO"],
+    "states": ["NEW", "REPRODUCED", "RESOLVED_MEASURED", "REGRESSION", "HOLD"],
+    "group_by": ["owning_engine", "surface", "role", "failure_mode"]
+  },
+  "must_include": [
+    "coverage",
+    "top_failures",
+    "top_ux_friction",
+    "conversation_findings",
+    "permission_findings",
+    "session_auth_findings",
+    "recovery_findings",
+    "unmeasured_or_held_cases",
+    "rollback_or_cleanup_status"
+  ],
+  "must_not_include": [
+    "passwords",
+    "access_tokens",
+    "refresh_tokens",
+    "jwt_values",
+    "api_keys",
+    "totp_seeds",
+    "otp_values",
+    "cookie_values",
+    "recovery_codes",
+    "raw_auth_headers"
+  ],
+  "truth_rules": {
+    "no_test_run_no_resolution_claim": true,
+    "no_physical_evidence_no_operational_claim": true,
+    "partial_run_must_be_marked_partial": true,
+    "browser_restart_without_verified_resume_is_not_recovery_success": true,
+    "session_reuse_requires_authenticated_post_restart_observation": true
+  },
+  "safety": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "trading_access": false,
+    "additional_cost_target_eur": 0
+  }
+}
