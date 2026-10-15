@@ -1,55 +1,46 @@
 {
   "schema_version": "1.0.0",
-  "state_type": "CEREBRO_CAP_OSM_CORDOBA_V0",
+  "state_type": "CEREBRO_CAP_PUBLIC_SOURCE_CANDIDATE_V0",
   "company_id": "fenix",
   "engine_id": "CAP-001",
   "environment": "PREPROD",
-  "version": "0.1.0",
+  "version": "0.1.1-hold",
   "rollout_item": 62,
-  "status": "REAL_PUBLIC_SOURCE_CONFIGURED_BASELINE_RUN_PENDING",
-  "source": {
-    "provider": "OpenStreetMap Overpass API",
-    "endpoint": "https://overpass-api.de/api/interpreter",
-    "geography": "cordoba",
-    "business_scope": "real_estate_agencies_for_b2b_partner_discovery",
-    "method": "GET_ONLY",
-    "cadence_hours": 24,
-    "attribution": "© OpenStreetMap contributors, ODbL",
-    "raw_body_persisted": false,
-    "company_fields_only": true,
-    "personal_contacts_persisted": false
-  },
-  "pipeline": [
-    "PUBLIC_OSM_OVERPASS_READ",
-    "ALLOWLIST_NAME_AND_WEBSITE_ONLY",
-    "DROP_SOCIAL_ONLY_OR_MISSING_DOMAIN",
-    "CAP_001_COMPANY_FIRST_DEDUPE_AND_ICP_SCORE",
-    "JOB_001_DURABLE_LOCAL_EXECUTION",
-    "EVIDENCE_ARTIFACT"
-  ],
-  "authority": {
+  "status": "HOLD_EXTERNAL_SOURCE_UNRELIABLE",
+  "candidate_source": "OPENSTREETMAP_OVERPASS_PUBLIC",
+  "decision": "DO_NOT_PROMOTE_OR_RETRY_BLINDLY",
+  "evidence": {
+    "offline_contract_tests": "GREEN",
+    "governed_main_integration": "GREEN",
+    "rsi_shadow": "GREEN",
+    "physical_public_source_run": "RED",
+    "failure_stage": "DISCOVER_REAL_PUBLIC_CORDOBA_COMPANIES",
+    "provider_writes": 0,
+    "crm_writes": 0,
+    "outreach_actions": 0,
+    "customer_data_used": false,
+    "personal_data_persisted": false,
     "prod_authorized": false,
-    "prod_write_authorized": false,
+    "trading_access": false,
+    "additional_cost_eur": 0
+  },
+  "anti_loop": {
+    "same_provider_family_retries_allowed": false,
+    "reason": "Public Overpass transport did not provide a reliable physical run; re-evaluate source strategy instead of repeated retries.",
+    "preferred_next_sources": [
+      "EXISTING_AUTHORIZED_FIRST_PARTY_COMPANY_DIRECTORY",
+      "EXISTING_CEREBRO_WEB_ACQUISITION_ADAPTER",
+      "ZERO_COST_PUBLIC_SOURCE_WITH_STABLE_CONTRACT"
+    ]
+  },
+  "authority": {
+    "method": "GET_ONLY",
     "provider_write_authorized": false,
     "crm_write_authorized": false,
     "outreach_authorized": false,
-    "customer_data_authorized": false,
-    "personal_contact_generation_authorized": false,
-    "external_dependency_install_authorized": false,
-    "trading_access": false,
-    "automatic_paid_fallback": false,
-    "additional_cost_eur": 0
+    "prod_write_authorized": false,
+    "trading_authorized": false
   },
-  "acceptance": {
-    "minimum_eligible_company_records": 1,
-    "provider_writes": 0,
-    "personal_contacts_generated": 0,
-    "outreach_actions": 0,
-    "crm_writes": 0,
-    "scheduled_real_runs_required": 3,
-    "current_scheduled_real_runs_verified": 0
-  },
-  "rollback": "Remove/revert this additive CAP source binding and scheduled workflow. No provider, CRM or customer mutation exists.",
-  "rebuild": "Recreate the PREPROD GET-only OSM Overpass adapter, whitelist company name/website only, feed company-level records into existing CAP-001 through JOB-001, run tests, capture a real baseline, then accumulate three genuine scheduled runs.",
-  "next_gate": "CAPTURE_REAL_OSM_BASELINE_THEN_THREE_SCHEDULED_REAL_CAP_RUNS_GREEN"
+  "rollback": "Candidate is not promoted. Closing the PR leaves main unchanged.",
+  "next_gate": "SELECT_RELIABLE_ZERO_COST_AUTHORIZED_COMPANY_SOURCE_THEN_NEW_PHYSICAL_PREPROD_RUN"
 }
