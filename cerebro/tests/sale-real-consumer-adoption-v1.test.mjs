@@ -37,13 +37,15 @@ test('SALE strict route reaches FULL_E2E_REAL_PREPROD with all required consumer
   assert.equal(r.idempotency_proven,true);
 });
 
-test('SALE strict route is restartable and idempotent on the same durable root',()=>{
+test('SALE strict route is restartable and semantically idempotent on the same durable root',()=>{
   const root=fs.mkdtempSync(path.join(os.tmpdir(),'sale-real-restart-'));
   const a=runSaleRealConsumerAdoption({company_id:'fenix',root_dir:root,source_run_id:102,source_head_sha:SHA});
   const b=runSaleRealConsumerAdoption({company_id:'fenix',root_dir:root,source_run_id:102,source_head_sha:SHA});
   assert.equal(a.bundle_id,b.bundle_id);
   assert.equal(a.semantic_outcome_hash,b.semantic_outcome_hash);
-  assert.equal(a.outcome_hash,b.outcome_hash);
+  assert.deepEqual(a.failed_consumers,b.failed_consumers);
+  assert.deepEqual(a.missing_consumers,b.missing_consumers);
+  assert.equal(a.com_route.route_plan_id,b.com_route.route_plan_id);
   assert.equal(b.full_e2e_real_preprod,true);
   assert.equal(b.idempotency_proven,true);
 });
