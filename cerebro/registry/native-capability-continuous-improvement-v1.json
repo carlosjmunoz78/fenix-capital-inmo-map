@@ -5,7 +5,7 @@
   "engine_id": "LRN-001",
   "environment": "PREPROD",
   "version": "1.0.0",
-  "status": "CONTINUOUS_IMPROVEMENT_GREEN_PREPROD_CANDIDATE_MAIN",
+  "status": "OPERATIONAL_FULL_CONTINUOUS_PREPROD",
   "capabilities": [
     "FACT-SKILL-NATIVE",
     "GH-SAFE-NATIVE",
@@ -34,6 +34,7 @@
     "state_artifact_name": "native-capability-learning-state",
     "state_retention_days": 30,
     "deterministic_rebuild_when_state_missing": true,
+    "restored_same_day_state_supported": true,
     "usage_to_learning": true,
     "learning_to_candidate": true,
     "daily_weekly_monthly_horizons": true,
@@ -86,13 +87,27 @@
     "android_touched": false
   },
   "main_gate": {
-    "exact_head_global_checks_green": false,
-    "merged_to_main": false,
-    "automatic_main_execution_green": false,
-    "persistent_state_artifact_green": false,
-    "final_full": false,
-    "main_workflow_run_id": null,
-    "main_head_sha": null
+    "exact_head_global_checks_green": true,
+    "exact_head_operational_run_id": 38913181874,
+    "exact_head_governed_main_run_id": 38913182186,
+    "exact_head_rsi_run_id": 38913182477,
+    "merged_to_main": true,
+    "merge_sha": "02dfc991e7dadef5defe9ebcda0092dc2206df7c",
+    "automatic_main_execution_green": true,
+    "persistent_state_artifact_green": true,
+    "final_full": true,
+    "main_workflow_run_id": 38913304094,
+    "main_head_sha": "02dfc991e7dadef5defe9ebcda0092dc2206df7c",
+    "main_operational_artifact_id": 12050948407,
+    "main_operational_artifact_digest": "sha256:5a93db7e57080200f0006de2907e57a6ff345a48f7ea0c752d7bfb2200dd3ef4",
+    "main_learning_state_artifact_id": 12050764047,
+    "main_learning_state_artifact_digest": "sha256:04d75f31bfb5c6335d9f913019f899f3fac7fbf6cc29b6ecbbe584ffc8b3ee52"
   },
-  "next_gate": "PR_EXACT_HEAD_GLOBAL_GATES_THEN_MAIN_AUTOMATIC_CONTINUOUS_EXECUTION"
+  "continuous_soak": {
+    "schedule_configured": true,
+    "multi_day_soak_complete": false,
+    "soak_overclaimed": false,
+    "state_artifact_available_for_next_run": true
+  },
+  "next_gate": "CONTINUOUS_DAILY_SOAK_AND_EVIDENCE_BACKED_OLD_VS_NEW_IMPROVEMENT"
 }

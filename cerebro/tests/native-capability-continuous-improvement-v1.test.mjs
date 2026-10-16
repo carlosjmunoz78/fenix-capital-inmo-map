@@ -14,6 +14,7 @@ test('continuous improvement contract keeps all eight capabilities governed and 
   assert.equal(NATIVE_CAPABILITY_CONTINUOUS_IMPROVEMENT_V1_CONTRACT.learning_engine_id,'LRN-001');
   assert.equal(NATIVE_CAPABILITY_CONTINUOUS_IMPROVEMENT_V1_CONTRACT.persistent_state,true);
   assert.equal(NATIVE_CAPABILITY_CONTINUOUS_IMPROVEMENT_V1_CONTRACT.daily,true);
+  assert.equal(NATIVE_CAPABILITY_CONTINUOUS_IMPROVEMENT_V1_CONTRACT.restored_same_day_state_supported,true);
   assert.equal(NATIVE_CAPABILITY_CONTINUOUS_IMPROVEMENT_V1_CONTRACT.old_vs_new_required,true);
   assert.equal(NATIVE_CAPABILITY_CONTINUOUS_IMPROVEMENT_V1_CONTRACT.evaluation_required,true);
   assert.equal(NATIVE_CAPABILITY_CONTINUOUS_IMPROVEMENT_V1_CONTRACT.tribunal_required,true);
@@ -47,6 +48,8 @@ test('real operational loop output is consumed by LRN, materializes governed can
     assert.equal(improvement.orchestration.status,'ORCHESTRATOR_GREEN');
     assert.equal(improvement.horizons.status,'HORIZON_EXECUTORS_GREEN');
     assert.equal(improvement.horizons.daily_green,true);
+    assert.equal(improvement.horizons.daily_completed_this_run,true);
+    assert.equal(improvement.horizons.daily_already_current,false);
     assert.equal(improvement.meta_observability.status,'META_METRICS_GREEN');
     assert.equal(improvement.persistence.idempotency_green,true);
     assert.ok(improvement.learning.idempotency_receipts_skipped_second_pass>=1);
@@ -67,6 +70,29 @@ test('real operational loop output is consumed by LRN, materializes governed can
     const learningLedger=path.join(stateRoot,'data','fenix','LRN-001','learning.v8');
     assert.equal(fs.existsSync(candidateLedger),true);
     assert.equal(fs.existsSync(learningLedger),true);
+  } finally {fs.rmSync(root,{recursive:true,force:true});}
+});
+
+test('restored same-day persistent state is healthy without rerunning an already current DAILY horizon',async()=>{
+  const root=fs.mkdtempSync(path.join(os.tmpdir(),'cerebro-continuous-restored-'));
+  try{
+    const stateRoot=path.join(root,'learning-state');
+    const firstOperationalRoot=path.join(root,'operational-a');
+    const firstOperational=await runNativeCapabilityOperationalLoopV1({company_id:'fenix',cycle_anchor:'2026-10-16T00:00:00Z',workdir:firstOperationalRoot,source_run_id:201,source_head_sha:'2222222222222222222222222222222222222222'});
+    const first=await runNativeCapabilityContinuousImprovementV1({operational_report:firstOperational,outbox_root:path.join(firstOperationalRoot,'lrn-outbox'),state_root:stateRoot,now:'2026-10-16T00:00:00Z'});
+    assert.equal(first.horizons.daily_completed_this_run,true);
+
+    const secondOperationalRoot=path.join(root,'operational-b');
+    const secondOperational=await runNativeCapabilityOperationalLoopV1({company_id:'fenix',cycle_anchor:'2026-10-16T00:00:00Z',workdir:secondOperationalRoot,source_run_id:202,source_head_sha:'3333333333333333333333333333333333333333'});
+    const second=await runNativeCapabilityContinuousImprovementV1({operational_report:secondOperational,outbox_root:path.join(secondOperationalRoot,'lrn-outbox'),state_root:stateRoot,now:'2026-10-16T00:00:00Z'});
+    assert.equal(second.status,'CONTINUOUS_IMPROVEMENT_GREEN_PREPROD');
+    assert.equal(second.horizons.daily_green,true);
+    assert.equal(second.horizons.daily_completed_this_run,false);
+    assert.equal(second.horizons.daily_already_current,true);
+    assert.equal(second.orchestration.planned_total,0);
+    assert.ok(second.candidates.candidate_total>=8);
+    assert.equal(second.authority.prod_authorized,false);
+    assert.equal(second.authority.additional_cost_eur,0);
   } finally {fs.rmSync(root,{recursive:true,force:true});}
 });
 

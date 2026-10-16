@@ -9,14 +9,13 @@
   "workflow": "CEREBRO Native Capability Operational FULL V1",
   "workflow_run_id": 38912685079,
   "validated_head_sha": "b44c085b9edc3587fad45c58926f9f3824126281",
-  "operational_artifact": {
-    "artifact_id": 12050084624,
-    "digest": "sha256:a18d88d76ca683912023c0a4d08a462a6775880646efc329e80ac449f47459b2"
-  },
-  "persistent_learning_state_artifact": {
-    "artifact_id": 12051245693,
-    "digest": "sha256:035edca32c6ee2167ff149b8c19f451bda51c32d25d2ecddf248fb3a94e4fbf5",
-    "retention_days": 30
+  "targeted": {
+    "workflow_run_id": 38912685079,
+    "validated_head_sha": "b44c085b9edc3587fad45c58926f9f3824126281",
+    "operational_artifact_id": 12050084624,
+    "operational_artifact_digest": "sha256:a18d88d76ca683912023c0a4d08a462a6775880646efc329e80ac449f47459b2",
+    "learning_state_artifact_id": 12051245693,
+    "learning_state_artifact_digest": "sha256:035edca32c6ee2167ff149b8c19f451bda51c32d25d2ecddf248fb3a94e4fbf5"
   },
   "operational": {
     "status": "OPERATIONAL_FULL_PREPROD",
@@ -49,6 +48,34 @@
     "meta_samples_total": 1,
     "input_fingerprint": "5c358f0ef326118aa8fb6586357b0f1808ee86aa51392c6f1fc369cb000fc85d"
   },
+  "exact_head_pr_gate": {
+    "pr_number": 744,
+    "head_sha": "6be1ca3a092447bad7bc94f826d1f939e8bc9819",
+    "operational_workflow_run_id": 38913181874,
+    "operational_workflow_green": true,
+    "governed_main_workflow_run_id": 38913182186,
+    "governed_main_green": true,
+    "rsi_promotion_readiness_run_id": 38913182477,
+    "rsi_promotion_readiness_green": true,
+    "tribunal_shadow_green": true,
+    "factory_preprod_shadow_green": true,
+    "app_surface_isolation_shadow_green": true
+  },
+  "merge": {
+    "merged": true,
+    "merge_sha": "02dfc991e7dadef5defe9ebcda0092dc2206df7c"
+  },
+  "automatic_main_execution": {
+    "workflow_run_id": 38913304094,
+    "head_sha": "02dfc991e7dadef5defe9ebcda0092dc2206df7c",
+    "event": "push",
+    "conclusion": "success",
+    "operational_artifact_id": 12050948407,
+    "operational_artifact_digest": "sha256:5a93db7e57080200f0006de2907e57a6ff345a48f7ea0c752d7bfb2200dd3ef4",
+    "persistent_learning_state_artifact_id": 12050764047,
+    "persistent_learning_state_artifact_digest": "sha256:04d75f31bfb5c6335d9f913019f899f3fac7fbf6cc29b6ecbbe584ffc8b3ee52",
+    "persistent_learning_state_available_for_next_run": true
+  },
   "governance": {
     "old_vs_new_required": true,
     "evaluation_required": true,
@@ -70,7 +97,8 @@
   "continuous_soak": {
     "daily_schedule_configured": true,
     "multi_day_soak_complete": false,
-    "soak_overclaimed": false
+    "soak_overclaimed": false,
+    "next_scheduled_run_will_have_prior_state_available": true
   },
-  "next_gate": "PR_EXACT_HEAD_GLOBAL_GATES_THEN_MAIN_AUTOMATIC_CONTINUOUS_EXECUTION"
+  "next_gate": "CONTINUOUS_DAILY_SOAK_AND_EVIDENCE_BACKED_OLD_VS_NEW_IMPROVEMENT"
 }
