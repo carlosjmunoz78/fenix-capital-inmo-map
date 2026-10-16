@@ -24,11 +24,11 @@ public final class TransportService extends Service {
   }
 
   @Override public int onStartCommand(Intent intent, int flags, int startId) {
-    if (running) return START_NOT_STICKY;
+    if (running) return START_STICKY;
     running = true;
     worker = new Thread(new Runnable(){ public void run(){ loop(); } }, "cerebro-transport-preprod");
     worker.start();
-    return START_NOT_STICKY;
+    return START_STICKY;
   }
 
   private void loop() {
