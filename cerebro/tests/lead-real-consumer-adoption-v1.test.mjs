@@ -72,9 +72,9 @@ test('SALE consumer reacts when top-lead priority loses urgency',()=>{
   assert.equal(r.full_e2e_real_preprod,false);
 });
 
-test('NBA consumer reacts when replay proof is lost',()=>{
+test('NBA consumer reacts when top-lead confidence falls below its action threshold',()=>{
   const b=clone(buildLeadProducerBundle());
-  b.semantic_profile.replay_green=false;
+  b.semantic_profile.lead_map['lead-hot'].confidence=.79;
   const r=consume(b,'nba');
   assert.equal(r.consumer_map['NBA-001'].decision,'NEXT_BEST_ACTION_HOLD');
   assert.equal(r.consumer_map['NBA-001'].outcome.action,'NO_CHANGE');
