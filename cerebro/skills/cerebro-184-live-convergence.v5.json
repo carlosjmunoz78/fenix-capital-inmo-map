@@ -1,0 +1,121 @@
+{
+  "schema_version": "5.0.0",
+  "state_type": "CEREBRO_184_LIVE_CONVERGENCE_V5",
+  "generated_at": "2026-10-16",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v5",
+  "supersedes": "cerebro/skills/cerebro-184-live-convergence.v4.json",
+  "status": "B3_ANDROID_AND_REAL_SOURCE_BINDINGS_GREEN_GENUINE_SCHEDULED_SOAK_PENDING",
+  "catalog_size": 184,
+  "normalized_item_count": 184,
+  "remaining_item_normalization_count": 0,
+  "full_catalog_reconciled": true,
+  "all_184_physically_active": false,
+  "closed_or_physically_green": {
+    "b3_server_write_e2e": "GREEN_PHYSICAL_PREPROD",
+    "android_item_48": "GREEN_PHYSICAL_PREPROD",
+    "android_web_pwa_item_183": "GREEN_PHYSICAL_PREPROD",
+    "compet_real_source_binding": "GREEN_PHYSICAL_PREPROD_BASELINE",
+    "cap_ieca_real_source_binding": "GREEN_PHYSICAL_PREPROD"
+  },
+  "real_sources": {
+    "compet_57_61": {
+      "configured": true,
+      "target_count": 3,
+      "targets": ["Kìron Córdoba","Grupo Negociador","Bimaik Córdoba"],
+      "baseline_workflow_run_id": 38699175484,
+      "baseline_green": true,
+      "cron_utc": "43 5 * * *",
+      "scheduled_green_runs_verified": 0,
+      "remaining": "THREE_CONTINUOUS_REAL_COMPETITOR_SCHEDULED_RUNS_GREEN"
+    },
+    "cap_62_68": {
+      "configured": true,
+      "publisher": "Instituto de Estadística y Cartografía de Andalucía",
+      "dataset": "ESPAND directorio_establecimientos",
+      "license": "CC-BY-4.0",
+      "method": "GET_ONLY",
+      "physical_workflow_run_id": 38713703960,
+      "physical_green": true,
+      "candidate_count": 5,
+      "strong_match_count": 5,
+      "cron_utc": "47 5 * * *",
+      "scheduled_green_runs_verified": 0,
+      "remaining": "THREE_GENUINE_SCHEDULED_PREPROD_RUNS_GREEN"
+    }
+  },
+  "remaining_physical_gates": [
+    {
+      "id": "WATCH_LEARN_47",
+      "state": "PARCIAL_SOAK_ONLY",
+      "scheduled_green_runs_verified": 0,
+      "required": 3,
+      "cron_utc": "17 4 * * *",
+      "next_gate": "THREE_GENUINE_SCHEDULED_RUNS_GREEN"
+    },
+    {
+      "id": "COMPET_57_61",
+      "state": "PARCIAL_SOAK_ONLY",
+      "scheduled_green_runs_verified": 0,
+      "required": 3,
+      "next_gate": "THREE_CONTINUOUS_REAL_COMPETITOR_SCHEDULED_RUNS_GREEN"
+    },
+    {
+      "id": "CAP_62_68",
+      "state": "PARCIAL_SOAK_ONLY",
+      "scheduled_green_runs_verified": 0,
+      "required": 3,
+      "next_gate": "THREE_GENUINE_SCHEDULED_PREPROD_RUNS_GREEN"
+    },
+    {
+      "id": "ANDROID_TEMPLATE_APK_183",
+      "state": "PARALLEL_PARTIAL",
+      "next_gate": "AUTHORIZED_TEMPLATE_APK_INSTALL_AND_RENDER_E2E",
+      "blocking_current_web_pwa_closeout": false
+    }
+  ],
+  "anti_overclaim": {
+    "manual_dispatch_counts_as_scheduled_soak": false,
+    "push_run_counts_as_scheduled_soak": false,
+    "pull_request_run_counts_as_scheduled_soak": false,
+    "duplicate_source_configuration_required": false,
+    "all_184_physically_active": false
+  },
+  "evidence": [
+    "cerebro/evidence/b3-grant-contract-live-probe-2026-10-16.json",
+    "cerebro/evidence/android-ui-readback-closeout-2026-10-16.json",
+    "cerebro/evidence/scheduled-soak-readiness-47-57-62-2026-10-16.json",
+    "cerebro/registry/b3-server-write-e2e-closeout.v1.json",
+    "cerebro/registry/compet-real-targets.v0.json",
+    "cerebro/registry/cap-ieca-cordoba.v0.json"
+  ],
+  "priority_queue": [
+    "VERIFY_GENUINE_SCHEDULED_SOAK_47_57_62",
+    "CONTINUE_OTHER_NON_BLOCKED_PHYSICAL_GAP_QUEUE_IN_PARALLEL",
+    "RUN_REMOTE_PHYSICAL_OLD_VS_NEW_BEFORE_ANY_PROMOTION",
+    "PROMOTE_ONLY_GOVERNED_CAPABILITIES"
+  ],
+  "authority": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "auto_merge_authorized": false,
+    "external_skill_code_execution_authorized": false,
+    "customer_data_authorized": false,
+    "trading_access": false,
+    "automatic_paid_fallback": false,
+    "additional_cost_eur": 0
+  },
+  "reporting_contract": {
+    "FULL": "184/184 normalized and reconciled",
+    "ACTIVE": "only capabilities with physical/policy gates passed",
+    "NEXT": "genuine scheduled soak for Watch & Learn, COMPET and CAP; other independent physical gaps may continue in parallel",
+    "REMAINING": "physical activation gaps only",
+    "HUMAN_REQUIRED": null,
+    "PROD": "not touched",
+    "do_not_claim_184_physically_active": true,
+    "do_not_count_184_capabilities_as_184_engines": true
+  },
+  "next_block": "VERIFY_GENUINE_SCHEDULED_SOAK_47_57_62_THEN_CONTINUE_PHYSICAL_GAP_QUEUE"
+}
