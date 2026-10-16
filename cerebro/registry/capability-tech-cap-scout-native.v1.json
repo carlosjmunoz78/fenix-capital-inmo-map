@@ -7,7 +7,7 @@
   "company_id":"GLOBAL",
   "environment":"PREPROD",
   "version":"1.0.0",
-  "status":"PREPROD_CANDIDATE",
+  "status":"NATIVE_FULL_PREPROD",
   "ownership":{"primary":"RSH-001","support":["ROUTE-001","WEB-001","SCAN-001","INN-001","SEC-001","QA-001","OBSERV-001","FINOPS-001","EVT-001"],"new_engine_created":false},
   "purpose":"First-party governed Technology/Capability Scout that reuses the existing RSH-001 web acquisition and technology scoring path to acquire public evidence, score zero-cost candidates and build deterministic provenance-preserving dossiers for downstream intelligence engines.",
   "route":"capability://TECH-CAP-SCOUT-NATIVE/v1/execute",
@@ -19,10 +19,10 @@
   "events":{"produces":["research.scout.acquisition.planned","research.scout.public_evidence.acquired","research.scout.evidence.accepted","research.scout.candidate.scored","research.scout.dossier.ready"],"event_bus_target":"EVT-001"},
   "observability":{"authorization_receipt":true,"deterministic_evidence_id":true,"deterministic_dossier_id":true,"replay_verification":true,"provenance":true,"cost":true,"evidence_required":true},
   "resilience":{"fallback":"OFFICIAL_PUBLIC_SOURCE_OR_NEXT_ZERO_COST_ROUTE_OR_HOLD","backup":"VERSIONED_EVIDENCE_AND_DOSSIER_EXPORT","rollback":"REMOVE_V1_WRAPPER_AND_PRESERVE_EXISTING_RSH_WEB_PROFILE_UNCHANGED","rebuild":"REPLAY_PUBLIC_EVIDENCE_METADATA_AND_DETERMINISTIC_DOSSIERS"},
-  "existing_evidence":{"rsh_web_profile_exists":true,"technology_scoring_exists":true,"public_source_adapter_exists":true,"zero_cost_resource_discovery_exists":true,"evaluation_tribunal_exists":true,"existing_runtime_modified":false,"prod_touched":false,"android_touched":false},
-  "full_gate":{"required":["registry_versioning","multi_company_fields","manifest_contracts_events","permissions_policy","real_implementation_or_wrapper","gateway_router_integration","tests_integration_e2e","evaluation_tribunal","old_vs_new_when_applicable","observability_idempotency_cost","fallbacks","backup_rollback_rebuild","runbook_changelog_dependencies","preprod_green_evidence"],"ci_green":false,"native_full":false,"workflow_run_id":null,"evidence_ref":null},
+  "existing_evidence":{"rsh_web_profile_exists":true,"technology_scoring_exists":true,"public_source_adapter_exists":true,"zero_cost_resource_discovery_exists":true,"evaluation_tribunal_exists":true,"existing_runtime_modified":false,"prod_touched":false,"android_touched":false,"evidence_ref":"cerebro/evidence/tech-cap-scout-native-v1-preprod.json"},
+  "full_gate":{"required":["registry_versioning","multi_company_fields","manifest_contracts_events","permissions_policy","real_implementation_or_wrapper","gateway_router_integration","tests_integration_e2e","evaluation_tribunal","old_vs_new_when_applicable","observability_idempotency_cost","fallbacks","backup_rollback_rebuild","runbook_changelog_dependencies","preprod_green_evidence"],"ci_green":true,"native_full":true,"workflow_run_id":38904994574,"evidence_ref":"cerebro/evidence/tech-cap-scout-native-v1-preprod.json"},
   "prod_authorized":false,
   "prod_write_authorized":false,
   "additional_cost_eur":0,
-  "next_gate":"TARGETED_CI_AND_PREPROD_E2E"
+  "next_gate":"PR_AND_MAIN_INTEGRATION_WITHOUT_PROD_OR_ANDROID"
 }
