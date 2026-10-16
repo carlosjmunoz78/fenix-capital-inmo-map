@@ -1,0 +1,42 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_ANDROID_HUMAN_CONTROL_PREPROD_V2_BUILD_EVIDENCE",
+  "company_id": "fenix",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "android-human-control-v2",
+  "status": "BUILD_AND_CI_GREEN_PHYSICAL_INSTALL_PENDING",
+  "package": "es.cerebro.worker.preprod.v2",
+  "rollback_package": "es.cerebro.worker.preprod",
+  "policy": {
+    "ordinary_apps": "BROAD_UI_CONTROL_ALLOWED",
+    "whatsapp": "ALLOWED",
+    "ordinary_https": "ALLOWED",
+    "high_risk": "HUMAN_REQUIRED_HIGH_RISK",
+    "kill_switch_preserved": true,
+    "preprod_only": true,
+    "engine_scope_preserved": true
+  },
+  "ci": {
+    "workflow": ".github/workflows/cerebro-android-human-control-preprod-v2.yml",
+    "run_id": 38869415952,
+    "conclusion": "success",
+    "artifact_id": 12032303814,
+    "artifact_digest": "sha256:39e32c7c5abeb171341756991930036f016611e658dd1528d405cd9f7f06679a",
+    "apk_sha256": "5d7e4ade6b48c62f5cace36f90d48be0a68a0035c70afb62d0d26c77a8a678ab",
+    "policy_tests": "PASS",
+    "apk_verify": "PASS",
+    "registry_validation": "PASS",
+    "full_cerebro_regression": "PASS"
+  },
+  "authority": {
+    "prod_authorized": false,
+    "trading_access": false,
+    "payment_automation": false,
+    "credential_automation": false,
+    "additional_cost_eur": 0
+  },
+  "rollback": "V1 remains installed and enrolled; do not uninstall or replace it until V2 physical E2E is green.",
+  "known_constraint": "V2 initial build signer is ephemeral; do not claim in-place update continuity until a durable signing contract is established.",
+  "next_gate": "PHYSICAL_V2_INSTALL_ACCESSIBILITY_ENROLLMENT_AND_WHATSAPP_E2E"
+}
