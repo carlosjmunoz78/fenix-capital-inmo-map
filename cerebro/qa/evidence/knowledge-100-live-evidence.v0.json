@@ -5,9 +5,9 @@
   "engine_id": "KNOWLEDGE-100-GATE",
   "environment": "PROD_READ_ONLY_ACCEPTANCE",
   "version": "v0",
-  "observed_at": "2026-10-14T18:19:20Z",
-  "observed_repo_sha": "f7b0b47d91ade885f8c9c951da8d81cc2ab744e2",
-  "evidence_method": "AUTHORIZED_CONNECTOR_READ_ONLY",
+  "observed_at": "2026-10-16T23:00:00Z",
+  "observed_repo_sha": "a811cebfa17c9f1ec4df1f9cb1e8a2afd9754ced",
+  "evidence_method": "AUTHORIZED_CONNECTOR_READ_ONLY_REFRESH",
   "notion_sources": [
     {
       "id": "3f781b1a-756d-8165-8d6d-e8853d3c41e3",
@@ -36,6 +36,12 @@
     "knowledge_foundry_found": true,
     "knowledge_router_found": true,
     "synthetic_human_population_found": true
+  },
+  "connector_evidence": {
+    "master_id_verified": "3f781b1a-756d-8165-8d6d-e8853d3c41e3",
+    "knowledge_foundry_id_verified": "3f781b1a-756d-81ad-8a1d-cc9c33fff720",
+    "knowledge_router_id_verified": "3c081b1a-756d-810e-8361-c19b018761fa",
+    "synthetic_human_id_verified": "3f781b1a-756d-8119-93c9-da74aec6855d"
   },
   "contains_customer_data": false,
   "contains_secrets": false,
