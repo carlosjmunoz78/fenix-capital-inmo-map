@@ -1,0 +1,35 @@
+name: CEREBRO LEAD Native V1 PREPROD
+on:
+  workflow_dispatch:
+  pull_request:
+    paths: ['cerebro/runtime/lead-native-v1.mjs','cerebro/tests/lead-native-v1.test.mjs','cerebro/registry/capability-lead-native.v1.json','cerebro/evidence/lead-native-v1-preprod.json','cerebro/docs/LEAD_NATIVE_V1_RUNBOOK.md','.github/workflows/cerebro-lead-native-v1.yml']
+  push:
+    branches: ['cerebro/lead-native-v1-*']
+permissions: {contents: read}
+jobs:
+  preprod-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Factory remains valid
+        working-directory: cerebro
+        run: npm run validate
+      - name: LEAD native E2E
+        run: node --test cerebro/tests/lead-native-v1.test.mjs
+      - name: Existing CRM and data surfaces preserved
+        run: git diff --exit-code 1b5b7f4a5b184f9cb535a0388cf77d389b34b2c9 -- supabase src cerebro/runtime/db-safe-native-v1.mjs
+      - name: Registry and policy gate
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';const r=JSON.parse(fs.readFileSync('cerebro/registry/capability-lead-native.v1.json','utf8'));
+          if(r.capability_id!=='LEAD-NATIVE'||r.owner_engine_id!=='LEAD-001'||r.environment!=='PREPROD')throw new Error('identity');
+          if(r.prod_authorized||r.prod_write_authorized||r.additional_cost_eur!==0||r.contracts.crm_write_authorized)throw new Error('authority/cost');
+          if(r.full_gate.required.length!==14||r.ownership.new_engine_created!==false||r.implementation.ml_required!==false)throw new Error('gate/engine/ml');
+          if(r.existing_evidence.prod_touched||r.existing_evidence.android_touched||r.existing_evidence.crm_write_performed)throw new Error('boundary');
+          if(r.status==='NATIVE_FULL_PREPROD'&&(!r.full_gate.ci_green||!r.full_gate.native_full||!r.full_gate.evidence_ref||!fs.existsSync(r.full_gate.evidence_ref)))throw new Error('full evidence');
+          console.log(JSON.stringify({status:'GREEN',capability:r.capability_id}));
+          NODE
