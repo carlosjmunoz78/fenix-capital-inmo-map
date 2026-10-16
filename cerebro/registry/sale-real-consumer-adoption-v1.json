@@ -1,0 +1,63 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_SALE_REAL_CONSUMER_ADOPTION",
+  "capability_id": "SALE-NATIVE",
+  "engine_id": "SALE-001",
+  "environment": "PREPROD",
+  "version": "1.0.0",
+  "status": "STRICT_CANDIDATE_PREPROD",
+  "strict_target_status": "FULL_E2E_REAL_PREPROD",
+  "legacy_contract_preserved": true,
+  "upstream": ["LEAD-001"],
+  "required_consumers": ["COM-001", "NBA-001", "C360-001", "CRM-001", "LRN-001", "OBSERV-001", "FINOPS-001"],
+  "consumer_model": {
+    "semantic_consumption_required": true,
+    "receipt_only_forbidden": true,
+    "real_runtime_use_required": true
+  },
+  "producer": {
+    "method": "DETERMINISTIC_HEURISTIC_V1",
+    "ai_required": false,
+    "crm_write_authorized": false,
+    "provider_write_authorized": false,
+    "direct_dispatch_authorized": false,
+    "external_code_execution": false
+  },
+  "strict_gates": {
+    "real_runtime_use_required": true,
+    "semantic_state_change_required": true,
+    "native_replay_verification_required": true,
+    "evaluation_required": true,
+    "independent_tribunal_required": true,
+    "learning_feedback_required": true,
+    "observability_required": true,
+    "finops_required": true,
+    "audit_required": true,
+    "backup_rollback_rebuild_required": true,
+    "idempotency_required": true,
+    "crm_write_denied": true,
+    "provider_write_denied": true,
+    "direct_dispatch_denied": true
+  },
+  "authority": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "db_mutation_authorized": false,
+    "provider_write_authorized": false,
+    "crm_write_authorized": false,
+    "spend_authorized": false,
+    "trading_access": false,
+    "android_touched": false,
+    "external_code_execution": false,
+    "additional_cost_eur": 0
+  },
+  "promotion": {
+    "automatic_prod_promotion": false,
+    "requires_exact_head_ci_green": true,
+    "requires_governed_main_replay": true,
+    "requires_old_vs_new": true,
+    "requires_independent_tribunal": true,
+    "requires_rollback": true
+  },
+  "next_gate": "EXACT_HEAD_CI_GOVERNED_MAIN_RSI_AND_MAIN_REPLAY"
+}
