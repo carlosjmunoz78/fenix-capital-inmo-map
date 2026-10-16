@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-16T01:12:57.958Z",
+  "updated_at": "2026-10-16T01:40:45.033Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -51,7 +51,8 @@
     "github-wide-skills:481a37f8c9ed473d71b4",
     "github-wide-skills:0210638a71cef7a51e3f",
     "github-wide-skills:28b33318e96c4dcfb74a",
-    "github-wide-skills:a9a119525d9fa0654756"
+    "github-wide-skills:a9a119525d9fa0654756",
+    "github-wide-skills:9e01bf213c0129ddaba5"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -156,6 +157,40 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 38802825358,
       "checkpointed_at": "2026-10-15T20:33:18.438Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:9e01bf213c0129ddaba5": {
+      "candidate_id": "github-wide-skills:9e01bf213c0129ddaba5",
+      "name": "api-harness",
+      "human_alias": "Api Harness",
+      "wrapper_id": "skillwrap:5d6916342f55cca81e48",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 87,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "webtyp/devskills",
+        "upstream_head_commit": "5fa5443b4fa0664cc47a3635c4e385737d7f6078",
+        "manifest_sha256": "4ef4f7c4209b827c8eef8d6ee985c7a7f46e4c0a00eed7125a07c5bc4e557701",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 38836353153,
+      "checkpointed_at": "2026-10-16T01:40:45.033Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -1115,7 +1150,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "IDLE_NO_NEW_ELIGIBLE_CANDIDATE",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -1128,5 +1163,5 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 38833860711
+  "last_discovery_run_id": 38836353153
 }
