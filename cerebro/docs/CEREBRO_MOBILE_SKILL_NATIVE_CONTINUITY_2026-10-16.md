@@ -78,6 +78,10 @@ Fabricar captura first-party normalizada y multiempresa para eventos web/app/CRM
 3. FFmpeg/OpenMontage composition.
 4. ComfyUI/image workflow o alternativa que gane el FREE_PARITY_GATE.
 
+## PRIORIDAD ALTA DIFERIDA · BROWSER-SAFE-NATIVE
+
+Browser/Computer Use/Browser Bridge sigue siendo prioridad alta ya aprobada. No entra en el Lote Móvil 1 únicamente porque su aceptación física Desktop/Browser Bridge puede necesitar presencia delante del PC y podría bloquear la regla de cerrar 4/4 antes de avanzar. Debe entrar en el primer lote elegible cuando esa dependencia física deje de bloquear.
+
 ## Reglas permanentes
 
 - `CONSERVAR → ENTENDER → ENVOLVER → PROBAR → MEJORAR → MIGRAR`.
