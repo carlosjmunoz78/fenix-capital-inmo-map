@@ -1,0 +1,61 @@
+{
+  "schema_version": "1",
+  "state_type": "ANDROID_UI_READBACK_AND_PHYSICAL_E2E_CLOSEOUT_48_183",
+  "company_id": "fenix",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "android-full-control-v1",
+  "device_id": "android-28781704-56ca-49fb-b181-98c3fc22c07c",
+  "agent_version_installed": "android-worker-1.0.0",
+  "status": "HUMAN_REQUIRED_POLICY_CONFLICT",
+  "diagnosis": {
+    "transport_previously_proven": true,
+    "open_url_previously_completed": true,
+    "read_screen_contract_mismatch": "worker action is DESCRIBE_SCREEN while prior queue used READ_SCREEN",
+    "browser_policy_gap": "installed worker allowlist does not include Samsung Internet",
+    "current_transport_polling": false,
+    "last_seen_at": "2026-10-15T18:08:31.488Z"
+  },
+  "source_repairs": {
+    "read_screen_alias_added": true,
+    "samsung_browser_preprod_allowlist_added": true,
+    "transport_start_sticky_added": true,
+    "head_sha": "54aedc53d6c33bfc4be98a8917cefe5cde70a814",
+    "ci_run_id": 38829555893,
+    "ci_conclusion": "success",
+    "artifact_id": 12016726662,
+    "artifact_digest": "sha256:b98214a0fc5abd0e8d59e017bf7da3ddb770bb5983c6fc2c009dbb53af3a0d80",
+    "new_apk_sha256": "c26612bde8c8413328acbcb0dec5f38d801b7466f4d7f93a9da4571c0366d97e"
+  },
+  "physical_closeout_queue": [
+    "android-health-20261016-closeout-01",
+    "android-open-worker-20261016-closeout-02",
+    "android-describe-worker-20261016-closeout-03",
+    "android-refresh-worker-20261016-closeout-04",
+    "android-describe-after-refresh-20261016-closeout-05",
+    "android-open-staging-20261016-closeout-06",
+    "android-describe-staging-20261016-closeout-07"
+  ],
+  "queue_state_at_evidence": {
+    "queued": 7,
+    "delivered": 0,
+    "completed": 0,
+    "failed": 0
+  },
+  "human_boundary": {
+    "reason": "POLICY_CONFLICT",
+    "required_action": "Open CEREBRO Worker PREPROD on the already-enrolled Android device and tap ACTIVAR CONTROL PREPROD once.",
+    "reinstall_required": false,
+    "reenrollment_required": false,
+    "permission_regrant_required": false
+  },
+  "safety": {
+    "prod": false,
+    "trading": false,
+    "banking": false,
+    "payments": false,
+    "credentials": false,
+    "customer_data": false,
+    "additional_cost_eur": 0
+  }
+}
