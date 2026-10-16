@@ -6,7 +6,7 @@
   "engine_id":"RSH-001",
   "environment":"PREPROD",
   "version":"1.0.0",
-  "status":"PARCIAL_AWAITING_EXACT_HEAD_CI",
+  "status":"FULL_E2E_REAL_PREPROD",
   "strict_target_status":"FULL_E2E_REAL_PREPROD",
   "legacy_contract_preserved":true,
   "legacy_registry_ref":"cerebro/registry/capability-tech-cap-scout-native.v1.json",
@@ -70,15 +70,26 @@
     "external_code_execution":false,
     "additional_cost_eur":0
   },
-  "main_gate":{
-    "exact_head_ci_green":false,
-    "governed_main_green":false,
-    "rsi_green":false,
-    "merged_to_main":false,
-    "automatic_main_execution_green":false,
-    "main_head_sha":null,
-    "workflow_run_id":null,
-    "full_e2e_real_preprod":false
+  "evidence":{
+    "branch_strict_ci_run_id":38939819883,
+    "implementation_pr":754,
+    "implementation_branch_head_sha":"a758a3775524ca67a63524dcf0df6c93576bb01b",
+    "pr_exact_head_strict_ci_run_id":38940004054,
+    "governed_main_run_id":38940004216,
+    "rsi_promotion_readiness_shadow_run_id":38940004006,
+    "implementation_merge_sha":"8dfb0961dff16f256ad05cdcce439246dc324f55",
+    "automatic_main_strict_run_id":38940226854,
+    "automatic_main_strict_conclusion":"success"
   },
-  "next_gate":"EXACT_HEAD_STRICT_REAL_CONSUMER_CI"
+  "main_gate":{
+    "exact_head_ci_green":true,
+    "governed_main_green":true,
+    "rsi_green":true,
+    "merged_to_main":true,
+    "automatic_main_execution_green":true,
+    "main_head_sha":"8dfb0961dff16f256ad05cdcce439246dc324f55",
+    "workflow_run_id":38940226854,
+    "full_e2e_real_preprod":true
+  },
+  "next_gate":"COMPET-NATIVE_REAL_CONSUMER_ADOPTION_TO_FULL_E2E"
 }
