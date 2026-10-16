@@ -1,0 +1,36 @@
+name: CEREBRO EVT-001 NATIVE V1 PREPROD
+on:
+  workflow_dispatch:
+  pull_request:
+    paths: ['cerebro/runtime/evt001-native-v1.mjs','cerebro/tests/evt001-native-v1.test.mjs','cerebro/registry/capability-evt001-native.v1.json','cerebro/evidence/evt001-native-v1-preprod.json','cerebro/docs/EVT001_NATIVE_V1_RUNBOOK.md','.github/workflows/cerebro-evt001-native-v1.yml']
+  push:
+    branches: ['cerebro/evt001-native-v1-*']
+permissions: {contents: read}
+jobs:
+  preprod-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Factory remains valid
+        working-directory: cerebro
+        run: npm run validate
+      - name: EVT-001 native E2E
+        run: node --test cerebro/tests/evt001-native-v1.test.mjs
+      - name: Existing event runtime preserved
+        run: |
+          git diff --exit-code 5690b2d6131c5be707f671c2b2d77e81d39c7111 -- cerebro/runtime/runtime.mjs cerebro/runtime/persistent-runtime.mjs cerebro/runtime/rsi-event-outbox.mjs
+      - name: Registry and policy gate
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';const r=JSON.parse(fs.readFileSync('cerebro/registry/capability-evt001-native.v1.json','utf8'));
+          if(r.capability_id!=='EVT-001'||r.owner_engine_id!=='EVT-001'||r.environment!=='PREPROD')throw new Error('identity/owner/environment');
+          if(r.prod_authorized||r.prod_write_authorized||r.additional_cost_eur!==0)throw new Error('unsafe authority/cost');
+          if(r.implementation.external_broker_required!==false||r.policy.reuse_existing_event_runtime!==true)throw new Error('runtime reuse/cost policy');
+          if(r.full_gate.required.length!==14)throw new Error('full gate incomplete');
+          if(r.existing_evidence.existing_runtime_modified!==false||r.existing_evidence.prod_touched!==false)throw new Error('existing runtime or PROD unexpectedly touched');
+          console.log(JSON.stringify({status:'GREEN',capability:r.capability_id}));
+          NODE
