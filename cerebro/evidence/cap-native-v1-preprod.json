@@ -1,0 +1,7 @@
+{
+  "schema_version":"1.0.0","state_type":"CEREBRO_NATIVE_CAPABILITY_PREPROD_EVIDENCE","capability_id":"CAP-NATIVE","company_id":"GLOBAL","engine_id":"CAP-001","environment":"PREPROD","version":"1.0.0","status":"PREPROD_GREEN",
+  "validated_head_sha":"b012db851bf704f1ff90a07bcee2542caba2a3b8","workflow":{"name":"CEREBRO CAP Native V1 PREPROD","run_id":38906832569,"job_id":116992392254,"conclusion":"success"},
+  "checks":{"factory_registry_valid":true,"targeted_e2e_green":true,"existing_stack_preserved":true,"gateway_fail_closed":true,"preprod_only":true,"multi_company_isolation_green":true,"deterministic_channel_scoring_green":true,"simple_bandit_plan_green":true,"stop_scale_green":true,"money_limit_green":true,"provider_write_denied":true,"plan_replay_green":true,"old_vs_new_green":true,"independent_tribunal_green":true,"prod_denied":true,"trading_denied":true,"android_touched":false,"spend_performed":false,"provider_write_performed":false,"additional_cost_eur":0},
+  "evaluation":{"benchmark":"cap-native-governance@1.0.0","old_required_gates_covered":7,"new_required_gates_covered":14,"delta":7,"judge_id":"QA-001","candidate_actor_id":"CAP-001","tribunal_decision":"PASS","prod_authorized":false},
+  "full_gate_count":14,"full_gate_result":"GREEN","human_required":null,"next_gate":"PR_AND_MAIN_INTEGRATION_WITHOUT_PROD_OR_ANDROID"
+}
