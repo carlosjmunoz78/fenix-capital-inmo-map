@@ -13,9 +13,10 @@ public final class PolicyGuard {
     "AUTO-001", "ACTGW-001", "FACT-001", "APPBOOT-001", "QA-001"
   ));
   private static final String[] HIGH_RISK_TOKENS = new String[]{
-    "bank", "banco", "wallet", "paypal", "payment", "pago", "crypto", "authenticator",
-    "identity", "credential", "password", "keystore", "signature", "signing", "legal",
-    "security", "deviceadmin", "device_admin", "packageinstaller", "permissioncontroller", "vpn"
+    "bank", "banco", "bbva", "santander", "caixabank", "unicaja", "sabadell", "bankinter", "openbank",
+    "revolut", "n26", "wise", "wallet", "paypal", "payment", "pago", "crypto", "authenticator",
+    "identity", "credential", "password", "keystore", "signature", "signing", "legal", "security", "settings",
+    "deviceadmin", "device_admin", "packageinstaller", "permissioncontroller", "vpn"
   };
   private PolicyGuard() {}
 
