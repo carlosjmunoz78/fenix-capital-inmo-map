@@ -23,6 +23,16 @@ The final agent is the durable Android runtime for CEREBRO. It must provide broa
 - CEREBRO-originated asynchronous commands through the Gateway even when no human voice command was issued;
 - voice is an interface to the Gateway, never a direct model-to-device bypass.
 
+### Call, audio and communication intelligence
+- work-phone calls are a mandatory information source when recording is technically available and policy-authorized;
+- call capture is adapter-based: OEM native recorder -> managed telephony/VoIP -> approved third-party recorder -> degraded accessibility/microphone fallback;
+- every captured call must carry company/device/call metadata, evidence hash, capture adapter/quality and retention policy before transcription;
+- call audio/transcripts flow to CEREBRO for structured extraction and entity/contact/case resolution;
+- CEREBRO must be able to generate or select authorized audio and send voice notes through WhatsApp, WhatsApp Business, Telegram and future ordinary messaging apps;
+- role/persona, voice, recipient scope, communication objective and approval policy are assigned above the Android device layer;
+- app-specific recipes remain server-side skills so communication behavior can evolve without reinstalling the APK;
+- detailed contract: `CALL_AUDIO_REQUIREMENTS.md`.
+
 ### Sensors and media planned for the same durable lineage
 - location/geolocation for routes, navigation context and device-aware workflows;
 - camera capture and inspection when explicitly enabled by the device owner;
@@ -54,6 +64,8 @@ The APK remains a thin universal device agent. Facebook, WhatsApp, Chrome, Insta
 - permanent signing lineage: CREATED and backed up;
 - physical USB/ADB on first Samsung device: GREEN;
 - installed V1/V2 workers: preserved as rollback until Final V2 acceptance;
+- call/audio/voice-message requirement: DEFINED and mandatory;
+- real cellular-call capture adapter on first Samsung: POR AUDITAR physically;
 - Final V2 source/runtime: IN HARDENING;
 - physical Final V2 install: NOT YET;
 - PROD authority: false until PREPROD acceptance gates are green.
