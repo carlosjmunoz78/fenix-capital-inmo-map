@@ -1,0 +1,75 @@
+name: CEREBRO VOICE-001 ESM06 + ESM07 es-ES Candidates
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'cerebro/voice/runtime/piper_es_es_esm06_esm07_candidates.py'
+      - '.github/workflows/cerebro-voice-esm06-esm07-candidates.yml'
+      - 'cerebro/voice/profiles/ESM06_CEREBRO_SOFT_EXECUTIVE_ES_ES_V0.json'
+      - 'cerebro/voice/profiles/ESM07_CEREBRO_AVENGERS_STYLE_DIRECTION_V0.json'
+      - 'cerebro/voice/profiles/VOICE_OWNER_SELECTIONS_V0.json'
+
+permissions:
+  contents: read
+
+jobs:
+  esm06-esm07-listening-candidates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install zero-cost local TTS dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install piper-tts huggingface-hub
+
+      - name: Generate ESM06 and ESM07 Spain-Spanish listening candidates
+        env:
+          CEREBRO_ENVIRONMENT: LAB
+        run: |
+          mkdir -p "$RUNNER_TEMP/esm06-esm07"
+          python cerebro/voice/runtime/piper_es_es_esm06_esm07_candidates.py --output-dir "$RUNNER_TEMP/esm06-esm07"
+
+      - name: Verify evidence boundary
+        shell: python
+        run: |
+          import json, os, pathlib
+          p = pathlib.Path(os.environ['RUNNER_TEMP']) / 'esm06-esm07' / 'ESM06_ESM07_candidate_evidence.json'
+          e = json.loads(p.read_text(encoding='utf-8'))
+          assert e['engine_id'] == 'VOICE-001'
+          assert e['target_locale'] == 'es-ES'
+          assert e['identity_policy']['actor_clone'] is False
+          assert e['identity_policy']['character_clone'] is False
+          assert e['identity_policy']['movie_audio_reference'] is False
+          assert e['authority']['automatic_promotion'] is False
+          assert e['authority']['voice_bank_ready'] is False
+          assert e['authority']['prod_enabled'] is False
+          assert e['candidates']['ESM06']['wav_sha256']
+          assert e['candidates']['ESM07']['wav_sha256']
+          print('GREEN: ESM06/ESM07 owner listening candidates generated; promotion remains forbidden.')
+
+      - name: Upload ESM06 and ESM07 listening candidates
+        uses: actions/upload-artifact@v4
+        with:
+          name: voice001-esm06-esm07-es-es-candidates
+          path: |
+            ${{ runner.temp }}/esm06-esm07/ESM06_cerebro_candidate.wav
+            ${{ runner.temp }}/esm06-esm07/ESM07_cerebro_candidate.wav
+            ${{ runner.temp }}/esm06-esm07/ESM06_ESM07_candidate_evidence.json
+          retention-days: 7
+          compression-level: 0
+          if-no-files-found: error
+
+      - name: Record scope
+        run: |
+          echo 'ESM06 = softer executive Spain-Spanish candidate.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'ESM07 = calm technical assistant candidate with the owner-requested JARVIS-like character direction, without cloning any actor or character.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'LAB listening only. No PREPROD/PROD promotion. automatic_promotion=false.' >> "$GITHUB_STEP_SUMMARY"

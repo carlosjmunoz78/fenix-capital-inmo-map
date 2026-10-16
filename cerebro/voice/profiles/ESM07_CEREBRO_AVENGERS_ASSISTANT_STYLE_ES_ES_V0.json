@@ -1,0 +1,42 @@
+{
+  "schema_version": "0.2.0",
+  "engine_id": "VOICE-001",
+  "voice_id": "ESM07",
+  "environment": "LAB",
+  "status": "OWNER_ACCEPTED_STANDALONE_SEED_CANDIDATE",
+  "locale": "es-ES",
+  "presentation": "masculine",
+  "profile": "calm_technical_cinematic",
+  "owner_intent": "KEEP_AS_DISTINCT_CEREBRO_VOICE",
+  "owner_assessment": {
+    "keep": true,
+    "jarvis_similarity_accepted": false,
+    "note": "Owner explicitly keeps this voice but says it does not sound like the desired Avengers-era JARVIS direction. Preserve it unchanged and continue the search with a different base timbre."
+  },
+  "traits": [
+    "Spain-Spanish",
+    "male",
+    "calm",
+    "technical",
+    "precise",
+    "controlled",
+    "polite",
+    "slightly-grave",
+    "cinematic"
+  ],
+  "identity_policy": {
+    "original_cerebro_voice": true,
+    "exact_person_identity_clone": false,
+    "exact_character_identity_clone": false,
+    "movie_audio_reference": false
+  },
+  "authority": {
+    "owner_seed_accepted": true,
+    "voice_bank_ready": false,
+    "automatic_promotion": false,
+    "preprod_ready": false,
+    "prod_enabled": false,
+    "public_clone_enabled": false
+  },
+  "next_gate": "PRESERVE_ESM07_AND_CONTINUE_DIFFERENT_BASE_TIMBRE_SEARCH_UNDER_ESM08"
+}

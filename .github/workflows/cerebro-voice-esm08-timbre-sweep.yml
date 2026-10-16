@@ -1,0 +1,78 @@
+name: CEREBRO VOICE-001 ESM08 es-ES Timbre Sweep
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'cerebro/voice/runtime/piper_es_es_esm08_timbre_sweep.py'
+      - '.github/workflows/cerebro-voice-esm08-timbre-sweep.yml'
+      - 'cerebro/voice/profiles/ESM08_CEREBRO_ORIGINAL_CINEMATIC_AI_ASSISTANT_ES_ES_V0.json'
+      - 'cerebro/voice/profiles/CEREBRO_MALE_VOICE_SHORTLIST_V0.json'
+
+permissions:
+  contents: read
+
+jobs:
+  esm08-timbre-sweep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install zero-cost local TTS dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install piper-tts huggingface-hub
+
+      - name: Generate ESM08 Spain-Spanish multi-base timbre sweep
+        env:
+          CEREBRO_ENVIRONMENT: LAB
+        run: |
+          mkdir -p "$RUNNER_TEMP/esm08"
+          python cerebro/voice/runtime/piper_es_es_esm08_timbre_sweep.py --output-dir "$RUNNER_TEMP/esm08"
+
+      - name: Verify evidence boundary
+        shell: python
+        run: |
+          import json, os, pathlib
+          p = pathlib.Path(os.environ['RUNNER_TEMP']) / 'esm08' / 'ESM08_timbre_sweep_evidence.json'
+          e = json.loads(p.read_text(encoding='utf-8'))
+          assert e['engine_id'] == 'VOICE-001'
+          assert e['voice_target'] == 'ESM08'
+          assert e['target_locale'] == 'es-ES'
+          assert set(e['candidates']) == {'CARLFM','MLS10246','MLS9972'}
+          assert e['identity_policy']['actor_clone'] is False
+          assert e['identity_policy']['character_clone'] is False
+          assert e['identity_policy']['movie_audio_reference'] is False
+          assert e['authority']['automatic_promotion'] is False
+          assert e['authority']['voice_bank_ready'] is False
+          assert e['authority']['prod_enabled'] is False
+          for c in e['candidates'].values():
+              assert c['wav_sha256']
+              assert c['audio_seconds'] > 3
+          print('GREEN: ESM08 multi-base timbre sweep generated for owner listening only.')
+
+      - name: Upload ESM08 listening candidates
+        uses: actions/upload-artifact@v4
+        with:
+          name: voice001-esm08-es-es-timbre-sweep
+          path: |
+            ${{ runner.temp }}/esm08/ESM08_CARLFM_raw_timbre.wav
+            ${{ runner.temp }}/esm08/ESM08_MLS10246_raw_timbre.wav
+            ${{ runner.temp }}/esm08/ESM08_MLS9972_raw_timbre.wav
+            ${{ runner.temp }}/esm08/ESM08_timbre_sweep_evidence.json
+          retention-days: 7
+          compression-level: 0
+          if-no-files-found: error
+
+      - name: Record scope
+        run: |
+          echo 'ESM05, ESM06 and ESM07 remain preserved.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'ESM08 compares three genuinely different es-ES source timbres before any aggressive processing.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'No actor/character cloning, no movie reference audio, no PROD, automatic_promotion=false.' >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,67 @@
+name: CEREBRO VOICE-001 ESM05 Original es-ES Seed
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'cerebro/voice/runtime/piper_es_es_executive_seed.py'
+      - '.github/workflows/cerebro-voice-esm05-piper-seed.yml'
+      - 'cerebro/voice/**'
+
+permissions:
+  contents: read
+
+jobs:
+  original-es-es-male-seed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install zero-cost local TTS dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install piper-tts huggingface-hub
+
+      - name: Generate original Spain-Spanish ESM05 seed
+        env:
+          CEREBRO_ENVIRONMENT: LAB
+        run: |
+          mkdir -p "$RUNNER_TEMP/esm05-piper"
+          python cerebro/voice/runtime/piper_es_es_executive_seed.py --output-dir "$RUNNER_TEMP/esm05-piper"
+
+      - name: Verify non-promotional evidence
+        shell: python
+        run: |
+          import json, os, pathlib
+          p = pathlib.Path(os.environ['RUNNER_TEMP']) / 'esm05-piper' / 'ESM05_piper_seed_evidence.json'
+          e = json.loads(p.read_text(encoding='utf-8'))
+          assert e['engine_id'] == 'VOICE-001'
+          assert e['voice_id'] == 'ESM05'
+          assert e['target_locale'] == 'es-ES'
+          assert e['source_license_declared'] == 'CC0-1.0'
+          assert e['authority']['automatic_promotion'] is False
+          assert e['authority']['ESM05_accepted'] is False
+          assert e['authority']['prod_enabled'] is False
+          assert e['wav_bytes'] > 1024
+          print('GREEN ESM05 original es-ES listening seed generated; promotion remains forbidden.')
+
+      - name: Upload ESM05 listening candidate
+        uses: actions/upload-artifact@v4
+        with:
+          name: voice001-esm05-original-es-es-seed
+          path: ${{ runner.temp }}/esm05-piper/
+          retention-days: 7
+          compression-level: 0
+          if-no-files-found: error
+
+      - name: Record scope
+        run: |
+          echo 'VOICE-001 ESM05: original public-domain Spain-Spanish male seed generated for owner listening only.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'No actor/character clone. No voice-bank acceptance. No PREPROD/PROD promotion. automatic_promotion=false.' >> "$GITHUB_STEP_SUMMARY"

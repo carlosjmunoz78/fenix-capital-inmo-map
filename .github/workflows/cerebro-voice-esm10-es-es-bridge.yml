@@ -1,0 +1,148 @@
+name: CEREBRO VOICE-001 ESM10 Synthetic Timbre es-ES Bridge
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'cerebro/voice/runtime/esm10_qwen_synthetic_references.py'
+      - 'cerebro/voice/runtime/esm10_chatterbox_es_es_from_reference.py'
+      - '.github/workflows/cerebro-voice-esm10-es-es-bridge.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  qwen-synthetic-references:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install lightweight Space client
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install 'gradio_client>=1.13,<2'
+
+      - name: Generate original synthetic timbre references
+        env:
+          CEREBRO_ENVIRONMENT: LAB
+        run: |
+          mkdir -p "$RUNNER_TEMP/esm10-refs"
+          python cerebro/voice/runtime/esm10_qwen_synthetic_references.py --output-dir "$RUNNER_TEMP/esm10-refs"
+
+      - name: Verify reference boundary
+        shell: python
+        run: |
+          import json, os, pathlib
+          p = pathlib.Path(os.environ['RUNNER_TEMP']) / 'esm10-refs' / 'ESM10_synthetic_reference_manifest.json'
+          e = json.loads(p.read_text(encoding='utf-8'))
+          assert e['engine_id'] == 'VOICE-001'
+          assert e['voice_target'] == 'ESM10'
+          assert e['identity_policy']['synthetic_only'] is True
+          assert e['identity_policy']['actor_clone'] is False
+          assert e['identity_policy']['character_clone'] is False
+          assert e['identity_policy']['movie_audio_reference'] is False
+          assert e['authority']['automatic_promotion'] is False
+          assert e['authority']['prod_enabled'] is False
+          assert len(e['references']) == 3
+          print('GREEN: three original synthetic ESM10 timbre references generated.')
+
+      - name: Upload synthetic references
+        uses: actions/upload-artifact@v4
+        with:
+          name: voice001-esm10-synthetic-references
+          path: |
+            ${{ runner.temp }}/esm10-refs/ESM10_*_synthetic_reference.wav
+            ${{ runner.temp }}/esm10-refs/ESM10_synthetic_reference_manifest.json
+          retention-days: 7
+          compression-level: 0
+          if-no-files-found: error
+
+  dedicated-es-es:
+    needs: qwen-synthetic-references
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - id: A_SMOOTH_BARITONE
+            ref: ESM10_A_SMOOTH_BARITONE_synthetic_reference.wav
+          - id: B_POLISHED_SYSTEM
+            ref: ESM10_B_POLISHED_SYSTEM_synthetic_reference.wav
+          - id: C_RESONANT_YOUNGER
+            ref: ESM10_C_RESONANT_YOUNGER_synthetic_reference.wav
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install lightweight Space client
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install 'gradio_client>=1.13,<2'
+
+      - name: Download original synthetic references
+        uses: actions/download-artifact@v4
+        with:
+          name: voice001-esm10-synthetic-references
+          path: ${{ runner.temp }}/esm10-refs
+
+      - name: Generate dedicated Spain-Spanish candidate
+        env:
+          CEREBRO_ENVIRONMENT: LAB
+        run: |
+          mkdir -p "$RUNNER_TEMP/esm10-out"
+          python cerebro/voice/runtime/esm10_chatterbox_es_es_from_reference.py \
+            --reference "$RUNNER_TEMP/esm10-refs/${{ matrix.ref }}" \
+            --candidate-id "${{ matrix.id }}" \
+            --output-dir "$RUNNER_TEMP/esm10-out"
+
+      - name: Verify evidence boundary
+        shell: python
+        env:
+          CANDIDATE_ID: ${{ matrix.id }}
+        run: |
+          import json, os, pathlib
+          cid = os.environ['CANDIDATE_ID']
+          p = pathlib.Path(os.environ['RUNNER_TEMP']) / 'esm10-out' / f'ESM10_{cid}_evidence.json'
+          e = json.loads(p.read_text(encoding='utf-8'))
+          assert e['engine_id'] == 'VOICE-001'
+          assert e['voice_target'] == 'ESM10'
+          assert e['candidate_id'] == cid
+          assert e['target_locale'] == 'es-ES'
+          assert e['reference_is_synthetic'] is True
+          assert e['identity_policy']['actor_clone'] is False
+          assert e['identity_policy']['character_clone'] is False
+          assert e['identity_policy']['movie_audio_reference'] is False
+          assert e['authority']['automatic_promotion'] is False
+          assert e['authority']['voice_bank_ready'] is False
+          assert e['authority']['prod_enabled'] is False
+          print(f'GREEN: {cid} dedicated es-ES candidate generated; no promotion.')
+
+      - name: Upload owner-listening candidate
+        uses: actions/upload-artifact@v4
+        with:
+          name: voice001-esm10-${{ matrix.id }}-es-es
+          path: |
+            ${{ runner.temp }}/esm10-out/ESM10_${{ matrix.id }}_es_ES.wav
+            ${{ runner.temp }}/esm10-out/ESM10_${{ matrix.id }}_evidence.json
+          retention-days: 7
+          compression-level: 0
+          if-no-files-found: error
+
+      - name: Record scope
+        run: |
+          echo 'ESM10 uses an original synthetic timbre reference and the dedicated Spain-Spanish Chatterbox model.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'No actor, movie, character, or identifiable-person reference audio is used.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Owner listening required. PROD=false. automatic_promotion=false.' >> "$GITHUB_STEP_SUMMARY"
