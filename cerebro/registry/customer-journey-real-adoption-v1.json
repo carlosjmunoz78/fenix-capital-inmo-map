@@ -1,0 +1,57 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_CUSTOMER_JOURNEY_REAL_ADOPTION",
+  "environment": "PREPROD",
+  "version": "1.0.0",
+  "status": "STRICT_CANDIDATE_PREPROD",
+  "strict_target_status": "FULL_E2E_REAL_PREPROD",
+  "engines": {
+    "POST-001": {"decision": "EXTEND_EXISTING", "runtime": "cerebro/customer/customer-journey-native-v1.mjs"},
+    "CX-001": {"decision": "EXTEND_EXISTING", "runtime": "cerebro/customer/customer-journey-native-v1.mjs"},
+    "RET-001": {"decision": "WRAP_EXISTING", "runtime": "cerebro/customer/ret-ref-rep-runtime-v0.mjs", "modified": false},
+    "REF-001": {"decision": "WRAP_EXISTING", "runtime": "cerebro/customer/ret-ref-rep-runtime-v0.mjs", "modified": false},
+    "REP-001": {"decision": "WRAP_EXISTING", "runtime": "cerebro/customer/ret-ref-rep-runtime-v0.mjs", "modified": false}
+  },
+  "upstream": ["C360-001", "SALE-001", "COM-001", "NOTIF-001"],
+  "required_consumers": ["POST-001", "CX-001", "RET-001", "REF-001", "REP-001", "COM-001", "SALE-001", "LRN-001", "OBSERV-001", "FINOPS-001"],
+  "strict_gates": {
+    "event_driven_post_signature_flow_required": true,
+    "cx_friction_silence_satisfaction_required": true,
+    "existing_ret_ref_rep_preserved": true,
+    "semantic_consumption_required": true,
+    "receipt_only_forbidden": true,
+    "review_public_write_forbidden": true,
+    "customer_dispatch_forbidden": true,
+    "crm_write_forbidden": true,
+    "evaluation_required": true,
+    "independent_tribunal_required": true,
+    "learning_feedback_required": true,
+    "observability_required": true,
+    "finops_required": true,
+    "audit_required": true,
+    "backup_rollback_rebuild_required": true,
+    "idempotency_required": true
+  },
+  "authority": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "db_mutation_authorized": false,
+    "provider_write_authorized": false,
+    "crm_write_authorized": false,
+    "dispatch_authorized": false,
+    "public_review_post_authorized": false,
+    "spend_authorized": false,
+    "trading_access": false,
+    "external_code_execution": false,
+    "additional_cost_eur": 0
+  },
+  "promotion": {
+    "automatic_prod_promotion": false,
+    "requires_exact_head_ci_green": true,
+    "requires_governed_main_replay": true,
+    "requires_old_vs_new": true,
+    "requires_independent_tribunal": true,
+    "requires_rollback": true
+  },
+  "next_gate": "EXACT_HEAD_CI_GOVERNED_MAIN_RSI_AND_MAIN_REPLAY"
+}
