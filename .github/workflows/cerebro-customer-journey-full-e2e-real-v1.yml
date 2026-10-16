@@ -1,0 +1,96 @@
+name: CEREBRO CUSTOMER JOURNEY FULL E2E REAL V1
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, 'cerebro/lote3-customer-journey-full-preprod-v1*']
+    paths:
+      - 'cerebro/customer/customer-journey-native-v1.mjs'
+      - 'cerebro/runtime/customer-journey-real-adoption-v1.mjs'
+      - 'cerebro/tests/customer-journey-native-v1.test.mjs'
+      - 'cerebro/tests/customer-journey-real-adoption-v1.test.mjs'
+      - 'cerebro/registry/customer-journey-real-adoption-v1.json'
+      - '.github/workflows/cerebro-customer-journey-full-e2e-real-v1.yml'
+  pull_request:
+    paths:
+      - 'cerebro/customer/customer-journey-native-v1.mjs'
+      - 'cerebro/runtime/customer-journey-real-adoption-v1.mjs'
+      - 'cerebro/tests/customer-journey-native-v1.test.mjs'
+      - 'cerebro/tests/customer-journey-real-adoption-v1.test.mjs'
+      - 'cerebro/registry/customer-journey-real-adoption-v1.json'
+      - '.github/workflows/cerebro-customer-journey-full-e2e-real-v1.yml'
+permissions: {contents: read, actions: read}
+
+jobs:
+  strict-customer-journey:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Canonical registry validation
+        working-directory: cerebro
+        run: npm run validate
+      - name: Preserve certified upstream and existing RET REF REP runtime
+        run: |
+          git diff --exit-code 5bad500f298db5854df7cce81932ad371b29ff4d -- \
+            cerebro/runtime/lead-native-v1.mjs \
+            cerebro/runtime/sale-native-v1.mjs \
+            cerebro/communication/com-delivery-router-v1.mjs \
+            cerebro/communication/notif-native-v1.mjs \
+            cerebro/customer/c360-native-v1.mjs \
+            cerebro/customer/ret-ref-rep-runtime-v0.mjs \
+            cerebro/registry/sale-real-consumer-adoption-v1.json \
+            cerebro/registry/lote3-com-notif-c360-real-v1.json
+      - name: Native and strict journey tests
+        run: >-
+          node --test
+          cerebro/tests/customer-journey-native-v1.test.mjs
+          cerebro/tests/customer-journey-real-adoption-v1.test.mjs
+      - name: Execute strict customer journey
+        run: |
+          mkdir -p /tmp/cerebro-customer-journey
+          node cerebro/runtime/customer-journey-real-adoption-v1.mjs \
+            --company fenix \
+            --workdir /tmp/cerebro-customer-journey/state \
+            --source-run-id "${{ github.run_id }}" \
+            --source-head-sha "${{ github.sha }}" \
+            --out /tmp/cerebro-customer-journey/report.json
+      - name: Strict FULL gate
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const r=JSON.parse(fs.readFileSync('/tmp/cerebro-customer-journey/report.json','utf8'));
+          const required=['POST-001','CX-001','RET-001','REF-001','REP-001','COM-001','SALE-001','LRN-001','OBSERV-001','FINOPS-001'];
+          const expected={'POST-001':'POST_SIGNATURE_JOURNEY_READY','CX-001':'CUSTOMER_EXPERIENCE_SCORED','RET-001':'RETENTION_AND_GROWTH_READY','REF-001':'REFERRAL_MOMENT_READY','REP-001':'REPUTATION_REVIEW_PLAN_READY','COM-001':'CUSTOMER_JOURNEY_COM_ROUTE_READY','SALE-001':'POSTSUCCESS_SALE_SIGNAL_READY','LRN-001':'LRN_FEEDBACK_PERSISTED','OBSERV-001':'OBSERVABILITY_RECORDED','FINOPS-001':'FINOPS_ZERO_COST_RECORDED'};
+          if(r.status!=='FULL_E2E_REAL_PREPROD'||r.full_e2e_real_preprod!==true)throw new Error('customer journey strict FULL not green');
+          if(JSON.stringify(r.required_consumers)!==JSON.stringify(required)||r.consumer_coverage!==1||r.functional_consumer_coverage!==1||r.missing_consumers.length||r.failed_consumers.length)throw new Error('consumer coverage incomplete');
+          if(!required.every(id=>r.consumer_map?.[id]?.decision===expected[id]&&r.consumer_map[id].real_consumption===true&&r.consumer_map[id].outcome_hash))throw new Error('semantic consumer proof incomplete');
+          if(r.independent_tribunal?.decision!=='PASS'||r.audit_green!==true)throw new Error('tribunal/audit failed');
+          if(r.com_route?.adapter_dispatch_authorized!==false||r.sale_action?.crm_write_authorized!==false||r.journey_bundle?.review?.public_post_authorized!==false||r.journey_bundle?.referral?.communication_intent?.dispatch_authorized!==false)throw new Error('journey authority leak');
+          const br=r.backup_rollback_rebuild;if(!br?.backup_ready||!br.rollback_green||!br.rebuild_green||br.applied_state_hash!==br.rebuilt_state_hash)throw new Error('backup/rollback/rebuild failed');
+          if(r.restartable!==true||r.idempotency_proven!==true||r.additional_cost_eur!==0)throw new Error('restart/idempotency/cost failed');
+          const forbidden=['prod_authorized','prod_write_authorized','db_mutation_authorized','provider_write_authorized','crm_write_authorized','dispatch_authorized','public_review_post_authorized','spend_authorized','trading_access','external_code_execution'];
+          if(forbidden.some(k=>r[k]!==false))throw new Error('authority expanded');
+          console.log(JSON.stringify({status:'GREEN',bundle_id:r.bundle_id,outcome_hash:r.outcome_hash}));
+          NODE
+      - name: Candidate registry gate
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const r=JSON.parse(fs.readFileSync('cerebro/registry/customer-journey-real-adoption-v1.json','utf8'));
+          if(r.environment!=='PREPROD'||r.engines?.['RET-001']?.decision!=='WRAP_EXISTING'||r.engines?.['RET-001']?.modified!==false||r.engines?.['REF-001']?.modified!==false||r.engines?.['REP-001']?.modified!==false)throw new Error('RET/REF/REP preservation invalid');
+          if(r.engines?.['POST-001']?.decision!=='EXTEND_EXISTING'||r.engines?.['CX-001']?.decision!=='EXTEND_EXISTING')throw new Error('POST/CX decision invalid');
+          const a=r.authority;const keys=['prod_authorized','prod_write_authorized','db_mutation_authorized','provider_write_authorized','crm_write_authorized','dispatch_authorized','public_review_post_authorized','spend_authorized','trading_access','external_code_execution'];
+          if(keys.some(k=>a[k]!==false)||a.additional_cost_eur!==0)throw new Error('authority/cost expanded');
+          NODE
+      - name: Upload evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: customer-journey-full-e2e-real-${{ github.run_id }}
+          path: |
+            /tmp/cerebro-customer-journey/report.json
+            /tmp/cerebro-customer-journey/state
+          retention-days: 30
+          if-no-files-found: error
