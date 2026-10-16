@@ -1,0 +1,109 @@
+name: CEREBRO COMPET FULL E2E REAL V1
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, 'cerebro/lote12-real-consumer-compet-v1-*']
+    paths:
+      - 'cerebro/runtime/compet-real-consumer-adoption-v1.mjs'
+      - 'cerebro/tests/compet-real-consumer-adoption-v1.test.mjs'
+      - 'cerebro/registry/compet-real-consumer-adoption-v1.json'
+      - 'cerebro/docs/COMPET_REAL_CONSUMER_ADOPTION_V1_RUNBOOK.md'
+      - '.github/workflows/cerebro-compet-full-e2e-real-v1.yml'
+  pull_request:
+    paths:
+      - 'cerebro/runtime/compet-real-consumer-adoption-v1.mjs'
+      - 'cerebro/tests/compet-real-consumer-adoption-v1.test.mjs'
+      - 'cerebro/registry/compet-real-consumer-adoption-v1.json'
+      - 'cerebro/docs/COMPET_REAL_CONSUMER_ADOPTION_V1_RUNBOOK.md'
+      - '.github/workflows/cerebro-compet-full-e2e-real-v1.yml'
+permissions: {contents: read, actions: read}
+jobs:
+  strict-real-consumer-adoption:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Canonical factory registry remains valid
+        working-directory: cerebro
+        run: npm run validate
+      - name: Preserve native COMPET and shared Lote 1+2 runtimes
+        run: |
+          git diff --exit-code 348a47e878c512c6287dbbd26fe48a72ff307a31 -- \
+            cerebro/runtime/compet-native-v1.mjs \
+            cerebro/tests/compet-native-v1.test.mjs \
+            cerebro/registry/capability-compet-native.v1.json \
+            cerebro/evidence/compet-native-v1-preprod.json \
+            cerebro/runtime/fact001-gap-capabilities-v0.mjs \
+            cerebro/runtime/compet-real-targets-v0.mjs \
+            cerebro/registry/compet-real-targets.v0.json \
+            cerebro/runtime/native-capability-operational-loop-v1.mjs \
+            cerebro/registry/native-capability-operational-adoption-v1.json
+      - name: Existing COMPET plus strict real-consumer tests
+        run: >-
+          node --test
+          cerebro/tests/compet-native-v1.test.mjs
+          cerebro/tests/compet-real-consumer-adoption-v1.test.mjs
+          cerebro/tests/native-capability-operational-loop-v1.test.mjs
+          cerebro/tests/native-capability-continuous-improvement-v1.test.mjs
+      - name: Execute strict COMPET route
+        run: |
+          mkdir -p /tmp/cerebro-compet-real
+          node cerebro/runtime/compet-real-consumer-adoption-v1.mjs \
+            --company fenix \
+            --workdir /tmp/cerebro-compet-real/state \
+            --source-run-id "${{ github.run_id }}" \
+            --source-head-sha "${{ github.sha }}" \
+            --out /tmp/cerebro-compet-real/report.json
+      - name: Strict FULL E2E REAL gate
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const r=JSON.parse(fs.readFileSync('/tmp/cerebro-compet-real/report.json','utf8'));
+          const required=['RSH-001','SEO-001','MKT-001','EXPAND-001','INN-001','LRN-001','OBSERV-001','FINOPS-001'];
+          const expected={
+            'RSH-001':'COMPET_RESEARCH_EVIDENCE_PACKET_READY',
+            'SEO-001':'SEO_COMPETITOR_GAP_INPUT_READY',
+            'MKT-001':'MARKETING_COMPETITOR_RESPONSE_READY',
+            'EXPAND-001':'EXPANSION_COMPETITOR_ALERT_READY',
+            'INN-001':'INNOVATION_COMPETITOR_OPPORTUNITY_READY',
+            'LRN-001':'LRN_FEEDBACK_PERSISTED',
+            'OBSERV-001':'OBSERVABILITY_RECORDED',
+            'FINOPS-001':'FINOPS_ZERO_COST_RECORDED'
+          };
+          if(r.status!=='FULL_E2E_REAL_PREPROD'||r.full_e2e_real_preprod!==true)throw new Error('COMPET strict FULL not green');
+          if(JSON.stringify(r.required_consumers)!==JSON.stringify(required)||r.consumers.length!==required.length)throw new Error('consumer map mismatch');
+          if(r.consumer_coverage!==1||r.functional_consumer_coverage!==1||r.missing_consumers.length||r.failed_consumers.length)throw new Error('semantic coverage incomplete');
+          if(!required.every(id=>r.consumer_map?.[id]?.decision===expected[id]&&r.consumer_map[id].real_consumption===true&&r.consumer_map[id].outcome_hash))throw new Error('semantic consumer decision proof incomplete');
+          if(r.evaluation_consumer?.decision!=='TRIBUNAL_PASS'||r.learning_sink?.decision!=='LRN_FEEDBACK_PERSISTED')throw new Error('Tribunal/LRN gate failed');
+          if(r.observability_consumer?.decision!=='OBSERVABILITY_RECORDED'||r.finops_consumer?.decision!=='FINOPS_ZERO_COST_RECORDED')throw new Error('OBSERV/FINOPS gate failed');
+          const rr=r.backup_rollback_rebuild;
+          if(!rr?.backup_ready||!rr.rollback_green||!rr.rebuild_green||rr.rebuilt_consumer_count!==5||rr.applied_state_hash!==rr.rebuilt_state_hash)throw new Error('backup/rollback/rebuild gate failed');
+          if(r.state_persisted!==true||r.semantic_state_persisted!==true||r.restartable!==true||r.idempotency_proven!==true||r.additional_cost_eur!==0)throw new Error('durability/idempotency/cost gate failed');
+          const forbidden=['prod_authorized','prod_write_authorized','db_mutation_authorized','provider_write_authorized','crm_write_authorized','spend_authorized','trading_access','android_touched','external_code_execution'];
+          if(forbidden.some(k=>r[k]!==false))throw new Error('authority expanded');
+          console.log(JSON.stringify({status:'GREEN',capability:r.capability_id,consumer_count:r.consumers.length,semantic_outcome_hash:r.semantic_outcome_hash,outcome_hash:r.outcome_hash}));
+          NODE
+      - name: Registry candidate gate
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const r=JSON.parse(fs.readFileSync('cerebro/registry/compet-real-consumer-adoption-v1.json','utf8'));
+          const required=['RSH-001','SEO-001','MKT-001','EXPAND-001','INN-001','LRN-001','OBSERV-001','FINOPS-001'];
+          if(r.capability_id!=='COMPET-NATIVE'||r.engine_id!=='COMPET-001'||r.environment!=='PREPROD'||JSON.stringify(r.required_consumers)!==JSON.stringify(required))throw new Error('registry identity/consumer map invalid');
+          const g=r.strict_gates;
+          if(!g.real_runtime_use_required||!g.semantic_state_change_required||!g.semantic_mutation_tests_required||!g.public_evidence_provenance_required||!g.replay_verification_required||!g.evaluation_tribunal_required||!g.learning_feedback_required||!g.backup_rollback_rebuild_required)throw new Error('strict gate weakened');
+          if(r.consumer_model?.receipt_only_forbidden!==true||r.producer?.live_external_fetch_required_for_ci!==false||r.producer?.external_code_execution!==false)throw new Error('consumer/producer policy invalid');
+          const a=r.authority;if(a.prod_authorized||a.prod_write_authorized||a.db_mutation_authorized||a.provider_write_authorized||a.crm_write_authorized||a.spend_authorized||a.trading_access||a.android_touched||a.external_code_execution||a.additional_cost_eur!==0)throw new Error('authority/cost expanded');
+          NODE
+      - name: Upload strict COMPET evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: compet-full-e2e-real-v1-${{ github.run_id }}
+          path: |
+            /tmp/cerebro-compet-real/report.json
+            /tmp/cerebro-compet-real/state
+          retention-days: 30
+          if-no-files-found: error

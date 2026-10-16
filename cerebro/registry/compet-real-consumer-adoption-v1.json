@@ -1,0 +1,110 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_CAPABILITY_REAL_CONSUMER_ADOPTION",
+  "capability_id": "COMPET-NATIVE",
+  "company_id": "fenix",
+  "engine_id": "COMPET-001",
+  "environment": "PREPROD",
+  "version": "1.0.0",
+  "status": "STRICT_CANDIDATE_PREPROD",
+  "strict_target_status": "FULL_E2E_REAL_PREPROD",
+  "legacy_contract_preserved": true,
+  "legacy_registry_ref": "cerebro/registry/capability-compet-native.v1.json",
+  "operational_registry_ref": "cerebro/registry/native-capability-operational-adoption-v1.json",
+  "required_consumers": [
+    "RSH-001",
+    "SEO-001",
+    "MKT-001",
+    "EXPAND-001",
+    "INN-001",
+    "LRN-001",
+    "OBSERV-001",
+    "FINOPS-001"
+  ],
+  "consumer_model": {
+    "classification": "REAL_SEMANTIC_CONSUMER",
+    "receipt_only_forbidden": true,
+    "semantic_state_change_required": true,
+    "proof": "each downstream engine changes a deterministic PREPROD research/SEO/marketing/expansion/innovation state only when the competitor fields it actually needs remain valid"
+  },
+  "producer": {
+    "native_runtime": "cerebro/runtime/compet-native-v1.mjs",
+    "strict_consumer_runtime": "cerebro/runtime/compet-real-consumer-adoption-v1.mjs",
+    "native_chain": [
+      "BUILD_WATCH_PLAN",
+      "RUN_CYCLE",
+      "BUILD_DOSSIER",
+      "REPLAY_VERIFY"
+    ],
+    "live_external_fetch_required_for_ci": false,
+    "public_evidence_fixture": "deterministic HTTPS competitor observations",
+    "external_code_execution": false
+  },
+  "cross_cutting": {
+    "evaluation_engine_id": "EVA-001",
+    "tribunal_required": true,
+    "learning_engine_id": "LRN-001",
+    "learning_required_for_full": true,
+    "observability_engine_id": "OBSERV-001",
+    "finops_engine_id": "FINOPS-001",
+    "learning_proof": "persists compet.consumer.outcome through the RSI outbox with idempotent replay"
+  },
+  "strict_gates": {
+    "complete_consumer_map": true,
+    "real_runtime_use_required": true,
+    "semantic_state_change_required": true,
+    "semantic_mutation_tests_required": true,
+    "public_evidence_provenance_required": true,
+    "source_evidence_separate_from_interpretation": true,
+    "replay_verification_required": true,
+    "old_vs_new_required": true,
+    "evaluation_tribunal_required": true,
+    "learning_feedback_required": true,
+    "observability_required": true,
+    "finops_zero_cost_required": true,
+    "persistent_restartable_state_required": true,
+    "idempotency_required": true,
+    "backup_rollback_rebuild_required": true,
+    "prod_authority_denied": true,
+    "external_code_execution_denied": true,
+    "exact_head_ci_required": true,
+    "governed_main_required": true,
+    "rsi_required": true,
+    "automatic_main_execution_required": true
+  },
+  "authority": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "db_mutation_authorized": false,
+    "provider_write_authorized": false,
+    "crm_write_authorized": false,
+    "spend_authorized": false,
+    "trading_access": false,
+    "android_touched": false,
+    "external_code_execution": false,
+    "additional_cost_eur": 0
+  },
+  "evidence": {
+    "baseline_main_sha": "348a47e878c512c6287dbbd26fe48a72ff307a31",
+    "branch_strict_ci_run_id": null,
+    "implementation_pr": null,
+    "implementation_branch_head_sha": null,
+    "pr_exact_head_strict_ci_run_id": null,
+    "governed_main_run_id": null,
+    "rsi_promotion_readiness_shadow_run_id": null,
+    "implementation_merge_sha": null,
+    "automatic_main_strict_run_id": null,
+    "automatic_main_strict_conclusion": null
+  },
+  "main_gate": {
+    "exact_head_ci_green": false,
+    "governed_main_green": false,
+    "rsi_green": false,
+    "merged_to_main": false,
+    "automatic_main_execution_green": false,
+    "main_head_sha": null,
+    "workflow_run_id": null,
+    "full_e2e_real_preprod": false
+  },
+  "next_gate": "EXACT_HEAD_CI_GOVERNED_MAIN_RSI_AND_MAIN_REPLAY"
+}
