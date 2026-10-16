@@ -1,0 +1,72 @@
+name: CEREBRO Android Human Control PREPROD V2
+
+on:
+  push:
+    branches: ['cerebro/android-full-control-preprod-v1']
+    paths:
+      - 'cerebro/android-worker-preprod-v1/**'
+      - 'cerebro/android-worker-preprod-v2/**'
+      - 'cerebro/runtime/build-android-human-control-preprod-v2.sh'
+      - 'cerebro/tests/android-human-control-preprod-v2.test.mjs'
+      - '.github/workflows/cerebro-android-human-control-preprod-v2.yml'
+  pull_request:
+    paths:
+      - 'cerebro/android-worker-preprod-v1/**'
+      - 'cerebro/android-worker-preprod-v2/**'
+      - 'cerebro/runtime/build-android-human-control-preprod-v2.sh'
+      - 'cerebro/tests/android-human-control-preprod-v2.test.mjs'
+      - '.github/workflows/cerebro-android-human-control-preprod-v2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-test-govern:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Policy contract tests
+        run: node --test cerebro/tests/android-human-control-preprod-v2.test.mjs
+      - name: Assert zero-download build path
+        run: |
+          if grep -Eiq 'sdkmanager|gradle |gradlew|mvn |npm (install|ci)|apt(-get)? install|curl .*[|].*(sh|bash)|wget .*[|].*(sh|bash)' cerebro/runtime/build-android-human-control-preprod-v2.sh; then
+            echo 'External dependency install path detected'; exit 1
+          fi
+      - name: Build side-by-side signed PREPROD V2 worker
+        run: bash cerebro/runtime/build-android-human-control-preprod-v2.sh /tmp/cerebro-android-human-control-preprod-v2
+      - name: Verify APK and authority boundaries
+        run: |
+          BT="$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)"
+          APK=/tmp/cerebro-android-human-control-preprod-v2/cerebro-android-worker-preprod-v2.apk
+          "$BT/apksigner" verify --verbose "$APK"
+          "$BT/aapt2" dump permissions "$APK" | tee /tmp/v2-permissions.txt
+          grep -q 'android.permission.INTERNET' /tmp/v2-permissions.txt
+          grep -q 'android.permission.FOREGROUND_SERVICE' /tmp/v2-permissions.txt
+          ! grep -q 'REQUEST_INSTALL_PACKAGES' /tmp/v2-permissions.txt
+          ! grep -q 'READ_SMS' /tmp/v2-permissions.txt
+          ! grep -q 'READ_CONTACTS' /tmp/v2-permissions.txt
+          node - <<'NODE'
+          const p=require('/tmp/cerebro-android-human-control-preprod-v2/android-human-control-preprod-v2-evidence.json');
+          if(p.status!=='SIDE_BY_SIDE_SIGNED_APK_BUILD_GREEN'||p.package!=='es.cerebro.worker.preprod.v2'||p.rollback_package!=='es.cerebro.worker.preprod'||p.prod_authorized||p.trading_access||p.payment_automation||p.credential_automation||p.additional_cost_eur!==0||p.physical_device_attested) process.exit(1);
+          console.log('Android V2 governed build GREEN '+p.apk_sha256);
+          NODE
+      - name: Canonical registry validation
+        working-directory: cerebro
+        run: npm run validate
+      - name: Full CEREBRO regression
+        working-directory: cerebro
+        run: npm test
+      - name: Upload governed V2 APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-android-human-control-preprod-v2
+          path: |
+            /tmp/cerebro-android-human-control-preprod-v2/cerebro-android-worker-preprod-v2.apk
+            /tmp/cerebro-android-human-control-preprod-v2/apksigner-verify.txt
+            /tmp/cerebro-android-human-control-preprod-v2/android-human-control-preprod-v2-evidence.json
+          retention-days: 14
