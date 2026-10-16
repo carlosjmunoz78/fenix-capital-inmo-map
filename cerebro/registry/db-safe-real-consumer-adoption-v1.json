@@ -1,0 +1,29 @@
+{
+  "schema_version":"1.0.0",
+  "state_type":"CEREBRO_CAPABILITY_REAL_CONSUMER_ADOPTION",
+  "capability_id":"DB-SAFE-NATIVE",
+  "company_id":"fenix",
+  "engine_id":"DATA-001",
+  "environment":"PREPROD",
+  "version":"1.0.0",
+  "status":"PARCIAL_AWAITING_EXACT_HEAD_CI",
+  "strict_target_status":"FULL_E2E_REAL_PREPROD",
+  "legacy_contract_preserved":true,
+  "legacy_registry_ref":"cerebro/registry/native-capability-operational-adoption-v1.json",
+  "producer":{"runtime":"cerebro/runtime/db-safe-native-v1.mjs","strict_consumer_runtime":"cerebro/runtime/db-safe-real-consumer-adoption-v1.mjs","adapter":"LOCAL_DETERMINISTIC_PREPROD_DB_SANDBOX"},
+  "required_consumers":[
+    {"engine_id":"MIG-001","classification":"REAL_RUNTIME_CONSUMER","proof":"consumes reversible migration plan and PREPROD apply result"},
+    {"engine_id":"DBOFF-001","classification":"REAL_RUNTIME_CONSUMER","proof":"consumes transactional versus heavy-workload routing decisions"},
+    {"engine_id":"CRM-001","classification":"REAL_RUNTIME_CONSUMER","proof":"consumes schema inventory and preserved CRM contract tables"},
+    {"engine_id":"SEC-001","classification":"GOVERNANCE_CONSUMER","proof":"consumes RLS, tenant isolation and PROD mutation denial"},
+    {"engine_id":"QA-001","classification":"GOVERNANCE_CONSUMER","proof":"consumes performance regression and transaction outcomes"},
+    {"engine_id":"RBLD-001","classification":"REAL_RUNTIME_CONSUMER","proof":"consumes rollback result and verifies baseline snapshot restoration"},
+    {"engine_id":"OBSERV-001","classification":"TELEMETRY_CONSUMER","proof":"persists and validates the complete DB-SAFE operation bundle"},
+    {"engine_id":"FINOPS-001","classification":"TELEMETRY_CONSUMER","proof":"consumes all operation cost fields and enforces zero cost"}
+  ],
+  "cross_cutting":{"evaluation_engine_id":"EVA-001","tribunal_required":true,"learning_engine_id":"LRN-001","learning_required_for_full":true},
+  "strict_gates":{"complete_consumer_map":true,"semantic_mutation_tests_required":true,"outcome_capture_required":true,"old_vs_new_required":true,"evaluation_tribunal_required":true,"learning_feedback_required":true,"persistent_restartable_state_required":true,"idempotency_required":true,"backup_rollback_rebuild_required":true,"zero_cost_required":true,"prod_authority_denied":true,"exact_head_ci_required":true,"governed_main_required":true,"rsi_required":true,"automatic_main_execution_required":true},
+  "authority":{"prod_authorized":false,"prod_write_authorized":false,"db_mutation_authorized":false,"provider_write_authorized":false,"crm_write_authorized":false,"spend_authorized":false,"trading_access":false,"android_touched":false,"additional_cost_eur":0},
+  "main_gate":{"exact_head_ci_green":false,"governed_main_green":false,"rsi_green":false,"merged_to_main":false,"automatic_main_execution_green":false,"main_head_sha":null,"workflow_run_id":null,"full_e2e_real_preprod":false},
+  "next_gate":"EXACT_HEAD_STRICT_REAL_CONSUMER_CI"
+}
