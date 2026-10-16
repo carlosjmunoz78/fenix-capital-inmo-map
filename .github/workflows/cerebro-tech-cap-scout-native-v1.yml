@@ -1,0 +1,55 @@
+name: CEREBRO Technology Capability Scout Native V1 PREPROD
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'cerebro/runtime/technology-capability-scout-native-v1.mjs'
+      - 'cerebro/tests/technology-capability-scout-native-v1.test.mjs'
+      - 'cerebro/registry/capability-tech-cap-scout-native.v1.json'
+      - 'cerebro/evidence/tech-cap-scout-native-v1-preprod.json'
+      - 'cerebro/docs/TECH_CAP_SCOUT_NATIVE_V1_RUNBOOK.md'
+      - '.github/workflows/cerebro-tech-cap-scout-native-v1.yml'
+  push:
+    branches: ['cerebro/tech-cap-scout-native-v1-*']
+permissions: {contents: read}
+jobs:
+  preprod-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Factory remains valid
+        working-directory: cerebro
+        run: npm run validate
+      - name: Existing RSH web profile remains green
+        run: node --test cerebro/tests/web-acquisition-intelligence-profile-v1.test.mjs
+      - name: Technology Capability Scout native E2E
+        run: node --test cerebro/tests/technology-capability-scout-native-v1.test.mjs
+      - name: Existing acquisition runtimes preserved OLD vs NEW
+        run: |
+          git diff --exit-code 40ff1f6bb68fc926c8939d9c6a34648b89efcb4b -- \
+            cerebro/runtime/web-acquisition-intelligence-profile-v1.mjs \
+            cerebro/runtime/public-source-adapter-v0.mjs \
+            cerebro/runtime/route001-resource-discovery.mjs \
+            cerebro/runtime/evaluation-tribunal.mjs
+      - name: Registry and policy gate
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const r=JSON.parse(fs.readFileSync('cerebro/registry/capability-tech-cap-scout-native.v1.json','utf8'));
+          if(r.capability_id!=='TECH-CAP-SCOUT-NATIVE'||r.owner_engine_id!=='RSH-001'||r.environment!=='PREPROD')throw new Error('identity/owner/environment');
+          if(r.prod_authorized||r.prod_write_authorized||r.additional_cost_eur!==0)throw new Error('unsafe authority/cost');
+          if(r.ownership.new_engine_created!==false||r.policy.reuse_existing_rsh_profile!==true||r.policy.zero_cost_first!==true)throw new Error('reuse/engine/cost policy');
+          if(r.contracts.public_evidence_only!==true||r.contracts.canonical_knowledge_write!==false||r.contracts.ai_required!==false)throw new Error('evidence/knowledge/AI policy');
+          if(r.permissions.cross_company!==false||r.permissions.captcha_bypass!==false||r.permissions.auth_bypass!==false)throw new Error('permission drift');
+          if(r.full_gate.required.length!==14)throw new Error('full gate incomplete');
+          if(r.existing_evidence.existing_runtime_modified!==false||r.existing_evidence.prod_touched!==false||r.existing_evidence.android_touched!==false)throw new Error('preservation boundary broken');
+          if(r.status==='NATIVE_FULL_PREPROD'){
+            if(r.full_gate.ci_green!==true||r.full_gate.native_full!==true||!r.full_gate.workflow_run_id||!r.full_gate.evidence_ref)throw new Error('full status without green evidence');
+            if(!fs.existsSync(r.full_gate.evidence_ref))throw new Error('evidence ref missing');
+          } else if(r.status!=='PREPROD_CANDIDATE') throw new Error('unexpected status');
+          console.log(JSON.stringify({status:'GREEN',capability:r.capability_id,registry_status:r.status}));
+          NODE
