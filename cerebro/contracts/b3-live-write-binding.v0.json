@@ -1,0 +1,73 @@
+{
+  "schema_version": "0.1.0",
+  "contract_id": "cerebro.b3.live-write-binding.v0",
+  "company_id": "fenix",
+  "engine_id": "ACTGW-001",
+  "environment": "PREPROD",
+  "status": "DEFINED_NOT_BOUND",
+  "purpose": "Bind the already-installed B3 durable journal to a single synthetic reversible PREPROD write without guessing endpoints or weakening Core Guard.",
+  "journal_protocol": {
+    "state_machine": ["INTENT", "LEASED", "GATED", "VERIFY", "RECEIPT"],
+    "unique_key": ["company_id", "site_id", "environment", "request_key"],
+    "lease_required": true,
+    "compare_and_swap_required": true,
+    "verify_persisted_before_writer_call": true,
+    "post_write_readback_sha256_required": true,
+    "unknown_side_effect_policy": "QUARANTINE_NO_BLIND_RETRY",
+    "idempotent_replay_required": true
+  },
+  "target_policy": {
+    "site_host": "staging.fenixcapital.es",
+    "target_must_be_new_synthetic_draft": true,
+    "existing_draft_ids_forbidden": [52287, 52295],
+    "published_content_forbidden": true,
+    "production_forbidden": true,
+    "customer_data_forbidden": true,
+    "trading_forbidden": true
+  },
+  "core_guard_attestation": {
+    "source": "SERVER_SIDE_INSTALLED_CORE_GUARD_PUBLIC_CONTRACT_ONLY",
+    "browser_payload_authorization_forbidden": true,
+    "health_score_required": 100,
+    "mode_required_before_and_after": "observer",
+    "preprod_host_match_required": true,
+    "backup_verified_required": true,
+    "rollback_verified_required": true,
+    "ephemeral_gate_required": true,
+    "gate_scope": "ONE_SYNTHETIC_DRAFT_ONE_MUTATION",
+    "gate_expiry_required": true,
+    "attest_immediately_before_writer": true,
+    "attest_after_writer": true,
+    "finally_close_gate_required": true
+  },
+  "connector_binding": {
+    "installed_read_namespace": "cerebro-b3-journal-lab/v1",
+    "known_read_route": "/cerebro-b3-journal-lab/v1/observe",
+    "write_route": "DISCOVER_FROM_LIVE_GRANTED_ROUTE_CONTRACT_DO_NOT_GUESS",
+    "current_write_route_granted": false,
+    "current_namespace_granted": false,
+    "grant_must_be_explicit_and_minimal": true,
+    "broad_rest_grant_forbidden": true
+  },
+  "acceptance": {
+    "intent_persisted": true,
+    "duplicate_replay_creates_no_second_intent": true,
+    "two_worker_race_single_lease_winner": true,
+    "one_writer_call_max": true,
+    "readback_matches_expected_sha256": true,
+    "receipt_durable": true,
+    "rollback_restores_synthetic_resource": true,
+    "gate_closed_after_success": true,
+    "gate_closed_after_failure": true,
+    "simulated_post_write_pre_receipt_failure_quarantines": true,
+    "cross_company_denied": true,
+    "public_publish_count": 0,
+    "additional_cost_eur": 0
+  },
+  "promotion": {
+    "prod_authorized": false,
+    "autonomous_prod": false,
+    "merge_authorized": false,
+    "current_gate": "HUMAN_REQUIRED_POLICY_CONFLICT_EXPLICIT_B3_ROUTE_GRANT_AND_EPHEMERAL_SYNTHETIC_WRITE_GATE"
+  }
+}
