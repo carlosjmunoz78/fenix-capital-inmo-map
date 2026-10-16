@@ -1,0 +1,136 @@
+name: CEREBRO Visual State Auth E2E V0
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/cerebro-visual-state-auth-e2e-v0.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  visual-state-auth-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      SUPABASE_URL: https://cluhljgonannaafpmblx.supabase.co
+      PROD_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
+      CEREBRO_E2E_USER_JWT: ${{ secrets.CEREBRO_E2E_USER_JWT }}
+      VISUAL_BRANCH: cerebro-visual-lab
+      CANARY_PATH: /functions/v1/cerebro-visual-state-v0-canary
+    steps:
+      - name: Checkout gate branch
+        uses: actions/checkout@v4
+
+      - name: Classify secure read-only E2E credential availability
+        id: credential
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${PROD_PUBLISHABLE_KEY}"
+          if [ -n "${CEREBRO_E2E_USER_JWT}" ]; then
+            echo 'VISUAL_STATE_AUTH_CREDENTIALS=AVAILABLE'
+            echo 'jwt_available=true' >> "${GITHUB_OUTPUT}"
+          else
+            echo 'VISUAL_STATE_AUTH_CREDENTIALS=OWNER_JWT_MISSING'
+            echo 'jwt_available=false' >> "${GITHUB_OUTPUT}"
+          fi
+
+      - name: Run authored visual projection and gateway contract tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin "${VISUAL_BRANCH}"
+          git checkout --detach FETCH_HEAD
+          echo "VISUAL_TEST_HEAD=$(git rev-parse HEAD)"
+          node --test tests/live-event-projection-v0.test.mjs tests/visual-state-command-v0.test.mjs
+          echo 'VISUAL_STATE_CONTRACT_TESTS=GREEN'
+
+      - name: Verify public canary health is PREPROD read-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp)"
+          trap 'rm -f "$tmp"' EXIT
+          curl --fail --silent --show-error --max-time 30 \
+            -H "apikey: ${PROD_PUBLISHABLE_KEY}" \
+            "${SUPABASE_URL}${CANARY_PATH}/health" >"$tmp"
+          jq -e '
+            .ok == true and
+            .status == 200 and
+            .environment == "LAB_PREPROD_CANARY" and
+            .mode == "READ_ONLY_GATEWAY_SIDECAR" and
+            .traffic_routing == false and
+            .main_gateway_mutated == false and
+            .prod_authorized == false and
+            .prod_write_authorized == false and
+            .trading_access == false and
+            .additional_cost_eur == 0
+          ' "$tmp" >/dev/null
+          echo 'VISUAL_STATE_HEALTH=GREEN'
+
+      - name: Verify visual-state fails closed without owner bearer
+        shell: bash
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp)"
+          trap 'rm -f "$tmp"' EXIT
+          code="$(curl --silent --show-error --max-time 30 \
+            -o "$tmp" -w '%{http_code}' \
+            -H "apikey: ${PROD_PUBLISHABLE_KEY}" \
+            "${SUPABASE_URL}${CANARY_PATH}/visual-state")"
+          test "$code" = '403'
+          jq -e '.ok == false and .status == 403 and .error == "OWNER_AUTH_REQUIRED" and .prod_authorized == false' "$tmp" >/dev/null
+          echo 'VISUAL_STATE_UNAUTH_FAIL_CLOSED=GREEN'
+
+      - name: Verify authenticated owner visual-state snapshot
+        if: steps.credential.outputs.jwt_available == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp)"
+          trap 'rm -f "$tmp"' EXIT
+          curl --fail --silent --show-error --max-time 30 \
+            -H "apikey: ${PROD_PUBLISHABLE_KEY}" \
+            -H "Authorization: Bearer ${CEREBRO_E2E_USER_JWT}" \
+            -H 'Origin: https://app.fenixcapital.es' \
+            "${SUPABASE_URL}${CANARY_PATH}/visual-state" >"$tmp"
+          jq -e '
+            .ok == true and
+            .status == 200 and
+            .state_type == "CEREBRO_VISUAL_STATE_LIVE_CANARY_V0" and
+            .snapshot_mode == "LIVE_GATEWAY_HEALTH_PLUS_VERSIONED_REGISTRY" and
+            .company_id == "fenix" and
+            .environment == "LAB_PREPROD" and
+            .canonical_engine_count == 179 and
+            (.engines | length) == 179 and
+            .live_active_engine_count == 1 and
+            ([.engines[] | select(.engine_id == "CONSOLE-001" and .live_activity == true and .health_state == "RESPONDING")] | length) == 1 and
+            .gateway_evidence.authenticated_transport == true and
+            .gateway_evidence.direct_model_access == false and
+            .gateway_evidence.prod_execution_enabled == false and
+            .gateway_evidence.live_writes == false and
+            .truth_contract.unknown_is_not_green == true and
+            .truth_contract.synthetic_does_not_mark_live == true and
+            .prod_authorized == false and
+            .prod_write_authorized == false and
+            .trading_access == false and
+            .additional_cost_eur == 0
+          ' "$tmp" >/dev/null
+          echo 'VISUAL_STATE_AUTHENTICATED_E2E=GREEN'
+
+      - name: Classify gate
+        shell: bash
+        run: |
+          if [ "${{ steps.credential.outputs.jwt_available }}" = 'true' ]; then
+            echo 'CEREBRO_VISUAL_STATE_AUTH_E2E=GREEN_PREPROD_READ_ONLY'
+          else
+            echo 'CEREBRO_VISUAL_STATE_AUTH_E2E=PARCIAL_OWNER_JWT_MISSING'
+          fi
+          echo 'VISUAL_STATE_CONTRACT_TESTS=GREEN'
+          echo 'VISUAL_STATE_HEALTH=GREEN'
+          echo 'VISUAL_STATE_UNAUTH_FAIL_CLOSED=GREEN'
+          echo 'PROD_AUTHORIZED=false'
+          echo 'ADDITIONAL_COST_EUR=0'
