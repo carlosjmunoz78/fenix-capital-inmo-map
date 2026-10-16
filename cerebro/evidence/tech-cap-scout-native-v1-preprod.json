@@ -1,0 +1,19 @@
+{
+  "schema_version":"1.0.0",
+  "state_type":"CEREBRO_NATIVE_CAPABILITY_PREPROD_EVIDENCE",
+  "capability_id":"TECH-CAP-SCOUT-NATIVE",
+  "company_id":"GLOBAL",
+  "engine_id":"RSH-001",
+  "environment":"PREPROD",
+  "version":"1.0.0",
+  "status":"PREPROD_GREEN",
+  "validated_head_sha":"4c64c32cf47f3957eb8f385f8b35702aeb9217f8",
+  "workflow":{"name":"CEREBRO Technology Capability Scout Native V1 PREPROD","run_id":38904994574,"job_id":116986214857,"conclusion":"success"},
+  "checks":{"factory_registry_valid":true,"existing_rsh_profile_tests_green":true,"targeted_e2e_green":true,"existing_acquisition_runtimes_unchanged":true,"registry_policy_gate_green":true,"gateway_fail_closed":true,"preprod_only":true,"multi_company_isolation_green":true,"public_evidence_only":true,"secret_url_denial_green":true,"zero_cost_money_limit_green":true,"deterministic_evidence_and_dossier_green":true,"replay_green":true,"old_vs_new_green":true,"independent_tribunal_green":true,"prod_denied":true,"trading_denied":true,"android_touched":false,"additional_cost_eur":0},
+  "existing_runtime_boundary":{"web_acquisition_profile_modified":false,"public_source_adapter_modified":false,"route001_resource_discovery_modified":false,"evaluation_tribunal_modified":false,"prod_touched":false},
+  "evaluation":{"benchmark":"tech-cap-scout-governance-coverage@1.0.0","old_required_gates_covered":7,"new_required_gates_covered":14,"delta":7,"judge_id":"QA-001","candidate_actor_id":"RSH-001","tribunal_decision":"PASS","prod_authorized":false},
+  "full_gate_count":14,
+  "full_gate_result":"GREEN",
+  "human_required":null,
+  "next_gate":"PR_AND_MAIN_INTEGRATION_WITHOUT_PROD_OR_ANDROID"
+}
