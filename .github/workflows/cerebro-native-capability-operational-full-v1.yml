@@ -8,27 +8,37 @@ on:
     branches:
       - main
       - 'cerebro/lote12-operational-full-v1-*'
+      - 'cerebro/lote12-continuous-improvement-v1-*'
     paths:
       - 'cerebro/runtime/native-capability-operational-loop-v1.mjs'
+      - 'cerebro/runtime/native-capability-continuous-improvement-v1.mjs'
       - 'cerebro/tests/native-capability-operational-loop-v1.test.mjs'
+      - 'cerebro/tests/native-capability-continuous-improvement-v1.test.mjs'
       - 'cerebro/registry/native-capability-operational-adoption-v1.json'
+      - 'cerebro/registry/native-capability-continuous-improvement-v1.json'
+      - 'cerebro/evidence/native-capability-continuous-improvement-v1-preprod.json'
       - 'cerebro/docs/NATIVE_CAPABILITY_OPERATIONAL_FULL_V1_RUNBOOK.md'
       - '.github/workflows/cerebro-native-capability-operational-full-v1.yml'
   pull_request:
     paths:
       - 'cerebro/runtime/native-capability-operational-loop-v1.mjs'
+      - 'cerebro/runtime/native-capability-continuous-improvement-v1.mjs'
       - 'cerebro/tests/native-capability-operational-loop-v1.test.mjs'
+      - 'cerebro/tests/native-capability-continuous-improvement-v1.test.mjs'
       - 'cerebro/registry/native-capability-operational-adoption-v1.json'
+      - 'cerebro/registry/native-capability-continuous-improvement-v1.json'
+      - 'cerebro/evidence/native-capability-continuous-improvement-v1-preprod.json'
       - 'cerebro/docs/NATIVE_CAPABILITY_OPERATIONAL_FULL_V1_RUNBOOK.md'
       - '.github/workflows/cerebro-native-capability-operational-full-v1.yml'
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   operational-full-preprod:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with:
@@ -39,8 +49,11 @@ jobs:
       - name: Canonical factory registry remains valid
         working-directory: cerebro
         run: npm run validate
-      - name: Operational adoption contract and E2E
-        run: node --test cerebro/tests/native-capability-operational-loop-v1.test.mjs
+      - name: Operational adoption and continuous-improvement E2E
+        run: >-
+          node --test
+          cerebro/tests/native-capability-operational-loop-v1.test.mjs
+          cerebro/tests/native-capability-continuous-improvement-v1.test.mjs
       - name: Preserve all eight native runtimes OLD vs NEW
         run: |
           git diff --exit-code cd24c45149d336b3ecf9f4e70e4c2547fb05ee9c -- \
@@ -75,6 +88,66 @@ jobs:
           if(r.continuous.schedule_configured!==true||r.continuous.soak_overclaimed!==false)throw new Error('continuous contract invalid');
           console.log(JSON.stringify({status:'GREEN',capabilities:r.capability_count,bindings:r.binding_receipts_total,engines:r.all_registered_engines_total,evidence_hash:r.evidence_hash}));
           NODE
+      - name: Locate previous successful persistent learning state
+        id: previous_state
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          found=""
+          mapfile -t runs < <(gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/cerebro-native-capability-operational-full-v1.yml/runs?branch=main&status=success&per_page=20" --jq '.workflow_runs[].id')
+          for candidate in "${runs[@]}"; do
+            if [ "$candidate" = "${GITHUB_RUN_ID}" ]; then continue; fi
+            artifact_id="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${candidate}/artifacts?per_page=100" --jq '.artifacts[]? | select(.name=="native-capability-learning-state") | .id' | head -n1 || true)"
+            if [ -n "$artifact_id" ]; then found="$candidate"; break; fi
+          done
+          echo "run_id=$found" >> "$GITHUB_OUTPUT"
+          if [ -n "$found" ]; then echo "Previous persistent learning state found in run $found"; else echo "No previous state artifact: deterministic rebuild/bootstrap will be used"; fi
+      - name: Restore previous persistent learning state
+        if: steps.previous_state.outputs.run_id != ''
+        uses: actions/download-artifact@v4
+        with:
+          name: native-capability-learning-state
+          path: /tmp/cerebro-opfull/learning-state
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ steps.previous_state.outputs.run_id }}
+      - name: Consume operational outcomes through LRN continuous-improvement host
+        run: |
+          node cerebro/runtime/native-capability-continuous-improvement-v1.mjs \
+            --operational-report /tmp/cerebro-opfull/report.json \
+            --outbox-root /tmp/cerebro-opfull/work/lrn-outbox \
+            --state-root /tmp/cerebro-opfull/learning-state \
+            --now "$(date -u +'%Y-%m-%dT00:00:00Z')" \
+            --out /tmp/cerebro-opfull/continuous-improvement.json
+      - name: Continuous improvement policy gate
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const r=JSON.parse(fs.readFileSync('/tmp/cerebro-opfull/continuous-improvement.json','utf8'));
+          if(r.status!=='CONTINUOUS_IMPROVEMENT_GREEN_PREPROD'||r.continuous_improvement_green!==true||r.learning_events_total!==8)throw new Error('continuous improvement aggregate not green');
+          if(r.learning.status!=='GREEN'||r.candidates.status!=='CANDIDATES_GREEN'||r.candidates.candidate_total<8||r.candidates.held_total!==0)throw new Error('learning/candidates incomplete');
+          if(r.orchestration.status!=='ORCHESTRATOR_GREEN'||r.horizons.status!=='HORIZON_EXECUTORS_GREEN'||r.horizons.daily_green!==true||r.meta_observability.status!=='META_METRICS_GREEN')throw new Error('orchestration/horizons/meta incomplete');
+          if(r.persistence.idempotency_green!==true||r.learning.idempotency_receipts_skipped_second_pass<1)throw new Error('idempotency not proven');
+          if(r.governance.old_vs_new_required!==true||r.governance.evaluation_required!==true||r.governance.tribunal_required!==true||r.governance.automatic_code_mutation!==false||r.governance.automatic_prod_promotion!==false)throw new Error('improvement governance weakened');
+          const a=r.authority;if(a.prod_authorized||a.prod_write_authorized||a.provider_write_authorized||a.crm_write_authorized||a.db_mutation_authorized||a.spend_authorized||a.trading_access||a.android_touched||a.additional_cost_eur!==0)throw new Error('continuous improvement authority/cost expanded');
+          console.log(JSON.stringify({status:'GREEN',learning_events:r.learning_events_total,candidates:r.candidates.candidate_total,horizons:r.horizons.completed_total,input_fingerprint:r.input_fingerprint}));
+          NODE
+      - name: Continuous improvement registry and evidence gate
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const r=JSON.parse(fs.readFileSync('cerebro/registry/native-capability-continuous-improvement-v1.json','utf8'));
+          const e=JSON.parse(fs.readFileSync('cerebro/evidence/native-capability-continuous-improvement-v1-preprod.json','utf8'));
+          if(r.company_id!=='fenix'||r.engine_id!=='LRN-001'||r.environment!=='PREPROD'||r.version!=='1.0.0'||r.capabilities.length!==8)throw new Error('continuous registry identity');
+          if(!['CONTINUOUS_IMPROVEMENT_GREEN_PREPROD_CANDIDATE_MAIN','OPERATIONAL_FULL_CONTINUOUS_PREPROD'].includes(r.status))throw new Error('continuous registry status');
+          if(r.continuous_contract.state_persisted_between_runs!==true||r.continuous_contract.usage_to_learning!==true||r.continuous_contract.learning_to_candidate!==true||r.continuous_contract.old_vs_new_required!==true||r.continuous_contract.evaluation_required!==true||r.continuous_contract.tribunal_required!==true)throw new Error('continuous contract weakened');
+          if(r.continuous_contract.automatic_code_mutation!==false||r.continuous_contract.automatic_prod_promotion!==false)throw new Error('unsafe self-mutation authority');
+          const a=r.authority;if(a.prod_authorized||a.prod_write_authorized||a.provider_write_authorized||a.crm_write_authorized||a.db_mutation_authorized||a.spend_authorized||a.trading_access||a.android_touched||a.additional_cost_eur!==0)throw new Error('registry authority/cost expanded');
+          if(e.status!=='TARGETED_CONTINUOUS_IMPROVEMENT_GREEN'||e.continuous_improvement.learning_events_total!==8||e.continuous_improvement.candidate_total!==8||e.continuous_improvement.horizons_completed_total!==3||e.continuous_improvement.daily_horizon_green!==true||e.authority.additional_cost_eur!==0||e.continuous_soak.soak_overclaimed!==false)throw new Error('targeted evidence incomplete');
+          if(r.status==='OPERATIONAL_FULL_CONTINUOUS_PREPROD'&&(!r.main_gate.exact_head_global_checks_green||!r.main_gate.merged_to_main||!r.main_gate.automatic_main_execution_green||!r.main_gate.persistent_state_artifact_green||!r.main_gate.final_full||!r.main_gate.main_workflow_run_id||!r.main_gate.main_head_sha))throw new Error('final FULL without main evidence');
+          console.log(JSON.stringify({status:'GREEN',registry_status:r.status,targeted_run:e.workflow_run_id}));
+          NODE
       - name: Existing technical native statuses remain GREEN
         run: |
           node --input-type=module <<'NODE'
@@ -82,11 +155,19 @@ jobs:
           const files=['capability-fact-skill-native.v1.json','capability-gh-safe-native.v1.json','capability-db-safe-native.v1.json','capability-evt001-native.v1.json','capability-tech-cap-scout-native.v1.json','capability-compet-native.v1.json','capability-cap-native.v1.json','capability-lead-native.v1.json'];
           for(const f of files){const r=JSON.parse(fs.readFileSync('cerebro/registry/'+f,'utf8'));if(r.status!=='NATIVE_FULL_PREPROD'||r.full_gate?.native_full!==true||r.full_gate?.ci_green!==true||r.prod_authorized!==false||r.additional_cost_eur!==0)throw new Error('technical native regression:'+f);}
           NODE
-      - name: Upload operational evidence
+      - name: Upload operational and continuous-improvement evidence
         uses: actions/upload-artifact@v4
         with:
           name: native-capability-operational-full-v1-${{ github.run_id }}
           path: |
             /tmp/cerebro-opfull/report.json
+            /tmp/cerebro-opfull/continuous-improvement.json
             /tmp/cerebro-opfull/work/lrn-outbox
           retention-days: 30
+      - name: Persist learning state for next automatic run
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-capability-learning-state
+          path: /tmp/cerebro-opfull/learning-state
+          retention-days: 30
+          if-no-files-found: error
