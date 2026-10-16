@@ -1,77 +1,58 @@
 {
-  "schema_version": "1",
-  "state_type": "CEREBRO_B3_LIVE_ADAPTER_GRANT_CONTRACT_PROBE",
+  "schema_version": "2",
+  "state_type": "CEREBRO_B3_LIVE_ADAPTER_GRANT_CONTRACT_RECONCILIATION",
   "company_id": "fenix",
   "engine_id": "EVT-001",
   "environment": "PREPROD",
-  "version": "v0",
-  "status": "HUMAN_REQUIRED_POLICY_CONFLICT",
+  "version": "v1",
+  "status": "GREEN_ALREADY_PHYSICAL_NO_DUPLICATE_WRITE_REQUIRED",
   "wordpress_site": "staging.fenixcapital.es",
-  "live_core_guard": {
-    "plugin_version": "1.0.0-rc12",
-    "mode": "observer",
-    "health_score": 100,
-    "environment_type": "staging",
-    "known_preprod_host_override": true,
-    "build_channel": "preprod",
-    "operations_master_authorized": true,
-    "operations_gate": false,
-    "runtime_gate_active": false,
-    "runtime_gate_max_ttl_seconds": 900,
-    "operational_writes_allowed": false,
-    "safe_default": true
-  },
-  "installed_b3_contract": {
-    "namespace": "/cerebro-b3-journal-lab/v1/*",
-    "historically_verified_read_route": "/cerebro-b3-journal-lab/v1/observe",
-    "historically_verified_write_routes": ["prepare","replay","claim","cleanup"],
-    "current_mcp_describe_observe": "NOT_GRANTED_FOR_THIS_MCP_CONNECTION",
-    "current_mcp_route_visibility": "NOT_GRANTED",
-    "standard_plugin_list_match_b3": false,
-    "standard_plugin_list_match_journal": false,
-    "historical_r6_r8_candidates": "LAB_ONLY_NOT_INSTALLED",
-    "permission_bypass_attempted": false,
-    "plugin_activation_or_replacement_attempted": false
-  },
-  "backup_state": {
-    "core_guard_exact_plugin_backup_exists": true,
-    "core_guard_backup_sha256": "3f4e7267cc8602c6c6324c33f18b0cbb943f4ebb5f805ab36ff3ab0001df2674",
-    "core_guard_snapshot_id": 588,
-    "fresh_b3_component_write_backup_created": false,
-    "reason": "No write lane is authorized yet; do not mutate or expand permissions before bounded authorization."
-  },
-  "authority_before_probe": {
-    "prod_authorized": false,
-    "prod_write_authorized": false,
-    "server_journal_write_authorized": false,
-    "persistent_core_guard_gate_authorized": false,
-    "mcp_permission_expansion_authorized": false,
-    "customer_data_authorized": false,
-    "trading_access": false,
+  "authorization_received": "AUTORIZO B3 PREPROD WRITE E2E",
+  "decision": "Do not repeat a physical write that is already canonically proven and merged; validate the existing canary against live state instead.",
+  "canonical_existing_closeout": {
+    "commit": "0b559c73b42b62e02ab59937413c53e1ebc0c26e",
+    "evidence": "cerebro/registry/b3-server-write-e2e-closeout.v1.json",
+    "status": "GREEN_PHYSICAL_PREPROD",
+    "write_ability": "cerebro-universal-qa__create-draft-live-once",
+    "readback_ability": "mosmcp__page-get",
+    "rollback_ability": "mosmcp__page-trash",
+    "synthetic_post_id": 54775,
+    "synthetic_write_verified": true,
+    "readback_verified": true,
+    "replay_idempotent_zero_second_write": true,
+    "rollback_compensation_verified": true,
+    "gate_closed_after": true,
+    "new_credential_created": false,
+    "prod_touched": false,
     "additional_cost_eur": 0
   },
-  "required_bounded_authorization": {
-    "scope": "B3_PREPROD_SYNTHETIC_WRITE_E2E_ONLY",
-    "allowed": [
-      "fresh component snapshot/backup before write",
-      "exact installed B3 adapter/grant binding only",
-      "short-lived Core Guard runtime gate up to existing 900 second cap",
-      "one synthetic no-customer-data intent",
-      "lease/CAS/gate/verify/receipt",
-      "idempotent replay with no duplicate",
-      "rollback/cleanup of synthetic data",
-      "grant and gate closure immediately after evidence"
-    ],
-    "denied": [
-      "PROD",
-      "customer data",
-      "Trading",
-      "historical R6/R8 installation",
-      "plugin replacement",
-      "permanent MCP permission expansion",
-      "persistent Core Guard gate",
-      "paid fallback"
-    ]
+  "live_reverification_2026_10_16": {
+    "core_guard_plugin_version": "1.0.0-rc12",
+    "core_guard_mode": "observer",
+    "core_guard_health_score": 100,
+    "operations_gate": false,
+    "runtime_gate_active": false,
+    "operational_writes_allowed": false,
+    "safe_default": true,
+    "synthetic_post_id": 54775,
+    "synthetic_post_status": "trash",
+    "rollback_still_intact": true
   },
-  "next_gate": "AUTHORIZED_B3_PREPROD_WRITE_E2E"
+  "direct_b3_rest_route_on_current_mcp": {
+    "route": "/cerebro-b3-journal-lab/v1/observe",
+    "current_connection_granted": false,
+    "interpretation": "Not a blocker: canonical physical B3 closeout used the already-authorized Universal QA WordPress Ability path with ephemeral Core Guard Apply, not a permanent REST grant.",
+    "permission_bypass_attempted": false,
+    "permanent_permission_expansion_performed": false
+  },
+  "safety": {
+    "duplicate_write_performed_2026_10_16": false,
+    "prod": false,
+    "customer_data": false,
+    "trading": false,
+    "persistent_gate": false,
+    "persistent_permission_expansion": false,
+    "additional_cost_eur": 0
+  },
+  "next_block": "COMPLETE_WATCH_LEARN_SCHEDULED_SOAK_AND_CONFIGURE_REAL_SOURCES_57_62"
 }
