@@ -1,0 +1,77 @@
+{
+  "schema_version": "1",
+  "state_type": "CEREBRO_B3_LIVE_ADAPTER_GRANT_CONTRACT_PROBE",
+  "company_id": "fenix",
+  "engine_id": "EVT-001",
+  "environment": "PREPROD",
+  "version": "v0",
+  "status": "HUMAN_REQUIRED_POLICY_CONFLICT",
+  "wordpress_site": "staging.fenixcapital.es",
+  "live_core_guard": {
+    "plugin_version": "1.0.0-rc12",
+    "mode": "observer",
+    "health_score": 100,
+    "environment_type": "staging",
+    "known_preprod_host_override": true,
+    "build_channel": "preprod",
+    "operations_master_authorized": true,
+    "operations_gate": false,
+    "runtime_gate_active": false,
+    "runtime_gate_max_ttl_seconds": 900,
+    "operational_writes_allowed": false,
+    "safe_default": true
+  },
+  "installed_b3_contract": {
+    "namespace": "/cerebro-b3-journal-lab/v1/*",
+    "historically_verified_read_route": "/cerebro-b3-journal-lab/v1/observe",
+    "historically_verified_write_routes": ["prepare","replay","claim","cleanup"],
+    "current_mcp_describe_observe": "NOT_GRANTED_FOR_THIS_MCP_CONNECTION",
+    "current_mcp_route_visibility": "NOT_GRANTED",
+    "standard_plugin_list_match_b3": false,
+    "standard_plugin_list_match_journal": false,
+    "historical_r6_r8_candidates": "LAB_ONLY_NOT_INSTALLED",
+    "permission_bypass_attempted": false,
+    "plugin_activation_or_replacement_attempted": false
+  },
+  "backup_state": {
+    "core_guard_exact_plugin_backup_exists": true,
+    "core_guard_backup_sha256": "3f4e7267cc8602c6c6324c33f18b0cbb943f4ebb5f805ab36ff3ab0001df2674",
+    "core_guard_snapshot_id": 588,
+    "fresh_b3_component_write_backup_created": false,
+    "reason": "No write lane is authorized yet; do not mutate or expand permissions before bounded authorization."
+  },
+  "authority_before_probe": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "server_journal_write_authorized": false,
+    "persistent_core_guard_gate_authorized": false,
+    "mcp_permission_expansion_authorized": false,
+    "customer_data_authorized": false,
+    "trading_access": false,
+    "additional_cost_eur": 0
+  },
+  "required_bounded_authorization": {
+    "scope": "B3_PREPROD_SYNTHETIC_WRITE_E2E_ONLY",
+    "allowed": [
+      "fresh component snapshot/backup before write",
+      "exact installed B3 adapter/grant binding only",
+      "short-lived Core Guard runtime gate up to existing 900 second cap",
+      "one synthetic no-customer-data intent",
+      "lease/CAS/gate/verify/receipt",
+      "idempotent replay with no duplicate",
+      "rollback/cleanup of synthetic data",
+      "grant and gate closure immediately after evidence"
+    ],
+    "denied": [
+      "PROD",
+      "customer data",
+      "Trading",
+      "historical R6/R8 installation",
+      "plugin replacement",
+      "permanent MCP permission expansion",
+      "persistent Core Guard gate",
+      "paid fallback"
+    ]
+  },
+  "next_gate": "AUTHORIZED_B3_PREPROD_WRITE_E2E"
+}
