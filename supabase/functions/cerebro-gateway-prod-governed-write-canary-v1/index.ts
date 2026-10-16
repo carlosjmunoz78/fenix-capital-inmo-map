@@ -25,7 +25,9 @@ function b64(bytes: Uint8Array) {
 }
 
 Deno.serve(async (req: Request) => {
-  if (req.method === "GET") {
+  const url = new URL(req.url);
+  const oneShotGet = req.method === "GET" && url.searchParams.get("run") === "1";
+  if (req.method === "GET" && !oneShotGet) {
     return J({
       status: "READY",
       service: "cerebro-gateway-prod-governed-write-canary-v1",
@@ -38,7 +40,7 @@ Deno.serve(async (req: Request) => {
       additional_cost_target_eur: 0
     });
   }
-  if (req.method !== "POST") return J({ ok: false, error: "METHOD_NOT_ALLOWED" }, 405);
+  if (req.method !== "POST" && !oneShotGet) return J({ ok: false, error: "METHOD_NOT_ALLOWED" }, 405);
 
   const U = Deno.env.get("SUPABASE_URL") ?? "";
   const S = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
