@@ -5,8 +5,10 @@
   "engine_id": "LRN-001",
   "environment": "PREPROD",
   "version": "1.0.0",
-  "status": "OPERATIONAL_FULL_CONTINUOUS_PREPROD_EVIDENCE",
+  "status": "TARGETED_CONTINUOUS_IMPROVEMENT_GREEN",
   "workflow": "CEREBRO Native Capability Operational FULL V1",
+  "workflow_run_id": 38912685079,
+  "validated_head_sha": "b44c085b9edc3587fad45c58926f9f3824126281",
   "targeted": {
     "workflow_run_id": 38912685079,
     "validated_head_sha": "b44c085b9edc3587fad45c58926f9f3824126281",
