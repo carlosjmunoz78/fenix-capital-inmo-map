@@ -4,10 +4,12 @@
 - Existe una única App Fénix Capital en PROD (`app.fenixcapital.es`).
 - La ficha de expediente permitía editar inmobiliaria y seguimiento, pero no disponía de una ficha completa y editable del inmueble comprado.
 - `fenix_prod.expedientes` conservaba `localidad`, `precio_vivienda`, `importe_solicitado`, `inmobiliaria_code` y `payload_operacion`.
+- Las tasaciones estaban enlazadas al expediente, no a la vivienda concreta.
 
 ## Estado actual
 - **HECHO DB PROD:** migración aditiva `expediente_propiedades_editables_v1`.
 - **HECHO DB PROD:** wrappers autenticados `expediente_propiedades_user_rpc_v1`.
+- **HECHO DB PROD:** `tasaciones_bind_property_v1`, que fija cada tasación a la vivienda correspondiente mediante `property_code`.
 - **HECHO BACKFILL:** 48 expedientes existentes / 48 viviendas actuales.
 - **HECHO FRONTEND EN RAMA:** `src/ExpedientePropertyGuard.tsx` + `src/expediente-property.css` montados desde `DetailShellGate.tsx`.
 - **PENDIENTE DE PROMOCIÓN:** CI/build + smoke test autenticado, después merge de PR #734 a `main`.
@@ -20,10 +22,16 @@
 5. La UI muestra vivienda actual e histórico de viviendas.
 6. Se mantienen sincronizados los campos legacy de `expedientes`: `localidad`, `precio_vivienda`, `importe_solicitado`, `inmobiliaria_code`.
 7. El control optimista usa versión del expediente + versión de la vivienda para impedir sobrescrituras concurrentes.
+8. Una tasación conserva el `property_code` de la vivienda que fue tasada; al cambiar de vivienda no se reasigna la tasación antigua a la nueva.
+9. Las nuevas tasaciones sin `property_code` explícito reciben automáticamente la vivienda actual mediante trigger.
 
 ## Entidades añadidas
 - `fenix_prod.expediente_propiedades`
 - `fenix_prod.expediente_propiedad_history`
+
+## Cambio compatible en entidad existente
+- `fenix_prod.tasaciones.property_code` (nullable para compatibilidad, backfill aplicado).
+- Trigger `trg_appraisal_bind_current_property` para nuevas tasaciones.
 
 ## Funciones server-side añadidas
 - `public.fenix_prod_exp_properties_server(actor, expediente)`
@@ -53,18 +61,33 @@
 - Las tablas nuevas no tienen acceso directo para `anon`/`authenticated`; escritura y lectura pasan por funciones `SECURITY DEFINER` con contexto de usuario y rol.
 - Roles permitidos: Dirección y Financiero; Financiero conserva su alcance por propietario del expediente.
 
+## Prueba transaccional realizada
+Prueba en subtransacción con rollback automático:
+- editar vivienda = OK
+- cambiar vivienda = OK
+- una única vivienda actual = OK
+- 2 viviendas tras sustitución = OK
+- 2 eventos de auditoría = OK
+- `precio_vivienda` legacy sincronizado = OK
+- `importe_solicitado` legacy sincronizado = OK
+- residuos de datos de prueba tras rollback = 0
+
 ## Rollback lógico
 Si el frontend nuevo causara una regresión:
 1. Revertir los commits de `ExpedientePropertyGuard`, CSS y montaje en `DetailShellGate`.
 2. Mantener las tablas nuevas en PROD para no perder histórico ya creado.
 3. La App anterior continúa operando con los campos legacy de `fenix_prod.expedientes`.
 4. Los valores actuales de localidad/precio/financiación/inmobiliaria siguen válidos porque cada escritura nueva los sincroniza.
-5. Deshabilitar wrappers nuevos solo si existiera un incidente de seguridad; no borrar tablas con datos operativos.
+5. Mantener `tasaciones.property_code`; es aditivo y evita mezclar tasaciones de viviendas distintas.
+6. Deshabilitar wrappers nuevos solo si existiera un incidente de seguridad; no borrar tablas con datos operativos.
 
 ## Rebuild
-- Aplicar primero `expediente_propiedades_editables_v1` y después `expediente_propiedades_user_rpc_v1`.
-- El trigger `trg_exp_property_after_insert` crea automáticamente la vivienda base en nuevos expedientes.
-- El backfill es idempotente: solo crea vivienda actual si el expediente no tiene una.
+Aplicar en este orden:
+1. `expediente_propiedades_editables_v1`
+2. `expediente_propiedades_user_rpc_v1`
+3. `tasaciones_bind_property_v1`
+
+El trigger `trg_exp_property_after_insert` crea automáticamente la vivienda base en nuevos expedientes. El backfill solo crea vivienda actual si el expediente no tiene una. Después, el trigger de tasaciones asigna la vivienda actual a nuevas tasaciones.
 
 ## Gate de aceptación
 - CI TypeScript/Vite = GREEN.
@@ -74,3 +97,4 @@ Si el frontend nuevo causara una regresión:
 - Edición y cambio de vivienda disponibles para Dirección/Financiero.
 - Histórico conserva la vivienda sustituida.
 - Campos legacy sincronizados.
+- Tasaciones antiguas no migran a una vivienda nueva al sustituir inmueble.
