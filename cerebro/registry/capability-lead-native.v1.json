@@ -1,0 +1,16 @@
+{
+  "schema_version":"1.0.0","state_type":"CEREBRO_NATIVE_CAPABILITY_REGISTRY_ENTRY","capability_id":"LEAD-NATIVE","alias_es":"Lead Scoring nativo","owner_engine_id":"LEAD-001","company_id":"GLOBAL","environment":"PREPROD","version":"1.0.0","status":"NATIVE_FULL_PREPROD",
+  "ownership":{"primary":"LEAD-001","support":["CRM-001","DATA-001","SALE-001","CAP-001","POL-001","QA-001","OBSERV-001","FINOPS-001","EVT-001"],"new_engine_created":false},
+  "purpose":"Deterministic multi-company heuristic lead scoring for conversion probability, value, urgency, priority and next action over existing CRM/Supabase transactional evidence before any ML adoption.",
+  "route":"capability://LEAD-NATIVE/v1/execute","context_contract":["company_id","engine_id","environment","version"],
+  "implementation":{"runtime":"cerebro/runtime/lead-native-v1.mjs","method":"HEURISTIC_FIRST","transactional_sources":["Supabase SQL","CRM history"],"ml_required":false,"external_code_execution":false},
+  "contracts":{"operations":["SCORE_LEAD","SCORE_BATCH","PRIORITIZE","BUILD_NEXT_ACTION","REPLAY_VERIFY"],"outputs":["probability_conversion","estimated_value_eur","urgency","priority","next_action"],"crm_write_authorized":false,"cross_company":"DENY","prod":"DENY"},
+  "permissions":{"default":"deny","gateway_required":true,"owner_engine":"LEAD-001","cross_company":false,"crm_write":false,"prod_write":false,"trading":false},
+  "policy":{"conservar_entender_envolver_probar_mejorar_migrar":true,"deterministic_before_ai":true,"heuristic_before_ml":true,"ml_requires_sufficient_data_and_new_evaluation":true,"zero_cost_first":true,"source_of_truth_not_duplicated":true,"additional_cost_target_eur":0},
+  "events":{"produces":["lead.scored","lead.score.human_required","lead.batch.scored","lead.priority.ready","lead.next_action.ready"],"event_bus_target":"EVT-001"},
+  "observability":{"authorization_receipt":true,"score_id":true,"probability":true,"priority":true,"confidence":true,"next_action":true,"replay_verification":true,"cost":true},
+  "resilience":{"fallback":"EXISTING_CRM_ORDER_OR_HUMAN_REQUIRED_ON_LOW_CONFIDENCE","backup":"VERSIONED_SCORING_INPUT_SCHEMA_RULES_AND_OUTPUTS","rollback":"REMOVE_V1_WRAPPER_WITH_NO_CRM_MUTATION_TO_UNDO","rebuild":"REPLAY_TRANSACTIONAL_SNAPSHOTS_THROUGH_VERSIONED_HEURISTIC_RULES"},
+  "existing_evidence":{"master_spec_owner_verified":true,"crm_source_of_truth_preserved":true,"supabase_transactional_core_preserved":true,"crm_write_performed":false,"prod_touched":false,"android_touched":false,"evidence_ref":"cerebro/evidence/lead-native-v1-preprod.json"},
+  "full_gate":{"required":["registry_versioning","multi_company_fields","manifest_contracts_events","permissions_policy","real_implementation_or_wrapper","gateway_router_integration","tests_integration_e2e","evaluation_tribunal","old_vs_new_when_applicable","observability_idempotency_cost","fallbacks","backup_rollback_rebuild","runbook_changelog_dependencies","preprod_green_evidence"],"ci_green":true,"native_full":true,"workflow_run_id":38907398350,"evidence_ref":"cerebro/evidence/lead-native-v1-preprod.json"},
+  "prod_authorized":false,"prod_write_authorized":false,"additional_cost_eur":0,"next_gate":"PR_AND_MAIN_INTEGRATION_WITHOUT_PROD_OR_ANDROID"
+}
