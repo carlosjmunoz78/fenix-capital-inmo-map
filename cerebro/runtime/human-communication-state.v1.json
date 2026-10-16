@@ -5,7 +5,7 @@
   "engine_id": "HEX-001",
   "environment": "PROD_CONTROL_PLANE",
   "version": "1.1.0",
-  "updated_at": "2026-10-16T05:49:36.764086Z",
+  "updated_at": "2026-10-16T09:32:12.496Z",
   "pending": {},
   "authorized_actions": {},
   "decisions": [],
@@ -14,6 +14,61 @@
   "standing_authorizations": {},
   "standing_policy_proposals": {},
   "skill_digest_snapshot": {
+    "name:api-design": {
+      "kind": "WAITING_SAFE",
+      "name": "api-design",
+      "human_alias": "Api Design",
+      "status": "WAITING_SAFE_HANDLER",
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "human_required": "",
+      "updated_at": "",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
+    "name:codebase-design": {
+      "kind": "WAITING_SAFE",
+      "name": "codebase-design",
+      "human_alias": "Codebase Design",
+      "status": "WAITING_SAFE_HANDLER",
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "human_required": "",
+      "updated_at": "",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
+    "name:watchfor-reliability-reports": {
+      "kind": "WAITING_SAFE",
+      "name": "watchfor-reliability-reports",
+      "human_alias": "Watchfor Reliability Reports",
+      "status": "WAITING_SAFE_HANDLER",
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "human_required": "",
+      "updated_at": "",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
+    "name:api-harness": {
+      "kind": "WAITING_SAFE",
+      "name": "api-harness",
+      "human_alias": "Api Harness",
+      "status": "WAITING_SAFE_HANDLER",
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "human_required": "",
+      "updated_at": "",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
+    "name:godot": {
+      "kind": "WAITING_SAFE",
+      "name": "godot",
+      "human_alias": "Godot",
+      "status": "WAITING_SAFE_HANDLER",
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "human_required": "",
+      "updated_at": "",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
     "name:reddit-content-ops": {
       "kind": "HOLD",
       "name": "reddit-content-ops",
@@ -179,6 +234,39 @@
       "canary": "",
       "additional_cost_eur": 0
     },
+    "name:lead-buyer-psychology": {
+      "kind": "HOLD",
+      "name": "lead-buyer-psychology",
+      "human_alias": "Lead Buyer Psychology",
+      "status": "TERMINAL_HOLD",
+      "stage": "SAFE_HANDLER_TERMINAL_HOLD",
+      "human_required": "",
+      "updated_at": "2026-10-15T11:38:42.551Z",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
+    "name:optale-functions": {
+      "kind": "HOLD",
+      "name": "optale-functions",
+      "human_alias": "Optale Functions",
+      "status": "TERMINAL_HOLD",
+      "stage": "SAFE_HANDLER_TERMINAL_HOLD",
+      "human_required": "",
+      "updated_at": "2026-10-15T12:19:25.589Z",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
+    "name:bugfix-tdd": {
+      "kind": "HOLD",
+      "name": "bugfix-tdd",
+      "human_alias": "Bugfix Tdd",
+      "status": "TERMINAL_HOLD",
+      "stage": "SAFE_HANDLER_TERMINAL_HOLD",
+      "human_required": "",
+      "updated_at": "2026-10-15T18:30:45.235Z",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
     "name:obsidian": {
       "kind": "COMPLETED",
       "name": "obsidian",
@@ -191,7 +279,7 @@
       "additional_cost_eur": 0
     }
   },
-  "last_digest_date": "2026-10-15",
+  "last_digest_date": "2026-10-16",
   "last_delivery_at": "2026-10-15T10:12:11Z",
   "mail_transport": {
     "status": "VERIFIED",
