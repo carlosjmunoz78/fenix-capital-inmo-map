@@ -23,8 +23,9 @@ public final class CommandExecutor {
     JSONObject out = new JSONObject();
     try {
       JSONObject p = cmd.optJSONObject("payload"); if (p == null) p = new JSONObject();
-      String action = p.optString("action", "").toUpperCase(Locale.ROOT);
-      out.put("action", action).put("device_id", DeviceState.deviceId(c)).put("at", System.currentTimeMillis());
+      String requestedAction = p.optString("action", "").toUpperCase(Locale.ROOT);
+      String action = "READ_SCREEN".equals(requestedAction) ? "DESCRIBE_SCREEN" : requestedAction;
+      out.put("action", requestedAction).put("resolved_action", action).put("device_id", DeviceState.deviceId(c)).put("at", System.currentTimeMillis());
       String denied = PolicyGuard.deny(c, cmd, p);
       if (denied != null) return out.put("ok", false).put("error", denied);
       if ("HEALTH".equals(action)) return out.put("ok", true).put("kill_switch", DeviceState.killSwitch(c)).put("accessibility", CerebroAccessibilityService.connected()).put("notifications", CerebroNotificationListenerService.connected()).put("active_package", DeviceState.activePackage(c));
