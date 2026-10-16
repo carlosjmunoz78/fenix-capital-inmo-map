@@ -1,0 +1,16 @@
+{
+  "schema_version":"1.0.0","state_type":"CEREBRO_NATIVE_CAPABILITY_REGISTRY_ENTRY","capability_id":"EVT-001","alias_es":"Bus de eventos gobernado","owner_engine_id":"EVT-001","company_id":"GLOBAL","environment":"PREPROD","version":"1.0.0","status":"PREPROD_CANDIDATE",
+  "ownership":{"primary":"EVT-001","support":["RUNTIME-001","OBSERV-001","SEC-001","QA-001","FINOPS-001"],"new_engine_created":false},
+  "purpose":"First-party multi-company event capability that wraps the existing EventBus/PersistentEventBus/outbox runtime with deterministic idempotency, durable PREPROD journals, bounded transport retries and dead-letter receipts without requiring a paid broker.",
+  "route":"capability://EVT-001/v1/execute","context_contract":["company_id","engine_id","environment","version"],
+  "implementation":{"runtime":"cerebro/runtime/evt001-native-v1.mjs","existing_runtime_reused":["cerebro/runtime/runtime.mjs#EventBus","cerebro/runtime/persistent-runtime.mjs#PersistentEventBus","cerebro/runtime/persistent-runtime.mjs#AtomicV8Journal","cerebro/runtime/rsi-event-outbox.mjs"],"transport":"INJECTED_AUTHORIZED_TRANSPORT_ADAPTER","external_broker_required":false,"external_skill_code_execution":false},
+  "contracts":{"operations":["PUBLISH","LIST_CONTEXT","LIST_COMPANY","DELIVER_CONTEXT","REPLAY_VERIFY"],"publish_requires":["PREPROD","company_id","engine_id","environment","version","event_type","schema_version"],"delivery":"BOUNDED_RETRY_THEN_DEAD_LETTER","idempotency":"CONTEXT_SCOPED_DETERMINISTIC","cross_company":"DENY","prod_mutation":"DENY"},
+  "permissions":{"default":"deny","cross_company":false,"prod_mutation":false,"prod_publish":false,"external_code_execution":false,"transport_adapter":"EXPLICIT_INJECTION_ONLY"},
+  "policy":{"conservar_entender_envolver_probar_mejorar_migrar":true,"reuse_existing_event_runtime":true,"paid_broker_required":false,"additional_cost_target_eur":0,"supabase_heavy_event_logs_required":false},
+  "events":{"produces":["evt.event.accepted","evt.event.duplicate","evt.delivery.delivered","evt.delivery.dead_letter"],"consumes":["authorized engine events in PREPROD"]},
+  "observability":{"authorization_receipt":true,"event_id":true,"idempotency_key":true,"delivery_receipt":true,"dead_letter_receipt":true,"journal_replay_verification":true,"cost":true},
+  "resilience":{"fallback":"DURABLE_LOCAL_OUTBOX_OR_STOP","backup":"COPY_OR_SNAPSHOT_EVENT_AND_DELIVERY_JOURNALS","rollback":"REMOVE_V1_WRAPPER_AND_KEEP_EXISTING_RUNTIME_UNCHANGED","rebuild":"REPLAY_ATOMIC_JOURNALS_AND_REATTACH_AUTHORIZED_TRANSPORT"},
+  "existing_evidence":{"event_bus_exists":true,"persistent_event_bus_exists":true,"atomic_journal_exists":true,"learning_outbox_exists":true,"existing_runtime_modified":false,"prod_touched":false},
+  "full_gate":{"required":["registry_versioning","multi_company_fields","manifest_contracts_events","permissions_policy","real_implementation_or_wrapper","gateway_router_integration","tests_integration_e2e","evaluation_tribunal","old_vs_new_when_applicable","observability_idempotency_cost","fallbacks","backup_rollback_rebuild","runbook_changelog_dependencies","preprod_green_evidence"],"ci_green":false,"native_full":false,"workflow_run_id":null,"evidence_ref":null},
+  "prod_authorized":false,"prod_write_authorized":false,"additional_cost_eur":0,"next_gate":"TARGETED_CI_AND_PREPROD_E2E"
+}
