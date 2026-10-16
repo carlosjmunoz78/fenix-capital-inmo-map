@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-16T01:40:45.033Z",
+  "updated_at": "2026-10-16T04:39:14.264Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -52,7 +52,8 @@
     "github-wide-skills:0210638a71cef7a51e3f",
     "github-wide-skills:28b33318e96c4dcfb74a",
     "github-wide-skills:a9a119525d9fa0654756",
-    "github-wide-skills:9e01bf213c0129ddaba5"
+    "github-wide-skills:9e01bf213c0129ddaba5",
+    "github-wide-skills:b011ccb61061fd9c478b"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -191,6 +192,40 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 38836353153,
       "checkpointed_at": "2026-10-16T01:40:45.033Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:b011ccb61061fd9c478b": {
+      "candidate_id": "github-wide-skills:b011ccb61061fd9c478b",
+      "name": "godot",
+      "human_alias": "Godot",
+      "wrapper_id": "skillwrap:6154def1cfb5339137eb",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 84.38,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "alivirgo/Major-AI-Skills",
+        "upstream_head_commit": "d2eff2ea8bf2f894124455b57c89a8e70e01d2cb",
+        "manifest_sha256": "ef16b6eaf0b24a9f3e71d9d101b37e809ad8e3143c75d54dd14ed6bdc7be0947",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 38851697015,
+      "checkpointed_at": "2026-10-16T04:39:14.264Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -1163,5 +1198,5 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 38836353153
+  "last_discovery_run_id": 38851697015
 }
