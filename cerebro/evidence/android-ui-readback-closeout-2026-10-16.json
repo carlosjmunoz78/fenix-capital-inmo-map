@@ -1,5 +1,5 @@
 {
-  "schema_version": "1",
+  "schema_version": "2",
   "state_type": "ANDROID_UI_READBACK_AND_PHYSICAL_E2E_CLOSEOUT_48_183",
   "company_id": "fenix",
   "engine_id": "FACT-001",
@@ -7,45 +7,104 @@
   "version": "android-full-control-v1",
   "device_id": "android-28781704-56ca-49fb-b181-98c3fc22c07c",
   "agent_version_installed": "android-worker-1.0.0",
-  "status": "GREEN_PHYSICAL_ANDROID_WORKER_BROWSER_READBACK",
+  "status": "CONFIRMED_OPERATIONAL_PREPROD_PHYSICAL_ANDROID_48_AND_WEB183",
+  "scope": {
+    "item_48_physical_worker_transport_and_ui": "GREEN",
+    "item_183_web_pwa_physical_android_render": "GREEN",
+    "item_183_separate_template_apk_physical_install": "NOT_CLAIMED_PARALLEL_GATE"
+  },
   "physical_evidence": {
     "worker_online": true,
     "kill_switch": false,
     "accessibility_connected": true,
     "notifications_connected": true,
-    "worker_ui_opened": true,
     "worker_ui_readback_semantic_verified": true,
-    "worker_ui_node_count": 20,
-    "synthetic_click_verified": true,
-    "staging_open_url_verified": true,
-    "browser_active_package": "com.android.chrome",
-    "staging_host_readback": "staging.fenixcapital.es",
+    "chrome_active_and_accessible": true,
+    "staging_exact_template_url": "https://staging.fenixcapital.es/cerebro-preprod-appboot-template-e2e/",
     "staging_ui_readback_semantic_verified": true,
-    "staging_ui_node_count": 100,
-    "staging_content_markers": [
-      "Fénix Capital",
-      "Entiende tu hipoteca. Decide con claridad.",
-      "Cuéntanos tu caso",
-      "Compra de vivienda",
-      "Mejora de hipoteca",
-      "Autónomos",
-      "Inversión inmobiliaria"
-    ],
-    "secure_connection_marker_observed": true,
-    "last_seen_at": "2026-10-16T05:28:06.836Z"
+    "multi_company_markers_verified": {
+      "company_id": "fenix",
+      "engine_id": "APPBOOT-001",
+      "environment": "PREPROD",
+      "version": "v0"
+    },
+    "acceptance_marker_contract": "CEREBRO_APPBOOT_183_REMOTE_STAGING_E2E_V0",
+    "synthetic_action": "SCROLL_FORWARD",
+    "synthetic_action_semantic_verified": true,
+    "post_action_readback_semantic_verified": true
   },
-  "command_evidence": {
-    "android-health-20261016-closeout-01": {"state":"COMPLETED","semantic_verified":true,"result_sha256":"1b959e3211783f7907583e84ba126e6fdb5da4c8e1ec6676253e9194b76627ad"},
-    "android-open-worker-20261016-closeout-02": {"state":"COMPLETED","semantic_verified":true,"result_sha256":"490118aacd938cc400c81cefe0de9422b027b3c4f31e8b5ccf626821940ecca6"},
-    "android-describe-worker-20261016-closeout-03": {"state":"COMPLETED","semantic_verified":true,"node_count":20,"result_sha256":"d3d1f82d0e7132ca97ecedd0f2f268c423a23996c6455a65caf2a76ff025c1c4"},
-    "android-refresh-worker-20261016-closeout-04": {"state":"COMPLETED","semantic_verified":true,"result_sha256":"29457c1be5b7c1f2bffa23e5a0759579b9c3b44d6ab61feb239bf3e4c136194f"},
-    "android-describe-after-refresh-20261016-closeout-05": {"state":"FAILED","semantic_verified":false,"error":"ACTIVE_PACKAGE_DENIED_PREPROD","result_sha256":"40a6cde6a5eadd3fbe81e7b2f432923d9a316e5de967b3140f4d7ad8557b0664","classification":"TRANSIENT_ACTIVE_WINDOW_POLICY_GUARD"},
-    "android-open-staging-20261016-closeout-06": {"state":"COMPLETED","semantic_verified":true,"result_sha256":"667bd5749baa5e805f92d85a016e4280f330836f1f517cb3332c4515389b3842"},
-    "android-describe-staging-20261016-closeout-07": {"state":"COMPLETED","semantic_verified":true,"node_count":0,"result_sha256":"c114287fc44827fe6bd935779dc826817acef3b2c8395f5a62eaee1d748efc48","classification":"TOO_EARLY_BROWSER_READBACK"},
-    "android-health-20261016-closeout-08": {"state":"COMPLETED","semantic_verified":true,"active_package":"com.android.systemui","result_sha256":"cd2a185be1b181a1d6f711a1aa250a02e9fb89ba757b73ebb6532d94ec45e431"},
-    "android-open-staging-20261016-closeout-09": {"state":"COMPLETED","semantic_verified":true,"result_sha256":"39df8a178633c9701b31a6bc5c29b10a81556324bcbbc185e2ac7b3a282011ad"},
-    "android-health-20261016-closeout-10": {"state":"COMPLETED","semantic_verified":true,"active_package":"com.android.chrome","result_sha256":"8ba82a9bdf5d37e6c739f4226342fd12fb33ee120f684b786f0de7487731c0f7"},
-    "android-describe-staging-20261016-closeout-11": {"state":"COMPLETED","semantic_verified":true,"node_count":100,"result_sha256":"75c26497f83f7e3679aef8a1fc1bf4288614a95b3a78ad7d93ca9af4a2eb76dc"}
+  "required_chain": {
+    "open_url": {
+      "command_id": "android-appboot-open-final-20261016-25",
+      "state": "COMPLETED",
+      "semantic_verified": true,
+      "result_sha256": "b9ab560b2283c58e67468e7834e97482edd1bfc3d4bc0d312612f79effea4633"
+    },
+    "readback_before_action": {
+      "command_id": "android-appboot-readback-final-20261016-26",
+      "state": "COMPLETED",
+      "semantic_verified": true,
+      "result_sha256": "6837db6578a6c88018cd7a8506b43991cbf45ee15561b420037455133a6dbcb5"
+    },
+    "synthetic_action": {
+      "command_id": "android-appboot-scroll-final-20261016-27",
+      "state": "COMPLETED",
+      "semantic_verified": true,
+      "result_sha256": "e1c080d23b12493537dca3f3c35173bd6769c25cf6b4aeb1d79adfd52d52ca30"
+    },
+    "readback_after_action": {
+      "command_id": "android-appboot-readback-post-scroll-20261016-28",
+      "state": "COMPLETED",
+      "semantic_verified": true,
+      "result_sha256": "14caddf23c1e5f29c0bb818e900beaf1567d06a342136284c4e83924c70bfa3b"
+    }
+  },
+  "replay_idempotency": {
+    "command_id": "android-appboot-scroll-final-20261016-27",
+    "delivery_attempt": 3,
+    "original_result_sha256": "e1c080d23b12493537dca3f3c35173bd6769c25cf6b4aeb1d79adfd52d52ca30",
+    "replayed_result_sha256": "e1c080d23b12493537dca3f3c35173bd6769c25cf6b4aeb1d79adfd52d52ca30",
+    "same_result_verified": true,
+    "final_state": "COMPLETED",
+    "gateway_replay_state_bug_found": true,
+    "preprod_fix": "cerebro_device_replay_finalize_preprod_v1",
+    "fix_scope": "PREPROD_ONLY_EXISTING_RESULT_REPLAY",
+    "trigger": "cerebro_device_replay_finalize_preprod_trg",
+    "trigger_enabled": true
+  },
+  "rollback": {
+    "wordpress_template_page_id": 54763,
+    "wordpress_template_final_status": "draft",
+    "template_content_preserved": true,
+    "temporary_chrome_bridge_page_id": 54777,
+    "temporary_chrome_bridge_final_status": "trash",
+    "homepage_changed": false,
+    "navigation_changed": false,
+    "theme_changed": false,
+    "prod_changed": false
+  },
+  "non_blocking_extra_probes": [
+    {
+      "command_id": "android-appboot-scroll-marker-20261016-29",
+      "state": "FAILED",
+      "error": "ACTIVE_PACKAGE_DENIED_PREPROD",
+      "classification": "TRANSIENT_ANDROID_SYSTEMUI_ACTIVE_WINDOW_POLICY_GUARD",
+      "invalidates_required_chain": false
+    },
+    {
+      "command_id": "android-appboot-readback-marker-20261016-30",
+      "state": "FAILED",
+      "error": "ACTIVE_PACKAGE_DENIED_PREPROD",
+      "classification": "TRANSIENT_ANDROID_SYSTEMUI_ACTIVE_WINDOW_POLICY_GUARD",
+      "invalidates_required_chain": false
+    }
+  ],
+  "queue_closeout": {
+    "queued": 0,
+    "delivered": 0,
+    "completed_observed": 26,
+    "failed_observed": 7,
+    "note": "Failed observations include deliberate/diagnostic policy-guard probes; the required closeout chain 25-28 is fully GREEN."
   },
   "source_hardening_not_yet_physical_on_device": {
     "read_screen_alias_added": true,
@@ -56,16 +115,14 @@
     "artifact_id": 12016726662,
     "artifact_digest": "sha256:b98214a0fc5abd0e8d59e017bf7da3ddb770bb5983c6fc2c009dbb53af3a0d80",
     "new_apk_sha256": "c26612bde8c8413328acbcb0dec5f38d801b7466f4d7f93a9da4571c0366d97e",
-    "note": "The installed physical worker remains android-worker-1.0.0; the hardened APK is CI-verified but was not installed because the existing enrolled worker completed the physical E2E."
+    "physically_installed": false,
+    "reason": "Existing enrolled worker completed the required physical E2E; no reinstall or reenrollment was needed."
   },
-  "convergence_closeout": {
+  "convergence_evidence": {
     "workflow": "CEREBRO 184 Live Convergence V2",
-    "run_id": 38856922297,
-    "conclusion": "success",
-    "focused_contracts": "PASS",
-    "full_regression": "PASS",
-    "authority_and_physical_evidence_gate": "PASS",
-    "gate_contract_commit": "981ccc442ac3e588632fb9354e7055fd7f9abdd4"
+    "prior_run_id": 38856922297,
+    "prior_conclusion": "success",
+    "prior_gate_contract_commit": "981ccc442ac3e588632fb9354e7055fd7f9abdd4"
   },
   "item_48_closeout": {
     "physical_device_bound": true,
@@ -73,13 +130,17 @@
     "remote_command_execution": true,
     "semantic_result_verified": true,
     "physical_ui_readback": true,
+    "replay_verified": true,
     "status": "CONFIRMED_OPERATIONAL_PREPROD"
   },
   "item_183_closeout": {
     "web_staging_physical_android_render_readback": true,
+    "web_staging_synthetic_action": true,
+    "web_staging_replay": true,
+    "web_staging_rollback_to_draft": true,
     "android_template_apk_physical_install": false,
-    "status": "PARTIAL",
-    "remaining_gate": "AUTHORIZED_TEMPLATE_APK_INSTALL_AND_RENDER_E2E_183"
+    "current_web_pwa_closeout_status": "CONFIRMED_OPERATIONAL_PREPROD",
+    "parallel_remaining_gate": "AUTHORIZED_PHYSICAL_ANDROID_TEMPLATE_INSTALL_RENDER_E2E"
   },
   "safety": {
     "prod": false,
@@ -88,7 +149,8 @@
     "payments": false,
     "credentials": false,
     "customer_data": false,
+    "permission_weakened": false,
     "additional_cost_eur": 0
   },
-  "next_block": "SCHEDULED_WATCH_AND_LEARN_SOAK_AND_COMPET_CAP_CONTINUOUS_CLOSURE"
+  "next_block": "VERIFY_EXACT_INSTALLED_B3_WRITE_ADAPTER_AND_GRANT_CONTRACT_THEN_RUN_NEW_SYNTHETIC_INTENT_LEASE_GATE_VERIFY_RECEIPT_ROLLBACK_E2E"
 }
