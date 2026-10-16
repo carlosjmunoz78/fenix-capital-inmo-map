@@ -1,0 +1,76 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_NATIVE_CAPABILITY_CONTINUOUS_IMPROVEMENT_EVIDENCE",
+  "company_id": "fenix",
+  "engine_id": "LRN-001",
+  "environment": "PREPROD",
+  "version": "1.0.0",
+  "status": "TARGETED_CONTINUOUS_IMPROVEMENT_GREEN",
+  "workflow": "CEREBRO Native Capability Operational FULL V1",
+  "workflow_run_id": 38912685079,
+  "validated_head_sha": "b44c085b9edc3587fad45c58926f9f3824126281",
+  "operational_artifact": {
+    "artifact_id": 12050084624,
+    "digest": "sha256:a18d88d76ca683912023c0a4d08a462a6775880646efc329e80ac449f47459b2"
+  },
+  "persistent_learning_state_artifact": {
+    "artifact_id": 12051245693,
+    "digest": "sha256:035edca32c6ee2167ff149b8c19f451bda51c32d25d2ecddf248fb3a94e4fbf5",
+    "retention_days": 30
+  },
+  "operational": {
+    "status": "OPERATIONAL_FULL_PREPROD",
+    "capabilities_total": 8,
+    "binding_receipts_total": 241,
+    "canonical_engines_total": 177,
+    "event_bus_all_engines_green": true,
+    "learning_outbox_green": true,
+    "learning_feedback_events_total": 8,
+    "evidence_hash": "c0366687f7b0a9d964646eb11eb77fe71b633fb9c677aa284262be80f489d1b9"
+  },
+  "continuous_improvement": {
+    "status": "CONTINUOUS_IMPROVEMENT_GREEN_PREPROD",
+    "learning_events_total": 8,
+    "learning_persisted_this_cycle": 8,
+    "learning_duplicates_this_cycle": 0,
+    "learning_ledger_operation_count": 8,
+    "idempotency_receipts_skipped_second_pass": 1,
+    "candidate_status": "CANDIDATES_GREEN",
+    "candidate_total": 8,
+    "new_candidates_this_cycle": 8,
+    "candidate_held_total": 0,
+    "candidate_next_gate": "OLD_VS_NEW_EXPERIMENT",
+    "orchestrator_status": "ORCHESTRATOR_GREEN",
+    "learning_plans_created_total": 3,
+    "horizon_status": "HORIZON_EXECUTORS_GREEN",
+    "horizons_completed_total": 3,
+    "daily_horizon_green": true,
+    "meta_observability_status": "META_METRICS_GREEN",
+    "meta_samples_total": 1,
+    "input_fingerprint": "5c358f0ef326118aa8fb6586357b0f1808ee86aa51392c6f1fc369cb000fc85d"
+  },
+  "governance": {
+    "old_vs_new_required": true,
+    "evaluation_required": true,
+    "tribunal_required": true,
+    "automatic_code_mutation": false,
+    "automatic_prod_promotion": false
+  },
+  "authority": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "provider_write_authorized": false,
+    "crm_write_authorized": false,
+    "db_mutation_authorized": false,
+    "spend_authorized": false,
+    "trading_access": false,
+    "android_touched": false,
+    "additional_cost_eur": 0
+  },
+  "continuous_soak": {
+    "daily_schedule_configured": true,
+    "multi_day_soak_complete": false,
+    "soak_overclaimed": false
+  },
+  "next_gate": "PR_EXACT_HEAD_GLOBAL_GATES_THEN_MAIN_AUTOMATIC_CONTINUOUS_EXECUTION"
+}
