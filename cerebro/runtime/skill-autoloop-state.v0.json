@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-16T11:56:53.740Z",
+  "updated_at": "2026-10-16T14:54:52.410Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -54,7 +54,8 @@
     "github-wide-skills:a9a119525d9fa0654756",
     "github-wide-skills:9e01bf213c0129ddaba5",
     "github-wide-skills:b011ccb61061fd9c478b",
-    "github-wide-skills:b05894039afbda18087b"
+    "github-wide-skills:b05894039afbda18087b",
+    "github-wide-skills:bde6eb1a0b79083f6769"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -263,6 +264,42 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 38896987155,
       "checkpointed_at": "2026-10-16T11:55:42.241Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:bde6eb1a0b79083f6769": {
+      "candidate_id": "github-wide-skills:bde6eb1a0b79083f6769",
+      "name": "create-verification-skill",
+      "human_alias": "Create Verification Skill",
+      "wrapper_id": "skillwrap:fb9f338300a9836a20fc",
+      "domain": "software-engineering-devops",
+      "engine_bindings": [
+        "FACT-001",
+        "ARCH-001",
+        "API-001",
+        "DEP-001",
+        "MIG-001",
+        "QA-001",
+        "REG-001",
+        "DOCS-001"
+      ],
+      "value_score": 88.24,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "csarigumba/sidstack",
+        "upstream_head_commit": "10e44cee4779bc4b8ea89970ab9a503239d0bb25",
+        "manifest_sha256": "57e3f2a1d4aa3ba4f8e748b825e9bb65f2adefa59f67fb6daa7c2986976c7db5",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 38919574802,
+      "checkpointed_at": "2026-10-16T14:54:52.410Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -1222,7 +1259,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "SKILL_AUTONOMY_ACTION_WORKER_IDLE",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -1235,5 +1272,5 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 38896987155
+  "last_discovery_run_id": 38919574802
 }
