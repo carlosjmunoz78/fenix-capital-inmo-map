@@ -1,0 +1,66 @@
+name: CEREBRO Android Device Agent Final V2
+
+on:
+  push:
+    branches: ['cerebro/android-device-agent-final-v2-preprod']
+    paths:
+      - 'cerebro/android-worker-final-v2/**'
+      - 'cerebro/runtime/build-android-device-agent-final-v2-ci.sh'
+      - 'cerebro/tests/android-device-agent-final-v2.test.mjs'
+      - '.github/workflows/cerebro-android-device-agent-final-v2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compile-test-govern:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Final V2 contract tests
+        run: node --test cerebro/tests/android-device-agent-final-v2.test.mjs
+      - name: Assert CI build does not install dependencies
+        run: |
+          if grep -Eiq 'sdkmanager|gradle |gradlew|mvn |npm (install|ci)|apt(-get)? install|curl .*[|].*(sh|bash)|wget .*[|].*(sh|bash)' cerebro/runtime/build-android-device-agent-final-v2-ci.sh; then
+            echo 'External dependency install path detected'; exit 1
+          fi
+      - name: Compile and sign CI-only Final V2 APK
+        run: bash cerebro/runtime/build-android-device-agent-final-v2-ci.sh /tmp/cerebro-android-device-agent-final-v2
+      - name: Verify package permissions and evidence
+        run: |
+          BT="$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)"
+          APK=/tmp/cerebro-android-device-agent-final-v2/cerebro-android-agent-final-v2-ci.apk
+          "$BT/apksigner" verify --verbose "$APK"
+          "$BT/aapt2" dump permissions "$APK" | tee /tmp/final-v2-permissions.txt
+          grep -q 'android.permission.INTERNET' /tmp/final-v2-permissions.txt
+          grep -q 'android.permission.FOREGROUND_SERVICE' /tmp/final-v2-permissions.txt
+          grep -q 'android.permission.RECEIVE_BOOT_COMPLETED' /tmp/final-v2-permissions.txt
+          ! grep -q 'REQUEST_INSTALL_PACKAGES' /tmp/final-v2-permissions.txt
+          ! grep -q 'READ_SMS' /tmp/final-v2-permissions.txt
+          ! grep -q 'READ_CONTACTS' /tmp/final-v2-permissions.txt
+          ! grep -q 'READ_CALL_LOG' /tmp/final-v2-permissions.txt
+          node - <<'NODE'
+          const p=require('/tmp/cerebro-android-device-agent-final-v2/evidence.json');
+          if(p.status!=='CI_COMPILE_SIGN_VERIFY_GREEN'||p.package!=='es.cerebro.agent'||p.signing_mode!=='CI_EPHEMERAL_NON_INSTALL'||!p.physical_signing_required||p.physical_device_attested||p.prod_authorized||p.additional_cost_eur!==0) process.exit(1);
+          console.log('Final V2 CI GREEN '+p.apk_sha256);
+          NODE
+      - name: Canonical registry validation
+        working-directory: cerebro
+        run: npm run validate
+      - name: Full CEREBRO regression
+        working-directory: cerebro
+        run: npm test
+      - name: Upload CI-only evidence artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-android-device-agent-final-v2-ci-only
+          path: |
+            /tmp/cerebro-android-device-agent-final-v2/cerebro-android-agent-final-v2-ci.apk
+            /tmp/cerebro-android-device-agent-final-v2/apksigner-verify.txt
+            /tmp/cerebro-android-device-agent-final-v2/evidence.json
+          retention-days: 14
