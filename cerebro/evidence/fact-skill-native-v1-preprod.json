@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_NATIVE_CAPABILITY_PREPROD_EVIDENCE",
+  "capability_id": "FACT-SKILL-NATIVE",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "1.0.0",
+  "status": "PREPROD_GREEN",
+  "validated_head_sha": "6d578a27ba7e95175f04c0ca053b04a112b45ef5",
+  "workflow": {
+    "name": "CEREBRO FACT-SKILL-NATIVE V1 PREPROD",
+    "run_id": 38895289136,
+    "job_id": 116954187733,
+    "conclusion": "success"
+  },
+  "checks": {
+    "factory_registry_valid": true,
+    "targeted_e2e_green": true,
+    "native_registry_contract_green": true,
+    "prod_authority_guard_green": true,
+    "idempotency_green": true,
+    "cross_company_guard_green": true,
+    "high_risk_fail_closed_green": true,
+    "permission_expansion_fail_closed_green": true,
+    "additional_cost_eur": 0,
+    "external_skill_code_executed": false,
+    "prod_write": false,
+    "trading_access": false
+  },
+  "full_gate_count": 14,
+  "full_gate_result": "GREEN",
+  "human_required": null,
+  "next_gate": "PR_AND_MAIN_INTEGRATION_WITHOUT_PROD_AUTHORITY"
+}
