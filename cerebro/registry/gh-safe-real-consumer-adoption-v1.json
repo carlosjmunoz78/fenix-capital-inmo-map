@@ -6,7 +6,7 @@
   "engine_id": "FACT-001",
   "environment": "PREPROD",
   "version": "1.0.0",
-  "status": "PARCIAL_AWAITING_EXACT_HEAD_CI",
+  "status": "FULL_E2E_REAL_PREPROD",
   "strict_target_status": "FULL_E2E_REAL_PREPROD",
   "legacy_contract_preserved": true,
   "legacy_registry_ref": "cerebro/registry/native-capability-operational-adoption-v1.json",
@@ -72,15 +72,26 @@
     "android_touched": false,
     "additional_cost_eur": 0
   },
-  "main_gate": {
-    "exact_head_ci_green": false,
-    "governed_main_green": false,
-    "rsi_green": false,
-    "merged_to_main": false,
-    "automatic_main_execution_green": false,
-    "main_head_sha": null,
-    "workflow_run_id": null,
-    "full_e2e_real_preprod": false
+  "evidence": {
+    "branch_strict_ci_run_id": 38930244029,
+    "implementation_pr": 748,
+    "implementation_branch_head_sha": "45c6845537e948aa757bfb1e2a26c8436432aeda",
+    "exact_head_strict_ci_run_id": 38930472980,
+    "governed_main_run_id": 38930473025,
+    "rsi_promotion_readiness_shadow_run_id": 38930472936,
+    "implementation_merge_sha": "961465fd904f2cf66364eae9f11fe3e28a64b347",
+    "automatic_main_strict_run_id": 38930617932,
+    "automatic_main_strict_conclusion": "success"
   },
-  "next_gate": "EXACT_HEAD_STRICT_REAL_CONSUMER_CI"
+  "main_gate": {
+    "exact_head_ci_green": true,
+    "governed_main_green": true,
+    "rsi_green": true,
+    "merged_to_main": true,
+    "automatic_main_execution_green": true,
+    "main_head_sha": "961465fd904f2cf66364eae9f11fe3e28a64b347",
+    "workflow_run_id": 38930617932,
+    "full_e2e_real_preprod": true
+  },
+  "next_gate": "DB-SAFE-NATIVE_REAL_CONSUMER_ADOPTION_TO_FULL_E2E"
 }
