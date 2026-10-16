@@ -88,6 +88,12 @@ function safeAutoHost(result,label){
   return result;
 }
 
+function dailyHorizonState(result){
+  const completed=(result.horizons?.completed??[]).some(x=>x.cadence==='DAILY'&&x.status==='GREEN');
+  const alreadyCurrent=!completed&&Number(result.orchestration?.planned_total??0)===0&&Number(result.horizons?.completed_total??0)===0;
+  return Object.freeze({green:completed||alreadyCurrent,completed_this_run:completed,already_current:alreadyCurrent});
+}
+
 export async function runNativeCapabilityContinuousImprovementV1({operational_report,outbox_root,state_root,now=null}={}){
   const report=validateOperationalReport(typeof operational_report==='string'?readJson(path.resolve(operational_report)):operational_report);
   const outboxEvents=readCurrentImprovementEvents({outbox_root,company_id:report.company_id});
@@ -101,7 +107,7 @@ export async function runNativeCapabilityContinuousImprovementV1({operational_re
   const first=safeAutoHost(await runAutoHostIteration({raw_config:cfg,now:()=>tick}),'first');
   const firstPersisted=Number(first.learning?.last_result?.persisted_total??0);const firstDuplicates=Number(first.learning?.last_result?.duplicates_total??0);
   if(first.candidates.candidate_total<8||first.candidates.held_total!==0||first.candidates.human_required.length!==0)throw new Error('candidate materialization incomplete or held');
-  if(!first.horizons.completed?.some(x=>x.cadence==='DAILY'&&x.status==='GREEN'))throw new Error('daily learning horizon did not execute');
+  const daily=dailyHorizonState(first);if(!daily.green)throw new Error('daily learning horizon neither executed nor already current');
   const second=safeAutoHost(await runAutoHostIteration({raw_config:cfg,now:()=>tick}),'idempotency');
   const secondSkipped=Number(second.learning?.last_result?.skipped_receipts??0);if(secondSkipped<1)throw new Error('learning inbox idempotency not proven');
   if(second.candidates.candidate_total!==first.candidates.candidate_total)throw new Error('candidate ledger not idempotent');
@@ -113,7 +119,7 @@ export async function runNativeCapabilityContinuousImprovementV1({operational_re
     learning:{status:first.learning.status,persisted_this_cycle:firstPersisted,duplicates_this_cycle:firstDuplicates,ledger_operation_count:first.learning?.last_result?.ledger_exists===true?first.candidates.source_learning_total:null,idempotency_receipts_skipped_second_pass:secondSkipped},
     candidates:{status:first.candidates.status,candidate_total:improvementCandidates,new_candidates_this_cycle:first.candidates.persisted_total,duplicate_candidates_this_cycle:first.candidates.duplicates_total,held_total:first.candidates.held_total,next_gate:first.candidates.next_gate,production_apply_allowed:false,auto_promotion_allowed:false},
     orchestration:{status:first.orchestration.status,planned_total:first.orchestration.planned_total,created_total:first.orchestration.created_total},
-    horizons:{status:first.horizons.status,completed_total:first.horizons.completed_total,daily_green:first.horizons.completed.some(x=>x.cadence==='DAILY'&&x.status==='GREEN')},
+    horizons:{status:first.horizons.status,completed_total:first.horizons.completed_total,daily_green:daily.green,daily_completed_this_run:daily.completed_this_run,daily_already_current:daily.already_current},
     meta_observability:{status:first.meta_observability.status,samples_total:first.meta_observability.samples_total},
     governance:{old_vs_new_required:true,evaluation_required:true,tribunal_required:true,automatic_code_mutation:false,automatic_prod_promotion:false,next_gate:'OLD_VS_NEW_EXPERIMENT_THEN_EVALUATION_AND_TRIBUNAL'},
     persistence:{state_root:path.resolve(state_root),restorable_from_previous_workflow_artifact:true,idempotency_green:true},
@@ -127,4 +133,4 @@ if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.ur
   const a=args(process.argv);runNativeCapabilityContinuousImprovementV1(a).then(result=>{const json=JSON.stringify(result,null,2)+'\n';if(a.out){ensureDir(path.dirname(path.resolve(a.out)));fs.writeFileSync(path.resolve(a.out),json,'utf8');}process.stdout.write(json);}).catch(error=>{console.error(error?.stack??String(error));process.exitCode=1;});
 }
 
-export const NATIVE_CAPABILITY_CONTINUOUS_IMPROVEMENT_V1_CONTRACT=Object.freeze({schema_version:'1.0.0',environment:PREPROD,capabilities:REQUIRED_CAPABILITIES,source:'OPERATIONAL_LRN_OUTBOX',learning_engine_id:'LRN-001',persistent_state:true,daily:true,improvement_candidates:true,old_vs_new_required:true,evaluation_required:true,tribunal_required:true,automatic_code_mutation:false,automatic_prod_promotion:false,additional_cost_target_eur:0,prod_authorized:false,trading_access:false,android_touched:false});
+export const NATIVE_CAPABILITY_CONTINUOUS_IMPROVEMENT_V1_CONTRACT=Object.freeze({schema_version:'1.0.0',environment:PREPROD,capabilities:REQUIRED_CAPABILITIES,source:'OPERATIONAL_LRN_OUTBOX',learning_engine_id:'LRN-001',persistent_state:true,daily:true,restored_same_day_state_supported:true,improvement_candidates:true,old_vs_new_required:true,evaluation_required:true,tribunal_required:true,automatic_code_mutation:false,automatic_prod_promotion:false,additional_cost_target_eur:0,prod_authorized:false,trading_access:false,android_touched:false});
