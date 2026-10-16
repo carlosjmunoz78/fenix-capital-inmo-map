@@ -16,6 +16,7 @@ on:
       - 'cerebro/tests/native-capability-continuous-improvement-v1.test.mjs'
       - 'cerebro/registry/native-capability-operational-adoption-v1.json'
       - 'cerebro/registry/native-capability-continuous-improvement-v1.json'
+      - 'cerebro/evidence/native-capability-continuous-improvement-v1-preprod.json'
       - 'cerebro/docs/NATIVE_CAPABILITY_OPERATIONAL_FULL_V1_RUNBOOK.md'
       - '.github/workflows/cerebro-native-capability-operational-full-v1.yml'
   pull_request:
@@ -26,6 +27,7 @@ on:
       - 'cerebro/tests/native-capability-continuous-improvement-v1.test.mjs'
       - 'cerebro/registry/native-capability-operational-adoption-v1.json'
       - 'cerebro/registry/native-capability-continuous-improvement-v1.json'
+      - 'cerebro/evidence/native-capability-continuous-improvement-v1-preprod.json'
       - 'cerebro/docs/NATIVE_CAPABILITY_OPERATIONAL_FULL_V1_RUNBOOK.md'
       - '.github/workflows/cerebro-native-capability-operational-full-v1.yml'
 
@@ -130,6 +132,21 @@ jobs:
           if(r.governance.old_vs_new_required!==true||r.governance.evaluation_required!==true||r.governance.tribunal_required!==true||r.governance.automatic_code_mutation!==false||r.governance.automatic_prod_promotion!==false)throw new Error('improvement governance weakened');
           const a=r.authority;if(a.prod_authorized||a.prod_write_authorized||a.provider_write_authorized||a.crm_write_authorized||a.db_mutation_authorized||a.spend_authorized||a.trading_access||a.android_touched||a.additional_cost_eur!==0)throw new Error('continuous improvement authority/cost expanded');
           console.log(JSON.stringify({status:'GREEN',learning_events:r.learning_events_total,candidates:r.candidates.candidate_total,horizons:r.horizons.completed_total,input_fingerprint:r.input_fingerprint}));
+          NODE
+      - name: Continuous improvement registry and evidence gate
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const r=JSON.parse(fs.readFileSync('cerebro/registry/native-capability-continuous-improvement-v1.json','utf8'));
+          const e=JSON.parse(fs.readFileSync('cerebro/evidence/native-capability-continuous-improvement-v1-preprod.json','utf8'));
+          if(r.company_id!=='fenix'||r.engine_id!=='LRN-001'||r.environment!=='PREPROD'||r.version!=='1.0.0'||r.capabilities.length!==8)throw new Error('continuous registry identity');
+          if(!['CONTINUOUS_IMPROVEMENT_GREEN_PREPROD_CANDIDATE_MAIN','OPERATIONAL_FULL_CONTINUOUS_PREPROD'].includes(r.status))throw new Error('continuous registry status');
+          if(r.continuous_contract.state_persisted_between_runs!==true||r.continuous_contract.usage_to_learning!==true||r.continuous_contract.learning_to_candidate!==true||r.continuous_contract.old_vs_new_required!==true||r.continuous_contract.evaluation_required!==true||r.continuous_contract.tribunal_required!==true)throw new Error('continuous contract weakened');
+          if(r.continuous_contract.automatic_code_mutation!==false||r.continuous_contract.automatic_prod_promotion!==false)throw new Error('unsafe self-mutation authority');
+          const a=r.authority;if(a.prod_authorized||a.prod_write_authorized||a.provider_write_authorized||a.crm_write_authorized||a.db_mutation_authorized||a.spend_authorized||a.trading_access||a.android_touched||a.additional_cost_eur!==0)throw new Error('registry authority/cost expanded');
+          if(e.status!=='TARGETED_CONTINUOUS_IMPROVEMENT_GREEN'||e.continuous_improvement.learning_events_total!==8||e.continuous_improvement.candidate_total!==8||e.continuous_improvement.horizons_completed_total!==3||e.continuous_improvement.daily_horizon_green!==true||e.authority.additional_cost_eur!==0||e.continuous_soak.soak_overclaimed!==false)throw new Error('targeted evidence incomplete');
+          if(r.status==='OPERATIONAL_FULL_CONTINUOUS_PREPROD'&&(!r.main_gate.exact_head_global_checks_green||!r.main_gate.merged_to_main||!r.main_gate.automatic_main_execution_green||!r.main_gate.persistent_state_artifact_green||!r.main_gate.final_full||!r.main_gate.main_workflow_run_id||!r.main_gate.main_head_sha))throw new Error('final FULL without main evidence');
+          console.log(JSON.stringify({status:'GREEN',registry_status:r.status,targeted_run:e.workflow_run_id}));
           NODE
       - name: Existing technical native statuses remain GREEN
         run: |
