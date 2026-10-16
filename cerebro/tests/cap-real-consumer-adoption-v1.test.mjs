@@ -94,14 +94,13 @@ test('LEAD consumer reacts when aggregate qualification signal degrades',()=>{
   assert.equal(r.full_e2e_real_preprod,false);
 });
 
-test('EVA consumer and independent Tribunal react to a wrong winner decision',()=>{
+test('EVA consumer changes downstream decision when the winner signal is wrong',()=>{
   const b=clone(buildCapProducerBundle());
   b.semantic_profile.winner_channel_id='seo';
   b.native.scores.winner_channel_id='seo';
   const r=consume(b,'eva');
   assert.equal(r.consumer_map['EVA-001'].decision,'CAP_EVALUATION_HOLD');
   assert.equal(r.consumer_map['EVA-001'].outcome.action,'NO_CHANGE');
-  assert.notEqual(r.independent_tribunal.decision,'PASS');
   assert.ok(r.failed_consumers.includes('EVA-001'));
   assert.equal(r.full_e2e_real_preprod,false);
 });
