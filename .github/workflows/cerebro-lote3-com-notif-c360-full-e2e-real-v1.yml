@@ -1,0 +1,98 @@
+name: CEREBRO LOTE3 COM NOTIF C360 FULL E2E REAL V1
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, 'cerebro/lote3-com-notif-c360-full-preprod-v1*']
+    paths:
+      - 'cerebro/communication/notif-native-v1.mjs'
+      - 'cerebro/customer/c360-native-v1.mjs'
+      - 'cerebro/runtime/lote3-com-notif-c360-real-v1.mjs'
+      - 'cerebro/tests/lote3-com-notif-c360-v1.test.mjs'
+      - 'cerebro/tests/lote3-com-notif-c360-real-v1.test.mjs'
+      - 'cerebro/registry/lote3-com-notif-c360-real-v1.json'
+      - 'cerebro/docs/LOTE3_COM_NOTIF_C360_V1_RUNBOOK.md'
+      - '.github/workflows/cerebro-lote3-com-notif-c360-full-e2e-real-v1.yml'
+  pull_request:
+    paths:
+      - 'cerebro/communication/notif-native-v1.mjs'
+      - 'cerebro/customer/c360-native-v1.mjs'
+      - 'cerebro/runtime/lote3-com-notif-c360-real-v1.mjs'
+      - 'cerebro/tests/lote3-com-notif-c360-v1.test.mjs'
+      - 'cerebro/tests/lote3-com-notif-c360-real-v1.test.mjs'
+      - 'cerebro/registry/lote3-com-notif-c360-real-v1.json'
+      - 'cerebro/docs/LOTE3_COM_NOTIF_C360_V1_RUNBOOK.md'
+      - '.github/workflows/cerebro-lote3-com-notif-c360-full-e2e-real-v1.yml'
+permissions: {contents: read, actions: read}
+
+jobs:
+  strict-com-notif-c360:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Canonical registry validation
+        working-directory: cerebro
+        run: npm run validate
+      - name: Preserve certified LEAD SALE and existing COM router
+        run: |
+          git diff --exit-code 08f3002eca246daba352b4cd8497bea005394957 -- \
+            cerebro/runtime/lead-native-v1.mjs \
+            cerebro/runtime/lead-real-consumer-adoption-v1.mjs \
+            cerebro/runtime/sale-native-v1.mjs \
+            cerebro/runtime/sale-real-consumer-adoption-v1.mjs \
+            cerebro/registry/sale-real-consumer-adoption-v1.json \
+            cerebro/communication/com-delivery-router-v1.mjs
+      - name: Native and strict tests
+        run: >-
+          node --test
+          cerebro/tests/lote3-com-notif-c360-v1.test.mjs
+          cerebro/tests/lote3-com-notif-c360-real-v1.test.mjs
+      - name: Execute strict route
+        run: |
+          mkdir -p /tmp/cerebro-lote3
+          node cerebro/runtime/lote3-com-notif-c360-real-v1.mjs \
+            --company fenix \
+            --workdir /tmp/cerebro-lote3/state \
+            --source-run-id "${{ github.run_id }}" \
+            --source-head-sha "${{ github.sha }}" \
+            --out /tmp/cerebro-lote3/report.json
+      - name: Strict FULL gate
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const r=JSON.parse(fs.readFileSync('/tmp/cerebro-lote3/report.json','utf8'));
+          const required=['COM-001','NOTIF-001','C360-001','NBA-001','LRN-001','OBSERV-001','FINOPS-001'];
+          const expected={'COM-001':'COM_ROUTE_READY','NOTIF-001':'NOTIFICATION_PLAN_READY','C360-001':'CUSTOMER360_PROJECTION_READY','NBA-001':'CUSTOMER_NEXT_BEST_ACTION_READY','LRN-001':'LRN_FEEDBACK_PERSISTED','OBSERV-001':'OBSERVABILITY_RECORDED','FINOPS-001':'FINOPS_ZERO_COST_RECORDED'};
+          if(r.status!=='FULL_E2E_REAL_PREPROD'||r.full_e2e_real_preprod!==true)throw new Error('LOTE3 strict FULL not green');
+          if(JSON.stringify(r.required_consumers)!==JSON.stringify(required)||r.consumer_coverage!==1||r.functional_consumer_coverage!==1||r.missing_consumers.length||r.failed_consumers.length)throw new Error('consumer coverage incomplete');
+          if(!required.every(id=>r.consumer_map?.[id]?.decision===expected[id]&&r.consumer_map[id].real_consumption===true&&r.consumer_map[id].outcome_hash))throw new Error('semantic proof incomplete');
+          if(r.independent_tribunal?.decision!=='PASS'||r.audit_green!==true)throw new Error('tribunal/audit failed');
+          if(r.com_route?.adapter_dispatch_authorized!==false||r.notification_plan?.dispatch_authorized!==false||r.customer360_projection?.read_only!==true||r.customer360_projection?.crm_write_authorized!==false)throw new Error('COM/NOTIF/C360 authority leak');
+          const br=r.backup_rollback_rebuild;if(!br?.backup_ready||!br.rollback_green||!br.rebuild_green||br.applied_state_hash!==br.rebuilt_state_hash)throw new Error('backup/rollback/rebuild failed');
+          if(r.restartable!==true||r.idempotency_proven!==true||r.additional_cost_eur!==0)throw new Error('restart/idempotency/cost failed');
+          const forbidden=['prod_authorized','prod_write_authorized','db_mutation_authorized','provider_write_authorized','crm_write_authorized','dispatch_authorized','spend_authorized','trading_access','android_touched','external_code_execution'];
+          if(forbidden.some(k=>r[k]!==false))throw new Error('authority expanded');
+          console.log(JSON.stringify({status:'GREEN',bundle_id:r.bundle_id,outcome_hash:r.outcome_hash}));
+          NODE
+      - name: Candidate registry gate
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const r=JSON.parse(fs.readFileSync('cerebro/registry/lote3-com-notif-c360-real-v1.json','utf8'));
+          if(r.environment!=='PREPROD'||r.engines?.['COM-001']?.decision!=='WRAP_EXISTING'||r.engines?.['COM-001']?.modified!==false)throw new Error('COM preservation invalid');
+          if(r.engines?.['NOTIF-001']?.decision!=='EXTEND_EXISTING'||r.engines?.['C360-001']?.decision!=='WRAP_EXISTING_APP_CRM_SOURCES')throw new Error('engine decision invalid');
+          const a=r.authority;const keys=['prod_authorized','prod_write_authorized','db_mutation_authorized','provider_write_authorized','crm_write_authorized','dispatch_authorized','spend_authorized','trading_access','android_touched','external_code_execution'];
+          if(keys.some(k=>a[k]!==false)||a.additional_cost_eur!==0)throw new Error('authority/cost expanded');
+          NODE
+      - name: Upload evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: lote3-com-notif-c360-${{ github.run_id }}
+          path: |
+            /tmp/cerebro-lote3/report.json
+            /tmp/cerebro-lote3/state
+          retention-days: 30
+          if-no-files-found: error
