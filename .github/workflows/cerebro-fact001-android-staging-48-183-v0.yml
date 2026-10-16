@@ -42,8 +42,11 @@ jobs:
           if(p.network_downloads_performed!==0||p.gradle_used||p.maven_used||p.npm_install_used||p.external_dependency_install) process.exit(1);
           if(p.prod_authorized||p.prod_write_authorized||p.trading_access||p.additional_cost_eur!==0) process.exit(1);
           if(!r.item_183.web_staging_acceptance.authenticated_preview_render_verified||!r.item_183.web_staging_acceptance.robots_noindex||r.item_183.web_staging_acceptance.page_status!=='draft') process.exit(1);
-          if(r.item_48.physical_device_bound||r.item_183.physical_device_installed||r.authority.prod_authorized||r.authority.prod_write_authorized||r.authority.public_deploy_authorized||r.authority.customer_data_authorized||r.authority.trading_access||r.authority.additional_cost_eur!==0) process.exit(1);
-          console.log(JSON.stringify({status:'GREEN',worker_sha:p.item_48.sha256,template_sha:p.item_183.sha256,staging_page:r.item_183.web_staging_acceptance.page_id,prod:false,cost_eur:0}));
+          if(!r.item_48.physical_device_bound||!r.item_48.transport_online_verified||!r.item_48.remote_command_execution_verified||!r.item_48.semantic_ui_readback_verified||!r.item_48.idempotent_replay_verified) process.exit(1);
+          if(!r.item_183.web_staging_acceptance.physical_android_browser_render_readback_verified||!r.item_183.web_staging_acceptance.physical_android_synthetic_action_verified||!r.item_183.web_staging_acceptance.physical_android_post_action_readback_verified||!r.item_183.web_staging_acceptance.physical_android_replay_verified||!r.item_183.web_staging_acceptance.physical_android_rollback_to_draft_verified) process.exit(1);
+          if(r.item_183.physical_device_installed||r.authority.prod_authorized||r.authority.prod_write_authorized||r.authority.public_deploy_authorized||r.authority.customer_data_authorized||r.authority.trading_access||r.authority.additional_cost_eur!==0) process.exit(1);
+          if(r.parallel_remaining_gate!=='AUTHORIZED_TEMPLATE_APK_INSTALL_AND_RENDER_E2E_183') process.exit(1);
+          console.log(JSON.stringify({status:'GREEN_PHYSICAL_48_WEB183_TEMPLATE_APK_PARALLEL',worker_sha:p.item_48.sha256,template_sha:p.item_183.sha256,device:r.item_48.physical_device_id,staging_page:r.item_183.web_staging_acceptance.page_id,template_apk_installed:false,prod:false,cost_eur:0}));
           NODE
           "$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)/apksigner" verify --verbose /tmp/cerebro-android-preprod-v0/worker/worker-preprod.apk
           "$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)/apksigner" verify --verbose /tmp/cerebro-android-preprod-v0/template/template-preprod.apk
