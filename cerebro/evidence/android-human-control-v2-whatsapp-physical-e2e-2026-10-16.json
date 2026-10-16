@@ -1,0 +1,93 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_ANDROID_HUMAN_CONTROL_V2_WHATSAPP_PHYSICAL_E2E",
+  "company_id": "fenix",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "android-human-control-v2",
+  "status": "GREEN_PHYSICAL_PREPROD_WHATSAPP_E2E",
+  "captured_at": "2026-10-16",
+  "physical_device": {
+    "device_id": "android-6d1a4630-20ed-4e9d-a805-32117473753d",
+    "package": "es.cerebro.worker.preprod.v2",
+    "accessibility_verified": true,
+    "notifications_verified": true,
+    "kill_switch_off_during_test": true,
+    "transport_online_verified": true
+  },
+  "build_evidence": {
+    "workflow": ".github/workflows/cerebro-android-human-control-preprod-v2.yml",
+    "workflow_run_id": 38869415952,
+    "workflow_conclusion": "success",
+    "artifact_id": 12032303814,
+    "artifact_digest": "sha256:39e32c7c5abeb171341756991930036f016611e658dd1528d405cd9f7f06679a",
+    "side_by_side_with_v1": true,
+    "v1_preserved_as_rollback": true
+  },
+  "physical_e2e": {
+    "health_command": "android-v2-health-20261016-01",
+    "health_result_sha256": "225a0b5525e0c2a3ab1099bf1e23ed2655b6d797ec24ce7a5ab6bbba169ef223",
+    "initial_readback_command": "android-v2-readback-20261016-02",
+    "initial_readback_result_sha256": "1f5c179cb68f9e7ad50f4ea630fa3bede9eac1d6311aba2b454681032300f6d3",
+    "whatsapp_launcher_click_command": "android-v2-whatsapp-click-launcher-20261016-06",
+    "new_chat_command": "android-v2-whatsapp-newchat-20261016-08",
+    "search_open_command": "android-v2-whatsapp-search-open-20261016-10",
+    "search_contact_command": "android-v2-whatsapp-search-belen-20261016-12",
+    "contact_search_readback_command": "android-v2-whatsapp-search-belen-readback-20261016-13",
+    "unique_target_verified": "Belén Trabajo",
+    "open_contact_command": "android-v2-whatsapp-open-belen-chat-20261016-14",
+    "open_message_action_command": "android-v2-whatsapp-message-contact-20261016-16",
+    "chat_readback_command": "android-v2-whatsapp-chat-final-readback-20261016-17",
+    "chat_title_verified": "Belén Trabajo",
+    "draft_command": "android-v2-whatsapp-draft-20261016-18",
+    "draft_readback_command": "android-v2-whatsapp-draft-readback-20261016-19",
+    "draft_verified": "Hola cariño.",
+    "send_command": "android-v2-whatsapp-send-20261016-20",
+    "send_command_result_sha256": "afae32e36249b5669397231f808757954b0e6a1f1517478808b82618735d048d",
+    "send_readback_command": "android-v2-whatsapp-send-readback-20261016-21",
+    "send_readback_result_sha256": "f5588b1c7562964072ee83d887ba8a446eb50bb3eb88732735823fc30807b62c",
+    "sent_message_visible_in_chat": true,
+    "composer_cleared_after_send": true,
+    "semantic_verified": true
+  },
+  "privacy": {
+    "unrelated_whatsapp_messages_intentionally_not_persisted_in_this_evidence": true,
+    "only_target_identity_draft_and_sent_message_markers_recorded": true
+  },
+  "authority": {
+    "user_explicitly_requested_this_message_send": true,
+    "prod_authorized": false,
+    "customer_bulk_messaging_authorized": false,
+    "banking_or_payment_automation_authorized": false,
+    "credential_automation_authorized": false,
+    "signature_or_legal_automation_authorized": false,
+    "trading_access": false,
+    "additional_cost_eur": 0
+  },
+  "known_gaps": {
+    "transport_self_identification_mismatch": {
+      "status": "PARCIAL_NON_BLOCKING_FOR_THIS_PREPROD_CANARY",
+      "reported_version": "android-full-control-v1",
+      "reported_agent_version": "android-worker-1.0.0",
+      "physical_package_is_v2": true,
+      "required_before_autonomous_promotion": "Give V2 its own runtime version/agent constants and preserve upgrade signing continuity."
+    },
+    "signing_continuity": {
+      "status": "PARCIAL",
+      "current_build_uses_ephemeral_build_keystore": true,
+      "required_before_future_in_place_upgrade": "Create governed stable V2 signing/upgrade path without exposing private key material."
+    },
+    "visual_fallback": {
+      "status": "PLANNED",
+      "accessibility_tree_and_gesture_control_green": true,
+      "computer_vision_fallback_not_yet_claimed": true
+    }
+  },
+  "rollback": {
+    "v1_app_preserved": true,
+    "v1_currently_disabled_by_owner": true,
+    "v2_local_kill_switch_available": true,
+    "no_prod_change": true
+  },
+  "next_block": "FIX_V2_SELF_IDENTIFICATION_AND_STABLE_SIGNING_THEN_ADD_VISUAL_FALLBACK_WITHOUT_BREAKING_PHYSICAL_V2"
+}
