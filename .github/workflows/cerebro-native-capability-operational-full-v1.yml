@@ -1,0 +1,92 @@
+name: CEREBRO Native Capability Operational FULL V1
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 4 * * *'
+  push:
+    branches:
+      - main
+      - 'cerebro/lote12-operational-full-v1-*'
+    paths:
+      - 'cerebro/runtime/native-capability-operational-loop-v1.mjs'
+      - 'cerebro/tests/native-capability-operational-loop-v1.test.mjs'
+      - 'cerebro/registry/native-capability-operational-adoption-v1.json'
+      - 'cerebro/docs/NATIVE_CAPABILITY_OPERATIONAL_FULL_V1_RUNBOOK.md'
+      - '.github/workflows/cerebro-native-capability-operational-full-v1.yml'
+  pull_request:
+    paths:
+      - 'cerebro/runtime/native-capability-operational-loop-v1.mjs'
+      - 'cerebro/tests/native-capability-operational-loop-v1.test.mjs'
+      - 'cerebro/registry/native-capability-operational-adoption-v1.json'
+      - 'cerebro/docs/NATIVE_CAPABILITY_OPERATIONAL_FULL_V1_RUNBOOK.md'
+      - '.github/workflows/cerebro-native-capability-operational-full-v1.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  operational-full-preprod:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Canonical factory registry remains valid
+        working-directory: cerebro
+        run: npm run validate
+      - name: Operational adoption contract and E2E
+        run: node --test cerebro/tests/native-capability-operational-loop-v1.test.mjs
+      - name: Preserve all eight native runtimes OLD vs NEW
+        run: |
+          git diff --exit-code cd24c45149d336b3ecf9f4e70e4c2547fb05ee9c -- \
+            cerebro/runtime/fact-skill-native-v1.mjs \
+            cerebro/runtime/github-safe-native-v1.mjs \
+            cerebro/runtime/db-safe-native-v1.mjs \
+            cerebro/runtime/evt001-native-v1.mjs \
+            cerebro/runtime/technology-capability-scout-native-v1.mjs \
+            cerebro/runtime/compet-native-v1.mjs \
+            cerebro/runtime/cap-native-v1.mjs \
+            cerebro/runtime/lead-native-v1.mjs
+      - name: Execute daily operational loop
+        run: |
+          mkdir -p /tmp/cerebro-opfull
+          node cerebro/runtime/native-capability-operational-loop-v1.mjs \
+            --company fenix \
+            --cycle-anchor "$(date -u +'%Y-%m-%dT00:00:00Z')" \
+            --workdir /tmp/cerebro-opfull/work \
+            --source-run-id "${{ github.run_id }}" \
+            --source-head-sha "${{ github.sha }}" \
+            --out /tmp/cerebro-opfull/report.json
+      - name: Operational FULL policy gate
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const r=JSON.parse(fs.readFileSync('/tmp/cerebro-opfull/report.json','utf8'));
+          if(r.status!=='OPERATIONAL_FULL_PREPROD'||r.operational_full!==true||r.capability_count!==8)throw new Error('aggregate operational FULL not green');
+          if(!r.capabilities.every(x=>x.status==='ACTIVE_CONTINUOUS_PREPROD'&&x.consumer_coverage===1))throw new Error('consumer adoption incomplete');
+          if(r.event_bus_all_engines_green!==true||r.all_registered_engines_total<1)throw new Error('EVT all-engine adoption incomplete');
+          if(r.learning.status!=='OUTBOX_GREEN'||r.learning.feedback_events_total!==8)throw new Error('LRN feedback incomplete');
+          if(r.authority.prod_authorized||r.authority.prod_write_authorized||r.authority.provider_write_authorized||r.authority.crm_write_authorized||r.authority.db_mutation_authorized||r.authority.spend_authorized||r.authority.trading_access||r.authority.android_touched||r.authority.additional_cost_eur!==0)throw new Error('authority or cost expanded');
+          if(r.continuous.schedule_configured!==true||r.continuous.soak_overclaimed!==false)throw new Error('continuous contract invalid');
+          console.log(JSON.stringify({status:'GREEN',capabilities:r.capability_count,bindings:r.binding_receipts_total,engines:r.all_registered_engines_total,evidence_hash:r.evidence_hash}));
+          NODE
+      - name: Existing technical native statuses remain GREEN
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const files=['capability-fact-skill-native.v1.json','capability-gh-safe-native.v1.json','capability-db-safe-native.v1.json','capability-evt001-native.v1.json','capability-tech-cap-scout-native.v1.json','capability-compet-native.v1.json','capability-cap-native.v1.json','capability-lead-native.v1.json'];
+          for(const f of files){const r=JSON.parse(fs.readFileSync('cerebro/registry/'+f,'utf8'));if(r.status!=='NATIVE_FULL_PREPROD'||r.full_gate?.native_full!==true||r.full_gate?.ci_green!==true||r.prod_authorized!==false||r.additional_cost_eur!==0)throw new Error('technical native regression:'+f);}
+          NODE
+      - name: Upload operational evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-capability-operational-full-v1-${{ github.run_id }}
+          path: |
+            /tmp/cerebro-opfull/report.json
+            /tmp/cerebro-opfull/work/lrn-outbox
+          retention-days: 30
