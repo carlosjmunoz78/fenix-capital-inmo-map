@@ -7,16 +7,47 @@
   "version": "android-full-control-v1",
   "device_id": "android-28781704-56ca-49fb-b181-98c3fc22c07c",
   "agent_version_installed": "android-worker-1.0.0",
-  "status": "HUMAN_REQUIRED_POLICY_CONFLICT",
-  "diagnosis": {
-    "transport_previously_proven": true,
-    "open_url_previously_completed": true,
-    "read_screen_contract_mismatch": "worker action is DESCRIBE_SCREEN while prior queue used READ_SCREEN",
-    "browser_policy_gap": "installed worker allowlist does not include Samsung Internet",
-    "current_transport_polling": false,
-    "last_seen_at": "2026-10-15T18:08:31.488Z"
+  "status": "GREEN_PHYSICAL_ANDROID_WORKER_BROWSER_READBACK",
+  "physical_evidence": {
+    "worker_online": true,
+    "kill_switch": false,
+    "accessibility_connected": true,
+    "notifications_connected": true,
+    "worker_ui_opened": true,
+    "worker_ui_readback_semantic_verified": true,
+    "worker_ui_node_count": 20,
+    "synthetic_click_verified": true,
+    "staging_open_url_verified": true,
+    "browser_active_package": "com.android.chrome",
+    "staging_host_readback": "staging.fenixcapital.es",
+    "staging_ui_readback_semantic_verified": true,
+    "staging_ui_node_count": 100,
+    "staging_content_markers": [
+      "Fénix Capital",
+      "Entiende tu hipoteca. Decide con claridad.",
+      "Cuéntanos tu caso",
+      "Compra de vivienda",
+      "Mejora de hipoteca",
+      "Autónomos",
+      "Inversión inmobiliaria"
+    ],
+    "secure_connection_marker_observed": true,
+    "last_seen_at": "2026-10-16T05:28:06.836Z"
   },
-  "source_repairs": {
+  "command_evidence": {
+    "android-health-20261016-closeout-01": {"state":"COMPLETED","semantic_verified":true,"result_sha256":"1b959e3211783f7907583e84ba126e6fdb5da4c8e1ec6676253e9194b76627ad"},
+    "android-open-worker-20261016-closeout-02": {"state":"COMPLETED","semantic_verified":true,"result_sha256":"490118aacd938cc400c81cefe0de9422b027b3c4f31e8b5ccf626821940ecca6"},
+    "android-describe-worker-20261016-closeout-03": {"state":"COMPLETED","semantic_verified":true,"node_count":20,"result_sha256":"d3d1f82d0e7132ca97ecedd0f2f268c423a23996c6455a65caf2a76ff025c1c4"},
+    "android-refresh-worker-20261016-closeout-04": {"state":"COMPLETED","semantic_verified":true,"result_sha256":"29457c1be5b7c1f2bffa23e5a0759579b9c3b44d6ab61feb239bf3e4c136194f"},
+    "android-describe-after-refresh-20261016-closeout-05": {"state":"FAILED","semantic_verified":false,"error":"ACTIVE_PACKAGE_DENIED_PREPROD","result_sha256":"40a6cde6a5eadd3fbe81e7b2f432923d9a316e5de967b3140f4d7ad8557b0664","classification":"TRANSIENT_ACTIVE_WINDOW_POLICY_GUARD"},
+    "android-open-staging-20261016-closeout-06": {"state":"COMPLETED","semantic_verified":true,"result_sha256":"667bd5749baa5e805f92d85a016e4280f330836f1f517cb3332c4515389b3842"},
+    "android-describe-staging-20261016-closeout-07": {"state":"COMPLETED","semantic_verified":true,"node_count":0,"result_sha256":"c114287fc44827fe6bd935779dc826817acef3b2c8395f5a62eaee1d748efc48","classification":"TOO_EARLY_BROWSER_READBACK"},
+    "android-health-20261016-closeout-08": {"state":"COMPLETED","semantic_verified":true,"active_package":"com.android.systemui","result_sha256":"cd2a185be1b181a1d6f711a1aa250a02e9fb89ba757b73ebb6532d94ec45e431"},
+    "android-open-staging-20261016-closeout-09": {"state":"COMPLETED","semantic_verified":true,"result_sha256":"39df8a178633c9701b31a6bc5c29b10a81556324bcbbc185e2ac7b3a282011ad"},
+    "android-health-20261016-closeout-10": {"state":"COMPLETED","semantic_verified":true,"active_package":"com.android.chrome","result_sha256":"8ba82a9bdf5d37e6c739f4226342fd12fb33ee120f684b786f0de7487731c0f7"},
+    "android-describe-staging-20261016-closeout-11": {"state":"COMPLETED","semantic_verified":true,"node_count":100,"result_sha256":"75c26497f83f7e3679aef8a1fc1bf4288614a95b3a78ad7d93ca9af4a2eb76dc"}
+  },
+  "source_hardening_not_yet_physical_on_device": {
     "read_screen_alias_added": true,
     "samsung_browser_preprod_allowlist_added": true,
     "transport_start_sticky_added": true,
@@ -25,29 +56,22 @@
     "ci_conclusion": "success",
     "artifact_id": 12016726662,
     "artifact_digest": "sha256:b98214a0fc5abd0e8d59e017bf7da3ddb770bb5983c6fc2c009dbb53af3a0d80",
-    "new_apk_sha256": "c26612bde8c8413328acbcb0dec5f38d801b7466f4d7f93a9da4571c0366d97e"
+    "new_apk_sha256": "c26612bde8c8413328acbcb0dec5f38d801b7466f4d7f93a9da4571c0366d97e",
+    "note": "The installed physical worker remains android-worker-1.0.0; the new hardened APK is CI-verified but was not installed during this closeout because the existing enrolled worker completed the physical E2E without reinstall."
   },
-  "physical_closeout_queue": [
-    "android-health-20261016-closeout-01",
-    "android-open-worker-20261016-closeout-02",
-    "android-describe-worker-20261016-closeout-03",
-    "android-refresh-worker-20261016-closeout-04",
-    "android-describe-after-refresh-20261016-closeout-05",
-    "android-open-staging-20261016-closeout-06",
-    "android-describe-staging-20261016-closeout-07"
-  ],
-  "queue_state_at_evidence": {
-    "queued": 7,
-    "delivered": 0,
-    "completed": 0,
-    "failed": 0
+  "item_48_closeout": {
+    "physical_device_bound": true,
+    "transport_online": true,
+    "remote_command_execution": true,
+    "semantic_result_verified": true,
+    "physical_ui_readback": true,
+    "status": "CONFIRMED_OPERATIONAL_PREPROD"
   },
-  "human_boundary": {
-    "reason": "POLICY_CONFLICT",
-    "required_action": "Open CEREBRO Worker PREPROD on the already-enrolled Android device and tap ACTIVAR CONTROL PREPROD once.",
-    "reinstall_required": false,
-    "reenrollment_required": false,
-    "permission_regrant_required": false
+  "item_183_closeout": {
+    "web_staging_physical_android_render_readback": true,
+    "android_template_apk_physical_install": false,
+    "status": "PARTIAL",
+    "remaining_gate": "AUTHORIZED_TEMPLATE_APK_INSTALL_AND_RENDER_E2E_183"
   },
   "safety": {
     "prod": false,
@@ -57,5 +81,6 @@
     "credentials": false,
     "customer_data": false,
     "additional_cost_eur": 0
-  }
+  },
+  "next_block": "SCHEDULED_WATCH_AND_LEARN_SOAK_AND_COMPET_CAP_CONTINUOUS_CLOSURE"
 }
