@@ -1,0 +1,19 @@
+{
+  "schema_version":"1.0.0",
+  "state_type":"CEREBRO_NATIVE_CAPABILITY_PREPROD_EVIDENCE",
+  "capability_id":"COMPET-NATIVE",
+  "company_id":"GLOBAL",
+  "engine_id":"COMPET-001",
+  "environment":"PREPROD",
+  "version":"1.0.0",
+  "status":"PREPROD_GREEN",
+  "validated_head_sha":"9b672f9597e2658a961bec29b10c4288a64effcf",
+  "workflow":{"name":"CEREBRO COMPET Native V1 PREPROD","run_id":38906062983,"job_id":116989816495,"conclusion":"success"},
+  "checks":{"factory_registry_valid":true,"existing_compet_contracts_green":true,"targeted_e2e_green":true,"existing_compet_runtimes_unchanged":true,"registry_policy_gate_green":true,"gateway_fail_closed":true,"preprod_only":true,"multi_company_isolation_green":true,"offer_pricing_seo_campaigns_expansion_positioning_contract_green":true,"public_source_boundary_green":true,"body_persisted":false,"personal_data_extracted":false,"zero_cost_money_limit_green":true,"deterministic_plan_and_dossier_green":true,"replay_green":true,"old_vs_new_green":true,"independent_tribunal_green":true,"fenix_real_target_baseline_preserved":true,"fenix_scheduler_soak_complete":false,"fenix_soak_overclaimed":false,"prod_denied":true,"trading_denied":true,"android_touched":false,"additional_cost_eur":0},
+  "existing_runtime_boundary":{"fact001_gap_capabilities_modified":false,"compet_real_targets_runtime_modified":false,"compet_real_targets_registry_modified":false,"public_source_adapter_modified":false,"prod_touched":false},
+  "evaluation":{"benchmark":"compet-native-governance@1.0.0","old_required_gates_covered":8,"new_required_gates_covered":14,"delta":6,"judge_id":"QA-001","candidate_actor_id":"COMPET-001","tribunal_decision":"PASS","prod_authorized":false},
+  "full_gate_count":14,
+  "full_gate_result":"GREEN",
+  "human_required":null,
+  "next_gate":"PR_AND_MAIN_INTEGRATION_WITHOUT_PROD_OR_ANDROID"
+}
