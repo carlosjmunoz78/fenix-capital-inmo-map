@@ -1,0 +1,107 @@
+name: CEREBRO CAP FULL E2E REAL V1
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, 'cerebro/lote12-real-consumer-cap-v1-*']
+    paths:
+      - 'cerebro/runtime/cap-real-consumer-adoption-v1.mjs'
+      - 'cerebro/tests/cap-real-consumer-adoption-v1.test.mjs'
+      - 'cerebro/registry/cap-real-consumer-adoption-v1.json'
+      - 'cerebro/docs/CAP_REAL_CONSUMER_ADOPTION_V1_RUNBOOK.md'
+      - '.github/workflows/cerebro-cap-full-e2e-real-v1.yml'
+  pull_request:
+    paths:
+      - 'cerebro/runtime/cap-real-consumer-adoption-v1.mjs'
+      - 'cerebro/tests/cap-real-consumer-adoption-v1.test.mjs'
+      - 'cerebro/registry/cap-real-consumer-adoption-v1.json'
+      - 'cerebro/docs/CAP_REAL_CONSUMER_ADOPTION_V1_RUNBOOK.md'
+      - '.github/workflows/cerebro-cap-full-e2e-real-v1.yml'
+permissions: {contents: read, actions: read}
+jobs:
+  strict-real-consumer-adoption:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Canonical factory registry remains valid
+        working-directory: cerebro
+        run: npm run validate
+      - name: Preserve native CAP and shared Lote 1+2 runtimes
+        run: |
+          git diff --exit-code 3b12b372bdf852400739a39f2b5936696752e56c -- \
+            cerebro/runtime/cap-native-v1.mjs \
+            cerebro/tests/cap-native-v1.test.mjs \
+            cerebro/registry/capability-cap-native.v1.json \
+            cerebro/evidence/cap-native-v1-preprod.json \
+            cerebro/runtime/cap-ieca-cordoba-v0.mjs \
+            cerebro/runtime/native-capability-operational-loop-v1.mjs \
+            cerebro/registry/native-capability-operational-adoption-v1.json
+      - name: Existing CAP plus strict real-consumer tests
+        run: >-
+          node --test
+          cerebro/tests/cap-native-v1.test.mjs
+          cerebro/tests/cap-real-consumer-adoption-v1.test.mjs
+          cerebro/tests/native-capability-operational-loop-v1.test.mjs
+          cerebro/tests/native-capability-continuous-improvement-v1.test.mjs
+      - name: Execute strict CAP route
+        run: |
+          mkdir -p /tmp/cerebro-cap-real
+          node cerebro/runtime/cap-real-consumer-adoption-v1.mjs \
+            --company fenix \
+            --workdir /tmp/cerebro-cap-real/state \
+            --source-run-id "${{ github.run_id }}" \
+            --source-head-sha "${{ github.sha }}" \
+            --out /tmp/cerebro-cap-real/report.json
+      - name: Strict FULL E2E REAL gate
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const r=JSON.parse(fs.readFileSync('/tmp/cerebro-cap-real/report.json','utf8'));
+          const required=['MKT-001','SEO-001','WEB-001','LEAD-001','EVA-001','LRN-001','OBSERV-001','FINOPS-001'];
+          const expected={
+            'MKT-001':'MARKETING_CHANNEL_MIX_READY',
+            'SEO-001':'SEO_ACQUISITION_SCALE_READY',
+            'WEB-001':'WEB_LANDING_OPTIMIZATION_READY',
+            'LEAD-001':'LEAD_QUALITY_SIGNAL_READY',
+            'EVA-001':'CAP_EVALUATION_READY',
+            'LRN-001':'LRN_FEEDBACK_PERSISTED',
+            'OBSERV-001':'OBSERVABILITY_RECORDED',
+            'FINOPS-001':'FINOPS_ZERO_COST_RECORDED'
+          };
+          if(r.status!=='FULL_E2E_REAL_PREPROD'||r.full_e2e_real_preprod!==true)throw new Error('CAP strict FULL not green');
+          if(JSON.stringify(r.required_consumers)!==JSON.stringify(required)||r.consumers.length!==required.length)throw new Error('consumer map mismatch');
+          if(r.consumer_coverage!==1||r.functional_consumer_coverage!==1||r.missing_consumers.length||r.failed_consumers.length)throw new Error('semantic coverage incomplete');
+          if(!required.every(id=>r.consumer_map?.[id]?.decision===expected[id]&&r.consumer_map[id].real_consumption===true&&r.consumer_map[id].outcome_hash))throw new Error('semantic consumer decision proof incomplete');
+          if(r.evaluation_consumer?.decision!=='CAP_EVALUATION_READY'||r.independent_tribunal?.decision!=='PASS')throw new Error('EVA/independent Tribunal gate failed');
+          if(r.learning_sink?.decision!=='LRN_FEEDBACK_PERSISTED'||r.observability_consumer?.decision!=='OBSERVABILITY_RECORDED'||r.finops_consumer?.decision!=='FINOPS_ZERO_COST_RECORDED')throw new Error('LRN/OBSERV/FINOPS gate failed');
+          const rr=r.backup_rollback_rebuild;
+          if(!rr?.backup_ready||!rr.rollback_green||!rr.rebuild_green||rr.rebuilt_consumer_count!==5||rr.applied_state_hash!==rr.rebuilt_state_hash)throw new Error('backup/rollback/rebuild gate failed');
+          if(r.state_persisted!==true||r.semantic_state_persisted!==true||r.restartable!==true||r.idempotency_proven!==true||r.additional_cost_eur!==0||r.recommended_new_spend_eur!==0)throw new Error('durability/idempotency/cost/spend gate failed');
+          const forbidden=['prod_authorized','prod_write_authorized','db_mutation_authorized','provider_write_authorized','crm_write_authorized','spend_authorized','trading_access','android_touched','external_code_execution'];
+          if(forbidden.some(k=>r[k]!==false))throw new Error('authority expanded');
+          console.log(JSON.stringify({status:'GREEN',capability:r.capability_id,consumer_count:r.consumers.length,semantic_outcome_hash:r.semantic_outcome_hash,outcome_hash:r.outcome_hash}));
+          NODE
+      - name: Registry candidate gate
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const r=JSON.parse(fs.readFileSync('cerebro/registry/cap-real-consumer-adoption-v1.json','utf8'));
+          const required=['MKT-001','SEO-001','WEB-001','LEAD-001','EVA-001','LRN-001','OBSERV-001','FINOPS-001'];
+          if(r.capability_id!=='CAP-NATIVE'||r.engine_id!=='CAP-001'||r.environment!=='PREPROD'||JSON.stringify(r.required_consumers)!==JSON.stringify(required))throw new Error('registry identity/consumer map invalid');
+          const g=r.strict_gates;
+          if(!g.real_runtime_use_required||!g.semantic_state_change_required||!g.semantic_mutation_tests_required||!g.native_replay_verification_required||!g.evaluation_required||!g.independent_tribunal_required||!g.learning_feedback_required||!g.backup_rollback_rebuild_required)throw new Error('strict gate weakened');
+          if(r.consumer_model?.receipt_only_forbidden!==true||r.producer?.recommended_new_spend_eur!==0||r.producer?.provider_execution_authorized!==false||r.producer?.external_code_execution!==false)throw new Error('consumer/producer policy invalid');
+          const a=r.authority;if(a.prod_authorized||a.prod_write_authorized||a.db_mutation_authorized||a.provider_write_authorized||a.crm_write_authorized||a.spend_authorized||a.trading_access||a.android_touched||a.external_code_execution||a.additional_cost_eur!==0)throw new Error('authority/cost expanded');
+          NODE
+      - name: Upload strict CAP evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: cap-full-e2e-real-v1-${{ github.run_id }}
+          path: |
+            /tmp/cerebro-cap-real/report.json
+            /tmp/cerebro-cap-real/state
+          retention-days: 30
+          if-no-files-found: error
