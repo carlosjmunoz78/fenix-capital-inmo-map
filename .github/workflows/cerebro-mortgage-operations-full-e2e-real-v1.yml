@@ -80,12 +80,14 @@ jobs:
           if(forbidden.some(k=>r[k]!==false))throw new Error('authority expanded');
           console.log(JSON.stringify({status:'GREEN',bundle_id:r.bundle_id,outcome_hash:r.outcome_hash}));
           NODE
-      - name: Candidate registry gate
+      - name: Registry state and authority gate
         run: |
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
           const r=JSON.parse(fs.readFileSync('cerebro/registry/mortgage-operations-real-adoption-v1.json','utf8'));
-          if(r.environment!=='PREPROD'||r.status!=='STRICT_CANDIDATE_PREPROD')throw new Error('candidate state invalid');
+          const allowedStates=new Set(['STRICT_CANDIDATE_PREPROD','FULL_E2E_REAL_PREPROD']);
+          if(r.environment!=='PREPROD'||!allowedStates.has(r.status)||r.strict_target_status!=='FULL_E2E_REAL_PREPROD')throw new Error('registry state invalid');
+          if(r.status==='FULL_E2E_REAL_PREPROD'&&r.main_gate?.full_e2e_real_preprod!==true)throw new Error('certified state lacks main evidence');
           const ids=['VIA-001','BNK-001','BNK-002','BNK-003','BNK-004','BNK-005','BNK-006','OFR-001'];
           if(!ids.every(id=>r.engines?.[id]?.decision==='EXTEND_HISTORICAL_CONTRACT'))throw new Error('historical contracts not reconciled');
           const a=r.authority;const keys=['prod_authorized','prod_write_authorized','db_mutation_authorized','crm_write_authorized','provider_write_authorized','bank_submission_authorized','credit_decision_authorized','external_communication_authorized','spend_authorized','trading_access','external_code_execution'];
