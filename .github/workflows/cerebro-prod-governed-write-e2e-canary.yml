@@ -1,0 +1,160 @@
+name: CEREBRO PROD Governed Write E2E Canary
+
+on:
+  push:
+    branches:
+      - cerebro/governed-write-v1-20261016
+    paths:
+      - '.github/workflows/cerebro-prod-governed-write-e2e-canary.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: cerebro-prod-governed-write-e2e-canary-v1
+  cancel-in-progress: false
+
+env:
+  CEREBRO_GATEWAY_URL: https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-gateway-prod-governed-write-canary-v1?authorize=1
+
+jobs:
+  physical-governed-write-canary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout governed executor source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Obtain exact CEREBRO governed-write authorization
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error "$CEREBRO_GATEWAY_URL" > /tmp/cerebro-plan.json
+          jq -e '
+            .ok==true and
+            .status=="AUTHORIZED" and
+            .executed_by=="CEREBRO_GATEWAY_CANARY" and
+            .credential_mode=="DELEGATED_EPHEMERAL_GITHUB_ACTIONS" and
+            .external_credential_received==false and
+            .result.ok==true and
+            .result.status=="AUTHORIZED" and
+            .result.operation=="CREATE_VERIFY_ROLLBACK_GOVERNED_CANARY_BRANCH_FILE" and
+            .result.repository=="carlosjmunoz78/fenix-capital-inmo-map" and
+            .result.base_ref=="main" and
+            .result.direct_main_write==false and
+            .result.merge==false and
+            .result.auto_merge==false and
+            .result.force_push==false and
+            .result.workflow_mutation==false and
+            .result.governance_self_mutation==false and
+            .result.customer_data==false and
+            .result.trading==false and
+            .result.additional_cost_eur==0 and
+            .result.credential_exported==false
+          ' /tmp/cerebro-plan.json >/dev/null
+
+      - name: Execute physical branch-file-write, remote readback and rollback
+        shell: bash
+        run: |
+          set -euo pipefail
+          base_sha="$(jq -r '.result.base_sha' /tmp/cerebro-plan.json)"
+          branch="$(jq -r '.result.branch' /tmp/cerebro-plan.json)"
+          path="$(jq -r '.result.path' /tmp/cerebro-plan.json)"
+          auth_id="$(jq -r '.result.authorization_id' /tmp/cerebro-plan.json)"
+
+          test "$base_sha" = "9baf5a1885d3fbd8fc18614fb3b867a49583f40f"
+          test "$branch" = "cerebro/prod-governed-write-e2e-canary-20261016-v1"
+          test "$path" = "cerebro/evidence/prod-governed-write/physical-canary-2026-10-16.json"
+
+          git fetch origin main --no-tags
+          test "$(git rev-parse origin/main)" = "$base_sha"
+          if git ls-remote --exit-code origin "refs/heads/$branch" >/dev/null 2>&1; then
+            echo 'Canary branch already exists; refusing to overwrite.' >&2
+            exit 1
+          fi
+
+          cleanup(){ git push origin --delete "$branch" >/dev/null 2>&1 || true; }
+          trap cleanup EXIT
+
+          git checkout --detach "$base_sha"
+          git switch -c "$branch"
+          mkdir -p "$(dirname "$path")"
+          jq '.result.artifact' /tmp/cerebro-plan.json > "$path"
+          git config user.name 'CEREBRO Governed Write Canary'
+          git config user.email 'cerebro-governed-write-canary@users.noreply.github.com'
+          git add "$path"
+          git commit -m "CEREBRO canary: physical PROD_GOVERNED_WRITE E2E"
+          local_commit="$(git rev-parse HEAD)"
+          git push origin "HEAD:refs/heads/$branch"
+
+          remote_commit="$(git ls-remote origin "refs/heads/$branch" | awk '{print $1}')"
+          test -n "$remote_commit"
+          test "$remote_commit" = "$local_commit"
+          git fetch origin "$branch" --no-tags
+          test "$(git rev-parse FETCH_HEAD)" = "$local_commit"
+          git show "FETCH_HEAD:$path" > /tmp/remote-readback.json
+          jq -S . "$path" > /tmp/local-normalized.json
+          jq -S . /tmp/remote-readback.json > /tmp/remote-normalized.json
+          cmp /tmp/local-normalized.json /tmp/remote-normalized.json
+
+          git push origin --delete "$branch"
+          trap - EXIT
+          if git ls-remote --exit-code origin "refs/heads/$branch" >/dev/null 2>&1; then
+            echo 'Rollback verification failed; canary branch still exists.' >&2
+            exit 1
+          fi
+
+          jq -n \
+            --arg authorization_id "$auth_id" \
+            --arg base_sha "$base_sha" \
+            --arg branch "$branch" \
+            --arg path "$path" \
+            --arg commit_sha "$local_commit" \
+            '{
+              schema_version:"1",
+              status:"GREEN_PHYSICAL_PROD_GOVERNED_WRITE_E2E",
+              company_id:"fenix",
+              engine_id:"ACTGW-001",
+              environment:"PROD",
+              version:"v1",
+              authorization_id:$authorization_id,
+              base_sha:$base_sha,
+              canary_branch:$branch,
+              canary_path:$path,
+              physical_commit_sha:$commit_sha,
+              branch_created:true,
+              file_created:true,
+              remote_readback:true,
+              rollback_deleted_branch:true,
+              rollback_verified:true,
+              credential_mode:"DELEGATED_EPHEMERAL_GITHUB_ACTIONS",
+              credential_exported:false,
+              credential_persisted:false,
+              direct_main_write:false,
+              merge:false,
+              auto_merge:false,
+              force_push:false,
+              customer_data:false,
+              trading:false,
+              additional_cost_eur:0
+            }' > /tmp/cerebro-physical-canary-evidence.json
+          cat /tmp/cerebro-physical-canary-evidence.json
+
+      - name: Upload immutable physical canary evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-prod-governed-write-physical-e2e-${{ github.run_id }}
+          path: /tmp/cerebro-physical-canary-evidence.json
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Record governed-write boundary
+        if: success()
+        run: |
+          echo 'GREEN: CEREBRO Gateway -> ACTGW-001 -> PROD_GOVERNED_WRITE runtime authorized an exact synthetic write; GitHub Actions executed it with its ephemeral credential, verified remote readback and deleted the canary branch.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'No direct main write, merge, force-push, customer data, Trading, persistent credential or additional cost.' >> "$GITHUB_STEP_SUMMARY"
