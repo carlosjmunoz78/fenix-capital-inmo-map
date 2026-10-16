@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0.0",
+  "engine_id": "MOTION-001",
+  "phase": "PHASE_2",
+  "version": "v0.4.3",
+  "name": "GEOMETRY_LOCK",
+  "status": "BUGFIX_READY_FOR_OWNER_RETEST",
+  "environment": ["LAB", "PREPROD"],
+  "prod_authorized": false,
+  "additional_cost_eur": 0,
+  "preserves": ["PHASE2_V0.4.2", "all_previous_visual_versions"],
+  "bug": {
+    "owner_report": "zoom moved neural links independently from neurons",
+    "root_cause": "filaments and neurons were not using an identical camera/scale transform; WebGL and Canvas layers diverged during fly/zoom",
+    "fix": "single transform contract for nodes+filaments; duplicate Canvas filament overlay disabled when WebGL is healthy"
+  },
+  "fixes": {
+    "webgl_line_transform_matches_node_transform": true,
+    "canvas_fallback_nodes_and_links_share_projection": true,
+    "semantic_overlay_projection_matches_shader": true,
+    "duplicate_webgl_canvas_filament_layer_removed": true
+  },
+  "syntax_gate": "GREEN",
+  "artifact": {
+    "file": "CEREBRO_PHASE2_V043_GEOMETRY_LOCK.html",
+    "sha256": "ed86af2972bfc589ae1957b0f7ee2fd9c081bf690c7bc97fd08e363aa4b691b0",
+    "bytes": 36265
+  },
+  "authority": {
+    "prod_enabled": false,
+    "automatic_promotion": false
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0.0",
+  "engine_id": "MOTION-001",
+  "phase": "PHASE_2",
+  "version": "v0.4.1",
+  "name": "SAFE_FALLBACK_COMPATIBILITY_PATCH",
+  "status": "HOTFIX_READY_FOR_OWNER_RETEST",
+  "environment": ["LAB", "PREPROD"],
+  "prod_authorized": false,
+  "additional_cost_eur": 0,
+  "preserves": ["PHASE2_V0.4", "all_previous_visual_versions"],
+  "fixes": {
+    "webgl_shader_failure_no_longer_breaks_page": true,
+    "automatic_canvas_fallback": true,
+    "shader_dynamic_array_index_removed": true,
+    "runtime_render_exception_fallback": true,
+    "mobile_fallback_load_reduced": true,
+    "essential_controls_clickable": true
+  },
+  "syntax_gate": "GREEN",
+  "artifact": {
+    "file": "CEREBRO_PHASE2_V041_SAFE_FALLBACK.html",
+    "sha256": "52037f9a6ca95918e03dd72f233286145556b29e4e1af209c5006856703408a7",
+    "bytes": 33299
+  },
+  "authority": {
+    "prod_enabled": false,
+    "automatic_promotion": false
+  }
+}

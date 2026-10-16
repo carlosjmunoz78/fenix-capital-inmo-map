@@ -1,0 +1,59 @@
+{
+  "schema_version": "1.0.0",
+  "system": "CEREBRO_VISUAL_SYSTEM",
+  "engine_id": "MOTION-001",
+  "phase": "PHASE_2",
+  "version": "v0.1",
+  "name": "PREMIUM_INSIDE_CLUSTER_DIVE",
+  "status": "OWNER_REVIEW_REQUIRED",
+  "environment": ["LAB", "PREPROD"],
+  "company_scope": "multiempresa-ready",
+  "drilldown": ["PRESENCE", "FAMILY_CLUSTER", "ENGINE", "JOB_EVENT_SHADOW"],
+  "atlas_regions": [
+    "CORE_ORCHESTRATION",
+    "FACTORY_BUILD",
+    "SUPERVISION_DECISION",
+    "COMMUNICATION_EXPERIENCE",
+    "KNOWLEDGE_LEARNING",
+    "GROWTH_INTELLIGENCE",
+    "OPERATIONS_BUSINESS",
+    "AUTOMATION_JOBS",
+    "SECURITY_RESILIENCE",
+    "FINANCE_RISK"
+  ],
+  "telemetry": {
+    "mode": "SIMULATED_SHADOW_ONLY",
+    "live_binding": false,
+    "no_fake_cognition": true,
+    "raw_content_required": false,
+    "customer_pii_required": false,
+    "secret_payload_required": false
+  },
+  "visual_grammar": {
+    "normal_palette": ["deep_navy_black", "electric_blue", "cyan", "white"],
+    "human_required_accent": "restrained_amber_focal",
+    "error_accent": "restrained_red_focal",
+    "rainbow_engine_coloring": false,
+    "depth_attenuation": true,
+    "curved_routes": true,
+    "volumetric_family_haze": true
+  },
+  "preserves": [
+    "PHASE1_V1",
+    "PHASE1_V2",
+    "PHASE1_V2.1",
+    "PHASE1_V2.2",
+    "PHASE2_V0"
+  ],
+  "authority": {
+    "prod_enabled": false,
+    "prod_write_authorized": false,
+    "automatic_promotion": false,
+    "trading_access": false,
+    "additional_cost_eur": 0
+  },
+  "artifact_evidence": {
+    "html_sha256": "4cfeaad6e93e58807e6cc7282530692e75d0b8ca9405f421c9d83fc14758ced4",
+    "bundle_sha256": "f7f00b732efdf432f1833aa99659fbd3e542f358d9dd2496c9638b2cfd4f00e3"
+  }
+}
