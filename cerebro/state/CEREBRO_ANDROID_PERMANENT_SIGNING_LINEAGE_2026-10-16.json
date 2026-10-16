@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_ANDROID_PERMANENT_SIGNING_LINEAGE",
+  "company_id": "fenix",
+  "engine_id": "ACTGW-001",
+  "environment": "PREPROD",
+  "status": "HECHO",
+  "created_at": "2026-10-16T12:05:40+02:00",
+  "alias": "cerebro-android",
+  "certificate_sha256": "9B:F8:AB:CA:93:80:8F:17:08:3D:29:6A:2D:6B:B5:06:D6:34:A9:98:9A:25:2A:DC:03:26:A0:93:C2:B8:E8:C3",
+  "key_algorithm": "RSA",
+  "key_size": 4096,
+  "store_type": "PKCS12",
+  "secret_storage_policy": "NO_PLAINTEXT_IN_REPOSITORY",
+  "local_secret_protection": "WINDOWS_DPAPI_CURRENT_USER",
+  "keystore_backup_required": true,
+  "password_external_backup_required": true,
+  "overwrite_allowed": false,
+  "rotation_requires_explicit_migration_plan": true,
+  "notes": "Metadata only. No keystore, password or DPAPI secret is stored in GitHub. This record exists to preserve signing lineage and prevent accidental key replacement."
+}
