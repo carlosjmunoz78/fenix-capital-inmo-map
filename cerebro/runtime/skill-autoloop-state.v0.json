@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-16T11:50:01.094Z",
+  "updated_at": "2026-10-16T11:55:42.241Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -53,7 +53,8 @@
     "github-wide-skills:28b33318e96c4dcfb74a",
     "github-wide-skills:a9a119525d9fa0654756",
     "github-wide-skills:9e01bf213c0129ddaba5",
-    "github-wide-skills:b011ccb61061fd9c478b"
+    "github-wide-skills:b011ccb61061fd9c478b",
+    "github-wide-skills:b05894039afbda18087b"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -226,6 +227,42 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 38851697015,
       "checkpointed_at": "2026-10-16T04:39:14.264Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:b05894039afbda18087b": {
+      "candidate_id": "github-wide-skills:b05894039afbda18087b",
+      "name": "domain-modeling",
+      "human_alias": "Domain Modeling",
+      "wrapper_id": "skillwrap:e7bb87074f4c2bda7bc7",
+      "domain": "software-engineering-devops",
+      "engine_bindings": [
+        "FACT-001",
+        "ARCH-001",
+        "API-001",
+        "DEP-001",
+        "MIG-001",
+        "QA-001",
+        "REG-001",
+        "DOCS-001"
+      ],
+      "value_score": 88.09,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "vdsmon/skills",
+        "upstream_head_commit": "6149d367a4f39944d169958c5ed3552aed748bf6",
+        "manifest_sha256": "d6a3a28a8a45156fe0d99293772ea2f9e9a8e7115849b02821142379d29ac842",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 38896987155,
+      "checkpointed_at": "2026-10-16T11:55:42.241Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -1185,7 +1222,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "IDLE_NO_NEW_ELIGIBLE_CANDIDATE",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -1198,5 +1235,5 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 38878053318
+  "last_discovery_run_id": 38896987155
 }
