@@ -7,7 +7,7 @@
   "company_id": "GLOBAL",
   "environment": "PREPROD",
   "version": "1.0.0",
-  "status": "PREPROD_CANDIDATE",
+  "status": "NATIVE_FULL_PREPROD",
   "ownership": {
     "primary": "FACT-001",
     "support": ["LRN-001", "QA-001", "EVA-001", "ROUTE-001", "OBSERV-001", "FINOPS-001"],
@@ -110,12 +110,14 @@
       "runbook_changelog_dependencies",
       "preprod_green_evidence"
     ],
-    "ci_green": false,
-    "native_full": false,
-    "evidence_ref": null
+    "ci_green": true,
+    "native_full": true,
+    "validated_head_sha": "6d578a27ba7e95175f04c0ca053b04a112b45ef5",
+    "workflow_run_id": 38895289136,
+    "evidence_ref": "cerebro/evidence/fact-skill-native-v1-preprod.json"
   },
   "prod_authorized": false,
   "prod_write_authorized": false,
   "additional_cost_eur": 0,
-  "next_gate": "TARGETED_CI_AND_PREPROD_E2E"
+  "next_gate": "PR_AND_MAIN_INTEGRATION_WITHOUT_PROD_AUTHORITY"
 }
