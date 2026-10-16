@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-16T16:53:35.691Z",
+  "updated_at": "2026-10-16T16:58:48.509Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -55,7 +55,8 @@
     "github-wide-skills:9e01bf213c0129ddaba5",
     "github-wide-skills:b011ccb61061fd9c478b",
     "github-wide-skills:b05894039afbda18087b",
-    "github-wide-skills:bde6eb1a0b79083f6769"
+    "github-wide-skills:bde6eb1a0b79083f6769",
+    "github-wide-skills:b36b9a1166bf6b1a543c"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -300,6 +301,40 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 38919574802,
       "checkpointed_at": "2026-10-16T14:54:52.410Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:b36b9a1166bf6b1a543c": {
+      "candidate_id": "github-wide-skills:b36b9a1166bf6b1a543c",
+      "name": "optale-files",
+      "human_alias": "Optale Files",
+      "wrapper_id": "skillwrap:5e91f77d16622bb69fb5",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 85,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "Optale-no/console-skills",
+        "upstream_head_commit": "993f2b8f1fd0be3f1d1e58e725f4364fa880b892",
+        "manifest_sha256": "b7268cbdf29530355d437dec712eafcdd529c2df7f28e53333520e71144586ff",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 38936069851,
+      "checkpointed_at": "2026-10-16T16:58:48.509Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -1259,7 +1294,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "IDLE_NO_NEW_ELIGIBLE_CANDIDATE",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -1272,5 +1307,5 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 38919568445
+  "last_discovery_run_id": 38936069851
 }
