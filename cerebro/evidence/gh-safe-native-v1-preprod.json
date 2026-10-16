@@ -1,0 +1,7 @@
+{
+  "schema_version":"1.0.0","state_type":"CEREBRO_NATIVE_CAPABILITY_PREPROD_EVIDENCE","capability_id":"GH-SAFE-NATIVE","company_id":"GLOBAL","engine_id":"FACT-001","environment":"PREPROD","version":"1.0.0","status":"PREPROD_GREEN",
+  "validated_head_sha":"6718d35faee8c0889645c9e5667f69ccddde0825","workflow":{"name":"CEREBRO GH-SAFE-NATIVE V1 PREPROD","run_id":38895808776,"job_id":116955876114,"conclusion":"success"},
+  "live_control_plane_evidence":{"source_pr":735,"source_merge_sha":"762df55eff27b934d8c193ae52ad27012521cbd3","observed_operations":["BRANCH_CREATE","COMMIT_FILE","PR_CREATE","CI_READ","MERGE"],"prod_deploy":false},
+  "checks":{"factory_registry_valid":true,"targeted_e2e_green":true,"policy_gate_green":true,"direct_main_commit_denied":true,"merge_exact_head_guard":true,"checks_green_guard":true,"rollback_required":true,"secret_guard":true,"force_bypass_denied":true,"idempotency_green":true,"additional_cost_eur":0},
+  "full_gate_count":14,"full_gate_result":"GREEN","human_required":null,"next_gate":"PR_AND_MAIN_INTEGRATION_WITHOUT_PROD_DEPLOY_AUTHORITY"
+}
