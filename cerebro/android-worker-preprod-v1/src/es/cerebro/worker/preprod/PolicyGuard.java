@@ -10,7 +10,7 @@ import java.util.Set;
 
 public final class PolicyGuard {
   private static final Set<String> UI_PACKAGES = new HashSet<String>(Arrays.asList(
-    "es.cerebro.worker.preprod", "com.android.chrome", "com.android.vending"
+    "es.cerebro.worker.preprod", "com.android.chrome", "com.sec.android.app.sbrowser", "com.android.vending"
   ));
   private static final Set<String> ENGINES = new HashSet<String>(Arrays.asList(
     "AUTO-001", "ACTGW-001", "FACT-001", "APPBOOT-001", "QA-001"
