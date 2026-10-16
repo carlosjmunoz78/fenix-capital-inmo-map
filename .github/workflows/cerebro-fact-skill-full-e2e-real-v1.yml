@@ -1,0 +1,114 @@
+name: CEREBRO FACT Skill FULL E2E REAL V1
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - 'cerebro/lote12-real-consumer-fact-skill-v1-*'
+    paths:
+      - 'cerebro/runtime/fact-skill-real-consumer-adoption-v1.mjs'
+      - 'cerebro/tests/fact-skill-real-consumer-adoption-v1.test.mjs'
+      - 'cerebro/registry/fact-skill-real-consumer-adoption-v1.json'
+      - 'cerebro/docs/FACT_SKILL_REAL_CONSUMER_ADOPTION_V1_RUNBOOK.md'
+      - '.github/workflows/cerebro-fact-skill-full-e2e-real-v1.yml'
+  pull_request:
+    paths:
+      - 'cerebro/runtime/fact-skill-real-consumer-adoption-v1.mjs'
+      - 'cerebro/tests/fact-skill-real-consumer-adoption-v1.test.mjs'
+      - 'cerebro/registry/fact-skill-real-consumer-adoption-v1.json'
+      - 'cerebro/docs/FACT_SKILL_REAL_CONSUMER_ADOPTION_V1_RUNBOOK.md'
+      - '.github/workflows/cerebro-fact-skill-full-e2e-real-v1.yml'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  strict-real-consumer-adoption:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Canonical factory registry remains valid
+        working-directory: cerebro
+        run: npm run validate
+
+      - name: Preserve legacy FACT and Lote 1+2 runtimes
+        run: |
+          git diff --exit-code 621497df1fbee5de40f4010ed2e26e2ec7a470d8 -- \
+            cerebro/runtime/fact-skill-native-v1.mjs \
+            cerebro/runtime/fact-skill-native-router-v1.mjs \
+            cerebro/runtime/native-capability-operational-loop-v1.mjs \
+            cerebro/runtime/native-capability-continuous-improvement-v1.mjs \
+            cerebro/registry/native-capability-operational-adoption-v1.json \
+            cerebro/registry/native-capability-continuous-improvement-v1.json
+
+      - name: Existing FACT contract plus strict real-consumer E2E
+        run: >-
+          node --test
+          cerebro/tests/fact-skill-native-v1.test.mjs
+          cerebro/tests/fact-skill-real-consumer-adoption-v1.test.mjs
+          cerebro/tests/native-capability-operational-loop-v1.test.mjs
+          cerebro/tests/native-capability-continuous-improvement-v1.test.mjs
+
+      - name: Execute strict FACT end-to-end route
+        run: |
+          mkdir -p /tmp/cerebro-fact-real
+          node cerebro/runtime/fact-skill-real-consumer-adoption-v1.mjs \
+            --company fenix \
+            --workdir /tmp/cerebro-fact-real/state \
+            --source-run-id "${{ github.run_id }}" \
+            --source-head-sha "${{ github.sha }}" \
+            --out /tmp/cerebro-fact-real/report.json
+
+      - name: Strict FULL E2E REAL policy gate
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const r=JSON.parse(fs.readFileSync('/tmp/cerebro-fact-real/report.json','utf8'));
+          const expected=['ROUTE-001','SEC-001','QA-001','EVA-001','LRN-001','OBSERV-001','FINOPS-001'];
+          if(r.status!=='FULL_E2E_REAL_PREPROD'||r.full_e2e_real_preprod!==true)throw new Error('FACT strict FULL not green');
+          if(r.gateway_router_real!==true||r.consumer_coverage!==1||r.functional_consumer_coverage!==1)throw new Error('functional consumer coverage incomplete');
+          if(JSON.stringify(r.required_consumers)!==JSON.stringify(expected))throw new Error('required consumer contract changed');
+          if(r.consumers.length!==7||!r.consumers.every(x=>x.real_consumption===true&&Array.isArray(x.fields_used)&&x.fields_used.length>0&&x.outcome_hash))throw new Error('consumer use proof incomplete');
+          if(r.missing_consumers.length||r.failed_consumers.length)throw new Error('consumer gap remains');
+          if(r.consumer_map['ROUTE-001'].decision!=='BINDINGS_APPLIED')throw new Error('ROUTE did not consume FACT output');
+          if(r.consumer_map['SEC-001'].decision!=='SECURITY_APPROVED_PREPROD')throw new Error('SEC did not consume FACT output');
+          if(r.consumer_map['QA-001'].decision!=='QA_PASS')throw new Error('QA did not consume FACT output');
+          if(r.consumer_map['EVA-001'].decision!=='TRIBUNAL_PASS')throw new Error('EVA/Tribunal not green');
+          if(r.consumer_map['LRN-001'].decision!=='LRN_FEEDBACK_PERSISTED'||r.continuous_improvement_feedback!==true)throw new Error('LRN feedback missing');
+          if(r.consumer_map['OBSERV-001'].decision!=='OBSERVABILITY_RECORDED')throw new Error('OBSERV did not persist outcome');
+          if(r.consumer_map['FINOPS-001'].decision!=='FINOPS_ZERO_COST_RECORDED'||r.additional_cost_eur!==0)throw new Error('FINOPS zero-cost gate failed');
+          if(r.state_persisted!==true||r.restartable!==true||r.idempotency_proven!==true)throw new Error('persistent/restartable/idempotent state not proven');
+          const forbidden=['prod_authorized','prod_write_authorized','provider_write_authorized','crm_write_authorized','db_mutation_authorized','spend_authorized','trading_access','android_touched'];
+          if(forbidden.some(k=>r[k]!==false))throw new Error('authority expanded');
+          console.log(JSON.stringify({status:'GREEN',capability:r.capability_id,consumers:r.consumers.length,outcome_hash:r.outcome_hash,producer_hash:r.producer_receipt_hash}));
+          NODE
+
+      - name: Strict registry candidate gate
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const r=JSON.parse(fs.readFileSync('cerebro/registry/fact-skill-real-consumer-adoption-v1.json','utf8'));
+          if(r.capability_id!=='FACT-SKILL-NATIVE'||r.company_id!=='fenix'||r.engine_id!=='FACT-001'||r.environment!=='PREPROD'||r.version!=='1.0.0')throw new Error('strict registry identity mismatch');
+          if(r.required_consumers.length!==7||!r.strict_gates.real_runtime_use_required||!r.strict_gates.semantic_mutation_tests_required||!r.strict_gates.outcome_capture_required||!r.strict_gates.learning_feedback_required)throw new Error('strict registry weakened');
+          const a=r.authority;
+          if(a.prod_authorized||a.prod_write_authorized||a.provider_write_authorized||a.crm_write_authorized||a.db_mutation_authorized||a.spend_authorized||a.trading_access||a.android_touched||a.additional_cost_eur!==0)throw new Error('strict registry authority/cost expanded');
+          NODE
+
+      - name: Upload strict FACT evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: fact-skill-full-e2e-real-v1-${{ github.run_id }}
+          path: |
+            /tmp/cerebro-fact-real/report.json
+            /tmp/cerebro-fact-real/state
+          retention-days: 30
+          if-no-files-found: error
