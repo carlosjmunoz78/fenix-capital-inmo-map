@@ -1,24 +1,32 @@
 {
-  "schema_version": "1.1.0",
+  "schema_version": "1.2.0",
   "state_type": "CEREBRO_FACT001_ANDROID_STAGING_48_183_V0",
   "company_id": "fenix",
   "engine_id": "FACT-001",
   "environment": "PREPROD",
   "version": "0.1.0",
-  "status": "VERIFIED_SIGNED_APK_BUILD_AND_STAGING_DRAFT_PREVIEW_GREEN",
+  "status": "PHYSICAL_WORKER_AND_WEB_STAGING_ANDROID_READBACK_GREEN_TEMPLATE_APK_INSTALL_PARTIAL",
   "source_main_sha": "623329c8d20ac0a6ef19425fc4a6114970f77a5d",
   "validated_head_sha": "9378d625767a6550438762ad9370efab5829fae0",
   "item_48": {
     "owner_engines": ["AUTO-001", "ACTGW-001", "IAM-001", "FACT-001"],
-    "verified_state": "SIGNED_PREPROD_APK_BUILD_GREEN_NO_DEVICE_BOUND",
+    "verified_state": "CONFIRMED_OPERATIONAL_PREPROD_PHYSICAL_DEVICE",
     "build_target": "SIGNED_PREPROD_APK_NO_NETWORK_DOWNLOADS",
     "kill_switch_default": true,
-    "physical_device_bound": false,
-    "remaining_gate": "AUTHORIZED_DEVICE_ATTESTATION_AND_PHYSICAL_DEVICE_E2E"
+    "physical_device_bound": true,
+    "physical_device_id": "android-28781704-56ca-49fb-b181-98c3fc22c07c",
+    "installed_agent_version": "android-worker-1.0.0",
+    "transport_online_verified": true,
+    "remote_command_execution_verified": true,
+    "semantic_ui_readback_verified": true,
+    "physical_closeout_command": "android-describe-staging-20261016-closeout-11",
+    "physical_closeout_result_sha256": "75c26497f83f7e3679aef8a1fc1bf4288614a95b3a78ad7d93ca9af4a2eb76dc",
+    "physical_closeout_at": "2026-10-16T05:28:06.836Z",
+    "remaining_gate": null
   },
   "item_183": {
     "owner_engines": ["APPBOOT-001", "FACT-001"],
-    "verified_state": "STAGING_DRAFT_RENDER_PLUS_SIGNED_ANDROID_APK_BUILD_GREEN",
+    "verified_state": "STAGING_DRAFT_RENDER_PLUS_SIGNED_ANDROID_APK_BUILD_AND_PHYSICAL_BROWSER_READBACK_GREEN",
     "web_staging_acceptance": {
       "wordpress_site": "staging.fenixcapital.es",
       "page_id": 54763,
@@ -30,6 +38,14 @@
       "acceptance_marker": "CEREBRO_APPBOOT_183_REMOTE_STAGING_E2E_V0",
       "stored_content_verified": true,
       "authenticated_preview_render_verified": true,
+      "physical_android_browser_render_readback_verified": true,
+      "physical_android_browser": "com.android.chrome",
+      "physical_android_readback_node_count": 100,
+      "physical_android_content_markers_verified": [
+        "Fénix Capital",
+        "Entiende tu hipoteca. Decide con claridad.",
+        "Cuéntanos tu caso"
+      ],
       "public_prod_deploy": false,
       "homepage_changed": false,
       "navigation_changed": false,
@@ -37,11 +53,12 @@
     },
     "android_build_target": "SIGNED_PREPROD_APK_NO_NETWORK_DOWNLOADS",
     "physical_device_installed": false,
-    "remaining_gate": "AUTHORIZED_DEVICE_INSTALL_AND_RENDER_E2E"
+    "remaining_gate": "AUTHORIZED_TEMPLATE_APK_INSTALL_AND_RENDER_E2E_183"
   },
   "implementation": {
     "android_build_runner": "cerebro/runtime/build-android-preprod-v0.sh",
     "workflow": ".github/workflows/cerebro-fact001-android-staging-48-183-v0.yml",
+    "full_control_worker_workflow": ".github/workflows/cerebro-android-full-control-preprod-v1.yml",
     "build_strategy": "PREINSTALLED_GITHUB_RUNNER_ANDROID_SDK_TOOLS_ONLY",
     "gradle": false,
     "maven": false,
@@ -61,7 +78,14 @@
     "rsi_promotion_readiness_shadow_run_id": 38650049140,
     "rsi_promotion_readiness_shadow": "PASS",
     "artifact_id": 11934097600,
-    "artifact_digest": "sha256:23b70456ee2d600fc7227702f1d7bae7e543d7ce5861370486aa847d27f1d820"
+    "artifact_digest": "sha256:23b70456ee2d600fc7227702f1d7bae7e543d7ce5861370486aa847d27f1d820",
+    "physical_closeout_evidence": "cerebro/evidence/android-ui-readback-closeout-2026-10-16.json",
+    "worker_hardening_ci_run_id": 38829555893,
+    "worker_hardening_ci_conclusion": "success",
+    "worker_hardening_artifact_id": 12016726662,
+    "worker_hardening_artifact_digest": "sha256:b98214a0fc5abd0e8d59e017bf7da3ddb770bb5983c6fc2c009dbb53af3a0d80",
+    "worker_hardening_apk_sha256": "c26612bde8c8413328acbcb0dec5f38d801b7466f4d7f93a9da4571c0366d97e",
+    "worker_hardening_physically_installed": false
   },
   "authority": {
     "prod_authorized": false,
@@ -74,8 +98,10 @@
   },
   "rollback": {
     "wordpress": "Restore Core Guard snapshot 584 or page revision and keep page as draft; no homepage/navigation/theme mutation exists.",
-    "github": "Revert the additive 48/183 build/acceptance PR."
+    "github": "Revert the additive 48/183 build/acceptance branch changes.",
+    "android": "Use the local kill switch to stop the PREPROD transport; physical worker remains bounded to PREPROD."
   },
-  "rebuild": "Run build-android-preprod-v0.sh on a governed runner with preinstalled Android SDK; recreate WordPress synthetic draft through the existing PREPROD connector and verify the acceptance marker in authenticated preview.",
-  "next_gate": "AUTHORIZED_PHYSICAL_ANDROID_DEVICE_E2E_48_183"
+  "rebuild": "Run build-android-preprod-v0.sh on a governed runner with preinstalled Android SDK; recreate WordPress synthetic draft through the existing PREPROD connector and verify the acceptance marker in authenticated preview. Rebuild the full-control worker with build-android-full-control-preprod-v1.sh when required.",
+  "next_gate": "SCHEDULED_WATCH_AND_LEARN_SOAK_AND_COMPET_CAP_CONTINUOUS_CLOSURE",
+  "parallel_remaining_gate": "AUTHORIZED_TEMPLATE_APK_INSTALL_AND_RENDER_E2E_183"
 }
