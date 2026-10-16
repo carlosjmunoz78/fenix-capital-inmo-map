@@ -1,0 +1,83 @@
+name: CEREBRO FACT-SKILL-NATIVE V1 PREPROD
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'cerebro/runtime/fact-skill-native-v1.mjs'
+      - 'cerebro/runtime/fact-skill-native-router-v1.mjs'
+      - 'cerebro/registry/capability-fact-skill-native.v1.json'
+      - 'cerebro/tests/fact-skill-native-v1.test.mjs'
+      - 'cerebro/docs/FACT_SKILL_NATIVE_V1_RUNBOOK.md'
+      - '.github/workflows/cerebro-fact-skill-native-v1.yml'
+  push:
+    branches:
+      - 'cerebro/fact-skill-native-v1-*'
+    paths:
+      - 'cerebro/runtime/fact-skill-native-v1.mjs'
+      - 'cerebro/runtime/fact-skill-native-router-v1.mjs'
+      - 'cerebro/registry/capability-fact-skill-native.v1.json'
+      - 'cerebro/tests/fact-skill-native-v1.test.mjs'
+      - 'cerebro/docs/FACT_SKILL_NATIVE_V1_RUNBOOK.md'
+      - '.github/workflows/cerebro-fact-skill-native-v1.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-fact-skill-native-v1-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  preprod-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@v4
+
+      - name: Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Factory registry remains valid
+        working-directory: cerebro
+        run: npm run validate
+
+      - name: FACT-SKILL-NATIVE targeted E2E
+        run: node --test cerebro/tests/fact-skill-native-v1.test.mjs
+
+      - name: Native registry contract
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const file='cerebro/registry/capability-fact-skill-native.v1.json';
+          const entry=JSON.parse(fs.readFileSync(file,'utf8'));
+          const required=['capability_id','owner_engine_id','company_id','environment','version','implementation','contracts','permissions','policy','events','observability','resilience','full_gate'];
+          for (const key of required) if (entry[key] == null) throw new Error(`missing ${key}`);
+          if (entry.capability_id!=='FACT-SKILL-NATIVE') throw new Error('wrong capability');
+          if (entry.owner_engine_id!=='FACT-001') throw new Error('wrong owner');
+          if (entry.environment!=='PREPROD') throw new Error('PREPROD only');
+          if (entry.prod_authorized!==false || entry.prod_write_authorized!==false) throw new Error('PROD authority forbidden');
+          if (entry.additional_cost_eur!==0) throw new Error('zero-cost gate failed');
+          if (!Array.isArray(entry.full_gate.required) || entry.full_gate.required.length!==14) throw new Error('FULL gate incomplete');
+          console.log(JSON.stringify({status:'GREEN', capability_id:entry.capability_id, version:entry.version, full_gate_count:entry.full_gate.required.length}));
+          NODE
+
+      - name: No forbidden PROD authority in native files
+        run: |
+          if grep -R -nE '"?(prod_authorized|prod_write_authorized|auto_merge_authorized)"?[[:space:]]*:[[:space:]]*true' \
+            cerebro/runtime/fact-skill-native-v1.mjs \
+            cerebro/runtime/fact-skill-native-router-v1.mjs \
+            cerebro/registry/capability-fact-skill-native.v1.json; then
+            echo 'Forbidden PROD authority detected'
+            exit 1
+          fi
+
+      - name: Gate summary
+        run: |
+          echo 'FACT-SKILL-NATIVE candidate checks GREEN'
+          echo 'No external skill code executed'
+          echo 'No PROD write authority granted'
+          echo 'Additional cost target: 0 EUR'

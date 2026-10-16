@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_NATIVE_CAPABILITY_REGISTRY_ENTRY",
+  "capability_id": "FACT-SKILL-NATIVE",
+  "alias_es": "Fábrica inteligente de skills",
+  "owner_engine_id": "FACT-001",
+  "company_id": "GLOBAL",
+  "environment": "PREPROD",
+  "version": "1.0.0",
+  "status": "NATIVE_FULL_PREPROD",
+  "ownership": {
+    "primary": "FACT-001",
+    "support": ["LRN-001", "QA-001", "EVA-001", "ROUTE-001", "OBSERV-001", "FINOPS-001"],
+    "new_engine_created": false
+  },
+  "purpose": "First-party governed skill factory capability that wraps the existing skill supply-chain, adoption, OLD-vs-NEW, Tribunal, learning and promotion evidence into one versioned PREPROD route without executing external skill code or granting PROD authority.",
+  "context_contract": ["company_id", "engine_id", "environment", "version"],
+  "route": "capability://FACT-SKILL-NATIVE/v1/admit",
+  "implementation": {
+    "runtime": "cerebro/runtime/fact-skill-native-v1.mjs",
+    "router": "cerebro/runtime/fact-skill-native-router-v1.mjs",
+    "reuse": [
+      "cerebro/runtime/skill-capability-autonomy-closure-v1.mjs",
+      "cerebro/registry/skill-full-adoption-v1.json",
+      "cerebro/skills/skill-capability-evolution-bridge.mjs",
+      "cerebro/skills/skill-old-vs-new-contract.mjs",
+      "cerebro/skills/skill-preprod-judge.mjs",
+      "cerebro/skills/skill-preprod-tribunal.mjs",
+      "cerebro/skills/skill-improvement-events.mjs",
+      "cerebro/skills/skill-autonomous-promotion-v1.mjs"
+    ],
+    "external_skill_code_execution": false,
+    "first_party_wrapper": true
+  },
+  "contracts": {
+    "discovery_import": "metadata + source_ref + manifest_sha256 only",
+    "dedupe": "skill_id + skill_version + manifest_sha256",
+    "registration": "stable versioned registration_id",
+    "impact_analysis": "existing governed engine bindings first; no automatic engine creation",
+    "old_vs_new": "PASS required when applicable",
+    "shadow_testing": "PREPROD integration/E2E evidence required",
+    "evaluation": "PASS required",
+    "tribunal": "PASS required",
+    "learning": "versioned first-party events to LRN path",
+    "promotion": "PREPROD registration only; PROD denied",
+    "rollback": "disable binding + restore previous version",
+    "rebuild": "replay versioned manifest + first-party wrapper"
+  },
+  "permissions": {
+    "default": "deny",
+    "cross_company": "deny",
+    "permission_expansion": false,
+    "external_code_execution": false,
+    "prod_write": false,
+    "auto_merge": false,
+    "trading": false
+  },
+  "policy": {
+    "factory_first": true,
+    "existing_engine_first": true,
+    "deterministic_first": true,
+    "additional_cost_target_eur": 0,
+    "paid_fallback": false,
+    "human_required_codes": [
+      "LEGAL_REQUIRED",
+      "SIGNATURE_REQUIRED",
+      "LOW_CONFIDENCE",
+      "HIGH_RISK",
+      "POLICY_CONFLICT",
+      "SECURITY_INCIDENT",
+      "MONEY_LIMIT",
+      "CUSTOMER_HUMAN_REQUEST"
+    ]
+  },
+  "events": {
+    "produces": [
+      "skill.native.discovery.accepted",
+      "skill.native.impact.evaluated",
+      "skill.native.tribunal.completed",
+      "skill.native.learning.feedback"
+    ],
+    "consumes": ["skill.candidate.discovered", "skill.candidate.revalidate"]
+  },
+  "observability": {
+    "audit": true,
+    "idempotency": true,
+    "cost": true,
+    "decision_receipt": true
+  },
+  "resilience": {
+    "fallback": "KEEP_PREVIOUS_VERSION_OR_USE_EXISTING_CAPABILITY",
+    "backup": "VERSIONED_REGISTRY_SNAPSHOT",
+    "rollback": "DISABLE_BINDING_AND_RESTORE_PREVIOUS_VERSION",
+    "rebuild": "REPLAY_VERSIONED_MANIFEST_AND_FIRST_PARTY_WRAPPER"
+  },
+  "full_gate": {
+    "required": [
+      "registry_versioning",
+      "multi_company_fields",
+      "manifest_contracts_events",
+      "permissions_policy",
+      "real_implementation_or_wrapper",
+      "gateway_router_integration",
+      "tests_integration_e2e",
+      "evaluation_tribunal",
+      "old_vs_new_when_applicable",
+      "observability_idempotency_cost",
+      "fallbacks",
+      "backup_rollback_rebuild",
+      "runbook_changelog_dependencies",
+      "preprod_green_evidence"
+    ],
+    "ci_green": true,
+    "native_full": true,
+    "validated_head_sha": "6d578a27ba7e95175f04c0ca053b04a112b45ef5",
+    "workflow_run_id": 38895289136,
+    "evidence_ref": "cerebro/evidence/fact-skill-native-v1-preprod.json"
+  },
+  "prod_authorized": false,
+  "prod_write_authorized": false,
+  "additional_cost_eur": 0,
+  "next_gate": "PR_AND_MAIN_INTEGRATION_WITHOUT_PROD_AUTHORITY"
+}
