@@ -5,10 +5,10 @@
   "engine_id": "QA-001",
   "environment": "PREPROD_CONTROL_PLANE",
   "version": "0.1.0",
-  "updated_at": "2026-10-15T23:05:28.169Z",
-  "mappings_total": 7,
+  "updated_at": "2026-10-16T04:33:32.370Z",
+  "mappings_total": 6,
   "verified_repo_hints": 1,
-  "external_owner_routes": 6,
+  "external_owner_routes": 5,
   "por_auditar": 0,
   "mappings": [
     {
@@ -155,32 +155,6 @@
         "status": "EXTERNAL_SURFACE_OWNER_VERIFIED",
         "surface": "WEB",
         "owner_engine": "HCI-001",
-        "repository": null,
-        "repository_ref": null,
-        "file_hints": [],
-        "external_target": "https://fenixcapital.es",
-        "mutation_surface": "WORDPRESS_PREPROD_ONLY",
-        "exact_symbol": "NO_APLICA_HASTA_MAPEO_WORDPRESS",
-        "prod_write_authorized": false
-      },
-      "execution_authority": {
-        "code_mutation_authorized": false,
-        "preprod_only": true,
-        "auto_merge": false,
-        "prod_write_authorized": false
-      }
-    },
-    {
-      "repair_id": "self:697d2e9b9fa3033f79ec34af",
-      "case_id": "qa-case:71e457bf6eefd75f90d79284",
-      "source": "IMPROVEMENT",
-      "owner_engine": "WEB-001",
-      "target": "WEB:qa-desktop-chromium",
-      "dimension": "perceived_performance",
-      "resolution": {
-        "status": "EXTERNAL_SURFACE_OWNER_VERIFIED",
-        "surface": "WEB",
-        "owner_engine": "WEB-001",
         "repository": null,
         "repository_ref": null,
         "file_hints": [],
