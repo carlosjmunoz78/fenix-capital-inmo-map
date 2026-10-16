@@ -115,6 +115,7 @@ import AnaKnowledgeBlock from './AnaKnowledgeBlock';
 import AnaChatBlock from './AnaChatBlock';
 import AnaKnowledgePlacementGuard from './AnaKnowledgePlacementGuard';
 import OperationalUniformityGuard from './OperationalUniformityGuard';
+import CerebroOwnerDecisionGuard from './CerebroOwnerDecisionGuard';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -165,6 +166,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <SpecialCaseIntervenientContactGuard />
       <TaskDetailExperienceGuard />
       <App />
+      <CerebroOwnerDecisionGuard />
       <RoleHomeShell />
       <ProfileShell />
       <OperationalShellGate />
