@@ -1,0 +1,96 @@
+{
+  "schema_version": "4.0.0",
+  "state_type": "CEREBRO_184_LIVE_CONVERGENCE_V4",
+  "generated_at": "2026-10-16",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v4",
+  "supersedes": "cerebro/skills/cerebro-184-live-convergence.v3.json",
+  "status": "B3_AND_ANDROID_REQUIRED_PHYSICAL_CLOSEOUTS_GREEN_REMAINING_SOAK_AND_REAL_SOURCE_GAPS",
+  "catalog_size": 184,
+  "normalized_item_count": 184,
+  "remaining_item_normalization_count": 0,
+  "full_catalog_reconciled": true,
+  "all_184_physically_active": false,
+  "b3_server_write_e2e": {
+    "status": "GREEN_PHYSICAL_PREPROD",
+    "canonical_evidence": "cerebro/registry/b3-server-write-e2e-closeout.v1.json",
+    "canonical_commit": "0b559c73b42b62e02ab59937413c53e1ebc0c26e",
+    "live_reverified_2026_10_16": true,
+    "synthetic_post_id": 54775,
+    "synthetic_post_final_status": "trash",
+    "core_guard_health_score": 100,
+    "core_guard_mode": "observer",
+    "runtime_gate_active": false,
+    "operational_writes_allowed": false,
+    "duplicate_write_repeated": false
+  },
+  "android_48_web183": {
+    "status": "GREEN_PHYSICAL_PREPROD",
+    "device_worker_transport": true,
+    "remote_command_execution": true,
+    "semantic_ui_readback": true,
+    "idempotent_replay": true,
+    "web_staging_android_render": true,
+    "synthetic_browser_action": true,
+    "post_action_readback": true,
+    "wordpress_rollback_to_draft": true,
+    "evidence": "cerebro/evidence/android-ui-readback-closeout-2026-10-16.json",
+    "registry": "cerebro/registry/fact001-android-staging-48-183.v0.json",
+    "separate_template_apk_install": "PARALLEL_GATE_NOT_REQUIRED_FOR_CURRENT_WEB_PWA_CLOSEOUT"
+  },
+  "remaining_physical_gates": [
+    {
+      "id": "WATCH_LEARN_47",
+      "state": "PARCIAL",
+      "next_gate": "THREE_GENUINE_SCHEDULED_RUNS_GREEN",
+      "note": "Scheduler exists; close only on genuine scheduled execution evidence."
+    },
+    {
+      "id": "COMPET_57_61",
+      "state": "PARCIAL",
+      "next_gate": "REAL_COMPETITOR_TARGETS_AND_CONTINUOUS_PREPROD_RUN",
+      "note": "Remote GET-only adapter and durable JOB-001 path are verified; real target configuration and continuous PREPROD evidence remain."
+    },
+    {
+      "id": "CAP_62_68",
+      "state": "PARCIAL",
+      "next_gate": "REAL_ACQUISITION_SOURCES_AND_CONTINUOUS_PREPROD_RUN",
+      "note": "Remote company-first GET-only adapter is verified; real acquisition source configuration and continuous PREPROD evidence remain."
+    },
+    {
+      "id": "ANDROID_TEMPLATE_APK_183",
+      "state": "PARALLEL_PARTIAL",
+      "next_gate": "AUTHORIZED_TEMPLATE_APK_INSTALL_AND_RENDER_E2E",
+      "note": "Signed template APK exists; current web/PWA item 183 physical acceptance is already GREEN and does not depend on reinstalling it."
+    }
+  ],
+  "priority_queue": [
+    "COMPLETE_WATCH_LEARN_SCHEDULED_SOAK_AND_CONFIGURE_REAL_SOURCES_57_62",
+    "AUDIT_OTHER_PHYSICAL_ADAPTER_GAPS_WITHOUT_PROD_MUTATION",
+    "RUN_REMOTE_PHYSICAL_OLD_VS_NEW_BEFORE_ANY_PROMOTION",
+    "PROMOTE_ONLY_GOVERNED_CAPABILITIES"
+  ],
+  "authority": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "auto_merge_authorized": false,
+    "external_skill_code_execution_authorized": false,
+    "customer_data_authorized": false,
+    "trading_access": false,
+    "automatic_paid_fallback": false,
+    "additional_cost_eur": 0
+  },
+  "reporting_contract": {
+    "FULL": "184/184 normalized and reconciled",
+    "ACTIVE": "only capabilities with physical/policy gates passed",
+    "NEXT": "scheduled Watch & Learn soak plus real governed COMPET/CAP sources",
+    "REMAINING": "physical activation gaps only",
+    "HUMAN_REQUIRED": null,
+    "PROD": "not touched",
+    "do_not_claim_184_physically_active": true,
+    "do_not_count_184_capabilities_as_184_engines": true
+  },
+  "next_block": "COMPLETE_WATCH_LEARN_SCHEDULED_SOAK_AND_CONFIGURE_REAL_SOURCES_57_62"
+}
