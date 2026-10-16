@@ -1,0 +1,63 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_CAPABILITY_REAL_CONSUMER_ADOPTION",
+  "capability_id": "FACT-SKILL-NATIVE",
+  "company_id": "fenix",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "1.0.0",
+  "status": "PARCIAL_AWAITING_EXACT_HEAD_CI",
+  "strict_target_status": "FULL_E2E_REAL_PREPROD",
+  "legacy_contract_preserved": true,
+  "legacy_registry_ref": "cerebro/registry/native-capability-operational-adoption-v1.json",
+  "producer": {
+    "runtime": "cerebro/runtime/fact-skill-native-v1.mjs",
+    "router": "cerebro/runtime/fact-skill-native-router-v1.mjs",
+    "strict_consumer_runtime": "cerebro/runtime/fact-skill-real-consumer-adoption-v1.mjs"
+  },
+  "required_consumers": [
+    {"engine_id":"ROUTE-001","classification":"REAL_RUNTIME_CONSUMER","proof":"uses impact bindings + FACT decision + PREPROD registration authorization to apply or hold bindings"},
+    {"engine_id":"SEC-001","classification":"GOVERNANCE_CONSUMER","proof":"uses provenance/supply-chain/license/permission scope and PROD denial to approve or deny"},
+    {"engine_id":"QA-001","classification":"GOVERNANCE_CONSUMER","proof":"uses native_full/status/failed_gates/full_gates to pass or fail QA"},
+    {"engine_id":"EVA-001","classification":"GOVERNANCE_CONSUMER","proof":"uses ROUTE+SEC+QA outcome and FACT decision through existing Evaluation/Tribunal runtime"},
+    {"engine_id":"LRN-001","classification":"LEARNING_CONSUMER","proof":"uses actual FACT learning event through RSI outbox with persistent idempotent replay"},
+    {"engine_id":"OBSERV-001","classification":"TELEMETRY_CONSUMER","proof":"uses producer status/idempotency/output hash and persists observability evidence"},
+    {"engine_id":"FINOPS-001","classification":"TELEMETRY_CONSUMER","proof":"uses actual FACT cost/target/fallback fields and persists zero-cost ledger event"}
+  ],
+  "strict_gates": {
+    "complete_consumer_map": true,
+    "real_runtime_use_required": true,
+    "semantic_mutation_tests_required": true,
+    "outcome_capture_required": true,
+    "learning_feedback_required": true,
+    "persistent_restartable_state_required": true,
+    "idempotency_required": true,
+    "evaluation_tribunal_required": true,
+    "zero_cost_required": true,
+    "prod_authority_denied": true,
+    "exact_head_ci_required": true,
+    "governed_main_required": true,
+    "automatic_main_execution_required": true
+  },
+  "authority": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "provider_write_authorized": false,
+    "crm_write_authorized": false,
+    "db_mutation_authorized": false,
+    "spend_authorized": false,
+    "trading_access": false,
+    "android_touched": false,
+    "additional_cost_eur": 0
+  },
+  "main_gate": {
+    "exact_head_ci_green": false,
+    "governed_main_green": false,
+    "merged_to_main": false,
+    "automatic_main_execution_green": false,
+    "main_head_sha": null,
+    "workflow_run_id": null,
+    "full_e2e_real_preprod": false
+  },
+  "next_gate": "EXACT_HEAD_STRICT_REAL_CONSUMER_CI"
+}
