@@ -1,0 +1,8 @@
+{
+  "name": "fenix-capital-prod-static",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "build": "node build-static.cjs"
+  }
+}
