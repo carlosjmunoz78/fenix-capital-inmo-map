@@ -1,0 +1,31 @@
+name: CEREBRO DB-SAFE-NATIVE V1 PREPROD
+on:
+  workflow_dispatch:
+  pull_request:
+    paths: ['cerebro/runtime/db-safe-native-v1.mjs','cerebro/tests/db-safe-native-v1.test.mjs','cerebro/registry/capability-db-safe-native.v1.json','cerebro/docs/DB_SAFE_NATIVE_V1_RUNBOOK.md','.github/workflows/cerebro-db-safe-native-v1.yml']
+  push:
+    branches: ['cerebro/db-safe-native-v1-*']
+permissions: {contents: read}
+jobs:
+  preprod-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Factory remains valid
+        working-directory: cerebro
+        run: npm run validate
+      - name: DB native E2E
+        run: node --test cerebro/tests/db-safe-native-v1.test.mjs
+      - name: Registry and policy gate
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';const r=JSON.parse(fs.readFileSync('cerebro/registry/capability-db-safe-native.v1.json','utf8'));
+          if(r.capability_id!=='DB-SAFE-NATIVE'||r.owner_engine_id!=='DATA-001'||r.environment!=='PREPROD')throw new Error('identity/owner/environment');
+          if(r.prod_authorized||r.prod_write_authorized||r.additional_cost_eur!==0)throw new Error('unsafe authority/cost');
+          if(r.full_gate.required.length!==14)throw new Error('full gate incomplete');
+          if(r.live_evidence.prod_project_touched!==false||r.live_evidence.ddl_applied!==false)throw new Error('unexpected database mutation');
+          console.log(JSON.stringify({status:'GREEN',capability:r.capability_id}));
+          NODE
