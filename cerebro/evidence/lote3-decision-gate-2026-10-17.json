@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_LOTE3_DECISION_GATE",
+  "date": "2026-10-17",
+  "base_main_sha": "c68a2a41400f8f1fb371d8252a3cfe0e956cae04",
+  "environment": "PREPROD",
+  "company_id": "fenix",
+  "decision": "EXTEND_AND_WRAP_EXISTING",
+  "principle": "CONSERVAR -> ENTENDER -> ENVOLVER -> PROBAR -> MEJORAR -> MIGRAR",
+  "engines": {
+    "SALE-001": {
+      "decision": "EXTEND_EXISTING",
+      "priority": "P0",
+      "reason": "LEAD-NATIVE already emits SALES_PRIORITY_READY and COM-001 already declares SALE-001 as upstream. Missing piece is a deterministic sales decision/cadence/objection contract, not a parallel CRM.",
+      "target": "FULL_E2E_REAL_PREPROD"
+    },
+    "COM-001": {
+      "decision": "WRAP_EXISTING",
+      "priority": "P0",
+      "reason": "Existing com-delivery-router-v1 already provides deterministic channel routing, permission fail-closed, quiet hours, dedupe and adapter gating. Do not duplicate it.",
+      "target": "CONNECT_SALE_OUTPUT_TO_EXISTING_ROUTER"
+    },
+    "NOTIF-001": {
+      "decision": "EXTEND_EXISTING",
+      "priority": "P1",
+      "reason": "Notification ownership is already declared by COM delivery router; extend grouping/priority/digest semantics after SALE->COM contract is green.",
+      "target": "PREPROD_NATIVE_WRAPPER"
+    },
+    "C360-001": {
+      "decision": "WRAP_EXISTING",
+      "priority": "P1",
+      "reason": "LEAD strict adoption already consumes C360-001. Build a non-duplicating projection/data contract over existing App/CRM sources.",
+      "target": "PREPROD_UNIFIED_PROJECTION"
+    },
+    "VOICE-001": {
+      "decision": "EXTEND_EXISTING",
+      "priority": "P1",
+      "reason": "Existing VOICE/VOICEUI work must be reused. Real outbound telephony remains separately gated by consent, provider binding, legal and cost policy.",
+      "target": "PREPROD_ROUTED_CHANNEL_CAPABILITY"
+    }
+  },
+  "preserved_closed_blocks": ["COMPET-NATIVE", "CAP-NATIVE", "LEAD-NATIVE"],
+  "blocked_policy_conflicts": [731, 732],
+  "new_paid_subscription_required": false,
+  "additional_cost_eur": 0,
+  "prod_authorized": false,
+  "prod_write_authorized": false,
+  "crm_write_authorized": false,
+  "trading_access": false,
+  "next_block": "SALE_NATIVE_V1_STRICT_PREPROD"
+}
