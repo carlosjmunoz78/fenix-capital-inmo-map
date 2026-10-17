@@ -6,12 +6,32 @@ import {loadIdentityCredentialFoundation,identityCredentialAuditSummary} from '.
 const PREPROD='PREPROD';
 const VERSION='1.0.0';
 const SECRET_PATTERNS=[/\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{5,}\b/,/\bsb_secret_[A-Za-z0-9_-]{8,}/,/\bAIza[A-Za-z0-9_-]{12,}/,/-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/];
+const SOFTWARE_ENGINEERING_DOMAIN='software-engineering-devops';
+const SOFTWARE_ENGINEERING_CAPABILITIES=Object.freeze(['software-engineering','debugging','script','shell','analysis','reasoning','openclaw_runtime']);
+export const SOFTWARE_ENGINEERING_SPECIALIST_CONTRACT=Object.freeze({
+  identity:'SOFTWARE_ENGINEERING',
+  domain:SOFTWARE_ENGINEERING_DOMAIN,
+  audit_route:'QA_EVA_JDG',
+  normal_execution_route:'WORKTREE_SANDBOX',
+  elevated_execution_route:'DRY_RUN_FIRST',
+  required_controls:Object.freeze([
+    'WORKTREE_OR_SANDBOX_ISOLATION',
+    'DETERMINISTIC_PRECHECKS',
+    'UNIT_AND_TARGETED_TESTS',
+    'STATIC_ANALYSIS',
+    'REGRESSION_COMPARISON',
+    'ROLLBACK_PLAN',
+    'QA_CODE_EVIDENCE',
+    'EVA_REGRESSION'
+  ])
+});
 
 function authority(){return Object.freeze({prod_authorized:false,prod_write_authorized:false,prod_mutation_authorized:false,permission_expansion_authorized:false,external_code_execution:false,external_skill_code_execution:false,dependency_install_authorized:false,customer_data_used:false,paid_fallback:false,spend_authorized:false,trading_access:false,additional_cost_eur:0});}
 function req(value,label){if(typeof value!=='string'||!value.trim())throw new Error(`${label} required`);return value.trim();}
 function source(value){return String(value??'').trim();}
 function hasSecretMaterial(text){return SECRET_PATTERNS.some((re)=>re.test(text));}
 function result(alias,company_id,checks,details={}){const green=Object.values(checks).every((v)=>v===true);return Object.freeze({schema_version:'1.0.0',state_type:'CEREBRO_TECHNICAL_SPECIALIST_EVALUATION_V1',alias,company_id,engine_id:'FACT-001',environment:PREPROD,version:VERSION,status:green?'SPECIALIST_GREEN':'SPECIALIST_HOLD',checks:Object.freeze(checks),details:Object.freeze(details),...authority()});}
+function normalizedCapabilities(values){return [...new Set((Array.isArray(values)?values:[]).map((value)=>String(value??'').trim().toLowerCase()).filter(Boolean))];}
 
 export const TECHNICAL_SPECIALIST_ALIASES=Object.freeze(['ARQUITECTO','CODE','SYSTEMS','MATH','DATA','SECURITY','QA','INTEGRATOR']);
 export const OPTIONAL_SPECIALIST_ALIASES=Object.freeze(['TECH_SCOUT','PERFORMANCE']);
@@ -20,7 +40,7 @@ export function technicalSpecialistRegistry(){return Object.freeze({
   schema_version:'1.0.0',state_type:'CEREBRO_TECHNICAL_SPECIALIST_REGISTRY_V1',company_id:'GLOBAL',engine_id:'FACT-001',environment:PREPROD,version:VERSION,
   specialists:Object.freeze([
     Object.freeze({alias:'ARQUITECTO',owner_engine_ids:Object.freeze(['ARCH-001','FACT-001']),mode:'REUSE_EXISTING'}),
-    Object.freeze({alias:'CODE',owner_engine_ids:Object.freeze(['FACT-001','QA-001','REG-001']),mode:'SAFE_ENGINEERING_CORE'}),
+    Object.freeze({alias:'CODE',identity:'SOFTWARE_ENGINEERING',domain:SOFTWARE_ENGINEERING_DOMAIN,owner_engine_ids:Object.freeze(['FACT-001','QA-001','REG-001']),mode:'SAFE_ENGINEERING_CORE'}),
     Object.freeze({alias:'SYSTEMS',owner_engine_ids:Object.freeze(['RUNTIME-001','JOB-001','ROUTE-001','DEP-001','DR-001','RBLD-001','OBSERV-001','QA-001']),mode:'SHARED_PLATFORM_ENGINEERING'}),
     Object.freeze({alias:'MATH',owner_engine_ids:Object.freeze(['OPT-001','SIM-001','DATA-001','FINOPS-001','EXP-001','QA-001']),mode:'DETERMINISTIC_SOLVER'}),
     Object.freeze({alias:'DATA',owner_engine_ids:Object.freeze(['DATA-001','DBOFF-001','STOROFF-001','API-001','CRM-001']),mode:'DB_SAFE_NATIVE'}),
@@ -33,6 +53,61 @@ export function technicalSpecialistRegistry(){return Object.freeze({
     Object.freeze({alias:'PERFORMANCE',owner_engine_ids:Object.freeze(['OPT-001','QA-001','OBSERV-001','FINOPS-001']),mode:'PLANNED_EXTENSION'})
   ]),new_engine_required:false,...authority()
 });}
+
+export function evaluateSoftwareEngineeringSpecialist({company_id='fenix',domain=SOFTWARE_ENGINEERING_DOMAIN,capabilities=[],source_text='',controls={},action={}}={}){
+  const company=req(company_id,'company_id'),text=source(source_text),caps=normalizedCapabilities(capabilities);
+  const recognized=caps.filter((capability)=>SOFTWARE_ENGINEERING_CAPABILITIES.includes(capability));
+  const engineering=recognized.includes('software-engineering')||recognized.includes('debugging');
+  const execution=recognized.includes('script')||recognized.includes('shell')||recognized.includes('openclaw_runtime');
+  const reasoning=recognized.includes('analysis')||recognized.includes('reasoning');
+  const capabilityCoverage=engineering&&execution&&reasoning;
+  const destructive=action?.destructive===true||action?.high_impact===true;
+  const criticalSecretWrite=action?.critical_secret_write===true||action?.critical_credential_write===true||hasSecretMaterial(text);
+  const elevated=action?.elevated===true;
+  const isolation=controls?.worktree_or_sandbox_isolation===true;
+  const dryRun=controls?.dry_run===true;
+  const elevatedRouteSafe=!elevated||(dryRun&&isolation);
+  const checks={
+    domain_semantic_match:String(domain??'').trim()===SOFTWARE_ENGINEERING_DOMAIN,
+    code_capability_coverage:capabilityCoverage,
+    worktree_or_sandbox_isolation:isolation,
+    deterministic_prechecks:controls?.deterministic_prechecks===true,
+    unit_and_targeted_tests:controls?.unit_and_targeted_tests===true,
+    static_analysis:controls?.static_analysis===true,
+    regression_comparison:controls?.regression_comparison===true,
+    rollback_plan:controls?.rollback_plan===true,
+    qa_code_evidence:controls?.qa_code_evidence===true,
+    eva_regression:controls?.eva_regression===true,
+    elevated_route_safe:elevatedRouteSafe,
+    no_destructive_action:!destructive,
+    no_critical_secret_manipulation:!criticalSecretWrite
+  };
+  const blockerCode=!checks.domain_semantic_match?'SOFTWARE_ENGINEERING_DOMAIN_MISMATCH'
+    :!capabilityCoverage?'CODE_CAPABILITY_GAP'
+    :criticalSecretWrite?'SECURITY_CRITICAL_CREDENTIAL_OPERATION'
+    :destructive?'HIGH_RISK_DESTRUCTIVE_CODE_ACTION'
+    :!elevatedRouteSafe?'ELEVATED_DRY_RUN_OR_ISOLATION_REQUIRED'
+    :Object.entries(checks).some(([key,value])=>!['no_destructive_action','no_critical_secret_manipulation','elevated_route_safe','domain_semantic_match','code_capability_coverage'].includes(key)&&value!==true)?'ENGINEERING_CONTROL_EVIDENCE_MISSING'
+    :null;
+  const humanRequired=criticalSecretWrite?'SECURITY_INCIDENT':destructive?'HIGH_RISK':null;
+  return result('SOFTWARE_ENGINEERING',company,checks,{
+    identity:'SOFTWARE_ENGINEERING',
+    domain:SOFTWARE_ENGINEERING_DOMAIN,
+    recognized_capabilities:Object.freeze(recognized),
+    missing_capability_groups:Object.freeze([
+      ...(engineering?[]:['ENGINEERING']),
+      ...(execution?[]:['EXECUTION']),
+      ...(reasoning?[]:['REASONING'])
+    ]),
+    audit_route:SOFTWARE_ENGINEERING_SPECIALIST_CONTRACT.audit_route,
+    normal_execution_route:SOFTWARE_ENGINEERING_SPECIALIST_CONTRACT.normal_execution_route,
+    elevated_execution_route:SOFTWARE_ENGINEERING_SPECIALIST_CONTRACT.elevated_execution_route,
+    required_controls:SOFTWARE_ENGINEERING_SPECIALIST_CONTRACT.required_controls,
+    dry_run_required:destructive||elevated,
+    human_required:humanRequired,
+    blocker_code:blockerCode
+  });
+}
 
 export function evaluateSystemsSpecialist({company_id='fenix',source_text=''}={}){
   const company=req(company_id,'company_id'),text=source(source_text),worker=DURABLE_WORKER_RUNNER_V1_CONTRACT,execution=authorizedExecutionDeviceProfile();
