@@ -2,18 +2,27 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {loadActivationRouting} from './universal-skill-activation-planner-v1.mjs';
+import {loadActivationRouting,classifyCapability} from './universal-skill-activation-planner-v1.mjs';
 
 function uniq(v){return [...new Set(v??[])];}
 function slug(v){return String(v??'item').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');}
 function authority(){return {prod_authorized:false,prod_write_authorized:false,trading_access:false,additional_cost_eur:0};}
+const GENERIC_OWNERS=new Set(['FACT-001','JOB-001','RSH-001','LRN-001','QA-001','API-001','ORCH-001','ROUTE-001']);
+
+function ownerScore(domain,owners){let score=0;const overlap=[];owners.forEach((id,index)=>{if(!domain.engine_bindings.includes(id))return;overlap.push(id);if(index===0&&!GENERIC_OWNERS.has(id))score+=20;else if(!GENERIC_OWNERS.has(id))score+=5;else score+=1;});return {score,overlap};}
 
 export function inferLegacyDomains(item,routing=loadActivationRouting()){
-  const owners=new Set(item.owner_engine_ids??[]);const scored=[];
-  for(const d of routing.signals.domains){const overlap=d.engine_bindings.filter((id)=>owners.has(id));if(overlap.length)scored.push({domain_id:d.domain_id,score:overlap.length,overlap});}
-  scored.sort((a,b)=>b.score-a.score||a.domain_id.localeCompare(b.domain_id));
-  const top=scored[0]?.score??0;
-  return Object.freeze(scored.filter((x)=>x.score===top).map((x)=>Object.freeze(x)));
+  const owners=uniq(item.owner_engine_ids??[]);
+  const textCapability=classifyCapability({capability_id:`legacy-domain:${item.id??'x'}`,technical_name:String(item.name??'legacy capability'),description:[item.reason??'',item.next_gate??'',item.state??''].filter(Boolean).join(' '),terms:[]},routing);
+  const textByDomain=new Map((textCapability.classification_evidence??[]).map((x)=>[x.domain_id,x]));
+  const rows=[];
+  for(const domain of routing.signals.domains){const owner=ownerScore(domain,owners);const text=textByDomain.get(domain.domain_id);const textScore=Number(text?.score??0);if(owner.score<=0&&textScore<=0)continue;rows.push({domain_id:domain.domain_id,score:textScore*10+owner.score,text_score:textScore,owner_score:owner.score,overlap:owner.overlap,text_matches:text?.matches??[]});}
+  const withText=rows.filter((x)=>x.text_score>0);
+  let selected=[];
+  if(withText.length){const topText=Math.max(...withText.map((x)=>x.text_score));const floor=Math.max(2,Math.floor(topText*0.5));selected=withText.filter((x)=>x.text_score>=floor);}
+  if(!selected.length&&rows.length){const topOwner=Math.max(...rows.map((x)=>x.owner_score));selected=rows.filter((x)=>x.owner_score===topOwner&&topOwner>0);}
+  selected.sort((a,b)=>b.score-a.score||a.domain_id.localeCompare(b.domain_id));
+  return Object.freeze(selected.map((x)=>Object.freeze({...x,overlap:Object.freeze([...x.overlap]),text_matches:Object.freeze([...x.text_matches])})));
 }
 
 export function normalizeLegacy184Item(item,{source_ref='legacy184:unknown',routing=loadActivationRouting()}={}){
@@ -22,17 +31,13 @@ export function normalizeLegacy184Item(item,{source_ref='legacy184:unknown',rout
   const candidate_id=`legacy184:${item.id}:${slug(item.name)}`;
   const common={company_id:'fenix',candidate_id,technical_name:slug(item.name),description:`${item.name}. ${item.reason??''}`,source_refs:evidence,inventory_complete:true,dependencies_mapped:true,reuse_checked:true,additional_cost_eur:0};
 
-  if(item.disposition==='REUTILIZAR'&&String(item.state??'').includes('FULL_PREPROD')){
-    return Object.freeze({source_item_id:item.id,source_disposition:item.disposition,source_state:item.state,expected_outcome:'ABSORBED',activation_input:{...common,provenance_license_green:true,reuse_assessment:{decision:'ABSORB',evidence_refs:evidence}},candidate_evidence:{semantic_bindings:[]},...authority()});
-  }
-  if(String(item.state??'').includes('PHYSICAL')||String(item.next_gate??'').includes('PHYSICAL')){
-    return Object.freeze({source_item_id:item.id,source_disposition:item.disposition,source_state:item.state,expected_outcome:'BLOCKED_EXTERNAL',activation_input:{...common,provenance_license_green:false},candidate_evidence:{semantic_bindings:[]},...authority()});
-  }
+  if(item.disposition==='REUTILIZAR'&&String(item.state??'').includes('FULL_PREPROD'))return Object.freeze({source_item_id:item.id,source_disposition:item.disposition,source_state:item.state,expected_outcome:'ABSORBED',activation_input:{...common,provenance_license_green:true,reuse_assessment:{decision:'ABSORB',evidence_refs:evidence}},candidate_evidence:{semantic_bindings:[]},...authority()});
+  if(String(item.state??'').includes('PHYSICAL')||String(item.next_gate??'').includes('PHYSICAL'))return Object.freeze({source_item_id:item.id,source_disposition:item.disposition,source_state:item.state,expected_outcome:'BLOCKED_EXTERNAL',activation_input:{...common,provenance_license_green:false},candidate_evidence:{semantic_bindings:[]},...authority()});
   if(item.disposition==='FABRICAR_GRATIS'||item.disposition==='ENVOLVER'){
     const inferred=inferLegacyDomains(item,routing);
     if(!inferred.length)return Object.freeze({source_item_id:item.id,source_disposition:item.disposition,source_state:item.state,expected_outcome:'HUMAN_REQUIRED',activation_input:{...common,provenance_license_green:true,description:`unmapped ${item.name}`},candidate_evidence:{semantic_bindings:[]},...authority()});
-    const capabilities=inferred.map((d,i)=>({capability_id:`${candidate_id}:cap:${i+1}`,technical_name:`${slug(item.name)}-${d.domain_id}`,declared_domains:[d.domain_id],domain_evidence:{[d.domain_id]:evidence}}));
-    return Object.freeze({source_item_id:item.id,source_disposition:item.disposition,source_state:item.state,expected_outcome:'ENGINEERING_TASK_REQUIRED',activation_input:{...common,provenance_license_green:true,capabilities},candidate_evidence:{semantic_bindings:[]},...authority()});
+    const capabilities=inferred.map((d,i)=>({capability_id:`${candidate_id}:cap:${i+1}`,technical_name:`${slug(item.name)}-${d.domain_id}`,description:common.description,terms:d.text_matches,declared_domains:[d.domain_id],domain_evidence:{[d.domain_id]:evidence}}));
+    return Object.freeze({source_item_id:item.id,source_disposition:item.disposition,source_state:item.state,expected_outcome:'ENGINEERING_TASK_REQUIRED',domain_inference:Object.freeze(inferred),activation_input:{...common,provenance_license_green:true,capabilities},candidate_evidence:{semantic_bindings:[]},...authority()});
   }
   const terminal=(item.disposition==='HOLD'||item.disposition==='DESCARTAR'||item.disposition==='CATALOGAR')?'REJECTED':'BLOCKED_EXTERNAL';
   return Object.freeze({source_item_id:item.id,source_disposition:item.disposition,source_state:item.state,expected_outcome:terminal,excluded_from_activation_batch:true,terminal_reason:item.reason??item.state??item.disposition,evidence_refs:evidence,...authority()});
