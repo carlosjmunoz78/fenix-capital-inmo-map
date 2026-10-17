@@ -1,7 +1,7 @@
 {
   "schema_version": "1.5.0",
   "state_type": "CEREBRO_SKILL_FULL_ADOPTION_QUEUE",
-  "generated_at": "2026-10-15",
+  "generated_at": "2026-10-17",
   "company_id": "GLOBAL",
   "engine_id": "FACT-001",
   "environment": "PREPROD",
@@ -20,7 +20,10 @@
     "cerebro/skills/skill-obsidian-full-closure-validator-v1.mjs",
     "cerebro/registry/skill-obsidian-full-safe-preprod.v1.json",
     "cerebro/registry/browser-transversal-autonomy-policy.v1.json",
-    "cerebro/runtime/browser-transversal-autonomy-v1.mjs"
+    "cerebro/runtime/browser-transversal-autonomy-v1.mjs",
+    "cerebro/registry/skill-high-risk-review-resolution-2026-10-17.json",
+    "cerebro/skills/skill-real-engine-binding-v1.mjs",
+    "cerebro/registry/skill-real-engine-binding-v1.json"
   ],
   "policy": {
     "human_alias_first": true,
@@ -117,9 +120,10 @@
     "specialized_cerebro_wrappers_observed": 5,
     "admitted_full_queue_count": 5,
     "observed_not_admitted_count": 0,
-    "full_safe_preprod_count": 3,
+    "full_safe_preprod_count": 5,
     "rule": "WRAPPER_EXISTENCE_DOES_NOT_EQUAL_ADMISSION; OBSIDIAN_ADMITTED_ONLY_AFTER_SYNTHETIC_OLD_VS_NEW_PLUS_INDEPENDENT_JUDGE_AND_TRIBUNAL",
-    "complete_for_specialized_wrappers_observed_on_2026_10_15": true
+    "complete_for_specialized_wrappers_observed_on_2026_10_15": true,
+    "all_admitted_full_safe_preprod_on_2026_10_17": true
   },
   "queue": [
     {
@@ -164,30 +168,47 @@
       "candidate_id": "mcpservers-agent-skills:4c2b2478f8fe3bed14df",
       "alias_es": "Optimización y seguridad de bases de datos",
       "technical_name": "supabase-postgres-best-practices",
-      "current_evidence": "READY_FOR_PREPROD_PROMOTION_REVIEW",
-      "current_scope": "BEHAVIORAL_EVIDENCE_READY",
-      "benefit_reason": "Puede elevar seguridad, rendimiento y fiabilidad de los motores que trabajan con datos, preservando Supabase como core transaccional.",
-      "target_engine_bindings": "RESOLVE_FROM_EXISTING_GOVERNED_EVIDENCE",
+      "current_evidence": "FULL_SAFE_PREPROD_TEN_ENGINE_BINDING_CLOSURE",
+      "current_scope": "SAFE_INTERNAL_NORMALIZED_WRAPPER_ONLY_NO_EXTERNAL_SKILL_EXECUTION_NO_DB_MUTATION",
+      "benefit_reason": "Eleva seguridad, rendimiento y fiabilidad de los motores que trabajan con datos, preservando Supabase como core transaccional y sin conceder escritura.",
+      "target_engine_bindings": ["DATA-001", "DBOFF-001", "STOROFF-001", "API-001", "CRM-001"],
       "target_status": "FULL_SAFE_PREPROD",
-      "status": "REVIEW_READY_HIGH_RISK",
-      "human_required": "HIGH_RISK",
-      "autonomous_ceiling": "EVIDENCE_ONLY_UNTIL_CANONICAL_HIGH_RISK_GATE_RESOLVED",
-      "next_gate": "HIGH_RISK_REVIEW_AFTER_ALL_NON_MUTATING_EVIDENCE_IS_COMPLETE"
+      "status": "FULL_SAFE_PREPROD",
+      "closure_evidence": "cerebro/registry/skill-real-engine-binding-v1.json",
+      "validated_by_workflow_run": 38985916440,
+      "validated_head_sha": "8e142031289ff6941d431fcaa4f84d2fbf326cf9",
+      "external_skill_code_execution": false,
+      "db_mutation_authorized": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "additional_cost_eur": 0,
+      "human_required": null,
+      "autonomous_ceiling": "FULL_SAFE_PREPROD",
+      "next_gate": "REGRESSION_MONITORING_NO_PROD_AUTHORITY"
     },
     {
       "priority": 4,
       "candidate_id": "mcpservers-agent-skills:157e52d4ac5038d53c1a",
       "alias_es": "Control avanzado del navegador",
       "technical_name": "agent-browser",
-      "current_evidence": "NORMALIZED_WRAPPER_GREEN_FOR_BEHAVIORAL_EVAL",
-      "current_scope": "RAW_STATIC_LAB_HOLD_PRESERVED_NORMALIZED_WRAPPER_EVALUABLE",
-      "benefit_reason": "La skill externa puede aportar patrones adicionales, pero CEREBRO ya dispone de una política interna de navegación transversal y no depende de ejecutar su código para tener autonomía web.",
-      "target_engine_bindings": "TRANSVERSAL_INTERNAL_POLICY_RESOLVES_TOOL_ACCESS_EXTERNAL_SKILL_REMAINS_SEPARATELY_GOVERNED",
+      "current_evidence": "FULL_SAFE_PREPROD_TEN_ENGINE_BINDING_CLOSURE",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_PLUS_TRANSVERSAL_BROWSER_POLICY_EXTERNAL_SKILL_CODE_NOT_EXECUTED",
+      "benefit_reason": "Aporta patrones gobernados adicionales a los motores de automatización, QA, web y scanning sin convertir el navegador en autoridad ni depender de ejecutar código externo.",
+      "target_engine_bindings": ["AUTO-001", "AUTBOOT-001", "QA-001", "WEB-001", "SCAN-001"],
       "target_status": "FULL_SAFE_PREPROD",
-      "status": "EXTERNAL_SKILL_REVIEW_READY_HIGH_RISK_INTERNAL_BROWSER_POLICY_GREEN",
-      "human_required": "HIGH_RISK",
-      "autonomous_ceiling": "INTERNAL_TRANSVERSAL_BROWSER_POLICY_GREEN_EXTERNAL_SKILL_EVIDENCE_ONLY_UNTIL_CANONICAL_GATE_RESOLVED",
-      "next_gate": "EXTERNAL_SKILL_HIGH_RISK_REVIEW_INDEPENDENT_FROM_INTERNAL_BROWSER_AUTONOMY"
+      "status": "FULL_SAFE_PREPROD",
+      "closure_evidence": "cerebro/registry/skill-real-engine-binding-v1.json",
+      "validated_by_workflow_run": 38985916440,
+      "validated_head_sha": "8e142031289ff6941d431fcaa4f84d2fbf326cf9",
+      "browser_is_tool_not_authority": true,
+      "external_skill_code_execution": false,
+      "browser_external_side_effect_authorized": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "additional_cost_eur": 0,
+      "human_required": null,
+      "autonomous_ceiling": "FULL_SAFE_PREPROD",
+      "next_gate": "FRESH_PHYSICAL_BROWSER_BINDING_PER_EXECUTION_AND_ENGINE_SCOPED_ACTION_GATES"
     },
     {
       "priority": 5,
@@ -199,7 +220,7 @@
       "current_evidence": "FULL_SAFE_PREPROD_CI_GREEN_OBSERVABILITY_AUDIT_FINOPS_LRN_IDEMPOTENT",
       "current_scope": "SAFE_INTERNAL_SHADOW_ONLY_REQUEST_DRIVEN_NO_REAL_VAULT_NO_EXTERNAL_EXECUTION",
       "benefit_reason": "Añade búsqueda con ámbito explícito, evidencia de relaciones entre notas y planificación de cambios con rollback sin sustituir los owners canónicos KNW/RAG/PRV/UPD.",
-      "target_engine_bindings": ["RSH-001","KNW-001","TRN-001","TRNBOOT-001","RAG-001","PRV-001"],
+      "target_engine_bindings": ["RSH-001", "KNW-001", "TRN-001", "TRNBOOT-001", "RAG-001", "PRV-001"],
       "target_status": "FULL_SAFE_PREPROD",
       "status": "FULL_SAFE_PREPROD",
       "admitted": true,
@@ -249,10 +270,10 @@
   ],
   "observed_not_admitted": [],
   "parallel_nonblocking_work": [
-    {"alias_es":"Aprendizaje continuo","gate":"THREE_GENUINE_SCHEDULED_RUNS_GREEN","policy":"ACCUMULATE_GENUINE_SCHEDULED_EVIDENCE_DO_NOT_FAKE_SOAK"},
-    {"alias_es":"Vigilancia de competencia","gate":"REAL_TARGETS_AND_CONTINUOUS_PREPROD_RUN","policy":"GET_ONLY_PREPROD_CONTINUOUS_EVIDENCE"},
-    {"alias_es":"Búsqueda de oportunidades","gate":"REAL_SOURCES_AND_CONTINUOUS_PREPROD_RUN","policy":"PUBLIC_SOURCE_PREPROD_CONTINUOUS_EVIDENCE"},
-    {"alias_es":"CEREBRO en Android","gate":"AUTHORIZED_PHYSICAL_ANDROID_DEVICE_E2E","policy":"WAIT_FOR_DATA_CABLE_WITHOUT_BLOCKING_OTHER_WORK"}
+    {"alias_es": "Aprendizaje continuo", "gate": "THREE_GENUINE_SCHEDULED_RUNS_GREEN", "policy": "ACCUMULATE_GENUINE_SCHEDULED_EVIDENCE_DO_NOT_FAKE_SOAK"},
+    {"alias_es": "Vigilancia de competencia", "gate": "REAL_TARGETS_AND_CONTINUOUS_PREPROD_RUN", "policy": "GET_ONLY_PREPROD_CONTINUOUS_EVIDENCE"},
+    {"alias_es": "Búsqueda de oportunidades", "gate": "REAL_SOURCES_AND_CONTINUOUS_PREPROD_RUN", "policy": "PUBLIC_SOURCE_PREPROD_CONTINUOUS_EVIDENCE"},
+    {"alias_es": "CEREBRO en Android", "gate": "AUTHORIZED_PHYSICAL_ANDROID_DEVICE_E2E", "policy": "WAIT_FOR_DATA_CABLE_WITHOUT_BLOCKING_OTHER_WORK"}
   ],
   "reporting_contract": {
     "use_alias_es_first": true,
