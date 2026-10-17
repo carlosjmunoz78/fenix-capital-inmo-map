@@ -1,0 +1,37 @@
+name: CEREBRO Universal Skill B16 Current Evidence V1
+
+on:
+  push:
+    paths:
+      - 'cerebro/skills/cerebro-184-items-176-184-live-reconciliation.v*.json'
+      - 'cerebro/registry/fact001-android-staging-48-183.v0.json'
+      - 'cerebro/runtime/universal-skill-reconciliation-resolver-v1.mjs'
+      - 'cerebro/runtime/universal-skill-auto-engineering-v1.mjs'
+      - 'cerebro/tests/universal-skill-b16-current-evidence-reconciliation-v1.test.mjs'
+      - '.github/workflows/cerebro-universal-skill-b16-current-evidence-v1.yml'
+  pull_request:
+    paths:
+      - 'cerebro/skills/cerebro-184-items-176-184-live-reconciliation.v*.json'
+      - 'cerebro/registry/fact001-android-staging-48-183.v0.json'
+      - 'cerebro/runtime/universal-skill-reconciliation-resolver-v1.mjs'
+      - 'cerebro/runtime/universal-skill-auto-engineering-v1.mjs'
+      - 'cerebro/tests/universal-skill-b16-current-evidence-reconciliation-v1.test.mjs'
+      - '.github/workflows/cerebro-universal-skill-b16-current-evidence-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  b16-current-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: B16 current-evidence reconciliation
+        run: node --test cerebro/tests/universal-skill-b16-current-evidence-reconciliation-v1.test.mjs
+      - name: B15 anti-false-FULL regression
+        run: node --test cerebro/tests/universal-skill-auto-engineering-v1.test.mjs cerebro/tests/universal-skill-b15-integrity-v1.test.mjs
