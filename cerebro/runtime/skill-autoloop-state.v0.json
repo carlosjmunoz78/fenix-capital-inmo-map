@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-17T05:39:11.063Z",
+  "updated_at": "2026-10-17T06:14:16.264Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -61,7 +61,8 @@
     "github-wide-skills:94b9bafee7c9bbf4f16f",
     "github-wide-skills:72a593d4bc7b37e8a8af",
     "github-wide-skills:f930119794bc6957b028",
-    "github-wide-skills:1f19ad7010380e0667aa"
+    "github-wide-skills:1f19ad7010380e0667aa",
+    "github-wide-skills:993ea6ac55816fccf267"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -510,6 +511,40 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 39007015272,
       "checkpointed_at": "2026-10-17T05:39:11.063Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:993ea6ac55816fccf267": {
+      "candidate_id": "github-wide-skills:993ea6ac55816fccf267",
+      "name": "adopt-and-delete",
+      "human_alias": "Adopt And Delete",
+      "wrapper_id": "skillwrap:ce5427f8a83cb2a5c39b",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 85.31,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "selamy-labs/agent-skills",
+        "upstream_head_commit": "ce35fa01ae538194221e798d8cb062bfc8700aa9",
+        "manifest_sha256": "3fcf303455fd3d4702f4742d7257f7baa9e4d140da4c7eec5a51dd396feb2d68",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 39009137844,
+      "checkpointed_at": "2026-10-17T06:14:16.264Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -1482,5 +1517,5 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 39007015272
+  "last_discovery_run_id": 39009137844
 }
