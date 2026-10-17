@@ -9,7 +9,9 @@ const pointer = load('../registry/current-operational-convergence.v1.json');
 const engines = load('../registry/engine-registry.v1.json');
 const v3 = load('../skills/cerebro-184-live-convergence.v3.json');
 const compet = load('../registry/compet-real-consumer-adoption-v1.json');
+const competTargets = load('../registry/compet-real-targets.v0.json');
 const cap = load('../registry/cap-real-consumer-adoption-v1.json');
+const capIeca = load('../registry/cap-ieca-cordoba.v0.json');
 const lead = load('../registry/lead-real-consumer-adoption-v1.json');
 const sale = load('../registry/sale-real-consumer-adoption-v1.json');
 const comNotifC360 = load('../registry/lote3-com-notif-c360-real-v1.json');
@@ -104,7 +106,7 @@ test('generic B3 server write closeout stays green without falsely closing the d
   assert.match(human.get(732)?.gate ?? '', /DIRECT_B3_JOURNAL/);
 });
 
-test('only evidence-backed physical/source gaps are reported as open, never inferred green', () => {
+test('physical source baselines are preserved while genuine scheduled soak stays open', () => {
   assert.equal(android.item_48.physical_device_bound, false);
   assert.equal(android.item_183.physical_device_installed, false);
   assert.equal(physicalById.get('ANDROID_48_183')?.state, 'PARCIAL');
@@ -114,10 +116,31 @@ test('only evidence-backed physical/source gaps are reported as open, never infe
   assert.equal(watch.verification.scheduled_soak_runs_verified, 0);
   assert.equal(physicalById.get('WATCH_LEARN_47')?.state, 'PARCIAL');
 
-  assert.equal(compet.producer.live_external_fetch_required_for_ci, false);
-  assert.equal(cap.producer.provider_execution_authorized, false);
-  assert.equal(physicalById.get('COMPET_REAL_SOURCE_CONFIGURATION')?.state, 'PARCIAL_PHYSICAL_SOURCE_GATE');
-  assert.equal(physicalById.get('CAP_REAL_SOURCE_CONFIGURATION')?.state, 'PARCIAL_PHYSICAL_SOURCE_GATE');
+  assert.equal(compet.status, 'FULL_E2E_REAL_PREPROD');
+  assert.equal(competTargets.status, 'REAL_TARGETS_BASELINE_FROZEN_CONTINUOUS_PREPROD');
+  assert.equal(competTargets.scheduler.configured, true);
+  assert.equal(competTargets.scheduler.soak_complete, false);
+  assert.equal(competTargets.baseline_capture.result, 'GREEN');
+  assert.equal(competTargets.targets.length, 3);
+  assert.ok(competTargets.targets.every((target) => target.baseline?.body_sha256?.length === 64));
+  assert.equal(physicalById.get('COMPET_REAL_SOURCE_SCHEDULED_SOAK')?.state, 'PARCIAL_SCHEDULED_SOAK');
+  assert.equal(physicalById.get('COMPET_REAL_SOURCE_SCHEDULED_SOAK')?.next_gate, 'THREE_CONTINUOUS_REAL_COMPETITOR_SCHEDULED_RUNS_GREEN');
+
+  assert.equal(cap.status, 'FULL_E2E_REAL_PREPROD');
+  assert.equal(capIeca.status, 'REAL_OFFICIAL_COMPANY_DISCOVERY_GREEN_SCHEDULED_SOAK_PENDING');
+  assert.equal(capIeca.source.method, 'GET_ONLY');
+  assert.equal(capIeca.source.source_class, 'OFFICIAL_PUBLIC_BUSINESS_SOURCE');
+  assert.equal(capIeca.physical_preprod_evidence.workflow_conclusion, 'success');
+  assert.equal(capIeca.physical_preprod_evidence.http_status, 200);
+  assert.ok(capIeca.physical_preprod_evidence.strong_match_count >= 1);
+  assert.equal(physicalById.get('CAP_REAL_SOURCE_SCHEDULED_SOAK')?.state, 'PARCIAL_SCHEDULED_SOAK');
+  assert.equal(physicalById.get('CAP_REAL_SOURCE_SCHEDULED_SOAK')?.next_gate, 'THREE_GENUINE_SCHEDULED_PREPROD_RUNS_GREEN');
+
+  assert.equal(competTargets.authority.provider_write_authorized, false);
+  assert.equal(competTargets.authority.additional_cost_eur, 0);
+  assert.equal(capIeca.authority.provider_write_authorized, false);
+  assert.equal(capIeca.authority.crm_write_authorized, false);
+  assert.equal(capIeca.authority.additional_cost_eur, 0);
 });
 
 test('V4 itself cannot expand PROD, provider, spend, customer-data or Trading authority', () => {

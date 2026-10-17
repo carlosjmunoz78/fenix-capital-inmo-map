@@ -1,12 +1,12 @@
 {
-  "schema_version": "4.0.0",
+  "schema_version": "4.0.1",
   "state_type": "CEREBRO_GLOBAL_OPERATIONAL_CONVERGENCE_V4",
   "generated_at": "2026-10-17",
   "company_id": "GLOBAL",
   "engine_id": "FACT-001",
   "environment": "PREPROD",
   "version": "v4",
-  "base_main_sha": "e516f47f5c7654eaf1b83aba6684ce44851fd5b7",
+  "base_main_sha": "9aafdcc3a1c1e9b5bc133b026bbeb87af9aefd38",
   "supersedes_for_current_operational_reporting": "cerebro/skills/cerebro-184-live-convergence.v3.json",
   "historical_evidence_preserved": [
     "cerebro/skills/cerebro-184-live-convergence.v2.json",
@@ -43,14 +43,14 @@
       "owner_engine": "COMPET-001",
       "state": "FULL_E2E_REAL_PREPROD",
       "evidence": "cerebro/registry/compet-real-consumer-adoption-v1.json",
-      "boundary": "Semantic downstream adoption is closed; real competitor target configuration and continuous external PREPROD source evidence remain a separate physical gate."
+      "boundary": "Semantic downstream adoption is closed. Real competitor targets and a physical GET-only baseline are also configured; only the required multi-run scheduled soak remains open."
     },
     {
       "id": "CAP-NATIVE",
       "owner_engine": "CAP-001",
       "state": "FULL_E2E_REAL_PREPROD",
       "evidence": "cerebro/registry/cap-real-consumer-adoption-v1.json",
-      "boundary": "Semantic downstream adoption is closed; real acquisition source configuration and continuous PREPROD source evidence remain separate."
+      "boundary": "Semantic downstream adoption is closed. The official IECA Córdoba GET-only source and physical PREPROD discovery evidence are also configured; only the required scheduled soak remains open."
     },
     {
       "id": "LEAD-NATIVE",
@@ -118,16 +118,18 @@
       "reason": "Daily zero-cost scheduler exists, but canonical evidence still records soak_complete=false and scheduled_soak_runs_verified=0."
     },
     {
-      "id": "COMPET_REAL_SOURCE_CONFIGURATION",
-      "state": "PARCIAL_PHYSICAL_SOURCE_GATE",
-      "next_gate": "REAL_COMPETITOR_TARGETS_AND_CONTINUOUS_PREPROD_RUN",
-      "reason": "COMPET semantic real-consumer adoption is FULL; live real-target source configuration remains independently unproven."
+      "id": "COMPET_REAL_SOURCE_SCHEDULED_SOAK",
+      "state": "PARCIAL_SCHEDULED_SOAK",
+      "next_gate": "THREE_CONTINUOUS_REAL_COMPETITOR_SCHEDULED_RUNS_GREEN",
+      "evidence": "cerebro/registry/compet-real-targets.v0.json",
+      "reason": "Three real Córdoba competitor targets are configured, a physical GET-only baseline is GREEN, and the daily zero-cost schedule exists; only the three genuine scheduled GREEN runs remain."
     },
     {
-      "id": "CAP_REAL_SOURCE_CONFIGURATION",
-      "state": "PARCIAL_PHYSICAL_SOURCE_GATE",
-      "next_gate": "REAL_ACQUISITION_SOURCES_AND_CONTINUOUS_PREPROD_RUN",
-      "reason": "CAP semantic real-consumer adoption is FULL; live real-source configuration remains independently unproven."
+      "id": "CAP_REAL_SOURCE_SCHEDULED_SOAK",
+      "state": "PARCIAL_SCHEDULED_SOAK",
+      "next_gate": "THREE_GENUINE_SCHEDULED_PREPROD_RUNS_GREEN",
+      "evidence": "cerebro/registry/cap-ieca-cordoba.v0.json",
+      "reason": "The official IECA Córdoba GET-only source is configured and physical PREPROD discovery is GREEN; only the required genuine scheduled soak remains."
     },
     {
       "id": "IAM_BROWSER_VAULT_PHYSICAL",
@@ -220,8 +222,7 @@
     "reconcile_before_action": true
   },
   "priority_queue": [
-    "RECONCILE_GENUINE_WATCH_LEARN_SCHEDULED_EVIDENCE",
-    "CONFIGURE_OR_VERIFY_REAL_READ_ONLY_COMPET_AND_CAP_PREPROD_SOURCES_WITHOUT_NEW_SPEND",
+    "RECONCILE_GENUINE_SCHEDULED_EVIDENCE_WATCH_LEARN_COMPET_CAP",
     "AUDIT_ZERO_COST_LOCAL_PHYSICAL_ADAPTERS_BY_DOMAIN",
     "AUTHORIZED_PHYSICAL_ANDROID_DEVICE_E2E_WHEN_DEVICE_IS_AVAILABLE",
     "HUMAN_REQUIRED_PR_731_AND_732_ONLY_BY_EXPLICIT_OWNER_DECISION",
@@ -235,13 +236,13 @@
     "backup": "Historical V2/V3 state files are retained unchanged; this V4 is additive and reversible by reverting its files.",
     "rollback": "Revert the V4 state, pointer, tests and workflow; no runtime or external resource is mutated by this reconciliation.",
     "rebuild": "Regenerate V4 only from current-main evidence registries and live PR metadata, preserving historical evidence files.",
-    "changelog": "2026-10-17: reconciled stale convergence reporting after runtime, mortgage and skill closures; retained only unproven physical/source/policy gates as open.",
+    "changelog": "2026-10-17: reconciled stale convergence reporting after runtime, mortgage and skill closures; corrected COMPET/CAP to preserve their already-green real source baselines and leave only scheduled soak as open.",
     "autonomy_state": "PREPROD_GOVERNED; PROD_FALSE; TRADING_ISOLATED; COST_0"
   },
   "reporting_contract": {
-    "HECHO": "Current-main strict runtime/skill closures listed above are evidence-backed.",
+    "HECHO": "Current-main strict runtime/skill closures and COMPET/CAP real source baselines listed above are evidence-backed.",
     "EXISTENTE": "179 canonical logical engines and 184 normalized rollout capabilities remain preserved.",
-    "PARCIAL": "Physical device/source/adapter gates remain explicit and must not be inferred from semantic adoption.",
+    "PARCIAL": "Physical device/scheduled-soak/adapter gates remain explicit and must not be inferred from semantic adoption or one baseline run.",
     "DEFINIDO": "Human policy conflicts and promotion boundaries are explicit and fail-closed.",
     "PLANIFICADO": "Proceed through zero-cost physical evidence in priority order.",
     "POR_AUDITAR": "Legacy physical adapter domains remain unpromoted until fresh evidence exists.",
