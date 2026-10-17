@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-17T14:10:31.720Z",
+  "updated_at": "2026-10-17T14:15:06.314Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -63,7 +63,8 @@
     "github-wide-skills:f930119794bc6957b028",
     "github-wide-skills:1f19ad7010380e0667aa",
     "github-wide-skills:993ea6ac55816fccf267",
-    "github-wide-skills:ee81a3b9106efbee10ed"
+    "github-wide-skills:ee81a3b9106efbee10ed",
+    "github-wide-skills:7596b35cb02a5e62737b"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -582,6 +583,42 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 39026523562,
       "checkpointed_at": "2026-10-17T10:52:19.357Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:7596b35cb02a5e62737b": {
+      "candidate_id": "github-wide-skills:7596b35cb02a5e62737b",
+      "name": "handoff-target",
+      "human_alias": "Handoff Target",
+      "wrapper_id": "skillwrap:41fed2324d7e9cbc5f0d",
+      "domain": "software-engineering-devops",
+      "engine_bindings": [
+        "FACT-001",
+        "ARCH-001",
+        "API-001",
+        "DEP-001",
+        "MIG-001",
+        "QA-001",
+        "REG-001",
+        "DOCS-001"
+      ],
+      "value_score": 86.09,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "pesuto-dev/graphtale",
+        "upstream_head_commit": "85592a213103a4851cd045f717edd369ffac34b6",
+        "manifest_sha256": "f9abf9f2f7db2a8845ae74b887c27ca0e5f0da5e5681aa65667fc44a5bc79cee",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 39039909236,
+      "checkpointed_at": "2026-10-17T14:15:06.314Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -1541,7 +1578,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "IDLE_NO_NEW_ELIGIBLE_CANDIDATE",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -1554,5 +1591,5 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 39039583952
+  "last_discovery_run_id": 39039909236
 }
