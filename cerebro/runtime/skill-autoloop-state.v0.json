@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-17T14:15:06.314Z",
+  "updated_at": "2026-10-17T14:26:39.372Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -64,7 +64,8 @@
     "github-wide-skills:1f19ad7010380e0667aa",
     "github-wide-skills:993ea6ac55816fccf267",
     "github-wide-skills:ee81a3b9106efbee10ed",
-    "github-wide-skills:7596b35cb02a5e62737b"
+    "github-wide-skills:7596b35cb02a5e62737b",
+    "github-wide-skills:9759ed2963019613263e"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -619,6 +620,42 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 39039909236,
       "checkpointed_at": "2026-10-17T14:15:06.314Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:9759ed2963019613263e": {
+      "candidate_id": "github-wide-skills:9759ed2963019613263e",
+      "name": "sample-intake",
+      "human_alias": "Sample Intake",
+      "wrapper_id": "skillwrap:2b289953b14d1750c5d2",
+      "domain": "software-engineering-devops",
+      "engine_bindings": [
+        "FACT-001",
+        "ARCH-001",
+        "API-001",
+        "DEP-001",
+        "MIG-001",
+        "QA-001",
+        "REG-001",
+        "DOCS-001"
+      ],
+      "value_score": 86.09,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "pesuto-dev/graphtale",
+        "upstream_head_commit": "85592a213103a4851cd045f717edd369ffac34b6",
+        "manifest_sha256": "7ba9dd6a409db4248da2c8c14543ea6ad73cb1aa083c837e48b325880a58f6e3",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 39040729873,
+      "checkpointed_at": "2026-10-17T14:26:39.372Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -1591,5 +1628,5 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 39039909236
+  "last_discovery_run_id": 39040729873
 }
