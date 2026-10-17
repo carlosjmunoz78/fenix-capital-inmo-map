@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_MULTIMEDIA_ZERO_COST_PHYSICAL_INVENTORY_V1",
+  "generated_at": "2026-10-17",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "capability_id": "DIGITAL-BUILD-MULTIMEDIA",
+  "environment": "PREPROD",
+  "version": "1.0.0",
+  "base_main_sha": "fd3f595a2096ff19a5b06b8668c36b2324bf38ef",
+  "status": "PARTIAL_ZERO_COST_MEDIA_CORE_PREPROD",
+  "target_status": "PHYSICAL_INVENTORY_EVIDENCE_RECORDED",
+  "scope": "GITHUB_HOSTED_UBUNTU_CI_PREPROD",
+  "purpose": "Verify which zero-cost local multimedia primitives are physically present in the governed GitHub-hosted PREPROD CI runtime without installing packages, downloading models, calling providers, using customer data, writing PROD or spending money.",
+  "preserves": [
+    "cerebro/registry/multimedia-factory-profile.v0.json",
+    "cerebro/digital-build/multimedia-factory-runtime-v0.mjs",
+    "existing Digital Build routing and adapter decisions"
+  ],
+  "probe_allowlist": {
+    "ffmpeg": "version metadata only",
+    "ffprobe": "version metadata only",
+    "imagemagick": "magick or convert version metadata only",
+    "sox": "version metadata only",
+    "espeak_ng": "version metadata only"
+  },
+  "observed_result": {
+    "runner_image": "ubuntu-24.04",
+    "runner_image_version": "20261012.334.1",
+    "ffmpeg": false,
+    "ffprobe": false,
+    "imagemagick": false,
+    "sox": false,
+    "espeak_ng": false,
+    "deterministic_media_core": false,
+    "interpretation": "The governed GitHub-hosted PREPROD CI runtime does not currently expose the allowlisted multimedia binaries. This is valid physical evidence and MUST NOT trigger automatic installation or model download."
+  },
+  "strict_boundaries": {
+    "no_apt": true,
+    "no_brew": true,
+    "no_choco": true,
+    "no_npm_install": true,
+    "no_pip_install": true,
+    "no_model_download": true,
+    "no_provider_call": true,
+    "no_customer_data": true,
+    "no_prod_write": true,
+    "no_artifact_publish": true,
+    "no_trading": true,
+    "additional_cost_eur": 0,
+    "physical_probe_does_not_grant_execution_authority": true,
+    "ci_runner_presence_does_not_prove_user_pc_or_server_presence": true
+  },
+  "semantic_gate": {
+    "ffmpeg_and_ffprobe_present_changes_outcome": true,
+    "mutation_test_required": true,
+    "absence_is_valid_evidence": true,
+    "absence_must_not_trigger_auto_install": true,
+    "mutation_test_passed": true
+  },
+  "authority": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "provider_write_authorized": false,
+    "crm_write_authorized": false,
+    "customer_dispatch_authorized": false,
+    "external_multimedia_process_authorized": false,
+    "install_authorized": false,
+    "model_download_authorized": false,
+    "spend_authorized": false,
+    "trading_access": false,
+    "additional_cost_eur": 0
+  },
+  "evidence": {
+    "implementation_branch": "cerebro/multimedia-zero-cost-physical-inventory-v1",
+    "workflow": ".github/workflows/cerebro-multimedia-zero-cost-physical-inventory-v1.yml",
+    "exploratory_exact_head_sha": "222a16006caa75cd811b2151fc436769c152f8c2",
+    "branch_run_id": 39021715181,
+    "branch_run_conclusion": "success",
+    "implementation_pr": 777,
+    "implementation_head_sha": null,
+    "exact_head_run_id": null,
+    "governed_main_run_id": null,
+    "rsi_run_id": null,
+    "merge_sha": null,
+    "automatic_main_run_id": null,
+    "observed_tools": {
+      "ffmpeg": false,
+      "ffprobe": false,
+      "imagemagick": false,
+      "sox": false,
+      "espeak_ng": false
+    },
+    "evidence_fingerprint": "6e036b0ffbb5a666cf76e72f2ff13ee3a1f2d8e3e7de7ab7140da24191a0f6e5",
+    "artifact_id": 12096597851
+  },
+  "rollback": "Revert this additive registry/runtime/probe/test/workflow/runbook package. It installs nothing, downloads no model, calls no provider, writes no PROD and changes no existing multimedia runtime authority.",
+  "rebuild": "Run the read-only allowlisted probe again on the governed PREPROD CI runtime and reassess from the emitted JSON; never infer presence from historical evidence.",
+  "next_gate": "AUDIT_AN_AUTHORIZED_CEREBRO_RUNTIME_FOR_EXISTING_ZERO_COST_MULTIMEDIA_TOOLS_WITHOUT_AUTO_INSTALL"
+}
