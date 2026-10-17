@@ -12,6 +12,7 @@ on:
       - 'cerebro/runtime/universal-skill-adapter-factory-v1.mjs'
       - 'cerebro/runtime/universal-skill-batch-orchestrator-v1.mjs'
       - 'cerebro/runtime/universal-skill-legacy184-normalizer-v1.mjs'
+      - 'cerebro/runtime/universal-skill-auto-engineering-v1.mjs'
       - 'cerebro/registry/fact-safe-engineering-bootstrap-v1.json'
       - 'cerebro/registry/universal-skill-activation-factory-v1.state.json'
       - 'cerebro/registry/universal-skill-activation-contracts-v1.json'
@@ -22,6 +23,7 @@ on:
       - 'cerebro/tests/universal-skill-adapter-factory-v1.test.mjs'
       - 'cerebro/tests/universal-skill-batch-orchestrator-v1.test.mjs'
       - 'cerebro/tests/universal-skill-blind-legacy184-batch-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-auto-engineering-v1.test.mjs'
       - '.github/workflows/cerebro-universal-skill-activation-factory-v1.yml'
   pull_request:
     paths:
@@ -32,6 +34,7 @@ on:
       - 'cerebro/runtime/universal-skill-adapter-factory-v1.mjs'
       - 'cerebro/runtime/universal-skill-batch-orchestrator-v1.mjs'
       - 'cerebro/runtime/universal-skill-legacy184-normalizer-v1.mjs'
+      - 'cerebro/runtime/universal-skill-auto-engineering-v1.mjs'
       - 'cerebro/registry/fact-safe-engineering-bootstrap-v1.json'
       - 'cerebro/registry/universal-skill-activation-factory-v1.state.json'
       - 'cerebro/registry/universal-skill-activation-contracts-v1.json'
@@ -42,6 +45,7 @@ on:
       - 'cerebro/tests/universal-skill-adapter-factory-v1.test.mjs'
       - 'cerebro/tests/universal-skill-batch-orchestrator-v1.test.mjs'
       - 'cerebro/tests/universal-skill-blind-legacy184-batch-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-auto-engineering-v1.test.mjs'
       - '.github/workflows/cerebro-universal-skill-activation-factory-v1.yml'
   workflow_dispatch:
 
@@ -141,6 +145,26 @@ jobs:
           test -f cerebro/skills/cerebro-184-items-38-50-live-reconciliation.v2.json
           grep -F "normalizeLegacy184Item" cerebro/runtime/universal-skill-legacy184-normalizer-v1.mjs
           ! grep -Eq "item\.id[[:space:]]*===|case[[:space:]]+[0-9]+" cerebro/runtime/universal-skill-legacy184-normalizer-v1.mjs
+
+  b8-auto-engineering-fulfillment:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Auto Engineering family fulfillment against real prior gap
+        run: node --test cerebro/tests/universal-skill-auto-engineering-v1.test.mjs
+      - name: Assert no candidate-ID special casing or contract-echo evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -F "'finance-accounting-payments':financeDryRun" cerebro/runtime/universal-skill-auto-engineering-v1.mjs
+          ! grep -Eq 'legacy184:[0-9]+|item\.id[[:space:]]*===|case[[:space:]]+[0-9]+' cerebro/runtime/universal-skill-auto-engineering-v1.mjs
+          ! grep -F 'Stripe' cerebro/runtime/universal-skill-auto-engineering-v1.mjs
+          ! grep -F 'contract.required_constraints' cerebro/runtime/universal-skill-auto-engineering-v1.mjs
+          ! grep -Eq 'prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true|additional_cost_eur[[:space:]]*:[[:space:]]*[1-9]' cerebro/runtime/universal-skill-auto-engineering-v1.mjs
 
   focused-existing-regression:
     runs-on: ubuntu-latest
