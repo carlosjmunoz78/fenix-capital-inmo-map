@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_UNIVERSAL_SKILL_ACTIVATION_FACTORY_V1_STATE",
+  "generated_at": "2026-10-17",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "issue": 780,
+  "branch": "cerebro/universal-skill-activation-factory-v1-20261017",
+  "status": "IN_PROGRESS",
+  "current_block": "B0_PERSISTENCE_AND_CONTRACT",
+  "next_block": "B1_ENGINEERING_BOOTSTRAP",
+  "objective": "Generalize skill/repository activation so normalized candidates become real governed engine bindings automatically without per-skill artisanal integration.",
+  "definition_of_full": "A candidate is FULL only when every relevant governed binding proves real semantic consumption, OLD_VS_NEW, QA/EVA/Tribunal, no regression, LRN feedback, observability/audit/FinOps, backup/rollback/rebuild, idempotency/restartability, zero-cost or approved exception, and physical PREPROD evidence where required.",
+  "terminal_states": [
+    "FULL_SAFE_PREPROD",
+    "FULL_REAL",
+    "ABSORBED",
+    "REJECTED",
+    "BLOCKED_EXTERNAL",
+    "HUMAN_REQUIRED"
+  ],
+  "human_required_reasons": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "preserve": {
+    "existing_factory": true,
+    "existing_skill_autoloop": true,
+    "existing_multilane": true,
+    "existing_safe_engineering_profile": true,
+    "existing_job_runtime": true,
+    "existing_rsi_lrn": true,
+    "existing_qa_eva_tribunal": true,
+    "existing_registry": true,
+    "prod_untouched": true,
+    "trading_isolated": true
+  },
+  "known_live_evidence": {
+    "catalog_size": 184,
+    "normalized_item_count": 184,
+    "all_184_physically_active": false,
+    "canonical_engine_count": 179,
+    "base_engine_count_preserved": 177,
+    "specific_real_binding_proof": {
+      "skills": 2,
+      "bindings": 10,
+      "status": "FULL_SAFE_PREPROD"
+    },
+    "safe_engineering_profile_exists": true,
+    "multilane_factory_exists": true,
+    "durable_job_runtime_exists": true,
+    "continuous_evolution_loop_exists": true
+  },
+  "blocks": [
+    {"id":"B0","name":"PERSISTENCE_AND_CONTRACT","status":"IN_PROGRESS"},
+    {"id":"B1","name":"ENGINEERING_BOOTSTRAP","status":"PLANNED"},
+    {"id":"B2","name":"GENERIC_ACTIVATION_PLANNER","status":"PLANNED"},
+    {"id":"B3","name":"SEMANTIC_CONTRACT_FAMILIES","status":"PLANNED"},
+    {"id":"B4","name":"GENERIC_REAL_BINDING_EXECUTOR","status":"PLANNED"},
+    {"id":"B5","name":"MULTILANE_EXECUTION","status":"PLANNED"},
+    {"id":"B6","name":"BLIND_BATCH_CERTIFICATION","status":"PLANNED"},
+    {"id":"B7","name":"SCALE_BATCH","status":"PLANNED"}
+  ],
+  "time_budget_hours": {
+    "target_min": 14,
+    "target_max": 18,
+    "structural_reassessment_limit": 20
+  },
+  "communication_policy": "Only milestone updates; one very short sentence stating current work, achieved result and next step.",
+  "handoff_policy": "Before chat saturation or after a major block, update MASTER, STATE, RUNBOOK and HANDOFF with exact SHAs/runs/evidence and next_block. New chat must continue from evidence, not memory.",
+  "authority": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "prod_mutation_authorized": false,
+    "auto_merge_authorized": false,
+    "customer_data_authorized": false,
+    "trading_access": false,
+    "paid_fallback": false,
+    "additional_cost_eur": 0
+  }
+}
