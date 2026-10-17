@@ -1,0 +1,48 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_FACT_SAFE_ENGINEERING_BOOTSTRAP_V1",
+  "generated_at": "2026-10-17",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "1.0.0",
+  "status": "IMPLEMENTED_PENDING_CI",
+  "reuse_profile": "CEREBRO_SAFE_ENGINEERING_PROFILE_V1",
+  "new_engine_required": false,
+  "task_kinds": [
+    "REPO_ANALYSIS",
+    "ACTIVATION_PLAN",
+    "WRAPPER_ADAPTER",
+    "SEMANTIC_CONTRACT",
+    "TEST_GENERATION",
+    "DEBUG_FIX"
+  ],
+  "purpose": "Make the existing Safe Engineering Profile directly invocable by FACT-001 as the technical bootstrap for Universal Skill Activation Factory V1.",
+  "boundaries": {
+    "plan_and_artifact_contract_only_until_governed_executor": true,
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "prod_mutation_authorized": false,
+    "permission_expansion_authorized": false,
+    "external_skill_code_execution": false,
+    "dependency_install_authorized": false,
+    "customer_data_authorized": false,
+    "paid_fallback": false,
+    "spend_authorized": false,
+    "trading_access": false,
+    "additional_cost_eur": 0
+  },
+  "preserves": [
+    "cerebro/runtime/cerebro-safe-engineering-profile-v1.mjs",
+    "cerebro/registry/safe-engineering-profile.v1.json",
+    "FACT-001 existing authority",
+    "existing QA/EVA/Tribunal/LRN/OBS/FinOps contracts"
+  ],
+  "acceptance": [
+    "FACT-001 can produce a deterministic governed engineering task for repository analysis, activation planning, wrappers, semantic contracts, tests and debugging",
+    "mutating tasks fail closed unless isolation/tests/backup/rollback/rebuild are ready",
+    "PROD/Trading/secrets/spend map to canonical HUMAN_REQUIRED or HOLD",
+    "no new engine and no additional cost"
+  ],
+  "next_gate": "CI_GREEN_THEN_B2_GENERIC_ACTIVATION_PLANNER"
+}

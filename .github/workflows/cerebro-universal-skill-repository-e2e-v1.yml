@@ -1,0 +1,62 @@
+name: CEREBRO Universal Skill Repository E2E V1
+
+on:
+  push:
+    branches:
+      - 'cerebro/universal-skill-activation-factory-v1-*'
+    paths:
+      - 'cerebro/runtime/universal-skill-repository-intake-v1.mjs'
+      - 'cerebro/runtime/universal-skill-auto-engineering-v1.mjs'
+      - 'cerebro/runtime/universal-skill-activation-planner-v1.mjs'
+      - 'cerebro/runtime/universal-skill-adapter-factory-v1.mjs'
+      - 'cerebro/runtime/universal-skill-real-binding-v1.mjs'
+      - 'cerebro/tests/universal-skill-repository-intake-v1.test.mjs'
+      - '.github/workflows/cerebro-universal-skill-repository-e2e-v1.yml'
+  pull_request:
+    paths:
+      - 'cerebro/runtime/universal-skill-repository-intake-v1.mjs'
+      - 'cerebro/runtime/universal-skill-auto-engineering-v1.mjs'
+      - 'cerebro/runtime/universal-skill-activation-planner-v1.mjs'
+      - 'cerebro/runtime/universal-skill-adapter-factory-v1.mjs'
+      - 'cerebro/runtime/universal-skill-real-binding-v1.mjs'
+      - 'cerebro/tests/universal-skill-repository-intake-v1.test.mjs'
+      - '.github/workflows/cerebro-universal-skill-repository-e2e-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: universal-skill-repository-e2e-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  unseen-repository-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Unseen repository to governed terminal state
+        run: node --test cerebro/tests/universal-skill-repository-intake-v1.test.mjs
+      - name: Assert no raw external execution or candidate-specific route
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -Eq 'child_process|npm install|external_skill_code_execution[[:space:]]*:[[:space:]]*true|prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true' cerebro/runtime/universal-skill-repository-intake-v1.mjs
+          grep -F "source_evidence_kind:'GOVERNED_READONLY_REMOTE'" cerebro/runtime/universal-skill-repository-intake-v1.mjs
+      - name: Existing B8 regression remains green
+        run: node --test cerebro/tests/universal-skill-auto-engineering-v1.test.mjs
+
+  full-cerebro-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Full CEREBRO regression
+        run: node --test cerebro/tests/*.test.mjs

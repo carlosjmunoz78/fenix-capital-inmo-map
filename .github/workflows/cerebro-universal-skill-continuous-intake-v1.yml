@@ -1,0 +1,58 @@
+name: CEREBRO Universal Skill Continuous Intake V1
+
+on:
+  repository_dispatch:
+    types: [cerebro_skill_intake]
+  workflow_dispatch:
+    inputs:
+      company_id:
+        description: company_id
+        required: true
+        default: fenix
+      github_urls:
+        description: GitHub skill URLs separated by comma or newline
+        required: true
+  push:
+    branches:
+      - 'cerebro/universal-skill-activation-factory-v1-*'
+    paths:
+      - 'cerebro/runtime/universal-skill-source-queue-v1.mjs'
+      - 'cerebro/tests/universal-skill-source-queue-v1.test.mjs'
+      - '.github/workflows/cerebro-universal-skill-continuous-intake-v1.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: universal-skill-continuous-intake-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: false
+
+jobs:
+  durable-source-queue:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Durable queue / idempotency / restart tests
+        run: node --test cerebro/tests/universal-skill-source-queue-v1.test.mjs
+      - name: Push certification without chat conductor
+        if: github.event_name == 'push'
+        env:
+          CEREBRO_SOURCE_QUEUE_ROOT: ${{ runner.temp }}/cerebro-source-queue-live
+          CEREBRO_COMPANY_ID: fenix
+          CEREBRO_SOURCE_CONCURRENCY: '4'
+        run: node cerebro/runtime/universal-skill-source-queue-v1.mjs https://github.com/ericrisco/rsc-harness/tree/main/skills/finance-ops https://github.com/ericrisco/rsc-harness/tree/main/skills/finance-ops
+      - name: Event-driven intake
+        if: github.event_name == 'repository_dispatch' || github.event_name == 'workflow_dispatch'
+        env:
+          CEREBRO_SOURCE_QUEUE_ROOT: ${{ runner.temp }}/cerebro-source-queue-event
+          CEREBRO_SOURCE_CONCURRENCY: '8'
+        run: node cerebro/runtime/universal-skill-source-queue-v1.mjs --event "$GITHUB_EVENT_PATH"
+      - name: Assert PREPROD-only authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -Eq 'prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true|external_skill_code_execution[[:space:]]*:[[:space:]]*true|npm install|child_process' cerebro/runtime/universal-skill-source-queue-v1.mjs

@@ -1,0 +1,59 @@
+name: CEREBRO Universal Skill B15 Integrity V1
+
+on:
+  push:
+    branches:
+      - 'cerebro/universal-skill-activation-factory-v1-*'
+    paths:
+      - 'cerebro/runtime/universal-skill-auto-engineering-v1.mjs'
+      - 'cerebro/runtime/universal-skill-terminal-view-v1.mjs'
+      - 'cerebro/runtime/universal-skill-family-coverage-v1.mjs'
+      - 'cerebro/tests/universal-skill-auto-engineering-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-b15-integrity-v1.test.mjs'
+      - 'cerebro/tests/fixtures/software-engineering-source-v1.md'
+      - '.github/workflows/cerebro-universal-skill-b15-integrity-v1.yml'
+      - 'cerebro/registry/universal-skill-activation-factory-v1.state.json'
+      - 'cerebro/docs/CEREBRO_UNIVERSAL_SKILL_ACTIVATION_FACTORY_V1_MASTER_2026-10-17.md'
+      - 'cerebro/docs/CEREBRO_UNIVERSAL_SKILL_ACTIVATION_FACTORY_V1_RUNBOOK_2026-10-17.md'
+      - 'cerebro/docs/CEREBRO_UNIVERSAL_SKILL_ACTIVATION_FACTORY_V1_HANDOFF.md'
+  pull_request:
+    paths:
+      - 'cerebro/runtime/universal-skill-auto-engineering-v1.mjs'
+      - 'cerebro/runtime/universal-skill-terminal-view-v1.mjs'
+      - 'cerebro/runtime/universal-skill-family-coverage-v1.mjs'
+      - 'cerebro/tests/universal-skill-auto-engineering-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-b15-integrity-v1.test.mjs'
+      - 'cerebro/tests/fixtures/software-engineering-source-v1.md'
+      - '.github/workflows/cerebro-universal-skill-b15-integrity-v1.yml'
+      - 'cerebro/registry/universal-skill-activation-factory-v1.state.json'
+      - 'cerebro/docs/CEREBRO_UNIVERSAL_SKILL_ACTIVATION_FACTORY_V1_MASTER_2026-10-17.md'
+      - 'cerebro/docs/CEREBRO_UNIVERSAL_SKILL_ACTIVATION_FACTORY_V1_RUNBOOK_2026-10-17.md'
+      - 'cerebro/docs/CEREBRO_UNIVERSAL_SKILL_ACTIVATION_FACTORY_V1_HANDOFF.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: universal-skill-b15-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  b15-source-scope-family-and-terminal-integrity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: B15 focused integrity tests
+        run: node --test cerebro/tests/universal-skill-auto-engineering-v1.test.mjs cerebro/tests/universal-skill-b15-integrity-v1.test.mjs
+      - name: B15 authority and truthfulness assertions
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -F "SOURCE_STATE_REQUIRES_ENGINEERING" cerebro/runtime/universal-skill-auto-engineering-v1.mjs
+          grep -F "FULL_REAL_EVIDENCE_INCOMPLETE" cerebro/runtime/universal-skill-terminal-view-v1.mjs
+          grep -F "Provider availability is not a FULL claim" cerebro/runtime/universal-skill-family-coverage-v1.mjs
+          ! grep -Eq 'prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true|additional_cost_eur[[:space:]]*:[[:space:]]*[1-9]' cerebro/runtime/universal-skill-auto-engineering-v1.mjs cerebro/runtime/universal-skill-terminal-view-v1.mjs cerebro/runtime/universal-skill-family-coverage-v1.mjs

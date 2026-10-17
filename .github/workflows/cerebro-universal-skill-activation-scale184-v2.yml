@@ -1,0 +1,46 @@
+name: CEREBRO Universal Skill Activation Scale184 V2
+
+on:
+  push:
+    branches:
+      - 'cerebro/universal-skill-activation-factory-v1-*'
+    paths:
+      - 'cerebro/runtime/universal-skill-legacy184-autoeng-scale-v2.mjs'
+      - 'cerebro/runtime/universal-skill-auto-engineering-v1.mjs'
+      - 'cerebro/runtime/universal-skill-legacy184-normalizer-v1.mjs'
+      - 'cerebro/runtime/universal-skill-legacy184-scale-v1.mjs'
+      - 'cerebro/tests/universal-skill-legacy184-autoeng-scale-v2.test.mjs'
+      - '.github/workflows/cerebro-universal-skill-activation-scale184-v2.yml'
+  pull_request:
+    paths:
+      - 'cerebro/runtime/universal-skill-legacy184-autoeng-scale-v2.mjs'
+      - 'cerebro/runtime/universal-skill-auto-engineering-v1.mjs'
+      - 'cerebro/runtime/universal-skill-legacy184-normalizer-v1.mjs'
+      - 'cerebro/runtime/universal-skill-legacy184-scale-v1.mjs'
+      - 'cerebro/tests/universal-skill-legacy184-autoeng-scale-v2.test.mjs'
+      - '.github/workflows/cerebro-universal-skill-activation-scale184-v2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scale184-auto-engineering-v2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Scale184 V2 tests
+        run: node --test cerebro/tests/universal-skill-legacy184-autoeng-scale-v2.test.mjs
+      - name: Produce current truthful 184 report
+        run: node cerebro/runtime/universal-skill-legacy184-autoeng-scale-v2.mjs "$RUNNER_TEMP/cerebro-usaf-scale184-v2-report.json"
+      - name: Upload evidence report
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-usaf-scale184-v2-${{ github.run_id }}
+          path: ${{ runner.temp }}/cerebro-usaf-scale184-v2-report.json
+          if-no-files-found: error
+          retention-days: 14

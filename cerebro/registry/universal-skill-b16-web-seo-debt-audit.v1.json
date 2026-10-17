@@ -1,0 +1,27 @@
+{
+  "schema_version":"1.0.0",
+  "state_type":"CEREBRO_UNIVERSAL_SKILL_B16_WEB_SEO_DEBT_EVIDENCE_V1",
+  "generated_at":"2026-10-17",
+  "company_id":"GLOBAL",
+  "engine_id":"FACT-001",
+  "environment":"PREPROD",
+  "version":"v1",
+  "certified_head_sha":"e4e52950ee588691a1f77294ca7f96556983f250",
+  "certification":{"workflow":"CEREBRO Universal Skill B16 Web SEO Debt V1","run_number":3,"run_id":39058932528,"status":"SUCCESS"},
+  "catalog":{"items_measured":184,"latest_version_per_exact_range":true,"history_preserved":true,"item_scoped":true},
+  "reusable_evidence":[
+    {"ref":"cerebro/registry/web-acquisition-intelligence-profile.v1.json","scope":"ANALYSIS_AND_ACQUISITION_INTELLIGENCE_NOT_UNIVERSAL_MUTATION_PROVIDER"},
+    {"ref":"cerebro/registry/phase13-marketing-seo-feedback-profile.v0.json","scope":"SAFE_SHADOW_FEEDBACK_CONTROL_NOT_UNIVERSAL_EXECUTION_PROVIDER"},
+    {"ref":"cerebro/registry/physical-adapter-audit-v1.json","scope":"PHYSICAL_SURFACE_AUDIT_NOT_GENERIC_WEB_OR_SEO_BINDING"},
+    {"ref":"cerebro/registry/fact001-android-staging-48-183.v0.json","scope":"CANDIDATE_SPECIFIC_WORDPRESS_STAGING_AND_ANDROID_BUILD_EVIDENCE"}
+  ],
+  "families":{
+    "web-wordpress-frontend":{"candidate_count":17,"engineering_debt_count":7,"repeated_engineering_debt":true,"provider_already_available":false,"generic_execution_evidence_refs":[],"recommendation":"NO_NEW_PROVIDER_JUSTIFIED","reason":"REPEATED_DEBT_BUT_NO_EXPLICIT_GENERIC_EXECUTION_EVIDENCE"},
+    "seo-search-content":{"candidate_count":30,"engineering_debt_count":19,"repeated_engineering_debt":true,"provider_already_available":false,"generic_execution_evidence_refs":[],"recommendation":"NO_NEW_PROVIDER_JUSTIFIED","reason":"REPEATED_DEBT_BUT_NO_EXPLICIT_GENERIC_EXECUTION_EVIDENCE"}
+  },
+  "global_recommendation":"NO_NEW_WEB_SEO_PROVIDER_JUSTIFIED",
+  "truth":"Repeated debt exists, but existing profiles/audits are analysis, shadow-control, surface-audit or candidate-specific evidence. They do not explicitly prove a generic PREPROD execution contract plus semantic binding, so FACT-001 must not synthesize a Web/SEO provider from them.",
+  "item_183":{"state":"PARTIAL_PREPROD_STAGING_RENDER_AND_SIGNED_ANDROID_BUILD_GREEN_PHYSICAL_DEVICE_PENDING","next_gate":"AUTHORIZED_DEVICE_INSTALL_AND_RENDER_E2E","generic_provider_evidence":false},
+  "authority":{"prod_authorized":false,"prod_write_authorized":false,"public_deploy_authorized":false,"auto_merge_authorized":false,"external_skill_code_execution_authorized":false,"external_dependency_install_authorized":false,"customer_data_authorized":false,"trading_access":false,"automatic_paid_fallback":false,"additional_cost_eur":0},
+  "human_required":[]
+}
