@@ -1,0 +1,81 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_UNIVERSAL_SKILL_B17_BROWSER_PHYSICAL_GATES_EVIDENCE_V1",
+  "generated_at": "2026-10-18",
+  "company_id": "fenix",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "certified_code_head_sha": "a7df20aefca134086329273e9ee2be2aa3b6dd4a",
+  "certification": {
+    "workflow": "CEREBRO Universal Skill B17 Browser Physical Gates V1",
+    "run_number": 2,
+    "run_id": 39077601170,
+    "status": "SUCCESS",
+    "targeted_tests": "GREEN",
+    "current_physical_truth_gate": "GREEN",
+    "full_cerebro_regression": "GREEN",
+    "node_runtime": "24.x",
+    "dependencies_added": false,
+    "test_exclusions_added": false,
+    "gate_weakening": false
+  },
+  "existing_assets_reused": [
+    "cerebro/registry/browser-transversal-autonomy-policy.v1.json",
+    "cerebro/registry/authorized-execution-device-profile.v1.json",
+    "cerebro/runtime/browser-transversal-autonomy-v1.mjs",
+    "cerebro/runtime/authorized-execution-device-profile-v1.mjs",
+    "cerebro/governance/identity-session-lifecycle.mjs",
+    "cerebro/registry/credential-lifecycle-policy.v0.json",
+    "cerebro/registry/physical-adapter-audit-v1.json"
+  ],
+  "implementation_added": {
+    "runtime": "cerebro/runtime/universal-skill-b17-browser-physical-gates-v1.mjs",
+    "tests": "cerebro/tests/universal-skill-b17-browser-physical-gates-v1.test.mjs",
+    "workflow": ".github/workflows/cerebro-universal-skill-b17-browser-physical-gates-v1.yml"
+  },
+  "configuration_gate": "HECHO_PREPROD",
+  "physical_runtime_current": {
+    "terminal_state": "BLOCKED_EXTERNAL",
+    "activation_state": "PHYSICAL_EVIDENCE_PENDING",
+    "browser_binding_fresh": false,
+    "action_observation_valid": false,
+    "human_required": null,
+    "reason": "CURRENT_ORCHESTRATION_CONTEXT_CANNOT_OBSERVE_THE_AUTHORIZED_BROWSER_BRIDGE_PHYSICAL_SURFACE; NO_FRESH_ATTESTATION_PLUS_BOUNDED_ACTION_OBSERVATION_IS_AVAILABLE_IN_THIS_RUNNER"
+  },
+  "truth_constraints": [
+    "CONFIGURATION_OR_PROFILE_PRESENCE_IS_NOT_PHYSICAL_PROOF",
+    "FRESH_BROWSER_ATTESTATION_ALONE_IS_NOT_SUFFICIENT_WITHOUT_A_BOUNDED_PHYSICAL_ACTION_OBSERVATION",
+    "SYNTHETIC_CONTRACT_TESTS_PROVE_GATE_LOGIC_BUT_DO_NOT_CERTIFY_CURRENT_PHYSICAL_RUNTIME",
+    "ACTION_CAPABLE_FULL_REQUIRES_FRESH_PREPROD_PHYSICAL_EVIDENCE",
+    "BLOCKED_EXTERNAL_IS_CANDIDATE_LOCAL_AND_DOES_NOT_FREEZE_INDEPENDENT_ENGINEERING",
+    "BROWSER_IS_A_TRANSVERSAL_TOOL_NOT_AN_AUTHORITY_OR_A_NEW_ENGINE"
+  ],
+  "safe_observation_contract": {
+    "allowed_environments": ["LAB", "PREPROD"],
+    "route_class": "BROWSER_BRIDGE",
+    "allowed_operation_kinds": ["OBSERVE", "AUTHENTICATED_OBSERVE"],
+    "max_age_seconds": 900,
+    "bounded_required": true,
+    "fail_closed_required": true,
+    "kill_switch_required": true,
+    "prod_mutation": false,
+    "public_mutation": false,
+    "trading_access": false,
+    "customer_data_used": false,
+    "incremental_cost_eur": 0,
+    "unexpected_evidence_fields_rejected": true
+  },
+  "authority": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "public_deploy_authorized": false,
+    "auto_merge_authorized": false,
+    "arbitrary_shell_authorized": false,
+    "external_dependency_install_authorized": false,
+    "customer_data_authorized": false,
+    "trading_access": false,
+    "additional_cost_eur": 0
+  },
+  "human_required_active": []
+}
