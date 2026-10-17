@@ -1,0 +1,81 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_SKILL_REAL_ENGINE_BINDING_ADOPTION",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "1.0.0",
+  "status": "STRICT_CANDIDATE_PREPROD",
+  "strict_target_status": "FULL_SAFE_PREPROD",
+  "human_gate_resolution": "cerebro/registry/skill-high-risk-review-resolution-2026-10-17.json",
+  "skills": {
+    "supabase-postgres-best-practices": {
+      "alias_es": "Optimización y seguridad de bases de datos",
+      "candidate_id": "mcpservers-agent-skills:4c2b2478f8fe3bed14df",
+      "wrapper_id": "skillwrap:cerebro-supabase-postgres-v0.1.0",
+      "binding_source": "cerebro/skills/internal-capability-signals.v0.json#data-database-supabase",
+      "target_engine_bindings": ["DATA-001", "DBOFF-001", "STOROFF-001", "API-001", "CRM-001"],
+      "external_skill_code_execution": false
+    },
+    "agent-browser": {
+      "alias_es": "Control avanzado del navegador",
+      "candidate_id": "mcpservers-agent-skills:157e52d4ac5038d53c1a",
+      "wrapper_id": "skillwrap:cerebro-agent-browser-v0.1.0",
+      "binding_source": "cerebro/skills/internal-capability-signals.v0.json#browser-automation-scraping",
+      "target_engine_bindings": ["AUTO-001", "AUTBOOT-001", "QA-001", "WEB-001", "SCAN-001"],
+      "browser_is_tool_not_authority": true,
+      "external_skill_code_execution": false
+    }
+  },
+  "binding_count": 10,
+  "strict_gates": {
+    "canonical_engine_ids_required": true,
+    "governed_binding_source_required": true,
+    "human_high_risk_resolution_required": true,
+    "normalized_internal_wrapper_required": true,
+    "external_skill_code_execution_forbidden": true,
+    "semantic_consumption_required_per_binding": true,
+    "meaningful_change_required_per_binding": true,
+    "old_vs_new_required_per_binding": true,
+    "independent_tribunal_required": true,
+    "learning_feedback_required": true,
+    "observability_required": true,
+    "audit_required": true,
+    "finops_required": true,
+    "backup_rollback_rebuild_required": true,
+    "idempotency_required": true,
+    "zero_cost_required": true
+  },
+  "prior_evidence": {
+    "supabase_behavioral_run_id": 37642814017,
+    "agent_browser_behavioral_run_id": 37644374137,
+    "shared_preprod_runtime_run_id": 37647914902,
+    "shared_preprod_runtime_status": "PREPROD_INTEGRATION_COMPLETE",
+    "prior_tribunal_status": "GREEN_FOR_HIGH_RISK_PROMOTION_REVIEW"
+  },
+  "authority": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "prod_mutation_authorized": false,
+    "db_mutation_authorized": false,
+    "crm_write_authorized": false,
+    "provider_write_authorized": false,
+    "browser_external_side_effect_authorized": false,
+    "external_skill_code_execution": false,
+    "permission_expansion_authorized": false,
+    "customer_data_authorized": false,
+    "paid_fallback": false,
+    "spend_authorized": false,
+    "trading_access": false,
+    "additional_cost_eur": 0
+  },
+  "promotion": {
+    "automatic_prod_promotion": false,
+    "requires_exact_head_ci_green": true,
+    "requires_governed_main_replay": true,
+    "requires_rsi_readiness": true,
+    "requires_post_merge_main_replay": true,
+    "requires_certification_pr": true
+  },
+  "next_gate": "EXACT_HEAD_CI_GOVERNED_MAIN_RSI_AND_MAIN_REPLAY"
+}
