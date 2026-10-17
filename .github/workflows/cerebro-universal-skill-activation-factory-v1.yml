@@ -7,24 +7,28 @@ on:
     paths:
       - 'cerebro/runtime/fact-safe-engineering-bootstrap-v1.mjs'
       - 'cerebro/runtime/universal-skill-activation-planner-v1.mjs'
+      - 'cerebro/runtime/universal-skill-semantic-contracts-v1.mjs'
       - 'cerebro/runtime/universal-skill-real-binding-v1.mjs'
       - 'cerebro/registry/fact-safe-engineering-bootstrap-v1.json'
       - 'cerebro/registry/universal-skill-activation-factory-v1.state.json'
       - 'cerebro/registry/universal-skill-activation-contracts-v1.json'
       - 'cerebro/tests/fact-safe-engineering-bootstrap-v1.test.mjs'
       - 'cerebro/tests/universal-skill-activation-planner-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-semantic-contracts-v1.test.mjs'
       - 'cerebro/tests/universal-skill-real-binding-v1.test.mjs'
       - '.github/workflows/cerebro-universal-skill-activation-factory-v1.yml'
   pull_request:
     paths:
       - 'cerebro/runtime/fact-safe-engineering-bootstrap-v1.mjs'
       - 'cerebro/runtime/universal-skill-activation-planner-v1.mjs'
+      - 'cerebro/runtime/universal-skill-semantic-contracts-v1.mjs'
       - 'cerebro/runtime/universal-skill-real-binding-v1.mjs'
       - 'cerebro/registry/fact-safe-engineering-bootstrap-v1.json'
       - 'cerebro/registry/universal-skill-activation-factory-v1.state.json'
       - 'cerebro/registry/universal-skill-activation-contracts-v1.json'
       - 'cerebro/tests/fact-safe-engineering-bootstrap-v1.test.mjs'
       - 'cerebro/tests/universal-skill-activation-planner-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-semantic-contracts-v1.test.mjs'
       - 'cerebro/tests/universal-skill-real-binding-v1.test.mjs'
       - '.github/workflows/cerebro-universal-skill-activation-factory-v1.yml'
   workflow_dispatch:
@@ -52,6 +56,19 @@ jobs:
         run: |
           set -euo pipefail
           ! grep -Eq 'prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true|additional_cost_eur[[:space:]]*:[[:space:]]*[1-9]' cerebro/runtime/fact-safe-engineering-bootstrap-v1.mjs cerebro/registry/fact-safe-engineering-bootstrap-v1.json
+
+  b2-b3-planner-and-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Generic activation planner and semantic contract tests
+        run: node --test cerebro/tests/universal-skill-activation-planner-v1.test.mjs cerebro/tests/universal-skill-semantic-contracts-v1.test.mjs
+      - name: Validate semantic contract registry executable check
+        run: node cerebro/runtime/universal-skill-semantic-contracts-v1.mjs
 
   focused-existing-regression:
     runs-on: ubuntu-latest
