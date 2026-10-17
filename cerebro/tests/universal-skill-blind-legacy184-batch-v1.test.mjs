@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {selectBlindLegacyBatch,normalizeLegacy184Item} from '../runtime/universal-skill-legacy184-normalizer-v1.mjs';
-import {runUniversalSkillBatchOnce} from '../runtime/universal-skill-batch-orchestrator-v1.mjs';
+import {runUniversalSkillBatchOnce,runUniversalSkillBatchIndustrial} from '../runtime/universal-skill-batch-orchestrator-v1.mjs';
 
 const here=path.dirname(fileURLToPath(import.meta.url));
 const realFile=path.resolve(here,'../skills/cerebro-184-items-38-50-live-reconciliation.v2.json');
@@ -49,6 +49,29 @@ test('blind real-catalog batch reaches truthful outcomes without candidate-speci
   assert.ok(report.results.some((x)=>x.status==='ENGINEERING_TASK_REQUIRED'));
   assert.equal(report.prod_authorized,false);
   assert.equal(report.additional_cost_eur,0);
+});
+
+test('industrial fast lane processes a real blind catalog batch concurrently without false FULL upgrades',async()=>{
+  const selection=selectBlindLegacyBatch(realDoc,{limit:10,source_ref:'cerebro/skills/cerebro-184-items-38-50-live-reconciliation.v2.json'});
+  assert.ok(selection.selected.length>=5,'real blind catalog must provide at least five independent candidates');
+  const candidates=selection.selected.map((x)=>({activation_input:x.activation_input,candidate_evidence:x.candidate_evidence,low_risk:true,external_side_effects:false}));
+  const expected=Object.fromEntries(selection.selected.map((x)=>[x.activation_input.candidate_id,x.expected_outcome]));
+  const root=fs.mkdtempSync(path.join(os.tmpdir(),'usaf-blind-industrial-real184-'));
+  const report=await runUniversalSkillBatchIndustrial({root_dir:root,candidates,concurrency:5,max_jobs:20,source_run_id:184038051,source_head_sha:'5555555555555555555555555555555555555555'});
+  assert.equal(report.parallel_execution_proven,true);
+  assert.ok(report.max_active_workers>=5);
+  assert.equal(report.executed_primary_count,selection.selected.length);
+  assert.equal(report.fail_fast,false);
+  for(const result of report.results){
+    assert.equal(result.status,expected[result.candidate_id],`${result.candidate_id}:${result.status}`);
+    assert.notEqual(result.status,'FULL_SAFE_PREPROD','Legacy catalog metadata alone must not be upgraded to FULL by industrial scheduling');
+  }
+  assert.ok(report.results.some((x)=>x.status==='ABSORBED'));
+  assert.ok(report.results.some((x)=>x.status==='BLOCKED_EXTERNAL'));
+  assert.ok(report.results.some((x)=>x.status==='ENGINEERING_TASK_REQUIRED'));
+  assert.equal(report.prod_authorized,false);
+  assert.equal(report.additional_cost_eur,0);
+  assert.equal(report.trading_access,false);
 });
 
 test('reference-only and HOLD items are explicitly excluded as REJECTED instead of being activated',()=>{
