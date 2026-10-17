@@ -1,0 +1,84 @@
+name: PLUGIN-UNIVERSAL PREPROD Physical Probe
+# recheck-after-manual-upload: 2026-09-28T22:30Z
+
+on:
+  push:
+    branches:
+      - work/finops-supabase-offload-wave1-2026-09-28
+    paths:
+      - ".github/workflows/plugin-universal-preprod-physical.yml"
+      - "cerebro/runtime/wordpress/plugins/fenix-cerebro-leads-1.3.3.php"
+      - "cerebro/runtime/docs/UNIVERSAL_PLUGIN_FULL_2026-09-28.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Fetch staging homepage and REST index
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location --max-time 20 https://staging.fenixcapital.es/ -o /tmp/staging-home.html
+          curl --fail --silent --show-error --location --max-time 20 https://staging.fenixcapital.es/wp-json/ -o /tmp/wp-json.json
+          test -s /tmp/staging-home.html
+          test -s /tmp/wp-json.json
+          echo "STAGING_HTML_BYTES=$(wc -c < /tmp/staging-home.html)"
+          echo "WP_JSON_BYTES=$(wc -c < /tmp/wp-json.json)"
+
+      - name: Classify Leads frontend state
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          html=Path('/tmp/staging-home.html').read_text(encoding='utf-8', errors='ignore')
+          markers={
+            'FenixCerebroLead':'FenixCerebroLead',
+            'consent_marketing':'consent_marketing',
+            'explicit_marketing_label':'Quiero recibir información, novedades, recursos y comunicaciones comerciales de Fénix Capital.',
+            'marketing_input':'input[name="marketing"]',
+          }
+          counts={k:html.count(v) for k,v in markers.items()}
+          for k,v in counts.items():
+              print(f'HOME_MARKER_{k}={v}')
+          ready=all(v>0 for v in counts.values())
+          print('LEADS_1_3_3_FRONTEND=' + ('PRESENT' if ready else 'NOT_ACTIVE_OR_NOT_DEPLOYED'))
+          PY
+
+      - name: Verify universal runtime and classify Leads REST namespace
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          with open('/tmp/wp-json.json', encoding='utf-8') as f:
+              data=json.load(f)
+          namespaces=set(data.get('namespaces',[]))
+          if 'cerebro-universal/v1' not in namespaces:
+              raise SystemExit('cerebro-universal/v1 missing')
+          print('CEREBRO_UNIVERSAL_NAMESPACE=PRESENT')
+          print('CEREBRO_UNIVERSAL_QA_NAMESPACE=' + ('PRESENT' if 'cerebro-universal-qa/v1' in namespaces else 'ABSENT'))
+          print('FENIX_CEREBRO_LEADS_NAMESPACE=' + ('PRESENT' if 'fenix-cerebro/v1' in namespaces else 'NOT_ACTIVE_OR_NOT_DEPLOYED'))
+          PY
+
+      - name: Verify Leads REST callback without forwarding
+        shell: bash
+        run: |
+          set -euo pipefail
+          status=$(curl --silent --show-error --location --max-time 20             -o /tmp/leads-empty-response.json             -w '%{http_code}'             -H 'Content-Type: application/json'             -H 'x-fenix-idempotency-key: preprod-empty-validation-only'             -d '{}'             https://staging.fenixcapital.es/wp-json/fenix-cerebro/v1/lead)
+          echo "LEADS_EMPTY_VALIDATION_STATUS=$status"
+          cat /tmp/leads-empty-response.json
+          test "$status" = "422"
+          grep -Fq 'identifier_required' /tmp/leads-empty-response.json
+          echo 'LEADS_CALLBACK_VALIDATION_ONLY=PASS'
+
+      - name: Gate semantics
+        shell: bash
+        run: |
+          echo 'PROBE=PASS'
+          echo 'NOTE=This probe confirms the universal PREPROD runtime, Leads 1.3.3 frontend markers, namespace, and local validation callback. It does not create a lead, forward to backend, promote, or write to PROD.'

@@ -1,0 +1,11 @@
+{
+  "job_id": "seo001-weekly-orchestrator",
+  "legacy_pg_cron_job_id": 2,
+  "url": "https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/fenix-seo-cerebro-preprod",
+  "body": {
+    "trigger": "cron",
+    "scope": "weekly_seo_preprod",
+    "company_id": "FENIX_CAPITAL"
+  },
+  "secret_file": "/home/u497370767/domains/fenixcapital.es/cerebro/secrets/fenix_cerebro_preprod.secret"
+}

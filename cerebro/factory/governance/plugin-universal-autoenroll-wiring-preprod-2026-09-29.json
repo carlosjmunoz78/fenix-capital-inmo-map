@@ -1,0 +1,31 @@
+{
+  "evidence_id": "PLUGIN-UNIVERSAL-AUTOENROLL-WIRING-PREPROD-2026-09-29",
+  "engine_id": "PLUGIN-UNIVERSAL-001",
+  "company_id": "fenix-capital",
+  "environment": "PREPROD",
+  "web_lead_function": {
+    "slug": "fenix-web-lead-preprod",
+    "version": 5
+  },
+  "enrollment_function": {
+    "slug": "fenix-newsletter-enroll-preprod",
+    "version": 2,
+    "verify_jwt": true
+  },
+  "rule": "explicit marketing consent + email only",
+  "audience_test": {
+    "landing_class": "inmobiliarias",
+    "audience": "INMOBILIARIAS",
+    "brevo_list_id": 18,
+    "dry_run": true
+  },
+  "cleanup": {
+    "lead_rows": 0,
+    "event_rows": 0,
+    "task_rows": 0,
+    "enrollment_rows": 0
+  },
+  "production_impact": false,
+  "cost_additional_eur": 0,
+  "status": "CONFIRMED_WIRING_PREPROD"
+}

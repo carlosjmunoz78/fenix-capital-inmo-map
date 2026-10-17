@@ -63,3 +63,16 @@ python cerebro/factory/scripts/factory.py status
 La creación idéntica devuelve `NO_CHANGE`. Si el mismo `engine_id` ya existe con definición distinta, devuelve `CONFLICT` y no sobrescribe: la evolución debe pasar por un flujo versionado posterior.
 
 Esta rama es deliberadamente aislada y no altera los contratos actuales de App, CRM, Supabase, Notion, WordPress, SEO, Training ni Trading LAB.
+
+## WordPress universal multiempresa standard
+FACT-001 now registers `WP-UNIVERSAL-MULTIEMPRESA-001` as the canonical WordPress bootstrap artifact for new companies.
+
+- Source: `cerebro/runtime/wordpress/plugins/cerebro-os-universal-multiempresa-0.2.0.php`.
+- Deterministic builder: `cerebro/runtime/wordpress/build_cerebro_os_universal_multiempresa.py`.
+- Factory contract: `cerebro/factory/artifacts/wordpress/universal-multiempresa-0.2.0.json`.
+- New-company hook: `COMP-ONB-001` emits package + company config during Automation Bootstrap.
+- Default target: PREPROD.
+- Automatic PROD installation: forbidden.
+- Additional cost target: 0 EUR.
+- Provider policy: wrap/preserve existing providers; native lead capture is optional only when no existing capture exists.
+- Identity contract: `company_id + engine_id + environment + version`.

@@ -6,14 +6,12 @@ on:
       - cerebro/fact-001-factory-v0
     paths:
       - 'cerebro/factory/**'
-      - 'cerebro/runtime/**'
       - '.github/workflows/fact-001-*.yml'
   pull_request:
     branches:
       - preprod-app-phase1
     paths:
       - 'cerebro/factory/**'
-      - 'cerebro/runtime/**'
       - '.github/workflows/fact-001-*.yml'
 
 permissions:
@@ -26,7 +24,7 @@ concurrency:
 jobs:
   app-compat:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 12
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -37,17 +35,10 @@ jobs:
           cache: npm
       - name: Install dependencies reproducibly
         run: npm ci
-      - name: Install Chromium browser
-        run: npx playwright install chromium
-        timeout-minutes: 5
-      - name: Build PREPROD unchanged app
+      - name: Build PREPROD compatibility contract
         env:
           VITE_FUNCTION_SUFFIX: '-test'
         run: npm run build
-      - name: Browser QA PREPROD unchanged app
-        env:
-          PLAYWRIGHT_SKIP_BUILD: '1'
-        run: npm run test:e2e -- --workers=2
       - name: Assert Factory remains additive
         shell: bash
         run: |
@@ -57,3 +48,11 @@ jobs:
           test -f cerebro/factory/governance/old-vs-new-fact-001.json
           python cerebro/factory/scripts/validate_manifest.py
 
+# FINOPS:
+# Full Playwright browser QA is intentionally NOT run on every FACT/runtime PR.
+# Standalone cerebro/runtime Python/contracts/deploy changes are validated by
+# FACT-001 Factory V0 and specialized/manual release gates; they do not affect
+# the React/Vite app bundle and therefore no longer trigger this Node build.
+# It remains available in the manual PRE-PROD App Build workflow and release gates.
+# This preserves the existing browser suite while preventing repeated live PREPROD
+# Edge Function traffic and GitHub Actions minutes for additive runtime/doc changes.

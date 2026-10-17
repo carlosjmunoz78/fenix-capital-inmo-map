@@ -1,0 +1,39 @@
+{
+  "artifact_id": "WP-UNIVERSAL-MULTIEMPRESA-001",
+  "engine_id": "PLUGIN-UNIVERSAL-001",
+  "factory_id": "FACT-001",
+  "version": "0.2.0",
+  "scope": "GLOBAL_OR_SCOPED",
+  "company_id": null,
+  "environment": "PREPROD",
+  "source": "cerebro/runtime/wordpress/plugins/cerebro-os-universal-multiempresa-0.2.0.php",
+  "builder": "cerebro/runtime/wordpress/build_cerebro_os_universal_multiempresa.py",
+  "contract": {
+    "required_identity": [
+      "company_id",
+      "engine_id",
+      "environment",
+      "version"
+    ],
+    "environments": [
+      "LAB",
+      "PREPROD",
+      "PROD"
+    ],
+    "fail_closed": true,
+    "prod_default_deny": true,
+    "provider_agnostic": true,
+    "native_lead_capture": "OPTIONAL_ONLY_IF_NO_EXISTING_CAPTURE"
+  },
+  "onboarding": {
+    "stage": "Automation Bootstrap",
+    "emitted_by": "COMP-ONB-001",
+    "default_environment": "PREPROD",
+    "install_mode": "GENERATE_ARTIFACT_AND_CONFIG_ONLY",
+    "automatic_prod_install": false
+  },
+  "cost": {
+    "additional_eur": 0
+  },
+  "status": "FACTORY_STANDARD_CANDIDATE"
+}

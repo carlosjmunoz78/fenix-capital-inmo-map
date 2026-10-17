@@ -1,0 +1,69 @@
+name: CEREBRO Notion Control Plane Sync
+
+on:
+  push:
+    branches:
+      - preprod-app-phase1
+    paths:
+      - 'cerebro/factory/registry/engine-registry.json'
+      - 'cerebro/factory/governance/human-exception-queue-2026-09-07.json'
+      - 'cerebro/runtime/notion_control_plane_sync.py'
+      - '.github/workflows/cerebro-notion-control-plane-sync.yml'
+  pull_request:
+    branches:
+      - preprod-app-phase1
+    paths:
+      - 'cerebro/factory/registry/engine-registry.json'
+      - 'cerebro/factory/governance/human-exception-queue-2026-09-07.json'
+      - 'cerebro/runtime/notion_control_plane_sync.py'
+      - 'cerebro/runtime/tests/test_notion_control_plane_sync.py'
+      - '.github/workflows/cerebro-notion-control-plane-sync.yml'
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: 'Apply idempotent Git -> Notion mirror updates'
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-notion-control-plane-sync-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Deterministic contract tests
+        run: python -m unittest cerebro.runtime.tests.test_notion_control_plane_sync -v
+      - name: Dry-run plan
+        run: python -m cerebro.runtime.notion_control_plane_sync --sync-date "$(date -u +%F)"
+
+  sync:
+    needs: validate
+    if: ${{ github.event_name == 'push' || inputs.apply == true }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Require existing Notion credential
+        shell: bash
+        run: test -n "$NOTION_TOKEN" || { echo "NOTION_TOKEN secret is not configured"; exit 2; }
+      - name: Event-driven idempotent mirror
+        run: python -m cerebro.runtime.notion_control_plane_sync --apply --sync-date "$(date -u +%F)"
+
+# Source of truth remains Git. This workflow is event-driven (path changes), not polling.
+# It never deletes Notion rows, never changes PROD runtime, and adds no paid dependency.

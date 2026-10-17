@@ -1,0 +1,11 @@
+{
+  "job_id": "seo001-growth-email-worker",
+  "legacy_pg_cron_job_id": 6,
+  "url": "https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/fenix-seo-growth-email-worker-preprod",
+  "body": {
+    "trigger": "cron",
+    "scope": "seo_growth_email_preprod",
+    "company_id": "FENIX_CAPITAL"
+  },
+  "secret_file": "/home/u497370767/domains/fenixcapital.es/cerebro/secrets/fenix_cerebro_preprod.secret"
+}

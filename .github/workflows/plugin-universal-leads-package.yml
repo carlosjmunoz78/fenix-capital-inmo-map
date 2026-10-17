@@ -1,0 +1,40 @@
+name: PLUGIN-UNIVERSAL Leads 1.3.5 Package
+
+on:
+  push:
+    branches:
+      - work/finops-supabase-offload-wave1-2026-09-28
+    paths:
+      - "cerebro/runtime/wordpress/plugins/fenix-cerebro-leads-1.3.5.php"
+      - "cerebro/runtime/wordpress/build_fenix_cerebro_leads_package.py"
+      - "cerebro/runtime/tests/test_fenix_cerebro_leads_rebuild.py"
+      - ".github/workflows/plugin-universal-leads-package.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Rebuild deterministic WordPress plugin package
+        run: python cerebro/runtime/wordpress/build_fenix_cerebro_leads_package.py --out dist/wordpress
+      - name: Verify rebuild tests
+        run: python -m unittest cerebro.runtime.tests.test_fenix_cerebro_leads_rebuild -v
+      - name: Show artifact hashes
+        run: cat dist/wordpress/fenix-cerebro-leads-1.3.5.build.json
+      - name: Upload PREPROD candidate artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fenix-cerebro-leads-1.3.5-preprod-candidate
+          path: |
+            dist/wordpress/fenix-cerebro-leads-1.3.5.zip
+            dist/wordpress/fenix-cerebro-leads-1.3.5.build.json
+          if-no-files-found: error
+          retention-days: 14

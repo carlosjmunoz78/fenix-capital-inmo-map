@@ -1,0 +1,48 @@
+{
+  "evidence_id": "PLUGIN-UNIVERSAL-PREPROD-DEPLOY-PATH-AUDIT-2026-09-28",
+  "engine_id": "PLUGIN-UNIVERSAL-001",
+  "company_id": "fenix-capital",
+  "environment": "PREPROD",
+  "objective": "Find a zero-additional-cost authorized path to deploy the custom Fénix CEREBRO Leads 1.3.3 plugin to staging without touching PROD.",
+  "paths_checked": [
+    {
+      "path": "MCP_Server_For_WordPress staging connector",
+      "result": "CONNECTED_READ_WRITE_CONTENT",
+      "plugin_install_or_filesystem_write": false,
+      "note": "205 abilities available, but no plugin install/activate/upload or filesystem-write ability is exposed."
+    },
+    {
+      "path": "Cowboy staging connector",
+      "result": "CONNECTOR_INTERNAL_ERROR",
+      "plugin_install_or_filesystem_write": "UNVERIFIED",
+      "note": "Discovery fails internally; anti-loop policy prevents blind retries."
+    },
+    {
+      "path": "WPWriter",
+      "result": "BLOCKED_BY_CURRENT_PLAN_SITE_LIMIT",
+      "plugin_install_or_filesystem_write": false,
+      "note": "Current Starter plan allows one site and is already occupied by PROD. No paid upgrade authorized."
+    },
+    {
+      "path": "GitHub Actions",
+      "result": "AVAILABLE_FOR_PROBES_AND_ARTIFACTS",
+      "plugin_install_or_filesystem_write": false,
+      "note": "No staging SFTP/SSH/FTP credential or deploy secret/path is present in the audited repository workflows."
+    }
+  ],
+  "decision": {
+    "new_paid_subscription": false,
+    "prod_as_test_target": false,
+    "wpvibe_dependency": false,
+    "make_dependency": false,
+    "status": "SYSTEM_BLOCKER",
+    "blocker_code": "PERMISSION_REQUIRED"
+  },
+  "safe_parallel_work": [
+    "keep physical PREPROD probe in CI",
+    "keep 1.3.3 candidate and consent tests green",
+    "finish rollback/rebuild documentation",
+    "do not enable real newsletter enrollment/send"
+  ],
+  "next_block": "Continue PLUGIN-UNIVERSAL hardening in Git/CI while preserving PREPROD deployment as an explicit permission-path blocker."
+}

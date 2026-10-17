@@ -1,0 +1,56 @@
+{
+  "evidence_id": "PLUGIN-UNIVERSAL-PREPROD-LEAD-CONSENT-BREVO-E2E-2026-09-28",
+  "engine_id": "PLUGIN-UNIVERSAL-001",
+  "company_id": "fenix-capital",
+  "environment": "PREPROD",
+  "lead_e2e": {
+    "workflow_run_id": 36494055199,
+    "source": "https://staging.fenixcapital.es/wp-json/fenix-cerebro/v1/lead",
+    "http_status": 201,
+    "lead_created": true,
+    "identity_status": "identified",
+    "consent_privacy": true,
+    "consent_marketing": true,
+    "idempotency_key": "preprod-e2e-consent-20260928-2239",
+    "preprod_endpoint": "fenix-web-lead-preprod",
+    "prod_impact": false
+  },
+  "database_verification": {
+    "lead_id": "43e45f67-622e-474d-93f4-9788daacfa0d",
+    "source": "web",
+    "landing_url": "https://staging.fenixcapital.es/",
+    "utm_source": "cerebro_e2e",
+    "utm_medium": "qa",
+    "utm_campaign": "plugin_universal_001",
+    "consent_privacy": true,
+    "consent_marketing": true,
+    "event_status": "accepted"
+  },
+  "brevo_consent_list_canary": {
+    "workflow_run_id": 36494181742,
+    "expected_list_id": 17,
+    "observed_list_ids": [17],
+    "in_expected_list": true,
+    "create_status": 201,
+    "read_status": 200,
+    "cleanup_status": 204,
+    "emails_sent": 0
+  },
+  "cleanup": {
+    "lead_rows_remaining": 0,
+    "event_rows_remaining": 0,
+    "task_rows_remaining": 0,
+    "brevo_contact_cleanup": true,
+    "one_shot_workflows_retired": true,
+    "temporary_brevo_function_retired": true,
+    "temporary_brevo_function_verify_jwt": true
+  },
+  "classification": {
+    "staging_to_preprod_lead_path": "CONFIRMED_OPERATIONAL",
+    "explicit_marketing_consent_persistence": "CONFIRMED_OPERATIONAL",
+    "brevo_particulares_list_mapping": "CONFIRMED_OPERATIONAL",
+    "automatic_lead_to_brevo_enrollment_worker": "NOT_YET_WIRED",
+    "prod_promotion": "NOT_AUTHORIZED"
+  },
+  "cost_additional_eur": 0
+}

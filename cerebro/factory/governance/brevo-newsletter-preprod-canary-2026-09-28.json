@@ -1,0 +1,72 @@
+{
+  "evidence_id": "BREVO-NEWSLETTER-PREPROD-CANARY-2026-09-28",
+  "company_id": "fenix-capital",
+  "engine_id": "PLUGIN-UNIVERSAL-001",
+  "environment": "PREPROD",
+  "provider": "brevo",
+  "account": {
+    "company_name": "Fénix Capital",
+    "plan": "free",
+    "observed_available_send_credits": 297
+  },
+  "sender": {
+    "email": "hipotecas@fenixcapital.es",
+    "active": true
+  },
+  "domain": {
+    "name": "fenixcapital.es",
+    "verified": true,
+    "authenticated": true,
+    "dkim_cname_1": true,
+    "dkim_cname_2": true,
+    "dmarc": true
+  },
+  "folder": {
+    "id": 16,
+    "name": "FENIX_CEREBRO_NEWSLETTERS"
+  },
+  "lists": {
+    "PARTICULARES": {"id": 17, "name": "FENIX_NEWSLETTER_PARTICULARES"},
+    "INMOBILIARIAS": {"id": 18, "name": "FENIX_NEWSLETTER_INMOBILIARIAS"}
+  },
+  "test_campaigns": [
+    {"id": 102, "audience": "PARTICULARES", "status": "draft", "emails_sent": 0},
+    {"id": 103, "audience": "INMOBILIARIAS", "status": "draft", "emails_sent": 0}
+  ],
+  "schedule_canaries": [
+    {
+      "id": 104,
+      "audience": "PARTICULARES",
+      "scheduled_for": "2030-01-15T10:00:00+01:00",
+      "scheduled_status": "queued",
+      "cleanup_status": "suspended",
+      "emails_sent": 0
+    },
+    {
+      "id": 105,
+      "audience": "INMOBILIARIAS",
+      "scheduled_for": "2030-01-15T10:00:00+01:00",
+      "scheduled_status": "queued",
+      "cleanup_status": "suspended",
+      "emails_sent": 0
+    }
+  ],
+  "synthetic_contacts": {
+    "created_for_canary": 2,
+    "deleted_after_canary": 2,
+    "real_contacts_touched": 0
+  },
+  "temporary_canary_function": {
+    "slug": "fenix-brevo-newsletter-preprod",
+    "final_state": "RETIRED_410",
+    "verify_jwt": true
+  },
+  "cost_additional_eur": 0,
+  "prod_send_enabled": false,
+  "notes": [
+    "Hostinger Reach is forbidden for newsletters.",
+    "Brevo is the sole newsletter provider.",
+    "Campaign tag was removed because it is not available on the observed free plan.",
+    "Schedule was physically proved, then both scheduled canaries were suspended before any send."
+  ]
+}
