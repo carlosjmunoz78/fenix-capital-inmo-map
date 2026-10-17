@@ -1,33 +1,64 @@
-# CEREBRO UNIVERSAL SKILL ACTIVATION FACTORY V1 · RUNBOOK
+# CEREBRO OS · Universal Skill Activation Factory V1 · RUNBOOK
 
-Fecha: 2026-10-17 · Issue #780 · PR #784 · LAB/PREPROD · PROD NO TOCAR · 0 EUR.
+## Contexto
+Repo: `carlosjmunoz78/fenix-capital-inmo-map`
+Branch: `cerebro/universal-skill-activation-factory-v1-20261017`
+PR: `#784`
+Último código certificado: `48feedf2e932d38ce74bf5c9663e53ed69a10d98`
+Entorno autorizado: `PREPROD`.
 
-## Regla
-Continuar automáticamente. Parar solo por HUMAN_REQUIRED canónico real o autoridad excedida. Conservar antes de modificar. Corregir fallos por familia/generador, no por skill.
+## Inicio / reanudación
+1. Leer HANDOFF, MASTER, RUNBOOK y state.
+2. Comprobar HEAD de branch y PR #784.
+3. Comprobar CI exact-head.
+4. Si HEAD coincide con `certified_code_head_sha`, entrar directamente en `next_block`.
+5. Si no coincide, comparar delta y validar solo la evidencia afectada; no rehacer auditorías completas sin causa.
 
-## Ciclo
-Evidencia viva → dependencias → implementación aditiva/wrapper → tests focales → regresión subsistema → regresión CEREBRO → OLD vs NEW → Tribunal → LRN/OBS/Audit/FinOps → rollback/rebuild → estado terminal.
+## Gates de la Factory
+- provenance/license
+- capability/domain classification
+- canonical engine mapping
+- exact semantic contract
+- safe wrapper/adapter
+- real semantic binding
+- OLD vs NEW
+- QA/EVA/independent Tribunal
+- LRN/OBSERV/FINOPS
+- backup/rollback/rebuild
+- physical PREPROD when required
 
-## FULL
-Nunca usar FULL para discovery/catálogo/normalización/wrapper/scaffold/simulación. `FULL_SAFE_PREPROD` requiere consumo semántico real por binding relevante, OLD vs NEW PASS, Tribunal PASS, no regresión, LRN/OBS/Audit/FinOps, backup/rollback/rebuild, idempotencia/restart, coste/política correctos y evidencia física donde aplique.
+## Tests principales
+- `node --test cerebro/tests/universal-skill-*.test.mjs`
+- `node --test cerebro/tests/cerebro-math-solver-profile-v1.test.mjs`
+- Full: `node --test cerebro/tests/*.test.mjs`
 
-## Certificado
-B0–B7 GREEN. B8 provider finance auto-engineering GREEN. B9 unseen repo + public GitHub URL real GREEN. B10 cola durable con JOB-001, concurrencia, duplicado/restart y trigger definitions GREEN en PREPROD control plane. HEAD certificado `876ae431e67b278b447fc21006c48c4bb94bb592`; Factory run `39032881903` incluye full regression SUCCESS.
-
-## B11 activo
-1. Corregir inferencia legacy de dominios para evitar sobre-binding por empates de owner overlap.
-2. Preferir evidencia textual/manifest y compatibilidad con owners.
-3. No inventar dominios con baja confianza: LOW_CONFIDENCE/HOLD.
-4. Añadir auto-engineering providers solo por familia/domain contract, nunca candidate ID.
-5. Reejecutar 47,48,57,62,101,130,157,176,181,183 y medir mejora.
-6. Physical browser/media/device no puede ser FULL sin evidencia física.
-7. Mantener code execution externo y dependency install deshabilitados salvo futura ruta explícitamente sandboxed y gobernada.
+No considerar GREEN hasta que los workflows exact-head relevantes estén SUCCESS. No interpretar un workflow antiguo como evidencia del HEAD nuevo.
 
 ## Anti-loop
-Tres fallos equivalentes => parar parcheo y volver a contrato/planner/normalizador/provider común.
+Ante fallo:
+1. leer evidencia/log exacto;
+2. aislar causa;
+3. cambiar una variable;
+4. ejecutar test enfocado;
+5. ejecutar regresión afectada/full según alcance;
+6. documentar.
+Tras tres fallos de la misma familia, reevaluar estructura antes de repetir.
 
-## B12 plan
-Certificación final: skill/repo/URL nueva → terminal verdadero sin chat conductor; pruebas multi-familia; SLO medido; restart/idempotencia; batch concurrente; promoción solo tras gates. Workflow continuo no se declarará activo en default branch hasta promoción gobernada.
+## Seguridad
+- No direct-main write.
+- No auto-merge.
+- No PROD mutation/publish/deploy.
+- No raw external skill code execution salvo contrato futuro explícito y gobernado.
+- No instalaciones/dependencias silenciosas.
+- No gasto incremental automático.
+- Trading aislado.
+- HUMAN_REQUIRED solo: LEGAL_REQUIRED, SIGNATURE_REQUIRED, LOW_CONFIDENCE, HIGH_RISK, POLICY_CONFLICT, SECURITY_INCIDENT, MONEY_LIMIT, CUSTOMER_HUMAN_REQUEST.
 
-## Continuidad
-Antes de saturación o hito mayor: MASTER + STATE + RUNBOOK + HANDOFF con HEAD/runs/evidencia/next_block.
+## Rollback
+Todos los cambios de esta misión permanecen en la branch/PR hasta promoción gobernada. Para un bloque defectuoso, restaurar el parent exacto del commit del bloque o revertir el commit en la rama; nunca arreglar alterando PROD. Confirmar después tests/regresión y reconstruibilidad.
+
+## Continuidad preventiva
+Actualizar HANDOFF/MASTER/RUNBOOK/state antes de saturación del chat o después de un cambio arquitectónico importante. Deben contener: branch, PR, último código certificado, CI, HECHO/PARCIAL/POR AUDITAR, next_block, reglas de comunicación y prompt exacto de siguiente chat.
+
+## Comunicación
+No usar al usuario como conductor. Trabajar continuamente. Solo hitos relevantes, una frase, alias-first. Formato: `Hito GREEN: X; sigo con Y.` Un rojo ordinario se corrige sin interrumpir; escalar solo HUMAN_REQUIRED real o decisión estratégica nueva.
