@@ -49,6 +49,7 @@ test('generic executor reaches FULL_SAFE_PREPROD with Tribunal, LRN, telemetry, 
   assert.equal(report.per_binding_old_vs_new_pass,true);
   assert.equal(report.independent_tribunal.decision,'PASS');
   assert.equal(report.learning_sink.decision,'LRN_FEEDBACK_PERSISTED');
+  assert.equal(report.learning_sink.learning_outcome,'UNIVERSAL_SKILL_REAL_BINDINGS_GREEN');
   assert.equal(report.observability_green,true);
   assert.equal(report.finops_green,true);
   assert.equal(report.audit_green,true);
@@ -69,14 +70,18 @@ test('action-capable browser binding cannot become FULL without physical browser
   const report=runUniversalSkillRealBinding({activation_plan:plan,adapter_resolver:perfectAdapter({physical:false,actionCapable:true}),root_dir:fs.mkdtempSync(path.join(os.tmpdir(),'usaf-browser-physical-'))});
   assert.equal(report.status,'BLOCKED_EXTERNAL');
   assert.equal(report.full_safe_preprod,false);
+  assert.equal(report.learning_sink.learning_outcome,'UNIVERSAL_SKILL_REAL_BINDINGS_HOLD');
+  assert.notEqual(report.learning_sink.learning_outcome,'UNIVERSAL_SKILL_REAL_BINDINGS_GREEN');
   assert.ok(report.missing_physical_bindings.length>0);
 });
 
-test('missing adapter holds only the candidate and never fabricates integration evidence',()=>{
+test('missing adapter holds only the candidate, emits HOLD learning and never fabricates integration evidence',()=>{
   const plan=engineeringPlan();
   const report=runUniversalSkillRealBinding({activation_plan:plan,adapter_resolver:()=>null,root_dir:fs.mkdtempSync(path.join(os.tmpdir(),'usaf-adapter-missing-'))});
   assert.equal(report.status,'HOLD');
   assert.equal(report.full_safe_preprod,false);
+  assert.equal(report.learning_sink.learning_outcome,'UNIVERSAL_SKILL_REAL_BINDINGS_HOLD');
+  assert.notEqual(report.learning_sink.learning_outcome,'UNIVERSAL_SKILL_REAL_BINDINGS_GREEN');
   assert.ok(report.semantic_bindings.every((x)=>x.decision==='ADAPTER_MISSING'));
   assert.ok(report.semantic_bindings.every((x)=>x.real_consumption===false));
 });
@@ -90,5 +95,6 @@ test('adapter authority expansion fails closed instead of becoming a real bindin
   });
   const report=runUniversalSkillRealBinding({activation_plan:plan,adapter_resolver:resolver,root_dir:fs.mkdtempSync(path.join(os.tmpdir(),'usaf-unsafe-adapter-'))});
   assert.equal(report.status,'HOLD');
+  assert.equal(report.learning_sink.learning_outcome,'UNIVERSAL_SKILL_REAL_BINDINGS_HOLD');
   assert.ok(report.semantic_bindings.every((x)=>x.decision==='ADAPTER_CONTRACT_HOLD'));
 });
