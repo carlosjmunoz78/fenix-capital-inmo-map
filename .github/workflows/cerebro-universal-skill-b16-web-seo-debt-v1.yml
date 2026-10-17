@@ -42,7 +42,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
       - name: B16 web/SEO debt audit
         run: node --test cerebro/tests/universal-skill-b16-web-seo-debt-audit-v1.test.mjs
       - name: B16 current-evidence regression
