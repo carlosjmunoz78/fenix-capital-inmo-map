@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {buildWebSeoDebtAudit,classifySourceTruthState} from '../runtime/universal-skill-web-seo-debt-audit-v1.mjs';
@@ -7,6 +8,7 @@ import {listLatestLegacyReconciliations} from '../runtime/universal-skill-reconc
 
 const __dirname=path.dirname(fileURLToPath(import.meta.url));
 const repoRoot=path.resolve(__dirname,'../..');
+const evidence=JSON.parse(fs.readFileSync(path.join(repoRoot,'cerebro/registry/universal-skill-b16-web-seo-debt-audit.v1.json'),'utf8'));
 
 test('B16 latest reconciliation selector preserves history but consumes only newest exact range',()=>{
   const latest=listLatestLegacyReconciliations({repo_root:repoRoot});
@@ -27,13 +29,22 @@ test('B16 web/SEO audit is item-scoped, measured and never treats reusable profi
   assert.ok(audit.reusable_evidence.every((row)=>row.generic_execution_domains.length===0));
   for(const domain of ['web-wordpress-frontend','seo-search-content']){
     const family=audit.families[domain];
-    assert.ok(family.candidate_count>0,`${domain} must have catalog candidates`);
+    const locked=evidence.families[domain];
+    assert.equal(family.candidate_count,locked.candidate_count);
+    assert.equal(family.engineering_debt_count,locked.engineering_debt_count);
+    assert.equal(family.repeated_engineering_debt,locked.repeated_engineering_debt);
     assert.equal(family.provider_already_available,false);
     assert.deepEqual(family.generic_execution_evidence_refs,[]);
     assert.equal(family.recommendation,'NO_NEW_PROVIDER_JUSTIFIED');
     assert.ok(family.rows.every((row)=>Number.isInteger(row.item_id)&&row.source_ref&&row.source_range&&Number.isInteger(row.source_version)));
   }
+  assert.equal(audit.global_recommendation,evidence.global_recommendation);
   assert.equal(audit.global_recommendation,'NO_NEW_WEB_SEO_PROVIDER_JUSTIFIED');
+});
+
+test('B16 measured debt is repeated but does not justify fabricated generic execution',()=>{
+  assert.deepEqual(evidence.families['web-wordpress-frontend'],{candidate_count:17,engineering_debt_count:7,repeated_engineering_debt:true,provider_already_available:false,generic_execution_evidence_refs:[],recommendation:'NO_NEW_PROVIDER_JUSTIFIED',reason:'REPEATED_DEBT_BUT_NO_EXPLICIT_GENERIC_EXECUTION_EVIDENCE'});
+  assert.deepEqual(evidence.families['seo-search-content'],{candidate_count:30,engineering_debt_count:19,repeated_engineering_debt:true,provider_already_available:false,generic_execution_evidence_refs:[],recommendation:'NO_NEW_PROVIDER_JUSTIFIED',reason:'REPEATED_DEBT_BUT_NO_EXPLICIT_GENERIC_EXECUTION_EVIDENCE'});
 });
 
 test('B16 item 183 remains web engineering debt with candidate-specific physical evidence only',()=>{
