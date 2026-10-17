@@ -11,6 +11,7 @@ on:
       - 'cerebro/runtime/universal-skill-real-binding-v1.mjs'
       - 'cerebro/runtime/universal-skill-adapter-factory-v1.mjs'
       - 'cerebro/runtime/universal-skill-batch-orchestrator-v1.mjs'
+      - 'cerebro/runtime/universal-skill-legacy184-normalizer-v1.mjs'
       - 'cerebro/registry/fact-safe-engineering-bootstrap-v1.json'
       - 'cerebro/registry/universal-skill-activation-factory-v1.state.json'
       - 'cerebro/registry/universal-skill-activation-contracts-v1.json'
@@ -20,6 +21,7 @@ on:
       - 'cerebro/tests/universal-skill-real-binding-v1.test.mjs'
       - 'cerebro/tests/universal-skill-adapter-factory-v1.test.mjs'
       - 'cerebro/tests/universal-skill-batch-orchestrator-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-blind-legacy184-batch-v1.test.mjs'
       - '.github/workflows/cerebro-universal-skill-activation-factory-v1.yml'
   pull_request:
     paths:
@@ -29,6 +31,7 @@ on:
       - 'cerebro/runtime/universal-skill-real-binding-v1.mjs'
       - 'cerebro/runtime/universal-skill-adapter-factory-v1.mjs'
       - 'cerebro/runtime/universal-skill-batch-orchestrator-v1.mjs'
+      - 'cerebro/runtime/universal-skill-legacy184-normalizer-v1.mjs'
       - 'cerebro/registry/fact-safe-engineering-bootstrap-v1.json'
       - 'cerebro/registry/universal-skill-activation-factory-v1.state.json'
       - 'cerebro/registry/universal-skill-activation-contracts-v1.json'
@@ -38,6 +41,7 @@ on:
       - 'cerebro/tests/universal-skill-real-binding-v1.test.mjs'
       - 'cerebro/tests/universal-skill-adapter-factory-v1.test.mjs'
       - 'cerebro/tests/universal-skill-batch-orchestrator-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-blind-legacy184-batch-v1.test.mjs'
       - '.github/workflows/cerebro-universal-skill-activation-factory-v1.yml'
   workflow_dispatch:
 
@@ -119,6 +123,24 @@ jobs:
           grep -F "DurableJobRuntimeV1" cerebro/runtime/universal-skill-batch-orchestrator-v1.mjs
           grep -F "const PREPROD='PREPROD'" cerebro/runtime/universal-skill-batch-orchestrator-v1.mjs
           ! grep -Eq 'prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true|additional_cost_eur[[:space:]]*:[[:space:]]*[1-9]' cerebro/runtime/universal-skill-adapter-factory-v1.mjs cerebro/runtime/universal-skill-batch-orchestrator-v1.mjs
+
+  b6-blind-real-catalog:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Blind batch against real 184 catalog reconciliation
+        run: node --test cerebro/tests/universal-skill-blind-legacy184-batch-v1.test.mjs
+      - name: Prove B6 uses live catalog file and generic rules only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f cerebro/skills/cerebro-184-items-38-50-live-reconciliation.v2.json
+          grep -F "normalizeLegacy184Item" cerebro/runtime/universal-skill-legacy184-normalizer-v1.mjs
+          ! grep -Eq "item\.id[[:space:]]*===|case[[:space:]]+[0-9]+" cerebro/runtime/universal-skill-legacy184-normalizer-v1.mjs
 
   focused-existing-regression:
     runs-on: ubuntu-latest
