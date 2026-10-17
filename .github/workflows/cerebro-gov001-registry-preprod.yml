@@ -5,7 +5,11 @@ on:
     paths:
       - 'cerebro/factory.mjs'
       - 'cerebro/registry/engine-registry.seed.json'
+      - 'cerebro/registry/brandboot-001.candidate.json'
       - 'cerebro/tests/factory.test.mjs'
+      - 'cerebro/tests/brandboot-candidate.test.mjs'
+      - 'cerebro/docs/BRANDBOOT-001_CANDIDATE_2026-10-05.md'
+      - 'cerebro/docs/ADR_BRANDBOOT_001_ENGINE_VS_CAPABILITY_2026-10-05.md'
       - '.github/workflows/cerebro-gov001-registry-preprod.yml'
 jobs:
   gov001-registry:
@@ -18,4 +22,4 @@ jobs:
       - working-directory: cerebro
         run: npm run validate
       - working-directory: cerebro
-        run: node --test tests/factory.test.mjs
+        run: node --test tests/factory.test.mjs tests/brandboot-candidate.test.mjs
