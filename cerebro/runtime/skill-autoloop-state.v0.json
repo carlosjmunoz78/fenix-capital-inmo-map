@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-17T01:15:27.869Z",
+  "updated_at": "2026-10-17T01:34:33.970Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -59,7 +59,8 @@
     "github-wide-skills:b36b9a1166bf6b1a543c",
     "github-wide-skills:b18afb8710737e6c4921",
     "github-wide-skills:94b9bafee7c9bbf4f16f",
-    "github-wide-skills:72a593d4bc7b37e8a8af"
+    "github-wide-skills:72a593d4bc7b37e8a8af",
+    "github-wide-skills:f930119794bc6957b028"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -440,6 +441,40 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 38986866214,
       "checkpointed_at": "2026-10-17T00:33:22.984Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:f930119794bc6957b028": {
+      "candidate_id": "github-wide-skills:f930119794bc6957b028",
+      "name": "flutter-perf-audit",
+      "human_alias": "Flutter Perf Audit",
+      "wrapper_id": "skillwrap:e164f657a9521f85448b",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 85.6,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "KinwiseNZ-DevOps/flutter-optimiser",
+        "upstream_head_commit": "8792aece15cee9db0f72aab1d1a1941a327251c4",
+        "manifest_sha256": "ca8306797262971b11a8d25d43b0a476d9a0e83abe02b6adeaf8a5f48fb35da4",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 38991410900,
+      "checkpointed_at": "2026-10-17T01:34:33.970Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -1399,7 +1434,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "IDLE_NO_NEW_ELIGIBLE_CANDIDATE",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -1412,5 +1447,5 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 38990048659
+  "last_discovery_run_id": 38991410900
 }
