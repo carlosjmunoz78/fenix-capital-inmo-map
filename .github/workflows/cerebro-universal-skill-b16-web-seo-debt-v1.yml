@@ -1,0 +1,47 @@
+name: CEREBRO Universal Skill B16 Web SEO Debt V1
+
+on:
+  push:
+    paths:
+      - 'cerebro/runtime/universal-skill-web-seo-debt-audit-v1.mjs'
+      - 'cerebro/runtime/universal-skill-reconciliation-resolver-v1.mjs'
+      - 'cerebro/skills/cerebro-184-items-*-live-reconciliation.v*.json'
+      - 'cerebro/registry/web-acquisition-intelligence-profile.v1.json'
+      - 'cerebro/registry/phase13-marketing-seo-feedback-profile.v0.json'
+      - 'cerebro/registry/physical-adapter-audit-v1.json'
+      - 'cerebro/registry/fact001-android-staging-48-183.v0.json'
+      - 'cerebro/tests/universal-skill-b16-web-seo-debt-audit-v1.test.mjs'
+      - '.github/workflows/cerebro-universal-skill-b16-web-seo-debt-v1.yml'
+  pull_request:
+    paths:
+      - 'cerebro/runtime/universal-skill-web-seo-debt-audit-v1.mjs'
+      - 'cerebro/runtime/universal-skill-reconciliation-resolver-v1.mjs'
+      - 'cerebro/skills/cerebro-184-items-*-live-reconciliation.v*.json'
+      - 'cerebro/registry/web-acquisition-intelligence-profile.v1.json'
+      - 'cerebro/registry/phase13-marketing-seo-feedback-profile.v0.json'
+      - 'cerebro/registry/physical-adapter-audit-v1.json'
+      - 'cerebro/registry/fact001-android-staging-48-183.v0.json'
+      - 'cerebro/tests/universal-skill-b16-web-seo-debt-audit-v1.test.mjs'
+      - '.github/workflows/cerebro-universal-skill-b16-web-seo-debt-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  b16-web-seo-debt:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: B16 web/SEO debt audit
+        run: node --test cerebro/tests/universal-skill-b16-web-seo-debt-audit-v1.test.mjs
+      - name: B16 current-evidence regression
+        run: node --test cerebro/tests/universal-skill-b16-current-evidence-reconciliation-v1.test.mjs
+      - name: B15 anti-false-FULL regression
+        run: node --test cerebro/tests/universal-skill-auto-engineering-v1.test.mjs cerebro/tests/universal-skill-b15-integrity-v1.test.mjs
+      - name: Emit measured report
+        run: node cerebro/runtime/universal-skill-web-seo-debt-audit-v1.mjs > /tmp/b16-web-seo-debt.json && node -e "const r=require('/tmp/b16-web-seo-debt.json'); console.log(JSON.stringify({status:r.status,items:r.sources.item_count,global_recommendation:r.global_recommendation,families:Object.fromEntries(Object.entries(r.families).map(([k,v])=>[k,{candidates:v.candidate_count,debt:v.engineering_debt_count,repeated:v.repeated_engineering_debt,recommendation:v.recommendation,reason:v.reason}]))},null,2))"
