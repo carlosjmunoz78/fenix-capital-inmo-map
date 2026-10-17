@@ -4,7 +4,7 @@
 Repo: `carlosjmunoz78/fenix-capital-inmo-map`
 Branch: `cerebro/universal-skill-activation-factory-v1-20261017`
 PR: `#784`
-Último código certificado: `5378bd9b7feb048fb26c3cb37c572a96ffe57775`
+Último código certificado: `e346c57bd177c62b151ed3de33e90d27c3d3f4da`
 Entorno autorizado: `PREPROD`.
 
 ## Inicio / reanudación
@@ -41,6 +41,27 @@ Reglas:
 - Worker-thread solo cuando el payload/adapters son clonables; si no, fallback inline veraz y `parallel_execution_proven=false`.
 - No afirmar paralelismo si no existen al menos 5 candidatas reclamadas y 5 workers activos en la prueba inicial.
 - Cache, batch y binding permanecen PREPROD/0 €/no Trading/no PROD.
+
+## B15 · Family coverage y terminal truth
+Estado: HECHO PREPROD sobre código certificado `e346c57...`.
+
+Providers Auto Engineering disponibles: finance, math, software engineering, systems, data y security.
+
+Reglas obligatorias:
+- Para fuentes `*-live-reconciliation.vN.json`, consumir solo el item exacto de la candidata legacy.
+- Si el estado del item contiene deuda real (`DEFINED_NOT_BUILT`, `SIMULATION_ONLY`, `LIVE_AUDIT_REQUIRED`, `SCAFFOLD_PLAN`, `NOT_PROMOTED`, `PHYSICAL_*_REQUIRED`), mantener `ENGINEERING_TASK_REQUIRED`; el provider de familia no puede fabricar evidencia.
+- Provider disponible no es una afirmación FULL.
+- Vista terminal estricta: `FULL_REAL | ABSORBED | REJECTED | BLOCKED_EXTERNAL | HUMAN_REQUIRED`.
+- `ENGINEERING_TASK_REQUIRED` y estados parciales siguen no terminales.
+
+## B16 · Current evidence reconciliation
+Antes de programar un App Factory, Website Builder o provider Web/SEO:
+1. leer evidencia actual de FACT-001/APPBOOT-001 y el estado legacy correspondiente;
+2. reconciliar reporting stale sin borrar v2/v3 históricos;
+3. preservar trabajo físico ya probado (PWA/STAGING/APK) y no repetirlo;
+4. mantener separado cualquier gate físico todavía no demostrado (p. ej. instalación/render Android autorizado);
+5. medir deuda real repetible de `web-wordpress-frontend` / `seo-search-content`;
+6. reutilizar SEO-001, WordPress, App/CRM/Supabase y contratos existentes; ningún provider nuevo por conveniencia.
 
 ## Telemetría mínima
 Por candidata: `queue_wait_ms`, `manifest_ms`, `scan_ms`, `sandbox_ms`, `adapter_ms`, `tests_ms`, `ci_wait_ms`, `eval_ms`, `human_wait_ms`, `activation_ms`.

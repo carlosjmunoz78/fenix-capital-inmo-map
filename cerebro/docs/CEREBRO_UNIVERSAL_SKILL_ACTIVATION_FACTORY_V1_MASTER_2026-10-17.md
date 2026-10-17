@@ -11,7 +11,7 @@ No cuentan como integración: descarga, inventario, normalización, manifest, wr
 
 `FULL_SAFE_PREPROD` exige consumo semántico real de todos los bindings pertinentes, mejora/no-regresión, Tribunal independiente, learning feedback, observabilidad/FinOps, rollback/rebuild e idempotencia. Browser/device/media action-capable exige evidencia física PREPROD. Nada de esto concede PROD.
 
-Estados: `FULL_SAFE_PREPROD`, `ABSORBED`, `REJECTED`, `BLOCKED_EXTERNAL`, `HUMAN_REQUIRED`; `ENGINEERING_TASK_REQUIRED` y `PARTIAL` son deuda/no cierre.
+Vista terminal estricta aditiva: `FULL_REAL | ABSORBED | REJECTED | BLOCKED_EXTERNAL | HUMAN_REQUIRED`. `ENGINEERING_TASK_REQUIRED` y `PARTIAL` son deuda/no cierre.
 
 ## Arquitectura
 FACT-001 reutiliza runtime/JOB-001 y motores canónicos. No se crea servidor/agente por skill ni por profesión.
@@ -25,17 +25,18 @@ Opcionales: `TECH SCOUT | PERFORMANCE`.
 ## Estado certificado 2026-10-17
 Rama: `cerebro/universal-skill-activation-factory-v1-20261017`
 PR: `#784`
-Código certificado: `5378bd9b7feb048fb26c3cb37c572a96ffe57775`
+Código certificado: `e346c57bd177c62b151ed3de33e90d27c3d3f4da`
 
 GREEN exact-head:
-- Factory V1 #74
-- Scale184 V1 #24
-- Scale184 V2 #19
-- Repository E2E #19
-- GitHub Live E2E #17
-- Skill Supply Chain #824
-- Governed Main Integration #639
-- RSI Promotion Shadow #805
+- Factory V1 #78
+- Scale184 V1 #26
+- Scale184 V2 #22
+- Repository E2E #22
+- GitHub Live E2E #20
+- B15 Integrity V1 #2
+- Skill Supply Chain #826
+- Governed Main Integration #641
+- RSI Promotion Shadow #807
 
 ## HECHO
 - Safe Engineering consumido por FACT-001.
@@ -68,21 +69,39 @@ Capacidades demostradas:
 - métricas p50/p95, wall time, eficiencia paralela, human touches, code changes por skill, cache ratios, regression, rerun idempotency y distribución terminal.
 - coste adicional 0 €, no PROD, no Trading, no datos cliente.
 
+## B15 · AUTO ENGINEERING FAMILY COVERAGE + TERMINAL TRUTH · HECHO PREPROD
+Providers genéricos certificados:
+- `finance-accounting-payments`
+- `math-optimization-simulation`
+- `software-engineering-devops`
+- `systems-platform-engineering`
+- `data-database-supabase`
+- `security-identity-privacy`
+
+Controles añadidos/certificados:
+- fuente legacy `184` acotada por item/candidate para impedir contaminación por evidencia de siblings;
+- estados como `DEFINED_NOT_BUILT`, `SIMULATION_ONLY`, `SCAFFOLD_PLAN`, `NOT_PROMOTED` o `PHYSICAL_*_REQUIRED` no pueden convertirse en FULL por un family provider;
+- provider disponible no equivale a integración cerrada;
+- `FULL_SAFE_PREPROD` solo puede exponerse como `FULL_REAL` cuando toda la evidencia estricta está completa;
+- deuda `ENGINEERING_TASK_REQUIRED` permanece no terminal.
+
 ## PARCIAL / POR AUDITAR
-- Auto Engineering aún no tiene provider de fabricación para todos los dominios. Providers demostrados: `finance-accounting-payments` y `math-optimization-simulation`.
+- No todos los dominios observados con deuda tienen family provider. Web/WordPress/SEO y browser automation deben medirse contra deuda real antes de fabricar nada.
 - ARQUITECTO sigue siendo composición/reutilización existente, no una implementación transversal nueva.
 - PERFORMANCE sigue posterior.
 - `FULL_SAFE_PREPROD` no equivale a activación física universal ni autoridad PROD.
+- App Factory/Website reporting legacy 176-184 tiene que reconciliarse con evidencia física posterior ya existente antes de decidir nueva fabricación; no se repetirá trabajo físico ya probado.
 
 ## next_block
-`B15_AUTO_ENGINEERING_FAMILY_COVERAGE_AND_STRICT_TERMINAL_VIEW`
+`B16_CURRENT_EVIDENCE_RECONCILIATION_APP_FACTORY_WEBSITE_AND_WEB_SEO_GAPS`
 
 Orden:
-1. ampliar providers genéricos solo para gaps reales repetibles, priorizando familias con `ENGINEERING_TASK_REQUIRED` observado;
-2. reutilizar antes de fabricar y nunca sintetizar evidencia desde el contrato objetivo;
-3. añadir vista terminal estricta aditiva `FULL_REAL | ABSORBED | REJECTED | BLOCKED_EXTERNAL | HUMAN_REQUIRED` sin borrar estados internos útiles;
-4. repetir blind real-catalog + exact-head regression;
-5. mantener PR #784 sin auto-merge: promoción a `main` solo por gate/política gobernada.
+1. reconciliar primero evidencia actual de `FACT-001/APPBOOT-001` contra estado legacy de items 181/183, conservando todo lo ya probado;
+2. no crear otro App Factory ni repetir template/PWA/STAGING/APK si la evidencia actual ya lo acredita;
+3. mantener explícito el gate físico Android restante y prohibir cualquier salto a PROD/publicación;
+4. medir deuda real de `web-wordpress-frontend` y `seo-search-content` y reutilizar SEO-001/WordPress existentes antes de fabricar provider genérico;
+5. ejecutar blind/targeted/full regression y exact-head CI;
+6. mantener PR #784 sin auto-merge; promoción a `main` solo por gate/política gobernada.
 
 ## Política
 `CONSERVAR -> ENTENDER -> ENVOLVER -> PROBAR -> MEJORAR -> MIGRAR`.

@@ -4,7 +4,7 @@ Fecha: 2026-10-17
 Repositorio: `carlosjmunoz78/fenix-capital-inmo-map`
 Rama: `cerebro/universal-skill-activation-factory-v1-20261017`
 PR: `#784`
-Último HEAD de código certificado: `5378bd9b7feb048fb26c3cb37c572a96ffe57775`
+Último HEAD de código certificado: `e346c57bd177c62b151ed3de33e90d27c3d3f4da`
 Entorno: `PREPROD`
 Coste adicional: `0 €`
 PROD write: `NO`
@@ -24,6 +24,8 @@ FACT-001 recibe skill/repo/URL, preserva provenance/licencia, normaliza y mapea 
 - Repo desconocido y GitHub URL pública demostrados E2E.
 - Source queue/event trigger: el chat no es conductor obligatorio.
 - MATH V1 determinista.
+- FACT Fast Lane industrial: concurrencia acotada >=5, batch 10-50+, dedupe, caches, JOB idempotente, blind catalog y telemetría.
+- B15 Family Coverage/Terminal Truth: providers genéricos finance, math, software-engineering, systems, data y security; source scoping por item legacy; estados de deuda no se auto-promueven; vista terminal estricta.
 
 ## CAPA TÉCNICA
 - `CODE / SOFTWARE_ENGINEERING`: HECHO. Usa capacidades existentes de software-engineering/debugging + script/shell/openclaw_runtime + analysis/reasoning. Normal: worktree/sandbox. Elevated: dry-run first. Destructivo: HIGH_RISK. Credencial crítica: SECURITY_INCIDENT.
@@ -34,52 +36,42 @@ FACT-001 recibe skill/repo/URL, preserva provenance/licencia, normaliza y mapea 
 - `ARQUITECTO`: reutilización existente, todavía no se crea capa nueva innecesaria.
 - `PERFORMANCE`: posterior.
 
-## FACT FAST LANE INDUSTRIAL · HECHO PREPROD
-Se ha industrializado el batch ya existente, sin crear otra arquitectura.
-
-Demostrado:
-- worker-thread pool acotado;
-- >=5 candidatas simultáneas en batch inicial de 10;
-- `fail_fast=false`;
-- fingerprint/content dedupe -> duplicado exacto `ABSORBED`;
-- preparación durable cacheada;
-- OLD baseline cacheado por `engine_version|environment|contract_hash`;
-- blueprint de familia adapter cacheado sin saltarse revalidación de binding;
-- JOB-001 idempotente y rerun sin reejecutar completadas;
-- blind multi-family para camino FULL;
-- blind sobre catálogo real 184 con >=5 concurrentes y resultados terminales veraces, sin ascenso falso a FULL;
-- telemetría/ratios de caché/p50-p95/wall time/eficiencia/regression/idempotency;
-- campos de etapa no medidos quedan `null`, no inventados;
-- 0 €, PREPROD, no PROD, no Trading, no datos cliente.
-
-## EVIDENCIA EXACT-HEAD EN `5378bd9...`
+## EVIDENCIA EXACT-HEAD EN `e346c57...`
 GREEN:
-- Universal Skill Activation Factory V1 #74
-- Universal Skill Activation Scale184 V1 #24
-- Universal Skill Activation Scale184 V2 #19
-- Universal Skill Repository E2E V1 #19
-- Universal Skill GitHub Live E2E V1 #17
-- Skill Supply Chain Gate #824
-- Governed Main Integration V0 #639
-- RSI Promotion Readiness Shadow V0 #805
+- Universal Skill Activation Factory V1 #78
+- Universal Skill Activation Scale184 V1 #26
+- Universal Skill Activation Scale184 V2 #22
+- Universal Skill Repository E2E V1 #22
+- Universal Skill GitHub Live E2E V1 #20
+- Universal Skill B15 Integrity V1 #2
+- Skill Supply Chain Gate #826
+- Governed Main Integration V0 #641
+- RSI Promotion Readiness Shadow V0 #807
 
-Factory #74 incluye GREEN de `b5-adapters-and-durable-batch`, `b6-blind-real-catalog` y full CEREBRO regression.
+## B15 · CIERRE
+- `SOFTWARE_ENGINEERING` ya forma parte de Auto Engineering family coverage junto a SYSTEMS/DATA/SECURITY.
+- Las fuentes legacy `184` se consumen por item exacto; evidencia de un sibling no puede cerrar otro.
+- Si el estado fuente exige fabricación o evidencia física, sigue `ENGINEERING_TASK_REQUIRED`.
+- `FULL_SAFE_PREPROD` no se traduce a `FULL_REAL` sin evidencia completa.
+- Provider disponible no es FULL.
+- Estados terminales estrictos: `FULL_REAL`, `ABSORBED`, `REJECTED`, `BLOCKED_EXTERNAL`, `HUMAN_REQUIRED`.
 
 ## PARCIAL / NO SOBREAFIRMAR
-- Auto Engineering family providers demostrados siguen limitados a `finance-accounting-payments` y `math-optimization-simulation`; otros gaps pueden terminar correctamente en `ENGINEERING_TASK_REQUIRED`.
+- No todos los dominios de deuda real tienen provider; Web/WordPress/SEO y browser automation siguen sujetos a medición/evidencia.
 - `FULL_SAFE_PREPROD` no es PROD ni “activación física universal”.
 - Una referencia legacy, HOLD o evidencia insuficiente no se convierte en FULL por batch industrial.
 - PR #784 sigue sin merge automático autorizado.
+- Reporting legacy de App Factory/Website puede estar por detrás de evidencia física posterior; se reconciliará antes de fabricar nada nuevo.
 
 ## next_block
-`B15_AUTO_ENGINEERING_FAMILY_COVERAGE_AND_STRICT_TERMINAL_VIEW`
+`B16_CURRENT_EVIDENCE_RECONCILIATION_APP_FACTORY_WEBSITE_AND_WEB_SEO_GAPS`
 
-1. Medir familias que producen `ENGINEERING_TASK_REQUIRED` repetible.
-2. Añadir provider genérico únicamente donde exista gap real y evidencia; reutilizar antes de fabricar.
-3. Prohibido generar evidencia copiando el contrato objetivo.
-4. Añadir vista terminal estricta aditiva `FULL_REAL | ABSORBED | REJECTED | BLOCKED_EXTERNAL | HUMAN_REQUIRED` sin perder estados internos.
-5. Blind test real + full regression + exact-head CI.
-6. Mantener PR #784 sin auto-merge; cualquier promoción a main sigue la política gobernada.
+1. Reconciliar item 181/183 con evidencia actual FACT-001/APPBOOT-001 sin borrar historia.
+2. No repetir PWA/STAGING/APK ya demostrados si la evidencia actual los acredita.
+3. Mantener explícito Android físico pendiente y no publicar/desplegar PROD.
+4. Medir deuda real Web/WordPress/SEO; reutilizar SEO-001/WordPress existentes antes de crear family provider.
+5. Targeted + blind + full regression + exact-head CI.
+6. Mantener PR #784 draft/no auto-merge hasta política gobernada.
 
 ## HUMAN_REQUIRED
 Únicamente `LEGAL_REQUIRED`, `SIGNATURE_REQUIRED`, `LOW_CONFIDENCE`, `HIGH_RISK`, `POLICY_CONFLICT`, `SECURITY_INCIDENT`, `MONEY_LIMIT`, `CUSTOMER_HUMAN_REQUEST`.
@@ -103,9 +95,9 @@ Verifica únicamente repo/rama/HEAD/PR/checks vivos. Si el delta desde certified
 
 No tocar PROD. No auto-merge. Coste adicional 0 €. Trading aislado. No crear motores/servidores duplicados. CONSERVAR -> ENTENDER -> ENVOLVER -> PROBAR -> MEJORAR -> MIGRAR.
 
-FACT Fast Lane ya está cerrado PREPROD: concurrencia >=5, dedupe, caches, idempotencia, blind real catalog y exact-head CI GREEN. No lo reconstruyas.
+FACT Fast Lane y B15 ya están cerrados PREPROD. No los reconstruyas.
 
-Siguiente bloque: B15_AUTO_ENGINEERING_FAMILY_COVERAGE_AND_STRICT_TERMINAL_VIEW. Trabaja en SUPERLOOP, corrige rojos ordinarios y continúa hasta HUMAN_REQUIRED real o cierre. Mantén verdad estricta: FULL_SAFE_PREPROD no es PROD y el catálogo 184 no significa 184 skills físicamente activas.
+Siguiente bloque: B16_CURRENT_EVIDENCE_RECONCILIATION_APP_FACTORY_WEBSITE_AND_WEB_SEO_GAPS. Primero reconcilia evidencia actual FACT-001/APPBOOT-001 con estados legacy 181/183; no repitas trabajo físico ya verde. Después mide deuda real Web/WordPress/SEO y solo fabrica provider si existe gap repetible probado. Mantén Android físico y cualquier side-effect/publicación como gates separados.
 
 Comunica a Carlos solo hitos relevantes y muy breves; no preguntes “¿procedo?” para trabajo seguro ya autorizado.
 ```
