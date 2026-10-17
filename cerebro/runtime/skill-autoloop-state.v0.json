@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-17T19:16:33.294Z",
+  "updated_at": "2026-10-17T19:43:31.166Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -67,7 +67,8 @@
     "github-wide-skills:7596b35cb02a5e62737b",
     "github-wide-skills:9759ed2963019613263e",
     "github-wide-skills:afd59b9ee9dd5b9c5e5b",
-    "github-wide-skills:6f8261757a7217a3627d"
+    "github-wide-skills:6f8261757a7217a3627d",
+    "github-wide-skills:a878cb5b090fb5510738"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -726,6 +727,40 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 39054243673,
       "checkpointed_at": "2026-10-17T17:33:24.056Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:a878cb5b090fb5510738": {
+      "candidate_id": "github-wide-skills:a878cb5b090fb5510738",
+      "name": "ai-session-material-miner",
+      "human_alias": "Ai Session Material Miner",
+      "wrapper_id": "skillwrap:bd8622fd7822023c10c9",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 87.34,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "xingtu1996/xingtu-skills",
+        "upstream_head_commit": "37eee7813a8d082ee5aa3928a271d7ad382efcf6",
+        "manifest_sha256": "f6dc5bed4e3ab1dfb8f850d505996c7efdc34fb422356aa5a8dd6005d861d360",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 39063645616,
+      "checkpointed_at": "2026-10-17T19:43:31.166Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -1685,7 +1720,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "IDLE_NO_NEW_ELIGIBLE_CANDIDATE",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -1698,5 +1733,5 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 39061718791
+  "last_discovery_run_id": 39063645616
 }
