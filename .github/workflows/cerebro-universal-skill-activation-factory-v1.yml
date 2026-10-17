@@ -9,6 +9,8 @@ on:
       - 'cerebro/runtime/universal-skill-activation-planner-v1.mjs'
       - 'cerebro/runtime/universal-skill-semantic-contracts-v1.mjs'
       - 'cerebro/runtime/universal-skill-real-binding-v1.mjs'
+      - 'cerebro/runtime/universal-skill-adapter-factory-v1.mjs'
+      - 'cerebro/runtime/universal-skill-batch-orchestrator-v1.mjs'
       - 'cerebro/registry/fact-safe-engineering-bootstrap-v1.json'
       - 'cerebro/registry/universal-skill-activation-factory-v1.state.json'
       - 'cerebro/registry/universal-skill-activation-contracts-v1.json'
@@ -16,6 +18,8 @@ on:
       - 'cerebro/tests/universal-skill-activation-planner-v1.test.mjs'
       - 'cerebro/tests/universal-skill-semantic-contracts-v1.test.mjs'
       - 'cerebro/tests/universal-skill-real-binding-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-adapter-factory-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-batch-orchestrator-v1.test.mjs'
       - '.github/workflows/cerebro-universal-skill-activation-factory-v1.yml'
   pull_request:
     paths:
@@ -23,6 +27,8 @@ on:
       - 'cerebro/runtime/universal-skill-activation-planner-v1.mjs'
       - 'cerebro/runtime/universal-skill-semantic-contracts-v1.mjs'
       - 'cerebro/runtime/universal-skill-real-binding-v1.mjs'
+      - 'cerebro/runtime/universal-skill-adapter-factory-v1.mjs'
+      - 'cerebro/runtime/universal-skill-batch-orchestrator-v1.mjs'
       - 'cerebro/registry/fact-safe-engineering-bootstrap-v1.json'
       - 'cerebro/registry/universal-skill-activation-factory-v1.state.json'
       - 'cerebro/registry/universal-skill-activation-contracts-v1.json'
@@ -30,6 +36,8 @@ on:
       - 'cerebro/tests/universal-skill-activation-planner-v1.test.mjs'
       - 'cerebro/tests/universal-skill-semantic-contracts-v1.test.mjs'
       - 'cerebro/tests/universal-skill-real-binding-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-adapter-factory-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-batch-orchestrator-v1.test.mjs'
       - '.github/workflows/cerebro-universal-skill-activation-factory-v1.yml'
   workflow_dispatch:
 
@@ -69,6 +77,23 @@ jobs:
         run: node --test cerebro/tests/universal-skill-activation-planner-v1.test.mjs cerebro/tests/universal-skill-semantic-contracts-v1.test.mjs
       - name: Validate semantic contract registry executable check
         run: node cerebro/runtime/universal-skill-semantic-contracts-v1.mjs
+
+  b4-real-binding:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Generic real-binding tests with truthful learning outcomes
+        run: node --test cerebro/tests/universal-skill-real-binding-v1.test.mjs
+      - name: Assert B4 never hardcodes GREEN learning before binding result
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -F "allBindings?'UNIVERSAL_SKILL_REAL_BINDINGS_GREEN':'UNIVERSAL_SKILL_REAL_BINDINGS_HOLD'" cerebro/runtime/universal-skill-real-binding-v1.mjs
+          grep -F "lrn.learning_outcome==='UNIVERSAL_SKILL_REAL_BINDINGS_GREEN'" cerebro/runtime/universal-skill-real-binding-v1.mjs
 
   focused-existing-regression:
     runs-on: ubuntu-latest
