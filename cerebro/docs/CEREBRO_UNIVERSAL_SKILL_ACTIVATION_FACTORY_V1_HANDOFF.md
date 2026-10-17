@@ -4,7 +4,7 @@ Fecha: 2026-10-18
 Repositorio: `carlosjmunoz78/fenix-capital-inmo-map`
 Rama: `cerebro/universal-skill-activation-factory-v1-20261017`
 PR: `#784`
-Último HEAD de código certificado: `0ba248c812ed21b2ddbea1f2b2010357615159c9`
+Último HEAD de código certificado: `a7df20aefca134086329273e9ee2be2aa3b6dd4a`
 Entorno: `PREPROD`
 Coste adicional: `0 €`
 PROD write: `NO`
@@ -25,8 +25,9 @@ FACT-001 recibe skill/repo/URL, preserva provenance/licencia, normaliza y mapea 
 - Source queue/event trigger: el chat no es conductor obligatorio.
 - MATH V1 determinista.
 - FACT Fast Lane industrial: concurrencia acotada >=5, batch 10-50+, dedupe, caches, JOB idempotente, blind catalog y telemetría.
-- B15 Family Coverage/Terminal Truth: providers genéricos finance, math, software-engineering, systems, data y security; source scoping por item legacy; estados de deuda no se auto-promueven; vista terminal estricta.
-- B16 Current Evidence + Web/SEO Debt: 184 items medidos; Web/WordPress 17 candidatas/7 deudas; SEO 30/19; no se fabrica provider genérico sin contrato+binding demostrados; exact-head 11/11 GREEN.
+- B15 Family Coverage/Terminal Truth cerrado.
+- B16 Current Evidence + Web/SEO Debt cerrado.
+- B17 Browser Automation + Physical Gates cerrado a nivel de gobernanza PREPROD, con residual físico actual veraz `BLOCKED_EXTERNAL`.
 
 ## CAPA TÉCNICA
 - `CODE / SOFTWARE_ENGINEERING`: HECHO. Usa capacidades existentes de software-engineering/debugging + script/shell/openclaw_runtime + analysis/reasoning. Normal: worktree/sandbox. Elevated: dry-run first. Destructivo: HIGH_RISK. Credencial crítica: SECURITY_INCIDENT.
@@ -37,73 +38,82 @@ FACT-001 recibe skill/repo/URL, preserva provenance/licencia, normaliza y mapea 
 - `ARQUITECTO`: reutilización existente, todavía no se crea capa nueva innecesaria.
 - `PERFORMANCE`: posterior.
 
-## EVIDENCIA EXACT-HEAD EN `0ba248c...`
-GREEN 11/11:
-- Universal Skill Activation Factory V1 #95
-- Universal Skill Activation Scale184 V1 #42
-- Universal Skill Activation Scale184 V2 #38
-- Universal Skill Repository E2E V1 #38
-- Universal Skill GitHub Live E2E V1 #36
-- Universal Skill B15 Integrity V1 #19
-- Universal Skill B16 Current Evidence V1 #17
-- Universal Skill B16 Web SEO Debt V1 #21
-- Skill Supply Chain Gate #843
-- Governed Main Integration V0 #657
-- RSI Promotion Readiness Shadow V0 #823
+## EVIDENCIA EXACT-HEAD EN `a7df20a...`
+GREEN 12/12:
+- Universal Skill Activation Factory V1 #104
+- Universal Skill Activation Scale184 V1 #50
+- Universal Skill Activation Scale184 V2 #46
+- Universal Skill Repository E2E V1 #46
+- Universal Skill GitHub Live E2E V1 #44
+- Universal Skill B15 Integrity V1 #31
+- Universal Skill B16 Current Evidence V1 #25
+- Universal Skill B16 Web SEO Debt V1 #34
+- Universal Skill B17 Browser Physical Gates V1 #2 (`run_id=39077601170`)
+- Skill Supply Chain Gate #851
+- Governed Main Integration V0 #665
+- RSI Promotion Readiness Shadow V0 #831
 
-## B16 · CIERRE
-- 184 items reconciliados item-scoped.
-- Web/WordPress/frontend: 17 candidatas, 7 deudas de ingeniería.
-- SEO/search/content: 30 candidatas, 19 deudas de ingeniería.
-- Recomendación: `NO_NEW_WEB_SEO_PROVIDER_JUSTIFIED` hasta demostrar ejecución genérica + binding semántico.
-- Item 183 conserva el gate físico Android; no hay falso FULL.
-- El único rojo final era infraestructura del runner: B16 usaba Node 20 pero el `package.json` raíz exige Node 24.x; 4 tests `.ts` fallaban con `ERR_UNKNOWN_FILE_EXTENSION`.
-- Reparación: Node 20 -> Node 24; cero tests excluidos, cero dependencias nuevas, cero rebaja de gates.
-- Resultado: 11/11 workflows GREEN en el exact-head certificado.
+## B17 · CIERRE
+Archivos añadidos:
+- `cerebro/runtime/universal-skill-b17-browser-physical-gates-v1.mjs`
+- `cerebro/tests/universal-skill-b17-browser-physical-gates-v1.test.mjs`
+- `.github/workflows/cerebro-universal-skill-b17-browser-physical-gates-v1.yml`
+- `cerebro/registry/universal-skill-b17-browser-physical-gates.v1.json`
+
+Resultado:
+- se reutilizan Browser Transversal Autonomy, Authorized Execution Device Profile, Identity Session Lifecycle, Credential Lifecycle y Physical Adapter Audit; no se crea provider/engine duplicado;
+- configuración/perfil no valen como prueba física;
+- atestación fresca sola tampoco: exige observación física bounded/fail-closed en LAB/PREPROD;
+- kill-switch requerido, coste 0, no PROD/public mutation, no customer data, no Trading;
+- campos inesperados de evidencia se rechazan para no aceptar tokens/secretos como prueba;
+- targeted + current-truth + full CEREBRO regression GREEN;
+- sintético prueba la lógica del gate, no la presencia física actual;
+- el contexto de orquestación actual no puede observar la superficie física autorizada del Browser Bridge: `BLOCKED_EXTERNAL / PHYSICAL_EVIDENCE_PENDING`, no HUMAN_REQUIRED;
+- el residual es local y no bloquea B18.
 
 ## PARCIAL / NO SOBREAFIRMAR
-- `FULL_SAFE_PREPROD` no es PROD ni activación física universal.
-- Browser/device/media action-capable exige evidencia física PREPROD; un profile o binding declarado no basta.
-- `physical-adapter-audit-v1` contiene evidencia histórica útil pero debe reconciliarse con rama/head/contrato actual antes de certificarla como nueva.
+- `FULL_SAFE_PREPROD` no es PROD.
+- El residual físico Browser/device se cerrará solo con evidencia PREPROD fresca real.
 - PR #784 sigue sin merge automático autorizado.
+- ARQUITECTO/PERFORMANCE mantienen su clasificación previa hasta su bloque correspondiente.
 
 ## next_block
-`B17_BROWSER_AUTOMATION_AND_PHYSICAL_GATES`
+`B18_LRN_MEASURED_ENGINEER_OUTCOME_LOOP`
 
-1. Inventariar Browser Bridge, authorized execution device profile, repair workflow, contratos y evidencia física existente.
-2. No crear browser provider/adaptador duplicado si el mecanismo existente cubre la capacidad.
-3. Separar configuración declarada de evidencia física observable.
-4. Reutilizar únicamente evidencia histórica compatible con contrato/adapter actual.
-5. Mantener PREPROD bounded/fail-closed: no arbitrary shell, no PROD/public mutation, no customer data, no Trading, no dependencia nueva por defecto.
-6. Exigir evidencia física para cualquier `FULL_REAL`/`FULL_SAFE_PREPROD` action-capable; residual externo -> `BLOCKED_EXTERNAL` o HUMAN_REQUIRED solo si aplica motivo canónico.
-7. Targeted + full regression + exact-head CI; preservar rollback/rebuild/observabilidad.
+1. Inventariar/reutilizar LRN, Safe Engineering, OLD vs NEW, QA/EVA/JDG, observabilidad y rollback existentes; no crear engine nuevo.
+2. Elegir fixture PREPROD determinista/segura, sin customer data ni Trading, con baseline y defecto/mejora medibles.
+3. Evidencia -> learning LRN trazable -> decisión de ingeniería gobernada -> cambio reversible.
+4. Medir NEW con la misma métrica/contrato y ejecutar OLD vs NEW.
+5. Evaluator/Tribunal independiente; rollback obligatorio ante no-mejora o regresión.
+6. Exigir evidencia de siguiente ciclo para probar que el aprendizaje altera la próxima decisión.
+7. Prohibido cerrar por metadata, plan-only, synthetic-only o self-judging.
+8. Targeted + full regression + exact-head CI.
 
 ## HUMAN_REQUIRED
 Únicamente `LEGAL_REQUIRED`, `SIGNATURE_REQUIRED`, `LOW_CONFIDENCE`, `HIGH_RISK`, `POLICY_CONFLICT`, `SECURITY_INCIDENT`, `MONEY_LIMIT`, `CUSTOMER_HUMAN_REQUEST`.
 Actualmente: ninguno activo.
 
+## SUPERLOOP / COMUNICACIÓN
+- Continuar exactamente desde el estado persistido; no reiniciar ni repetir auditorías cerradas.
+- Bucle: `EJECUTA -> PRUEBA -> CORRIGE -> VUELVE A PROBAR -> DOCUMENTA -> SIGUE CON EL SIGUIENTE BLOQUE LÓGICO`.
+- En LAB/PREPROD resolver sin permiso toda acción segura/reversible.
+- No detenerse tras commits, tests, CI, docs, hitos o errores reparables.
+- Informar solo hitos importantes o ~20–30 min en una frase: `HECHO: [resultado]. AHORA: [siguiente bloque]. BLOQUEO: ninguno.`
+- Después de informar, continuar sin esperar respuesta.
+- Detenerse únicamente por HUMAN_REQUIRED canónico.
+- Antes de saturación, actualizar este HANDOFF con HECHO/PARCIAL/PENDIENTE, rama, HEAD, commits, tests/CI, archivos, decisiones, next_block, problemas y estas mismas reglas.
+
 ## PROMPT EXACTO DE CONTINUIDAD
 ```text
-CONTINÚA CEREBRO OS · UNIVERSAL SKILL ACTIVATION FACTORY SIN RECONSTRUIR ESTADO POR MEMORIA.
-
-Lee íntegramente y en este orden:
-1. cerebro/docs/CEREBRO_UNIVERSAL_SKILL_ACTIVATION_FACTORY_V1_HANDOFF.md
-2. cerebro/docs/CEREBRO_UNIVERSAL_SKILL_ACTIVATION_FACTORY_V1_MASTER_2026-10-17.md
-3. cerebro/docs/CEREBRO_UNIVERSAL_SKILL_ACTIVATION_FACTORY_V1_RUNBOOK_2026-10-17.md
-4. cerebro/registry/universal-skill-activation-factory-v1.state.json
-
+CONTINÚA EXACTAMENTE DESDE DONDE ESTÁS. NO REINICIES, NO REPITAS AUDITORÍAS Y NO RECONSTRUYAS CONTEXTO.
+Activa MODO SUPERLOOP: EJECUTA -> PRUEBA -> CORRIGE -> VUELVE A PROBAR -> DOCUMENTA -> SIGUE.
 Repo: carlosjmunoz78/fenix-capital-inmo-map
 Branch: cerebro/universal-skill-activation-factory-v1-20261017
 PR: #784
-Certified code head: 0ba248c812ed21b2ddbea1f2b2010357615159c9
-
-Verifica únicamente repo/rama/HEAD/PR/checks vivos. Si el delta desde certified_code_head_sha es solo documental/evidencia, no repitas auditorías técnicas cerradas. Entra directamente en next_block.
-
-No tocar PROD. No auto-merge. Coste adicional 0 €. Trading aislado. No crear motores/servidores duplicados. CONSERVAR -> ENTENDER -> ENVOLVER -> PROBAR -> MEJORAR -> MIGRAR.
-
-FACT Fast Lane, B15 y B16 ya están cerrados PREPROD. No los reconstruyas.
-
-Siguiente bloque: B17_BROWSER_AUTOMATION_AND_PHYSICAL_GATES. Primero inventaría Browser Bridge/device profile/repair workflow/physical adapters y distingue configuración de evidencia física real. No fabriques provider nuevo si el existente sirve. Exige prueba física PREPROD antes de FULL_REAL/FULL_SAFE_PREPROD para acciones de browser/device/media. Si la superficie física no está disponible, registra BLOCKED_EXTERNAL veraz; HUMAN_REQUIRED solo para los ocho motivos canónicos.
-
-Comunica a Carlos solo hitos relevantes y muy breves; no preguntes “¿procedo?” para trabajo seguro ya autorizado.
+Certified code head: a7df20aefca134086329273e9ee2be2aa3b6dd4a
+PREPROD. Coste adicional 0 €. No PROD, no auto-merge, no Trading, no customer data.
+B15, B16 y B17 están cerrados. No los reconstruyas.
+Residual físico B17: BLOCKED_EXTERNAL / PHYSICAL_EVIDENCE_PENDING; no HUMAN_REQUIRED y no bloquea trabajo independiente.
+Entra directamente en B18_LRN_MEASURED_ENGINEER_OUTCOME_LOOP y demuestra baseline -> LRN -> cambio de ingeniería -> NEW medido -> OLD vs NEW -> tribunal independiente -> aceptar o rollback -> siguiente ciclo.
+Solo detente por HUMAN_REQUIRED canónico. Comunica muy poco y continúa después de cada hito.
 ```
