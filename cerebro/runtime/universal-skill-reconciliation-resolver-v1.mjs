@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
-const VERSION='1.0.0';
+const VERSION='1.1.0';
 const __dirname=path.dirname(fileURLToPath(import.meta.url));
 const DEFAULT_REPO_ROOT=path.resolve(__dirname,'../..');
 const FILE_RE=/^cerebro-184-items-(\d+)-(\d+)-live-reconciliation\.v(\d+)\.json$/i;
@@ -34,9 +34,32 @@ export function listRangeReconciliations({repo_root=DEFAULT_REPO_ROOT,start,end}
     const abs=path.join(dir,filename);
     const doc=JSON.parse(fs.readFileSync(abs,'utf8'));
     if(doc.catalog_range!==`${start}-${end}`||!Array.isArray(doc.items))throw new Error(`INVALID_RECONCILIATION_DOCUMENT:${ref}`);
-    rows.push({ref,abs,version:parsed.version,doc});
+    rows.push({ref,abs,start,end,version:parsed.version,doc});
   }
   rows.sort((a,b)=>a.version-b.version);
+  return freeze(rows);
+}
+
+export function listLatestLegacyReconciliations({repo_root=DEFAULT_REPO_ROOT}={}){
+  const dir=path.join(path.resolve(repo_root),'cerebro','skills');
+  if(!fs.existsSync(dir))return freeze([]);
+  const ranges=new Map();
+  for(const filename of fs.readdirSync(dir)){
+    const parsed=parseReconciliationFilename(filename);
+    if(!parsed)continue;
+    const key=`${parsed.start}-${parsed.end}`;
+    const current=ranges.get(key);
+    if(!current||parsed.version>current.version)ranges.set(key,{...parsed});
+  }
+  const rows=[];
+  for(const parsed of ranges.values()){
+    const ref=`cerebro/skills/${parsed.filename}`;
+    const abs=path.join(dir,parsed.filename);
+    const doc=JSON.parse(fs.readFileSync(abs,'utf8'));
+    if(doc.catalog_range!==`${parsed.start}-${parsed.end}`||!Array.isArray(doc.items))throw new Error(`INVALID_RECONCILIATION_DOCUMENT:${ref}`);
+    rows.push({ref,abs,start:parsed.start,end:parsed.end,version:parsed.version,doc});
+  }
+  rows.sort((a,b)=>a.start-b.start||a.end-b.end||a.version-b.version);
   return freeze(rows);
 }
 
