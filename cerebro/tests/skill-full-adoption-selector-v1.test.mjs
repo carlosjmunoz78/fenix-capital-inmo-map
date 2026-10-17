@@ -5,6 +5,21 @@ import {selectNextSkillFullAdoption,validateSkillFullAdoptionQueue} from '../ski
 
 const registry=()=>JSON.parse(fs.readFileSync(new URL('../registry/skill-full-adoption-v1.json',import.meta.url),'utf8'));
 
+function restoreHistoricalHighRiskState(q){
+  const supabase=q.queue.find(x=>x.technical_name==='supabase-postgres-best-practices');
+  const browser=q.queue.find(x=>x.technical_name==='agent-browser');
+  assert.ok(supabase); assert.ok(browser);
+  supabase.status='REVIEW_READY_HIGH_RISK';
+  supabase.human_required='HIGH_RISK';
+  supabase.autonomous_ceiling='EVIDENCE_ONLY_UNTIL_CANONICAL_HIGH_RISK_GATE_RESOLVED';
+  supabase.next_gate='HIGH_RISK_REVIEW_AFTER_ALL_NON_MUTATING_EVIDENCE_IS_COMPLETE';
+  browser.status='EXTERNAL_SKILL_REVIEW_READY_HIGH_RISK_INTERNAL_BROWSER_POLICY_GREEN';
+  browser.human_required='HIGH_RISK';
+  browser.autonomous_ceiling='INTERNAL_TRANSVERSAL_BROWSER_POLICY_GREEN_EXTERNAL_SKILL_EVIDENCE_ONLY_UNTIL_CANONICAL_GATE_RESOLVED';
+  browser.next_gate='EXTERNAL_SKILL_HIGH_RISK_REVIEW_INDEPENDENT_FROM_INTERNAL_BROWSER_AUTONOMY';
+  return {supabase,browser};
+}
+
 test('priority strategy keeps the compounding factory skill first before its FULL closure',()=>{
   const q=registry();
   assert.equal(validateSkillFullAdoptionQueue(q).green,true);
@@ -31,8 +46,9 @@ test('queue advances to safe GitHub capability after factory skill is FULL while
   assert.equal(out.selected.candidate_id,'lobehub-skills:52441cd3d76607ffffab');
 });
 
-test('queue advances to admitted Obsidian while earlier safe capabilities are FULL and high-risk skills stay blocked',()=>{
+test('historical queue advances to admitted Obsidian while earlier safe capabilities are FULL and unresolved high-risk skills stay blocked',()=>{
   const q=registry();
+  restoreHistoricalHighRiskState(q);
   assert.equal(q.queue[0].status,'FULL_SAFE_PREPROD');
   assert.equal(q.queue[1].status,'FULL_SAFE_PREPROD');
   const obsidian=q.queue.find(x=>x.technical_name==='obsidian');
@@ -49,8 +65,9 @@ test('queue advances to admitted Obsidian while earlier safe capabilities are FU
   assert.deepEqual(out.blocked.map(x=>x.alias_es),['Optimización y seguridad de bases de datos','Control avanzado del navegador']);
 });
 
-test('HIGH_RISK candidates remain blocked and become the next gate only after Obsidian also reaches FULL or terminal',()=>{
+test('historical HIGH_RISK candidates remain blocked until their canonical review gate is resolved',()=>{
   const q=registry();
+  restoreHistoricalHighRiskState(q);
   const obsidian=q.queue.find(x=>x.technical_name==='obsidian');
   assert.ok(obsidian);
   obsidian.status='FULL_SAFE_PREPROD';
@@ -59,6 +76,30 @@ test('HIGH_RISK candidates remain blocked and become the next gate only after Ob
   assert.equal(out.selected,null);
   assert.deepEqual(out.blocked.map(x=>x.alias_es),['Optimización y seguridad de bases de datos','Control avanzado del navegador']);
   assert.ok(out.blocked.every(x=>x.human_required==='HIGH_RISK'));
+});
+
+test('current admitted queue is fully closed after scoped HIGH_RISK resolution',()=>{
+  const q=registry();
+  const out=selectNextSkillFullAdoption(q);
+  assert.equal(out.status,'ALL_FULL_OR_TERMINAL');
+  assert.equal(out.selected,null);
+  assert.deepEqual(out.blocked,[]);
+  assert.equal(out.incomplete_count,0);
+  assert.equal(q.inventory_audit.full_safe_preprod_count,5);
+  assert.equal(q.inventory_audit.all_admitted_full_safe_preprod_on_2026_10_17,true);
+  const supabase=q.queue.find(x=>x.technical_name==='supabase-postgres-best-practices');
+  const browser=q.queue.find(x=>x.technical_name==='agent-browser');
+  assert.equal(supabase.status,'FULL_SAFE_PREPROD');
+  assert.equal(supabase.human_required,null);
+  assert.deepEqual(supabase.target_engine_bindings,['DATA-001','DBOFF-001','STOROFF-001','API-001','CRM-001']);
+  assert.equal(supabase.external_skill_code_execution,false);
+  assert.equal(supabase.db_mutation_authorized,false);
+  assert.equal(browser.status,'FULL_SAFE_PREPROD');
+  assert.equal(browser.human_required,null);
+  assert.deepEqual(browser.target_engine_bindings,['AUTO-001','AUTBOOT-001','QA-001','WEB-001','SCAN-001']);
+  assert.equal(browser.browser_is_tool_not_authority,true);
+  assert.equal(browser.external_skill_code_execution,false);
+  assert.equal(browser.browser_external_side_effect_authorized,false);
 });
 
 test('unsafe authority expansion fails closed',()=>{
@@ -73,12 +114,13 @@ test('every queued skill must have a Spanish alias',()=>{
   assert.throws(()=>validateSkillFullAdoptionQueue(q),/alias_es required/);
 });
 
-test('specialized wrapper inventory is reconciled with Obsidian admitted only after green synthetic judge and tribunal',()=>{
+test('specialized wrapper inventory is reconciled with all five admitted skills FULL SAFE PREPROD',()=>{
   const q=registry();
   assert.equal(q.inventory_audit.specialized_cerebro_wrappers_observed,5);
   assert.equal(q.inventory_audit.admitted_full_queue_count,5);
   assert.equal(q.inventory_audit.observed_not_admitted_count,0);
-  assert.equal(q.inventory_audit.full_safe_preprod_count,3);
+  assert.equal(q.inventory_audit.full_safe_preprod_count,5);
+  assert.ok(q.queue.every(x=>x.status==='FULL_SAFE_PREPROD'));
   const obsidian=q.queue.find(x=>x.technical_name==='obsidian');
   assert.ok(obsidian);
   assert.equal(obsidian.alias_es,'Asistente seguro de conocimiento en Obsidian');
