@@ -95,6 +95,31 @@ jobs:
           grep -F "allBindings?'UNIVERSAL_SKILL_REAL_BINDINGS_GREEN':'UNIVERSAL_SKILL_REAL_BINDINGS_HOLD'" cerebro/runtime/universal-skill-real-binding-v1.mjs
           grep -F "lrn.learning_outcome==='UNIVERSAL_SKILL_REAL_BINDINGS_GREEN'" cerebro/runtime/universal-skill-real-binding-v1.mjs
 
+  b5-adapters-and-durable-batch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Automatic evidence-grounded adapter and durable batch tests
+        run: node --test cerebro/tests/universal-skill-adapter-factory-v1.test.mjs cerebro/tests/universal-skill-batch-orchestrator-v1.test.mjs
+      - name: Assert adapter factory cannot synthesize semantic evidence from target contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -F 'semantic_adapter_evidence_missing' cerebro/runtime/universal-skill-adapter-factory-v1.mjs
+          grep -F "observed_constraints:Object.freeze([...validation.observed])" cerebro/runtime/universal-skill-adapter-factory-v1.mjs
+          ! grep -F "observed_constraints:contract.required_constraints" cerebro/runtime/universal-skill-adapter-factory-v1.mjs
+      - name: Assert durable batch reuses JOB-001 and stays PREPROD zero-cost
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -F "DurableJobRuntimeV1" cerebro/runtime/universal-skill-batch-orchestrator-v1.mjs
+          grep -F "const PREPROD='PREPROD'" cerebro/runtime/universal-skill-batch-orchestrator-v1.mjs
+          ! grep -Eq 'prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true|additional_cost_eur[[:space:]]*:[[:space:]]*[1-9]' cerebro/runtime/universal-skill-adapter-factory-v1.mjs cerebro/runtime/universal-skill-batch-orchestrator-v1.mjs
+
   focused-existing-regression:
     runs-on: ubuntu-latest
     timeout-minutes: 10
