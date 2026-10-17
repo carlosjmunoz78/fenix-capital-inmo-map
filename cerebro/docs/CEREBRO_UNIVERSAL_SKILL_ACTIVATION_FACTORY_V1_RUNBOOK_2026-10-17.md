@@ -4,7 +4,7 @@
 Repo: `carlosjmunoz78/fenix-capital-inmo-map`
 Branch: `cerebro/universal-skill-activation-factory-v1-20261017`
 PR: `#784`
-Último código certificado: `0ba248c812ed21b2ddbea1f2b2010357615159c9`
+Último código certificado: `a7df20aefca134086329273e9ee2be2aa3b6dd4a`
 Entorno autorizado: `PREPROD`.
 
 ## Inicio / reanudación
@@ -49,36 +49,49 @@ Providers Auto Engineering disponibles: finance, math, software engineering, sys
 
 Reglas obligatorias:
 - Para fuentes `*-live-reconciliation.vN.json`, consumir solo el item exacto de la candidata legacy.
-- Si el estado del item contiene deuda real (`DEFINED_NOT_BUILT`, `SIMULATION_ONLY`, `LIVE_AUDIT_REQUIRED`, `SCAFFOLD_PLAN`, `NOT_PROMOTED`, `PHYSICAL_*_REQUIRED`), mantener `ENGINEERING_TASK_REQUIRED`; el provider de familia no puede fabricar evidencia.
+- Si el estado del item contiene deuda real, mantener `ENGINEERING_TASK_REQUIRED`; el provider de familia no puede fabricar evidencia.
 - Provider disponible no es una afirmación FULL.
 - Vista terminal estricta: `FULL_REAL | ABSORBED | REJECTED | BLOCKED_EXTERNAL | HUMAN_REQUIRED`.
 - `ENGINEERING_TASK_REQUIRED` y estados parciales siguen no terminales.
 
 ## B16 · Current evidence + Web/SEO debt
-Estado: HECHO PREPROD sobre código certificado `0ba248c812ed21b2ddbea1f2b2010357615159c9`.
+Estado: HECHO PREPROD.
 
 Resultado:
 - 184 items reconciliados item-scoped.
 - Web/WordPress/frontend: 17 candidatas / 7 deudas de ingeniería.
 - SEO/search/content: 30 candidatas / 19 deudas de ingeniería.
-- Recomendación: `NO_NEW_WEB_SEO_PROVIDER_JUSTIFIED` hasta existir contrato genérico de ejecución + binding semántico demostrados.
-- Item 183 conserva su gate físico Android pendiente; no hay falso FULL.
-- Runner B16 alineado de Node 20 a Node 24.x, que es el engine raíz del repo.
-- No se excluyeron tests, no se añadieron dependencias y no se relajaron gates.
-- Exact-head: 11/11 workflows GREEN.
+- `NO_NEW_WEB_SEO_PROVIDER_JUSTIFIED` hasta existir contrato genérico de ejecución + binding semántico demostrados.
+- Node 24.x alineado con el engine raíz; sin test exclusions, dependencias nuevas ni gate weakening.
 
 ## B17 · Browser automation + physical gates
+Estado: HECHO PREPROD en gobernanza; residual físico actual `BLOCKED_EXTERNAL`.
+Código certificado: `a7df20aefca134086329273e9ee2be2aa3b6dd4a`.
+CI certificado: B17 #2 + exact-head 12/12 GREEN.
+
+Reglas y resultado:
+- Reutilizar Browser Transversal Autonomy, Authorized Execution Device Profile, Identity Session Lifecycle, Credential Lifecycle y Physical Adapter Audit; no crear provider/engine duplicado.
+- `config/profile/binding declared` no es prueba física.
+- `FULL_REAL/FULL_SAFE_PREPROD` action-capable requiere atestación fresca + observación física bounded/fail-closed en LAB/PREPROD.
+- Observación válida: kill-switch visto, coste 0, sin PROD/public mutation, Trading ni customer data; campos inesperados se rechazan.
+- La ruta sintética certifica lógica del gate, no disponibilidad física actual.
+- El contexto de orquestación actual no puede observar la superficie física autorizada del Browser Bridge, por lo que el estado actual permanece `BLOCKED_EXTERNAL / PHYSICAL_EVIDENCE_PENDING` y `human_required=null`.
+- Este residual es local y no bloquea trabajo independiente.
+
+## B18 · LRN measured engineer outcome loop
 Estado: EN CURSO / POR AUDITAR.
 
 Procedimiento obligatorio:
-1. Inventariar primero Browser Bridge, `authorized-execution-device-profile`, repair workflow, contratos y evidencia física existentes.
-2. No fabricar un browser provider nuevo si el mecanismo actual cubre la capacidad.
-3. Separar `config/profile/binding declared` de `physical evidence observed`; configuración sola no certifica acción real.
-4. Reutilizar pruebas históricas solo si siguen aplicando al contrato/adapter actual; registrar branch/head/time cuando sean relevantes.
-5. Ejecución PREPROD bounded/fail-closed: sin arbitrary shell, sin PROD/public mutation, sin customer data, sin Trading, sin dependencia externa nueva por defecto.
-6. Para `FULL_REAL` / `FULL_SAFE_PREPROD` action-capable exigir prueba física PREPROD del binding pertinente.
-7. Si la superficie física no puede observarse desde el runner disponible, no falsear GREEN físico: mantener residual verificable como `BLOCKED_EXTERNAL` o `HUMAN_REQUIRED` solo si aplica uno de los ocho motivos canónicos.
-8. Cerrar con targeted tests, full CEREBRO regression y exact-head CI; conservar rollback/rebuild/observabilidad.
+1. Inventariar y reutilizar LRN, Safe Engineering, OLD vs NEW, QA/EVA/JDG, observabilidad y rollback existentes; no crear motor nuevo.
+2. Elegir una fixture PREPROD determinista, sin datos cliente ni Trading, con baseline medible y un defecto/mejora concreta.
+3. Generar evidencia medible del baseline y un artefacto LRN trazable que derive una decisión de ingeniería concreta.
+4. Aplicar el cambio solo por el gate de ingeniería gobernada, reversible y acotado.
+5. Medir post-cambio con exactamente la misma métrica/contrato; ejecutar OLD vs NEW.
+6. Exigir evaluator/Tribunal independiente del código que propone/aplica el cambio.
+7. Si NEW no mejora o regresa cualquier guardrail, rollback y registrar aprendizaje de rechazo; no promover.
+8. Si mejora sin regresión, exigir evidencia de siguiente ciclo para demostrar que el learning alimenta la próxima decisión y no es metadata ornamental.
+9. No aceptar plan-only, self-judging, synthetic-only ni `learning_artifact_created=true` como prueba suficiente.
+10. Cerrar con targeted tests, full CEREBRO regression y exact-head CI.
 
 ## Telemetría mínima
 Por candidata: `queue_wait_ms`, `manifest_ms`, `scan_ms`, `sandbox_ms`, `adapter_ms`, `tests_ms`, `ci_wait_ms`, `eval_ms`, `human_wait_ms`, `activation_ms`.
@@ -92,11 +105,6 @@ Métricas batch: p50/p95 activation, batch wall time, serial activation sum, par
 - `node --test cerebro/tests/cerebro-technical-specialists-v1.test.mjs`
 - `node --test cerebro/tests/cerebro-math-solver-profile-v1.test.mjs`
 - Full: `node --test cerebro/tests/*.test.mjs`
-
-Certificación Fast Lane exige además:
-- blind synthetic multi-family: >=10 primarias, >=5 concurrentes, dedupe y rerun idempotente;
-- blind real catalog: >=5 concurrentes, resultados iguales a la verdad legacy, **sin falso FULL** por metadata;
-- full CEREBRO regression exact-head.
 
 ## Anti-loop
 Ante fallo: evidencia exacta -> clasificar causa -> una variable -> test enfocado -> regresión afectada/full -> documentar. Tras tres fallos equivalentes, cambiar estrategia estructural.
@@ -116,8 +124,9 @@ Cambios permanecen en branch/PR hasta promoción gobernada. Revertir el commit d
 
 El binding mantiene backup/rollback/rebuild por candidata. La caché Fast Lane solo guarda plan/scheduling y metadatos de contratos/baselines; puede eliminarse y reconstruirse sin pérdida de autoridad ni estado transaccional.
 
-## Continuidad
-Actualizar HANDOFF/MASTER/RUNBOOK/state después de cambios arquitectónicos o antes de saturación. Mantener HECHO/PARCIAL/POR AUDITAR, code SHA certificado, CI, next_block y restricciones reales.
-
-## Comunicación
-Trabajar continuamente, sin usar al usuario como conductor. Solo hitos relevantes y muy breves. Un rojo ordinario se corrige sin interrumpir. Escalar únicamente HUMAN_REQUIRED real o una decisión estratégica nueva.
+## Continuidad / SUPERLOOP
+Trabajar continuamente: `EJECUTA -> PRUEBA -> CORRIGE -> VUELVE A PROBAR -> DOCUMENTA -> SIGUE`.
+No pedir permiso para acciones seguras/reversibles en LAB/PREPROD y no detenerse tras commits, CI, docs o errores reparables.
+Comunicar solo hitos importantes o ~20–30 min con: `HECHO: ... AHORA: ... BLOQUEO: ninguno.` y continuar sin esperar respuesta.
+Detenerse únicamente por HUMAN_REQUIRED canónico.
+Antes de saturación, actualizar HANDOFF/MASTER/RUNBOOK/state con estado, rama, HEAD, commits, tests/CI, archivos, decisiones, next_block, problemas y estas reglas.
