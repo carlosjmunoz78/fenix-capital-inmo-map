@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {buildUniversalActivationPlan} from '../runtime/universal-skill-activation-planner-v1.mjs';
 import {resolveSemanticContract} from '../runtime/universal-skill-semantic-contracts-v1.mjs';
-import {runUniversalSkillBatchOnce,prepareBatchCandidate} from '../runtime/universal-skill-batch-orchestrator-v1.mjs';
+import {runUniversalSkillBatchOnce,runUniversalSkillBatchIndustrial,prepareBatchCandidate} from '../runtime/universal-skill-batch-orchestrator-v1.mjs';
 
 const base={company_id:'fenix',inventory_complete:true,dependencies_mapped:true,reuse_checked:true,provenance_license_green:true,additional_cost_eur:0};
 function safeAuthority(){return {prod_authorized:false,prod_write_authorized:false,prod_mutation_authorized:false,permission_expansion_authorized:false,external_skill_code_execution:false,customer_data_used:false,paid_fallback:false,spend_authorized:false,trading_access:false,additional_cost_eur:0};}
@@ -72,4 +72,56 @@ test('batch output keeps per-candidate lane and no global HUMAN_REQUIRED freeze'
   assert.equal(report.results.find((r)=>r.candidate_id==='blind:human').status,'HUMAN_REQUIRED');
   assert.equal(report.results.find((r)=>r.candidate_id==='blind:growth-full').status,'FULL_SAFE_PREPROD');
   assert.equal(report.results.find((r)=>r.candidate_id==='blind:growth-full').lane,'GROWTH');
+});
+
+test('industrial blind batch proves at least five concurrent workers, content dedupe, zero cost and terminal evidence',async()=>{
+  const domains=[
+    'software-engineering-devops',
+    'data-database-supabase',
+    'security-identity-privacy',
+    'documents-office-pdf',
+    'seo-search-content',
+    'finance-accounting-payments',
+    'external-information-retrieval',
+    'knowledge-research-training',
+    'hr-people-operations',
+    'multi-company-business-bootstrap'
+  ];
+  const candidates=domains.map((domain,index)=>addExactEvidence(candidateForDomain({id:`blind:industrial-${index+1}`,domain,work_class:'EXPRESS',low_risk:true})));
+  candidates[0]={...candidates[0],content_hash:'sha256:blind-shared-content'};
+  const duplicate={...candidates[0],activation_input:{...candidates[0].activation_input,candidate_id:'blind:industrial-duplicate'},content_hash:'sha256:blind-shared-content'};
+  const root=fs.mkdtempSync(path.join(os.tmpdir(),'usaf-batch-industrial-'));
+  const report=await runUniversalSkillBatchIndustrial({root_dir:root,candidates:[...candidates,duplicate],concurrency:5,max_jobs:20,source_run_id:987654,source_head_sha:'3333333333333333333333333333333333333333'});
+  assert.equal(report.status,'INDUSTRIAL_BATCH_EXECUTED');
+  assert.equal(report.input_candidates,11);
+  assert.equal(report.primary_candidates,10);
+  assert.equal(report.executed_primary_count,10);
+  assert.equal(report.absorbed_count,1);
+  assert.ok(report.max_active_workers>=5);
+  assert.equal(report.parallel_execution_proven,true);
+  assert.equal(report.fail_fast,false);
+  assert.equal(report.by_status.FULL_SAFE_PREPROD,10);
+  assert.equal(report.by_status.ABSORBED,1);
+  assert.equal(report.metrics.content_cache_hits,1);
+  assert.ok(report.metrics.activation_wall_time_p50_ms>=0);
+  assert.ok(report.metrics.activation_wall_time_p95_ms>=report.metrics.activation_wall_time_p50_ms);
+  assert.equal(report.additional_cost_eur,0);
+  assert.equal(report.prod_authorized,false);
+  assert.equal(report.trading_access,false);
+  assert.ok(report.results.filter((row)=>row.status==='FULL_SAFE_PREPROD').every((row)=>row.execution_mode==='WORKER_THREAD'));
+  assert.ok(report.results.filter((row)=>row.status==='FULL_SAFE_PREPROD').every((row)=>Number.isFinite(row.telemetry.activation_ms)));
+});
+
+test('industrial rerun is durable and idempotent without re-executing completed primaries',async()=>{
+  const candidates=['documents-office-pdf','finance-accounting-payments','seo-search-content','data-database-supabase','software-engineering-devops'].map((domain,index)=>addExactEvidence(candidateForDomain({id:`blind:industrial-rerun-${index+1}`,domain,work_class:'EXPRESS',low_risk:true})));
+  const root=fs.mkdtempSync(path.join(os.tmpdir(),'usaf-batch-industrial-rerun-'));
+  const first=await runUniversalSkillBatchIndustrial({root_dir:root,candidates,concurrency:5,max_jobs:10,source_run_id:777,source_head_sha:'4444444444444444444444444444444444444444'});
+  assert.equal(first.executed_primary_count,5);
+  assert.equal(first.parallel_execution_proven,true);
+  const second=await runUniversalSkillBatchIndustrial({root_dir:root,candidates,concurrency:5,max_jobs:10,source_run_id:778,source_head_sha:'4444444444444444444444444444444444444444',now_ms:Date.now()+1000});
+  assert.equal(second.status,'NO_WORK');
+  assert.equal(second.executed_primary_count,0);
+  assert.equal(second.idempotent_job_hits,5);
+  assert.equal(second.metrics.idempotent_rerun_rate,1);
+  assert.equal(second.additional_cost_eur,0);
 });

@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import {Worker} from 'node:worker_threads';
 import {DurableJobRuntimeV1} from './durable-job-runtime-v1.mjs';
 import {buildUniversalActivationPlan} from './universal-skill-activation-planner-v1.mjs';
 import {createAutomaticAdapterResolver,adapterFactorySummary} from './universal-skill-adapter-factory-v1.mjs';
@@ -18,6 +19,73 @@ function stable(v){if(v===null||typeof v!=='object')return v;if(Array.isArray(v)
 function hash(v){return crypto.createHash('sha256').update(JSON.stringify(stable(v))).digest('hex');}
 function authority(){return {prod_authorized:false,prod_write_authorized:false,prod_mutation_authorized:false,permission_expansion_authorized:false,external_skill_code_execution:false,customer_data_used:false,paid_fallback:false,spend_authorized:false,trading_access:false,additional_cost_eur:0};}
 function ctx(company_id){return {company_id,engine_id:'FACT-001',environment:PREPROD,version:VERSION};}
+function percentile(values,p){if(!values.length)return null;const sorted=[...values].sort((a,b)=>a-b);const index=Math.min(sorted.length-1,Math.max(0,Math.ceil((p/100)*sorted.length)-1));return sorted[index];}
+function contentFingerprint(candidate){
+  const input={...(candidate?.activation_input??candidate??{})};
+  const explicit=candidate?.content_hash??candidate?.source_hash??input.content_hash??input.source_hash;
+  if(typeof explicit==='string'&&explicit.trim())return `explicit:${explicit.trim()}`;
+  delete input.candidate_id;
+  delete input.content_hash;
+  delete input.source_hash;
+  return `derived:${hash({activation_input:input,candidate_evidence:candidate?.candidate_evidence??{}})}`;
+}
+function dedupeByContent(candidates){
+  const primaryByFingerprint=new Map(),primaries=[],absorbed=[];
+  for(const candidate of candidates){
+    const input=candidate?.activation_input??candidate;
+    const candidate_id=req(input?.candidate_id,'candidate_id');
+    const fingerprint=contentFingerprint(candidate);
+    const prior=primaryByFingerprint.get(fingerprint);
+    if(prior){absorbed.push(Object.freeze({candidate_id,status:'ABSORBED',content_fingerprint:fingerprint,absorbed_by:prior.candidate_id,human_required:Object.freeze([]),...authority()}));continue;}
+    const row=Object.freeze({candidate,content_fingerprint:fingerprint,candidate_id});
+    primaryByFingerprint.set(fingerprint,row);primaries.push(row);
+  }
+  return Object.freeze({primaries:Object.freeze(primaries),absorbed:Object.freeze(absorbed)});
+}
+function adaptersWorkerSafe(existing_adapters){
+  if(!existing_adapters||Object.keys(existing_adapters).length===0)return true;
+  try{structuredClone(existing_adapters);return true;}catch{return false;}
+}
+function candidateTelemetry({queue_wait_ms=0,activation_ms=null}={}){
+  return Object.freeze({
+    queue_wait_ms,
+    manifest_ms:null,
+    scan_ms:null,
+    sandbox_ms:null,
+    adapter_ms:null,
+    tests_ms:null,
+    ci_wait_ms:null,
+    eval_ms:null,
+    human_wait_ms:null,
+    activation_ms,
+    unmeasured_fields:Object.freeze(['manifest_ms','scan_ms','sandbox_ms','adapter_ms','tests_ms','ci_wait_ms','eval_ms','human_wait_ms'])
+  });
+}
+function runWorkerThread(args){
+  const code=`const {parentPort,workerData}=require('node:worker_threads');(async()=>{try{const mod=await import(workerData.module_url);const result=mod.processUniversalSkillCandidatePayload(workerData.args);parentPort.postMessage({ok:true,result});}catch(error){parentPort.postMessage({ok:false,error:String(error&&error.stack?error.stack:error&&error.message?error.message:error)});}})();`;
+  return new Promise((resolve,reject)=>{
+    const worker=new Worker(code,{eval:true,workerData:{module_url:import.meta.url,args}});
+    let settled=false;
+    worker.once('message',(message)=>{if(settled)return;settled=true;if(message?.ok===true)resolve(message.result);else reject(new Error(message?.error??'INDUSTRIAL_WORKER_FAILED'));});
+    worker.once('error',(error)=>{if(settled)return;settled=true;reject(error);});
+    worker.once('exit',(codeValue)=>{if(settled)return;settled=true;if(codeValue===0)reject(new Error('INDUSTRIAL_WORKER_EXITED_WITHOUT_RESULT'));else reject(new Error(`INDUSTRIAL_WORKER_EXIT_${codeValue}`));});
+  });
+}
+async function mapConcurrent(items,limit,fn){
+  if(!Number.isInteger(limit)||limit<1||limit>50)throw new Error('concurrency must be 1..50');
+  const output=new Array(items.length);let cursor=0,active=0,maxActive=0;
+  async function runner(){
+    for(;;){
+      const index=cursor++;
+      if(index>=items.length)return;
+      active+=1;maxActive=Math.max(maxActive,active);
+      try{output[index]=await fn(items[index],index);}finally{active-=1;}
+    }
+  }
+  const workers=Array.from({length:Math.min(limit,items.length)},()=>runner());
+  await Promise.all(workers);
+  return Object.freeze({output:Object.freeze(output),max_active:maxActive});
+}
 
 const LANE_DOMAINS=Object.freeze({
   ENGINEERING:new Set(['agent-ai-orchestration','integration-mcp-connectors','software-engineering-devops','security-identity-privacy','observability-quality-resilience']),
@@ -82,6 +150,7 @@ function processCandidatePayload({payload,root,source_run_id,source_head_sha,exi
   if(status==='HOLD'&&adapterSummary.status==='BLOCKED_EXTERNAL')status='BLOCKED_EXTERNAL';
   return Object.freeze({candidate_id:payload.candidate_id,status,activation_plan_id:plan.plan_id,binding_id:binding.binding_id,lane:payload.scheduling?.lane??'GENERAL',work_class:payload.scheduling?.work_class??'STANDARD',adapter_summary:adapterSummary,binding_report:binding,human_required:Object.freeze([]),...authority()});
 }
+export function processUniversalSkillCandidatePayload(args){return processCandidatePayload(args);}
 
 export function runUniversalSkillBatchOnce({root_dir,candidates,max_jobs=50,worker_prefix='usaf-worker',source_run_id=1,source_head_sha='0000000000000000000000000000000000000001',now_ms=Date.now(),existing_adapters={}}={}){
   if(!Number.isInteger(max_jobs)||max_jobs<1||max_jobs>500)throw new Error('max_jobs must be 1..500');
@@ -107,5 +176,98 @@ export function runUniversalSkillBatchOnce({root_dir,candidates,max_jobs=50,work
   const byStatus=Object.fromEntries([...new Set(results.map((r)=>r.status))].sort().map((s)=>[s,results.filter((r)=>r.status===s).length]));
   const byLane=Object.fromEntries([...new Set(results.map((r)=>r.lane??'GENERAL'))].sort().map((s)=>[s,results.filter((r)=>(r.lane??'GENERAL')===s).length]));
   const report={schema_version:'1.0.0',state_type:'CEREBRO_UNIVERSAL_SKILL_BATCH_REPORT_V1',status:results.length?'BATCH_EXECUTED':'NO_WORK',company_id:'MULTI',engine_id:'FACT-001',environment:PREPROD,version:VERSION,accepted:setup.accepted.length,processed:results.length,results:Object.freeze(results),by_status:Object.freeze(byStatus),by_lane:Object.freeze(byLane),job_journal:runtime.journal_path,...authority()};
+  return Object.freeze({...report,batch_hash:hash(report)});
+}
+
+export async function runUniversalSkillBatchIndustrial({root_dir,candidates,concurrency=5,max_jobs=50,worker_prefix='usaf-industrial',source_run_id=1,source_head_sha='0000000000000000000000000000000000000001',now_ms=Date.now(),existing_adapters={}}={}){
+  if(!Array.isArray(candidates)||candidates.length===0)throw new Error('candidates required');
+  if(!Number.isInteger(concurrency)||concurrency<1||concurrency>50)throw new Error('concurrency must be 1..50');
+  if(!Number.isInteger(max_jobs)||max_jobs<1||max_jobs>500)throw new Error('max_jobs must be 1..500');
+  const dedupe=dedupeByContent(candidates);
+  const primaryCandidates=dedupe.primaries.map((row)=>row.candidate);
+  const setup=enqueueUniversalSkillBatch({root_dir,candidates:primaryCandidates,now_ms});
+  const runtime=setup.runtime;
+  const companies=[...new Set(primaryCandidates.map((c)=>(c.activation_input??c).company_id??'fenix'))].sort();
+  const claimed=[];
+  while(claimed.length<max_jobs){
+    let job=null;
+    for(const company of companies){
+      const claimAt=now_ms+claimed.length;
+      const candidate=runtime.claim({context:ctx(company),worker_id:`${worker_prefix}-${claimed.length+1}`,now_ms:claimAt,lease_ms:120000});
+      if(candidate){job={job:candidate,claim_at_ms:claimAt,queue_wait_ms:Math.max(0,claimAt-(candidate.created_at_ms??claimAt))};break;}
+    }
+    if(!job)break;
+    claimed.push(job);
+  }
+
+  const threadSafe=adaptersWorkerSafe(existing_adapters);
+  const pool=await mapConcurrent(claimed,concurrency,async({job,queue_wait_ms})=>{
+    const started=Date.now();
+    try{
+      const args={payload:job.payload,root:setup.root,source_run_id,source_head_sha,existing_adapters};
+      const result=threadSafe?await runWorkerThread(args):processCandidatePayload(args);
+      return Object.freeze({ok:true,job,result,telemetry:candidateTelemetry({queue_wait_ms,activation_ms:Math.max(0,Date.now()-started)}),execution_mode:threadSafe?'WORKER_THREAD':'INLINE_ADAPTER_FALLBACK'});
+    }catch(error){
+      return Object.freeze({ok:false,job,error:String(error?.message??error),telemetry:candidateTelemetry({queue_wait_ms,activation_ms:Math.max(0,Date.now()-started)}),execution_mode:threadSafe?'WORKER_THREAD':'INLINE_ADAPTER_FALLBACK'});
+    }
+  });
+
+  const executed=[];
+  for(let index=0;index<pool.output.length;index+=1){
+    const row=pool.output[index],completeAt=now_ms+claimed.length+index+1;
+    if(row.ok){
+      runtime.complete({job_id:row.job.job_id,worker_id:row.job.worker_id,result:row.result,now_ms:completeAt});
+      executed.push(Object.freeze({...row.result,telemetry:row.telemetry,execution_mode:row.execution_mode}));
+    }else{
+      const failed=runtime.fail({job_id:row.job.job_id,worker_id:row.job.worker_id,error:row.error,now_ms:completeAt});
+      executed.push(Object.freeze({candidate_id:row.job.payload.candidate_id,status:failed.status==='DEAD_LETTER'?'BLOCKED_EXTERNAL':'RETRY_WAIT',error:row.error,telemetry:row.telemetry,execution_mode:row.execution_mode,...authority()}));
+    }
+  }
+
+  const results=Object.freeze([...executed,...dedupe.absorbed]);
+  const byStatus=Object.fromEntries([...new Set(results.map((r)=>r.status))].sort().map((status)=>[status,results.filter((r)=>r.status===status).length]));
+  const byLane=Object.fromEntries([...new Set(executed.map((r)=>r.lane??'GENERAL'))].sort().map((lane)=>[lane,executed.filter((r)=>(r.lane??'GENERAL')===lane).length]));
+  const activationTimes=executed.map((r)=>r.telemetry?.activation_ms).filter(Number.isFinite);
+  const idempotentHits=setup.accepted.filter((row)=>row.duplicate===true).length;
+  const cacheHits=dedupe.absorbed.length;
+  const parallelExecutionProven=threadSafe&&claimed.length>=5&&pool.max_active>=5;
+  const metrics=Object.freeze({
+    activation_wall_time_p50_ms:percentile(activationTimes,50),
+    activation_wall_time_p95_ms:percentile(activationTimes,95),
+    human_touches_per_skill:results.length?Number((results.filter((r)=>r.status==='HUMAN_REQUIRED').length/results.length).toFixed(6)):0,
+    skill_specific_code_changes:0,
+    content_cache_hits:cacheHits,
+    content_cache_hit_ratio:candidates.length?Number((cacheHits/candidates.length).toFixed(6)):0,
+    idempotent_job_hits:idempotentHits,
+    idempotent_rerun_rate:primaryCandidates.length?Number((idempotentHits/primaryCandidates.length).toFixed(6)):0,
+    regression_rate:results.length?Number((results.filter((r)=>['BLOCKED_EXTERNAL','RETRY_WAIT'].includes(r.status)).length/results.length).toFixed(6)):0,
+    terminal_outcome_distribution:Object.freeze(byStatus)
+  });
+  const report={
+    schema_version:'1.0.0',
+    state_type:'CEREBRO_UNIVERSAL_SKILL_BATCH_INDUSTRIAL_REPORT_V1',
+    status:claimed.length?(parallelExecutionProven?'INDUSTRIAL_BATCH_EXECUTED':'INDUSTRIAL_BATCH_EXECUTED_WITHOUT_PARALLEL_PROOF'):'NO_WORK',
+    company_id:'MULTI',
+    engine_id:'FACT-001',
+    environment:PREPROD,
+    version:VERSION,
+    input_candidates:candidates.length,
+    primary_candidates:primaryCandidates.length,
+    absorbed_count:dedupe.absorbed.length,
+    accepted_new_jobs:setup.accepted.filter((row)=>row.accepted===true).length,
+    idempotent_job_hits:idempotentHits,
+    executed_primary_count:executed.length,
+    max_active_workers:pool.max_active,
+    requested_concurrency:concurrency,
+    worker_mode:threadSafe?'WORKER_THREAD':'INLINE_ADAPTER_FALLBACK',
+    parallel_execution_proven:parallelExecutionProven,
+    fail_fast:false,
+    results,
+    by_status:Object.freeze(byStatus),
+    by_lane:Object.freeze(byLane),
+    metrics,
+    job_journal:runtime.journal_path,
+    ...authority()
+  };
   return Object.freeze({...report,batch_hash:hash(report)});
 }
