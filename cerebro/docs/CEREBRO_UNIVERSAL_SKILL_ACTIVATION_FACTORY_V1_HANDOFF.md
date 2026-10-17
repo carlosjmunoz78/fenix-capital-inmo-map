@@ -4,7 +4,7 @@ Fecha: 2026-10-18
 Repositorio: `carlosjmunoz78/fenix-capital-inmo-map`
 Rama: `cerebro/universal-skill-activation-factory-v1-20261017`
 PR: `#784`
-Último HEAD de código certificado: `a7df20aefca134086329273e9ee2be2aa3b6dd4a`
+Último HEAD de código certificado B18: `ed92f8b7ff351d98318d57225b4d3f510e20b7a4`
 Entorno: `PREPROD`
 Coste adicional: `0 €`
 PROD write: `NO`
@@ -28,6 +28,7 @@ FACT-001 recibe skill/repo/URL, preserva provenance/licencia, normaliza y mapea 
 - B15 Family Coverage/Terminal Truth cerrado.
 - B16 Current Evidence + Web/SEO Debt cerrado.
 - B17 Browser Automation + Physical Gates cerrado a nivel de gobernanza PREPROD, con residual físico actual veraz `BLOCKED_EXTERNAL`.
+- B18 LRN Measured Engineer Outcome Loop cerrado PREPROD con baseline real 0 -> NEW 1, learning persistido, Safe Engineering, OLD vs NEW, Tribunal independiente y evidencia de siguiente ciclo.
 
 ## CAPA TÉCNICA
 - `CODE / SOFTWARE_ENGINEERING`: HECHO. Usa capacidades existentes de software-engineering/debugging + script/shell/openclaw_runtime + analysis/reasoning. Normal: worktree/sandbox. Elevated: dry-run first. Destructivo: HIGH_RISK. Credencial crítica: SECURITY_INCIDENT.
@@ -38,7 +39,7 @@ FACT-001 recibe skill/repo/URL, preserva provenance/licencia, normaliza y mapea 
 - `ARQUITECTO`: reutilización existente, todavía no se crea capa nueva innecesaria.
 - `PERFORMANCE`: posterior.
 
-## EVIDENCIA EXACT-HEAD EN `a7df20a...`
+## EVIDENCIA B17 EXACT-HEAD EN `a7df20a...`
 GREEN 12/12:
 - Universal Skill Activation Factory V1 #104
 - Universal Skill Activation Scale184 V1 #50
@@ -51,10 +52,10 @@ GREEN 12/12:
 - Universal Skill B17 Browser Physical Gates V1 #2 (`run_id=39077601170`)
 - Skill Supply Chain Gate #851
 - Governed Main Integration V0 #665
-- RSI Promotion Readiness Shadow V0 #831
+- RSI Promotion Shadow #831
 
 ## B17 · CIERRE
-Archivos añadidos:
+Archivos:
 - `cerebro/runtime/universal-skill-b17-browser-physical-gates-v1.mjs`
 - `cerebro/tests/universal-skill-b17-browser-physical-gates-v1.test.mjs`
 - `.github/workflows/cerebro-universal-skill-b17-browser-physical-gates-v1.yml`
@@ -66,28 +67,49 @@ Resultado:
 - atestación fresca sola tampoco: exige observación física bounded/fail-closed en LAB/PREPROD;
 - kill-switch requerido, coste 0, no PROD/public mutation, no customer data, no Trading;
 - campos inesperados de evidencia se rechazan para no aceptar tokens/secretos como prueba;
-- targeted + current-truth + full CEREBRO regression GREEN;
 - sintético prueba la lógica del gate, no la presencia física actual;
-- el contexto de orquestación actual no puede observar la superficie física autorizada del Browser Bridge: `BLOCKED_EXTERNAL / PHYSICAL_EVIDENCE_PENDING`, no HUMAN_REQUIRED;
-- el residual es local y no bloquea B18.
+- residual: `BLOCKED_EXTERNAL / PHYSICAL_EVIDENCE_PENDING`, no HUMAN_REQUIRED; no bloquea trabajo independiente.
+
+## B18 · CIERRE HECHO PREPROD
+Baseline real: `f17fd6481c27d11df3442fb5764ba63c414bbfea`.
+Código certificado B18: `ed92f8b7ff351d98318d57225b4d3f510e20b7a4`.
+Workflow: `CEREBRO Universal Skill B18 LRN Measured Engineer Outcome Loop V1` run #2, `run_id=39080643672`, SUCCESS.
+Artifact: `12119220118`, digest `sha256:f4dd30b155d31093507f6107c482a42e5ac5043a89644b58fdcdf7fa63429520`.
+
+Prueba real:
+- target: `cerebro/platform/auto001-preprod-patch-planner-v0.mjs`;
+- defecto baseline: selección de mapping certificado dependía del orden del array;
+- métrica `order_invariance_score`: OLD=0, NEW=1;
+- LRN persiste evidencia y candidate de mejora;
+- Safe Engineering: `PASS_PREPROD_PLAN`;
+- OLD vs NEW usa mismo contrato/fixture;
+- Tribunal independiente: `APPROVE_PREPROD_NEXT_STAGE`;
+- segundo ciclo medido demuestra que el learning cambia la decisión a `KEEP_NEW_MONITOR`;
+- targeted + real OLD/NEW + full CEREBRO regression GREEN;
+- exact PR head checkout demostrado;
+- coste 0 €, no PROD, no auto-merge, no Trading, no customer data.
+
+Documentación B18:
+- `cerebro/registry/universal-skill-b18-lrn-measured-engineer-outcome-loop.v1.json`
+- `cerebro/docs/CEREBRO_B18_LRN_MEASURED_ENGINEER_OUTCOME_LOOP_V1_CONTRACT.md`
+- `cerebro/docs/CEREBRO_B18_LRN_MEASURED_ENGINEER_OUTCOME_LOOP_V1_DEPENDENCY_MAP.md`
+- `cerebro/docs/CEREBRO_B18_LRN_MEASURED_ENGINEER_OUTCOME_LOOP_V1_RUNBOOK.md`
+- `cerebro/docs/CEREBRO_B18_LRN_MEASURED_ENGINEER_OUTCOME_LOOP_V1_CHANGELOG.md`
+- `cerebro/docs/CEREBRO_B18_LRN_MEASURED_ENGINEER_OUTCOME_LOOP_V1_BACKUP_REBUILD_AUTONOMY.md`
 
 ## PARCIAL / NO SOBREAFIRMAR
 - `FULL_SAFE_PREPROD` no es PROD.
 - El residual físico Browser/device se cerrará solo con evidencia PREPROD fresca real.
 - PR #784 sigue sin merge automático autorizado.
 - ARQUITECTO/PERFORMANCE mantienen su clasificación previa hasta su bloque correspondiente.
+- B19/B20/B21 todavía no se declaran cerrados.
 
 ## next_block
-`B18_LRN_MEASURED_ENGINEER_OUTCOME_LOOP`
+`B19_UNIVERSAL_E2E_REAL`
 
-1. Inventariar/reutilizar LRN, Safe Engineering, OLD vs NEW, QA/EVA/JDG, observabilidad y rollback existentes; no crear engine nuevo.
-2. Elegir fixture PREPROD determinista/segura, sin customer data ni Trading, con baseline y defecto/mejora medibles.
-3. Evidencia -> learning LRN trazable -> decisión de ingeniería gobernada -> cambio reversible.
-4. Medir NEW con la misma métrica/contrato y ejecutar OLD vs NEW.
-5. Evaluator/Tribunal independiente; rollback obligatorio ante no-mejora o regresión.
-6. Exigir evidencia de siguiente ciclo para probar que el aprendizaje altera la próxima decisión.
-7. Prohibido cerrar por metadata, plan-only, synthetic-only o self-judging.
-8. Targeted + full regression + exact-head CI.
+Objetivo B19: probar físicamente en PREPROD y con una candidata gobernada el flujo completo:
+`factory -> register -> evaluate -> LRN -> engineer -> re-evaluate -> tribunal -> promotion/hold -> rollback/rebuild -> audit`.
+Ninguna etapa puede ser simulación que se auto-certifica.
 
 ## HUMAN_REQUIRED
 Únicamente `LEGAL_REQUIRED`, `SIGNATURE_REQUIRED`, `LOW_CONFIDENCE`, `HIGH_RISK`, `POLICY_CONFLICT`, `SECURITY_INCIDENT`, `MONEY_LIMIT`, `CUSTOMER_HUMAN_REQUEST`.
@@ -110,10 +132,10 @@ Activa MODO SUPERLOOP: EJECUTA -> PRUEBA -> CORRIGE -> VUELVE A PROBAR -> DOCUME
 Repo: carlosjmunoz78/fenix-capital-inmo-map
 Branch: cerebro/universal-skill-activation-factory-v1-20261017
 PR: #784
-Certified code head: a7df20aefca134086329273e9ee2be2aa3b6dd4a
+Certified B18 code head: ed92f8b7ff351d98318d57225b4d3f510e20b7a4
 PREPROD. Coste adicional 0 €. No PROD, no auto-merge, no Trading, no customer data.
-B15, B16 y B17 están cerrados. No los reconstruyas.
+B15, B16, B17 y B18 están cerrados dentro de su alcance. No los reconstruyas.
 Residual físico B17: BLOCKED_EXTERNAL / PHYSICAL_EVIDENCE_PENDING; no HUMAN_REQUIRED y no bloquea trabajo independiente.
-Entra directamente en B18_LRN_MEASURED_ENGINEER_OUTCOME_LOOP y demuestra baseline -> LRN -> cambio de ingeniería -> NEW medido -> OLD vs NEW -> tribunal independiente -> aceptar o rollback -> siguiente ciclo.
+Entra directamente en B19_UNIVERSAL_E2E_REAL y demuestra factory -> register -> evaluate -> LRN -> engineer -> re-evaluate -> tribunal -> promotion/hold -> rollback/rebuild -> audit con candidata PREPROD gobernada y evidencia real.
 Solo detente por HUMAN_REQUIRED canónico. Comunica muy poco y continúa después de cada hito.
 ```

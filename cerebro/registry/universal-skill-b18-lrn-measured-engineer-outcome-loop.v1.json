@@ -1,0 +1,65 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_UNIVERSAL_SKILL_B18_LRN_MEASURED_ENGINEER_OUTCOME_LOOP_EVIDENCE_V1",
+  "generated_at": "2026-10-18",
+  "company_id": "fenix",
+  "engine_id": "LRN-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "baseline_code_head_sha": "f17fd6481c27d11df3442fb5764ba63c414bbfea",
+  "certified_code_head_sha": "ed92f8b7ff351d98318d57225b4d3f510e20b7a4",
+  "certification": {
+    "workflow": "CEREBRO Universal Skill B18 LRN Measured Engineer Outcome Loop V1",
+    "run_number": 2,
+    "run_id": 39080643672,
+    "status": "SUCCESS",
+    "targeted_tests": "GREEN",
+    "real_old_new_loop": "GREEN",
+    "full_cerebro_regression": "GREEN",
+    "exact_pr_head_checkout": true,
+    "artifact_id": 12119220118,
+    "artifact_digest": "sha256:f4dd30b155d31093507f6107c482a42e5ac5043a89644b58fdcdf7fa63429520",
+    "node_runtime": "24.x"
+  },
+  "measured_outcome": {
+    "target": "cerebro/platform/auto001-preprod-patch-planner-v0.mjs",
+    "metric": "order_invariance_score",
+    "old_score": 0,
+    "new_score": 1,
+    "change": "deterministic stable selection among equivalent certified mappings",
+    "same_contract_old_new": true,
+    "learning_persisted": true,
+    "safe_engineering_gate": "PASS_PREPROD_PLAN",
+    "independent_tribunal": "APPROVE_PREPROD_NEXT_STAGE",
+    "next_cycle_learning_changed_decision": true,
+    "rollback_on_non_improvement_required": true
+  },
+  "existing_assets_reused": [
+    "cerebro/runtime/cerebro-safe-engineering-profile-v1.mjs",
+    "cerebro/runtime/learning-pipeline.mjs",
+    "cerebro/runtime/learning-ledger.mjs",
+    "cerebro/runtime/improvement-candidate-factory.mjs",
+    "cerebro/runtime/rsi-old-new-evaluation-tribunal-gate.mjs",
+    "cerebro/runtime/evaluation-tribunal.mjs",
+    "cerebro/runtime/experiment-pipeline.mjs",
+    "cerebro/runtime/promotion-pipeline.mjs"
+  ],
+  "implementation": {
+    "runtime": "cerebro/runtime/universal-skill-b18-lrn-measured-engineer-outcome-loop-v1.mjs",
+    "target_change": "cerebro/platform/auto001-preprod-patch-planner-v0.mjs",
+    "target_regression_test": "cerebro/tests/auto001-preprod-patch-executor-v0.test.mjs",
+    "loop_test": "cerebro/tests/universal-skill-b18-lrn-measured-engineer-outcome-loop-v1.test.mjs",
+    "workflow": ".github/workflows/cerebro-universal-skill-b18-lrn-measured-engineer-outcome-loop-v1.yml"
+  },
+  "authority": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "public_deploy_authorized": false,
+    "auto_merge_authorized": false,
+    "customer_data_authorized": false,
+    "trading_access": false,
+    "additional_cost_eur": 0
+  },
+  "human_required_active": [],
+  "next_block": "B19_UNIVERSAL_E2E_REAL"
+}

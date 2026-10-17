@@ -25,21 +25,9 @@ Opcionales: `TECH SCOUT | PERFORMANCE`.
 ## Estado certificado 2026-10-18
 Rama: `cerebro/universal-skill-activation-factory-v1-20261017`
 PR: `#784`
-Código certificado: `a7df20aefca134086329273e9ee2be2aa3b6dd4a`
+Último código B18 certificado: `ed92f8b7ff351d98318d57225b4d3f510e20b7a4`.
 
-GREEN exact-head 12/12:
-- Factory V1 #104
-- Scale184 V1 #50
-- Scale184 V2 #46
-- Repository E2E #46
-- GitHub Live E2E #44
-- B15 Integrity V1 #31
-- B16 Current Evidence V1 #25
-- B16 Web SEO Debt V1 #34
-- B17 Browser Physical Gates V1 #2
-- Skill Supply Chain #851
-- Governed Main Integration #665
-- RSI Promotion Shadow #831
+B17 mantiene su certificación histórica exact-head en `a7df20aefca134086329273e9ee2be2aa3b6dd4a`; B18 añade su propia certificación exact-head sin reescribir la evidencia B17.
 
 ## HECHO
 - Safe Engineering consumido por FACT-001.
@@ -54,6 +42,7 @@ GREEN exact-head 12/12:
 - SYSTEMS reutiliza runtime durable, concurrencia, retry/checkpoint/recovery y ejecución PREPROD fail-closed.
 - DATA reutiliza DB-SAFE-NATIVE, tenant scope/RLS y bloquea mutación sin backup/rollback.
 - SECURITY reutiliza IAM/credential foundation, mínimo privilegio y fail-closed sin exponer secretos.
+- B18 demuestra un aprendizaje LRN medido que produce un cambio de ingeniería real, NEW mejor, Tribunal independiente y una decisión posterior distinta por el aprendizaje.
 
 ## FACT FAST LANE INDUSTRIAL · HECHO PREPROD
 Se industrializa el batch existente; no se crea otra arquitectura universal.
@@ -105,11 +94,32 @@ Resultado:
 - el gate exige atestación fresca y una observación física bounded/fail-closed en LAB/PREPROD, kill-switch observado, coste 0, sin PROD/public mutation, customer data ni Trading;
 - evidencia con campos inesperados se rechaza para impedir que secretos/tokens se acepten como prueba;
 - targeted tests, verdad actual sin evidencia inyectada y full CEREBRO regression pasan;
-- exact-head: 12/12 workflows GREEN;
 - la ruta sintética demuestra la semántica del gate pero NO certifica el runtime físico actual;
-- el contexto de orquestación actual no puede observar la superficie física autorizada del Browser Bridge, por lo que el estado actual se mantiene veraz como `BLOCKED_EXTERNAL / PHYSICAL_EVIDENCE_PENDING`;
+- estado actual `BLOCKED_EXTERNAL / PHYSICAL_EVIDENCE_PENDING`;
 - no existe HUMAN_REQUIRED activo; este residual es local y no congela bloques independientes;
 - PROD/public deploy/auto-merge siguen no autorizados.
+
+## B18 · LRN MEASURED ENGINEER OUTCOME LOOP · HECHO PREPROD
+Baseline real: `f17fd6481c27d11df3442fb5764ba63c414bbfea`.
+Código certificado: `ed92f8b7ff351d98318d57225b4d3f510e20b7a4`.
+Workflow run #2 / `run_id=39080643672`: SUCCESS.
+Artifact `12119220118`, digest `sha256:f4dd30b155d31093507f6107c482a42e5ac5043a89644b58fdcdf7fa63429520`.
+
+Prueba:
+- fixture sobre código real `AUTO-001 PREPROD Patch Planner`;
+- baseline seleccionaba el primer mapping certificado elegible con `find()`, por lo que dos mappings equivalentes podían producir distinto plan según orden;
+- métrica predefinida `order_invariance_score`: OLD=0;
+- LRN crea y persiste learning trazable desde esa evidencia;
+- Safe Engineering autoriza únicamente cambio mínimo PREPROD reversible;
+- cambio: selección estable determinista entre mappings equivalentes;
+- misma métrica/contrato: NEW=1;
+- `compareEngineeringOutcomes`: `NEW_BETTER`;
+- Tribunal independiente: `APPROVE_PREPROD_NEXT_STAGE`;
+- segundo ciclo real medido persiste nuevo learning y cambia la decisión posterior a `KEEP_NEW_MONITOR`;
+- targeted + real OLD/NEW + full CEREBRO regression GREEN con exact PR head;
+- coste 0 €, sin PROD, auto-merge, Trading ni customer data.
+
+B18 reutiliza capacidades existentes; no crea motor nuevo.
 
 ## PARCIAL / POR AUDITAR
 - ARQUITECTO sigue siendo composición/reutilización existente, no una implementación transversal nueva.
@@ -117,18 +127,17 @@ Resultado:
 - `FULL_SAFE_PREPROD` no equivale a autoridad PROD.
 - Browser/device/media action-capable solo podrá cerrar el residual físico con evidencia PREPROD fresca real.
 - cualquier residual externo se clasifica por candidata como `BLOCKED_EXTERNAL`; HUMAN_REQUIRED solo si aplica uno de los ocho motivos canónicos.
+- B19/B20/B21 todavía deben certificarse.
 
 ## next_block
-`B18_LRN_MEASURED_ENGINEER_OUTCOME_LOOP`
+`B19_UNIVERSAL_E2E_REAL`
 
-Orden:
-1. inventariar y reutilizar LRN, Safe Engineering, OLD vs NEW, QA/EVA/JDG y observabilidad existentes; no crear motores duplicados;
-2. seleccionar una fixture PREPROD determinista y segura con baseline medible y un defecto/mejora concreta;
-3. producir evidencia -> aprendizaje LRN trazable -> decisión de ingeniería gobernada -> cambio reversible;
-4. medir post-cambio con la misma métrica/contrato y ejecutar OLD vs NEW;
-5. exigir evaluación independiente, rollback ante no-mejora/regresión y evidencia de siguiente ciclo;
-6. impedir falso closed-loop basado solo en plan, metadata o test sintético auto-juzgado;
-7. cerrar con targeted tests + full CEREBRO regression + exact-head CI.
+Criterio B19:
+1. candidata gobernada PREPROD real;
+2. `factory -> register -> evaluate -> LRN -> engineer -> re-evaluate -> tribunal -> promotion/hold -> rollback/rebuild -> audit`;
+3. ninguna etapa se cierra por simulación que se auto-certifica;
+4. targeted + full regression + exact-head evidence;
+5. no PROD, no auto-merge, no Trading, no customer data, coste 0 €.
 
 ## Política
 `CONSERVAR -> ENTENDER -> ENVOLVER -> PROBAR -> MEJORAR -> MIGRAR`.
