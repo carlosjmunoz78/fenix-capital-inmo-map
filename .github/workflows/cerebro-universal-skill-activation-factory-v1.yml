@@ -1,0 +1,76 @@
+name: CEREBRO Universal Skill Activation Factory V1
+
+on:
+  push:
+    branches:
+      - 'cerebro/universal-skill-activation-factory-v1-*'
+    paths:
+      - 'cerebro/runtime/fact-safe-engineering-bootstrap-v1.mjs'
+      - 'cerebro/runtime/universal-skill-activation-planner-v1.mjs'
+      - 'cerebro/runtime/universal-skill-real-binding-v1.mjs'
+      - 'cerebro/registry/fact-safe-engineering-bootstrap-v1.json'
+      - 'cerebro/registry/universal-skill-activation-factory-v1.state.json'
+      - 'cerebro/registry/universal-skill-activation-contracts-v1.json'
+      - 'cerebro/tests/fact-safe-engineering-bootstrap-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-activation-planner-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-real-binding-v1.test.mjs'
+      - '.github/workflows/cerebro-universal-skill-activation-factory-v1.yml'
+  pull_request:
+    paths:
+      - 'cerebro/runtime/fact-safe-engineering-bootstrap-v1.mjs'
+      - 'cerebro/runtime/universal-skill-activation-planner-v1.mjs'
+      - 'cerebro/runtime/universal-skill-real-binding-v1.mjs'
+      - 'cerebro/registry/fact-safe-engineering-bootstrap-v1.json'
+      - 'cerebro/registry/universal-skill-activation-factory-v1.state.json'
+      - 'cerebro/registry/universal-skill-activation-contracts-v1.json'
+      - 'cerebro/tests/fact-safe-engineering-bootstrap-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-activation-planner-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-real-binding-v1.test.mjs'
+      - '.github/workflows/cerebro-universal-skill-activation-factory-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: universal-skill-activation-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  b1-fact-safe-engineering:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: FACT Safe Engineering bootstrap tests
+        run: node --test cerebro/tests/fact-safe-engineering-bootstrap-v1.test.mjs cerebro/tests/cerebro-safe-engineering-profile-v1.test.mjs
+      - name: Assert authority boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -Eq 'prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true|additional_cost_eur[[:space:]]*:[[:space:]]*[1-9]' cerebro/runtime/fact-safe-engineering-bootstrap-v1.mjs cerebro/registry/fact-safe-engineering-bootstrap-v1.json
+
+  focused-existing-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Existing skill/evaluation regression
+        run: node --test cerebro/tests/skill-real-engine-binding-v1.test.mjs cerebro/tests/skill-capability-evolution-v0.test.mjs cerebro/tests/evaluation-tribunal.test.mjs
+
+  full-cerebro-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Full CEREBRO regression
+        run: node --test cerebro/tests/*.test.mjs
