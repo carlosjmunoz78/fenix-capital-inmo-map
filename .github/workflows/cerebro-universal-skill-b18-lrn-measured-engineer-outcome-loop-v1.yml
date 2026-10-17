@@ -8,6 +8,13 @@ on:
       - 'cerebro/runtime/universal-skill-b18-lrn-measured-engineer-outcome-loop-v1.mjs'
       - 'cerebro/tests/auto001-preprod-patch-executor-v0.test.mjs'
       - 'cerebro/tests/universal-skill-b18-lrn-measured-engineer-outcome-loop-v1.test.mjs'
+      - 'cerebro/registry/universal-skill-b18-lrn-measured-engineer-outcome-loop.v1.json'
+      - 'cerebro/docs/CEREBRO_UNIVERSAL_SKILL_ACTIVATION_FACTORY_V1_HANDOFF.md'
+      - 'cerebro/docs/CEREBRO_UNIVERSAL_SKILL_ACTIVATION_FACTORY_V1_MASTER_2026-10-17.md'
+      - 'cerebro/docs/CEREBRO_UNIVERSAL_SKILL_ACTIVATION_FACTORY_V1_RUNBOOK_2026-10-17.md'
+      - 'cerebro/docs/DEPENDENCY_MAP.md'
+      - 'cerebro/docs/CHANGELOG.md'
+      - 'cerebro/docs/AUTONOMY_BACKUP_REBUILD.md'
       - '.github/workflows/cerebro-universal-skill-b18-lrn-measured-engineer-outcome-loop-v1.yml'
 
 permissions:
@@ -28,6 +35,7 @@ jobs:
       - name: Checkout candidate exact head
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
 
       - name: Setup Node 24
@@ -83,7 +91,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: cerebro-b18-lrn-measured-engineer-outcome-${{ github.sha }}
+          name: cerebro-b18-lrn-measured-engineer-outcome-${{ github.event.pull_request.head.sha || github.sha }}
           path: .artifacts/b18
           if-no-files-found: error
           retention-days: 14
