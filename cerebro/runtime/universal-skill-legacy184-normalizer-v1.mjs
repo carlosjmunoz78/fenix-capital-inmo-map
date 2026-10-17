@@ -19,7 +19,7 @@ export function inferLegacyDomains(item,routing=loadActivationRouting()){
   for(const domain of routing.signals.domains){const owner=ownerScore(domain,owners);const text=textByDomain.get(domain.domain_id);const textScore=Number(text?.score??0);if(owner.score<=0&&textScore<=0)continue;rows.push({domain_id:domain.domain_id,score:textScore*10+owner.score,text_score:textScore,owner_score:owner.score,overlap:owner.overlap,text_matches:text?.matches??[]});}
   const withText=rows.filter((x)=>x.text_score>0);
   let selected=[];
-  if(withText.length){const topText=Math.max(...withText.map((x)=>x.text_score));const floor=Math.max(2,Math.floor(topText*0.5));selected=withText.filter((x)=>x.text_score>=floor);}
+  if(withText.length){const topText=Math.max(...withText.map((x)=>x.text_score));const floor=topText>=4?Math.ceil(topText*0.75):2;selected=withText.filter((x)=>x.text_score>=floor);}
   if(!selected.length&&rows.length){const topOwner=Math.max(...rows.map((x)=>x.owner_score));selected=rows.filter((x)=>x.owner_score===topOwner&&topOwner>0);}
   selected.sort((a,b)=>b.score-a.score||a.domain_id.localeCompare(b.domain_id));
   return Object.freeze(selected.map((x)=>Object.freeze({...x,overlap:Object.freeze([...x.overlap]),text_matches:Object.freeze([...x.text_matches])})));
