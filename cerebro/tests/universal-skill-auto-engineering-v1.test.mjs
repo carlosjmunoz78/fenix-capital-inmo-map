@@ -11,60 +11,14 @@ import {runUniversalSkillAutoEngineering,supportedAutoEngineeringDomains} from '
 const __dirname=path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT=path.resolve(__dirname,'../..');
 const SOURCE_FILE='cerebro/skills/cerebro-184-items-118-131-live-reconciliation.v2.json';
+const MATH_SOURCE='cerebro/tests/fixtures/math-solver-source-v1.md';
 
-function realFinanceCandidate(){
-  const doc=JSON.parse(fs.readFileSync(path.join(REPO_ROOT,SOURCE_FILE),'utf8'));
-  const item=doc.items.find((x)=>x.id===128);
-  assert.ok(item);
-  return normalizeLegacy184Item(item,{source_ref:SOURCE_FILE});
-}
+function realFinanceCandidate(){const doc=JSON.parse(fs.readFileSync(path.join(REPO_ROOT,SOURCE_FILE),'utf8'));const item=doc.items.find((x)=>x.id===128);assert.ok(item);return normalizeLegacy184Item(item,{source_ref:SOURCE_FILE});}
 
-test('B8 family executor advances a real prior ENGINEERING_TASK_REQUIRED finance candidate without per-ID runtime code',()=>{
-  const normalized=realFinanceCandidate();
-  assert.equal(normalized.expected_outcome,'ENGINEERING_TASK_REQUIRED');
-  const plan=buildUniversalActivationPlan(normalized.activation_input);
-  assert.equal(plan.status,'ACTIVATION_PLAN_READY');
-  assert.deepEqual(plan.domain_ids,['finance-accounting-payments']);
-  assert.equal(plan.binding_count,6);
+test('B8 family executor advances a real prior ENGINEERING_TASK_REQUIRED finance candidate without per-ID runtime code',()=>{const normalized=realFinanceCandidate();assert.equal(normalized.expected_outcome,'ENGINEERING_TASK_REQUIRED');const plan=buildUniversalActivationPlan(normalized.activation_input);assert.equal(plan.status,'ACTIVATION_PLAN_READY');assert.deepEqual(plan.domain_ids,['finance-accounting-payments']);assert.equal(plan.binding_count,6);const root=fs.mkdtempSync(path.join(os.tmpdir(),'cerebro-b8-finance-'));const report=runUniversalSkillAutoEngineering({activation_plan:plan,candidate_evidence:normalized.candidate_evidence,repo_root:REPO_ROOT,root_dir:root,source_run_id:8001,source_head_sha:'8888888888888888888888888888888888888888'});assert.equal(report.status,'FULL_SAFE_PREPROD');assert.equal(report.full_safe_preprod,true);assert.equal(report.fulfillment.initial_engineering_tasks,6);assert.equal(report.fulfillment.generated_semantic_evidence_count,6);assert.equal(report.fulfillment.unresolved_engineering_tasks.length,0);assert.equal(report.binding_report.binding_count,6);assert.equal(report.binding_report.independent_tribunal.decision,'PASS');assert.equal(report.binding_report.learning_sink.learning_outcome,'UNIVERSAL_SKILL_REAL_BINDINGS_GREEN');assert.equal(report.binding_report.backup_rollback_rebuild.rollback_green,true);assert.equal(report.binding_report.backup_rollback_rebuild.rebuild_green,true);assert.equal(report.additional_cost_eur,0);for(const provider of report.fulfillment.provider_reports){assert.equal(provider.provider_id,'FIRST_PARTY_FINANCE_SAFE_WRAP_V1');assert.equal(provider.status,'SEMANTIC_EVIDENCE_GREEN');assert.equal(provider.checks.no_payment_execution,true);assert.equal(provider.checks.reconcilable_output,true);assert.equal(provider.external_skill_code_execution,false);}});
 
-  const root=fs.mkdtempSync(path.join(os.tmpdir(),'cerebro-b8-finance-'));
-  const report=runUniversalSkillAutoEngineering({activation_plan:plan,candidate_evidence:normalized.candidate_evidence,repo_root:REPO_ROOT,root_dir:root,source_run_id:8001,source_head_sha:'8888888888888888888888888888888888888888'});
-  assert.equal(report.status,'FULL_SAFE_PREPROD');
-  assert.equal(report.full_safe_preprod,true);
-  assert.equal(report.fulfillment.initial_engineering_tasks,6);
-  assert.equal(report.fulfillment.generated_semantic_evidence_count,6);
-  assert.equal(report.fulfillment.unresolved_engineering_tasks.length,0);
-  assert.equal(report.binding_report.binding_count,6);
-  assert.equal(report.binding_report.independent_tribunal.decision,'PASS');
-  assert.equal(report.binding_report.learning_sink.learning_outcome,'UNIVERSAL_SKILL_REAL_BINDINGS_GREEN');
-  assert.equal(report.binding_report.backup_rollback_rebuild.rollback_green,true);
-  assert.equal(report.binding_report.backup_rollback_rebuild.rebuild_green,true);
-  assert.equal(report.additional_cost_eur,0);
-  for(const provider of report.fulfillment.provider_reports){
-    assert.equal(provider.provider_id,'FIRST_PARTY_FINANCE_SAFE_WRAP_V1');
-    assert.equal(provider.status,'SEMANTIC_EVIDENCE_GREEN');
-    assert.equal(provider.checks.no_payment_execution,true);
-    assert.equal(provider.checks.reconcilable_output,true);
-    assert.equal(provider.external_skill_code_execution,false);
-  }
-});
+test('B12 MATH family auto-engineering reaches FULL_SAFE_PREPROD across canonical math consumers',()=>{const input={company_id:'fenix',candidate_id:'math:bounded-solver:v1',technical_name:'bounded constraint solver',description:'mathematical optimization and constraint solver for deterministic bounded candidate selection',source_refs:[MATH_SOURCE],inventory_complete:true,dependencies_mapped:true,reuse_checked:true,provenance_license_green:true,additional_cost_eur:0};const plan=buildUniversalActivationPlan(input);assert.equal(plan.status,'ACTIVATION_PLAN_READY');assert.deepEqual(plan.domain_ids,['math-optimization-simulation']);assert.deepEqual(plan.target_engine_bindings,['OPT-001','SIM-001','DATA-001','FINOPS-001','EXP-001','QA-001']);const report=runUniversalSkillAutoEngineering({activation_plan:plan,candidate_evidence:{semantic_bindings:[]},repo_root:REPO_ROOT,root_dir:fs.mkdtempSync(path.join(os.tmpdir(),'cerebro-b12-math-')),source_run_id:12001,source_head_sha:'1212121212121212121212121212121212121212'});assert.equal(report.status,'FULL_SAFE_PREPROD');assert.equal(report.full_safe_preprod,true);assert.equal(report.fulfillment.initial_engineering_tasks,6);assert.equal(report.fulfillment.generated_semantic_evidence_count,6);assert.equal(report.binding_report.binding_count,6);assert.equal(report.binding_report.independent_tribunal.decision,'PASS');for(const provider of report.fulfillment.provider_reports){assert.equal(provider.provider_id,'FIRST_PARTY_MATH_SOLVER_SAFE_WRAP_V1');assert.equal(provider.status,'SEMANTIC_EVIDENCE_GREEN');assert.equal(provider.checks.deterministic_replay,true);assert.equal(provider.checks.input_validation,true);assert.equal(provider.additional_cost_eur,0);}});
 
-test('B8 fails closed when first-party source evidence cannot be consumed',()=>{
-  const normalized=realFinanceCandidate();
-  const plan=buildUniversalActivationPlan(normalized.activation_input);
-  const emptyRoot=fs.mkdtempSync(path.join(os.tmpdir(),'cerebro-b8-emptyrepo-'));
-  const report=runUniversalSkillAutoEngineering({activation_plan:plan,candidate_evidence:normalized.candidate_evidence,repo_root:emptyRoot,root_dir:fs.mkdtempSync(path.join(os.tmpdir(),'cerebro-b8-hold-'))});
-  assert.equal(report.status,'ENGINEERING_TASK_REQUIRED');
-  assert.equal(report.full_safe_preprod,false);
-  assert.equal(report.fulfillment.generated_semantic_evidence_count,0);
-  assert.equal(report.binding_report,null);
-});
+test('B8/B12 fail closed when governed source evidence cannot be consumed',()=>{const normalized=realFinanceCandidate();const plan=buildUniversalActivationPlan(normalized.activation_input);const emptyRoot=fs.mkdtempSync(path.join(os.tmpdir(),'cerebro-b8-emptyrepo-'));const report=runUniversalSkillAutoEngineering({activation_plan:plan,candidate_evidence:normalized.candidate_evidence,repo_root:emptyRoot,root_dir:fs.mkdtempSync(path.join(os.tmpdir(),'cerebro-b8-hold-'))});assert.equal(report.status,'ENGINEERING_TASK_REQUIRED');assert.equal(report.full_safe_preprod,false);assert.equal(report.fulfillment.generated_semantic_evidence_count,0);assert.equal(report.binding_report,null);});
 
-test('B8 exposes family-level providers, not candidate-specific adapters',()=>{
-  assert.deepEqual(supportedAutoEngineeringDomains(),['finance-accounting-payments']);
-  const runtime=fs.readFileSync(path.join(REPO_ROOT,'cerebro/runtime/universal-skill-auto-engineering-v1.mjs'),'utf8');
-  assert.equal(runtime.includes('legacy184:'),false);
-  assert.equal(runtime.includes('Stripe'),false);
-  assert.equal(runtime.includes('item.id==='),false);
-  assert.equal(runtime.includes('contract.required_constraints'),false);
-});
+test('B8/B12 expose family-level providers, not candidate-specific adapters',()=>{assert.deepEqual(supportedAutoEngineeringDomains(),['finance-accounting-payments','math-optimization-simulation']);const runtime=fs.readFileSync(path.join(REPO_ROOT,'cerebro/runtime/universal-skill-auto-engineering-v1.mjs'),'utf8');assert.equal(runtime.includes('legacy184:'),false);assert.equal(runtime.includes('Stripe'),false);assert.equal(runtime.includes('item.id==='),false);assert.equal(runtime.includes('contract.required_constraints'),false);assert.equal(runtime.includes('math:bounded-solver:v1'),false);});
