@@ -21,13 +21,15 @@ Mantener un único resumen operativo actual de CEREBRO sin reescribir la histori
 - Las `5/5` skills admitidas están `FULL_SAFE_PREPROD`.
 - `supabase-postgres-best-practices` y `agent-browser` tienen `10` bindings pertinentes gobernados en total.
 - El write path servidor→WordPress de Universal QA/Core Guard tiene E2E sintético PREPROD con readback, replay idempotente, compensación y gate cerrado al finalizar.
+- COMPET tiene tres targets reales de Córdoba configurados, baseline físico GET-only GREEN y scheduler diario de coste 0 €.
+- CAP tiene fuente oficial IECA Córdoba GET-only configurada, discovery físico PREPROD GREEN y scheduler diario de coste 0 €.
 
 ## PARCIAL
 
 - Android 48/183: APK firmada y STAGING verificados; falta dispositivo físico autorizado.
 - Watch & Learn: scheduler diario configurado; la evidencia canónica todavía declara `soak_complete=false` y `scheduled_soak_runs_verified=0`.
-- COMPET: la adopción semántica está cerrada, pero la configuración de targets reales + ejecución continua PREPROD sigue siendo un gate físico separado.
-- CAP: la adopción semántica está cerrada, pero las fuentes reales de adquisición + ejecución continua PREPROD siguen siendo un gate físico separado.
+- COMPET: targets y baseline real ya están cerrados; falta exclusivamente el soak de tres ejecuciones programadas genuinas GREEN.
+- CAP: fuente oficial y primera evidencia física ya están cerradas; falta exclusivamente el soak de ejecuciones programadas genuinas exigido por su contrato.
 - Los restantes dominios con efectos físicos se conservan `POR_AUDITAR_PHYSICAL` hasta evidencia fresca; no se promocionan por inferencia.
 
 ## HUMAN_REQUIRED
@@ -55,6 +57,8 @@ El workflow `CEREBRO Global Operational Convergence V4` debe comprobar como mín
 - B3 genérico GREEN sin cerrar falsamente PR #732;
 - Android físico todavía false;
 - Watch & Learn soak todavía no cerrado mientras el registry lo declare así;
+- COMPET baseline real de tres targets preservado y scheduler configurado, sin fingir el soak de tres cron;
+- CAP fuente oficial IECA y discovery físico preservados, sin fingir el soak programado;
 - PROD, writes, provider side effects, customer data, gasto, Trading y ejecución de código externo denegados.
 
 ## Backup
@@ -78,14 +82,14 @@ No existe rollback de datos de negocio porque esta reconciliación no muta recur
 1. Leer registry canónico actual.
 2. Leer V3 solo como baseline histórico.
 3. Leer registries estrictos actuales y evidencia de skills.
-4. Leer gates físicos Android/Watch & Learn/B3.
+4. Leer gates físicos Android/Watch & Learn/B3 y los registries de fuentes reales COMPET/CAP.
 5. Verificar en GitHub los PR HUMAN_REQUIRED activos.
 6. Generar un nuevo estado únicamente con evidencia observada; nunca convertir ausencia de evidencia en GREEN.
 7. Ejecutar OLD-vs-NEW/regresión y gates de gobernanza antes de promover el puntero actual.
 
 ## Changelog
 
-`2026-10-17`: V4 reconcilia el mapa global después de cierres de COMPET/CAP/LEAD, Lote 3, Mortgage Operations y skill bindings. La deuda lógica cerrada no elimina los gates físicos ni los conflictos de política reales.
+`2026-10-17`: V4 reconcilia el mapa global después de cierres de COMPET/CAP/LEAD, Lote 3, Mortgage Operations y skill bindings. Se corrige además la clasificación de COMPET/CAP: sus fuentes reales y baselines físicos ya existen; lo pendiente es el soak programado, no la configuración de fuentes. La deuda lógica cerrada no elimina los gates físicos ni los conflictos de política reales.
 
 ## Estado de autonomía
 
