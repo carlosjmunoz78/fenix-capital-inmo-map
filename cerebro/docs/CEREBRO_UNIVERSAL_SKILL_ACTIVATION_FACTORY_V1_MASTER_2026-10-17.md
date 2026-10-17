@@ -1,110 +1,42 @@
 # CEREBRO UNIVERSAL SKILL ACTIVATION FACTORY V1 · MASTER
 
-Fecha: 2026-10-17
-Issue canónica: #780
-PR: #784
-Branch: `cerebro/universal-skill-activation-factory-v1-20261017`
-Estado: IN_PROGRESS
-Entorno: LAB/PREPROD
-PROD: NO TOCAR
-Coste adicional objetivo: 0 EUR
+Fecha 2026-10-17 · Issue #780 · PR #784 draft · Branch `cerebro/universal-skill-activation-factory-v1-20261017` · LAB/PREPROD · PROD NO TOCAR · coste adicional 0 EUR.
 
-## 1. Objetivo
+## Objetivo
+Efecto operativo tipo Cloud: una skill/repositorio/URL entra y CEREBRO la convierte automáticamente en capacidad funcional en sus motores relevantes, o devuelve un estado terminal preciso, sin integración artesanal individual.
 
-Convertir la incorporación de skills/repositorios en un proceso industrial y automático. El efecto objetivo es equivalente a "pegar una URL y, poco después, CEREBRO sabe usarla", pero con gobierno, pruebas, trazabilidad, OLD vs NEW, rollback y aprendizaje.
+Pipeline: `INGEST → PROVENANCE/LICENSE → DISCOVERY → DEDUPE → DOMAIN/ENGINE PLAN → SAFE ENGINEERING → ADAPTER → REAL SEMANTIC BINDINGS → OLD VS NEW → QA/EVA/TRIBUNAL → LRN/OBS/AUDIT/FINOPS → BACKUP/ROLLBACK/REBUILD → PHYSICAL PREPROD WHEN REQUIRED → TERMINAL STATE`.
 
-Entradas: skill, repositorio, capability/package/librería, wrapper normalizado o capacidad interna que necesite bindings reales.
+Terminales: FULL_SAFE_PREPROD/FULL_REAL, ABSORBED, REJECTED, BLOCKED_EXTERNAL, HUMAN_REQUIRED. FULL exige evidencia real, no catálogo/scaffold/wrapper.
 
-Salidas terminales válidas: `FULL_SAFE_PREPROD/FULL_REAL`, `ABSORBED`, `REJECTED`, `BLOCKED_EXTERNAL`, `HUMAN_REQUIRED`.
+## Arquitectura preservada
+Safe Engineering es brazo técnico de FACT; JOB-001 es runtime durable; Planner usa Capability Signals + Engine Registry; contratos semánticos son por dominio; adapter factory acepta solo evidencia segura/exacta; B4 aplica OLD vs NEW/Tribunal/LRN/telemetría/rollback; FACT Skill Native hace registro gobernado. Motor ≠ IA. Existing-engine-first. Multiempresa. Trading aislado.
 
-Una skill NO cuenta como integrada por discovery, descarga, catálogo, normalización, documentación, wrapper, scaffold o test aislado.
+## B0–B7
+Persistencia, bootstrap, planner, semantic contracts, real bindings, adapter/batch, blind batch y escala 184 truthful: GREEN.
 
-## 2. Definición de FULL
+## B8 · GREEN primer family provider
+`universal-skill-auto-engineering-v1.mjs` convierte `ENGINEERING_TASK_REQUIRED` en trabajo ejecutable por familia. Finance provider consume evidencia de fuente y ejecuta benchmark determinista; no copia constraints del contrato. Item real #128 pasó automáticamente a FULL_SAFE_PREPROD en 6 bindings.
 
-FULL exige por cada binding relevante: provenance/licencia válida; ruta segura de reuse/wrapper; target engine gobernado; consumo semántico real; OLD vs NEW PASS; QA/EVA/Tribunal PASS; no regresión; backup/rollback/rebuild; OBS/Audit/FinOps; feedback LRN persistente e idempotente; restart/fail-closed; coste 0 o excepción aprobada; evidencia física PREPROD cuando aplique; invocación ordinaria sin humano.
+## B9 · GREEN
+Repositorio dinámico no preparado: FULL_SAFE_PREPROD + registro nativo. Entrada GitHub pública real: `https://github.com/ericrisco/rsc-harness/tree/main/skills/finance-ops` → lectura read-only, SHA fijado, licencia, `SKILL.md` inferido, planner, auto-engineering, 6 bindings, gates y registro nativo → FULL_SAFE_PREPROD. Sin clone/token/install/code execution externo.
 
-## 3. Principios
+## B10 · GREEN_PREPROD_CONTROL_PLANE
+`universal-skill-source-queue-v1.mjs` usa JOB-001 para lotes de URLs, concurrencia, idempotency key, restart/reuse de resultado y estados terminales. Workflow `cerebro-universal-skill-continuous-intake-v1.yml` define repository_dispatch/workflow_dispatch. En rama se certifica el control plane; activación event-driven en default branch queda para promoción gobernada, no se afirma operativa todavía.
 
-CONSERVAR → ENTENDER → ENVOLVER → PROBAR → MEJORAR → MIGRAR. Factory First. Existing-engine-first. Motor ≠ IA. No forzar skills en todos los motores. No ejecutar código externo crudo sin aislamiento/evaluación/autoridad. Multiempresa. Trading aislado. Supabase no como runtime universal pesado. No PROD.
+HEAD certificado `876ae431e67b278b447fc21006c48c4bb94bb592`. Runs SUCCESS: Factory 39032881903; Scale184 V1 39032881926; Scale184 V2 39032881910; GitHub live 39032881905; Repository E2E 39032881906; Governed Main 39032881956; RSI 39032881917.
 
-## 4. Arquitectura
+## Scale184 V2
+35 ABSORBED, 59 REJECTED, 79 BLOCKED_EXTERNAL, 10 ENGINEERING_TASK_REQUIRED, 1 FULL_SAFE_PREPROD. `full_claim=false`. Artifact 12101021987 digest `sha256:adfbfb754c29928a9e034fb7f72b77ea49d03cd25b185386d205bc17857855a7`.
 
-`INGEST → PROVENANCE/LICENSE → CAPABILITY DISCOVERY → DEDUPE/ABSORB → DOMAIN CLASSIFICATION → TARGET ENGINE PLANNER → SAFE ENGINEERING → ADAPTER → PARALLEL LAB → SEMANTIC BINDINGS → OLD VS NEW → QA/EVA/TRIBUNAL → LRN/OBS/FINOPS → BACKUP/ROLLBACK/REBUILD → PHYSICAL PREPROD → TERMINAL STATE`
+## B11 · IN_PROGRESS
+Cuello actual: cross-domain. Legacy normalizer usa top owner-overlap y los empates pueden sobrerutear items a dominios colaterales. Corregir inferencia usando evidencia textual/manifest + owners, luego fabricar providers reutilizables por domain contract y reejecutar los 10 gaps. Nunca hardcodear IDs ni fabricar evidencia. Physical remains physical.
 
-El planner resuelve `skill/repo → capacidades → dominios → motores relevantes` usando Registry/señales gobernadas, no tablas por skill concreta.
+## B12
+Certificación final multi-familia y SLO. Objetivos posteriores: simple 1–5 min, normal 5–15 min, repo mediano 10–30 min, compleja 20–60 min; medir, no prometer. Presupuesto V1 14–18 h, reevaluación estructural a 20 h si reaparece trabajo manual por skill.
 
-## 5. Bootstrap de ingeniería
+## Math/Engineering posterior
+No proyecto separado antes de Factory. Safe Engineering ya acelera FACT. Tras B11/B12, usar Factory para absorber Math/Solver/Optimization, Systems Engineering, Data Engineering y Security Engineering.
 
-Safe Engineering Profile V1 se reutiliza como brazo técnico de FACT. No crear agente programador aislado. Mantener permisos/coste/PROD cerrados.
-
-## 6. Generalización del binding real
-
-V1 sustituye rutas hardcodeadas por ActivationPlan, familias de contratos semánticos y un executor N candidates × M bindings con receipts, OLD vs NEW, Tribunal, LRN/OBS/FinOps y rollback/rebuild.
-
-## 7. Paralelismo
-
-Reutilizar JOB-001 durable. FAST_LANE/ENGINEERING/DEVICES/GROWTH/MEDIA/BUSINESS/GENERAL; EXPRESS/STANDARD/DEEP; una candidata lenta no bloquea las demás; corregir por familia.
-
-## 8. Capacidades expertas posteriores
-
-Tras cerrar la Factory: Math/Solver/Optimization, Systems Engineering, Data Engineering, Security Engineering y futuras capabilities se incorporan usando la propia Factory. Math no bloquea la Factory; Safe Engineering sí se usa desde el bootstrap.
-
-## 9. Métricas objetivo
-
-Presupuesto V1: 14–18 h técnicas; reevaluación estructural a 20 h si persiste trabajo manual por skill. SLO objetivo posterior: sencilla 1–5 min, normal 5–15 min, repo mediano 10–30 min, compleja 20–60 min, externo/hardware hasta bloqueo terminal. Son objetivos a medir, no garantías.
-
-## 10. Comunicación
-
-Solo hitos relevantes y breves. No pedir intervención salvo HUMAN_REQUIRED real.
-
-## 11. Continuidad entre chats
-
-Actualizar MASTER + STATE + RUNBOOK + HANDOFF antes de saturación o tras bloque mayor. El siguiente chat lee evidencia viva y entra en `next_block`, sin reconstruir por memoria.
-
-## 12. Bloques
-
-- B0 Persistencia/contrato: GREEN.
-- B1 Engineering bootstrap: GREEN.
-- B2 Generic Activation Planner: GREEN.
-- B3 Semantic Contract Families: GREEN.
-- B4 Generic Real Binding Executor: GREEN.
-- B5 Automatic Adapter + Durable Batch: GREEN.
-- B6 Blind Batch Certification: GREEN.
-- B7 Scale184 Truthful Certification: GREEN.
-- B8 Auto Engineering Fulfillment: IN_PROGRESS.
-- B9 Unseen Repository E2E + SLO: PLANNED.
-- B10 Continuous Trigger + Final Factory Certification: PLANNED.
-
-## 13. Evidencia certificada B0–B7
-
-HEAD certificado `e663bb404cf7022d5469e6384759195bbdd5e1c1`.
-
-Runs: Factory `39031138379` SUCCESS; Scale184 `39031138363` SUCCESS; Governed Main `39031138343` SUCCESS; RSI Readiness `39031138350` SUCCESS.
-
-Artifact Scale184 `12100228380`, digest `sha256:64d62a173cdaae86eede9cef56c44bac6c73b9775fe5fc05605bdb7a67315c86`.
-
-Matriz 184: 35 ABSORBED, 59 REJECTED, 79 BLOCKED_EXTERNAL, 11 ENGINEERING_TASK_REQUIRED; 58 atravesaron runtime; 126 terminaron por evidencia/estado previo; `full_claim=false`.
-
-Esto demuestra clasificación/batch/verdad a escala, no 184 activaciones físicas.
-
-## 14. Gap estructural actual
-
-El adapter factory ya puede reutilizar adapters existentes o generar adapters declarativos cuando existe evidencia semántica segura y exacta. Cuando falta esa evidencia, genera una `ENGINEERING_TASK_REQUIRED` gobernada. El batch actualmente propaga ese estado: todavía no ejecuta automáticamente la ingeniería necesaria hasta obtener implementación + pruebas + evidencia y reintentar el binding.
-
-Ese es el cuello de botella restante para conseguir el efecto "meto una skill/repo y queda funcionando" sin chat conductor.
-
-## 15. B8 · Auto Engineering Fulfillment
-
-FACT debe convertir una `ENGINEERING_TASK_REQUIRED` en trabajo durable ejecutable: Safe Engineering → aislamiento → inventario/dependencias/reuse → tests → implementación mínima/wrapper → probe real → evidencia → rerun del binding → OLD vs NEW/gates → terminal state.
-
-No se acepta generar evidencia copiando constraints del contrato. No se acepta código por ID de candidata. Los fallos se agrupan por familia. Evidencia física sigue siendo física.
-
-Criterio mínimo B8: una candidata que antes terminaba `ENGINEERING_TASK_REQUIRED` avanza automáticamente sin integración escrita específicamente para ella.
-
-## 16. B9/B10
-
-B9 debe tomar una entrada no preparada (repositorio/skill) y demostrar E2E real, además de medir SLO. B10 conecta trigger continuo y certifica que el proceso opera sin chat conductor.
-
-## 17. Regla de éxito final
-
-La Factory no termina porque compile o porque la matriz 184 sea GREEN. Termina cuando una entrada nueva no preparada puede atravesar el circuito automáticamente y quedar en un estado terminal verdadero, y las candidatas ordinarias que necesitan ingeniería no requieren trabajo artesanal por candidata.
+## Comunicación/continuidad
+Solo hitos relevantes y breves. Antes de saturación o cierre mayor actualizar MASTER/STATE/RUNBOOK/HANDOFF y continuar desde `next_block`, nunca por memoria.

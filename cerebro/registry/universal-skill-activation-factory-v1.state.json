@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.2.0",
+  "schema_version": "1.3.0",
   "state_type": "CEREBRO_UNIVERSAL_SKILL_ACTIVATION_FACTORY_V1_STATE",
   "generated_at": "2026-10-17",
   "company_id": "GLOBAL",
@@ -10,60 +10,54 @@
   "pull_request": 784,
   "branch": "cerebro/universal-skill-activation-factory-v1-20261017",
   "status": "IN_PROGRESS",
-  "current_block": "B8_AUTO_ENGINEERING_FULFILLMENT",
-  "next_block": "B8_CLOSE_ENGINEERING_TASK_REQUIRED_WITHOUT_PER_SKILL_MANUAL_WORK",
-  "last_certified_head_sha": "e663bb404cf7022d5469e6384759195bbdd5e1c1",
-  "objective": "Generalize skill/repository activation so candidates become real governed engine bindings automatically without per-skill artisanal integration.",
-  "definition_of_full": "A candidate is FULL only when every relevant governed binding proves real semantic consumption, OLD_VS_NEW, QA/EVA/Tribunal, no regression, LRN feedback, observability/audit/FinOps, backup/rollback/rebuild, idempotency/restartability, zero-cost or approved exception, and physical PREPROD evidence where required.",
+  "current_block": "B11_CROSS_DOMAIN_GENERALIZATION",
+  "next_block": "B11_FIX_LEGACY_DOMAIN_INFERENCE_AND_GENERALIZE_AUTO_ENGINEERING_BY_FAMILY",
+  "last_certified_head_sha": "876ae431e67b278b447fc21006c48c4bb94bb592",
+  "objective": "Skill/repository URL -> governed activation -> real bindings -> terminal truth without per-skill artisanal integration.",
+  "definition_of_full": "FULL only when every relevant governed binding proves real semantic consumption, OLD_VS_NEW, QA/EVA/Tribunal, no regression, LRN feedback, observability/audit/FinOps, backup/rollback/rebuild, idempotency/restartability, zero-cost or approved exception, and physical PREPROD evidence where required.",
   "terminal_states": ["FULL_SAFE_PREPROD","FULL_REAL","ABSORBED","REJECTED","BLOCKED_EXTERNAL","HUMAN_REQUIRED"],
   "human_required_reasons": ["LEGAL_REQUIRED","SIGNATURE_REQUIRED","LOW_CONFIDENCE","HIGH_RISK","POLICY_CONFLICT","SECURITY_INCIDENT","MONEY_LIMIT","CUSTOMER_HUMAN_REQUEST"],
-  "preserve": {
-    "existing_factory": true,
-    "existing_skill_autoloop": true,
-    "existing_multilane_design": true,
-    "existing_safe_engineering_profile": true,
-    "existing_job_runtime": true,
-    "existing_rsi_lrn": true,
-    "existing_qa_eva_tribunal": true,
-    "existing_registry": true,
-    "prod_untouched": true,
-    "trading_isolated": true
+  "preserve": {"existing_factory":true,"existing_skill_autoloop":true,"existing_multilane_design":true,"existing_safe_engineering_profile":true,"existing_job_runtime":true,"existing_rsi_lrn":true,"existing_qa_eva_tribunal":true,"existing_registry":true,"prod_untouched":true,"trading_isolated":true},
+  "certified_capabilities": {
+    "generic_activation_planner": "GREEN",
+    "semantic_contract_families": "GREEN",
+    "generic_real_binding_executor": "GREEN",
+    "automatic_adapter_factory": "GREEN_FOR_EVIDENCE_GROUNDED_BINDINGS",
+    "durable_batch_job001": "GREEN",
+    "auto_engineering_finance_family": "GREEN",
+    "unseen_repository_directory_e2e": "GREEN",
+    "public_github_skill_url_live_e2e": "GREEN",
+    "durable_source_queue_restart_idempotency": "GREEN",
+    "continuous_repository_dispatch_workflow": "DEFINED_ON_BRANCH_NOT_DEFAULT_BRANCH_ACTIVATED"
   },
-  "known_live_evidence": {
-    "catalog_size": 184,
-    "normalized_item_count": 184,
-    "all_184_physically_active": false,
-    "canonical_engine_count": 179,
-    "base_engine_count_preserved": 177,
-    "specific_real_binding_proof": {"skills":2,"bindings":10,"status":"FULL_SAFE_PREPROD"},
-    "safe_engineering_profile_exists": true,
-    "durable_job_runtime_exists": true,
-    "continuous_evolution_loop_exists": true,
-    "generic_activation_planner_green": true,
-    "semantic_contract_families_green": true,
-    "generic_real_binding_executor_green": true,
-    "automatic_adapter_factory_green_for_evidence_grounded_bindings": true,
-    "durable_batch_green": true,
-    "blind_real_catalog_green": true,
-    "scale184_truthful_matrix_green": true,
-    "scale184_full_claim": false,
-    "scale184_observed_outcomes": {"ABSORBED":35,"REJECTED":59,"BLOCKED_EXTERNAL":79,"ENGINEERING_TASK_REQUIRED":11},
-    "scale184_processed_runtime": 58,
-    "scale184_terminal_without_runtime": 126,
-    "remaining_structural_gap": "ENGINEERING_TASK_REQUIRED is planned automatically but not yet fulfilled automatically into implementation plus semantic evidence; arbitrary repo URL to FULL is therefore not yet certified."
+  "live_external_proof": {
+    "source": "https://github.com/ericrisco/rsc-harness/tree/main/skills/finance-ops",
+    "mode": "PUBLIC_GITHUB_READONLY_PINNED_SHA",
+    "result": "FULL_SAFE_PREPROD",
+    "external_skill_code_executed": false,
+    "dependency_installed": false,
+    "additional_cost_eur": 0,
+    "workflow_run": 39032881905
   },
-  "certified_runs": {
-    "head_sha": "e663bb404cf7022d5469e6384759195bbdd5e1c1",
-    "universal_skill_factory": 39031138379,
-    "scale184": 39031138363,
-    "governed_main": 39031138343,
-    "rsi_promotion_readiness": 39031138350,
-    "conclusion": "SUCCESS"
+  "scale184_v2": {
+    "workflow_run": 39032665290,
+    "artifact_id": 12101021987,
+    "artifact_digest": "sha256:adfbfb754c29928a9e034fb7f72b77ea49d03cd25b185386d205bc17857855a7",
+    "observed_outcomes": {"ABSORBED":35,"REJECTED":59,"BLOCKED_EXTERNAL":79,"ENGINEERING_TASK_REQUIRED":10,"FULL_SAFE_PREPROD":1},
+    "new_full_item_ids": [128],
+    "remaining_engineering_item_ids": [47,48,57,62,101,130,157,176,181,183],
+    "full_claim": false
   },
-  "scale184_artifact": {
-    "artifact_id": 12100228380,
-    "name": "cerebro-usaf-scale184-39031138363",
-    "digest": "sha256:64d62a173cdaae86eede9cef56c44bac6c73b9775fe5fc05605bdb7a67315c86"
+  "certified_runs_at_head": {
+    "head_sha": "876ae431e67b278b447fc21006c48c4bb94bb592",
+    "factory": 39032881903,
+    "scale184_v1": 39032881926,
+    "scale184_v2": 39032881910,
+    "github_live_e2e": 39032881905,
+    "repository_e2e": 39032881906,
+    "governed_main": 39032881956,
+    "rsi_readiness": 39032881917,
+    "all_conclusion": "SUCCESS"
   },
   "blocks": [
     {"id":"B0","name":"PERSISTENCE_AND_CONTRACT","status":"GREEN"},
@@ -74,27 +68,23 @@
     {"id":"B5","name":"AUTOMATIC_ADAPTER_AND_DURABLE_BATCH","status":"GREEN"},
     {"id":"B6","name":"BLIND_BATCH_CERTIFICATION","status":"GREEN"},
     {"id":"B7","name":"SCALE184_TRUTHFUL_CERTIFICATION","status":"GREEN"},
-    {"id":"B8","name":"AUTO_ENGINEERING_FULFILLMENT","status":"IN_PROGRESS"},
-    {"id":"B9","name":"UNSEEN_REPOSITORY_E2E_AND_SLO","status":"PLANNED"},
-    {"id":"B10","name":"CONTINUOUS_TRIGGER_AND_FINAL_FACTORY_CERTIFICATION","status":"PLANNED"}
+    {"id":"B8","name":"AUTO_ENGINEERING_FULFILLMENT_FIRST_FAMILY","status":"GREEN"},
+    {"id":"B9","name":"UNSEEN_REPOSITORY_AND_PUBLIC_GITHUB_URL_E2E","status":"GREEN"},
+    {"id":"B10","name":"DURABLE_CONTINUOUS_SOURCE_INTAKE_CONTROL_PLANE","status":"GREEN_PREPROD_CONTROL_PLANE"},
+    {"id":"B11","name":"CROSS_DOMAIN_GENERALIZATION","status":"IN_PROGRESS"},
+    {"id":"B12","name":"FINAL_FACTORY_CERTIFICATION_AND_PROMOTION_READINESS","status":"PLANNED"}
   ],
-  "b8_acceptance": [
-    "ENGINEERING_TASK_REQUIRED must become executable governed work, not a manual stop.",
-    "The worker must reuse FACT Safe Engineering, isolated worktree/sandbox policy, tests-first, rollback/rebuild and zero-cost boundaries.",
-    "No semantic evidence may be fabricated from target contracts.",
-    "A generated adapter is accepted only after real probe evidence and OLD vs NEW.",
-    "At least one previously ENGINEERING_TASK_REQUIRED candidate must advance automatically without per-skill handwritten integration.",
-    "Failures must collapse to reusable family-level reasons and remain fail-closed."
+  "b11_acceptance": [
+    "Legacy domain inference must stop over-binding by owner-engine tie alone and use textual/domain evidence plus owner compatibility.",
+    "Auto-engineering providers must be family/domain based, never candidate-ID based.",
+    "Multiple previously ENGINEERING_TASK_REQUIRED catalog items must advance without handwritten per-item routes.",
+    "Physical domains remain BLOCKED_EXTERNAL until physical evidence exists.",
+    "No semantic evidence may be generated by copying target contract constraints.",
+    "Factory and full CEREBRO regressions stay GREEN."
   ],
-  "truth_guards": [
-    "Never derive observed semantic evidence by echoing the target contract.",
-    "Missing evidence routes to governed engineering work instead of fabricating FULL.",
-    "Physical-required domains remain BLOCKED_EXTERNAL until physical evidence exists.",
-    "Failed bindings emit HOLD learning, never GREEN learning.",
-    "GREEN scale matrix is not equivalent to 184 FULL."
-  ],
+  "truth_guards": ["GREEN matrix != 184 FULL","No contract-echo evidence","No raw external code execution","No silent dependency install","No PROD mutation","Physical evidence stays physical"],
   "time_budget_hours": {"target_min":14,"target_max":18,"structural_reassessment_limit":20},
-  "communication_policy": "Only milestone updates; one very short sentence stating current work, achieved result and next step.",
-  "handoff_policy": "Before chat saturation or after a major block, update MASTER, STATE, RUNBOOK and HANDOFF with exact SHAs/runs/evidence and next_block. New chat must continue from evidence, not memory.",
+  "communication_policy": "Only major milestone updates, one short sentence.",
+  "handoff_policy": "Before saturation or major-block close update MASTER, STATE, RUNBOOK and HANDOFF with exact SHA/runs/evidence/next_block.",
   "authority": {"prod_authorized":false,"prod_write_authorized":false,"prod_mutation_authorized":false,"auto_merge_authorized":false,"customer_data_authorized":false,"trading_access":false,"paid_fallback":false,"additional_cost_eur":0}
 }
