@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "state_type": "CEREBRO_UNIVERSAL_SKILL_ACTIVATION_FACTORY_V1_STATE",
   "generated_at": "2026-10-17",
   "company_id": "GLOBAL",
@@ -7,34 +7,22 @@
   "environment": "PREPROD",
   "version": "v1",
   "issue": 780,
+  "pull_request": 784,
   "branch": "cerebro/universal-skill-activation-factory-v1-20261017",
   "status": "IN_PROGRESS",
-  "current_block": "B0_PERSISTENCE_AND_CONTRACT",
-  "next_block": "B1_ENGINEERING_BOOTSTRAP",
+  "current_block": "B5_AUTOMATIC_ADAPTER_AND_DURABLE_BATCH",
+  "next_block": "B6_BLIND_BATCH_CERTIFICATION_AFTER_B5_CI_GREEN",
+  "last_certified_head_sha": "9a810685d372cd4cc59c24a88289b162e93f1531",
+  "working_head_sha_observed": "15c5527eb48c46d4f16f87e07add892837b4368d",
+  "working_head_ci_state_at_checkpoint": "IN_PROGRESS",
   "objective": "Generalize skill/repository activation so normalized candidates become real governed engine bindings automatically without per-skill artisanal integration.",
   "definition_of_full": "A candidate is FULL only when every relevant governed binding proves real semantic consumption, OLD_VS_NEW, QA/EVA/Tribunal, no regression, LRN feedback, observability/audit/FinOps, backup/rollback/rebuild, idempotency/restartability, zero-cost or approved exception, and physical PREPROD evidence where required.",
-  "terminal_states": [
-    "FULL_SAFE_PREPROD",
-    "FULL_REAL",
-    "ABSORBED",
-    "REJECTED",
-    "BLOCKED_EXTERNAL",
-    "HUMAN_REQUIRED"
-  ],
-  "human_required_reasons": [
-    "LEGAL_REQUIRED",
-    "SIGNATURE_REQUIRED",
-    "LOW_CONFIDENCE",
-    "HIGH_RISK",
-    "POLICY_CONFLICT",
-    "SECURITY_INCIDENT",
-    "MONEY_LIMIT",
-    "CUSTOMER_HUMAN_REQUEST"
-  ],
+  "terminal_states": ["FULL_SAFE_PREPROD","FULL_REAL","ABSORBED","REJECTED","BLOCKED_EXTERNAL","HUMAN_REQUIRED"],
+  "human_required_reasons": ["LEGAL_REQUIRED","SIGNATURE_REQUIRED","LOW_CONFIDENCE","HIGH_RISK","POLICY_CONFLICT","SECURITY_INCIDENT","MONEY_LIMIT","CUSTOMER_HUMAN_REQUEST"],
   "preserve": {
     "existing_factory": true,
     "existing_skill_autoloop": true,
-    "existing_multilane": true,
+    "existing_multilane_design": true,
     "existing_safe_engineering_profile": true,
     "existing_job_runtime": true,
     "existing_rsi_lrn": true,
@@ -49,41 +37,52 @@
     "all_184_physically_active": false,
     "canonical_engine_count": 179,
     "base_engine_count_preserved": 177,
-    "specific_real_binding_proof": {
-      "skills": 2,
-      "bindings": 10,
-      "status": "FULL_SAFE_PREPROD"
-    },
+    "specific_real_binding_proof": {"skills":2,"bindings":10,"status":"FULL_SAFE_PREPROD"},
     "safe_engineering_profile_exists": true,
-    "multilane_factory_exists": true,
+    "multilane_design_doc_exists": true,
+    "multilane_runtime_implementation_verified": false,
+    "multilane_runtime_note": "MULTILANE_SKILL_FACTORY_V0.md is live on main, but code search/tree inspection did not verify a physical runtime/state file with the documented multilane names. B5 therefore reuses verified JOB-001 and implements an additive durable batch orchestrator rather than claiming an unseen runtime.",
     "durable_job_runtime_exists": true,
     "continuous_evolution_loop_exists": true
   },
+  "certified_runs": {
+    "head_sha": "9a810685d372cd4cc59c24a88289b162e93f1531",
+    "universal_skill_factory": 39031651063,
+    "governed_main": 39031651067,
+    "rsi_promotion_readiness": 39031651060,
+    "conclusion": "SUCCESS"
+  },
+  "working_runs": {
+    "head_sha": "15c5527eb48c46d4f16f87e07add892837b4368d",
+    "universal_skill_factory": 39030671589,
+    "governed_main": 39030671611,
+    "rsi_promotion_readiness": 39030671666,
+    "state_at_checkpoint": "FACTORY_AND_RSI_IN_PROGRESS_GOVERNED_MAIN_SUCCESS"
+  },
   "blocks": [
-    {"id":"B0","name":"PERSISTENCE_AND_CONTRACT","status":"IN_PROGRESS"},
-    {"id":"B1","name":"ENGINEERING_BOOTSTRAP","status":"PLANNED"},
-    {"id":"B2","name":"GENERIC_ACTIVATION_PLANNER","status":"PLANNED"},
-    {"id":"B3","name":"SEMANTIC_CONTRACT_FAMILIES","status":"PLANNED"},
-    {"id":"B4","name":"GENERIC_REAL_BINDING_EXECUTOR","status":"PLANNED"},
-    {"id":"B5","name":"MULTILANE_EXECUTION","status":"PLANNED"},
+    {"id":"B0","name":"PERSISTENCE_AND_CONTRACT","status":"HECHO"},
+    {"id":"B1","name":"ENGINEERING_BOOTSTRAP","status":"GREEN"},
+    {"id":"B2","name":"GENERIC_ACTIVATION_PLANNER","status":"GREEN"},
+    {"id":"B3","name":"SEMANTIC_CONTRACT_FAMILIES","status":"GREEN"},
+    {"id":"B4","name":"GENERIC_REAL_BINDING_EXECUTOR","status":"GREEN"},
+    {"id":"B5","name":"AUTOMATIC_ADAPTER_AND_DURABLE_BATCH","status":"IN_PROGRESS"},
     {"id":"B6","name":"BLIND_BATCH_CERTIFICATION","status":"PLANNED"},
     {"id":"B7","name":"SCALE_BATCH","status":"PLANNED"}
   ],
-  "time_budget_hours": {
-    "target_min": 14,
-    "target_max": 18,
-    "structural_reassessment_limit": 20
-  },
+  "b5_working_files": [
+    "cerebro/runtime/universal-skill-adapter-factory-v1.mjs",
+    "cerebro/tests/universal-skill-adapter-factory-v1.test.mjs",
+    "cerebro/runtime/universal-skill-batch-orchestrator-v1.mjs",
+    "cerebro/tests/universal-skill-batch-orchestrator-v1.test.mjs"
+  ],
+  "truth_guards": [
+    "Never derive observed semantic evidence by echoing the target contract.",
+    "Missing adapter evidence routes to Safe Engineering work instead of fabricating FULL.",
+    "Physical-required domains remain BLOCKED_EXTERNAL until physical evidence exists.",
+    "Failed bindings emit HOLD learning, never GREEN learning."
+  ],
+  "time_budget_hours": {"target_min":14,"target_max":18,"structural_reassessment_limit":20},
   "communication_policy": "Only milestone updates; one very short sentence stating current work, achieved result and next step.",
   "handoff_policy": "Before chat saturation or after a major block, update MASTER, STATE, RUNBOOK and HANDOFF with exact SHAs/runs/evidence and next_block. New chat must continue from evidence, not memory.",
-  "authority": {
-    "prod_authorized": false,
-    "prod_write_authorized": false,
-    "prod_mutation_authorized": false,
-    "auto_merge_authorized": false,
-    "customer_data_authorized": false,
-    "trading_access": false,
-    "paid_fallback": false,
-    "additional_cost_eur": 0
-  }
+  "authority": {"prod_authorized":false,"prod_write_authorized":false,"prod_mutation_authorized":false,"auto_merge_authorized":false,"customer_data_authorized":false,"trading_access":false,"paid_fallback":false,"additional_cost_eur":0}
 }
