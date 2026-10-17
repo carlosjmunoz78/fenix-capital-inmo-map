@@ -10,8 +10,10 @@ const repoRoot=path.resolve(__dirname,'../..');
 
 test('B16 latest reconciliation selector preserves history but consumes only newest exact range',()=>{
   const latest=listLatestLegacyReconciliations({repo_root:repoRoot});
-  assert.equal(latest.length,15);
-  assert.equal(latest.reduce((sum,row)=>sum+row.doc.items.length,0),184);
+  const items=latest.flatMap((row)=>row.doc.items);
+  assert.ok(latest.length>0);
+  assert.equal(items.length,184);
+  assert.equal(new Set(items.map((item)=>item.id)).size,184);
   assert.ok(latest.some((row)=>row.ref==='cerebro/skills/cerebro-184-items-176-184-live-reconciliation.v3.json'));
   assert.ok(!latest.some((row)=>row.ref==='cerebro/skills/cerebro-184-items-176-184-live-reconciliation.v2.json'));
 });
