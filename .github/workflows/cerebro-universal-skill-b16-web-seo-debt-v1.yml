@@ -50,6 +50,6 @@ jobs:
       - name: B15 anti-false-FULL regression
         run: node --test cerebro/tests/universal-skill-auto-engineering-v1.test.mjs cerebro/tests/universal-skill-b15-integrity-v1.test.mjs
       - name: Full CEREBRO regression
-        run: node --test cerebro/tests/*.test.mjs
+        run: node --test --test-concurrency=1 cerebro/tests/*.test.mjs
       - name: Emit measured report
         run: node cerebro/runtime/universal-skill-web-seo-debt-audit-v1.mjs > /tmp/b16-web-seo-debt.json && node -e "const r=require('/tmp/b16-web-seo-debt.json'); console.log(JSON.stringify({status:r.status,items:r.sources.item_count,global_recommendation:r.global_recommendation,families:Object.fromEntries(Object.entries(r.families).map(([k,v])=>[k,{candidates:v.candidate_count,debt:v.engineering_debt_count,repeated:v.repeated_engineering_debt,recommendation:v.recommendation,reason:v.reason}]))},null,2))"
