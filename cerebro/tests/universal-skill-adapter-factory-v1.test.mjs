@@ -36,8 +36,8 @@ test('exact evidence-grounded declarative capability becomes internal adapter an
   assert.equal(d.decision,'GENERATE_DECLARATIVE_ADAPTER');
   assert.notEqual(d.adapter,null);
   const probe=d.adapter.probe();
-  assert.deepEqual(probe.observed_constraints.sort(),observed.sort());
-  assert.deepEqual(probe.evidence_refs,['artifact:blind-eval:abc']);
+  assert.deepEqual([...probe.observed_constraints].sort(),[...observed].sort());
+  assert.deepEqual([...probe.evidence_refs],['artifact:blind-eval:abc']);
   assert.equal(probe.real_consumption,true);
   assert.equal(probe.external_skill_code_execution,false);
 });
