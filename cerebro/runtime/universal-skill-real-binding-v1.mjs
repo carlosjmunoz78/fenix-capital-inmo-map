@@ -106,13 +106,14 @@ function stateHash(s){return hash({company_id:s.company_id,environment:s.environ
 function persistState(root,state){const file=path.join(root,'universal-skill-bindings.json');if(fs.existsSync(file)){const old=readJson(file);if(stateHash(old)!==stateHash(state))throw new Error('UNIVERSAL_SKILL_BINDING_STATE_CONFLICT');return {file,state:old,created:false};}writeJson(file,state);return {file,state,created:true};}
 function backupRollbackRebuild(root,state){const file=path.join(root,'universal-skill-bindings.json'),backup=path.join(root,'backups','universal-skill-bindings.json');writeJson(backup,readJson(file));const before=stateHash(readJson(file));fs.unlinkSync(file);const rollback_green=!fs.existsSync(file);writeJson(file,state);const after=stateHash(readJson(file));return Object.freeze({backup_ready:fs.existsSync(backup),backup_file:backup,rollback_green,rebuild_green:before===after,applied_state_hash:before,rebuilt_state_hash:after});}
 
-function learningConsumer(bundle,root,source){
-  const event_report={events:[{event_id:`evt:universal-skill-bind:${hash({binding_id:bundle.binding_id}).slice(0,24)}`,company_id:bundle.company_id,signal_family:'ENGINE_RESULT',engine_id:'FACT-001',environment:PREPROD,version:VERSION,outcome:'UNIVERSAL_SKILL_REAL_BINDINGS_GREEN',outcome_hash:hash(bundle.receipts.map((x)=>x.outcome_hash)),prod_authorized:false,trading_access:false,additional_cost_eur:0}]};
+function learningConsumer(bundle,allBindings,root,source){
+  const learningOutcome=allBindings?'UNIVERSAL_SKILL_REAL_BINDINGS_GREEN':'UNIVERSAL_SKILL_REAL_BINDINGS_HOLD';
+  const event_report={events:[{event_id:`evt:universal-skill-bind:${hash({binding_id:bundle.binding_id,learningOutcome}).slice(0,24)}`,company_id:bundle.company_id,signal_family:'ENGINE_RESULT',engine_id:'FACT-001',environment:PREPROD,version:VERSION,outcome:learningOutcome,outcome_hash:hash(bundle.receipts.map((x)=>x.outcome_hash)),prod_authorized:false,trading_access:false,additional_cost_eur:0}]};
   const build=buildLearningOutbox({event_report,subscriber_registry:readJson(SUBSCRIBERS_PATH),source});
   const persisted=persistLearningOutbox({build,output_root:path.join(root,'learning-outbox')});
   const pass=build.batches_total===1&&persisted.status==='OUTBOX_GREEN'&&persisted.batches_total===1;
-  const outcome={pass,batches_total:persisted.batches_total,created_total:persisted.created_total};
-  return Object.freeze({engine_id:'LRN-001',decision:pass?'LRN_FEEDBACK_PERSISTED':'LRN_FEEDBACK_HOLD',real_consumption:true,outcome:Object.freeze(outcome),outcome_hash:hash(outcome),...authority()});
+  const outcome={pass,learning_outcome:learningOutcome,batches_total:persisted.batches_total,created_total:persisted.created_total};
+  return Object.freeze({engine_id:'LRN-001',decision:pass?'LRN_FEEDBACK_PERSISTED':'LRN_FEEDBACK_HOLD',real_consumption:true,learning_outcome:learningOutcome,outcome:Object.freeze(outcome),outcome_hash:hash(outcome),...authority()});
 }
 
 function telemetry(bundle,root,semanticOutcomeHash){
@@ -132,12 +133,12 @@ function telemetry(bundle,root,semanticOutcomeHash){
 export function runUniversalSkillRealBinding({activation_plan,adapter_resolver,root_dir,source_run_id=1,source_head_sha='0000000000000000000000000000000000000001'}={}){
   const root=path.resolve(root_dir??fs.mkdtempSync(path.join(os.tmpdir(),'cerebro-universal-skill-bindings-')));fs.mkdirSync(root,{recursive:true});
   const bundle=buildUniversalBindingBundle({activation_plan,adapter_resolver});
-  const eva=overallEvaluation(bundle);const state=semanticState(bundle);const first=persistState(root,state);const again=persistState(root,state);const br=backupRollbackRebuild(root,state);
-  const lrn=learningConsumer(bundle,root,{workflow:'CEREBRO Universal Skill Activation Factory V1',run_id:Number(source_run_id),head_sha:source_head_sha});
-  const tel=telemetry(bundle,root,state.outcome_hash);
   const allBindings=bundle.binding_count>0&&bundle.receipts.every((x)=>x.status==='PASS'&&x.real_consumption===true&&x.meaningful_change===true&&x.old_vs_new?.decision==='PASS'&&x.candidate_coverage===1&&x.baseline_coverage<1);
+  const eva=overallEvaluation(bundle);const state=semanticState(bundle);const first=persistState(root,state);const again=persistState(root,state);const br=backupRollbackRebuild(root,state);
+  const lrn=learningConsumer(bundle,allBindings,root,{workflow:'CEREBRO Universal Skill Activation Factory V1',run_id:Number(source_run_id),head_sha:source_head_sha});
+  const tel=telemetry(bundle,root,state.outcome_hash);
   const missingPhysical=bundle.receipts.filter((x)=>x.decision==='PHYSICAL_EVIDENCE_REQUIRED');
-  const green=allBindings&&eva.tribunal.decision==='PASS'&&again.created===false&&lrn.decision==='LRN_FEEDBACK_PERSISTED'&&tel.observability_green&&tel.finops_green&&tel.audit_green&&br.backup_ready&&br.rollback_green&&br.rebuild_green;
+  const green=allBindings&&eva.tribunal.decision==='PASS'&&again.created===false&&lrn.decision==='LRN_FEEDBACK_PERSISTED'&&lrn.learning_outcome==='UNIVERSAL_SKILL_REAL_BINDINGS_GREEN'&&tel.observability_green&&tel.finops_green&&tel.audit_green&&br.backup_ready&&br.rollback_green&&br.rebuild_green;
   const status=green?'FULL_SAFE_PREPROD':missingPhysical.length?'BLOCKED_EXTERNAL':'HOLD';
   const report={
     schema_version:'1.0.0',state_type:'CEREBRO_UNIVERSAL_SKILL_REAL_BINDING_REPORT_V1',status,full_safe_preprod:green,
