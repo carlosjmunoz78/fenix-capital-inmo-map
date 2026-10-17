@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_CURRENT_OPERATIONAL_CONVERGENCE_POINTER",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "current": "cerebro/registry/cerebro-global-operational-convergence-v4.json",
+  "current_version": "v4",
+  "historical": [
+    "cerebro/skills/cerebro-184-live-convergence.v2.json",
+    "cerebro/skills/cerebro-184-live-convergence.v3.json"
+  ],
+  "selection_rule": "Use current for operational reporting; preserve historical files as evidence and never rewrite their observed state to make current gates look greener.",
+  "authority_change": false,
+  "additional_cost_eur": 0
+}
