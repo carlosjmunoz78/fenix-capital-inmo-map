@@ -25,20 +25,21 @@ Opcionales: `TECH SCOUT | PERFORMANCE`.
 ## Estado certificado 2026-10-18
 Rama: `cerebro/universal-skill-activation-factory-v1-20261017`
 PR: `#784`
-Código certificado: `0ba248c812ed21b2ddbea1f2b2010357615159c9`
+Código certificado: `a7df20aefca134086329273e9ee2be2aa3b6dd4a`
 
-GREEN exact-head 11/11:
-- Factory V1 #95
-- Scale184 V1 #42
-- Scale184 V2 #38
-- Repository E2E #38
-- GitHub Live E2E #36
-- B15 Integrity V1 #19
-- B16 Current Evidence V1 #17
-- B16 Web SEO Debt V1 #21
-- Skill Supply Chain #843
-- Governed Main Integration #657
-- RSI Promotion Shadow #823
+GREEN exact-head 12/12:
+- Factory V1 #104
+- Scale184 V1 #50
+- Scale184 V2 #46
+- Repository E2E #46
+- GitHub Live E2E #44
+- B15 Integrity V1 #31
+- B16 Current Evidence V1 #25
+- B16 Web SEO Debt V1 #34
+- B17 Browser Physical Gates V1 #2
+- Skill Supply Chain #851
+- Governed Main Integration #665
+- RSI Promotion Shadow #831
 
 ## HECHO
 - Safe Engineering consumido por FACT-001.
@@ -68,7 +69,7 @@ Capacidades demostradas:
 - blind batch real sobre reconciliación 184, con resultados terminales veraces y prohibición explícita de ascender metadata legacy a falso FULL.
 - batch sintético multi-familia para demostrar el camino FULL sin código por candidate-id.
 - telemetría de colas/activación y campos de etapa; lo no medido se deja `null`, no se inventa.
-- métricas p50/p95, wall time, eficiencia paralela, human touches, code changes por skill, cache ratios, regression, rerun idempotency y distribución terminal.
+- métricas p50/p95, wall time, eficiencia paralela, human touches/skill, code changes por skill, cache ratios, regression, rerun idempotency y distribución terminal.
 - coste adicional 0 €, no PROD, no Trading, no datos cliente.
 
 ## B15 · AUTO ENGINEERING FAMILY COVERAGE + TERMINAL TRUTH · HECHO PREPROD
@@ -80,44 +81,54 @@ Providers genéricos certificados:
 - `data-database-supabase`
 - `security-identity-privacy`
 
-Controles añadidos/certificados:
-- fuente legacy `184` acotada por item/candidate para impedir contaminación por evidencia de siblings;
-- estados como `DEFINED_NOT_BUILT`, `SIMULATION_ONLY`, `SCAFFOLD_PLAN`, `NOT_PROMOTED` o `PHYSICAL_*_REQUIRED` no pueden convertirse en FULL por un family provider;
+Controles certificados:
+- fuente legacy `184` acotada por item/candidate;
+- estados de deuda no se convierten en FULL por family provider;
 - provider disponible no equivale a integración cerrada;
-- `FULL_SAFE_PREPROD` solo puede exponerse como `FULL_REAL` cuando toda la evidencia estricta está completa;
-- deuda `ENGINEERING_TASK_REQUIRED` permanece no terminal.
+- `FULL_SAFE_PREPROD` solo puede exponerse como `FULL_REAL` con evidencia estricta completa;
+- `ENGINEERING_TASK_REQUIRED` permanece no terminal.
 
 ## B16 · CURRENT EVIDENCE + WEB/SEO DEBT · HECHO PREPROD
-Resultado certificado sobre el código `0ba248c812ed21b2ddbea1f2b2010357615159c9`:
-- 184 items medidos y reconciliados item-scoped;
-- `web-wordpress-frontend`: 17 candidatas, 7 con deuda de ingeniería;
-- `seo-search-content`: 30 candidatas, 19 con deuda de ingeniería;
-- deuda repetida sí, pero sin evidencia explícita de contrato genérico de ejecución + binding semántico, por lo que **NO** se fabrica un provider Web/SEO genérico por inferencia;
-- se preservan SEO-001, WordPress, APPBOOT/FACT y la evidencia física ya existente;
-- item 183 permanece `PARTIAL_PREPROD_STAGING_RENDER_AND_SIGNED_ANDROID_BUILD_GREEN_PHYSICAL_DEVICE_PENDING` y no se asciende artificialmente;
-- la regresión completa inicialmente detectó 4 tests que importan módulos `.ts`; la causa fue el runner B16 fijado en Node 20 mientras el contrato raíz del repo exige Node 24.x;
-- reparación mínima: Node 20 -> Node 24 en el workflow B16; sin excluir tests, sin añadir dependencias, sin rebajar gates;
-- resultado final B16 y exact-head: GREEN 11/11 workflows;
+- 184 items medidos y reconciliados item-scoped.
+- Web/WordPress/frontend: 17 candidatas, 7 deudas de ingeniería.
+- SEO/search/content: 30 candidatas, 19 deudas de ingeniería.
+- `NO_NEW_WEB_SEO_PROVIDER_JUSTIFIED` hasta existir contrato genérico de ejecución + binding semántico demostrados.
+- Item 183 mantiene su gate físico Android pendiente.
+- B16 se alineó de Node 20 a Node 24.x, sin excluir tests, añadir dependencias ni rebajar gates.
+
+## B17 · BROWSER AUTOMATION + PHYSICAL GATES · HECHO PREPROD CON RESIDUAL EXTERNO
+Código certificado: `a7df20aefca134086329273e9ee2be2aa3b6dd4a`.
+
+Resultado:
+- se reutilizan Browser Transversal Autonomy, Authorized Execution Device Profile, Identity Session Lifecycle, Credential Lifecycle y Physical Adapter Audit; no se crea proveedor/browser engine duplicado;
+- configuración/perfil/binding declarado no cuentan como evidencia física;
+- el gate exige atestación fresca y una observación física bounded/fail-closed en LAB/PREPROD, kill-switch observado, coste 0, sin PROD/public mutation, customer data ni Trading;
+- evidencia con campos inesperados se rechaza para impedir que secretos/tokens se acepten como prueba;
+- targeted tests, verdad actual sin evidencia inyectada y full CEREBRO regression pasan;
+- exact-head: 12/12 workflows GREEN;
+- la ruta sintética demuestra la semántica del gate pero NO certifica el runtime físico actual;
+- el contexto de orquestación actual no puede observar la superficie física autorizada del Browser Bridge, por lo que el estado actual se mantiene veraz como `BLOCKED_EXTERNAL / PHYSICAL_EVIDENCE_PENDING`;
+- no existe HUMAN_REQUIRED activo; este residual es local y no congela bloques independientes;
 - PROD/public deploy/auto-merge siguen no autorizados.
 
 ## PARCIAL / POR AUDITAR
 - ARQUITECTO sigue siendo composición/reutilización existente, no una implementación transversal nueva.
 - PERFORMANCE sigue posterior.
-- `FULL_SAFE_PREPROD` no equivale a activación física universal ni autoridad PROD.
-- Browser/device/media action-capable debe reconciliar configuración frente a evidencia física PREPROD actual; presencia de profile o binding declarado no cuenta como prueba física.
-- `physical-adapter-audit-v1` contiene evidencia histórica útil pero debe auditarse contra la rama/código actual antes de usarla como certificación nueva.
-- cualquier residual externo se clasifica por candidata como `BLOCKED_EXTERNAL` o, solo si aplica uno de los ocho motivos canónicos, `HUMAN_REQUIRED`.
+- `FULL_SAFE_PREPROD` no equivale a autoridad PROD.
+- Browser/device/media action-capable solo podrá cerrar el residual físico con evidencia PREPROD fresca real.
+- cualquier residual externo se clasifica por candidata como `BLOCKED_EXTERNAL`; HUMAN_REQUIRED solo si aplica uno de los ocho motivos canónicos.
 
 ## next_block
-`B17_BROWSER_AUTOMATION_AND_PHYSICAL_GATES`
+`B18_LRN_MEASURED_ENGINEER_OUTCOME_LOOP`
 
 Orden:
-1. inventariar Browser Bridge, authorized execution device profile, repair workflow, contratos y evidencia física existentes; no crear un proveedor duplicado;
-2. separar configuración declarada de prueba física observable y conservar toda evidencia histórica válida;
-3. verificar bindings de navegador/dispositivo en PREPROD con ejecución bounded/fail-closed, sin arbitrary shell, datos cliente, Trading, PROD ni dependencias nuevas;
-4. exigir evidencia física para cualquier claim `FULL_REAL`/`FULL_SAFE_PREPROD` action-capable; si la superficie física no está disponible, registrar el residual exacto sin falso verde;
-5. ejecutar targeted + full regression + exact-head CI, manteniendo rollback/rebuild/observabilidad;
-6. mantener PR #784 sin auto-merge; promoción a `main` solo por gate/política gobernada.
+1. inventariar y reutilizar LRN, Safe Engineering, OLD vs NEW, QA/EVA/JDG y observabilidad existentes; no crear motores duplicados;
+2. seleccionar una fixture PREPROD determinista y segura con baseline medible y un defecto/mejora concreta;
+3. producir evidencia -> aprendizaje LRN trazable -> decisión de ingeniería gobernada -> cambio reversible;
+4. medir post-cambio con la misma métrica/contrato y ejecutar OLD vs NEW;
+5. exigir evaluación independiente, rollback ante no-mejora/regresión y evidencia de siguiente ciclo;
+6. impedir falso closed-loop basado solo en plan, metadata o test sintético auto-juzgado;
+7. cerrar con targeted tests + full CEREBRO regression + exact-head CI.
 
 ## Política
 `CONSERVAR -> ENTENDER -> ENVOLVER -> PROBAR -> MEJORAR -> MIGRAR`.
