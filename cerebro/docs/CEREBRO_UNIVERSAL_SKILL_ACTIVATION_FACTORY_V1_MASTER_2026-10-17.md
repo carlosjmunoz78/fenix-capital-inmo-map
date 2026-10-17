@@ -22,21 +22,23 @@ Opcionales: `TECH SCOUT | PERFORMANCE`.
 
 `CODE` usa identidad lógica `SOFTWARE_ENGINEERING` sobre capacidades reales existentes; no es un motor nuevo. SYSTEMS/DATA/SECURITY reutilizan runtime/JOB/device profile, DB-SAFE-NATIVE e IAM/credential foundation respectivamente.
 
-## Estado certificado 2026-10-17
+## Estado certificado 2026-10-18
 Rama: `cerebro/universal-skill-activation-factory-v1-20261017`
 PR: `#784`
-Código certificado: `e346c57bd177c62b151ed3de33e90d27c3d3f4da`
+Código certificado: `0ba248c812ed21b2ddbea1f2b2010357615159c9`
 
-GREEN exact-head:
-- Factory V1 #78
-- Scale184 V1 #26
-- Scale184 V2 #22
-- Repository E2E #22
-- GitHub Live E2E #20
-- B15 Integrity V1 #2
-- Skill Supply Chain #826
-- Governed Main Integration #641
-- RSI Promotion Shadow #807
+GREEN exact-head 11/11:
+- Factory V1 #95
+- Scale184 V1 #42
+- Scale184 V2 #38
+- Repository E2E #38
+- GitHub Live E2E #36
+- B15 Integrity V1 #19
+- B16 Current Evidence V1 #17
+- B16 Web SEO Debt V1 #21
+- Skill Supply Chain #843
+- Governed Main Integration #657
+- RSI Promotion Shadow #823
 
 ## HECHO
 - Safe Engineering consumido por FACT-001.
@@ -85,22 +87,36 @@ Controles añadidos/certificados:
 - `FULL_SAFE_PREPROD` solo puede exponerse como `FULL_REAL` cuando toda la evidencia estricta está completa;
 - deuda `ENGINEERING_TASK_REQUIRED` permanece no terminal.
 
+## B16 · CURRENT EVIDENCE + WEB/SEO DEBT · HECHO PREPROD
+Resultado certificado sobre el código `0ba248c812ed21b2ddbea1f2b2010357615159c9`:
+- 184 items medidos y reconciliados item-scoped;
+- `web-wordpress-frontend`: 17 candidatas, 7 con deuda de ingeniería;
+- `seo-search-content`: 30 candidatas, 19 con deuda de ingeniería;
+- deuda repetida sí, pero sin evidencia explícita de contrato genérico de ejecución + binding semántico, por lo que **NO** se fabrica un provider Web/SEO genérico por inferencia;
+- se preservan SEO-001, WordPress, APPBOOT/FACT y la evidencia física ya existente;
+- item 183 permanece `PARTIAL_PREPROD_STAGING_RENDER_AND_SIGNED_ANDROID_BUILD_GREEN_PHYSICAL_DEVICE_PENDING` y no se asciende artificialmente;
+- la regresión completa inicialmente detectó 4 tests que importan módulos `.ts`; la causa fue el runner B16 fijado en Node 20 mientras el contrato raíz del repo exige Node 24.x;
+- reparación mínima: Node 20 -> Node 24 en el workflow B16; sin excluir tests, sin añadir dependencias, sin rebajar gates;
+- resultado final B16 y exact-head: GREEN 11/11 workflows;
+- PROD/public deploy/auto-merge siguen no autorizados.
+
 ## PARCIAL / POR AUDITAR
-- No todos los dominios observados con deuda tienen family provider. Web/WordPress/SEO y browser automation deben medirse contra deuda real antes de fabricar nada.
 - ARQUITECTO sigue siendo composición/reutilización existente, no una implementación transversal nueva.
 - PERFORMANCE sigue posterior.
 - `FULL_SAFE_PREPROD` no equivale a activación física universal ni autoridad PROD.
-- App Factory/Website reporting legacy 176-184 tiene que reconciliarse con evidencia física posterior ya existente antes de decidir nueva fabricación; no se repetirá trabajo físico ya probado.
+- Browser/device/media action-capable debe reconciliar configuración frente a evidencia física PREPROD actual; presencia de profile o binding declarado no cuenta como prueba física.
+- `physical-adapter-audit-v1` contiene evidencia histórica útil pero debe auditarse contra la rama/código actual antes de usarla como certificación nueva.
+- cualquier residual externo se clasifica por candidata como `BLOCKED_EXTERNAL` o, solo si aplica uno de los ocho motivos canónicos, `HUMAN_REQUIRED`.
 
 ## next_block
-`B16_CURRENT_EVIDENCE_RECONCILIATION_APP_FACTORY_WEBSITE_AND_WEB_SEO_GAPS`
+`B17_BROWSER_AUTOMATION_AND_PHYSICAL_GATES`
 
 Orden:
-1. reconciliar primero evidencia actual de `FACT-001/APPBOOT-001` contra estado legacy de items 181/183, conservando todo lo ya probado;
-2. no crear otro App Factory ni repetir template/PWA/STAGING/APK si la evidencia actual ya lo acredita;
-3. mantener explícito el gate físico Android restante y prohibir cualquier salto a PROD/publicación;
-4. medir deuda real de `web-wordpress-frontend` y `seo-search-content` y reutilizar SEO-001/WordPress existentes antes de fabricar provider genérico;
-5. ejecutar blind/targeted/full regression y exact-head CI;
+1. inventariar Browser Bridge, authorized execution device profile, repair workflow, contratos y evidencia física existentes; no crear un proveedor duplicado;
+2. separar configuración declarada de prueba física observable y conservar toda evidencia histórica válida;
+3. verificar bindings de navegador/dispositivo en PREPROD con ejecución bounded/fail-closed, sin arbitrary shell, datos cliente, Trading, PROD ni dependencias nuevas;
+4. exigir evidencia física para cualquier claim `FULL_REAL`/`FULL_SAFE_PREPROD` action-capable; si la superficie física no está disponible, registrar el residual exacto sin falso verde;
+5. ejecutar targeted + full regression + exact-head CI, manteniendo rollback/rebuild/observabilidad;
 6. mantener PR #784 sin auto-merge; promoción a `main` solo por gate/política gobernada.
 
 ## Política
