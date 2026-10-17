@@ -1,0 +1,70 @@
+name: CEREBRO Scheduled Soak Reconciler V1
+
+on:
+  push:
+    paths:
+      - 'cerebro/runtime/scheduled-soak-reconciler-v1.mjs'
+      - 'cerebro/tests/scheduled-soak-reconciler-v1.test.mjs'
+      - 'cerebro/registry/scheduled-soak-reconciler.v1.json'
+      - 'cerebro/docs/SCHEDULED_SOAK_RECONCILER_V1_RUNBOOK.md'
+      - '.github/workflows/cerebro-scheduled-soak-reconciler-v1.yml'
+  pull_request:
+    paths:
+      - 'cerebro/runtime/scheduled-soak-reconciler-v1.mjs'
+      - 'cerebro/tests/scheduled-soak-reconciler-v1.test.mjs'
+      - 'cerebro/registry/scheduled-soak-reconciler.v1.json'
+      - 'cerebro/docs/SCHEDULED_SOAK_RECONCILER_V1_RUNBOOK.md'
+      - '.github/workflows/cerebro-scheduled-soak-reconciler-v1.yml'
+  schedule:
+    - cron: '11 7 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  contract-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Prove genuine scheduled-run contract
+        run: node --test cerebro/tests/scheduled-soak-reconciler-v1.test.mjs
+      - name: Canonical registry validation
+        working-directory: cerebro
+        run: npm run validate
+      - name: Full CEREBRO regression
+        working-directory: cerebro
+        run: npm test
+
+  live-readonly-reconciliation:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    needs: contract-proof
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Reconcile genuine scheduled evidence from GitHub Actions
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: >-
+          node cerebro/runtime/scheduled-soak-reconciler-v1.mjs
+          --mode live
+          --out /tmp/cerebro-scheduled-soak-reconciliation-v1.json
+      - name: Assert read-only authority boundary
+        run: >-
+          node -e "const r=require('/tmp/cerebro-scheduled-soak-reconciliation-v1.json');if(!['SCHEDULED_SOAKS_IN_PROGRESS','ALL_SCHEDULED_SOAKS_READY_TO_CERTIFY'].includes(r.status)||r.lanes.length!==3||r.certification_boundary.repository_mutation_authorized||r.certification_boundary.registry_auto_promotion_authorized||r.certification_boundary.prod_promotion_authorized||r.authority.prod_authorized||r.authority.prod_write_authorized||r.authority.provider_write_authorized||r.authority.crm_write_authorized||r.authority.customer_data_authorized||r.authority.external_skill_code_execution||r.authority.spend_authorized||r.authority.trading_access||r.authority.additional_cost_eur!==0)process.exit(1);for(const l of r.lanes){if(l.verified_scheduled_green_runs<0||l.required_scheduled_green_runs!==3||l.qualifying_run_ids.length>3)process.exit(1)}console.log('Scheduled soak evidence status='+r.status)"
+      - name: Upload reconciliation evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-scheduled-soak-reconciliation-v1
+          path: /tmp/cerebro-scheduled-soak-reconciliation-v1.json
+          retention-days: 30
