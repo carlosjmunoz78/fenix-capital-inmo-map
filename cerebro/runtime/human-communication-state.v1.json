@@ -5,7 +5,7 @@
   "engine_id": "HEX-001",
   "environment": "PROD_CONTROL_PLANE",
   "version": "1.1.0",
-  "updated_at": "2026-10-17T09:17:29.304942Z",
+  "updated_at": "2026-10-17T10:42:16.149Z",
   "pending": {},
   "authorized_actions": {},
   "decisions": [],
@@ -62,6 +62,105 @@
       "kind": "WAITING_SAFE",
       "name": "godot",
       "human_alias": "Godot",
+      "status": "WAITING_SAFE_HANDLER",
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "human_required": "",
+      "updated_at": "",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
+    "name:domain-modeling": {
+      "kind": "WAITING_SAFE",
+      "name": "domain-modeling",
+      "human_alias": "Domain Modeling",
+      "status": "WAITING_SAFE_HANDLER",
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "human_required": "",
+      "updated_at": "",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
+    "name:create-verification-skill": {
+      "kind": "WAITING_SAFE",
+      "name": "create-verification-skill",
+      "human_alias": "Create Verification Skill",
+      "status": "WAITING_SAFE_HANDLER",
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "human_required": "",
+      "updated_at": "",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
+    "name:optale-files": {
+      "kind": "WAITING_SAFE",
+      "name": "optale-files",
+      "human_alias": "Optale Files",
+      "status": "WAITING_SAFE_HANDLER",
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "human_required": "",
+      "updated_at": "",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
+    "name:flutter-perf-derived-state": {
+      "kind": "WAITING_SAFE",
+      "name": "flutter-perf-derived-state",
+      "human_alias": "Flutter Perf Derived State",
+      "status": "WAITING_SAFE_HANDLER",
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "human_required": "",
+      "updated_at": "",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
+    "name:sara-tool-authorization": {
+      "kind": "WAITING_SAFE",
+      "name": "sara-tool-authorization",
+      "human_alias": "Sara Tool Authorization",
+      "status": "WAITING_SAFE_HANDLER",
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "human_required": "",
+      "updated_at": "",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
+    "name:verifying-ai-crawlers": {
+      "kind": "WAITING_SAFE",
+      "name": "verifying-ai-crawlers",
+      "human_alias": "Verifying Ai Crawlers",
+      "status": "WAITING_SAFE_HANDLER",
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "human_required": "",
+      "updated_at": "",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
+    "name:flutter-perf-audit": {
+      "kind": "WAITING_SAFE",
+      "name": "flutter-perf-audit",
+      "human_alias": "Flutter Perf Audit",
+      "status": "WAITING_SAFE_HANDLER",
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "human_required": "",
+      "updated_at": "",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
+    "name:adversarial-review": {
+      "kind": "WAITING_SAFE",
+      "name": "adversarial-review",
+      "human_alias": "Adversarial Review",
+      "status": "WAITING_SAFE_HANDLER",
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "human_required": "",
+      "updated_at": "",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
+    "name:adopt-and-delete": {
+      "kind": "WAITING_SAFE",
+      "name": "adopt-and-delete",
+      "human_alias": "Adopt And Delete",
       "status": "WAITING_SAFE_HANDLER",
       "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
       "human_required": "",
@@ -279,7 +378,7 @@
       "additional_cost_eur": 0
     }
   },
-  "last_digest_date": "2026-10-16",
+  "last_digest_date": "2026-10-17",
   "last_delivery_at": "2026-10-16T09:32:54Z",
   "mail_transport": {
     "status": "VERIFIED",
