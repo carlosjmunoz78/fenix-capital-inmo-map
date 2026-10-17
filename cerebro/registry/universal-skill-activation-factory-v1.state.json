@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.1.0",
+  "schema_version": "1.2.0",
   "state_type": "CEREBRO_UNIVERSAL_SKILL_ACTIVATION_FACTORY_V1_STATE",
   "generated_at": "2026-10-17",
   "company_id": "GLOBAL",
@@ -10,12 +10,10 @@
   "pull_request": 784,
   "branch": "cerebro/universal-skill-activation-factory-v1-20261017",
   "status": "IN_PROGRESS",
-  "current_block": "B5_AUTOMATIC_ADAPTER_AND_DURABLE_BATCH",
-  "next_block": "B6_BLIND_BATCH_CERTIFICATION_AFTER_B5_CI_GREEN",
-  "last_certified_head_sha": "9a810685d372cd4cc59c24a88289b162e93f1531",
-  "working_head_sha_observed": "15c5527eb48c46d4f16f87e07add892837b4368d",
-  "working_head_ci_state_at_checkpoint": "IN_PROGRESS",
-  "objective": "Generalize skill/repository activation so normalized candidates become real governed engine bindings automatically without per-skill artisanal integration.",
+  "current_block": "B8_AUTO_ENGINEERING_FULFILLMENT",
+  "next_block": "B8_CLOSE_ENGINEERING_TASK_REQUIRED_WITHOUT_PER_SKILL_MANUAL_WORK",
+  "last_certified_head_sha": "e663bb404cf7022d5469e6384759195bbdd5e1c1",
+  "objective": "Generalize skill/repository activation so candidates become real governed engine bindings automatically without per-skill artisanal integration.",
   "definition_of_full": "A candidate is FULL only when every relevant governed binding proves real semantic consumption, OLD_VS_NEW, QA/EVA/Tribunal, no regression, LRN feedback, observability/audit/FinOps, backup/rollback/rebuild, idempotency/restartability, zero-cost or approved exception, and physical PREPROD evidence where required.",
   "terminal_states": ["FULL_SAFE_PREPROD","FULL_REAL","ABSORBED","REJECTED","BLOCKED_EXTERNAL","HUMAN_REQUIRED"],
   "human_required_reasons": ["LEGAL_REQUIRED","SIGNATURE_REQUIRED","LOW_CONFIDENCE","HIGH_RISK","POLICY_CONFLICT","SECURITY_INCIDENT","MONEY_LIMIT","CUSTOMER_HUMAN_REQUEST"],
@@ -39,47 +37,61 @@
     "base_engine_count_preserved": 177,
     "specific_real_binding_proof": {"skills":2,"bindings":10,"status":"FULL_SAFE_PREPROD"},
     "safe_engineering_profile_exists": true,
-    "multilane_design_doc_exists": true,
-    "multilane_runtime_implementation_verified": false,
-    "multilane_runtime_note": "MULTILANE_SKILL_FACTORY_V0.md is live on main, but code search/tree inspection did not verify a physical runtime/state file with the documented multilane names. B5 therefore reuses verified JOB-001 and implements an additive durable batch orchestrator rather than claiming an unseen runtime.",
     "durable_job_runtime_exists": true,
-    "continuous_evolution_loop_exists": true
+    "continuous_evolution_loop_exists": true,
+    "generic_activation_planner_green": true,
+    "semantic_contract_families_green": true,
+    "generic_real_binding_executor_green": true,
+    "automatic_adapter_factory_green_for_evidence_grounded_bindings": true,
+    "durable_batch_green": true,
+    "blind_real_catalog_green": true,
+    "scale184_truthful_matrix_green": true,
+    "scale184_full_claim": false,
+    "scale184_observed_outcomes": {"ABSORBED":35,"REJECTED":59,"BLOCKED_EXTERNAL":79,"ENGINEERING_TASK_REQUIRED":11},
+    "scale184_processed_runtime": 58,
+    "scale184_terminal_without_runtime": 126,
+    "remaining_structural_gap": "ENGINEERING_TASK_REQUIRED is planned automatically but not yet fulfilled automatically into implementation plus semantic evidence; arbitrary repo URL to FULL is therefore not yet certified."
   },
   "certified_runs": {
-    "head_sha": "9a810685d372cd4cc59c24a88289b162e93f1531",
-    "universal_skill_factory": 39031651063,
-    "governed_main": 39031651067,
-    "rsi_promotion_readiness": 39031651060,
+    "head_sha": "e663bb404cf7022d5469e6384759195bbdd5e1c1",
+    "universal_skill_factory": 39031138379,
+    "scale184": 39031138363,
+    "governed_main": 39031138343,
+    "rsi_promotion_readiness": 39031138350,
     "conclusion": "SUCCESS"
   },
-  "working_runs": {
-    "head_sha": "15c5527eb48c46d4f16f87e07add892837b4368d",
-    "universal_skill_factory": 39030671589,
-    "governed_main": 39030671611,
-    "rsi_promotion_readiness": 39030671666,
-    "state_at_checkpoint": "FACTORY_AND_RSI_IN_PROGRESS_GOVERNED_MAIN_SUCCESS"
+  "scale184_artifact": {
+    "artifact_id": 12100228380,
+    "name": "cerebro-usaf-scale184-39031138363",
+    "digest": "sha256:64d62a173cdaae86eede9cef56c44bac6c73b9775fe5fc05605bdb7a67315c86"
   },
   "blocks": [
-    {"id":"B0","name":"PERSISTENCE_AND_CONTRACT","status":"HECHO"},
+    {"id":"B0","name":"PERSISTENCE_AND_CONTRACT","status":"GREEN"},
     {"id":"B1","name":"ENGINEERING_BOOTSTRAP","status":"GREEN"},
     {"id":"B2","name":"GENERIC_ACTIVATION_PLANNER","status":"GREEN"},
     {"id":"B3","name":"SEMANTIC_CONTRACT_FAMILIES","status":"GREEN"},
     {"id":"B4","name":"GENERIC_REAL_BINDING_EXECUTOR","status":"GREEN"},
-    {"id":"B5","name":"AUTOMATIC_ADAPTER_AND_DURABLE_BATCH","status":"IN_PROGRESS"},
-    {"id":"B6","name":"BLIND_BATCH_CERTIFICATION","status":"PLANNED"},
-    {"id":"B7","name":"SCALE_BATCH","status":"PLANNED"}
+    {"id":"B5","name":"AUTOMATIC_ADAPTER_AND_DURABLE_BATCH","status":"GREEN"},
+    {"id":"B6","name":"BLIND_BATCH_CERTIFICATION","status":"GREEN"},
+    {"id":"B7","name":"SCALE184_TRUTHFUL_CERTIFICATION","status":"GREEN"},
+    {"id":"B8","name":"AUTO_ENGINEERING_FULFILLMENT","status":"IN_PROGRESS"},
+    {"id":"B9","name":"UNSEEN_REPOSITORY_E2E_AND_SLO","status":"PLANNED"},
+    {"id":"B10","name":"CONTINUOUS_TRIGGER_AND_FINAL_FACTORY_CERTIFICATION","status":"PLANNED"}
   ],
-  "b5_working_files": [
-    "cerebro/runtime/universal-skill-adapter-factory-v1.mjs",
-    "cerebro/tests/universal-skill-adapter-factory-v1.test.mjs",
-    "cerebro/runtime/universal-skill-batch-orchestrator-v1.mjs",
-    "cerebro/tests/universal-skill-batch-orchestrator-v1.test.mjs"
+  "b8_acceptance": [
+    "ENGINEERING_TASK_REQUIRED must become executable governed work, not a manual stop.",
+    "The worker must reuse FACT Safe Engineering, isolated worktree/sandbox policy, tests-first, rollback/rebuild and zero-cost boundaries.",
+    "No semantic evidence may be fabricated from target contracts.",
+    "A generated adapter is accepted only after real probe evidence and OLD vs NEW.",
+    "At least one previously ENGINEERING_TASK_REQUIRED candidate must advance automatically without per-skill handwritten integration.",
+    "Failures must collapse to reusable family-level reasons and remain fail-closed."
   ],
   "truth_guards": [
     "Never derive observed semantic evidence by echoing the target contract.",
-    "Missing adapter evidence routes to Safe Engineering work instead of fabricating FULL.",
+    "Missing evidence routes to governed engineering work instead of fabricating FULL.",
     "Physical-required domains remain BLOCKED_EXTERNAL until physical evidence exists.",
-    "Failed bindings emit HOLD learning, never GREEN learning."
+    "Failed bindings emit HOLD learning, never GREEN learning.",
+    "GREEN scale matrix is not equivalent to 184 FULL."
   ],
   "time_budget_hours": {"target_min":14,"target_max":18,"structural_reassessment_limit":20},
   "communication_policy": "Only milestone updates; one very short sentence stating current work, achieved result and next step.",

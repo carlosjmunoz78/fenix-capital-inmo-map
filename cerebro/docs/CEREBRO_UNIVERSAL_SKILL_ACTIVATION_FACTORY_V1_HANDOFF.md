@@ -1,102 +1,95 @@
 # CEREBRO UNIVERSAL SKILL ACTIVATION FACTORY V1 · HANDOFF
 
-> Este archivo es continuidad viva. Debe actualizarse antes de saturación del chat y al cerrar bloques mayores.
+> Continuidad viva. Actualizar antes de saturación del chat y al cerrar bloques mayores.
 
 ## Identidad
 
 - Proyecto: CEREBRO OS · ENGINE FACTORY & MULTIEMPRESA
-- Misión activa: Universal Skill Activation Factory V1
-- Issue canónica: #780
+- Misión: Universal Skill Activation Factory V1
+- Issue: #780
+- PR: #784 (draft)
 - Branch: `cerebro/universal-skill-activation-factory-v1-20261017`
+- Último HEAD certificado: `e663bb404cf7022d5469e6384759195bbdd5e1c1`
 - Entorno: LAB/PREPROD
 - PROD: NO TOCAR
 - Coste adicional: 0 EUR
 
-## Objetivo de la misión
+## Objetivo
 
-Conseguir que una skill, repositorio o capability pueda entrar en CEREBRO y quedar automáticamente FULL_SAFE_PREPROD/FULL_REAL o en un estado terminal explicable, sin integración artesanal individual.
+Una skill/repositorio/capability entra y CEREBRO la convierte automáticamente en `FULL_SAFE_PREPROD/FULL_REAL`, `ABSORBED`, `REJECTED`, `BLOCKED_EXTERNAL` o `HUMAN_REQUIRED`, sin integración artesanal individual.
 
-El efecto de usuario objetivo es: aportar URL/repositorio/skill → CEREBRO descubre capacidades → deduplica/absorbe → resuelve motores relevantes → genera/reutiliza wrapper/adaptador → prueba en paralelo → OLD vs NEW → QA/EVA/Tribunal → LRN/OBS/FinOps → rollback/rebuild → PREPROD físico → estado terminal.
+`FULL` exige consumo semántico real, OLD vs NEW, QA/EVA/Tribunal, LRN/OBS/Audit/FinOps, rollback/rebuild, idempotencia/restart y evidencia física cuando aplique.
 
-## Definición estricta
+## Hito certificado B0–B7
 
-No llamar integrada a una skill por discovery, catálogo, normalización, documentación, wrapper o test aislado.
+GREEN en HEAD `e663bb404cf7022d5469e6384759195bbdd5e1c1`:
 
-Estados terminales permitidos:
+- B0 persistencia/contrato.
+- B1 FACT reutiliza Safe Engineering.
+- B2 planner genérico candidate/capability → dominios → motores.
+- B3 contratos semánticos reutilizables.
+- B4 binding real genérico con OLD vs NEW + Tribunal + LRN + observabilidad + FinOps + backup/rollback/rebuild.
+- B5 adapter factory basada en evidencia + batch durable sobre JOB-001.
+- B6 blind batch contra catálogo real sin reglas por skill concreta.
+- B7 certificación exacta del catálogo 184 + regresión CEREBRO completa.
 
-- FULL_SAFE_PREPROD / FULL_REAL
-- ABSORBED
-- REJECTED
-- BLOCKED_EXTERNAL
-- HUMAN_REQUIRED
+Runs certificados:
+- Universal Skill Activation Factory V1: `39031138379` SUCCESS.
+- Scale184 V1: `39031138363` SUCCESS.
+- Governed Main Integration V0: `39031138343` SUCCESS.
+- RSI Promotion Readiness Shadow V0: `39031138350` SUCCESS.
+- Artifact Scale184: `12100228380`, digest `sha256:64d62a173cdaae86eede9cef56c44bac6c73b9775fe5fc05605bdb7a67315c86`.
 
-HUMAN_REQUIRED solo: LEGAL_REQUIRED, SIGNATURE_REQUIRED, LOW_CONFIDENCE, HIGH_RISK, POLICY_CONFLICT, SECURITY_INCIDENT, MONEY_LIMIT, CUSTOMER_HUMAN_REQUEST.
+## Verdad del catálogo 184
 
-## Evidencia viva de partida
+La matriz B7 es GREEN porque clasifica correctamente cada item según evidencia actual; **NO** porque las 184 estén FULL.
 
-- FACT-001/Factory V1 existe físicamente.
-- Registry actual: 179 motores canónicos, preservando 177 base.
-- Catálogo: 184/184 items normalizados/reconciliados; no todos físicamente activos.
-- Existe Skill Full Adoption workflow.
-- Existe Multilane Skill Factory con FAST_LANE y paralelismo.
-- Existe Safe Engineering Profile V1.
-- Existe durable JOB-001.
-- Existe RSI/LRN continuous evolution loop.
-- Existe prueba real de 2 skills → 10 bindings FULL SAFE PREPROD.
-- Gap principal: la ruta profunda de binding todavía contiene especificidad por skills/domains concretos; hay que generalizarla.
+Resultado observado:
+- 35 `ABSORBED`.
+- 59 `REJECTED`.
+- 79 `BLOCKED_EXTERNAL`.
+- 11 `ENGINEERING_TASK_REQUIRED`.
+- 58 items atravesaron runtime.
+- 126 terminaron por evidencia/estado previo sin runtime.
+- `full_claim=false`.
 
-## Decisión de arquitectura
-
-No construir primero un conjunto grande de nuevos motores matemático/ingeniero/programador.
-
-Orden:
-
-1. Bootstrap mínimo: hacer que FACT reutilice Safe Engineering Profile existente como brazo técnico.
-2. Construir Generic Activation Planner y Generic Real Binding Executor.
-3. Conectar Multilane.
-4. Certificar con lote ciego.
-5. Usar la propia Factory para incorporar Math/Solver, Systems Engineering, Data Engineering, Security Engineering y futuras capabilities.
-
-La ingeniería previa forma parte del presupuesto total, no añade una fase separada larga.
-
-## Presupuesto técnico
-
-Objetivo: 14–18 horas técnicas sobre base existente.
-Límite de reevaluación estructural: 20 horas si persiste trabajo manual por skill.
-
-SLO objetivo posterior, sujeto a medición real:
-- sencilla 1–5 min;
-- normal 5–15 min;
-- repo mediano 10–30 min;
-- compleja 20–60 min;
-- hardware/credenciales/runtime externo: automático hasta bloqueo terminal.
+Los 11 `ENGINEERING_TASK_REQUIRED` son el gap estructural inmediato: hoy FACT sabe planificar el trabajo de ingeniería, pero el batch todavía se detiene antes de convertir ese trabajo en implementación + evidencia semántica real de forma autónoma.
 
 ## Estado de bloques
 
-- B0 PERSISTENCE_AND_CONTRACT: IN_PROGRESS
-- B1 ENGINEERING_BOOTSTRAP: PLANNED
-- B2 GENERIC_ACTIVATION_PLANNER: PLANNED
-- B3 SEMANTIC_CONTRACT_FAMILIES: PLANNED
-- B4 GENERIC_REAL_BINDING_EXECUTOR: PLANNED
-- B5 MULTILANE_EXECUTION: PLANNED
-- B6 BLIND_BATCH_CERTIFICATION: PLANNED
-- B7 SCALE_BATCH: PLANNED
+- B0: GREEN
+- B1: GREEN
+- B2: GREEN
+- B3: GREEN
+- B4: GREEN
+- B5: GREEN
+- B6: GREEN
+- B7: GREEN
+- B8 AUTO_ENGINEERING_FULFILLMENT: IN_PROGRESS
+- B9 UNSEEN_REPOSITORY_E2E_AND_SLO: PLANNED
+- B10 CONTINUOUS_TRIGGER_AND_FINAL_FACTORY_CERTIFICATION: PLANNED
 
 ## next_block
 
-`B1_ENGINEERING_BOOTSTRAP`
+`B8_CLOSE_ENGINEERING_TASK_REQUIRED_WITHOUT_PER_SKILL_MANUAL_WORK`
 
-Leer antes de tocar código:
-- `cerebro/runtime/cerebro-safe-engineering-profile-v1.mjs`
-- `cerebro/registry/safe-engineering-profile.v1.json`
-- `cerebro/skills/skill-real-engine-binding-v1.mjs`
-- `cerebro/skills/internal-capability-signals.v0.json`
-- `cerebro/skills/MULTILANE_SKILL_FACTORY_V0.md`
-- runtime/tests de skill capability evolution y evaluation tribunal.
+Objetivo B8:
+1. convertir `ENGINEERING_TASK_REQUIRED` en trabajo ejecutable gobernado;
+2. reutilizar FACT Safe Engineering, aislamiento, tests-first, rollback/rebuild y JOB-001;
+3. nunca fabricar evidencia semántica desde el contrato objetivo;
+4. solo promover adapter tras probe real + OLD vs NEW;
+5. demostrar avance autónomo de al menos una candidata previamente `ENGINEERING_TASK_REQUIRED` sin código dedicado a su ID;
+6. agrupar fallos por familia y fail-close.
+
+Después B9 debe probar la experiencia real objetivo: entrada de repositorio/skill no preparada → intake → análisis → adaptación → ejecución → estado terminal, midiendo SLO real.
+
+## Decisión sobre Math/Engineering
+
+No abrir un proyecto aparte que ralentice la Factory. Safe Engineering ya está enganchado a FACT y se usa como brazo técnico. Tras cerrar B8/B9, la propia Factory incorporará Math/Solver, Systems Engineering, Data Engineering y Security Engineering como capabilities transversales.
 
 ## Política de comunicación
 
-El usuario no quiere interrupciones frecuentes. Solo avisar por hitos importantes con una frase muy breve: qué se está haciendo, qué se consiguió y qué sigue.
+Carlos no quiere mensajes frecuentes. Solo hitos importantes, muy escuetos: `haciendo X · conseguido Y · sigue Z`.
 
 ## Prompt exacto para nuevo chat
 
@@ -105,33 +98,33 @@ CONTINÚA CEREBRO OS · UNIVERSAL SKILL ACTIVATION FACTORY V1.
 
 NO reconstruyas estado por memoria y NO repitas investigación cerrada. Trabaja desde evidencia viva del repositorio.
 
-1. Lee primero, en este orden:
+1. Lee primero:
    - cerebro/docs/CEREBRO_UNIVERSAL_SKILL_ACTIVATION_FACTORY_V1_HANDOFF.md
    - cerebro/registry/universal-skill-activation-factory-v1.state.json
    - cerebro/docs/CEREBRO_UNIVERSAL_SKILL_ACTIVATION_FACTORY_V1_MASTER_2026-10-17.md
    - cerebro/docs/CEREBRO_UNIVERSAL_SKILL_ACTIVATION_FACTORY_V1_RUNBOOK_2026-10-17.md
-   - issue GitHub #780
-2. Verifica únicamente evidencia viva mínima: branch/HEAD/PR/runs y archivos tocados desde el último HANDOFF.
-3. Entra directamente en `next_block` del HANDOFF/STATE.
-4. CONSERVAR → ENTENDER → ENVOLVER → PROBAR → MEJORAR → MIGRAR. No sustituyas ni borres sistemas existentes.
-5. PREPROD/LAB únicamente. No tocar PROD. No ampliar permisos. Trading aislado. Coste adicional 0 EUR.
-6. Una skill NO está integrada por estar catalogada/normalizada/envuelta. FULL exige consumo semántico real en todos los bindings relevantes, OLD vs NEW, QA/EVA/Tribunal, no regresión, LRN/OBS/Audit/FinOps, rollback/rebuild, idempotencia/restart y evidencia física cuando aplique.
-7. Corrige fallos por familia/generador, no skill por skill. Si la misma familia falla 3 veces, reevalúa la estructura.
-8. Continúa automáticamente entre pasos. Solo para por HUMAN_REQUIRED canónico real.
-9. Comunicación con Carlos: solo por hitos importantes, una frase muy corta de vez en cuando; no interrumpir cada pocos minutos.
-10. Antes de saturación del chat o al cerrar un bloque mayor, actualiza MASTER + STATE + RUNBOOK + HANDOFF con exact HEAD, PR/runs, evidencias, cambios, rollback, bloque cerrado y `next_block`, para saltar al siguiente chat sin perder nada.
+   - issue #780 y PR #784.
+2. Verifica solo branch/HEAD/runs y cambios posteriores al último HANDOFF.
+3. Entra directamente en `next_block`.
+4. CONSERVAR → ENTENDER → ENVOLVER → PROBAR → MEJORAR → MIGRAR.
+5. LAB/PREPROD. No PROD. Trading aislado. Coste adicional 0 EUR.
+6. NO confundas catálogo/normalización/plan/wrapper con FULL. FULL requiere consumo semántico real y todos los gates.
+7. Corrige por familia/generador; no por skill individual. Tres fallos equivalentes ⇒ reevaluación estructural.
+8. Continúa automáticamente y para solo por HUMAN_REQUIRED canónico real.
+9. Comunicación con Carlos: solo hitos importantes y una frase muy corta.
+10. Antes de saturación o al cerrar bloque mayor actualiza MASTER + STATE + RUNBOOK + HANDOFF con SHA, runs, evidencia y next_block.
 
-OBJETIVO FINAL DE ESTA MISIÓN:
-Que una skill/repositorio entre y CEREBRO la convierta automáticamente en FULL_SAFE_PREPROD/FULL_REAL, ABSORBED, REJECTED, BLOCKED_EXTERNAL o HUMAN_REQUIRED, sin integración artesanal individual.
+ESTADO CERTIFICADO DE PARTIDA:
+HEAD e663bb404cf7022d5469e6384759195bbdd5e1c1. B0–B7 GREEN. Scale184: 35 ABSORBED, 59 REJECTED, 79 BLOCKED_EXTERNAL, 11 ENGINEERING_TASK_REQUIRED; full_claim=false. El gap inmediato es B8: auto-fulfillment de ENGINEERING_TASK_REQUIRED sin integración artesanal.
+
+OBJETIVO FINAL:
+Skill/repositorio nuevo → CEREBRO lo activa y lo deja funcional en sus motores relevantes en minutos/horas de máquina, o devuelve un bloqueo terminal preciso, sin Carlos ni un chat guiando cada paso.
 ```
 
-## Changelog de continuidad
+## Changelog
 
-### 2026-10-17 · inicio
-- Rama dedicada creada.
-- Issue #780 creada.
-- MASTER creado.
-- STATE creado.
-- RUNBOOK creado.
-- HANDOFF inicial creado.
-- Siguiente bloque: B1 Engineering Bootstrap.
+### 2026-10-17 · B0–B7 certificado
+- Universal Factory y Scale184 GREEN.
+- Matriz 184 real preserva verdad: no se declara FULL masivo.
+- Detectado gap estructural exacto: auto-ejecución de las tareas de ingeniería faltantes.
+- `next_block`: B8 Auto Engineering Fulfillment.
