@@ -1,0 +1,250 @@
+{
+  "schema_version": "4.0.0",
+  "state_type": "CEREBRO_GLOBAL_OPERATIONAL_CONVERGENCE_V4",
+  "generated_at": "2026-10-17",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v4",
+  "base_main_sha": "e516f47f5c7654eaf1b83aba6684ce44851fd5b7",
+  "supersedes_for_current_operational_reporting": "cerebro/skills/cerebro-184-live-convergence.v3.json",
+  "historical_evidence_preserved": [
+    "cerebro/skills/cerebro-184-live-convergence.v2.json",
+    "cerebro/skills/cerebro-184-live-convergence.v3.json"
+  ],
+  "status": "CURRENT_MAIN_RECONCILED_LOGICAL_AND_SKILL_CLOSURES_GREEN_PHYSICAL_AND_POLICY_GATES_ONLY",
+  "truth_contract": {
+    "canonical_logical_engine_count": 179,
+    "normalized_capability_catalog_count": 184,
+    "normalization_debt_count": 0,
+    "all_184_physically_active": false,
+    "full_does_not_mean_prod": true,
+    "semantic_adoption_does_not_equal_external_source_or_side_effect_activation": true,
+    "historical_open_pr_does_not_equal_active_blocker": true,
+    "current_main_evidence_first": true
+  },
+  "authority": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "prod_mutation_authorized": false,
+    "auto_merge_authorized": false,
+    "external_skill_code_execution_authorized": false,
+    "customer_data_authorized": false,
+    "provider_write_authorized": false,
+    "crm_write_authorized": false,
+    "spend_authorized": false,
+    "trading_access": false,
+    "automatic_paid_fallback": false,
+    "additional_cost_eur": 0
+  },
+  "closed_runtime_and_skill_gates": [
+    {
+      "id": "COMPET-NATIVE",
+      "owner_engine": "COMPET-001",
+      "state": "FULL_E2E_REAL_PREPROD",
+      "evidence": "cerebro/registry/compet-real-consumer-adoption-v1.json",
+      "boundary": "Semantic downstream adoption is closed; real competitor target configuration and continuous external PREPROD source evidence remain a separate physical gate."
+    },
+    {
+      "id": "CAP-NATIVE",
+      "owner_engine": "CAP-001",
+      "state": "FULL_E2E_REAL_PREPROD",
+      "evidence": "cerebro/registry/cap-real-consumer-adoption-v1.json",
+      "boundary": "Semantic downstream adoption is closed; real acquisition source configuration and continuous PREPROD source evidence remain separate."
+    },
+    {
+      "id": "LEAD-NATIVE",
+      "owner_engine": "LEAD-001",
+      "state": "FULL_E2E_REAL_PREPROD",
+      "evidence": "cerebro/registry/lead-real-consumer-adoption-v1.json"
+    },
+    {
+      "id": "SALE-NATIVE",
+      "owner_engine": "SALE-001",
+      "state": "FULL_E2E_REAL_PREPROD",
+      "evidence": "cerebro/registry/sale-real-consumer-adoption-v1.json"
+    },
+    {
+      "id": "LOTE3-COM-NOTIF-C360",
+      "owner_engine": "COM-001",
+      "state": "FULL_E2E_REAL_PREPROD",
+      "evidence": "cerebro/registry/lote3-com-notif-c360-real-v1.json",
+      "boundary": "No real provider dispatch or CRM mutation authority is implied."
+    },
+    {
+      "id": "CUSTOMER-JOURNEY",
+      "owner_engine": "CX-001",
+      "state": "FULL_E2E_REAL_PREPROD",
+      "evidence": "cerebro/registry/customer-journey-real-adoption-v1.json",
+      "boundary": "No customer dispatch, CRM write or public review write authority is implied."
+    },
+    {
+      "id": "MORTGAGE-OPERATIONS",
+      "owner_engine": "VIA-001",
+      "state": "FULL_E2E_REAL_PREPROD",
+      "evidence": "cerebro/registry/mortgage-operations-real-adoption-v1.json",
+      "boundary": "No credit decision, lender commitment, bank submission or external bank communication authority is implied."
+    },
+    {
+      "id": "ADMITTED-SKILLS",
+      "owner_engine": "FACT-001",
+      "state": "5_OF_5_FULL_SAFE_PREPROD",
+      "evidence": "cerebro/registry/skill-full-adoption-v1.json",
+      "binding_evidence": "cerebro/registry/skill-real-engine-binding-v1.json",
+      "pertinent_binding_closure": "supabase-postgres-best-practices=5 engines; agent-browser=5 engines; 10 governed bindings total",
+      "boundary": "External skill code execution, DB mutation, browser external side effects and PROD authority remain denied."
+    },
+    {
+      "id": "B3-GENERIC-SERVER-WRITE-PATH",
+      "owner_engine": "ACTGW-001",
+      "state": "GREEN_PHYSICAL_PREPROD",
+      "evidence": "cerebro/registry/b3-server-write-e2e-closeout.v1.json",
+      "boundary": "This closes the Universal QA/Core Guard synthetic draft server-write path only; it does not close the separate direct B3 journal exact write-adapter/grant contract in PR 732."
+    }
+  ],
+  "remaining_real_physical_gates": [
+    {
+      "id": "ANDROID_48_183",
+      "state": "PARCIAL",
+      "next_gate": "AUTHORIZED_PHYSICAL_ANDROID_DEVICE_E2E",
+      "evidence": "cerebro/registry/fact001-android-staging-48-183.v0.json",
+      "reason": "Signed PREPROD APK builds and STAGING draft preview are green, but no authorized physical device attestation/install/render is proven."
+    },
+    {
+      "id": "WATCH_LEARN_47",
+      "state": "PARCIAL",
+      "next_gate": "THREE_GENUINE_SCHEDULED_RUNS_GREEN_AND_RETENTION_REVIEW",
+      "evidence": "cerebro/registry/watch-learn-remote-observation.v0.json",
+      "reason": "Daily zero-cost scheduler exists, but canonical evidence still records soak_complete=false and scheduled_soak_runs_verified=0."
+    },
+    {
+      "id": "COMPET_REAL_SOURCE_CONFIGURATION",
+      "state": "PARCIAL_PHYSICAL_SOURCE_GATE",
+      "next_gate": "REAL_COMPETITOR_TARGETS_AND_CONTINUOUS_PREPROD_RUN",
+      "reason": "COMPET semantic real-consumer adoption is FULL; live real-target source configuration remains independently unproven."
+    },
+    {
+      "id": "CAP_REAL_SOURCE_CONFIGURATION",
+      "state": "PARCIAL_PHYSICAL_SOURCE_GATE",
+      "next_gate": "REAL_ACQUISITION_SOURCES_AND_CONTINUOUS_PREPROD_RUN",
+      "reason": "CAP semantic real-consumer adoption is FULL; live real-source configuration remains independently unproven."
+    },
+    {
+      "id": "IAM_BROWSER_VAULT_PHYSICAL",
+      "state": "POR_AUDITAR_PHYSICAL",
+      "source": "cerebro/skills/cerebro-184-live-convergence.v2.json#38-50",
+      "next_gate": "FRESH_AUTHORIZED_DEVICE_BROWSER_VAULT_BINDINGS",
+      "reason": "Do not infer physical Browser Bridge, device attestation or vault binding from safe browser skill admission."
+    },
+    {
+      "id": "COMPANY_INTENT_PRIVACY_PHYSICAL",
+      "state": "POR_AUDITAR_PHYSICAL",
+      "source": "cerebro/skills/cerebro-184-live-convergence.v2.json#69-73",
+      "next_gate": "PRIVACY_AND_PHYSICAL_INTENT_GAPS"
+    },
+    {
+      "id": "LEAD_CONTACT_CALIBRATION_PHYSICAL",
+      "state": "POR_AUDITAR_PHYSICAL",
+      "source": "cerebro/skills/cerebro-184-live-convergence.v2.json#83-92",
+      "next_gate": "CALIBRATION_AND_PHYSICAL_CONTACT_GAPS"
+    },
+    {
+      "id": "SALES_PHYSICAL_CHANNEL_DELIVERY",
+      "state": "POR_AUDITAR_PHYSICAL",
+      "source": "cerebro/skills/cerebro-184-live-convergence.v2.json#93-104",
+      "next_gate": "PHYSICAL_CHANNEL_ADAPTERS_AND_PERMISSIONED_DELIVERY"
+    },
+    {
+      "id": "VOICE_LIVE_TELEPHONY",
+      "state": "POR_AUDITAR_PHYSICAL",
+      "source": "cerebro/skills/cerebro-184-live-convergence.v2.json#105-117",
+      "next_gate": "LIVE_TELEPHONY_COMPLIANCE_AND_ADAPTER_EVIDENCE"
+    },
+    {
+      "id": "AGENDA_CONTRACT_PAYMENT_FULFILLMENT",
+      "state": "POR_AUDITAR_PHYSICAL",
+      "source": "cerebro/skills/cerebro-184-live-convergence.v2.json#118-131",
+      "next_gate": "PHYSICAL_ADAPTER_INVENTORY_AND_GOVERNED_SIDE_EFFECTS"
+    },
+    {
+      "id": "REPUTATION_PUBLIC_REVIEW",
+      "state": "POR_AUDITAR_PHYSICAL",
+      "source": "cerebro/skills/cerebro-184-live-convergence.v2.json#132-142",
+      "next_gate": "PHYSICAL_COM_AND_REPUTATION_ADAPTER_AUDIT"
+    },
+    {
+      "id": "ECONOMIC_ACTIONS",
+      "state": "POR_AUDITAR_PHYSICAL",
+      "source": "cerebro/skills/cerebro-184-live-convergence.v2.json#143-151",
+      "next_gate": "PHYSICAL_ECONOMIC_DATA_AND_ACTION_ADAPTERS"
+    },
+    {
+      "id": "MARKETING_SEO_PHYSICAL_ADAPTERS",
+      "state": "POR_AUDITAR_PHYSICAL",
+      "source": "cerebro/skills/cerebro-184-live-convergence.v2.json#152-161",
+      "next_gate": "PHYSICAL_MARKETING_SEO_ADAPTERS_WITH_EXISTING_RELATIONSHIPS_PRESERVED"
+    },
+    {
+      "id": "MULTIMEDIA_PHYSICAL_BINDINGS",
+      "state": "POR_AUDITAR_PHYSICAL",
+      "source": "cerebro/skills/cerebro-184-live-convergence.v2.json#162-175",
+      "next_gate": "ZERO_COST_LOCAL_CAPABILITY_PHYSICAL_INVENTORY"
+    },
+    {
+      "id": "BRAND_COMMERCE_APP_PHYSICAL",
+      "state": "POR_AUDITAR_PHYSICAL",
+      "source": "cerebro/skills/cerebro-184-live-convergence.v2.json#176-184",
+      "next_gate": "AUTHORIZED_PHYSICAL_EXECUTION_WITHOUT_PUBLIC_OR_PROD_PROMOTION"
+    }
+  ],
+  "human_required_policy_conflicts": [
+    {
+      "pr": 731,
+      "reason": "POLICY_CONFLICT",
+      "gate": "BIND_EXISTING_GITHUB_WRITE_CREDENTIAL_TO_PROD_GOVERNED_RUNTIME",
+      "state": "HUMAN_REQUIRED",
+      "note": "No credential is to be shared in chat. No PROD GitHub write is authorized by this convergence state."
+    },
+    {
+      "pr": 732,
+      "reason": "POLICY_CONFLICT",
+      "gate": "DIRECT_B3_JOURNAL_EXACT_WRITE_ADAPTER_AND_MINIMAL_PREPROD_GRANT",
+      "state": "HUMAN_REQUIRED",
+      "note": "Separate from the already-green generic Universal QA/Core Guard synthetic draft write path. No permission expansion is implied."
+    }
+  ],
+  "historical_open_pr_policy": {
+    "default_classification": "NON_BLOCKING_HISTORICAL_OR_SUPERSEDED_UNLESS_CURRENT_MAIN_EVIDENCE_REFERENCES_IT",
+    "mass_merge_forbidden": true,
+    "mass_close_forbidden": true,
+    "reconcile_before_action": true
+  },
+  "priority_queue": [
+    "RECONCILE_GENUINE_WATCH_LEARN_SCHEDULED_EVIDENCE",
+    "CONFIGURE_OR_VERIFY_REAL_READ_ONLY_COMPET_AND_CAP_PREPROD_SOURCES_WITHOUT_NEW_SPEND",
+    "AUDIT_ZERO_COST_LOCAL_PHYSICAL_ADAPTERS_BY_DOMAIN",
+    "AUTHORIZED_PHYSICAL_ANDROID_DEVICE_E2E_WHEN_DEVICE_IS_AVAILABLE",
+    "HUMAN_REQUIRED_PR_731_AND_732_ONLY_BY_EXPLICIT_OWNER_DECISION",
+    "PROD_PROMOTION_ONLY_AFTER_SEPARATE_GOVERNED_PROMOTION_CONTRACT"
+  ],
+  "documentation": {
+    "engine_registry_change_required": false,
+    "contracts_change_required": false,
+    "dependency_map_change_required": false,
+    "runbook": "cerebro/docs/GLOBAL_OPERATIONAL_CONVERGENCE_V4_RUNBOOK.md",
+    "backup": "Historical V2/V3 state files are retained unchanged; this V4 is additive and reversible by reverting its files.",
+    "rollback": "Revert the V4 state, pointer, tests and workflow; no runtime or external resource is mutated by this reconciliation.",
+    "rebuild": "Regenerate V4 only from current-main evidence registries and live PR metadata, preserving historical evidence files.",
+    "changelog": "2026-10-17: reconciled stale convergence reporting after runtime, mortgage and skill closures; retained only unproven physical/source/policy gates as open.",
+    "autonomy_state": "PREPROD_GOVERNED; PROD_FALSE; TRADING_ISOLATED; COST_0"
+  },
+  "reporting_contract": {
+    "HECHO": "Current-main strict runtime/skill closures listed above are evidence-backed.",
+    "EXISTENTE": "179 canonical logical engines and 184 normalized rollout capabilities remain preserved.",
+    "PARCIAL": "Physical device/source/adapter gates remain explicit and must not be inferred from semantic adoption.",
+    "DEFINIDO": "Human policy conflicts and promotion boundaries are explicit and fail-closed.",
+    "PLANIFICADO": "Proceed through zero-cost physical evidence in priority order.",
+    "POR_AUDITAR": "Legacy physical adapter domains remain unpromoted until fresh evidence exists.",
+    "PROD": "NOT_AUTHORIZED"
+  }
+}
