@@ -1,0 +1,75 @@
+name: CEREBRO Global Operational Convergence V4
+
+on:
+  push:
+    paths:
+      - 'cerebro/registry/cerebro-global-operational-convergence-v4.json'
+      - 'cerebro/registry/current-operational-convergence.v1.json'
+      - 'cerebro/registry/engine-registry.v1.json'
+      - 'cerebro/skills/cerebro-184-live-convergence.v3.json'
+      - 'cerebro/registry/compet-real-consumer-adoption-v1.json'
+      - 'cerebro/registry/cap-real-consumer-adoption-v1.json'
+      - 'cerebro/registry/lead-real-consumer-adoption-v1.json'
+      - 'cerebro/registry/sale-real-consumer-adoption-v1.json'
+      - 'cerebro/registry/lote3-com-notif-c360-real-v1.json'
+      - 'cerebro/registry/customer-journey-real-adoption-v1.json'
+      - 'cerebro/registry/mortgage-operations-real-adoption-v1.json'
+      - 'cerebro/registry/skill-full-adoption-v1.json'
+      - 'cerebro/registry/skill-real-engine-binding-v1.json'
+      - 'cerebro/registry/b3-server-write-e2e-closeout.v1.json'
+      - 'cerebro/registry/fact001-android-staging-48-183.v0.json'
+      - 'cerebro/registry/watch-learn-remote-observation.v0.json'
+      - 'cerebro/tests/global-operational-convergence-v4.test.mjs'
+      - 'cerebro/docs/GLOBAL_OPERATIONAL_CONVERGENCE_V4_RUNBOOK.md'
+      - '.github/workflows/cerebro-global-operational-convergence-v4.yml'
+  pull_request:
+    paths:
+      - 'cerebro/registry/cerebro-global-operational-convergence-v4.json'
+      - 'cerebro/registry/current-operational-convergence.v1.json'
+      - 'cerebro/registry/engine-registry.v1.json'
+      - 'cerebro/skills/cerebro-184-live-convergence.v3.json'
+      - 'cerebro/registry/compet-real-consumer-adoption-v1.json'
+      - 'cerebro/registry/cap-real-consumer-adoption-v1.json'
+      - 'cerebro/registry/lead-real-consumer-adoption-v1.json'
+      - 'cerebro/registry/sale-real-consumer-adoption-v1.json'
+      - 'cerebro/registry/lote3-com-notif-c360-real-v1.json'
+      - 'cerebro/registry/customer-journey-real-adoption-v1.json'
+      - 'cerebro/registry/mortgage-operations-real-adoption-v1.json'
+      - 'cerebro/registry/skill-full-adoption-v1.json'
+      - 'cerebro/registry/skill-real-engine-binding-v1.json'
+      - 'cerebro/registry/b3-server-write-e2e-closeout.v1.json'
+      - 'cerebro/registry/fact001-android-staging-48-183.v0.json'
+      - 'cerebro/registry/watch-learn-remote-observation.v0.json'
+      - 'cerebro/tests/global-operational-convergence-v4.test.mjs'
+      - 'cerebro/docs/GLOBAL_OPERATIONAL_CONVERGENCE_V4_RUNBOOK.md'
+      - '.github/workflows/cerebro-global-operational-convergence-v4.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  current-truth-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Global operational convergence truth contract
+        run: node --test cerebro/tests/global-operational-convergence-v4.test.mjs
+      - name: Canonical engine registry validation
+        working-directory: cerebro
+        run: npm run validate
+      - name: Full CEREBRO regression baseline
+        working-directory: cerebro
+        run: npm test
+      - name: Emit current convergence report
+        run: cp cerebro/registry/cerebro-global-operational-convergence-v4.json /tmp/cerebro-global-operational-convergence-v4.json
+      - name: Upload current convergence report
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-global-operational-convergence-v4
+          path: /tmp/cerebro-global-operational-convergence-v4.json
+          retention-days: 30
