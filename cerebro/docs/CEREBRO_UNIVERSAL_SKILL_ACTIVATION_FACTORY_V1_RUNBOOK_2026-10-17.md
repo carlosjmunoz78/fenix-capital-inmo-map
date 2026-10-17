@@ -4,7 +4,7 @@
 Repo: `carlosjmunoz78/fenix-capital-inmo-map`
 Branch: `cerebro/universal-skill-activation-factory-v1-20261017`
 PR: `#784`
-Último código certificado: `e346c57bd177c62b151ed3de33e90d27c3d3f4da`
+Último código certificado: `0ba248c812ed21b2ddbea1f2b2010357615159c9`
 Entorno autorizado: `PREPROD`.
 
 ## Inicio / reanudación
@@ -43,7 +43,7 @@ Reglas:
 - Cache, batch y binding permanecen PREPROD/0 €/no Trading/no PROD.
 
 ## B15 · Family coverage y terminal truth
-Estado: HECHO PREPROD sobre código certificado `e346c57...`.
+Estado: HECHO PREPROD.
 
 Providers Auto Engineering disponibles: finance, math, software engineering, systems, data y security.
 
@@ -54,14 +54,31 @@ Reglas obligatorias:
 - Vista terminal estricta: `FULL_REAL | ABSORBED | REJECTED | BLOCKED_EXTERNAL | HUMAN_REQUIRED`.
 - `ENGINEERING_TASK_REQUIRED` y estados parciales siguen no terminales.
 
-## B16 · Current evidence reconciliation
-Antes de programar un App Factory, Website Builder o provider Web/SEO:
-1. leer evidencia actual de FACT-001/APPBOOT-001 y el estado legacy correspondiente;
-2. reconciliar reporting stale sin borrar v2/v3 históricos;
-3. preservar trabajo físico ya probado (PWA/STAGING/APK) y no repetirlo;
-4. mantener separado cualquier gate físico todavía no demostrado (p. ej. instalación/render Android autorizado);
-5. medir deuda real repetible de `web-wordpress-frontend` / `seo-search-content`;
-6. reutilizar SEO-001, WordPress, App/CRM/Supabase y contratos existentes; ningún provider nuevo por conveniencia.
+## B16 · Current evidence + Web/SEO debt
+Estado: HECHO PREPROD sobre código certificado `0ba248c812ed21b2ddbea1f2b2010357615159c9`.
+
+Resultado:
+- 184 items reconciliados item-scoped.
+- Web/WordPress/frontend: 17 candidatas / 7 deudas de ingeniería.
+- SEO/search/content: 30 candidatas / 19 deudas de ingeniería.
+- Recomendación: `NO_NEW_WEB_SEO_PROVIDER_JUSTIFIED` hasta existir contrato genérico de ejecución + binding semántico demostrados.
+- Item 183 conserva su gate físico Android pendiente; no hay falso FULL.
+- Runner B16 alineado de Node 20 a Node 24.x, que es el engine raíz del repo.
+- No se excluyeron tests, no se añadieron dependencias y no se relajaron gates.
+- Exact-head: 11/11 workflows GREEN.
+
+## B17 · Browser automation + physical gates
+Estado: EN CURSO / POR AUDITAR.
+
+Procedimiento obligatorio:
+1. Inventariar primero Browser Bridge, `authorized-execution-device-profile`, repair workflow, contratos y evidencia física existentes.
+2. No fabricar un browser provider nuevo si el mecanismo actual cubre la capacidad.
+3. Separar `config/profile/binding declared` de `physical evidence observed`; configuración sola no certifica acción real.
+4. Reutilizar pruebas históricas solo si siguen aplicando al contrato/adapter actual; registrar branch/head/time cuando sean relevantes.
+5. Ejecución PREPROD bounded/fail-closed: sin arbitrary shell, sin PROD/public mutation, sin customer data, sin Trading, sin dependencia externa nueva por defecto.
+6. Para `FULL_REAL` / `FULL_SAFE_PREPROD` action-capable exigir prueba física PREPROD del binding pertinente.
+7. Si la superficie física no puede observarse desde el runner disponible, no falsear GREEN físico: mantener residual verificable como `BLOCKED_EXTERNAL` o `HUMAN_REQUIRED` solo si aplica uno de los ocho motivos canónicos.
+8. Cerrar con targeted tests, full CEREBRO regression y exact-head CI; conservar rollback/rebuild/observabilidad.
 
 ## Telemetría mínima
 Por candidata: `queue_wait_ms`, `manifest_ms`, `scan_ms`, `sandbox_ms`, `adapter_ms`, `tests_ms`, `ci_wait_ms`, `eval_ms`, `human_wait_ms`, `activation_ms`.
