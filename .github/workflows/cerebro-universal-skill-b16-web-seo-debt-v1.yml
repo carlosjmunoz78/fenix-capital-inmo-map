@@ -53,22 +53,29 @@ jobs:
         shell: bash
         run: |
           set -uo pipefail
-          report_file="b16-failed-tests.txt"
+          report_file="b16-regression-diagnostics.txt"
           : > "${report_file}"
           count=0
           failures=0
           failed_files=()
           while IFS= read -r test_file; do
             count=$((count + 1))
+            tmp_output="$(mktemp)"
             echo "::group::${test_file}"
-            if node --test "${test_file}"; then
-              :
+            if node --test "${test_file}" >"${tmp_output}" 2>&1; then
+              cat "${tmp_output}"
             else
               failures=$((failures + 1))
               failed_files+=("${test_file}")
-              printf '%s\n' "${test_file}" >> "${report_file}"
+              cat "${tmp_output}"
+              {
+                printf '===== FAILED: %s =====\n' "${test_file}"
+                cat "${tmp_output}"
+                printf '\n'
+              } >> "${report_file}"
               echo "::error file=${test_file},title=CEREBRO regression failure::Test file failed in isolated Node process"
             fi
+            rm -f "${tmp_output}"
             echo "::endgroup::"
           done < <(find cerebro/tests -maxdepth 1 -type f -name '*.test.mjs' -print | sort)
           if (( count == 0 )); then
@@ -88,7 +95,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: b16-regression-diagnostics
-          path: b16-failed-tests.txt
+          path: b16-regression-diagnostics.txt
           if-no-files-found: error
           retention-days: 1
       - name: Emit measured report
