@@ -70,10 +70,17 @@ test('gateway E2E run cycle -> dossier -> replay stays PREPROD',async()=>{
   assert.equal(replay.replay_green,true);assert.equal(dossier.prod_authorized,false);
 });
 
-test('existing Fenix real-target soak remains preserved and is not falsely overclaimed',()=>{
+test('existing Fenix real-target continuous acceptance is preserved without granting side effects',()=>{
   const config=JSON.parse(fs.readFileSync(new URL('../registry/compet-real-targets.v0.json',import.meta.url),'utf8'));
-  assert.equal(config.status,'REAL_TARGETS_BASELINE_FROZEN_CONTINUOUS_PREPROD');
-  assert.equal(config.scheduler.soak_complete,false);
+  assert.equal(config.status,'REAL_TARGETS_CONTINUOUS_PREPROD_ACCEPTANCE_GREEN');
+  assert.equal(config.scheduler.soak_complete,true);
+  assert.equal(config.scheduler.verified_scheduled_green_runs,3);
+  assert.equal(config.scheduler.qualifying_run_ids.length,3);
+  assert.equal(new Set(config.scheduler.qualifying_run_ids).size,3);
+  assert.equal(config.remaining_gate,null);
+  assert.equal(config.authority.prod_authorized,false);
+  assert.equal(config.authority.provider_write_authorized,false);
+  assert.equal(config.authority.additional_cost_eur,0);
   assert.equal(COMPET_NATIVE_V1_CONTRACT.existing_fenix_real_target_soak_overclaimed,false);
 });
 
