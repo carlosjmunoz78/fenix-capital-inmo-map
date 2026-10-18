@@ -33,7 +33,7 @@ test('exact legacy dispatch -> durable runtime -> shared worker -> resolver -> v
     const batch=buildLegacy184SelfExtendingDispatchBatch({company_id:'fenix'});
     assert.ok(batch.jobs.length>0);
     const first=batch.jobs[0];
-    const result=await runSelfExtendingSharedWorkerIteration({company_root:root,company_id:'fenix',bindings:[bindingFor(first)],max_rounds:1,now_ms:1792367000000});
+    const result=await runSelfExtendingSharedWorkerIteration({company_root:root,company_id:'fenix',bindings:[bindingFor(first)],max_rounds:1,now_ms:1700000000000});
     assert.equal(result.status,'PREPROD_ITERATION_COMPLETE');
     assert.equal(result.dispatch.requested,batch.jobs.length);
     assert.equal(result.dispatch.accepted_count,batch.jobs.length);
@@ -52,14 +52,14 @@ test('durable journal survives runtime recreation and idempotent redispatch',asy
   try{
     const batch=buildLegacy184SelfExtendingDispatchBatch({company_id:'fenix'});
     const first=batch.jobs[0];
-    const firstRun=await runSelfExtendingSharedWorkerIteration({company_root:root,company_id:'fenix',bindings:[bindingFor(first)],max_rounds:1,now_ms:1792367000000});
+    const firstRun=await runSelfExtendingSharedWorkerIteration({company_root:root,company_id:'fenix',bindings:[bindingFor(first)],max_rounds:1,now_ms:1700000000000});
     const runtime=new DurableJobRuntimeV1({file_path:path.join(root,'job001-self-extending.v1.journal'),environment:'PREPROD'});
     const context={company_id:'fenix',engine_id:'FACT-001',environment:'PREPROD',version:'0.1.0'};
     const persisted=runtime.listForContext(context);
     assert.equal(persisted.length,batch.jobs.length);
     assert.equal(persisted.filter((job)=>job.status==='SUCCEEDED').length,1);
     assert.equal(persisted.find((job)=>job.status==='SUCCEEDED').result.status,'RESUMED_GREEN');
-    const secondRun=await runSelfExtendingSharedWorkerIteration({company_root:root,company_id:'fenix',bindings:[bindingFor(first)],max_rounds:1,now_ms:1792367001000});
+    const secondRun=await runSelfExtendingSharedWorkerIteration({company_root:root,company_id:'fenix',bindings:[bindingFor(first)],max_rounds:1,now_ms:1700000001000});
     assert.equal(secondRun.dispatch.accepted_count,0);
     assert.equal(secondRun.dispatch.duplicate_count,batch.jobs.length);
     assert.equal(firstRun.batch_hash,secondRun.batch_hash);
