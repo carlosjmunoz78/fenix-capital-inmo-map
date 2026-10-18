@@ -1,0 +1,68 @@
+name: CEREBRO Fenix STAGING H1 Jaen
+
+on:
+  push:
+    branches:
+      - cerebro/seo001-staging-audit-v5-20261018
+    paths:
+      - 'cerebro/qa/fenix-staging-h1-jaen.spec.ts'
+      - '.github/workflows/cerebro-fenix-staging-h1-jaen.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: cerebro-fenix-staging-h1-jaen-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  TARGET_BASE: https://staging.fenixcapital.es
+
+jobs:
+  h1-jaen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install repository dependencies
+        run: npm ci
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run H1 Jaen causal acceptance only
+        id: qa
+        continue-on-error: true
+        run: |
+          mkdir -p artifacts/staging-h1-jaen
+          set +e
+          npx playwright test cerebro/qa/fenix-staging-h1-jaen.spec.ts --config=cerebro/qa/playwright.fenix-staging-v5.config.ts --project=v5-390 --reporter=json > artifacts/staging-h1-jaen/playwright-report.json 2> artifacts/staging-h1-jaen/playwright-stderr.log
+          code=$?
+          set -e
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+          test -s artifacts/staging-h1-jaen/playwright-report.json
+      - name: Extract deterministic H1 summary
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const p='artifacts/staging-h1-jaen/playwright-report.json';
+          const report=JSON.parse(fs.readFileSync(p,'utf8'));
+          const tests=[];
+          const walk=s=>{for(const spec of s.specs??[]){for(const t of spec.tests??[]){tests.push({title:spec.title,project:t.projectName,status:t.results?.at(-1)?.status??'unknown',errors:(t.results?.at(-1)?.errors??[]).map(e=>e.message??String(e))});}} for(const x of s.suites??[]) walk(x);};
+          for(const suite of report.suites??[]) walk(suite);
+          const summary={schema:'FENIX_STAGING_H1_JAEN_SUMMARY_V1',environment:'STAGING',prod_touched:false,tests_total:tests.length,passed:tests.filter(t=>t.status==='passed').length,failed:tests.filter(t=>t.status==='failed'||t.status==='timedOut').length,tests};
+          fs.writeFileSync('artifacts/staging-h1-jaen/summary.json',JSON.stringify(summary,null,2)+'\n');
+          console.log(JSON.stringify(summary));
+          NODE
+      - name: Upload H1 evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: CEREBRO_FENIX_STAGING_H1_JAEN_${{ github.sha }}
+          path: artifacts/staging-h1-jaen
+          if-no-files-found: error
+          retention-days: 30
+      - name: Enforce H1 result after evidence upload
+        run: test '${{ steps.qa.outputs.exit_code }}' = '0'
