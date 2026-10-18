@@ -22,6 +22,10 @@ on:
       - 'cerebro/tests/self-extending-shared-worker-v1.test.mjs'
       - 'cerebro/tests/rsi-learning-auto-host.test.mjs'
       - 'cerebro/tests/fixtures/universal-repo-build-node/**'
+      - 'cerebro/registry/self-extending-shared-worker-v1.json'
+      - 'cerebro/contracts/self-extending-shared-worker-v1.contract.json'
+      - 'cerebro/docs/SELF_EXTENDING_SHARED_WORKER_V1_*.md'
+      - 'cerebro/docs/CEREBRO_LIVE_RUNTIME_RESIDUAL_CONVERGENCE_*.md'
       - '.github/workflows/cerebro-self-extending-repo-runtime-v0.yml'
   workflow_dispatch:
 
