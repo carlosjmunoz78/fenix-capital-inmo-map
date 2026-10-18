@@ -1,8 +1,26 @@
-# fenix-capital-inmo-map
-App interna Fénix Capital: mapa de inmobiliarias (OSM/Overpass), filtros por CP/municipio/ciudad, scoring de oportunidad, histórico y export.
+# CEREBRO SEO001 H1 Native Form Dependency Wrapper · v0.1.0
 
-## Política operativa CEREBRO
+Scope: **Fénix STAGING / PREPROD only** (`staging.fenixcapital.es`).
 
-**WPVibe no se usa en ningún flujo CEREBRO, ni como fallback ni como vía temporal.** Para cualquier operación WordPress se usan Fénix Core Guard y los plugins/abilities/REST/MCP propios de CEREBRO/Fénix. Si falta una capacidad, se implementa en el plugin propio y se valida en PRE-PROD con backup, tests y rollback.
+Purpose: preserve CEREBRO Universal Operator while removing only the accidental `elementor-frontend` dependency from `cerebro-universal-landing-native-form` on requests that are not Elementor documents.
 
-Documento canónico: `CEREBRO_TOOLING_POLICY_NO_WPVIBE.md`.
+Safety contract:
+- exact host guard; other hosts are NO-OP;
+- no data/content mutation;
+- no Elementor version/config mutation;
+- no fake `elementorFrontendConfig`;
+- Elementor documents are NO-OP;
+- all non-target dependencies are preserved;
+- rollback is plugin deactivation/removal;
+- source-level marker reports `APPLIED_REMOVE_ELEMENTOR_FRONTEND_DEP` or a NO-OP status.
+
+Acceptance before any production consideration:
+1. CEREBRO Universal Operator remains active.
+2. Previously failing non-Elementor pages no longer load `elementor-frontend` solely through the native form dependency.
+3. Real Elementor pages retain normal Elementor behavior/config.
+4. Native form renders and works.
+5. Console is clean for the former `elementorFrontendConfig` failure.
+6. Targeted V5 matrix reaches 0 JS failures; Complianz remains handled independently.
+7. Rollback by deactivation is verified.
+
+This branch/package is not authorization for PROD.

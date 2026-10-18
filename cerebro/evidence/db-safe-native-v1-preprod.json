@@ -1,8 +1,0 @@
-{
-  "schema_version":"1.0.0","state_type":"CEREBRO_NATIVE_CAPABILITY_PREPROD_EVIDENCE","capability_id":"DB-SAFE-NATIVE","company_id":"GLOBAL","engine_id":"DATA-001","environment":"PREPROD","version":"1.0.0","status":"PREPROD_GREEN",
-  "validated_head_sha":"2966e27137444ccc7453389b03b77b6d89cdcebb","workflow":{"name":"CEREBRO DB-SAFE-NATIVE V1 PREPROD","run_id":38896508315,"job_id":116958146477,"conclusion":"success"},
-  "live_read_only_evidence":{"project_ref":"hnqlnvakzaywtafeiybt","project_name":"fenix-capital-inmo-map","project_status":"ACTIVE_HEALTHY","postgres_version":"17.6.1.063","schema_inventory_read":true,"security_advisors_read":true,"prod_project_ref":"cluhljgonannaafpmblx","prod_project_touched":false,"ddl_applied":false,"data_mutated":false},
-  "checks":{"factory_registry_valid":true,"targeted_e2e_green":true,"policy_gate_green":true,"destructive_sql_denied":true,"rls_disable_denied":true,"prod_mutation_denied":true,"backup_rollback_contract_regression_schema_lease_required":true,"heavy_workload_offload_green":true,"idempotency_green":true,"additional_cost_eur":0},
-  "advisor_findings_policy":"OBSERVE_AND_MAP_DEPENDENCIES_BEFORE_FIX; NO_BULK_REWRITE",
-  "full_gate_count":14,"full_gate_result":"GREEN","human_required":null,"next_gate":"PR_AND_MAIN_INTEGRATION_WITHOUT_PROD_DB_MUTATION"
-}
