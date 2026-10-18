@@ -5,6 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {runAutoHostIteration} from '../runtime/rsi-learning-auto-host.mjs';
+import {buildLegacy184SelfExtendingDispatchBatch} from '../runtime/universal-skill-legacy184-self-extending-reopen-v0.mjs';
 
 const base='https://raw.githubusercontent.com/carlosjmunoz78/fenix-capital-inmo-map/cerebro-rsi-learning-outbox-v0/cerebro/runtime/rsi-outbox';
 function temp(){return fs.mkdtempSync(path.join(os.tmpdir(),'cerebro-rsi-auto-host-'));}
@@ -18,6 +19,14 @@ function remote(){
   const companyBase=`${base}/fenix`;
   return async url=>{if(url===`${companyBase}/index.json`)return {ok:true,status:200,text:async()=>indexText};if(url===`${companyBase}/batches/lrn-batch_auto1.json`)return {ok:true,status:200,text:async()=>batchText};return {ok:false,status:404,text:async()=>''};};
 }
+function selfExtendingBinding(){
+  const first=buildLegacy184SelfExtendingDispatchBatch({company_id:'fenix'}).jobs[0];
+  return {first,binding:{
+    capability_id:first.resolution.capability_id,state:'FULL_SAFE_PREPROD',strategies:['REUSE_INTERNAL'],evidence_ref:`evidence:${first.resolution.capability_id}`,
+    validation:{metric:'acceptance_score',direction:'higher',old:0.4,new:0.9,judge_id:'EVA-001',candidate_actor_id:first.candidate_id,evidence_refs:[`evidence:${first.resolution.capability_id}`]},
+    recovery:{backup_ref:'backup:rsi-host:selfext',rollback_ref:'rollback:rsi-host:selfext',rebuild_ref:'rebuild:rsi-host:selfext'}
+  }};
+}
 
 test('one autonomous iteration pulls verified outbox, learns and materializes one versioned candidate without manual JSON',async()=>{
   const root=temp();
@@ -26,11 +35,29 @@ test('one autonomous iteration pulls verified outbox, learns and materializes on
     assert.equal(result.status,'GREEN');assert.equal(result.remote_outbox.status,'REMOTE_OUTBOX_GREEN');assert.equal(result.remote_outbox.downloaded_total,1);
     assert.equal(result.learning.last_result.persisted_total,1);assert.equal(result.prod_authorized,false);assert.equal(result.trading_access,false);
     assert.equal(result.candidates.status,'CANDIDATES_GREEN');assert.equal(result.candidates.persisted_total,1);assert.equal(result.candidates.candidate_total,1);assert.equal(result.candidates.next_gate,'OLD_VS_NEW_EXPERIMENT');
+    assert.equal(result.self_extending.status,'SELF_EXTENDING_DISABLED');
     assert.equal(fs.existsSync(path.join(root,'data','fenix','LRN-001','learning.v8')),true);
     assert.equal(fs.existsSync(path.join(root,'data','fenix','LRN-001','improvement-candidates.v8')),true);
     const rerun=await runAutoHostIteration({raw_config:config(root),fetch_impl:remote(),now:()=> '2026-10-08T14:01:00.000Z'});
     assert.equal(rerun.remote_outbox.skipped_total,1);assert.equal(rerun.learning.last_result.persisted_total,0);assert.ok(rerun.learning.last_result.skipped_receipts>=1);
     assert.equal(rerun.candidates.persisted_total,0);assert.equal(rerun.candidates.duplicates_total,1);assert.equal(rerun.candidates.candidate_total,1);
+  }finally{fs.rmSync(root,{recursive:true,force:true});}
+});
+
+test('existing RSI auto-host can run the self-extending durable shared worker in the same persistent company root',async()=>{
+  const root=temp();
+  try{
+    const cfg=config(root);const {first,binding}=selfExtendingBinding();cfg.self_extending={enabled:true,bindings:[binding],max_rounds:1,worker_id:'rsi-shared-test'};
+    const result=await runAutoHostIteration({raw_config:cfg,fetch_impl:remote(),now:()=> '2026-10-08T14:00:00.000Z'});
+    assert.equal(result.status,'GREEN');
+    assert.equal(result.self_extending.status,'PREPROD_ITERATION_COMPLETE');
+    assert.equal(result.self_extending.outcomes[0].status,'SUCCEEDED');
+    assert.equal(result.self_extending.outcomes[0].job.result.status,'RESUMED_GREEN');
+    assert.equal(result.self_extending.outcomes[0].job.result.resume_result.tribunal.decision,'PASS');
+    assert.equal(result.self_extending.prod_authorized,false);
+    const journal=path.join(root,'data','fenix','LRN-001','job001-self-extending.v1.journal');
+    assert.equal(fs.existsSync(journal),true);
+    assert.equal(result.self_extending.outcomes[0].job.payload.resolution.capability_id,first.resolution.capability_id);
   }finally{fs.rmSync(root,{recursive:true,force:true});}
 });
 
@@ -41,6 +68,7 @@ test('kill switch skips remote pull and performs zero new persistence or candida
     let calls=0;const fetch=async()=>{calls+=1;throw new Error('must not call');};
     const result=await runAutoHostIteration({raw_config:cfg,fetch_impl:fetch,now:()=> '2026-10-08T14:00:00.000Z'});
     assert.equal(calls,0);assert.equal(result.status,'KILLED');assert.equal(result.learning.last_result.reason,'KILL_SWITCH');assert.equal(result.candidates.status,'CANDIDATES_KILLED');
+    assert.equal(result.self_extending.status,'SELF_EXTENDING_DISABLED');
   }finally{fs.rmSync(root,{recursive:true,force:true});}
 });
 
