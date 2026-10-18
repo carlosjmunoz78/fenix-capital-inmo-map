@@ -1,0 +1,135 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_LEGACY184_CURRENT_EVIDENCE_OVERLAY_V1",
+  "company_id": "fenix",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "1.0.0",
+  "status": "CURRENT_EVIDENCE_RECONCILED_FAIL_CLOSED",
+  "purpose": "Overlay stale legacy reconciliation snapshots with later governed repository evidence without rewriting history or falsely claiming physical activation.",
+  "policy": {
+    "historical_reconciliation_files_are_immutable_inputs": true,
+    "overlay_may_only_reduce_false_engineering_debt_when_later_evidence_exists": true,
+    "overlay_may_not_emit_full_safe_preprod": true,
+    "physical_or_external_residual_maps_to": "BLOCKED_EXTERNAL",
+    "verified_existing_reuse_maps_to": "ABSORBED",
+    "unresolved_real_engineering_work_remains": "ENGINEERING_TASK_REQUIRED",
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "trading_access": false,
+    "additional_cost_eur": 0
+  },
+  "items": {
+    "47": {
+      "resolution": "BLOCKED_EXTERNAL",
+      "current_state": "VERIFIED_REMOTE_OBSERVATION_REPLAY_GREEN_SOAK_PENDING",
+      "reason": "Watch & Learn core, remote read-only observation, deterministic replay and scheduler are implemented; three separated scheduled runs and retention review remain external acceptance evidence.",
+      "evidence_refs": [
+        "cerebro/registry/watch-learn-remote-observation.v0.json",
+        "cerebro/skills/cerebro-184-live-convergence.v3.json"
+      ],
+      "remaining_gate": "THREE_SCHEDULED_RUNS_GREEN_AND_RETENTION_REVIEW"
+    },
+    "48": {
+      "resolution": "BLOCKED_EXTERNAL",
+      "current_state": "SIGNED_PREPROD_APK_BUILD_GREEN_NO_DEVICE_BOUND",
+      "reason": "The governed Android worker shell and signed PREPROD APK build are evidenced; a real authorized Android device install, attestation and E2E remain physical acceptance.",
+      "evidence_refs": [
+        "cerebro/registry/fact001-android-staging-48-183.v0.json",
+        "cerebro/skills/cerebro-184-live-convergence.v3.json"
+      ],
+      "remaining_gate": "AUTHORIZED_DEVICE_ATTESTATION_AND_PHYSICAL_DEVICE_E2E"
+    },
+    "57": {
+      "resolution": "BLOCKED_EXTERNAL",
+      "current_state": "REAL_PUBLIC_TARGETS_CONFIGURED_AND_SCHEDULED_SOAK_PENDING",
+      "reason": "COMPET-001 continuous runtime, durable scheduler and real public Cordoba targets are configured; fresh separated scheduled PREPROD runs remain acceptance evidence.",
+      "evidence_refs": [
+        "cerebro/registry/fact001-real-source-rollout-57-62.v0.json",
+        "cerebro/registry/fact001-six-gap-physical-e2e.v0.json",
+        "cerebro/skills/cerebro-184-live-convergence.v3.json"
+      ],
+      "remaining_gate": "THREE_GENUINE_SCHEDULED_PREPROD_RUNS_GREEN"
+    },
+    "62": {
+      "resolution": "BLOCKED_EXTERNAL",
+      "current_state": "CORE_AND_TRANSPORT_GREEN_STABLE_ZERO_COST_REAL_SOURCE_PENDING",
+      "reason": "CAP-001 core, durable scheduler and remote-read transport are evidenced; the attempted public source was held as unreliable, so a stable zero-cost authorized company source is still required before real continuous PREPROD acceptance.",
+      "evidence_refs": [
+        "cerebro/registry/fact001-real-source-rollout-57-62.v0.json",
+        "cerebro/registry/fact001-six-gap-physical-e2e.v0.json",
+        "cerebro/skills/cerebro-184-live-convergence.v3.json"
+      ],
+      "remaining_gate": "STABLE_ZERO_COST_AUTHORIZED_COMPANY_SOURCE_AND_REAL_CONTINUOUS_PREPROD_RUN"
+    },
+    "101": {
+      "resolution": "BLOCKED_EXTERNAL",
+      "current_state": "VOICE001_SIMULATION_GOVERNED_LIVE_TELEPHONY_DISABLED",
+      "reason": "Call cadence is delegated to canonical VOICE-001 and the governed simulation seam exists; live telephony is deliberately not bound or authorized and therefore remains an external physical gate rather than missing generic engineering.",
+      "evidence_refs": [
+        "cerebro/registry/voice001-outreach-profile.v0.json",
+        "cerebro/skills/cerebro-184-items-93-104-live-reconciliation.v2.json"
+      ],
+      "remaining_gate": "LIVE_TELEPHONY_PROVIDER_AND_PHYSICAL_CALL_E2E_UNDER_SEPARATE_PROMOTION_GATE"
+    },
+    "157": {
+      "resolution": "ABSORBED",
+      "current_state": "SEO001_EXISTING_WRAP_NO_REPLACEMENT",
+      "reason": "The current PREPROD profile explicitly reuses and wraps canonical SEO-001. No replacement engine or duplicate implementation is justified by this legacy item.",
+      "evidence_refs": [
+        "cerebro/registry/phase13-marketing-seo-feedback-profile.v0.json",
+        "cerebro/skills/cerebro-184-items-152-161-live-reconciliation.v2.json"
+      ],
+      "reuse_decision": "ABSORB_EXISTING_CANONICAL_ENGINE"
+    },
+    "176": {
+      "resolution": "ABSORBED",
+      "current_state": "BRANDBOOT001_EXISTING_GOVERNED_LAB_CANDIDATE_REUSED",
+      "reason": "The brand/app-factory profile explicitly reuses the existing BRANDBOOT-001 governed LAB candidate and forbids silent promotion or duplicate engine creation.",
+      "evidence_refs": [
+        "cerebro/registry/brand-commerce-appfactory-profile.v0.json",
+        "cerebro/skills/cerebro-184-items-176-184-live-reconciliation.v2.json"
+      ],
+      "reuse_decision": "ABSORB_EXISTING_GOVERNED_CANDIDATE"
+    },
+    "181": {
+      "resolution": "ABSORBED",
+      "current_state": "APP_FACTORY_WRAPS_FACT001_APPBOOT001",
+      "reason": "The App Factory legacy capability is explicitly composed from existing FACT-001 and APPBOOT-001 rather than requiring a new engine.",
+      "evidence_refs": [
+        "cerebro/registry/brand-commerce-appfactory-profile.v0.json",
+        "cerebro/skills/cerebro-184-items-176-184-live-reconciliation.v2.json"
+      ],
+      "reuse_decision": "ABSORB_EXISTING_CANONICAL_ENGINES"
+    },
+    "183": {
+      "resolution": "BLOCKED_EXTERNAL",
+      "current_state": "STAGING_DRAFT_RENDER_AND_SIGNED_ANDROID_APK_GREEN_PHYSICAL_DEVICE_PENDING",
+      "reason": "Deterministic templates, authenticated staging draft rendering and signed PREPROD Android build are evidenced; authorized physical device install/render E2E remains external acceptance.",
+      "evidence_refs": [
+        "cerebro/registry/fact001-android-staging-48-183.v0.json",
+        "cerebro/registry/fact001-six-gap-physical-e2e.v0.json",
+        "cerebro/skills/cerebro-184-live-convergence.v3.json"
+      ],
+      "remaining_gate": "AUTHORIZED_DEVICE_INSTALL_AND_RENDER_E2E"
+    }
+  },
+  "intentionally_unresolved_engineering": {
+    "130": {
+      "state": "ENGINEERING_TASK_REQUIRED",
+      "reason": "Product Delivery still requires repository live-adapter seam audit before any real delivery side effect. Preserve and wrap the existing AION/Product Factory; do not duplicate it.",
+      "evidence_refs": [
+        "cerebro/skills/cerebro-184-items-118-131-live-reconciliation.v2.json"
+      ]
+    }
+  },
+  "truth_constraints": [
+    "ABSORBED means reuse/composition evidence exists; it is not a claim of autonomous PROD authority.",
+    "BLOCKED_EXTERNAL means generic engineering core is not the remaining blocker; real external or physical acceptance evidence is still missing.",
+    "No overlay entry may convert a candidate to FULL_SAFE_PREPROD.",
+    "Historical reconciliation snapshots remain preserved for auditability."
+  ],
+  "rollback": "Remove this additive overlay and the normalizer will fall back to the historical reconciliation classifications; no external state is mutated.",
+  "rebuild": "Re-derive each overlay row from current canonical registry evidence and the preserved legacy reconciliation snapshot, then rerun Scale184 V1/V2.",
+  "next_gate": "AUDIT_ITEM_130_PRODUCT_DELIVERY_LIVE_ADAPTER_SEAM_AND_RERUN_184"
+}
