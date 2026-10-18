@@ -22,16 +22,22 @@ test('COMPET real targets remain PREPROD, public and company scoped',()=>{
   }
 });
 
-test('real baselines are frozen but scheduled soak is not overclaimed',()=>{
-  assert.equal(config.status,'REAL_TARGETS_BASELINE_FROZEN_CONTINUOUS_PREPROD');
+test('real baselines and three genuine scheduled runs are certified without granting side effects',()=>{
+  assert.equal(config.status,'REAL_TARGETS_CONTINUOUS_PREPROD_ACCEPTANCE_GREEN');
   assert.equal(config.baseline_capture.result,'GREEN');
   assert.equal(config.targets.every(t=>t.baseline&&typeof t.baseline.body_sha256==='string'&&t.baseline.body_sha256.length===64),true);
   assert.equal(config.scheduler.configured,true);
   assert.equal(config.scheduler.kind,'GITHUB_ACTIONS_CRON');
   assert.equal(config.scheduler.cron,'43 5 * * *');
-  assert.equal(config.scheduler.soak_complete,false);
+  assert.equal(config.scheduler.soak_complete,true);
   assert.equal(config.scheduler.required_scheduled_green_runs,3);
-  assert.equal(config.next_gate,'THREE_CONTINUOUS_REAL_COMPETITOR_SCHEDULED_RUNS_GREEN');
+  assert.equal(config.scheduler.verified_scheduled_green_runs,3);
+  assert.equal(config.scheduler.qualifying_run_ids.length,3);
+  assert.equal(new Set(config.scheduler.qualifying_run_ids).size,3);
+  assert.equal(config.scheduled_soak_certification.verified_scheduled_green_runs,3);
+  assert.equal(config.scheduled_soak_certification.missing_scheduled_green_runs,0);
+  assert.equal(config.scheduled_soak_certification.manual_or_dispatch_substitution,false);
+  assert.equal(config.remaining_gate,null);
 });
 
 test('data minimization and authority are fail closed',()=>{
