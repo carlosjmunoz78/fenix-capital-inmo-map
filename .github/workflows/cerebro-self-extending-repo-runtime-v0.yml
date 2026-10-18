@@ -5,10 +5,13 @@ on:
     paths:
       - 'cerebro/runtime/universal-repo-runtime-v0.mjs'
       - 'cerebro/runtime/universal-repo-sandbox-executor-v0.mjs'
+      - 'cerebro/runtime/universal-repo-build-pipeline-v0.mjs'
       - 'cerebro/runtime/self-extending-capability-resolver-v0.mjs'
       - 'cerebro/runtime/universal-self-extending-github-intake-v0.mjs'
       - 'cerebro/tests/universal-self-extending-repo-v0.test.mjs'
       - 'cerebro/tests/universal-repo-sandbox-executor-v0.test.mjs'
+      - 'cerebro/tests/universal-repo-build-pipeline-v0.test.mjs'
+      - 'cerebro/tests/fixtures/universal-repo-build-node/**'
       - '.github/workflows/cerebro-self-extending-repo-runtime-v0.yml'
   workflow_dispatch:
 
@@ -28,6 +31,8 @@ jobs:
         run: node --test cerebro/tests/universal-self-extending-repo-v0.test.mjs
       - name: Physical sandbox executor contract tests
         run: node --test cerebro/tests/universal-repo-sandbox-executor-v0.test.mjs
+      - name: Universal repo build pipeline contract tests
+        run: node --test cerebro/tests/universal-repo-build-pipeline-v0.test.mjs
 
   physical-sandbox-e2e:
     runs-on: ubuntu-latest
@@ -60,5 +65,39 @@ jobs:
         with:
           name: cerebro-universal-repo-sandbox-e2e-v0
           path: cerebro/artifacts/runtime/universal-repo-sandbox-e2e.v0.json
+          if-no-files-found: error
+          retention-days: 14
+
+  physical-build-pipeline-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Resolve immutable build/proxy/runtime image
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker pull node:22-alpine
+          IMAGE="$(docker inspect --format='{{index .RepoDigests 0}}' node:22-alpine)"
+          test -n "$IMAGE"
+          case "$IMAGE" in
+            *@sha256:*) ;;
+            *) echo "Image is not digest pinned: $IMAGE" >&2; exit 1 ;;
+          esac
+          echo "CEREBRO_BUILD_IMAGE=$IMAGE" >> "$GITHUB_ENV"
+      - name: Exact SHA -> isolated allowlist-proxy build -> lock/SBOM -> offline runtime probe -> PREPROD tribunal
+        env:
+          CEREBRO_PHYSICAL_BUILD_E2E: '1'
+          CEREBRO_BUILD_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          CEREBRO_BUILD_ARTIFACT: 'cerebro/artifacts/runtime/universal-repo-build-pipeline-e2e.v0.json'
+        run: node --test cerebro/tests/universal-repo-build-pipeline-v0.test.mjs
+      - name: Upload build pipeline PREPROD attestation
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-universal-repo-build-pipeline-e2e-v0
+          path: cerebro/artifacts/runtime/universal-repo-build-pipeline-e2e.v0.json
           if-no-files-found: error
           retention-days: 14
