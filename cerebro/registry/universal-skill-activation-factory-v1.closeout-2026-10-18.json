@@ -1,0 +1,95 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_UNIVERSAL_SKILL_ACTIVATION_FACTORY_V1_CLOSEOUT",
+  "generated_at": "2026-10-18",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "1.0.0",
+  "repository": "carlosjmunoz78/fenix-capital-inmo-map",
+  "branch": "cerebro/universal-skill-activation-factory-v1-20261017",
+  "pull_request": 784,
+  "supersedes_operational_status_from": "cerebro/registry/universal-skill-activation-factory-v1.state.json",
+  "certified_implementation_head_sha": "f53ef4d68fd8e42fbb7ec0001e66eb18472fcb43",
+  "status": "FACT001_P0_MASS_RECONCILIATION_GREEN_PREPROD",
+  "last_completed_block": "FACT001_P0_CANDIDATE_FREEZE_AND_MASS_RECONCILIATION",
+  "next_block": "PHYSICAL_RESIDUAL_CLOSURE_AND_PRODUCTION_PROMOTION_REVIEW",
+  "catalog": {
+    "catalog_size": 184,
+    "processed": 184,
+    "remaining_engineering_tasks": 0,
+    "observed_outcome_counts": {
+      "ABSORBED": 39,
+      "REJECTED": 59,
+      "BLOCKED_EXTERNAL": 85,
+      "FULL_SAFE_PREPROD": 1
+    },
+    "full_claim": false,
+    "truth": "Zero engineering debt means all 184 items are truthfully reconciled under the current contract; it does not mean 184/184 are physically active or FULL."
+  },
+  "scale184_v2_evidence": {
+    "workflow": "CEREBRO Universal Skill Activation Scale184 V2",
+    "run_id": 39118438155,
+    "head_sha": "f53ef4d68fd8e42fbb7ec0001e66eb18472fcb43",
+    "status": "SUCCESS",
+    "artifact_id": 12132759823,
+    "artifact_digest": "sha256:aaa6e3fb8b6acd0584cda07666906b085bd9773b1006f6d00c1d4c249b7a30a5",
+    "report_hash": "8338788b2bffa9133595894629d05a7261091af42a53744b5f683529b58094f6",
+    "product_delivery_item_130": "ABSORBED",
+    "stripe_item_128": "FULL_SAFE_PREPROD"
+  },
+  "exact_head_gates": {
+    "b16_web_seo_debt": "SUCCESS",
+    "b17_browser_physical_gates": "SUCCESS",
+    "b20_p0_acceptance_scale_release": "SUCCESS",
+    "all_engineering_specialists": "SUCCESS",
+    "full_cerebro_regression": "SUCCESS",
+    "repository_e2e": "SUCCESS",
+    "github_url_e2e": "SUCCESS",
+    "tribunal_shadow": "SUCCESS",
+    "skill_supply_chain": "SUCCESS"
+  },
+  "remaining_physical_gate_groups": [
+    {
+      "id": "ANDROID_48_183",
+      "state": "PHYSICAL_EVIDENCE_PENDING",
+      "required": "AUTHORIZED_PHYSICAL_ANDROID_DEVICE_E2E"
+    },
+    {
+      "id": "WATCH_LEARN_47",
+      "state": "PHYSICAL_EVIDENCE_PENDING",
+      "required": "THREE_GENUINE_SCHEDULED_RUNS_GREEN"
+    },
+    {
+      "id": "COMPET_57_61",
+      "state": "PHYSICAL_EVIDENCE_PENDING",
+      "required": "REAL_COMPETITOR_TARGETS_AND_CONTINUOUS_PREPROD_RUN"
+    },
+    {
+      "id": "CAP_62_68",
+      "state": "PHYSICAL_EVIDENCE_PENDING",
+      "required": "REAL_ACQUISITION_SOURCES_AND_CONTINUOUS_PREPROD_RUN"
+    }
+  ],
+  "authority": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "prod_mutation_authorized": false,
+    "auto_merge_authorized": false,
+    "external_skill_code_execution_authorized": false,
+    "external_dependency_install_authorized": false,
+    "customer_data_authorized": false,
+    "trading_access": false,
+    "automatic_paid_fallback": false,
+    "additional_cost_eur": 0
+  },
+  "truth_constraints": [
+    "184/184 reconciled is not 184/184 physically active",
+    "BLOCKED_EXTERNAL remains valid and must not be converted into false FULL",
+    "FULL_SAFE_PREPROD is not PROD authority",
+    "no skill is forced into every engine",
+    "routing remains impact-based and engine-specific",
+    "physical evidence cannot be replaced by synthetic or configuration-only evidence"
+  ],
+  "human_required": null
+}
