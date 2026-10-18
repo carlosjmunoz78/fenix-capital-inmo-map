@@ -8,7 +8,7 @@ const targets=[
   ['LOCAL_B2B','/financiacion-compradores-inmobiliarias-montilla/'],
   ['PROFILE','/hipotecas/hipoteca-100/funcionarios/'],
   ['PRODUCT','/hipotecas/hipoteca-100/'],
-  ['PROCESS','/hipotecas/documentacion-hipoteca/'],
+  ['PROCESS','/hipotecas/documentacion-para-pedir-una-hipoteca/'],
   ['RESOURCE','/calculadora-hipotecaria/'],
   ['ARTICLE','/blog/'],
   ['CONTACT','/contacto/'],
@@ -20,7 +20,7 @@ const safeName=(value:string)=>value.toLowerCase().replace(/[^a-z0-9]+/g,'-').re
 for(const [kind,path] of targets){
   test(`${kind} ${path} · responsive read-only gate`,async({page},testInfo)=>{
     const pageErrors:string[]=[];
-    page.on('pageerror',e=>pageErrors.push(e.message));
+    page.on('pageerror',e=>pageErrors.push(e.stack||e.message));
     const response=await page.goto(`${base}${path}`,{waitUntil:'networkidle',timeout:60_000});
     expect(response,`${path} response`).not.toBeNull();
     if(response) expect(response.status(),`${path} HTTP status`).toBe(200);
@@ -48,7 +48,7 @@ for(const [kind,path] of targets){
         tinyTouchTargets:innerWidth<=600?interactive.filter(el=>{const r=el.getBoundingClientRect();return r.width>0&&r.height>0&&(r.width<44||r.height<44);}).length:0
       };
     });
-    console.log(`FENIX_V5_OBS:${JSON.stringify({kind,...obs})}`);
+    console.log(`FENIX_V5_OBS:${JSON.stringify({kind,...obs,pageErrors})}`);
     await page.screenshot({path:`artifacts/staging-v5/screens/${testInfo.project.name}-${safeName(kind)}.png`,fullPage:true});
     expect(pageErrors,`${path} JS page errors`).toEqual([]);
     expect(obs.horizontalOverflow,`${path} horizontal overflow`).toBe(false);
@@ -57,20 +57,23 @@ for(const [kind,path] of targets){
   });
 }
 
-test('removed SYSTEM_TEST is not publicly reachable',async({page})=>{
+test('removed SYSTEM_TEST is not publicly reachable',async({page},testInfo)=>{
+  test.skip(testInfo.project.name!=='v5-390','single canonical viewport is sufficient for this non-visual gate');
   const response=await page.goto(`${base}/cerebro-core-guard-final-test-20260903/`,{waitUntil:'domcontentloaded',timeout:45_000});
   expect(response).not.toBeNull();
   if(response) expect(response.status()).toBe(404);
   await expect(page.getByText('Validación técnica final controlada de Core Guard en PRE-PROD.')).toHaveCount(0);
 });
 
-test('Montilla LOCAL_B2B has non-empty meta description',async({page})=>{
+test('Montilla LOCAL_B2B has non-empty meta description',async({page},testInfo)=>{
+  test.skip(testInfo.project.name!=='v5-390','single canonical viewport is sufficient for this metadata gate');
   await page.goto(`${base}/financiacion-compradores-inmobiliarias-montilla/`,{waitUntil:'domcontentloaded',timeout:45_000});
   const meta=await page.locator('meta[name="description"]').getAttribute('content');
   expect((meta||'').trim().length).toBeGreaterThan(80);
 });
 
-test('consent blocks analytics before opt-in and enables after accept',async({browser})=>{
+test('consent blocks analytics before opt-in and enables after accept',async({browser},testInfo)=>{
+  test.skip(testInfo.project.name!=='v5-390','consent state is viewport-independent; run once');
   const context=await browser.newContext({viewport:{width:390,height:844}});
   const page=await context.newPage();
   const tracker=(url:string)=>/google-analytics\.com|googletagmanager\.com\/gtag|facebook\.com\/tr|connect\.facebook\.net/i.test(url);
@@ -81,7 +84,16 @@ test('consent blocks analytics before opt-in and enables after accept',async({br
   console.log(`FENIX_V5_CONSENT_BEFORE:${JSON.stringify(before)}`);
   expect(before,'analytics/pixel must not transmit before consent').toEqual([]);
 
-  const accept=page.locator('#cmplz-accept, .cmplz-accept, button:has-text("Aceptar"), button:has-text("Accept")').first();
+  const diag=await page.evaluate(()=>({
+    bodyCmplz:document.body.getAttribute('data-cmplz'),
+    cmplzNodes:document.querySelectorAll('[id*="cmplz"],[class*="cmplz"]').length,
+    cmplzButtons:[...document.querySelectorAll('button')].filter(b=>/acept|accept|rechaz|reject|cookie/i.test((b.textContent||'')+' '+b.className+' '+b.id)).map(b=>({text:(b.textContent||'').trim(),id:b.id,className:String(b.className)})).slice(0,20),
+    scripts:[...document.querySelectorAll('script')].filter(s=>/complianz|cmplz/i.test((s.src||'')+' '+s.id+' '+s.className)).map(s=>s.src||s.id).slice(0,20),
+    cookies:document.cookie.split(';').map(v=>v.trim().split('=')[0]).filter(Boolean).sort()
+  }));
+  console.log(`FENIX_V5_CONSENT_DIAG:${JSON.stringify(diag)}`);
+
+  const accept=page.locator('#cmplz-cookiebanner-container .cmplz-accept, .cmplz-cookiebanner .cmplz-accept, button.cmplz-accept, button:has-text("Aceptar"), button:has-text("Accept")').first();
   await expect(accept,'Complianz accept control').toBeVisible({timeout:10_000});
   await accept.click();
   await page.waitForTimeout(2500);
