@@ -10,10 +10,14 @@ import {runUniversalSkillBatchOnce,runUniversalSkillBatchIndustrial} from '../ru
 const here=path.dirname(fileURLToPath(import.meta.url));
 const realFile=path.resolve(here,'../skills/cerebro-184-items-38-50-live-reconciliation.v2.json');
 const realDoc=JSON.parse(fs.readFileSync(realFile,'utf8'));
+const HISTORICAL_OVERLAY=Object.freeze({items:Object.freeze({})});
+function historicalBlindSelection(limit,source_ref='cerebro/skills/cerebro-184-items-38-50-live-reconciliation.v2.json'){
+  return selectBlindLegacyBatch(realDoc,{limit,source_ref,current_evidence_overlay:HISTORICAL_OVERLAY});
+}
 
-test('blind selector consumes real catalog reconciliation rather than handcrafted skill fixtures',()=>{
+test('blind selector can replay the preserved historical catalog contract without current-evidence rewriting',()=>{
   assert.equal(realDoc.state_type,'CEREBRO_184_ITEMS_38_50_LIVE_RECONCILIATION_V2');
-  const selection=selectBlindLegacyBatch(realDoc,{limit:4,source_ref:'cerebro/skills/cerebro-184-items-38-50-live-reconciliation.v2.json'});
+  const selection=historicalBlindSelection(4);
   assert.equal(selection.catalog_range,'38-50');
   assert.equal(selection.selected.length,4);
   const names=selection.selected.map((x)=>x.activation_input?.technical_name??'').join(' ');
@@ -22,6 +26,14 @@ test('blind selector consumes real catalog reconciliation rather than handcrafte
   assert.ok(selection.selected.some((x)=>x.expected_outcome==='BLOCKED_EXTERNAL'));
   assert.ok(selection.selected.some((x)=>x.expected_outcome==='ENGINEERING_TASK_REQUIRED'));
   assert.ok(selection.excluded_terminal.some((x)=>x.expected_outcome==='REJECTED'));
+});
+
+test('default blind selector uses current evidence and does not recreate stale engineering debt for 47/48',()=>{
+  const selection=selectBlindLegacyBatch(realDoc,{limit:10,source_ref:'cerebro/skills/cerebro-184-items-38-50-live-reconciliation.v2.json'});
+  const currentRows=[...selection.selected,...selection.excluded_terminal].filter((x)=>[47,48].includes(x.source_item_id));
+  assert.equal(currentRows.length,2);
+  assert.ok(currentRows.every((x)=>x.expected_outcome==='BLOCKED_EXTERNAL'));
+  assert.ok(currentRows.every((x)=>x.evidence_resolution==='BLOCKED_EXTERNAL'));
 });
 
 test('generic legacy normalizer uses disposition/state/evidence rules, not item-id special cases',()=>{
@@ -33,8 +45,8 @@ test('generic legacy normalizer uses disposition/state/evidence rules, not item-
   assert.equal(normalized.prod_authorized,false);
 });
 
-test('blind real-catalog batch reaches truthful outcomes without candidate-specific integration code',()=>{
-  const selection=selectBlindLegacyBatch(realDoc,{limit:4,source_ref:'cerebro/skills/cerebro-184-items-38-50-live-reconciliation.v2.json'});
+test('historical blind real-catalog batch reaches its preserved truthful outcomes without candidate-specific integration code',()=>{
+  const selection=historicalBlindSelection(4);
   const candidates=selection.selected.map((x)=>({activation_input:x.activation_input,candidate_evidence:x.candidate_evidence,low_risk:true,external_side_effects:false}));
   const root=fs.mkdtempSync(path.join(os.tmpdir(),'usaf-blind-real184-'));
   const report=runUniversalSkillBatchOnce({root_dir:root,candidates,max_jobs:20,source_run_id:184038050,source_head_sha:'3333333333333333333333333333333333333333',now_ms:5000000});
@@ -51,8 +63,8 @@ test('blind real-catalog batch reaches truthful outcomes without candidate-speci
   assert.equal(report.additional_cost_eur,0);
 });
 
-test('industrial fast lane processes a real blind catalog batch concurrently without false FULL upgrades',async()=>{
-  const selection=selectBlindLegacyBatch(realDoc,{limit:10,source_ref:'cerebro/skills/cerebro-184-items-38-50-live-reconciliation.v2.json'});
+test('industrial fast lane replays a historical real blind catalog batch concurrently without false FULL upgrades',async()=>{
+  const selection=historicalBlindSelection(10);
   assert.ok(selection.selected.length>=5,'real blind catalog must provide at least five independent candidates');
   const candidates=selection.selected.map((x)=>({activation_input:x.activation_input,candidate_evidence:x.candidate_evidence,low_risk:true,external_side_effects:false}));
   const expected=Object.fromEntries(selection.selected.map((x)=>[x.activation_input.candidate_id,x.expected_outcome]));
@@ -75,7 +87,7 @@ test('industrial fast lane processes a real blind catalog batch concurrently wit
 });
 
 test('reference-only and HOLD items are explicitly excluded as REJECTED instead of being activated',()=>{
-  const selection=selectBlindLegacyBatch(realDoc,{limit:4,source_ref:'real:38-50'});
+  const selection=historicalBlindSelection(4,'real:38-50');
   const rejected=selection.excluded_terminal.filter((x)=>x.expected_outcome==='REJECTED');
   assert.ok(rejected.length>=1);
   assert.ok(rejected.every((x)=>['CATALOGAR','HOLD','DESCARTAR'].includes(x.source_disposition)));
