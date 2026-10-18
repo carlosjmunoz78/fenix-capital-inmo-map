@@ -62,7 +62,8 @@ test('Elementor bootstrap lifecycle diagnostic',async({page},testInfo)=>{
   const paths=[
     ['FAILING_LOCAL','/asesor-hipotecario-cordoba/'],
     ['PASSING_PROFILE','/hipotecas/hipoteca-100/funcionarios/'],
-    ['FAILING_HOME','/']
+    ['FAILING_HOME','/'],
+    ['FAILING_BLOG','/blog/']
   ] as const;
   for(const [kind,path] of paths){
     const errors:string[]=[];
@@ -78,15 +79,20 @@ test('Elementor bootstrap lifecycle diagnostic',async({page},testInfo)=>{
         async:s.async,
         defer:s.defer,
         hasConfigText:(s.textContent||'').includes('elementorFrontendConfig'),
-        textPrefix:(s.textContent||'').trim().slice(0,100)
+        textPrefix:(s.textContent||'').trim().slice(0,180)
       }));
       const relevant=scripts.filter(s=>/elementor|frontend/i.test(`${s.id} ${s.src} ${s.textPrefix}`)||s.hasConfigText);
+      const frontendIndex=scripts.findIndex(s=>s.id==='elementor-frontend-js'||/\/elementor\/assets\/js\/frontend(?:\.min)?\.js/i.test(s.src));
+      const neighborhood=frontendIndex>=0?scripts.slice(Math.max(0,frontendIndex-6),Math.min(scripts.length,frontendIndex+7)):[];
       return {
         bodyClass:document.body.className,
         configExists:typeof (window as any).elementorFrontendConfig!=='undefined',
         configScriptCount:scripts.filter(s=>s.hasConfigText).length,
         beforeNode:document.getElementById('elementor-frontend-js-before')?.tagName||null,
         frontendNode:document.getElementById('elementor-frontend-js')?.tagName||null,
+        frontendIndex,
+        scriptCount:scripts.length,
+        neighborhood,
         relevant
       };
     });
