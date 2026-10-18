@@ -1,0 +1,84 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_AION_PRODUCT_DELIVERY_LIVE_ADAPTER_AUDIT_V1",
+  "generated_at": "2026-10-18",
+  "company_id": "aion",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "legacy_item_id": 130,
+  "legacy_capability": "product delivery",
+  "status": "EXISTING_CAPABILITY_REUSE_VERIFIED",
+  "decision": "ABSORBED",
+  "decision_reason": "AION already exposes an active PREPROD Product Factory and active delivery/fulfillment compatibility layers. Legacy item 130 therefore does not justify a second Product Factory or new generic delivery engine. CEREBRO should preserve and wrap the existing capability.",
+  "live_observation": {
+    "observed_at": "2026-10-18",
+    "source": "AION WordPress live plugin inventory via authenticated read-only connector",
+    "product_factory": {
+      "plugin_file": "aion-product-factory/aion-product-factory.php",
+      "name": "AION Product Factory",
+      "version": "1.0.13",
+      "active": true,
+      "description_contract": "Zero-added-cost deterministic product runtime for AION Operator. PREPROD-first and PROD-denied in V0."
+    },
+    "reuse_seams": [
+      {
+        "plugin_file": "cerebro-bundle-commerce-bridge-v0/cerebro-bundle-commerce-bridge-v0.php",
+        "name": "CEREBRO Bundle Commerce Bridge V0",
+        "active": true,
+        "evidence": "Reuses Product Factory order/artifact/delivery primitives without enabling public checkout or real sales."
+      },
+      {
+        "plugin_file": "cerebro-bundle-fulfillment-adapter-v0/cerebro-bundle-fulfillment-adapter-v0.php",
+        "name": "CEREBRO Bundle Fulfillment Adapter V0",
+        "active": true,
+        "evidence": "PREPROD-only fulfillment adapter that wraps existing proven runtimes and creates no public checkout or real charges."
+      },
+      {
+        "plugin_file": "aion-customer-zero-payment-test-v1/aion-customer-zero-payment-test-v1.php",
+        "name": "AION Customer Zero-Payment Test V1",
+        "active": true,
+        "evidence": "PREPROD customer-journey simulator exercises purchase -> fulfillment -> welcome/access email -> private result with zero real payment."
+      },
+      {
+        "plugin_file": "aion-customer-experience-quality-gate-v1/aion-customer-experience-quality-gate-v1.php",
+        "name": "AION Customer Experience Quality Gate V1",
+        "active": true,
+        "evidence": "PREPROD evidence gate covers customer email, private delivery and customer-facing UX."
+      }
+    ]
+  },
+  "historical_project_evidence": {
+    "sources": [
+      "Recuperar estado de AION.txt",
+      "Analizar enlaces de skills.txt",
+      "AION F001 Follow-up.txt"
+    ],
+    "supported_facts": [
+      "AION Product Factory, PRODMAN and PORTFOLIO already exist and must not be duplicated.",
+      "Private delivery already exists for P001/P002/P003 using token, expiry, artifact download and refund revocation.",
+      "Legacy item 130 automatic delivery belongs to Product Factory and requires completion/reuse, not a new engine."
+    ]
+  },
+  "scope_truth": {
+    "legacy_capability_absorbed": true,
+    "new_engine_required": false,
+    "new_product_factory_required": false,
+    "repository_duplicate_implementation_required": false,
+    "full_safe_preprod_claimed": false,
+    "real_customer_delivery_executed_by_this_audit": false,
+    "physical_delivery_e2e_claimed_by_this_audit": false,
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "auto_merge_authorized": false,
+    "trading_access": false,
+    "additional_cost_eur": 0
+  },
+  "residuals": [
+    "Any future real customer delivery or PROD side effect remains under its own promotion, policy and physical-E2E gates.",
+    "This audit proves reuse/absorption of the legacy capability; it does not promote AION commerce or delivery to PROD."
+  ],
+  "rollback": "Remove this additive audit record and the item-130 overlay row; historical reconciliation remains untouched.",
+  "rebuild": "Re-run the authenticated read-only AION plugin inventory, verify Product Factory plus delivery/fulfillment reuse seams remain active, and regenerate this record without executing customer delivery.",
+  "next_gate": "RECONCILE_ITEM_130_AS_ABSORBED_AND_RERUN_SCALE184"
+}
