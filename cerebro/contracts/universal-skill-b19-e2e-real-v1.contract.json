@@ -1,10 +1,10 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "state_type": "CEREBRO_UNIVERSAL_SKILL_B19_E2E_REAL_CONTRACT_V1",
   "company_id": "fenix",
   "engine_id": "FACT-001",
   "environment": "PREPROD",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "candidate_id": "AUTO-001:planner-order-invariance:v1",
   "technical_name": "auto001-planner-order-invariance",
   "skill_version": "1.0.0-b19",
@@ -14,27 +14,15 @@
   "source_refs": [
     "cerebro/contracts/universal-skill-b19-e2e-real-v1.contract.json"
   ],
+  "registry_ref": "cerebro/registry/universal-skill-b19-universal-e2e-real.v1.json",
   "capability": {
     "capability_id": "AUTO-001:planner-order-invariance:v1:cap:1",
     "technical_name": "software-engineering-deterministic-planner-repair",
     "description": "Software engineering and DevOps repair workflow for deterministic codebase behavior, bounded GitHub change, regression evaluation and safe PREPROD rollback/rebuild.",
-    "terms": [
-      "software engineering",
-      "developer",
-      "github",
-      "codebase",
-      "regression",
-      "rollback",
-      "rebuild",
-      "evaluation"
-    ],
-    "declared_domains": [
-      "software-engineering-devops"
-    ],
+    "terms": ["software engineering","developer","github","codebase","regression","rollback","rebuild","evaluation"],
+    "declared_domains": ["software-engineering-devops"],
     "domain_evidence": {
-      "software-engineering-devops": [
-        "cerebro/contracts/universal-skill-b19-e2e-real-v1.contract.json"
-      ]
+      "software-engineering-devops": ["cerebro/contracts/universal-skill-b19-e2e-real-v1.contract.json"]
     }
   },
   "engineering_controls": {
@@ -50,8 +38,11 @@
     "dependency_impact": "dependency impact and dependencies mapped before change"
   },
   "lifecycle": {
-    "runbook_ref": "cerebro/docs/CEREBRO_UNIVERSAL_SKILL_ACTIVATION_FACTORY_V1_HANDOFF.md",
-    "changelog_ref": "cerebro/docs/CEREBRO_UNIVERSAL_SKILL_ACTIVATION_FACTORY_V1_HANDOFF.md",
+    "governance_ref": "cerebro/docs/CEREBRO_B19_UNIVERSAL_E2E_REAL_V1_GOVERNANCE.md",
+    "runbook_ref": "cerebro/docs/CEREBRO_B19_UNIVERSAL_E2E_REAL_V1_GOVERNANCE.md#runbook",
+    "changelog_ref": "cerebro/docs/CEREBRO_B19_UNIVERSAL_E2E_REAL_V1_GOVERNANCE.md#changelog",
+    "dependency_map_ref": "cerebro/docs/CEREBRO_B19_UNIVERSAL_E2E_REAL_V1_GOVERNANCE.md#dependency-map",
+    "backup_rebuild_autonomy_ref": "cerebro/docs/CEREBRO_B19_UNIVERSAL_E2E_REAL_V1_GOVERNANCE.md#backup--rollback--rebuild--autonomy",
     "dependencies_mapped": true,
     "backup_required": true,
     "rollback_required": true,
