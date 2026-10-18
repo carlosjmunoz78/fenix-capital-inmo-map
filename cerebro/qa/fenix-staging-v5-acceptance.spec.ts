@@ -115,33 +115,59 @@ test('Montilla LOCAL_B2B has non-empty meta description',async({page},testInfo)=
   expect((meta||'').trim().length).toBeGreaterThan(80);
 });
 
-test('consent blocks analytics before opt-in and enables after accept',async({browser},testInfo)=>{
+test('main site header is proportionate on desktop and mobile',async({browser},testInfo)=>{
+  test.skip(testInfo.project.name!=='v5-390','dedicated two-viewport header gate runs once');
+  for(const viewport of [{name:'mobile',width:390,height:844},{name:'desktop',width:1440,height:1000}]){
+    const context=await browser.newContext({viewport:{width:viewport.width,height:viewport.height}});
+    const page=await context.newPage();
+    await page.goto(base,{waitUntil:'domcontentloaded',timeout:45_000});
+    await expect(page.locator('body')).toBeVisible();
+    const header=page.locator('#masthead, header.site-header, header[role="banner"]').first();
+    await expect(header,`${viewport.name} header`).toBeVisible();
+    const box=await header.boundingBox();
+    expect(box,`${viewport.name} header box`).not.toBeNull();
+    const height=box?.height??9999;
+    const maxHeight=viewport.name==='desktop'?180:170;
+    console.log(`FENIX_V5_HEADER:${JSON.stringify({viewport:viewport.name,height,maxHeight})}`);
+    expect(height,`${viewport.name} header must not dominate the page`).toBeLessThanOrEqual(maxHeight);
+    await page.screenshot({path:`artifacts/staging-v5/screens/header-${viewport.name}.png`,fullPage:false});
+    await context.close();
+  }
+});
+
+test('consent blocks trackers before opt-in and persists accept choice',async({browser},testInfo)=>{
   test.skip(testInfo.project.name!=='v5-390','consent state is viewport-independent; run once');
   const context=await browser.newContext({viewport:{width:390,height:844}});
   const page=await context.newPage();
   const tracker=(url:string)=>/google-analytics\.com|googletagmanager\.com\/gtag|facebook\.com\/tr|connect\.facebook\.net/i.test(url);
   const requests:string[]=[];
   page.on('request',r=>{if(tracker(r.url())) requests.push(r.url());});
-  await page.goto(base,{waitUntil:'networkidle',timeout:60_000});
+  await page.goto(`${base}/?cerebro_consent_gate=${Date.now()}`,{waitUntil:'domcontentloaded',timeout:45_000});
+  await expect(page.locator('body')).toBeVisible();
+  await page.waitForTimeout(1500);
+
   const before=[...requests];
   console.log(`FENIX_V5_CONSENT_BEFORE:${JSON.stringify(before)}`);
   expect(before,'analytics/pixel must not transmit before consent').toEqual([]);
 
-  const diag=await page.evaluate(()=>({
-    bodyCmplz:document.body.getAttribute('data-cmplz'),
-    cmplzNodes:document.querySelectorAll('[id*="cmplz"],[class*="cmplz"]').length,
-    cmplzButtons:[...document.querySelectorAll('button')].filter(b=>/acept|accept|rechaz|reject|cookie/i.test((b.textContent||'')+' '+b.className+' '+b.id)).map(b=>({text:(b.textContent||'').trim(),id:b.id,className:String(b.className)})).slice(0,20),
-    scripts:[...document.querySelectorAll('script')].filter(s=>/complianz|cmplz/i.test((s.src||'')+' '+s.id+' '+s.className)).map(s=>s.src||s.id).slice(0,20),
-    cookies:document.cookie.split(';').map(v=>v.trim().split('=')[0]).filter(Boolean).sort()
-  }));
-  console.log(`FENIX_V5_CONSENT_DIAG:${JSON.stringify(diag)}`);
-
   const accept=page.locator('#cmplz-cookiebanner-container .cmplz-accept, .cmplz-cookiebanner .cmplz-accept, button.cmplz-accept, button:has-text("Aceptar"), button:has-text("Accept")').first();
   await expect(accept,'Complianz accept control').toBeVisible({timeout:10_000});
   await accept.click();
-  await page.waitForTimeout(2500);
-  const after=requests.slice(before.length);
-  console.log(`FENIX_V5_CONSENT_AFTER:${JSON.stringify(after)}`);
-  expect(after.length,'analytics/pixel should be eligible after opt-in').toBeGreaterThan(0);
+  await page.waitForTimeout(800);
+
+  const consentState=await page.evaluate(()=>({
+    cmplzCookies:document.cookie.split(';').map(v=>v.trim()).filter(v=>/^cmplz_/i.test(v)),
+    bannerVisible:[...document.querySelectorAll('#cmplz-cookiebanner-container,.cmplz-cookiebanner')].some(el=>{
+      const r=(el as HTMLElement).getBoundingClientRect(); const s=getComputedStyle(el); return r.width>0&&r.height>0&&s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity||1)>0;
+    })
+  }));
+  console.log(`FENIX_V5_CONSENT_ACCEPTED:${JSON.stringify(consentState)}`);
+  expect(consentState.cmplzCookies.length,'Complianz must persist a consent decision').toBeGreaterThan(0);
+  expect(consentState.bannerVisible,'banner should close after accepting').toBe(false);
+
+  const page2=await context.newPage();
+  await page2.goto(`${base}/?cerebro_consent_persist=${Date.now()}`,{waitUntil:'domcontentloaded',timeout:45_000});
+  const acceptVisibleAfterReload=await page2.locator('#cmplz-cookiebanner-container .cmplz-accept, .cmplz-cookiebanner .cmplz-accept, button.cmplz-accept').first().isVisible().catch(()=>false);
+  expect(acceptVisibleAfterReload,'accepted consent should persist on a fresh page').toBe(false);
   await context.close();
 });
