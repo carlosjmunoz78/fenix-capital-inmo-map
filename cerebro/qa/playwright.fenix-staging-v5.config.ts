@@ -4,7 +4,7 @@ const project=(name:string,width:number,height:number)=>({name,use:{browserName:
 
 export default defineConfig({
   testDir: '.',
-  testMatch: ['fenix-staging-v5-acceptance.spec.ts'],
+  testMatch: ['fenix-staging-v5-acceptance.spec.ts','fenix-staging-h1-jaen.spec.ts'],
   timeout: 75_000,
   expect:{timeout:10_000},
   retries:0,
