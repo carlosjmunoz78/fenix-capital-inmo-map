@@ -9,6 +9,7 @@ on:
       - 'cerebro/runtime/universal-skill-auto-engineering-v1.mjs'
       - 'cerebro/runtime/universal-skill-legacy184-normalizer-v1.mjs'
       - 'cerebro/runtime/universal-skill-legacy184-scale-v1.mjs'
+      - 'cerebro/registry/legacy184-current-evidence-overlay.v1.json'
       - 'cerebro/tests/universal-skill-legacy184-autoeng-scale-v2.test.mjs'
       - '.github/workflows/cerebro-universal-skill-activation-scale184-v2.yml'
   pull_request:
@@ -17,6 +18,7 @@ on:
       - 'cerebro/runtime/universal-skill-auto-engineering-v1.mjs'
       - 'cerebro/runtime/universal-skill-legacy184-normalizer-v1.mjs'
       - 'cerebro/runtime/universal-skill-legacy184-scale-v1.mjs'
+      - 'cerebro/registry/legacy184-current-evidence-overlay.v1.json'
       - 'cerebro/tests/universal-skill-legacy184-autoeng-scale-v2.test.mjs'
       - '.github/workflows/cerebro-universal-skill-activation-scale184-v2.yml'
   workflow_dispatch:
@@ -85,6 +87,7 @@ jobs:
             full_safe_preprod: report.matrix.filter(x=>x.observed_outcome==='FULL_SAFE_PREPROD').length,
             absorbed: report.matrix.filter(x=>x.observed_outcome==='ABSORBED').length,
             engineering_task_required: pending.length,
+            engineering_task_items: pending.map(x=>x.item_id),
             blocked_external: report.matrix.filter(x=>x.observed_outcome==='BLOCKED_EXTERNAL').length,
             human_required: report.matrix.filter(x=>x.observed_outcome==='HUMAN_REQUIRED').length,
             rejected: report.matrix.filter(x=>x.observed_outcome==='REJECTED').length,
@@ -101,10 +104,12 @@ jobs:
           import fs from 'node:fs';
           const report=JSON.parse(fs.readFileSync(process.env.MASS_REPORT,'utf8'));
           const physical=JSON.parse(fs.readFileSync('cerebro/skills/cerebro-184-live-convergence.v3.json','utf8'));
+          const overlay=JSON.parse(fs.readFileSync('cerebro/registry/legacy184-current-evidence-overlay.v1.json','utf8'));
           if(physical.all_184_physically_active!==false) throw new Error('FALSE_PHYSICAL_FULL');
           const expected=['ANDROID_48_183','WATCH_LEARN_47','COMPET_57_61','CAP_62_68'];
           const ids=new Set((physical.remaining_physical_gates||[]).map(x=>x.id));
           for(const id of expected) if(!ids.has(id)) throw new Error(`MISSING_PHYSICAL_GATE:${id}`);
+          for(const [id,row] of Object.entries(overlay.items||{})) if(row.resolution==='FULL_SAFE_PREPROD') throw new Error(`FORBIDDEN_OVERLAY_FULL:${id}`);
           if(report.prod_authorized!==false) throw new Error('PROD_AUTHORITY_FORBIDDEN');
           NODE
 
@@ -119,6 +124,7 @@ jobs:
             echo '- environment: PREPROD'
             echo '- catalog target: 184/184'
             echo '- routing: capability -> justified domains -> canonical engines'
+            echo '- current-evidence overlay: fail-closed; ABSORBED/BLOCKED_EXTERNAL only; never FULL'
             echo '- ENGINEERING_TASK_REQUIRED is a governed retry state, never terminal FULL'
             echo '- PROD authority: false'
             echo '- auto-merge: false'
