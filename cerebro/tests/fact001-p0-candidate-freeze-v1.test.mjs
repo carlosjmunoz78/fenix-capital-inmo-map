@@ -1,15 +1,20 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
 
-const readJson = (path) => JSON.parse(fs.readFileSync(path, 'utf8'));
-const readText = (path) => fs.readFileSync(path, 'utf8');
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const repoRoot = path.resolve(__dirname, '../..');
+const fromRoot = (...parts) => path.join(repoRoot, ...parts);
+const readJson = (...parts) => JSON.parse(fs.readFileSync(fromRoot(...parts), 'utf8'));
+const readText = (...parts) => fs.readFileSync(fromRoot(...parts), 'utf8');
 
-const convergence = readJson('cerebro/skills/cerebro-184-live-convergence.v3.json');
-const b20 = readJson('cerebro/registry/universal-skill-b20-p0-acceptance-and-scale-release.v1.json');
-const intake = readText('.github/workflows/cerebro-universal-skill-continuous-intake-v1.yml');
-const batch = readText('cerebro/runtime/universal-skill-batch-orchestrator-v1.mjs');
-const autoEngineering = readText('cerebro/runtime/universal-skill-auto-engineering-v1.mjs');
+const convergence = readJson('cerebro', 'skills', 'cerebro-184-live-convergence.v3.json');
+const b20 = readJson('cerebro', 'registry', 'universal-skill-b20-p0-acceptance-and-scale-release.v1.json');
+const intake = readText('.github', 'workflows', 'cerebro-universal-skill-continuous-intake-v1.yml');
+const batch = readText('cerebro', 'runtime', 'universal-skill-batch-orchestrator-v1.mjs');
+const autoEngineering = readText('cerebro', 'runtime', 'universal-skill-auto-engineering-v1.mjs');
 
 test('FACT-001 P0 freezes the complete 184-item catalog without false FULL', () => {
   assert.equal(convergence.environment, 'PREPROD');
