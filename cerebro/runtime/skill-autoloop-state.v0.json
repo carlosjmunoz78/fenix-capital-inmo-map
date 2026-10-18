@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-18T20:58:47.048Z",
+  "updated_at": "2026-10-18T21:03:41.296Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -74,7 +74,8 @@
     "github-wide-skills:66b7982a1c10e80fe904",
     "github-wide-skills:dc1ae2df5d2050d73d5f",
     "github-wide-skills:7b389e2a60bf0e10c7f8",
-    "github-wide-skills:1a93de26f34128ca7bff"
+    "github-wide-skills:1a93de26f34128ca7bff",
+    "github-wide-skills:0c89ff5bc2cecf4bf945"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -975,6 +976,40 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 39165207540,
       "checkpointed_at": "2026-10-18T20:51:38.423Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:0c89ff5bc2cecf4bf945": {
+      "candidate_id": "github-wide-skills:0c89ff5bc2cecf4bf945",
+      "name": "blind-spots",
+      "human_alias": "Blind Spots",
+      "wrapper_id": "skillwrap:1e68ea9482b5e1f982bb",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 85.6,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "peakstate-global/peakstate-skills",
+        "upstream_head_commit": "9a5f734671fe417c473f15471541245c5e531a5c",
+        "manifest_sha256": "e08cf01bd7387ea9e864cb96f13a00289aa51683cde3ac45a313af5e60a3f23e",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 39166094677,
+      "checkpointed_at": "2026-10-18T21:03:41.296Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -1934,7 +1969,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "IDLE_NO_NEW_ELIGIBLE_CANDIDATE",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -1947,5 +1982,5 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 39165205274
+  "last_discovery_run_id": 39166094677
 }
