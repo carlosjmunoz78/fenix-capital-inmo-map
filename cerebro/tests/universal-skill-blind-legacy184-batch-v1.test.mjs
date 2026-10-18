@@ -28,12 +28,15 @@ test('blind selector can replay the preserved historical catalog contract withou
   assert.ok(selection.excluded_terminal.some((x)=>x.expected_outcome==='REJECTED'));
 });
 
-test('default blind selector uses current evidence and does not recreate stale engineering debt for 47/48',()=>{
+test('default blind selector uses current evidence: 47 is absorbed after certified soak while 48 remains physical-blocked',()=>{
   const selection=selectBlindLegacyBatch(realDoc,{limit:10,source_ref:'cerebro/skills/cerebro-184-items-38-50-live-reconciliation.v2.json'});
   const currentRows=[...selection.selected,...selection.excluded_terminal].filter((x)=>[47,48].includes(x.source_item_id));
   assert.equal(currentRows.length,2);
-  assert.ok(currentRows.every((x)=>x.expected_outcome==='BLOCKED_EXTERNAL'));
-  assert.ok(currentRows.every((x)=>x.evidence_resolution==='BLOCKED_EXTERNAL'));
+  const byId=new Map(currentRows.map((x)=>[x.source_item_id,x]));
+  assert.equal(byId.get(47)?.expected_outcome,'ABSORBED');
+  assert.equal(byId.get(47)?.evidence_resolution,'ABSORBED');
+  assert.equal(byId.get(48)?.expected_outcome,'BLOCKED_EXTERNAL');
+  assert.equal(byId.get(48)?.evidence_resolution,'BLOCKED_EXTERNAL');
 });
 
 test('generic legacy normalizer uses disposition/state/evidence rules, not item-id special cases',()=>{
