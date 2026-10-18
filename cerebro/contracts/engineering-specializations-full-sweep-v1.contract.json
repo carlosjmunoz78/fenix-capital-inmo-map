@@ -1,0 +1,54 @@
+{
+  "schema_version": "1.0.0",
+  "contract_id": "CEREBRO_ENGINEERING_SPECIALIZATIONS_FULL_SWEEP_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "1.0.0",
+  "purpose": "Certify the shared CEREBRO Safe Engineering Profile across all ten engineering specializations without creating profession-specific engines.",
+  "required_aliases": [
+    "ARQUITECTO",
+    "CODE",
+    "SYSTEMS",
+    "MATH",
+    "DATA",
+    "SECURITY",
+    "QA",
+    "INTEGRATOR",
+    "TECH_SCOUT",
+    "PERFORMANCE"
+  ],
+  "acceptance": {
+    "all_aliases_full_safe_preprod": true,
+    "single_transversal_profile": true,
+    "new_engine_required": false,
+    "architect_inventory_dependencies_contracts_preprod_old_vs_new_rollback": true,
+    "performance_measured_parallelism_latency_cache_idempotency": true,
+    "qa_tribunal_and_full_regression": true,
+    "integrator_generic_candidate_and_e2e": true,
+    "tech_scout_read_only_provenance_license_zero_cost": true,
+    "math_deterministic_first": true,
+    "no_false_full": true
+  },
+  "authority": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "prod_mutation_authorized": false,
+    "auto_merge_authorized": false,
+    "external_skill_code_execution_authorized": false,
+    "external_dependency_install_authorized": false,
+    "customer_data_authorized": false,
+    "trading_access": false,
+    "additional_cost_eur": 0
+  },
+  "human_required_only": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ]
+}
