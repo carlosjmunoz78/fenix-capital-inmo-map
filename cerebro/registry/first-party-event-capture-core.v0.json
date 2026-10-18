@@ -6,9 +6,10 @@
   "engine_id": "EVT-001",
   "environment": "PREPROD",
   "version": "0.1.0",
-  "status": "CANDIDATE_PREPROD_IMPLEMENTED_AWAITING_EXACT_HEAD_CI",
+  "status": "LOCAL_PREPROD_CAPTURE_PERSISTENCE_CORE_GREEN_PHYSICAL_SOURCE_PENDING",
   "catalog_item": 74,
   "decision": "EXTEND_EXISTING_EVT001_NO_NEW_ENGINE",
+  "implementation_head_sha": "9991cdec24550aec1f24a9d8f2ca16bfff0ff705",
   "existing_assets_reused": [
     "cerebro/runtime/first-party-account-signals-profile-v1.mjs",
     "cerebro/runtime/persistent-runtime.mjs",
@@ -40,6 +41,22 @@
     "person_identity_storage_allowed": false,
     "device_fingerprinting_allowed": false
   },
+  "verification": {
+    "exact_head_full_regression": "PASS",
+    "engineering_specializations_run_id": 39128377990,
+    "engineering_specializations_artifact_id": 12136549578,
+    "engineering_specializations_artifact_digest": "sha256:dde42c86a5fff4078a883d49362cb7f50d6c4a88d0dc38d14027f44a471b15dc",
+    "scale184_v2_run_id": 39128377988,
+    "scale184_v2": "PASS",
+    "b20_run_id": 39128378076,
+    "b20": "PASS",
+    "repository_e2e_run_id": 39128378012,
+    "repository_e2e": "PASS",
+    "governed_main_run_id": 39128378016,
+    "governed_main": "PASS",
+    "github_live_e2e_run_id": 39128378056,
+    "github_live_e2e": "PASS"
+  },
   "authority": {
     "prod_authorized": false,
     "prod_write_authorized": false,
@@ -59,5 +76,5 @@
   ],
   "rollback": "Remove the additive capture adapter and test. Existing first-party normalization and PersistentEventBus remain untouched.",
   "rebuild": "Recreate the adapter from normalizeFirstPartyEvent plus PersistentEventBus and rerun exact-head tests.",
-  "next_gate": "EXACT_HEAD_CI_THEN_REAL_FIRST_PARTY_SOURCE_BINDING_PREPROD"
+  "next_gate": "REAL_FIRST_PARTY_SOURCE_BINDING_AND_BOUNDED_PREPROD_E2E"
 }

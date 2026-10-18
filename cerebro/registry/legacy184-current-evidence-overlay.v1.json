@@ -62,6 +62,19 @@
       ],
       "remaining_gate": "STABLE_ZERO_COST_AUTHORIZED_COMPANY_SOURCE_AND_REAL_CONTINUOUS_PREPROD_RUN"
     },
+    "74": {
+      "resolution": "BLOCKED_EXTERNAL",
+      "current_state": "LOCAL_PREPROD_CAPTURE_PERSISTENCE_CORE_GREEN_PHYSICAL_SOURCE_PENDING",
+      "reason": "The privacy-minimized first-party normalization contract is now wrapped by a zero-cost PREPROD capture core that reuses the existing EVT-001 PersistentEventBus, atomic local journal, deterministic idempotency and multi-company context isolation. Exact-head full CEREBRO regression is green on implementation commit 9991cdec24550aec1f24a9d8f2ca16bfff0ff705. No website tag or real source is bound, so physical source acceptance remains external rather than missing generic engineering.",
+      "evidence_refs": [
+        "cerebro/registry/first-party-event-capture-core.v0.json",
+        "cerebro/runtime/first-party-event-capture-core-v0.mjs",
+        "cerebro/tests/first-party-event-capture-core-v0.test.mjs",
+        "cerebro/runtime/persistent-runtime.mjs",
+        "cerebro/registry/first-party-account-signals-profile.v1.json"
+      ],
+      "remaining_gate": "REAL_FIRST_PARTY_SOURCE_BINDING_AND_BOUNDED_PREPROD_E2E"
+    },
     "101": {
       "resolution": "BLOCKED_EXTERNAL",
       "current_state": "VOICE001_SIMULATION_GOVERNED_LIVE_TELEPHONY_DISABLED",
@@ -130,7 +143,8 @@
     "BLOCKED_EXTERNAL means generic engineering core is not the remaining blocker; real external or physical acceptance evidence is still missing.",
     "No overlay entry may convert a candidate to FULL_SAFE_PREPROD.",
     "Historical reconciliation snapshots remain preserved for auditability.",
-    "Item 130 absorption records an existing PREPROD AION delivery capability; it does not claim real customer delivery, commerce PROD authority or physical E2E from this audit."
+    "Item 130 absorption records an existing PREPROD AION delivery capability; it does not claim real customer delivery, commerce PROD authority or physical E2E from this audit.",
+    "Item 74 closure certifies only the local PREPROD capture/persistence core; it does not claim a website tag, real visitor traffic, provider activation or PROD tracking."
   ],
   "rollback": "Remove this additive overlay and the normalizer will fall back to the historical reconciliation classifications; no external state is mutated.",
   "rebuild": "Re-derive each overlay row from current canonical registry evidence and the preserved legacy reconciliation snapshot, then rerun Scale184 V1/V2.",
