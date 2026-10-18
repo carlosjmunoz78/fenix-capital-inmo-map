@@ -63,6 +63,9 @@ Gold Standard:
 
 Los 25 informes L01–L25 están como subpáginas de la auditoría maestra.
 
+Continuidad V5:
+`STAGING V5 · Traspaso Total IA · SUPERLOOP · 2026-10-18`
+
 ## 5. REGLAS EXPLÍCITAS DEL USUARIO
 
 - No estética morada/rosa dominante.
@@ -87,3 +90,104 @@ Los 25 informes L01–L25 están como subpáginas de la auditoría maestra.
 - Cambios de URL solo si el beneficio supera el riesgo; si URL existente cumple, conservarla.
 - Local SEO: no fabricar diferenciación ficticia.
 - YMYL: trazabilidad reforzada.
+
+## 7. STATE VIVO · SUPERLOOP V5 · 2026-10-18
+
+- `last_head_observed_before_this_state_commit`: `6b1e52025e26c2a1561e25241351dc47d47e77cd`
+- `last_ci`: `39113766754` · CEREBRO Fenix STAGING V5 Acceptance · `failure`
+- `lighthouse_home_desktop`: `PASS`
+- `lighthouse_home_mobile`: `PASS`
+- `lighthouse_local_mobile`: `PASS`
+- `lighthouse_b2b_mobile`: `PASS`
+- `visual_e2e_gate`: `RED`
+- `consent_gate`: `PARTIAL/RED`
+- `prod_touched`: `false`
+
+### 7.1 FALLO EXACTO TRANSVERSAL
+
+25 fallos de la matriz representativa no son 25 causas independientes. HOME, `LOCAL_B2C_CORE`, `LOCAL_B2C_DUP_CLUSTER`, `LOCAL_B2B` y BLOG reproducen:
+
+`ReferenceError: elementorFrontendConfig is not defined`
+
+origen observado:
+
+`elementor/assets/js/frontend.min.js?ver=4.3.5`
+
+PROFILE, PRODUCT, PROCESS, RESOURCE, CONTACT y LEGAL no reproducen ese error.
+
+### 7.2 CAUSA TÉCNICA DEMOSTRADA HASTA ESTA CAPA
+
+Run diagnóstico `39113766754` / commit `6b1e52025e26c2a1561e25241351dc47d47e77cd` compara una página roja local, una PROFILE verde y HOME roja.
+
+En páginas rojas:
+- `elementor-frontend-js` = presente.
+- `elementor-frontend-js-before` = ausente.
+- `configScriptCount = 0`.
+- `window.elementorFrontendConfig` = ausente.
+- body no contiene `elementor-page`.
+
+En PROFILE verde:
+- `elementor-frontend-js-before` = presente.
+- el inline define `var elementorFrontendConfig = {...}`.
+- `elementor-frontend-js` = presente después.
+- `configScriptCount = 1`.
+- `window.elementorFrontendConfig` = presente.
+- body sí contiene `elementor-page`.
+
+Conclusión demostrada: **el runtime frontend de Elementor se está encolando en determinadas páginas que no son páginas Elementor builder, pero la configuración inline que necesita no se genera en ellas**. Falta todavía identificar qué capa/hook concreto provoca ese enqueue global antes de declarar `root_cause` completamente cerrado.
+
+### 7.3 HOME CANÓNICA · CORRECCIÓN DE ESTADO
+
+La HOME viva es:
+- post/page id: `52487`.
+- título: `Fénix Capital · Home Andalucía V2 · PREPROD`.
+- template: `elementor_header_footer`.
+- Elementor: `has_data=false`, `data_bytes=0`, `edit_mode=''`, sin versión guardada.
+
+La página 22 `Inicio`, inspeccionada durante una fase intermedia, **no es la HOME viva actual**. Cualquier conclusión que use su `_elementor_version 4.3.3` para explicar la HOME queda `OBSOLETE_EVIDENCE`.
+
+Landings locales rojas observadas (p. ej. IDs `49107` y `49128`) tampoco tienen layout Elementor. BLOG `40858` solo conserva `_elementor_data=[]` y no está en modo builder. PROFILE `46028` y PRODUCT `47042`, que pasan, sí tienen layout builder guardado.
+
+### 7.4 TRIALS CERRADOS
+
+`TRIAL-ELEMENTOR-001`:
+- variable aislada: `CEREBRO Pro-Free Compatibility V0 0.1.4-preprod`.
+- backup/checksum previo registrado.
+- desactivación temporal STAGING.
+- resultado: el fallo persistió.
+- rollback: plugin reactivado y verificado.
+- conclusión: descartado como causa raíz única.
+
+Trial de caché:
+- no se detectó caché persistente activa.
+- flush limpió/regeneró `Elementor generated CSS`.
+- el problema no queda explicado por caché persistente.
+
+### 7.5 CONSENTIMIENTO
+
+En contexto Playwright limpio:
+- requests GA/Meta antes de opt-in: `0` → bloqueo previo correcto.
+- `body[data-cmplz] = 1`.
+- nodos Complianz detectados: `1`.
+- botones aceptar/rechazar detectados: `0`.
+- scripts Complianz detectados por el diagnóstico: `0`.
+- cookies iniciales: `0`.
+- Complianz `7.5.6` activo.
+
+Estado: `PARTIAL`. Falta demostrar banner/controles visibles en sesión limpia y transmisión elegible después del opt-in.
+
+## 8. NEXT_BLOCK ÚNICO
+
+`STAGING_V5_ELEMENTOR_ENQUEUE_ROOT_CAUSE`
+
+1. localizar qué capa compartida encola `elementor-frontend` sobre páginas no-builder;
+2. no fabricar `elementorFrontendConfig` como parche si puede eliminarse el enqueue incorrecto;
+3. antes de modificar: backup/snapshot + dependencia + OLD;
+4. aplicar la corrección mínima compartida solo en STAGING;
+5. rerun selectivo visual/JS y comparar OLD vs NEW;
+6. persistir `root_cause`, detector, regla reusable, prevention gate y automation candidate;
+7. después cerrar `CONSENT_GATE`;
+8. después QA visual/E2E con Opera;
+9. solo con todos los gates verdes generar baseline V5 y traspaso final.
+
+PROD continúa fuera de alcance.
