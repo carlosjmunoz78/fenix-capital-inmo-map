@@ -56,8 +56,9 @@ test('B20 proves candidate-free generic factory behavior and recovery invariants
 test('mass intake and engineering remain generic and engine-routed', () => {
   assert.match(intake, /cerebro_skill_intake/);
   assert.match(intake, /PREPROD/);
-  assert.match(batch, /runUniversalSkillIndustrialBatch/);
-  assert.match(autoEngineering, /AUTO_ENGINEERING/);
+  assert.match(batch, /UNIVERSAL_SKILL_ACTIVATION_V1/);
+  assert.match(batch, /mapConcurrent/);
+  assert.match(autoEngineering, /FIRST_PARTY_SOFTWARE_ENGINEERING_SAFE_WRAP_V1/);
   assert.match(convergence.learning_policy, /FACT-001 routes capabilities into existing engines/);
   assert.match(convergence.learning_policy, /No skill is forced into every engine/);
   assert.match(convergence.active_policy, /HOLD, LAB, reference-only, simulation and scaffold items remain intentionally non-active/);
