@@ -57,6 +57,43 @@ for(const [kind,path] of targets){
   });
 }
 
+test('Elementor bootstrap lifecycle diagnostic',async({page},testInfo)=>{
+  test.skip(testInfo.project.name!=='v5-390','single viewport diagnostic');
+  const paths=[
+    ['FAILING_LOCAL','/asesor-hipotecario-cordoba/'],
+    ['PASSING_PROFILE','/hipotecas/hipoteca-100/funcionarios/'],
+    ['FAILING_HOME','/']
+  ] as const;
+  for(const [kind,path] of paths){
+    const errors:string[]=[];
+    page.removeAllListeners('pageerror');
+    page.on('pageerror',e=>errors.push(e.stack||e.message));
+    await page.goto(`${base}${path}`,{waitUntil:'networkidle',timeout:60_000});
+    const diag=await page.evaluate(()=>{
+      const scripts=[...document.scripts].map((s,index)=>({
+        index,
+        id:s.id,
+        src:s.src,
+        type:s.type,
+        async:s.async,
+        defer:s.defer,
+        hasConfigText:(s.textContent||'').includes('elementorFrontendConfig'),
+        textPrefix:(s.textContent||'').trim().slice(0,100)
+      }));
+      const relevant=scripts.filter(s=>/elementor|frontend/i.test(`${s.id} ${s.src} ${s.textPrefix}`)||s.hasConfigText);
+      return {
+        bodyClass:document.body.className,
+        configExists:typeof (window as any).elementorFrontendConfig!=='undefined',
+        configScriptCount:scripts.filter(s=>s.hasConfigText).length,
+        beforeNode:document.getElementById('elementor-frontend-js-before')?.tagName||null,
+        frontendNode:document.getElementById('elementor-frontend-js')?.tagName||null,
+        relevant
+      };
+    });
+    console.log(`FENIX_V5_ELEMENTOR_DIAG:${JSON.stringify({kind,path,errors,diag})}`);
+  }
+});
+
 test('removed SYSTEM_TEST is not publicly reachable',async({page},testInfo)=>{
   test.skip(testInfo.project.name!=='v5-390','single canonical viewport is sufficient for this non-visual gate');
   const response=await page.goto(`${base}/cerebro-core-guard-final-test-20260903/`,{waitUntil:'domcontentloaded',timeout:45_000});
