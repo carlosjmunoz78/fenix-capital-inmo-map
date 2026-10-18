@@ -72,6 +72,16 @@
       ],
       "remaining_gate": "LIVE_TELEPHONY_PROVIDER_AND_PHYSICAL_CALL_E2E_UNDER_SEPARATE_PROMOTION_GATE"
     },
+    "130": {
+      "resolution": "ABSORBED",
+      "current_state": "AION_PRODUCT_FACTORY_DELIVERY_REUSE_SEAM_VERIFIED_PREPROD",
+      "reason": "Authenticated read-only live audit verifies the active AION Product Factory plus existing delivery/fulfillment reuse seams. Legacy item 130 is therefore existing capability to preserve and wrap, not missing generic engineering and not a reason to create a second Product Factory.",
+      "evidence_refs": [
+        "cerebro/registry/aion-product-delivery-live-adapter-audit.v1.json",
+        "cerebro/skills/cerebro-184-items-118-131-live-reconciliation.v2.json"
+      ],
+      "reuse_decision": "ABSORB_EXISTING_AION_PRODUCT_FACTORY_DELIVERY_CAPABILITY"
+    },
     "157": {
       "resolution": "ABSORBED",
       "current_state": "SEO001_EXISTING_WRAP_NO_REPLACEMENT",
@@ -114,22 +124,15 @@
       "remaining_gate": "AUTHORIZED_DEVICE_INSTALL_AND_RENDER_E2E"
     }
   },
-  "intentionally_unresolved_engineering": {
-    "130": {
-      "state": "ENGINEERING_TASK_REQUIRED",
-      "reason": "Product Delivery still requires repository live-adapter seam audit before any real delivery side effect. Preserve and wrap the existing AION/Product Factory; do not duplicate it.",
-      "evidence_refs": [
-        "cerebro/skills/cerebro-184-items-118-131-live-reconciliation.v2.json"
-      ]
-    }
-  },
+  "intentionally_unresolved_engineering": {},
   "truth_constraints": [
     "ABSORBED means reuse/composition evidence exists; it is not a claim of autonomous PROD authority.",
     "BLOCKED_EXTERNAL means generic engineering core is not the remaining blocker; real external or physical acceptance evidence is still missing.",
     "No overlay entry may convert a candidate to FULL_SAFE_PREPROD.",
-    "Historical reconciliation snapshots remain preserved for auditability."
+    "Historical reconciliation snapshots remain preserved for auditability.",
+    "Item 130 absorption records an existing PREPROD AION delivery capability; it does not claim real customer delivery, commerce PROD authority or physical E2E from this audit."
   ],
   "rollback": "Remove this additive overlay and the normalizer will fall back to the historical reconciliation classifications; no external state is mutated.",
   "rebuild": "Re-derive each overlay row from current canonical registry evidence and the preserved legacy reconciliation snapshot, then rerun Scale184 V1/V2.",
-  "next_gate": "AUDIT_ITEM_130_PRODUCT_DELIVERY_LIVE_ADAPTER_SEAM_AND_RERUN_184"
+  "next_gate": "RERUN_SCALE184_AND_VERIFY_ZERO_ENGINEERING_TASK_REQUIRED"
 }
