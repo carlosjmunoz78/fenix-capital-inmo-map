@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_UNIVERSAL_SKILL_B20_P0_ACCEPTANCE_SCALE_RELEASE_REGISTRY_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "1.0.0",
+  "status": "PENDING_EXACT_HEAD_CI",
+  "contract_ref": "cerebro/contracts/universal-skill-b20-p0-acceptance-and-scale-release-v1.contract.json",
+  "governance_ref": "cerebro/docs/CEREBRO_B20_P0_ACCEPTANCE_AND_SCALE_RELEASE_CERTIFICATION_V1.md",
+  "workflow": "CEREBRO Universal Skill B20 P0 Acceptance and Scale Release V1",
+  "reconciles": [
+    "B19_UNIVERSAL_E2E_REAL",
+    "FAST_LANE",
+    "BLIND_REAL_CATALOG_BATCH",
+    "SCALE184_V1",
+    "SCALE184_V2",
+    "REPOSITORY_E2E",
+    "GITHUB_LIVE_E2E",
+    "FULL_CEREBRO_REGRESSION"
+  ],
+  "acceptance": {
+    "new_candidate_without_candidate_specific_core_required": true,
+    "terminal_truth_required": true,
+    "idempotency_required": true,
+    "rollback_rebuild_required": true,
+    "exact_head_required": true,
+    "full_without_binding_forbidden": true
+  },
+  "authority": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "prod_mutation_authorized": false,
+    "auto_merge_authorized": false,
+    "external_skill_code_execution_authorized": false,
+    "external_dependency_install_authorized": false,
+    "customer_data_authorized": false,
+    "trading_access": false,
+    "additional_cost_eur": 0
+  },
+  "next_block_on_green": "ENGINEERING_SPECIALIZATIONS_EVIDENCE_SWEEP_ARCHITECT_PERFORMANCE",
+  "note": "Do not mark B20_GREEN_PREPROD until the B20 workflow is SUCCESS on the exact live PR head."
+}
