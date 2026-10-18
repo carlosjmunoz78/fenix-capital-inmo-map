@@ -43,37 +43,41 @@
     "57": {
       "resolution": "BLOCKED_EXTERNAL",
       "current_state": "REAL_PUBLIC_TARGETS_CONFIGURED_AND_SCHEDULED_SOAK_PENDING",
-      "reason": "COMPET-001 continuous runtime, durable scheduler and real public Cordoba targets are configured; fresh separated scheduled PREPROD runs remain acceptance evidence.",
+      "reason": "COMPET-001 continuous runtime, durable scheduler, three real Cordoba competitor targets and a physical GET-only baseline are green; three separated scheduled PREPROD runs remain acceptance evidence.",
       "evidence_refs": [
+        "cerebro/registry/compet-real-targets.v0.json",
+        "cerebro/registry/compet-real-consumer-adoption-v1.json",
         "cerebro/registry/fact001-real-source-rollout-57-62.v0.json",
-        "cerebro/registry/fact001-six-gap-physical-e2e.v0.json",
-        "cerebro/skills/cerebro-184-live-convergence.v3.json"
+        "cerebro/registry/fact001-six-gap-physical-e2e.v0.json"
       ],
-      "remaining_gate": "THREE_GENUINE_SCHEDULED_PREPROD_RUNS_GREEN"
+      "remaining_gate": "THREE_CONTINUOUS_REAL_COMPETITOR_SCHEDULED_RUNS_GREEN"
     },
     "62": {
       "resolution": "BLOCKED_EXTERNAL",
-      "current_state": "CORE_AND_TRANSPORT_GREEN_STABLE_ZERO_COST_REAL_SOURCE_PENDING",
-      "reason": "CAP-001 core, durable scheduler and remote-read transport are evidenced; the attempted public source was held as unreliable, so a stable zero-cost authorized company source is still required before real continuous PREPROD acceptance.",
+      "current_state": "REAL_OFFICIAL_IECA_SOURCE_PHYSICAL_GREEN_SCHEDULED_SOAK_PENDING",
+      "reason": "CAP-001 core and durable scheduler are green and the official Junta de Andalucia/IECA Cordoba GET-only source has physical PREPROD discovery evidence. Source selection is no longer the blocker; only the required genuine scheduled soak remains.",
       "evidence_refs": [
+        "cerebro/registry/cap-ieca-cordoba.v0.json",
+        "cerebro/registry/cap-real-consumer-adoption-v1.json",
         "cerebro/registry/fact001-real-source-rollout-57-62.v0.json",
-        "cerebro/registry/fact001-six-gap-physical-e2e.v0.json",
-        "cerebro/skills/cerebro-184-live-convergence.v3.json"
+        "cerebro/registry/fact001-six-gap-physical-e2e.v0.json"
       ],
-      "remaining_gate": "STABLE_ZERO_COST_AUTHORIZED_COMPANY_SOURCE_AND_REAL_CONTINUOUS_PREPROD_RUN"
+      "remaining_gate": "THREE_GENUINE_SCHEDULED_PREPROD_RUNS_GREEN"
     },
     "74": {
       "resolution": "BLOCKED_EXTERNAL",
-      "current_state": "LOCAL_PREPROD_CAPTURE_PERSISTENCE_CORE_GREEN_PHYSICAL_SOURCE_PENDING",
-      "reason": "The privacy-minimized first-party normalization contract is now wrapped by a zero-cost PREPROD capture core that reuses the existing EVT-001 PersistentEventBus, atomic local journal, deterministic idempotency and multi-company context isolation. Exact-head full CEREBRO regression is green on implementation commit 9991cdec24550aec1f24a9d8f2ca16bfff0ff705. No website tag or real source is bound, so physical source acceptance remains external rather than missing generic engineering.",
+      "current_state": "LOCAL_CAPTURE_CORE_AND_STAGING_BROWSER_EMITTER_GREEN_SERVER_JOURNAL_BINDING_PENDING",
+      "reason": "The zero-cost PREPROD EVT-001 capture core persists privacy-minimized events idempotently, and a real authenticated STAGING Elementor browser emitter has executed and replayed idempotently. The guarded WordPress server-write primitive is separately GREEN_PHYSICAL_PREPROD. What is not yet proven is the direct consented browser-emitter to existing guarded server-journal E2E because the minimum explicit journal observe/write grant is not available to the connected surface; no permission bypass or weakening is permitted.",
       "evidence_refs": [
         "cerebro/registry/first-party-event-capture-core.v0.json",
+        "cerebro/registry/evt001-browser-staging-e2e.v0.json",
+        "cerebro/registry/b3-server-write-e2e-closeout.v1.json",
+        "cerebro/registry/first-party-account-signals-profile.v1.json",
         "cerebro/runtime/first-party-event-capture-core-v0.mjs",
-        "cerebro/tests/first-party-event-capture-core-v0.test.mjs",
-        "cerebro/runtime/persistent-runtime.mjs",
-        "cerebro/registry/first-party-account-signals-profile.v1.json"
+        "cerebro/tests/first-party-event-capture-core-v0.test.mjs"
       ],
-      "remaining_gate": "REAL_FIRST_PARTY_SOURCE_BINDING_AND_BOUNDED_PREPROD_E2E"
+      "remaining_gate": "CONSENTED_BROWSER_EMITTER_TO_EXISTING_GUARDED_SERVER_JOURNAL_E2E_WITH_EXPLICIT_MINIMUM_REQUIRED_GRANT",
+      "human_required_gate": "POLICY_CONFLICT"
     },
     "101": {
       "resolution": "BLOCKED_EXTERNAL",
@@ -140,13 +144,14 @@
   "intentionally_unresolved_engineering": {},
   "truth_constraints": [
     "ABSORBED means reuse/composition evidence exists; it is not a claim of autonomous PROD authority.",
-    "BLOCKED_EXTERNAL means generic engineering core is not the remaining blocker; real external or physical acceptance evidence is still missing.",
+    "BLOCKED_EXTERNAL means generic engineering core is not the remaining blocker; real external, physical or policy acceptance evidence is still missing.",
     "No overlay entry may convert a candidate to FULL_SAFE_PREPROD.",
     "Historical reconciliation snapshots remain preserved for auditability.",
     "Item 130 absorption records an existing PREPROD AION delivery capability; it does not claim real customer delivery, commerce PROD authority or physical E2E from this audit.",
-    "Item 74 closure certifies only the local PREPROD capture/persistence core; it does not claim a website tag, real visitor traffic, provider activation or PROD tracking."
+    "Item 74 certifies the local PREPROD capture core and authenticated STAGING browser emitter only; it does not certify direct guarded server-journal binding, public/PROD tracking, customer-data capture or permission expansion.",
+    "Item 62 has a real official IECA Cordoba source and physical GET-only baseline; its remaining blocker is scheduled soak, not source selection."
   ],
   "rollback": "Remove this additive overlay and the normalizer will fall back to the historical reconciliation classifications; no external state is mutated.",
   "rebuild": "Re-derive each overlay row from current canonical registry evidence and the preserved legacy reconciliation snapshot, then rerun Scale184 V1/V2.",
-  "next_gate": "RERUN_SCALE184_AND_VERIFY_ZERO_ENGINEERING_TASK_REQUIRED"
+  "next_gate": "RERUN_SCALE184_AND_VERIFY_ZERO_ENGINEERING_TASK_REQUIRED_WITH_CURRENT_PHYSICAL_TRUTH"
 }
