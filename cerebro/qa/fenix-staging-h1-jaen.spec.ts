@@ -32,6 +32,12 @@ test('H1 Jaen · three fresh loads keep native form and remove accidental Elemen
     expect(before.nativeFormRuntime,`Jaen load ${i} must keep CEREBRO native-form runtime`).toBe(true);
     expect(before.nativeFormConfig,`Jaen load ${i} must keep native-form runtime config`).toBe(true);
 
+    const diag=await page.evaluate(()=>({
+      runtime:(document.getElementById('cerebro-universal-landing-native-form-js-after')?.textContent||'').slice(0,12000),
+      candidates:Array.from(document.querySelectorAll('button,a')).filter((el)=>/Estudiar mi operaci[oó]n/i.test(el.textContent||'')).map((el)=>({tag:el.tagName,html:(el as HTMLElement).outerHTML.slice(0,2000)}))
+    }));
+    if(i===1) console.log(`FENIX_H1_JAEN_TRIGGER_DIAG:${JSON.stringify(diag)}`);
+
     const cta=page.getByRole('button',{name:'Estudiar mi operación'}).first();
     await expect(cta,`Jaen load ${i} native-form CTA`).toBeVisible();
     await cta.click();
