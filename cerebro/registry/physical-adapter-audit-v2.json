@@ -1,5 +1,5 @@
 {
-  "schema_version": "2.0.0",
+  "schema_version": "2.0.1",
   "state_type": "CEREBRO_PHYSICAL_ADAPTER_AUDIT_V2",
   "generated_at": "2026-10-18",
   "company_id": "GLOBAL",
@@ -27,8 +27,8 @@
     {
       "id": "COMPET_REAL_SOURCE_SCHEDULED_SOAK",
       "state": "CONTINUOUS_PREPROD_ACCEPTANCE_GREEN",
-      "evidence": "cerebro/registry/compet-real-targets.v0.json",
-      "facts": ["three real Cordoba targets", "GET-only physical baseline GREEN", "three genuine separated schedule runs GREEN"]
+      "evidence": ["cerebro/registry/compet-real-targets.v0.json", "cerebro/registry/compet-real-targets-acceptance.v1.json"],
+      "facts": ["preserved V0 contains three real Cordoba targets and GET-only physical baseline", "additive acceptance V1 certifies three genuine separated schedule runs GREEN", "resilience is additive wrapper-only"]
     },
     {
       "id": "CAP_REAL_SOURCE_SCHEDULED_SOAK",
@@ -100,7 +100,7 @@
     "additional_cost_eur": 0
   },
   "rollback": "Point current-physical-adapter-audit.v1.json back to V1. V2 performs no external mutation.",
-  "rebuild": "Re-derive from V1 plus current Watch/COMPET/CAP/EVT74/Android/multimedia registries and rerun exact-head CI.",
+  "rebuild": "Re-derive from V1 plus current Watch/COMPET base+acceptance/CAP/EVT74/Android/multimedia registries and rerun exact-head CI.",
   "next_block": [
     "KEEP_WATCH_COMPET_CAP_CONTINUOUS_MONITORING_READ_ONLY_AND_HOLD_ON_REGRESSION",
     "RECONCILE_FRESH_BROWSER_BRIDGE_PHYSICAL_ATTESTATION_WHEN_AUTHORIZED_RUNTIME_IS_AVAILABLE",
