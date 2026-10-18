@@ -1,0 +1,58 @@
+{
+  "schema": "CEREBRO_OPERATIONAL_STATE_V1",
+  "company_id": "fenix-capital",
+  "engine_id": "SEO-001",
+  "environment": "STAGING",
+  "version": "V4",
+  "status": "HECHO",
+  "certification": "PASS",
+  "prod_touched": false,
+  "promotion_authorized": false,
+  "evidence": {
+    "branch": "cerebro/seo001-staging-audit-v5-20261018",
+    "certification_path": "docs/ops/FENIX_STAGING_CERTIFICACION_V4_2026-10-18.md",
+    "snapshot_path": "docs/web-baseline/2026-10-18-v4/CEREBRO_FENIX_STAGING_BASELINE_2026-10-18.zip",
+    "snapshot_sha256": "59944be1aba38d15a29991e7aa27579941382fc6dae701ef6032adfeae2f2b04",
+    "manifest_path": "docs/web-baseline/2026-10-18-v4/manifest.json",
+    "artifact_pointer_path": "docs/web-baseline/2026-10-18-v4/ARTIFACT_POINTER.md",
+    "baseline_run_id": 39083584923,
+    "baseline_job_id": 117554274470,
+    "artifact_id": 12120333543,
+    "persistence_run_id": 39087004545,
+    "persistence_job_id": 117555562499
+  },
+  "validated": {
+    "content_urls": 204,
+    "unique_internal_targets": 212,
+    "broken_internal_targets": 0,
+    "redirected_internal_targets": 2,
+    "images": 680,
+    "image_binary_failures": 0,
+    "export_errors": 0
+  },
+  "residuals": [
+    {
+      "type": "REDIRECT",
+      "severity": "NON_BLOCKING",
+      "target": "https://staging.fenixcapital.es/author/fenixcapital/",
+      "resolves_to": "https://staging.fenixcapital.es"
+    },
+    {
+      "type": "REDIRECT",
+      "severity": "NON_BLOCKING",
+      "target": "https://staging.fenixcapital.es/author/mrbogart/",
+      "resolves_to": "https://staging.fenixcapital.es"
+    },
+    {
+      "type": "COSMETIC_FOOTER",
+      "severity": "NON_BLOCKING",
+      "description": "Astra native footer credit remains rendered; no demonstrated safe reversible write path was available."
+    }
+  ],
+  "next_block": {
+    "id": "FENIX_PROD_PROMOTION_GATE",
+    "state": "HUMAN_REQUIRED",
+    "reason": "HIGH_RISK",
+    "instruction": "Do not touch PROD until the production promotion gate is explicitly entered with its own backup, OLD vs NEW comparison, rollback and acceptance evidence."
+  }
+}
