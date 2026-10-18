@@ -26,6 +26,7 @@ test('discovers, pins and deduplicates public skill directories while excluding 
   const report=await discoverPublicSkillSources({fetch_impl,queries:['filename:SKILL.md description','filename:cerebro.skill.json technical_name'],max_sources:8});
   assert.equal(report.status,'SOURCES_DISCOVERED');
   assert.equal(report.source_count,1);
+  assert.equal(report.retry_required,false);
   assert.equal(report.sources[0].github_url,`https://github.com/example/skill-pack/tree/${sha}/skills/finance`);
   assert.equal(report.external_skill_code_execution,false);
   assert.equal(report.additional_cost_eur,0);
@@ -40,11 +41,27 @@ test('builds a source-queue compatible PREPROD event',async()=>{
   assert.equal(event.environment,'PREPROD');
   assert.equal(event.client_payload.company_id,'fenix');
   assert.deepEqual(event.client_payload.github_urls,report.sources.map((x)=>x.github_url));
+  assert.equal(event.discovery.retry_required,false);
   assert.equal(event.prod_authorized,false);
   assert.equal(event.trading_access,false);
 });
 
-test('fails closed when every discovery query fails',async()=>{
-  const fetch_impl=async()=>response(403,{message:'rate limited'});
+test('defers a pure GitHub Search 429 window without fabricating sources or green evidence',async()=>{
+  const fetch_impl=async()=>response(429,{message:'rate limited'});
+  const report=await discoverPublicSkillSources({fetch_impl,queries:['q1','q2'],max_sources:4});
+  assert.equal(report.status,'DISCOVERY_DEFERRED_RATE_LIMIT');
+  assert.equal(report.retry_required,true);
+  assert.equal(report.retry_reason,'GITHUB_SEARCH_RATE_LIMIT');
+  assert.equal(report.source_count,0);
+  assert.deepEqual(report.sources,[]);
+  assert.equal(report.prod_authorized,false);
+  assert.equal(report.additional_cost_eur,0);
+  const event=buildScoutEvent({report,company_id:'fenix'});
+  assert.equal(event.discovery.retry_required,true);
+  assert.deepEqual(event.client_payload.github_urls,[]);
+});
+
+test('fails closed when every discovery query fails for a non-rate-limit reason',async()=>{
+  const fetch_impl=async()=>response(403,{message:'forbidden'});
   await assert.rejects(()=>discoverPublicSkillSources({fetch_impl,queries:['q1','q2'],max_sources:4}),/GITHUB_SCOUT_ALL_QUERIES_FAILED:403,403/);
 });
