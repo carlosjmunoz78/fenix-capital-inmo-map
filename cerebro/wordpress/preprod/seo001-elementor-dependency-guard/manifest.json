@@ -1,0 +1,13 @@
+{
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "PREPROD",
+  "version": "0.1.0-preprod",
+  "fix_id": "FIX_NATIVE_FORM_DEPENDENCY_ORDER",
+  "target_host": "staging.fenixcapital.es",
+  "target_handle": "cerebro-universal-landing-native-form",
+  "removed_dependency": "elementor-frontend",
+  "prod_write_authorized": false,
+  "additional_subscription_eur": 0,
+  "rollback": "deactivate_or_remove_plugin"
+}
