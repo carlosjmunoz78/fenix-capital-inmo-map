@@ -56,7 +56,7 @@ function lifecycleFromBinding({binding,b18,promotionRollback,contract}){
 }
 function factInput({contract,manifest_sha256,plan,completed=false,lifecycle=null,b18=null,binding=null}){
   const oldNewPass=completed&&b18?.safe_engineering_comparison?.decision==='NEW_BETTER'&&binding?.per_binding_old_vs_new_pass===true;
-  const evalPass=completed&&binding?.evaluation?.decision==='PASS';
+  const evalPass=completed&&binding?.evaluation?.leakage_check==='PASS'&&Number(binding?.evaluation?.delta)>0;
   const tribunalPass=completed&&binding?.independent_tribunal?.decision==='PASS'&&b18?.tribunal?.decision==='APPROVE_PREPROD_NEXT_STAGE';
   const safeLifecycle=lifecycle??{
     internal_wrapper_ready:false,external_code_execution_required:false,rollback_ready:false,rebuild_ready:false,backup_ready:false,
