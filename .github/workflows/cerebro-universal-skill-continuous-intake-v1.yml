@@ -27,6 +27,15 @@ on:
       - 'cerebro/tests/universal-skill-autonomous-scout-v1.test.mjs'
       - 'cerebro/tests/universal-skill-lrn-impact-bridge-v1.test.mjs'
       - '.github/workflows/cerebro-universal-skill-continuous-intake-v1.yml'
+  pull_request:
+    paths:
+      - 'cerebro/runtime/universal-skill-source-queue-v1.mjs'
+      - 'cerebro/runtime/universal-skill-autonomous-scout-v1.mjs'
+      - 'cerebro/runtime/universal-skill-lrn-impact-bridge-v1.mjs'
+      - 'cerebro/tests/universal-skill-source-queue-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-autonomous-scout-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-lrn-impact-bridge-v1.test.mjs'
+      - '.github/workflows/cerebro-universal-skill-continuous-intake-v1.yml'
 
 permissions:
   contents: read
@@ -86,7 +95,7 @@ jobs:
             node cerebro/runtime/universal-skill-source-queue-v1.mjs --event "$SCOUT_EVENT"
           }
           case "$EVENT_NAME" in
-            push|schedule)
+            push|pull_request|schedule)
               run_scout
               ;;
             workflow_dispatch)
