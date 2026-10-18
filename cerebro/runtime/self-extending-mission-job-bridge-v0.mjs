@@ -192,7 +192,7 @@ export function createSelfExtendingMissionHandler({
   verify_and_resume,
   max_steps = 16
 } = {}) {
-  return async function selfExtendingMissionHandler({ payload, checkpoint, signal }) {
+  return async function selfExtendingMissionHandler({ payload, resume_from, signal }) {
     if (signal?.aborted) throw new Error(`ABORTED:${signal.reason ?? 'UNKNOWN'}`);
     const resolution = assertResolution(object(payload, 'payload').resolution);
 
@@ -224,7 +224,7 @@ export function createSelfExtendingMissionHandler({
       return Object.freeze({
         ...result,
         job001_resume: 'VERIFIED_AND_RESUMED',
-        previous_checkpoint: checkpoint ?? null,
+        previous_checkpoint: resume_from ?? null,
         prod_authorized: false,
         additional_cost_eur: 0
       });
