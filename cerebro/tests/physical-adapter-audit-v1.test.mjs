@@ -21,7 +21,8 @@ const multimediaInventory = load('../registry/multimedia-zero-cost-physical-inve
 const brand = load('../registry/brand-commerce-appfactory-profile.v0.json');
 const android = load('../registry/fact001-android-staging-48-183.v0.json');
 const watch = load('../registry/watch-learn-remote-observation.v0.json');
-const compet = load('../registry/compet-real-targets.v0.json');
+const competBase = load('../registry/compet-real-targets.v0.json');
+const competAcceptance = load('../registry/compet-real-targets-acceptance.v1.json');
 const cap = load('../registry/cap-ieca-cordoba.v0.json');
 const evt74 = load('../registry/first-party-event-capture-core.v0.json');
 
@@ -30,10 +31,7 @@ const openById = new Map(audit.genuine_physical_or_policy_gates_still_open.map((
 
 function assertNoAuthorityExpansion(authority) {
   for (const [key, value] of Object.entries(authority)) {
-    if (key === 'additional_cost_eur') {
-      assert.equal(value, 0);
-      continue;
-    }
+    if (key === 'additional_cost_eur') { assert.equal(value, 0); continue; }
     assert.notEqual(value, true, `authority expansion forbidden: ${key}`);
   }
 }
@@ -57,8 +55,10 @@ test('Watch Learn, COMPET and CAP scheduled acceptance is closed only with curre
   assert.equal(watch.retention.review_status, 'GREEN');
   assert.equal(closedById.get('WATCH_LEARN_47')?.state, 'CONTINUOUS_PREPROD_ACCEPTANCE_GREEN');
 
-  assert.equal(compet.status, 'REAL_TARGETS_CONTINUOUS_PREPROD_ACCEPTANCE_GREEN');
-  assert.equal(compet.scheduler.verified_scheduled_green_runs, 3);
+  assert.equal(competBase.status, 'REAL_TARGETS_BASELINE_FROZEN_CONTINUOUS_PREPROD');
+  assert.equal(competBase.scheduler.soak_complete, false);
+  assert.equal(competAcceptance.status, 'REAL_TARGETS_CONTINUOUS_PREPROD_ACCEPTANCE_GREEN');
+  assert.equal(competAcceptance.scheduled_acceptance.verified_scheduled_green_runs, 3);
   assert.equal(closedById.get('COMPET_REAL_SOURCE_SCHEDULED_SOAK')?.state, 'CONTINUOUS_PREPROD_ACCEPTANCE_GREEN');
 
   assert.equal(cap.status, 'REAL_OFFICIAL_COMPANY_DISCOVERY_CONTINUOUS_PREPROD_ACCEPTANCE_GREEN');
