@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.1.0",
+  "schema_version": "1.1.1",
   "state_type": "CEREBRO_SCHEDULED_SOAK_RECONCILER_V1",
   "company_id": "GLOBAL",
   "engine_id": "LRN-001",
@@ -32,7 +32,8 @@
       "id": "COMPET_REAL_SOURCE_SCHEDULED_SOAK",
       "workflow_file": "cerebro-compet-real-targets-v0.yml",
       "required_runs": 3,
-      "registry_ref": "cerebro/registry/compet-real-targets.v0.json",
+      "base_registry_ref": "cerebro/registry/compet-real-targets.v0.json",
+      "registry_ref": "cerebro/registry/compet-real-targets-acceptance.v1.json",
       "current_canonical_state": "REAL_TARGETS_CONTINUOUS_PREPROD_ACCEPTANCE_GREEN",
       "verified_runs_at_certification": 3,
       "next_gate": "CONTINUE_READ_ONLY_CONTINUOUS_COMPETITOR_OBSERVATION_AND_HOLD_ON_POLICY_OR_SOURCE_REGRESSION"
@@ -104,7 +105,7 @@
     "additional_cost_eur": 0
   },
   "backup": "GitHub workflow history plus the certification artifact remain durable evidence; the reconciler creates no business state.",
-  "rollback": "Revert this metadata to the prior accumulator state or disable the reconciler schedule; certified source registries and historical workflow evidence remain intact.",
-  "rebuild": "Recreate the pure reconciliation runtime and read-only Actions workflow, then re-read qualifying schedule history and current canonical source registries.",
+  "rollback": "Revert this metadata to the prior accumulator state or disable the reconciler schedule; certified acceptance and historical workflow evidence remain intact.",
+  "rebuild": "Recreate the pure reconciliation runtime and read-only Actions workflow, then re-read qualifying schedule history and current base/acceptance registries.",
   "next_gate": "EXACT_HEAD_CI_THEN_CONTINUITY_MONITORING"
 }
