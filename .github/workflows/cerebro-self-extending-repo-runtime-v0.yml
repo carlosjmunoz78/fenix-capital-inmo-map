@@ -7,10 +7,12 @@ on:
       - 'cerebro/runtime/universal-repo-sandbox-executor-v0.mjs'
       - 'cerebro/runtime/universal-repo-build-pipeline-v0.mjs'
       - 'cerebro/runtime/self-extending-capability-resolver-v0.mjs'
+      - 'cerebro/runtime/self-extending-mission-job-bridge-v0.mjs'
       - 'cerebro/runtime/universal-self-extending-github-intake-v0.mjs'
       - 'cerebro/tests/universal-self-extending-repo-v0.test.mjs'
       - 'cerebro/tests/universal-repo-sandbox-executor-v0.test.mjs'
       - 'cerebro/tests/universal-repo-build-pipeline-v0.test.mjs'
+      - 'cerebro/tests/self-extending-mission-job-bridge-v0.test.mjs'
       - 'cerebro/tests/fixtures/universal-repo-build-node/**'
       - '.github/workflows/cerebro-self-extending-repo-runtime-v0.yml'
   workflow_dispatch:
@@ -29,6 +31,8 @@ jobs:
           node-version: '24'
       - name: Universal repo runtime + recursive dependency resolver
         run: node --test cerebro/tests/universal-self-extending-repo-v0.test.mjs
+      - name: JOB-001 self-extending mission dispatch + durable resume
+        run: node --test cerebro/tests/self-extending-mission-job-bridge-v0.test.mjs
       - name: Physical sandbox executor contract tests
         run: node --test cerebro/tests/universal-repo-sandbox-executor-v0.test.mjs
       - name: Universal repo build pipeline contract tests
