@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-18T00:54:24.130Z",
+  "updated_at": "2026-10-18T01:09:12.032Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -70,7 +70,8 @@
     "github-wide-skills:6f8261757a7217a3627d",
     "github-wide-skills:a878cb5b090fb5510738",
     "github-wide-skills:fde8ca54cb5752431a1e",
-    "github-wide-skills:bacaf0987d8abd240515"
+    "github-wide-skills:bacaf0987d8abd240515",
+    "github-wide-skills:66b7982a1c10e80fe904"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -833,6 +834,40 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 39079200036,
       "checkpointed_at": "2026-10-17T23:29:39.477Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:66b7982a1c10e80fe904": {
+      "candidate_id": "github-wide-skills:66b7982a1c10e80fe904",
+      "name": "agent-redteam",
+      "human_alias": "Agent Redteam",
+      "wrapper_id": "skillwrap:d880f1bbe1349cacc3fc",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 80.55,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "Hefrock/agent-skills",
+        "upstream_head_commit": "d105b52600cb78e838ccfd7b17e2fcb9cde2a252",
+        "manifest_sha256": "577ad91ff37fa7bf4754d232bf93c8a700d2cb1e84a9b00a537ad568692f5dac",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 39085394173,
+      "checkpointed_at": "2026-10-18T01:09:12.032Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -1792,7 +1827,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "IDLE_NO_NEW_ELIGIBLE_CANDIDATE",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -1805,5 +1840,5 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 39084467971
+  "last_discovery_run_id": 39085394173
 }
