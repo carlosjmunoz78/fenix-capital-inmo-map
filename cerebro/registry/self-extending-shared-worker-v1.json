@@ -1,0 +1,56 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_SELF_EXTENDING_SHARED_WORKER_V1",
+  "generated_at": "2026-10-19",
+  "company_id": "GLOBAL",
+  "engine_id": "JOB-001",
+  "environment": "PREPROD",
+  "version": "1.0.0",
+  "status": "CANDIDATE_PREPROD_AWAITING_EXACT_HEAD_CI",
+  "runtime": "cerebro/runtime/self-extending-shared-worker-v1.mjs",
+  "shared_host": "cerebro/runtime/rsi-learning-auto-host.mjs",
+  "chain": [
+    "buildLegacy184SelfExtendingDispatchBatch",
+    "enqueueSelfExtendingDispatchBatch",
+    "DurableJobRuntimeV1",
+    "DurableWorkerRunnerV1",
+    "self-extending-capability-resolver-v0",
+    "verify_and_resume",
+    "evaluation-tribunal"
+  ],
+  "persistence": {
+    "kind": "AtomicV8Journal",
+    "location": "existing RSI auto-host company_root/job001-self-extending.v1.journal",
+    "same_persistent_host": true,
+    "new_server_required": false,
+    "github_runner_cross_run_persistence_claim": false
+  },
+  "binding_policy": {
+    "mode": "EVIDENCE_ONLY_FAIL_CLOSED",
+    "green_states": ["FULL_SAFE_PREPROD", "EVIDENCED_GREEN_PREPROD"],
+    "independent_tribunal_required": true,
+    "backup_required": true,
+    "rollback_required": true,
+    "rebuild_required": true,
+    "automatic_paid_fallback": false
+  },
+  "authority": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "auto_merge_authorized": false,
+    "external_dependency_install_authorized": false,
+    "customer_data_authorized": false,
+    "trading_access": false,
+    "additional_cost_eur": 0
+  },
+  "physical_runtime": {
+    "code_path_connected_to_existing_host": true,
+    "host_activation_on_a_persistent_machine": "POR_AUDITAR",
+    "full_legacy184_resolution_claim": false
+  },
+  "tests": [
+    "cerebro/tests/self-extending-shared-worker-v1.test.mjs",
+    "cerebro/tests/rsi-learning-auto-host.test.mjs"
+  ],
+  "next_gate": "EXACT_HEAD_CI_THEN_GOVERNED_PERSISTENT_HOST_ACTIVATION_WHEN_AUTHORIZED_RUNTIME_IS_AVAILABLE"
+}
