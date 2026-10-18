@@ -16,6 +16,8 @@ function safeSubpath(v=''){const out=String(v??'').replace(/^\/+|\/+$/g,'');if(!
 function yamlScalar(text,key){const m=text.match(new RegExp(`^${key}:\\s*(.+)$`,'mi'));if(!m)return null;let v=m[1].trim();if((v.startsWith('"')&&v.endsWith('"'))||(v.startsWith("'")&&v.endsWith("'")))v=v.slice(1,-1);return v.trim();}
 function yamlList(text,key){const raw=yamlScalar(text,key);if(!raw)return [];if(raw.startsWith('[')&&raw.endsWith(']'))return raw.slice(1,-1).split(',').map((x)=>x.trim().replace(/^['"]|['"]$/g,'')).filter(Boolean);return [raw];}
 function detectLicense(meta,licenseText){const spdx=meta?.license?.spdx_id;if(typeof spdx==='string'&&spdx&&spdx!=='NOASSERTION')return spdx;if(/^MIT License\b/im.test(licenseText??''))return 'MIT';if(/Apache License[\s\S]{0,80}Version 2\.0/i.test(licenseText??''))return 'Apache-2.0';return null;}
+function isCommitSha(value){return /^[a-f0-9]{40}$/i.test(String(value??''));}
+function requestHeaders(url,{json=false,token=null}={}){const out={'accept':json?'application/vnd.github+json':'text/plain','user-agent':UA};const host=new URL(url).hostname;if(token&&host==='api.github.com')out.authorization=`Bearer ${token}`;return out;}
 
 export function parseGitHubSkillUrl(raw){
   const url=new URL(req(raw,'github_url',2048));if(url.protocol!=='https:'||url.hostname!=='github.com'||url.username||url.password||url.search||url.hash)throw new Error('GITHUB_PUBLIC_HTTPS_URL_REQUIRED');
@@ -24,15 +26,17 @@ export function parseGitHubSkillUrl(raw){
   return Object.freeze({owner,repo,ref,subpath,canonical_repo_url:`https://github.com/${owner}/${repo}`});
 }
 
-async function fetchBounded(url,{fetch_impl=fetch,json=false,allow404=false}={}){
-  const response=await fetch_impl(url,{method:'GET',redirect:'error',headers:{'accept':json?'application/vnd.github+json':'text/plain','user-agent':UA}});
+async function fetchBounded(url,{fetch_impl=fetch,json=false,allow404=false,token=null}={}){
+  const response=await fetch_impl(url,{method:'GET',redirect:'error',headers:requestHeaders(url,{json,token})});
   if(response.status===404&&allow404)return null;if(response.status<200||response.status>=300)throw new Error(`GITHUB_REMOTE_HTTP_${response.status}`);
   const len=Number(response.headers?.get?.('content-length')??0);if(Number.isFinite(len)&&len>MAX_REMOTE_BYTES)throw new Error('GITHUB_REMOTE_FILE_TOO_LARGE');const bytes=Buffer.from(await response.arrayBuffer());if(bytes.length>MAX_REMOTE_BYTES)throw new Error('GITHUB_REMOTE_FILE_TOO_LARGE');const text=bytes.toString('utf8');return json?JSON.parse(text):text;
 }
 
-async function resolvePinnedSource(parsed,fetch_impl){
-  const meta=await fetchBounded(`https://api.github.com/repos/${parsed.owner}/${parsed.repo}`,{fetch_impl,json:true});if(meta?.private===true)throw new Error('PUBLIC_REPOSITORY_REQUIRED');if(meta?.archived===true)throw new Error('ARCHIVED_REPOSITORY_HOLD');
-  const ref=parsed.ref??safeSegment(meta?.default_branch??'main','default_branch');const commit=await fetchBounded(`https://api.github.com/repos/${parsed.owner}/${parsed.repo}/commits/${encodeURIComponent(ref)}`,{fetch_impl,json:true});const sha=req(commit?.sha,'commit sha',80);if(!/^[a-f0-9]{40}$/i.test(sha))throw new Error('GITHUB_COMMIT_SHA_INVALID');return Object.freeze({meta,ref,sha});
+async function resolvePinnedSource(parsed,fetch_impl,token){
+  const meta=await fetchBounded(`https://api.github.com/repos/${parsed.owner}/${parsed.repo}`,{fetch_impl,json:true,token});if(meta?.private===true)throw new Error('PUBLIC_REPOSITORY_REQUIRED');if(meta?.archived===true)throw new Error('ARCHIVED_REPOSITORY_HOLD');
+  const ref=parsed.ref??safeSegment(meta?.default_branch??'main','default_branch');
+  if(isCommitSha(ref))return Object.freeze({meta,ref:ref.toLowerCase(),sha:ref.toLowerCase(),resolution:'URL_PINNED_SHA'});
+  const commit=await fetchBounded(`https://api.github.com/repos/${parsed.owner}/${parsed.repo}/commits/${encodeURIComponent(ref)}`,{fetch_impl,json:true,token});const sha=req(commit?.sha,'commit sha',80);if(!isCommitSha(sha))throw new Error('GITHUB_COMMIT_SHA_INVALID');return Object.freeze({meta,ref,sha:sha.toLowerCase(),resolution:'API_RESOLVED_REF'});
 }
 function rawUrl(parsed,sha,file){const rel=safeSubpath([parsed.subpath,file].filter(Boolean).join('/'));return `https://raw.githubusercontent.com/${parsed.owner}/${parsed.repo}/${sha}/${rel}`;}
 
@@ -41,22 +45,22 @@ function inferManifest(skillText,{license,repoFullName,sha}){
   return {schema_version:'1.0.0',technical_name:name,version:`github-${sha.slice(0,12)}`,license,description,origin:{repository:repoFullName,commit_sha:sha,source:'SKILL.md'},capabilities:[{technical_name:name,description,terms:tags,declared_domains:[]}],policy:{external_code_execution:false,prod_authorized:false,additional_cost_eur:0}};
 }
 
-export async function acquirePublicGitHubSkill({github_url,fetch_impl=fetch}={}){
-  const parsed=parseGitHubSkillUrl(github_url);const pinned=await resolvePinnedSource(parsed,fetch_impl);const acquired=new Map();
+export async function acquirePublicGitHubSkill({github_url,fetch_impl=fetch,token=process.env.GITHUB_TOKEN??null}={}){
+  const parsed=parseGitHubSkillUrl(github_url);const pinned=await resolvePinnedSource(parsed,fetch_impl,token);const acquired=new Map();
   for(const name of FILES){const text=await fetchBounded(rawUrl(parsed,pinned.sha,name),{fetch_impl,allow404:true});if(text!=null)acquired.set(name,text);}
   let licenseText=null;for(const name of LICENSE_FILES){const text=await fetchBounded(`https://raw.githubusercontent.com/${parsed.owner}/${parsed.repo}/${pinned.sha}/${name}`,{fetch_impl,allow404:true});if(text!=null){licenseText=text;acquired.set('LICENSE',text);break;}}
   const license=detectLicense(pinned.meta,licenseText);if(!license)throw new Error('LICENSE_INCOMPATIBLE_OR_UNVERIFIED');
   if(!acquired.has('cerebro.skill.json')&&!acquired.has('skill.json')){const skill=acquired.get('SKILL.md');if(skill){const inferred=inferManifest(skill,{license,repoFullName:`${parsed.owner}/${parsed.repo}`,sha:pinned.sha});if(inferred)acquired.set('cerebro.skill.json',`${JSON.stringify(inferred,null,2)}\n`);}}
   if(!acquired.has('cerebro.skill.json')&&!acquired.has('skill.json'))return Object.freeze({status:'HUMAN_REQUIRED',human_required:'LOW_CONFIDENCE',reason:'NO_MACHINE_READABLE_OR_INFERABLE_SKILL_MANIFEST',parsed,pinned_sha:pinned.sha,...authority()});
   const dir=fs.mkdtempSync(path.join(os.tmpdir(),'cerebro-github-skill-'));for(const [name,text] of acquired)fs.writeFileSync(path.join(dir,name),text,{mode:0o600});
-  return Object.freeze({status:'ACQUIRED_READONLY',repo_dir:dir,source_locator:`github://${parsed.owner}/${parsed.repo}@${pinned.sha}/${parsed.subpath}`,github_url,owner:parsed.owner,repo:parsed.repo,ref:pinned.ref,pinned_sha:pinned.sha,subpath:parsed.subpath,file_count:acquired.size,license_spdx:license,read_only:true,...authority()});
+  return Object.freeze({status:'ACQUIRED_READONLY',repo_dir:dir,source_locator:`github://${parsed.owner}/${parsed.repo}@${pinned.sha}/${parsed.subpath}`,github_url,owner:parsed.owner,repo:parsed.repo,ref:pinned.ref,pinned_sha:pinned.sha,pin_resolution:pinned.resolution,subpath:parsed.subpath,file_count:acquired.size,license_spdx:license,read_only:true,...authority()});
 }
 
-export async function runGitHubRepositoryActivation({github_url,company_id='fenix',fetch_impl=fetch,root_dir=null,source_run_id=1,source_head_sha='0000000000000000000000000000000000000001'}={}){
-  let acquisition;try{acquisition=await acquirePublicGitHubSkill({github_url,fetch_impl});}catch(error){return Object.freeze({schema_version:'1.0.0',state_type:'CEREBRO_GITHUB_REPOSITORY_ACTIVATION_REPORT_V1',status:'REJECTED',terminal_state:'REJECTED',reason:String(error.message??error),github_url,full_safe_preprod:false,...authority()});}
+export async function runGitHubRepositoryActivation({github_url,company_id='fenix',fetch_impl=fetch,token=process.env.GITHUB_TOKEN??null,root_dir=null,source_run_id=1,source_head_sha='0000000000000000000000000000000000000001'}={}){
+  let acquisition;try{acquisition=await acquirePublicGitHubSkill({github_url,fetch_impl,token});}catch(error){return Object.freeze({schema_version:'1.0.0',state_type:'CEREBRO_GITHUB_REPOSITORY_ACTIVATION_REPORT_V1',status:'REJECTED',terminal_state:'REJECTED',reason:String(error.message??error),github_url,full_safe_preprod:false,...authority()});}
   if(acquisition.status!=='ACQUIRED_READONLY')return Object.freeze({schema_version:'1.0.0',state_type:'CEREBRO_GITHUB_REPOSITORY_ACTIVATION_REPORT_V1',status:acquisition.status,terminal_state:null,reason:acquisition.reason,human_required:acquisition.human_required??null,github_url,pinned_sha:acquisition.pinned_sha??null,full_safe_preprod:false,...authority()});
   const activation=runRepositoryActivation({repo_dir:acquisition.repo_dir,source_locator:acquisition.source_locator,company_id,root_dir,source_run_id,source_head_sha});
-  return Object.freeze({schema_version:'1.0.0',state_type:'CEREBRO_GITHUB_REPOSITORY_ACTIVATION_REPORT_V1',status:activation.status,terminal_state:activation.terminal_state,full_safe_preprod:activation.full_safe_preprod===true,github_url,source_locator:acquisition.source_locator,pinned_sha:acquisition.pinned_sha,license_spdx:acquisition.license_spdx,acquisition:Object.freeze({status:acquisition.status,owner:acquisition.owner,repo:acquisition.repo,ref:acquisition.ref,subpath:acquisition.subpath,file_count:acquisition.file_count,read_only:true}),activation,...authority()});
+  return Object.freeze({schema_version:'1.0.0',state_type:'CEREBRO_GITHUB_REPOSITORY_ACTIVATION_REPORT_V1',status:activation.status,terminal_state:activation.terminal_state,full_safe_preprod:activation.full_safe_preprod===true,github_url,source_locator:acquisition.source_locator,pinned_sha:acquisition.pinned_sha,license_spdx:acquisition.license_spdx,acquisition:Object.freeze({status:acquisition.status,owner:acquisition.owner,repo:acquisition.repo,ref:acquisition.ref,pin_resolution:acquisition.pin_resolution,subpath:acquisition.subpath,file_count:acquisition.file_count,read_only:true}),activation,...authority()});
 }
 
 if(process.argv[1]&&path.resolve(process.argv[1])===path.resolve(new URL(import.meta.url).pathname)){
