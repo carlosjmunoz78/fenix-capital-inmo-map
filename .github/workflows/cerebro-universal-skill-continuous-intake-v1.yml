@@ -4,7 +4,8 @@ on:
   schedule:
     - cron: '17 */6 * * *'
   repository_dispatch:
-    types: [cerebro_skill_intake]
+    types:
+      - cerebro_skill_intake
   workflow_dispatch:
     inputs:
       company_id:
@@ -12,7 +13,7 @@ on:
         required: true
         default: fenix
       github_urls:
-        description: Optional GitHub skill URLs separated by comma or newline. Leave empty to run the autonomous scout.
+        description: Optional GitHub skill URLs separated by comma or newline
         required: false
         default: ''
   push:
@@ -38,6 +39,9 @@ jobs:
     timeout-minutes: 18
     env:
       CEREBRO_SOURCE_QUEUE_ROOT: ${{ runner.temp }}/cerebro-source-queue-persistent
+      CEREBRO_SOURCE_CONCURRENCY: '8'
+      CEREBRO_SKILL_SCOUT_MAX: '16'
+      CEREBRO_COMPANY_ID: fenix
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -46,8 +50,8 @@ jobs:
       - name: Prepare persistent PREPROD queue root
         shell: bash
         run: mkdir -p "$CEREBRO_SOURCE_QUEUE_ROOT"
-      - name: Restore durable queue state
-        uses: actions/cache/restore@v4
+      - name: Restore and persist durable queue state
+        uses: actions/cache@v4
         with:
           path: ${{ runner.temp }}/cerebro-source-queue-persistent
           key: usaf-source-queue-v1-${{ github.ref_name }}-${{ github.run_id }}
@@ -55,39 +59,45 @@ jobs:
             usaf-source-queue-v1-${{ github.ref_name }}-
       - name: Continuous intake tests
         run: node --test cerebro/tests/universal-skill-source-queue-v1.test.mjs cerebro/tests/universal-skill-autonomous-scout-v1.test.mjs
-      - name: Autonomous public skill discovery
-        if: github.event_name == 'schedule' || github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.github_urls == '')
+      - name: Run autonomous or event-driven PREPROD intake
+        shell: bash
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          CEREBRO_COMPANY_ID: ${{ github.event.inputs.company_id || 'fenix' }}
-          CEREBRO_SKILL_SCOUT_MAX: '16'
-        run: node cerebro/runtime/universal-skill-autonomous-scout-v1.mjs --out "$RUNNER_TEMP/cerebro-skill-scout-event.json"
-      - name: Autonomous PREPROD intake
-        if: github.event_name == 'schedule' || github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.github_urls == '')
-        env:
-          CEREBRO_SOURCE_CONCURRENCY: '8'
-        shell: bash
         run: |
           set -euo pipefail
-          COUNT="$(node -e "const fs=require('fs');const x=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP + '/cerebro-skill-scout-event.json','utf8'));process.stdout.write(String(x.client_payload.github_urls.length));")"
-          if [ "$COUNT" -eq 0 ]; then
-            echo 'No eligible public skill sources discovered in this bounded cycle.'
-            exit 0
-          fi
-          node cerebro/runtime/universal-skill-source-queue-v1.mjs --event "$RUNNER_TEMP/cerebro-skill-scout-event.json"
-      - name: Event-driven intake
-        if: github.event_name == 'repository_dispatch' || (github.event_name == 'workflow_dispatch' && inputs.github_urls != '')
-        env:
-          CEREBRO_SOURCE_CONCURRENCY: '8'
-        run: node cerebro/runtime/universal-skill-source-queue-v1.mjs --event "$GITHUB_EVENT_PATH"
+          EVENT_NAME="$GITHUB_EVENT_NAME"
+          SCOUT_EVENT="$RUNNER_TEMP/cerebro-skill-scout-event.json"
+          run_scout() {
+            node cerebro/runtime/universal-skill-autonomous-scout-v1.mjs --out "$SCOUT_EVENT"
+            COUNT="$(node -e "const fs=require('fs');const x=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP + '/cerebro-skill-scout-event.json','utf8'));process.stdout.write(String(x.client_payload.github_urls.length));")"
+            if [ "$COUNT" -eq 0 ]; then
+              echo 'No eligible public skill sources discovered in this bounded cycle.'
+              return 0
+            fi
+            node cerebro/runtime/universal-skill-source-queue-v1.mjs --event "$SCOUT_EVENT"
+          }
+          case "$EVENT_NAME" in
+            push|schedule)
+              run_scout
+              ;;
+            workflow_dispatch)
+              MANUAL_COUNT="$(node -e "const fs=require('fs');const e=JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH,'utf8'));const v=String((e.inputs&&e.inputs.github_urls)||'').trim();process.stdout.write(v? '1':'0');")"
+              if [ "$MANUAL_COUNT" -eq 1 ]; then
+                node cerebro/runtime/universal-skill-source-queue-v1.mjs --event "$GITHUB_EVENT_PATH"
+              else
+                run_scout
+              fi
+              ;;
+            repository_dispatch)
+              node cerebro/runtime/universal-skill-source-queue-v1.mjs --event "$GITHUB_EVENT_PATH"
+              ;;
+            *)
+              echo "Unsupported event: $EVENT_NAME" >&2
+              exit 2
+              ;;
+          esac
       - name: Assert PREPROD-only authority
         shell: bash
         run: |
           set -euo pipefail
           ! grep -Eq 'prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true|external_skill_code_execution[[:space:]]*:[[:space:]]*true|npm install|child_process' cerebro/runtime/universal-skill-source-queue-v1.mjs cerebro/runtime/universal-skill-autonomous-scout-v1.mjs
-      - name: Save durable queue state
-        if: always()
-        uses: actions/cache/save@v4
-        with:
-          path: ${{ runner.temp }}/cerebro-source-queue-persistent
-          key: usaf-source-queue-v1-${{ github.ref_name }}-${{ github.run_id }}
