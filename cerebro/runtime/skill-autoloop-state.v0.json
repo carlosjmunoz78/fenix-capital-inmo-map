@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-18T14:31:06.367Z",
+  "updated_at": "2026-10-18T14:41:42.151Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -71,7 +71,8 @@
     "github-wide-skills:a878cb5b090fb5510738",
     "github-wide-skills:fde8ca54cb5752431a1e",
     "github-wide-skills:bacaf0987d8abd240515",
-    "github-wide-skills:66b7982a1c10e80fe904"
+    "github-wide-skills:66b7982a1c10e80fe904",
+    "github-wide-skills:dc1ae2df5d2050d73d5f"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -868,6 +869,40 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 39085394173,
       "checkpointed_at": "2026-10-18T01:09:12.032Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:dc1ae2df5d2050d73d5f": {
+      "candidate_id": "github-wide-skills:dc1ae2df5d2050d73d5f",
+      "name": "ai-repo-engineering-layout",
+      "human_alias": "Ai Repo Engineering Layout",
+      "wrapper_id": "skillwrap:e12d0ce2e87a5afd7868",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 86.91,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "xingtu1996/xingtu-skills",
+        "upstream_head_commit": "7ac7097996b050fd1ce5790412230caf1b5c158a",
+        "manifest_sha256": "63c2b2efdb1e968394b3ea99640415d8a5f68b11df7651086a2c321886810114",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 39137081872,
+      "checkpointed_at": "2026-10-18T14:41:42.151Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -1827,7 +1862,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "IDLE_NO_NEW_ELIGIBLE_CANDIDATE",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -1840,5 +1875,5 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 39136312100
+  "last_discovery_run_id": 39137081872
 }
