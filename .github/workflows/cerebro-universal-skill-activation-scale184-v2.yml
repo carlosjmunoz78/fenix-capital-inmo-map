@@ -24,23 +24,110 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: cerebro-scale184-v2-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   scale184-auto-engineering-v2:
     runs-on: ubuntu-latest
-    timeout-minutes: 18
+    timeout-minutes: 30
+    env:
+      EXACT_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+      MASS_ROOT: ${{ runner.temp }}/cerebro-usaf-scale184-v2-state
+      MASS_REPORT: ${{ runner.temp }}/cerebro-usaf-scale184-v2-report.json
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout exact candidate head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+
+      - name: Verify exact candidate head
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXACT_HEAD"
+
       - name: Scale184 V2 tests
         run: node --test cerebro/tests/universal-skill-legacy184-autoeng-scale-v2.test.mjs
-      - name: Produce current truthful 184 report
-        run: node cerebro/runtime/universal-skill-legacy184-autoeng-scale-v2.mjs "$RUNNER_TEMP/cerebro-usaf-scale184-v2-report.json"
-      - name: Upload evidence report
+
+      - name: Execute governed 184-skill mass activation across routed engines
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$MASS_ROOT"
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import {runLegacy184AutoEngineeringScale} from './cerebro/runtime/universal-skill-legacy184-autoeng-scale-v2.mjs';
+          const report=runLegacy184AutoEngineeringScale({
+            root_dir: process.env.MASS_ROOT,
+            source_run_id: Number(process.env.GITHUB_RUN_ID),
+            source_head_sha: process.env.EXACT_HEAD
+          });
+          fs.writeFileSync(process.env.MASS_REPORT, JSON.stringify(report,null,2)+'\n');
+          const terminalAllowed=new Set(['FULL_SAFE_PREPROD','ABSORBED','REJECTED','BLOCKED_EXTERNAL','HUMAN_REQUIRED']);
+          if(report.catalog_size!==184) throw new Error(`CATALOG_SIZE_MISMATCH:${report.catalog_size}`);
+          if(report.matrix.length!==184) throw new Error(`MATRIX_SIZE_MISMATCH:${report.matrix.length}`);
+          const unsafe=report.matrix.filter(r=>!terminalAllowed.has(r.observed_outcome));
+          if(unsafe.length) throw new Error(`NON_TERMINAL_ITEMS:${unsafe.map(x=>x.item_id).join(',')}`);
+          if(report.prod_authorized!==false || report.prod_write_authorized!==false || report.trading_access!==false || Number(report.additional_cost_eur)!==0) throw new Error('AUTHORITY_EXPANSION_DETECTED');
+          console.log(JSON.stringify({
+            status: report.status,
+            catalog_size: report.catalog_size,
+            full_safe_preprod: report.matrix.filter(x=>x.observed_outcome==='FULL_SAFE_PREPROD').length,
+            absorbed: report.matrix.filter(x=>x.observed_outcome==='ABSORBED').length,
+            blocked_external: report.matrix.filter(x=>x.observed_outcome==='BLOCKED_EXTERNAL').length,
+            human_required: report.matrix.filter(x=>x.observed_outcome==='HUMAN_REQUIRED').length,
+            rejected: report.matrix.filter(x=>x.observed_outcome==='REJECTED').length,
+            full_claim: report.full_claim
+          },null,2));
+          NODE
+
+      - name: Verify physical residual truth is preserved
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const report=JSON.parse(fs.readFileSync(process.env.MASS_REPORT,'utf8'));
+          const physical=JSON.parse(fs.readFileSync('cerebro/skills/cerebro-184-live-convergence.v3.json','utf8'));
+          if(physical.all_184_physically_active!==false) throw new Error('FALSE_PHYSICAL_FULL');
+          const expected=['ANDROID_48_183','WATCH_LEARN_47','COMPET_57_61','CAP_62_68'];
+          const ids=new Set((physical.remaining_physical_gates||[]).map(x=>x.id));
+          for(const id of expected) if(!ids.has(id)) throw new Error(`MISSING_PHYSICAL_GATE:${id}`);
+          if(report.prod_authorized!==false) throw new Error('PROD_AUTHORITY_FORBIDDEN');
+          NODE
+
+      - name: Write mass activation summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo '## CEREBRO Scale184 V2 Mass Activation'
+            echo
+            echo "- exact head: \`$EXACT_HEAD\`"
+            echo '- environment: PREPROD'
+            echo '- catalog target: 184/184'
+            echo '- routing: capability -> justified domains -> canonical engines'
+            echo '- PROD authority: false'
+            echo '- auto-merge: false'
+            echo '- Trading: false'
+            echo '- additional cost: 0 EUR'
+            echo '- physical residual gates remain fail-closed until real evidence exists'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload complete activation state and evidence
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: cerebro-usaf-scale184-v2-${{ github.run_id }}
-          path: ${{ runner.temp }}/cerebro-usaf-scale184-v2-report.json
+          name: cerebro-usaf-scale184-v2-${{ github.run_id }}-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            ${{ runner.temp }}/cerebro-usaf-scale184-v2-report.json
+            ${{ runner.temp }}/cerebro-usaf-scale184-v2-state
           if-no-files-found: error
           retention-days: 14
