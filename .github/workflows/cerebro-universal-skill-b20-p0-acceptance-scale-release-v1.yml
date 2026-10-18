@@ -1,0 +1,141 @@
+name: CEREBRO Universal Skill B20 P0 Acceptance and Scale Release V1
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'cerebro/universal-skill-activation-factory-v1-*'
+    paths:
+      - 'cerebro/contracts/universal-skill-b20-p0-acceptance-and-scale-release-v1.contract.json'
+      - 'cerebro/tests/universal-skill-b20-p0-acceptance-and-scale-release-certification-v1.test.mjs'
+      - 'cerebro/registry/universal-skill-b20-p0-acceptance-and-scale-release.v1.json'
+      - 'cerebro/registry/universal-skill-activation-factory-v1.state.json'
+      - 'cerebro/docs/CEREBRO_B20_P0_ACCEPTANCE_AND_SCALE_RELEASE_CERTIFICATION_V1.md'
+      - 'cerebro/docs/CEREBRO_UNIVERSAL_SKILL_ACTIVATION_FACTORY_V1_HANDOFF.md'
+      - '.github/workflows/cerebro-universal-skill-b20-p0-acceptance-scale-release-v1.yml'
+  pull_request:
+    paths:
+      - 'cerebro/contracts/universal-skill-b20-p0-acceptance-and-scale-release-v1.contract.json'
+      - 'cerebro/tests/universal-skill-b20-p0-acceptance-and-scale-release-certification-v1.test.mjs'
+      - 'cerebro/registry/universal-skill-b20-p0-acceptance-and-scale-release.v1.json'
+      - 'cerebro/registry/universal-skill-activation-factory-v1.state.json'
+      - 'cerebro/docs/CEREBRO_B20_P0_ACCEPTANCE_AND_SCALE_RELEASE_CERTIFICATION_V1.md'
+      - 'cerebro/docs/CEREBRO_UNIVERSAL_SKILL_ACTIVATION_FACTORY_V1_HANDOFF.md'
+      - '.github/workflows/cerebro-universal-skill-b20-p0-acceptance-scale-release-v1.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-universal-skill-b20-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  b20-p0-acceptance-scale-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      EXACT_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - name: Checkout exact candidate head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.x'
+
+      - name: Verify checkout is exact PR head
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXACT_HEAD"
+
+      - name: B20 acceptance tests
+        run: node --test cerebro/tests/universal-skill-b20-p0-acceptance-and-scale-release-certification-v1.test.mjs
+
+      - name: Reconcile FAST_LANE blind-batch Scale184 Repository and GitHub E2E tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test \
+            cerebro/tests/universal-skill-batch-orchestrator-v1.test.mjs \
+            cerebro/tests/universal-skill-blind-legacy184-batch-v1.test.mjs \
+            cerebro/tests/universal-skill-legacy184-scale-v1.test.mjs \
+            cerebro/tests/universal-skill-legacy184-autoeng-scale-v2.test.mjs \
+            cerebro/tests/universal-skill-repository-intake-v1.test.mjs \
+            cerebro/tests/universal-skill-github-intake-v1.test.mjs \
+            cerebro/tests/universal-skill-b19-universal-e2e-real-v1.test.mjs
+
+      - name: Live public GitHub URL read-only E2E
+        run: node cerebro/runtime/universal-skill-github-intake-v1.mjs https://github.com/ericrisco/rsc-harness/tree/main/skills/finance-ops
+
+      - name: Assert factory authority and no uncontrolled external execution
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILES=(
+            cerebro/runtime/universal-skill-repository-intake-v1.mjs
+            cerebro/runtime/universal-skill-github-intake-v1.mjs
+            cerebro/runtime/universal-skill-batch-orchestrator-v1.mjs
+          )
+          ! grep -E 'external_skill_code_execution[[:space:]]*:[[:space:]]*true|dependency_install_authorized[[:space:]]*:[[:space:]]*true|prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|prod_mutation_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true' "${FILES[@]}"
+          ! grep -E 'child_process|npm install|pnpm add|yarn add' cerebro/runtime/universal-skill-repository-intake-v1.mjs cerebro/runtime/universal-skill-github-intake-v1.mjs
+
+      - name: Full CEREBRO regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILES="$(find cerebro/tests -maxdepth 1 -type f -name '*.test.mjs' \
+            | grep -v '/lab-' \
+            | grep -v '/seo-autonomous-regression.e2e.test.mjs$' \
+            | grep -v '/repo-inventory\.test\.mjs$' \
+            | sort)"
+          test -n "$FILES"
+          node --test $FILES
+
+      - name: Materialize exact-head B20 certification artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .artifacts/b20
+          git rev-parse HEAD > .artifacts/b20/exact-head.txt
+          node <<'NODE'
+          const fs=require('fs');
+          const b19=JSON.parse(fs.readFileSync('cerebro/registry/universal-skill-b19-universal-e2e-real.v1.json','utf8'));
+          const summary={
+            schema_version:'1.0.0',
+            state_type:'CEREBRO_B20_P0_ACCEPTANCE_SCALE_RELEASE_CERTIFICATION_V1',
+            status:'B20_GREEN_PREPROD',
+            exact_head:process.env.EXACT_HEAD,
+            source_run_id:Number(process.env.GITHUB_RUN_ID),
+            environment:'PREPROD',
+            b19:{status:b19.status,rollback_green:b19.evidence.rollback_green,rebuild_green:b19.evidence.rebuild_green,idempotency_proven:b19.evidence.idempotency_proven,final_registration:b19.evidence.final_registration_status},
+            reconciled:['FAST_LANE','BLIND_REAL_CATALOG_BATCH','SCALE184_V1','SCALE184_V2','REPOSITORY_E2E','GITHUB_LIVE_E2E','FULL_CEREBRO_REGRESSION'],
+            new_candidate_without_candidate_specific_core:true,
+            terminal_truth:true,
+            prod_authorized:false,
+            prod_write_authorized:false,
+            prod_mutation_authorized:false,
+            auto_merge_authorized:false,
+            external_skill_code_execution_authorized:false,
+            external_dependency_install_authorized:false,
+            customer_data_authorized:false,
+            trading_access:false,
+            additional_cost_eur:0
+          };
+          fs.writeFileSync('.artifacts/b20/certification.json',JSON.stringify(summary,null,2)+'\n');
+          console.log(JSON.stringify(summary));
+          NODE
+
+      - name: Upload B20 certification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-b20-p0-acceptance-scale-release-${{ github.event.pull_request.head.sha || github.sha }}
+          path: .artifacts/b20
+          if-no-files-found: error
+          retention-days: 14
