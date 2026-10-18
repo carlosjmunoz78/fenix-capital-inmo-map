@@ -1,5 +1,5 @@
 {
-  "schema_version": "4.1.0",
+  "schema_version": "4.1.1",
   "state_type": "CEREBRO_GLOBAL_OPERATIONAL_CONVERGENCE_V4",
   "generated_at": "2026-10-18",
   "company_id": "GLOBAL",
@@ -43,8 +43,9 @@
       "owner_engine": "COMPET-001",
       "state": "FULL_E2E_REAL_PREPROD",
       "evidence": "cerebro/registry/compet-real-consumer-adoption-v1.json",
-      "physical_evidence": "cerebro/registry/compet-real-targets.v0.json",
-      "boundary": "Semantic downstream adoption is closed and real Cordoba target observation has a physical GET-only baseline plus three genuine separated scheduled GREEN runs. No provider write or PROD authority is implied."
+      "baseline_evidence": "cerebro/registry/compet-real-targets.v0.json",
+      "physical_evidence": "cerebro/registry/compet-real-targets-acceptance.v1.json",
+      "boundary": "Semantic downstream adoption is closed. The preserved V0 registry retains the physical GET-only Cordoba baseline, while additive acceptance V1 certifies three genuine separated scheduled GREEN runs. No provider write or PROD authority is implied."
     },
     {
       "id": "CAP-NATIVE",
@@ -231,15 +232,15 @@
     "contracts_change_required": false,
     "dependency_map_change_required": false,
     "runbook": "cerebro/docs/GLOBAL_OPERATIONAL_CONVERGENCE_V4_RUNBOOK.md",
-    "backup": "Historical V2/V3 state files are retained unchanged; V4 remains additive and reversible by reverting its files.",
+    "backup": "Historical V2/V3 state files and preserved COMPET V0 baseline remain unchanged; V4 remains additive and reversible by reverting its files.",
     "rollback": "Revert the V4 state, pointer, tests and workflow; no runtime or external resource is mutated by this reconciliation.",
-    "rebuild": "Regenerate V4 only from current evidence registries and live PR metadata, preserving historical evidence files.",
-    "changelog": "2026-10-18: certified genuine scheduled soak for Watch & Learn, COMPET and CAP; completed Watch retention review; removed those three stale physical gates and kept Android, EVT-74 minimum-grant and other physical/side-effect gates fail-closed.",
+    "rebuild": "Regenerate V4 only from current evidence registries, including preserved COMPET V0 plus additive acceptance V1, preserving historical evidence files.",
+    "changelog": "2026-10-18: certified genuine scheduled soak for Watch & Learn, COMPET and CAP; COMPET V0 runtime/config were restored unchanged and scheduled acceptance/resilience moved to additive V1 wrappers; Android, EVT-74 minimum-grant and other physical/side-effect gates remain fail-closed.",
     "autonomy_state": "PREPROD_GOVERNED; PROD_FALSE; TRADING_ISOLATED; COST_0"
   },
   "reporting_contract": {
-    "HECHO": "Current strict runtime/skill closures plus Watch & Learn, COMPET and CAP scheduled-source acceptance are evidence-backed.",
-    "EXISTENTE": "179 canonical logical engines and 184 normalized rollout capabilities remain preserved.",
+    "HECHO": "Current strict runtime/skill closures plus Watch & Learn, additive COMPET acceptance and CAP scheduled-source acceptance are evidence-backed.",
+    "EXISTENTE": "179 canonical logical engines and 184 normalized rollout capabilities remain preserved, including the COMPET V0 baseline contract.",
     "PARCIAL": "Android, EVT-74 guarded journal binding and other physical/provider/side-effect gates remain explicit; scheduled soak is no longer pending.",
     "DEFINIDO": "Human policy conflicts and promotion boundaries are explicit and fail-closed.",
     "PLANIFICADO": "Proceed through zero-cost physical evidence in priority order without opening side effects by inference.",
