@@ -115,26 +115,23 @@ test('Montilla LOCAL_B2B has non-empty meta description',async({page},testInfo)=
   expect((meta||'').trim().length).toBeGreaterThan(80);
 });
 
-test('main site header is proportionate on desktop and mobile',async({browser},testInfo)=>{
+test('main site header and menu do not consume excessive vertical space',async({browser},testInfo)=>{
   test.skip(testInfo.project.name!=='v5-390','dedicated two-viewport header gate runs once');
   for(const viewport of [{name:'mobile',width:390,height:844},{name:'desktop',width:1440,height:1000}]){
     const context=await browser.newContext({viewport:{width:viewport.width,height:viewport.height}});
     const page=await context.newPage();
     await page.goto(base,{waitUntil:'domcontentloaded',timeout:45_000});
     await expect(page.locator('body')).toBeVisible();
-    const headerObs=await page.evaluate(()=>{
-      const selectors=['#masthead','#ast-mobile-header','.ast-mobile-header-wrap','header.site-header','header[role="banner"]','.site-primary-header-wrap'];
-      const nodes=[...document.querySelectorAll(selectors.join(','))] as HTMLElement[];
-      const visible=nodes.map(el=>{const r=el.getBoundingClientRect();const s=getComputedStyle(el);return {tag:el.tagName,id:el.id,className:el.className,height:r.height,width:r.width,top:r.top,display:s.display,visibility:s.visibility,visible:r.width>0&&r.height>0&&s.display!=='none'&&s.visibility!=='hidden'};}).filter(x=>x.visible);
-      visible.sort((a,b)=>b.width*b.height-a.width*a.height);
-      return {visible,chosen:visible[0]||null};
+    const obs=await page.evaluate(()=>{
+      const main=(document.querySelector('main')||document.querySelector('#content')||document.querySelector('.site-content')||document.querySelector('[role="main"]')) as HTMLElement|null;
+      const mainTop=main?.getBoundingClientRect().top??null;
+      const visibleTopControls=[...document.querySelectorAll('a[href],button')].map(el=>{const r=(el as HTMLElement).getBoundingClientRect();const s=getComputedStyle(el);return {text:(el.textContent||'').trim().slice(0,80),top:r.top,bottom:r.bottom,width:r.width,height:r.height,visible:r.width>0&&r.height>0&&s.display!=='none'&&s.visibility!=='hidden'};}).filter(x=>x.visible&&x.top<220&&x.bottom>-1).slice(0,40);
+      return {mainTop,visibleTopControls};
     });
-    const chosen=headerObs.chosen;
-    expect(chosen,`${viewport.name} visible header candidate`).not.toBeNull();
-    const height=chosen?.height??9999;
-    const maxHeight=viewport.name==='desktop'?180:170;
-    console.log(`FENIX_V5_HEADER:${JSON.stringify({viewport:viewport.name,height,maxHeight,chosen,visible:headerObs.visible})}`);
-    expect(height,`${viewport.name} header must not dominate the page`).toBeLessThanOrEqual(maxHeight);
+    expect(obs.mainTop,`${viewport.name} main content top`).not.toBeNull();
+    const maxMainTop=220;
+    console.log(`FENIX_V5_HEADER_MENU:${JSON.stringify({viewport:viewport.name,maxMainTop,...obs})}`);
+    expect(obs.mainTop??9999,`${viewport.name} header/menu must not dominate the page`).toBeLessThanOrEqual(maxMainTop);
     await page.screenshot({path:`artifacts/staging-v5/screens/header-${viewport.name}.png`,fullPage:false});
     await context.close();
   }
