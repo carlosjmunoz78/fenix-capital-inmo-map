@@ -22,8 +22,10 @@ on:
     paths:
       - 'cerebro/runtime/universal-skill-source-queue-v1.mjs'
       - 'cerebro/runtime/universal-skill-autonomous-scout-v1.mjs'
+      - 'cerebro/runtime/universal-skill-lrn-impact-bridge-v1.mjs'
       - 'cerebro/tests/universal-skill-source-queue-v1.test.mjs'
       - 'cerebro/tests/universal-skill-autonomous-scout-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-lrn-impact-bridge-v1.test.mjs'
       - '.github/workflows/cerebro-universal-skill-continuous-intake-v1.yml'
 
 permissions:
@@ -46,20 +48,26 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Prepare persistent PREPROD queue root
+      - name: Prepare persistent PREPROD state roots
         shell: bash
         run: |
+          set -euo pipefail
           echo "CEREBRO_SOURCE_QUEUE_ROOT=$RUNNER_TEMP/cerebro-source-queue-persistent" >> "$GITHUB_ENV"
-          mkdir -p "$RUNNER_TEMP/cerebro-source-queue-persistent"
-      - name: Restore and persist durable queue state
+          echo "CEREBRO_LRN_LEDGER_FILE=$RUNNER_TEMP/cerebro-lrn-persistent/learning.v8" >> "$GITHUB_ENV"
+          echo "CEREBRO_IMPROVEMENT_CANDIDATE_LEDGER_FILE=$RUNNER_TEMP/cerebro-lrn-persistent/improvement-candidates.v8" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/cerebro-source-queue-persistent" "$RUNNER_TEMP/cerebro-lrn-persistent"
+      - name: Restore and persist durable PREPROD state
         uses: actions/cache@v4
         with:
-          path: ${{ runner.temp }}/cerebro-source-queue-persistent
-          key: usaf-source-queue-v1-${{ github.ref_name }}-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/cerebro-source-queue-persistent
+            ${{ runner.temp }}/cerebro-lrn-persistent
+          key: usaf-continuous-state-v2-${{ github.ref_name }}-${{ github.run_id }}
           restore-keys: |
+            usaf-continuous-state-v2-${{ github.ref_name }}-
             usaf-source-queue-v1-${{ github.ref_name }}-
-      - name: Continuous intake tests
-        run: node --test cerebro/tests/universal-skill-source-queue-v1.test.mjs cerebro/tests/universal-skill-autonomous-scout-v1.test.mjs
+      - name: Continuous intake and learning tests
+        run: node --test cerebro/tests/universal-skill-source-queue-v1.test.mjs cerebro/tests/universal-skill-autonomous-scout-v1.test.mjs cerebro/tests/universal-skill-lrn-impact-bridge-v1.test.mjs
       - name: Run autonomous or event-driven PREPROD intake
         shell: bash
         env:
@@ -101,4 +109,4 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          ! grep -Eq 'prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true|external_skill_code_execution[[:space:]]*:[[:space:]]*true|npm install|child_process' cerebro/runtime/universal-skill-source-queue-v1.mjs cerebro/runtime/universal-skill-autonomous-scout-v1.mjs
+          ! grep -Eq 'prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true|external_skill_code_execution[[:space:]]*:[[:space:]]*true|npm install|child_process' cerebro/runtime/universal-skill-source-queue-v1.mjs cerebro/runtime/universal-skill-autonomous-scout-v1.mjs cerebro/runtime/universal-skill-lrn-impact-bridge-v1.mjs
