@@ -5,7 +5,7 @@
   "engine_id": "HEX-001",
   "environment": "PROD_CONTROL_PLANE",
   "version": "1.1.0",
-  "updated_at": "2026-10-18T05:50:59.483094Z",
+  "updated_at": "2026-10-18T06:23:37.895Z",
   "pending": {},
   "authorized_actions": {},
   "decisions": [],
@@ -161,6 +161,105 @@
       "kind": "WAITING_SAFE",
       "name": "adopt-and-delete",
       "human_alias": "Adopt And Delete",
+      "status": "WAITING_SAFE_HANDLER",
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "human_required": "",
+      "updated_at": "",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
+    "name:watchfor-incident-response": {
+      "kind": "WAITING_SAFE",
+      "name": "watchfor-incident-response",
+      "human_alias": "Watchfor Incident Response",
+      "status": "WAITING_SAFE_HANDLER",
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "human_required": "",
+      "updated_at": "",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
+    "name:handoff-target": {
+      "kind": "WAITING_SAFE",
+      "name": "handoff-target",
+      "human_alias": "Handoff Target",
+      "status": "WAITING_SAFE_HANDLER",
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "human_required": "",
+      "updated_at": "",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
+    "name:sample-intake": {
+      "kind": "WAITING_SAFE",
+      "name": "sample-intake",
+      "human_alias": "Sample Intake",
+      "status": "WAITING_SAFE_HANDLER",
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "human_required": "",
+      "updated_at": "",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
+    "name:architecture-decision-records": {
+      "kind": "WAITING_SAFE",
+      "name": "architecture-decision-records",
+      "human_alias": "Architecture Decision Records",
+      "status": "WAITING_SAFE_HANDLER",
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "human_required": "",
+      "updated_at": "",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
+    "name:premium-saas-web": {
+      "kind": "WAITING_SAFE",
+      "name": "premium-saas-web",
+      "human_alias": "Premium Saas Web",
+      "status": "WAITING_SAFE_HANDLER",
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "human_required": "",
+      "updated_at": "",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
+    "name:ai-session-material-miner": {
+      "kind": "WAITING_SAFE",
+      "name": "ai-session-material-miner",
+      "human_alias": "Ai Session Material Miner",
+      "status": "WAITING_SAFE_HANDLER",
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "human_required": "",
+      "updated_at": "",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
+    "name:ide-version-change-analyzer": {
+      "kind": "WAITING_SAFE",
+      "name": "ide-version-change-analyzer",
+      "human_alias": "Ide Version Change Analyzer",
+      "status": "WAITING_SAFE_HANDLER",
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "human_required": "",
+      "updated_at": "",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
+    "name:optale-find-and-read": {
+      "kind": "WAITING_SAFE",
+      "name": "optale-find-and-read",
+      "human_alias": "Optale Find And Read",
+      "status": "WAITING_SAFE_HANDLER",
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "human_required": "",
+      "updated_at": "",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
+    "name:agent-redteam": {
+      "kind": "WAITING_SAFE",
+      "name": "agent-redteam",
+      "human_alias": "Agent Redteam",
       "status": "WAITING_SAFE_HANDLER",
       "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
       "human_required": "",
@@ -378,7 +477,7 @@
       "additional_cost_eur": 0
     }
   },
-  "last_digest_date": "2026-10-17",
+  "last_digest_date": "2026-10-18",
   "last_delivery_at": "2026-10-17T10:42:56Z",
   "mail_transport": {
     "status": "VERIFIED",
