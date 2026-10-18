@@ -1,11 +1,11 @@
 {
-  "schema_version": "1.1.0",
+  "schema_version": "1.2.0",
   "state_type": "CEREBRO_CAP_IECA_CORDOBA_V0",
   "company_id": "fenix",
   "engine_id": "CAP-001",
   "environment": "PREPROD",
-  "version": "v0",
-  "status": "REAL_OFFICIAL_COMPANY_DISCOVERY_GREEN_SCHEDULED_SOAK_PENDING",
+  "version": "v0.2",
+  "status": "REAL_OFFICIAL_COMPANY_DISCOVERY_CONTINUOUS_PREPROD_ACCEPTANCE_GREEN",
   "source": {
     "publisher": "Instituto de Estadística y Cartografía de Andalucía",
     "dataset": "ESPAND directorio_establecimientos",
@@ -40,6 +40,16 @@
     "canonical_registry_validation": "PASS",
     "full_cerebro_regression": "PASS"
   },
+  "scheduled_soak_certification": {
+    "reconciler_run_id": 39125588186,
+    "artifact_id": 12136037115,
+    "artifact_digest": "sha256:66074f4508593e6a2279ac7517746d95bbbcc17c17fb79f57982fd62cdcc01f7",
+    "status": "READY_TO_CERTIFY",
+    "verified_scheduled_green_runs": 3,
+    "missing_scheduled_green_runs": 0,
+    "qualifying_run_ids": [39117088113, 39021987622, 38884987351],
+    "manual_or_dispatch_substitution": false
+  },
   "implementation": {
     "runtime": "cerebro/runtime/cap-ieca-cordoba-v0.mjs",
     "tests": "cerebro/tests/cap-ieca-cordoba-v0.test.mjs",
@@ -61,7 +71,8 @@
     "automatic_paid_fallback": false,
     "additional_cost_eur": 0
   },
-  "rollback": "Revert additive CAP IECA PR; source access is GET-only and creates no provider/CRM/PROD mutation.",
-  "rebuild": "Recreate from the fixed official IECA WFS source contract + CAP lead discovery profile + JOB-001 persistent runtime.",
-  "next_gate": "THREE_GENUINE_SCHEDULED_PREPROD_RUNS_GREEN"
+  "rollback": "Revert this governed soak certification or the additive CAP IECA profile; source access is GET-only and creates no provider/CRM/PROD mutation.",
+  "rebuild": "Recreate from the fixed official IECA WFS source contract + CAP lead discovery profile + JOB-001 persistent runtime, then verify three distinct genuine schedule runs through the read-only reconciler.",
+  "remaining_gate": null,
+  "next_gate": "CONTINUE_READ_ONLY_CONTINUOUS_DISCOVERY_AND_HOLD_ON_POLICY_OR_SOURCE_REGRESSION"
 }

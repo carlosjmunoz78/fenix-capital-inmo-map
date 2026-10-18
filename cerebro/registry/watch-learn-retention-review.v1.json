@@ -1,0 +1,95 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_WATCH_LEARN_RETENTION_REVIEW_V1",
+  "company_id": "fenix",
+  "engine_id": "LRN-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "status": "RETENTION_REVIEW_GREEN",
+  "reviewed_at": "2026-10-18",
+  "catalog_item": 47,
+  "source_registry": "cerebro/registry/watch-learn-remote-observation.v0.json",
+  "scheduled_soak_reconciliation": {
+    "run_id": 39125588186,
+    "artifact_id": 12136037115,
+    "artifact_digest": "sha256:66074f4508593e6a2279ac7517746d95bbbcc17c17fb79f57982fd62cdcc01f7",
+    "status": "ALL_SCHEDULED_SOAKS_READY_TO_CERTIFY",
+    "verified_scheduled_green_runs": 3,
+    "missing_scheduled_green_runs": 0,
+    "qualifying_run_ids": [39113182916, 39018013243, 38877925046]
+  },
+  "cycle_reviews": [
+    {
+      "run_id": 38877925046,
+      "artifact_id": 12036575469,
+      "artifact_digest": "sha256:98675449a21bcb5318da665feed3e2da3a2e397abc1999b216342d7bc770d43d",
+      "cycle_status": "REMOTE_OBSERVATION_DURABLE_CYCLE_GREEN",
+      "job_status": "SUCCEEDED",
+      "replay_status": "REPLAY_MATCH",
+      "stable_within_cycle": true,
+      "external_writes": 0,
+      "customer_data_used": false,
+      "auth_used": false,
+      "cookies_used": false
+    },
+    {
+      "run_id": 39018013243,
+      "artifact_id": 12096025112,
+      "artifact_digest": "sha256:fe1eb929b66d20459e2f535880bba8a32675faa0a29acc8b747a752aa89e3a4e",
+      "cycle_status": "REMOTE_OBSERVATION_DURABLE_CYCLE_GREEN",
+      "job_status": "SUCCEEDED",
+      "replay_status": "REPLAY_MATCH",
+      "stable_within_cycle": true,
+      "external_writes": 0,
+      "customer_data_used": false,
+      "auth_used": false,
+      "cookies_used": false
+    },
+    {
+      "run_id": 39113182916,
+      "artifact_id": 12131111818,
+      "artifact_digest": "sha256:dd1a36f56e0ba4332e1b762ca289fe6383c553609aa04604afa5660f90138e56",
+      "cycle_status": "REMOTE_OBSERVATION_DURABLE_CYCLE_GREEN",
+      "job_status": "SUCCEEDED",
+      "replay_status": "REPLAY_MATCH",
+      "stable_within_cycle": true,
+      "external_writes": 0,
+      "customer_data_used": false,
+      "auth_used": false,
+      "cookies_used": false
+    }
+  ],
+  "retention_review": {
+    "artifact_retention_days": 30,
+    "remote_customer_data_retained": false,
+    "credentials_retained_in_artifact": false,
+    "raw_remote_body_retained_by_registry": false,
+    "long_term_state": "GITHUB_WORKFLOW_RUN_AND_ARTIFACT_HISTORY",
+    "ephemeral_per_run_journal": true,
+    "durable_reopen_idempotency_check": true,
+    "cross_run_source_change_observed": true,
+    "cross_run_source_change_is_policy_violation": false,
+    "reason": "The observed public PREPROD page changed between scheduled days, which is expected for Watch & Learn. Every individual cycle remained deterministic and replay-stable, and no customer data, credentials, cookies, authentication or remote writes were used. The 30-day artifact retention policy is bounded and contains only minimized observation evidence."
+  },
+  "decision": "GREEN_CONTINUOUS_PREPROD_ACCEPTANCE",
+  "truth_constraints": [
+    "THREE_GENUINE_SCHEDULED_GREEN_RUNS_ARE_EVIDENCED",
+    "RETENTION_REVIEW_DOES_NOT_REQUIRE_CROSS_DAY_BODY_IMMUTABILITY",
+    "EACH_CYCLE_MUST_REMAIN_REPLAY_STABLE",
+    "NO_CUSTOMER_DATA_OR_CREDENTIAL_RETENTION",
+    "NO_PROD_OR_PROVIDER_WRITE_AUTHORITY_GRANTED"
+  ],
+  "authority": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "provider_write_authorized": false,
+    "customer_data_authorized": false,
+    "external_dependency_install_authorized": false,
+    "trading_access": false,
+    "automatic_paid_fallback": false,
+    "additional_cost_eur": 0
+  },
+  "rollback": "Revert this additive certification record and restore the prior soak-pending registry state; no remote state is mutated by this review.",
+  "rebuild": "Re-read the three qualifying schedule-run artifacts plus the Scheduled Soak Reconciler artifact and re-evaluate the bounded retention/privacy/idempotency contract.",
+  "next_gate": "CONTINUE_GOVERNED_PREPROD_OBSERVATION_AND_HOLD_ON_POLICY_OR_REPLAY_REGRESSION"
+}

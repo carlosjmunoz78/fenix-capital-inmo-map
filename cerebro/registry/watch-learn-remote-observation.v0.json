@@ -1,12 +1,12 @@
 {
-  "schema_version": "1.2.0",
+  "schema_version": "1.3.0",
   "state_type": "CEREBRO_WATCH_LEARN_REMOTE_OBSERVATION_V0",
   "company_id": "fenix",
   "engine_id": "LRN-001",
   "environment": "PREPROD",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "rollout_item": 47,
-  "status": "VERIFIED_REMOTE_OBSERVATION_REPLAY_GREEN",
+  "status": "CONTINUOUS_PREPROD_ACCEPTANCE_GREEN",
   "source_main_sha": "76ca57a7ac8666d82b2628182aed58b703974faf",
   "purpose": "Run a governed continuous Watch & Learn observation loop against a user-owned public PREPROD source with deterministic replay, durable in-run JOB-001 evidence and a zero-cost external scheduler.",
   "implementation": {
@@ -26,7 +26,7 @@
     "provider_write": false,
     "paid_service_required": false,
     "configured": true,
-    "soak_complete": false
+    "soak_complete": true
   },
   "retention": {
     "artifact_days": 30,
@@ -35,7 +35,9 @@
     "body_content_persisted_by_registry": false,
     "journal_scope": "EPHEMERAL_PER_RUN_WITH_DURABLE_REOPEN_IDEMPOTENCY_CHECK",
     "long_term_state": "WORKFLOW_RUN_AND_ARTIFACT_HISTORY",
-    "review_after_successful_scheduled_runs": 3
+    "review_after_successful_scheduled_runs": 3,
+    "review_status": "GREEN",
+    "review_ref": "cerebro/registry/watch-learn-retention-review.v1.json"
   },
   "verification": {
     "initial_remote_workflow_run_id": 38647871977,
@@ -47,20 +49,27 @@
     "durable_reopen_idempotency_check": true,
     "scheduled_workflow_configuration": "DEFINED_AND_CI_GATED",
     "scheduler_regression_contract_aligned": true,
-    "scheduled_soak_runs_verified": 0,
+    "scheduled_soak_runs_verified": 3,
+    "scheduled_soak_run_ids": [39113182916, 39018013243, 38877925046],
+    "scheduled_soak_reconciler_run_id": 39125588186,
+    "scheduled_soak_reconciler_artifact_id": 12136037115,
+    "scheduled_soak_reconciler_digest": "sha256:66074f4508593e6a2279ac7517746d95bbbcc17c17fb79f57982fd62cdcc01f7",
+    "retention_review": "PASS",
+    "retention_review_ref": "cerebro/registry/watch-learn-retention-review.v1.json",
     "canonical_registry_validation": "PASS",
     "full_cerebro_regression": "PASS"
   },
   "acceptance": {
     "target_class": "USER_OWNED_PUBLIC_PREPROD_WORDPRESS_REST_API",
     "reads_per_run": 2,
-    "stable_semantic_and_body_evidence_required": true,
+    "stable_semantic_and_body_evidence_required_within_each_cycle": true,
+    "cross_day_source_change_allowed": true,
     "replay_match_required": true,
     "auth": false,
     "cookies": false,
     "writes": false,
     "customer_data": false,
-    "on_change": "HOLD_CYCLE_NO_AUTO_PROMOTION"
+    "on_change": "LEARN_OR_HOLD_BY_POLICY_NO_AUTO_PROD_PROMOTION"
   },
   "authority": {
     "prod_authorized": false,
@@ -72,8 +81,8 @@
     "automatic_paid_fallback": false,
     "additional_cost_eur": 0
   },
-  "rollback": "Disable/remove the schedule line or revert this additive scheduler PR; the observation core is read-only and no remote mutation exists.",
-  "rebuild": "Recreate from public-source-adapter-v0 + deterministic Watch & Learn replay core + PersistentJobQueue + the governed daily PREPROD workflow schedule.",
-  "remaining_gate": "THREE_SCHEDULED_RUNS_GREEN_AND_RETENTION_REVIEW",
-  "next_gate": "THREE_SCHEDULED_RUNS_GREEN_AND_RETENTION_REVIEW"
+  "rollback": "Revert this governed acceptance update or disable/remove the schedule line; the observation core is read-only and no remote mutation exists.",
+  "rebuild": "Recreate from public-source-adapter-v0 + deterministic Watch & Learn replay core + PersistentJobQueue + governed daily PREPROD workflow, then re-read three genuine schedule artifacts and rerun retention review.",
+  "remaining_gate": null,
+  "next_gate": "CONTINUE_GOVERNED_PREPROD_OBSERVATION_AND_HOLD_ON_POLICY_OR_REPLAY_REGRESSION"
 }
