@@ -6,6 +6,7 @@ const load = (relativeUrl) => JSON.parse(fs.readFileSync(new URL(relativeUrl, im
 
 const auditV1 = load('../registry/physical-adapter-audit-v1.json');
 const audit = load('../registry/physical-adapter-audit-v2.json');
+const auditV3 = load('../registry/physical-adapter-audit-v3.json');
 const pointer = load('../registry/current-physical-adapter-audit.v1.json');
 const iam = load('../registry/authorized-execution-device-profile.v1.json');
 const intent = load('../registry/company-intent-resolution-profile.v1.json');
@@ -36,17 +37,48 @@ function assertNoAuthorityExpansion(authority) {
   }
 }
 
-test('current pointer selects V2 while V1 remains preserved historical evidence', () => {
-  assert.equal(pointer.current, 'cerebro/registry/physical-adapter-audit-v2.json');
-  assert.equal(pointer.current_version, 'v2');
+test('current pointer selects V3 while V1 and V2 remain preserved historical evidence', () => {
+  assert.equal(pointer.current, 'cerebro/registry/physical-adapter-audit-v3.json');
+  assert.equal(pointer.current_version, 'v3');
   assert.ok(pointer.historical.includes('cerebro/registry/physical-adapter-audit-v1.json'));
+  assert.ok(pointer.historical.includes('cerebro/registry/physical-adapter-audit-v2.json'));
   assert.equal(pointer.authority_change, false);
   assert.equal(pointer.additional_cost_eur, 0);
-  assert.equal(audit.environment, 'PREPROD');
+  assert.equal(auditV3.environment, 'PREPROD');
+  assert.equal(auditV3.supersedes_for_current_reporting, 'cerebro/registry/physical-adapter-audit-v2.json');
   assert.equal(audit.supersedes_for_current_reporting, 'cerebro/registry/physical-adapter-audit-v1.json');
   assert.equal(auditV1.status, 'AUDITED_NO_BLIND_PHYSICAL_PROMOTION');
   assertNoAuthorityExpansion(audit.authority);
   assert.equal(audit.prod, 'NOT_AUTHORIZED');
+  assert.equal(auditV3.autonomy.prod, 'NOT_AUTHORIZED');
+  assert.equal(auditV3.autonomy.auto_merge, false);
+  assert.equal(auditV3.autonomy.automatic_paid_fallback, false);
+  assert.equal(auditV3.autonomy.trading_access, false);
+  assert.equal(auditV3.autonomy.additional_cost_eur, 0);
+});
+
+test('V3 closes Core Guard only from live readiness while preserving the exact residual order', () => {
+  assert.deepEqual(auditV3.mandatory_order, [
+    'EVT74_GUARDED_SERVER_JOURNAL_BINDING',
+    'ANDROID_48_183',
+    'IAM_BROWSER_VAULT_PHYSICAL',
+    'MULTIMEDIA_PHYSICAL_BINDINGS',
+    'CORE_GUARD_SCHEMA_MARKER'
+  ]);
+  assert.equal(auditV3.blocks.CORE_GUARD_SCHEMA_MARKER.state, 'HECHO_STAGING_PHYSICAL_GREEN');
+  assert.equal(auditV3.blocks.CORE_GUARD_SCHEMA_MARKER.live_readiness_generated_at_utc, '2026-10-18T23:41:13+00:00');
+  assert.equal(auditV3.blocks.EVT74_GUARDED_SERVER_JOURNAL_BINDING.state, 'PARCIAL_POLICY_BOUND');
+  assert.equal(auditV3.blocks.EVT74_GUARDED_SERVER_JOURNAL_BINDING.human_required, 'POLICY_CONFLICT');
+  assert.equal(auditV3.blocks.ANDROID_48_183.state, 'PARCIAL_PHYSICAL_ATTESTATION_REQUIRED');
+  assert.equal(auditV3.blocks.IAM_BROWSER_VAULT_PHYSICAL.state, 'PARCIAL_PHYSICAL_ATTESTATION_REQUIRED');
+  assert.equal(auditV3.blocks.MULTIMEDIA_PHYSICAL_BINDINGS.state, 'PARCIAL_TARGET_RUNTIME_UNVERIFIED');
+  assert.equal(auditV3.exact_head_baseline.observed_pull_request_workflows, 38);
+  assert.equal(auditV3.exact_head_baseline.success, 38);
+  assert.equal(auditV3.exact_head_baseline.failure, 0);
+  assert.equal(auditV3.self_extending_runtime.state, 'PREPROD_GREEN');
+  assert.equal(auditV3.self_extending_runtime.runtime_run, 39177521567);
+  assert.equal(auditV3.self_extending_runtime.shared_worker, true);
+  assert.equal(auditV3.self_extending_runtime.new_server_required, false);
 });
 
 test('Watch Learn, COMPET and CAP scheduled acceptance is closed only with current physical evidence', () => {
@@ -133,7 +165,7 @@ test('brand and app physical execution stays gated without inventing public depl
   assert.equal(openById.get('BRAND_COMMERCE_APP_PHYSICAL')?.state, 'PARCIAL_DEVICE_AND_SIDE_EFFECT_GATED');
 });
 
-test('V2 remains PREPROD zero-cost and names only safe next work', () => {
+test('V2 historical contract remains PREPROD zero-cost and names only safe next work', () => {
   assert.equal(audit.authority.additional_cost_eur, 0);
   assert.ok(audit.next_block.includes('KEEP_WATCH_COMPET_CAP_CONTINUOUS_MONITORING_READ_ONLY_AND_HOLD_ON_REGRESSION'));
   assert.ok(audit.next_block.includes('CONTINUE_ANDROID_PHYSICAL_E2E_ONLY_WHEN_AUTHORIZED_DEVICE_IS_AVAILABLE'));
