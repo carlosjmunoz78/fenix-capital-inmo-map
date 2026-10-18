@@ -1,10 +1,10 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.0.1",
   "state_type": "CEREBRO_LEGACY184_CURRENT_EVIDENCE_OVERLAY_V1",
   "company_id": "fenix",
   "engine_id": "FACT-001",
   "environment": "PREPROD",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "status": "CURRENT_EVIDENCE_RECONCILED_FAIL_CLOSED",
   "purpose": "Overlay stale legacy reconciliation snapshots with later governed repository evidence without rewriting history or falsely claiming physical activation.",
   "policy": {
@@ -42,8 +42,8 @@
     "57": {
       "resolution": "ABSORBED",
       "current_state": "REAL_TARGETS_CONTINUOUS_PREPROD_ACCEPTANCE_GREEN",
-      "reason": "COMPET-001 has three real Cordoba targets, a physical GET-only baseline and three genuine separated scheduled runs green. The free continuous competitor capability is accepted through canonical COMPET-001 with no provider writes or paid dependency.",
-      "evidence_refs": ["cerebro/registry/compet-real-targets.v0.json","cerebro/registry/compet-real-consumer-adoption-v1.json","cerebro/registry/scheduled-soak-reconciler.v1.json"],
+      "reason": "COMPET-001 preserves the existing V0 baseline/targets contract and adds a separate acceptance record proving three genuine separated scheduled runs green. The continuous capability is accepted through canonical COMPET-001 with no provider writes or paid dependency.",
+      "evidence_refs": ["cerebro/registry/compet-real-targets.v0.json","cerebro/registry/compet-real-targets-acceptance.v1.json","cerebro/registry/compet-real-consumer-adoption-v1.json","cerebro/registry/scheduled-soak-reconciler.v1.json"],
       "reuse_decision": "ABSORB_ACCEPTED_CANONICAL_COMPET001_CONTINUOUS_CAPABILITY"
     },
     "62": {
@@ -111,6 +111,7 @@
     "No overlay entry may convert a candidate to FULL_SAFE_PREPROD.",
     "Historical reconciliation snapshots remain preserved for auditability.",
     "Items 47, 57 and 62 are absorbed only after three genuine schedule runs are evidenced; manual runs never substitute.",
+    "Item 57 preserves COMPET V0 and records scheduled acceptance additively in compet-real-targets-acceptance.v1.json.",
     "Item 74 does not certify direct guarded server-journal binding or permission expansion."
   ],
   "rollback": "Remove this additive overlay and the normalizer falls back to historical reconciliation classifications; no external state is mutated.",
