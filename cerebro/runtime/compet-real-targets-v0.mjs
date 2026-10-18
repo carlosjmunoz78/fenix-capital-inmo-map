@@ -10,6 +10,7 @@ import { PersistentJobQueue } from './persistent-runtime.mjs';
 const PREPROD='PREPROD';
 const DEFAULT_CONFIG=new URL('../registry/compet-real-targets.v0.json',import.meta.url);
 const CONTEXT=Object.freeze({company_id:'fenix',engine_id:'COMPET-001',environment:PREPROD,version:'v0'});
+const DEFAULT_RETRY_DELAYS_MS=Object.freeze([250,1000]);
 
 function readConfig(configPath){
   const raw=fs.readFileSync(configPath??DEFAULT_CONFIG,'utf8');
@@ -19,6 +20,7 @@ function readConfig(configPath){
   return config;
 }
 function isoNow(value){const d=value?new Date(value):new Date();if(Number.isNaN(d.valueOf()))throw new Error('observed_at invalid');return d.toISOString();}
+function wait(ms){return new Promise(resolve=>setTimeout(resolve,ms));}
 function previousRows(config){
   const rows=[];
   for(const target of config.targets){
@@ -29,17 +31,42 @@ function previousRows(config){
   }
   return rows;
 }
+
+export function isRetryablePublicSourceError(error){
+  const message=String(error?.message??error??'');
+  if(/remote HTTP status\s+(429|5\d\d)\b/i.test(message))return true;
+  return /(fetch failed|aborted|aborterror|eai_again|econnreset|etimedout|enetunreach|ehostunreach|econnrefused|und_err|socket hang up)/i.test(message);
+}
+
+export async function fetchCompetTargetEvidenceV0(target,{fetcher=fetchPublicEvidenceV0,sleep_fn=wait,retry_delays_ms=DEFAULT_RETRY_DELAYS_MS}={}){
+  if(!target||typeof target.url!=='string'||!target.url)throw new TypeError('COMPET target url required');
+  if(typeof fetcher!=='function'||typeof sleep_fn!=='function')throw new TypeError('COMPET fetch retry dependencies invalid');
+  if(!Array.isArray(retry_delays_ms)||retry_delays_ms.length>4||retry_delays_ms.some(ms=>!Number.isSafeInteger(ms)||ms<0||ms>5000))throw new TypeError('COMPET retry delays invalid');
+  let attempts=0;
+  for(;;){
+    attempts+=1;
+    try{
+      const evidence=await fetcher({
+        company_id:'fenix',engine_id:'RSH-001',environment:PREPROD,version:'v0',
+        target_url:target.url,authorized_public_research:true,robots_allowed:true,timeout_ms:20000,max_bytes:1_500_000
+      });
+      if(evidence.status!=='REMOTE_READ_GREEN'||evidence.http_status!==200||evidence.read_only!==true)throw new Error(`COMPET target not green:${target.competitor_id}`);
+      return Object.freeze({evidence,attempts});
+    }catch(error){
+      const delay=retry_delays_ms[attempts-1];
+      if(delay===undefined||!isRetryablePublicSourceError(error))throw error;
+      await sleep_fn(delay);
+    }
+  }
+}
+
 export async function runCompetRealTargetsV0({config_path,observed_at,workdir}={}){
   const config=readConfig(config_path);
   const observedAt=isoNow(observed_at);
   const snapshots=[];
   for(const target of config.targets){
-    const evidence=await fetchPublicEvidenceV0({
-      company_id:'fenix',engine_id:'RSH-001',environment:PREPROD,version:'v0',
-      target_url:target.url,authorized_public_research:true,robots_allowed:true,timeout_ms:20000,max_bytes:1_500_000
-    });
-    if(evidence.status!=='REMOTE_READ_GREEN'||evidence.http_status!==200||evidence.read_only!==true)throw new Error(`COMPET target not green:${target.competitor_id}`);
-    snapshots.push({competitor_id:target.competitor_id,name:target.name,url:evidence.final_url,title:evidence.summary.title??null,body_sha256:evidence.body_sha256,body_bytes:evidence.body_bytes,observed_at:observedAt,http_status:evidence.http_status,read_only:true});
+    const {evidence,attempts}=await fetchCompetTargetEvidenceV0(target);
+    snapshots.push({competitor_id:target.competitor_id,name:target.name,url:evidence.final_url,title:evidence.summary.title??null,body_sha256:evidence.body_sha256,body_bytes:evidence.body_bytes,observed_at:observedAt,http_status:evidence.http_status,read_only:true,network_attempts:attempts});
   }
   const previous=previousRows(config);
   const current=snapshots.flatMap(s=>[
@@ -59,12 +86,13 @@ export async function runCompetRealTargetsV0({config_path,observed_at,workdir}={
     const complete=queue.completeContext(claim.job_id,CONTEXT,result);if(complete.status!=='SUCCEEDED')throw new Error('COMPET real scan complete failed');
     const baselineComplete=config.targets.every(t=>t.baseline&&typeof t.baseline.body_sha256==='string');
     return Object.freeze({
-      schema_version:'1.0.0',state_type:'CEREBRO_COMPET_REAL_TARGET_SCAN_V0',company_id:'fenix',engine_id:'COMPET-001',environment:PREPROD,
+      schema_version:'1.1.0',state_type:'CEREBRO_COMPET_REAL_TARGET_SCAN_V0',company_id:'fenix',engine_id:'COMPET-001',environment:PREPROD,
       status:baselineComplete?'REAL_COMPETITOR_CONTINUOUS_SCAN_GREEN':'REAL_COMPETITOR_BASELINE_CAPTURE_GREEN',
       observed_at:observedAt,target_count:snapshots.length,snapshots,baseline_complete:baselineComplete,change_count:result.change_count,changes:result.changes,
       job_id:claim.job_id,job_status:complete.status,next_scheduled_for:result.next_job.scheduled_for,
-      network_reads:snapshots.length,provider_writes:0,customer_data_used:false,personal_data_extracted:false,prod_authorized:false,prod_write_authorized:false,trading_access:false,additional_cost_eur:0,
-      next_gate:baselineComplete?'THREE_CONTINUOUS_REAL_COMPETITOR_RUNS_GREEN':'FREEZE_CAPTURED_REAL_BASELINES'
+      network_reads:snapshots.length,network_attempts:snapshots.reduce((sum,s)=>sum+s.network_attempts,0),provider_writes:0,customer_data_used:false,personal_data_extracted:false,prod_authorized:false,prod_write_authorized:false,trading_access:false,additional_cost_eur:0,
+      retry_policy:{transient_only:true,max_attempts:DEFAULT_RETRY_DELAYS_MS.length+1,retry_delays_ms:[...DEFAULT_RETRY_DELAYS_MS],non_transient_fail_closed:true},
+      next_gate:baselineComplete?'CONTINUE_READ_ONLY_CONTINUOUS_COMPETITOR_OBSERVATION_AND_HOLD_ON_POLICY_OR_SOURCE_REGRESSION':'FREEZE_CAPTURED_REAL_BASELINES'
     });
   } finally {if(owns)fs.rmSync(root,{recursive:true,force:true});}
 }
