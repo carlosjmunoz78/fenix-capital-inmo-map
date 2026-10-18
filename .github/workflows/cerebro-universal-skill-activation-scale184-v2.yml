@@ -34,8 +34,6 @@ jobs:
     timeout-minutes: 30
     env:
       EXACT_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
-      MASS_ROOT: ${{ runner.temp }}/cerebro-usaf-scale184-v2-state
-      MASS_REPORT: ${{ runner.temp }}/cerebro-usaf-scale184-v2-report.json
     steps:
       - name: Checkout exact candidate head
         uses: actions/checkout@v4
@@ -60,6 +58,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          export MASS_ROOT="$RUNNER_TEMP/cerebro-usaf-scale184-v2-state"
+          export MASS_REPORT="$RUNNER_TEMP/cerebro-usaf-scale184-v2-report.json"
           mkdir -p "$MASS_ROOT"
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
@@ -92,6 +92,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          export MASS_REPORT="$RUNNER_TEMP/cerebro-usaf-scale184-v2-report.json"
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
           const report=JSON.parse(fs.readFileSync(process.env.MASS_REPORT,'utf8'));
