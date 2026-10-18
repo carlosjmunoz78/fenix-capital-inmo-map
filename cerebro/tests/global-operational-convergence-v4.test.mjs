@@ -9,7 +9,8 @@ const pointer = load('../registry/current-operational-convergence.v1.json');
 const engines = load('../registry/engine-registry.v1.json');
 const v3 = load('../skills/cerebro-184-live-convergence.v3.json');
 const compet = load('../registry/compet-real-consumer-adoption-v1.json');
-const competTargets = load('../registry/compet-real-targets.v0.json');
+const competTargetsBase = load('../registry/compet-real-targets.v0.json');
+const competAcceptance = load('../registry/compet-real-targets-acceptance.v1.json');
 const cap = load('../registry/cap-real-consumer-adoption-v1.json');
 const capIeca = load('../registry/cap-ieca-cordoba.v0.json');
 const lead = load('../registry/lead-real-consumer-adoption-v1.json');
@@ -107,7 +108,7 @@ test('generic B3 server write stays green without falsely closing the direct jou
   assert.match(human.get(732)?.gate ?? '', /DIRECT_B3_JOURNAL/);
 });
 
-test('Watch Learn, COMPET and CAP scheduled source acceptance is genuinely closed while PROD stays false', () => {
+test('Watch Learn, COMPET and CAP scheduled source acceptance is genuinely closed while preserved baselines stay historical', () => {
   assert.equal(watch.status, 'CONTINUOUS_PREPROD_ACCEPTANCE_GREEN');
   assert.equal(watch.scheduler.configured, true);
   assert.equal(watch.scheduler.soak_complete, true);
@@ -121,12 +122,13 @@ test('Watch Learn, COMPET and CAP scheduled source acceptance is genuinely close
   assert.equal(physicalById.has('WATCH_LEARN_47'), false);
 
   assert.equal(compet.status, 'FULL_E2E_REAL_PREPROD');
-  assert.equal(competTargets.status, 'REAL_TARGETS_CONTINUOUS_PREPROD_ACCEPTANCE_GREEN');
-  assert.equal(competTargets.scheduler.configured, true);
-  assert.equal(competTargets.scheduler.soak_complete, true);
-  assert.equal(competTargets.scheduler.verified_scheduled_green_runs, 3);
-  assert.equal(competTargets.targets.length, 3);
-  assert.ok(competTargets.targets.every((target) => target.baseline?.body_sha256?.length === 64));
+  assert.equal(competTargetsBase.status, 'REAL_TARGETS_BASELINE_FROZEN_CONTINUOUS_PREPROD');
+  assert.equal(competTargetsBase.scheduler.soak_complete, false);
+  assert.equal(competTargetsBase.targets.length, 3);
+  assert.ok(competTargetsBase.targets.every((target) => target.baseline?.body_sha256?.length === 64));
+  assert.equal(competAcceptance.status, 'REAL_TARGETS_CONTINUOUS_PREPROD_ACCEPTANCE_GREEN');
+  assert.equal(competAcceptance.scheduled_acceptance.verified_scheduled_green_runs, 3);
+  assert.equal(competAcceptance.scheduled_acceptance.missing_scheduled_green_runs, 0);
   assert.equal(physicalById.has('COMPET_REAL_SOURCE_SCHEDULED_SOAK'), false);
 
   assert.equal(cap.status, 'FULL_E2E_REAL_PREPROD');
@@ -140,7 +142,7 @@ test('Watch Learn, COMPET and CAP scheduled source acceptance is genuinely close
   assert.equal(capIeca.scheduled_soak_certification.missing_scheduled_green_runs, 0);
   assert.equal(physicalById.has('CAP_REAL_SOURCE_SCHEDULED_SOAK'), false);
 
-  for (const registry of [watch, competTargets, capIeca, watchRetention]) assertNoAuthorityExpansion(registry.authority);
+  for (const registry of [watch, competAcceptance, capIeca, watchRetention]) assertNoAuthorityExpansion(registry.authority);
 });
 
 test('remaining physical and policy gates stay explicit and fail closed', () => {
