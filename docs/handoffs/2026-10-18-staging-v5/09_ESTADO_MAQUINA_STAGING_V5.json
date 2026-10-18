@@ -1,0 +1,64 @@
+{
+  "schema": "CEREBRO_STAGING_V5_HANDOFF_STATE_V1",
+  "generated_at": "2026-10-18",
+  "company_id": "fenix-capital",
+  "environment": "STAGING",
+  "working_version": "V5_REMEDIATION",
+  "old_baseline": {
+    "version": "V4",
+    "sha256": "59944be1aba38d15a29991e7aa27579941382fc6dae701ef6032adfeae2f2b04",
+    "path": "docs/web-baseline/2026-10-18-v4/",
+    "immutable": true
+  },
+  "repo": "carlosjmunoz78/fenix-capital-inmo-map",
+  "branch": "cerebro/seo001-staging-audit-v5-20261018",
+  "prod_touched": false,
+  "promotion_authorized": false,
+  "audit": {
+    "content_urls": 204,
+    "images": 680,
+    "internal_edges": 42073,
+    "broken_internal_targets": 0,
+    "redirected_internal_targets": 2,
+    "near_duplicate_local_b2c_pages": 24,
+    "empty_metas": 2,
+    "test_pages_with_duplicate_h1": 1,
+    "pages_without_main": 29,
+    "heading_jump_pages": 13,
+    "images_gt_500kb_used": 27,
+    "images_gt_1mb_used": 3,
+    "rendered_image_uses_without_dimensions": 516,
+    "montserrat_css_pages": 114
+  },
+  "gold_gates": [
+    "URL_STANDARD_GATE",
+    "PAGE_PURPOSE_GATE",
+    "LANDING_STANDARD_GATE",
+    "LOCAL_DIFFERENTIATION_GATE",
+    "ARTICLE_STANDARD_GATE",
+    "YMYL_TRUST_GATE",
+    "FENIX_VISUAL_POLICY_GATE",
+    "MOBILE_SECTION_ORDER_GATE"
+  ],
+  "visual_policy": {
+    "no_dominant_purple_pink_ui": true,
+    "preferred_base": ["white", "black_anthracite", "clean_grays"],
+    "preferred_accents": ["orange", "yellow"],
+    "official_purple_allowed_for_logo_or_documented_exception": true
+  },
+  "mobile_section_order": ["heading", "image", "content", "cta"],
+  "browser_preference": "Opera Browser Connector",
+  "next_block": {
+    "id": "STAGING_V5_REMEDIATION_INIT",
+    "state": "READY",
+    "steps": [
+      "verify V4 immutable and recovery evidence",
+      "create V5 remediation state",
+      "build deduplicated finding matrix",
+      "classify 204 URLs by archetype and owned intent",
+      "execute deterministic P0/root-cause fixes",
+      "continue master plan in SUPERLOOP"
+    ]
+  },
+  "stop_condition": "Only real HUMAN_REQUIRED or completed STAGING V5 with next physical step PROD gate (HIGH_RISK)."
+}
