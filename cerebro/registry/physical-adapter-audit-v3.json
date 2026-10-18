@@ -1,0 +1,172 @@
+{
+  "schema_version": "3.0.0",
+  "state_type": "CEREBRO_PHYSICAL_ADAPTER_AUDIT_V3",
+  "generated_at": "2026-10-19",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v3",
+  "status": "LIVE_RUNTIME_RESIDUAL_CONVERGENCE_RECONCILED",
+  "supersedes_for_current_reporting": "cerebro/registry/physical-adapter-audit-v2.json",
+  "historical_evidence_preserved": [
+    "cerebro/registry/physical-adapter-audit-v1.json",
+    "cerebro/registry/physical-adapter-audit-v2.json",
+    "cerebro/docs/CEREBRO_ENGINEERS_SKILLS_CURRENT_EVIDENCE_2026-10-18.md"
+  ],
+  "exact_head_baseline": {
+    "sha": "e6126b0b9d1c599e0a6b87141acd62fdabf290e2",
+    "pr": 784,
+    "pr_state": "OPEN_DRAFT_MERGEABLE_NOT_MERGED",
+    "observed_pull_request_workflows": 38,
+    "success": 38,
+    "failure": 0,
+    "cancelled": 0,
+    "queued": 0,
+    "in_progress": 0,
+    "self_extending_runtime_run": 39177521567,
+    "self_extending_runtime_conclusion": "SUCCESS"
+  },
+  "mandatory_order": [
+    "EVT74_GUARDED_SERVER_JOURNAL_BINDING",
+    "ANDROID_48_183",
+    "IAM_BROWSER_VAULT_PHYSICAL",
+    "MULTIMEDIA_PHYSICAL_BINDINGS",
+    "CORE_GUARD_SCHEMA_MARKER"
+  ],
+  "blocks": {
+    "EVT74_GUARDED_SERVER_JOURNAL_BINDING": {
+      "order": 2,
+      "state": "PARCIAL_POLICY_BOUND",
+      "confirmed": [
+        "generic B3 server-write primitive is GREEN_PHYSICAL_PREPROD",
+        "authenticated STAGING browser emitter and idempotent replay are GREEN",
+        "current Secure MCP connection has zero granted cerebro-b3-journal-lab routes",
+        "direct browser inspect returns rest_forbidden 401"
+      ],
+      "next_gate": "EXACT_MINIMUM_PREPROD_JOURNAL_GRANT_THEN_SYNTHETIC_BROWSER_TO_JOURNAL_E2E_REPLAY_CLEANUP",
+      "human_required": "POLICY_CONFLICT"
+    },
+    "ANDROID_48_183": {
+      "order": 3,
+      "state": "PARCIAL_PHYSICAL_ATTESTATION_REQUIRED",
+      "confirmed": [
+        "signed PREPROD worker APK exists",
+        "signed PREPROD template APK exists",
+        "STAGING draft render evidence is GREEN",
+        "device worker kill-switch defaults to safe"
+      ],
+      "next_gate": "AUTHORIZED_PHYSICAL_ANDROID_INSTALL_ATTESTATION_RENDER_E2E",
+      "human_required": "POLICY_CONFLICT"
+    },
+    "IAM_BROWSER_VAULT_PHYSICAL": {
+      "order": 4,
+      "state": "PARCIAL_PHYSICAL_ATTESTATION_REQUIRED",
+      "confirmed": [
+        "authenticated STAGING WordPress browser session is live",
+        "Secure MCP AI-agent policy surface is physically visible",
+        "IAM fail-closed route ladder is preserved",
+        "no secret value is stored in registry evidence"
+      ],
+      "next_gate": "FRESH_EXACT_SCOPE_BROWSER_AND_VAULT_BINDING_ATTESTATION",
+      "human_required": "POLICY_CONFLICT"
+    },
+    "MULTIMEDIA_PHYSICAL_BINDINGS": {
+      "order": 5,
+      "state": "PARCIAL_TARGET_RUNTIME_UNVERIFIED",
+      "confirmed": [
+        "zero-cost multimedia contract exists",
+        "automatic install and download remain forbidden",
+        "GitHub runner absence does not prove target runtime absence"
+      ],
+      "next_gate": "READ_ONLY_INVENTORY_ON_AUTHORIZED_CEREBRO_TARGET_RUNTIME",
+      "human_required": "POLICY_CONFLICT"
+    },
+    "CORE_GUARD_SCHEMA_MARKER": {
+      "order": 1,
+      "state": "HECHO_STAGING_PHYSICAL_GREEN",
+      "confirmed": [
+        "Core Guard 1.0.0-rc12 live on STAGING",
+        "schema_version PASS detail 1",
+        "blocking_failures empty",
+        "ready_for_preprod_observer true",
+        "observer mode",
+        "operational_writes_allowed false",
+        "production_approved false"
+      ],
+      "live_readiness_generated_at_utc": "2026-10-18T23:41:13+00:00",
+      "next_gate": null,
+      "human_required": null
+    }
+  },
+  "self_extending_runtime": {
+    "state": "PREPROD_GREEN",
+    "chain": [
+      "buildLegacy184SelfExtendingDispatchBatch",
+      "enqueueSelfExtendingDispatchBatch",
+      "DurableJobRuntimeV1",
+      "DurableWorkerRunnerV1",
+      "self-extending-capability-resolver-v0",
+      "verify_and_resume",
+      "evaluation-tribunal"
+    ],
+    "runtime_run": 39177521567,
+    "contract_tests": "SUCCESS",
+    "physical_sandbox_e2e": "SUCCESS",
+    "physical_build_pipeline_e2e": "SUCCESS",
+    "new_server_required": false,
+    "shared_worker": true,
+    "persistent_runtime_reused": true
+  },
+  "change_log": [
+    {"sha":"9a8ce62ab9454b5b7b45ae842a4a054fec174141","change":"preserve canonical self-extending dispatch order in JOB-001"},
+    {"sha":"f6e85ff55d66575cca35770bbfd0a2c2be9b78ec","change":"injectable durable worker clock for deterministic scheduling tests"},
+    {"sha":"f1196db46bf6c2c13a56fbaa56e62c5fedb4610b","change":"shared worker clock integration"},
+    {"sha":"e6126b0b9d1c599e0a6b87141acd62fdabf290e2","change":"keep durable leases on real clock by default while preserving injectable test clock"}
+  ],
+  "dependency_map": {
+    "preserve": [
+      "JOB-001 DurableJobRuntimeV1",
+      "DurableWorkerRunnerV1",
+      "AtomicV8Journal",
+      "RSI persistent host",
+      "FACT-001",
+      "LRN-001",
+      "EVA-001/Tribunal",
+      "Core Guard rc12",
+      "Secure MCP fail-closed policy"
+    ],
+    "extend": [
+      "exact-minimum EVT74 journal grant",
+      "authorized Android physical worker binding",
+      "fresh browser/vault physical attestation",
+      "read-only target-runtime multimedia inventory"
+    ],
+    "replace": [],
+    "new_server_required": false
+  },
+  "recovery": {
+    "backup": [
+      "Core Guard rc12 exact binary backup already retained before prior remediation",
+      "Git history retains every runtime change"
+    ],
+    "rollback": "revert V3/doc commit and runtime commits independently; do not broaden policy or promote PROD",
+    "rebuild": "rebuild from main repository contracts + V1/V2/V3 audit chain + exact-head CI; physical bindings must be re-attested, never inferred"
+  },
+  "autonomy": {
+    "ordinary_preprod_safe_reversible_work": "AUTONOMOUS",
+    "physical_or_policy_exceptions": "HUMAN_BY_EXCEPTION",
+    "prod": "NOT_AUTHORIZED",
+    "auto_merge": false,
+    "automatic_paid_fallback": false,
+    "trading_access": false,
+    "additional_cost_eur": 0
+  },
+  "next_block": [
+    "APPLY_EVT74_EXACT_MINIMUM_PREPROD_JOURNAL_GRANT_WHEN_POLICY_SURFACE_CAN_BE_MUTATED",
+    "RUN_EVT74_SYNTHETIC_BROWSER_TO_JOURNAL_E2E_REPLAY_AND_CLEANUP",
+    "ANDROID_PHYSICAL_E2E_ON_AUTHORIZED_DEVICE",
+    "REFRESH_IAM_BROWSER_VAULT_ATTESTATION",
+    "READ_ONLY_MULTIMEDIA_INVENTORY_ON_AUTHORIZED_TARGET_RUNTIME",
+    "GOVERNED_PROD_PROMOTION_REVIEW_ONLY_AFTER_APPLICABLE_GATES"
+  ]
+}

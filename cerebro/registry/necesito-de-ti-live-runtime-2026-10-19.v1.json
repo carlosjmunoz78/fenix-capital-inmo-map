@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_NECESITO_DE_TI_BATCH_V1",
+  "generated_at": "2026-10-19",
+  "environment": "PREPROD",
+  "status": "QUEUED_HUMAN_EXCEPTIONS_ONLY",
+  "rule": "No interrumpir por separado; ejecutar como un unico lote cuando el dispositivo/superficie fisica correspondiente este disponible.",
+  "groups": {
+    "MOVIL": [
+      {
+        "gate": "ANDROID_48_183",
+        "human_required": "POLICY_CONFLICT",
+        "action": "Instalar el APK PREPROD ya firmado en el Android designado y permitir attestation + render E2E.",
+        "limits": ["PREPROD_ONLY", "KILL_SWITCH_ON", "NO_PROD", "NO_PAID_FALLBACK"]
+      }
+    ],
+    "CHROME_OPERA": [
+      {
+        "gate": "EVT74_GUARDED_SERVER_JOURNAL_BINDING",
+        "human_required": "POLICY_CONFLICT",
+        "action": "Aplicar al conector Secure MCP autenticado el grant minimo exacto LAB/PREPROD para las rutas del journal B3 necesarias por EVT74 y refrescar la atestacion browser/vault.",
+        "limits": ["EXACT_MINIMUM_SCOPES", "NO_BROAD_GRANT", "NO_SECRET_EXPOSURE", "NO_PROD"]
+      }
+    ],
+    "PC_OFICINA": [
+      {
+        "gate": "MULTIMEDIA_PHYSICAL_BINDINGS",
+        "human_required": "POLICY_CONFLICT",
+        "action": "Arrancar/autorizar el runtime o bridge CEREBRO designado y permitir inventario solo lectura de ffmpeg, ffprobe, ImageMagick, sox y espeak-ng.",
+        "limits": ["READ_ONLY_INVENTORY", "NO_AUTO_INSTALL", "NO_DOWNLOAD", "NO_SPEND", "PREPROD_ONLY"]
+      }
+    ]
+  },
+  "already_closed": [
+    "CORE_GUARD_SCHEMA_MARKER"
+  ],
+  "after_human_step": "CEREBRO reanuda automaticamente cada gate, verifica evidencia viva, limpia sintéticos y actualiza Tribunal/Registry.",
+  "prod_authorized": false,
+  "auto_merge_authorized": false,
+  "automatic_paid_fallback": false,
+  "trading_access": false,
+  "additional_cost_eur": 0
+}

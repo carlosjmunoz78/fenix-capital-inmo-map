@@ -1,9 +1,12 @@
 {
-  "schema_version": "1.1.0",
+  "schema_version": "1.2.0",
   "state_type": "CEREBRO_CURRENT_PHYSICAL_ADAPTER_AUDIT_POINTER",
-  "current": "cerebro/registry/physical-adapter-audit-v2.json",
-  "current_version": "v2",
-  "historical": ["cerebro/registry/physical-adapter-audit-v1.json"],
+  "current": "cerebro/registry/physical-adapter-audit-v3.json",
+  "current_version": "v3",
+  "historical": [
+    "cerebro/registry/physical-adapter-audit-v1.json",
+    "cerebro/registry/physical-adapter-audit-v2.json"
+  ],
   "environment": "PREPROD",
   "authority_change": false,
   "additional_cost_eur": 0,
