@@ -37,9 +37,9 @@ export const TECHNICAL_SPECIALIST_ALIASES=Object.freeze(['ARQUITECTO','CODE','SY
 export const OPTIONAL_SPECIALIST_ALIASES=Object.freeze(['TECH_SCOUT','PERFORMANCE']);
 
 export function technicalSpecialistRegistry(){return Object.freeze({
-  schema_version:'1.0.0',state_type:'CEREBRO_TECHNICAL_SPECIALIST_REGISTRY_V1',company_id:'GLOBAL',engine_id:'FACT-001',environment:PREPROD,version:VERSION,
+  schema_version:'1.1.0',state_type:'CEREBRO_TECHNICAL_SPECIALIST_REGISTRY_V1',company_id:'GLOBAL',engine_id:'FACT-001',environment:PREPROD,version:VERSION,
   specialists:Object.freeze([
-    Object.freeze({alias:'ARQUITECTO',owner_engine_ids:Object.freeze(['ARCH-001','FACT-001']),mode:'REUSE_EXISTING'}),
+    Object.freeze({alias:'ARQUITECTO',owner_engine_ids:Object.freeze(['ARCH-001','FACT-001']),mode:'CERTIFIED_ARCHITECTURE_EVIDENCE_SWEEP'}),
     Object.freeze({alias:'CODE',identity:'SOFTWARE_ENGINEERING',domain:SOFTWARE_ENGINEERING_DOMAIN,owner_engine_ids:Object.freeze(['FACT-001','QA-001','REG-001']),mode:'SAFE_ENGINEERING_CORE'}),
     Object.freeze({alias:'SYSTEMS',owner_engine_ids:Object.freeze(['RUNTIME-001','JOB-001','ROUTE-001','DEP-001','DR-001','RBLD-001','OBSERV-001','QA-001']),mode:'SHARED_PLATFORM_ENGINEERING'}),
     Object.freeze({alias:'MATH',owner_engine_ids:Object.freeze(['OPT-001','SIM-001','DATA-001','FINOPS-001','EXP-001','QA-001']),mode:'DETERMINISTIC_SOLVER'}),
@@ -49,8 +49,8 @@ export function technicalSpecialistRegistry(){return Object.freeze({
     Object.freeze({alias:'INTEGRATOR',owner_engine_ids:Object.freeze(['FACT-001','INT-001','API-001','EVT-001','JOB-001']),mode:'UNIVERSAL_ACTIVATION_CORE'})
   ]),
   optional_specialists:Object.freeze([
-    Object.freeze({alias:'TECH_SCOUT',owner_engine_ids:Object.freeze(['RSH-001','INN-001','FACT-001']),mode:'EXISTING_SCOUT_SURFACES'}),
-    Object.freeze({alias:'PERFORMANCE',owner_engine_ids:Object.freeze(['OPT-001','QA-001','OBSERV-001','FINOPS-001']),mode:'PLANNED_EXTENSION'})
+    Object.freeze({alias:'TECH_SCOUT',owner_engine_ids:Object.freeze(['RSH-001','INN-001','FACT-001']),mode:'CERTIFIED_GOVERNED_DISCOVERY_SURFACES'}),
+    Object.freeze({alias:'PERFORMANCE',owner_engine_ids:Object.freeze(['OPT-001','QA-001','OBSERV-001','FINOPS-001']),mode:'CERTIFIED_MEASURED_FAST_LANE_PERFORMANCE'})
   ]),new_engine_required:false,...authority()
 });}
 
