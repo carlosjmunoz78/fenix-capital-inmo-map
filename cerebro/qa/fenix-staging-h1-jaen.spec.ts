@@ -20,15 +20,16 @@ test('H1 Jaen · three fresh loads keep native form and remove accidental Elemen
     const before=await page.evaluate(()=>({
       bodyClass:document.body.className,
       frontendScript:!!document.getElementById('elementor-frontend-js'),
-      nativeFormScript:!!document.getElementById('cerebro-universal-landing-native-form-js'),
+      nativeFormRuntime:!!document.getElementById('cerebro-universal-landing-native-form-js-after'),
       nativeFormConfig:!!document.getElementById('cerebro-universal-landing-native-form-js-extra'),
       shellExists:!!document.getElementById('cerebro-native-form-shell')
     }));
 
+    console.log(`FENIX_H1_JAEN_BEFORE:${JSON.stringify({load:i,pageErrors,before})}`);
     expect(pageErrors,`Jaen load ${i} JS page errors`).toEqual([]);
     expect(pageErrors.some(e=>e.includes('elementorFrontendConfig is not defined')),`Jaen load ${i} must not raise elementorFrontendConfig error`).toBe(false);
     expect(before.frontendScript,`Jaen load ${i} must not load Elementor frontend on this non-Elementor page`).toBe(false);
-    expect(before.nativeFormScript,`Jaen load ${i} must keep CEREBRO native-form script`).toBe(true);
+    expect(before.nativeFormRuntime,`Jaen load ${i} must keep CEREBRO native-form runtime`).toBe(true);
     expect(before.nativeFormConfig,`Jaen load ${i} must keep native-form runtime config`).toBe(true);
 
     const cta=page.getByRole('button',{name:'Estudiar mi operación'}).first();
