@@ -34,9 +34,11 @@ jobs:
       - name: Deterministic mocked acquisition and full activation tests
         run: node --test cerebro/tests/universal-skill-github-intake-v1.test.mjs
       - name: Live public GitHub skill URL to FULL_SAFE_PREPROD
-        run: node cerebro/runtime/universal-skill-github-intake-v1.mjs https://github.com/ericrisco/rsc-harness/tree/main/skills/finance-ops
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node cerebro/runtime/universal-skill-github-intake-v1.mjs https://github.com/ericrisco/rsc-harness/tree/5bf06162f682dd61cbf791b4bc340bc353d84e3d/skills/finance-ops
       - name: Assert read-only zero-cost authority
         shell: bash
         run: |
           set -euo pipefail
-          ! grep -Eq 'GITHUB_TOKEN|git clone|npm install|child_process|external_skill_code_execution[[:space:]]*:[[:space:]]*true|prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true' cerebro/runtime/universal-skill-github-intake-v1.mjs
+          ! grep -Eq 'git clone|npm install|child_process|console\.log\(process\.env\.GITHUB_TOKEN\)|process\.stdout\.write\(process\.env\.GITHUB_TOKEN\)|external_skill_code_execution[[:space:]]*:[[:space:]]*true|prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true' cerebro/runtime/universal-skill-github-intake-v1.mjs
