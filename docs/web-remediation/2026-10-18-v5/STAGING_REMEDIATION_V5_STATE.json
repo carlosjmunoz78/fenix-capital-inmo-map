@@ -1,0 +1,113 @@
+{
+  "schema": "STAGING_REMEDIATION_V5_STATE_V1",
+  "generated_at": "2026-10-18T08:30:00Z",
+  "company_id": "fenix-capital",
+  "environment": "STAGING",
+  "version": "V5_REMEDIATION",
+  "repo": "carlosjmunoz78/fenix-capital-inmo-map",
+  "branch": "cerebro/seo001-staging-audit-v5-20261018",
+  "branch_head_verified": "e0e8ea5488673ecec2197c4428ba4816c04bc2c1",
+  "prod_touched": false,
+  "promotion_authorized": false,
+  "recovery": {
+    "v4_immutable_artifact_id": 12120333543,
+    "outer_artifact_sha256": "6d05d025c66f0a26b15e28bb6e6f7f1725ed1f430ec195436e3fb25b910fdc61",
+    "inner_baseline_sha256": "59944be1aba38d15a29991e7aa27579941382fc6dae701ef6032adfeae2f2b04",
+    "inner_hash_verified_live": true,
+    "astra_backup": {
+      "version": "4.14.1",
+      "sha256": "16bbd23d711c8b29d62f8eff458691a20e6b9eedd704fe3ea1609299df12c1f6",
+      "created_at": "2026-10-18T08:24:24Z"
+    },
+    "post_snapshots": {
+      "52228": 1027,
+      "49128": 1028
+    },
+    "recovery_gate": "PASS_CURRENT_WRITE_SCOPE",
+    "note": "Before any new theme/plugin/template/snippet mutation, capture exact component backup/snapshot and verify restore path."
+  },
+  "inventory": {
+    "content_urls": 204,
+    "archetype_counts": {
+      "ABOUT_TRUST": 1,
+      "ARTICLE_INFORMATIONAL": 32,
+      "AUDIENCE_PROFILE": 22,
+      "B2B_SERVICE": 4,
+      "CATEGORY_ARCHIVE": 5,
+      "CONTACT_CONVERSION": 1,
+      "HOME": 1,
+      "IMPROVEMENT_SERVICE": 6,
+      "LEGAL": 3,
+      "LOCAL_B2B": 24,
+      "LOCAL_B2C": 67,
+      "PROCESS_GUIDE": 9,
+      "PRODUCT_TYPE": 17,
+      "RESOURCE_TOOL": 6,
+      "SERVICE_PILLAR": 5,
+      "SYSTEM_TEST": 1
+    },
+    "deduplicated_findings": 17,
+    "local_b2c_near_duplicate_cluster": [
+      "asesor-hipotecario-alcala-de-guadaira",
+      "asesor-hipotecario-arahal",
+      "asesor-hipotecario-bormujos",
+      "asesor-hipotecario-camas",
+      "asesor-hipotecario-cazorla",
+      "asesor-hipotecario-coria-del-rio",
+      "asesor-hipotecario-dos-hermanas",
+      "asesor-hipotecario-ecija",
+      "asesor-hipotecario-el-viso-del-alcor",
+      "asesor-hipotecario-jodar",
+      "asesor-hipotecario-la-carolina",
+      "asesor-hipotecario-la-rinconada",
+      "asesor-hipotecario-lebrija",
+      "asesor-hipotecario-los-palacios-y-villafranca",
+      "asesor-hipotecario-mairena-del-alcor",
+      "asesor-hipotecario-mairena-del-aljarafe",
+      "asesor-hipotecario-marchena",
+      "asesor-hipotecario-mengibar",
+      "asesor-hipotecario-moron-de-la-frontera",
+      "asesor-hipotecario-san-juan-de-aznalfarache",
+      "asesor-hipotecario-tomares",
+      "asesor-hipotecario-torredelcampo",
+      "asesor-hipotecario-utrera",
+      "asesor-hipotecario-villacarrillo"
+    ]
+  },
+  "changes": [
+    {
+      "id": "V5-C001",
+      "scope": "wp_id=52228",
+      "change": "published SYSTEM_TEST moved to trash",
+      "old": "public 200 page with duplicate H1",
+      "new": "reversible trash; visitor URL no longer serves test page",
+      "rollback": "snapshot_id=1027 + page restore",
+      "status": "HECHO_TARGETED"
+    },
+    {
+      "id": "V5-C002",
+      "scope": "wp_id=49128",
+      "change": "meta description added",
+      "old": "empty meta",
+      "new": "144-char factual meta description",
+      "rollback": "snapshot_id=1028",
+      "status": "HECHO_TARGETED"
+    }
+  ],
+  "open_p0": [
+    "V5-F003 taxonomy archive meta root cause",
+    "V5-F004 24 local B2C near-duplicate pages",
+    "V5-F012 Lighthouse/CWV + responsive visual QA",
+    "V5-F013 forms→CRM E2E",
+    "V5-F014 consent/tracking E2E"
+  ],
+  "next_block": {
+    "id": "STAGING_V5_P0_ROOT_CAUSE_CONTINUE",
+    "steps": [
+      "Resolve taxonomy archive meta owner for category 209",
+      "Persist V5 state/finding/archetype matrices",
+      "Map repeated template/component causes for local duplicate/landmark/font/image issues",
+      "Run targeted visual/performance/E2E capabilities without touching PROD"
+    ]
+  }
+}
