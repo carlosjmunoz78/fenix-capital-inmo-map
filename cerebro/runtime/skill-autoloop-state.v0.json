@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-18T21:04:34.967Z",
+  "updated_at": "2026-10-18T23:19:37.887Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -75,7 +75,8 @@
     "github-wide-skills:dc1ae2df5d2050d73d5f",
     "github-wide-skills:7b389e2a60bf0e10c7f8",
     "github-wide-skills:1a93de26f34128ca7bff",
-    "github-wide-skills:0c89ff5bc2cecf4bf945"
+    "github-wide-skills:0c89ff5bc2cecf4bf945",
+    "github-wide-skills:fc1cc2732113e136aa31"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -1010,6 +1011,42 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 39166094677,
       "checkpointed_at": "2026-10-18T21:03:41.296Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:fc1cc2732113e136aa31": {
+      "candidate_id": "github-wide-skills:fc1cc2732113e136aa31",
+      "name": "skill-census",
+      "human_alias": "Skill Census",
+      "wrapper_id": "skillwrap:7512fdea76dc2ff2d84b",
+      "domain": "software-engineering-devops",
+      "engine_bindings": [
+        "FACT-001",
+        "ARCH-001",
+        "API-001",
+        "DEP-001",
+        "MIG-001",
+        "QA-001",
+        "REG-001",
+        "DOCS-001"
+      ],
+      "value_score": 88.09,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "findastra/lunas-log",
+        "upstream_head_commit": "c27bf77818de0b8324e3c3f5009ca6c37a0f6756",
+        "manifest_sha256": "110ccfe97a3d2868c1803268199f0f8f1d7523b04b4b28a304d1ed376808427d",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 39176014062,
+      "checkpointed_at": "2026-10-18T23:19:37.887Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -1969,7 +2006,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "SKILL_AUTONOMY_ACTION_WORKER_IDLE",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -1982,5 +2019,5 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 39166094677
+  "last_discovery_run_id": 39176014062
 }
