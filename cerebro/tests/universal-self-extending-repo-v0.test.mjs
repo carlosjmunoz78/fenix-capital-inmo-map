@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {detectRepositoryRuntime,buildUniversalRepoSandboxPlan,createUniversalRepoWorkerHandler} from '../runtime/universal-repo-runtime-v0.mjs';
 import {resolveBlockedCapability,runSelfExtendingCapabilityLoop} from '../runtime/self-extending-capability-resolver-v0.mjs';
+import {upgradeActivationReportToSelfExtending} from '../runtime/universal-self-extending-github-intake-v0.mjs';
 
 test('detects common stacks and creates PREPROD sandbox-only plan',()=>{
   const files=[{path:'package.json',bytes:120},{path:'package-lock.json',bytes:400},{path:'src/index.js',bytes:80}];
@@ -37,4 +38,15 @@ test('loop searches more then FACT-001 builds and resumes original skill',async(
   let scoutCalls=0;let buildCalls=0;
   const out=await runSelfExtendingCapabilityLoop({resolution,reuse_internal:async()=>({status:'MISS'}),wrap_existing:async()=>({status:'MISS'}),tech_scout:async()=>{scoutCalls++;return {status:'MISS'};},fact_build:async()=>{buildCalls++;return {status:'GREEN',evidence_ref:'fact://built'};},verify_and_resume:async()=>({status:'FULL_SAFE_PREPROD'})});
   assert.equal(out.status,'RESUMED_GREEN');assert.ok(scoutCalls>=1);assert.equal(buildCalls,1);assert.equal(out.selected.strategy,'FACT001_BUILD_MINIMAL_SUBSTITUTE');
+});
+
+test('GitHub intake BLOCKED_EXTERNAL is upgraded to nonterminal dependency resolution',()=>{
+  const legacy={status:'BLOCKED_EXTERNAL',full_safe_preprod:false,activation:{candidate_id:'repo:blocked',auto_engineering:{fulfillment:{blocked_external:[{capability_id:'cap:blocked',domain_id:'multimedia',engine_id:'FACT-001',decision:{reason:'SYSTEM_BINARY',dependency_name:'ffmpeg'}}]}}}};
+  const upgraded=upgradeActivationReportToSelfExtending(legacy,{company_id:'fenix'});
+  assert.equal(upgraded.status,'DEPENDENCY_RESOLUTION_REQUIRED');assert.equal(upgraded.legacy_status,'BLOCKED_EXTERNAL');assert.equal(upgraded.terminal_state,null);assert.equal(upgraded.resolutions[0].status,'DEPENDENCY_RESOLUTION_REQUIRED');assert.equal(upgraded.resolutions[0].dependency_kind,'SYSTEM_BINARY');
+});
+
+test('GitHub intake preserves already-green and genuine terminal rejection semantics',()=>{
+  const green=upgradeActivationReportToSelfExtending({status:'FULL_SAFE_PREPROD',full_safe_preprod:true});assert.equal(green.self_extension.status,'NOT_REQUIRED');
+  const rejected=upgradeActivationReportToSelfExtending({status:'REJECTED',reason:'LICENSE_INCOMPATIBLE_OR_UNVERIFIED'});assert.equal(rejected.status,'REJECTED');assert.equal(rejected.self_extension.reason,'TERMINAL_REJECTION_RETAINED');
 });
