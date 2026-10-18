@@ -143,7 +143,7 @@ export function enqueueSelfExtendingDispatchBatch({ job_runtime, batch, version 
   const accepted = [];
   const duplicates = [];
 
-  for (const job of batch.jobs) {
+  for (const [index, job] of batch.jobs.entries()) {
     object(job, 'batch.jobs[]');
     const resolution = assertResolution(job.resolution);
     const result = enqueueSelfExtendingResolution({
@@ -158,7 +158,10 @@ export function enqueueSelfExtendingDispatchBatch({ job_runtime, batch, version 
       priority: job.priority ?? 50,
       max_attempts: job.max_attempts ?? 5,
       idempotency_key: nonEmpty(job.idempotency_key, 'job.idempotency_key'),
-      now_ms,
+      // Preserve the canonical dispatch order for equal-priority jobs. DurableJobRuntimeV1
+      // uses created_at_ms before job_id as its tie-breaker, so a deterministic 1 ms
+      // offset prevents hash ordering from selecting an unevidenced later mission first.
+      now_ms: now_ms + index,
       metadata: {
         source_job_id: job.job_id ?? null,
         item_id: job.item_id ?? null,
