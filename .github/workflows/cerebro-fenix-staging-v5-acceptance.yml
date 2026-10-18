@@ -1,0 +1,117 @@
+name: CEREBRO Fenix STAGING V5 Acceptance
+
+on:
+  push:
+    branches:
+      - cerebro/seo001-staging-audit-v5-20261018
+    paths:
+      - 'cerebro/qa/fenix-staging-v5-acceptance.spec.ts'
+      - 'cerebro/qa/playwright.fenix-staging-v5.config.ts'
+      - '.github/workflows/cerebro-fenix-staging-v5-acceptance.yml'
+      - 'docs/web-remediation/2026-10-18-v5/**'
+  workflow_dispatch:
+
+concurrency:
+  group: cerebro-fenix-staging-v5-acceptance-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  TARGET_BASE: https://staging.fenixcapital.es
+
+jobs:
+  visual-responsive-consent:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install repository dependencies
+        run: npm ci
+      - name: Install Chromium for existing Playwright stack
+        run: npx playwright install --with-deps chromium
+      - name: Run STAGING V5 visual responsive and consent gates
+        id: qa
+        continue-on-error: true
+        run: |
+          mkdir -p artifacts/staging-v5/screens
+          set +e
+          npx playwright test --config=cerebro/qa/playwright.fenix-staging-v5.config.ts --reporter=json > artifacts/staging-v5/playwright-report.json 2> artifacts/staging-v5/playwright-stderr.log
+          code=$?
+          set -e
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+          test -s artifacts/staging-v5/playwright-report.json
+      - name: Extract deterministic QA summary
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const p='artifacts/staging-v5/playwright-report.json';
+          const report=JSON.parse(fs.readFileSync(p,'utf8'));
+          const tests=[];
+          const walk=s=>{for(const spec of s.specs??[]){for(const t of spec.tests??[]){tests.push({title:spec.title,project:t.projectName,status:t.results?.at(-1)?.status??'unknown',errors:(t.results?.at(-1)?.errors??[]).map(e=>e.message??String(e))});}} for(const x of s.suites??[]) walk(x);};
+          for(const suite of report.suites??[]) walk(suite);
+          const summary={schema:'FENIX_STAGING_V5_PLAYWRIGHT_SUMMARY_V1',environment:'STAGING',prod_touched:false,tests_total:tests.length,passed:tests.filter(t=>t.status==='passed').length,failed:tests.filter(t=>t.status==='failed'||t.status==='timedOut').length,tests};
+          fs.writeFileSync('artifacts/staging-v5/summary.json',JSON.stringify(summary,null,2)+'\n');
+          console.log(JSON.stringify({tests_total:summary.tests_total,passed:summary.passed,failed:summary.failed}));
+          NODE
+      - name: Upload QA evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: CEREBRO_FENIX_STAGING_V5_QA_${{ github.sha }}
+          path: artifacts/staging-v5
+          if-no-files-found: error
+          retention-days: 30
+      - name: Enforce acceptance result after evidence upload
+        run: test '${{ steps.qa.outputs.exit_code }}' = '0'
+
+  lighthouse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: home-mobile
+            url: https://staging.fenixcapital.es/
+            preset: mobile
+          - name: home-desktop
+            url: https://staging.fenixcapital.es/
+            preset: desktop
+          - name: local-mobile
+            url: https://staging.fenixcapital.es/asesor-hipotecario-cordoba/
+            preset: mobile
+          - name: b2b-mobile
+            url: https://staging.fenixcapital.es/financiacion-compradores-inmobiliarias-montilla/
+            preset: mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run real Lighthouse against STAGING
+        run: |
+          mkdir -p artifacts/staging-v5-lighthouse
+          args="--quiet --chrome-flags='--headless --no-sandbox' --output=json --output-path=artifacts/staging-v5-lighthouse/${{ matrix.name }}.json"
+          if [ '${{ matrix.preset }}' = 'desktop' ]; then args="$args --preset=desktop"; fi
+          eval "npx --yes lighthouse@12.8.2 '${{ matrix.url }}' $args"
+      - name: Extract metrics
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const p='artifacts/staging-v5-lighthouse/${{ matrix.name }}.json';
+          const j=JSON.parse(fs.readFileSync(p,'utf8'));
+          const o={name:'${{ matrix.name }}',url:j.finalUrl,performance:j.categories.performance.score,accessibility:j.categories.accessibility.score,seo:j.categories.seo.score,lcp:j.audits['largest-contentful-paint'].numericValue,cls:j.audits['cumulative-layout-shift'].numericValue,tbt:j.audits['total-blocking-time'].numericValue,fcp:j.audits['first-contentful-paint'].numericValue,speedIndex:j.audits['speed-index'].numericValue};
+          fs.writeFileSync('artifacts/staging-v5-lighthouse/${{ matrix.name }}-summary.json',JSON.stringify(o,null,2)+'\n');
+          console.log(JSON.stringify(o));
+          NODE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CEREBRO_FENIX_STAGING_V5_LIGHTHOUSE_${{ matrix.name }}_${{ github.sha }}
+          path: artifacts/staging-v5-lighthouse
+          if-no-files-found: error
+          retention-days: 30
