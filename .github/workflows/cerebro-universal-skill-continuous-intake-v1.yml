@@ -38,7 +38,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 18
     env:
-      CEREBRO_SOURCE_QUEUE_ROOT: ${{ runner.temp }}/cerebro-source-queue-persistent
       CEREBRO_SOURCE_CONCURRENCY: '8'
       CEREBRO_SKILL_SCOUT_MAX: '16'
       CEREBRO_COMPANY_ID: fenix
@@ -49,7 +48,9 @@ jobs:
           node-version: 24
       - name: Prepare persistent PREPROD queue root
         shell: bash
-        run: mkdir -p "$CEREBRO_SOURCE_QUEUE_ROOT"
+        run: |
+          echo "CEREBRO_SOURCE_QUEUE_ROOT=$RUNNER_TEMP/cerebro-source-queue-persistent" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/cerebro-source-queue-persistent"
       - name: Restore and persist durable queue state
         uses: actions/cache@v4
         with:
