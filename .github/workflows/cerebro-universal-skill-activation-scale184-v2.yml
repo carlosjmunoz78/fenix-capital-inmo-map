@@ -9,8 +9,11 @@ on:
       - 'cerebro/runtime/universal-skill-auto-engineering-v1.mjs'
       - 'cerebro/runtime/universal-skill-legacy184-normalizer-v1.mjs'
       - 'cerebro/runtime/universal-skill-legacy184-scale-v1.mjs'
+      - 'cerebro/runtime/universal-skill-legacy184-self-extending-reopen-v0.mjs'
+      - 'cerebro/runtime/self-extending-capability-resolver-v0.mjs'
       - 'cerebro/registry/legacy184-current-evidence-overlay.v1.json'
       - 'cerebro/tests/universal-skill-legacy184-autoeng-scale-v2.test.mjs'
+      - 'cerebro/tests/universal-skill-legacy184-self-extending-reopen-v0.test.mjs'
       - '.github/workflows/cerebro-universal-skill-activation-scale184-v2.yml'
   pull_request:
     paths:
@@ -18,8 +21,11 @@ on:
       - 'cerebro/runtime/universal-skill-auto-engineering-v1.mjs'
       - 'cerebro/runtime/universal-skill-legacy184-normalizer-v1.mjs'
       - 'cerebro/runtime/universal-skill-legacy184-scale-v1.mjs'
+      - 'cerebro/runtime/universal-skill-legacy184-self-extending-reopen-v0.mjs'
+      - 'cerebro/runtime/self-extending-capability-resolver-v0.mjs'
       - 'cerebro/registry/legacy184-current-evidence-overlay.v1.json'
       - 'cerebro/tests/universal-skill-legacy184-autoeng-scale-v2.test.mjs'
+      - 'cerebro/tests/universal-skill-legacy184-self-extending-reopen-v0.test.mjs'
       - '.github/workflows/cerebro-universal-skill-activation-scale184-v2.yml'
   workflow_dispatch:
 
@@ -55,6 +61,9 @@ jobs:
 
       - name: Scale184 V2 tests
         run: node --test cerebro/tests/universal-skill-legacy184-autoeng-scale-v2.test.mjs
+
+      - name: Legacy184 self-extending reopen tests
+        run: node --test cerebro/tests/universal-skill-legacy184-self-extending-reopen-v0.test.mjs
 
       - name: Execute governed 184-skill mass activation across routed engines
         shell: bash
@@ -95,6 +104,30 @@ jobs:
           },null,2));
           NODE
 
+      - name: Reopen useful legacy BLOCKED_EXTERNAL as recursive self-extending missions
+        shell: bash
+        run: |
+          set -euo pipefail
+          export REOPEN_REPORT="$RUNNER_TEMP/cerebro-usaf-scale184-self-extending-reopen-v0.json"
+          export REOPEN_BATCH="$RUNNER_TEMP/cerebro-usaf-scale184-self-extending-dispatch-v0.json"
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import {buildLegacy184SelfExtendingReopenPlan,buildLegacy184SelfExtendingDispatchBatch} from './cerebro/runtime/universal-skill-legacy184-self-extending-reopen-v0.mjs';
+          const plan=buildLegacy184SelfExtendingReopenPlan();
+          const batch=buildLegacy184SelfExtendingDispatchBatch();
+          if(plan.catalog_size!==184) throw new Error(`CATALOG_SIZE_MISMATCH:${plan.catalog_size}`);
+          if(plan.reopened_count<=0) throw new Error('NO_BLOCKED_EXTERNAL_REOPENED');
+          if(plan.reopened_count!==plan.dependency_resolution_required+plan.human_required) throw new Error('REOPEN_COUNT_MISMATCH');
+          if(plan.missions.some(x=>x.resolution?.status==='REJECTED'||x.resolution?.terminal===true)) throw new Error('USEFUL_BLOCKED_EXTERNAL_TERMINATED');
+          if(batch.jobs.length!==plan.dependency_resolution_required) throw new Error('DISPATCH_JOB_COUNT_MISMATCH');
+          if(batch.human_required.length!==plan.human_required) throw new Error('HUMAN_GATE_COUNT_MISMATCH');
+          if(plan.prod_authorized!==false||batch.prod_authorized!==false||plan.trading_access!==false||batch.trading_access!==false) throw new Error('AUTHORITY_EXPANSION_DETECTED');
+          if(Number(plan.additional_cost_eur)!==0||Number(batch.additional_cost_eur)!==0) throw new Error('ZERO_COST_POLICY_BREACH');
+          fs.writeFileSync(process.env.REOPEN_REPORT,JSON.stringify(plan,null,2)+'\n');
+          fs.writeFileSync(process.env.REOPEN_BATCH,JSON.stringify(batch,null,2)+'\n');
+          console.log(JSON.stringify({status:plan.status,reopened_count:plan.reopened_count,dependency_resolution_required:plan.dependency_resolution_required,human_required:plan.human_required,job_count:batch.jobs.length,full_claim:plan.full_claim},null,2));
+          NODE
+
       - name: Verify physical residual truth is preserved
         shell: bash
         run: |
@@ -118,13 +151,15 @@ jobs:
         shell: bash
         run: |
           {
-            echo '## CEREBRO Scale184 V2 Mass Activation'
+            echo '## CEREBRO Scale184 V2 Mass Activation + Self-Extending Reopen'
             echo
             echo "- exact head: \`$EXACT_HEAD\`"
             echo '- environment: PREPROD'
             echo '- catalog target: 184/184'
             echo '- routing: capability -> justified domains -> canonical engines'
             echo '- current-evidence overlay: fail-closed; ABSORBED/BLOCKED_EXTERNAL only; never FULL'
+            echo '- useful BLOCKED_EXTERNAL is reopened as recursive dependency work, not terminal rejection'
+            echo '- terminal HOLD/DESCARTAR/CATALOGAR semantics remain preserved'
             echo '- ENGINEERING_TASK_REQUIRED is a governed retry state, never terminal FULL'
             echo '- PROD authority: false'
             echo '- auto-merge: false'
@@ -141,5 +176,7 @@ jobs:
           path: |
             ${{ runner.temp }}/cerebro-usaf-scale184-v2-report.json
             ${{ runner.temp }}/cerebro-usaf-scale184-v2-state
+            ${{ runner.temp }}/cerebro-usaf-scale184-self-extending-reopen-v0.json
+            ${{ runner.temp }}/cerebro-usaf-scale184-self-extending-dispatch-v0.json
           if-no-files-found: error
           retention-days: 14
