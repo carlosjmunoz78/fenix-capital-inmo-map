@@ -45,7 +45,7 @@ function normalizeBinding(raw,index){
     recovery:Object.freeze({
       backup_ref:nonEmpty(recovery.backup_ref,`bindings[${index}].recovery.backup_ref`),
       rollback_ref:nonEmpty(recovery.rollback_ref,`bindings[${index}].recovery.rollback_ref`),
-      rebuild_ref:nonEmpty(recovery.rebuild_ref,`bindings[${index}].recovery.rebuild_ref`)
+      rebuild_ref:nonEmpty(recovery.rebuild_ref,`bindings[${index}].rebuild_ref`)
     })
   });
 }
@@ -94,21 +94,18 @@ export function createTribunalVerifyAndResume(){
 }
 
 export async function runSelfExtendingSharedWorkerIteration({
-  company_root,company_id='fenix',skills_dir,bindings=[],worker_id='cerebro-shared-worker-v1',max_rounds=1,now_ms=Date.now()
+  company_root,company_id='fenix',skills_dir,bindings=[],worker_id='cerebro-shared-worker-v1',max_rounds=1,now_ms=Date.now(),clock=Date.now
 }={}){
   const root=nonEmpty(company_root,'company_root');
   const company=nonEmpty(company_id,'company_id',120);
   if(!Number.isSafeInteger(max_rounds)||max_rounds<1||max_rounds>100) throw new TypeError('max_rounds must be 1..100');
   if(!Number.isSafeInteger(now_ms)||now_ms<0) throw new TypeError('now_ms must be a non-negative safe integer');
+  if(typeof clock!=='function') throw new TypeError('clock must be a function');
   const batch=buildLegacy184SelfExtendingDispatchBatch({skills_dir,company_id:company});
   const runtime=new DurableJobRuntimeV1({file_path:path.join(root,'job001-self-extending.v1.journal'),environment:PREPROD});
   const dispatch=enqueueSelfExtendingDispatchBatch({job_runtime:runtime,batch,now_ms});
   const adapters=createEvidenceBoundSelfExtendingAdapters({bindings});
-  let logicalNow=now_ms;
-  const runner=new DurableWorkerRunnerV1({
-    job_runtime:runtime,worker_id,environment:PREPROD,max_concurrency:4,max_per_company:2,
-    clock:()=>logicalNow++
-  });
+  const runner=new DurableWorkerRunnerV1({job_runtime:runtime,worker_id,environment:PREPROD,max_concurrency:4,max_per_company:2,clock});
   registerSelfExtendingMissionWorker({worker_runner:runner,...adapters,verify_and_resume:createTribunalVerifyAndResume()});
   const context=Object.freeze({company_id:company,engine_id:'FACT-001',environment:PREPROD,version:'0.1.0'});
   const outcomes=await runner.drainFair({contexts:[context],max_rounds,idle_delay_ms:0});
@@ -126,5 +123,5 @@ export const SELF_EXTENDING_SHARED_WORKER_V1_CONTRACT=Object.freeze({
   capability:'JOB-001/self-extending-shared-worker-v1',environment:PREPROD,
   chain:Object.freeze(['buildLegacy184SelfExtendingDispatchBatch','enqueueSelfExtendingDispatchBatch','DurableJobRuntimeV1','DurableWorkerRunnerV1','self-extending-capability-resolver-v0','verify_and_resume','evaluation-tribunal']),
   persistence:'existing host company_root + AtomicV8Journal',shared_worker:true,new_server_required:false,binding_mode:'EVIDENCE_ONLY_FAIL_CLOSED',
-  deterministic_scheduler_clock:true,auto_install:false,automatic_paid_fallback:false,prod_authorized:false,prod_write_authorized:false,trading_access:false,additional_cost_target_eur:0
+  injectable_scheduler_clock:true,default_scheduler_clock:'Date.now',auto_install:false,automatic_paid_fallback:false,prod_authorized:false,prod_write_authorized:false,trading_access:false,additional_cost_target_eur:0
 });
