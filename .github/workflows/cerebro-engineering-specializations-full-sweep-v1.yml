@@ -1,0 +1,90 @@
+name: CEREBRO Engineering Specializations Full Sweep V1
+
+on:
+  push:
+    branches:
+      - 'cerebro/universal-skill-activation-factory-v1-*'
+    paths:
+      - 'cerebro/runtime/cerebro-engineering-specializations-evidence-sweep-v1.mjs'
+      - 'cerebro/tests/cerebro-engineering-specializations-evidence-sweep-v1.test.mjs'
+      - 'cerebro/runtime/cerebro-technical-specialists-v1.mjs'
+      - 'cerebro/runtime/cerebro-math-solver-profile-v1.mjs'
+      - 'cerebro/runtime/universal-skill-batch-orchestrator-v1.mjs'
+      - 'cerebro/runtime/universal-skill-activation-planner-v1.mjs'
+      - 'cerebro/runtime/universal-skill-semantic-contracts-v1.mjs'
+      - 'cerebro/registry/universal-skill-activation-factory-v1.state.json'
+      - '.github/workflows/cerebro-engineering-specializations-full-sweep-v1.yml'
+  pull_request:
+    paths:
+      - 'cerebro/runtime/cerebro-engineering-specializations-evidence-sweep-v1.mjs'
+      - 'cerebro/tests/cerebro-engineering-specializations-evidence-sweep-v1.test.mjs'
+      - 'cerebro/runtime/cerebro-technical-specialists-v1.mjs'
+      - 'cerebro/runtime/cerebro-math-solver-profile-v1.mjs'
+      - 'cerebro/runtime/universal-skill-batch-orchestrator-v1.mjs'
+      - 'cerebro/runtime/universal-skill-activation-planner-v1.mjs'
+      - 'cerebro/runtime/universal-skill-semantic-contracts-v1.mjs'
+      - 'cerebro/registry/universal-skill-activation-factory-v1.state.json'
+      - '.github/workflows/cerebro-engineering-specializations-full-sweep-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-engineering-specializations-full-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  all-engineering-specialists:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact candidate head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.x'
+
+      - name: Run engineering specialist evidence sweep
+        run: node --test cerebro/tests/cerebro-engineering-specializations-evidence-sweep-v1.test.mjs
+
+      - name: Assert single-profile authority boundaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -Eq 'prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|auto_merge_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true|new_engine_required[[:space:]]*:[[:space:]]*true|child_process|npm install' cerebro/runtime/cerebro-engineering-specializations-evidence-sweep-v1.mjs
+
+      - name: Materialize exact-head specialist report
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .artifacts/engineering-specialists
+          node cerebro/runtime/cerebro-engineering-specializations-evidence-sweep-v1.mjs > .artifacts/engineering-specialists/report.json
+          git rev-parse HEAD > .artifacts/engineering-specialists/exact-head.txt
+          node -e "const r=require('./.artifacts/engineering-specialists/report.json'); if(r.status!=='ALL_ENGINEERING_SPECIALISTS_FULL_SAFE_PREPROD'||r.results.length!==10||r.hold_aliases.length!==0||r.new_engine_required!==false||r.prod_authorized!==false||r.additional_cost_eur!==0) process.exit(1);"
+
+      - name: Full CEREBRO regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILES="$(find cerebro/tests -maxdepth 1 -type f -name '*.test.mjs' \
+            | grep -v '/lab-' \
+            | grep -v '/seo-autonomous-regression.e2e.test.mjs$' \
+            | grep -v '/repo-inventory\.test\.mjs$' \
+            | sort)"
+          test -n "$FILES"
+          node --test $FILES
+
+      - name: Upload engineering specialist evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-engineering-specialists-full-${{ github.event.pull_request.head.sha || github.sha }}
+          path: .artifacts/engineering-specialists
+          if-no-files-found: error
+          retention-days: 14
