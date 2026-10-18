@@ -8,7 +8,7 @@ import {oldOrderSensitivePlannerB19} from './fixtures/auto001-order-sensitive-pl
 import {runB19UniversalE2EReal} from '../runtime/universal-skill-b19-universal-e2e-real-v1.mjs';
 
 const BASELINE='f17fd6481c27d11df3442fb5764ba63c414bbfea';
-const CANDIDATE='b19-universal-e2e-real-candidate-head';
+const CANDIDATE='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 
 test('B19 closes factory -> registry HOLD -> measured LRN engineering -> tribunal -> promotion hold -> rollback/rebuild -> audit in PREPROD',async()=>{
   const root=fs.mkdtempSync(path.join(os.tmpdir(),'cerebro-b19-test-'));
