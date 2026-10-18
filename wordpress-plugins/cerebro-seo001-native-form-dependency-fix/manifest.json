@@ -1,0 +1,10 @@
+{
+  "company_id": "fenix-capital",
+  "engine_id": "SEO-001",
+  "environment": "PREPROD",
+  "version": "0.1.0-preprod",
+  "artifact": "cerebro-seo001-native-form-dependency-fix",
+  "scope_host": "staging.fenixcapital.es",
+  "rollback": "Deactivate or remove plugin; no database mutation",
+  "prod_mutation": false
+}
