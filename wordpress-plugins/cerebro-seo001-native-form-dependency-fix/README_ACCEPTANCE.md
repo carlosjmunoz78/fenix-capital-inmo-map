@@ -1,0 +1,1 @@
+Deployment is intentionally not marked complete until the wrapper is physically installed and live evidence passes all PREPROD gates.
