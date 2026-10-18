@@ -23,18 +23,22 @@ on:
       - 'cerebro/runtime/universal-skill-source-queue-v1.mjs'
       - 'cerebro/runtime/universal-skill-autonomous-scout-v1.mjs'
       - 'cerebro/runtime/universal-skill-lrn-impact-bridge-v1.mjs'
+      - 'cerebro/runtime/universal-skill-github-intake-v1.mjs'
       - 'cerebro/tests/universal-skill-source-queue-v1.test.mjs'
       - 'cerebro/tests/universal-skill-autonomous-scout-v1.test.mjs'
       - 'cerebro/tests/universal-skill-lrn-impact-bridge-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-github-intake-v1.test.mjs'
       - '.github/workflows/cerebro-universal-skill-continuous-intake-v1.yml'
   pull_request:
     paths:
       - 'cerebro/runtime/universal-skill-source-queue-v1.mjs'
       - 'cerebro/runtime/universal-skill-autonomous-scout-v1.mjs'
       - 'cerebro/runtime/universal-skill-lrn-impact-bridge-v1.mjs'
+      - 'cerebro/runtime/universal-skill-github-intake-v1.mjs'
       - 'cerebro/tests/universal-skill-source-queue-v1.test.mjs'
       - 'cerebro/tests/universal-skill-autonomous-scout-v1.test.mjs'
       - 'cerebro/tests/universal-skill-lrn-impact-bridge-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-github-intake-v1.test.mjs'
       - '.github/workflows/cerebro-universal-skill-continuous-intake-v1.yml'
 
 permissions:
@@ -76,7 +80,7 @@ jobs:
             usaf-continuous-state-v2-${{ github.ref_name }}-
             usaf-source-queue-v1-${{ github.ref_name }}-
       - name: Continuous intake and learning tests
-        run: node --test cerebro/tests/universal-skill-source-queue-v1.test.mjs cerebro/tests/universal-skill-autonomous-scout-v1.test.mjs cerebro/tests/universal-skill-lrn-impact-bridge-v1.test.mjs
+        run: node --test cerebro/tests/universal-skill-source-queue-v1.test.mjs cerebro/tests/universal-skill-autonomous-scout-v1.test.mjs cerebro/tests/universal-skill-lrn-impact-bridge-v1.test.mjs cerebro/tests/universal-skill-github-intake-v1.test.mjs
       - name: Run autonomous or event-driven PREPROD intake
         shell: bash
         env:
@@ -87,6 +91,11 @@ jobs:
           SCOUT_EVENT="$RUNNER_TEMP/cerebro-skill-scout-event.json"
           run_scout() {
             node cerebro/runtime/universal-skill-autonomous-scout-v1.mjs --out "$SCOUT_EVENT"
+            STATUS="$(node -e "const fs=require('fs');const x=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP + '/cerebro-skill-scout-event.json','utf8'));process.stdout.write(String(x.status));")"
+            if [ "$STATUS" = "DISCOVERY_DEFERRED_RATE_LIMIT" ]; then
+              echo 'GitHub Search rate-limited this bounded cycle; state unchanged and the next scheduled cycle will retry.'
+              return 0
+            fi
             COUNT="$(node -e "const fs=require('fs');const x=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP + '/cerebro-skill-scout-event.json','utf8'));process.stdout.write(String(x.client_payload.github_urls.length));")"
             if [ "$COUNT" -eq 0 ]; then
               echo 'No eligible public skill sources discovered in this bounded cycle.'
@@ -94,8 +103,17 @@ jobs:
             fi
             node cerebro/runtime/universal-skill-source-queue-v1.mjs --event "$SCOUT_EVENT"
           }
+          run_pinned_pr_source() {
+            cat > "$SCOUT_EVENT" <<'JSON'
+          {"client_payload":{"company_id":"fenix","github_urls":["https://github.com/ericrisco/rsc-harness/tree/5bf06162f682dd61cbf791b4bc340bc353d84e3d/skills/finance-ops"]}}
+          JSON
+            node cerebro/runtime/universal-skill-source-queue-v1.mjs --event "$SCOUT_EVENT"
+          }
           case "$EVENT_NAME" in
-            push|pull_request|schedule)
+            pull_request)
+              run_pinned_pr_source
+              ;;
+            push|schedule)
               run_scout
               ;;
             workflow_dispatch)
@@ -118,4 +136,4 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          ! grep -Eq 'prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true|external_skill_code_execution[[:space:]]*:[[:space:]]*true|npm install|child_process' cerebro/runtime/universal-skill-source-queue-v1.mjs cerebro/runtime/universal-skill-autonomous-scout-v1.mjs cerebro/runtime/universal-skill-lrn-impact-bridge-v1.mjs
+          ! grep -Eq 'prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true|external_skill_code_execution[[:space:]]*:[[:space:]]*true|npm install|child_process' cerebro/runtime/universal-skill-source-queue-v1.mjs cerebro/runtime/universal-skill-autonomous-scout-v1.mjs cerebro/runtime/universal-skill-lrn-impact-bridge-v1.mjs cerebro/runtime/universal-skill-github-intake-v1.mjs
