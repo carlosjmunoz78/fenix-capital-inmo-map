@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_SKILL_PRIORITY_PORTFOLIO_V1",
+  "date": "2026-10-20",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "1.0.0",
+  "status": "DEFINED_FOR_GOVERNED_EXECUTION",
+  "authorization_basis": "explicit_user_request_2026-10-20_prioritize_language_human_communication_synthetic_humans_app_web_social_scraping_statistics_reports",
+  "objective": "Prioritize and accelerate safe zero-cost acquisition, evaluation and adoption of human-language communication and digital-building capabilities without weakening CEREBRO promotion gates.",
+  "execution_policy": {
+    "factory_first": true,
+    "event_driven_primary": true,
+    "blocked_candidate_blocks_independent_work": false,
+    "priority_batch_parallelism_target": 8,
+    "priority_batch_parallelism_ceiling_without_new_benchmark": 8,
+    "fast_lane_after_complete_evidence_seconds": 300,
+    "zero_additional_cost_required": true,
+    "external_skill_code_execution": false,
+    "prod_write_authorized": false,
+    "prod_mutation_authorized": false,
+    "permission_expansion_authorized": false,
+    "trading_access": false,
+    "paid_fallback": false
+  },
+  "portfolio": [
+    {
+      "priority": 1,
+      "capability_family": "LANGUAGE_HUMAN_INTERACTION",
+      "human_alias_es": "Lenguaje y comunicación humana",
+      "weight": 100,
+      "global_cross_cutting": true,
+      "candidate_terms": ["language", "communication", "conversation", "dialogue", "humanize", "tone", "voice", "writing", "persona", "customer communication"],
+      "primary_engine_bindings": ["SEM-001", "COM-001", "VOICE-001", "CX-001", "CHAT-001", "VOICEUI-001", "CONSOLE-001", "NOTIF-001", "DOC-001", "REP-001"],
+      "propagation_policy": "AUTO_BIND_READONLY_ADVISORY_TO_ANY_CANONICAL_NON_TRADING_ENGINE_WHEN_GOVERNED_PROD_CAPABILITY_IS_GREEN",
+      "required_qualities": ["naturalness", "clarity", "charisma", "warmth", "empathy", "professionalism", "brevity_control", "context_awareness", "register_adaptation", "multilingual_consistency", "brand_voice", "accessibility", "de_es_quality", "es_es_quality"],
+      "prod_action_authority": "ORIGIN_ENGINE_POLICY_ONLY"
+    },
+    {
+      "priority": 2,
+      "capability_family": "SYNTHETIC_HUMAN_COACHING",
+      "human_alias_es": "Humanos sintéticos para perfeccionamiento continuo",
+      "weight": 98,
+      "global_cross_cutting": true,
+      "candidate_terms": ["synthetic user", "persona", "roleplay", "conversation evaluation", "customer simulation", "dialogue evaluation", "communication coach"],
+      "primary_engine_bindings": ["LRN-001", "TRN-001", "EVA-001", "JDG-001", "SIM-001", "TWIN-001", "COM-001", "VOICE-001", "CX-001", "CHAT-001"],
+      "propagation_policy": "LAB_AND_PREPROD_EVIDENCE_FEEDS_LRN001_NO_UNCHECKED_SELF_MODIFICATION",
+      "required_qualities": ["charisma", "naturalness", "trust", "empathy", "precision", "helpfulness", "non_repetition", "objection_handling", "emotional_calibration", "persona_consistency", "honesty", "safety"],
+      "prod_action_authority": "NONE_FROM_SYNTHETIC_HUMAN_LAB"
+    },
+    {
+      "priority": 3,
+      "capability_family": "APP_DEV_CROSS_DEVICE",
+      "human_alias_es": "Creación y desarrollo de apps multidispositivo",
+      "weight": 94,
+      "global_cross_cutting": false,
+      "candidate_terms": ["app development", "mobile", "desktop", "tablet", "ios", "android", "react native", "flutter", "pwa", "cross platform"],
+      "primary_engine_bindings": ["APP-001", "APPBOOT-001", "ARCH-001", "API-001", "QA-001", "DEP-001", "FF-001", "CAN-001"],
+      "required_qualities": ["cross_device", "responsive", "offline_strategy", "accessibility", "security", "testing", "rollback", "rebuild", "performance"]
+    },
+    {
+      "priority": 4,
+      "capability_family": "WEB_BUILD",
+      "human_alias_es": "Creación y desarrollo de webs",
+      "weight": 92,
+      "global_cross_cutting": false,
+      "candidate_terms": ["web development", "frontend", "website", "landing page", "react", "nextjs", "wordpress", "accessibility", "web performance"],
+      "primary_engine_bindings": ["WEB-001", "WAUD-001", "SEO-001", "QA-001", "DEP-001", "ARCH-001", "MKT-001"],
+      "required_qualities": ["seo_ready", "responsive", "accessible", "fast", "secure", "testable", "rollback", "rebuild"]
+    },
+    {
+      "priority": 5,
+      "capability_family": "SOCIAL_PUBLIC_DATA_ACQUISITION",
+      "human_alias_es": "Lectura y extracción segura de redes sociales",
+      "weight": 90,
+      "global_cross_cutting": false,
+      "candidate_terms": ["social media", "scraping", "social listening", "instagram", "facebook", "linkedin", "x twitter", "public data", "competitor intelligence"],
+      "primary_engine_bindings": ["SOCAUD-001", "SOCBOOT-001", "SCAN-001", "MKT-001", "COMPET-001", "CMP-001", "DATA-001"],
+      "collection_policy": {
+        "public_readonly_default": true,
+        "official_api_first": true,
+        "authenticated_access_only_when_existing_governed_authority_exists": true,
+        "bypass_auth": false,
+        "bypass_captcha": false,
+        "bypass_anti_bot": false,
+        "private_data_without_authority": false,
+        "respect_rate_limits": true,
+        "data_minimization": true,
+        "legal_and_platform_policy_gate": true
+      }
+    },
+    {
+      "priority": 6,
+      "capability_family": "ANALYTICS_STATISTICS",
+      "human_alias_es": "Estadística y analítica",
+      "weight": 88,
+      "global_cross_cutting": false,
+      "candidate_terms": ["statistics", "analytics", "data analysis", "forecast", "experiment", "metrics", "kpi", "visualization"],
+      "primary_engine_bindings": ["DATA-001", "REP-001", "MKT-001", "SEO-001", "FINOPS-001", "EVA-001", "OBS-001"],
+      "required_qualities": ["reproducibility", "source_traceability", "uncertainty", "validation", "no_fabricated_metrics", "decision_relevance"]
+    },
+    {
+      "priority": 7,
+      "capability_family": "REPORTING_DOCUMENTS",
+      "human_alias_es": "Informes y documentos profesionales",
+      "weight": 86,
+      "global_cross_cutting": false,
+      "candidate_terms": ["reporting", "report", "document generation", "pdf", "docx", "executive summary", "dashboard", "presentation"],
+      "primary_engine_bindings": ["REP-001", "DOC-001", "DOC-002", "DOC-003", "DOC-004", "DOCS-001", "DATA-001", "OBS-001"],
+      "required_qualities": ["evidence_backed", "clear_structure", "auditable", "source_traceability", "executive_readability", "export_ready"]
+    }
+  ],
+  "global_language_binding": {
+    "requested_scope": "EVERYWHERE",
+    "effective_scope": "ANY_CANONICAL_NON_TRADING_ENGINE",
+    "excluded_engine_ids": ["LAB-TRD"],
+    "excluded_engine_id_prefixes": ["TRD-"],
+    "activation_gate": "PROD_CAPABILITY_AVAILABLE_READONLY",
+    "allowed_modes": ["ADVISE", "ANALYZE", "REVIEW", "PLAN", "READONLY_OBSERVE"],
+    "prod_write_authorized": false,
+    "prod_mutation_authorized": false,
+    "external_skill_code_execution": false,
+    "action_authority_source": "ORIGIN_ENGINE_GOVERNED_POLICY_ONLY"
+  },
+  "synthetic_human_policy": {
+    "continuous_goal": "Continuously improve communication quality, charisma and human usability through bounded synthetic evaluation and LRN-001 feedback.",
+    "environments": ["LAB", "PREPROD"],
+    "prod_customer_impersonation": false,
+    "real_person_impersonation": false,
+    "synthetic_personas_must_be_disclosed_in_evidence": true,
+    "training_feedback_requires_evaluation": true,
+    "automatic_unreviewed_prod_prompt_mutation": false,
+    "automatic_unreviewed_prod_persona_mutation": false,
+    "lrn001_feedback": true,
+    "additional_cost_eur": 0
+  },
+  "next_gate": "CI_GREEN_THEN_GOVERNED_MERGE_THEN_PRIORITY_DISCOVERY_AND_LAB_EXECUTION"
+}
