@@ -20,7 +20,7 @@ const corsHeaders={
   'content-type':'application/json'
 };
 
-test('OPERATIVA V3 uses aliases, real progress and one horizontal process rail',async({page})=>{
+test('OPERATIVA V4 uses aliases, real progress, process help and one horizontal rail',async({page})=>{
   test.setTimeout(20_000);
   let postedChat:any=null;
 
@@ -65,16 +65,9 @@ test('OPERATIVA V3 uses aliases, real progress and one horizontal process rail',
     const request=route.request();
     if(request.method()==='OPTIONS')return route.fulfill({status:204,headers:corsHeaders,body:''});
     const url=request.url();
-    if(url.endsWith('/health'))return route.fulfill({status:200,headers:corsHeaders,body:JSON.stringify({
-      status:'ok',service:'cerebro-console-gateway-v0',environment:'TEST_ISOLATED',version:'e2e',
-      authenticated_transport:true,direct_model_access:false,prod_execution_enabled:false,live_writes:false,
-      chat_available:true,chat_mode:'OWNER_DECISION_BY_EXCEPTION_V1'
-    })});
+    if(url.endsWith('/health'))return route.fulfill({status:200,headers:corsHeaders,body:JSON.stringify({status:'ok',service:'cerebro-console-gateway-v0',environment:'TEST_ISOLATED',version:'e2e',authenticated_transport:true,direct_model_access:false,prod_execution_enabled:false,live_writes:false,chat_available:true,chat_mode:'OWNER_DECISION_BY_EXCEPTION_V1'})});
     if(url.endsWith('/preferences'))return route.fulfill({status:200,headers:corsHeaders,body:JSON.stringify({status:'ok',preferences:{response_length:'concise'}})});
-    if(url.endsWith('/chat')){
-      postedChat=request.postDataJSON();
-      return route.fulfill({status:200,headers:corsHeaders,body:JSON.stringify({status:'OK',intent:'e2e_probe',message:'PONG_OPERATIVA',executed:false})});
-    }
+    if(url.endsWith('/chat')){postedChat=request.postDataJSON();return route.fulfill({status:200,headers:corsHeaders,body:JSON.stringify({status:'OK',intent:'e2e_probe',message:'PONG_OPERATIVA',executed:false})})}
     return route.fulfill({status:404,headers:corsHeaders,body:'{}'});
   });
 
@@ -93,7 +86,7 @@ test('OPERATIVA V3 uses aliases, real progress and one horizontal process rail',
   await page.goto('/cerebro',{waitUntil:'domcontentloaded'});
   const operativa=page.locator('.cerebro-operative');
   await expect(operativa).toBeVisible();
-  await expect(operativa.getByRole('heading',{name:'Procesos'})).toBeVisible();
+  await expect(operativa.getByRole('heading',{name:'Actividad'})).toBeVisible();
 
   const strip=operativa.locator('.cerebro-process-strip');
   await expect(strip).toBeVisible();
@@ -105,6 +98,15 @@ test('OPERATIVA V3 uses aliases, real progress and one horizontal process rail',
   await expect(operativa.locator('.cerebro-process-route')).toHaveCount(0);
   await expect(operativa.locator('.cerebro-live-progress').first()).toBeVisible();
   await expect.poll(()=>strip.evaluate(el=>getComputedStyle(el).overflowX)).toBe('auto');
+
+  await strip.getByText('SEO-001',{exact:true}).click();
+  const inspector=page.getByRole('dialog',{name:'Detalle de SEO-001'});
+  await expect(inspector).toBeVisible();
+  await expect(inspector.getByText('¿Para qué sirve?',{exact:true})).toBeVisible();
+  await expect(inspector.getByText('publish · Validate city output',{exact:true})).toBeVisible();
+  await expect(inspector.getByText('publish · Tribunal',{exact:true})).toBeVisible();
+  await expect(inspector.getByRole('link',{name:'Ver evidencia'})).toBeVisible();
+  await inspector.getByRole('button',{name:'Cerrar detalle'}).click();
 
   const floatingVoice=page.getByRole('button',{name:'Abrir acciones por voz'});
   if(await floatingVoice.count())await expect(floatingVoice).toBeHidden();
