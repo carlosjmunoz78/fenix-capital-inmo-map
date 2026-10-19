@@ -20,7 +20,7 @@ must(operative,'Sin datos ficticios','reality contract');
 must(operative,'Sin métrica fiable','no fake progress contract');
 must(operative,'REAL · orden observada','REAL provenance');
 must(operative,'DERIVED · evento observado','DERIVED provenance');
-must(operative,'x-cerebro','',);
+must(operative,"disabled title=\"Adjuntos: pendiente de contrato real de subida\"",'attachments fail-closed');
 mustNot(operative,'68%','reference demo percentage');
 mustNot(operative,'80%','reference demo percentage');
 mustNot(operative,'60%','reference demo percentage');
