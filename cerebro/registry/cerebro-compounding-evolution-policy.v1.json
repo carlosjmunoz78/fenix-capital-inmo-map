@@ -1,0 +1,313 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_COMPOUNDING_EVOLUTION_POLICY_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "LRN-001",
+  "environment": "PREPROD",
+  "version": "1.0.0",
+  "status": "STAGED_PREPROD_POLICY",
+  "objective": "Make CEREBRO measurably better across multiple fronts every cycle by discovering, comparing, testing, measuring, learning, integrating, reusing and productizing capabilities without expanding authority or cost by default.",
+  "growth_model": {
+    "target": "COMPOUNDED_MEASURABLE_IMPROVEMENT",
+    "exponential_growth_guaranteed": false,
+    "rule": "Do not claim exponential improvement unless longitudinal metrics demonstrate it.",
+    "cycle": [
+      "DISCOVER",
+      "COMPARE",
+      "TEST",
+      "MEASURE",
+      "LEARN",
+      "INTEGRATE",
+      "REUSE",
+      "PRODUCTIZE",
+      "MEASURE_AGAIN"
+    ]
+  },
+  "existing_assets_reused": {
+    "engine_factory": "FACT-001",
+    "learning": "LRN-001",
+    "research_scout": "RSH-001",
+    "evaluation": "EVA-001",
+    "tribunal": "JDG-001",
+    "observability": "OBSERV-001",
+    "finops": "FINOPS-001",
+    "incident_response": "INC-001",
+    "security": ["SEC-001", "SEC-002"],
+    "red_team": "RED-001",
+    "iam": "IAM-001",
+    "qa": "QA-001",
+    "disaster_recovery": "DR-001",
+    "rebuild": "RBLD-001",
+    "technology_scout_runtime": "cerebro/runtime/technology-capability-scout-native-v1.mjs",
+    "continuous_improvement_runtime": "cerebro/runtime/native-capability-continuous-improvement-v1.mjs",
+    "measured_old_vs_new_registry": "cerebro/registry/universal-skill-b18-lrn-measured-engineer-outcome-loop.v1.json",
+    "engineering_specializations_registry": "cerebro/registry/engineering-specializations-full-sweep.v1.json"
+  },
+  "permanent_parallel_fronts": [
+    "CAPABILITY_ACQUISITION",
+    "HUMAN_AI_COMMUNICATION",
+    "CYBERSECURITY_BLUE_TEAM",
+    "CYBERSECURITY_RED_TEAM_AUTHORIZED",
+    "CYBERSECURITY_PURPLE_TEAM",
+    "PERFORMANCE_AND_SPEED",
+    "RELIABILITY_AND_QA",
+    "PRODUCTIZATION",
+    "MARKET_AND_COMPETITOR_INTELLIGENCE",
+    "AUTOMATION_AND_AUTONOMY",
+    "ARCHITECTURE_AND_TECH_DEBT",
+    "DATA_AND_KNOWLEDGE",
+    "OBSERVABILITY",
+    "COST_AND_FINOPS",
+    "BACKUP_ROLLBACK_REBUILD"
+  ],
+  "parallelism_policy": {
+    "multifront_required": true,
+    "critical_path_prioritized": true,
+    "bounded_parallelism_required": true,
+    "wip_limits_required": true,
+    "blocked_front_does_not_block_other_safe_fronts": true,
+    "fail_fast_globally": false,
+    "preserve_existing_behavior": true
+  },
+  "capability_acquisition": {
+    "continuous": true,
+    "domains": "ALL_RELEVANT_DOMAINS",
+    "sources": [
+      "PUBLIC_OPEN_SOURCE_REPOSITORIES",
+      "STANDARDS",
+      "PAPERS_WITH_IMPLEMENTATIONS",
+      "PUBLIC_DOCUMENTATION",
+      "EXISTING_CONTRACTED_TOOLS",
+      "FREE_TIERS",
+      "LOCAL_SOFTWARE"
+    ],
+    "candidate_gate": "TECH_SCOUT_PLUS_FREE_PARITY_GATE",
+    "required_checks": [
+      "LICENSE",
+      "MAINTENANCE_ACTIVITY",
+      "SECURITY_POSTURE",
+      "DEPENDENCIES",
+      "REAL_ADDITIONAL_COST",
+      "PRIVACY",
+      "SELF_HOST_LOCAL_OPTION",
+      "COMPATIBILITY",
+      "MATURITY",
+      "EVIDENCE_QUALITY",
+      "INCREMENTAL_VALUE_VS_EXISTING",
+      "BACKUP_ROLLBACK_REBUILD",
+      "OLD_VS_NEW"
+    ],
+    "allowed_dispositions": [
+      "REUSE",
+      "WRAP",
+      "ADAPT",
+      "HOLD",
+      "REJECT"
+    ],
+    "external_code_execution_before_gate": false,
+    "external_dependency_install_before_gate": false,
+    "paid_subscription_default": false
+  },
+  "human_communication_front": {
+    "engine_refs": ["HCI-001", "CHAT-001", "VOICE-001", "VOICEUI-001", "CTX-001", "WHY-001"],
+    "continuous_scout_topics": [
+      "INTENT_UNDERSTANDING",
+      "AMBIGUITY_DETECTION",
+      "CLARIFICATION_STRATEGIES",
+      "TURN_TAKING",
+      "TONE_ADAPTATION",
+      "EXPLANATION_QUALITY",
+      "SUMMARIZATION",
+      "CONVERSATIONAL_MEMORY",
+      "SPANISH_AND_MULTILINGUAL",
+      "PLAIN_LANGUAGE",
+      "ACCESSIBILITY",
+      "STT",
+      "TTS",
+      "CONFIDENCE_CALIBRATION",
+      "HUMAN_IN_THE_LOOP",
+      "DIALOGUE_MANAGEMENT",
+      "DETERMINISTIC_NLP",
+      "HYBRID_NLP_LLM"
+    ],
+    "metric_examples": [
+      "task_success_rate",
+      "clarification_rate",
+      "misunderstanding_rate",
+      "human_correction_rate",
+      "time_to_intent_resolution",
+      "user_effort_turns",
+      "confidence_calibration_error"
+    ]
+  },
+  "cybersecurity": {
+    "mode": "RED_BLUE_PURPLE_CONTINUOUS_PREPROD",
+    "engine_refs": ["SEC-001", "SEC-002", "RED-001", "IAM-001", "INC-001", "QA-001", "DR-001", "RBLD-001"],
+    "blue_team": [
+      "ASSET_AND_ATTACK_SURFACE_INVENTORY",
+      "THREAT_MODELING",
+      "HARDENING",
+      "SAST",
+      "DAST",
+      "SCA",
+      "SBOM",
+      "SECRET_SCANNING",
+      "SUPPLY_CHAIN_SECURITY",
+      "IAM_AND_AUTHZ_TESTING",
+      "API_SECURITY",
+      "WEB_SECURITY",
+      "MOBILE_SECURITY",
+      "CONFIGURATION_SECURITY",
+      "DETECTION_ENGINEERING",
+      "SECURITY_TELEMETRY",
+      "INCIDENT_RESPONSE",
+      "BACKUP_RESTORE_DR_VALIDATION"
+    ],
+    "red_team": [
+      "AUTHORIZED_ADVERSARIAL_SIMULATION",
+      "PREPROD_ATTACK_PATH_TESTING",
+      "FUZZING",
+      "PROPERTY_BASED_SECURITY_TESTING",
+      "AUTHENTICATION_AND_AUTHORIZATION_NEGATIVE_TESTS",
+      "INPUT_VALIDATION_ABUSE_TESTS",
+      "RATE_LIMIT_AND_ABUSE_CONTROL_TESTS",
+      "SECURITY_REGRESSION_TESTS"
+    ],
+    "purple_team_loop": [
+      "SIMULATE_AUTHORIZED_ATTACK",
+      "OBSERVE_DETECTION",
+      "MEASURE_GAP",
+      "HARDEN",
+      "ADD_REGRESSION_TEST",
+      "RETEST",
+      "PERSIST_LEARNING"
+    ],
+    "offensive_guardrails": {
+      "owned_or_explicitly_authorized_targets_only": true,
+      "lab_or_preprod_default": true,
+      "scope_must_be_explicit": true,
+      "non_destructive_default": true,
+      "third_party_unauthorized_access": false,
+      "credential_theft": false,
+      "malicious_persistence": false,
+      "data_exfiltration": false,
+      "malware_deployment": false,
+      "destructive_payloads": false,
+      "bypass_legal_or_policy_controls": false,
+      "cleanup_and_evidence_required": true,
+      "audit_log_required": true,
+      "rate_and_blast_radius_limits_required": true,
+      "uncertain_scope_human_required": "POLICY_CONFLICT",
+      "high_risk_human_required": "HIGH_RISK",
+      "security_incident_human_required": "SECURITY_INCIDENT"
+    }
+  },
+  "error_learning_contract": {
+    "every_material_error_requires": [
+      "ROOT_CAUSE",
+      "FIX",
+      "REGRESSION_TEST",
+      "LEARNING_EVENT",
+      "REUSE_ASSET_OR_RULE_WHEN_APPLICABLE"
+    ],
+    "repeat_same_error_is_learning_failure": true,
+    "proactive_improvement_without_error_required": true
+  },
+  "speed_and_performance_contract": {
+    "measure_every_material_work_unit": true,
+    "required_metrics": [
+      "expected_ms",
+      "actual_ms",
+      "wait_ms",
+      "rework_ms",
+      "p50_ms",
+      "p95_ms",
+      "throughput",
+      "success_rate",
+      "human_minutes",
+      "additional_cost_eur",
+      "old_vs_new_delta"
+    ],
+    "optimization_rule": "Improve latency and throughput without reducing security, correctness, test coverage, rollbackability or evidence quality.",
+    "baseline_required": true,
+    "trend_required": true
+  },
+  "productization_contract": {
+    "capability_to_asset_to_product": true,
+    "periodic_inventory_recombination": true,
+    "candidate_outputs": [
+      "REUSABLE_COMPONENT",
+      "SKILL",
+      "ENGINE_CAPABILITY",
+      "INTERNAL_AUTOMATION",
+      "FREE_TOOL",
+      "LEAD_MAGNET",
+      "SELLABLE_PRODUCT_OR_SERVICE"
+    ],
+    "product_candidate_requires_incremental_value": true,
+    "do_not_productize_low_quality_wrappers": true
+  },
+  "autonomy_measurement": {
+    "track_human_exception_rate": true,
+    "track_human_minutes": true,
+    "track_autonomous_success_rate": true,
+    "reduce_exceptions_only_with_evidence": true,
+    "canonical_human_required_reasons_only": [
+      "LEGAL_REQUIRED",
+      "SIGNATURE_REQUIRED",
+      "LOW_CONFIDENCE",
+      "HIGH_RISK",
+      "POLICY_CONFLICT",
+      "SECURITY_INCIDENT",
+      "MONEY_LIMIT",
+      "CUSTOMER_HUMAN_REQUEST"
+    ]
+  },
+  "meta_improvement": {
+    "improve_the_improvement_system": true,
+    "measure_scout_quality": true,
+    "measure_candidate_hit_rate": true,
+    "measure_experiment_cycle_time": true,
+    "measure_learning_to_adoption_time": true,
+    "measure_reuse_ratio": true,
+    "measure_productization_yield": true,
+    "retire_or_hold_low_value_paths_safely": true
+  },
+  "promotion_gates": {
+    "contracts_required": true,
+    "permissions_required": true,
+    "tests_required": true,
+    "evaluation_required": true,
+    "tribunal_required": true,
+    "observability_required": true,
+    "rollback_required": true,
+    "backup_required": true,
+    "rebuild_required": true,
+    "cost_measured_required": true,
+    "policy_required": true,
+    "preprod_required": true,
+    "old_vs_new_required": true
+  },
+  "authority": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "auto_merge_authorized": false,
+    "spend_authorized": false,
+    "external_dependency_install_authorized": false,
+    "external_skill_code_execution_authorized": false,
+    "customer_data_for_red_team_authorized": false,
+    "third_party_attack_authorized": false,
+    "trading_access": false,
+    "additional_cost_eur": 0
+  },
+  "implementation_state": {
+    "policy_registered_on_feature_branch": true,
+    "existing_continuous_learning_runtime_reused": true,
+    "existing_tech_scout_runtime_reused": true,
+    "security_specialist_already_exists_in_engineering_profile": true,
+    "security_engine_ids_already_exist_in_engine_registry": true,
+    "runtime_consumer_binding_for_this_policy": "PENDING_EXACT_HEAD_TESTED_WIRING",
+    "prod_operational": false
+  },
+  "next_gate": "WIRE_POLICY_INTO_EXISTING_LRN_RSH_FACT_PREPROD_LOOPS_AND_PROVE_EXACT_HEAD_OLD_VS_NEW_WITHOUT_EXPANDING_AUTHORITY"
+}
