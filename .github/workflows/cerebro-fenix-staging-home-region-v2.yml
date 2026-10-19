@@ -1,0 +1,35 @@
+name: CEREBRO Fenix STAGING Home Region V2
+
+on:
+  push:
+    branches:
+      - cerebro/seo001-staging-audit-v5-20261018
+    paths:
+      - 'cerebro/qa/home-region-v2-visual.mjs'
+      - '.github/workflows/cerebro-fenix-staging-home-region-v2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  home-region-v2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: node cerebro/qa/home-region-v2-visual.mjs
+      - name: Upload focused visual evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fenix-home-region-v2-${{ github.sha }}
+          path: artifacts/home-region-v2
+          if-no-files-found: error
+          retention-days: 30
