@@ -1,7 +1,8 @@
 import {useEffect,useMemo,useRef,useState,type FormEvent,type KeyboardEvent} from 'react';
-import {Activity,BrainCircuit,CheckCircle2,CircleDot,ExternalLink,ListTodo,MessageSquareText,Mic,Paperclip,RefreshCw,Send,ShieldCheck,Square} from 'lucide-react';
+import {Activity,BrainCircuit,CheckCircle2,CircleDot,ExternalLink,ListTodo,MessageSquareText,Mic,Paperclip,Send,ShieldCheck,Square} from 'lucide-react';
 import {fetchCerebroActivity,type CerebroActivityRun} from './cerebroActivityApi';
 import {applyVoiceContextHints,createVoiceRecognition,voiceRecognitionSupported,type CerebroSpeechRecognition} from './cerebroVoice';
+import {CerebroVoiceSettings} from './CerebroVoiceSettings';
 import './cerebro-operative-console.css';
 
 type CoreLine={key:string;role:'user'|'cerebro';text:string;observedAt:string};
@@ -268,15 +269,6 @@ export default function CerebroOperativeConsole(){
   if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();submit()}
  }
 
- async function refreshActivity(){
-  const {status,data}=await fetchCerebroActivity();
-  if(status===200&&data?.status==='OK'){
-   setRuns(data.runs||[]);
-   setActivitySource(data.source_status);
-   setActivityObservedAt(data.observed_at);
-  }else setActivitySource('UNAVAILABLE');
- }
-
  return <main className="cerebro-operative cerebro-operative-compact" aria-label="CEREBRO · Vista operativa">
   <header className="cerebro-operative-header">
    <div className="cerebro-operative-brand">
@@ -294,7 +286,7 @@ export default function CerebroOperativeConsole(){
   <section className="cerebro-process-zone" aria-labelledby="cerebro-process-title">
    <div className="cerebro-process-zone-head">
     <div className="cerebro-section-title compact"><Activity size={23}/><div><h2 id="cerebro-process-title">Procesos</h2><small className={`cerebro-source-inline is-${activitySource.toLowerCase()}`}>{activitySource==='LIVE'?'LIVE':activitySource==='CACHED'?'CACHÉ':'SIN FUENTE'}{activityObservedAt?` · ${startClock(activityObservedAt)}`:''}</small></div></div>
-    <div className="cerebro-process-counts"><span>{activeRuns.length} curso</span><span>{queuedRuns.length} cola</span><span>{recentRuns.length} recientes</span><button type="button" className="cerebro-refresh" onClick={()=>{void refreshActivity()}} aria-label="Actualizar procesos"><RefreshCw size={17}/></button></div>
+    <div className="cerebro-process-counts"><span>{activeRuns.length} curso</span><span>{queuedRuns.length} cola</span><span>{recentRuns.length} recientes</span><CerebroVoiceSettings/></div>
    </div>
 
    <div className="cerebro-process-strip" aria-live="polite" aria-label="Procesos de CEREBRO; desplazamiento horizontal">
