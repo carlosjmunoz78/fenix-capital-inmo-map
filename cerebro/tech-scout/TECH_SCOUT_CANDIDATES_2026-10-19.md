@@ -1,10 +1,10 @@
 # CEREBRO TECH_SCOUT — Governed LAB Candidate Intake
 
-Date: 2026-10-19
+Date: 2026-10-20
 Status: LAB_CANDIDATES_ONLY
-Production: FORBIDDEN
-External code execution: FORBIDDEN in this intake
-External installation: FORBIDDEN in this intake
+Production: FORBIDDEN UNTIL GREEN PROMOTION GATE
+External code execution: FORBIDDEN in scout intake
+External installation: FORBIDDEN in scout intake
 Paid services: FORBIDDEN unless separately approved
 
 ## Purpose
@@ -23,12 +23,25 @@ Rules:
 - Prefer local/self-host and zero incremental cost where capability parity is adequate.
 - Secrets must never be returned to models or persisted in scout evidence.
 - Fail closed on uncertain authorization or safety state.
-- PROD promotion is outside this dossier and requires the existing governed promotion path.
+- PROD promotion requires the existing governed promotion path and real GREEN evidence.
 
 ## Consolidated priority shortlist
 
+### APP FACTORY — P0
+- Flutter — S++ — REUSE candidate. BSD-3-Clause ecosystem; one codebase targets Android, iOS, web, Windows, macOS and Linux. Security policy covers stable branch. Preferred universal employee/client/mobile/tablet application baseline. FREE_PARITY: PASS pending CEREBRO build/E2E evidence.
+- Tauri — S++ — REUSE/ADAPT candidate. MIT/Apache-2.0 where applicable; Rust + web frontend; Windows/macOS/Linux plus Android/iOS. Preferred specialist desktop/control-center challenger where native OS integration and small runtime matter. FREE_PARITY: PASS pending CEREBRO build/E2E evidence.
+- Expo / React Native — S+ — BENCHMARK challenger only until OLD-vs-NEW proves material advantage over Flutter for CEREBRO use cases.
+- Pipecat — S+ — BENCHMARK challenger for realtime multimodal agent pipeline; no promotion merely from upstream claims.
+
+### HUMAN COMMUNICATION — P0
+- LiveKit Server + LiveKit Agents — S++ — REUSE/WRAP candidate. Server Apache-2.0; Agents Apache-2.0, with separate LiveKit Model License applying to turn-detection models. Self-host path exists. Supports realtime audio/video/data, SIP telephony, SDKs including Flutter/React Native, and MCP in Agents. Any STT/LLM/TTS/provider dependency must be explicitly inventoried; no paid inference is permitted by default. Preferred realtime human↔CEREBRO benchmark.
+- Novu — S++ functional candidate, WRAP/HOLD pending exact open-core boundary review. Core is MIT while enterprise paths/features use a commercial license. Unified in-app/email/SMS/push/chat workflow model is valuable, but CEREBRO must not depend on enterprise-only code or paid providers to pass FREE_PARITY.
+- ntfy — S — REUSE candidate for simple self-hosted HTTP→push fallback. Treat as low-complexity notification channel, not a replacement for workflow orchestration.
+
 ### Desktop / Windows
 - windows-mcp-server — S+ — ADAPT candidate; governance/attestation/audit/kill-switch patterns.
+- Zavora Computer Use MCP — S+ — BENCHMARK/ADAPT candidate for cross-platform native computer-use.
+- OpenControl — S — BENCHMARK candidate for minimum native Windows runtime.
 - desk-mcp — S — ADAPT candidate; UIA/CDP/OCR hierarchy, batching and differential snapshots.
 - Touchpoint — S — ADAPT candidate; cross-platform accessibility + CDP.
 - windows-gui-mcp — S- — benchmark for trace -> stable deterministic script generation.
@@ -37,70 +50,121 @@ Rules:
 ### Browser
 - gsd-browser — S+ — ADAPT candidate; sessions, versioned refs, batching, evidence and human takeover.
 - Microsoft Playwright MCP — S — REUSE/WRAP candidate; deterministic accessibility-based browser control.
+- Cereon Browser Operator — S — ADAPT/BENCHMARK for authenticated Chrome/CDP bridge patterns.
 - CEREBRO Browser Bridge — BASELINE OLD; do not replace without OLD-vs-NEW evidence.
 
-### Android / mobile
+### Android / mobile / QA
+- Maestro — S — ADAPT/QA candidate.
+- maestro-mcp — S+ — BENCHMARK/ADAPT candidate for agentic generation/execution/diagnosis of Maestro E2E flows; must be source/license/security verified before LAB install.
 - android-use — S — benchmark/ADAPT candidate.
 - NeuralBridge — S — benchmark/ADAPT candidate.
-- Maestro — S — ADAPT/QA candidate.
 - Appium — S — WRAP/QA candidate.
 - scrcpy — S — complementary visual/control infrastructure.
-- MobileRun MCP — HOLD/BENCHMARK pending deeper license/security review; preserve stale-handle invalidation pattern.
+- DroidPilot — A — benchmark Accessibility-Service architecture.
+- Open Mobile MCP — A — benchmark for combined UI state + logs + screen evidence.
 
 ### Public web acquisition / extraction
 - Crawlee Python — S — ADAPT/REUSE candidate.
 - Crawl4AI — S — ADAPT candidate for web-to-knowledge transformation.
 - turbo-surf — S- — benchmark Rust fast-path; upstream performance claims unverified.
-- Other Rust challengers (webclaw, Essence, Crawlberg, fastCRW) — benchmark only; avoid redundant adoption.
+
+### SEO / research
+- OpenSERP — S+ candidate subject to current repository/license verification and ToS-compliant use only.
+- Crawlie — S candidate subject to current repository/license verification; technical SEO/GEO QA role.
+- thatseoagent-mcp — S candidate subject to source/license verification; GSC/GA4/PageSpeed operational layer.
+- gocrawl — A HOLD/BENCHMARK; avoid redundant adoption unless it beats the selected stack.
 
 ### Document intelligence
 - Xberg — S+ — REUSE candidate for broad document intelligence.
 - docparse-rs — S — REUSE/benchmark candidate for deterministic, provenance-preserving fast path.
 
 ### Social operations
-- BrightBean Studio — S — LAB candidate; official APIs/self-host/multi-workspace claims require source/license/security verification before adoption.
-- Pendpost — S- — preferred governance pattern: local-first, fail-closed and separated human approval.
-- Other social schedulers remain comparators/HOLD unless they demonstrate material advantage.
+- Pendpost — S — preferred governance candidate if current source/license verification confirms prior findings.
+- BrightBean Studio — S — LAB candidate; official APIs/self-host/multi-workspace claims require source/license/security verification.
+- PostSider — S functional challenger but AGPL boundary makes WRAP/HOLD preferable for proprietary productization.
+- TryPost — A+ HOLD/BENCHMARK; avoid expanding social stack without material measured advantage.
 
 ### Observability / replay / evaluation
-- mcp-tape — S — REUSE/WRAP candidate for MCP trace recording/replay with secret redaction.
-- Lookspan — S — REUSE/WRAP candidate for traces, datasets, OLD-vs-NEW and evaluation.
+- Lookspan — S — REUSE/WRAP candidate for traces, datasets, OLD-vs-NEW and evaluation, subject to source verification.
 - OpenReplay — S — WRAP/LAB candidate for session replay and UI evidence.
-- OpenTelemetry + otlp-mcp — A+/S- pattern; standard telemetry path, localhost-only unless independently secured.
+- OpenTelemetry + local collector — preferred standards-based telemetry path.
+- mcp-tape — A/HOLD experimental challenger; small community means it is not a primary production dependency without stronger evidence.
 
-## LAB benchmark gates
+## P0 APP FACTORY gate
+
+A universal-app candidate must be tested on a minimal CEREBRO reference application containing authentication boundary mocks, navigation, forms, local state, API client abstraction, notification hook, accessibility labels and failure/recovery states. Required evidence:
+1. Reproducible clean build from pinned upstream/toolchain versions.
+2. Static analysis/lint and unit tests GREEN.
+3. Android build + E2E; Windows build + E2E. iOS/macOS require an authorized macOS runner and are not to be simulated.
+4. Tablet/responsive layout test.
+5. Offline/network-loss/retry behavior.
+6. Secret scan and dependency/license inventory.
+7. Artifact provenance/checksum and rollback procedure.
+8. OLD-vs-NEW comparison: implementation time, build time, artifact size, runtime memory/CPU where measurable, testability, native integration effort and maintenance complexity.
+9. Tribunal decision before PREPROD/PROD.
+
+Flutter is default universal baseline; Tauri is evaluated as desktop-specialist, not forced into a false one-winner comparison.
+
+## P0 HUMAN COMMUNICATION gate
+
+No real customer or employee contact is allowed during LAB tests. Use synthetic identities/endpoints or explicitly authorized test recipients only.
+
+LiveKit gate:
+1. Pin Server + Agents versions/commits and inventory all licenses including model/plugin licenses.
+2. Self-host/local transport test with no mandatory cloud spend.
+3. Synthetic audio loop: connect → receive audio → agent turn → tool invocation mock → response → disconnect.
+4. Interruption/timeout/reconnect tests.
+5. Authentication/authorization and room isolation tests.
+6. No transcript/audio retention by default; retention must be explicit and bounded.
+7. Secrets never enter prompts/logs/evidence.
+8. Measure end-to-end latency, reconnect success and resource use.
+
+Novu gate:
+1. Verify exact MIT/open-core boundary at pinned revision.
+2. Self-host core only; enterprise/commercial paths excluded unless separately approved.
+3. Use local/synthetic notification provider first; no paid SMS/email provider required for gate.
+4. Test idempotency, preferences, retries, escalation, auditability and tenant/workspace isolation.
+5. Prove CEREBRO can issue a channel-agnostic CONTACT intent without exposing provider credentials.
+
+ntfy gate:
+1. Self-host/local only for baseline.
+2. Authenticated topic, non-sensitive synthetic payload.
+3. Delivery/retry/offline test and bounded retention.
+4. Never use public topics for CEREBRO operational data.
+
+## Existing benchmark gates
 
 ### Desktop gate
-Compare current Browser Bridge / existing desktop path vs windows-mcp-server, desk-mcp, Touchpoint and windows-gui-mcp on authorized Windows targets. Measure p50/p95 latency, task success, round-trips, tokens, background execution, authenticated Chrome, Win32/WPF/Electron coverage, frozen-window recovery, multi-monitor behavior, auditability, human abort and skillification.
+Compare current desktop path vs selected challengers on authorized targets. Measure p50/p95 latency, task success, round-trips, tokens, background execution, authenticated Chrome, Win32/WPF/Electron coverage, recovery, multi-monitor behavior, auditability, human abort and skillification.
 
 ### Browser gate
-Compare Browser Bridge vs gsd-browser vs Playwright MCP. Measure success rate, latency, token volume, stale-reference handling, session persistence, evidence quality, recovery and deterministic replay. Exclude stealth/anti-detection features from evaluation.
+Compare Browser Bridge vs gsd-browser vs Playwright MCP. Measure success rate, latency, token volume, stale-reference handling, session persistence, evidence quality, recovery and deterministic replay. Exclude stealth/anti-detection features.
 
 ### Mobile gate
-Compare android-use, NeuralBridge, Maestro and Appium on the same authorized physical device/tasks. Measure setup, p50/p95 action latency, E2E task time, model calls, tokens, success/recovery, stability, resource consumption, permissions/revocation and batching. scrcpy remains complementary.
+Compare selected mobile adapters on the same authorized device/tasks. Measure setup, p50/p95 action latency, E2E time, model calls, tokens, success/recovery, stability, resource consumption, permissions/revocation and batching.
 
 ### Web gate
-Use a representative public corpus. Compare Crawlee/Crawl4AI baseline with challengers on pages/minute, CPU/RAM, Markdown quality, structured extraction, link recall, JS correctness, recovery, robots/rate-limit compliance and cost per 1,000 pages. No CAPTCHA or anti-abuse bypass testing.
+Use a representative public corpus. Measure pages/minute, CPU/RAM, Markdown quality, structured extraction, link recall, JS correctness, recovery, robots/rate-limit compliance and cost per 1,000 pages. No CAPTCHA or anti-abuse bypass testing.
 
 ### Document gate
-Use anonymized/synthetic representative FEIN, payroll, employment-history, bank-statement, appraisal, land-registry, IBI and contract documents. Compare Xberg and docparse-rs on field accuracy, tables, reading order, provenance/bounding boxes, reproducibility, OCR fallback, RAM, time/page, error recovery and suspicious-content handling. Critical financial fields require independent validation.
+Use anonymized/synthetic representative financial/real-estate documents. Measure field accuracy, tables, reading order, provenance, reproducibility, OCR fallback, RAM, time/page, error recovery and suspicious-content handling. Critical financial fields require independent validation.
 
 ### Social gate
-Compare current SOC-001 baseline, BrightBean Studio and Pendpost only through official/public APIs or authorized accounts. Measure platform coverage, approval separation, idempotency, retries, audit trail, RBAC/workspace isolation, token/secret handling, analytics/inbox value and incremental cost. No cookie/session scraping or unofficial private APIs.
+Use official/public APIs or authorized accounts only. Measure coverage, approval separation, idempotency, retries, audit, RBAC/workspace isolation, token/secret handling, analytics/inbox value and incremental cost. No cookie/session scraping or unofficial private APIs.
 
 ### Observability gate
-Evaluate mcp-tape + OpenTelemetry/otlp-mcp + Lookspan/OpenReplay as separable layers: intent/tool calls, runtime telemetry, UI outcome, replay/evaluation. Require secret redaction, bounded retention and no external egress by default.
+Separate intent/tool traces, runtime telemetry, UI outcome and replay/evaluation. Require secret redaction, bounded retention and no external egress by default.
 
 ## Promotion rule
 
-A candidate may move beyond LAB only when all are true:
-1. License and security review pass.
+A candidate may move LAB → PREPROD → PROD only when all are true:
+1. License and security review pass on pinned revision.
 2. FREE_PARITY_GATE passes.
 3. No new mandatory spend.
-4. Measured OLD-vs-NEW shows material benefit.
-5. Reliability and rollback are demonstrated.
+4. Measured OLD-vs-NEW shows material benefit or a clearly new required capability.
+5. Reliability, failure recovery and rollback are demonstrated.
 6. Privacy/secrets controls pass.
-7. QA/Tribunal passes.
-8. Governed promotion explicitly authorizes the change.
+7. QA/Tribunal passes with real evidence.
+8. Governed promotion mechanism authorizes and records the change.
 
-Until then: CANDIDATE != INTEGRATED != PRODUCTION.
+A deadline never overrides a red gate. Until then: CANDIDATE != INTEGRATED != PRODUCTION.
