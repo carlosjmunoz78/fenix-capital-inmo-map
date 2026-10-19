@@ -1,0 +1,48 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_ACCESSBOOT_UNIVERSAL_END_STATE_V1",
+  "status": "DEFINED",
+  "objective": "One authorized executable on the owner's computer bootstraps and connects the complete CEREBRO access stack without binding the device permanently to one company or one website.",
+  "principles": {
+    "device_binding": "DEVICE_LEVEL_IDENTITY_ONLY",
+    "tenant_binding": "DYNAMIC_MULTI_COMPANY_PER_COMMAND",
+    "site_binding": "DISCOVERED_AND_SCOPED_PER_TARGET",
+    "environment_binding": "LAB_PREPROD_BY_POLICY; PROD_FAIL_CLOSED_UNTIL_PROMOTED",
+    "single_executable_target": true,
+    "manual_repair_loops_forbidden": true,
+    "preserve_existing_connectors": true,
+    "no_broad_grants": true,
+    "no_raw_secrets": true,
+    "additional_cost_eur_target": 0
+  },
+  "bootstrap_flow": [
+    "discover local runtime/browser/device/vault/controller",
+    "discover authorized companies and target sites",
+    "discover available connector/API/MCP surfaces per target",
+    "create or reuse least-privilege scoped bindings",
+    "store credentials only as protected references",
+    "attest identity, tenant scope and environment",
+    "run synthetic read/write/readback/replay/cleanup where permitted",
+    "record sanitized receipts",
+    "start persistent services",
+    "verify restart persistence",
+    "verify rollback/rebuild",
+    "leave PROD disabled unless separately promoted"
+  ],
+  "staging_connector_role": "BOOTSTRAP_AND_ACCEPTANCE_SURFACE_ONLY_NOT_UNIVERSAL_AUTHORITY",
+  "staging_connector_note": "The current staging connector is site/environment specific. It may be used to close STAGING acceptance, but the universal design must discover and bind arbitrary authorized sites/companies dynamically rather than baking staging.fenixcapital.es into the device identity or executable.",
+  "final_acceptance": [
+    "one executable",
+    "no per-company executable",
+    "no per-site executable",
+    "dynamic company_id engine_id environment version scope",
+    "automatic connector discovery/bootstrap where APIs permit",
+    "human only for legal/signature/high-risk/low-confidence/policy/security/money/customer-human-request",
+    "restart persistence proven",
+    "rollback proven",
+    "rebuild proven",
+    "vault recovery proven without exposing secrets"
+  ],
+  "prod_authorized": false,
+  "trading_access": false
+}
