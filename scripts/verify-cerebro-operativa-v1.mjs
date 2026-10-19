@@ -13,9 +13,10 @@ must(route,"import CerebroConsoleHost from './CerebroConsoleHost';",'reversible 
 must(route,'return <CerebroConsoleHost/>;','host mount');
 must(host,"return'OPERATIVA'",'OPERATIVA default');
 must(host,'<CerebroConsoleShell/>','preserved V0 core');
-must(host,"view==='V0'?'is-visible':'is-hidden'",'reversible V0 visibility');
-must(host,'NEURAL · POR AUDITAR','neural recovery gate');
+must(host,"const coreClass=view==='V0'?'is-visible':view==='NEURAL'?'is-neural-overlay':'is-hidden';",'three-view shared-core routing');
+must(host,"type CerebroView='V0'|'OPERATIVA'|'NEURAL';",'three reversible views');
 must(css,'.cerebro-host-v0.is-hidden','V0 hidden-but-mounted wrapper');
+must(css,'.cerebro-host-v0.is-neural-overlay','shared V0 core on Neural');
 must(operative,'Sin datos ficticios','reality contract');
 must(operative,'Sin métrica fiable','no fake progress contract');
 must(operative,'REAL · orden observada','REAL provenance');
