@@ -17,8 +17,8 @@ const corsHeaders={
   'content-type':'application/json'
 };
 
-test('OPERATIVA reuses the authenticated V0 core and preserves reversible state',async({page})=>{
-  test.setTimeout(20_000);
+test('OPERATIVA, V0 and recovered NEURAL share one authenticated Console state',async({page})=>{
+  test.setTimeout(30_000);
   let postedChat:any=null;
 
   await page.addInitScript(s=>{
@@ -81,6 +81,14 @@ test('OPERATIVA reuses the authenticated V0 core and preserves reversible state'
   for(const demoValue of ['68%','80%','60%','45%','70%','90%']){
     await expect(operativa.getByText(demoValue,{exact:true})).toHaveCount(0);
   }
+
+  await page.getByRole('button',{name:'NEURAL',exact:true}).click();
+  await expect(page.locator('.cerebro-neural-view')).toBeVisible();
+  await expect(page.locator('.cerebro-host-v0')).toHaveClass(/is-neural-overlay/);
+  await expect(page.getByText('PONG_OPERATIVA',{exact:true})).toBeVisible();
+  const neuralFrame=page.frameLocator('iframe.cerebro-neural-frame');
+  await expect(neuralFrame.locator('.brand b')).toContainText('LAB V1.4.25',{timeout:8_000});
+  await expect(neuralFrame.locator('body')).toContainText('SEGUIR SEÑAL');
 
   await page.getByRole('button',{name:'VISTA 0'}).click();
   await expect(page.locator('.cerebro-host-v0')).toHaveClass(/is-visible/);
