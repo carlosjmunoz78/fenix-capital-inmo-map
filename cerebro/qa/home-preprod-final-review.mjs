@@ -24,10 +24,12 @@ for (const width of [390,768,1440]) {
     const h2=[...document.querySelectorAll('h2')].map(x=>x.textContent.trim());
     const visibleLinks=[...document.querySelectorAll('main a')].filter(a=>{const r=a.getBoundingClientRect();return r.width>0&&r.height>0}).map(a=>({text:(a.textContent||'').replace(/\s+/g,' ').trim(),href:a.getAttribute('href')}));
     const headerLinks=[...document.querySelectorAll('header a, #masthead a')].filter(a=>{const r=a.getBoundingClientRect();return r.width>0&&r.height>0}).map(a=>({text:(a.textContent||'').replace(/\s+/g,' ').trim(),href:a.getAttribute('href')}));
+    const inicio=[...document.querySelectorAll('header a, #masthead a')].find(a=>(a.textContent||'').replace(/\s+/g,' ').trim()==='Inicio');
+    const inicioContext=inicio?{link:inicio.outerHTML,parent:inicio.parentElement?.outerHTML||null,nav:inicio.closest('nav')?.outerHTML||null,headerClass:inicio.closest('header')?.className||null,headerId:inicio.closest('header')?.id||null}:null;
     const images=[...document.querySelectorAll('img')].map(img=>({src:img.currentSrc||img.src,alt:img.getAttribute('alt'),complete:img.complete,naturalWidth:img.naturalWidth,naturalHeight:img.naturalHeight}));
     const missingAlt=images.filter(img=>img.alt===null || img.alt.trim()==='');
     const visualImages=[...document.querySelectorAll('.home-polish-visuals img')].map(img=>({src:img.currentSrc||img.src,alt:img.getAttribute('alt'),complete:img.complete,naturalWidth:img.naturalWidth,naturalHeight:img.naturalHeight}));
-    return {title:document.title,scrollWidth:document.documentElement.scrollWidth,innerWidth,scrollHeight:document.documentElement.scrollHeight,h1,h2,sections,numberish,digitLeaves,visibleLinks,headerLinks,missingAlt,visualImages,bodyTextLength:text.length};
+    return {title:document.title,scrollWidth:document.documentElement.scrollWidth,innerWidth,scrollHeight:document.documentElement.scrollHeight,h1,h2,sections,numberish,digitLeaves,visibleLinks,headerLinks,inicioContext,missingAlt,visualImages,bodyTextLength:text.length};
   });
   if (await visual.count()) await visual.screenshot({path:`artifacts/home-final-review/visuals-${width}.png`});
   await page.screenshot({path:`artifacts/home-final-review/home-${width}.png`,fullPage:true});
