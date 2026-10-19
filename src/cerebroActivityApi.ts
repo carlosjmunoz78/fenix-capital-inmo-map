@@ -4,10 +4,12 @@ const CANONICAL_ACTIVITY_URL='https://cluhljgonannaafpmblx.supabase.co/functions
 const RAW_ACTIVITY_URL=(import.meta.env.VITE_CEREBRO_ACTIVITY_URL as string|undefined)?.trim()||CANONICAL_ACTIVITY_URL;
 
 export type CerebroActivityStatus='queued'|'in_progress'|'completed'|'waiting'|'requested'|'pending'|string;
+export type CerebroProgressProvenance='REAL_GITHUB_JOBS'|'TERMINAL_STATUS'|'UNAVAILABLE';
 
 export type CerebroActivityRun={
   run_id:number;
   workflow_name:string;
+  workflow_alias:string;
   workflow_path:string;
   status:CerebroActivityStatus;
   conclusion:string|null;
@@ -23,6 +25,13 @@ export type CerebroActivityRun={
   source:'GITHUB_ACTIONS';
   provenance:'REAL';
   company_provenance:'DERIVED_REPOSITORY_SCOPE';
+  alias_provenance:'ENGINE_ID'|'DERIVED_WORKFLOW_NAME';
+  progress_percent:number|null;
+  progress_completed_steps:number|null;
+  progress_total_steps:number|null;
+  current_step:string|null;
+  next_step:string|null;
+  progress_provenance:CerebroProgressProvenance;
 };
 
 export type CerebroActivityResponse={
