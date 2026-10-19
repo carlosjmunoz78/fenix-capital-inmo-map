@@ -36,7 +36,7 @@ must(cssV2,"html[data-cerebro-console='1'] .ops-mobile-menu-button",'CEREBRO-onl
 must(activityApi,'cerebro-console-activity-v0','activity gateway endpoint');
 must(activityGateway,'source:"GITHUB_ACTIONS"','real source declaration');
 must(activityGateway,'company_provenance:"DERIVED_REPOSITORY_SCOPE"','derived company provenance');
-must(activityGateway,'additional_cost','activity gateway zero-cost language');
+must(activityGateway,'https://api.github.com/repos/','public zero-cost activity source');
 mustNot(operative,'68%','reference demo percentage');
 mustNot(operative,'80%','reference demo percentage');
 mustNot(operative,'60%','reference demo percentage');
