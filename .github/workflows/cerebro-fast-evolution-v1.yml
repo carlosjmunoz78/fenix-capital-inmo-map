@@ -9,9 +9,11 @@ on:
       - 'cerebro/registry/cerebro-fast-evolution-execution.v1.json'
       - 'cerebro/runtime/cerebro-fast-evolution-planner-v1.mjs'
       - 'cerebro/runtime/cerebro-fast-evolution-job001-bridge-v1.mjs'
+      - 'cerebro/runtime/cerebro-fast-evolution-worker-v1.mjs'
       - 'cerebro/tests/cerebro-compounding-evolution-policy-v1.test.mjs'
       - 'cerebro/tests/cerebro-fast-evolution-planner-v1.test.mjs'
       - 'cerebro/tests/cerebro-fast-evolution-job001-bridge-v1.test.mjs'
+      - 'cerebro/tests/cerebro-fast-evolution-worker-v1.test.mjs'
       - '.github/workflows/cerebro-fast-evolution-v1.yml'
   pull_request:
     paths:
@@ -19,9 +21,11 @@ on:
       - 'cerebro/registry/cerebro-fast-evolution-execution.v1.json'
       - 'cerebro/runtime/cerebro-fast-evolution-planner-v1.mjs'
       - 'cerebro/runtime/cerebro-fast-evolution-job001-bridge-v1.mjs'
+      - 'cerebro/runtime/cerebro-fast-evolution-worker-v1.mjs'
       - 'cerebro/tests/cerebro-compounding-evolution-policy-v1.test.mjs'
       - 'cerebro/tests/cerebro-fast-evolution-planner-v1.test.mjs'
       - 'cerebro/tests/cerebro-fast-evolution-job001-bridge-v1.test.mjs'
+      - 'cerebro/tests/cerebro-fast-evolution-worker-v1.test.mjs'
       - '.github/workflows/cerebro-fast-evolution-v1.yml'
   workflow_dispatch:
 
@@ -46,14 +50,17 @@ jobs:
           node --test \
             cerebro/tests/cerebro-compounding-evolution-policy-v1.test.mjs \
             cerebro/tests/cerebro-fast-evolution-planner-v1.test.mjs \
-            cerebro/tests/cerebro-fast-evolution-job001-bridge-v1.test.mjs
+            cerebro/tests/cerebro-fast-evolution-job001-bridge-v1.test.mjs \
+            cerebro/tests/cerebro-fast-evolution-worker-v1.test.mjs
       - name: Fail closed authority assertions
         shell: bash
         run: |
           set -euo pipefail
           grep -F '"primary_trigger": "EVENT_DRIVEN"' cerebro/registry/cerebro-fast-evolution-execution.v1.json
           grep -F '"max_active_fronts": 5' cerebro/registry/cerebro-fast-evolution-execution.v1.json
+          grep -F 'max_per_company: MAX_FAST_CONCURRENCY' cerebro/runtime/cerebro-fast-evolution-worker-v1.mjs
           ! grep -Eq 'prod_authorized["[:space:]]*:[[:space:]]*true|prod_write_authorized["[:space:]]*:[[:space:]]*true|trading_access["[:space:]]*:[[:space:]]*true|additional_cost_eur["[:space:]]*:[[:space:]]*[1-9]' \
             cerebro/registry/cerebro-fast-evolution-execution.v1.json \
             cerebro/runtime/cerebro-fast-evolution-planner-v1.mjs \
-            cerebro/runtime/cerebro-fast-evolution-job001-bridge-v1.mjs
+            cerebro/runtime/cerebro-fast-evolution-job001-bridge-v1.mjs \
+            cerebro/runtime/cerebro-fast-evolution-worker-v1.mjs
