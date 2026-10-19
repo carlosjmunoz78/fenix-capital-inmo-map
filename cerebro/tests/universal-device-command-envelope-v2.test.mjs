@@ -16,7 +16,7 @@ function envelope(overrides={}){
   return {
     request_id:'req-001',idempotency_key:'idem-001',issued_at:'2026-10-19T11:59:00.000Z',expires_at:'2026-10-19T12:09:00.000Z',
     device_id:'desktop-4c008d88919f',company_id:'fenix',venture_id:'capital',engine_id:'AUTO-001',environment:'PREPROD',version:'2.0.0',capability:'DEVICE_EXECUTE',action:'SYNTHETIC_TEST',credential_refs:['vault://fenix/preprod/test'],
-    policy:{policy_id:'UDV2-PREPROD',allowed_company_ids:['fenix','aion'],allowed_venture_ids:['capital','operator'],allowed_engine_ids:['AUTO-001'],allowed_capabilities:['DEVICE_EXECUTE'],allowed_actions:['SYNTHETIC_TEST'],prod_allowed:false,trading_allowed:false,state_changing:true},
+    policy:{policy_id:'UDV2-PREPROD',allowed_company_ids:['fenix','aion'],allowed_venture_ids:['capital','operator'],allowed_engine_ids:['AUTO-001'],allowed_environments:['PREPROD'],allowed_versions:['2.0.0'],allowed_capabilities:['DEVICE_EXECUTE'],allowed_actions:['SYNTHETIC_TEST'],prod_allowed:false,trading_allowed:false,state_changing:true},
     ...overrides
   };
 }
@@ -32,6 +32,8 @@ test('valid PREPROD envelope authorizes dynamic scope independent of legacy prof
   assert.equal(result.decision,'AUTHORIZED_PREPROD');
   assert.equal(result.scope.company_id,'aion');
   assert.equal(result.scope.venture_id,'operator');
+  assert.equal(result.scope.environment,'PREPROD');
+  assert.equal(result.scope.version,'2.0.0');
   assert.equal(wrapLegacyTransportProfile(legacy).tenant_authority,false);
 });
 
@@ -53,6 +55,16 @@ test('unknown device identity fails closed as HOLD rather than throwing',()=>{
 test('PROD and unknown environment fail closed',()=>{
   assert.ok(validateUniversalDeviceEnvelopeV2(envelope({environment:'PROD'}),{now:NOW}).errors.includes('prod_context_not_allowed'));
   assert.ok(validateUniversalDeviceEnvelopeV2(envelope({environment:'DEV'}),{now:NOW}).errors.includes('invalid:environment'));
+});
+
+test('policy explicitly constrains environment and version',()=>{
+  const lab=envelope({environment:'LAB',policy:{...envelope().policy,allowed_environments:['PREPROD']}});
+  const deniedEnvironment=authorizeUniversalDeviceEnvelopeV2(lab,{now:NOW,identity:IDENTITY});
+  assert.equal(deniedEnvironment.decision,'HOLD');
+  assert.ok(deniedEnvironment.blockers.includes('environment_scope_denied'));
+  const deniedVersion=authorizeUniversalDeviceEnvelopeV2(envelope({version:'2.1.0'}),{now:NOW,identity:IDENTITY});
+  assert.equal(deniedVersion.decision,'HOLD');
+  assert.ok(deniedVersion.blockers.includes('version_scope_denied'));
 });
 
 test('policy is mandatory, wildcards are forbidden and cross-tenant scope is denied',()=>{
