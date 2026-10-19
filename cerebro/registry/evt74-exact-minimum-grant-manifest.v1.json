@@ -1,24 +1,41 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "state_type": "CEREBRO_EVT74_EXACT_MINIMUM_GRANT_MANIFEST_V1",
   "engine_id": "EVT-001",
   "environment": "PREPROD",
-  "status": "DEFINED_NOT_APPLIED",
+  "status": "ROUTES_DISCOVERED_GRANT_NOT_APPLIED",
   "human_required": "POLICY_CONFLICT",
   "namespace": "cerebro-b3-journal-lab/v1",
-  "known_live_route": "/wp-json/cerebro-b3-journal-lab/v1/inspect",
-  "known_live_route_state": "REST_FORBIDDEN_401_WITH_ZERO_GRANTED_ROUTES",
-  "grant_strategy": "DISCOVER_THEN_EXACT_ALLOWLIST_ONLY",
-  "route_discovery_required": true,
+  "route_discovery_required": false,
+  "live_route_catalog_attested": true,
+  "discovery_source": "STAGING WordPress REST index via designated office Opera session",
+  "discovered_routes": [
+    {"path": "/wp-json/cerebro-b3-journal-lab/v1/observe", "method": "GET", "observed_access": "REST_FORBIDDEN_401"},
+    {"path": "/wp-json/cerebro-b3-journal-lab/v1/prepare", "method": "POST", "observed_access": "NOT_INVOKED_PRE_GRANT"},
+    {"path": "/wp-json/cerebro-b3-journal-lab/v1/replay", "method": "POST", "observed_access": "NOT_INVOKED_PRE_GRANT"},
+    {"path": "/wp-json/cerebro-b3-journal-lab/v1/claim", "method": "POST", "observed_access": "NOT_INVOKED_PRE_GRANT"},
+    {"path": "/wp-json/cerebro-b3-journal-lab/v1/inspect", "method": "GET", "observed_access": "REST_FORBIDDEN_401"},
+    {"path": "/wp-json/cerebro-b3-journal-lab/v1/cleanup", "method": "POST", "observed_access": "NOT_INVOKED_PRE_GRANT"}
+  ],
+  "exact_route_allowlist_candidate": [
+    "GET /wp-json/cerebro-b3-journal-lab/v1/observe",
+    "POST /wp-json/cerebro-b3-journal-lab/v1/prepare",
+    "POST /wp-json/cerebro-b3-journal-lab/v1/replay",
+    "POST /wp-json/cerebro-b3-journal-lab/v1/claim",
+    "GET /wp-json/cerebro-b3-journal-lab/v1/inspect",
+    "POST /wp-json/cerebro-b3-journal-lab/v1/cleanup"
+  ],
+  "grant_strategy": "EXACT_ALLOWLIST_ONLY",
   "required_semantics": [
-    "INSPECT",
-    "SYNTHETIC_WRITE",
-    "READBACK",
+    "OBSERVE",
+    "PREPARE_SYNTHETIC_RECORD",
+    "CLAIM_SYNTHETIC_RECORD",
     "IDEMPOTENT_REPLAY",
+    "INSPECT_READBACK",
     "SYNTHETIC_CLEANUP",
     "NO_SIDE_EFFECT_VERIFY"
   ],
-  "forbidden_inference": "Do not invent write/replay/cleanup route paths before live route catalog or connector policy surface confirms them.",
+  "semantic_mapping_state": "ROUTE_NAMES_AND_METHODS_ATTESTED; BEHAVIORAL_MAPPING_PENDING_AUTHORIZED_GRANT_AND_SYNTHETIC_E2E",
   "grant_constraints": {
     "namespace_exact_match_required": true,
     "allowed_environments": ["LAB", "PREPROD"],
@@ -32,7 +49,8 @@
   },
   "application_preconditions": [
     "LIVE_ROUTE_CATALOG_ATTESTED",
-    "EXACT_ROUTE_TO_SEMANTIC_MAPPING_RECORDED",
+    "EXACT_METHOD_AND_PATH_ALLOWLIST_RECORDED",
+    "AUTHORIZED_POLICY_SURFACE_AVAILABLE",
     "NEGATIVE_SCOPE_TESTS_PASS",
     "ROLLBACK_REVOKE_SET_PREPARED"
   ],
@@ -44,11 +62,11 @@
     "VERIFY_NO_CUSTOMER_OR_PROD_SIDE_EFFECT",
     "REFRESH_IAM_BROWSER_VAULT_ATTESTATION"
   ],
-  "rollback": "Revoke only the exact newly granted journal routes and re-run inspect/negative-scope checks.",
+  "rollback": "Revoke only the exact six newly granted journal route/method pairs and re-run inspect/observe negative-scope checks.",
   "prod_authorized": false,
   "prod_write_authorized": false,
   "auto_merge_authorized": false,
   "trading_access": false,
   "additional_cost_eur": 0,
-  "next_gate": "LIVE_ROUTE_DISCOVERY_AND_EXACT_GRANT_AT_AUTHORIZED_POLICY_SURFACE"
+  "next_gate": "APPLY_EXACT_SIX_ROUTE_GRANT_AT_AUTHORIZED_POLICY_SURFACE_THEN_SYNTHETIC_E2E"
 }
