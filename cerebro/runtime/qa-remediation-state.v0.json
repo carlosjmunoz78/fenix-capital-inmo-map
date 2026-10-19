@@ -5,7 +5,7 @@
   "engine_id": "SELF-001",
   "environment": "PREPROD_CONTROL_PLANE",
   "version": "0.1.0",
-  "updated_at": "2026-10-19T18:03:15.147Z",
+  "updated_at": "2026-10-19T19:18:52.612Z",
   "status": "ROUTED_AUTONOMOUSLY_TO_PREPROD",
   "open_cases": 6,
   "bug_cases": 0,
@@ -188,7 +188,7 @@
       ],
       "source_type": "METRIC_OBSERVATION",
       "source_environment": "PROD_READ_ONLY",
-      "observed_at": "2026-10-19T18:03:15.075Z",
+      "observed_at": "2026-10-19T19:18:52.539Z",
       "hypothesis": "Nombrar controles visibles reduce fricción para tecnologías de asistencia.",
       "expected_metric_delta": {
         "name": "unnamed_interactive_count",
@@ -221,7 +221,7 @@
       ],
       "source_type": "METRIC_OBSERVATION",
       "source_environment": "PROD_READ_ONLY",
-      "observed_at": "2026-10-19T18:03:15.075Z",
+      "observed_at": "2026-10-19T19:18:52.539Z",
       "hypothesis": "Nombrar controles visibles reduce fricción para tecnologías de asistencia.",
       "expected_metric_delta": {
         "name": "unnamed_interactive_count",
@@ -254,7 +254,7 @@
       ],
       "source_type": "METRIC_OBSERVATION",
       "source_environment": "PROD_READ_ONLY",
-      "observed_at": "2026-10-19T18:03:15.075Z",
+      "observed_at": "2026-10-19T19:18:52.539Z",
       "hypothesis": "Añadir una estructura semántica principal puede mejorar navegación asistida sin cambiar la lógica de negocio.",
       "expected_metric_delta": {
         "name": "accessible_main_landmark",
@@ -287,7 +287,7 @@
       ],
       "source_type": "METRIC_OBSERVATION",
       "source_environment": "PROD_READ_ONLY",
-      "observed_at": "2026-10-19T18:03:15.075Z",
+      "observed_at": "2026-10-19T19:18:52.539Z",
       "hypothesis": "Añadir una estructura semántica principal puede mejorar navegación asistida sin cambiar la lógica de negocio.",
       "expected_metric_delta": {
         "name": "accessible_main_landmark",
@@ -320,7 +320,7 @@
       ],
       "source_type": "METRIC_OBSERVATION",
       "source_environment": "PROD_READ_ONLY",
-      "observed_at": "2026-10-19T18:03:15.075Z",
+      "observed_at": "2026-10-19T19:18:52.539Z",
       "hypothesis": "Aumentar el área táctil de controles pequeños puede reducir pulsaciones fallidas.",
       "expected_metric_delta": {
         "name": "small_touch_target_count",
@@ -353,7 +353,7 @@
       ],
       "source_type": "METRIC_OBSERVATION",
       "source_environment": "PROD_READ_ONLY",
-      "observed_at": "2026-10-19T18:03:15.075Z",
+      "observed_at": "2026-10-19T19:18:52.539Z",
       "hypothesis": "Aumentar el área táctil de controles pequeños puede reducir pulsaciones fallidas.",
       "expected_metric_delta": {
         "name": "small_touch_target_count",
@@ -407,7 +407,7 @@
       "evidence_refs": [
         "qa-improvement:qa-imp:df7d01d86dba70010fa11b83"
       ],
-      "created_at": "2026-10-19T18:03:15.075Z",
+      "created_at": "2026-10-19T19:18:52.539Z",
       "state": "CANDIDATE",
       "next_gate": "OLD_VS_NEW_EXPERIMENT",
       "experiment_contract": {
@@ -470,7 +470,7 @@
       "evidence_refs": [
         "qa-improvement:qa-imp:f79da2012c0d9d6a655fb154"
       ],
-      "created_at": "2026-10-19T18:03:15.075Z",
+      "created_at": "2026-10-19T19:18:52.539Z",
       "state": "CANDIDATE",
       "next_gate": "OLD_VS_NEW_EXPERIMENT",
       "experiment_contract": {
@@ -533,7 +533,7 @@
       "evidence_refs": [
         "qa-improvement:qa-imp:8d10770927b05c3c549b03ec"
       ],
-      "created_at": "2026-10-19T18:03:15.075Z",
+      "created_at": "2026-10-19T19:18:52.539Z",
       "state": "CANDIDATE",
       "next_gate": "OLD_VS_NEW_EXPERIMENT",
       "experiment_contract": {
@@ -596,7 +596,7 @@
       "evidence_refs": [
         "qa-improvement:qa-imp:db213ba0744836beb266503c"
       ],
-      "created_at": "2026-10-19T18:03:15.075Z",
+      "created_at": "2026-10-19T19:18:52.539Z",
       "state": "CANDIDATE",
       "next_gate": "OLD_VS_NEW_EXPERIMENT",
       "experiment_contract": {
@@ -659,7 +659,7 @@
       "evidence_refs": [
         "qa-improvement:qa-imp:52423800ed61b40ef9734fb3"
       ],
-      "created_at": "2026-10-19T18:03:15.075Z",
+      "created_at": "2026-10-19T19:18:52.539Z",
       "state": "CANDIDATE",
       "next_gate": "OLD_VS_NEW_EXPERIMENT",
       "experiment_contract": {
@@ -722,7 +722,7 @@
       "evidence_refs": [
         "qa-improvement:qa-imp:57a0188b6184af2eb6e90df8"
       ],
-      "created_at": "2026-10-19T18:03:15.075Z",
+      "created_at": "2026-10-19T19:18:52.539Z",
       "state": "CANDIDATE",
       "next_gate": "OLD_VS_NEW_EXPERIMENT",
       "experiment_contract": {
