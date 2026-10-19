@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "CEREBRO_ACCESSBOOT_V0_3_3",
+  "environment": "PREPROD",
+  "status": "CANDIDATE_PREPROD",
+  "physical_execution": "PENDING",
+  "confirmed_operational": false,
+  "prod_allowed": false,
+  "additional_cost_eur": 0,
+  "strategy": "TARGETED_THREE_GATE_REPLACEMENT_NO_GREEN_REPLAY",
+  "retests_only": ["HOTKEY", "VAULT_SYNTHETIC_ROUNDTRIP", "STARTUP_CONFIG"],
+  "preserves": ["Browser Universal 8765", "Device Agent 8766", "Evidence Host 8767", "legacy profiles", "identity aliases", "previous physical PASS evidence"],
+  "changes": {
+    "hotkey": "low-level user32 key injection with KeyDown semantic event readback on synthetic surface",
+    "vault": "semantic PUT->LIST->USE->clipboard readback with retry->DELETE->LIST; no stdout wording dependency; no reveal",
+    "startup": "enumerate compatible CEREBRO DeviceAgent V022/V023/V024 and EvidenceHost keys; live 8766/8767 required; reboot remains separate gate"
+  },
+  "exe_sha256": "eadbb5f7364b62b05036c7454f6e73d7e8c200748d0a13bff4af8aea54041191",
+  "zip_sha256": "fc582c43378581a769cb9d92f5350c18d46d7603862eeda1dfad393b50d8cf80",
+  "build": {
+    "go_test": "PASS_NO_TEST_FILES",
+    "windows_amd64_cross_build": "PASS",
+    "format": "PE32+ x86-64"
+  },
+  "promotion": {
+    "auto_merge_authorized": false,
+    "prod_authorized": false,
+    "trading_access": false,
+    "paid_fallback": false
+  }
+}
