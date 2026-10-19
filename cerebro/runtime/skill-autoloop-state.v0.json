@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-19T13:51:20.125Z",
+  "updated_at": "2026-10-19T14:11:37.439Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -110,42 +110,6 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 38774605690,
       "checkpointed_at": "2026-10-15T17:07:40.286Z",
-      "human_required": null,
-      "external_skill_code_execution": false,
-      "customer_data_used": false,
-      "prod_write": false,
-      "trading_access": false,
-      "paid_fallback": false,
-      "additional_cost_eur": 0
-    },
-    "github-wide-skills:28b33318e96c4dcfb74a": {
-      "candidate_id": "github-wide-skills:28b33318e96c4dcfb74a",
-      "name": "codebase-design",
-      "human_alias": "Codebase Design",
-      "wrapper_id": "skillwrap:04e1fde65b041e51cf49",
-      "domain": "software-engineering-devops",
-      "engine_bindings": [
-        "FACT-001",
-        "ARCH-001",
-        "API-001",
-        "DEP-001",
-        "MIG-001",
-        "QA-001",
-        "REG-001",
-        "DOCS-001"
-      ],
-      "value_score": 90.41,
-      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
-      "evidence_refs": {
-        "upstream_full_name": "vdsmon/skills",
-        "upstream_head_commit": "8e8653f53d463e5d69441de0928eccc4e45a2a0f",
-        "manifest_sha256": "5e5344140ee597fa157d9a54284987bc38305f5e504b64e409fdcfec4d4f2b8b",
-        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
-      },
-      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
-      "status": "WAITING_SAFE_HANDLER",
-      "source_discovery_run_id": 38801452751,
-      "checkpointed_at": "2026-10-15T20:23:24.008Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -1169,6 +1133,57 @@
         "standing_authorization_consumed": true
       },
       "autonomous_business_prod_write_authorized": false
+    },
+    "github-wide-skills:28b33318e96c4dcfb74a": {
+      "candidate_id": "github-wide-skills:28b33318e96c4dcfb74a",
+      "name": "codebase-design",
+      "human_alias": "Codebase Design",
+      "wrapper_id": "skillwrap:04e1fde65b041e51cf49",
+      "domain": "software-engineering-devops",
+      "engine_bindings": [
+        "FACT-001",
+        "ARCH-001",
+        "API-001",
+        "DEP-001",
+        "MIG-001",
+        "QA-001",
+        "REG-001",
+        "DOCS-001"
+      ],
+      "value_score": 90.41,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "vdsmon/skills",
+        "upstream_head_commit": "8e8653f53d463e5d69441de0928eccc4e45a2a0f",
+        "manifest_sha256": "5e5344140ee597fa157d9a54284987bc38305f5e504b64e409fdcfec4d4f2b8b",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "SKILL_AUTONOMY_DECISION_RECORDED",
+      "status": "COMPLETED",
+      "source_discovery_run_id": 38801452751,
+      "checkpointed_at": "2026-10-15T20:23:24.008Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0,
+      "disposition": "DESCARTAR",
+      "evidence": {
+        "reason": "UNTRUSTED_SOURCE_OR_SUPPLY_CHAIN",
+        "decision_id": "skill-autonomy:3a986bf5efdb89621367d11c",
+        "decision": "DESCARTAR",
+        "human_required": null,
+        "source": "CEREBRO Skill AutoLoop Safe Handler V0"
+      },
+      "updated_at": "2026-10-19T14:11:37.439Z",
+      "prod_authorized": false,
+      "autonomous_promotion_authorized": false,
+      "action_id": "skill-action:8f8bec5ae35cfd657173335b",
+      "action_type": "REJECT_CAPABILITY",
+      "action_status": "APPLIED_METADATA_ONLY",
+      "next_gate": "CONTINUE_DISCOVERY"
     }
   },
   "terminal_hold": {
@@ -2043,7 +2058,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "IDLE_NO_NEW_ELIGIBLE_CANDIDATE",
+  "last_action": "APPLY_REJECT_CAPABILITY_CONTINUE_DISCOVERY",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -2056,5 +2071,49 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 39240446065
+  "last_discovery_run_id": 39240446065,
+  "autonomy_action_ledger": {
+    "github-wide-skills:28b33318e96c4dcfb74a": {
+      "schema_version": "1.0.0",
+      "state_type": "CEREBRO_SKILL_AUTONOMY_ACTION_RECEIPT",
+      "action_id": "skill-action:8f8bec5ae35cfd657173335b",
+      "decision_id": "skill-autonomy:3a986bf5efdb89621367d11c",
+      "company_id": "GLOBAL",
+      "engine_id": "SKILL-AUTONOMY-ACTION",
+      "environment": "PREPROD",
+      "version": "1.0.0",
+      "skill_id": "github-wide-skills:28b33318e96c4dcfb74a",
+      "skill_version": "skillwrap:04e1fde65b041e51cf49",
+      "decision": "DESCARTAR",
+      "action_type": "REJECT_CAPABILITY",
+      "status": "APPLIED_METADATA_ONLY",
+      "next_gate": "CONTINUE_DISCOVERY",
+      "target_engine_ids": [
+        "API-001",
+        "ARCH-001",
+        "DEP-001",
+        "DOCS-001",
+        "FACT-001",
+        "MIG-001",
+        "QA-001",
+        "REG-001"
+      ],
+      "observed_at": null,
+      "human_required": null,
+      "queueable_safe_work": false,
+      "terminal_metadata_only": true,
+      "mutation_authorized": false,
+      "internal_wrapper_shadow_authorized": false,
+      "fact001_gap_candidate_authorized": false,
+      "fact001_create_authorized": false,
+      "paid_activation_authorized": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "external_skill_code_execution_authorized": false,
+      "additional_cost_eur": 0,
+      "recorded_at": "2026-10-19T14:11:37.439Z"
+    }
+  },
+  "autonomy_action_queue": {}
 }
