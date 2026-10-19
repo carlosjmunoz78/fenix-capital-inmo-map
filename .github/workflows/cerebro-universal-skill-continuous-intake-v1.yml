@@ -2,10 +2,11 @@ name: CEREBRO Universal Skill Continuous Intake V1
 
 on:
   schedule:
-    - cron: '17 */6 * * *'
+    - cron: '17 * * * *'
   repository_dispatch:
     types:
       - cerebro_skill_intake
+      - cerebro_priority_skill_intake
   workflow_dispatch:
     inputs:
       company_id:
@@ -19,11 +20,13 @@ on:
   push:
     branches:
       - 'cerebro/universal-skill-activation-factory-v1-*'
+      - 'cerebro/p0-human-language-digital-build-v1-*'
     paths:
       - 'cerebro/runtime/universal-skill-source-queue-v1.mjs'
       - 'cerebro/runtime/universal-skill-autonomous-scout-v1.mjs'
       - 'cerebro/runtime/universal-skill-lrn-impact-bridge-v1.mjs'
       - 'cerebro/runtime/universal-skill-github-intake-v1.mjs'
+      - 'cerebro/registry/skill-priority-portfolio-v1.json'
       - 'cerebro/tests/universal-skill-source-queue-v1.test.mjs'
       - 'cerebro/tests/universal-skill-autonomous-scout-v1.test.mjs'
       - 'cerebro/tests/universal-skill-lrn-impact-bridge-v1.test.mjs'
@@ -35,6 +38,7 @@ on:
       - 'cerebro/runtime/universal-skill-autonomous-scout-v1.mjs'
       - 'cerebro/runtime/universal-skill-lrn-impact-bridge-v1.mjs'
       - 'cerebro/runtime/universal-skill-github-intake-v1.mjs'
+      - 'cerebro/registry/skill-priority-portfolio-v1.json'
       - 'cerebro/tests/universal-skill-source-queue-v1.test.mjs'
       - 'cerebro/tests/universal-skill-autonomous-scout-v1.test.mjs'
       - 'cerebro/tests/universal-skill-lrn-impact-bridge-v1.test.mjs'
@@ -54,7 +58,7 @@ jobs:
     timeout-minutes: 18
     env:
       CEREBRO_SOURCE_CONCURRENCY: '8'
-      CEREBRO_SKILL_SCOUT_MAX: '16'
+      CEREBRO_SKILL_SCOUT_MAX: '24'
       CEREBRO_COMPANY_ID: fenix
     steps:
       - uses: actions/checkout@v4
@@ -81,7 +85,7 @@ jobs:
             usaf-source-queue-v1-${{ github.ref_name }}-
       - name: Continuous intake and learning tests
         run: node --test cerebro/tests/universal-skill-source-queue-v1.test.mjs cerebro/tests/universal-skill-autonomous-scout-v1.test.mjs cerebro/tests/universal-skill-lrn-impact-bridge-v1.test.mjs cerebro/tests/universal-skill-github-intake-v1.test.mjs
-      - name: Run autonomous or event-driven PREPROD intake
+      - name: Run priority-first autonomous or event-driven PREPROD intake
         shell: bash
         env:
           GITHUB_TOKEN: ${{ github.token }}
@@ -93,12 +97,12 @@ jobs:
             node cerebro/runtime/universal-skill-autonomous-scout-v1.mjs --out "$SCOUT_EVENT"
             STATUS="$(node -e "const fs=require('fs');const x=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP + '/cerebro-skill-scout-event.json','utf8'));process.stdout.write(String(x.status));")"
             if [ "$STATUS" = "DISCOVERY_DEFERRED_RATE_LIMIT" ]; then
-              echo 'GitHub Search rate-limited this bounded cycle; state unchanged and the next scheduled cycle will retry.'
+              echo 'GitHub Search rate-limited this bounded cycle; state unchanged and the next event/hourly recovery cycle will retry.'
               return 0
             fi
             COUNT="$(node -e "const fs=require('fs');const x=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP + '/cerebro-skill-scout-event.json','utf8'));process.stdout.write(String(x.client_payload.github_urls.length));")"
             if [ "$COUNT" -eq 0 ]; then
-              echo 'No eligible public skill sources discovered in this bounded cycle.'
+              echo 'No eligible public skill sources discovered in this bounded priority-first cycle.'
               return 0
             fi
             node cerebro/runtime/universal-skill-source-queue-v1.mjs --event "$SCOUT_EVENT"
@@ -125,7 +129,12 @@ jobs:
               fi
               ;;
             repository_dispatch)
-              node cerebro/runtime/universal-skill-source-queue-v1.mjs --event "$GITHUB_EVENT_PATH"
+              PAYLOAD_COUNT="$(node -e "const fs=require('fs');const e=JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH,'utf8'));const a=e.client_payload&&e.client_payload.github_urls;process.stdout.write(Array.isArray(a)&&a.length?'1':'0');")"
+              if [ "$PAYLOAD_COUNT" -eq 1 ]; then
+                node cerebro/runtime/universal-skill-source-queue-v1.mjs --event "$GITHUB_EVENT_PATH"
+              else
+                run_scout
+              fi
               ;;
             *)
               echo "Unsupported event: $EVENT_NAME" >&2
