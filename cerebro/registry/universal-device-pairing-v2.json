@@ -16,6 +16,9 @@
     "stable_device_identity": true,
     "device_aliases_supported": true,
     "tenant_scope_dynamic_per_command": true,
+    "environment_scope_explicit_per_policy": true,
+    "version_scope_explicit_per_policy": true,
+    "wildcard_policy_scopes_allowed": false,
     "legacy_browser_profile_tenant_authority": false,
     "prod_allowed": false,
     "trading_access": false,
@@ -29,6 +32,7 @@
     "additional_cost_eur": 0
   },
   "required_scope": ["device_id","company_id","venture_id","engine_id","environment","version","capability","action","policy"],
+  "policy_scope_allowlists": ["allowed_company_ids","allowed_venture_ids","allowed_engine_ids","allowed_environments","allowed_versions","allowed_capabilities","allowed_actions"],
   "human_required_codes": ["LEGAL_REQUIRED","SIGNATURE_REQUIRED","LOW_CONFIDENCE","HIGH_RISK","POLICY_CONFLICT","SECURITY_INCIDENT","MONEY_LIMIT","CUSTOMER_HUMAN_REQUEST"],
   "dependency_map": {
     "preserve": [
@@ -39,7 +43,7 @@
       "cerebro/router/execution-model-router.mjs",
       "Browser Universal legacy profile records"
     ],
-    "extend": ["dynamic mission/command scope","canonical device aliases","replay/idempotency ledger","sanitized semantic receipts"],
+    "extend": ["dynamic mission/command scope","canonical device aliases","environment/version policy scoping","replay/idempotency ledger","sanitized semantic receipts"],
     "replace": []
   },
   "factory_reuse": {
