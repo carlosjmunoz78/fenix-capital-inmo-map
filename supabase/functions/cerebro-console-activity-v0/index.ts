@@ -25,6 +25,18 @@ type GithubRun={
   head_sha?:string;
 };
 
+type GithubStep={name?:string;status?:string;conclusion?:string|null;number?:number};
+type GithubJob={name?:string;status?:string;conclusion?:string|null;steps?:GithubStep[]};
+
+type ProgressProjection={
+  progress_percent:number|null;
+  progress_completed_steps:number|null;
+  progress_total_steps:number|null;
+  current_step:string|null;
+  next_step:string|null;
+  progress_provenance:"REAL_GITHUB_JOBS"|"TERMINAL_STATUS"|"UNAVAILABLE";
+};
+
 type ActivityPayload={
   status:"OK"|"ERROR";
   observed_at:string;
@@ -71,8 +83,36 @@ async function authorizedOwner(req:Request){
   return Boolean(!ce&&ctx?.ok&&String(ctx.actor_code)==="CARLOS-ADMIN");
 }
 
+function githubHeaders(){
+  const headers:Record<string,string>={
+    "accept":"application/vnd.github+json",
+    "x-github-api-version":"2022-11-28",
+    "user-agent":"cerebro-console-activity-v0"
+  };
+  const token=(Deno.env.get("GITHUB_TOKEN")??"").trim();
+  if(token)headers.authorization=`Bearer ${token}`;
+  return headers;
+}
+
 function engineId(name:string){
   return name.match(/\b([A-Z][A-Z0-9]{1,15}-\d{3})\b/)?.[1]??null;
+}
+
+function workflowAlias(name:string){
+  const declared=engineId(name);
+  if(declared)return{alias:declared,provenance:"ENGINE_ID" as const};
+  const upper=name.toUpperCase();
+  if(upper.includes("OPERATIVA"))return{alias:"OPERATIVA",provenance:"DERIVED_WORKFLOW_NAME" as const};
+  if(upper.includes("PROD LIVE DEPLOY"))return{alias:"DEPLOY",provenance:"DERIVED_WORKFLOW_NAME" as const};
+  if(upper.includes("RUNTIME")&&upper.includes("SMOKE"))return{alias:"SMOKE",provenance:"DERIVED_WORKFLOW_NAME" as const};
+  if(upper.includes("VOICE"))return{alias:"VOICE",provenance:"DERIVED_WORKFLOW_NAME" as const};
+  if(upper.includes("FACTORY")||upper.includes("FABRICA"))return{alias:"FACTORY",provenance:"DERIVED_WORKFLOW_NAME" as const};
+  const compact=upper
+    .replace(/\bCEREBRO\b/g,"")
+    .replace(/\bPREPROD\b|\bPROD\b|\bLIVE\b/g,"")
+    .replace(/[^A-Z0-9]+/g," ")
+    .trim();
+  return{alias:(compact||"WORKFLOW").slice(0,18),provenance:"DERIVED_WORKFLOW_NAME" as const};
 }
 
 function environment(name:string,path:string){
@@ -83,12 +123,70 @@ function environment(name:string,path:string){
   return "UNKNOWN";
 }
 
-function projectRun(run:GithubRun){
+function isCerebroWorkflow(run:GithubRun){
+  const text=`${run.name??""} ${run.path??""}`.toUpperCase();
+  return text.includes("CEREBRO")||text.includes("PROD LIVE DEPLOY")||text.includes("ENGINE FACTORY");
+}
+
+function terminalProgress(run:GithubRun):ProgressProjection{
+  if(String(run.status)==="completed")return{
+    progress_percent:100,
+    progress_completed_steps:null,
+    progress_total_steps:null,
+    current_step:"Finalizado",
+    next_step:null,
+    progress_provenance:"TERMINAL_STATUS"
+  };
+  return{
+    progress_percent:null,
+    progress_completed_steps:null,
+    progress_total_steps:null,
+    current_step:null,
+    next_step:null,
+    progress_provenance:"UNAVAILABLE"
+  };
+}
+
+async function liveProgress(run:GithubRun):Promise<ProgressProjection>{
+  if(String(run.status)!=="in_progress")return terminalProgress(run);
+  // Step-level progress is only queried when an authenticated GitHub token is available.
+  // This avoids exhausting the public API quota while preserving a zero-additional-cost design.
+  if(!(Deno.env.get("GITHUB_TOKEN")??"").trim())return terminalProgress(run);
+  try{
+    const response=await fetch(`https://api.github.com/repos/${REPOSITORY}/actions/runs/${run.id}/jobs?per_page=100`,{headers:githubHeaders()});
+    if(!response.ok)return terminalProgress(run);
+    const data=await response.json() as {jobs?:GithubJob[]};
+    const jobs=data.jobs??[];
+    const steps=jobs.flatMap(job=>(job.steps??[]).map(step=>({...step,job_name:job.name??"Job"})));
+    if(!steps.length){
+      const currentJob=jobs.find(job=>job.status==="in_progress")?.name??null;
+      return{...terminalProgress(run),current_step:currentJob};
+    }
+    const completed=steps.filter(step=>step.status==="completed").length;
+    const total=steps.length;
+    const current=steps.find(step=>step.status==="in_progress");
+    const currentIndex=current?steps.indexOf(current):-1;
+    const next=steps.slice(Math.max(0,currentIndex+1)).find(step=>step.status!=="completed");
+    return{
+      progress_percent:Math.max(0,Math.min(99,Math.round((completed/total)*100))),
+      progress_completed_steps:completed,
+      progress_total_steps:total,
+      current_step:current?`${current.job_name} · ${current.name??"Paso"}`:(jobs.find(job=>job.status==="in_progress")?.name??null),
+      next_step:next?`${next.job_name} · ${next.name??"Paso"}`:null,
+      progress_provenance:"REAL_GITHUB_JOBS"
+    };
+  }catch{return terminalProgress(run)}
+}
+
+async function projectRun(run:GithubRun){
   const workflowName=String(run.name??"CEREBRO workflow");
   const workflowPath=String(run.path??"");
+  const alias=workflowAlias(workflowName);
+  const progress=await liveProgress(run);
   return{
     run_id:run.id,
     workflow_name:workflowName,
+    workflow_alias:alias.alias,
     workflow_path:workflowPath,
     status:String(run.status??"unknown"),
     conclusion:run.conclusion??null,
@@ -103,7 +201,9 @@ function projectRun(run:GithubRun){
     version:String(run.head_sha??"").slice(0,12)||"UNKNOWN",
     source:"GITHUB_ACTIONS",
     provenance:"REAL",
-    company_provenance:"DERIVED_REPOSITORY_SCOPE"
+    company_provenance:"DERIVED_REPOSITORY_SCOPE",
+    alias_provenance:alias.provenance,
+    ...progress
   };
 }
 
@@ -113,18 +213,11 @@ async function loadActivity():Promise<ActivityPayload>{
     return{...cache.payload,source_status:"CACHED",observed_at:new Date().toISOString()};
   }
   try{
-    const response=await fetch(RUNS_URL,{
-      headers:{
-        "accept":"application/vnd.github+json",
-        "x-github-api-version":"2022-11-28",
-        "user-agent":"cerebro-console-activity-v0"
-      }
-    });
+    const response=await fetch(RUNS_URL,{headers:githubHeaders()});
     if(!response.ok)throw new Error(`GITHUB_${response.status}`);
     const data=await response.json() as {workflow_runs?:GithubRun[]};
-    const runs=(data.workflow_runs??[])
-      .filter(run=>String(run.name??"").toUpperCase().includes("CEREBRO"))
-      .map(projectRun);
+    const selected=(data.workflow_runs??[]).filter(isCerebroWorkflow).slice(0,24);
+    const runs=await Promise.all(selected.map(projectRun));
     const payload:ActivityPayload={
       status:"OK",
       observed_at:new Date().toISOString(),

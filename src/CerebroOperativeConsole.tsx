@@ -1,5 +1,5 @@
 import {useEffect,useMemo,useRef,useState,type FormEvent,type KeyboardEvent} from 'react';
-import {Activity,AlertTriangle,ArrowRight,BrainCircuit,CheckCircle2,CircleDot,Clock3,Gauge,Globe2,ListTodo,MessageSquareText,Mic,Paperclip,RefreshCw,Send,ShieldCheck,Square,Target,Zap} from 'lucide-react';
+import {Activity,BrainCircuit,CheckCircle2,CircleDot,ExternalLink,ListTodo,MessageSquareText,Mic,Paperclip,RefreshCw,Send,ShieldCheck,Square} from 'lucide-react';
 import {fetchCerebroActivity,type CerebroActivityRun} from './cerebroActivityApi';
 import {applyVoiceContextHints,createVoiceRecognition,voiceRecognitionSupported,type CerebroSpeechRecognition} from './cerebroVoice';
 import './cerebro-operative-console.css';
@@ -15,24 +15,27 @@ function hhmm(date=new Date()){
  return new Intl.DateTimeFormat('es-ES',{hour:'2-digit',minute:'2-digit',hour12:false}).format(date);
 }
 
-function dateTime(value:string|null|undefined){
- if(!value)return '—';
- const date=new Date(value);
- if(Number.isNaN(date.getTime()))return '—';
- return new Intl.DateTimeFormat('es-ES',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(date);
+function parseMs(value:string|null|undefined){
+ if(!value)return null;
+ const ms=new Date(value).getTime();
+ return Number.isFinite(ms)?ms:null;
 }
 
 function elapsed(value:string|null|undefined,now:number){
- if(!value)return '—';
- const started=new Date(value).getTime();
- if(!Number.isFinite(started))return '—';
+ const started=parseMs(value);
+ if(started===null)return '—';
  const total=Math.max(0,Math.floor((now-started)/1000));
  const hours=Math.floor(total/3600);
  const minutes=Math.floor((total%3600)/60);
  const seconds=total%60;
- if(hours>0)return `${hours} h ${minutes} min`;
- if(minutes>0)return `${minutes} min ${seconds} s`;
- return `${seconds} s`;
+ if(hours>0)return `${hours}h ${minutes}m`;
+ if(minutes>0)return `${minutes}m ${seconds}s`;
+ return `${seconds}s`;
+}
+
+function startClock(value:string|null|undefined){
+ const ms=parseMs(value);
+ return ms===null?'—':hhmm(new Date(ms));
 }
 
 function setReactTextareaValue(textarea:HTMLTextAreaElement,value:string){
@@ -42,46 +45,84 @@ function setReactTextareaValue(textarea:HTMLTextAreaElement,value:string){
  textarea.dispatchEvent(new Event('change',{bubbles:true}));
 }
 
-function short(text:string,limit=170){
- const clean=text.replace(/\s+/g,' ').trim();
- return clean.length>limit?`${clean.slice(0,limit-1)}…`:clean;
-}
-
-function processStage(run:CerebroActivityRun){
- if(run.status==='completed')return 2;
- if(ACTIVE_STATUSES.has(run.status))return 1;
- return 0;
+function compactAlias(run:CerebroActivityRun){
+ if(run.workflow_alias)return run.workflow_alias;
+ if(run.engine_id)return run.engine_id;
+ const upper=run.workflow_name.toUpperCase();
+ if(upper.includes('OPERATIVA'))return 'OPERATIVA';
+ if(upper.includes('PROD LIVE DEPLOY'))return 'DEPLOY';
+ if(upper.includes('RUNTIME')&&upper.includes('SMOKE'))return 'SMOKE';
+ if(upper.includes('VOICE'))return 'VOICE';
+ if(upper.includes('FACTORY'))return 'FACTORY';
+ return upper.replace(/\bCEREBRO\b|\bPREPROD\b|\bPROD\b|\bLIVE\b/g,'').replace(/[^A-Z0-9]+/g,' ').trim().slice(0,18)||'WORKFLOW';
 }
 
 function processState(run:CerebroActivityRun){
  if(run.status==='completed'){
-  if(run.conclusion==='success')return {label:'Completado',className:'is-ok',current:'Finalizado',next:'—'};
-  return {label:run.conclusion||'Finalizado',className:'is-error',current:'Finalizado',next:'Revisar evidencia'};
+  if(run.conclusion==='success')return{label:'OK',className:'is-ok'};
+  return{label:'INCIDENCIA',className:'is-error'};
  }
- if(ACTIVE_STATUSES.has(run.status))return {label:'En ejecución',className:'is-running',current:'Ejecución',next:'Finalización'};
- return {label:'En cola',className:'is-queued',current:'Cola',next:'Ejecución'};
+ if(ACTIVE_STATUSES.has(run.status))return{label:'EN CURSO',className:'is-running'};
+ return{label:'EN COLA',className:'is-queued'};
+}
+
+function progressValue(run:CerebroActivityRun){
+ if(run.status==='completed')return 100;
+ const value=Number(run.progress_percent);
+ if(run.progress_percent!==null&&run.progress_percent!==undefined&&Number.isFinite(value))return Math.max(0,Math.min(99,Math.round(value)));
+ return null;
+}
+
+function estimatedFinish(run:CerebroActivityRun,now:number){
+ const progress=progressValue(run);
+ const started=parseMs(run.run_started_at||run.created_at);
+ if(run.status!=='in_progress'||run.progress_provenance!=='REAL_GITHUB_JOBS'||progress===null||progress<5||started===null)return '—';
+ const elapsedMs=Math.max(0,now-started);
+ const totalEstimate=elapsedMs/(progress/100);
+ const finishAt=started+totalEstimate;
+ if(!Number.isFinite(finishAt)||finishAt<=now)return '—';
+ return `≈ ${hhmm(new Date(finishAt))}`;
 }
 
 function ProcessCard({run,now}:{run:CerebroActivityRun;now:number}){
  const state=processState(run);
- const stage=processStage(run);
+ const progress=progressValue(run);
  const started=run.run_started_at||run.created_at;
- return <article className={`cerebro-process-card ${state.className}`} data-run-id={run.run_id}>
+ const isIndeterminate=ACTIVE_STATUSES.has(run.status)&&progress===null;
+ const step=run.current_step?.trim()||'';
+ const eta=estimatedFinish(run,now);
+ return <article className={`cerebro-process-card ${state.className}`} data-run-id={run.run_id} title={run.workflow_name}>
   <div className="cerebro-process-head">
-   <div><strong>{run.workflow_name}</strong><small>{run.engine_id||'ENGINE · NO DECLARADO'} · Fénix <em>DERIVED</em> · {run.environment}</small></div>
+   <div className="cerebro-process-identity"><strong>{compactAlias(run)}</strong><small>{run.environment}</small></div>
    <span className={`cerebro-state-chip ${state.className}`}>{state.label}</span>
   </div>
-  <div className="cerebro-process-route" aria-label={`Recorrido de ${run.workflow_name}`}>
-   {['En cola','En ejecución',run.status==='completed'&&run.conclusion!=='success'?'Finalizado con incidencia':'Finalizado'].map((label,index)=><div key={label} className={`cerebro-route-step ${index<stage?'is-done':index===stage?'is-current':''}`}><span>{index<stage?<CheckCircle2 size={15}/>:<CircleDot size={14}/>}</span><small>{label}</small></div>)}
+
+  <div className="cerebro-live-progress-row">
+   <div
+    className={`cerebro-live-progress ${isIndeterminate?'is-indeterminate':''}`}
+    role="progressbar"
+    aria-label={`Progreso de ${compactAlias(run)}`}
+    aria-valuemin={progress===null?undefined:0}
+    aria-valuemax={progress===null?undefined:100}
+    aria-valuenow={progress===null?undefined:progress}
+   >
+    {progress!==null?<span style={{width:`${progress}%`}}/>:<span/>}
+   </div>
+   <b className="cerebro-progress-value">{progress!==null?`${progress}%`:isIndeterminate?'LIVE':'—'}</b>
   </div>
-  <dl className="cerebro-process-meta">
-   <div><dt>Inicio</dt><dd>{run.status==='queued'?'Pendiente':dateTime(started)}</dd></div>
-   <div><dt>Transcurrido</dt><dd>{run.status==='completed'?'Finalizado':elapsed(started,now)}</dd></div>
-   <div><dt>Paso actual</dt><dd>{state.current}</dd></div>
-   <div><dt>Siguiente</dt><dd>{state.next}</dd></div>
-   <div><dt>Fin estimado</dt><dd>Estimación aún no disponible</dd></div>
-  </dl>
-  <div className="cerebro-process-foot"><span>REAL · GitHub Actions · v{run.version}</span>{run.html_url?<a href={run.html_url} target="_blank" rel="noreferrer">Ver evidencia</a>:null}</div>
+
+  {step?<div className="cerebro-current-step" title={step}>{step}</div>:null}
+
+  <div className="cerebro-process-times">
+   <span><small>Inicio</small><b>{run.status==='queued'?'—':startClock(started)}</b></span>
+   <span><small>Tiempo</small><b>{run.status==='completed'?'FIN':elapsed(started,now)}</b></span>
+   <span title={eta==='—'?'Sin estimación fiable':`DERIVED · pasos reales de GitHub Actions`}><small>Fin est.</small><b>{eta}</b></span>
+  </div>
+
+  <div className="cerebro-process-foot">
+   <span>{run.progress_provenance==='REAL_GITHUB_JOBS'?'REAL · STEPS':'REAL · RUN'}</span>
+   {run.html_url?<a href={run.html_url} target="_blank" rel="noreferrer" aria-label={`Ver evidencia de ${compactAlias(run)}`}><ExternalLink size={15}/></a>:null}
+  </div>
  </article>;
 }
 
@@ -113,12 +154,10 @@ export default function CerebroOperativeConsole(){
     setRuns(data.runs||[]);
     setActivitySource(data.source_status);
     setActivityObservedAt(data.observed_at);
-   }else{
-    setActivitySource('UNAVAILABLE');
-   }
+   }else setActivitySource('UNAVAILABLE');
   };
   void refresh();
-  timer=window.setInterval(()=>{void refresh()},60_000);
+  timer=window.setInterval(()=>{void refresh()},30_000);
   return()=>{cancelled=true;window.clearInterval(timer)};
  },[]);
 
@@ -140,14 +179,14 @@ export default function CerebroOperativeConsole(){
     const voiceListening=voiceStatus.includes('escuchando');
     const voiceSpeaking=voiceStatus.includes('hablando');
     const lineNodes=Array.from(root.querySelectorAll<HTMLElement>('.cerebro-chat-line'));
-    const lines:CoreLine[]=lineNodes.slice(-12).map((node,index)=>{
+    const lines:CoreLine[]=lineNodes.slice(-10).map((node,index)=>{
      const role=node.classList.contains('cerebro-chat-user')?'user':'cerebro';
      const strong=node.querySelector('strong');
      const clone=node.cloneNode(true) as HTMLElement;
      clone.querySelector('strong')?.remove();
      clone.querySelector('.cerebro-media-link')?.remove();
      const text=(clone.textContent||node.textContent||'').replace(strong?.textContent||'','').trim();
-     const key=`${lineNodes.length-12+index}:${role}:${text}`;
+     const key=`${lineNodes.length-10+index}:${role}:${text}`;
      if(!observedAtRef.current.has(key))observedAtRef.current.set(key,hhmm());
      return{key,role,text,observedAt:observedAtRef.current.get(key)||hhmm()};
     });
@@ -167,26 +206,12 @@ export default function CerebroOperativeConsole(){
   if(recognition){try{recognition.abort()}catch{/* already stopped */}}
  },[]);
 
- const conversationActivity=useMemo(()=>snapshot.lines.slice(-5).map(line=>{
-  const lower=line.text.toLowerCase();
-  const isError=lower.includes('no he podido contactar')||lower.includes('error');
-  const needsHuman=line.role==='cerebro'&&(lower.includes('confirm')||lower.includes('elige el número')||lower.includes('human_required'));
-  return{
-   ...line,
-   kind:isError?'error':needsHuman?'human':line.role==='user'?'user':'response',
-   title:isError?'Incidencia comunicada':needsHuman?'CEREBRO necesita tu decisión':line.role==='user'?'Orden enviada':'Respuesta de CEREBRO',
-   detail:short(line.text)
-  };
- }),[snapshot.lines]);
-
  const activeRuns=useMemo(()=>runs.filter(run=>ACTIVE_STATUSES.has(run.status)),[runs]);
  const queuedRuns=useMemo(()=>runs.filter(run=>QUEUED_STATUSES.has(run.status)),[runs]);
  const recentRuns=useMemo(()=>runs.filter(run=>run.status==='completed').slice(0,8),[runs]);
  const visibleRuns=useMemo(()=>[...activeRuns,...queuedRuns,...recentRuns],[activeRuns,queuedRuns,recentRuns]);
- const lastLine=snapshot.lines.at(-1);
  const activeCount=activeRuns.length+(snapshot.sending?1:0);
  const statusLabel=activeRuns.length||snapshot.sending?'Trabajando':snapshot.ready?'Listo':'Sin conexión';
- const nextPrimary=!snapshot.ready?'Restablecer conexión segura con CEREBRO Gateway':queuedRuns.length?`Hay ${queuedRuns.length} proceso(s) esperando ejecución`:snapshot.sending?'Esperar el resultado de la ejecución actual':lastLine?.role==='cerebro'?'Continuar la conversación o dar una nueva orden':'Dar una orden a CEREBRO';
 
  function submit(event?:FormEvent){
   event?.preventDefault();
@@ -234,7 +259,7 @@ export default function CerebroOperativeConsole(){
     window.setTimeout(()=>composerRef.current?.focus(),0);
    }
   };
-  recognition.onerror=()=>setDictationError('No se pudo completar el dictado. Puedes escribir o volver a intentarlo.');
+  recognition.onerror=()=>setDictationError('No se pudo completar el dictado.');
   recognition.onend=()=>{dictationRef.current=null;setDictating(false)};
   try{recognition.start()}catch{dictationRef.current=null;setDictating(false);setDictationError('No se pudo iniciar el dictado.')}
  }
@@ -252,78 +277,46 @@ export default function CerebroOperativeConsole(){
   }else setActivitySource('UNAVAILABLE');
  }
 
- return <main className="cerebro-operative" aria-label="CEREBRO · Vista operativa">
+ return <main className="cerebro-operative cerebro-operative-compact" aria-label="CEREBRO · Vista operativa">
   <header className="cerebro-operative-header">
    <div className="cerebro-operative-brand">
-    <span className="cerebro-operative-logo"><BrainCircuit size={34}/></span>
-    <div><h1>CEREBRO</h1><p>Asistente operativo</p></div>
+    <span className="cerebro-operative-logo"><BrainCircuit size={30}/></span>
+    <div><h1>CEREBRO</h1><p>Fénix Capital</p></div>
    </div>
-   <div className={`cerebro-work-state ${activeRuns.length||snapshot.sending?'is-working':snapshot.ready?'is-ready':'is-offline'}`}><CircleDot size={18}/><strong>{statusLabel}</strong></div>
+   <div className={`cerebro-work-state ${activeRuns.length||snapshot.sending?'is-working':snapshot.ready?'is-ready':'is-offline'}`}><CircleDot size={17}/><strong>{statusLabel}</strong></div>
    <div className="cerebro-top-metrics" aria-label="Estado operativo">
-    <div className="cerebro-metric"><CheckCircle2 size={22}/><span><small>Gateway</small><strong>{snapshot.ready?'Conectado':'Conexión pendiente'}</strong></span></div>
-    <div className="cerebro-metric"><ListTodo size={22}/><span><small>En ejecución</small><strong>{activeCount}</strong></span></div>
-    <div className="cerebro-metric cerebro-metric-progress"><Gauge size={22}/><span><small>Progreso</small><strong>Sin % fiable</strong></span></div>
-    <div className="cerebro-owner-badge" title="Superficie owner autenticada"><ShieldCheck size={20}/><span>OWNER</span></div>
+    <div className="cerebro-metric"><CheckCircle2 size={20}/><span><small>Gateway</small><strong>{snapshot.ready?'ON':'PENDIENTE'}</strong></span></div>
+    <div className="cerebro-metric"><ListTodo size={20}/><span><small>Procesos</small><strong>{activeCount} activos</strong></span></div>
+    <div className="cerebro-owner-badge"><ShieldCheck size={18}/><span>OWNER</span></div>
    </div>
   </header>
 
-  <div className="cerebro-operative-grid">
-   <section className="cerebro-surface cerebro-timeline" aria-labelledby="cerebro-timeline-title">
-    <div className="cerebro-section-title cerebro-section-title-with-action"><Activity size={30}/><div><h2 id="cerebro-timeline-title">Procesos reales de CEREBRO</h2><p>En ejecución, en cola y últimos finalizados. La barra de recorrido usa estados reales; no inventa porcentajes ni ETA.</p></div><button type="button" className="cerebro-refresh" onClick={()=>{void refreshActivity()}} title="Actualizar actividad"><RefreshCw size={18}/>Actualizar</button></div>
-    <div className="cerebro-source-line"><span className={`cerebro-source-dot is-${activitySource.toLowerCase()}`}/><strong>{activitySource==='LIVE'?'REAL · GitHub Actions en vivo':activitySource==='CACHED'?'REAL · GitHub Actions · caché reciente':'POR AUDITAR · fuente de actividad no disponible'}</strong>{activityObservedAt?<small>Observado {dateTime(activityObservedAt)}</small>:null}</div>
+  <section className="cerebro-process-zone" aria-labelledby="cerebro-process-title">
+   <div className="cerebro-process-zone-head">
+    <div className="cerebro-section-title compact"><Activity size={23}/><div><h2 id="cerebro-process-title">Procesos</h2><small className={`cerebro-source-inline is-${activitySource.toLowerCase()}`}>{activitySource==='LIVE'?'LIVE':activitySource==='CACHED'?'CACHÉ':'SIN FUENTE'}{activityObservedAt?` · ${startClock(activityObservedAt)}`:''}</small></div></div>
+    <div className="cerebro-process-counts"><span>{activeRuns.length} curso</span><span>{queuedRuns.length} cola</span><span>{recentRuns.length} recientes</span><button type="button" className="cerebro-refresh" onClick={()=>{void refreshActivity()}} aria-label="Actualizar procesos"><RefreshCw size={17}/></button></div>
+   </div>
 
-    <div className="cerebro-process-summary" aria-label="Resumen de procesos"><span><b>{activeRuns.length}</b> ejecutando</span><span><b>{queuedRuns.length}</b> en cola</span><span><b>{recentRuns.length}</b> finalizados recientes</span></div>
-    <div className="cerebro-process-list" aria-live="polite">
-     {visibleRuns.length===0?<div className="cerebro-empty-state"><Clock3 size={24}/><div><strong>{activitySource==='UNAVAILABLE'?'Todavía no hay actividad de motores verificable desde la Console.':'No hay procesos activos ni recientes en la proyección recibida.'}</strong><span>{activitySource==='UNAVAILABLE'?'La conversación sigue operativa; no mostraré trabajos inventados.':'La fuente está conectada y no reporta trabajo que mostrar.'}</span></div></div>:visibleRuns.map(run=><ProcessCard key={run.run_id} run={run} now={now}/>) }
-    </div>
+   <div className="cerebro-process-strip" aria-live="polite" aria-label="Procesos de CEREBRO; desplazamiento horizontal">
+    {visibleRuns.length===0?<div className="cerebro-empty-process"><CircleDot size={20}/><strong>{activitySource==='UNAVAILABLE'?'Sin actividad verificable':'Sin procesos que mostrar'}</strong></div>:visibleRuns.map(run=><ProcessCard key={run.run_id} run={run} now={now}/>) }
+   </div>
+  </section>
 
-    <div className="cerebro-conversation-activity">
-     <div className="cerebro-section-title compact"><MessageSquareText size={24}/><h3>Actividad de conversación</h3></div>
-     <div className="cerebro-timeline-list">
-      {conversationActivity.length===0?<div className="cerebro-empty-inline">Sin órdenes o respuestas observadas todavía.</div>:conversationActivity.map((item,index)=><article key={item.key} className={`cerebro-event is-${item.kind}`}>
-       <time>{item.observedAt}</time>
-       <span className="cerebro-event-node">{item.kind==='error'?<AlertTriangle size={20}/>:item.kind==='human'?<ShieldCheck size={20}/>:item.role==='user'?<Zap size={20}/>:<BrainCircuit size={20}/>}</span>
-       <div className="cerebro-event-card"><div className="cerebro-event-meta"><strong>{item.title}</strong><small>{item.role==='user'?'REAL · orden observada':'DERIVED · evento observado'}</small></div><p>{item.detail}</p></div>
-       {index<conversationActivity.length-1?<span className="cerebro-event-line"/>:null}
-      </article>)}
-      {snapshot.sending?<div className="cerebro-working-tail"><span className="cerebro-pulse-dots"><i/><i/><i/></span>CEREBRO sigue trabajando en tu petición…</div>:null}
-     </div>
-    </div>
-   </section>
-
-   <aside className="cerebro-operative-side">
-    <section className="cerebro-surface cerebro-now" aria-labelledby="cerebro-now-title">
-     <div className="cerebro-section-title compact"><Target size={28}/><h2 id="cerebro-now-title">En marcha ahora</h2></div>
-     {activeRuns.map(run=><div className="cerebro-now-row is-running" key={run.run_id}><span className="cerebro-now-icon"><BrainCircuit size={22}/></span><div><strong>{run.engine_id||run.workflow_name}</strong><small>{run.workflow_name}</small></div><span className="cerebro-state-chip is-running">En curso</span></div>)}
-     {activeRuns.length===0&&!snapshot.sending&&!snapshot.voiceActive?<div className="cerebro-empty-side"><CircleDot size={24}/><div><strong>Sin ejecución activa verificada</strong><span>No afirmaré que CEREBRO trabaja si la fuente real no lo acredita.</span></div></div>:null}
-     {snapshot.sending?<div className="cerebro-now-row is-running"><span className="cerebro-now-icon"><MessageSquareText size={22}/></span><div><strong>Procesando tu petición</strong><small>REAL · petición de Console en curso</small></div><span className="cerebro-state-chip is-running">En curso</span></div>:null}
-     {snapshot.voiceActive?<div className="cerebro-now-row"><span className="cerebro-now-icon"><Mic size={22}/></span><div><strong>Conversación por voz activa</strong><small>{snapshot.voiceListening?'Escuchando':snapshot.voiceSpeaking?'Respondiendo':'Preparada'}</small></div><span className="cerebro-state-chip">Activa</span></div>:null}
-     <div className="cerebro-now-row"><span className="cerebro-now-icon"><Globe2 size={22}/></span><div><strong>CEREBRO Gateway</strong><small>{snapshot.ready?'Transporte autenticado verificado':'No disponible'}</small></div><span className={`cerebro-state-chip ${snapshot.ready?'is-ok':'is-error'}`}>{snapshot.ready?'Conectado':'Bloqueado'}</span></div>
-    </section>
-
-    <section className="cerebro-surface cerebro-next" aria-labelledby="cerebro-next-title">
-     <div className="cerebro-section-title compact"><ArrowRight size={28}/><h2 id="cerebro-next-title">Siguiente</h2></div>
-     <ol>
-      <li><span>1</span><strong>{nextPrimary}</strong></li>
-      <li><span>2</span><strong>Las acciones sensibles conservarán propuesta y confirmación humana</strong></li>
-     </ol>
-    </section>
-
-    <section className="cerebro-surface cerebro-reality" aria-label="Contrato de datos de la vista">
-     <div><ShieldCheck size={20}/><strong>Sin datos ficticios</strong></div>
-     <p>REAL identifica ejecuciones observadas en su fuente. DERIVED identifica contexto inferido de un origen real. Cuando la fuente no ofrece porcentaje o ETA, se muestra expresamente como no disponible.</p>
-    </section>
-   </aside>
-  </div>
+  <section className="cerebro-chat-zone" aria-label="Conversación con CEREBRO">
+   <div className="cerebro-chat-stream">
+    {snapshot.lines.length===0?<div className="cerebro-chat-empty">{snapshot.ready?'Da una orden a CEREBRO.':'Esperando conexión segura con CEREBRO…'}</div>:snapshot.lines.map(line=><div key={line.key} className={`cerebro-chat-bubble is-${line.role}`}><small>{line.role==='user'?'TÚ':'CEREBRO'} · {line.observedAt}</small><p>{line.text}</p></div>)}
+    {snapshot.sending?<div className="cerebro-chat-working"><span/><span/><span/> CEREBRO trabajando…</div>:null}
+   </div>
+  </section>
 
   <section className="cerebro-composer-shell" aria-label="Compositor de órdenes">
    <form onSubmit={submit} className="cerebro-operative-form">
     <div className="cerebro-composer-main">
-     <button type="button" className="cerebro-icon-button" disabled title="Adjuntar archivo · POR AUDITAR: todavía no existe contrato real de subida" aria-label="Adjuntar archivo"><Paperclip size={20}/></button>
-     <button type="button" className={`cerebro-icon-button ${dictating?'is-active':''}`} onClick={toggleDictation} disabled={!snapshot.ready||snapshot.sending||snapshot.voiceActive||!voiceRecognitionSupported()} title={dictating?'Detener dictado':'Dictar al campo de texto'} aria-label={dictating?'Detener dictado':'Dictar'}>{dictating?<Square size={18}/>:<Mic size={20}/>}</button>
+     <button type="button" className="cerebro-icon-button" disabled title="Adjuntar archivo · pendiente de contrato real" aria-label="Adjuntar archivo"><Paperclip size={20}/></button>
+     <button type="button" className={`cerebro-icon-button ${dictating?'is-active':''}`} onClick={toggleDictation} disabled={!snapshot.ready||snapshot.sending||snapshot.voiceActive||!voiceRecognitionSupported()} title={dictating?'Detener dictado':'Dictar'} aria-label={dictating?'Detener dictado':'Dictar'}>{dictating?<Square size={18}/>:<Mic size={20}/>}</button>
      <button type="button" className={`cerebro-talk-button ${snapshot.voiceActive?'is-active':''}`} onClick={toggleVoice} disabled={!snapshot.ready||snapshot.sending||dictating} title={snapshot.voiceActive?'Finalizar conversación por voz':'Hablar con CEREBRO'} aria-label={snapshot.voiceActive?'Finalizar conversación por voz':'Hablar con CEREBRO'}>{snapshot.voiceActive?<Square size={17}/>:<MessageSquareText size={18}/>}<span>{snapshot.voiceActive?'Finalizar':'Hablar'}</span></button>
      <textarea ref={composerRef} value={composer} onChange={event=>setComposer(event.target.value)} onKeyDown={onComposerKeyDown} disabled={!snapshot.ready||snapshot.sending} rows={1} placeholder={snapshot.ready?'Escribe, habla o da una orden a CEREBRO…':'Esperando conexión segura con CEREBRO…'} aria-label="Escribe una orden para CEREBRO"/>
-     <button type="submit" className="cerebro-send-button" disabled={!snapshot.ready||snapshot.sending||!composer.trim()} title="Enviar a CEREBRO · Enter" aria-label="Enviar a CEREBRO"><Send size={22}/></button>
+     <button type="submit" className="cerebro-send-button" disabled={!snapshot.ready||snapshot.sending||!composer.trim()} title="Enviar · Enter" aria-label="Enviar a CEREBRO"><Send size={21}/></button>
     </div>
     {dictationError?<div className="cerebro-dictation-error" role="status">{dictationError}</div>:null}
    </form>
