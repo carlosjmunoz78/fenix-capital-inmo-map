@@ -29,9 +29,11 @@ for (const width of widths) {
   const diag = await page.evaluate(({expected,width}) => {
     const sec = document.querySelector('#andalucia');
     const heading = sec?.querySelector('h2')?.textContent?.trim() || '';
-    const allRegionCards = [...(sec?.querySelectorAll('.region-card') || [])];
-    const cards = [...(sec?.querySelectorAll('.region-v2-grid > a.region-card') || [])];
-    const links = cards.map(c => ({text:(c.textContent||'').replace(/\s+/g,' ').trim(), href:c.getAttribute('href'), html:c.outerHTML}));
+    const cards = [...(sec?.querySelectorAll('.region-v2-grid > .region-card') || [])];
+    const links = cards.map(c => {
+      const a = c.querySelector('a.region-card-link');
+      return {text:(c.textContent||'').replace(/\s+/g,' ').trim(), href:a?.getAttribute('href') || null, html:c.outerHTML};
+    });
     const expectedOk = expected.every(([href,name]) => links.some(l => l.href === href && l.text.includes(name)));
     const rects = cards.map(c => c.getBoundingClientRect());
     let overlap = false;
@@ -47,7 +49,6 @@ for (const width of widths) {
     return {
       heading,
       directCardCount: cards.length,
-      allRegionCardCount: allRegionCards.length,
       links,
       expectedOk,
       overlap,
