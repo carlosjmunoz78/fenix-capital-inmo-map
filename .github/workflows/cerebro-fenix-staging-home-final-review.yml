@@ -1,0 +1,28 @@
+name: CEREBRO Fenix STAGING Home Final Review
+on:
+  push:
+    branches: [cerebro/seo001-staging-audit-v5-20261018]
+    paths:
+      - 'cerebro/qa/home-preprod-final-review.mjs'
+      - '.github/workflows/cerebro-fenix-staging-home-final-review.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: node cerebro/qa/home-preprod-final-review.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fenix-home-final-review-${{ github.sha }}
+          path: artifacts/home-final-review
+          retention-days: 30
