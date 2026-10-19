@@ -6,7 +6,7 @@ export const UNIVERSAL_DEVICE_HUMAN_REQUIRED=Object.freeze([...HUMAN_REQUIRED_CO
 const SECRET_KEYS=new Set(['password','passwd','secret','token','access_token','refresh_token','api_key','apikey','cookie','cookies','authorization','auth_header','private_key','client_secret']);
 const CREDENTIAL_REF_KEYS=new Set(['credential_ref','credential_refs']);
 const REQUIRED_FIELDS=Object.freeze(['request_id','idempotency_key','issued_at','expires_at','device_id','company_id','venture_id','engine_id','environment','version','capability','action','policy']);
-const POLICY_SCOPE_FIELDS=Object.freeze(['allowed_company_ids','allowed_venture_ids','allowed_engine_ids','allowed_capabilities','allowed_actions']);
+const POLICY_SCOPE_FIELDS=Object.freeze(['allowed_company_ids','allowed_venture_ids','allowed_engine_ids','allowed_environments','allowed_versions','allowed_capabilities','allowed_actions']);
 
 export class UniversalDeviceEnvelopeError extends Error{
   constructor(code,message,context={}){super(message);this.name='UniversalDeviceEnvelopeError';this.code=code;this.context=context;}
@@ -119,6 +119,8 @@ export function authorizeUniversalDeviceEnvelopeV2(envelope={},context={}){
   if(!policyAllows(envelope.company_id,p.allowed_company_ids)) blockers.push('company_scope_denied');
   if(!policyAllows(envelope.venture_id,p.allowed_venture_ids)) blockers.push('venture_scope_denied');
   if(!policyAllows(envelope.engine_id,p.allowed_engine_ids)) blockers.push('engine_scope_denied');
+  if(!policyAllows(check.normalized_environment,p.allowed_environments.map(upper))) blockers.push('environment_scope_denied');
+  if(!policyAllows(envelope.version,p.allowed_versions)) blockers.push('version_scope_denied');
   if(!policyAllows(envelope.capability,p.allowed_capabilities)) blockers.push('capability_scope_denied');
   if(!policyAllows(envelope.action,p.allowed_actions)) blockers.push('action_scope_denied');
   if(context.expected_company_id&&context.expected_company_id!==envelope.company_id) blockers.push('tenant_isolation_violation');
