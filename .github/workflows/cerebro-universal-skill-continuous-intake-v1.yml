@@ -1,0 +1,139 @@
+name: CEREBRO Universal Skill Continuous Intake V1
+
+on:
+  schedule:
+    - cron: '17 */6 * * *'
+  repository_dispatch:
+    types:
+      - cerebro_skill_intake
+  workflow_dispatch:
+    inputs:
+      company_id:
+        description: company_id
+        required: true
+        default: fenix
+      github_urls:
+        description: Optional GitHub skill URLs separated by comma or newline
+        required: false
+        default: ''
+  push:
+    branches:
+      - 'cerebro/universal-skill-activation-factory-v1-*'
+    paths:
+      - 'cerebro/runtime/universal-skill-source-queue-v1.mjs'
+      - 'cerebro/runtime/universal-skill-autonomous-scout-v1.mjs'
+      - 'cerebro/runtime/universal-skill-lrn-impact-bridge-v1.mjs'
+      - 'cerebro/runtime/universal-skill-github-intake-v1.mjs'
+      - 'cerebro/tests/universal-skill-source-queue-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-autonomous-scout-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-lrn-impact-bridge-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-github-intake-v1.test.mjs'
+      - '.github/workflows/cerebro-universal-skill-continuous-intake-v1.yml'
+  pull_request:
+    paths:
+      - 'cerebro/runtime/universal-skill-source-queue-v1.mjs'
+      - 'cerebro/runtime/universal-skill-autonomous-scout-v1.mjs'
+      - 'cerebro/runtime/universal-skill-lrn-impact-bridge-v1.mjs'
+      - 'cerebro/runtime/universal-skill-github-intake-v1.mjs'
+      - 'cerebro/tests/universal-skill-source-queue-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-autonomous-scout-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-lrn-impact-bridge-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-github-intake-v1.test.mjs'
+      - '.github/workflows/cerebro-universal-skill-continuous-intake-v1.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: universal-skill-continuous-intake-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  durable-source-queue:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    env:
+      CEREBRO_SOURCE_CONCURRENCY: '8'
+      CEREBRO_SKILL_SCOUT_MAX: '16'
+      CEREBRO_COMPANY_ID: fenix
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Prepare persistent PREPROD state roots
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "CEREBRO_SOURCE_QUEUE_ROOT=$RUNNER_TEMP/cerebro-source-queue-persistent" >> "$GITHUB_ENV"
+          echo "CEREBRO_LRN_LEDGER_FILE=$RUNNER_TEMP/cerebro-lrn-persistent/learning.v8" >> "$GITHUB_ENV"
+          echo "CEREBRO_IMPROVEMENT_CANDIDATE_LEDGER_FILE=$RUNNER_TEMP/cerebro-lrn-persistent/improvement-candidates.v8" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/cerebro-source-queue-persistent" "$RUNNER_TEMP/cerebro-lrn-persistent"
+      - name: Restore and persist durable PREPROD state
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ runner.temp }}/cerebro-source-queue-persistent
+            ${{ runner.temp }}/cerebro-lrn-persistent
+          key: usaf-continuous-state-v2-${{ github.ref_name }}-${{ github.run_id }}
+          restore-keys: |
+            usaf-continuous-state-v2-${{ github.ref_name }}-
+            usaf-source-queue-v1-${{ github.ref_name }}-
+      - name: Continuous intake and learning tests
+        run: node --test cerebro/tests/universal-skill-source-queue-v1.test.mjs cerebro/tests/universal-skill-autonomous-scout-v1.test.mjs cerebro/tests/universal-skill-lrn-impact-bridge-v1.test.mjs cerebro/tests/universal-skill-github-intake-v1.test.mjs
+      - name: Run autonomous or event-driven PREPROD intake
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          EVENT_NAME="$GITHUB_EVENT_NAME"
+          SCOUT_EVENT="$RUNNER_TEMP/cerebro-skill-scout-event.json"
+          run_scout() {
+            node cerebro/runtime/universal-skill-autonomous-scout-v1.mjs --out "$SCOUT_EVENT"
+            STATUS="$(node -e "const fs=require('fs');const x=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP + '/cerebro-skill-scout-event.json','utf8'));process.stdout.write(String(x.status));")"
+            if [ "$STATUS" = "DISCOVERY_DEFERRED_RATE_LIMIT" ]; then
+              echo 'GitHub Search rate-limited this bounded cycle; state unchanged and the next scheduled cycle will retry.'
+              return 0
+            fi
+            COUNT="$(node -e "const fs=require('fs');const x=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP + '/cerebro-skill-scout-event.json','utf8'));process.stdout.write(String(x.client_payload.github_urls.length));")"
+            if [ "$COUNT" -eq 0 ]; then
+              echo 'No eligible public skill sources discovered in this bounded cycle.'
+              return 0
+            fi
+            node cerebro/runtime/universal-skill-source-queue-v1.mjs --event "$SCOUT_EVENT"
+          }
+          run_pinned_pr_source() {
+            cat > "$SCOUT_EVENT" <<'JSON'
+          {"client_payload":{"company_id":"fenix","github_urls":["https://github.com/ericrisco/rsc-harness/tree/5bf06162f682dd61cbf791b4bc340bc353d84e3d/skills/finance-ops"]}}
+          JSON
+            node cerebro/runtime/universal-skill-source-queue-v1.mjs --event "$SCOUT_EVENT"
+          }
+          case "$EVENT_NAME" in
+            pull_request)
+              run_pinned_pr_source
+              ;;
+            push|schedule)
+              run_scout
+              ;;
+            workflow_dispatch)
+              MANUAL_COUNT="$(node -e "const fs=require('fs');const e=JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH,'utf8'));const v=String((e.inputs&&e.inputs.github_urls)||'').trim();process.stdout.write(v? '1':'0');")"
+              if [ "$MANUAL_COUNT" -eq 1 ]; then
+                node cerebro/runtime/universal-skill-source-queue-v1.mjs --event "$GITHUB_EVENT_PATH"
+              else
+                run_scout
+              fi
+              ;;
+            repository_dispatch)
+              node cerebro/runtime/universal-skill-source-queue-v1.mjs --event "$GITHUB_EVENT_PATH"
+              ;;
+            *)
+              echo "Unsupported event: $EVENT_NAME" >&2
+              exit 2
+              ;;
+          esac
+      - name: Assert PREPROD-only authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -Eq 'prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true|external_skill_code_execution[[:space:]]*:[[:space:]]*true|npm install|child_process' cerebro/runtime/universal-skill-source-queue-v1.mjs cerebro/runtime/universal-skill-autonomous-scout-v1.mjs cerebro/runtime/universal-skill-lrn-impact-bridge-v1.mjs cerebro/runtime/universal-skill-github-intake-v1.mjs

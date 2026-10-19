@@ -1,0 +1,130 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_FAST_EVOLUTION_EXECUTION_V1",
+  "extends": "cerebro/registry/cerebro-compounding-evolution-policy.v1.json",
+  "company_id": "GLOBAL",
+  "engine_id": "LRN-001",
+  "environment": "PREPROD",
+  "version": "1.0.0",
+  "status": "STAGED_FAST_EXECUTION_CONTRACT",
+  "objective": "Minimize learning-to-improvement latency while preserving security, correctness, evidence, rollbackability and zero-additional-cost defaults.",
+  "execution_model": {
+    "primary_trigger": "EVENT_DRIVEN",
+    "polling_primary": false,
+    "daily_cycle_only": false,
+    "microcycles_enabled": true,
+    "blocked_work_never_blocks_other_safe_fronts": true,
+    "deterministic_fast_path_before_ai": true,
+    "heavy_work_async": true,
+    "reuse_cache_before_recompute": true,
+    "early_reject_low_value_candidates": true,
+    "coalesce_duplicate_events": true,
+    "batch_coalescing_ms": 250
+  },
+  "latency_classes": {
+    "ROUTE_AND_CLASSIFY": {"target_ms": 250, "hard_ceiling_ms": 2000},
+    "DETERMINISTIC_VALIDATION": {"target_ms": 2000, "hard_ceiling_ms": 10000},
+    "CANDIDATE_SCORE": {"target_ms": 10000, "hard_ceiling_ms": 30000},
+    "MICRO_EXPERIMENT": {"target_ms": 60000, "hard_ceiling_ms": 180000},
+    "STANDARD_EXPERIMENT": {"target_ms": 300000, "hard_ceiling_ms": 900000}
+  },
+  "parallelism": {
+    "max_active_fronts": 5,
+    "max_global_wip": 10,
+    "max_wip_per_front": 2,
+    "critical_path_first": true,
+    "bounded_parallelism": true,
+    "priority_order": ["P0_SECURITY_OR_REGRESSION", "P1_USER_OR_PERFORMANCE", "P2_CAPABILITY_OR_MARKET", "P3_PROACTIVE"]
+  },
+  "event_triggers": [
+    "SECURITY_FINDING",
+    "ERROR",
+    "REGRESSION",
+    "HUMAN_FEEDBACK",
+    "PERFORMANCE_REGRESSION",
+    "COST_REGRESSION",
+    "NEW_CAPABILITY",
+    "MARKET_SIGNAL",
+    "DEPENDENCY_CHANGE",
+    "NEW_EVIDENCE",
+    "PROACTIVE_IMPROVEMENT"
+  ],
+  "fast_path": [
+    "CLASSIFY_SIGNAL",
+    "DEDUPLICATE",
+    "REUSE_EXISTING_EVIDENCE_AND_CACHE",
+    "RUN_CHEAP_DETERMINISTIC_CHECKS",
+    "REJECT_OR_PRIORITIZE",
+    "RUN_SMALLEST_VALID_OLD_VS_NEW_EXPERIMENT",
+    "EVALUATE",
+    "TRIBUNAL",
+    "PERSIST_LEARNING",
+    "QUEUE_SAFE_ADOPTION_OR_NEXT_EXPERIMENT"
+  ],
+  "slow_path_rules": {
+    "split_large_work": true,
+    "checkpoint_and_resume": true,
+    "do_not_hold_worker_for_external_wait": true,
+    "queue_via_existing_job_runtime": "JOB-001",
+    "reuse_shared_worker": true,
+    "new_server_per_engine": false
+  },
+  "existing_runtime_bindings": {
+    "learning": "LRN-001",
+    "research_scout": "RSH-001",
+    "engine_factory": "FACT-001",
+    "jobs": "JOB-001",
+    "evaluation": "EVA-001",
+    "tribunal": "JDG-001",
+    "observability": "OBSERV-001",
+    "finops": "FINOPS-001",
+    "security": ["SEC-001", "SEC-002", "RED-001", "IAM-001", "INC-001"],
+    "qa": "QA-001",
+    "rollback": "RBLD-001",
+    "disaster_recovery": "DR-001"
+  },
+  "required_cycle_metrics": [
+    "signal_to_classification_ms",
+    "classification_to_experiment_ms",
+    "experiment_to_decision_ms",
+    "learning_to_adoption_ms",
+    "queue_wait_ms",
+    "rework_ms",
+    "p50_ms",
+    "p95_ms",
+    "throughput_per_hour",
+    "success_rate",
+    "reuse_ratio",
+    "human_minutes",
+    "additional_cost_eur",
+    "old_vs_new_delta"
+  ],
+  "speed_failure_policy": {
+    "target_miss_is_learning_signal": true,
+    "repeated_target_miss_requires_root_cause": true,
+    "optimization_must_preserve_security_and_correctness": true,
+    "no_evidence_skipping_for_speed": true,
+    "no_permission_broadening_for_speed": true,
+    "no_prod_bypass_for_speed": true
+  },
+  "security_boundaries": {
+    "red_team_owned_or_explicitly_authorized_only": true,
+    "red_team_lab_or_preprod_default": true,
+    "non_destructive_default": true,
+    "credential_theft": false,
+    "data_exfiltration": false,
+    "malicious_persistence": false,
+    "third_party_unauthorized_access": false
+  },
+  "authority": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "auto_merge_authorized": false,
+    "spend_authorized": false,
+    "external_dependency_install_authorized": false,
+    "external_skill_code_execution_authorized": false,
+    "trading_access": false,
+    "additional_cost_eur": 0
+  },
+  "next_gate": "BIND_FAST_PLANNER_TO_EXISTING_LRN_RSH_FACT_JOB001_PREPROD_CHAIN_AND_MEASURE_REAL_MICROCYCLE_P50_P95"
+}

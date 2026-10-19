@@ -1,0 +1,59 @@
+{
+  "schema_version": "1.0.0",
+  "contract_id": "CEREBRO-B20-P0-ACCEPTANCE-AND-SCALE-RELEASE-V1",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "1.0.0",
+  "objective": "Certify FACT-001 as a general industrial skill/capability activation factory by reconciling B19 lifecycle evidence, FAST_LANE/blind-batch, Scale184 V1/V2, Repository E2E and GitHub Live E2E on one exact PR head without candidate-specific core code or authority expansion.",
+  "required_evidence": [
+    "B19_GREEN_PREPROD persisted lifecycle evidence",
+    "Scale184 V1 truthful 184 outcome matrix",
+    "Scale184 V2 evidenced auto-engineering improvements without false global FULL",
+    "blind real-catalog batch with truthful terminal outcomes",
+    "FAST_LANE bounded concurrent worker execution and durable idempotency",
+    "unseen repository activation without candidate-specific core code",
+    "live public GitHub skill URL read-only activation",
+    "full CEREBRO regression",
+    "exact-head GitHub Actions certification artifact"
+  ],
+  "terminal_truth": {
+    "catalogued_is_integrated": false,
+    "metadata_is_physical_evidence": false,
+    "config_is_physical_evidence": false,
+    "synthetic_is_current_physical_evidence": false,
+    "full_requires_binding_and_required_gates": true,
+    "hold_or_fail_closed_when_evidence_missing": true
+  },
+  "failure_conditions": [
+    "candidate-specific core branch required for a standard new entry",
+    "FULL or NATIVE_FULL without required binding/evidence",
+    "PROD authority expansion",
+    "automatic merge authorization",
+    "Trading access",
+    "customer data use",
+    "external code execution or dependency installation not governed",
+    "additional cost above 0 EUR"
+  ],
+  "authority": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "prod_mutation_authorized": false,
+    "auto_merge_authorized": false,
+    "external_skill_code_execution_authorized": false,
+    "external_dependency_install_authorized": false,
+    "customer_data_authorized": false,
+    "trading_access": false,
+    "additional_cost_eur": 0
+  },
+  "human_required": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ]
+}

@@ -1,0 +1,116 @@
+name: CEREBRO FACT-001 P0 Candidate Freeze V1
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'cerebro/universal-skill-activation-factory-v1-*'
+    paths:
+      - 'cerebro/tests/fact001-p0-candidate-freeze-v1.test.mjs'
+      - 'cerebro/registry/fact001-p0-candidate-freeze.v1.json'
+      - 'cerebro/skills/cerebro-184-live-convergence.v3.json'
+      - 'cerebro/runtime/universal-skill-batch-orchestrator-v1.mjs'
+      - 'cerebro/runtime/universal-skill-auto-engineering-v1.mjs'
+      - '.github/workflows/cerebro-universal-skill-continuous-intake-v1.yml'
+      - '.github/workflows/cerebro-fact001-p0-candidate-freeze-v1.yml'
+  pull_request:
+    paths:
+      - 'cerebro/tests/fact001-p0-candidate-freeze-v1.test.mjs'
+      - 'cerebro/registry/fact001-p0-candidate-freeze.v1.json'
+      - 'cerebro/skills/cerebro-184-live-convergence.v3.json'
+      - 'cerebro/runtime/universal-skill-batch-orchestrator-v1.mjs'
+      - 'cerebro/runtime/universal-skill-auto-engineering-v1.mjs'
+      - '.github/workflows/cerebro-universal-skill-continuous-intake-v1.yml'
+      - '.github/workflows/cerebro-fact001-p0-candidate-freeze-v1.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-fact001-p0-freeze-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fact001-p0-candidate-freeze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      EXACT_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - name: Checkout exact candidate head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.x'
+
+      - name: Verify exact candidate head
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXACT_HEAD"
+
+      - name: FACT-001 P0 candidate freeze contract
+        run: node --test cerebro/tests/fact001-p0-candidate-freeze-v1.test.mjs
+
+      - name: Re-run B20 candidate-free generic factory acceptance
+        run: node --test cerebro/tests/universal-skill-b20-p0-acceptance-and-scale-release-certification-v1.test.mjs
+
+      - name: Full CEREBRO regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILES="$(find cerebro/tests -maxdepth 1 -type f -name '*.test.mjs' \
+            | grep -v '/lab-' \
+            | grep -v '/seo-autonomous-regression.e2e.test.mjs$' \
+            | grep -v '/repo-inventory\.test\.mjs$' \
+            | sort)"
+          test -n "$FILES"
+          node --test $FILES
+
+      - name: Materialize exact-head freeze evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .artifacts/fact001-p0-freeze
+          node <<'NODE'
+          const fs=require('fs');
+          const convergence=JSON.parse(fs.readFileSync('cerebro/skills/cerebro-184-live-convergence.v3.json','utf8'));
+          const freeze=JSON.parse(fs.readFileSync('cerebro/registry/fact001-p0-candidate-freeze.v1.json','utf8'));
+          const summary={
+            schema_version:'1.0.0',
+            state_type:'CEREBRO_FACT001_P0_CANDIDATE_FREEZE_EVIDENCE_V1',
+            status:'GREEN_PREPROD',
+            exact_head:process.env.EXACT_HEAD,
+            run_id:Number(process.env.GITHUB_RUN_ID),
+            environment:'PREPROD',
+            catalog_size:convergence.catalog_size,
+            normalized_item_count:convergence.normalized_item_count,
+            full_catalog_reconciled:convergence.full_catalog_reconciled,
+            physical_evidence_pending:convergence.remaining_physical_gates.map(g=>({id:g.id,next_gate:g.next_gate})),
+            activation_policy:freeze.catalog_contract.activation_policy,
+            candidate_specific_core_code_required:false,
+            prod_authorized:false,
+            prod_write_authorized:false,
+            auto_merge_authorized:false,
+            customer_data_authorized:false,
+            trading_access:false,
+            additional_cost_eur:0
+          };
+          fs.writeFileSync('.artifacts/fact001-p0-freeze/certification.json',JSON.stringify(summary,null,2)+'\n');
+          fs.writeFileSync('.artifacts/fact001-p0-freeze/exact-head.txt',process.env.EXACT_HEAD+'\n');
+          console.log(JSON.stringify(summary));
+          NODE
+
+      - name: Upload candidate freeze evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-fact001-p0-candidate-freeze-${{ github.event.pull_request.head.sha || github.sha }}
+          path: .artifacts/fact001-p0-freeze
+          if-no-files-found: error
+          retention-days: 14

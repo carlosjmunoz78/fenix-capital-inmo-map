@@ -1,7 +1,7 @@
 {
-  "schema_version": "4.0.1",
+  "schema_version": "4.1.1",
   "state_type": "CEREBRO_GLOBAL_OPERATIONAL_CONVERGENCE_V4",
-  "generated_at": "2026-10-17",
+  "generated_at": "2026-10-18",
   "company_id": "GLOBAL",
   "engine_id": "FACT-001",
   "environment": "PREPROD",
@@ -12,7 +12,7 @@
     "cerebro/skills/cerebro-184-live-convergence.v2.json",
     "cerebro/skills/cerebro-184-live-convergence.v3.json"
   ],
-  "status": "CURRENT_MAIN_RECONCILED_LOGICAL_AND_SKILL_CLOSURES_GREEN_PHYSICAL_AND_POLICY_GATES_ONLY",
+  "status": "CURRENT_MAIN_RECONCILED_LOGICAL_SKILL_AND_SCHEDULED_SOURCE_ACCEPTANCE_GREEN_PHYSICAL_AND_POLICY_GATES_ONLY",
   "truth_contract": {
     "canonical_logical_engine_count": 179,
     "normalized_capability_catalog_count": 184,
@@ -43,14 +43,25 @@
       "owner_engine": "COMPET-001",
       "state": "FULL_E2E_REAL_PREPROD",
       "evidence": "cerebro/registry/compet-real-consumer-adoption-v1.json",
-      "boundary": "Semantic downstream adoption is closed. Real competitor targets and a physical GET-only baseline are also configured; only the required multi-run scheduled soak remains open."
+      "baseline_evidence": "cerebro/registry/compet-real-targets.v0.json",
+      "physical_evidence": "cerebro/registry/compet-real-targets-acceptance.v1.json",
+      "boundary": "Semantic downstream adoption is closed. The preserved V0 registry retains the physical GET-only Cordoba baseline, while additive acceptance V1 certifies three genuine separated scheduled GREEN runs. No provider write or PROD authority is implied."
     },
     {
       "id": "CAP-NATIVE",
       "owner_engine": "CAP-001",
       "state": "FULL_E2E_REAL_PREPROD",
       "evidence": "cerebro/registry/cap-real-consumer-adoption-v1.json",
-      "boundary": "Semantic downstream adoption is closed. The official IECA Córdoba GET-only source and physical PREPROD discovery evidence are also configured; only the required scheduled soak remains open."
+      "physical_evidence": "cerebro/registry/cap-ieca-cordoba.v0.json",
+      "boundary": "Semantic downstream adoption is closed and the official IECA Cordoba GET-only source has physical PREPROD discovery plus three genuine separated scheduled GREEN runs. No CRM/provider write or PROD authority is implied."
+    },
+    {
+      "id": "WATCH-LEARN-47",
+      "owner_engine": "LRN-001",
+      "state": "CONTINUOUS_PREPROD_ACCEPTANCE_GREEN",
+      "evidence": "cerebro/registry/watch-learn-remote-observation.v0.json",
+      "retention_evidence": "cerebro/registry/watch-learn-retention-review.v1.json",
+      "boundary": "Three genuine separated schedule runs are GREEN, every reviewed cycle is replay-stable and bounded retention review is GREEN. No remote write, customer-data or PROD authority is implied."
     },
     {
       "id": "LEAD-NATIVE",
@@ -111,25 +122,12 @@
       "reason": "Signed PREPROD APK builds and STAGING draft preview are green, but no authorized physical device attestation/install/render is proven."
     },
     {
-      "id": "WATCH_LEARN_47",
-      "state": "PARCIAL",
-      "next_gate": "THREE_GENUINE_SCHEDULED_RUNS_GREEN_AND_RETENTION_REVIEW",
-      "evidence": "cerebro/registry/watch-learn-remote-observation.v0.json",
-      "reason": "Daily zero-cost scheduler exists, but canonical evidence still records soak_complete=false and scheduled_soak_runs_verified=0."
-    },
-    {
-      "id": "COMPET_REAL_SOURCE_SCHEDULED_SOAK",
-      "state": "PARCIAL_SCHEDULED_SOAK",
-      "next_gate": "THREE_CONTINUOUS_REAL_COMPETITOR_SCHEDULED_RUNS_GREEN",
-      "evidence": "cerebro/registry/compet-real-targets.v0.json",
-      "reason": "Three real Córdoba competitor targets are configured, a physical GET-only baseline is GREEN, and the daily zero-cost schedule exists; only the three genuine scheduled GREEN runs remain."
-    },
-    {
-      "id": "CAP_REAL_SOURCE_SCHEDULED_SOAK",
-      "state": "PARCIAL_SCHEDULED_SOAK",
-      "next_gate": "THREE_GENUINE_SCHEDULED_PREPROD_RUNS_GREEN",
-      "evidence": "cerebro/registry/cap-ieca-cordoba.v0.json",
-      "reason": "The official IECA Córdoba GET-only source is configured and physical PREPROD discovery is GREEN; only the required genuine scheduled soak remains."
+      "id": "EVT74_GUARDED_SERVER_JOURNAL_BINDING",
+      "state": "PARCIAL_POLICY_BOUND",
+      "next_gate": "CONSENTED_BROWSER_EMITTER_TO_EXISTING_GUARDED_SERVER_JOURNAL_E2E_WITH_EXPLICIT_MINIMUM_REQUIRED_GRANT",
+      "evidence": "cerebro/registry/first-party-event-capture-core.v0.json",
+      "reason": "Local privacy-minimized EVT-001 persistence and authenticated STAGING browser emitter are GREEN. The direct guarded server-journal binding is deliberately not inferred from the generic B3 write path and requires the minimum explicit PREPROD grant.",
+      "human_required": "POLICY_CONFLICT"
     },
     {
       "id": "IAM_BROWSER_VAULT_PHYSICAL",
@@ -222,10 +220,11 @@
     "reconcile_before_action": true
   },
   "priority_queue": [
-    "RECONCILE_GENUINE_SCHEDULED_EVIDENCE_WATCH_LEARN_COMPET_CAP",
     "AUDIT_ZERO_COST_LOCAL_PHYSICAL_ADAPTERS_BY_DOMAIN",
+    "RECONCILE_FRESH_BROWSER_BRIDGE_PHYSICAL_ATTESTATION_WHEN_AUTHORIZED_RUNTIME_IS_AVAILABLE",
     "AUTHORIZED_PHYSICAL_ANDROID_DEVICE_E2E_WHEN_DEVICE_IS_AVAILABLE",
-    "HUMAN_REQUIRED_PR_731_AND_732_ONLY_BY_EXPLICIT_OWNER_DECISION",
+    "EVT74_DIRECT_GUARDED_JOURNAL_ONLY_AFTER_EXPLICIT_MINIMUM_PREPROD_GRANT",
+    "DO_NOT_OPEN_EXTERNAL_SIDE_EFFECT_GATES_WITHOUT_EXACT_POLICY_HUMAN_OR_MONEY_CONTRACT",
     "PROD_PROMOTION_ONLY_AFTER_SEPARATE_GOVERNED_PROMOTION_CONTRACT"
   ],
   "documentation": {
@@ -233,18 +232,18 @@
     "contracts_change_required": false,
     "dependency_map_change_required": false,
     "runbook": "cerebro/docs/GLOBAL_OPERATIONAL_CONVERGENCE_V4_RUNBOOK.md",
-    "backup": "Historical V2/V3 state files are retained unchanged; this V4 is additive and reversible by reverting its files.",
+    "backup": "Historical V2/V3 state files and preserved COMPET V0 baseline remain unchanged; V4 remains additive and reversible by reverting its files.",
     "rollback": "Revert the V4 state, pointer, tests and workflow; no runtime or external resource is mutated by this reconciliation.",
-    "rebuild": "Regenerate V4 only from current-main evidence registries and live PR metadata, preserving historical evidence files.",
-    "changelog": "2026-10-17: reconciled stale convergence reporting after runtime, mortgage and skill closures; corrected COMPET/CAP to preserve their already-green real source baselines and leave only scheduled soak as open.",
+    "rebuild": "Regenerate V4 only from current evidence registries, including preserved COMPET V0 plus additive acceptance V1, preserving historical evidence files.",
+    "changelog": "2026-10-18: certified genuine scheduled soak for Watch & Learn, COMPET and CAP; COMPET V0 runtime/config were restored unchanged and scheduled acceptance/resilience moved to additive V1 wrappers; Android, EVT-74 minimum-grant and other physical/side-effect gates remain fail-closed.",
     "autonomy_state": "PREPROD_GOVERNED; PROD_FALSE; TRADING_ISOLATED; COST_0"
   },
   "reporting_contract": {
-    "HECHO": "Current-main strict runtime/skill closures and COMPET/CAP real source baselines listed above are evidence-backed.",
-    "EXISTENTE": "179 canonical logical engines and 184 normalized rollout capabilities remain preserved.",
-    "PARCIAL": "Physical device/scheduled-soak/adapter gates remain explicit and must not be inferred from semantic adoption or one baseline run.",
+    "HECHO": "Current strict runtime/skill closures plus Watch & Learn, additive COMPET acceptance and CAP scheduled-source acceptance are evidence-backed.",
+    "EXISTENTE": "179 canonical logical engines and 184 normalized rollout capabilities remain preserved, including the COMPET V0 baseline contract.",
+    "PARCIAL": "Android, EVT-74 guarded journal binding and other physical/provider/side-effect gates remain explicit; scheduled soak is no longer pending.",
     "DEFINIDO": "Human policy conflicts and promotion boundaries are explicit and fail-closed.",
-    "PLANIFICADO": "Proceed through zero-cost physical evidence in priority order.",
+    "PLANIFICADO": "Proceed through zero-cost physical evidence in priority order without opening side effects by inference.",
     "POR_AUDITAR": "Legacy physical adapter domains remain unpromoted until fresh evidence exists.",
     "PROD": "NOT_AUTHORIZED"
   }

@@ -1,0 +1,109 @@
+name: CEREBRO Universal Skill B19 Universal E2E Real V1
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'cerebro/contracts/universal-skill-b19-e2e-real-v1.contract.json'
+      - 'cerebro/runtime/universal-skill-b19-universal-e2e-real-v1.mjs'
+      - 'cerebro/tests/fixtures/auto001-order-sensitive-planner-b19-v1.mjs'
+      - 'cerebro/tests/universal-skill-b19-universal-e2e-real-v1.test.mjs'
+      - 'cerebro/tests/run-universal-skill-b19-evidence-v1.mjs'
+      - 'cerebro/platform/auto001-preprod-patch-planner-v0.mjs'
+      - 'cerebro/runtime/universal-skill-b18-lrn-measured-engineer-outcome-loop-v1.mjs'
+      - 'cerebro/runtime/universal-skill-auto-engineering-v1.mjs'
+      - 'cerebro/runtime/universal-skill-real-binding-v1.mjs'
+      - 'cerebro/runtime/fact-skill-native-v1.mjs'
+      - 'cerebro/runtime/promotion-pipeline.mjs'
+      - 'cerebro/runtime/observability-audit-finops.mjs'
+      - 'cerebro/docs/CEREBRO_UNIVERSAL_SKILL_ACTIVATION_FACTORY_V1_HANDOFF.md'
+      - '.github/workflows/cerebro-universal-skill-b19-universal-e2e-real-v1.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-universal-skill-b19-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  B19_BASELINE_SHA: f17fd6481c27d11df3442fb5764ba63c414bbfea
+
+jobs:
+  b19-universal-e2e-real:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout candidate exact head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.x'
+
+      - name: Targeted B19 and B18 regression tests
+        run: |
+          node --test \
+            cerebro/tests/universal-skill-b18-lrn-measured-engineer-outcome-loop-v1.test.mjs \
+            cerebro/tests/universal-skill-b19-universal-e2e-real-v1.test.mjs
+
+      - name: Materialize exact OLD baseline
+        run: |
+          git cat-file -e "${B19_BASELINE_SHA}^{commit}"
+          git worktree add --detach ../b19-old "${B19_BASELINE_SHA}"
+
+      - name: Execute exact OLD repository module through B19 universal E2E
+        run: |
+          set -euo pipefail
+          mkdir -p .artifacts/b19
+          CANDIDATE_SHA="$(git rev-parse HEAD)"
+          node cerebro/tests/run-universal-skill-b19-evidence-v1.mjs \
+            --old-root ../b19-old \
+            --new-root . \
+            --baseline-sha "${B19_BASELINE_SHA}" \
+            --candidate-sha "${CANDIDATE_SHA}" \
+            --ledger .artifacts/b19/learning.v8 \
+            --root .artifacts/b19/runtime \
+            --source-run-id "${GITHUB_RUN_ID}" \
+            --out .artifacts/b19/report.json
+          node -e "const r=require('./.artifacts/b19/report.json'); if(r.status!=='B19_GREEN_PREPROD'||r.factory.status!=='ACTIVATION_PLAN_READY'||r.registration.initial_status!=='HOLD'||r.registration.final_status!=='NATIVE_FULL_PREPROD'||r.measured_loop.old_score!==0||r.measured_loop.new_score!==1||r.measured_loop.tribunal_decision!=='APPROVE_PREPROD_NEXT_STAGE'||r.promotion.healthy_decision!=='KEEP_NONPROD'||r.promotion.controlled_breach_decision!=='ROLLBACK'||r.physical_lifecycle.rollback_green!==true||r.physical_lifecycle.rebuild_green!==true||r.audit.valid!==true||r.audit.records!==12||r.prod_write_authorized!==false||r.trading_access!==false||r.additional_cost_eur!==0) process.exit(1);"
+
+      - name: Full CEREBRO regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILES="$(find cerebro/tests -maxdepth 1 -type f -name '*.test.mjs' \
+            | grep -v '/lab-' \
+            | grep -v '/seo-autonomous-regression.e2e.test.mjs$' \
+            | grep -v '/repo-inventory\.test\.mjs$' \
+            | sort)"
+          test -n "$FILES"
+          node --test $FILES
+
+      - name: Record exact-head evidence
+        run: |
+          set -euo pipefail
+          git rev-parse HEAD > .artifacts/b19/exact-head.txt
+          printf '%s\n' "$B19_BASELINE_SHA" > .artifacts/b19/baseline-head.txt
+          printf '%s\n' \
+            'CHAIN=factory->register-hold->evaluate->LRN->engineer->re-evaluate->tribunal->promotion-hold->rollback/rebuild->audit' \
+            'PREPROD_ONLY=true' \
+            'PROD_WRITE=false' \
+            'PROD_MUTATION=false' \
+            'AUTO_MERGE=false' \
+            'TRADING=false' \
+            'CUSTOMER_DATA=false' \
+            'ADDITIONAL_COST_EUR=0' > .artifacts/b19/boundaries.txt
+
+      - name: Upload B19 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-b19-universal-e2e-real-${{ github.event.pull_request.head.sha || github.sha }}
+          path: .artifacts/b19
+          if-no-files-found: error
+          retention-days: 14

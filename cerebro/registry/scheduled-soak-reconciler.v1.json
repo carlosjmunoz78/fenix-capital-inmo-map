@@ -1,40 +1,51 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.1",
   "state_type": "CEREBRO_SCHEDULED_SOAK_RECONCILER_V1",
   "company_id": "GLOBAL",
   "engine_id": "LRN-001",
   "environment": "PREPROD",
-  "version": "v1",
-  "status": "AUTOMATED_EVIDENCE_ACCUMULATOR_READY",
-  "purpose": "Count only genuine successful GitHub Actions schedule runs for Watch & Learn, COMPET real targets and CAP IECA, without faking soak or mutating registries automatically.",
+  "version": "v1.1",
+  "status": "SCHEDULED_ACCEPTANCE_CERTIFIED_CONTINUITY_MONITOR_READY",
+  "purpose": "Count genuine successful GitHub Actions schedule runs for Watch & Learn, COMPET real targets and CAP IECA, preserve the certified acceptance evidence, and continue read-only continuity monitoring without faking runs or mutating registries automatically.",
   "runtime": "cerebro/runtime/scheduled-soak-reconciler-v1.mjs",
   "tests": "cerebro/tests/scheduled-soak-reconciler-v1.test.mjs",
   "workflow": ".github/workflows/cerebro-scheduled-soak-reconciler-v1.yml",
   "runbook": "cerebro/docs/SCHEDULED_SOAK_RECONCILER_V1_RUNBOOK.md",
+  "certification_evidence": {
+    "run_id": 39125588186,
+    "artifact_id": 12136037115,
+    "artifact_digest": "sha256:66074f4508593e6a2279ac7517746d95bbbcc17c17fb79f57982fd62cdcc01f7",
+    "status": "ALL_SCHEDULED_SOAKS_READY_TO_CERTIFY",
+    "certified_at": "2026-10-18"
+  },
   "lanes": [
     {
       "id": "WATCH_LEARN_47",
       "workflow_file": "cerebro-watch-learn-remote-observation-v0.yml",
       "required_runs": 3,
       "registry_ref": "cerebro/registry/watch-learn-remote-observation.v0.json",
-      "current_canonical_state": "SOAK_PENDING",
-      "next_gate": "THREE_GENUINE_SCHEDULED_RUNS_GREEN_AND_RETENTION_REVIEW"
+      "current_canonical_state": "CONTINUOUS_PREPROD_ACCEPTANCE_GREEN",
+      "verified_runs_at_certification": 3,
+      "next_gate": "CONTINUE_GOVERNED_PREPROD_OBSERVATION_AND_HOLD_ON_POLICY_OR_REPLAY_REGRESSION"
     },
     {
       "id": "COMPET_REAL_SOURCE_SCHEDULED_SOAK",
       "workflow_file": "cerebro-compet-real-targets-v0.yml",
       "required_runs": 3,
-      "registry_ref": "cerebro/registry/compet-real-targets.v0.json",
-      "current_canonical_state": "REAL_TARGETS_BASELINE_GREEN_SOAK_PENDING",
-      "next_gate": "THREE_CONTINUOUS_REAL_COMPETITOR_SCHEDULED_RUNS_GREEN"
+      "base_registry_ref": "cerebro/registry/compet-real-targets.v0.json",
+      "registry_ref": "cerebro/registry/compet-real-targets-acceptance.v1.json",
+      "current_canonical_state": "REAL_TARGETS_CONTINUOUS_PREPROD_ACCEPTANCE_GREEN",
+      "verified_runs_at_certification": 3,
+      "next_gate": "CONTINUE_READ_ONLY_CONTINUOUS_COMPETITOR_OBSERVATION_AND_HOLD_ON_POLICY_OR_SOURCE_REGRESSION"
     },
     {
       "id": "CAP_REAL_SOURCE_SCHEDULED_SOAK",
       "workflow_file": "cerebro-cap-ieca-cordoba-v0.yml",
       "required_runs": 3,
       "registry_ref": "cerebro/registry/cap-ieca-cordoba.v0.json",
-      "current_canonical_state": "REAL_OFFICIAL_SOURCE_PHYSICAL_GREEN_SOAK_PENDING",
-      "next_gate": "THREE_GENUINE_SCHEDULED_PREPROD_RUNS_GREEN"
+      "current_canonical_state": "REAL_OFFICIAL_COMPANY_DISCOVERY_CONTINUOUS_PREPROD_ACCEPTANCE_GREEN",
+      "verified_runs_at_certification": 3,
+      "next_gate": "CONTINUE_READ_ONLY_CONTINUOUS_DISCOVERY_AND_HOLD_ON_POLICY_OR_SOURCE_REGRESSION"
     }
   ],
   "genuine_run_contract": {
@@ -54,7 +65,7 @@
     "kind": "GITHUB_ACTIONS_CRON",
     "cron": "11 7 * * *",
     "timezone": "UTC",
-    "reason": "Runs after the three observed-source schedules and reads their GitHub Actions history.",
+    "reason": "Runs after the observed-source schedules and reads their GitHub Actions history.",
     "github_actions_read_only": true,
     "external_paid_service_required": false
   },
@@ -63,6 +74,7 @@
     "retention_days": 30,
     "ready_state": "ALL_SCHEDULED_SOAKS_READY_TO_CERTIFY",
     "not_ready_state": "SCHEDULED_SOAKS_IN_PROGRESS",
+    "post_certification_role": "READ_ONLY_CONTINUITY_AND_REGRESSION_MONITOR",
     "registry_auto_promotion": false,
     "repository_auto_write": false
   },
@@ -92,8 +104,8 @@
     "automatic_paid_fallback": false,
     "additional_cost_eur": 0
   },
-  "backup": "The reconciler only reads Actions metadata and emits an artifact; source registries and workflow histories remain the durable evidence.",
-  "rollback": "Disable/remove the reconciler schedule or revert its additive files; no external or business-state mutation exists.",
-  "rebuild": "Recreate the pure reconciliation runtime, genuine-run tests and read-only Actions workflow from the three canonical source registries.",
-  "next_gate": "EXACT_HEAD_CI_GOVERNED_MAIN_RSI_THEN_LIVE_READONLY_RECONCILIATION"
+  "backup": "GitHub workflow history plus the certification artifact remain durable evidence; the reconciler creates no business state.",
+  "rollback": "Revert this metadata to the prior accumulator state or disable the reconciler schedule; certified acceptance and historical workflow evidence remain intact.",
+  "rebuild": "Recreate the pure reconciliation runtime and read-only Actions workflow, then re-read qualifying schedule history and current base/acceptance registries.",
+  "next_gate": "EXACT_HEAD_CI_THEN_CONTINUITY_MONITORING"
 }

@@ -1,0 +1,28 @@
+{
+  "schema_version":"1.1.0",
+  "state_type":"CEREBRO_UNIVERSAL_SKILL_B16_WEB_SEO_DEBT_EVIDENCE_V1",
+  "generated_at":"2026-10-18",
+  "company_id":"GLOBAL",
+  "engine_id":"FACT-001",
+  "environment":"PREPROD",
+  "version":"v1.1",
+  "certified_code_head_sha":"0ba248c812ed21b2ddbea1f2b2010357615159c9",
+  "certification":{"workflow":"CEREBRO Universal Skill B16 Web SEO Debt V1","run_number":21,"run_id":39076591270,"status":"SUCCESS","exact_head_workflows_green":11,"exact_head_workflows_total":11,"node_runtime":"24.x","node_runtime_alignment":"ALIGNED_WITH_ROOT_PACKAGE_ENGINE","test_exclusions_added":false,"dependencies_added":false,"gate_weakening":false},
+  "catalog":{"items_measured":184,"latest_version_per_exact_range":true,"history_preserved":true,"item_scoped":true},
+  "reusable_evidence":[
+    {"ref":"cerebro/registry/web-acquisition-intelligence-profile.v1.json","scope":"ANALYSIS_AND_ACQUISITION_INTELLIGENCE_NOT_UNIVERSAL_MUTATION_PROVIDER"},
+    {"ref":"cerebro/registry/phase13-marketing-seo-feedback-profile.v0.json","scope":"SAFE_SHADOW_FEEDBACK_CONTROL_NOT_UNIVERSAL_EXECUTION_PROVIDER"},
+    {"ref":"cerebro/registry/physical-adapter-audit-v1.json","scope":"PHYSICAL_SURFACE_AUDIT_NOT_GENERIC_WEB_OR_SEO_BINDING"},
+    {"ref":"cerebro/registry/fact001-android-staging-48-183.v0.json","scope":"CANDIDATE_SPECIFIC_WORDPRESS_STAGING_AND_ANDROID_BUILD_EVIDENCE"}
+  ],
+  "families":{
+    "web-wordpress-frontend":{"candidate_count":17,"engineering_debt_count":7,"repeated_engineering_debt":true,"provider_already_available":false,"generic_execution_evidence_refs":[],"recommendation":"NO_NEW_PROVIDER_JUSTIFIED","reason":"REPEATED_DEBT_BUT_NO_EXPLICIT_GENERIC_EXECUTION_EVIDENCE"},
+    "seo-search-content":{"candidate_count":30,"engineering_debt_count":19,"repeated_engineering_debt":true,"provider_already_available":false,"generic_execution_evidence_refs":[],"recommendation":"NO_NEW_PROVIDER_JUSTIFIED","reason":"REPEATED_DEBT_BUT_NO_EXPLICIT_GENERIC_EXECUTION_EVIDENCE"}
+  },
+  "global_recommendation":"NO_NEW_WEB_SEO_PROVIDER_JUSTIFIED",
+  "truth":"Repeated debt exists, but existing profiles/audits are analysis, shadow-control, surface-audit or candidate-specific evidence. They do not explicitly prove a generic PREPROD execution contract plus semantic binding, so FACT-001 must not synthesize a Web/SEO provider from them.",
+  "runner_reconciliation":{"root_package_node_engine":"24.x","previous_b16_runner":"20","observed_failure":"ERR_UNKNOWN_FILE_EXTENSION_.ts_IN_4_EXISTING_TESTS","repair":"ALIGN_B16_WORKFLOW_TO_NODE_24","functional_web_seo_failure":false,"full_regression_after_repair":"GREEN","diagnostic_artifact_preserved":true},
+  "item_183":{"state":"PARTIAL_PREPROD_STAGING_RENDER_AND_SIGNED_ANDROID_BUILD_GREEN_PHYSICAL_DEVICE_PENDING","next_gate":"AUTHORIZED_DEVICE_INSTALL_AND_RENDER_E2E","generic_provider_evidence":false},
+  "authority":{"prod_authorized":false,"prod_write_authorized":false,"public_deploy_authorized":false,"auto_merge_authorized":false,"external_skill_code_execution_authorized":false,"external_dependency_install_authorized":false,"customer_data_authorized":false,"trading_access":false,"automatic_paid_fallback":false,"additional_cost_eur":0},
+  "human_required":[]
+}

@@ -1,0 +1,97 @@
+name: CEREBRO Universal Skill B18 LRN Measured Engineer Outcome Loop V1
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'cerebro/platform/auto001-preprod-patch-planner-v0.mjs'
+      - 'cerebro/runtime/universal-skill-b18-lrn-measured-engineer-outcome-loop-v1.mjs'
+      - 'cerebro/tests/auto001-preprod-patch-executor-v0.test.mjs'
+      - 'cerebro/tests/universal-skill-b18-lrn-measured-engineer-outcome-loop-v1.test.mjs'
+      - 'cerebro/registry/universal-skill-b18-lrn-measured-engineer-outcome-loop.v1.json'
+      - 'cerebro/docs/CEREBRO_UNIVERSAL_SKILL_ACTIVATION_FACTORY_V1_HANDOFF.md'
+      - 'cerebro/docs/CEREBRO_UNIVERSAL_SKILL_ACTIVATION_FACTORY_V1_MASTER_2026-10-17.md'
+      - 'cerebro/docs/CEREBRO_UNIVERSAL_SKILL_ACTIVATION_FACTORY_V1_RUNBOOK_2026-10-17.md'
+      - 'cerebro/docs/DEPENDENCY_MAP.md'
+      - 'cerebro/docs/CHANGELOG.md'
+      - 'cerebro/docs/AUTONOMY_BACKUP_REBUILD.md'
+      - '.github/workflows/cerebro-universal-skill-b18-lrn-measured-engineer-outcome-loop-v1.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-universal-skill-b18-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  B18_BASELINE_SHA: f17fd6481c27d11df3442fb5764ba63c414bbfea
+
+jobs:
+  b18-measured-engineer-outcome-loop:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout candidate exact head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.x'
+
+      - name: Targeted B18 and AUTO-001 regression tests
+        run: |
+          node --test \
+            cerebro/tests/auto001-preprod-patch-executor-v0.test.mjs \
+            cerebro/tests/universal-skill-b18-lrn-measured-engineer-outcome-loop-v1.test.mjs
+
+      - name: Materialize exact OLD baseline
+        run: |
+          git cat-file -e "${B18_BASELINE_SHA}^{commit}"
+          git worktree add --detach ../b18-old "${B18_BASELINE_SHA}"
+
+      - name: Execute real OLD module vs candidate module through LRN and Tribunal
+        run: |
+          set -euo pipefail
+          mkdir -p .artifacts/b18
+          CANDIDATE_SHA="$(git rev-parse HEAD)"
+          node cerebro/runtime/universal-skill-b18-lrn-measured-engineer-outcome-loop-v1.mjs \
+            --old-root ../b18-old \
+            --new-root . \
+            --baseline-sha "${B18_BASELINE_SHA}" \
+            --candidate-sha "${CANDIDATE_SHA}" \
+            --ledger .artifacts/b18/learning.v8 \
+            --out .artifacts/b18/report.json
+          node -e "const r=require('./.artifacts/b18/report.json'); if(r.status!=='B18_GREEN_PREPROD'||r.old_measurement.score!==0||r.new_measurement.score!==1||r.tribunal.decision!=='APPROVE_PREPROD_NEXT_STAGE'||r.next_cycle.learning_changed_next_decision!==true||r.prod_write_authorized!==false||r.trading_access!==false||r.additional_cost_eur!==0) process.exit(1);"
+
+      - name: Full CEREBRO regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILES="$(find cerebro/tests -maxdepth 1 -type f -name '*.test.mjs' \
+            | grep -v '/lab-' \
+            | grep -v '/seo-autonomous-regression.e2e.test.mjs$' \
+            | grep -v '/repo-inventory\.test\.mjs$' \
+            | sort)"
+          test -n "$FILES"
+          node --test $FILES
+
+      - name: Record exact-head evidence
+        run: |
+          set -euo pipefail
+          git rev-parse HEAD > .artifacts/b18/exact-head.txt
+          printf '%s\n' "$B18_BASELINE_SHA" > .artifacts/b18/baseline-head.txt
+          printf '%s\n' 'PREPROD_ONLY=true' 'PROD_WRITE=false' 'AUTO_MERGE=false' 'TRADING=false' 'CUSTOMER_DATA=false' 'ADDITIONAL_COST_EUR=0' > .artifacts/b18/boundaries.txt
+
+      - name: Upload B18 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-b18-lrn-measured-engineer-outcome-${{ github.event.pull_request.head.sha || github.sha }}
+          path: .artifacts/b18
+          if-no-files-found: error
+          retention-days: 14

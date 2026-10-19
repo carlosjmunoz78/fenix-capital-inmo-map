@@ -1,0 +1,44 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "CEREBRO_ACCESSBOOT_V0_3_1/CEREBRO_ACCESSBOOT.exe",
+  "version": "0.3.1",
+  "status": "CANDIDATE_PREPROD",
+  "environment": "PREPROD",
+  "prod_allowed": false,
+  "additional_cost_eur": 0,
+  "sha256": "6d55566b792b8d500e0a4f63e4261d2e1fef88d8aad3e73ec24fe7283d43f68f",
+  "preserves": {
+    "browser_universal_8765": true,
+    "device_agent_8766": true,
+    "evidence_host_8767": true,
+    "legacy_browser_profiles": true,
+    "prod": true
+  },
+  "fixes": [
+    "WINDOWS_POWERSHELL_UTF8_BOM_TO_GO_JSON_EVIDENCE_COMPATIBILITY",
+    "CANONICALIZE_RECEIPT_UTF8_NO_BOM",
+    "VALIDATE_RECEIPT_JSON_BEFORE_EXIT",
+    "SANITIZED_GO_FALLBACK_ON_RUNNER_OR_RECEIPT_FAILURE"
+  ],
+  "physical_baseline": {
+    "canonical_device_id": "desktop-4c008d88919f",
+    "device_aliases": ["desktop-74ca87506edbd7a5"],
+    "tenant_binding": "DYNAMIC_MULTI_COMPANY",
+    "browser_8765": "GREEN_PHYSICAL",
+    "device_8766": "GREEN_PHYSICAL",
+    "evidence_8767": "GREEN_PHYSICAL",
+    "physical_acceptance_receipt": "PENDING_V0_3_1_EXECUTION"
+  },
+  "do_not_repeat": [
+    "CEREBRO_DEVICE_PHYSICAL_ACCEPTANCE_V0_2",
+    "CEREBRO_ACCESSBOOT_V0_3_0",
+    "BROWSER_UNIVERSAL_INSTALLATION"
+  ],
+  "promotion_blockers": [
+    "physical_acceptance_receipt_readback",
+    "remote_command_roundtrip",
+    "restart_persistence_after_windows_reboot",
+    "rollback_physical",
+    "portable_vault_cross_device_recovery"
+  ]
+}

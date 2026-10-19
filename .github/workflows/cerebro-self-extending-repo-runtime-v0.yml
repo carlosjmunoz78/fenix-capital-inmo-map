@@ -1,0 +1,123 @@
+name: CEREBRO Self-Extending Repo Runtime V0
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/runtime/universal-repo-runtime-v0.mjs'
+      - 'cerebro/runtime/universal-repo-sandbox-executor-v0.mjs'
+      - 'cerebro/runtime/universal-repo-build-pipeline-v0.mjs'
+      - 'cerebro/runtime/self-extending-capability-resolver-v0.mjs'
+      - 'cerebro/runtime/self-extending-mission-job-bridge-v0.mjs'
+      - 'cerebro/runtime/self-extending-shared-worker-v1.mjs'
+      - 'cerebro/runtime/durable-job-runtime-v1.mjs'
+      - 'cerebro/runtime/durable-worker-runner-v1.mjs'
+      - 'cerebro/runtime/rsi-learning-auto-host.mjs'
+      - 'cerebro/runtime/universal-skill-legacy184-self-extending-reopen-v0.mjs'
+      - 'cerebro/runtime/evaluation-tribunal.mjs'
+      - 'cerebro/runtime/universal-self-extending-github-intake-v0.mjs'
+      - 'cerebro/tests/universal-self-extending-repo-v0.test.mjs'
+      - 'cerebro/tests/universal-repo-sandbox-executor-v0.test.mjs'
+      - 'cerebro/tests/universal-repo-build-pipeline-v0.test.mjs'
+      - 'cerebro/tests/self-extending-mission-job-bridge-v0.test.mjs'
+      - 'cerebro/tests/self-extending-shared-worker-v1.test.mjs'
+      - 'cerebro/tests/rsi-learning-auto-host.test.mjs'
+      - 'cerebro/tests/fixtures/universal-repo-build-node/**'
+      - 'cerebro/registry/self-extending-shared-worker-v1.json'
+      - 'cerebro/contracts/self-extending-shared-worker-v1.contract.json'
+      - 'cerebro/docs/SELF_EXTENDING_SHARED_WORKER_V1_*.md'
+      - 'cerebro/docs/CEREBRO_LIVE_RUNTIME_RESIDUAL_CONVERGENCE_*.md'
+      - '.github/workflows/cerebro-self-extending-repo-runtime-v0.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Universal repo runtime + recursive dependency resolver
+        run: node --test cerebro/tests/universal-self-extending-repo-v0.test.mjs
+      - name: JOB-001 self-extending mission dispatch + durable resume
+        run: node --test cerebro/tests/self-extending-mission-job-bridge-v0.test.mjs
+      - name: Legacy184 -> JOB-001 durable shared worker -> resolver -> Tribunal
+        run: node --test cerebro/tests/self-extending-shared-worker-v1.test.mjs
+      - name: Existing RSI persistent host + shared self-extending worker integration
+        run: node --test cerebro/tests/rsi-learning-auto-host.test.mjs
+      - name: Physical sandbox executor contract tests
+        run: node --test cerebro/tests/universal-repo-sandbox-executor-v0.test.mjs
+      - name: Universal repo build pipeline contract tests
+        run: node --test cerebro/tests/universal-repo-build-pipeline-v0.test.mjs
+
+  physical-sandbox-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify OCI backend and resolve immutable runtime image
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker version
+          docker pull node:22-alpine
+          IMAGE="$(docker inspect --format='{{index .RepoDigests 0}}' node:22-alpine)"
+          test -n "$IMAGE"
+          case "$IMAGE" in
+            *@sha256:*) ;;
+            *) echo "Image is not digest pinned: $IMAGE" >&2; exit 1 ;;
+          esac
+          echo "CEREBRO_SANDBOX_IMAGE=$IMAGE" >> "$GITHUB_ENV"
+      - name: Public repo exact SHA -> isolated OCI sandbox -> boundary probes -> cleanup
+        env:
+          CEREBRO_PHYSICAL_SANDBOX_E2E: '1'
+          CEREBRO_SANDBOX_ARTIFACT: 'cerebro/artifacts/runtime/universal-repo-sandbox-e2e.v0.json'
+        run: node --test cerebro/tests/universal-repo-sandbox-executor-v0.test.mjs
+      - name: Upload physical PREPROD attestation
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-universal-repo-sandbox-e2e-v0
+          path: cerebro/artifacts/runtime/universal-repo-sandbox-e2e.v0.json
+          if-no-files-found: error
+          retention-days: 14
+
+  physical-build-pipeline-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Resolve immutable build/proxy/runtime image
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker pull node:22-alpine
+          IMAGE="$(docker inspect --format='{{index .RepoDigests 0}}' node:22-alpine)"
+          test -n "$IMAGE"
+          case "$IMAGE" in
+            *@sha256:*) ;;
+            *) echo "Image is not digest pinned: $IMAGE" >&2; exit 1 ;;
+          esac
+          echo "CEREBRO_BUILD_IMAGE=$IMAGE" >> "$GITHUB_ENV"
+      - name: Exact SHA -> isolated allowlist-proxy build -> lock/SBOM -> offline runtime probe -> PREPROD tribunal
+        env:
+          CEREBRO_PHYSICAL_BUILD_E2E: '1'
+          CEREBRO_BUILD_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          CEREBRO_BUILD_ARTIFACT: 'cerebro/artifacts/runtime/universal-repo-build-pipeline-e2e.v0.json'
+        run: node --test cerebro/tests/universal-repo-build-pipeline-v0.test.mjs
+      - name: Upload build pipeline PREPROD attestation
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-universal-repo-build-pipeline-e2e-v0
+          path: cerebro/artifacts/runtime/universal-repo-build-pipeline-e2e.v0.json
+          if-no-files-found: error
+          retention-days: 14

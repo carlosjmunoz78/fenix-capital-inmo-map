@@ -4,14 +4,22 @@ on:
   push:
     paths:
       - 'cerebro/runtime/compet-real-targets-v0.mjs'
+      - 'cerebro/runtime/compet-real-targets-resilient-v1.mjs'
       - 'cerebro/registry/compet-real-targets.v0.json'
+      - 'cerebro/registry/compet-real-targets-acceptance.v1.json'
       - 'cerebro/tests/compet-real-targets-v0.test.mjs'
+      - 'cerebro/tests/compet-real-targets-resilient-v1.test.mjs'
+      - 'cerebro/tests/compet-real-targets-acceptance-v1.test.mjs'
       - '.github/workflows/cerebro-compet-real-targets-v0.yml'
   pull_request:
     paths:
       - 'cerebro/runtime/compet-real-targets-v0.mjs'
+      - 'cerebro/runtime/compet-real-targets-resilient-v1.mjs'
       - 'cerebro/registry/compet-real-targets.v0.json'
+      - 'cerebro/registry/compet-real-targets-acceptance.v1.json'
       - 'cerebro/tests/compet-real-targets-v0.test.mjs'
+      - 'cerebro/tests/compet-real-targets-resilient-v1.test.mjs'
+      - 'cerebro/tests/compet-real-targets-acceptance-v1.test.mjs'
       - '.github/workflows/cerebro-compet-real-targets-v0.yml'
   schedule:
     - cron: '43 5 * * *'
@@ -26,19 +34,33 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Offline target and authority contracts
-        run: node --test cerebro/tests/compet-real-targets-v0.test.mjs cerebro/tests/public-source-adapter-v0.test.mjs
-      - name: Scan real public competitor targets
+      - name: Offline target, acceptance, resilience and authority contracts
         run: >-
-          node cerebro/runtime/compet-real-targets-v0.mjs
+          node --test
+          cerebro/tests/compet-real-targets-v0.test.mjs
+          cerebro/tests/compet-real-targets-acceptance-v1.test.mjs
+          cerebro/tests/compet-real-targets-resilient-v1.test.mjs
+          cerebro/tests/public-source-adapter-v0.test.mjs
+      - name: Verify preserved V0 files against COMPET native baseline
+        run: >-
+          git diff --exit-code be1c71a18cfd7ce871d805ed305f9860327ba2c4 --
+          cerebro/runtime/fact001-gap-capabilities-v0.mjs
+          cerebro/runtime/compet-real-targets-v0.mjs
+          cerebro/registry/compet-real-targets.v0.json
+          cerebro/runtime/public-source-adapter-v0.mjs
+      - name: Scan real public competitor targets through resilient additive wrapper
+        run: >-
+          node cerebro/runtime/compet-real-targets-resilient-v1.mjs
           --observed-at "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
           --out /tmp/compet-real-targets-report.json
       - name: Validate continuous scan boundary
         run: >-
-          node -e "const fs=require('fs');const r=JSON.parse(fs.readFileSync('/tmp/compet-real-targets-report.json','utf8'));if(r.status!=='REAL_COMPETITOR_CONTINUOUS_SCAN_GREEN'||r.target_count!==3||r.snapshots.length!==3||r.baseline_complete!==true||r.job_status!=='SUCCEEDED'||r.network_reads!==3||r.provider_writes!==0||r.customer_data_used||r.personal_data_extracted||r.prod_authorized||r.prod_write_authorized||r.trading_access||r.additional_cost_eur!==0)process.exit(1);for(const s of r.snapshots){if(s.http_status!==200||s.read_only!==true||!s.body_sha256||s.body_sha256.length!==64)process.exit(1)}for(const c of r.changes){if(!['public_page_sha256','public_page_title'].includes(c.dimension))process.exit(1)}console.log('COMPET real Córdoba continuous scan GREEN; changes='+r.change_count)"
+          node -e "const fs=require('fs');const r=JSON.parse(fs.readFileSync('/tmp/compet-real-targets-report.json','utf8'));if(r.status!=='REAL_COMPETITOR_CONTINUOUS_SCAN_GREEN'||r.state_type!=='CEREBRO_COMPET_REAL_TARGET_SCAN_RESILIENT_V1'||r.resilience_wrapper!=='compet-real-targets-resilient-v1'||r.base_runtime_preserved!==true||r.target_count!==3||r.snapshots.length!==3||r.baseline_complete!==true||r.job_status!=='SUCCEEDED'||r.network_reads!==3||r.provider_writes!==0||r.customer_data_used||r.personal_data_extracted||r.prod_authorized||r.prod_write_authorized||r.trading_access||r.additional_cost_eur!==0||r.attempt_count<1||r.attempt_count>3)process.exit(1);for(const s of r.snapshots){if(s.http_status!==200||s.read_only!==true||!s.body_sha256||s.body_sha256.length!==64)process.exit(1)}for(const c of r.changes){if(!['public_page_sha256','public_page_title'].includes(c.dimension))process.exit(1)}console.log('COMPET resilient real Cordoba continuous scan GREEN; attempts='+r.attempt_count+'; changes='+r.change_count)"
       - name: Canonical registry validation
         working-directory: cerebro
         run: npm run validate

@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_UNIVERSAL_SKILL_B20_P0_ACCEPTANCE_SCALE_RELEASE_REGISTRY_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "1.0.0",
+  "status": "B20_GREEN_PREPROD",
+  "contract_ref": "cerebro/contracts/universal-skill-b20-p0-acceptance-and-scale-release-v1.contract.json",
+  "governance_ref": "cerebro/docs/CEREBRO_B20_P0_ACCEPTANCE_AND_SCALE_RELEASE_CERTIFICATION_V1.md",
+  "workflow": "CEREBRO Universal Skill B20 P0 Acceptance and Scale Release V1",
+  "reconciles": [
+    "B19_UNIVERSAL_E2E_REAL",
+    "FAST_LANE",
+    "BLIND_REAL_CATALOG_BATCH",
+    "SCALE184_V1",
+    "SCALE184_V2",
+    "REPOSITORY_E2E",
+    "GITHUB_LIVE_E2E",
+    "FULL_CEREBRO_REGRESSION"
+  ],
+  "acceptance": {
+    "new_candidate_without_candidate_specific_core_proven": true,
+    "terminal_truth_proven": true,
+    "idempotency_proven": true,
+    "rollback_rebuild_proven": true,
+    "exact_head_gate_required_for_current_head": true,
+    "full_without_binding_forbidden": true,
+    "full_cerebro_regression_green": true
+  },
+  "last_green_evidence": {
+    "head_sha": "fe5d6eeb6ad34c5a09b9b132ef403cd67b2bf3f4",
+    "run_id": 39110141659,
+    "run_number": 4,
+    "status": "SUCCESS",
+    "artifact_id": 12130230882,
+    "artifact_digest": "sha256:f50ef9eb7555e82084df077a0383af1e481516775df46b264219d0585bdc300e",
+    "b19_exact_head_run_id": 39110141703,
+    "b19_exact_head_run_number": 9,
+    "b19_exact_head_status": "SUCCESS"
+  },
+  "authority": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "prod_mutation_authorized": false,
+    "auto_merge_authorized": false,
+    "external_skill_code_execution_authorized": false,
+    "external_dependency_install_authorized": false,
+    "customer_data_authorized": false,
+    "trading_access": false,
+    "additional_cost_eur": 0
+  },
+  "next_block_on_green": "ENGINEERING_SPECIALIZATIONS_EVIDENCE_SWEEP_ARCHITECT_PERFORMANCE",
+  "note": "B20 is accepted in PREPROD. Every later branch commit must still pass the exact-head B20 workflow before being treated as current certified evidence."
+}

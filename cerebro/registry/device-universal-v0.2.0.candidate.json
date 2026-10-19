@@ -1,0 +1,47 @@
+{
+  "schema_version": "1.0.0",
+  "engine_or_capability": "DEVICE_UNIVERSAL",
+  "version": "0.2.0",
+  "status": "CANDIDATE_PREPROD",
+  "date": "2026-10-19",
+  "artifact": {
+    "name": "CEREBRO_DEVICE_ACCESSBOOT_UNIVERSAL_V0_2_0.exe",
+    "sha256": "d9e83c3c46867c6f1259bdbbfc7027b1cc0d49f667ddaec95b8737887f96e60c",
+    "size_bytes": 20511744
+  },
+  "identity_contract": {
+    "version": "V2",
+    "canonical_device_id": true,
+    "device_aliases": true,
+    "existing_profiles_rewritten": false,
+    "physical_fingerprint": "MACHINEGUID_SHA256_ONLY_NO_RAW_VALUE",
+    "migration_policy": "CONSERVATIVE_PRESERVE_AND_ALIAS"
+  },
+  "browser": {
+    "repeat_browser_universal": false,
+    "preserve_bridge_version": "0.5.4",
+    "physical_handoff_e2e": "PENDING"
+  },
+  "credential_vault": {
+    "local": "WINDOWS_DPAPI_CURRENT_USER",
+    "portable_recovery_code": "AES_256_GCM_PBKDF2_HMAC_SHA256",
+    "portable_recovery_physical_test": "PENDING",
+    "automatic_cross_device_sync": "PLANIFICADO",
+    "secret_values_in_logs_or_receipts": false
+  },
+  "tests": {
+    "go_unit_identity_contract": "PASS",
+    "windows_amd64_cross_build": "PASS",
+    "suspicious_literal_secret_values": 0,
+    "physical_windows_e2e": "PENDING",
+    "rollback_physical": "PENDING"
+  },
+  "governance": {
+    "environment": "LAB_PREPROD_ONLY",
+    "prod_allowed": false,
+    "auto_merge_authorized": false,
+    "additional_cost_eur": 0,
+    "trading_access": false
+  },
+  "next_block": "DEVICE_V0_2_0_PHYSICAL_WINDOWS_E2E_AND_ROLLBACK"
+}

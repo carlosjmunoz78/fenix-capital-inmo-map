@@ -1,0 +1,189 @@
+name: CEREBRO Universal Skill Activation Factory V1
+
+on:
+  push:
+    branches:
+      - 'cerebro/universal-skill-activation-factory-v1-*'
+    paths:
+      - 'cerebro/runtime/fact-safe-engineering-bootstrap-v1.mjs'
+      - 'cerebro/runtime/universal-skill-activation-planner-v1.mjs'
+      - 'cerebro/runtime/universal-skill-semantic-contracts-v1.mjs'
+      - 'cerebro/runtime/universal-skill-real-binding-v1.mjs'
+      - 'cerebro/runtime/universal-skill-adapter-factory-v1.mjs'
+      - 'cerebro/runtime/universal-skill-batch-orchestrator-v1.mjs'
+      - 'cerebro/runtime/universal-skill-legacy184-normalizer-v1.mjs'
+      - 'cerebro/runtime/universal-skill-auto-engineering-v1.mjs'
+      - 'cerebro/registry/fact-safe-engineering-bootstrap-v1.json'
+      - 'cerebro/registry/universal-skill-activation-factory-v1.state.json'
+      - 'cerebro/registry/universal-skill-activation-contracts-v1.json'
+      - 'cerebro/tests/fact-safe-engineering-bootstrap-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-activation-planner-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-semantic-contracts-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-real-binding-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-adapter-factory-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-batch-orchestrator-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-blind-legacy184-batch-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-auto-engineering-v1.test.mjs'
+      - '.github/workflows/cerebro-universal-skill-activation-factory-v1.yml'
+  pull_request:
+    paths:
+      - 'cerebro/runtime/fact-safe-engineering-bootstrap-v1.mjs'
+      - 'cerebro/runtime/universal-skill-activation-planner-v1.mjs'
+      - 'cerebro/runtime/universal-skill-semantic-contracts-v1.mjs'
+      - 'cerebro/runtime/universal-skill-real-binding-v1.mjs'
+      - 'cerebro/runtime/universal-skill-adapter-factory-v1.mjs'
+      - 'cerebro/runtime/universal-skill-batch-orchestrator-v1.mjs'
+      - 'cerebro/runtime/universal-skill-legacy184-normalizer-v1.mjs'
+      - 'cerebro/runtime/universal-skill-auto-engineering-v1.mjs'
+      - 'cerebro/registry/fact-safe-engineering-bootstrap-v1.json'
+      - 'cerebro/registry/universal-skill-activation-factory-v1.state.json'
+      - 'cerebro/registry/universal-skill-activation-contracts-v1.json'
+      - 'cerebro/tests/fact-safe-engineering-bootstrap-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-activation-planner-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-semantic-contracts-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-real-binding-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-adapter-factory-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-batch-orchestrator-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-blind-legacy184-batch-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-auto-engineering-v1.test.mjs'
+      - '.github/workflows/cerebro-universal-skill-activation-factory-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: universal-skill-activation-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  b1-fact-safe-engineering:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: FACT Safe Engineering bootstrap tests
+        run: node --test cerebro/tests/fact-safe-engineering-bootstrap-v1.test.mjs cerebro/tests/cerebro-safe-engineering-profile-v1.test.mjs
+      - name: Assert authority boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -Eq 'prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true|additional_cost_eur[[:space:]]*:[[:space:]]*[1-9]' cerebro/runtime/fact-safe-engineering-bootstrap-v1.mjs cerebro/registry/fact-safe-engineering-bootstrap-v1.json
+
+  b2-b3-planner-and-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Generic activation planner and semantic contract tests
+        run: node --test cerebro/tests/universal-skill-activation-planner-v1.test.mjs cerebro/tests/universal-skill-semantic-contracts-v1.test.mjs
+      - name: Validate semantic contract registry executable check
+        run: node cerebro/runtime/universal-skill-semantic-contracts-v1.mjs
+
+  b4-real-binding:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Generic real-binding tests with truthful learning outcomes
+        run: node --test cerebro/tests/universal-skill-real-binding-v1.test.mjs
+      - name: Assert B4 never hardcodes GREEN learning before binding result
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -F "allBindings?'UNIVERSAL_SKILL_REAL_BINDINGS_GREEN':'UNIVERSAL_SKILL_REAL_BINDINGS_HOLD'" cerebro/runtime/universal-skill-real-binding-v1.mjs
+          grep -F "lrn.learning_outcome==='UNIVERSAL_SKILL_REAL_BINDINGS_GREEN'" cerebro/runtime/universal-skill-real-binding-v1.mjs
+
+  b5-adapters-and-durable-batch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Automatic evidence-grounded adapter and durable batch tests
+        run: node --test cerebro/tests/universal-skill-adapter-factory-v1.test.mjs cerebro/tests/universal-skill-batch-orchestrator-v1.test.mjs
+      - name: Assert adapter factory cannot synthesize semantic evidence from target contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -F 'semantic_adapter_evidence_missing' cerebro/runtime/universal-skill-adapter-factory-v1.mjs
+          grep -F "observed_constraints:Object.freeze([...validation.observed])" cerebro/runtime/universal-skill-adapter-factory-v1.mjs
+          ! grep -F "observed_constraints:contract.required_constraints" cerebro/runtime/universal-skill-adapter-factory-v1.mjs
+      - name: Assert durable batch reuses JOB-001 and stays PREPROD zero-cost
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -F "DurableJobRuntimeV1" cerebro/runtime/universal-skill-batch-orchestrator-v1.mjs
+          grep -F "const PREPROD='PREPROD'" cerebro/runtime/universal-skill-batch-orchestrator-v1.mjs
+          ! grep -Eq 'prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true|additional_cost_eur[[:space:]]*:[[:space:]]*[1-9]' cerebro/runtime/universal-skill-adapter-factory-v1.mjs cerebro/runtime/universal-skill-batch-orchestrator-v1.mjs
+
+  b6-blind-real-catalog:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Blind batch against real 184 catalog reconciliation
+        run: node --test cerebro/tests/universal-skill-blind-legacy184-batch-v1.test.mjs
+      - name: Prove B6 uses live catalog file and generic rules only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f cerebro/skills/cerebro-184-items-38-50-live-reconciliation.v2.json
+          grep -F "normalizeLegacy184Item" cerebro/runtime/universal-skill-legacy184-normalizer-v1.mjs
+          ! grep -Eq "item\.id[[:space:]]*===|case[[:space:]]+[0-9]+" cerebro/runtime/universal-skill-legacy184-normalizer-v1.mjs
+
+  b8-auto-engineering-fulfillment:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Auto Engineering family fulfillment against real prior gap
+        run: node --test cerebro/tests/universal-skill-auto-engineering-v1.test.mjs
+      - name: Assert no candidate-ID special casing or contract-echo evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -F "'finance-accounting-payments':financeDryRun" cerebro/runtime/universal-skill-auto-engineering-v1.mjs
+          ! grep -Eq 'legacy184:[0-9]+|item\.id[[:space:]]*===|case[[:space:]]+[0-9]+' cerebro/runtime/universal-skill-auto-engineering-v1.mjs
+          ! grep -F 'Stripe' cerebro/runtime/universal-skill-auto-engineering-v1.mjs
+          ! grep -F 'contract.required_constraints' cerebro/runtime/universal-skill-auto-engineering-v1.mjs
+          ! grep -Eq 'prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true|additional_cost_eur[[:space:]]*:[[:space:]]*[1-9]' cerebro/runtime/universal-skill-auto-engineering-v1.mjs
+
+  focused-existing-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Existing skill/evaluation regression
+        run: node --test cerebro/tests/skill-real-engine-binding-v1.test.mjs cerebro/tests/skill-capability-evolution-v0.test.mjs cerebro/tests/evaluation-tribunal.test.mjs
+
+  full-cerebro-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Full CEREBRO regression
+        run: node --test cerebro/tests/*.test.mjs

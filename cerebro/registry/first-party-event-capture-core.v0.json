@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_FIRST_PARTY_EVENT_CAPTURE_CORE_V0",
+  "generated_at": "2026-10-18",
+  "company_id": "GLOBAL",
+  "engine_id": "EVT-001",
+  "environment": "PREPROD",
+  "version": "0.1.0",
+  "status": "LOCAL_PREPROD_CAPTURE_PERSISTENCE_CORE_GREEN_STAGING_BROWSER_EMITTER_GREEN_SERVER_JOURNAL_BINDING_PENDING",
+  "catalog_item": 74,
+  "decision": "EXTEND_EXISTING_EVT001_NO_NEW_ENGINE",
+  "implementation_head_sha": "9991cdec24550aec1f24a9d8f2ca16bfff0ff705",
+  "existing_assets_reused": [
+    "cerebro/runtime/first-party-account-signals-profile-v1.mjs",
+    "cerebro/runtime/persistent-runtime.mjs",
+    "cerebro/runtime/runtime.mjs",
+    "cerebro/registry/first-party-account-signals-profile.v1.json"
+  ],
+  "implementation_added": {
+    "runtime": "cerebro/runtime/first-party-event-capture-core-v0.mjs",
+    "tests": "cerebro/tests/first-party-event-capture-core-v0.test.mjs"
+  },
+  "core_scope": {
+    "normalize_privacy_minimized_event": true,
+    "persist_preprod_event": true,
+    "idempotent_replay": true,
+    "multi_company_context_isolation": true,
+    "local_atomic_journal": true,
+    "supabase_required": false,
+    "external_provider_required": false,
+    "staging_browser_emitter_verified": true,
+    "public_prod_tag_deployed": false,
+    "guarded_server_journal_binding_verified": false
+  },
+  "privacy": {
+    "analytics_consent_required": true,
+    "raw_ip_storage_allowed": false,
+    "user_agent_storage_allowed": false,
+    "cookie_value_storage_allowed": false,
+    "form_value_capture_allowed": false,
+    "query_parameter_storage_allowed": false,
+    "person_identity_storage_allowed": false,
+    "device_fingerprinting_allowed": false
+  },
+  "verification": {
+    "implementation_exact_head_full_regression": "PASS",
+    "engineering_specializations_run_id": 39128377990,
+    "engineering_specializations_artifact_id": 12136549578,
+    "engineering_specializations_artifact_digest": "sha256:dde42c86a5fff4078a883d49362cb7f50d6c4a88d0dc38d14027f44a471b15dc",
+    "scale184_v2_run_id": 39128377988,
+    "scale184_v2": "PASS",
+    "b20_run_id": 39128378076,
+    "b20": "PASS",
+    "repository_e2e_run_id": 39128378012,
+    "repository_e2e": "PASS",
+    "governed_main_run_id": 39128378016,
+    "governed_main": "PASS",
+    "github_live_e2e_run_id": 39128378056,
+    "github_live_e2e": "PASS",
+    "staging_browser_evidence": "cerebro/registry/evt001-browser-staging-e2e.v0.json",
+    "staging_browser_emitter": "PASS",
+    "staging_browser_replay_idempotency": "PASS",
+    "generic_b3_server_write_evidence": "cerebro/registry/b3-server-write-e2e-closeout.v1.json",
+    "generic_b3_server_write": "GREEN_PHYSICAL_PREPROD",
+    "direct_browser_to_guarded_journal_binding": "PENDING_EXPLICIT_MINIMUM_REQUIRED_GRANT"
+  },
+  "authority": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "provider_write_authorized": false,
+    "crm_write_authorized": false,
+    "external_dispatch_authorized": false,
+    "customer_data_authorized": false,
+    "trading_access": false,
+    "automatic_paid_fallback": false,
+    "additional_cost_eur": 0
+  },
+  "truth_constraints": [
+    "LOCAL_PREPROD_CAPTURE_CORE_AND_AUTHENTICATED_STAGING_BROWSER_EMITTER_ARE_GREEN",
+    "STAGING_BROWSER_EMITTER_IS_NOT_DIRECT_GUARDED_SERVER_JOURNAL_BINDING",
+    "NO_PERMISSION_BYPASS_OR_WEAKENING_IS_AUTHORIZED",
+    "NO_PROD_OR_CUSTOMER_DATA_AUTHORITY_IS_GRANTED",
+    "EXISTING_EVT001_PERSISTENT_RUNTIME_IS_REUSED_NOT_DUPLICATED"
+  ],
+  "rollback": "Remove the additive capture adapter and follow-up metadata; existing first-party normalization, staging evidence and PersistentEventBus remain separately auditable.",
+  "rebuild": "Recreate the adapter from normalizeFirstPartyEvent plus PersistentEventBus, replay the atomic EVT-001 journal, and revalidate the authenticated STAGING browser emitter evidence.",
+  "human_required_gate": "POLICY_CONFLICT",
+  "next_gate": "CONSENTED_BROWSER_EMITTER_TO_EXISTING_GUARDED_SERVER_JOURNAL_E2E_WITH_EXPLICIT_MINIMUM_REQUIRED_GRANT"
+}

@@ -1,0 +1,61 @@
+name: CEREBRO Universal Skill Activation Scale184 V1
+
+on:
+  push:
+    branches:
+      - 'cerebro/universal-skill-activation-factory-v1-*'
+    paths:
+      - 'cerebro/runtime/universal-skill-legacy184-scale-v1.mjs'
+      - 'cerebro/runtime/universal-skill-legacy184-normalizer-v1.mjs'
+      - 'cerebro/runtime/universal-skill-batch-orchestrator-v1.mjs'
+      - 'cerebro/tests/universal-skill-legacy184-scale-v1.test.mjs'
+      - '.github/workflows/cerebro-universal-skill-activation-scale184-v1.yml'
+  pull_request:
+    paths:
+      - 'cerebro/runtime/universal-skill-legacy184-scale-v1.mjs'
+      - 'cerebro/runtime/universal-skill-legacy184-normalizer-v1.mjs'
+      - 'cerebro/runtime/universal-skill-batch-orchestrator-v1.mjs'
+      - 'cerebro/tests/universal-skill-legacy184-scale-v1.test.mjs'
+      - '.github/workflows/cerebro-universal-skill-activation-scale184-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: usaf-scale184-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  b7-scale184:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Test exact 184 coverage and truthful outcome matrix
+        run: node --test cerebro/tests/universal-skill-legacy184-scale-v1.test.mjs
+      - name: Generate immutable scale report
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/usaf-scale184
+          node cerebro/runtime/universal-skill-legacy184-scale-v1.mjs > artifacts/usaf-scale184/report.json
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const r=JSON.parse(fs.readFileSync('artifacts/usaf-scale184/report.json','utf8'));
+          if(r.status!=='GREEN_TRUTHFUL_184_OUTCOME_MATRIX'||r.catalog_size!==184||r.matrix.length!==184||r.mismatches.length!==0)throw new Error('SCALE184_NOT_GREEN');
+          if(r.full_claim!==false||r.prod_authorized!==false||r.trading_access!==false||r.additional_cost_eur!==0)throw new Error('SCALE184_TRUTH_OR_AUTHORITY_BOUNDARY_FAILED');
+          console.log(JSON.stringify({status:r.status,catalog_size:r.catalog_size,processed_runtime:r.processed_runtime,terminal_without_runtime:r.terminal_without_runtime,outcomes:r.observed_outcome_counts,full_claim:r.full_claim,prod:false,cost_eur:0}));
+          NODE
+      - name: Full CEREBRO regression
+        run: node --test cerebro/tests/*.test.mjs
+      - name: Upload B7 scale evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-usaf-scale184-${{ github.run_id }}
+          path: artifacts/usaf-scale184/report.json
+          retention-days: 30
+          if-no-files-found: error

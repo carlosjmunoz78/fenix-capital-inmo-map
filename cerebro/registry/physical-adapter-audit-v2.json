@@ -1,0 +1,112 @@
+{
+  "schema_version": "2.0.1",
+  "state_type": "CEREBRO_PHYSICAL_ADAPTER_AUDIT_V2",
+  "generated_at": "2026-10-18",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v2",
+  "status": "CURRENT_PHYSICAL_TRUTH_RECONCILED_NO_BLIND_PROMOTION",
+  "supersedes_for_current_reporting": "cerebro/registry/physical-adapter-audit-v1.json",
+  "historical_evidence_preserved": ["cerebro/registry/physical-adapter-audit-v1.json"],
+  "principles": {
+    "preserve_existing": true,
+    "current_evidence_first": true,
+    "no_live_side_effect_required_to_close_safe_preprod_logic": true,
+    "zero_additional_cost_default": true,
+    "supabase_not_universal_runtime": true,
+    "trading_isolated": true
+  },
+  "newly_closed_since_v1": [
+    {
+      "id": "WATCH_LEARN_47",
+      "state": "CONTINUOUS_PREPROD_ACCEPTANCE_GREEN",
+      "evidence": ["cerebro/registry/watch-learn-remote-observation.v0.json", "cerebro/registry/watch-learn-retention-review.v1.json"],
+      "facts": ["three genuine separated schedule runs GREEN", "retention review GREEN", "deterministic replay stable per cycle", "no remote writes or customer data"]
+    },
+    {
+      "id": "COMPET_REAL_SOURCE_SCHEDULED_SOAK",
+      "state": "CONTINUOUS_PREPROD_ACCEPTANCE_GREEN",
+      "evidence": ["cerebro/registry/compet-real-targets.v0.json", "cerebro/registry/compet-real-targets-acceptance.v1.json"],
+      "facts": ["preserved V0 contains three real Cordoba targets and GET-only physical baseline", "additive acceptance V1 certifies three genuine separated schedule runs GREEN", "resilience is additive wrapper-only"]
+    },
+    {
+      "id": "CAP_REAL_SOURCE_SCHEDULED_SOAK",
+      "state": "CONTINUOUS_PREPROD_ACCEPTANCE_GREEN",
+      "evidence": "cerebro/registry/cap-ieca-cordoba.v0.json",
+      "facts": ["official IECA Cordoba GET-only source", "physical PREPROD discovery GREEN", "three genuine separated schedule runs GREEN"]
+    }
+  ],
+  "genuine_physical_or_policy_gates_still_open": [
+    {
+      "id": "ANDROID_48_183",
+      "state": "PARCIAL_PHYSICAL_ATTESTATION_REQUIRED",
+      "evidence": "cerebro/registry/fact001-android-staging-48-183.v0.json",
+      "next_gate": "AUTHORIZED_PHYSICAL_ANDROID_DEVICE_E2E"
+    },
+    {
+      "id": "EVT74_GUARDED_SERVER_JOURNAL_BINDING",
+      "state": "PARCIAL_POLICY_BOUND",
+      "evidence": "cerebro/registry/first-party-event-capture-core.v0.json",
+      "next_gate": "CONSENTED_BROWSER_EMITTER_TO_EXISTING_GUARDED_SERVER_JOURNAL_E2E_WITH_EXPLICIT_MINIMUM_REQUIRED_GRANT",
+      "human_required": "POLICY_CONFLICT"
+    },
+    {
+      "id": "IAM_BROWSER_VAULT_PHYSICAL",
+      "state": "PARCIAL_PHYSICAL_ATTESTATION_REQUIRED",
+      "evidence": "cerebro/registry/authorized-execution-device-profile.v1.json",
+      "next_gate": "FRESH_AUTHORIZED_DEVICE_BROWSER_VAULT_BINDINGS"
+    },
+    {
+      "id": "MULTIMEDIA_PHYSICAL_BINDINGS",
+      "state": "PARCIAL_PHYSICAL_BINDINGS_UNVERIFIED",
+      "evidence": "cerebro/registry/multimedia-zero-cost-physical-inventory-v1.json",
+      "facts": ["GitHub-hosted PREPROD runner has no allowlisted multimedia binaries", "automatic installation/download remains forbidden"],
+      "next_gate": "READ_ONLY_AUTHORIZED_RUNTIME_INVENTORY_IF_AVAILABLE"
+    },
+    {
+      "id": "BRAND_COMMERCE_APP_PHYSICAL",
+      "state": "PARCIAL_DEVICE_AND_SIDE_EFFECT_GATED",
+      "evidence": ["cerebro/registry/brand-commerce-appfactory-profile.v0.json", "cerebro/registry/fact001-android-staging-48-183.v0.json"],
+      "next_gate": "AUTHORIZED_PHYSICAL_EXECUTION_WITHOUT_PUBLIC_OR_PROD_PROMOTION"
+    }
+  ],
+  "safe_preprod_logic_closed_side_effects_still_gated": [
+    "COMPANY_INTENT_PRIVACY_PHYSICAL",
+    "LEAD_CONTACT_CALIBRATION_PHYSICAL",
+    "SALES_PHYSICAL_CHANNEL_DELIVERY",
+    "VOICE_LIVE_TELEPHONY",
+    "AGENDA_CONTRACT_PAYMENT_FULFILLMENT",
+    "REPUTATION_PUBLIC_REVIEW",
+    "ECONOMIC_ACTIONS",
+    "MARKETING_SEO_PHYSICAL_ADAPTERS"
+  ],
+  "authority": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "prod_mutation_authorized": false,
+    "provider_write_authorized": false,
+    "crm_write_authorized": false,
+    "customer_dispatch_authorized": false,
+    "public_publish_authorized": false,
+    "calendar_write_authorized": false,
+    "signature_execution_authorized": false,
+    "payment_execution_authorized": false,
+    "invoice_issue_authorized": false,
+    "real_ad_spend_authorized": false,
+    "external_skill_code_execution_authorized": false,
+    "trading_access": false,
+    "automatic_paid_fallback": false,
+    "additional_cost_eur": 0
+  },
+  "rollback": "Point current-physical-adapter-audit.v1.json back to V1. V2 performs no external mutation.",
+  "rebuild": "Re-derive from V1 plus current Watch/COMPET base+acceptance/CAP/EVT74/Android/multimedia registries and rerun exact-head CI.",
+  "next_block": [
+    "KEEP_WATCH_COMPET_CAP_CONTINUOUS_MONITORING_READ_ONLY_AND_HOLD_ON_REGRESSION",
+    "RECONCILE_FRESH_BROWSER_BRIDGE_PHYSICAL_ATTESTATION_WHEN_AUTHORIZED_RUNTIME_IS_AVAILABLE",
+    "CONTINUE_ANDROID_PHYSICAL_E2E_ONLY_WHEN_AUTHORIZED_DEVICE_IS_AVAILABLE",
+    "AUDIT_ALREADY_PRESENT_ZERO_COST_MULTIMEDIA_TOOLS_READ_ONLY_WHEN_AUTHORIZED_RUNTIME_IS_AVAILABLE",
+    "DO_NOT_OPEN_SIDE_EFFECT_GATES_WITHOUT_EXACT_POLICY_HUMAN_OR_MONEY_CONTRACT"
+  ],
+  "prod": "NOT_AUTHORIZED"
+}

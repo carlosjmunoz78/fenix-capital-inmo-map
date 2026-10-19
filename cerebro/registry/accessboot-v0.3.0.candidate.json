@@ -1,0 +1,49 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "CEREBRO_ACCESSBOOT",
+  "version": "0.3.0",
+  "status": "CANDIDATE_PREPROD",
+  "environment": "PREPROD",
+  "prod_allowed": false,
+  "additional_cost_eur": 0,
+  "purpose": "Single-entry physical finalizer replacing loose acceptance executables; preserve Browser Universal, preserve Device Universal v0.2.4, run corrected physical acceptance, persist sanitized receipt even on partial failure.",
+  "artifact_evidence": {
+    "exe_sha256": "b291b10d48f34ede90376ee04ca5a34a36b4a765e733c43a9d9d9d04f8bf1add",
+    "exe_size": 29458944,
+    "windows_arch": "amd64",
+    "cross_build": "PASS",
+    "embedded_device_v0_2_4_sha256": "1683bf3027dac2f4ff70cce1bf54ff7f3f0fede5c022efec0a009159e06d4f43",
+    "narrow_literal_secret_scan_hits": 0,
+    "powershell_static_balance": {
+      "braces_open": 105,
+      "braces_close": 105,
+      "parentheses_open": 188,
+      "parentheses_close": 188,
+      "here_strings_open": 1,
+      "here_strings_close": 1
+    }
+  },
+  "preserves": [
+    "Browser Universal on 127.0.0.1:8765",
+    "Device Agent on 127.0.0.1:8766",
+    "Evidence Host on 127.0.0.1:8767",
+    "canonical device identity and aliases",
+    "legacy Browser profiles",
+    "Vault DPAPI data",
+    "PREPROD-only policy"
+  ],
+  "corrects": [
+    "Physical Acceptance v0.2 could exit before persisting a receipt",
+    "Missing physical_acceptance evidence forced manual repetition",
+    "Fallback receipt is now written by Go if the PowerShell runner fails early"
+  ],
+  "receipt_compatibility_path": "%LOCALAPPDATA%\\CEREBRO\\UniversalDevice\\device-physical-acceptance-v0.2.json",
+  "canonical_finalization_receipt": "%LOCALAPPDATA%\\CEREBRO\\UniversalDevice\\accessboot-finalization-v0.3.0.json",
+  "physical_execution": "PENDING",
+  "promotion_limits": [
+    "remote_command_roundtrip",
+    "restart_persistence_after_windows_reboot",
+    "rollback_physical",
+    "portable_vault_cross_device_recovery"
+  ]
+}

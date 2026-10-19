@@ -1,0 +1,68 @@
+name: CEREBRO Universal Device Pairing V2
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/runtime/universal-device-command-envelope-v2.mjs'
+      - 'cerebro/tests/universal-device-command-envelope-v2.test.mjs'
+      - 'cerebro/contracts/universal-device-command-envelope-v2.schema.json'
+      - 'cerebro/registry/universal-device-pairing-v2.json'
+      - 'cerebro/docs/CEREBRO_UNIVERSAL_DEVICE_PAIRING_V2_2026-10-19.md'
+      - '.github/workflows/cerebro-universal-device-pairing-v2.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'cerebro/runtime/universal-device-command-envelope-v2.mjs'
+      - 'cerebro/tests/universal-device-command-envelope-v2.test.mjs'
+      - 'cerebro/contracts/universal-device-command-envelope-v2.schema.json'
+      - 'cerebro/registry/universal-device-pairing-v2.json'
+      - 'cerebro/docs/CEREBRO_UNIVERSAL_DEVICE_PAIRING_V2_2026-10-19.md'
+      - '.github/workflows/cerebro-universal-device-pairing-v2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-universal-device-pairing-v2-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  focused-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node --test cerebro/tests/universal-device-command-envelope-v2.test.mjs
+
+  device-control-plane-regressions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node --test cerebro/tests/authorized-execution-device-profile-v1.test.mjs cerebro/tests/identity-credential-broker-v0.test.mjs cerebro/tests/identity-session-lifecycle-v0.test.mjs cerebro/tests/execution-model-router-v0.test.mjs
+
+  candidate-full-suite:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node --test cerebro/tests/*.test.mjs
+
+  base-full-suite:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node --test cerebro/tests/*.test.mjs

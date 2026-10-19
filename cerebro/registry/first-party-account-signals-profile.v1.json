@@ -1,25 +1,25 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.1",
   "state_type": "CEREBRO_FIRST_PARTY_ACCOUNT_SIGNALS_PROFILE_REGISTRY_V1",
   "company_id": "fenix",
   "engine_id": "EVT-001",
   "environment": "PREPROD",
-  "version": "1.0.0",
+  "version": "1.1.1",
   "block": "74-82",
-  "state": "INTEGRATED_MAIN_VALIDATED",
-  "block_status": "HECHO",
-  "closure_scope": "TRANSVERSAL_PROFILE_INTEGRATION_NOT_TRACKING_PROVIDER_OR_PERSISTENCE_ACTIVATION",
+  "state": "INTEGRATED_MAIN_VALIDATED_PLUS_EVT74_LOCAL_CAPTURE_AND_STAGING_BROWSER_EMITTER",
+  "block_status": "HECHO_PARCIAL_SERVER_JOURNAL_BINDING_PENDING",
+  "closure_scope": "TRANSVERSAL_FIRST_PARTY_SIGNAL_PROFILE_PLUS_LOCAL_EVT74_CAPTURE_PERSISTENCE_CORE_PLUS_AUTHENTICATED_STAGING_BROWSER_EMITTER_NO_PROD_TRACKING",
   "profile_kind": "TRANSVERSAL_FIRST_PARTY_SIGNALS_PROFILE_NOT_NEW_ENGINE",
   "items": {
-    "74": {"name":"First-party event capture","status":"PARCIAL","implementation":"privacy-minimized deterministic event contract integrated; no PROD tag deployment, event persistence or provider activation"},
+    "74": {"name":"First-party event capture","status":"PARCIAL_CORE_AND_STAGING_EMITTER_GREEN_SERVER_JOURNAL_BINDING_PENDING","implementation":"privacy-minimized normalization plus zero-cost PREPROD local capture/persistence over existing EVT-001 PersistentEventBus plus authenticated STAGING browser emitter and idempotent replay; direct consented browser-to-guarded-server-journal E2E remains pending the minimum explicit grant"},
     "75": {"name":"PostHog","status":"POR AUDITAR","implementation":"free-tier/self-host candidate with hard zero-cost boundary; no project/runtime activated"},
     "76": {"name":"Talivia","status":"HOLD","implementation":"paid revenue-attribution service; patterns only under zero-cost policy"},
     "77": {"name":"Microsoft Clarity","status":"POR AUDITAR","implementation":"free provider candidate but activation remains consent/privacy gated; no tag deployed"},
     "78": {"name":"Yandex Metrica","status":"HOLD","implementation":"free provider candidate remains privacy/legal/DPA/consent gated; no tag deployed"},
     "79": {"name":"Company visitor identification","status":"PARCIAL","implementation":"exact known account or explicit first-party company-domain planning integrated; no person resolution, fingerprinting or covert deanonymization"},
-    "80": {"name":"Visited-page intent score","status":"PARCIAL","implementation":"deterministic page-category account signal integrated over normalized consented events; no live event source activated"},
-    "81": {"name":"Return-visit signal","status":"PARCIAL","implementation":"deterministic second-visit-window account signal integrated; no device fingerprinting or live tracking activated"},
-    "82": {"name":"CRM + website event merge","status":"PARCIAL","implementation":"read-only exact account/domain merge integrated; no CRM writes, fuzzy matching or live persistence"}
+    "80": {"name":"Visited-page intent score","status":"PARCIAL","implementation":"deterministic page-category account signal integrated over normalized consented events; local EVT persistence and STAGING emitter evidence exist, but direct guarded server-journal binding is not yet proven"},
+    "81": {"name":"Return-visit signal","status":"PARCIAL","implementation":"deterministic second-visit-window account signal integrated; local EVT persistence and STAGING replay evidence exist with no device fingerprinting"},
+    "82": {"name":"CRM + website event merge","status":"PARCIAL","implementation":"read-only exact account/domain merge integrated; local EVT persistence exists, while CRM writes, fuzzy matching and direct website-to-guarded-server-journal integration remain disabled/pending"}
   },
   "analytics_provider_order": ["FIRST_PARTY_LOCAL", "POSTHOG_FREE", "MICROSOFT_CLARITY_FREE", "YANDEX_METRICA_FREE"],
   "page_intent_weights": {"HOME":5,"BLOG":10,"SERVICE":20,"CASE_STUDY":25,"CONTACT":30,"PRICING":35,"APPLICATION_START":40},
@@ -39,26 +39,25 @@
     "automatic_paid_fallback": false,
     "silent_spend_allowed": false
   },
-  "external_evidence": {
-    "observed_at": "2026-10-14",
-    "posthog": "official pricing offers 1M analytics events/month free with no card required; official docs also describe freely available self-hosting; provider remains optional and no auto-spend is permitted",
-    "talivia": "official site states 14-day trial then paid monthly pricing for founding customers; patterns only",
-    "microsoft_clarity": "official pricing states free forever; Microsoft consent documentation requires consent signals for EEA/UK/CH full functionality from 2025-10-31; activation remains consent gated",
-    "yandex_metrica": "official GDPR documentation describes cookie/tracking notice, data-processing agreement and IP masking; activation remains privacy/legal gated"
-  },
   "dependency_map": {
     "preserve": [
       "cerebro/runtime/company-intent-resolution-profile-v1.mjs",
       "cerebro/runtime/lead-discovery-enrichment-profile-v1.mjs",
       "cerebro/runtime/web-acquisition-intelligence-profile-v1.mjs",
-      "cerebro/registry/engine-registry.seed.json"
+      "cerebro/runtime/persistent-runtime.mjs",
+      "cerebro/registry/engine-registry.seed.json",
+      "cerebro/registry/evt001-browser-staging-e2e.v0.json",
+      "cerebro/registry/b3-server-write-e2e-closeout.v1.json"
     ],
-    "extend": ["cerebro/runtime/first-party-account-signals-profile-v1.mjs"],
+    "extend": [
+      "cerebro/runtime/first-party-account-signals-profile-v1.mjs",
+      "cerebro/runtime/first-party-event-capture-core-v0.mjs"
+    ],
     "replace": [],
-    "not_activated": ["website tracking tags", "PostHog runtime", "Clarity runtime", "Yandex Metrica runtime", "Talivia runtime", "CRM writes"]
+    "not_activated": ["public/PROD website tracking tags", "PostHog runtime", "Clarity runtime", "Yandex Metrica runtime", "Talivia runtime", "CRM writes", "direct browser-to-guarded-server-journal permission bypass"]
   },
   "verification": {
-    "status": "GREEN_MAIN_POSTMERGE",
+    "status": "GREEN_BASE_PROFILE_PLUS_EVT74_CORE_AND_STAGING_BROWSER_EMITTER",
     "feature_pr": 663,
     "feature_head_sha": "67ec51ca0b041bae0967f8a6dc39ecdf6d83063a",
     "feature_merge_sha": "c07037a9358ed9b53b004ba4ff6071a091355961",
@@ -79,14 +78,23 @@
     "prod_runtime_smoke_run_id": 38485472824,
     "prod_runtime_smoke": "PASS",
     "prod_live_deploy_run_id": 38485472900,
-    "prod_live_deploy": "SKIPPED"
+    "prod_live_deploy": "SKIPPED",
+    "evt74_implementation_head_sha": "9991cdec24550aec1f24a9d8f2ca16bfff0ff705",
+    "evt74_engineering_specializations_run_id": 39128377990,
+    "evt74_full_cerebro_regression": "PASS",
+    "evt74_staging_browser_evidence": "cerebro/registry/evt001-browser-staging-e2e.v0.json",
+    "evt74_staging_browser_emitter": "PASS",
+    "evt74_staging_browser_replay": "PASS",
+    "evt74_generic_b3_server_write": "GREEN_PHYSICAL_PREPROD",
+    "evt74_direct_guarded_server_journal_binding": "PENDING_EXPLICIT_MINIMUM_REQUIRED_GRANT"
   },
-  "rollback": {"method":"revert PR #663 / merge c07037a9358ed9b53b004ba4ff6071a091355961; Company Intent, Lead Discovery and Web Acquisition profiles remain canonical"},
-  "rebuild": {"method":"recreate from runtime contract + registry + tests + provider dispositions on current main"},
+  "rollback": {"method":"revert EVT-74 follow-up metadata/runtime while preserving original PR #663 profile; Company Intent, Lead Discovery, Web Acquisition and PersistentEventBus remain canonical"},
+  "rebuild": {"method":"recreate original profile plus EVT-74 adapter from runtime contract + registry + tests, replay the local EVT-001 journal, and revalidate authenticated STAGING emitter evidence"},
   "next_block": {
-    "range": "83-92",
-    "items": ["LEAD-001", "fit_score", "intent_score", "urgency_score", "conversion_probability", "expected_value", "next_best_action", "Verifio", "email/MX/SMTP/catch-all confidence", "phone/contact confidence"],
-    "authorized_to_start": true
+    "range": "74 guarded server-journal binding + 83-92 unchanged",
+    "items": ["EVT-74 direct guarded server-journal E2E with minimum grant", "LEAD-001", "fit_score", "intent_score", "urgency_score", "conversion_probability", "expected_value", "next_best_action", "Verifio", "email/MX/SMTP/catch-all confidence", "phone/contact confidence"],
+    "authorized_to_start": false,
+    "human_required": "POLICY_CONFLICT"
   },
   "prod_authorized": false,
   "prod_write_authorized": false,

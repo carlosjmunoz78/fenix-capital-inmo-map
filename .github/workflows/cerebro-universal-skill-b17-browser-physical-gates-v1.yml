@@ -1,0 +1,106 @@
+name: CEREBRO Universal Skill B17 Browser Physical Gates V1
+
+on:
+  push:
+    paths:
+      - 'cerebro/runtime/universal-skill-b17-browser-physical-gates-v1.mjs'
+      - 'cerebro/runtime/browser-transversal-autonomy-v1.mjs'
+      - 'cerebro/runtime/authorized-execution-device-profile-v1.mjs'
+      - 'cerebro/governance/identity-session-lifecycle.mjs'
+      - 'cerebro/registry/browser-transversal-autonomy-policy.v1.json'
+      - 'cerebro/registry/authorized-execution-device-profile.v1.json'
+      - 'cerebro/registry/credential-lifecycle-policy.v0.json'
+      - 'cerebro/registry/physical-adapter-audit-v1.json'
+      - 'cerebro/registry/universal-skill-b17-browser-physical-gates.v1.json'
+      - 'cerebro/registry/universal-skill-activation-factory-v1.state.json'
+      - 'cerebro/docs/CEREBRO_UNIVERSAL_SKILL_ACTIVATION_FACTORY_V1_*.md'
+      - 'cerebro/tests/browser-transversal-autonomy-v1.test.mjs'
+      - 'cerebro/tests/authorized-execution-device-profile-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-b17-browser-physical-gates-v1.test.mjs'
+      - '.github/workflows/cerebro-universal-skill-b17-browser-physical-gates-v1.yml'
+  pull_request:
+    paths:
+      - 'cerebro/runtime/universal-skill-b17-browser-physical-gates-v1.mjs'
+      - 'cerebro/runtime/browser-transversal-autonomy-v1.mjs'
+      - 'cerebro/runtime/authorized-execution-device-profile-v1.mjs'
+      - 'cerebro/governance/identity-session-lifecycle.mjs'
+      - 'cerebro/registry/browser-transversal-autonomy-policy.v1.json'
+      - 'cerebro/registry/authorized-execution-device-profile.v1.json'
+      - 'cerebro/registry/credential-lifecycle-policy.v0.json'
+      - 'cerebro/registry/physical-adapter-audit-v1.json'
+      - 'cerebro/registry/universal-skill-b17-browser-physical-gates.v1.json'
+      - 'cerebro/registry/universal-skill-activation-factory-v1.state.json'
+      - 'cerebro/docs/CEREBRO_UNIVERSAL_SKILL_ACTIVATION_FACTORY_V1_*.md'
+      - 'cerebro/tests/browser-transversal-autonomy-v1.test.mjs'
+      - 'cerebro/tests/authorized-execution-device-profile-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-b17-browser-physical-gates-v1.test.mjs'
+      - '.github/workflows/cerebro-universal-skill-b17-browser-physical-gates-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  b17-browser-physical-gates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: B17 targeted browser/device governance and physical-gate tests
+        run: node --test cerebro/tests/browser-transversal-autonomy-v1.test.mjs cerebro/tests/authorized-execution-device-profile-v1.test.mjs cerebro/tests/universal-skill-b17-browser-physical-gates-v1.test.mjs
+      - name: Current physical truth without injected evidence
+        run: |
+          node cerebro/runtime/universal-skill-b17-browser-physical-gates-v1.mjs > /tmp/b17-current.json
+          node -e "const r=require('/tmp/b17-current.json'); if(r.configuration_gate!=='HECHO'||r.terminal_state!=='BLOCKED_EXTERNAL'||r.physical_evidence_current!==false||r.human_required!==null) process.exit(1); console.log(JSON.stringify({configuration_gate:r.configuration_gate,terminal_state:r.terminal_state,activation_state:r.activation_state,browser_binding_status:r.browser_binding_status,action_observation_status:r.action_observation_status,residuals:r.residuals},null,2))"
+      - name: Full CEREBRO regression isolated per test file
+        shell: bash
+        run: |
+          set -uo pipefail
+          report_file="b17-regression-diagnostics.txt"
+          : > "${report_file}"
+          count=0
+          failures=0
+          failed_files=()
+          while IFS= read -r test_file; do
+            count=$((count + 1))
+            tmp_output="$(mktemp)"
+            echo "::group::${test_file}"
+            if node --test "${test_file}" >"${tmp_output}" 2>&1; then
+              cat "${tmp_output}"
+            else
+              failures=$((failures + 1))
+              failed_files+=("${test_file}")
+              cat "${tmp_output}"
+              {
+                printf '===== FAILED: %s =====\n' "${test_file}"
+                cat "${tmp_output}"
+                printf '\n'
+              } >> "${report_file}"
+              echo "::error file=${test_file},title=CEREBRO regression failure::Test file failed in isolated Node process"
+            fi
+            rm -f "${tmp_output}"
+            echo "::endgroup::"
+          done < <(find cerebro/tests -maxdepth 1 -type f -name '*.test.mjs' -print | sort)
+          if (( count == 0 )); then
+            printf '%s\n' 'NO_TEST_FILES_DISCOVERED' > "${report_file}"
+            echo "::error title=CEREBRO regression failure::No CEREBRO test files were discovered"
+            exit 1
+          fi
+          if (( failures > 0 )); then
+            printf 'Failed files (%d):\n' "${failures}"
+            printf ' - %s\n' "${failed_files[@]}"
+            exit 1
+          fi
+          printf '%s\n' 'ALL_CEREBRO_TEST_FILES_GREEN' > "${report_file}"
+          echo "Executed ${count} CEREBRO test files in isolated Node test-runner processes."
+      - name: Upload B17 regression diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: b17-regression-diagnostics
+          path: b17-regression-diagnostics.txt
+          if-no-files-found: error
+          retention-days: 1

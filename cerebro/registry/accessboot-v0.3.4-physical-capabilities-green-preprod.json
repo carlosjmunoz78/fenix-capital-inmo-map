@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0.0",
+  "recorded_at": "2026-10-19T16:25:09Z",
+  "environment": "PREPROD",
+  "status": "PHYSICAL_CAPABILITIES_BATCH_GREEN_PREPROD",
+  "confirmed_operational": false,
+  "prod_allowed": false,
+  "additional_cost_eur": 0,
+  "canonical_device_id": "desktop-4c008d88919f",
+  "device_aliases": ["desktop-74ca87506edbd7a5"],
+  "tenant_binding": "DYNAMIC_MULTI_COMPANY",
+  "evidence_source": "CEREBRO Device Evidence Host 127.0.0.1:8767/evidence via Opera oficina",
+  "services": {
+    "browser_agent_host": {"listener":"127.0.0.1:8765","version":"0.3.0","status":"PASS_PRESERVED"},
+    "device_agent": {"listener":"127.0.0.1:8766","version":"0.2.0","status":"PASS"},
+    "evidence_host": {"listener":"127.0.0.1:8767","version":"0.2.4","status":"PASS"}
+  },
+  "physical_capabilities_green": [
+    "SCREENSHOT","MOVE","CLICK","TYPE_TEXT","HOTKEY","GUI_ACCEPTANCE","FILES","APP_LAUNCH","PROCESSES","APP_FOCUS","CLIPBOARD","SHELL_GUARDED","VAULT_PUT_LIST","VAULT_USE_READBACK","VAULT_DELETE_READBACK","VAULT_SYNTHETIC_ROUNDTRIP","STARTUP_CONFIG","IDENTITY_V2","UNIVERSAL_PAIRING_SCOPE","FINALIZER_BOOT","LOCAL_HEALTH_GUARD"
+  ],
+  "preservation": {
+    "browser_repeated": false,
+    "legacy_profiles_rewritten": false,
+    "raw_secrets_logged": false
+  },
+  "still_pending": [
+    "remote_command_roundtrip",
+    "restart_persistence_after_windows_reboot",
+    "rollback_physical",
+    "portable_vault_cross_device_recovery",
+    "camera",
+    "microphone",
+    "audio",
+    "peripherals"
+  ],
+  "next_block": "UNIVERSAL_DEVICE_PAIRING_V2_SYNTHETIC_REMOTE_ROUNDTRIP",
+  "promotion_rule": "No PROD/autonomous promotion until pending physical gates are closed and evidenced."
+}

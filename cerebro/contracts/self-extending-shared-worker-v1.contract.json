@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0.0",
+  "contract_id": "JOB-001/SELF_EXTENDING_SHARED_WORKER_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "JOB-001",
+  "environment": "PREPROD",
+  "version": "1.0.0",
+  "inputs": {
+    "legacy_dispatch_batch": "CEREBRO_LEGACY184_SELF_EXTENDING_DISPATCH_BATCH_V0",
+    "bindings": "explicit PREPROD evidence bindings only",
+    "persistent_company_root": "existing RSI auto-host company root"
+  },
+  "required_chain": ["FACT-001 legacy batch", "JOB-001 enqueue", "DurableJobRuntimeV1", "DurableWorkerRunnerV1", "resolver", "verify_and_resume", "Tribunal"],
+  "invariants": {
+    "shared_runtime_first": true,
+    "new_server_default": false,
+    "preprod_only": true,
+    "idempotency_required": true,
+    "checkpoint_resume_required": true,
+    "independent_tribunal_required": true,
+    "backup_rollback_rebuild_required": true,
+    "no_secret_values": true,
+    "no_prod_write": true,
+    "no_trading": true,
+    "no_automatic_paid_fallback": true,
+    "additional_cost_target_eur": 0
+  },
+  "human_required_reasons": ["LEGAL_REQUIRED", "SIGNATURE_REQUIRED", "LOW_CONFIDENCE", "HIGH_RISK", "POLICY_CONFLICT", "SECURITY_INCIDENT", "MONEY_LIMIT", "CUSTOMER_HUMAN_REQUEST"],
+  "promotion": "PREPROD -> exact-head CI -> OLD vs NEW/Tribunal evidence -> governed persistent-host activation -> gradual PROD review only when separately authorized"
+}

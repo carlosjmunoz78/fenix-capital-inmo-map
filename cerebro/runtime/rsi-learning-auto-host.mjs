@@ -9,6 +9,7 @@ import {persistDueLearningPlans} from './learning-orchestrator.mjs';
 import {executePendingLearningHorizons} from './learning-horizon-executor.mjs';
 import {MetaObservabilityLedger,makeMetaTimingSample} from './meta-observability-ledger.mjs';
 import {materializeImprovementCandidates} from './improvement-candidate-factory.mjs';
+import {runSelfExtendingSharedWorkerIteration} from './self-extending-shared-worker-v1.mjs';
 
 function readJson(file){return JSON.parse(fs.readFileSync(file,'utf8'));}
 function ensureDir(dir){fs.mkdirSync(dir,{recursive:true});return dir;}
@@ -36,6 +37,7 @@ function noteRemoteFailure(file,error){
 }
 function clearRemoteFailure(file){if(fs.existsSync(file))fs.rmSync(file,{force:true});}
 function elapsed(start){return Math.max(0,performance.now()-start);}
+function timestampMs(value){const parsed=Date.parse(value);return Number.isFinite(parsed)?parsed:Date.now();}
 
 export async function runAutoHostIteration({raw_config,fetch_impl=globalThis.fetch,now=()=>new Date().toISOString()}){
   const cfg=normalizeHostConfig(raw_config);
@@ -63,6 +65,7 @@ export async function runAutoHostIteration({raw_config,fetch_impl=globalThis.fet
   let orchestration={status:'ORCHESTRATOR_KILLED',planned_total:0,created_total:0,prod_authorized:false,prod_write_authorized:false,trading_access:false,additional_cost_eur:0};
   let horizons={status:'HORIZON_EXECUTORS_KILLED',completed_total:0,skipped_total:0,prod_authorized:false,prod_write_authorized:false,trading_access:false,additional_cost_eur:0};
   let meta_observability={status:'META_METRICS_KILLED',accepted:false,not_due:false,samples_total:0,prod_authorized:false,trading_access:false};
+  let self_extending={status:'SELF_EXTENDING_DISABLED',prod_authorized:false,prod_write_authorized:false,trading_access:false,additional_cost_eur:0};
   if(learning.status!=='KILLED'){
     const evaluateStarted=performance.now();
     const candidateLedgerFile=path.join(paths.companyRoot,'improvement-candidates.v8');
@@ -73,14 +76,25 @@ export async function runAutoHostIteration({raw_config,fetch_impl=globalThis.fet
     const metaMetricsFile=path.join(paths.companyRoot,'meta-stage-metrics.v8');
     orchestration=persistDueLearningPlans({state_file:stateFile,plans_dir:plansDir,company_id:cfg.company_id,version:cfg.version,now:tick});
     horizons=executePendingLearningHorizons({state_file:stateFile,plans_dir:plansDir,results_dir:resultsDir,company_id:cfg.company_id,version:cfg.version,ledger_file:paths.ledger,receipts_dir:paths.receipts,heartbeat_file:paths.heartbeat,meta_metrics_file:metaMetricsFile,now:tick});
+    if(raw_config.self_extending?.enabled===true){
+      self_extending=await runSelfExtendingSharedWorkerIteration({
+        company_root:paths.companyRoot,
+        company_id:cfg.company_id,
+        skills_dir:raw_config.self_extending.skills_dir,
+        bindings:Array.isArray(raw_config.self_extending.bindings)?raw_config.self_extending.bindings:[],
+        worker_id:raw_config.self_extending.worker_id??'cerebro-rsi-shared-worker-v1',
+        max_rounds:raw_config.self_extending.max_rounds??1,
+        now_ms:timestampMs(tick)
+      });
+    }
     const evaluateMs=elapsed(evaluateStarted);
     const metrics=new MetaObservabilityLedger({file_path:metaMetricsFile});
-    const append=metrics.appendIfDue(makeMetaTimingSample({company_id:cfg.company_id,version:cfg.version,observed_at:tick,collect_ms:collectMs,learn_ms:learnMs,evaluate_ms:evaluateMs,statuses:{remote:remote.status,learning:learning.status,candidates:candidates.status,orchestration:orchestration.status,horizons:horizons.status}}));
+    const append=metrics.appendIfDue(makeMetaTimingSample({company_id:cfg.company_id,version:cfg.version,observed_at:tick,collect_ms:collectMs,learn_ms:learnMs,evaluate_ms:evaluateMs,statuses:{remote:remote.status,learning:learning.status,candidates:candidates.status,orchestration:orchestration.status,horizons:horizons.status,self_extending:self_extending.status}}));
     const summary=metrics.summarize({company_id:cfg.company_id,version:cfg.version,limit:168});
     meta_observability={status:'META_METRICS_GREEN',accepted:append.accepted===true,not_due:append.not_due===true,samples_total:summary.samples_total,stage_metrics:summary.stage_metrics,prod_authorized:false,trading_access:false};
   }
   const status=remote.status==='REMOTE_OUTBOX_ERROR'?'PARTIAL_REMOTE_ERROR':learning.status;
-  return Object.freeze({status,remote_outbox:remote,learning,candidates,orchestration,horizons,meta_observability,additional_cost_eur:0,prod_authorized:false,prod_write_authorized:false,trading_access:false});
+  return Object.freeze({status,remote_outbox:remote,learning,candidates,orchestration,horizons,self_extending,meta_observability,additional_cost_eur:0,prod_authorized:false,prod_write_authorized:false,trading_access:false});
 }
 
 export async function runAutoHostLoop({raw_config,signal,fetch_impl=globalThis.fetch,sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms)),now=()=>new Date().toISOString()}){

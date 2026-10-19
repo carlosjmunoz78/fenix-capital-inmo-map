@@ -1,0 +1,64 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_COMPET_REAL_TARGETS_ACCEPTANCE_V1",
+  "company_id": "fenix",
+  "engine_id": "COMPET-001",
+  "environment": "PREPROD",
+  "version": "1.0.0",
+  "status": "REAL_TARGETS_CONTINUOUS_PREPROD_ACCEPTANCE_GREEN",
+  "base_registry_ref": "cerebro/registry/compet-real-targets.v0.json",
+  "base_registry_policy": "PRESERVE_IMMUTABLE_EXISTING_V0_CONTRACT",
+  "source_policy": "PUBLIC_OFFICIAL_COMPETITOR_WEBSITE_GET_ONLY",
+  "target_count": 3,
+  "baseline_evidence": {
+    "workflow_run_id": 38699175484,
+    "artifact_id": 11955359340,
+    "artifact_digest": "sha256:b34fa789a5c2af89d090ac78d2d04fc7565df186737f2e9446751e1e22e4fe64",
+    "result": "GREEN"
+  },
+  "scheduled_acceptance": {
+    "reconciler_run_id": 39125588186,
+    "artifact_id": 12136037115,
+    "artifact_digest": "sha256:66074f4508593e6a2279ac7517746d95bbbcc17c17fb79f57982fd62cdcc01f7",
+    "status": "CERTIFIED",
+    "required_runs": 3,
+    "verified_scheduled_green_runs": 3,
+    "missing_scheduled_green_runs": 0,
+    "qualifying_run_ids": [39117110184, 39021991560, 38884956053],
+    "manual_or_dispatch_substitution": false,
+    "distinct_run_ids_verified": true
+  },
+  "resilience": {
+    "wrapper_ref": "cerebro/runtime/compet-real-targets-resilient-v1.mjs",
+    "base_runtime_ref": "cerebro/runtime/compet-real-targets-v0.mjs",
+    "base_runtime_modified": false,
+    "transient_retry_only": true,
+    "max_attempts": 3,
+    "non_transient_fail_closed": true,
+    "provider_write_on_retry": false
+  },
+  "authority": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "provider_write_authorized": false,
+    "crm_write_authorized": false,
+    "customer_data_authorized": false,
+    "external_dependency_install_authorized": false,
+    "trading_access": false,
+    "automatic_paid_fallback": false,
+    "additional_cost_eur": 0
+  },
+  "truth_constraints": [
+    "V0_RUNTIME_AND_V0_REGISTRY_REMAIN_PRESERVED",
+    "ACCEPTANCE_EVIDENCE_IS_ADDITIVE_NOT_A_REWRITE_OF_HISTORY",
+    "THREE_GENUINE_SCHEDULE_RUNS_ARE_REQUIRED_AND_EVIDENCED",
+    "MANUAL_OR_DISPATCH_RUNS_DO_NOT_SUBSTITUTE",
+    "RETRY_WRAPPER_ONLY_HANDLES_BOUNDED_TRANSIENT_FAILURES",
+    "NO_PROVIDER_WRITE_PROD_CUSTOMER_DATA_OR_TRADING_AUTHORITY"
+  ],
+  "remaining_gate": null,
+  "next_gate": "CONTINUE_READ_ONLY_CONTINUOUS_COMPETITOR_OBSERVATION_AND_HOLD_ON_POLICY_OR_SOURCE_REGRESSION",
+  "rollback": "Remove this additive acceptance registry and resilient wrapper references; preserved V0 runtime/config remain unchanged.",
+  "rebuild": "Read the preserved V0 target registry, verify the baseline artifact, re-read the three qualifying genuine schedule runs through the read-only reconciler, and rerun exact-head CI.",
+  "additional_cost_eur": 0
+}

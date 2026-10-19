@@ -1,0 +1,71 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_ENGINEERING_SPECIALIZATIONS_FULL_SWEEP_REGISTRY_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "1.0.0",
+  "status": "ALL_ENGINEERING_SPECIALISTS_FULL_SAFE_PREPROD",
+  "single_transversal_safe_engineering_profile": true,
+  "new_engine_required": false,
+  "specialists": {
+    "ARQUITECTO": "FULL_SAFE_PREPROD",
+    "CODE": "FULL_SAFE_PREPROD",
+    "SYSTEMS": "FULL_SAFE_PREPROD",
+    "MATH": "FULL_SAFE_PREPROD",
+    "DATA": "FULL_SAFE_PREPROD",
+    "SECURITY": "FULL_SAFE_PREPROD",
+    "QA": "FULL_SAFE_PREPROD",
+    "INTEGRATOR": "FULL_SAFE_PREPROD",
+    "TECH_SCOUT": "FULL_SAFE_PREPROD",
+    "PERFORMANCE": "FULL_SAFE_PREPROD"
+  },
+  "evidence": {
+    "implementation_head_sha": "1240de63ac979749da4837447416b7a55a30ca64",
+    "workflow": "CEREBRO Engineering Specializations Full Sweep V1",
+    "run_number": 2,
+    "run_id": 39111241508,
+    "status": "SUCCESS",
+    "artifact_id": 12130582388,
+    "artifact_digest": "sha256:a460bef2ce0bd3a502a920eef46ce38f67f5b48896f5711e28793a4daf7c9241",
+    "targeted_sweep": "GREEN",
+    "full_cerebro_regression": "GREEN"
+  },
+  "architect": {
+    "contracts": true,
+    "dependency_map": true,
+    "runbook_handoff": true,
+    "old_vs_new": true,
+    "preprod": true,
+    "rollback_rebuild": true,
+    "terminal_truth": true,
+    "multi_company_dimensions": true,
+    "zero_cost": true,
+    "no_prod_authority": true
+  },
+  "performance": {
+    "bounded_worker_threads": true,
+    "minimum_parallelism_proven": 5,
+    "latency_p50_p95_measured": true,
+    "batch_wall_time_measured": true,
+    "durable_idempotent_rerun": true,
+    "preparation_cache_reused": true,
+    "baseline_cache_reused": true,
+    "adapter_family_cache_reused": true,
+    "binding_revalidation_preserved": true,
+    "fail_fast": false,
+    "additional_cost_eur": 0
+  },
+  "authority": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "prod_mutation_authorized": false,
+    "auto_merge_authorized": false,
+    "external_skill_code_execution_authorized": false,
+    "external_dependency_install_authorized": false,
+    "customer_data_authorized": false,
+    "trading_access": false,
+    "additional_cost_eur": 0
+  },
+  "note": "FULL_SAFE_PREPROD certifies the engineering specialization profile in PREPROD. It does not grant PROD authority or eliminate candidate-local physical evidence requirements."
+}

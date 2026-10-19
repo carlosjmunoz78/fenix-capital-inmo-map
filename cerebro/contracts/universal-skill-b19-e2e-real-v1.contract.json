@@ -1,0 +1,67 @@
+{
+  "schema_version": "1.1.0",
+  "state_type": "CEREBRO_UNIVERSAL_SKILL_B19_E2E_REAL_CONTRACT_V1",
+  "company_id": "fenix",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "1.1.0",
+  "candidate_id": "AUTO-001:planner-order-invariance:v1",
+  "technical_name": "auto001-planner-order-invariance",
+  "skill_version": "1.0.0-b19",
+  "license_spdx": "MIT",
+  "description": "First-party software engineering capability for deterministic planner selection with measured OLD vs NEW, LRN feedback, independent evaluation tribunal, non-PROD promotion gates, rollback, rebuild and append-only audit evidence.",
+  "source_ref": "cerebro/contracts/universal-skill-b19-e2e-real-v1.contract.json",
+  "source_refs": [
+    "cerebro/contracts/universal-skill-b19-e2e-real-v1.contract.json"
+  ],
+  "registry_ref": "cerebro/registry/universal-skill-b19-universal-e2e-real.v1.json",
+  "capability": {
+    "capability_id": "AUTO-001:planner-order-invariance:v1:cap:1",
+    "technical_name": "software-engineering-deterministic-planner-repair",
+    "description": "Software engineering and DevOps repair workflow for deterministic codebase behavior, bounded GitHub change, regression evaluation and safe PREPROD rollback/rebuild.",
+    "terms": ["software engineering","developer","github","codebase","regression","rollback","rebuild","evaluation"],
+    "declared_domains": ["software-engineering-devops"],
+    "domain_evidence": {
+      "software-engineering-devops": ["cerebro/contracts/universal-skill-b19-e2e-real-v1.contract.json"]
+    }
+  },
+  "engineering_controls": {
+    "worktree_or_sandbox_isolation": "sandbox and worktree isolation required",
+    "deterministic_prechecks": "deterministic precheck, lint and typecheck before mutation",
+    "unit_and_targeted_tests": "node --test targeted unit test coverage required",
+    "static_analysis": "static analysis and lint required",
+    "regression_comparison": "OLD vs NEW regression comparison required",
+    "rollback_plan": "rollback, revert, restore and rebuild evidence required",
+    "qa_code_evidence": "QA code evidence required",
+    "eva_regression": "EVA evaluation benchmark and independent tribunal required",
+    "minimal_change": "minimal change, small diff, bounded files and max_files_changed controls required",
+    "dependency_impact": "dependency impact and dependencies mapped before change"
+  },
+  "lifecycle": {
+    "governance_ref": "cerebro/docs/CEREBRO_B19_UNIVERSAL_E2E_REAL_V1_GOVERNANCE.md",
+    "runbook_ref": "cerebro/docs/CEREBRO_B19_UNIVERSAL_E2E_REAL_V1_GOVERNANCE.md#runbook",
+    "changelog_ref": "cerebro/docs/CEREBRO_B19_UNIVERSAL_E2E_REAL_V1_GOVERNANCE.md#changelog",
+    "dependency_map_ref": "cerebro/docs/CEREBRO_B19_UNIVERSAL_E2E_REAL_V1_GOVERNANCE.md#dependency-map",
+    "backup_rebuild_autonomy_ref": "cerebro/docs/CEREBRO_B19_UNIVERSAL_E2E_REAL_V1_GOVERNANCE.md#backup--rollback--rebuild--autonomy",
+    "dependencies_mapped": true,
+    "backup_required": true,
+    "rollback_required": true,
+    "rebuild_required": true,
+    "audit_required": true,
+    "learning_required": true,
+    "promotion_policy": "PREPROD_ONLY_NO_AUTO_MERGE"
+  },
+  "authority": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "prod_mutation_authorized": false,
+    "permission_expansion_authorized": false,
+    "external_skill_code_execution": false,
+    "dependency_install_authorized": false,
+    "customer_data_used": false,
+    "paid_fallback": false,
+    "spend_authorized": false,
+    "trading_access": false,
+    "additional_cost_eur": 0
+  }
+}

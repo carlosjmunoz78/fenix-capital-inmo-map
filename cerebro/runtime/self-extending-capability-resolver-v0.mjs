@@ -1,0 +1,40 @@
+import crypto from 'node:crypto';
+
+const VERSION='0.1.0';
+const PREPROD='PREPROD';
+const TERMINAL_REJECT_REASONS=new Set(['REDUNDANT_CAPABILITY','INFERIOR_TO_EXISTING_CAPABILITY','UNSAFE_BY_DESIGN','POLICY_INCOMPATIBLE','STRATEGICALLY_NOT_USEFUL','LICENSE_INCOMPATIBLE_OR_UNVERIFIED','UNSAFE_DEPENDENCY_SPEC']);
+const HUMAN_MAP=Object.freeze({LEGAL_REQUIRED:'LEGAL_REQUIRED',SIGNATURE_REQUIRED:'SIGNATURE_REQUIRED',HIGH_RISK:'HIGH_RISK',SECURITY_INCIDENT:'SECURITY_INCIDENT',MONEY_LIMIT:'MONEY_LIMIT',CUSTOMER_HUMAN_REQUEST:'CUSTOMER_HUMAN_REQUEST',OAUTH_REQUIRED:'POLICY_CONFLICT',SECRET_REQUIRED:'POLICY_CONFLICT',CREDENTIAL_REQUIRED:'POLICY_CONFLICT',DEVICE_REQUIRED:'POLICY_CONFLICT',ACCOUNT_OWNER_AUTH_REQUIRED:'POLICY_CONFLICT'});
+const RESOLUTION_ORDER=Object.freeze(['REUSE_INTERNAL','WRAP_EXISTING','TECH_SCOUT_OSS_LOCAL','TECH_SCOUT_ALREADY_PAID','TECH_SCOUT_FREE_TIER','SELF_HOST','FACT001_BUILD_MINIMAL_SUBSTITUTE','EXTERNAL_PAID_WITH_EXPLICIT_ROI_GATE']);
+function stable(v){if(v===null||typeof v!=='object')return v;if(Array.isArray(v))return v.map(stable);return Object.fromEntries(Object.keys(v).sort().map(k=>[k,stable(v[k])]));}
+function hash(v){return crypto.createHash('sha256').update(JSON.stringify(stable(v))).digest('hex');}
+function nonEmpty(v,label,max=4096){if(typeof v!=='string'||!v.trim())throw new Error(`${label} required`);const out=v.trim();if(out.length>max)throw new Error(`${label} too long`);return out;}
+function authority(){return Object.freeze({prod_authorized:false,prod_write_authorized:false,prod_mutation_authorized:false,permission_expansion_authorized:false,host_external_code_execution:false,host_dependency_install:false,customer_data_used:false,paid_fallback:false,spend_authorized:false,trading_access:false,additional_cost_eur:0});}
+function dependencyKind(value){const raw=String(value??'UNKNOWN').toUpperCase();if(/OAUTH/.test(raw))return 'OAUTH_REQUIRED';if(/SECRET|TOKEN|API_KEY|PASSWORD|CREDENTIAL/.test(raw))return 'SECRET_REQUIRED';if(/DEVICE|ANDROID|IOS|USB|HARDWARE/.test(raw))return 'DEVICE_REQUIRED';if(/LEGAL/.test(raw))return 'LEGAL_REQUIRED';if(/SIGNATURE/.test(raw))return 'SIGNATURE_REQUIRED';if(/MONEY|BUDGET|PAYMENT|PAID/.test(raw))return 'MONEY_LIMIT';if(/BINARY|FFMPEG|IMAGEMAGICK|SOX|CHROMIUM|BROWSER/.test(raw))return 'SYSTEM_BINARY';if(/RUNTIME|NODE|PYTHON|PHP|JAVA|GO|RUST|DENO/.test(raw))return 'RUNTIME';if(/PACKAGE|NPM|PIP|COMPOSER|CARGO|MAVEN|GRADLE|DEPENDENCY/.test(raw))return 'PACKAGE';if(/API|PROVIDER|SERVICE|ENDPOINT/.test(raw))return 'EXTERNAL_SERVICE';return raw;}
+
+export function resolveBlockedCapability({company_id='fenix',candidate_id,capability_id,reason='BLOCKED_EXTERNAL',useful=true,dependency={}}={}){
+  const company=nonEmpty(company_id,'company_id',120);const candidate=nonEmpty(candidate_id,'candidate_id',240);const capability=nonEmpty(capability_id,'capability_id',240);const rawReason=nonEmpty(reason,'reason',240).toUpperCase();
+  if(useful!==true||TERMINAL_REJECT_REASONS.has(rawReason))return Object.freeze({schema_version:'1.0.0',state_type:'CEREBRO_SELF_EXTENDING_CAPABILITY_RESOLUTION_V0',status:'REJECTED',terminal:true,reason:useful===true?rawReason:'STRATEGICALLY_NOT_USEFUL',company_id:company,candidate_id:candidate,capability_id:capability,...authority()});
+  const kind=dependencyKind(dependency.kind??dependency.type??rawReason);const humanReason=HUMAN_MAP[kind]??null;
+  if(humanReason){const report={schema_version:'1.0.0',state_type:'CEREBRO_SELF_EXTENDING_CAPABILITY_RESOLUTION_V0',status:'HUMAN_REQUIRED',terminal:false,human_required:humanReason,human_action:Object.freeze({action:`AUTHORIZE_OR_PROVIDE_${kind}`,subject:String(dependency.name??dependency.subject??capability),scope:'MINIMUM_REQUIRED_ONLY',resume_automatically:true}),company_id:company,candidate_id:candidate,capability_id:capability,dependency_kind:kind,resume_state:'DEPENDENCY_RESOLUTION_REQUIRED',...authority()};return Object.freeze({...report,resolution_hash:hash(report)});}
+  const searchTerms=[dependency.name,dependency.package,dependency.binary,dependency.runtime,capability].filter(Boolean).map(String);
+  const workItems=Object.freeze([
+    Object.freeze({owner_engine_id:'TECH_SCOUT',action:'SEARCH_MORE',priority:1,queries:Object.freeze([...new Set(searchTerms.flatMap(t=>[`${t} open source github`,`${t} self hosted`,`${t} free alternative`]))]),stop_on_first_match:false,compare_required:true,free_parity_gate:true}),
+    Object.freeze({owner_engine_id:'FACT-001',action:'BUILD_OR_WRAP_IF_SCOUT_NO_GREEN',priority:2,dependency_kind:kind,reuse_first:true,shared_runtime_first:true,new_server_default:false}),
+    Object.freeze({owner_engine_id:'QA',action:'VERIFY_DEPENDENCY_AND_RESUME_SKILL',priority:3,required:['contracts','permissions','tests','evaluation','tribunal','observability','backup','rollback','rebuild','cost','policy']})
+  ]);
+  const report={schema_version:'1.0.0',state_type:'CEREBRO_SELF_EXTENDING_CAPABILITY_RESOLUTION_V0',status:'DEPENDENCY_RESOLUTION_REQUIRED',terminal:false,company_id:company,engine_id:'FACT-001',environment:PREPROD,version:VERSION,candidate_id:candidate,capability_id:capability,dependency_kind:kind,dependency_name:dependency.name??null,resolution_order:RESOLUTION_ORDER,work_items:workItems,resume_policy:Object.freeze({resume_original_skill:true,recheck_after_each_dependency:true,max_recursive_depth:8,reject_on_missing_dependency:false}),...authority()};return Object.freeze({...report,resolution_hash:hash(report)});
+}
+
+export async function runSelfExtendingCapabilityLoop({resolution,reuse_internal,wrap_existing,tech_scout,fact_build,verify_and_resume,max_steps=16}={}){
+  if(!resolution||resolution.state_type!=='CEREBRO_SELF_EXTENDING_CAPABILITY_RESOLUTION_V0')throw new Error('resolution required');
+  if(resolution.status==='REJECTED'||resolution.status==='HUMAN_REQUIRED')return resolution;
+  if(resolution.status!=='DEPENDENCY_RESOLUTION_REQUIRED')throw new Error('DEPENDENCY_RESOLUTION_REQUIRED expected');
+  const adapters={REUSE_INTERNAL:reuse_internal,WRAP_EXISTING:wrap_existing,TECH_SCOUT_OSS_LOCAL:tech_scout,TECH_SCOUT_ALREADY_PAID:tech_scout,TECH_SCOUT_FREE_TIER:tech_scout,SELF_HOST:tech_scout,FACT001_BUILD_MINIMAL_SUBSTITUTE:fact_build};
+  const attempts=[];let selected=null;let step=0;
+  for(const strategy of resolution.resolution_order){if(step++>=max_steps)break;if(strategy==='EXTERNAL_PAID_WITH_EXPLICIT_ROI_GATE'){attempts.push(Object.freeze({strategy,status:'HOLD_MONEY_LIMIT',human_required:'MONEY_LIMIT'}));break;}const adapter=adapters[strategy];if(typeof adapter!=='function'){attempts.push(Object.freeze({strategy,status:'ADAPTER_UNAVAILABLE'}));continue;}const result=await adapter({resolution,strategy});attempts.push(Object.freeze({strategy,status:result?.status??'NO_RESULT',evidence_ref:result?.evidence_ref??null}));if(result?.status==='GREEN'){selected=Object.freeze({strategy,...result});break;}}
+  if(!selected){const report={...resolution,status:'DEPENDENCY_RESOLUTION_REQUIRED',attempts:Object.freeze(attempts),next_action:'SEARCH_MORE_OR_BUILD',terminal:false};return Object.freeze({...report,resolution_hash:hash(report)});}
+  if(typeof verify_and_resume!=='function')throw new Error('verify_and_resume required after dependency selected');const resumed=await verify_and_resume({resolution,selected});
+  const green=resumed?.status==='FULL_SAFE_PREPROD'||resumed?.status==='RESUMED_GREEN';const report={...resolution,status:green?'RESUMED_GREEN':'DEPENDENCY_VERIFIED_SKILL_NOT_YET_GREEN',selected,attempts:Object.freeze(attempts),resume_result:resumed,terminal:false};return Object.freeze({...report,resolution_hash:hash(report)});
+}
+
+export const SELF_EXTENDING_CAPABILITY_RESOLVER_V0_CONTRACT=Object.freeze({capability:'FACT-001/self-extending-capability-resolver-v0',blocked_external_is_terminal:false,rejected_only_for_genuine_terminal_reasons:true,search_more_before_build:true,build_when_missing:true,resume_original_skill:true,recursive:true,max_recursive_depth:8,additional_cost_target_eur:0,paid_fallback_automatic:false,prod:false,trading:false,customer_data:false});

@@ -1,0 +1,56 @@
+{
+  "schema_version": "1.0.0",
+  "engine_or_capability": "DEVICE_UNIVERSAL",
+  "version": "0.2.3",
+  "status": "PHYSICAL_LOCAL_HEALTHY_PREPROD",
+  "date": "2026-10-19",
+  "evidence_origin": "AUTHORIZED_OFFICE_PC_PLUS_OPERA_LOCALHOST_HEALTH_CHECKS",
+  "identity": {
+    "canonical_device_id": "desktop-4c008d88919f",
+    "device_aliases": ["desktop-74ca87506edbd7a5"],
+    "tenant_binding": "DYNAMIC_MULTI_COMPANY"
+  },
+  "physical_observations": {
+    "installer_reported_device_agent_healthy": true,
+    "installer_console_closed_before_recheck": true,
+    "browser_listener": "127.0.0.1:8765",
+    "browser_health": "OK",
+    "browser_service": "CEREBRO Browser Agent Host",
+    "browser_version": "0.3.0",
+    "device_listener": "127.0.0.1:8766",
+    "device_health": "OK",
+    "device_agent_version_reported": "0.2.0",
+    "both_listeners_alive_after_installer_exit": true,
+    "prod_allowed": false
+  },
+  "what_this_proves": [
+    "BROWSER_AND_DEVICE_CAN_COEXIST_ON_DISTINCT_PORTS",
+    "DEVICE_AGENT_PERSISTS_AFTER_INSTALLER_CONSOLE_CLOSE",
+    "CANONICAL_DEVICE_IDENTITY_AND_ALIAS_CONTRACT_PRESERVED"
+  ],
+  "what_this_does_not_prove": [
+    "REMOTE_CONTROLLER_PAIRING",
+    "REMOTE_COMMAND_ROUNDTRIP",
+    "REBOOT_PERSISTENCE",
+    "PHYSICAL_ROLLBACK",
+    "PORTABLE_VAULT_CROSS_DEVICE_RECOVERY",
+    "EVIDENCE_HOST_8767",
+    "CAMERA_MIC_AUDIO_PERIPHERALS",
+    "PROD_READINESS"
+  ],
+  "preservation": {
+    "browser_universal_repeated": false,
+    "legacy_device_agent_overwritten": false,
+    "prod_touched": false
+  },
+  "governance": {
+    "environment": "PREPROD",
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "auto_merge_authorized": false,
+    "trading_access": false,
+    "additional_cost_eur": 0
+  },
+  "superseded_for_next_install_candidate_by": "cerebro/registry/device-universal-v0.2.4.candidate.json",
+  "next_gate": "DEVICE_V0_2_4_PHYSICAL_EVIDENCE_HOST_THEN_UNIVERSAL_PAIRING_ROUNDTRIP"
+}

@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_ACCESSBOOT_V0_4_0_PHYSICAL_EVIDENCE",
+  "recorded_at": "2026-10-19T16:38:48Z",
+  "environment": "PREPROD",
+  "prod_allowed": false,
+  "trading_access": false,
+  "additional_cost_eur": 0,
+  "tenant_binding": "DYNAMIC_MULTI_COMPANY",
+  "company_binding": false,
+  "controller": {
+    "service": "CEREBRO Universal Device Controller V2",
+    "version": "0.4.0",
+    "listener": "127.0.0.1:8768",
+    "health": "OK",
+    "paired": true
+  },
+  "physical_acceptance": {
+    "status": "UNIVERSAL_DEVICE_PAIRING_ROUNDTRIP_GREEN_PREPROD",
+    "authenticated_controller": true,
+    "semantic_readback": true,
+    "idempotency": true,
+    "prod_fail_closed": true,
+    "tenant_isolation": true,
+    "synthetic_only": true
+  },
+  "still_pending_before_confirmed_operational": [
+    "restart_persistence_after_windows_reboot",
+    "rollback_physical",
+    "portable_vault_cross_device_recovery"
+  ],
+  "unclaimed_optional_capabilities": ["camera", "microphone", "audio", "peripherals"],
+  "do_not_repeat": [
+    "Browser Universal nuclear acceptance unless regression evidence exists",
+    "v0.3.x physical capability batch unless regression evidence exists",
+    "Universal Device Pairing V2 roundtrip unless regression evidence exists"
+  ]
+}

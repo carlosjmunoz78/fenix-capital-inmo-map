@@ -1,0 +1,151 @@
+{
+  "schema_version": "1.1.0",
+  "state_type": "CEREBRO_IAM_BROWSER_VAULT_REFRESH_PLAN_V1",
+  "engine_id": "IAM-001",
+  "environment": "PREPROD",
+  "status": "PARTIAL_FRESH_LOCAL_ATTESTATION_VAULT_BINDING_PENDING",
+  "depends_on": "EVT74_PHYSICAL_E2E_GREEN",
+  "purpose": "Refresh exact-scope Browser + Vault binding evidence after the minimum EVT74 journal grant without expanding authority.",
+  "fresh_evidence": {
+    "browser_agent_health": {
+      "url": "http://127.0.0.1:8765/health",
+      "status": "OK",
+      "version": "0.3.0",
+      "durable_queue": true,
+      "profile_count": 5,
+      "prod_allowed": false
+    },
+    "browser_agent_protected_surface_negative_test": {
+      "url": "http://127.0.0.1:8765/profiles",
+      "without_authorization": "DENY_401_UNAUTHORIZED",
+      "meaning": "Fresh evidence that profile/binding metadata is not exposed without the local bearer binding. No token was read or logged."
+    },
+    "device_controller_health": {
+      "url": "http://127.0.0.1:8768/health",
+      "status": "OK",
+      "version": "0.4.0",
+      "paired": true,
+      "environment": "PREPROD",
+      "tenant_binding": "DYNAMIC_MULTI_COMPANY",
+      "company_binding": false,
+      "prod_allowed": false,
+      "additional_cost_eur": 0
+    },
+    "device_controller_roundtrip": {
+      "status": "UNIVERSAL_DEVICE_PAIRING_ROUNDTRIP_GREEN_PREPROD",
+      "authenticated_controller": true,
+      "canonical_device_id": "desktop-4c008d88919f",
+      "company_binding": false,
+      "tenant_binding": "DYNAMIC_MULTI_COMPANY",
+      "idempotency": true,
+      "prod_fail_closed": true,
+      "semantic_readback": true,
+      "tenant_isolation": true,
+      "synthetic_only": true,
+      "additional_cost_eur": 0
+    },
+    "device_evidence_host": {
+      "url": "http://127.0.0.1:8767/health",
+      "status": "OK",
+      "version": "0.2.4",
+      "sanitized": true,
+      "prod_allowed": false
+    },
+    "device_agent_health": {
+      "url": "http://127.0.0.1:8766/health",
+      "status": "OK",
+      "version": "0.2.0",
+      "durable_queue": true,
+      "prod_allowed": false
+    }
+  },
+  "source_contract_revalidated_without_secret_access": {
+    "browser_allowed_environments": ["LAB", "PREPROD"],
+    "browser_prod_policy_required_false": true,
+    "browser_mission_scope_exact_match_required": true,
+    "browser_password_typing_requires_credential_broker": true,
+    "browser_raw_secret_command_path_not_used": true,
+    "browser_profile_is_device_scoped_not_tenant_authority": true,
+    "vault_encryption": "WINDOWS_DPAPI_CURRENT_USER",
+    "vault_command_contract": "credential_ref -> local broker/vault resolution",
+    "mfa_bypass_allowed": false,
+    "captcha_bypass_allowed": false
+  },
+  "required_evidence": {
+    "browser": [
+      "fresh_authenticated_binding",
+      "environment_is_LAB_or_PREPROD",
+      "route_scope_exact",
+      "kill_switch_observed",
+      "prod_mutation_false",
+      "public_mutation_false",
+      "customer_data_used_false",
+      "incremental_cost_eur_0"
+    ],
+    "vault": [
+      "credential_reference_resolves_locally",
+      "raw_secret_not_in_command",
+      "raw_secret_not_in_receipt",
+      "raw_secret_not_in_registry",
+      "mfa_bypass_false",
+      "captcha_bypass_false",
+      "prod_secret_scope_absent"
+    ],
+    "device": [
+      "canonical_device_or_registered_alias",
+      "tenant_scope_from_command_not_browser_profile",
+      "semantic_readback_if_state_changes"
+    ]
+  },
+  "evidence_matrix": {
+    "fresh_authenticated_browser_binding": "PENDING_NON_SECRET_AUTHENTICATED_READ_SURFACE",
+    "environment_is_LAB_or_PREPROD": "GREEN",
+    "route_scope_exact": "GREEN_EVT74_EXACT_SIX",
+    "kill_switch_observed": "PARTIAL_PROD_FAIL_CLOSED_GREEN_EXPLICIT_KILL_SWITCH_FIELD_NOT_EXPOSED",
+    "prod_mutation_false": "GREEN",
+    "public_mutation_false": "GREEN",
+    "customer_data_used_false": "GREEN",
+    "incremental_cost_eur_0": "GREEN",
+    "credential_reference_resolves_locally": "PENDING_FRESH_SYNTHETIC_VAULT_USE",
+    "raw_secret_not_in_command": "GREEN_BY_CONTRACT_AND_CURRENT_EVIDENCE",
+    "raw_secret_not_in_receipt": "GREEN_BY_CONTRACT_AND_SANITIZED_EVIDENCE_HOST",
+    "raw_secret_not_in_registry": "GREEN",
+    "mfa_bypass_false": "GREEN_BY_CONTRACT",
+    "captcha_bypass_false": "GREEN_BY_CONTRACT",
+    "prod_secret_scope_absent": "PARTIAL_PENDING_FRESH_VAULT_METADATA_ATTESTATION",
+    "canonical_device_or_registered_alias": "GREEN",
+    "tenant_scope_from_command_not_browser_profile": "GREEN",
+    "semantic_readback_if_state_changes": "GREEN"
+  },
+  "negative_tests": {
+    "DENY_PROD_ENVIRONMENT": "GREEN_VIA_CONTROLLER_PROD_FAIL_CLOSED_AND_BROWSER_SOURCE_CONTRACT",
+    "DENY_WILDCARD_ROUTE_SCOPE": "GREEN_EVT74_EXACT_SIX_ONLY",
+    "DENY_UNLISTED_JOURNAL_ROUTE": "GREEN_BY_EXACT_GRANT_POLICY",
+    "DENY_RAW_PASSWORD_TOKEN_COOKIE_API_KEY": "GREEN_BY_CONTRACT_NO_SECRET_READ_PERFORMED",
+    "DENY_CROSS_COMPANY_SCOPE": "GREEN_TENANT_ISOLATION",
+    "DENY_STALE_BROWSER_ATTESTATION": "PENDING_FRESH_AUTHENTICATED_BROWSER_BINDING",
+    "DENY_MISSING_KILL_SWITCH": "PENDING_EXPLICIT_KILL_SWITCH_ATTESTATION_SURFACE",
+    "DENY_STATE_CHANGE_WITHOUT_SEMANTIC_READBACK": "GREEN"
+  },
+  "secret_policy": {
+    "references_only": true,
+    "allowed_reference_fields": ["credential_ref", "credential_refs"],
+    "secret_values_in_github": false,
+    "secret_values_in_receipts": false,
+    "secret_values_in_logs": false,
+    "secret_values_read_during_refresh": false
+  },
+  "blocking_gap": {
+    "classification": "LOCAL_ATTESTATION_SURFACE_GAP",
+    "human_required": null,
+    "detail": "Current exposed HTTP surfaces provide health, authenticated controller roundtrip and sanitized evidence, but do not expose a non-secret authenticated Browser binding receipt or a fresh synthetic Vault credential_ref resolution. Do not retrieve or print bearer/vault secrets to bridge this gap.",
+    "safe_next_action": "Use an existing authorized local Device/Controller acceptance surface if discovered; otherwise require a dedicated non-secret acceptance endpoint in a future AccessBoot increment rather than exposing credentials."
+  },
+  "rollback": "Revoke only newly granted EVT74 routes and invalidate any new IAM attestation receipt; preserve Browser Universal, profiles and Vault records.",
+  "prod_authorized": false,
+  "prod_write_authorized": false,
+  "auto_merge_authorized": false,
+  "trading_access": false,
+  "additional_cost_eur": 0,
+  "next_gate": "DISCOVER_OR_ADD_NON_SECRET_BROWSER_VAULT_ACCEPTANCE_SURFACE_WITHOUT_REPEATING_ACCESSBOOT"
+}

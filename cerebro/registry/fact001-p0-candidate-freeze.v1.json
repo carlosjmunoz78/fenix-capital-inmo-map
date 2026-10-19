@@ -1,0 +1,78 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_FACT001_P0_CANDIDATE_FREEZE_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "1.0.0",
+  "status": "CANDIDATE_FREEZE_CONTRACT_DEFINED",
+  "objective": "Process the complete skill/capability catalog through one generic governed factory, route each capability only to engines where it has justified impact, activate every gate-approved capability, and preserve HOLD/reference/physical-evidence gates without candidate-specific core code.",
+  "catalog_contract": {
+    "catalog_size": 184,
+    "normalized_item_count": 184,
+    "remaining_item_normalization_count": 0,
+    "full_catalog_reconciled": true,
+    "activation_policy": "PROCESS_ALL_ROUTE_BY_IMPACT_ACTIVATE_GATE_APPROVED_ONLY",
+    "force_every_skill_into_every_engine": false,
+    "candidate_specific_core_code_required": false,
+    "source_of_truth": "cerebro/skills/cerebro-184-live-convergence.v3.json"
+  },
+  "pipeline": [
+    "INTAKE",
+    "NORMALIZE_AND_REGISTER",
+    "IMPACT_ANALYSIS",
+    "ENGINE_ROUTING",
+    "SAFE_ENGINEERING",
+    "QA",
+    "EVALUATION_TRIBUNAL",
+    "OLD_VS_NEW",
+    "ROLLBACK_REBUILD_CHECK",
+    "ACTIVATE_IF_GATES_PASS",
+    "LEARN_AND_OBSERVE"
+  ],
+  "engineering_profile": {
+    "mode": "ONE_TRANSVERSAL_SAFE_ENGINEERING_PROFILE",
+    "specializations": [
+      "ARCHITECT",
+      "CODE",
+      "SYSTEMS",
+      "MATH",
+      "DATA",
+      "SECURITY",
+      "QA",
+      "INTEGRATOR",
+      "TECH_SCOUT",
+      "PERFORMANCE"
+    ],
+    "separate_agent_or_server_per_specialization": false
+  },
+  "physical_residuals": [
+    "ANDROID_48_183",
+    "WATCH_LEARN_47",
+    "COMPET_57_61",
+    "CAP_62_68"
+  ],
+  "authority": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "prod_mutation_authorized": false,
+    "auto_merge_authorized": false,
+    "external_skill_code_execution_authorized": false,
+    "external_dependency_install_authorized": false,
+    "customer_data_authorized": false,
+    "trading_access": false,
+    "additional_cost_eur": 0
+  },
+  "acceptance": {
+    "full_catalog_enters_generic_pipeline": true,
+    "new_candidate_without_candidate_specific_core": true,
+    "idempotency_required": true,
+    "terminal_truth_required": true,
+    "rollback_rebuild_required": true,
+    "evaluation_tribunal_required": true,
+    "exact_head_ci_required": true,
+    "false_full_forbidden": true
+  },
+  "next_block_on_green": "PHYSICAL_RESIDUAL_CLOSURE_AND_PRODUCTION_PROMOTION_REVIEW",
+  "human_required": null
+}

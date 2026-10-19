@@ -1,0 +1,44 @@
+name: CEREBRO Universal Skill GitHub Live E2E V1
+
+on:
+  push:
+    branches:
+      - 'cerebro/universal-skill-activation-factory-v1-*'
+    paths:
+      - 'cerebro/runtime/universal-skill-github-intake-v1.mjs'
+      - 'cerebro/runtime/universal-skill-repository-intake-v1.mjs'
+      - 'cerebro/runtime/universal-skill-auto-engineering-v1.mjs'
+      - 'cerebro/tests/universal-skill-github-intake-v1.test.mjs'
+      - '.github/workflows/cerebro-universal-skill-github-live-e2e-v1.yml'
+  pull_request:
+    paths:
+      - 'cerebro/runtime/universal-skill-github-intake-v1.mjs'
+      - 'cerebro/runtime/universal-skill-repository-intake-v1.mjs'
+      - 'cerebro/runtime/universal-skill-auto-engineering-v1.mjs'
+      - 'cerebro/tests/universal-skill-github-intake-v1.test.mjs'
+      - '.github/workflows/cerebro-universal-skill-github-live-e2e-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  github-url-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Deterministic mocked acquisition and full activation tests
+        run: node --test cerebro/tests/universal-skill-github-intake-v1.test.mjs
+      - name: Live public GitHub skill URL to FULL_SAFE_PREPROD
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node cerebro/runtime/universal-skill-github-intake-v1.mjs https://github.com/ericrisco/rsc-harness/tree/5bf06162f682dd61cbf791b4bc340bc353d84e3d/skills/finance-ops
+      - name: Assert read-only zero-cost authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -Eq 'git clone|npm install|child_process|console\.log\(process\.env\.GITHUB_TOKEN\)|process\.stdout\.write\(process\.env\.GITHUB_TOKEN\)|external_skill_code_execution[[:space:]]*:[[:space:]]*true|prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true' cerebro/runtime/universal-skill-github-intake-v1.mjs

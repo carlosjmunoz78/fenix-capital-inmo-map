@@ -6,6 +6,10 @@ function arg(name){const i=process.argv.indexOf(name);return i>=0?process.argv[i
 function req(v,l){if(typeof v!=='string'||!v.trim())throw new Error(`${l} required`);return v.trim()}
 function read(file){return JSON.parse(fs.readFileSync(file,'utf8'))}
 function stable(parts){return crypto.createHash('sha256').update(parts.join('|')).digest('hex').slice(0,16)}
+function mappingOrderKey(mapping){
+  return [mapping?.repair_id,mapping?.case_id,mapping?.target,...(mapping?.resolution?.file_hints??[])].map(v=>String(v??'')).join('|');
+}
+function compareMappingOrder(left,right){const a=mappingOrderKey(left);const b=mappingOrderKey(right);return a<b?-1:a>b?1:0}
 
 function certifiedTransformSourceState(sourceText){
   if(typeof sourceText!=='string')return null;
@@ -19,7 +23,7 @@ function certifiedTransformSourceState(sourceText){
 export function planAuto001Patch(sourceMap,{baseSha='UNKNOWN',sourceText=null}={}){
   if(!sourceMap||sourceMap.state_type!=='CEREBRO_QA_SOURCE_MAPPING_STATE_V0')throw new Error('verified QA source mapping required');
   if(sourceMap.safety?.prod_write!==false||sourceMap.safety?.customer_data!==false||sourceMap.safety?.trading!==false||Number(sourceMap.safety?.additional_subscription_eur??NaN)!==0)throw new Error('source map safety drift');
-  const eligible=(sourceMap.mappings??[]).find(m=>
+  const eligible=(sourceMap.mappings??[]).filter(m=>
     m?.resolution?.status==='SOURCE_HINT_VERIFIED' &&
     m.resolution.repository==='carlosjmunoz78/fenix-capital-inmo-map' &&
     m.owner_engine==='HCI-001' &&
@@ -27,7 +31,7 @@ export function planAuto001Patch(sourceMap,{baseSha='UNKNOWN',sourceText=null}={
     String(m.target??'').startsWith('APP:') &&
     (m.resolution.file_hints??[]).includes('src/App.tsx') &&
     m.execution_authority?.prod_write_authorized===false
-  );
+  ).sort(compareMappingOrder)[0];
   if(!eligible)return {status:'NO_ELIGIBLE_PATCH',engine_id:'AUTO-001',environment:'PREPROD',execute:false,reason:'NO_CERTIFIED_TRANSFORM_MATCH',prod_write_authorized:false,auto_merge:false,additional_cost_eur:0};
   const sourceState=certifiedTransformSourceState(sourceText);
   if(sourceState?.status==='ALREADY_SATISFIED')return {status:'NO_ELIGIBLE_PATCH',engine_id:'AUTO-001',environment:'PREPROD',execute:false,reason:'CERTIFIED_TRANSFORM_ALREADY_SATISFIED',source_state:sourceState,prod_write_authorized:false,auto_merge:false,additional_cost_eur:0};

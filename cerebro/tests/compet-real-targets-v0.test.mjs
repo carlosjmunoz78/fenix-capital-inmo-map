@@ -22,7 +22,7 @@ test('COMPET real targets remain PREPROD, public and company scoped',()=>{
   }
 });
 
-test('real baselines are frozen but scheduled soak is not overclaimed',()=>{
+test('real baselines are frozen but scheduled soak is not overclaimed in preserved V0',()=>{
   assert.equal(config.status,'REAL_TARGETS_BASELINE_FROZEN_CONTINUOUS_PREPROD');
   assert.equal(config.baseline_capture.result,'GREEN');
   assert.equal(config.targets.every(t=>t.baseline&&typeof t.baseline.body_sha256==='string'&&t.baseline.body_sha256.length===64),true);

@@ -1,0 +1,138 @@
+{
+  "schema_version": "3.0.0",
+  "state_type": "CEREBRO_184_ITEMS_176_184_LIVE_RECONCILIATION_V3",
+  "generated_at": "2026-10-17",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v3",
+  "supersedes": "cerebro/skills/cerebro-184-items-176-184-live-reconciliation.v2.json",
+  "status": "CURRENT_EVIDENCE_RECONCILED_APP_FACTORY_TEMPLATE_EXECUTION_WITH_ANDROID_PHYSICAL_GATE_OPEN",
+  "catalog_range": "176-184",
+  "authority": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "public_deploy_authorized": false,
+    "auto_merge_authorized": false,
+    "external_skill_code_execution_authorized": false,
+    "external_dependency_install_authorized": false,
+    "customer_data_authorized": false,
+    "trading_access": false,
+    "automatic_paid_fallback": false,
+    "additional_cost_eur": 0
+  },
+  "items": [
+    {
+      "id": 176,
+      "name": "BRANDBOOT-001",
+      "disposition": "ENVOLVER",
+      "state": "PARTIAL_LAB_CANDIDATE_NOT_PROMOTED",
+      "owner_engine_ids": ["FACT-001", "BRANDBOOT-001"],
+      "evidence": ["cerebro/registry/brand-commerce-appfactory-profile.v0.json", "cerebro/digital-build/brand-commerce-appfactory-runtime-v0.mjs"],
+      "reason": "Unchanged from v2. Preserve and wrap the governed LAB candidate; no silent promotion or duplicate engine."
+    },
+    {
+      "id": 177,
+      "name": "Automated brand tokens",
+      "disposition": "REUTILIZAR",
+      "state": "FULL_PREPROD_DETERMINISTIC_LOCAL",
+      "owner_engine_ids": ["FACT-001"],
+      "evidence": ["cerebro/registry/brand-commerce-appfactory-profile.v0.json", "cerebro/digital-build/brand-commerce-appfactory-runtime-v0.mjs"],
+      "reason": "Unchanged from v2. Deterministic PREPROD-local token generation remains evidenced."
+    },
+    {
+      "id": 178,
+      "name": "Claude Commerce Agents",
+      "disposition": "CATALOGAR",
+      "state": "TERMINAL_REFERENCE_PATTERN_ONLY",
+      "owner_engine_ids": ["SALE-001", "PAY-001", "INV-001"],
+      "evidence": ["cerebro/registry/brand-commerce-appfactory-profile.v0.json", "cerebro/digital-build/brand-commerce-appfactory-runtime-v0.mjs"],
+      "reason": "Unchanged from v2. Reference pattern only; no Claude runtime dependency."
+    },
+    {
+      "id": 179,
+      "name": "Shopping Agent capability",
+      "disposition": "REUTILIZAR",
+      "state": "PARTIAL_PREPROD_PLAN_ONLY",
+      "owner_engine_ids": ["SALE-001", "COM-001"],
+      "evidence": ["cerebro/registry/brand-commerce-appfactory-profile.v0.json", "cerebro/digital-build/brand-commerce-appfactory-runtime-v0.mjs"],
+      "reason": "Unchanged from v2. Provider-neutral plan only; order/payment/customer mutations remain disabled."
+    },
+    {
+      "id": 180,
+      "name": "Merchant Agent capability",
+      "disposition": "REUTILIZAR",
+      "state": "PARTIAL_PREPROD_PLAN_ONLY",
+      "owner_engine_ids": ["SALE-001", "PAY-001", "INV-001", "COM-001"],
+      "evidence": ["cerebro/registry/brand-commerce-appfactory-profile.v0.json", "cerebro/digital-build/brand-commerce-appfactory-runtime-v0.mjs"],
+      "reason": "Unchanged from v2. Provider-neutral plan only; charge/refund/invoice/order mutations remain disabled."
+    },
+    {
+      "id": 181,
+      "name": "App Factory",
+      "disposition": "ENVOLVER",
+      "state": "PARTIAL_PREPROD_APPBOOT_WRAPPER_WITH_VERIFIED_DOWNSTREAM_TEMPLATE_EXECUTION",
+      "owner_engine_ids": ["FACT-001", "APPBOOT-001"],
+      "evidence": [
+        "cerebro/registry/brand-commerce-appfactory-profile.v0.json",
+        "cerebro/digital-build/brand-commerce-appfactory-runtime-v0.mjs",
+        "cerebro/registry/fact001-android-staging-48-183.v0.json"
+      ],
+      "reason": "The App Factory remains a wrapper over FACT-001 + APPBOOT-001 rather than a duplicate engine. Newer evidence proves downstream item 183 WordPress STAGING draft render/readback and signed PREPROD APK build, but item 181 itself is not promoted to FULL and carries no deploy/publish/PROD authority.",
+      "next_gate": "KEEP_WRAPPER_AND_CONSUME_ONLY_GATE_APPROVED_APPBOOT_OUTPUTS"
+    },
+    {
+      "id": 182,
+      "name": "Blink",
+      "disposition": "CATALOGAR",
+      "state": "TERMINAL_REFERENCE_NO_INSTALL",
+      "owner_engine_ids": ["FACT-001", "RSH-001"],
+      "evidence": ["cerebro/registry/brand-commerce-appfactory-profile.v0.json", "cerebro/digital-build/brand-commerce-appfactory-runtime-v0.mjs"],
+      "reason": "Unchanged from v2. Reference-only capability with no install/provider binding."
+    },
+    {
+      "id": 183,
+      "name": "Web apps / PWA / mobile templates",
+      "disposition": "REUTILIZAR_Y_COMPLETAR_GATE_FISICO",
+      "state": "PARTIAL_PREPROD_STAGING_RENDER_AND_SIGNED_ANDROID_BUILD_GREEN_PHYSICAL_DEVICE_PENDING",
+      "owner_engine_ids": ["FACT-001", "APPBOOT-001"],
+      "evidence": [
+        "cerebro/registry/brand-commerce-appfactory-profile.v0.json",
+        "cerebro/digital-build/brand-commerce-appfactory-runtime-v0.mjs",
+        "cerebro/registry/fact001-android-staging-48-183.v0.json"
+      ],
+      "verified": {
+        "wordpress_staging_draft_render_readback": true,
+        "signed_preprod_android_apk_build": true,
+        "apksigner_verification": true,
+        "external_dependency_install": false,
+        "physical_device_installed": false,
+        "public_prod_deploy": false
+      },
+      "reason": "v2 reported template packs as DEFINED_NOT_BUILT, but later governed evidence proves a WordPress STAGING draft render/readback plus signed PREPROD Android APK build using preinstalled SDK tooling. This closes the fabrication claim, not the physical-device gate. No public or PROD deployment is authorized.",
+      "next_gate": "AUTHORIZED_DEVICE_INSTALL_AND_RENDER_E2E"
+    },
+    {
+      "id": 184,
+      "name": "text-to-CAD",
+      "disposition": "CATALOGAR",
+      "state": "TERMINAL_SPECIALIZED_CATALOG_ONLY",
+      "owner_engine_ids": ["FACT-001", "RSH-001"],
+      "evidence": ["cerebro/registry/brand-commerce-appfactory-profile.v0.json", "cerebro/digital-build/brand-commerce-appfactory-runtime-v0.mjs"],
+      "reason": "Unchanged from v2. Specialized catalog-only capability; no execution justified without a concrete governed requirement."
+    }
+  ],
+  "summary": {
+    "items_total": 9,
+    "history_preserved": true,
+    "app_factory_duplicate_created": false,
+    "item_181_full_claim": false,
+    "item_183_fabrication_gap_closed": true,
+    "item_183_physical_device_gate_open": true,
+    "human_required": [],
+    "additional_cost_eur": 0,
+    "prod_authorized": false,
+    "public_deploy_authorized": false,
+    "next_gate": "AUTHORIZED_PHYSICAL_ANDROID_DEVICE_E2E_48_183"
+  }
+}

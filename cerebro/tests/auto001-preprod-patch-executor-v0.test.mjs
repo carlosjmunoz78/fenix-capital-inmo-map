@@ -23,6 +23,22 @@ test('AUTO-001 plans only the certified APP accessibility transform when source 
  assert.equal(plan.additional_cost_eur,0);
 });
 
+test('AUTO-001 certified mapping selection is deterministic across equivalent mapping permutations',()=>{
+ const a=structuredClone(sourceMap.mappings[0]);
+ Object.assign(a,{repair_id:'r-a',case_id:'c-a',target:'APP:qa-mobile-alpha'});
+ const z=structuredClone(sourceMap.mappings[0]);
+ Object.assign(z,{repair_id:'r-z',case_id:'c-z',target:'APP:qa-mobile-zeta'});
+ const first=structuredClone(sourceMap);first.mappings=[z,a];
+ const second=structuredClone(sourceMap);second.mappings=[a,z];
+ const planOne=planAuto001Patch(first,{baseSha:'abc123',sourceText:pendingSource});
+ const planTwo=planAuto001Patch(second,{baseSha:'abc123',sourceText:pendingSource});
+ assert.equal(planOne.status,'PATCH_PLAN_READY');
+ assert.equal(planTwo.status,'PATCH_PLAN_READY');
+ assert.equal(planOne.source_repair_id,'r-a');
+ assert.equal(planTwo.source_repair_id,'r-a');
+ assert.equal(planOne.plan_id,planTwo.plan_id);
+});
+
 test('AUTO-001 fails closed when no certified transform matches',()=>{
  const other=structuredClone(sourceMap);other.mappings[0].dimension='mobile_usability';
  const plan=planAuto001Patch(other,{baseSha:'abc123',sourceText:pendingSource});

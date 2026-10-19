@@ -1,0 +1,56 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "CEREBRO_ACCESSBOOT_V0_3_2",
+  "environment": "PREPROD",
+  "status": "PHYSICAL_CAPABILITIES_BATCH_PARTIAL",
+  "confirmed_operational": false,
+  "prod_allowed": false,
+  "additional_cost_eur": 0,
+  "evidence_surface": "http://127.0.0.1:8767/evidence",
+  "observed_via": "Opera office connector",
+  "observed_at_utc": "2026-10-19T15:50:58Z",
+  "canonical_device_id": "desktop-4c008d88919f",
+  "device_aliases": ["desktop-74ca87506edbd7a5"],
+  "listeners": {
+    "browser": {"address": "127.0.0.1:8765", "healthy": true, "service": "CEREBRO Browser Agent Host", "version": "0.3.0"},
+    "device": {"address": "127.0.0.1:8766", "healthy": true, "version": "0.2.0"},
+    "evidence": {"address": "127.0.0.1:8767", "healthy": true, "service": "CEREBRO Device Evidence Host", "version": "0.2.4", "sanitized": true}
+  },
+  "physical_pass": [
+    "BROWSER_HANDOFF",
+    "LOCAL_AGENT",
+    "EVIDENCE_HOST",
+    "SCREENSHOT",
+    "MOVE",
+    "CLICK",
+    "TYPE_TEXT",
+    "FILES",
+    "APP_LAUNCH",
+    "PROCESSES",
+    "APP_FOCUS",
+    "CLIPBOARD",
+    "SHELL_GUARDED",
+    "IDENTITY_V2",
+    "UNIVERSAL_PAIRING_SCOPE_LOCAL_CONTRACT"
+  ],
+  "physical_fail_isolated": [
+    "GUI_ACCEPTANCE",
+    "VAULT_SYNTHETIC_ROUNDTRIP",
+    "STARTUP_CONFIG"
+  ],
+  "anti_loop": {
+    "same_failure_family_repeated": true,
+    "decision": "STOP_RETRY_AND_CHANGE_TEST_STRATEGY",
+    "do_not_repeat_green_blocks": true
+  },
+  "still_pending": [
+    "remote_command_roundtrip",
+    "restart_persistence_after_windows_reboot",
+    "rollback_physical",
+    "portable_vault_cross_device_recovery",
+    "camera",
+    "microphone",
+    "audio",
+    "peripherals"
+  ]
+}
