@@ -27,21 +27,22 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Validate remote-only residual manifests
+      - name: Validate remote residual manifests monotonically
         run: |
           node - <<'NODE'
           const fs=require('fs');
-          const files=[
-            'cerebro/registry/evt74-exact-minimum-grant-manifest.v1.json',
-            'cerebro/registry/android-48-183-physical-attestation-bundle.v1.json',
-            'cerebro/registry/iam-browser-vault-refresh-plan.v1.json',
-            'cerebro/registry/multimedia-readonly-physical-inventory-plan.v1.json'
-          ];
-          for(const f of files){
-            const x=JSON.parse(fs.readFileSync(f,'utf8'));
-            if(x.prod_authorized!==false||x.prod_write_authorized!==false||x.trading_access!==false||x.additional_cost_eur!==0) throw new Error(`unsafe authority in ${f}`);
+          const paths={
+            evt:'cerebro/registry/evt74-exact-minimum-grant-manifest.v1.json',
+            android:'cerebro/registry/android-48-183-physical-attestation-bundle.v1.json',
+            iam:'cerebro/registry/iam-browser-vault-refresh-plan.v1.json',
+            media:'cerebro/registry/multimedia-readonly-physical-inventory-plan.v1.json'
+          };
+          const docs=Object.fromEntries(Object.entries(paths).map(([k,p])=>[k,JSON.parse(fs.readFileSync(p,'utf8'))]));
+          for(const [k,x] of Object.entries(docs)){
+            if(x.prod_authorized!==false||x.prod_write_authorized!==false||x.trading_access!==false||Number(x.additional_cost_eur)!==0) throw new Error(`unsafe authority in ${paths[k]}`);
           }
-          const evt=JSON.parse(fs.readFileSync(files[0],'utf8'));
+
+          const evt=docs.evt;
           const expectedEvtRoutes=[
             'GET /wp-json/cerebro-b3-journal-lab/v1/observe',
             'POST /wp-json/cerebro-b3-journal-lab/v1/prepare',
@@ -73,18 +74,39 @@ jobs:
             evt.acceptance?.cleanup_synthetic_record==='GREEN';
           if(
             !(legacyDiscoveryState||currentPhysicalGreenState)||
-            evt.grant_constraints.wildcard_routes_allowed!==false||
-            evt.grant_constraints.prod_allowed!==false||
-            evt.grant_constraints.customer_data_allowed!==false||
+            evt.grant_constraints?.wildcard_routes_allowed!==false||
+            evt.grant_constraints?.prod_allowed!==false||
+            evt.grant_constraints?.customer_data_allowed!==false||
             JSON.stringify(observedEvtRoutes)!==JSON.stringify(expectedEvtRoutes)
           ) throw new Error('EVT74 grant manifest drift');
-          const android=JSON.parse(fs.readFileSync(files[1],'utf8'));
-          if(android.status!=='DEFINED_NOT_EXECUTED'||android.source_artifact.artifact_id!==11934097600) throw new Error('Android attestation bundle drift');
-          const iam=JSON.parse(fs.readFileSync(files[2],'utf8'));
-          if(iam.status!=='DEFINED_NOT_EXECUTED'||iam.secret_policy.references_only!==true) throw new Error('IAM refresh plan drift');
-          const media=JSON.parse(fs.readFileSync(files[3],'utf8'));
-          if(media.rules.read_only!==true||media.rules.auto_install_allowed!==false||media.rules.download_allowed!==false) throw new Error('Multimedia plan drift');
-          console.log(JSON.stringify({status:'PASS_REMOTE_PREP_CONTRACTS',evt74_state:currentPhysicalGreenState?'PHYSICAL_GREEN':'DISCOVERED_NOT_APPLIED',prod:false,cost_eur:0}));
+
+          const android=docs.android;
+          const androidAllowedStatuses=new Set(['DEFINED_NOT_EXECUTED','PHYSICAL_PARTIAL','PHYSICAL_E2E_GREEN','FULL_SAFE_PREPROD']);
+          if(!androidAllowedStatuses.has(android.status)||android.source_artifact?.artifact_id!==11934097600||android.pass_criteria?.prod_authorized!==false||android.pass_criteria?.prod_write_authorized!==false||android.pass_criteria?.customer_data_used!==false) throw new Error('Android attestation bundle unsafe drift');
+
+          const iam=docs.iam;
+          const iamProgressSafe=
+            iam.secret_policy?.references_only===true&&
+            iam.secret_policy?.secret_values_in_github===false&&
+            iam.secret_policy?.secret_values_in_receipts===false&&
+            iam.secret_policy?.secret_values_in_logs===false&&
+            iam.source_contract_revalidated_without_secret_access?.mfa_bypass_allowed===false&&
+            iam.source_contract_revalidated_without_secret_access?.captcha_bypass_allowed===false;
+          if(!iamProgressSafe||!iam.status||/FAILED_UNSAFE|PROD_ENABLED|SECRET_EXPOSED/.test(iam.status)) throw new Error('IAM refresh plan unsafe drift');
+
+          const media=docs.media;
+          if(media.rules?.read_only!==true||media.rules?.auto_install_allowed!==false||media.rules?.download_allowed!==false||media.rules?.package_manager_allowed!==false||media.rules?.prod_allowed!==false) throw new Error('Multimedia plan unsafe drift');
+
+          console.log(JSON.stringify({
+            status:'PASS_REMOTE_PREP_CONTRACTS',
+            evt74_state:currentPhysicalGreenState?'PHYSICAL_GREEN':'DISCOVERED_NOT_APPLIED',
+            android_state:android.status,
+            iam_state:iam.status,
+            media_state:media.status,
+            prod:false,
+            trading:false,
+            cost_eur:0
+          }));
           NODE
       - name: Focused multimedia tests
         run: node --test cerebro/tests/multimedia-readonly-inventory-v1.test.mjs
