@@ -49,3 +49,22 @@ test('composer keeps attach dictation talk send and Enter semantics',async()=>{
  expect(source).toContain("event.key==='Enter'&&!event.shiftKey");
  expect(source).toContain('aria-label="Enviar a CEREBRO"');
 });
+
+test('automatic activity refresh replaces manual refresh with scalable voice settings',async()=>{
+ const source=read('src/CerebroOperativeConsole.tsx');
+ const settings=read('src/CerebroVoiceSettings.tsx');
+ const css=read('src/cerebro-voice-settings.css');
+ expect(source).toContain('window.setInterval(()=>{void refresh()},30_000)');
+ expect(source).toContain('<CerebroVoiceSettings/>');
+ expect(source).not.toContain('Actualizar procesos');
+ expect(settings).toContain("const VOICE_STORAGE_KEY='cerebro_console_voice_id_v1'");
+ expect(settings).toContain('spanishVoices()');
+ expect(settings).toContain('<strong>Voz {index+1}</strong>');
+ expect(settings).toContain('aria-label={`Escuchar Voz ${index+1}`}');
+ expect(settings).toContain("speed==='normal'");
+ expect(settings).toContain("speed==='fast'");
+ expect(settings).not.toContain('JARVIS');
+ expect(settings).not.toContain('TONY STARK');
+ expect(css).toContain('max-height:228px');
+ expect(css).toContain('overflow-y:auto');
+});
