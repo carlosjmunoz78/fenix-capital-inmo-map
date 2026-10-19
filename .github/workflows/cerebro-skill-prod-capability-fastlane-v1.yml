@@ -1,0 +1,81 @@
+name: CEREBRO Skill PROD Capability Fast Lane V1
+
+on:
+  push:
+    branches:
+      - main
+      - 'cerebro/skill-prod-capability-fastlane-v1-*'
+    paths:
+      - 'cerebro/runtime/skill-prod-capability-fastlane-v1.mjs'
+      - 'cerebro/tests/skill-prod-capability-fastlane-v1.test.mjs'
+      - 'cerebro/registry/skill-prod-capability-fastlane-v1.json'
+      - 'cerebro/registry/skill-full-adoption-v1.json'
+      - 'cerebro/registry/*full-safe-preprod*.json'
+      - 'cerebro/docs/CEREBRO_SKILL_PROD_CAPABILITY_FAST_LANE_V1_2026-10-20.md'
+      - '.github/workflows/cerebro-skill-prod-capability-fastlane-v1.yml'
+  pull_request:
+    paths:
+      - 'cerebro/runtime/skill-prod-capability-fastlane-v1.mjs'
+      - 'cerebro/tests/skill-prod-capability-fastlane-v1.test.mjs'
+      - 'cerebro/registry/skill-prod-capability-fastlane-v1.json'
+      - 'cerebro/registry/skill-full-adoption-v1.json'
+      - 'cerebro/registry/*full-safe-preprod*.json'
+      - 'cerebro/docs/CEREBRO_SKILL_PROD_CAPABILITY_FAST_LANE_V1_2026-10-20.md'
+      - '.github/workflows/cerebro-skill-prod-capability-fastlane-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-skill-prod-capability-fastlane-v1-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fast-lane-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Targeted fast-lane tests
+        run: node --test cerebro/tests/skill-prod-capability-fastlane-v1.test.mjs
+      - name: Build deterministic PROD capability report
+        run: |
+          mkdir -p artifacts
+          node cerebro/runtime/skill-prod-capability-fastlane-v1.mjs --output artifacts/skill-prod-capability-fastlane-v1.json > /tmp/skill-fastlane.json
+          node - <<'NODE'
+          const fs=require('fs');
+          const report=JSON.parse(fs.readFileSync('artifacts/skill-prod-capability-fastlane-v1.json','utf8'));
+          const policy=JSON.parse(fs.readFileSync('cerebro/registry/skill-prod-capability-fastlane-v1.json','utf8'));
+          if(report.status!=='GREEN_PROD_READONLY_CAPABILITY_SET') throw new Error(`unexpected report status ${report.status}`);
+          if(report.available_count<2) throw new Error(`expected at least two already-proven candidates, got ${report.available_count}`);
+          if(policy.execution.hourly_wait_required!==false||policy.execution.polling_as_primary!==false) throw new Error('zero-idle policy drift');
+          if(policy.execution.fast_lane_target_seconds_after_all_required_evidence_is_in_main!==300) throw new Error('fast-lane SLA drift');
+          const expected=new Set(policy.current_expected_initial_availability.technical_names);
+          const actual=new Set(report.available.map(x=>x.technical_name));
+          for(const name of expected) if(!actual.has(name)) throw new Error(`missing initial canary-proven capability ${name}`);
+          for(const row of report.available){
+            const a=row.authority||{};
+            if(a.prod_authorized!==false||a.prod_write_authorized!==false||a.prod_mutation_authorized!==false||a.permission_expansion_authorized!==false||a.external_skill_code_execution!==false||a.customer_data_authorized!==false||a.trading_access!==false||a.spend_authorized!==false||Number(a.additional_cost_eur)!==0) throw new Error(`unsafe authority for ${row.technical_name}`);
+          }
+          const top=report.authority||{};
+          if(top.prod_write_authorized!==false||top.prod_mutation_authorized!==false||top.permission_expansion_authorized!==false||top.external_skill_code_execution!==false||top.trading_access!==false||top.spend_authorized!==false||Number(top.additional_cost_eur)!==0) throw new Error('unsafe top-level authority');
+          console.log(JSON.stringify({status:'PASS_SKILL_PROD_CAPABILITY_FAST_LANE_V1',available:[...actual].sort(),available_count:report.available_count,target_seconds:300,prod_write:false,prod_mutation:false,external_skill_code:false,trading:false,cost_eur:0}));
+          NODE
+      - name: Canonical CEREBRO registry validation
+        working-directory: cerebro
+        run: npm run validate
+
+  full-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Full CEREBRO regression
+        run: node --test cerebro/tests/*.test.mjs
