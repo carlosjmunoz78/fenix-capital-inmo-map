@@ -22,8 +22,9 @@ Reglas:
 - `PROD` fail-closed;
 - identidad presentada debe ser canonical o alias registrado;
 - `company_id` / `venture_id` proceden del envelope V2, nunca del perfil Browser legacy;
-- policy contiene allowlists explícitas de company/venture/engine/capability/action;
-- scope cruzado se deniega;
+- policy contiene allowlists explícitas de **company / venture / engine / environment / version / capability / action**;
+- ninguna allowlist admite wildcard `*`;
+- scope cruzado o versión/entorno fuera de policy se deniega;
 - secretos crudos se deniegan recursivamente;
 - únicamente `credential_ref` / `credential_refs` pueden viajar como referencias;
 - ventanas temporales acotadas;
@@ -52,10 +53,14 @@ HUMAN_REQUIRED conserva exactamente ocho códigos canónicos. MFA/CAPTCHA/login 
 ## Tests incluidos
 
 - canonical y alias;
+- unknown device fail-closed como HOLD;
 - tenant dinámico aunque el perfil legacy tenga otra empresa;
 - PROD denegado;
 - policy obligatoria;
+- wildcard scopes denegados;
 - aislamiento cross-company;
+- environment fuera de allowlist denegado;
+- version fuera de allowlist denegada;
 - raw secrets denegados / credential refs admitidos;
 - expiración / future skew / lifetime;
 - replay request id;
