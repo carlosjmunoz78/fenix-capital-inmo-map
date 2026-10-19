@@ -26,11 +26,12 @@ for (const width of widths) {
   const response = await page.goto(url,{waitUntil:'networkidle',timeout:60_000});
   const section = page.locator('#andalucia');
   await section.waitFor({state:'visible',timeout:20_000});
-  const diag = await page.evaluate((expected) => {
+  const diag = await page.evaluate(({expected,width}) => {
     const sec = document.querySelector('#andalucia');
     const heading = sec?.querySelector('h2')?.textContent?.trim() || '';
-    const cards = [...(sec?.querySelectorAll('.region-card') || [])];
-    const links = cards.map(c => ({text:(c.textContent||'').replace(/\s+/g,' ').trim(), href:c.getAttribute('href')}));
+    const allRegionCards = [...(sec?.querySelectorAll('.region-card') || [])];
+    const cards = [...(sec?.querySelectorAll('.region-v2-grid > a.region-card') || [])];
+    const links = cards.map(c => ({text:(c.textContent||'').replace(/\s+/g,' ').trim(), href:c.getAttribute('href'), html:c.outerHTML}));
     const expectedOk = expected.every(([href,name]) => links.some(l => l.href === href && l.text.includes(name)));
     const rects = cards.map(c => c.getBoundingClientRect());
     let overlap = false;
@@ -45,7 +46,8 @@ for (const width of widths) {
     const target = document.getElementById('home-study-form');
     return {
       heading,
-      cardCount: cards.length,
+      directCardCount: cards.length,
+      allRegionCardCount: allRegionCards.length,
       links,
       expectedOk,
       overlap,
@@ -56,9 +58,10 @@ for (const width of widths) {
       horizontalOverflow: document.documentElement.scrollWidth > innerWidth + 1,
       sectionWidth: secRect?.width || 0,
       sectionVisible: !!sec && secRect.width > 0 && secRect.height > 0,
+      renderedHtml: width === 1440 ? (sec?.outerHTML || '').slice(0,30000) : null,
     };
-  }, expected);
-  const ok = response?.status() === 200 && diag.heading === 'Tu hipoteca, a unos clics de ti.' && diag.cardCount === 8 && diag.expectedOk && !diag.overlap && !diag.horizontalOverflow && diag.buttonPresent && diag.popoverTargetPresent && errors.length === 0;
+  }, {expected,width});
+  const ok = response?.status() === 200 && diag.heading === 'Tu hipoteca, a unos clics de ti.' && diag.directCardCount === 8 && diag.expectedOk && !diag.overlap && !diag.horizontalOverflow && diag.buttonPresent && diag.popoverTargetPresent && errors.length === 0;
   await section.screenshot({path:`artifacts/home-region-v2/home-region-v2-${width}.png`});
   results.push({width,httpStatus:response?.status()||0,errors,diag,ok});
   await context.close();
