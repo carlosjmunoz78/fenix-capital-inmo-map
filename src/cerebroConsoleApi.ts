@@ -95,11 +95,15 @@ async function authHeaders(){
   const {data:{session}}=await supabase.auth.getSession();
   const token=session?.access_token;
   if(!token)return null;
+  // Keep a stable local Console session identity, but do not send it as a
+  // cross-origin custom header until the Gateway CORS contract advertises it.
+  // The current Gateway does not consume this value; conversation context is
+  // carried explicitly in the chat payload.
+  cerebroConsoleSessionId();
   return{
     Authorization:`Bearer ${token}`,
     apikey:SUPABASE_PUBLISHABLE_KEY,
-    'content-type':'application/json',
-    'x-cerebro-session-id':cerebroConsoleSessionId()
+    'content-type':'application/json'
   };
 }
 
