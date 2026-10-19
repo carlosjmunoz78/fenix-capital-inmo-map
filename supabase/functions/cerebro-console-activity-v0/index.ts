@@ -5,6 +5,7 @@ import {createClient} from "https://esm.sh/@supabase/supabase-js@2";
 const REPOSITORY="carlosjmunoz78/fenix-capital-inmo-map";
 const RUNS_URL=`https://api.github.com/repos/${REPOSITORY}/actions/runs?per_page=100`;
 const CACHE_TTL_MS=45_000;
+const PREPROD_PROJECT_REF="hnqlnvakzaywtafeiybt";
 const ALLOWED_ORIGINS=new Set([
   "https://app.fenixcapital.es",
   "https://www.app.fenixcapital.es"
@@ -50,6 +51,12 @@ function json(req:Request,status:number,body:unknown){
   return new Response(JSON.stringify(body),{status,headers:cors(req.headers.get("origin"))});
 }
 
+function actorContextRpc(supabaseUrl:string){
+  return supabaseUrl.includes(PREPROD_PROJECT_REF)
+    ?"preprod_test_actor_context_by_auth_server"
+    :"fenix_prod_actor_context_by_auth_server";
+}
+
 async function authorizedOwner(req:Request){
   const U=Deno.env.get("SUPABASE_URL")??"";
   const A=Deno.env.get("SUPABASE_ANON_KEY")??"";
@@ -60,7 +67,7 @@ async function authorizedOwner(req:Request){
   const svc=createClient(U,S,{auth:{persistSession:false,autoRefreshToken:false}});
   const {data:ud,error:ue}=await auth.auth.getUser(bearer.slice(7));
   if(ue||!ud.user)return false;
-  const {data:ctx,error:ce}=await svc.rpc("fenix_prod_actor_context_by_auth_server",{p_auth_user_id:ud.user.id});
+  const {data:ctx,error:ce}=await svc.rpc(actorContextRpc(U),{p_auth_user_id:ud.user.id});
   return Boolean(!ce&&ctx?.ok&&String(ctx.actor_code)==="CARLOS-ADMIN");
 }
 
