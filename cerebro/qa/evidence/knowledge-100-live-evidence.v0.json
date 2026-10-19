@@ -5,8 +5,8 @@
   "engine_id": "KNOWLEDGE-100-GATE",
   "environment": "PROD_READ_ONLY_ACCEPTANCE",
   "version": "v0",
-  "observed_at": "2026-10-16T23:00:00Z",
-  "observed_repo_sha": "a811cebfa17c9f1ec4df1f9cb1e8a2afd9754ced",
+  "observed_at": "2026-10-19T14:26:00Z",
+  "observed_repo_sha": "a649b7acf8fb3b08b3f7e2fad0af85fbef64d795",
   "evidence_method": "AUTHORIZED_CONNECTOR_READ_ONLY_REFRESH",
   "notion_sources": [
     {
