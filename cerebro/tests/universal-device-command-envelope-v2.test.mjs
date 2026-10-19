@@ -44,14 +44,22 @@ test('device alias resolves to canonical without rewriting the presented identit
   assert.equal(result.identity_match,'ALIAS');
 });
 
+test('unknown device identity fails closed as HOLD rather than throwing',()=>{
+  const result=authorizeUniversalDeviceEnvelopeV2(envelope({device_id:'desktop-not-authorized'}),{now:NOW,identity:IDENTITY});
+  assert.equal(result.decision,'HOLD');
+  assert.deepEqual(result.blockers,['device_scope_denied']);
+});
+
 test('PROD and unknown environment fail closed',()=>{
   assert.ok(validateUniversalDeviceEnvelopeV2(envelope({environment:'PROD'}),{now:NOW}).errors.includes('prod_context_not_allowed'));
   assert.ok(validateUniversalDeviceEnvelopeV2(envelope({environment:'DEV'}),{now:NOW}).errors.includes('invalid:environment'));
 });
 
-test('policy is mandatory and cross-tenant scope is denied',()=>{
+test('policy is mandatory, wildcards are forbidden and cross-tenant scope is denied',()=>{
   const missing=envelope();delete missing.policy;
   assert.equal(validateUniversalDeviceEnvelopeV2(missing,{now:NOW}).ok,false);
+  const wildcard=validateUniversalDeviceEnvelopeV2(envelope({policy:{...envelope().policy,allowed_company_ids:['*']}}),{now:NOW});
+  assert.ok(wildcard.errors.includes('wildcard_forbidden:policy.allowed_company_ids'));
   const result=authorizeUniversalDeviceEnvelopeV2(envelope(),{now:NOW,identity:IDENTITY,expected_company_id:'aion'});
   assert.equal(result.decision,'HOLD');
   assert.ok(result.blockers.includes('tenant_isolation_violation'));
