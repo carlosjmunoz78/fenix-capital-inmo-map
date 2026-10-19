@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-19T22:35:28.458Z",
+  "updated_at": "2026-10-19T22:41:04.270Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -78,8 +78,7 @@
     "github-wide-skills:0c89ff5bc2cecf4bf945",
     "github-wide-skills:fc1cc2732113e136aa31",
     "github-wide-skills:f8e51b089b2996c601a2",
-    "github-wide-skills:d4f361b79385cbadf32e",
-    "github-wide-skills:e182de3c55cb8554333b"
+    "github-wide-skills:d4f361b79385cbadf32e"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -216,42 +215,6 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 38896987155,
       "checkpointed_at": "2026-10-16T11:55:42.241Z",
-      "human_required": null,
-      "external_skill_code_execution": false,
-      "customer_data_used": false,
-      "prod_write": false,
-      "trading_access": false,
-      "paid_fallback": false,
-      "additional_cost_eur": 0
-    },
-    "github-wide-skills:bde6eb1a0b79083f6769": {
-      "candidate_id": "github-wide-skills:bde6eb1a0b79083f6769",
-      "name": "create-verification-skill",
-      "human_alias": "Create Verification Skill",
-      "wrapper_id": "skillwrap:fb9f338300a9836a20fc",
-      "domain": "software-engineering-devops",
-      "engine_bindings": [
-        "FACT-001",
-        "ARCH-001",
-        "API-001",
-        "DEP-001",
-        "MIG-001",
-        "QA-001",
-        "REG-001",
-        "DOCS-001"
-      ],
-      "value_score": 88.24,
-      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
-      "evidence_refs": {
-        "upstream_full_name": "csarigumba/sidstack",
-        "upstream_head_commit": "10e44cee4779bc4b8ea89970ab9a503239d0bb25",
-        "manifest_sha256": "57e3f2a1d4aa3ba4f8e748b825e9bb65f2adefa59f67fb6daa7c2986976c7db5",
-        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
-      },
-      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
-      "status": "WAITING_SAFE_HANDLER",
-      "source_discovery_run_id": 38919574802,
-      "checkpointed_at": "2026-10-16T14:54:52.410Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -1019,42 +982,6 @@
       "trading_access": false,
       "paid_fallback": false,
       "additional_cost_eur": 0
-    },
-    "github-wide-skills:e182de3c55cb8554333b": {
-      "candidate_id": "github-wide-skills:e182de3c55cb8554333b",
-      "name": "api-conventions",
-      "human_alias": "Api Conventions",
-      "wrapper_id": "skillwrap:2625a083fc17d50f67bb",
-      "domain": "software-engineering-devops",
-      "engine_bindings": [
-        "FACT-001",
-        "ARCH-001",
-        "API-001",
-        "DEP-001",
-        "MIG-001",
-        "QA-001",
-        "REG-001",
-        "DOCS-001"
-      ],
-      "value_score": 91.06,
-      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
-      "evidence_refs": {
-        "upstream_full_name": "thomiOmi/agent-skills",
-        "upstream_head_commit": "ac3ef50fe7e7282f28c072c299396515ffe15b84",
-        "manifest_sha256": "5f33d63d1e2ee32aff23d622a02688cec187482acbe5e489f8326b97e50ebd09",
-        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
-      },
-      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
-      "status": "WAITING_SAFE_HANDLER",
-      "source_discovery_run_id": 39334873975,
-      "checkpointed_at": "2026-10-19T22:26:05.414Z",
-      "human_required": null,
-      "external_skill_code_execution": false,
-      "customer_data_used": false,
-      "prod_write": false,
-      "trading_access": false,
-      "paid_fallback": false,
-      "additional_cost_eur": 0
     }
   },
   "completed": {
@@ -1232,6 +1159,57 @@
       "prod_authorized": false,
       "autonomous_promotion_authorized": false,
       "action_id": "skill-action:839cf009a0ac64d56e317b0e",
+      "action_type": "REJECT_CAPABILITY",
+      "action_status": "APPLIED_METADATA_ONLY",
+      "next_gate": "CONTINUE_DISCOVERY"
+    },
+    "github-wide-skills:bde6eb1a0b79083f6769": {
+      "candidate_id": "github-wide-skills:bde6eb1a0b79083f6769",
+      "name": "create-verification-skill",
+      "human_alias": "Create Verification Skill",
+      "wrapper_id": "skillwrap:fb9f338300a9836a20fc",
+      "domain": "software-engineering-devops",
+      "engine_bindings": [
+        "FACT-001",
+        "ARCH-001",
+        "API-001",
+        "DEP-001",
+        "MIG-001",
+        "QA-001",
+        "REG-001",
+        "DOCS-001"
+      ],
+      "value_score": 88.24,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "csarigumba/sidstack",
+        "upstream_head_commit": "10e44cee4779bc4b8ea89970ab9a503239d0bb25",
+        "manifest_sha256": "57e3f2a1d4aa3ba4f8e748b825e9bb65f2adefa59f67fb6daa7c2986976c7db5",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "SKILL_AUTONOMY_DECISION_RECORDED",
+      "status": "COMPLETED",
+      "source_discovery_run_id": 38919574802,
+      "checkpointed_at": "2026-10-16T14:54:52.410Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0,
+      "disposition": "DESCARTAR",
+      "evidence": {
+        "reason": "LICENSE_INCOMPATIBLE_OR_DISALLOWED",
+        "decision_id": "skill-autonomy:537c0f44435d14c856281bb5",
+        "decision": "DESCARTAR",
+        "human_required": null,
+        "source": "CEREBRO Skill AutoLoop Safe Handler V0"
+      },
+      "updated_at": "2026-10-19T22:41:04.270Z",
+      "prod_authorized": false,
+      "autonomous_promotion_authorized": false,
+      "action_id": "skill-action:1c84476a00f9482407eb33d6",
       "action_type": "REJECT_CAPABILITY",
       "action_status": "APPLIED_METADATA_ONLY",
       "next_gate": "CONTINUE_DISCOVERY"
@@ -2154,7 +2132,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "IDLE_NO_NEW_ELIGIBLE_CANDIDATE",
+  "last_action": "APPLY_REJECT_CAPABILITY_CONTINUE_DISCOVERY",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -2167,7 +2145,7 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 39334869299,
+  "last_discovery_run_id": 39321698072,
   "autonomy_action_ledger": {
     "github-wide-skills:28b33318e96c4dcfb74a": {
       "schema_version": "1.0.0",
@@ -2250,6 +2228,47 @@
       "external_skill_code_execution_authorized": false,
       "additional_cost_eur": 0,
       "recorded_at": "2026-10-19T17:50:00.399Z"
+    },
+    "github-wide-skills:bde6eb1a0b79083f6769": {
+      "schema_version": "1.0.0",
+      "state_type": "CEREBRO_SKILL_AUTONOMY_ACTION_RECEIPT",
+      "action_id": "skill-action:1c84476a00f9482407eb33d6",
+      "decision_id": "skill-autonomy:537c0f44435d14c856281bb5",
+      "company_id": "GLOBAL",
+      "engine_id": "SKILL-AUTONOMY-ACTION",
+      "environment": "PREPROD",
+      "version": "1.0.0",
+      "skill_id": "github-wide-skills:bde6eb1a0b79083f6769",
+      "skill_version": "skillwrap:fb9f338300a9836a20fc",
+      "decision": "DESCARTAR",
+      "action_type": "REJECT_CAPABILITY",
+      "status": "APPLIED_METADATA_ONLY",
+      "next_gate": "CONTINUE_DISCOVERY",
+      "target_engine_ids": [
+        "API-001",
+        "ARCH-001",
+        "DEP-001",
+        "DOCS-001",
+        "FACT-001",
+        "MIG-001",
+        "QA-001",
+        "REG-001"
+      ],
+      "observed_at": null,
+      "human_required": null,
+      "queueable_safe_work": false,
+      "terminal_metadata_only": true,
+      "mutation_authorized": false,
+      "internal_wrapper_shadow_authorized": false,
+      "fact001_gap_candidate_authorized": false,
+      "fact001_create_authorized": false,
+      "paid_activation_authorized": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "external_skill_code_execution_authorized": false,
+      "additional_cost_eur": 0,
+      "recorded_at": "2026-10-19T22:41:04.270Z"
     }
   },
   "autonomy_action_queue": {}
