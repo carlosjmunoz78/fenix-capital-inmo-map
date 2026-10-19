@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_ANDROID_48_183_PHYSICAL_ATTESTATION_BUNDLE_V1",
+  "company_id": "fenix",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "status": "DEFINED_NOT_EXECUTED",
+  "source_registry": "cerebro/registry/fact001-android-staging-48-183.v0.json",
+  "source_workflow": ".github/workflows/cerebro-fact001-android-staging-48-183-v0.yml",
+  "source_artifact": {
+    "artifact_id": 11934097600,
+    "artifact_digest": "sha256:23b70456ee2d600fc7227702f1d7bae7e543d7ce5861370486aa847d27f1d820",
+    "artifact_name": "cerebro-android-preprod-48-183-v0",
+    "retention_days_at_build": 14
+  },
+  "preconditions": [
+    "AUTHORIZED_DESIGNATED_ANDROID_DEVICE",
+    "PREPROD_ONLY",
+    "KILL_SWITCH_DEFAULT_ON",
+    "APK_SIGNATURE_VERIFIED",
+    "NO_CUSTOMER_DATA",
+    "NO_PROD",
+    "NO_PAID_FALLBACK"
+  ],
+  "physical_batch": [
+    {
+      "step": 1,
+      "action": "ATTEST_DEVICE_IDENTITY_AND_OS_CONTEXT",
+      "evidence": ["device_model", "android_version", "attestation_timestamp", "authorized_owner_context"],
+      "sensitive_values_allowed": false
+    },
+    {
+      "step": 2,
+      "action": "VERIFY_APK_BYTES_AND_SIGNER_BEFORE_INSTALL",
+      "targets": ["worker/worker-preprod.apk", "template/template-preprod.apk"],
+      "evidence": ["sha256", "apksigner_verify_result"],
+      "network_install_allowed": false
+    },
+    {
+      "step": 3,
+      "action": "INSTALL_PREPROD_APKS_ON_DESIGNATED_DEVICE",
+      "prod_package_allowed": false,
+      "store_publish_allowed": false
+    },
+    {
+      "step": 4,
+      "action": "VERIFY_KILL_SWITCH_SAFE_DEFAULT",
+      "required": true
+    },
+    {
+      "step": 5,
+      "action": "RUN_SYNTHETIC_WORKER_AND_TEMPLATE_RENDER_E2E",
+      "staging_page_id": 54763,
+      "acceptance_marker": "CEREBRO_APPBOOT_183_REMOTE_STAGING_E2E_V0",
+      "customer_data_used": false
+    },
+    {
+      "step": 6,
+      "action": "SEMANTIC_READBACK_AND_CLEANUP",
+      "required_evidence": ["render_verified", "no_public_publish", "no_navigation_change", "no_theme_change", "no_prod_write"]
+    }
+  ],
+  "pass_criteria": {
+    "physical_device_bound": true,
+    "physical_device_installed": true,
+    "signed_worker_apk_verified": true,
+    "signed_template_apk_verified": true,
+    "kill_switch_observed": true,
+    "synthetic_render_e2e": true,
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "customer_data_used": false,
+    "additional_cost_eur": 0
+  },
+  "rollback": [
+    "UNINSTALL_ONLY_THE_PREPROD_TEST_APKS_IF_REQUIRED",
+    "KEEP_STAGING_PAGE_AS_DRAFT_OR_RESTORE_EXISTING_SNAPSHOT_584",
+    "DO_NOT_TOUCH_HOME_NAVIGATION_THEME_OR_PROD"
+  ],
+  "human_required": "POLICY_CONFLICT",
+  "prod_authorized": false,
+  "prod_write_authorized": false,
+  "trading_access": false,
+  "additional_cost_eur": 0,
+  "next_gate": "AUTHORIZED_PHYSICAL_ANDROID_INSTALL_ATTESTATION_RENDER_E2E"
+}
