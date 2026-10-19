@@ -8,6 +8,12 @@ for (const width of [390,768,1440]) {
   const page=await context.newPage();
   const errors=[]; page.on('pageerror',e=>errors.push(String(e.message||e)));
   const resp=await page.goto(`https://staging.fenixcapital.es/?cerebro_home_final=${Date.now()}_${width}`,{waitUntil:'networkidle',timeout:60000});
+  const visual=page.locator('.home-polish-visuals');
+  if (await visual.count()) {
+    await visual.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(1800);
+    await page.waitForFunction(() => [...document.querySelectorAll('.home-polish-visuals img')].every(img => img.complete), null, {timeout:10000}).catch(()=>{});
+  }
   const diag=await page.evaluate(()=>{
     const text=(document.body.innerText||'').replace(/\s+/g,' ').trim();
     const sections=[...document.querySelectorAll('main>section')].map(s=>({id:s.id||null,cls:s.className,heading:s.querySelector('h1,h2')?.textContent?.trim()||'',height:Math.round(s.getBoundingClientRect().height)}));
@@ -15,8 +21,10 @@ for (const width of [390,768,1440]) {
     const h1=[...document.querySelectorAll('h1')].map(x=>x.textContent.trim());
     const h2=[...document.querySelectorAll('h2')].map(x=>x.textContent.trim());
     const visibleLinks=[...document.querySelectorAll('main a')].filter(a=>{const r=a.getBoundingClientRect();return r.width>0&&r.height>0}).map(a=>({text:(a.textContent||'').replace(/\s+/g,' ').trim(),href:a.getAttribute('href')}));
-    return {title:document.title,scrollWidth:document.documentElement.scrollWidth,innerWidth,scrollHeight:document.documentElement.scrollHeight,h1,h2,sections,numberish,visibleLinks,bodyTextLength:text.length};
+    const visualImages=[...document.querySelectorAll('.home-polish-visuals img')].map(img=>({src:img.currentSrc||img.src,complete:img.complete,naturalWidth:img.naturalWidth,naturalHeight:img.naturalHeight}));
+    return {title:document.title,scrollWidth:document.documentElement.scrollWidth,innerWidth,scrollHeight:document.documentElement.scrollHeight,h1,h2,sections,numberish,visibleLinks,visualImages,bodyTextLength:text.length};
   });
+  if (await visual.count()) await visual.screenshot({path:`artifacts/home-final-review/visuals-${width}.png`});
   await page.screenshot({path:`artifacts/home-final-review/home-${width}.png`,fullPage:true});
   results.push({width,status:resp?.status()||0,errors,diag});
   await context.close();
