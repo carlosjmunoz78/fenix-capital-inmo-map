@@ -52,6 +52,18 @@ jobs:
           grep -F "fetchAppApi" src/appRpcCompat.ts >/dev/null
           ! grep -R -n -E "rest/v1/rpc/fenix_prod_session_context|rpc\(['\"]fenix_prod_session_context['\"]" src
 
+      - name: Assert CEREBRO browser CORS header contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -F 'cerebroConsoleSessionId();' src/cerebroConsoleApi.ts >/dev/null
+          if grep -F "'x-cerebro-session-id':" src/cerebroConsoleApi.ts >/dev/null; then
+            grep -F '"access-control-allow-headers":"authorization,apikey,content-type,x-cerebro-session-id"' supabase/functions/cerebro-console-gateway-v0/index.ts >/dev/null || {
+              echo 'CEREBRO Console sends x-cerebro-session-id but Gateway CORS does not allow it.'
+              exit 1
+            }
+          fi
+
       - name: Assert CEREBRO knowledge routing guards
         shell: bash
         run: |
