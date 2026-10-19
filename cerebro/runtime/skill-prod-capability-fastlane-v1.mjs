@@ -16,7 +16,7 @@ function nonEmptyArray(v){return Array.isArray(v)&&v.length>0;}
 function closurePath(row,root=CEREBRO_ROOT){
   const rel=String(row?.closure_evidence??'').trim();
   if(!rel||rel.includes('..')) return null;
-  return path.resolve(root,'..',rel.startsWith('cerebro/')?rel.slice('cerebro/'.length):rel);
+  return rel.startsWith('cerebro/')?path.resolve(root,rel.slice('cerebro/'.length)):path.resolve(root,rel);
 }
 function requiredClosureGreen(required={}){
   const requiredKeys=[
