@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.0.0",
+  "engine_or_capability": "DEVICE_UNIVERSAL",
+  "version": "0.2.4",
+  "status": "CANDIDATE_PREPROD",
+  "date": "2026-10-19",
+  "artifact": {
+    "name": "CEREBRO_DEVICE_ACCESSBOOT_UNIVERSAL_V0_2_4.exe",
+    "sha256": "1683bf3027dac2f4ff70cce1bf54ff7f3f0fede5c022efec0a009159e06d4f43",
+    "size_bytes": 23778816
+  },
+  "listeners": {
+    "browser_universal": "127.0.0.1:8765",
+    "device_agent": "127.0.0.1:8766",
+    "sanitized_evidence_host": "127.0.0.1:8767"
+  },
+  "evidence_host": {
+    "localhost_only": true,
+    "read_only": true,
+    "routes": ["GET /health", "GET /evidence"],
+    "whitelist_sanitization": true,
+    "serves_secrets": false,
+    "persistent_startup_configured": true,
+    "physical_test": "PENDING"
+  },
+  "preservation": {
+    "browser_universal_repeated": false,
+    "legacy_device_agent_overwritten": false,
+    "side_by_side": true,
+    "existing_profiles_rewritten": false
+  },
+  "tests": {
+    "go_unit_identity_contract": "PASS",
+    "windows_amd64_cross_build": "PASS",
+    "physical_windows_v0_2_4": "PENDING"
+  },
+  "governance": {
+    "environment": "LAB_PREPROD_ONLY",
+    "prod_allowed": false,
+    "auto_merge_authorized": false,
+    "additional_cost_eur": 0,
+    "trading_access": false
+  },
+  "next_block": "DEVICE_V0_2_4_PHYSICAL_EVIDENCE_HOST_THEN_UNIVERSAL_PAIRING_ROUNDTRIP"
+}
