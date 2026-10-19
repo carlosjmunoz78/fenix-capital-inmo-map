@@ -1,21 +1,23 @@
 {
-  "schema_version": "1.0.1",
-  "state_type": "CEREBRO_ACCESSBOOT_V0_5_0_PORTABLE_PROD_CAPABLE_DESIGN",
+  "schema_version": "1.1.0",
+  "state_type": "CEREBRO_ACCESSBOOT_V0_5_0_PORTABLE_PROD_CAPABLE_CANDIDATE",
   "recorded_at": "2026-10-19",
   "company_id": "GLOBAL",
   "engine_id": "FACT-001",
   "environment": "PREPROD",
   "version": "0.5.0",
-  "status": "DEFINED_NOT_BUILT_NOT_PHYSICALLY_ATTESTED",
-  "objective": "One Windows amd64 executable should install the existing v0.4.0 universal access stack on another authorized PC, preserve dynamic multi-company scope, attest reboot persistence, provide rollback, and recover the local credential vault across devices without exposing raw secrets.",
+  "status": "CANDIDATE_PREPROD_BASE_BUILT_PHYSICAL_CAPTURE_PENDING",
+  "objective": "Produce one Windows amd64 AccessBoot that preserves the existing universal stack, captures the physically GREEN 8765/8766/8767/8768 runtime code without state or secrets into a SHA-256 authenticated executable overlay, installs side-by-side on another authorized PC, persists through Windows user startup, supports rollback, and transports the credential vault through AES-256-GCM plus target-PC DPAPI re-encryption.",
   "artifact": {
     "name": "CEREBRO_ACCESSBOOT.exe",
-    "sha256": null,
-    "size_bytes": null,
+    "sha256": "724c321f382e4304b4c3674fde673524ff4c0f7c864ae46f8c71375f41fa9835",
+    "size_bytes": 38276096,
     "target": "windows-amd64",
-    "embedded_core_version_target": "0.4.0",
-    "embedded_core_sha256": null,
-    "evidence_status": "NOT_BUILT"
+    "embedded_core_version": "0.4.0",
+    "embedded_core_sha256": "78733cce3f2473205f8cf7bb50ee9a73901dd58dcaf2df10ac2748eb6a0aa8ef",
+    "embedded_browser_accessboot_version": "0.3.6",
+    "embedded_browser_accessboot_sha256": "0a7b57d52855db14bdefcb97438464d77dfc4b98abc2d14761ebb445068105ac",
+    "evidence_status": "DETERMINISTIC_LOCAL_BUILD_GREEN_NOT_PHYSICALLY_EXECUTED"
   },
   "preserves": [
     "Browser Universal 127.0.0.1:8765",
@@ -27,17 +29,21 @@
     "local Windows DPAPI for operational credential storage",
     "zero raw secrets in receipts/logs"
   ],
-  "planned_additions": {
-    "single_executable_portability": true,
-    "windows_user_startup": "HKCU_RUN_SELF_HEAL",
-    "automatic_real_reboot_attestation": true,
+  "implemented_additions": {
+    "single_executable_portability": "BASE_EXE_BUILT; SELF_CONTAINED_RUNTIME_OVERLAY_CREATED_ONLY_AFTER_PHYSICAL_CAPTURE_ON_GREEN_SOURCE_PC",
+    "runtime_capture": "DISCOVER_8765_8766_8767_8768_PROCESS_CODE_UNDER_LOCALAPPDATA_CEREBRO_AND_EXCLUDE_STATE_SECRET_TOKEN_VAULT_COOKIE_LOG_DB_MATERIAL",
+    "runtime_overlay_integrity": "SHA256_AUTHENTICATED_PE_OVERLAY",
+    "windows_user_startup": "HKCU_RUN_SELF_HEAL_VIA_RESUME",
+    "resume_behavior": "VERIFY_OR_RESTART_MISSING_LISTENERS_WITHOUT_REPEATING_PRIOR_PHYSICAL_ACCEPTANCE",
     "wrapper_backup_rollback": true,
-    "portable_vault": "AES_256_GCM_ENCRYPTED_BUNDLE_PLUS_SEPARATE_RANDOM_RECOVERY_KEY",
+    "portable_vault": "AES_256_GCM_ENCRYPTED_BUNDLE_PLUS_SEPARATE_RANDOM_32_BYTE_RECOVERY_KEY",
     "cross_device_reencrypt": "IMPORT_REPROTECTS_WITH_WINDOWS_DPAPI_CURRENT_USER_ON_TARGET_PC",
+    "vault_source_secret_logging": false,
     "prod_capable_after_promotion": true,
     "prod_enabled_default": false,
     "prod_fail_closed": true
   },
+  "fresh_pc_fail_closed_rule": "A base v0.5.0 EXE without a physically captured runtime overlay must not claim Device 8766 or Evidence 8767 on a fresh PC; it blocks until a source-PC portable capture exists.",
   "prod_promotion_contract": {
     "required": [
       "BUILD_EVIDENCE_GREEN",
@@ -61,28 +67,40 @@
     "automatic_prod_promotion": false
   },
   "build_evidence": {
-    "status": "NOT_EXECUTED",
+    "status": "GREEN_LOCAL_BUILD_AND_STATIC_TESTS",
     "go_target": "windows/amd64",
-    "go_test_cross_compile": null,
-    "pe32_plus_verified": null,
-    "secret_scan": null,
-    "source_rebuild_bundle_sha256": null
+    "go_unit_tests": "PASS",
+    "go_test_windows_binary_compile": "PASS",
+    "go_vet_linux": "PASS",
+    "go_vet_windows_target": "PASS",
+    "windows_amd64_cross_build": "PASS",
+    "pe32_plus_verified": true,
+    "deterministic_rebuild_byte_for_byte": "PASS",
+    "secret_scan": "PASS",
+    "unit_coverage": [
+      "AES_256_GCM_PORTABLE_VAULT_ROUNDTRIP",
+      "SELF_EXE_RUNTIME_OVERLAY_APPEND_PARSE_SHA256",
+      "RUNTIME_BUNDLE_SECRET_FILE_SANITIZATION"
+    ]
   },
-  "evidence_gap": [
-    "No v0.5.0 source/build was produced or executed in the session that first registered this design.",
-    "No v0.5.0 executable SHA-256 or size may be claimed until a real deterministic build exists.",
-    "No v0.5.0 physical acceptance may be claimed until execution on an authorized second Windows PC plus readback evidence."
-  ],
+  "physical_acceptance": {
+    "base_v0_5_execution_on_source_pc": "PENDING",
+    "portable_single_exe_capture_from_green_source": "PENDING",
+    "second_authorized_windows_pc_install": "PENDING",
+    "listeners_8765_8766_8767_8768_on_second_pc": "PENDING",
+    "windows_real_reboot_persistence": "PENDING",
+    "physical_rollback": "PENDING",
+    "portable_vault_cross_device_synthetic_recovery": "PENDING"
+  },
   "still_pending_before_confirmed_operational_prod": [
-    "implement v0.5.0 source from preserved v0.4.0 baseline",
-    "deterministic Windows amd64 build and secret scan",
-    "execute v0.5.0 on a second authorized Windows PC",
-    "real Windows reboot persistence attestation on that target",
+    "execute base v0.5.0 on the already-GREEN source Windows PC and create the sanitized single-EXE runtime capture",
+    "execute captured portable EXE on a second authorized Windows PC and verify 8765/8766/8767/8768",
+    "real Windows reboot persistence attestation on the target",
     "physical rollback restore test",
-    "portable vault export on source PC and import/re-encrypt on second PC using synthetic credential",
+    "portable vault export on source PC and import/re-encrypt/readback/cleanup on second PC using synthetic credential",
     "EVT74 journal synthetic E2E closeout",
     "fresh IAM Browser/Vault exact-scope attestation",
-    "Tribunal and governed PROD promotion"
+    "Tribunal, backup/rebuild and governed PROD promotion"
   ],
   "trading_access": false,
   "customer_data_required_for_acceptance": false,
