@@ -93,8 +93,9 @@ test('OPERATIVA projects real activity, preserves V0 and exposes the compact com
   await expect(operativa).toBeVisible();
   await expect(operativa.getByRole('heading',{name:'Procesos reales de CEREBRO'})).toBeVisible();
   await expect(operativa.getByText('REAL · GitHub Actions en vivo',{exact:true})).toBeVisible();
-  await expect(operativa.getByText('CEREBRO SEO-001 city execution',{exact:true})).toBeVisible();
-  await expect(operativa.getByText('CEREBRO FACT-001 build',{exact:true})).toBeVisible();
+  const processList=operativa.locator('.cerebro-process-list');
+  await expect(processList.getByText('CEREBRO SEO-001 city execution',{exact:true})).toBeVisible();
+  await expect(processList.getByText('CEREBRO FACT-001 build',{exact:true})).toBeVisible();
   await expect(operativa.getByText('Estimación aún no disponible',{exact:true}).first()).toBeVisible();
   await expect(operativa.getByText('Sin % fiable',{exact:true})).toBeVisible();
   await expect(operativa.getByText('Sin datos ficticios',{exact:true})).toBeVisible();
