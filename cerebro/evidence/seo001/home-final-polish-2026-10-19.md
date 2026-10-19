@@ -34,9 +34,14 @@ CEREBRO Pro-Free Compatibility V0 v0.1.4-preprod backup was refreshed on 2026-10
 
 Final focused home review workflow:
 `CEREBRO Fenix STAGING Home Final Review`
-Run: 39216846044
-Latest job: 117945337748
-Conclusion: SUCCESS
+
+Latest source-context diagnostic:
+- Commit: `46b71946afb839a34f5a47851a5fd0ea886afe47`
+- Run: `39218795218`
+- Job: `117948931270`
+- Conclusion: SUCCESS
+- Artifact: `12171006716`
+- Artifact SHA256: `e2668dd2001776ddce8ef388a0aac06ffaadbf3545b4733419c2464c6062362f`
 
 Validated widths: 390, 768, 1440 px.
 - HTTP 200 at all widths.
@@ -48,10 +53,25 @@ Validated widths: 390, 768, 1440 px.
 
 ## PARCIAL / BLOCKER BEFORE CLAIMING 100% READY FOR PROD
 
-Desktop fallback header still renders an `Inicio` menu item. The source is the active `CEREBRO Pro-Free Compatibility V0` v0.1.4-preprod fallback header, not the native WordPress/Astra menu. The current safe WordPress connector does not expose plugin-source edit capability, so this item has not been hidden with CSS/JS or changed blindly.
+Desktop fallback header still renders one redundant `Inicio` item.
 
-Do not mark the presentation layer as 100% final until `Inicio` is removed through the source/plugin path and the header is re-tested.
+Live DOM source was pinned by CI, not inferred:
+- Header class: `cerebro-pf-header`
+- Nav id: `cerebro-pf-nav`
+- Nav class: `cerebro-pf-nav`
+- First item: `<a href="https://staging.fenixcapital.es/">Inicio</a>`
+- Remaining navigation: Hipotecas dropdown, Servicios dropdown, Quiénes somos, Blog, Contacto and `Calculadora Hipotecaria` CTA.
+
+The generator is the active `CEREBRO Pro-Free Compatibility V0` v0.1.4-preprod fallback header (`cerebro_profree_header()`), not the native WordPress/Astra menu.
+
+Safe-source rule: remove only the first hardcoded `Inicio` anchor from the plugin source; preserve logo, dropdowns, all remaining links, CTA, responsive behavior and Pro-Free fallback contract.
+
+Current authenticated WordPress connector can back up/restore the plugin and manage activation, but does not expose plugin-source edit/write. The authenticated browser role explicitly returns `Lo siento, no tienes permisos para acceder a esta página.` for `wp-admin/plugin-editor.php`. Cowboy/WPVibe file routes are unavailable and must not be used as a workaround. Therefore no CSS/JS concealment, Astra/theme hack or blind plugin reconstruction has been applied.
+
+Do not mark the presentation layer as 100% final until the source-level single-link deletion is physically applied and re-tested.
 
 ## PROD CUTOVER NOTES
 
 STAGING intentionally remains `noindex,nofollow`. Canonical/self-canonical and indexability must be verified/switched as part of the controlled PROD promotion, not by changing STAGING protection now.
+
+PROD remains untouched and promotion remains closed while the presentation blocker above is open.
