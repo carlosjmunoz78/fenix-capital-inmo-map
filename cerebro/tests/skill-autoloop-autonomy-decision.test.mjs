@@ -1,62 +1,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {buildAutoloopAutonomyDecision} from '../skills/skill-autoloop-autonomy-decision.mjs';
+import {buildAutoloopAutonomyDecision,buildSafeHandlerReconciliation} from '../skills/skill-autoloop-autonomy-decision.mjs';
 
 function green(bindings=['SEO-001']){
   const id='skill-x';
-  return {
-    selection:{selected:{candidate_id:id,engine_bindings:bindings}},
-    wrappers:{plans:[{candidate_id:id,enabled:false,execution_authorized:false,install_authorized:false,prod_authorized:false,engine_bindings:bindings,permissions:{network:false,filesystem_read:false,filesystem_write:false,credentials:false,external_actions:false,prod_write:false,trading_access:false},economics:{additional_cost_target_eur:0},provenance:{upstream_head_commit:'abcdef1234567890'}}]},
-    manifests:{results:[{candidate_id:id,upstream_head_commit:'abcdef1234567890'}]},
-    staticLab:{results:[{candidate_id:id,status:'STATIC_LAB_GREEN_FOR_BEHAVIORAL_EVAL',hard_blocks:[],policy_alignment_score:100}]},
-    licenses:{results:[{candidate_id:id,status:'EXACT_LICENSE_FILE_EVIDENCE',metadata_matches_detected:true}]},
-    behavioral:{status:'PROXY_COMPLETE',results:[{candidate_id:id,decision:'PASS'}]},
-    tribunal:{decision:'GREEN',green:true,candidates:[{candidate_id:id,decision:'GREEN'}]},
-    rollback:{ready:true,status:'GREEN_ROLLBACK_REBUILD_PROOF'},
-    readiness:{ready:true,status:'READY_FOR_PREPROD_PROMOTION_REVIEW',autonomous_preprod_decision_authorized:true,blockers:[]},
-    runId:'42'
-  };
+  return {selection:{selected:{candidate_id:id,engine_bindings:bindings}},wrappers:{plans:[{candidate_id:id,enabled:false,execution_authorized:false,install_authorized:false,prod_authorized:false,engine_bindings:bindings,permissions:{network:false,filesystem_read:false,filesystem_write:false,credentials:false,external_actions:false,prod_write:false,trading_access:false},economics:{additional_cost_target_eur:0},provenance:{upstream_head_commit:'abcdef1234567890'}}]},manifests:{results:[{candidate_id:id,upstream_head_commit:'abcdef1234567890'}]},staticLab:{results:[{candidate_id:id,status:'STATIC_LAB_GREEN_FOR_BEHAVIORAL_EVAL',hard_blocks:[],policy_alignment_score:100}]},licenses:{results:[{candidate_id:id,status:'EXACT_LICENSE_FILE_EVIDENCE',metadata_matches_detected:true}]},behavioral:{status:'PROXY_COMPLETE',results:[{candidate_id:id,decision:'PASS'}]},tribunal:{decision:'GREEN',green:true,candidates:[{candidate_id:id,decision:'GREEN'}]},rollback:{ready:true,status:'GREEN_ROLLBACK_REBUILD_PROOF'},readiness:{ready:true,status:'READY_FOR_PREPROD_PROMOTION_REVIEW',autonomous_preprod_decision_authorized:true,blockers:[]},runId:'42'};
 }
 
-test('green evidence with an existing engine binding becomes ENVOLVER without physical activation claim',()=>{
-  const out=buildAutoloopAutonomyDecision(green());
-  assert.equal(out.decision,'ENVOLVER');
-  assert.deepEqual(out.existing_engine_bindings,['SEO-001']);
-  assert.equal(out.preprod_internal_wrapper_activation_authorized,false);
-  assert.equal(out.next_gate,'INTERNAL_WRAPPER_REQUIRED');
-  assert.equal(out.human_required,null);
-  assert.equal(out.prod_authorized,false);
-  assert.equal(out.trading_access,false);
-});
-
-test('green zero-cost capability gap becomes FACT-001 candidate only',()=>{
-  const out=buildAutoloopAutonomyDecision(green([]));
-  assert.equal(out.decision,'FABRICAR_GRATIS');
-  assert.equal(out.factory_candidate_authorized,true);
-  assert.equal(out.factory_create_authorized,false);
-  assert.equal(out.additional_cost_eur,0);
-});
-
-test('incomplete technical evidence becomes HOLD without manufacturing a human exception',()=>{
-  const input=green();
-  input.readiness={ready:false,status:'NOT_READY',autonomous_preprod_decision_authorized:false,blockers:['TRIBUNAL_NOT_GREEN']};
-  const out=buildAutoloopAutonomyDecision(input);
-  assert.equal(out.decision,'HOLD');
-  assert.equal(out.human_required,null);
-  assert.equal(out.prod_authorized,false);
-});
-
-test('candidate evidence mismatch fails closed',()=>{
-  const input=green();
-  input.manifests.results[0].candidate_id='other';
-  assert.throws(()=>buildAutoloopAutonomyDecision(input),/candidate evidence mismatch/);
-});
-
-test('unsafe wrapper prevents green autonomous disposition',()=>{
-  const input=green();
-  input.wrappers.plans[0].permissions.network=true;
-  const out=buildAutoloopAutonomyDecision(input);
-  assert.equal(out.decision,'HOLD');
-  assert.equal(out.human_required,null);
-  assert.equal(out.prod_authorized,false);
-});
+test('green evidence with an existing engine binding becomes ENVOLVER without physical activation claim',()=>{const out=buildAutoloopAutonomyDecision(green());assert.equal(out.decision,'ENVOLVER');assert.deepEqual(out.existing_engine_bindings,['SEO-001']);assert.equal(out.preprod_internal_wrapper_activation_authorized,false);assert.equal(out.next_gate,'INTERNAL_WRAPPER_REQUIRED');assert.equal(out.human_required,null);assert.equal(out.prod_authorized,false);assert.equal(out.trading_access,false);});
+test('green zero-cost capability gap becomes FACT-001 candidate only',()=>{const out=buildAutoloopAutonomyDecision(green([]));assert.equal(out.decision,'FABRICAR_GRATIS');assert.equal(out.factory_candidate_authorized,true);assert.equal(out.factory_create_authorized,false);assert.equal(out.additional_cost_eur,0);});
+test('incomplete technical evidence becomes HOLD without manufacturing a human exception',()=>{const input=green();input.readiness={ready:false,status:'NOT_READY',autonomous_preprod_decision_authorized:false,blockers:['TRIBUNAL_NOT_GREEN']};const out=buildAutoloopAutonomyDecision(input);assert.equal(out.decision,'HOLD');assert.equal(out.human_required,null);assert.equal(out.prod_authorized,false);});
+test('candidate evidence mismatch fails closed',()=>{const input=green();input.manifests.results[0].candidate_id='other';assert.throws(()=>buildAutoloopAutonomyDecision(input),/candidate evidence mismatch/);});
+test('unsafe wrapper prevents green autonomous disposition',()=>{const input=green();input.wrappers.plans[0].permissions.network=true;const out=buildAutoloopAutonomyDecision(input);assert.equal(out.decision,'HOLD');assert.equal(out.human_required,null);assert.equal(out.prod_authorized,false);});
+test('canonical decision maps to safe-handler outcome instead of leaking disposition as workflow outcome',()=>{const decision=buildAutoloopAutonomyDecision(green([]));const r=buildSafeHandlerReconciliation(decision);assert.equal(r.outcome,'AUTONOMOUS_PREPROD_DECISION');assert.equal(r.decision,'FABRICAR_GRATIS');assert.equal(r.human_required,null);assert.ok(r.decision_id.startsWith('skill-autonomy:'));});
+test('non-human HOLD remains autonomous PREPROD decision and does not manufacture HUMAN_REQUIRED',()=>{const input=green();input.readiness={ready:false,status:'NOT_READY',autonomous_preprod_decision_authorized:false,blockers:['TRIBUNAL_NOT_GREEN']};const decision=buildAutoloopAutonomyDecision(input);const r=buildSafeHandlerReconciliation(decision);assert.equal(decision.decision,'HOLD');assert.equal(r.outcome,'AUTONOMOUS_PREPROD_DECISION');assert.equal(r.human_required,null);});
