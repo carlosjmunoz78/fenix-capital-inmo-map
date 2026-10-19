@@ -4,14 +4,22 @@ on:
   pull_request:
     paths:
       - 'cerebro/platform/auto001-preprod-patch-planner-v0.mjs'
+      - 'cerebro/platform/incident-root-cause-escalator-v0.mjs'
       - 'cerebro/platform/patch-transforms/**'
       - 'cerebro/qa/auto001-repair-validator-v0.mjs'
       - 'cerebro/governance/auto001-repair-tribunal-v0.mjs'
       - 'cerebro/governance/qa-promotion-readiness-v0.mjs'
       - 'cerebro/registry/rsi-domain-autonomy-policies.v0.json'
+      - 'cerebro/tests/incident-root-cause-escalator-v0.test.mjs'
       - 'cerebro/tests/auto001-preprod-patch-executor-v0.test.mjs'
       - 'cerebro/tests/auto001-repair-validation-v0.test.mjs'
       - 'cerebro/tests/qa-promotion-readiness-v0.test.mjs'
+      - '.github/workflows/cerebro-auto001-preprod-patch-executor-v0.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'cerebro/platform/incident-root-cause-escalator-v0.mjs'
+      - 'cerebro/tests/incident-root-cause-escalator-v0.test.mjs'
       - '.github/workflows/cerebro-auto001-preprod-patch-executor-v0.yml'
   workflow_run:
     workflows: ['CEREBRO QA Source Mapping V0']
@@ -33,8 +41,29 @@ env:
   AUTO_REPAIR_STATE_PATH: cerebro/runtime/auto001-repair-autonomy-state.v0.json
 
 jobs:
+  anti-loop-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Prove repeated-failure escalation and repair envelope
+        run: node --test cerebro/tests/incident-root-cause-escalator-v0.test.mjs
+      - name: Prove canonical edgesOut incident escalates to repair instead of retry loop
+        run: |
+          node --input-type=module <<'NODE'
+          import {decideIncidentAction} from './cerebro/platform/incident-root-cause-escalator-v0.mjs';
+          const f={workflow:'CEREBRO Skill AutoLoop Safe Handler V0',job:'safe-handler',step:'Install pinned zero-cost OSS inference runtime without install scripts',error:"Cannot read properties of null (reading 'edgesOut')",environment:'PREPROD'};
+          const repair={bounded:true,reversible:true,preprod_only:true,tests_defined:true,rollback_defined:true,additional_cost_eur:0,prod_write:false,permission_expansion:false,gate_relaxation:false};
+          const d=decideIncidentAction({current:f,history:[f],proposedRepair:repair});
+          if(d.state!=='ROOT_CAUSE_REPAIR_READY'||d.retry_authorized!==false||d.repair_authorized!==true||d.prod_authorized!==false) throw new Error(JSON.stringify(d));
+          console.log(JSON.stringify(d));
+          NODE
+
   executor:
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    if: github.event_name != 'push' && (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
     runs-on: ubuntu-latest
     timeout-minutes: 18
     steps:
@@ -45,9 +74,10 @@ jobs:
         with:
           node-version: 24
           cache: npm
-      - name: Prove AUTO-001 executor validation tribunal and promotion contracts
+      - name: Prove AUTO-001 executor validation tribunal promotion and anti-loop contracts
         run: >-
           node --test
+          cerebro/tests/incident-root-cause-escalator-v0.test.mjs
           cerebro/tests/auto001-preprod-patch-executor-v0.test.mjs
           cerebro/tests/auto001-repair-validation-v0.test.mjs
           cerebro/tests/qa-promotion-readiness-v0.test.mjs
@@ -103,26 +133,15 @@ jobs:
           set -euo pipefail
           npm ci
           npm run build
-          node --test cerebro/tests/auto001-preprod-patch-executor-v0.test.mjs cerebro/tests/auto001-repair-validation-v0.test.mjs cerebro/tests/qa-promotion-readiness-v0.test.mjs
+          node --test cerebro/tests/incident-root-cause-escalator-v0.test.mjs cerebro/tests/auto001-preprod-patch-executor-v0.test.mjs cerebro/tests/auto001-repair-validation-v0.test.mjs cerebro/tests/qa-promotion-readiness-v0.test.mjs
       - name: Prove OLD vs NEW rebuild rollback and independent tribunal before any push
         if: github.event_name != 'pull_request' && steps.plan.outputs.status == 'PATCH_PLAN_READY' && steps.patch.outputs.existing != 'true'
         run: |
           set -euo pipefail
           BASE_SHA="$(jq -r '.base_sha' artifacts/auto001/plan.json)"
-          node cerebro/qa/auto001-repair-validator-v0.mjs \
-            --base artifacts/auto001/base-App.tsx \
-            --candidate artifacts/auto001/candidate-App.tsx \
-            --base-sha "$BASE_SHA" \
-            --head-sha 'UNPUSHED_CERTIFIED_CANDIDATE' \
-            --out artifacts/auto001/validation.json
+          node cerebro/qa/auto001-repair-validator-v0.mjs --base artifacts/auto001/base-App.tsx --candidate artifacts/auto001/candidate-App.tsx --base-sha "$BASE_SHA" --head-sha 'UNPUSHED_CERTIFIED_CANDIDATE' --out artifacts/auto001/validation.json
           jq -e '.status=="VALIDATION_GREEN" and .old_vs_new.old==0 and .old_vs_new.new==2 and .old_vs_new.improved==true and .regression.passed==true and .rebuild.passed==true and .rollback.passed==true and .promotion_authorized==false and .auto_merge==false' artifacts/auto001/validation.json >/dev/null
-          node cerebro/governance/auto001-repair-tribunal-v0.mjs \
-            --validation artifacts/auto001/validation.json \
-            --build-green true \
-            --tests-green true \
-            --diff-files '${{ steps.patch.outputs.changed }}' \
-            --diff-line-delta '${{ steps.patch.outputs.delta }}' \
-            --out artifacts/auto001/tribunal.json
+          node cerebro/governance/auto001-repair-tribunal-v0.mjs --validation artifacts/auto001/validation.json --build-green true --tests-green true --diff-files '${{ steps.patch.outputs.changed }}' --diff-line-delta '${{ steps.patch.outputs.delta }}' --out artifacts/auto001/tribunal.json
           jq -e '.status=="APPROVE_PREPROD_PATCH" and .approved==true and .authority.merge_authorized==false and .authority.promotion_authorized==false and .authority.prod_authorized==false and .authority.prod_write_authorized==false and .safety.additional_subscription_eur==0' artifacts/auto001/tribunal.json >/dev/null
       - name: Commit tribunal-approved snapshot-bound patch and attempt governed repair PR
         if: github.event_name != 'pull_request' && steps.plan.outputs.status == 'PATCH_PLAN_READY' && steps.patch.outputs.existing != 'true'
@@ -130,63 +149,29 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          PLAN='artifacts/auto001/plan.json'
-          BRANCH="$(jq -r '.branch_name' "$PLAN")"
-          PLAN_ID="$(jq -r '.plan_id' "$PLAN")"
-          BASE_SHA="$(jq -r '.base_sha' "$PLAN")"
-          git config user.name 'cerebro-auto001[bot]'
-          git config user.email 'cerebro-auto001[bot]@users.noreply.github.com'
-          git add src/App.tsx
-          git commit -m "fix(AUTO-001): certified HCI main landmark patch"
-          git push origin "HEAD:refs/heads/$BRANCH"
+          PLAN='artifacts/auto001/plan.json'; BRANCH="$(jq -r '.branch_name' "$PLAN")"; PLAN_ID="$(jq -r '.plan_id' "$PLAN")"; BASE_SHA="$(jq -r '.base_sha' "$PLAN")"
+          git config user.name 'cerebro-auto001[bot]'; git config user.email 'cerebro-auto001[bot]@users.noreply.github.com'
+          git add src/App.tsx; git commit -m "fix(AUTO-001): certified HCI main landmark patch"; git push origin "HEAD:refs/heads/$BRANCH"
           PR_STATUS='ALREADY_OPEN'
           if gh pr list --repo "$GITHUB_REPOSITORY" --head "$BRANCH" --state open --json number --jq 'length' | grep -qx '0'; then
             set +e
-            gh pr create --repo "$GITHUB_REPOSITORY" --base main --head "$BRANCH" \
-              --title 'AUTO-001: certified PREPROD HCI main landmark repair' \
-              --body "Automated bounded PREPROD repair from $PLAN_ID. Base snapshot: $BASE_SHA. Certified transform: APP_AUTH_SHELL_ROLE_MAIN_V0. Files changed: src/App.tsx only. Build, OLD vs NEW, regression, rebuild, rollback and independent tribunal passed before push. No PROD write, no customer data, no Trading, cost 0€. AUTO-MERGE DISABLED. Remaining gate: governed promotion." \
-              > artifacts/auto001/pr-create.stdout 2> artifacts/auto001/pr-create.stderr
-            RC=$?
-            set -e
-            if [ "$RC" -eq 0 ]; then
-              PR_STATUS='OPENED_AUTONOMOUSLY'
-            elif grep -F 'GitHub Actions is not permitted to create or approve pull requests' artifacts/auto001/pr-create.stderr >/dev/null; then
-              PR_STATUS='BLOCKED_REPOSITORY_ACTIONS_POLICY'
-            else
-              cat artifacts/auto001/pr-create.stderr >&2
-              exit "$RC"
-            fi
+            gh pr create --repo "$GITHUB_REPOSITORY" --base main --head "$BRANCH" --title 'AUTO-001: certified PREPROD HCI main landmark repair' --body "Automated bounded PREPROD repair from $PLAN_ID. Base snapshot: $BASE_SHA. Build, OLD vs NEW, regression, rebuild, rollback and tribunal passed. No PROD/customer data/Trading/cost. AUTO-MERGE DISABLED." > artifacts/auto001/pr-create.stdout 2> artifacts/auto001/pr-create.stderr
+            RC=$?; set -e
+            if [ "$RC" -eq 0 ]; then PR_STATUS='OPENED_AUTONOMOUSLY'; elif grep -F 'GitHub Actions is not permitted to create or approve pull requests' artifacts/auto001/pr-create.stderr >/dev/null; then PR_STATUS='BLOCKED_REPOSITORY_ACTIONS_POLICY'; else cat artifacts/auto001/pr-create.stderr >&2; exit "$RC"; fi
           fi
-          jq -n \
-            --arg status "$PR_STATUS" \
-            --arg branch "$BRANCH" \
-            --arg plan_id "$PLAN_ID" \
-            --arg base_sha "$BASE_SHA" \
-            '{state_type:"CEREBRO_AUTO001_PR_HANDOFF_V0",status:$status,branch:$branch,plan_id:$plan_id,base_sha:$base_sha,preprod_patch_validated:true,tribunal_approved:true,auto_merge:false,promotion_authorized:false,prod_authorized:false,prod_write_authorized:false,customer_data:false,trading_access:false,additional_cost_eur:0}' \
-            > artifacts/auto001/pr-handoff.json
-          cat artifacts/auto001/pr-handoff.json
+          jq -n --arg status "$PR_STATUS" --arg branch "$BRANCH" --arg plan_id "$PLAN_ID" --arg base_sha "$BASE_SHA" '{state_type:"CEREBRO_AUTO001_PR_HANDOFF_V0",status:$status,branch:$branch,plan_id:$plan_id,base_sha:$base_sha,preprod_patch_validated:true,tribunal_approved:true,auto_merge:false,promotion_authorized:false,prod_authorized:false,prod_write_authorized:false,customer_data:false,trading_access:false,additional_cost_eur:0}' > artifacts/auto001/pr-handoff.json
       - name: Evaluate promotion readiness against current domain policy
         if: github.event_name != 'pull_request' && steps.plan.outputs.status == 'PATCH_PLAN_READY' && steps.patch.outputs.existing != 'true'
         run: |
-          set -euo pipefail
-          node cerebro/governance/qa-promotion-readiness-v0.mjs \
-            --tribunal artifacts/auto001/tribunal.json \
-            --pr-handoff artifacts/auto001/pr-handoff.json \
-            --policies cerebro/registry/rsi-domain-autonomy-policies.v0.json \
-            --out artifacts/auto001/promotion-readiness.json
+          node cerebro/governance/qa-promotion-readiness-v0.mjs --tribunal artifacts/auto001/tribunal.json --pr-handoff artifacts/auto001/pr-handoff.json --policies cerebro/registry/rsi-domain-autonomy-policies.v0.json --out artifacts/auto001/promotion-readiness.json
           jq -e '.authority.merge_authorized==false and .authority.promotion_authorized==false and .authority.prod_authorized==false and .authority.prod_write_authorized==false and .safety.prod_write==false and .safety.additional_subscription_eur==0' artifacts/auto001/promotion-readiness.json >/dev/null
-          jq '{status,human_required,blockers,evidence,next_gate}' artifacts/auto001/promotion-readiness.json
       - name: Build canonical AUTO repair autonomy state
         if: github.event_name != 'pull_request' && steps.plan.outputs.status == 'PATCH_PLAN_READY' && steps.patch.outputs.existing != 'true'
         run: |
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
-          const plan=JSON.parse(fs.readFileSync('artifacts/auto001/plan.json','utf8'));
-          const validation=JSON.parse(fs.readFileSync('artifacts/auto001/validation.json','utf8'));
-          const tribunal=JSON.parse(fs.readFileSync('artifacts/auto001/tribunal.json','utf8'));
-          const handoff=JSON.parse(fs.readFileSync('artifacts/auto001/pr-handoff.json','utf8'));
-          const readiness=JSON.parse(fs.readFileSync('artifacts/auto001/promotion-readiness.json','utf8'));
-          const state={schema_version:'0.1.0',state_type:'CEREBRO_AUTO001_REPAIR_AUTONOMY_STATE_V0',company_id:'fenix',engine_id:'AUTO-001',environment:'PREPROD_CONTROL_PLANE',version:'0.1.0',updated_at:new Date().toISOString(),plan_id:plan.plan_id,branch:handoff.branch,base_sha:plan.base_sha,transform_id:plan.transform_id,owner_engine:plan.owner_engine,target:plan.target,preprod_patch_validated:validation.status==='VALIDATION_GREEN',old_vs_new:validation.old_vs_new,regression_passed:validation.regression?.passed===true,rebuild_passed:validation.rebuild?.passed===true,rollback_passed:validation.rollback?.passed===true,tribunal_approved:tribunal.approved===true,tribunal_status:tribunal.status,pr_handoff_status:handoff.status,promotion_readiness:readiness,authority:{auto_merge:false,promotion_authorized:false,prod_authorized:false,prod_write_authorized:false},safety:{prod_write:false,customer_data:false,trading:false,paid_fallback:false,additional_subscription_eur:0}};
+          const plan=JSON.parse(fs.readFileSync('artifacts/auto001/plan.json','utf8')), validation=JSON.parse(fs.readFileSync('artifacts/auto001/validation.json','utf8')), tribunal=JSON.parse(fs.readFileSync('artifacts/auto001/tribunal.json','utf8')), handoff=JSON.parse(fs.readFileSync('artifacts/auto001/pr-handoff.json','utf8')), readiness=JSON.parse(fs.readFileSync('artifacts/auto001/promotion-readiness.json','utf8'));
+          const state={schema_version:'0.2.0',state_type:'CEREBRO_AUTO001_REPAIR_AUTONOMY_STATE_V0',company_id:'fenix',engine_id:'AUTO-001',environment:'PREPROD_CONTROL_PLANE',version:'0.2.0',updated_at:new Date().toISOString(),plan_id:plan.plan_id,branch:handoff.branch,base_sha:plan.base_sha,transform_id:plan.transform_id,owner_engine:plan.owner_engine,target:plan.target,preprod_patch_validated:validation.status==='VALIDATION_GREEN',old_vs_new:validation.old_vs_new,regression_passed:validation.regression?.passed===true,rebuild_passed:validation.rebuild?.passed===true,rollback_passed:validation.rollback?.passed===true,tribunal_approved:tribunal.approved===true,tribunal_status:tribunal.status,pr_handoff_status:handoff.status,promotion_readiness:readiness,anti_loop_root_cause_escalation:true,authority:{auto_merge:false,promotion_authorized:false,prod_authorized:false,prod_write_authorized:false},safety:{prod_write:false,customer_data:false,trading:false,paid_fallback:false,additional_subscription_eur:0}};
           fs.writeFileSync('artifacts/auto001/repair-autonomy-state.json',JSON.stringify(state,null,2)+'\n');
           NODE
       - name: Persist AUTO repair evidence on dedicated QA state branch
@@ -194,21 +179,13 @@ jobs:
         run: |
           set -euo pipefail
           cp artifacts/auto001/repair-autonomy-state.json /tmp/auto-repair-state.json
-          git config user.name 'cerebro-auto001[bot]'
-          git config user.email 'cerebro-auto001[bot]@users.noreply.github.com'
+          git config user.name 'cerebro-auto001[bot]'; git config user.email 'cerebro-auto001[bot]@users.noreply.github.com'
           for attempt in 1 2 3 4 5; do
-            git fetch --no-tags --force origin "+refs/heads/$QA_STATE_BRANCH:refs/remotes/origin/$QA_STATE_BRANCH"
-            git checkout --detach "refs/remotes/origin/$QA_STATE_BRANCH"
-            mkdir -p "$(dirname "$AUTO_REPAIR_STATE_PATH")"
-            cp /tmp/auto-repair-state.json "$AUTO_REPAIR_STATE_PATH"
-            git add "$AUTO_REPAIR_STATE_PATH"
-            if git diff --cached --quiet; then
-              echo 'AUTO repair evidence already current.'
-              exit 0
-            fi
+            git fetch --no-tags --force origin "+refs/heads/$QA_STATE_BRANCH:refs/remotes/origin/$QA_STATE_BRANCH"; git checkout --detach "refs/remotes/origin/$QA_STATE_BRANCH"
+            mkdir -p "$(dirname "$AUTO_REPAIR_STATE_PATH")"; cp /tmp/auto-repair-state.json "$AUTO_REPAIR_STATE_PATH"; git add "$AUTO_REPAIR_STATE_PATH"
+            if git diff --cached --quiet; then exit 0; fi
             git commit -m 'chore(cerebro): persist AUTO-001 repair autonomy evidence'
             if git push origin "HEAD:refs/heads/$QA_STATE_BRANCH"; then exit 0; fi
-            echo "QA state ref moved concurrently; retrying ($attempt/5)."
             sleep "$attempt"
           done
           exit 1
