@@ -42,7 +42,23 @@ jobs:
             if(x.prod_authorized!==false||x.prod_write_authorized!==false||x.trading_access!==false||x.additional_cost_eur!==0) throw new Error(`unsafe authority in ${f}`);
           }
           const evt=JSON.parse(fs.readFileSync(files[0],'utf8'));
-          if(evt.status!=='DEFINED_NOT_APPLIED'||evt.route_discovery_required!==true||evt.grant_constraints.wildcard_routes_allowed!==false) throw new Error('EVT74 grant manifest drift');
+          const expectedEvtRoutes=[
+            'GET /wp-json/cerebro-b3-journal-lab/v1/observe',
+            'POST /wp-json/cerebro-b3-journal-lab/v1/prepare',
+            'POST /wp-json/cerebro-b3-journal-lab/v1/replay',
+            'POST /wp-json/cerebro-b3-journal-lab/v1/claim',
+            'GET /wp-json/cerebro-b3-journal-lab/v1/inspect',
+            'POST /wp-json/cerebro-b3-journal-lab/v1/cleanup'
+          ].sort();
+          const observedEvtRoutes=(evt.discovered_routes||[]).map(r=>`${r.method} ${r.path}`).sort();
+          if(
+            evt.status!=='ROUTES_DISCOVERED_GRANT_NOT_APPLIED'||
+            evt.route_discovery_required!==false||
+            evt.live_route_catalog_attested!==true||
+            evt.human_required!=='POLICY_CONFLICT'||
+            evt.grant_constraints.wildcard_routes_allowed!==false||
+            JSON.stringify(observedEvtRoutes)!==JSON.stringify(expectedEvtRoutes)
+          ) throw new Error('EVT74 grant manifest drift');
           const android=JSON.parse(fs.readFileSync(files[1],'utf8'));
           if(android.status!=='DEFINED_NOT_EXECUTED'||android.source_artifact.artifact_id!==11934097600) throw new Error('Android attestation bundle drift');
           const iam=JSON.parse(fs.readFileSync(files[2],'utf8'));
