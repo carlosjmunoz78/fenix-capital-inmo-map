@@ -1,29 +1,22 @@
 {
-  "schema_version": "1.1.0",
+  "schema_version": "1.2.0",
   "state_type": "CEREBRO_EVT74_EXACT_MINIMUM_GRANT_MANIFEST_V1",
   "engine_id": "EVT-001",
   "environment": "PREPROD",
-  "status": "ROUTES_DISCOVERED_GRANT_NOT_APPLIED",
-  "human_required": "POLICY_CONFLICT",
+  "status": "EXACT_GRANT_APPLIED_RC14_BOOTSTRAP_REQUIRED",
+  "human_required": "LOW_CONFIDENCE",
   "namespace": "cerebro-b3-journal-lab/v1",
   "route_discovery_required": false,
   "live_route_catalog_attested": true,
-  "discovery_source": "STAGING WordPress REST index via designated office Opera session",
-  "discovered_routes": [
-    {"path": "/wp-json/cerebro-b3-journal-lab/v1/observe", "method": "GET", "observed_access": "REST_FORBIDDEN_401"},
-    {"path": "/wp-json/cerebro-b3-journal-lab/v1/prepare", "method": "POST", "observed_access": "NOT_INVOKED_PRE_GRANT"},
-    {"path": "/wp-json/cerebro-b3-journal-lab/v1/replay", "method": "POST", "observed_access": "NOT_INVOKED_PRE_GRANT"},
-    {"path": "/wp-json/cerebro-b3-journal-lab/v1/claim", "method": "POST", "observed_access": "NOT_INVOKED_PRE_GRANT"},
-    {"path": "/wp-json/cerebro-b3-journal-lab/v1/inspect", "method": "GET", "observed_access": "REST_FORBIDDEN_401"},
-    {"path": "/wp-json/cerebro-b3-journal-lab/v1/cleanup", "method": "POST", "observed_access": "NOT_INVOKED_PRE_GRANT"}
-  ],
-  "exact_route_allowlist_candidate": [
-    "GET /wp-json/cerebro-b3-journal-lab/v1/observe",
-    "POST /wp-json/cerebro-b3-journal-lab/v1/prepare",
-    "POST /wp-json/cerebro-b3-journal-lab/v1/replay",
-    "POST /wp-json/cerebro-b3-journal-lab/v1/claim",
-    "GET /wp-json/cerebro-b3-journal-lab/v1/inspect",
-    "POST /wp-json/cerebro-b3-journal-lab/v1/cleanup"
+  "exact_grant_applied": true,
+  "grant_verified_via": "STAGING Secure MCP Server rest-list-routes",
+  "granted_routes": [
+    {"path": "/wp-json/cerebro-b3-journal-lab/v1/observe", "method": "GET", "live_access": "HTTP_200_READINESS"},
+    {"path": "/wp-json/cerebro-b3-journal-lab/v1/prepare", "method": "POST", "live_access": "GRANTED_ENDPOINT_EXECUTION_FAILS_UNDER_RC12"},
+    {"path": "/wp-json/cerebro-b3-journal-lab/v1/replay", "method": "POST", "live_access": "GRANTED_PENDING_SYNTHETIC_E2E"},
+    {"path": "/wp-json/cerebro-b3-journal-lab/v1/claim", "method": "POST", "live_access": "GRANTED_PENDING_SYNTHETIC_E2E"},
+    {"path": "/wp-json/cerebro-b3-journal-lab/v1/inspect", "method": "GET", "live_access": "GRANTED_NO_PREPARED_RECORD"},
+    {"path": "/wp-json/cerebro-b3-journal-lab/v1/cleanup", "method": "POST", "live_access": "GRANTED_PENDING_SYNTHETIC_E2E"}
   ],
   "grant_strategy": "EXACT_ALLOWLIST_ONLY",
   "required_semantics": [
@@ -35,7 +28,39 @@
     "SYNTHETIC_CLEANUP",
     "NO_SIDE_EFFECT_VERIFY"
   ],
-  "semantic_mapping_state": "ROUTE_NAMES_AND_METHODS_ATTESTED; BEHAVIORAL_MAPPING_PENDING_AUTHORIZED_GRANT_AND_SYNTHETIC_E2E",
+  "live_preprod_evidence": {
+    "observe_http_200": true,
+    "sources_sha256_match": true,
+    "innodb_unique_index": true,
+    "writes_performed_at_readiness": false,
+    "publication_allowed": false,
+    "deployment_certified": false,
+    "core_guard_live_version": "1.0.0-rc12",
+    "core_guard_mode_restored": "observer",
+    "core_guard_operations_gate_restored": false,
+    "manual_gate_apply_probe_performed": true,
+    "prepare_still_failed_with_gate_and_apply": true,
+    "failure_classification": "RC12_LACKS_EVT74_ONE_SHOT_COMPANION_AND_PREPROD_RELEASE_RECEIVER"
+  },
+  "rc14_candidate": {
+    "version": "1.0.0-rc14",
+    "commit": "1ffb1c08f5bbd99e3cc6d605d68a5ac774714164",
+    "quality_gate": "GREEN",
+    "preprod_release_workflow": "GREEN",
+    "release_asset": "fenix-core-guard-1.0.0-rc14-bootstrap.zip",
+    "release_asset_sha256": "67ffcd28940fe339891f19f2e8751a23c065bc0699b769f70f3fb0ecf9a254ae",
+    "evt74_one_shot_companion_included": true,
+    "finally_restores_observer_and_closes_gate": true,
+    "oidc_receiver_included": true,
+    "staging_deployment_state": "BOOTSTRAP_REQUIRED_FROM_RC12",
+    "receiver_probe_http": 404
+  },
+  "backup_before_bootstrap": {
+    "plugin": "fenix-core-guard/fenix-core-guard.php",
+    "version": "1.0.0-rc12",
+    "sha256": "3f4e7267cc8602c6c6324c33f18b0cbb943f4ebb5f805ab36ff3ab0001df2674",
+    "path_exposed": false
+  },
   "grant_constraints": {
     "namespace_exact_match_required": true,
     "allowed_environments": ["LAB", "PREPROD"],
@@ -47,26 +72,22 @@
     "secret_values_in_policy": false,
     "additional_cost_eur": 0
   },
-  "application_preconditions": [
-    "LIVE_ROUTE_CATALOG_ATTESTED",
-    "EXACT_METHOD_AND_PATH_ALLOWLIST_RECORDED",
-    "AUTHORIZED_POLICY_SURFACE_AVAILABLE",
-    "NEGATIVE_SCOPE_TESTS_PASS",
-    "ROLLBACK_REVOKE_SET_PREPARED"
-  ],
-  "post_grant_acceptance": [
-    "SYNTHETIC_BROWSER_TO_JOURNAL_WRITE",
+  "post_bootstrap_acceptance": [
+    "VERIFY_LIVE_CORE_GUARD_RC14",
+    "DISCOVER_EVT74_SYNTHETIC_TRANSACTION_ABILITY",
+    "RUN_ONE_SHOT_SYNTHETIC_TRANSACTION",
     "SEMANTIC_READBACK",
     "IDEMPOTENT_REPLAY_NO_DUPLICATE",
     "CLEANUP_SYNTHETIC_RECORD",
+    "VERIFY_OBSERVER_AND_GATE_CLOSED",
     "VERIFY_NO_CUSTOMER_OR_PROD_SIDE_EFFECT",
     "REFRESH_IAM_BROWSER_VAULT_ATTESTATION"
   ],
-  "rollback": "Revoke only the exact six newly granted journal route/method pairs and re-run inspect/observe negative-scope checks.",
+  "rollback": "RC12 exact plugin backup retained before bootstrap; after RC14, autonomous receiver owns backup/snapshot/verify/rollback for future PREPROD releases.",
   "prod_authorized": false,
   "prod_write_authorized": false,
   "auto_merge_authorized": false,
   "trading_access": false,
   "additional_cost_eur": 0,
-  "next_gate": "APPLY_EXACT_SIX_ROUTE_GRANT_AT_AUTHORIZED_POLICY_SURFACE_THEN_SYNTHETIC_E2E"
+  "next_gate": "ONE_TIME_PHYSICAL_RC12_TO_RC14_BOOTSTRAP_ON_STAGING_THEN_EVT74_ONE_SHOT_E2E"
 }
