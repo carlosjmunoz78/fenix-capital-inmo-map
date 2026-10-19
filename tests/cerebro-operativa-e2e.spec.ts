@@ -17,7 +17,7 @@ const corsHeaders={
   'content-type':'application/json'
 };
 
-test('OPERATIVA reuses the authenticated V0 core and preserves reversible state',async({page})=>{
+test('OPERATIVA projects real activity, preserves V0 and exposes the compact command bar',async({page})=>{
   test.setTimeout(20_000);
   let postedChat:any=null;
 
@@ -26,6 +26,21 @@ test('OPERATIVA reuses the authenticated V0 core and preserves reversible state'
     localStorage.setItem('fenix-remember-device','true');
     sessionStorage.setItem('fenix-session-active','1');
     sessionStorage.setItem('cerebro_console_view_v1','OPERATIVA');
+    class FakeRecognition{
+      lang='';continuous=false;interimResults=false;maxAlternatives=1;
+      onstart:any=null;onresult:any=null;onerror:any=null;onend:any=null;
+      start(){
+        this.onstart?.(new Event('start'));
+        setTimeout(()=>{
+          const alternative={transcript:'Dictado operativo',confidence:.96};
+          this.onresult?.({results:{0:{0:alternative,length:1,isFinal:true},length:1}} as any);
+          this.onend?.(new Event('end'));
+        },20);
+      }
+      stop(){this.onend?.(new Event('end'))}
+      abort(){this.onend?.(new Event('end'))}
+    }
+    ;(window as any).SpeechRecognition=FakeRecognition;
   },session);
 
   await page.route('http://127.0.0.1:54321/auth/v1/**',async route=>{
@@ -60,21 +75,47 @@ test('OPERATIVA reuses the authenticated V0 core and preserves reversible state'
     return route.fulfill({status:404,headers:corsHeaders,body:'{}'});
   });
 
+  await page.route('https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-activity-v0/**',async route=>{
+    if(route.request().method()==='OPTIONS')return route.fulfill({status:204,headers:corsHeaders,body:''});
+    return route.fulfill({status:200,headers:corsHeaders,body:JSON.stringify({
+      status:'OK',observed_at:'2026-10-20T18:00:00.000Z',source:'GITHUB_ACTIONS',source_status:'LIVE',repository:'carlosjmunoz78/fenix-capital-inmo-map',
+      runs:[
+        {run_id:101,workflow_name:'CEREBRO SEO-001 city execution',workflow_path:'.github/workflows/cerebro-seo.yml',status:'in_progress',conclusion:null,event:'workflow_dispatch',html_url:'https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/101',created_at:'2026-10-20T17:54:00.000Z',run_started_at:'2026-10-20T17:55:00.000Z',updated_at:'2026-10-20T17:59:00.000Z',engine_id:'SEO-001',company_id:'fenix',environment:'PROD',version:'abc123def456',source:'GITHUB_ACTIONS',provenance:'REAL',company_provenance:'DERIVED_REPOSITORY_SCOPE'},
+        {run_id:102,workflow_name:'CEREBRO FACT-001 build',workflow_path:'.github/workflows/cerebro-fact.yml',status:'queued',conclusion:null,event:'workflow_dispatch',html_url:'https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/102',created_at:'2026-10-20T17:58:00.000Z',run_started_at:null,updated_at:'2026-10-20T17:58:00.000Z',engine_id:'FACT-001',company_id:'fenix',environment:'PREPROD',version:'def456abc123',source:'GITHUB_ACTIONS',provenance:'REAL',company_provenance:'DERIVED_REPOSITORY_SCOPE'},
+        {run_id:100,workflow_name:'CEREBRO JOB-001 worker',workflow_path:'.github/workflows/cerebro-job.yml',status:'completed',conclusion:'success',event:'push',html_url:'https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/100',created_at:'2026-10-20T17:40:00.000Z',run_started_at:'2026-10-20T17:41:00.000Z',updated_at:'2026-10-20T17:47:00.000Z',engine_id:'JOB-001',company_id:'fenix',environment:'PREPROD',version:'456abc123def',source:'GITHUB_ACTIONS',provenance:'REAL',company_provenance:'DERIVED_REPOSITORY_SCOPE'}
+      ]
+    })});
+  });
+
   await page.goto('/cerebro',{waitUntil:'domcontentloaded'});
 
   const operativa=page.locator('.cerebro-operative');
   await expect(operativa).toBeVisible();
-  await expect(operativa.getByRole('heading',{name:'Qué está haciendo CEREBRO'})).toBeVisible();
-  await expect(operativa.getByText('Conectado',{exact:true})).toBeVisible();
-  await expect(operativa.getByText('Sin métrica fiable',{exact:true})).toBeVisible();
+  await expect(operativa.getByRole('heading',{name:'Procesos reales de CEREBRO'})).toBeVisible();
+  await expect(operativa.getByText('REAL · GitHub Actions en vivo',{exact:true})).toBeVisible();
+  const processList=operativa.locator('.cerebro-process-list');
+  await expect(processList.getByText('CEREBRO SEO-001 city execution',{exact:true})).toBeVisible();
+  await expect(processList.getByText('CEREBRO FACT-001 build',{exact:true})).toBeVisible();
+  await expect(operativa.getByText('Estimación aún no disponible',{exact:true}).first()).toBeVisible();
+  await expect(operativa.getByText('Sin % fiable',{exact:true})).toBeVisible();
   await expect(operativa.getByText('Sin datos ficticios',{exact:true})).toBeVisible();
 
   const visibleComposer=operativa.getByRole('textbox',{name:'Escribe una orden para CEREBRO'});
   await expect(visibleComposer).toBeEnabled();
-  await visibleComposer.fill('Prueba E2E Operativa');
-  await operativa.locator('.cerebro-send-button').click();
+  await expect(operativa.getByRole('button',{name:'Adjuntar archivo'})).toBeDisabled();
+  await expect(operativa.getByRole('button',{name:'Dictar'})).toBeEnabled();
+  await expect(operativa.getByRole('button',{name:'Hablar con CEREBRO'})).toBeVisible();
+  await expect(operativa.getByRole('button',{name:'Enviar a CEREBRO'})).toBeVisible();
+  await expect(operativa.locator('.cerebro-composer-actions')).toHaveCount(0);
 
-  await expect.poll(()=>postedChat?.message??null,{timeout:5_000}).toBe('Prueba E2E Operativa');
+  await operativa.getByRole('button',{name:'Dictar'}).click();
+  await expect(visibleComposer).toHaveValue('Dictado operativo');
+  await visibleComposer.press('Shift+Enter');
+  await visibleComposer.type('segunda línea');
+  await expect(visibleComposer).toHaveValue('Dictado operativo\nsegunda línea');
+  await visibleComposer.press('Enter');
+
+  await expect.poll(()=>postedChat?.message??null,{timeout:5_000}).toBe('Dictado operativo\nsegunda línea');
   await expect(operativa.getByText('PONG_OPERATIVA',{exact:true})).toBeVisible();
   await expect(operativa.getByText('DERIVED · evento observado',{exact:true})).toBeVisible();
 
