@@ -6,6 +6,7 @@ import './cerebro-voice-settings.css';
 const VOICE_STORAGE_KEY='cerebro_console_voice_id_v1';
 const SPEED_STORAGE_KEY='cerebro_console_voice_speed_v1';
 type VoiceSpeed='normal'|'fast';
+type CerebroUtterance=SpeechSynthesisUtterance&{__cerebroPreviewVoice?:boolean};
 
 function voiceId(voice:SpeechSynthesisVoice){
  return voice.voiceURI||`${voice.name}:${voice.lang}`;
@@ -40,6 +41,7 @@ function installSpeechPreferenceBridge(){
  const synth=window.speechSynthesis;
  const originalSpeak=synth.speak.bind(synth);
  const bridgedSpeak=(utterance:SpeechSynthesisUtterance)=>{
+  if((utterance as CerebroUtterance).__cerebroPreviewVoice){originalSpeak(utterance);return}
   const voices=spanishVoices();
   const selected=resolveSelectedVoice(voices);
   if(selected){utterance.voice=selected;utterance.lang=selected.lang||'es-ES'}
@@ -112,7 +114,8 @@ export function CerebroVoiceSettings(){
  function preview(voice:SpeechSynthesisVoice){
   if(!speechSynthesisSupported())return;
   window.speechSynthesis.cancel();
-  const utterance=new SpeechSynthesisUtterance('Hola, soy CEREBRO. Esta es mi voz.');
+  const utterance=new SpeechSynthesisUtterance('Hola, soy CEREBRO. Esta es mi voz.') as CerebroUtterance;
+  utterance.__cerebroPreviewVoice=true;
   utterance.voice=voice;
   utterance.lang=voice.lang||'es-ES';
   utterance.rate=speed==='fast'?1.12:1;
