@@ -1,14 +1,14 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "state_type": "CEREBRO_PHYSICAL_ADAPTER_AUDIT_V1",
   "generated_at": "2026-10-17",
   "company_id": "GLOBAL",
   "engine_id": "FACT-001",
   "environment": "PREPROD",
-  "version": "v1",
-  "base_main_sha": "35d045226613eca433d27fbcd69f4095426ad0dc",
-  "status": "AUDITED_NO_BLIND_PHYSICAL_PROMOTION",
-  "purpose": "Reconcile the legacy POR_AUDITAR_PHYSICAL domain buckets from CEREBRO Global Operational Convergence V4 against current-main evidence, separating real physical gaps from intentionally fail-closed side effects and human-exception gates.",
+  "version": "v1.1",
+  "base_main_sha": "4c90f7a120e0a2dd03309efc08ff19a2c651950a",
+  "status": "AUDITED_POST_MULTIMEDIA_INVENTORY_NO_BLIND_PHYSICAL_PROMOTION",
+  "purpose": "Reconcile the legacy POR_AUDITAR_PHYSICAL domain buckets from CEREBRO Global Operational Convergence V4 against current-main evidence, separating real physical gaps from intentionally fail-closed side effects and human-exception gates. This revision also consumes the certified zero-cost multimedia inventory already present on current main instead of leaving that completed probe as an open generic task.",
   "reporting_priority": "Use this audit for physical-domain detail while cerebro-global-operational-convergence-v4.json remains the global logical convergence report.",
   "principles": {
     "preserve_existing": true,
@@ -177,15 +177,19 @@
     },
     {
       "id": "MULTIMEDIA_PHYSICAL_BINDINGS",
-      "state": "PARCIAL_PHYSICAL_BINDINGS_UNVERIFIED",
+      "state": "PARCIAL_GITHUB_CI_INVENTORIED_AUTHORIZED_RUNTIME_STILL_OPEN",
       "safe_preprod_logic": "HECHO",
-      "evidence": "cerebro/registry/multimedia-factory-profile.v0.json",
+      "evidence": [
+        "cerebro/registry/multimedia-factory-profile.v0.json",
+        "cerebro/registry/multimedia-zero-cost-physical-inventory-v1.json"
+      ],
       "facts": [
         "Digital Build multimedia contracts, routing and adapter seams exist.",
-        "No local/provider install, model download, FFmpeg binary, network provider call or artifact publish is claimed by repository evidence.",
-        "Zero-cost/local inventory is still a genuine physical audit task."
+        "The governed GitHub-hosted Ubuntu PREPROD CI inventory is HECHO and found FFmpeg, FFprobe, ImageMagick, SoX and eSpeak NG not present in that runtime.",
+        "NOT_PRESENT_IN_THIS_RUNTIME is valid physical evidence and must not trigger package installation, model download, provider execution or spending.",
+        "The remaining physical task is to inventory an already-authorized CEREBRO runtime and verify any existing zero-cost tools there without auto-installing anything."
       ],
-      "open_gates": ["ZERO_COST_LOCAL_TOOL_INVENTORY", "FFMPEG_PHYSICAL_VERIFICATION_IF_PRESENT", "PER_ADAPTER_LICENSE_HARDWARE_EVALUATION_TRIBUNAL"],
+      "open_gates": ["AUTHORIZED_CEREBRO_RUNTIME_ZERO_COST_TOOL_INVENTORY", "FFMPEG_PHYSICAL_VERIFICATION_IF_PRESENT_IN_THAT_RUNTIME", "PER_ADAPTER_LICENSE_HARDWARE_EVALUATION_TRIBUNAL"],
       "human_required": "LEGAL_REQUIRED_FOR_LICENSE_RISK; MONEY_LIMIT_FOR_COMMERCIAL_PROVIDER; POLICY_CONFLICT_FOR_INSTALL_OR_EXTERNAL_EXECUTION_WITHOUT_GRANT",
       "not_a_blocker_for_safe_preprod": false
     },
@@ -211,19 +215,21 @@
     "genuine_physical_binding_domains_still_open": ["IAM_BROWSER_VAULT_PHYSICAL", "MULTIMEDIA_PHYSICAL_BINDINGS", "BRAND_COMMERCE_APP_PHYSICAL"],
     "data_calibration_open": ["LEAD_CONTACT_CALIBRATION_PHYSICAL"],
     "external_side_effect_or_human_gate_domains": ["COMPANY_INTENT_PRIVACY_PHYSICAL", "SALES_PHYSICAL_CHANNEL_DELIVERY", "VOICE_LIVE_TELEPHONY", "AGENDA_CONTRACT_PAYMENT_FULFILLMENT", "REPUTATION_PUBLIC_REVIEW", "ECONOMIC_ACTIONS", "MARKETING_SEO_PHYSICAL_ADAPTERS"],
+    "multimedia_github_hosted_ci_inventory": "HECHO_NOT_PRESENT",
+    "multimedia_authorized_cerebro_runtime_inventory": "POR_AUDITAR",
     "no_new_engine_created": true,
     "no_existing_relationship_replaced": true,
     "no_prod_or_external_authority_added": true,
     "additional_cost_eur": 0
   },
   "next_block": [
-    "VERIFY_ZERO_COST_LOCAL_MULTIMEDIA_CAPABILITIES_WITHOUT_INSTALLING_OR_DOWNLOADING_ANYTHING",
+    "AUDIT_AN_AUTHORIZED_CEREBRO_RUNTIME_FOR_EXISTING_ZERO_COST_MULTIMEDIA_TOOLS_WITHOUT_AUTO_INSTALL",
     "RECONCILE_FRESH_BROWSER_BRIDGE_PHYSICAL_ATTESTATION_WHEN_AUTHORIZED_RUNTIME_IS_AVAILABLE",
     "CONTINUE_ANDROID_PHYSICAL_E2E_ONLY_WHEN_AUTHORIZED_DEVICE_IS_AVAILABLE",
     "LET_SCHEDULED_SOAK_RECONCILER_ACCUMULATE_GENUINE_CRON_EVIDENCE_FOR_WATCH_LEARN_COMPET_CAP",
     "DO_NOT_OPEN_SIDE_EFFECT_GATES_WITHOUT_THEIR_EXACT_POLICY_HUMAN_OR_MONEY_CONTRACT"
   ],
-  "rollback": "Revert this additive registry/test/docs/workflow package. It performs no runtime mutation and grants no authority.",
-  "rebuild": "Regenerate only from current-main profile registries and physical evidence, preserving global convergence history.",
+  "rollback": "Revert this physical audit reconciliation. It performs no runtime mutation, installation, provider call, business write or authority expansion; Git history preserves the prior audit snapshot.",
+  "rebuild": "Regenerate only from current-main profile registries and fresh physical evidence, including the certified multimedia inventory, while preserving global convergence history.",
   "prod": "NOT_AUTHORIZED"
 }

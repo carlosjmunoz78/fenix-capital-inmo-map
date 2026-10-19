@@ -16,6 +16,7 @@ const reputation = load('../registry/ret-ref-rep-profile.v0.json');
 const economic = load('../registry/phase12-economic-learning-profile.v0.json');
 const marketing = load('../registry/phase13-marketing-seo-feedback-profile.v0.json');
 const multimedia = load('../registry/multimedia-factory-profile.v0.json');
+const multimediaPhysical = load('../registry/multimedia-zero-cost-physical-inventory-v1.json');
 const brand = load('../registry/brand-commerce-appfactory-profile.v0.json');
 const android = load('../registry/fact001-android-staging-48-183.v0.json');
 
@@ -96,22 +97,47 @@ test('economic and marketing analytics/planning stay closed while live spend/pub
   assert.equal(byId.get('MARKETING_SEO_PHYSICAL_ADAPTERS')?.not_a_blocker_for_safe_preprod, true);
 });
 
-test('multimedia and app physical bindings remain genuinely open without inventing installations', () => {
+test('multimedia physical inventory consumes the certified GitHub CI probe without inventing a local runtime', () => {
   assert.equal(multimedia.repository_audit.physical_installation_verified, false);
   assert.equal(multimedia.repository_audit.ffmpeg_binary_verified, false);
   assert.equal(multimedia.defaults.install_authorized, false);
   assert.equal(multimedia.defaults.model_download_authorized, false);
+
+  assert.equal(multimediaPhysical.status, 'PARTIAL_ZERO_COST_MEDIA_CORE_PREPROD');
+  assert.equal(multimediaPhysical.scope, 'GITHUB_HOSTED_UBUNTU_CI_PREPROD');
+  assert.equal(multimediaPhysical.observed_result.ffmpeg, false);
+  assert.equal(multimediaPhysical.observed_result.ffprobe, false);
+  assert.equal(multimediaPhysical.observed_result.deterministic_media_core, false);
+  assert.equal(multimediaPhysical.semantic_gate.absence_is_valid_evidence, true);
+  assert.equal(multimediaPhysical.semantic_gate.absence_must_not_trigger_auto_install, true);
+  assert.equal(multimediaPhysical.closure.github_hosted_ci_inventory, 'HECHO');
+  assert.equal(multimediaPhysical.closure.github_hosted_ci_zero_cost_media_core, 'NOT_PRESENT');
+  assert.equal(multimediaPhysical.closure.authorized_cerebro_runtime_inventory, 'POR_AUDITAR');
+  assert.equal(multimediaPhysical.authority.install_authorized, false);
+  assert.equal(multimediaPhysical.authority.model_download_authorized, false);
+  assert.equal(multimediaPhysical.authority.additional_cost_eur, 0);
+
+  const physicalDomain = byId.get('MULTIMEDIA_PHYSICAL_BINDINGS');
+  assert.equal(physicalDomain?.state, 'PARCIAL_GITHUB_CI_INVENTORIED_AUTHORIZED_RUNTIME_STILL_OPEN');
+  assert.ok(Array.isArray(physicalDomain?.evidence));
+  assert.ok(physicalDomain.evidence.includes('cerebro/registry/multimedia-zero-cost-physical-inventory-v1.json'));
+  assert.ok(physicalDomain.open_gates.includes('AUTHORIZED_CEREBRO_RUNTIME_ZERO_COST_TOOL_INVENTORY'));
+});
+
+test('brand/app physical bindings remain genuinely open without inventing device execution', () => {
   assert.equal(brand.safety.external_provider_execution, false);
   assert.equal(brand.safety.deploy_or_publish, false);
   assert.equal(android.item_48.physical_device_bound, false);
   assert.equal(android.item_183.physical_device_installed, false);
-  assert.equal(byId.get('MULTIMEDIA_PHYSICAL_BINDINGS')?.not_a_blocker_for_safe_preprod, false);
   assert.equal(byId.get('BRAND_COMMERCE_APP_PHYSICAL')?.not_a_blocker_for_safe_preprod, false);
 });
 
-test('all audited domains stay PREPROD and zero additional cost', () => {
+test('all audited domains stay PREPROD and zero additional cost with the completed CI inventory removed from next work', () => {
   assert.equal(audit.summary.additional_cost_eur, 0);
   assert.equal(audit.summary.genuine_physical_binding_domains_still_open.length, 3);
-  assert.ok(audit.next_block.includes('VERIFY_ZERO_COST_LOCAL_MULTIMEDIA_CAPABILITIES_WITHOUT_INSTALLING_OR_DOWNLOADING_ANYTHING'));
+  assert.equal(audit.summary.multimedia_github_hosted_ci_inventory, 'HECHO_NOT_PRESENT');
+  assert.equal(audit.summary.multimedia_authorized_cerebro_runtime_inventory, 'POR_AUDITAR');
+  assert.ok(audit.next_block.includes('AUDIT_AN_AUTHORIZED_CEREBRO_RUNTIME_FOR_EXISTING_ZERO_COST_MULTIMEDIA_TOOLS_WITHOUT_AUTO_INSTALL'));
+  assert.equal(audit.next_block.includes('VERIFY_ZERO_COST_LOCAL_MULTIMEDIA_CAPABILITIES_WITHOUT_INSTALLING_OR_DOWNLOADING_ANYTHING'), false);
   assert.ok(audit.next_block.includes('DO_NOT_OPEN_SIDE_EFFECT_GATES_WITHOUT_THEIR_EXACT_POLICY_HUMAN_OR_MONEY_CONTRACT'));
 });
