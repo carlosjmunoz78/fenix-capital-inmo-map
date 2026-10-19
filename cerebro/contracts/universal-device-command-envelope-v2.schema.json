@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "cerebro://contracts/universal-device-command-envelope-v2",
+  "title": "CEREBRO Universal Device Command Envelope V2",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["request_id","idempotency_key","issued_at","expires_at","device_id","company_id","venture_id","engine_id","environment","version","capability","action","policy"],
+  "properties": {
+    "request_id": {"type":"string","minLength":1},
+    "idempotency_key": {"type":"string","minLength":1},
+    "issued_at": {"type":"string","format":"date-time"},
+    "expires_at": {"type":"string","format":"date-time"},
+    "device_id": {"type":"string","minLength":1},
+    "company_id": {"type":"string","minLength":1},
+    "venture_id": {"type":"string","minLength":1},
+    "engine_id": {"type":"string","minLength":1},
+    "environment": {"enum":["LAB","PREPROD"]},
+    "version": {"type":"string","minLength":1},
+    "capability": {"type":"string","minLength":1},
+    "action": {"type":"string","minLength":1},
+    "credential_ref": {"type":"string","minLength":1},
+    "credential_refs": {"type":"array","items":{"type":"string","minLength":1},"uniqueItems":true},
+    "policy": {
+      "type":"object",
+      "additionalProperties":true,
+      "required":["policy_id","allowed_company_ids","allowed_venture_ids","allowed_engine_ids","allowed_capabilities","allowed_actions"],
+      "properties": {
+        "policy_id":{"type":"string","minLength":1},
+        "allowed_company_ids":{"type":"array","minItems":1,"items":{"type":"string","minLength":1}},
+        "allowed_venture_ids":{"type":"array","minItems":1,"items":{"type":"string","minLength":1}},
+        "allowed_engine_ids":{"type":"array","minItems":1,"items":{"type":"string","minLength":1}},
+        "allowed_capabilities":{"type":"array","minItems":1,"items":{"type":"string","minLength":1}},
+        "allowed_actions":{"type":"array","minItems":1,"items":{"type":"string","minLength":1}},
+        "state_changing":{"type":"boolean"},
+        "prod_allowed":{"const":false},
+        "trading_allowed":{"const":false},
+        "human_required":{"enum":["LEGAL_REQUIRED","SIGNATURE_REQUIRED","LOW_CONFIDENCE","HIGH_RISK","POLICY_CONFLICT","SECURITY_INCIDENT","MONEY_LIMIT","CUSTOMER_HUMAN_REQUEST"]}
+      }
+    }
+  }
+}
