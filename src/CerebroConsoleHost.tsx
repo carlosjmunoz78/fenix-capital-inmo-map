@@ -3,6 +3,7 @@ import {useLocation} from 'react-router-dom';
 import CerebroConsoleShell from './CerebroConsoleShell';
 import CerebroOperativeConsole from './CerebroOperativeConsole';
 import './cerebro-console-host.css';
+import './cerebro-operative-console-v2.css';
 
 type CerebroView='V0'|'OPERATIVA';
 const VIEW_STORAGE_KEY='cerebro_console_view_v1';
