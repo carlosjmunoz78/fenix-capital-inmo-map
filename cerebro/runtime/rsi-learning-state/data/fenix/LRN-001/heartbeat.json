@@ -5,9 +5,9 @@
   "environment": "PREPROD",
   "version": "0.5.0",
   "status": "GREEN",
-  "cycle_started_at": "2026-10-19T23:39:15.980Z",
-  "cycle_finished_at": "2026-10-19T23:39:15.980Z",
-  "last_success_at": "2026-10-19T23:39:15.980Z",
+  "cycle_started_at": "2026-10-19T23:40:18.738Z",
+  "cycle_finished_at": "2026-10-19T23:40:18.738Z",
+  "last_success_at": "2026-10-19T23:40:18.738Z",
   "last_batch_ref": null,
   "last_result": {
     "processed_batches": 0,
