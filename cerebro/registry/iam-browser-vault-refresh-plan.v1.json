@@ -1,0 +1,69 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_IAM_BROWSER_VAULT_REFRESH_PLAN_V1",
+  "engine_id": "IAM-001",
+  "environment": "PREPROD",
+  "status": "DEFINED_NOT_EXECUTED",
+  "depends_on": "EVT74_EXACT_MINIMUM_GRANT_APPLIED_AND_VERIFIED",
+  "purpose": "Refresh exact-scope Browser + Vault binding evidence after the minimum EVT74 journal grant without expanding authority.",
+  "required_evidence": {
+    "browser": [
+      "fresh_authenticated_binding",
+      "environment_is_LAB_or_PREPROD",
+      "route_scope_exact",
+      "kill_switch_observed",
+      "prod_mutation_false",
+      "public_mutation_false",
+      "customer_data_used_false",
+      "incremental_cost_eur_0"
+    ],
+    "vault": [
+      "credential_reference_resolves_locally",
+      "raw_secret_not_in_command",
+      "raw_secret_not_in_receipt",
+      "raw_secret_not_in_registry",
+      "mfa_bypass_false",
+      "captcha_bypass_false",
+      "prod_secret_scope_absent"
+    ],
+    "device": [
+      "canonical_device_or_registered_alias",
+      "tenant_scope_from_command_not_browser_profile",
+      "semantic_readback_if_state_changes"
+    ]
+  },
+  "negative_tests": [
+    "DENY_PROD_ENVIRONMENT",
+    "DENY_WILDCARD_ROUTE_SCOPE",
+    "DENY_UNLISTED_JOURNAL_ROUTE",
+    "DENY_RAW_PASSWORD_TOKEN_COOKIE_API_KEY",
+    "DENY_CROSS_COMPANY_SCOPE",
+    "DENY_STALE_BROWSER_ATTESTATION",
+    "DENY_MISSING_KILL_SWITCH",
+    "DENY_STATE_CHANGE_WITHOUT_SEMANTIC_READBACK"
+  ],
+  "secret_policy": {
+    "references_only": true,
+    "allowed_reference_fields": ["credential_ref", "credential_refs"],
+    "secret_values_in_github": false,
+    "secret_values_in_receipts": false,
+    "secret_values_in_logs": false
+  },
+  "human_required_codes": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "rollback": "Revoke only newly granted EVT74 routes and invalidate the refreshed binding receipt; preserve Browser Universal, profiles and Vault records.",
+  "prod_authorized": false,
+  "prod_write_authorized": false,
+  "auto_merge_authorized": false,
+  "trading_access": false,
+  "additional_cost_eur": 0,
+  "next_gate": "FRESH_EXACT_SCOPE_BROWSER_AND_VAULT_BINDING_ATTESTATION"
+}
