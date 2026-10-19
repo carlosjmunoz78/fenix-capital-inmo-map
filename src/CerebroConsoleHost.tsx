@@ -2,24 +2,50 @@ import {useEffect,useState} from 'react';
 import {useLocation} from 'react-router-dom';
 import CerebroConsoleShell from './CerebroConsoleShell';
 import CerebroOperativeConsole from './CerebroOperativeConsole';
+import {fetchAppApi,supabase} from './supabase';
 import './cerebro-console-host.css';
 import './cerebro-operative-console-v2.css';
 
 type CerebroView='V0'|'OPERATIVA';
+type OwnerAccess='checking'|'allowed'|'denied';
+type SessionContext={actor_code?:string;role?:string};
 const VIEW_STORAGE_KEY='cerebro_console_view_v1';
 
 function initialView():CerebroView{
  if(typeof window==='undefined')return'OPERATIVA';
- try{
-  const stored=window.sessionStorage.getItem(VIEW_STORAGE_KEY);
-  return stored==='V0'?'V0':'OPERATIVA';
- }catch{return'OPERATIVA'}
+ try{return window.sessionStorage.getItem(VIEW_STORAGE_KEY)==='V0'?'V0':'OPERATIVA'}catch{return'OPERATIVA'}
 }
 
 export default function CerebroConsoleHost(){
  const location=useLocation();
  const isCerebroPath=location.pathname.replace(/\/+$/,'')==='/cerebro';
  const[view,setView]=useState<CerebroView>(initialView);
+ const[ownerAccess,setOwnerAccess]=useState<OwnerAccess>('checking');
+
+ useEffect(()=>{
+  if(!isCerebroPath)return;
+  const ensure=()=>{if(document.documentElement.dataset.cerebroConsole!=='1')document.documentElement.dataset.cerebroConsole='1'};
+  ensure();
+  const observer=new MutationObserver(ensure);
+  observer.observe(document.documentElement,{attributes:true,attributeFilter:['data-cerebro-console']});
+  return()=>{observer.disconnect();delete document.documentElement.dataset.cerebroConsole};
+ },[isCerebroPath]);
+
+ useEffect(()=>{
+  if(!isCerebroPath){setOwnerAccess('checking');return}
+  let cancelled=false;
+  const check=async()=>{
+   const {data:{session}}=await supabase.auth.getSession();
+   if(cancelled)return;
+   if(!session){setOwnerAccess('checking');return}
+   const {status,data}=await fetchAppApi<SessionContext>('/session/context');
+   if(cancelled)return;
+   setOwnerAccess(status===200&&data?.actor_code==='CARLOS-ADMIN'?'allowed':'denied');
+  };
+  void check();
+  const {data:{subscription}}=supabase.auth.onAuthStateChange(()=>{void check()});
+  return()=>{cancelled=true;subscription.unsubscribe()};
+ },[isCerebroPath]);
 
  useEffect(()=>{
   if(!isCerebroPath)return;
@@ -27,19 +53,11 @@ export default function CerebroConsoleHost(){
  },[isCerebroPath,view]);
 
  if(!isCerebroPath)return <CerebroConsoleShell/>;
+ if(ownerAccess!=='allowed')return <CerebroConsoleShell/>;
 
  return <div className={`cerebro-console-host view-${view.toLowerCase()}`}>
-  <div className="cerebro-host-topbar">
-   <nav className="cerebro-view-switch" aria-label="Cambiar vista de CEREBRO">
-    <span className="cerebro-view-switch-label">INTERFAZ</span>
-    <button type="button" className={view==='V0'?'is-active':''} onClick={()=>setView('V0')}>VISTA 0</button>
-    <button type="button" className={view==='OPERATIVA'?'is-active':''} onClick={()=>setView('OPERATIVA')}>OPERATIVA</button>
-    <button type="button" disabled title="NEURAL se recuperará desde los artefactos existentes; no se reconstruirá desde cero.">NEURAL · POR AUDITAR</button>
-   </nav>
-  </div>
-  <div className={`cerebro-host-v0 ${view==='V0'?'is-visible':'is-hidden'}`} aria-hidden={view!=='V0'}>
-   <CerebroConsoleShell/>
-  </div>
-  {view==='OPERATIVA'?<CerebroOperativeConsole/>:null}
+  {view==='V0'?<div className="cerebro-host-topbar"><nav className="cerebro-view-switch" aria-label="Cambiar vista de CEREBRO"><span className="cerebro-view-switch-label">INTERFAZ</span><button type="button" className="is-active">VISTA 0</button><button type="button" onClick={()=>setView('OPERATIVA')}>OPERATIVA</button><button type="button" disabled title="NEURAL se recuperará desde los artefactos existentes; no se reconstruirá desde cero.">NEURAL · POR AUDITAR</button></nav></div>:null}
+  <div className={`cerebro-host-v0 ${view==='V0'?'is-visible':'is-hidden'}`} aria-hidden={view!=='V0'}><CerebroConsoleShell/></div>
+  {view==='OPERATIVA'?<CerebroOperativeConsole onViewChange={setView}/>:null}
  </div>;
 }
