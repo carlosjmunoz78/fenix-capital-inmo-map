@@ -8,7 +8,11 @@ test('CEREBRO is served by the authenticated SPA route, not a shadow static page
   expect(shell).toContain("data?.actor_code==='CARLOS-ADMIN'");
   const guard=fs.readFileSync('src/RouteAccessGuard.tsx','utf8');
   expect(guard).toContain("'/cerebro'");
-  expect(guard).toContain('<CerebroConsoleShell/>');
+  expect(guard).toContain('<CerebroConsoleHost/>');
+  const host=fs.readFileSync('src/CerebroConsoleHost.tsx','utf8');
+  expect(host).toContain('<CerebroConsoleShell/>');
+  expect(host).toContain("type CerebroView='V0'|'OPERATIVA'");
+  expect(host).toContain("view==='V0'?'is-visible':'is-hidden'");
   const gateway=fs.readFileSync('supabase/functions/cerebro-console-gateway-v0/index.ts','utf8');
   expect(gateway).toContain('actor==="CARLOS-ADMIN"');
   expect(gateway).toContain('reason:"OWNER_ONLY"');
