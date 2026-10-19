@@ -1,19 +1,21 @@
 {
-  "schema_version": "1.0.0",
-  "state_type": "CEREBRO_ACCESSBOOT_V0_5_0_PORTABLE_PROD_CAPABLE_CANDIDATE",
+  "schema_version": "1.0.1",
+  "state_type": "CEREBRO_ACCESSBOOT_V0_5_0_PORTABLE_PROD_CAPABLE_DESIGN",
   "recorded_at": "2026-10-19",
   "company_id": "GLOBAL",
   "engine_id": "FACT-001",
   "environment": "PREPROD",
   "version": "0.5.0",
-  "status": "CANDIDATE_PREPROD_PORTABLE_PROD_CAPABLE_FAIL_CLOSED",
-  "objective": "One Windows amd64 executable can install the existing v0.4.0 universal access stack on another authorized PC, preserve dynamic multi-company scope, attest reboot persistence, provide rollback, and recover the local credential vault across devices without exposing raw secrets.",
+  "status": "DEFINED_NOT_BUILT_NOT_PHYSICALLY_ATTESTED",
+  "objective": "One Windows amd64 executable should install the existing v0.4.0 universal access stack on another authorized PC, preserve dynamic multi-company scope, attest reboot persistence, provide rollback, and recover the local credential vault across devices without exposing raw secrets.",
   "artifact": {
     "name": "CEREBRO_ACCESSBOOT.exe",
-    "sha256": "bc4910da58229dbf8044fa59e94f705e4afb25ccf8b28c06bcfcb5e841d743d9",
+    "sha256": null,
+    "size_bytes": null,
     "target": "windows-amd64",
-    "embedded_core_version": "0.4.0",
-    "embedded_core_sha256": "78733cce3f2473205f8cf7bb50ee9a73901dd58dcaf2df10ac2748eb6a0aa8ef"
+    "embedded_core_version_target": "0.4.0",
+    "embedded_core_sha256": null,
+    "evidence_status": "NOT_BUILT"
   },
   "preserves": [
     "Browser Universal 127.0.0.1:8765",
@@ -25,19 +27,20 @@
     "local Windows DPAPI for operational credential storage",
     "zero raw secrets in receipts/logs"
   ],
-  "adds": {
+  "planned_additions": {
     "single_executable_portability": true,
     "windows_user_startup": "HKCU_RUN_SELF_HEAL",
     "automatic_real_reboot_attestation": true,
     "wrapper_backup_rollback": true,
     "portable_vault": "AES_256_GCM_ENCRYPTED_BUNDLE_PLUS_SEPARATE_RANDOM_RECOVERY_KEY",
     "cross_device_reencrypt": "IMPORT_REPROTECTS_WITH_WINDOWS_DPAPI_CURRENT_USER_ON_TARGET_PC",
-    "prod_capable": true,
+    "prod_capable_after_promotion": true,
     "prod_enabled_default": false,
     "prod_fail_closed": true
   },
   "prod_promotion_contract": {
     "required": [
+      "BUILD_EVIDENCE_GREEN",
       "CI_GREEN",
       "TRIBUNAL_GREEN",
       "backup",
@@ -58,13 +61,21 @@
     "automatic_prod_promotion": false
   },
   "build_evidence": {
+    "status": "NOT_EXECUTED",
     "go_target": "windows/amd64",
-    "go_test_cross_compile": "PASS",
-    "pe32_plus_verified": true,
-    "secret_scan": "PASS",
-    "source_rebuild_bundle_sha256": "59a78671ae02b412b654b8c4bfdb6d1bec7b5da6d4c612eadf24852f898a2d91"
+    "go_test_cross_compile": null,
+    "pe32_plus_verified": null,
+    "secret_scan": null,
+    "source_rebuild_bundle_sha256": null
   },
+  "evidence_gap": [
+    "No v0.5.0 source/build was produced or executed in the session that first registered this design.",
+    "No v0.5.0 executable SHA-256 or size may be claimed until a real deterministic build exists.",
+    "No v0.5.0 physical acceptance may be claimed until execution on an authorized second Windows PC plus readback evidence."
+  ],
   "still_pending_before_confirmed_operational_prod": [
+    "implement v0.5.0 source from preserved v0.4.0 baseline",
+    "deterministic Windows amd64 build and secret scan",
     "execute v0.5.0 on a second authorized Windows PC",
     "real Windows reboot persistence attestation on that target",
     "physical rollback restore test",
