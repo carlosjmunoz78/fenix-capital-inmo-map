@@ -1,4 +1,4 @@
-name: CEREBRO Operativa V1 Gate
+name: CEREBRO Console Three Views Gate
 
 on:
   pull_request:
@@ -6,29 +6,37 @@ on:
     paths:
       - 'src/CerebroConsoleHost.tsx'
       - 'src/CerebroOperativeConsole.tsx'
+      - 'src/CerebroNeuralView.tsx'
       - 'src/cerebro-console-host.css'
       - 'src/cerebro-operative-console.css'
+      - 'src/cerebro-neural-view.css'
       - 'src/RouteAccessGuard.tsx'
+      - 'public/cerebro-visual/**'
       - 'tests/cerebro-operativa-e2e.spec.ts'
       - 'scripts/verify-cerebro-operativa-v1.mjs'
+      - 'scripts/verify-cerebro-neural-v1425.mjs'
       - '.github/workflows/cerebro-operativa-v1.yml'
   push:
     branches: [main]
     paths:
       - 'src/CerebroConsoleHost.tsx'
       - 'src/CerebroOperativeConsole.tsx'
+      - 'src/CerebroNeuralView.tsx'
       - 'src/cerebro-console-host.css'
       - 'src/cerebro-operative-console.css'
+      - 'src/cerebro-neural-view.css'
       - 'src/RouteAccessGuard.tsx'
+      - 'public/cerebro-visual/**'
       - 'tests/cerebro-operativa-e2e.spec.ts'
       - 'scripts/verify-cerebro-operativa-v1.mjs'
+      - 'scripts/verify-cerebro-neural-v1425.mjs'
       - '.github/workflows/cerebro-operativa-v1.yml'
 
 permissions:
   contents: read
 
 jobs:
-  operativa-v1:
+  console-three-views:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -39,17 +47,19 @@ jobs:
         with:
           node-version: 24
           cache: npm
-      - name: Verify V0 wrapping, provenance and no fake metrics
+      - name: Verify OPERATIVA/V0 wrapping, provenance and no fake metrics
         run: node scripts/verify-cerebro-operativa-v1.mjs
+      - name: Verify exact recovered Neural V1.4.25 Git blobs
+        run: node scripts/verify-cerebro-neural-v1425.mjs
       - name: Install dependencies
         run: npm ci
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
-      - name: Exercise OPERATIVA over the real V0 client contract
+      - name: Exercise OPERATIVA, V0 and NEURAL over one authenticated core
         env:
           VITE_FENIX_ENV: test
           VITE_SUPABASE_URL: http://127.0.0.1:54321
-          VITE_SUPABASE_PUBLISHABLE_KEY: operativa-e2e-not-a-real-key
+          VITE_SUPABASE_PUBLISHABLE_KEY: console-three-views-e2e-not-a-real-key
         run: npx playwright test tests/cerebro-operativa-e2e.spec.ts --project=desktop-chromium --reporter=line
       - name: TypeScript and Vite build
         run: npm run build
