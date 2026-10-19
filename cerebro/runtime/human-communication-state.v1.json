@@ -5,7 +5,7 @@
   "engine_id": "HEX-001",
   "environment": "PROD_CONTROL_PLANE",
   "version": "1.1.0",
-  "updated_at": "2026-10-19T09:48:18.379Z",
+  "updated_at": "2026-10-19T10:44:25.306121Z",
   "pending": {},
   "authorized_actions": {},
   "decisions": [],
@@ -533,12 +533,12 @@
     }
   },
   "last_digest_date": "2026-10-19",
-  "last_delivery_at": "2026-10-18T06:24:37Z",
+  "last_delivery_at": "2026-10-19T09:48:56Z",
   "mail_transport": {
     "status": "VERIFIED",
-    "last_success_at": "2026-10-18T06:24:37Z",
+    "last_success_at": "2026-10-19T09:48:56Z",
     "last_error": null,
-    "last_verified_delivery_key": "DIGEST:2026-10-18"
+    "last_verified_delivery_key": "DIGEST:2026-10-19"
   },
   "safety": {
     "prod_write": false,
