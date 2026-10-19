@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_MULTIMEDIA_READONLY_PHYSICAL_INVENTORY_PLAN_V1",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "status": "DEFINED_NOT_EXECUTED",
+  "runtime": "cerebro/runtime/multimedia-readonly-inventory-v1.mjs",
+  "tests": "cerebro/tests/multimedia-readonly-inventory-v1.test.mjs",
+  "targets": ["ffmpeg", "ffprobe", "ImageMagick", "sox", "espeak-ng"],
+  "rules": {
+    "read_only": true,
+    "network_required": false,
+    "auto_install_allowed": false,
+    "download_allowed": false,
+    "package_manager_allowed": false,
+    "shell_mutation_allowed": false,
+    "prod_allowed": false,
+    "additional_cost_eur": 0
+  },
+  "physical_acceptance": {
+    "required": true,
+    "expected_output": "CEREBRO_MULTIMEDIA_READONLY_INVENTORY_V1",
+    "missing_tool_interpretation": "ABSENT_ON_TARGET_RUNTIME_ONLY; DOES_NOT_AUTHORIZE_INSTALL",
+    "probe_error_interpretation": "PARCIAL_TARGET_RUNTIME_UNVERIFIED",
+    "customer_data_used": false
+  },
+  "rollback": "No runtime mutation is performed; no rollback action should be needed.",
+  "human_required": "POLICY_CONFLICT",
+  "prod_authorized": false,
+  "prod_write_authorized": false,
+  "trading_access": false,
+  "additional_cost_eur": 0,
+  "next_gate": "RUN_READ_ONLY_INVENTORY_ON_AUTHORIZED_CEREBRO_TARGET_RUNTIME"
+}
