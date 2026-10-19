@@ -6,6 +6,7 @@ export const UNIVERSAL_DEVICE_HUMAN_REQUIRED=Object.freeze([...HUMAN_REQUIRED_CO
 const SECRET_KEYS=new Set(['password','passwd','secret','token','access_token','refresh_token','api_key','apikey','cookie','cookies','authorization','auth_header','private_key','client_secret']);
 const CREDENTIAL_REF_KEYS=new Set(['credential_ref','credential_refs']);
 const REQUIRED_FIELDS=Object.freeze(['request_id','idempotency_key','issued_at','expires_at','device_id','company_id','venture_id','engine_id','environment','version','capability','action','policy']);
+const POLICY_SCOPE_FIELDS=Object.freeze(['allowed_company_ids','allowed_venture_ids','allowed_engine_ids','allowed_capabilities','allowed_actions']);
 
 export class UniversalDeviceEnvelopeError extends Error{
   constructor(code,message,context={}){super(message);this.name='UniversalDeviceEnvelopeError';this.code=code;this.context=context;}
@@ -37,7 +38,7 @@ function walkForSecretValues(value,path=[]){
 
 function policyAllows(value,allowed){
   if(!Array.isArray(allowed)||allowed.length===0) return false;
-  return allowed.includes('*')||allowed.includes(value);
+  return allowed.includes(value);
 }
 
 export function resolveCanonicalDeviceIdentity(deviceId,identity={}){
@@ -72,7 +73,14 @@ export function validateUniversalDeviceEnvelopeV2(envelope={},options={}){
   if(!envelope.policy||typeof envelope.policy!=='object'||Array.isArray(envelope.policy)) errors.push('invalid:policy');
   else{
     if(!nonEmpty(envelope.policy.policy_id)) errors.push('missing:policy.policy_id');
-    for(const field of ['allowed_company_ids','allowed_venture_ids','allowed_engine_ids','allowed_capabilities','allowed_actions']) if(!Array.isArray(envelope.policy[field])||envelope.policy[field].length===0) errors.push(`invalid:policy.${field}`);
+    for(const field of POLICY_SCOPE_FIELDS){
+      const values=envelope.policy[field];
+      if(!Array.isArray(values)||values.length===0) errors.push(`invalid:policy.${field}`);
+      else{
+        if(values.some(x=>!nonEmpty(x))) errors.push(`invalid:policy.${field}`);
+        if(values.includes('*')) errors.push(`wildcard_forbidden:policy.${field}`);
+      }
+    }
     if(envelope.policy.prod_allowed===true) errors.push('policy_prod_authority_forbidden');
     if(envelope.policy.trading_allowed===true) errors.push('policy_trading_authority_forbidden');
     if(envelope.policy.human_required!=null&&!HUMAN_REQUIRED_CODES.includes(envelope.policy.human_required)) errors.push('invalid:policy.human_required');
@@ -97,7 +105,15 @@ export function validateUniversalDeviceEnvelopeV2(envelope={},options={}){
 export function authorizeUniversalDeviceEnvelopeV2(envelope={},context={}){
   const check=validateUniversalDeviceEnvelopeV2(envelope,context);
   if(!check.ok) return Object.freeze({decision:'HOLD',blockers:check.errors,human_required:null,prod_authorized:false,trading_access:false});
-  const identity=resolveCanonicalDeviceIdentity(envelope.device_id,context.identity??{});
+  let identity;
+  try{
+    identity=resolveCanonicalDeviceIdentity(envelope.device_id,context.identity??{});
+  }catch(error){
+    if(error instanceof UniversalDeviceEnvelopeError){
+      return Object.freeze({decision:'HOLD',blockers:Object.freeze([String(error.code).toLowerCase()]),human_required:null,prod_authorized:false,trading_access:false});
+    }
+    throw error;
+  }
   const p=envelope.policy;
   const blockers=[];
   if(!policyAllows(envelope.company_id,p.allowed_company_ids)) blockers.push('company_scope_denied');
