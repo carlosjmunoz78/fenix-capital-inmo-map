@@ -1,0 +1,47 @@
+{
+  "schema_version": "1.0.0",
+  "engine_or_capability": "DEVICE_UNIVERSAL",
+  "version": "0.2.2",
+  "date": "2026-10-19",
+  "status": "PHYSICAL_LOCAL_HEALTHY_PREPROD",
+  "evidence_source": "OWNER_OBSERVED_CONSOLE_PLUS_PRIOR_BROWSER_HEALTH",
+  "identity": {
+    "canonical_device_id": "desktop-4c008d88919f",
+    "device_aliases": ["desktop-74ca87506edbd7a5"],
+    "tenant_binding": "DYNAMIC_MULTI_COMPANY"
+  },
+  "listeners": {
+    "browser": {
+      "address": "127.0.0.1:8765",
+      "status": "BROWSER_AGENT_HOST_HEALTHY",
+      "service": "CEREBRO Browser Agent Host",
+      "browser_repeated": false
+    },
+    "device": {
+      "address": "127.0.0.1:8766",
+      "status": "DEVICE_AGENT_LOCAL_HEALTHY",
+      "independent_remote_readback": "PENDING"
+    }
+  },
+  "install_policy": {
+    "mode": "SIDE_BY_SIDE",
+    "legacy_device_agent_overwritten": false,
+    "browser_universal_overwritten": false,
+    "prod_allowed": false,
+    "additional_cost_eur": 0
+  },
+  "vault": {
+    "status": "READY_LOCAL_DPAPI",
+    "portable_recovery_physical": "PENDING"
+  },
+  "acceptance": {
+    "confirmed_operational": false,
+    "reason": "physical command roundtrip, restart persistence and rollback still pending",
+    "next": "PHYSICAL_CAPABILITY_ACCEPTANCE_THEN_DYNAMIC_CONTROLLER_PAIRING"
+  },
+  "pairing_contract_audit": {
+    "status": "PARCIAL",
+    "finding": "legacy local-agent profile schema binds company_id and venture_id immutably; do not bind Device Universal to Fenix or any single company",
+    "required_contract": "device identity independent from company/profile; company/venture/engine/environment/version remain per-mission context"
+  }
+}
