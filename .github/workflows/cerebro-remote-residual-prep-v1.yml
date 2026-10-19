@@ -50,13 +50,32 @@ jobs:
             'GET /wp-json/cerebro-b3-journal-lab/v1/inspect',
             'POST /wp-json/cerebro-b3-journal-lab/v1/cleanup'
           ].sort();
-          const observedEvtRoutes=(evt.discovered_routes||[]).map(r=>`${r.method} ${r.path}`).sort();
+          const routeSource=evt.granted_routes||evt.discovered_routes||[];
+          const observedEvtRoutes=routeSource.map(r=>`${r.method} ${r.path}`).sort();
+          const legacyDiscoveryState=
+            evt.status==='ROUTES_DISCOVERED_GRANT_NOT_APPLIED'&&
+            evt.route_discovery_required===false&&
+            evt.live_route_catalog_attested===true&&
+            evt.human_required==='POLICY_CONFLICT'&&
+            evt.exact_grant_applied!==true;
+          const currentPhysicalGreenState=
+            evt.status==='PHYSICAL_E2E_GREEN_ACCEPTANCE_WRAPPER_PATCH_PENDING'&&
+            evt.route_discovery_required===false&&
+            evt.live_route_catalog_attested===true&&
+            evt.exact_grant_applied===true&&
+            evt.human_required===null&&
+            evt.live_preprod_evidence?.prod_touched===false&&
+            evt.live_preprod_evidence?.customer_data_touched===false&&
+            evt.live_preprod_evidence?.trading_touched===false&&
+            evt.acceptance?.synthetic_browser_to_journal_write==='GREEN_VIA_AUTHORIZED_MCP_PATH'&&
+            evt.acceptance?.semantic_readback==='GREEN'&&
+            evt.acceptance?.idempotent_replay_no_duplicate==='GREEN'&&
+            evt.acceptance?.cleanup_synthetic_record==='GREEN';
           if(
-            evt.status!=='ROUTES_DISCOVERED_GRANT_NOT_APPLIED'||
-            evt.route_discovery_required!==false||
-            evt.live_route_catalog_attested!==true||
-            evt.human_required!=='POLICY_CONFLICT'||
+            !(legacyDiscoveryState||currentPhysicalGreenState)||
             evt.grant_constraints.wildcard_routes_allowed!==false||
+            evt.grant_constraints.prod_allowed!==false||
+            evt.grant_constraints.customer_data_allowed!==false||
             JSON.stringify(observedEvtRoutes)!==JSON.stringify(expectedEvtRoutes)
           ) throw new Error('EVT74 grant manifest drift');
           const android=JSON.parse(fs.readFileSync(files[1],'utf8'));
@@ -65,7 +84,7 @@ jobs:
           if(iam.status!=='DEFINED_NOT_EXECUTED'||iam.secret_policy.references_only!==true) throw new Error('IAM refresh plan drift');
           const media=JSON.parse(fs.readFileSync(files[3],'utf8'));
           if(media.rules.read_only!==true||media.rules.auto_install_allowed!==false||media.rules.download_allowed!==false) throw new Error('Multimedia plan drift');
-          console.log(JSON.stringify({status:'PASS_REMOTE_PREP_CONTRACTS',prod:false,cost_eur:0}));
+          console.log(JSON.stringify({status:'PASS_REMOTE_PREP_CONTRACTS',evt74_state:currentPhysicalGreenState?'PHYSICAL_GREEN':'DISCOVERED_NOT_APPLIED',prod:false,cost_eur:0}));
           NODE
       - name: Focused multimedia tests
         run: node --test cerebro/tests/multimedia-readonly-inventory-v1.test.mjs
