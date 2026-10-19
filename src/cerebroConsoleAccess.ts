@@ -1,4 +1,5 @@
-const RAW_URL=(import.meta.env.VITE_CEREBRO_CONSOLE_URL as string|undefined)?.trim()||'';
+const CANONICAL_PROD_URL='https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-gateway-v0/';
+const RAW_URL=(import.meta.env.VITE_CEREBRO_CONSOLE_URL as string|undefined)?.trim()||CANONICAL_PROD_URL;
 
 export function cerebroConsoleUrl():string|null{
   if(!RAW_URL)return null;
@@ -21,5 +22,6 @@ export function cerebroConsoleLinkEnabled():boolean{
   return Boolean(cerebroConsoleUrl());
 }
 
-// Fail-closed by design: ProfileShell must not expose a dead or non-HTTPS
-// CEREBRO link until a deployable Console URL is explicitly configured.
+// The environment variable remains the explicit override. When it is absent,
+// the authenticated owner-only PROD Console uses its canonical Supabase Gateway.
+// No secret is embedded here; the browser still sends the authenticated user JWT.
