@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-19T17:26:25.313Z",
+  "updated_at": "2026-10-19T17:32:31.084Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -78,7 +78,8 @@
     "github-wide-skills:0c89ff5bc2cecf4bf945",
     "github-wide-skills:fc1cc2732113e136aa31",
     "github-wide-skills:f8e51b089b2996c601a2",
-    "github-wide-skills:d4f361b79385cbadf32e"
+    "github-wide-skills:d4f361b79385cbadf32e",
+    "github-wide-skills:8ecfe729426ccda86714"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -1090,6 +1091,40 @@
       "trading_access": false,
       "paid_fallback": false,
       "additional_cost_eur": 0
+    },
+    "github-wide-skills:8ecfe729426ccda86714": {
+      "candidate_id": "github-wide-skills:8ecfe729426ccda86714",
+      "name": "vibetags-usage",
+      "human_alias": "Vibetags Usage",
+      "wrapper_id": "skillwrap:6e50302feeec76285ff4",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 87.71,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "PIsberg/skill3",
+        "upstream_head_commit": "5091e98ac65457fe7f100f2e9f3aeb780d52eb5c",
+        "manifest_sha256": "bb61a7b68742b3d56a8b8f12210a5f2e7b56516cd0940759c5915908704225f1",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 39294919481,
+      "checkpointed_at": "2026-10-19T17:32:31.084Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
     }
   },
   "completed": {
@@ -2093,7 +2128,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "IDLE_NO_NEW_ELIGIBLE_CANDIDATE",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -2106,7 +2141,7 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 39294051982,
+  "last_discovery_run_id": 39294919481,
   "autonomy_action_ledger": {
     "github-wide-skills:28b33318e96c4dcfb74a": {
       "schema_version": "1.0.0",
