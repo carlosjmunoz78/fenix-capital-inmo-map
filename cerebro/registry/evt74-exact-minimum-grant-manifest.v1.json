@@ -1,0 +1,54 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_EVT74_EXACT_MINIMUM_GRANT_MANIFEST_V1",
+  "engine_id": "EVT-001",
+  "environment": "PREPROD",
+  "status": "DEFINED_NOT_APPLIED",
+  "human_required": "POLICY_CONFLICT",
+  "namespace": "cerebro-b3-journal-lab/v1",
+  "known_live_route": "/wp-json/cerebro-b3-journal-lab/v1/inspect",
+  "known_live_route_state": "REST_FORBIDDEN_401_WITH_ZERO_GRANTED_ROUTES",
+  "grant_strategy": "DISCOVER_THEN_EXACT_ALLOWLIST_ONLY",
+  "route_discovery_required": true,
+  "required_semantics": [
+    "INSPECT",
+    "SYNTHETIC_WRITE",
+    "READBACK",
+    "IDEMPOTENT_REPLAY",
+    "SYNTHETIC_CLEANUP",
+    "NO_SIDE_EFFECT_VERIFY"
+  ],
+  "forbidden_inference": "Do not invent write/replay/cleanup route paths before live route catalog or connector policy surface confirms them.",
+  "grant_constraints": {
+    "namespace_exact_match_required": true,
+    "allowed_environments": ["LAB", "PREPROD"],
+    "prod_allowed": false,
+    "customer_data_allowed": false,
+    "arbitrary_wordpress_routes_allowed": false,
+    "wildcard_routes_allowed": false,
+    "broad_plugin_admin_allowed": false,
+    "secret_values_in_policy": false,
+    "additional_cost_eur": 0
+  },
+  "application_preconditions": [
+    "LIVE_ROUTE_CATALOG_ATTESTED",
+    "EXACT_ROUTE_TO_SEMANTIC_MAPPING_RECORDED",
+    "NEGATIVE_SCOPE_TESTS_PASS",
+    "ROLLBACK_REVOKE_SET_PREPARED"
+  ],
+  "post_grant_acceptance": [
+    "SYNTHETIC_BROWSER_TO_JOURNAL_WRITE",
+    "SEMANTIC_READBACK",
+    "IDEMPOTENT_REPLAY_NO_DUPLICATE",
+    "CLEANUP_SYNTHETIC_RECORD",
+    "VERIFY_NO_CUSTOMER_OR_PROD_SIDE_EFFECT",
+    "REFRESH_IAM_BROWSER_VAULT_ATTESTATION"
+  ],
+  "rollback": "Revoke only the exact newly granted journal routes and re-run inspect/negative-scope checks.",
+  "prod_authorized": false,
+  "prod_write_authorized": false,
+  "auto_merge_authorized": false,
+  "trading_access": false,
+  "additional_cost_eur": 0,
+  "next_gate": "LIVE_ROUTE_DISCOVERY_AND_EXACT_GRANT_AT_AUTHORIZED_POLICY_SURFACE"
+}
