@@ -1,0 +1,69 @@
+name: CEREBRO Remote Residual Prep V1
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/registry/evt74-exact-minimum-grant-manifest.v1.json'
+      - 'cerebro/registry/android-48-183-physical-attestation-bundle.v1.json'
+      - 'cerebro/registry/iam-browser-vault-refresh-plan.v1.json'
+      - 'cerebro/registry/multimedia-readonly-physical-inventory-plan.v1.json'
+      - 'cerebro/runtime/multimedia-readonly-inventory-v1.mjs'
+      - 'cerebro/tests/multimedia-readonly-inventory-v1.test.mjs'
+      - '.github/workflows/cerebro-remote-residual-prep-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-remote-residual-prep-v1-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  remote-prep-contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Validate remote-only residual manifests
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const files=[
+            'cerebro/registry/evt74-exact-minimum-grant-manifest.v1.json',
+            'cerebro/registry/android-48-183-physical-attestation-bundle.v1.json',
+            'cerebro/registry/iam-browser-vault-refresh-plan.v1.json',
+            'cerebro/registry/multimedia-readonly-physical-inventory-plan.v1.json'
+          ];
+          for(const f of files){
+            const x=JSON.parse(fs.readFileSync(f,'utf8'));
+            if(x.prod_authorized!==false||x.prod_write_authorized!==false||x.trading_access!==false||x.additional_cost_eur!==0) throw new Error(`unsafe authority in ${f}`);
+          }
+          const evt=JSON.parse(fs.readFileSync(files[0],'utf8'));
+          if(evt.status!=='DEFINED_NOT_APPLIED'||evt.route_discovery_required!==true||evt.grant_constraints.wildcard_routes_allowed!==false) throw new Error('EVT74 grant manifest drift');
+          const android=JSON.parse(fs.readFileSync(files[1],'utf8'));
+          if(android.status!=='DEFINED_NOT_EXECUTED'||android.source_artifact.artifact_id!==11934097600) throw new Error('Android attestation bundle drift');
+          const iam=JSON.parse(fs.readFileSync(files[2],'utf8'));
+          if(iam.status!=='DEFINED_NOT_EXECUTED'||iam.secret_policy.references_only!==true) throw new Error('IAM refresh plan drift');
+          const media=JSON.parse(fs.readFileSync(files[3],'utf8'));
+          if(media.rules.read_only!==true||media.rules.auto_install_allowed!==false||media.rules.download_allowed!==false) throw new Error('Multimedia plan drift');
+          console.log(JSON.stringify({status:'PASS_REMOTE_PREP_CONTRACTS',prod:false,cost_eur:0}));
+          NODE
+      - name: Focused multimedia tests
+        run: node --test cerebro/tests/multimedia-readonly-inventory-v1.test.mjs
+      - name: Focused universal device V2 tests
+        run: node --test cerebro/tests/universal-device-command-envelope-v2.test.mjs
+      - name: Canonical CEREBRO registry validation
+        working-directory: cerebro
+        run: npm run validate
+
+  full-regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node --test cerebro/tests/*.test.mjs
