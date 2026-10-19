@@ -9,6 +9,7 @@ on:
       - 'src/cerebro-console-host.css'
       - 'src/cerebro-operative-console.css'
       - 'src/RouteAccessGuard.tsx'
+      - 'tests/cerebro-operativa-e2e.spec.ts'
       - 'scripts/verify-cerebro-operativa-v1.mjs'
       - '.github/workflows/cerebro-operativa-v1.yml'
   push:
@@ -19,6 +20,7 @@ on:
       - 'src/cerebro-console-host.css'
       - 'src/cerebro-operative-console.css'
       - 'src/RouteAccessGuard.tsx'
+      - 'tests/cerebro-operativa-e2e.spec.ts'
       - 'scripts/verify-cerebro-operativa-v1.mjs'
       - '.github/workflows/cerebro-operativa-v1.yml'
 
@@ -41,5 +43,13 @@ jobs:
         run: node scripts/verify-cerebro-operativa-v1.mjs
       - name: Install dependencies
         run: npm ci
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Exercise OPERATIVA over the real V0 client contract
+        env:
+          VITE_FENIX_ENV: test
+          VITE_SUPABASE_URL: http://127.0.0.1:54321
+          VITE_SUPABASE_PUBLISHABLE_KEY: operativa-e2e-not-a-real-key
+        run: npx playwright test tests/cerebro-operativa-e2e.spec.ts --project=desktop-chromium --reporter=line
       - name: TypeScript and Vite build
         run: npm run build
