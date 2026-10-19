@@ -5,7 +5,7 @@
   "engine_id": "HEX-001",
   "environment": "PROD_CONTROL_PLANE",
   "version": "1.1.0",
-  "updated_at": "2026-10-19T05:06:29.116527Z",
+  "updated_at": "2026-10-19T09:48:18.379Z",
   "pending": {},
   "authorized_actions": {},
   "decisions": [],
@@ -267,6 +267,61 @@
       "canary": "",
       "additional_cost_eur": 0
     },
+    "name:ai-repo-engineering-layout": {
+      "kind": "WAITING_SAFE",
+      "name": "ai-repo-engineering-layout",
+      "human_alias": "Ai Repo Engineering Layout",
+      "status": "WAITING_SAFE_HANDLER",
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "human_required": "",
+      "updated_at": "",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
+    "name:ffmpeg": {
+      "kind": "WAITING_SAFE",
+      "name": "ffmpeg",
+      "human_alias": "Ffmpeg",
+      "status": "WAITING_SAFE_HANDLER",
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "human_required": "",
+      "updated_at": "",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
+    "name:review-pr": {
+      "kind": "WAITING_SAFE",
+      "name": "review-pr",
+      "human_alias": "Review Pr",
+      "status": "WAITING_SAFE_HANDLER",
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "human_required": "",
+      "updated_at": "",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
+    "name:blind-spots": {
+      "kind": "WAITING_SAFE",
+      "name": "blind-spots",
+      "human_alias": "Blind Spots",
+      "status": "WAITING_SAFE_HANDLER",
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "human_required": "",
+      "updated_at": "",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
+    "name:skill-census": {
+      "kind": "WAITING_SAFE",
+      "name": "skill-census",
+      "human_alias": "Skill Census",
+      "status": "WAITING_SAFE_HANDLER",
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "human_required": "",
+      "updated_at": "",
+      "canary": "",
+      "additional_cost_eur": 0
+    },
     "name:reddit-content-ops": {
       "kind": "HOLD",
       "name": "reddit-content-ops",
@@ -477,7 +532,7 @@
       "additional_cost_eur": 0
     }
   },
-  "last_digest_date": "2026-10-18",
+  "last_digest_date": "2026-10-19",
   "last_delivery_at": "2026-10-18T06:24:37Z",
   "mail_transport": {
     "status": "VERIFIED",
