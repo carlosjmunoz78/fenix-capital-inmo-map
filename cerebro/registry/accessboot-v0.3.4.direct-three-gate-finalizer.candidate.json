@@ -1,0 +1,40 @@
+{
+  "schema_version": "1.0.0",
+  "artifact": "CEREBRO_ACCESSBOOT.exe",
+  "version": "0.3.4",
+  "environment": "PREPROD",
+  "status": "CANDIDATE_PREPROD",
+  "purpose": "direct three-gate physical finalizer with incremental evidence",
+  "preserves": [
+    "Browser Universal",
+    "Device Agent",
+    "Evidence Host",
+    "prior physical PASS results",
+    "legacy profiles"
+  ],
+  "does_not_repeat": [
+    "Browser Universal acceptance",
+    "SCREENSHOT",
+    "MOVE",
+    "CLICK",
+    "TYPE_TEXT",
+    "FILES",
+    "APP_LAUNCH",
+    "PROCESSES",
+    "CLIPBOARD baseline",
+    "SHELL_GUARDED"
+  ],
+  "targeted_gates": [
+    "HOTKEY",
+    "VAULT_SYNTHETIC_ROUNDTRIP",
+    "STARTUP_CONFIG"
+  ],
+  "evidence_strategy": "Go writes device-physical-acceptance-v0.2.json immediately at FINALIZER_BOOT and after each gate; no PowerShell dependency for persistence",
+  "failure_observability": "failure reason is encoded in result.status so Evidence Host v0.2.4 can expose it through its existing whitelist",
+  "prod_allowed": false,
+  "additional_cost_eur": 0,
+  "sha256": "a29d6cee8af7e7b778527935c3b62ce6612424673ecdf0ca9976c2517eb9d299",
+  "physical_execution": "PENDING",
+  "confirmed_operational": false,
+  "supersedes_for_finalization": ["0.3.2", "0.3.3"]
+}
