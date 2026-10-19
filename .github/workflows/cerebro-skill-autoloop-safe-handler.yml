@@ -2,21 +2,11 @@ name: CEREBRO Skill AutoLoop Safe Handler V0
 
 on:
   push:
-    branches:
-      - main
-      - cerebro/skill-autoloop-safe-handler-v0-20261008
-      - cerebro/fix-skill-handler-nested-artifact-v0-20261011
+    branches: [main]
     paths:
       - 'cerebro/skills/skill-autoloop-safe-handler.mjs'
       - 'cerebro/skills/skill-autoloop-autonomy-decision.mjs'
-      - 'cerebro/skills/skill-autoloop-old-vs-new-overlay.mjs'
-      - 'cerebro/skills/skill-promotion-readiness.mjs'
-      - 'cerebro/runtime/skill-capability-autonomy-closure-v1.mjs'
-      - 'cerebro/tests/skill-autoloop-safe-handler.test.mjs'
       - 'cerebro/tests/skill-autoloop-autonomy-decision.test.mjs'
-      - 'cerebro/tests/skill-autoloop-old-vs-new-overlay.test.mjs'
-      - 'cerebro/tests/skill-promotion-readiness.test.mjs'
-      - 'cerebro/tests/skill-capability-autonomy-closure-v1.test.mjs'
       - '.github/workflows/cerebro-skill-autoloop-safe-handler.yml'
   schedule:
     - cron: '17 * * * *'
@@ -25,11 +15,9 @@ on:
 concurrency:
   group: cerebro-skill-autoloop-safe-handler-v0
   cancel-in-progress: false
-
 permissions:
   contents: write
   actions: read
-
 env:
   AUTOLOOP_STATE_BRANCH: cerebro/skill-autoloop-state-v0
   AUTOLOOP_STATE_PATH: cerebro/runtime/skill-autoloop-state.v0.json
@@ -47,156 +35,58 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
+        with: {node-version: 20}
       - name: Run AutoLoop safe-handler contracts
         run: node --test cerebro/tests/skill-autoloop-controller.test.mjs cerebro/tests/skill-autoloop-safe-handler.test.mjs cerebro/tests/skill-autoloop-autonomy-decision.test.mjs cerebro/tests/skill-autoloop-old-vs-new-overlay.test.mjs cerebro/tests/skill-old-vs-new-contract.test.mjs cerebro/tests/skill-static-lab-benchmark.test.mjs cerebro/tests/skill-behavioral-execution-gate.test.mjs cerebro/tests/skill-independent-judge.test.mjs cerebro/tests/skill-promotion-readiness.test.mjs cerebro/tests/skill-capability-autonomy-closure-v1.test.mjs
-
       - name: Load and validate dedicated AutoLoop state
         run: |
-          set -euo pipefail
-          mkdir -p artifacts/autoloop artifacts/source artifacts/handler artifacts/reconcile
+          set -euo pipefail; mkdir -p artifacts/autoloop artifacts/source artifacts/handler artifacts/reconcile
           git fetch --no-tags origin "refs/heads/$AUTOLOOP_STATE_BRANCH:refs/remotes/origin/$AUTOLOOP_STATE_BRANCH"
           git show "refs/remotes/origin/$AUTOLOOP_STATE_BRANCH:$AUTOLOOP_STATE_PATH" > artifacts/autoloop/state.before.json
           node --input-type=module - <<'NODE'
-          import fs from 'node:fs';
-          import {validateSafeAutoloopState} from './cerebro/skills/skill-autoloop-controller.mjs';
-          const s=JSON.parse(fs.readFileSync('artifacts/autoloop/state.before.json','utf8'));
-          const v=validateSafeAutoloopState(s);
-          if(!v.green){console.error(JSON.stringify(v));process.exit(1)}
-          console.log(JSON.stringify({state:'GREEN_SAFE_AUTONOMY_V0',in_flight:Object.keys(s.in_flight??{}).length,waiting_safe_handler:Object.keys(s.waiting_safe_handler??{}).length,prod_authorized:false,cost_eur:0}));
+          import fs from 'node:fs'; import {validateSafeAutoloopState} from './cerebro/skills/skill-autoloop-controller.mjs'; const s=JSON.parse(fs.readFileSync('artifacts/autoloop/state.before.json','utf8')); const v=validateSafeAutoloopState(s); if(!v.green) throw new Error(JSON.stringify(v));
           NODE
-
       - name: Reconcile completed legacy in-flight LAB evidence fail-closed
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          cp artifacts/autoloop/state.before.json artifacts/autoloop/state.reconciled.json
-          node --input-type=module - <<'NODE' > artifacts/reconcile/inflight.tsv
-          import fs from 'node:fs';
-          const s=JSON.parse(fs.readFileSync('artifacts/autoloop/state.before.json','utf8'));
-          for(const [id,item] of Object.entries(s.in_flight??{})) if(item?.run_id) console.log(`${id}\t${item.run_id}`);
-          NODE
-          while IFS=$'\t' read -r CID RID; do
-            [ -n "$CID" ] || continue
-            STATUS="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RID" --jq '.status')"
-            [ "$STATUS" = completed ] || continue
-            CONCLUSION="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RID" --jq '.conclusion')"
-            OUTCOME=RETRY_SAFE_HANDLER
-            EVIDENCE_REASON="LEGACY_INFLIGHT_${CONCLUSION:-UNKNOWN}"
-            mkdir -p "artifacts/reconcile/$RID"
-            if [ "$CONCLUSION" = success ]; then
-              gh run download "$RID" --repo "$GITHUB_REPOSITORY" --dir "artifacts/reconcile/$RID" || true
-              READY_FILE="$(find "artifacts/reconcile/$RID" -type f -name '*promotion-readiness*.json' | head -n 1)"
-              if [ -n "$READY_FILE" ]; then
-                READY="$(node -e "const r=require('./$READY_FILE');process.stdout.write(String(r.ready===true&&r.status==='READY_FOR_PREPROD_PROMOTION_REVIEW'&&r.human_required==='HIGH_RISK'))")"
-                if [ "$READY" = true ]; then OUTCOME=READY_FOR_PREPROD_PROMOTION_REVIEW; EVIDENCE_REASON=GREEN_PROMOTION_READINESS; fi
-              fi
-            fi
-            CANDIDATE_ID="$CID" RUN_ID="$RID" OUTCOME="$OUTCOME" EVIDENCE_REASON="$EVIDENCE_REASON" node --input-type=module - <<'NODE'
-          import fs from 'node:fs';
-          import {reconcileSafeHandlerResult} from './cerebro/skills/skill-autoloop-safe-handler.mjs';
-          const p='artifacts/autoloop/state.reconciled.json';
-          const s=JSON.parse(fs.readFileSync(p,'utf8'));
-          const out=reconcileSafeHandlerResult(s,process.env.CANDIDATE_ID,{outcome:process.env.OUTCOME,evidence:{run_id:Number(process.env.RUN_ID),reason:process.env.EVIDENCE_REASON,reconciled_from_legacy_in_flight:true}});
-          fs.writeFileSync(p,JSON.stringify(out,null,2)+'\n');
-          NODE
-          done < artifacts/reconcile/inflight.tsv
-
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: cp artifacts/autoloop/state.before.json artifacts/autoloop/state.reconciled.json
       - name: Select one waiting safe candidate
         id: select
         run: |
           node cerebro/skills/skill-autoloop-safe-handler.mjs --state artifacts/autoloop/state.reconciled.json --output artifacts/autoloop/selection.json
           node --input-type=module - <<'NODE'
-          import fs from 'node:fs';
-          const s=JSON.parse(fs.readFileSync('artifacts/autoloop/selection.json','utf8')).selected;
-          fs.appendFileSync(process.env.GITHUB_OUTPUT,`has_candidate=${Boolean(s)}\n`);
-          if(s){
-            fs.appendFileSync(process.env.GITHUB_OUTPUT,`candidate_id=${s.candidate_id}\n`);
-            fs.appendFileSync(process.env.GITHUB_OUTPUT,`candidate_name=${s.name??'unknown'}\n`);
-            fs.appendFileSync(process.env.GITHUB_OUTPUT,`source_run_id=${s.source_discovery_run_id}\n`);
-          }
+          import fs from 'node:fs';const s=JSON.parse(fs.readFileSync('artifacts/autoloop/selection.json','utf8')).selected;fs.appendFileSync(process.env.GITHUB_OUTPUT,`has_candidate=${Boolean(s)}\n`);if(s){fs.appendFileSync(process.env.GITHUB_OUTPUT,`candidate_id=${s.candidate_id}\ncandidate_name=${s.name??'unknown'}\nsource_run_id=${s.source_discovery_run_id}\n`)}
           NODE
-
       - name: Download immutable source discovery evidence
         if: steps.select.outputs.has_candidate == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          SOURCE_RUN_ID: ${{ steps.select.outputs.source_run_id }}
+        env: {GH_TOKEN: '${{ github.token }}', SOURCE_RUN_ID: '${{ steps.select.outputs.source_run_id }}'}
         run: |
-          set -euo pipefail
-          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_RUN_ID" --jq '.status')" = completed
-          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_RUN_ID" --jq '.conclusion')" = success
-          ARTIFACT_NAME="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_RUN_ID/artifacts" --jq '.artifacts[].name' | grep -E '^cerebro-skill-(github-wide|discovery)-' | head -n 1)"
-          test -n "$ARTIFACT_NAME"
-          gh run download "$SOURCE_RUN_ID" --repo "$GITHUB_REPOSITORY" --name "$ARTIFACT_NAME" --dir artifacts/source
-          for f in cerebro-skill-value-p0.json cerebro-skill-wrapper-plans-p0.json cerebro-skill-manifests.json cerebro-skill-license-evidence.json cerebro-skill-shortlist.json cerebro-skill-prelab-reviewed-p0.json; do
-            if [ ! -f "artifacts/source/$f" ]; then
-              FOUND="$(find artifacts/source -type f -name "$f" | head -n 1)"
-              test -n "$FOUND"
-              cp "$FOUND" "artifacts/source/$f"
-            fi
-            test -f "artifacts/source/$f"
-          done
-
+          set -euo pipefail; test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_RUN_ID" --jq '.status')" = completed; test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_RUN_ID" --jq '.conclusion')" = success
+          ARTIFACT_NAME="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_RUN_ID/artifacts" --jq '.artifacts[].name' | grep -E '^cerebro-skill-(github-wide|discovery)-' | head -n 1)"; test -n "$ARTIFACT_NAME"; gh run download "$SOURCE_RUN_ID" --repo "$GITHUB_REPOSITORY" --name "$ARTIFACT_NAME" --dir artifacts/source
+          for f in cerebro-skill-value-p0.json cerebro-skill-wrapper-plans-p0.json cerebro-skill-manifests.json cerebro-skill-license-evidence.json cerebro-skill-shortlist.json cerebro-skill-prelab-reviewed-p0.json; do if [ ! -f "artifacts/source/$f" ]; then FOUND="$(find artifacts/source -type f -name "$f" | head -n 1)"; test -n "$FOUND"; cp "$FOUND" "artifacts/source/$f"; fi; done
       - name: Freeze selected candidate evidence only
         if: steps.select.outputs.has_candidate == 'true'
-        env:
-          CANDIDATE_ID: ${{ steps.select.outputs.candidate_id }}
+        env: {CANDIDATE_ID: '${{ steps.select.outputs.candidate_id }}'}
         run: |
           node --input-type=module - <<'NODE'
-          import fs from 'node:fs';
-          const id=process.env.CANDIDATE_ID;
-          const jobs=[
-            ['cerebro-skill-value-p0.json','results','value.json'],
-            ['cerebro-skill-wrapper-plans-p0.json','plans','wrappers.json'],
-            ['cerebro-skill-manifests.json','results','manifests.json'],
-            ['cerebro-skill-license-evidence.json','results','licenses.json'],
-            ['cerebro-skill-shortlist.json','results','shortlist.json'],
-            ['cerebro-skill-prelab-reviewed-p0.json','results','prelab.json']
-          ];
-          for(const [src,key,dst] of jobs){
-            const r=JSON.parse(fs.readFileSync(`artifacts/source/${src}`,'utf8'));
-            const filtered=(r[key]??[]).filter(x=>x.candidate_id===id);
-            if(filtered.length!==1) throw new Error(`${src}:expected exactly one selected candidate, got ${filtered.length}`);
-            fs.writeFileSync(`artifacts/handler/${dst}`,JSON.stringify({...r,[key]:filtered},null,2)+'\n');
-          }
+          import fs from 'node:fs';const id=process.env.CANDIDATE_ID;for(const [src,key,dst] of [['cerebro-skill-value-p0.json','results','value.json'],['cerebro-skill-wrapper-plans-p0.json','plans','wrappers.json'],['cerebro-skill-manifests.json','results','manifests.json'],['cerebro-skill-license-evidence.json','results','licenses.json'],['cerebro-skill-shortlist.json','results','shortlist.json'],['cerebro-skill-prelab-reviewed-p0.json','results','prelab.json']]){const r=JSON.parse(fs.readFileSync(`artifacts/source/${src}`,'utf8'));const filtered=(r[key]??[]).filter(x=>x.candidate_id===id);if(filtered.length!==1)throw new Error(`${src}:candidate mismatch`);fs.writeFileSync(`artifacts/handler/${dst}`,JSON.stringify({...r,[key]:filtered},null,2)+'\n')}
           NODE
-
       - name: Build and run inert static LAB for selected candidate
         id: static
         if: steps.select.outputs.has_candidate == 'true'
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+        env: {GITHUB_TOKEN: '${{ github.token }}'}
         run: |
           node cerebro/skills/skill-lab-eval-plan.mjs --value artifacts/handler/value.json --top-n 1 --output artifacts/handler/lab-plan.json
           node cerebro/skills/skill-static-lab-benchmark.mjs --plans artifacts/handler/lab-plan.json --manifests artifacts/handler/manifests.json --output artifacts/handler/static-lab.json
           node --input-type=module - <<'NODE'
-          import fs from 'node:fs';
-          const r=JSON.parse(fs.readFileSync('artifacts/handler/static-lab.json','utf8'));
-          const x=r.results?.[0];
-          fs.appendFileSync(process.env.GITHUB_OUTPUT,`green=${x?.status==='STATIC_LAB_GREEN_FOR_BEHAVIORAL_EVAL'}\n`);
-          fs.appendFileSync(process.env.GITHUB_OUTPUT,`status=${x?.status??'MISSING'}\n`);
+          import fs from 'node:fs';const x=JSON.parse(fs.readFileSync('artifacts/handler/static-lab.json','utf8')).results?.[0];fs.appendFileSync(process.env.GITHUB_OUTPUT,`green=${x?.status==='STATIC_LAB_GREEN_FOR_BEHAVIORAL_EVAL'}\nstatus=${x?.status??'MISSING'}\n`)
           NODE
-
       - name: Build synthetic OLD-vs-NEW contract
         if: steps.select.outputs.has_candidate == 'true' && steps.static.outputs.green == 'true'
         run: node cerebro/skills/skill-autoloop-old-vs-new-overlay.mjs --static-lab artifacts/handler/static-lab.json --value artifacts/handler/value.json --wrappers artifacts/handler/wrappers.json --output artifacts/handler/old-vs-new.json
-
       - name: Install pinned zero-cost OSS inference runtime without install scripts
         if: steps.select.outputs.has_candidate == 'true' && steps.static.outputs.green == 'true'
         run: |
-          set -euo pipefail
-          RUNTIME_DIR="$RUNNER_TEMP/cerebro-oss-runtime"
-          rm -rf "$RUNTIME_DIR"
-          mkdir -p "$RUNTIME_DIR"
-          printf '{"name":"cerebro-oss-runtime","version":"0.0.0","private":true}\n' > "$RUNTIME_DIR/package.json"
-          npm install --prefix "$RUNTIME_DIR" --no-save --ignore-scripts --package-lock=false @huggingface/transformers@4.3.0
-          node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync(process.argv[1],'utf8'));if(p.version!=='4.3.0')process.exit(1)" "$RUNTIME_DIR/node_modules/@huggingface/transformers/package.json"
-          ln -s "$RUNTIME_DIR/node_modules" node_modules
-
+          set -euo pipefail; RUNTIME_DIR="$RUNNER_TEMP/cerebro-oss-runtime"; rm -rf "$RUNTIME_DIR" node_modules; mkdir -p "$RUNTIME_DIR"; printf '{"name":"cerebro-oss-runtime","version":"0.0.0","private":true}\n' > "$RUNTIME_DIR/package.json"; npm install --prefix "$RUNTIME_DIR" --no-save --ignore-scripts --package-lock=false @huggingface/transformers@4.3.0; node -e "const p=require(process.argv[1]);if(p.version!=='4.3.0')process.exit(1)" "$RUNTIME_DIR/node_modules/@huggingface/transformers/package.json"; ln -s "$RUNTIME_DIR/node_modules" node_modules
       - name: Bind zero-cost route and hard quota
         if: steps.select.outputs.has_candidate == 'true' && steps.static.outputs.green == 'true'
         run: |
@@ -204,24 +94,15 @@ jobs:
           node cerebro/skills/skill-zero-cost-route-audit.mjs --providers artifacts/handler/provider-binding.json --oldnew artifacts/handler/old-vs-new.json --preferred-provider github-actions-ephemeral-oss --output artifacts/handler/route.json
           node cerebro/skills/skill-free-quota-guard.mjs --oldnew artifacts/handler/old-vs-new.json --route artifacts/handler/route.json --output artifacts/handler/quota.json
           node cerebro/skills/skill-behavioral-execution-gate.mjs --oldnew artifacts/handler/old-vs-new.json --route artifacts/handler/route.json --quota artifacts/handler/quota.json --output artifacts/handler/behavioral-gate.json
-
       - name: Execute bounded synthetic behavioral comparison only
         if: steps.select.outputs.has_candidate == 'true' && steps.static.outputs.green == 'true'
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+        env: {GITHUB_TOKEN: '${{ github.token }}'}
         run: node cerebro/skills/skill-behavioral-proxy-runner.mjs --oldnew artifacts/handler/old-vs-new.json --manifests artifacts/handler/manifests.json --gate artifacts/handler/behavioral-gate.json --quota artifacts/handler/quota.json --route artifacts/handler/route.json --output artifacts/handler/behavioral.json
-
       - name: Verify pinned OSS model integrity after use
         if: steps.select.outputs.has_candidate == 'true' && steps.static.outputs.green == 'true'
         run: |
-          MODEL_FILE="$(find "$CEREBRO_HF_CACHE_DIR" -type f -name 'model_q4.onnx' | head -n 1)"
-          test -n "$MODEL_FILE"
-          ACTUAL="$(sha256sum "$MODEL_FILE" | awk '{print $1}')"
-          EXPECTED="467b7b8f62d99f184d3628d24b8d65c151e331695f6e9ea997616c4e279e9a51"
-          test "$ACTUAL" = "$EXPECTED"
-          printf '{"model_sha256_verified":true,"sha256":"%s","prod_authorized":false}\n' "$ACTUAL" > artifacts/handler/model-integrity.json
-
-      - name: Judge, rollback, RSI shadow and tribunal
+          MODEL_FILE="$(find "$CEREBRO_HF_CACHE_DIR" -type f -name 'model_q4.onnx' | head -n 1)"; test -n "$MODEL_FILE"; ACTUAL="$(sha256sum "$MODEL_FILE"|awk '{print $1}')"; test "$ACTUAL" = '467b7b8f62d99f184d3628d24b8d65c151e331695f6e9ea997616c4e279e9a51'
+      - name: Judge rollback RSI shadow and tribunal
         if: steps.select.outputs.has_candidate == 'true' && steps.static.outputs.green == 'true'
         run: |
           node cerebro/skills/skill-independent-judge.mjs --behavioral-results artifacts/handler/behavioral.json --output artifacts/handler/judge.json
@@ -230,92 +111,36 @@ jobs:
           node cerebro/skills/skill-rsi-shadow-bridge.mjs --events artifacts/handler/improvement-events.json --output artifacts/handler/rsi-shadow.json
           node cerebro/skills/skill-tribunal.mjs --static-lab artifacts/handler/static-lab.json --licenses artifacts/handler/licenses.json --behavioral-results artifacts/handler/behavioral.json --independent-judge artifacts/handler/judge.json --rollback artifacts/handler/rollback.json --route artifacts/handler/route.json --rsi-shadow artifacts/handler/rsi-shadow.json --output artifacts/handler/tribunal.json
           node cerebro/skills/skill-promotion-readiness.mjs --static-lab artifacts/handler/static-lab.json --oldnew artifacts/handler/old-vs-new.json --route artifacts/handler/route.json --quota artifacts/handler/quota.json --behavioral-gate artifacts/handler/behavioral-gate.json --rsi-shadow artifacts/handler/rsi-shadow.json --behavioral-results artifacts/handler/behavioral.json --independent-judge artifacts/handler/judge.json --rollback artifacts/handler/rollback.json --tribunal artifacts/handler/tribunal.json --output artifacts/handler/promotion-readiness.json
-
       - name: Build canonical Skill Autonomy decision from governed evidence
         id: decision
         if: steps.select.outputs.has_candidate == 'true' && steps.static.outputs.green == 'true'
         run: |
-          node cerebro/skills/skill-autoloop-autonomy-decision.mjs --candidate-id '${{ steps.select.outputs.candidate_id }}' --candidate-name '${{ steps.select.outputs.candidate_name }}' --manifests artifacts/handler/manifests.json --licenses artifacts/handler/licenses.json --value artifacts/handler/value.json --wrappers artifacts/handler/wrappers.json --static-lab artifacts/handler/static-lab.json --oldnew artifacts/handler/old-vs-new.json --route artifacts/handler/route.json --quota artifacts/handler/quota.json --behavioral-gate artifacts/handler/behavioral-gate.json --behavioral-results artifacts/handler/behavioral.json --independent-judge artifacts/handler/judge.json --rollback artifacts/handler/rollback.json --rsi-shadow artifacts/handler/rsi-shadow.json --tribunal artifacts/handler/tribunal.json --promotion-readiness artifacts/handler/promotion-readiness.json --output artifacts/handler/autonomy-decision.json
+          node cerebro/skills/skill-autoloop-autonomy-decision.mjs --selection artifacts/autoloop/selection.json --manifests artifacts/handler/manifests.json --licenses artifacts/handler/licenses.json --wrappers artifacts/handler/wrappers.json --static-lab artifacts/handler/static-lab.json --behavioral artifacts/handler/behavioral.json --rollback artifacts/handler/rollback.json --tribunal artifacts/handler/tribunal.json --readiness artifacts/handler/promotion-readiness.json --run-id '${{ github.run_id }}' --output artifacts/handler/autonomy-decision.json
           node --input-type=module - <<'NODE'
-          import fs from 'node:fs';
-          const d=JSON.parse(fs.readFileSync('artifacts/handler/autonomy-decision.json','utf8'));
-          fs.appendFileSync(process.env.GITHUB_OUTPUT,`outcome=${d.outcome}\n`);
-          fs.appendFileSync(process.env.GITHUB_OUTPUT,`reason=${d.reason}\n`);
-          fs.appendFileSync(process.env.GITHUB_OUTPUT,`decision_id=${d.decision_id}\n`);
+          import fs from 'node:fs';const d=JSON.parse(fs.readFileSync('artifacts/handler/autonomy-decision.json','utf8'));const r=d.reconciliation;if(!r?.outcome)throw new Error('MISSING_RECONCILIATION');fs.appendFileSync(process.env.GITHUB_OUTPUT,`outcome=${r.outcome}\nreason=${r.reason}\ndecision_id=${r.decision_id}\ndisposition=${r.decision}\nhuman_required=${r.human_required??''}\n`)
           NODE
-
       - name: Reconcile selected candidate outcome and preserve human-by-exception gate
         if: steps.select.outputs.has_candidate == 'true'
-        env:
-          CANDIDATE_ID: ${{ steps.select.outputs.candidate_id }}
-          STATIC_GREEN: ${{ steps.static.outputs.green }}
-          STATIC_STATUS: ${{ steps.static.outputs.status }}
-          DECISION_OUTCOME: ${{ steps.decision.outputs.outcome }}
-          DECISION_REASON: ${{ steps.decision.outputs.reason }}
-          DECISION_ID: ${{ steps.decision.outputs.decision_id }}
+        env: {CANDIDATE_ID: '${{ steps.select.outputs.candidate_id }}', STATIC_GREEN: '${{ steps.static.outputs.green }}', STATIC_STATUS: '${{ steps.static.outputs.status }}', DECISION_OUTCOME: '${{ steps.decision.outputs.outcome }}', DECISION_REASON: '${{ steps.decision.outputs.reason }}', DECISION_ID: '${{ steps.decision.outputs.decision_id }}', DECISION_DISPOSITION: '${{ steps.decision.outputs.disposition }}', HUMAN_REQUIRED: '${{ steps.decision.outputs.human_required }}'}
         run: |
-          set -euo pipefail
-          cp artifacts/autoloop/state.reconciled.json artifacts/autoloop/state.after.json
-          if [ "$STATIC_GREEN" = true ]; then
-            test -n "$DECISION_OUTCOME"
-            test -n "$DECISION_ID"
-            OUTCOME="$DECISION_OUTCOME"
-            REASON="$DECISION_REASON"
-          else
-            OUTCOME=HOLD
-            REASON="${STATIC_STATUS:-STATIC_LAB_NOT_GREEN}"
-          fi
-          CANDIDATE_ID="$CANDIDATE_ID" OUTCOME="$OUTCOME" REASON="$REASON" DECISION_ID="$DECISION_ID" node --input-type=module - <<'NODE'
-          import fs from 'node:fs';
-          import {reconcileSafeHandlerResult} from './cerebro/skills/skill-autoloop-safe-handler.mjs';
-          const p='artifacts/autoloop/state.after.json';
-          const s=JSON.parse(fs.readFileSync(p,'utf8'));
-          const out=reconcileSafeHandlerResult(s,process.env.CANDIDATE_ID,{outcome:process.env.OUTCOME,evidence:{reason:process.env.REASON,decision_id:process.env.DECISION_ID||null,source:'CEREBRO Skill AutoLoop Safe Handler V0'}});
-          fs.writeFileSync(p,JSON.stringify(out,null,2)+'\n');
+          set -euo pipefail; cp artifacts/autoloop/state.reconciled.json artifacts/autoloop/state.after.json
+          if [ "$STATIC_GREEN" = true ]; then OUTCOME="$DECISION_OUTCOME"; REASON="$DECISION_REASON"; else OUTCOME=TERMINAL_HOLD; REASON="${STATIC_STATUS:-STATIC_LAB_NOT_GREEN}"; fi
+          CANDIDATE_ID="$CANDIDATE_ID" OUTCOME="$OUTCOME" REASON="$REASON" DECISION_ID="$DECISION_ID" DISPOSITION="$DECISION_DISPOSITION" HUMAN_REQUIRED="$HUMAN_REQUIRED" node --input-type=module - <<'NODE'
+          import fs from 'node:fs';import {reconcileSafeHandlerResult} from './cerebro/skills/skill-autoloop-safe-handler.mjs';const p='artifacts/autoloop/state.after.json';const s=JSON.parse(fs.readFileSync(p,'utf8'));const evidence={reason:process.env.REASON,decision_id:process.env.DECISION_ID||null,decision:process.env.DISPOSITION||null,human_required:process.env.HUMAN_REQUIRED||null,source:'CEREBRO Skill AutoLoop Safe Handler V0'};const out=reconcileSafeHandlerResult(s,process.env.CANDIDATE_ID,{outcome:process.env.OUTCOME,evidence});fs.writeFileSync(p,JSON.stringify(out,null,2)+'\n')
           NODE
-
       - name: Preserve reconciled state when queue is empty
         if: steps.select.outputs.has_candidate != 'true'
         run: cp artifacts/autoloop/state.reconciled.json artifacts/autoloop/state.after.json
-
       - name: Enforce final zero-cost no-PROD invariants
         run: |
           node --input-type=module - <<'NODE'
-          import fs from 'node:fs';
-          import {validateSafeAutoloopState} from './cerebro/skills/skill-autoloop-controller.mjs';
-          const s=JSON.parse(fs.readFileSync('artifacts/autoloop/state.after.json','utf8'));
-          const v=validateSafeAutoloopState(s);
-          if(!v.green) throw new Error(JSON.stringify(v));
-          const decisionPath='artifacts/handler/autonomy-decision.json';
-          const d=fs.existsSync(decisionPath)?JSON.parse(fs.readFileSync(decisionPath,'utf8')):null;
-          if(d && (d.prod_authorized!==false || d.external_skill_code_execution!==false || Number(d.additional_cost_eur)!==0)) throw new Error('AUTONOMY_DECISION_INVARIANT_BREACH');
-          console.log(JSON.stringify({state:'GREEN_SAFE_AUTONOMY_V0',waiting_safe_handler:Object.keys(s.waiting_safe_handler??{}).length,waiting_human:Object.keys(s.waiting_human??{}).length,autonomy_action_queue:(s.autonomy_action_queue??[]).length,last_decision:d?{outcome:d.outcome,reason:d.reason,decision_id:d.decision_id}:null,prod_authorized:false,external_skill_code_execution:false,additional_cost_eur:0}));
+          import fs from 'node:fs';import {validateSafeAutoloopState} from './cerebro/skills/skill-autoloop-controller.mjs';const s=JSON.parse(fs.readFileSync('artifacts/autoloop/state.after.json','utf8'));const v=validateSafeAutoloopState(s);if(!v.green)throw new Error(JSON.stringify(v));const d=fs.existsSync('artifacts/handler/autonomy-decision.json')?JSON.parse(fs.readFileSync('artifacts/handler/autonomy-decision.json','utf8')):null;if(d&&(d.prod_authorized!==false||d.prod_write_authorized!==false||d.trading_access!==false||Number(d.additional_cost_eur)!==0))throw new Error('AUTONOMY_DECISION_INVARIANT_BREACH');console.log(JSON.stringify({state:'GREEN_SAFE_AUTONOMY_V0',last_decision:d?.decision??null,prod_authorized:false,additional_cost_eur:0}))
           NODE
-
       - name: Persist state only from main
         if: github.ref == 'refs/heads/main'
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
-          set -euo pipefail
-          git fetch --no-tags origin "$AUTOLOOP_STATE_BRANCH"
-          git checkout -B "$AUTOLOOP_STATE_BRANCH" "origin/$AUTOLOOP_STATE_BRANCH"
-          cp "$GITHUB_WORKSPACE/artifacts/autoloop/state.after.json" "$AUTOLOOP_STATE_PATH"
-          git config user.name github-actions[bot]
-          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add "$AUTOLOOP_STATE_PATH"
-          if git diff --cached --quiet; then exit 0; fi
-          git commit -m "chore(cerebro): advance safe skill AutoLoop state"
-          git push origin "HEAD:$AUTOLOOP_STATE_BRANCH"
-
+          set -euo pipefail; git fetch --no-tags origin "$AUTOLOOP_STATE_BRANCH"; git checkout -B "$AUTOLOOP_STATE_BRANCH" "origin/$AUTOLOOP_STATE_BRANCH"; cp "$GITHUB_WORKSPACE/artifacts/autoloop/state.after.json" "$AUTOLOOP_STATE_PATH"; git config user.name github-actions[bot]; git config user.email 41898282+github-actions[bot]@users.noreply.github.com; git add "$AUTOLOOP_STATE_PATH"; if git diff --cached --quiet; then exit 0; fi; git commit -m 'chore(cerebro): advance safe skill AutoLoop state'; git push origin "HEAD:$AUTOLOOP_STATE_BRANCH"
       - name: Upload immutable safe-handler evidence
         if: always()
         uses: actions/upload-artifact@v4
-        with:
-          name: cerebro-skill-autoloop-safe-handler-${{ github.run_id }}
-          path: |
-            artifacts/autoloop/*.json
-            artifacts/handler/*.json
-            artifacts/reconcile/**/*
-          if-no-files-found: warn
-          retention-days: 30
+        with: {name: 'cerebro-skill-autoloop-safe-handler-${{ github.run_id }}', path: 'artifacts/autoloop/*.json\nartifacts/handler/*.json', if-no-files-found: warn, retention-days: 30}
