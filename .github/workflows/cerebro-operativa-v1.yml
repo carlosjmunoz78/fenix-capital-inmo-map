@@ -1,0 +1,45 @@
+name: CEREBRO Operativa V1 Gate
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/CerebroConsoleHost.tsx'
+      - 'src/CerebroOperativeConsole.tsx'
+      - 'src/cerebro-console-host.css'
+      - 'src/cerebro-operative-console.css'
+      - 'src/RouteAccessGuard.tsx'
+      - 'scripts/verify-cerebro-operativa-v1.mjs'
+      - '.github/workflows/cerebro-operativa-v1.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'src/CerebroConsoleHost.tsx'
+      - 'src/CerebroOperativeConsole.tsx'
+      - 'src/cerebro-console-host.css'
+      - 'src/cerebro-operative-console.css'
+      - 'src/RouteAccessGuard.tsx'
+      - 'scripts/verify-cerebro-operativa-v1.mjs'
+      - '.github/workflows/cerebro-operativa-v1.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  operativa-v1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Verify V0 wrapping, provenance and no fake metrics
+        run: node scripts/verify-cerebro-operativa-v1.mjs
+      - name: Install dependencies
+        run: npm ci
+      - name: TypeScript and Vite build
+        run: npm run build
