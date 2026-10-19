@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.0.0",
+  "status": "HECHO",
+  "recorded_at": "2026-10-19T15:35:00Z",
+  "scope": "PREPROD",
+  "canonical_device_id": "desktop-4c008d88919f",
+  "browser_instances": {
+    "opera_office": {
+      "label": "Opera oficina",
+      "authoritative_for": "PC_OFICINA",
+      "verified_signature": {
+        "expected_visible_state_when_idle": "single_normal_start_tab",
+        "connector_tab_signature_example": {
+          "tab_id": 1126889980,
+          "title": "Acceso rápido",
+          "url": "opera://startpageshared/"
+        },
+        "localhost_health_verified": "http://127.0.0.1:8767/health",
+        "evidence_host_service": "CEREBRO Device Evidence Host",
+        "evidence_host_version": "0.2.4"
+      }
+    },
+    "other_opera": {
+      "label": "Opera no-oficina",
+      "authoritative_for": "NOT_PC_OFICINA",
+      "observed_signature": "multiple staging/admin tabs",
+      "do_not_use_for_pc_office_evidence": true
+    }
+  },
+  "selection_rule": "For PC office work, use only the Opera instance physically verified as Opera oficina. If connector results conflict with the recorded signature, stop and re-identify before acting. Never infer office Opera from staging tabs alone.",
+  "do_not_repeat": [
+    "Do not confuse the two Opera instances.",
+    "Do not treat the Opera with multiple staging tabs as Opera oficina unless re-verified.",
+    "Do not overwrite this binding without fresh physical verification from the PC office.",
+    "Do not use the non-office Opera for localhost physical evidence of desktop-4c008d88919f."
+  ],
+  "prod_allowed": false,
+  "additional_cost_eur": 0
+}
