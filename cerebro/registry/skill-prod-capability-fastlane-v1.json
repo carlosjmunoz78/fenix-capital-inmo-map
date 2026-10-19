@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_SKILL_PROD_CAPABILITY_FAST_LANE_POLICY_V1",
+  "date": "2026-10-20",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PROD_CAPABILITY",
+  "version": "1.0.0",
+  "status": "DEFINED_IMPLEMENTED_PENDING_CI_AND_MERGE",
+  "objective": "Eliminate avoidable waiting between FULL_SAFE_PREPROD plus real PROD read-only canary evidence and safe production capability availability, without granting mutation authority.",
+  "authorization_basis": "explicit_user_request_2026-10-20_to_increase_skill_prod_promotion_speed_massively",
+  "execution": {
+    "primary_mode": "EVENT_DRIVEN",
+    "hourly_wait_required": false,
+    "polling_as_primary": false,
+    "blocked_candidate_blocks_independent_work": false,
+    "preprod_batch_parallelism_target": 5,
+    "preprod_batch_parallelism_ceiling_without_new_benchmark": 5,
+    "fast_lane_target_seconds_after_all_required_evidence_is_in_main": 300,
+    "human_wait_target_seconds_when_no_canonical_exception_exists": 0
+  },
+  "readonly_prod_capability_gate": {
+    "required_status": "FULL_SAFE_PREPROD",
+    "real_prod_readonly_canary_required": true,
+    "provenance_and_license_green": true,
+    "safe_internal_wrapper_or_reuse_path": true,
+    "relevant_engine_bindings_resolved": true,
+    "old_vs_new_pass": true,
+    "tribunal_pass": true,
+    "no_regression": true,
+    "rollback_proven": true,
+    "rebuild_proven": true,
+    "observability_connected": true,
+    "audit_chain_connected": true,
+    "finops_connected": true,
+    "lrn001_feedback_connected": true,
+    "idempotency_proven": true,
+    "zero_additional_cost": true,
+    "human_required_must_be_null": true
+  },
+  "result_state": "PROD_CAPABILITY_AVAILABLE_READONLY",
+  "semantic_separation": {
+    "prod_capability_available_readonly": "The internal CEREBRO wrapper/pattern may be resolved by an already-governed PROD engine for read-only/advisory modes.",
+    "prod_authorized": "Still false. The skill itself does not own PROD action authority.",
+    "prod_write_authorized": "Still false. Mutation authority can only come from the origin engine policy/action contract.",
+    "external_skill_code_execution": "Always false in this lane. CEREBRO uses its safe internal wrapper/reuse path only."
+  },
+  "allowed_request_modes": [
+    "ADVISE",
+    "ANALYZE",
+    "REVIEW",
+    "PLAN",
+    "READONLY_OBSERVE"
+  ],
+  "forbidden_in_this_lane": [
+    "PROD_WRITE",
+    "PROD_MUTATION",
+    "PERMISSION_EXPANSION",
+    "CUSTOMER_DATA_ACCESS_NOT_ALREADY_AUTHORIZED_BY_ORIGIN_ENGINE",
+    "EXTERNAL_SKILL_CODE_EXECUTION",
+    "TRADING_ACCESS",
+    "PAID_FALLBACK",
+    "SILENT_SPEND"
+  ],
+  "human_required_codes": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "current_expected_initial_availability": {
+    "count": 2,
+    "technical_names": [
+      "skill-creator",
+      "github"
+    ],
+    "reason": "Both already have FULL_SAFE_PREPROD plus explicit GREEN PROD read-only canary evidence in the canonical queue. This policy does not manufacture equivalent evidence for other skills."
+  },
+  "cost": {
+    "additional_cost_eur": 0,
+    "idle_cron_added": false
+  },
+  "rollback": "Disable or revert this resolver/policy. Existing FULL_SAFE_PREPROD closures remain unchanged. No external PROD mutation is performed by this lane.",
+  "next_gate": "CI_GREEN_THEN_MERGE_SMALL_PR_THEN_VERIFY_MAIN_RESOLVER_OUTPUT"
+}
