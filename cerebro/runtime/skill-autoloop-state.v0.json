@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-19T23:51:11.752Z",
+  "updated_at": "2026-10-19T23:51:48.379Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -799,42 +799,6 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 39166094677,
       "checkpointed_at": "2026-10-18T21:03:41.296Z",
-      "human_required": null,
-      "external_skill_code_execution": false,
-      "customer_data_used": false,
-      "prod_write": false,
-      "trading_access": false,
-      "paid_fallback": false,
-      "additional_cost_eur": 0
-    },
-    "github-wide-skills:fc1cc2732113e136aa31": {
-      "candidate_id": "github-wide-skills:fc1cc2732113e136aa31",
-      "name": "skill-census",
-      "human_alias": "Skill Census",
-      "wrapper_id": "skillwrap:7512fdea76dc2ff2d84b",
-      "domain": "software-engineering-devops",
-      "engine_bindings": [
-        "FACT-001",
-        "ARCH-001",
-        "API-001",
-        "DEP-001",
-        "MIG-001",
-        "QA-001",
-        "REG-001",
-        "DOCS-001"
-      ],
-      "value_score": 88.09,
-      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
-      "evidence_refs": {
-        "upstream_full_name": "findastra/lunas-log",
-        "upstream_head_commit": "c27bf77818de0b8324e3c3f5009ca6c37a0f6756",
-        "manifest_sha256": "110ccfe97a3d2868c1803268199f0f8f1d7523b04b4b28a304d1ed376808427d",
-        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
-      },
-      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
-      "status": "WAITING_SAFE_HANDLER",
-      "source_discovery_run_id": 39176014062,
-      "checkpointed_at": "2026-10-18T23:19:37.887Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -2160,9 +2124,54 @@
       },
       "updated_at": "2026-10-19T17:50:22.539Z",
       "prod_authorized": false
+    },
+    "github-wide-skills:fc1cc2732113e136aa31": {
+      "candidate_id": "github-wide-skills:fc1cc2732113e136aa31",
+      "name": "skill-census",
+      "human_alias": "Skill Census",
+      "wrapper_id": "skillwrap:7512fdea76dc2ff2d84b",
+      "domain": "software-engineering-devops",
+      "engine_bindings": [
+        "FACT-001",
+        "ARCH-001",
+        "API-001",
+        "DEP-001",
+        "MIG-001",
+        "QA-001",
+        "REG-001",
+        "DOCS-001"
+      ],
+      "value_score": 88.09,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "findastra/lunas-log",
+        "upstream_head_commit": "c27bf77818de0b8324e3c3f5009ca6c37a0f6756",
+        "manifest_sha256": "110ccfe97a3d2868c1803268199f0f8f1d7523b04b4b28a304d1ed376808427d",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "SAFE_HANDLER_TERMINAL_HOLD",
+      "status": "TERMINAL_HOLD",
+      "source_discovery_run_id": 39176014062,
+      "checkpointed_at": "2026-10-18T23:19:37.887Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0,
+      "evidence": {
+        "reason": "STATIC_LAB_HOLD",
+        "decision_id": null,
+        "decision": null,
+        "human_required": null,
+        "source": "CEREBRO Skill AutoLoop Safe Handler V0"
+      },
+      "updated_at": "2026-10-19T23:51:48.379Z",
+      "prod_authorized": false
     }
   },
-  "last_action": "APPLY_REJECT_CAPABILITY_CONTINUE_DISCOVERY",
+  "last_action": "TERMINAL_HOLD_CONTINUE_OTHER_SAFE_WORK",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
