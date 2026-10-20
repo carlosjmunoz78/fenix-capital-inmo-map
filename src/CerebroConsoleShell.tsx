@@ -2,6 +2,7 @@ import {useEffect,useRef,useState,type FormEvent} from 'react';
 import {useLocation,useNavigate} from 'react-router-dom';
 import {BrainCircuit,ChevronLeft,Mic,MicOff,Send,ShieldCheck,Square} from 'lucide-react';
 import {cerebroConsoleLinkEnabled} from './cerebroConsoleAccess';
+import {CEREBRO_CONVERSATION_SELECT,ensureActiveCerebroConversation,getCerebroConversation,persistCerebroConversation} from './cerebroConversationHistory';
 import {fetchAppApi,supabase} from './supabase';
 import {fetchCerebroConsoleHealth,fetchCerebroConsolePreferences,postCerebroConsoleChat,type CerebroConsoleHealth,type CerebroConversationTurn,type CerebroLearningCandidate,type CerebroPendingAction,type CerebroPreferences,type CerebroReadContext} from './cerebroConsoleApi';
 import {applyVoiceContextHints,applyVoiceInterruptHints,createVoiceRecognition,preferredSpanishVoice,spanishVoices,speechSegments,speechSynthesisSupported,voiceActivityFrame,voiceActivityThreshold,voiceAlternativeScore,voiceInterruptRequested,voiceNeedsClarification,voiceResumeRequested,voiceNeedsManualConfirmation,voiceRecognitionSupported,type CerebroSpeechRecognition,type CerebroSpokenMeta} from './cerebroVoice';
@@ -24,12 +25,15 @@ export default function CerebroConsoleShell(){
  const location=useLocation(),navigate=useNavigate();
  const isCerebroPath=location.pathname.replace(/\/+$/,'')==='/cerebro';
  const configured=cerebroConsoleLinkEnabled();
+ const initialConversationRef=useRef<ReturnType<typeof ensureActiveCerebroConversation>|null>(null);
+ if(initialConversationRef.current===null)initialConversationRef.current=ensureActiveCerebroConversation();
  const [ownerAccess,setOwnerAccess]=useState<OwnerAccess>('checking');
  const [gatewayState,setGatewayState]=useState<GatewayState>('closed');
  const [health,setHealth]=useState<CerebroConsoleHealth|null>(null);
  const [message,setMessage]=useState('');
  const [sending,setSending]=useState(false);
- const [lines,setLines]=useState<ChatLine[]>([]);
+ const [activeConversationId,setActiveConversationId]=useState(initialConversationRef.current.id);
+ const [lines,setLines]=useState<ChatLine[]>(initialConversationRef.current.lines);
  const [pendingAction,setPendingAction]=useState<CerebroPendingAction|null>(null);
  const [readContext,setReadContext]=useState<CerebroReadContext|null>(null);
  const [voiceSessionActive,setVoiceSessionActive]=useState(false);
@@ -69,6 +73,30 @@ export default function CerebroConsoleShell(){
  useEffect(()=>{readContextRef.current=readContext},[readContext]);
  useEffect(()=>{voicePreferencesRef.current=voicePreferences},[voicePreferences]);
  useEffect(()=>{learningCandidateRef.current=learningCandidate},[learningCandidate]);
+ useEffect(()=>{if(activeConversationId)persistCerebroConversation(activeConversationId,lines)},[activeConversationId,lines]);
+ useEffect(()=>{
+  const onSelect=(event:Event)=>{
+   const id=String((event as CustomEvent<{id?:string}>).detail?.id??'');
+   if(!id||id===activeConversationId)return;
+   const target=getCerebroConversation(id);
+   if(!target)return;
+   if(voiceSessionRef.current)endVoiceSession();
+   sendingRef.current=false;
+   pendingActionRef.current=null;
+   readContextRef.current=null;
+   learningCandidateRef.current=null;
+   setSending(false);
+   setPendingAction(null);
+   setReadContext(null);
+   setLearningCandidate(null);
+   setMessage('');
+   setVoiceError('');
+   setActiveConversationId(target.id);
+   setLines(target.lines);
+  };
+  window.addEventListener(CEREBRO_CONVERSATION_SELECT,onSelect as EventListener);
+  return()=>window.removeEventListener(CEREBRO_CONVERSATION_SELECT,onSelect as EventListener);
+ },[activeConversationId]);
 
  useEffect(()=>{
   let cancelled=false;
@@ -673,7 +701,7 @@ export default function CerebroConsoleShell(){
      ?'Conversación activa. Reanudando escucha automáticamente…'
      :'Un toque inicia una conversación continua: hablas, CEREBRO responde y vuelve a escuchar.';
 
- return <main className="cerebro-console">
+ return <main className="cerebro-console" data-conversation-id={activeConversationId}>
   <header className="cerebro-header"><button className="cerebro-back" onClick={()=>navigate('/perfil')}><ChevronLeft size={18}/> Mi perfil</button><div><small>CEREBRO OS · CONSOLE V0</small><h1><BrainCircuit size={25}/> CEREBRO</h1></div><span className="cerebro-lab"><ShieldCheck size={16}/> LAB</span></header>
   <section className="cerebro-panel">
    <h2>{title}</h2>
