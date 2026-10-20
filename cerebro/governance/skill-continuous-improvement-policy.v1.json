@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_SKILL_CONTINUOUS_IMPROVEMENT_POLICY_V1",
+  "policy_id": "CEREBRO_SKILL_EVOLUTION_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "LRN-001",
+  "environment": "GOVERNANCE",
+  "version": "1.0.0",
+  "enabled_by_default": true,
+  "scope": {
+    "all_acquired_skills": true,
+    "all_cerebro_owned_wrappers": true,
+    "all_generated_or_derived_skills": true,
+    "opt_out_requires_policy_exception": true
+  },
+  "principle": "A skill is never considered finished when acquired. Its active production version is an immutable governed baseline while CEREBRO continuously seeks, tests and learns from safer, cheaper or more capable candidates.",
+  "ownership": {
+    "learning_engine": "LRN-001",
+    "factory_engine": "FACT-001",
+    "evaluation_required": true,
+    "tribunal_required": true
+  },
+  "review": {
+    "mode": "EVENT_DRIVEN_PLUS_PERIODIC",
+    "periodic_review_enabled": true,
+    "max_interval_hours": 24,
+    "triggers": [
+      "UPSTREAM_RELEASE_OR_CHANGE",
+      "TEST_OR_REGRESSION_SIGNAL",
+      "SECURITY_OR_POLICY_SIGNAL",
+      "LOW_CONFIDENCE_OR_RECURRING_FAILURE",
+      "USAGE_OR_EVALUATION_EVIDENCE",
+      "LRN_001_LEARNED_GAP",
+      "COMPLEMENTARY_CAPABILITY_DISCOVERED",
+      "CHEAPER_LOCAL_OR_SAFER_ALTERNATIVE_DISCOVERED",
+      "PERIODIC_REVIEW"
+    ]
+  },
+  "strategies": [
+    "UPSTREAM_UPDATE",
+    "INTERNAL_HARDENING",
+    "COMPOSITE_AUGMENTATION",
+    "DERIVED_SKILL",
+    "REPLACEMENT_CANDIDATE"
+  ],
+  "candidate_rules": {
+    "mode": "GOVERNED_CANDIDATE_ONLY",
+    "baseline_immutable_in_prod": true,
+    "candidate_environment": "PREPROD",
+    "parallel_implementation_required": true,
+    "old_vs_new_required": true,
+    "tests_required": true,
+    "evaluation_required": true,
+    "tribunal_required": true,
+    "observability_required": true,
+    "rollback_required": true,
+    "backup_rebuild_required": true,
+    "cost_measurement_required": true,
+    "promotion_requires_measurable_gain": true,
+    "reject_on_uncertain_gain": true,
+    "record_rejected_attempt_as_learning": true
+  },
+  "non_regression_dimensions": [
+    "SAFETY",
+    "COMPATIBILITY",
+    "QUALITY",
+    "COST",
+    "OBSERVABILITY",
+    "ROLLBACK",
+    "BACKUP_REBUILD"
+  ],
+  "authority": {
+    "direct_prod_mutation": false,
+    "direct_prod_write": false,
+    "external_side_effects": false,
+    "raw_external_skill_code_execution": false,
+    "dependency_install": false,
+    "trading_access": false,
+    "spend_authorized": false,
+    "additional_cost_budget_eur": 0
+  },
+  "human_required_reasons": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "loop": [
+    "OBSERVE",
+    "MEASURE",
+    "SEEK_IMPROVEMENT",
+    "PROPOSE_CANDIDATE",
+    "ADAPT_COMPOSE_OR_CREATE",
+    "TEST_IN_PARALLEL",
+    "OLD_VS_NEW",
+    "EVALUATE",
+    "TRIBUNAL",
+    "PROMOTE_OR_REJECT",
+    "LEARN",
+    "REPEAT"
+  ]
+}
