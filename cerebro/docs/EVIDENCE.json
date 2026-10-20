@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "phase_5": {
     "reviewed_head_sha": "2180258a3ae91697d6bd988361996afa62032f72",
     "merge_sha": "c2eb030e2e8ed0ab45ca58775a7183e359e3d2e9",
@@ -33,6 +33,38 @@
         "runtime_smoke": { "run_id": 34293942069, "conclusion": "success", "head_sha": "6bf6af92c1106884da87fb9a659f807093d47e0a" }
       },
       "autonomous_cerebro": false
+    }
+  },
+  "external_system_state_2026_10_20": {
+    "registry": "../registry/external-system-state.v1.json",
+    "canonical_doc": "CEREBRO_EXTERNAL_SYSTEM_STATE_2026-10-20.md",
+    "web_001": {
+      "evidence_state": "CONFIRMED_OPERATIONAL",
+      "scope": "EXISTING_FENIX_CAPITAL_WORDPRESS_PROD_SURFACE",
+      "environment": "PROD",
+      "url": "https://fenixcapital.es",
+      "readonly_live_check": {
+        "date": "2026-10-20",
+        "result": "REACHABLE_EXISTING_PROD_SURFACE",
+        "wp_version": "7.1.3",
+        "active_theme": "Astra 4.14.0"
+      },
+      "planned_change_date": "2026-10-21",
+      "planned_change_status": "PLANIFICADO",
+      "mutation_performed_by_this_correction": false
+    },
+    "lab_trd": {
+      "evidence_state": "DOCUMENTED_PARTIAL",
+      "scope": "EXISTING_ISOLATED_TRADING_SYSTEM",
+      "purpose": "STOCK_MARKET_INVESTING_TRADING_SYSTEM",
+      "runtime_location": "GOOGLE_CLOUD_OWNER_CONFIRMED",
+      "isolated": true,
+      "cerebro_trading_access": false,
+      "blocked_by": [
+        "BROWSER_CONTROL_E2E_CONFIRMED",
+        "PC_CONTROL_E2E_CONFIRMED"
+      ],
+      "separate_trading_validation_required_after_device_gates": true
     }
   },
   "governance_v0": {
