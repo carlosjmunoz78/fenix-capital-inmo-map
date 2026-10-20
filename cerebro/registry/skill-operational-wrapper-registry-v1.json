@@ -1,0 +1,59 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_SKILL_OPERATIONAL_WRAPPER_REGISTRY_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PROD_CAPABILITY",
+  "version": "1.0.0",
+  "policy": {
+    "internal_cerebro_code_only": true,
+    "raw_external_skill_code_execution": false,
+    "external_side_effects_authorized": false,
+    "direct_prod_write_authorized": false,
+    "direct_prod_mutation_authorized": false,
+    "trading_access": false,
+    "spend_authorized": false,
+    "additional_cost_budget_eur": 0
+  },
+  "wrappers": [
+    {
+      "candidate_id": "repo:fc81dac4018cb6cdf3b2e98a901f",
+      "technical_name": "drei",
+      "wrapper_id": "skillwrap:drei-internal-v1",
+      "wrapper_ref": "cerebro/runtime/skill-wrappers/drei-v1.mjs",
+      "export_name": "executeDreiInternalCapability",
+      "implementation_kind": "CEREBRO_INTERNAL_REIMPLEMENTATION_FROM_LICENSED_KNOWLEDGE",
+      "source_locator": "github://TerminalSkills/skills@6edcf94159d9f46b0759d2e1b59dd545cfaca254/skills/drei",
+      "source_license": "Apache-2.0",
+      "pinned_sha": "6edcf94159d9f46b0759d2e1b59dd545cfaca254",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "supported_modes": [
+        "ADVISE",
+        "ANALYZE",
+        "REVIEW",
+        "PLAN",
+        "TRANSFORM",
+        "GENERATE",
+        "VALIDATE",
+        "SIMULATE",
+        "INTERNAL_BUILD",
+        "EXECUTE_INTERNAL"
+      ],
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "external_side_effects_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "trading_access": false,
+      "spend_authorized": false,
+      "additional_cost_eur": 0,
+      "status": "READY_INTERNAL_OPERATIONAL_CANARY"
+    }
+  ]
+}
