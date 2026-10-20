@@ -7,7 +7,7 @@ on:
       - CEREBRO Known Skill Pool Intake V1
     types:
       - completed
-  workflow_dispatch:
+  workflow_dispatch: {}
 
 permissions:
   contents: write
@@ -19,11 +19,11 @@ concurrency:
 
 jobs:
   adopt-and-promote-readonly:
-    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main') }}
     runs-on: ubuntu-latest
     timeout-minutes: 12
     env:
-      PROPOSAL_DIR: ${{ runner.temp }}/dynamic-proposal
+      PROPOSAL_DIR: /tmp/cerebro-dynamic-proposal
       REGISTRY: cerebro/registry/skill-dynamic-adoption-v1.json
     steps:
       - uses: actions/checkout@v4
@@ -39,7 +39,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: cerebro-dynamic-adoption-proposal-${{ github.event.workflow_run.id }}
-          path: ${{ runner.temp }}/dynamic-proposal
+          path: /tmp/cerebro-dynamic-proposal
           github-token: ${{ github.token }}
           run-id: ${{ github.event.workflow_run.id }}
       - name: Gate proposal and recover any pending registry work
