@@ -74,7 +74,7 @@ export function applySafeEngineeringAdmissions({state,queue_report,now=new Date(
       preprod_internal_wrapper_activation_authorized:false,factory_candidate_authorized:decision==='FABRICAR_GRATIS',factory_create_authorized:false,
       additional_cost_eur:0,prod_authorized:false,prod_write_authorized:false,trading_access:false,external_skill_code_execution_authorized:false
     };
-    out=reconcileSafeHandlerResult(out,id,{outcome:'AUTONOMOUS_PREPROD_DECISION',evidence,now});
+    out=clone(reconcileSafeHandlerResult(out,id,{outcome:'AUTONOMOUS_PREPROD_DECISION',evidence,now}));
     admissions.push({candidate_id:id,technical_name:technicalName(row),status:'ADMITTED_TO_SAFE_ACTION_QUEUE',decision,decision_id:decisionId,action_type:out.completed?.[id]?.action_type??null,action_status:out.completed?.[id]?.action_status??null,human_required:null});
     admitted+=1;
   }
