@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_DYNAMIC_SKILL_ADOPTION_GATEWAY_POLICY_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "consumer": "CEREBRO_GATEWAY_VIA_ORIGIN_ENGINE",
+  "direct_model_binding": false,
+  "direct_external_skill_binding": false,
+  "origin_engine_policy_required": true,
+  "additional_cost_eur": 0
+}
