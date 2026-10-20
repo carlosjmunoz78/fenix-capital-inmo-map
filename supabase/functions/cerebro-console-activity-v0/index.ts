@@ -10,6 +10,7 @@ const ALLOWED_ORIGINS=new Set([
   "https://app.fenixcapital.es",
   "https://www.app.fenixcapital.es"
 ]);
+const NON_FAILURE_CONCLUSIONS=new Set(["success","neutral","skipped"]);
 
 type GithubRun={
   id:number;
@@ -26,7 +27,16 @@ type GithubRun={
 };
 
 type GithubStep={name?:string;status?:string;conclusion?:string|null;number?:number};
-type GithubJob={name?:string;status?:string;conclusion?:string|null;steps?:GithubStep[]};
+type GithubJob={
+  id?:number;
+  name?:string;
+  status?:string;
+  conclusion?:string|null;
+  started_at?:string|null;
+  completed_at?:string|null;
+  html_url?:string;
+  steps?:GithubStep[];
+};
 
 type ProgressProjection={
   progress_percent:number|null;
@@ -149,8 +159,6 @@ function terminalProgress(run:GithubRun):ProgressProjection{
 
 async function liveProgress(run:GithubRun):Promise<ProgressProjection>{
   if(String(run.status)!=="in_progress")return terminalProgress(run);
-  // Step-level progress is only queried when an authenticated GitHub token is available.
-  // This avoids exhausting the public API quota while preserving a zero-additional-cost design.
   if(!(Deno.env.get("GITHUB_TOKEN")??"").trim())return terminalProgress(run);
   try{
     const response=await fetch(`https://api.github.com/repos/${REPOSITORY}/actions/runs/${run.id}/jobs?per_page=100`,{headers:githubHeaders()});
@@ -207,6 +215,85 @@ async function projectRun(run:GithubRun){
   };
 }
 
+function isoMs(value:string|null|undefined){
+  if(!value)return null;
+  const ms=Date.parse(value);
+  return Number.isFinite(ms)?ms:null;
+}
+
+function durationMs(start:string|null,finish:string|null){
+  const a=isoMs(start),b=isoMs(finish);
+  return a===null||b===null||b<a?null:b-a;
+}
+
+function failurePriority(conclusion:string|null|undefined){
+  const value=String(conclusion??"");
+  if(value==="failure")return 0;
+  if(value==="timed_out")return 1;
+  if(value==="startup_failure")return 2;
+  if(value==="action_required")return 3;
+  if(value==="cancelled")return 4;
+  return 5;
+}
+
+async function loadRunDetail(runId:number){
+  const [runResponse,jobsResponse]=await Promise.all([
+    fetch(`https://api.github.com/repos/${REPOSITORY}/actions/runs/${runId}`,{headers:githubHeaders()}),
+    fetch(`https://api.github.com/repos/${REPOSITORY}/actions/runs/${runId}/jobs?per_page=100`,{headers:githubHeaders()})
+  ]);
+  if(!runResponse.ok)throw new Error(`GITHUB_RUN_${runResponse.status}`);
+  if(!jobsResponse.ok)throw new Error(`GITHUB_JOBS_${jobsResponse.status}`);
+  const run=await runResponse.json() as GithubRun;
+  if(!isCerebroWorkflow(run))throw new Error("RUN_OUTSIDE_CEREBRO_SCOPE");
+  const jobsData=await jobsResponse.json() as {jobs?:GithubJob[]};
+  const jobs=jobsData.jobs??[];
+  const failedSteps=jobs.flatMap(job=>(job.steps??[])
+    .filter(step=>Boolean(step.conclusion)&&!NON_FAILURE_CONCLUSIONS.has(String(step.conclusion)))
+    .map(step=>({
+      job_name:String(job.name??"Job"),
+      step_name:String(step.name??"Paso"),
+      step_number:Number.isFinite(Number(step.number))?Number(step.number):null,
+      conclusion:step.conclusion??null
+    })))
+    .sort((a,b)=>failurePriority(a.conclusion)-failurePriority(b.conclusion));
+  const failedJobs=jobs
+    .filter(job=>Boolean(job.conclusion)&&!NON_FAILURE_CONCLUSIONS.has(String(job.conclusion)))
+    .sort((a,b)=>failurePriority(a.conclusion)-failurePriority(b.conclusion));
+  const firstStep=failedSteps[0]??null;
+  const firstJob=failedJobs[0]??null;
+  const startedAt=run.run_started_at?String(run.run_started_at):(run.created_at?String(run.created_at):null);
+  const jobCompletionTimes=jobs.map(job=>job.completed_at?String(job.completed_at):null).filter((value):value is string=>Boolean(value));
+  const latestJobCompletion=jobCompletionTimes.sort((a,b)=>(isoMs(b)??0)-(isoMs(a)??0))[0]??null;
+  const completedAt=String(run.status??"")==="completed"?(latestJobCompletion||(run.updated_at?String(run.updated_at):null)):null;
+  const conclusion=run.conclusion??null;
+  let failureSummary:string|null=null;
+  if(String(run.status)==="completed"&&conclusion!=="success"){
+    if(firstStep)failureSummary=`Falló el paso «${firstStep.step_name}» dentro de «${firstStep.job_name}» (${firstStep.conclusion??conclusion??"sin resultado"}).`;
+    else if(firstJob)failureSummary=`El job «${firstJob.name??"Job"}» terminó con resultado «${firstJob.conclusion??conclusion??"sin resultado"}».`;
+    else failureSummary=`La ejecución terminó con resultado «${conclusion??"desconocido"}». GitHub no publica un paso fallido resumido para este run.`;
+  }
+  return{
+    run_id:run.id,
+    status:String(run.status??"unknown"),
+    conclusion,
+    started_at:startedAt,
+    completed_at:completedAt,
+    duration_ms:durationMs(startedAt,completedAt),
+    failed_job:firstStep?.job_name??(firstJob?.name?String(firstJob.name):null),
+    failed_step:firstStep?.step_name??null,
+    failure_summary:failureSummary,
+    failed_steps:failedSteps.slice(0,12),
+    jobs:jobs.map(job=>({
+      name:String(job.name??"Job"),
+      status:String(job.status??"unknown"),
+      conclusion:job.conclusion??null,
+      started_at:job.started_at?String(job.started_at):null,
+      completed_at:job.completed_at?String(job.completed_at):null,
+      html_url:String(job.html_url??"")
+    }))
+  };
+}
+
 async function loadActivity():Promise<ActivityPayload>{
   const now=Date.now();
   if(cache&&now-cache.at<CACHE_TTL_MS){
@@ -259,6 +346,18 @@ export default{
     }
     if(req.method!=="GET")return json(req,405,{status:"CLOSED",reason:"READ_ONLY"});
     if(!await authorizedOwner(req))return json(req,403,{status:"FORBIDDEN",reason:"OWNER_ONLY"});
+    const url=new URL(req.url);
+    const runIdRaw=url.searchParams.get("run_id");
+    if(runIdRaw!==null){
+      const runId=Number(runIdRaw);
+      if(!Number.isSafeInteger(runId)||runId<=0)return json(req,400,{status:"ERROR",reason:"INVALID_RUN_ID"});
+      try{
+        const runDetail=await loadRunDetail(runId);
+        return json(req,200,{status:"OK",observed_at:new Date().toISOString(),source:"GITHUB_ACTIONS",repository:REPOSITORY,run_detail:runDetail});
+      }catch(error){
+        return json(req,502,{status:"ERROR",observed_at:new Date().toISOString(),source:"GITHUB_ACTIONS",repository:REPOSITORY,reason:String(error)});
+      }
+    }
     const payload=await loadActivity();
     return json(req,payload.status==="OK"?200:503,payload);
   })
