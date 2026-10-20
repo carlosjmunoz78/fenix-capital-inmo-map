@@ -6,9 +6,11 @@ import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 import { validateFactoryRequest } from './fact001-request-runner.mjs';
+import { atomicReplaceFactoryDirectory } from './fact001-safe-fs.mjs';
 
 const HERE=path.dirname(fileURLToPath(import.meta.url));
 const ROOT=path.resolve(HERE,'..');
+const REPO_ROOT=path.resolve(ROOT,'..');
 const FACTORY=path.join(ROOT,'factory-v1.mjs');
 const DEFAULT_REGISTRY=path.join(ROOT,'registry','engine-registry.v1.json');
 function sha256(v){return crypto.createHash('sha256').update(v).digest('hex')}
@@ -22,11 +24,13 @@ export function runFactoryRequestV1({requestFile,outDir,registryFile=DEFAULT_REG
     execFileSync(process.execPath,[FACTORY,'validate','--registry',registryFile],{stdio:'pipe'});
     execFileSync(process.execPath,[FACTORY,'generate','--registry',registryFile,'--out',scratch],{stdio:'pipe'});
     const source=path.join(scratch,'engines',request.engine_id);if(!fs.existsSync(source)){const e=new Error('generated engine scaffold missing');e.code='LOW_CONFIDENCE';e.human_required='LOW_CONFIDENCE';throw e}
-    const target=path.resolve(outDir);fs.rmSync(target,{recursive:true,force:true});fs.mkdirSync(target,{recursive:true});fs.cpSync(source,target,{recursive:true});
-    const files=listFiles(target);if(files.length!==18){const e=new Error(`expected 18 scaffold files, got ${files.length}`);e.code='LOW_CONFIDENCE';e.human_required='LOW_CONFIDENCE';throw e}
     const registryBytes=fs.readFileSync(registryFile);const canonical=JSON.stringify(canonicalize(request));
-    const result={schema_version:'1.1.0',state_type:'CEREBRO_FACT001_V1_AUTOMATIC_SCAFFOLD_RESULT',status:'FACTORY_SCAFFOLD_GREEN',request_id:request.request_id,idempotency_key:`fact001-v1:${sha256(canonical+':'+sha256(registryBytes))}`,company_id:request.company_id,engine_id:request.engine_id,environment:request.environment,version:request.version,intent:request.intent,generated_files:files,generated_file_count:files.length,bundle_sha256:bundleDigest(target,files),source_registry_sha256:sha256(registryBytes),base_registry_preserved:true,next_gate:'PREPROD_CONTRACT_TESTS_AND_EVALUATION_REQUIRED',human_required:[],additional_cost_eur:0,prod_authorized:false,prod_write_authorized:false,trading_access:false,external_code_execution:false};
-    fs.writeFileSync(path.join(target,'fact001-result.json'),JSON.stringify(result,null,2)+'\n');return result;
+    return atomicReplaceFactoryDirectory(outDir,(stage)=>{
+      fs.cpSync(source,stage,{recursive:true,force:false});
+      const files=listFiles(stage);if(files.length!==18){const e=new Error(`expected 18 scaffold files, got ${files.length}`);e.code='LOW_CONFIDENCE';e.human_required='LOW_CONFIDENCE';throw e}
+      const result={schema_version:'1.1.0',state_type:'CEREBRO_FACT001_V1_AUTOMATIC_SCAFFOLD_RESULT',status:'FACTORY_SCAFFOLD_GREEN',request_id:request.request_id,idempotency_key:`fact001-v1:${sha256(canonical+':'+sha256(registryBytes))}`,company_id:request.company_id,engine_id:request.engine_id,environment:request.environment,version:request.version,intent:request.intent,generated_files:files,generated_file_count:files.length,bundle_sha256:bundleDigest(stage,files),source_registry_sha256:sha256(registryBytes),base_registry_preserved:true,next_gate:'PREPROD_CONTRACT_TESTS_AND_EVALUATION_REQUIRED',human_required:[],additional_cost_eur:0,prod_authorized:false,prod_write_authorized:false,trading_access:false,external_code_execution:false};
+      fs.writeFileSync(path.join(stage,'fact001-result.json'),JSON.stringify(result,null,2)+'\n');return result;
+    },{forbidden:[ROOT,REPO_ROOT],markers:['fact001-result.json']});
   }finally{fs.rmSync(scratch,{recursive:true,force:true})}
 }
 function args(argv){const o={};for(let i=2;i<argv.length;i++){if(argv[i]==='--request')o.requestFile=argv[++i];else if(argv[i]==='--out')o.outDir=argv[++i];else if(argv[i]==='--registry')o.registryFile=argv[++i];else throw new Error(`unknown argument: ${argv[i]}`)}if(!o.requestFile||!o.outDir)throw new Error('Usage: node fact001-request-runner-v1.mjs --request <file> --out <dir> [--registry <file>]');return o}
