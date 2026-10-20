@@ -4,7 +4,7 @@
   "company_id": "fenix",
   "engine_id": "LRN-001",
   "environment": "PREPROD",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "batches": [
     {
       "batch_id": "lrn-batch:02b210ed11c931d745ac7e66",
@@ -885,6 +885,14 @@
       "events_total": 15,
       "source_run_id": 38819795274,
       "source_head_sha": "d919e25583708ce054d46e725412b285196a429c"
+    },
+    {
+      "batch_id": "lrn-batch:2a453e59b2dd215d2b8531b1",
+      "path": "batches/lrn-batch_2a453e59b2dd215d2b8531b1.json",
+      "sha256": "fbd7d205f8154738abd3025478e79ecbb260a936e913ac8854664d54e05b9943",
+      "events_total": 8,
+      "source_run_id": 39347084549,
+      "source_head_sha": "e9ade91294bdc0afc67cfd18d6fe3475fafdac4d"
     },
     {
       "batch_id": "lrn-batch:2a4925596214132494a9b1bf",
@@ -4250,5 +4258,5 @@
   "prod_authorized": false,
   "trading_access": false,
   "additional_cost_eur": 0,
-  "batches_total": 530
+  "batches_total": 531
 }
