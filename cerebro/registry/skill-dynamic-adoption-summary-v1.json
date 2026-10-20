@@ -1,0 +1,10 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_DYNAMIC_SKILL_ADOPTION_SUMMARY_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "goal": "NEW_SAFE_CAPABILITIES_DISCOVERED_ADOPTED_CANARIED_AND_CALLABLE_READONLY_WITHOUT_HUMAN_INTERVENTION",
+  "additional_cost_eur": 0
+}
