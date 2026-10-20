@@ -82,9 +82,11 @@ test('automatic activity refresh remains and settings stay scalable',async()=>{
  expect(source).toContain('window.setInterval(()=>{void refresh()},30_000)');
  expect(source).not.toContain('Actualizar procesos');
  expect(settings).toContain("const VOICE_STORAGE_KEY='cerebro_console_voice_id_v1'");
- expect(settings).toContain('spanishVoices()');
- expect(settings).toContain('<strong>Voz {index+1}</strong>');
- expect(settings).toContain('aria-label={`Escuchar Voz ${index+1}`}');
+ expect(settings).toContain('function availableVoices()');
+ expect(settings).toContain('window.speechSynthesis.getVoices()');
+ expect(settings).toContain("const USER_VOICE_ALIASES:Record<number,string>={1:'Bipi',2:'Trasta',3:'Pablo',4:'Marcos'}");
+ expect(settings).toContain('voice.name||`Voz ${index+1}`');
+ expect(settings).toContain('aria-label={`Escuchar ${alias||voice.name||`Voz ${index+1}`}`}');
  expect(settings).toContain("speed==='normal'");
  expect(settings).toContain("speed==='fast'");
  expect(settings).not.toContain('JARVIS');

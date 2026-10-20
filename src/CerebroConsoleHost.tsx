@@ -2,6 +2,7 @@ import {useEffect,useState} from 'react';
 import {useLocation} from 'react-router-dom';
 import CerebroConsoleShell from './CerebroConsoleShell';
 import CerebroOperativeConsole from './CerebroOperativeConsole';
+import CerebroSpeechOutputGuard from './CerebroSpeechOutputGuard';
 import {fetchAppApi,supabase} from './supabase';
 import './cerebro-console-host.css';
 import './cerebro-operative-console-v2.css';
@@ -56,6 +57,7 @@ export default function CerebroConsoleHost(){
  if(ownerAccess!=='allowed')return <CerebroConsoleShell/>;
 
  return <div className={`cerebro-console-host view-${view.toLowerCase()}`}>
+  <CerebroSpeechOutputGuard/>
   {view==='V0'?<div className="cerebro-host-topbar"><nav className="cerebro-view-switch" aria-label="Cambiar vista de CEREBRO"><span className="cerebro-view-switch-label">INTERFAZ</span><button type="button" className="is-active">VISTA 0</button><button type="button" onClick={()=>setView('OPERATIVA')}>OPERATIVA</button><button type="button" disabled title="NEURAL se recuperará desde los artefactos existentes; no se reconstruirá desde cero.">NEURAL · POR AUDITAR</button></nav></div>:null}
   <div className={`cerebro-host-v0 ${view==='V0'?'is-visible':'is-hidden'}`} aria-hidden={view!=='V0'}><CerebroConsoleShell/></div>
   {view==='OPERATIVA'?<CerebroOperativeConsole onViewChange={setView}/>:null}
