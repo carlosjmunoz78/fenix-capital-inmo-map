@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'cerebro/qa/knowledge-100-v0.mjs'
+      - 'cerebro/qa/knowledge-100-runner-v1.mjs'
       - 'cerebro/qa/evidence/knowledge-100-live-evidence.v0.json'
       - 'cerebro/human-intelligence/**'
       - 'cerebro/multichannel/**'
@@ -13,6 +14,7 @@ on:
     branches: [main]
     paths:
       - 'cerebro/qa/knowledge-100-v0.mjs'
+      - 'cerebro/qa/knowledge-100-runner-v1.mjs'
       - 'cerebro/qa/evidence/knowledge-100-live-evidence.v0.json'
       - 'cerebro/human-intelligence/**'
       - 'cerebro/multichannel/**'
@@ -130,7 +132,7 @@ jobs:
 
       - name: Measure canonical 12-front conversational and knowledge coverage
         run: |
-          node cerebro/qa/knowledge-100-v0.mjs --out artifacts/knowledge-100/report.json
+          node cerebro/qa/knowledge-100-runner-v1.mjs --out artifacts/knowledge-100/report.json
 
       - name: Publish measured coverage summary
         if: always()
