@@ -6,6 +6,7 @@ on:
       - main
       - 'cerebro/safe-handler-context-guard-*'
       - 'cerebro/oss-context-window-guard-*'
+      - 'cerebro/oss-runtime-guard-chain-driver-*'
     paths:
       - 'cerebro/skills/skill-ephemeral-oss-inference.mjs'
       - 'cerebro/tests/skill-ephemeral-oss-context-guard.test.mjs'
@@ -34,13 +35,13 @@ jobs:
       - name: Prove local OSS context guard contracts
         run: node --test cerebro/tests/skill-ephemeral-oss-context-guard.test.mjs
 
-      - name: Dispatch governed Safe Handler after main runtime change
+      - name: Dispatch governed Chain Driver after main runtime change
         if: github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          gh workflow run cerebro-skill-autoloop-safe-handler.yml --repo "$GITHUB_REPOSITORY" --ref main
+          gh workflow run cerebro-skill-chain-driver-v0.yml --repo "$GITHUB_REPOSITORY" --ref main
 
       - name: Assert immutable safety boundary
         run: |
