@@ -46,24 +46,24 @@ function adaptiveResponse(persona,scenario){
 }
 function baselineResponse(){return 'Gracias por tu mensaje. Voy a analizar la situación con detalle para poder darte una respuesta completa. Hay varios aspectos que conviene tener en cuenta y podemos revisarlos paso a paso para determinar la mejor opción posible según el contexto disponible.';}
 function score({text,persona,scenario,dimensions,variant}){
-  const h=evaluateCommunicationText(text);const out={};
+  const h=evaluateCommunicationText(text);const out={};const lower=text.toLowerCase();
   for(const d of dimensions){let s=.78;
-    if(d.id==='D-CLARITY')s=h.avg_words_per_sentence<=22?.91:.76;
-    else if(d.id==='D-CONCISION')s=h.word_count<=80?.91:.72;
-    else if(d.id==='D-NONREPEAT')s=h.repeated_terms.length===0?.94:.70;
-    else if(d.id==='D-EMPATHY')s=(scenario.id==='SC-004'||persona.traits?.includes('values_empathy'))?(h.empathy_marker?.90:.65):.86;
-    else if(d.id==='D-CONTEXT')s=scenario.id==='SC-006'?(text.includes('contexto')||text.includes('repetir')?.90:.68):.86;
-    else if(d.id==='D-OBJECTION')s=scenario.id==='SC-003'?(text.toLowerCase().includes('objec')?.89:.66):.85;
-    else if(d.id==='D-TRUST')s=(persona.traits?.includes('asks_for_evidence')||persona.traits?.includes('evidence_driven'))?(text.toLowerCase().includes('evidencia')?.95:.72):.93;
-    else if(d.id==='D-VOICE')s=(scenario.id==='SC-009'||persona.traits?.includes('spoken_naturalness'))?(h.avg_words_per_sentence<=18?.88:.68):.84;
-    else if(d.id==='D-ACCESS')s=(persona.traits?.includes('screen_reader_friendly')||persona.traits?.includes('low_jargon_tolerance'))?(h.jargon_hits<=1?.89:.70):.86;
-    else if(d.id==='D-REGISTER')s=scenario.id==='SC-007'?.88:.85;
-    else if(d.id==='D-PRECISION')s=text.toLowerCase().includes('comprobado')||text.toLowerCase().includes('evidencia')?.93:.88;
-    else if(d.id==='D-NATURAL')s=h.word_count<=100&&h.avg_words_per_sentence<=22?.88:.75;
-    else if(d.id==='D-CHARISMA')s=variant==='adaptive'?.86:.76;
-    else if(d.id==='D-WARMTH')s=h.empathy_marker?.87:.80;
+    if(d.id==='D-CLARITY')s=h.avg_words_per_sentence<=22 ? .91 : .76;
+    else if(d.id==='D-CONCISION')s=h.word_count<=80 ? .91 : .72;
+    else if(d.id==='D-NONREPEAT')s=h.repeated_terms.length===0 ? .94 : .70;
+    else if(d.id==='D-EMPATHY')s=(scenario.id==='SC-004'||persona.traits?.includes('values_empathy')) ? (h.empathy_marker ? .90 : .65) : .86;
+    else if(d.id==='D-CONTEXT')s=scenario.id==='SC-006' ? ((lower.includes('contexto')||lower.includes('repetir')) ? .90 : .68) : .86;
+    else if(d.id==='D-OBJECTION')s=scenario.id==='SC-003' ? (lower.includes('objec') ? .89 : .66) : .85;
+    else if(d.id==='D-TRUST')s=(persona.traits?.includes('asks_for_evidence')||persona.traits?.includes('evidence_driven')) ? (lower.includes('evidencia') ? .95 : .72) : .93;
+    else if(d.id==='D-VOICE')s=(scenario.id==='SC-009'||persona.traits?.includes('spoken_naturalness')) ? (h.avg_words_per_sentence<=18 ? .88 : .68) : .84;
+    else if(d.id==='D-ACCESS')s=(persona.traits?.includes('screen_reader_friendly')||persona.traits?.includes('low_jargon_tolerance')) ? (h.jargon_hits<=1 ? .89 : .70) : .86;
+    else if(d.id==='D-REGISTER')s=scenario.id==='SC-007' ? .88 : .85;
+    else if(d.id==='D-PRECISION')s=(lower.includes('comprobado')||lower.includes('evidencia')) ? .93 : .88;
+    else if(d.id==='D-NATURAL')s=(h.word_count<=100&&h.avg_words_per_sentence<=22) ? .88 : .75;
+    else if(d.id==='D-CHARISMA')s=variant==='adaptive' ? .86 : .76;
+    else if(d.id==='D-WARMTH')s=h.empathy_marker ? .87 : .80;
     else if(d.id==='D-ES-ES')s=.94;
-    else if(d.id==='D-MULTI')s=scenario.id==='SC-007'?.84:.82;
+    else if(d.id==='D-MULTI')s=scenario.id==='SC-007' ? .84 : .82;
     out[d.id]=clamp(s);
   }
   return {scores:out,heuristic:h};
