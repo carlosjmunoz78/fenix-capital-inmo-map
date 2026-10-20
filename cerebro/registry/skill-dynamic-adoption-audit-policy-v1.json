@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_DYNAMIC_SKILL_ADOPTION_AUDIT_POLICY_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "audit_fields": ["candidate_id", "technical_name", "source_locator", "pinned_sha", "snapshot_sha256", "manifest_sha256", "outcome_hash", "target_engine_bindings", "closure_summary", "current_evidence", "canary"],
+  "mutable_external_code": false,
+  "additional_cost_eur": 0
+}
