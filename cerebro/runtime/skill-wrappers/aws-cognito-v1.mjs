@@ -55,7 +55,7 @@ export const executeAwsCognitoInternalCapability=createGovernedInternalWrapper({
   technical_name:'aws-cognito',
   source_license:'Apache-2.0',
   pinned_sha:PIN,
-  default_engine:'IAM-001',
+  default_engine:'APP-001',
   default_task:'AUTH_ARCHITECTURE_PLAN',
   tasks
 });
