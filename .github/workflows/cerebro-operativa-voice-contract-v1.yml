@@ -1,0 +1,43 @@
+name: CEREBRO Operativa Voice Contract V1
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/CerebroConsoleHost.tsx'
+      - 'src/CerebroConsoleShell.tsx'
+      - 'src/CerebroOperativeConsole.tsx'
+      - 'src/cerebroVoice.ts'
+      - 'tests/cerebro-operative-voice-contract.spec.ts'
+      - '.github/workflows/cerebro-operativa-voice-contract-v1.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'src/CerebroConsoleHost.tsx'
+      - 'src/CerebroConsoleShell.tsx'
+      - 'src/CerebroOperativeConsole.tsx'
+      - 'src/cerebroVoice.ts'
+      - 'tests/cerebro-operative-voice-contract.spec.ts'
+      - '.github/workflows/cerebro-operativa-voice-contract-v1.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  voice-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Verify OPERATIVA continuous voice contract
+        run: npx playwright test tests/cerebro-operative-voice-contract.spec.ts --project=desktop-chromium --reporter=line
+      - name: TypeScript and Vite build
+        run: npm run build
