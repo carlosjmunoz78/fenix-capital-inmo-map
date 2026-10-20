@@ -38,7 +38,7 @@ test('cross-device app scaffold creates a runnable zero-dependency PWA in PREPRO
   for(const f of ['index.html','app.js','styles.css','manifest.webmanifest','sw.js','cerebro-app-contract.json','README.md'])assert.ok(fs.existsSync(path.join(r.output_dir,f)));
   const contract=JSON.parse(fs.readFileSync(path.join(r.output_dir,'cerebro-app-contract.json'),'utf8'));
   assert.equal(contract.targets.mobile,'RUNNABLE_PWA_INSTALLABLE');
-  assert.equal(contract.prod_deploy_authorized,false);
+  assert.equal(contract.security.prod_deploy_authorized,false);
 });
 
 test('website scaffold creates responsive semantic files without publishing PROD',()=>{
