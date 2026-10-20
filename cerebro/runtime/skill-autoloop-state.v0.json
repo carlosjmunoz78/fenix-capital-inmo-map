@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-19T23:57:09.798Z",
+  "updated_at": "2026-10-20T00:31:48.617Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -84,42 +84,6 @@
   "in_flight": {},
   "waiting_human": {},
   "waiting_safe_handler": {
-    "github-wide-skills:481a37f8c9ed473d71b4": {
-      "candidate_id": "github-wide-skills:481a37f8c9ed473d71b4",
-      "name": "api-design",
-      "human_alias": "Api Design",
-      "wrapper_id": "skillwrap:84473baada4d97ace104",
-      "domain": "software-engineering-devops",
-      "engine_bindings": [
-        "FACT-001",
-        "ARCH-001",
-        "API-001",
-        "DEP-001",
-        "MIG-001",
-        "QA-001",
-        "REG-001",
-        "DOCS-001"
-      ],
-      "value_score": 87.66,
-      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
-      "evidence_refs": {
-        "upstream_full_name": "webtyp/devskills",
-        "upstream_head_commit": "dd81ad6b7672d18915a3f7b71d97dd96fa7e19f1",
-        "manifest_sha256": "00ab5611c596bccea7d8d7dfa9ed7485c03fdf2cd648339cd4239b0f6f015b56",
-        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
-      },
-      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
-      "status": "WAITING_SAFE_HANDLER",
-      "source_discovery_run_id": 38774605690,
-      "checkpointed_at": "2026-10-15T17:07:40.286Z",
-      "human_required": null,
-      "external_skill_code_execution": false,
-      "customer_data_used": false,
-      "prod_write": false,
-      "trading_access": false,
-      "paid_fallback": false,
-      "additional_cost_eur": 0
-    },
     "github-wide-skills:9e01bf213c0129ddaba5": {
       "candidate_id": "github-wide-skills:9e01bf213c0129ddaba5",
       "name": "api-harness",
@@ -1242,6 +1206,57 @@
       "action_type": "REJECT_CAPABILITY",
       "action_status": "APPLIED_METADATA_ONLY",
       "next_gate": "CONTINUE_DISCOVERY"
+    },
+    "github-wide-skills:481a37f8c9ed473d71b4": {
+      "candidate_id": "github-wide-skills:481a37f8c9ed473d71b4",
+      "name": "api-design",
+      "human_alias": "Api Design",
+      "wrapper_id": "skillwrap:84473baada4d97ace104",
+      "domain": "software-engineering-devops",
+      "engine_bindings": [
+        "FACT-001",
+        "ARCH-001",
+        "API-001",
+        "DEP-001",
+        "MIG-001",
+        "QA-001",
+        "REG-001",
+        "DOCS-001"
+      ],
+      "value_score": 87.66,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "webtyp/devskills",
+        "upstream_head_commit": "dd81ad6b7672d18915a3f7b71d97dd96fa7e19f1",
+        "manifest_sha256": "00ab5611c596bccea7d8d7dfa9ed7485c03fdf2cd648339cd4239b0f6f015b56",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "SKILL_AUTONOMY_DECISION_RECORDED",
+      "status": "COMPLETED",
+      "source_discovery_run_id": 38774605690,
+      "checkpointed_at": "2026-10-15T17:07:40.286Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0,
+      "disposition": "DESCARTAR",
+      "evidence": {
+        "reason": "UNTRUSTED_SOURCE_OR_SUPPLY_CHAIN",
+        "decision_id": "skill-autonomy:13f8ee0c4c8bbd3998303f45",
+        "decision": "DESCARTAR",
+        "human_required": null,
+        "source": "CEREBRO Skill AutoLoop Safe Handler V0"
+      },
+      "updated_at": "2026-10-20T00:31:48.617Z",
+      "prod_authorized": false,
+      "autonomous_promotion_authorized": false,
+      "action_id": "skill-action:33e4d120ac71de4d5e7f815b",
+      "action_type": "REJECT_CAPABILITY",
+      "action_status": "APPLIED_METADATA_ONLY",
+      "next_gate": "CONTINUE_DISCOVERY"
     }
   },
   "terminal_hold": {
@@ -2206,7 +2221,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
+  "last_action": "APPLY_REJECT_CAPABILITY_CONTINUE_DISCOVERY",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -2423,6 +2438,47 @@
       "external_skill_code_execution_authorized": false,
       "additional_cost_eur": 0,
       "recorded_at": "2026-10-19T23:51:11.752Z"
+    },
+    "github-wide-skills:481a37f8c9ed473d71b4": {
+      "schema_version": "1.0.0",
+      "state_type": "CEREBRO_SKILL_AUTONOMY_ACTION_RECEIPT",
+      "action_id": "skill-action:33e4d120ac71de4d5e7f815b",
+      "decision_id": "skill-autonomy:13f8ee0c4c8bbd3998303f45",
+      "company_id": "GLOBAL",
+      "engine_id": "SKILL-AUTONOMY-ACTION",
+      "environment": "PREPROD",
+      "version": "1.0.0",
+      "skill_id": "github-wide-skills:481a37f8c9ed473d71b4",
+      "skill_version": "skillwrap:84473baada4d97ace104",
+      "decision": "DESCARTAR",
+      "action_type": "REJECT_CAPABILITY",
+      "status": "APPLIED_METADATA_ONLY",
+      "next_gate": "CONTINUE_DISCOVERY",
+      "target_engine_ids": [
+        "API-001",
+        "ARCH-001",
+        "DEP-001",
+        "DOCS-001",
+        "FACT-001",
+        "MIG-001",
+        "QA-001",
+        "REG-001"
+      ],
+      "observed_at": null,
+      "human_required": null,
+      "queueable_safe_work": false,
+      "terminal_metadata_only": true,
+      "mutation_authorized": false,
+      "internal_wrapper_shadow_authorized": false,
+      "fact001_gap_candidate_authorized": false,
+      "fact001_create_authorized": false,
+      "paid_activation_authorized": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "external_skill_code_execution_authorized": false,
+      "additional_cost_eur": 0,
+      "recorded_at": "2026-10-20T00:31:48.617Z"
     }
   },
   "autonomy_action_queue": {}
