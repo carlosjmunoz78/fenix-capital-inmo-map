@@ -56,6 +56,56 @@ test('balances the first overnight slots across capability families instead of l
   assert.equal(report.sources.filter((x)=>x.capability_family==='LANGUAGE_HUMAN_INTERACTION').length,1);
 });
 
+test('empty rotated page falls back once to page one and discovers real sources',async()=>{
+  const sha='c'.repeat(40);const calls=[];
+  const fetch_impl=async(url)=>{
+    const u=String(url);calls.push(u);
+    if(u.includes('/search/code?')){
+      const page=new URL(u).searchParams.get('page');
+      if(page==='4')return response(200,{total_count:1,items:[]});
+      if(page==='1')return response(200,{total_count:1,items:[{path:'skills/new-capability/SKILL.md',repository:{full_name:'example/new-capability'}}]});
+      throw new Error(`unexpected search page:${page}`);
+    }
+    if(u.endsWith('/repos/example/new-capability'))return response(200,{private:false,archived:false,disabled:false,default_branch:'main'});
+    if(u.endsWith('/repos/example/new-capability/commits/main'))return response(200,{sha});
+    throw new Error(`unexpected url:${u}`);
+  };
+  const report=await discoverPublicSkillSources({fetch_impl,queries:['filename:SKILL.md description'],max_sources:4,search_page:4});
+  assert.equal(report.status,'SOURCES_DISCOVERED');
+  assert.equal(report.source_count,1);
+  assert.equal(report.preferred_search_page,4);
+  assert.equal(report.effective_search_page,1);
+  assert.deepEqual(report.attempted_pages,[4,1]);
+  assert.equal(report.fallback_used,true);
+  assert.equal(report.sources[0].search_page,1);
+  assert.equal(calls.filter((u)=>u.includes('/search/code?')).length,2);
+});
+
+test('empty rotated page without known results does not fan out across pages',async()=>{
+  const calls=[];
+  const fetch_impl=async(url)=>{calls.push(String(url));return response(200,{total_count:0,items:[]});};
+  const report=await discoverPublicSkillSources({fetch_impl,queries:['filename:SKILL.md description'],max_sources:4,search_page:5});
+  assert.equal(report.status,'NO_SOURCES');
+  assert.equal(report.fallback_used,false);
+  assert.deepEqual(report.attempted_pages,[5]);
+  assert.equal(calls.length,1);
+});
+
+test('fallback rate limit defers instead of fabricating sources',async()=>{
+  const fetch_impl=async(url)=>{
+    const page=new URL(String(url)).searchParams.get('page');
+    if(page==='3')return response(200,{total_count:2,items:[]});
+    if(page==='1')return response(429,{message:'rate limited'});
+    throw new Error(`unexpected page:${page}`);
+  };
+  const report=await discoverPublicSkillSources({fetch_impl,queries:['filename:SKILL.md description'],max_sources:4,search_page:3});
+  assert.equal(report.status,'DISCOVERY_DEFERRED_RATE_LIMIT');
+  assert.equal(report.retry_required,true);
+  assert.equal(report.fallback_used,true);
+  assert.deepEqual(report.attempted_pages,[3,1]);
+  assert.equal(report.source_count,0);
+});
+
 test('builds a source-queue compatible PREPROD event',async()=>{
   const {fetch_impl}=mockFetchFactory();
   const report=await discoverPublicSkillSources({fetch_impl,queries:['filename:SKILL.md description'],max_sources:4});
@@ -65,6 +115,7 @@ test('builds a source-queue compatible PREPROD event',async()=>{
   assert.deepEqual(event.client_payload.github_urls,report.sources.map((x)=>x.github_url));
   assert.equal(event.discovery.retry_required,false);
   assert.equal(event.discovery.diversity_mode,'ROUND_ROBIN_CAPABILITY_FAMILY');
+  assert.deepEqual(event.discovery.attempted_pages,[1]);
   assert.equal(event.prod_authorized,false);
   assert.equal(event.trading_access,false);
 });
