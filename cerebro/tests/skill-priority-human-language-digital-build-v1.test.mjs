@@ -9,7 +9,7 @@ import {buildSyntheticHumanPlan,evaluateSyntheticHumanResults} from '../runtime/
 const HERE=path.dirname(fileURLToPath(import.meta.url));
 const ROOT=path.resolve(HERE,'..');
 const policy=JSON.parse(fs.readFileSync(path.join(ROOT,'registry','skill-priority-portfolio-v1.json'),'utf8'));
-const engines=JSON.parse(fs.readFileSync(path.join(ROOT,'registry','engine-registry.seed.json'),'utf8'));
+const engines=JSON.parse(fs.readFileSync(path.join(ROOT,'registry','engine-registry.v1.json'),'utf8'));
 const lab=JSON.parse(fs.readFileSync(path.join(ROOT,'registry','synthetic-human-language-lab-v1.json'),'utf8'));
 
 test('language and human communication is the highest-priority capability family',()=>{
@@ -27,14 +27,13 @@ test('language and human communication is the highest-priority capability family
   assert.equal(ranked[2].candidate_id,'r');
 });
 
-test('global language binding reaches every canonical non-trading engine only after governed readonly capability green',()=>{
+test('global language binding reaches every current non-trading engine only after governed readonly capability green',()=>{
   const candidate={candidate_id:'lang-1',technical_name:'human-language-coach',description:'language communication conversation humanize',prod_capability_state:'PROD_CAPABILITY_AVAILABLE_READONLY',human_required:null,additional_cost_eur:0,external_skill_code_execution:false};
   const result=resolveGlobalLanguageBinding({candidate,policy,engineRegistry:engines,requested_mode:'ANALYZE'});
   assert.equal(result.allowed,true);
-  assert.equal(result.target_engine_ids.includes('COM-001'),true);
-  assert.equal(result.target_engine_ids.includes('VOICE-001'),true);
-  assert.equal(result.target_engine_ids.includes('APP-001'),true);
-  assert.equal(result.target_engine_ids.includes('WEB-001'),true);
+  assert.equal(engines.engine_ids.length,179);
+  assert.equal(result.target_engine_count,178);
+  for(const id of ['SEM-001','COM-001','VOICE-001','APP-001','WEB-001','HCI-001','MOTION-001']) assert.equal(result.target_engine_ids.includes(id),true,id);
   assert.equal(result.target_engine_ids.includes('LAB-TRD'),false);
   assert.equal(result.excluded_engine_ids.includes('LAB-TRD'),true);
   assert.equal(result.prod_write_authorized,false);
@@ -95,11 +94,12 @@ test('low charisma becomes a bounded LRN-001 improvement candidate and never a d
   assert.equal(evalReport.prod_write_authorized,false);
 });
 
-test('priority report preserves canonical 177-engine registry and zero-cost authority',()=>{
+test('priority report preserves current 179-engine registry including HCI/MOTION extensions and zero-cost authority',()=>{
   const report=buildPriorityReport();
   assert.equal(report.status,'GREEN_PRIORITY_POLICY_ACTIVE');
   assert.equal(report.portfolio_count,7);
-  assert.equal(report.canonical_engine_count,177);
+  assert.equal(report.canonical_engine_count,179);
+  assert.deepEqual([...report.registry_extension_ids].sort(),['HCI-001','MOTION-001']);
   assert.equal(report.prod_authorized,false);
   assert.equal(report.prod_write_authorized,false);
   assert.equal(report.trading_access,false);
