@@ -1,0 +1,189 @@
+name: CEREBRO Skill Adoption SLA V1
+
+on:
+  workflow_run:
+    workflows:
+      - CEREBRO Universal Skill Continuous Intake V1
+      - CEREBRO Known Skill Pool Intake V1
+    types:
+      - completed
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/cerebro-skill-adoption-sla-v1.yml'
+      - 'cerebro/tests/skill-adoption-sla-workflow-v1.test.mjs'
+      - 'cerebro/docs/CEREBRO_SKILL_ADOPTION_SLA_V1.md'
+  pull_request:
+    paths:
+      - '.github/workflows/cerebro-skill-adoption-sla-v1.yml'
+      - 'cerebro/tests/skill-adoption-sla-workflow-v1.test.mjs'
+      - 'cerebro/docs/CEREBRO_SKILL_ADOPTION_SLA_V1.md'
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: cerebro-skill-adoption-sla-v1
+  cancel-in-progress: false
+
+jobs:
+  contract-test:
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Validate skill adoption SLA contract
+        run: node --test cerebro/tests/skill-adoption-sla-workflow-v1.test.mjs
+
+  monitor-and-recover:
+    if: >-
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main'
+    permissions:
+      contents: read
+      actions: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      SOFT_SLA_SECONDS: '300'
+      HARD_SLA_SECONDS: '600'
+      POLL_SECONDS: '15'
+      DYNAMIC_WORKFLOW: cerebro-dynamic-skill-adoption-v1.yml
+      DYNAMIC_REGISTRY: cerebro/registry/skill-dynamic-adoption-v1.json
+    steps:
+      - name: Enforce candidate-to-PROD-readonly latency
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          SOURCE_RUN_ID: ${{ github.event.workflow_run.id }}
+          SOURCE_WORKFLOW: ${{ github.event.workflow_run.name }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          PROPOSAL_DIR="$RUNNER_TEMP/cerebro-skill-adoption-sla-proposal"
+          PROPOSAL_FILE="$PROPOSAL_DIR/cerebro-dynamic-adoption-proposal.json"
+          CANDIDATE_FILE="$RUNNER_TEMP/cerebro-skill-adoption-sla-candidates.txt"
+          REGISTRY_FILE="$RUNNER_TEMP/cerebro-skill-adoption-sla-registry.json"
+          ARTIFACT="cerebro-dynamic-adoption-proposal-${SOURCE_RUN_ID}"
+          mkdir -p "$PROPOSAL_DIR"
+
+          if ! gh run download "$SOURCE_RUN_ID" --name "$ARTIFACT" --dir "$PROPOSAL_DIR" 2>"$RUNNER_TEMP/skill-adoption-sla-download.err"; then
+            echo "No dynamic adoption proposal artifact for source run $SOURCE_RUN_ID; no valid candidate SLA to enforce."
+            cat "$RUNNER_TEMP/skill-adoption-sla-download.err" || true
+            echo "status=NO_VALID_CANDIDATE_ARTIFACT source_workflow=$SOURCE_WORKFLOW source_run=$SOURCE_RUN_ID" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          test -f "$PROPOSAL_FILE"
+          node --input-type=module - "$PROPOSAL_FILE" "$CANDIDATE_FILE" <<'NODE'
+          import fs from 'node:fs';
+          const proposal=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
+          if(proposal.state_type!=='CEREBRO_DYNAMIC_SKILL_ADOPTION_REGISTRY_V1') throw new Error('INVALID_DYNAMIC_ADOPTION_PROPOSAL');
+          const ids=(proposal.capabilities??[])
+            .filter((x)=>x.status==='FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY')
+            .map((x)=>String(x.candidate_id??'').trim())
+            .filter(Boolean);
+          fs.writeFileSync(process.argv[3], ids.join('\n') + (ids.length?'\n':''));
+          console.log(JSON.stringify({status:'SLA_VALID_CANDIDATES_RESOLVED',count:ids.length,candidate_ids:ids}));
+          NODE
+
+          CANDIDATE_COUNT="$(grep -cve '^$' "$CANDIDATE_FILE" || true)"
+          if [ "$CANDIDATE_COUNT" -eq 0 ]; then
+            echo "status=NO_NEW_VALID_CANDIDATES source_workflow=$SOURCE_WORKFLOW source_run=$SOURCE_RUN_ID" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          SOURCE_FINISHED_AT="$(gh api "repos/$GH_REPO/actions/runs/$SOURCE_RUN_ID" --jq '.updated_at')"
+          test -n "$SOURCE_FINISHED_AT"
+          SOURCE_FINISHED_EPOCH="$(date -u -d "$SOURCE_FINISHED_AT" +%s)"
+
+          fetch_registry() {
+            gh api "repos/$GH_REPO/contents/$DYNAMIC_REGISTRY?ref=main" --jq '.content' | tr -d '\n' | base64 --decode > "$REGISTRY_FILE"
+          }
+
+          verify_promoted() {
+            fetch_registry
+            node --input-type=module - "$CANDIDATE_FILE" "$REGISTRY_FILE" <<'NODE'
+          import fs from 'node:fs';
+          const ids=fs.readFileSync(process.argv[2],'utf8').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+          const registry=JSON.parse(fs.readFileSync(process.argv[3],'utf8'));
+          const rows=new Map((registry.capabilities??[]).map((x)=>[x.candidate_id,x]));
+          const failures=[];
+          for(const id of ids){
+            const row=rows.get(id);
+            if(!row){ failures.push(`${id}:MISSING`); continue; }
+            if(row.status!=='PROD_CAPABILITY_AVAILABLE_READONLY') failures.push(`${id}:${row.status}`);
+            if(row.canary?.ref!=='refs/heads/main') failures.push(`${id}:NON_MAIN_CANARY`);
+            if(row.canary?.side_effects!==false) failures.push(`${id}:SIDE_EFFECTS_NOT_FALSE`);
+            if(row.prod_write_authorized!==false||row.prod_mutation_authorized!==false) failures.push(`${id}:MUTATION_AUTHORITY`);
+            if(row.external_skill_code_execution!==false||row.trading_access!==false) failures.push(`${id}:FORBIDDEN_AUTHORITY`);
+            if(Number(row.additional_cost_eur)!==0) failures.push(`${id}:NONZERO_COST`);
+          }
+          if(failures.length){
+            console.error(JSON.stringify({status:'NOT_YET_PROMOTED',failures}));
+            process.exit(1);
+          }
+          console.log(JSON.stringify({status:'ALL_VALID_CANDIDATES_PROD_READONLY_GREEN',count:ids.length}));
+          NODE
+          }
+
+          dispatch_recovery() {
+            local attempt
+            for attempt in 1 2 3; do
+              if gh workflow run "$DYNAMIC_WORKFLOW" --ref main; then
+                echo "RECOVERY_DISPATCHED workflow=$DYNAMIC_WORKFLOW attempt=$attempt"
+                return 0
+              fi
+              echo "::warning::Skill adoption recovery dispatch attempt $attempt failed"
+              sleep $(( attempt * 5 ))
+            done
+            echo "::error::Unable to dispatch governed dynamic adoption recovery after 3 attempts"
+            return 1
+          }
+
+          RECOVERY_DISPATCHED=0
+          while true; do
+            NOW_EPOCH="$(date -u +%s)"
+            ELAPSED_SECONDS=$(( NOW_EPOCH - SOURCE_FINISHED_EPOCH ))
+
+            if verify_promoted; then
+              echo "GREEN: candidate_count=$CANDIDATE_COUNT elapsed_seconds=$ELAPSED_SECONDS recovery_dispatched=$RECOVERY_DISPATCHED"
+              echo "status=GREEN candidate_count=$CANDIDATE_COUNT elapsed_seconds=$ELAPSED_SECONDS recovery_dispatched=$RECOVERY_DISPATCHED source_run=$SOURCE_RUN_ID" >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+
+            if (( ELAPSED_SECONDS >= HARD_SLA_SECONDS )); then
+              echo "::error::SKILL_ADOPTION_SLA_RED valid candidates did not reach governed PROD read-only within ${HARD_SLA_SECONDS}s"
+              echo "status=RED candidate_count=$CANDIDATE_COUNT elapsed_seconds=$ELAPSED_SECONDS hard_sla_seconds=$HARD_SLA_SECONDS source_run=$SOURCE_RUN_ID" >> "$GITHUB_STEP_SUMMARY"
+              exit 1
+            fi
+
+            if (( ELAPSED_SECONDS >= SOFT_SLA_SECONDS )) && (( RECOVERY_DISPATCHED == 0 )); then
+              echo "::warning::Soft SLA exceeded at ${ELAPSED_SECONDS}s; dispatching bounded governed recovery"
+              dispatch_recovery
+              RECOVERY_DISPATCHED=1
+              echo "recovery=DISPATCHED elapsed_seconds=$ELAPSED_SECONDS source_run=$SOURCE_RUN_ID" >> "$GITHUB_STEP_SUMMARY"
+            fi
+
+            sleep "$POLL_SECONDS"
+          done
+
+      - name: Assert watchdog authority remains bounded
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$SOFT_SLA_SECONDS" -eq 300
+          test "$HARD_SLA_SECONDS" -eq 600
+          test "$POLL_SECONDS" -eq 15
+          echo 'GREEN: this watchdog can only read Actions/repository state and dispatch the existing governed dynamic-adoption workflow; it cannot write repository content or grant PROD mutation authority.'
