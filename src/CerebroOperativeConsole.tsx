@@ -1,9 +1,11 @@
 import {useEffect,useMemo,useRef,useState,type FormEvent,type KeyboardEvent} from 'react';
-import {Activity,BrainCircuit,CircleDot,ExternalLink,Info,MessageSquareText,Mic,Paperclip,Send,Square,X} from 'lucide-react';
+import {Activity,BrainCircuit,Check,CircleDot,ExternalLink,Info,MessageSquareText,Mic,PanelLeftClose,PanelLeftOpen,Paperclip,Pencil,Plus,Send,Square,X} from 'lucide-react';
 import {fetchCerebroActivity,type CerebroActivityRun} from './cerebroActivityApi';
+import {CEREBRO_CONVERSATIONS_CHANGED,createCerebroConversation,ensureActiveCerebroConversation,getActiveCerebroConversationId,listCerebroConversations,renameCerebroConversation,selectCerebroConversation,type CerebroStoredConversation} from './cerebroConversationHistory';
 import {applyVoiceContextHints,createVoiceRecognition,voiceRecognitionSupported,type CerebroSpeechRecognition} from './cerebroVoice';
 import {CerebroVoiceSettings} from './CerebroVoiceSettings';
 import './cerebro-operative-console.css';
+import './cerebro-conversation-history.css';
 
 type CoreLine={key:string;role:'user'|'cerebro';text:string;observedAt:string};
 type CoreSnapshot={ready:boolean;sending:boolean;voiceActive:boolean;voiceListening:boolean;voiceSpeaking:boolean;title:string;detail:string;lines:CoreLine[]};
@@ -34,6 +36,13 @@ function elapsed(value:string|null|undefined,now:number){
 function startClock(value:string|null|undefined){
  const ms=parseMs(value);
  return ms===null?'—':hhmm(new Date(ms));
+}
+function conversationStamp(value:string){
+ const ms=parseMs(value);
+ if(ms===null)return 'Sin fecha';
+ const date=new Date(ms),today=new Date();
+ const sameDay=date.getFullYear()===today.getFullYear()&&date.getMonth()===today.getMonth()&&date.getDate()===today.getDate();
+ return sameDay?`Hoy · ${hhmm(date)}`:new Intl.DateTimeFormat('es-ES',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(date);
 }
 function setReactTextareaValue(textarea:HTMLTextAreaElement,value:string){
  const descriptor=Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value');
@@ -114,10 +123,26 @@ export default function CerebroOperativeConsole({onViewChange}:Props){
  const [dictating,setDictating]=useState(false);
  const [dictationError,setDictationError]=useState('');
  const [selectedRun,setSelectedRun]=useState<CerebroActivityRun|null>(null);
+ const [historyOpen,setHistoryOpen]=useState(false);
+ const [conversations,setConversations]=useState<CerebroStoredConversation[]>(()=>listCerebroConversations());
+ const [activeConversationId,setActiveConversationId]=useState(()=>getActiveCerebroConversationId()||ensureActiveCerebroConversation().id);
+ const [editingConversationId,setEditingConversationId]=useState('');
+ const [editingTitle,setEditingTitle]=useState('');
  const [now,setNow]=useState(()=>Date.now());
  const observedAtRef=useRef(new Map<string,string>()),composerRef=useRef<HTMLTextAreaElement|null>(null),dictationRef=useRef<CerebroSpeechRecognition|null>(null);
 
  useEffect(()=>{const timer=window.setInterval(()=>setNow(Date.now()),1000);return()=>window.clearInterval(timer)},[]);
+ useEffect(()=>{
+  const refresh=()=>{
+   const active=ensureActiveCerebroConversation();
+   setActiveConversationId(getActiveCerebroConversationId()||active.id);
+   setConversations(listCerebroConversations());
+  };
+  refresh();
+  window.addEventListener(CEREBRO_CONVERSATIONS_CHANGED,refresh);
+  window.addEventListener('storage',refresh);
+  return()=>{window.removeEventListener(CEREBRO_CONVERSATIONS_CHANGED,refresh);window.removeEventListener('storage',refresh)};
+ },[]);
  useEffect(()=>{
   let cancelled=false,timer=0;
   const refresh=async()=>{
@@ -146,10 +171,11 @@ export default function CerebroOperativeConsole({onViewChange}:Props){
     const sending=Boolean(sendButton?.textContent?.includes('Enviando')||voiceStatus.includes('procesando'));
     const voiceActive=voiceButton?.getAttribute('aria-pressed')==='true',voiceListening=voiceStatus.includes('escuchando'),voiceSpeaking=voiceStatus.includes('hablando');
     const lineNodes=Array.from(root.querySelectorAll<HTMLElement>('.cerebro-chat-line'));
-    const lines:CoreLine[]=lineNodes.slice(-10).map((node,index)=>{
+    const visibleNodes=lineNodes.slice(-80),offset=Math.max(0,lineNodes.length-visibleNodes.length);
+    const lines:CoreLine[]=visibleNodes.map((node,index)=>{
      const role=node.classList.contains('cerebro-chat-user')?'user':'cerebro',strong=node.querySelector('strong'),clone=node.cloneNode(true) as HTMLElement;
      clone.querySelector('strong')?.remove();clone.querySelector('.cerebro-media-link')?.remove();
-     const text=(clone.textContent||node.textContent||'').replace(strong?.textContent||'','').trim(),key=`${lineNodes.length-10+index}:${role}:${text}`;
+     const text=(clone.textContent||node.textContent||'').replace(strong?.textContent||'','').trim(),key=`${offset+index}:${role}:${text}`;
      if(!observedAtRef.current.has(key))observedAtRef.current.set(key,hhmm());
      return{key,role,text,observedAt:observedAtRef.current.get(key)||hhmm()};
     });
@@ -157,7 +183,7 @@ export default function CerebroOperativeConsole({onViewChange}:Props){
    });
   };
   inspect();
-  const observer=new MutationObserver(inspect);observer.observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['disabled','aria-pressed','class']});
+  const observer=new MutationObserver(inspect);observer.observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['disabled','aria-pressed','class','data-conversation-id']});
   const interval=window.setInterval(inspect,1200);
   return()=>{cancelAnimationFrame(raf);observer.disconnect();window.clearInterval(interval)};
  },[]);
@@ -189,6 +215,21 @@ export default function CerebroOperativeConsole({onViewChange}:Props){
   try{recognition.start()}catch{dictationRef.current=null;setDictating(false);setDictationError('No se pudo iniciar el dictado.')}
  }
  function onComposerKeyDown(event:KeyboardEvent<HTMLTextAreaElement>){if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();submit()}}
+ function openConversation(id:string){
+  const selected=selectCerebroConversation(id);
+  if(selected){setActiveConversationId(selected.id);setEditingConversationId('');setEditingTitle('')}
+ }
+ function newConversation(){
+  const created=createCerebroConversation();
+  setActiveConversationId(created.id);setEditingConversationId('');setEditingTitle('');
+ }
+ function beginRename(conversation:CerebroStoredConversation){setEditingConversationId(conversation.id);setEditingTitle(conversation.title)}
+ function saveRename(event?:FormEvent){
+  event?.preventDefault();
+  if(!editingConversationId)return;
+  const renamed=renameCerebroConversation(editingConversationId,editingTitle);
+  if(renamed){setEditingConversationId('');setEditingTitle('')}
+ }
 
  return <main className="cerebro-operative cerebro-operative-compact cerebro-hud-glass" aria-label="CEREBRO · Vista operativa">
   <header className="cerebro-operative-header">
@@ -207,10 +248,21 @@ export default function CerebroOperativeConsole({onViewChange}:Props){
    </div>
   </section>
 
-  <section className="cerebro-chat-zone" aria-label="Conversación con CEREBRO"><div className="cerebro-chat-stream">
-   {snapshot.lines.length===0?<div className="cerebro-chat-empty">{snapshot.ready?'Da una orden a CEREBRO.':'Esperando conexión segura con CEREBRO…'}</div>:snapshot.lines.map(line=><div key={line.key} className={`cerebro-chat-bubble is-${line.role}`}><small>{line.role==='user'?'TÚ':'CEREBRO'} · {line.observedAt}</small><p>{line.text}</p></div>)}
-   {snapshot.sending?<div className="cerebro-chat-working"><span/><span/><span/> CEREBRO trabajando…</div>:null}
-  </div></section>
+  <section className={`cerebro-conversation-stage ${historyOpen?'is-history-open':''}`} aria-label="Conversación con CEREBRO">
+   <button type="button" className="cerebro-history-rail-toggle" onClick={()=>setHistoryOpen(current=>!current)} aria-label={historyOpen?'Cerrar conversaciones':'Abrir conversaciones'} title={historyOpen?'Cerrar conversaciones':'Conversaciones'}>{historyOpen?<PanelLeftClose size={16}/>:<PanelLeftOpen size={16}/>}</button>
+   <aside className="cerebro-history-drawer" aria-label="Conversaciones" aria-hidden={!historyOpen}>
+    <div className="cerebro-history-head"><div><strong>Conversaciones</strong><small>{conversations.length} guardadas en este dispositivo</small></div><button type="button" className="cerebro-history-new" onClick={newConversation} aria-label="Nueva conversación" title="Nueva conversación"><Plus size={16}/></button><button type="button" className="cerebro-history-close" onClick={()=>setHistoryOpen(false)} aria-label="Cerrar historial"><X size={15}/></button></div>
+    <div className="cerebro-history-list">
+     {conversations.length===0?<div className="cerebro-history-empty">Todavía no hay conversaciones guardadas.</div>:conversations.map(conversation=><div key={conversation.id} className={`cerebro-history-row ${conversation.id===activeConversationId?'is-active':''}`}>
+      {editingConversationId===conversation.id?<form className="cerebro-history-rename" onSubmit={saveRename}><input autoFocus value={editingTitle} onChange={event=>setEditingTitle(event.target.value)} onKeyDown={event=>{if(event.key==='Escape'){setEditingConversationId('');setEditingTitle('')}}} maxLength={72} aria-label="Nombre de la conversación"/><button type="submit" className="cerebro-history-save" aria-label="Guardar nombre"><Check size={14}/></button></form>:<><button type="button" className="cerebro-history-select" onClick={()=>openConversation(conversation.id)} aria-current={conversation.id===activeConversationId?'page':undefined}><strong>{conversation.title}</strong><small>{conversationStamp(conversation.updated_at)}</small></button><button type="button" className="cerebro-history-edit" onClick={()=>beginRename(conversation)} aria-label={`Cambiar nombre de ${conversation.title}`} title="Cambiar nombre"><Pencil size={12}/></button></>}
+     </div>)}
+    </div>
+   </aside>
+   <div className="cerebro-chat-zone"><div className="cerebro-chat-stream">
+    {snapshot.lines.length===0?<div className="cerebro-chat-empty">{snapshot.ready?'Da una orden a CEREBRO.':'Esperando conexión segura con CEREBRO…'}</div>:snapshot.lines.map(line=><div key={line.key} className={`cerebro-chat-bubble is-${line.role}`}><small>{line.role==='user'?'TÚ':'CEREBRO'} · {line.observedAt}</small><p>{line.text}</p></div>)}
+    {snapshot.sending?<div className="cerebro-chat-working"><span/><span/><span/> CEREBRO trabajando…</div>:null}
+   </div></div>
+  </section>
 
   <section className="cerebro-composer-shell" aria-label="Compositor de órdenes"><form onSubmit={submit} className="cerebro-operative-form"><div className="cerebro-composer-main">
    <button type="button" className="cerebro-icon-button" disabled title="Adjuntar archivo · pendiente de contrato real" aria-label="Adjuntar archivo"><Paperclip size={20}/></button>
