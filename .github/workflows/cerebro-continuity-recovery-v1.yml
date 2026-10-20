@@ -17,6 +17,8 @@ on:
   workflow_run:
     workflows:
       - CEREBRO RSI Learning Control Plane V0
+      - CEREBRO Continuous Human QA V0
+      - CEREBRO AUTO-001 PREPROD Patch Executor V0
     types:
       - completed
   schedule:
@@ -63,8 +65,12 @@ jobs:
       LANGUAGE_MAX_AGE_SECONDS: '2100'
       INTAKE_WORKFLOW: cerebro-universal-skill-continuous-intake-v1.yml
       INTAKE_MAX_AGE_SECONDS: '5400'
+      SCOUT_WORKFLOW: cerebro-skill-github-wide-scout.yml
+      SCOUT_MAX_AGE_SECONDS: '4500'
+      ACTION_WORKER_WORKFLOW: cerebro-skill-autonomy-safe-action-worker-v1.yml
+      ACTION_WORKER_MAX_AGE_SECONDS: '4500'
     steps:
-      - name: Recover stale read-only continuity lanes
+      - name: Recover stale governed continuity lanes
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
@@ -138,6 +144,8 @@ jobs:
 
           recover_if_stale "$LANGUAGE_WORKFLOW" "$LANGUAGE_MAX_AGE_SECONDS" "synthetic_language_lab"
           recover_if_stale "$INTAKE_WORKFLOW" "$INTAKE_MAX_AGE_SECONDS" "universal_skill_intake"
+          recover_if_stale "$SCOUT_WORKFLOW" "$SCOUT_MAX_AGE_SECONDS" "skill_github_wide_scout"
+          recover_if_stale "$ACTION_WORKER_WORKFLOW" "$ACTION_WORKER_MAX_AGE_SECONDS" "skill_autonomy_safe_action_worker"
 
       - name: Assert recovery authority remains bounded
         shell: bash
@@ -145,4 +153,6 @@ jobs:
           set -euo pipefail
           test "$LANGUAGE_MAX_AGE_SECONDS" -eq 2100
           test "$INTAKE_MAX_AGE_SECONDS" -eq 5400
-          echo 'GREEN: continuity recovery can only inspect Actions state and dispatch the two governed workflows; it cannot mutate repository content or grant engine authority.'
+          test "$SCOUT_MAX_AGE_SECONDS" -eq 4500
+          test "$ACTION_WORKER_MAX_AGE_SECONDS" -eq 4500
+          echo 'GREEN: continuity recovery can only inspect Actions state and dispatch the four governed workflows; it cannot mutate repository content or grant engine authority.'
