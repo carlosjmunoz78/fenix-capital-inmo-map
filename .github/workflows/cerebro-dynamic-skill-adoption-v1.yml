@@ -8,6 +8,11 @@ on:
     types:
       - completed
   workflow_dispatch:
+    inputs:
+      source_run_id:
+        description: Exact successful intake run carrying the dynamic adoption proposal artifact
+        required: false
+        type: string
 
 permissions:
   contents: write
@@ -33,7 +38,37 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Download exact intake proposal
+      - name: Validate exact manually-dispatched source run
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.source_run_id != ''
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_RUN_ID: ${{ github.event.inputs.source_run_id }}
+        run: |
+          set -euo pipefail
+          test "$SOURCE_RUN_ID" != "$GITHUB_RUN_ID"
+          OK=false
+          for attempt in $(seq 1 18); do
+            RUN_JSON="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SOURCE_RUN_ID")"
+            NAME="$(jq -r '.name // ""' <<<"$RUN_JSON")"
+            BRANCH="$(jq -r '.head_branch // ""' <<<"$RUN_JSON")"
+            STATUS="$(jq -r '.status // ""' <<<"$RUN_JSON")"
+            CONCLUSION="$(jq -r '.conclusion // ""' <<<"$RUN_JSON")"
+            case "$NAME" in
+              'CEREBRO Universal Skill Continuous Intake V1'|'CEREBRO Known Skill Pool Intake V1') ;;
+              *) echo "SOURCE_WORKFLOW_NOT_ALLOWED:$NAME" >&2; exit 1 ;;
+            esac
+            test "$BRANCH" = 'main'
+            if [ "$STATUS" = 'completed' ]; then
+              test "$CONCLUSION" = 'success'
+              OK=true
+              break
+            fi
+            sleep 2
+          done
+          test "$OK" = true
+          echo "EXACT_SOURCE_RUN_GREEN source_run_id=$SOURCE_RUN_ID workflow=$NAME branch=$BRANCH conclusion=$CONCLUSION"
+      - name: Download exact intake proposal from workflow_run
         if: github.event_name == 'workflow_run'
         continue-on-error: true
         uses: actions/download-artifact@v4
@@ -42,6 +77,14 @@ jobs:
           path: ${{ runner.temp }}/dynamic-proposal
           github-token: ${{ github.token }}
           run-id: ${{ github.event.workflow_run.id }}
+      - name: Download exact intake proposal from direct handoff
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.source_run_id != ''
+        uses: actions/download-artifact@v4
+        with:
+          name: cerebro-dynamic-adoption-proposal-${{ github.event.inputs.source_run_id }}
+          path: ${{ runner.temp }}/dynamic-proposal
+          github-token: ${{ github.token }}
+          run-id: ${{ github.event.inputs.source_run_id }}
       - name: Gate proposal and recover any pending registry work
         id: merge_proposal
         shell: bash
