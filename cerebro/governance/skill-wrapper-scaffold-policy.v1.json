@@ -1,0 +1,88 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_SKILL_WRAPPER_SCAFFOLD_POLICY_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "1.0.0",
+  "purpose": "Generate a deterministic, fail-closed CEREBRO-owned PREPROD scaffold from governed skill metadata without executing external code, installing dependencies, mutating PROD or granting operational authority.",
+  "required_external_metadata": [
+    "candidate_id",
+    "technical_name",
+    "source_locator",
+    "source_license",
+    "pinned_sha",
+    "target_engine_bindings"
+  ],
+  "license_policy": {
+    "permissive_external_allowlist": [
+      "MIT",
+      "Apache-2.0",
+      "BSD-2-Clause",
+      "BSD-3-Clause",
+      "ISC"
+    ],
+    "unknown_or_missing_external_license": "BLOCK_LEGAL_REQUIRED",
+    "copy_raw_external_code": false,
+    "implementation_kind": "CEREBRO_INTERNAL_REIMPLEMENTATION_FROM_LICENSED_KNOWLEDGE"
+  },
+  "authority": {
+    "external_skill_code_execution": false,
+    "dependency_install_authorized": false,
+    "direct_prod_write_authorized": false,
+    "direct_prod_mutation_authorized": false,
+    "external_side_effects_authorized": false,
+    "permission_expansion_authorized": false,
+    "customer_data_authorized": false,
+    "trading_access": false,
+    "spend_authorized": false,
+    "additional_cost_budget_eur": 0
+  },
+  "generated_scaffold": {
+    "operational": false,
+    "candidate_environment": "PREPROD",
+    "wrapper_template_must_fail_closed_until_implemented": true,
+    "manifest_required": true,
+    "permissions_required": true,
+    "policy_binding_required": true,
+    "tests_required": true,
+    "evaluation_contract_required": true,
+    "tribunal_required": true,
+    "observability_required": true,
+    "cost_contract_required": true,
+    "backup_required": true,
+    "rollback_required": true,
+    "rebuild_required": true,
+    "documentation_required": true,
+    "training_hooks_required": true,
+    "provenance_required": true
+  },
+  "promotion_contract": {
+    "parallel_implementation_required": true,
+    "old_vs_new_required": true,
+    "measurable_gain_required": true,
+    "no_regression_required": true,
+    "evaluation_required": true,
+    "tribunal_required": true,
+    "rollback_test_required": true,
+    "backup_rebuild_required": true,
+    "cost_measurement_required": true,
+    "preprod_required": true,
+    "gradual_promotion_required": true,
+    "autonomous_prod_promotion": false
+  },
+  "continuous_improvement": {
+    "policy_ref": "cerebro/governance/skill-continuous-improvement-policy.v1.json",
+    "binding_ref": "cerebro/registry/skill-evolution-policy-binding-v1.json",
+    "inherit_on_creation": true,
+    "new_promoted_version_becomes_next_baseline": true
+  },
+  "existing_control_plane_reuse": {
+    "learning_engine": "LRN-001",
+    "research_engine": "RSH-001",
+    "factory_engine": "FACT-001",
+    "evaluation_engine": "EVA-001",
+    "tribunal_engine": "JDG-001",
+    "rule": "REUSE_EXISTING_CONTROL_PLANES_DO_NOT_DUPLICATE"
+  }
+}
