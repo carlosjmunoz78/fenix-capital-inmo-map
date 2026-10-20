@@ -35,10 +35,6 @@ jobs:
       CEREBRO_COMPANY_ID: fenix
       CEREBRO_SOURCE_CONCURRENCY: '8'
       CEREBRO_SKILL_POOL_MAX: '50'
-      CEREBRO_SOURCE_QUEUE_ROOT: ${{ runner.temp }}/cerebro-known-pool-source-queue-r1
-      CEREBRO_LRN_LEDGER_FILE: ${{ runner.temp }}/cerebro-known-pool-lrn/learning.v8
-      CEREBRO_IMPROVEMENT_CANDIDATE_LEDGER_FILE: ${{ runner.temp }}/cerebro-known-pool-lrn/improvement-candidates.v8
-      CEREBRO_DYNAMIC_ADOPTION_PROPOSAL: ${{ runner.temp }}/cerebro-dynamic-adoption-proposal.json
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -48,7 +44,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p "$CEREBRO_SOURCE_QUEUE_ROOT" "$(dirname "$CEREBRO_LRN_LEDGER_FILE")"
+          echo "CEREBRO_SOURCE_QUEUE_ROOT=$RUNNER_TEMP/cerebro-known-pool-source-queue-r1" >> "$GITHUB_ENV"
+          echo "CEREBRO_LRN_LEDGER_FILE=$RUNNER_TEMP/cerebro-known-pool-lrn/learning.v8" >> "$GITHUB_ENV"
+          echo "CEREBRO_IMPROVEMENT_CANDIDATE_LEDGER_FILE=$RUNNER_TEMP/cerebro-known-pool-lrn/improvement-candidates.v8" >> "$GITHUB_ENV"
+          echo "CEREBRO_DYNAMIC_ADOPTION_PROPOSAL=$RUNNER_TEMP/cerebro-dynamic-adoption-proposal.json" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/cerebro-known-pool-source-queue-r1" "$RUNNER_TEMP/cerebro-known-pool-lrn"
       - name: Restore independent durable pool state
         uses: actions/cache@v4
         with:
@@ -77,8 +77,7 @@ jobs:
           import fs from 'node:fs';
           const r=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
           const full=(r.results??[]).filter(x=>x.full_safe_preprod===true);
-          const elapsed=(r.results??[]).map(x=>Number(x.elapsed_ms??0)).filter(Number.isFinite);
-          console.log(JSON.stringify({status:'KNOWN_POOL_CYCLE_COMPLETE',requested:r.requested,by_status:r.by_status,full_safe_preprod:full.length,new_full_names:full.map(x=>x.technical_name??x.priority_seed_technical_name??x.github_url),queue_revision:r.pipeline_revision,max_candidate_elapsed_ms:elapsed.length?Math.max(...elapsed):null}));
+          console.log(JSON.stringify({status:'KNOWN_POOL_CYCLE_COMPLETE',requested:r.requested,by_status:r.by_status,full_safe_preprod:full.length,new_full_names:full.map(x=>x.technical_name??x.priority_seed_technical_name??x.github_url),queue_revision:r.pipeline_revision}));
           NODE
       - name: Upload exact dynamic adoption proposal
         uses: actions/upload-artifact@v4
