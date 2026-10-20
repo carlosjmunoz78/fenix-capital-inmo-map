@@ -12,7 +12,7 @@ const greenClosure={full_safe_preprod:true,per_binding_old_vs_new_pass:true,trib
 function queueRow(overrides={}){return {company_id:'fenix',status:'FULL_SAFE_PREPROD',full_safe_preprod:true,human_required:null,candidate_id:'repo:dynamic-finance-001',technical_name:'finance-ops-dynamic',source_locator:`github://example/finance@${SHA}/skills/finance`,pinned_sha:SHA,snapshot_sha256:H1,manifest_sha256:H2,outcome_hash:H3,target_engine_bindings:['FINOPS-001','ACC-001'],capability_contracts:[{capability_id:'cap:finance',technical_name:'finance-ops-dynamic',description:'Read-only finance operations analysis and reconciliation semantics.',domains:[{domain_id:'finance-accounting-payments',engine_bindings:['FINOPS-001','ACC-001']}]}],closure_summary:greenClosure,learning_impact_status:'LRN_IMPACT_GREEN_PREPROD',additional_cost_eur:0,prod_write_authorized:false,prod_mutation_authorized:false,external_skill_code_execution:false,trading_access:false,...overrides};}
 function emptyRegistry(){return {schema_version:'1.0.0',state_type:'CEREBRO_DYNAMIC_SKILL_ADOPTION_REGISTRY_V1',company_id:'GLOBAL',engine_id:'FACT-001',environment:'PREPROD',version:'v1',policy:{},capabilities:[]};}
 
-test('dynamic adoption registry starts fail-closed and cannot grant PROD mutation authority',()=>{
+test('dynamic adoption registry remains fail-closed as live capabilities are added',()=>{
   const registry=JSON.parse(fs.readFileSync(path.join(root,'cerebro/registry/skill-dynamic-adoption-v1.json'),'utf8'));
   assert.equal(registry.state_type,'CEREBRO_DYNAMIC_SKILL_ADOPTION_REGISTRY_V1');
   assert.equal(registry.environment,'PREPROD');
@@ -23,7 +23,27 @@ test('dynamic adoption registry starts fail-closed and cannot grant PROD mutatio
   assert.equal(registry.policy.prod_mutation_authorized,false);
   assert.equal(registry.policy.trading_access,false);
   assert.equal(registry.policy.additional_cost_budget_eur,0);
-  assert.deepEqual(registry.capabilities,[]);
+  for(const capability of registry.capabilities??[]){
+    assert.ok(['FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY','PROD_CAPABILITY_AVAILABLE_READONLY'].includes(capability.status),`UNEXPECTED_DYNAMIC_STATUS:${capability.candidate_id}:${capability.status}`);
+    assert.equal(capability.prod_authorized,false);
+    assert.equal(capability.prod_write_authorized,false);
+    assert.equal(capability.prod_mutation_authorized,false);
+    assert.equal(capability.permission_expansion_authorized,false);
+    assert.equal(capability.external_skill_code_execution,false);
+    assert.equal(capability.dependency_install_authorized,false);
+    assert.equal(capability.customer_data_authorized,false);
+    assert.equal(capability.paid_fallback,false);
+    assert.equal(capability.spend_authorized,false);
+    assert.equal(capability.trading_access,false);
+    assert.equal(Number(capability.additional_cost_eur),0);
+    assert.equal((capability.target_engine_bindings??[]).some((engine)=>String(engine).toUpperCase().includes('TRADING')),false);
+    if(capability.status==='PROD_CAPABILITY_AVAILABLE_READONLY'){
+      assert.equal(capability.environment,'PROD');
+      assert.equal(capability.current_scope,'PROD_READONLY_GOVERNED');
+      assert.equal(capability.canary?.ref,'refs/heads/main');
+      assert.equal(capability.canary?.side_effects,false);
+    }
+  }
 });
 
 test('FULL_SAFE_PREPROD queue result becomes a pending dynamic capability only with complete closure',()=>{
