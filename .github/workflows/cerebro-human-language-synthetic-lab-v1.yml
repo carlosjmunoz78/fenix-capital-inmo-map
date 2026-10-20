@@ -8,13 +8,17 @@ on:
       - 'cerebro/registry/synthetic-human-language-lab-v1.json'
       - 'cerebro/registry/rsi-learning-subscribers.v0.json'
       - 'cerebro/registry/universal-skill-activation-contracts-v1.json'
+      - 'cerebro/registry/p0-operational-capabilities-v1.json'
       - 'cerebro/skills/internal-capability-signals.v0.json'
       - 'cerebro/runtime/skill-priority-portfolio-v1.mjs'
       - 'cerebro/runtime/skill-priority-governed-evidence-v1.mjs'
       - 'cerebro/runtime/synthetic-human-language-lab-v1.mjs'
+      - 'cerebro/runtime/synthetic-human-selfplay-v1.mjs'
+      - 'cerebro/runtime/p0-operational-capability-pack-v1.mjs'
       - 'cerebro/runtime/universal-skill-autonomous-scout-v1.mjs'
       - 'cerebro/tests/skill-priority-human-language-digital-build-v1.test.mjs'
       - 'cerebro/tests/skill-priority-governed-evidence-v1.test.mjs'
+      - 'cerebro/tests/p0-operational-capability-pack-v1.test.mjs'
       - '.github/workflows/cerebro-human-language-synthetic-lab-v1.yml'
   pull_request:
     paths:
@@ -23,13 +27,17 @@ on:
       - 'cerebro/registry/synthetic-human-language-lab-v1.json'
       - 'cerebro/registry/rsi-learning-subscribers.v0.json'
       - 'cerebro/registry/universal-skill-activation-contracts-v1.json'
+      - 'cerebro/registry/p0-operational-capabilities-v1.json'
       - 'cerebro/skills/internal-capability-signals.v0.json'
       - 'cerebro/runtime/skill-priority-portfolio-v1.mjs'
       - 'cerebro/runtime/skill-priority-governed-evidence-v1.mjs'
       - 'cerebro/runtime/synthetic-human-language-lab-v1.mjs'
+      - 'cerebro/runtime/synthetic-human-selfplay-v1.mjs'
+      - 'cerebro/runtime/p0-operational-capability-pack-v1.mjs'
       - 'cerebro/runtime/universal-skill-autonomous-scout-v1.mjs'
       - 'cerebro/tests/skill-priority-human-language-digital-build-v1.test.mjs'
       - 'cerebro/tests/skill-priority-governed-evidence-v1.test.mjs'
+      - 'cerebro/tests/p0-operational-capability-pack-v1.test.mjs'
       - '.github/workflows/cerebro-human-language-synthetic-lab-v1.yml'
   repository_dispatch:
     types:
@@ -37,7 +45,7 @@ on:
       - cerebro_synthetic_human_results
   workflow_dispatch:
   schedule:
-    - cron: '37 * * * *'
+    - cron: '7,22,37,52 * * * *'
 
 permissions:
   contents: read
@@ -55,8 +63,21 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+      - name: Prepare persistent zero-cost synthetic learning ledger
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "CEREBRO_SYNTHETIC_LEDGER_ROOT=$RUNNER_TEMP/cerebro-synthetic-human-ledger" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/cerebro-synthetic-human-ledger"
+      - name: Restore persistent synthetic-human learning history
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/cerebro-synthetic-human-ledger
+          key: synthetic-human-language-v1-${{ github.ref_name }}-${{ github.run_id }}
+          restore-keys: |
+            synthetic-human-language-v1-${{ github.ref_name }}-
       - name: Targeted P0 language, routing and synthetic-human tests
-        run: node --test cerebro/tests/skill-priority-human-language-digital-build-v1.test.mjs cerebro/tests/skill-priority-governed-evidence-v1.test.mjs cerebro/tests/universal-skill-autonomous-scout-v1.test.mjs
+        run: node --test cerebro/tests/skill-priority-human-language-digital-build-v1.test.mjs cerebro/tests/skill-priority-governed-evidence-v1.test.mjs cerebro/tests/universal-skill-autonomous-scout-v1.test.mjs cerebro/tests/p0-operational-capability-pack-v1.test.mjs
       - name: Build priority portfolio report and full synthetic-human plan
         shell: bash
         run: |
@@ -77,6 +98,24 @@ jobs:
           if(p.prod_authorized||p.prod_write_authorized||p.trading_access||Number(p.additional_cost_eur)!==0) throw new Error('unsafe priority authority');
           if(s.prod_authorized||s.prod_write_authorized||s.prod_mutation_authorized||s.automatic_prod_prompt_mutation||s.automatic_prod_persona_mutation||s.trading_access||s.paid_fallback||Number(s.additional_cost_eur)!==0) throw new Error('unsafe synthetic lab authority');
           console.log(JSON.stringify({status:'PASS_HUMAN_LANGUAGE_SYNTHETIC_LAB_V1',priority_families:p.portfolio_count,synthetic_cases:s.case_count,canonical_engines:p.canonical_engine_count,language_global_scope:p.global_language_binding_policy.effective_scope,lrn_signal:true,prod_write:false,prod_mutation:false,trading:false,cost_eur:0}));
+          NODE
+      - name: Run continuous synthetic-human self-play and persist bounded LRN-001 candidates
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          node cerebro/runtime/synthetic-human-selfplay-v1.mjs \
+            --output artifacts/synthetic-human-selfplay-v1.json \
+            --ledger "$CEREBRO_SYNTHETIC_LEDGER_ROOT/learning-ledger-v1.json" \
+            | tee /tmp/cerebro-synthetic-selfplay.json
+          node - <<'NODE'
+          const fs=require('fs');
+          const r=JSON.parse(fs.readFileSync('artifacts/synthetic-human-selfplay-v1.json','utf8'));
+          if(r.status!=='GREEN_SYNTHETIC_SELFPLAY_CYCLE'||r.case_count!==160||!(r.adaptive_weighted_average>r.baseline_weighted_average)) throw new Error(`selfplay not green ${r.status}/${r.case_count}`);
+          if(r.prod_write_authorized||r.prod_mutation_authorized||r.automatic_prod_prompt_mutation||r.automatic_prod_persona_mutation||r.external_skill_code_execution||r.trading_access||Number(r.additional_cost_eur)!==0) throw new Error('unsafe selfplay authority');
+          if(r.measurement_scope!=='DETERMINISTIC_ZERO_COST_PROXY_EVALUATION') throw new Error('selfplay measurement scope drift');
+          for(const c of r.improvement_candidates) if(c.target!=='LRN-001'||c.direct_prod_mutation!==false||c.tribunal_required_before_prod_behavior_change!==true) throw new Error('unsafe learning candidate');
+          console.log(JSON.stringify({status:'PASS_CONTINUOUS_SYNTHETIC_HUMAN_SELFPLAY',cases:r.case_count,baseline:r.baseline_weighted_average,adaptive:r.adaptive_weighted_average,relative_gain:r.relative_gain,learning_candidates:r.improvement_candidates.length,target:'LRN-001',direct_prod_mutation:false,cost_eur:0}));
           NODE
       - name: Evaluate dispatched synthetic-human results when supplied
         if: github.event_name == 'repository_dispatch' && github.event.action == 'cerebro_synthetic_human_results'
@@ -119,4 +158,4 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          ! grep -Eq 'prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|prod_mutation_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true|paid_fallback[[:space:]]*:[[:space:]]*true|external_skill_code_execution[[:space:]]*:[[:space:]]*true' cerebro/registry/skill-priority-portfolio-v1.json cerebro/registry/synthetic-human-language-lab-v1.json cerebro/registry/skill-priority-seed-sources-v1.json
+          ! grep -Eq 'prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|prod_mutation_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true|paid_fallback[[:space:]]*:[[:space:]]*true|external_skill_code_execution[[:space:]]*:[[:space:]]*true' cerebro/registry/skill-priority-portfolio-v1.json cerebro/registry/synthetic-human-language-lab-v1.json cerebro/registry/skill-priority-seed-sources-v1.json cerebro/registry/p0-operational-capabilities-v1.json
