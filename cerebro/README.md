@@ -5,11 +5,18 @@ Este árbol se mantiene separado del runtime funcional de App Fénix y no sustit
 ## Estado por fase
 
 - **FACT-001 / GOV-001 — HECHO · estructural/reference green.** Factory V0 y registro canónico de 177 motores validados; 177 scaffolds reproducibles, sin afirmar que los 177 motores estén operativos.
-- **Phase 2 — HECHO wrapper + auditoría read-only V0 / estados live diferenciados.** Los nueve bindings siguen conservadores. El ledger `evidence/phase2-existing-bindings-audit.json` confirma `APP-001` como `CONFIRMED_OPERATIONAL` por deploy/smoke exact-SHA del App existente; `CORE-001`, `SUP-001`, `TRN-001` y `DOC-001` quedan `DOCUMENTED_PARTIAL`; `CRM-001`, `SEO-001`, `WEB-001` y `LAB-TRD` permanecen `UNKNOWN_REQUIRES_AUDIT`. Ningún estado habilita autonomía CEREBRO PROD.
+- **Phase 2 — HECHO wrapper + auditoría read-only V0 / estados live diferenciados.** El ledger `evidence/phase2-existing-bindings-audit.json` confirma `APP-001` como `CONFIRMED_OPERATIONAL` por deploy/smoke exact-SHA del App existente; `WEB-001` queda `CONFIRMED_OPERATIONAL` para la web WordPress PROD existente de Fénix Capital tras verificación viva read-only de 2026-10-20; `LAB-TRD` queda `DOCUMENTED_PARTIAL` como sistema de Trading existente en Google Cloud, aislado y bloqueado para puesta a punto/activación hasta cerrar control E2E de navegador y PC. `CORE-001`, `SUP-001`, `TRN-001` y `DOC-001` quedan `DOCUMENTED_PARTIAL`; `CRM-001` y `SEO-001` permanecen `UNKNOWN_REQUIRES_AUDIT`. Ningún estado habilita por sí solo autonomía CEREBRO PROD.
 - **Phase 3 — HECHO V0 reference / DEFINIDO según motor.** `RUNTIME-001` y `FINOPS-001` tienen referencia ejecutable PREPROD. `EVT-001` y `JOB-001` tienen además persistencia local/self-hosted PREPROD V0 con replay determinista, idempotencia tras restart, recuperación durable de claims abandonados y aislamiento multiempresa; siguen siendo adapters paralelos single-writer, no motores autónomos PROD. `DBOFF-001`, `STOROFF-001`, `FREE-001` y `AIBUD-001` permanecen definidos como contratos V0, no operativos autónomos.
 - **Phase 4 — HECHO · estructural/reference green.** Bootstrap multiempresa de 17 motores con aislamiento por tenant, PREPROD-only, HUMAN_REQUIRED canónico y promoción PROD autónoma deshabilitada.
 - **Phase 5 — HECHO · estructural/reference green.** `CONSOLE-001`, `CHAT-001`, `CTX-001`, `CMD-001` y `ACTGW-001` implementados como Console/Gateway V0: selector de empresa/contexto, sesiones, historial, auditoría, consulta de motores, chat y órdenes mediados por Gateway, nunca acceso directo a un modelo.
 - **Governance V0 — HECHO · estructural/reference green.** `POL-001` y `HEX-001` disponen de referencia determinista PREPROD-only: reglas versionadas ALLOW/DENY/REVIEW, fail-closed, escalado exacto HUMAN_REQUIRED, aislamiento por empresa, priorización y asignación de excepciones humanas. `autonomous_prod=false` permanece sin cambios.
+
+## Corrección canónica externa · 2026-10-20
+
+- `WEB-001`: la web de Fénix Capital **ya existe en PROD** en `https://fenixcapital.es`. El cambio previsto para 2026-10-21 es una modificación sobre la web existente, no su primer despliegue. Esta corrección no realiza ninguna mutación de WordPress.
+- `LAB-TRD`: el sistema de Trading para inversión en bolsa **existe en Google Cloud** según confirmación expresa del propietario. Permanece aislado por seguridad; aislamiento significa no compartir credenciales, lógica de ejecución ni recursos críticos con App/CRM/CEREBRO PROD, no que Trading sea inexistente o esté excluido.
+- `LAB-TRD` no se pone a punto ni se activa mediante CEREBRO hasta que `BROWSER_CONTROL_E2E_CONFIRMED` y `PC_CONTROL_E2E_CONFIRMED` estén cerrados. Después deberá superar auditoría, tests, tribunal, observabilidad, backup, rollback y rebuild propios de Trading.
+- Fuente máquina: `registry/external-system-state.v1.json`. Documento canónico: `docs/CEREBRO_EXTERNAL_SYSTEM_STATE_2026-10-20.md`.
 
 ## Evidencia vigente
 
@@ -20,6 +27,7 @@ La evidencia estructurada por alcance está en `docs/EVIDENCE.json`; el audit re
 - Phase 2 live-audit anchor: merge `4705f6821bde7bff47d156ae2a9ce60b09dee781`; PROD Live Deploy `34313457110` y PROD Runtime Smoke `34313457061`, success sobre ese SHA.
 - Governance V0 anchor: merge `c523da8f11dbf1a2618982aeeb5940670317bb6e`; PROD Live Deploy `34330670776` y PROD Runtime Smoke `34330670550`, success sobre ese SHA.
 - Persistent EVT/JOB V0 anchor: reviewed HEAD `16484fdf50760afbd98e1d85824ed352dd3a5585`; PREPROD Factory `34337677363` y App `34337677429` success; merge `26fb9c75b9a7361afccccdc111761ad10aac5fa4`; PROD Live Deploy `34340279918` y PROD Runtime Smoke `34340279922`, success sobre ese SHA.
+- External-system state anchor: `registry/external-system-state.v1.json`, recorded 2026-10-20. `WEB-001` has live read-only WordPress evidence; `LAB-TRD` existence/location is owner-confirmed and remains partial pending device-control and Trading-specific live audit.
 
 Esta evidencia valida los alcances expresamente citados. **No demuestra que todos los motores CEREBRO sean operativos o autónomos en PROD.**
 
@@ -40,10 +48,11 @@ Cada scaffold contiene `company_id`, `engine_id`, `environment` y `version`, ade
 
 - No escribe en Supabase desde estos V0 de CEREBRO.
 - No reemplaza App/CRM/WordPress/Notion/SEO/Training/Trading.
-- Trading mantiene aislamiento explícito.
+- Trading mantiene aislamiento explícito. Ese aislamiento es separación de credenciales, lógica y recursos críticos; no equivale a inexistencia.
+- AccessBoot/CEREBRO mantiene `trading_access=false` hasta control integral de navegador y PC E2E y posterior gate propio de `LAB-TRD`.
 - Acceso cross-company: deny por defecto.
-- PREPROD-only en Runtime/Multiempresa/Console/Governance V0.
-- `prod_execution_enabled=false`, `autonomous_prod=false` y sin promoción PROD autónoma.
+- PREPROD-only en Runtime/Multiempresa/Console/Governance V0 salvo promociones posteriores expresamente gobernadas.
+- `prod_execution_enabled=false`, `autonomous_prod=false` en los V0 de referencia y sin promoción PROD autónoma por mero scaffold/evidencia parcial.
 - Console conecta conceptualmente al CEREBRO Gateway; chat y comandos no acceden directamente a un modelo.
 - HUMAN_REQUIRED limitado a las razones canónicas del proyecto.
 - Coste adicional objetivo: 0 €.
@@ -52,6 +61,8 @@ Cada scaffold contiene `company_id`, `engine_id`, `environment` y `version`, ade
 
 Los 177 scaffolds se reconstruyen desde `registry/engine-registry.seed.json` + `factory.mjs`. Runtime, Multiempresa, Console y Governance son código declarativo bajo `runtime/`, `multicompany/`, `console/` y `governance/`, sin dependencia obligatoria de servicios de pago. La salida generada de Factory es desechable y reproducible.
 
+El estado externo `WEB-001`/`LAB-TRD` se reconstruye documentalmente desde `registry/external-system-state.v1.json`; nunca desde secretos. El rebuild de AccessBoot debe conservar `trading_access=false` hasta cerrar los gates físicos de dispositivo y el gate específico posterior de Trading.
+
 ## Documentación operativa
 
-Ver `docs/CURRENT_STATE.md`, `docs/EVIDENCE.json`, `docs/DEPENDENCY_MAP.md`, `docs/RUNBOOK.md`, `docs/CHANGELOG.md` y `docs/AUTONOMY_BACKUP_REBUILD.md` para estado de evidencia, dependencias, gates, rollback/rebuild y autonomía.
+Ver `docs/CURRENT_STATE.md`, `docs/EVIDENCE.json`, `docs/DEPENDENCY_MAP.md`, `docs/RUNBOOK.md`, `docs/CHANGELOG.md`, `docs/AUTONOMY_BACKUP_REBUILD.md` y `docs/CEREBRO_EXTERNAL_SYSTEM_STATE_2026-10-20.md` para estado de evidencia, dependencias, gates, rollback/rebuild y autonomía.

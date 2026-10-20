@@ -1,0 +1,69 @@
+{
+  "schema_version": "1.1.0",
+  "state_type": "CEREBRO_EXTERNAL_SYSTEM_STATE_V1",
+  "recorded_on": "2026-10-20",
+  "company_id": "fenix",
+  "web_001": {
+    "evidence_state": "CONFIRMED_OPERATIONAL",
+    "system_exists": true,
+    "environment": "PROD",
+    "url": "https://fenixcapital.es",
+    "platform": "WORDPRESS",
+    "live_readonly_check": {
+      "date": "2026-10-20",
+      "result": "REACHABLE_EXISTING_PROD_SURFACE",
+      "wp_version": "7.1.3",
+      "active_theme": "Astra 4.14.0"
+    },
+    "planned_change": {
+      "date": "2026-10-21",
+      "status": "PLANIFICADO"
+    },
+    "mutation_now_authorized": false,
+    "interpretation": "The Fenix Capital website already exists in PROD. The planned 2026-10-21 work is a modification of the existing site, not an initial deployment."
+  },
+  "lab_trd": {
+    "evidence_state": "DOCUMENTED_PARTIAL",
+    "system_exists": true,
+    "purpose": "STOCK_MARKET_INVESTING_TRADING_SYSTEM",
+    "runtime_location": "GOOGLE_CLOUD",
+    "gcp_project": "fenix-trading-lab",
+    "gcp_vm": "cerebro-trading-lab",
+    "historical_operational_evidence": {
+      "evidence_date": "2026-09-04",
+      "source": "NOTION_TRADING_LAB_MASTER",
+      "shadow_automatic": "ACTIVE",
+      "alpaca_paper": "ARMED_AND_ACTIVE_BEHIND_GATES",
+      "real_capital_authorized": false,
+      "current_health_revalidated_on_2026_10_20": false
+    },
+    "isolated": true,
+    "isolation_meaning": "NO_SHARED_CREDENTIALS_LOGIC_OR_EXECUTION_RESOURCES_WITH_APP_CRM_CEREBRO_PROD",
+    "cerebro_trading_access": false,
+    "integral_tuning_or_authority_expansion_blocked_until": [
+      "BROWSER_CONTROL_E2E_CONFIRMED",
+      "PC_CONTROL_E2E_CONFIRMED"
+    ],
+    "after_device_gates": "SEPARATE_LAB_TRD_LIVE_AUDIT_TEST_TRIBUNAL_OBSERVABILITY_BACKUP_ROLLBACK_REBUILD_AND_PROMOTION_REQUIRED",
+    "interpretation": "Trading isolation means security and execution separation, not nonexistence. Existing historical Shadow/Paper execution evidence does not authorize real capital and does not prove current 2026-10-20 health."
+  },
+  "device_control": {
+    "evidence_state": "PARCIAL",
+    "browser_control": "NOT_YET_FULL_E2E_CONFIRMED",
+    "pc_control": "NOT_YET_FULL_E2E_CONFIRMED",
+    "required_for_integral_trading_tuning": true,
+    "fail_closed": true
+  },
+  "human_required_set": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "additional_cost_target_eur": 0,
+  "secrets_recorded": false
+}

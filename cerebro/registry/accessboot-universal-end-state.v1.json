@@ -1,7 +1,8 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "state_type": "CEREBRO_ACCESSBOOT_UNIVERSAL_END_STATE_V1",
   "status": "DEFINED",
+  "operational_progress": "PARCIAL_DEVICE_CONTROL_NOT_FULLY_CLOSED",
   "objective": "One authorized executable on the owner's computer bootstraps and connects the complete CEREBRO access stack without binding the device permanently to one company or one website.",
   "principles": {
     "device_binding": "DEVICE_LEVEL_IDENTITY_ONLY",
@@ -31,6 +32,18 @@
   ],
   "staging_connector_role": "BOOTSTRAP_AND_ACCEPTANCE_SURFACE_ONLY_NOT_UNIVERSAL_AUTHORITY",
   "staging_connector_note": "The current staging connector is site/environment specific. It may be used to close STAGING acceptance, but the universal design must discover and bind arbitrary authorized sites/companies dynamically rather than baking staging.fenixcapital.es into the device identity or executable.",
+  "trading_dependency": {
+    "trading_system_exists": true,
+    "purpose": "STOCK_MARKET_INVESTING_TRADING_SYSTEM",
+    "runtime_location": "GOOGLE_CLOUD_OWNER_CONFIRMED",
+    "isolation_meaning": "SEPARATED_CREDENTIALS_LOGIC_AND_EXECUTION_RESOURCES_NOT_NONEXISTENCE",
+    "trading_access": false,
+    "tuning_or_activation_blocked_until": [
+      "BROWSER_CONTROL_E2E_CONFIRMED",
+      "PC_CONTROL_E2E_CONFIRMED"
+    ],
+    "post_device_gate": "SEPARATE_LAB_TRD_AUDIT_TEST_TRIBUNAL_AND_PROMOTION_REQUIRED"
+  },
   "final_acceptance": [
     "one executable",
     "no per-company executable",
@@ -44,5 +57,6 @@
     "vault recovery proven without exposing secrets"
   ],
   "prod_authorized": false,
-  "trading_access": false
+  "trading_access": false,
+  "external_system_state_registry": "external-system-state.v1.json"
 }
