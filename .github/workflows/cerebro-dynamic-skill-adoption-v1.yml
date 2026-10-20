@@ -1,0 +1,144 @@
+name: CEREBRO Dynamic Skill Adoption V1
+
+on:
+  workflow_run:
+    workflows:
+      - CEREBRO Universal Skill Continuous Intake V1
+    types:
+      - completed
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: cerebro-dynamic-skill-adoption-main
+  cancel-in-progress: false
+
+jobs:
+  adopt-and-promote-readonly:
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      PROPOSAL_DIR: ${{ runner.temp }}/dynamic-proposal
+      REGISTRY: cerebro/registry/skill-dynamic-adoption-v1.json
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Download exact intake proposal
+        if: github.event_name == 'workflow_run'
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: cerebro-dynamic-adoption-proposal-${{ github.event.workflow_run.id }}
+          path: ${{ runner.temp }}/dynamic-proposal
+          github-token: ${{ github.token }}
+          run-id: ${{ github.event.workflow_run.id }}
+      - name: Gate proposal and merge into current registry
+        id: merge_proposal
+        shell: bash
+        run: |
+          set -euo pipefail
+          PROPOSAL="$PROPOSAL_DIR/cerebro-dynamic-adoption-proposal.json"
+          if [ ! -f "$PROPOSAL" ]; then
+            echo 'No dynamic adoption proposal in this intake cycle.'
+            echo 'changed=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          cp "$REGISTRY" "$RUNNER_TEMP/dynamic-registry-before.json"
+          node --input-type=module - "$PROPOSAL" "$REGISTRY" <<'NODE'
+          import fs from 'node:fs';
+          import {mergeDynamicCandidates} from './cerebro/runtime/skill-dynamic-adoption-v1.mjs';
+          const proposal=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
+          const current=JSON.parse(fs.readFileSync(process.argv[3],'utf8'));
+          if(proposal.state_type!=='CEREBRO_DYNAMIC_SKILL_ADOPTION_REGISTRY_V1') throw new Error('PROPOSAL_REGISTRY_INVALID');
+          const incoming=(proposal.capabilities??[]).filter((x)=>x.status==='FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY');
+          const merged=mergeDynamicCandidates({registry:current,candidates:incoming});
+          fs.writeFileSync(process.argv[3],`${JSON.stringify(merged,null,2)}\n`);
+          console.log(JSON.stringify({status:'DYNAMIC_PROPOSAL_MERGED',incoming:incoming.length,total:merged.capabilities.length,pending:merged.summary.pending_canary}));
+          NODE
+          if cmp -s "$RUNNER_TEMP/dynamic-registry-before.json" "$REGISTRY"; then
+            echo 'Proposal contains no new governed capability.'
+            echo 'changed=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          node --test cerebro/tests/skill-dynamic-adoption-v1.test.mjs cerebro/tests/skill-prod-capability-fastlane-v1.test.mjs
+          CHANGED="$(git diff --name-only)"
+          test "$CHANGED" = "$REGISTRY"
+          echo 'changed=true' >> "$GITHUB_OUTPUT"
+      - name: Persist FULL_SAFE_PREPROD pending registry on main
+        if: steps.merge_proposal.outputs.changed == 'true'
+        id: persist_pending
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'CEREBRO FACT-001'
+          git config user.email 'cerebro-fact-001@users.noreply.github.com'
+          BASE_SHA="$(git rev-parse HEAD)"
+          git add "$REGISTRY"
+          test "$(git diff --cached --name-only)" = "$REGISTRY"
+          git commit -m 'CEREBRO: register FULL_SAFE_PREPROD dynamic capabilities [skip ci]'
+          git push origin HEAD:main
+          PENDING_SHA="$(git rev-parse HEAD)"
+          echo "base_sha=$BASE_SHA" >> "$GITHUB_OUTPUT"
+          echo "pending_sha=$PENDING_SHA" >> "$GITHUB_OUTPUT"
+      - name: Canonical main no-side-effect PROD read-only canary
+        if: steps.merge_proposal.outputs.changed == 'true'
+        id: canary
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${{ steps.persist_pending.outputs.pending_sha }}"
+          node cerebro/runtime/skill-dynamic-adoption-v1.mjs \
+            --promote "$REGISTRY" \
+            --head-sha "${{ steps.persist_pending.outputs.pending_sha }}" \
+            --run-id "$GITHUB_RUN_ID" \
+            --ref refs/heads/main \
+            --output "$REGISTRY"
+          node --test cerebro/tests/skill-dynamic-adoption-v1.test.mjs cerebro/tests/skill-prod-capability-fastlane-v1.test.mjs
+          node cerebro/runtime/skill-prod-capability-fastlane-v1.mjs --output "$RUNNER_TEMP/dynamic-fastlane.json"
+          node - <<'NODE'
+          const fs=require('fs');
+          const registry=JSON.parse(fs.readFileSync(process.env.REGISTRY,'utf8'));
+          const fast=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/dynamic-fastlane.json','utf8'));
+          const promoted=(registry.capabilities??[]).filter(x=>x.status==='PROD_CAPABILITY_AVAILABLE_READONLY');
+          if(!promoted.length) throw new Error('NO_DYNAMIC_CAPABILITY_PROMOTED');
+          for(const row of promoted){
+            if(row.canary?.ref!=='refs/heads/main'||row.canary?.head_sha!==process.env.PENDING_SHA) throw new Error(`NON_CANONICAL_CANARY:${row.candidate_id}`);
+            if(row.canary?.side_effects!==false||row.prod_write_authorized!==false||row.prod_mutation_authorized!==false||row.external_skill_code_execution!==false||row.trading_access!==false||Number(row.additional_cost_eur)!==0) throw new Error(`UNSAFE_PROMOTION:${row.candidate_id}`);
+            const live=fast.available.find(x=>x.candidate_id===row.candidate_id&&x.source_kind==='DYNAMIC_ADOPTION');
+            if(!live) throw new Error(`FASTLANE_NOT_CALLABLE:${row.candidate_id}`);
+          }
+          console.log(JSON.stringify({status:'DYNAMIC_PROD_READONLY_CANARY_GREEN',promoted:promoted.length,dynamic_fastlane:fast.dynamic_available_count}));
+          NODE
+        env:
+          PENDING_SHA: ${{ steps.persist_pending.outputs.pending_sha }}
+      - name: Persist governed PROD read-only availability on main
+        if: steps.merge_proposal.outputs.changed == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHANGED="$(git diff --name-only)"
+          test "$CHANGED" = "$REGISTRY"
+          git add "$REGISTRY"
+          test "$(git diff --cached --name-only)" = "$REGISTRY"
+          git commit -m 'CEREBRO: promote dynamic capabilities to governed PROD read-only [skip ci]'
+          git push origin HEAD:main
+          echo "DYNAMIC_SKILL_ADOPTION_GREEN main_sha=$(git rev-parse HEAD)"
+      - name: Assert workflow cannot mutate anything except the dynamic registry
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          DIRTY="$(git status --porcelain | awk '{print $2}' | sort -u || true)"
+          if [ -n "$DIRTY" ] && [ "$DIRTY" != "$REGISTRY" ]; then
+            echo "Unexpected dirty paths: $DIRTY" >&2
+            exit 1
+          fi
