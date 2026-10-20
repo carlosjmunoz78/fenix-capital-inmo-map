@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_DYNAMIC_SKILL_ADOPTION_ACCEPTANCE_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "acceptance": "A_NEW_NON_SEEDED_CAPABILITY_MUST_BE_DISCOVERED_FULL_SAFE_PREPROD_CANARIED_AND_RESOLVABLE_READONLY_ON_A_GOVERNED_ENGINE",
+  "review_only_is_not_accepted": true,
+  "candidate_only_is_not_accepted": true,
+  "full_safe_preprod_only_is_not_final_acceptance": true,
+  "external_skill_code_execution": false,
+  "prod_write_authorized": false,
+  "additional_cost_eur": 0
+}
