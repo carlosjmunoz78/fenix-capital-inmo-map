@@ -1,0 +1,52 @@
+name: CEREBRO LRN State Migration Gate V1
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/runtime/learning-orchestrator.mjs'
+      - 'cerebro/tests/learning-orchestrator-state-migration-v1.test.mjs'
+      - '.github/workflows/cerebro-lrn-state-migration-gate-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-lrn-state-migration-gate-v1-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  migration-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Run deterministic migration contract tests
+        run: node --test cerebro/tests/learning-orchestrator-state-migration-v1.test.mjs
+      - name: Replay migration against durable LRN PREPROD snapshot without mutation
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin '+refs/heads/cerebro-rsi-learning-state-v0:refs/remotes/origin/cerebro-rsi-learning-state-v0'
+          STATE_PATH='cerebro/runtime/rsi-learning-state/data/fenix/LRN-001/orchestration-state.json'
+          git show "refs/remotes/origin/cerebro-rsi-learning-state-v0:$STATE_PATH" > /tmp/lrn-orchestration-state.json
+          TARGET_VERSION="$(jq -r '.subscribers[] | select(.company_id == "fenix" and .enabled == true and .environment == "PREPROD") | .version' cerebro/registry/rsi-learning-subscribers.v0.json | head -n1)"
+          test -n "$TARGET_VERSION" && test "$TARGET_VERSION" != 'null'
+          TARGET_VERSION="$TARGET_VERSION" node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import {migrateOrchestratorStateVersion,validateOrchestratorState} from './cerebro/runtime/learning-orchestrator.mjs';
+          const state=JSON.parse(fs.readFileSync('/tmp/lrn-orchestration-state.json','utf8'));
+          const migrated=migrateOrchestratorStateVersion(state,{company_id:'fenix',version:process.env.TARGET_VERSION,now:'2026-10-20T12:00:00.000Z'});
+          validateOrchestratorState(migrated,{company_id:'fenix',version:process.env.TARGET_VERSION});
+          if(migrated.prod_authorized!==false||migrated.prod_write_authorized!==false||migrated.trading_access!==false||Number(migrated.additional_cost_eur)!==0) throw new Error('AUTHORITY_EXPANSION');
+          if(Number(migrated.plans_emitted??0)<Number(state.plans_emitted??0)) throw new Error('PROGRESS_RESET');
+          for(const cadence of ['DAILY','WEEKLY','MONTHLY']) if((migrated.last_success?.[cadence]??null)!==(state.last_success?.[cadence]??null)) throw new Error(`LAST_SUCCESS_CHANGED:${cadence}`);
+          console.log(JSON.stringify({status:'GREEN_LRN_DURABLE_STATE_MIGRATION_REPLAY',from_version:state.version,to_version:migrated.version,plans_emitted:migrated.plans_emitted,prod_authorized:false,prod_write_authorized:false,trading_access:false,additional_cost_eur:0}));
+          NODE
+      - name: Assert repository remained untouched
+        run: test -z "$(git status --porcelain --untracked-files=all)"
