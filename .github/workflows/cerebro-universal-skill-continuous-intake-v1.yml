@@ -2,7 +2,7 @@ name: CEREBRO Universal Skill Continuous Intake V1
 
 on:
   schedule:
-    - cron: '17 * * * *'
+    - cron: '2,17,32,47 * * * *'
   repository_dispatch:
     types:
       - cerebro_skill_intake
@@ -119,12 +119,12 @@ jobs:
             node cerebro/runtime/universal-skill-autonomous-scout-v1.mjs --out "$SCOUT_EVENT"
             STATUS="$(node -e "const fs=require('fs');const x=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP + '/cerebro-skill-scout-event.json','utf8'));process.stdout.write(String(x.status));")"
             if [ "$STATUS" = "DISCOVERY_DEFERRED_RATE_LIMIT" ]; then
-              echo 'GitHub Search rate-limited; pinned P0 seeds were already processed, so priority work does not stall. Search will retry next event/hourly recovery cycle.'
+              echo 'GitHub Search rate-limited; pinned P0 seeds were already processed, so priority work does not stall. Search will retry on the next event or 15-minute recovery cycle.'
               return 0
             fi
             COUNT="$(node -e "const fs=require('fs');const x=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP + '/cerebro-skill-scout-event.json','utf8'));process.stdout.write(String(x.client_payload.github_urls.length));")"
             if [ "$COUNT" -eq 0 ]; then
-              echo 'No additional eligible public skill sources discovered after pinned P0 seeds.'
+              echo 'No additional eligible public skill sources discovered after bounded page fallback.'
               return 0
             fi
             node cerebro/runtime/universal-skill-source-queue-v1.mjs --event "$SCOUT_EVENT"
