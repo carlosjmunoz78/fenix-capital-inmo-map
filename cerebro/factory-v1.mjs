@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 import fs from 'node:fs';
-import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
+import { atomicReplaceFactoryDirectory } from './runtime/fact001-safe-fs.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const BASE_FACTORY = path.join(HERE, 'factory.mjs');
@@ -72,18 +72,19 @@ function cloneScaffold(source, target, fromId, toId, override) {
 }
 export function generateRegistryV1(registryFile, outDir) {
   const registry=readJson(registryFile); validateRegistryV1(registry);
-  const scratch=fs.mkdtempSync(path.join(os.tmpdir(),'cerebro-factory-v1-'));
-  try {
-    execFileSync(process.execPath,[BASE_FACTORY,'generate','--registry',BASE_REGISTRY,'--out',scratch],{stdio:'pipe'});
-    fs.rmSync(outDir,{recursive:true,force:true}); fs.cpSync(scratch,outDir,{recursive:true});
-    const index=readJson(path.join(outDir,'skeleton-index.json'));
+  return atomicReplaceFactoryDirectory(outDir, (stage) => {
+    execFileSync(process.execPath,[BASE_FACTORY,'generate','--registry',BASE_REGISTRY,'--out',stage],{stdio:'pipe'});
+    const index=readJson(path.join(stage,'skeleton-index.json'));
     if(index.engine_count!==BASE_COUNT) throw new Error('base factory output drift');
-    const template=path.join(outDir,'engines',TEMPLATE_ENGINE);
-    for(const id of ADDED){const target=path.join(outDir,'engines',id);const row=cloneScaffold(template,target,TEMPLATE_ENGINE,id,registry.overrides?.[id]);index.engines.push(row);}
+    const template=path.join(stage,'engines',TEMPLATE_ENGINE);
+    for(const id of ADDED){const target=path.join(stage,'engines',id);const row=cloneScaffold(template,target,TEMPLATE_ENGINE,id,registry.overrides?.[id]);index.engines.push(row);}
     index.generated_by='FACT-001-V1_NON_BREAKING_EXTENSION'; index.engine_count=CANONICAL_COUNT; index.template_file_count=EXPECTED_FILES; index.base_engine_count=BASE_COUNT; index.added_engine_ids=ADDED;
-    fs.writeFileSync(path.join(outDir,'skeleton-index.json'),json(index),'utf8');
+    fs.writeFileSync(path.join(stage,'skeleton-index.json'),json(index),'utf8');
     return index;
-  } finally { fs.rmSync(scratch,{recursive:true,force:true}); }
+  }, {
+    forbidden: [HERE, path.resolve(HERE, '..')],
+    markers: ['skeleton-index.json']
+  });
 }
 
 const args=parseArgs(process.argv);
