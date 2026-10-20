@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_DYNAMIC_SKILL_ADOPTION_DEPENDENCY_MAP_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "depends_on": [
+    "universal-skill-autonomous-scout-v1",
+    "universal-skill-source-queue-v1",
+    "universal-skill-repository-intake-v1",
+    "universal-skill-auto-engineering-v1",
+    "universal-skill-real-binding-v1",
+    "universal-skill-lrn-impact-bridge-v1"
+  ],
+  "feeds": [
+    "skill-dynamic-adoption-v1",
+    "skill-prod-capability-fastlane-v1"
+  ],
+  "existing_surfaces_preserved": [
+    "APP_FENIX",
+    "CRM",
+    "SUPABASE",
+    "NOTION",
+    "WORDPRESS",
+    "SEO",
+    "TRAINING",
+    "AUTOMATIONS",
+    "TRADING_ISOLATED"
+  ]
+}
