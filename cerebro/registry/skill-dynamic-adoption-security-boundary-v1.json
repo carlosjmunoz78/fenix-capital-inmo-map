@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_DYNAMIC_SKILL_ADOPTION_SECURITY_BOUNDARY_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "external_code": "NEVER_EXECUTED",
+  "dependencies": "NEVER_INSTALLED_FROM_DISCOVERED_SKILL",
+  "credentials": "NOT_IMPORTED_FROM_DISCOVERED_SKILL",
+  "customer_data": false,
+  "permission_expansion": false,
+  "trading": "DENIED_AND_ISOLATED",
+  "prod_write": false,
+  "prod_mutation": false,
+  "additional_cost_eur": 0
+}
