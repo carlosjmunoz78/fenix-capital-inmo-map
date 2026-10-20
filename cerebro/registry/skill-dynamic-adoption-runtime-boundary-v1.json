@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_DYNAMIC_SKILL_ADOPTION_RUNTIME_BOUNDARY_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "shared_runtime": true,
+  "new_server_per_skill": false,
+  "external_skill_process_spawn": false,
+  "external_skill_dependency_install": false,
+  "origin_engine_executes_governed_logic": true,
+  "additional_cost_eur": 0
+}
