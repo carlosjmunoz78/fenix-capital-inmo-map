@@ -22,6 +22,7 @@ on:
       - main
       - 'cerebro/universal-skill-activation-factory-v1-*'
       - 'cerebro/p0-human-language-digital-build-v1-*'
+      - 'cerebro/overnight-scout-empty-page-fallback-v1-*'
     paths:
       - 'cerebro/runtime/universal-skill-source-queue-v1.mjs'
       - 'cerebro/runtime/universal-skill-autonomous-scout-v1.mjs'
@@ -30,6 +31,8 @@ on:
       - 'cerebro/runtime/universal-skill-repository-intake-v1.mjs'
       - 'cerebro/runtime/skill-priority-seed-intake-v1.mjs'
       - 'cerebro/runtime/skill-priority-governed-evidence-v1.mjs'
+      - 'cerebro/runtime/skill-dynamic-adoption-v1.mjs'
+      - 'cerebro/registry/skill-dynamic-adoption-v1.json'
       - 'cerebro/registry/skill-priority-portfolio-v1.json'
       - 'cerebro/registry/skill-priority-seed-sources-v1.json'
       - 'cerebro/registry/universal-skill-activation-contracts-v1.json'
@@ -40,6 +43,7 @@ on:
       - 'cerebro/tests/universal-skill-github-intake-v1.test.mjs'
       - 'cerebro/tests/skill-priority-seed-intake-v1.test.mjs'
       - 'cerebro/tests/skill-priority-governed-evidence-v1.test.mjs'
+      - 'cerebro/tests/skill-dynamic-adoption-v1.test.mjs'
       - '.github/workflows/cerebro-universal-skill-continuous-intake-v1.yml'
   pull_request:
     paths:
@@ -50,6 +54,8 @@ on:
       - 'cerebro/runtime/universal-skill-repository-intake-v1.mjs'
       - 'cerebro/runtime/skill-priority-seed-intake-v1.mjs'
       - 'cerebro/runtime/skill-priority-governed-evidence-v1.mjs'
+      - 'cerebro/runtime/skill-dynamic-adoption-v1.mjs'
+      - 'cerebro/registry/skill-dynamic-adoption-v1.json'
       - 'cerebro/registry/skill-priority-portfolio-v1.json'
       - 'cerebro/registry/skill-priority-seed-sources-v1.json'
       - 'cerebro/registry/universal-skill-activation-contracts-v1.json'
@@ -60,6 +66,7 @@ on:
       - 'cerebro/tests/universal-skill-github-intake-v1.test.mjs'
       - 'cerebro/tests/skill-priority-seed-intake-v1.test.mjs'
       - 'cerebro/tests/skill-priority-governed-evidence-v1.test.mjs'
+      - 'cerebro/tests/skill-dynamic-adoption-v1.test.mjs'
       - '.github/workflows/cerebro-universal-skill-continuous-intake-v1.yml'
 
 permissions:
@@ -89,6 +96,7 @@ jobs:
           echo "CEREBRO_SOURCE_QUEUE_ROOT=$RUNNER_TEMP/cerebro-source-queue-persistent" >> "$GITHUB_ENV"
           echo "CEREBRO_LRN_LEDGER_FILE=$RUNNER_TEMP/cerebro-lrn-persistent/learning.v8" >> "$GITHUB_ENV"
           echo "CEREBRO_IMPROVEMENT_CANDIDATE_LEDGER_FILE=$RUNNER_TEMP/cerebro-lrn-persistent/improvement-candidates.v8" >> "$GITHUB_ENV"
+          echo "CEREBRO_DYNAMIC_ADOPTION_PROPOSAL=$RUNNER_TEMP/cerebro-dynamic-adoption-proposal.json" >> "$GITHUB_ENV"
           mkdir -p "$RUNNER_TEMP/cerebro-source-queue-persistent" "$RUNNER_TEMP/cerebro-lrn-persistent"
       - name: Restore and persist durable PREPROD state
         uses: actions/cache@v4
@@ -96,11 +104,12 @@ jobs:
           path: |
             ${{ runner.temp }}/cerebro-source-queue-persistent
             ${{ runner.temp }}/cerebro-lrn-persistent
-          key: usaf-continuous-state-v4-${{ github.ref_name }}-${{ github.run_id }}
+          key: usaf-continuous-state-v5-${{ github.ref_name }}-${{ github.run_id }}
           restore-keys: |
+            usaf-continuous-state-v5-${{ github.ref_name }}-
             usaf-continuous-state-v4-${{ github.ref_name }}-
-      - name: Continuous intake, P0 evidence, seed and learning tests
-        run: node --test cerebro/tests/universal-skill-source-queue-v1.test.mjs cerebro/tests/universal-skill-autonomous-scout-v1.test.mjs cerebro/tests/universal-skill-lrn-impact-bridge-v1.test.mjs cerebro/tests/universal-skill-github-intake-v1.test.mjs cerebro/tests/skill-priority-seed-intake-v1.test.mjs cerebro/tests/skill-priority-governed-evidence-v1.test.mjs
+      - name: Continuous intake, dynamic adoption, P0 evidence, seed and learning tests
+        run: node --test cerebro/tests/universal-skill-source-queue-v1.test.mjs cerebro/tests/universal-skill-autonomous-scout-v1.test.mjs cerebro/tests/universal-skill-lrn-impact-bridge-v1.test.mjs cerebro/tests/universal-skill-github-intake-v1.test.mjs cerebro/tests/skill-priority-seed-intake-v1.test.mjs cerebro/tests/skill-priority-governed-evidence-v1.test.mjs cerebro/tests/skill-dynamic-adoption-v1.test.mjs
       - name: Run P0 seeds first, then autonomous or event-driven PREPROD intake
         shell: bash
         env:
@@ -111,9 +120,20 @@ jobs:
           SCOUT_EVENT="$RUNNER_TEMP/cerebro-skill-scout-event.json"
           SEED_EVENT="$RUNNER_TEMP/cerebro-priority-seed-event.json"
           P0_QUEUE_REPORT="$RUNNER_TEMP/cerebro-p0-queue-report.json"
+          SCOUT_QUEUE_REPORT="$RUNNER_TEMP/cerebro-scout-queue-report.json"
           run_priority_seeds() {
             node cerebro/runtime/skill-priority-seed-intake-v1.mjs --out "$SEED_EVENT"
             node cerebro/runtime/universal-skill-source-queue-v1.mjs --event "$SEED_EVENT" | tee "$P0_QUEUE_REPORT"
+          }
+          build_dynamic_proposal() {
+            if [ -f "$SCOUT_QUEUE_REPORT" ]; then
+              node cerebro/runtime/skill-dynamic-adoption-v1.mjs --queue-report "$SCOUT_QUEUE_REPORT" --registry cerebro/registry/skill-dynamic-adoption-v1.json --output "$CEREBRO_DYNAMIC_ADOPTION_PROPOSAL"
+            fi
+          }
+          run_event_queue() {
+            local event_file="$1"
+            CEREBRO_SOURCE_QUEUE_REPORT_FILE="$SCOUT_QUEUE_REPORT" node cerebro/runtime/universal-skill-source-queue-v1.mjs --event "$event_file"
+            build_dynamic_proposal
           }
           run_scout() {
             node cerebro/runtime/universal-skill-autonomous-scout-v1.mjs --out "$SCOUT_EVENT"
@@ -127,13 +147,13 @@ jobs:
               echo 'No additional eligible public skill sources discovered after bounded page fallback.'
               return 0
             fi
-            node cerebro/runtime/universal-skill-source-queue-v1.mjs --event "$SCOUT_EVENT"
+            run_event_queue "$SCOUT_EVENT"
           }
           run_pinned_pr_source() {
             cat > "$SCOUT_EVENT" <<'JSON'
           {"client_payload":{"company_id":"fenix","github_urls":["https://github.com/ericrisco/rsc-harness/tree/5bf06162f682dd61cbf791b4bc340bc353d84e3d/skills/finance-ops"]}}
           JSON
-            node cerebro/runtime/universal-skill-source-queue-v1.mjs --event "$SCOUT_EVENT"
+            CEREBRO_SOURCE_QUEUE_REPORT_FILE="$SCOUT_QUEUE_REPORT" node cerebro/runtime/universal-skill-source-queue-v1.mjs --event "$SCOUT_EVENT"
           }
           case "$EVENT_NAME" in
             pull_request)
@@ -146,7 +166,7 @@ jobs:
             workflow_dispatch)
               MANUAL_COUNT="$(node -e "const fs=require('fs');const e=JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH,'utf8'));const v=String((e.inputs&&e.inputs.github_urls)||'').trim();process.stdout.write(v? '1':'0');")"
               if [ "$MANUAL_COUNT" -eq 1 ]; then
-                node cerebro/runtime/universal-skill-source-queue-v1.mjs --event "$GITHUB_EVENT_PATH"
+                run_event_queue "$GITHUB_EVENT_PATH"
               else
                 run_priority_seeds
                 run_scout
@@ -155,7 +175,7 @@ jobs:
             repository_dispatch)
               PAYLOAD_COUNT="$(node -e "const fs=require('fs');const e=JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH,'utf8'));const a=e.client_payload&&e.client_payload.github_urls;process.stdout.write(Array.isArray(a)&&a.length?'1':'0');")"
               if [ "$PAYLOAD_COUNT" -eq 1 ]; then
-                node cerebro/runtime/universal-skill-source-queue-v1.mjs --event "$GITHUB_EVENT_PATH"
+                run_event_queue "$GITHUB_EVENT_PATH"
               else
                 run_priority_seeds
                 run_scout
@@ -189,12 +209,22 @@ jobs:
             if(r.priority_evidence_status!=='PRIORITY_SEMANTIC_EVIDENCE_GREEN') throw new Error(`${r.technical_name} priority evidence not green`);
             if(!r.candidate_id||!r.pinned_sha||!r.source_locator||!r.snapshot_sha256||!r.manifest_sha256||!r.outcome_hash) throw new Error(`${r.technical_name} missing exact identity`);
             if(r.generated_bindings!==r.expected_bindings||!(r.generated_bindings>0)) throw new Error(`${r.technical_name} incomplete bindings`);
+            if(!Array.isArray(r.target_engine_bindings)||r.target_engine_bindings.length===0) throw new Error(`${r.technical_name} missing governed engine bindings`);
+            if(r.closure_summary?.full_safe_preprod!==true||r.closure_summary?.tribunal_pass!==true) throw new Error(`${r.technical_name} missing full closure summary`);
             if(r.additional_cost_eur!==0||r.prod_write_authorized||r.prod_mutation_authorized||r.external_skill_code_execution||r.trading_access) throw new Error(`${r.technical_name} unsafe authority`);
           }
-          console.log(JSON.stringify({status:'P0_EXACT_RESULT_SNAPSHOT_GREEN',count:rows.length,intake_epoch:report.intake_epoch,rows}));
+          console.log(JSON.stringify({status:'P0_EXACT_RESULT_SNAPSHOT_GREEN',count:rows.length,intake_epoch:report.intake_epoch,pipeline_revision:report.pipeline_revision,rows}));
           NODE
+      - name: Upload dynamic adoption proposal
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-dynamic-adoption-proposal-${{ github.run_id }}
+          path: ${{ runner.temp }}/cerebro-dynamic-adoption-proposal.json
+          if-no-files-found: ignore
+          retention-days: 2
       - name: Assert PREPROD-only authority
         shell: bash
         run: |
           set -euo pipefail
-          ! grep -Eq 'prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|prod_mutation_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true|external_skill_code_execution[[:space:]]*:[[:space:]]*true|npm install|child_process' cerebro/runtime/universal-skill-source-queue-v1.mjs cerebro/runtime/universal-skill-autonomous-scout-v1.mjs cerebro/runtime/universal-skill-lrn-impact-bridge-v1.mjs cerebro/runtime/universal-skill-github-intake-v1.mjs cerebro/runtime/universal-skill-repository-intake-v1.mjs cerebro/runtime/skill-priority-seed-intake-v1.mjs cerebro/runtime/skill-priority-governed-evidence-v1.mjs
+          ! grep -Eq 'prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|prod_mutation_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true|external_skill_code_execution[[:space:]]*:[[:space:]]*true|npm install|child_process' cerebro/runtime/universal-skill-source-queue-v1.mjs cerebro/runtime/universal-skill-autonomous-scout-v1.mjs cerebro/runtime/universal-skill-lrn-impact-bridge-v1.mjs cerebro/runtime/universal-skill-github-intake-v1.mjs cerebro/runtime/universal-skill-repository-intake-v1.mjs cerebro/runtime/skill-priority-seed-intake-v1.mjs cerebro/runtime/skill-priority-governed-evidence-v1.mjs cerebro/runtime/skill-dynamic-adoption-v1.mjs
