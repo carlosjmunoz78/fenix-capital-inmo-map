@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_DYNAMIC_SKILL_ADOPTION_CLOSURE_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "required_closure": [
+    "FULL_SAFE_PREPROD",
+    "OLD_VS_NEW_PASS",
+    "TRIBUNAL_PASS",
+    "LRN_FEEDBACK_GREEN",
+    "OBSERVABILITY_GREEN",
+    "AUDIT_GREEN",
+    "FINOPS_ZERO_COST_GREEN",
+    "BACKUP_READY",
+    "ROLLBACK_GREEN",
+    "REBUILD_GREEN",
+    "IDEMPOTENCY_GREEN"
+  ],
+  "additional_cost_eur": 0
+}
