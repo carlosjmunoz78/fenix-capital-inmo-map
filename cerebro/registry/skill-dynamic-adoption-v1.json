@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_DYNAMIC_SKILL_ADOPTION_REGISTRY_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "policy": {
+    "full_safe_preprod_required": true,
+    "origin_engine_binding_required": true,
+    "real_prod_readonly_canary_required": true,
+    "external_skill_code_execution": false,
+    "dependency_install_authorized": false,
+    "prod_write_authorized": false,
+    "prod_mutation_authorized": false,
+    "permission_expansion_authorized": false,
+    "customer_data_authorized": false,
+    "trading_access": false,
+    "paid_fallback": false,
+    "additional_cost_budget_eur": 0
+  },
+  "capabilities": []
+}
