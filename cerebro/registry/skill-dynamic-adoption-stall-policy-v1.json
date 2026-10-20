@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_DYNAMIC_SKILL_ADOPTION_STALL_POLICY_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "healthy_discovery_zero_adoption_cycles_before_degraded": 8,
+  "scheduled_recovery_minutes": 15,
+  "degraded_action": "AUDIT_BOTTLENECK_AND_CONTINUE_INDEPENDENT_SAFE_WORK",
+  "silent_green_on_stall": false,
+  "additional_cost_eur": 0
+}
