@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_DYNAMIC_SKILL_ADOPTION_PUBLIC_SOURCE_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "source_scope": "PUBLIC_GITHUB_METADATA_AND_DOCUMENTATION_ONLY",
+  "pinned_commit_required": true,
+  "license_required": true,
+  "private_repository_access": false,
+  "external_code_execution": false,
+  "additional_cost_eur": 0
+}
