@@ -7,7 +7,7 @@ const HERE=path.dirname(fileURLToPath(import.meta.url));
 const CEREBRO_ROOT=path.resolve(HERE,'..');
 const DEFAULT_POLICY=path.join(CEREBRO_ROOT,'registry','skill-priority-portfolio-v1.json');
 const DEFAULT_QUEUE=path.join(CEREBRO_ROOT,'registry','skill-full-adoption-v1.json');
-const DEFAULT_ENGINES=path.join(CEREBRO_ROOT,'registry','engine-registry.seed.json');
+const DEFAULT_ENGINES=path.join(CEREBRO_ROOT,'registry','engine-registry.v1.json');
 const READONLY_MODES=new Set(['ADVISE','ANALYZE','REVIEW','PLAN','READONLY_OBSERVE']);
 
 function loadJson(file){return JSON.parse(fs.readFileSync(file,'utf8'));}
@@ -106,9 +106,10 @@ export function buildPriorityReport({policyFile=DEFAULT_POLICY,queueFile=DEFAULT
   const familyCounts={};
   for(const row of matched){const key=row.priority_match.capability_family;familyCounts[key]=(familyCounts[key]??0)+1;}
   return Object.freeze({
-    schema_version:'1.0.0',state_type:'CEREBRO_SKILL_PRIORITY_PORTFOLIO_REPORT_V1',company_id:'GLOBAL',engine_id:'FACT-001',environment:'PREPROD',version:'1.0.0',
+    schema_version:'1.1.0',state_type:'CEREBRO_SKILL_PRIORITY_PORTFOLIO_REPORT_V1',company_id:'GLOBAL',engine_id:'FACT-001',environment:'PREPROD',version:'1.1.0',
     status:'GREEN_PRIORITY_POLICY_ACTIVE',portfolio_count:(policy?.portfolio??[]).length,queue_count:(queue?.queue??[]).length,matched_count:matched.length,
     ranked,capability_family_counts:Object.freeze(familyCounts),canonical_engine_count:(engines?.engine_ids??[]).length,
+    registry_version:engines?.schema_version??null,registry_extension_ids:Object.freeze([...(engines?.extension?.added_engine_ids??[])]),
     global_language_binding_policy:policy?.global_language_binding??null,synthetic_human_policy:policy?.synthetic_human_policy??null,
     ...authority()
   });
