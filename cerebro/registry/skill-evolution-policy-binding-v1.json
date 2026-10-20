@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_SKILL_EVOLUTION_POLICY_BINDING_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "GOVERNANCE",
+  "version": "1.0.0",
+  "policy_ref": "cerebro/governance/skill-continuous-improvement-policy.v1.json",
+  "registry_bindings": [
+    {
+      "registry_ref": "cerebro/registry/skill-operational-wrapper-registry-v1.json",
+      "selector": "wrappers[*]",
+      "inherit_policy": true
+    }
+  ],
+  "future_skill_binding": {
+    "enabled": true,
+    "selector": "ALL_ACQUIRED_GENERATED_OR_DERIVED_SKILLS",
+    "inherit_policy_by_default": true,
+    "exception_requires_governed_policy_record": true
+  },
+  "learning_binding": {
+    "consumer_engine": "LRN-001",
+    "factory_engine": "FACT-001",
+    "feedback_required_for_promoted_and_rejected_candidates": true
+  },
+  "production_baseline": {
+    "immutable_during_candidate_evaluation": true,
+    "replacement_only_after_promotion_gate": true,
+    "rollback_target_required": true
+  },
+  "authority": {
+    "direct_prod_mutation": false,
+    "external_side_effects": false,
+    "trading_access": false,
+    "additional_cost_eur": 0
+  }
+}
