@@ -1,18 +1,32 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "state_type": "CEREBRO_P0_OPERATIONAL_CAPABILITIES_V1",
   "date": "2026-10-20",
   "company_id": "GLOBAL",
   "engine_id": "FACT-001",
-  "environment": "PREPROD",
-  "version": "1.0.0",
-  "status": "FULL_SAFE_PREPROD_OPERATIONAL_PACK",
+  "environment": "MULTI",
+  "version": "1.1.0",
+  "status": "PROD_CAPABILITY_AVAILABLE_READONLY_10_OF_10",
   "source_snapshot": {
     "main_sha": "8ead240a53bc63d8e4d2016ec1a89b77360d38f2",
     "workflow_run": 39347241298,
     "intake_epoch": "v3-p0-canonical-evidence",
     "exact_seed_count": 10,
     "queue_status": "QUEUE_TERMINAL_GREEN"
+  },
+  "canonical_prod_readonly_canary": {
+    "status": "GREEN_P0_PROD_READONLY_CANARY_SET",
+    "run_id": 39348303218,
+    "head_sha": "d4c1b399babd51dbd948e052078492f1bb8961c0",
+    "observed_at": "2026-10-20T00:33:07Z",
+    "capability_count": 10,
+    "canonical_main_ref": true,
+    "side_effects": false,
+    "prod_write_authorized": false,
+    "prod_mutation_authorized": false,
+    "external_skill_code_execution": false,
+    "trading_access": false,
+    "additional_cost_eur": 0
   },
   "policy": {
     "factory_first": true,
@@ -45,7 +59,7 @@
       "expected_bindings": 7,
       "priority_evidence_status": "PRIORITY_SEMANTIC_EVIDENCE_GREEN",
       "status": "FULL_SAFE_PREPROD",
-      "prod_readonly_canary": "PENDING_MAIN_CANARY"
+      "prod_readonly_canary": "GREEN_BRAND_VOICE_PROD_READONLY_CANARY"
     },
     {
       "priority": 1,
@@ -61,7 +75,7 @@
       "expected_bindings": 7,
       "priority_evidence_status": "PRIORITY_SEMANTIC_EVIDENCE_GREEN",
       "status": "FULL_SAFE_PREPROD",
-      "prod_readonly_canary": "PENDING_MAIN_CANARY"
+      "prod_readonly_canary": "GREEN_CUSTOMER_SUPPORT_PROD_READONLY_CANARY"
     },
     {
       "priority": 2,
@@ -77,7 +91,7 @@
       "expected_bindings": 8,
       "priority_evidence_status": "PRIORITY_SEMANTIC_EVIDENCE_GREEN",
       "status": "FULL_SAFE_PREPROD",
-      "prod_readonly_canary": "PENDING_MAIN_CANARY"
+      "prod_readonly_canary": "GREEN_PROJECT_BOOTSTRAPPER_PROD_READONLY_CANARY"
     },
     {
       "priority": 3,
@@ -93,7 +107,7 @@
       "expected_bindings": 5,
       "priority_evidence_status": "PRIORITY_SEMANTIC_EVIDENCE_GREEN",
       "status": "FULL_SAFE_PREPROD",
-      "prod_readonly_canary": "PENDING_MAIN_CANARY"
+      "prod_readonly_canary": "GREEN_DESIGN_PROD_READONLY_CANARY"
     },
     {
       "priority": 4,
@@ -109,7 +123,7 @@
       "expected_bindings": 5,
       "priority_evidence_status": "PRIORITY_SEMANTIC_EVIDENCE_GREEN",
       "status": "FULL_SAFE_PREPROD",
-      "prod_readonly_canary": "PENDING_MAIN_CANARY"
+      "prod_readonly_canary": "GREEN_DATA_SCRAPER_PROD_READONLY_CANARY"
     },
     {
       "priority": 4,
@@ -125,7 +139,7 @@
       "expected_bindings": 5,
       "priority_evidence_status": "PRIORITY_SEMANTIC_EVIDENCE_GREEN",
       "status": "FULL_SAFE_PREPROD",
-      "prod_readonly_canary": "PENDING_MAIN_CANARY"
+      "prod_readonly_canary": "GREEN_COMPETITOR_WATCH_PROD_READONLY_CANARY"
     },
     {
       "priority": 5,
@@ -141,7 +155,7 @@
       "expected_bindings": 7,
       "priority_evidence_status": "PRIORITY_SEMANTIC_EVIDENCE_GREEN",
       "status": "FULL_SAFE_PREPROD",
-      "prod_readonly_canary": "PENDING_MAIN_CANARY"
+      "prod_readonly_canary": "GREEN_ANALYTICS_PROD_READONLY_CANARY"
     },
     {
       "priority": 5,
@@ -157,7 +171,7 @@
       "expected_bindings": 7,
       "priority_evidence_status": "PRIORITY_SEMANTIC_EVIDENCE_GREEN",
       "status": "FULL_SAFE_PREPROD",
-      "prod_readonly_canary": "PENDING_MAIN_CANARY"
+      "prod_readonly_canary": "GREEN_AB_TESTING_PROD_READONLY_CANARY"
     },
     {
       "priority": 5,
@@ -173,7 +187,7 @@
       "expected_bindings": 7,
       "priority_evidence_status": "PRIORITY_SEMANTIC_EVIDENCE_GREEN",
       "status": "FULL_SAFE_PREPROD",
-      "prod_readonly_canary": "PENDING_MAIN_CANARY"
+      "prod_readonly_canary": "GREEN_BUSINESS_INTELLIGENCE_PROD_READONLY_CANARY"
     },
     {
       "priority": 6,
@@ -189,8 +203,8 @@
       "expected_bindings": 4,
       "priority_evidence_status": "PRIORITY_SEMANTIC_EVIDENCE_GREEN",
       "status": "FULL_SAFE_PREPROD",
-      "prod_readonly_canary": "PENDING_MAIN_CANARY"
+      "prod_readonly_canary": "GREEN_REPORTING_PROD_READONLY_CANARY"
     }
   ],
-  "next_gate": "MAIN_READONLY_CANARY_THEN_PROD_CAPABILITY_AVAILABLE_READONLY"
+  "next_gate": "ORIGIN_ENGINE_POLICY_FOR_ANY_PROD_ACTION_NO_GLOBAL_WRITE_AUTHORITY"
 }
