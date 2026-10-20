@@ -143,4 +143,10 @@ jobs:
       - name: Upload immutable safe-handler evidence
         if: always()
         uses: actions/upload-artifact@v4
-        with: {name: 'cerebro-skill-autoloop-safe-handler-${{ github.run_id }}', path: 'artifacts/autoloop/*.json\nartifacts/handler/*.json', if-no-files-found: warn, retention-days: 30}
+        with:
+          name: cerebro-skill-autoloop-safe-handler-${{ github.run_id }}
+          path: |
+            artifacts/autoloop/*.json
+            artifacts/handler/*.json
+          if-no-files-found: error
+          retention-days: 30
