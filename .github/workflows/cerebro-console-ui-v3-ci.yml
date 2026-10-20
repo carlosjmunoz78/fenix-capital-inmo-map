@@ -1,0 +1,49 @@
+name: CEREBRO Console Technical V3 CI
+
+on:
+  push:
+    branches:
+      - cerebro/continuity-core-2026-10-21
+    paths:
+      - 'src/CerebroOperativeConsole.tsx'
+      - 'src/CerebroConsoleHost.tsx'
+      - 'src/cerebro-operative-console.css'
+      - 'src/cerebro-operative-console-v2.css'
+      - 'src/cerebro-operative-console-v3.css'
+      - 'src/cerebroActivityApi.ts'
+      - '.github/workflows/cerebro-console-ui-v3-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: TypeScript + Vite build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact commit
+        uses: actions/checkout@v4
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci --ignore-scripts
+      - name: Build console
+        run: npm run build
+      - name: Verify technical mode contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'PROCESOS AHORA' src/CerebroOperativeConsole.tsx
+          grep -q 'HABLAR' src/CerebroOperativeConsole.tsx
+          grep -q 'TÉCNICA' src/CerebroOperativeConsole.tsx
+          grep -q 'NEURAL' src/CerebroOperativeConsole.tsx
+          grep -q 'DURACIÓN' src/CerebroOperativeConsole.tsx
+          grep -q 'FIN OBS.' src/CerebroOperativeConsole.tsx
+          grep -q 'FUENTE REAL' src/CerebroOperativeConsole.tsx
+          test -f src/cerebro-operative-console-v3.css
+          echo 'CEREBRO Console Technical V3 contract: PASS'
