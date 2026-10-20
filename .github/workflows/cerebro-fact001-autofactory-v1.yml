@@ -4,10 +4,14 @@ on:
   push:
     branches:
       - main
+      - cerebro/continuity-core-2026-10-21
     paths:
       - 'cerebro/factory/requests-v1/**.json'
       - 'cerebro/factory-v1.mjs'
+      - 'cerebro/runtime/fact001-request-runner.mjs'
       - 'cerebro/runtime/fact001-request-runner-v1.mjs'
+      - 'cerebro/runtime/fact001-safe-fs.mjs'
+      - 'cerebro/tests/fact001-safe-fs.test.mjs'
       - 'cerebro/registry/engine-registry.v1.json'
       - 'cerebro/registry/hci-motion-engine-contracts.v0.json'
       - '.github/workflows/cerebro-fact001-autofactory-v1.yml'
