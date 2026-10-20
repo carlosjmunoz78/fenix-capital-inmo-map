@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_DYNAMIC_SKILL_ADOPTION_READONLY_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "allowed_modes": ["ADVISE", "ANALYZE", "REVIEW", "PLAN", "READONLY_OBSERVE"],
+  "write_modes": [],
+  "additional_cost_eur": 0
+}
