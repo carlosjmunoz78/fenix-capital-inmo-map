@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_DYNAMIC_SKILL_ADOPTION_REGRESSION_POLICY_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "old_vs_new_required": true,
+  "independent_tribunal_required": true,
+  "no_regression_required": true,
+  "failed_regression_blocks_only_candidate": true,
+  "additional_cost_eur": 0
+}
