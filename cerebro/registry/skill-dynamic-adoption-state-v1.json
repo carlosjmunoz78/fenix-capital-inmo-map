@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_DYNAMIC_SKILL_ADOPTION_STATE_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "autonomy_state": "PREPROD_IMPLEMENTED_PENDING_VALIDATION",
+  "continuous_intake_recovery_minutes": 15,
+  "event_driven": true,
+  "dynamic_registry": "cerebro/registry/skill-dynamic-adoption-v1.json",
+  "prod_readonly_fastlane": "cerebro/runtime/skill-prod-capability-fastlane-v1.mjs",
+  "external_skill_code_execution": false,
+  "prod_write_authorized": false,
+  "prod_mutation_authorized": false,
+  "trading_access": false,
+  "additional_cost_eur": 0
+}
