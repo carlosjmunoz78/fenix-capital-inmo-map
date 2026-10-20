@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-20T08:42:33.798Z",
+  "updated_at": "2026-10-20T09:24:12.821Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -699,42 +699,6 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 39355866898,
       "checkpointed_at": "2026-10-20T01:53:22.141Z",
-      "human_required": null,
-      "external_skill_code_execution": false,
-      "customer_data_used": false,
-      "prod_write": false,
-      "trading_access": false,
-      "paid_fallback": false,
-      "additional_cost_eur": 0
-    },
-    "github-wide-skills:18a6ee3c44123c37be76": {
-      "candidate_id": "github-wide-skills:18a6ee3c44123c37be76",
-      "name": "crabcloud-atelier",
-      "human_alias": "Crabcloud Atelier",
-      "wrapper_id": "skillwrap:893b585d7d5c1f89eee4",
-      "domain": "software-engineering-devops",
-      "engine_bindings": [
-        "FACT-001",
-        "ARCH-001",
-        "API-001",
-        "DEP-001",
-        "MIG-001",
-        "QA-001",
-        "REG-001",
-        "DOCS-001"
-      ],
-      "value_score": 86.43,
-      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
-      "evidence_refs": {
-        "upstream_full_name": "niklauslu/crabcloud-skills",
-        "upstream_head_commit": "28ab8fdd1da17f081cbc31c2bc2f8e3afe421426",
-        "manifest_sha256": "6eb20409dafd6b1532c4127e1032f6ba5c7eb121b368cf8aecfbf5bfee161919",
-        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
-      },
-      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
-      "status": "WAITING_SAFE_HANDLER",
-      "source_discovery_run_id": 39366204282,
-      "checkpointed_at": "2026-10-20T03:48:44.496Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -2387,6 +2351,51 @@
         "source": "CEREBRO Skill AutoLoop Safe Handler V0"
       },
       "updated_at": "2026-10-20T08:42:33.798Z",
+      "prod_authorized": false
+    },
+    "github-wide-skills:18a6ee3c44123c37be76": {
+      "candidate_id": "github-wide-skills:18a6ee3c44123c37be76",
+      "name": "crabcloud-atelier",
+      "human_alias": "Crabcloud Atelier",
+      "wrapper_id": "skillwrap:893b585d7d5c1f89eee4",
+      "domain": "software-engineering-devops",
+      "engine_bindings": [
+        "FACT-001",
+        "ARCH-001",
+        "API-001",
+        "DEP-001",
+        "MIG-001",
+        "QA-001",
+        "REG-001",
+        "DOCS-001"
+      ],
+      "value_score": 86.43,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "niklauslu/crabcloud-skills",
+        "upstream_head_commit": "28ab8fdd1da17f081cbc31c2bc2f8e3afe421426",
+        "manifest_sha256": "6eb20409dafd6b1532c4127e1032f6ba5c7eb121b368cf8aecfbf5bfee161919",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "SAFE_HANDLER_TERMINAL_HOLD",
+      "status": "TERMINAL_HOLD",
+      "source_discovery_run_id": 39366204282,
+      "checkpointed_at": "2026-10-20T03:48:44.496Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0,
+      "evidence": {
+        "reason": "STATIC_LAB_HOLD",
+        "decision_id": null,
+        "decision": null,
+        "human_required": null,
+        "source": "CEREBRO Skill AutoLoop Safe Handler V0"
+      },
+      "updated_at": "2026-10-20T09:24:12.821Z",
       "prod_authorized": false
     }
   },
