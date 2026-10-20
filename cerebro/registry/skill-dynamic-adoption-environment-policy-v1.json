@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_DYNAMIC_SKILL_ADOPTION_ENVIRONMENT_POLICY_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "stages": ["PREPROD_DISCOVERY", "FULL_SAFE_PREPROD", "CANONICAL_MAIN_READONLY_CANARY", "PROD_CAPABILITY_AVAILABLE_READONLY"],
+  "direct_external_prod_execution": false,
+  "direct_prod_write_promotion": false,
+  "additional_cost_eur": 0
+}
