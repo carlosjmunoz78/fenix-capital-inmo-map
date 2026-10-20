@@ -1,0 +1,48 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_SKILL_KNOWN_REPOSITORY_POOL_V1",
+  "company_id": "MULTI",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "repositories": [
+    {
+      "repository": "anthropics/skills",
+      "roots": ["skills"],
+      "priority": 1,
+      "source_class": "PUBLIC_CURATED_SKILL_REPOSITORY"
+    },
+    {
+      "repository": "microsoft/SkillOpt",
+      "roots": [""],
+      "priority": 2,
+      "source_class": "PUBLIC_VENDOR_REPOSITORY"
+    },
+    {
+      "repository": "TerminalSkills/skills",
+      "roots": [""],
+      "priority": 3,
+      "source_class": "PUBLIC_SKILL_REPOSITORY"
+    },
+    {
+      "repository": "bergside/awesome-design-skills",
+      "roots": [""],
+      "priority": 4,
+      "source_class": "PUBLIC_SKILL_REPOSITORY"
+    }
+  ],
+  "policy": {
+    "public_repositories_only": true,
+    "pinned_commit_required": true,
+    "skill_descriptor_only": true,
+    "external_skill_code_execution": false,
+    "dependency_install_authorized": false,
+    "prod_write_authorized": false,
+    "prod_mutation_authorized": false,
+    "permission_expansion_authorized": false,
+    "customer_data_authorized": false,
+    "trading_access": false,
+    "paid_fallback": false,
+    "additional_cost_budget_eur": 0
+  }
+}
