@@ -1,0 +1,92 @@
+name: CEREBRO P0 Result Snapshot V1
+
+on:
+  push:
+    branches:
+      - 'cerebro/p0-human-language-digital-build-v1-*'
+    paths:
+      - '.github/workflows/cerebro-p0-result-snapshot-v1.yml'
+      - 'cerebro/registry/skill-priority-seed-sources-v1.json'
+      - 'cerebro/runtime/skill-priority-seed-intake-v1.mjs'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  p0-result-snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    env:
+      CEREBRO_SOURCE_QUEUE_ROOT: ${{ runner.temp }}/cerebro-source-queue-persistent
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restore latest P0 PREPROD state
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            ${{ runner.temp }}/cerebro-source-queue-persistent
+            ${{ runner.temp }}/cerebro-lrn-persistent
+          key: usaf-p0-snapshot-readonly-${{ github.run_id }}
+          restore-keys: |
+            usaf-continuous-state-v4-${{ github.ref_name }}-
+      - name: Emit safe exact P0 result summary
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs');
+          const path=require('path');
+          const seedRegistry=JSON.parse(fs.readFileSync('cerebro/registry/skill-priority-seed-sources-v1.json','utf8'));
+          const expected=new Map(seedRegistry.sources.map(s=>[s.github_url,{technical_name:s.technical_name,capability_family:s.capability_family,pinned_sha:s.pinned_sha}]));
+          const root=process.env.CEREBRO_SOURCE_QUEUE_ROOT;
+          const dir=path.join(root,'results');
+          if(!fs.existsSync(dir)) throw new Error(`result directory missing: ${dir}`);
+          const rows=[];
+          for(const name of fs.readdirSync(dir).filter(x=>x.endsWith('.json')).sort()){
+            const doc=JSON.parse(fs.readFileSync(path.join(dir,name),'utf8'));
+            const r=doc.report||{};
+            const request=doc.request||{};
+            const url=request.github_url||request.url||r.source_url||null;
+            const sourceLocator=String(r.source_locator||'');
+            const seed=[...expected.entries()].find(([seedUrl,meta])=>sourceLocator.includes(meta.pinned_sha)&&sourceLocator.includes(meta.technical_name.replace('project-bootstrapper','project-bootstrap')))||null;
+            const exactMeta=seed?seed[1]:null;
+            const technicalName=r.priority_seed?.technical_name||exactMeta?.technical_name||r.technical_name||null;
+            if(!technicalName||!seedRegistry.sources.some(s=>s.technical_name===technicalName)) continue;
+            rows.push({
+              technical_name:technicalName,
+              capability_family:seedRegistry.sources.find(s=>s.technical_name===technicalName)?.capability_family||null,
+              status:r.status||null,
+              full_safe_preprod:r.full_safe_preprod===true,
+              candidate_id:r.candidate_id||null,
+              source_locator:r.source_locator||null,
+              snapshot_sha256:r.snapshot_sha256||null,
+              manifest_sha256:r.manifest_sha256||null,
+              outcome_hash:r.outcome_hash||null,
+              priority_evidence_status:r.priority_seed?.evidence_status||null,
+              generated_bindings:r.priority_seed?.generated_bindings??null,
+              expected_bindings:r.priority_seed?.expected_bindings??null,
+              additional_cost_eur:Number(r.additional_cost_eur??0),
+              prod_authorized:r.prod_authorized===true,
+              prod_write_authorized:r.prod_write_authorized===true,
+              prod_mutation_authorized:r.prod_mutation_authorized===true,
+              external_skill_code_execution:r.external_skill_code_execution===true,
+              trading_access:r.trading_access===true
+            });
+          }
+          rows.sort((a,b)=>a.technical_name.localeCompare(b.technical_name));
+          const unique=new Map(rows.map(r=>[r.technical_name,r]));
+          const out=[...unique.values()];
+          if(out.length!==10) throw new Error(`expected 10 exact P0 seed results, got ${out.length}`);
+          for(const r of out){
+            if(r.status!=='FULL_SAFE_PREPROD'||r.full_safe_preprod!==true) throw new Error(`${r.technical_name} not FULL_SAFE_PREPROD`);
+            if(r.priority_evidence_status!=='PRIORITY_SEMANTIC_EVIDENCE_GREEN') throw new Error(`${r.technical_name} priority evidence not green`);
+            if(!r.candidate_id||!r.snapshot_sha256||!r.manifest_sha256||!r.outcome_hash) throw new Error(`${r.technical_name} missing exact evidence identity`);
+            if(r.generated_bindings!==r.expected_bindings||!(r.generated_bindings>0)) throw new Error(`${r.technical_name} incomplete bindings`);
+            if(r.additional_cost_eur!==0||r.prod_authorized||r.prod_write_authorized||r.prod_mutation_authorized||r.external_skill_code_execution||r.trading_access) throw new Error(`${r.technical_name} unsafe authority`);
+          }
+          const summary={status:'P0_EXACT_RESULT_SNAPSHOT_GREEN',count:out.length,rows:out};
+          fs.mkdirSync('artifacts',{recursive:true});
+          fs.writeFileSync('artifacts/p0-exact-result-snapshot-v1.json',JSON.stringify(summary,null,2)+'\n');
+          console.log(JSON.stringify(summary));
+          NODE
