@@ -34,6 +34,34 @@ export type CerebroActivityRun={
   progress_provenance:CerebroProgressProvenance;
 };
 
+export type CerebroActivityFailedStep={
+  job_name:string;
+  step_name:string;
+  step_number:number|null;
+  conclusion:string|null;
+};
+
+export type CerebroActivityRunDetail={
+  run_id:number;
+  status:string;
+  conclusion:string|null;
+  started_at:string|null;
+  completed_at:string|null;
+  duration_ms:number|null;
+  failed_job:string|null;
+  failed_step:string|null;
+  failure_summary:string|null;
+  failed_steps:CerebroActivityFailedStep[];
+  jobs:Array<{
+    name:string;
+    status:string;
+    conclusion:string|null;
+    started_at:string|null;
+    completed_at:string|null;
+    html_url:string;
+  }>;
+};
+
 export type CerebroActivityResponse={
   status:'OK'|'ERROR';
   observed_at:string;
@@ -44,12 +72,21 @@ export type CerebroActivityResponse={
   reason?:string;
 };
 
+export type CerebroActivityRunDetailResponse={
+  status:'OK'|'ERROR';
+  observed_at:string;
+  source:'GITHUB_ACTIONS';
+  repository:string;
+  run_detail?:CerebroActivityRunDetail;
+  reason?:string;
+};
+
 function activityEndpoint(){
   try{
     const url=new URL(RAW_ACTIVITY_URL);
     if(url.protocol!=='https:')return null;
     if(!url.pathname.endsWith('/'))url.pathname=`${url.pathname}/`;
-    return url.toString();
+    return url;
   }catch{return null}
 }
 
@@ -70,9 +107,23 @@ export async function fetchCerebroActivity():Promise<{status:number;data:Cerebro
   const headers=await authHeaders();
   if(!headers)return{status:401,data:null};
   try{
-    const response=await fetch(endpoint,{method:'GET',headers,cache:'no-store'});
+    const response=await fetch(endpoint.toString(),{method:'GET',headers,cache:'no-store'});
     let data:CerebroActivityResponse|null=null;
     try{data=await response.json() as CerebroActivityResponse}catch{data=null}
+    return{status:response.status,data};
+  }catch{return{status:0,data:null}}
+}
+
+export async function fetchCerebroActivityRunDetail(runId:number):Promise<{status:number;data:CerebroActivityRunDetailResponse|null}>{
+  const endpoint=activityEndpoint();
+  if(!endpoint||!Number.isSafeInteger(runId)||runId<=0)return{status:0,data:null};
+  endpoint.searchParams.set('run_id',String(runId));
+  const headers=await authHeaders();
+  if(!headers)return{status:401,data:null};
+  try{
+    const response=await fetch(endpoint.toString(),{method:'GET',headers,cache:'no-store'});
+    let data:CerebroActivityRunDetailResponse|null=null;
+    try{data=await response.json() as CerebroActivityRunDetailResponse}catch{data=null}
     return{status:response.status,data};
   }catch{return{status:0,data:null}}
 }
