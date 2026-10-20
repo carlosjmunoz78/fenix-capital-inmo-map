@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_DYNAMIC_SKILL_ADOPTION_COMPANY_SCOPE_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "required_dimensions": ["company_id", "engine_id", "environment", "version"],
+  "cross_company_authority_inheritance": false,
+  "origin_engine_policy_per_company_required": true,
+  "additional_cost_eur": 0
+}
