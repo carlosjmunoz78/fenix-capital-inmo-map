@@ -1,10 +1,10 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.2.0",
   "state_type": "CEREBRO_DYNAMIC_SKILL_ADOPTION_REGISTRY_V1",
   "company_id": "GLOBAL",
   "engine_id": "FACT-001",
   "environment": "PREPROD",
-  "version": "v1",
+  "version": "v1.2",
   "policy": {
     "full_safe_preprod_required": true,
     "origin_engine_binding_required": true,
@@ -19,5 +19,85 @@
     "paid_fallback": false,
     "additional_cost_budget_eur": 0
   },
-  "capabilities": []
+  "capabilities": [
+    {
+      "candidate_id": "repo:45634853e08ec0e33ec3f9cceacd",
+      "technical_name": "design-md",
+      "source_locator": "github://TerminalSkills/skills@6edcf94159d9f46b0759d2e1b59dd545cfaca254/skills/design-md",
+      "pinned_sha": "6edcf94159d9f46b0759d2e1b59dd545cfaca254",
+      "snapshot_sha256": "45634853e08ec0e33ec3f9cceacd779be53e40ffc0342c65c8e8baf68110f459",
+      "manifest_sha256": "25b37c9ea1373dc3f1d10c6b4bea6a5957fa303aa6b69dbaeea230105d6274d7",
+      "outcome_hash": "521ffbee8e164b48085aaf4e59cfb727d72bb2190a987470038e80c822183e80",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:45634853e08ec0e3:cap:1",
+          "technical_name": "design-md",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-20T09:22:57.767Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "ffd9ef3f8267f5837a76d86fac05c64abbdf2a934957d702fc1e803b26626055"
+    }
+  ],
+  "adoption_skips": [],
+  "summary": {
+    "total": 1,
+    "inserted": 1,
+    "updated": 0,
+    "skipped": 0,
+    "pending_canary": 1,
+    "prod_readonly": 0
+  }
 }
