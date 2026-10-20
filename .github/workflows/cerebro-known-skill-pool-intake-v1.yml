@@ -1,0 +1,94 @@
+name: CEREBRO Known Skill Pool Intake V1
+
+on:
+  schedule:
+    - cron: '9,24,39,54 * * * *'
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - 'cerebro/skill-pool-rate-limit-bypass-v1-*'
+    paths:
+      - 'cerebro/runtime/skill-known-repository-pool-v1.mjs'
+      - 'cerebro/runtime/universal-skill-readonly-semantic-evidence-v1.mjs'
+      - 'cerebro/runtime/universal-skill-repository-intake-v1.mjs'
+      - 'cerebro/runtime/universal-skill-source-queue-v1.mjs'
+      - 'cerebro/runtime/skill-dynamic-adoption-v1.mjs'
+      - 'cerebro/registry/skill-known-repository-pool-v1.json'
+      - 'cerebro/tests/skill-known-repository-pool-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-readonly-semantic-evidence-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-readonly-web-activation-v1.test.mjs'
+      - '.github/workflows/cerebro-known-skill-pool-intake-v1.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-known-skill-pool-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  pool-intake:
+    runs-on: ubuntu-latest
+    timeout-minutes: 24
+    env:
+      CEREBRO_COMPANY_ID: fenix
+      CEREBRO_SOURCE_CONCURRENCY: '8'
+      CEREBRO_SKILL_POOL_MAX: '50'
+      CEREBRO_SOURCE_QUEUE_ROOT: ${{ runner.temp }}/cerebro-known-pool-source-queue-r1
+      CEREBRO_LRN_LEDGER_FILE: ${{ runner.temp }}/cerebro-known-pool-lrn/learning.v8
+      CEREBRO_IMPROVEMENT_CANDIDATE_LEDGER_FILE: ${{ runner.temp }}/cerebro-known-pool-lrn/improvement-candidates.v8
+      CEREBRO_DYNAMIC_ADOPTION_PROPOSAL: ${{ runner.temp }}/cerebro-dynamic-adoption-proposal.json
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Prepare independent durable pool state
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$CEREBRO_SOURCE_QUEUE_ROOT" "$(dirname "$CEREBRO_LRN_LEDGER_FILE")"
+      - name: Restore independent durable pool state
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ runner.temp }}/cerebro-known-pool-source-queue-r1
+            ${{ runner.temp }}/cerebro-known-pool-lrn
+          key: cerebro-known-pool-r1-${{ github.ref_name }}-${{ github.run_id }}
+          restore-keys: |
+            cerebro-known-pool-r1-${{ github.ref_name }}-
+      - name: Validate pool and readonly wrapping
+        run: node --test cerebro/tests/skill-known-repository-pool-v1.test.mjs cerebro/tests/universal-skill-readonly-semantic-evidence-v1.test.mjs cerebro/tests/universal-skill-readonly-web-activation-v1.test.mjs cerebro/tests/skill-dynamic-adoption-v1.test.mjs
+      - name: Discover pinned candidates without Code Search and run governed intake
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          EVENT="$RUNNER_TEMP/cerebro-known-pool-event.json"
+          REPORT="$RUNNER_TEMP/cerebro-known-pool-queue-report.json"
+          node cerebro/runtime/skill-known-repository-pool-v1.mjs --registry cerebro/registry/skill-known-repository-pool-v1.json --out "$EVENT"
+          COUNT="$(node -e "const fs=require('fs');const x=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/cerebro-known-pool-event.json','utf8'));process.stdout.write(String(x.client_payload.github_urls.length));")"
+          test "$COUNT" -gt 0
+          CEREBRO_SOURCE_QUEUE_REPORT_FILE="$REPORT" node cerebro/runtime/universal-skill-source-queue-v1.mjs --event "$EVENT"
+          node cerebro/runtime/skill-dynamic-adoption-v1.mjs --queue-report "$REPORT" --registry cerebro/registry/skill-dynamic-adoption-v1.json --output "$CEREBRO_DYNAMIC_ADOPTION_PROPOSAL"
+          node --input-type=module - "$REPORT" <<'NODE'
+          import fs from 'node:fs';
+          const r=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
+          const full=(r.results??[]).filter(x=>x.full_safe_preprod===true);
+          const elapsed=(r.results??[]).map(x=>Number(x.elapsed_ms??0)).filter(Number.isFinite);
+          console.log(JSON.stringify({status:'KNOWN_POOL_CYCLE_COMPLETE',requested:r.requested,by_status:r.by_status,full_safe_preprod:full.length,new_full_names:full.map(x=>x.technical_name??x.priority_seed_technical_name??x.github_url),queue_revision:r.pipeline_revision,max_candidate_elapsed_ms:elapsed.length?Math.max(...elapsed):null}));
+          NODE
+      - name: Upload exact dynamic adoption proposal
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-dynamic-adoption-proposal-${{ github.run_id }}
+          path: ${{ runner.temp }}/cerebro-dynamic-adoption-proposal.json
+          if-no-files-found: error
+          retention-days: 2
+      - name: Assert zero mutation authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -Eq 'prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|prod_mutation_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true|external_skill_code_execution[[:space:]]*:[[:space:]]*true|npm install|child_process' cerebro/runtime/skill-known-repository-pool-v1.mjs cerebro/runtime/universal-skill-readonly-semantic-evidence-v1.mjs cerebro/runtime/universal-skill-repository-intake-v1.mjs cerebro/runtime/universal-skill-source-queue-v1.mjs cerebro/runtime/skill-dynamic-adoption-v1.mjs
