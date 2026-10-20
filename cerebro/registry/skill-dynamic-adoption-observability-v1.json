@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_DYNAMIC_SKILL_ADOPTION_OBSERVABILITY_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "signals": [
+    "DISCOVERY_SOURCE_COUNT",
+    "FULL_SAFE_PREPROD_COUNT",
+    "DYNAMIC_PENDING_CANARY_COUNT",
+    "DYNAMIC_PROD_READONLY_COUNT",
+    "ADOPTION_SKIP_COUNT",
+    "LAST_CANARY_HEAD_SHA",
+    "LAST_CANARY_RUN_ID"
+  ],
+  "silent_success_with_zero_new_capabilities": "OBSERVABLE_NOT_EQUIVALENT_TO_THROUGHPUT",
+  "additional_cost_eur": 0
+}
