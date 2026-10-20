@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_DYNAMIC_SKILL_ADOPTION_OWNER_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "owner": "FACT-001",
+  "governance": ["GOV-001", "QA-001", "EVA-001", "LRN-001", "OBSERV-001", "FINOPS-001"],
+  "origin_engine_action_authority_preserved": true,
+  "additional_cost_eur": 0
+}
