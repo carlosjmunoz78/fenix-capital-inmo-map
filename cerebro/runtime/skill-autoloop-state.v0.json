@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-20T14:21:20.166Z",
+  "updated_at": "2026-10-20T14:37:38.923Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -83,7 +83,8 @@
     "github-wide-skills:e2159789567f0870b589",
     "github-wide-skills:18a6ee3c44123c37be76",
     "github-wide-skills:08863d9ead1a710bc28f",
-    "github-wide-skills:e65b377ca30c3a4203ec"
+    "github-wide-skills:e65b377ca30c3a4203ec",
+    "repo:96e72438df437e5b8cc2d6c5afff"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -966,6 +967,71 @@
       "action_type": "REJECT_CAPABILITY",
       "action_status": "APPLIED_METADATA_ONLY",
       "next_gate": "CONTINUE_DISCOVERY"
+    },
+    "repo:96e72438df437e5b8cc2d6c5afff": {
+      "candidate_id": "repo:96e72438df437e5b8cc2d6c5afff",
+      "company_id": "fenix",
+      "name": "file-organizer",
+      "human_alias": "file-organizer",
+      "wrapper_id": "safe-engineering:96a60f60d49a3bf38ef3",
+      "domain": "universal-skill-engineering",
+      "engine_bindings": [
+        "COM-001",
+        "MKT-001",
+        "VOICE-001",
+        "VOICEUI-001",
+        "WEB-001"
+      ],
+      "value_score": null,
+      "recommendation": "SAFE_ENGINEERING_REQUIRED",
+      "evidence_refs": {
+        "github_url": "https://github.com/TerminalSkills/skills/tree/6edcf94159d9f46b0759d2e1b59dd545cfaca254/skills/file-organizer",
+        "source_locator": "github://TerminalSkills/skills@6edcf94159d9f46b0759d2e1b59dd545cfaca254/skills/file-organizer",
+        "pinned_sha": "6edcf94159d9f46b0759d2e1b59dd545cfaca254",
+        "snapshot_sha256": "96e72438df437e5b8cc2d6c5afff4dc20525085837b9f0151a99ef26b281a54a",
+        "manifest_sha256": null,
+        "source_status": "ENGINEERING_TASK_REQUIRED",
+        "reason": "AUTO_ENGINEERING_NOT_FULL"
+      },
+      "stage": "SKILL_AUTONOMY_DECISION_RECORDED",
+      "status": "COMPLETED",
+      "source_discovery_run_id": 39440788294,
+      "checkpointed_at": "2026-10-20T14:37:38.857Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0,
+      "disposition": "ENVOLVER",
+      "evidence": {
+        "reason": "AUTO_ENGINEERING_INCOMPLETE_IS_TECHNICAL_WORK",
+        "decision_id": "skill-decision:d5125306aee026d393fb8610",
+        "decision": "ENVOLVER",
+        "skill_version": "github-6edcf94159d9",
+        "human_required": null,
+        "source_status": "ENGINEERING_TASK_REQUIRED",
+        "source_reason": "AUTO_ENGINEERING_NOT_FULL",
+        "source_queue_status": "SAFE_ENGINEERING_REQUIRED",
+        "synthetic_low_confidence_removed": false,
+        "preprod_internal_wrapper_activation_authorized": false,
+        "factory_candidate_authorized": false,
+        "factory_create_authorized": false,
+        "additional_cost_eur": 0,
+        "prod_authorized": false,
+        "prod_write_authorized": false,
+        "trading_access": false,
+        "external_skill_code_execution_authorized": false
+      },
+      "updated_at": "2026-10-20T14:37:38.923Z",
+      "prod_authorized": false,
+      "autonomous_promotion_authorized": false,
+      "action_id": "skill-action:631a70676c7b404011a0829a",
+      "action_type": "BUILD_INTERNAL_WRAPPER_PLAN",
+      "action_status": "ROUTED_TO_EXISTING_GOVERNED_PIPELINE",
+      "next_gate": "SKILL_CAPABILITY_EVOLUTION_EXISTING_ENGINE",
+      "handoff_id": "skill-engine-extension:f8a292613bc358b8701c77a2"
     }
   },
   "terminal_hold": {
@@ -2499,7 +2565,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "TERMINAL_HOLD_CONTINUE_OTHER_SAFE_WORK",
+  "last_action": "ROUTE_CEREBRO_SKILL_ENGINE_EXTENSION_HANDOFF_CONTINUE_OTHER_SAFE_WORK",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -2798,7 +2864,102 @@
       "external_skill_code_execution_authorized": false,
       "additional_cost_eur": 0,
       "recorded_at": "2026-10-20T06:03:03.080Z"
+    },
+    "repo:96e72438df437e5b8cc2d6c5afff": {
+      "schema_version": "1.0.0",
+      "state_type": "CEREBRO_SKILL_AUTONOMY_ACTION_RECEIPT",
+      "action_id": "skill-action:631a70676c7b404011a0829a",
+      "decision_id": "skill-decision:d5125306aee026d393fb8610",
+      "company_id": "fenix",
+      "engine_id": "SKILL-AUTONOMY-ACTION",
+      "environment": "PREPROD",
+      "version": "1.0.0",
+      "skill_id": "repo:96e72438df437e5b8cc2d6c5afff",
+      "skill_version": "github-6edcf94159d9",
+      "decision": "ENVOLVER",
+      "action_type": "BUILD_INTERNAL_WRAPPER_PLAN",
+      "status": "QUEUED_SAFE_WORK",
+      "next_gate": "INTERNAL_WRAPPER_BUILD_AND_REEVALUATE",
+      "target_engine_ids": [
+        "COM-001",
+        "MKT-001",
+        "VOICE-001",
+        "VOICEUI-001",
+        "WEB-001"
+      ],
+      "observed_at": null,
+      "human_required": null,
+      "queueable_safe_work": true,
+      "terminal_metadata_only": false,
+      "mutation_authorized": false,
+      "internal_wrapper_shadow_authorized": false,
+      "fact001_gap_candidate_authorized": false,
+      "fact001_create_authorized": false,
+      "paid_activation_authorized": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "external_skill_code_execution_authorized": false,
+      "additional_cost_eur": 0,
+      "recorded_at": "2026-10-20T14:37:38.857Z"
     }
   },
-  "autonomy_action_queue": {}
+  "autonomy_action_queue": {},
+  "autonomy_action_handoffs": {
+    "repo:96e72438df437e5b8cc2d6c5afff": {
+      "schema_version": "1.0.0",
+      "company_id": "fenix",
+      "skill_id": "repo:96e72438df437e5b8cc2d6c5afff",
+      "skill_version": "github-6edcf94159d9",
+      "source_action_id": "skill-action:631a70676c7b404011a0829a",
+      "source_decision_id": "skill-decision:d5125306aee026d393fb8610",
+      "source_discovery_run_id": 39440788294,
+      "wrapper_id": "safe-engineering:96a60f60d49a3bf38ef3",
+      "domain": "universal-skill-engineering",
+      "environment": "PREPROD",
+      "additional_cost_eur": 0,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "external_skill_code_execution_authorized": false,
+      "paid_activation_authorized": false,
+      "auto_merge_authorized": false,
+      "state_type": "CEREBRO_SKILL_ENGINE_EXTENSION_HANDOFF",
+      "handoff_id": "skill-engine-extension:f8a292613bc358b8701c77a2",
+      "action_type": "BUILD_INTERNAL_WRAPPER_PLAN",
+      "target_engine_ids": [
+        "COM-001",
+        "MKT-001",
+        "VOICE-001",
+        "VOICEUI-001",
+        "WEB-001"
+      ],
+      "preservation_required": true,
+      "old_vs_new_required": true,
+      "tribunal_required": true,
+      "rollback_required": true,
+      "rebuild_required": true,
+      "internal_wrapper_only": true,
+      "raw_external_skill_execution_forbidden": true,
+      "shadow_activation_candidate": false,
+      "next_gate": "SKILL_CAPABILITY_EVOLUTION_EXISTING_ENGINE"
+    }
+  },
+  "autonomy_action_history": {
+    "repo:96e72438df437e5b8cc2d6c5afff": {
+      "action_id": "skill-action:631a70676c7b404011a0829a",
+      "handoff_id": "skill-engine-extension:f8a292613bc358b8701c77a2",
+      "status": "ROUTED_TO_EXISTING_GOVERNED_PIPELINE",
+      "routed_at": "2026-10-20T14:37:38.923Z",
+      "next_gate": "SKILL_CAPABILITY_EVOLUTION_EXISTING_ENGINE",
+      "environment": "PREPROD",
+      "additional_cost_eur": 0,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "external_skill_code_execution_authorized": false,
+      "paid_activation_authorized": false,
+      "auto_merge_authorized": false
+    }
+  }
 }
