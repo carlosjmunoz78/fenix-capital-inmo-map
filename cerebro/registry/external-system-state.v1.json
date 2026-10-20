@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "state_type": "CEREBRO_EXTERNAL_SYSTEM_STATE_V1",
   "recorded_on": "2026-10-20",
   "company_id": "fenix",
@@ -26,22 +26,32 @@
     "evidence_state": "DOCUMENTED_PARTIAL",
     "system_exists": true,
     "purpose": "STOCK_MARKET_INVESTING_TRADING_SYSTEM",
-    "runtime_location": "GOOGLE_CLOUD_OWNER_CONFIRMED",
+    "runtime_location": "GOOGLE_CLOUD",
+    "gcp_project": "fenix-trading-lab",
+    "gcp_vm": "cerebro-trading-lab",
+    "historical_operational_evidence": {
+      "evidence_date": "2026-09-04",
+      "source": "NOTION_TRADING_LAB_MASTER",
+      "shadow_automatic": "ACTIVE",
+      "alpaca_paper": "ARMED_AND_ACTIVE_BEHIND_GATES",
+      "real_capital_authorized": false,
+      "current_health_revalidated_on_2026_10_20": false
+    },
     "isolated": true,
-    "isolation_meaning": "NO_SHARED_CREDENTIALS_OR_EXECUTION_RESOURCES_WITH_APP_CRM_CEREBRO_PROD",
+    "isolation_meaning": "NO_SHARED_CREDENTIALS_LOGIC_OR_EXECUTION_RESOURCES_WITH_APP_CRM_CEREBRO_PROD",
     "cerebro_trading_access": false,
-    "tuning_or_activation_blocked_until": [
+    "integral_tuning_or_authority_expansion_blocked_until": [
       "BROWSER_CONTROL_E2E_CONFIRMED",
       "PC_CONTROL_E2E_CONFIRMED"
     ],
-    "after_device_gates": "SEPARATE_LAB_TRD_AUDIT_TEST_TRIBUNAL_AND_PROMOTION_REQUIRED",
-    "interpretation": "Trading isolation means security and execution separation. It does not mean the Trading system is nonexistent or forbidden."
+    "after_device_gates": "SEPARATE_LAB_TRD_LIVE_AUDIT_TEST_TRIBUNAL_OBSERVABILITY_BACKUP_ROLLBACK_REBUILD_AND_PROMOTION_REQUIRED",
+    "interpretation": "Trading isolation means security and execution separation, not nonexistence. Existing historical Shadow/Paper execution evidence does not authorize real capital and does not prove current 2026-10-20 health."
   },
   "device_control": {
     "evidence_state": "PARCIAL",
     "browser_control": "NOT_YET_FULL_E2E_CONFIRMED",
     "pc_control": "NOT_YET_FULL_E2E_CONFIRMED",
-    "required_for_trading_tuning": true,
+    "required_for_integral_trading_tuning": true,
     "fail_closed": true
   },
   "human_required_set": [
