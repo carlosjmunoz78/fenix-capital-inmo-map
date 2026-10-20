@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-20T14:20:37.356Z",
+  "updated_at": "2026-10-20T14:21:20.166Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -526,40 +526,6 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 39166094677,
       "checkpointed_at": "2026-10-18T21:03:41.296Z",
-      "human_required": null,
-      "external_skill_code_execution": false,
-      "customer_data_used": false,
-      "prod_write": false,
-      "trading_access": false,
-      "paid_fallback": false,
-      "additional_cost_eur": 0
-    },
-    "github-wide-skills:4fb84b20de21ce432ba1": {
-      "candidate_id": "github-wide-skills:4fb84b20de21ce432ba1",
-      "name": "product-rebuild-gate",
-      "human_alias": "Product Rebuild Gate",
-      "wrapper_id": "skillwrap:f2e1e7f660dd6e4fb83b",
-      "domain": "agent-ai-orchestration",
-      "engine_bindings": [
-        "ORCH-001",
-        "ROUTE-001",
-        "FACT-001",
-        "RAG-001",
-        "LRN-001",
-        "ACTGW-001"
-      ],
-      "value_score": 85.8,
-      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
-      "evidence_refs": {
-        "upstream_full_name": "kamalkatul92kk-sudo/progoals-agent-skills",
-        "upstream_head_commit": "96800bb18e8662042c7938dae690156118747dd6",
-        "manifest_sha256": "c6fd7a96f310aa8b7951a6b4df1c8d095b4e23d56dcf662a6fd880efabd00fe4",
-        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
-      },
-      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
-      "status": "WAITING_SAFE_HANDLER",
-      "source_discovery_run_id": 39344661173,
-      "checkpointed_at": "2026-10-19T23:57:09.798Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -2487,6 +2453,49 @@
         "source": "CEREBRO Skill AutoLoop Safe Handler V0"
       },
       "updated_at": "2026-10-20T14:20:37.356Z",
+      "prod_authorized": false
+    },
+    "github-wide-skills:4fb84b20de21ce432ba1": {
+      "candidate_id": "github-wide-skills:4fb84b20de21ce432ba1",
+      "name": "product-rebuild-gate",
+      "human_alias": "Product Rebuild Gate",
+      "wrapper_id": "skillwrap:f2e1e7f660dd6e4fb83b",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 85.8,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "kamalkatul92kk-sudo/progoals-agent-skills",
+        "upstream_head_commit": "96800bb18e8662042c7938dae690156118747dd6",
+        "manifest_sha256": "c6fd7a96f310aa8b7951a6b4df1c8d095b4e23d56dcf662a6fd880efabd00fe4",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "SAFE_HANDLER_TERMINAL_HOLD",
+      "status": "TERMINAL_HOLD",
+      "source_discovery_run_id": 39344661173,
+      "checkpointed_at": "2026-10-19T23:57:09.798Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0,
+      "evidence": {
+        "reason": "STATIC_LAB_REJECT_LOW_COVERAGE",
+        "decision_id": null,
+        "decision": null,
+        "human_required": null,
+        "source": "CEREBRO Skill AutoLoop Safe Handler V0"
+      },
+      "updated_at": "2026-10-20T14:21:20.166Z",
       "prod_authorized": false
     }
   },
