@@ -1,27 +1,56 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "state_type": "CEREBRO_SKILL_EVOLUTION_POLICY_BINDING_V1",
   "company_id": "GLOBAL",
   "engine_id": "FACT-001",
   "environment": "GOVERNANCE",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "policy_ref": "cerebro/governance/skill-continuous-improvement-policy.v1.json",
+  "architecture_reuse": {
+    "compounding_policy_ref": "cerebro/registry/cerebro-compounding-evolution-policy.v1.json",
+    "native_continuous_improvement_ref": "cerebro/registry/native-capability-continuous-improvement-v1.json",
+    "rule": "SPECIALIZE_AND_REUSE_EXISTING_LRN_FACT_RSH_EVA_JDG_OBSERV_FINOPS_QA_DR_RBLD_LOOPS_DO_NOT_DUPLICATE_CONTROL_PLANES"
+  },
   "registry_bindings": [
     {
       "registry_ref": "cerebro/registry/skill-operational-wrapper-registry-v1.json",
       "selector": "wrappers[*]",
+      "skill_class": "CEREBRO_OPERATIONAL_WRAPPER",
+      "inherit_policy": true
+    },
+    {
+      "registry_ref": "cerebro/registry/skill-dynamic-adoption-v1.json",
+      "selector": "capabilities[*]",
+      "skill_class": "DYNAMIC_ADOPTED_CAPABILITY",
+      "inherit_policy": true
+    },
+    {
+      "registry_ref": "cerebro/registry/skill-full-adoption-v1.json",
+      "selector": "queue[*]",
+      "skill_class": "FULL_SAFE_PREPROD_ADOPTED_SKILL",
       "inherit_policy": true
     }
   ],
+  "coverage_contract": {
+    "multi_registry_required": true,
+    "deduplicate_by_technical_name": true,
+    "preserve_all_registry_provenance": true,
+    "missing_bound_registry_is_failure": true,
+    "empty_bound_registry_is_allowed_only_when_registry_contract_allows_it": true
+  },
   "future_skill_binding": {
     "enabled": true,
-    "selector": "ALL_ACQUIRED_GENERATED_OR_DERIVED_SKILLS",
+    "selector": "ALL_ACQUIRED_ADAPTED_GENERATED_OR_DERIVED_SKILLS",
     "inherit_policy_by_default": true,
+    "new_canonical_skill_registry_must_be_added_to_registry_bindings": true,
     "exception_requires_governed_policy_record": true
   },
   "learning_binding": {
     "consumer_engine": "LRN-001",
     "factory_engine": "FACT-001",
+    "research_engine": "RSH-001",
+    "evaluation_engine": "EVA-001",
+    "tribunal_engine": "JDG-001",
     "feedback_required_for_promoted_and_rejected_candidates": true
   },
   "production_baseline": {
