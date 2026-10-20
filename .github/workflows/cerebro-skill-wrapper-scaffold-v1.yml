@@ -1,0 +1,92 @@
+name: CEREBRO Skill Wrapper Scaffold V1
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - 'cerebro/skill-auto-scaffold-*'
+    paths:
+      - 'cerebro/governance/skill-wrapper-scaffold-policy.v1.json'
+      - 'cerebro/governance/skill-continuous-improvement-policy.v1.json'
+      - 'cerebro/registry/skill-evolution-policy-binding-v1.json'
+      - 'cerebro/registry/skill-dynamic-adoption-v1.json'
+      - 'cerebro/runtime/skill-wrappers/governed-wrapper-factory-v1.mjs'
+      - 'cerebro/runtime/skill-wrappers/governed-wrapper-scaffold-v1.mjs'
+      - 'cerebro/tests/skill-wrapper-scaffold-v1.test.mjs'
+      - 'cerebro/docs/CEREBRO_SKILL_WRAPPER_SCAFFOLD_V1.md'
+      - '.github/workflows/cerebro-skill-wrapper-scaffold-v1.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-skill-wrapper-scaffold-v1-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fact001-governed-scaffold:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Test scaffold policy and fail-closed generator
+        run: node --test cerebro/tests/skill-wrapper-scaffold-v1.test.mjs
+
+      - name: Generate a real PREPROD scaffold from governed aws-cognito metadata
+        run: |
+          node cerebro/runtime/skill-wrappers/governed-wrapper-scaffold-v1.mjs \
+            --registry cerebro/registry/skill-dynamic-adoption-v1.json \
+            --technical-name aws-cognito \
+            --company-id fenix \
+            --output-dir "$RUNNER_TEMP/cerebro-skill-wrapper-scaffold"
+
+      - name: Assert generated scaffold has zero authority and is not promoted
+        env:
+          RESULT_FILE: ${{ runner.temp }}/cerebro-skill-wrapper-scaffold/scaffold-result.json
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const s=JSON.parse(fs.readFileSync(process.env.RESULT_FILE,'utf8'));
+          if(s.status!=='GREEN_SCAFFOLD_READY_PREPROD') throw new Error(`SCAFFOLD_NOT_GREEN:${s.status}`);
+          if(s.environment!=='PREPROD') throw new Error(`UNSAFE_ENVIRONMENT:${s.environment}`);
+          if(s.technical_name!=='aws-cognito') throw new Error(`UNEXPECTED_CANDIDATE:${s.technical_name}`);
+          if(s.operational!==false) throw new Error('SCAFFOLD_MUST_NOT_BE_OPERATIONAL');
+          if(Number(s.generated_files?.length)!==7) throw new Error(`SCAFFOLD_FILE_COUNT:${s.generated_files?.length}`);
+          if(s.registry_entry_candidate?.registry_promotion_authorized!==false) throw new Error('REGISTRY_PROMOTION_AUTHORIZED');
+          if(s.implementation_contract?.promotion_after_scaffold!==false) throw new Error('PROMOTION_AFTER_SCAFFOLD_AUTHORIZED');
+          if(s.authority?.direct_prod_write_authorized!==false) throw new Error('PROD_WRITE_AUTHORITY_EXPANDED');
+          if(s.authority?.direct_prod_mutation_authorized!==false) throw new Error('PROD_MUTATION_AUTHORITY_EXPANDED');
+          if(s.authority?.external_skill_code_execution!==false) throw new Error('EXTERNAL_SKILL_EXECUTION_AUTHORIZED');
+          if(s.authority?.dependency_install_authorized!==false) throw new Error('DEPENDENCY_INSTALL_AUTHORIZED');
+          if(s.authority?.external_side_effects_authorized!==false) throw new Error('EXTERNAL_SIDE_EFFECTS_AUTHORIZED');
+          if(s.authority?.trading_access!==false) throw new Error('TRADING_AUTHORIZED');
+          if(s.authority?.spend_authorized!==false) throw new Error('SPEND_AUTHORIZED');
+          if(Number(s.authority?.additional_cost_budget_eur)!==0) throw new Error('COST_BUDGET_EXPANDED');
+          if(s.evaluation_contract?.old_vs_new_required!==true) throw new Error('OLD_VS_NEW_NOT_REQUIRED');
+          if(s.evaluation_contract?.measurable_gain_required!==true) throw new Error('MEASURABLE_GAIN_NOT_REQUIRED');
+          if(s.evaluation_contract?.no_regression_required!==true) throw new Error('NO_REGRESSION_NOT_REQUIRED');
+          if(s.recovery_contract?.backup_required!==true||s.recovery_contract?.rollback_required!==true||s.recovery_contract?.rebuild_required!==true) throw new Error('RECOVERY_CONTRACT_INCOMPLETE');
+          if(s.continuous_improvement?.inherit_on_creation!==true) throw new Error('CONTINUOUS_IMPROVEMENT_NOT_INHERITED');
+          const wrapper=s.generated_files.find(file=>String(file.path).endsWith('.scaffold.mjs'));
+          if(!wrapper?.content?.includes('SKILL_WRAPPER_SCAFFOLD_NOT_IMPLEMENTED')) throw new Error('FAIL_CLOSED_WRAPPER_MISSING');
+          console.log(JSON.stringify({status:s.status,technical_name:s.technical_name,environment:s.environment,operational:s.operational,generated_files:s.generated_files.length,old_vs_new_required:true,rollback_required:true,continuous_improvement:true,additional_cost_budget_eur:0}));
+          NODE
+
+      - name: Assert scaffold generation did not mutate repository checkout
+        run: git diff --exit-code
+
+      - name: Upload immutable scaffold evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-skill-wrapper-scaffold-${{ github.run_id }}
+          path: ${{ runner.temp }}/cerebro-skill-wrapper-scaffold
+          if-no-files-found: error
+          retention-days: 14
