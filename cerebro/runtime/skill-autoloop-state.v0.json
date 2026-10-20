@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-20T18:33:41.705Z",
+  "updated_at": "2026-10-20T18:34:07.704Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -188,40 +188,6 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 39026523562,
       "checkpointed_at": "2026-10-17T10:52:19.357Z",
-      "human_required": null,
-      "external_skill_code_execution": false,
-      "customer_data_used": false,
-      "prod_write": false,
-      "trading_access": false,
-      "paid_fallback": false,
-      "additional_cost_eur": 0
-    },
-    "github-wide-skills:6f8261757a7217a3627d": {
-      "candidate_id": "github-wide-skills:6f8261757a7217a3627d",
-      "name": "premium-saas-web",
-      "human_alias": "Premium Saas Web",
-      "wrapper_id": "skillwrap:6f99611d5601244794ce",
-      "domain": "agent-ai-orchestration",
-      "engine_bindings": [
-        "ORCH-001",
-        "ROUTE-001",
-        "FACT-001",
-        "RAG-001",
-        "LRN-001",
-        "ACTGW-001"
-      ],
-      "value_score": 85.06,
-      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
-      "evidence_refs": {
-        "upstream_full_name": "MiddleSugar7000/premium-saas-web-skill",
-        "upstream_head_commit": "3092ce0ca5da2918d6f140618c74c91bc5ed5b3f",
-        "manifest_sha256": "c8ccbe88344a9b2a537b64d1c4c265126b149df87fd0c8ae6265d2f854f6d93e",
-        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
-      },
-      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
-      "status": "WAITING_SAFE_HANDLER",
-      "source_discovery_run_id": 39054243673,
-      "checkpointed_at": "2026-10-17T17:33:24.056Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -2771,6 +2737,49 @@
         "source": "CEREBRO Skill AutoLoop Safe Handler V0"
       },
       "updated_at": "2026-10-20T18:33:41.705Z",
+      "prod_authorized": false
+    },
+    "github-wide-skills:6f8261757a7217a3627d": {
+      "candidate_id": "github-wide-skills:6f8261757a7217a3627d",
+      "name": "premium-saas-web",
+      "human_alias": "Premium Saas Web",
+      "wrapper_id": "skillwrap:6f99611d5601244794ce",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 85.06,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "MiddleSugar7000/premium-saas-web-skill",
+        "upstream_head_commit": "3092ce0ca5da2918d6f140618c74c91bc5ed5b3f",
+        "manifest_sha256": "c8ccbe88344a9b2a537b64d1c4c265126b149df87fd0c8ae6265d2f854f6d93e",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "SAFE_HANDLER_TERMINAL_HOLD",
+      "status": "TERMINAL_HOLD",
+      "source_discovery_run_id": 39054243673,
+      "checkpointed_at": "2026-10-17T17:33:24.056Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0,
+      "evidence": {
+        "reason": "STATIC_LAB_HOLD",
+        "decision_id": null,
+        "decision": null,
+        "human_required": null,
+        "source": "CEREBRO Skill AutoLoop Safe Handler V0"
+      },
+      "updated_at": "2026-10-20T18:34:07.704Z",
       "prod_authorized": false
     }
   },
