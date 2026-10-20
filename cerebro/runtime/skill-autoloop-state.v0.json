@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-20T18:35:05.012Z",
+  "updated_at": "2026-10-20T18:35:30.200Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -118,42 +118,6 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 38851697015,
       "checkpointed_at": "2026-10-16T04:39:14.264Z",
-      "human_required": null,
-      "external_skill_code_execution": false,
-      "customer_data_used": false,
-      "prod_write": false,
-      "trading_access": false,
-      "paid_fallback": false,
-      "additional_cost_eur": 0
-    },
-    "github-wide-skills:ee81a3b9106efbee10ed": {
-      "candidate_id": "github-wide-skills:ee81a3b9106efbee10ed",
-      "name": "watchfor-incident-response",
-      "human_alias": "Watchfor Incident Response",
-      "wrapper_id": "skillwrap:e2a2abba52397e75c9f4",
-      "domain": "observability-quality-resilience",
-      "engine_bindings": [
-        "OBSERV-001",
-        "INC-001",
-        "SUP-001",
-        "QA-001",
-        "REG-001",
-        "DR-001",
-        "RBLD-001",
-        "BCP-001"
-      ],
-      "value_score": 84.65,
-      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
-      "evidence_refs": {
-        "upstream_full_name": "watchfor-io/agent-toolkit",
-        "upstream_head_commit": "99fb2dd9f0e7af694eab0dd2cca50965366d22d1",
-        "manifest_sha256": "f1366c9f4b3566ad5fa31c3fd5727af02cca7caee196b807b6a32e28e184ea37",
-        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
-      },
-      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
-      "status": "WAITING_SAFE_HANDLER",
-      "source_discovery_run_id": 39026523562,
-      "checkpointed_at": "2026-10-17T10:52:19.357Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -2798,6 +2762,51 @@
         "source": "CEREBRO Skill AutoLoop Safe Handler V0"
       },
       "updated_at": "2026-10-20T18:35:05.012Z",
+      "prod_authorized": false
+    },
+    "github-wide-skills:ee81a3b9106efbee10ed": {
+      "candidate_id": "github-wide-skills:ee81a3b9106efbee10ed",
+      "name": "watchfor-incident-response",
+      "human_alias": "Watchfor Incident Response",
+      "wrapper_id": "skillwrap:e2a2abba52397e75c9f4",
+      "domain": "observability-quality-resilience",
+      "engine_bindings": [
+        "OBSERV-001",
+        "INC-001",
+        "SUP-001",
+        "QA-001",
+        "REG-001",
+        "DR-001",
+        "RBLD-001",
+        "BCP-001"
+      ],
+      "value_score": 84.65,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "watchfor-io/agent-toolkit",
+        "upstream_head_commit": "99fb2dd9f0e7af694eab0dd2cca50965366d22d1",
+        "manifest_sha256": "f1366c9f4b3566ad5fa31c3fd5727af02cca7caee196b807b6a32e28e184ea37",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "SAFE_HANDLER_TERMINAL_HOLD",
+      "status": "TERMINAL_HOLD",
+      "source_discovery_run_id": 39026523562,
+      "checkpointed_at": "2026-10-17T10:52:19.357Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0,
+      "evidence": {
+        "reason": "STATIC_LAB_HOLD",
+        "decision_id": null,
+        "decision": null,
+        "human_required": null,
+        "source": "CEREBRO Skill AutoLoop Safe Handler V0"
+      },
+      "updated_at": "2026-10-20T18:35:30.200Z",
       "prod_authorized": false
     }
   },
