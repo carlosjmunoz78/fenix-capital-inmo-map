@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-20T16:02:44.926Z",
+  "updated_at": "2026-10-20T16:09:08.839Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -529,40 +529,6 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 39166094677,
       "checkpointed_at": "2026-10-18T21:03:41.296Z",
-      "human_required": null,
-      "external_skill_code_execution": false,
-      "customer_data_used": false,
-      "prod_write": false,
-      "trading_access": false,
-      "paid_fallback": false,
-      "additional_cost_eur": 0
-    },
-    "github-wide-skills:0123f884f001811189ed": {
-      "candidate_id": "github-wide-skills:0123f884f001811189ed",
-      "name": "code-review",
-      "human_alias": "Code Review",
-      "wrapper_id": "skillwrap:da73bb8510abe6dd6710",
-      "domain": "agent-ai-orchestration",
-      "engine_bindings": [
-        "ORCH-001",
-        "ROUTE-001",
-        "FACT-001",
-        "RAG-001",
-        "LRN-001",
-        "ACTGW-001"
-      ],
-      "value_score": 86.4,
-      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
-      "evidence_refs": {
-        "upstream_full_name": "JacobStephens2/skills",
-        "upstream_head_commit": "5240c71520489447c9bf9741e6a60fabfd3e2ee1",
-        "manifest_sha256": "47f4e52c21694def9c7c11cbfbf891ca35eac7a93e395797515be3c8a409ae50",
-        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
-      },
-      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
-      "status": "WAITING_SAFE_HANDLER",
-      "source_discovery_run_id": 39447879076,
-      "checkpointed_at": "2026-10-20T15:24:01.332Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -2650,9 +2616,52 @@
       },
       "updated_at": "2026-10-20T14:21:20.166Z",
       "prod_authorized": false
+    },
+    "github-wide-skills:0123f884f001811189ed": {
+      "candidate_id": "github-wide-skills:0123f884f001811189ed",
+      "name": "code-review",
+      "human_alias": "Code Review",
+      "wrapper_id": "skillwrap:da73bb8510abe6dd6710",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 86.4,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "JacobStephens2/skills",
+        "upstream_head_commit": "5240c71520489447c9bf9741e6a60fabfd3e2ee1",
+        "manifest_sha256": "47f4e52c21694def9c7c11cbfbf891ca35eac7a93e395797515be3c8a409ae50",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "SAFE_HANDLER_TERMINAL_HOLD",
+      "status": "TERMINAL_HOLD",
+      "source_discovery_run_id": 39447879076,
+      "checkpointed_at": "2026-10-20T15:24:01.332Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0,
+      "evidence": {
+        "reason": "STATIC_LAB_HOLD",
+        "decision_id": null,
+        "decision": null,
+        "human_required": null,
+        "source": "CEREBRO Skill AutoLoop Safe Handler V0"
+      },
+      "updated_at": "2026-10-20T16:09:08.839Z",
+      "prod_authorized": false
     }
   },
-  "last_action": "APPLY_REJECT_CAPABILITY_CONTINUE_DISCOVERY",
+  "last_action": "TERMINAL_HOLD_CONTINUE_OTHER_SAFE_WORK",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
