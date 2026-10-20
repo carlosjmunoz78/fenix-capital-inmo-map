@@ -13,10 +13,13 @@ on:
     branches:
       - main
       - 'cerebro/skill-prod-operational-fastlane-*'
+      - 'cerebro/skill-wrapper-*'
     paths:
       - 'cerebro/runtime/skill-prod-capability-fastlane-v1.mjs'
       - 'cerebro/runtime/skill-prod-operational-fastlane-v1.mjs'
       - 'cerebro/registry/skill-dynamic-adoption-v1.json'
+      - 'cerebro/registry/skill-operational-wrapper-registry-v1.json'
+      - 'cerebro/runtime/skill-wrappers/**'
       - 'cerebro/tests/skill-prod-capability-fastlane-v1.test.mjs'
       - 'cerebro/tests/skill-prod-operational-fastlane-v1.test.mjs'
       - '.github/workflows/cerebro-skill-prod-operational-fastlane-v1.yml'
@@ -51,13 +54,16 @@ jobs:
           import fs from 'node:fs';
           const r=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/cerebro-prod-operational-fastlane.json','utf8'));
           if(r.status!=='GREEN_PROD_OPERATIONAL_INTERNAL_CAPABILITY_SET') throw new Error(`OPERATIONAL_SET_NOT_GREEN:${r.status}`);
-          if(Number(r.available_count)<1) throw new Error('NO_OPERATIONAL_CAPABILITIES');
+          if(Number(r.available_count)<5) throw new Error(`OPERATIONAL_BATCH_INCOMPLETE:${r.available_count}`);
+          const expected=new Set(['aws-cognito','aws-ec2','design-md','drei','figma-to-code']);
           for(const row of r.available??[]){
             const a=row.authority??{};
             if(row.status!=='PROD_CAPABILITY_AVAILABLE_OPERATIONAL') throw new Error(`NON_OPERATIONAL_STATUS:${row.candidate_id}`);
             if(a.direct_prod_write_authorized!==false||a.direct_prod_mutation_authorized!==false||a.external_side_effects_authorized!==false||a.external_skill_code_execution!==false||a.trading_access!==false||a.spend_authorized!==false||Number(a.additional_cost_eur)!==0) throw new Error(`AUTHORITY_EXPANSION:${row.candidate_id}`);
+            expected.delete(row.technical_name);
           }
-          console.log(JSON.stringify({status:r.status,available_count:r.available_count,dynamic_available_count:r.dynamic_available_count,direct_prod_write_authorized:false,external_side_effects_authorized:false,trading_access:false,additional_cost_eur:0}));
+          if(expected.size) throw new Error(`MISSING_OPERATIONAL_WRAPPERS:${[...expected].join(',')}`);
+          console.log(JSON.stringify({status:r.status,available_count:r.available_count,dynamic_available_count:r.dynamic_available_count,required_wrappers:5,direct_prod_write_authorized:false,external_side_effects_authorized:false,trading_access:false,additional_cost_eur:0}));
           NODE
       - name: Upload immutable PROD operational evidence
         uses: actions/upload-artifact@v4
