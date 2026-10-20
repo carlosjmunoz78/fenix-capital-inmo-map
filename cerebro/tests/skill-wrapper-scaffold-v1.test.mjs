@@ -99,9 +99,9 @@ test('unsafe authority requests and Trading bindings are rejected fail-closed',(
   }
 });
 
-test('real aws-cognito adoption metadata can generate a safe scaffold without becoming operational',()=>{
-  const adoption=JSON.parse(fs.readFileSync(new URL('../registry/skill-dynamic-adoption-v1.json',import.meta.url),'utf8'));
-  const candidate=adoption.capabilities.find(item=>item.technical_name==='aws-cognito');
+test('real governed aws-cognito provenance can generate a safe scaffold without becoming operational',()=>{
+  const registry=JSON.parse(fs.readFileSync(new URL('../registry/skill-operational-wrapper-registry-v1.json',import.meta.url),'utf8'));
+  const candidate=registry.wrappers.find(item=>item.technical_name==='aws-cognito');
   assert.ok(candidate);
   const scaffold=buildGovernedWrapperScaffold(candidate,{company_id:'fenix'});
   assert.equal(scaffold.status,'GREEN_SCAFFOLD_READY_PREPROD');
@@ -109,6 +109,17 @@ test('real aws-cognito adoption metadata can generate a safe scaffold without be
   assert.equal(scaffold.operational,false);
   assert.equal(scaffold.registry_entry_candidate.registry_promotion_authorized,false);
   assert.equal(scaffold.authority.additional_cost_budget_eur,0);
+});
+
+test('dynamic adoption without a carried license is not silently treated as licensed provenance',()=>{
+  const adoption=JSON.parse(fs.readFileSync(new URL('../registry/skill-dynamic-adoption-v1.json',import.meta.url),'utf8'));
+  const candidate=adoption.capabilities.find(item=>item.technical_name==='aws-cognito');
+  assert.ok(candidate);
+  const scaffold=buildGovernedWrapperScaffold(candidate,{company_id:'fenix'});
+  assert.equal(scaffold.status,'BLOCKED_FAIL_CLOSED');
+  assert.equal(scaffold.operational,false);
+  assert.equal(scaffold.inspection.human_required,'LEGAL_REQUIRED');
+  assert.ok(scaffold.inspection.blockers.some(item=>item.code==='SOURCE_LICENSE_REQUIRED'));
 });
 
 test('incomplete full-adoption metadata is not silently upgraded into an automatic scaffold',()=>{
