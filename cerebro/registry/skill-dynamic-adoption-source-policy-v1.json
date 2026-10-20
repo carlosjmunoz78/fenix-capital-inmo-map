@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_DYNAMIC_SKILL_ADOPTION_SOURCE_POLICY_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "public_pinned_source_required": true,
+  "verified_license_required": true,
+  "immutable_source_hashes_required": true,
+  "raw_external_code_execution": false,
+  "raw_external_dependency_install": false,
+  "additional_cost_eur": 0
+}
