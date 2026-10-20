@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-20T18:31:07.764Z",
+  "updated_at": "2026-10-20T18:32:26.860Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -87,8 +87,7 @@
     "repo:96e72438df437e5b8cc2d6c5afff",
     "github-wide-skills:4c88ea671dfb2c747269",
     "github-wide-skills:0123f884f001811189ed",
-    "github-wide-skills:d4c2fee1d9b47948d6f3",
-    "github-wide-skills:734e454641b63dfd6d8b"
+    "github-wide-skills:d4c2fee1d9b47948d6f3"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -393,74 +392,6 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 39085394173,
       "checkpointed_at": "2026-10-18T01:09:12.032Z",
-      "human_required": null,
-      "external_skill_code_execution": false,
-      "customer_data_used": false,
-      "prod_write": false,
-      "trading_access": false,
-      "paid_fallback": false,
-      "additional_cost_eur": 0
-    },
-    "github-wide-skills:0c89ff5bc2cecf4bf945": {
-      "candidate_id": "github-wide-skills:0c89ff5bc2cecf4bf945",
-      "name": "blind-spots",
-      "human_alias": "Blind Spots",
-      "wrapper_id": "skillwrap:1e68ea9482b5e1f982bb",
-      "domain": "agent-ai-orchestration",
-      "engine_bindings": [
-        "ORCH-001",
-        "ROUTE-001",
-        "FACT-001",
-        "RAG-001",
-        "LRN-001",
-        "ACTGW-001"
-      ],
-      "value_score": 85.6,
-      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
-      "evidence_refs": {
-        "upstream_full_name": "peakstate-global/peakstate-skills",
-        "upstream_head_commit": "9a5f734671fe417c473f15471541245c5e531a5c",
-        "manifest_sha256": "e08cf01bd7387ea9e864cb96f13a00289aa51683cde3ac45a313af5e60a3f23e",
-        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
-      },
-      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
-      "status": "WAITING_SAFE_HANDLER",
-      "source_discovery_run_id": 39166094677,
-      "checkpointed_at": "2026-10-18T21:03:41.296Z",
-      "human_required": null,
-      "external_skill_code_execution": false,
-      "customer_data_used": false,
-      "prod_write": false,
-      "trading_access": false,
-      "paid_fallback": false,
-      "additional_cost_eur": 0
-    },
-    "github-wide-skills:734e454641b63dfd6d8b": {
-      "candidate_id": "github-wide-skills:734e454641b63dfd6d8b",
-      "name": "brigade-handoffs",
-      "human_alias": "Brigade Handoffs",
-      "wrapper_id": "skillwrap:0b8cbc829baefa5c02bf",
-      "domain": "agent-ai-orchestration",
-      "engine_bindings": [
-        "ORCH-001",
-        "ROUTE-001",
-        "FACT-001",
-        "RAG-001",
-        "LRN-001",
-        "ACTGW-001"
-      ],
-      "value_score": 87.31,
-      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
-      "evidence_refs": {
-        "upstream_full_name": "escoffier-labs/skillet",
-        "upstream_head_commit": "739165dada596c7490e0f64b511e3b0117afc023",
-        "manifest_sha256": "4d535c7feb0f001509c9cb9df77698d79ed48d7380c53faf6e309c847150c7b5",
-        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
-      },
-      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
-      "status": "WAITING_SAFE_HANDLER",
-      "source_discovery_run_id": 39475346912,
-      "checkpointed_at": "2026-10-20T18:31:07.764Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -1014,6 +945,55 @@
       "prod_authorized": false,
       "autonomous_promotion_authorized": false,
       "action_id": "skill-action:489641954a7f206270f6721f",
+      "action_type": "REJECT_CAPABILITY",
+      "action_status": "APPLIED_METADATA_ONLY",
+      "next_gate": "CONTINUE_DISCOVERY"
+    },
+    "github-wide-skills:0c89ff5bc2cecf4bf945": {
+      "candidate_id": "github-wide-skills:0c89ff5bc2cecf4bf945",
+      "name": "blind-spots",
+      "human_alias": "Blind Spots",
+      "wrapper_id": "skillwrap:1e68ea9482b5e1f982bb",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 85.6,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "peakstate-global/peakstate-skills",
+        "upstream_head_commit": "9a5f734671fe417c473f15471541245c5e531a5c",
+        "manifest_sha256": "e08cf01bd7387ea9e864cb96f13a00289aa51683cde3ac45a313af5e60a3f23e",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "SKILL_AUTONOMY_DECISION_RECORDED",
+      "status": "COMPLETED",
+      "source_discovery_run_id": 39166094677,
+      "checkpointed_at": "2026-10-18T21:03:41.296Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0,
+      "disposition": "DESCARTAR",
+      "evidence": {
+        "reason": "UNTRUSTED_SOURCE_OR_SUPPLY_CHAIN",
+        "decision_id": "skill-autonomy:d077c669aa4c59eda32fbd43",
+        "decision": "DESCARTAR",
+        "human_required": null,
+        "source": "CEREBRO Skill AutoLoop Safe Handler V0"
+      },
+      "updated_at": "2026-10-20T18:32:26.860Z",
+      "prod_authorized": false,
+      "autonomous_promotion_authorized": false,
+      "action_id": "skill-action:08b12f74f2b1436993b0455b",
       "action_type": "REJECT_CAPABILITY",
       "action_status": "APPLIED_METADATA_ONLY",
       "next_gate": "CONTINUE_DISCOVERY"
@@ -2767,7 +2747,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
+  "last_action": "APPLY_REJECT_CAPABILITY_CONTINUE_DISCOVERY",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -2780,7 +2760,7 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 39475346912,
+  "last_discovery_run_id": 39462837886,
   "autonomy_action_ledger": {
     "github-wide-skills:28b33318e96c4dcfb74a": {
       "schema_version": "1.0.0",
@@ -3145,6 +3125,45 @@
       "external_skill_code_execution_authorized": false,
       "additional_cost_eur": 0,
       "recorded_at": "2026-10-20T16:02:44.926Z"
+    },
+    "github-wide-skills:0c89ff5bc2cecf4bf945": {
+      "schema_version": "1.0.0",
+      "state_type": "CEREBRO_SKILL_AUTONOMY_ACTION_RECEIPT",
+      "action_id": "skill-action:08b12f74f2b1436993b0455b",
+      "decision_id": "skill-autonomy:d077c669aa4c59eda32fbd43",
+      "company_id": "GLOBAL",
+      "engine_id": "SKILL-AUTONOMY-ACTION",
+      "environment": "PREPROD",
+      "version": "1.0.0",
+      "skill_id": "github-wide-skills:0c89ff5bc2cecf4bf945",
+      "skill_version": "skillwrap:1e68ea9482b5e1f982bb",
+      "decision": "DESCARTAR",
+      "action_type": "REJECT_CAPABILITY",
+      "status": "APPLIED_METADATA_ONLY",
+      "next_gate": "CONTINUE_DISCOVERY",
+      "target_engine_ids": [
+        "ACTGW-001",
+        "FACT-001",
+        "LRN-001",
+        "ORCH-001",
+        "RAG-001",
+        "ROUTE-001"
+      ],
+      "observed_at": null,
+      "human_required": null,
+      "queueable_safe_work": false,
+      "terminal_metadata_only": true,
+      "mutation_authorized": false,
+      "internal_wrapper_shadow_authorized": false,
+      "fact001_gap_candidate_authorized": false,
+      "fact001_create_authorized": false,
+      "paid_activation_authorized": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "external_skill_code_execution_authorized": false,
+      "additional_cost_eur": 0,
+      "recorded_at": "2026-10-20T18:32:26.860Z"
     }
   },
   "autonomy_action_queue": {},
