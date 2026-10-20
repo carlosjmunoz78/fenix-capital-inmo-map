@@ -4,7 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {runRepositoryActivation} from './universal-skill-repository-intake-v1.mjs';
 
-const VERSION='1.1.0';
+const VERSION='1.1.1';
 const MAX_REMOTE_BYTES=512*1024;
 const UA='CEREBRO-USAF-PREPROD/1.1';
 const FILES=['cerebro.skill.json','skill.json','SKILL.md','package.json','README.md'];
@@ -47,11 +47,11 @@ async function resolvePinnedSource(parsed,fetch_impl,token){
 function rawUrl(parsed,sha,file){const rel=safeSubpath([parsed.subpath,file].filter(Boolean).join('/'));return `https://raw.githubusercontent.com/${parsed.owner}/${parsed.repo}/${sha}/${rel}`;}
 
 function inferManifest(sourceText,{license,repoFullName,sha,sourceName='SKILL.md',fallbackName='remote-skill'}){
-  const explicitName=yamlScalar(sourceText,'name');const explicitDescription=yamlScalar(sourceText,'description');const heading=headingName(sourceText);const tags=yamlList(sourceText,'tags');const description=explicitDescription??firstUsefulDescription(sourceText);const semantic=semanticText(sourceText);
-  if(!description||description.length<24||semantic.length<80)return null;
+  const explicitName=yamlScalar(sourceText,'name');const explicitDescription=yamlScalar(sourceText,'description');const declared=Boolean(explicitName&&explicitDescription);const heading=headingName(sourceText);const tags=yamlList(sourceText,'tags');const description=explicitDescription??firstUsefulDescription(sourceText);const semantic=semanticText(sourceText);
+  if(!description)return null;if(!declared&&(description.length<24||semantic.length<80))return null;
   const technical_name=technicalSlug(explicitName??heading??fallbackName,technicalSlug(fallbackName));const terms=semanticTerms(sourceText,tags);
-  if(!technical_name||terms.length<3)return null;
-  return {schema_version:'1.1.0',technical_name,version:`github-${sha.slice(0,12)}`,license,description,origin:{repository:repoFullName,commit_sha:sha,source:sourceName,inference:explicitName&&explicitDescription?'DECLARED_FRONTMATTER':'DETERMINISTIC_DOCUMENT_FALLBACK',read_only:true},capabilities:[{technical_name,description,terms,declared_domains:[]}],policy:{external_code_execution:false,dependency_install_authorized:false,prod_authorized:false,prod_write_authorized:false,prod_mutation_authorized:false,trading_access:false,additional_cost_eur:0}};
+  if(!technical_name||(!declared&&terms.length<3))return null;
+  return {schema_version:'1.1.0',technical_name,version:`github-${sha.slice(0,12)}`,license,description,origin:{repository:repoFullName,commit_sha:sha,source:sourceName,inference:declared?'DECLARED_FRONTMATTER':'DETERMINISTIC_DOCUMENT_FALLBACK',read_only:true},capabilities:[{technical_name,description,terms,declared_domains:[]}],policy:{external_code_execution:false,dependency_install_authorized:false,prod_authorized:false,prod_write_authorized:false,prod_mutation_authorized:false,trading_access:false,additional_cost_eur:0}};
 }
 
 export async function acquirePublicGitHubSkill({github_url,fetch_impl=fetch,token=process.env.GITHUB_TOKEN??null}={}){
