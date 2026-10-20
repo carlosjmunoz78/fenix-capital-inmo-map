@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-20T01:53:16.897Z",
+  "updated_at": "2026-10-20T01:53:22.141Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -79,7 +79,8 @@
     "github-wide-skills:fc1cc2732113e136aa31",
     "github-wide-skills:f8e51b089b2996c601a2",
     "github-wide-skills:d4f361b79385cbadf32e",
-    "github-wide-skills:4fb84b20de21ce432ba1"
+    "github-wide-skills:4fb84b20de21ce432ba1",
+    "github-wide-skills:e2159789567f0870b589"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -532,6 +533,40 @@
       "paid_fallback": false,
       "additional_cost_eur": 0
     },
+    "github-wide-skills:a878cb5b090fb5510738": {
+      "candidate_id": "github-wide-skills:a878cb5b090fb5510738",
+      "name": "ai-session-material-miner",
+      "human_alias": "Ai Session Material Miner",
+      "wrapper_id": "skillwrap:bd8622fd7822023c10c9",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 87.34,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "xingtu1996/xingtu-skills",
+        "upstream_head_commit": "37eee7813a8d082ee5aa3928a271d7ad382efcf6",
+        "manifest_sha256": "f6dc5bed4e3ab1dfb8f850d505996c7efdc34fb422356aa5a8dd6005d861d360",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 39063645616,
+      "checkpointed_at": "2026-10-17T19:43:31.166Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
     "github-wide-skills:bacaf0987d8abd240515": {
       "candidate_id": "github-wide-skills:bacaf0987d8abd240515",
       "name": "optale-find-and-read",
@@ -834,6 +869,40 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 39344661173,
       "checkpointed_at": "2026-10-19T23:57:09.798Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:e2159789567f0870b589": {
+      "candidate_id": "github-wide-skills:e2159789567f0870b589",
+      "name": "agent-quality-grading",
+      "human_alias": "Agent Quality Grading",
+      "wrapper_id": "skillwrap:9aa7beb7dc5433e09fc5",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 85.91,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "ever-just/agentskills",
+        "upstream_head_commit": "b85e7f36de4839d8bb7b699675c4dec8f012b19e",
+        "manifest_sha256": "aad8fdd721a8bb97125a2af2015c8db698ad2d3df0349989c0c74cb82a5eddfb",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 39355866898,
+      "checkpointed_at": "2026-10-20T01:53:22.141Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -2185,52 +2254,9 @@
       },
       "updated_at": "2026-10-19T23:51:48.379Z",
       "prod_authorized": false
-    },
-    "github-wide-skills:a878cb5b090fb5510738": {
-      "candidate_id": "github-wide-skills:a878cb5b090fb5510738",
-      "name": "ai-session-material-miner",
-      "human_alias": "Ai Session Material Miner",
-      "wrapper_id": "skillwrap:bd8622fd7822023c10c9",
-      "domain": "agent-ai-orchestration",
-      "engine_bindings": [
-        "ORCH-001",
-        "ROUTE-001",
-        "FACT-001",
-        "RAG-001",
-        "LRN-001",
-        "ACTGW-001"
-      ],
-      "value_score": 87.34,
-      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
-      "evidence_refs": {
-        "upstream_full_name": "xingtu1996/xingtu-skills",
-        "upstream_head_commit": "37eee7813a8d082ee5aa3928a271d7ad382efcf6",
-        "manifest_sha256": "f6dc5bed4e3ab1dfb8f850d505996c7efdc34fb422356aa5a8dd6005d861d360",
-        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
-      },
-      "stage": "SAFE_HANDLER_TERMINAL_HOLD",
-      "status": "TERMINAL_HOLD",
-      "source_discovery_run_id": 39063645616,
-      "checkpointed_at": "2026-10-17T19:43:31.166Z",
-      "human_required": null,
-      "external_skill_code_execution": false,
-      "customer_data_used": false,
-      "prod_write": false,
-      "trading_access": false,
-      "paid_fallback": false,
-      "additional_cost_eur": 0,
-      "evidence": {
-        "reason": "STATIC_LAB_REJECT_LOW_COVERAGE",
-        "decision_id": null,
-        "decision": null,
-        "human_required": null,
-        "source": "CEREBRO Skill AutoLoop Safe Handler V0"
-      },
-      "updated_at": "2026-10-20T01:53:16.897Z",
-      "prod_authorized": false
     }
   },
-  "last_action": "TERMINAL_HOLD_CONTINUE_OTHER_SAFE_WORK",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -2243,7 +2269,7 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 39354965297,
+  "last_discovery_run_id": 39355866898,
   "autonomy_action_ledger": {
     "github-wide-skills:28b33318e96c4dcfb74a": {
       "schema_version": "1.0.0",
