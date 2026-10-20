@@ -9,6 +9,7 @@ import './cerebro-console.css';
 
 const CONTEXTS=['GENERAL','EMPRESA','ENGINE','CRM','APP','SEO','MARKETING','TRAINING','AUTOMATION'];
 const DEFAULT_VOICE_PREFERENCES:CerebroPreferences={tone:'warm_close_caring',response_length:'concise',speech_rate:'1.08',speech_pitch:'1.04'};
+const SPEECH_AUDIO_LEAD_IN_MS=320;
 type GatewayState='closed'|'checking'|'ready'|'error';
 type ChatLine={role:'user'|'cerebro';text:string;mediaUrl?:string|null};
 type OwnerAccess='checking'|'allowed'|'denied';
@@ -53,6 +54,7 @@ export default function CerebroConsoleShell(){
  const speechPlanRef=useRef<ReturnType<typeof speechSegments>>([]);
  const speechCursorRef=useRef({segmentIndex:0,charIndex:0});
  const speechRunTokenRef=useRef(0);
+ const speechLeadInTimerRef=useRef<number|null>(null);
  const sendingRef=useRef(false);
  const pendingActionRef=useRef<CerebroPendingAction|null>(null);
  const readContextRef=useRef<CerebroReadContext|null>(null);
@@ -143,6 +145,13 @@ export default function CerebroConsoleShell(){
   if(interruptRestartTimerRef.current!==null){
    window.clearTimeout(interruptRestartTimerRef.current);
    interruptRestartTimerRef.current=null;
+  }
+ }
+
+ function clearSpeechLeadInTimer(){
+  if(speechLeadInTimerRef.current!==null){
+   window.clearTimeout(speechLeadInTimerRef.current);
+   speechLeadInTimerRef.current=null;
   }
  }
 
@@ -269,6 +278,7 @@ export default function CerebroConsoleShell(){
 
  function finishSpeechPlan(token:number){
   if(token!==speechRunTokenRef.current||voicePausedRef.current)return;
+  clearSpeechLeadInTimer();
   voiceSpeakingRef.current=false;
   setVoiceSpeaking(false);
   stopInterruptRecognition();
@@ -280,6 +290,7 @@ export default function CerebroConsoleShell(){
  function playSpeechPlan(startIndex:number,startCharIndex:number){
   const plan=speechPlanRef.current;
   if(!voiceSessionRef.current||!voiceSupport.tts||!plan.length)return false;
+  clearSpeechLeadInTimer();
   const token=++speechRunTokenRef.current;
   const selected=preferredSpanishVoice(spanishVoices());
   const speakSegment=(index:number,charIndex:number)=>{
@@ -321,11 +332,16 @@ export default function CerebroConsoleShell(){
   };
   void prepareVoiceActivityBargeIn().then(vadReady=>{
    if(token!==speechRunTokenRef.current||voicePausedRef.current||!voiceSessionRef.current)return;
-   voiceSpeakingRef.current=true;
-   setVoiceSpeaking(true);
-   bargeInSpeechStartedAtRef.current=performance.now();
-   if(!vadReady)scheduleInterruptListening(120);
-   speakSegment(startIndex,startCharIndex);
+   speechLeadInTimerRef.current=window.setTimeout(()=>{
+    speechLeadInTimerRef.current=null;
+    if(token!==speechRunTokenRef.current||voicePausedRef.current||!voiceSessionRef.current)return;
+    if(typeof window.speechSynthesis.resume==='function')window.speechSynthesis.resume();
+    voiceSpeakingRef.current=true;
+    setVoiceSpeaking(true);
+    bargeInSpeechStartedAtRef.current=performance.now();
+    if(!vadReady)scheduleInterruptListening(120);
+    speakSegment(startIndex,startCharIndex);
+   },SPEECH_AUDIO_LEAD_IN_MS);
   });
   return true;
  }
@@ -334,6 +350,7 @@ export default function CerebroConsoleShell(){
   voiceSessionRef.current=false;
   setVoiceSessionActive(false);
   clearRestartTimer();
+  clearSpeechLeadInTimer();
   stopRecognition();
   stopInterruptRecognition();
   stopVoiceActivityBargeIn();
@@ -369,6 +386,7 @@ export default function CerebroConsoleShell(){
  function pauseSpeech(){
   if(!voiceSpeakingRef.current||voicePausedRef.current)return;
   clearRestartTimer();
+  clearSpeechLeadInTimer();
   stopInterruptRecognition();
   stopVoiceActivityBargeIn();
   speechRunTokenRef.current+=1;
@@ -399,6 +417,7 @@ export default function CerebroConsoleShell(){
 
  function discardPausedSpeech(){
   if(!voicePausedRef.current&&!speechPlanRef.current.length)return;
+  clearSpeechLeadInTimer();
   speechRunTokenRef.current+=1;
   if(voiceSupport.tts)window.speechSynthesis.cancel();
   voiceSpeakingRef.current=false;
@@ -623,6 +642,7 @@ export default function CerebroConsoleShell(){
   return()=>{
    voiceSessionRef.current=false;
    clearRestartTimer();
+   clearSpeechLeadInTimer();
    const recognition=recognitionRef.current;
    recognitionRef.current=null;
    if(recognition){try{recognition.abort()}catch{/* no-op */}}
