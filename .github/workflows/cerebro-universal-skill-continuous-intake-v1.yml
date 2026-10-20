@@ -28,6 +28,7 @@ on:
       - 'cerebro/runtime/universal-skill-source-queue-v1.mjs'
       - 'cerebro/runtime/universal-skill-autonomous-scout-v1.mjs'
       - 'cerebro/runtime/skill-known-repository-pool-v1.mjs'
+      - 'cerebro/runtime/universal-skill-readonly-semantic-evidence-v1.mjs'
       - 'cerebro/runtime/universal-skill-lrn-impact-bridge-v1.mjs'
       - 'cerebro/runtime/universal-skill-github-intake-v1.mjs'
       - 'cerebro/runtime/universal-skill-repository-intake-v1.mjs'
@@ -43,6 +44,8 @@ on:
       - 'cerebro/tests/universal-skill-source-queue-v1.test.mjs'
       - 'cerebro/tests/universal-skill-autonomous-scout-v1.test.mjs'
       - 'cerebro/tests/skill-known-repository-pool-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-readonly-semantic-evidence-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-readonly-web-activation-v1.test.mjs'
       - 'cerebro/tests/universal-skill-lrn-impact-bridge-v1.test.mjs'
       - 'cerebro/tests/universal-skill-github-intake-v1.test.mjs'
       - 'cerebro/tests/skill-priority-seed-intake-v1.test.mjs'
@@ -54,6 +57,7 @@ on:
       - 'cerebro/runtime/universal-skill-source-queue-v1.mjs'
       - 'cerebro/runtime/universal-skill-autonomous-scout-v1.mjs'
       - 'cerebro/runtime/skill-known-repository-pool-v1.mjs'
+      - 'cerebro/runtime/universal-skill-readonly-semantic-evidence-v1.mjs'
       - 'cerebro/runtime/universal-skill-lrn-impact-bridge-v1.mjs'
       - 'cerebro/runtime/universal-skill-github-intake-v1.mjs'
       - 'cerebro/runtime/universal-skill-repository-intake-v1.mjs'
@@ -69,6 +73,8 @@ on:
       - 'cerebro/tests/universal-skill-source-queue-v1.test.mjs'
       - 'cerebro/tests/universal-skill-autonomous-scout-v1.test.mjs'
       - 'cerebro/tests/skill-known-repository-pool-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-readonly-semantic-evidence-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-readonly-web-activation-v1.test.mjs'
       - 'cerebro/tests/universal-skill-lrn-impact-bridge-v1.test.mjs'
       - 'cerebro/tests/universal-skill-github-intake-v1.test.mjs'
       - 'cerebro/tests/skill-priority-seed-intake-v1.test.mjs'
@@ -117,8 +123,8 @@ jobs:
             usaf-continuous-state-v6-${{ github.ref_name }}-
             usaf-continuous-state-v5-${{ github.ref_name }}-
             usaf-continuous-state-v4-${{ github.ref_name }}-
-      - name: Continuous intake, dynamic adoption, pool fallback, P0 evidence, seed and learning tests
-        run: node --test cerebro/tests/universal-skill-source-queue-v1.test.mjs cerebro/tests/universal-skill-autonomous-scout-v1.test.mjs cerebro/tests/skill-known-repository-pool-v1.test.mjs cerebro/tests/universal-skill-lrn-impact-bridge-v1.test.mjs cerebro/tests/universal-skill-github-intake-v1.test.mjs cerebro/tests/skill-priority-seed-intake-v1.test.mjs cerebro/tests/skill-priority-governed-evidence-v1.test.mjs cerebro/tests/skill-dynamic-adoption-v1.test.mjs
+      - name: Continuous intake, dynamic adoption, pool fallback, readonly wrapping, P0 evidence and learning tests
+        run: node --test cerebro/tests/universal-skill-source-queue-v1.test.mjs cerebro/tests/universal-skill-autonomous-scout-v1.test.mjs cerebro/tests/skill-known-repository-pool-v1.test.mjs cerebro/tests/universal-skill-readonly-semantic-evidence-v1.test.mjs cerebro/tests/universal-skill-readonly-web-activation-v1.test.mjs cerebro/tests/universal-skill-lrn-impact-bridge-v1.test.mjs cerebro/tests/universal-skill-github-intake-v1.test.mjs cerebro/tests/skill-priority-seed-intake-v1.test.mjs cerebro/tests/skill-priority-governed-evidence-v1.test.mjs cerebro/tests/skill-dynamic-adoption-v1.test.mjs
       - name: Run P0 seeds first, then autonomous/event-driven PREPROD intake with durable pool fallback
         shell: bash
         env:
@@ -249,4 +255,4 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          ! grep -Eq 'prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|prod_mutation_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true|external_skill_code_execution[[:space:]]*:[[:space:]]*true|npm install|child_process' cerebro/runtime/universal-skill-source-queue-v1.mjs cerebro/runtime/universal-skill-autonomous-scout-v1.mjs cerebro/runtime/skill-known-repository-pool-v1.mjs cerebro/runtime/universal-skill-lrn-impact-bridge-v1.mjs cerebro/runtime/universal-skill-github-intake-v1.mjs cerebro/runtime/universal-skill-repository-intake-v1.mjs cerebro/runtime/skill-priority-seed-intake-v1.mjs cerebro/runtime/skill-priority-governed-evidence-v1.mjs cerebro/runtime/skill-dynamic-adoption-v1.mjs
+          ! grep -Eq 'prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|prod_mutation_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true|external_skill_code_execution[[:space:]]*:[[:space:]]*true|npm install|child_process' cerebro/runtime/universal-skill-source-queue-v1.mjs cerebro/runtime/universal-skill-autonomous-scout-v1.mjs cerebro/runtime/skill-known-repository-pool-v1.mjs cerebro/runtime/universal-skill-readonly-semantic-evidence-v1.mjs cerebro/runtime/universal-skill-lrn-impact-bridge-v1.mjs cerebro/runtime/universal-skill-github-intake-v1.mjs cerebro/runtime/universal-skill-repository-intake-v1.mjs cerebro/runtime/skill-priority-seed-intake-v1.mjs cerebro/runtime/skill-priority-governed-evidence-v1.mjs cerebro/runtime/skill-dynamic-adoption-v1.mjs
