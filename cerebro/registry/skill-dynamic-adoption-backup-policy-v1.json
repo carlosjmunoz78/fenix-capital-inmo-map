@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_DYNAMIC_SKILL_ADOPTION_BACKUP_POLICY_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "backup": "GIT_HISTORY_OF_DYNAMIC_REGISTRY",
+  "rollback": "RESTORE_PREVIOUS_REGISTRY_REVISION",
+  "rebuild": "REPLAY_PINNED_SOURCE_THROUGH_FACT001_FULL_SAFE_PREPROD_PIPELINE",
+  "force_push": false,
+  "destructive_migration": false,
+  "additional_cost_eur": 0
+}
