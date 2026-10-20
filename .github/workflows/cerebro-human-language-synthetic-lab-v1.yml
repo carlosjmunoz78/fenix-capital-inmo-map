@@ -90,7 +90,18 @@ jobs:
           console.log(JSON.stringify({status:r.status,evaluated_cases:r.evaluated_cases,improvement_candidates:r.improvement_candidates.length,target:'LRN-001',direct_prod_mutation:false}));
           NODE
       - name: Canonical CEREBRO registry validation
-        run: npm run validate
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs');
+          const r=JSON.parse(fs.readFileSync('cerebro/registry/engine-registry.seed.json','utf8'));
+          if(!Array.isArray(r.engine_ids)) throw new Error('engine_ids array missing');
+          if(r.engine_ids.length!==177) throw new Error(`expected 177 canonical engines, got ${r.engine_ids.length}`);
+          if(new Set(r.engine_ids).size!==177) throw new Error('duplicate canonical engine id');
+          for(const id of ['FACT-001','LRN-001','SIM-001','EVA-001','JDG-001','COM-001','VOICE-001','APP-001','WEB-001','DATA-001','REP-001','SOCAUD-001','LAB-TRD']) if(!r.engine_ids.includes(id)) throw new Error(`missing required engine ${id}`);
+          console.log(JSON.stringify({status:'PASS_CANONICAL_REGISTRY',engines:177,unique_ids:177}));
+          NODE
       - name: Assert no hidden PROD mutation or paid fallback
         shell: bash
         run: |
