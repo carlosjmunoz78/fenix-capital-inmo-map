@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_DYNAMIC_SKILL_ADOPTION_CADENCE_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "event_driven": true,
+  "scheduled_recovery_minutes": 15,
+  "empty_rotated_page_fallback": "ONE_BOUNDED_PAGE1_RETRY_WHEN_KNOWN_RESULTS_EXIST",
+  "github_search_rate_limit": "DEFER_TO_NEXT_EVENT_OR_RECOVERY_CYCLE",
+  "additional_cost_eur": 0
+}
