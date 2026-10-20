@@ -6,6 +6,7 @@ import CerebroSpeechOutputGuard from './CerebroSpeechOutputGuard';
 import {fetchAppApi,supabase} from './supabase';
 import './cerebro-console-host.css';
 import './cerebro-operative-console-v2.css';
+import './cerebro-operative-console-v3.css';
 
 type CerebroView='V0'|'OPERATIVA';
 type OwnerAccess='checking'|'allowed'|'denied';
@@ -58,7 +59,7 @@ export default function CerebroConsoleHost(){
 
  return <div className={`cerebro-console-host view-${view.toLowerCase()}`}>
   <CerebroSpeechOutputGuard/>
-  {view==='V0'?<div className="cerebro-host-topbar"><nav className="cerebro-view-switch" aria-label="Cambiar vista de CEREBRO"><span className="cerebro-view-switch-label">INTERFAZ</span><button type="button" className="is-active">VISTA 0</button><button type="button" onClick={()=>setView('OPERATIVA')}>OPERATIVA</button><button type="button" disabled title="NEURAL se recuperará desde los artefactos existentes; no se reconstruirá desde cero.">NEURAL · POR AUDITAR</button></nav></div>:null}
+  {view==='V0'?<div className="cerebro-host-topbar"><nav className="cerebro-view-switch" aria-label="Cambiar interfaz de CEREBRO"><span className="cerebro-view-switch-label">INTERFAZ</span><button type="button" className="is-active">HABLAR</button><button type="button" onClick={()=>setView('OPERATIVA')}>TÉCNICA</button><button type="button" disabled title="NEURAL se recuperará desde los artefactos existentes; no se reconstruirá desde cero.">NEURAL · POR AUDITAR</button></nav></div>:null}
   <div className={`cerebro-host-v0 ${view==='V0'?'is-visible':'is-hidden'}`} aria-hidden={view!=='V0'}><CerebroConsoleShell/></div>
   {view==='OPERATIVA'?<CerebroOperativeConsole onViewChange={setView}/>:null}
  </div>;
