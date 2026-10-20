@@ -34,6 +34,28 @@ test('discovers, pins and deduplicates public skill directories while excluding 
   assert.equal(calls.filter((url)=>url.endsWith('/repos/example/skill-pack/commits/main')).length,1);
 });
 
+test('balances the first overnight slots across capability families instead of letting query zero consume the batch',async()=>{
+  const sha='b'.repeat(40);
+  const queries=['language communication humanizer','app development mobile desktop','reporting report document pdf'];
+  const fetch_impl=async(url)=>{
+    const u=String(url);
+    if(u.includes('/search/code?')){
+      const decoded=decodeURIComponent(u);
+      if(decoded.includes(queries[0]))return response(200,{total_count:4,items:[0,1,2,3].map((i)=>({path:`skills/lang-${i}/SKILL.md`,repository:{full_name:`example/lang-${i}`}}))});
+      if(decoded.includes(queries[1]))return response(200,{total_count:1,items:[{path:'skills/app/SKILL.md',repository:{full_name:'example/app'}}]});
+      if(decoded.includes(queries[2]))return response(200,{total_count:1,items:[{path:'skills/report/SKILL.md',repository:{full_name:'example/report'}}]});
+    }
+    const repo=/\/repos\/([^/]+\/[^/]+)$/.exec(u)?.[1];if(repo)return response(200,{private:false,archived:false,disabled:false,default_branch:'main'});
+    if(/\/commits\/main$/.test(u))return response(200,{sha});
+    throw new Error(`unexpected url:${u}`);
+  };
+  const report=await discoverPublicSkillSources({fetch_impl,queries,max_sources:3});
+  assert.equal(report.source_count,3);
+  assert.equal(report.diversity_mode,'ROUND_ROBIN_CAPABILITY_FAMILY');
+  assert.deepEqual(new Set(report.sources.map((x)=>x.capability_family)),new Set(['LANGUAGE_HUMAN_INTERACTION','APP_DEV_CROSS_DEVICE','REPORTING_DOCUMENTS']));
+  assert.equal(report.sources.filter((x)=>x.capability_family==='LANGUAGE_HUMAN_INTERACTION').length,1);
+});
+
 test('builds a source-queue compatible PREPROD event',async()=>{
   const {fetch_impl}=mockFetchFactory();
   const report=await discoverPublicSkillSources({fetch_impl,queries:['filename:SKILL.md description'],max_sources:4});
@@ -42,6 +64,7 @@ test('builds a source-queue compatible PREPROD event',async()=>{
   assert.equal(event.client_payload.company_id,'fenix');
   assert.deepEqual(event.client_payload.github_urls,report.sources.map((x)=>x.github_url));
   assert.equal(event.discovery.retry_required,false);
+  assert.equal(event.discovery.diversity_mode,'ROUND_ROBIN_CAPABILITY_FAMILY');
   assert.equal(event.prod_authorized,false);
   assert.equal(event.trading_access,false);
 });
