@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_DYNAMIC_SKILL_ADOPTION_PROVENANCE_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "required": ["source_locator", "pinned_sha", "snapshot_sha256", "manifest_sha256", "outcome_hash"],
+  "source_drift_allowed": false,
+  "revalidation_on_new_sha": true,
+  "additional_cost_eur": 0
+}
