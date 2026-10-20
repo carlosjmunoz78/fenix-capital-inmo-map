@@ -24,9 +24,36 @@ CEREBRO debe revisar cada habilidad por eventos y también periódicamente, con 
 
 Las fuentes de mejora incluyen evidencia de uso real, tests y regresiones, aprendizaje de LRN-001, cambios upstream, habilidades complementarias, alternativas open-source/locales y oportunidades de coste, seguridad o rendimiento.
 
+## Cobertura canónica multi-registro
+
+El scout no se limita al registro de wrappers de la última tanda. La política se aplica a la unión deduplicada de los registros gobernados que representan skills realmente incorporadas en distintas fases:
+
+- `cerebro/registry/skill-operational-wrapper-registry-v1.json` → wrappers CEREBRO operativos;
+- `cerebro/registry/skill-dynamic-adoption-v1.json` → capacidades dinámicamente adoptadas;
+- `cerebro/registry/skill-full-adoption-v1.json` → skills admitidas en FULL_SAFE_PREPROD.
+
+El binding canónico es `cerebro/registry/skill-evolution-policy-binding-v1.json`. Cualquier nuevo registro canónico de skills adquiridas, adaptadas, generadas o derivadas debe añadirse a ese binding para heredar la obligación de mejora. El scout conserva la procedencia de todos los registros y deduplica por `technical_name`, evitando revisar dos veces la misma capacidad sin perder trazabilidad.
+
+## Reutilización de la arquitectura existente
+
+Este loop **no crea un segundo sistema de aprendizaje ni una segunda fábrica**. Especializa para skills los planos ya existentes de CEREBRO y los reutiliza:
+
+- política acumulativa global: `cerebro/registry/cerebro-compounding-evolution-policy.v1.json`;
+- aprendizaje y mejora continua existente: `cerebro/registry/native-capability-continuous-improvement-v1.json`;
+- aprendizaje: `LRN-001`;
+- investigación/scouting: `RSH-001`;
+- fábrica: `FACT-001`;
+- evaluación: `EVA-001`;
+- tribunal: `JDG-001`;
+- observabilidad, FinOps, QA, backup, rollback y rebuild: motores gobernados existentes.
+
+La regla es **SPECIALIZE + REUSE, no DUPLICATE CONTROL PLANES**.
+
 ## Responsabilidades
 
 **LRN-001** consume evidencia, fallos, resultados de evaluación, promociones y rechazos. Debe convertirlos en gaps, hipótesis y prioridades de mejora y evitar repetir intentos ya descartados sin nueva evidencia.
+
+**RSH-001** busca cambios upstream, alternativas mejores, técnicas complementarias, opciones open-source/locales y evidencia externa útil sin conceder autoridad de ejecución a código externo.
 
 **FACT-001** toma una hipótesis aprobada para experimentación y genera el scaffold del candidato: contratos, permisos, config, tests, evaluación, tribunal, observabilidad, costes, backup, rollback, rebuild, documentación y hooks de training.
 
@@ -60,15 +87,17 @@ El efecto buscado es acumulativo:
 
 Una habilidad puede terminar mejorada internamente, ampliada con otra, convertida en una composición, derivada en una capacidad nueva o reemplazada por una alternativa superior. El objetivo no es aumentar el número de skills, sino aumentar capacidad útil, calidad, autonomía y robustez con evidencia.
 
+Cada versión mejorada se convierte en el nuevo baseline únicamente después de pasar los gates. A partir de ahí vuelve a entrar en el mismo ciclo. Por tanto, la mejora no es una tarea puntual: es una propiedad permanente de la habilidad mientras siga activa en CEREBRO.
+
 ## Artefactos V1
 
 - Política canónica: `cerebro/governance/skill-continuous-improvement-policy.v1.json`.
 - Binding para skills presentes y futuras: `cerebro/registry/skill-evolution-policy-binding-v1.json`.
 - Planificador de candidatos: `cerebro/runtime/skill-wrappers/skill-evolution-planner-v1.mjs`.
-- Scout/cola de revisión: `cerebro/runtime/skill-wrappers/skill-evolution-scout-v1.mjs`.
-- Tests de guardrails: `cerebro/tests/skill-evolution-loop-v1.test.mjs`.
+- Scout/cola de revisión multi-registro: `cerebro/runtime/skill-wrappers/skill-evolution-scout-v1.mjs`.
+- Tests de guardrails y cobertura: `cerebro/tests/skill-evolution-loop-v1.test.mjs`.
 - Workflow de revisión recurrente: `.github/workflows/cerebro-skill-evolution-loop-v1.yml`.
 
 ## Estado V1
 
-V1 crea y prueba la **obligación de mejora**, la cola recurrente de revisión y el contrato de candidato seguro. No concede por sí solo capacidad para mutar PROD ni convierte automáticamente una hipótesis en una promoción. La promoción sigue requiriendo el pipeline de tests, evaluación, tribunal, observabilidad y rollback de CEREBRO.
+V1 crea y prueba la **obligación de mejora**, la cobertura multi-registro, la cola recurrente de revisión y el contrato de candidato seguro. No concede por sí solo capacidad para mutar PROD ni convierte automáticamente una hipótesis en una promoción. La promoción sigue requiriendo el pipeline de tests, evaluación, tribunal, observabilidad y rollback de CEREBRO.
