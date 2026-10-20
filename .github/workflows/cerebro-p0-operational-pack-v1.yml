@@ -1,0 +1,85 @@
+name: CEREBRO P0 Operational Pack V1
+
+on:
+  push:
+    branches:
+      - main
+      - 'cerebro/p0-operational-pack-v1-*'
+    paths:
+      - 'cerebro/registry/p0-operational-capabilities-v1.json'
+      - 'cerebro/runtime/p0-operational-capability-pack-v1.mjs'
+      - 'cerebro/runtime/p0-prod-readonly-canary-v1.mjs'
+      - 'cerebro/runtime/synthetic-human-selfplay-v1.mjs'
+      - 'cerebro/tests/p0-operational-capability-pack-v1.test.mjs'
+      - 'cerebro/tests/p0-prod-readonly-canary-v1.test.mjs'
+      - '.github/workflows/cerebro-p0-operational-pack-v1.yml'
+  pull_request:
+    paths:
+      - 'cerebro/registry/p0-operational-capabilities-v1.json'
+      - 'cerebro/runtime/p0-operational-capability-pack-v1.mjs'
+      - 'cerebro/runtime/p0-prod-readonly-canary-v1.mjs'
+      - 'cerebro/runtime/synthetic-human-selfplay-v1.mjs'
+      - 'cerebro/tests/p0-operational-capability-pack-v1.test.mjs'
+      - 'cerebro/tests/p0-prod-readonly-canary-v1.test.mjs'
+      - '.github/workflows/cerebro-p0-operational-pack-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-p0-operational-pack-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  operational-pack-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: P0 operational runtime tests
+        run: node --test cerebro/tests/p0-operational-capability-pack-v1.test.mjs cerebro/tests/p0-prod-readonly-canary-v1.test.mjs
+      - name: Build operational catalog
+        run: node cerebro/runtime/p0-operational-capability-pack-v1.mjs > /tmp/p0-operational-catalog.json
+      - name: Shadow bounded read-only canary
+        run: node cerebro/runtime/p0-prod-readonly-canary-v1.mjs > /tmp/p0-readonly-canary-shadow.json
+      - name: Verify exact P0 operational safety contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs');
+          const c=JSON.parse(fs.readFileSync('/tmp/p0-operational-catalog.json','utf8'));
+          const p=JSON.parse(fs.readFileSync('/tmp/p0-readonly-canary-shadow.json','utf8'));
+          if(c.status!=='GREEN_P0_OPERATIONAL_CATALOG'||c.capability_count!==10) throw new Error(`catalog drift ${c.status}/${c.capability_count}`);
+          if(p.status!=='GREEN_P0_PROD_READONLY_CANARY_SET'||p.capability_count!==10) throw new Error(`canary drift ${p.status}/${p.capability_count}`);
+          for(const doc of [c,p]) if(doc.prod_write_authorized||doc.prod_mutation_authorized||doc.external_skill_code_execution||doc.trading_access||Number(doc.additional_cost_eur)!==0) throw new Error('unsafe authority');
+          console.log(JSON.stringify({status:'PASS_P0_OPERATIONAL_PACK_V1',capabilities:c.capability_count,preprod_operational:true,canonical_prod_readonly_canary_pending:c.prod_readonly_count===0,external_skill_code:false,prod_write:false,prod_mutation:false,trading:false,cost_eur:0}));
+          NODE
+      - name: Full CEREBRO registry validation
+        run: npm run validate
+
+  canonical-main-prod-readonly-canary:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Run canonical main bounded PROD read-only canary set
+        shell: bash
+        run: |
+          set -euo pipefail
+          node cerebro/runtime/p0-prod-readonly-canary-v1.mjs --require-main | tee /tmp/p0-main-canary.json
+          node - <<'NODE'
+          const fs=require('fs');const x=JSON.parse(fs.readFileSync('/tmp/p0-main-canary.json','utf8'));
+          if(x.status!=='GREEN_P0_PROD_READONLY_CANARY_SET'||x.capability_count!==10||x.canonical_main_ref!==true) throw new Error('main canary not green');
+          for(const c of x.canaries) if(!/^GREEN_[A-Z0-9_]+_PROD_READONLY_CANARY$/.test(c.evidence)||c.side_effects!==false) throw new Error(`invalid canary ${c.technical_name}`);
+          if(x.prod_write_authorized||x.prod_mutation_authorized||x.external_skill_code_execution||x.trading_access||Number(x.additional_cost_eur)!==0) throw new Error('unsafe main canary authority');
+          console.log(JSON.stringify({status:'PASS_CANONICAL_MAIN_P0_PROD_READONLY_CANARIES',count:x.capability_count,evidence:x.canaries.map(c=>c.evidence),prod_write:false,prod_mutation:false,trading:false,cost_eur:0}));
+          NODE
