@@ -1,0 +1,26 @@
+.cerebro-conversation-stage{position:relative;max-width:1720px;margin:0 auto;padding:3px 24px 14px;display:grid;grid-template-columns:0 minmax(0,1fr);transition:grid-template-columns .2s ease;isolation:isolate}
+.cerebro-conversation-stage.is-history-open{grid-template-columns:270px minmax(0,1fr);gap:10px}
+.cerebro-conversation-stage .cerebro-chat-zone{max-width:none;margin:0;padding:0;min-width:0}
+.cerebro-history-drawer{min-width:0;overflow:hidden;border-radius:18px;background:linear-gradient(180deg,rgba(7,28,36,.78),rgba(4,17,23,.7));box-shadow:inset 0 0 0 1px rgba(73,184,196,.09);backdrop-filter:blur(18px);opacity:0;pointer-events:none;transform:translateX(-14px);transition:opacity .18s ease,transform .18s ease}
+.is-history-open .cerebro-history-drawer{opacity:1;pointer-events:auto;transform:translateX(0)}
+.cerebro-history-head{display:flex;align-items:center;gap:8px;padding:12px 11px 9px;border-bottom:1px solid rgba(82,180,191,.08)}
+.cerebro-history-head strong{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#cce3e9}.cerebro-history-head small{display:block;color:#648692;font-size:8px;margin-top:2px}.cerebro-history-head>div{min-width:0;flex:1}
+.cerebro-history-new,.cerebro-history-close,.cerebro-history-edit,.cerebro-history-save{border:0;background:rgba(10,42,50,.55);color:#9fc4ce;border-radius:9px;display:grid;place-items:center;cursor:pointer}
+.cerebro-history-new{width:31px;height:31px;color:#55efc7}.cerebro-history-close{width:31px;height:31px}.cerebro-history-new:hover,.cerebro-history-close:hover,.cerebro-history-edit:hover,.cerebro-history-save:hover{background:rgba(18,66,74,.72);color:#e2f6f8}
+.cerebro-history-list{padding:8px;display:grid;gap:4px;max-height:clamp(300px,51vh,596px);overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(35,130,142,.55) transparent}
+.cerebro-history-row{display:grid;grid-template-columns:minmax(0,1fr) 30px;gap:3px;align-items:center;border-radius:11px;background:transparent;box-shadow:inset 0 0 0 1px transparent}
+.cerebro-history-row.is-active{background:rgba(20,241,176,.055);box-shadow:inset 0 0 0 1px rgba(20,241,176,.14)}
+.cerebro-history-select{min-width:0;border:0;background:transparent;color:#b9d0d7;text-align:left;padding:9px 8px;border-radius:10px;cursor:pointer}.cerebro-history-select strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:10px;font-weight:700}.cerebro-history-select small{display:block;margin-top:3px;color:#607e89;font-size:7px}.cerebro-history-row.is-active .cerebro-history-select strong{color:#62edcc}
+.cerebro-history-edit{width:26px;height:26px;opacity:.25}.cerebro-history-row:hover .cerebro-history-edit,.cerebro-history-row.is-active .cerebro-history-edit{opacity:1}
+.cerebro-history-rename{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) 30px;gap:4px;padding:4px}.cerebro-history-rename input{min-width:0;border:1px solid rgba(20,241,176,.28);background:#071b23;color:#e4f1f4;border-radius:9px;padding:7px 8px;font-size:10px;outline:0}.cerebro-history-save{width:30px;height:30px;color:#55efc7}
+.cerebro-history-empty{padding:18px 12px;text-align:center;color:#63818b;font-size:9px;line-height:1.5}
+.cerebro-history-rail-toggle{position:absolute;left:4px;top:50%;z-index:4;transform:translateY(-50%);width:28px;height:62px;border:0;border-radius:0 12px 12px 0;background:rgba(7,31,39,.88);color:#65ddcf;box-shadow:inset 0 0 0 1px rgba(60,181,190,.14),0 8px 24px rgba(0,0,0,.2);display:grid;place-items:center;cursor:pointer;transition:left .2s ease,background .18s ease}
+.is-history-open .cerebro-history-rail-toggle{left:274px}.cerebro-history-rail-toggle:hover{background:rgba(11,49,58,.96);color:#84f4df}
+
+@media(max-width:760px){
+ .cerebro-conversation-stage,.cerebro-conversation-stage.is-history-open{grid-template-columns:minmax(0,1fr);padding-left:10px;padding-right:10px}
+ .cerebro-history-drawer{position:absolute;z-index:8;left:10px;top:3px;bottom:14px;width:min(82vw,290px);transform:translateX(calc(-100% - 14px));box-shadow:inset 0 0 0 1px rgba(73,184,196,.13),18px 0 52px rgba(0,0,0,.34)}
+ .is-history-open .cerebro-history-drawer{transform:translateX(0)}
+ .cerebro-history-rail-toggle{left:0}.is-history-open .cerebro-history-rail-toggle{left:min(82vw,290px)}
+ .cerebro-history-list{max-height:calc(100% - 54px)}
+}
