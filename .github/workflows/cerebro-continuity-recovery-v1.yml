@@ -1,0 +1,148 @@
+name: CEREBRO Continuity Recovery V1
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/cerebro-continuity-recovery-v1.yml'
+      - 'cerebro/tests/continuity-recovery-workflow-v1.test.mjs'
+      - 'cerebro/docs/CEREBRO_CONTINUITY_RECOVERY_V1.md'
+  pull_request:
+    paths:
+      - '.github/workflows/cerebro-continuity-recovery-v1.yml'
+      - 'cerebro/tests/continuity-recovery-workflow-v1.test.mjs'
+      - 'cerebro/docs/CEREBRO_CONTINUITY_RECOVERY_V1.md'
+  workflow_dispatch:
+  workflow_run:
+    workflows:
+      - CEREBRO RSI Learning Control Plane V0
+    types:
+      - completed
+  schedule:
+    - cron: '41 * * * *'
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: cerebro-continuity-recovery-v1
+  cancel-in-progress: false
+
+jobs:
+  contract-test:
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Validate bounded continuity recovery contract
+        run: node --test cerebro/tests/continuity-recovery-workflow-v1.test.mjs
+
+  recover-continuity:
+    if: >-
+      github.event_name == 'push' ||
+      github.event_name == 'schedule' ||
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'main')
+    permissions:
+      contents: read
+      actions: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      LANGUAGE_WORKFLOW: cerebro-human-language-synthetic-lab-v1.yml
+      LANGUAGE_MAX_AGE_SECONDS: '2100'
+      INTAKE_WORKFLOW: cerebro-universal-skill-continuous-intake-v1.yml
+      INTAKE_MAX_AGE_SECONDS: '5400'
+    steps:
+      - name: Recover stale read-only continuity lanes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          dispatch_with_retry() {
+            local workflow="$1"
+            local attempt
+            for attempt in 1 2 3; do
+              if gh workflow run "$workflow" --ref main; then
+                echo "RECOVERY_DISPATCHED workflow=$workflow attempt=$attempt"
+                return 0
+              fi
+              echo "::warning::Recovery dispatch attempt $attempt failed for $workflow"
+              sleep $(( attempt * 5 ))
+            done
+            echo "::error::Unable to dispatch $workflow after 3 attempts"
+            return 1
+          }
+
+          recover_if_stale() {
+            local workflow="$1"
+            local max_age_seconds="$2"
+            local lane="$3"
+            local runs_json
+            local active_count
+            local created_at
+            local run_id
+            local now_epoch
+            local created_epoch
+            local age_seconds
+
+            if ! runs_json="$(gh run list --workflow "$workflow" --branch main --limit 20 --json databaseId,createdAt,status,conclusion,event 2>"/tmp/${lane}-runs.err")"; then
+              echo "::warning::Unable to inspect $lane continuity; applying bounded recovery dispatch"
+              cat "/tmp/${lane}-runs.err" || true
+              dispatch_with_retry "$workflow"
+              echo "$lane=RECOVERY_DISPATCHED_INSPECTION_ERROR" >> "$GITHUB_STEP_SUMMARY"
+              return 0
+            fi
+
+            active_count="$(jq '[.[] | select(.status != "completed")] | length' <<<"$runs_json")"
+            if (( active_count > 0 )); then
+              echo "$lane=HEALTHY_ACTIVE_RUN active_count=$active_count"
+              echo "$lane=HEALTHY_ACTIVE_RUN" >> "$GITHUB_STEP_SUMMARY"
+              return 0
+            fi
+
+            created_at="$(jq -r '[.[] | select(.conclusion == "success")][0].createdAt // empty' <<<"$runs_json")"
+            run_id="$(jq -r '[.[] | select(.conclusion == "success")][0].databaseId // empty' <<<"$runs_json")"
+            if [[ -z "$created_at" ]]; then
+              echo "No successful run found for $lane; dispatching recovery"
+              dispatch_with_retry "$workflow"
+              echo "$lane=RECOVERY_DISPATCHED_NO_SUCCESS" >> "$GITHUB_STEP_SUMMARY"
+              return 0
+            fi
+
+            now_epoch="$(date -u +%s)"
+            created_epoch="$(date -u -d "$created_at" +%s)"
+            age_seconds=$(( now_epoch - created_epoch ))
+            echo "$lane latest_success_run=$run_id age_seconds=$age_seconds max_age_seconds=$max_age_seconds"
+
+            if (( age_seconds > max_age_seconds )); then
+              dispatch_with_retry "$workflow"
+              echo "$lane=RECOVERY_DISPATCHED_STALE age_seconds=$age_seconds" >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "$lane=HEALTHY age_seconds=$age_seconds" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          }
+
+          recover_if_stale "$LANGUAGE_WORKFLOW" "$LANGUAGE_MAX_AGE_SECONDS" "synthetic_language_lab"
+          recover_if_stale "$INTAKE_WORKFLOW" "$INTAKE_MAX_AGE_SECONDS" "universal_skill_intake"
+
+      - name: Assert recovery authority remains bounded
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$LANGUAGE_MAX_AGE_SECONDS" -eq 2100
+          test "$INTAKE_MAX_AGE_SECONDS" -eq 5400
+          echo 'GREEN: continuity recovery can only inspect Actions state and dispatch the two governed workflows; it cannot mutate repository content or grant engine authority.'
