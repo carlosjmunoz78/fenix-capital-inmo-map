@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_DYNAMIC_SKILL_ADOPTION_THROUGHPUT_TARGET_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "target": "MEASURABLE_NEW_GOVERNED_CAPABILITY_THROUGHPUT_PER_OVERNIGHT_WINDOW",
+  "zero_new_capabilities_after_healthy_discovery": "DEGRADED_THROUGHPUT_REQUIRES_AUDIT",
+  "count_reviewed_is_not_count_adopted": true,
+  "count_full_safe_preprod_is_not_count_prod_readonly": true,
+  "additional_cost_eur": 0
+}
