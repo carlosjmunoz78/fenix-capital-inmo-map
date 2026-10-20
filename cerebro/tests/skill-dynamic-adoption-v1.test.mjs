@@ -38,8 +38,8 @@ test('dynamic adoption registry remains fail-closed as live capabilities are add
     assert.equal(Number(capability.additional_cost_eur),0);
     assert.equal((capability.target_engine_bindings??[]).some((engine)=>String(engine).toUpperCase().includes('TRADING')),false);
     if(capability.status==='PROD_CAPABILITY_AVAILABLE_READONLY'){
-      assert.equal(capability.environment,'PROD');
-      assert.equal(capability.current_scope,'PROD_READONLY_GOVERNED');
+      assert.equal(capability.environment,'PROD_CAPABILITY');
+      assert.equal(capability.current_scope,'READONLY_ADVISORY_ANALYZE_REVIEW_PLAN_OBSERVE');
       assert.equal(capability.canary?.ref,'refs/heads/main');
       assert.equal(capability.canary?.side_effects,false);
     }
