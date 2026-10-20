@@ -1,0 +1,83 @@
+name: CEREBRO Skill Evolution Loop V1
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 3 * * *'
+  push:
+    branches:
+      - main
+      - 'cerebro/skill-evolution-loop-*'
+    paths:
+      - 'cerebro/governance/skill-continuous-improvement-policy.v1.json'
+      - 'cerebro/registry/skill-evolution-policy-binding-v1.json'
+      - 'cerebro/registry/skill-operational-wrapper-registry-v1.json'
+      - 'cerebro/runtime/skill-wrappers/skill-evolution-planner-v1.mjs'
+      - 'cerebro/runtime/skill-wrappers/skill-evolution-scout-v1.mjs'
+      - 'cerebro/runtime/skill-wrappers/governed-wrapper-factory-v1.mjs'
+      - 'cerebro/tests/skill-evolution-loop-v1.test.mjs'
+      - 'cerebro/docs/CEREBRO_SKILL_EVOLUTION_LOOP_V1.md'
+      - '.github/workflows/cerebro-skill-evolution-loop-v1.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-skill-evolution-loop-v1-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  governed-evolution-scout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Validate Skill Evolution policy and guardrails
+        run: node --test cerebro/tests/skill-evolution-loop-v1.test.mjs
+
+      - name: Build recurring skill improvement review queue
+        run: |
+          node cerebro/runtime/skill-wrappers/skill-evolution-scout-v1.mjs \
+            --output "$RUNNER_TEMP/cerebro-skill-evolution-review-queue.json"
+
+      - name: Assert queue is safe and complete for the active wrapper registry
+        env:
+          QUEUE_FILE: ${{ runner.temp }}/cerebro-skill-evolution-review-queue.json
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const q=JSON.parse(fs.readFileSync(process.env.QUEUE_FILE,'utf8'));
+          if(q.status!=='GREEN_REVIEW_QUEUE_READY') throw new Error(`QUEUE_NOT_GREEN:${q.status}`);
+          if(Number(q.review_count)!==Number(q.reviews?.length??0)) throw new Error('QUEUE_COUNT_MISMATCH');
+          if(Number(q.review_count)<1) throw new Error('QUEUE_EMPTY');
+          if(q.environment!=='PREPROD') throw new Error(`UNSAFE_ENVIRONMENT:${q.environment}`);
+          if(q.authority?.direct_prod_mutation!==false) throw new Error('PROD_MUTATION_AUTHORITY_EXPANDED');
+          if(q.authority?.external_side_effects!==false) throw new Error('EXTERNAL_SIDE_EFFECT_AUTHORITY_EXPANDED');
+          if(q.authority?.trading_access!==false) throw new Error('TRADING_AUTHORITY_EXPANDED');
+          if(Number(q.authority?.additional_cost_budget_eur)!==0) throw new Error('COST_BUDGET_EXPANDED');
+          for(const review of q.reviews){
+            if(review.candidate_environment!=='PREPROD') throw new Error(`UNSAFE_CANDIDATE_ENV:${review.technical_name}`);
+            if(review.baseline_immutable_in_prod!==true) throw new Error(`MUTABLE_BASELINE:${review.technical_name}`);
+            if(review.old_vs_new_required!==true||review.tribunal_required!==true||review.rollback_required!==true) throw new Error(`PROMOTION_GUARDRAIL_MISSING:${review.technical_name}`);
+            const lanes=new Set(review.improvement_search_lanes??[]);
+            for(const lane of ['UPSTREAM_UPDATE','INTERNAL_HARDENING','COMPOSITE_AUGMENTATION','DERIVED_SKILL','REPLACEMENT_CANDIDATE']){
+              if(!lanes.has(lane)) throw new Error(`MISSING_IMPROVEMENT_LANE:${review.technical_name}:${lane}`);
+            }
+          }
+          console.log(JSON.stringify({status:q.status,review_count:q.review_count,environment:q.environment,learning_loop:q.learning_loop,candidate_factory:q.candidate_factory,direct_prod_mutation:false,trading_access:false,additional_cost_budget_eur:0}));
+          NODE
+
+      - name: Upload immutable skill evolution review evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-skill-evolution-review-queue-${{ github.run_id }}
+          path: ${{ runner.temp }}/cerebro-skill-evolution-review-queue.json
+          if-no-files-found: error
+          retention-days: 14
