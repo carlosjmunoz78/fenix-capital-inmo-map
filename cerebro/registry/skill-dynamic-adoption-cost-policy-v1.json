@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_DYNAMIC_SKILL_ADOPTION_COST_POLICY_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "additional_cost_budget_eur": 0,
+  "paid_fallback": false,
+  "external_subscription_required": false,
+  "preferred_runtime": ["DETERMINISTIC_INTERNAL", "EXISTING_TOOLS", "FREE_TIER", "SELF_HOSTED"],
+  "money_limit_exception": "HUMAN_REQUIRED_MONEY_LIMIT"
+}
