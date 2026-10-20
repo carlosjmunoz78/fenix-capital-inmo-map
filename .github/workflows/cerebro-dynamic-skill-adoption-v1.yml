@@ -41,19 +41,15 @@ jobs:
           path: ${{ runner.temp }}/dynamic-proposal
           github-token: ${{ github.token }}
           run-id: ${{ github.event.workflow_run.id }}
-      - name: Gate proposal and merge into current registry
+      - name: Gate proposal and recover any pending registry work
         id: merge_proposal
         shell: bash
         run: |
           set -euo pipefail
           PROPOSAL="$PROPOSAL_DIR/cerebro-dynamic-adoption-proposal.json"
-          if [ ! -f "$PROPOSAL" ]; then
-            echo 'No dynamic adoption proposal in this intake cycle.'
-            echo 'changed=false' >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
           cp "$REGISTRY" "$RUNNER_TEMP/dynamic-registry-before.json"
-          node --input-type=module - "$PROPOSAL" "$REGISTRY" <<'NODE'
+          if [ -f "$PROPOSAL" ]; then
+            node --input-type=module - "$PROPOSAL" "$REGISTRY" <<'NODE'
           import fs from 'node:fs';
           import {mergeDynamicCandidates} from './cerebro/runtime/skill-dynamic-adoption-v1.mjs';
           const proposal=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
@@ -64,9 +60,14 @@ jobs:
           fs.writeFileSync(process.argv[3],`${JSON.stringify(merged,null,2)}\n`);
           console.log(JSON.stringify({status:'DYNAMIC_PROPOSAL_MERGED',incoming:incoming.length,total:merged.capabilities.length,pending:merged.summary.pending_canary}));
           NODE
+          else
+            echo 'No proposal artifact in this cycle; checking registry for pending work from a prior safe cycle.'
+          fi
+          PENDING_COUNT="$(node -e "const fs=require('fs');const r=JSON.parse(fs.readFileSync(process.env.REGISTRY,'utf8'));process.stdout.write(String((r.capabilities||[]).filter(x=>x.status==='FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY').length));")"
+          echo "pending_count=$PENDING_COUNT" >> "$GITHUB_OUTPUT"
           if cmp -s "$RUNNER_TEMP/dynamic-registry-before.json" "$REGISTRY"; then
-            echo 'Proposal contains no new governed capability.'
             echo 'changed=false' >> "$GITHUB_OUTPUT"
+            echo "Registry unchanged; pending_count=$PENDING_COUNT"
             exit 0
           fi
           node --test cerebro/tests/skill-dynamic-adoption-v1.test.mjs cerebro/tests/skill-prod-capability-fastlane-v1.test.mjs
@@ -89,16 +90,32 @@ jobs:
           PENDING_SHA="$(git rev-parse HEAD)"
           echo "base_sha=$BASE_SHA" >> "$GITHUB_OUTPUT"
           echo "pending_sha=$PENDING_SHA" >> "$GITHUB_OUTPUT"
-      - name: Canonical main no-side-effect PROD read-only canary
-        if: steps.merge_proposal.outputs.changed == 'true'
-        id: canary
+      - name: Resolve canonical main SHA for pending canary
+        if: steps.merge_proposal.outputs.pending_count != '0'
+        id: resolve_pending_sha
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = "${{ steps.persist_pending.outputs.pending_sha }}"
+          if [ "${{ steps.merge_proposal.outputs.changed }}" = 'true' ]; then
+            SHA="${{ steps.persist_pending.outputs.pending_sha }}"
+          else
+            SHA="$(git rev-parse HEAD)"
+          fi
+          test -n "$SHA"
+          test "$SHA" = "$(git rev-parse HEAD)"
+          echo "pending_sha=$SHA" >> "$GITHUB_OUTPUT"
+      - name: Canonical main no-side-effect PROD read-only canary
+        if: steps.merge_proposal.outputs.pending_count != '0'
+        id: canary
+        shell: bash
+        env:
+          PENDING_SHA: ${{ steps.resolve_pending_sha.outputs.pending_sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$PENDING_SHA"
           node cerebro/runtime/skill-dynamic-adoption-v1.mjs \
             --promote "$REGISTRY" \
-            --head-sha "${{ steps.persist_pending.outputs.pending_sha }}" \
+            --head-sha "$PENDING_SHA" \
             --run-id "$GITHUB_RUN_ID" \
             --ref refs/heads/main \
             --output "$REGISTRY"
@@ -108,25 +125,25 @@ jobs:
           const fs=require('fs');
           const registry=JSON.parse(fs.readFileSync(process.env.REGISTRY,'utf8'));
           const fast=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/dynamic-fastlane.json','utf8'));
-          const promoted=(registry.capabilities??[]).filter(x=>x.status==='PROD_CAPABILITY_AVAILABLE_READONLY');
-          if(!promoted.length) throw new Error('NO_DYNAMIC_CAPABILITY_PROMOTED');
-          for(const row of promoted){
+          const promotedThisRun=(registry.capabilities??[]).filter(x=>x.status==='PROD_CAPABILITY_AVAILABLE_READONLY'&&Number(x.canary?.run_id)===Number(process.env.GITHUB_RUN_ID));
+          if(!promotedThisRun.length) throw new Error('NO_DYNAMIC_CAPABILITY_PROMOTED_THIS_RUN');
+          for(const row of promotedThisRun){
             if(row.canary?.ref!=='refs/heads/main'||row.canary?.head_sha!==process.env.PENDING_SHA) throw new Error(`NON_CANONICAL_CANARY:${row.candidate_id}`);
             if(row.canary?.side_effects!==false||row.prod_write_authorized!==false||row.prod_mutation_authorized!==false||row.external_skill_code_execution!==false||row.trading_access!==false||Number(row.additional_cost_eur)!==0) throw new Error(`UNSAFE_PROMOTION:${row.candidate_id}`);
             const live=fast.available.find(x=>x.candidate_id===row.candidate_id&&x.source_kind==='DYNAMIC_ADOPTION');
             if(!live) throw new Error(`FASTLANE_NOT_CALLABLE:${row.candidate_id}`);
           }
-          console.log(JSON.stringify({status:'DYNAMIC_PROD_READONLY_CANARY_GREEN',promoted:promoted.length,dynamic_fastlane:fast.dynamic_available_count}));
+          console.log(JSON.stringify({status:'DYNAMIC_PROD_READONLY_CANARY_GREEN',promoted_this_run:promotedThisRun.length,dynamic_fastlane:fast.dynamic_available_count}));
           NODE
-        env:
-          PENDING_SHA: ${{ steps.persist_pending.outputs.pending_sha }}
       - name: Persist governed PROD read-only availability on main
-        if: steps.merge_proposal.outputs.changed == 'true'
+        if: steps.merge_proposal.outputs.pending_count != '0'
         shell: bash
         run: |
           set -euo pipefail
           CHANGED="$(git diff --name-only)"
           test "$CHANGED" = "$REGISTRY"
+          git config user.name 'CEREBRO FACT-001'
+          git config user.email 'cerebro-fact-001@users.noreply.github.com'
           git add "$REGISTRY"
           test "$(git diff --cached --name-only)" = "$REGISTRY"
           git commit -m 'CEREBRO: promote dynamic capabilities to governed PROD read-only [skip ci]'
