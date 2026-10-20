@@ -4,22 +4,32 @@ on:
   push:
     paths:
       - 'cerebro/registry/skill-priority-portfolio-v1.json'
+      - 'cerebro/registry/skill-priority-seed-sources-v1.json'
       - 'cerebro/registry/synthetic-human-language-lab-v1.json'
       - 'cerebro/registry/rsi-learning-subscribers.v0.json'
+      - 'cerebro/registry/universal-skill-activation-contracts-v1.json'
+      - 'cerebro/skills/internal-capability-signals.v0.json'
       - 'cerebro/runtime/skill-priority-portfolio-v1.mjs'
+      - 'cerebro/runtime/skill-priority-governed-evidence-v1.mjs'
       - 'cerebro/runtime/synthetic-human-language-lab-v1.mjs'
       - 'cerebro/runtime/universal-skill-autonomous-scout-v1.mjs'
       - 'cerebro/tests/skill-priority-human-language-digital-build-v1.test.mjs'
+      - 'cerebro/tests/skill-priority-governed-evidence-v1.test.mjs'
       - '.github/workflows/cerebro-human-language-synthetic-lab-v1.yml'
   pull_request:
     paths:
       - 'cerebro/registry/skill-priority-portfolio-v1.json'
+      - 'cerebro/registry/skill-priority-seed-sources-v1.json'
       - 'cerebro/registry/synthetic-human-language-lab-v1.json'
       - 'cerebro/registry/rsi-learning-subscribers.v0.json'
+      - 'cerebro/registry/universal-skill-activation-contracts-v1.json'
+      - 'cerebro/skills/internal-capability-signals.v0.json'
       - 'cerebro/runtime/skill-priority-portfolio-v1.mjs'
+      - 'cerebro/runtime/skill-priority-governed-evidence-v1.mjs'
       - 'cerebro/runtime/synthetic-human-language-lab-v1.mjs'
       - 'cerebro/runtime/universal-skill-autonomous-scout-v1.mjs'
       - 'cerebro/tests/skill-priority-human-language-digital-build-v1.test.mjs'
+      - 'cerebro/tests/skill-priority-governed-evidence-v1.test.mjs'
       - '.github/workflows/cerebro-human-language-synthetic-lab-v1.yml'
   repository_dispatch:
     types:
@@ -45,8 +55,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Targeted P0 language and synthetic-human tests
-        run: node --test cerebro/tests/skill-priority-human-language-digital-build-v1.test.mjs cerebro/tests/universal-skill-autonomous-scout-v1.test.mjs
+      - name: Targeted P0 language, routing and synthetic-human tests
+        run: node --test cerebro/tests/skill-priority-human-language-digital-build-v1.test.mjs cerebro/tests/skill-priority-governed-evidence-v1.test.mjs cerebro/tests/universal-skill-autonomous-scout-v1.test.mjs
       - name: Build priority portfolio report and full synthetic-human plan
         shell: bash
         run: |
@@ -60,7 +70,8 @@ jobs:
           const s=JSON.parse(fs.readFileSync('artifacts/synthetic-human-language-plan-v1.json','utf8'));
           const l=JSON.parse(fs.readFileSync('cerebro/registry/rsi-learning-subscribers.v0.json','utf8'));
           if(p.status!=='GREEN_PRIORITY_POLICY_ACTIVE') throw new Error(`priority status ${p.status}`);
-          if(p.canonical_engine_count!==177) throw new Error(`engine registry drift ${p.canonical_engine_count}`);
+          if(p.canonical_engine_count!==179) throw new Error(`engine registry drift ${p.canonical_engine_count}`);
+          if(!p.registry_extension_ids.includes('HCI-001')||!p.registry_extension_ids.includes('MOTION-001')) throw new Error('current registry extensions missing');
           if(s.status!=='GREEN_SYNTHETIC_HUMAN_EVAL_PLAN_READY'||s.case_count!==160) throw new Error(`synthetic plan drift ${s.status}/${s.case_count}`);
           if(!l.accepted_signal_families.includes('SYNTHETIC_HUMAN_COMMUNICATION_EVAL')) throw new Error('LRN-001 synthetic communication signal not wired');
           if(p.prod_authorized||p.prod_write_authorized||p.trading_access||Number(p.additional_cost_eur)!==0) throw new Error('unsafe priority authority');
@@ -89,21 +100,23 @@ jobs:
           if(r.prod_write_authorized||r.prod_mutation_authorized||r.automatic_prod_prompt_mutation||r.automatic_prod_persona_mutation) throw new Error('direct prod self-modification forbidden');
           console.log(JSON.stringify({status:r.status,evaluated_cases:r.evaluated_cases,improvement_candidates:r.improvement_candidates.length,target:'LRN-001',direct_prod_mutation:false}));
           NODE
-      - name: Canonical CEREBRO registry validation
+      - name: Current CEREBRO registry validation
         shell: bash
         run: |
           set -euo pipefail
           node - <<'NODE'
           const fs=require('fs');
-          const r=JSON.parse(fs.readFileSync('cerebro/registry/engine-registry.seed.json','utf8'));
-          if(!Array.isArray(r.engine_ids)) throw new Error('engine_ids array missing');
-          if(r.engine_ids.length!==177) throw new Error(`expected 177 canonical engines, got ${r.engine_ids.length}`);
-          if(new Set(r.engine_ids).size!==177) throw new Error('duplicate canonical engine id');
-          for(const id of ['FACT-001','LRN-001','SIM-001','EVA-001','JDG-001','COM-001','VOICE-001','APP-001','WEB-001','DATA-001','REP-001','SOCAUD-001','LAB-TRD']) if(!r.engine_ids.includes(id)) throw new Error(`missing required engine ${id}`);
-          console.log(JSON.stringify({status:'PASS_CANONICAL_REGISTRY',engines:177,unique_ids:177}));
+          const seed=JSON.parse(fs.readFileSync('cerebro/registry/engine-registry.seed.json','utf8'));
+          const current=JSON.parse(fs.readFileSync('cerebro/registry/engine-registry.v1.json','utf8'));
+          if(!Array.isArray(seed.engine_ids)||seed.engine_ids.length!==177||new Set(seed.engine_ids).size!==177) throw new Error('177-engine base registry drift');
+          if(!Array.isArray(current.engine_ids)||current.engine_ids.length!==179||new Set(current.engine_ids).size!==179) throw new Error('179-engine current registry drift');
+          for(const id of seed.engine_ids) if(!current.engine_ids.includes(id)) throw new Error(`base engine lost ${id}`);
+          for(const id of ['HCI-001','MOTION-001']) if(!current.engine_ids.includes(id)) throw new Error(`extension engine missing ${id}`);
+          for(const id of ['FACT-001','LRN-001','SIM-001','EVA-001','JDG-001','COM-001','VOICE-001','APP-001','WEB-001','DATA-001','REP-001','SOCAUD-001','LAB-TRD']) if(!current.engine_ids.includes(id)) throw new Error(`missing required engine ${id}`);
+          console.log(JSON.stringify({status:'PASS_CURRENT_REGISTRY',base_engines:177,current_engines:179,base_preserved:true,extensions:['HCI-001','MOTION-001']}));
           NODE
       - name: Assert no hidden PROD mutation or paid fallback
         shell: bash
         run: |
           set -euo pipefail
-          ! grep -Eq 'prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|prod_mutation_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true|paid_fallback[[:space:]]*:[[:space:]]*true|external_skill_code_execution[[:space:]]*:[[:space:]]*true' cerebro/registry/skill-priority-portfolio-v1.json cerebro/registry/synthetic-human-language-lab-v1.json
+          ! grep -Eq 'prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|prod_mutation_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true|paid_fallback[[:space:]]*:[[:space:]]*true|external_skill_code_execution[[:space:]]*:[[:space:]]*true' cerebro/registry/skill-priority-portfolio-v1.json cerebro/registry/synthetic-human-language-lab-v1.json cerebro/registry/skill-priority-seed-sources-v1.json
