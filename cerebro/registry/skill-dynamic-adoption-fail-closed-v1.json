@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_DYNAMIC_SKILL_ADOPTION_FAIL_CLOSED_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "unknown_evidence": "HOLD",
+  "missing_canary": "HOLD",
+  "missing_binding": "HOLD",
+  "missing_contract": "HOLD",
+  "unsafe_authority": "DENY",
+  "additional_cost_eur": 0
+}
