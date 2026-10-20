@@ -2,10 +2,11 @@ name: CEREBRO Universal Skill Continuous Intake V1
 
 on:
   schedule:
-    - cron: '17 */6 * * *'
+    - cron: '17 * * * *'
   repository_dispatch:
     types:
       - cerebro_skill_intake
+      - cerebro_priority_skill_intake
   workflow_dispatch:
     inputs:
       company_id:
@@ -18,16 +19,27 @@ on:
         default: ''
   push:
     branches:
+      - main
       - 'cerebro/universal-skill-activation-factory-v1-*'
+      - 'cerebro/p0-human-language-digital-build-v1-*'
     paths:
       - 'cerebro/runtime/universal-skill-source-queue-v1.mjs'
       - 'cerebro/runtime/universal-skill-autonomous-scout-v1.mjs'
       - 'cerebro/runtime/universal-skill-lrn-impact-bridge-v1.mjs'
       - 'cerebro/runtime/universal-skill-github-intake-v1.mjs'
+      - 'cerebro/runtime/universal-skill-repository-intake-v1.mjs'
+      - 'cerebro/runtime/skill-priority-seed-intake-v1.mjs'
+      - 'cerebro/runtime/skill-priority-governed-evidence-v1.mjs'
+      - 'cerebro/registry/skill-priority-portfolio-v1.json'
+      - 'cerebro/registry/skill-priority-seed-sources-v1.json'
+      - 'cerebro/registry/universal-skill-activation-contracts-v1.json'
+      - 'cerebro/skills/internal-capability-signals.v0.json'
       - 'cerebro/tests/universal-skill-source-queue-v1.test.mjs'
       - 'cerebro/tests/universal-skill-autonomous-scout-v1.test.mjs'
       - 'cerebro/tests/universal-skill-lrn-impact-bridge-v1.test.mjs'
       - 'cerebro/tests/universal-skill-github-intake-v1.test.mjs'
+      - 'cerebro/tests/skill-priority-seed-intake-v1.test.mjs'
+      - 'cerebro/tests/skill-priority-governed-evidence-v1.test.mjs'
       - '.github/workflows/cerebro-universal-skill-continuous-intake-v1.yml'
   pull_request:
     paths:
@@ -35,10 +47,19 @@ on:
       - 'cerebro/runtime/universal-skill-autonomous-scout-v1.mjs'
       - 'cerebro/runtime/universal-skill-lrn-impact-bridge-v1.mjs'
       - 'cerebro/runtime/universal-skill-github-intake-v1.mjs'
+      - 'cerebro/runtime/universal-skill-repository-intake-v1.mjs'
+      - 'cerebro/runtime/skill-priority-seed-intake-v1.mjs'
+      - 'cerebro/runtime/skill-priority-governed-evidence-v1.mjs'
+      - 'cerebro/registry/skill-priority-portfolio-v1.json'
+      - 'cerebro/registry/skill-priority-seed-sources-v1.json'
+      - 'cerebro/registry/universal-skill-activation-contracts-v1.json'
+      - 'cerebro/skills/internal-capability-signals.v0.json'
       - 'cerebro/tests/universal-skill-source-queue-v1.test.mjs'
       - 'cerebro/tests/universal-skill-autonomous-scout-v1.test.mjs'
       - 'cerebro/tests/universal-skill-lrn-impact-bridge-v1.test.mjs'
       - 'cerebro/tests/universal-skill-github-intake-v1.test.mjs'
+      - 'cerebro/tests/skill-priority-seed-intake-v1.test.mjs'
+      - 'cerebro/tests/skill-priority-governed-evidence-v1.test.mjs'
       - '.github/workflows/cerebro-universal-skill-continuous-intake-v1.yml'
 
 permissions:
@@ -51,10 +72,10 @@ concurrency:
 jobs:
   durable-source-queue:
     runs-on: ubuntu-latest
-    timeout-minutes: 18
+    timeout-minutes: 24
     env:
       CEREBRO_SOURCE_CONCURRENCY: '8'
-      CEREBRO_SKILL_SCOUT_MAX: '16'
+      CEREBRO_SKILL_SCOUT_MAX: '24'
       CEREBRO_COMPANY_ID: fenix
     steps:
       - uses: actions/checkout@v4
@@ -75,13 +96,12 @@ jobs:
           path: |
             ${{ runner.temp }}/cerebro-source-queue-persistent
             ${{ runner.temp }}/cerebro-lrn-persistent
-          key: usaf-continuous-state-v2-${{ github.ref_name }}-${{ github.run_id }}
+          key: usaf-continuous-state-v4-${{ github.ref_name }}-${{ github.run_id }}
           restore-keys: |
-            usaf-continuous-state-v2-${{ github.ref_name }}-
-            usaf-source-queue-v1-${{ github.ref_name }}-
-      - name: Continuous intake and learning tests
-        run: node --test cerebro/tests/universal-skill-source-queue-v1.test.mjs cerebro/tests/universal-skill-autonomous-scout-v1.test.mjs cerebro/tests/universal-skill-lrn-impact-bridge-v1.test.mjs cerebro/tests/universal-skill-github-intake-v1.test.mjs
-      - name: Run autonomous or event-driven PREPROD intake
+            usaf-continuous-state-v4-${{ github.ref_name }}-
+      - name: Continuous intake, P0 evidence, seed and learning tests
+        run: node --test cerebro/tests/universal-skill-source-queue-v1.test.mjs cerebro/tests/universal-skill-autonomous-scout-v1.test.mjs cerebro/tests/universal-skill-lrn-impact-bridge-v1.test.mjs cerebro/tests/universal-skill-github-intake-v1.test.mjs cerebro/tests/skill-priority-seed-intake-v1.test.mjs cerebro/tests/skill-priority-governed-evidence-v1.test.mjs
+      - name: Run P0 seeds first, then autonomous or event-driven PREPROD intake
         shell: bash
         env:
           GITHUB_TOKEN: ${{ github.token }}
@@ -89,16 +109,22 @@ jobs:
           set -euo pipefail
           EVENT_NAME="$GITHUB_EVENT_NAME"
           SCOUT_EVENT="$RUNNER_TEMP/cerebro-skill-scout-event.json"
+          SEED_EVENT="$RUNNER_TEMP/cerebro-priority-seed-event.json"
+          P0_QUEUE_REPORT="$RUNNER_TEMP/cerebro-p0-queue-report.json"
+          run_priority_seeds() {
+            node cerebro/runtime/skill-priority-seed-intake-v1.mjs --out "$SEED_EVENT"
+            node cerebro/runtime/universal-skill-source-queue-v1.mjs --event "$SEED_EVENT" | tee "$P0_QUEUE_REPORT"
+          }
           run_scout() {
             node cerebro/runtime/universal-skill-autonomous-scout-v1.mjs --out "$SCOUT_EVENT"
             STATUS="$(node -e "const fs=require('fs');const x=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP + '/cerebro-skill-scout-event.json','utf8'));process.stdout.write(String(x.status));")"
             if [ "$STATUS" = "DISCOVERY_DEFERRED_RATE_LIMIT" ]; then
-              echo 'GitHub Search rate-limited this bounded cycle; state unchanged and the next scheduled cycle will retry.'
+              echo 'GitHub Search rate-limited; pinned P0 seeds were already processed, so priority work does not stall. Search will retry next event/hourly recovery cycle.'
               return 0
             fi
             COUNT="$(node -e "const fs=require('fs');const x=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP + '/cerebro-skill-scout-event.json','utf8'));process.stdout.write(String(x.client_payload.github_urls.length));")"
             if [ "$COUNT" -eq 0 ]; then
-              echo 'No eligible public skill sources discovered in this bounded cycle.'
+              echo 'No additional eligible public skill sources discovered after pinned P0 seeds.'
               return 0
             fi
             node cerebro/runtime/universal-skill-source-queue-v1.mjs --event "$SCOUT_EVENT"
@@ -114,6 +140,7 @@ jobs:
               run_pinned_pr_source
               ;;
             push|schedule)
+              run_priority_seeds
               run_scout
               ;;
             workflow_dispatch)
@@ -121,19 +148,53 @@ jobs:
               if [ "$MANUAL_COUNT" -eq 1 ]; then
                 node cerebro/runtime/universal-skill-source-queue-v1.mjs --event "$GITHUB_EVENT_PATH"
               else
+                run_priority_seeds
                 run_scout
               fi
               ;;
             repository_dispatch)
-              node cerebro/runtime/universal-skill-source-queue-v1.mjs --event "$GITHUB_EVENT_PATH"
+              PAYLOAD_COUNT="$(node -e "const fs=require('fs');const e=JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH,'utf8'));const a=e.client_payload&&e.client_payload.github_urls;process.stdout.write(Array.isArray(a)&&a.length?'1':'0');")"
+              if [ "$PAYLOAD_COUNT" -eq 1 ]; then
+                node cerebro/runtime/universal-skill-source-queue-v1.mjs --event "$GITHUB_EVENT_PATH"
+              else
+                run_priority_seeds
+                run_scout
+              fi
               ;;
             *)
               echo "Unsupported event: $EVENT_NAME" >&2
               exit 2
               ;;
           esac
+      - name: Validate safe exact P0 result summary
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs');
+          const path=require('path');
+          const file=path.join(process.env.RUNNER_TEMP,'cerebro-p0-queue-report.json');
+          if(!fs.existsSync(file)) throw new Error(`P0 queue report missing: ${file}`);
+          const report=JSON.parse(fs.readFileSync(file,'utf8'));
+          const seeds=JSON.parse(fs.readFileSync('cerebro/registry/skill-priority-seed-sources-v1.json','utf8'));
+          const expected=new Map(seeds.sources.map(s=>[s.technical_name,s]));
+          const rows=report.results||[];
+          if(report.status!=='QUEUE_TERMINAL_GREEN') throw new Error(`queue not green: ${report.status}`);
+          if(report.intake_epoch!=='v3-p0-canonical-evidence') throw new Error(`unexpected intake epoch: ${report.intake_epoch}`);
+          if(rows.length!==10) throw new Error(`expected 10 P0 result rows, got ${rows.length}`);
+          for(const r of rows){
+            if(!expected.has(r.technical_name)) throw new Error(`unexpected P0 technical name: ${r.technical_name}`);
+            if(r.status!=='FULL_SAFE_PREPROD'||r.full_safe_preprod!==true) throw new Error(`${r.technical_name} not FULL_SAFE_PREPROD`);
+            if(r.priority_evidence_status!=='PRIORITY_SEMANTIC_EVIDENCE_GREEN') throw new Error(`${r.technical_name} priority evidence not green`);
+            if(!r.candidate_id||!r.pinned_sha||!r.source_locator||!r.snapshot_sha256||!r.manifest_sha256||!r.outcome_hash) throw new Error(`${r.technical_name} missing exact identity`);
+            if(r.generated_bindings!==r.expected_bindings||!(r.generated_bindings>0)) throw new Error(`${r.technical_name} incomplete bindings`);
+            if(r.additional_cost_eur!==0||r.prod_write_authorized||r.prod_mutation_authorized||r.external_skill_code_execution||r.trading_access) throw new Error(`${r.technical_name} unsafe authority`);
+          }
+          console.log(JSON.stringify({status:'P0_EXACT_RESULT_SNAPSHOT_GREEN',count:rows.length,intake_epoch:report.intake_epoch,rows}));
+          NODE
       - name: Assert PREPROD-only authority
         shell: bash
         run: |
           set -euo pipefail
-          ! grep -Eq 'prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true|external_skill_code_execution[[:space:]]*:[[:space:]]*true|npm install|child_process' cerebro/runtime/universal-skill-source-queue-v1.mjs cerebro/runtime/universal-skill-autonomous-scout-v1.mjs cerebro/runtime/universal-skill-lrn-impact-bridge-v1.mjs cerebro/runtime/universal-skill-github-intake-v1.mjs
+          ! grep -Eq 'prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|prod_mutation_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true|external_skill_code_execution[[:space:]]*:[[:space:]]*true|npm install|child_process' cerebro/runtime/universal-skill-source-queue-v1.mjs cerebro/runtime/universal-skill-autonomous-scout-v1.mjs cerebro/runtime/universal-skill-lrn-impact-bridge-v1.mjs cerebro/runtime/universal-skill-github-intake-v1.mjs cerebro/runtime/universal-skill-repository-intake-v1.mjs cerebro/runtime/skill-priority-seed-intake-v1.mjs cerebro/runtime/skill-priority-governed-evidence-v1.mjs
