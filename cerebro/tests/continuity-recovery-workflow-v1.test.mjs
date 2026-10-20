@@ -1,8 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const file = '.github/workflows/cerebro-continuity-recovery-v1.yml';
+const testDir = path.dirname(fileURLToPath(import.meta.url));
+const file = path.resolve(testDir, '../../.github/workflows/cerebro-continuity-recovery-v1.yml');
 const workflow = fs.readFileSync(file, 'utf8');
 
 test('continuity recovery rides the proven LRN heartbeat and keeps an independent idle fallback', () => {
