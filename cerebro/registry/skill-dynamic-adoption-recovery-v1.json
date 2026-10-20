@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_DYNAMIC_SKILL_ADOPTION_RECOVERY_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "retry_on_main_race": true,
+  "force_push": false,
+  "retry_on_rate_limit": "NEXT_EVENT_OR_15_MINUTE_RECOVERY",
+  "pending_canary_is_not_callable": true,
+  "additional_cost_eur": 0
+}
