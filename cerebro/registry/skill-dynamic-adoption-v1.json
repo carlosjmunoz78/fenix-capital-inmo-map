@@ -21,6 +21,148 @@
   },
   "capabilities": [
     {
+      "candidate_id": "repo:be539f32206970b088329ceaf60b",
+      "technical_name": "aws-cognito",
+      "source_locator": "github://TerminalSkills/skills@6edcf94159d9f46b0759d2e1b59dd545cfaca254/skills/aws-cognito",
+      "pinned_sha": "6edcf94159d9f46b0759d2e1b59dd545cfaca254",
+      "snapshot_sha256": "be539f32206970b088329ceaf60ba6ffc93065800d7e6122368d5243183c473c",
+      "manifest_sha256": "5fecca985703292b842719eeae0615884824b4a21e6c839304ee036c4c80a372",
+      "outcome_hash": "99cd35e3b05a80d79b08a121b40a2e4222b1ee4626fa37d6bf5ebd152f58cfd2",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:be539f32206970b0:cap:1",
+          "technical_name": "aws-cognito",
+          "description": "|",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-20T09:22:57.032Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "e985a4b555e6a6350cc8502f3f4e0d56b17e2c0e383fe1ca7951cbffe1848b1a"
+    },
+    {
+      "candidate_id": "repo:9a0225a6e15ebccefb2b18c38eaf",
+      "technical_name": "aws-ec2",
+      "source_locator": "github://TerminalSkills/skills@6edcf94159d9f46b0759d2e1b59dd545cfaca254/skills/aws-ec2",
+      "pinned_sha": "6edcf94159d9f46b0759d2e1b59dd545cfaca254",
+      "snapshot_sha256": "9a0225a6e15ebccefb2b18c38eafce793f8947785eb7d0bdf21a2867747332e5",
+      "manifest_sha256": "20f6790255f3084df55dc469d439fc52994ced18ff711c03c6ce8bfbbe37aac6",
+      "outcome_hash": "906222a0318adb2cd195b5f6bbbfa12db4f26afe5681558996afc86806050d5a",
+      "target_engine_bindings": [
+        "CMP-002",
+        "DPO-001",
+        "IAM-001",
+        "RED-001",
+        "SEC-001",
+        "SEC-002"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:9a0225a6e15ebcce:cap:1",
+          "technical_name": "aws-ec2",
+          "description": "|",
+          "domains": [
+            {
+              "domain_id": "security-identity-privacy",
+              "engine_bindings": [
+                "CMP-002",
+                "DPO-001",
+                "IAM-001",
+                "RED-001",
+                "SEC-001",
+                "SEC-002"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 6
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-20T09:22:57.033Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "4a58338acf031c8777d938fc4c598ab34a22325f6410ccf347c4504c29fdbb3b"
+    },
+    {
       "candidate_id": "repo:45634853e08ec0e33ec3f9cceacd",
       "technical_name": "design-md",
       "source_locator": "github://TerminalSkills/skills@6edcf94159d9f46b0759d2e1b59dd545cfaca254/skills/design-md",
@@ -93,11 +235,11 @@
   ],
   "adoption_skips": [],
   "summary": {
-    "total": 1,
-    "inserted": 1,
+    "total": 3,
+    "inserted": 2,
     "updated": 0,
     "skipped": 0,
-    "pending_canary": 1,
+    "pending_canary": 3,
     "prod_readonly": 0
   }
 }
