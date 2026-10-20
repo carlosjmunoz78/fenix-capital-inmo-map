@@ -11,6 +11,7 @@ on:
       - 'cerebro/governance/skill-continuous-improvement-policy.v1.json'
       - 'cerebro/registry/skill-evolution-policy-binding-v1.json'
       - 'cerebro/registry/skill-dynamic-adoption-v1.json'
+      - 'cerebro/registry/skill-operational-wrapper-registry-v1.json'
       - 'cerebro/runtime/skill-wrappers/governed-wrapper-factory-v1.mjs'
       - 'cerebro/runtime/skill-wrappers/governed-wrapper-scaffold-v1.mjs'
       - 'cerebro/tests/skill-wrapper-scaffold-v1.test.mjs'
@@ -40,10 +41,10 @@ jobs:
       - name: Test scaffold policy and fail-closed generator
         run: node --test cerebro/tests/skill-wrapper-scaffold-v1.test.mjs
 
-      - name: Generate a real PREPROD scaffold from governed aws-cognito metadata
+      - name: Generate a real PREPROD scaffold from complete governed aws-cognito provenance
         run: |
           node cerebro/runtime/skill-wrappers/governed-wrapper-scaffold-v1.mjs \
-            --registry cerebro/registry/skill-dynamic-adoption-v1.json \
+            --registry cerebro/registry/skill-operational-wrapper-registry-v1.json \
             --technical-name aws-cognito \
             --company-id fenix \
             --output-dir "$RUNNER_TEMP/cerebro-skill-wrapper-scaffold"
