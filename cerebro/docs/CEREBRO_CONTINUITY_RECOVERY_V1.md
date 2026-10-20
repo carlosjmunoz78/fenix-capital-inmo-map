@@ -2,37 +2,48 @@
 
 ## Estado
 
-DEFINIDO en rama hasta promoción a `main`. El estado operativo solo se considera HECHO tras evidencia verde del workflow en `main`.
+EXISTENTE en `main` con evidencia previa de recuperación automática para los carriles de lenguaje sintético e intake. Esta revisión amplía la misma envolvente, sin ampliar autoridad, a los dos carriles de skills que han mostrado huecos de `schedule`.
 
 ## Objetivo
 
-Cerrar el hueco de continuidad observado en dos carriles ya gobernados:
+Evitar que la continuidad dependa de un único cron de GitHub Actions. La envolvente conserva los cron existentes y recupera de forma acotada cuatro carriles gobernados cuando no exista una ejecución satisfactoria suficientemente reciente:
 
-- `CEREBRO Human Language Synthetic Lab V1`, objetivo de actividad cada 15 minutos y recuperación cuando no exista un éxito reciente en 35 minutos.
-- `CEREBRO Universal Skill Continuous Intake V1`, objetivo horario y recuperación cuando no exista un éxito reciente en 90 minutos.
+- `CEREBRO Human Language Synthetic Lab V1`: recuperación si el último éxito supera 35 minutos.
+- `CEREBRO Universal Skill Continuous Intake V1`: recuperación si el último éxito supera 90 minutos.
+- `CEREBRO Skill GitHub Wide Scout`: recuperación si el último éxito supera 75 minutos.
+- `CEREBRO Skill Autonomy Safe Action Worker V1`: recuperación si el último éxito supera 75 minutos.
 
 ## Diseño
 
-La recuperación no sustituye los cron existentes. Los conserva y añade una envolvente de continuidad.
+La recuperación no sustituye los cron de los workflows objetivo. Los conserva y añade una envolvente redundante.
 
-El heartbeat primario de recuperación es la finalización satisfactoria de `CEREBRO RSI Learning Control Plane V0`, que ya dispone de cron `*/15 * * * *`, además de eventos propios. Existe también un cron independiente de recuperación a minuto 41 de cada hora y `workflow_dispatch` manual.
+La envolvente puede arrancar por cuatro vías independientes dentro de GitHub Actions:
 
-El recovery consulta el estado de GitHub Actions. Si el workflow objetivo ya tiene una ejecución activa, no duplica trabajo. Si existe un éxito suficientemente reciente, hace no-op. Si está fuera del SLO, no existe éxito previo o falla la inspección, solicita una ejecución del workflow gobernado mediante `workflow_dispatch`, con hasta tres intentos.
+- finalización satisfactoria en `main` de `CEREBRO RSI Learning Control Plane V0`;
+- finalización satisfactoria en `main` de `CEREBRO Continuous Human QA V0`;
+- finalización satisfactoria en `main` de `CEREBRO AUTO-001 PREPROD Patch Executor V0`;
+- cron propio de recuperación a minuto 41 de cada hora, además de `workflow_dispatch` manual.
+
+Esto corrige el punto débil observado: si el cron horario del Scout o del Safe Action Worker se retrasa o se pierde, una ejecución sana de cualquiera de los heartbeats event-driven puede detectar el carril obsoleto y relanzarlo mediante `workflow_dispatch`.
+
+Antes de relanzar, el recovery consulta el estado real de GitHub Actions. Si el workflow objetivo ya tiene una ejecución activa, no duplica trabajo. Si existe un éxito suficientemente reciente, hace no-op. Si está fuera del SLO, no existe éxito previo o falla la inspección, solicita una ejecución del workflow gobernado con hasta tres intentos.
 
 ## Autoridad
 
 La envolvente tiene únicamente:
 
-- `contents: read`
-- `actions: write`, exclusivamente para lanzar workflows existentes.
+- `contents: read`;
+- `actions: write`, exclusivamente para inspeccionar y lanzar workflows existentes.
 
 No recibe autoridad para modificar repositorio, App, CRM, Supabase, WordPress, Trading, datos de cliente ni comportamiento PROD. No cambia los contratos de autoridad de los workflows objetivo y no introduce fallback de pago.
+
+En particular, recuperar `CEREBRO Skill GitHub Wide Scout` o `CEREBRO Skill Autonomy Safe Action Worker V1` no autoriza instalación directa de código externo ni promoción automática a PROD. Solo restablece su ejecución gobernada normal.
 
 ## Dependencias
 
 - GitHub Actions.
-- `CEREBRO RSI Learning Control Plane V0` como heartbeat event-driven redundante.
-- Los dos workflows objetivo existentes.
+- Los tres heartbeats event-driven ya existentes.
+- Los cuatro workflows objetivo existentes, todos con `workflow_dispatch`.
 
 No se añade suscripción ni infraestructura externa.
 
@@ -40,9 +51,9 @@ No se añade suscripción ni infraestructura externa.
 
 `cerebro/tests/continuity-recovery-workflow-v1.test.mjs` bloquea por contrato:
 
-- heartbeat y fallback horario;
-- nombres exactos de los dos workflows objetivo;
-- umbrales de 2.100 s y 5.400 s;
+- los tres heartbeats event-driven y el fallback horario;
+- nombres exactos de los cuatro workflows objetivo;
+- umbrales de 2.100 s, 5.400 s, 4.500 s y 4.500 s;
 - ausencia de `contents: write` y otros permisos de mutación;
 - ausencia de autoridad PROD/Trading/fallback de pago.
 
@@ -50,16 +61,16 @@ No se añade suscripción ni infraestructura externa.
 
 Cada ejecución escribe en `GITHUB_STEP_SUMMARY` uno de estos estados por carril:
 
-- `HEALTHY_ACTIVE_RUN`
-- `HEALTHY`
-- `RECOVERY_DISPATCHED_STALE`
-- `RECOVERY_DISPATCHED_NO_SUCCESS`
-- `RECOVERY_DISPATCHED_INSPECTION_ERROR`
+- `HEALTHY_ACTIVE_RUN`;
+- `HEALTHY`;
+- `RECOVERY_DISPATCHED_STALE`;
+- `RECOVERY_DISPATCHED_NO_SUCCESS`;
+- `RECOVERY_DISPATCHED_INSPECTION_ERROR`.
 
 ## Rollback
 
-Rollback inmediato: revertir el commit/merge que incorpora `.github/workflows/cerebro-continuity-recovery-v1.yml`. Los cron originales de los dos workflows objetivo permanecen intactos, por lo que el rollback elimina únicamente la envolvente redundante.
+Rollback inmediato: revertir el commit/merge de esta revisión. Los cron originales de los cuatro workflows objetivo permanecen intactos, por lo que el rollback elimina únicamente la envolvente redundante añadida.
 
 ## Criterio de cierre
 
-No declarar continuidad 24/7 probada por una sola ejecución. El cierre técnico inicial exige workflow recovery verde en `main` y dispatch/health check correcto de ambos carriles. La continuidad sostenida se valida después con evidencia temporal real de ejecuciones, sin inferirla del contrato.
+No declarar continuidad 24/7 por contrato. Esta revisión se considera HECHA únicamente cuando, en `main`, el recovery quede verde y exista evidencia de que detecta como stale y relanza correctamente al menos uno de los dos carriles de skills sin intervención humana. La continuidad sostenida se valida posteriormente con evidencia temporal real.
