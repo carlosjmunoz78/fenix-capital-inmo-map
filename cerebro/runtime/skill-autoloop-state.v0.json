@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-20T05:23:49.772Z",
+  "updated_at": "2026-10-20T06:03:03.080Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -740,42 +740,6 @@
       "paid_fallback": false,
       "additional_cost_eur": 0
     },
-    "github-wide-skills:f8e51b089b2996c601a2": {
-      "candidate_id": "github-wide-skills:f8e51b089b2996c601a2",
-      "name": "crabcloud-agent",
-      "human_alias": "Crabcloud Agent",
-      "wrapper_id": "skillwrap:bd9fbf8f32aae77d6a52",
-      "domain": "software-engineering-devops",
-      "engine_bindings": [
-        "FACT-001",
-        "ARCH-001",
-        "API-001",
-        "DEP-001",
-        "MIG-001",
-        "QA-001",
-        "REG-001",
-        "DOCS-001"
-      ],
-      "value_score": 87.23,
-      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
-      "evidence_refs": {
-        "upstream_full_name": "niklauslu/crabcloud-skills",
-        "upstream_head_commit": "3473a384d58158d2f68f73b15d46ef2ab45d189c",
-        "manifest_sha256": "207e1f11024fae685a9370b5eb74497081a3f6ca88403c3d137a50b59864780c",
-        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
-      },
-      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
-      "status": "WAITING_SAFE_HANDLER",
-      "source_discovery_run_id": 39237230007,
-      "checkpointed_at": "2026-10-19T10:25:02.315Z",
-      "human_required": null,
-      "external_skill_code_execution": false,
-      "customer_data_used": false,
-      "prod_write": false,
-      "trading_access": false,
-      "paid_fallback": false,
-      "additional_cost_eur": 0
-    },
     "github-wide-skills:d4f361b79385cbadf32e": {
       "candidate_id": "github-wide-skills:d4f361b79385cbadf32e",
       "name": "data-driven-tuning",
@@ -1292,6 +1256,57 @@
       "prod_authorized": false,
       "autonomous_promotion_authorized": false,
       "action_id": "skill-action:33e4d120ac71de4d5e7f815b",
+      "action_type": "REJECT_CAPABILITY",
+      "action_status": "APPLIED_METADATA_ONLY",
+      "next_gate": "CONTINUE_DISCOVERY"
+    },
+    "github-wide-skills:f8e51b089b2996c601a2": {
+      "candidate_id": "github-wide-skills:f8e51b089b2996c601a2",
+      "name": "crabcloud-agent",
+      "human_alias": "Crabcloud Agent",
+      "wrapper_id": "skillwrap:bd9fbf8f32aae77d6a52",
+      "domain": "software-engineering-devops",
+      "engine_bindings": [
+        "FACT-001",
+        "ARCH-001",
+        "API-001",
+        "DEP-001",
+        "MIG-001",
+        "QA-001",
+        "REG-001",
+        "DOCS-001"
+      ],
+      "value_score": 87.23,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "niklauslu/crabcloud-skills",
+        "upstream_head_commit": "3473a384d58158d2f68f73b15d46ef2ab45d189c",
+        "manifest_sha256": "207e1f11024fae685a9370b5eb74497081a3f6ca88403c3d137a50b59864780c",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "SKILL_AUTONOMY_DECISION_RECORDED",
+      "status": "COMPLETED",
+      "source_discovery_run_id": 39237230007,
+      "checkpointed_at": "2026-10-19T10:25:02.315Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0,
+      "disposition": "DESCARTAR",
+      "evidence": {
+        "reason": "LICENSE_INCOMPATIBLE_OR_DISALLOWED",
+        "decision_id": "skill-autonomy:269c622ac29cbe6c168eb37b",
+        "decision": "DESCARTAR",
+        "human_required": null,
+        "source": "CEREBRO Skill AutoLoop Safe Handler V0"
+      },
+      "updated_at": "2026-10-20T06:03:03.080Z",
+      "prod_authorized": false,
+      "autonomous_promotion_authorized": false,
+      "action_id": "skill-action:790f1592ce60ae87b219a7bf",
       "action_type": "REJECT_CAPABILITY",
       "action_status": "APPLIED_METADATA_ONLY",
       "next_gate": "CONTINUE_DISCOVERY"
@@ -2302,7 +2317,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "SKILL_AUTONOMY_ACTION_WORKER_IDLE",
+  "last_action": "APPLY_REJECT_CAPABILITY_CONTINUE_DISCOVERY",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -2560,6 +2575,47 @@
       "external_skill_code_execution_authorized": false,
       "additional_cost_eur": 0,
       "recorded_at": "2026-10-20T00:31:48.617Z"
+    },
+    "github-wide-skills:f8e51b089b2996c601a2": {
+      "schema_version": "1.0.0",
+      "state_type": "CEREBRO_SKILL_AUTONOMY_ACTION_RECEIPT",
+      "action_id": "skill-action:790f1592ce60ae87b219a7bf",
+      "decision_id": "skill-autonomy:269c622ac29cbe6c168eb37b",
+      "company_id": "GLOBAL",
+      "engine_id": "SKILL-AUTONOMY-ACTION",
+      "environment": "PREPROD",
+      "version": "1.0.0",
+      "skill_id": "github-wide-skills:f8e51b089b2996c601a2",
+      "skill_version": "skillwrap:bd9fbf8f32aae77d6a52",
+      "decision": "DESCARTAR",
+      "action_type": "REJECT_CAPABILITY",
+      "status": "APPLIED_METADATA_ONLY",
+      "next_gate": "CONTINUE_DISCOVERY",
+      "target_engine_ids": [
+        "API-001",
+        "ARCH-001",
+        "DEP-001",
+        "DOCS-001",
+        "FACT-001",
+        "MIG-001",
+        "QA-001",
+        "REG-001"
+      ],
+      "observed_at": null,
+      "human_required": null,
+      "queueable_safe_work": false,
+      "terminal_metadata_only": true,
+      "mutation_authorized": false,
+      "internal_wrapper_shadow_authorized": false,
+      "fact001_gap_candidate_authorized": false,
+      "fact001_create_authorized": false,
+      "paid_activation_authorized": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "external_skill_code_execution_authorized": false,
+      "additional_cost_eur": 0,
+      "recorded_at": "2026-10-20T06:03:03.080Z"
     }
   },
   "autonomy_action_queue": {}
