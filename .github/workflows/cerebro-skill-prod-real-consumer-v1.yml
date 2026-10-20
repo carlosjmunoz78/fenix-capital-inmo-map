@@ -1,0 +1,75 @@
+name: CEREBRO Skill PROD Real Consumer V1
+
+on:
+  workflow_run:
+    workflows:
+      - CEREBRO Skill PROD Operational Fast Lane V1
+    types:
+      - completed
+  schedule:
+    - cron: '14,29,44,59 * * * *'
+  workflow_dispatch:
+  push:
+    branches:
+      - 'cerebro/skill-real-prod-consumer-*'
+    paths:
+      - 'cerebro/registry/skill-operational-wrapper-registry-v1.json'
+      - 'cerebro/runtime/skill-prod-operational-fastlane-v1.mjs'
+      - 'cerebro/runtime/skill-prod-real-consumer-v1.mjs'
+      - 'cerebro/runtime/skill-wrappers/**'
+      - 'cerebro/tests/skill-prod-operational-fastlane-v1.test.mjs'
+      - 'cerebro/tests/skill-prod-real-consumer-v1.test.mjs'
+      - '.github/workflows/cerebro-skill-prod-real-consumer-v1.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-skill-prod-real-consumer-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  real-prod-capability-consumer:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && 'main' || github.ref }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Validate operational fast lane and real consumer
+        run: node --test cerebro/tests/skill-prod-capability-fastlane-v1.test.mjs cerebro/tests/skill-prod-operational-fastlane-v1.test.mjs cerebro/tests/skill-prod-real-consumer-v1.test.mjs
+      - name: Execute representative real dynamic skill operation
+        run: |
+          node cerebro/runtime/skill-prod-real-consumer-v1.mjs \
+            --candidate 'repo:fc81dac4018cb6cdf3b2e98a901f' \
+            --company fenix \
+            --engine WEB-001 \
+            --mode GENERATE \
+            --task PRODUCT_VIEWER \
+            --goal 'Representative governed dynamic skill execution in PROD capability runtime' \
+            --output "$RUNNER_TEMP/cerebro-skill-prod-real-consumer.json"
+      - name: Assert semantic result and zero external authority
+        shell: bash
+        run: |
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const r=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/cerebro-skill-prod-real-consumer.json','utf8'));
+          if(r.status!=='PROD_CAPABILITY_REAL_INTERNAL_EXECUTION_GREEN') throw new Error(`REAL_CONSUMER_NOT_GREEN:${r.status}`);
+          if(r.technical_name!=='drei'||r.engine_id!=='WEB-001'||r.requested_mode!=='GENERATE') throw new Error('REPRESENTATIVE_OPERATION_IDENTITY_MISMATCH');
+          if(!r.result?.output?.recommended_components?.includes('Stage')||!r.result?.output?.recommended_components?.includes('OrbitControls')) throw new Error('SEMANTIC_DREI_RESULT_MISSING');
+          if(r.result?.provenance?.raw_external_skill_code_executed!==false) throw new Error('RAW_EXTERNAL_SKILL_CODE_EXECUTION');
+          const a=r.authority??{};
+          if(a.direct_prod_write_authorized!==false||a.direct_prod_mutation_authorized!==false||a.external_side_effects_authorized!==false||a.external_skill_code_execution!==false||a.trading_access!==false||a.spend_authorized!==false||Number(a.additional_cost_eur)!==0) throw new Error('REAL_CONSUMER_AUTHORITY_EXPANSION');
+          console.log(JSON.stringify({status:r.status,candidate_id:r.candidate_id,technical_name:r.technical_name,engine_id:r.engine_id,mode:r.requested_mode,wrapper_id:r.wrapper_id,result_hash:r.result_hash,direct_prod_write_authorized:false,external_side_effects_authorized:false,trading_access:false,additional_cost_eur:0}));
+          NODE
+      - name: Upload immutable real-consumer evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-skill-prod-real-consumer-${{ github.run_id }}
+          path: ${{ runner.temp }}/cerebro-skill-prod-real-consumer.json
+          if-no-files-found: error
+          retention-days: 30
