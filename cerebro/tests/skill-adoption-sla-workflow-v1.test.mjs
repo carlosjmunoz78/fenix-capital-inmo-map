@@ -1,8 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const workflowPath = '.github/workflows/cerebro-skill-adoption-sla-v1.yml';
+const here = path.dirname(fileURLToPath(import.meta.url));
+const repoRoot = path.resolve(here, '..', '..');
+const workflowPath = path.join(repoRoot, '.github', 'workflows', 'cerebro-skill-adoption-sla-v1.yml');
 const workflow = fs.readFileSync(workflowPath, 'utf8');
 
 test('skill adoption SLA guard uses the approved 5m recovery and 10m hard red thresholds', () => {
