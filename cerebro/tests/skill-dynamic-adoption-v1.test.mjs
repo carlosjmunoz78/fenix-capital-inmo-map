@@ -1,9 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {candidateFromQueueResult,mergeDynamicCandidates,promotePendingCandidates,resolveDynamicSkillCapability,runDynamicProdReadonlyCanary} from '../runtime/skill-dynamic-adoption-v1.mjs';
+import {candidateFromQueueResult,mergeDynamicCandidates,promotePendingCandidates,registryFromQueueReport,resolveDynamicSkillCapability,runDynamicProdReadonlyCanary} from '../runtime/skill-dynamic-adoption-v1.mjs';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
 const SHA='a'.repeat(40);const H1='1'.repeat(64);const H2='2'.repeat(64);const H3='3'.repeat(64);
@@ -35,6 +36,20 @@ test('FULL_SAFE_PREPROD queue result becomes a pending dynamic capability only w
   const merged=mergeDynamicCandidates({registry:emptyRegistry(),candidates:[candidate]});
   assert.equal(merged.summary.inserted,1);
   assert.equal(merged.summary.pending_canary,1);
+});
+
+test('one unsafe FULL_SAFE_PREPROD row is skipped without blocking an independent safe capability',()=>{
+  const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'cerebro-dynamic-nonblocking-'));const registryFile=path.join(tmp,'registry.json');fs.writeFileSync(registryFile,JSON.stringify(emptyRegistry()));
+  const unsafe=queueRow({candidate_id:'repo:unsafe-trading',technical_name:'unsafe-trading',target_engine_bindings:['TRADING-001'],capability_contracts:[{capability_id:'cap:unsafe',technical_name:'unsafe-trading',description:'Unsafe trading binding fixture',domains:[{domain_id:'finance-accounting-payments',engine_bindings:['TRADING-001']}]}]});
+  const report={status:'QUEUE_TERMINAL_GREEN',results:[unsafe,queueRow()]};
+  const registry=registryFromQueueReport({queueReport:report,registryFile,observed_at:'2026-10-20T07:00:00.000Z'});
+  assert.equal(registry.summary.inserted,1);
+  assert.equal(registry.summary.skipped,1);
+  assert.equal(registry.summary.pending_canary,1);
+  assert.equal(registry.capabilities[0].candidate_id,'repo:dynamic-finance-001');
+  assert.equal(registry.adoption_skips[0].candidate_id,'repo:unsafe-trading');
+  assert.equal(registry.adoption_skips[0].blocking,false);
+  assert.match(registry.adoption_skips[0].reason,/TRADING_BINDING_DENIED/);
 });
 
 test('canonical main no-side-effect canary promotes pending capability to callable PROD read-only',()=>{
