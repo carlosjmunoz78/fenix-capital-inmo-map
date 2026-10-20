@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_DYNAMIC_SKILL_ADOPTION_LIFECYCLE_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "states": ["DISCOVERED", "FULL_SAFE_PREPROD", "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY", "PROD_CAPABILITY_AVAILABLE_READONLY"],
+  "write_state": "NEVER_GRANTED_BY_THIS_PIPELINE",
+  "additional_cost_eur": 0
+}
