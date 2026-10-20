@@ -19,6 +19,7 @@ on:
         default: ''
   push:
     branches:
+      - main
       - 'cerebro/universal-skill-activation-factory-v1-*'
       - 'cerebro/p0-human-language-digital-build-v1-*'
     paths:
@@ -26,11 +27,14 @@ on:
       - 'cerebro/runtime/universal-skill-autonomous-scout-v1.mjs'
       - 'cerebro/runtime/universal-skill-lrn-impact-bridge-v1.mjs'
       - 'cerebro/runtime/universal-skill-github-intake-v1.mjs'
+      - 'cerebro/runtime/skill-priority-seed-intake-v1.mjs'
       - 'cerebro/registry/skill-priority-portfolio-v1.json'
+      - 'cerebro/registry/skill-priority-seed-sources-v1.json'
       - 'cerebro/tests/universal-skill-source-queue-v1.test.mjs'
       - 'cerebro/tests/universal-skill-autonomous-scout-v1.test.mjs'
       - 'cerebro/tests/universal-skill-lrn-impact-bridge-v1.test.mjs'
       - 'cerebro/tests/universal-skill-github-intake-v1.test.mjs'
+      - 'cerebro/tests/skill-priority-seed-intake-v1.test.mjs'
       - '.github/workflows/cerebro-universal-skill-continuous-intake-v1.yml'
   pull_request:
     paths:
@@ -38,11 +42,14 @@ on:
       - 'cerebro/runtime/universal-skill-autonomous-scout-v1.mjs'
       - 'cerebro/runtime/universal-skill-lrn-impact-bridge-v1.mjs'
       - 'cerebro/runtime/universal-skill-github-intake-v1.mjs'
+      - 'cerebro/runtime/skill-priority-seed-intake-v1.mjs'
       - 'cerebro/registry/skill-priority-portfolio-v1.json'
+      - 'cerebro/registry/skill-priority-seed-sources-v1.json'
       - 'cerebro/tests/universal-skill-source-queue-v1.test.mjs'
       - 'cerebro/tests/universal-skill-autonomous-scout-v1.test.mjs'
       - 'cerebro/tests/universal-skill-lrn-impact-bridge-v1.test.mjs'
       - 'cerebro/tests/universal-skill-github-intake-v1.test.mjs'
+      - 'cerebro/tests/skill-priority-seed-intake-v1.test.mjs'
       - '.github/workflows/cerebro-universal-skill-continuous-intake-v1.yml'
 
 permissions:
@@ -55,7 +62,7 @@ concurrency:
 jobs:
   durable-source-queue:
     runs-on: ubuntu-latest
-    timeout-minutes: 18
+    timeout-minutes: 24
     env:
       CEREBRO_SOURCE_CONCURRENCY: '8'
       CEREBRO_SKILL_SCOUT_MAX: '24'
@@ -79,13 +86,14 @@ jobs:
           path: |
             ${{ runner.temp }}/cerebro-source-queue-persistent
             ${{ runner.temp }}/cerebro-lrn-persistent
-          key: usaf-continuous-state-v2-${{ github.ref_name }}-${{ github.run_id }}
+          key: usaf-continuous-state-v3-${{ github.ref_name }}-${{ github.run_id }}
           restore-keys: |
+            usaf-continuous-state-v3-${{ github.ref_name }}-
             usaf-continuous-state-v2-${{ github.ref_name }}-
             usaf-source-queue-v1-${{ github.ref_name }}-
-      - name: Continuous intake and learning tests
-        run: node --test cerebro/tests/universal-skill-source-queue-v1.test.mjs cerebro/tests/universal-skill-autonomous-scout-v1.test.mjs cerebro/tests/universal-skill-lrn-impact-bridge-v1.test.mjs cerebro/tests/universal-skill-github-intake-v1.test.mjs
-      - name: Run priority-first autonomous or event-driven PREPROD intake
+      - name: Continuous intake, seed and learning tests
+        run: node --test cerebro/tests/universal-skill-source-queue-v1.test.mjs cerebro/tests/universal-skill-autonomous-scout-v1.test.mjs cerebro/tests/universal-skill-lrn-impact-bridge-v1.test.mjs cerebro/tests/universal-skill-github-intake-v1.test.mjs cerebro/tests/skill-priority-seed-intake-v1.test.mjs
+      - name: Run P0 seeds first, then autonomous or event-driven PREPROD intake
         shell: bash
         env:
           GITHUB_TOKEN: ${{ github.token }}
@@ -93,16 +101,21 @@ jobs:
           set -euo pipefail
           EVENT_NAME="$GITHUB_EVENT_NAME"
           SCOUT_EVENT="$RUNNER_TEMP/cerebro-skill-scout-event.json"
+          SEED_EVENT="$RUNNER_TEMP/cerebro-priority-seed-event.json"
+          run_priority_seeds() {
+            node cerebro/runtime/skill-priority-seed-intake-v1.mjs --out "$SEED_EVENT"
+            node cerebro/runtime/universal-skill-source-queue-v1.mjs --event "$SEED_EVENT"
+          }
           run_scout() {
             node cerebro/runtime/universal-skill-autonomous-scout-v1.mjs --out "$SCOUT_EVENT"
             STATUS="$(node -e "const fs=require('fs');const x=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP + '/cerebro-skill-scout-event.json','utf8'));process.stdout.write(String(x.status));")"
             if [ "$STATUS" = "DISCOVERY_DEFERRED_RATE_LIMIT" ]; then
-              echo 'GitHub Search rate-limited this bounded cycle; state unchanged and the next event/hourly recovery cycle will retry.'
+              echo 'GitHub Search rate-limited; pinned P0 seeds were already processed, so priority work does not stall. Search will retry next event/hourly recovery cycle.'
               return 0
             fi
             COUNT="$(node -e "const fs=require('fs');const x=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP + '/cerebro-skill-scout-event.json','utf8'));process.stdout.write(String(x.client_payload.github_urls.length));")"
             if [ "$COUNT" -eq 0 ]; then
-              echo 'No eligible public skill sources discovered in this bounded priority-first cycle.'
+              echo 'No additional eligible public skill sources discovered after pinned P0 seeds.'
               return 0
             fi
             node cerebro/runtime/universal-skill-source-queue-v1.mjs --event "$SCOUT_EVENT"
@@ -118,6 +131,7 @@ jobs:
               run_pinned_pr_source
               ;;
             push|schedule)
+              run_priority_seeds
               run_scout
               ;;
             workflow_dispatch)
@@ -125,6 +139,7 @@ jobs:
               if [ "$MANUAL_COUNT" -eq 1 ]; then
                 node cerebro/runtime/universal-skill-source-queue-v1.mjs --event "$GITHUB_EVENT_PATH"
               else
+                run_priority_seeds
                 run_scout
               fi
               ;;
@@ -133,6 +148,7 @@ jobs:
               if [ "$PAYLOAD_COUNT" -eq 1 ]; then
                 node cerebro/runtime/universal-skill-source-queue-v1.mjs --event "$GITHUB_EVENT_PATH"
               else
+                run_priority_seeds
                 run_scout
               fi
               ;;
@@ -145,4 +161,4 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          ! grep -Eq 'prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true|external_skill_code_execution[[:space:]]*:[[:space:]]*true|npm install|child_process' cerebro/runtime/universal-skill-source-queue-v1.mjs cerebro/runtime/universal-skill-autonomous-scout-v1.mjs cerebro/runtime/universal-skill-lrn-impact-bridge-v1.mjs cerebro/runtime/universal-skill-github-intake-v1.mjs
+          ! grep -Eq 'prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|prod_mutation_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true|external_skill_code_execution[[:space:]]*:[[:space:]]*true|npm install|child_process' cerebro/runtime/universal-skill-source-queue-v1.mjs cerebro/runtime/universal-skill-autonomous-scout-v1.mjs cerebro/runtime/universal-skill-lrn-impact-bridge-v1.mjs cerebro/runtime/universal-skill-github-intake-v1.mjs cerebro/runtime/skill-priority-seed-intake-v1.mjs
