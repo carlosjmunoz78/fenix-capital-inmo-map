@@ -4,7 +4,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 
-const VERSION='1.1.0';
+const VERSION='1.2.0';
 const HERE=path.dirname(fileURLToPath(import.meta.url));
 const DEFAULT_REGISTRY=path.resolve(HERE,'../registry/skill-dynamic-adoption-v1.json');
 const SHA40=/^[a-f0-9]{40}$/i;
@@ -23,6 +23,7 @@ function closureGreen(c={}){return c.full_safe_preprod===true&&c.per_binding_old
 function safeContracts(value,bindings){if(!Array.isArray(value)||value.length===0)throw new Error('capability_contracts required');const allowed=new Set(bindings);const rows=value.map((cap)=>Object.freeze({capability_id:req(String(cap.capability_id),'capability_id',240),technical_name:req(String(cap.technical_name),'capability technical_name',240),description:String(cap.description??'').slice(0,1200),domains:Object.freeze((cap.domains??[]).map((d)=>{const engine_bindings=safeBindings(d.engine_bindings??[]);if(engine_bindings.some((x)=>!allowed.has(x)))throw new Error('CAPABILITY_BINDING_OUTSIDE_TARGET_SET');return Object.freeze({domain_id:req(String(d.domain_id),'domain_id',160),engine_bindings:Object.freeze(engine_bindings)});} ))}));if(rows.some((x)=>x.domains.length===0))throw new Error('capability domains required');return Object.freeze(rows);}
 function capabilityIdentity(base){return {candidate_id:base.candidate_id,technical_name:base.technical_name,source_locator:base.source_locator,pinned_sha:base.pinned_sha,snapshot_sha256:base.snapshot_sha256,manifest_sha256:base.manifest_sha256,outcome_hash:base.outcome_hash,target_engine_bindings:base.target_engine_bindings,capability_contracts:base.capability_contracts,closure_summary:base.closure_summary,company_id:base.company_id};}
 function safeCanaryName(row){const name=String(row.technical_name??'CAPABILITY').toUpperCase().replace(/[^A-Z0-9]+/g,'_').replace(/^_+|_+$/g,'').slice(0,48)||'CAPABILITY';return `GREEN_DYNAMIC_${name}_${hash({candidate_id:row.candidate_id,pinned_sha:row.pinned_sha}).slice(0,8).toUpperCase()}_PROD_READONLY_CANARY`;}
+function safeSkip(row,error){return Object.freeze({candidate_id:row?.candidate_id??null,technical_name:row?.technical_name??null,source_locator:row?.source_locator??null,reason:String(error?.message??error),blocking:false,...authority()});}
 
 export function candidateFromQueueResult(row,{observed_at=new Date().toISOString()}={}){
   if(row?.status!=='FULL_SAFE_PREPROD'||row?.full_safe_preprod!==true)throw new Error('FULL_SAFE_PREPROD_REQUIRED');
@@ -36,18 +37,22 @@ export function candidateFromQueueResult(row,{observed_at=new Date().toISOString
   return Object.freeze({...base,capability_hash:hash(capabilityIdentity(base))});
 }
 
-export function mergeDynamicCandidates({registry,candidates}){
+export function mergeDynamicCandidates({registry,candidates,adoption_skips=[]}){
   if(registry?.state_type!=='CEREBRO_DYNAMIC_SKILL_ADOPTION_REGISTRY_V1')throw new Error('DYNAMIC_REGISTRY_REQUIRED');
   if(!Array.isArray(candidates))throw new Error('candidates required');const byId=new Map((registry.capabilities??[]).map((x)=>[x.candidate_id,x]));let inserted=0,updated=0;
   for(const candidate of candidates){const prior=byId.get(candidate.candidate_id);if(!prior){byId.set(candidate.candidate_id,candidate);inserted+=1;continue;}if(prior.capability_hash!==candidate.capability_hash&&prior.status!==AVAILABLE){byId.set(candidate.candidate_id,candidate);updated+=1;}}
   const capabilities=[...byId.values()].sort((a,b)=>String(a.technical_name).localeCompare(String(b.technical_name))||String(a.candidate_id).localeCompare(String(b.candidate_id)));
-  return Object.freeze({...registry,schema_version:'1.1.0',version:'v1.1',capabilities:Object.freeze(capabilities),summary:Object.freeze({total:capabilities.length,inserted,updated,pending_canary:capabilities.filter((x)=>x.status===PENDING).length,prod_readonly:capabilities.filter((x)=>x.status===AVAILABLE).length})});
+  return Object.freeze({...registry,schema_version:'1.2.0',version:'v1.2',capabilities:Object.freeze(capabilities),adoption_skips:Object.freeze([...(adoption_skips??[])]),summary:Object.freeze({total:capabilities.length,inserted,updated,skipped:(adoption_skips??[]).length,pending_canary:capabilities.filter((x)=>x.status===PENDING).length,prod_readonly:capabilities.filter((x)=>x.status===AVAILABLE).length})});
 }
 
 export function registryFromQueueReport({queueReport,registryFile=DEFAULT_REGISTRY,observed_at}={}){
   if(queueReport?.status!=='QUEUE_TERMINAL_GREEN')throw new Error('QUEUE_TERMINAL_GREEN_REQUIRED');const registry=JSON.parse(fs.readFileSync(registryFile,'utf8'));
-  const candidates=[];for(const row of queueReport.results??[]){if(row.status==='FULL_SAFE_PREPROD'&&row.full_safe_preprod===true&&row.human_required==null&&Array.isArray(row.target_engine_bindings)&&row.target_engine_bindings.length)candidates.push(candidateFromQueueResult(row,{observed_at}));}
-  return mergeDynamicCandidates({registry,candidates});
+  const candidates=[];const adoption_skips=[];
+  for(const row of queueReport.results??[]){
+    if(row?.status!=='FULL_SAFE_PREPROD'||row?.full_safe_preprod!==true||row?.human_required!=null)continue;
+    try{candidates.push(candidateFromQueueResult(row,{observed_at}));}catch(error){adoption_skips.push(safeSkip(row,error));}
+  }
+  return mergeDynamicCandidates({registry,candidates,adoption_skips});
 }
 
 export function runDynamicProdReadonlyCanary({candidate,head_sha,run_id,ref='refs/heads/main'}={}){
@@ -58,7 +63,7 @@ export function runDynamicProdReadonlyCanary({candidate,head_sha,run_id,ref='ref
 }
 
 export function promotePendingCandidates({registry,head_sha,run_id,ref='refs/heads/main',observed_at=new Date().toISOString()}={}){
-  if(registry?.state_type!=='CEREBRO_DYNAMIC_SKILL_ADOPTION_REGISTRY_V1')throw new Error('DYNAMIC_REGISTRY_REQUIRED');let promoted=0;const capabilities=(registry.capabilities??[]).map((row)=>{if(row.status!==PENDING)return row;const canary=runDynamicProdReadonlyCanary({candidate:row,head_sha,run_id,ref});promoted+=1;return Object.freeze({...row,environment:'PROD_CAPABILITY',status:AVAILABLE,current_scope:'READONLY_ADVISORY_ANALYZE_REVIEW_PLAN_OBSERVE',current_evidence:canary.status,canary:Object.freeze({...canary,observed_at}),promoted_at:observed_at,...authority()});});return Object.freeze({...registry,schema_version:'1.1.0',version:'v1.1',capabilities:Object.freeze(capabilities),summary:Object.freeze({total:capabilities.length,promoted,pending_canary:capabilities.filter((x)=>x.status===PENDING).length,prod_readonly:capabilities.filter((x)=>x.status===AVAILABLE).length})});
+  if(registry?.state_type!=='CEREBRO_DYNAMIC_SKILL_ADOPTION_REGISTRY_V1')throw new Error('DYNAMIC_REGISTRY_REQUIRED');let promoted=0;const capabilities=(registry.capabilities??[]).map((row)=>{if(row.status!==PENDING)return row;const canary=runDynamicProdReadonlyCanary({candidate:row,head_sha,run_id,ref});promoted+=1;return Object.freeze({...row,environment:'PROD_CAPABILITY',status:AVAILABLE,current_scope:'READONLY_ADVISORY_ANALYZE_REVIEW_PLAN_OBSERVE',current_evidence:canary.status,canary:Object.freeze({...canary,observed_at}),promoted_at:observed_at,...authority()});});return Object.freeze({...registry,schema_version:'1.2.0',version:'v1.2',capabilities:Object.freeze(capabilities),summary:Object.freeze({total:capabilities.length,promoted,skipped:Number(registry?.summary?.skipped??registry?.adoption_skips?.length??0),pending_canary:capabilities.filter((x)=>x.status===PENDING).length,prod_readonly:capabilities.filter((x)=>x.status===AVAILABLE).length})});
 }
 
 export function resolveDynamicSkillCapability({candidate_id,engine_id,requested_mode='ANALYZE',registryFile=DEFAULT_REGISTRY,registry=null}={}){
@@ -71,6 +76,6 @@ if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.ur
     const output=req(arg('--output')??DEFAULT_REGISTRY,'--output');let registry;
     if(arg('--promote')){const input=req(arg('--promote'),'--promote');registry=JSON.parse(fs.readFileSync(input,'utf8'));registry=promotePendingCandidates({registry,head_sha:req(arg('--head-sha')??process.env.GITHUB_SHA,'--head-sha',80),run_id:Number(arg('--run-id')??process.env.GITHUB_RUN_ID),ref:arg('--ref')??process.env.GITHUB_REF??'refs/heads/main'});}
     else{const input=req(arg('--queue-report'),'--queue-report');const report=JSON.parse(fs.readFileSync(input,'utf8'));registry=registryFromQueueReport({queueReport:report,registryFile:arg('--registry')??DEFAULT_REGISTRY});}
-    fs.mkdirSync(path.dirname(path.resolve(output)),{recursive:true});fs.writeFileSync(output,`${JSON.stringify(registry,null,2)}\n`,'utf8');process.stdout.write(`${JSON.stringify({status:'DYNAMIC_ADOPTION_REGISTRY_GREEN',output,total:registry.summary?.total??registry.capabilities?.length??0,inserted:registry.summary?.inserted??0,updated:registry.summary?.updated??0,promoted:registry.summary?.promoted??0,pending_canary:registry.summary?.pending_canary??0,prod_readonly:registry.summary?.prod_readonly??0,...authority()})}\n`);
+    fs.mkdirSync(path.dirname(path.resolve(output)),{recursive:true});fs.writeFileSync(output,`${JSON.stringify(registry,null,2)}\n`,'utf8');process.stdout.write(`${JSON.stringify({status:'DYNAMIC_ADOPTION_REGISTRY_GREEN',output,total:registry.summary?.total??registry.capabilities?.length??0,inserted:registry.summary?.inserted??0,updated:registry.summary?.updated??0,skipped:registry.summary?.skipped??0,promoted:registry.summary?.promoted??0,pending_canary:registry.summary?.pending_canary??0,prod_readonly:registry.summary?.prod_readonly??0,...authority()})}\n`);
   }catch(error){process.stderr.write(`${JSON.stringify({status:'RED_FAIL_CLOSED',error:String(error?.message??error),...authority()})}\n`);process.exitCode=1;}
 }
