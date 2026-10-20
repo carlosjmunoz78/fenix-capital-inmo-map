@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_DYNAMIC_SKILL_ADOPTION_NONBLOCKING_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "blocked_candidate_blocks_independent_work": false,
+  "low_confidence_candidate_blocks_independent_work": false,
+  "trading_candidate_blocks_nontrading_work": false,
+  "rate_limited_discovery_blocks_pinned_priority_work": false,
+  "additional_cost_eur": 0
+}
