@@ -82,3 +82,20 @@ test('canary limit admits only one engineering candidate per cycle',()=>{
   assert.equal(result.report.deferred,1);
   assert.equal(Object.keys(result.state.autonomy_action_queue).length,1);
 });
+
+test('batch admission keeps state writable across multiple autonomous reconciliations',()=>{
+  const a=engineeringRow();
+  const b=engineeringRow({candidate_id:'repo:bbbbbbbbbbbbbbbbbbbbbbbbbbbb',technical_name:'second-safe-skill',github_url:'https://github.com/acme/skills/tree/main/skills/second'});
+  const c=engineeringRow({candidate_id:'repo:cccccccccccccccccccccccccccc',technical_name:'third-gap',github_url:'https://github.com/acme/skills/tree/main/skills/third',target_engine_bindings:[],capability_contracts:[]});
+  const result=applySafeEngineeringAdmissions({state:baseState(),queue_report:queue([a,b,c]),now:'2026-10-20T15:00:00.000Z',source_run_id:39501321035,max_admissions:8});
+  assert.equal(result.report.admitted,3);
+  assert.equal(result.report.deferred,0);
+  assert.equal(result.report.queue_depth,3);
+  assert.equal(Object.keys(result.state.autonomy_action_ledger).length,3);
+  assert.equal(result.state.completed[a.candidate_id].action_type,'BUILD_INTERNAL_WRAPPER_PLAN');
+  assert.equal(result.state.completed[b.candidate_id].action_type,'BUILD_INTERNAL_WRAPPER_PLAN');
+  assert.equal(result.state.completed[c.candidate_id].action_type,'FACT001_CAPABILITY_GAP_CANDIDATE');
+  assert.equal(result.state.waiting_human[a.candidate_id],undefined);
+  assert.equal(result.state.waiting_human[b.candidate_id],undefined);
+  assert.equal(result.state.waiting_human[c.candidate_id],undefined);
+});
