@@ -373,11 +373,11 @@
         "binding_count": 5
       },
       "company_id": "fenix",
-      "environment": "PREPROD",
+      "environment": "PROD_CAPABILITY",
       "version": "1.2.0",
-      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
-      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
-      "current_evidence": null,
+      "status": "PROD_CAPABILITY_AVAILABLE_READONLY",
+      "current_scope": "READONLY_ADVISORY_ANALYZE_REVIEW_PLAN_OBSERVE",
+      "current_evidence": "GREEN_DYNAMIC_DREI_30B280BC_PROD_READONLY_CANARY",
       "observed_at": "2026-10-20T13:53:19.057Z",
       "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
       "prod_authorized": false,
@@ -391,16 +391,45 @@
       "spend_authorized": false,
       "trading_access": false,
       "additional_cost_eur": 0,
-      "capability_hash": "3cccd21a97245499afa4e2dfe7255b0ed06de9533f027db2b6f709978f9a1f24"
+      "capability_hash": "3cccd21a97245499afa4e2dfe7255b0ed06de9533f027db2b6f709978f9a1f24",
+      "canary": {
+        "status": "GREEN_DYNAMIC_DREI_30B280BC_PROD_READONLY_CANARY",
+        "candidate_id": "repo:fc81dac4018cb6cdf3b2e98a901f",
+        "technical_name": "drei",
+        "head_sha": "9f56de52413e9f06e556e0970b49661ab10c211f",
+        "run_id": 39434334785,
+        "ref": "refs/heads/main",
+        "checked_bindings": [
+          "APP-001",
+          "ARCH-001",
+          "QA-001",
+          "WAUD-001",
+          "WEB-001"
+        ],
+        "checked_modes": [
+          "ADVISE",
+          "ANALYZE",
+          "REVIEW",
+          "PLAN",
+          "READONLY_OBSERVE"
+        ],
+        "side_effects": false,
+        "external_skill_code_execution": false,
+        "prod_write_authorized": false,
+        "prod_mutation_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": 0,
+        "observed_at": "2026-10-20T13:53:35.637Z"
+      },
+      "promoted_at": "2026-10-20T13:53:35.637Z"
     }
   ],
   "adoption_skips": [],
   "summary": {
     "total": 4,
-    "inserted": 1,
-    "updated": 0,
+    "promoted": 1,
     "skipped": 0,
-    "pending_canary": 1,
-    "prod_readonly": 3
+    "pending_canary": 0,
+    "prod_readonly": 4
   }
 }
