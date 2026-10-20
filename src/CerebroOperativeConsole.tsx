@@ -1,16 +1,18 @@
 import {useEffect,useMemo,useRef,useState,type FormEvent,type KeyboardEvent} from 'react';
 import {Activity,BrainCircuit,Check,CircleDot,ExternalLink,Info,MessageSquareText,Mic,PanelLeftClose,PanelLeftOpen,Paperclip,Pencil,Plus,Send,Square,X} from 'lucide-react';
-import {fetchCerebroActivity,type CerebroActivityRun} from './cerebroActivityApi';
+import {fetchCerebroActivity,fetchCerebroActivityRunDetail,type CerebroActivityRun,type CerebroActivityRunDetail} from './cerebroActivityApi';
 import {CEREBRO_CONVERSATIONS_CHANGED,createCerebroConversation,ensureActiveCerebroConversation,getActiveCerebroConversationId,listCerebroConversations,renameCerebroConversation,selectCerebroConversation,type CerebroStoredConversation} from './cerebroConversationHistory';
 import {applyVoiceContextHints,createVoiceRecognition,voiceRecognitionSupported,type CerebroSpeechRecognition} from './cerebroVoice';
 import {CerebroVoiceSettings} from './CerebroVoiceSettings';
 import './cerebro-operative-console.css';
 import './cerebro-conversation-history.css';
+import './cerebro-process-inspector-detail.css';
 
 type CoreLine={key:string;role:'user'|'cerebro';text:string;observedAt:string};
 type CoreSnapshot={ready:boolean;sending:boolean;voiceActive:boolean;voiceListening:boolean;voiceSpeaking:boolean;title:string;detail:string;lines:CoreLine[]};
 type ViewName='V0'|'OPERATIVA';
 type Props={onViewChange?:(view:ViewName)=>void};
+type RunDetailState='idle'|'loading'|'ready'|'error';
 
 const EMPTY:CoreSnapshot={ready:false,sending:false,voiceActive:false,voiceListening:false,voiceSpeaking:false,title:'Verificando CEREBRO Gateway…',detail:'Esperando evidencia del transporte autenticado.',lines:[]};
 const ACTIVE_STATUSES=new Set(['in_progress']);
@@ -27,15 +29,28 @@ function parseMs(value:string|null|undefined){
 function elapsed(value:string|null|undefined,now:number){
  const started=parseMs(value);
  if(started===null)return '—';
- const total=Math.max(0,Math.floor((now-started)/1000));
+ return durationLabel(Math.max(0,now-started));
+}
+function durationLabel(ms:number|null|undefined){
+ if(ms===null||ms===undefined||!Number.isFinite(ms)||ms<0)return '—';
+ const total=Math.max(0,Math.floor(ms/1000));
  const hours=Math.floor(total/3600),minutes=Math.floor((total%3600)/60),seconds=total%60;
- if(hours>0)return `${hours}h ${minutes}m`;
+ if(hours>0)return `${hours}h ${minutes}m ${seconds}s`;
  if(minutes>0)return `${minutes}m ${seconds}s`;
  return `${seconds}s`;
+}
+function durationBetween(start:string|null|undefined,end:string|null|undefined){
+ const a=parseMs(start),b=parseMs(end);
+ return a===null||b===null||b<a?null:b-a;
 }
 function startClock(value:string|null|undefined){
  const ms=parseMs(value);
  return ms===null?'—':hhmm(new Date(ms));
+}
+function fullClock(value:string|null|undefined){
+ const ms=parseMs(value);
+ if(ms===null)return '—';
+ return new Intl.DateTimeFormat('es-ES',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(new Date(ms));
 }
 function conversationStamp(value:string){
  const ms=parseMs(value);
@@ -66,6 +81,12 @@ function processState(run:CerebroActivityRun){
  if(ACTIVE_STATUSES.has(run.status))return{label:'EN CURSO',className:'is-running'};
  return{label:'EN COLA',className:'is-queued'};
 }
+function conclusionLabel(run:CerebroActivityRun){
+ if(run.status!=='completed')return ACTIVE_STATUSES.has(run.status)?'EN CURSO':'PENDIENTE';
+ const value=String(run.conclusion??'desconocido').toLowerCase();
+ const labels:Record<string,string>={success:'OK',failure:'FALLO',cancelled:'CANCELADO',timed_out:'TIEMPO AGOTADO',action_required:'REQUIERE ACCIÓN',startup_failure:'FALLO DE ARRANQUE',neutral:'NEUTRO',skipped:'OMITIDO',stale:'EXPIRADO'};
+ return labels[value]??value.toUpperCase();
+}
 function progressValue(run:CerebroActivityRun){
  if(run.status==='completed')return 100;
  const value=Number(run.progress_percent);
@@ -81,22 +102,31 @@ function estimatedFinish(run:CerebroActivityRun,now:number){
 }
 function processPurpose(run:CerebroActivityRun){
  const text=`${run.workflow_name} ${run.workflow_path}`.toUpperCase();
+ if(text.includes('AUTO-001')||text.includes('PATCH EXECUTOR'))return 'Aplica en PREPROD un parche ya autorizado, ejecuta sus comprobaciones y deja evidencia. Este proceso no publica en PROD por sí solo.';
+ if(text.includes('REPAIR VALIDATION'))return 'Comprueba que una reparación propuesta corrige el problema sin romper el comportamiento protegido antes de permitir el siguiente paso.';
+ if(text.includes('OPERATIVA')&&text.includes('VOICE'))return 'Protege la conversación continua de la vista OPERATIVA: escuchar, enviar al Gateway, responder por voz y volver a escuchar.';
  if(text.includes('OPERATIVA'))return 'Valida la interfaz operativa de CEREBRO: contratos, progreso real, ausencia de métricas inventadas y build antes de promover cambios.';
  if(text.includes('SESSION CONTEXT'))return 'Protege la autenticación y el contexto de sesión de CEREBRO para evitar regresiones de identidad, permisos, CORS y acceso al Gateway.';
- if(text.includes('CONTINUOUS HUMAN QA'))return 'Ejecuta controles recurrentes de calidad humana y funcional sobre CEREBRO para detectar degradaciones antes de que lleguen a producción.';
- if(text.includes('GOVERNED MAIN INTEGRATION'))return 'Controla que la integración en main respete los gates y la gobernanza de CEREBRO antes de continuar el ciclo de entrega.';
- if(text.includes('PROD LIVE DEPLOY'))return 'Construye y publica el snapshot validado de la App Fénix en producción mediante el pipeline oficial de despliegue.';
- if(text.includes('RUNTIME')&&text.includes('SMOKE'))return 'Comprueba después del despliegue que el runtime de producción responde y que los contratos críticos siguen operativos.';
- if(text.includes('FACTORY')||text.includes('FABRICA'))return 'Ejecuta la Fábrica de Motores CEREBRO para generar o validar el scaffold estándar de motores bajo los contratos de la plataforma.';
- if(run.engine_id)return `Ejecuta el motor ${run.engine_id}. La finalidad detallada se toma del workflow real y su evidencia enlazada; esta vista no inventa funciones adicionales.`;
- return `Ejecuta el workflow real «${run.workflow_name}». La finalidad exacta disponible aquí procede de su nombre, pasos y evidencia de GitHub Actions.`;
+ if(text.includes('CONTINUOUS HUMAN QA'))return 'Ejecuta controles recurrentes de calidad funcional para detectar degradaciones de CEREBRO antes de una promoción.';
+ if(text.includes('GOVERNED MAIN INTEGRATION'))return 'Comprueba que la integración en main respeta los gates y la gobernanza definidos antes de continuar la entrega.';
+ if(text.includes('SKILL ADOPTION'))return 'Comprueba el ciclo de adopción de skills de CEREBRO y sus límites de tiempo mediante evidencia del workflow real.';
+ if(text.includes('APP RESTORATION BUILD'))return 'Construye la App y comprueba que los contratos de restauración siguen pasando antes de aceptar cambios.';
+ if(text.includes('PROD LIVE DEPLOY'))return 'Construye y publica el snapshot validado mediante el pipeline oficial de despliegue a producción.';
+ if(text.includes('RUNTIME')&&text.includes('SMOKE'))return 'Comprueba después del despliegue que el runtime responde y que los contratos críticos siguen operativos.';
+ if(text.includes('FACTORY')||text.includes('FABRICA'))return 'Ejecuta la Fábrica de Motores CEREBRO para generar o validar el scaffold estándar bajo los contratos de la plataforma.';
+ if(run.engine_id)return `Ejecuta ${run.engine_id} dentro del workflow «${run.workflow_name}». La pantalla muestra únicamente estado y evidencia observados en GitHub Actions.`;
+ return `Ejecuta «${run.workflow_name}» y muestra su estado real, tiempos y evidencia disponible en GitHub Actions.`;
 }
+function runStartedAt(run:CerebroActivityRun,detail:CerebroActivityRunDetail|null){return detail?.started_at||run.run_started_at||run.created_at}
+function runCompletedAt(run:CerebroActivityRun,detail:CerebroActivityRunDetail|null){return detail?.completed_at||(run.status==='completed'?run.updated_at:null)}
+function runDuration(run:CerebroActivityRun,detail:CerebroActivityRunDetail|null){return detail?.duration_ms??durationBetween(runStartedAt(run,detail),runCompletedAt(run,detail))}
 
 function ProcessCard({run,now,onOpen}:{run:CerebroActivityRun;now:number;onOpen:(run:CerebroActivityRun)=>void}){
  const state=processState(run),progress=progressValue(run),started=run.run_started_at||run.created_at;
  const isIndeterminate=ACTIVE_STATUSES.has(run.status)&&progress===null;
  const step=run.current_step?.trim()||'';
  const eta=estimatedFinish(run,now);
+ const completedDuration=run.status==='completed'?durationBetween(started,run.updated_at):null;
  return <article className={`cerebro-process-card ${state.className}`} data-run-id={run.run_id} title={`Abrir detalle de ${run.workflow_name}`} role="button" tabIndex={0} onClick={()=>onOpen(run)} onKeyDown={event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();onOpen(run)}}}>
   <div className="cerebro-process-head">
    <div className="cerebro-process-identity"><strong>{compactAlias(run)}</strong><small>{run.environment}</small></div>
@@ -109,8 +139,8 @@ function ProcessCard({run,now,onOpen}:{run:CerebroActivityRun;now:number;onOpen:
    <b className="cerebro-progress-value">{progress!==null?`${progress}%`:isIndeterminate?'LIVE':'—'}</b>
   </div>
   {step?<div className="cerebro-current-step" title={step}>{step}</div>:<div className="cerebro-current-step is-muted">Sin paso publicado</div>}
-  <div className="cerebro-process-meta"><span>{run.status==='queued'?'EN ESPERA':`Inicio ${startClock(started)}`}</span><span>{run.status==='completed'?'FINALIZADO':elapsed(started,now)}</span></div>
-  <div className="cerebro-process-foot"><span><Info size={13}/> Toca para saber qué hace</span><span>{eta??'Estimación aún no disponible'}</span></div>
+  <div className="cerebro-process-meta"><span>{run.status==='queued'?'EN ESPERA':`Inicio ${startClock(started)}`}</span><span>{run.status==='completed'?durationLabel(completedDuration):elapsed(started,now)}</span></div>
+  <div className="cerebro-process-foot"><span><Info size={13}/> Toca para saber qué hace</span><span>{eta??(run.status==='completed'?conclusionLabel(run):'Estimación aún no disponible')}</span></div>
  </article>;
 }
 
@@ -123,6 +153,8 @@ export default function CerebroOperativeConsole({onViewChange}:Props){
  const [dictating,setDictating]=useState(false);
  const [dictationError,setDictationError]=useState('');
  const [selectedRun,setSelectedRun]=useState<CerebroActivityRun|null>(null);
+ const [runDetail,setRunDetail]=useState<CerebroActivityRunDetail|null>(null);
+ const [runDetailState,setRunDetailState]=useState<RunDetailState>('idle');
  const [historyOpen,setHistoryOpen]=useState(false);
  const [conversations,setConversations]=useState<CerebroStoredConversation[]>(()=>listCerebroConversations());
  const [activeConversationId,setActiveConversationId]=useState(()=>getActiveCerebroConversationId()||ensureActiveCerebroConversation().id);
@@ -155,6 +187,17 @@ export default function CerebroOperativeConsole({onViewChange}:Props){
   timer=window.setInterval(()=>{void refresh()},30_000);
   return()=>{cancelled=true;window.clearInterval(timer)};
  },[]);
+ useEffect(()=>{
+  let cancelled=false;
+  if(!selectedRun){setRunDetail(null);setRunDetailState('idle');return}
+  setRunDetail(null);setRunDetailState('loading');
+  void fetchCerebroActivityRunDetail(selectedRun.run_id).then(({status,data})=>{
+   if(cancelled)return;
+   if(status===200&&data?.status==='OK'&&data.run_detail){setRunDetail(data.run_detail);setRunDetailState('ready')}
+   else setRunDetailState('error');
+  });
+  return()=>{cancelled=true};
+ },[selectedRun?.run_id]);
  useEffect(()=>{
   let raf=0;
   const inspect=()=>{
@@ -273,11 +316,16 @@ export default function CerebroOperativeConsole({onViewChange}:Props){
   </div>{dictationError?<div className="cerebro-dictation-error" role="status">{dictationError}</div>:null}</form></section>
 
   {selectedRun?<div className="cerebro-process-inspector-backdrop" role="presentation" onMouseDown={event=>{if(event.target===event.currentTarget)setSelectedRun(null)}}><aside className="cerebro-process-inspector" role="dialog" aria-modal="true" aria-label={`Detalle de ${compactAlias(selectedRun)}`}>
-   <div className="cerebro-inspector-head"><div><small>PROCESO REAL</small><h3>{compactAlias(selectedRun)}</h3><p>{selectedRun.workflow_name}</p></div><button type="button" onClick={()=>setSelectedRun(null)} aria-label="Cerrar detalle"><X size={19}/></button></div>
-   <div className="cerebro-inspector-purpose"><span>¿Para qué sirve?</span><p>{processPurpose(selectedRun)}</p></div>
-   <div className="cerebro-inspector-grid"><div><small>Estado</small><strong>{processState(selectedRun).label}</strong></div><div><small>Entorno</small><strong>{selectedRun.environment}</strong></div><div><small>Inicio</small><strong>{startClock(selectedRun.run_started_at||selectedRun.created_at)}</strong></div><div><small>Tiempo</small><strong>{selectedRun.status==='completed'?'Finalizado':elapsed(selectedRun.run_started_at||selectedRun.created_at,now)}</strong></div></div>
-   <div className="cerebro-inspector-flow"><div><small>Ahora</small><strong>{selectedRun.current_step||'Sin paso publicado'}</strong></div><div><small>Siguiente</small><strong>{selectedRun.next_step||'Sin siguiente paso publicado'}</strong></div><div><small>Fin estimado</small><strong>{estimatedFinish(selectedRun,now)??'Estimación aún no disponible'}</strong></div></div>
-   <div className="cerebro-inspector-foot"><span>{selectedRun.progress_provenance==='REAL_GITHUB_JOBS'?'REAL · pasos GitHub Actions':'REAL · ejecución GitHub Actions'}</span>{selectedRun.html_url?<a href={selectedRun.html_url} target="_blank" rel="noreferrer"><ExternalLink size={15}/> Ver evidencia</a>:null}</div>
+   <div className="cerebro-inspector-head"><div><small>PROCESO REAL · RUN #{selectedRun.run_id}</small><h3>{compactAlias(selectedRun)}</h3><p>{selectedRun.workflow_name}</p></div><button type="button" onClick={()=>setSelectedRun(null)} aria-label="Cerrar detalle"><X size={19}/></button></div>
+   <div className="cerebro-inspector-purpose"><span>¿Qué hace?</span><p>{processPurpose(selectedRun)}</p></div>
+   <div className="cerebro-inspector-grid"><div><small>Estado</small><strong>{processState(selectedRun).label}</strong></div><div><small>Entorno</small><strong>{selectedRun.environment}</strong></div><div><small>Resultado</small><strong className={`cerebro-inspector-conclusion ${selectedRun.status==='completed'?(selectedRun.conclusion==='success'?'is-success':'is-failure'):'is-active'}`}>{conclusionLabel(selectedRun)}</strong></div><div><small>Versión observada</small><strong>{selectedRun.version}</strong></div></div>
+   <div className="cerebro-inspector-grid is-timing"><div><small>Inicio</small><strong>{fullClock(runStartedAt(selectedRun,runDetail))}</strong></div><div><small>Finalización</small><strong>{fullClock(runCompletedAt(selectedRun,runDetail))}</strong></div><div><small>Duración</small><strong>{selectedRun.status==='completed'?durationLabel(runDuration(selectedRun,runDetail)):elapsed(runStartedAt(selectedRun,runDetail),now)}</strong></div></div>
+   {runDetailState==='loading'?<div className="cerebro-inspector-detail-loading">Leyendo jobs y pasos reales de GitHub Actions…</div>:null}
+   {runDetailState==='error'?<div className="cerebro-inspector-detail-loading is-error">No he podido ampliar el diagnóstico ahora. Mantengo los datos del run y el enlace de evidencia sin inventar una causa.</div>:null}
+   {selectedRun.status==='completed'&&selectedRun.conclusion==='success'?<div className="cerebro-inspector-result is-ok"><span>Resultado</span><p>OK. GitHub Actions marca la ejecución como completada correctamente y no hay pasos fallidos en el resumen disponible.</p></div>:null}
+   {selectedRun.status==='completed'&&selectedRun.conclusion!=='success'?<div className="cerebro-inspector-incident"><span>Qué ha pasado</span><p>{runDetail?.failure_summary??(runDetailState==='loading'?'Estoy leyendo el job y el paso que fallaron.':`La ejecución terminó como ${conclusionLabel(selectedRun)}. No voy a atribuir una causa que GitHub no haya publicado.`)}</p>{runDetail?.failed_job||runDetail?.failed_step?<div className="cerebro-inspector-diagnostic-meta"><div><small>Job afectado</small><strong>{runDetail.failed_job??'No identificado'}</strong></div><div><small>Paso afectado</small><strong>{runDetail.failed_step??'No identificado'}</strong></div></div>:null}{runDetail?.failed_steps?.length?<ul className="cerebro-inspector-failed-steps">{runDetail.failed_steps.slice(0,5).map((step,index)=><li key={`${step.job_name}-${step.step_number}-${index}`}><b>{step.conclusion??'incidencia'}</b>{step.job_name} · {step.step_name}</li>)}</ul>:null}</div>:null}
+   {selectedRun.status!=='completed'?<div className="cerebro-inspector-flow"><div><small>Ahora</small><strong>{selectedRun.current_step||'Sin paso publicado'}</strong></div><div><small>Siguiente</small><strong>{selectedRun.next_step||'Sin siguiente paso publicado'}</strong></div><div><small>Fin estimado</small><strong>{estimatedFinish(selectedRun,now)??'Estimación aún no disponible'}</strong></div></div>:null}
+   <div className="cerebro-inspector-foot"><span>{runDetailState==='ready'?'REAL · jobs y pasos GitHub Actions':selectedRun.progress_provenance==='REAL_GITHUB_JOBS'?'REAL · pasos GitHub Actions':'REAL · ejecución GitHub Actions'}</span>{selectedRun.html_url?<a href={selectedRun.html_url} target="_blank" rel="noreferrer"><ExternalLink size={15}/> Ver evidencia completa</a>:null}</div>
   </aside></div>:null}
  </main>;
 }
