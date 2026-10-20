@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_DYNAMIC_SKILL_ADOPTION_MANIFEST_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "runtime": "cerebro/runtime/skill-dynamic-adoption-v1.mjs",
+  "registry": "cerebro/registry/skill-dynamic-adoption-v1.json",
+  "workflow": ".github/workflows/cerebro-dynamic-skill-adoption-v1.yml",
+  "tests": ["cerebro/tests/skill-dynamic-adoption-v1.test.mjs", "cerebro/tests/skill-prod-capability-fastlane-v1.test.mjs"],
+  "additional_cost_eur": 0
+}
