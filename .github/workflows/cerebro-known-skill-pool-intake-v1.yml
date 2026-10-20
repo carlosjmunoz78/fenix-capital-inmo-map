@@ -8,7 +8,6 @@ on:
     branches:
       - main
       - 'cerebro/skill-pool-rate-limit-bypass-v1-*'
-      - 'cerebro/skill-adoption-latency-sla-v1-*'
     paths:
       - 'cerebro/runtime/skill-known-repository-pool-v1.mjs'
       - 'cerebro/runtime/universal-skill-readonly-semantic-evidence-v1.mjs'
@@ -20,11 +19,9 @@ on:
       - 'cerebro/tests/universal-skill-readonly-semantic-evidence-v1.test.mjs'
       - 'cerebro/tests/universal-skill-readonly-web-activation-v1.test.mjs'
       - '.github/workflows/cerebro-known-skill-pool-intake-v1.yml'
-      - '.github/workflows/cerebro-dynamic-skill-adoption-v1.yml'
 
 permissions:
   contents: read
-  actions: write
 
 concurrency:
   group: cerebro-known-skill-pool-${{ github.ref }}
@@ -94,14 +91,3 @@ jobs:
         run: |
           set -euo pipefail
           ! grep -Eq 'prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|prod_mutation_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true|external_skill_code_execution[[:space:]]*:[[:space:]]*true|npm install|child_process' cerebro/runtime/skill-known-repository-pool-v1.mjs cerebro/runtime/universal-skill-readonly-semantic-evidence-v1.mjs cerebro/runtime/universal-skill-repository-intake-v1.mjs cerebro/runtime/universal-skill-source-queue-v1.mjs cerebro/runtime/skill-dynamic-adoption-v1.mjs
-      - name: Immediate exact-run handoff to dynamic adoption
-        if: github.ref == 'refs/heads/main'
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          gh workflow run cerebro-dynamic-skill-adoption-v1.yml \
-            --ref main \
-            -f source_run_id="$GITHUB_RUN_ID"
-          echo "DYNAMIC_ADOPTION_HANDOFF_DISPATCHED source_run_id=$GITHUB_RUN_ID"
