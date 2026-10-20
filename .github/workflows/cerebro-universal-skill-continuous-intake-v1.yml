@@ -110,9 +110,10 @@ jobs:
           EVENT_NAME="$GITHUB_EVENT_NAME"
           SCOUT_EVENT="$RUNNER_TEMP/cerebro-skill-scout-event.json"
           SEED_EVENT="$RUNNER_TEMP/cerebro-priority-seed-event.json"
+          P0_QUEUE_REPORT="$RUNNER_TEMP/cerebro-p0-queue-report.json"
           run_priority_seeds() {
             node cerebro/runtime/skill-priority-seed-intake-v1.mjs --out "$SEED_EVENT"
-            node cerebro/runtime/universal-skill-source-queue-v1.mjs --event "$SEED_EVENT"
+            node cerebro/runtime/universal-skill-source-queue-v1.mjs --event "$SEED_EVENT" | tee "$P0_QUEUE_REPORT"
           }
           run_scout() {
             node cerebro/runtime/universal-skill-autonomous-scout-v1.mjs --out "$SCOUT_EVENT"
@@ -165,55 +166,32 @@ jobs:
               exit 2
               ;;
           esac
-      - name: Emit safe exact P0 result summary
+      - name: Validate safe exact P0 result summary
+        if: github.event_name != 'pull_request'
         shell: bash
         run: |
           set -euo pipefail
           node - <<'NODE'
           const fs=require('fs');
           const path=require('path');
-          const seedRegistry=JSON.parse(fs.readFileSync('cerebro/registry/skill-priority-seed-sources-v1.json','utf8'));
-          const allowed=new Map(seedRegistry.sources.map(s=>[s.technical_name,s]));
-          const root=process.env.CEREBRO_SOURCE_QUEUE_ROOT;
-          const dir=path.join(root,'results');
-          if(!fs.existsSync(dir)) throw new Error(`result directory missing: ${dir}`);
-          const byName=new Map();
-          for(const file of fs.readdirSync(dir).filter(x=>x.endsWith('.json')).sort()){
-            const doc=JSON.parse(fs.readFileSync(path.join(dir,file),'utf8'));
-            const r=doc.report||{};
-            const technicalName=r.priority_seed?.technical_name||r.technical_name||null;
-            if(!technicalName||!allowed.has(technicalName)) continue;
-            byName.set(technicalName,{
-              technical_name:technicalName,
-              capability_family:allowed.get(technicalName).capability_family,
-              status:r.status||null,
-              full_safe_preprod:r.full_safe_preprod===true,
-              candidate_id:r.candidate_id||null,
-              source_locator:r.source_locator||null,
-              snapshot_sha256:r.snapshot_sha256||null,
-              manifest_sha256:r.manifest_sha256||null,
-              outcome_hash:r.outcome_hash||null,
-              priority_evidence_status:r.priority_seed?.evidence_status||null,
-              generated_bindings:r.priority_seed?.generated_bindings??null,
-              expected_bindings:r.priority_seed?.expected_bindings??null,
-              additional_cost_eur:Number(r.additional_cost_eur??0),
-              prod_authorized:r.prod_authorized===true,
-              prod_write_authorized:r.prod_write_authorized===true,
-              prod_mutation_authorized:r.prod_mutation_authorized===true,
-              external_skill_code_execution:r.external_skill_code_execution===true,
-              trading_access:r.trading_access===true
-            });
-          }
-          const rows=[...byName.values()].sort((a,b)=>a.technical_name.localeCompare(b.technical_name));
-          if(rows.length!==10) throw new Error(`expected 10 exact P0 seed results, got ${rows.length}`);
+          const file=path.join(process.env.RUNNER_TEMP,'cerebro-p0-queue-report.json');
+          if(!fs.existsSync(file)) throw new Error(`P0 queue report missing: ${file}`);
+          const report=JSON.parse(fs.readFileSync(file,'utf8'));
+          const seeds=JSON.parse(fs.readFileSync('cerebro/registry/skill-priority-seed-sources-v1.json','utf8'));
+          const expected=new Map(seeds.sources.map(s=>[s.technical_name,s]));
+          const rows=report.results||[];
+          if(report.status!=='QUEUE_TERMINAL_GREEN') throw new Error(`queue not green: ${report.status}`);
+          if(report.intake_epoch!=='v3-p0-canonical-evidence') throw new Error(`unexpected intake epoch: ${report.intake_epoch}`);
+          if(rows.length!==10) throw new Error(`expected 10 P0 result rows, got ${rows.length}`);
           for(const r of rows){
+            if(!expected.has(r.technical_name)) throw new Error(`unexpected P0 technical name: ${r.technical_name}`);
             if(r.status!=='FULL_SAFE_PREPROD'||r.full_safe_preprod!==true) throw new Error(`${r.technical_name} not FULL_SAFE_PREPROD`);
             if(r.priority_evidence_status!=='PRIORITY_SEMANTIC_EVIDENCE_GREEN') throw new Error(`${r.technical_name} priority evidence not green`);
-            if(!r.candidate_id||!r.snapshot_sha256||!r.manifest_sha256||!r.outcome_hash) throw new Error(`${r.technical_name} missing exact evidence identity`);
+            if(!r.candidate_id||!r.pinned_sha||!r.source_locator||!r.snapshot_sha256||!r.manifest_sha256||!r.outcome_hash) throw new Error(`${r.technical_name} missing exact identity`);
             if(r.generated_bindings!==r.expected_bindings||!(r.generated_bindings>0)) throw new Error(`${r.technical_name} incomplete bindings`);
-            if(r.additional_cost_eur!==0||r.prod_authorized||r.prod_write_authorized||r.prod_mutation_authorized||r.external_skill_code_execution||r.trading_access) throw new Error(`${r.technical_name} unsafe authority`);
+            if(r.additional_cost_eur!==0||r.prod_write_authorized||r.prod_mutation_authorized||r.external_skill_code_execution||r.trading_access) throw new Error(`${r.technical_name} unsafe authority`);
           }
-          console.log(JSON.stringify({status:'P0_EXACT_RESULT_SNAPSHOT_GREEN',count:rows.length,rows}));
+          console.log(JSON.stringify({status:'P0_EXACT_RESULT_SNAPSHOT_GREEN',count:rows.length,intake_epoch:report.intake_epoch,rows}));
           NODE
       - name: Assert PREPROD-only authority
         shell: bash
