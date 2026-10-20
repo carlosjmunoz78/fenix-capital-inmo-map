@@ -206,7 +206,7 @@ jobs:
             elif [ "$logical" = 'AUTOLOOP_SAFE' ]; then
               if [ "$waiting" -gt 0 ]; then next='SAFE_HANDLER'; reason='AUTOLOOP_CHECKPOINT_READY'; else next='PRIORITY_LADDER'; reason='P0_EXHAUSTED_TRY_P1_P2'; fi
             elif [ "$logical" = 'SAFE_HANDLER' ]; then
-              if [ "$waiting" -gt 0 ]; then reason='SAFE_HANDLER_RETRY_LEFT_TO_NORMAL_CADENCE'; else next='PRIORITY_LADDER'; reason='HANDLER_TERMINAL_NEXT_CANDIDATE'; fi
+              if [ "$waiting" -gt 0 ]; then next='SAFE_HANDLER'; reason='SAFE_HANDLER_CONTINUE_SAFE_QUEUE'; else next='PRIORITY_LADDER'; reason='HANDLER_TERMINAL_NEXT_CANDIDATE'; fi
             elif [ "$logical" = 'PRIORITY_LADDER' ]; then
               if [ "$waiting" -gt 0 ]; then next='SAFE_HANDLER'; reason='LADDER_CHECKPOINT_READY';
               elif [ "$priority_decision" = 'DEFER_TO_EXISTING_P0_AUTOLOOP' ]; then next='AUTOLOOP_SAFE'; reason='LADDER_DEFERRED_TO_P0_AUTOLOOP';
