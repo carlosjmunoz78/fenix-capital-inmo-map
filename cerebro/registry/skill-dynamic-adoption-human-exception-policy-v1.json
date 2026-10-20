@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_DYNAMIC_SKILL_ADOPTION_HUMAN_EXCEPTION_POLICY_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "allowed_human_required_codes": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ]
+}
