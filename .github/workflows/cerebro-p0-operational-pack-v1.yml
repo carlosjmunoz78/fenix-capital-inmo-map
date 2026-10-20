@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - 'cerebro/p0-operational-pack-v1-*'
+      - 'cerebro/p0-prod-readonly-promote-v1-*'
     paths:
       - 'cerebro/registry/p0-operational-capabilities-v1.json'
       - 'cerebro/runtime/p0-operational-capability-pack-v1.mjs'
@@ -46,7 +47,7 @@ jobs:
         run: node cerebro/runtime/p0-operational-capability-pack-v1.mjs > /tmp/p0-operational-catalog.json
       - name: Shadow bounded read-only canary
         run: node cerebro/runtime/p0-prod-readonly-canary-v1.mjs > /tmp/p0-readonly-canary-shadow.json
-      - name: Verify exact P0 operational safety contract
+      - name: Verify exact P0 operational safety and PROD read-only contract
         shell: bash
         run: |
           set -euo pipefail
@@ -54,10 +55,11 @@ jobs:
           const fs=require('fs');
           const c=JSON.parse(fs.readFileSync('/tmp/p0-operational-catalog.json','utf8'));
           const p=JSON.parse(fs.readFileSync('/tmp/p0-readonly-canary-shadow.json','utf8'));
-          if(c.status!=='GREEN_P0_OPERATIONAL_CATALOG'||c.capability_count!==10) throw new Error(`catalog drift ${c.status}/${c.capability_count}`);
+          if(c.status!=='GREEN_P0_OPERATIONAL_CATALOG'||c.capability_count!==10||c.prod_readonly_count!==10) throw new Error(`catalog drift ${c.status}/${c.capability_count}/${c.prod_readonly_count}`);
           if(p.status!=='GREEN_P0_PROD_READONLY_CANARY_SET'||p.capability_count!==10) throw new Error(`canary drift ${p.status}/${p.capability_count}`);
+          for(const row of c.capabilities){if(row.prod_capability_state!=='PROD_CAPABILITY_AVAILABLE_READONLY'||!/^GREEN_[A-Z0-9_]+_PROD_READONLY_CANARY$/.test(row.prod_readonly_canary)) throw new Error(`prod readonly evidence drift ${row.technical_name}`);}
           for(const doc of [c,p]) if(doc.prod_write_authorized||doc.prod_mutation_authorized||doc.external_skill_code_execution||doc.trading_access||Number(doc.additional_cost_eur)!==0) throw new Error('unsafe authority');
-          console.log(JSON.stringify({status:'PASS_P0_OPERATIONAL_PACK_V1',capabilities:c.capability_count,preprod_operational:true,canonical_prod_readonly_canary_pending:c.prod_readonly_count===0,external_skill_code:false,prod_write:false,prod_mutation:false,trading:false,cost_eur:0}));
+          console.log(JSON.stringify({status:'PASS_P0_OPERATIONAL_PACK_V1',capabilities:c.capability_count,preprod_operational:true,prod_readonly_available:c.prod_readonly_count,external_skill_code:false,prod_write:false,prod_mutation:false,trading:false,cost_eur:0}));
           NODE
       - name: Validate current engine and P0 registries
         shell: bash
@@ -68,9 +70,11 @@ jobs:
           const e=JSON.parse(fs.readFileSync('cerebro/registry/engine-registry.v1.json','utf8'));
           const p=JSON.parse(fs.readFileSync('cerebro/registry/p0-operational-capabilities-v1.json','utf8'));
           if(!Array.isArray(e.engine_ids)||e.engine_ids.length!==179||new Set(e.engine_ids).size!==179) throw new Error('engine registry drift');
+          if(p.status!=='PROD_CAPABILITY_AVAILABLE_READONLY_10_OF_10') throw new Error(`P0 promotion status drift ${p.status}`);
+          if(!p.canonical_prod_readonly_canary||p.canonical_prod_readonly_canary.status!=='GREEN_P0_PROD_READONLY_CANARY_SET'||p.canonical_prod_readonly_canary.run_id!==39348303218||p.canonical_prod_readonly_canary.head_sha!=='d4c1b399babd51dbd948e052078492f1bb8961c0') throw new Error('canonical canary provenance drift');
           if(!Array.isArray(p.capabilities)||p.capabilities.length!==10||new Set(p.capabilities.map(x=>x.technical_name)).size!==10) throw new Error('P0 registry drift');
-          for(const x of p.capabilities){if(x.status!=='FULL_SAFE_PREPROD'||x.priority_evidence_status!=='PRIORITY_SEMANTIC_EVIDENCE_GREEN'||x.generated_bindings!==x.expected_bindings) throw new Error(`P0 evidence drift ${x.technical_name}`);}
-          console.log(JSON.stringify({status:'PASS_P0_REGISTRY_VALIDATION',engines:e.engine_ids.length,capabilities:p.capabilities.length}));
+          for(const x of p.capabilities){if(x.status!=='FULL_SAFE_PREPROD'||x.priority_evidence_status!=='PRIORITY_SEMANTIC_EVIDENCE_GREEN'||x.generated_bindings!==x.expected_bindings||!/^GREEN_[A-Z0-9_]+_PROD_READONLY_CANARY$/.test(x.prod_readonly_canary)) throw new Error(`P0 evidence drift ${x.technical_name}`);}
+          console.log(JSON.stringify({status:'PASS_P0_REGISTRY_VALIDATION',engines:e.engine_ids.length,capabilities:p.capabilities.length,prod_readonly_available:10,canary_run:p.canonical_prod_readonly_canary.run_id}));
           NODE
 
   canonical-main-prod-readonly-canary:
