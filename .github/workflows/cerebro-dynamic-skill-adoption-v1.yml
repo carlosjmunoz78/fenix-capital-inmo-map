@@ -4,6 +4,7 @@ on:
   workflow_run:
     workflows:
       - CEREBRO Universal Skill Continuous Intake V1
+      - CEREBRO Known Skill Pool Intake V1
     types:
       - completed
   workflow_dispatch:
