@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_DYNAMIC_SKILL_ADOPTION_VERSIONING_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "source_version_identity": "PINNED_GIT_COMMIT_SHA",
+  "internal_capability_identity": "CANDIDATE_ID_PLUS_CAPABILITY_HASH",
+  "silent_source_drift": false,
+  "new_source_sha_requires_revalidation": true,
+  "additional_cost_eur": 0
+}
