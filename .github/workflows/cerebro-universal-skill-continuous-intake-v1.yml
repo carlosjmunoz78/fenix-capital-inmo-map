@@ -27,14 +27,19 @@ on:
       - 'cerebro/runtime/universal-skill-autonomous-scout-v1.mjs'
       - 'cerebro/runtime/universal-skill-lrn-impact-bridge-v1.mjs'
       - 'cerebro/runtime/universal-skill-github-intake-v1.mjs'
+      - 'cerebro/runtime/universal-skill-repository-intake-v1.mjs'
       - 'cerebro/runtime/skill-priority-seed-intake-v1.mjs'
+      - 'cerebro/runtime/skill-priority-governed-evidence-v1.mjs'
       - 'cerebro/registry/skill-priority-portfolio-v1.json'
       - 'cerebro/registry/skill-priority-seed-sources-v1.json'
+      - 'cerebro/registry/universal-skill-activation-contracts-v1.json'
+      - 'cerebro/skills/internal-capability-signals.v0.json'
       - 'cerebro/tests/universal-skill-source-queue-v1.test.mjs'
       - 'cerebro/tests/universal-skill-autonomous-scout-v1.test.mjs'
       - 'cerebro/tests/universal-skill-lrn-impact-bridge-v1.test.mjs'
       - 'cerebro/tests/universal-skill-github-intake-v1.test.mjs'
       - 'cerebro/tests/skill-priority-seed-intake-v1.test.mjs'
+      - 'cerebro/tests/skill-priority-governed-evidence-v1.test.mjs'
       - '.github/workflows/cerebro-universal-skill-continuous-intake-v1.yml'
   pull_request:
     paths:
@@ -42,14 +47,19 @@ on:
       - 'cerebro/runtime/universal-skill-autonomous-scout-v1.mjs'
       - 'cerebro/runtime/universal-skill-lrn-impact-bridge-v1.mjs'
       - 'cerebro/runtime/universal-skill-github-intake-v1.mjs'
+      - 'cerebro/runtime/universal-skill-repository-intake-v1.mjs'
       - 'cerebro/runtime/skill-priority-seed-intake-v1.mjs'
+      - 'cerebro/runtime/skill-priority-governed-evidence-v1.mjs'
       - 'cerebro/registry/skill-priority-portfolio-v1.json'
       - 'cerebro/registry/skill-priority-seed-sources-v1.json'
+      - 'cerebro/registry/universal-skill-activation-contracts-v1.json'
+      - 'cerebro/skills/internal-capability-signals.v0.json'
       - 'cerebro/tests/universal-skill-source-queue-v1.test.mjs'
       - 'cerebro/tests/universal-skill-autonomous-scout-v1.test.mjs'
       - 'cerebro/tests/universal-skill-lrn-impact-bridge-v1.test.mjs'
       - 'cerebro/tests/universal-skill-github-intake-v1.test.mjs'
       - 'cerebro/tests/skill-priority-seed-intake-v1.test.mjs'
+      - 'cerebro/tests/skill-priority-governed-evidence-v1.test.mjs'
       - '.github/workflows/cerebro-universal-skill-continuous-intake-v1.yml'
 
 permissions:
@@ -86,13 +96,11 @@ jobs:
           path: |
             ${{ runner.temp }}/cerebro-source-queue-persistent
             ${{ runner.temp }}/cerebro-lrn-persistent
-          key: usaf-continuous-state-v3-${{ github.ref_name }}-${{ github.run_id }}
+          key: usaf-continuous-state-v4-${{ github.ref_name }}-${{ github.run_id }}
           restore-keys: |
-            usaf-continuous-state-v3-${{ github.ref_name }}-
-            usaf-continuous-state-v2-${{ github.ref_name }}-
-            usaf-source-queue-v1-${{ github.ref_name }}-
-      - name: Continuous intake, seed and learning tests
-        run: node --test cerebro/tests/universal-skill-source-queue-v1.test.mjs cerebro/tests/universal-skill-autonomous-scout-v1.test.mjs cerebro/tests/universal-skill-lrn-impact-bridge-v1.test.mjs cerebro/tests/universal-skill-github-intake-v1.test.mjs cerebro/tests/skill-priority-seed-intake-v1.test.mjs
+            usaf-continuous-state-v4-${{ github.ref_name }}-
+      - name: Continuous intake, P0 evidence, seed and learning tests
+        run: node --test cerebro/tests/universal-skill-source-queue-v1.test.mjs cerebro/tests/universal-skill-autonomous-scout-v1.test.mjs cerebro/tests/universal-skill-lrn-impact-bridge-v1.test.mjs cerebro/tests/universal-skill-github-intake-v1.test.mjs cerebro/tests/skill-priority-seed-intake-v1.test.mjs cerebro/tests/skill-priority-governed-evidence-v1.test.mjs
       - name: Run P0 seeds first, then autonomous or event-driven PREPROD intake
         shell: bash
         env:
@@ -161,4 +169,4 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          ! grep -Eq 'prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|prod_mutation_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true|external_skill_code_execution[[:space:]]*:[[:space:]]*true|npm install|child_process' cerebro/runtime/universal-skill-source-queue-v1.mjs cerebro/runtime/universal-skill-autonomous-scout-v1.mjs cerebro/runtime/universal-skill-lrn-impact-bridge-v1.mjs cerebro/runtime/universal-skill-github-intake-v1.mjs cerebro/runtime/skill-priority-seed-intake-v1.mjs
+          ! grep -Eq 'prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|prod_mutation_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true|external_skill_code_execution[[:space:]]*:[[:space:]]*true|npm install|child_process' cerebro/runtime/universal-skill-source-queue-v1.mjs cerebro/runtime/universal-skill-autonomous-scout-v1.mjs cerebro/runtime/universal-skill-lrn-impact-bridge-v1.mjs cerebro/runtime/universal-skill-github-intake-v1.mjs cerebro/runtime/universal-skill-repository-intake-v1.mjs cerebro/runtime/skill-priority-seed-intake-v1.mjs cerebro/runtime/skill-priority-governed-evidence-v1.mjs
