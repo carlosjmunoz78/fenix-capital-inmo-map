@@ -11,23 +11,47 @@ import {runSyntheticSelfPlayCycle,persistSyntheticLearning} from '../runtime/syn
 
 function temp(prefix){return fs.mkdtempSync(path.join(os.tmpdir(),prefix));}
 
-test('P0 operational catalog preserves all 10 exact FULL_SAFE_PREPROD capabilities without premature PROD canary',()=>{
+test('P0 operational catalog exposes all 10 exact capabilities as governed PROD read-only after canonical main canary',()=>{
   const c=buildP0OperationalCatalog();
   assert.equal(c.status,'GREEN_P0_OPERATIONAL_CATALOG');
   assert.equal(c.capability_count,10);
-  assert.equal(c.prod_readonly_count,0);
+  assert.equal(c.prod_readonly_count,10);
   assert.equal(c.external_skill_code_execution,false);
+  assert.equal(c.prod_write_authorized,false);
+  assert.equal(c.prod_mutation_authorized,false);
   assert.equal(c.additional_cost_eur,0);
-  for(const row of c.capabilities){assert.equal(row.full_safe_preprod_evidence_green,true);assert.equal(row.prod_capability_state,'HOLD_PREPROD_CANARY');assert.ok(row.target_engine_bindings.length>0);}
+  for(const row of c.capabilities){
+    assert.equal(row.full_safe_preprod_evidence_green,true);
+    assert.equal(row.prod_capability_state,'PROD_CAPABILITY_AVAILABLE_READONLY');
+    assert.match(row.prod_readonly_canary,/^GREEN_[A-Z0-9_]+_PROD_READONLY_CANARY$/);
+    assert.ok(row.target_engine_bindings.length>0);
+  }
 });
 
-test('language capability is transversally bound to non-trading engines and PROD fails closed until main canary',()=>{
-  const pre=resolveP0Capability({technical_name:'brand-voice',engine_id:'COM-001',environment:'PREPROD',requested_mode:'ANALYZE'});
-  assert.equal(pre.allowed,true);
+test('each P0 capability resolves in PROD read-only on its governed engine and never grants write/mutation authority',()=>{
+  const cases=[
+    ['brand-voice','COM-001'],['customer-support','VOICE-001'],['project-bootstrapper','APP-001'],['design','WEB-001'],
+    ['data-scraper','SOCAUD-001'],['competitor-watch','SOCAUD-001'],['analytics','DATA-001'],['ab-testing','DATA-001'],
+    ['business-intelligence','DATA-001'],['reporting','REP-001']
+  ];
+  for(const [technical_name,engine_id] of cases){
+    const r=resolveP0Capability({technical_name,engine_id,environment:'PROD',requested_mode:'ANALYZE'});
+    assert.equal(r.allowed,true,`${technical_name} should be PROD readonly on ${engine_id}`);
+    assert.equal(r.status,'PROD_CAPABILITY_AVAILABLE_READONLY');
+    assert.equal(r.prod_write_authorized,false);
+    assert.equal(r.prod_mutation_authorized,false);
+    assert.equal(r.external_skill_code_execution,false);
+    assert.equal(r.additional_cost_eur,0);
+  }
+});
+
+test('language capability is transversal to non-trading engines while Trading and non-readonly PROD modes remain denied',()=>{
   const prod=resolveP0Capability({technical_name:'brand-voice',engine_id:'COM-001',environment:'PROD',requested_mode:'ANALYZE'});
-  assert.equal(prod.allowed,false);
-  assert.ok(prod.blockers.includes('PROD_READONLY_CANARY_NOT_GREEN'));
-  const trd=resolveP0Capability({technical_name:'brand-voice',engine_id:'LAB-TRD',environment:'PREPROD',requested_mode:'ANALYZE'});
+  assert.equal(prod.allowed,true);
+  const wrongMode=resolveP0Capability({technical_name:'brand-voice',engine_id:'COM-001',environment:'PROD',requested_mode:'WRITE'});
+  assert.equal(wrongMode.allowed,false);
+  assert.ok(wrongMode.blockers.includes('PROD_MODE_NOT_READONLY'));
+  const trd=resolveP0Capability({technical_name:'brand-voice',engine_id:'LAB-TRD',environment:'PROD',requested_mode:'ANALYZE'});
   assert.equal(trd.allowed,false);
   assert.ok(trd.blockers.includes('ENGINE_BINDING_MISMATCH'));
 });
