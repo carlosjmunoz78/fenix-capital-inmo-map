@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-20T16:09:08.839Z",
+  "updated_at": "2026-10-20T17:08:09.821Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -459,42 +459,6 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 39085394173,
       "checkpointed_at": "2026-10-18T01:09:12.032Z",
-      "human_required": null,
-      "external_skill_code_execution": false,
-      "customer_data_used": false,
-      "prod_write": false,
-      "trading_access": false,
-      "paid_fallback": false,
-      "additional_cost_eur": 0
-    },
-    "github-wide-skills:1a93de26f34128ca7bff": {
-      "candidate_id": "github-wide-skills:1a93de26f34128ca7bff",
-      "name": "review-pr",
-      "human_alias": "Review Pr",
-      "wrapper_id": "skillwrap:8a0ec307f5a7dcf9a92a",
-      "domain": "software-engineering-devops",
-      "engine_bindings": [
-        "FACT-001",
-        "ARCH-001",
-        "API-001",
-        "DEP-001",
-        "MIG-001",
-        "QA-001",
-        "REG-001",
-        "DOCS-001"
-      ],
-      "value_score": 85.61,
-      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
-      "evidence_refs": {
-        "upstream_full_name": "craftbag/craftbag",
-        "upstream_head_commit": "595d6a6830e8230affe0d484714c719b2620d05c",
-        "manifest_sha256": "213ee6115e16d7b0a06c3be6cb9f84d3a304ef429ea5428db152c599a2c01a22",
-        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
-      },
-      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
-      "status": "WAITING_SAFE_HANDLER",
-      "source_discovery_run_id": 39165207540,
-      "checkpointed_at": "2026-10-18T20:51:38.423Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -2658,6 +2622,51 @@
         "source": "CEREBRO Skill AutoLoop Safe Handler V0"
       },
       "updated_at": "2026-10-20T16:09:08.839Z",
+      "prod_authorized": false
+    },
+    "github-wide-skills:1a93de26f34128ca7bff": {
+      "candidate_id": "github-wide-skills:1a93de26f34128ca7bff",
+      "name": "review-pr",
+      "human_alias": "Review Pr",
+      "wrapper_id": "skillwrap:8a0ec307f5a7dcf9a92a",
+      "domain": "software-engineering-devops",
+      "engine_bindings": [
+        "FACT-001",
+        "ARCH-001",
+        "API-001",
+        "DEP-001",
+        "MIG-001",
+        "QA-001",
+        "REG-001",
+        "DOCS-001"
+      ],
+      "value_score": 85.61,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "craftbag/craftbag",
+        "upstream_head_commit": "595d6a6830e8230affe0d484714c719b2620d05c",
+        "manifest_sha256": "213ee6115e16d7b0a06c3be6cb9f84d3a304ef429ea5428db152c599a2c01a22",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "SAFE_HANDLER_TERMINAL_HOLD",
+      "status": "TERMINAL_HOLD",
+      "source_discovery_run_id": 39165207540,
+      "checkpointed_at": "2026-10-18T20:51:38.423Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0,
+      "evidence": {
+        "reason": "STATIC_LAB_HOLD",
+        "decision_id": null,
+        "decision": null,
+        "human_required": null,
+        "source": "CEREBRO Skill AutoLoop Safe Handler V0"
+      },
+      "updated_at": "2026-10-20T17:08:09.821Z",
       "prod_authorized": false
     }
   },
