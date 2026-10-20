@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-20T08:02:18.662Z",
+  "updated_at": "2026-10-20T08:42:33.798Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -181,40 +181,6 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 38950374026,
       "checkpointed_at": "2026-10-16T18:50:36.807Z",
-      "human_required": null,
-      "external_skill_code_execution": false,
-      "customer_data_used": false,
-      "prod_write": false,
-      "trading_access": false,
-      "paid_fallback": false,
-      "additional_cost_eur": 0
-    },
-    "github-wide-skills:72a593d4bc7b37e8a8af": {
-      "candidate_id": "github-wide-skills:72a593d4bc7b37e8a8af",
-      "name": "verifying-ai-crawlers",
-      "human_alias": "Verifying Ai Crawlers",
-      "wrapper_id": "skillwrap:7c87c1bfb2676c64940a",
-      "domain": "agent-ai-orchestration",
-      "engine_bindings": [
-        "ORCH-001",
-        "ROUTE-001",
-        "FACT-001",
-        "RAG-001",
-        "LRN-001",
-        "ACTGW-001"
-      ],
-      "value_score": 86.51,
-      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
-      "evidence_refs": {
-        "upstream_full_name": "rafeblandford/skills",
-        "upstream_head_commit": "adb660257e96cf074bc602b438e72f72d5aeb30e",
-        "manifest_sha256": "b8e03e1d28ac36de1e6508a146921d9da86a57609bccf5df8f48d61d9f50b185",
-        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
-      },
-      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
-      "status": "WAITING_SAFE_HANDLER",
-      "source_discovery_run_id": 38986866214,
-      "checkpointed_at": "2026-10-17T00:33:22.984Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -2378,6 +2344,49 @@
         "source": "CEREBRO Skill AutoLoop Safe Handler V0"
       },
       "updated_at": "2026-10-20T08:02:18.662Z",
+      "prod_authorized": false
+    },
+    "github-wide-skills:72a593d4bc7b37e8a8af": {
+      "candidate_id": "github-wide-skills:72a593d4bc7b37e8a8af",
+      "name": "verifying-ai-crawlers",
+      "human_alias": "Verifying Ai Crawlers",
+      "wrapper_id": "skillwrap:7c87c1bfb2676c64940a",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 86.51,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "rafeblandford/skills",
+        "upstream_head_commit": "adb660257e96cf074bc602b438e72f72d5aeb30e",
+        "manifest_sha256": "b8e03e1d28ac36de1e6508a146921d9da86a57609bccf5df8f48d61d9f50b185",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "SAFE_HANDLER_TERMINAL_HOLD",
+      "status": "TERMINAL_HOLD",
+      "source_discovery_run_id": 38986866214,
+      "checkpointed_at": "2026-10-17T00:33:22.984Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0,
+      "evidence": {
+        "reason": "STATIC_LAB_REJECT_LOW_COVERAGE",
+        "decision_id": null,
+        "decision": null,
+        "human_required": null,
+        "source": "CEREBRO Skill AutoLoop Safe Handler V0"
+      },
+      "updated_at": "2026-10-20T08:42:33.798Z",
       "prod_authorized": false
     }
   },
