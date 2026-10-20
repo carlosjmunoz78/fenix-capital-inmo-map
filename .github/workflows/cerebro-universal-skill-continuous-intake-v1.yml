@@ -165,6 +165,56 @@ jobs:
               exit 2
               ;;
           esac
+      - name: Emit safe exact P0 result summary
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs');
+          const path=require('path');
+          const seedRegistry=JSON.parse(fs.readFileSync('cerebro/registry/skill-priority-seed-sources-v1.json','utf8'));
+          const allowed=new Map(seedRegistry.sources.map(s=>[s.technical_name,s]));
+          const root=process.env.CEREBRO_SOURCE_QUEUE_ROOT;
+          const dir=path.join(root,'results');
+          if(!fs.existsSync(dir)) throw new Error(`result directory missing: ${dir}`);
+          const byName=new Map();
+          for(const file of fs.readdirSync(dir).filter(x=>x.endsWith('.json')).sort()){
+            const doc=JSON.parse(fs.readFileSync(path.join(dir,file),'utf8'));
+            const r=doc.report||{};
+            const technicalName=r.priority_seed?.technical_name||r.technical_name||null;
+            if(!technicalName||!allowed.has(technicalName)) continue;
+            byName.set(technicalName,{
+              technical_name:technicalName,
+              capability_family:allowed.get(technicalName).capability_family,
+              status:r.status||null,
+              full_safe_preprod:r.full_safe_preprod===true,
+              candidate_id:r.candidate_id||null,
+              source_locator:r.source_locator||null,
+              snapshot_sha256:r.snapshot_sha256||null,
+              manifest_sha256:r.manifest_sha256||null,
+              outcome_hash:r.outcome_hash||null,
+              priority_evidence_status:r.priority_seed?.evidence_status||null,
+              generated_bindings:r.priority_seed?.generated_bindings??null,
+              expected_bindings:r.priority_seed?.expected_bindings??null,
+              additional_cost_eur:Number(r.additional_cost_eur??0),
+              prod_authorized:r.prod_authorized===true,
+              prod_write_authorized:r.prod_write_authorized===true,
+              prod_mutation_authorized:r.prod_mutation_authorized===true,
+              external_skill_code_execution:r.external_skill_code_execution===true,
+              trading_access:r.trading_access===true
+            });
+          }
+          const rows=[...byName.values()].sort((a,b)=>a.technical_name.localeCompare(b.technical_name));
+          if(rows.length!==10) throw new Error(`expected 10 exact P0 seed results, got ${rows.length}`);
+          for(const r of rows){
+            if(r.status!=='FULL_SAFE_PREPROD'||r.full_safe_preprod!==true) throw new Error(`${r.technical_name} not FULL_SAFE_PREPROD`);
+            if(r.priority_evidence_status!=='PRIORITY_SEMANTIC_EVIDENCE_GREEN') throw new Error(`${r.technical_name} priority evidence not green`);
+            if(!r.candidate_id||!r.snapshot_sha256||!r.manifest_sha256||!r.outcome_hash) throw new Error(`${r.technical_name} missing exact evidence identity`);
+            if(r.generated_bindings!==r.expected_bindings||!(r.generated_bindings>0)) throw new Error(`${r.technical_name} incomplete bindings`);
+            if(r.additional_cost_eur!==0||r.prod_authorized||r.prod_write_authorized||r.prod_mutation_authorized||r.external_skill_code_execution||r.trading_access) throw new Error(`${r.technical_name} unsafe authority`);
+          }
+          console.log(JSON.stringify({status:'P0_EXACT_RESULT_SNAPSHOT_GREEN',count:rows.length,rows}));
+          NODE
       - name: Assert PREPROD-only authority
         shell: bash
         run: |
