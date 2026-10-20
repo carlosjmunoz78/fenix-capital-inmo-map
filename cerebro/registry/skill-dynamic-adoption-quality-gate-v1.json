@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_DYNAMIC_SKILL_ADOPTION_QUALITY_GATE_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "required": ["FULL_SAFE_PREPROD", "TARGET_ENGINE_BINDINGS", "CAPABILITY_CONTRACTS", "LRN_IMPACT_GREEN_PREPROD", "CANONICAL_MAIN_READONLY_CANARY"],
+  "failed_candidate_blocks_independent_candidates": false,
+  "prod_write_authorized": false,
+  "additional_cost_eur": 0
+}
