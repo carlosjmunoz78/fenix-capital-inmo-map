@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-20T18:35:54.773Z",
+  "updated_at": "2026-10-20T18:53:21.073Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -91,42 +91,7 @@
   ],
   "in_flight": {},
   "waiting_human": {},
-  "waiting_safe_handler": {
-    "github-wide-skills:66b7982a1c10e80fe904": {
-      "candidate_id": "github-wide-skills:66b7982a1c10e80fe904",
-      "name": "agent-redteam",
-      "human_alias": "Agent Redteam",
-      "wrapper_id": "skillwrap:d880f1bbe1349cacc3fc",
-      "domain": "agent-ai-orchestration",
-      "engine_bindings": [
-        "ORCH-001",
-        "ROUTE-001",
-        "FACT-001",
-        "RAG-001",
-        "LRN-001",
-        "ACTGW-001"
-      ],
-      "value_score": 80.55,
-      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
-      "evidence_refs": {
-        "upstream_full_name": "Hefrock/agent-skills",
-        "upstream_head_commit": "d105b52600cb78e838ccfd7b17e2fcb9cde2a252",
-        "manifest_sha256": "577ad91ff37fa7bf4754d232bf93c8a700d2cb1e84a9b00a537ad568692f5dac",
-        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
-      },
-      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
-      "status": "WAITING_SAFE_HANDLER",
-      "source_discovery_run_id": 39085394173,
-      "checkpointed_at": "2026-10-18T01:09:12.032Z",
-      "human_required": null,
-      "external_skill_code_execution": false,
-      "customer_data_used": false,
-      "prod_write": false,
-      "trading_access": false,
-      "paid_fallback": false,
-      "additional_cost_eur": 0
-    }
-  },
+  "waiting_safe_handler": {},
   "completed": {
     "lobehub-skills:9a6e3fac20369220df43": {
       "candidate_id": "lobehub-skills:9a6e3fac20369220df43",
@@ -720,6 +685,55 @@
       "prod_authorized": false,
       "autonomous_promotion_authorized": false,
       "action_id": "skill-action:08b12f74f2b1436993b0455b",
+      "action_type": "REJECT_CAPABILITY",
+      "action_status": "APPLIED_METADATA_ONLY",
+      "next_gate": "CONTINUE_DISCOVERY"
+    },
+    "github-wide-skills:66b7982a1c10e80fe904": {
+      "candidate_id": "github-wide-skills:66b7982a1c10e80fe904",
+      "name": "agent-redteam",
+      "human_alias": "Agent Redteam",
+      "wrapper_id": "skillwrap:d880f1bbe1349cacc3fc",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 80.55,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "Hefrock/agent-skills",
+        "upstream_head_commit": "d105b52600cb78e838ccfd7b17e2fcb9cde2a252",
+        "manifest_sha256": "577ad91ff37fa7bf4754d232bf93c8a700d2cb1e84a9b00a537ad568692f5dac",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "SKILL_AUTONOMY_DECISION_RECORDED",
+      "status": "COMPLETED",
+      "source_discovery_run_id": 39085394173,
+      "checkpointed_at": "2026-10-18T01:09:12.032Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0,
+      "disposition": "DESCARTAR",
+      "evidence": {
+        "reason": "UNTRUSTED_SOURCE_OR_SUPPLY_CHAIN",
+        "decision_id": "skill-autonomy:8bccf95a0485834e41411aac",
+        "decision": "DESCARTAR",
+        "human_required": null,
+        "source": "CEREBRO Skill AutoLoop Safe Handler V0"
+      },
+      "updated_at": "2026-10-20T18:53:21.073Z",
+      "prod_authorized": false,
+      "autonomous_promotion_authorized": false,
+      "action_id": "skill-action:cd99a9c14688658d9031bd77",
       "action_type": "REJECT_CAPABILITY",
       "action_status": "APPLIED_METADATA_ONLY",
       "next_gate": "CONTINUE_DISCOVERY"
@@ -2819,7 +2833,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "TERMINAL_HOLD_CONTINUE_OTHER_SAFE_WORK",
+  "last_action": "APPLY_REJECT_CAPABILITY_CONTINUE_DISCOVERY",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -3236,6 +3250,45 @@
       "external_skill_code_execution_authorized": false,
       "additional_cost_eur": 0,
       "recorded_at": "2026-10-20T18:32:26.860Z"
+    },
+    "github-wide-skills:66b7982a1c10e80fe904": {
+      "schema_version": "1.0.0",
+      "state_type": "CEREBRO_SKILL_AUTONOMY_ACTION_RECEIPT",
+      "action_id": "skill-action:cd99a9c14688658d9031bd77",
+      "decision_id": "skill-autonomy:8bccf95a0485834e41411aac",
+      "company_id": "GLOBAL",
+      "engine_id": "SKILL-AUTONOMY-ACTION",
+      "environment": "PREPROD",
+      "version": "1.0.0",
+      "skill_id": "github-wide-skills:66b7982a1c10e80fe904",
+      "skill_version": "skillwrap:d880f1bbe1349cacc3fc",
+      "decision": "DESCARTAR",
+      "action_type": "REJECT_CAPABILITY",
+      "status": "APPLIED_METADATA_ONLY",
+      "next_gate": "CONTINUE_DISCOVERY",
+      "target_engine_ids": [
+        "ACTGW-001",
+        "FACT-001",
+        "LRN-001",
+        "ORCH-001",
+        "RAG-001",
+        "ROUTE-001"
+      ],
+      "observed_at": null,
+      "human_required": null,
+      "queueable_safe_work": false,
+      "terminal_metadata_only": true,
+      "mutation_authorized": false,
+      "internal_wrapper_shadow_authorized": false,
+      "fact001_gap_candidate_authorized": false,
+      "fact001_create_authorized": false,
+      "paid_activation_authorized": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "external_skill_code_execution_authorized": false,
+      "additional_cost_eur": 0,
+      "recorded_at": "2026-10-20T18:53:21.073Z"
     }
   },
   "autonomy_action_queue": {},
