@@ -6,8 +6,12 @@ import './cerebro-jarvis-hud.css';
 
 const VOICE_STORAGE_KEY='cerebro_console_voice_id_v1';
 const SPEED_STORAGE_KEY='cerebro_console_voice_speed_v1';
+const VOICE_SLOT_STORAGE_KEY='cerebro_console_voice_slots_v1';
+const USER_VOICE_ALIASES:Record<number,string>={1:'Bipi',2:'Trasta',3:'Pablo',4:'Marcos'};
+const USER_HIDDEN_SLOT=5;
 type VoiceSpeed='normal'|'fast';
 type CerebroUtterance=SpeechSynthesisUtterance&{__cerebroPreviewVoice?:boolean};
+type VoiceSlots=Record<string,string>;
 
 function voiceId(voice:SpeechSynthesisVoice){
  return voice.voiceURI||`${voice.name}:${voice.lang}`;
@@ -19,6 +23,41 @@ function storedVoiceId(){
 
 function storedSpeed():VoiceSpeed{
  try{return window.localStorage.getItem(SPEED_STORAGE_KEY)==='fast'?'fast':'normal'}catch{return 'normal'}
+}
+
+function storedVoiceSlots():VoiceSlots{
+ try{
+  const parsed=JSON.parse(window.localStorage.getItem(VOICE_SLOT_STORAGE_KEY)||'{}');
+  return parsed&&typeof parsed==='object'&&!Array.isArray(parsed)?parsed as VoiceSlots:{};
+ }catch{return {}}
+}
+
+function persistVoiceSlots(slots:VoiceSlots){
+ try{window.localStorage.setItem(VOICE_SLOT_STORAGE_KEY,JSON.stringify(slots))}catch{/* preference remains session-local */}
+}
+
+function ensureVoiceSlots(voices:SpeechSynthesisVoice[]){
+ const current=storedVoiceSlots();
+ const next={...current};
+ let changed=false;
+ for(let slot=1;slot<=USER_HIDDEN_SLOT;slot+=1){
+  const voice=voices[slot-1];
+  if(!voice||next[String(slot)])continue;
+  next[String(slot)]=voiceId(voice);
+  changed=true;
+ }
+ if(changed)persistVoiceSlots(next);
+ return next;
+}
+
+function slotForVoice(id:string,slots:VoiceSlots){
+ const entry=Object.entries(slots).find(([,storedId])=>storedId===id);
+ return entry?Number(entry[0]):null;
+}
+
+function aliasForVoice(id:string,slots:VoiceSlots){
+ const slot=slotForVoice(id,slots);
+ return slot?USER_VOICE_ALIASES[slot]||'':'';
 }
 
 function availableVoices(){
@@ -75,6 +114,7 @@ export function CerebroVoiceSettings(){
  const [open,setOpen]=useState(false);
  const [voicesOpen,setVoicesOpen]=useState(true);
  const [voices,setVoices]=useState<SpeechSynthesisVoice[]>(()=>availableVoices());
+ const [voiceSlots,setVoiceSlots]=useState<VoiceSlots>(()=>ensureVoiceSlots(availableVoices()));
  const [selectedId,setSelectedId]=useState(()=>storedVoiceId());
  const [speed,setSpeed]=useState<VoiceSpeed>(()=>storedSpeed());
  const rootRef=useRef<HTMLDivElement|null>(null);
@@ -88,10 +128,13 @@ export function CerebroVoiceSettings(){
   const refresh=()=>{
    if(cancelled)return;
    const next=availableVoices();
+   const slots=ensureVoiceSlots(next);
    setVoices(next);
+   setVoiceSlots(slots);
    if(next.length>0){
     const current=storedVoiceId();
-    if(current&&!next.some(voice=>voiceId(voice)===current)){
+    const hiddenId=slots[String(USER_HIDDEN_SLOT)]||'';
+    if(current===hiddenId||current&&!next.some(voice=>voiceId(voice)===current)){
      persistVoice('');
      setSelectedId('');
     }
@@ -121,7 +164,11 @@ export function CerebroVoiceSettings(){
   };
  },[open]);
 
- const effectiveSelected=useMemo(()=>voices.find(voice=>voiceId(voice)===selectedId)||null,[voices,selectedId]);
+ const visibleVoices=useMemo(()=>{
+  const hiddenId=voiceSlots[String(USER_HIDDEN_SLOT)]||'';
+  return voices.filter(voice=>voiceId(voice)!==hiddenId);
+ },[voices,voiceSlots]);
+ const effectiveSelected=useMemo(()=>visibleVoices.find(voice=>voiceId(voice)===selectedId)||null,[visibleVoices,selectedId]);
 
  function chooseVoice(voice:SpeechSynthesisVoice){
   const id=voiceId(voice);
@@ -142,7 +189,8 @@ export function CerebroVoiceSettings(){
  function preview(voice:SpeechSynthesisVoice){
   if(!speechSynthesisSupported())return;
   window.speechSynthesis.cancel();
-  const utterance=new SpeechSynthesisUtterance('Hola, soy CEREBRO. Esta es mi voz.') as CerebroUtterance;
+  const alias=aliasForVoice(voiceId(voice),voiceSlots);
+  const utterance=new SpeechSynthesisUtterance(alias?`Hola, soy ${alias}. Esta es mi voz para CEREBRO.`:'Hola, soy CEREBRO. Esta es mi voz.') as CerebroUtterance;
   utterance.__cerebroPreviewVoice=true;
   utterance.voice=voice;
   utterance.lang=voice.lang||'es-ES';
@@ -163,19 +211,20 @@ export function CerebroVoiceSettings(){
 
    {voicesOpen?<div className="cerebro-voice-picker">
     <div className="cerebro-voice-selection-status">
-     <strong>{effectiveSelected?'Voz elegida por ti':'Elige tú la voz'}</strong>
-     <small>{effectiveSelected?`${effectiveSelected.name} · ${effectiveSelected.lang||'idioma no indicado'}`:`${voices.length} ${voices.length===1?'voz disponible':'voces disponibles'} en este navegador/dispositivo`}</small>
+     <strong>{effectiveSelected?'Voz elegida por ti':'Catálogo de voces'}</strong>
+     <small>{effectiveSelected?`${aliasForVoice(voiceId(effectiveSelected),voiceSlots)?`${aliasForVoice(voiceId(effectiveSelected),voiceSlots)} — `:''}${effectiveSelected.name} · ${effectiveSelected.lang||'idioma no indicado'}`:`${visibleVoices.length} ${visibleVoices.length===1?'voz disponible':'voces disponibles'} · la voz descartada está oculta`}</small>
     </div>
-    {voices.length===0?<div className="cerebro-voice-empty">El navegador todavía no ha publicado sus voces. CEREBRO seguirá reintentando durante unos segundos.</div>:<div className="cerebro-voice-list" role="listbox" aria-label="Voces disponibles en este navegador y dispositivo">
-     {voices.map((voice,index)=>{
+    {visibleVoices.length===0?<div className="cerebro-voice-empty">El navegador todavía no ha publicado sus voces. CEREBRO seguirá reintentando durante unos segundos.</div>:<div className="cerebro-voice-list" role="listbox" aria-label="Voces disponibles en este navegador y dispositivo">
+     {visibleVoices.map((voice,index)=>{
       const id=voiceId(voice);
       const selected=selectedId===id;
+      const alias=aliasForVoice(id,voiceSlots);
       return <div className={`cerebro-voice-option ${selected?'is-selected':''}`} key={id} role="option" aria-selected={selected}>
        <button type="button" className="cerebro-voice-choice" onClick={()=>chooseVoice(voice)}>
         <span className="cerebro-voice-check">{selected?<Check size={15}/>:null}</span>
-        <span><strong>{voice.name||`Voz ${index+1}`}</strong><small>{voice.lang||'idioma no indicado'} · {voice.localService?'dispositivo':'navegador/red'}</small></span>
+        <span><strong>{alias?`${alias} — `:''}{voice.name||`Voz ${index+1}`}</strong><small>{voice.lang||'idioma no indicado'} · {voice.localService?'dispositivo':'navegador/red'}</small></span>
        </button>
-       <button type="button" className="cerebro-voice-preview" onClick={()=>preview(voice)} aria-label={`Escuchar ${voice.name||`Voz ${index+1}`}`} title="Probar esta voz"><Volume2 size={16}/></button>
+       <button type="button" className="cerebro-voice-preview" onClick={()=>preview(voice)} aria-label={`Escuchar ${alias||voice.name||`Voz ${index+1}`}`} title="Probar esta voz"><Volume2 size={16}/></button>
       </div>;
      })}
     </div>}
