@@ -13,11 +13,13 @@ on:
       - 'cerebro/runtime/universal-skill-readonly-semantic-evidence-v1.mjs'
       - 'cerebro/runtime/universal-skill-repository-intake-v1.mjs'
       - 'cerebro/runtime/universal-skill-source-queue-v1.mjs'
+      - 'cerebro/runtime/universal-skill-safe-engineering-admission-v1.mjs'
       - 'cerebro/runtime/skill-dynamic-adoption-v1.mjs'
       - 'cerebro/registry/skill-known-repository-pool-v1.json'
       - 'cerebro/tests/skill-known-repository-pool-v1.test.mjs'
       - 'cerebro/tests/universal-skill-readonly-semantic-evidence-v1.test.mjs'
       - 'cerebro/tests/universal-skill-readonly-web-activation-v1.test.mjs'
+      - 'cerebro/tests/universal-skill-safe-engineering-admission-v1.test.mjs'
       - '.github/workflows/cerebro-known-skill-pool-intake-v1.yml'
 
 permissions:
@@ -58,8 +60,8 @@ jobs:
           key: cerebro-known-pool-r1-${{ github.ref_name }}-${{ github.run_id }}
           restore-keys: |
             cerebro-known-pool-r1-${{ github.ref_name }}-
-      - name: Validate pool and readonly wrapping
-        run: node --test cerebro/tests/skill-known-repository-pool-v1.test.mjs cerebro/tests/universal-skill-readonly-semantic-evidence-v1.test.mjs cerebro/tests/universal-skill-readonly-web-activation-v1.test.mjs cerebro/tests/skill-dynamic-adoption-v1.test.mjs
+      - name: Validate pool readonly wrapping and safe engineering admission
+        run: node --test cerebro/tests/skill-known-repository-pool-v1.test.mjs cerebro/tests/universal-skill-readonly-semantic-evidence-v1.test.mjs cerebro/tests/universal-skill-readonly-web-activation-v1.test.mjs cerebro/tests/skill-dynamic-adoption-v1.test.mjs cerebro/tests/universal-skill-safe-engineering-admission-v1.test.mjs
       - name: Discover pinned candidates without Code Search and run governed intake
         shell: bash
         env:
@@ -68,17 +70,28 @@ jobs:
           set -euo pipefail
           EVENT="$RUNNER_TEMP/cerebro-known-pool-event.json"
           REPORT="$RUNNER_TEMP/cerebro-known-pool-queue-report.json"
+          SAFE_REPORT="$RUNNER_TEMP/cerebro-known-pool-safe-engineering-report.json"
           node cerebro/runtime/skill-known-repository-pool-v1.mjs --registry cerebro/registry/skill-known-repository-pool-v1.json --out "$EVENT"
           COUNT="$(node -e "const fs=require('fs');const x=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/cerebro-known-pool-event.json','utf8'));process.stdout.write(String(x.client_payload.github_urls.length));")"
           test "$COUNT" -gt 0
           CEREBRO_SOURCE_QUEUE_REPORT_FILE="$REPORT" node cerebro/runtime/universal-skill-source-queue-v1.mjs --event "$EVENT"
-          node cerebro/runtime/skill-dynamic-adoption-v1.mjs --queue-report "$REPORT" --registry cerebro/registry/skill-dynamic-adoption-v1.json --output "$CEREBRO_DYNAMIC_ADOPTION_PROPOSAL"
-          node --input-type=module - "$REPORT" <<'NODE'
+          node cerebro/runtime/universal-skill-safe-engineering-admission-v1.mjs --queue-report "$REPORT" --normalize-only --report-output "$SAFE_REPORT"
+          node cerebro/runtime/skill-dynamic-adoption-v1.mjs --queue-report "$SAFE_REPORT" --registry cerebro/registry/skill-dynamic-adoption-v1.json --output "$CEREBRO_DYNAMIC_ADOPTION_PROPOSAL"
+          node --input-type=module - "$SAFE_REPORT" <<'NODE'
           import fs from 'node:fs';
           const r=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
           const full=(r.results??[]).filter(x=>x.full_safe_preprod===true);
-          console.log(JSON.stringify({status:'KNOWN_POOL_CYCLE_COMPLETE',requested:r.requested,by_status:r.by_status,full_safe_preprod:full.length,new_full_names:full.map(x=>x.technical_name??x.priority_seed_technical_name??x.github_url),queue_revision:r.pipeline_revision}));
+          console.log(JSON.stringify({status:'KNOWN_POOL_CYCLE_COMPLETE',requested:r.requested,by_status:r.by_status,full_safe_preprod:full.length,safe_engineering_required:r.safe_engineering_required??0,new_full_names:full.map(x=>x.technical_name??x.priority_seed_technical_name??x.github_url),queue_revision:r.pipeline_revision}));
           NODE
+      - name: Upload exact source queue admission evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-known-skill-pool-source-queue-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/cerebro-known-pool-queue-report.json
+            ${{ runner.temp }}/cerebro-known-pool-safe-engineering-report.json
+          if-no-files-found: error
+          retention-days: 2
       - name: Upload exact dynamic adoption proposal
         uses: actions/upload-artifact@v4
         with:
@@ -90,4 +103,4 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          ! grep -Eq 'prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|prod_mutation_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true|external_skill_code_execution[[:space:]]*:[[:space:]]*true|npm install|child_process' cerebro/runtime/skill-known-repository-pool-v1.mjs cerebro/runtime/universal-skill-readonly-semantic-evidence-v1.mjs cerebro/runtime/universal-skill-repository-intake-v1.mjs cerebro/runtime/universal-skill-source-queue-v1.mjs cerebro/runtime/skill-dynamic-adoption-v1.mjs
+          ! grep -Eq 'prod_authorized[[:space:]]*:[[:space:]]*true|prod_write_authorized[[:space:]]*:[[:space:]]*true|prod_mutation_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true|external_skill_code_execution[[:space:]]*:[[:space:]]*true|npm install|child_process' cerebro/runtime/skill-known-repository-pool-v1.mjs cerebro/runtime/universal-skill-readonly-semantic-evidence-v1.mjs cerebro/runtime/universal-skill-repository-intake-v1.mjs cerebro/runtime/universal-skill-source-queue-v1.mjs cerebro/runtime/universal-skill-safe-engineering-admission-v1.mjs cerebro/runtime/skill-dynamic-adoption-v1.mjs

@@ -4,6 +4,7 @@ on:
   workflow_run:
     workflows:
       - CEREBRO Skill AutoLoop Safe Handler V0
+      - CEREBRO Known Skill Pool Intake V1
     types:
       - completed
   schedule:
@@ -34,19 +35,46 @@ jobs:
           node-version: 24
 
       - name: Run safe action worker contracts
-        run: node --test cerebro/tests/skill-autonomy-action-application-v1.test.mjs cerebro/tests/skill-autonomy-safe-action-worker-v1.test.mjs cerebro/tests/skill-autoloop-safe-handler.test.mjs cerebro/tests/skill-capability-evolution.test.mjs cerebro/tests/skill-capability-evolution-bridge.test.mjs cerebro/tests/fact001-request-runner.test.mjs
+        run: node --test cerebro/tests/skill-autonomy-action-application-v1.test.mjs cerebro/tests/skill-autonomy-safe-action-worker-v1.test.mjs cerebro/tests/skill-autoloop-safe-handler.test.mjs cerebro/tests/skill-capability-evolution.test.mjs cerebro/tests/skill-capability-evolution-bridge.test.mjs cerebro/tests/fact001-request-runner.test.mjs cerebro/tests/universal-skill-safe-engineering-admission-v1.test.mjs
 
       - name: Load durable Skill AutoLoop state
         run: |
           set -euo pipefail
-          mkdir -p artifacts/autoloop
+          mkdir -p artifacts/autoloop artifacts/source
           git fetch --no-tags origin "refs/heads/$AUTOLOOP_STATE_BRANCH:refs/remotes/origin/$AUTOLOOP_STATE_BRANCH"
           git show "refs/remotes/origin/$AUTOLOOP_STATE_BRANCH:$AUTOLOOP_STATE_PATH" > artifacts/autoloop/state.before-action-worker.json
+
+      - name: Download exact known-pool source queue evidence
+        if: github.event_name == 'workflow_run' && github.event.workflow_run.name == 'CEREBRO Known Skill Pool Intake V1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          set -euo pipefail
+          gh run download "$SOURCE_RUN_ID" --repo "$GITHUB_REPOSITORY" --name "cerebro-known-skill-pool-source-queue-$SOURCE_RUN_ID" --dir artifacts/source
+          test -f artifacts/source/cerebro-known-pool-safe-engineering-report.json
+
+      - name: Admit one technical engineering candidate to the canonical safe action queue
+        if: github.event_name == 'workflow_run' && github.event.workflow_run.name == 'CEREBRO Known Skill Pool Intake V1'
+        env:
+          SOURCE_RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          node cerebro/runtime/universal-skill-safe-engineering-admission-v1.mjs \
+            --state artifacts/autoloop/state.before-action-worker.json \
+            --queue-report artifacts/source/cerebro-known-pool-safe-engineering-report.json \
+            --source-run-id "$SOURCE_RUN_ID" \
+            --max-admissions 1 \
+            --state-output artifacts/autoloop/state.admitted.json \
+            --report-output artifacts/autoloop/safe-engineering-admission.json
+
+      - name: Preserve current state when no source-engineering admission is attached
+        if: github.event_name != 'workflow_run' || github.event.workflow_run.name != 'CEREBRO Known Skill Pool Intake V1'
+        run: cp artifacts/autoloop/state.before-action-worker.json artifacts/autoloop/state.admitted.json
 
       - name: Route one safe queued action to the existing governed pipeline
         run: |
           node cerebro/skills/skill-autonomy-safe-action-worker-v1.mjs \
-            --state artifacts/autoloop/state.before-action-worker.json \
+            --state artifacts/autoloop/state.admitted.json \
             --output artifacts/autoloop/state.after-action-worker.json \
             --handoff-output artifacts/autoloop/action-handoff.json
 
