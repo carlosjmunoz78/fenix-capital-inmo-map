@@ -4,17 +4,24 @@
   "owner_engine": "MKT-001",
   "environment": "PREPROD",
   "evidence_state": "PREPROD_REFERENCE_GREEN",
-  "validated_code_head_sha": "438355977d291dc2d887d9283e89ad1a575d3cf5",
+  "validated_code_head_sha": "4c075b68c8d14d9404f7f4850c6a9d6466e0d33c",
   "validation_workflow": {
     "name": "CEREBRO Channel Intelligence V1",
-    "run_id": 39602014107,
+    "run_id": 39602914148,
     "conclusion": "success",
     "checks": [
       "channel-intelligence contract JSON parses",
+      "channel-intelligence evidence JSON parses",
       "channel-intelligence runtime tests pass",
       "multicompany adapter integration tests pass",
+      "JOB-001 durable watch bridge tests pass",
       "canonical Factory registry validation passes"
     ]
+  },
+  "governed_integration_workflow": {
+    "name": "CEREBRO Governed Main Integration V0",
+    "run_id": 39602914045,
+    "conclusion": "success"
   },
   "existing_components_reused": [
     {
@@ -26,14 +33,21 @@
       "path": "cerebro/multicompany/bootstrap-tier-v1.mjs",
       "blob_sha": "af7702da942efd5aaa597af6d5ce65f3f084245c",
       "engines": ["SOCBOOT-001"]
+    },
+    {
+      "path": "cerebro/runtime/durable-job-runtime-v1.mjs",
+      "engines": ["JOB-001"],
+      "reuse": "persistent PREPROD journal-backed queue; no new scheduler"
     }
   ],
   "new_files_under_test": [
     "cerebro/marketing/channel-intelligence-runtime-v1.mjs",
     "cerebro/marketing/channel-intelligence-multicompany-adapter-v1.mjs",
+    "cerebro/marketing/channel-intelligence-job001-bridge-v1.mjs",
     "cerebro/contracts/channel-intelligence-v1.contract.json",
     "cerebro/tests/channel-intelligence-runtime-v1.test.mjs",
-    "cerebro/tests/channel-intelligence-multicompany-adapter-v1.test.mjs"
+    "cerebro/tests/channel-intelligence-multicompany-adapter-v1.test.mjs",
+    "cerebro/tests/channel-intelligence-job001-bridge-v1.test.mjs"
   ],
   "proven": {
     "web_operating_profile": true,
@@ -44,6 +58,15 @@
     "cross_channel_insight_without_blind_asset_copy": true,
     "new_channel_bootstrap_plan_without_new_engine_id": true,
     "reuse_existing_multicompany_web_social_pipeline": true,
+    "reuse_existing_job001_runtime": true,
+    "durable_preprod_watch_jobs": true,
+    "watch_cycle_idempotency_and_dedupe": true,
+    "trend_radar_3h_plan": true,
+    "competitor_radar_12h_plan": true,
+    "market_radar_12h_plan": true,
+    "channel_health_6h_plan": true,
+    "search_and_platform_capability_24h_plan": true,
+    "web_visual_radar_blocked_until_official_baseline_stable": true,
     "cross_company_deny": true,
     "low_confidence_fail_closed": true,
     "publish_and_prod_write_disabled": true,
@@ -55,8 +78,9 @@
   "not_proven_or_not_enabled": [
     "physical always-on trend collection from each platform",
     "physical competitor data collection for every channel",
-    "physical EVT-001/JOB-001 scheduling binding for this capability",
-    "provider/API bindings for social networks",
+    "read-only collector adapter bindings for Meta and LinkedIn",
+    "registered JOB-001 worker handler that executes those collectors",
+    "provider/API write bindings for social networks",
     "public publishing or community actions",
     "paid ads execution",
     "automatic visual screenshot capture and pixel regression of the live website",
@@ -67,7 +91,8 @@
     "parallel_build": true,
     "wordpress_prod_write_from_this_capability": false,
     "merge_during_active_staging_to_prod_migration": false,
-    "baseline_after_prod_stability_required": true
+    "baseline_after_prod_stability_required": true,
+    "web_visual_radar_requires_explicit_baseline_ready": true
   },
   "human_required_reasons": [
     "LEGAL_REQUIRED",
@@ -79,5 +104,5 @@
     "MONEY_LIMIT",
     "CUSTOMER_HUMAN_REQUEST"
   ],
-  "promotion_note": "PREPROD_REFERENCE_GREEN does not mean autonomous PROD. Physical collectors, scheduler bindings, channel adapters, visual baseline/regression and governed promotion remain separate gates."
+  "promotion_note": "PREPROD_REFERENCE_GREEN proves the additive profiles/scoring/integration and durable JOB-001 watch dispatch. It does not prove physical platform collection or autonomous PROD. Collector bindings, worker execution, channel write adapters, visual baseline/regression and governed promotion remain separate gates."
 }
