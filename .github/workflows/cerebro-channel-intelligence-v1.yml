@@ -10,6 +10,7 @@ on:
       - 'cerebro/marketing/channel-intelligence-worker-v1.mjs'
       - 'cerebro/marketing/channel-intelligence-direct-read-adapters-v1.mjs'
       - 'cerebro/marketing/channel-intelligence-existing-read-bridge-v1.mjs'
+      - 'cerebro/marketing/channel-intelligence-publisher-gateway-v1.mjs'
       - 'cerebro/tests/channel-intelligence-runtime-v1.test.mjs'
       - 'cerebro/tests/channel-intelligence-multicompany-adapter-v1.test.mjs'
       - 'cerebro/tests/channel-intelligence-job001-bridge-v1.test.mjs'
@@ -19,11 +20,13 @@ on:
       - 'cerebro/tests/channel-intelligence-existing-read-bridge-v1.test.mjs'
       - 'cerebro/tests/channel-intelligence-existing-bindings-evidence-v1.test.mjs'
       - 'cerebro/tests/channel-intelligence-existing-read-worker-e2e-v1.test.mjs'
+      - 'cerebro/tests/channel-intelligence-publisher-gateway-v1.test.mjs'
       - 'cerebro/contracts/channel-intelligence-v1.contract.json'
       - 'cerebro/docs/CHANNEL_INTELLIGENCE_V1_SCOPE.md'
       - 'cerebro/docs/*CHANNEL_INTELLIGENCE_V1*'
       - 'cerebro/evidence/channel-intelligence-v1.json'
       - 'cerebro/evidence/channel-intelligence-collectors-fenix-v1.json'
+      - 'cerebro/evidence/channel-intelligence-publisher-topology-fenix-v1.json'
       - '.github/workflows/cerebro-channel-intelligence-v1.yml'
   workflow_dispatch:
 
@@ -48,9 +51,10 @@ jobs:
           node -e "JSON.parse(require('fs').readFileSync('cerebro/contracts/channel-intelligence-v1.contract.json','utf8')); console.log('contract json ok')"
           node -e "JSON.parse(require('fs').readFileSync('cerebro/evidence/channel-intelligence-v1.json','utf8')); console.log('evidence json ok')"
           node -e "JSON.parse(require('fs').readFileSync('cerebro/evidence/channel-intelligence-collectors-fenix-v1.json','utf8')); console.log('collector evidence json ok')"
+          node -e "JSON.parse(require('fs').readFileSync('cerebro/evidence/channel-intelligence-publisher-topology-fenix-v1.json','utf8')); console.log('publisher topology evidence json ok')"
 
       - name: Run Channel Intelligence V1 tests
-        run: node --test cerebro/tests/channel-intelligence-runtime-v1.test.mjs cerebro/tests/channel-intelligence-multicompany-adapter-v1.test.mjs cerebro/tests/channel-intelligence-job001-bridge-v1.test.mjs cerebro/tests/channel-intelligence-collector-registry-v1.test.mjs cerebro/tests/channel-intelligence-worker-v1.test.mjs cerebro/tests/channel-intelligence-direct-read-adapters-v1.test.mjs cerebro/tests/channel-intelligence-existing-read-bridge-v1.test.mjs cerebro/tests/channel-intelligence-existing-bindings-evidence-v1.test.mjs cerebro/tests/channel-intelligence-existing-read-worker-e2e-v1.test.mjs
+        run: node --test cerebro/tests/channel-intelligence-runtime-v1.test.mjs cerebro/tests/channel-intelligence-multicompany-adapter-v1.test.mjs cerebro/tests/channel-intelligence-job001-bridge-v1.test.mjs cerebro/tests/channel-intelligence-collector-registry-v1.test.mjs cerebro/tests/channel-intelligence-worker-v1.test.mjs cerebro/tests/channel-intelligence-direct-read-adapters-v1.test.mjs cerebro/tests/channel-intelligence-existing-read-bridge-v1.test.mjs cerebro/tests/channel-intelligence-existing-bindings-evidence-v1.test.mjs cerebro/tests/channel-intelligence-existing-read-worker-e2e-v1.test.mjs cerebro/tests/channel-intelligence-publisher-gateway-v1.test.mjs
 
       - name: Validate canonical Factory registry remains unchanged
         working-directory: cerebro
