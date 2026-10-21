@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-21T07:45:48.088Z",
+  "updated_at": "2026-10-21T07:55:22.164Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -124,40 +124,6 @@
   "in_flight": {},
   "waiting_human": {},
   "waiting_safe_handler": {
-    "github-wide-skills:963783997f06f5fa613f": {
-      "candidate_id": "github-wide-skills:963783997f06f5fa613f",
-      "name": "document-evolution-tracker",
-      "human_alias": "Document Evolution Tracker",
-      "wrapper_id": "skillwrap:931e002ec878f05fc550",
-      "domain": "agent-ai-orchestration",
-      "engine_bindings": [
-        "ORCH-001",
-        "ROUTE-001",
-        "FACT-001",
-        "RAG-001",
-        "LRN-001",
-        "ACTGW-001"
-      ],
-      "value_score": 80.01,
-      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
-      "evidence_refs": {
-        "upstream_full_name": "JiamingShi-JsPhys/agent-skills",
-        "upstream_head_commit": "13a8b0f1c260337146881e02a6974f9164042f74",
-        "manifest_sha256": "a5f1c76ac7a7453131090853df62af290c857efd5e8a068cec50e198b4af3a69",
-        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
-      },
-      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
-      "status": "WAITING_SAFE_HANDLER",
-      "source_discovery_run_id": 39556004629,
-      "checkpointed_at": "2026-10-21T06:32:32.644Z",
-      "human_required": null,
-      "external_skill_code_execution": false,
-      "customer_data_used": false,
-      "prod_write": false,
-      "trading_access": false,
-      "paid_fallback": false,
-      "additional_cost_eur": 0
-    },
     "github-wide-skills:03ebb80f0ffb1dfc260d": {
       "candidate_id": "github-wide-skills:03ebb80f0ffb1dfc260d",
       "name": "conflict-detector",
@@ -4897,9 +4863,52 @@
       },
       "updated_at": "2026-10-21T07:45:32.274Z",
       "prod_authorized": false
+    },
+    "github-wide-skills:963783997f06f5fa613f": {
+      "candidate_id": "github-wide-skills:963783997f06f5fa613f",
+      "name": "document-evolution-tracker",
+      "human_alias": "Document Evolution Tracker",
+      "wrapper_id": "skillwrap:931e002ec878f05fc550",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 80.01,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "JiamingShi-JsPhys/agent-skills",
+        "upstream_head_commit": "13a8b0f1c260337146881e02a6974f9164042f74",
+        "manifest_sha256": "a5f1c76ac7a7453131090853df62af290c857efd5e8a068cec50e198b4af3a69",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "SAFE_HANDLER_TERMINAL_HOLD",
+      "status": "TERMINAL_HOLD",
+      "source_discovery_run_id": 39556004629,
+      "checkpointed_at": "2026-10-21T06:32:32.644Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0,
+      "evidence": {
+        "reason": "STATIC_LAB_REJECT_LOW_COVERAGE",
+        "decision_id": null,
+        "decision": null,
+        "human_required": null,
+        "source": "CEREBRO Skill AutoLoop Safe Handler V0"
+      },
+      "updated_at": "2026-10-21T07:55:22.164Z",
+      "prod_authorized": false
     }
   },
-  "last_action": "SKILL_AUTONOMY_ACTION_WORKER_IDLE",
+  "last_action": "TERMINAL_HOLD_CONTINUE_OTHER_SAFE_WORK",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
