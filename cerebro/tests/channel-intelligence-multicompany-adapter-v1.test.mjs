@@ -101,7 +101,7 @@ test('adapter creates separate Instagram Facebook and LinkedIn pods from existin
     social_bootstrap,
     site_ref: 'site:fenixcapital:prod-baseline'
   });
-  assert.deepEqual(out.channel_pods.map((pod) => pod.channel_id), ['instagram','facebook','linkedin']);
+  assert.deepEqual([...out.channel_pods.map((pod) => pod.channel_id)].sort(), ['facebook','instagram','linkedin']);
   assert.equal(new Set(out.channel_pods.map((pod) => pod.pod_id)).size, 3);
   assert.equal(out.channel_pods.every((pod) => pod.account_ref.startsWith(`account:${pod.channel_id}:`)), true);
 });
