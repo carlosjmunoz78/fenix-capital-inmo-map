@@ -64,6 +64,32 @@ Se instancia por `company_id + channel_id` y coordina roles lógicos, no nuevos 
 - Brand Guardian
 - Policy/QA
 
+## Publisher Gateway
+
+La auditoría vigente fija la topología actual así:
+
+`SOC-001 / CEREBRO → BUFFER → Facebook / Instagram / LinkedIn`
+
+Las rutas activas de Make auditadas para Facebook, Instagram y LinkedIn se consideran exclusivamente:
+
+`plataforma social → lectura identidad/métricas → CEREBRO`
+
+Reglas canónicas V1:
+
+- Buffer es el publisher actual evidenciado.
+- Make no es el publisher canónico; queda como puente transitorio de lectura/métricas donde ya existe.
+- Buffer no se convierte en dependencia estructural permanente.
+- CEREBRO expone un `Publisher Gateway` neutral a proveedor.
+- Adaptadores directos futuros (`META_DIRECT`, `LINKEDIN_DIRECT`, otros) permanecen `PLANNED_NOT_BOUND`.
+- No se desactiva Buffer hasta que un sustituto pase PREPROD E2E, idempotencia, verificación física, OLD vs NEW contra Buffer, rollback probado y promoción gradual.
+- Esta V1 no autoriza escrituras externas de publicación; solo planifica y valida topología/gates.
+
+Topología objetivo:
+
+`SOC-001 → Publisher Gateway → BUFFER | META_DIRECT | LINKEDIN_DIRECT | FUTURE_ADAPTER`
+
+Así se podrá retirar Buffer posteriormente sin rehacer SOC-001, calendario, aprendizaje, diseño, métricas ni PODs.
+
 ## Inteligencia continua
 
 Cada canal debe observar señales propias y clasificarlas al menos como:
@@ -106,6 +132,7 @@ Se introducirán contratos de capability/data sin alterar los 177 IDs:
 - `experiment-result.v1`
 - `cross-channel-insight.v1`
 - `channel-performance.v1`
+- `publisher-topology.v1`
 
 ## Eventos V1
 
@@ -124,6 +151,8 @@ Se introducirán contratos de capability/data sin alterar los 177 IDs:
 - `channel.function_added`
 - `channel.policy_changed`
 - `channel.new_detected`
+- `publisher.adapter_candidate`
+- `publisher.migration_ready`
 - `insight.cross_channel_ready`
 - `learning.rule_candidate`
 
@@ -139,6 +168,8 @@ La incorporación de una nueva red relevante debe seguir:
 - `prod_execution_enabled=false`.
 - `autonomous_prod=false`.
 - No escribir en WordPress PROD durante la migración actual.
+- No publicar por Make desde esta capability.
+- No desactivar Buffer ni reconfigurar proveedor sin sustituto validado.
 - No duplicar source-of-truth.
 - No saltar POL-001/HEX-001.
 - HUMAN_REQUIRED limitado a razones canónicas.
@@ -156,4 +187,5 @@ La V1 queda aceptada cuando:
 4. Puede transferir un insight entre canales sin copiar automáticamente la pieza creativa.
 5. Puede fabricar el scaffold de un nuevo channel pod a partir de un `channel-manifest`.
 6. Tests demuestran aislamiento multiempresa, PREPROD-only, fail-closed y coste 0 por defecto.
-7. Registry, dependencias, runbook y changelog quedan actualizados antes de promoción.
+7. Puede representar la topología de publicación actual con Buffer y bloquear Make como publisher.
+8. Registry, dependencias, runbook y changelog quedan actualizados antes de promoción.
