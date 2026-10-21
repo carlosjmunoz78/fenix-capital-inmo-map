@@ -1,0 +1,83 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix-capital",
+  "capability_id": "CHANNEL-INTELLIGENCE-V1",
+  "environment": "PREPROD",
+  "evidence_at": "2026-10-21T15:00:00+02:00",
+  "publisher_topology": {
+    "canonical_current_publisher": "BUFFER",
+    "publisher_gateway_target": "CEREBRO_PROVIDER_NEUTRAL_PUBLISHER_GATEWAY",
+    "make_role": "READ_METRICS_BRIDGE_ONLY",
+    "make_is_canonical_publisher": false,
+    "buffer_is_hard_dependency_target": false,
+    "migration_rule": "KEEP_BUFFER_UNTIL_REPLACEMENT_ADAPTER_PASSES_PREPROD_E2E_OLD_VS_NEW_AND_ROLLBACK",
+    "prod_publish_authorized_by_this_capability": false
+  },
+  "buffer_evidence": {
+    "repository": "carlosjmunoz78/fenix-capital-cerebro-social",
+    "default_branch": "main",
+    "preflight_commit": "f947acf089da4075890f949d003bb4a971050d4f",
+    "preflight_workflow": ".github/workflows/buffer-preflight.yml",
+    "publisher_script": "scripts/buffer_schedule_post.py",
+    "transport": "https://api.buffer.com",
+    "publisher_operations_observed": [
+      "CreateScheduledPost/createPost",
+      "EditScheduledPost/editPost"
+    ],
+    "mutation_workflows_policy": "MANUAL_ONLY_WORKFLOW_DISPATCH_AFTER_SAFETY_HARDENING",
+    "read_only_preflight_available": true,
+    "notes": "Buffer remains the evidenced publication runtime. Safety hardening prevents mutating legacy workflows from firing automatically on push/schedule; this does not redefine Make as publisher."
+  },
+  "make_read_evidence": [
+    {
+      "scenario_id": 9911827,
+      "name": "CEREBRO SOC-001 Facebook Native Identity V1",
+      "observed_role": "READ_POSTS_REACTIONS_AND_INGEST_METRICS",
+      "publishes": false,
+      "status": "ACTIVE_AT_AUDIT"
+    },
+    {
+      "scenario_id": 9911823,
+      "name": "CEREBRO SOC-001 Instagram Native Identity V1",
+      "observed_role": "READ_MEDIA_IDENTITY_AND_INGEST_METRICS",
+      "publishes": false,
+      "status": "ACTIVE_AT_AUDIT"
+    },
+    {
+      "scenario_id": 9597372,
+      "name": "FENIX · TEST · RADAR · LinkedIn engagement → Inteligencia · V1",
+      "observed_role": "READ_ORGANIZATION_POSTS_STATISTICS_AND_INGEST_INTELLIGENCE",
+      "publishes": false,
+      "status": "ACTIVE_AT_AUDIT"
+    }
+  ],
+  "observed_legacy_make_publishers": {
+    "state": "INACTIVE_OR_DEPRECATED_IN_AUDITED_INSTAGRAM_PUBLISHER_SCENARIOS",
+    "canonical_use": false,
+    "preserve_for_audit_until_dependency_map_complete": true
+  },
+  "future_adapters": [
+    {
+      "provider": "META_DIRECT",
+      "channels": ["facebook", "instagram"],
+      "state": "PLANNED_NOT_BOUND",
+      "promotion_gate": "PREPROD_E2E_AND_OLD_VS_NEW_AGAINST_BUFFER"
+    },
+    {
+      "provider": "LINKEDIN_DIRECT",
+      "channels": ["linkedin"],
+      "state": "PLANNED_NOT_BOUND",
+      "promotion_gate": "PREPROD_E2E_AND_OLD_VS_NEW_AGAINST_BUFFER"
+    }
+  ],
+  "guardrails": {
+    "publish_authorized": false,
+    "provider_write_authorized": false,
+    "buffer_disable_authorized": false,
+    "make_disable_authorized": false,
+    "credential_export_authorized": false,
+    "new_subscription_authorized": false,
+    "additional_cost_authorized_eur": 0,
+    "prod_write_authorized": false
+  }
+}
