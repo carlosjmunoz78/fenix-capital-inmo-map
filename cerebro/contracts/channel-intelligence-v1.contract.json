@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.1.0",
+  "schema_version": "1.2.0",
   "contract_id": "MKT-001/CHANNEL_INTELLIGENCE_V1",
   "company_id": "GLOBAL_OR_SCOPED",
   "engine_id": "MKT-001",
@@ -28,6 +28,17 @@
     "migration_rule": "KEEP_BUFFER_UNTIL_TARGET_ADAPTER_PASSES_PREPROD_E2E_OLD_VS_NEW_IDEMPOTENCY_PHYSICAL_VERIFY_ROLLBACK_AND_GRADUAL_PROMOTION",
     "v1_external_publish_enabled": false
   },
+  "evidence_governance": {
+    "canonical_company_id": "fenix-capital",
+    "legacy_read_aliases": ["FENIX_CAPITAL"],
+    "legacy_alias_write_allowed": false,
+    "freshness_required_for_current_decisions": true,
+    "own_performance_is_not_market_trend": true,
+    "own_performance_is_not_competitor_evidence": true,
+    "platform_trend_requires_platform_public_trend_evidence": true,
+    "market_opportunity_requires_multi_source_evidence": true,
+    "private_competitor_metrics_must_not_be_invented": true
+  },
   "data_contracts": [
     "channel-manifest.v1",
     "channel-pod-profile.v1",
@@ -40,7 +51,11 @@
     "experiment-result.v1",
     "cross-channel-insight.v1",
     "channel-performance.v1",
-    "publisher-topology.v1"
+    "publisher-topology.v1",
+    "evidence-freshness.v1",
+    "source-capability.v1",
+    "own-performance-metric-series.v1",
+    "own-performance-signal.v1"
   ],
   "trend_stages": ["SEED", "EMERGING", "BREAKOUT", "MAINSTREAM", "SATURATED", "DECLINING"],
   "events": [
@@ -61,6 +76,10 @@
     "channel.new_detected",
     "publisher.adapter_candidate",
     "publisher.migration_ready",
+    "evidence.stale",
+    "evidence.expired",
+    "performance.velocity_detected",
+    "performance.acceleration_detected",
     "insight.cross_channel_ready",
     "learning.rule_candidate"
   ],
@@ -80,6 +99,10 @@
     "blind_cross_channel_copy": false,
     "owner_taste_is_one_signal_not_absolute_rule": true,
     "trend_acceleration_before_raw_popularity": true,
+    "unknown_metrics_preserved_as_null": true,
+    "metric_imputation_without_evidence": false,
+    "stale_evidence_drives_current_decision": false,
+    "own_metrics_prove_market_trend": false,
     "experiment_before_promotion": true,
     "learning_requires_validation": true,
     "additional_cost_target_eur": 0
