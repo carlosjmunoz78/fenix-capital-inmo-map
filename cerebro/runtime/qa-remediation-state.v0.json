@@ -5,21 +5,21 @@
   "engine_id": "SELF-001",
   "environment": "PREPROD_CONTROL_PLANE",
   "version": "0.1.0",
-  "updated_at": "2026-10-21T20:10:30.652Z",
+  "updated_at": "2026-10-21T23:19:36.872Z",
   "status": "ROUTED_AUTONOMOUSLY_TO_PREPROD",
-  "open_cases": 8,
+  "open_cases": 4,
   "bug_cases": 0,
-  "improvement_cases": 8,
-  "learning_records_total": 8,
-  "candidate_packages_total": 8,
+  "improvement_cases": 4,
+  "learning_records_total": 4,
+  "candidate_packages_total": 4,
   "cases": [
     {
-      "case_id": "qa-case:550d7b32255aafcc3a9bceaf",
+      "case_id": "qa-case:5238209f0279541d270f4a95",
       "company_id": "fenix",
       "owner_engine": "HCI-001",
       "environment": "PREPROD",
       "source": "IMPROVEMENT",
-      "source_learning_id": "qa-learning:0b6fca608831c37c0745670c",
+      "source_learning_id": "qa-learning:2c72c8984471e786fdae5674",
       "issue_severity": null,
       "state": "ROUTED_TO_PREPROD_OWNER",
       "human_required": null,
@@ -41,12 +41,12 @@
       "additional_cost_eur": 0
     },
     {
-      "case_id": "qa-case:85c075e9de8b2c851039414d",
+      "case_id": "qa-case:367921d5199d96bc513adfbd",
       "company_id": "fenix",
       "owner_engine": "HCI-001",
       "environment": "PREPROD",
       "source": "IMPROVEMENT",
-      "source_learning_id": "qa-learning:568489a73179c37b7857ea92",
+      "source_learning_id": "qa-learning:bff844dc5851a34667aad2b5",
       "issue_severity": null,
       "state": "ROUTED_TO_PREPROD_OWNER",
       "human_required": null,
@@ -68,93 +68,12 @@
       "additional_cost_eur": 0
     },
     {
-      "case_id": "qa-case:8b34799bc57d962802207fce",
+      "case_id": "qa-case:87b58b01b509b6c7e465c542",
       "company_id": "fenix",
       "owner_engine": "HCI-001",
       "environment": "PREPROD",
       "source": "IMPROVEMENT",
-      "source_learning_id": "qa-learning:900bca29663a9e3053b67b8c",
-      "issue_severity": null,
-      "state": "ROUTED_TO_PREPROD_OWNER",
-      "human_required": null,
-      "repair_mode": "VERSIONED_PREPROD_CANDIDATE",
-      "gates": {
-        "reproduce_required": false,
-        "regression_test_required": false,
-        "old_vs_new_required": true,
-        "preprod_required": true,
-        "independent_judge_required": true,
-        "rollback_required": true,
-        "rebuild_required": true
-      },
-      "promotion_authorized": false,
-      "prod_authorized": false,
-      "prod_write_authorized": false,
-      "customer_data": false,
-      "trading_access": false,
-      "additional_cost_eur": 0
-    },
-    {
-      "case_id": "qa-case:4f84805bfe11d4a588e8d467",
-      "company_id": "fenix",
-      "owner_engine": "HCI-001",
-      "environment": "PREPROD",
-      "source": "IMPROVEMENT",
-      "source_learning_id": "qa-learning:e92cb6e9ce6e9e3268ce21d1",
-      "issue_severity": null,
-      "state": "ROUTED_TO_PREPROD_OWNER",
-      "human_required": null,
-      "repair_mode": "VERSIONED_PREPROD_CANDIDATE",
-      "gates": {
-        "reproduce_required": false,
-        "regression_test_required": false,
-        "old_vs_new_required": true,
-        "preprod_required": true,
-        "independent_judge_required": true,
-        "rollback_required": true,
-        "rebuild_required": true
-      },
-      "promotion_authorized": false,
-      "prod_authorized": false,
-      "prod_write_authorized": false,
-      "customer_data": false,
-      "trading_access": false,
-      "additional_cost_eur": 0
-    },
-    {
-      "case_id": "qa-case:74a474cf2b879505d611f10d",
-      "company_id": "fenix",
-      "owner_engine": "SEO-001",
-      "environment": "PREPROD",
-      "source": "IMPROVEMENT",
-      "source_learning_id": "qa-learning:499ec86ed302381f45d1a4a9",
-      "issue_severity": null,
-      "state": "ROUTED_TO_PREPROD_OWNER",
-      "human_required": null,
-      "repair_mode": "VERSIONED_PREPROD_CANDIDATE",
-      "gates": {
-        "reproduce_required": false,
-        "regression_test_required": false,
-        "old_vs_new_required": true,
-        "preprod_required": true,
-        "independent_judge_required": true,
-        "rollback_required": true,
-        "rebuild_required": true
-      },
-      "promotion_authorized": false,
-      "prod_authorized": false,
-      "prod_write_authorized": false,
-      "customer_data": false,
-      "trading_access": false,
-      "additional_cost_eur": 0
-    },
-    {
-      "case_id": "qa-case:5159fc6f411de638c09bfcff",
-      "company_id": "fenix",
-      "owner_engine": "SEO-001",
-      "environment": "PREPROD",
-      "source": "IMPROVEMENT",
-      "source_learning_id": "qa-learning:5b793e816e0ab9dc5c479980",
+      "source_learning_id": "qa-learning:04812c9c0f8c6e34fa6d5e4d",
       "issue_severity": null,
       "state": "ROUTED_TO_PREPROD_OWNER",
       "human_required": null,
@@ -201,48 +120,21 @@
       "customer_data": false,
       "trading_access": false,
       "additional_cost_eur": 0
-    },
-    {
-      "case_id": "qa-case:a7a121b29ed2c508b6e71d20",
-      "company_id": "fenix",
-      "owner_engine": "HCI-001",
-      "environment": "PREPROD",
-      "source": "IMPROVEMENT",
-      "source_learning_id": "qa-learning:57a0188b6184af2eb6e90df8",
-      "issue_severity": null,
-      "state": "ROUTED_TO_PREPROD_OWNER",
-      "human_required": null,
-      "repair_mode": "VERSIONED_PREPROD_CANDIDATE",
-      "gates": {
-        "reproduce_required": false,
-        "regression_test_required": false,
-        "old_vs_new_required": true,
-        "preprod_required": true,
-        "independent_judge_required": true,
-        "rollback_required": true,
-        "rebuild_required": true
-      },
-      "promotion_authorized": false,
-      "prod_authorized": false,
-      "prod_write_authorized": false,
-      "customer_data": false,
-      "trading_access": false,
-      "additional_cost_eur": 0
     }
   ],
   "learning_records": [
     {
-      "learning_id": "qa-learning:0b6fca608831c37c0745670c",
+      "learning_id": "qa-learning:2c72c8984471e786fdae5674",
       "company_id": "fenix",
       "engine_id": "HCI-001",
       "environment": "PREPROD",
       "version": "0.1.0",
       "source_event_ids": [
-        "qa-imp:0b6fca608831c37c0745670c"
+        "qa-imp:2c72c8984471e786fdae5674"
       ],
       "source_type": "METRIC_OBSERVATION",
       "source_environment": "PROD_READ_ONLY",
-      "observed_at": "2026-10-21T20:10:30.598Z",
+      "observed_at": "2026-10-21T23:19:36.794Z",
       "hypothesis": "Nombrar controles visibles reduce fricción para tecnologías de asistencia.",
       "expected_metric_delta": {
         "name": "unnamed_interactive_count",
@@ -252,7 +144,7 @@
       "confidence": 0.96,
       "risk_class": "LOW",
       "evidence_refs": [
-        "qa-improvement:qa-imp:0b6fca608831c37c0745670c"
+        "qa-improvement:qa-imp:2c72c8984471e786fdae5674"
       ],
       "promotion_state": "CANDIDATE",
       "created_by": "QA-001",
@@ -265,83 +157,17 @@
       "additional_cost_eur": 0
     },
     {
-      "learning_id": "qa-learning:568489a73179c37b7857ea92",
+      "learning_id": "qa-learning:bff844dc5851a34667aad2b5",
       "company_id": "fenix",
       "engine_id": "HCI-001",
       "environment": "PREPROD",
       "version": "0.1.0",
       "source_event_ids": [
-        "qa-imp:568489a73179c37b7857ea92"
+        "qa-imp:bff844dc5851a34667aad2b5"
       ],
       "source_type": "METRIC_OBSERVATION",
       "source_environment": "PROD_READ_ONLY",
-      "observed_at": "2026-10-21T20:10:30.598Z",
-      "hypothesis": "Etiquetar entradas mejora comprensión del formulario y reduce errores de interacción.",
-      "expected_metric_delta": {
-        "name": "unlabeled_input_count",
-        "direction": "LOWER",
-        "measurement": "CONTROLLED_OLD_VS_NEW"
-      },
-      "confidence": 0.96,
-      "risk_class": "LOW",
-      "evidence_refs": [
-        "qa-improvement:qa-imp:568489a73179c37b7857ea92"
-      ],
-      "promotion_state": "CANDIDATE",
-      "created_by": "QA-001",
-      "reason": "CONTINUOUS_HUMAN_QA_IMPROVEMENT_SCOUT",
-      "persistent_publish_authorized": true,
-      "persistence_scope": "LOCAL_PREPROD_LRN_LEDGER_ONLY",
-      "prod_authorized": false,
-      "prod_write_authorized": false,
-      "trading_access": false,
-      "additional_cost_eur": 0
-    },
-    {
-      "learning_id": "qa-learning:900bca29663a9e3053b67b8c",
-      "company_id": "fenix",
-      "engine_id": "HCI-001",
-      "environment": "PREPROD",
-      "version": "0.1.0",
-      "source_event_ids": [
-        "qa-imp:900bca29663a9e3053b67b8c"
-      ],
-      "source_type": "METRIC_OBSERVATION",
-      "source_environment": "PROD_READ_ONLY",
-      "observed_at": "2026-10-21T20:10:30.598Z",
-      "hypothesis": "Etiquetar entradas mejora comprensión del formulario y reduce errores de interacción.",
-      "expected_metric_delta": {
-        "name": "unlabeled_input_count",
-        "direction": "LOWER",
-        "measurement": "CONTROLLED_OLD_VS_NEW"
-      },
-      "confidence": 0.96,
-      "risk_class": "LOW",
-      "evidence_refs": [
-        "qa-improvement:qa-imp:900bca29663a9e3053b67b8c"
-      ],
-      "promotion_state": "CANDIDATE",
-      "created_by": "QA-001",
-      "reason": "CONTINUOUS_HUMAN_QA_IMPROVEMENT_SCOUT",
-      "persistent_publish_authorized": true,
-      "persistence_scope": "LOCAL_PREPROD_LRN_LEDGER_ONLY",
-      "prod_authorized": false,
-      "prod_write_authorized": false,
-      "trading_access": false,
-      "additional_cost_eur": 0
-    },
-    {
-      "learning_id": "qa-learning:e92cb6e9ce6e9e3268ce21d1",
-      "company_id": "fenix",
-      "engine_id": "HCI-001",
-      "environment": "PREPROD",
-      "version": "0.1.0",
-      "source_event_ids": [
-        "qa-imp:e92cb6e9ce6e9e3268ce21d1"
-      ],
-      "source_type": "METRIC_OBSERVATION",
-      "source_environment": "PROD_READ_ONLY",
-      "observed_at": "2026-10-21T20:10:30.598Z",
+      "observed_at": "2026-10-21T23:19:36.794Z",
       "hypothesis": "Nombrar controles visibles reduce fricción para tecnologías de asistencia.",
       "expected_metric_delta": {
         "name": "unnamed_interactive_count",
@@ -351,7 +177,7 @@
       "confidence": 0.96,
       "risk_class": "LOW",
       "evidence_refs": [
-        "qa-improvement:qa-imp:e92cb6e9ce6e9e3268ce21d1"
+        "qa-improvement:qa-imp:bff844dc5851a34667aad2b5"
       ],
       "promotion_state": "CANDIDATE",
       "created_by": "QA-001",
@@ -364,60 +190,27 @@
       "additional_cost_eur": 0
     },
     {
-      "learning_id": "qa-learning:499ec86ed302381f45d1a4a9",
+      "learning_id": "qa-learning:04812c9c0f8c6e34fa6d5e4d",
       "company_id": "fenix",
-      "engine_id": "SEO-001",
+      "engine_id": "HCI-001",
       "environment": "PREPROD",
       "version": "0.1.0",
       "source_event_ids": [
-        "qa-imp:499ec86ed302381f45d1a4a9"
+        "qa-imp:04812c9c0f8c6e34fa6d5e4d"
       ],
       "source_type": "METRIC_OBSERVATION",
       "source_environment": "PROD_READ_ONLY",
-      "observed_at": "2026-10-21T20:10:30.598Z",
-      "hypothesis": "Una jerarquía H1 inequívoca puede mejorar comprensión humana y estructura SEO.",
+      "observed_at": "2026-10-21T23:19:36.794Z",
+      "hypothesis": "Aumentar el área táctil de controles pequeños puede reducir pulsaciones fallidas.",
       "expected_metric_delta": {
-        "name": "single_primary_h1",
-        "direction": "HIGHER",
+        "name": "small_touch_target_count",
+        "direction": "LOWER",
         "measurement": "CONTROLLED_OLD_VS_NEW"
       },
-      "confidence": 0.9,
+      "confidence": 0.8,
       "risk_class": "LOW",
       "evidence_refs": [
-        "qa-improvement:qa-imp:499ec86ed302381f45d1a4a9"
-      ],
-      "promotion_state": "CANDIDATE",
-      "created_by": "QA-001",
-      "reason": "CONTINUOUS_HUMAN_QA_IMPROVEMENT_SCOUT",
-      "persistent_publish_authorized": true,
-      "persistence_scope": "LOCAL_PREPROD_LRN_LEDGER_ONLY",
-      "prod_authorized": false,
-      "prod_write_authorized": false,
-      "trading_access": false,
-      "additional_cost_eur": 0
-    },
-    {
-      "learning_id": "qa-learning:5b793e816e0ab9dc5c479980",
-      "company_id": "fenix",
-      "engine_id": "SEO-001",
-      "environment": "PREPROD",
-      "version": "0.1.0",
-      "source_event_ids": [
-        "qa-imp:5b793e816e0ab9dc5c479980"
-      ],
-      "source_type": "METRIC_OBSERVATION",
-      "source_environment": "PROD_READ_ONLY",
-      "observed_at": "2026-10-21T20:10:30.598Z",
-      "hypothesis": "Una jerarquía H1 inequívoca puede mejorar comprensión humana y estructura SEO.",
-      "expected_metric_delta": {
-        "name": "single_primary_h1",
-        "direction": "HIGHER",
-        "measurement": "CONTROLLED_OLD_VS_NEW"
-      },
-      "confidence": 0.9,
-      "risk_class": "LOW",
-      "evidence_refs": [
-        "qa-improvement:qa-imp:5b793e816e0ab9dc5c479980"
+        "qa-improvement:qa-imp:04812c9c0f8c6e34fa6d5e4d"
       ],
       "promotion_state": "CANDIDATE",
       "created_by": "QA-001",
@@ -440,7 +233,7 @@
       ],
       "source_type": "METRIC_OBSERVATION",
       "source_environment": "PROD_READ_ONLY",
-      "observed_at": "2026-10-21T20:10:30.598Z",
+      "observed_at": "2026-10-21T23:19:36.794Z",
       "hypothesis": "Aumentar el área táctil de controles pequeños puede reducir pulsaciones fallidas.",
       "expected_metric_delta": {
         "name": "small_touch_target_count",
@@ -461,21 +254,156 @@
       "prod_write_authorized": false,
       "trading_access": false,
       "additional_cost_eur": 0
-    },
+    }
+  ],
+  "candidate_packages": [
     {
-      "learning_id": "qa-learning:57a0188b6184af2eb6e90df8",
+      "schema_version": "1.0.0",
+      "state_type": "CEREBRO_VERSIONED_IMPROVEMENT_CANDIDATE",
+      "candidate_id": "cand:082082936c29406f81e983db",
       "company_id": "fenix",
       "engine_id": "HCI-001",
       "environment": "PREPROD",
-      "version": "0.1.0",
+      "baseline_version": "0.1.0",
+      "baseline_version_source": "LEARNING_CONTEXT_VERSION_REQUIRES_OLD_CONTRACT_RESOLUTION",
+      "baseline_verification_required": true,
+      "candidate_version": "0.1.0-rsi-cand.08208293",
+      "learning_runtime_version": "0.1.0",
+      "source_learning_id": "qa-learning:2c72c8984471e786fdae5674",
       "source_event_ids": [
-        "qa-imp:57a0188b6184af2eb6e90df8"
+        "qa-imp:2c72c8984471e786fdae5674"
       ],
       "source_type": "METRIC_OBSERVATION",
       "source_environment": "PROD_READ_ONLY",
-      "observed_at": "2026-10-21T20:10:30.598Z",
+      "hypothesis": "Nombrar controles visibles reduce fricción para tecnologías de asistencia.",
+      "change_intent": "IMPROVE_MEASURED_ENGINE_OUTCOME",
+      "target_metric": {
+        "name": "unnamed_interactive_count",
+        "direction": "LOWER",
+        "measurement": "CONTROLLED_OLD_VS_NEW"
+      },
+      "confidence": 0.96,
+      "risk_class": "LOW",
+      "evidence_refs": [
+        "qa-improvement:qa-imp:2c72c8984471e786fdae5674"
+      ],
+      "created_at": "2026-10-21T23:19:36.794Z",
+      "state": "CANDIDATE",
+      "next_gate": "OLD_VS_NEW_EXPERIMENT",
+      "experiment_contract": {
+        "required": true,
+        "old_version": "0.1.0",
+        "new_version": "0.1.0-rsi-cand.08208293",
+        "baseline_resolution_required": true,
+        "dataset_kinds": [
+          "HISTORICAL",
+          "SYNTHETIC"
+        ],
+        "prod_writes": false,
+        "customer_data_required": false
+      },
+      "preservation_contract": {
+        "preserve_existing": true,
+        "contract_resolution_required": true,
+        "rollback_required": true,
+        "rebuild_required": true,
+        "policy_mutation_allowed": false,
+        "permission_elevation_allowed": false,
+        "budget_elevation_allowed": false
+      },
+      "auto_experiment_eligible": true,
+      "promotion_authorized": false,
+      "persistent_publish_authorized": true,
+      "persistence_scope": "LOCAL_PREPROD_IMPROVEMENT_CANDIDATE_LEDGER_ONLY",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "schema_version": "1.0.0",
+      "state_type": "CEREBRO_VERSIONED_IMPROVEMENT_CANDIDATE",
+      "candidate_id": "cand:8d3cbf33d0c61f4da2ad014d",
+      "company_id": "fenix",
+      "engine_id": "HCI-001",
+      "environment": "PREPROD",
+      "baseline_version": "0.1.0",
+      "baseline_version_source": "LEARNING_CONTEXT_VERSION_REQUIRES_OLD_CONTRACT_RESOLUTION",
+      "baseline_verification_required": true,
+      "candidate_version": "0.1.0-rsi-cand.8d3cbf33",
+      "learning_runtime_version": "0.1.0",
+      "source_learning_id": "qa-learning:bff844dc5851a34667aad2b5",
+      "source_event_ids": [
+        "qa-imp:bff844dc5851a34667aad2b5"
+      ],
+      "source_type": "METRIC_OBSERVATION",
+      "source_environment": "PROD_READ_ONLY",
+      "hypothesis": "Nombrar controles visibles reduce fricción para tecnologías de asistencia.",
+      "change_intent": "IMPROVE_MEASURED_ENGINE_OUTCOME",
+      "target_metric": {
+        "name": "unnamed_interactive_count",
+        "direction": "LOWER",
+        "measurement": "CONTROLLED_OLD_VS_NEW"
+      },
+      "confidence": 0.96,
+      "risk_class": "LOW",
+      "evidence_refs": [
+        "qa-improvement:qa-imp:bff844dc5851a34667aad2b5"
+      ],
+      "created_at": "2026-10-21T23:19:36.794Z",
+      "state": "CANDIDATE",
+      "next_gate": "OLD_VS_NEW_EXPERIMENT",
+      "experiment_contract": {
+        "required": true,
+        "old_version": "0.1.0",
+        "new_version": "0.1.0-rsi-cand.8d3cbf33",
+        "baseline_resolution_required": true,
+        "dataset_kinds": [
+          "HISTORICAL",
+          "SYNTHETIC"
+        ],
+        "prod_writes": false,
+        "customer_data_required": false
+      },
+      "preservation_contract": {
+        "preserve_existing": true,
+        "contract_resolution_required": true,
+        "rollback_required": true,
+        "rebuild_required": true,
+        "policy_mutation_allowed": false,
+        "permission_elevation_allowed": false,
+        "budget_elevation_allowed": false
+      },
+      "auto_experiment_eligible": true,
+      "promotion_authorized": false,
+      "persistent_publish_authorized": true,
+      "persistence_scope": "LOCAL_PREPROD_IMPROVEMENT_CANDIDATE_LEDGER_ONLY",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "schema_version": "1.0.0",
+      "state_type": "CEREBRO_VERSIONED_IMPROVEMENT_CANDIDATE",
+      "candidate_id": "cand:5a96950270b7c38001b902a6",
+      "company_id": "fenix",
+      "engine_id": "HCI-001",
+      "environment": "PREPROD",
+      "baseline_version": "0.1.0",
+      "baseline_version_source": "LEARNING_CONTEXT_VERSION_REQUIRES_OLD_CONTRACT_RESOLUTION",
+      "baseline_verification_required": true,
+      "candidate_version": "0.1.0-rsi-cand.5a969502",
+      "learning_runtime_version": "0.1.0",
+      "source_learning_id": "qa-learning:04812c9c0f8c6e34fa6d5e4d",
+      "source_event_ids": [
+        "qa-imp:04812c9c0f8c6e34fa6d5e4d"
+      ],
+      "source_type": "METRIC_OBSERVATION",
+      "source_environment": "PROD_READ_ONLY",
       "hypothesis": "Aumentar el área táctil de controles pequeños puede reducir pulsaciones fallidas.",
-      "expected_metric_delta": {
+      "change_intent": "IMPROVE_MEASURED_ENGINE_OUTCOME",
+      "target_metric": {
         "name": "small_touch_target_count",
         "direction": "LOWER",
         "measurement": "CONTROLLED_OLD_VS_NEW"
@@ -483,372 +411,15 @@
       "confidence": 0.8,
       "risk_class": "LOW",
       "evidence_refs": [
-        "qa-improvement:qa-imp:57a0188b6184af2eb6e90df8"
+        "qa-improvement:qa-imp:04812c9c0f8c6e34fa6d5e4d"
       ],
-      "promotion_state": "CANDIDATE",
-      "created_by": "QA-001",
-      "reason": "CONTINUOUS_HUMAN_QA_IMPROVEMENT_SCOUT",
-      "persistent_publish_authorized": true,
-      "persistence_scope": "LOCAL_PREPROD_LRN_LEDGER_ONLY",
-      "prod_authorized": false,
-      "prod_write_authorized": false,
-      "trading_access": false,
-      "additional_cost_eur": 0
-    }
-  ],
-  "candidate_packages": [
-    {
-      "schema_version": "1.0.0",
-      "state_type": "CEREBRO_VERSIONED_IMPROVEMENT_CANDIDATE",
-      "candidate_id": "cand:1491b3d2f668f15942073eed",
-      "company_id": "fenix",
-      "engine_id": "HCI-001",
-      "environment": "PREPROD",
-      "baseline_version": "0.1.0",
-      "baseline_version_source": "LEARNING_CONTEXT_VERSION_REQUIRES_OLD_CONTRACT_RESOLUTION",
-      "baseline_verification_required": true,
-      "candidate_version": "0.1.0-rsi-cand.1491b3d2",
-      "learning_runtime_version": "0.1.0",
-      "source_learning_id": "qa-learning:0b6fca608831c37c0745670c",
-      "source_event_ids": [
-        "qa-imp:0b6fca608831c37c0745670c"
-      ],
-      "source_type": "METRIC_OBSERVATION",
-      "source_environment": "PROD_READ_ONLY",
-      "hypothesis": "Nombrar controles visibles reduce fricción para tecnologías de asistencia.",
-      "change_intent": "IMPROVE_MEASURED_ENGINE_OUTCOME",
-      "target_metric": {
-        "name": "unnamed_interactive_count",
-        "direction": "LOWER",
-        "measurement": "CONTROLLED_OLD_VS_NEW"
-      },
-      "confidence": 0.96,
-      "risk_class": "LOW",
-      "evidence_refs": [
-        "qa-improvement:qa-imp:0b6fca608831c37c0745670c"
-      ],
-      "created_at": "2026-10-21T20:10:30.598Z",
+      "created_at": "2026-10-21T23:19:36.794Z",
       "state": "CANDIDATE",
       "next_gate": "OLD_VS_NEW_EXPERIMENT",
       "experiment_contract": {
         "required": true,
         "old_version": "0.1.0",
-        "new_version": "0.1.0-rsi-cand.1491b3d2",
-        "baseline_resolution_required": true,
-        "dataset_kinds": [
-          "HISTORICAL",
-          "SYNTHETIC"
-        ],
-        "prod_writes": false,
-        "customer_data_required": false
-      },
-      "preservation_contract": {
-        "preserve_existing": true,
-        "contract_resolution_required": true,
-        "rollback_required": true,
-        "rebuild_required": true,
-        "policy_mutation_allowed": false,
-        "permission_elevation_allowed": false,
-        "budget_elevation_allowed": false
-      },
-      "auto_experiment_eligible": true,
-      "promotion_authorized": false,
-      "persistent_publish_authorized": true,
-      "persistence_scope": "LOCAL_PREPROD_IMPROVEMENT_CANDIDATE_LEDGER_ONLY",
-      "prod_authorized": false,
-      "prod_write_authorized": false,
-      "trading_access": false,
-      "additional_cost_eur": 0
-    },
-    {
-      "schema_version": "1.0.0",
-      "state_type": "CEREBRO_VERSIONED_IMPROVEMENT_CANDIDATE",
-      "candidate_id": "cand:12165b0f91620b66a3d2d1cb",
-      "company_id": "fenix",
-      "engine_id": "HCI-001",
-      "environment": "PREPROD",
-      "baseline_version": "0.1.0",
-      "baseline_version_source": "LEARNING_CONTEXT_VERSION_REQUIRES_OLD_CONTRACT_RESOLUTION",
-      "baseline_verification_required": true,
-      "candidate_version": "0.1.0-rsi-cand.12165b0f",
-      "learning_runtime_version": "0.1.0",
-      "source_learning_id": "qa-learning:568489a73179c37b7857ea92",
-      "source_event_ids": [
-        "qa-imp:568489a73179c37b7857ea92"
-      ],
-      "source_type": "METRIC_OBSERVATION",
-      "source_environment": "PROD_READ_ONLY",
-      "hypothesis": "Etiquetar entradas mejora comprensión del formulario y reduce errores de interacción.",
-      "change_intent": "IMPROVE_MEASURED_ENGINE_OUTCOME",
-      "target_metric": {
-        "name": "unlabeled_input_count",
-        "direction": "LOWER",
-        "measurement": "CONTROLLED_OLD_VS_NEW"
-      },
-      "confidence": 0.96,
-      "risk_class": "LOW",
-      "evidence_refs": [
-        "qa-improvement:qa-imp:568489a73179c37b7857ea92"
-      ],
-      "created_at": "2026-10-21T20:10:30.598Z",
-      "state": "CANDIDATE",
-      "next_gate": "OLD_VS_NEW_EXPERIMENT",
-      "experiment_contract": {
-        "required": true,
-        "old_version": "0.1.0",
-        "new_version": "0.1.0-rsi-cand.12165b0f",
-        "baseline_resolution_required": true,
-        "dataset_kinds": [
-          "HISTORICAL",
-          "SYNTHETIC"
-        ],
-        "prod_writes": false,
-        "customer_data_required": false
-      },
-      "preservation_contract": {
-        "preserve_existing": true,
-        "contract_resolution_required": true,
-        "rollback_required": true,
-        "rebuild_required": true,
-        "policy_mutation_allowed": false,
-        "permission_elevation_allowed": false,
-        "budget_elevation_allowed": false
-      },
-      "auto_experiment_eligible": true,
-      "promotion_authorized": false,
-      "persistent_publish_authorized": true,
-      "persistence_scope": "LOCAL_PREPROD_IMPROVEMENT_CANDIDATE_LEDGER_ONLY",
-      "prod_authorized": false,
-      "prod_write_authorized": false,
-      "trading_access": false,
-      "additional_cost_eur": 0
-    },
-    {
-      "schema_version": "1.0.0",
-      "state_type": "CEREBRO_VERSIONED_IMPROVEMENT_CANDIDATE",
-      "candidate_id": "cand:978bb5cb7481dff56bda52ca",
-      "company_id": "fenix",
-      "engine_id": "HCI-001",
-      "environment": "PREPROD",
-      "baseline_version": "0.1.0",
-      "baseline_version_source": "LEARNING_CONTEXT_VERSION_REQUIRES_OLD_CONTRACT_RESOLUTION",
-      "baseline_verification_required": true,
-      "candidate_version": "0.1.0-rsi-cand.978bb5cb",
-      "learning_runtime_version": "0.1.0",
-      "source_learning_id": "qa-learning:900bca29663a9e3053b67b8c",
-      "source_event_ids": [
-        "qa-imp:900bca29663a9e3053b67b8c"
-      ],
-      "source_type": "METRIC_OBSERVATION",
-      "source_environment": "PROD_READ_ONLY",
-      "hypothesis": "Etiquetar entradas mejora comprensión del formulario y reduce errores de interacción.",
-      "change_intent": "IMPROVE_MEASURED_ENGINE_OUTCOME",
-      "target_metric": {
-        "name": "unlabeled_input_count",
-        "direction": "LOWER",
-        "measurement": "CONTROLLED_OLD_VS_NEW"
-      },
-      "confidence": 0.96,
-      "risk_class": "LOW",
-      "evidence_refs": [
-        "qa-improvement:qa-imp:900bca29663a9e3053b67b8c"
-      ],
-      "created_at": "2026-10-21T20:10:30.598Z",
-      "state": "CANDIDATE",
-      "next_gate": "OLD_VS_NEW_EXPERIMENT",
-      "experiment_contract": {
-        "required": true,
-        "old_version": "0.1.0",
-        "new_version": "0.1.0-rsi-cand.978bb5cb",
-        "baseline_resolution_required": true,
-        "dataset_kinds": [
-          "HISTORICAL",
-          "SYNTHETIC"
-        ],
-        "prod_writes": false,
-        "customer_data_required": false
-      },
-      "preservation_contract": {
-        "preserve_existing": true,
-        "contract_resolution_required": true,
-        "rollback_required": true,
-        "rebuild_required": true,
-        "policy_mutation_allowed": false,
-        "permission_elevation_allowed": false,
-        "budget_elevation_allowed": false
-      },
-      "auto_experiment_eligible": true,
-      "promotion_authorized": false,
-      "persistent_publish_authorized": true,
-      "persistence_scope": "LOCAL_PREPROD_IMPROVEMENT_CANDIDATE_LEDGER_ONLY",
-      "prod_authorized": false,
-      "prod_write_authorized": false,
-      "trading_access": false,
-      "additional_cost_eur": 0
-    },
-    {
-      "schema_version": "1.0.0",
-      "state_type": "CEREBRO_VERSIONED_IMPROVEMENT_CANDIDATE",
-      "candidate_id": "cand:ddd1eb16ada641505f426514",
-      "company_id": "fenix",
-      "engine_id": "HCI-001",
-      "environment": "PREPROD",
-      "baseline_version": "0.1.0",
-      "baseline_version_source": "LEARNING_CONTEXT_VERSION_REQUIRES_OLD_CONTRACT_RESOLUTION",
-      "baseline_verification_required": true,
-      "candidate_version": "0.1.0-rsi-cand.ddd1eb16",
-      "learning_runtime_version": "0.1.0",
-      "source_learning_id": "qa-learning:e92cb6e9ce6e9e3268ce21d1",
-      "source_event_ids": [
-        "qa-imp:e92cb6e9ce6e9e3268ce21d1"
-      ],
-      "source_type": "METRIC_OBSERVATION",
-      "source_environment": "PROD_READ_ONLY",
-      "hypothesis": "Nombrar controles visibles reduce fricción para tecnologías de asistencia.",
-      "change_intent": "IMPROVE_MEASURED_ENGINE_OUTCOME",
-      "target_metric": {
-        "name": "unnamed_interactive_count",
-        "direction": "LOWER",
-        "measurement": "CONTROLLED_OLD_VS_NEW"
-      },
-      "confidence": 0.96,
-      "risk_class": "LOW",
-      "evidence_refs": [
-        "qa-improvement:qa-imp:e92cb6e9ce6e9e3268ce21d1"
-      ],
-      "created_at": "2026-10-21T20:10:30.598Z",
-      "state": "CANDIDATE",
-      "next_gate": "OLD_VS_NEW_EXPERIMENT",
-      "experiment_contract": {
-        "required": true,
-        "old_version": "0.1.0",
-        "new_version": "0.1.0-rsi-cand.ddd1eb16",
-        "baseline_resolution_required": true,
-        "dataset_kinds": [
-          "HISTORICAL",
-          "SYNTHETIC"
-        ],
-        "prod_writes": false,
-        "customer_data_required": false
-      },
-      "preservation_contract": {
-        "preserve_existing": true,
-        "contract_resolution_required": true,
-        "rollback_required": true,
-        "rebuild_required": true,
-        "policy_mutation_allowed": false,
-        "permission_elevation_allowed": false,
-        "budget_elevation_allowed": false
-      },
-      "auto_experiment_eligible": true,
-      "promotion_authorized": false,
-      "persistent_publish_authorized": true,
-      "persistence_scope": "LOCAL_PREPROD_IMPROVEMENT_CANDIDATE_LEDGER_ONLY",
-      "prod_authorized": false,
-      "prod_write_authorized": false,
-      "trading_access": false,
-      "additional_cost_eur": 0
-    },
-    {
-      "schema_version": "1.0.0",
-      "state_type": "CEREBRO_VERSIONED_IMPROVEMENT_CANDIDATE",
-      "candidate_id": "cand:078308f909ba97c5461f0b52",
-      "company_id": "fenix",
-      "engine_id": "SEO-001",
-      "environment": "PREPROD",
-      "baseline_version": "0.1.0",
-      "baseline_version_source": "LEARNING_CONTEXT_VERSION_REQUIRES_OLD_CONTRACT_RESOLUTION",
-      "baseline_verification_required": true,
-      "candidate_version": "0.1.0-rsi-cand.078308f9",
-      "learning_runtime_version": "0.1.0",
-      "source_learning_id": "qa-learning:499ec86ed302381f45d1a4a9",
-      "source_event_ids": [
-        "qa-imp:499ec86ed302381f45d1a4a9"
-      ],
-      "source_type": "METRIC_OBSERVATION",
-      "source_environment": "PROD_READ_ONLY",
-      "hypothesis": "Una jerarquía H1 inequívoca puede mejorar comprensión humana y estructura SEO.",
-      "change_intent": "IMPROVE_MEASURED_ENGINE_OUTCOME",
-      "target_metric": {
-        "name": "single_primary_h1",
-        "direction": "HIGHER",
-        "measurement": "CONTROLLED_OLD_VS_NEW"
-      },
-      "confidence": 0.9,
-      "risk_class": "LOW",
-      "evidence_refs": [
-        "qa-improvement:qa-imp:499ec86ed302381f45d1a4a9"
-      ],
-      "created_at": "2026-10-21T20:10:30.598Z",
-      "state": "CANDIDATE",
-      "next_gate": "OLD_VS_NEW_EXPERIMENT",
-      "experiment_contract": {
-        "required": true,
-        "old_version": "0.1.0",
-        "new_version": "0.1.0-rsi-cand.078308f9",
-        "baseline_resolution_required": true,
-        "dataset_kinds": [
-          "HISTORICAL",
-          "SYNTHETIC"
-        ],
-        "prod_writes": false,
-        "customer_data_required": false
-      },
-      "preservation_contract": {
-        "preserve_existing": true,
-        "contract_resolution_required": true,
-        "rollback_required": true,
-        "rebuild_required": true,
-        "policy_mutation_allowed": false,
-        "permission_elevation_allowed": false,
-        "budget_elevation_allowed": false
-      },
-      "auto_experiment_eligible": true,
-      "promotion_authorized": false,
-      "persistent_publish_authorized": true,
-      "persistence_scope": "LOCAL_PREPROD_IMPROVEMENT_CANDIDATE_LEDGER_ONLY",
-      "prod_authorized": false,
-      "prod_write_authorized": false,
-      "trading_access": false,
-      "additional_cost_eur": 0
-    },
-    {
-      "schema_version": "1.0.0",
-      "state_type": "CEREBRO_VERSIONED_IMPROVEMENT_CANDIDATE",
-      "candidate_id": "cand:610bab1da1772d703b80847b",
-      "company_id": "fenix",
-      "engine_id": "SEO-001",
-      "environment": "PREPROD",
-      "baseline_version": "0.1.0",
-      "baseline_version_source": "LEARNING_CONTEXT_VERSION_REQUIRES_OLD_CONTRACT_RESOLUTION",
-      "baseline_verification_required": true,
-      "candidate_version": "0.1.0-rsi-cand.610bab1d",
-      "learning_runtime_version": "0.1.0",
-      "source_learning_id": "qa-learning:5b793e816e0ab9dc5c479980",
-      "source_event_ids": [
-        "qa-imp:5b793e816e0ab9dc5c479980"
-      ],
-      "source_type": "METRIC_OBSERVATION",
-      "source_environment": "PROD_READ_ONLY",
-      "hypothesis": "Una jerarquía H1 inequívoca puede mejorar comprensión humana y estructura SEO.",
-      "change_intent": "IMPROVE_MEASURED_ENGINE_OUTCOME",
-      "target_metric": {
-        "name": "single_primary_h1",
-        "direction": "HIGHER",
-        "measurement": "CONTROLLED_OLD_VS_NEW"
-      },
-      "confidence": 0.9,
-      "risk_class": "LOW",
-      "evidence_refs": [
-        "qa-improvement:qa-imp:5b793e816e0ab9dc5c479980"
-      ],
-      "created_at": "2026-10-21T20:10:30.598Z",
-      "state": "CANDIDATE",
-      "next_gate": "OLD_VS_NEW_EXPERIMENT",
-      "experiment_contract": {
-        "required": true,
-        "old_version": "0.1.0",
-        "new_version": "0.1.0-rsi-cand.610bab1d",
+        "new_version": "0.1.0-rsi-cand.5a969502",
         "baseline_resolution_required": true,
         "dataset_kinds": [
           "HISTORICAL",
@@ -905,76 +476,13 @@
       "evidence_refs": [
         "qa-improvement:qa-imp:52423800ed61b40ef9734fb3"
       ],
-      "created_at": "2026-10-21T20:10:30.598Z",
+      "created_at": "2026-10-21T23:19:36.794Z",
       "state": "CANDIDATE",
       "next_gate": "OLD_VS_NEW_EXPERIMENT",
       "experiment_contract": {
         "required": true,
         "old_version": "0.1.0",
         "new_version": "0.1.0-rsi-cand.68939aac",
-        "baseline_resolution_required": true,
-        "dataset_kinds": [
-          "HISTORICAL",
-          "SYNTHETIC"
-        ],
-        "prod_writes": false,
-        "customer_data_required": false
-      },
-      "preservation_contract": {
-        "preserve_existing": true,
-        "contract_resolution_required": true,
-        "rollback_required": true,
-        "rebuild_required": true,
-        "policy_mutation_allowed": false,
-        "permission_elevation_allowed": false,
-        "budget_elevation_allowed": false
-      },
-      "auto_experiment_eligible": true,
-      "promotion_authorized": false,
-      "persistent_publish_authorized": true,
-      "persistence_scope": "LOCAL_PREPROD_IMPROVEMENT_CANDIDATE_LEDGER_ONLY",
-      "prod_authorized": false,
-      "prod_write_authorized": false,
-      "trading_access": false,
-      "additional_cost_eur": 0
-    },
-    {
-      "schema_version": "1.0.0",
-      "state_type": "CEREBRO_VERSIONED_IMPROVEMENT_CANDIDATE",
-      "candidate_id": "cand:1cca0c658df94b407c174c06",
-      "company_id": "fenix",
-      "engine_id": "HCI-001",
-      "environment": "PREPROD",
-      "baseline_version": "0.1.0",
-      "baseline_version_source": "LEARNING_CONTEXT_VERSION_REQUIRES_OLD_CONTRACT_RESOLUTION",
-      "baseline_verification_required": true,
-      "candidate_version": "0.1.0-rsi-cand.1cca0c65",
-      "learning_runtime_version": "0.1.0",
-      "source_learning_id": "qa-learning:57a0188b6184af2eb6e90df8",
-      "source_event_ids": [
-        "qa-imp:57a0188b6184af2eb6e90df8"
-      ],
-      "source_type": "METRIC_OBSERVATION",
-      "source_environment": "PROD_READ_ONLY",
-      "hypothesis": "Aumentar el área táctil de controles pequeños puede reducir pulsaciones fallidas.",
-      "change_intent": "IMPROVE_MEASURED_ENGINE_OUTCOME",
-      "target_metric": {
-        "name": "small_touch_target_count",
-        "direction": "LOWER",
-        "measurement": "CONTROLLED_OLD_VS_NEW"
-      },
-      "confidence": 0.8,
-      "risk_class": "LOW",
-      "evidence_refs": [
-        "qa-improvement:qa-imp:57a0188b6184af2eb6e90df8"
-      ],
-      "created_at": "2026-10-21T20:10:30.598Z",
-      "state": "CANDIDATE",
-      "next_gate": "OLD_VS_NEW_EXPERIMENT",
-      "experiment_contract": {
-        "required": true,
-        "old_version": "0.1.0",
-        "new_version": "0.1.0-rsi-cand.1cca0c65",
         "baseline_resolution_required": true,
         "dataset_kinds": [
           "HISTORICAL",
