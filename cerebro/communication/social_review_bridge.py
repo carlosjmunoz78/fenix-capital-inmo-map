@@ -8,13 +8,15 @@ import os
 import re
 import smtplib
 import ssl
+import urllib.error
 import urllib.request
 from email.header import decode_header
 from email.message import EmailMessage
 from email.utils import parseaddr
 
-SUBJECT_RE = re.compile(r"^\s*(?:re\s*:\s*)?CEREBRO\s*·\s*Revisión de publicación\s*·\s*(Instagram|Facebook|LinkedIn)(?:\s*·\s*(.*))?$", re.IGNORECASE)
+SUBJECT_RE = re.compile(r"^\s*(?:re\s*:\s*)?CEREBRO\s*·\s*Revisión de publicación\s*·\s*(Instagram|Facebook|LinkedIn)(?:\s*·?\s*(.*))?$", re.IGNORECASE)
 QUOTED_BOUNDARY_RE = re.compile(r"^(on .+wrote:|el .+escribi[oó]:|from:\s+.+|de:\s+.+|-{2,}\s*(original message|mensaje original)\s*-{2,})$", re.IGNORECASE)
+EXPLICIT_REVIEW_RE = re.compile(r"^\s*(?:OK\b|NO\s+OK\b)", re.IGNORECASE)
 WORKER_URL = "https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-social-owner-review-worker-v1"
 OIDC_AUDIENCE = "cerebro-social-owner-review-worker-v1"
 
@@ -31,10 +33,7 @@ def decode_header_text(value):
         return ""
     out = []
     for part, charset in decode_header(value):
-        if isinstance(part, bytes):
-            out.append(part.decode(charset or "utf-8", errors="replace"))
-        else:
-            out.append(part)
+        out.append(part.decode(charset or "utf-8", errors="replace") if isinstance(part, bytes) else part)
     return "".join(out)
 
 
@@ -75,6 +74,10 @@ def classify_reply(text):
     return "CORRECTION" if t else "EMPTY"
 
 
+def accept_owner_reply(text, referenced_generated=False):
+    return bool(EXPLICIT_REVIEW_RE.match(str(text or ""))) or bool(referenced_generated)
+
+
 def fetch_message(conn, msg_id):
     status, rows = conn.fetch(msg_id, "(RFC822)")
     if status != "OK":
@@ -85,19 +88,21 @@ def fetch_message(conn, msg_id):
     return None
 
 
-def referenced_review_key(conn, in_reply_to):
+def referenced_review_meta(conn, in_reply_to):
     if not in_reply_to:
-        return None
+        return None, False
     status, data = conn.search(None, "HEADER", "Message-ID", f'"{in_reply_to}"')
     if status != "OK":
-        return None
+        return None, False
     ids = (data[0] or b"").split()
     if not ids:
-        return None
+        return None, False
     original = fetch_message(conn, ids[-1])
     if original is None:
-        return None
-    return (original.get("X-CEREBRO-Social-Review-Key") or "").strip() or None
+        return None, False
+    key = (original.get("X-CEREBRO-Social-Review-Key") or "").strip() or None
+    generated = (original.get("X-CEREBRO-Generated") or "").strip().lower() == "social-review-v1"
+    return key, generated
 
 
 def poll_owner(output_path, limit):
@@ -133,10 +138,13 @@ def poll_owner(output_path, limit):
             if not text:
                 continue
             in_reply_to = msg.get("In-Reply-To") or None
+            decision_key, referenced_generated = referenced_review_meta(conn, in_reply_to)
+            if not accept_owner_reply(text, referenced_generated):
+                continue
             messages.append({
                 "message_id": msg.get("Message-ID") or f"imap:{msg_id.decode()}",
                 "in_reply_to": in_reply_to,
-                "decision_key": referenced_review_key(conn, in_reply_to),
+                "decision_key": decision_key,
                 "from_identity": "OWNER_PRIVATE_IDENTITY_FROM_MATCH",
                 "subject": subject,
                 "date": msg.get("Date") or "",
@@ -158,8 +166,7 @@ def oidc_token():
     request_url = env("ACTIONS_ID_TOKEN_REQUEST_URL")
     request_token = env("ACTIONS_ID_TOKEN_REQUEST_TOKEN")
     sep = "&" if "?" in request_url else "?"
-    url = f"{request_url}{sep}audience={OIDC_AUDIENCE}"
-    req = urllib.request.Request(url, headers={"Authorization": f"bearer {request_token}"})
+    req = urllib.request.Request(f"{request_url}{sep}audience={OIDC_AUDIENCE}", headers={"Authorization": f"bearer {request_token}"})
     with urllib.request.urlopen(req, timeout=30) as response:
         payload = json.loads(response.read().decode("utf-8"))
     value = payload.get("value")
@@ -175,10 +182,14 @@ def call_worker(messages):
     req = urllib.request.Request(WORKER_URL, data=data, method="POST", headers={
         "Content-Type": "application/json",
         "Authorization": f"Bearer {oidc_token()}",
-        "User-Agent": "cerebro-social-review-bridge/1.0",
+        "User-Agent": "cerebro-social-review-bridge/1.1",
     })
-    with urllib.request.urlopen(req, timeout=60) as response:
-        return json.loads(response.read().decode("utf-8"))
+    try:
+        with urllib.request.urlopen(req, timeout=60) as response:
+            return json.loads(response.read().decode("utf-8"))
+    except urllib.error.HTTPError as exc:
+        body = exc.read().decode("utf-8", errors="replace")
+        raise RuntimeError(f"social review worker HTTP {exc.code}: {body[:1200]}") from exc
 
 
 def deterministic_message_id(delivery_key):
@@ -223,9 +234,7 @@ def process(input_path, output_path):
     with open(input_path, "r", encoding="utf-8") as fh:
         messages = json.load(fh)
     result = call_worker(messages)
-    sent = []
-    for mail in result.get("mails") or []:
-        sent.append(send_one(mail))
+    sent = [send_one(mail) for mail in (result.get("mails") or [])]
     result["delivery"] = sent
     with open(output_path, "w", encoding="utf-8") as fh:
         json.dump(result, fh, ensure_ascii=False, indent=2)
