@@ -3568,6 +3568,76 @@
       "promoted_at": "2026-10-21T09:39:06.003Z"
     },
     {
+      "candidate_id": "repo:5b77b4c0b5f8ab620eec9929af39",
+      "technical_name": "radix-ui",
+      "source_locator": "github://TerminalSkills/skills@6edcf94159d9f46b0759d2e1b59dd545cfaca254/skills/radix-ui",
+      "pinned_sha": "6edcf94159d9f46b0759d2e1b59dd545cfaca254",
+      "snapshot_sha256": "5b77b4c0b5f8ab620eec9929af39a76f9151b993956a2418ae79df361dbbae7a",
+      "manifest_sha256": "4301291a64e59875483f28bb9dbfb4b6c6f8b142f12408e624c3fa6068042354",
+      "outcome_hash": "d4f83cca5e55749ecf8f47b0c3e2f95b307079a5dde9a3e518efc6320f6af14c",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:5b77b4c0b5f8ab62:cap:1",
+          "technical_name": "radix-ui",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-21T18:53:40.737Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "2c2180d52c50d5a795ebc2ace2713e9e4bc395e253698f24a62e9b642189a961"
+    },
+    {
       "candidate_id": "repo:f23baa3b09be2f1e431a32b7d592",
       "technical_name": "refined",
       "source_locator": "github://bergside/awesome-design-skills@f631a09b4fcc0166f2e2c1a8c81906ef680c57e8/skills/refined",
@@ -4470,10 +4540,11 @@
   ],
   "adoption_skips": [],
   "summary": {
-    "total": 44,
-    "promoted": 2,
+    "total": 45,
+    "inserted": 1,
+    "updated": 0,
     "skipped": 0,
-    "pending_canary": 0,
+    "pending_canary": 1,
     "prod_readonly": 44
   }
 }
