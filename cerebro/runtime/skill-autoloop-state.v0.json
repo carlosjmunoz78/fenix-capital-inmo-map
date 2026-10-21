@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-21T22:25:17.932Z",
+  "updated_at": "2026-10-21T22:38:58.862Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -152,42 +152,6 @@
   "in_flight": {},
   "waiting_human": {},
   "waiting_safe_handler": {
-    "github-wide-skills:3b1d174e4cc5e09bdae9": {
-      "candidate_id": "github-wide-skills:3b1d174e4cc5e09bdae9",
-      "name": "anti-slop-guardrails",
-      "human_alias": "Anti Slop Guardrails",
-      "wrapper_id": "skillwrap:27771adf4576bcf577d4",
-      "domain": "software-engineering-devops",
-      "engine_bindings": [
-        "FACT-001",
-        "ARCH-001",
-        "API-001",
-        "DEP-001",
-        "MIG-001",
-        "QA-001",
-        "REG-001",
-        "DOCS-001"
-      ],
-      "value_score": 88.87,
-      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
-      "evidence_refs": {
-        "upstream_full_name": "Xhuk/skillgram",
-        "upstream_head_commit": "6027fd4d0d44d258d2e113f83eb219079d5f245a",
-        "manifest_sha256": "3b9777e04b48a345e66055eba17ff1a53e2df50a1acae8eff55e11635323ae81",
-        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
-      },
-      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
-      "status": "WAITING_SAFE_HANDLER",
-      "source_discovery_run_id": 39668036654,
-      "checkpointed_at": "2026-10-21T20:11:19.360Z",
-      "human_required": null,
-      "external_skill_code_execution": false,
-      "customer_data_used": false,
-      "prod_write": false,
-      "trading_access": false,
-      "paid_fallback": false,
-      "additional_cost_eur": 0
-    },
     "github-wide-skills:68d04f96689d6878fd81": {
       "candidate_id": "github-wide-skills:68d04f96689d6878fd81",
       "name": "done-gate",
@@ -4413,6 +4377,57 @@
       "action_status": "ROUTED_TO_EXISTING_GOVERNED_PIPELINE",
       "next_gate": "SKILL_CAPABILITY_EVOLUTION_EXISTING_ENGINE",
       "handoff_id": "skill-engine-extension:69e6c98038dd8decf5785ba0"
+    },
+    "github-wide-skills:3b1d174e4cc5e09bdae9": {
+      "candidate_id": "github-wide-skills:3b1d174e4cc5e09bdae9",
+      "name": "anti-slop-guardrails",
+      "human_alias": "Anti Slop Guardrails",
+      "wrapper_id": "skillwrap:27771adf4576bcf577d4",
+      "domain": "software-engineering-devops",
+      "engine_bindings": [
+        "FACT-001",
+        "ARCH-001",
+        "API-001",
+        "DEP-001",
+        "MIG-001",
+        "QA-001",
+        "REG-001",
+        "DOCS-001"
+      ],
+      "value_score": 88.87,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "Xhuk/skillgram",
+        "upstream_head_commit": "6027fd4d0d44d258d2e113f83eb219079d5f245a",
+        "manifest_sha256": "3b9777e04b48a345e66055eba17ff1a53e2df50a1acae8eff55e11635323ae81",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "SKILL_AUTONOMY_DECISION_RECORDED",
+      "status": "COMPLETED",
+      "source_discovery_run_id": 39668036654,
+      "checkpointed_at": "2026-10-21T20:11:19.360Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0,
+      "disposition": "DESCARTAR",
+      "evidence": {
+        "reason": "UNTRUSTED_SOURCE_OR_SUPPLY_CHAIN",
+        "decision_id": "skill-autonomy:eed14b61cbdb899304326828",
+        "decision": "DESCARTAR",
+        "human_required": null,
+        "source": "CEREBRO Skill AutoLoop Safe Handler V0"
+      },
+      "updated_at": "2026-10-21T22:38:58.862Z",
+      "prod_authorized": false,
+      "autonomous_promotion_authorized": false,
+      "action_id": "skill-action:3c790945dc00e798f083603d",
+      "action_type": "REJECT_CAPABILITY",
+      "action_status": "APPLIED_METADATA_ONLY",
+      "next_gate": "CONTINUE_DISCOVERY"
     }
   },
   "terminal_hold": {
@@ -6810,7 +6825,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "IDLE_NO_NEW_ELIGIBLE_CANDIDATE",
+  "last_action": "APPLY_REJECT_CAPABILITY_CONTINUE_DISCOVERY",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -9483,6 +9498,47 @@
       "external_skill_code_execution_authorized": false,
       "additional_cost_eur": 0,
       "recorded_at": "2026-10-21T22:02:17.098Z"
+    },
+    "github-wide-skills:3b1d174e4cc5e09bdae9": {
+      "schema_version": "1.0.0",
+      "state_type": "CEREBRO_SKILL_AUTONOMY_ACTION_RECEIPT",
+      "action_id": "skill-action:3c790945dc00e798f083603d",
+      "decision_id": "skill-autonomy:eed14b61cbdb899304326828",
+      "company_id": "GLOBAL",
+      "engine_id": "SKILL-AUTONOMY-ACTION",
+      "environment": "PREPROD",
+      "version": "1.0.0",
+      "skill_id": "github-wide-skills:3b1d174e4cc5e09bdae9",
+      "skill_version": "skillwrap:27771adf4576bcf577d4",
+      "decision": "DESCARTAR",
+      "action_type": "REJECT_CAPABILITY",
+      "status": "APPLIED_METADATA_ONLY",
+      "next_gate": "CONTINUE_DISCOVERY",
+      "target_engine_ids": [
+        "API-001",
+        "ARCH-001",
+        "DEP-001",
+        "DOCS-001",
+        "FACT-001",
+        "MIG-001",
+        "QA-001",
+        "REG-001"
+      ],
+      "observed_at": null,
+      "human_required": null,
+      "queueable_safe_work": false,
+      "terminal_metadata_only": true,
+      "mutation_authorized": false,
+      "internal_wrapper_shadow_authorized": false,
+      "fact001_gap_candidate_authorized": false,
+      "fact001_create_authorized": false,
+      "paid_activation_authorized": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "external_skill_code_execution_authorized": false,
+      "additional_cost_eur": 0,
+      "recorded_at": "2026-10-21T22:38:58.862Z"
     }
   },
   "autonomy_action_queue": {},
