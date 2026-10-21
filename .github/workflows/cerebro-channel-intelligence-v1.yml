@@ -4,9 +4,13 @@ on:
   pull_request:
     paths:
       - 'cerebro/marketing/channel-intelligence-runtime-v1.mjs'
+      - 'cerebro/marketing/channel-intelligence-multicompany-adapter-v1.mjs'
       - 'cerebro/tests/channel-intelligence-runtime-v1.test.mjs'
+      - 'cerebro/tests/channel-intelligence-multicompany-adapter-v1.test.mjs'
       - 'cerebro/contracts/channel-intelligence-v1.contract.json'
       - 'cerebro/docs/CHANNEL_INTELLIGENCE_V1_SCOPE.md'
+      - 'cerebro/docs/*CHANNEL_INTELLIGENCE_V1*'
+      - 'cerebro/evidence/channel-intelligence-v1.json'
       - '.github/workflows/cerebro-channel-intelligence-v1.yml'
   workflow_dispatch:
 
@@ -29,8 +33,8 @@ jobs:
       - name: Validate channel intelligence contract JSON
         run: node -e "JSON.parse(require('fs').readFileSync('cerebro/contracts/channel-intelligence-v1.contract.json','utf8')); console.log('contract json ok')"
 
-      - name: Run focused V1 tests
-        run: node --test cerebro/tests/channel-intelligence-runtime-v1.test.mjs
+      - name: Run Channel Intelligence V1 tests
+        run: node --test cerebro/tests/channel-intelligence-runtime-v1.test.mjs cerebro/tests/channel-intelligence-multicompany-adapter-v1.test.mjs
 
       - name: Validate canonical Factory registry remains unchanged
         working-directory: cerebro
