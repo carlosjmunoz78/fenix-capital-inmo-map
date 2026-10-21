@@ -1048,15 +1048,85 @@
         "observed_at": "2026-10-20T21:34:09.433Z"
       },
       "promoted_at": "2026-10-20T21:34:09.433Z"
+    },
+    {
+      "candidate_id": "repo:53a1da47af691824a77b3a9761b4",
+      "technical_name": "material-ui",
+      "source_locator": "github://TerminalSkills/skills@6edcf94159d9f46b0759d2e1b59dd545cfaca254/skills/material-ui",
+      "pinned_sha": "6edcf94159d9f46b0759d2e1b59dd545cfaca254",
+      "snapshot_sha256": "53a1da47af691824a77b3a9761b432464383f8d1341bd32f3ec2736efb928ca0",
+      "manifest_sha256": "1a0799777e89b6b2d2064a3f694279561f5cac23736d942889c11a73f2bb84fd",
+      "outcome_hash": "9de6b4c6c5579e5a571a4c30ceb4a96c018439212aea3b9e9b1312e9c85d8c32",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:53a1da47af691824:cap:1",
+          "technical_name": "material-ui",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-21T00:05:48.455Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "3f1ad64c098affddc2e6090330796f028afec5291a3f1cd26994bcd9db19a4ca"
     }
   ],
   "adoption_skips": [],
   "summary": {
-    "total": 10,
-    "inserted": 0,
+    "total": 11,
+    "inserted": 1,
     "updated": 0,
     "skipped": 0,
-    "pending_canary": 0,
+    "pending_canary": 1,
     "prod_readonly": 10
   }
 }
