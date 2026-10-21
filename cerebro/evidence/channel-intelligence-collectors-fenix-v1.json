@@ -1,0 +1,92 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix-capital",
+  "capability_id": "CHANNEL-INTELLIGENCE-V1",
+  "environment": "PREPROD",
+  "evidence_at": "2026-10-21T16:00:00.000Z",
+  "purpose": "Record live connector availability without secrets and without authorizing writes, paid upgrades or account disconnections.",
+  "observed_provider": "Windsor.ai",
+  "plan_constraint": {
+    "state": "FREE_PLAN_READS_PAUSED",
+    "reported_connected_account_count": 13,
+    "reported_included_account_count": 1,
+    "policy": "NO_UPGRADE_AND_NO_ACCOUNT_DISCONNECTION_WITHOUT_SEPARATE_REVIEW",
+    "additional_cost_authorized_eur": 0
+  },
+  "collectors": [
+    {
+      "collector_id": "collector:windsor:facebook-organic:fenix",
+      "provider": "Windsor.ai",
+      "connector_id": "facebook_organic",
+      "connection_state": "CONNECTED",
+      "read_state": "BLOCKED_ZERO_COST_PLAN_ACCOUNT_LIMIT",
+      "purposes": ["SOCIAL_OWN_PERFORMANCE"],
+      "channels": ["facebook"],
+      "read_test": "LIVE_QUERY_RETURNED_PROVIDER_PLAN_BLOCK_PLACEHOLDER_NOT_REAL_METRICS",
+      "write_authorized": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "collector_id": "collector:windsor:ga4:fenixcapital",
+      "provider": "Windsor.ai",
+      "connector_id": "googleanalytics4",
+      "connection_state": "CONNECTED",
+      "read_state": "BLOCKED_ZERO_COST_PLAN_ACCOUNT_LIMIT",
+      "purposes": ["WEB_ANALYTICS"],
+      "channels": [],
+      "read_test": "LIVE_QUERY_RETURNED_PROVIDER_PLAN_BLOCK_PLACEHOLDER_NOT_REAL_METRICS",
+      "write_authorized": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "collector_id": "collector:windsor:gsc:fenixcapital",
+      "provider": "Windsor.ai",
+      "connector_id": "searchconsole",
+      "connection_state": "CONNECTED",
+      "read_state": "BLOCKED_ZERO_COST_PLAN_ACCOUNT_LIMIT",
+      "purposes": ["SEARCH_DEMAND"],
+      "channels": [],
+      "read_test": "LIVE_QUERY_RETURNED_PROVIDER_PLAN_BLOCK_PLACEHOLDER_NOT_REAL_METRICS",
+      "write_authorized": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "collector_id": "collector:windsor:instagram:fenix",
+      "provider": "Windsor.ai",
+      "connector_id": "instagram",
+      "connection_state": "NOT_CONNECTED_IN_OBSERVED_CONNECTOR_LIST",
+      "read_state": "NOT_TESTED",
+      "purposes": ["SOCIAL_OWN_PERFORMANCE", "SOCIAL_PUBLIC_TRENDS"],
+      "channels": ["instagram"],
+      "write_authorized": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "collector_id": "collector:windsor:linkedin-organic:fenix",
+      "provider": "Windsor.ai",
+      "connector_id": "linkedin_organic",
+      "connection_state": "NOT_CONNECTED_IN_OBSERVED_CONNECTOR_LIST",
+      "read_state": "NOT_TESTED",
+      "purposes": ["SOCIAL_OWN_PERFORMANCE", "SOCIAL_PUBLIC_TRENDS"],
+      "channels": ["linkedin"],
+      "write_authorized": false,
+      "additional_cost_eur": 0
+    }
+  ],
+  "conclusion": {
+    "windsor_metadata_connections_exist": true,
+    "windsor_verified_real_data_read_ready": false,
+    "windsor_primary_collector_selected": false,
+    "reason": "ZERO_COST_PLAN_ACCOUNT_LIMIT",
+    "next_action": "AUDIT_EXISTING_DIRECT_OR_FREE_READ_PATHS_BEFORE_ANY_PAID_CHANGE_OR_DISCONNECTION",
+    "human_required_now": false
+  },
+  "guardrails": {
+    "prod_write_authorized": false,
+    "publish_authorized": false,
+    "spend_authorized": false,
+    "provider_reconfiguration_authorized": false,
+    "account_disconnection_authorized": false,
+    "trading_access": false
+  }
+}
