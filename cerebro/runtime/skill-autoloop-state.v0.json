@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-21T07:55:22.164Z",
+  "updated_at": "2026-10-21T07:55:51.318Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -123,42 +123,7 @@
   ],
   "in_flight": {},
   "waiting_human": {},
-  "waiting_safe_handler": {
-    "github-wide-skills:03ebb80f0ffb1dfc260d": {
-      "candidate_id": "github-wide-skills:03ebb80f0ffb1dfc260d",
-      "name": "conflict-detector",
-      "human_alias": "Conflict Detector",
-      "wrapper_id": "skillwrap:8b5fc203638a32b10e47",
-      "domain": "agent-ai-orchestration",
-      "engine_bindings": [
-        "ORCH-001",
-        "ROUTE-001",
-        "FACT-001",
-        "RAG-001",
-        "LRN-001",
-        "ACTGW-001"
-      ],
-      "value_score": 78.61,
-      "recommendation": "LAB_BENCHMARK",
-      "evidence_refs": {
-        "upstream_full_name": "JiamingShi-JsPhys/agent-skills",
-        "upstream_head_commit": "13a8b0f1c260337146881e02a6974f9164042f74",
-        "manifest_sha256": "272e07e5004f41fb32c6a84469e5659559d65f7f9740ad371c2e14eb03679d5e",
-        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
-      },
-      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
-      "status": "WAITING_SAFE_HANDLER",
-      "source_discovery_run_id": 39556343365,
-      "checkpointed_at": "2026-10-21T06:35:44.122Z",
-      "human_required": null,
-      "external_skill_code_execution": false,
-      "customer_data_used": false,
-      "prod_write": false,
-      "trading_access": false,
-      "paid_fallback": false,
-      "additional_cost_eur": 0
-    }
-  },
+  "waiting_safe_handler": {},
   "completed": {
     "lobehub-skills:9a6e3fac20369220df43": {
       "candidate_id": "lobehub-skills:9a6e3fac20369220df43",
@@ -4905,6 +4870,49 @@
         "source": "CEREBRO Skill AutoLoop Safe Handler V0"
       },
       "updated_at": "2026-10-21T07:55:22.164Z",
+      "prod_authorized": false
+    },
+    "github-wide-skills:03ebb80f0ffb1dfc260d": {
+      "candidate_id": "github-wide-skills:03ebb80f0ffb1dfc260d",
+      "name": "conflict-detector",
+      "human_alias": "Conflict Detector",
+      "wrapper_id": "skillwrap:8b5fc203638a32b10e47",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 78.61,
+      "recommendation": "LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "JiamingShi-JsPhys/agent-skills",
+        "upstream_head_commit": "13a8b0f1c260337146881e02a6974f9164042f74",
+        "manifest_sha256": "272e07e5004f41fb32c6a84469e5659559d65f7f9740ad371c2e14eb03679d5e",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "SAFE_HANDLER_TERMINAL_HOLD",
+      "status": "TERMINAL_HOLD",
+      "source_discovery_run_id": 39556343365,
+      "checkpointed_at": "2026-10-21T06:35:44.122Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0,
+      "evidence": {
+        "reason": "STATIC_LAB_HOLD",
+        "decision_id": null,
+        "decision": null,
+        "human_required": null,
+        "source": "CEREBRO Skill AutoLoop Safe Handler V0"
+      },
+      "updated_at": "2026-10-21T07:55:51.318Z",
       "prod_authorized": false
     }
   },
