@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "contract_id": "MKT-001/CHANNEL_INTELLIGENCE_V1",
   "company_id": "GLOBAL_OR_SCOPED",
   "engine_id": "MKT-001",
@@ -18,6 +18,16 @@
       "initial_channels": ["instagram", "facebook", "linkedin"]
     }
   },
+  "publisher_gateway": {
+    "current_evidenced_provider": "BUFFER",
+    "gateway_contract": "PROVIDER_NEUTRAL",
+    "make_role": "READ_METRICS_BRIDGE_ONLY",
+    "make_is_publisher": false,
+    "buffer_is_permanent_dependency": false,
+    "future_targets": ["META_DIRECT", "LINKEDIN_DIRECT"],
+    "migration_rule": "KEEP_BUFFER_UNTIL_TARGET_ADAPTER_PASSES_PREPROD_E2E_OLD_VS_NEW_IDEMPOTENCY_PHYSICAL_VERIFY_ROLLBACK_AND_GRADUAL_PROMOTION",
+    "v1_external_publish_enabled": false
+  },
   "data_contracts": [
     "channel-manifest.v1",
     "channel-pod-profile.v1",
@@ -29,7 +39,8 @@
     "creative-variant.v1",
     "experiment-result.v1",
     "cross-channel-insight.v1",
-    "channel-performance.v1"
+    "channel-performance.v1",
+    "publisher-topology.v1"
   ],
   "trend_stages": ["SEED", "EMERGING", "BREAKOUT", "MAINSTREAM", "SATURATED", "DECLINING"],
   "events": [
@@ -48,6 +59,8 @@
     "channel.function_added",
     "channel.policy_changed",
     "channel.new_detected",
+    "publisher.adapter_candidate",
+    "publisher.migration_ready",
     "insight.cross_channel_ready",
     "learning.rule_candidate"
   ],
@@ -61,6 +74,8 @@
     "public_publish": false,
     "paid_execution": false,
     "provider_binding": false,
+    "make_publish": false,
+    "buffer_disable_before_replacement_green": false,
     "cross_company_access": "DENY_BY_DEFAULT",
     "blind_cross_channel_copy": false,
     "owner_taste_is_one_signal_not_absolute_rule": true,
