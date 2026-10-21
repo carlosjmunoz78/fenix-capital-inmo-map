@@ -30,8 +30,10 @@ jobs:
         with:
           node-version: '24.x'
 
-      - name: Validate channel intelligence contract JSON
-        run: node -e "JSON.parse(require('fs').readFileSync('cerebro/contracts/channel-intelligence-v1.contract.json','utf8')); console.log('contract json ok')"
+      - name: Validate Channel Intelligence JSON artifacts
+        run: |
+          node -e "JSON.parse(require('fs').readFileSync('cerebro/contracts/channel-intelligence-v1.contract.json','utf8')); console.log('contract json ok')"
+          node -e "JSON.parse(require('fs').readFileSync('cerebro/evidence/channel-intelligence-v1.json','utf8')); console.log('evidence json ok')"
 
       - name: Run Channel Intelligence V1 tests
         run: node --test cerebro/tests/channel-intelligence-runtime-v1.test.mjs cerebro/tests/channel-intelligence-multicompany-adapter-v1.test.mjs
