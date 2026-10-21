@@ -1,0 +1,105 @@
+name: CEREBRO Social Owner Review V1
+
+on:
+  push:
+    branches: [cerebro/social-owner-review-loop-v1, main]
+    paths:
+      - 'cerebro/communication/social_review_bridge.py'
+      - 'cerebro/tests/test_social_review_bridge.py'
+      - '.github/workflows/cerebro-social-owner-review-v1.yml'
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: cerebro-social-owner-review-v1
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  SOCIAL_EVIDENCE_DIR: artifacts/social-owner-review
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Test natural-language social review bridge
+        run: python -m unittest cerebro/tests/test_social_review_bridge.py
+
+      - name: Prepare evidence directory
+        run: mkdir -p "$SOCIAL_EVIDENCE_DIR"
+
+      - name: Check private mail transport
+        id: mail
+        env:
+          SMTP_USER: ${{ secrets.CEREBRO_MAIL_USERNAME }}
+          SMTP_PASS: ${{ secrets.CEREBRO_MAIL_PASSWORD }}
+          OWNER_EMAIL: ${{ secrets.CEREBRO_OWNER_EMAIL }}
+        run: |
+          if [ -n "$SMTP_USER" ] && [ -n "$SMTP_PASS" ] && [ -n "$OWNER_EMAIL" ]; then
+            echo 'ready=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'ready=false' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Poll owner social-review replies
+        if: github.ref == 'refs/heads/main' && steps.mail.outputs.ready == 'true'
+        env:
+          CEREBRO_MAIL_IMAP_HOST: imap.gmail.com
+          CEREBRO_MAIL_IMAP_PORT: '993'
+          CEREBRO_MAIL_USERNAME: ${{ secrets.CEREBRO_MAIL_USERNAME }}
+          CEREBRO_MAIL_PASSWORD: ${{ secrets.CEREBRO_MAIL_PASSWORD }}
+          CEREBRO_OWNER_EMAIL: ${{ secrets.CEREBRO_OWNER_EMAIL }}
+        run: python cerebro/communication/social_review_bridge.py poll --output "$SOCIAL_EVIDENCE_DIR/messages.json" --limit 80
+
+      - name: Use empty inbox outside main
+        if: github.ref != 'refs/heads/main' || steps.mail.outputs.ready != 'true'
+        run: echo '[]' > "$SOCIAL_EVIDENCE_DIR/messages.json"
+
+      - name: Process corrections approvals Buffer hold and preview delivery
+        if: github.ref == 'refs/heads/main' && steps.mail.outputs.ready == 'true'
+        env:
+          CEREBRO_MAIL_SMTP_HOST: smtp.gmail.com
+          CEREBRO_MAIL_SMTP_PORT: '465'
+          CEREBRO_MAIL_IMAP_HOST: imap.gmail.com
+          CEREBRO_MAIL_IMAP_PORT: '993'
+          CEREBRO_MAIL_USERNAME: ${{ secrets.CEREBRO_MAIL_USERNAME }}
+          CEREBRO_MAIL_PASSWORD: ${{ secrets.CEREBRO_MAIL_PASSWORD }}
+          CEREBRO_MAIL_FROM: ${{ secrets.CEREBRO_MAIL_USERNAME }}
+          CEREBRO_OWNER_EMAIL: ${{ secrets.CEREBRO_OWNER_EMAIL }}
+        run: python cerebro/communication/social_review_bridge.py process --input "$SOCIAL_EVIDENCE_DIR/messages.json" --output "$SOCIAL_EVIDENCE_DIR/result.json"
+
+      - name: Assert branch validation is non-mutating
+        if: github.ref != 'refs/heads/main'
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          messages=json.loads(Path('artifacts/social-owner-review/messages.json').read_text())
+          assert messages == []
+          Path('artifacts/social-owner-review/branch-gate.json').write_text(json.dumps({
+            'status':'GREEN_DRY_RUN',
+            'mail_sent':False,
+            'buffer_changed':False,
+            'prod_changed':False,
+            'additional_cost_eur':0
+          },indent=2)+'\n')
+          PY
+
+      - name: Upload social review evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-social-owner-review-v1-${{ github.run_id }}
+          path: artifacts/social-owner-review/**
+          if-no-files-found: warn
+          retention-days: 30
