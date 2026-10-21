@@ -11,6 +11,12 @@ on:
       - 'src/cerebro-operative-console-v2.css'
       - 'src/cerebro-operative-console-v3.css'
       - 'src/cerebroActivityApi.ts'
+      - 'qa/cerebroActivityApi.fixture.ts'
+      - 'qa/cerebroVisualQaEntry.tsx'
+      - 'qa/cerebro-console-v3.visual.spec.ts'
+      - 'cerebro-visual-qa.html'
+      - 'vite.cerebro-visual-qa.config.ts'
+      - 'playwright.cerebro-visual.config.ts'
       - '.github/workflows/cerebro-console-ui-v3-ci.yml'
   workflow_dispatch:
 
@@ -47,3 +53,58 @@ jobs:
           grep -q 'FUENTE REAL' src/CerebroOperativeConsole.tsx
           test -f src/cerebro-operative-console-v3.css
           echo 'CEREBRO Console Technical V3 contract: PASS'
+
+  visual-qa:
+    name: Chromium visual QA · desktop + mobile
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact commit
+        uses: actions/checkout@v4
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci --ignore-scripts
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Start isolated QA renderer
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx vite --config vite.cerebro-visual-qa.config.ts --host 127.0.0.1 --port 4175 > /tmp/cerebro-visual-qa-vite.log 2>&1 &
+          echo $! > /tmp/cerebro-visual-qa-vite.pid
+          ready=0
+          for attempt in $(seq 1 40); do
+            if curl -fsS http://127.0.0.1:4175/cerebro-visual-qa.html >/dev/null; then
+              ready=1
+              break
+            fi
+            sleep 1
+          done
+          if [ "$ready" != "1" ]; then
+            cat /tmp/cerebro-visual-qa-vite.log
+            exit 1
+          fi
+      - name: Render and interact in Chromium
+        run: npx playwright test --config=playwright.cerebro-visual.config.ts
+      - name: Upload visual evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-console-v3-visual-qa-${{ github.run_id }}
+          path: qa-artifacts/
+          if-no-files-found: warn
+          retention-days: 30
+      - name: QA summary
+        if: success()
+        run: |
+          echo 'CEREBRO Console V3 visual QA: PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo '- Chromium desktop: 1440x1000' >> "$GITHUB_STEP_SUMMARY"
+          echo '- Chromium mobile: 390x844' >> "$GITHUB_STEP_SUMMARY"
+          echo '- Process rows + inspector interaction verified' >> "$GITHUB_STEP_SUMMARY"
+          echo '- Horizontal overflow guard verified' >> "$GITHUB_STEP_SUMMARY"
+          echo '- Fixture-only PREPROD visual evidence; no PROD credentials or writes' >> "$GITHUB_STEP_SUMMARY"
