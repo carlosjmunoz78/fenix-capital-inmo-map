@@ -1,0 +1,48 @@
+{
+  "contract_id": "gmail-push-ingress-v1",
+  "company_id": "fenix-capital",
+  "engine_id": "CORE-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "status": "DEFINED_NOT_OPERATIONAL",
+  "objective": "event_driven_owner_email_ingress",
+  "completion_rule": "NOT_DONE_UNTIL_PROD",
+  "additional_cost_eur_target": 0,
+  "preserve_existing_polling_fallback": true,
+  "source": "gmail",
+  "transport": "gmail_watch_to_google_pubsub",
+  "target": "cerebro_push_ingress",
+  "required_controls": [
+    "authenticated_push",
+    "gmail_oauth_refresh_token_as_secret_only",
+    "history_id_idempotency",
+    "message_id_deduplication",
+    "company_isolation",
+    "environment_isolation",
+    "audit_log",
+    "fallback_polling",
+    "rollback"
+  ],
+  "forbidden": [
+    "tokens_in_repo",
+    "tokens_in_logs",
+    "disable_existing_polling_before_e2e",
+    "new_paid_subscription_without_authorization",
+    "publish_social_no_ok_during_calibration"
+  ],
+  "promotion_path": ["LAB", "PREPROD", "PROD"],
+  "prod_requirements": [
+    "contracts",
+    "permissions",
+    "tests",
+    "evaluation",
+    "observability",
+    "backup",
+    "rollback",
+    "rebuild",
+    "cost_measured",
+    "preprod_e2e",
+    "old_vs_new",
+    "real_message_test"
+  ]
+}
