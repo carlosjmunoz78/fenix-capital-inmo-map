@@ -30,6 +30,7 @@ on:
       - 'cerebro/tests/channel-intelligence-public-read-adapters-v1.test.mjs'
       - 'cerebro/tests/channel-intelligence-social-adapter-registry-bridge-v1.test.mjs'
       - 'cerebro/contracts/channel-intelligence-v1.contract.json'
+      - 'cerebro/contracts/continuous-improvement-autonomy-v1.contract.json'
       - 'cerebro/docs/CHANNEL_INTELLIGENCE_V1_SCOPE.md'
       - 'cerebro/docs/*CHANNEL_INTELLIGENCE_V1*'
       - 'cerebro/evidence/channel-intelligence-v1.json'
@@ -60,6 +61,7 @@ jobs:
       - name: Validate Channel Intelligence JSON artifacts
         run: |
           node -e "JSON.parse(require('fs').readFileSync('cerebro/contracts/channel-intelligence-v1.contract.json','utf8')); console.log('contract json ok')"
+          node -e "JSON.parse(require('fs').readFileSync('cerebro/contracts/continuous-improvement-autonomy-v1.contract.json','utf8')); console.log('continuous improvement autonomy contract json ok')"
           node -e "JSON.parse(require('fs').readFileSync('cerebro/evidence/channel-intelligence-v1.json','utf8')); console.log('evidence json ok')"
           node -e "JSON.parse(require('fs').readFileSync('cerebro/evidence/channel-intelligence-collectors-fenix-v1.json','utf8')); console.log('collector evidence json ok')"
           node -e "JSON.parse(require('fs').readFileSync('cerebro/evidence/channel-intelligence-publisher-topology-fenix-v1.json','utf8')); console.log('publisher topology json ok')"
