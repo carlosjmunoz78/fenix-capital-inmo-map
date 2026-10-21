@@ -7,6 +7,7 @@ import {fetchAppApi,supabase} from './supabase';
 import './cerebro-console-host.css';
 import './cerebro-operative-console-v2.css';
 import './cerebro-operative-console-v3.css';
+import './cerebro-operative-console-v3-fixes.css';
 
 type CerebroView='V0'|'OPERATIVA';
 type OwnerAccess='checking'|'allowed'|'denied';
