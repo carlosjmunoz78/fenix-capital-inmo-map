@@ -1,10 +1,10 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "company_id": "fenix-capital",
   "capability_id": "CHANNEL-INTELLIGENCE-V1",
   "environment": "PREPROD",
   "evidence_at": "2026-10-21T16:00:00.000Z",
-  "purpose": "Record live connector availability without secrets and without authorizing writes, paid upgrades or account disconnections.",
+  "purpose": "Record live connector availability and zero-cost direct read paths without secrets and without authorizing writes, paid upgrades or account disconnections.",
   "observed_provider": "Windsor.ai",
   "plan_constraint": {
     "state": "FREE_PLAN_READS_PAUSED",
@@ -73,12 +73,74 @@
       "additional_cost_eur": 0
     }
   ],
+  "secondary_connector_audit": {
+    "provider": "GSC Wizard",
+    "live_read_attempt": "REFUSED_BY_PROVIDER",
+    "reason": "SUBSCRIPTION_REQUIRED_TRIAL_ENDED",
+    "retry_before_subscription": false,
+    "paid_subscription_authorized": false,
+    "selected_as_runtime_dependency": false
+  },
+  "direct_path_audit": {
+    "implementation_file": "cerebro/marketing/channel-intelligence-direct-read-adapters-v1.mjs",
+    "state": "IMPLEMENTED_UNBOUND_PREPROD",
+    "secret_handling": "AUTH_BOUND_EXTERNALLY_AND_NEVER_RETURNED_IN_COLLECTOR_OUTPUT",
+    "paths": [
+      {
+        "collector_family": "GOOGLE_SEARCH_CONSOLE_DIRECT",
+        "read_endpoint": "POST https://www.googleapis.com/webmasters/v3/sites/{siteUrl}/searchAnalytics/query",
+        "minimum_scope": "https://www.googleapis.com/auth/webmasters.readonly",
+        "quota_model": "GOOGLE_NATIVE_QUOTA",
+        "additional_cost_target_eur": 0,
+        "credential_binding_verified": false,
+        "runtime_state": "READY_FOR_READONLY_CREDENTIAL_BINDING"
+      },
+      {
+        "collector_family": "GOOGLE_ANALYTICS_DATA_DIRECT",
+        "read_endpoint": "POST https://analyticsdata.googleapis.com/v1beta/properties/{propertyId}:runReport",
+        "minimum_scope": "https://www.googleapis.com/auth/analytics.readonly",
+        "quota_model": "GOOGLE_NATIVE_PROPERTY_QUOTA",
+        "additional_cost_target_eur": 0,
+        "credential_binding_verified": false,
+        "runtime_state": "READY_FOR_READONLY_CREDENTIAL_BINDING"
+      },
+      {
+        "collector_family": "META_PAGE_INSIGHTS_DIRECT",
+        "read_endpoint": "GET https://graph.facebook.com/{apiVersion}/{pageId}/insights",
+        "minimum_permissions": ["read_insights", "pages_read_engagement"],
+        "token_type": "PAGE_ACCESS_TOKEN",
+        "additional_cost_target_eur": 0,
+        "credential_binding_verified": false,
+        "runtime_state": "READY_FOR_PERMISSION_AND_PAGE_TOKEN_VERIFICATION"
+      },
+      {
+        "collector_family": "LINKEDIN_ORGANIZATION_ANALYTICS_DIRECT",
+        "read_endpoint_family": "https://api.linkedin.com/rest",
+        "minimum_permission": "r_organization_admin",
+        "program_dependency": "COMMUNITY_MANAGEMENT_API_ACCESS",
+        "additional_cost_target_eur": 0,
+        "credential_binding_verified": false,
+        "runtime_state": "READY_FOR_ACCESS_AND_PERMISSION_VERIFICATION"
+      }
+    ],
+    "documentation_sources": [
+      "https://developers.google.com/webmaster-tools/v1/searchanalytics/query",
+      "https://developers.google.com/webmaster-tools/limits",
+      "https://developers.google.com/analytics/devguides/reporting/data/v1/rest/v1beta/properties/runReport",
+      "https://developers.google.com/analytics/devguides/reporting/data/v1/quotas",
+      "https://developers.facebook.com/docs/graph-api/reference/page/insights/",
+      "https://learn.microsoft.com/en-us/linkedin/marketing/community-management/organizations/organization-access-control-by-role"
+    ]
+  },
   "conclusion": {
     "windsor_metadata_connections_exist": true,
     "windsor_verified_real_data_read_ready": false,
     "windsor_primary_collector_selected": false,
-    "reason": "ZERO_COST_PLAN_ACCOUNT_LIMIT",
-    "next_action": "AUDIT_EXISTING_DIRECT_OR_FREE_READ_PATHS_BEFORE_ANY_PAID_CHANGE_OR_DISCONNECTION",
+    "gsc_wizard_selected": false,
+    "direct_read_adapter_code_exists": true,
+    "direct_read_credentials_verified": false,
+    "reason": "THIRD_PARTY_FREE_PATHS_BLOCKED_OR_UNAVAILABLE_BUT_NATIVE_ZERO_COST_READ_PATHS_IMPLEMENTED_FOR_BINDING",
+    "next_action": "VERIFY_EXISTING_READONLY_CREDENTIALS_OR_CREATE_LEAST_PRIVILEGE_NATIVE_BINDINGS_WITHOUT_NEW_SUBSCRIPTION",
     "human_required_now": false
   },
   "guardrails": {
@@ -87,6 +149,7 @@
     "spend_authorized": false,
     "provider_reconfiguration_authorized": false,
     "account_disconnection_authorized": false,
+    "new_subscription_authorized": false,
     "trading_access": false
   }
 }
