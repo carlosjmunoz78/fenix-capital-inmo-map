@@ -5,7 +5,7 @@
   "engine_id": "QA-001",
   "environment": "CONTROL_PLANE",
   "version": "0.1.0",
-  "updated_at": "2026-10-20T23:54:57.364Z",
+  "updated_at": "2026-10-21T04:46:59.331Z",
   "status": "IMPROVEMENTS_FOUND",
   "observations_total": 6,
   "candidates_total": 6,
