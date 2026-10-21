@@ -10,6 +10,7 @@ on:
       - 'src/cerebro-operative-console.css'
       - 'src/cerebro-operative-console-v2.css'
       - 'src/cerebro-operative-console-v3.css'
+      - 'src/cerebro-operative-console-v3-fixes.css'
       - 'src/cerebroActivityApi.ts'
       - 'qa/cerebroActivityApi.fixture.ts'
       - 'qa/cerebroVisualQaEntry.tsx'
@@ -52,6 +53,8 @@ jobs:
           grep -q 'FIN OBS.' src/CerebroOperativeConsole.tsx
           grep -q 'FUENTE REAL' src/CerebroOperativeConsole.tsx
           test -f src/cerebro-operative-console-v3.css
+          test -f src/cerebro-operative-console-v3-fixes.css
+          grep -q 'cerebro-operative-console-v3-fixes.css' src/CerebroConsoleHost.tsx
           echo 'CEREBRO Console Technical V3 contract: PASS'
 
   visual-qa:
@@ -106,5 +109,5 @@ jobs:
           echo '- Chromium desktop: 1440x1000' >> "$GITHUB_STEP_SUMMARY"
           echo '- Chromium mobile: 390x844' >> "$GITHUB_STEP_SUMMARY"
           echo '- Process rows + inspector interaction verified' >> "$GITHUB_STEP_SUMMARY"
-          echo '- Horizontal overflow guard verified' >> "$GITHUB_STEP_SUMMARY"
+          echo '- Horizontal overflow + composer viewport fit verified' >> "$GITHUB_STEP_SUMMARY"
           echo '- Fixture-only PREPROD visual evidence; no PROD credentials or writes' >> "$GITHUB_STEP_SUMMARY"
