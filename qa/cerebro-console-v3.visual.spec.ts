@@ -10,7 +10,12 @@ async function assertConsole(page:Page,screenshotName:string){
   await expect(page.getByRole('heading',{name:'PROCESOS AHORA'})).toBeVisible();
   await expect(page.locator('[data-run-id="910001"]')).toBeVisible();
   await expect(page.locator('[data-run-id="910002"]')).toBeVisible();
-  await expect(page.getByRole('button',{name:'NEURAL'})).toBeDisabled();
+  await expect(page.getByRole('button',{name:'HABLAR'})).toBeVisible();
+  await expect(page.getByRole('button',{name:'TÉCNICA'})).toBeVisible();
+  const viewport=page.viewportSize();
+  const neural=page.getByRole('button',{name:'NEURAL'});
+  if((viewport?.width??1440)>760)await expect(neural).toBeDisabled();
+  else await expect(neural).toHaveCount(0);
 
   const overflow=await page.evaluate(()=>({width:window.innerWidth,scrollWidth:document.documentElement.scrollWidth}));
   expect(overflow.scrollWidth).toBeLessThanOrEqual(overflow.width+1);
@@ -20,7 +25,7 @@ async function assertConsole(page:Page,screenshotName:string){
   await expect(dialog).toBeVisible();
   await expect(dialog.getByText('Ejecutar pruebas estructurales')).toBeVisible();
   await expect(dialog.getByText('Generar evidencia de aceptación')).toBeVisible();
-  await expect(dialog.getByText('PREPROD')).toBeVisible();
+  await expect(dialog.getByText('PREPROD',{exact:true})).toBeVisible();
   await page.getByRole('button',{name:'Cerrar detalle'}).click();
   await expect(dialog).toBeHidden();
 
