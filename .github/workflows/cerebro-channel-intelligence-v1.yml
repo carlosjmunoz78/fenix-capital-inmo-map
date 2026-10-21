@@ -5,8 +5,10 @@ on:
     paths:
       - 'cerebro/marketing/channel-intelligence-runtime-v1.mjs'
       - 'cerebro/marketing/channel-intelligence-multicompany-adapter-v1.mjs'
+      - 'cerebro/marketing/channel-intelligence-job001-bridge-v1.mjs'
       - 'cerebro/tests/channel-intelligence-runtime-v1.test.mjs'
       - 'cerebro/tests/channel-intelligence-multicompany-adapter-v1.test.mjs'
+      - 'cerebro/tests/channel-intelligence-job001-bridge-v1.test.mjs'
       - 'cerebro/contracts/channel-intelligence-v1.contract.json'
       - 'cerebro/docs/CHANNEL_INTELLIGENCE_V1_SCOPE.md'
       - 'cerebro/docs/*CHANNEL_INTELLIGENCE_V1*'
@@ -36,7 +38,7 @@ jobs:
           node -e "JSON.parse(require('fs').readFileSync('cerebro/evidence/channel-intelligence-v1.json','utf8')); console.log('evidence json ok')"
 
       - name: Run Channel Intelligence V1 tests
-        run: node --test cerebro/tests/channel-intelligence-runtime-v1.test.mjs cerebro/tests/channel-intelligence-multicompany-adapter-v1.test.mjs
+        run: node --test cerebro/tests/channel-intelligence-runtime-v1.test.mjs cerebro/tests/channel-intelligence-multicompany-adapter-v1.test.mjs cerebro/tests/channel-intelligence-job001-bridge-v1.test.mjs
 
       - name: Validate canonical Factory registry remains unchanged
         working-directory: cerebro
