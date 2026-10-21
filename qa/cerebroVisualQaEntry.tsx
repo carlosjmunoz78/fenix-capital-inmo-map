@@ -3,6 +3,7 @@ import {createRoot} from 'react-dom/client';
 import CerebroOperativeConsole from '../src/CerebroOperativeConsole';
 import '../src/cerebro-operative-console-v2.css';
 import '../src/cerebro-operative-console-v3.css';
+import '../src/cerebro-operative-console-v3-fixes.css';
 
 const source=document.createElement('div');
 source.className='cerebro-host-v0';
@@ -21,11 +22,12 @@ document.body.appendChild(source);
 
 const qaMark=document.createElement('div');
 qaMark.id='cerebro-visual-qa-mark';
-qaMark.textContent='QA VISUAL · DATOS SINTÉTICOS · PREPROD · NO PROD';
+qaMark.textContent='QA VISUAL · SINTÉTICO · PREPROD · NO PROD';
 Object.assign(qaMark.style,{
-  position:'fixed',top:'0',left:'50%',transform:'translateX(-50%)',zIndex:'9999',
-  padding:'4px 12px',font:'700 10px/1.4 ui-monospace,monospace',letterSpacing:'.08em',
-  color:'#051419',background:'#f6d34a',borderRadius:'0 0 8px 8px',pointerEvents:'none'
+  position:'fixed',right:'12px',bottom:'82px',zIndex:'9999',
+  padding:'4px 9px',font:'700 9px/1.35 ui-monospace,monospace',letterSpacing:'.06em',
+  color:'#051419',background:'rgba(246,211,74,.9)',borderRadius:'8px',pointerEvents:'none',
+  boxShadow:'0 6px 18px rgba(0,0,0,.28)'
 });
 document.body.appendChild(qaMark);
 
