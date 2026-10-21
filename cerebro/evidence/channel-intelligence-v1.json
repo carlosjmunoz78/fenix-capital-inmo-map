@@ -4,23 +4,26 @@
   "owner_engine": "MKT-001",
   "environment": "PREPROD",
   "evidence_state": "PREPROD_REFERENCE_GREEN",
-  "validated_code_head_sha": "4c075b68c8d14d9404f7f4850c6a9d6466e0d33c",
+  "validated_code_head_sha": "7416265df8e4cbd36cf65a6b33832bdfa2ed9e7f",
   "validation_workflow": {
     "name": "CEREBRO Channel Intelligence V1",
-    "run_id": 39602914148,
+    "run_id": 39604155289,
     "conclusion": "success",
     "checks": [
       "channel-intelligence contract JSON parses",
       "channel-intelligence evidence JSON parses",
+      "Fenix collector evidence JSON parses",
       "channel-intelligence runtime tests pass",
       "multicompany adapter integration tests pass",
       "JOB-001 durable watch bridge tests pass",
+      "zero-cost collector registry tests pass",
+      "fail-closed read-only collector worker tests pass",
       "canonical Factory registry validation passes"
     ]
   },
   "governed_integration_workflow": {
     "name": "CEREBRO Governed Main Integration V0",
-    "run_id": 39602914045,
+    "run_id": 39604155106,
     "conclusion": "success"
   },
   "existing_components_reused": [
@@ -44,11 +47,28 @@
     "cerebro/marketing/channel-intelligence-runtime-v1.mjs",
     "cerebro/marketing/channel-intelligence-multicompany-adapter-v1.mjs",
     "cerebro/marketing/channel-intelligence-job001-bridge-v1.mjs",
+    "cerebro/marketing/channel-intelligence-collector-registry-v1.mjs",
+    "cerebro/marketing/channel-intelligence-worker-v1.mjs",
     "cerebro/contracts/channel-intelligence-v1.contract.json",
     "cerebro/tests/channel-intelligence-runtime-v1.test.mjs",
     "cerebro/tests/channel-intelligence-multicompany-adapter-v1.test.mjs",
-    "cerebro/tests/channel-intelligence-job001-bridge-v1.test.mjs"
+    "cerebro/tests/channel-intelligence-job001-bridge-v1.test.mjs",
+    "cerebro/tests/channel-intelligence-collector-registry-v1.test.mjs",
+    "cerebro/tests/channel-intelligence-worker-v1.test.mjs"
   ],
+  "live_connector_audit": {
+    "provider": "Windsor.ai",
+    "connected_metadata_seen": ["facebook_organic", "googleanalytics4", "searchconsole"],
+    "fenix_real_data_read_ready": false,
+    "blocker": "ZERO_COST_PLAN_ACCOUNT_LIMIT",
+    "reported_connected_accounts": 13,
+    "reported_free_plan_accounts": 1,
+    "instagram_connector_connected_in_observed_list": false,
+    "linkedin_organic_connector_connected_in_observed_list": false,
+    "paid_upgrade_authorized": false,
+    "account_disconnection_authorized": false,
+    "evidence_file": "cerebro/evidence/channel-intelligence-collectors-fenix-v1.json"
+  },
   "proven": {
     "web_operating_profile": true,
     "instagram_facebook_linkedin_logical_pods": true,
@@ -67,23 +87,27 @@
     "channel_health_6h_plan": true,
     "search_and_platform_capability_24h_plan": true,
     "web_visual_radar_blocked_until_official_baseline_stable": true,
+    "zero_cost_collector_registry": true,
+    "blocked_provider_safe_skip_no_retry_storm": true,
+    "verified_read_only_adapter_worker_contract": true,
+    "collector_output_authority_validation": true,
+    "secret_pii_shaped_collector_output_rejected": true,
     "cross_company_deny": true,
     "low_confidence_fail_closed": true,
     "publish_and_prod_write_disabled": true,
     "paid_execution_disabled": true,
-    "secret_pii_shaped_fields_rejected": true,
     "additional_cost_target_eur": 0,
     "canonical_engine_count_unchanged": 177
   },
   "not_proven_or_not_enabled": [
-    "physical always-on trend collection from each platform",
+    "physical always-on trend collection from each social platform",
     "physical competitor data collection for every channel",
-    "read-only collector adapter bindings for Meta and LinkedIn",
-    "registered JOB-001 worker handler that executes those collectors",
+    "verified real-data zero-cost collector binding for Facebook/Instagram/LinkedIn",
+    "long-running worker process bound to the JOB-001 queue in infrastructure",
     "provider/API write bindings for social networks",
     "public publishing or community actions",
     "paid ads execution",
-    "automatic visual screenshot capture and pixel regression of the live website",
+    "automatic visual screenshot capture and pixel regression of the live official website",
     "autonomous LRN-001 promotion of creative rules",
     "PROD autonomy"
   ],
@@ -104,5 +128,5 @@
     "MONEY_LIMIT",
     "CUSTOMER_HUMAN_REQUEST"
   ],
-  "promotion_note": "PREPROD_REFERENCE_GREEN proves the additive profiles/scoring/integration and durable JOB-001 watch dispatch. It does not prove physical platform collection or autonomous PROD. Collector bindings, worker execution, channel write adapters, visual baseline/regression and governed promotion remain separate gates."
+  "promotion_note": "PREPROD_REFERENCE_GREEN now proves profiles, scoring, multicompany reuse, durable JOB-001 watch dispatch, zero-cost collector selection and a fail-closed worker contract. It still does not prove physical social collection or autonomous PROD. Real-data read-only adapters, infrastructure worker binding, official-web visual baseline/regression and governed promotion remain separate gates."
 }
