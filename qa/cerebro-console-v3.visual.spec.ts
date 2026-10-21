@@ -5,11 +5,12 @@ const QA_PATH='/cerebro-visual-qa.html';
 
 async function assertConsole(page:Page,screenshotName:string){
   await page.goto(QA_PATH,{waitUntil:'networkidle'});
-  await expect(page.getByText('QA VISUAL · DATOS SINTÉTICOS · PREPROD · NO PROD')).toBeVisible();
+  await expect(page.getByText('QA VISUAL · SINTÉTICO · PREPROD · NO PROD')).toBeVisible();
   await expect(page.getByRole('main',{name:'CEREBRO · Vista técnica'})).toBeVisible();
   await expect(page.getByRole('heading',{name:'PROCESOS AHORA'})).toBeVisible();
   await expect(page.locator('[data-run-id="910001"]')).toBeVisible();
   await expect(page.locator('[data-run-id="910002"]')).toBeVisible();
+  await expect(page.locator('[data-run-id="910004"]')).toBeVisible();
 
   const viewSwitch=page.getByRole('navigation',{name:'Cambiar interfaz de CEREBRO'});
   const viewButtons=viewSwitch.locator('button');
@@ -26,6 +27,16 @@ async function assertConsole(page:Page,screenshotName:string){
 
   const overflow=await page.evaluate(()=>({width:window.innerWidth,scrollWidth:document.documentElement.scrollWidth}));
   expect(overflow.scrollWidth).toBeLessThanOrEqual(overflow.width+1);
+
+  const composer=page.locator('.cerebro-composer-shell');
+  await expect(composer).toBeVisible();
+  await expect(page.getByRole('textbox',{name:'Escribe una orden para CEREBRO'})).toBeVisible();
+  const composerBox=await composer.boundingBox();
+  expect(composerBox).not.toBeNull();
+  if(composerBox&&viewport){
+    expect(composerBox.x).toBeGreaterThanOrEqual(0);
+    expect(composerBox.x+composerBox.width).toBeLessThanOrEqual(viewport.width+1);
+  }
 
   await page.locator('[data-run-id="910001"]').click();
   const dialog=page.getByRole('dialog',{name:'Detalle de FACT-001'});
