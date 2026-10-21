@@ -1401,11 +1401,11 @@
         "binding_count": 6
       },
       "company_id": "fenix",
-      "environment": "PREPROD",
+      "environment": "PROD_CAPABILITY",
       "version": "1.2.0",
-      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
-      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
-      "current_evidence": null,
+      "status": "PROD_CAPABILITY_AVAILABLE_READONLY",
+      "current_scope": "READONLY_ADVISORY_ANALYZE_REVIEW_PLAN_OBSERVE",
+      "current_evidence": "GREEN_DYNAMIC_MODAL_2827C08A_PROD_READONLY_CANARY",
       "observed_at": "2026-10-21T04:34:22.514Z",
       "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
       "prod_authorized": false,
@@ -1419,7 +1419,38 @@
       "spend_authorized": false,
       "trading_access": false,
       "additional_cost_eur": 0,
-      "capability_hash": "7093728138743449da7ea1effcb754398d14baf7fda688d8c99c11ce650d1dba"
+      "capability_hash": "7093728138743449da7ea1effcb754398d14baf7fda688d8c99c11ce650d1dba",
+      "canary": {
+        "status": "GREEN_DYNAMIC_MODAL_2827C08A_PROD_READONLY_CANARY",
+        "candidate_id": "repo:d467e64402b053e5371c1b2c7fbc",
+        "technical_name": "modal",
+        "head_sha": "7d21400fc526d3d24b30fff28bdcd88fd9fa64f9",
+        "run_id": 39544785827,
+        "ref": "refs/heads/main",
+        "checked_bindings": [
+          "CMP-002",
+          "DPO-001",
+          "IAM-001",
+          "RED-001",
+          "SEC-001",
+          "SEC-002"
+        ],
+        "checked_modes": [
+          "ADVISE",
+          "ANALYZE",
+          "REVIEW",
+          "PLAN",
+          "READONLY_OBSERVE"
+        ],
+        "side_effects": false,
+        "external_skill_code_execution": false,
+        "prod_write_authorized": false,
+        "prod_mutation_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": 0,
+        "observed_at": "2026-10-21T04:34:41.431Z"
+      },
+      "promoted_at": "2026-10-21T04:34:41.431Z"
     },
     {
       "candidate_id": "repo:c527b570c445b07466c162986847",
@@ -1471,11 +1502,11 @@
         "binding_count": 5
       },
       "company_id": "fenix",
-      "environment": "PREPROD",
+      "environment": "PROD_CAPABILITY",
       "version": "1.2.0",
-      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
-      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
-      "current_evidence": null,
+      "status": "PROD_CAPABILITY_AVAILABLE_READONLY",
+      "current_scope": "READONLY_ADVISORY_ANALYZE_REVIEW_PLAN_OBSERVE",
+      "current_evidence": "GREEN_DYNAMIC_MOTION_904063B1_PROD_READONLY_CANARY",
       "observed_at": "2026-10-21T04:34:22.513Z",
       "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
       "prod_authorized": false,
@@ -1489,16 +1520,45 @@
       "spend_authorized": false,
       "trading_access": false,
       "additional_cost_eur": 0,
-      "capability_hash": "3bbd615d664dc354ab5834c8482fb81456c0e3a307aafb58f7a36aeb2e1dffd3"
+      "capability_hash": "3bbd615d664dc354ab5834c8482fb81456c0e3a307aafb58f7a36aeb2e1dffd3",
+      "canary": {
+        "status": "GREEN_DYNAMIC_MOTION_904063B1_PROD_READONLY_CANARY",
+        "candidate_id": "repo:c527b570c445b07466c162986847",
+        "technical_name": "motion",
+        "head_sha": "7d21400fc526d3d24b30fff28bdcd88fd9fa64f9",
+        "run_id": 39544785827,
+        "ref": "refs/heads/main",
+        "checked_bindings": [
+          "APP-001",
+          "ARCH-001",
+          "QA-001",
+          "WAUD-001",
+          "WEB-001"
+        ],
+        "checked_modes": [
+          "ADVISE",
+          "ANALYZE",
+          "REVIEW",
+          "PLAN",
+          "READONLY_OBSERVE"
+        ],
+        "side_effects": false,
+        "external_skill_code_execution": false,
+        "prod_write_authorized": false,
+        "prod_mutation_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": 0,
+        "observed_at": "2026-10-21T04:34:41.431Z"
+      },
+      "promoted_at": "2026-10-21T04:34:41.431Z"
     }
   ],
   "adoption_skips": [],
   "summary": {
     "total": 15,
-    "inserted": 2,
-    "updated": 0,
+    "promoted": 2,
     "skipped": 0,
-    "pending_canary": 2,
-    "prod_readonly": 13
+    "pending_canary": 0,
+    "prod_readonly": 15
   }
 }
