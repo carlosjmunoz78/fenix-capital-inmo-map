@@ -2859,6 +2859,220 @@
       "promoted_at": "2026-10-21T09:34:16.064Z"
     },
     {
+      "candidate_id": "repo:725a73647194012ae11948908fcc",
+      "technical_name": "pci-dss-compliance",
+      "source_locator": "github://TerminalSkills/skills@6edcf94159d9f46b0759d2e1b59dd545cfaca254/skills/pci-dss-compliance",
+      "pinned_sha": "6edcf94159d9f46b0759d2e1b59dd545cfaca254",
+      "snapshot_sha256": "725a73647194012ae11948908fccd06349a824d7998bdf5ef4821ff547800014",
+      "manifest_sha256": "cca6d6fce9f5b93e93ada3036857f034948ee59c92340b4925923f1f92aea2d1",
+      "outcome_hash": "4f4ff4bb5908515ecaa2ced6ca4f7d94db99d4e7bda23d2243c091949fff9089",
+      "target_engine_bindings": [
+        "CMP-002",
+        "DPO-001",
+        "IAM-001",
+        "RED-001",
+        "SEC-001",
+        "SEC-002"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:725a73647194012a:cap:1",
+          "technical_name": "pci-dss-compliance",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "security-identity-privacy",
+              "engine_bindings": [
+                "CMP-002",
+                "DPO-001",
+                "IAM-001",
+                "RED-001",
+                "SEC-001",
+                "SEC-002"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 6
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-21T14:37:38.484Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "2838bb1574d158b281333a86daae65fe15b40ff106a3125d1a597f41367249e1"
+    },
+    {
+      "candidate_id": "repo:bef099ca21d5c7d1e8f9cdb909da",
+      "technical_name": "plasmo",
+      "source_locator": "github://TerminalSkills/skills@6edcf94159d9f46b0759d2e1b59dd545cfaca254/skills/plasmo",
+      "pinned_sha": "6edcf94159d9f46b0759d2e1b59dd545cfaca254",
+      "snapshot_sha256": "bef099ca21d5c7d1e8f9cdb909dabda0d8cc3cbfee6af54150d21ae6b6838f55",
+      "manifest_sha256": "fd5ffa81614042a6bd618696c1904d57f02f47620a8719096c4a69a1c94c9c0f",
+      "outcome_hash": "4529c8198b13c12bb77b1fc2ba46916f09e2e4c2ebf0bac85a57a38d5f6f6e5b",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:bef099ca21d5c7d1:cap:1",
+          "technical_name": "plasmo",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-21T14:37:38.485Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "fc1902b7326c609b0e34eb0bd3e64bb6551c8d886531c2729f6b687c871f38bf"
+    },
+    {
+      "candidate_id": "repo:c54e937cfe1467dd8f4f3e0a7993",
+      "technical_name": "plausible",
+      "source_locator": "github://TerminalSkills/skills@6edcf94159d9f46b0759d2e1b59dd545cfaca254/skills/plausible",
+      "pinned_sha": "6edcf94159d9f46b0759d2e1b59dd545cfaca254",
+      "snapshot_sha256": "c54e937cfe1467dd8f4f3e0a7993a5a3928f0c5016821e10d726c3696c98a234",
+      "manifest_sha256": "b8093c7fc3932db94705b11816503c6c8561ac612815c33e1423f843a70d43ce",
+      "outcome_hash": "dff7934ef751c3b8fa35cf94f2425638a793dda7584ba6be33d9e57a38a98c8c",
+      "target_engine_bindings": [
+        "CMP-002",
+        "DPO-001",
+        "IAM-001",
+        "RED-001",
+        "SEC-001",
+        "SEC-002"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:c54e937cfe1467dd:cap:1",
+          "technical_name": "plausible",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "security-identity-privacy",
+              "engine_bindings": [
+                "CMP-002",
+                "DPO-001",
+                "IAM-001",
+                "RED-001",
+                "SEC-001",
+                "SEC-002"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 6
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-21T14:37:38.484Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "451e78b123df31b6cb51a348199928c278e516ac123c707557efdf24175e54e7"
+    },
+    {
       "candidate_id": "repo:c7ec67b6837faa544c400a8491fd",
       "technical_name": "professional",
       "source_locator": "github://bergside/awesome-design-skills@f631a09b4fcc0166f2e2c1a8c81906ef680c57e8/skills/professional",
@@ -3961,10 +4175,11 @@
   ],
   "adoption_skips": [],
   "summary": {
-    "total": 39,
-    "promoted": 11,
+    "total": 42,
+    "inserted": 3,
+    "updated": 0,
     "skipped": 0,
-    "pending_canary": 0,
+    "pending_canary": 3,
     "prod_readonly": 39
   }
 }
