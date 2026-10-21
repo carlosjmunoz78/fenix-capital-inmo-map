@@ -1,0 +1,83 @@
+{
+  "schema_version": "1.0.0",
+  "capability_id": "CHANNEL-INTELLIGENCE-V1",
+  "owner_engine": "MKT-001",
+  "environment": "PREPROD",
+  "evidence_state": "PREPROD_REFERENCE_GREEN",
+  "validated_code_head_sha": "438355977d291dc2d887d9283e89ad1a575d3cf5",
+  "validation_workflow": {
+    "name": "CEREBRO Channel Intelligence V1",
+    "run_id": 39602014107,
+    "conclusion": "success",
+    "checks": [
+      "channel-intelligence contract JSON parses",
+      "channel-intelligence runtime tests pass",
+      "multicompany adapter integration tests pass",
+      "canonical Factory registry validation passes"
+    ]
+  },
+  "existing_components_reused": [
+    {
+      "path": "cerebro/multicompany/post-scan-parallel-v1.mjs",
+      "blob_sha": "0718379581a3261513a9e52714117d2577e8f48c",
+      "engines": ["WAUD-001", "SOCAUD-001"]
+    },
+    {
+      "path": "cerebro/multicompany/bootstrap-tier-v1.mjs",
+      "blob_sha": "af7702da942efd5aaa597af6d5ce65f3f084245c",
+      "engines": ["SOCBOOT-001"]
+    }
+  ],
+  "new_files_under_test": [
+    "cerebro/marketing/channel-intelligence-runtime-v1.mjs",
+    "cerebro/marketing/channel-intelligence-multicompany-adapter-v1.mjs",
+    "cerebro/contracts/channel-intelligence-v1.contract.json",
+    "cerebro/tests/channel-intelligence-runtime-v1.test.mjs",
+    "cerebro/tests/channel-intelligence-multicompany-adapter-v1.test.mjs"
+  ],
+  "proven": {
+    "web_operating_profile": true,
+    "instagram_facebook_linkedin_logical_pods": true,
+    "trend_stage_and_opportunity_scoring": true,
+    "saturation_and_decline_guard": true,
+    "visual_taste_profile_as_non_absolute_signal": true,
+    "cross_channel_insight_without_blind_asset_copy": true,
+    "new_channel_bootstrap_plan_without_new_engine_id": true,
+    "reuse_existing_multicompany_web_social_pipeline": true,
+    "cross_company_deny": true,
+    "low_confidence_fail_closed": true,
+    "publish_and_prod_write_disabled": true,
+    "paid_execution_disabled": true,
+    "secret_pii_shaped_fields_rejected": true,
+    "additional_cost_target_eur": 0,
+    "canonical_engine_count_unchanged": 177
+  },
+  "not_proven_or_not_enabled": [
+    "physical always-on trend collection from each platform",
+    "physical competitor data collection for every channel",
+    "physical EVT-001/JOB-001 scheduling binding for this capability",
+    "provider/API bindings for social networks",
+    "public publishing or community actions",
+    "paid ads execution",
+    "automatic visual screenshot capture and pixel regression of the live website",
+    "autonomous LRN-001 promotion of creative rules",
+    "PROD autonomy"
+  ],
+  "website_migration_guard": {
+    "parallel_build": true,
+    "wordpress_prod_write_from_this_capability": false,
+    "merge_during_active_staging_to_prod_migration": false,
+    "baseline_after_prod_stability_required": true
+  },
+  "human_required_reasons": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "promotion_note": "PREPROD_REFERENCE_GREEN does not mean autonomous PROD. Physical collectors, scheduler bindings, channel adapters, visual baseline/regression and governed promotion remain separate gates."
+}
