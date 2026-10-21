@@ -1099,11 +1099,11 @@
         "binding_count": 5
       },
       "company_id": "fenix",
-      "environment": "PREPROD",
+      "environment": "PROD_CAPABILITY",
       "version": "1.2.0",
-      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
-      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
-      "current_evidence": null,
+      "status": "PROD_CAPABILITY_AVAILABLE_READONLY",
+      "current_scope": "READONLY_ADVISORY_ANALYZE_REVIEW_PLAN_OBSERVE",
+      "current_evidence": "GREEN_DYNAMIC_MATERIAL_UI_2D95FBFE_PROD_READONLY_CANARY",
       "observed_at": "2026-10-21T00:05:48.455Z",
       "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
       "prod_authorized": false,
@@ -1117,16 +1117,45 @@
       "spend_authorized": false,
       "trading_access": false,
       "additional_cost_eur": 0,
-      "capability_hash": "3f1ad64c098affddc2e6090330796f028afec5291a3f1cd26994bcd9db19a4ca"
+      "capability_hash": "3f1ad64c098affddc2e6090330796f028afec5291a3f1cd26994bcd9db19a4ca",
+      "canary": {
+        "status": "GREEN_DYNAMIC_MATERIAL_UI_2D95FBFE_PROD_READONLY_CANARY",
+        "candidate_id": "repo:53a1da47af691824a77b3a9761b4",
+        "technical_name": "material-ui",
+        "head_sha": "37af0a9419925866db3d66337bdac0ba98e70f64",
+        "run_id": 39519210978,
+        "ref": "refs/heads/main",
+        "checked_bindings": [
+          "APP-001",
+          "ARCH-001",
+          "QA-001",
+          "WAUD-001",
+          "WEB-001"
+        ],
+        "checked_modes": [
+          "ADVISE",
+          "ANALYZE",
+          "REVIEW",
+          "PLAN",
+          "READONLY_OBSERVE"
+        ],
+        "side_effects": false,
+        "external_skill_code_execution": false,
+        "prod_write_authorized": false,
+        "prod_mutation_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": 0,
+        "observed_at": "2026-10-21T00:06:05.748Z"
+      },
+      "promoted_at": "2026-10-21T00:06:05.748Z"
     }
   ],
   "adoption_skips": [],
   "summary": {
     "total": 11,
-    "inserted": 1,
-    "updated": 0,
+    "promoted": 1,
     "skipped": 0,
-    "pending_canary": 1,
-    "prod_readonly": 10
+    "pending_canary": 0,
+    "prod_readonly": 11
   }
 }
