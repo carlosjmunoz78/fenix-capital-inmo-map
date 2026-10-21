@@ -4359,6 +4359,14 @@
       "source_head_sha": "b3ae45d2560311d4525d5d135db0fbe836c24e31"
     },
     {
+      "batch_id": "lrn-batch:dd00c5f49f64fedec0f95c63",
+      "path": "batches/lrn-batch_dd00c5f49f64fedec0f95c63.json",
+      "sha256": "82d24d719aaedb5847dc99078094e02587191872a262649f219e05518cab5d5b",
+      "events_total": 3,
+      "source_run_id": 39545867055,
+      "source_head_sha": "35eba05d01eb875812d431da624db4593631050f"
+    },
+    {
       "batch_id": "lrn-batch:dd1faec3bc3f008ef5cf26d8",
       "path": "batches/lrn-batch_dd1faec3bc3f008ef5cf26d8.json",
       "sha256": "48adc48a3f415b948d232e6f595ff1437051f30820d9915bef2011baaa53c760",
@@ -5066,5 +5074,5 @@
   "prod_authorized": false,
   "trading_access": false,
   "additional_cost_eur": 0,
-  "batches_total": 632
+  "batches_total": 633
 }
