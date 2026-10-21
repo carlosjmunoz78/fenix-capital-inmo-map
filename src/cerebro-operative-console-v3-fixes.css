@@ -1,0 +1,98 @@
+/* V3 physical-browser corrections. Loaded after V2/V3 so these stay narrow and reversible. */
+.cerebro-technical-v3 .cerebro-composer-shell{
+  left:50%;
+  right:auto;
+  transform:translateX(-50%);
+  width:min(1180px,calc(100vw - 56px));
+  max-width:none;
+  box-sizing:border-box;
+}
+
+@media(max-width:760px){
+  .cerebro-technical-v3 .cerebro-process-table-body{
+    max-height:none;
+    overflow:visible;
+  }
+
+  .cerebro-technical-v3 .cerebro-chat-zone{
+    padding-bottom:96px;
+  }
+
+  .cerebro-technical-v3 .cerebro-composer-shell{
+    left:50%;
+    right:auto;
+    transform:translateX(-50%);
+    width:calc(100vw - 20px);
+    max-width:none;
+    bottom:max(10px,env(safe-area-inset-bottom));
+  }
+
+  .cerebro-technical-v3 .cerebro-inline-view-switch button{
+    width:auto;
+    min-width:44px;
+    height:28px;
+    padding:0 8px;
+    font-size:8px;
+    line-height:1;
+    white-space:nowrap;
+  }
+
+  .cerebro-technical-v3 .cerebro-inline-view-switch button::after{
+    content:none!important;
+  }
+}
+
+@media(max-width:460px){
+  .cerebro-technical-v3 .cerebro-operative-header{
+    padding-left:8px;
+    padding-right:8px;
+  }
+
+  .cerebro-technical-v3 .cerebro-operative-logo{
+    width:34px;
+    height:34px;
+  }
+
+  .cerebro-technical-v3 .cerebro-operative-brand h1{
+    font-size:17px;
+  }
+
+  .cerebro-technical-v3 .cerebro-operative-brand p{
+    display:none;
+  }
+
+  .cerebro-technical-v3 .cerebro-section-title h2{
+    font-size:20px;
+    letter-spacing:.055em;
+  }
+
+  .cerebro-technical-v3 .cerebro-process-counts span{
+    min-height:34px;
+    padding:6px 10px;
+    font-size:9px;
+  }
+
+  .cerebro-technical-v3 .cerebro-process-counts b{
+    font-size:14px;
+  }
+
+  .cerebro-technical-v3 .cerebro-inline-view-switch button{
+    min-width:42px;
+    padding:0 7px;
+    font-size:7.5px;
+  }
+
+  .cerebro-technical-v3 .cerebro-composer-main{
+    grid-template-columns:36px 36px 40px minmax(0,1fr) 42px;
+  }
+
+  .cerebro-technical-v3 .cerebro-composer-main textarea{
+    padding-left:7px;
+    padding-right:7px;
+  }
+
+  .cerebro-technical-v3 .cerebro-send-button{
+    width:36px;
+    height:36px;
+  }
+}
