@@ -36,6 +36,27 @@ Usar `buildChannelIntelligenceFromExistingScan` únicamente con un `scan_result`
 
 No sustituir el pipeline multiempresa canónico por este helper. Este camino es de integración/evaluación PREPROD.
 
+## Publisher Gateway
+
+Estado canónico auditado:
+
+- publisher actual evidenciado: `BUFFER`;
+- Make: `READ_METRICS_BRIDGE_ONLY`;
+- adaptadores futuros: `META_DIRECT`, `LINKEDIN_DIRECT`, otros por Factory;
+- V1: planificación y gates únicamente, sin publish externo.
+
+Comprobar la topología con `getPublisherTopology()` y resolver un canal con `resolvePublisherAdapter()`.
+
+Un plan de publicación de esta V1 debe devolver siempre `publish_executed=false`. Incluso si se pasa `authorize_publish=true`, debe bloquearse con `V1_DOES_NOT_AUTHORIZE_EXTERNAL_PUBLISH_WRITES`.
+
+No usar Make como adapter de publicación. Si se intenta `provider=MAKE`, el gateway debe responder `READ_ONLY_BRIDGE_NOT_PUBLISHER`.
+
+Para sustituir Buffer, usar `planPublisherMigration()` y exigir como mínimo:
+
+`DEPENDENCY_MAP -> BACKUP_SNAPSHOT -> PREPROD_E2E -> OLD_VS_NEW_AGAINST_BUFFER -> IDEMPOTENCY -> VERIFY_PHYSICAL_POST -> ROLLBACK_TEST -> GRADUAL_PROMOTION`
+
+Buffer no se desactiva antes de completar esos gates.
+
 ## Tendencias
 
 Cada señal debe contener scores observables/versionados de 0..100 para:
@@ -101,7 +122,8 @@ CI específica:
 ```bash
 node --test \
   cerebro/tests/channel-intelligence-runtime-v1.test.mjs \
-  cerebro/tests/channel-intelligence-multicompany-adapter-v1.test.mjs
+  cerebro/tests/channel-intelligence-multicompany-adapter-v1.test.mjs \
+  cerebro/tests/channel-intelligence-publisher-gateway-v1.test.mjs
 
 cd cerebro
 npm run validate
