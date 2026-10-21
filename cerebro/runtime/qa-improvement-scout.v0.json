@@ -5,10 +5,10 @@
   "engine_id": "QA-001",
   "environment": "CONTROL_PLANE",
   "version": "0.1.0",
-  "updated_at": "2026-10-21T19:22:15.848Z",
+  "updated_at": "2026-10-21T20:10:30.598Z",
   "status": "IMPROVEMENTS_FOUND",
   "observations_total": 6,
-  "candidates_total": 9,
+  "candidates_total": 8,
   "candidates": [
     {
       "improvement_id": "qa-imp:0b6fca608831c37c0745670c",
@@ -222,34 +222,6 @@
       "risk_class": "LOW",
       "expected_metric_delta": {
         "name": "small_touch_target_count",
-        "direction": "LOWER",
-        "measurement": "CONTROLLED_OLD_VS_NEW"
-      },
-      "next_gate": "OWNER_PREPROD_CANDIDATE",
-      "auto_fix_eligible": false,
-      "promotion_authorized": false,
-      "prod_authorized": false,
-      "prod_write_authorized": false,
-      "customer_data": false,
-      "trading_access": false,
-      "additional_cost_eur": 0
-    },
-    {
-      "improvement_id": "qa-imp:c7d3cc2bf435ae5ea7e6685a",
-      "company_id": "fenix",
-      "engine_id": "WEB-001",
-      "environment": "PREPROD",
-      "version": "0.1.0",
-      "source": "QA-001_HUMAN_READONLY_OBSERVATION",
-      "target": "WEB:qa-desktop-chromium",
-      "dimension": "perceived_performance",
-      "title": "Recorrido humano read-only con duración elevada",
-      "hypothesis": "Investigar el recorrido lento puede descubrir una mejora de rendimiento perceptible.",
-      "evidence": "duration_ms=9915",
-      "confidence": 0.7,
-      "risk_class": "LOW",
-      "expected_metric_delta": {
-        "name": "human_journey_duration_ms",
         "direction": "LOWER",
         "measurement": "CONTROLLED_OLD_VS_NEW"
       },
