@@ -94,6 +94,39 @@ Dependencias lógicas principales:
 
 Inicialmente se prueban perfiles de `instagram`, `facebook` y `linkedin`. Una red futura usa el mismo contrato y pasa por `FACT-001` para scaffold de capability/profile, sin ampliar el Registry salvo gap real auditado.
 
+## Publicación y medición social
+
+Topología auditada actual:
+
+```text
+SOC-001 / CEREBRO
+      ↓
+Publisher Gateway
+      ↓
+BUFFER
+      ↓
+Facebook / Instagram / LinkedIn
+```
+
+Lectura/medición existente:
+
+```text
+Facebook / Instagram / LinkedIn
+      ↓
+Make (rutas ya conectadas de lectura/identidad/métricas)
+      ↓
+Supabase / Notion / CEREBRO
+```
+
+Reglas de dependencia:
+
+- `BUFFER` es el publisher actual evidenciado.
+- `MAKE` no es publisher canónico y no debe adquirir autoridad de publicación por reutilizarse como bridge de lectura.
+- Buffer se conserva hasta que un adapter sustituto demuestre paridad/superioridad en PREPROD.
+- `META_DIRECT` y `LINKEDIN_DIRECT` son candidatos futuros, todavía sin binding de escritura.
+- La migración de publisher exige mapa de dependencias, snapshot, E2E, OLD vs NEW, idempotencia, verificación física, rollback y promoción gradual.
+- El gateway de esta V1 es fail-closed y no ejecuta publicaciones externas.
+
 ## Runtime / jobs / eventos
 
 Se reutilizan:
