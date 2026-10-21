@@ -10,12 +10,18 @@ async function assertConsole(page:Page,screenshotName:string){
   await expect(page.getByRole('heading',{name:'PROCESOS AHORA'})).toBeVisible();
   await expect(page.locator('[data-run-id="910001"]')).toBeVisible();
   await expect(page.locator('[data-run-id="910002"]')).toBeVisible();
-  await expect(page.getByRole('button',{name:'HABLAR'})).toBeVisible();
-  await expect(page.getByRole('button',{name:'TÉCNICA'})).toBeVisible();
+
+  const viewSwitch=page.getByRole('navigation',{name:'Cambiar interfaz de CEREBRO'});
+  const viewButtons=viewSwitch.locator('button');
+  await expect(viewButtons.nth(0)).toBeVisible();
+  await expect(viewButtons.nth(1)).toBeVisible();
   const viewport=page.viewportSize();
-  const neural=page.getByRole('button',{name:'NEURAL'});
-  if((viewport?.width??1440)>760)await expect(neural).toBeDisabled();
-  else await expect(neural).toHaveCount(0);
+  if((viewport?.width??1440)>760){
+    await expect(viewButtons).toHaveCount(3);
+    await expect(viewButtons.nth(2)).toBeDisabled();
+  }else{
+    await expect(viewButtons).toHaveCount(2);
+  }
 
   const overflow=await page.evaluate(()=>({width:window.innerWidth,scrollWidth:document.documentElement.scrollWidth}));
   expect(overflow.scrollWidth).toBeLessThanOrEqual(overflow.width+1);
