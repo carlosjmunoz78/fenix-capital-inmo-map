@@ -13,14 +13,15 @@ async function assertConsole(page:Page,screenshotName:string){
 
   const viewSwitch=page.getByRole('navigation',{name:'Cambiar interfaz de CEREBRO'});
   const viewButtons=viewSwitch.locator('button');
+  await expect(viewButtons).toHaveCount(3);
   await expect(viewButtons.nth(0)).toBeVisible();
   await expect(viewButtons.nth(1)).toBeVisible();
   const viewport=page.viewportSize();
   if((viewport?.width??1440)>760){
-    await expect(viewButtons).toHaveCount(3);
+    await expect(viewButtons.nth(2)).toBeVisible();
     await expect(viewButtons.nth(2)).toBeDisabled();
   }else{
-    await expect(viewButtons).toHaveCount(2);
+    await expect(viewButtons.nth(2)).toBeHidden();
   }
 
   const overflow=await page.evaluate(()=>({width:window.innerWidth,scrollWidth:document.documentElement.scrollWidth}));
