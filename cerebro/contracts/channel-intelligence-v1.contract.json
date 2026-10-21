@@ -1,0 +1,74 @@
+{
+  "schema_version": "1.0.0",
+  "contract_id": "MKT-001/CHANNEL_INTELLIGENCE_V1",
+  "company_id": "GLOBAL_OR_SCOPED",
+  "engine_id": "MKT-001",
+  "capability_id": "CHANNEL-INTELLIGENCE-V1",
+  "environment": "PREPROD",
+  "version": "v1",
+  "purpose": "Coordinate existing web, marketing, social, competition, market, forecasting, opportunity, experiment, learning, evaluation and supervisor engines as Web Operating Profiles and per-channel Pods without adding canonical engine IDs.",
+  "profiles": {
+    "web_operating_profile": {
+      "required": ["company_id", "site_ref"],
+      "engines": ["WEB-001", "WAUD-001", "SEO-001", "KW-001", "MKT-001", "COMPET-001", "MKT-002", "FRC-001", "OPP-001", "INN-001", "EXP-001", "LAB-MKT", "LRN-001", "EVA-001", "SUP-001"]
+    },
+    "channel_pod_profile": {
+      "required": ["company_id", "channel_id", "account_ref"],
+      "roles": ["CHANNEL_DIRECTOR", "TREND_SCOUT", "COMPETITOR_SCOUT", "AUDIENCE_INTELLIGENCE", "MARKET_INTELLIGENCE", "CREATIVE_DIRECTOR", "FORMAT_SPECIALIST", "COPY_SCRIPT", "MULTIMEDIA_PRODUCER", "PUBLISHER_VERIFICATION", "COMMUNITY", "EXPERIMENTATION", "ANALYTICS", "FORECASTING", "LEARNING", "BRAND_GUARDIAN", "POLICY_QA"],
+      "initial_channels": ["instagram", "facebook", "linkedin"]
+    }
+  },
+  "data_contracts": [
+    "channel-manifest.v1",
+    "channel-pod-profile.v1",
+    "trend-signal.v1",
+    "trend-opportunity.v1",
+    "competitor-snapshot.v1",
+    "visual-taste-profile.v1",
+    "creative-decision.v1",
+    "creative-variant.v1",
+    "experiment-result.v1",
+    "cross-channel-insight.v1",
+    "channel-performance.v1"
+  ],
+  "trend_stages": ["SEED", "EMERGING", "BREAKOUT", "MAINSTREAM", "SATURATED", "DECLINING"],
+  "events": [
+    "trend.detected",
+    "trend.accelerating",
+    "trend.breakout_predicted",
+    "trend.saturated",
+    "competitor.winner_detected",
+    "competitor.strategy_changed",
+    "market.signal_detected",
+    "search.demand_changed",
+    "creative.opportunity_detected",
+    "creative.variant_ready",
+    "experiment.started",
+    "experiment.winner_detected",
+    "channel.function_added",
+    "channel.policy_changed",
+    "channel.new_detected",
+    "insight.cross_channel_ready",
+    "learning.rule_candidate"
+  ],
+  "new_channel_pipeline": ["RESEARCH", "TERMS_API_POLICY", "FORMATS", "METRICS", "AUDIENCE", "COMPETITION", "TRENDS", "CHANNEL_MANIFEST", "FACTORY_SCAFFOLD", "ADAPTERS", "TEMPLATES", "LAB", "PREPROD", "E2E", "GOVERNED_PROMOTION"],
+  "invariants": {
+    "reuse_existing_engines_first": true,
+    "new_engine_id_default": false,
+    "shared_runtime_first": true,
+    "preprod_only": true,
+    "prod_write": false,
+    "public_publish": false,
+    "paid_execution": false,
+    "provider_binding": false,
+    "cross_company_access": "DENY_BY_DEFAULT",
+    "blind_cross_channel_copy": false,
+    "owner_taste_is_one_signal_not_absolute_rule": true,
+    "trend_acceleration_before_raw_popularity": true,
+    "experiment_before_promotion": true,
+    "learning_requires_validation": true,
+    "additional_cost_target_eur": 0
+  },
+  "human_required_reasons": ["LEGAL_REQUIRED", "SIGNATURE_REQUIRED", "LOW_CONFIDENCE", "HIGH_RISK", "POLICY_CONFLICT", "SECURITY_INCIDENT", "MONEY_LIMIT", "CUSTOMER_HUMAN_REQUEST"],
+  "promotion": "PREPROD -> exact-head tests/eval -> OLD vs NEW where applicable -> governed gradual promotion after website migration stability; never by scaffold alone"
+}
