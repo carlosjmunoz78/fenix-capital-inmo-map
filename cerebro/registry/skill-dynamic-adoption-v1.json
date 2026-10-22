@@ -573,11 +573,11 @@
         "binding_count": 5
       },
       "company_id": "fenix",
-      "environment": "PREPROD",
+      "environment": "PROD_CAPABILITY",
       "version": "1.2.0",
-      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
-      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
-      "current_evidence": null,
+      "status": "PROD_CAPABILITY_AVAILABLE_READONLY",
+      "current_scope": "READONLY_ADVISORY_ANALYZE_REVIEW_PLAN_OBSERVE",
+      "current_evidence": "GREEN_DYNAMIC_BRAINSTORMING_C467E75B_PROD_READONLY_CANARY",
       "observed_at": "2026-10-22T00:40:47.829Z",
       "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
       "prod_authorized": false,
@@ -591,7 +591,37 @@
       "spend_authorized": false,
       "trading_access": false,
       "additional_cost_eur": 0,
-      "capability_hash": "a741b8e29ffc2641b693edc01d057f722bc3a2a7a602ea2c2209c3dfe85d130c"
+      "capability_hash": "a741b8e29ffc2641b693edc01d057f722bc3a2a7a602ea2c2209c3dfe85d130c",
+      "canary": {
+        "status": "GREEN_DYNAMIC_BRAINSTORMING_C467E75B_PROD_READONLY_CANARY",
+        "candidate_id": "repo:f1650146f47538c5c37f62ff8b11",
+        "technical_name": "brainstorming",
+        "head_sha": "c1a71fbe16d0bf38e8c472e013e8ee800db9e1bd",
+        "run_id": 39701135030,
+        "ref": "refs/heads/main",
+        "checked_bindings": [
+          "APP-001",
+          "ARCH-001",
+          "QA-001",
+          "WAUD-001",
+          "WEB-001"
+        ],
+        "checked_modes": [
+          "ADVISE",
+          "ANALYZE",
+          "REVIEW",
+          "PLAN",
+          "READONLY_OBSERVE"
+        ],
+        "side_effects": false,
+        "external_skill_code_execution": false,
+        "prod_write_authorized": false,
+        "prod_mutation_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": 0,
+        "observed_at": "2026-10-22T00:41:03.136Z"
+      },
+      "promoted_at": "2026-10-22T00:41:03.136Z"
     },
     {
       "candidate_id": "repo:3bf76497558ac95ae47a73497093",
@@ -5570,10 +5600,9 @@
   "adoption_skips": [],
   "summary": {
     "total": 55,
-    "inserted": 1,
-    "updated": 0,
+    "promoted": 1,
     "skipped": 0,
-    "pending_canary": 1,
-    "prod_readonly": 54
+    "pending_canary": 0,
+    "prod_readonly": 55
   }
 }
