@@ -5,9 +5,9 @@
   "engine_id": "ROUTE-001",
   "environment": "PREPROD_CONTROL_PLANE",
   "version": "0.2.0",
-  "updated_at": "2026-10-22T12:12:40.000Z",
-  "source_run_id": 39776458736,
-  "source_head_sha": "b0211f8afae81c42f0f1e41de8b2e5b6b50a96dc",
+  "updated_at": "2026-10-22T17:26:46.000Z",
+  "source_run_id": 39822712664,
+  "source_head_sha": "dd1e200bba076a3a581ea8cd3cfc119efa714c1a",
   "repository_visibility": "public",
   "resources": [
     {
@@ -28,8 +28,8 @@
       "quota_state": "NOT_APPLICABLE",
       "current_observation": true,
       "evidence_refs": [
-        "runtime:node:v24.21.0",
-        "github-run:39776458736"
+        "runtime:node:v24.22.0",
+        "github-run:39822712664"
       ],
       "reason": null
     },
@@ -51,7 +51,7 @@
       "current_observation": true,
       "evidence_refs": [
         "runtime:python:Python 3.12.15",
-        "github-run:39776458736"
+        "github-run:39822712664"
       ],
       "reason": null
     },
@@ -77,7 +77,7 @@
       "evidence_refs": [
         "repo:visibility:public",
         "runtime:gh:gh version 2.102.0 (2026-09-30)",
-        "github-run:39776458736"
+        "github-run:39822712664"
       ],
       "reason": null
     },
@@ -211,8 +211,8 @@
     "selected_resource_class": "DETERMINISTIC_LOCAL",
     "actual_runtime": "node",
     "execution_provenance": "NODE_IN_PROCESS_FIXED_FIXTURE",
-    "observed_at": "2026-10-22T12:12:40.000Z",
-    "duration_ms": 0.666685,
+    "observed_at": "2026-10-22T17:26:46.000Z",
+    "duration_ms": 0.632617,
     "learning_events": 3,
     "business_execution": false
   },
@@ -225,9 +225,8 @@
   "multicompany_continuation": false,
   "additional_cost_eur": 0,
   "repeatability": {
-    "consecutive_live_green_cycles": 49,
+    "consecutive_live_green_cycles": 50,
     "recent_live_green_run_ids": [
-      39372941913,
       39418411953,
       39465814673,
       39503099071,
@@ -236,10 +235,11 @@
       39644288311,
       39682218168,
       39726345006,
-      39776458736
+      39776458736,
+      39822712664
     ],
     "last_rehearsal_status": "REPEATABILITY_REHEARSAL_GREEN",
-    "last_rehearsal_observed_at": "2026-10-22T12:12:40.000Z",
+    "last_rehearsal_observed_at": "2026-10-22T17:26:46.000Z",
     "fallback_rehearsal_green": true,
     "restoration_green": true,
     "full_loss_hold_green": true,
