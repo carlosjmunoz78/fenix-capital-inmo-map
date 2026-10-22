@@ -3327,6 +3327,76 @@
       "promoted_at": "2026-10-21T04:41:56.999Z"
     },
     {
+      "candidate_id": "repo:59f93146cfa11c97d9fb7a06c4f5",
+      "technical_name": "fiction",
+      "source_locator": "github://bergside/awesome-design-skills@f631a09b4fcc0166f2e2c1a8c81906ef680c57e8/skills/fiction",
+      "pinned_sha": "f631a09b4fcc0166f2e2c1a8c81906ef680c57e8",
+      "snapshot_sha256": "59f93146cfa11c97d9fb7a06c4f599cbfbf21b4a69a147be5c141b73fb34e8d2",
+      "manifest_sha256": "1db1a2d28e522da44146baf24bd4da6a61970af075c6b78c52f11e10b5f463be",
+      "outcome_hash": "2b75c7cf8445d4f698e0b90e38e6e381f4b4aecf8d723dd8b0b43ed821a4ddb4",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:59f93146cfa11c97:cap:1",
+          "technical_name": "fiction",
+          "description": "A playful, energetic, cartoonesque interface inspired by friendly children's-book illustrations — warm cream backgrounds, big bold custom display typography, saturated brand color blocks, thick black outlines, generously rounded shapes",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-22T15:22:49.080Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "8a16fb0afe8bc682f1ad50cd270fd4319d9bdb2e05c33fe4cd0e287f5f0bd6ab"
+    },
+    {
       "candidate_id": "repo:92207779a87a5dd5282b5b69b099",
       "technical_name": "figma-to-code",
       "source_locator": "github://TerminalSkills/skills@6edcf94159d9f46b0759d2e1b59dd545cfaca254/skills/figma-to-code",
@@ -3425,6 +3495,356 @@
         "observed_at": "2026-10-20T14:37:37.471Z"
       },
       "promoted_at": "2026-10-20T14:37:37.471Z"
+    },
+    {
+      "candidate_id": "repo:2f43d33d3612eaf6251075da2e4e",
+      "technical_name": "flat",
+      "source_locator": "github://bergside/awesome-design-skills@f631a09b4fcc0166f2e2c1a8c81906ef680c57e8/skills/flat",
+      "pinned_sha": "f631a09b4fcc0166f2e2c1a8c81906ef680c57e8",
+      "snapshot_sha256": "2f43d33d3612eaf6251075da2e4ee67dd1a1d1666414fa10af50fa0461bb815a",
+      "manifest_sha256": "98b37513c92f9a2fad1ec1e42f6704e759f56a44e5f622328766e306a47f3669",
+      "outcome_hash": "18e6c9a4c429993d0976274e9ea2301e8a4b37c104fcb5afd07ac5e6c4df8237",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:2f43d33d3612eaf6:cap:1",
+          "technical_name": "flat",
+          "description": "Two-dimensional minimalist style with vibrant colors, clean typography, and no 3D effects for fast, user-friendly interfaces.",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-22T15:22:49.080Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "b153d5d7499d033dddbbe2aa329926ce9e27b0155b295cf3a82a27ba7cc1ab40"
+    },
+    {
+      "candidate_id": "repo:5d5be7bae337095e147714236522",
+      "technical_name": "friendly",
+      "source_locator": "github://bergside/awesome-design-skills@f631a09b4fcc0166f2e2c1a8c81906ef680c57e8/skills/friendly",
+      "pinned_sha": "f631a09b4fcc0166f2e2c1a8c81906ef680c57e8",
+      "snapshot_sha256": "5d5be7bae337095e1477142365223e16ba9b8a8db51f95135735804f51a17c14",
+      "manifest_sha256": "9b8295d9f8a18898673cde099dbb6c9e80af4425420f2fe63902a5e35d24f1e5",
+      "outcome_hash": "3f418e17596336d29bf07816dacdc20b3632076f7c76d30bc5ce58be56cd8fc2",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:5d5be7bae337095e:cap:1",
+          "technical_name": "friendly",
+          "description": "Approachable, intuitive design with rounded elements, ample whitespace, and soft pastel color palettes.",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-22T15:22:49.080Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "d70570e55880474bad811c31f52c915c1090aa5b2cd6eaeda8580a99b5a250c4"
+    },
+    {
+      "candidate_id": "repo:b686bb4338549e504ecbc6997219",
+      "technical_name": "futuristic",
+      "source_locator": "github://bergside/awesome-design-skills@f631a09b4fcc0166f2e2c1a8c81906ef680c57e8/skills/futuristic",
+      "pinned_sha": "f631a09b4fcc0166f2e2c1a8c81906ef680c57e8",
+      "snapshot_sha256": "b686bb4338549e504ecbc699721920286e2ae03567c06d538373f55954011529",
+      "manifest_sha256": "38156c6e41fdf1e2e1c7b55bf280cd37037c17d002a4334f471c09c6af10e19d",
+      "outcome_hash": "e19c6fde7fd973fa92cc429e6d0a67109802743881235bc81dad17100f1bdb54",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:b686bb4338549e50:cap:1",
+          "technical_name": "futuristic",
+          "description": "Forward-looking design with tech-inspired typography, modern layouts, and a sleek, innovation-driven aesthetic.",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-22T15:22:49.081Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "156bbfa52c8bf018644e6210cbcfc1ea9432909047f5bcac8bb0ccc1015aef8f"
+    },
+    {
+      "candidate_id": "repo:46cb128ad8e3b43b42bfb9eef68f",
+      "technical_name": "geometric",
+      "source_locator": "github://bergside/awesome-design-skills@f631a09b4fcc0166f2e2c1a8c81906ef680c57e8/skills/geometric",
+      "pinned_sha": "f631a09b4fcc0166f2e2c1a8c81906ef680c57e8",
+      "snapshot_sha256": "46cb128ad8e3b43b42bfb9eef68f137d58309826e4956129e5fef10f174a4e64",
+      "manifest_sha256": "12e879c75c904494f6f145df3f6bebb59f00d46929f02de394e32c0af2fd37e5",
+      "outcome_hash": "7c66f8f95f62d5f32045dd0a981ae43d2774ad3c56cd7816236a55d74528f554",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:46cb128ad8e3b43b:cap:1",
+          "technical_name": "geometric",
+          "description": "Geometric, structured design with clean typography, neutral colors, precise shapes, and intuitive layouts that stay out of the way.",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-22T15:22:49.081Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "55faa534aa75f681d0db6bd01a022844415206206c749930a81edbe9d7d54362"
+    },
+    {
+      "candidate_id": "repo:55d3ebd030f36da12f48347357b8",
+      "technical_name": "gradient",
+      "source_locator": "github://bergside/awesome-design-skills@f631a09b4fcc0166f2e2c1a8c81906ef680c57e8/skills/gradient",
+      "pinned_sha": "f631a09b4fcc0166f2e2c1a8c81906ef680c57e8",
+      "snapshot_sha256": "55d3ebd030f36da12f48347357b837140d347e4c7c06a2b9c4e2af8a9514ba25",
+      "manifest_sha256": "8bef63bdd63ae99571a5e08985a58cbda789aaa02c4792454f561df9e5a20a62",
+      "outcome_hash": "f0ec79e8c1823d6927162ed1824f33126a6ac4168809b1febd25f48d4ece2dbd",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:55d3ebd030f36da1:cap:1",
+          "technical_name": "gradient",
+          "description": "Smooth color transitions and gradient-rich surfaces for modern, playful interfaces with visual depth.",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-22T15:22:49.082Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "9d607ceab4ca6b9ebff67b44039ff5211236967be993110707077679c3866a25"
     },
     {
       "candidate_id": "repo:0e553d4c497c3ab1e3bd1cd1f42a",
@@ -3850,6 +4270,146 @@
       "promoted_at": "2026-10-20T21:34:09.433Z"
     },
     {
+      "candidate_id": "repo:7ed60a75687b4dfaf6ab1c097889",
+      "technical_name": "immersive",
+      "source_locator": "github://bergside/awesome-design-skills@f631a09b4fcc0166f2e2c1a8c81906ef680c57e8/skills/immersive",
+      "pinned_sha": "f631a09b4fcc0166f2e2c1a8c81906ef680c57e8",
+      "snapshot_sha256": "7ed60a75687b4dfaf6ab1c09788973a7da751f04c3fab1f1932ad518fcd3084c",
+      "manifest_sha256": "23d69f8285421f922a72379ff656db72e5496ada17d42b58cb53a7ab313e76c4",
+      "outcome_hash": "57d547cd624fb9b32048301dbe0e09af80577862bed01859e64a6794b906b92a",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:7ed60a75687b4dfa:cap:1",
+          "technical_name": "immersive",
+          "description": "An immersive, interactive, exhibit-style interface that blends storytelling, animation, and gamified elements to create a playful, experience-driven journey. The entire app sits on a single continuous brand-colored canvas (deep green)",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-22T15:22:49.080Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "b37bbbe9358e586154066763b745740fee70c7b3f440627dc5a462b88c5b945e"
+    },
+    {
+      "candidate_id": "repo:cc08e2eaafd264c2d90d6e5069e3",
+      "technical_name": "impeccable",
+      "source_locator": "github://bergside/awesome-design-skills@f631a09b4fcc0166f2e2c1a8c81906ef680c57e8/skills/impeccable",
+      "pinned_sha": "f631a09b4fcc0166f2e2c1a8c81906ef680c57e8",
+      "snapshot_sha256": "cc08e2eaafd264c2d90d6e5069e30dc8b4fa22efaf7ef06cce4689e0b1401e19",
+      "manifest_sha256": "b86e9865e8ecf13b8eaf4e764ecc0869740108fce34f88c9e96914740ef10c5b",
+      "outcome_hash": "c0bd940d3d0c5549c1f73f3e1e9262f4578291dd272747873952baf22a592966",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:cc08e2eaafd264c2:cap:1",
+          "technical_name": "impeccable",
+          "description": "A modern, graphic, editorial-poster aesthetic — warm and confident — built on alternating cream and burnt orange sections, an amber brand color.",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-22T15:22:49.078Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "ab2cf4a2c103a518de85d0d0f9e9eb943428872bd737dcd5eb9521ea53bd306f"
+    },
+    {
       "candidate_id": "repo:7462cf20446353f5b5a77b316704",
       "technical_name": "istio",
       "source_locator": "github://TerminalSkills/skills@6edcf94159d9f46b0759d2e1b59dd545cfaca254/skills/istio",
@@ -3953,6 +4513,146 @@
       "promoted_at": "2026-10-20T21:34:09.433Z"
     },
     {
+      "candidate_id": "repo:8176c2b2505b937d44ce37b22992",
+      "technical_name": "lingo",
+      "source_locator": "github://bergside/awesome-design-skills@f631a09b4fcc0166f2e2c1a8c81906ef680c57e8/skills/lingo",
+      "pinned_sha": "f631a09b4fcc0166f2e2c1a8c81906ef680c57e8",
+      "snapshot_sha256": "8176c2b2505b937d44ce37b22992797fab308d128fb897c8fa3452a0f5b763b1",
+      "manifest_sha256": "b0663553acbedc2874a2a241163950333a262d5e79b38e0e68a3e215cbb619c9",
+      "outcome_hash": "91d8e032a3b62c6d6ebe00b39d52e270f03895029a0d6d5c266bdfbe0dd41ebb",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:8176c2b2505b937d:cap:1",
+          "technical_name": "lingo",
+          "description": "Playful, minimal design with bright colors, rounded shapes, tactile 3D borders, and friendly illustrations for approachable interfaces.",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-22T15:22:49.081Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "2d06eba27d036842b82a033ccfbc0d03c55127fb60a0122b1061b7b45b62c784"
+    },
+    {
+      "candidate_id": "repo:bf836186aa848d46925459f253ac",
+      "technical_name": "material",
+      "source_locator": "github://bergside/awesome-design-skills@f631a09b4fcc0166f2e2c1a8c81906ef680c57e8/skills/material",
+      "pinned_sha": "f631a09b4fcc0166f2e2c1a8c81906ef680c57e8",
+      "snapshot_sha256": "bf836186aa848d46925459f253acee229704eab1985898e430ba04ab49c4373a",
+      "manifest_sha256": "33bb7323b6243c22692e30489186a1121a936ca77bec7ba419edf31a424e8351",
+      "outcome_hash": "c52a6623052f5571d77af8d55b90f7a9d4af9c69543fbb0c7d57937ce8f78450",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:bf836186aa848d46:cap:1",
+          "technical_name": "material",
+          "description": "Google's Material Design with layered surfaces, dynamic theming, built-in motion, and responsive cross-platform patterns.",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-22T15:22:49.080Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "06dcfcf58cda45eea1a5106358e5f8915ea9398f5888898433151e6a5d406ef6"
+    },
+    {
       "candidate_id": "repo:53a1da47af691824a77b3a9761b4",
       "technical_name": "material-ui",
       "source_locator": "github://TerminalSkills/skills@6edcf94159d9f46b0759d2e1b59dd545cfaca254/skills/material-ui",
@@ -4051,6 +4751,146 @@
         "observed_at": "2026-10-21T00:06:05.748Z"
       },
       "promoted_at": "2026-10-21T00:06:05.748Z"
+    },
+    {
+      "candidate_id": "repo:47275b92cdf5fc881cbe11dd53dd",
+      "technical_name": "matrix",
+      "source_locator": "github://bergside/awesome-design-skills@f631a09b4fcc0166f2e2c1a8c81906ef680c57e8/skills/matrix",
+      "pinned_sha": "f631a09b4fcc0166f2e2c1a8c81906ef680c57e8",
+      "snapshot_sha256": "47275b92cdf5fc881cbe11dd53dda575b4845f336a918d8db7ce4676ca58f661",
+      "manifest_sha256": "d9c43a9ec26c046f04adb18eada9750bc754c8ec6c4d3440b642c3f3a21c4908",
+      "outcome_hash": "2654cac3fe8fec17179220e396c2c5abcdcc8c4ba0d9141d7ed4ef0014950c11",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:47275b92cdf5fc88:cap:1",
+          "technical_name": "matrix",
+          "description": "A cyber-slick, dark-only Matrix-inspired interface defined by minimalist fashion, high-tech digital elements",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-22T15:22:49.081Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "03a4a0a9807bb1972216b9213d4cf361537d6c106572786e97baf9d0d1243027"
+    },
+    {
+      "candidate_id": "repo:a00588e041655413ff52abcde941",
+      "technical_name": "minimal",
+      "source_locator": "github://bergside/awesome-design-skills@f631a09b4fcc0166f2e2c1a8c81906ef680c57e8/skills/minimal",
+      "pinned_sha": "f631a09b4fcc0166f2e2c1a8c81906ef680c57e8",
+      "snapshot_sha256": "a00588e041655413ff52abcde941dcbefc84dc3e47b2be33b39a45691f50434a",
+      "manifest_sha256": "1719e83f90c62dde47060c411720011c97805b42c74553364685b33ee1a093e2",
+      "outcome_hash": "645bfa0d2e4d1296c3751d735986ac33c3c248c36336baf4d5607e372f47089a",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:a00588e041655413:cap:1",
+          "technical_name": "minimal",
+          "description": "Stripped-back design emphasizing whitespace, clean typography, and restrained color for maximum clarity and focus.",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-22T15:22:49.080Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "c9cfb8807248610b789a83fdb989aca8468e72695dcd9173a0f2b46898099b69"
     },
     {
       "candidate_id": "repo:d467e64402b053e5371c1b2c7fbc",
@@ -7399,11 +8239,11 @@
   ],
   "adoption_skips": [],
   "summary": {
-    "total": 73,
-    "inserted": 0,
+    "total": 85,
+    "inserted": 12,
     "updated": 0,
     "skipped": 0,
-    "pending_canary": 0,
+    "pending_canary": 12,
     "prod_readonly": 73
   }
 }
