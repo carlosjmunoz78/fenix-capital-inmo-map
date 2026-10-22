@@ -524,6 +524,76 @@
       "promoted_at": "2026-10-21T00:08:48.480Z"
     },
     {
+      "candidate_id": "repo:f1650146f47538c5c37f62ff8b11",
+      "technical_name": "brainstorming",
+      "source_locator": "github://roedyrustam/vibes-plug@a2dac5a99f5b4be3769f3c59632b1d0bb4d89527/.cursor/skills/brainstorming",
+      "pinned_sha": "a2dac5a99f5b4be3769f3c59632b1d0bb4d89527",
+      "snapshot_sha256": "f1650146f47538c5c37f62ff8b110cac02dd84de47cd8d1106c1440de330b6fb",
+      "manifest_sha256": "639ace1d9590bf8600fc6694a0e4599be3567d03b625e1bd6446514bceec489f",
+      "outcome_hash": "3427734fa624e7a7de3789f5daafda7d823b2cf1851d1028152075c7c0b53cf8",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:f1650146f47538c5:cap:1",
+          "technical_name": "brainstorming",
+          "description": "Master ideation protocol & architectural orchestrator with Modern Web Guidance. Validates design ideas and orchestrates all specialized vibes-plug skills before coding begins / Protokol ideasi utama & orkestrator arsitektur dengan Modern Web Guidance. Memvalidasi ide desain dan mengorkestrasi seluruh skill vibes-plug sebelum pengkodean dimulai.",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-22T00:40:47.829Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "a741b8e29ffc2641b693edc01d057f722bc3a2a7a602ea2c2209c3dfe85d130c"
+    },
+    {
       "candidate_id": "repo:3bf76497558ac95ae47a73497093",
       "technical_name": "breach-data",
       "source_locator": "github://TerminalSkills/skills@6edcf94159d9f46b0759d2e1b59dd545cfaca254/skills/breach-data",
@@ -5499,10 +5569,11 @@
   ],
   "adoption_skips": [],
   "summary": {
-    "total": 54,
-    "promoted": 3,
+    "total": 55,
+    "inserted": 1,
+    "updated": 0,
     "skipped": 0,
-    "pending_canary": 0,
+    "pending_canary": 1,
     "prod_readonly": 54
   }
 }
