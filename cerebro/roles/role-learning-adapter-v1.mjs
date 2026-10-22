@@ -128,12 +128,8 @@ export function buildRoleLearningSignal(input = {}) {
     version,
     observed_at: observedAt,
     severity: input.severity ?? 'LOW',
-    confidence: input.confidence,
-    risk_class: input.risk_class,
     reason: input.reason ?? `Governed learning proposal from ${roleId}`,
-    hypothesis: input.hypothesis,
     evidence_refs: evidenceRefs,
-    metric: input.metric,
     payload: {
       role_id: roleId,
       role_class: roleContext.role.class,
@@ -156,13 +152,16 @@ export function buildRoleLearningSignal(input = {}) {
     additional_cost_eur: 0,
     prod_authorized: false,
     prod_write_authorized: false,
-    trading_access: false
+    trading_access: false,
+    ...(input.confidence == null ? {} : { confidence: input.confidence }),
+    ...(input.risk_class == null ? {} : { risk_class: input.risk_class }),
+    ...(input.hypothesis == null ? {} : { hypothesis: input.hypothesis }),
+    ...(input.metric == null ? {} : { metric: cloneJson(input.metric, 'metric') })
   };
 }
 
 export function buildRoleLearningEventReport(input = {}) {
-  const signal = buildRoleLearningSignal(input);
-  return buildUniversalLearningEventReport({ signals: [signal] });
+  return buildUniversalLearningEventReport({ signals: [buildRoleLearningSignal(input)] });
 }
 
 export function runRoleLearningProposalOnce(input = {}) {
