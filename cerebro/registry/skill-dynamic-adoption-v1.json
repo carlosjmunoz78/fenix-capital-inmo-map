@@ -6000,7 +6000,8 @@
   "adoption_skips": [],
   "summary": {
     "total": 59,
-    "promoted": 4,
+    "inserted": 0,
+    "updated": 0,
     "skipped": 0,
     "pending_canary": 0,
     "prod_readonly": 59
