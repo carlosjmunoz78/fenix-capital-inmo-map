@@ -1,0 +1,284 @@
+{
+  "schema_version": "1.0.0",
+  "knowledge_pack_id": "KP-FENIX-APP-CRM-V1",
+  "company_id": "fenix",
+  "domain_id": "APP_CRM",
+  "environment": "PREPROD",
+  "version": "1.0.0",
+  "state": "SOURCE_BACKED_WITH_CURRENT_RUNTIME_BINDINGS",
+  "created_at": "2026-10-22",
+  "authority": {
+    "authority_delta": false,
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "auto_apply": false,
+    "direct_knowledge_mutation": false,
+    "supabase_writes": false,
+    "customer_data": false,
+    "trading_access": false,
+    "external_side_effects": false,
+    "additional_cost_eur": 0
+  },
+  "evidence_model": {
+    "classes": [
+      "SOURCE_SPECIFICATION",
+      "HISTORICAL_CONTRACT_AUDIT",
+      "CURRENT_RUNTIME_VERIFIED"
+    ],
+    "rule": "A historical audit or functional specification must never be promoted to current runtime evidence without an exact current-HEAD file or executable check.",
+    "sources": [
+      {
+        "class": "SOURCE_SPECIFICATION",
+        "name": "ESPECIFICACION_IA_APP_FENIXCAPITAL_FASE_1(2).md",
+        "scope": "FASE 1 roles Belen/Direccion Financiera, Financiero y Visitador; UI, RBAC, calculator and acceptance rules."
+      },
+      {
+        "class": "SOURCE_SPECIFICATION",
+        "name": "FENIX_CAPITAL_CEREBRO_ESPECIFICACION_FUNCIONAL_PARA_IA(3).docx",
+        "scope": "Functional master specification, reusable master records, navigation, data principles and operational modules."
+      },
+      {
+        "class": "HISTORICAL_CONTRACT_AUDIT",
+        "name": "APP_CONTRACT_MATRIX_CEREBRO_2026-09-05.md",
+        "scope": "Read-only audit of historical branch preprod-app-phase1 at commit 94a6c73; not current HEAD evidence."
+      },
+      {
+        "class": "HISTORICAL_CONTRACT_AUDIT",
+        "name": "SUPABASE_SYSTEM_CONTRACT_MAP_2026-09-05(1).md",
+        "scope": "Read-only Supabase contract map dated 2026-09-05; entities and flows are historical evidence until reverified live/current."
+      },
+      {
+        "class": "CURRENT_RUNTIME_VERIFIED",
+        "name": "src/appRpcCompat.ts",
+        "scope": "Current branch compatibility adapter routes selected legacy/user RPC calls through the App gateway."
+      },
+      {
+        "class": "CURRENT_RUNTIME_VERIFIED",
+        "name": "supabase/functions/fenix-app-gateway/index.ts",
+        "scope": "Current branch App gateway implements identity-scoped HTTP routes and server RPC delegation."
+      },
+      {
+        "class": "CURRENT_RUNTIME_VERIFIED",
+        "name": "scripts/audit-app-rpc-migration-readiness.mjs",
+        "scope": "Current branch static readiness audit verifies required compat cases, server RPC names and gateway routes without deployment or DB mutation."
+      }
+    ]
+  },
+  "preservation_contract": {
+    "rules": [
+      "No tocar PROD ni el CRM activo desde esta capa de conocimiento.",
+      "Auditar antes de crear bases, propiedades, tablas o estructuras equivalentes.",
+      "No duplicar fuentes de verdad ni reintroducir datos entre modulos.",
+      "No cambiar RBAC/RLS/permisos para hacer pasar tests.",
+      "Todo cambio debe conservar trazabilidad, PREPROD, OLD vs NEW y rollback.",
+      "Las rutas o componentes auditados en ramas historicas no se consideran existentes en el HEAD actual sin reverificacion."
+    ]
+  },
+  "phase1_functional_scope": {
+    "roles": [
+      "BELEN_DIRECCION_FINANCIERA",
+      "FINANCIERO",
+      "VISITADOR"
+    ],
+    "postponed_in_phase1_spec": [
+      "CARLOS_ADMIN",
+      "RECEPCION",
+      "OTROS_ROLES"
+    ],
+    "architecture": "Usuario -> app.fenixcapital.es -> Frontend -> API/backend -> Supabase/Notion/automatizaciones -> CEREBRO/Ana",
+    "role_security": [
+      "RBAC mas control por registro.",
+      "El backend debe validar permisos incluso ante URL manual.",
+      "Financiero solo ve sus expedientes autorizados.",
+      "Visitador solo ve inmobiliarias, contactos, visitas y leads autorizados.",
+      "Belen ve el ambito financiero global autorizado, no administracion tecnica global."
+    ],
+    "component_definition_requires": [
+      "id_componente",
+      "pantalla",
+      "rol_permitido",
+      "tipo",
+      "objetivo",
+      "fuente_datos",
+      "endpoint",
+      "filtros",
+      "calculo",
+      "campos_mostrados",
+      "accion",
+      "permisos",
+      "estado_vacio",
+      "estado_error",
+      "auditoria",
+      "qa",
+      "version"
+    ]
+  },
+  "product_rules": {
+    "expediente_is_primary_operational_record": true,
+    "reuse_master_records_and_components": true,
+    "avoid_screen_per_process_stage": true,
+    "no_hardcoded_real_kpis": true,
+    "no_notion_page_links_as_final_ui_solution": true,
+    "screen_done_requires": [
+      "design",
+      "data",
+      "actions",
+      "permissions",
+      "qa",
+      "documentation"
+    ],
+    "calculator": {
+      "global": true,
+      "floating": true,
+      "draggable": true,
+      "minimizable": true,
+      "preserve_state": true,
+      "stay_on_current_screen": true,
+      "may_use_expediente_data_with_confirmation": true,
+      "crm_write_requires_explicit_action": true,
+      "capabilities": [
+        "capacidad_compra",
+        "cuota",
+        "LTV",
+        "gastos",
+        "ahorro",
+        "ratio",
+        "comparador",
+        "escenarios"
+      ]
+    },
+    "ana": {
+      "contextual": true,
+      "must_respect_user_permissions": true,
+      "actions_transparent_and_correctable": true,
+      "important_actions_require_confirmation": true
+    }
+  },
+  "master_data_principles": {
+    "single_source_relationship_by_ids": true,
+    "entities_from_functional_spec": [
+      "expedientes",
+      "personas_contactos",
+      "bancos",
+      "contactos_bancarios",
+      "inmobiliarias",
+      "trabajadores_inmobiliarias",
+      "financieros",
+      "visitadores",
+      "tasadores",
+      "tasaciones",
+      "firmas",
+      "notarias",
+      "personal_notarias",
+      "registros_propiedad",
+      "personal_registros",
+      "proveedores",
+      "tareas",
+      "documentos",
+      "comisiones",
+      "actividad",
+      "precedentes",
+      "aprendizajes_ana",
+      "reglas",
+      "alertas"
+    ]
+  },
+  "historical_contract_snapshot_2026_09_05": {
+    "classification": "HISTORICAL_CONTRACT_AUDIT",
+    "branch": "preprod-app-phase1",
+    "commit": "94a6c73",
+    "do_not_treat_as_current_head": true,
+    "items": [
+      "BEL-001 dashboard Direccion historically reported implemented with Carlos/Admin fallback separation gap.",
+      "FIN-001 RoleHomeShell historically reported implemented with live component-document contract gap.",
+      "VIS-001 RoleHomeShell historically reported implemented with same documentation gap.",
+      "VIS-002 VisitasShell historically reported implemented.",
+      "CAL-001 historically partial: drag, gastos, ahorro, comparador, escenarios and expediente data remained gaps.",
+      "Historical security guards did not by themselves prove backend security."
+    ]
+  },
+  "historical_supabase_snapshot_2026_09_05": {
+    "classification": "HISTORICAL_CONTRACT_AUDIT",
+    "do_not_treat_counts_as_current": true,
+    "canonical_entities_reported": [
+      "actors",
+      "personal_directorio",
+      "clientes",
+      "inmobiliarias",
+      "contactos_inmobiliaria",
+      "bancos",
+      "contactos_bancarios",
+      "expedientes",
+      "tareas",
+      "gestiones_b2b",
+      "comunicaciones",
+      "envios_banco",
+      "ofertas",
+      "tasaciones",
+      "firmas",
+      "firma_history",
+      "expediente_stage_history",
+      "economia",
+      "documentos",
+      "document_versions",
+      "document_origin_links",
+      "document_upload_sessions",
+      "notarias",
+      "registros_propiedad",
+      "special_cases",
+      "special_case_people",
+      "ana_correcciones",
+      "chat_messages",
+      "notification_state"
+    ],
+    "overlap_candidates_reported": [
+      "Ana corrections between gateway and fenix-ana-api",
+      "Documents split between gateway, document-actions and evidence-api",
+      "Banks split between gateway cycle and bank-api isolated creation",
+      "Directory split across gateway, directory-api and directory-actions",
+      "Expedientes split between gateway and expediente-stage"
+    ]
+  },
+  "current_runtime_bindings": {
+    "classification": "CURRENT_RUNTIME_VERIFIED",
+    "runtime_files": [
+      "src/appRpcCompat.ts",
+      "supabase/functions/fenix-app-gateway/index.ts",
+      "scripts/audit-app-rpc-migration-readiness.mjs"
+    ],
+    "compat_routes_verified": [
+      "chat_list",
+      "chat_send",
+      "contact_create",
+      "expediente_create",
+      "expediente_update",
+      "notifications_list",
+      "notification_mark",
+      "signature_create"
+    ],
+    "gateway_capability_families_observed": [
+      "session_context",
+      "navigation",
+      "expedientes",
+      "tareas",
+      "search",
+      "documentos",
+      "bancos",
+      "envios_banco",
+      "ofertas",
+      "tasaciones",
+      "firmas"
+    ],
+    "runtime_truth_limit": "Physical source presence verifies code/contracts in current branch, not live deployment state, live database state or successful PROD execution."
+  },
+  "acceptance": {
+    "rules": [
+      "Cross-module information is related rather than re-entered.",
+      "Permissions are enforced in backend contracts, not only navigation.",
+      "Ana actions remain transparent, correctable and scoped.",
+      "Documents can be uploaded, related and viewed through governed flows.",
+      "Operational screens are not considered complete without QA and traceable evidence.",
+      "Current runtime evidence must be rechecked at the branch HEAD used for promotion."
+    ]
+  }
+}

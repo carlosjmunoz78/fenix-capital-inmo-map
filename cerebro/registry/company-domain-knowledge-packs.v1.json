@@ -1,0 +1,254 @@
+{
+  "schema_version": "1.0.0",
+  "registry_id": "CEREBRO_COMPANY_DOMAIN_KNOWLEDGE_PACKS_V1",
+  "environment": "PREPROD",
+  "version": "1.0.0",
+  "status": "ACTIVE_PREPROD_ADDITIVE",
+  "created_at": "2026-10-22",
+  "governance": {
+    "authority_delta": false,
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "auto_apply": false,
+    "direct_knowledge_mutation": false,
+    "customer_data": false,
+    "trading_access": false,
+    "external_side_effects": false,
+    "additional_cost_eur": 0,
+    "volatile_bank_policy_requires_live_verification": true,
+    "legal_or_fiscal_instruction_requires_human": true
+  },
+  "packs": [
+    {
+      "knowledge_pack_id": "KP-FENIX-MORTGAGE-OPS-V1",
+      "company_id": "fenix",
+      "domain_id": "MORTGAGE",
+      "language": "es",
+      "state": "SOURCE_BACKED_PREPROD",
+      "source_provenance": [
+        {
+          "source_kind": "USER_PROJECT_SPEC",
+          "source_name": "CEREBRO_Cuestionario_Belen_Notion(1)(1).md",
+          "source_version": 1,
+          "purpose": "Base maestra del criterio operativo financiero de Fenix Capital",
+          "capture_date": "2026-10-22",
+          "limits": [
+            "Los criterios bancarios descritos desde experiencia deben verificarse de nuevo antes de usarse como politica bancaria vigente.",
+            "Los porcentajes fiscales o requisitos normativos no se consideran vigentes sin fuente oficial fechada.",
+            "El pack no concede autoridad de decision crediticia, envio a banco, comunicacion externa ni escritura en PROD."
+          ]
+        }
+      ],
+      "epistemic_classes": [
+        "FENIX_PROCESS_RULE",
+        "OBSERVED_EXPERIENCE",
+        "LIVE_VERIFICATION_REQUIRED",
+        "LEGAL_HUMAN_REQUIRED"
+      ],
+      "principles": [
+        {
+          "id": "FMO-PRINCIPLE-001",
+          "class": "FENIX_PROCESS_RULE",
+          "rule": "Intentar sacar adelante todo expediente con base tecnica defendible y buscar alternativas antes de descartar."
+        },
+        {
+          "id": "FMO-PRINCIPLE-002",
+          "class": "FENIX_PROCESS_RULE",
+          "rule": "No descartar por una sola etiqueta laboral; evaluar estabilidad real, ingresos, antiguedad y perfil completo."
+        },
+        {
+          "id": "FMO-PRINCIPLE-003",
+          "class": "FENIX_PROCESS_RULE",
+          "rule": "Si un problema es subsanable, mantener viva la operacion, coordinar intervinientes y ajustar plazos."
+        },
+        {
+          "id": "FMO-PRINCIPLE-004",
+          "class": "FENIX_PROCESS_RULE",
+          "rule": "No enviar estudio economico a banco sin documentacion esencial completa y coherente."
+        }
+      ],
+      "viability": {
+        "primary_dimensions": [
+          "ingresos_liquidos",
+          "ratio_endeudamiento",
+          "tipo_y_antiguedad_laboral",
+          "ahorro",
+          "porcentaje_financiacion_necesario",
+          "tasacion",
+          "deudas",
+          "avalistas_o_doble_garantia_cuando_proceda"
+        ],
+        "initial_debt_ratio_reference_pct": 35,
+        "upper_review_reference_pct": 40,
+        "upper_reference_rule": "No automatizar como regla bancaria rigida; aprender por banco, producto, perfil y precedentes.",
+        "hard_stop_rule": "Si el ratio no da y no existe solucion defendible, no forzar."
+      },
+      "initial_intake": {
+        "required_topics": [
+          "titulares_y_edades",
+          "estado_civil_si_relevante",
+          "tipo_contrato_y_antiguedad",
+          "ingresos_liquidos_y_pagas",
+          "prestamos_tarjetas_y_otras_deudas",
+          "banco_habitual",
+          "ahorro_disponible",
+          "precio_vivienda",
+          "porcentaje_financiacion_necesario",
+          "intentos_hipotecarios_previos",
+          "avalista_o_doble_garantia",
+          "nacionalidad_residencia_si_afecta",
+          "vivienda_habitual_si_afecta_gastos"
+        ],
+        "interaction_pattern": [
+          "empatia",
+          "conexion",
+          "preguntas",
+          "deteccion_de_salidas",
+          "explicacion_clara",
+          "siguiente_paso"
+        ]
+      },
+      "documentation": {
+        "precondition": "Antes de solicitar documentacion operativa, deben estar firmados proteccion de datos y contrato/solicitud de servicio de Fenix Capital.",
+        "employed_core": [
+          "DNI",
+          "tres_ultimas_nominas",
+          "contrato_trabajo",
+          "vida_laboral_actualizada",
+          "retenciones_o_renta",
+          "movimientos_bancarios_ultimos_meses",
+          "justificante_ahorros",
+          "ultimo_recibo_de_cada_prestamo"
+        ],
+        "self_employed_additional": [
+          "declaraciones_trimestrales",
+          "IVA",
+          "IRPF",
+          "renta",
+          "movimientos",
+          "documentacion_fiscal_y_economica_completa"
+        ],
+        "bank_send_gate": "No enviar el expediente para estudio economico hasta tener completos los documentos esenciales."
+      },
+      "self_employed": {
+        "classification": "OBSERVED_EXPERIENCE",
+        "observed_monthly_declared_income_reference_eur": [1400, 1600],
+        "universal_bank_rule": false,
+        "live_verification_required": true,
+        "assessment": [
+          "antiguedad_suficiente",
+          "declaraciones_positivas",
+          "ingresos_declarados_razonables",
+          "cuentas_coherentes",
+          "trimestres_positivos",
+          "ingresos_recurrentes_demostrables"
+        ]
+      },
+      "bank_selection_observed": {
+        "classification": "OBSERVED_EXPERIENCE",
+        "live_verification_required": true,
+        "not_bank_commitment": true,
+        "rules": [
+          {
+            "bank": "BBVA",
+            "observed_use": "Priorizado con frecuencia cuando no se necesita 100%, por rapidez, condiciones y financiacion alta segun operacion."
+          },
+          {
+            "bank": "Caja Rural de Granada",
+            "observed_use": "Priorizado con frecuencia en financiacion muy alta o 100%, especialmente cuando faltan fondos iniciales para todos los gastos."
+          },
+          {
+            "bank": "Abanca",
+            "observed_use": "Puede admitir financiacion alta; seguros o vinculaciones pueden elevar el coste y los fondos propios para gastos pueden ser determinantes."
+          },
+          {
+            "bank": "ING",
+            "observed_use": "Puede ser via relevante cuando el cliente ya trabaja con la entidad o segun nivel de financiacion."
+          },
+          {
+            "bank": "Unicaja",
+            "observed_use": "Experiencia observada menos util para el perfil Fenix cuando se necesitan porcentajes de financiacion muy elevados."
+          }
+        ],
+        "transversal_rule": "Preguntar siempre con que banco trabaja el cliente; puede cambiar el orden de presentacion."
+      },
+      "valuation": {
+        "sequence": [
+          "condiciones_bancarias",
+          "pretasacion_prevaloracion",
+          "nota_simple_y_fotos_al_tasador",
+          "validar_logica",
+          "tasacion",
+          "sancion_tecnica_banco",
+          "continuar_a_FEIN_si_resultado_positivo"
+        ],
+        "learning_dimensions": [
+          "zona",
+          "tipologia",
+          "metros_registrales",
+          "metros_reales_si_procede",
+          "precio_compraventa",
+          "pretasacion",
+          "valor_final",
+          "tasador",
+          "fecha",
+          "condicionantes",
+          "desviacion",
+          "banco",
+          "resultado"
+        ],
+        "human_gate": "Si la tasacion requerida queda muy por encima de la estimacion aprendida, bloquear y pedir validacion humana.",
+        "human_required_reason": "LOW_CONFIDENCE"
+      },
+      "bank_denial": {
+        "sequence": [
+          "presentar",
+          "recibir_respuesta",
+          "conocer_motivo_si_es_no",
+          "analizar_si_es_subsanable",
+          "subsanar_si_es_posible",
+          "pasar_a_otra_entidad_adecuada_si_no",
+          "reconsiderar_viabilidad_si_varias_entidades_adecuadas_denieg_an_por_la_misma_causa_estructural"
+        ],
+        "rule": "Analizar siempre el motivo de denegacion antes de abandonar o cambiar de banco."
+      },
+      "signature_and_close": {
+        "sequence": [
+          "tasacion_validada",
+          "emision_FEIN",
+          "explicacion_FEIN_al_cliente",
+          "FEIN_a_portal_notarial",
+          "eleccion_notaria",
+          "acta_transparencia_y_fecha_firma",
+          "coordinar_apoderado_banco",
+          "documentacion_y_forma_pago_a_notaria",
+          "firma_y_verificacion_de_orden_de_pago"
+        ],
+        "payment_rule": "La forma de pago debe cuadrar al centimo y prepararse con antelacion."
+      },
+      "legal_fiscal": {
+        "classification": "LEGAL_HUMAN_REQUIRED",
+        "human_required_reason": "LEGAL_REQUIRED",
+        "automatic_instruction_forbidden": true,
+        "rules": [
+          "No convertir explicaciones sobre herencias, valores, sobredeclaraciones, donaciones o fiscalidad en instrucciones automaticas.",
+          "Toda estructura debe reflejar la realidad economica y cumplir normativa tributaria y de prevencion de blanqueo.",
+          "Porcentajes fiscales y requisitos deben verificarse con fuente oficial vigente y fechada.",
+          "Si titulares del prestamo y compraventa no coinciden, generar alerta y solicitar validacion humana/juridica/fiscal cuando proceda."
+        ]
+      },
+      "case_learning": {
+        "pipeline": [
+          "CEREBRO_analiza_sin_conocer_decision_humana",
+          "produce_viabilidad_calculos_riesgos_faltantes_bancos_ranking_estrategia_documentacion_alternativas_siguiente_accion",
+          "Belen_analiza_mismo_caso",
+          "comparar",
+          "preguntar_solo_diferencias_importantes",
+          "registrar_aprendizaje",
+          "aplicar_al_siguiente_expediente"
+        ],
+        "promotion": "El aprendizaje no aumenta autonomia por si solo; requiere evaluacion y gobierno CEREBRO."
+      }
+    }
+  ]
+}
