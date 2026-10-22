@@ -6,11 +6,15 @@ import { MultiCompanyBootstrap, getPhase4Registry } from '../multicompany/bootst
 import * as MortgageOperations from '../mortgage/mortgage-operations-native-v1.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const REPO_ROOT = path.resolve(__dirname, '../..');
 const PACKS_PATH = path.resolve(__dirname, '../registry/company-domain-knowledge-packs.v1.json');
+const APP_CRM_PACK_PATH = path.resolve(__dirname, '../registry/fenix-app-crm-knowledge-pack.v1.json');
 const COMPANY_DOMAIN_PACKS = JSON.parse(fs.readFileSync(PACKS_PATH, 'utf8'));
+const APP_CRM_PACK = JSON.parse(fs.readFileSync(APP_CRM_PACK_PATH, 'utf8'));
+const ALL_COMPANY_DOMAIN_PACKS = Object.freeze([...COMPANY_DOMAIN_PACKS.packs, APP_CRM_PACK]);
 
 const EXACT_ENVIRONMENT = 'PREPROD';
-const SUPPORTED_DOMAIN = 'MORTGAGE';
+const SUPPORTED_DOMAINS = Object.freeze(['MORTGAGE', 'APP_CRM']);
 const FORBIDDEN_AUTHORITY = Object.freeze([
   'prod_authority',
   'prod_authorized',
@@ -30,6 +34,7 @@ const FORBIDDEN_LIVE_KEYS = new Set([
   'email','phone','telephone','mobile','name','first_name','last_name','full_name','address',
   'dni','nif','nie','iban','token','jwt','secret','password','api_key','access_token','refresh_token'
 ]);
+
 const MORTGAGE_BINDING = Object.freeze({
   domain_id: 'MORTGAGE',
   binding_state: 'PHYSICAL_RUNTIME_VERIFIED',
@@ -46,6 +51,64 @@ const MORTGAGE_BINDING = Object.freeze({
   ]),
   knowledge_update_reference: 'KNW-001',
   knowledge_update_reference_state: 'REFERENCE_OBSERVED_IN_RUNTIME_NOT_PROMOTED_BY_COMPOSER'
+});
+
+const APP_CRM_BINDING = Object.freeze({
+  domain_id: 'APP_CRM',
+  binding_state: 'CURRENT_SOURCE_RUNTIME_VERIFIED_NOT_LIVE_DEPLOYMENT_ASSERTION',
+  runtime_paths: Object.freeze([
+    'src/appRpcCompat.ts',
+    'supabase/functions/fenix-app-gateway/index.ts',
+    'scripts/audit-app-rpc-migration-readiness.mjs'
+  ]),
+  capability_families: Object.freeze([
+    'session_context',
+    'navigation',
+    'chat',
+    'contactos',
+    'expedientes',
+    'tareas',
+    'search',
+    'documentos',
+    'bancos',
+    'envios_banco',
+    'ofertas',
+    'tasaciones',
+    'firmas',
+    'notificaciones'
+  ]),
+  historical_contract_reference: 'preprod-app-phase1@94a6c73',
+  historical_contract_state: 'HISTORICAL_ONLY_NOT_CURRENT_RUNTIME_PROOF',
+  live_deployment_state: 'NOT_ASSERTED_BY_COMPOSER'
+});
+
+const APP_CRM_REQUIRED_TOKENS = Object.freeze({
+  'src/appRpcCompat.ts': Object.freeze([
+    "case 'fenix_prod_contact_create'",
+    "case 'fenix_prod_exp_create'",
+    "case 'fenix_prod_exp_update'",
+    "case 'fenix_prod_notifications_list_user'",
+    "case 'fenix_prod_sign_create'",
+    "fetchAppApi"
+  ]),
+  'supabase/functions/fenix-app-gateway/index.ts': Object.freeze([
+    "p==='/session/context'&&req.method==='GET'",
+    "p==='/navigation'&&req.method==='GET'",
+    "p==='/expedientes'&&req.method==='POST'",
+    "p==='/tareas'&&req.method==='GET'",
+    "p==='/documentos'&&req.method==='GET'",
+    "p==='/bancos'&&req.method==='GET'",
+    "p==='/tasaciones'&&req.method==='GET'",
+    "p==='/firmas'&&req.method==='POST'",
+    "fenix_prod_actor_context_by_auth_server"
+  ]),
+  'scripts/audit-app-rpc-migration-readiness.mjs': Object.freeze([
+    "mode: 'READ_ONLY_STATIC_READINESS_AUDIT'",
+    'ready_for_controlled_gateway_deploy',
+    'requiredCompat',
+    'requiredServer',
+    'requiredRoutes'
+  ])
 });
 
 function clone(value) {
@@ -106,8 +169,24 @@ function validateMortgageBinding() {
   return errors;
 }
 
+function validateAppCrmBinding() {
+  const errors = [];
+  for (const [relativePath, tokens] of Object.entries(APP_CRM_REQUIRED_TOKENS)) {
+    const absolutePath = path.resolve(REPO_ROOT, relativePath);
+    if (!fs.existsSync(absolutePath)) {
+      errors.push(`APP_CRM:${relativePath}:missing`);
+      continue;
+    }
+    const source = fs.readFileSync(absolutePath, 'utf8');
+    for (const token of tokens) {
+      if (!source.includes(token)) errors.push(`APP_CRM:${relativePath}:missing_token:${token}`);
+    }
+  }
+  return errors;
+}
+
 function findCompanyDomainPack(companyId, domainId) {
-  return COMPANY_DOMAIN_PACKS.packs.find(
+  return ALL_COMPANY_DOMAIN_PACKS.find(
     (item) => item.company_id === companyId && item.domain_id === domainId
   ) ?? null;
 }
@@ -130,12 +209,23 @@ function buildCommonLayer() {
 }
 
 function buildDomainLayer(domainId) {
-  if (domainId !== SUPPORTED_DOMAIN) throw new Error(`unsupported or unverified domain_id: ${domainId}`);
-  const bindingErrors = validateMortgageBinding();
-  if (bindingErrors.length) throw new Error(`mortgage runtime binding invalid: ${bindingErrors.join(',')}`);
+  if (!SUPPORTED_DOMAINS.includes(domainId)) throw new Error(`unsupported or unverified domain_id: ${domainId}`);
+  if (domainId === 'MORTGAGE') {
+    const bindingErrors = validateMortgageBinding();
+    if (bindingErrors.length) throw new Error(`mortgage runtime binding invalid: ${bindingErrors.join(',')}`);
+    return {
+      layer: 'DOMAIN',
+      ...clone(MORTGAGE_BINDING),
+      authority_delta: false,
+      external_side_effects: false,
+      additional_cost_eur: 0
+    };
+  }
+  const bindingErrors = validateAppCrmBinding();
+  if (bindingErrors.length) throw new Error(`APP_CRM runtime binding invalid: ${bindingErrors.join(',')}`);
   return {
     layer: 'DOMAIN',
-    ...clone(MORTGAGE_BINDING),
+    ...clone(APP_CRM_BINDING),
     authority_delta: false,
     external_side_effects: false,
     additional_cost_eur: 0
@@ -173,7 +263,9 @@ function buildCompanyLayer({ companyId, domainId, version }) {
       'cerebro/multicompany/bootstrap.mjs',
       'cerebro/multicompany/company-reg-tenant-preprod.mjs',
       'cerebro/registry/multicompany-bootstrap.json',
-      'cerebro/registry/company-domain-knowledge-packs.v1.json'
+      domainId === 'APP_CRM'
+        ? 'cerebro/registry/fenix-app-crm-knowledge-pack.v1.json'
+        : 'cerebro/registry/company-domain-knowledge-packs.v1.json'
     ]
   };
 }
@@ -185,7 +277,7 @@ export const KNOWLEDGE_CONTEXT_COMPOSER_V1_CONTRACT = Object.freeze({
   composition_order: Object.freeze(['COMMON','DOMAIN','COMPANY','ROLE']),
   effective_precedence: Object.freeze(['ROLE','COMPANY','DOMAIN','COMMON']),
   live_context: 'EPHEMERAL_SEPARATE',
-  supported_domains: Object.freeze([SUPPORTED_DOMAIN]),
+  supported_domains: SUPPORTED_DOMAINS,
   company_registry_durability: 'IN_MEMORY_REFERENCE_ONLY',
   authority_delta: false,
   direct_knowledge_mutation: false,
@@ -228,7 +320,7 @@ export function composeKnowledgeContext(input = {}) {
   };
 
   return Object.freeze({
-    schema_version: '1.0.0',
+    schema_version: '1.1.0',
     state_type: 'CEREBRO_COMPOSED_KNOWLEDGE_CONTEXT',
     status: 'COMPOSED_PREPROD_GREEN',
     context: Object.freeze({
@@ -265,8 +357,12 @@ export function validateKnowledgeContextComposer() {
   if (COMPANY_DOMAIN_PACKS.environment !== EXACT_ENVIRONMENT) errors.push('company/domain packs must be PREPROD');
   if (COMPANY_DOMAIN_PACKS.governance?.authority_delta !== false) errors.push('authority_delta must remain false');
   if (COMPANY_DOMAIN_PACKS.governance?.additional_cost_eur !== 0) errors.push('knowledge pack cost must remain zero');
-  if (COMPANY_DOMAIN_PACKS.packs.length !== 1) errors.push(`unexpected company/domain pack count:${COMPANY_DOMAIN_PACKS.packs.length}`);
+  if (APP_CRM_PACK.environment !== EXACT_ENVIRONMENT) errors.push('APP_CRM pack must be PREPROD');
+  if (APP_CRM_PACK.authority?.authority_delta !== false) errors.push('APP_CRM authority_delta must remain false');
+  if (APP_CRM_PACK.authority?.additional_cost_eur !== 0) errors.push('APP_CRM pack cost must remain zero');
+  if (ALL_COMPANY_DOMAIN_PACKS.length !== 2) errors.push(`unexpected company/domain pack count:${ALL_COMPANY_DOMAIN_PACKS.length}`);
   errors.push(...validateMortgageBinding());
+  errors.push(...validateAppCrmBinding());
   const phase4 = getPhase4Registry();
   for (const required of ['COMP-REG-001','TENANT-001','KBOOT-001']) {
     if (!phase4.engines.some((engine) => engine.engine_id === required)) errors.push(`missing engine:${required}`);
@@ -275,8 +371,9 @@ export function validateKnowledgeContextComposer() {
     ok: errors.length === 0,
     errors,
     environment: EXACT_ENVIRONMENT,
-    pack_count: COMPANY_DOMAIN_PACKS.packs.length,
-    supported_domains: [SUPPORTED_DOMAIN],
+    pack_count: ALL_COMPANY_DOMAIN_PACKS.length,
+    supported_domains: clone(SUPPORTED_DOMAINS),
+    app_crm_binding_state: APP_CRM_BINDING.binding_state,
     company_registry_durability: 'IN_MEMORY_REFERENCE_ONLY',
     authority_delta: false,
     direct_knowledge_mutation: false,
