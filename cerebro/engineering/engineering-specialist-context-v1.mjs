@@ -29,7 +29,9 @@ function clone(value) {
 }
 
 function findSpecialist(name) {
-  return ENGINEERING_REGISTRY.specialists.find((item) => item.specialist === name) ?? null;
+  const status = ENGINEERING_REGISTRY.specialists?.[name] ?? null;
+  if (!status) return null;
+  return { specialist: name, status };
 }
 
 export function listEngineeringSpecialistBindings() {
@@ -82,7 +84,7 @@ export function buildEngineeringSpecialistContext(input = {}) {
     role_context: roleKnowledge,
     knowledge_pack: getRoleKnowledgePack(roleId),
     source_registry: {
-      registry_id: ENGINEERING_REGISTRY.registry_id,
+      registry_id: ENGINEERING_REGISTRY.state_type,
       status: ENGINEERING_REGISTRY.status,
       environment: ENGINEERING_REGISTRY.environment,
       implementation_head_sha: ENGINEERING_REGISTRY.evidence?.implementation_head_sha ?? null
@@ -98,6 +100,12 @@ export function validateEngineeringSpecialistBindings() {
   const entries = Object.entries(ENGINEERING_SPECIALIST_ROLE_BINDINGS_V1);
 
   if (entries.length !== 10) errors.push(`expected 10 bindings, got ${entries.length}`);
+  if (ENGINEERING_REGISTRY.status !== 'ALL_ENGINEERING_SPECIALISTS_FULL_SAFE_PREPROD') {
+    errors.push(`unexpected source registry status:${ENGINEERING_REGISTRY.status}`);
+  }
+  if (ENGINEERING_REGISTRY.environment !== 'PREPROD') {
+    errors.push(`unexpected source environment:${ENGINEERING_REGISTRY.environment}`);
+  }
 
   for (const [specialist, roleId] of entries) {
     const physical = findSpecialist(specialist);
