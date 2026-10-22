@@ -13,11 +13,13 @@ const BASE = Object.freeze({
   environment: 'PREPROD',
   version: 'v1'
 });
+const APP_CRM = Object.freeze({ ...BASE, domain_id: 'APP_CRM' });
 
 test('composer contract is PREPROD-only, cost0 and no authority delta', () => {
   assert.equal(KNOWLEDGE_CONTEXT_COMPOSER_V1_CONTRACT.environment, 'PREPROD');
   assert.deepEqual(KNOWLEDGE_CONTEXT_COMPOSER_V1_CONTRACT.composition_order, ['COMMON','DOMAIN','COMPANY','ROLE']);
   assert.deepEqual(KNOWLEDGE_CONTEXT_COMPOSER_V1_CONTRACT.effective_precedence, ['ROLE','COMPANY','DOMAIN','COMMON']);
+  assert.deepEqual(KNOWLEDGE_CONTEXT_COMPOSER_V1_CONTRACT.supported_domains, ['MORTGAGE','APP_CRM']);
   assert.equal(KNOWLEDGE_CONTEXT_COMPOSER_V1_CONTRACT.company_registry_durability, 'IN_MEMORY_REFERENCE_ONLY');
   assert.equal(KNOWLEDGE_CONTEXT_COMPOSER_V1_CONTRACT.authority_delta, false);
   assert.equal(KNOWLEDGE_CONTEXT_COMPOSER_V1_CONTRACT.direct_knowledge_mutation, false);
@@ -50,6 +52,26 @@ test('all 11 verified roles compose against Fenix mortgage knowledge', () => {
   }
 });
 
+test('all 11 verified roles compose against Fenix App CRM knowledge without new authority', () => {
+  const roles = listRoleProfiles();
+  assert.equal(roles.length, 11);
+  for (const role of roles) {
+    const result = composeKnowledgeContext({ ...APP_CRM, role_id: role.role_id });
+    assert.equal(result.status, 'COMPOSED_PREPROD_GREEN');
+    assert.equal(result.context.domain_id, 'APP_CRM');
+    assert.equal(result.layers.company.knowledge_pack.knowledge_pack_id, 'KP-FENIX-APP-CRM-V1');
+    assert.equal(result.layers.company.knowledge_pack.state, 'SOURCE_BACKED_WITH_CURRENT_RUNTIME_BINDINGS');
+    assert.equal(result.layers.domain.binding_state, 'CURRENT_SOURCE_RUNTIME_VERIFIED_NOT_LIVE_DEPLOYMENT_ASSERTION');
+    assert.equal(result.layers.domain.live_deployment_state, 'NOT_ASSERTED_BY_COMPOSER');
+    assert.equal(result.layers.domain.historical_contract_state, 'HISTORICAL_ONLY_NOT_CURRENT_RUNTIME_PROOF');
+    assert.equal(result.effective_authority.prod_write_authorized, false);
+    assert.equal(result.effective_authority.supabase_writes, false);
+    assert.equal(result.effective_authority.customer_data, false);
+    assert.equal(result.external_side_effect_executed, false);
+    assert.equal(result.cost_eur, 0);
+  }
+});
+
 test('mortgage domain binds all physically verified native capabilities', () => {
   const result = composeKnowledgeContext({ ...BASE, role_id: 'ENG-CODE' });
   assert.deepEqual(result.layers.domain.capabilities, [
@@ -64,6 +86,22 @@ test('mortgage domain binds all physically verified native capabilities', () => 
   ]);
   assert.equal(result.layers.domain.knowledge_update_reference, 'KNW-001');
   assert.equal(result.layers.domain.knowledge_update_reference_state, 'REFERENCE_OBSERVED_IN_RUNTIME_NOT_PROMOTED_BY_COMPOSER');
+});
+
+test('App CRM domain requires current physical runtime source and does not confuse it with deployment', () => {
+  const result = composeKnowledgeContext({ ...APP_CRM, role_id: 'ENG-INTEGRATOR' });
+  assert.deepEqual(result.layers.domain.runtime_paths, [
+    'src/appRpcCompat.ts',
+    'supabase/functions/fenix-app-gateway/index.ts',
+    'scripts/audit-app-rpc-migration-readiness.mjs'
+  ]);
+  assert.ok(result.layers.domain.capability_families.includes('expedientes'));
+  assert.ok(result.layers.domain.capability_families.includes('documentos'));
+  assert.ok(result.layers.domain.capability_families.includes('bancos'));
+  assert.ok(result.layers.domain.capability_families.includes('tasaciones'));
+  assert.ok(result.layers.domain.capability_families.includes('firmas'));
+  assert.equal(result.layers.domain.historical_contract_reference, 'preprod-app-phase1@94a6c73');
+  assert.equal(result.layers.domain.live_deployment_state, 'NOT_ASSERTED_BY_COMPOSER');
 });
 
 test('Fenix mortgage pack contains source-backed process knowledge and volatile-bank safeguards', () => {
@@ -81,23 +119,44 @@ test('Fenix mortgage pack contains source-backed process knowledge and volatile-
   assert.equal(pack.case_learning.pipeline.length, 7);
 });
 
-test('company layer surfaces KBOOT registration and the real durability gap without inventing persistence', () => {
-  const result = composeKnowledgeContext({ ...BASE, role_id: 'ENG-ARCHITECT' });
-  assert.equal(result.layers.company.registry_engine.engine_id, 'COMP-REG-001');
-  assert.equal(result.layers.company.tenant_engine.engine_id, 'TENANT-001');
-  assert.equal(result.layers.company.knowledge_bootstrap_engine.engine_id, 'KBOOT-001');
-  assert.equal(result.layers.company.knowledge_bootstrap_engine.mode, 'DETERMINISTIC_REFERENCE');
-  assert.equal(result.layers.company.durability_state, 'IN_MEMORY_REFERENCE_ONLY');
-  assert.equal(result.layers.company.cross_company_access, 'deny');
+test('Fenix App CRM pack preserves source classes, RBAC and master-data rules', () => {
+  const result = composeKnowledgeContext({ ...APP_CRM, role_id: 'ENG-ARCHITECT' });
+  const pack = result.layers.company.knowledge_pack;
+  assert.deepEqual(pack.evidence_model.classes, ['SOURCE_SPECIFICATION','HISTORICAL_CONTRACT_AUDIT','CURRENT_RUNTIME_VERIFIED']);
+  assert.equal(pack.historical_contract_snapshot_2026_09_05.do_not_treat_as_current_head, true);
+  assert.equal(pack.historical_supabase_snapshot_2026_09_05.do_not_treat_counts_as_current, true);
+  assert.equal(pack.current_runtime_bindings.classification, 'CURRENT_RUNTIME_VERIFIED');
+  assert.equal(pack.product_rules.expediente_is_primary_operational_record, true);
+  assert.equal(pack.product_rules.reuse_master_records_and_components, true);
+  assert.equal(pack.product_rules.no_hardcoded_real_kpis, true);
+  assert.equal(pack.product_rules.calculator.crm_write_requires_explicit_action, true);
+  assert.equal(pack.product_rules.ana.must_respect_user_permissions, true);
+  assert.equal(pack.master_data_principles.single_source_relationship_by_ids, true);
+  assert.equal(pack.authority.supabase_writes, false);
+  assert.equal(pack.authority.prod_write_authorized, false);
 });
 
-test('Sales remains company-scoped and gains knowledge without execution authority', () => {
-  const result = composeKnowledgeContext({ ...BASE, role_id: 'AGT-SALES-EXECUTIVE' });
-  assert.equal(result.layers.role.role.company_scope, 'fenix');
-  assert.equal(result.layers.role.knowledge.role_id, 'AGT-SALES-EXECUTIVE');
-  assert.equal(result.effective_authority.prod_write_authorized, false);
-  assert.equal(result.effective_authority.external_side_effect_authorized, false);
-  assert.equal(result.effective_authority.customer_data, false);
+test('company layer surfaces KBOOT registration and the real durability gap without inventing persistence', () => {
+  for (const domain_id of ['MORTGAGE','APP_CRM']) {
+    const result = composeKnowledgeContext({ ...BASE, domain_id, role_id: 'ENG-ARCHITECT' });
+    assert.equal(result.layers.company.registry_engine.engine_id, 'COMP-REG-001');
+    assert.equal(result.layers.company.tenant_engine.engine_id, 'TENANT-001');
+    assert.equal(result.layers.company.knowledge_bootstrap_engine.engine_id, 'KBOOT-001');
+    assert.equal(result.layers.company.knowledge_bootstrap_engine.mode, 'DETERMINISTIC_REFERENCE');
+    assert.equal(result.layers.company.durability_state, 'IN_MEMORY_REFERENCE_ONLY');
+    assert.equal(result.layers.company.cross_company_access, 'deny');
+  }
+});
+
+test('Sales remains company-scoped and gains knowledge without execution authority in both domains', () => {
+  for (const domain_id of ['MORTGAGE','APP_CRM']) {
+    const result = composeKnowledgeContext({ ...BASE, domain_id, role_id: 'AGT-SALES-EXECUTIVE' });
+    assert.equal(result.layers.role.role.company_scope, 'fenix');
+    assert.equal(result.layers.role.knowledge.role_id, 'AGT-SALES-EXECUTIVE');
+    assert.equal(result.effective_authority.prod_write_authorized, false);
+    assert.equal(result.effective_authority.external_side_effect_authorized, false);
+    assert.equal(result.effective_authority.customer_data, false);
+  }
 });
 
 test('unknown company/domain and cross-company role use fail closed', () => {
@@ -130,9 +189,9 @@ test('PROD and requested authority escalation are rejected', () => {
 
 test('live context is ephemeral and rejects raw PII/secrets', () => {
   const result = composeKnowledgeContext({
-    ...BASE,
+    ...APP_CRM,
     role_id: 'ENG-DATA',
-    live_context: { task_ref: 'case-fixture-001', requested_financing_pct: 90, flags: ['PREPROD_FIXTURE'] }
+    live_context: { task_ref: 'case-fixture-001', module: 'expedientes', flags: ['PREPROD_FIXTURE'] }
   });
   assert.equal(result.live_context.state, 'EPHEMERAL_NOT_CANONICAL_KNOWLEDGE');
   assert.equal(result.live_context.persisted, false);
@@ -143,7 +202,7 @@ test('live context is ephemeral and rejects raw PII/secrets', () => {
     { access_token: 'secret' }
   ]) {
     assert.throws(
-      () => composeKnowledgeContext({ ...BASE, role_id: 'ENG-DATA', live_context: sample }),
+      () => composeKnowledgeContext({ ...APP_CRM, role_id: 'ENG-DATA', live_context: sample }),
       /PII\/secret key forbidden/i
     );
   }
@@ -152,8 +211,9 @@ test('live context is ephemeral and rejects raw PII/secrets', () => {
 test('composer registry validation is green with explicit partial durability', () => {
   const validation = validateKnowledgeContextComposer();
   assert.equal(validation.ok, true, JSON.stringify(validation.errors));
-  assert.equal(validation.pack_count, 1);
-  assert.deepEqual(validation.supported_domains, ['MORTGAGE']);
+  assert.equal(validation.pack_count, 2);
+  assert.deepEqual(validation.supported_domains, ['MORTGAGE','APP_CRM']);
+  assert.equal(validation.app_crm_binding_state, 'CURRENT_SOURCE_RUNTIME_VERIFIED_NOT_LIVE_DEPLOYMENT_ASSERTION');
   assert.equal(validation.company_registry_durability, 'IN_MEMORY_REFERENCE_ONLY');
   assert.equal(validation.authority_delta, false);
   assert.equal(validation.direct_knowledge_mutation, false);
