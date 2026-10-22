@@ -5,11 +5,11 @@
   "engine_id": "AUTO-001",
   "environment": "PREPROD_CONTROL_PLANE",
   "version": "0.1.0",
-  "updated_at": "2026-10-22T04:45:58.633Z",
-  "source_healing_updated_at": "2026-10-22T04:45:26.740Z",
-  "owners_total": 1,
+  "updated_at": "2026-10-22T13:58:53.465Z",
+  "source_healing_updated_at": "2026-10-22T13:58:22.254Z",
+  "owners_total": 2,
   "verified_code_executors": 0,
-  "owners_without_verified_executor": 1,
+  "owners_without_verified_executor": 2,
   "status": "SAFE_HOLD_NO_VERIFIED_CODE_EXECUTOR",
   "owners": [
     {
@@ -20,6 +20,17 @@
       "evidence": [
         "engine-registry:HCI-001=AUTOMATED_ASSISTED",
         "qa-healing-plans.v0.json:owner_engine=HCI-001;execute=false"
+      ],
+      "next_action": "KEEP_SELF001_PLAN_ONLY"
+    },
+    {
+      "owner_engine": "WEB-001",
+      "status": "NO_VERIFIED_EXECUTOR",
+      "classification": "OWNER_ASSISTED_NO_VERIFIED_CODE_EXECUTOR",
+      "verified_code_executor": false,
+      "evidence": [
+        "engine-registry:WEB-001=AUTOMATED_ASSISTED",
+        "no-current-main-owner-code-executor-evidence"
       ],
       "next_action": "KEEP_SELF001_PLAN_ONLY"
     }
