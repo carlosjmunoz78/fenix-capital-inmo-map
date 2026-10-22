@@ -1,0 +1,127 @@
+{
+  "contract": "continuous-improvement-autonomy.v1",
+  "owner_capability": "CHANNEL-INTELLIGENCE-V1",
+  "applies_to": [
+    "WEB_OPERATING_PROFILE",
+    "CHANNEL_POD_PROFILE"
+  ],
+  "target_state": "PROD_AUTONOMOUS",
+  "completion_rule": "NOT_DONE_UNTIL_PROD",
+  "promotion_path": [
+    "LAB",
+    "PREPROD",
+    "PROD"
+  ],
+  "preprod_semantics": "MANDATORY_VALIDATION_GATE_NOT_FINAL_DESTINATION",
+  "improvement_mode": "CONTINUOUS_PROACTIVE",
+  "baseline_semantics": "CURRENT_BEST_IS_FLOOR_NOT_FINISH",
+  "optimization_cycle": [
+    "OBSERVE",
+    "COMPARE",
+    "DETECT_OPPORTUNITY",
+    "GENERATE_CHALLENGER",
+    "TEST",
+    "EVALUATE",
+    "PROMOTE_IF_BETTER",
+    "LEARN",
+    "REPEAT"
+  ],
+  "improvement_triggers": [
+    "SCHEDULE",
+    "PERFORMANCE_CHANGE",
+    "TREND_CHANGE",
+    "COMPETITOR_CHANGE",
+    "PLATFORM_CHANGE",
+    "SEARCH_DEMAND_CHANGE",
+    "OWNER_FEEDBACK",
+    "NEW_EVIDENCE"
+  ],
+  "human_calibration": {
+    "mode": "LEARN_THEN_AUTONOMOUS",
+    "phases": [
+      {
+        "phase": "CALIBRATION_0",
+        "behavior": "ASK_FOR_PREFERENCE_WHEN_USEFUL",
+        "purpose": "Learn explicit owner taste, acceptable tradeoffs and preferred patterns."
+      },
+      {
+        "phase": "CALIBRATION_1",
+        "behavior": "ASK_ONLY_ON_NOVEL_OR_LOW_CONFIDENCE_PREFERENCE",
+        "purpose": "Reduce questions as evidence accumulates."
+      },
+      {
+        "phase": "AUTONOMY_2",
+        "behavior": "AUTONOMOUS_BY_DEFAULT_WITHIN_PROVEN_POLICY",
+        "purpose": "Apply learned taste plus performance evidence without routine approval."
+      },
+      {
+        "phase": "HUMAN_BY_EXCEPTION_3",
+        "behavior": "NO_ROUTINE_QUESTIONS",
+        "purpose": "Escalate only canonical human-exception cases or explicit owner requests."
+      }
+    ],
+    "calibration_query_is_human_required": false,
+    "canonical_human_required_reasons": [
+      "LEGAL_REQUIRED",
+      "SIGNATURE_REQUIRED",
+      "LOW_CONFIDENCE",
+      "HIGH_RISK",
+      "POLICY_CONFLICT",
+      "SECURITY_INCIDENT",
+      "MONEY_LIMIT",
+      "CUSTOMER_HUMAN_REQUEST"
+    ]
+  },
+  "decision_inputs": [
+    "OWNER_TASTE",
+    "BRAND_SYSTEM",
+    "AUDIENCE_RESPONSE",
+    "OWN_PERFORMANCE",
+    "MARKET_TRENDS",
+    "COMPETITOR_SIGNALS",
+    "SEARCH_DEMAND",
+    "COMMERCIAL_VALUE",
+    "RISK",
+    "COST"
+  ],
+  "promotion_requirements": [
+    "CONTRACTS",
+    "PERMISSIONS",
+    "TESTS",
+    "EVALUATION",
+    "TRIBUNAL",
+    "OBSERVABILITY",
+    "BACKUP",
+    "ROLLBACK",
+    "REBUILD",
+    "COST_MEASURED",
+    "POLICY",
+    "PREPROD_EVIDENCE",
+    "OLD_VS_NEW"
+  ],
+  "promotion_rule": "ONLY_PROMOTE_IF_CHALLENGER_IS_BETTER_OR_CLEARLY_JUSTIFIED_AND_ALL_GATES_PASS",
+  "rollback_rule": "EVERY_AUTONOMOUS_PROD_CHANGE_MUST_HAVE_A_PROVEN_ROLLBACK_PATH",
+  "continuous_scope": [
+    "WEB_VISUAL",
+    "UX_UI",
+    "CRO",
+    "SEO_ARCHITECTURE",
+    "CONTENT",
+    "CREATIVE",
+    "SOCIAL_FORMATS",
+    "HOOKS",
+    "COPY",
+    "MEDIA",
+    "CHANNEL_STRATEGY",
+    "TREND_RESPONSE",
+    "COMPETITOR_RESPONSE"
+  ],
+  "multi_company_keys": [
+    "company_id",
+    "capability_id",
+    "environment",
+    "version"
+  ],
+  "cost_policy": "ZERO_ADDITIONAL_COST_BY_DEFAULT",
+  "notes": "PREPROD remains mandatory, but it is never the terminal state. The target is governed autonomous PROD operation. Continuous improvement is proactive: absence of a defect does not stop optimization."
+}

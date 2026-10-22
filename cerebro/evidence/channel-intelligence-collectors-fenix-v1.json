@@ -1,0 +1,260 @@
+{
+  "schema_version": "1.2.0",
+  "company_id": "fenix-capital",
+  "capability_id": "CHANNEL-INTELLIGENCE-V1",
+  "environment": "PREPROD",
+  "evidence_at": "2026-10-21T16:20:00.000Z",
+  "purpose": "Record live connector availability, existing zero-cost read routes and native direct read paths without secrets and without authorizing writes, paid upgrades, credential export or account disconnections.",
+  "observed_provider": "Windsor.ai",
+  "plan_constraint": {
+    "state": "FREE_PLAN_READS_PAUSED",
+    "reported_connected_account_count": 13,
+    "reported_included_account_count": 1,
+    "policy": "NO_UPGRADE_AND_NO_ACCOUNT_DISCONNECTION_WITHOUT_SEPARATE_REVIEW",
+    "additional_cost_authorized_eur": 0
+  },
+  "collectors": [
+    {
+      "collector_id": "collector:windsor:facebook-organic:fenix",
+      "provider": "Windsor.ai",
+      "connector_id": "facebook_organic",
+      "connection_state": "CONNECTED",
+      "read_state": "BLOCKED_ZERO_COST_PLAN_ACCOUNT_LIMIT",
+      "purposes": ["SOCIAL_OWN_PERFORMANCE"],
+      "channels": ["facebook"],
+      "read_test": "LIVE_QUERY_RETURNED_PROVIDER_PLAN_BLOCK_PLACEHOLDER_NOT_REAL_METRICS",
+      "write_authorized": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "collector_id": "collector:windsor:ga4:fenixcapital",
+      "provider": "Windsor.ai",
+      "connector_id": "googleanalytics4",
+      "connection_state": "CONNECTED",
+      "read_state": "BLOCKED_ZERO_COST_PLAN_ACCOUNT_LIMIT",
+      "purposes": ["WEB_ANALYTICS"],
+      "channels": [],
+      "read_test": "LIVE_QUERY_RETURNED_PROVIDER_PLAN_BLOCK_PLACEHOLDER_NOT_REAL_METRICS",
+      "write_authorized": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "collector_id": "collector:windsor:gsc:fenixcapital",
+      "provider": "Windsor.ai",
+      "connector_id": "searchconsole",
+      "connection_state": "CONNECTED",
+      "read_state": "BLOCKED_ZERO_COST_PLAN_ACCOUNT_LIMIT",
+      "purposes": ["SEARCH_DEMAND"],
+      "channels": [],
+      "read_test": "LIVE_QUERY_RETURNED_PROVIDER_PLAN_BLOCK_PLACEHOLDER_NOT_REAL_METRICS",
+      "write_authorized": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "collector_id": "collector:windsor:instagram:fenix",
+      "provider": "Windsor.ai",
+      "connector_id": "instagram",
+      "connection_state": "NOT_CONNECTED_IN_OBSERVED_CONNECTOR_LIST",
+      "read_state": "NOT_TESTED",
+      "purposes": ["SOCIAL_OWN_PERFORMANCE", "SOCIAL_PUBLIC_TRENDS"],
+      "channels": ["instagram"],
+      "write_authorized": false,
+      "additional_cost_eur": 0
+    },
+    {
+      "collector_id": "collector:windsor:linkedin-organic:fenix",
+      "provider": "Windsor.ai",
+      "connector_id": "linkedin_organic",
+      "connection_state": "NOT_CONNECTED_IN_OBSERVED_CONNECTOR_LIST",
+      "read_state": "NOT_TESTED",
+      "purposes": ["SOCIAL_OWN_PERFORMANCE", "SOCIAL_PUBLIC_TRENDS"],
+      "channels": ["linkedin"],
+      "write_authorized": false,
+      "additional_cost_eur": 0
+    }
+  ],
+  "secondary_connector_audit": {
+    "provider": "GSC Wizard",
+    "live_read_attempt": "REFUSED_BY_PROVIDER",
+    "reason": "SUBSCRIPTION_REQUIRED_TRIAL_ENDED",
+    "retry_before_subscription": false,
+    "paid_subscription_authorized": false,
+    "selected_as_runtime_dependency": false
+  },
+  "existing_zero_cost_read_routes": {
+    "audit_state": "EXISTING_CONNECTED_READ_ROUTES_VERIFIED_NOT_YET_BOUND_TO_CEREBRO_RUNTIME",
+    "platform_role": "TRANSITIONAL_EXISTING_READ_BRIDGE_ONLY",
+    "hard_dependency": false,
+    "credential_export_performed": false,
+    "credential_values_recorded": false,
+    "write_authority_inherited": false,
+    "provider_reconfiguration_authorized": false,
+    "bridge_implementation": "cerebro/marketing/channel-intelligence-existing-read-bridge-v1.mjs",
+    "bridge_state": "IMPLEMENTED_UNBOUND_PREPROD",
+    "routes": [
+      {
+        "route_id": "existing:gsc:fenixcapital",
+        "provider": "Google Search Console",
+        "existing_platform": "Make",
+        "connection_ref": "make:connection:14438259",
+        "site_ref": "https://fenixcapital.es/",
+        "read_capability": "SEARCH_ANALYTICS",
+        "lifecycle_state": "OK_AT_AUDIT",
+        "live_read_verified": true,
+        "scenario_ref": "make:scenario:9694039",
+        "execution_ref": "make:execution:6f133835d4374d8ca88503c15429e8d5",
+        "execution_observed_at": "2026-09-28T14:55:03.890Z",
+        "evidence_summary": "Existing connected GSC module returned real clicks, impressions, CTR and position data.",
+        "cerebro_runtime_binding_verified": false,
+        "write_authorized": false,
+        "additional_cost_eur": 0
+      },
+      {
+        "route_id": "existing:ga4:fenixcapital",
+        "provider": "Google Analytics 4",
+        "existing_platform": "Make",
+        "connection_refs": ["make:connection:14438423", "make:connection:14524247"],
+        "read_capability": "ANALYTICS_REPORTING",
+        "lifecycle_state": "OK_AT_AUDIT",
+        "live_read_verified": true,
+        "scenario_ref": "make:scenario:9694039",
+        "execution_ref": "make:execution:6f133835d4374d8ca88503c15429e8d5",
+        "execution_observed_at": "2026-09-28T14:55:03.890Z",
+        "evidence_summary": "Existing connected GA4 module returned real page/report metrics in the same successful PREPROD bridge execution.",
+        "cerebro_runtime_binding_verified": false,
+        "write_authorized": false,
+        "additional_cost_eur": 0
+      },
+      {
+        "route_id": "existing:linkedin:fenixcapital",
+        "provider": "LinkedIn",
+        "existing_platform": "Make",
+        "connection_ref": "make:connection:14435718",
+        "organization_ref": "urn:li:organization:107443702",
+        "read_capability": "ORGANIZATION_POSTS_AND_STATISTICS",
+        "lifecycle_state": "OK_AT_AUDIT",
+        "live_read_verified": true,
+        "scenario_ref": "make:scenario:9597372",
+        "execution_ref": "make:execution:ba1c570f792b45dab62bd95f5b023fae",
+        "execution_observed_at": "2026-10-21T08:15:02.422Z",
+        "evidence_summary": "Existing connected LinkedIn organization read modules completed successfully. Downstream scenario writes are explicitly excluded from CEREBRO authority.",
+        "cerebro_runtime_binding_verified": false,
+        "write_authorized": false,
+        "additional_cost_eur": 0
+      },
+      {
+        "route_id": "existing:facebook:fenixcapital",
+        "provider": "Facebook Pages",
+        "existing_platform": "Make",
+        "connection_ref": "make:connection:14428711",
+        "page_ref": "654319477",
+        "read_capability": "PAGE_POSTS_IDENTITY_REACTIONS",
+        "lifecycle_state": "EXPIRING_AT_AUDIT",
+        "live_read_verified": true,
+        "scenario_ref": "make:scenario:9911827",
+        "execution_ref": "make:execution:65dcfb82901b4165a0e26db0bf4ad851",
+        "execution_observed_at": "2026-10-20T17:15:02.534Z",
+        "evidence_summary": "Existing connected Facebook Page read modules completed successfully; credential lifecycle is expiring and must remain explicit.",
+        "cerebro_runtime_binding_verified": false,
+        "write_authorized": false,
+        "additional_cost_eur": 0
+      },
+      {
+        "route_id": "existing:instagram:fenixcapital",
+        "provider": "Instagram Business",
+        "existing_platform": "Make",
+        "connection_ref": "make:connection:14428711",
+        "account_ref": "17841475125858156",
+        "account_alias": "@fenixcapitalhipotecas",
+        "read_capability": "ACCOUNT_MEDIA_READ",
+        "lifecycle_state": "EXPIRING_AT_AUDIT",
+        "live_read_verified": true,
+        "insights_report_execution_verified": false,
+        "scenario_ref": "make:scenario:9911823",
+        "execution_ref": "make:execution:d48a57a8f95a4f059149bab5ca1ad4c8",
+        "execution_observed_at": "2026-10-21T09:15:04.500Z",
+        "evidence_summary": "Existing connected Instagram media read completed successfully. This does not yet prove an Instagram Insights report execution.",
+        "cerebro_runtime_binding_verified": false,
+        "write_authorized": false,
+        "additional_cost_eur": 0
+      }
+    ]
+  },
+  "direct_path_audit": {
+    "implementation_file": "cerebro/marketing/channel-intelligence-direct-read-adapters-v1.mjs",
+    "state": "IMPLEMENTED_UNBOUND_PREPROD",
+    "secret_handling": "AUTH_BOUND_EXTERNALLY_AND_NEVER_RETURNED_IN_COLLECTOR_OUTPUT",
+    "paths": [
+      {
+        "collector_family": "GOOGLE_SEARCH_CONSOLE_DIRECT",
+        "read_endpoint": "POST https://www.googleapis.com/webmasters/v3/sites/{siteUrl}/searchAnalytics/query",
+        "minimum_scope": "https://www.googleapis.com/auth/webmasters.readonly",
+        "quota_model": "GOOGLE_NATIVE_QUOTA",
+        "additional_cost_target_eur": 0,
+        "credential_binding_verified": false,
+        "runtime_state": "READY_FOR_READONLY_CREDENTIAL_BINDING"
+      },
+      {
+        "collector_family": "GOOGLE_ANALYTICS_DATA_DIRECT",
+        "read_endpoint": "POST https://analyticsdata.googleapis.com/v1beta/properties/{propertyId}:runReport",
+        "minimum_scope": "https://www.googleapis.com/auth/analytics.readonly",
+        "quota_model": "GOOGLE_NATIVE_PROPERTY_QUOTA",
+        "additional_cost_target_eur": 0,
+        "credential_binding_verified": false,
+        "runtime_state": "READY_FOR_READONLY_CREDENTIAL_BINDING"
+      },
+      {
+        "collector_family": "META_PAGE_INSIGHTS_DIRECT",
+        "read_endpoint": "GET https://graph.facebook.com/{apiVersion}/{pageId}/insights",
+        "minimum_permissions": ["read_insights", "pages_read_engagement"],
+        "token_type": "PAGE_ACCESS_TOKEN",
+        "additional_cost_target_eur": 0,
+        "credential_binding_verified": false,
+        "runtime_state": "READY_FOR_PERMISSION_AND_PAGE_TOKEN_VERIFICATION"
+      },
+      {
+        "collector_family": "LINKEDIN_ORGANIZATION_ANALYTICS_DIRECT",
+        "read_endpoint_family": "https://api.linkedin.com/rest",
+        "minimum_permission": "r_organization_admin",
+        "program_dependency": "COMMUNITY_MANAGEMENT_API_ACCESS",
+        "additional_cost_target_eur": 0,
+        "credential_binding_verified": false,
+        "runtime_state": "READY_FOR_ACCESS_AND_PERMISSION_VERIFICATION"
+      }
+    ],
+    "documentation_sources": [
+      "https://developers.google.com/webmaster-tools/v1/searchanalytics/query",
+      "https://developers.google.com/webmaster-tools/limits",
+      "https://developers.google.com/analytics/devguides/reporting/data/v1/rest/v1beta/properties/runReport",
+      "https://developers.google.com/analytics/devguides/reporting/data/v1/quotas",
+      "https://developers.facebook.com/docs/graph-api/reference/page/insights/",
+      "https://learn.microsoft.com/en-us/linkedin/marketing/community-management/organizations/organization-access-control-by-role"
+    ]
+  },
+  "conclusion": {
+    "windsor_metadata_connections_exist": true,
+    "windsor_verified_real_data_read_ready": false,
+    "windsor_primary_collector_selected": false,
+    "gsc_wizard_selected": false,
+    "existing_zero_cost_read_routes_verified": true,
+    "existing_bridge_code_exists": true,
+    "existing_bridge_runtime_binding_verified": false,
+    "direct_read_adapter_code_exists": true,
+    "direct_read_credentials_verified": false,
+    "meta_connection_lifecycle_attention": true,
+    "instagram_insights_execution_verified": false,
+    "reason": "EXISTING_ZERO_COST_READ_ROUTES_ARE_REAL_AND_REUSABLE_BUT_CEREBRO_RUNTIME_BINDING_REMAINS_SEPARATE_AND_FAIL_CLOSED",
+    "next_action": "BIND_PROVIDER_NEUTRAL_EXISTING_READ_CALLBACK_IN_PREPROD_WITHOUT_CREDENTIAL_EXPORT_THEN_RUN_WORKER_E2E_AND_OLD_VS_NEW",
+    "human_required_now": false
+  },
+  "guardrails": {
+    "prod_write_authorized": false,
+    "publish_authorized": false,
+    "spend_authorized": false,
+    "credential_export_authorized": false,
+    "provider_reconfiguration_authorized": false,
+    "account_disconnection_authorized": false,
+    "new_subscription_authorized": false,
+    "trading_access": false
+  }
+}

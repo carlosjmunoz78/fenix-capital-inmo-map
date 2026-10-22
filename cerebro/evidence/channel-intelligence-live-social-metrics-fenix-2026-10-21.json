@@ -1,0 +1,78 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix-capital",
+  "environment": "PREPROD",
+  "observed_at": "2026-10-21T14:41:00.000Z",
+  "source": "live read-only audit of existing Make native-read scenarios plus Supabase metric tables",
+  "social_metrics": {
+    "facebook": {
+      "rows": 28,
+      "first_observed_at": "2026-10-01T08:10:36.090Z",
+      "last_observed_at": "2026-10-20T17:15:07.392Z",
+      "with_impressions": 9,
+      "with_clicks": 9,
+      "with_engagements": 19,
+      "with_conversions": 0,
+      "active_read_scenario_ref": "make:scenario:9911827",
+      "latest_verified_execution_ref": "make:execution:65dcfb82901b4165a0e26db0bf4ad851",
+      "current_native_scope": "posts + reactions + existing historical impression/click rows",
+      "gap": "current daily scenario does not populate fresh impressions/clicks for every observed post"
+    },
+    "instagram": {
+      "rows": 15,
+      "first_observed_at": "2026-10-05T09:15:06.903Z",
+      "last_observed_at": "2026-10-21T09:15:08.820Z",
+      "with_impressions": 0,
+      "with_clicks": 0,
+      "with_engagements": 15,
+      "with_conversions": 0,
+      "active_read_scenario_ref": "make:scenario:9911823",
+      "latest_verified_execution_ref": "make:execution:d48a57a8f95a4f059149bab5ca1ad4c8",
+      "current_native_scope": "media identity + likes/comments",
+      "gap": "Instagram Insights report is not yet evidenced in the active route; no impressions/clicks are stored"
+    },
+    "linkedin": {
+      "rows": 20,
+      "first_observed_at": "2026-10-01T08:54:20.641Z",
+      "last_observed_at": "2026-10-21T08:15:18.336Z",
+      "with_impressions": 20,
+      "with_clicks": 20,
+      "with_engagements": 20,
+      "with_conversions": 0,
+      "active_read_scenario_ref": "make:scenario:9597372",
+      "latest_verified_execution_ref": "make:execution:ba1c570f792b45dab62bd95f5b023fae",
+      "current_native_scope": "organization posts + share statistics",
+      "gap": "no sessions/conversions attribution in the social metrics table"
+    }
+  },
+  "learning_state": {
+    "rows_exist": true,
+    "channels": ["facebook", "instagram", "linkedin"],
+    "caution": "existing pillar scores are based on small sample counts and must remain candidate learning, not autonomous production rules"
+  },
+  "competitor_intelligence": {
+    "legacy_company_id_found": "FENIX_CAPITAL",
+    "canonical_company_id": "fenix-capital",
+    "legacy_rows": 19,
+    "last_checked_at": "2026-10-03T07:43:59.782Z",
+    "freshness_at_audit": "EXPIRED_FOR_CURRENT_COMPETITOR_DECISIONS",
+    "write_migration_performed": false,
+    "read_alias_required": true,
+    "gap": "competitor observations exist but are not fresh enough for a continuous 12h competitor radar and use a legacy company_id alias"
+  },
+  "critical_gaps": [
+    "fresh platform-specific public trend collectors are not physically bound for Instagram/Facebook/LinkedIn",
+    "competitor intelligence is stale relative to the intended 12h cadence",
+    "Instagram own-performance lacks impressions/clicks",
+    "social-to-web-to-lead conversion attribution is not populated in current social metrics",
+    "Make remains a transitional read/metrics bridge and must not become the publisher dependency"
+  ],
+  "guardrails": {
+    "prod_write_authorized": false,
+    "publish_authorized": false,
+    "spend_authorized": false,
+    "credential_export_performed": false,
+    "provider_reconfiguration_performed": false,
+    "additional_cost_eur": 0
+  }
+}
