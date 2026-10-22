@@ -1,0 +1,68 @@
+name: CEREBRO Role Knowledge V1
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/registry/role-agent-registry.v1.json'
+      - 'cerebro/registry/role-knowledge-packs.v1.json'
+      - 'cerebro/roles/role-knowledge-runtime-v1.mjs'
+      - 'cerebro/engineering/engineering-specialist-context-v1.mjs'
+      - 'cerebro/revenue/sales-executive-knowledge-context-v1.mjs'
+      - 'cerebro/tests/role-knowledge-runtime-v1.test.mjs'
+      - 'cerebro/tests/engineering-specialist-context-v1.test.mjs'
+      - 'cerebro/tests/sales-executive-knowledge-context-v1.test.mjs'
+      - '.github/workflows/cerebro-role-knowledge-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-role-knowledge-v1-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-role-knowledge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Parse registries
+        shell: bash
+        run: |
+          node -e "JSON.parse(require('fs').readFileSync('cerebro/registry/role-agent-registry.v1.json','utf8')); JSON.parse(require('fs').readFileSync('cerebro/registry/role-knowledge-packs.v1.json','utf8')); console.log('ROLE_KNOWLEDGE_JSON_GREEN')"
+
+      - name: Role knowledge runtime tests
+        run: node --test cerebro/tests/role-knowledge-runtime-v1.test.mjs
+
+      - name: Engineering specialist binding tests
+        run: node --test cerebro/tests/engineering-specialist-context-v1.test.mjs
+
+      - name: Sales executive knowledge binding tests
+        run: node --test cerebro/tests/sales-executive-knowledge-context-v1.test.mjs
+
+      - name: Confirm zero side-effect contract
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import { validateRoleKnowledgeRegistries } from './cerebro/roles/role-knowledge-runtime-v1.mjs';
+          import { validateEngineeringSpecialistBindings } from './cerebro/engineering/engineering-specialist-context-v1.mjs';
+          import { validateSalesExecutiveKnowledgeBinding } from './cerebro/revenue/sales-executive-knowledge-context-v1.mjs';
+          const results = [
+            validateRoleKnowledgeRegistries(),
+            validateEngineeringSpecialistBindings(),
+            validateSalesExecutiveKnowledgeBinding()
+          ];
+          if (!results.every((result) => result.ok === true && result.cost_eur === 0)) {
+            console.error(JSON.stringify(results, null, 2));
+            process.exit(1);
+          }
+          console.log(JSON.stringify({status:'GREEN', environment:'PREPROD', authority_delta:false, external_side_effects:false, cost_eur:0}, null, 2));
+          NODE
