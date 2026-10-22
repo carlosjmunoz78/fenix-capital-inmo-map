@@ -5,7 +5,7 @@
 **company_id:** GLOBAL  
 **engine_id:** FACT-001  
 **environment:** PREPROD  
-**version:** 1.0.0
+**version:** 1.1.0
 
 ## 1. Decisión canónica
 
@@ -17,7 +17,7 @@ La unidad reutilizable no es la empresa actual. La unidad reutilizable es:
 
 `SOCIAL_CORE + SECTOR_FAMILY + PLATFORM_FAMILY + COMPANY_OVERLAY + BRAND_OVERLAY + TERRITORY_OVERLAY + CAMPAIGN_CONTEXT`
 
-Por tanto, una empresa concreta —incluida la primera empresa financiera hoy conectada a CEREBRO— es una **instancia**, nunca el nombre ni el límite de la arquitectura.
+Por tanto, una empresa concreta es una **instancia**, nunca el nombre ni el límite de la arquitectura.
 
 ## 2. Familias sectoriales
 
@@ -27,65 +27,41 @@ Por tanto, una empresa concreta —incluida la primera empresa financiera hoy co
 
 Debe poder atender múltiples empresas diferentes pertenecientes a la misma familia: intermediación financiera, hipotecas, inmobiliarias, obra nueva, inversión, servicios inmobiliarios, captación, compraventa, valoración, B2B inmobiliario y futuras líneas compatibles.
 
-Cobertura territorial objetivo:
-
-`Andalucía → resto de España`
-
-La territorialidad es una dimensión separada de la familia. Una misma familia debe poder operar por país, comunidad autónoma, provincia, municipio, ciudad, barrio o zona sin duplicar la arquitectura.
+Cobertura territorial objetivo: `Andalucía → resto de España`.
 
 ### 2.2 Segunda familia planificada
 
 **TECH_PRODUCTS_AI** · Familia de productos tecnológicos e IA.
 
-AION deberá encajar en esta familia o en una especialización derivada si la auditoría futura demuestra que necesita separación material. No se fuerza la taxonomía antes de auditar producto, mercado, compradores, canales y modelo de negocio.
+AION deberá encajar en esta familia o en una especialización derivada si la auditoría futura demuestra que necesita separación material.
 
 ### 2.3 Regla universal de nueva familia
 
-Cuando entra una empresa de un sector no cubierto:
-
-1. CEREBRO investiga sector, subsegmentos, cliente, competencia, regulación, geografía, canales y modelos de adquisición.
-2. Busca si una familia existente cubre el caso con suficiente similitud.
-3. Si sí: reutiliza la familia y crea overlays específicos.
-4. Si no: FACT-001 genera una nueva familia sectorial estándar.
-5. La nueva familia se convierte en patrimonio reutilizable para empresas futuras compatibles.
-
-Nunca se mezcla conocimiento privado entre empresas.
+Cuando entra una empresa de un sector no cubierto, CEREBRO investiga, intenta reutilizar una familia compatible y, si no existe, FACT-001 genera una nueva familia sectorial reutilizable. Nunca se mezcla conocimiento privado entre empresas.
 
 ## 3. Familias por red social
 
 Cada plataforma social materialmente distinta dispone de su propia **Platform Family**. El conocimiento común se comparte; las diferencias de algoritmo, formatos, distribución, publicidad, conversación, grupos, comercio, vídeo, búsqueda y políticas se encapsulan en la familia de plataforma.
 
-Secuencia inicial acordada:
+Secuencia inicial:
 
-1. **Facebook + FINANCIAL_REAL_ESTATE** — diseño actual.
-2. **Facebook + TECH_PRODUCTS_AI** — futura especialización para AION y productos tecnológicos.
-3. Investigación profunda de **Instagram** y creación de las dos familias sectoriales sobre Instagram.
-4. Investigación profunda de **LinkedIn** y creación de las dos familias sectoriales sobre LinkedIn.
-5. Repetir con las restantes redes relevantes, una por una, incluyendo futuras plataformas.
-
-CEREBRO mantendrá un catálogo de capacidades para todas las redes estudiadas, pero una empresa nueva solo activará en producción las plataformas con encaje demostrado. No se debe obligar a toda empresa a publicar en todas las redes sin evidencia de valor.
+1. Facebook + FINANCIAL_REAL_ESTATE.
+2. Facebook + TECH_PRODUCTS_AI.
+3. Instagram + ambas familias.
+4. LinkedIn + ambas familias.
+5. Repetir con las restantes redes actuales y futuras.
 
 ## 4. Capas de conocimiento
 
-El contexto de un agente o subagente social se compone en este orden:
+El contexto de un agente o subagente social se compone por capas:
 
-1. `COMMON_CEREBRO`
-2. `SOCIAL_COMMON`
-3. `SECTOR_FAMILY`
-4. `PLATFORM_FAMILY`
-5. `COMPANY`
-6. `BRAND`
-7. `TERRITORY`
-8. `AUDIENCE/PERSONA`
-9. `CAMPAIGN/OBJECTIVE`
-10. `ROLE/SPECIALIST`
-11. `LEARNING/PRECEDENTS`
+`COMMON_CEREBRO → SOCIAL_COMMON → SECTOR_FAMILY → PLATFORM_FAMILY → COMPANY → BRAND → TERRITORY → AUDIENCE/PERSONA → CAMPAIGN/OBJECTIVE → ROLE/SPECIALIST → LEARNING/PRECEDENTS`
 
 El conocimiento compartido se referencia, no se duplica innecesariamente.
 
 ## 5. Facebook Family Factory V1
 
-La primera Platform Family definida es **FACEBOOK** para la familia **FINANCIAL_REAL_ESTATE**.
+La primera Platform Family definida es **FACEBOOK** para **FINANCIAL_REAL_ESTATE**.
 
 ### Agentes funcionales principales
 
@@ -125,19 +101,126 @@ La primera Platform Family definida es **FACEBOOK** para la familia **FINANCIAL_
 - FB-33 BRAND & COMPLIANCE
 - FB-34 MULTICOMPANY GOVERNANCE
 
-Estos son **roles lógicos**, no 35 servidores. Comparten runtime, workers, datos, eventos, observabilidad y tooling siempre que el aislamiento sea seguro.
+Son **roles lógicos**, no servidores independientes.
 
-Cada agente principal puede activar subagentes especializados: investigadores, buyer-persona analysts, trend scouts, hooks, CTAs, copywriters, guionistas, diseñadores, fotógrafos, iluminación, locución, sonido, editores, Reels, animación, VFX, memes, grupos, Marketplace, creators, community, leads, Messenger, media buyers, analítica, experimentación, tracking, compliance y aprendizaje.
+## 6. Supervisión obligatoria por combinación RED × FAMILIA
 
-## 6. Contrato multiempresa mínimo
+No existe un único supervisor genérico para todas las redes ni un único supervisor genérico para todas las familias sectoriales.
 
-Toda ejecución de una Social Family debe transportar como mínimo:
+Cada combinación material de `PLATFORM_FAMILY × SECTOR_FAMILY` debe disponer de su propio **Family Platform Supervisor**, especializado y con conocimiento completo de esa rama.
+
+Ejemplos:
+
+- `SUP-FB-FINANCIAL_REAL_ESTATE`
+- `SUP-FB-TECH_PRODUCTS_AI`
+- `SUP-IG-FINANCIAL_REAL_ESTATE`
+- `SUP-IG-TECH_PRODUCTS_AI`
+- `SUP-LI-FINANCIAL_REAL_ESTATE`
+- `SUP-LI-TECH_PRODUCTS_AI`
+
+Cuando aparezcan nuevas familias o redes, FACT-001 debe poder generar sus supervisores correspondientes.
+
+### 6.1 Función del supervisor
+
+El supervisor no es un simple checklist ni un copy-editor final. Es el **responsable de coherencia integral y certificación operativa de la rama**. Debe poder reconstruir por qué se hizo cada pieza, qué conocimiento debía aplicarse, qué políticas estaban vigentes y si el resultado final se ajusta exactamente a ello.
+
+Debe verificar como mínimo:
+
+- objetivo de negocio y campaña;
+- conocimiento profesional vigente;
+- conocimiento de la plataforma/red;
+- conocimiento de la familia sectorial;
+- conocimiento de empresa y marca;
+- territorio y mercado local cuando aplique;
+- buyer persona/audiencia;
+- oferta, funnel y CTA;
+- copy, hooks, guion y narrativa;
+- imagen, vídeo, audio, edición y formato;
+- requisitos técnicos y de publicación de la red;
+- paid media cuando aplique;
+- conversación, community y handoff de leads;
+- tracking, datos y atribución;
+- brand, compliance, legal y políticas de plataforma;
+- coste y límites económicos;
+- resultados históricos y precedentes;
+- conocimiento aprendido recientemente;
+- cambios externos recientes que puedan invalidar conocimiento anterior.
+
+### 6.2 El supervisor debe tirar de todo lo que se sabe
+
+Antes de certificar una salida, el supervisor compone dinámicamente:
+
+`COMMON_CEREBRO + SOCIAL_COMMON + PLATFORM_FAMILY + SECTOR_FAMILY + COMPANY + BRAND + TERRITORY + AUDIENCE + CAMPAIGN + ROLE_OUTPUTS + POLICY_CURRENT + LEARNING_PRECEDENTS + CURRENT_EXTERNAL_CHANGES`
+
+No basta con que cada especialista haya hecho bien su parte aislada. El supervisor comprueba la **coherencia entre todas las partes**.
+
+### 6.3 Subagentes internos del supervisor
+
+Cada Family Platform Supervisor puede activar revisores especializados:
+
+- KNOWLEDGE-COVERAGE-REVIEWER
+- PLATFORM-RULES-REVIEWER
+- SECTOR-EXPERT-REVIEWER
+- COMPANY-BRAND-REVIEWER
+- TERRITORY-REVIEWER
+- AUDIENCE-FIT-REVIEWER
+- FUNNEL-OFFER-REVIEWER
+- COPY-HOOK-CTA-REVIEWER
+- CREATIVE-QUALITY-REVIEWER
+- VIDEO-AUDIO-FORMAT-REVIEWER
+- PAID-MEDIA-REVIEWER
+- COMMUNITY-CONVERSATION-REVIEWER
+- TRACKING-DATA-REVIEWER
+- CLAIMS-FACT-CHECKER
+- LEGAL-POLICY-COMPLIANCE-REVIEWER
+- COST-MONEY-GUARD
+- KNOWLEDGE-FRESHNESS-REVIEWER
+- LEARNING-APPLICATION-REVIEWER
+- ANOMALY-RISK-REVIEWER
+- ROLLBACK-READINESS-REVIEWER
+
+Son perfiles lógicos y gates compartidos cuando sea seguro; no implican servidores separados.
+
+### 6.4 Independencia respecto al Orchestrator
+
+El Orchestrator organiza y ejecuta el trabajo. El Supervisor **no depende de la conclusión del Orchestrator para aprobarla**.
+
+`AGENTES/SUBAGENTES → ORCHESTRATOR → FAMILY PLATFORM SUPERVISOR → PUBLICACIÓN/EJECUCIÓN O DEVOLUCIÓN`
+
+El Supervisor puede aprobar, devolver a un especialista concreto, pedir otra variante, pedir conocimiento adicional a CEREBRO, ordenar una nueva comprobación, degradar temporalmente una capacidad a shadow/copilot, bloquear ejecución dentro de sus permisos o escalar únicamente por HUMAN_REQUIRED canónico.
+
+### 6.5 El supervisor también aprende y evoluciona
+
+El Supervisor está sujeto a la misma regla universal de aprendizaje continuo y evolución proactiva. Debe estudiar cambios de plataforma, políticas, regulación, formatos, algoritmos, prácticas profesionales, resultados de sus propias decisiones, falsos positivos/negativos, incidencias posteriores y mejoras de otros supervisores compatibles.
+
+Un supervisor con conocimiento obsoleto no puede seguir certificando indefinidamente.
+
+### 6.6 Supervisión por empresa sin duplicar toda la arquitectura
+
+No se crea un supervisor físico independiente por cada empresa. El `Family Platform Supervisor` se instancia con overlays de empresa, marca, territorio y campaña.
+
+Ejemplo:
+
+`SUP-FB-FINANCIAL_REAL_ESTATE + company_id=A + brand_id=A1`
+
+`SUP-FB-FINANCIAL_REAL_ESTATE + company_id=B + brand_id=B1`
+
+Así varias empresas de la misma familia comparten conocimiento sectorial y de Facebook, pero conservan separadas sus reglas, marca, clientes, datos privados, claims, territorios y métricas.
+
+### 6.7 Tribunal independiente
+
+El Supervisor no se certifica a sí mismo. Para promociones de autonomía, cambios materiales, nuevas capacidades, nuevas familias, nuevas redes o decisiones de alto impacto, entra un **Tribunal independiente** que carga el contexto exacto de la combinación juzgada.
+
+## 7. Contrato multiempresa mínimo
+
+Toda ejecución debe transportar como mínimo:
 
 - `company_id`
 - `brand_id`
 - `business_family`
 - `business_line`
 - `platform_id`
+- `supervisor_id`
 - `country`
 - `autonomous_community`
 - `province`
@@ -147,159 +230,80 @@ Toda ejecución de una Social Family debe transportar como mínimo:
 - `environment`
 - `version`
 
-Los campos territoriales pueden ser nulos cuando no apliquen, pero el contrato debe soportarlos.
+## 8. Bootstrap automático de redes para una empresa nueva
 
-## 7. Bootstrap automático de redes para una empresa nueva
+`COMPANY DISCOVERY → SECTOR CLASSIFICATION → FAMILY MATCH/CREATE → DIGITAL FOOTPRINT → SOCIAL NETWORK AUDIT → PLATFORM FIT → TEAM GENERATION → SUPERVISOR GENERATION/BINDING → KNOWLEDGE COMPOSITION → BASELINE → SHADOW → COPILOT → LIMITED AUTONOMY → AUTONOMOUS WITH GUARDS`
 
-Cuando Company Registry incorpore una nueva empresa, CEREBRO debe poder ejecutar:
-
-`COMPANY DISCOVERY → SECTOR CLASSIFICATION → FAMILY MATCH/CREATE → DIGITAL FOOTPRINT → SOCIAL NETWORK AUDIT → PLATFORM FIT → TEAM GENERATION → KNOWLEDGE COMPOSITION → BASELINE → SHADOW → COPILOT → LIMITED AUTONOMY → AUTONOMOUS WITH GUARDS`
-
-Para cada red:
-
-- estudiar presencia actual;
-- estudiar competencia;
-- estudiar usuarios y buyer personas;
-- identificar formatos y capacidades necesarias;
-- seleccionar agentes/subagentes;
-- cargar conocimiento sectorial, de red, empresa, marca y territorio;
-- conectar datos, CRM y tracking permitidos;
-- probar sin efectos reales;
-- comparar OLD vs NEW;
-- promover progresivamente.
-
-## 8. Relevo del sistema/equipo social actual
-
-La Factory no sustituye de golpe lo existente.
-
-Secuencia obligatoria:
+## 9. Relevo del sistema/equipo social actual
 
 `INVENTARIO → BASELINE → SHADOW → COPILOT → LIMITED_AUTO → AUTONOMOUS_WITH_GUARDS → FALLBACK/ROLLBACK`
 
-Fases:
-
-1. **Shadow:** CEREBRO propone pero no ejecuta.
-2. **Copilot:** prepara trabajo y el sistema/humano actual valida.
-3. **Limited Auto:** asume únicamente capacidades certificadas.
-4. **Autonomous With Guards:** ejecuta trabajo ordinario y escala excepciones.
-5. **Fallback:** el sistema anterior permanece disponible hasta demostrar rollback y estabilidad.
-
 Nunca se elimina una relación, integración, automatización, calendario, cuenta, histórico, contenido, tracking o workflow existente sin inventario, dependencias, backup, contrato, tests, PREPROD, OLD vs NEW y rollback.
 
-## 9. Estados de autonomía social
+## 10. Estados de autonomía social
 
-Estados canónicos iniciales:
+- DRAFT_ONLY
+- APPROVAL_REQUIRED
+- LIMITED_AUTO_PUBLISH
+- AUTONOMOUS_WITH_GUARDS
 
-- `DRAFT_ONLY`
-- `APPROVAL_REQUIRED`
-- `LIMITED_AUTO_PUBLISH`
-- `AUTONOMOUS_WITH_GUARDS`
+La autonomía se certifica por capacidad, empresa, marca, red, territorio, supervisor y versión.
 
-La autonomía se certifica por capacidad, empresa, marca, red, territorio y versión. No existe una promoción global implícita.
+## 11. HUMAN_REQUIRED
 
-## 10. HUMAN_REQUIRED
+Solo: LEGAL_REQUIRED, SIGNATURE_REQUIRED, LOW_CONFIDENCE, HIGH_RISK, POLICY_CONFLICT, SECURITY_INCIDENT, MONEY_LIMIT, CUSTOMER_HUMAN_REQUEST.
 
-Solo se permiten los motivos canónicos:
+## 12. Aprendizaje cruzado gobernado
 
-- `LEGAL_REQUIRED`
-- `SIGNATURE_REQUIRED`
-- `LOW_CONFIDENCE`
-- `HIGH_RISK`
-- `POLICY_CONFLICT`
-- `SECURITY_INCIDENT`
-- `MONEY_LIMIT`
-- `CUSTOMER_HUMAN_REQUEST`
+CEREBRO puede promover únicamente patrones generalizables y gobernados. Datos de clientes, credenciales, contratos, información bancaria, expedientes, pricing privado e inteligencia estratégica no compartible permanecen aislados.
 
-## 11. Aprendizaje cruzado gobernado
+## 13. Factory First
 
-CEREBRO debe aprender de todas las empresas sin mezclar datos confidenciales.
+FACT-001 debe poder generar para una nueva familia/red: manifest, config, data contracts, roles/agentes/subagentes, supervisor de plataforma × familia, permisos, políticas, knowledge packs, eventos, jobs, APIs/adapters, tests, evaluación/tribunal, observabilidad, costes, backup, rollback, rebuild, documentación y hooks de learning/training.
 
-Puede promover a capas compartidas únicamente patrones generalizables y gobernados, por ejemplo:
-
-- estructura de hooks;
-- formatos de vídeo;
-- patrones de retención;
-- métodos de experimentación;
-- aprendizajes de plataforma;
-- heurísticas creativas;
-- buenas prácticas de reporting;
-- procesos de QA y compliance.
-
-Datos de clientes, precios privados, contratos, expedientes, credenciales, información bancaria o inteligencia estratégica específica permanecen en su ámbito autorizado.
-
-## 12. Factory First
-
-FACT-001 debe poder generar automáticamente para una nueva familia/red:
-
-- manifest;
-- config;
-- data contracts;
-- roles/agentes/subagentes;
-- permisos;
-- políticas;
-- knowledge packs;
-- eventos;
-- jobs;
-- APIs/adapters;
-- tests;
-- evaluación/tribunal;
-- observabilidad;
-- costes;
-- backup;
-- rollback;
-- rebuild;
-- documentación;
-- hooks de learning/training.
-
-No se crean decenas de servicios físicos cuando roles lógicos compartidos son suficientes.
-
-## 13. Regla de coste
+## 14. Regla de coste
 
 Coste adicional objetivo: **0 €**.
 
-Orden de preferencia:
-
 `determinista → open-source/local → herramientas contratadas → free tier → self-hosted → servicio externo barato → pago justificado`
 
-La IA de pago no es requisito para que exista una familia social.
-
-## 14. Estado actual
+## 15. Estado actual
 
 ### HECHO
 
-- Decisión conceptual de arquitectura por familias sociales multiempresa.
-- Definición de la primera familia sectorial: `FINANCIAL_REAL_ESTATE`.
-- Definición de Facebook V1 como primera Platform Family.
-- Lista funcional inicial de 35 agentes principales y subespecialidades asociadas.
-- Decisión de relevo progresivo, no destructivo.
+- Arquitectura por familias sociales multiempresa definida.
+- Primera familia sectorial: FINANCIAL_REAL_ESTATE.
+- Facebook V1 como primera Platform Family.
+- 35 agentes principales y subespecialidades asociadas definidos conceptualmente.
+- Relevo progresivo y no destructivo definido.
+- Regla canónica de supervisor especializado por combinación `PLATFORM_FAMILY × SECTOR_FAMILY`.
 
 ### DEFINIDO
 
-- Segunda familia prevista: `TECH_PRODUCTS_AI`, sujeta a auditoría antes de especializar AION.
-- Orden de expansión: Facebook → Instagram → LinkedIn → restantes redes.
-- Reutilización automática para futuras empresas y creación automática de nuevas familias cuando no exista encaje.
+- TECH_PRODUCTS_AI como segunda familia prevista, sujeta a auditoría para AION.
+- Facebook → Instagram → LinkedIn → restantes redes.
+- Supervisores específicos por red × familia con overlays por empresa/marca/territorio/campaña.
+- Tribunal independiente para promoción y cambios materiales.
 
 ### PLANIFICADO
 
 - Auditoría física de activos sociales actuales.
-- Knowledge Baseline por agente/subagente.
+- Knowledge Baseline por agente/subagente y supervisor.
 - Implementación de manifests y contratos ejecutables.
 - Shadow Mode Facebook.
-- Familia Facebook `TECH_PRODUCTS_AI`.
-- Investigación y familias Instagram.
-- Investigación y familias LinkedIn.
+- Facebook TECH_PRODUCTS_AI.
+- Familias Instagram.
+- Familias LinkedIn.
 - Extensión al resto de redes.
 
 ### POR AUDITAR
 
 - Estado físico de cuentas, permisos, automatizaciones, CRM, tracking, herramientas, calendarios y pipelines sociales existentes por empresa.
-- Taxonomía definitiva de AION dentro de `TECH_PRODUCTS_AI`.
-- Qué plataformas merecen activación real para cada empresa futura.
+- Taxonomía definitiva de AION dentro de TECH_PRODUCTS_AI.
+- Plataformas que merecen activación real por empresa futura.
 
-## 15. Regla final
+## 16. Regla final
 
-**Una nueva empresa no debe empezar construyendo redes desde cero.**
+**Una nueva empresa no debe empezar construyendo redes desde cero.** CEREBRO debe detectar qué es, asignar o crear su familia sectorial, estudiar cada plataforma, generar el equipo lógico y su supervisor especializado, cargar conocimiento, probarlo contra el sistema actual y promover solo las capacidades demostradas.
 
-CEREBRO debe detectar qué es, asignarle o crear su familia sectorial, estudiar cada plataforma, generar el equipo lógico apropiado, cargar conocimiento, probarlo contra el sistema actual y promover solo las capacidades demostradas.
-
-`CONSERVAR → ENTENDER → CLASIFICAR → REUTILIZAR/CREAR FAMILIA → ESPECIALIZAR POR RED → PROBAR → COMPARAR → PROMOVER → APRENDER → REUTILIZAR`
+`CONSERVAR → ENTENDER → CLASIFICAR → REUTILIZAR/CREAR FAMILIA → ESPECIALIZAR POR RED → SUPERVISAR CON CONOCIMIENTO COMPLETO → PROBAR → COMPARAR → PROMOVER → APRENDER → REUTILIZAR`
