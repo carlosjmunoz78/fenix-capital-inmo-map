@@ -1,0 +1,178 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_RSI_LRN_EVENT_BATCH",
+  "batch_id": "lrn-batch:2a288c7937f6469c2172f251",
+  "company_id": "fenix",
+  "engine_id": "LRN-001",
+  "environment": "PREPROD",
+  "version": "0.6.0",
+  "source": {
+    "workflow": "CEREBRO RSI Universal Learning Ingress V0",
+    "run_id": 39761512410,
+    "head_sha": "83a04a60fefcee633c5bd55422ad63149e7834cc"
+  },
+  "source_event_count": 3,
+  "events_total": 3,
+  "events": [
+    {
+      "schema_version": "1.0.0",
+      "event_id": "evt:lrn:0693068dece8251e9b613cc9",
+      "event_type": "CEREBRO_METRIC_OBSERVATION",
+      "signal_id": "qa:quality-regression:2026-10-22T10:13:41.615Z",
+      "source_type": "METRIC_OBSERVATION",
+      "company_id": "fenix",
+      "engine_id": "QA-001",
+      "environment": "PREPROD_CANDIDATE",
+      "source_environment": "PROD",
+      "version": "0.2.0",
+      "observed_at": "2026-10-22T10:13:41.615Z",
+      "severity": "MEDIUM",
+      "confidence": 0.9,
+      "risk_class": "LOW",
+      "reason": "Daily verified QA quality score regressed by -40.",
+      "learning_hypothesis": "QA-001 should identify the smallest evidence-backed change set that restores quality without weakening contracts.",
+      "expected_metric_delta": {
+        "name": "daily_quality_score",
+        "direction": "HIGHER",
+        "measurement": "QA_OLD_VS_NEW"
+      },
+      "evidence_refs": [
+        "qa-state:2026-10-22T10:13:41.615Z"
+      ],
+      "payload": {
+        "previous_quality_score": 100,
+        "quality_delta": -40,
+        "quality_score": 60
+      },
+      "local_validation_required": true,
+      "publish_authorized": false,
+      "persistent_publish_authorized": false,
+      "rsi_publish_authorized": false,
+      "contains_customer_data": false,
+      "contains_secrets": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "origin_event_id": "evt:universal:2b04af587a2de6cf2160d953",
+      "origin_company_id": "fenix"
+    },
+    {
+      "schema_version": "1.0.0",
+      "event_id": "evt:lrn:83f25d6e913af6b1de818b48",
+      "event_type": "CEREBRO_ENGINE_ERROR",
+      "signal_id": "qa:106a1d44c42fd29681abaa93:detected",
+      "source_type": "ENGINE_ERROR",
+      "company_id": "fenix",
+      "engine_id": "WEB-001",
+      "environment": "PREPROD_CANDIDATE",
+      "source_environment": "PROD",
+      "version": "0.2.0",
+      "observed_at": "2026-10-22T10:13:41.615Z",
+      "severity": "HIGH",
+      "confidence": 0.9,
+      "risk_class": "MEDIUM",
+      "reason": "QA-001 reproduced a human-facing defect: human-readonly-observation.spec.ts › [WEB] Fénix Capital Web · human read-only observation",
+      "learning_hypothesis": "A bounded change owned by WEB-001 should reduce recurrence of QA finding 106a1d44c42fd29681abaa93 without weakening existing contracts.",
+      "expected_metric_delta": {
+        "name": "qa_finding_recurrence",
+        "direction": "LOWER",
+        "measurement": "QA_OLD_VS_NEW_PLUS_REGRESSION_RETEST"
+      },
+      "evidence_refs": [
+        "qa-evidence:106a1d44c42fd29681abaa93:1",
+        "qa-finding:106a1d44c42fd29681abaa93",
+        "qa-state:2026-10-22T10:13:41.615Z"
+      ],
+      "payload": {
+        "finding_kind": "WEB",
+        "finding_severity": "HIGH",
+        "finding_title": "human-readonly-observation.spec.ts › [WEB] Fénix Capital Web · human read-only observation",
+        "owner_engine": "WEB-001",
+        "qa_fingerprint": "106a1d44c42fd29681abaa93",
+        "required_path": [
+          "REPRODUCE",
+          "PREPROD_FIX_OR_ROUTE",
+          "ADD_REGRESSION_TEST",
+          "OLD_VS_NEW",
+          "TRIBUNAL",
+          "PROMOTE_ONLY_IF_AUTHORIZED"
+        ]
+      },
+      "local_validation_required": true,
+      "publish_authorized": false,
+      "persistent_publish_authorized": false,
+      "rsi_publish_authorized": false,
+      "contains_customer_data": false,
+      "contains_secrets": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "origin_event_id": "evt:universal:5d502880888777a6f1b19859",
+      "origin_company_id": "fenix"
+    },
+    {
+      "schema_version": "1.0.0",
+      "event_id": "evt:lrn:ad695f0228238e27b5be2101",
+      "event_type": "CEREBRO_ENGINE_ERROR",
+      "signal_id": "qa:2bde0086f90207b526542ae3:detected",
+      "source_type": "ENGINE_ERROR",
+      "company_id": "fenix",
+      "engine_id": "WEB-001",
+      "environment": "PREPROD_CANDIDATE",
+      "source_environment": "PROD",
+      "version": "0.2.0",
+      "observed_at": "2026-10-22T10:13:41.615Z",
+      "severity": "HIGH",
+      "confidence": 0.9,
+      "risk_class": "MEDIUM",
+      "reason": "QA-001 reproduced a human-facing defect: human-readonly-observation.spec.ts › [WEB] Fénix Capital Web · human read-only observation",
+      "learning_hypothesis": "A bounded change owned by WEB-001 should reduce recurrence of QA finding 2bde0086f90207b526542ae3 without weakening existing contracts.",
+      "expected_metric_delta": {
+        "name": "qa_finding_recurrence",
+        "direction": "LOWER",
+        "measurement": "QA_OLD_VS_NEW_PLUS_REGRESSION_RETEST"
+      },
+      "evidence_refs": [
+        "qa-evidence:2bde0086f90207b526542ae3:1",
+        "qa-finding:2bde0086f90207b526542ae3",
+        "qa-state:2026-10-22T10:13:41.615Z"
+      ],
+      "payload": {
+        "finding_kind": "WEB",
+        "finding_severity": "HIGH",
+        "finding_title": "human-readonly-observation.spec.ts › [WEB] Fénix Capital Web · human read-only observation",
+        "owner_engine": "WEB-001",
+        "qa_fingerprint": "2bde0086f90207b526542ae3",
+        "required_path": [
+          "REPRODUCE",
+          "PREPROD_FIX_OR_ROUTE",
+          "ADD_REGRESSION_TEST",
+          "OLD_VS_NEW",
+          "TRIBUNAL",
+          "PROMOTE_ONLY_IF_AUTHORIZED"
+        ]
+      },
+      "local_validation_required": true,
+      "publish_authorized": false,
+      "persistent_publish_authorized": false,
+      "rsi_publish_authorized": false,
+      "contains_customer_data": false,
+      "contains_secrets": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "origin_event_id": "evt:universal:68a307ffe16787a7962290d3",
+      "origin_company_id": "fenix"
+    }
+  ],
+  "local_validation_required": true,
+  "persistent_publish_authorized": false,
+  "rsi_publish_authorized": false,
+  "prod_authorized": false,
+  "prod_write_authorized": false,
+  "trading_access": false,
+  "additional_cost_eur": 0
+}
