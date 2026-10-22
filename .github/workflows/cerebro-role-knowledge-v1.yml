@@ -6,9 +6,11 @@ on:
       - 'cerebro/registry/role-agent-registry.v1.json'
       - 'cerebro/registry/role-knowledge-packs.v1.json'
       - 'cerebro/roles/role-knowledge-runtime-v1.mjs'
+      - 'cerebro/roles/role-learning-adapter-v1.mjs'
       - 'cerebro/engineering/engineering-specialist-context-v1.mjs'
       - 'cerebro/revenue/sales-executive-knowledge-context-v1.mjs'
       - 'cerebro/tests/role-knowledge-runtime-v1.test.mjs'
+      - 'cerebro/tests/role-learning-adapter-v1.test.mjs'
       - 'cerebro/tests/engineering-specialist-context-v1.test.mjs'
       - 'cerebro/tests/sales-executive-knowledge-context-v1.test.mjs'
       - '.github/workflows/cerebro-role-knowledge-v1.yml'
@@ -42,6 +44,9 @@ jobs:
       - name: Role knowledge runtime tests
         run: node --test cerebro/tests/role-knowledge-runtime-v1.test.mjs
 
+      - name: Role learning adapter tests
+        run: node --test cerebro/tests/role-learning-adapter-v1.test.mjs
+
       - name: Engineering specialist binding tests
         run: node --test cerebro/tests/engineering-specialist-context-v1.test.mjs
 
@@ -53,6 +58,7 @@ jobs:
         run: |
           node --input-type=module <<'NODE'
           import { validateRoleKnowledgeRegistries } from './cerebro/roles/role-knowledge-runtime-v1.mjs';
+          import { ROLE_LEARNING_ADAPTER_V1_CONTRACT } from './cerebro/roles/role-learning-adapter-v1.mjs';
           import { validateEngineeringSpecialistBindings } from './cerebro/engineering/engineering-specialist-context-v1.mjs';
           import { validateSalesExecutiveKnowledgeBinding } from './cerebro/revenue/sales-executive-knowledge-context-v1.mjs';
           const results = [
@@ -64,5 +70,19 @@ jobs:
             console.error(JSON.stringify(results, null, 2));
             process.exit(1);
           }
-          console.log(JSON.stringify({status:'GREEN', environment:'PREPROD', authority_delta:false, external_side_effects:false, cost_eur:0}, null, 2));
+          if (
+            ROLE_LEARNING_ADAPTER_V1_CONTRACT.engine_id !== 'LRN-001' ||
+            ROLE_LEARNING_ADAPTER_V1_CONTRACT.environment !== 'PREPROD' ||
+            ROLE_LEARNING_ADAPTER_V1_CONTRACT.auto_apply !== false ||
+            ROLE_LEARNING_ADAPTER_V1_CONTRACT.evaluation_required !== true ||
+            ROLE_LEARNING_ADAPTER_V1_CONTRACT.tribunal_required !== true ||
+            ROLE_LEARNING_ADAPTER_V1_CONTRACT.prod_authorized !== false ||
+            ROLE_LEARNING_ADAPTER_V1_CONTRACT.prod_write_authorized !== false ||
+            ROLE_LEARNING_ADAPTER_V1_CONTRACT.trading_access !== false ||
+            ROLE_LEARNING_ADAPTER_V1_CONTRACT.additional_cost_eur !== 0
+          ) {
+            console.error(JSON.stringify(ROLE_LEARNING_ADAPTER_V1_CONTRACT, null, 2));
+            process.exit(1);
+          }
+          console.log(JSON.stringify({status:'GREEN', environment:'PREPROD', learning_engine:'LRN-001', authority_delta:false, auto_apply:false, evaluation_required:true, tribunal_required:true, external_side_effects:false, cost_eur:0}, null, 2));
           NODE
