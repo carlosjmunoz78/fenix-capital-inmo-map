@@ -18,14 +18,18 @@ function requirePlanOnlyProfile() {
   if (SALES_PROFILE.profile_id !== PROFILE_ID) {
     throw new Error(`unexpected sales profile_id: ${SALES_PROFILE.profile_id}`);
   }
+  if (SALES_PROFILE.environment_scope !== 'PREPROD') {
+    throw new Error(`sales profile is not PREPROD scoped: ${SALES_PROFILE.environment_scope}`);
+  }
 
   const defaults = SALES_PROFILE.defaults ?? {};
   const violations = [];
   if (defaults.execution_mode !== 'PLAN_ONLY') violations.push('execution_mode');
-  if (defaults.outreach !== false) violations.push('outreach');
-  if (defaults.crm_writes !== false) violations.push('crm_writes');
-  if (defaults.delivery !== false) violations.push('delivery');
-  if (defaults.prod_write !== false) violations.push('prod_write');
+  if (defaults.outreach_authorized !== false) violations.push('outreach_authorized');
+  if (defaults.crm_write_authorized !== false) violations.push('crm_write_authorized');
+  if (defaults.delivery_enabled !== false) violations.push('delivery_enabled');
+  if (defaults.prod_write_authorized !== false) violations.push('prod_write_authorized');
+  if (defaults.external_side_effect_authorized !== false) violations.push('external_side_effect_authorized');
 
   if (violations.length) {
     throw new Error(`sales profile is not safe PLAN_ONLY: ${violations.join(',')}`);
@@ -55,7 +59,7 @@ export function buildSalesExecutiveKnowledgeContext(input = {}) {
     binding_version: 'v1',
     profile_id: PROFILE_ID,
     role_id: ROLE_ID,
-    execution_mode: 'PLAN_ONLY',
+    execution_mode: defaults.execution_mode,
     original_profile_defaults: clone(defaults),
     role_context: roleContext,
     preparation_contract: {
@@ -68,11 +72,13 @@ export function buildSalesExecutiveKnowledgeContext(input = {}) {
       may_write_crm: false,
       may_deliver: false,
       may_write_prod: false,
-      human_checkpoint: defaults.checkpoint_token ?? 'customer_human_request'
+      external_side_effect_authorized: false,
+      human_blocker: defaults.blocker,
+      human_checkpoint: defaults.checkpoint_token
     },
     authority_delta: false,
     external_side_effect_executed: false,
-    cost_eur: 0
+    cost_eur: defaults.additional_cost_eur ?? 0
   };
 }
 
@@ -87,13 +93,15 @@ export function validateSalesExecutiveKnowledgeBinding() {
         && context.preparation_contract.may_send === false
         && context.preparation_contract.may_write_crm === false
         && context.preparation_contract.may_deliver === false
-        && context.preparation_contract.may_write_prod === false,
+        && context.preparation_contract.may_write_prod === false
+        && context.preparation_contract.external_side_effect_authorized === false
+        && context.preparation_contract.human_blocker === 'HUMAN_REQUIRED',
       profile_id: SALES_PROFILE.profile_id,
-      profile_status: SALES_PROFILE.status ?? SALES_PROFILE.state ?? null,
+      profile_status: SALES_PROFILE.technical_closeout?.allowed_status ?? null,
       execution_mode: defaults.execution_mode,
       authority_delta: false,
       external_side_effects: false,
-      cost_eur: 0
+      cost_eur: defaults.additional_cost_eur ?? 0
     };
   } catch (error) {
     return {
