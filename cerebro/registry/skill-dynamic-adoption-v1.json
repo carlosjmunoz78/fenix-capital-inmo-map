@@ -521,6 +521,148 @@
       "promoted_at": "2026-10-22T10:19:14.841Z"
     },
     {
+      "candidate_id": "repo:64828c195d3676acd141ef2d99aa",
+      "technical_name": "aws-bedrock",
+      "source_locator": "github://TerminalSkills/skills@20719c32fa1cc0bf4598bd3d2c75c058f8c19ddd/skills/aws-bedrock",
+      "pinned_sha": "20719c32fa1cc0bf4598bd3d2c75c058f8c19ddd",
+      "snapshot_sha256": "64828c195d3676acd141ef2d99aaa76a86b628f9cd2988f33e73861a7200d3d8",
+      "manifest_sha256": "e8847b7cf7af5101dfa55c56d7e095af23aac5d9f6df3554c7fe857985fb39e7",
+      "outcome_hash": "b8bb09c0aae8da037d930a6e0cd00de692af8d09192c3611d5dc4835ec6af664",
+      "target_engine_bindings": [
+        "CMP-002",
+        "DPO-001",
+        "IAM-001",
+        "RED-001",
+        "SEC-001",
+        "SEC-002"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:64828c195d3676ac:cap:1",
+          "technical_name": "aws-bedrock",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "security-identity-privacy",
+              "engine_bindings": [
+                "CMP-002",
+                "DPO-001",
+                "IAM-001",
+                "RED-001",
+                "SEC-001",
+                "SEC-002"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 6
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-22T22:27:58.240Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "8dfb5c89c0452fb8b09d8738a1eaa728e11ad2505751d7fe1f751d5bed434d1f"
+    },
+    {
+      "candidate_id": "repo:160f0b82695a7a96111cf8dec518",
+      "technical_name": "aws-cognito",
+      "source_locator": "github://TerminalSkills/skills@20719c32fa1cc0bf4598bd3d2c75c058f8c19ddd/skills/aws-cognito",
+      "pinned_sha": "20719c32fa1cc0bf4598bd3d2c75c058f8c19ddd",
+      "snapshot_sha256": "160f0b82695a7a96111cf8dec518364a170c07a309f3f982a8202fc9dd90cde4",
+      "manifest_sha256": "1a82980ab52693d6c22b13b1fd4e2dadf6a14bc14c40795794550653a8624cb5",
+      "outcome_hash": "b51368b680283160dea5711e6c9980ec6e212b4398f17e49802358c5c4aab31a",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:160f0b82695a7a96:cap:1",
+          "technical_name": "aws-cognito",
+          "description": "|",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-22T22:27:58.240Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "66da5035105b48ba7bac5bc870197de05fed0df8e4fc543975c3ffee8642a77c"
+    },
+    {
       "candidate_id": "repo:be539f32206970b088329ceaf60b",
       "technical_name": "aws-cognito",
       "source_locator": "github://TerminalSkills/skills@6edcf94159d9f46b0759d2e1b59dd545cfaca254/skills/aws-cognito",
@@ -722,6 +864,78 @@
         "observed_at": "2026-10-20T09:28:08.255Z"
       },
       "promoted_at": "2026-10-20T09:28:08.255Z"
+    },
+    {
+      "candidate_id": "repo:b278ff7e9776c02d096b68348077",
+      "technical_name": "aws-ec2",
+      "source_locator": "github://TerminalSkills/skills@20719c32fa1cc0bf4598bd3d2c75c058f8c19ddd/skills/aws-ec2",
+      "pinned_sha": "20719c32fa1cc0bf4598bd3d2c75c058f8c19ddd",
+      "snapshot_sha256": "b278ff7e9776c02d096b683480771aa472a35eeb2342757ba486bb1297a1ec01",
+      "manifest_sha256": "e18ca735b14715c4d8caf62db882c495ad89577c844fa69e81f10a388c38dea8",
+      "outcome_hash": "83f0df60c090de4efd08e731ce7965cecd726504eb0b7488a38e5bce480c3606",
+      "target_engine_bindings": [
+        "CMP-002",
+        "DPO-001",
+        "IAM-001",
+        "RED-001",
+        "SEC-001",
+        "SEC-002"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:b278ff7e9776c02d:cap:1",
+          "technical_name": "aws-ec2",
+          "description": "|",
+          "domains": [
+            {
+              "domain_id": "security-identity-privacy",
+              "engine_bindings": [
+                "CMP-002",
+                "DPO-001",
+                "IAM-001",
+                "RED-001",
+                "SEC-001",
+                "SEC-002"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 6
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-22T22:27:58.240Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "9c47a29d8ee0c422bbfd0b64782c71ab0473a2672678681b97b4d31aedcb8713"
     },
     {
       "candidate_id": "repo:e8b780d34bd89779fdb5cfcb903d",
@@ -9895,15 +10109,295 @@
         "observed_at": "2026-10-22T05:19:42.393Z"
       },
       "promoted_at": "2026-10-22T05:19:42.393Z"
+    },
+    {
+      "candidate_id": "repo:d2df1485cf336ac9e0cd10d90281",
+      "technical_name": "terracotta",
+      "source_locator": "github://bergside/awesome-design-skills@f631a09b4fcc0166f2e2c1a8c81906ef680c57e8/skills/terracotta",
+      "pinned_sha": "f631a09b4fcc0166f2e2c1a8c81906ef680c57e8",
+      "snapshot_sha256": "d2df1485cf336ac9e0cd10d9028164bab254732b6ed01cc358e20d5e55d8603d",
+      "manifest_sha256": "207cde143562bc44e88d70ef53f55e8e22aab390a106e6554fce59f089062a16",
+      "outcome_hash": "eb2b83ccf6798a10662988303a30640313bfce6ccdeeb8a727d47bbd21c59f55",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:d2df1485cf336ac9:cap:1",
+          "technical_name": "terracotta",
+          "description": "A sun-baked, clay-toned editorial interface built on warm cream surfaces, ink-brown headlines set in a display serif, and a single terracotta accent.",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-22T22:27:58.238Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "b974a5401a48592d78bc29593911dcfdc4ddb46667d3aaa3bced1d7e7b8b779c"
+    },
+    {
+      "candidate_id": "repo:da22b5969ef779dd1ab40f4514bf",
+      "technical_name": "tetris",
+      "source_locator": "github://bergside/awesome-design-skills@f631a09b4fcc0166f2e2c1a8c81906ef680c57e8/skills/tetris",
+      "pinned_sha": "f631a09b4fcc0166f2e2c1a8c81906ef680c57e8",
+      "snapshot_sha256": "da22b5969ef779dd1ab40f4514bfba462e96af4c2c3c3bd8f6e13561f1e1d603",
+      "manifest_sha256": "9cff7809d8e0c9d7c9bd3e07a8ee6d38419aac887c92014734de340d5cd86fb9",
+      "outcome_hash": "a02d7df42c57aaf3761d93586276011b877426cdeb3ea78989d2da6cb159bc68",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:da22b5969ef779dd:cap:1",
+          "technical_name": "tetris",
+          "description": "Classic block-game inspired design with playful colors, bold display fonts, and compact, high-energy layouts.",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-22T22:27:58.240Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "7ff414803a2464fc62b7cde48db2da36633c131ee68713bc922c361159d574e5"
+    },
+    {
+      "candidate_id": "repo:0fd8280fd69d4ee4b62875dc16af",
+      "technical_name": "vibrant",
+      "source_locator": "github://bergside/awesome-design-skills@f631a09b4fcc0166f2e2c1a8c81906ef680c57e8/skills/vibrant",
+      "pinned_sha": "f631a09b4fcc0166f2e2c1a8c81906ef680c57e8",
+      "snapshot_sha256": "0fd8280fd69d4ee4b62875dc16af81a781f0b7eaa9d018aa32824c9a1df90fcc",
+      "manifest_sha256": "b87fb4a6b6d7de23c198ae64af24f02d8ff93f6b494622c576a0f5fb4f492c5d",
+      "outcome_hash": "517662adead8fa734873f1956ab1abffec476ce6d9aa188b33df4faf2b7ef9f0",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:0fd8280fd69d4ee4:cap:1",
+          "technical_name": "vibrant",
+          "description": "Lively, colorful design with bold playful typography, warm accents, and dynamic visual energy.",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-22T22:27:58.240Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "777a2335a9cfbffd50f4a87c52e1ea796f148e2a1d23f874ffc7925528e88fe4"
+    },
+    {
+      "candidate_id": "repo:00c86493eebb4923e3861bd34387",
+      "technical_name": "vintage",
+      "source_locator": "github://bergside/awesome-design-skills@f631a09b4fcc0166f2e2c1a8c81906ef680c57e8/skills/vintage",
+      "pinned_sha": "f631a09b4fcc0166f2e2c1a8c81906ef680c57e8",
+      "snapshot_sha256": "00c86493eebb4923e3861bd34387ea4c9ba9c71cf900e91d30cb9ce30a21d762",
+      "manifest_sha256": "a7ea8e372e188fa4768bb61b16497bf9f6acca8025c8069d4619efc2115870e3",
+      "outcome_hash": "e43e552abb13173dc3401213282f406a60b5a76a5ca9a34a3fdce3a8f79c5c4f",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:00c86493eebb4923:cap:1",
+          "technical_name": "vintage",
+          "description": "1950s-1990s nostalgia with skeuomorphic touches, grainy textures, retro color palettes, and pixel-style typography.",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-22T22:27:58.240Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "a2a7d4e435ffaddfe4361c031fdae0fac2b5735887a769d8d2e307005a0b9344"
     }
   ],
   "adoption_skips": [],
   "summary": {
-    "total": 98,
-    "inserted": 0,
+    "total": 105,
+    "inserted": 7,
     "updated": 0,
     "skipped": 0,
-    "pending_canary": 0,
+    "pending_canary": 7,
     "prod_readonly": 98
   }
 }
