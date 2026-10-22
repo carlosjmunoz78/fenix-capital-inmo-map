@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.1.0",
+  "schema_version": "1.2.0",
   "audit_mode": "READ_ONLY_NO_ACTIVATION",
   "audited_from_main_sha": "6bf6af92c1106884da87fb9a659f807093d47e0a",
   "status_correction_date": "2026-10-20",
@@ -13,6 +13,10 @@
     "DEFINED_NOT_BUILT",
     "PROPOSED",
     "UNKNOWN_REQUIRES_AUDIT"
+  ],
+  "allowed_confirmation_bases": [
+    "EXACT_SHA_WORKFLOW_PAIR",
+    "EXTERNAL_READONLY_EXISTENCE_CHECK"
   ],
   "engines": [
     {
@@ -49,6 +53,7 @@
     {
       "engine_id": "APP-001",
       "evidence_state": "CONFIRMED_OPERATIONAL",
+      "confirmation_basis": "EXACT_SHA_WORKFLOW_PAIR",
       "live_claim": true,
       "evidence": [
         { "type": "source", "ref": "src/App.tsx", "result": "exists" },
@@ -88,8 +93,10 @@
     {
       "engine_id": "WEB-001",
       "evidence_state": "CONFIRMED_OPERATIONAL",
+      "confirmation_basis": "EXTERNAL_READONLY_EXISTENCE_CHECK",
       "live_claim": true,
       "environment": "PROD",
+      "mutation_now_authorized": false,
       "evidence": [
         {
           "type": "external_readonly_live_check",
@@ -105,7 +112,7 @@
           "result": "EXISTING_SITE_WITH_PLANNED_MODIFICATION_2026-10-21"
         }
       ],
-      "rationale": "The Fenix Capital WordPress website already exists in PROD and was verified read-only on 2026-10-20. The 2026-10-21 work is a planned modification of the existing surface, not an initial deployment."
+      "rationale": "The Fenix Capital WordPress website already exists in PROD and was verified read-only on 2026-10-20. The 2026-10-21 work is a planned modification of the existing surface, not an initial deployment. This existence claim grants no autonomous CEREBRO mutation or promotion authority."
     },
     {
       "engine_id": "LAB-TRD",
