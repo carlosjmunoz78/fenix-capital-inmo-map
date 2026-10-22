@@ -1,0 +1,79 @@
+{
+  "schema_version": "1.0",
+  "policy_id": "CEREBRO_PROACTIVE_SPECIALIST_EVOLUTION_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "LRN-001",
+  "environment": "PREPROD",
+  "version": "1.0.0",
+  "status": "DEFINED_ADDITIVE_PREPROD",
+  "created_at": "2026-10-22",
+  "scope": "ALL_AGENTS_SUBAGENTS_DIRECTORS_SPECIALISTS_FAMILIES_ENGINES_COMPANIES",
+  "principle": "No agent waits for a detected deficiency before learning. Every role continuously scans its professional frontier, platform, market, regulation, tools, methods and competitors for changes and opportunities that can improve CEREBRO before current performance degrades.",
+  "mandatory_modes": {
+    "reactive_gap_learning": true,
+    "proactive_frontier_learning": true,
+    "event_driven_learning": true,
+    "results_based_learning": true
+  },
+  "proactive_loop": [
+    "MAINTAIN_CURRENT_BASELINE",
+    "SCAN_FRONTIER",
+    "DETECT_CHANGE_TREND_OR_OPPORTUNITY",
+    "ASSESS_RELEVANCE_TO_ROLE_FAMILY_COMPANY",
+    "REQUEST_OR_OPEN_KNOWLEDGE_CANDIDATE",
+    "CEREBRO_ROUTE_TO_BEST_SOURCE",
+    "RESEARCH_AND_COLLECT_EVIDENCE",
+    "VALIDATE_PROVENANCE_LICENSE_SECURITY_PRIVACY_COST_COMPATIBILITY",
+    "BUILD_SAFE_CANDIDATE",
+    "TEST_IN_LAB_OR_PREPROD",
+    "COMPARE_AGAINST_CURRENT_BASELINE",
+    "QA_EVALUATION_TRIBUNAL_WHEN_REQUIRED",
+    "PROMOTE_ONLY_IF_BETTER_OR_STRATEGICALLY_NECESSARY",
+    "MEASURE_REAL_RESULT_WITHIN_GRANTED_AUTHORITY",
+    "SHARE_GENERALIZABLE_LEARNING",
+    "REPEAT"
+  ],
+  "frontier_watch_dimensions": [
+    "OFFICIAL_PLATFORM_CHANGES",
+    "PROFESSIONAL_RESEARCH",
+    "INDUSTRY_STANDARDS",
+    "REGULATION",
+    "ALGORITHMS_AND_DISTRIBUTION",
+    "AUDIENCE_BEHAVIOR",
+    "COMPETITOR_INNOVATION",
+    "CREATIVE_PATTERNS",
+    "NEW_TOOLS",
+    "OPEN_SOURCE",
+    "REPOSITORIES_AND_LIBRARIES",
+    "APIS_AND_CONNECTORS",
+    "MCP_AND_AGENT_TOOLING",
+    "AUTOMATION_METHODS",
+    "DATA_AND_MEASUREMENT",
+    "SECURITY_AND_PRIVACY",
+    "COST_OPTIMIZATION",
+    "NEW_BUSINESS_OPPORTUNITIES"
+  ],
+  "cadence_policy": {
+    "rule": "Cadence is risk-and-volatility based, not one fixed global schedule.",
+    "high_volatility_examples": ["SOCIAL_PLATFORMS", "PAID_MEDIA", "AI_TOOLING", "SECURITY", "SEO_ALGORITHM_CHANGES"],
+    "medium_volatility_examples": ["CREATIVE_METHODS", "SALES_METHODS", "MARKET_COMPETITION", "ANALYTICS"],
+    "low_volatility_examples": ["STABLE_INTERNAL_SOPS", "MATURE_DETERMINISTIC_COMPONENTS"],
+    "event_driven_triggers": ["OFFICIAL_RELEASE", "POLICY_CHANGE", "REGULATION_CHANGE", "SECURITY_ADVISORY", "PERFORMANCE_ANOMALY", "COMPETITOR_BREAKTHROUGH", "NEW_RELEVANT_TOOL_OR_STANDARD"]
+  },
+  "coordination": {
+    "specialist_responsibility": "Formulate what changed, why it matters and what knowledge/capability should be investigated.",
+    "cerebro_responsibility": "Route, research, validate, govern, test and compose the resulting knowledge or capability.",
+    "shared_scouts": ["TECH_SCOUT", "KNOWLEDGE_SCOUT", "MARKET_INTELLIGENCE", "PLATFORM_INTELLIGENCE", "REGULATORY_WATCH", "COMPETITOR_INTELLIGENCE"],
+    "avoid_duplicate_scanning": true,
+    "deduplicate_and_fan_out_relevant_findings": true
+  },
+  "promotion_guards": {
+    "no_direct_canonical_self_mutation": true,
+    "no_direct_authority_increase": true,
+    "no_unproven_prod_change": true,
+    "old_vs_new_required_when_comparable": true,
+    "proof_required_when_applicable": true,
+    "rollback_required_for_prod_behavior_change": true
+  },
+  "objective": "Keep CEREBRO continuously current and systematically capable of becoming better than its current baseline before external changes force a reaction."
+}
