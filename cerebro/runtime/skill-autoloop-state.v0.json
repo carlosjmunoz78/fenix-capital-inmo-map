@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-22T22:28:20.362Z",
+  "updated_at": "2026-10-22T22:38:20.353Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -204,44 +204,7 @@
   ],
   "in_flight": {},
   "waiting_human": {},
-  "waiting_safe_handler": {
-    "github-wide-skills:91027ec1fe8936e7b1c5": {
-      "candidate_id": "github-wide-skills:91027ec1fe8936e7b1c5",
-      "name": "healthcare-ambulatory-access-backlog",
-      "human_alias": "Healthcare Ambulatory Access Backlog",
-      "wrapper_id": "skillwrap:866cb037a3096553830e",
-      "domain": "observability-quality-resilience",
-      "engine_bindings": [
-        "OBSERV-001",
-        "INC-001",
-        "SUP-001",
-        "QA-001",
-        "REG-001",
-        "DR-001",
-        "RBLD-001",
-        "BCP-001"
-      ],
-      "value_score": 86.11,
-      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
-      "evidence_refs": {
-        "upstream_full_name": "ajhcs/healthcare-agents",
-        "upstream_head_commit": "7b536b5ba707a74cc3b9208b658606f36c9a92c8",
-        "manifest_sha256": "fd2de18959b79f402402980049b262d88492b75d70a106f935e6c3f2e8034ae0",
-        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
-      },
-      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
-      "status": "WAITING_SAFE_HANDLER",
-      "source_discovery_run_id": 39864716992,
-      "checkpointed_at": "2026-10-22T22:25:00.946Z",
-      "human_required": null,
-      "external_skill_code_execution": false,
-      "customer_data_used": false,
-      "prod_write": false,
-      "trading_access": false,
-      "paid_fallback": false,
-      "additional_cost_eur": 0
-    }
-  },
+  "waiting_safe_handler": {},
   "completed": {
     "lobehub-skills:9a6e3fac20369220df43": {
       "candidate_id": "lobehub-skills:9a6e3fac20369220df43",
@@ -10584,9 +10547,54 @@
       },
       "updated_at": "2026-10-22T07:52:18.749Z",
       "prod_authorized": false
+    },
+    "github-wide-skills:91027ec1fe8936e7b1c5": {
+      "candidate_id": "github-wide-skills:91027ec1fe8936e7b1c5",
+      "name": "healthcare-ambulatory-access-backlog",
+      "human_alias": "Healthcare Ambulatory Access Backlog",
+      "wrapper_id": "skillwrap:866cb037a3096553830e",
+      "domain": "observability-quality-resilience",
+      "engine_bindings": [
+        "OBSERV-001",
+        "INC-001",
+        "SUP-001",
+        "QA-001",
+        "REG-001",
+        "DR-001",
+        "RBLD-001",
+        "BCP-001"
+      ],
+      "value_score": 86.11,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "ajhcs/healthcare-agents",
+        "upstream_head_commit": "7b536b5ba707a74cc3b9208b658606f36c9a92c8",
+        "manifest_sha256": "fd2de18959b79f402402980049b262d88492b75d70a106f935e6c3f2e8034ae0",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "SAFE_HANDLER_TERMINAL_HOLD",
+      "status": "TERMINAL_HOLD",
+      "source_discovery_run_id": 39864716992,
+      "checkpointed_at": "2026-10-22T22:25:00.946Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0,
+      "evidence": {
+        "reason": "STATIC_LAB_HOLD",
+        "decision_id": null,
+        "decision": null,
+        "human_required": null,
+        "source": "CEREBRO Skill AutoLoop Safe Handler V0"
+      },
+      "updated_at": "2026-10-22T22:38:20.353Z",
+      "prod_authorized": false
     }
   },
-  "last_action": "ROUTE_SAFE_ACTION_BATCH_8_CONTINUE_OTHER_SAFE_WORK",
+  "last_action": "TERMINAL_HOLD_CONTINUE_OTHER_SAFE_WORK",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
