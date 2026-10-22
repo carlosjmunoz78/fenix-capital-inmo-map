@@ -5,15 +5,15 @@
   "engine_id": "QA-001",
   "environment": "CONTROL_PLANE",
   "version": "0.2.0",
-  "status": "GREEN",
-  "updated_at": "2026-10-22T04:45:26.547Z",
-  "quality_score": 100,
+  "status": "FINDINGS_OPEN",
+  "updated_at": "2026-10-22T10:13:41.615Z",
+  "quality_score": 60,
   "previous_quality_score": 100,
-  "quality_delta": 0,
+  "quality_delta": -40,
   "tests": {
     "executed": 12,
-    "passed": 12,
-    "failed": 0
+    "passed": 10,
+    "failed": 2
   },
   "targets": {
     "APP": {
@@ -29,10 +29,10 @@
       "passed": 6
     },
     "WEB": {
-      "status": "GREEN",
+      "status": "RED",
       "executed": 2,
-      "failed": 0,
-      "passed": 2
+      "failed": 2,
+      "passed": 0
     },
     "PRODUCT": {
       "status": "GREEN",
@@ -41,13 +41,84 @@
       "passed": 2
     }
   },
-  "issues": [],
-  "issue_fingerprints": [],
-  "new_issue_fingerprints": [],
+  "issues": [
+    {
+      "fingerprint": "2bde0086f90207b526542ae3",
+      "severity": "HIGH",
+      "kind": "WEB",
+      "title": "human-readonly-observation.spec.ts › [WEB] Fénix Capital Web · human read-only observation",
+      "project": "qa-desktop-chromium",
+      "owner_engine": "WEB-001",
+      "evidence": [
+        "Error: Fénix Capital Web uncaught page errors\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n\n  106 |   console.log(`CEREBRO_OBS:${JSON.stringify(observation)}`);\n  107 |   expect(observation.scrollWidth,`${target.name} horizontal overflow`).toBeLessThanOrEqual(observation.clientWidth+4);\n> 108 |   expect(pageErrors,`${target.name} uncaught page errors`).toEqual([]);\n      |                                                            ^\n  109 |\n  110 |   if(target.exploreLinks){\n  111 |    const links=await page.locator('a[href]').evaluateAll((nodes,origin)=>nodes\n    at /home/runner/work/fenix-capital-inmo-map/fenix-capital-inmo-map/cerebro/qa/human-readonly-observation.spec.ts:108:60"
+      ],
+      "next_action": "REPRODUCE_AND_FIX_OR_ROUTE",
+      "auto_fix_eligible": false
+    },
+    {
+      "fingerprint": "106a1d44c42fd29681abaa93",
+      "severity": "HIGH",
+      "kind": "WEB",
+      "title": "human-readonly-observation.spec.ts › [WEB] Fénix Capital Web · human read-only observation",
+      "project": "qa-mobile-chromium",
+      "owner_engine": "WEB-001",
+      "evidence": [
+        "Error: Fénix Capital Web uncaught page errors\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n\n  106 |   console.log(`CEREBRO_OBS:${JSON.stringify(observation)}`);\n  107 |   expect(observation.scrollWidth,`${target.name} horizontal overflow`).toBeLessThanOrEqual(observation.clientWidth+4);\n> 108 |   expect(pageErrors,`${target.name} uncaught page errors`).toEqual([]);\n      |                                                            ^\n  109 |\n  110 |   if(target.exploreLinks){\n  111 |    const links=await page.locator('a[href]').evaluateAll((nodes,origin)=>nodes\n    at /home/runner/work/fenix-capital-inmo-map/fenix-capital-inmo-map/cerebro/qa/human-readonly-observation.spec.ts:108:60"
+      ],
+      "next_action": "REPRODUCE_AND_FIX_OR_ROUTE",
+      "auto_fix_eligible": false
+    }
+  ],
+  "issue_fingerprints": [
+    "2bde0086f90207b526542ae3",
+    "106a1d44c42fd29681abaa93"
+  ],
+  "new_issue_fingerprints": [
+    "2bde0086f90207b526542ae3",
+    "106a1d44c42fd29681abaa93"
+  ],
   "resolved_issue_fingerprints": [],
   "recurring_issue_fingerprints": [],
-  "new_issues": [],
-  "dispatch_queue": [],
+  "new_issues": [
+    {
+      "fingerprint": "2bde0086f90207b526542ae3",
+      "severity": "HIGH",
+      "kind": "WEB",
+      "title": "human-readonly-observation.spec.ts › [WEB] Fénix Capital Web · human read-only observation",
+      "project": "qa-desktop-chromium",
+      "owner_engine": "WEB-001",
+      "evidence": [
+        "Error: Fénix Capital Web uncaught page errors\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n\n  106 |   console.log(`CEREBRO_OBS:${JSON.stringify(observation)}`);\n  107 |   expect(observation.scrollWidth,`${target.name} horizontal overflow`).toBeLessThanOrEqual(observation.clientWidth+4);\n> 108 |   expect(pageErrors,`${target.name} uncaught page errors`).toEqual([]);\n      |                                                            ^\n  109 |\n  110 |   if(target.exploreLinks){\n  111 |    const links=await page.locator('a[href]').evaluateAll((nodes,origin)=>nodes\n    at /home/runner/work/fenix-capital-inmo-map/fenix-capital-inmo-map/cerebro/qa/human-readonly-observation.spec.ts:108:60"
+      ],
+      "next_action": "REPRODUCE_AND_FIX_OR_ROUTE",
+      "auto_fix_eligible": false
+    },
+    {
+      "fingerprint": "106a1d44c42fd29681abaa93",
+      "severity": "HIGH",
+      "kind": "WEB",
+      "title": "human-readonly-observation.spec.ts › [WEB] Fénix Capital Web · human read-only observation",
+      "project": "qa-mobile-chromium",
+      "owner_engine": "WEB-001",
+      "evidence": [
+        "Error: Fénix Capital Web uncaught page errors\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n\n  106 |   console.log(`CEREBRO_OBS:${JSON.stringify(observation)}`);\n  107 |   expect(observation.scrollWidth,`${target.name} horizontal overflow`).toBeLessThanOrEqual(observation.clientWidth+4);\n> 108 |   expect(pageErrors,`${target.name} uncaught page errors`).toEqual([]);\n      |                                                            ^\n  109 |\n  110 |   if(target.exploreLinks){\n  111 |    const links=await page.locator('a[href]').evaluateAll((nodes,origin)=>nodes\n    at /home/runner/work/fenix-capital-inmo-map/fenix-capital-inmo-map/cerebro/qa/human-readonly-observation.spec.ts:108:60"
+      ],
+      "next_action": "REPRODUCE_AND_FIX_OR_ROUTE",
+      "auto_fix_eligible": false
+    }
+  ],
+  "dispatch_queue": [
+    {
+      "fingerprint": "2bde0086f90207b526542ae3",
+      "owner_engine": "WEB-001",
+      "action": "REPRODUCE_AND_FIX_OR_ROUTE"
+    },
+    {
+      "fingerprint": "106a1d44c42fd29681abaa93",
+      "owner_engine": "WEB-001",
+      "action": "REPRODUCE_AND_FIX_OR_ROUTE"
+    }
+  ],
   "learned_regression_tests": 0,
   "recurring_issues": 0,
   "human_required": [],
@@ -192,10 +263,10 @@
   },
   "remediation": {
     "status": "ROUTED_AUTONOMOUSLY_TO_PREPROD",
-    "open_cases": 4,
-    "bug_cases": 0,
+    "open_cases": 6,
+    "bug_cases": 2,
     "improvement_cases": 4,
-    "candidate_packages_total": 4,
+    "candidate_packages_total": 6,
     "human_required": [],
     "next_gate": "OLD_VS_NEW_EXPERIMENT",
     "authority": {
@@ -215,8 +286,8 @@
   },
   "self_healing": {
     "status": "PLANS_READY",
-    "plans_total": 4,
-    "plan_ready": 4,
+    "plans_total": 6,
+    "plan_ready": 6,
     "human_required_total": 0,
     "next_gate": "OWNER_EXECUTOR_CAPABILITY_AUDIT",
     "execution_authority": {
@@ -235,7 +306,7 @@
     }
   },
   "learning_bridge": {
-    "signals_total": 0,
+    "signals_total": 3,
     "downstream": "CEREBRO_RSI_UNIVERSAL_LEARNING_INGRESS_V0",
     "repair_semantics": "PREPROD_CANDIDATE_ONLY_UNTIL_EXISTING_PROMOTION_GATES_AUTHORIZE_MORE",
     "prod_write_authorized": false,
