@@ -4797,6 +4797,76 @@
       "promoted_at": "2026-10-21T09:39:06.003Z"
     },
     {
+      "candidate_id": "repo:4e3ff0d83c4354f8840cf11841e0",
+      "technical_name": "shadcn-ui",
+      "source_locator": "github://TerminalSkills/skills@6edcf94159d9f46b0759d2e1b59dd545cfaca254/skills/shadcn-ui",
+      "pinned_sha": "6edcf94159d9f46b0759d2e1b59dd545cfaca254",
+      "snapshot_sha256": "4e3ff0d83c4354f8840cf11841e0245bbd34b39285944b1c2e5ec3381d64f6e3",
+      "manifest_sha256": "f715aa4cfe27220e6d7ed361f4f202071bfcb64e2da54e9c60879874143b6172",
+      "outcome_hash": "24b9f39a58406099bb68289239b11f8e97a17d22c4f26ec60dd79438af5903cb",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:4e3ff0d83c4354f8:cap:1",
+          "technical_name": "shadcn-ui",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-22T00:36:33.967Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "6276456d5523c660b203c3a705bc1d6b16a4adcd499f94cccc00ffc0bdbc296e"
+    },
+    {
       "candidate_id": "repo:37c66b865b2d6211a2afaa4e68cb",
       "technical_name": "sketch",
       "source_locator": "github://bergside/awesome-design-skills@f631a09b4fcc0166f2e2c1a8c81906ef680c57e8/skills/sketch",
@@ -4997,6 +5067,76 @@
       "promoted_at": "2026-10-21T09:39:06.003Z"
     },
     {
+      "candidate_id": "repo:fc95c594e37c0110a64de220020a",
+      "technical_name": "skipfish",
+      "source_locator": "github://TerminalSkills/skills@6edcf94159d9f46b0759d2e1b59dd545cfaca254/skills/skipfish",
+      "pinned_sha": "6edcf94159d9f46b0759d2e1b59dd545cfaca254",
+      "snapshot_sha256": "fc95c594e37c0110a64de220020a88bff53c7378127967d4a97fa48c5eb89f44",
+      "manifest_sha256": "ea084908f0e04bb5f3124bb56bb2b1af6530c1915435f149e026bfe5c8f0419e",
+      "outcome_hash": "555b5f87fce4fb982a7dc13bb9edab7e52ecc5c983cfbe79ba04cef6e6cedcb5",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:fc95c594e37c0110:cap:1",
+          "technical_name": "skipfish",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-22T00:36:33.967Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "27070245781f636fdc712ec6d100da813695600365381dd20f38b5bb44110bc4"
+    },
+    {
       "candidate_id": "repo:9c911cbd9827a36790d25d0b818f",
       "technical_name": "sleek",
       "source_locator": "github://bergside/awesome-design-skills@f631a09b4fcc0166f2e2c1a8c81906ef680c57e8/skills/sleek",
@@ -5195,15 +5335,85 @@
         "observed_at": "2026-10-21T09:39:06.003Z"
       },
       "promoted_at": "2026-10-21T09:39:06.003Z"
+    },
+    {
+      "candidate_id": "repo:df8a7fb42ca04a362d69c04d690d",
+      "technical_name": "spline",
+      "source_locator": "github://TerminalSkills/skills@6edcf94159d9f46b0759d2e1b59dd545cfaca254/skills/spline",
+      "pinned_sha": "6edcf94159d9f46b0759d2e1b59dd545cfaca254",
+      "snapshot_sha256": "df8a7fb42ca04a362d69c04d690dfd1a8bfebdd6644aa852287aa7e4b8db3085",
+      "manifest_sha256": "a17d42c3d5be29fa40d5dad91361bdfd8af4d45fecf2a09daccca892f4f477db",
+      "outcome_hash": "510df1b19604c26b5383da122fa74670151b601764af886008965719f874aeb6",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:df8a7fb42ca04a36:cap:1",
+          "technical_name": "spline",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-22T00:36:33.965Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "bfb9630f84bd46c202482f77b8eef009eedaf9021a4d7d3b302273dce1d8fdb5"
     }
   ],
   "adoption_skips": [],
   "summary": {
-    "total": 51,
-    "inserted": 0,
+    "total": 54,
+    "inserted": 3,
     "updated": 0,
     "skipped": 0,
-    "pending_canary": 0,
+    "pending_canary": 3,
     "prod_readonly": 51
   }
 }
