@@ -1,0 +1,152 @@
+{
+  "schema_version": "1.0",
+  "policy_id": "CEREBRO_CONTINUOUS_SPECIALIST_LEARNING_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "LRN-001",
+  "environment": "PREPROD",
+  "version": "1.0.0",
+  "status": "DEFINED_ADDITIVE_PREPROD",
+  "created_at": "2026-10-22",
+  "scope": "ALL_AGENTS_SUBAGENTS_DIRECTORS_SPECIALISTS_FAMILIES_CHANNELS_COMPANIES",
+  "principle": "Every agent and subagent continuously learns from its own work, detects knowledge or capability gaps, requests what it needs from CEREBRO, and CEREBRO routes the request to the most appropriate governed source, validates the result, proves it, and only then makes the new knowledge or capability available in the appropriate context layer.",
+  "mandatory": {
+    "continuous_learning": true,
+    "self_observation": true,
+    "result_feedback": true,
+    "gap_detection": true,
+    "knowledge_request": true,
+    "capability_request": true,
+    "source_routing_by_cerebro": true,
+    "evidence_before_adoption": true,
+    "old_vs_new_before_promotion": true,
+    "cross_company_privacy_isolation": true,
+    "rollback_required_for_prod_behavior_change": true
+  },
+  "learning_loop": [
+    "EXECUTE_OR_OBSERVE",
+    "MEASURE_RESULT",
+    "DETECT_GAP_OR_OPPORTUNITY",
+    "REQUEST_KNOWLEDGE_OR_CAPABILITY",
+    "CEREBRO_ROUTE_TO_BEST_SOURCE",
+    "RESEARCH_OR_RETRIEVE",
+    "VALIDATE_SOURCE_LICENSE_SECURITY_PRIVACY_COST_COMPATIBILITY",
+    "INGEST_AS_PROPOSAL",
+    "TEST",
+    "COMPARE_OLD_VS_NEW",
+    "QA_EVALUATION_TRIBUNAL_WHEN_REQUIRED",
+    "PROMOTE_TO_APPROPRIATE_KNOWLEDGE_LAYER",
+    "APPLY_WITHIN_GRANTED_AUTHORITY",
+    "MEASURE",
+    "LEARN_AGAIN"
+  ],
+  "knowledge_request_contract": {
+    "required_fields": [
+      "requesting_role_id",
+      "company_id",
+      "family_id",
+      "platform_or_domain",
+      "environment",
+      "gap_type",
+      "problem_statement",
+      "expected_improvement",
+      "evidence_available",
+      "risk_level",
+      "cost_ceiling_eur"
+    ],
+    "gap_types": [
+      "KNOWLEDGE_GAP",
+      "SKILL_GAP",
+      "TOOL_GAP",
+      "DATA_GAP",
+      "PROCESS_GAP",
+      "QUALITY_GAP",
+      "PERFORMANCE_GAP",
+      "PLATFORM_CHANGE",
+      "REGULATION_CHANGE",
+      "COMPETITOR_CHANGE",
+      "NEW_OPPORTUNITY"
+    ]
+  },
+  "cerebro_source_routing_order": [
+    "EXISTING_INTERNAL_KNOWLEDGE",
+    "EXISTING_SPECIALIST_OR_ENGINE",
+    "VERIFIED_INTERNAL_DATA_AND_PRECEDENTS",
+    "OFFICIAL_DOCUMENTATION_AND_STANDARDS",
+    "DETERMINISTIC_LOGIC_OR_CODE",
+    "OPEN_SOURCE_LIBRARIES",
+    "PUBLIC_REPOSITORIES_AND_SCRIPTS",
+    "LOCAL_OR_SELF_HOSTED_TOOLS",
+    "EXISTING_CONNECTED_APPS_AND_APIS",
+    "MCP_OR_CONNECTORS",
+    "TOOLS_ALREADY_CONTRACTED",
+    "FREE_TIER_SERVICES",
+    "FACT_001_BUILD_OR_EXTENSION",
+    "PAID_EXTERNAL_SERVICE_ONLY_IF_JUSTIFIED_AND_AUTHORIZED"
+  ],
+  "knowledge_layers": [
+    "COMMON_CEREBRO",
+    "PROFESSIONAL_DISCIPLINE",
+    "DOMAIN_OR_PLATFORM",
+    "SECTOR_FAMILY",
+    "COMPANY",
+    "BRAND",
+    "TERRITORY",
+    "PROJECT_OR_CAMPAIGN",
+    "ROLE_SPECIALIST",
+    "LEARNING_PRECEDENTS"
+  ],
+  "promotion_rules": {
+    "direct_self_mutation_of_canonical_knowledge": false,
+    "direct_authority_increase": false,
+    "direct_prod_behavior_change": false,
+    "lRn_001_ingress": "PROPOSAL_ONLY_UNTIL_GOVERNED_PROMOTION",
+    "source_provenance_required": true,
+    "confidence_required": true,
+    "proof_artifact_required_when_applicable": true,
+    "quality_comparison_required": true,
+    "cost_measurement_required": true
+  },
+  "cross_company_learning": {
+    "allowed": "GENERALIZED_GOVERNED_PATTERNS_ONLY",
+    "forbidden": [
+      "CUSTOMER_PII",
+      "CREDENTIALS",
+      "PRIVATE_CONTRACTS",
+      "BANKING_DATA",
+      "CASE_FILES",
+      "COMPANY_PRIVATE_PRICING",
+      "NON_SHAREABLE_STRATEGIC_INTELLIGENCE"
+    ]
+  },
+  "human_required_reasons": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "cost_policy": {
+    "additional_cost_target_eur": 0,
+    "paid_ai_required": false,
+    "paid_source_requires_justification_and_authorization": true
+  },
+  "applies_to_examples": [
+    "SOCIAL_NETWORK_AGENTS",
+    "FACEBOOK_SUBAGENTS",
+    "INSTAGRAM_SUBAGENTS",
+    "LINKEDIN_SUBAGENTS",
+    "AION_TECH_PRODUCT_FAMILY",
+    "SEO",
+    "ENGINEERING",
+    "SALES",
+    "SUPPORT",
+    "OPERATIONS",
+    "SECURITY",
+    "DATA",
+    "DOCUMENTS",
+    "FUTURE_AGENTS_AND_FAMILIES"
+  ]
+}
