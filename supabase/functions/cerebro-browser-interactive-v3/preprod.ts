@@ -1,0 +1,146 @@
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import {createClient} from "npm:@supabase/supabase-js@2";
+import {createRemoteJWKSet,jwtVerify} from "npm:jose@5.10.0";
+
+const U=Deno.env.get('SUPABASE_URL')??'';
+const A=Deno.env.get('SUPABASE_ANON_KEY')??'';
+const S=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')??'';
+const svc=createClient(U,S,{auth:{persistSession:false,autoRefreshToken:false}});
+const auth=createClient(U,A,{auth:{persistSession:false,autoRefreshToken:false}});
+const ISSUER='https://token.actions.githubusercontent.com';
+const AUD='cerebro-browser-worker-v1';
+const REPO='carlosjmunoz78/fenix-capital-inmo-map';
+const PREPROD_PROJECT_REF='hnqlnvakzaywtafeiybt';
+const WORKFLOW='.github/workflows/cerebro-browser-interactive-v3-preprod.yml';
+const ALLOWED_ORIGINS=new Set(['https://carlosjmunoz78.github.io','http://localhost:5173','http://127.0.0.1:5173']);
+const JWKS=createRemoteJWKSet(new URL(`${ISSUER}/.well-known/jwks`));
+const INPUT_TYPES=new Set(['CLICK_POINT','DOUBLE_CLICK_POINT','MOVE_POINT','KEYBOARD_TYPE','KEYBOARD_PRESS','SCROLL','SWITCH_TAB','BACK','FORWARD','RELOAD','OPEN_TAB','CLOSE_TAB']);
+const ACTIVE_STATES=['CONNECTING','CEREBRO_CONTROLLED','HUMAN_REQUIRED','TAKEOVER_PENDING','HUMAN_CONTROLLED','HANDBACK_PENDING','AI_RESUMING'];
+const PHASE3_ENGINE_AUTHORITY=Object.freeze({browser_use_authorized:true,operation_authorized:true,prod_mutation_authorized:false,promotion_gate_green:true,rollback_ready:true,observability_ready:true,audit_ready:true,idempotency_proven:true});
+
+function headers(origin:string|null=null){const h:Record<string,string>={'content-type':'application/json; charset=utf-8','cache-control':'no-store','vary':'origin'};if(origin&&ALLOWED_ORIGINS.has(origin))h['access-control-allow-origin']=origin;return h;}
+function out(req:Request,status:number,body:unknown){return new Response(JSON.stringify(body),{status,headers:headers(req.headers.get('origin'))});}
+function bearer(req:Request){const v=req.headers.get('authorization')??'';return v.toLowerCase().startsWith('bearer ')?v.slice(7).trim():'';}
+function cleanUrl(raw:unknown){try{const u=new URL(String(raw||''));u.username='';u.password='';u.search='';u.hash='';return u.toString();}catch{return '';}}
+function nowIso(){return new Date().toISOString();}
+function safeId(raw:unknown){return String(raw??'').trim().replace(/[^a-zA-Z0-9._-]/g,'_').slice(0,120);}
+function profile(company:string,identity:string,account:string){return `b1-${safeId(company)}-${safeId(identity)}-${safeId(account)}-PREPROD`;}
+async function event(session_id:string,event_type:string,actor:string,detail:Record<string,unknown>={}){await svc.from('cerebro_browser_event_v3').insert({session_id,event_type,actor,detail});}
+
+async function owner(req:Request){
+ const token=bearer(req);if(!token)return{ok:false,error:'OWNER_TOKEN_REQUIRED'} as const;
+ const {data,error}=await auth.auth.getUser(token);if(error||!data.user)return{ok:false,error:'OWNER_TOKEN_INVALID'} as const;
+ const {data:ctx,error:ce}=await svc.rpc('preprod_test_actor_context_by_auth_server',{p_auth_user_id:data.user.id});
+ if(ce||ctx?.ok!==true||String(ctx?.actor_code??'')!=='CARLOS-ADMIN')return{ok:false,error:'OWNER_REQUIRED'} as const;
+ return{ok:true,actor:'CARLOS-ADMIN',user_id:data.user.id} as const;
+}
+async function companies(){
+ const r=await svc.from('cerebro_company_registry_preprod').select('company_id,environment,version,state,tenant_boundary,prod_authorized,prod_write_authorized,trading_access,additional_cost_eur').eq('environment','PREPROD').order('company_id');
+ if(r.error)throw r.error;
+ return{ok:true,companies:(r.data||[]).filter(x=>x.tenant_boundary==='DENY_CROSS_COMPANY'&&x.trading_access===false)};
+}
+async function validateCompany(raw:unknown){
+ const companyId=safeId(raw||'');if(!companyId)throw new Error('COMPANY_ID_REQUIRED');
+ const r=await svc.from('cerebro_company_registry_preprod').select('company_id,state,tenant_boundary,prod_authorized,prod_write_authorized,trading_access').eq('company_id',companyId).eq('environment','PREPROD').maybeSingle();
+ if(r.error)throw r.error;
+ if(!r.data||r.data.tenant_boundary!=='DENY_CROSS_COMPANY'||r.data.trading_access!==false)throw new Error('COMPANY_SCOPE_DENIED');
+ return companyId;
+}
+async function worker(req:Request){
+ if(!U.includes(PREPROD_PROJECT_REF))return{ok:false,error:'PREPROD_PROJECT_REF_MISMATCH'} as const;
+ const token=bearer(req);if(!token)return{ok:false,error:'GITHUB_OIDC_REQUIRED'} as const;
+ try{
+  const {payload}=await jwtVerify(token,JWKS,{issuer:ISSUER,audience:AUD});
+  if(payload.repository!==REPO)return{ok:false,error:'GITHUB_REPOSITORY_DENIED'} as const;
+  const workflowRef=String(payload.workflow_ref??'');
+  if(!workflowRef.includes(`${REPO}/${WORKFLOW}@`))return{ok:false,error:'GITHUB_WORKFLOW_DENIED'} as const;
+  return{ok:true,worker_id:`github-preprod:${String(payload.run_id??'unknown')}:${String(payload.run_attempt??'1')}`} as const;
+ }catch(e){return{ok:false,error:'GITHUB_OIDC_INVALID',detail:e instanceof Error?e.message:String(e)} as const;}
+}
+async function sessionKey(sessionId:string){
+ if(!sessionId)throw new Error('SESSION_ID_REQUIRED');
+ const exists=await svc.from('cerebro_browser_session_v3').select('session_id,environment').eq('session_id',sessionId).eq('environment','PREPROD').maybeSingle();
+ if(exists.error)throw exists.error;if(!exists.data)throw new Error('SESSION_NOT_FOUND');
+ const bytes=new TextEncoder().encode(`${S}|${sessionId}|CEREBRO_BROWSER_PHASE3_V0`);const digest=new Uint8Array(await crypto.subtle.digest('SHA-256',bytes));let binary='';for(const b of digest)binary+=String.fromCharCode(b);return btoa(binary);
+}
+
+async function startSession(body:any,actor:string){
+ const companyId=await validateCompany(body?.company_id);
+ const existing=await svc.from('cerebro_browser_session_v3').select('session_id,state,control_owner,worker_alive,current_url,company_id,environment,updated_at').eq('environment','PREPROD').eq('company_id',companyId).in('state',ACTIVE_STATES).order('updated_at',{ascending:false}).limit(1).maybeSingle();
+ if(existing.error)throw existing.error;if(existing.data)return{ok:true,reused:true,session:existing.data};
+ const target=String(body?.target_url||'data:text/html;charset=utf-8,%3Chtml%3E%3Cbody%20style%3D%22font-family%3Asans-serif%3Bpadding%3A48px%22%3E%3Ch1%3ECEREBRO%20Browser%201%20Phase%203%3C%2Fh1%3E%3Cp%3ESesi%C3%B3n%20interactiva%20PREPROD%20gobernada.%3C%2Fp%3E%3C%2Fbody%3E%3C%2Fhtml%3E');
+ const identity='carlos-admin';const account='owner-console';const browserProfile=profile(companyId,identity,account);
+ const {data,error}=await svc.rpc('cerebro_browser_enqueue_v2',{
+  p_idempotency_key:String(body?.idempotency_key||`browser1-phase3-preprod-${companyId}-${crypto.randomUUID()}`),p_company_id:companyId,p_engine_id:'CONSOLE-001',p_department_id:'cerebro',p_environment:'PREPROD',p_version:'v3',p_mode:'MUTATE',p_identity_id:identity,p_account_id:account,p_browser_profile_id:browserProfile,p_credential_ref_id:null,p_target_url:target,
+  p_commands:[{command:'goto',url:target},{command:'wait',ms:500}],p_authority:{canonical_engine_ids:['CONSOLE-001'],browser_binding:{healthy:true,kill_switch_enabled:true,fresh_attestation:true,attestation_source:'PHASE3_OWNER_PREPROD'},engine_authority:PHASE3_ENGINE_AUTHORITY,kill_switch_enabled:true},p_priority:100,p_risk:'LOW',p_capability:'browser1.interactive',p_expected_cost_eur:0,p_timeout_seconds:900,p_max_attempts:1,p_audit_id:`browser-v3-preprod-${Date.now()}`,p_created_by:actor
+ });
+ if(error)throw error;const jobId=String(data?.job_id||'');if(!jobId)throw new Error('INTERACTIVE_JOB_ID_MISSING');
+ const row={session_id:jobId,job_id:jobId,company_id:companyId,engine_id:'CONSOLE-001',department_id:'cerebro',environment:'PREPROD',version:'v3',identity_id:identity,account_id:account,browser_profile_id:browserProfile,state:'CONNECTING',control_owner:'NONE',expires_at:new Date(Date.now()+15*60_000).toISOString()};
+ const ins=await svc.from('cerebro_browser_session_v3').insert(row).select('session_id,state,control_owner,worker_alive,current_url,company_id,environment,updated_at').single();if(ins.error)throw ins.error;
+ await event(jobId,'SESSION_OPENED','SYSTEM',{source:'OWNER_START',company_id:companyId,secret_material_logged:false});return{ok:true,reused:false,session:ins.data};
+}
+async function ownerStatus(body:any){
+ const companyId=await validateCompany(body?.company_id);
+ let q=svc.from('cerebro_browser_session_v3').select('session_id,job_id,company_id,department_id,environment,version,identity_id,account_id,browser_profile_id,state,control_owner,worker_alive,emergency_stop,current_url,current_title,tabs,active_tab_index,viewport_width,viewport_height,frame_ciphertext,frame_iv,frame_seq,frame_mime,frame_captured_at,human_lease_id,human_lease_expires_at,human_required,last_heartbeat_at,opened_at,expires_at,closed_at,updated_at').eq('environment','PREPROD').eq('company_id',companyId);
+ if(body?.session_id)q=q.eq('session_id',String(body.session_id));else q=q.order('updated_at',{ascending:false});
+ const r=await q.limit(1).maybeSingle();if(r.error)throw r.error;return{ok:true,session:r.data||null};
+}
+async function scopedSession(sessionId:string,companyId:string){const r=await svc.from('cerebro_browser_session_v3').select('session_id').eq('session_id',sessionId).eq('company_id',companyId).eq('environment','PREPROD').maybeSingle();if(r.error)throw r.error;if(!r.data)throw new Error('SESSION_SCOPE_DENIED');}
+async function takeover(sessionId:string,companyId:string){await scopedSession(sessionId,companyId);const r=await svc.from('cerebro_browser_session_v3').update({state:'TAKEOVER_PENDING',updated_at:nowIso()}).eq('session_id',sessionId).eq('state','CEREBRO_CONTROLLED').eq('control_owner','CEREBRO').eq('worker_alive',true).eq('emergency_stop',false).select('session_id').maybeSingle();if(r.error)throw r.error;if(!r.data)return{ok:false,error:'TAKEOVER_PRECONDITION_FAILED'};await event(sessionId,'CONTROL_CHANGED','HUMAN',{from:'CEREBRO',to:'TAKEOVER_PENDING'});return{ok:true,requested:true};}
+async function handback(sessionId:string,leaseId:string,companyId:string){await scopedSession(sessionId,companyId);if(!leaseId)return{ok:false,error:'SESSION_AND_LEASE_REQUIRED'};const r=await svc.from('cerebro_browser_session_v3').update({state:'HANDBACK_PENDING',control_owner:'NONE',human_lease_id:null,human_lease_expires_at:null,updated_at:nowIso()}).eq('session_id',sessionId).eq('state','HUMAN_CONTROLLED').eq('control_owner','HUMAN').eq('human_lease_id',leaseId).select('session_id').maybeSingle();if(r.error)throw r.error;if(!r.data)return{ok:false,error:'HANDBACK_PRECONDITION_FAILED'};await event(sessionId,'HUMAN_HANDBACK','HUMAN',{secret_material_logged:false});return{ok:true};}
+async function stopSession(sessionId:string,companyId:string){await scopedSession(sessionId,companyId);const r=await svc.from('cerebro_browser_session_v3').update({state:'STOPPED',control_owner:'NONE',emergency_stop:true,human_lease_id:null,human_lease_expires_at:null,updated_at:nowIso()}).eq('session_id',sessionId).select('session_id').maybeSingle();if(r.error)throw r.error;if(!r.data)return{ok:false,error:'SESSION_NOT_FOUND'};await event(sessionId,'EMERGENCY_STOP','HUMAN',{secret_material_logged:false});return{ok:true};}
+async function queueInput(body:any,companyId:string){const sessionId=String(body?.session_id||'');const leaseId=String(body?.lease_id||'');const type=String(body?.command_type||'');await scopedSession(sessionId,companyId);if(!INPUT_TYPES.has(type))return{ok:false,error:'INPUT_TYPE_DENIED'};if(!body?.payload_ciphertext||!body?.payload_iv)return{ok:false,error:'ENCRYPTED_INPUT_REQUIRED'};const s=await svc.from('cerebro_browser_session_v3').select('state,control_owner,human_lease_id,human_lease_expires_at,worker_alive,emergency_stop').eq('session_id',sessionId).maybeSingle();if(s.error)throw s.error;const x=s.data;if(!x||x.state!=='HUMAN_CONTROLLED'||x.control_owner!=='HUMAN'||x.human_lease_id!==leaseId||!x.worker_alive||x.emergency_stop||Date.parse(x.human_lease_expires_at||'')<=Date.now())return{ok:false,error:'HUMAN_CONTROL_LEASE_INVALID'};const r=await svc.from('cerebro_browser_control_v3').insert({session_id:sessionId,lease_id:leaseId,actor:'HUMAN',command_type:type,payload_ciphertext:String(body.payload_ciphertext),payload_iv:String(body.payload_iv),audit_id:`human-preprod-${Date.now()}-${crypto.randomUUID()}`}).select('command_id,status').single();if(r.error)throw r.error;await event(sessionId,'HUMAN_ACTION','HUMAN',{command_type:type,secret_material_logged:false});return{ok:true,command:r.data};}
+
+async function workerOpen(body:any,w:any){const id=String(body?.session_id||'');const r=await svc.from('cerebro_browser_session_v3').update({worker_id:w.worker_id,worker_alive:true,state:'CEREBRO_CONTROLLED',control_owner:'CEREBRO',last_heartbeat_at:nowIso(),updated_at:nowIso(),expires_at:new Date(Date.now()+15*60_000).toISOString()}).eq('session_id',id).eq('environment','PREPROD').eq('state','CONNECTING').select('session_id,state,control_owner').maybeSingle();if(r.error)throw r.error;if(!r.data)return{ok:false,error:'SESSION_OPEN_PRECONDITION_FAILED'};await event(id,'CONTROL_CHANGED','SYSTEM',{from:'NONE',to:'CEREBRO'});return{ok:true,session:r.data};}
+async function workerFrame(body:any,w:any){const id=String(body?.session_id||'');if(!body?.frame_ciphertext||!body?.frame_iv)return{ok:false,error:'ENCRYPTED_FRAME_REQUIRED'};const mime=['image/jpeg','image/png'].includes(String(body.frame_mime||''))?String(body.frame_mime):'image/png';const patch={worker_alive:true,last_heartbeat_at:nowIso(),updated_at:nowIso(),current_url:cleanUrl(body.current_url),current_title:String(body.current_title||'').slice(0,240),tabs:Array.isArray(body.tabs)?body.tabs.slice(0,32):[],active_tab_index:Number.isInteger(body.active_tab_index)?body.active_tab_index:null,viewport_width:Number(body.viewport_width||0)||null,viewport_height:Number(body.viewport_height||0)||null,frame_ciphertext:String(body.frame_ciphertext),frame_iv:String(body.frame_iv),frame_seq:Number(body.frame_seq||0),frame_mime:mime,frame_captured_at:nowIso()};const r=await svc.from('cerebro_browser_session_v3').update(patch).eq('session_id',id).eq('environment','PREPROD').eq('worker_id',w.worker_id).neq('state','CLOSED').select('state,control_owner,human_lease_id,human_lease_expires_at,emergency_stop').maybeSingle();if(r.error)throw r.error;if(!r.data)return{ok:false,error:'WORKER_SESSION_MISMATCH'};return{ok:true,...r.data};}
+async function workerPoll(body:any,w:any){
+ const id=String(body?.session_id||'');let s=await svc.from('cerebro_browser_session_v3').select('state,control_owner,human_lease_id,human_lease_expires_at,emergency_stop,worker_id').eq('session_id',id).eq('environment','PREPROD').maybeSingle();if(s.error)throw s.error;if(!s.data||s.data.worker_id!==w.worker_id)return{ok:false,error:'WORKER_SESSION_MISMATCH'};
+ if(s.data.emergency_stop||s.data.state==='STOPPED')return{ok:true,stop:true,state:'STOPPED'};
+ if(s.data.state==='TAKEOVER_PENDING'){const lease=crypto.randomUUID();const exp=new Date(Date.now()+5*60_000).toISOString();const u=await svc.from('cerebro_browser_session_v3').update({state:'HUMAN_CONTROLLED',control_owner:'HUMAN',human_lease_id:lease,human_lease_expires_at:exp,updated_at:nowIso()}).eq('session_id',id).eq('state','TAKEOVER_PENDING').select('state,control_owner,human_lease_id,human_lease_expires_at').maybeSingle();if(u.error)throw u.error;if(u.data){await event(id,'HUMAN_TAKEOVER','SYSTEM',{secret_material_logged:false});await event(id,'CONTROL_CHANGED','SYSTEM',{from:'CEREBRO',to:'HUMAN'});s={...s,data:{...s.data,...u.data}};}}
+ if(s.data.state==='HUMAN_CONTROLLED'&&Date.parse(s.data.human_lease_expires_at||'')<=Date.now()){await svc.from('cerebro_browser_session_v3').update({state:'HANDBACK_PENDING',control_owner:'NONE',human_lease_id:null,human_lease_expires_at:null,updated_at:nowIso()}).eq('session_id',id);return{ok:true,handback:true,state:'HANDBACK_PENDING',reason:'LEASE_EXPIRED'};}
+ if(s.data.state==='HANDBACK_PENDING')return{ok:true,handback:true,state:'HANDBACK_PENDING'};
+ if(s.data.state==='HUMAN_CONTROLLED'){
+  const q=await svc.from('cerebro_browser_control_v3').select('command_id,command_type,payload_ciphertext,payload_iv').eq('session_id',id).eq('status','QUEUED').order('created_at',{ascending:true}).limit(1).maybeSingle();if(q.error)throw q.error;
+  if(q.data){const claimed=await svc.from('cerebro_browser_control_v3').update({status:'CLAIMED',worker_id:w.worker_id,claimed_at:nowIso()}).eq('command_id',q.data.command_id).eq('status','QUEUED').select('command_id,command_type,payload_ciphertext,payload_iv').maybeSingle();if(claimed.error)throw claimed.error;if(claimed.data)return{ok:true,state:s.data.state,control_owner:s.data.control_owner,command:claimed.data};}
+ }
+ return{ok:true,state:s.data.state,control_owner:s.data.control_owner,human_lease_id:s.data.human_lease_id,human_lease_expires_at:s.data.human_lease_expires_at};
+}
+async function workerComplete(body:any,w:any){const r=await svc.from('cerebro_browser_control_v3').update({status:body?.ok===true?'COMPLETED':'FAILED',completed_at:nowIso(),error_code:body?.ok===true?null:String(body?.error_code||'INPUT_FAILED').slice(0,120)}).eq('command_id',String(body?.command_id||'')).eq('worker_id',w.worker_id).eq('status','CLAIMED').select('command_id,status').maybeSingle();if(r.error)throw r.error;return r.data?{ok:true,command:r.data}:{ok:false,error:'COMMAND_COMPLETE_PRECONDITION_FAILED'};}
+async function workerHandback(body:any,w:any){const id=String(body?.session_id||'');const r=await svc.from('cerebro_browser_session_v3').update({state:'CEREBRO_CONTROLLED',control_owner:'CEREBRO',human_lease_id:null,human_lease_expires_at:null,updated_at:nowIso()}).eq('session_id',id).eq('environment','PREPROD').eq('worker_id',w.worker_id).eq('state','HANDBACK_PENDING').select('session_id').maybeSingle();if(r.error)throw r.error;if(!r.data)return{ok:false,error:'HANDBACK_COMPLETE_PRECONDITION_FAILED'};await event(id,'AI_RESUME','SYSTEM',{snapshot_reconciled:true,secret_material_logged:false});await event(id,'CONTROL_CHANGED','SYSTEM',{from:'HUMAN',to:'CEREBRO'});return{ok:true};}
+async function workerClose(body:any,w:any){const id=String(body?.session_id||'');const state=String(body?.state||'CLOSED')==='ERROR'?'ERROR':'CLOSED';const r=await svc.from('cerebro_browser_session_v3').update({state,control_owner:'NONE',worker_alive:false,frame_ciphertext:null,frame_iv:null,human_lease_id:null,human_lease_expires_at:null,closed_at:nowIso(),updated_at:nowIso()}).eq('session_id',id).eq('environment','PREPROD').eq('worker_id',w.worker_id).select('session_id').maybeSingle();if(r.error)throw r.error;if(r.data)await event(id,'SESSION_CLOSED','SYSTEM',{state,secret_material_logged:false});return{ok:Boolean(r.data)};}
+
+Deno.serve(async req=>{
+ const origin=req.headers.get('origin');
+ if(req.method==='OPTIONS'){if(!origin||!ALLOWED_ORIGINS.has(origin))return new Response(null,{status:403});return new Response(null,{status:204,headers:{...headers(origin),'access-control-allow-methods':'GET,POST,OPTIONS','access-control-allow-headers':'authorization,content-type,apikey','access-control-max-age':'600'}});}
+ const route=new URL(req.url).pathname.split('/').filter(Boolean).slice(-2).join('/');
+ if(req.method==='GET'&&route.endsWith('health'))return out(req,200,{ok:true,service:'cerebro-browser-interactive-v3',environment:'PREPROD',schema_version:'3.1.0',multi_company_registry:true,frames_encrypted:true,input_encrypted:true,prod_write_authorized:false,trading_access:false,incremental_cost_eur:0});
+ if(req.method!=='POST')return out(req,404,{ok:false,error:'ROUTE_NOT_AVAILABLE'});
+ let body:any={};try{body=await req.json();}catch{}
+ try{
+  if(route.startsWith('owner/')){
+   const o=await owner(req);if(!o.ok)return out(req,403,o);
+   if(route==='owner/companies')return out(req,200,await companies());
+   const companyId=route==='owner/start'||route==='owner/status'?String(body?.company_id||''):await validateCompany(body?.company_id);
+   if(route==='owner/start')return out(req,200,await startSession(body,o.actor));
+   if(route==='owner/status')return out(req,200,await ownerStatus(body));
+   if(route==='owner/key'){await scopedSession(String(body.session_id||''),companyId);return out(req,200,{ok:true,session_id:String(body.session_id||''),key_b64:await sessionKey(String(body.session_id||'')),expires_in_seconds:900});}
+   if(route==='owner/takeover')return out(req,200,await takeover(String(body.session_id||''),companyId));
+   if(route==='owner/handback')return out(req,200,await handback(String(body.session_id||''),String(body.lease_id||''),companyId));
+   if(route==='owner/input')return out(req,200,await queueInput(body,companyId));
+   if(route==='owner/stop')return out(req,200,await stopSession(String(body.session_id||''),companyId));
+   return out(req,404,{ok:false,error:'OWNER_ROUTE_NOT_AVAILABLE'});
+  }
+  if(route.startsWith('worker/')){
+   const w=await worker(req);if(!w.ok)return out(req,403,w);
+   if(route==='worker/key')return out(req,200,{ok:true,session_id:String(body.session_id||''),key_b64:await sessionKey(String(body.session_id||'')),expires_in_seconds:900});
+   if(route==='worker/open')return out(req,200,await workerOpen(body,w));
+   if(route==='worker/frame')return out(req,200,await workerFrame(body,w));
+   if(route==='worker/poll')return out(req,200,await workerPoll(body,w));
+   if(route==='worker/complete')return out(req,200,await workerComplete(body,w));
+   if(route==='worker/handback-complete')return out(req,200,await workerHandback(body,w));
+   if(route==='worker/close')return out(req,200,await workerClose(body,w));
+   return out(req,404,{ok:false,error:'WORKER_ROUTE_NOT_AVAILABLE'});
+  }
+  return out(req,404,{ok:false,error:'ROUTE_NOT_AVAILABLE'});
+ }catch(e){return out(req,400,{ok:false,error:'BROWSER_PHASE3_PREPROD_OPERATION_FAILED',detail:e instanceof Error?e.message:String(e)});}
+});
