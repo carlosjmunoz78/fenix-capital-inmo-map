@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-23T13:32:33.038Z",
+  "updated_at": "2026-10-23T13:43:07.955Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -235,42 +235,6 @@
   "in_flight": {},
   "waiting_human": {},
   "waiting_safe_handler": {
-    "github-wide-skills:e182de3c55cb8554333b": {
-      "candidate_id": "github-wide-skills:e182de3c55cb8554333b",
-      "name": "api-conventions",
-      "human_alias": "Api Conventions",
-      "wrapper_id": "skillwrap:6eb2c3a6fa1095966aee",
-      "domain": "software-engineering-devops",
-      "engine_bindings": [
-        "FACT-001",
-        "ARCH-001",
-        "API-001",
-        "DEP-001",
-        "MIG-001",
-        "QA-001",
-        "REG-001",
-        "DOCS-001"
-      ],
-      "value_score": 91.06,
-      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
-      "evidence_refs": {
-        "upstream_full_name": "thomiOmi/agent-skills",
-        "upstream_head_commit": "a5ffdb65abf48dc4b3426fad1c1a93771a1080b2",
-        "manifest_sha256": "5f33d63d1e2ee32aff23d622a02688cec187482acbe5e489f8326b97e50ebd09",
-        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
-      },
-      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
-      "status": "WAITING_SAFE_HANDLER",
-      "source_discovery_run_id": 39931847933,
-      "checkpointed_at": "2026-10-23T09:26:44.802Z",
-      "human_required": null,
-      "external_skill_code_execution": false,
-      "customer_data_used": false,
-      "prod_write": false,
-      "trading_access": false,
-      "paid_fallback": false,
-      "additional_cost_eur": 0
-    },
     "github-wide-skills:e9a3111ea663fbc7ca36": {
       "candidate_id": "github-wide-skills:e9a3111ea663fbc7ca36",
       "name": "adaptive-classifier",
@@ -12538,9 +12502,54 @@
       },
       "updated_at": "2026-10-23T07:38:27.933Z",
       "prod_authorized": false
+    },
+    "github-wide-skills:e182de3c55cb8554333b": {
+      "candidate_id": "github-wide-skills:e182de3c55cb8554333b",
+      "name": "api-conventions",
+      "human_alias": "Api Conventions",
+      "wrapper_id": "skillwrap:6eb2c3a6fa1095966aee",
+      "domain": "software-engineering-devops",
+      "engine_bindings": [
+        "FACT-001",
+        "ARCH-001",
+        "API-001",
+        "DEP-001",
+        "MIG-001",
+        "QA-001",
+        "REG-001",
+        "DOCS-001"
+      ],
+      "value_score": 91.06,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "thomiOmi/agent-skills",
+        "upstream_head_commit": "a5ffdb65abf48dc4b3426fad1c1a93771a1080b2",
+        "manifest_sha256": "5f33d63d1e2ee32aff23d622a02688cec187482acbe5e489f8326b97e50ebd09",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "SAFE_HANDLER_TERMINAL_HOLD",
+      "status": "TERMINAL_HOLD",
+      "source_discovery_run_id": 39931847933,
+      "checkpointed_at": "2026-10-23T09:26:44.802Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0,
+      "evidence": {
+        "reason": "STATIC_LAB_HOLD",
+        "decision_id": null,
+        "decision": null,
+        "human_required": null,
+        "source": "CEREBRO Skill AutoLoop Safe Handler V0"
+      },
+      "updated_at": "2026-10-23T13:43:07.955Z",
+      "prod_authorized": false
     }
   },
-  "last_action": "SKILL_AUTONOMY_ACTION_WORKER_IDLE",
+  "last_action": "TERMINAL_HOLD_CONTINUE_OTHER_SAFE_WORK",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
