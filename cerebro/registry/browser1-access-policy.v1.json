@@ -1,0 +1,72 @@
+{
+  "state_type": "CEREBRO_BROWSER1_ACCESS_POLICY",
+  "schema_version": "1.0.0",
+  "capability_id": "BROWSER-1",
+  "company_id": "GLOBAL",
+  "engine_id": "AUTO-001",
+  "environment": "MULTI_ENV_GOVERNED",
+  "version": "v1",
+  "status": "DEFINED_FOR_GOVERNED_SERIAL_USE",
+  "transversal_tool": true,
+  "logical_engine": false,
+  "authority_model": {
+    "browser_never_grants_new_authority": true,
+    "origin_engine_authority_required": true,
+    "department_scope_required": true,
+    "prod_mutation_requires_origin_engine_prod_authority": true,
+    "prod_mutation_requires_promotion_gate_green": true,
+    "prod_mutation_requires_rollback_ready": true,
+    "prod_mutation_requires_observability_ready": true,
+    "prod_mutation_requires_audit_ready": true,
+    "prod_mutation_requires_idempotency_proven": true,
+    "incremental_spend_requires_money_limit_approval": true,
+    "captcha_bypass_forbidden": true,
+    "mfa_bypass_forbidden": true,
+    "anti_abuse_bypass_forbidden": true
+  },
+  "session_scope": {
+    "keys": ["company_id", "identity_id", "account_id", "environment", "browser_profile_id"],
+    "multiple_accounts_same_company_supported": true,
+    "cross_company_denied": true,
+    "cross_environment_denied": true,
+    "department_borrowing_requires_explicit_session_scope": true,
+    "encrypted_session_material_required_for_authenticated_use": true,
+    "plaintext_secret_material_forbidden": true
+  },
+  "initial_limits": {
+    "max_active_sessions": 1,
+    "max_registered_sessions": 64,
+    "max_tabs_per_session": 8,
+    "max_actions_per_job": 50,
+    "default_action_timeout_ms": 30000,
+    "execution_model": "SINGLE_ACTIVE_SESSION_SERIAL"
+  },
+  "capabilities": {
+    "public_browsing": true,
+    "authenticated_browsing": true,
+    "navigation": true,
+    "read_extract": true,
+    "click": true,
+    "write_fill_type": true,
+    "forms": true,
+    "uploads": true,
+    "downloads": true,
+    "screenshots": true,
+    "pdf": true,
+    "multi_tab": true,
+    "popup_tab_limit_enforced": true,
+    "persistent_profiles": true,
+    "audit": true
+  },
+  "deferred_to_next_steps": {
+    "orchestrator_pool": false,
+    "parallel_active_sessions": false,
+    "live_viewer": false,
+    "human_takeover_ui": false
+  },
+  "cost": {
+    "additional_cost_eur": 0,
+    "paid_browser_service_required": false
+  },
+  "acceptance_gate": "BROWSER1_PHYSICAL_E2E_AND_REGRESSION_GREEN"
+}
