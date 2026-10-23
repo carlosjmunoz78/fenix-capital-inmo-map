@@ -1,0 +1,128 @@
+{
+  "mission_id": "CANVA-NIGHT-2026-10-24",
+  "engine_id": "CANVA-001",
+  "company_id": "fenix",
+  "environment": "PREPROD",
+  "version": "v1",
+  "status": "READY_AFTER_OAUTH",
+  "window_local": {
+    "timezone": "Europe/Madrid",
+    "start": "2026-10-24T01:00:00+02:00",
+    "end": "2026-10-24T08:00:00+02:00"
+  },
+  "objective": "Produce a broad, high-quality Canva creative baseline for Fenix/CEREBRO while preserving all existing Canva content and publishing nothing outside Canva.",
+  "execution_mode": "ITERATIVE_BATCHES_WITH_QA",
+  "batch_plan": [
+    {
+      "batch": 1,
+      "name": "Inventory and structure",
+      "actions": [
+        "inventory existing folders/designs/brand kits/templates",
+        "identify Capital brand kit and reusable assets",
+        "create or reuse a dedicated Fenix CEREBRO workspace/folder structure without deleting existing content",
+        "record baseline"
+      ]
+    },
+    {
+      "batch": 2,
+      "name": "Brand and reusable masters",
+      "actions": [
+        "create reusable master styles and layout systems",
+        "create post, story, reel cover, carousel, testimonial, FAQ, comparison and educational masters",
+        "create variants for personal-brand and corporate use"
+      ]
+    },
+    {
+      "batch": 3,
+      "name": "Static creative production",
+      "targets": {
+        "social_posts": 12,
+        "carousel_concepts": 6,
+        "stories": 12,
+        "reel_covers": 8,
+        "youtube_or_video_thumbnails": 6
+      },
+      "actions": [
+        "use distinct hypotheses and visual directions",
+        "keep editable masters",
+        "apply brand/legibility/accessibility/license QA"
+      ]
+    },
+    {
+      "batch": 4,
+      "name": "Image and AI experimentation",
+      "targets": {
+        "generated_image_concepts": 12,
+        "background_or_cutout_variants": 6,
+        "authority_portrait_or_lifestyle_concepts": 6
+      },
+      "actions": [
+        "test realistic professional visual directions",
+        "avoid cheap synthetic aesthetic",
+        "retain source/provenance notes when available",
+        "use premium Canva capabilities only when included in plan"
+      ]
+    },
+    {
+      "batch": 5,
+      "name": "Video and motion drafts",
+      "targets": {
+        "short_video_drafts": 6,
+        "animated_story_or_post_variants": 6
+      },
+      "actions": [
+        "create hook-first vertical concepts",
+        "add captions and on-screen text where appropriate",
+        "test pacing, transitions and motion",
+        "leave drafts in Canva and do not publish"
+      ]
+    },
+    {
+      "batch": 6,
+      "name": "Platform adaptation",
+      "actions": [
+        "adapt strongest concepts for Facebook",
+        "prepare reusable variants for Instagram, LinkedIn, TikTok, YouTube and web",
+        "do not treat resize alone as native adaptation"
+      ]
+    },
+    {
+      "batch": 7,
+      "name": "Final QA and handoff",
+      "actions": [
+        "deduplicate obvious low-value variants",
+        "keep all useful experiments",
+        "mark strongest candidates as READY_FOR_REVIEW",
+        "record what each variant tests",
+        "produce an inventory of created assets and next experiments"
+      ]
+    }
+  ],
+  "quality_gates": [
+    "brand_consistency",
+    "mobile_legibility",
+    "visual_hierarchy",
+    "realism_or_intentional_style",
+    "platform_format",
+    "accessibility",
+    "license_and_commercial_use",
+    "no_unapproved_claims",
+    "editable_master_preserved",
+    "no_external_publish"
+  ],
+  "cost_policy": {
+    "additional_cost_eur": 0,
+    "canva_paid_plan_features": "ALLOWED_WHEN_ALREADY_INCLUDED",
+    "ai_credit_usage": "ALLOWED_WITHIN_EXISTING_PLAN_ALLOWANCE",
+    "extra_purchase": "MONEY_LIMIT"
+  },
+  "stop_conditions": [
+    "provider_oauth_not_available",
+    "security_incident",
+    "policy_conflict",
+    "unexpected_extra_charge",
+    "high_risk_mutation"
+  ],
+  "required_start_gate": "CANVA_OAUTH_CONNECTED_TO_CEREBRO_MCP",
+  "publish_permission": false
+}
