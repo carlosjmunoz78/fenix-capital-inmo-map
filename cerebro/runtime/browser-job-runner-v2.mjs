@@ -2,6 +2,7 @@ import { pathToFileURL } from 'node:url';
 
 const DEFAULT_AUDIENCE='cerebro-browser-worker-v1';
 const CREDENTIAL_PLACEHOLDER=/^\$CREDENTIAL\.([A-Za-z0-9_.-]{1,120})$/;
+const MAX_BROWSER1_ACTIONS=50;
 
 const DEFAULT_ENDPOINT=process.env.CEREBRO_BROWSER_DISPATCH_URL || '';
 const DEFAULT_SLOT=Number(process.env.CEREBRO_BROWSER_WORKER_SLOT || 1);
@@ -19,6 +20,30 @@ async function getGitHubOidcTokenV2({audience=process.env.CEREBRO_BROWSER_OIDC_A
 }
 function resolveCredentialPath(secret,dottedPath){let value=secret;for(const segment of dottedPath.split('.')){if(!plainObject(value)||!Object.prototype.hasOwnProperty.call(value,segment))throw new Error('CREDENTIAL_PLACEHOLDER_NOT_AVAILABLE');value=value[segment];}if(value===undefined||value===null||!['string','number','boolean'].includes(typeof value))throw new Error('CREDENTIAL_PLACEHOLDER_VALUE_INVALID');return String(value);}
 export function hydrateCredentialPlaceholdersV2(value,secret){if(typeof value==='string'){const match=CREDENTIAL_PLACEHOLDER.exec(value);return match?resolveCredentialPath(secret,match[1]):value;}if(Array.isArray(value))return value.map(item=>hydrateCredentialPlaceholdersV2(item,secret));if(plainObject(value))return Object.fromEntries(Object.entries(value).map(([key,nested])=>[key,hydrateCredentialPlaceholdersV2(nested,secret)]));return value;}
+
+export function applyHumanOperatorPacingV2(commands=[]){
+  if(!Array.isArray(commands))throw new Error('COMMANDS_MUST_BE_ARRAY');
+  const out=[];
+  const shortSettle=new Set(['fill','write','type','select','check','uncheck']);
+  const submitSettle=new Set(['click','double_click','press','upload','download_click','drag']);
+  const navigationSettle=new Set(['goto','reload','open_tab','switch_tab']);
+  for(let i=0;i<commands.length;i+=1){
+    const command=commands[i];
+    out.push(command);
+    const name=String(command?.command||'').toLowerCase();
+    const nextName=String(commands[i+1]?.command||'').toLowerCase();
+    if(nextName==='wait')continue;
+    let ms=0;
+    if(shortSettle.has(name))ms=650;
+    else if(submitSettle.has(name))ms=900;
+    else if(navigationSettle.has(name))ms=700;
+    if(!ms)continue;
+    const remainingOriginal=commands.length-(i+1);
+    if(out.length+1+remainingOriginal<=MAX_BROWSER1_ACTIONS)out.push({command:'wait',ms});
+  }
+  return out;
+}
+
 async function createDefaultBrowser1(){const mod=await import('./browser1-access-v1.mjs');return mod.createBrowser1Tool({sessions:[]});}
 function scrub(value,seen=new WeakSet()){
   if(!value||typeof value!=='object'||seen.has(value))return;
@@ -95,6 +120,7 @@ export async function runOneBrowserJobV2({
       secretPayload=materialized.secret_payload; effectiveCommands=hydrateCredentialPlaceholdersV2(job.commands,secretPayload); credentialMaterialized=true;
     }
 
+    effectiveCommands=applyHumanOperatorPacingV2(effectiveCommands);
     const mode=String(job.mode||'OBSERVE').toUpperCase();
     const executeTool=mode==='MUTATE'?browser.act:browser.observe;
     if(typeof executeTool!=='function')throw new Error(`BROWSER1_${mode}_EXECUTOR_MISSING`);
@@ -129,4 +155,4 @@ async function main(){
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href)await main();
 
-export const BROWSER_JOB_RUNNER_V2_CONTRACT=Object.freeze({schema_version:'2.0.0',capability_id:'BROWSER-1',orchestrator:'BROWSER-ORCH-V2',authentication:'GITHUB_ACTIONS_OIDC',worker_pool:true,one_serial_browser1_per_worker:true,raw_credentials_in_queue:false,vault_credential_materialization:true,metrics_without_secrets:true,incremental_cost_eur:0,serial_v1_rollback_preserved:true});
+export const BROWSER_JOB_RUNNER_V2_CONTRACT=Object.freeze({schema_version:'2.1.0',capability_id:'BROWSER-1',orchestrator:'BROWSER-ORCH-V2',authentication:'GITHUB_ACTIONS_OIDC',worker_pool:true,one_serial_browser1_per_worker:true,raw_credentials_in_queue:false,vault_credential_materialization:true,human_operator_liveness:true,adaptive_ui_settle_pacing:true,no_stealth_evasion:true,metrics_without_secrets:true,incremental_cost_eur:0,serial_v1_rollback_preserved:true});
