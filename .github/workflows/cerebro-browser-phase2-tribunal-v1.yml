@@ -1,0 +1,47 @@
+name: CEREBRO Browser 1 Phase 2 Tribunal V1
+
+on:
+  push:
+    branches:
+      - 'cerebro/browser1-phase2-orchestrator-v1'
+    paths:
+      - 'docs/CEREBRO_BROWSER_PHASE2_EVIDENCE_2026-10-23.json'
+      - 'docs/CEREBRO_BROWSER_PHASE2_OLD_VS_NEW_2026-10-23.md'
+      - 'cerebro/tribunal/browser-phase2-tribunal-v1.mjs'
+      - '.github/workflows/cerebro-browser-phase2-tribunal-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tribunal:
+    name: Phase 2 deterministic promotion tribunal
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Prove latest main is an ancestor of this Phase 2 branch
+        run: |
+          git fetch origin main
+          git merge-base --is-ancestor origin/main HEAD
+      - name: Prove Phase 1 Browser implementation was not modified
+        run: |
+          git fetch origin main
+          changed="$(git diff --name-only origin/main...HEAD)"
+          printf '%s\n' "$changed"
+          if printf '%s\n' "$changed" | grep -E '(^|/)(browser-job-runner-v1\.mjs|cerebro-browser-job-runner-v1\.yml|cerebro-browser-dispatch-v1/index\.ts|.*browser.*_v1\.sql)$'; then
+            echo 'Phase 1 Browser file modified by Phase 2'
+            exit 1
+          fi
+      - name: Run Phase 2 runtime contract tests
+        run: node --test cerebro/tests/browser-orchestrator-v2.test.mjs cerebro/tests/browser-job-runner-v2.test.mjs
+      - name: Run deterministic Phase 2 tribunal
+        run: node cerebro/tribunal/browser-phase2-tribunal-v1.mjs
