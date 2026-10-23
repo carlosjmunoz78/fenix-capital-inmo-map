@@ -1,0 +1,54 @@
+{
+  "schema_version": "1.0.0",
+  "registry_id": "CEREBRO-CREATIVE-MEDIA-KNOWLEDGE-REGISTRY-V1",
+  "status": "ACTIVE_SHARED_KNOWLEDGE_REGISTRY",
+  "scope": "CEREBRO_OS_ALL_DEPARTMENTS",
+  "source_repository": "carlosjmunoz78/fenix-capital-cerebro-social",
+  "source_branch": "cerebro/facebook-autonomous-ops-v1-2026-10-23",
+  "authoritative_contracts": [
+    "config/creative-media-knowledge-master-v1.json",
+    "knowledge/canva-creative-knowledge-seed-2026-10-23.json",
+    "knowledge/creative-platform-production-specs-2026-10-23.json",
+    "knowledge/creative-accessibility-licensing-seed-2026-10-23.json"
+  ],
+  "consumers": [
+    "PERSONAL_BRAND_AND_INFLUENCE_FACTORY",
+    "FACEBOOK_FAMILY",
+    "FUTURE_INSTAGRAM_FAMILY",
+    "FUTURE_LINKEDIN_FAMILY",
+    "FUTURE_TIKTOK_FAMILY",
+    "FUTURE_YOUTUBE_GOOGLE_FAMILY",
+    "MARKETING",
+    "DIGITAL_BUILD_WEB",
+    "APP_CREATIVE",
+    "TRAINING_CONTENT",
+    "SALES_ENABLEMENT",
+    "ANY_ENGINE_CREATING_IMAGES_VIDEO_AUDIO_CAROUSELS_THUMBNAILS_OR_SOCIAL_ASSETS"
+  ],
+  "mandatory_behavior": [
+    "LOAD_CREATIVE_MEDIA_MASTER_BEFORE_HIGH_VALUE_CREATIVE_EXECUTION",
+    "LOAD_CURRENT_TOOL_AND_PLATFORM_SEEDS",
+    "REFRESH_STALE_OFFICIAL_SPECS_BEFORE_HIGH_VOLUME_AUTOMATION",
+    "PRESERVE_PERSON_COMPANY_BRAND_AND_SESSION_SCOPE",
+    "USE_ZERO_ADDITIONAL_COST_DEFAULT",
+    "USE_BROWSER_FOR_LEGITIMATE_FREE_UI_WHEN_SAFE_RELIABLE_AND_COST_BETTER",
+    "USE_CANVA_AS_CREATIVE_WORKSPACE_WHEN_USEFUL_NOT_AS_DEFAULT_VOICE_PROVIDER",
+    "PREFER_CEREBRO_OWN_OR_BEST_ALLOWED_ZERO_COST_EXPRESSIVE_VOICE",
+    "RUN_BRAND_VISUAL_AUDIO_CAPTION_ACCESSIBILITY_LICENSE_AND_PLATFORM_QA",
+    "PRESERVE_HIGH_QUALITY_SOURCE_MASTERS",
+    "STORE_LICENSE_AND_ASSET_PROVENANCE",
+    "LEARN_FROM_FIRST_PARTY_CREATIVE_PERFORMANCE"
+  ],
+  "governance": {
+    "company_id_required": true,
+    "engine_id_required": true,
+    "environment_required": true,
+    "version_required": true,
+    "person_or_brand_scope_required_when_applicable": true,
+    "human_by_exception": true,
+    "canonical_human_required_only": true,
+    "no_new_paid_subscription_by_default": true,
+    "no_make_or_buffer_removal_without_parallel_parity_and_rollback": true
+  },
+  "runtime_truth": "Knowledge contracts are registered and available for CEREBRO-wide reuse. Automatic loading and physical execution must still be proven per consuming engine or platform binding before that consumer is called operationally certified."
+}
