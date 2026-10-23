@@ -9,13 +9,16 @@ export type BrowserSessionV3={
 };
 
 type ApiResult<T>=Promise<{status:number;data:T|null}>;
+const BROWSER_GATEWAY='cerebro-console-browser-gateway-v1';
+const BROWSER_SCOPE=Object.freeze({company_id:'fenix',engine_id:'CONSOLE-001',environment:'PROD',version:'v3'});
 
-export async function fetchBrowserInteractiveApi<T>(path:string,body:unknown={}):ApiResult<T>{
+export async function fetchBrowserInteractiveApi<T>(path:string,body:Record<string,unknown>={}):ApiResult<T>{
  const {data:{session}}=await supabase.auth.getSession();
  const token=session?.access_token;if(!token)return{status:401,data:null};
+ const route=String(path||'').replace(/^\/+/, '');
  try{
-  const response=await fetch(`${SUPABASE_URL}/functions/v1/cerebro-browser-interactive-v3${path}`,{
-   method:'POST',headers:{'content-type':'application/json',Authorization:`Bearer ${token}`,apikey:SUPABASE_PUBLISHABLE_KEY},body:JSON.stringify(body)
+  const response=await fetch(`${SUPABASE_URL}/functions/v1/${BROWSER_GATEWAY}/${route}`,{
+   method:'POST',headers:{'content-type':'application/json',Authorization:`Bearer ${token}`,apikey:SUPABASE_PUBLISHABLE_KEY},body:JSON.stringify({...body,...BROWSER_SCOPE}),cache:'no-store'
   });
   const data=await response.json().catch(()=>null) as T|null;
   return{status:response.status,data};
