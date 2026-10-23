@@ -56,6 +56,10 @@ async function fixtureServer() {
       <div id="persist">NO</div>
       <div id="auth">NO|NO</div>
       <a id="download" href="/download.txt" download>Descargar</a>
+      <button id="pointButton" style="position:fixed;left:100px;top:700px;width:120px;height:60px" onclick="document.querySelector('#pointClickOut').textContent='CLICK_OK'">Visual Button</button>
+      <div id="pointClickOut" style="position:fixed;left:100px;top:770px">CLICK_NO</div>
+      <input id="pointInput" style="position:fixed;left:300px;top:700px;width:200px;height:40px" oninput="document.querySelector('#pointTypeOut').textContent=this.value" />
+      <div id="pointTypeOut" style="position:fixed;left:300px;top:750px">TYPE_NO</div>
       <script>
         if(localStorage.getItem('cerebroPersist')==='YES') document.querySelector('#persist').textContent='YES';
         document.querySelector('#auth').textContent=(document.cookie.includes('cerebroAuth=YES')?'YES':'NO')+'|'+(localStorage.getItem('cerebroToken')||'NO');
@@ -73,6 +77,9 @@ test('capability contract is broad but fail-closed on bypasses', () => {
   assert.equal(caps.persistent_profiles, true);
   assert.equal(caps.governed_storage_state_restore, true);
   assert.equal(caps.authenticated_jobs_require_physical_materialization, true);
+  assert.equal(caps.coordinate_computer_use, true);
+  assert.equal(caps.global_keyboard_input, true);
+  assert.equal(caps.coordinates_bounded_to_viewport, true);
   assert.equal(caps.uploads, true);
   assert.equal(caps.downloads, true);
   assert.equal(caps.multi_tab, true);
@@ -81,7 +88,7 @@ test('capability contract is broad but fail-closed on bypasses', () => {
   assert.equal(caps.arbitrary_page_javascript, false);
 });
 
-test('real Chromium performs navigation, form, upload, download, evidence and persistent session', { timeout: 90_000, skip: PHYSICAL_BROWSER_E2E ? false : 'DEDICATED_PHYSICAL_BROWSER_GATE_ONLY' }, async () => {
+test('real Chromium performs DOM and coordinate Computer Use, upload, download, evidence and persistent session', { timeout: 90_000, skip: PHYSICAL_BROWSER_E2E ? false : 'DEDICATED_PHYSICAL_BROWSER_GATE_ONLY' }, async () => {
   const { server, baseUrl } = await fixtureServer();
   const temp = await fs.mkdtemp(path.join(os.tmpdir(), 'cerebro-browser-'));
   const profiles = path.join(temp, 'profiles');
@@ -102,7 +109,12 @@ test('real Chromium performs navigation, form, upload, download, evidence and pe
         { type: 'EXTRACT_TEXT', target: { selector: '#fileout' } },
         { type: 'CLICK', target: { selector: '#remember' } },
         { type: 'DOWNLOAD_CLICK', target: { selector: '#download' } },
-        { type: 'SCREENSHOT', label: 'first-run' }
+        { type: 'SCREENSHOT', label: 'first-run' },
+        { type: 'CLICK_POINT', x: 160, y: 730 },
+        { type: 'EXTRACT_TEXT', target: { selector: '#pointClickOut' } },
+        { type: 'CLICK_POINT', x: 350, y: 720 },
+        { type: 'KEYBOARD_TYPE', value: 'POINT_OK' },
+        { type: 'EXTRACT_TEXT', target: { selector: '#pointTypeOut' } }
       ]
     }));
 
@@ -111,6 +123,8 @@ test('real Chromium performs navigation, form, upload, download, evidence and pe
     assert.equal(first.results[5], 'upload.txt');
     assert.match(await fs.readFile(first.results[7].file, 'utf8'), /CEREBRO_BROWSER_DOWNLOAD_OK/);
     await fs.access(first.results[8].file);
+    assert.equal(first.results[10], 'CLICK_OK');
+    assert.equal(first.results[13], 'POINT_OK');
     await fs.access(first.final_evidence);
 
     const worker2 = createCloudBrowserWorker({ profiles_root: profiles, artifacts_root: artifacts, headless: true, audit_sink: async e => audit.push(e) });
@@ -124,7 +138,8 @@ test('real Chromium performs navigation, form, upload, download, evidence and pe
     }));
     assert.equal(second.results[1], 'YES');
     assert.ok(audit.some(e => e.type === 'BROWSER_JOB_COMPLETED'));
-    assert.ok(audit.some(e => e.type === 'BROWSER_ACTION'));
+    assert.ok(audit.some(e => e.type === 'BROWSER_ACTION' && e.action_type === 'CLICK_POINT'));
+    assert.ok(audit.some(e => e.type === 'BROWSER_ACTION' && e.action_type === 'KEYBOARD_TYPE'));
   } finally {
     await new Promise(resolve => server.close(resolve));
     await fs.rm(temp, { recursive: true, force: true });

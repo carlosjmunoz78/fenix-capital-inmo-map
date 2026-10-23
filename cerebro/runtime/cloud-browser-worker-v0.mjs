@@ -5,6 +5,7 @@ import { evaluateBrowserExecution } from './browser-transversal-autonomy-v1.mjs'
 const ACTIONS = new Set([
   'NAVIGATE','BACK','FORWARD','RELOAD','OPEN_TAB','CLOSE_TAB','SWITCH_TAB',
   'CLICK','DOUBLE_CLICK','HOVER','FILL','TYPE','PRESS','CHECK','UNCHECK','SELECT',
+  'CLICK_POINT','DOUBLE_CLICK_POINT','MOVE_POINT','KEYBOARD_TYPE','KEYBOARD_PRESS',
   'UPLOAD','DRAG','SCROLL','WAIT','EXTRACT_TEXT','EXTRACT_HTML','SCREENSHOT','PDF',
   'DOWNLOAD_CLICK'
 ]);
@@ -49,6 +50,16 @@ function locatorFor(page, target = {}) {
   throw new Error('MISSING_TARGET');
 }
 
+function pointFor(page, action = {}) {
+  const x = Number(action.x);
+  const y = Number(action.y);
+  if (!Number.isFinite(x) || !Number.isFinite(y)) throw new Error('INVALID_POINT');
+  if (x < 0 || y < 0) throw new Error('POINT_OUTSIDE_VIEWPORT');
+  const viewport = page.viewportSize();
+  if (viewport && (x > viewport.width || y > viewport.height)) throw new Error('POINT_OUTSIDE_VIEWPORT');
+  return Object.freeze({x,y});
+}
+
 function assertScope(job) {
   required(job.company_id, 'COMPANY_ID');
   required(job.identity_id, 'IDENTITY_ID');
@@ -78,12 +89,15 @@ function validateStorageState(storageState) {
 
 export function getCloudBrowserWorkerCapabilities() {
   return Object.freeze({
-    schema_version: '0.2.0',
+    schema_version: '0.3.0',
     backend: 'PLAYWRIGHT_CHROMIUM',
     persistent_profiles: true,
     governed_storage_state_restore: true,
     authenticated_jobs_require_physical_materialization: true,
     dom_and_accessibility_locators: true,
+    coordinate_computer_use: true,
+    global_keyboard_input: true,
+    coordinates_bounded_to_viewport: true,
     screenshots: true,
     pdf: true,
     uploads: true,
@@ -249,6 +263,32 @@ export function createCloudBrowserWorker({
       case 'CHECK': await target.check({ timeout }); break;
       case 'UNCHECK': await target.uncheck({ timeout }); break;
       case 'SELECT': result = await target.selectOption(action.value, { timeout }); break;
+      case 'CLICK_POINT': {
+        const point = pointFor(page, action);
+        await page.mouse.click(point.x, point.y, {button:action.button || 'left'});
+        result = point;
+        break;
+      }
+      case 'DOUBLE_CLICK_POINT': {
+        const point = pointFor(page, action);
+        await page.mouse.click(point.x, point.y, {button:action.button || 'left',clickCount:2,delay:Number(action.delay_ms || 0)});
+        result = point;
+        break;
+      }
+      case 'MOVE_POINT': {
+        const point = pointFor(page, action);
+        await page.mouse.move(point.x, point.y, {steps:Math.max(1,Math.min(Number(action.steps || 1),100))});
+        result = point;
+        break;
+      }
+      case 'KEYBOARD_TYPE':
+        await page.keyboard.type(String(action.value ?? ''), {delay:Math.max(0,Math.min(Number(action.delay_ms || 0),1000))});
+        result = {characters:String(action.value ?? '').length};
+        break;
+      case 'KEYBOARD_PRESS':
+        await page.keyboard.press(required(action.key, 'KEY'), {delay:Math.max(0,Math.min(Number(action.delay_ms || 0),1000))});
+        result = {key:String(action.key)};
+        break;
       case 'UPLOAD': await target.setInputFiles(required(action.files, 'FILES'), { timeout }); break;
       case 'DRAG': await target.dragTo(locatorFor(page, required(action.to, 'DRAG_DESTINATION')), { timeout }); break;
       case 'SCROLL':
