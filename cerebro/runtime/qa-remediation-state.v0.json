@@ -5,13 +5,13 @@
   "engine_id": "SELF-001",
   "environment": "PREPROD_CONTROL_PLANE",
   "version": "0.1.0",
-  "updated_at": "2026-10-22T23:30:00.101Z",
+  "updated_at": "2026-10-23T04:54:51.061Z",
   "status": "ROUTED_AUTONOMOUSLY_TO_PREPROD",
-  "open_cases": 7,
+  "open_cases": 6,
   "bug_cases": 2,
-  "improvement_cases": 5,
-  "learning_records_total": 7,
-  "candidate_packages_total": 7,
+  "improvement_cases": 4,
+  "learning_records_total": 6,
+  "candidate_packages_total": 6,
   "cases": [
     {
       "case_id": "qa-case:7c605788e8bb32b5147aca4b",
@@ -174,33 +174,6 @@
       "customer_data": false,
       "trading_access": false,
       "additional_cost_eur": 0
-    },
-    {
-      "case_id": "qa-case:e249ddf9aa3cf02df38ebff6",
-      "company_id": "fenix",
-      "owner_engine": "WEB-001",
-      "environment": "PREPROD",
-      "source": "IMPROVEMENT",
-      "source_learning_id": "qa-learning:10f6ec60cf405b890efa9d61",
-      "issue_severity": null,
-      "state": "ROUTED_TO_PREPROD_OWNER",
-      "human_required": null,
-      "repair_mode": "VERSIONED_PREPROD_CANDIDATE",
-      "gates": {
-        "reproduce_required": false,
-        "regression_test_required": false,
-        "old_vs_new_required": true,
-        "preprod_required": true,
-        "independent_judge_required": true,
-        "rollback_required": true,
-        "rebuild_required": true
-      },
-      "promotion_authorized": false,
-      "prod_authorized": false,
-      "prod_write_authorized": false,
-      "customer_data": false,
-      "trading_access": false,
-      "additional_cost_eur": 0
     }
   ],
   "learning_records": [
@@ -215,7 +188,7 @@
       ],
       "source_type": "ENGINE_ERROR",
       "source_environment": "PROD_READ_ONLY",
-      "observed_at": "2026-10-22T23:29:59.663Z",
+      "observed_at": "2026-10-23T04:54:50.975Z",
       "hypothesis": "Reproducir y corregir human-readonly-observation.spec.ts › [WEB] Fénix Capital Web · human read-only observation sin relajar contratos debe reducir su reincidencia.",
       "expected_metric_delta": {
         "name": "qa_issue_presence",
@@ -248,7 +221,7 @@
       ],
       "source_type": "ENGINE_ERROR",
       "source_environment": "PROD_READ_ONLY",
-      "observed_at": "2026-10-22T23:29:59.663Z",
+      "observed_at": "2026-10-23T04:54:50.975Z",
       "hypothesis": "Reproducir y corregir human-readonly-observation.spec.ts › [WEB] Fénix Capital Web · human read-only observation sin relajar contratos debe reducir su reincidencia.",
       "expected_metric_delta": {
         "name": "qa_issue_presence",
@@ -281,7 +254,7 @@
       ],
       "source_type": "METRIC_OBSERVATION",
       "source_environment": "PROD_READ_ONLY",
-      "observed_at": "2026-10-22T23:29:59.857Z",
+      "observed_at": "2026-10-23T04:54:51.014Z",
       "hypothesis": "Nombrar controles visibles reduce fricción para tecnologías de asistencia.",
       "expected_metric_delta": {
         "name": "unnamed_interactive_count",
@@ -314,7 +287,7 @@
       ],
       "source_type": "METRIC_OBSERVATION",
       "source_environment": "PROD_READ_ONLY",
-      "observed_at": "2026-10-22T23:29:59.857Z",
+      "observed_at": "2026-10-23T04:54:51.014Z",
       "hypothesis": "Nombrar controles visibles reduce fricción para tecnologías de asistencia.",
       "expected_metric_delta": {
         "name": "unnamed_interactive_count",
@@ -347,7 +320,7 @@
       ],
       "source_type": "METRIC_OBSERVATION",
       "source_environment": "PROD_READ_ONLY",
-      "observed_at": "2026-10-22T23:29:59.857Z",
+      "observed_at": "2026-10-23T04:54:51.014Z",
       "hypothesis": "Aumentar el área táctil de controles pequeños puede reducir pulsaciones fallidas.",
       "expected_metric_delta": {
         "name": "small_touch_target_count",
@@ -380,7 +353,7 @@
       ],
       "source_type": "METRIC_OBSERVATION",
       "source_environment": "PROD_READ_ONLY",
-      "observed_at": "2026-10-22T23:29:59.857Z",
+      "observed_at": "2026-10-23T04:54:51.014Z",
       "hypothesis": "Aumentar el área táctil de controles pequeños puede reducir pulsaciones fallidas.",
       "expected_metric_delta": {
         "name": "small_touch_target_count",
@@ -391,39 +364,6 @@
       "risk_class": "LOW",
       "evidence_refs": [
         "qa-improvement:qa-imp:52423800ed61b40ef9734fb3"
-      ],
-      "promotion_state": "CANDIDATE",
-      "created_by": "QA-001",
-      "reason": "CONTINUOUS_HUMAN_QA_IMPROVEMENT_SCOUT",
-      "persistent_publish_authorized": true,
-      "persistence_scope": "LOCAL_PREPROD_LRN_LEDGER_ONLY",
-      "prod_authorized": false,
-      "prod_write_authorized": false,
-      "trading_access": false,
-      "additional_cost_eur": 0
-    },
-    {
-      "learning_id": "qa-learning:10f6ec60cf405b890efa9d61",
-      "company_id": "fenix",
-      "engine_id": "WEB-001",
-      "environment": "PREPROD",
-      "version": "0.1.0",
-      "source_event_ids": [
-        "qa-imp:10f6ec60cf405b890efa9d61"
-      ],
-      "source_type": "METRIC_OBSERVATION",
-      "source_environment": "PROD_READ_ONLY",
-      "observed_at": "2026-10-22T23:29:59.857Z",
-      "hypothesis": "Investigar el recorrido lento puede descubrir una mejora de rendimiento perceptible.",
-      "expected_metric_delta": {
-        "name": "human_journey_duration_ms",
-        "direction": "LOWER",
-        "measurement": "CONTROLLED_OLD_VS_NEW"
-      },
-      "confidence": 0.7,
-      "risk_class": "LOW",
-      "evidence_refs": [
-        "qa-improvement:qa-imp:10f6ec60cf405b890efa9d61"
       ],
       "promotion_state": "CANDIDATE",
       "created_by": "QA-001",
@@ -467,7 +407,7 @@
       "evidence_refs": [
         "qa:2bde0086f90207b526542ae3"
       ],
-      "created_at": "2026-10-22T23:29:59.663Z",
+      "created_at": "2026-10-23T04:54:50.975Z",
       "state": "CANDIDATE",
       "next_gate": "OLD_VS_NEW_EXPERIMENT",
       "experiment_contract": {
@@ -530,7 +470,7 @@
       "evidence_refs": [
         "qa:106a1d44c42fd29681abaa93"
       ],
-      "created_at": "2026-10-22T23:29:59.663Z",
+      "created_at": "2026-10-23T04:54:50.975Z",
       "state": "CANDIDATE",
       "next_gate": "OLD_VS_NEW_EXPERIMENT",
       "experiment_contract": {
@@ -593,7 +533,7 @@
       "evidence_refs": [
         "qa-improvement:qa-imp:2c72c8984471e786fdae5674"
       ],
-      "created_at": "2026-10-22T23:29:59.857Z",
+      "created_at": "2026-10-23T04:54:51.014Z",
       "state": "CANDIDATE",
       "next_gate": "OLD_VS_NEW_EXPERIMENT",
       "experiment_contract": {
@@ -656,7 +596,7 @@
       "evidence_refs": [
         "qa-improvement:qa-imp:bff844dc5851a34667aad2b5"
       ],
-      "created_at": "2026-10-22T23:29:59.857Z",
+      "created_at": "2026-10-23T04:54:51.014Z",
       "state": "CANDIDATE",
       "next_gate": "OLD_VS_NEW_EXPERIMENT",
       "experiment_contract": {
@@ -719,7 +659,7 @@
       "evidence_refs": [
         "qa-improvement:qa-imp:04812c9c0f8c6e34fa6d5e4d"
       ],
-      "created_at": "2026-10-22T23:29:59.857Z",
+      "created_at": "2026-10-23T04:54:51.014Z",
       "state": "CANDIDATE",
       "next_gate": "OLD_VS_NEW_EXPERIMENT",
       "experiment_contract": {
@@ -782,76 +722,13 @@
       "evidence_refs": [
         "qa-improvement:qa-imp:52423800ed61b40ef9734fb3"
       ],
-      "created_at": "2026-10-22T23:29:59.857Z",
+      "created_at": "2026-10-23T04:54:51.014Z",
       "state": "CANDIDATE",
       "next_gate": "OLD_VS_NEW_EXPERIMENT",
       "experiment_contract": {
         "required": true,
         "old_version": "0.1.0",
         "new_version": "0.1.0-rsi-cand.68939aac",
-        "baseline_resolution_required": true,
-        "dataset_kinds": [
-          "HISTORICAL",
-          "SYNTHETIC"
-        ],
-        "prod_writes": false,
-        "customer_data_required": false
-      },
-      "preservation_contract": {
-        "preserve_existing": true,
-        "contract_resolution_required": true,
-        "rollback_required": true,
-        "rebuild_required": true,
-        "policy_mutation_allowed": false,
-        "permission_elevation_allowed": false,
-        "budget_elevation_allowed": false
-      },
-      "auto_experiment_eligible": true,
-      "promotion_authorized": false,
-      "persistent_publish_authorized": true,
-      "persistence_scope": "LOCAL_PREPROD_IMPROVEMENT_CANDIDATE_LEDGER_ONLY",
-      "prod_authorized": false,
-      "prod_write_authorized": false,
-      "trading_access": false,
-      "additional_cost_eur": 0
-    },
-    {
-      "schema_version": "1.0.0",
-      "state_type": "CEREBRO_VERSIONED_IMPROVEMENT_CANDIDATE",
-      "candidate_id": "cand:68d1728b4254592a73b18653",
-      "company_id": "fenix",
-      "engine_id": "WEB-001",
-      "environment": "PREPROD",
-      "baseline_version": "0.1.0",
-      "baseline_version_source": "LEARNING_CONTEXT_VERSION_REQUIRES_OLD_CONTRACT_RESOLUTION",
-      "baseline_verification_required": true,
-      "candidate_version": "0.1.0-rsi-cand.68d1728b",
-      "learning_runtime_version": "0.1.0",
-      "source_learning_id": "qa-learning:10f6ec60cf405b890efa9d61",
-      "source_event_ids": [
-        "qa-imp:10f6ec60cf405b890efa9d61"
-      ],
-      "source_type": "METRIC_OBSERVATION",
-      "source_environment": "PROD_READ_ONLY",
-      "hypothesis": "Investigar el recorrido lento puede descubrir una mejora de rendimiento perceptible.",
-      "change_intent": "IMPROVE_MEASURED_ENGINE_OUTCOME",
-      "target_metric": {
-        "name": "human_journey_duration_ms",
-        "direction": "LOWER",
-        "measurement": "CONTROLLED_OLD_VS_NEW"
-      },
-      "confidence": 0.7,
-      "risk_class": "LOW",
-      "evidence_refs": [
-        "qa-improvement:qa-imp:10f6ec60cf405b890efa9d61"
-      ],
-      "created_at": "2026-10-22T23:29:59.857Z",
-      "state": "CANDIDATE",
-      "next_gate": "OLD_VS_NEW_EXPERIMENT",
-      "experiment_contract": {
-        "required": true,
-        "old_version": "0.1.0",
-        "new_version": "0.1.0-rsi-cand.68d1728b",
         "baseline_resolution_required": true,
         "dataset_kinds": [
           "HISTORICAL",
