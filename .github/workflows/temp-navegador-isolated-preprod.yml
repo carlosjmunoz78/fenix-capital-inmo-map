@@ -20,7 +20,6 @@ jobs:
       VITE_FENIX_ENV: preprod
       VITE_SUPABASE_URL: https://hnqlnvakzaywtafeiybt.supabase.co
       VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_uvtiidkBBkFRt2K34so27g_JpCbMUZw
-      PHYSICAL_PREPROD_URL: https://fenix-capital-prep-git-e46185-carlosjmunozcabeza-2582s-projects.vercel.app
     steps:
       - name: Checkout exact verification branch
         uses: actions/checkout@v4
@@ -51,6 +50,26 @@ jobs:
           ! grep -R -F 'cluhljgonannaafpmblx.supabase.co' dist-preprod
           grep -R -F 'Abrir interfaz Navegador' dist-preprod >/dev/null
           grep -R -F 'NAVEGADOR' dist-preprod >/dev/null
+
+      - name: Install Chromium for exact-build acceptance
+        run: npx playwright install --with-deps chromium
+
+      - name: Start exact PREPROD build locally for browser acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx vite preview --host 127.0.0.1 --port 4173 --outDir dist-preprod >/tmp/navegador-vite.log 2>&1 &
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/navegador-vite.log >&2 || true
+          exit 1
+
+      - name: Synthetic-session semantic acceptance on exact build
+        env:
+          PHYSICAL_PREPROD_URL: http://127.0.0.1:4173
+        run: node scripts/temp-navegador-physical-qa.mjs
 
       - name: Prepare Vercel-readable isolated static branch
         shell: bash
@@ -88,27 +107,6 @@ jobs:
           git commit -m "deploy: isolated NAVEGADOR PREPROD ${GITHUB_SHA}"
           git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           git push --force origin preprod-navegador-pages
-
-      - name: Wait until Vercel serves this exact PREPROD source SHA
-        shell: bash
-        run: |
-          set -euo pipefail
-          for attempt in $(seq 1 40); do
-            served="$(curl -fsSL --max-time 10 "${PHYSICAL_PREPROD_URL}/PREPROD_SOURCE_SHA.txt?attempt=${attempt}" 2>/dev/null | tr -d '\r\n' || true)"
-            if [ "$served" = "$GITHUB_SHA" ]; then
-              echo "PHYSICAL_PREPROD_SOURCE_SHA=$served"
-              exit 0
-            fi
-            sleep 3
-          done
-          echo "Vercel did not converge to expected SHA $GITHUB_SHA" >&2
-          exit 1
-
-      - name: Install Chromium for remote physical acceptance
-        run: npx playwright install --with-deps chromium
-
-      - name: Physical synthetic-session NAVEGADOR acceptance
-        run: node scripts/temp-navegador-physical-qa.mjs
 
       - name: Upload physical acceptance evidence
         if: always()
