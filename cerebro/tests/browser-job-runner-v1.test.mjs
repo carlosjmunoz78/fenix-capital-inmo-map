@@ -33,7 +33,7 @@ test('leases, executes and completes a public OBSERVE job without secret materia
       identity_id:'public',account_id:'public',audit_id:'audit-1',credential_ref_id:null,
       commands:[{command:'goto',url:'https://fenixcapital.es/'}],
       authority:{canonical_engine_ids:['CONSOLE-001'],browser_binding:{healthy:true,kill_switch_enabled:true,fresh_attestation:true},engine_authority:{browser_use_authorized:true},kill_switch_enabled:true}
-    }}}),{status:200,headers:{'content-type':'application/json'}});
+    }}),{status:200,headers:{'content-type':'application/json'}});
     if(u.endsWith('/complete')) return new Response(JSON.stringify({ok:true,status:'SUCCEEDED'}),{status:200,headers:{'content-type':'application/json'}});
     throw new Error(`unexpected fetch ${u}`);
   };
