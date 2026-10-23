@@ -1230,6 +1230,76 @@
       "promoted_at": "2026-10-22T10:19:14.841Z"
     },
     {
+      "candidate_id": "repo:0f1d4cd5610bbbb45a13089a23bb",
+      "technical_name": "blog-article-design",
+      "source_locator": "github://TerminalSkills/skills@20719c32fa1cc0bf4598bd3d2c75c058f8c19ddd/skills/blog-article-design",
+      "pinned_sha": "20719c32fa1cc0bf4598bd3d2c75c058f8c19ddd",
+      "snapshot_sha256": "0f1d4cd5610bbbb45a13089a23bbeaf7f7fa7b3ed071186004c80398295731b6",
+      "manifest_sha256": "84be93b658ae6859f6fe6670e6fc07307cbcf3863bdbf4c300383d39ea12bbea",
+      "outcome_hash": "86eb5980b9d8ab4257c9e63e8c692a426b8bedcdeaade46f242a071da6a5d727",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:0f1d4cd5610bbbb4:cap:1",
+          "technical_name": "blog-article-design",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-23T00:53:35.521Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "875e4bb7566e184eb2fd1a74f0dee5cd1aa28b117a6da2433db7bf15ba06faeb"
+    },
+    {
       "candidate_id": "repo:dbd00f2cfc5b33e91c1c65f0499f",
       "technical_name": "blog-article-design",
       "source_locator": "github://TerminalSkills/skills@6edcf94159d9f46b0759d2e1b59dd545cfaca254/skills/blog-article-design",
@@ -1831,6 +1901,78 @@
         "observed_at": "2026-10-21T14:40:37.050Z"
       },
       "promoted_at": "2026-10-21T14:40:37.050Z"
+    },
+    {
+      "candidate_id": "repo:fde1bfa7282cbeea370ee15cf77d",
+      "technical_name": "breach-data",
+      "source_locator": "github://TerminalSkills/skills@20719c32fa1cc0bf4598bd3d2c75c058f8c19ddd/skills/breach-data",
+      "pinned_sha": "20719c32fa1cc0bf4598bd3d2c75c058f8c19ddd",
+      "snapshot_sha256": "fde1bfa7282cbeea370ee15cf77d2c0dd05cb5c65a2224b99401d80f6df1ec20",
+      "manifest_sha256": "062915b0cf2b1c43996de0ad61f98d225c142a9571835e33c0e7b4cf02813556",
+      "outcome_hash": "b13bb4af912221d9accd735a8502c4acfa8abe6656836d17bad48059e116c019",
+      "target_engine_bindings": [
+        "CMP-002",
+        "DPO-001",
+        "IAM-001",
+        "RED-001",
+        "SEC-001",
+        "SEC-002"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:fde1bfa7282cbeea:cap:1",
+          "technical_name": "breach-data",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "security-identity-privacy",
+              "engine_bindings": [
+                "CMP-002",
+                "DPO-001",
+                "IAM-001",
+                "RED-001",
+                "SEC-001",
+                "SEC-002"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 6
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-23T00:53:35.522Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "c7a71095391d5aebd047ab4561f35944c41887df83192c59061a8f4822f62324"
     },
     {
       "candidate_id": "repo:eb5b51e4a6ac69732371e1c6bbf8",
@@ -10605,11 +10747,11 @@
   ],
   "adoption_skips": [],
   "summary": {
-    "total": 105,
-    "inserted": 0,
+    "total": 107,
+    "inserted": 2,
     "updated": 0,
     "skipped": 0,
-    "pending_canary": 0,
+    "pending_canary": 2,
     "prod_readonly": 105
   }
 }
