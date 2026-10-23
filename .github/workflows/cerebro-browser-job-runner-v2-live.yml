@@ -6,8 +6,10 @@ on:
     paths:
       - '.github/workflows/cerebro-browser-job-runner-v2-live.yml'
       - 'cerebro/runtime/browser-job-runner-v2.mjs'
+      - 'cerebro/runtime/browser-interactive-session-v3.mjs'
       - 'cerebro/runtime/browser1-access-v1.mjs'
       - 'supabase/functions/cerebro-browser-dispatch-v2/**'
+      - 'supabase/functions/cerebro-browser-interactive-v3/**'
   schedule:
     - cron: '*/5 * * * *'
   workflow_dispatch:
