@@ -1,0 +1,120 @@
+name: TEMP NAVEGADOR Isolated PREPROD
+
+on:
+  push:
+    branches:
+      - cerebro/navegador-physical-verify-20261023
+
+permissions:
+  contents: write
+
+concurrency:
+  group: temp-navegador-isolated-preprod
+  cancel-in-progress: true
+
+jobs:
+  build-publish-physical-verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      VITE_FENIX_ENV: preprod
+      VITE_SUPABASE_URL: https://hnqlnvakzaywtafeiybt.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_uvtiidkBBkFRt2K34so27g_JpCbMUZw
+      PHYSICAL_PREPROD_URL: https://fenix-capital-prep-git-e46185-carlosjmunozcabeza-2582s-projects.vercel.app
+    steps:
+      - name: Checkout exact verification branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies reproducibly
+        run: npm ci
+
+      - name: Contract test NAVEGADOR
+        run: npx playwright test tests/cerebro-browser-console-v0-contract.spec.ts --project=desktop-chromium --reporter=line
+
+      - name: Build isolated PREPROD snapshot
+        run: npx vite build --base=/ --outDir dist-preprod
+
+      - name: Assert PREPROD isolation and NAVEGADOR in physical bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f dist-preprod/index.html
+          grep -R -F 'hnqlnvakzaywtafeiybt.supabase.co' dist-preprod >/dev/null
+          ! grep -R -F 'cluhljgonannaafpmblx.supabase.co' dist-preprod
+          grep -R -F 'Abrir interfaz Navegador' dist-preprod >/dev/null
+          grep -R -F 'NAVEGADOR' dist-preprod >/dev/null
+
+      - name: Prepare Vercel-readable isolated static branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp dist-preprod/index.html dist-preprod/404.html
+          touch dist-preprod/.nojekyll
+          printf '%s\n' "${GITHUB_SHA}" > dist-preprod/PREPROD_SOURCE_SHA.txt
+          cat > dist-preprod/package.json <<'JSON'
+          {"name":"fenix-capital-navegador-isolated-preprod-static","private":true,"version":"1.0.0","scripts":{"build":"node build-static.cjs"}}
+          JSON
+          cat > dist-preprod/build-static.cjs <<'JS'
+          const fs=require('fs');const path=require('path');const root=process.cwd();const out=path.join(root,'dist');fs.rmSync(out,{recursive:true,force:true});fs.mkdirSync(out,{recursive:true});const skip=new Set(['dist','.git','node_modules','package.json','package-lock.json','build-static.cjs','vercel.json']);for(const name of fs.readdirSync(root)){if(skip.has(name))continue;fs.cpSync(path.join(root,name),path.join(out,name),{recursive:true});}
+          JS
+          cat > dist-preprod/vercel.json <<'JSON'
+          {"buildCommand":"npm run build","outputDirectory":"dist","cleanUrls":false}
+          JSON
+          test ! -e dist-preprod/CNAME
+
+      - name: Publish isolated PREPROD snapshot branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/fenix-navegador-preprod
+          mkdir -p /tmp/fenix-navegador-preprod
+          cp -R dist-preprod/. /tmp/fenix-navegador-preprod/
+          cd /tmp/fenix-navegador-preprod
+          git init
+          git checkout -b preprod-navegador-pages
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m "deploy: isolated NAVEGADOR PREPROD ${GITHUB_SHA}"
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git push --force origin preprod-navegador-pages
+
+      - name: Wait until Vercel serves this exact PREPROD source SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 40); do
+            served="$(curl -fsSL --max-time 10 "${PHYSICAL_PREPROD_URL}/PREPROD_SOURCE_SHA.txt?attempt=${attempt}" 2>/dev/null | tr -d '\r\n' || true)"
+            if [ "$served" = "$GITHUB_SHA" ]; then
+              echo "PHYSICAL_PREPROD_SOURCE_SHA=$served"
+              exit 0
+            fi
+            sleep 3
+          done
+          echo "Vercel did not converge to expected SHA $GITHUB_SHA" >&2
+          exit 1
+
+      - name: Install Chromium for remote physical acceptance
+        run: npx playwright install --with-deps chromium
+
+      - name: Physical synthetic-session NAVEGADOR acceptance
+        run: node scripts/temp-navegador-physical-qa.mjs
+
+      - name: Upload physical acceptance evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: navegador-preprod-physical-${{ github.sha }}
+          path: navegador-preprod-physical.png
+          retention-days: 7
+          if-no-files-found: warn
