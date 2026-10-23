@@ -1,0 +1,118 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_CLOUD_BROWSER_WORKER_STATE_V0",
+  "company_id": "GLOBAL",
+  "engine_id": "AUTO-001",
+  "environment": "MULTI_ENV_GOVERNED",
+  "version": "0.1.0",
+  "alias_es": "Navegador cloud transversal CEREBRO",
+  "implementation": {
+    "runtime": "cerebro/runtime/cloud-browser-worker-v0.mjs",
+    "policy": "cerebro/registry/browser-transversal-autonomy-policy.v1.json",
+    "tests": "cerebro/tests/cloud-browser-worker-v0.test.mjs",
+    "physical_ci": ".github/workflows/cerebro-cloud-browser-worker-v0.yml",
+    "prod_canary": "cerebro/canary/cloud-browser-prod-observe-v0.mjs",
+    "prod_canary_workflow": ".github/workflows/cerebro-cloud-browser-prod-canary-v0.yml"
+  },
+  "capabilities_confirmed_by_contract_and_physical_e2e": [
+    "PLAYWRIGHT_CHROMIUM",
+    "NAVIGATION",
+    "MULTI_TAB",
+    "CLICK",
+    "DOUBLE_CLICK",
+    "HOVER",
+    "FORM_FILL",
+    "KEYBOARD",
+    "CHECKBOX",
+    "SELECT",
+    "UPLOAD",
+    "DOWNLOAD",
+    "DRAG_DROP",
+    "SCROLL",
+    "TEXT_EXTRACTION",
+    "HTML_EXTRACTION",
+    "SCREENSHOT",
+    "PDF",
+    "PERSISTENT_PROFILE_STORAGE",
+    "AUDIT_EVENTS",
+    "MULTICOMPANY_SCOPE_ISOLATION",
+    "FAIL_CLOSED_AUTHORIZATION",
+    "KILL_SWITCH"
+  ],
+  "promotion_evidence": {
+    "runtime_pr": 866,
+    "runtime_main_commit": "12f98124afd24dd9e67a929100c87f52748d8200",
+    "physical_e2e_run_id": 39916278781,
+    "physical_e2e_status": "GREEN",
+    "full_cerebro_regression": "GREEN",
+    "factory_shadow": "GREEN",
+    "app_surface_isolation_shadow": "GREEN",
+    "tribunal_shadow": "GREEN",
+    "prod_canary_pr": 867,
+    "prod_canary_main_commit": "cab876b0222db9f94e12d2b8045933f15818cf76",
+    "prod_canary_run_id": 39916870397,
+    "prod_canary_artifact_id": 12485726098,
+    "prod_canary_artifact_sha256": "deae2af57b82ec58a432d071901efd4430cfea956dcbb3bc11e0f6d8fa13042a",
+    "prod_canary_target": "https://fenixcapital.es/",
+    "prod_canary_operation": "OBSERVE",
+    "prod_canary_authorization": "AUTHORIZED",
+    "prod_canary_physical_browser": "PLAYWRIGHT_CHROMIUM",
+    "prod_canary_execution_surface": "GITHUB_ACTIONS_EPHEMERAL",
+    "prod_canary_observed_h1": "Hipotecas en Córdoba y Andalucía.\nDecide con claridad.",
+    "prod_canary_status": "GREEN_PHYSICAL_PROD_OBSERVATION"
+  },
+  "authority_state": {
+    "prod_observation": "CONFIRMED",
+    "prod_authenticated_observation": "NOT_YET_PHYSICALLY_ATTESTED_IN_CLOUD",
+    "prod_routine_mutation": "NOT_YET_PHYSICALLY_ATTESTED",
+    "persistent_24x7_cloud_host": "POR_AUDITAR",
+    "authenticated_cloud_identity_vault": "POR_AUDITAR",
+    "vision_coordinate_computer_use_fallback": "PARCIAL_NOT_IMPLEMENTED_IN_THIS_WORKER",
+    "captcha_mfa_antibot_bypass": "FORBIDDEN",
+    "trading_authority": "FORBIDDEN_WITHOUT_ISOLATED_TRADING_RUNTIME"
+  },
+  "cost": {
+    "new_subscription_required": false,
+    "incremental_cost_eur": 0,
+    "current_execution_surface": "EXISTING_GITHUB_ACTIONS_EPHEMERAL"
+  },
+  "security_state": {
+    "raw_credentials_in_registry": false,
+    "kill_switch_required": true,
+    "cross_company_profile_access": "DENIED_BY_TEST",
+    "cross_identity_profile_access": "DENIED_BY_CONTRACT",
+    "cross_environment_profile_access": "DENIED_BY_CONTRACT",
+    "dependency_audit_note": "POR_AUDITAR: npm ci reported 2 high-severity advisories in the repository dependency graph during the PROD canary. No forced dependency upgrades were applied because exact attribution and regression-safe remediation have not yet been proven."
+  },
+  "rollback": {
+    "runtime_kill_switch": true,
+    "prod_mutation_default": "DENIED",
+    "code_rollback": "Revert cab876b0222db9f94e12d2b8045933f15818cf76 and/or 12f98124afd24dd9e67a929100c87f52748d8200 after preserving evidence",
+    "profile_isolation": "company_id + identity_id + environment"
+  },
+  "rebuild": {
+    "package_install": "npm ci",
+    "browser_install": "npx playwright install --with-deps chromium",
+    "physical_test": "CEREBRO_PHYSICAL_BROWSER_E2E=1 node --test cerebro/tests/cloud-browser-worker-v0.test.mjs",
+    "prod_canary": "node cerebro/canary/cloud-browser-prod-observe-v0.mjs"
+  },
+  "canonical_human_required": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "status": "PROD_OBSERVATION_CONFIRMED__MUTATION_AND_PERSISTENT_HOST_PARTIAL",
+  "next_gates": [
+    "DEPENDENCY_SECURITY_AUDIT_EXACT_ATTRIBUTION",
+    "PERSISTENT_ZERO_COST_OR_EXISTING_HOST_CERTIFICATION",
+    "AUTHENTICATED_CLOUD_SESSION_VAULT",
+    "PROD_AUTHENTICATED_OBSERVATION_CANARY",
+    "BOUNDED_REVERSIBLE_PROD_MUTATION_CANARY",
+    "VISION_AND_COMPUTER_USE_FALLBACK_GATE"
+  ]
+}
