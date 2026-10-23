@@ -3,7 +3,9 @@ import fs from 'node:fs/promises';
 import {createGovernedCloudBrowserWorker} from './cloud-browser-governed-session-v1.mjs';
 import {compileBrowser1Commands} from './browser1-access-v1.mjs';
 
-const DEFAULT_ENDPOINT=process.env.CEREBRO_BROWSER_INTERACTIVE_URL || 'https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-browser-interactive-v3';
+const PROD_PROJECT_REF='cluhljgonannaafpmblx';
+const PREPROD_PROJECT_REF='hnqlnvakzaywtafeiybt';
+const DEFAULT_ENDPOINT=process.env.CEREBRO_BROWSER_INTERACTIVE_URL || `https://${PROD_PROJECT_REF}.supabase.co/functions/v1/cerebro-browser-interactive-v3`;
 const MAX_SESSION_MS=Math.min(Number(process.env.CEREBRO_BROWSER_INTERACTIVE_MAX_MS||780000),780000);
 const FRAME_INTERVAL_MS=Math.max(900,Number(process.env.CEREBRO_BROWSER_INTERACTIVE_FRAME_MS||1400));
 const POLL_INTERVAL_MS=Math.max(250,Number(process.env.CEREBRO_BROWSER_INTERACTIVE_POLL_MS||450));
@@ -12,6 +14,20 @@ function required(value,name){if(value===undefined||value===null||value==='')thr
 function sleep(ms){return new Promise(resolve=>setTimeout(resolve,ms));}
 function b64ToBuffer(v){return Buffer.from(String(v||''),'base64');}
 function scrubUrl(raw){try{const u=new URL(String(raw||''));u.username='';u.password='';u.search='';u.hash='';return u.toString();}catch{return '';}}
+function assertInteractiveScope(job,endpoint){
+  const environment=String(job?.environment||'');
+  const company=String(job?.company_id||'');
+  const target=String(endpoint||'');
+  if(environment==='PROD'){
+    if(company!=='fenix'||!target.includes(PROD_PROJECT_REF))throw new Error('INTERACTIVE_SCOPE_DENIED');
+    return;
+  }
+  if(environment==='PREPROD'){
+    if(!company||company.length>120||!target.includes(PREPROD_PROJECT_REF))throw new Error('INTERACTIVE_SCOPE_DENIED');
+    return;
+  }
+  throw new Error('INTERACTIVE_SCOPE_DENIED');
+}
 
 async function callInteractive(endpoint,route,token,body={},fetch_impl=fetch){
   const response=await fetch_impl(`${endpoint.replace(/\/$/,'')}/${route}`,{method:'POST',headers:{authorization:`Bearer ${token}`,'content-type':'application/json'},body:JSON.stringify(body),redirect:'error'});
@@ -66,14 +82,16 @@ async function captureFrame(worker,base,sessionId,key,seq,endpoint,token,fetch_i
   const file=result.results?.[0]?.file;if(!file)throw new Error('INTERACTIVE_FRAME_FILE_MISSING');
   let bytes;try{bytes=await fs.readFile(file);}finally{await fs.unlink(file).catch(()=>{});}
   const encrypted=encryptBytes(bytes,key);const url=scrubUrl(result.final_url);
-  await callInteractive(endpoint,'worker/frame',token,{session_id:sessionId,frame_ciphertext:encrypted.ciphertext,frame_iv:encrypted.iv,frame_seq:seq,frame_mime:'image/png',current_url:url,current_title:'',tabs:url?[{index:0,url,active:true}]:[],active_tab_index:0,viewport_width:1440,viewport_height:1000},fetch_impl);
+  const tabs=Array.isArray(result.tabs)&&result.tabs.length?result.tabs.slice(0,32).map((tab,index)=>({index:Number.isInteger(tab?.index)?tab.index:index,url:scrubUrl(tab?.url),title:String(tab?.title||'').slice(0,240),active:tab?.active===true})):(url?[{index:0,url,title:'',active:true}]:[]);
+  const activeTabIndex=Number.isInteger(result.active_tab_index)?result.active_tab_index:(tabs.find(tab=>tab.active)?.index??0);
+  await callInteractive(endpoint,'worker/frame',token,{session_id:sessionId,frame_ciphertext:encrypted.ciphertext,frame_iv:encrypted.iv,frame_seq:seq,frame_mime:'image/png',current_url:url,current_title:String(result.current_title||'').slice(0,240),tabs,active_tab_index:activeTabIndex,viewport_width:Number(result.viewport_width||1440),viewport_height:Number(result.viewport_height||1000)},fetch_impl);
   return{final_url:url,frame_seq:seq};
 }
 
 export async function runInteractiveBrowserSessionV3({job,token,fetch_impl=fetch,endpoint=DEFAULT_ENDPOINT}={}){
   required(job?.job_id,'JOB_ID');required(token,'WORKER_TOKEN');
   if(String(job.capability)!=='browser1.interactive')throw new Error('INTERACTIVE_CAPABILITY_REQUIRED');
-  if(String(job.environment)!=='PROD'||String(job.company_id)!=='fenix')throw new Error('INTERACTIVE_SCOPE_DENIED');
+  assertInteractiveScope(job,endpoint);
   const base=buildBaseJob(job);const sessionId=String(job.job_id);
   const worker=createGovernedCloudBrowserWorker({max_tabs:8});
   const startedAt=Date.now();let seq=0,lastFrameAt=0,lastUrl='';let opened=false;let closed=false;
@@ -114,4 +132,4 @@ export async function runInteractiveBrowserSessionV3({job,token,fetch_impl=fetch
   }
 }
 
-export const BROWSER_INTERACTIVE_V3_CONTRACT=Object.freeze({schema_version:'3.0.0',capability:'browser1.interactive',same_runtime:'PLAYWRIGHT_CHROMIUM',same_v2_queue:true,exclusive_control_lease:true,frames_encrypted_aes_gcm:true,human_input_encrypted_aes_gcm:true,raw_cdp_exposed:false,default_browser1_unchanged:true,incremental_cost_eur:0});
+export const BROWSER_INTERACTIVE_V3_CONTRACT=Object.freeze({schema_version:'3.1.0',capability:'browser1.interactive',supported_environments:['PREPROD','PROD'],environment_endpoint_binding:true,multi_company_preprod:true,prod_company_scope:'fenix',same_runtime:'PLAYWRIGHT_CHROMIUM',same_v2_queue:true,exclusive_control_lease:true,frames_encrypted_aes_gcm:true,human_input_encrypted_aes_gcm:true,raw_cdp_exposed:false,max_tabs:8,default_browser1_unchanged:true,incremental_cost_eur:0});
