@@ -1,4 +1,4 @@
-import {SUPABASE_PUBLISHABLE_KEY,SUPABASE_URL,supabase} from './supabase';
+import {IS_PRODUCTION,SUPABASE_PUBLISHABLE_KEY,SUPABASE_URL,supabase} from './supabase';
 
 export type BrowserSessionV3={
  session_id:string;job_id:string;company_id:string;department_id:string;environment:string;version:string;
@@ -10,7 +10,7 @@ export type BrowserSessionV3={
 
 type ApiResult<T>=Promise<{status:number;data:T|null}>;
 const BROWSER_GATEWAY='cerebro-console-browser-gateway-v1';
-const BROWSER_SCOPE=Object.freeze({company_id:'fenix',engine_id:'CONSOLE-001',environment:'PROD',version:'v3'});
+const BROWSER_SCOPE=Object.freeze({company_id:'fenix',engine_id:'CONSOLE-001',environment:IS_PRODUCTION?'PROD':'PREPROD',version:'v3'});
 
 export async function fetchBrowserInteractiveApi<T>(path:string,body:Record<string,unknown>={}):ApiResult<T>{
  const {data:{session}}=await supabase.auth.getSession();
