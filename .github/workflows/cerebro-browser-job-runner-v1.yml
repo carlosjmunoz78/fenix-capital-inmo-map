@@ -1,0 +1,49 @@
+name: CEREBRO Browser 1 Job Runner V1
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'cerebro/browser1-live-dispatch-v1'
+      - 'cerebro/browser1-live-dispatch-v1-final'
+    paths:
+      - 'cerebro/runtime/browser-job-runner-v1.mjs'
+      - 'cerebro/tests/browser-job-runner-v1.test.mjs'
+      - '.github/workflows/cerebro-browser-job-runner-v1.yml'
+      - 'supabase/functions/cerebro-browser-dispatch-v1/**'
+      - 'supabase/migrations/*cerebro_browser_dispatch_v1*'
+      - 'supabase/migrations/*cerebro_browser_credential_broker_v1*'
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  browser1-live-dispatch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      CEREBRO_BROWSER_DISPATCH_URL: ${{ github.ref == 'refs/heads/main' && 'https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-browser-dispatch-v1' || 'https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-browser-dispatch-v1' }}
+      CEREBRO_BROWSER_OIDC_AUDIENCE: cerebro-browser-worker-v1
+      CEREBRO_BROWSER_SEED_CANARY: ${{ github.ref == 'refs/heads/main' && 'false' || 'true' }}
+      CEREBRO_BROWSER_SEED_CREDENTIAL_CANARY: ${{ github.ref == 'refs/heads/main' && 'false' || 'true' }}
+      CEREBRO_PHYSICAL_BROWSER_E2E: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Unit contract tests
+        run: node --test cerebro/tests/browser-job-runner-v1.test.mjs
+      - name: Install Chromium runtime
+        run: npx playwright install --with-deps chromium
+      - name: Physical Gateway queue and Vault broker to Browser 1
+        run: node cerebro/runtime/browser-job-runner-v1.mjs
+      - name: Browser 1 governance regression
+        run: node --test cerebro/tests/browser-transversal-autonomy-v1.test.mjs cerebro/tests/browser1-access-v1.test.mjs cerebro/tests/browser1-action-gateway-binding-v1.test.mjs cerebro/tests/browser-computer-use-v1.test.mjs
