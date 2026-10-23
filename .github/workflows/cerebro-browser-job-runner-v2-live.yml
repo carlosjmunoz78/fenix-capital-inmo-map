@@ -1,0 +1,101 @@
+name: CEREBRO Browser 1 V2 Live Worker
+
+on:
+  push:
+    branches: ['main']
+    paths:
+      - '.github/workflows/cerebro-browser-job-runner-v2-live.yml'
+      - 'cerebro/runtime/browser-job-runner-v2.mjs'
+      - 'cerebro/runtime/browser1-access-v1.mjs'
+      - 'supabase/functions/cerebro-browser-dispatch-v2/**'
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: cerebro-browser1-v2-live
+  cancel-in-progress: false
+
+env:
+  CEREBRO_BROWSER_DISPATCH_URL: https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-browser-dispatch-v2
+  CEREBRO_BROWSER_OIDC_AUDIENCE: cerebro-browser-worker-v1
+  CEREBRO_BROWSER_STAGE_CONCURRENCY: '8'
+  CEREBRO_PHYSICAL_BROWSER_E2E: '1'
+
+jobs:
+  queue:
+    name: Check Browser 1 V2 PROD queue
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    outputs:
+      pending: ${{ steps.status.outputs.pending }}
+    steps:
+      - id: status
+        name: Read queue state
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const u=new URL(process.env.ACTIONS_ID_TOKEN_REQUEST_URL);
+          u.searchParams.set('audience',process.env.CEREBRO_BROWSER_OIDC_AUDIENCE);
+          const tr=await fetch(u,{headers:{authorization:`Bearer ${process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN}`},redirect:'error'});
+          if(!tr.ok)throw new Error(`OIDC_TOKEN_FAILED:${tr.status}`);
+          const {value:token}=await tr.json();
+          const r=await fetch(`${process.env.CEREBRO_BROWSER_DISPATCH_URL}/status-v2`,{method:'POST',headers:{authorization:`Bearer ${token}`,'content-type':'application/json'},body:'{}',redirect:'error'});
+          const body=await r.json().catch(()=>null);
+          if(!r.ok||body?.ok!==true)throw new Error(`STATUS_FAILED:${r.status}:${JSON.stringify(body)}`);
+          const states=body.states||{};
+          const pending=Number(states.QUEUED||0)+Number(states.RETRY_WAIT||0);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT,`pending=${pending}\n`);
+          console.log(JSON.stringify({pending,states,active_profiles:body.active_profiles,global_max_concurrent:body.global_max_concurrent,incremental_cost_eur:body.incremental_cost_eur}));
+          NODE
+
+  workers:
+    name: Browser 1 V2 worker ${{ matrix.slot }} / 8
+    needs: queue
+    if: needs.queue.outputs.pending != '0'
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        slot: [1,2,3,4,5,6,7,8]
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+    timeout-minutes: 15
+    env:
+      CEREBRO_BROWSER_WORKER_SLOT: ${{ matrix.slot }}
+      CEREBRO_BROWSER_PHASE2_SEED_CANARY: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Execute one governed Browser 1 V2 job
+        run: node cerebro/runtime/browser-job-runner-v2.mjs
+
+  status:
+    name: Record live queue state
+    needs: [queue, workers]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Read final status
+        run: |
+          node --input-type=module <<'NODE'
+          const u=new URL(process.env.ACTIONS_ID_TOKEN_REQUEST_URL);
+          u.searchParams.set('audience',process.env.CEREBRO_BROWSER_OIDC_AUDIENCE);
+          const tr=await fetch(u,{headers:{authorization:`Bearer ${process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN}`}});
+          if(!tr.ok)throw new Error(`OIDC_TOKEN_FAILED:${tr.status}`);
+          const {value:token}=await tr.json();
+          const r=await fetch(`${process.env.CEREBRO_BROWSER_DISPATCH_URL}/status-v2`,{method:'POST',headers:{authorization:`Bearer ${token}`,'content-type':'application/json'},body:'{}'});
+          const body=await r.json().catch(()=>null);
+          console.log(JSON.stringify(body));
+          if(!r.ok||body?.ok!==true)process.exit(1);
+          NODE
