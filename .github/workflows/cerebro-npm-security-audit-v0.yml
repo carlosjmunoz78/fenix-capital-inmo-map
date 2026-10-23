@@ -1,0 +1,60 @@
+name: CEREBRO NPM Security Audit V0
+
+on:
+  push:
+    branches:
+      - 'cerebro/npm-security-audit-v0'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  npm-security-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+      - name: Install locked dependencies exactly
+        run: npm ci
+      - name: Capture npm audit JSON without mutating dependencies
+        shell: bash
+        run: |
+          set +e
+          npm audit --json > npm-audit.json
+          rc=$?
+          echo "npm_audit_exit_code=${rc}" >> "$GITHUB_OUTPUT"
+          exit 0
+        id: audit
+      - name: Print bounded vulnerability attribution
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const a=JSON.parse(fs.readFileSync('npm-audit.json','utf8'));
+          const vulns=a.vulnerabilities||{};
+          const rows=Object.entries(vulns).map(([name,v])=>({
+            name,
+            severity:v.severity,
+            direct:!!v.isDirect,
+            range:v.range,
+            fixAvailable:v.fixAvailable,
+            via:(v.via||[]).map(x=>typeof x==='string'?x:{source:x.source,name:x.name,severity:x.severity,title:x.title,url:x.url,range:x.range})
+          }));
+          console.log(JSON.stringify({
+            schema_version:'1.0.0',
+            metadata:a.metadata||null,
+            vulnerabilities:rows
+          },null,2));
+          NODE
+      - name: Upload audit evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-npm-security-audit-v0
+          path: npm-audit.json
+          if-no-files-found: error
+          retention-days: 7
