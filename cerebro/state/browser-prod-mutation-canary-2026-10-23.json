@@ -1,0 +1,44 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_BROWSER_PROD_MUTATION_CANARY_EVIDENCE",
+  "generated_at": "2026-10-23T07:35:04Z",
+  "company_id": "fenix",
+  "engine_id": "AUTO-001",
+  "environment": "PROD",
+  "version": "v0",
+  "surface": "https://fenixcapital.es/",
+  "execution_path": "AUTHENTICATED_WORDPRESS_CONNECTOR",
+  "incremental_cost_eur": 0,
+  "customer_data_used": false,
+  "public_content_published": false,
+  "mutation": {
+    "resource_type": "post",
+    "resource_id": 52617,
+    "resource_status": "draft",
+    "resource_title": "CEREBRO PROD MUTATION CANARY 2026-10-23",
+    "create_change_id": 1820,
+    "create_verified": true
+  },
+  "rollback": {
+    "mechanism": "wp_undo_change",
+    "source_change_id": 1820,
+    "redo_change_id": 1821,
+    "undo_reported": true,
+    "post_absent_after_rollback": true,
+    "journal_source_change_status": "undone",
+    "journal_rollback_entry_status": "active"
+  },
+  "status": "GREEN_AUTHENTICATED_CONNECTOR_PROD_MUTATION_AND_ROLLBACK",
+  "browser_chromium_authenticated_mutation": {
+    "status": "POR_AUDITAR",
+    "reason": "No cloud browser secret material was provisioned. The connector canary proves reversible authenticated PROD mutation on the Fenix-owned surface, but it does not prove Playwright-authenticated mutation.",
+    "required_next_gate": "Provision an encrypted governed session reference that satisfies browser-session-binding-v1, then run a private draft create/read/rollback canary through createGovernedCloudBrowserWorker."
+  },
+  "safety": {
+    "existing_public_pages_modified": false,
+    "home_modified": false,
+    "seo_public_state_modified": false,
+    "customer_records_modified": false,
+    "rollback_verified": true
+  }
+}
