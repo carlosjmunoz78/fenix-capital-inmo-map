@@ -1,9 +1,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import http from 'node:http';
+import os from 'node:os';
+import path from 'node:path';
+import fs from 'node:fs/promises';
 import { ActionGatewayV1 } from '../gateway/action-gateway-v1.mjs';
 import { CerebroGatewayV0 } from '../console/gateway.mjs';
 import { bindConsoleToActionGatewayV1 } from '../console/action-gateway-binding-v1.mjs';
 import { bindBrowser1ToActionGatewayV1 } from '../gateway/browser1-action-gateway-binding-v1.mjs';
+import { createBrowser1Tool } from '../runtime/browser1-access-v1.mjs';
+
+const PHYSICAL = process.env.CEREBRO_PHYSICAL_BROWSER_E2E === '1';
 
 function authorityProvider() {
   return {
@@ -107,4 +114,55 @@ test('observe and act are distinct capabilities through ACTGW',async()=>{
   await gateway.execute({...base,context,capability:'browser1.observe',idempotency_key:'observe-1'});
   await gateway.execute({...base,context,capability:'browser1.act',idempotency_key:'act-1'});
   assert.deepEqual(browser.calls.map(x=>x.mode),['OBSERVE','MUTATE']);
+});
+
+async function fixtureServer() {
+  const server=http.createServer((req,res)=>{
+    res.writeHead(200,{'content-type':'text/html; charset=utf-8'});
+    res.end('<!doctype html><html><body><input aria-label="Texto"><button id="go" onclick="document.querySelector(\'#out\').textContent=document.querySelector(\'input\').value">Aplicar</button><div id="out">EMPTY</div></body></html>');
+  });
+  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+  return {server,url:`http://127.0.0.1:${server.address().port}`};
+}
+
+test('physical chain Console -> ACTGW -> Browser 1 -> Chromium writes and verifies', {timeout:90_000,skip:PHYSICAL?false:'DEDICATED_PHYSICAL_BROWSER_GATE_ONLY'}, async()=>{
+  const {server,url}=await fixtureServer();
+  const temp=await fs.mkdtemp(path.join(os.tmpdir(),'browser1-gateway-e2e-'));
+  try {
+    const consoleGateway=new CerebroGatewayV0({environment:'PREPROD',version:'0.1.0'});
+    const actionGateway=new ActionGatewayV1();
+    const browser=createBrowser1Tool({worker_options:{profiles_root:path.join(temp,'profiles'),artifacts_root:path.join(temp,'artifacts'),headless:true}});
+    bindBrowser1ToActionGatewayV1({actionGateway,browser1Tool:browser,authority_provider:authorityProvider});
+    bindConsoleToActionGatewayV1({consoleGateway,actionGateway});
+    consoleGateway.createSession({session_id:'physical-console',company_id:'fenix'});
+
+    const result=await consoleGateway.execute({
+      session_id:'physical-console',command:'action.execute',payload:{
+        authorized:true,capability:'browser1.act',idempotency_key:'physical-browser1-e2e',risk:'LOW',estimated_additional_cost_eur:0,
+        payload:{
+          department_id:'SEO',identity_id:'public-e2e',account_id:'fixture',
+          commands:[
+            {command:'goto',url},
+            {command:'write',target:{label:'Texto'},value:'CEREBRO_GATEWAY_BROWSER1_OK'},
+            {command:'click',target:{selector:'#go'}},
+            {command:'extract_text',target:{selector:'#out'}},
+            {command:'screenshot',label:'gateway-browser1-e2e'}
+          ]
+        }
+      }
+    });
+
+    assert.equal(result.status,'ACTION_EXECUTED');
+    assert.equal(result.result.ok,true);
+    assert.equal(result.result.results[3],'CEREBRO_GATEWAY_BROWSER1_OK');
+    assert.equal(result.result.browser1.capability_id,'BROWSER-1');
+    assert.equal(result.result.browser1.department_id,'SEO');
+    assert.equal(result.result.browser1.serialized_execution,true);
+    await fs.access(result.result.final_evidence);
+    assert.equal(actionGateway.auditLog().at(-1).type,'ACTION_EXECUTED');
+    assert.equal(consoleGateway.auditLog().at(-1).type,'COMMAND_EXECUTED');
+  } finally {
+    await new Promise(resolve=>server.close(resolve));
+    await fs.rm(temp,{recursive:true,force:true});
+  }
 });
