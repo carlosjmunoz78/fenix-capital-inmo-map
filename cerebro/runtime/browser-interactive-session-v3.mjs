@@ -12,6 +12,12 @@ function required(value,name){if(value===undefined||value===null||value==='')thr
 function sleep(ms){return new Promise(resolve=>setTimeout(resolve,ms));}
 function b64ToBuffer(v){return Buffer.from(String(v||''),'base64');}
 function scrubUrl(raw){try{const u=new URL(String(raw||''));u.username='';u.password='';u.search='';u.hash='';return u.toString();}catch{return '';}}
+function safeNavigationUrl(raw){
+  const value=String(raw||'').trim();
+  if(value==='about:blank')return value;
+  try{const u=new URL(value);if(!['http:','https:'].includes(u.protocol))throw new Error('HUMAN_NAVIGATION_SCHEME_DENIED');return u.toString();}
+  catch(error){if(String(error?.message||'').includes('SCHEME_DENIED'))throw error;throw new Error('HUMAN_NAVIGATION_URL_INVALID');}
+}
 
 async function callInteractive(endpoint,route,token,body={},fetch_impl=fetch){
   const response=await fetch_impl(`${endpoint.replace(/\/$/,'')}/${route}`,{method:'POST',headers:{authorization:`Bearer ${token}`,'content-type':'application/json'},body:JSON.stringify(body),redirect:'error'});
@@ -54,20 +60,47 @@ function humanAction(commandType,payload){
     case'BACK':return{type:'BACK'};
     case'FORWARD':return{type:'FORWARD'};
     case'RELOAD':return{type:'RELOAD'};
-    case'OPEN_TAB':return{type:'OPEN_TAB',url:String(payload.url||'').slice(0,4000)};
+    case'NAVIGATE':return{type:'NAVIGATE',url:safeNavigationUrl(payload.url)};
+    case'OPEN_TAB':return{type:'OPEN_TAB',url:payload.url?safeNavigationUrl(payload.url):'about:blank'};
     case'CLOSE_TAB':return{type:'CLOSE_TAB'};
     default:throw new Error('HUMAN_COMMAND_TYPE_DENIED');
   }
 }
+function normalizedTabs(tabs,activeIndex,currentUrl){
+  const source=Array.isArray(tabs)?tabs.slice(0,8):[];
+  const fallback=currentUrl?[{index:0,url:currentUrl,active:true,title:''}]:[];
+  const list=(source.length?source:fallback).map((tab,index)=>({index,url:scrubUrl(tab?.url)||String(tab?.url||'about:blank'),active:index===activeIndex,title:String(tab?.title||'').slice(0,120)}));
+  return list.map((tab,index)=>({...tab,index,active:index===activeIndex}));
+}
+function applyTabCommand(tabs,activeIndex,commandType,payload,result,lastUrl){
+  let next=normalizedTabs(tabs,activeIndex,lastUrl);let active=Math.max(0,Math.min(Number.isInteger(activeIndex)?activeIndex:0,Math.max(0,next.length-1)));
+  const step=result?.results?.[0]||{};
+  if(commandType==='OPEN_TAB'){
+    const index=Number.isInteger(step.tab_index)?step.tab_index:next.length;
+    const url=scrubUrl(step.url||result?.final_url)||'about:blank';
+    next[index]={index,url,active:true,title:''};active=index;
+  }else if(commandType==='SWITCH_TAB'){
+    const requested=Number.isInteger(step.tab_index)?step.tab_index:Number(payload?.index);
+    if(Number.isInteger(requested)&&requested>=0&&requested<next.length)active=requested;
+  }else if(commandType==='CLOSE_TAB'){
+    if(next.length>1){next.splice(active,1);active=Math.max(0,Math.min(active-1,next.length-1));}
+    else{next=[{index:0,url:'about:blank',active:true,title:''}];active=0;}
+  }
+  const current=scrubUrl(result?.final_url||lastUrl);
+  if(next[active]&&current)next[active]={...next[active],url:current};
+  next=next.map((tab,index)=>({...tab,index,active:index===active}));
+  return{tabs:next,activeIndex:active};
+}
 
-async function captureFrame(worker,base,sessionId,key,seq,endpoint,token,fetch_impl){
+async function captureFrame(worker,base,sessionId,key,seq,endpoint,token,fetch_impl,tabs,activeTabIndex){
   const result=await worker.execute({...base,actions:[{type:'SCREENSHOT',label:`live-${seq}`}],keep_session_open:true,capture_final_evidence:false});
   if(result?.ok!==true)throw new Error(`INTERACTIVE_FRAME_NOT_AUTHORIZED:${result?.authorization?.status||'UNKNOWN'}`);
   const file=result.results?.[0]?.file;if(!file)throw new Error('INTERACTIVE_FRAME_FILE_MISSING');
   let bytes;try{bytes=await fs.readFile(file);}finally{await fs.unlink(file).catch(()=>{});}
   const encrypted=encryptBytes(bytes,key);const url=scrubUrl(result.final_url);
-  await callInteractive(endpoint,'worker/frame',token,{session_id:sessionId,frame_ciphertext:encrypted.ciphertext,frame_iv:encrypted.iv,frame_seq:seq,frame_mime:'image/png',current_url:url,current_title:'',tabs:url?[{index:0,url,active:true}]:[],active_tab_index:0,viewport_width:1440,viewport_height:1000},fetch_impl);
-  return{final_url:url,frame_seq:seq};
+  const currentTabs=normalizedTabs(tabs,activeTabIndex,url);
+  await callInteractive(endpoint,'worker/frame',token,{session_id:sessionId,frame_ciphertext:encrypted.ciphertext,frame_iv:encrypted.iv,frame_seq:seq,frame_mime:'image/png',current_url:url,current_title:'',tabs:currentTabs,active_tab_index:activeTabIndex,viewport_width:1440,viewport_height:1000},fetch_impl);
+  return{final_url:url,frame_seq:seq,tabs:currentTabs,active_tab_index:activeTabIndex};
 }
 
 export async function runInteractiveBrowserSessionV3({job,token,fetch_impl=fetch,endpoint=DEFAULT_ENDPOINT}={}){
@@ -76,12 +109,12 @@ export async function runInteractiveBrowserSessionV3({job,token,fetch_impl=fetch
   if(String(job.environment)!=='PROD'||String(job.company_id)!=='fenix')throw new Error('INTERACTIVE_SCOPE_DENIED');
   const base=buildBaseJob(job);const sessionId=String(job.job_id);
   const worker=createGovernedCloudBrowserWorker({max_tabs:8});
-  const startedAt=Date.now();let seq=0,lastFrameAt=0,lastUrl='';let opened=false;let closed=false;
+  const startedAt=Date.now();let seq=0,lastFrameAt=0,lastUrl='';let opened=false;let closed=false;let tabs=[];let activeTabIndex=0;
   try{
     const initialActions=compileBrowser1Commands(job.commands||[],{mode:'MUTATE'});
     const initial=await worker.execute({...base,actions:initialActions,keep_session_open:true,capture_final_evidence:false});
     if(initial?.ok!==true)throw new Error(`INTERACTIVE_INITIAL_NOT_AUTHORIZED:${initial?.authorization?.status||'UNKNOWN'}`);
-    lastUrl=scrubUrl(initial.final_url);
+    lastUrl=scrubUrl(initial.final_url);tabs=normalizedTabs([],0,lastUrl);activeTabIndex=0;
     await callInteractive(endpoint,'worker/open',token,{session_id:sessionId},fetch_impl);opened=true;
     const keyResult=await callInteractive(endpoint,'worker/key',token,{session_id:sessionId},fetch_impl);const key=b64ToBuffer(keyResult.key_b64);if(key.length!==32)throw new Error('INTERACTIVE_KEY_INVALID');
     while(Date.now()-startedAt<MAX_SESSION_MS){
@@ -94,19 +127,20 @@ export async function runInteractiveBrowserSessionV3({job,token,fetch_impl=fetch
           const action=humanAction(poll.command.command_type,payload);
           const result=await worker.execute({...base,actions:[action],keep_session_open:true,capture_final_evidence:false});
           ok=result?.ok===true;lastUrl=scrubUrl(result?.final_url||lastUrl);if(!ok)errorCode=result?.authorization?.status||'HUMAN_ACTION_NOT_AUTHORIZED';
+          if(ok){const tabState=applyTabCommand(tabs,activeTabIndex,poll.command.command_type,payload,result,lastUrl);tabs=tabState.tabs;activeTabIndex=tabState.activeIndex;}
         }catch(error){errorCode=String(error?.message||error).slice(0,120);}
         await callInteractive(endpoint,'worker/complete',token,{session_id:sessionId,command_id:poll.command.command_id,ok,error_code:errorCode},fetch_impl);
       }
       if(poll.handback===true){
-        seq+=1;const frame=await captureFrame(worker,base,sessionId,key,seq,endpoint,token,fetch_impl);lastUrl=frame.final_url||lastUrl;lastFrameAt=Date.now();
+        seq+=1;const frame=await captureFrame(worker,base,sessionId,key,seq,endpoint,token,fetch_impl,tabs,activeTabIndex);lastUrl=frame.final_url||lastUrl;tabs=frame.tabs;activeTabIndex=frame.active_tab_index;lastFrameAt=Date.now();
         await callInteractive(endpoint,'worker/handback-complete',token,{session_id:sessionId},fetch_impl);
       }
-      if(Date.now()-lastFrameAt>=FRAME_INTERVAL_MS){seq+=1;const frame=await captureFrame(worker,base,sessionId,key,seq,endpoint,token,fetch_impl);lastUrl=frame.final_url||lastUrl;lastFrameAt=Date.now();}
+      if(Date.now()-lastFrameAt>=FRAME_INTERVAL_MS){seq+=1;const frame=await captureFrame(worker,base,sessionId,key,seq,endpoint,token,fetch_impl,tabs,activeTabIndex);lastUrl=frame.final_url||lastUrl;tabs=frame.tabs;activeTabIndex=frame.active_tab_index;lastFrameAt=Date.now();}
       await sleep(POLL_INTERVAL_MS);
     }
     await worker.stop('INTERACTIVE_SESSION_COMPLETE');
     if(opened){await callInteractive(endpoint,'worker/close',token,{session_id:sessionId,state:'CLOSED'},fetch_impl);closed=true;}
-    return{ok:true,authorization:{status:'AUTHORIZED'},results:[],final_url:lastUrl,final_evidence:null,interactive_session:true,session_id:sessionId,frame_seq:seq};
+    return{ok:true,authorization:{status:'AUTHORIZED'},results:[],final_url:lastUrl,final_evidence:null,interactive_session:true,session_id:sessionId,frame_seq:seq,tabs,active_tab_index:activeTabIndex};
   }catch(error){
     await worker.stop('INTERACTIVE_SESSION_FAILED').catch(()=>{});
     if(opened&&!closed)await callInteractive(endpoint,'worker/close',token,{session_id:sessionId,state:'ERROR'},fetch_impl).catch(()=>{});
@@ -114,4 +148,4 @@ export async function runInteractiveBrowserSessionV3({job,token,fetch_impl=fetch
   }
 }
 
-export const BROWSER_INTERACTIVE_V3_CONTRACT=Object.freeze({schema_version:'3.0.0',capability:'browser1.interactive',same_runtime:'PLAYWRIGHT_CHROMIUM',same_v2_queue:true,exclusive_control_lease:true,frames_encrypted_aes_gcm:true,human_input_encrypted_aes_gcm:true,raw_cdp_exposed:false,default_browser1_unchanged:true,incremental_cost_eur:0});
+export const BROWSER_INTERACTIVE_V3_CONTRACT=Object.freeze({schema_version:'3.1.0',capability:'browser1.interactive',same_runtime:'PLAYWRIGHT_CHROMIUM',same_v2_queue:true,exclusive_control_lease:true,frames_encrypted_aes_gcm:true,human_input_encrypted_aes_gcm:true,governed_navigation:true,persistent_explicit_tabs:true,raw_cdp_exposed:false,default_browser1_unchanged:true,incremental_cost_eur:0});

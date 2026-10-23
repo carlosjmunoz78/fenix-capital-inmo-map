@@ -8,11 +8,15 @@ on:
       - 'cerebro/**'
       - 'src/CerebroBrowserConsole.tsx'
       - 'src/cerebroBrowserInteractive.ts'
+      - 'src/cerebro-browser-console.css'
+      - 'tests/cerebro-browser-console-v0-contract.spec.ts'
+      - 'tests/cerebro-browser-phase3-1-contract.spec.ts'
       - 'supabase/functions/cerebro-human-old-actor-preprod-v0/**'
       - 'supabase/functions/cerebro-human-new-actor-preprod-v1/**'
       - 'supabase/functions/cerebro-human-route-control-preprod-v1/**'
       - 'supabase/functions/cerebro-console-gateway-human-v1-canary/**'
       - 'supabase/functions/cerebro-console-human-router-zero-v1/**'
+      - 'supabase/functions/cerebro-console-browser-gateway-v1/**'
       - 'supabase/functions/_shared/cerebro-conversation-policy-v1.ts'
       - 'supabase/functions/_shared/cerebro-channel-access-policy-v1.ts'
       - 'supabase/functions/cerebro-telegram-gateway-v0/**'
@@ -123,7 +127,7 @@ jobs:
           fi
           changed="$(git diff --name-only "$base" HEAD)"
           protected='^(src/|tests/|public/|scripts/|index\.html$|package(-lock)?\.json$|playwright\.config\.(ts|js)$|vite\.config\.(ts|js)$|tsconfig[^/]*\.json$|\.env|\.github/workflows/(preprod-build|app-restoration-build|prod-[^/]+)\.yml$)'
-          phase3_app='^(src/CerebroBrowserConsole\.tsx|src/cerebroBrowserInteractive\.ts)$'
+          phase3_app='^(src/CerebroBrowserConsole\.tsx|src/cerebroBrowserInteractive\.ts|src/cerebro-browser-console\.css|tests/cerebro-browser-console-v0-contract\.spec\.ts|tests/cerebro-browser-phase3-1-contract\.spec\.ts)$'
           unexpected_app="$(printf '%s\n' "$changed" | grep -E "$protected" | grep -Ev "$phase3_app" || true)"
           if [ -n "$unexpected_app" ]; then
             echo 'RSI bounded scope invalidated: unrelated App/UI/test/build/deploy surface changed.' >&2
@@ -132,12 +136,12 @@ jobs:
           fi
           phase3_changed="$(printf '%s\n' "$changed" | grep -E "$phase3_app" || true)"
           if [ -n "$phase3_changed" ]; then
-            required_phase3='cerebro/runtime/browser-interactive-session-v3.mjs cerebro/runtime/browser-job-runner-v2.mjs supabase/functions/cerebro-browser-interactive-v3/index.ts supabase/migrations/20261024230000_cerebro_browser_phase3_interactive_v0.sql supabase/migrations/rollback/20261024230000_cerebro_browser_phase3_interactive_v0.rollback.sql'
+            required_phase3='cerebro/runtime/browser-interactive-session-v3.mjs cerebro/runtime/browser-job-runner-v2.mjs supabase/functions/cerebro-browser-interactive-v3/index.ts supabase/functions/cerebro-console-browser-gateway-v1/index.ts supabase/migrations/20261024230000_cerebro_browser_phase3_interactive_v0.sql supabase/migrations/rollback/20261024230000_cerebro_browser_phase3_interactive_v0.rollback.sql'
             for file in $required_phase3; do
               test -f "$file" || { echo "Phase 3 companion missing: $file" >&2; exit 1; }
             done
           fi
-          allowed='^(supabase/functions/(cerebro-human-old-actor-preprod-v0|cerebro-human-new-actor-preprod-v1|cerebro-human-route-control-preprod-v1|cerebro-console-gateway-human-v1-canary|cerebro-console-human-router-zero-v1|cerebro-telegram-gateway-v0|cerebro-telegram-voice-v1|cerebro-browser-dispatch-v2|cerebro-browser-dispatch-v2-prod|cerebro-browser-interactive-v3)/|supabase/functions/cerebro-browser-dispatch-v1/index\.ts$|supabase/functions/_shared/cerebro-(conversation|channel-access)-policy-v1\.ts$|supabase/migrations/(20261012132000_cerebro_human_route_control_preprod_v1|20261013010500_cerebro_multichannel_ana_overlay_v1|20261013042000_cerebro_channel_access_profiles_v1|20261013075000_cerebro_company_registry_preprod_persistence_v1|20261013083000_cerebro_company_onboarding_preprod_persistence_v1|20261013093000_cerebro_scan001_preprod_persistence_v1|20261013101500_cerebro_post_scan_parallel_preprod_v1|20261023093000_cerebro_browser_dispatch_v1|20261023093100_cerebro_browser_credential_broker_v1|20261023180000_cerebro_browser_orchestrator_v2|20261023194500_cerebro_browser_credential_broker_v2|20261023195500_cerebro_browser_credential_broker_v2_scope_fix|20261023201500_cerebro_browser_barrier_v2_table|20261023201600_cerebro_browser_barrier_v2_acl|20261023201700_cerebro_browser_barrier_v2_functions|20261023201800_cerebro_browser_lease_benchmark_v2|20261024230000_cerebro_browser_phase3_interactive_v0)\.sql$|supabase/migrations/rollback/20261024230000_cerebro_browser_phase3_interactive_v0\.rollback\.sql$)'
+          allowed='^(supabase/functions/(cerebro-human-old-actor-preprod-v0|cerebro-human-new-actor-preprod-v1|cerebro-human-route-control-preprod-v1|cerebro-console-gateway-human-v1-canary|cerebro-console-human-router-zero-v1|cerebro-console-browser-gateway-v1|cerebro-telegram-gateway-v0|cerebro-telegram-voice-v1|cerebro-browser-dispatch-v2|cerebro-browser-dispatch-v2-prod|cerebro-browser-interactive-v3)/|supabase/functions/cerebro-browser-dispatch-v1/index\.ts$|supabase/functions/_shared/cerebro-(conversation|channel-access)-policy-v1\.ts$|supabase/migrations/(20261012132000_cerebro_human_route_control_preprod_v1|20261013010500_cerebro_multichannel_ana_overlay_v1|20261013042000_cerebro_channel_access_profiles_v1|20261013075000_cerebro_company_registry_preprod_persistence_v1|20261013083000_cerebro_company_onboarding_preprod_persistence_v1|20261013093000_cerebro_scan001_preprod_persistence_v1|20261013101500_cerebro_post_scan_parallel_preprod_v1|20261023093000_cerebro_browser_dispatch_v1|20261023093100_cerebro_browser_credential_broker_v1|20261023180000_cerebro_browser_orchestrator_v2|20261023194500_cerebro_browser_credential_broker_v2|20261023195500_cerebro_browser_credential_broker_v2_scope_fix|20261023201500_cerebro_browser_barrier_v2_table|20261023201600_cerebro_browser_barrier_v2_acl|20261023201700_cerebro_browser_barrier_v2_functions|20261023201800_cerebro_browser_lease_benchmark_v2|20261024230000_cerebro_browser_phase3_interactive_v0)\.sql$|supabase/migrations/rollback/20261024230000_cerebro_browser_phase3_interactive_v0\.rollback\.sql$)'
           unexpected_supabase="$(printf '%s\n' "$changed" | grep '^supabase/' | grep -Ev "$allowed" || true)"
           if [ -n "$unexpected_supabase" ]; then
             echo 'Unapproved Supabase surface changed:' >&2
@@ -198,14 +202,14 @@ jobs:
           fi
           changed="$(git diff --name-only "$base" HEAD)"
           protected='^(src/|tests/|public/|scripts/|index\.html$|package(-lock)?\.json$|playwright\.config\.(ts|js)$|vite\.config\.(ts|js)$|tsconfig[^/]*\.json$|\.env|\.github/workflows/(preprod-build|app-restoration-build|prod-[^/]+)\.yml$)'
-          phase3_app='^(src/CerebroBrowserConsole\.tsx|src/cerebroBrowserInteractive\.ts)$'
+          phase3_app='^(src/CerebroBrowserConsole\.tsx|src/cerebroBrowserInteractive\.ts|src/cerebro-browser-console\.css|tests/cerebro-browser-console-v0-contract\.spec\.ts|tests/cerebro-browser-phase3-1-contract\.spec\.ts)$'
           unexpected_app="$(printf '%s\n' "$changed" | grep -E "$protected" | grep -Ev "$phase3_app" || true)"
           if [ -n "$unexpected_app" ]; then
             echo 'Unexpected App/application/test/production surface changed.' >&2
             printf '%s\n' "$unexpected_app" >&2
             exit 1
           fi
-          allowed='^(supabase/functions/(cerebro-human-old-actor-preprod-v0|cerebro-human-new-actor-preprod-v1|cerebro-human-route-control-preprod-v1|cerebro-console-gateway-human-v1-canary|cerebro-console-human-router-zero-v1|cerebro-telegram-gateway-v0|cerebro-telegram-voice-v1|cerebro-browser-dispatch-v2|cerebro-browser-dispatch-v2-prod|cerebro-browser-interactive-v3)/|supabase/functions/cerebro-browser-dispatch-v1/index\.ts$|supabase/functions/_shared/cerebro-(conversation|channel-access)-policy-v1\.ts$|supabase/migrations/(20261012132000_cerebro_human_route_control_preprod_v1|20261013010500_cerebro_multichannel_ana_overlay_v1|20261013042000_cerebro_channel_access_profiles_v1|20261013075000_cerebro_company_registry_preprod_persistence_v1|20261013083000_cerebro_company_onboarding_preprod_persistence_v1|20261013093000_cerebro_scan001_preprod_persistence_v1|20261013101500_cerebro_post_scan_parallel_preprod_v1|20261023093000_cerebro_browser_dispatch_v1|20261023093100_cerebro_browser_credential_broker_v1|20261023180000_cerebro_browser_orchestrator_v2|20261023194500_cerebro_browser_credential_broker_v2|20261023195500_cerebro_browser_credential_broker_v2_scope_fix|20261023201500_cerebro_browser_barrier_v2_table|20261023201600_cerebro_browser_barrier_v2_acl|20261023201700_cerebro_browser_barrier_v2_functions|20261023201800_cerebro_browser_lease_benchmark_v2|20261024230000_cerebro_browser_phase3_interactive_v0)\.sql$|supabase/migrations/rollback/20261024230000_cerebro_browser_phase3_interactive_v0\.rollback\.sql$)'
+          allowed='^(supabase/functions/(cerebro-human-old-actor-preprod-v0|cerebro-human-new-actor-preprod-v1|cerebro-human-route-control-preprod-v1|cerebro-console-gateway-human-v1-canary|cerebro-console-human-router-zero-v1|cerebro-console-browser-gateway-v1|cerebro-telegram-gateway-v0|cerebro-telegram-voice-v1|cerebro-browser-dispatch-v2|cerebro-browser-dispatch-v2-prod|cerebro-browser-interactive-v3)/|supabase/functions/cerebro-browser-dispatch-v1/index\.ts$|supabase/functions/_shared/cerebro-(conversation|channel-access)-policy-v1\.ts$|supabase/migrations/(20261012132000_cerebro_human_route_control_preprod_v1|20261013010500_cerebro_multichannel_ana_overlay_v1|20261013042000_cerebro_channel_access_profiles_v1|20261013075000_cerebro_company_registry_preprod_persistence_v1|20261013083000_cerebro_company_onboarding_preprod_persistence_v1|20261013093000_cerebro_scan001_preprod_persistence_v1|20261013101500_cerebro_post_scan_parallel_preprod_v1|20261023093000_cerebro_browser_dispatch_v1|20261023093100_cerebro_browser_credential_broker_v1|20261023180000_cerebro_browser_orchestrator_v2|20261023194500_cerebro_browser_credential_broker_v2|20261023195500_cerebro_browser_credential_broker_v2_scope_fix|20261023201500_cerebro_browser_barrier_v2_table|20261023201600_cerebro_browser_barrier_v2_acl|20261023201700_cerebro_browser_barrier_v2_functions|20261023201800_cerebro_browser_lease_benchmark_v2|20261024230000_cerebro_browser_phase3_interactive_v0)\.sql$|supabase/migrations/rollback/20261024230000_cerebro_browser_phase3_interactive_v0\.rollback\.sql$)'
           unexpected_supabase="$(printf '%s\n' "$changed" | grep '^supabase/' | grep -Ev "$allowed" || true)"
           test -z "$unexpected_supabase" || { printf '%s\n' "$unexpected_supabase" >&2; exit 1; }
       - name: Browser Phase 3 bounded-authority contract
@@ -238,6 +242,25 @@ jobs:
           grep -F "name:'AES-GCM'" "$client"
           ! grep -R -E 'ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]+' "$edge" "$runtime" "$runner" "$client" "$migration"
           echo 'Browser Phase 3 is owner-scoped, OIDC-bound, encrypted, lease-exclusive, emergency-stoppable, additive and zero-cost.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Browser Phase 3.1 Console Gateway bounded-authority contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          gateway='supabase/functions/cerebro-console-browser-gateway-v1/index.ts'
+          test -f "$gateway"
+          grep -F "service:'cerebro-console-browser-gateway-v1'" "$gateway"
+          grep -F 'direct_browser_edge_access:false' "$gateway"
+          grep -F 'owner_only:true' "$gateway"
+          grep -F "company_scope:'fenix'" "$gateway"
+          grep -F "environment:'PROD'" "$gateway"
+          grep -F 'incremental_cost_eur:0' "$gateway"
+          grep -F "ctx?.actor_code??'')!=='CARLOS-ADMIN'" "$gateway"
+          grep -F "const BROWSER_EDGE='cerebro-browser-interactive-v3'" "$gateway"
+          grep -F 'BROWSER_GATEWAY_ROUTE_DENIED' "$gateway"
+          grep -F 'COMPANY_SCOPE_DENIED' "$gateway"
+          grep -F 'ENVIRONMENT_SCOPE_DENIED' "$gateway"
+          ! grep -R -E 'ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]+' "$gateway"
+          echo 'Browser Phase 3.1 Console Gateway is exact-routed, owner-only, Fenix/PROD scoped, fail-closed and zero-cost.' >> "$GITHUB_STEP_SUMMARY"
 
   browser-dispatch-governance-shadow:
     runs-on: ubuntu-latest
