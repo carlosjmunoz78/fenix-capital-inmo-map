@@ -1,4 +1,4 @@
-import {useEffect,useRef,useState,type FormEvent,type KeyboardEvent,type MouseEvent,type WheelEvent} from 'react';
+import {useEffect,useMemo,useRef,useState,type FormEvent,type KeyboardEvent,type MouseEvent,type WheelEvent} from 'react';
 import {BrainCircuit,CircleDot,Globe2,Hand,MessageSquareText,Mic,Paperclip,Play,RotateCcw,Send,ShieldAlert,Square} from 'lucide-react';
 import {applyVoiceContextHints,createVoiceRecognition,voiceRecognitionSupported,type CerebroSpeechRecognition} from './cerebroVoice';
 import {CerebroVoiceSettings} from './CerebroVoiceSettings';
@@ -24,7 +24,7 @@ function setReactTextareaValue(textarea:HTMLTextAreaElement,value:string){
 
 function stateLabel(session:BrowserSessionV3|null){
  if(!session)return'SIN SESIÓN VISUAL';
- if(session.state==='CONNECTING')return'CONECTANDO BROWSER 1';
+ if(session.state==='CONNECTING')return'CONECTANDO';
  if(session.state==='CEREBRO_CONTROLLED')return'CEREBRO EN CONTROL';
  if(session.state==='TAKEOVER_PENDING')return'TOMA DE CONTROL PENDIENTE';
  if(session.state==='HUMAN_CONTROLLED')return'CONTROL HUMANO';
@@ -33,6 +33,29 @@ function stateLabel(session:BrowserSessionV3|null){
  if(session.state==='ERROR')return'ERROR DE SESIÓN';
  if(session.state==='CLOSED')return'SESIÓN CERRADA';
  return session.state.replaceAll('_',' ');
+}
+
+function readableId(value:string|null|undefined,fallback='—'){
+ if(!value)return fallback;
+ return value.length>20?`${value.slice(0,8)}…${value.slice(-5)}`:value;
+}
+
+function formatTime(value:string|null|undefined){
+ if(!value)return'—';
+ const date=new Date(value);
+ if(Number.isNaN(date.getTime()))return'—';
+ return new Intl.DateTimeFormat('es-ES',{hour:'2-digit',minute:'2-digit',second:'2-digit'}).format(date);
+}
+
+function humanRequiredLabel(value:unknown){
+ if(!value)return'';
+ if(typeof value==='string')return value;
+ if(typeof value==='object'){
+  const record=value as Record<string,unknown>;
+  const code=record.code||record.reason||record.type||record.status;
+  if(typeof code==='string')return code;
+ }
+ return'HUMAN_REQUIRED';
 }
 
 export default function CerebroBrowserConsole({onViewChange}:Props){
@@ -159,37 +182,59 @@ export default function CerebroBrowserConsole({onViewChange}:Props){
  const humanControl=Boolean(browserSession?.worker_alive&&browserSession.state==='HUMAN_CONTROLLED'&&browserSession.control_owner==='HUMAN'&&browserSession.human_lease_id);
  const canStop=Boolean(browserSession?.worker_alive&&!TERMINAL.has(browserSession.state));
  const canStart=!browserSession||TERMINAL.has(browserSession.state);
+ const tabs=browserSession?.tabs||[];
+ const activeTab=tabs.find(tab=>tab.active)||tabs.find(tab=>tab.index===browserSession?.active_tab_index)||tabs[0];
+ const companyLabel=browserSession?.company_id||'SIN EMPRESA';
+ const environmentLabel=browserSession?.environment||'SIN SESIÓN';
+ const humanRequired=humanRequiredLabel(browserSession?.human_required);
+ const sessionHealth=browserSession?.worker_alive?'WORKER ONLINE':browserSession?'WORKER OFFLINE':'ESPERANDO';
+ const viewport=browserSession?.viewport_width&&browserSession?.viewport_height?`${browserSession.viewport_width}×${browserSession.viewport_height}`:'—';
+ const freshness=useMemo(()=>formatTime(browserSession?.last_heartbeat_at),[browserSession?.last_heartbeat_at]);
 
  return <main className="cerebro-browser-console" aria-label="CEREBRO · Navegador">
   <header className="cerebro-browser-header">
-   <div className="cerebro-browser-brand"><span><BrainCircuit size={28}/></span><div><h1>CEREBRO</h1><p>Fénix Capital</p></div></div>
+   <div className="cerebro-browser-brand"><span><BrainCircuit size={28}/></span><div><h1>CEREBRO</h1><p>Navegador gobernado</p></div></div>
    <nav className="cerebro-browser-view-switch" aria-label="Cambiar vista de CEREBRO"><button type="button" onClick={()=>onViewChange?.('V0')}>VISTA 0</button><button type="button" onClick={()=>onViewChange?.('OPERATIVA')}>OPERATIVA</button><button type="button" disabled title="NEURAL permanece pendiente de colocación">NEURAL</button><button type="button" className="is-active"><Globe2 size={14}/> NAVEGADOR</button></nav>
-   <div className="cerebro-browser-head-actions"><span className="cerebro-browser-core-state"><CircleDot size={13}/>{snapshot.ready?'CEREBRO LISTO':'CEREBRO CONECTANDO'}</span><CerebroVoiceSettings/></div>
+   <div className="cerebro-browser-head-actions"><span className={`cerebro-browser-core-state ${snapshot.ready?'is-ready':''}`}><CircleDot size={13}/>{snapshot.ready?'CEREBRO LISTO':'CEREBRO CONECTANDO'}</span><CerebroVoiceSettings/></div>
   </header>
 
   <section className="cerebro-browser-sessionbar" aria-label="Estado de Browser 1">
-   <div className="cerebro-browser-session-context"><span><small>EMPRESA</small><strong>Fénix</strong></span><span><small>ENTORNO</small><strong>PROD</strong></span><span><small>MOTOR</small><strong>Browser 1</strong></span><span><small>CAPACIDAD</small><strong>8 / 4 / 2</strong></span></div>
+   <div className="cerebro-browser-session-context">
+    <span><small>EMPRESA</small><strong>{companyLabel}</strong></span>
+    <span><small>ENTORNO</small><strong>{environmentLabel}</strong></span>
+    <span><small>RUNTIME</small><strong>Browser 1 · V3</strong></span>
+    <span><small>PESTAÑAS</small><strong>{tabs.length}</strong></span>
+   </div>
    <div className="cerebro-browser-controlbar">
     <span className={`cerebro-browser-mode ${humanControl?'is-human':''}`}><CircleDot size={12}/>{stateLabel(browserSession)}</span>
-    {canStart?<button type="button" className="is-takeover" onClick={startBrowser} disabled={browserBusy}><Play size={15}/> Iniciar Browser 1</button>:null}
-    <button type="button" className="is-danger" onClick={emergencyStop} disabled={!canStop||browserBusy} title="Detiene inmediatamente la sesión interactiva"><ShieldAlert size={15}/> Parada de emergencia</button>
+    {canStart?<button type="button" className="is-takeover" onClick={startBrowser} disabled={browserBusy}><Play size={15}/> Iniciar</button>:null}
     <button type="button" className="is-takeover" onClick={takeover} disabled={!canTakeover||browserBusy}><Hand size={15}/> Tomar control</button>
     <button type="button" onClick={handback} disabled={!humanControl||browserBusy}><RotateCcw size={15}/> Devolver a CEREBRO</button>
+    <button type="button" className="is-danger" onClick={emergencyStop} disabled={!canStop||browserBusy} title="Detiene inmediatamente la sesión interactiva"><ShieldAlert size={15}/> Parada</button>
    </div>
   </section>
 
   <section className="cerebro-browser-frame" aria-label="Visor de navegador">
-   <div className="cerebro-browser-tabs" aria-hidden="true"><span className="is-active"><Globe2 size={13}/> {live?'Browser 1 · sesión física viva':'Browser 1 · visor preparado'}</span></div>
-   <div className="cerebro-browser-address" aria-hidden="true"><span className="cerebro-address-lock">●</span><span>{browserSession?.current_url||'Esperando sesión Browser 1'}</span></div>
-   <div className="cerebro-browser-viewport" tabIndex={humanControl?0:-1} onWheel={onViewerWheel} onKeyDown={onViewerKeyDown} style={{outline:humanControl?'2px solid currentColor':'none'}}>
-    {live?<img src={frameUrl} alt="Vista en vivo de Browser 1" onClick={onViewerClick} draggable={false} style={{display:'block',width:'100%',height:'100%',objectFit:'contain',cursor:humanControl?'crosshair':'default',userSelect:'none'}}/>:<div className="cerebro-browser-awaiting"><span className="cerebro-browser-awaiting-icon"><Globe2 size={38}/></span><small>FASE 3 · LIVE VIEWER</small><h2>{browserSession?.state==='CONNECTING'?'Arrancando Browser 1':'Navegador preparado'}</h2><p>{browserSession?.state==='CONNECTING'?'La sesión está en la cola PROD y espera al worker gobernado.':'La interfaz está lista para abrir una sesión Browser 1 real. No se simula navegación.'}</p><div className="cerebro-browser-awaiting-meta"><span>{browserSession?stateLabel(browserSession):'Sin sesión activa'}</span><span>{browserSession?.session_id?`ID ${browserSession.session_id.slice(0,8)}…`:'Misma sesión Browser 1'}</span><span>{humanControl?'Entrada humana habilitada':'Control humano gobernado'}</span></div></div>}
+   <div className="cerebro-browser-tabs" aria-label="Pestañas de la sesión">
+    {tabs.length?tabs.map((tab,index)=><span key={`${tab.index??index}-${tab.url??tab.title??index}`} className={tab.active||tab.index===browserSession?.active_tab_index?'is-active':''} title={tab.url||tab.title||`Pestaña ${index+1}`}><Globe2 size={13}/><b>{tab.title||`Pestaña ${index+1}`}</b></span>):<span className="is-active"><Globe2 size={13}/><b>{live?'Sesión física viva':'Visor preparado'}</b></span>}
    </div>
-   {browserError?<div className="cerebro-browser-dictation-error" role="status">{browserError}</div>:null}
+   <div className="cerebro-browser-address"><span className="cerebro-address-lock">●</span><span className="cerebro-browser-address-url">{activeTab?.url||browserSession?.current_url||'Esperando sesión gobernada'}</span><span className="cerebro-browser-address-state">{sessionHealth}</span></div>
+   <div className="cerebro-browser-viewport" tabIndex={humanControl?0:-1} onWheel={onViewerWheel} onKeyDown={onViewerKeyDown} data-control={humanControl?'human':'cerebro'}>
+    {live?<img src={frameUrl} alt="Vista en vivo de Browser 1" onClick={onViewerClick} draggable={false} className="cerebro-browser-live-frame" style={{cursor:humanControl?'crosshair':'default'}}/>:<div className="cerebro-browser-awaiting"><span className="cerebro-browser-awaiting-icon"><Globe2 size={38}/></span><small>LIVE VIEWER · GOVERNED CONTROL</small><h2>{browserSession?.state==='CONNECTING'?'Arrancando navegador':'Navegador preparado'}</h2><p>{browserSession?.state==='CONNECTING'?'La sesión espera al worker gobernado.':'La consola está preparada para una sesión física real; no se simula navegación ni estado.'}</p><div className="cerebro-browser-awaiting-meta"><span>{stateLabel(browserSession)}</span><span>{browserSession?.session_id?`ID ${readableId(browserSession.session_id)}`:'Sin sesión activa'}</span><span>{humanControl?'Entrada humana habilitada':'Control gobernado por CEREBRO'}</span></div></div>}
+    <aside className="cerebro-browser-telemetry" aria-label="Telemetría de sesión">
+     <span><small>SESIÓN</small><strong>{readableId(browserSession?.session_id)}</strong></span>
+     <span><small>CONTROL</small><strong>{browserSession?.control_owner||'NONE'}</strong></span>
+     <span><small>VIEWPORT</small><strong>{viewport}</strong></span>
+     <span><small>HEARTBEAT</small><strong>{freshness}</strong></span>
+    </aside>
+    {humanRequired?<div className="cerebro-browser-human-required" role="alert"><ShieldAlert size={14}/><div><small>HUMAN_REQUIRED</small><strong>{humanRequired}</strong></div></div>:null}
+   </div>
+   {browserError?<div className="cerebro-browser-error" role="status">{browserError}</div>:null}
   </section>
 
   <section className="cerebro-browser-composer" aria-label="Órdenes para CEREBRO">
    <form onSubmit={submit} className="cerebro-browser-form">
-    <button type="button" className="cerebro-browser-icon" disabled title="Adjuntar archivo · pendiente de contrato real" aria-label="Adjuntar archivo"><Paperclip size={19}/></button>
+    <button type="button" className="cerebro-browser-icon" disabled title="Adjuntos permanecen bloqueados hasta contrato de transferencia verificado" aria-label="Adjuntar archivo"><Paperclip size={19}/></button>
     <button type="button" className={`cerebro-browser-action ${dictating?'is-active':''}`} onClick={toggleDictation} disabled={!snapshot.ready||snapshot.sending||snapshot.voiceActive||!voiceRecognitionSupported()}>{dictating?<Square size={16}/>:<Mic size={18}/>}<span>{dictating?'Parar dictado':'Dictar'}</span></button>
     <button type="button" className={`cerebro-browser-action ${snapshot.voiceActive?'is-active':''}`} onClick={toggleVoice} disabled={!snapshot.ready||snapshot.sending||dictating}>{snapshot.voiceActive?<Square size={16}/>:<MessageSquareText size={18}/>}<span>{snapshot.voiceActive?'Finalizar':'Hablar'}</span></button>
     <textarea ref={composerRef} value={composer} onChange={event=>setComposer(event.target.value)} onKeyDown={onComposerKeyDown} disabled={!snapshot.ready||snapshot.sending} rows={1} placeholder={snapshot.ready?'Escribe, habla o da una orden a CEREBRO…':'Esperando conexión segura con CEREBRO…'} aria-label="Escribe una orden para CEREBRO"/>
