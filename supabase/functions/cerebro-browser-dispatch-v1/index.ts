@@ -33,7 +33,8 @@ async function githubWorker(req:Request){
     if(!workflowRef.includes(`${GITHUB_REPOSITORY}/${GITHUB_WORKFLOW}@`))return {ok:false,error:"GITHUB_WORKFLOW_DENIED"} as const;
     const ref=String(payload.ref??"");
     if(PREPROD){
-      if(ref!=="refs/heads/main"&&ref!=="refs/heads/cerebro/browser1-live-dispatch-v1")return {ok:false,error:"GITHUB_REF_DENIED"} as const;
+      const preprodRefs=new Set(["refs/heads/main","refs/heads/cerebro/browser1-live-dispatch-v1","refs/heads/cerebro/browser1-live-dispatch-v1-final"]);
+      if(!preprodRefs.has(ref))return {ok:false,error:"GITHUB_REF_DENIED"} as const;
     } else if(ref!=="refs/heads/main") return {ok:false,error:"GITHUB_REF_DENIED"} as const;
     return {ok:true,worker_id:`github:${String(payload.run_id??"unknown")}:${String(payload.run_attempt??"1")}`,claims:{repository:payload.repository,ref,workflow_ref:workflowRef,run_id:payload.run_id,runner_environment:payload.runner_environment}} as const;
   }catch(e){return {ok:false,error:"GITHUB_OIDC_INVALID",detail:safeError(e)} as const;}
