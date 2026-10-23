@@ -152,7 +152,11 @@ export async function runOneBrowserJob({
       credentialMaterialized = true;
     }
 
-    const result = await browser1.observe(workerInput(job,effectiveCommands));
+    const mode=String(job.mode||'OBSERVE').toUpperCase();
+    if (mode!=='OBSERVE'&&mode!=='MUTATE') throw new Error('BROWSER_JOB_MODE_INVALID');
+    const executeTool=mode==='MUTATE'?browser1.act:browser1.observe;
+    if (typeof executeTool!=='function') throw new Error(`BROWSER1_${mode}_EXECUTOR_MISSING`);
+    const result = await executeTool(workerInput(job,effectiveCommands));
     const status = result.ok === true ? 'SUCCEEDED' : 'HOLD';
     const summary = resultSummary(result,{credential_materialized:credentialMaterialized});
     await callDispatch(endpoint, 'complete', token, {
