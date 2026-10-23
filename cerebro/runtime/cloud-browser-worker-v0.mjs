@@ -1,6 +1,5 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { chromium } from '@playwright/test';
 import { evaluateBrowserExecution } from './browser-transversal-autonomy-v1.mjs';
 
 const ACTIONS = new Set([
@@ -9,6 +8,22 @@ const ACTIONS = new Set([
   'UPLOAD','DRAG','SCROLL','WAIT','EXTRACT_TEXT','EXTRACT_HTML','SCREENSHOT','PDF',
   'DOWNLOAD_CLICK'
 ]);
+
+let chromiumRuntime = null;
+
+async function getChromiumRuntime() {
+  if (chromiumRuntime) return chromiumRuntime;
+  try {
+    const playwright = await import('@playwright/test');
+    chromiumRuntime = playwright.chromium;
+    if (!chromiumRuntime) throw new Error('CHROMIUM_EXPORT_MISSING');
+    return chromiumRuntime;
+  } catch (cause) {
+    const error = new Error('PLAYWRIGHT_CHROMIUM_RUNTIME_UNAVAILABLE');
+    error.cause = cause;
+    throw error;
+  }
+}
 
 function required(value, name) {
   if (value === undefined || value === null || value === '') throw new Error(`MISSING_${name}`);
@@ -90,6 +105,7 @@ export function createCloudBrowserWorker({
     await fs.mkdir(profileDir, { recursive: true });
     await fs.mkdir(path.resolve(artifacts_root), { recursive: true });
 
+    const chromium = await getChromiumRuntime();
     context = await chromium.launchPersistentContext(profileDir, {
       headless,
       acceptDownloads: true,
