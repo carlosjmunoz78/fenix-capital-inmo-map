@@ -54,8 +54,12 @@ async function fixtureServer() {
       <div id="fileout">NONE</div>
       <button id="remember" onclick="localStorage.setItem('cerebroPersist','YES'); document.querySelector('#persist').textContent='YES'">Recordar</button>
       <div id="persist">NO</div>
+      <div id="auth">NO|NO</div>
       <a id="download" href="/download.txt" download>Descargar</a>
-      <script>if(localStorage.getItem('cerebroPersist')==='YES') document.querySelector('#persist').textContent='YES';</script>
+      <script>
+        if(localStorage.getItem('cerebroPersist')==='YES') document.querySelector('#persist').textContent='YES';
+        document.querySelector('#auth').textContent=(document.cookie.includes('cerebroAuth=YES')?'YES':'NO')+'|'+(localStorage.getItem('cerebroToken')||'NO');
+      </script>
     </body></html>`);
   });
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
@@ -67,6 +71,8 @@ test('capability contract is broad but fail-closed on bypasses', () => {
   const caps = getCloudBrowserWorkerCapabilities();
   assert.equal(caps.backend, 'PLAYWRIGHT_CHROMIUM');
   assert.equal(caps.persistent_profiles, true);
+  assert.equal(caps.governed_storage_state_restore, true);
+  assert.equal(caps.authenticated_jobs_require_physical_materialization, true);
   assert.equal(caps.uploads, true);
   assert.equal(caps.downloads, true);
   assert.equal(caps.multi_tab, true);
@@ -122,6 +128,53 @@ test('real Chromium performs navigation, form, upload, download, evidence and pe
   } finally {
     await new Promise(resolve => server.close(resolve));
     await fs.rm(temp, { recursive: true, force: true });
+  }
+});
+
+test('authenticated Chromium job is denied until storage state is physically restored', { timeout: 90_000, skip: PHYSICAL_BROWSER_E2E ? false : 'DEDICATED_PHYSICAL_BROWSER_GATE_ONLY' }, async () => {
+  const { server, baseUrl } = await fixtureServer();
+  const temp = await fs.mkdtemp(path.join(os.tmpdir(), 'cerebro-browser-auth-'));
+  const profiles = path.join(temp, 'profiles');
+  const artifacts = path.join(temp, 'artifacts');
+  const audit = [];
+  const authJob = authorizedJob(baseUrl, {profiles,artifacts}, {
+    request_id:'req-auth',
+    audit_id:'audit-auth',
+    operation:{kind:'AUTHENTICATED_OBSERVE',incremental_spend_eur:0},
+    actions:[
+      {type:'NAVIGATE',url:baseUrl},
+      {type:'EXTRACT_TEXT',target:{selector:'#auth'}}
+    ],
+    capture_final_evidence:false
+  });
+
+  try {
+    const direct = createCloudBrowserWorker({profiles_root:profiles,artifacts_root:artifacts,headless:true});
+    const denied = await direct.execute(authJob);
+    assert.equal(denied.ok,false);
+    assert.equal(denied.authorization.status,'HOLD_SESSION_MATERIALIZATION_REQUIRED');
+
+    const worker = createCloudBrowserWorker({profiles_root:profiles,artifacts_root:artifacts,headless:true,audit_sink:async e=>audit.push(e)});
+    await worker.start(authJob);
+    await worker.restoreStorageState({
+      cookies:[{name:'cerebroAuth',value:'YES',domain:'127.0.0.1',path:'/',expires:-1,httpOnly:false,secure:false,sameSite:'Lax'}],
+      origins:[{origin:baseUrl,localStorage:[{name:'cerebroToken',value:'YES'}]}]
+    },{
+      session_binding_authorized:true,
+      company_id:'fenix',identity_id:'test-identity',environment:'PREPROD',browser_profile_id:'fenix-test-preprod',
+      bundle_id:'synthetic-bundle',attestation_fingerprint:'sha256:synthetic'
+    });
+    const result=await worker.execute(authJob);
+    assert.equal(result.ok,true);
+    assert.equal(result.results[1],'YES|YES');
+    const restored=audit.find(e=>e.type==='BROWSER_STORAGE_STATE_RESTORED');
+    assert.ok(restored);
+    assert.equal(restored.cookies_count,1);
+    assert.equal(restored.origins_count,1);
+    assert.equal(restored.secret_material_logged,false);
+  } finally {
+    await new Promise(resolve => server.close(resolve));
+    await fs.rm(temp,{recursive:true,force:true});
   }
 });
 
