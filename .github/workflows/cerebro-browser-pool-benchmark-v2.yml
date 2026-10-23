@@ -16,17 +16,17 @@ permissions:
 env:
   CEREBRO_BROWSER_DISPATCH_URL: https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-browser-dispatch-v2
   CEREBRO_BROWSER_OIDC_AUDIENCE: cerebro-browser-worker-v1
-  CEREBRO_BROWSER_STAGE_CONCURRENCY: '8'
+  CEREBRO_BROWSER_STAGE_CONCURRENCY: '16'
   CEREBRO_PHYSICAL_BROWSER_E2E: '1'
 
 jobs:
-  pool-stage8:
-    name: Single-host Chromium pool 8
+  pool-stage16:
+    name: Single-host Chromium pool 16
     runs-on: ubuntu-latest
     container:
       image: mcr.microsoft.com/playwright:v1.62.1-noble
       options: --ipc=host
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -34,13 +34,13 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci
-      - name: Run eight governed Browser 1 instances concurrently
+      - name: Run sixteen governed Browser 1 instances concurrently
         run: node cerebro/runtime/browser-pool-benchmark-v2.mjs
       - name: Upload physical browser evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: browser-phase2-single-host-stage8
+          name: browser-phase2-single-host-stage16
           path: .cerebro/browser-artifacts/**
           if-no-files-found: ignore
           retention-days: 7
