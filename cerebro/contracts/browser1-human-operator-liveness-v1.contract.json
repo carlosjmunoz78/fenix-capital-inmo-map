@@ -1,0 +1,59 @@
+{
+  "schema_version": "1.0.0",
+  "contract_id": "CEREBRO-BROWSER1-HUMAN-OPERATOR-LIVENESS-V1",
+  "status": "MANDATORY",
+  "scope": "ALL_BROWSER1_CURRENT_AND_FUTURE_CONSUMERS",
+  "objective": "Operate authorized web interfaces with human-paced, context-aware, stateful interaction while respecting provider security, verification and usage controls.",
+  "principles": {
+    "operate_as_authorized_human_delegate": true,
+    "maintain_context_between_steps": true,
+    "verify_ui_state_before_next_action": true,
+    "use_small_natural_interaction_pauses_for_ui_stability": true,
+    "avoid_bursty_parallel_mutations_on_same_surface": true,
+    "adapt_to_page_latency_and_rendering": true,
+    "prefer_existing_authenticated_session_when_authorized": true,
+    "preserve_identity_company_account_and_session_isolation": true,
+    "capture_only_needed_audit_evidence": true,
+    "zero_additional_cost_preferred": true
+  },
+  "interaction_sequence": [
+    "FOCUS_TARGET",
+    "WAIT_FOR_UI_STABILITY",
+    "ENTER_OR_SELECT_VALUE",
+    "WAIT_FOR_VISIBLE_STATE_CHANGE",
+    "CLICK_OR_SUBMIT",
+    "WAIT_FOR_PROVIDER_RESPONSE",
+    "VERIFY_RESULT_BEFORE_CONTINUING"
+  ],
+  "timing_policy": {
+    "fixed_bot_like_speed": false,
+    "adaptive_waits": true,
+    "short_pause_between_distinct_mutating_steps": true,
+    "page_or_component_ready_state_preferred_over_blind_sleep": true,
+    "retry_only_after_state_recheck": true,
+    "no_unbounded_retries": true
+  },
+  "human_required_when": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST",
+    "PROVIDER_HUMAN_VERIFICATION_REQUIRED"
+  ],
+  "hard_prohibitions": [
+    "NO_CAPTCHA_BYPASS",
+    "NO_MFA_BYPASS",
+    "NO_PROVIDER_SECURITY_BYPASS",
+    "NO_IDENTITY_FALSIFICATION",
+    "NO_STEALTH_OR_ANTI_DETECTION_MECHANISM",
+    "NO_FAKE_HUMAN_TELEMETRY",
+    "NO_RATE_LIMIT_EVASION",
+    "NO_CREDENTIALS_IN_CHAT_LOGS_OR_REPOSITORIES"
+  ],
+  "operator_model": "CEREBRO behaves as an authorized delegated operator that reads the interface, understands current state, acts deliberately, observes the result and continues. The goal is reliable human-like operation, not evasion of provider controls.",
+  "factory_inheritance": "Every future engine, department, social network or tool binding that consumes BROWSER-001 must inherit this contract automatically unless a stricter provider-specific contract applies."
+}
