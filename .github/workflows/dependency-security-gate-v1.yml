@@ -1,3 +1,5 @@
+# Dedicated dependency/App gate. It is intentionally outside the cerebro-rsi-* namespace:
+# RSI must continue rejecting package.json/package-lock.json as protected App surface.
 name: CEREBRO Dependency Security Gate V1
 
 on:
