@@ -9,6 +9,11 @@ on:
     paths:
       - 'cerebro/runtime/browser-job-runner-v1.mjs'
       - 'cerebro/tests/browser-job-runner-v1.test.mjs'
+      - 'cerebro/runtime/cloud-browser-worker-v0.mjs'
+      - 'cerebro/runtime/browser1-access-v1.mjs'
+      - 'cerebro/tests/browser1-access-v1.test.mjs'
+      - 'cerebro/runtime/browser1-action-gateway-binding-v1.mjs'
+      - 'cerebro/tests/browser1-action-gateway-binding-v1.test.mjs'
       - '.github/workflows/cerebro-browser-job-runner-v1.yml'
       - 'supabase/functions/cerebro-browser-dispatch-v1/**'
       - 'supabase/migrations/*cerebro_browser_dispatch_v1*'
