@@ -65,13 +65,15 @@ async function seedCredentialCanary(benchmarkId:string,n:number,c:number,created
   const company='fenix';
   const identity='iam:browser-phase1-synthetic';
   const account='acct:browser-phase1-synthetic';
-  const target='https://fenixcapital.es';
+  const authorizedOriginTarget='https://fenixcapital.es/';
+  const html=encodeURIComponent(`<html><body><h1>CEREBRO Browser Credential Broker V2</h1><p>${benchmarkId}/${n}/${c}</p></body></html>`);
+  const deterministicBrowserTarget=`data:text/html;charset=utf-8,${html}`;
   return await enqueue({
     p_idempotency_key:`browser1-phase2-${benchmarkId}-stage-${c}-credential-slot-${n}`,
     p_company_id:company,p_engine_id:'CONSOLE-001',p_department_id:'security',p_environment:'PREPROD',p_version:'v2',p_mode:'OBSERVE',
     p_identity_id:identity,p_account_id:account,p_browser_profile_id:profile(company,identity,account),
-    p_credential_ref_id:'credref:browser-phase1-synthetic-v1',p_target_url:target,
-    p_commands:[{command:'goto',url:target},{command:'extract_text',target:{selector:'h1'}},{command:'screenshot',label:`phase2-credential-${benchmarkId}`}],
+    p_credential_ref_id:'credref:browser-phase1-synthetic-v1',p_target_url:authorizedOriginTarget,
+    p_commands:[{command:'goto',url:deterministicBrowserTarget},{command:'extract_text',target:{selector:'h1'}},{command:'screenshot',label:`phase2-credential-${benchmarkId}`}],
     p_authority:{canonical_engine_ids:['CONSOLE-001'],browser_binding:{healthy:true,kill_switch_enabled:true,fresh_attestation:true,attestation_source:'GITHUB_OIDC_VERIFIED_WORKER_V2'},engine_authority:{browser_use_authorized:true},kill_switch_enabled:true},
     p_priority:90,p_risk:'LOW',p_capability:'browser1.observe',p_expected_cost_eur:0,p_timeout_seconds:300,p_max_attempts:1,
     p_audit_id:`browser-v2-credential-${benchmarkId}-${n}`,p_created_by:createdBy
