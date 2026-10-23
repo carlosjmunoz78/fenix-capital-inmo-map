@@ -14,6 +14,7 @@ on:
       - 'cerebro/runtime/browser-session-secret-resolver-v1.mjs'
       - 'cerebro/runtime/browser-vision-fallback-v1.mjs'
       - 'cerebro/runtime/browser1-access-v1.mjs'
+      - 'cerebro/gateway/browser1-action-gateway-binding-v1.mjs'
       - 'cerebro/tests/cloud-browser-worker-v0.test.mjs'
       - 'cerebro/tests/cloud-browser-governed-session-v1.test.mjs'
       - 'cerebro/tests/browser-session-binding-v1.test.mjs'
@@ -21,6 +22,7 @@ on:
       - 'cerebro/tests/browser-vision-fallback-v1.test.mjs'
       - 'cerebro/tests/browser1-access-v1.test.mjs'
       - 'cerebro/tests/browser1-access-policy-v1.test.mjs'
+      - 'cerebro/tests/browser1-action-gateway-binding-v1.test.mjs'
       - 'cerebro/runtime/browser-transversal-autonomy-v1.mjs'
       - 'cerebro/registry/browser-transversal-autonomy-policy.v1.json'
       - 'cerebro/registry/browser1-access-policy.v1.json'
@@ -33,6 +35,7 @@ on:
       - 'cerebro/runtime/browser-session-secret-resolver-v1.mjs'
       - 'cerebro/runtime/browser-vision-fallback-v1.mjs'
       - 'cerebro/runtime/browser1-access-v1.mjs'
+      - 'cerebro/gateway/browser1-action-gateway-binding-v1.mjs'
       - 'cerebro/tests/cloud-browser-worker-v0.test.mjs'
       - 'cerebro/tests/cloud-browser-governed-session-v1.test.mjs'
       - 'cerebro/tests/browser-session-binding-v1.test.mjs'
@@ -40,6 +43,7 @@ on:
       - 'cerebro/tests/browser-vision-fallback-v1.test.mjs'
       - 'cerebro/tests/browser1-access-v1.test.mjs'
       - 'cerebro/tests/browser1-access-policy-v1.test.mjs'
+      - 'cerebro/tests/browser1-action-gateway-binding-v1.test.mjs'
       - 'cerebro/runtime/browser-transversal-autonomy-v1.mjs'
       - 'cerebro/registry/browser-transversal-autonomy-policy.v1.json'
       - 'cerebro/registry/browser1-access-policy.v1.json'
@@ -67,8 +71,8 @@ jobs:
         env:
           CEREBRO_PHYSICAL_BROWSER_E2E: '1'
         run: node --test cerebro/tests/cloud-browser-worker-v0.test.mjs cerebro/tests/cloud-browser-governed-session-v1.test.mjs cerebro/tests/browser1-access-v1.test.mjs
-      - name: Browser governance regression
-        run: node --test cerebro/tests/browser-transversal-autonomy-v1.test.mjs cerebro/tests/authorized-execution-device-profile-v1.test.mjs cerebro/tests/universal-skill-b17-browser-physical-gates-v1.test.mjs cerebro/tests/browser-session-binding-v1.test.mjs cerebro/tests/browser-session-secret-resolver-v1.test.mjs cerebro/tests/browser-vision-fallback-v1.test.mjs cerebro/tests/browser1-access-v1.test.mjs cerebro/tests/browser1-access-policy-v1.test.mjs
+      - name: Browser governance and gateway regression
+        run: node --test cerebro/tests/browser-transversal-autonomy-v1.test.mjs cerebro/tests/authorized-execution-device-profile-v1.test.mjs cerebro/tests/universal-skill-b17-browser-physical-gates-v1.test.mjs cerebro/tests/browser-session-binding-v1.test.mjs cerebro/tests/browser-session-secret-resolver-v1.test.mjs cerebro/tests/browser-vision-fallback-v1.test.mjs cerebro/tests/browser1-access-v1.test.mjs cerebro/tests/browser1-access-policy-v1.test.mjs cerebro/tests/browser1-action-gateway-binding-v1.test.mjs cerebro/tests/action-gateway-v1.test.mjs
       - name: Full CEREBRO regression isolated per test file
         shell: bash
         run: |
