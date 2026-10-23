@@ -11,8 +11,8 @@ function gate(name,condition,detail=''){
   checks.push({name,ok,detail});
   if(!ok)throw new Error(`TRIBUNAL_GATE_FAILED:${name}${detail?`:${detail}`:''}`);
 }
-
 function exists(rel){return fs.existsSync(path.join(root,rel));}
+function text(rel){return fs.readFileSync(path.join(root,rel),'utf8');}
 
 gate('schema',evidence.schema_version==='browser.phase2.evidence.v1');
 gate('phase',evidence.phase==='BROWSER_1_PHASE_2');
@@ -66,7 +66,31 @@ gate('v1_vault_preserved',evidence.old_vs_new?.v2_preserves_v1_binding_and_vault
 gate('rebuild_source_controlled',evidence.rebuild?.source_controlled===true);
 for(const rel of evidence.rebuild?.migrations??[])gate(`rebuild_exists:${rel}`,exists(rel));
 gate('edge_source_exists',exists(evidence.rebuild?.edge_source));
+gate('prod_edge_source_exists',exists(evidence.rebuild?.prod_edge_source));
+gate('prod_rollout_workflow_exists',exists(evidence.rebuild?.prod_rollout_workflow));
 for(const rel of evidence.rebuild?.runtime_sources??[])gate(`runtime_exists:${rel}`,exists(rel));
+
+const barrierTable=text('supabase/migrations/20261023201500_cerebro_browser_barrier_v2_table.sql');
+const barrierFunctions=text('supabase/migrations/20261023201700_cerebro_browser_barrier_v2_functions.sql');
+const benchmarkLease=text('supabase/migrations/20261023201800_cerebro_browser_lease_benchmark_v2.sql');
+const prodEdge=text(evidence.rebuild.prod_edge_source);
+const prodWorkflow=text(evidence.rebuild.prod_rollout_workflow);
+const prodRunner=text('cerebro/runtime/browser-prod-rollout-v2.mjs');
+
+gate('rebuild_barrier_table_versioned',barrierTable.includes('cerebro_browser_barrier_v2'));
+gate('rebuild_barrier_stage1_supported',barrierFunctions.includes('(1,2,4,8,16)'));
+gate('rebuild_benchmark_lease_versioned',benchmarkLease.includes('cerebro_browser_lease_benchmark_v2'));
+gate('prod_edge_locked_to_prod_project',prodEdge.includes("PROD_PROJECT_REF='cluhljgonannaafpmblx'"));
+gate('prod_edge_locked_to_canary_ref',prodEdge.includes("refs/heads/cerebro/browser1-phase2-prod-canary-v1"));
+gate('prod_edge_locked_to_workflow',prodEdge.includes('cerebro-browser-phase2-prod-rollout-v1.yml'));
+gate('prod_edge_no_credential_materialization',prodEdge.includes('credential_materialization:false')&&!prodEdge.includes('credential-materialize-v2'));
+gate('prod_workflow_uses_prod_endpoint',prodWorkflow.includes('cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-browser-dispatch-v2'));
+gate('prod_rollout_stages_1_2_4_8',prodRunner.includes('for(const stage of [1,2,4,8])'));
+gate('prod_rollout_failure_disables_v2',prodRunner.includes("action:'DISABLE'"));
+gate('prod_rollout_final_8_4_2',prodRunner.includes('PROD_FINAL_CONFIG_NOT_8_4_2_GREEN'));
+gate('prod_authorized',evidence.promotion?.prod_authorized===true);
+gate('prod_canary_observe_only',evidence.promotion?.prod_canary_observe_only===true);
+gate('prod_canary_credentials_disabled',evidence.promotion?.prod_canary_credentials_enabled===false);
 
 gate('no_prod_change_yet',evidence.backup?.prod_change_performed===false);
 gate('phase1_git_snapshot',evidence.backup?.phase1_source_snapshot_preserved_in_git===true);
@@ -80,15 +104,5 @@ gate('prod_not_promoted',evidence.promotion?.prod_promoted===false);
 gate('phase3_not_started',evidence.promotion?.phase3_started===false);
 gate('no_human_required',evidence.promotion?.human_required===null);
 
-const result={
-  ok:true,
-  tribunal:'PASS',
-  schema_version:'browser.phase2.tribunal.v1',
-  checks:checks.length,
-  failures:0,
-  environment:'PREPROD',
-  prod_promoted:false,
-  phase3_started:false,
-  incremental_cost_eur:0
-};
+const result={ok:true,tribunal:'PASS',schema_version:'browser.phase2.tribunal.v1',checks:checks.length,failures:0,environment:'PREPROD',prod_promoted:false,phase3_started:false,incremental_cost_eur:0};
 console.log(JSON.stringify(result));
