@@ -101,6 +101,33 @@ jobs:
       - run: npm ci
       - name: Install Chromium runtime
         run: npx playwright install --with-deps chromium
+      - name: Distributed READY to GO barrier
+        env:
+          SLOT: ${{ matrix.slot }}
+          STAGE: '4'
+        run: |
+          node --input-type=module <<'NODE'
+          const reqUrl=process.env.ACTIONS_ID_TOKEN_REQUEST_URL;
+          const reqToken=process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN;
+          if(!reqUrl||!reqToken)throw new Error('OIDC_REQUEST_CONTEXT_MISSING');
+          const u=new URL(reqUrl);u.searchParams.set('audience',process.env.CEREBRO_BROWSER_OIDC_AUDIENCE);
+          const tr=await fetch(u,{headers:{authorization:`Bearer ${reqToken}`},redirect:'error'});
+          if(!tr.ok)throw new Error(`OIDC_TOKEN_FAILED:${tr.status}`);
+          const {value:token}=await tr.json();
+          const call=async(route,body)=>{
+            const r=await fetch(`${process.env.CEREBRO_BROWSER_DISPATCH_URL}/${route}`,{method:'POST',headers:{authorization:`Bearer ${token}`,'content-type':'application/json'},body:JSON.stringify(body),redirect:'error'});
+            const data=await r.json().catch(()=>null);
+            if(!r.ok||data?.ok!==true)throw new Error(`${route}:${r.status}:${JSON.stringify(data)}`);
+            return data;
+          };
+          let state=await call('barrier-arrive-v2',{worker_slot:Number(process.env.SLOT),stage_concurrency:Number(process.env.STAGE)});
+          for(let attempt=0;attempt<180 && state.go!==true;attempt++){
+            await new Promise(resolve=>setTimeout(resolve,1000));
+            state=await call('barrier-status-v2',{stage_concurrency:Number(process.env.STAGE)});
+          }
+          if(state.go!==true)throw new Error(`BARRIER_TIMEOUT:${JSON.stringify(state)}`);
+          console.log(JSON.stringify({barrier:'GO',ready:state.ready,target:state.target,slot:Number(process.env.SLOT)}));
+          NODE
       - name: Lease and execute one governed Browser 1 job
         run: node cerebro/runtime/browser-job-runner-v2.mjs
       - name: Upload physical evidence
