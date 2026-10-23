@@ -1,0 +1,48 @@
+{
+  "schema_version": "1.0.0",
+  "contract_id": "CEREBRO-BROWSER-INTERACTION-PACING-V1",
+  "status": "MANDATORY",
+  "scope": "ALL_BROWSER1_UI_WORKFLOWS",
+  "purpose": "Improve UI reliability, page stability, form readiness and provider-friendly pacing without bypassing provider security, anti-abuse or verification controls.",
+  "rules": {
+    "wait_for_dom_or_control_readiness_before_input": true,
+    "focus_control_before_fill_or_type": true,
+    "short_settle_between_focus_input_and_submit": true,
+    "allow_explicit_wait_when_ui_transition_is_pending": true,
+    "avoid_burst_clicking_or_parallel_mutations_on_same_page": true,
+    "respect_provider_rate_limits_and_retry_after": true,
+    "do_not_randomize_for_stealth_or_bot_detection_evasion": true,
+    "do_not_bypass_captcha_mfa_or_provider_verification": true,
+    "capture_failure_evidence_before_retry_when_safe": true
+  },
+  "recommended_defaults": {
+    "focus_settle_ms": 300,
+    "input_settle_ms": 350,
+    "submit_settle_ms": 500,
+    "navigation_wait_until": "domcontentloaded",
+    "max_ui_wait_ms_without_specific_reason": 30000,
+    "retry_model": "BOUNDED_AND_EVIDENCE_DRIVEN"
+  },
+  "login_sequence": [
+    "NAVIGATE",
+    "WAIT_FOR_CONTROL_READY",
+    "FOCUS_IDENTIFIER_FIELD",
+    "SHORT_SETTLE",
+    "FILL_IDENTIFIER",
+    "SHORT_SETTLE",
+    "FOCUS_PASSWORD_FIELD",
+    "SHORT_SETTLE",
+    "FILL_PASSWORD_FROM_CREDENTIAL_REF",
+    "SHORT_SETTLE",
+    "SUBMIT",
+    "WAIT_FOR_NAVIGATION_OR_PROVIDER_RESPONSE",
+    "HANDLE_PROVIDER_HUMAN_VERIFICATION_AS_HUMAN_REQUIRED"
+  ],
+  "security": {
+    "raw_password_in_job_queue": false,
+    "raw_password_in_repository": false,
+    "raw_password_in_logs": false,
+    "credential_ref_required_when_credentials_are_needed": true
+  },
+  "factory_rule": "Every future Browser 1 integration inherits this pacing contract unless an application-specific contract defines stricter timings."
+}
