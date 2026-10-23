@@ -1,12 +1,22 @@
 {
-  "schema_version": "1.1.0",
+  "schema_version": "1.2.0",
   "registry_id": "CEREBRO-CREATIVE-MEDIA-KNOWLEDGE-REGISTRY-V1",
   "status": "ACTIVE_SHARED_KNOWLEDGE_REGISTRY",
   "scope": "CEREBRO_OS_ALL_DEPARTMENTS",
   "source_repository": "carlosjmunoz78/fenix-capital-cerebro-social",
   "source_branch": "cerebro/facebook-autonomous-ops-v1-2026-10-23",
-  "source_commit_sha": "224269503020535f8890539ea309ac9044a78a66",
+  "source_commit_sha": "05737e1c5e4ae618df425c6ca6dff45fe7042caf",
   "source_ref_policy": "The commit SHA is the canonical immutable knowledge snapshot for this registry version. The branch is informational and may continue evolving; promotion to a newer snapshot requires an explicit registry update and delta validation.",
+  "source_validation": {
+    "workflow": "CEREBRO Creative Media Knowledge Integrity",
+    "workflow_file": ".github/workflows/creative-media-knowledge-integrity.yml",
+    "workflow_run_id": 40023655252,
+    "validated_commit_sha": "05737e1c5e4ae618df425c6ca6dff45fe7042caf",
+    "job": "validate",
+    "conclusion": "success",
+    "validation_scope": "CREATIVE_MEDIA_PERSONAL_BRAND_FACEBOOK_STATIC_INTEGRITY",
+    "cross_repo_secret_required": false
+  },
   "authoritative_contracts": [
     "config/creative-media-knowledge-master-v1.json",
     "knowledge/canva-creative-knowledge-seed-2026-10-23.json",
@@ -55,14 +65,15 @@
     "canonical_human_required_only": true,
     "no_new_paid_subscription_by_default": true,
     "no_make_or_buffer_removal_without_parallel_parity_and_rollback": true,
-    "knowledge_snapshot_pin_required": true
+    "knowledge_snapshot_pin_required": true,
+    "source_repo_must_validate_its_private_content": true
   },
   "integrity_validation": {
-    "validator": "scripts/validate-creative-media-knowledge.mjs",
-    "workflow": ".github/workflows/cerebro-creative-knowledge-integrity.yml",
-    "last_audit_requested_at": "2026-10-23",
-    "validation_scope": "STATIC_PINNED_KNOWLEDGE_INTEGRITY",
+    "core_validator": "scripts/validate-creative-media-knowledge.mjs",
+    "core_workflow": ".github/workflows/cerebro-creative-knowledge-integrity.yml",
+    "source_validator": "scripts/validate-creative-media-knowledge.mjs",
+    "source_workflow": ".github/workflows/creative-media-knowledge-integrity.yml",
     "runtime_consumption_certification_separate": true
   },
-  "runtime_truth": "Knowledge contracts are registered, source-pinned and available for CEREBRO-wide reuse. Automatic loading and physical execution must still be proven per consuming engine or platform binding before that consumer is called operationally certified."
+  "runtime_truth": "Knowledge contracts are registered, source-validated, source-pinned and available for CEREBRO-wide reuse. Automatic loading and physical execution must still be proven per consuming engine or platform binding before that consumer is called operationally certified."
 }
