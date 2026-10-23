@@ -1,17 +1,17 @@
 {
-  "schema_version": "1.2.0",
+  "schema_version": "1.3.0",
   "registry_id": "CEREBRO-CREATIVE-MEDIA-KNOWLEDGE-REGISTRY-V1",
   "status": "ACTIVE_SHARED_KNOWLEDGE_REGISTRY",
   "scope": "CEREBRO_OS_ALL_DEPARTMENTS",
   "source_repository": "carlosjmunoz78/fenix-capital-cerebro-social",
   "source_branch": "cerebro/facebook-autonomous-ops-v1-2026-10-23",
-  "source_commit_sha": "05737e1c5e4ae618df425c6ca6dff45fe7042caf",
+  "source_commit_sha": "ec63622ac3b28b23a3311af076b91965757f1391",
   "source_ref_policy": "The commit SHA is the canonical immutable knowledge snapshot for this registry version. The branch is informational and may continue evolving; promotion to a newer snapshot requires an explicit registry update and delta validation.",
   "source_validation": {
     "workflow": "CEREBRO Creative Media Knowledge Integrity",
     "workflow_file": ".github/workflows/creative-media-knowledge-integrity.yml",
-    "workflow_run_id": 40023655252,
-    "validated_commit_sha": "05737e1c5e4ae618df425c6ca6dff45fe7042caf",
+    "workflow_run_id": 40025079579,
+    "validated_commit_sha": "ec63622ac3b28b23a3311af076b91965757f1391",
     "job": "validate",
     "conclusion": "success",
     "validation_scope": "CREATIVE_MEDIA_PERSONAL_BRAND_FACEBOOK_STATIC_INTEGRITY",
@@ -20,6 +20,7 @@
   "authoritative_contracts": [
     "config/creative-media-knowledge-master-v1.json",
     "knowledge/canva-creative-knowledge-seed-2026-10-23.json",
+    "knowledge/canva-ai-capabilities-2026-10-23.json",
     "knowledge/canva-license-hardening-2026-10-23.json",
     "knowledge/creative-platform-production-specs-2026-10-23.json",
     "knowledge/creative-accessibility-licensing-seed-2026-10-23.json"
@@ -41,6 +42,8 @@
   "mandatory_behavior": [
     "LOAD_CREATIVE_MEDIA_MASTER_BEFORE_HIGH_VALUE_CREATIVE_EXECUTION",
     "LOAD_CURRENT_TOOL_AND_PLATFORM_SEEDS",
+    "LOAD_CANVA_AI_CAPABILITIES_BEFORE_CANVA_AI_EXECUTION",
+    "CHECK_CANVA_AI_PLAN_ENTITLEMENT_AND_ALLOWANCE_BEFORE_BATCH_USE",
     "LOAD_CANVA_LICENSE_HARDENING_FOR_CANVA_LIBRARY_ASSETS",
     "REFRESH_STALE_OFFICIAL_SPECS_BEFORE_HIGH_VOLUME_AUTOMATION",
     "PRESERVE_PERSON_COMPANY_BRAND_AND_SESSION_SCOPE",
