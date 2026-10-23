@@ -1,5 +1,5 @@
 import {useEffect,useRef,useState,type FormEvent,type KeyboardEvent,type MouseEvent,type WheelEvent} from 'react';
-import {BrainCircuit,CircleDot,Globe2,Hand,MessageSquareText,Mic,Paperclip,Play,RotateCcw,Send,ShieldAlert,Square} from 'lucide-react';
+import {ArrowLeft,ArrowRight,BrainCircuit,CircleDot,Globe2,Hand,LockKeyhole,MessageSquareText,Mic,Paperclip,Play,Plus,RefreshCw,RotateCcw,Send,ShieldAlert,Square,X} from 'lucide-react';
 import {applyVoiceContextHints,createVoiceRecognition,voiceRecognitionSupported,type CerebroSpeechRecognition} from './cerebroVoice';
 import {CerebroVoiceSettings} from './CerebroVoiceSettings';
 import {decryptBrowserFrame,encryptBrowserInput,fetchBrowserInteractiveApi,importBrowserSessionKey,type BrowserSessionV3} from './cerebroBrowserInteractive';
@@ -21,18 +21,31 @@ function setReactTextareaValue(textarea:HTMLTextAreaElement,value:string){
  textarea.dispatchEvent(new Event('input',{bubbles:true}));
  textarea.dispatchEvent(new Event('change',{bubbles:true}));
 }
-
 function stateLabel(session:BrowserSessionV3|null){
  if(!session)return'SIN SESIÓN VISUAL';
  if(session.state==='CONNECTING')return'CONECTANDO BROWSER 1';
  if(session.state==='CEREBRO_CONTROLLED')return'CEREBRO EN CONTROL';
+ if(session.state==='HUMAN_REQUIRED')return'INTERVENCIÓN HUMANA REQUERIDA';
  if(session.state==='TAKEOVER_PENDING')return'TOMA DE CONTROL PENDIENTE';
  if(session.state==='HUMAN_CONTROLLED')return'CONTROL HUMANO';
  if(session.state==='HANDBACK_PENDING')return'DEVOLVIENDO A CEREBRO';
+ if(session.state==='AI_RESUMING')return'CEREBRO REANUDANDO';
  if(session.state==='STOPPED')return'PARADA DE EMERGENCIA';
  if(session.state==='ERROR')return'ERROR DE SESIÓN';
  if(session.state==='CLOSED')return'SESIÓN CERRADA';
  return session.state.replaceAll('_',' ');
+}
+function normalizeAddress(value:string){
+ const clean=value.trim();if(!clean)return'';
+ if(clean==='about:blank')return clean;
+ try{const parsed=new URL(clean);return ['http:','https:'].includes(parsed.protocol)?parsed.toString():''}catch{/* continue */}
+ if(/^localhost(?::\d+)?(?:\/|$)/i.test(clean)||/^127\.0\.0\.1(?::\d+)?(?:\/|$)/.test(clean))return `http://${clean}`;
+ if(/^[a-z0-9.-]+\.[a-z]{2,}(?::\d+)?(?:\/.*)?$/i.test(clean))return `https://${clean}`;
+ return `https://www.google.com/search?q=${encodeURIComponent(clean)}`;
+}
+function tabLabel(tab:{title?:string;url?:string},index:number){
+ const title=String(tab.title||'').trim();if(title)return title.slice(0,34);
+ try{const url=new URL(String(tab.url||''));return url.hostname.replace(/^www\./,'')||`Pestaña ${index+1}`}catch{return index===0?'Browser 1':`Pestaña ${index+1}`}
 }
 
 export default function CerebroBrowserConsole({onViewChange}:Props){
@@ -44,7 +57,10 @@ export default function CerebroBrowserConsole({onViewChange}:Props){
  const[browserError,setBrowserError]=useState('');
  const[browserBusy,setBrowserBusy]=useState(false);
  const[frameUrl,setFrameUrl]=useState('');
+ const[addressDraft,setAddressDraft]=useState('');
  const composerRef=useRef<HTMLTextAreaElement|null>(null);
+ const addressRef=useRef<HTMLInputElement|null>(null);
+ const viewportRef=useRef<HTMLDivElement|null>(null);
  const dictationRef=useRef<CerebroSpeechRecognition|null>(null);
  const keyRef=useRef<CryptoKey|null>(null);
  const keySessionRef=useRef('');
@@ -90,6 +106,7 @@ export default function CerebroBrowserConsole({onViewChange}:Props){
    if(cancelled)return;
    if(result.status!==200||!result.data?.ok){if(result.status!==0)setBrowserError(result.data?.error||'No se pudo leer Browser 1');return}
    const session=result.data.session;setBrowserSession(session);setBrowserError('');
+   if(document.activeElement!==addressRef.current)setAddressDraft(session?.current_url||'');
    if(!session||TERMINAL.has(session.state)){
     if(!session||session.session_id!==keySessionRef.current){keyRef.current=null;keySessionRef.current='';frameSeqRef.current=-1;}
     return;
@@ -150,15 +167,21 @@ export default function CerebroBrowserConsole({onViewChange}:Props){
   const session=browserSession;if(!session?.viewport_width||!session.viewport_height)return null;
   const rect=event.currentTarget.getBoundingClientRect();return{x:Math.max(0,Math.min(session.viewport_width,(event.clientX-rect.left)*session.viewport_width/rect.width)),y:Math.max(0,Math.min(session.viewport_height,(event.clientY-rect.top)*session.viewport_height/rect.height))};
  }
- function onViewerClick(event:MouseEvent<HTMLImageElement>){const p=viewerPoint(event);if(p)void humanInput('CLICK_POINT',p)}
+ function onViewerClick(event:MouseEvent<HTMLImageElement>){viewportRef.current?.focus();const p=viewerPoint(event);if(p)void humanInput('CLICK_POINT',p)}
  function onViewerWheel(event:WheelEvent<HTMLDivElement>){if(browserSession?.state!=='HUMAN_CONTROLLED')return;event.preventDefault();void humanInput('SCROLL',{delta_x:event.deltaX,delta_y:event.deltaY})}
  function onViewerKeyDown(event:KeyboardEvent<HTMLDivElement>){if(browserSession?.state!=='HUMAN_CONTROLLED')return;event.preventDefault();if(event.key.length===1&&!event.ctrlKey&&!event.metaKey)void humanInput('KEYBOARD_TYPE',{value:event.key});else void humanInput('KEYBOARD_PRESS',{key:event.key})}
+ function onAddressKeyDown(event:KeyboardEvent<HTMLInputElement>){if(event.key==='Enter'){event.preventDefault();const url=normalizeAddress(addressDraft);if(url)void humanInput('NAVIGATE',{url})}}
 
  const live=Boolean(browserSession?.worker_alive&&frameUrl&&!TERMINAL.has(browserSession.state));
  const canTakeover=Boolean(browserSession?.worker_alive&&browserSession.state==='CEREBRO_CONTROLLED'&&browserSession.control_owner==='CEREBRO'&&!browserSession.emergency_stop);
  const humanControl=Boolean(browserSession?.worker_alive&&browserSession.state==='HUMAN_CONTROLLED'&&browserSession.control_owner==='HUMAN'&&browserSession.human_lease_id);
  const canStop=Boolean(browserSession?.worker_alive&&!TERMINAL.has(browserSession.state));
  const canStart=!browserSession||TERMINAL.has(browserSession.state);
+ const tabs=browserSession?.tabs?.length?browserSession.tabs:[{index:0,url:browserSession?.current_url||'',active:true,title:browserSession?.current_title||''}];
+ const activeTab=Math.max(0,Math.min(browserSession?.active_tab_index??0,tabs.length-1));
+ const leaseSeconds=humanControl&&browserSession?.human_lease_expires_at?Math.max(0,Math.ceil((Date.parse(browserSession.human_lease_expires_at)-Date.now())/1000)):0;
+ const companyLabel=browserSession?.company_id==='fenix'?'Fénix':browserSession?.company_id||'Fénix';
+ const environmentLabel=browserSession?.environment||'PROD';
 
  return <main className="cerebro-browser-console" aria-label="CEREBRO · Navegador">
   <header className="cerebro-browser-header">
@@ -168,9 +191,9 @@ export default function CerebroBrowserConsole({onViewChange}:Props){
   </header>
 
   <section className="cerebro-browser-sessionbar" aria-label="Estado de Browser 1">
-   <div className="cerebro-browser-session-context"><span><small>EMPRESA</small><strong>Fénix</strong></span><span><small>ENTORNO</small><strong>PROD</strong></span><span><small>MOTOR</small><strong>Browser 1</strong></span><span><small>CAPACIDAD</small><strong>8 / 4 / 2</strong></span></div>
+   <div className="cerebro-browser-session-context"><span><small>EMPRESA</small><strong>{companyLabel}</strong></span><span><small>ENTORNO</small><strong>{environmentLabel}</strong></span><span><small>MOTOR</small><strong>Browser 1</strong></span><span><small>PESTAÑAS</small><strong>{tabs.length} / 8</strong></span></div>
    <div className="cerebro-browser-controlbar">
-    <span className={`cerebro-browser-mode ${humanControl?'is-human':''}`}><CircleDot size={12}/>{stateLabel(browserSession)}</span>
+    <span className={`cerebro-browser-mode ${humanControl?'is-human':''}`}><CircleDot size={12}/>{stateLabel(browserSession)}{humanControl&&leaseSeconds>0?<small>{Math.floor(leaseSeconds/60)}:{String(leaseSeconds%60).padStart(2,'0')}</small>:null}</span>
     {canStart?<button type="button" className="is-takeover" onClick={startBrowser} disabled={browserBusy}><Play size={15}/> Iniciar Browser 1</button>:null}
     <button type="button" className="is-danger" onClick={emergencyStop} disabled={!canStop||browserBusy} title="Detiene inmediatamente la sesión interactiva"><ShieldAlert size={15}/> Parada de emergencia</button>
     <button type="button" className="is-takeover" onClick={takeover} disabled={!canTakeover||browserBusy}><Hand size={15}/> Tomar control</button>
@@ -179,17 +202,28 @@ export default function CerebroBrowserConsole({onViewChange}:Props){
   </section>
 
   <section className="cerebro-browser-frame" aria-label="Visor de navegador">
-   <div className="cerebro-browser-tabs" aria-hidden="true"><span className="is-active"><Globe2 size={13}/> {live?'Browser 1 · sesión física viva':'Browser 1 · visor preparado'}</span></div>
-   <div className="cerebro-browser-address" aria-hidden="true"><span className="cerebro-address-lock">●</span><span>{browserSession?.current_url||'Esperando sesión Browser 1'}</span></div>
-   <div className="cerebro-browser-viewport" tabIndex={humanControl?0:-1} onWheel={onViewerWheel} onKeyDown={onViewerKeyDown} style={{outline:humanControl?'2px solid currentColor':'none'}}>
-    {live?<img src={frameUrl} alt="Vista en vivo de Browser 1" onClick={onViewerClick} draggable={false} style={{display:'block',width:'100%',height:'100%',objectFit:'contain',cursor:humanControl?'crosshair':'default',userSelect:'none'}}/>:<div className="cerebro-browser-awaiting"><span className="cerebro-browser-awaiting-icon"><Globe2 size={38}/></span><small>FASE 3 · LIVE VIEWER</small><h2>{browserSession?.state==='CONNECTING'?'Arrancando Browser 1':'Navegador preparado'}</h2><p>{browserSession?.state==='CONNECTING'?'La sesión está en la cola PROD y espera al worker gobernado.':'La interfaz está lista para abrir una sesión Browser 1 real. No se simula navegación.'}</p><div className="cerebro-browser-awaiting-meta"><span>{browserSession?stateLabel(browserSession):'Sin sesión activa'}</span><span>{browserSession?.session_id?`ID ${browserSession.session_id.slice(0,8)}…`:'Misma sesión Browser 1'}</span><span>{humanControl?'Entrada humana habilitada':'Control humano gobernado'}</span></div></div>}
+   <div className="cerebro-browser-tabs" role="tablist" aria-label="Pestañas de Browser 1">
+    <div className="cerebro-browser-tabstrip">{tabs.map((tab,index)=><button key={`${index}:${tab.url||''}`} type="button" role="tab" aria-selected={index===activeTab} className={index===activeTab?'is-active':''} disabled={!humanControl} onClick={()=>{if(index!==activeTab)void humanInput('SWITCH_TAB',{index})}} title={tab.url||`Pestaña ${index+1}`}><Globe2 size={13}/><span>{tabLabel(tab,index)}</span>{index===activeTab&&humanControl?<X size={12} onClick={event=>{event.stopPropagation();void humanInput('CLOSE_TAB',{})}}/>:null}</button>)}</div>
+    <button type="button" className="cerebro-browser-new-tab" disabled={!humanControl||tabs.length>=8} onClick={()=>void humanInput('OPEN_TAB',{url:'about:blank'})} title="Nueva pestaña"><Plus size={15}/></button>
    </div>
-   {browserError?<div className="cerebro-browser-dictation-error" role="status">{browserError}</div>:null}
+   <div className="cerebro-browser-toolbar">
+    <div className="cerebro-browser-nav-buttons">
+     <button type="button" disabled={!humanControl} onClick={()=>void humanInput('BACK',{})} title="Atrás"><ArrowLeft size={16}/></button>
+     <button type="button" disabled={!humanControl} onClick={()=>void humanInput('FORWARD',{})} title="Adelante"><ArrowRight size={16}/></button>
+     <button type="button" disabled={!humanControl} onClick={()=>void humanInput('RELOAD',{})} title="Recargar"><RefreshCw size={15}/></button>
+    </div>
+    <label className={`cerebro-browser-address ${humanControl?'is-editable':''}`}><LockKeyhole size={13}/><input ref={addressRef} value={addressDraft} onChange={event=>setAddressDraft(event.target.value)} onKeyDown={onAddressKeyDown} readOnly={!humanControl} aria-label="Dirección del navegador" placeholder={browserSession?.current_url||'Esperando sesión Browser 1'}/></label>
+    <span className={`cerebro-browser-live ${live?'is-live':''}`}><CircleDot size={11}/>{live?'LIVE':'STANDBY'}</span>
+   </div>
+   <div ref={viewportRef} className={`cerebro-browser-viewport ${humanControl?'is-human-control':''}`} tabIndex={humanControl?0:-1} onWheel={onViewerWheel} onKeyDown={onViewerKeyDown}>
+    {live?<img src={frameUrl} alt="Vista en vivo de Browser 1" onClick={onViewerClick} draggable={false}/>:<div className="cerebro-browser-awaiting"><span className="cerebro-browser-awaiting-icon"><Globe2 size={38}/></span><small>FASE 3 · LIVE VIEWER</small><h2>{browserSession?.state==='CONNECTING'?'Arrancando Browser 1':'Navegador preparado'}</h2><p>{browserSession?.state==='CONNECTING'?'La sesión está en la cola gobernada y espera al worker autorizado.':'La interfaz está lista para abrir una sesión Browser 1 real. No se simula navegación.'}</p><div className="cerebro-browser-awaiting-meta"><span>{browserSession?stateLabel(browserSession):'Sin sesión activa'}</span><span>{browserSession?.session_id?`ID ${browserSession.session_id.slice(0,8)}…`:'Misma sesión Browser 1'}</span><span>{humanControl?'Ratón y teclado habilitados':'Observación segura'}</span></div></div>}
+   </div>
+   {browserError?<div className="cerebro-browser-error" role="status">{browserError}</div>:null}
   </section>
 
   <section className="cerebro-browser-composer" aria-label="Órdenes para CEREBRO">
    <form onSubmit={submit} className="cerebro-browser-form">
-    <button type="button" className="cerebro-browser-icon" disabled title="Adjuntar archivo · pendiente de contrato real" aria-label="Adjuntar archivo"><Paperclip size={19}/></button>
+    <button type="button" className="cerebro-browser-icon" disabled title="Adjuntos: contrato de chat aún no habilitado; no se simula" aria-label="Adjuntar archivo"><Paperclip size={19}/></button>
     <button type="button" className={`cerebro-browser-action ${dictating?'is-active':''}`} onClick={toggleDictation} disabled={!snapshot.ready||snapshot.sending||snapshot.voiceActive||!voiceRecognitionSupported()}>{dictating?<Square size={16}/>:<Mic size={18}/>}<span>{dictating?'Parar dictado':'Dictar'}</span></button>
     <button type="button" className={`cerebro-browser-action ${snapshot.voiceActive?'is-active':''}`} onClick={toggleVoice} disabled={!snapshot.ready||snapshot.sending||dictating}>{snapshot.voiceActive?<Square size={16}/>:<MessageSquareText size={18}/>}<span>{snapshot.voiceActive?'Finalizar':'Hablar'}</span></button>
     <textarea ref={composerRef} value={composer} onChange={event=>setComposer(event.target.value)} onKeyDown={onComposerKeyDown} disabled={!snapshot.ready||snapshot.sending} rows={1} placeholder={snapshot.ready?'Escribe, habla o da una orden a CEREBRO…':'Esperando conexión segura con CEREBRO…'} aria-label="Escribe una orden para CEREBRO"/>
