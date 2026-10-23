@@ -1,0 +1,55 @@
+name: CEREBRO Cloud Browser PROD Canary V0
+
+on:
+  push:
+    branches:
+      - 'cerebro/cloud-browser-prod-canary-v0'
+    paths:
+      - 'cerebro/canary/cloud-browser-prod-observe-v0.mjs'
+      - 'cerebro/runtime/cloud-browser-worker-v0.mjs'
+      - 'cerebro/runtime/browser-transversal-autonomy-v1.mjs'
+      - 'cerebro/registry/engine-registry.v1.json'
+      - '.github/workflows/cerebro-cloud-browser-prod-canary-v0.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CEREBRO_BROWSER_CANARY_URL: 'https://fenixcapital.es/'
+  CEREBRO_BROWSER_PROFILES_ROOT: '.cerebro/browser-profiles'
+  CEREBRO_BROWSER_ARTIFACTS_ROOT: '.cerebro/browser-artifacts'
+
+jobs:
+  prod-observe-canary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Install Chromium runtime
+        run: npx playwright install --with-deps chromium
+      - name: Assert read-only PROD canary contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -F "kind: 'OBSERVE'" cerebro/canary/cloud-browser-prod-observe-v0.mjs
+          grep -F "incremental_spend_eur: 0" cerebro/canary/cloud-browser-prod-observe-v0.mjs
+          grep -F "customer_data_used: false" cerebro/canary/cloud-browser-prod-observe-v0.mjs
+          grep -F "prod_mutation: false" cerebro/canary/cloud-browser-prod-observe-v0.mjs
+          grep -F "public_mutation: false" cerebro/canary/cloud-browser-prod-observe-v0.mjs
+      - name: Physical PROD observation with Chromium
+        run: node cerebro/canary/cloud-browser-prod-observe-v0.mjs
+      - name: Upload physical PROD evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-cloud-browser-prod-canary-v0-evidence
+          path: .cerebro/browser-artifacts
+          if-no-files-found: error
+          retention-days: 7
