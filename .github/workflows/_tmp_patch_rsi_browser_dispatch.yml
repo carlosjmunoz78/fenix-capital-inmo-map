@@ -1,0 +1,111 @@
+name: TMP Patch RSI Browser Dispatch Governance
+
+on:
+  push:
+    branches:
+      - 'cerebro/browser1-live-dispatch-v1'
+    paths:
+      - '.github/workflows/_tmp_patch_rsi_browser_dispatch.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch-rsi:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: cerebro/browser1-live-dispatch-v1
+          fetch-depth: 0
+      - name: Patch exact RSI allowlists and add Browser Dispatch contract job
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/cerebro-rsi-promotion-readiness-shadow-v0.yml')
+          s=p.read_text()
+
+          # Add exact trigger paths once.
+          trigger="""      - 'supabase/migrations/20261013101500_cerebro_post_scan_parallel_preprod_v1.sql'\n"""
+          trigger_plus=trigger+"""      - 'supabase/functions/cerebro-browser-dispatch-v1/index.ts'\n      - 'supabase/migrations/20261023093000_cerebro_browser_dispatch_v1.sql'\n      - 'supabase/migrations/20261023093100_cerebro_browser_credential_broker_v1.sql'\n"""
+          if "supabase/functions/cerebro-browser-dispatch-v1/index.ts" not in s:
+              if trigger not in s: raise SystemExit('trigger anchor missing')
+              s=s.replace(trigger,trigger_plus,1)
+
+          old="""allowed='^(supabase/functions/(cerebro-human-old-actor-preprod-v0|cerebro-human-new-actor-preprod-v1|cerebro-human-route-control-preprod-v1|cerebro-console-gateway-human-v1-canary|cerebro-console-human-router-zero-v1|cerebro-telegram-gateway-v0|cerebro-telegram-voice-v1)/|supabase/functions/_shared/cerebro-(conversation|channel-access)-policy-v1\\.ts$|supabase/migrations/(20261012132000_cerebro_human_route_control_preprod_v1|20261013010500_cerebro_multichannel_ana_overlay_v1|20261013042000_cerebro_channel_access_profiles_v1|20261013075000_cerebro_company_registry_preprod_persistence_v1|20261013083000_cerebro_company_onboarding_preprod_persistence_v1|20261013093000_cerebro_scan001_preprod_persistence_v1|20261013101500_cerebro_post_scan_parallel_preprod_v1)\\.sql$)'"""
+          new="""allowed='^(supabase/functions/(cerebro-human-old-actor-preprod-v0|cerebro-human-new-actor-preprod-v1|cerebro-human-route-control-preprod-v1|cerebro-console-gateway-human-v1-canary|cerebro-console-human-router-zero-v1|cerebro-telegram-gateway-v0|cerebro-telegram-voice-v1)/|supabase/functions/cerebro-browser-dispatch-v1/index\\.ts$|supabase/functions/_shared/cerebro-(conversation|channel-access)-policy-v1\\.ts$|supabase/migrations/(20261012132000_cerebro_human_route_control_preprod_v1|20261013010500_cerebro_multichannel_ana_overlay_v1|20261013042000_cerebro_channel_access_profiles_v1|20261013075000_cerebro_company_registry_preprod_persistence_v1|20261013083000_cerebro_company_onboarding_preprod_persistence_v1|20261013093000_cerebro_scan001_preprod_persistence_v1|20261013101500_cerebro_post_scan_parallel_preprod_v1|20261023093000_cerebro_browser_dispatch_v1|20261023093100_cerebro_browser_credential_broker_v1)\\.sql$)'"""
+          count=s.count(old)
+          if count not in (0,2): raise SystemExit(f'unexpected allowlist count: {count}')
+          if count==2: s=s.replace(old,new)
+
+          job="""
+
+  browser-dispatch-governance-shadow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.EXACT_HEAD }}
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Assert exact PR head checkout
+        run: test "$(git rev-parse HEAD)" = "$EXACT_HEAD"
+      - name: Browser Dispatch and Vault broker bounded-authority contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          edge='supabase/functions/cerebro-browser-dispatch-v1/index.ts'
+          queue='supabase/migrations/20261023093000_cerebro_browser_dispatch_v1.sql'
+          broker='supabase/migrations/20261023093100_cerebro_browser_credential_broker_v1.sql'
+          test -f "$edge"
+          test -f "$queue"
+          test -f "$broker"
+          test -f cerebro/runtime/browser-job-runner-v1.mjs
+          test -f cerebro/tests/browser-job-runner-v1.test.mjs
+          node --test cerebro/tests/browser-job-runner-v1.test.mjs
+          grep -F 'enable row level security' "$queue"
+          grep -F 'enable row level security' "$broker"
+          grep -F 'revoke all on public.cerebro_browser_job_v1 from anon, authenticated' "$queue"
+          grep -F 'revoke all on public.cerebro_credential_binding_v1 from anon, authenticated' "$queue"
+          grep -F 'revoke all on public.cerebro_credential_lease_audit_v1 from anon, authenticated' "$broker"
+          grep -F 'to service_role' "$queue"
+          grep -F 'to service_role' "$broker"
+          grep -F 'RAW_SECRET_FIELD_FORBIDDEN' "$queue"
+          grep -F 'CROSS_COMPANY_CREDENTIAL_DENIED' "$broker"
+          grep -F 'CREDENTIAL_ENVIRONMENT_DENIED' "$broker"
+          grep -F 'CREDENTIAL_ORIGIN_DENIED' "$broker"
+          grep -F 'CREDENTIAL_CAPABILITY_DENIED' "$broker"
+          grep -F 'const GITHUB_AUDIENCE="cerebro-browser-worker-v1"' "$edge"
+          grep -F 'const GITHUB_REPOSITORY="carlosjmunoz78/fenix-capital-inmo-map"' "$edge"
+          grep -F 'const GITHUB_WORKFLOW=".github/workflows/cerebro-browser-job-runner-v1.yml"' "$edge"
+          grep -F 'else if(ref!=="refs/heads/main")' "$edge"
+          grep -F 'if(!PREPROD)return out(req,404,{ok:false,error:"CANARY_ROUTE_NOT_AVAILABLE"})' "$edge"
+          grep -F 'raw_credentials_in_queue:false' cerebro/runtime/browser-job-runner-v1.mjs
+          grep -F 'vault_credential_materialization:true' cerebro/runtime/browser-job-runner-v1.mjs
+          grep -F 'credential_values_logged:false' cerebro/runtime/browser-job-runner-v1.mjs
+          grep -F 'incremental_cost_eur:0' cerebro/runtime/browser-job-runner-v1.mjs
+          ! grep -R -E 'ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]+' "$edge" cerebro/runtime/browser-job-runner-v1.mjs "$queue" "$broker"
+          ! grep -R -F 'carlosj.munozcabeza@gmail.com' "$edge" cerebro/runtime/browser-job-runner-v1.mjs "$queue" "$broker"
+          echo 'Browser Dispatch surface is exact-scoped, service-role-only, OIDC-bound, Vault-brokered and does not expand Browser 1 engine authority.' >> "$GITHUB_STEP_SUMMARY"
+"""
+          if '  browser-dispatch-governance-shadow:' not in s:
+              s=s.rstrip()+job+'\n'
+          p.write_text(s)
+          PY
+          git diff --check
+          git diff -- .github/workflows/cerebro-rsi-promotion-readiness-shadow-v0.yml
+      - name: Commit exact gate update
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'cerebro-governed-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add .github/workflows/cerebro-rsi-promotion-readiness-shadow-v0.yml
+          git diff --cached --quiet && exit 0
+          git commit -m 'CEREBRO: govern Browser Dispatch in RSI shadow'
+          git push origin HEAD:cerebro/browser1-live-dispatch-v1
