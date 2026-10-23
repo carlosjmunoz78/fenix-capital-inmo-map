@@ -89,7 +89,7 @@ function validateStorageState(storageState) {
 
 export function getCloudBrowserWorkerCapabilities() {
   return Object.freeze({
-    schema_version: '0.3.0',
+    schema_version: '0.3.1',
     backend: 'PLAYWRIGHT_CHROMIUM',
     persistent_profiles: true,
     governed_storage_state_restore: true,
@@ -103,6 +103,7 @@ export function getCloudBrowserWorkerCapabilities() {
     uploads: true,
     downloads: true,
     multi_tab: true,
+    physical_tab_limit_enforced: true,
     popups: true,
     iframe_via_selector: true,
     shadow_dom_via_playwright: true,
@@ -120,8 +121,10 @@ export function createCloudBrowserWorker({
   artifacts_root = process.env.CEREBRO_BROWSER_ARTIFACTS_ROOT || '.cerebro/browser-artifacts',
   headless = process.env.CEREBRO_BROWSER_HEADLESS !== 'false',
   launch_options = {},
+  max_tabs = Number(process.env.CEREBRO_BROWSER_MAX_TABS || 32),
   audit_sink = async () => {}
 } = {}) {
+  if (!Number.isInteger(max_tabs) || max_tabs < 1) throw new Error('INVALID_BROWSER_MAX_TABS');
   let context = null;
   let activePage = null;
   let runningScope = null;
@@ -129,6 +132,17 @@ export function createCloudBrowserWorker({
 
   async function emit(event) {
     await audit_sink(Object.freeze({ at: new Date().toISOString(), ...event }));
+  }
+
+  async function enforceTabLimit() {
+    if (!context) return;
+    const pages = context.pages();
+    if (pages.length <= max_tabs) return;
+    const overflow = pages.slice(max_tabs);
+    for (const page of overflow) await page.close().catch(() => {});
+    activePage = context.pages().at(-1) || null;
+    await emit({ type:'BROWSER_TAB_LIMIT_EXCEEDED', max_tabs, observed_tabs:pages.length, ...runningScope });
+    throw new Error('BROWSER_TAB_LIMIT_EXCEEDED');
   }
 
   async function start(job) {
@@ -157,7 +171,8 @@ export function createCloudBrowserWorker({
     });
     sessionMaterialization = null;
     context.on('page', page => { activePage = page; });
-    await emit({ type: 'BROWSER_STARTED', ...runningScope });
+    await enforceTabLimit();
+    await emit({ type: 'BROWSER_STARTED', max_tabs, ...runningScope });
     return runningScope;
   }
 
@@ -235,6 +250,7 @@ export function createCloudBrowserWorker({
       case 'FORWARD': await page.goForward({ timeout }); result = { url: page.url() }; break;
       case 'RELOAD': await page.reload({ waitUntil: action.wait_until || 'domcontentloaded', timeout }); result = { url: page.url() }; break;
       case 'OPEN_TAB':
+        if (context.pages().length >= max_tabs) throw new Error('BROWSER_TAB_LIMIT_EXCEEDED');
         activePage = await context.newPage();
         if (action.url) await activePage.goto(action.url, { waitUntil: 'domcontentloaded', timeout });
         result = { tab_index: context.pages().indexOf(activePage), url: activePage.url() };
@@ -325,6 +341,7 @@ export function createCloudBrowserWorker({
       default: throw new Error(`UNSUPPORTED_BROWSER_ACTION:${action.type}`);
     }
 
+    await enforceTabLimit();
     await emit({
       type: 'BROWSER_ACTION',
       request_id: job.request_id || null,
@@ -335,6 +352,7 @@ export function createCloudBrowserWorker({
       index,
       action_type: action.type,
       url: activePage?.url() || null,
+      tabs: context?.pages().length || 0,
       ok: true
     });
     return result;
