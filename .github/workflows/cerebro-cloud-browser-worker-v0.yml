@@ -3,11 +3,13 @@ name: CEREBRO Cloud Browser Worker V0
 on:
   push:
     branches:
+      - 'main'
       - 'cerebro/cloud-browser-worker-v0'
       - 'cerebro/browser-p0-identity-vision-v0'
       - 'cerebro/browser-session-materialization-v1'
       - 'cerebro/browser-computer-use-v1'
       - 'cerebro/browser1-access-v1-rebased'
+      - 'cerebro/browser1-phase1-prod-canary'
     paths:
       - 'cerebro/runtime/cloud-browser-worker-v0.mjs'
       - 'cerebro/runtime/cloud-browser-governed-session-v1.mjs'
@@ -26,6 +28,7 @@ on:
       - 'cerebro/tests/browser1-access-v1.test.mjs'
       - 'cerebro/tests/browser1-access-policy-v1.test.mjs'
       - 'cerebro/tests/browser1-action-gateway-binding-v1.test.mjs'
+      - 'cerebro/tests/browser1-prod-observe-canary-v1.test.mjs'
       - 'cerebro/runtime/browser-transversal-autonomy-v1.mjs'
       - 'cerebro/registry/browser-transversal-autonomy-policy.v1.json'
       - 'cerebro/registry/browser1-access-policy.v1.json'
@@ -49,6 +52,7 @@ on:
       - 'cerebro/tests/browser1-access-v1.test.mjs'
       - 'cerebro/tests/browser1-access-policy-v1.test.mjs'
       - 'cerebro/tests/browser1-action-gateway-binding-v1.test.mjs'
+      - 'cerebro/tests/browser1-prod-observe-canary-v1.test.mjs'
       - 'cerebro/runtime/browser-transversal-autonomy-v1.mjs'
       - 'cerebro/registry/browser-transversal-autonomy-policy.v1.json'
       - 'cerebro/registry/browser1-access-policy.v1.json'
@@ -72,10 +76,10 @@ jobs:
         run: npm ci
       - name: Install Chromium runtime
         run: npx playwright install --with-deps chromium
-      - name: Cloud browser physical E2E including CEREBRO gateway chain
+      - name: Cloud browser physical E2E including CEREBRO gateway chain and PROD observe canary
         env:
           CEREBRO_PHYSICAL_BROWSER_E2E: '1'
-        run: node --test cerebro/tests/cloud-browser-worker-v0.test.mjs cerebro/tests/cloud-browser-governed-session-v1.test.mjs cerebro/tests/browser1-access-v1.test.mjs cerebro/tests/browser1-action-gateway-binding-v1.test.mjs
+        run: node --test cerebro/tests/cloud-browser-worker-v0.test.mjs cerebro/tests/cloud-browser-governed-session-v1.test.mjs cerebro/tests/browser1-access-v1.test.mjs cerebro/tests/browser1-action-gateway-binding-v1.test.mjs cerebro/tests/browser1-prod-observe-canary-v1.test.mjs
       - name: Browser governance, Computer Use and gateway regression
         run: node --test cerebro/tests/browser-transversal-autonomy-v1.test.mjs cerebro/tests/authorized-execution-device-profile-v1.test.mjs cerebro/tests/universal-skill-b17-browser-physical-gates-v1.test.mjs cerebro/tests/browser-session-binding-v1.test.mjs cerebro/tests/browser-session-secret-resolver-v1.test.mjs cerebro/tests/browser-vision-fallback-v1.test.mjs cerebro/tests/browser-computer-use-v1.test.mjs cerebro/tests/browser1-access-v1.test.mjs cerebro/tests/browser1-access-policy-v1.test.mjs cerebro/tests/browser1-action-gateway-binding-v1.test.mjs cerebro/tests/action-gateway-v1.test.mjs
       - name: Full CEREBRO regression isolated per test file
