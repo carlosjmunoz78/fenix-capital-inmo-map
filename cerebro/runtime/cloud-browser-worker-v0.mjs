@@ -8,6 +8,7 @@ const ACTIONS = new Set([
   'UPLOAD','DRAG','SCROLL','WAIT','EXTRACT_TEXT','EXTRACT_HTML','SCREENSHOT','PDF',
   'DOWNLOAD_CLICK'
 ]);
+const MAX_STORAGE_STATE_BYTES = 5 * 1024 * 1024;
 
 let chromiumRuntime = null;
 
@@ -32,6 +33,10 @@ function required(value, name) {
 
 function safeSegment(value, fallback = 'unknown') {
   return String(value ?? fallback).replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 120);
+}
+
+function requiresMaterializedSession(job = {}) {
+  return job.operation?.kind === 'AUTHENTICATED_OBSERVE' || job.operation?.authenticated_session_required === true;
 }
 
 function locatorFor(page, target = {}) {
@@ -59,11 +64,25 @@ function assertAction(action = {}) {
   if (!ACTIONS.has(action.type)) throw new Error(`UNSUPPORTED_BROWSER_ACTION:${action.type ?? 'null'}`);
 }
 
+function validateStorageState(storageState) {
+  if (!storageState || typeof storageState !== 'object' || Array.isArray(storageState)) throw new Error('INVALID_STORAGE_STATE');
+  if (storageState.cookies !== undefined && !Array.isArray(storageState.cookies)) throw new Error('INVALID_STORAGE_STATE_COOKIES');
+  if (storageState.origins !== undefined && !Array.isArray(storageState.origins)) throw new Error('INVALID_STORAGE_STATE_ORIGINS');
+  const serialized = JSON.stringify(storageState);
+  if (Buffer.byteLength(serialized, 'utf8') > MAX_STORAGE_STATE_BYTES) throw new Error('STORAGE_STATE_TOO_LARGE');
+  return {
+    cookies: Array.isArray(storageState.cookies) ? storageState.cookies.length : 0,
+    origins: Array.isArray(storageState.origins) ? storageState.origins.length : 0
+  };
+}
+
 export function getCloudBrowserWorkerCapabilities() {
   return Object.freeze({
-    schema_version: '0.1.0',
+    schema_version: '0.2.0',
     backend: 'PLAYWRIGHT_CHROMIUM',
     persistent_profiles: true,
+    governed_storage_state_restore: true,
+    authenticated_jobs_require_physical_materialization: true,
     dom_and_accessibility_locators: true,
     screenshots: true,
     pdf: true,
@@ -92,6 +111,7 @@ export function createCloudBrowserWorker({
   let context = null;
   let activePage = null;
   let runningScope = null;
+  let sessionMaterialization = null;
 
   async function emit(event) {
     await audit_sink(Object.freeze({ at: new Date().toISOString(), ...event }));
@@ -121,9 +141,42 @@ export function createCloudBrowserWorker({
       environment: job.environment,
       browser_profile_id: profileId
     });
+    sessionMaterialization = null;
     context.on('page', page => { activePage = page; });
     await emit({ type: 'BROWSER_STARTED', ...runningScope });
     return runningScope;
+  }
+
+  async function restoreStorageState(storageState, proof = {}) {
+    if (!context || !runningScope) throw new Error('BROWSER_WORKER_NOT_STARTED');
+    if (proof.session_binding_authorized !== true) throw new Error('SESSION_BINDING_PROOF_REQUIRED');
+    if (proof.company_id !== runningScope.company_id) throw new Error('SESSION_MATERIALIZATION_COMPANY_MISMATCH');
+    if (proof.identity_id !== runningScope.identity_id) throw new Error('SESSION_MATERIALIZATION_IDENTITY_MISMATCH');
+    if (proof.environment !== runningScope.environment) throw new Error('SESSION_MATERIALIZATION_ENVIRONMENT_MISMATCH');
+    if (proof.browser_profile_id !== runningScope.browser_profile_id) throw new Error('SESSION_MATERIALIZATION_PROFILE_MISMATCH');
+    required(proof.bundle_id, 'SESSION_BUNDLE_ID');
+    required(proof.attestation_fingerprint, 'SESSION_ATTESTATION_FINGERPRINT');
+
+    const counts = validateStorageState(storageState);
+    if (typeof context.setStorageState !== 'function') throw new Error('PLAYWRIGHT_SET_STORAGE_STATE_UNAVAILABLE');
+    await context.setStorageState(storageState);
+    sessionMaterialization = Object.freeze({
+      company_id: runningScope.company_id,
+      identity_id: runningScope.identity_id,
+      environment: runningScope.environment,
+      browser_profile_id: runningScope.browser_profile_id,
+      bundle_id: String(proof.bundle_id),
+      attestation_fingerprint: String(proof.attestation_fingerprint)
+    });
+    await emit({
+      type: 'BROWSER_STORAGE_STATE_RESTORED',
+      ...runningScope,
+      bundle_id: sessionMaterialization.bundle_id,
+      cookies_count: counts.cookies,
+      origins_count: counts.origins,
+      secret_material_logged: false
+    });
+    return Object.freeze({restored:true,cookies_count:counts.cookies,origins_count:counts.origins});
   }
 
   async function stop(reason = 'NORMAL') {
@@ -133,6 +186,7 @@ export function createCloudBrowserWorker({
     context = null;
     activePage = null;
     runningScope = null;
+    sessionMaterialization = null;
     await emit({ type: 'BROWSER_STOPPED', reason, ...scope });
   }
 
@@ -264,6 +318,21 @@ export function createCloudBrowserWorker({
     if (runningScope.company_id !== job.company_id || runningScope.identity_id !== job.identity_id || runningScope.environment !== job.environment) {
       throw new Error('RUNNING_BROWSER_SCOPE_MISMATCH');
     }
+    if (requiresMaterializedSession(job)) {
+      const materialized = sessionMaterialization &&
+        sessionMaterialization.company_id === runningScope.company_id &&
+        sessionMaterialization.identity_id === runningScope.identity_id &&
+        sessionMaterialization.environment === runningScope.environment &&
+        sessionMaterialization.browser_profile_id === runningScope.browser_profile_id;
+      if (!materialized) {
+        if (job.keep_session_open !== true) await stop('SESSION_MATERIALIZATION_REQUIRED');
+        return {
+          ok:false,
+          authorization:Object.freeze({...auth,status:'HOLD_SESSION_MATERIALIZATION_REQUIRED',action_execution_authorized:false}),
+          results:[]
+        };
+      }
+    }
 
     const results = [];
     try {
@@ -282,5 +351,5 @@ export function createCloudBrowserWorker({
     }
   }
 
-  return Object.freeze({ start, stop, execute, capabilities: getCloudBrowserWorkerCapabilities });
+  return Object.freeze({ start, restoreStorageState, stop, execute, capabilities: getCloudBrowserWorkerCapabilities });
 }
