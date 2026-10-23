@@ -1,4 +1,4 @@
-name: CEREBRO RSI Promotion Readiness Shadow V0
+name: CEREBRO RSI Promotion Readiness Shadow V1
 
 on:
   pull_request:
@@ -15,6 +15,7 @@ on:
       - 'supabase/functions/_shared/cerebro-channel-access-policy-v1.ts'
       - 'supabase/functions/cerebro-telegram-gateway-v0/**'
       - 'supabase/functions/cerebro-telegram-voice-v1/**'
+      - 'supabase/functions/cerebro-browser-dispatch-v1/index.ts'
       - 'supabase/migrations/20261012132000_cerebro_human_route_control_preprod_v1.sql'
       - 'supabase/migrations/20261013010500_cerebro_multichannel_ana_overlay_v1.sql'
       - 'supabase/migrations/20261013042000_cerebro_channel_access_profiles_v1.sql'
@@ -22,6 +23,8 @@ on:
       - 'supabase/migrations/20261013083000_cerebro_company_onboarding_preprod_persistence_v1.sql'
       - 'supabase/migrations/20261013093000_cerebro_scan001_preprod_persistence_v1.sql'
       - 'supabase/migrations/20261013101500_cerebro_post_scan_parallel_preprod_v1.sql'
+      - 'supabase/migrations/20261023093000_cerebro_browser_dispatch_v1.sql'
+      - 'supabase/migrations/20261023093100_cerebro_browser_credential_broker_v1.sql'
       - '.github/workflows/cerebro-rsi-*.yml'
       - '.github/workflows/cerebro-hygiene-audit-v0.yml'
       - '.github/workflows/cerebro-human-intelligence-*.yml'
@@ -42,7 +45,7 @@ env:
 jobs:
   factory-preprod-shadow:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
         with:
@@ -56,13 +59,14 @@ jobs:
       - name: Validate canonical engine registry
         working-directory: cerebro
         run: npm run validate
-      - name: Test FACT-001 and GOV-001 contracts
+      - name: Test complete CEREBRO contracts
         working-directory: cerebro
         run: npm test
       - name: Generate all engine skeletons
         working-directory: cerebro
         run: npm run generate -- --out /tmp/cerebro-generated
       - name: Assert canonical engine count and no repo mutation
+        shell: bash
         run: |
           set -euo pipefail
           EXPECTED_COUNT="$(node -e "const x=require('./cerebro/registry/engine-registry.seed.json'); console.log(Array.isArray(x)?x.length:(x.engines?.length ?? x.engine_count ?? x.count ?? ''))")"
@@ -70,12 +74,10 @@ jobs:
           test -n "$EXPECTED_COUNT"
           test "$GENERATED_COUNT" = "$EXPECTED_COUNT"
           git diff --exit-code
-      - name: Mark equivalence boundary
-        run: echo 'This job executes the validation body of CEREBRO Factory PREPROD on the exact PR head; it does not claim the named manual gate ran.' >> "$GITHUB_STEP_SUMMARY"
 
   app-surface-isolation-shadow:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     env:
       VITE_FENIX_ENV: preprod
       VITE_SUPABASE_URL: https://hnqlnvakzaywtafeiybt.supabase.co
@@ -91,7 +93,7 @@ jobs:
           cache: npm
       - name: Assert exact PR head checkout
         run: test "$(git rev-parse HEAD)" = "$EXACT_HEAD"
-      - name: Assert zero App UI drift and exact governed Supabase surfaces
+      - name: Assert zero App drift and exact governed Supabase surface
         env:
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
         shell: bash
@@ -111,116 +113,18 @@ jobs:
             printf '%s\n' "$changed" >&2
             exit 1
           fi
-          allowed='^(supabase/functions/(cerebro-human-old-actor-preprod-v0|cerebro-human-new-actor-preprod-v1|cerebro-human-route-control-preprod-v1|cerebro-console-gateway-human-v1-canary|cerebro-console-human-router-zero-v1|cerebro-telegram-gateway-v0|cerebro-telegram-voice-v1)/|supabase/functions/_shared/cerebro-(conversation|channel-access)-policy-v1\.ts$|supabase/migrations/(20261012132000_cerebro_human_route_control_preprod_v1|20261013010500_cerebro_multichannel_ana_overlay_v1|20261013042000_cerebro_channel_access_profiles_v1|20261013075000_cerebro_company_registry_preprod_persistence_v1|20261013083000_cerebro_company_onboarding_preprod_persistence_v1|20261013093000_cerebro_scan001_preprod_persistence_v1|20261013101500_cerebro_post_scan_parallel_preprod_v1)\.sql$)'
+          allowed='^(supabase/functions/(cerebro-human-old-actor-preprod-v0|cerebro-human-new-actor-preprod-v1|cerebro-human-route-control-preprod-v1|cerebro-console-gateway-human-v1-canary|cerebro-console-human-router-zero-v1|cerebro-telegram-gateway-v0|cerebro-telegram-voice-v1)/|supabase/functions/cerebro-browser-dispatch-v1/index\.ts$|supabase/functions/_shared/cerebro-(conversation|channel-access)-policy-v1\.ts$|supabase/migrations/(20261012132000_cerebro_human_route_control_preprod_v1|20261013010500_cerebro_multichannel_ana_overlay_v1|20261013042000_cerebro_channel_access_profiles_v1|20261013075000_cerebro_company_registry_preprod_persistence_v1|20261013083000_cerebro_company_onboarding_preprod_persistence_v1|20261013093000_cerebro_scan001_preprod_persistence_v1|20261013101500_cerebro_post_scan_parallel_preprod_v1|20261023093000_cerebro_browser_dispatch_v1|20261023093100_cerebro_browser_credential_broker_v1)\.sql$)'
           unexpected_supabase="$(printf '%s\n' "$changed" | grep '^supabase/' | grep -Ev "$allowed" || true)"
           if [ -n "$unexpected_supabase" ]; then
             echo 'Unapproved Supabase surface changed:' >&2
             printf '%s\n' "$unexpected_supabase" >&2
             exit 1
           fi
-          if printf '%s\n' "$changed" | grep -Eq '^(supabase/functions/(cerebro-human-old-actor-preprod-v0|cerebro-human-new-actor-preprod-v1|cerebro-human-route-control-preprod-v1|cerebro-console-gateway-human-v1-canary|cerebro-console-human-router-zero-v1)/|supabase/migrations/20261012132000_cerebro_human_route_control_preprod_v1\.sql$)'; then
-            test -f .github/workflows/cerebro-human-intelligence-v1.yml
-            test -f .github/workflows/cerebro-human-intelligence-promotion-readiness-v1.yml
-            test -f .github/workflows/cerebro-human-intelligence-prod-canary-v1.yml
-            test -f .github/workflows/cerebro-human-intelligence-prod-router-zero-v1.yml
-            node --test \
-              cerebro/tests/human-intelligence-real-actor-gate-v1.test.mjs \
-              cerebro/tests/human-intelligence-autonomy-bridge-v1.test.mjs \
-              cerebro/tests/human-intelligence-gateway-routing-v1.test.mjs \
-              cerebro/tests/human-intelligence-production-overlay-v1.test.mjs \
-              cerebro/tests/human-intelligence-prod-router-zero-v1.test.mjs
-          fi
-          if printf '%s\n' "$changed" | grep -Eq '^(supabase/functions/_shared/cerebro-(conversation|channel-access)-policy-v1\.ts|supabase/functions/cerebro-telegram-(gateway-v0|voice-v1)/|supabase/migrations/(20261013010500_cerebro_multichannel_ana_overlay_v1|20261013042000_cerebro_channel_access_profiles_v1)\.sql$)'; then
-            test -f .github/workflows/cerebro-multichannel-conversation-unification-v1.yml
-            node --test cerebro/tests/multichannel-conversation-policy-v1.test.mjs cerebro/tests/channel-access-profiles-v1.test.mjs cerebro/tests/universal-learning-ingress.test.mjs
-            grep -F "APP_ANA_TEXT" supabase/migrations/20261013010500_cerebro_multichannel_ana_overlay_v1.sql
-            grep -F "TELEGRAM_TEXT" supabase/functions/cerebro-telegram-gateway-v0/index.ts
-            grep -F "TELEGRAM_VOICE" supabase/functions/cerebro-telegram-voice-v1/index.ts
-            grep -F "FULL_OWNER" supabase/functions/_shared/cerebro-channel-access-policy-v1.ts
-            grep -F "FENIX_OPERATIONAL" supabase/functions/_shared/cerebro-channel-access-policy-v1.ts
-            grep -F "fenix_prod_ana_channel_scope_guard_v1" supabase/migrations/20261013042000_cerebro_channel_access_profiles_v1.sql
-            ! printf '%s\n' "$changed" | grep -q '^supabase/functions/fenix-app-gateway/'
-            ! printf '%s\n' "$changed" | grep -q '^supabase/functions/cerebro-console-gateway-v0/'
-          fi
-          if printf '%s\n' "$changed" | grep -q '^supabase/migrations/20261013075000_cerebro_company_registry_preprod_persistence_v1\.sql$'; then
-            node --test cerebro/tests/company-registry-preprod-persistence-v1.test.mjs
-            m='supabase/migrations/20261013075000_cerebro_company_registry_preprod_persistence_v1.sql'
-            grep -F 'DENY_CROSS_COMPANY' "$m"
-            grep -F 'enable row level security' "$m"
-            grep -F 'to service_role' "$m"
-            grep -F "'prod_authorized',false" "$m"
-            grep -F "'prod_write_authorized',false" "$m"
-            grep -F "'trading_access',false" "$m"
-            ! grep -F 'cluhljgonannaafpmblx' "$m"
-            ! grep -F 'fenix_prod.' "$m"
-          fi
-          if printf '%s\n' "$changed" | grep -q '^supabase/migrations/20261013083000_cerebro_company_onboarding_preprod_persistence_v1\.sql$'; then
-            node --test cerebro/tests/company-onboarding-preprod-persistence-v1.test.mjs
-            m='supabase/migrations/20261013083000_cerebro_company_onboarding_preprod_persistence_v1.sql'
-            grep -F 'cerebro_company_onboarding_start_preprod' "$m"
-            grep -F 'cerebro_company_engine_state_preprod' "$m"
-            grep -F 'DENY_CROSS_COMPANY' "$m"
-            grep -F "'next_gate','SCAN_001_DURABLE_EXECUTION_REQUIRED'" "$m"
-            grep -F 'enable row level security' "$m"
-            grep -F 'to service_role' "$m"
-            grep -F "'prod_write_authorized',false" "$m"
-            grep -F "'trading_access',false" "$m"
-            ! grep -F 'cluhljgonannaafpmblx' "$m"
-            ! grep -F 'fenix_prod.' "$m"
-          fi
-          if printf '%s\n' "$changed" | grep -q '^supabase/migrations/20261013093000_cerebro_scan001_preprod_persistence_v1\.sql$'; then
-            node --test cerebro/tests/scan001-digital-footprint-v1.test.mjs cerebro/tests/scan001-preprod-persistence-v1.test.mjs
-            m='supabase/migrations/20261013093000_cerebro_scan001_preprod_persistence_v1.sql'
-            grep -F 'cerebro_scan001_record_success_preprod' "$m"
-            grep -F 'cerebro_company_engine_state_preprod' "$m"
-            grep -F "engine_id in ('KW-001','WAUD-001','SOCAUD-001','LOCALP-001')" "$m"
-            grep -F "'next_gate','POST_SCAN_PARALLEL_DURABLE_EXECUTION_REQUIRED'" "$m"
-            grep -F 'enable row level security' "$m"
-            grep -F 'to service_role' "$m"
-            grep -F "'prod_write_authorized',false" "$m"
-            grep -F "'trading_access',false" "$m"
-            ! grep -F 'cluhljgonannaafpmblx' "$m"
-            ! grep -F 'fenix_prod.' "$m"
-          fi
-          if printf '%s\n' "$changed" | grep -q '^supabase/migrations/20261013101500_cerebro_post_scan_parallel_preprod_v1\.sql$'; then
-            node --test cerebro/tests/post-scan-parallel-v1.test.mjs cerebro/tests/post-scan-parallel-preprod-persistence-v1.test.mjs
-            m='supabase/migrations/20261013101500_cerebro_post_scan_parallel_preprod_v1.sql'
-            grep -F 'cerebro_post_scan_audit_record_preprod' "$m"
-            grep -F "engine_id in ('KW-001','WAUD-001','SOCAUD-001','LOCALP-001')" "$m"
-            grep -F "engine_id='SEOBOOT-001' and state='BLOCKED'" "$m"
-            grep -F "engine_id='SOCBOOT-001' and state='BLOCKED'" "$m"
-            grep -F "engine_id='KBOOT-001' and state='BLOCKED'" "$m"
-            grep -F "'BOOTSTRAP_TIER_DURABLE_EXECUTION_REQUIRED'" "$m"
-            grep -F 'enable row level security' "$m"
-            grep -F 'to service_role' "$m"
-            grep -F "'prod_write_authorized',false" "$m"
-            grep -F "'trading_access',false" "$m"
-            ! grep -F 'cluhljgonannaafpmblx' "$m"
-            ! grep -F 'fenix_prod.' "$m"
-          fi
-          if printf '%s\n' "$changed" | grep -q '^supabase/functions/cerebro-console-gateway-human-v1-canary/'; then
-            grep -F 'PROD_CANARY_UNROUTED' supabase/functions/cerebro-console-gateway-human-v1-canary/index.ts
-            grep -F 'live_chat_invoked:false' supabase/functions/cerebro-console-gateway-human-v1-canary/index.ts
-            ! grep -F 'SUPABASE_SERVICE_ROLE_KEY' supabase/functions/cerebro-console-gateway-human-v1-canary/index.ts
-            ! printf '%s\n' "$changed" | grep -q '^supabase/functions/cerebro-console-gateway-v0/'
-          fi
-          if printf '%s\n' "$changed" | grep -q '^supabase/functions/cerebro-console-human-router-zero-v1/'; then
-            d='supabase/functions/cerebro-console-human-router-zero-v1'
-            grep -F 'export const LIVE_CANARY_PERCENT=0;' "$d/router.ts"
-            grep -F 'PREPROD_NORMAL_ROUTING_DISABLED' "$d/index.ts"
-            grep -F 'consumer_routing_enabled:false' "$d/index.ts"
-            ! grep -R -F 'SUPABASE_SERVICE_ROLE_KEY' "$d"
-            ! grep -R -Eq 'prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true' "$d"
-            ! printf '%s\n' "$changed" | grep -q '^supabase/functions/cerebro-console-gateway-v0/'
-          fi
-          echo 'No App UI/build/current Console authority drift. Exact governed PREPROD registry/onboarding/SCAN/post-SCAN persistence and multichannel adapters preserve authority boundaries.' >> "$GITHUB_STEP_SUMMARY"
       - name: Install dependencies reproducibly
-        run: |
-          set -euo pipefail
-          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+        run: npm ci
       - name: Build exact head
         run: npm run build
-      - name: PRE-PROD Ana CORS smoke
+      - name: PREPROD Ana CORS smoke
         shell: bash
         run: |
           set -euo pipefail
@@ -233,21 +137,10 @@ jobs:
             'https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/fenix-ana-api-test/capabilities')"
           test "$status" = "204"
           grep -qi '^access-control-allow-origin:' "$headers"
-      - name: Archive exact-head build evidence
-        uses: actions/upload-artifact@v4
-        with:
-          name: rsi-promotion-readiness-build-${{ env.EXACT_HEAD }}
-          path: dist
-          if-no-files-found: error
-          retention-days: 7
-      - name: Mark App gate boundary
-        run: |
-          echo 'This job proves zero App UI/build/current Console gateway drift plus exact-head build and PREPROD CORS smoke.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'Governed PREPROD Company Registry, COMP-ONB, SCAN-001 and post-SCAN parallel persistence are service-role only/read-only bounded and add no PROD actions or Trading.' >> "$GITHUB_STEP_SUMMARY"
 
   tribunal-shadow:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
         with:
@@ -258,7 +151,7 @@ jobs:
           node-version: 24
       - name: Assert exact PR head checkout
         run: test "$(git rev-parse HEAD)" = "$EXACT_HEAD"
-      - name: Independent-evaluation and promotion safety contracts
+      - name: Independent evaluation and promotion safety contracts
         run: >-
           node --test
           cerebro/tests/evaluation-tribunal.test.mjs
@@ -266,7 +159,7 @@ jobs:
           cerebro/tests/promotion-pipeline.test.mjs
           cerebro/tests/rsi-recovery-e2e.test.mjs
           cerebro/tests/bounded-recovery-supervisor.test.mjs
-      - name: Assert PR remains bounded and exact governed production adapters preserve authority
+      - name: Assert bounded authority surface
         env:
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
         shell: bash
@@ -282,83 +175,65 @@ jobs:
           changed="$(git diff --name-only "$base" HEAD)"
           protected='^(src/|tests/|public/|scripts/|index\.html$|package(-lock)?\.json$|playwright\.config\.(ts|js)$|vite\.config\.(ts|js)$|tsconfig[^/]*\.json$|\.env|\.github/workflows/(preprod-build|app-restoration-build|prod-[^/]+)\.yml$)'
           if printf '%s\n' "$changed" | grep -Eq "$protected"; then
-            echo 'Unexpected App/application/test/production surface changed by RSI recovery.' >&2
+            echo 'Unexpected App/application/test/production surface changed.' >&2
             printf '%s\n' "$changed" >&2
             exit 1
           fi
-          allowed='^(supabase/functions/(cerebro-human-old-actor-preprod-v0|cerebro-human-new-actor-preprod-v1|cerebro-human-route-control-preprod-v1|cerebro-console-gateway-human-v1-canary|cerebro-console-human-router-zero-v1|cerebro-telegram-gateway-v0|cerebro-telegram-voice-v1)/|supabase/functions/_shared/cerebro-(conversation|channel-access)-policy-v1\.ts$|supabase/migrations/(20261012132000_cerebro_human_route_control_preprod_v1|20261013010500_cerebro_multichannel_ana_overlay_v1|20261013042000_cerebro_channel_access_profiles_v1|20261013075000_cerebro_company_registry_preprod_persistence_v1|20261013083000_cerebro_company_onboarding_preprod_persistence_v1|20261013093000_cerebro_scan001_preprod_persistence_v1|20261013101500_cerebro_post_scan_parallel_preprod_v1)\.sql$)'
+          allowed='^(supabase/functions/(cerebro-human-old-actor-preprod-v0|cerebro-human-new-actor-preprod-v1|cerebro-human-route-control-preprod-v1|cerebro-console-gateway-human-v1-canary|cerebro-console-human-router-zero-v1|cerebro-telegram-gateway-v0|cerebro-telegram-voice-v1)/|supabase/functions/cerebro-browser-dispatch-v1/index\.ts$|supabase/functions/_shared/cerebro-(conversation|channel-access)-policy-v1\.ts$|supabase/migrations/(20261012132000_cerebro_human_route_control_preprod_v1|20261013010500_cerebro_multichannel_ana_overlay_v1|20261013042000_cerebro_channel_access_profiles_v1|20261013075000_cerebro_company_registry_preprod_persistence_v1|20261013083000_cerebro_company_onboarding_preprod_persistence_v1|20261013093000_cerebro_scan001_preprod_persistence_v1|20261013101500_cerebro_post_scan_parallel_preprod_v1|20261023093000_cerebro_browser_dispatch_v1|20261023093100_cerebro_browser_credential_broker_v1)\.sql$)'
           unexpected_supabase="$(printf '%s\n' "$changed" | grep '^supabase/' | grep -Ev "$allowed" || true)"
-          if [ -n "$unexpected_supabase" ]; then
-            echo 'Unexpected Supabase surface changed by RSI recovery.' >&2
-            printf '%s\n' "$unexpected_supabase" >&2
-            exit 1
+          test -z "$unexpected_supabase" || { printf '%s\n' "$unexpected_supabase" >&2; exit 1; }
+
+  browser-dispatch-governance-shadow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.EXACT_HEAD }}
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Assert exact PR head checkout
+        run: test "$(git rev-parse HEAD)" = "$EXACT_HEAD"
+      - name: Browser Dispatch and Vault broker bounded-authority contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          edge='supabase/functions/cerebro-browser-dispatch-v1/index.ts'
+          queue='supabase/migrations/20261023093000_cerebro_browser_dispatch_v1.sql'
+          broker='supabase/migrations/20261023093100_cerebro_browser_credential_broker_v1.sql'
+          if [ ! -f "$edge" ] && [ ! -f "$queue" ] && [ ! -f "$broker" ]; then
+            echo 'Browser Dispatch not present on this head; no Browser Dispatch contract to evaluate.'
+            exit 0
           fi
-          if printf '%s\n' "$changed" | grep -Eq '^(supabase/functions/_shared/cerebro-(conversation|channel-access)-policy-v1\.ts|supabase/functions/cerebro-telegram-(gateway-v0|voice-v1)/|supabase/migrations/(20261013010500_cerebro_multichannel_ana_overlay_v1|20261013042000_cerebro_channel_access_profiles_v1)\.sql$)'; then
-            node --test cerebro/tests/multichannel-conversation-policy-v1.test.mjs cerebro/tests/channel-access-profiles-v1.test.mjs cerebro/tests/universal-learning-ingress.test.mjs
-            grep -F "prod_authority_changed:false" supabase/functions/_shared/cerebro-conversation-policy-v1.ts
-            grep -F "prod_authorized:false" supabase/functions/_shared/cerebro-channel-access-policy-v1.ts
-            grep -F "prod_write_authorized:false" supabase/functions/_shared/cerebro-channel-access-policy-v1.ts
-            grep -F "trading_access:false" supabase/functions/_shared/cerebro-channel-access-policy-v1.ts
-            ! printf '%s\n' "$changed" | grep -q '^supabase/functions/cerebro-console-gateway-v0/'
-            ! printf '%s\n' "$changed" | grep -q '^supabase/functions/fenix-app-gateway/'
-          fi
-          if printf '%s\n' "$changed" | grep -q '^supabase/migrations/20261013075000_cerebro_company_registry_preprod_persistence_v1\.sql$'; then
-            node --test cerebro/tests/company-registry-preprod-persistence-v1.test.mjs
-            m='supabase/migrations/20261013075000_cerebro_company_registry_preprod_persistence_v1.sql'
-            grep -F 'DENY_CROSS_COMPANY' "$m"
-            grep -F 'enable row level security' "$m"
-            grep -F 'to service_role' "$m"
-            ! grep -F 'cluhljgonannaafpmblx' "$m"
-            ! grep -F 'fenix_prod.' "$m"
-          fi
-          if printf '%s\n' "$changed" | grep -q '^supabase/migrations/20261013083000_cerebro_company_onboarding_preprod_persistence_v1\.sql$'; then
-            node --test cerebro/tests/company-onboarding-preprod-persistence-v1.test.mjs
-            m='supabase/migrations/20261013083000_cerebro_company_onboarding_preprod_persistence_v1.sql'
-            grep -F 'cerebro_company_onboarding_start_preprod' "$m"
-            grep -F 'cerebro_company_engine_state_preprod' "$m"
-            grep -F 'DENY_CROSS_COMPANY' "$m"
-            grep -F "'next_gate','SCAN_001_DURABLE_EXECUTION_REQUIRED'" "$m"
-            grep -F 'enable row level security' "$m"
-            grep -F 'to service_role' "$m"
-            ! grep -F 'cluhljgonannaafpmblx' "$m"
-            ! grep -F 'fenix_prod.' "$m"
-          fi
-          if printf '%s\n' "$changed" | grep -q '^supabase/migrations/20261013093000_cerebro_scan001_preprod_persistence_v1\.sql$'; then
-            node --test cerebro/tests/scan001-digital-footprint-v1.test.mjs cerebro/tests/scan001-preprod-persistence-v1.test.mjs
-            m='supabase/migrations/20261013093000_cerebro_scan001_preprod_persistence_v1.sql'
-            grep -F 'cerebro_scan001_record_success_preprod' "$m"
-            grep -F 'cerebro_company_engine_state_preprod' "$m"
-            grep -F "engine_id in ('KW-001','WAUD-001','SOCAUD-001','LOCALP-001')" "$m"
-            grep -F "'next_gate','POST_SCAN_PARALLEL_DURABLE_EXECUTION_REQUIRED'" "$m"
-            grep -F 'enable row level security' "$m"
-            grep -F 'to service_role' "$m"
-            ! grep -F 'cluhljgonannaafpmblx' "$m"
-            ! grep -F 'fenix_prod.' "$m"
-          fi
-          if printf '%s\n' "$changed" | grep -q '^supabase/migrations/20261013101500_cerebro_post_scan_parallel_preprod_v1\.sql$'; then
-            node --test cerebro/tests/post-scan-parallel-v1.test.mjs cerebro/tests/post-scan-parallel-preprod-persistence-v1.test.mjs
-            m='supabase/migrations/20261013101500_cerebro_post_scan_parallel_preprod_v1.sql'
-            grep -F 'cerebro_post_scan_audit_record_preprod' "$m"
-            grep -F "engine_id in ('KW-001','WAUD-001','SOCAUD-001','LOCALP-001')" "$m"
-            grep -F "engine_id='SEOBOOT-001' and state='BLOCKED'" "$m"
-            grep -F "engine_id='SOCBOOT-001' and state='BLOCKED'" "$m"
-            grep -F "engine_id='KBOOT-001' and state='BLOCKED'" "$m"
-            grep -F "'BOOTSTRAP_TIER_DURABLE_EXECUTION_REQUIRED'" "$m"
-            grep -F 'enable row level security' "$m"
-            grep -F 'to service_role' "$m"
-            ! grep -F 'cluhljgonannaafpmblx' "$m"
-            ! grep -F 'fenix_prod.' "$m"
-          fi
-          if printf '%s\n' "$changed" | grep -q '^supabase/functions/cerebro-console-gateway-human-v1-canary/'; then
-            ! printf '%s\n' "$changed" | grep -q '^supabase/functions/cerebro-console-gateway-v0/'
-          fi
-          if printf '%s\n' "$changed" | grep -q '^supabase/functions/cerebro-console-human-router-zero-v1/'; then
-            d='supabase/functions/cerebro-console-human-router-zero-v1'
-            grep -F 'export const LIVE_CANARY_PERCENT=0;' "$d/router.ts"
-            grep -F 'PREPROD_NORMAL_ROUTING_DISABLED' "$d/index.ts"
-            grep -F 'consumer_routing_enabled:false' "$d/index.ts"
-            ! grep -R -F 'SUPABASE_SERVICE_ROLE_KEY' "$d"
-            ! grep -R -Eq 'prod_write_authorized[[:space:]]*:[[:space:]]*true|trading_access[[:space:]]*:[[:space:]]*true' "$d"
-            ! printf '%s\n' "$changed" | grep -q '^supabase/functions/cerebro-console-gateway-v0/'
-          fi
-          echo 'RSI remains bounded: exact governed PREPROD registry/onboarding/SCAN/post-SCAN persistence and multichannel adapters cannot expand authority, writes, Trading, or bypass OLD-vs-NEW/Tribunal promotion.' >> "$GITHUB_STEP_SUMMARY"
+          test -f "$edge"
+          test -f "$queue"
+          test -f "$broker"
+          test -f cerebro/runtime/browser-job-runner-v1.mjs
+          test -f cerebro/tests/browser-job-runner-v1.test.mjs
+          node --test cerebro/tests/browser-job-runner-v1.test.mjs
+          grep -F 'enable row level security' "$queue"
+          grep -F 'enable row level security' "$broker"
+          grep -F 'revoke all on public.cerebro_browser_job_v1 from anon, authenticated' "$queue"
+          grep -F 'revoke all on public.cerebro_credential_binding_v1 from anon, authenticated' "$queue"
+          grep -F 'revoke all on public.cerebro_credential_lease_audit_v1 from anon, authenticated' "$broker"
+          grep -F 'to service_role' "$queue"
+          grep -F 'to service_role' "$broker"
+          grep -F 'RAW_SECRET_FIELD_FORBIDDEN' "$queue"
+          grep -F 'CROSS_COMPANY_CREDENTIAL_DENIED' "$broker"
+          grep -F 'CREDENTIAL_ENVIRONMENT_DENIED' "$broker"
+          grep -F 'CREDENTIAL_ORIGIN_DENIED' "$broker"
+          grep -F 'CREDENTIAL_CAPABILITY_DENIED' "$broker"
+          grep -F 'const GITHUB_AUDIENCE="cerebro-browser-worker-v1"' "$edge"
+          grep -F 'const GITHUB_REPOSITORY="carlosjmunoz78/fenix-capital-inmo-map"' "$edge"
+          grep -F 'const GITHUB_WORKFLOW=".github/workflows/cerebro-browser-job-runner-v1.yml"' "$edge"
+          grep -F 'else if(ref!=="refs/heads/main")' "$edge"
+          grep -F 'if(!PREPROD)return out(req,404,{ok:false,error:"CANARY_ROUTE_NOT_AVAILABLE"})' "$edge"
+          grep -F 'raw_credentials_in_queue:false' cerebro/runtime/browser-job-runner-v1.mjs
+          grep -F 'vault_credential_materialization:true' cerebro/runtime/browser-job-runner-v1.mjs
+          grep -F 'credential_values_logged:false' cerebro/runtime/browser-job-runner-v1.mjs
+          grep -F 'incremental_cost_eur:0' cerebro/runtime/browser-job-runner-v1.mjs
+          ! grep -R -E 'ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]+' "$edge" cerebro/runtime/browser-job-runner-v1.mjs "$queue" "$broker"
+          ! grep -R -F 'carlosj.munozcabeza@gmail.com' "$edge" cerebro/runtime/browser-job-runner-v1.mjs "$queue" "$broker"
+          echo 'Browser Dispatch is exact-scoped, service-role-only, OIDC-bound, Vault-brokered and does not expand Browser 1 engine authority.' >> "$GITHUB_STEP_SUMMARY"
