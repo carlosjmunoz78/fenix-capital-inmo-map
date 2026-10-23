@@ -1279,11 +1279,11 @@
         "binding_count": 5
       },
       "company_id": "fenix",
-      "environment": "PREPROD",
+      "environment": "PROD_CAPABILITY",
       "version": "1.2.0",
-      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
-      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
-      "current_evidence": null,
+      "status": "PROD_CAPABILITY_AVAILABLE_READONLY",
+      "current_scope": "READONLY_ADVISORY_ANALYZE_REVIEW_PLAN_OBSERVE",
+      "current_evidence": "GREEN_DYNAMIC_BLOG_ARTICLE_DESIGN_E5CC514E_PROD_READONLY_CANARY",
       "observed_at": "2026-10-23T00:53:35.521Z",
       "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
       "prod_authorized": false,
@@ -1297,7 +1297,37 @@
       "spend_authorized": false,
       "trading_access": false,
       "additional_cost_eur": 0,
-      "capability_hash": "875e4bb7566e184eb2fd1a74f0dee5cd1aa28b117a6da2433db7bf15ba06faeb"
+      "capability_hash": "875e4bb7566e184eb2fd1a74f0dee5cd1aa28b117a6da2433db7bf15ba06faeb",
+      "canary": {
+        "status": "GREEN_DYNAMIC_BLOG_ARTICLE_DESIGN_E5CC514E_PROD_READONLY_CANARY",
+        "candidate_id": "repo:0f1d4cd5610bbbb45a13089a23bb",
+        "technical_name": "blog-article-design",
+        "head_sha": "130be84aac3f9a6e56e52d8048c30ef21f12c042",
+        "run_id": 39880821866,
+        "ref": "refs/heads/main",
+        "checked_bindings": [
+          "APP-001",
+          "ARCH-001",
+          "QA-001",
+          "WAUD-001",
+          "WEB-001"
+        ],
+        "checked_modes": [
+          "ADVISE",
+          "ANALYZE",
+          "REVIEW",
+          "PLAN",
+          "READONLY_OBSERVE"
+        ],
+        "side_effects": false,
+        "external_skill_code_execution": false,
+        "prod_write_authorized": false,
+        "prod_mutation_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": 0,
+        "observed_at": "2026-10-23T00:53:55.004Z"
+      },
+      "promoted_at": "2026-10-23T00:53:55.004Z"
     },
     {
       "candidate_id": "repo:dbd00f2cfc5b33e91c1c65f0499f",
@@ -1954,11 +1984,11 @@
         "binding_count": 6
       },
       "company_id": "fenix",
-      "environment": "PREPROD",
+      "environment": "PROD_CAPABILITY",
       "version": "1.2.0",
-      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
-      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
-      "current_evidence": null,
+      "status": "PROD_CAPABILITY_AVAILABLE_READONLY",
+      "current_scope": "READONLY_ADVISORY_ANALYZE_REVIEW_PLAN_OBSERVE",
+      "current_evidence": "GREEN_DYNAMIC_BREACH_DATA_94D09BAA_PROD_READONLY_CANARY",
       "observed_at": "2026-10-23T00:53:35.522Z",
       "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
       "prod_authorized": false,
@@ -1972,7 +2002,38 @@
       "spend_authorized": false,
       "trading_access": false,
       "additional_cost_eur": 0,
-      "capability_hash": "c7a71095391d5aebd047ab4561f35944c41887df83192c59061a8f4822f62324"
+      "capability_hash": "c7a71095391d5aebd047ab4561f35944c41887df83192c59061a8f4822f62324",
+      "canary": {
+        "status": "GREEN_DYNAMIC_BREACH_DATA_94D09BAA_PROD_READONLY_CANARY",
+        "candidate_id": "repo:fde1bfa7282cbeea370ee15cf77d",
+        "technical_name": "breach-data",
+        "head_sha": "130be84aac3f9a6e56e52d8048c30ef21f12c042",
+        "run_id": 39880821866,
+        "ref": "refs/heads/main",
+        "checked_bindings": [
+          "CMP-002",
+          "DPO-001",
+          "IAM-001",
+          "RED-001",
+          "SEC-001",
+          "SEC-002"
+        ],
+        "checked_modes": [
+          "ADVISE",
+          "ANALYZE",
+          "REVIEW",
+          "PLAN",
+          "READONLY_OBSERVE"
+        ],
+        "side_effects": false,
+        "external_skill_code_execution": false,
+        "prod_write_authorized": false,
+        "prod_mutation_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": 0,
+        "observed_at": "2026-10-23T00:53:55.004Z"
+      },
+      "promoted_at": "2026-10-23T00:53:55.004Z"
     },
     {
       "candidate_id": "repo:eb5b51e4a6ac69732371e1c6bbf8",
@@ -10748,10 +10809,9 @@
   "adoption_skips": [],
   "summary": {
     "total": 107,
-    "inserted": 2,
-    "updated": 0,
+    "promoted": 2,
     "skipped": 0,
-    "pending_canary": 2,
-    "prod_readonly": 105
+    "pending_canary": 0,
+    "prod_readonly": 107
   }
 }
