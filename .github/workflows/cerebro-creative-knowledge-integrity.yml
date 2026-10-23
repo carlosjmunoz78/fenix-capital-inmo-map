@@ -1,0 +1,26 @@
+name: CEREBRO Creative Knowledge Integrity
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'cerebro/knowledge/creative-media-knowledge-registry-v1.json'
+      - 'scripts/validate-creative-media-knowledge.mjs'
+      - '.github/workflows/cerebro-creative-knowledge-integrity.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Use Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Validate pinned creative knowledge snapshot
+        run: node scripts/validate-creative-media-knowledge.mjs
