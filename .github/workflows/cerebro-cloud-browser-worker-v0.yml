@@ -1,0 +1,92 @@
+name: CEREBRO Cloud Browser Worker V0
+
+on:
+  push:
+    branches:
+      - 'cerebro/cloud-browser-worker-v0'
+    paths:
+      - 'cerebro/runtime/cloud-browser-worker-v0.mjs'
+      - 'cerebro/tests/cloud-browser-worker-v0.test.mjs'
+      - 'cerebro/runtime/browser-transversal-autonomy-v1.mjs'
+      - 'cerebro/registry/browser-transversal-autonomy-policy.v1.json'
+      - '.github/workflows/cerebro-cloud-browser-worker-v0.yml'
+  pull_request:
+    paths:
+      - 'cerebro/runtime/cloud-browser-worker-v0.mjs'
+      - 'cerebro/tests/cloud-browser-worker-v0.test.mjs'
+      - 'cerebro/runtime/browser-transversal-autonomy-v1.mjs'
+      - 'cerebro/registry/browser-transversal-autonomy-policy.v1.json'
+      - '.github/workflows/cerebro-cloud-browser-worker-v0.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cloud-browser-worker-v0:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Install Chromium runtime
+        run: npx playwright install --with-deps chromium
+      - name: Cloud browser physical E2E
+        env:
+          CEREBRO_PHYSICAL_BROWSER_E2E: '1'
+        run: node --test cerebro/tests/cloud-browser-worker-v0.test.mjs
+      - name: Browser governance regression
+        run: node --test cerebro/tests/browser-transversal-autonomy-v1.test.mjs cerebro/tests/authorized-execution-device-profile-v1.test.mjs cerebro/tests/universal-skill-b17-browser-physical-gates-v1.test.mjs
+      - name: Full CEREBRO regression isolated per test file
+        shell: bash
+        run: |
+          set -uo pipefail
+          report_file="cloud-browser-v0-regression-diagnostics.txt"
+          : > "${report_file}"
+          count=0
+          failures=0
+          failed_files=()
+          while IFS= read -r test_file; do
+            count=$((count + 1))
+            tmp_output="$(mktemp)"
+            echo "::group::${test_file}"
+            if node --test "${test_file}" >"${tmp_output}" 2>&1; then
+              cat "${tmp_output}"
+            else
+              failures=$((failures + 1))
+              failed_files+=("${test_file}")
+              cat "${tmp_output}"
+              {
+                printf '===== FAILED: %s =====\n' "${test_file}"
+                cat "${tmp_output}"
+                printf '\n'
+              } >> "${report_file}"
+              echo "::error file=${test_file},title=CEREBRO regression failure::Test file failed in isolated Node process"
+            fi
+            rm -f "${tmp_output}"
+            echo "::endgroup::"
+          done < <(find cerebro/tests -maxdepth 1 -type f -name '*.test.mjs' -print | sort)
+          if (( count == 0 )); then
+            printf '%s\n' 'NO_TEST_FILES_DISCOVERED' > "${report_file}"
+            exit 1
+          fi
+          if (( failures > 0 )); then
+            printf 'Failed files (%d):\n' "${failures}"
+            printf ' - %s\n' "${failed_files[@]}"
+            exit 1
+          fi
+          printf '%s\n' 'ALL_CEREBRO_TEST_FILES_GREEN' > "${report_file}"
+          echo "Executed ${count} CEREBRO test files in isolated Node test-runner processes."
+      - name: Upload regression diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cloud-browser-v0-regression-diagnostics
+          path: cloud-browser-v0-regression-diagnostics.txt
+          if-no-files-found: warn
+          retention-days: 1
