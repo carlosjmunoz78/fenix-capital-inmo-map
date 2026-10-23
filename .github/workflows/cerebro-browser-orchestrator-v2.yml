@@ -87,7 +87,9 @@ jobs:
       matrix:
         slot: [1, 2, 3, 4]
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+    timeout-minutes: 15
     env:
       CEREBRO_BROWSER_WORKER_SLOT: ${{ matrix.slot }}
       CEREBRO_BROWSER_PHASE2_SEED_CANARY: 'false'
@@ -99,8 +101,6 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci
-      - name: Install Chromium runtime
-        run: npx playwright install --with-deps chromium
       - name: Distributed READY to GO barrier
         env:
           SLOT: ${{ matrix.slot }}
