@@ -1,13 +1,16 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "registry_id": "CEREBRO-CREATIVE-MEDIA-KNOWLEDGE-REGISTRY-V1",
   "status": "ACTIVE_SHARED_KNOWLEDGE_REGISTRY",
   "scope": "CEREBRO_OS_ALL_DEPARTMENTS",
   "source_repository": "carlosjmunoz78/fenix-capital-cerebro-social",
   "source_branch": "cerebro/facebook-autonomous-ops-v1-2026-10-23",
+  "source_commit_sha": "224269503020535f8890539ea309ac9044a78a66",
+  "source_ref_policy": "The commit SHA is the canonical immutable knowledge snapshot for this registry version. The branch is informational and may continue evolving; promotion to a newer snapshot requires an explicit registry update and delta validation.",
   "authoritative_contracts": [
     "config/creative-media-knowledge-master-v1.json",
     "knowledge/canva-creative-knowledge-seed-2026-10-23.json",
+    "knowledge/canva-license-hardening-2026-10-23.json",
     "knowledge/creative-platform-production-specs-2026-10-23.json",
     "knowledge/creative-accessibility-licensing-seed-2026-10-23.json"
   ],
@@ -28,6 +31,7 @@
   "mandatory_behavior": [
     "LOAD_CREATIVE_MEDIA_MASTER_BEFORE_HIGH_VALUE_CREATIVE_EXECUTION",
     "LOAD_CURRENT_TOOL_AND_PLATFORM_SEEDS",
+    "LOAD_CANVA_LICENSE_HARDENING_FOR_CANVA_LIBRARY_ASSETS",
     "REFRESH_STALE_OFFICIAL_SPECS_BEFORE_HIGH_VOLUME_AUTOMATION",
     "PRESERVE_PERSON_COMPANY_BRAND_AND_SESSION_SCOPE",
     "USE_ZERO_ADDITIONAL_COST_DEFAULT",
@@ -37,6 +41,8 @@
     "RUN_BRAND_VISUAL_AUDIO_CAPTION_ACCESSIBILITY_LICENSE_AND_PLATFORM_QA",
     "PRESERVE_HIGH_QUALITY_SOURCE_MASTERS",
     "STORE_LICENSE_AND_ASSET_PROVENANCE",
+    "APPLY_MOST_RESTRICTIVE_RELEVANT_CONTENT_LICENSE_CLASS",
+    "CHECK_MUSIC_RIGHTS_SEPARATELY_FROM_VISUAL_ASSET_RIGHTS",
     "LEARN_FROM_FIRST_PARTY_CREATIVE_PERFORMANCE"
   ],
   "governance": {
@@ -48,7 +54,8 @@
     "human_by_exception": true,
     "canonical_human_required_only": true,
     "no_new_paid_subscription_by_default": true,
-    "no_make_or_buffer_removal_without_parallel_parity_and_rollback": true
+    "no_make_or_buffer_removal_without_parallel_parity_and_rollback": true,
+    "knowledge_snapshot_pin_required": true
   },
-  "runtime_truth": "Knowledge contracts are registered and available for CEREBRO-wide reuse. Automatic loading and physical execution must still be proven per consuming engine or platform binding before that consumer is called operationally certified."
+  "runtime_truth": "Knowledge contracts are registered, source-pinned and available for CEREBRO-wide reuse. Automatic loading and physical execution must still be proven per consuming engine or platform binding before that consumer is called operationally certified."
 }
