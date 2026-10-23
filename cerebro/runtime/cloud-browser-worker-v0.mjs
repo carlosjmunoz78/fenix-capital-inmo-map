@@ -89,7 +89,7 @@ function validateStorageState(storageState) {
 
 export function getCloudBrowserWorkerCapabilities() {
   return Object.freeze({
-    schema_version: '0.3.1',
+    schema_version: '0.3.2',
     backend: 'PLAYWRIGHT_CHROMIUM',
     persistent_profiles: true,
     governed_storage_state_restore: true,
@@ -104,6 +104,7 @@ export function getCloudBrowserWorkerCapabilities() {
     downloads: true,
     multi_tab: true,
     physical_tab_limit_enforced: true,
+    popup_tab_limit_continuous: true,
     popups: true,
     iframe_via_selector: true,
     shadow_dom_via_playwright: true,
@@ -129,6 +130,8 @@ export function createCloudBrowserWorker({
   let activePage = null;
   let runningScope = null;
   let sessionMaterialization = null;
+  let tabPolicyChain = Promise.resolve();
+  let tabPolicyError = null;
 
   async function emit(event) {
     await audit_sink(Object.freeze({ at: new Date().toISOString(), ...event }));
@@ -143,6 +146,28 @@ export function createCloudBrowserWorker({
     activePage = context.pages().at(-1) || null;
     await emit({ type:'BROWSER_TAB_LIMIT_EXCEEDED', max_tabs, observed_tabs:pages.length, ...runningScope });
     throw new Error('BROWSER_TAB_LIMIT_EXCEEDED');
+  }
+
+  function scheduleTabLimitEnforcement() {
+    tabPolicyChain = tabPolicyChain.then(async () => {
+      try {
+        await enforceTabLimit();
+      } catch (error) {
+        tabPolicyError ||= error;
+      }
+    });
+    return tabPolicyChain;
+  }
+
+  async function settleTabLimitPolicy() {
+    await new Promise(resolve => setImmediate(resolve));
+    await tabPolicyChain;
+    if (tabPolicyError) {
+      const error = tabPolicyError;
+      tabPolicyError = null;
+      throw error;
+    }
+    await enforceTabLimit();
   }
 
   async function start(job) {
@@ -170,7 +195,12 @@ export function createCloudBrowserWorker({
       browser_profile_id: profileId
     });
     sessionMaterialization = null;
-    context.on('page', page => { activePage = page; });
+    tabPolicyChain = Promise.resolve();
+    tabPolicyError = null;
+    context.on('page', page => {
+      activePage = page;
+      void scheduleTabLimitEnforcement();
+    });
     await enforceTabLimit();
     await emit({ type: 'BROWSER_STARTED', max_tabs, ...runningScope });
     return runningScope;
@@ -211,11 +241,14 @@ export function createCloudBrowserWorker({
   async function stop(reason = 'NORMAL') {
     if (!context) return;
     const scope = runningScope;
+    await tabPolicyChain.catch(() => {});
     await context.close();
     context = null;
     activePage = null;
     runningScope = null;
     sessionMaterialization = null;
+    tabPolicyChain = Promise.resolve();
+    tabPolicyError = null;
     await emit({ type: 'BROWSER_STOPPED', reason, ...scope });
   }
 
@@ -341,7 +374,7 @@ export function createCloudBrowserWorker({
       default: throw new Error(`UNSUPPORTED_BROWSER_ACTION:${action.type}`);
     }
 
-    await enforceTabLimit();
+    await settleTabLimitPolicy();
     await emit({
       type: 'BROWSER_ACTION',
       request_id: job.request_id || null,
