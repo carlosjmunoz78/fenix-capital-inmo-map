@@ -37,6 +37,8 @@ jobs:
       - name: Install Chromium runtime
         run: npx playwright install --with-deps chromium
       - name: Cloud browser physical E2E
+        env:
+          CEREBRO_PHYSICAL_BROWSER_E2E: '1'
         run: node --test cerebro/tests/cloud-browser-worker-v0.test.mjs
       - name: Browser governance regression
         run: node --test cerebro/tests/browser-transversal-autonomy-v1.test.mjs cerebro/tests/authorized-execution-device-profile-v1.test.mjs cerebro/tests/universal-skill-b17-browser-physical-gates-v1.test.mjs
