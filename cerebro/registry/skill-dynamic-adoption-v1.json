@@ -3536,6 +3536,106 @@
       "promoted_at": "2026-10-21T04:41:56.999Z"
     },
     {
+      "candidate_id": "repo:8f58c9c5c2d1118795c1f39bc7d5",
+      "technical_name": "drei",
+      "source_locator": "github://TerminalSkills/skills@20719c32fa1cc0bf4598bd3d2c75c058f8c19ddd/skills/drei",
+      "pinned_sha": "20719c32fa1cc0bf4598bd3d2c75c058f8c19ddd",
+      "snapshot_sha256": "8f58c9c5c2d1118795c1f39bc7d5c54c8c8d631b374b80424ce63eae00781c15",
+      "manifest_sha256": "a1bf5dd8c982363e111acdec4dd52cd759ce5fe7f4ea7041bdf98c17e5951ee9",
+      "outcome_hash": "943a9781c31a4ed16f0fc0be3ec40cea5931b325cf0da3b9af951a55d8dbd5e8",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:8f58c9c5c2d11187:cap:1",
+          "technical_name": "drei",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PROD_CAPABILITY",
+      "version": "1.2.0",
+      "status": "PROD_CAPABILITY_AVAILABLE_READONLY",
+      "current_scope": "READONLY_ADVISORY_ANALYZE_REVIEW_PLAN_OBSERVE",
+      "current_evidence": "GREEN_DYNAMIC_DREI_BBF1127E_PROD_READONLY_CANARY",
+      "observed_at": "2026-10-23T15:25:41.121Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "1b6a34c6c529b71a7e5ad89a912dd87feae4d74ee663726a1da4cf7b36fd988a",
+      "canary": {
+        "status": "GREEN_DYNAMIC_DREI_BBF1127E_PROD_READONLY_CANARY",
+        "candidate_id": "repo:8f58c9c5c2d1118795c1f39bc7d5",
+        "technical_name": "drei",
+        "head_sha": "20eb191a1334bb83fe5bd4da88faf83b3dc9a651",
+        "run_id": 39978184380,
+        "ref": "refs/heads/main",
+        "checked_bindings": [
+          "APP-001",
+          "ARCH-001",
+          "QA-001",
+          "WAUD-001",
+          "WEB-001"
+        ],
+        "checked_modes": [
+          "ADVISE",
+          "ANALYZE",
+          "REVIEW",
+          "PLAN",
+          "READONLY_OBSERVE"
+        ],
+        "side_effects": false,
+        "external_skill_code_execution": false,
+        "prod_write_authorized": false,
+        "prod_mutation_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": 0,
+        "observed_at": "2026-10-23T15:26:00.315Z"
+      },
+      "promoted_at": "2026-10-23T15:26:00.315Z"
+    },
+    {
       "candidate_id": "repo:fc81dac4018cb6cdf3b2e98a901f",
       "technical_name": "drei",
       "source_locator": "github://TerminalSkills/skills@6edcf94159d9f46b0759d2e1b59dd545cfaca254/skills/drei",
@@ -10908,11 +11008,10 @@
   ],
   "adoption_skips": [],
   "summary": {
-    "total": 108,
-    "inserted": 0,
-    "updated": 0,
+    "total": 109,
+    "promoted": 1,
     "skipped": 0,
     "pending_canary": 0,
-    "prod_readonly": 108
+    "prod_readonly": 109
   }
 }
