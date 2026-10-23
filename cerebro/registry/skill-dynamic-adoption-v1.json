@@ -3585,11 +3585,11 @@
         "binding_count": 5
       },
       "company_id": "fenix",
-      "environment": "PREPROD",
+      "environment": "PROD_CAPABILITY",
       "version": "1.2.0",
-      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
-      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
-      "current_evidence": null,
+      "status": "PROD_CAPABILITY_AVAILABLE_READONLY",
+      "current_scope": "READONLY_ADVISORY_ANALYZE_REVIEW_PLAN_OBSERVE",
+      "current_evidence": "GREEN_DYNAMIC_DREI_BBF1127E_PROD_READONLY_CANARY",
       "observed_at": "2026-10-23T15:25:41.121Z",
       "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
       "prod_authorized": false,
@@ -3603,7 +3603,37 @@
       "spend_authorized": false,
       "trading_access": false,
       "additional_cost_eur": 0,
-      "capability_hash": "1b6a34c6c529b71a7e5ad89a912dd87feae4d74ee663726a1da4cf7b36fd988a"
+      "capability_hash": "1b6a34c6c529b71a7e5ad89a912dd87feae4d74ee663726a1da4cf7b36fd988a",
+      "canary": {
+        "status": "GREEN_DYNAMIC_DREI_BBF1127E_PROD_READONLY_CANARY",
+        "candidate_id": "repo:8f58c9c5c2d1118795c1f39bc7d5",
+        "technical_name": "drei",
+        "head_sha": "20eb191a1334bb83fe5bd4da88faf83b3dc9a651",
+        "run_id": 39978184380,
+        "ref": "refs/heads/main",
+        "checked_bindings": [
+          "APP-001",
+          "ARCH-001",
+          "QA-001",
+          "WAUD-001",
+          "WEB-001"
+        ],
+        "checked_modes": [
+          "ADVISE",
+          "ANALYZE",
+          "REVIEW",
+          "PLAN",
+          "READONLY_OBSERVE"
+        ],
+        "side_effects": false,
+        "external_skill_code_execution": false,
+        "prod_write_authorized": false,
+        "prod_mutation_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": 0,
+        "observed_at": "2026-10-23T15:26:00.315Z"
+      },
+      "promoted_at": "2026-10-23T15:26:00.315Z"
     },
     {
       "candidate_id": "repo:fc81dac4018cb6cdf3b2e98a901f",
@@ -10979,10 +11009,9 @@
   "adoption_skips": [],
   "summary": {
     "total": 109,
-    "inserted": 1,
-    "updated": 0,
+    "promoted": 1,
     "skipped": 0,
-    "pending_canary": 1,
-    "prod_readonly": 108
+    "pending_canary": 0,
+    "prod_readonly": 109
   }
 }
