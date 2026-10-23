@@ -6,6 +6,8 @@ import path from 'node:path';
 import fs from 'node:fs/promises';
 import { createCloudBrowserWorker, getCloudBrowserWorkerCapabilities } from '../runtime/cloud-browser-worker-v0.mjs';
 
+const PHYSICAL_BROWSER_E2E = process.env.CEREBRO_PHYSICAL_BROWSER_E2E === '1';
+
 function authorizedJob(baseUrl, roots, overrides = {}) {
   return {
     request_id: `req-${Date.now()}`,
@@ -73,7 +75,7 @@ test('capability contract is broad but fail-closed on bypasses', () => {
   assert.equal(caps.arbitrary_page_javascript, false);
 });
 
-test('real Chromium performs navigation, form, upload, download, evidence and persistent session', { timeout: 90_000 }, async () => {
+test('real Chromium performs navigation, form, upload, download, evidence and persistent session', { timeout: 90_000, skip: PHYSICAL_BROWSER_E2E ? false : 'DEDICATED_PHYSICAL_BROWSER_GATE_ONLY' }, async () => {
   const { server, baseUrl } = await fixtureServer();
   const temp = await fs.mkdtemp(path.join(os.tmpdir(), 'cerebro-browser-'));
   const profiles = path.join(temp, 'profiles');
