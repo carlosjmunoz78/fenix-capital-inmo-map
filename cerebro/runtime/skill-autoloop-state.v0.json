@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-23T22:17:18.697Z",
+  "updated_at": "2026-10-23T22:17:20.989Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -253,42 +253,7 @@
   ],
   "in_flight": {},
   "waiting_human": {},
-  "waiting_safe_handler": {
-    "github-wide-skills:b0f8ae56c7dc6b46f3f8": {
-      "candidate_id": "github-wide-skills:b0f8ae56c7dc6b46f3f8",
-      "name": "curating-product-requirements",
-      "human_alias": "Curating Product Requirements",
-      "wrapper_id": "skillwrap:dff9270fc44a0072a652",
-      "domain": "agent-ai-orchestration",
-      "engine_bindings": [
-        "ORCH-001",
-        "ROUTE-001",
-        "FACT-001",
-        "RAG-001",
-        "LRN-001",
-        "ACTGW-001"
-      ],
-      "value_score": 85.46,
-      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
-      "evidence_refs": {
-        "upstream_full_name": "theultimate-dev/skills",
-        "upstream_head_commit": "9982dc65d4b17841a456e5e29b5819122ce3bd32",
-        "manifest_sha256": "ce9a9424dcd5315c9273a33e35be62187a19a3cb0daba5d50b278c733215959b",
-        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
-      },
-      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
-      "status": "WAITING_SAFE_HANDLER",
-      "source_discovery_run_id": 40012549309,
-      "checkpointed_at": "2026-10-23T19:35:42.111Z",
-      "human_required": null,
-      "external_skill_code_execution": false,
-      "customer_data_used": false,
-      "prod_write": false,
-      "trading_access": false,
-      "paid_fallback": false,
-      "additional_cost_eur": 0
-    }
-  },
+  "waiting_safe_handler": {},
   "completed": {
     "lobehub-skills:9a6e3fac20369220df43": {
       "candidate_id": "lobehub-skills:9a6e3fac20369220df43",
@@ -13848,9 +13813,52 @@
       },
       "updated_at": "2026-10-23T18:39:37.750Z",
       "prod_authorized": false
+    },
+    "github-wide-skills:b0f8ae56c7dc6b46f3f8": {
+      "candidate_id": "github-wide-skills:b0f8ae56c7dc6b46f3f8",
+      "name": "curating-product-requirements",
+      "human_alias": "Curating Product Requirements",
+      "wrapper_id": "skillwrap:dff9270fc44a0072a652",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 85.46,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "theultimate-dev/skills",
+        "upstream_head_commit": "9982dc65d4b17841a456e5e29b5819122ce3bd32",
+        "manifest_sha256": "ce9a9424dcd5315c9273a33e35be62187a19a3cb0daba5d50b278c733215959b",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "SAFE_HANDLER_TERMINAL_HOLD",
+      "status": "TERMINAL_HOLD",
+      "source_discovery_run_id": 40012549309,
+      "checkpointed_at": "2026-10-23T19:35:42.111Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0,
+      "evidence": {
+        "reason": "STATIC_LAB_HOLD",
+        "decision_id": null,
+        "decision": null,
+        "human_required": null,
+        "source": "CEREBRO Skill AutoLoop Safe Handler V0"
+      },
+      "updated_at": "2026-10-23T22:17:20.989Z",
+      "prod_authorized": false
     }
   },
-  "last_action": "IDLE_NO_NEW_ELIGIBLE_CANDIDATE",
+  "last_action": "TERMINAL_HOLD_CONTINUE_OTHER_SAFE_WORK",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -13863,7 +13871,7 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 40032561071,
+  "last_discovery_run_id": 40003208256,
   "autonomy_action_ledger": {
     "github-wide-skills:28b33318e96c4dcfb74a": {
       "schema_version": "1.0.0",
