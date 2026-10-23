@@ -6,17 +6,20 @@ on:
       - 'cerebro/cloud-browser-worker-v0'
       - 'cerebro/browser-p0-identity-vision-v0'
       - 'cerebro/browser-session-materialization-v1'
+      - 'cerebro/browser1-access-v1'
     paths:
       - 'cerebro/runtime/cloud-browser-worker-v0.mjs'
       - 'cerebro/runtime/cloud-browser-governed-session-v1.mjs'
       - 'cerebro/runtime/browser-session-binding-v1.mjs'
       - 'cerebro/runtime/browser-session-secret-resolver-v1.mjs'
       - 'cerebro/runtime/browser-vision-fallback-v1.mjs'
+      - 'cerebro/runtime/browser1-access-v1.mjs'
       - 'cerebro/tests/cloud-browser-worker-v0.test.mjs'
       - 'cerebro/tests/cloud-browser-governed-session-v1.test.mjs'
       - 'cerebro/tests/browser-session-binding-v1.test.mjs'
       - 'cerebro/tests/browser-session-secret-resolver-v1.test.mjs'
       - 'cerebro/tests/browser-vision-fallback-v1.test.mjs'
+      - 'cerebro/tests/browser1-access-v1.test.mjs'
       - 'cerebro/runtime/browser-transversal-autonomy-v1.mjs'
       - 'cerebro/registry/browser-transversal-autonomy-policy.v1.json'
       - '.github/workflows/cerebro-cloud-browser-worker-v0.yml'
@@ -27,11 +30,13 @@ on:
       - 'cerebro/runtime/browser-session-binding-v1.mjs'
       - 'cerebro/runtime/browser-session-secret-resolver-v1.mjs'
       - 'cerebro/runtime/browser-vision-fallback-v1.mjs'
+      - 'cerebro/runtime/browser1-access-v1.mjs'
       - 'cerebro/tests/cloud-browser-worker-v0.test.mjs'
       - 'cerebro/tests/cloud-browser-governed-session-v1.test.mjs'
       - 'cerebro/tests/browser-session-binding-v1.test.mjs'
       - 'cerebro/tests/browser-session-secret-resolver-v1.test.mjs'
       - 'cerebro/tests/browser-vision-fallback-v1.test.mjs'
+      - 'cerebro/tests/browser1-access-v1.test.mjs'
       - 'cerebro/runtime/browser-transversal-autonomy-v1.mjs'
       - 'cerebro/registry/browser-transversal-autonomy-policy.v1.json'
       - '.github/workflows/cerebro-cloud-browser-worker-v0.yml'
@@ -57,9 +62,9 @@ jobs:
       - name: Cloud browser physical E2E
         env:
           CEREBRO_PHYSICAL_BROWSER_E2E: '1'
-        run: node --test cerebro/tests/cloud-browser-worker-v0.test.mjs cerebro/tests/cloud-browser-governed-session-v1.test.mjs
+        run: node --test cerebro/tests/cloud-browser-worker-v0.test.mjs cerebro/tests/cloud-browser-governed-session-v1.test.mjs cerebro/tests/browser1-access-v1.test.mjs
       - name: Browser governance regression
-        run: node --test cerebro/tests/browser-transversal-autonomy-v1.test.mjs cerebro/tests/authorized-execution-device-profile-v1.test.mjs cerebro/tests/universal-skill-b17-browser-physical-gates-v1.test.mjs cerebro/tests/browser-session-binding-v1.test.mjs cerebro/tests/browser-session-secret-resolver-v1.test.mjs cerebro/tests/browser-vision-fallback-v1.test.mjs
+        run: node --test cerebro/tests/browser-transversal-autonomy-v1.test.mjs cerebro/tests/authorized-execution-device-profile-v1.test.mjs cerebro/tests/universal-skill-b17-browser-physical-gates-v1.test.mjs cerebro/tests/browser-session-binding-v1.test.mjs cerebro/tests/browser-session-secret-resolver-v1.test.mjs cerebro/tests/browser-vision-fallback-v1.test.mjs cerebro/tests/browser1-access-v1.test.mjs
       - name: Full CEREBRO regression isolated per test file
         shell: bash
         run: |
