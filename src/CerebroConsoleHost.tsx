@@ -1,4 +1,5 @@
 import {useEffect,useState} from 'react';
+import {createPortal} from 'react-dom';
 import {useLocation} from 'react-router-dom';
 import CerebroConsoleShell from './CerebroConsoleShell';
 import CerebroOperativeConsole from './CerebroOperativeConsole';
@@ -19,6 +20,18 @@ function initialView():CerebroView{
   const stored=window.sessionStorage.getItem(VIEW_STORAGE_KEY);
   return stored==='V0'||stored==='NAVEGADOR'?stored:'OPERATIVA';
  }catch{return'OPERATIVA'}
+}
+
+function OperativeBrowserTab({onOpen}:{onOpen:()=>void}){
+ const[target,setTarget]=useState<HTMLElement|null>(null);
+ useEffect(()=>{
+  const resolve=()=>setTarget(document.querySelector<HTMLElement>('.cerebro-inline-view-switch'));
+  resolve();
+  const observer=new MutationObserver(resolve);
+  observer.observe(document.body,{subtree:true,childList:true});
+  return()=>observer.disconnect();
+ },[]);
+ return target?createPortal(<button type="button" onClick={onOpen}>NAVEGADOR</button>,target):null;
 }
 
 export default function CerebroConsoleHost(){
@@ -64,7 +77,7 @@ export default function CerebroConsoleHost(){
   <CerebroSpeechOutputGuard/>
   {view==='V0'?<div className="cerebro-host-topbar"><nav className="cerebro-view-switch" aria-label="Cambiar vista de CEREBRO"><span className="cerebro-view-switch-label">INTERFAZ</span><button type="button" className="is-active">VISTA 0</button><button type="button" onClick={()=>setView('OPERATIVA')}>OPERATIVA</button><button type="button" disabled title="NEURAL se recuperará desde los artefactos existentes; no se reconstruirá desde cero.">NEURAL · POR AUDITAR</button><button type="button" onClick={()=>setView('NAVEGADOR')}>NAVEGADOR</button></nav></div>:null}
   <div className={`cerebro-host-v0 ${view==='V0'?'is-visible':'is-hidden'}`} aria-hidden={view!=='V0'}><CerebroConsoleShell/></div>
-  {view==='OPERATIVA'?<CerebroOperativeConsole onViewChange={setView}/>:null}
+  {view==='OPERATIVA'?<><CerebroOperativeConsole onViewChange={setView}/><OperativeBrowserTab onOpen={()=>setView('NAVEGADOR')}/></>:null}
   {view==='NAVEGADOR'?<CerebroBrowserConsole onViewChange={setView}/>:null}
  </div>;
 }
