@@ -6,7 +6,6 @@ on:
       - 'main'
       - 'cerebro/browser1-live-dispatch-v1'
       - 'cerebro/browser1-live-dispatch-v1-final'
-      - 'cerebro/browser1-phase1-final-trigger-v1'
     paths:
       - 'cerebro/runtime/browser-job-runner-v1.mjs'
       - 'cerebro/tests/browser-job-runner-v1.test.mjs'
