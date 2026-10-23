@@ -16,6 +16,8 @@ on:
       - 'supabase/functions/cerebro-telegram-gateway-v0/**'
       - 'supabase/functions/cerebro-telegram-voice-v1/**'
       - 'supabase/functions/cerebro-browser-dispatch-v1/index.ts'
+      - 'supabase/functions/cerebro-browser-dispatch-v2/**'
+      - 'supabase/functions/cerebro-browser-dispatch-v2-prod/**'
       - 'supabase/migrations/20261012132000_cerebro_human_route_control_preprod_v1.sql'
       - 'supabase/migrations/20261013010500_cerebro_multichannel_ana_overlay_v1.sql'
       - 'supabase/migrations/20261013042000_cerebro_channel_access_profiles_v1.sql'
@@ -25,10 +27,18 @@ on:
       - 'supabase/migrations/20261013101500_cerebro_post_scan_parallel_preprod_v1.sql'
       - 'supabase/migrations/20261023093000_cerebro_browser_dispatch_v1.sql'
       - 'supabase/migrations/20261023093100_cerebro_browser_credential_broker_v1.sql'
+      - 'supabase/migrations/20261023180000_cerebro_browser_orchestrator_v2.sql'
+      - 'supabase/migrations/20261023194500_cerebro_browser_credential_broker_v2.sql'
+      - 'supabase/migrations/20261023195500_cerebro_browser_credential_broker_v2_scope_fix.sql'
+      - 'supabase/migrations/20261023201500_cerebro_browser_barrier_v2_table.sql'
+      - 'supabase/migrations/20261023201600_cerebro_browser_barrier_v2_acl.sql'
+      - 'supabase/migrations/20261023201700_cerebro_browser_barrier_v2_functions.sql'
+      - 'supabase/migrations/20261023201800_cerebro_browser_lease_benchmark_v2.sql'
       - '.github/workflows/cerebro-rsi-*.yml'
       - '.github/workflows/cerebro-hygiene-audit-v0.yml'
       - '.github/workflows/cerebro-human-intelligence-*.yml'
       - '.github/workflows/cerebro-multichannel-conversation-unification-v1.yml'
+      - '.github/workflows/cerebro-browser-*.yml'
       - '.github/workflows/cerebro-rsi-promotion-readiness-shadow-v0.yml'
   workflow_dispatch:
 
@@ -113,7 +123,7 @@ jobs:
             printf '%s\n' "$changed" >&2
             exit 1
           fi
-          allowed='^(supabase/functions/(cerebro-human-old-actor-preprod-v0|cerebro-human-new-actor-preprod-v1|cerebro-human-route-control-preprod-v1|cerebro-console-gateway-human-v1-canary|cerebro-console-human-router-zero-v1|cerebro-telegram-gateway-v0|cerebro-telegram-voice-v1)/|supabase/functions/cerebro-browser-dispatch-v1/index\.ts$|supabase/functions/_shared/cerebro-(conversation|channel-access)-policy-v1\.ts$|supabase/migrations/(20261012132000_cerebro_human_route_control_preprod_v1|20261013010500_cerebro_multichannel_ana_overlay_v1|20261013042000_cerebro_channel_access_profiles_v1|20261013075000_cerebro_company_registry_preprod_persistence_v1|20261013083000_cerebro_company_onboarding_preprod_persistence_v1|20261013093000_cerebro_scan001_preprod_persistence_v1|20261013101500_cerebro_post_scan_parallel_preprod_v1|20261023093000_cerebro_browser_dispatch_v1|20261023093100_cerebro_browser_credential_broker_v1)\.sql$)'
+          allowed='^(supabase/functions/(cerebro-human-old-actor-preprod-v0|cerebro-human-new-actor-preprod-v1|cerebro-human-route-control-preprod-v1|cerebro-console-gateway-human-v1-canary|cerebro-console-human-router-zero-v1|cerebro-telegram-gateway-v0|cerebro-telegram-voice-v1|cerebro-browser-dispatch-v2|cerebro-browser-dispatch-v2-prod)/|supabase/functions/cerebro-browser-dispatch-v1/index\.ts$|supabase/functions/_shared/cerebro-(conversation|channel-access)-policy-v1\.ts$|supabase/migrations/(20261012132000_cerebro_human_route_control_preprod_v1|20261013010500_cerebro_multichannel_ana_overlay_v1|20261013042000_cerebro_channel_access_profiles_v1|20261013075000_cerebro_company_registry_preprod_persistence_v1|20261013083000_cerebro_company_onboarding_preprod_persistence_v1|20261013093000_cerebro_scan001_preprod_persistence_v1|20261013101500_cerebro_post_scan_parallel_preprod_v1|20261023093000_cerebro_browser_dispatch_v1|20261023093100_cerebro_browser_credential_broker_v1|20261023180000_cerebro_browser_orchestrator_v2|20261023194500_cerebro_browser_credential_broker_v2|20261023195500_cerebro_browser_credential_broker_v2_scope_fix|20261023201500_cerebro_browser_barrier_v2_table|20261023201600_cerebro_browser_barrier_v2_acl|20261023201700_cerebro_browser_barrier_v2_functions|20261023201800_cerebro_browser_lease_benchmark_v2)\.sql$)'
           unexpected_supabase="$(printf '%s\n' "$changed" | grep '^supabase/' | grep -Ev "$allowed" || true)"
           if [ -n "$unexpected_supabase" ]; then
             echo 'Unapproved Supabase surface changed:' >&2
@@ -179,7 +189,7 @@ jobs:
             printf '%s\n' "$changed" >&2
             exit 1
           fi
-          allowed='^(supabase/functions/(cerebro-human-old-actor-preprod-v0|cerebro-human-new-actor-preprod-v1|cerebro-human-route-control-preprod-v1|cerebro-console-gateway-human-v1-canary|cerebro-console-human-router-zero-v1|cerebro-telegram-gateway-v0|cerebro-telegram-voice-v1)/|supabase/functions/cerebro-browser-dispatch-v1/index\.ts$|supabase/functions/_shared/cerebro-(conversation|channel-access)-policy-v1\.ts$|supabase/migrations/(20261012132000_cerebro_human_route_control_preprod_v1|20261013010500_cerebro_multichannel_ana_overlay_v1|20261013042000_cerebro_channel_access_profiles_v1|20261013075000_cerebro_company_registry_preprod_persistence_v1|20261013083000_cerebro_company_onboarding_preprod_persistence_v1|20261013093000_cerebro_scan001_preprod_persistence_v1|20261013101500_cerebro_post_scan_parallel_preprod_v1|20261023093000_cerebro_browser_dispatch_v1|20261023093100_cerebro_browser_credential_broker_v1)\.sql$)'
+          allowed='^(supabase/functions/(cerebro-human-old-actor-preprod-v0|cerebro-human-new-actor-preprod-v1|cerebro-human-route-control-preprod-v1|cerebro-console-gateway-human-v1-canary|cerebro-console-human-router-zero-v1|cerebro-telegram-gateway-v0|cerebro-telegram-voice-v1|cerebro-browser-dispatch-v2|cerebro-browser-dispatch-v2-prod)/|supabase/functions/cerebro-browser-dispatch-v1/index\.ts$|supabase/functions/_shared/cerebro-(conversation|channel-access)-policy-v1\.ts$|supabase/migrations/(20261012132000_cerebro_human_route_control_preprod_v1|20261013010500_cerebro_multichannel_ana_overlay_v1|20261013042000_cerebro_channel_access_profiles_v1|20261013075000_cerebro_company_registry_preprod_persistence_v1|20261013083000_cerebro_company_onboarding_preprod_persistence_v1|20261013093000_cerebro_scan001_preprod_persistence_v1|20261013101500_cerebro_post_scan_parallel_preprod_v1|20261023093000_cerebro_browser_dispatch_v1|20261023093100_cerebro_browser_credential_broker_v1|20261023180000_cerebro_browser_orchestrator_v2|20261023194500_cerebro_browser_credential_broker_v2|20261023195500_cerebro_browser_credential_broker_v2_scope_fix|20261023201500_cerebro_browser_barrier_v2_table|20261023201600_cerebro_browser_barrier_v2_acl|20261023201700_cerebro_browser_barrier_v2_functions|20261023201800_cerebro_browser_lease_benchmark_v2)\.sql$)'
           unexpected_supabase="$(printf '%s\n' "$changed" | grep '^supabase/' | grep -Ev "$allowed" || true)"
           test -z "$unexpected_supabase" || { printf '%s\n' "$unexpected_supabase" >&2; exit 1; }
 
