@@ -153,5 +153,6 @@ export const BROWSER_JOB_RUNNER_V1_CONTRACT = Object.freeze({
   audience:DEFAULT_AUDIENCE,
   raw_credentials_in_queue:false,
   phase1_authenticated_materialization:false,
-  incremental_cost_eur:0
+  incremental_cost_eur:0,
+  additional_cost_eur:0
 });
