@@ -1,4 +1,5 @@
 import { pathToFileURL } from 'node:url';
+import { runInteractiveBrowserSessionV3 } from './browser-interactive-session-v3.mjs';
 
 const DEFAULT_AUDIENCE='cerebro-browser-worker-v1';
 const CREDENTIAL_PLACEHOLDER=/^\$CREDENTIAL\.([A-Za-z0-9_.-]{1,120})$/;
@@ -75,7 +76,7 @@ function workerInput(job,commands=job.commands){
 function resultSummary(result={},credential_materialized=false){
   const firstText=!credential_materialized&&Array.isArray(result.results)?result.results.find(value=>typeof value==='string'):null;
   return {ok:result.ok===true,authorization_status:result.authorization?.status||null,final_url:result.final_url||null,result_count:Array.isArray(result.results)?result.results.length:0,
-    observed_text_sample:firstText?firstText.slice(0,300):null,evidence_captured:Boolean(result.final_evidence),credential_materialized,secret_material_logged:false};
+    observed_text_sample:firstText?firstText.slice(0,300):null,evidence_captured:Boolean(result.final_evidence),credential_materialized,interactive_session:result.interactive_session===true,session_id:result.interactive_session===true?result.session_id||null:null,secret_material_logged:false};
 }
 
 function resourceSample(){
@@ -121,10 +122,16 @@ export async function runOneBrowserJobV2({
     }
 
     effectiveCommands=applyHumanOperatorPacingV2(effectiveCommands);
-    const mode=String(job.mode||'OBSERVE').toUpperCase();
-    const executeTool=mode==='MUTATE'?browser.act:browser.observe;
-    if(typeof executeTool!=='function')throw new Error(`BROWSER1_${mode}_EXECUTOR_MISSING`);
-    const result=await executeTool(workerInput(job,effectiveCommands));
+    let result;
+    if(String(job.capability||'')==='browser1.interactive'){
+      if(credentialMaterialized)throw new Error('INTERACTIVE_V3_CREDENTIAL_MATERIALIZATION_NOT_YET_ALLOWED');
+      result=await runInteractiveBrowserSessionV3({job:{...job,commands:effectiveCommands},token:oidc,fetch_impl});
+    }else{
+      const mode=String(job.mode||'OBSERVE').toUpperCase();
+      const executeTool=mode==='MUTATE'?browser.act:browser.observe;
+      if(typeof executeTool!=='function')throw new Error(`BROWSER1_${mode}_EXECUTOR_MISSING`);
+      result=await executeTool(workerInput(job,effectiveCommands));
+    }
     const authorized=result.ok===true;
     const outcome=authorized?'SUCCEEDED':(result.authorization?.status==='HUMAN_REQUIRED'?'HOLD':'FAILED');
     const summary=resultSummary(result,credentialMaterialized);
@@ -146,7 +153,7 @@ export async function runOneBrowserJobV2({
   }
 }
 
-function safeConsoleResult(result){return {ok:result.ok,status:result.status,job_id:result.job_id||null,worker_slot:result.worker_slot,stage_concurrency:result.stage_concurrency,duration_ms:result.duration_ms||null,final_url:result.summary?.final_url||null,authorization_status:result.summary?.authorization_status||null,credential_materialized:result.summary?.credential_materialized===true,secret_material_logged:false};}
+function safeConsoleResult(result){return {ok:result.ok,status:result.status,job_id:result.job_id||null,worker_slot:result.worker_slot,stage_concurrency:result.stage_concurrency,duration_ms:result.duration_ms||null,final_url:result.summary?.final_url||null,authorization_status:result.summary?.authorization_status||null,credential_materialized:result.summary?.credential_materialized===true,interactive_session:result.summary?.interactive_session===true,secret_material_logged:false};}
 
 async function main(){
   const result=await runOneBrowserJobV2({seed_canary:process.env.CEREBRO_BROWSER_PHASE2_SEED_CANARY==='true'});
@@ -155,4 +162,4 @@ async function main(){
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href)await main();
 
-export const BROWSER_JOB_RUNNER_V2_CONTRACT=Object.freeze({schema_version:'2.1.0',capability_id:'BROWSER-1',orchestrator:'BROWSER-ORCH-V2',authentication:'GITHUB_ACTIONS_OIDC',worker_pool:true,one_serial_browser1_per_worker:true,raw_credentials_in_queue:false,vault_credential_materialization:true,human_operator_liveness:true,adaptive_ui_settle_pacing:true,no_stealth_evasion:true,metrics_without_secrets:true,incremental_cost_eur:0,serial_v1_rollback_preserved:true});
+export const BROWSER_JOB_RUNNER_V2_CONTRACT=Object.freeze({schema_version:'2.2.0',capability_id:'BROWSER-1',orchestrator:'BROWSER-ORCH-V2',authentication:'GITHUB_ACTIONS_OIDC',worker_pool:true,one_serial_browser1_per_worker:true,raw_credentials_in_queue:false,vault_credential_materialization:true,human_operator_liveness:true,adaptive_ui_settle_pacing:true,interactive_phase3_opt_in:true,interactive_same_v2_queue:true,no_stealth_evasion:true,metrics_without_secrets:true,incremental_cost_eur:0,serial_v1_rollback_preserved:true});
