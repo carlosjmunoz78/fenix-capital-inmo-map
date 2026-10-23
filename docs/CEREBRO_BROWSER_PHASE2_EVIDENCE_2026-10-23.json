@@ -1,0 +1,130 @@
+{
+  "schema_version": "browser.phase2.evidence.v1",
+  "as_of": "2026-10-23",
+  "company_id": "fenix",
+  "environment": "PREPROD",
+  "phase": "BROWSER_1_PHASE_2",
+  "status": "PREPROD_GATES_GREEN_PROD_NOT_PROMOTED",
+  "phase1": {
+    "preserved": true,
+    "rollback_available": true,
+    "baseline_main_sha": "13f857f7dc05aa2f220deec758dce6a1e2c2e748",
+    "dispatch_v1_active": true,
+    "dispatch_v1_version": 3,
+    "credential_baseline_run_id": 39937419272,
+    "credential_materialized": true,
+    "secret_material_logged": false
+  },
+  "orchestrator_v2": {
+    "preprod_enabled": true,
+    "operational_global_max_concurrent": 8,
+    "default_company_max_concurrent": 4,
+    "default_department_max_concurrent": 2,
+    "one_writer_per_profile": true,
+    "prod_enabled": false,
+    "incremental_cost_eur": 0
+  },
+  "physical_capacity": {
+    "distributed_4": {
+      "run_id": 39986972372,
+      "status": "GREEN",
+      "successful": 4,
+      "concurrency": 4
+    },
+    "single_host_8": {
+      "run_id": 39987189978,
+      "status": "GREEN",
+      "successful": 8,
+      "concurrency": 8,
+      "duration_ms": 15235,
+      "container_memory_peak_bytes": 1089679360
+    },
+    "single_host_16_lab": {
+      "run_id": 39987396238,
+      "status": "GREEN_LAB_CAPACITY_ONLY",
+      "successful": 16,
+      "concurrency": 16,
+      "duration_ms": 18018,
+      "container_memory_peak_bytes": 1696112640
+    },
+    "safe_operational_cap": 8,
+    "reason_for_not_setting_16_operational": "Hard cgroup memory limit was not exposed by the hosted runner; 16 is proven capacity but is intentionally not the operating cap."
+  },
+  "credential_broker_v2": {
+    "binding_source": "V1_ALIAS_AND_SUPABASE_VAULT",
+    "new_secret_store_created": false,
+    "final_physical_run_id": 39990778979,
+    "status": "GREEN",
+    "credential_materialized": true,
+    "secret_material_logged": false,
+    "inactive_lease_denied": true,
+    "secret_returned_on_inactive_lease": false,
+    "audit_rows_observed": 2,
+    "all_audit_rows_secret_material_logged_false": true,
+    "checks": [
+      "ACTIVE_JOB_LEASE",
+      "ACTIVE_EXCLUSIVE_PROFILE_LEASE",
+      "COMPANY",
+      "IDENTITY",
+      "ACCOUNT",
+      "ENVIRONMENT",
+      "ORIGIN",
+      "CAPABILITY",
+      "BINDING_ACTIVE_NOT_REVOKED"
+    ]
+  },
+  "rollback": {
+    "physical_preprod_tested": true,
+    "disabled_probe_ok": true,
+    "disabled_probe_job": null,
+    "disabled_probe_backpressure": "ORCHESTRATOR_DISABLED",
+    "restored_enabled": true,
+    "restored_global_max_concurrent": 8,
+    "restored_company_max_concurrent": 4,
+    "restored_department_max_concurrent": 2,
+    "active_jobs_before_test": 0,
+    "active_profile_leases_after_test": 0
+  },
+  "old_vs_new": {
+    "old_v1_run_id": 39937419272,
+    "new_v2_run_id": 39990778979,
+    "v1_secret_logging": false,
+    "v2_secret_logging": false,
+    "v2_adds_profile_lease_validation": true,
+    "v2_adds_identity_account_validation": true,
+    "v2_adds_revocation_validation": true,
+    "v2_preserves_v1_binding_and_vault": true
+  },
+  "rebuild": {
+    "source_controlled": true,
+    "migrations": [
+      "supabase/migrations/20261023180000_cerebro_browser_orchestrator_v2.sql",
+      "supabase/migrations/20261023194500_cerebro_browser_credential_broker_v2.sql",
+      "supabase/migrations/20261023195500_cerebro_browser_credential_broker_v2_scope_fix.sql"
+    ],
+    "edge_source": "supabase/functions/cerebro-browser-dispatch-v2/index.ts",
+    "runtime_sources": [
+      "cerebro/runtime/browser-orchestrator-v2.mjs",
+      "cerebro/runtime/browser-job-runner-v2.mjs",
+      "cerebro/runtime/browser-pool-benchmark-v2.mjs"
+    ]
+  },
+  "backup": {
+    "prod_change_performed": false,
+    "phase1_source_snapshot_preserved_in_git": true,
+    "phase1_runtime_preserved": true,
+    "phase2_database_changes_additive_only": true,
+    "destructive_migration_used": false,
+    "prod_snapshot_required_before_future_prod_promotion": true
+  },
+  "branch_reconciliation": {
+    "main_sha_at_reconciliation": "0a0f4c13cbd635a3fd04d2245e3c24c40adbf708",
+    "sync_pr": 884,
+    "behind_main_after_sync": 0
+  },
+  "promotion": {
+    "prod_promoted": false,
+    "phase3_started": false,
+    "human_required": null
+  }
+}
