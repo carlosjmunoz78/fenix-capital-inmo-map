@@ -11,8 +11,10 @@ test('NAVEGADOR is additive and preserves V0 plus OPERATIVA',async()=>{
  expect(host).toContain('<CerebroConsoleShell/>');
  expect(host).toContain('<CerebroOperativeConsole onViewChange={setView}/>');
  expect(host).toContain('<CerebroBrowserConsole onViewChange={setView}/>');
- expect(host).toContain('OperativeBrowserTab');
- expect(host).toContain('NAVEGADOR');
+ expect(host).toContain('cerebro-browser-entry-button');
+ expect(host).toContain("onClick={()=>setView('NAVEGADOR')}");
+ expect(host).not.toContain('createPortal');
+ expect(host).not.toContain('OperativeBrowserTab');
 });
 
 test('browser surface has no application left sidebar and makes viewport dominant',async()=>{
@@ -24,6 +26,15 @@ test('browser surface has no application left sidebar and makes viewport dominan
  expect(source).not.toContain('left-menu');
  expect(css).toContain('grid-template-rows:72px 66px minmax(0,1fr) 78px');
  expect(css).toContain('.cerebro-browser-frame{min-height:0');
+});
+
+test('technical interface renders a direct visible Navegador access without DOM injection',async()=>{
+ const host=read('src/CerebroConsoleHost.tsx');
+ const css=read('src/cerebro-console-host.css');
+ expect(host).toContain('aria-label="Abrir interfaz Navegador"');
+ expect(host).toContain('>NAVEGADOR</button>');
+ expect(css).toContain('.cerebro-browser-entry-button{position:fixed');
+ expect(css).toContain('z-index:90');
 });
 
 test('takeover controls are truthful and fail closed until Phase 3 transport exists',async()=>{
