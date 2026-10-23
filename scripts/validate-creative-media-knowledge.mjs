@@ -10,11 +10,12 @@ assert(registry.registry_id === 'CEREBRO-CREATIVE-MEDIA-KNOWLEDGE-REGISTRY-V1', 
 assert(registry.status === 'ACTIVE_SHARED_KNOWLEDGE_REGISTRY', 'Registry is not active');
 assert(registry.scope === 'CEREBRO_OS_ALL_DEPARTMENTS', 'Unexpected registry scope');
 assert(/^[0-9a-f]{40}$/.test(registry.source_commit_sha || ''), 'source_commit_sha must be a 40-char SHA');
-assert(Array.isArray(registry.authoritative_contracts) && registry.authoritative_contracts.length === 5, 'Expected exactly 5 authoritative creative knowledge contracts');
+assert(Array.isArray(registry.authoritative_contracts) && registry.authoritative_contracts.length === 6, 'Expected exactly 6 authoritative creative knowledge contracts');
 assert(new Set(registry.authoritative_contracts).size === registry.authoritative_contracts.length, 'Duplicate authoritative contracts');
 for (const path of [
   'config/creative-media-knowledge-master-v1.json',
   'knowledge/canva-creative-knowledge-seed-2026-10-23.json',
+  'knowledge/canva-ai-capabilities-2026-10-23.json',
   'knowledge/canva-license-hardening-2026-10-23.json',
   'knowledge/creative-platform-production-specs-2026-10-23.json',
   'knowledge/creative-accessibility-licensing-seed-2026-10-23.json'
@@ -34,6 +35,8 @@ assert(registry.governance?.no_new_paid_subscription_by_default === true, 'Zero-
 
 for (const behavior of [
   'LOAD_CREATIVE_MEDIA_MASTER_BEFORE_HIGH_VALUE_CREATIVE_EXECUTION',
+  'LOAD_CANVA_AI_CAPABILITIES_BEFORE_CANVA_AI_EXECUTION',
+  'CHECK_CANVA_AI_PLAN_ENTITLEMENT_AND_ALLOWANCE_BEFORE_BATCH_USE',
   'LOAD_CANVA_LICENSE_HARDENING_FOR_CANVA_LIBRARY_ASSETS',
   'USE_CANVA_AS_CREATIVE_WORKSPACE_WHEN_USEFUL_NOT_AS_DEFAULT_VOICE_PROVIDER',
   'PREFER_CEREBRO_OWN_OR_BEST_ALLOWED_ZERO_COST_EXPRESSIVE_VOICE',
@@ -53,6 +56,7 @@ console.log(JSON.stringify({
   source_validation_run_id: validation.workflow_run_id,
   source_validation_conclusion: validation.conclusion,
   authoritative_contracts_registered: registry.authoritative_contracts.length,
+  canva_ai_capabilities_registered: true,
   cross_repo_secret_required: false,
   note: 'Core registry/pin integrity passed. Detailed private source content is validated by the source-repository CI recorded in source_validation. Runtime consumption remains a separate per-engine E2E certification gate.'
 }, null, 2));
