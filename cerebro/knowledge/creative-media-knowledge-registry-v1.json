@@ -57,5 +57,12 @@
     "no_make_or_buffer_removal_without_parallel_parity_and_rollback": true,
     "knowledge_snapshot_pin_required": true
   },
+  "integrity_validation": {
+    "validator": "scripts/validate-creative-media-knowledge.mjs",
+    "workflow": ".github/workflows/cerebro-creative-knowledge-integrity.yml",
+    "last_audit_requested_at": "2026-10-23",
+    "validation_scope": "STATIC_PINNED_KNOWLEDGE_INTEGRITY",
+    "runtime_consumption_certification_separate": true
+  },
   "runtime_truth": "Knowledge contracts are registered, source-pinned and available for CEREBRO-wide reuse. Automatic loading and physical execution must still be proven per consuming engine or platform binding before that consumer is called operationally certified."
 }
