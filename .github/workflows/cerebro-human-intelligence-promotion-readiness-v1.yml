@@ -9,7 +9,7 @@ on:
       - 'cerebro/multicompany/digital-footprint-scanner-v1.mjs'
       - 'cerebro/multicompany/post-scan-parallel-v1.mjs'
       - 'cerebro/multicompany/rollback/scan001-preprod-persistence-v1.rollback.sql'
-      - 'cerebro/multicompany/rollback/post-scan-parallel-preprod-v1.rollback.sql'
+      - 'cerebro/multicompany/rollback/post-scan-parallel-preprod-persistence-v1.rollback.sql'
       - 'cerebro/tests/human-intelligence-*.test.mjs'
       - 'cerebro/tests/multichannel-conversation-policy-v1.test.mjs'
       - 'cerebro/tests/multichannel-conversation-old-vs-new-v1.test.mjs'
@@ -19,25 +19,35 @@ on:
       - 'cerebro/tests/scan001-preprod-persistence-v1.test.mjs'
       - 'cerebro/tests/post-scan-parallel-v1.test.mjs'
       - 'cerebro/tests/post-scan-parallel-preprod-persistence-v1.test.mjs'
+      - 'src/CerebroBrowserConsole.tsx'
+      - 'src/cerebroBrowserInteractive.ts'
+      - 'src/cerebro-browser-console.css'
+      - 'tests/cerebro-browser-console-v0-contract.spec.ts'
+      - 'tests/cerebro-browser-phase3-1-contract.spec.ts'
       - 'supabase/functions/cerebro-human-old-actor-preprod-v0/**'
       - 'supabase/functions/cerebro-human-new-actor-preprod-v1/**'
       - 'supabase/functions/cerebro-human-route-control-preprod-v1/**'
       - 'supabase/functions/cerebro-console-gateway-human-v1-canary/**'
       - 'supabase/functions/cerebro-console-human-router-zero-v1/**'
+      - 'supabase/functions/cerebro-console-browser-gateway-v1/**'
       - 'supabase/functions/_shared/cerebro-conversation-policy-v1.ts'
       - 'supabase/functions/_shared/cerebro-channel-access-policy-v1.ts'
       - 'supabase/functions/cerebro-telegram-gateway-v0/**'
       - 'supabase/functions/cerebro-telegram-voice-v1/**'
+      - 'supabase/functions/cerebro-browser-interactive-v3/**'
       - 'supabase/migrations/20261012132000_cerebro_human_route_control_preprod_v1.sql'
       - 'supabase/migrations/20261013010500_cerebro_multichannel_ana_overlay_v1.sql'
       - 'supabase/migrations/20261013042000_cerebro_channel_access_profiles_v1.sql'
       - 'supabase/migrations/20261013093000_cerebro_scan001_preprod_persistence_v1.sql'
       - 'supabase/migrations/20261013101500_cerebro_post_scan_parallel_preprod_v1.sql'
+      - 'supabase/migrations/20261024230000_cerebro_browser_phase3_interactive_v0.sql'
+      - 'supabase/migrations/rollback/20261024230000_cerebro_browser_phase3_interactive_v0.rollback.sql'
       - '.github/workflows/cerebro-company-reg-tenant-preprod-v0.yml'
       - '.github/workflows/cerebro-post-scan-parallel-preprod-v1.yml'
       - '.github/workflows/cerebro-human-intelligence-*.yml'
       - '.github/workflows/cerebro-multichannel-conversation-unification-v1.yml'
       - '.github/workflows/cerebro-rsi-promotion-readiness-shadow-v0.yml'
+      - '.github/workflows/cerebro-browser-job-runner-v2-live.yml'
   workflow_dispatch:
 
 permissions:
@@ -72,16 +82,16 @@ jobs:
           test "$(git rev-parse HEAD)" = "$EXACT_HEAD"
           if [ -n "${PR_BASE_SHA:-}" ]; then git fetch origin "$PR_BASE_SHA" --depth=1; base="$PR_BASE_SHA"; else git fetch origin main --depth=1; base="$(git rev-parse FETCH_HEAD)"; fi
           changed="$(git diff --name-only "$base" HEAD)"
-          allowed='^(cerebro/human-intelligence/|cerebro/multichannel/|cerebro/multicompany/(digital-footprint-scanner-v1|post-scan-parallel-v1)\.mjs$|cerebro/multicompany/rollback/(company-registry-preprod-persistence-v1|company-onboarding-preprod-persistence-v1|scan001-preprod-persistence-v1|post-scan-parallel-preprod-v1)\.rollback\.sql$|cerebro/tests/human-intelligence-[^/]+\.test\.mjs$|cerebro/tests/multichannel-conversation-(policy|old-vs-new)-v1\.test\.mjs$|cerebro/tests/channel-access-profiles-v1\.test\.mjs$|cerebro/tests/continuous-human-qa-v0\.test\.mjs$|cerebro/tests/company-registry-preprod-persistence-v1\.test\.mjs$|cerebro/tests/company-onboarding-preprod-persistence-v1\.test\.mjs$|cerebro/tests/scan001-(digital-footprint|preprod-persistence)-v1\.test\.mjs$|cerebro/tests/post-scan-parallel(-preprod-persistence)?-v1\.test\.mjs$|supabase/functions/cerebro-human-old-actor-preprod-v0/|supabase/functions/cerebro-human-new-actor-preprod-v1/|supabase/functions/cerebro-human-route-control-preprod-v1/|supabase/functions/cerebro-console-gateway-human-v1-canary/|supabase/functions/cerebro-console-human-router-zero-v1/|supabase/functions/_shared/cerebro-(conversation|channel-access)-policy-v1\.ts$|supabase/functions/cerebro-telegram-gateway-v0/|supabase/functions/cerebro-telegram-voice-v1/|supabase/migrations/(20261012132000_cerebro_human_route_control_preprod_v1|20261013010500_cerebro_multichannel_ana_overlay_v1|20261013042000_cerebro_channel_access_profiles_v1|20261013075000_cerebro_company_registry_preprod_persistence_v1|20261013083000_cerebro_company_onboarding_preprod_persistence_v1|20261013093000_cerebro_scan001_preprod_persistence_v1|20261013101500_cerebro_post_scan_parallel_preprod_v1)\.sql$|\.github/workflows/cerebro-company-reg-tenant-preprod-v0\.yml$|\.github/workflows/cerebro-post-scan-parallel-preprod-v1\.yml$|\.github/workflows/cerebro-human-intelligence-[^/]+\.yml$|\.github/workflows/cerebro-multichannel-conversation-unification-v1\.yml$|\.github/workflows/cerebro-rsi-promotion-readiness-shadow-v0\.yml$|cerebro/runtime/browser-interactive-session-v3\.mjs$|cerebro/runtime/browser-job-runner-v2\.mjs$|src/CerebroBrowserConsole\.tsx$|src/cerebroBrowserInteractive\.ts$|supabase/functions/cerebro-browser-interactive-v3/|supabase/migrations/20261024230000_cerebro_browser_phase3_interactive_v0\.sql$|supabase/migrations/rollback/20261024230000_cerebro_browser_phase3_interactive_v0\.rollback\.sql$|\.github/workflows/cerebro-browser-job-runner-v2-live\.yml$)'
+          allowed='^(cerebro/human-intelligence/|cerebro/multichannel/|cerebro/multicompany/(digital-footprint-scanner-v1|post-scan-parallel-v1)\.mjs$|cerebro/multicompany/rollback/(company-registry-preprod-persistence-v1|company-onboarding-preprod-persistence-v1|scan001-preprod-persistence-v1|post-scan-parallel-preprod-persistence-v1)\.rollback\.sql$|cerebro/tests/human-intelligence-[^/]+\.test\.mjs$|cerebro/tests/multichannel-conversation-(policy|old-vs-new)-v1\.test\.mjs$|cerebro/tests/channel-access-profiles-v1\.test\.mjs$|cerebro/tests/continuous-human-qa-v0\.test\.mjs$|cerebro/tests/company-registry-preprod-persistence-v1\.test\.mjs$|cerebro/tests/company-onboarding-preprod-persistence-v1\.test\.mjs$|cerebro/tests/scan001-(digital-footprint|preprod-persistence)-v1\.test\.mjs$|cerebro/tests/post-scan-parallel(-preprod-persistence)?-v1\.test\.mjs$|src/CerebroBrowserConsole\.tsx$|src/cerebroBrowserInteractive\.ts$|src/cerebro-browser-console\.css$|tests/cerebro-browser-console-v0-contract\.spec\.ts$|tests/cerebro-browser-phase3-1-contract\.spec\.ts$|supabase/functions/cerebro-human-old-actor-preprod-v0/|supabase/functions/cerebro-human-new-actor-preprod-v1/|supabase/functions/cerebro-human-route-control-preprod-v1/|supabase/functions/cerebro-console-gateway-human-v1-canary/|supabase/functions/cerebro-console-human-router-zero-v1/|supabase/functions/cerebro-console-browser-gateway-v1/|supabase/functions/_shared/cerebro-(conversation|channel-access)-policy-v1\.ts$|supabase/functions/cerebro-telegram-gateway-v0/|supabase/functions/cerebro-telegram-voice-v1/|supabase/functions/cerebro-browser-interactive-v3/|supabase/migrations/(20261012132000_cerebro_human_route_control_preprod_v1|20261013010500_cerebro_multichannel_ana_overlay_v1|20261013042000_cerebro_channel_access_profiles_v1|20261013075000_cerebro_company_registry_preprod_persistence_v1|20261013083000_cerebro_company_onboarding_preprod_persistence_v1|20261013093000_cerebro_scan001_preprod_persistence_v1|20261013101500_cerebro_post_scan_parallel_preprod_v1|20261024230000_cerebro_browser_phase3_interactive_v0)\.sql$|supabase/migrations/rollback/20261024230000_cerebro_browser_phase3_interactive_v0\.rollback\.sql$|\.github/workflows/cerebro-company-reg-tenant-preprod-v0\.yml$|\.github/workflows/cerebro-post-scan-parallel-preprod-v1\.yml$|\.github/workflows/cerebro-human-intelligence-[^/]+\.yml$|\.github/workflows/cerebro-multichannel-conversation-unification-v1\.yml$|\.github/workflows/cerebro-rsi-promotion-readiness-shadow-v0\.yml$|cerebro/runtime/browser-interactive-session-v3\.mjs$|cerebro/runtime/browser-job-runner-v2\.mjs$|\.github/workflows/cerebro-browser-job-runner-v2-live\.yml$)'
           bad="$(printf '%s\n' "$changed" | grep -Ev "$allowed" || true)"
           if [ -n "$bad" ]; then echo 'Human Intelligence PR crossed its governed surface:' >&2; printf '%s\n' "$bad" >&2; exit 1; fi
-          phase3='^(cerebro/runtime/browser-interactive-session-v3\.mjs|cerebro/runtime/browser-job-runner-v2\.mjs|src/CerebroBrowserConsole\.tsx|src/cerebroBrowserInteractive\.ts|supabase/functions/cerebro-browser-interactive-v3/index\.ts|supabase/migrations/20261024230000_cerebro_browser_phase3_interactive_v0\.sql|supabase/migrations/rollback/20261024230000_cerebro_browser_phase3_interactive_v0\.rollback\.sql|\.github/workflows/cerebro-browser-job-runner-v2-live\.yml)$'
+          phase3='^(cerebro/runtime/browser-interactive-session-v3\.mjs|cerebro/runtime/browser-job-runner-v2\.mjs|src/CerebroBrowserConsole\.tsx|src/cerebroBrowserInteractive\.ts|src/cerebro-browser-console\.css|tests/cerebro-browser-console-v0-contract\.spec\.ts|tests/cerebro-browser-phase3-1-contract\.spec\.ts|supabase/functions/cerebro-console-browser-gateway-v1/index\.ts|supabase/functions/cerebro-browser-interactive-v3/index\.ts|supabase/migrations/20261024230000_cerebro_browser_phase3_interactive_v0\.sql|supabase/migrations/rollback/20261024230000_cerebro_browser_phase3_interactive_v0\.rollback\.sql|\.github/workflows/cerebro-browser-job-runner-v2-live\.yml)$'
           phase3_changed="$(printf '%s\n' "$changed" | grep -E "$phase3" || true)"
           if [ -n "$phase3_changed" ]; then
-            printf '%s\n' "$changed" | grep -Fx '.github/workflows/cerebro-rsi-promotion-readiness-shadow-v0.yml' >/dev/null || { echo 'Browser Phase 3 coexistence requires its RSI tribunal update.' >&2; exit 1; }
-            for f in cerebro/runtime/browser-interactive-session-v3.mjs cerebro/runtime/browser-job-runner-v2.mjs src/CerebroBrowserConsole.tsx src/cerebroBrowserInteractive.ts supabase/functions/cerebro-browser-interactive-v3/index.ts supabase/migrations/20261024230000_cerebro_browser_phase3_interactive_v0.sql supabase/migrations/rollback/20261024230000_cerebro_browser_phase3_interactive_v0.rollback.sql; do test -f "$f"; done
+            printf '%s\n' "$changed" | grep -Fx '.github/workflows/cerebro-rsi-promotion-readiness-shadow-v0.yml' >/dev/null || { echo 'Browser Phase 3.1 coexistence requires its RSI tribunal update.' >&2; exit 1; }
+            for f in cerebro/runtime/browser-interactive-session-v3.mjs cerebro/runtime/browser-job-runner-v2.mjs src/CerebroBrowserConsole.tsx src/cerebroBrowserInteractive.ts src/cerebro-browser-console.css tests/cerebro-browser-console-v0-contract.spec.ts tests/cerebro-browser-phase3-1-contract.spec.ts supabase/functions/cerebro-console-browser-gateway-v1/index.ts supabase/functions/cerebro-browser-interactive-v3/index.ts supabase/migrations/20261024230000_cerebro_browser_phase3_interactive_v0.sql supabase/migrations/rollback/20261024230000_cerebro_browser_phase3_interactive_v0.rollback.sql; do test -f "$f"; done
           fi
-          protected="$(printf '%s\n' "$changed" | grep -E '^(src/|tests/|public/|scripts/|supabase/migrations/|\.github/workflows/(preprod-build|app-restoration-build|prod-[^/]+)\.yml$)' | grep -Ev '^(src/(CerebroBrowserConsole\.tsx|cerebroBrowserInteractive\.ts)|supabase/migrations/(20261012132000_cerebro_human_route_control_preprod_v1|20261013010500_cerebro_multichannel_ana_overlay_v1|20261013042000_cerebro_channel_access_profiles_v1|20261013075000_cerebro_company_registry_preprod_persistence_v1|20261013083000_cerebro_company_onboarding_preprod_persistence_v1|20261013093000_cerebro_scan001_preprod_persistence_v1|20261013101500_cerebro_post_scan_parallel_preprod_v1|20261024230000_cerebro_browser_phase3_interactive_v0)\.sql|supabase/migrations/rollback/20261024230000_cerebro_browser_phase3_interactive_v0\.rollback\.sql)$' || true)"
+          protected="$(printf '%s\n' "$changed" | grep -E '^(src/|tests/|public/|scripts/|supabase/migrations/|\.github/workflows/(preprod-build|app-restoration-build|prod-[^/]+)\.yml$)' | grep -Ev '^(src/(CerebroBrowserConsole\.tsx|cerebroBrowserInteractive\.ts|cerebro-browser-console\.css)|tests/(cerebro-browser-console-v0-contract|cerebro-browser-phase3-1-contract)\.spec\.ts|supabase/migrations/(20261012132000_cerebro_human_route_control_preprod_v1|20261013010500_cerebro_multichannel_ana_overlay_v1|20261013042000_cerebro_channel_access_profiles_v1|20261013075000_cerebro_company_registry_preprod_persistence_v1|20261013083000_cerebro_company_onboarding_preprod_persistence_v1|20261013093000_cerebro_scan001_preprod_persistence_v1|20261013101500_cerebro_post_scan_parallel_preprod_v1|20261024230000_cerebro_browser_phase3_interactive_v0)\.sql|supabase/migrations/rollback/20261024230000_cerebro_browser_phase3_interactive_v0\.rollback\.sql)$' || true)"
           if [ -n "$protected" ]; then echo 'Protected App/PROD surface changed.' >&2; printf '%s\n' "$protected" >&2; exit 1; fi
       - name: Install dependencies reproducibly
         run: npm ci
@@ -153,4 +163,3 @@ jobs:
       - name: Mark strict boundary
         run: |
           echo 'Human Intelligence readiness reuses existing LRN-001 and Continuous Human QA; multichannel surfaces only wrap passive conversation, require OLD-vs-NEW non-regression evidence, and preserve each channel authority.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'Exact PREPROD Company Registry, COMP-ONB, SCAN-001 and post-SCAN persistence are service-role only, tenant fail-closed/read-only and grant no PROD writes, secrets disclosure or Trading access.' >> "$GITHUB_STEP_SUMMARY"
