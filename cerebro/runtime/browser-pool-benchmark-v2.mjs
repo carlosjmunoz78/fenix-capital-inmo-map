@@ -1,8 +1,30 @@
+import fs from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 import { runOneBrowserJobV2 } from './browser-job-runner-v2.mjs';
 
 const DEFAULT_AUDIENCE='cerebro-browser-worker-v1';
 const ALLOWED_STAGES=new Set([2,4,8,16]);
+const CGROUP_MEMORY_CURRENT='/sys/fs/cgroup/memory.current';
+const CGROUP_MEMORY_PEAK='/sys/fs/cgroup/memory.peak';
+const CGROUP_MEMORY_MAX='/sys/fs/cgroup/memory.max';
+
+async function readCgroupNumber(path){
+  try{
+    const raw=(await fs.readFile(path,'utf8')).trim();
+    if(!raw||raw==='max')return null;
+    const value=Number(raw);
+    return Number.isFinite(value)&&value>=0?value:null;
+  }catch{return null;}
+}
+
+async function cgroupSnapshot(){
+  const [current,peak,max]=await Promise.all([
+    readCgroupNumber(CGROUP_MEMORY_CURRENT),
+    readCgroupNumber(CGROUP_MEMORY_PEAK),
+    readCgroupNumber(CGROUP_MEMORY_MAX)
+  ]);
+  return Object.freeze({current_bytes:current,peak_bytes:peak,max_bytes:max});
+}
 
 async function oidcToken({audience=process.env.CEREBRO_BROWSER_OIDC_AUDIENCE||DEFAULT_AUDIENCE,fetch_impl=fetch}={}){
   const requestUrl=process.env.ACTIONS_ID_TOKEN_REQUEST_URL;
@@ -33,9 +55,22 @@ export async function runBrowserPoolBenchmarkV2({
   const token=await oidcToken({fetch_impl});
   const start=Date.now();
   const memStart=process.memoryUsage();
+  const cgroupStart=await cgroupSnapshot();
   let peakRss=memStart.rss;
   let peakHeap=memStart.heapUsed;
-  const sampler=setInterval(()=>{const m=process.memoryUsage();peakRss=Math.max(peakRss,m.rss);peakHeap=Math.max(peakHeap,m.heapUsed);},100);
+  let observedContainerPeak=cgroupStart.current_bytes||0;
+  let sampling=false;
+  const sampler=setInterval(async()=>{
+    if(sampling)return;
+    sampling=true;
+    try{
+      const m=process.memoryUsage();
+      peakRss=Math.max(peakRss,m.rss);
+      peakHeap=Math.max(peakHeap,m.heapUsed);
+      const current=await readCgroupNumber(CGROUP_MEMORY_CURRENT);
+      if(current!==null)observedContainerPeak=Math.max(observedContainerPeak,current);
+    }finally{sampling=false;}
+  },100);
   sampler.unref?.();
   try{
     const seeded=[];
@@ -51,17 +86,28 @@ export async function runBrowserPoolBenchmarkV2({
       token,
       run_id
     })));
+    while(sampling)await new Promise(resolve=>setTimeout(resolve,10));
     const fulfilled=executions.filter(x=>x.status==='fulfilled').map(x=>x.value);
     const rejected=executions.filter(x=>x.status==='rejected').map(x=>String(x.reason?.message||x.reason));
     const successful=fulfilled.filter(x=>x.ok===true&&x.status==='SUCCEEDED').length;
     const noJob=fulfilled.filter(x=>x.status==='NO_JOB').length;
     const memEnd=process.memoryUsage();
+    const cgroupEnd=await cgroupSnapshot();
+    const containerPeak=Math.max(observedContainerPeak,cgroupEnd.peak_bytes||0,cgroupEnd.current_bytes||0);
+    const memoryLimit=cgroupEnd.max_bytes??cgroupStart.max_bytes;
+    const peakUtilization=memoryLimit&&containerPeak?Number((containerPeak/memoryLimit).toFixed(4)):null;
     const summary={
       ok:successful===stage_concurrency&&rejected.length===0,
       run_id,stage_concurrency,seeded:seeded.length,successful,no_job:noJob,rejected,
       duration_ms:Date.now()-start,
       rss_start_bytes:memStart.rss,rss_end_bytes:memEnd.rss,peak_rss_bytes:peakRss,
       heap_start_bytes:memStart.heapUsed,heap_end_bytes:memEnd.heapUsed,peak_heap_bytes:peakHeap,
+      container_memory_start_bytes:cgroupStart.current_bytes,
+      container_memory_end_bytes:cgroupEnd.current_bytes,
+      container_memory_peak_bytes:containerPeak||null,
+      container_memory_limit_bytes:memoryLimit,
+      container_memory_peak_utilization:peakUtilization,
+      container_memory_source:'CGROUP_V2',
       incremental_cost_eur:0,secret_material_logged:false,serial_v1_rollback_preserved:true
     };
     console.log(JSON.stringify(summary));
