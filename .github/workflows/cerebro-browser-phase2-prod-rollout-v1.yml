@@ -10,6 +10,10 @@ permissions:
   contents: read
   id-token: write
 
+concurrency:
+  group: cerebro-browser-phase2-prod-rollout-v1
+  cancel-in-progress: false
+
 env:
   CEREBRO_BROWSER_DISPATCH_URL: https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-browser-dispatch-v2
   CEREBRO_BROWSER_OIDC_AUDIENCE: cerebro-browser-worker-v1
