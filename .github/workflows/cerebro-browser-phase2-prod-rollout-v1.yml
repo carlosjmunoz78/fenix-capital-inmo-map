@@ -1,0 +1,44 @@
+name: CEREBRO Browser 1 Phase 2 PROD Rollout V1
+
+on:
+  push:
+    branches:
+      - 'cerebro/browser1-phase2-prod-canary-v1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  CEREBRO_BROWSER_DISPATCH_URL: https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-browser-dispatch-v2
+  CEREBRO_BROWSER_OIDC_AUDIENCE: cerebro-browser-worker-v1
+  CEREBRO_PHYSICAL_BROWSER_E2E: '1'
+
+jobs:
+  rollout:
+    name: Staged PROD canary 1-2-4-8
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+      options: --ipc=host
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Re-run Phase 2 runtime contracts before PROD
+        run: node --test cerebro/tests/browser-orchestrator-v2.test.mjs cerebro/tests/browser-job-runner-v2.test.mjs
+      - name: Execute governed staged rollout
+        run: node cerebro/runtime/browser-prod-rollout-v2.mjs
+      - name: Upload PROD canary evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-phase2-prod-rollout-v1
+          path: .cerebro/browser-artifacts/**
+          if-no-files-found: ignore
+          retention-days: 14
