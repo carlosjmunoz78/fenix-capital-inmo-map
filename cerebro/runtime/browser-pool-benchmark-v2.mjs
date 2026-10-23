@@ -44,10 +44,16 @@ async function dispatch(endpoint,route,token,body,fetch_impl=fetch){
   return data;
 }
 
+function benchmarkRunId(){
+  return process.env.GITHUB_RUN_ID
+    ? `${process.env.GITHUB_RUN_ID}-a${process.env.GITHUB_RUN_ATTEMPT||'1'}`
+    : `local-${Date.now()}`;
+}
+
 export async function runBrowserPoolBenchmarkV2({
   endpoint=process.env.CEREBRO_BROWSER_DISPATCH_URL,
   stage_concurrency=Number(process.env.CEREBRO_BROWSER_STAGE_CONCURRENCY||4),
-  run_id=process.env.GITHUB_RUN_ID||`local-${Date.now()}`,
+  run_id=benchmarkRunId(),
   fetch_impl=fetch
 }={}){
   if(!endpoint)throw new Error('CEREBRO_BROWSER_DISPATCH_URL_REQUIRED');
