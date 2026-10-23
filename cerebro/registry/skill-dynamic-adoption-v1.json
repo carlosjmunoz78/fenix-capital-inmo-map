@@ -4236,6 +4236,76 @@
       "promoted_at": "2026-10-22T15:23:06.998Z"
     },
     {
+      "candidate_id": "repo:1d35c97076a190e9debc2fa49de3",
+      "technical_name": "figma-to-code",
+      "source_locator": "github://TerminalSkills/skills@20719c32fa1cc0bf4598bd3d2c75c058f8c19ddd/skills/figma-to-code",
+      "pinned_sha": "20719c32fa1cc0bf4598bd3d2c75c058f8c19ddd",
+      "snapshot_sha256": "1d35c97076a190e9debc2fa49de31fc046f9e62e97ce54e95d4ccfc6700a249b",
+      "manifest_sha256": "6929e9b2aa4741d14dbe4c33361d3ebac183e4d3a05adfe2be2bb70d2f832ebe",
+      "outcome_hash": "892bf5e8b31305b2d8fdb4898ca26d07fc2963a0c4c9e67425802668983cf569",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:1d35c97076a190e9:cap:1",
+          "technical_name": "figma-to-code",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-23T19:31:13.795Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "bd2ae83d5ea42e7300faaac5de5207567718db31e7d5e658eb9b733e045bbc03"
+    },
+    {
       "candidate_id": "repo:92207779a87a5dd5282b5b69b099",
       "technical_name": "figma-to-code",
       "source_locator": "github://TerminalSkills/skills@6edcf94159d9f46b0759d2e1b59dd545cfaca254/skills/figma-to-code",
@@ -11008,11 +11078,11 @@
   ],
   "adoption_skips": [],
   "summary": {
-    "total": 109,
-    "inserted": 0,
+    "total": 110,
+    "inserted": 1,
     "updated": 0,
     "skipped": 0,
-    "pending_canary": 0,
+    "pending_canary": 1,
     "prod_readonly": 109
   }
 }
