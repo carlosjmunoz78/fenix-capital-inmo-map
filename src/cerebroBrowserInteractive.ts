@@ -8,13 +8,15 @@ export type BrowserSessionV3={
  human_lease_id:string|null;human_lease_expires_at:string|null;human_required:unknown;last_heartbeat_at:string|null;opened_at:string;expires_at:string;closed_at:string|null;updated_at:string;
 };
 
+export type BrowserCompanyV3={company_id:string;environment:string;version:string;state:string;tenant_boundary:string;prod_authorized:boolean;prod_write_authorized:boolean;trading_access:boolean;additional_cost_eur:number|string};
 type ApiResult<T>=Promise<{status:number;data:T|null}>;
+const BROWSER_GATEWAY='cerebro-browser-gateway-v1';
 
 export async function fetchBrowserInteractiveApi<T>(path:string,body:unknown={}):ApiResult<T>{
  const {data:{session}}=await supabase.auth.getSession();
  const token=session?.access_token;if(!token)return{status:401,data:null};
  try{
-  const response=await fetch(`${SUPABASE_URL}/functions/v1/cerebro-browser-interactive-v3${path}`,{
+  const response=await fetch(`${SUPABASE_URL}/functions/v1/${BROWSER_GATEWAY}${path}`,{
    method:'POST',headers:{'content-type':'application/json',Authorization:`Bearer ${token}`,apikey:SUPABASE_PUBLISHABLE_KEY},body:JSON.stringify(body)
   });
   const data=await response.json().catch(()=>null) as T|null;
@@ -28,12 +30,10 @@ function b64FromBytes(bytes:Uint8Array){let raw='';const chunk=0x8000;for(let i=
 export async function importBrowserSessionKey(keyB64:string){
  return crypto.subtle.importKey('raw',bytesFromB64(keyB64),{name:'AES-GCM'},false,['encrypt','decrypt']);
 }
-
 export async function decryptBrowserFrame(key:CryptoKey,ciphertextB64:string,ivB64:string,mime='image/png'){
  const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:bytesFromB64(ivB64)},key,bytesFromB64(ciphertextB64));
  return URL.createObjectURL(new Blob([plain],{type:mime||'image/png'}));
 }
-
 export async function encryptBrowserInput(key:CryptoKey,payload:Record<string,unknown>){
  const iv=crypto.getRandomValues(new Uint8Array(12));
  const plain=new TextEncoder().encode(JSON.stringify(payload));
