@@ -1,0 +1,146 @@
+name: CEREBRO Browser Work Total V1 PREPROD
+
+on:
+  push:
+    branches: ['feat/browser-work-total-v1-20261024']
+    paths:
+      - '.github/workflows/cerebro-browser-work-total-v1-preprod.yml'
+      - 'cerebro/runtime/browser-interactive-session-v3.mjs'
+      - 'cerebro/runtime/browser-session-bundle-v1.mjs'
+      - 'cerebro/runtime/browser-session-bundle-v1.test.mjs'
+      - 'cerebro/runtime/browser-work-total-v1-contract.test.mjs'
+      - 'cerebro/runtime/browser-job-runner-v2.mjs'
+      - 'cerebro/runtime/browser1-access-v1.mjs'
+      - 'cerebro/runtime/cloud-browser-worker-v0.mjs'
+      - 'cerebro/runtime/cloud-browser-governed-session-v1.mjs'
+      - 'src/**'
+      - 'supabase/functions/cerebro-browser-work-total-v1-preprod/**'
+      - 'supabase/functions/cerebro-browser-work-total-dispatch-v1-preprod/**'
+      - 'supabase/functions/cerebro-browser-work-total-worker-v1-preprod/**'
+      - 'supabase/functions/cerebro-browser-work-total-owner-v1-preprod/**'
+      - 'supabase/migrations/20261024_browser_workspace_session_bundle_v1.sql'
+      - 'supabase/migrations/20261024_browser_workspace_hibernate_state_v0.sql'
+      - 'supabase/migrations/20261024223500_browser_workspace_v1_contracts.sql'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+  actions: write
+
+concurrency:
+  group: cerebro-browser-work-total-v1-preprod-consumer
+  cancel-in-progress: false
+
+env:
+  CEREBRO_BROWSER_DISPATCH_URL: https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-browser-work-total-dispatch-v1-preprod
+  CEREBRO_BROWSER_INTERACTIVE_URL: https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-browser-work-total-worker-v1-preprod
+  CEREBRO_BROWSER_WORKSPACE_URL: https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-browser-work-total-v1-preprod
+  CEREBRO_BROWSER_OIDC_AUDIENCE: cerebro-browser-worker-v1
+  CEREBRO_BROWSER_STAGE_CONCURRENCY: '1'
+  CEREBRO_BROWSER_WORKER_SLOT: '1'
+  CEREBRO_BROWSER_PHASE2_SEED_CANARY: 'false'
+  CEREBRO_BROWSER_INTERACTIVE_MAX_MS: '720000'
+  CEREBRO_BROWSER_INTERACTIVE_FRAME_MS: '320'
+  CEREBRO_BROWSER_INTERACTIVE_IDLE_FRAME_MS: '1200'
+  CEREBRO_BROWSER_INTERACTIVE_POLL_MS: '90'
+  CEREBRO_BROWSER_INTERACTIVE_ACTIVE_WINDOW_MS: '3000'
+
+jobs:
+  validate:
+    name: Validate Work Total contracts and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Test session bundle integrity
+        run: node --test cerebro/runtime/browser-session-bundle-v1.test.mjs
+      - name: Test Work Total contracts
+        run: node --test cerebro/runtime/browser-work-total-v1-contract.test.mjs
+      - name: Syntax-check interactive runtime
+        run: node --check cerebro/runtime/browser-interactive-session-v3.mjs
+      - name: Build App integration
+        run: npm run build
+
+  watch:
+    name: Watch PREPROD Work Total queue
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 48
+    outputs:
+      pending: ${{ steps.watch.outputs.pending }}
+    steps:
+      - id: watch
+        name: Wait for one governed Work Total job
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const endpoint=process.env.CEREBRO_BROWSER_DISPATCH_URL;
+          const audience=process.env.CEREBRO_BROWSER_OIDC_AUDIENCE;
+          const deadline=Date.now()+45*60_000;
+          let pending=0;
+          async function oidc(){
+            const u=new URL(process.env.ACTIONS_ID_TOKEN_REQUEST_URL);
+            u.searchParams.set('audience',audience);
+            const r=await fetch(u,{headers:{authorization:`Bearer ${process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN}`},redirect:'error'});
+            if(!r.ok)throw new Error(`OIDC_TOKEN_FAILED:${r.status}`);
+            const body=await r.json();
+            if(!body?.value)throw new Error('OIDC_TOKEN_MISSING');
+            return body.value;
+          }
+          while(Date.now()<deadline){
+            const token=await oidc();
+            const r=await fetch(`${endpoint}/status-v2`,{method:'POST',headers:{authorization:`Bearer ${token}`,'content-type':'application/json'},body:'{}',redirect:'error'});
+            const body=await r.json().catch(()=>null);
+            if(!r.ok||body?.ok!==true)throw new Error(`STATUS_FAILED:${r.status}:${body?.error||'UNKNOWN'}`);
+            const states=body.states||{};
+            pending=Number(states.QUEUED||0)+Number(states.RETRY_WAIT||0);
+            if(pending>0)break;
+            await new Promise(resolve=>setTimeout(resolve,5000));
+          }
+          fs.appendFileSync(process.env.GITHUB_OUTPUT,`pending=${pending}\n`);
+          console.log(JSON.stringify({pending,environment:'PREPROD',work_total_v1:true,secret_material_logged:false}));
+          NODE
+
+  work-total-worker:
+    name: Browser Work Total V1 governed worker
+    needs: watch
+    if: needs.watch.outputs.pending != '0'
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Execute at most one PREPROD Work Total job
+        run: node cerebro/runtime/browser-job-runner-v2.mjs
+
+  rearm:
+    name: Rearm PREPROD Work Total consumer
+    needs: [validate, watch, work-total-worker]
+    if: always() && needs.validate.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Dispatch next bounded Work Total cycle
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          node --input-type=module <<'NODE'
+          const url=`https://api.github.com/repos/${process.env.REPO}/actions/workflows/cerebro-browser-work-total-v1-preprod.yml/dispatches`;
+          const r=await fetch(url,{method:'POST',headers:{authorization:`Bearer ${process.env.GH_TOKEN}`,'accept':'application/vnd.github+json','x-github-api-version':'2022-11-28','content-type':'application/json'},body:JSON.stringify({ref:process.env.REF_NAME}),redirect:'error'});
+          if(r.status!==204)throw new Error(`WORKFLOW_REARM_FAILED:${r.status}`);
+          console.log(JSON.stringify({ok:true,rearmed:true,ref:process.env.REF_NAME,work_total_v1:true,static_secret_added:false}));
+          NODE
