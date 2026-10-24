@@ -215,7 +215,7 @@ async function addAudioAndCaptions({baseVideo,out,total,payload,timeline,temp}){
   args.push('-t',String(total),'-shortest','-movflags','+faststart','-y',srt?mixed:out);
   await execFileAsync('ffmpeg',args,{maxBuffer:10*1024*1024});
   if(srt){
-    await execFileAsync('ffmpeg',['-hide_banner','-loglevel','error','-i',mixed,'-vf',`subtitles=${srtPath}:force_style=FontName=DejaVu Sans,FontSize=18,PrimaryColour=&H00FFFFFF,OutlineColour=&H80000000,BorderStyle=3,Outline=1,Shadow=0,MarginV=48`,'-c:v','libx264','-preset','veryfast','-crf','26','-c:a','copy','-movflags','+faststart','-y',out],{maxBuffer:10*1024*1024});
+    await execFileAsync('ffmpeg',['-hide_banner','-loglevel','error','-i',mixed,'-vf',`subtitles=${srtPath}`,'-c:v','libx264','-preset','veryfast','-crf','26','-c:a','copy','-movflags','+faststart','-y',out],{maxBuffer:10*1024*1024});
   }
   return {voice:voiceRequested?{provider:'PIPER',model:'es_ES-sharvard-medium',voice_id:payload.audio.voice_id,runtime_license:'MIT',dataset_license:'CC-BY-3.0'}:null,music:musicRequested?{provider:'FFMPEG_PROCEDURAL',profile:payload.audio.music_profile,license:'GENERATED_ORIGINAL'}:null,captions:srt?'BURNED_SRT_TIMELINE':'NONE'};
 }
