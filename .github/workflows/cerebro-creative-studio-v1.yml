@@ -5,21 +5,34 @@ on:
     branches: [cerebro/creative-quality-v23-2026-10-24, main]
     paths:
       - 'cerebro/runtime/creative-studio-orchestrator-v1.mjs'
+      - 'cerebro/runtime/creative-studio-script-supervisor-v1.mjs'
       - 'cerebro/runtime/creative-studio-tribunal-v1.mjs'
+      - 'cerebro/runtime/creative-studio-campaign-v1.mjs'
       - 'cerebro/runtime/creative-social-audio-v4.mjs'
       - 'cerebro/runtime/creative-social-finisher-v4.mjs'
       - 'cerebro/runtime/creative-social-quality-v4.mjs'
       - 'cerebro/runtime/creative-job-runner-v2-live.mjs'
+      - 'cerebro/registry/creative-studio-expert-bindings-v1.json'
       - 'cerebro/tests/creative-studio-orchestrator-v1.test.mjs'
+      - 'cerebro/tests/creative-studio-campaign-v1.test.mjs'
       - 'cerebro/tests/creative-studio-showcase-v1.mjs'
+      - 'cerebro/tests/creative-studio-campaign-showcase-v1.mjs'
       - '.github/workflows/cerebro-creative-studio-v1.yml'
   pull_request:
     branches: [main]
     paths:
       - 'cerebro/runtime/creative-studio-orchestrator-v1.mjs'
+      - 'cerebro/runtime/creative-studio-script-supervisor-v1.mjs'
       - 'cerebro/runtime/creative-studio-tribunal-v1.mjs'
+      - 'cerebro/runtime/creative-studio-campaign-v1.mjs'
+      - 'cerebro/runtime/creative-social-audio-v4.mjs'
+      - 'cerebro/runtime/creative-social-finisher-v4.mjs'
+      - 'cerebro/runtime/creative-social-quality-v4.mjs'
+      - 'cerebro/registry/creative-studio-expert-bindings-v1.json'
       - 'cerebro/tests/creative-studio-orchestrator-v1.test.mjs'
+      - 'cerebro/tests/creative-studio-campaign-v1.test.mjs'
       - 'cerebro/tests/creative-studio-showcase-v1.mjs'
+      - 'cerebro/tests/creative-studio-campaign-showcase-v1.mjs'
       - '.github/workflows/cerebro-creative-studio-v1.yml'
   workflow_dispatch:
 
@@ -33,11 +46,12 @@ env:
   CEREBRO_PIPER_MODEL: /tmp/cerebro-piper/es_ES-sharvard-medium.onnx
   CEREBRO_PIPER_CONFIG: /tmp/cerebro-piper/es_ES-sharvard-medium.onnx.json
   CEREBRO_STUDIO_OUT: /tmp/cerebro-creative-studio-v1
+  CEREBRO_CAMPAIGN_OUT: /tmp/cerebro-creative-studio-campaign-v1
 
 jobs:
   studio-grade-production-gate:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -50,9 +64,13 @@ jobs:
         run: |
           set -euo pipefail
           node --check cerebro/runtime/creative-studio-orchestrator-v1.mjs
+          node --check cerebro/runtime/creative-studio-script-supervisor-v1.mjs
           node --check cerebro/runtime/creative-studio-tribunal-v1.mjs
+          node --check cerebro/runtime/creative-studio-campaign-v1.mjs
           node --check cerebro/tests/creative-studio-showcase-v1.mjs
-          node --test cerebro/tests/creative-studio-orchestrator-v1.test.mjs cerebro/tests/creative-social-v4.test.mjs
+          node --check cerebro/tests/creative-studio-campaign-showcase-v1.mjs
+          node --test cerebro/tests/creative-studio-orchestrator-v1.test.mjs cerebro/tests/creative-studio-campaign-v1.test.mjs cerebro/tests/creative-social-v4.test.mjs
+          node -e "const x=require('./cerebro/registry/creative-studio-expert-bindings-v1.json'); if(x.bindings.length!==14||x.publication_authority!==false||x.additional_cost_eur!==0) throw new Error('EXPERT_BINDINGS_INVALID'); console.log('EXPERT_BINDINGS_GREEN')"
       - name: Install Chromium and FFmpeg
         run: |
           npx playwright install --with-deps chromium
@@ -101,6 +119,7 @@ jobs:
             if(!x.social_qa?.passed||x.social_qa.score<88) throw new Error(`SOCIAL_QA:${x.label}`);
             if(x.candidate_scores?.length<3||x.rejected_candidates?.length<2) throw new Error(`MULTI_CANDIDATE:${x.label}`);
             if(x.expert_decisions?.length<14) throw new Error(`EXPERTS:${x.label}`);
+            if(!x.script_supervisor) throw new Error(`SCRIPT_SUPERVISOR:${x.label}`);
             const e=x.physical_evidence||{};
             if(e.continuous_narration!==true||e.scene_locked_narration===true) throw new Error(`TELEGRAM:${x.label}`);
             if(e.audio_coverage_ratio<.98) throw new Error(`AUDIO_COVERAGE:${x.label}`);
@@ -121,9 +140,52 @@ jobs:
           for f in story reel video-largo; do
             ffmpeg -hide_banner -loglevel error -i "$CEREBRO_STUDIO_OUT/$f.mp4" -vf 'fps=1/1.5,scale=420:-2,tile=6x5:padding=5:margin=5' -frames:v 1 -y "$CEREBRO_STUDIO_OUT/review-frames/$f-contact-sheet.jpg"
           done
-      - name: Upload studio-grade PREPROD package
+      - name: Physical six-format studio campaign
+        shell: bash
+        run: |
+          set -euo pipefail
+          node cerebro/tests/creative-studio-campaign-showcase-v1.mjs | tee /tmp/studio-campaign-result.json
+          grep -F '"ok":true' /tmp/studio-campaign-result.json
+      - name: Verify campaign bible and six physical formats
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs');
+          const p='/tmp/cerebro-creative-studio-campaign-v1/CAMPAIGN_MANIFEST.json';
+          const m=JSON.parse(fs.readFileSync(p,'utf8'));
+          if(m.studio_mode!=='CEREBRO_STUDIO_GRADE') throw new Error('CAMPAIGN_STUDIO_MODE');
+          if(m.formats.length!==6) throw new Error(`CAMPAIGN_FORMAT_COUNT:${m.formats.length}`);
+          if(m.publish_authorized!==false||m.additional_cost_eur!==0) throw new Error('CAMPAIGN_GOVERNANCE');
+          const expected=new Set(['post-instagram','post-facebook','carousel','story','reel','video-largo']);
+          for(const x of m.formats){
+            expected.delete(x.label);
+            if(x.campaign_continuity!==true) throw new Error(`CAMPAIGN_CONTINUITY:${x.label}`);
+            if(!Array.isArray(x.artifacts)||!x.artifacts.length) throw new Error(`CAMPAIGN_ARTIFACTS:${x.label}`);
+            if(['story','reel','video-largo'].includes(x.label)){
+              if(!x.studio_qa?.passed||!x.social_qa?.passed) throw new Error(`CAMPAIGN_VIDEO_QA:${x.label}`);
+              const e=x.physical_evidence||{};
+              if(e.continuous_narration!==true||e.scene_locked_narration===true) throw new Error(`CAMPAIGN_TELEGRAM:${x.label}`);
+              if(e.sfx_peak_db<-16||e.audio_coverage_ratio<.98) throw new Error(`CAMPAIGN_AUDIO:${x.label}`);
+            } else if(!x.quality?.passed) throw new Error(`CAMPAIGN_STATIC_QA:${x.label}`);
+          }
+          if(expected.size) throw new Error(`CAMPAIGN_MISSING:${[...expected].join(',')}`);
+          console.log('CEREBRO_STUDIO_SIX_FORMAT_CAMPAIGN_GREEN');
+          NODE
+          sha256sum "$CEREBRO_CAMPAIGN_OUT"/* > "$CEREBRO_CAMPAIGN_OUT/SHA256SUMS.txt"
+      - name: Extract campaign review contact sheets
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$CEREBRO_CAMPAIGN_OUT/review-frames"
+          for f in story reel video-largo; do
+            ffmpeg -hide_banner -loglevel error -i "$CEREBRO_CAMPAIGN_OUT/$f.mp4" -vf 'fps=1/1.5,scale=420:-2,tile=6x5:padding=5:margin=5' -frames:v 1 -y "$CEREBRO_CAMPAIGN_OUT/review-frames/$f-contact-sheet.jpg"
+          done
+      - name: Upload studio-grade PREPROD packages
         uses: actions/upload-artifact@v4
         with:
           name: cerebro-creative-studio-v1-${{ github.sha }}
-          path: /tmp/cerebro-creative-studio-v1
+          path: |
+            /tmp/cerebro-creative-studio-v1
+            /tmp/cerebro-creative-studio-campaign-v1
           retention-days: 7
