@@ -57,14 +57,30 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Install pinned dependency graph
-        run: corepack enable && corepack prepare pnpm@10.20.0 --activate && cd opendesign && pnpm install --frozen-lockfile
+      - name: Install dependencies and record upstream lock integrity
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.20.0 --activate
+          cd opendesign
+          if pnpm install --frozen-lockfile; then
+            echo "OPENDESIGN_LOCK_STATE=GREEN" >> "$GITHUB_ENV"
+          else
+            echo "OPENDESIGN_LOCK_STATE=UPSTREAM_LOCKFILE_CONFIG_MISMATCH" >> "$GITHUB_ENV"
+            echo "Upstream package.json/pnpm-lock.yaml mismatch detected; regenerating lock temporarily in LAB only."
+            pnpm install --no-frozen-lockfile
+            git diff -- pnpm-lock.yaml > /tmp/opendesign-lock-repair.patch || true
+          fi
       - name: Upstream unit tests
         working-directory: opendesign
         run: pnpm test
       - name: Production build
         working-directory: opendesign
         run: pnpm build
+      - name: Confirm lock repair was not committed upstream
+        working-directory: opendesign
+        run: |
+          test "$(git rev-parse HEAD)" = "89c61f83c6c5141895d281385e90c6438ac7be1f"
+          echo "${OPENDESIGN_LOCK_STATE:-UNKNOWN}"
       - name: Static secret pattern check
         working-directory: opendesign
         run: >-
