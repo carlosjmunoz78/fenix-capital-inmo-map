@@ -1,0 +1,74 @@
+{
+  "schema_version": "1.0.0",
+  "system": "CEREBRO_VISUAL_SYSTEM",
+  "engine_id": "MOTION-001",
+  "phase": "PHASE_2",
+  "version": "v0",
+  "environment": "LAB_PREPROD_ONLY",
+  "status": "INITIAL_FUNCTIONAL_ATLAS_NOT_LIVE_BOUND",
+  "telemetry_mode": "SIMULATED_SHADOW_ONLY",
+  "company_id": "*",
+  "regions": [
+    {
+      "region_id": "CORE_ORCHESTRATION",
+      "label": "CORE / ORCHESTRATION",
+      "members": ["Gateway", "Model Router", "Event Bus", "Engine Registry"]
+    },
+    {
+      "region_id": "FACTORY_BUILD",
+      "label": "FACTORY / BUILD",
+      "members": ["FACT-001", "Contracts", "Rebuild", "Promotion"]
+    },
+    {
+      "region_id": "SUPERVISION_DECISION",
+      "label": "SUPERVISION / DECISION",
+      "members": ["Supervisor", "EVA-001", "JDG-001", "HUMAN_REQUIRED"]
+    },
+    {
+      "region_id": "COMMUNICATION_EXPERIENCE",
+      "label": "COMMUNICATION / EXPERIENCE",
+      "members": ["HCI-001", "VOICE-001", "MOTION-001", "Console"]
+    },
+    {
+      "region_id": "KNOWLEDGE_LEARNING",
+      "label": "KNOWLEDGE / LEARNING",
+      "members": ["Training", "Knowledge", "LRN family", "Docs"]
+    },
+    {
+      "region_id": "GROWTH_INTELLIGENCE",
+      "label": "GROWTH / INTELLIGENCE",
+      "members": ["SEO-001", "Local SEO", "Research", "Competitor Intel"]
+    },
+    {
+      "region_id": "OPERATIONS_BUSINESS",
+      "label": "OPERATIONS / BUSINESS",
+      "members": ["CRM", "App", "Processes", "Customer Flows"]
+    },
+    {
+      "region_id": "AUTOMATION_JOBS",
+      "label": "AUTOMATION / JOBS",
+      "members": ["Workers", "Jobs", "Integrations", "Automation Bootstrap"]
+    },
+    {
+      "region_id": "SECURITY_RESILIENCE",
+      "label": "SECURITY / RESILIENCE",
+      "members": ["Auth", "Permissions", "Backup", "Rollback"]
+    },
+    {
+      "region_id": "FINANCE_RISK",
+      "label": "FINANCE / RISK",
+      "members": ["Finance", "Money Limits", "Cost Control", "Risk Gates"]
+    }
+  ],
+  "runtime_contract": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "automatic_promotion": false,
+    "trading_access": false,
+    "raw_content_required": false,
+    "customer_pii_required": false,
+    "secret_payload_required": false,
+    "additional_cost_eur": 0
+  },
+  "next_gate": "OWNER_VISUAL_REVIEW_THEN_ENGINE_REGISTRY_BINDING_AUDIT"
+}

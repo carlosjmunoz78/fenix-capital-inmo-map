@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.0.0",
+  "engine_id": "MOTION-001",
+  "phase": "PHASE1_V2.1_NEURAL_AREAS",
+  "version": "v2.1",
+  "environment": ["LAB", "PREPROD"],
+  "status": "PROCEDURAL_PROTOTYPE_USABLE_OWNER_REVIEW_REQUIRED",
+  "artifact": {
+    "name": "CEREBRO_MOTION_PHASE1_V21_NEURAL_AREAS.html",
+    "sha256": "33fe4596bf463bd1b50766dfc65f99c9ba0247acc3ea607ab723ed65603dfceb",
+    "self_contained": true,
+    "external_dependencies": []
+  },
+  "bundle": {
+    "name": "CEREBRO_MOTION_PHASE1_V21_NEURAL_AREAS.zip",
+    "sha256": "dcf21ac7e81abad223ad567fa6375deeb8884a8004a8099bbd868cf70e4e2286"
+  },
+  "connection_layers": ["LATENT", "ACTIVE", "PULSE"],
+  "features": [
+    "node_to_edge_activation",
+    "active_filament_glow",
+    "edge_afterglow",
+    "multi_hop_connected_routes",
+    "regional_neural_area_activation"
+  ],
+  "palette": ["deep_navy_black", "electric_blue", "cyan", "white"],
+  "exception_accents": {
+    "HUMAN_REQUIRED": "restrained_amber_focal",
+    "ERROR": "restrained_red_focal"
+  },
+  "preserved_old": ["PHASE1_V1", "PHASE1_V2"],
+  "gates": {
+    "node_syntax_check": "PASS",
+    "owner_visual_acceptance": "PENDING",
+    "live_connection": "NOT_AUTHORIZED",
+    "prod": false
+  },
+  "authority": {
+    "prod_enabled": false,
+    "prod_write_authorized": false,
+    "automatic_promotion": false,
+    "trading_access": false,
+    "additional_cost_eur": 0
+  }
+}

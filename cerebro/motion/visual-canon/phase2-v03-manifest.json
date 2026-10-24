@@ -1,0 +1,64 @@
+{
+  "schema_version": "1.0.0",
+  "system": "CEREBRO_VISUAL_SYSTEM",
+  "engine_id": "MOTION-001",
+  "phase": "PHASE_2",
+  "version": "v0.3",
+  "name": "FULLSCREEN_WEBGL_PREMIUM",
+  "status": "USABLE_SHADOW_PROTOTYPE_READY_FOR_OWNER_REVIEW",
+  "environment": ["LAB", "PREPROD"],
+  "prod_authorized": false,
+  "additional_cost_eur": 0,
+  "dependency_audit": {
+    "three_js_found_in_repo": false,
+    "react_three_fiber_found_in_repo": false,
+    "webgl_runtime_found_in_repo": false,
+    "decision": "RAW_WEBGL2_ZERO_DEPENDENCY_PROTOTYPE",
+    "reason": "Preserve current stack and avoid adding a dependency before viability and OLD-vs-NEW validation."
+  },
+  "preserves": [
+    "PHASE1_V1",
+    "PHASE1_V2",
+    "PHASE1_V2.1",
+    "PHASE1_V2.2",
+    "PHASE2_V0",
+    "PHASE2_V0.1",
+    "PHASE2_V0.2"
+  ],
+  "features": {
+    "fullscreen_brain_first": true,
+    "operator_ui_hidden_by_default": true,
+    "clean_mode_only_brain": true,
+    "webgl2_particle_renderer": true,
+    "canvas_fallback": true,
+    "presence_inside_cluster_engine": true,
+    "engine_micro_network": true,
+    "semantic_route_overlay": true,
+    "signal_follow": true,
+    "contextual_ui_only": true,
+    "no_fake_cognition_notice": true
+  },
+  "rendering": {
+    "primary": "WebGL2",
+    "fallback": "Canvas2D",
+    "outer_particle_count": 3000,
+    "external_dependencies": []
+  },
+  "telemetry_mode": "SIMULATED_SHADOW_ONLY",
+  "live_binding": false,
+  "artifact": {
+    "file": "CEREBRO_PHASE2_V03_FULLSCREEN_WEBGL.html",
+    "sha256": "39428350a2de29abdb5f66beea895ce6900dc018d94f96f397a46309e194ff52",
+    "bytes": 25426
+  },
+  "bundle": {
+    "file": "CEREBRO_PHASE2_V03_FULLSCREEN_WEBGL.zip",
+    "sha256": "f5759f39f96dc3a1ecd5c750f65bcdfe5cd080b1b4963e89cc6654d8e096e8ed"
+  },
+  "authority": {
+    "prod_enabled": false,
+    "prod_write_authorized": false,
+    "automatic_promotion": false,
+    "trading_access": false
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "schema_version": "1.0.0",
+  "engine_id": "MOTION-001",
+  "phase": "PHASE1_V2_NEURAL_PRESENCE",
+  "version": "v2",
+  "status": "PROCEDURAL_PROTOTYPE_USABLE_NOT_LIVE_CONNECTED",
+  "environment": ["LAB", "PREPROD"],
+  "portable_artifact": {
+    "filename": "CEREBRO_MOTION_PHASE1_V2_NEURAL_PRESENCE.html",
+    "sha256": "b0b7c616fe86fad5e30ed746c9bbe605c043ee3d576e04312a688d6d68b312ae",
+    "bytes": 21809,
+    "storage_state": "CONVERSATION_ARTIFACT_NOT_DURABLE_RUNTIME_STORAGE"
+  },
+  "bundle_artifact": {
+    "filename": "CEREBRO_MOTION_PHASE1_V2_NEURAL_PRESENCE.zip",
+    "sha256": "aeb856c5eb81787b1b3549e854cc3af5840ba1e3732ace2a4770d6aee0403d56",
+    "bytes": 9725
+  },
+  "implemented": {
+    "procedural_nodes": true,
+    "node_budget": 1250,
+    "procedural_local_connections": true,
+    "travelling_pulses": true,
+    "depth_projection": true,
+    "pointer_parallax": true,
+    "drag_orbit": true,
+    "wheel_depth": true,
+    "state_driven_behavior": true,
+    "reduced_motion": true,
+    "external_runtime_dependencies": 0
+  },
+  "states": ["IDLE", "LISTENING", "PROCESSING", "SPEAKING", "HUMAN_REQUIRED", "DEGRADED", "ERROR"],
+  "visual_policy": {
+    "default_palette": ["DEEP_NAVY_BLACK", "ELECTRIC_BLUE", "CYAN", "WHITE"],
+    "human_required": "AMBER_FOCAL_ONLY",
+    "error": "RED_FOCAL_ONLY",
+    "whole_brain_rainbow": false,
+    "whole_brain_exception_recolor": false
+  },
+  "preservation": {
+    "phase1_v1_preserved_as_old_and_fallback": true,
+    "current_live_ui_replaced": false,
+    "app_crm_supabase_wordpress_changed": false,
+    "trading_touched": false
+  },
+  "authority": {
+    "prod_enabled": false,
+    "prod_write_authorized": false,
+    "automatic_promotion": false,
+    "additional_cost_eur": 0
+  },
+  "next_gate": "OWNER_VISUAL_REVIEW_THEN_OLD_VS_NEW_AND_PREPROD_SHADOW_BINDING"
+}

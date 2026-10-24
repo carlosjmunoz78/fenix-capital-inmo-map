@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0.0",
+  "system": "CEREBRO_VISUAL_SYSTEM",
+  "engine_id": "MOTION-001",
+  "phase": "PHASE_2",
+  "version": "v0.4",
+  "name": "NEURAL_FILAMENT_VOLUME",
+  "status": "USABLE_SHADOW_PROTOTYPE_READY_FOR_OWNER_REVIEW",
+  "environment": ["LAB", "PREPROD"],
+  "prod_authorized": false,
+  "additional_cost_eur": 0,
+  "preserves": ["all_previous_visual_versions", "PHASE2_V0.3.1"],
+  "improvements": {
+    "webgl_3d_filament_field": true,
+    "outer_latent_filaments": true,
+    "inner_cluster_filaments": true,
+    "selected_cluster_filament_emphasis": true,
+    "depth_fog_attenuation": true,
+    "slower_cinematic_camera": true,
+    "essential_controls_remain_clickable_in_clean_mode": true
+  },
+  "dependency_policy": {
+    "external_dependencies": [],
+    "renderer": "RAW_WEBGL2",
+    "three_js_added": false
+  },
+  "telemetry_mode": "SIMULATED_SHADOW_ONLY",
+  "live_binding": false,
+  "syntax_gate": "GREEN",
+  "artifact": {
+    "file": "CEREBRO_PHASE2_V04_NEURAL_FILAMENT_VOLUME.html",
+    "sha256": "4d945bf35b6d76b105da2721ca10e2d844577d2b4cf3abd88e912953ba8064e7",
+    "bytes": 32179
+  },
+  "authority": {
+    "prod_enabled": false,
+    "prod_write_authorized": false,
+    "automatic_promotion": false,
+    "trading_access": false
+  }
+}

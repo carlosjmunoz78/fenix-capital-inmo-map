@@ -1,0 +1,44 @@
+name: CEREBRO MOTION-001 Phase 1 Gate
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/runtime/motion001-visual-state-adapter.mjs'
+      - 'cerebro/tests/motion001-visual-state-adapter.test.mjs'
+      - 'cerebro/docs/MOTION001_PHASE1_COMPLETION_V1.md'
+      - 'cerebro/docs/MOTION001_VISUAL_COLOR_DISCIPLINE_V0.md'
+      - 'cerebro/docs/CEREBRO_VISUAL_SYSTEM_V1.md'
+      - '.github/workflows/cerebro-motion-phase1-gate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  phase1-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run MOTION Phase 1 contract tests
+        run: node --test cerebro/tests/motion001-visual-state-adapter.test.mjs
+      - name: Run existing MOTION runtime regression tests
+        run: node --test cerebro/tests/motion001-presence-runtime.test.mjs
+      - name: Verify Phase 1 completion boundaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'PHASE1_USABLE_COMPLETE' cerebro/docs/MOTION001_PHASE1_COMPLETION_V1.md
+          grep -q 'no per-engine permanent colour assignment' cerebro/docs/MOTION001_VISUAL_COLOR_DISCIPLINE_V0.md
+          grep -q 'PROD_FALSE' cerebro/docs/MOTION001_PHASE1_COMPLETION_V1.md
+          grep -q 'Phase 2 · CEREBRO Inside' cerebro/docs/MOTION001_PHASE1_COMPLETION_V1.md
+          ! grep -q 'prod_authorized:true' cerebro/runtime/motion001-visual-state-adapter.mjs
+      - name: Record gate boundary
+        run: |
+          echo 'MOTION-001 PHASE1 CODE_GATE=GREEN_IF_JOB_SUCCEEDS'
+          echo 'LIVE_CONNECTED=false'
+          echo 'PROD=false'
+          echo 'ADDITIONAL_COST_EUR=0'

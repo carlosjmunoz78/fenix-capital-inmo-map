@@ -1,0 +1,81 @@
+{
+  "schema_version": "1.0.0",
+  "system": "CEREBRO_VISUAL_SYSTEM",
+  "engine_id": "MOTION-001",
+  "company_id": "*",
+  "phase": "PHASE_2",
+  "version": "v0.2",
+  "name": "SIGNAL_DIVE_ENGINE_MICRONET",
+  "status": "USABLE_SHADOW_PROTOTYPE_READY_FOR_OWNER_REVIEW",
+  "environment": ["LAB", "PREPROD"],
+  "prod_authorized": false,
+  "additional_cost_eur": 0,
+  "preserves": [
+    "PHASE1_V1",
+    "PHASE1_V2",
+    "PHASE1_V2.1",
+    "PHASE1_V2.2",
+    "PHASE2_V0",
+    "PHASE2_V0.1"
+  ],
+  "drilldown": [
+    "PRESENCE",
+    "INSIDE",
+    "FAMILY_CLUSTER",
+    "ENGINE",
+    "MICRO_NETWORK",
+    "JOB_EVENT_SHADOW"
+  ],
+  "features": {
+    "cinematic_signal_follow": true,
+    "presence_inside_cluster_engine_micronet_path": true,
+    "engine_micro_network": true,
+    "shadow_job_event_nodes": true,
+    "curved_local_filaments": true,
+    "active_micro_filaments": true,
+    "depth_attenuation": true,
+    "reduced_motion": true,
+    "no_fake_cognition_notice": true
+  },
+  "telemetry": {
+    "mode": "SIMULATED_SHADOW_ONLY",
+    "live_binding": false,
+    "raw_content_required": false,
+    "customer_pii_required": false,
+    "secret_payload_required": false,
+    "fabricated_live_activity_allowed": false
+  },
+  "palette": {
+    "normal": ["deep_navy_black", "electric_blue", "cyan", "white"],
+    "human_required": "restrained_amber_focal",
+    "error": "restrained_red_focal"
+  },
+  "artifact": {
+    "file": "CEREBRO_PHASE2_V02_SIGNAL_DIVE.html",
+    "sha256": "1659b16ad03e3aee679004e4a62dc7f8a4071e97c2a9edee8cdf1ec9c8296b91",
+    "storage_state": "CONVERSATION_ARTIFACT_EXTERNAL_TO_REPO"
+  },
+  "bundle": {
+    "file": "CEREBRO_PHASE2_V02_SIGNAL_DIVE.zip",
+    "sha256": "712a984d5d3a33df811f2d6c469ace20a54a173f7b6eb812a03da9329af13d0d"
+  },
+  "authority": {
+    "prod_enabled": false,
+    "prod_write_authorized": false,
+    "automatic_promotion": false,
+    "trading_access": false,
+    "business_authority": false
+  },
+  "gates_pending": [
+    "OWNER_VISUAL_ACCEPTANCE",
+    "MOBILE_PERFORMANCE",
+    "ENGINE_REGISTRY_COORDINATE_AUDIT",
+    "REAL_TELEMETRY_CONTRACT",
+    "PRIVACY_MINIMIZATION",
+    "OLD_VS_NEW",
+    "EVA_001",
+    "JDG_001",
+    "ROLLBACK",
+    "PREPROD_LIVE_INTEGRATION"
+  ]
+}
