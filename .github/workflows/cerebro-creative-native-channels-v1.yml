@@ -1,0 +1,37 @@
+name: CEREBRO Creative Native Channels V1
+
+on:
+  push:
+    branches: [cerebro/creative-quality-v23-2026-10-24, main]
+    paths:
+      - 'cerebro/runtime/creative-channel-native-adapter-v1.mjs'
+      - 'cerebro/registry/creative-mass-marketing-channel-matrix-v1.json'
+      - 'cerebro/tests/creative-channel-native-adapter-v1.test.mjs'
+      - '.github/workflows/cerebro-creative-native-channels-v1.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'cerebro/runtime/creative-channel-native-adapter-v1.mjs'
+      - 'cerebro/registry/creative-mass-marketing-channel-matrix-v1.json'
+      - 'cerebro/tests/creative-channel-native-adapter-v1.test.mjs'
+      - '.github/workflows/cerebro-creative-native-channels-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native-channel-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Validate native channel planning
+        run: |
+          set -euo pipefail
+          node --check cerebro/runtime/creative-channel-native-adapter-v1.mjs
+          node --test cerebro/tests/creative-channel-native-adapter-v1.test.mjs
+          node -e "const x=require('./cerebro/registry/creative-mass-marketing-channel-matrix-v1.json'); if(x.status!=='DEFINED_NOT_ACTIVE'||x.publication_authority!==false||x.paid_media_authority!==false||x.additional_cost_eur!==0) throw new Error('MASS_MARKETING_GOVERNANCE_INVALID'); if(x.channels.length!==12) throw new Error('CHANNEL_COUNT_INVALID'); console.log('NATIVE_CHANNEL_MATRIX_GREEN')"

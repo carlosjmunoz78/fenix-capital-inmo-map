@@ -1,0 +1,37 @@
+import { resolveGovernedVideoSourceV2 } from './creative-media-sources-v2.mjs';
+function arr(v){return Array.isArray(v)?v:[]}
+function obj(v){return v&&typeof v==='object'&&!Array.isArray(v)?v:{}}
+function refHost(ref){try{return new URL(String(ref||'')).hostname.toLowerCase()}catch{return ''}}
+function isStockVideoRef(ref){return /^(PEXELS|PIXABAY|MIXKIT|COVERr|VIDEVO):/i.test(String(ref||''))}
+function isOwnedFenixImage(ref){const h=refHost(ref);return h==='fenixcapital.es'||h.endsWith('.fenixcapital.es')}
+
+export function evaluatePrimaryCastGovernanceV2({scenes,primary_cast_asset}={}){
+  const list=arr(scenes).map(obj),primary=list.filter(s=>String(obj(s.continuity).character_intent||'').toUpperCase()==='PRIMARY_CAST'),failures=[],stockContext=[];
+  if(primary.length<2)failures.push({code:'PRIMARY_CAST_TOO_SPARSE',detail:String(primary.length)});
+  for(const s of primary){
+    const kind=String(s.source_kind||'').toUpperCase();
+    if(kind==='VIDEO'&&isStockVideoRef(s.video_source))failures.push({code:'STOCK_PRIMARY_CAST_FORBIDDEN',detail:String(s.video_source)});
+    if(kind==='PHOTO'&&!isOwnedFenixImage(s.visual_source||primary_cast_asset))failures.push({code:'PRIMARY_CAST_IMAGE_NOT_FENIX_GOVERNED',detail:String(s.visual_source||primary_cast_asset||'')});
+    if(!['PHOTO','VIDEO'].includes(kind))failures.push({code:'PRIMARY_CAST_SOURCE_KIND_INVALID',detail:kind});
+  }
+  const primaryRefs=[...new Set(primary.map(s=>String(s.visual_source||s.video_source||primary_cast_asset||'')).filter(Boolean))];
+  if(primaryRefs.length!==1)failures.push({code:'PRIMARY_CAST_SOURCE_DRIFT',detail:primaryRefs.join(',')});
+  for(const s of list){
+    if(String(s.source_kind||'').toUpperCase()!=='VIDEO'||!isStockVideoRef(s.video_source))continue;
+    const intent=String(obj(s.continuity).character_intent||'').toUpperCase();
+    if(intent!=='CONTEXT_BROLL')failures.push({code:'STOCK_VIDEO_MUST_BE_CONTEXT_BROLL',detail:String(s.video_source)});
+    const source=resolveGovernedVideoSourceV2(s.video_source);
+    stockContext.push({ref:String(s.video_source),identifiable_human_content:source.identifiable_human_content===true,context_visual_role:source.context_visual_role||null});
+    if(source.identifiable_human_content===true)failures.push({code:'IDENTIFIABLE_STOCK_HUMAN_CONTEXT_FORBIDDEN',detail:String(s.video_source)});
+    if(String(source.continuity_use||'').toUpperCase()!=='CONTEXT_ONLY')failures.push({code:'STOCK_CONTEXT_ASSET_NOT_CONTEXT_ONLY',detail:String(s.video_source)});
+  }
+  const contextRefs=[...new Set(stockContext.map(x=>x.ref))],contextRoles=[...new Set(stockContext.map(x=>x.context_visual_role).filter(Boolean))];
+  const minContextRefs=Math.min(4,Math.max(1,stockContext.length));
+  const minContextRoles=Math.min(4,Math.max(1,stockContext.length));
+  if(stockContext.length&&contextRefs.length<minContextRefs)failures.push({code:'STOCK_CONTEXT_SOURCE_DIVERSITY_TOO_LOW',detail:`${contextRefs.length}<${minContextRefs}`});
+  if(stockContext.length&&contextRoles.length<minContextRoles)failures.push({code:'STOCK_CONTEXT_ROLE_DIVERSITY_TOO_LOW',detail:`${contextRoles.length}<${minContextRoles}`});
+  const passed=failures.length===0;
+  return Object.freeze({schema_version:'2.2.0',passed,hard_fail:!passed,primary_scene_count:primary.length,primary_asset_refs:primaryRefs,stock_context_assets:stockContext,stock_context_unique_refs:contextRefs,stock_context_unique_ref_count:contextRefs.length,stock_context_visual_roles:contextRoles,stock_context_visual_role_count:contextRoles.length,stock_primary_forbidden:true,stock_video_context_only:true,identifiable_stock_human_context_forbidden:true,min_context_source_diversity:minContextRefs,min_context_role_diversity:minContextRoles,failures,verdict:passed?'PRIMARY_CAST_GOVERNED':'PRIMARY_CAST_REJECTED'});
+}
+export function assertPrimaryCastGovernanceV2(input){const r=evaluatePrimaryCastGovernanceV2(input);if(!r.passed){const e=new Error(`PRIMARY_CAST_QA_REJECTED:${r.failures.map(x=>x.code).join(',')}`);e.tribunal=r;throw e}return r}
+export const CREATIVE_PRIMARY_CAST_GOVERNANCE_V2_CONTRACT=Object.freeze({schema_version:'2.2.0',owner_engine:'CREATIVE-STUDIO-001',stock_primary_cast_forbidden:true,stock_video_context_only:true,identifiable_stock_human_context_forbidden:true,context_stock_must_be_context_only:true,min_context_source_diversity:4,min_context_role_diversity:4,fenix_owned_primary_image_supported:true,single_primary_asset_lock:true,biometric_face_recognition:false,publication_authority:false,additional_cost_eur:0});
