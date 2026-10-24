@@ -1,0 +1,92 @@
+{
+  "schema_version": "1.0.0",
+  "registry_id": "CEREBRO-CREATIVE-TOOL-CAPABILITIES-V1",
+  "scope": "CEREBRO_OS_ALL_DEPARTMENTS",
+  "status": "PREPROD_GOVERNED",
+  "owner_factory": "FACT-001",
+  "execution_gateway": "ACTGW-001",
+  "shared_runtime": "RUNTIME-001",
+  "knowledge_registry": "CEREBRO-CREATIVE-MEDIA-KNOWLEDGE-REGISTRY-V1",
+  "rule": "TOOLS_ARE_SHARED_CAPABILITIES_NOT_CANONICAL_ENGINES",
+  "capabilities": [
+    {
+      "capability_id": "CREATIVE-CANVA-V1",
+      "class": "PAID_EXISTING_PROVIDER_DESIGN",
+      "provider": "CANVA",
+      "status": "ROUTING_GREEN_PENDING_CEREBRO_OAUTH_FOR_PHYSICAL_MCP",
+      "cost_policy": "EXISTING_PAID_PLAN_ALLOWED_NO_EXTRA_SPEND",
+      "preferred_for": ["brand_kit", "brand_templates", "premium_assets", "collaboration", "native_canva_designs", "resize_when_plan_includes"],
+      "binding_registry": "cerebro/integrations/canva/canva-capability-bindings.v1.json"
+    },
+    {
+      "capability_id": "CREATIVE-VISUAL-LOCAL-V1",
+      "class": "LOCAL_SELF_HOSTED_VISUAL_EDITOR",
+      "provider": "clawnify/OpenDesign",
+      "pinned_commit": "89c61f83c6c5141895d281385e90c6438ac7be1f",
+      "license": "MIT",
+      "status": "LAB_BUILD_GREEN",
+      "physical_evidence": {
+        "clone_pin": "GREEN",
+        "license": "GREEN",
+        "install": "GREEN_WITH_UPSTREAM_LOCKFILE_REPAIR_IN_LAB",
+        "upstream_tests": "GREEN",
+        "production_build": "GREEN",
+        "secret_pattern_scan": "GREEN",
+        "upstream_packaging_debt": "package.json overrides and pnpm-lock.yaml config mismatch at pinned commit"
+      },
+      "interfaces": {
+        "human_ui": true,
+        "http_api": true,
+        "design_crud": true,
+        "templates": true,
+        "uploads": true,
+        "fillable_fields": true,
+        "headless_batch": "API_BASED"
+      },
+      "preferred_for": ["zero_cost_editable_design", "self_hosted_design", "deterministic_templates", "batch_fill", "provider_independence", "canva_fallback_when_native_provider_not_required"],
+      "additional_cost_eur_target": 0,
+      "prod_authorized": false
+    },
+    {
+      "capability_id": "CREATIVE-VIDEO-EDITOR-V1",
+      "class": "OPEN_SOURCE_VIDEO_EDITOR",
+      "provider": "OpenCut-app/OpenCut",
+      "pinned_commit": "e668010778568641babef2cc40be4703ae6916d6",
+      "license": "MIT",
+      "status": "LAB_BUILD_GREEN_AUTOMATION_INTERFACE_UPSTREAM_PLANNED",
+      "physical_evidence": {
+        "clone_pin": "GREEN",
+        "license": "GREEN",
+        "cargo_metadata_locked": "GREEN",
+        "cargo_check_workspace_locked": "GREEN",
+        "warnings": "NON_BLOCKING_UNUSED_CODE_AND_ONE_FUTURE_INCOMPAT_DEPENDENCY_WARNING"
+      },
+      "interfaces": {
+        "desktop_ui": "BUILD_GREEN",
+        "editor_api": "UPSTREAM_PLANNED_NOT_CLAIMED",
+        "mcp_server": "UPSTREAM_PLANNED_NOT_CLAIMED",
+        "headless_mode": "UPSTREAM_PLANNED_NOT_CLAIMED"
+      },
+      "operational_video_path_until_parity": ["HYPERFRAMES", "OPENMONTAGE", "FFMPEG"],
+      "preferred_for": ["interactive_video_editor_lab", "future_editor_api", "future_mcp", "future_headless_batch"],
+      "additional_cost_eur_target": 0,
+      "prod_authorized": false
+    }
+  ],
+  "current_consumer_classes": ["SOCIAL", "MARKETING", "MARKETING_LAB", "SEO", "WEB", "APP", "TRAINING", "SALES", "DIGITAL_BUILD"],
+  "future_consumer_rule": {
+    "trigger": "ENGINE_OR_DEPARTMENT_DECLARES_IMAGE_VIDEO_OR_DESIGN_NEED",
+    "action": "FACT-001_GENERATES_MINIMUM_CAPABILITY_BINDING",
+    "default": "DENY_UNTIL_BOUND_AND_TESTED",
+    "cross_company": "DENY",
+    "never_clone_runtime_per_department": true,
+    "never_register_tool_as_engine": true
+  },
+  "routing_order": [
+    "EXISTING_PROVEN_NATIVE_OR_PAID_PROVIDER_WHEN_IT_ADDS_VALUE",
+    "LOCAL_OR_SELF_HOSTED_ZERO_COST_CAPABILITY",
+    "EXISTING_MULTIMEDIA_FACTORY",
+    "HUMAN_REQUIRED_ONLY_FOR_CANONICAL_EXCEPTIONS"
+  ],
+  "promotion_gates": ["contracts", "permissions", "tests", "evaluation", "tribunal", "observability", "rollback", "backup", "rebuild", "cost", "PREPROD"]
+}
