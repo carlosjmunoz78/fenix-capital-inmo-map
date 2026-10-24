@@ -119,7 +119,10 @@ async function verifyWorkspaceIdentity(worker,base,job,restoreUrl,endpoint,token
   if(String(profileState?.profile?.provider||'')!=='google')return{status:'NOT_APPLICABLE'};
   const returnUrl=privateUrl(restoreUrl)||'https://www.google.com/';
   const result=await worker.execute({...base,actions:[{type:'NAVIGATE',url:'https://myaccount.google.com/'},{type:'WAIT',ms:1200},{type:'EXTRACT_TEXT',target:{selector:'body'}},{type:'NAVIGATE',url:returnUrl}],keep_session_open:true,capture_final_evidence:false});
-  if(result?.ok!==true)return{status:'UNVERIFIED'};
+  if(result?.ok!==true){
+    await callInteractive(endpoint,'worker/human-required',tokenProvider,{session_id:String(job.job_id),reason:'LOW_CONFIDENCE',detail:{code:'ACCOUNT_IDENTITY_UNVERIFIED',provider:'google'}},fetch_impl).catch(()=>null);
+    return{status:'UNVERIFIED'};
+  }
   const accountUrl=String(result.results?.[0]?.url||'');
   if(accountUrl.includes('accounts.google.com')&&(accountUrl.includes('signin')||accountUrl.includes('ServiceLogin'))){
     const observed=await callWorkspace('worker/observe-account',tokenProvider,{session_id:String(job.job_id),reauth_required:true},fetch_impl);
@@ -127,7 +130,10 @@ async function verifyWorkspaceIdentity(worker,base,job,restoreUrl,endpoint,token
     return observed;
   }
   const email=firstEmail(result.results?.[2]);
-  if(!email)return{status:'UNVERIFIED'};
+  if(!email){
+    await callInteractive(endpoint,'worker/human-required',tokenProvider,{session_id:String(job.job_id),reason:'LOW_CONFIDENCE',detail:{code:'ACCOUNT_IDENTITY_UNVERIFIED',provider:'google'}},fetch_impl).catch(()=>null);
+    return{status:'UNVERIFIED'};
+  }
   const observed=await callWorkspace('worker/observe-account',tokenProvider,{session_id:String(job.job_id),account_email:email},fetch_impl);
   if(observed.status==='PENDING_CONFIRMATION')await callInteractive(endpoint,'worker/human-required',tokenProvider,{session_id:String(job.job_id),reason:'LOW_CONFIDENCE',detail:{code:'ACCOUNT_CONFIRMATION_REQUIRED',provider:'google',account_hint:observed.account_hint}},fetch_impl).catch(()=>null);
   else if(observed.status==='MISMATCH')await callInteractive(endpoint,'worker/human-required',tokenProvider,{session_id:String(job.job_id),reason:'SECURITY_INCIDENT',detail:{code:'ACCOUNT_MISMATCH',provider:'google',account_hint:observed.account_hint}},fetch_impl).catch(()=>null);
@@ -164,7 +170,7 @@ export async function runInteractiveBrowserSessionV3({job,token=null,token_provi
     lastUrl=scrubUrl(initial.final_url);lastPrivateTabs=normalizePrivateTabs(initial.tabs);lastActiveTabIndex=Number.isInteger(initial.active_tab_index)?initial.active_tab_index:0;
     await callInteractive(endpoint,'worker/open',tokenProvider,{session_id:sessionId},fetch_impl);opened=true;
     const keyResult=await callInteractive(endpoint,'worker/key',tokenProvider,{session_id:sessionId},fetch_impl);const key=b64ToBuffer(keyResult.key_b64);if(key.length!==32)throw new Error('INTERACTIVE_KEY_INVALID');
-    if(restoredWorkspace?.restored)identityVerification=await verifyWorkspaceIdentity(worker,base,job,lastUrl,endpoint,tokenProvider,fetch_impl);
+    if(workspaceEnabled(job))identityVerification=await verifyWorkspaceIdentity(worker,base,job,lastUrl,endpoint,tokenProvider,fetch_impl);
     while(Date.now()-startedAt<MAX_SESSION_MS){
       const poll=await callInteractive(endpoint,'worker/poll',tokenProvider,{session_id:sessionId},fetch_impl);
       if(poll.stop===true||poll.state==='STOPPED'){stopRequested=true;break;}
@@ -199,4 +205,4 @@ export async function runInteractiveBrowserSessionV3({job,token=null,token_provi
   }
 }
 
-export const BROWSER_INTERACTIVE_V3_CONTRACT=Object.freeze({schema_version:'3.4.0',capability:'browser1.interactive',supported_environments:['PREPROD','PROD'],environment_endpoint_binding:true,multi_company_preprod:true,prod_company_scope:'fenix',same_runtime:'PLAYWRIGHT_CHROMIUM',same_v2_queue:true,host_browser_channel_supported:true,oidc_refresh_provider_supported:true,exclusive_control_lease:true,frames_encrypted_aes_gcm:true,human_input_encrypted_aes_gcm:true,workspace_hibernate_preprod:true,workspace_immediate_hibernate:true,workspace_tabs_encrypted:true,workspace_identity_verification:'GOOGLE_HMAC_CONFIRMATION',workspace_prod_enabled:false,raw_cdp_exposed:false,max_tabs:8,default_browser1_unchanged:true,incremental_cost_eur:0});
+export const BROWSER_INTERACTIVE_V3_CONTRACT=Object.freeze({schema_version:'3.4.1',capability:'browser1.interactive',supported_environments:['PREPROD','PROD'],environment_endpoint_binding:true,multi_company_preprod:true,prod_company_scope:'fenix',same_runtime:'PLAYWRIGHT_CHROMIUM',same_v2_queue:true,host_browser_channel_supported:true,oidc_refresh_provider_supported:true,exclusive_control_lease:true,frames_encrypted_aes_gcm:true,human_input_encrypted_aes_gcm:true,workspace_hibernate_preprod:true,workspace_immediate_hibernate:true,workspace_tabs_encrypted:true,workspace_identity_verification:'GOOGLE_HMAC_CONFIRMATION_FAIL_CLOSED',workspace_prod_enabled:false,raw_cdp_exposed:false,max_tabs:8,default_browser1_unchanged:true,incremental_cost_eur:0});
