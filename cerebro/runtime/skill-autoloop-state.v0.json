@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-24T21:55:07.934Z",
+  "updated_at": "2026-10-24T22:45:05.734Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -313,39 +313,6 @@
   "in_flight": {},
   "waiting_human": {},
   "waiting_safe_handler": {
-    "github-wide-skills:d82d015f4795582a1ae8": {
-      "candidate_id": "github-wide-skills:d82d015f4795582a1ae8",
-      "name": "claw-browser-anchor",
-      "human_alias": "Claw Browser Anchor",
-      "wrapper_id": "skillwrap:4b5dc1ba9ef25232e82a",
-      "domain": "browser-automation-scraping",
-      "engine_bindings": [
-        "AUTO-001",
-        "AUTBOOT-001",
-        "QA-001",
-        "WEB-001",
-        "SCAN-001"
-      ],
-      "value_score": 90.41,
-      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
-      "evidence_refs": {
-        "upstream_full_name": "breakstageaxe61/genspark-claw",
-        "upstream_head_commit": "5669df491136acfba14713c0cc9d5386af3ed186",
-        "manifest_sha256": "186078d139f759dd1575f26a1307b5a2fed9010d8890d7c57eb3292c897d7850",
-        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
-      },
-      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
-      "status": "WAITING_SAFE_HANDLER",
-      "source_discovery_run_id": 40129551521,
-      "checkpointed_at": "2026-10-24T20:23:54.496Z",
-      "human_required": null,
-      "external_skill_code_execution": false,
-      "customer_data_used": false,
-      "prod_write": false,
-      "trading_access": false,
-      "paid_fallback": false,
-      "additional_cost_eur": 0
-    },
     "github-wide-skills:9ce5b5827108f64a631d": {
       "candidate_id": "github-wide-skills:9ce5b5827108f64a631d",
       "name": "2d-game",
@@ -15158,6 +15125,54 @@
       "action_status": "ROUTED_TO_EXISTING_GOVERNED_PIPELINE",
       "next_gate": "SKILL_CAPABILITY_EVOLUTION_EXISTING_ENGINE",
       "handoff_id": "skill-engine-extension:87c4eeb375a2b3314f528ebd"
+    },
+    "github-wide-skills:d82d015f4795582a1ae8": {
+      "candidate_id": "github-wide-skills:d82d015f4795582a1ae8",
+      "name": "claw-browser-anchor",
+      "human_alias": "Claw Browser Anchor",
+      "wrapper_id": "skillwrap:4b5dc1ba9ef25232e82a",
+      "domain": "browser-automation-scraping",
+      "engine_bindings": [
+        "AUTO-001",
+        "AUTBOOT-001",
+        "QA-001",
+        "WEB-001",
+        "SCAN-001"
+      ],
+      "value_score": 90.41,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "breakstageaxe61/genspark-claw",
+        "upstream_head_commit": "5669df491136acfba14713c0cc9d5386af3ed186",
+        "manifest_sha256": "186078d139f759dd1575f26a1307b5a2fed9010d8890d7c57eb3292c897d7850",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "SKILL_AUTONOMY_DECISION_RECORDED",
+      "status": "COMPLETED",
+      "source_discovery_run_id": 40129551521,
+      "checkpointed_at": "2026-10-24T20:23:54.496Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0,
+      "disposition": "DESCARTAR",
+      "evidence": {
+        "reason": "UNTRUSTED_SOURCE_OR_SUPPLY_CHAIN",
+        "decision_id": "skill-autonomy:e92ac0c3d54d36125190e286",
+        "decision": "DESCARTAR",
+        "human_required": null,
+        "source": "CEREBRO Skill AutoLoop Safe Handler V0"
+      },
+      "updated_at": "2026-10-24T22:45:05.734Z",
+      "prod_authorized": false,
+      "autonomous_promotion_authorized": false,
+      "action_id": "skill-action:f2ab845f756b475ddbaabee0",
+      "action_type": "REJECT_CAPABILITY",
+      "action_status": "APPLIED_METADATA_ONLY",
+      "next_gate": "CONTINUE_DISCOVERY"
     }
   },
   "terminal_hold": {
@@ -18034,7 +18049,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
+  "last_action": "APPLY_REJECT_CAPABILITY_CONTINUE_DISCOVERY",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -27320,6 +27335,44 @@
       "external_skill_code_execution_authorized": false,
       "additional_cost_eur": 0,
       "recorded_at": "2026-10-24T21:51:03.029Z"
+    },
+    "github-wide-skills:d82d015f4795582a1ae8": {
+      "schema_version": "1.0.0",
+      "state_type": "CEREBRO_SKILL_AUTONOMY_ACTION_RECEIPT",
+      "action_id": "skill-action:f2ab845f756b475ddbaabee0",
+      "decision_id": "skill-autonomy:e92ac0c3d54d36125190e286",
+      "company_id": "GLOBAL",
+      "engine_id": "SKILL-AUTONOMY-ACTION",
+      "environment": "PREPROD",
+      "version": "1.0.0",
+      "skill_id": "github-wide-skills:d82d015f4795582a1ae8",
+      "skill_version": "skillwrap:4b5dc1ba9ef25232e82a",
+      "decision": "DESCARTAR",
+      "action_type": "REJECT_CAPABILITY",
+      "status": "APPLIED_METADATA_ONLY",
+      "next_gate": "CONTINUE_DISCOVERY",
+      "target_engine_ids": [
+        "AUTBOOT-001",
+        "AUTO-001",
+        "QA-001",
+        "SCAN-001",
+        "WEB-001"
+      ],
+      "observed_at": null,
+      "human_required": null,
+      "queueable_safe_work": false,
+      "terminal_metadata_only": true,
+      "mutation_authorized": false,
+      "internal_wrapper_shadow_authorized": false,
+      "fact001_gap_candidate_authorized": false,
+      "fact001_create_authorized": false,
+      "paid_activation_authorized": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "external_skill_code_execution_authorized": false,
+      "additional_cost_eur": 0,
+      "recorded_at": "2026-10-24T22:45:05.734Z"
     }
   },
   "autonomy_action_queue": {},
