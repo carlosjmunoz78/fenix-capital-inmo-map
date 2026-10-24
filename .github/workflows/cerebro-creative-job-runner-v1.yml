@@ -1,0 +1,73 @@
+name: CEREBRO Creative Job Runner V1
+
+on:
+  push:
+    branches:
+      - main
+      - cerebro/creative-output-pipeline-v1-2026-10-24
+    paths:
+      - 'cerebro/runtime/creative-job-runner-v1.mjs'
+      - 'cerebro/tests/creative-job-runner-v1.test.mjs'
+      - 'supabase/functions/cerebro-creative-dispatch-v1/**'
+      - 'supabase/migrations/*cerebro_creative_job_v1*'
+      - '.github/workflows/cerebro-creative-job-runner-v1.yml'
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: cerebro-creative-job-runner-v1-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  creative-worker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CEREBRO_CREATIVE_DISPATCH_URL: ${{ github.ref == 'refs/heads/main' && 'https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-creative-dispatch-v1' || 'https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-creative-dispatch-v1' }}
+      CEREBRO_CREATIVE_OIDC_AUDIENCE: cerebro-creative-worker-v1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Unit contract tests
+        run: node --test cerebro/tests/creative-job-runner-v1.test.mjs
+      - name: Install Chromium runtime
+        run: npx playwright install --with-deps chromium
+      - name: Install FFmpeg runtime
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends ffmpeg
+          ffmpeg -version | head -n 1
+      - name: PREPROD physical image carousel reel suite
+        if: ${{ github.ref == 'refs/heads/cerebro/creative-output-pipeline-v1-2026-10-24' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          CEREBRO_CREATIVE_SEED_CANARY=true node cerebro/runtime/creative-job-runner-v1.mjs | tee /tmp/creative-image.json
+          CEREBRO_CREATIVE_SEED_CANARY=false node cerebro/runtime/creative-job-runner-v1.mjs | tee /tmp/creative-carousel.json
+          CEREBRO_CREATIVE_SEED_CANARY=false node cerebro/runtime/creative-job-runner-v1.mjs | tee /tmp/creative-reel.json
+          grep -F '"status":"SUCCEEDED"' /tmp/creative-image.json >/dev/null
+          grep -F '"status":"SUCCEEDED"' /tmp/creative-carousel.json >/dev/null
+          grep -F '"status":"SUCCEEDED"' /tmp/creative-reel.json >/dev/null
+          grep -F '"publish_authorized":false' /tmp/creative-image.json >/dev/null
+          grep -F '"publish_authorized":false' /tmp/creative-carousel.json >/dev/null
+          grep -F '"publish_authorized":false' /tmp/creative-reel.json >/dev/null
+      - name: PROD queue worker
+        if: ${{ github.ref == 'refs/heads/main' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in 1 2 3 4 5; do
+            out="$(CEREBRO_CREATIVE_SEED_CANARY=false node cerebro/runtime/creative-job-runner-v1.mjs)"
+            printf '%s\n' "$out"
+            if printf '%s' "$out" | grep -F '"status":"NO_JOB"' >/dev/null; then break; fi
+          done
