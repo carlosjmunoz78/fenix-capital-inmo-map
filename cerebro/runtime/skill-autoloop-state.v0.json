@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-24T21:53:25.310Z",
+  "updated_at": "2026-10-24T21:55:07.934Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -307,7 +307,8 @@
     "repo:534f3082723892b2aee35bbe039e",
     "repo:c2930f28549d4a3d93e9b0412497",
     "repo:6a48a2b4ac7321e44c4d54ad8b62",
-    "github-wide-skills:9ce5b5827108f64a631d"
+    "github-wide-skills:9ce5b5827108f64a631d",
+    "github-wide-skills:e5789dd748bde637728d"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -373,6 +374,42 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 40136162581,
       "checkpointed_at": "2026-10-24T21:53:25.310Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:e5789dd748bde637728d": {
+      "candidate_id": "github-wide-skills:e5789dd748bde637728d",
+      "name": "3d-world",
+      "human_alias": "3d World",
+      "wrapper_id": "skillwrap:a0ea43346d334aa635a1",
+      "domain": "software-engineering-devops",
+      "engine_bindings": [
+        "FACT-001",
+        "ARCH-001",
+        "API-001",
+        "DEP-001",
+        "MIG-001",
+        "QA-001",
+        "REG-001",
+        "DOCS-001"
+      ],
+      "value_score": 86.14,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "GipityAI/skills",
+        "upstream_head_commit": "feb84a5635baefe22592517234c80134905f0878",
+        "manifest_sha256": "5316547d0d30f3bfed22882a77ad48a63e003c221839bfbc8d762050f15ed48f",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 40136275468,
+      "checkpointed_at": "2026-10-24T21:55:07.934Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -18010,7 +18047,7 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 40136162581,
+  "last_discovery_run_id": 40136275468,
   "autonomy_action_ledger": {
     "github-wide-skills:28b33318e96c4dcfb74a": {
       "schema_version": "1.0.0",
