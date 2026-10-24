@@ -1,0 +1,39 @@
+name: CEREBRO Browser V3 Physical E2E TEMP
+on:
+  push:
+    branches: [cerebro/navegador-e2e-verification-20261024]
+    paths: [.github/workflows/cerebro-browser-v3-physical-e2e-temp.yml]
+permissions:
+  contents: read
+jobs:
+  physical-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      SUPABASE_URL: https://cluhljgonannaafpmblx.supabase.co
+      SUPABASE_PUBLISHABLE_KEY: sb_publishable_yjISKmA5UPfF3d7NitP_DA_j5LGydh0
+      CEREBRO_E2E_USER_JWT: ${{ secrets.CEREBRO_E2E_USER_JWT }}
+    steps:
+      - name: Verify protected credential exists
+        shell: bash
+        run: |
+          test -n "$CEREBRO_E2E_USER_JWT" || { echo 'CEREBRO_E2E_USER_JWT_MISSING'; exit 1; }
+      - name: Execute physical Browser V3 natural-command E2E
+        shell: bash
+        run: |
+          node <<'NODE'
+          const { webcrypto } = require('node:crypto'); const crypto = webcrypto;
+          const base = `${process.env.SUPABASE_URL}/functions/v1/cerebro-browser-gateway-v1`;
+          const headers = {'content-type':'application/json','authorization':`Bearer ${process.env.CEREBRO_E2E_USER_JWT}`,'apikey':process.env.SUPABASE_PUBLISHABLE_KEY};
+          const sleep = ms => new Promise(r=>setTimeout(r,ms));
+          async function post(path,body={}){const r=await fetch(`${base}${path}`,{method:'POST',headers,body:JSON.stringify(body)});const data=await r.json().catch(()=>null);if(!r.ok||!data?.ok)throw new Error(`${path}:${r.status}:${data?.error||'UNKNOWN'}`);return data;}
+          const b64=bytes=>Buffer.from(bytes).toString('base64'); const bytesFromB64=s=>Uint8Array.from(Buffer.from(s,'base64'));
+          (async()=>{const target='https://www.google.es/search?q=F%C3%A9nix+Capital+C%C3%B3rdoba';
+            const start=await post('/owner/start',{company_id:'fenix',idempotency_key:`physical-e2e-${Date.now()}`}); const sessionId=start.session?.session_id;if(!sessionId)throw new Error('SESSION_ID_MISSING');
+            let session=null;for(let i=0;i<48;i++){session=(await post('/owner/status',{company_id:'fenix',session_id:sessionId})).session;if(session?.worker_alive&&session?.state==='CEREBRO_CONTROLLED'&&Number(session?.frame_seq||0)>0)break;await sleep(2500);}if(!session?.worker_alive||session?.state!=='CEREBRO_CONTROLLED'||Number(session?.frame_seq||0)<=0)throw new Error('WORKER_OR_FRAME_NOT_LIVE');
+            const keyData=await post('/owner/key',{company_id:'fenix',session_id:sessionId});const key=await crypto.subtle.importKey('raw',bytesFromB64(keyData.key_b64),{name:'AES-GCM'},false,['encrypt']);const iv=crypto.getRandomValues(new Uint8Array(12));const plain=new TextEncoder().encode(JSON.stringify({url:target}));const cipher=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},key,plain));
+            const queued=await post('/owner/command',{company_id:'fenix',session_id:sessionId,command_type:'OPEN_TAB',payload_ciphertext:b64(cipher),payload_iv:b64(iv),idempotency_key:`natural-google-${Date.now()}`});const commandId=queued.command?.command_id;if(!commandId)throw new Error('COMMAND_ID_MISSING');
+            let command=null;for(let i=0;i<40;i++){command=(await post('/owner/command-status',{company_id:'fenix',session_id:sessionId,command_id:commandId})).command;if(command?.status==='COMPLETED'||command?.status==='FAILED')break;await sleep(1500);}if(command?.status!=='COMPLETED')throw new Error(`COMMAND_NOT_COMPLETED:${command?.status||'UNKNOWN'}:${command?.error_code||''}`);
+            let verified=null;for(let i=0;i<20;i++){verified=(await post('/owner/status',{company_id:'fenix',session_id:sessionId})).session;const tabs=Array.isArray(verified?.tabs)?verified.tabs:[];const googleTab=tabs.find(t=>String(t?.url||'').includes('google.')&&String(t?.url||'').includes('search'));if(googleTab&&Number(verified?.frame_seq||0)>0)break;await sleep(1000);}const tabs=Array.isArray(verified?.tabs)?verified.tabs:[];const googleTab=tabs.find(t=>String(t?.url||'').includes('google.')&&String(t?.url||'').includes('search'));if(!googleTab)throw new Error('GOOGLE_RESULTS_TAB_NOT_VISIBLE');const decoded=decodeURIComponent(String(googleTab.url||'').replace(/\+/g,' '));if(!decoded.includes('Fénix Capital Córdoba'))throw new Error('GOOGLE_QUERY_NOT_VERIFIED');if(!verified?.worker_alive||Number(verified?.frame_seq||0)<=0||!verified?.last_heartbeat_at)throw new Error('FINAL_LIVE_EVIDENCE_MISSING');console.log(`E2E_GREEN session=${sessionId} command=${commandId} status=${command.status} frame_seq=${verified.frame_seq} tabs=${tabs.length} title=${String(googleTab.title||'').slice(0,120)}`);
+          })().catch(err=>{console.error(`E2E_RED ${err.message}`);process.exit(1)});
+          NODE
