@@ -111,8 +111,6 @@ function xfade(t){return ({CROSSFADE:'fade',DIP_TO_BLACK:'fadeblack',PUSH:'slide
 
 async function photoClip({browser,photo,overlay,preset,duration,motion,out}){
   const bg=path.join(path.dirname(out),`bg-${crypto.randomUUID()}.jpg`);await fs.writeFile(bg,photo.buffer);const ov=path.join(path.dirname(out),`ov-${crypto.randomUUID()}.png`);await screenshotHtml(browser,overlay,preset.w,preset.h,ov,{transparent:true});
-  const vf=`${photoMotion(motion,preset.w,preset.h,Math.round(duration*30))},format=rgba[base];[1:v]format=rgba[ov];[base][ov]overlay=x='if(lt(t,.55),-55+100*t,0)':y=0:eval=frame:shortest=1,format=yuv420p`;
-  await execFileAsync('ffmpeg',['-hide_banner','-loglevel','error','-loop','1','-framerate','30','-t',String(duration),'-i',bg,'-loop','1','-framerate','30','-t',String(duration),'-i',ov,'-filter_complex',vf,'-map','0:a?','-map','[base]' ],{maxBuffer:1024}).catch(()=>{});
   await execFileAsync('ffmpeg',['-hide_banner','-loglevel','error','-loop','1','-framerate','30','-t',String(duration),'-i',bg,'-loop','1','-framerate','30','-t',String(duration),'-i',ov,'-filter_complex',`${photoMotion(motion,preset.w,preset.h,Math.round(duration*30))},format=rgba[bgm];[1:v]format=rgba[ov];[bgm][ov]overlay=x='if(lt(t,.55),-55+100*t,0)':y=0:eval=frame:shortest=1,format=yuv420p[v]`,'-map','[v]','-an','-r','30','-c:v','libx264','-preset','veryfast','-crf','22','-y',out],{maxBuffer:20*1024*1024});
 }
 
@@ -129,9 +127,9 @@ async function renderVideo(browser,plan,preset,payload,temp,images,videos,logoDa
     const s=obj(plan.scenes[i]),duration=Math.min(15,Math.max(2,Number(s.duration_sec||s.duration||6)));total+=duration;if(total>preset.max)throw new Error(`VIDEO_DURATION_OVER_${preset.max}_SECONDS`);
     const kind=String(s.source_kind||'PHOTO').toUpperCase(),clip=path.join(temp,`clip-${String(i+1).padStart(2,'0')}.mp4`),overlay=overlayHtml({w:preset.w,h:preset.h,logo:logoData,brand:plan.brand,headline:txt(s.headline||payload.headline||'Fénix Capital',130),subheadline:txt(s.subheadline||'',260),metric:txt(s.metric||'',40),metric_label:txt(s.metric_label||'',100),index:i+1,count:plan.scenes.length,layout:s.layout_style});
     if(kind==='VIDEO'){
-      const ref=String(s.video_source||plan.video_sources[i%plan.video_sources.length]||'');const vid=videos.get(ref);if(!vid)throw new Error(`VIDEO_SCENE_SOURCE_MISSING:${ref}`);await liveClip({video:vid,overlay,preset,duration,start:Number(s.source_start_sec||0),out, browser,accent:plan.brand.accent});liveSeconds+=duration;usedVideoRefs.add(ref);
+      const ref=String(s.video_source||plan.video_sources[i%plan.video_sources.length]||'');const vid=videos.get(ref);if(!vid)throw new Error(`VIDEO_SCENE_SOURCE_MISSING:${ref}`);await liveClip({video:vid,overlay,preset,duration,start:Number(s.source_start_sec||0),out:clip,browser,accent:plan.brand.accent});liveSeconds+=duration;usedVideoRefs.add(ref);
     }else{
-      const photo=images[i%images.length];if(!photo)throw new Error('PHOTO_SCENE_SOURCE_MISSING');await photoClip({browser,photo,overlay,preset,duration,motion:plan.motion_profiles[i%plan.motion_profiles.length],out});
+      const photo=images[i%images.length];if(!photo)throw new Error('PHOTO_SCENE_SOURCE_MISSING');await photoClip({browser,photo,overlay,preset,duration,motion:plan.motion_profiles[i%plan.motion_profiles.length],out:clip});
     }
     clips.push({clip,duration});sceneMeta.push({duration,headline:s.headline||'',subheadline:s.subheadline||'',voiceover:s.voiceover||s.subheadline||s.headline||'',source_kind:kind});
   }
@@ -159,4 +157,4 @@ export async function renderCreativeJobV2Live(job,{browserFactory=()=>chromium.l
   }catch(e){await fs.rm(temp,{recursive:true,force:true}).catch(()=>{});throw e}finally{await browser.close()}
 }
 
-export const CREATIVE_JOB_RUNNER_V2_LIVE_CONTRACT=Object.freeze({schema_version:'2.2.0',owner_engine:'FACT-001',status:'PREPROD_CANDIDATE',runtime:'PLAYWRIGHT_FFMPEG_PIPER',mandatory_creative_tribunal:'CREATIVE_QUALITY_TRIBUNAL_V2',governed_live_action_sources:true,pexels_license_provenance:true,transparent_logo:true,multiple_layout_system:true,real_live_action:true,photo_motion:true,animated_overlay:true,transitions:true,neural_voice:true,procedural_music:true,audio_ducking:true,captions:true,physical_motion_analysis:true,live_action_ratio_analysis:true,rollback_runtime:'creative-job-runner-v1.mjs',publish_authorized:false,additional_cost_eur:0});
+export const CREATIVE_JOB_RUNNER_V2_LIVE_CONTRACT=Object.freeze({schema_version:'2.2.1',owner_engine:'FACT-001',status:'PREPROD_CANDIDATE',runtime:'PLAYWRIGHT_FFMPEG_PIPER',mandatory_creative_tribunal:'CREATIVE_QUALITY_TRIBUNAL_V2',governed_live_action_sources:true,pexels_license_provenance:true,transparent_logo:true,multiple_layout_system:true,real_live_action:true,photo_motion:true,animated_overlay:true,transitions:true,neural_voice:true,procedural_music:true,audio_ducking:true,captions:true,physical_motion_analysis:true,live_action_ratio_analysis:true,rollback_runtime:'creative-job-runner-v1.mjs',publish_authorized:false,additional_cost_eur:0});
