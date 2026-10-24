@@ -8,13 +8,18 @@ const svc=createClient(U,S,{auth:{persistSession:false,autoRefreshToken:false}})
 const ISSUER='https://token.actions.githubusercontent.com';
 const AUD='cerebro-browser-worker-v1';
 const REPO='carlosjmunoz78/fenix-capital-inmo-map';
-const WORKFLOW='.github/workflows/cerebro-browser-job-runner-v2-live.yml';
+const BRANCH_REF='refs/heads/cerebro/navegador-phase3-1-ui-20261024';
+const WORKFLOWS=[
+ '.github/workflows/cerebro-browser-interactive-v3-preprod.yml',
+ '.github/workflows/cerebro-browser-job-runner-v2-live.yml',
+] as const;
 const PREPROD_PROJECT_REF='hnqlnvakzaywtafeiybt';
 const JWKS=createRemoteJWKSet(new URL(`${ISSUER}/.well-known/jwks`));
 function out(status:number,body:unknown){return new Response(JSON.stringify(body),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store'}});}
 function bearer(req:Request){const h=req.headers.get('authorization')??'';return h.toLowerCase().startsWith('bearer ')?h.slice(7).trim():'';}
 function nowIso(){return new Date().toISOString();}
 function cleanUrl(raw:unknown){try{const u=new URL(String(raw||''));u.username='';u.password='';u.search='';u.hash='';return u.toString();}catch{return '';}}
+function allowedWorkflowRef(workflowRef:string){return WORKFLOWS.some(workflow=>workflowRef===`${REPO}/${workflow}@${BRANCH_REF}`);}
 async function event(session_id:string,event_type:string,actor:string,detail:Record<string,unknown>={}){await svc.from('cerebro_browser_event_v3').insert({session_id,event_type,actor,detail});}
 async function worker(req:Request){
  if(!U.includes(PREPROD_PROJECT_REF))return{ok:false,error:'PREPROD_PROJECT_REF_MISMATCH'} as const;
@@ -22,8 +27,9 @@ async function worker(req:Request){
  try{
   const {payload}=await jwtVerify(token,JWKS,{issuer:ISSUER,audience:AUD});
   if(payload.repository!==REPO)return{ok:false,error:'GITHUB_REPOSITORY_DENIED'} as const;
+  if(String(payload.ref??'')!==BRANCH_REF)return{ok:false,error:'GITHUB_REF_DENIED'} as const;
   const workflowRef=String(payload.workflow_ref??'');
-  if(!workflowRef.includes(`${REPO}/${WORKFLOW}@`))return{ok:false,error:'GITHUB_WORKFLOW_DENIED'} as const;
+  if(!allowedWorkflowRef(workflowRef))return{ok:false,error:'GITHUB_WORKFLOW_DENIED'} as const;
   return{ok:true,worker_id:`github-preprod:${String(payload.run_id??'unknown')}:${String(payload.run_attempt??'1')}`} as const;
  }catch(e){return{ok:false,error:'GITHUB_OIDC_INVALID',detail:e instanceof Error?e.message:String(e)} as const;}
 }
@@ -52,7 +58,7 @@ async function handback(body:any,w:any){const id=String(body?.session_id||'');co
 async function close(body:any,w:any){const id=String(body?.session_id||'');const state=String(body?.state||'CLOSED')==='ERROR'?'ERROR':'CLOSED';const r=await svc.from('cerebro_browser_session_v3').update({state,control_owner:'NONE',worker_alive:false,frame_ciphertext:null,frame_iv:null,human_lease_id:null,human_lease_expires_at:null,closed_at:nowIso(),updated_at:nowIso()}).eq('session_id',id).eq('environment','PREPROD').eq('worker_id',w.worker_id).select('session_id').maybeSingle();if(r.error)throw r.error;if(r.data)await event(id,'SESSION_CLOSED','SYSTEM',{state,secret_material_logged:false});return{ok:Boolean(r.data)};}
 Deno.serve(async req=>{
  const route=new URL(req.url).pathname.split('/').filter(Boolean).at(-1)??'';
- if(req.method==='GET'&&route==='health')return out(200,{ok:true,service:'cerebro-browser-worker-v3-preprod',environment:'PREPROD',owner_routes_exposed:false,prod_access:false,trading_access:false,frames_encrypted:true,input_encrypted:true,incremental_cost_eur:0,allowed_workflow:WORKFLOW});
+ if(req.method==='GET'&&route==='health')return out(200,{ok:true,service:'cerebro-browser-worker-v3-preprod',environment:'PREPROD',owner_routes_exposed:false,prod_access:false,trading_access:false,frames_encrypted:true,input_encrypted:true,incremental_cost_eur:0,branch_ref:BRANCH_REF,allowed_workflows:WORKFLOWS});
  if(req.method!=='POST')return out(404,{ok:false,error:'ROUTE_NOT_AVAILABLE'});
  const w=await worker(req);if(!w.ok)return out(403,w);
  let body:any={};try{body=await req.json();}catch{}
