@@ -11,6 +11,15 @@ test('creative worker contract is zero-cost, external-render and non-publishing'
   assert.equal(CREATIVE_JOB_RUNNER_V1_CONTRACT.additional_cost_eur,0);
 });
 
+test('AV extension remains zero-cost and bounded',()=>{
+  assert.equal(CREATIVE_JOB_RUNNER_V1_CONTRACT.neural_voice_provider,'PIPER');
+  assert.equal(CREATIVE_JOB_RUNNER_V1_CONTRACT.procedural_music,true);
+  assert.equal(CREATIVE_JOB_RUNNER_V1_CONTRACT.long_video_max_seconds,180);
+  assert.deepEqual(CREATIVE_JOB_RUNNER_V1_CONTRACT.owned_photo_host_allowlist,['fenixcapital.es','www.fenixcapital.es','staging.fenixcapital.es']);
+  assert.equal(CREATIVE_JOB_RUNNER_V1_CONTRACT.publish_authorized,false);
+  assert.equal(CREATIVE_JOB_RUNNER_V1_CONTRACT.additional_cost_eur,0);
+});
+
 test('OIDC token request binds the exact creative audience and bearer request token',async()=>{
   let seen=null;
   const token=await getGitHubOidcToken({
