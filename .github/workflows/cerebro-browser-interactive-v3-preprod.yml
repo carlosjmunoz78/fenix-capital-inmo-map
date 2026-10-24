@@ -23,7 +23,7 @@ concurrency:
 
 env:
   CEREBRO_BROWSER_DISPATCH_URL: https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-browser-dispatch-v3-preprod
-  CEREBRO_BROWSER_INTERACTIVE_URL: https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-browser-interactive-v3
+  CEREBRO_BROWSER_INTERACTIVE_URL: https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-browser-worker-v3-preprod
   CEREBRO_BROWSER_OIDC_AUDIENCE: cerebro-browser-worker-v1
   CEREBRO_BROWSER_STAGE_CONCURRENCY: '1'
   CEREBRO_BROWSER_WORKER_SLOT: '1'
