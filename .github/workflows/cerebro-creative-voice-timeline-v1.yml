@@ -1,0 +1,37 @@
+name: CEREBRO Creative Voice Timeline V1
+
+on:
+  push:
+    branches: [cerebro/creative-quality-v23-2026-10-24, main]
+    paths:
+      - 'cerebro/runtime/creative-voice-timeline-planner-v1.mjs'
+      - 'cerebro/runtime/creative-social-audio-v4.mjs'
+      - 'cerebro/tests/creative-voice-timeline-planner-v1.test.mjs'
+      - '.github/workflows/cerebro-creative-voice-timeline-v1.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'cerebro/runtime/creative-voice-timeline-planner-v1.mjs'
+      - 'cerebro/runtime/creative-social-audio-v4.mjs'
+      - 'cerebro/tests/creative-voice-timeline-planner-v1.test.mjs'
+      - '.github/workflows/cerebro-creative-voice-timeline-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  voice-timeline-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Voice timeline deterministic contract
+        run: |
+          set -euo pipefail
+          node --check cerebro/runtime/creative-voice-timeline-planner-v1.mjs
+          node --check cerebro/runtime/creative-social-audio-v4.mjs
+          node --test cerebro/tests/creative-voice-timeline-planner-v1.test.mjs
