@@ -3,6 +3,7 @@ import {ArrowLeft,ArrowRight,BrainCircuit,CircleDot,Globe2,Hand,MessageSquareTex
 import {applyVoiceContextHints,createVoiceRecognition,voiceRecognitionSupported,type CerebroSpeechRecognition} from './cerebroVoice';
 import {CerebroVoiceSettings} from './CerebroVoiceSettings';
 import {decryptBrowserFrame,encryptBrowserInput,fetchBrowserInteractiveApi,importBrowserSessionKey,type BrowserCompanyV3,type BrowserSessionV3} from './cerebroBrowserInteractive';
+import {parseBrowserCommand} from './cerebroBrowserCommand';
 import './cerebro-browser-console.css';
 
 type ViewName='V0'|'OPERATIVA'|'NAVEGADOR';
@@ -10,7 +11,9 @@ type Props={onViewChange?:(view:ViewName)=>void};
 type CoreSnapshot={ready:boolean;sending:boolean;voiceActive:boolean};
 type BrowserStatusResponse={ok:boolean;session:BrowserSessionV3|null;error?:string};
 type BrowserKeyResponse={ok:boolean;key_b64?:string;error?:string};
-type BrowserActionResponse={ok:boolean;error?:string};
+type BrowserActionResponse={ok:boolean;error?:string;command?:{command_id:string;status:string}};
+type BrowserCommandStatusResponse={ok:boolean;command?:{command_id:string;status:string;error_code?:string|null};error?:string};
+type VisibleCommand={text:string;status:'ENVIADA'|'INICIANDO'|'EJECUTANDO'|'COMPLETADA'|'ERROR';error?:string};
 type BrowserCompaniesResponse={ok:boolean;companies:BrowserCompanyV3[];error?:string};
 type BrowserSessionSummary={session_id:string;state:string;control_owner:string;worker_alive:boolean;current_url:string|null;current_title:string|null;opened_at:string;last_heartbeat_at:string|null;closed_at:string|null;updated_at:string};
 type BrowserSessionsResponse={ok:boolean;sessions:BrowserSessionSummary[];error?:string};
@@ -18,12 +21,6 @@ type BrowserSessionsResponse={ok:boolean;sessions:BrowserSessionSummary[];error?
 const EMPTY:CoreSnapshot={ready:false,sending:false,voiceActive:false};
 const TERMINAL=new Set(['STOPPED','ERROR','CLOSED']);
 
-function setReactTextareaValue(textarea:HTMLTextAreaElement,value:string){
- const descriptor=Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value');
- descriptor?.set?.call(textarea,value);
- textarea.dispatchEvent(new Event('input',{bubbles:true}));
- textarea.dispatchEvent(new Event('change',{bubbles:true}));
-}
 function stateLabel(session:BrowserSessionV3|null){
  if(!session)return'SIN SESIÓN VISUAL';
  if(session.state==='CONNECTING')return'CONECTANDO';
@@ -48,6 +45,8 @@ export default function CerebroBrowserConsole({onViewChange}:Props){
  const[browserSession,setBrowserSession]=useState<BrowserSessionV3|null>(null);
  const[browserError,setBrowserError]=useState('');
  const[browserBusy,setBrowserBusy]=useState(false);
+ const[commandBusy,setCommandBusy]=useState(false);
+ const[visibleCommand,setVisibleCommand]=useState<VisibleCommand|null>(null);
  const[frameUrl,setFrameUrl]=useState('');
  const[companies,setCompanies]=useState<BrowserCompanyV3[]>([]);
  const[selectedCompany,setSelectedCompany]=useState('');
@@ -59,6 +58,7 @@ export default function CerebroBrowserConsole({onViewChange}:Props){
  const keySessionRef=useRef('');
  const frameSeqRef=useRef(-1);
  const frameUrlRef=useRef('');
+ const commandLockRef=useRef(false);
 
  useEffect(()=>{
   let raf=0;
@@ -115,7 +115,10 @@ export default function CerebroBrowserConsole({onViewChange}:Props){
  function resetVisualSession(){setBrowserSession(null);keyRef.current=null;keySessionRef.current='';frameSeqRef.current=-1;if(frameUrlRef.current){URL.revokeObjectURL(frameUrlRef.current);frameUrlRef.current='';setFrameUrl('');}}
  function changeCompany(value:string){if(hasActiveSession)return;setSelectedCompany(value);setSelectedSessionId('');setSessionOptions([]);setBrowserError('');resetVisualSession();}
  function changeSession(value:string){if(value===selectedSessionId)return;setSelectedSessionId(value);setBrowserError('');resetVisualSession();}
- function submit(event?:FormEvent){event?.preventDefault();const clean=composer.trim();if(!clean||!snapshot.ready||snapshot.sending)return;const core=document.querySelector<HTMLElement>('.cerebro-host-v0 .cerebro-console');const textarea=core?.querySelector<HTMLTextAreaElement>('.cerebro-chat-form textarea');const form=core?.querySelector<HTMLFormElement>('.cerebro-chat-form');if(!textarea||!form)return;setReactTextareaValue(textarea,clean);window.setTimeout(()=>form.requestSubmit(),0);setComposer('');}
+ async function waitForCerebroSession(){for(let attempt=0;attempt<40;attempt++){const r=await fetchBrowserInteractiveApi<BrowserStatusResponse>('/owner/status',{company_id:selectedCompany});const s=r.data?.session;if(r.status===200&&r.data?.ok&&s?.worker_alive&&s.state==='CEREBRO_CONTROLLED'&&s.control_owner==='CEREBRO'&&!s.emergency_stop)return s;await new Promise(resolve=>window.setTimeout(resolve,500));}throw new Error('BROWSER_WORKER_NO_QUEDO_LISTO');}
+ async function waitForCommand(sessionId:string,commandId:string){for(let attempt=0;attempt<60;attempt++){const r=await fetchBrowserInteractiveApi<BrowserCommandStatusResponse>('/owner/command-status',{company_id:selectedCompany,session_id:sessionId,command_id:commandId});const c=r.data?.command;if(r.status!==200||!r.data?.ok)throw new Error(r.data?.error||'No se pudo consultar la orden');if(c?.status==='COMPLETED')return;if(c?.status==='FAILED')throw new Error(c.error_code||'La orden del navegador falló');await new Promise(resolve=>window.setTimeout(resolve,250));}throw new Error('TIMEOUT_EJECUTANDO_ORDEN');}
+ async function submit(event?:FormEvent){event?.preventDefault();const clean=composer.trim();if(!clean||commandLockRef.current)return;const parsed=parseBrowserCommand(clean);setVisibleCommand({text:clean,status:'ENVIADA'});setComposer('');if(!parsed.ok){setVisibleCommand({text:clean,status:'ERROR',error:parsed.error});return;}commandLockRef.current=true;setCommandBusy(true);setBrowserError('');try{let session=browserSession;if(!session?.worker_alive||session.state!=='CEREBRO_CONTROLLED'||session.control_owner!=='CEREBRO'||session.emergency_stop){setVisibleCommand({text:clean,status:'INICIANDO'});const start=await fetchBrowserInteractiveApi<BrowserActionResponse>('/owner/start',{company_id:selectedCompany,idempotency_key:`ui-start-${crypto.randomUUID()}`});if(start.status!==200||!start.data?.ok)throw new Error(start.data?.error||'No se pudo iniciar Browser 1');session=await waitForCerebroSession();setSelectedSessionId(session.session_id);}const keyResponse=await fetchBrowserInteractiveApi<BrowserKeyResponse>('/owner/key',{company_id:selectedCompany,session_id:session.session_id});if(keyResponse.status!==200||!keyResponse.data?.ok||!keyResponse.data.key_b64)throw new Error(keyResponse.data?.error||'Clave de ejecución no disponible');const key=await importBrowserSessionKey(keyResponse.data.key_b64);for(const action of parsed.commands){setVisibleCommand({text:clean,status:'EJECUTANDO'});const encrypted=await encryptBrowserInput(key,action.payload);const queued=await fetchBrowserInteractiveApi<BrowserActionResponse>('/owner/command',{company_id:selectedCompany,session_id:session.session_id,command_type:action.command_type,idempotency_key:crypto.randomUUID(),...encrypted});if(queued.status!==200||!queued.data?.ok||!queued.data.command?.command_id)throw new Error(queued.data?.error||'La orden no entró en Browser 1');await waitForCommand(session.session_id,queued.data.command.command_id);}setVisibleCommand({text:clean,status:'COMPLETADA'});}catch(error){const message=String((error as Error)?.message||error);setVisibleCommand({text:clean,status:'ERROR',error:message});setBrowserError(message);}finally{commandLockRef.current=false;setCommandBusy(false);}}
+
  function toggleVoice(){if(dictating)return;const button=document.querySelector<HTMLButtonElement>('.cerebro-host-v0 .cerebro-voice-main');if(button&&!button.disabled)button.click();}
  function stopDictation(){const recognition=dictationRef.current;dictationRef.current=null;if(recognition){try{recognition.stop()}catch{/* already stopped */}}setDictating(false);}
  function toggleDictation(){if(dictating){stopDictation();return}if(!snapshot.ready||snapshot.voiceActive||!voiceRecognitionSupported())return;const recognition=createVoiceRecognition();if(!recognition){setDictationError('Dictado no disponible en este navegador.');return}dictationRef.current=recognition;recognition.lang='es-ES';recognition.continuous=false;recognition.interimResults=false;recognition.maxAlternatives=3;applyVoiceContextHints(recognition);recognition.onstart=()=>{setDictating(true);setDictationError('')};recognition.onresult=event=>{const result=event.results[event.results.length-1];const transcript=String(result?.[0]?.transcript||'').trim();if(transcript){setComposer(current=>`${current}${current.trim()?' ':''}${transcript}`);window.setTimeout(()=>composerRef.current?.focus(),0)}};recognition.onerror=()=>setDictationError('No se pudo completar el dictado.');recognition.onend=()=>{dictationRef.current=null;setDictating(false)};try{recognition.start()}catch{dictationRef.current=null;setDictating(false);setDictationError('No se pudo iniciar el dictado.')}}
@@ -206,12 +209,13 @@ export default function CerebroBrowserConsole({onViewChange}:Props){
   </section>
 
   <section className="cerebro-browser-composer" aria-label="Órdenes para CEREBRO" style={{position:'relative',minWidth:0,maxWidth:'100%',overflow:'hidden'}}>
+   {visibleCommand?<div role="status" aria-live="polite" data-browser-command-status={visibleCommand.status} style={{margin:'0 0 7px',padding:'8px 10px',border:'1px solid rgba(77,184,255,.16)',borderRadius:9,background:'rgba(4,18,25,.72)',fontSize:8,color:visibleCommand.status==='ERROR'?'#ff9b80':visibleCommand.status==='COMPLETADA'?'#95efc7':'#bcd7e2'}}><strong style={{marginRight:8}}>{visibleCommand.status}</strong><span>{visibleCommand.text}</span>{visibleCommand.error?<span style={{display:'block',marginTop:4}}>{visibleCommand.error}</span>:null}</div>:null}
    <form onSubmit={submit} className="cerebro-browser-form" style={{minWidth:0,maxWidth:'100%'}}>
     <button type="button" className="cerebro-browser-icon" disabled title="Adjuntos permanecen bloqueados hasta contrato de transferencia verificado" aria-label="Adjuntar archivo"><Paperclip size={19}/></button>
     <button type="button" className={`cerebro-browser-action ${dictating?'is-active':''}`} onClick={toggleDictation} disabled={!snapshot.ready||snapshot.sending||snapshot.voiceActive||!voiceRecognitionSupported()}>{dictating?<Square size={16}/>:<Mic size={18}/>}<span>{dictating?'Parar dictado':'Dictar'}</span></button>
     <button type="button" className={`cerebro-browser-action ${snapshot.voiceActive?'is-active':''}`} onClick={toggleVoice} disabled={!snapshot.ready||snapshot.sending||dictating}>{snapshot.voiceActive?<Square size={16}/>:<MessageSquareText size={18}/>}<span>{snapshot.voiceActive?'Finalizar':'Hablar'}</span></button>
-    <textarea ref={composerRef} value={composer} onChange={event=>setComposer(event.target.value)} onKeyDown={onComposerKeyDown} disabled={!snapshot.ready||snapshot.sending} rows={1} placeholder={snapshot.ready?'Escribe, habla o da una orden a CEREBRO…':'Esperando conexión segura con CEREBRO…'} aria-label="Escribe una orden para CEREBRO"/>
-    <button type="submit" className="cerebro-browser-send" disabled={!snapshot.ready||snapshot.sending||!composer.trim()} title="Enviar · Enter" aria-label="Enviar a CEREBRO"><Send size={19}/><span>Enviar</span></button>
+    <textarea ref={composerRef} value={composer} onChange={event=>setComposer(event.target.value)} onKeyDown={onComposerKeyDown} disabled={commandBusy} rows={1} placeholder={snapshot.ready?'Escribe, habla o da una orden a CEREBRO…':'Esperando conexión segura con CEREBRO…'} aria-label="Escribe una orden para CEREBRO"/>
+    <button type="submit" className="cerebro-browser-send" disabled={commandBusy||!composer.trim()} title="Enviar · Enter" aria-label="Enviar a CEREBRO"><Send size={19}/><span>Enviar</span></button>
    </form>
    {dictationError?<div className="cerebro-browser-dictation-error" role="status">{dictationError}</div>:null}
   </section>
