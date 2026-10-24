@@ -25,19 +25,19 @@ export function superviseStudioScriptV1(production){
     ];limits=[18,10,16,10];
   }else if(output==='LONG_VIDEO'){
     blocks=[
-      {start_sec:.05,text:`Te encanta. Ya estás colocando el sofá con la mirada. Y llega el mensaje: “${pressure}”.`},
-      {start_sec:8.8,text:'Freno. No para quitarte ilusión. Para que la prisa no decida por ti.'},
-      {start_sec:17.2,text:'Primero mira si la operación encaja contigo y con esa vivienda. Sin convertirlo en un examen.'},
-      {start_sec:26.0,text:'Cuando lo ves claro, cambia el cuerpo. Dejas de adivinar y empiezas a decidir.'},
-      {start_sec:34.7,text:'Y si encaja, entonces sí: aceleramos. Con ganas, con criterio y sin matar el momento.'},
-      {start_sec:43.5,text:'Cuéntanos tu caso. Si hay que correr, corremos contigo, pero en la dirección correcta.'}
-    ];limits=[26,18,22,18,20,20];
+      {start_sec:.05,text:`Te encanta. Entras, miras la cocina y ya estás colocando el sofá con la cabeza. Entonces llega el mensaje: “${pressure}”.`},
+      {start_sec:8.8,text:'Y ahí el corazón quiere correr más rápido que los números. Es normal: cuando una casa te encaja, perderla parece peor que equivocarte.'},
+      {start_sec:17.2,text:'Freno. No para quitarte ilusión, sino para protegerla. Antes de lanzarte, conviene saber si la operación encaja contigo y con esa vivienda.'},
+      {start_sec:26.0,text:'Cuando lo compruebas, cambia todo. Dejas de imaginar problemas, sabes qué margen tienes y puedes decidir con la cabeza tranquila sin apagar las ganas.'},
+      {start_sec:34.7,text:'Si encaja, entonces sí: aceleramos. Hablamos, movemos documentación y buscamos que esa ilusión avance sin convertir cada decisión en una apuesta.'},
+      {start_sec:43.5,text:'Cuéntanos tu caso. Si hay que correr, corremos contigo; pero en la dirección correcta, con claridad desde el principio y sin ir a ciegas.'}
+    ];limits=[30,28,28,30,28,30];
   }else throw new Error(`STUDIO_SCRIPT_OUTPUT_UNSUPPORTED:${output}`);
   assertBlocks(blocks,limits);
   const castLock=lockCreativeCastV1({scenes:plan.scenes,character_bible:plan.character_bible});
-  const selected_plan={...plan,scenes:castLock.scenes,narration_blocks:blocks,script_supervised:true,cast_lock:castLock,primary_cast_video_source:castLock.primary_cast_video_source,voice_direction:'Conversational, smiling, quick reactions; one thought can travel across several cuts; never instructional or announcer-like.'};
-  const production_passes=[...(Array.isArray(p.production_passes)?p.production_passes:[]),{id:'SCRIPT_SUPERVISOR',status:'GREEN_CANDIDATE',notes:'Format-specific copy fit, continuous narration spacing and governed primary-cast source lock checked before physical production.'}];
-  return Object.freeze({...p,selected_plan,production_passes,iteration_count:Math.max(6,Number(p.iteration_count||0)),script_supervisor:{version:'v1.4',output_type:output,block_count:blocks.length,word_counts:blocks.map(x=>countWords(x.text)),starts:blocks.map(x=>x.start_sec),continuous_across_cuts:true,cast_lock_method:castLock.method,primary_cast_video_source:castLock.primary_cast_video_source,primary_character_scene_ratio:castLock.primary_character_scene_ratio,status:'GREEN_CANDIDATE'}});
+  const selected_plan={...plan,scenes:castLock.scenes,narration_blocks:blocks,script_supervised:true,cast_lock:castLock,primary_cast_video_source:castLock.primary_cast_video_source,voice_direction:'Conversational, cinematic and human; smiling when appropriate, varied rhythm, meaningful pauses and reactions; never instructional, list-like or announcer-like.'};
+  const production_passes=[...(Array.isArray(p.production_passes)?p.production_passes:[]),{id:'SCRIPT_SUPERVISOR',status:'GREEN_CANDIDATE',notes:'Format-specific copy fit, continuous narrative density and governed primary-cast source lock checked before physical production.'}];
+  return Object.freeze({...p,selected_plan,production_passes,iteration_count:Math.max(6,Number(p.iteration_count||0)),script_supervisor:{version:'v1.5',output_type:output,block_count:blocks.length,word_counts:blocks.map(x=>countWords(x.text)),total_words:blocks.reduce((n,x)=>n+countWords(x.text),0),starts:blocks.map(x=>x.start_sec),continuous_across_cuts:true,cast_lock_method:castLock.method,primary_cast_video_source:castLock.primary_cast_video_source,primary_character_scene_ratio:castLock.primary_character_scene_ratio,status:'GREEN_CANDIDATE'}});
 }
 
-export const CREATIVE_STUDIO_SCRIPT_SUPERVISOR_V1_CONTRACT=Object.freeze({schema_version:'1.4.0',owner_engine:'CREATIVE-STUDIO-001',format_aware:true,story_specific_copy:true,reel_specific_copy:true,long_form_specific_copy:true,pre_synthesis_fit_check:true,voice_direction:true,continuous_across_cuts:true,natural_timing_over_forced_speed:true,max_social_voice_gap_sec:2.4,governed_primary_cast_lock:true,broll_separated_from_primary:true,publication_authority:false,additional_cost_eur:0});
+export const CREATIVE_STUDIO_SCRIPT_SUPERVISOR_V1_CONTRACT=Object.freeze({schema_version:'1.5.0',owner_engine:'CREATIVE-STUDIO-001',format_aware:true,story_specific_copy:true,reel_specific_copy:true,long_form_specific_copy:true,long_form_story_density_required:true,pre_synthesis_fit_check:true,voice_direction:true,continuous_across_cuts:true,natural_timing_over_forced_speed:true,max_social_voice_gap_sec:2.4,governed_primary_cast_lock:true,broll_separated_from_primary:true,publication_authority:false,additional_cost_eur:0});
