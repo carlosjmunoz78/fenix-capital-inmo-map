@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'cerebro/**'
+      - 'docs/CEREBRO_CREATIVE_OUTPUT_PIPELINE_V1_2026-10-24.md'
       - 'src/CerebroBrowserConsole.tsx'
       - 'src/cerebroBrowserInteractive.ts'
       - 'supabase/functions/cerebro-human-old-actor-preprod-v0/**'
@@ -250,6 +251,27 @@ jobs:
           grep -F 'additional_cost_eur:0' "$runner"
           ! grep -R -E 'ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]+' "$edge" "$queue" "$scope" "$deny" "$rollback" "$runner"
           echo 'Creative Pipeline is company-scoped, OIDC-bound, service-role-only, non-publishing, external-rendered, zero-cost and has a non-destructive fail-closed rollback.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Creative PROD physical-evidence contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          registry='cerebro/registry/creative-tool-capabilities.v1.json'
+          runbook='docs/CEREBRO_CREATIVE_OUTPUT_PIPELINE_V1_2026-10-24.md'
+          test -f "$registry" && test -f "$runbook"
+          grep -F '"status": "PROD_CORE_CONFIRMED_OPERATIONAL_PROVIDER_GATED"' "$registry"
+          grep -F '"status": "CONFIRMED_OPERATIONAL_PROD"' "$registry"
+          grep -F '"prod_merge_commit": "4399870744e8341e37a7a570cdc91ed594215d03"' "$registry"
+          grep -F '"prod_worker_run_id": 40084548785' "$registry"
+          grep -F '"prod_worker_job_id": 120845537414' "$registry"
+          grep -F '"prod_queue_e2e": "GREEN"' "$registry"
+          grep -F '"prod_private_storage_6_artifacts": "GREEN"' "$registry"
+          grep -F '"prod_cross_company_negative_gate": "GREEN_REJECTED_NO_PERSISTENCE"' "$registry"
+          grep -F '"prod_money_limit_negative_gate": "GREEN_REJECTED_NO_PERSISTENCE"' "$registry"
+          grep -F '"prod_publish_negative_gate": "GREEN_REJECTED_NO_PERSISTENCE"' "$registry"
+          grep -F '"publish_authority": false' "$registry"
+          grep -F '**Estado:** PROD · CONFIRMED_OPERATIONAL para `CREATIVE-PROGRAMMATIC-RENDER-V1` · PROVIDER_GATED para Canva/OpenDesign/OpenCut' "$runbook"
+          grep -F 'Canva/OpenDesign/OpenCut' "$runbook"
+          echo 'Physical PROD evidence is registered without extending provider or publishing authority.' >> "$GITHUB_STEP_SUMMARY"
       - name: Browser Phase 3 bounded-authority contract
         shell: bash
         run: |
