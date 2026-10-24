@@ -1,8 +1,8 @@
 {
-  "schema_version": "1.1.0",
+  "schema_version": "1.2.0",
   "registry_id": "CEREBRO-CREATIVE-TOOL-CAPABILITIES-V1",
   "scope": "CEREBRO_OS_ALL_DEPARTMENTS",
-  "status": "PROD_CORE_GREEN_PROVIDER_GATED",
+  "status": "PROD_CORE_CONFIRMED_OPERATIONAL_PROVIDER_GATED",
   "owner_factory": "FACT-001",
   "execution_gateway": "ACTGW-001",
   "shared_runtime": "RUNTIME-001",
@@ -13,7 +13,7 @@
       "capability_id": "CREATIVE-PROGRAMMATIC-RENDER-V1",
       "class": "CEREBRO_ZERO_COST_PROGRAMMATIC_RENDER",
       "provider": "CEREBRO_HTML_CHROMIUM_FFMPEG",
-      "status": "PROD_GREEN",
+      "status": "CONFIRMED_OPERATIONAL_PROD",
       "execution_plane": "GITHUB_ACTIONS_OIDC_WORKER",
       "queue": "public.cerebro_creative_job_v1",
       "artifact_bucket": "cerebro-creative-assets",
@@ -21,12 +21,52 @@
       "supported_outputs": ["STATIC_POST","SQUARE_POST","CAROUSEL","STORY","REEL","SHORT_VIDEO","LANDSCAPE_VIDEO","THUMBNAIL","SEO_IMAGE","WEB_HERO","EMAIL_BANNER","DOCUMENT_COVER","APP_ASSET","INFOGRAPHIC"],
       "physical_evidence": {
         "preprod_queue_e2e": "GREEN",
-        "seo_image_1200x630": "GREEN",
-        "carousel_3_png_plus_pdf": "GREEN",
-        "reel_1080x1920_4s": "GREEN",
-        "private_storage_upload": "GREEN",
-        "sha256_manifest": "GREEN",
-        "publish_authority": false
+        "preprod_rollback_rehearsal": "GREEN_NON_DESTRUCTIVE_REVOKE_AND_RESTORE",
+        "prod_merge_commit": "4399870744e8341e37a7a570cdc91ed594215d03",
+        "prod_worker_run_id": 40084548785,
+        "prod_worker_job_id": 120845537414,
+        "prod_worker_conclusion": "SUCCESS",
+        "prod_edge_function": "cerebro-creative-dispatch-v1",
+        "prod_edge_function_version": 1,
+        "prod_edge_bundle_sha256": "8b297de0e7d943e94faf38b1e9182c4aa90576339523d8f33d14243921358edb",
+        "prod_queue_e2e": "GREEN",
+        "prod_seo_image_1200x630": "GREEN",
+        "prod_carousel_3_png_plus_pdf": "GREEN",
+        "prod_reel_1080x1920_4s": "GREEN",
+        "prod_private_storage_6_artifacts": "GREEN",
+        "prod_sha256_manifest": "GREEN",
+        "prod_acl_anon_authenticated_denied": "GREEN",
+        "prod_service_role_worker_only": "GREEN",
+        "prod_cross_company_negative_gate": "GREEN_REJECTED_NO_PERSISTENCE",
+        "prod_money_limit_negative_gate": "GREEN_REJECTED_NO_PERSISTENCE",
+        "prod_publish_negative_gate": "GREEN_REJECTED_NO_PERSISTENCE",
+        "security_advisor_new_findings_for_creative_queue": 0,
+        "publish_authority": false,
+        "additional_cost_eur": 0
+      },
+      "prod_canaries": {
+        "seo_image": {
+          "job_id": "f864db58-63f5-4279-9340-2392eec04e83",
+          "status": "SUCCEEDED",
+          "width": 1200,
+          "height": 630,
+          "sha256": "cc19eca8019d11db16324845b73c2b6579e23e71759b28f57024c446dd97749d"
+        },
+        "carousel": {
+          "job_id": "b184730c-80c9-4df0-b4ba-8e168db8a52e",
+          "status": "SUCCEEDED",
+          "pages": 3,
+          "pdf_pages": 3,
+          "artifact_count": 4
+        },
+        "reel": {
+          "job_id": "907e6d2e-5547-4d7a-b890-39f5b7972453",
+          "status": "SUCCEEDED",
+          "width": 1080,
+          "height": 1920,
+          "duration_sec": 4,
+          "sha256": "a8742d3505625693a545c9c75167a0812805ee47bc8221d5103c3ab0d19b3546"
+        }
       },
       "additional_cost_eur_target": 0,
       "prod_authorized": true
