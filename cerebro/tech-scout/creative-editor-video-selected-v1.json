@@ -1,15 +1,17 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.0.1",
   "selection_id": "CEREBRO-CREATIVE-EDITOR-VIDEO-SELECTED-V1",
   "date": "2026-10-24",
-  "status": "LAB_SELECTED_PINNED_PENDING_PHYSICAL_BUILD",
+  "status": "LAB_SELECTED_PINNED_PHYSICAL_BUILD_TRIGGERED",
   "rule": "REUSE_OR_WRAP_CAPABILITIES; DO_NOT_CREATE_NEW_CANONICAL_ENGINES",
+  "physical_lab_workflow": ".github/workflows/cerebro-creative-editor-video-lab-v1.yml",
   "candidates": [
     {
       "lane": "CANVA_LIKE_VISUAL_EDITOR",
       "repository": "clawnify/OpenDesign",
       "pinned_commit": "89c61f83c6c5141895d281385e90c6438ac7be1f",
       "license": "MIT",
+      "license_verified_from_upstream_at_pin": true,
       "disposition": "WRAP_LAB_P0",
       "role": "self-hosted visual design editor and deterministic fallback/complement to Canva",
       "stack": ["Preact", "Fabric.js", "Hono", "SQLite", "Vite"],
@@ -23,6 +25,7 @@
       "repository": "OpenCut-app/OpenCut",
       "pinned_commit": "e668010778568641babef2cc40be4703ae6916d6",
       "license": "MIT",
+      "license_verified_from_upstream_at_pin": true,
       "disposition": "LAB_P0_REWRITE_CANDIDATE",
       "role": "future interactive video editor/headless/MCP candidate",
       "stack": ["Rust", "FFmpeg", "Bun", "Moon", "web/desktop architecture"],
