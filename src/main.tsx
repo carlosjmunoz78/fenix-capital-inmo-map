@@ -115,6 +115,7 @@ import AnaKnowledgeBlock from './AnaKnowledgeBlock';
 import AnaChatBlock from './AnaChatBlock';
 import AnaKnowledgePlacementGuard from './AnaKnowledgePlacementGuard';
 import OperationalUniformityGuard from './OperationalUniformityGuard';
+import CerebroAttachmentBridge from './CerebroAttachmentBridge';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -164,6 +165,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <SpecialCaseLifecycleGuard />
       <SpecialCaseIntervenientContactGuard />
       <TaskDetailExperienceGuard />
+      <CerebroAttachmentBridge />
       <App />
       <RoleHomeShell />
       <ProfileShell />
