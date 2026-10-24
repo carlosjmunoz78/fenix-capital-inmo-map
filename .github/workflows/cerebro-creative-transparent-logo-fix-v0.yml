@@ -1,0 +1,48 @@
+name: CEREBRO Creative Transparent Logo Fix V0
+
+on:
+  push:
+    branches: [cerebro/creative-quality-v2-2026-10-24]
+    paths:
+      - '.github/workflows/cerebro-creative-transparent-logo-fix-v0.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch-transparent-logo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: cerebro/creative-quality-v2-2026-10-24
+          fetch-depth: 0
+      - name: Remove white logo plate from live renderer
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('cerebro/runtime/creative-job-runner-v2-live.mjs')
+          s=p.read_text()
+          old1="background:rgba(255,255,255,.91);border:1px solid rgba(255,255,255,.55);border-radius:${Math.round(w*.018)}px;padding:${Math.round(w*.011)}px ${Math.round(w*.016)}px;box-shadow:0 12px 40px rgba(0,0,0,.22)"
+          new1="background:transparent;border:0;border-radius:0;padding:0;box-shadow:none;filter:drop-shadow(0 4px 10px rgba(0,0,0,.55))"
+          old2="background:rgba(255,255,255,.91);border-radius:${Math.round(w*.016)}px;padding:${Math.round(w*.008)}px ${Math.round(w*.013)}px;box-shadow:0 10px 32px rgba(0,0,0,.2)"
+          new2="background:transparent;border:0;border-radius:0;padding:0;box-shadow:none;filter:drop-shadow(0 4px 10px rgba(0,0,0,.55))"
+          if s.count(old1)!=1: raise SystemExit(f'expected static logo plate once, got {s.count(old1)}')
+          if s.count(old2)!=1: raise SystemExit(f'expected video logo plate once, got {s.count(old2)}')
+          s=s.replace(old1,new1).replace(old2,new2)
+          p.write_text(s)
+          PY
+          git diff --check
+          grep -F 'background:transparent;border:0;border-radius:0;padding:0;box-shadow:none' cerebro/runtime/creative-job-runner-v2-live.mjs | wc -l | grep '^2$'
+      - name: Commit exact renderer patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'CEREBRO CI'
+          git config user.email '130542695+carlosjmunoz78@users.noreply.github.com'
+          git add cerebro/runtime/creative-job-runner-v2-live.mjs
+          git diff --cached --quiet && { echo 'No renderer patch produced'; exit 1; }
+          git commit -m 'fix(creative): render official logo without white plate'
+          git push origin HEAD:cerebro/creative-quality-v2-2026-10-24
