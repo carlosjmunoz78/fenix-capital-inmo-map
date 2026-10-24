@@ -2,15 +2,17 @@ name: CEREBRO Creative Quality V2 Live
 
 on:
   push:
-    branches: [cerebro/creative-quality-v2-2026-10-24, main]
+    branches: [cerebro/creative-quality-v2-2026-10-24, cerebro/creative-quality-v23-2026-10-24, main]
     paths:
       - 'cerebro/runtime/creative-quality-tribunal-v2.mjs'
       - 'cerebro/runtime/creative-media-sources-v2.mjs'
       - 'cerebro/runtime/creative-job-runner-v2-live.mjs'
       - 'cerebro/runtime/creative-audio-master-v3.mjs'
+      - 'cerebro/runtime/creative-visual-finisher-v3.mjs'
       - 'cerebro/tests/creative-quality-tribunal-v2.test.mjs'
       - 'cerebro/tests/creative-media-sources-v2.test.mjs'
       - 'cerebro/tests/creative-job-runner-v2-live.test.mjs'
+      - 'cerebro/tests/creative-visual-finisher-v3.test.mjs'
       - 'cerebro/tests/creative-quality-v2-live-showcase.mjs'
       - '.github/workflows/cerebro-creative-quality-v2-live.yml'
   pull_request:
@@ -20,9 +22,11 @@ on:
       - 'cerebro/runtime/creative-media-sources-v2.mjs'
       - 'cerebro/runtime/creative-job-runner-v2-live.mjs'
       - 'cerebro/runtime/creative-audio-master-v3.mjs'
+      - 'cerebro/runtime/creative-visual-finisher-v3.mjs'
       - 'cerebro/tests/creative-quality-tribunal-v2.test.mjs'
       - 'cerebro/tests/creative-media-sources-v2.test.mjs'
       - 'cerebro/tests/creative-job-runner-v2-live.test.mjs'
+      - 'cerebro/tests/creative-visual-finisher-v3.test.mjs'
       - 'cerebro/tests/creative-quality-v2-live-showcase.mjs'
       - '.github/workflows/cerebro-creative-quality-v2-live.yml'
   workflow_dispatch:
@@ -57,7 +61,8 @@ jobs:
           node --check cerebro/runtime/creative-media-sources-v2.mjs
           node --check cerebro/runtime/creative-job-runner-v2-live.mjs
           node --check cerebro/runtime/creative-audio-master-v3.mjs
-          node --test cerebro/tests/creative-quality-tribunal-v2.test.mjs cerebro/tests/creative-media-sources-v2.test.mjs cerebro/tests/creative-job-runner-v2-live.test.mjs
+          node --check cerebro/runtime/creative-visual-finisher-v3.mjs
+          node --test cerebro/tests/creative-quality-tribunal-v2.test.mjs cerebro/tests/creative-media-sources-v2.test.mjs cerebro/tests/creative-job-runner-v2-live.test.mjs cerebro/tests/creative-visual-finisher-v3.test.mjs
       - name: Brand transparency CSS gate
         shell: bash
         run: |
@@ -140,11 +145,15 @@ jobs:
                 const minLiveSources=item.output_type==='LONG_VIDEO'?5:3;
                 if(p.live_action_seconds_ratio<minLiveRatio) throw new Error(`LIVE_RATIO_FAIL:${a.filename}:${p.live_action_seconds_ratio}<${minLiveRatio}`);
                 if(p.live_action_source_count<minLiveSources) throw new Error(`LIVE_SOURCE_FAIL:${a.filename}`);
+                if(p.visual_finisher_version!=='V3'||p.visual_effect_layers<7) throw new Error(`VISUAL_FINISHER_FAIL:${a.filename}`);
+                if(p.scene_synced_effect_events<(p.scene_change_count+1)) throw new Error(`SCENE_EFFECT_COVERAGE_FAIL:${a.filename}`);
+                if(p.transition_flash_events<p.scene_change_count) throw new Error(`TRANSITION_EFFECT_FAIL:${a.filename}`);
+                if(!p.audio_preserved||!p.duration_preserved) throw new Error(`FINISHER_INTEGRITY_FAIL:${a.filename}`);
               }
             }
           }
           if(expected.size) throw new Error(`MISSING:${[...expected].join(',')}`);
-          console.log('MIXED_LIVE_ACTION_SHOWCASE_V23_GREEN');
+          console.log('MIXED_LIVE_ACTION_SHOWCASE_V23_FINISHER_GREEN');
           NODE
           for f in 05-story-video 06-reel 07-video-largo; do
             ffprobe -v error -show_entries format=duration -show_entries stream=codec_type,codec_name,width,height,duration -of json "$CEREBRO_SHOWCASE_OUT/$f.mp4"
@@ -156,11 +165,11 @@ jobs:
           set -euo pipefail
           mkdir -p "$CEREBRO_SHOWCASE_OUT/review-frames"
           for f in 05-story-video 06-reel 07-video-largo; do
-            ffmpeg -hide_banner -loglevel error -i "$CEREBRO_SHOWCASE_OUT/$f.mp4" -vf 'fps=1/2.5,scale=480:-2,tile=5x4:padding=6:margin=6' -frames:v 1 -y "$CEREBRO_SHOWCASE_OUT/review-frames/$f-contact-sheet.jpg"
+            ffmpeg -hide_banner -loglevel error -i "$CEREBRO_SHOWCASE_OUT/$f.mp4" -vf 'fps=1/2,scale=480:-2,tile=5x5:padding=6:margin=6' -frames:v 1 -y "$CEREBRO_SHOWCASE_OUT/review-frames/$f-contact-sheet.jpg"
           done
       - name: Upload PREPROD live-action review package
         uses: actions/upload-artifact@v4
         with:
-          name: cerebro-creative-quality-v2-live-${{ github.sha }}
+          name: cerebro-creative-quality-v23-live-${{ github.sha }}
           path: /tmp/cerebro-creative-quality-v2-live
           retention-days: 7
