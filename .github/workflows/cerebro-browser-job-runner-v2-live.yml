@@ -1,17 +1,17 @@
-name: CEREBRO Browser 1 V3 PREPROD Physical Gate
+name: CEREBRO Browser 1 V2 Live Worker
 
 on:
   push:
-    branches: ['cerebro/navegador-phase3-1-ui-20261024']
+    branches: ['main']
     paths:
       - '.github/workflows/cerebro-browser-job-runner-v2-live.yml'
       - 'cerebro/runtime/browser-job-runner-v2.mjs'
       - 'cerebro/runtime/browser-interactive-session-v3.mjs'
       - 'cerebro/runtime/browser1-access-v1.mjs'
-      - 'cerebro/runtime/cloud-browser-governed-session-v1.mjs'
-      - 'supabase/functions/cerebro-browser-dispatch-v2/interactive-preprod.ts'
-      - 'supabase/functions/cerebro-browser-interactive-v3/preprod.ts'
-      - 'supabase/functions/cerebro-browser-interactive-v3/worker-preprod.ts'
+      - 'supabase/functions/cerebro-browser-dispatch-v2/**'
+      - 'supabase/functions/cerebro-browser-interactive-v3/**'
+  schedule:
+    - cron: '*/5 * * * *'
   workflow_dispatch:
 
 permissions:
@@ -19,29 +19,25 @@ permissions:
   id-token: write
 
 concurrency:
-  group: cerebro-browser1-v3-preprod-physical-gate
+  group: cerebro-browser1-v2-live
   cancel-in-progress: false
 
 env:
-  CEREBRO_BROWSER_DISPATCH_URL: https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-browser-dispatch-v3-preprod
-  CEREBRO_BROWSER_INTERACTIVE_URL: https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-browser-worker-v3-preprod
+  CEREBRO_BROWSER_DISPATCH_URL: https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-browser-dispatch-v2
   CEREBRO_BROWSER_OIDC_AUDIENCE: cerebro-browser-worker-v1
-  CEREBRO_BROWSER_STAGE_CONCURRENCY: '1'
+  CEREBRO_BROWSER_STAGE_CONCURRENCY: '8'
   CEREBRO_PHYSICAL_BROWSER_E2E: '1'
-  CEREBRO_BROWSER_INTERACTIVE_MAX_MS: '720000'
-  CEREBRO_BROWSER_INTERACTIVE_FRAME_MS: '1200'
-  CEREBRO_BROWSER_INTERACTIVE_POLL_MS: '400'
 
 jobs:
   queue:
-    name: Check Browser 1 V3 PREPROD queue
+    name: Check Browser 1 V2 PROD queue
     runs-on: ubuntu-latest
     timeout-minutes: 3
     outputs:
       pending: ${{ steps.status.outputs.pending }}
     steps:
       - id: status
-        name: Read PREPROD queue state
+        name: Read queue state
         run: |
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
@@ -56,19 +52,24 @@ jobs:
           const states=body.states||{};
           const pending=Number(states.QUEUED||0)+Number(states.RETRY_WAIT||0);
           fs.appendFileSync(process.env.GITHUB_OUTPUT,`pending=${pending}\n`);
-          console.log(JSON.stringify({pending,states,environment:'PREPROD',interactive_preprod:body.interactive_preprod,incremental_cost_eur:body.incremental_cost_eur}));
+          console.log(JSON.stringify({pending,states,active_profiles:body.active_profiles,global_max_concurrent:body.global_max_concurrent,incremental_cost_eur:body.incremental_cost_eur}));
           NODE
 
   workers:
-    name: Browser 1 V3 PREPROD governed worker
+    name: Browser 1 V2 worker ${{ matrix.slot }} / 8
     needs: queue
     if: needs.queue.outputs.pending != '0'
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        slot: [1,2,3,4,5,6,7,8]
     runs-on: ubuntu-latest
     container:
       image: mcr.microsoft.com/playwright:v1.62.1-noble
     timeout-minutes: 15
     env:
-      CEREBRO_BROWSER_WORKER_SLOT: '1'
+      CEREBRO_BROWSER_WORKER_SLOT: ${{ matrix.slot }}
       CEREBRO_BROWSER_PHASE2_SEED_CANARY: 'false'
     steps:
       - uses: actions/checkout@v4
@@ -77,17 +78,17 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci
-      - name: Execute one governed Browser 1 V3 PREPROD job
+      - name: Execute one governed Browser 1 V2 job
         run: node cerebro/runtime/browser-job-runner-v2.mjs
 
   status:
-    name: Record Browser 1 V3 PREPROD state
+    name: Record live queue state
     needs: [queue, workers]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
-      - name: Read final PREPROD status
+      - name: Read final status
         run: |
           node --input-type=module <<'NODE'
           const u=new URL(process.env.ACTIONS_ID_TOKEN_REQUEST_URL);
