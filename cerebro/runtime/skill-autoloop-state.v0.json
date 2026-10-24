@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-24T23:17:55.687Z",
+  "updated_at": "2026-10-24T23:20:53.711Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -308,11 +308,47 @@
     "repo:c2930f28549d4a3d93e9b0412497",
     "repo:6a48a2b4ac7321e44c4d54ad8b62",
     "github-wide-skills:9ce5b5827108f64a631d",
-    "github-wide-skills:e5789dd748bde637728d"
+    "github-wide-skills:e5789dd748bde637728d",
+    "github-wide-skills:624fc964a333be64ec6b"
   ],
   "in_flight": {},
   "waiting_human": {},
-  "waiting_safe_handler": {},
+  "waiting_safe_handler": {
+    "github-wide-skills:624fc964a333be64ec6b": {
+      "candidate_id": "github-wide-skills:624fc964a333be64ec6b",
+      "name": "ai-visibility-audit",
+      "human_alias": "Ai Visibility Audit",
+      "wrapper_id": "skillwrap:22c5d6d7059d9750207a",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 86.15,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "Seolyticize/skills",
+        "upstream_head_commit": "c2f528c99c1c7c6cadb0e819e8c045d4408d9ff3",
+        "manifest_sha256": "60b9221a372979e3ef32356c5e4ca95f7dd78ef3cd1212ba8cac70c0c400f459",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 40142328721,
+      "checkpointed_at": "2026-10-24T23:20:53.711Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    }
+  },
   "completed": {
     "lobehub-skills:9a6e3fac20369220df43": {
       "candidate_id": "lobehub-skills:9a6e3fac20369220df43",
@@ -18078,7 +18114,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "IDLE_NO_NEW_ELIGIBLE_CANDIDATE",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -18091,7 +18127,7 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 40142119600,
+  "last_discovery_run_id": 40142328721,
   "autonomy_action_ledger": {
     "github-wide-skills:28b33318e96c4dcfb74a": {
       "schema_version": "1.0.0",
