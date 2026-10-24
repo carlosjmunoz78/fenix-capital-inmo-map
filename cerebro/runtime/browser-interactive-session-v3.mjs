@@ -7,8 +7,10 @@ const PROD_PROJECT_REF='cluhljgonannaafpmblx';
 const PREPROD_PROJECT_REF='hnqlnvakzaywtafeiybt';
 const DEFAULT_ENDPOINT=process.env.CEREBRO_BROWSER_INTERACTIVE_URL || `https://${PROD_PROJECT_REF}.supabase.co/functions/v1/cerebro-browser-interactive-v3`;
 const MAX_SESSION_MS=Math.min(Number(process.env.CEREBRO_BROWSER_INTERACTIVE_MAX_MS||780000),780000);
-const FRAME_INTERVAL_MS=Math.max(900,Number(process.env.CEREBRO_BROWSER_INTERACTIVE_FRAME_MS||1400));
-const POLL_INTERVAL_MS=Math.max(250,Number(process.env.CEREBRO_BROWSER_INTERACTIVE_POLL_MS||450));
+const ACTIVE_FRAME_INTERVAL_MS=Math.max(220,Number(process.env.CEREBRO_BROWSER_INTERACTIVE_FRAME_MS||320));
+const IDLE_FRAME_INTERVAL_MS=Math.max(900,Number(process.env.CEREBRO_BROWSER_INTERACTIVE_IDLE_FRAME_MS||1200));
+const POLL_INTERVAL_MS=Math.max(60,Number(process.env.CEREBRO_BROWSER_INTERACTIVE_POLL_MS||90));
+const ACTIVE_WINDOW_MS=Math.max(1500,Number(process.env.CEREBRO_BROWSER_INTERACTIVE_ACTIVE_WINDOW_MS||3000));
 
 function required(value,name){if(value===undefined||value===null||value==='')throw new Error(`MISSING_${name}`);return value;}
 function sleep(ms){return new Promise(resolve=>setTimeout(resolve,ms));}
@@ -97,7 +99,8 @@ export async function runInteractiveBrowserSessionV3({job,token=null,token_provi
   assertInteractiveScope(job,endpoint);
   const base=buildBaseJob(job);const sessionId=String(job.job_id);
   const worker=createGovernedCloudBrowserWorker({max_tabs:8,...browserWorkerOptions()});
-  const startedAt=Date.now();let seq=0,lastFrameAt=0,lastUrl='';let opened=false;let closed=false;
+  const startedAt=Date.now();let seq=0,lastFrameAt=0,lastUrl='',lastActivityAt=startedAt;let opened=false;let closed=false;
+  const publishFrame=async key=>{seq+=1;const frame=await captureFrame(worker,base,sessionId,key,seq,endpoint,tokenProvider,fetch_impl);lastUrl=frame.final_url||lastUrl;lastFrameAt=Date.now();return frame;};
   try{
     const initialActions=compileBrowser1Commands(job.commands||[],{mode:'MUTATE'});
     const initial=await worker.execute({...base,actions:initialActions,keep_session_open:true,capture_final_evidence:false});
@@ -105,10 +108,13 @@ export async function runInteractiveBrowserSessionV3({job,token=null,token_provi
     lastUrl=scrubUrl(initial.final_url);
     await callInteractive(endpoint,'worker/open',tokenProvider,{session_id:sessionId},fetch_impl);opened=true;
     const keyResult=await callInteractive(endpoint,'worker/key',tokenProvider,{session_id:sessionId},fetch_impl);const key=b64ToBuffer(keyResult.key_b64);if(key.length!==32)throw new Error('INTERACTIVE_KEY_INVALID');
+    await publishFrame(key);
     while(Date.now()-startedAt<MAX_SESSION_MS){
       const poll=await callInteractive(endpoint,'worker/poll',tokenProvider,{session_id:sessionId},fetch_impl);
       if(poll.stop===true||poll.state==='STOPPED')break;
+      let commandCompleted=false;
       if(poll.command){
+        lastActivityAt=Date.now();
         let ok=false,errorCode=null;
         try{
           const payload=decryptJson(poll.command.payload_ciphertext,poll.command.payload_iv,key);
@@ -117,12 +123,17 @@ export async function runInteractiveBrowserSessionV3({job,token=null,token_provi
           ok=result?.ok===true;lastUrl=scrubUrl(result?.final_url||lastUrl);if(!ok)errorCode=result?.authorization?.status||'HUMAN_ACTION_NOT_AUTHORIZED';
         }catch(error){errorCode=String(error?.message||error).slice(0,120);}
         await callInteractive(endpoint,'worker/complete',tokenProvider,{session_id:sessionId,command_id:poll.command.command_id,ok,error_code:errorCode},fetch_impl);
+        commandCompleted=ok;
+        if(ok){await publishFrame(key);lastActivityAt=Date.now();}
       }
       if(poll.handback===true){
-        seq+=1;const frame=await captureFrame(worker,base,sessionId,key,seq,endpoint,tokenProvider,fetch_impl);lastUrl=frame.final_url||lastUrl;lastFrameAt=Date.now();
+        lastActivityAt=Date.now();
+        if(!commandCompleted)await publishFrame(key);
         await callInteractive(endpoint,'worker/handback-complete',tokenProvider,{session_id:sessionId},fetch_impl);
       }
-      if(Date.now()-lastFrameAt>=FRAME_INTERVAL_MS){seq+=1;const frame=await captureFrame(worker,base,sessionId,key,seq,endpoint,tokenProvider,fetch_impl);lastUrl=frame.final_url||lastUrl;lastFrameAt=Date.now();}
+      const active=Date.now()-lastActivityAt<=ACTIVE_WINDOW_MS;
+      const frameInterval=active?ACTIVE_FRAME_INTERVAL_MS:IDLE_FRAME_INTERVAL_MS;
+      if(Date.now()-lastFrameAt>=frameInterval)await publishFrame(key);
       await sleep(POLL_INTERVAL_MS);
     }
     await worker.stop('INTERACTIVE_SESSION_COMPLETE');
@@ -135,4 +146,4 @@ export async function runInteractiveBrowserSessionV3({job,token=null,token_provi
   }
 }
 
-export const BROWSER_INTERACTIVE_V3_CONTRACT=Object.freeze({schema_version:'3.2.0',capability:'browser1.interactive',supported_environments:['PREPROD','PROD'],environment_endpoint_binding:true,multi_company_preprod:true,prod_company_scope:'fenix',same_runtime:'PLAYWRIGHT_CHROMIUM',same_v2_queue:true,host_browser_channel_supported:true,oidc_refresh_provider_supported:true,exclusive_control_lease:true,frames_encrypted_aes_gcm:true,human_input_encrypted_aes_gcm:true,raw_cdp_exposed:false,max_tabs:8,default_browser1_unchanged:true,incremental_cost_eur:0});
+export const BROWSER_INTERACTIVE_V3_CONTRACT=Object.freeze({schema_version:'3.3.0',capability:'browser1.interactive',supported_environments:['PREPROD','PROD'],environment_endpoint_binding:true,multi_company_preprod:true,prod_company_scope:'fenix',same_runtime:'PLAYWRIGHT_CHROMIUM',same_v2_queue:true,host_browser_channel_supported:true,oidc_refresh_provider_supported:true,exclusive_control_lease:true,frames_encrypted_aes_gcm:true,human_input_encrypted_aes_gcm:true,adaptive_realtime_loop:true,immediate_post_action_frame:true,raw_cdp_exposed:false,max_tabs:8,default_browser1_unchanged:true,incremental_cost_eur:0});
