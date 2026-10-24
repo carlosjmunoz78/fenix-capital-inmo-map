@@ -68,9 +68,14 @@ test('authenticated routine mutation can explicitly require the same session bin
 
 test('fully authorized session job still fails closed before browser launch when secret resolver is absent',async()=>{
   const worker=createGovernedCloudBrowserWorker();
+  const liveBundle={
+    ...bundle,
+    issued_at:new Date(Date.now()-60_000).toISOString(),
+    expires_at:new Date(Date.now()+60*60*1000).toISOString()
+  };
   const result=await worker.execute({
     ...base,
-    session_bundle:bundle,
+    session_bundle:liveBundle,
     canonical_engine_ids:['AUTO-001'],
     kill_switch_enabled:true,
     browser_binding:{healthy:true,kill_switch_enabled:true,fresh_attestation:true}

@@ -1,0 +1,78 @@
+name: CEREBRO Creative Output Pipeline V1
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/contracts/creative-output-pipeline-v1.contract.json'
+      - 'cerebro/runtime/creative-output-pipeline-v1.mjs'
+      - 'cerebro/tests/creative-output-pipeline-v1.test.mjs'
+      - 'docs/CEREBRO_CREATIVE_OUTPUT_PIPELINE_V1_2026-10-24.md'
+      - '.github/workflows/cerebro-creative-output-pipeline-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Validate contract
+        run: |
+          node -e "const c=require('./cerebro/contracts/creative-output-pipeline-v1.contract.json'); if(c.owner_engine!=='FACT-001'||c.new_canonical_engine!==false||c.cost_policy.default_additional_cost_eur!==0||c.authority_separation.publish!==false) process.exit(1); console.log('creative contract ok')"
+      - name: Run shared creative output tests
+        run: node --test cerebro/tests/creative-output-pipeline-v1.test.mjs
+      - name: Guard no direct publication authority
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const c=JSON.parse(fs.readFileSync('cerebro/contracts/creative-output-pipeline-v1.contract.json','utf8'));
+          if (c.authority_separation.publish || c.authority_separation.send || c.authority_separation.spend) process.exit(1);
+          if (!c.video_policy.deterministic_rendering || !c.video_policy.visual_identity_gate) process.exit(1);
+          console.log('authority and deterministic render guards ok');
+          NODE
+
+  physical-zero-cost-canary:
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install zero-cost FFmpeg runtime in ephemeral LAB runner
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends ffmpeg
+      - name: Verify local FFmpeg lane exists
+        run: |
+          command -v ffmpeg
+          command -v ffprobe
+          ffmpeg -version | head -n 1
+      - name: Generate deterministic SEO image and vertical reel canaries
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/cerebro-creative-canary
+          ffmpeg -hide_banner -loglevel error \
+            -f lavfi -i "color=c=0x222222:s=1200x630:d=1" \
+            -frames:v 1 -y /tmp/cerebro-creative-canary/seo-image-1200x630.png
+          ffmpeg -hide_banner -loglevel error \
+            -f lavfi -i "color=c=0x870064:s=1080x1920:r=30:d=2" \
+            -f lavfi -i "sine=frequency=880:sample_rate=44100:duration=2" \
+            -shortest -c:v libx264 -pix_fmt yuv420p -c:a aac -movflags +faststart \
+            -y /tmp/cerebro-creative-canary/reel-1080x1920.mp4
+      - name: Verify physical artifacts semantically
+        run: |
+          set -euo pipefail
+          test -s /tmp/cerebro-creative-canary/seo-image-1200x630.png
+          test -s /tmp/cerebro-creative-canary/reel-1080x1920.mp4
+          test "$(ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 /tmp/cerebro-creative-canary/seo-image-1200x630.png)" = "1200x630"
+          test "$(ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 /tmp/cerebro-creative-canary/reel-1080x1920.mp4)" = "1080x1920"
+          test "$(ffprobe -v error -select_streams a:0 -show_entries stream=codec_type -of default=nw=1:nk=1 /tmp/cerebro-creative-canary/reel-1080x1920.mp4)" = "audio"
+          duration="$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 /tmp/cerebro-creative-canary/reel-1080x1920.mp4)"
+          awk -v d="$duration" 'BEGIN { if (d < 1.8 || d > 2.2) exit 1 }'
+          sha256sum /tmp/cerebro-creative-canary/seo-image-1200x630.png /tmp/cerebro-creative-canary/reel-1080x1920.mp4
+          echo "physical creative canary ok"

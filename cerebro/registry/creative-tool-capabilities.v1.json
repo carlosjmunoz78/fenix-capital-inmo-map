@@ -1,8 +1,8 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "registry_id": "CEREBRO-CREATIVE-TOOL-CAPABILITIES-V1",
   "scope": "CEREBRO_OS_ALL_DEPARTMENTS",
-  "status": "PREPROD_GOVERNED",
+  "status": "PROD_CORE_GREEN_PROVIDER_GATED",
   "owner_factory": "FACT-001",
   "execution_gateway": "ACTGW-001",
   "shared_runtime": "RUNTIME-001",
@@ -10,13 +10,36 @@
   "rule": "TOOLS_ARE_SHARED_CAPABILITIES_NOT_CANONICAL_ENGINES",
   "capabilities": [
     {
+      "capability_id": "CREATIVE-PROGRAMMATIC-RENDER-V1",
+      "class": "CEREBRO_ZERO_COST_PROGRAMMATIC_RENDER",
+      "provider": "CEREBRO_HTML_CHROMIUM_FFMPEG",
+      "status": "PROD_GREEN",
+      "execution_plane": "GITHUB_ACTIONS_OIDC_WORKER",
+      "queue": "public.cerebro_creative_job_v1",
+      "artifact_bucket": "cerebro-creative-assets",
+      "heavy_render_outside_supabase": true,
+      "supported_outputs": ["STATIC_POST","SQUARE_POST","CAROUSEL","STORY","REEL","SHORT_VIDEO","LANDSCAPE_VIDEO","THUMBNAIL","SEO_IMAGE","WEB_HERO","EMAIL_BANNER","DOCUMENT_COVER","APP_ASSET","INFOGRAPHIC"],
+      "physical_evidence": {
+        "preprod_queue_e2e": "GREEN",
+        "seo_image_1200x630": "GREEN",
+        "carousel_3_png_plus_pdf": "GREEN",
+        "reel_1080x1920_4s": "GREEN",
+        "private_storage_upload": "GREEN",
+        "sha256_manifest": "GREEN",
+        "publish_authority": false
+      },
+      "additional_cost_eur_target": 0,
+      "prod_authorized": true
+    },
+    {
       "capability_id": "CREATIVE-CANVA-V1",
       "class": "PAID_EXISTING_PROVIDER_DESIGN",
       "provider": "CANVA",
       "status": "ROUTING_GREEN_PENDING_CEREBRO_OAUTH_FOR_PHYSICAL_MCP",
       "cost_policy": "EXISTING_PAID_PLAN_ALLOWED_NO_EXTRA_SPEND",
       "preferred_for": ["brand_kit", "brand_templates", "premium_assets", "collaboration", "native_canva_designs", "resize_when_plan_includes"],
-      "binding_registry": "cerebro/integrations/canva/canva-capability-bindings.v1.json"
+      "binding_registry": "cerebro/integrations/canva/canva-capability-bindings.v1.json",
+      "prod_authorized": false
     },
     {
       "capability_id": "CREATIVE-VISUAL-LOCAL-V1",
@@ -67,7 +90,7 @@
         "mcp_server": "UPSTREAM_PLANNED_NOT_CLAIMED",
         "headless_mode": "UPSTREAM_PLANNED_NOT_CLAIMED"
       },
-      "operational_video_path_until_parity": ["HYPERFRAMES", "OPENMONTAGE", "FFMPEG"],
+      "operational_video_path_until_parity": ["CREATIVE-PROGRAMMATIC-RENDER-V1", "HYPERFRAMES", "OPENMONTAGE", "FFMPEG"],
       "preferred_for": ["interactive_video_editor_lab", "future_editor_api", "future_mcp", "future_headless_batch"],
       "additional_cost_eur_target": 0,
       "prod_authorized": false
@@ -83,8 +106,9 @@
     "never_register_tool_as_engine": true
   },
   "routing_order": [
-    "EXISTING_PROVEN_NATIVE_OR_PAID_PROVIDER_WHEN_IT_ADDS_VALUE",
-    "LOCAL_OR_SELF_HOSTED_ZERO_COST_CAPABILITY",
+    "CERTIFIED_CEREBRO_PROGRAMMATIC_PROD_CORE",
+    "EXISTING_PROVEN_NATIVE_OR_PAID_PROVIDER_WHEN_IT_ADDS_VALUE_AND_BINDING_IS_GREEN",
+    "LOCAL_OR_SELF_HOSTED_ZERO_COST_CAPABILITY_WHEN_PROD_CERTIFIED",
     "EXISTING_MULTIMEDIA_FACTORY",
     "HUMAN_REQUIRED_ONLY_FOR_CANONICAL_EXCEPTIONS"
   ],
