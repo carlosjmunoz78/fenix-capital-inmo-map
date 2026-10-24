@@ -8609,6 +8609,76 @@
       "promoted_at": "2026-10-22T19:18:26.653Z"
     },
     {
+      "candidate_id": "repo:5da9cd1aed8ad2e437ccc318c138",
+      "technical_name": "plasmo",
+      "source_locator": "github://TerminalSkills/skills@d9ad8723e712dff2cc2acee0b37147d3937cebc8/skills/plasmo",
+      "pinned_sha": "d9ad8723e712dff2cc2acee0b37147d3937cebc8",
+      "snapshot_sha256": "5da9cd1aed8ad2e437ccc318c138237b269a9e5fa0bcbe77a5b1fa7bcb1ec798",
+      "manifest_sha256": "e4fac77794df036747eb807a51e27b0ee4dc5c85237be67422955fa335132344",
+      "outcome_hash": "e51eee058dc61cbe1ac5013441c961562f6a9c86cbdd5fc606dd65c05629ef39",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:5da9cd1aed8ad2e4:cap:1",
+          "technical_name": "plasmo",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-24T19:25:01.165Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "d8ab6a5eb4b09c65ec1adc02c4e90fbf3fd72dd471373db1b0efaf505cc4ffb4"
+    },
+    {
       "candidate_id": "repo:bef099ca21d5c7d1e8f9cdb909da",
       "technical_name": "plasmo",
       "source_locator": "github://TerminalSkills/skills@6edcf94159d9f46b0759d2e1b59dd545cfaca254/skills/plasmo",
@@ -12243,11 +12313,11 @@
   ],
   "adoption_skips": [],
   "summary": {
-    "total": 121,
-    "inserted": 0,
+    "total": 122,
+    "inserted": 1,
     "updated": 0,
     "skipped": 0,
-    "pending_canary": 0,
+    "pending_canary": 1,
     "prod_readonly": 121
   }
 }
