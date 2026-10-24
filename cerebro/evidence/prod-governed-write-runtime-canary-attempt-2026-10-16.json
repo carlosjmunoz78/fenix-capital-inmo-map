@@ -1,0 +1,54 @@
+{
+  "schema_version": "1",
+  "evidence_id": "CEREBRO-PROD-GOVERNED-WRITE-RUNTIME-CANARY-ATTEMPT-2026-10-16",
+  "company_id": "fenix",
+  "engine_id": "ACTGW-001",
+  "environment": "PROD",
+  "version": "v1",
+  "requested_chain": [
+    "CEREBRO_GATEWAY",
+    "ACTGW-001",
+    "PROD_GOVERNED_WRITE_RUNTIME",
+    "GITHUB_PHYSICAL_CANARY"
+  ],
+  "observed": {
+    "gateway_deployment_version": 2,
+    "runtime_deployment_version": 1,
+    "gateway_http_status": 409,
+    "runtime_http_status": 409,
+    "gateway_execution_time_ms": 1178,
+    "runtime_execution_time_ms": 600,
+    "gateway_execution_id": "0fa26717-1ee7-42e0-b6b1-b2dc73130dd8",
+    "runtime_execution_id": "6d46e491-caa3-4dde-9959-104dc750c6c6",
+    "stage_reached": "CREDENTIAL_BROKER",
+    "error": "EXISTING_GITHUB_CREDENTIAL_NOT_BOUND",
+    "human_required": "POLICY_CONFLICT",
+    "new_credentials_created": false,
+    "physical_github_branch_created": false,
+    "physical_github_file_created": false,
+    "physical_github_pr_created": false
+  },
+  "safety": {
+    "main_sha_lease": "9baf5a1885d3fbd8fc18614fb3b867a49583f40f",
+    "direct_main_write": false,
+    "merge": false,
+    "auto_merge": false,
+    "force_push": false,
+    "workflow_mutation": false,
+    "governance_self_mutation": false,
+    "customer_data": false,
+    "trading": false,
+    "paid_fallback": false,
+    "additional_cost_eur": 0
+  },
+  "rollback": {
+    "gateway_trigger_closed_after_attempt": true,
+    "closed_gateway_deployment_version": 3,
+    "verification_request_id": 336,
+    "verification_http_status": 200,
+    "verification_state": "CLOSED_AFTER_CANARY",
+    "trigger_enabled": false
+  },
+  "verdict": "HUMAN_REQUIRED_POLICY_CONFLICT",
+  "next_required_decision": "Authorize a governed binding of an existing or dedicated GitHub write credential to the PROD_GOVERNED_WRITE runtime. Do not expose the credential in chat and do not create one implicitly."
+}
