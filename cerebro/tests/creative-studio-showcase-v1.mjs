@@ -8,6 +8,7 @@ import { renderCreativeJobV2Live } from '../runtime/creative-job-runner-v2-live.
 import { masterCreativeSocialAudioV4 } from '../runtime/creative-social-audio-v4.mjs';
 import { finishCreativeSocialV4 } from '../runtime/creative-social-finisher-v4.mjs';
 import { assertCreativeSocialV4 } from '../runtime/creative-social-quality-v4.mjs';
+import { evaluatePhysicalCharacterContinuityV1 } from '../runtime/creative-character-continuity-physical-v1.mjs';
 
 const out=process.env.CEREBRO_STUDIO_OUT||'/tmp/cerebro-creative-studio-v1';
 await fs.rm(out,{recursive:true,force:true});await fs.mkdir(out,{recursive:true});
@@ -22,7 +23,7 @@ const brand={logo_url:logo,primary:'#ffffff',accent:'#f47b20',background:'#11111
 const audio={voice_enabled:true,voice_id:'ES_FEMALE',music_enabled:true,ducking:true,captions:true};
 const baseBrief={objective:'Crear una pieza social que entretenga primero, conecte con la ansiedad real de comprar vivienda y convierta sin parecer formación.',audience:'Personas que han encontrado una vivienda que les encanta y sienten presión por reservar.',desire:'Ves la casa, ves la cocina y ya sabes hasta dónde va el sofá',pressure:'hay que reservar hoy',truth:'primero conviene comprobar que la operación encaja contigo y con la vivienda',benefit:'puedes decidir con ilusión, sin ir a ciegas y sin matar el momento',cta:'Cuéntanos tu caso y lo miramos contigo'};
 const formats=[['story','STORY_VIDEO','INSTAGRAM'],['reel','REEL','INSTAGRAM'],['video-largo','LONG_VIDEO','FACEBOOK']];
-const manifest={schema_version:'1.0.1',environment:'PREPROD',studio_mode:'CEREBRO_STUDIO_GRADE',publish_authorized:false,additional_cost_eur:0,productions:[]};
+const manifest={schema_version:'1.1.0',environment:'PREPROD',studio_mode:'CEREBRO_STUDIO_GRADE',publish_authorized:false,additional_cost_eur:0,productions:[]};
 
 for(const [label,output_type,channel] of formats){
   let production=orchestrateCreativeStudioV1({company_id:'fenix',environment:'PREPROD',brief:{...baseBrief,output_type,channel},assets:{visual_sources:photos,video_sources:vids}});
@@ -35,11 +36,12 @@ for(const [label,output_type,channel] of formats){
     const art=rendered.artifacts.find(x=>x.mime==='video/mp4');if(!art)throw new Error(`STUDIO_VIDEO_ARTIFACT_MISSING:${label}`);
     const mastered=await masterCreativeSocialAudioV4({videoFile:art.local_path,narrationBlocks:production.selected_plan.narration_blocks,scenes:production.selected_plan.scenes,temp:rendered.temp,voiceId:'ES_FEMALE'});
     const finished=await finishCreativeSocialV4({videoFile:mastered.file,scenes:production.selected_plan.scenes,temp:rendered.temp,accent:brand.accent});
-    const physical={...(art.physical_evidence||{}),...mastered.evidence,...finished.evidence,live_action_seconds_ratio:art.physical_evidence?.live_action_seconds_ratio,live_action_source_count:art.physical_evidence?.live_action_source_count,scene_change_count:Math.max(0,production.selected_plan.scenes.length-1)};
+    const character_continuity=evaluatePhysicalCharacterContinuityV1({scenes:production.selected_plan.scenes,character_bible:production.selected_plan.character_bible,voice_id:'ES_FEMALE'});
+    const physical={...(art.physical_evidence||{}),...mastered.evidence,...finished.evidence,character_continuity,live_action_seconds_ratio:art.physical_evidence?.live_action_seconds_ratio,live_action_source_count:art.physical_evidence?.live_action_source_count,scene_change_count:Math.max(0,production.selected_plan.scenes.length-1)};
     const social=assertCreativeSocialV4({plan:production.selected_plan,physical_evidence:physical});
     const studio=assertCreativeStudioV1({production,physical_evidence:physical});
     const target=path.join(out,`${label}.mp4`);await fs.copyFile(finished.file,target);
-    manifest.productions.push({label,output_type,channel,selected_candidate_id:production.selected_candidate_id,candidate_scores:production.candidates.map(x=>({id:x.id,score:x.evaluation.score})),rejected_candidates:production.rejected_candidates,expert_decisions:production.expert_decisions,production_passes:production.production_passes,script_supervisor:production.script_supervisor,architecture_qa:studioArchitecture,studio_qa:studio,social_qa:social,physical_evidence:physical,artifact:{filename:path.basename(target),bytes:(await fs.stat(target)).size},publish_authorized:false,additional_cost_eur:0});
+    manifest.productions.push({label,output_type,channel,character_mode:production.selected_plan.character_bible?.mode||null,selected_candidate_id:production.selected_candidate_id,candidate_scores:production.candidates.map(x=>({id:x.id,score:x.evaluation.score})),rejected_candidates:production.rejected_candidates,expert_decisions:production.expert_decisions,production_passes:production.production_passes,script_supervisor:production.script_supervisor,architecture_qa:studioArchitecture,studio_qa:studio,social_qa:social,physical_evidence:physical,artifact:{filename:path.basename(target),bytes:(await fs.stat(target)).size},publish_authorized:false,additional_cost_eur:0});
   } finally {await fs.rm(rendered.temp,{recursive:true,force:true})}
 }
 await fs.writeFile(path.join(out,'STUDIO_MANIFEST.json'),JSON.stringify(manifest,null,2));
