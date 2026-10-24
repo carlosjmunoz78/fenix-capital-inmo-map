@@ -1,7 +1,7 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.0.1",
   "contract_id": "CEREBRO-SOCIAL-FACEBOOK-HUMAN-BROWSER-V1",
-  "status": "PREPROD_DEFINED_CANARY_PENDING",
+  "status": "BROWSER_MECHANICS_GREEN_AUTHENTICATED_CANARY_PENDING",
   "company_id": "fenix",
   "engine_id": "SOC-001",
   "department_id": "social-facebook",
@@ -65,7 +65,8 @@
     "company_binding_required": true
   },
   "autonomy_policy": {
-    "routine_low_risk_browser_work": "ALLOWED_AFTER_CANARY_GREEN",
+    "routine_low_risk_browser_work": "ALLOWED",
+    "authenticated_browser_work": "HOLD_UNTIL_VALID_CREDENTIAL_CANARY_GREEN",
     "publish_or_external_side_effect": "REQUIRES_EXISTING_SOCIAL_POLICY_AND_PROVIDER_GATES",
     "money_spend": "HUMAN_REQUIRED_MONEY_LIMIT",
     "legal_or_signature": "HUMAN_REQUIRED",
@@ -85,6 +86,7 @@
   ],
   "provider_strategy": {
     "native_api_first_when_complete": true,
+    "existing_proven_provider_path_preserved": true,
     "browser_when_native_missing_or_insufficient": true,
     "preserve_existing_buffer_make_until_parity_proven": true
   },
@@ -96,10 +98,30 @@
     "idempotency_required": true,
     "rollback": "STOP_SESSION_OR_CANCEL_JOB_AND_PRESERVE_PREVIOUS_PROVIDER_PATH"
   },
+  "physical_evidence": {
+    "synthetic_mutation_canary": {
+      "job_id": "8b24ee63-4bc0-42e6-9e2d-bebfe159fcf1",
+      "status": "SUCCEEDED",
+      "authorization_status": "AUTHORIZED",
+      "actions_proven": ["goto", "fill", "click", "extract_text", "screenshot"],
+      "credential_materialized": false,
+      "secret_material_logged": false
+    },
+    "facebook_real_observe_canary": {
+      "job_id": "921c5698-d863-4582-8fee-f3555c2ad5cf",
+      "status": "SUCCEEDED",
+      "authorization_status": "AUTHORIZED",
+      "final_url": "https://www.facebook.com/",
+      "evidence_captured": true,
+      "credential_materialized": false,
+      "secret_material_logged": false
+    },
+    "authenticated_credential_canary": "PENDING_VALID_PROVIDER_CREDENTIAL"
+  },
   "future_reuse": {
     "pattern": "ENGINE_TO_BROWSER_HUMAN_BINDING",
     "future_consumers": ["SEO", "MARKETING", "APP_FACTORY", "WEB_FACTORY", "LANGUAGE", "OTHER_ENGINES"],
     "current_scope": "FACEBOOK_ONLY"
   },
-  "runtime_truth": "The contract is additive. Physical SOC-001 browser mutation canary must pass before autonomous Facebook UI work is certified."
+  "runtime_truth": "SOC-001 browser mechanics are physically proven for mutation and real Facebook navigation. Authenticated autonomy remains blocked until a valid provider credential/session canary passes."
 }
