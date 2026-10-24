@@ -1,0 +1,43 @@
+name: CEREBRO Browser Work Total V1 Validate
+
+on:
+  push:
+    branches: ['feat/browser-work-total-v1-20261024']
+    paths:
+      - '.github/workflows/cerebro-browser-work-total-v1-validate.yml'
+      - 'src/cerebroBrowserWorkTotalDock.ts'
+      - 'src/cerebroBrowserInteractive.ts'
+      - 'src/CerebroBrowserConsole.tsx'
+      - 'cerebro/runtime/browser-interactive-session-v3.mjs'
+      - 'cerebro/runtime/browser-session-bundle-v1.mjs'
+      - 'cerebro/runtime/browser-session-bundle-v1.test.mjs'
+      - 'cerebro/runtime/browser-work-total-v1-contract.test.mjs'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-browser-work-total-v1-validate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate Work Total UI + runtime
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Test session bundle integrity
+        run: node --test cerebro/runtime/browser-session-bundle-v1.test.mjs
+      - name: Test Work Total contracts
+        run: node --test cerebro/runtime/browser-work-total-v1-contract.test.mjs
+      - name: Syntax-check interactive runtime
+        run: node --check cerebro/runtime/browser-interactive-session-v3.mjs
+      - name: Build App with PREPROD Work Total dock
+        run: npm run build
