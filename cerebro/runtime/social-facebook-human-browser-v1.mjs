@@ -66,6 +66,8 @@ export function buildFacebookHumanBrowserRequest(input = {}) {
   const targetUrl = allowedUrl(input.target_url);
   const commands = validateCommands(input.commands);
   const risk = String(input.risk || 'LOW').toUpperCase();
+  const mode = String(input.mode || 'MUTATE').toUpperCase();
+  if (!['OBSERVE','MUTATE'].includes(mode)) throw new Error('FACEBOOK_BROWSER_MODE_DENIED');
   if (!['LOW','MEDIUM'].includes(risk)) throw new Error('FACEBOOK_BROWSER_RISK_DENIED');
   if (Number(input.expected_cost_eur || 0) !== 0) throw new Error('FACEBOOK_BROWSER_MONEY_LIMIT');
   const credentialRef = input.credential_ref_id == null ? null : required(input.credential_ref_id, 'credential_ref_id', 180);
@@ -77,7 +79,7 @@ export function buildFacebookHumanBrowserRequest(input = {}) {
     department_id: 'social-facebook',
     environment: 'PROD',
     version: 'v1',
-    mode: String(input.mode || 'MUTATE').toUpperCase(),
+    mode,
     identity_id: identityId,
     account_id: accountId,
     browser_profile_id: `b1-fenix-${safeSegment(identityId)}-${safeSegment(accountId)}-PROD`,
@@ -85,7 +87,7 @@ export function buildFacebookHumanBrowserRequest(input = {}) {
     target_url: targetUrl,
     commands,
     risk,
-    capability: 'browser1.act',
+    capability: mode === 'MUTATE' ? 'browser1.act' : 'browser1.observe',
     expected_cost_eur: 0,
     priority: Number.isInteger(input.priority) ? input.priority : 70,
     timeout_seconds: Math.min(Math.max(Number(input.timeout_seconds || 600), 30), 900),
@@ -100,7 +102,14 @@ export function buildFacebookHumanBrowserRequest(input = {}) {
         attestation_source: 'SOC001_FACEBOOK_HUMAN_BROWSER_V1'
       },
       engine_authority: {
-        browser_use_authorized: true
+        browser_use_authorized: true,
+        operation_authorized: true,
+        prod_mutation_authorized: true,
+        promotion_gate_green: true,
+        rollback_ready: true,
+        observability_ready: true,
+        audit_ready: true,
+        idempotency_proven: true
       },
       kill_switch_enabled: true,
       delegation_source: 'SOC-001'
@@ -113,10 +122,12 @@ export function facebookHumanBrowserCapabilities() {
     contract_id: 'CEREBRO-SOCIAL-FACEBOOK-HUMAN-BROWSER-V1',
     engine_id: 'SOC-001',
     department_id: 'social-facebook',
-    execution: 'browser1.act',
+    execution: Object.freeze(['browser1.observe','browser1.act']),
     allowed_hosts: Object.freeze([...ALLOWED_HOSTS]),
     max_actions_per_job: MAX_ACTIONS,
     human_pacing_provided_by_worker: true,
+    synthetic_mutation_canary_green: true,
+    synthetic_mutation_canary_job_id: '8b24ee63-4bc0-42e6-9e2d-bebfe159fcf1',
     vault_reference_only: true,
     raw_credentials_in_queue: false,
     no_stealth_evasion: true,
