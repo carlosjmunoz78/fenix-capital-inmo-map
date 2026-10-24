@@ -69,7 +69,7 @@ export async function fetchBrowserInteractiveApi<T>(path:string,body:unknown={})
  }catch{return{status:0,data:null}}
 }
 
-function bytesFromB64(value:string){const raw=atob(value);const bytes=new Uint8Array(raw.length);for(let i=0;i<raw.length;i+=chunk)raw+=String.fromCharCode(...bytes.subarray(i,i+chunk));return btoa(raw);}
+function bytesFromB64(value:string){const raw=atob(value);const bytes=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);return bytes;}
 function b64FromBytes(bytes:Uint8Array){let raw='';const chunk=0x8000;for(let i=0;i<bytes.length;i+=chunk)raw+=String.fromCharCode(...bytes.subarray(i,i+chunk));return btoa(raw);}
 
 export async function importBrowserSessionKey(keyB64:string){
