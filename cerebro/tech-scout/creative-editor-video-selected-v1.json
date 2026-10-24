@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0.0",
+  "selection_id": "CEREBRO-CREATIVE-EDITOR-VIDEO-SELECTED-V1",
+  "date": "2026-10-24",
+  "status": "LAB_SELECTED_PINNED_PENDING_PHYSICAL_BUILD",
+  "rule": "REUSE_OR_WRAP_CAPABILITIES; DO_NOT_CREATE_NEW_CANONICAL_ENGINES",
+  "candidates": [
+    {
+      "lane": "CANVA_LIKE_VISUAL_EDITOR",
+      "repository": "clawnify/OpenDesign",
+      "pinned_commit": "89c61f83c6c5141895d281385e90c6438ac7be1f",
+      "license": "MIT",
+      "disposition": "WRAP_LAB_P0",
+      "role": "self-hosted visual design editor and deterministic fallback/complement to Canva",
+      "stack": ["Preact", "Fabric.js", "Hono", "SQLite", "Vite"],
+      "evidence": ["active upstream in Oct 2026", "design CRUD API", "templates", "uploads", "brand-kit related fixes", "resize", "local/self-host path"],
+      "integration_target": "DIGITAL_BUILD_CREATIVE / OPS-CREATIVE-001",
+      "additional_cost_eur_target": 0,
+      "prod_authorized": false
+    },
+    {
+      "lane": "VIDEO_CREATION_EDITING",
+      "repository": "OpenCut-app/OpenCut",
+      "pinned_commit": "e668010778568641babef2cc40be4703ae6916d6",
+      "license": "MIT",
+      "disposition": "LAB_P0_REWRITE_CANDIDATE",
+      "role": "future interactive video editor/headless/MCP candidate",
+      "stack": ["Rust", "FFmpeg", "Bun", "Moon", "web/desktop architecture"],
+      "upstream_state": "REWRITE_IN_PROGRESS",
+      "integration_target": "DIGITAL_BUILD_MULTIMEDIA / existing Multimedia Factory V0",
+      "existing_operational_neighbors": ["HyperFrames", "OpenMontage", "FFmpeg"],
+      "policy": "Do not replace existing video pipeline until physical build and OLD-vs-NEW demonstrate material advantage",
+      "additional_cost_eur_target": 0,
+      "prod_authorized": false
+    }
+  ],
+  "mandatory_gates": ["license_pin", "dependency_inventory", "secret_scan", "clean_build", "basic_function_smoke", "resource_measurement", "OLD_vs_NEW", "EVA-001", "JDG-001", "rollback", "rebuild", "PREPROD_before_PROD"]
+}
