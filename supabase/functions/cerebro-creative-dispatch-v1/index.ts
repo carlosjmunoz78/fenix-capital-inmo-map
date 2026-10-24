@@ -54,13 +54,15 @@ async function enqueue(body:any,createdBy:string){
   const {data,error}=await svc.rpc("cerebro_creative_enqueue_v1",{p_request:request});if(error)throw error;return data;
 }
 
-function canaryBody(runId:string){return {
-  idempotency_key:`creative-${PREPROD?'preprod':'prod'}-canary-${runId}`,
-  company_id:"fenix",engine_id:"FACT-001",department_id:"creative",version:"v1",
-  channel:"SEO",output_type:"SEO_IMAGE",audit_id:`creative-canary-${runId}`,priority:100,max_attempts:1,
-  brand_profile_ref:"brand:fenix-capital:synthetic-canary",brief_ref:"brief:creative-canary",
-  creative_payload:{headline:"CEREBRO CREATIVE",subheadline:"Physical zero-cost canary",cta:"PREPROD",brand:{background:"#161616",primary:"#ffffff",accent:"#8a1d63"}}
-};}
+function canarySuite(runId:string){
+  const common={company_id:"fenix",engine_id:"FACT-001",department_id:"creative",version:"v1",audit_id:`creative-canary-${runId}`,priority:100,max_attempts:1,brand_profile_ref:"brand:fenix-capital:synthetic-canary",brief_ref:"brief:creative-canary",brand_label:"Fénix Capital"};
+  const brand={background:"#161616",primary:"#ffffff",accent:"#8a1d63"};
+  return [
+    {...common,idempotency_key:`creative-preprod-image-${runId}`,channel:"SEO",output_type:"SEO_IMAGE",creative_payload:{brand_label:"Fénix Capital",headline:"CEREBRO CREATIVE",subheadline:"Imagen SEO · canario físico",cta:"PREPROD",brand}},
+    {...common,idempotency_key:`creative-preprod-carousel-${runId}`,channel:"INSTAGRAM",output_type:"CAROUSEL",creative_payload:{brand_label:"Fénix Capital",headline:"CEREBRO CREATIVE",brand,pages:[{headline:"Carrusel automático",subheadline:"Página 1 · diseño gobernado",cta:"SIGUIENTE"},{headline:"Multiempresa",subheadline:"Página 2 · mismo motor, otra salida",cta:"CEREBRO"},{headline:"0 € adicional",subheadline:"Página 3 · render open-source",cta:"QA GREEN"}]}},
+    {...common,idempotency_key:`creative-preprod-reel-${runId}`,channel:"INSTAGRAM",output_type:"REEL",duration_sec:4,creative_payload:{brand_label:"Fénix Capital",headline:"CEREBRO VIDEO",brand,timeline:[{headline:"Reel automático",subheadline:"Escena 1",duration_sec:2},{headline:"Render local",subheadline:"Escena 2 · FFmpeg + Chromium",duration_sec:2}]}}
+  ];
+}
 
 async function leaseRow(jobId:string,leaseId:string,workerId:string){
   const {data,error}=await svc.from("cerebro_creative_job_v1").select("job_id,company_id,environment,status,lease_id,lease_owner").eq("job_id",jobId).eq("status","LEASED").eq("lease_id",leaseId).eq("lease_owner",workerId).maybeSingle();
@@ -79,7 +81,10 @@ Deno.serve(async req=>{
   if(req.method==="POST"&&route==="canary-seed"){
     if(!PREPROD)return out(req,404,{ok:false,error:"CANARY_ROUTE_NOT_AVAILABLE"});
     const w=await githubWorker(req);if(!w.ok)return out(req,403,w);
-    try{return out(req,200,await enqueue(canaryBody(String(w.claims.run_id??Date.now())),w.worker_id));}catch(e){return out(req,400,{ok:false,error:"CANARY_ENQUEUE_FAILED",detail:safeError(e)});}
+    try{
+      const jobs=[];for(const body of canarySuite(String(w.claims.run_id??Date.now())))jobs.push(await enqueue(body,w.worker_id));
+      return out(req,200,{ok:true,jobs});
+    }catch(e){return out(req,400,{ok:false,error:"CANARY_ENQUEUE_FAILED",detail:safeError(e)});}
   }
 
   if(req.method==="POST"&&route==="enqueue"){
@@ -115,17 +120,18 @@ Deno.serve(async req=>{
     const w=await githubWorker(req);if(!w.ok)return out(req,403,w);
     try{
       const body=await req.json();
-      const {data,error}=await svc.rpc("cerebro_creative_complete_v1",{
-        p_job_id:body.job_id,p_lease_id:body.lease_id,p_worker_id:w.worker_id,p_status:body.status,
-        p_result_summary:body.result_summary??null,p_artifact_manifest:body.artifact_manifest??null,p_error_code:body.error_code??null
-      });
+      const {data,error}=await svc.rpc("cerebro_creative_complete_v1",{p_job_id:body.job_id,p_lease_id:body.lease_id,p_worker_id:w.worker_id,p_status:body.status,p_result_summary:body.result_summary??null,p_artifact_manifest:body.artifact_manifest??null,p_error_code:body.error_code??null});
       if(error)throw error;return out(req,200,data);
     }catch(e){return out(req,400,{ok:false,error:"COMPLETE_FAILED",detail:safeError(e)});}
   }
 
   if(req.method==="POST"&&route==="asset-url"){
     const o=await owner(req);if(!o.ok)return out(req,403,o);
-    try{const body=await req.json();const path=String(body.path??"");if(!/^[-A-Za-z0-9_./]{1,500}$/.test(path)||path.includes(".."))throw new Error("ASSET_PATH_DENIED");const {data,error}=await svc.storage.from(BUCKET).createSignedUrl(path,Math.min(Math.max(Number(body.expires_in??3600),60),86400));if(error)throw error;return out(req,200,{ok:true,path,signed_url:data.signedUrl});}catch(e){return out(req,400,{ok:false,error:"ASSET_URL_FAILED",detail:safeError(e)});}
+    try{
+      const body=await req.json();const path=String(body.path??"");if(!/^[-A-Za-z0-9_./]{1,500}$/.test(path)||path.includes(".."))throw new Error("ASSET_PATH_DENIED");
+      const {data,error}=await svc.storage.from(BUCKET).createSignedUrl(path,Math.min(Math.max(Number(body.expires_in??3600),60),86400));if(error)throw error;
+      return out(req,200,{ok:true,path,signed_url:data.signedUrl});
+    }catch(e){return out(req,400,{ok:false,error:"ASSET_URL_FAILED",detail:safeError(e)});}
   }
 
   return out(req,404,{ok:false,error:"ROUTE_NOT_AVAILABLE"});
