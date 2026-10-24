@@ -146,7 +146,7 @@ export async function runOneBrowserJobV2({
     const end=resourceSample(); const duration=Date.now()-startMs;
     await callDispatch(endpoint,'complete-v2',oidc,{worker_slot,job_id:job.job_id,lease_id:job.lease_id,outcome:'FAILED',error_code:String(error?.message||error).slice(0,240),retryable:true,result_summary:{ok:false,credential_materialized:credentialMaterialized,secret_material_logged:false}},fetch_impl).catch(()=>null);
     await callDispatch(endpoint,'metrics-v2',oidc,{worker_slot,run_id,stage_concurrency,job_id:job.job_id,company_id:job.company_id,department_id:job.department_id,browser_profile_id:job.browser_profile_id,
-      started_at:start.at,finished_at:end.at,duration_ms:duration,rss_start_bytes:start.rss,rss_end_bytes:end.rss,heap_used_start_bytes:start.heap_used,rss_end_bytes:end.rss,heap_used_end_bytes:end.heap_used,
+      started_at:start.at,finished_at:end.at,duration_ms:duration,rss_start_bytes:start.rss,rss_end_bytes:end.rss,heap_used_start_bytes:start.heap_used,heap_used_end_bytes:end.heap_used,
       cpu_user_micros:Math.max(0,end.cpu_user-start.cpu_user),cpu_system_micros:Math.max(0,end.cpu_system-start.cpu_system),outcome:'FAILED'},fetch_impl).catch(()=>null);
     throw error;
   }finally{
