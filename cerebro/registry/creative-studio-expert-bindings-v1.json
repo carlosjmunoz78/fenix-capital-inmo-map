@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "CREATIVE-STUDIO-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "status": "PARTIAL_PHYSICAL_CERTIFICATION",
+  "principle": "Logical departments share runtimes and governed capabilities; no claim of one server or one AI per department.",
+  "publication_authority": false,
+  "additional_cost_eur": 0,
+  "bindings": [
+    {
+      "department": "SHOWRUNNER",
+      "binding_type": "LOGICAL_ROLE",
+      "runtime": "creative-studio-orchestrator-v1.mjs",
+      "state": "PREPROD_CANDIDATE",
+      "evidence": "Multi-candidate selection, production passes and final creative direction are implemented; physical campaign approval still pending."
+    },
+    {
+      "department": "SOCIAL_STRATEGIST",
+      "binding_type": "LOGICAL_ENGINE_BINDING",
+      "runtime": "SOC-001 + creative-social-quality-v4.mjs",
+      "state": "PREPROD_CANDIDATE",
+      "evidence": "Social-native hook, retention, telegram rejection, numeric-density rejection and channel gates are implemented. Social publishing remains separately governed."
+    },
+    {
+      "department": "SCREENWRITER",
+      "binding_type": "LOGICAL_ROLE",
+      "runtime": "creative-studio-orchestrator-v1.mjs + creative-studio-script-supervisor-v1.mjs",
+      "state": "PREPROD_CANDIDATE",
+      "evidence": "Three competing directions plus format-specific script supervision and fail-closed voice-fit checks are implemented."
+    },
+    {
+      "department": "CREATIVE_DIRECTOR",
+      "binding_type": "LOGICAL_ROLE",
+      "runtime": "creative-studio-orchestrator-v1.mjs + creative-studio-tribunal-v1.mjs",
+      "state": "PREPROD_CANDIDATE",
+      "evidence": "Concept selection, energy/humor/novelty scoring, rejected alternatives and director notes are implemented."
+    },
+    {
+      "department": "ART_DIRECTOR",
+      "binding_type": "PHYSICAL_CAPABILITY_BINDING",
+      "runtime": "CREATIVE-PROGRAMMATIC-RENDER-V1 + creative-job-runner-v2-live.mjs",
+      "state": "CONFIRMED_COMPONENT",
+      "evidence": "Owned Playwright/HTML/CSS renderer, official transparent Fénix logo and governed owned visual assets have physical PREPROD/PROD evidence from earlier creative pipeline."
+    },
+    {
+      "department": "DIRECTOR_OF_PHOTOGRAPHY",
+      "binding_type": "LOGICAL_ROLE_WITH_GOVERNED_MEDIA",
+      "runtime": "creative-media-sources-v2.mjs + creative-studio-orchestrator-v1.mjs",
+      "state": "PREPROD_CANDIDATE",
+      "evidence": "Shot progression and governed live-action source assignment are implemented; no claim of autonomous camera capture."
+    },
+    {
+      "department": "EDITOR",
+      "binding_type": "PHYSICAL_CAPABILITY_BINDING",
+      "runtime": "FFmpeg + creative-job-runner-v2-live.mjs",
+      "state": "CONFIRMED_COMPONENT",
+      "evidence": "Physical video assembly, xfade transitions, scene timing, subtitles and final encoding have passed prior PREPROD canaries. OpenCut remains LAB-only and is not required."
+    },
+    {
+      "department": "MOTION_VFX_DIRECTOR",
+      "binding_type": "PHYSICAL_PREPROD_BINDING",
+      "runtime": "creative-social-finisher-v4.mjs",
+      "state": "PREPROD_CANDIDATE",
+      "evidence": "Fast transition accents and rejection of repeated full-frame sweeps are implemented; current Studio V1 physical canary is the acceptance gate. HyperFrames/LTX remain non-certified seams."
+    },
+    {
+      "department": "VOICE_DIRECTOR",
+      "binding_type": "PHYSICAL_PREPROD_BINDING",
+      "runtime": "Piper + creative-social-audio-v4.mjs",
+      "state": "PREPROD_CANDIDATE",
+      "evidence": "Piper is physically executable and voice pacing/profile are governed. QWEN3_TTS exists only as ADAPTER_SEAM_ONLY and is not claimed operational."
+    },
+    {
+      "department": "SOUND_DESIGNER",
+      "binding_type": "PHYSICAL_PREPROD_BINDING",
+      "runtime": "FFmpeg procedural music/SFX + creative-social-audio-v4.mjs",
+      "state": "PREPROD_CANDIDATE",
+      "evidence": "Full-length music, ducking, SFX generation and measured SFX peak are implemented; current Studio V1 physical canary must pass."
+    },
+    {
+      "department": "BRAND_GUARDIAN",
+      "binding_type": "LOGICAL_ROLE_WITH_PHYSICAL_ASSETS",
+      "runtime": "creative-studio-tribunal-v1.mjs + official Fénix brand assets",
+      "state": "PREPROD_CANDIDATE",
+      "evidence": "Official transparent logo and brand tokens are physically verified; final campaign-level brand consistency is pending."
+    },
+    {
+      "department": "RETENTION_EDITOR",
+      "binding_type": "LOGICAL_ROLE",
+      "runtime": "creative-social-quality-v4.mjs + creative-studio-tribunal-v1.mjs",
+      "state": "PREPROD_CANDIDATE",
+      "evidence": "Hook timing, narration block ratio, edit density, voice gaps and scroll-away heuristics are governed."
+    },
+    {
+      "department": "CHANNEL_EDITOR",
+      "binding_type": "LOGICAL_ROLE",
+      "runtime": "creative-studio-campaign-v1.mjs + creative-social-quality-v4.mjs",
+      "state": "PREPROD_CANDIDATE",
+      "evidence": "Format-specific Story/Reel/Long plans and a six-format campaign slate are implemented; full campaign render is pending."
+    },
+    {
+      "department": "CREATIVE_CRITIC",
+      "binding_type": "LOGICAL_TRIBUNAL_ROLE",
+      "runtime": "creative-studio-tribunal-v1.mjs",
+      "state": "PREPROD_CANDIDATE",
+      "evidence": "Rejects telegram narration, training tone, repetitive effects, quiet SFX and insufficient physical motion; human visual acceptance remains mandatory for this milestone."
+    }
+  ],
+  "known_non_operational_seams": [
+    {"capability": "QWEN3_TTS", "state": "ADAPTER_SEAM_ONLY"},
+    {"capability": "HYPERFRAMES", "state": "ADAPTER_SEAM_ONLY"},
+    {"capability": "LTX_VIDEO", "state": "LAB_ADAPTER_SEAM_ONLY"},
+    {"capability": "COMFYUI", "state": "ADAPTER_SEAM_ONLY"},
+    {"capability": "Z_IMAGE_TURBO", "state": "LAB_ADAPTER_SEAM_ONLY"},
+    {"capability": "OPENCUT", "state": "LAB_BUILD_ONLY_NO_HEADLESS_PARITY"}
+  ],
+  "promotion_rule": "Do not promote CREATIVE-STUDIO-001 to autonomous PROD until physical Studio video canary, full six-format campaign canary, creative/brand/channel tribunals, visual human review, rollback and main reconciliation are GREEN."
+}
