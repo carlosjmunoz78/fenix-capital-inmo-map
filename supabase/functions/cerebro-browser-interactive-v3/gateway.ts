@@ -2,17 +2,25 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
 const PROJECT_REF='hnqlnvakzaywtafeiybt';
 const UPSTREAM=`https://${PROJECT_REF}.supabase.co/functions/v1/cerebro-browser-interactive-v3`;
-const ALLOWED_ORIGINS=new Set(['https://carlosjmunoz78.github.io','http://localhost:5173','http://127.0.0.1:5173']);
+const EXACT_ALLOWED_ORIGINS=new Set([
+ 'https://carlosjmunoz78.github.io',
+ 'https://fenix-capital-preprod.vercel.app',
+ 'https://fenix-capital-preprod-bhdzchxoz.vercel.app',
+ 'http://localhost:5173',
+ 'http://127.0.0.1:5173'
+]);
+const VERCEL_PREPROD_ORIGIN=/^https:\/\/fenix-capital-preprod(?:-[a-z0-9-]+)?\.vercel\.app$/i;
 const OWNER_ROUTES=new Set(['owner/companies','owner/status','owner/start','owner/key','owner/takeover','owner/handback','owner/input','owner/stop']);
 
-function cors(origin:string|null){const h:Record<string,string>={'content-type':'application/json; charset=utf-8','cache-control':'no-store','vary':'origin','x-cerebro-browser-gateway':'v1-preprod'};if(origin&&ALLOWED_ORIGINS.has(origin))h['access-control-allow-origin']=origin;return h;}
+function allowedOrigin(origin:string|null){return Boolean(origin&&(EXACT_ALLOWED_ORIGINS.has(origin)||VERCEL_PREPROD_ORIGIN.test(origin)));}
+function cors(origin:string|null){const h:Record<string,string>={'content-type':'application/json; charset=utf-8','cache-control':'no-store','vary':'origin','x-cerebro-browser-gateway':'v1-preprod'};if(allowedOrigin(origin)&&origin)h['access-control-allow-origin']=origin;return h;}
 function json(req:Request,status:number,body:unknown){return new Response(JSON.stringify(body),{status,headers:cors(req.headers.get('origin'))});}
 function routeOf(req:Request){const parts=new URL(req.url).pathname.split('/').filter(Boolean);const marker=parts.lastIndexOf('cerebro-browser-gateway-v1');const suffix=marker>=0?parts.slice(marker+1):parts.slice(-2);return suffix.join('/');}
 
 Deno.serve(async(req:Request)=>{
  const origin=req.headers.get('origin');
  if(req.method==='OPTIONS'){
-  if(!origin||!ALLOWED_ORIGINS.has(origin))return new Response(null,{status:403});
+  if(!allowedOrigin(origin))return new Response(null,{status:403,headers:{'cache-control':'no-store','vary':'origin'}});
   return new Response(null,{status:204,headers:{...cors(origin),'access-control-allow-methods':'GET,POST,OPTIONS','access-control-allow-headers':'authorization,content-type,apikey','access-control-max-age':'600'}});
  }
  const route=routeOf(req);
