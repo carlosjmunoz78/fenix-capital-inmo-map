@@ -3,6 +3,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { renderCreativeJobV2Live } from '../runtime/creative-job-runner-v2-live.mjs';
 import { masterCreativeVideoAudioV3 } from '../runtime/creative-audio-master-v3.mjs';
+import { finishCreativeVideoV3 } from '../runtime/creative-visual-finisher-v3.mjs';
 import { assertCreativePlanV2 } from '../runtime/creative-quality-tribunal-v2.mjs';
 
 const out=process.env.CEREBRO_SHOWCASE_OUT||'/tmp/cerebro-creative-quality-v2-live';
@@ -57,8 +58,8 @@ const jobs=[
 {source_kind:'VIDEO',video_source:vids[1],source_start_sec:9,duration_sec:4.8,metric:'13',metric_label:'CIERRE',headline:'Llega preparado a firma',subheadline:'Sin sorpresas evitables.',voiceover:'Llega preparado a firma.'},
 {source_kind:'PHOTO',duration_sec:4.8,metric:'14',metric_label:'FÉNIX CAPITAL',headline:'Primero viabilidad. Después compromiso.',subheadline:'Método antes que prisa.',voiceover:'Primero viabilidad. Después compromiso.'}],audio:{...audio,voice_id:'ES_MALE'}})]
 ];
-const manifest={schema_version:'2.3.0',environment:'PREPROD',publish_authorized:false,additional_cost_eur:0,items:[]};
-for(const [label,job] of jobs){const r=await renderCreativeJobV2Live(job);try{const item={label,output_type:job.output_type,quality:r.quality,video_source_provenance:r.video_source_provenance,artifacts:[]};for(const a of r.artifacts){let local=a.local_path,physical={...(a.physical_evidence||{})};if(a.mime==='video/mp4'){const cp=job.request.creative_payload;const mastered=await masterCreativeVideoAudioV3({videoFile:a.local_path,scenes:cp.scenes,temp:r.temp,voiceId:cp.audio?.voice_id||'ES_FEMALE'});local=mastered.file;Object.assign(physical,mastered.evidence,{scene_change_count:cp.scenes.length-1,video_duration_sec:mastered.evidence.video_duration_sec});item.quality=assertCreativePlanV2({plan:r.plan,physical_evidence:physical});}
+const manifest={schema_version:'2.3.1',environment:'PREPROD',publish_authorized:false,additional_cost_eur:0,items:[]};
+for(const [label,job] of jobs){const r=await renderCreativeJobV2Live(job);try{const item={label,output_type:job.output_type,quality:r.quality,video_source_provenance:r.video_source_provenance,artifacts:[]};for(const a of r.artifacts){let local=a.local_path,physical={...(a.physical_evidence||{})};if(a.mime==='video/mp4'){const cp=job.request.creative_payload;const mastered=await masterCreativeVideoAudioV3({videoFile:a.local_path,scenes:cp.scenes,temp:r.temp,voiceId:cp.audio?.voice_id||'ES_FEMALE'});const finished=await finishCreativeVideoV3({videoFile:mastered.file,scenes:cp.scenes,temp:r.temp,accent:cp.brand?.accent||'#f47b20'});local=finished.file;Object.assign(physical,mastered.evidence,finished.evidence,{scene_change_count:cp.scenes.length-1,video_duration_sec:mastered.evidence.video_duration_sec});item.quality=assertCreativePlanV2({plan:r.plan,physical_evidence:physical});}
 const ext=path.extname(a.filename),suffix=a.page?`-${String(a.page).padStart(2,'0')}`:'',target=path.join(out,`${label}${suffix}${ext}`);await fs.copyFile(local,target);item.artifacts.push({...a,local_path:undefined,filename:path.basename(target),physical_evidence:physical,quality_verdict:item.quality.verdict,quality_score:item.quality.score})}manifest.items.push(item)}finally{await fs.rm(r.temp,{recursive:true,force:true})}}
 await fs.writeFile(path.join(out,'MANIFEST.json'),JSON.stringify(manifest,null,2));
 console.log(JSON.stringify({ok:true,items:manifest.items.length,artifacts:manifest.items.reduce((n,x)=>n+x.artifacts.length,0),out}));
