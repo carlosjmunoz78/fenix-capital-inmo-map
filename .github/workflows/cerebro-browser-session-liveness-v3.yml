@@ -6,11 +6,19 @@ on:
     paths:
       - 'supabase/functions/cerebro-browser-interactive-v3/**'
       - 'cerebro/runtime/browser-session-liveness-v3.test.mjs'
+      - 'cerebro/runtime/browser-live-runner-host.test.mjs'
+      - 'cerebro/runtime/browser-job-runner-v2.mjs'
+      - 'cerebro/runtime/browser-interactive-session-v3.mjs'
+      - '.github/workflows/cerebro-browser-job-runner-v2-live.yml'
       - '.github/workflows/cerebro-browser-session-liveness-v3.yml'
   pull_request:
     paths:
       - 'supabase/functions/cerebro-browser-interactive-v3/**'
       - 'cerebro/runtime/browser-session-liveness-v3.test.mjs'
+      - 'cerebro/runtime/browser-live-runner-host.test.mjs'
+      - 'cerebro/runtime/browser-job-runner-v2.mjs'
+      - 'cerebro/runtime/browser-interactive-session-v3.mjs'
+      - '.github/workflows/cerebro-browser-job-runner-v2-live.yml'
       - '.github/workflows/cerebro-browser-session-liveness-v3.yml'
 
 permissions:
@@ -18,7 +26,7 @@ permissions:
 
 jobs:
   session-liveness:
-    name: Stale session recovery contract
+    name: Stale session recovery and LIVE runtime contract
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -26,5 +34,5 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Validate stale-session classifier
-        run: node --test cerebro/runtime/browser-session-liveness-v3.test.mjs
+      - name: Validate browser session and LIVE runtime contracts
+        run: node --test cerebro/runtime/browser-session-liveness-v3.test.mjs cerebro/runtime/browser-live-runner-host.test.mjs
