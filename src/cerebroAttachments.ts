@@ -50,7 +50,8 @@ async function sha256(buffer:ArrayBuffer){return bytesToHex(new Uint8Array(await
 
 async function inflateRaw(bytes:Uint8Array){
  if(typeof DecompressionStream==='undefined')throw new Error('DESCOMPRESION_NO_DISPONIBLE');
- const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+ const copy=Uint8Array.from(bytes).buffer;
+ const stream=new Blob([copy]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
  return new Uint8Array(await new Response(stream).arrayBuffer());
 }
 
