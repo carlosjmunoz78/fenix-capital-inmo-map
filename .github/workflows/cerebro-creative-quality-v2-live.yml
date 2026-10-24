@@ -54,6 +54,14 @@ jobs:
           node --check cerebro/runtime/creative-media-sources-v2.mjs
           node --check cerebro/runtime/creative-job-runner-v2-live.mjs
           node --test cerebro/tests/creative-quality-tribunal-v2.test.mjs cerebro/tests/creative-media-sources-v2.test.mjs cerebro/tests/creative-job-runner-v2-live.test.mjs
+      - name: Brand transparency gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(grep -F 'background:transparent;border:0;border-radius:0;padding:0;box-shadow:none' cerebro/runtime/creative-job-runner-v2-live.mjs | wc -l)" -eq 2
+          ! grep -F 'background:rgba(255,255,255,.91)' cerebro/runtime/creative-job-runner-v2-live.mjs
+          grep -F 'filter:drop-shadow' cerebro/runtime/creative-job-runner-v2-live.mjs >/dev/null
+          echo 'TRANSPARENT_LOGO_INTEGRATION_GREEN'
       - name: Install Chromium and FFmpeg
         run: |
           npx playwright install --with-deps chromium
