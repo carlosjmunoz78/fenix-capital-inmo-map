@@ -9,10 +9,14 @@ on:
       - 'cerebro/runtime/creative-job-runner-v2-live.mjs'
       - 'cerebro/runtime/creative-audio-master-v3.mjs'
       - 'cerebro/runtime/creative-visual-finisher-v3.mjs'
+      - 'cerebro/runtime/creative-social-audio-v4.mjs'
+      - 'cerebro/runtime/creative-social-quality-v4.mjs'
+      - 'cerebro/runtime/creative-social-finisher-v4.mjs'
       - 'cerebro/tests/creative-quality-tribunal-v2.test.mjs'
       - 'cerebro/tests/creative-media-sources-v2.test.mjs'
       - 'cerebro/tests/creative-job-runner-v2-live.test.mjs'
       - 'cerebro/tests/creative-visual-finisher-v3.test.mjs'
+      - 'cerebro/tests/creative-social-v4.test.mjs'
       - 'cerebro/tests/creative-quality-v2-live-showcase.mjs'
       - '.github/workflows/cerebro-creative-quality-v2-live.yml'
   pull_request:
@@ -23,10 +27,14 @@ on:
       - 'cerebro/runtime/creative-job-runner-v2-live.mjs'
       - 'cerebro/runtime/creative-audio-master-v3.mjs'
       - 'cerebro/runtime/creative-visual-finisher-v3.mjs'
+      - 'cerebro/runtime/creative-social-audio-v4.mjs'
+      - 'cerebro/runtime/creative-social-quality-v4.mjs'
+      - 'cerebro/runtime/creative-social-finisher-v4.mjs'
       - 'cerebro/tests/creative-quality-tribunal-v2.test.mjs'
       - 'cerebro/tests/creative-media-sources-v2.test.mjs'
       - 'cerebro/tests/creative-job-runner-v2-live.test.mjs'
       - 'cerebro/tests/creative-visual-finisher-v3.test.mjs'
+      - 'cerebro/tests/creative-social-v4.test.mjs'
       - 'cerebro/tests/creative-quality-v2-live-showcase.mjs'
       - '.github/workflows/cerebro-creative-quality-v2-live.yml'
   workflow_dispatch:
@@ -62,7 +70,10 @@ jobs:
           node --check cerebro/runtime/creative-job-runner-v2-live.mjs
           node --check cerebro/runtime/creative-audio-master-v3.mjs
           node --check cerebro/runtime/creative-visual-finisher-v3.mjs
-          node --test cerebro/tests/creative-quality-tribunal-v2.test.mjs cerebro/tests/creative-media-sources-v2.test.mjs cerebro/tests/creative-job-runner-v2-live.test.mjs cerebro/tests/creative-visual-finisher-v3.test.mjs
+          node --check cerebro/runtime/creative-social-audio-v4.mjs
+          node --check cerebro/runtime/creative-social-quality-v4.mjs
+          node --check cerebro/runtime/creative-social-finisher-v4.mjs
+          node --test cerebro/tests/creative-quality-tribunal-v2.test.mjs cerebro/tests/creative-media-sources-v2.test.mjs cerebro/tests/creative-job-runner-v2-live.test.mjs cerebro/tests/creative-visual-finisher-v3.test.mjs cerebro/tests/creative-social-v4.test.mjs
       - name: Brand transparency CSS gate
         shell: bash
         run: |
@@ -127,33 +138,32 @@ jobs:
           for(const item of m.items){
             expected.delete(item.label);
             if(!item.quality?.passed||item.quality.score<88) throw new Error(`QUALITY_FAIL:${item.label}`);
+            if(['STORY_VIDEO','REEL','LONG_VIDEO'].includes(item.output_type)&&(!item.social_quality?.passed||item.social_quality.verdict!=='SOCIAL_QA_GREEN')) throw new Error(`SOCIAL_QA_FAIL:${item.label}`);
             for(const a of item.artifacts){
               if(a.quality_verdict!=='CREATIVE_QA_GREEN') throw new Error(`ARTIFACT_QA_FAIL:${a.filename}`);
               if(a.mime==='video/mp4'){
-                const p=a.physical_evidence||{};
+                const p=a.physical_evidence||{},sceneCount=p.scene_change_count+1;
                 if(!a.audio?.voice||!a.audio?.music||a.audio.ducking!==true||a.audio.captions!==true) throw new Error(`AUDIO_DECLARATION_FAIL:${a.filename}`);
                 if(!p.audio_stream_present||p.audio_coverage_ratio<.98) throw new Error(`AUDIO_COVERAGE_FAIL:${a.filename}:${p.audio_coverage_ratio}`);
-                if(!p.scene_synced_voice||p.voice_segment_count<Math.ceil((p.scene_change_count+1)*.75)) throw new Error(`VOICE_SYNC_FAIL:${a.filename}`);
-                if(p.max_voice_speedup>1.18) throw new Error(`VOICE_SPEED_FAIL:${a.filename}:${p.max_voice_speedup}`);
-                if(p.transition_sfx_count<Math.max(2,p.scene_change_count-1)) throw new Error(`SFX_FAIL:${a.filename}`);
-                const duration=p.video_duration_sec||a.duration_sec;
-                const rate=p.scene_change_count/duration;
-                const minRate=item.output_type==='LONG_VIDEO'?.18:.25;
+                if(!p.continuous_narration||p.scene_locked_narration!==false) throw new Error(`TELEGRAM_NARRATION_FAIL:${a.filename}`);
+                if(p.voice_block_count>=Math.ceil(sceneCount*.67)) throw new Error(`VOICE_FRAGMENTATION_FAIL:${a.filename}:${p.voice_block_count}/${sceneCount}`);
+                const minVoiceCoverage=item.output_type==='LONG_VIDEO'?.42:.52;
+                if(p.voice_coverage_ratio<minVoiceCoverage||p.max_voice_gap_sec>2.4) throw new Error(`VOICE_FLOW_FAIL:${a.filename}:${p.voice_coverage_ratio}:${p.max_voice_gap_sec}`);
+                if(p.voice_wpm<135||p.voice_wpm>195||p.max_voice_speedup>1.12) throw new Error(`VOICE_ENERGY_FAIL:${a.filename}:${p.voice_wpm}:${p.max_voice_speedup}`);
+                if(p.sfx_peak_db<-18||p.sfx_event_count<Math.max(3,Math.ceil(sceneCount*.6))) throw new Error(`SFX_AUDIBILITY_FAIL:${a.filename}:${p.sfx_peak_db}`);
+                const duration=p.video_duration_sec||a.duration_sec,rate=p.scene_change_count/duration,minRate=item.output_type==='LONG_VIDEO'?.18:.25;
                 if(rate<minRate) throw new Error(`EDIT_DENSITY_FAIL:${a.filename}:${rate}<${minRate}`);
                 if(p.unique_frame_ratio<.45||p.motion_score<.30) throw new Error(`MOTION_FAIL:${a.filename}`);
-                const minLiveRatio=item.output_type==='LONG_VIDEO'?.55:.60;
-                const minLiveSources=item.output_type==='LONG_VIDEO'?5:3;
+                const minLiveRatio=item.output_type==='LONG_VIDEO'?.55:.60,minLiveSources=item.output_type==='LONG_VIDEO'?5:3;
                 if(p.live_action_seconds_ratio<minLiveRatio) throw new Error(`LIVE_RATIO_FAIL:${a.filename}:${p.live_action_seconds_ratio}<${minLiveRatio}`);
                 if(p.live_action_source_count<minLiveSources) throw new Error(`LIVE_SOURCE_FAIL:${a.filename}`);
-                if(p.visual_finisher_version!=='V3'||p.visual_effect_layers<7) throw new Error(`VISUAL_FINISHER_FAIL:${a.filename}`);
-                if(p.scene_synced_effect_events<(p.scene_change_count+1)) throw new Error(`SCENE_EFFECT_COVERAGE_FAIL:${a.filename}`);
-                if(p.transition_flash_events<p.scene_change_count) throw new Error(`TRANSITION_EFFECT_FAIL:${a.filename}`);
+                if(p.visual_finisher_version!=='V4_SOCIAL'||!p.fast_transition_accents||p.repetitive_full_frame_sweeps!==false) throw new Error(`SOCIAL_FINISHER_FAIL:${a.filename}`);
                 if(!p.audio_preserved||!p.duration_preserved) throw new Error(`FINISHER_INTEGRITY_FAIL:${a.filename}`);
               }
             }
           }
           if(expected.size) throw new Error(`MISSING:${[...expected].join(',')}`);
-          console.log('MIXED_LIVE_ACTION_SHOWCASE_V23_FINISHER_GREEN');
+          console.log('CEREBRO_SOCIAL_SHOWCASE_V24_GREEN');
           NODE
           for f in 05-story-video 06-reel 07-video-largo; do
             ffprobe -v error -show_entries format=duration -show_entries stream=codec_type,codec_name,width,height,duration -of json "$CEREBRO_SHOWCASE_OUT/$f.mp4"
@@ -167,9 +177,9 @@ jobs:
           for f in 05-story-video 06-reel 07-video-largo; do
             ffmpeg -hide_banner -loglevel error -i "$CEREBRO_SHOWCASE_OUT/$f.mp4" -vf 'fps=1/2,scale=480:-2,tile=5x5:padding=6:margin=6' -frames:v 1 -y "$CEREBRO_SHOWCASE_OUT/review-frames/$f-contact-sheet.jpg"
           done
-      - name: Upload PREPROD live-action review package
+      - name: Upload PREPROD social review package
         uses: actions/upload-artifact@v4
         with:
-          name: cerebro-creative-quality-v23-live-${{ github.sha }}
+          name: cerebro-creative-social-v24-${{ github.sha }}
           path: /tmp/cerebro-creative-quality-v2-live
           retention-days: 7
