@@ -14,6 +14,7 @@ function required(value,name){if(value===undefined||value===null||value==='')thr
 function sleep(ms){return new Promise(resolve=>setTimeout(resolve,ms));}
 function b64ToBuffer(v){return Buffer.from(String(v||''),'base64');}
 function scrubUrl(raw){try{const u=new URL(String(raw||''));u.username='';u.password='';u.search='';u.hash='';return u.toString();}catch{return '';}}
+function browserWorkerOptions(){const channel=String(process.env.CEREBRO_BROWSER_CHANNEL||'').trim();return channel?{launch_options:{channel}}:{};}
 function assertInteractiveScope(job,endpoint){
   const environment=String(job?.environment||'');
   const company=String(job?.company_id||'');
@@ -93,7 +94,7 @@ export async function runInteractiveBrowserSessionV3({job,token,fetch_impl=fetch
   if(String(job.capability)!=='browser1.interactive')throw new Error('INTERACTIVE_CAPABILITY_REQUIRED');
   assertInteractiveScope(job,endpoint);
   const base=buildBaseJob(job);const sessionId=String(job.job_id);
-  const worker=createGovernedCloudBrowserWorker({max_tabs:8});
+  const worker=createGovernedCloudBrowserWorker({max_tabs:8,...browserWorkerOptions()});
   const startedAt=Date.now();let seq=0,lastFrameAt=0,lastUrl='';let opened=false;let closed=false;
   try{
     const initialActions=compileBrowser1Commands(job.commands||[],{mode:'MUTATE'});
@@ -132,4 +133,4 @@ export async function runInteractiveBrowserSessionV3({job,token,fetch_impl=fetch
   }
 }
 
-export const BROWSER_INTERACTIVE_V3_CONTRACT=Object.freeze({schema_version:'3.1.0',capability:'browser1.interactive',supported_environments:['PREPROD','PROD'],environment_endpoint_binding:true,multi_company_preprod:true,prod_company_scope:'fenix',same_runtime:'PLAYWRIGHT_CHROMIUM',same_v2_queue:true,exclusive_control_lease:true,frames_encrypted_aes_gcm:true,human_input_encrypted_aes_gcm:true,raw_cdp_exposed:false,max_tabs:8,default_browser1_unchanged:true,incremental_cost_eur:0});
+export const BROWSER_INTERACTIVE_V3_CONTRACT=Object.freeze({schema_version:'3.1.1',capability:'browser1.interactive',supported_environments:['PREPROD','PROD'],environment_endpoint_binding:true,multi_company_preprod:true,prod_company_scope:'fenix',same_runtime:'PLAYWRIGHT_CHROMIUM',same_v2_queue:true,host_browser_channel_supported:true,exclusive_control_lease:true,frames_encrypted_aes_gcm:true,human_input_encrypted_aes_gcm:true,raw_cdp_exposed:false,max_tabs:8,default_browser1_unchanged:true,incremental_cost_eur:0});
