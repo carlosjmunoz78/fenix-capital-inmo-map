@@ -1,0 +1,158 @@
+name: CEREBRO Creative Quality V2 Live
+
+on:
+  push:
+    branches: [cerebro/creative-quality-v2-2026-10-24, main]
+    paths:
+      - 'cerebro/runtime/creative-quality-tribunal-v2.mjs'
+      - 'cerebro/runtime/creative-media-sources-v2.mjs'
+      - 'cerebro/runtime/creative-job-runner-v2-live.mjs'
+      - 'cerebro/tests/creative-quality-tribunal-v2.test.mjs'
+      - 'cerebro/tests/creative-media-sources-v2.test.mjs'
+      - 'cerebro/tests/creative-job-runner-v2-live.test.mjs'
+      - 'cerebro/tests/creative-quality-v2-live-showcase.mjs'
+      - '.github/workflows/cerebro-creative-quality-v2-live.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'cerebro/runtime/creative-quality-tribunal-v2.mjs'
+      - 'cerebro/runtime/creative-media-sources-v2.mjs'
+      - 'cerebro/runtime/creative-job-runner-v2-live.mjs'
+      - 'cerebro/tests/creative-quality-tribunal-v2.test.mjs'
+      - 'cerebro/tests/creative-media-sources-v2.test.mjs'
+      - 'cerebro/tests/creative-job-runner-v2-live.test.mjs'
+      - 'cerebro/tests/creative-quality-v2-live-showcase.mjs'
+      - '.github/workflows/cerebro-creative-quality-v2-live.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PIPER_RELEASE: '2023.11.14-2'
+  PIPER_VOICE_REV: 'b145f2ac26522d6a2ccde0164b7b0e48b1e3199c'
+  CEREBRO_PIPER_BIN: /tmp/cerebro-piper/piper/piper
+  CEREBRO_PIPER_MODEL: /tmp/cerebro-piper/es_ES-sharvard-medium.onnx
+  CEREBRO_PIPER_CONFIG: /tmp/cerebro-piper/es_ES-sharvard-medium.onnx.json
+  CEREBRO_SHOWCASE_OUT: /tmp/cerebro-creative-quality-v2-live
+  CEREBRO_FENIX_LOGO: https://fenixcapital.es/wp-content/uploads/2026/10/Logo-Fenix-Capital-oficial-color-completo-scaled-1.png
+
+jobs:
+  live-action-quality-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Contract tests
+        run: |
+          node --check cerebro/runtime/creative-quality-tribunal-v2.mjs
+          node --check cerebro/runtime/creative-media-sources-v2.mjs
+          node --check cerebro/runtime/creative-job-runner-v2-live.mjs
+          node --test cerebro/tests/creative-quality-tribunal-v2.test.mjs cerebro/tests/creative-media-sources-v2.test.mjs cerebro/tests/creative-job-runner-v2-live.test.mjs
+      - name: Brand transparency CSS gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(grep -F 'background:transparent;border:0;border-radius:0;padding:0;box-shadow:none' cerebro/runtime/creative-job-runner-v2-live.mjs | wc -l)" -eq 2
+          ! grep -F 'background:rgba(255,255,255,.91)' cerebro/runtime/creative-job-runner-v2-live.mjs
+          grep -F 'filter:drop-shadow' cerebro/runtime/creative-job-runner-v2-live.mjs >/dev/null
+          echo 'TRANSPARENT_LOGO_CONTAINER_GREEN'
+      - name: Install Chromium and FFmpeg
+        run: |
+          npx playwright install --with-deps chromium
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends ffmpeg fonts-dejavu-core
+      - name: Verify official logo has physical alpha transparency
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --silent --show-error "$CEREBRO_FENIX_LOGO" -o /tmp/fenix-logo.png
+          test -s /tmp/fenix-logo.png
+          ffmpeg -hide_banner -loglevel error -i /tmp/fenix-logo.png -vf 'alphaextract,signalstats,metadata=print:file=/tmp/logo-alpha.txt' -frames:v 1 -f null -
+          cat /tmp/logo-alpha.txt
+          YMIN="$(sed -n 's/.*lavfi.signalstats.YMIN=//p' /tmp/logo-alpha.txt | head -n 1)"
+          test -n "$YMIN"
+          awk -v v="$YMIN" 'BEGIN { if ((v+0) >= 250) exit 1 }'
+          echo "LOGO_ALPHA_TRANSPARENCY_GREEN:YMIN=$YMIN"
+      - name: Cache pinned Piper neural voice
+        uses: actions/cache@v4
+        with:
+          path: /tmp/cerebro-piper
+          key: quality-v2-live-piper-${{ runner.os }}-2023-11-14-2-b145f2a-sharvard-medium
+      - name: Materialize pinned Piper voice
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/cerebro-piper
+          if [ ! -x "$CEREBRO_PIPER_BIN" ]; then
+            curl --fail --location --silent --show-error "https://github.com/rhasspy/piper/releases/download/${PIPER_RELEASE}/piper_linux_x86_64.tar.gz" -o /tmp/cerebro-piper/piper.tar.gz
+            tar -xzf /tmp/cerebro-piper/piper.tar.gz -C /tmp/cerebro-piper
+          fi
+          if [ ! -s "$CEREBRO_PIPER_MODEL" ]; then
+            curl --fail --location --silent --show-error "https://huggingface.co/rhasspy/piper-voices/resolve/${PIPER_VOICE_REV}/es/es_ES/sharvard/medium/es_ES-sharvard-medium.onnx" -o "$CEREBRO_PIPER_MODEL"
+          fi
+          if [ ! -s "$CEREBRO_PIPER_CONFIG" ]; then
+            curl --fail --location --silent --show-error "https://huggingface.co/rhasspy/piper-voices/resolve/${PIPER_VOICE_REV}/es/es_ES/sharvard/medium/es_ES-sharvard-medium.onnx.json" -o "$CEREBRO_PIPER_CONFIG"
+          fi
+          chmod +x "$CEREBRO_PIPER_BIN"
+          "$CEREBRO_PIPER_BIN" --help >/dev/null
+      - name: Physical mixed live-action showcase
+        shell: bash
+        run: |
+          set -euo pipefail
+          node cerebro/tests/creative-quality-v2-live-showcase.mjs | tee /tmp/showcase-result.json
+          grep -F '"ok":true' /tmp/showcase-result.json
+      - name: Verify physical quality evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -F '"ok":true' /tmp/showcase-result.json
+          node - <<'NODE'
+          const fs=require('fs');
+          const m=JSON.parse(fs.readFileSync('/tmp/cerebro-creative-quality-v2-live/MANIFEST.json','utf8'));
+          if(m.items.length!==7) throw new Error('SHOWCASE_ITEM_COUNT');
+          const expected=new Set(['01-post-fotografico','02-post-editorial','03-post-conversion','04-carrusel','05-story-video','06-reel','07-video-largo']);
+          for(const item of m.items){
+            expected.delete(item.label);
+            if(!item.quality?.passed||item.quality.score<82) throw new Error(`QUALITY_FAIL:${item.label}`);
+            for(const a of item.artifacts){
+              if(a.quality_verdict!=='CREATIVE_QA_GREEN') throw new Error(`ARTIFACT_QA_FAIL:${a.filename}`);
+              if(a.mime==='video/mp4'){
+                if(!a.audio?.voice||!a.audio?.music||a.audio.ducking!==true||a.audio.captions!==true) throw new Error(`AUDIO_FAIL:${a.filename}`);
+                const p=a.physical_evidence||{};
+                if(!p.audio_stream_present||p.unique_frame_ratio<.25||p.motion_score<.18) throw new Error(`MOTION_FAIL:${a.filename}`);
+                const minLiveRatio=item.output_type==='LONG_VIDEO'?.30:.35;
+                const minLiveSources=item.output_type==='LONG_VIDEO'?3:2;
+                if(p.live_action_seconds_ratio<minLiveRatio) throw new Error(`LIVE_RATIO_FAIL:${a.filename}:${p.live_action_seconds_ratio}<${minLiveRatio}`);
+                if(p.live_action_source_count<minLiveSources) throw new Error(`LIVE_SOURCE_FAIL:${a.filename}:${p.live_action_source_count}<${minLiveSources}`);
+                if(!Array.isArray(a.video_source_provenance)||a.video_source_provenance.length<minLiveSources) throw new Error(`PROVENANCE_FAIL:${a.filename}`);
+              }
+            }
+          }
+          if(expected.size) throw new Error(`MISSING:${[...expected].join(',')}`);
+          console.log('MIXED_LIVE_ACTION_SHOWCASE_GREEN');
+          NODE
+          ffprobe -v error -show_entries format=duration -show_entries stream=codec_type,codec_name,width,height -of json "$CEREBRO_SHOWCASE_OUT/05-story-video.mp4"
+          ffprobe -v error -show_entries format=duration -show_entries stream=codec_type,codec_name,width,height -of json "$CEREBRO_SHOWCASE_OUT/06-reel.mp4"
+          ffprobe -v error -show_entries format=duration -show_entries stream=codec_type,codec_name,width,height -of json "$CEREBRO_SHOWCASE_OUT/07-video-largo.mp4"
+          sha256sum "$CEREBRO_SHOWCASE_OUT"/* > "$CEREBRO_SHOWCASE_OUT/SHA256SUMS.txt"
+      - name: Extract visual review frames
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$CEREBRO_SHOWCASE_OUT/review-frames"
+          for f in 05-story-video 06-reel 07-video-largo; do
+            ffmpeg -hide_banner -loglevel error -i "$CEREBRO_SHOWCASE_OUT/$f.mp4" -vf 'fps=1/4,scale=480:-2,tile=4x3:padding=6:margin=6' -frames:v 1 -y "$CEREBRO_SHOWCASE_OUT/review-frames/$f-contact-sheet.jpg"
+          done
+      - name: Upload PREPROD live-action review package
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-creative-quality-v2-live-${{ github.sha }}
+          path: /tmp/cerebro-creative-quality-v2-live
+          retention-days: 7

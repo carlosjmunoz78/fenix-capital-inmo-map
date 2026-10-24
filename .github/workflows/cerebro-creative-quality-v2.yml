@@ -1,0 +1,82 @@
+name: CEREBRO Creative Quality V2
+
+on:
+  push:
+    branches:
+      - cerebro/creative-quality-v2-2026-10-24
+      - main
+    paths:
+      - 'cerebro/runtime/creative-quality-tribunal-v2.mjs'
+      - 'cerebro/runtime/creative-job-runner-v2.mjs'
+      - 'cerebro/tests/creative-quality-tribunal-v2.test.mjs'
+      - 'cerebro/tests/creative-job-runner-v2.test.mjs'
+      - '.github/workflows/cerebro-creative-quality-v2.yml'
+      - 'docs/CEREBRO_CREATIVE_QUALITY_STANDARD_V2_2026-10-24.md'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'cerebro/runtime/creative-quality-tribunal-v2.mjs'
+      - 'cerebro/runtime/creative-job-runner-v2.mjs'
+      - 'cerebro/tests/creative-quality-tribunal-v2.test.mjs'
+      - 'cerebro/tests/creative-job-runner-v2.test.mjs'
+      - '.github/workflows/cerebro-creative-quality-v2.yml'
+      - 'docs/CEREBRO_CREATIVE_QUALITY_STANDARD_V2_2026-10-24.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  photo-motion-compatibility-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Preserve old renderer and hardened tribunal
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check cerebro/runtime/creative-quality-tribunal-v2.mjs
+          node --check cerebro/runtime/creative-job-runner-v2.mjs
+          node --test cerebro/tests/creative-quality-tribunal-v2.test.mjs cerebro/tests/creative-job-runner-v2.test.mjs
+      - name: Prove OLD is PHOTO_MOTION only and cannot masquerade as live action
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import { evaluateCreativePlanV2, assertCreativePlanV2 } from './cerebro/runtime/creative-quality-tribunal-v2.mjs';
+          const logo='https://fenixcapital.es/wp-content/uploads/2026/10/Logo-Fenix-Capital-oficial-color-completo-scaled-1.png';
+          const photos=[
+            'https://fenixcapital.es/wp-content/uploads/2026/10/Fenix-C2B7-Pareja-haciendo-numeros-para-comprar-vivienda-cerebro.webp',
+            'https://fenixcapital.es/wp-content/uploads/2026/10/cadiz-revision-vivienda-asesor-scaled-1-cerebro.webp'
+          ];
+          const base={
+            output_type:'REEL',channel:'INSTAGRAM',publish_authorized:false,additional_cost_eur:0,
+            creative_concept:'Compatibilidad del renderer fotográfico anterior',channel_fit:true,accessibility_checked:true,
+            brand:{logo_url:logo,primary:'#ffffff',accent:'#f47b20'},visual_sources:photos,
+            scenes:[{source_kind:'PHOTO'},{source_kind:'PHOTO'},{source_kind:'PHOTO'}],
+            motion_profiles:['KEN_BURNS_IN','PAN_RIGHT','PUSH_IN'],transitions:['CROSSFADE','WIPE','DIP_TO_BLACK'],
+            motion_design:true,broll_required:true,scene_text_only_ratio:0,
+            audio:{voice_enabled:true,music_enabled:true,ducking:true,captions:true},
+            physical_evidence:{audio_stream_present:true,scene_change_count:3,motion_score:.7,unique_frame_ratio:.9}
+          };
+          const oldPlan={...base,video_mode:'PHOTO_MOTION',allow_photo_motion:true};
+          const oldResult=assertCreativePlanV2(oldPlan);
+          if(!oldResult.warnings.some(x=>x.code==='PHOTO_MOTION_LIMITED_FORMAT')) throw new Error('OLD_LIMIT_WARNING_MISSING');
+          const fakeLive={...base,video_mode:'LIVE_ACTION_MIXED',video_sources:[]};
+          const fakeResult=evaluateCreativePlanV2(fakeLive);
+          if(fakeResult.passed) throw new Error('OLD_MASQUERADED_AS_LIVE_ACTION');
+          if(!fakeResult.failures.some(x=>x.code==='LIVE_ACTION_SOURCE_DIVERSITY_TOO_LOW')) throw new Error('LIVE_ACTION_GUARD_MISSING');
+          console.log(JSON.stringify({ok:true,old:'PHOTO_MOTION_COMPATIBILITY_ONLY',new_gate:'CEREBRO Creative Quality V2 Live',publish_authorized:false,additional_cost_eur:0}));
+          NODE
+      - name: Compatibility verdict
+        run: |
+          echo 'OLD=PHOTO_MOTION_COMPATIBILITY_ONLY'
+          echo 'NEW=CEREBRO Creative Quality V2 Live'
+          echo 'LIVE_ACTION_MUST_USE_GOVERNED_BROLL=true'
