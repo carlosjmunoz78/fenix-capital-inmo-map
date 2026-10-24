@@ -1,0 +1,41 @@
+name: CEREBRO Browser Attachments V0
+
+on:
+  pull_request:
+    paths:
+      - 'src/cerebroAttachments.ts'
+      - 'src/CerebroAttachmentBridge.tsx'
+      - 'src/cerebro-attachment-bridge.css'
+      - 'src/main.tsx'
+      - 'cerebro/runtime/browser-attachments-v0.test.mjs'
+      - '.github/workflows/cerebro-browser-attachments-v0.yml'
+  push:
+    branches: ['main']
+    paths:
+      - 'src/cerebroAttachments.ts'
+      - 'src/CerebroAttachmentBridge.tsx'
+      - 'src/cerebro-attachment-bridge.css'
+      - 'src/main.tsx'
+      - 'cerebro/runtime/browser-attachments-v0.test.mjs'
+      - '.github/workflows/cerebro-browser-attachments-v0.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  attachment-contract:
+    name: Local extraction, single gateway and PROD build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Validate zero-cost attachment contract
+        run: node --experimental-strip-types --test cerebro/runtime/browser-attachments-v0.test.mjs
+      - name: Build application
+        run: npm run build
