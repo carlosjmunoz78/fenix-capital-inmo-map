@@ -86,7 +86,8 @@ jobs:
           import fs from 'node:fs/promises';
           import path from 'node:path';
           import crypto from 'node:crypto';
-          import { renderCreativeJobV2 } from './cerebro/runtime/creative-job-runner-v2.mjs';
+          import { pathToFileURL } from 'node:url';
+          const { renderCreativeJobV2 } = await import(pathToFileURL(path.join(process.env.GITHUB_WORKSPACE,'cerebro/runtime/creative-job-runner-v2.mjs')).href);
           const out='/tmp/cerebro-creative-quality-v2';await fs.rm(out,{recursive:true,force:true});await fs.mkdir(out,{recursive:true});
           const logo='https://fenixcapital.es/wp-content/uploads/2026/10/Logo-Fenix-Capital-oficial-color-completo-scaled-1.png';
           const photos=[
