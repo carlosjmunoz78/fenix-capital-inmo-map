@@ -1,0 +1,64 @@
+name: CEREBRO Pexels Broll Audit V0
+
+on:
+  push:
+    branches: [cerebro/creative-quality-v2-2026-10-24]
+    paths: ['.github/workflows/cerebro-pexels-broll-audit-v0.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit-pexels-broll:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Install ffmpeg
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends ffmpeg
+      - name: Download governed free-stock candidates
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/pexels-audit
+          ids='7817205 7816382 7646690 7735853 7646396'
+          for id in $ids; do
+            curl --fail --location --retry 2 --user-agent 'Mozilla/5.0 CEREBRO-Creative-QA/2.0' --referer 'https://www.pexels.com/' "https://www.pexels.com/download/video/${id}/" -o "/tmp/pexels-audit/${id}.mp4"
+            test -s "/tmp/pexels-audit/${id}.mp4"
+            ffprobe -v error -show_entries format=duration,size -show_entries stream=codec_type,codec_name,width,height -of json "/tmp/pexels-audit/${id}.mp4" > "/tmp/pexels-audit/${id}.json"
+            ffmpeg -hide_banner -loglevel error -ss 2 -i "/tmp/pexels-audit/${id}.mp4" -frames:v 1 -vf 'scale=480:-2' -y "/tmp/pexels-audit/${id}-a.jpg"
+            ffmpeg -hide_banner -loglevel error -ss 5 -i "/tmp/pexels-audit/${id}.mp4" -frames:v 1 -vf 'scale=480:-2' -y "/tmp/pexels-audit/${id}-b.jpg" || true
+          done
+          cat > /tmp/pexels-audit/LICENSE_PROVENANCE.json <<'JSON'
+          {
+            "provider":"PEXELS",
+            "license_url":"https://www.pexels.com/license/",
+            "license_checked_at":"2026-10-24",
+            "commercial_use":true,
+            "modification_allowed":true,
+            "attribution_required":false,
+            "endorsement_implication_forbidden":true,
+            "assets":[
+              {"id":"7817205","page":"https://www.pexels.com/video/couple-planning-with-the-realtor-7817205/"},
+              {"id":"7816382","page":"https://www.pexels.com/video/realtor-giving-the-key-of-new-house-to-clients-7816382/"},
+              {"id":"7646690","page":"https://www.pexels.com/video/a-realtor-explaining-a-documents-to-a-couple-7646690/"},
+              {"id":"7735853","page":"https://www.pexels.com/video/a-couple-working-7735853/"},
+              {"id":"7646396","page":"https://www.pexels.com/video/couple-buying-a-house-7646396/"}
+            ]
+          }
+          JSON
+      - name: Build contact sheet
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/pexels-audit/sheet
+          cp /tmp/pexels-audit/*-[ab].jpg /tmp/pexels-audit/sheet/
+          ffmpeg -hide_banner -loglevel error -pattern_type glob -i '/tmp/pexels-audit/sheet/*.jpg' -filter_complex 'scale=480:-2,tile=5x2:padding=6:margin=6' -frames:v 1 -y /tmp/pexels-audit/contact-sheet.jpg
+          rm -rf /tmp/pexels-audit/sheet
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-pexels-broll-audit-v0
+          path: /tmp/pexels-audit
+          retention-days: 2
