@@ -134,6 +134,7 @@ export default function CerebroBrowserConsole({onViewChange}:Props){
  const viewport=browserSession?.viewport_width&&browserSession?.viewport_height?`${browserSession.viewport_width}×${browserSession.viewport_height}`:'—';
  const freshness=useMemo(()=>formatTime(browserSession?.last_heartbeat_at),[browserSession?.last_heartbeat_at]);
  const navButtonStyle={display:'inline-flex',alignItems:'center',justifyContent:'center',width:24,height:24,border:0,borderRadius:7,background:'transparent',color:humanControl?'#cbe5ef':'#54717c',cursor:humanControl?'pointer':'not-allowed',padding:0,flex:'none'} as const;
+ const boundedBarStyle={minWidth:0,maxWidth:'100%',width:'100%',flexWrap:'wrap',overflow:'hidden'} as const;
 
  return <main className="cerebro-browser-console" aria-label="CEREBRO · Navegador">
   <header className="cerebro-browser-header">
@@ -142,9 +143,9 @@ export default function CerebroBrowserConsole({onViewChange}:Props){
    <div className="cerebro-browser-head-actions"><span className="cerebro-browser-core-state" style={snapshot.ready?{borderColor:'rgba(76,227,162,.28)',color:'#95efc7',background:'rgba(34,139,94,.08)'}:undefined}><CircleDot size={13}/>{snapshot.ready?'CEREBRO LISTO':'CEREBRO CONECTANDO'}</span><CerebroVoiceSettings/></div>
   </header>
 
-  <section className="cerebro-browser-sessionbar" aria-label="Estado de Browser 1">
-   <div className="cerebro-browser-session-context">
-    <span style={{minWidth:130}}><small>EMPRESA</small>{companies.length>1?<select aria-label="Seleccionar empresa" value={selectedCompany} disabled={Boolean(browserSession&&!TERMINAL.has(browserSession.state))} onChange={event=>changeCompany(event.target.value)} style={{marginTop:2,border:0,outline:0,background:'transparent',color:'#cbe5ef',fontSize:10,fontWeight:700}}>{companies.map(company=><option key={company.company_id} value={company.company_id}>{company.company_id.toUpperCase()}</option>)}</select>:<strong>{companyLabel.toUpperCase()}</strong>}</span>
+  <section className="cerebro-browser-sessionbar" aria-label="Estado de Browser 1" style={{minWidth:0,maxWidth:'100%',overflow:'hidden'}}>
+   <div className="cerebro-browser-session-context" style={boundedBarStyle}>
+    <span style={{minWidth:92,maxWidth:'100%',overflow:'hidden'}}><small>EMPRESA</small>{companies.length>1?<select aria-label="Seleccionar empresa" value={selectedCompany} disabled={Boolean(browserSession&&!TERMINAL.has(browserSession.state))} onChange={event=>changeCompany(event.target.value)} style={{marginTop:2,width:'100%',minWidth:0,maxWidth:'100%',border:0,outline:0,background:'transparent',color:'#cbe5ef',fontSize:10,fontWeight:700}}>{companies.map(company=><option key={company.company_id} value={company.company_id}>{company.company_id.toUpperCase()}</option>)}</select>:<strong style={{overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{companyLabel.toUpperCase()}</strong>}</span>
     <span><small>ENTORNO</small><strong>{environmentLabel}</strong></span>
     <span><small>RUNTIME</small><strong>Browser 1 · V3</strong></span>
     <span><small>PESTAÑAS</small><strong>{tabs.length}/8</strong></span>
@@ -152,7 +153,7 @@ export default function CerebroBrowserConsole({onViewChange}:Props){
     <span><small>VIEWPORT</small><strong>{viewport}</strong></span>
     <span><small>HEARTBEAT</small><strong>{freshness}</strong></span>
    </div>
-   <div className="cerebro-browser-controlbar">
+   <div className="cerebro-browser-controlbar" style={boundedBarStyle}>
     <span className="cerebro-browser-mode" style={humanControl?{borderColor:'rgba(255,183,66,.34)',color:'#ffd78a',background:'rgba(158,101,19,.1)'}:undefined}><CircleDot size={12}/>{stateLabel(browserSession)}</span>
     {canStart?<button type="button" className="is-takeover" onClick={startBrowser} disabled={browserBusy}><Play size={15}/> Iniciar</button>:null}
     <button type="button" className="is-takeover" onClick={takeover} disabled={!canTakeover||browserBusy}><Hand size={15}/> Tomar control</button>
@@ -161,9 +162,9 @@ export default function CerebroBrowserConsole({onViewChange}:Props){
    </div>
   </section>
 
-  <section className="cerebro-browser-frame" aria-label="Visor de navegador" style={{position:'relative'}}>
-   <div className="cerebro-browser-tabs" aria-label="Pestañas de la sesión" style={{gap:5,overflowX:'auto'}}>{tabs.length?tabs.map((tab,index)=>{const tabIndex=Number.isInteger(tab.index)?Number(tab.index):index;const isActive=tab.active||tab.index===browserSession?.active_tab_index;return <span key={`${tabIndex}-${tab.url??tab.title??index}`} className={isActive?'is-active':''} title={humanControl?`${tab.url||tab.title||`Pestaña ${index+1}`} · Cambiar a esta pestaña`:`${tab.url||tab.title||`Pestaña ${index+1}`} · Toma el control para cambiar`} role="button" aria-current={isActive?'page':undefined} aria-disabled={!humanControl} tabIndex={humanControl?0:-1} onClick={()=>switchTab(tabIndex)} onKeyDown={event=>onTabKeyDown(event,tabIndex)} style={{minWidth:150,maxWidth:260,overflow:'hidden',cursor:humanControl?'pointer':'default',opacity:humanControl||isActive?1:.78}}><Globe2 size={13}/><b style={{fontWeight:700,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{tab.title||`Pestaña ${index+1}`}</b></span>}):<span className="is-active"><Globe2 size={13}/><b>{live?'Sesión física viva':'Visor preparado'}</b></span>}</div>
-   <div className="cerebro-browser-address" aria-label="Controles del navegador">
+  <section className="cerebro-browser-frame" aria-label="Visor de navegador" style={{position:'relative',minWidth:0,maxWidth:'100%'}}>
+   <div className="cerebro-browser-tabs" aria-label="Pestañas de la sesión" style={{gap:5,overflowX:'auto',minWidth:0,maxWidth:'100%'}}>{tabs.length?tabs.map((tab,index)=>{const tabIndex=Number.isInteger(tab.index)?Number(tab.index):index;const isActive=tab.active||tab.index===browserSession?.active_tab_index;return <span key={`${tabIndex}-${tab.url??tab.title??index}`} className={isActive?'is-active':''} title={humanControl?`${tab.url||tab.title||`Pestaña ${index+1}`} · Cambiar a esta pestaña`:`${tab.url||tab.title||`Pestaña ${index+1}`} · Toma el control para cambiar`} role="button" aria-current={isActive?'page':undefined} aria-disabled={!humanControl} tabIndex={humanControl?0:-1} onClick={()=>switchTab(tabIndex)} onKeyDown={event=>onTabKeyDown(event,tabIndex)} style={{minWidth:150,maxWidth:260,overflow:'hidden',cursor:humanControl?'pointer':'default',opacity:humanControl||isActive?1:.78}}><Globe2 size={13}/><b style={{fontWeight:700,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{tab.title||`Pestaña ${index+1}`}</b></span>}):<span className="is-active"><Globe2 size={13}/><b>{live?'Sesión física viva':'Visor preparado'}</b></span>}</div>
+   <div className="cerebro-browser-address" aria-label="Controles del navegador" style={{minWidth:0,maxWidth:'100%',overflow:'hidden'}}>
     <button type="button" style={navButtonStyle} onClick={navigateBack} disabled={!humanControl} title="Atrás" aria-label="Atrás"><ArrowLeft size={14}/></button>
     <button type="button" style={navButtonStyle} onClick={navigateForward} disabled={!humanControl} title="Adelante" aria-label="Adelante"><ArrowRight size={14}/></button>
     <button type="button" style={navButtonStyle} onClick={reloadPage} disabled={!humanControl} title="Recargar" aria-label="Recargar"><RefreshCw size={13}/></button>
@@ -181,8 +182,8 @@ export default function CerebroBrowserConsole({onViewChange}:Props){
    {browserError?<div role="status" style={{position:'absolute',right:14,bottom:12,zIndex:6,maxWidth:'min(620px,80%)',color:'#ff9b80',background:'#24110d',border:'1px solid rgba(255,106,66,.2)',borderRadius:9,padding:'7px 10px',fontSize:8,boxShadow:'0 10px 30px rgba(0,0,0,.3)'}}>{browserError}</div>:null}
   </section>
 
-  <section className="cerebro-browser-composer" aria-label="Órdenes para CEREBRO" style={{position:'relative'}}>
-   <form onSubmit={submit} className="cerebro-browser-form">
+  <section className="cerebro-browser-composer" aria-label="Órdenes para CEREBRO" style={{position:'relative',minWidth:0,maxWidth:'100%',overflow:'hidden'}}>
+   <form onSubmit={submit} className="cerebro-browser-form" style={{minWidth:0,maxWidth:'100%'}}>
     <button type="button" className="cerebro-browser-icon" disabled title="Adjuntos permanecen bloqueados hasta contrato de transferencia verificado" aria-label="Adjuntar archivo"><Paperclip size={19}/></button>
     <button type="button" className={`cerebro-browser-action ${dictating?'is-active':''}`} onClick={toggleDictation} disabled={!snapshot.ready||snapshot.sending||snapshot.voiceActive||!voiceRecognitionSupported()}>{dictating?<Square size={16}/>:<Mic size={18}/>}<span>{dictating?'Parar dictado':'Dictar'}</span></button>
     <button type="button" className={`cerebro-browser-action ${snapshot.voiceActive?'is-active':''}`} onClick={toggleVoice} disabled={!snapshot.ready||snapshot.sending||dictating}>{snapshot.voiceActive?<Square size={16}/>:<MessageSquareText size={18}/>}<span>{snapshot.voiceActive?'Finalizar':'Hablar'}</span></button>
