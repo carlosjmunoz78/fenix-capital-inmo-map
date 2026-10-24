@@ -9,6 +9,10 @@ on:
       - 'cerebro/runtime/creative-studio-tribunal-v1.mjs'
       - 'cerebro/runtime/creative-studio-campaign-v1.mjs'
       - 'cerebro/runtime/creative-character-bible-v1.mjs'
+      - 'cerebro/runtime/creative-cast-lock-v1.mjs'
+      - 'cerebro/runtime/creative-character-continuity-physical-v1.mjs'
+      - 'cerebro/runtime/creative-media-sources-v2.mjs'
+      - 'cerebro/runtime/creative-voice-timeline-planner-v1.mjs'
       - 'cerebro/runtime/creative-social-audio-v4.mjs'
       - 'cerebro/runtime/creative-social-finisher-v4.mjs'
       - 'cerebro/runtime/creative-social-quality-v4.mjs'
@@ -27,9 +31,14 @@ on:
       - 'cerebro/runtime/creative-studio-tribunal-v1.mjs'
       - 'cerebro/runtime/creative-studio-campaign-v1.mjs'
       - 'cerebro/runtime/creative-character-bible-v1.mjs'
+      - 'cerebro/runtime/creative-cast-lock-v1.mjs'
+      - 'cerebro/runtime/creative-character-continuity-physical-v1.mjs'
+      - 'cerebro/runtime/creative-media-sources-v2.mjs'
+      - 'cerebro/runtime/creative-voice-timeline-planner-v1.mjs'
       - 'cerebro/runtime/creative-social-audio-v4.mjs'
       - 'cerebro/runtime/creative-social-finisher-v4.mjs'
       - 'cerebro/runtime/creative-social-quality-v4.mjs'
+      - 'cerebro/runtime/creative-job-runner-v2-live.mjs'
       - 'cerebro/registry/creative-studio-expert-bindings-v1.json'
       - 'cerebro/tests/creative-studio-orchestrator-v1.test.mjs'
       - 'cerebro/tests/creative-studio-campaign-v1.test.mjs'
@@ -70,9 +79,12 @@ jobs:
           node --check cerebro/runtime/creative-studio-tribunal-v1.mjs
           node --check cerebro/runtime/creative-studio-campaign-v1.mjs
           node --check cerebro/runtime/creative-character-bible-v1.mjs
+          node --check cerebro/runtime/creative-cast-lock-v1.mjs
+          node --check cerebro/runtime/creative-character-continuity-physical-v1.mjs
+          node --check cerebro/runtime/creative-voice-timeline-planner-v1.mjs
           node --check cerebro/tests/creative-studio-showcase-v1.mjs
           node --check cerebro/tests/creative-studio-campaign-showcase-v1.mjs
-          node --test cerebro/tests/creative-studio-orchestrator-v1.test.mjs cerebro/tests/creative-studio-campaign-v1.test.mjs cerebro/tests/creative-social-v4.test.mjs
+          node --test cerebro/tests/creative-studio-orchestrator-v1.test.mjs cerebro/tests/creative-studio-campaign-v1.test.mjs cerebro/tests/creative-social-v4.test.mjs cerebro/tests/creative-voice-timeline-planner-v1.test.mjs
           node -e "const x=require('./cerebro/registry/creative-studio-expert-bindings-v1.json'); if(x.bindings.length!==16||x.publication_authority!==false||x.additional_cost_eur!==0) throw new Error('EXPERT_BINDINGS_INVALID'); console.log('EXPERT_BINDINGS_GREEN')"
       - name: Install Chromium and FFmpeg
         run: |
