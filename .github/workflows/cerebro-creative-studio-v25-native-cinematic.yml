@@ -98,16 +98,21 @@ jobs:
           const m=JSON.parse(fs.readFileSync(p,'utf8'));
           if(m.environment!=='PREPROD'||m.publish_authorized!==false||m.additional_cost_eur!==0) throw new Error('GOVERNANCE');
           if(m.promotion_eligible!==false||m.human_creative_review_required!==true||m.human_creative_gate!=='PENDING_REVIEW') throw new Error('HUMAN_GATE');
+          if(m.native_pipeline_order!=='LEGACY_RENDER_THEN_NATIVE_RECUT_THEN_FINAL_AUDIO_MASTER') throw new Error('PIPELINE_ORDER');
+          if(m.captions_mode!=='REAL_DIALOGUE_SRT_SIDECAR') throw new Error('CAPTIONS_MODE');
           if(m.productions.length!==3) throw new Error('PRODUCTION_COUNT');
           if(!String(m.cross_format_primary_cast_source||'').includes('fenixcapital.es/')) throw new Error('PRIMARY_CAST_NOT_FENIX_GOVERNED');
           for(const x of m.productions){
             const q=x.technical_cinematic_qa||{},e=x.physical_evidence||{},c=x.primary_cast_governance||{};
             if(q.technical_passed!==true||q.promotion_eligible!==false) throw new Error(`TECH_QA:${x.label}`);
             if(c.passed!==true||c.stock_primary_forbidden!==true||c.stock_video_context_only!==true) throw new Error(`CAST:${x.label}`);
-            if(e.music_real_track!==true||e.music_license!=='CC0-1.0'||e.music_peak_db<-8) throw new Error(`MUSIC:${x.label}`);
-            if(e.distinct_voice_count<2) throw new Error(`VOICES:${x.label}`);
+            if(e.legacy_prerender_recut!==true||e.planned_duration_enforced!==true||e.audio_mastered_after_native_recut!==true) throw new Error(`NATIVE_TIMELINE:${x.label}`);
+            if(Math.abs(Number(e.video_duration_sec)-Number(e.native_timeline_output_sec))>0.35) throw new Error(`AUDIO_VIDEO_TIMELINE_DRIFT:${x.label}`);
+            if(e.music_real_track!==true||e.music_full_length!==true||e.music_license!=='CC0-1.0'||e.music_peak_db<-8) throw new Error(`MUSIC:${x.label}`);
+            if(e.distinct_voice_count<2||e.max_voice_gap_sec>2.2||e.max_voice_speedup>1.12) throw new Error(`VOICES:${x.label}`);
             if(e.per_shot_camera_motion!==true||e.camera_motion_profile_count<5) throw new Error(`CAMERA:${x.label}`);
-            if(e.vfx_profile_count<4) throw new Error(`VFX:${x.label}`);
+            if(e.named_vfx_match_physical_filters!==true||e.vfx_profile_count<4) throw new Error(`VFX:${x.label}`);
+            if(e.real_dialogue_caption_sidecar!==true||!String(e.caption_sidecar_file||'').endsWith('.srt')) throw new Error(`CAPTIONS:${x.label}`);
             if(x.human_creative_gate!=='PENDING_REVIEW'||x.promotion_eligible!==false) throw new Error(`PROMOTION_GATE:${x.label}`);
           }
           console.log('V25_TECHNICAL_CANDIDATE_HUMAN_PENDING');
@@ -118,9 +123,9 @@ jobs:
           set -euo pipefail
           mkdir -p "$CEREBRO_NATIVE_STUDIO_OUT/review-frames"
           for f in story-v25 reel-v25 video-largo-v25; do
-            ffmpeg -hide_banner -loglevel error -i "$CEREBRO_NATIVE_STUDIO_OUT/$f.mp4" -vf 'fps=2,scale=360:-2,tile=8x6:padding=4:margin=4' -frames:v 1 -y "$CEREBRO_NATIVE_STUDIO_OUT/review-frames/$f-contact-sheet.jpg"
+            ffmpeg -hide_banner -loglevel error -i "$CEREBRO_NATIVE_STUDIO_OUT/$f.mp4" -vf 'fps=1,scale=360:-2,tile=8x8:padding=4:margin=4' -frames:v 1 -y "$CEREBRO_NATIVE_STUDIO_OUT/review-frames/$f-contact-sheet.jpg"
           done
-          sha256sum "$CEREBRO_NATIVE_STUDIO_OUT"/*.mp4 "$CEREBRO_NATIVE_STUDIO_OUT/NATIVE_CINEMATIC_MANIFEST.json" > "$CEREBRO_NATIVE_STUDIO_OUT/SHA256SUMS.txt"
+          sha256sum "$CEREBRO_NATIVE_STUDIO_OUT"/*.mp4 "$CEREBRO_NATIVE_STUDIO_OUT"/*.srt "$CEREBRO_NATIVE_STUDIO_OUT/NATIVE_CINEMATIC_MANIFEST.json" > "$CEREBRO_NATIVE_STUDIO_OUT/SHA256SUMS.txt"
       - name: Upload PREPROD candidate for human review
         uses: actions/upload-artifact@v4
         with:
