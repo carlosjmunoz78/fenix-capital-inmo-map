@@ -21,13 +21,10 @@ jobs:
       - name: Apply bounded cleanup patch
         run: python3 scripts/apply-navegador-command-hotfix.py
       - name: Assert bounded diff
-        shell: bash
         run: |
           set -euo pipefail
           git diff --check
-          git diff --name-only | sort > /tmp/changed
-          printf '%s\n' src/CerebroBrowserConsole.tsx src/cerebroBrowserInteractive.ts > /tmp/expected
-          diff -u /tmp/expected /tmp/changed
+          test "$(git diff --name-only)" = 'src/CerebroBrowserConsole.tsx'
       - name: Install locked dependencies
         run: npm ci
       - name: Reproduce real command and contract tests
@@ -35,11 +32,10 @@ jobs:
       - name: Build application
         run: npm run build
       - name: Commit bounded cleanup
-        shell: bash
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add src/CerebroBrowserConsole.tsx src/cerebroBrowserInteractive.ts
-          git commit -m 'fix(navegador): keep parser inside governed Browser V3 client'
+          git add src/CerebroBrowserConsole.tsx
+          git commit -m 'fix(navegador): bind parser to Browser V3 runtime'
           git push origin HEAD:cerebro/navegador-command-execution-hotfix-20261024
