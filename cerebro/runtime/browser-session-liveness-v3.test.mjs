@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import {classifySessionReuseV3} from '../../supabase/functions/cerebro-browser-interactive-v3/session-liveness.mjs';
 
 const NOW=Date.parse('2026-10-24T10:00:00.000Z');
@@ -25,4 +26,10 @@ test('rejects CONNECTING for all terminal queue outcomes',()=>{
 
 test('keeps a non-expired controlled session reusable',()=>{
   assert.deepEqual(classifySessionReuseV3({...base,state:'CEREBRO_CONTROLLED'},{job_status:'SUCCEEDED',now_ms:NOW}),{reusable:true,reason:'ACTIVE_SESSION'});
+});
+
+test('records stale recovery inside the canonical ERROR event contract',()=>{
+  const source=fs.readFileSync(new URL('../../supabase/functions/cerebro-browser-interactive-v3/index.ts',import.meta.url),'utf8');
+  assert.match(source,/event\(String\(session\.session_id\),'ERROR','SYSTEM',\{code:'STALE_SESSION_REAPED'/);
+  assert.doesNotMatch(source,/event\([^\n]*,'STALE_SESSION_REAPED','SYSTEM'/);
 });
