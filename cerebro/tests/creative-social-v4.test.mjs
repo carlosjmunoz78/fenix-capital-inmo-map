@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { evaluateCreativeSocialV4, assertCreativeSocialV4 } from '../runtime/creative-social-quality-v4.mjs';
 
-const scenes=Array.from({length:7},(_,i)=>({headline:`Escena ${i+1}`,duration_sec:2.8}));
+const sceneNames=['Hook','Descubrimiento','Tensión','Giro','Alivio','Payoff','CTA'];
+const scenes=sceneNames.map(headline=>({headline,duration_sec:2.8}));
 const base={output_type:'REEL',channel:'INSTAGRAM',social_narrative:true,hook_within_sec:.2,voice_style:'SOCIAL_ENERGETIC',social_arc:['HOOK','TENSION','RELIEF','PAYOFF','CTA'],scenes,narration_blocks:[{start_sec:.1,text:'Hook social'},{start_sec:5,text:'Desarrollo'},{start_sec:11,text:'Cierre'}]};
 const physical={continuous_narration:true,scene_locked_narration:false,voice_coverage_ratio:.64,max_voice_gap_sec:1.3,voice_wpm:164,sfx_peak_db:-7.5,sfx_event_count:7,fast_transition_accents:true,repetitive_full_frame_sweeps:false};
 
