@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0.0",
+  "registry_id": "CEREBRO-CANVA-SHARED-CAPABILITY-BINDINGS-V1",
+  "capability_id": "CREATIVE-CANVA-V1",
+  "status": "PREPROD_BINDINGS_DEFINED",
+  "scope": "CEREBRO_OS_ALL_DEPARTMENTS",
+  "default_policy": "DENY_UNLESS_BOUND",
+  "shared_integration": true,
+  "duplicate_runtime_per_department": false,
+  "duplicate_credentials_per_department": false,
+  "required_context": ["company_id", "engine_id", "environment", "version"],
+  "current_consumers": [
+    {"consumer":"FACEBOOK_FAMILY","engine_id":"SOC-001","department_id":"social-facebook","priority":"P0","operations":["search_designs","create_design","generate_design","edit_design","generate_image","folders","brand_kits","brand_templates","resize","export"],"publish_authority":false},
+    {"consumer":"MARKETING","engine_id":"MKT-001","priority":"P1","operations":["search_designs","create_design","generate_design","edit_design","generate_image","folders","brand_kits","brand_templates","resize","export"],"publish_authority":false},
+    {"consumer":"MARKETING_LAB","engine_id":"LAB-MKT","priority":"P1","operations":["search_designs","create_design","generate_design","edit_design","generate_image","resize","export"],"publish_authority":false},
+    {"consumer":"SEO","engine_id":"SEO-001","priority":"P1","operations":["search_designs","create_design","generate_image","resize","export"],"publish_authority":false},
+    {"consumer":"WEB","engine_id":"WEB-001","priority":"P1","operations":["search_designs","create_design","generate_image","brand_kits","resize","export"],"publish_authority":false},
+    {"consumer":"APP","engine_id":"APP-001","priority":"P1","operations":["search_designs","create_design","generate_image","brand_kits","resize","export"],"publish_authority":false},
+    {"consumer":"TRAINING","engine_id":"TRN-001","priority":"P2","operations":["search_designs","create_design","generate_image","export"],"publish_authority":false},
+    {"consumer":"SOCIAL_BOOTSTRAP","engine_id":"SOCBOOT-001","priority":"P1","operations":["search_designs","create_design","generate_design","generate_image","brand_kits","resize","export"],"publish_authority":false},
+    {"consumer":"MARKETING_BOOTSTRAP","engine_id":"MKTBOOT-001","priority":"P1","operations":["search_designs","create_design","generate_design","generate_image","brand_kits","resize","export"],"publish_authority":false},
+    {"consumer":"SEO_BOOTSTRAP","engine_id":"SEOBOOT-001","priority":"P2","operations":["search_designs","create_design","generate_image","resize","export"],"publish_authority":false},
+    {"consumer":"APP_BOOTSTRAP","engine_id":"APPBOOT-001","priority":"P2","operations":["search_designs","create_design","generate_image","brand_kits","export"],"publish_authority":false}
+  ],
+  "future_consumer_rule": {
+    "trigger": "NEW_OR_UPDATED_ENGINE_DECLARES_CREATIVE_MEDIA_NEED",
+    "factory": "FACT-001",
+    "action": "GENERATE_CANVA_BINDING_CANDIDATE",
+    "requirements": ["canonical_or_governed_engine_identity","company_scope","operation_allowlist","zero_cost_check","data_privacy_check","tests","EVA-001","JDG-001","observability","rollback","rebuild"],
+    "automatic_provider_authority": false,
+    "automatic_publish_authority": false,
+    "cross_company_access": "DENY",
+    "rule": "REUSE_CREATIVE_CANVA_V1; NEVER_CREATE_A_NEW_CANVA_ENGINE_OR_PER_DEPARTMENT_CANVA_RUNTIME"
+  },
+  "authority_rule": "CANVA_CAPABILITY_CREATES_OR_EDITS_ASSETS_ONLY; ANY_EXTERNAL_PUBLICATION_OR_BUSINESS_SIDE_EFFECT_REMAINS_WITH_THE_ORIGIN_ENGINE_AND_POLICY_GATE"
+}
