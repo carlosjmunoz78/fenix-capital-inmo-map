@@ -35,6 +35,7 @@ env:
   CEREBRO_PIPER_MODEL: /tmp/cerebro-piper/es_ES-sharvard-medium.onnx
   CEREBRO_PIPER_CONFIG: /tmp/cerebro-piper/es_ES-sharvard-medium.onnx.json
   CEREBRO_SHOWCASE_OUT: /tmp/cerebro-creative-quality-v2-live
+  CEREBRO_FENIX_LOGO: https://fenixcapital.es/wp-content/uploads/2026/10/Logo-Fenix-Capital-oficial-color-completo-scaled-1.png
 
 jobs:
   live-action-quality-gate:
@@ -54,19 +55,31 @@ jobs:
           node --check cerebro/runtime/creative-media-sources-v2.mjs
           node --check cerebro/runtime/creative-job-runner-v2-live.mjs
           node --test cerebro/tests/creative-quality-tribunal-v2.test.mjs cerebro/tests/creative-media-sources-v2.test.mjs cerebro/tests/creative-job-runner-v2-live.test.mjs
-      - name: Brand transparency gate
+      - name: Brand transparency CSS gate
         shell: bash
         run: |
           set -euo pipefail
           test "$(grep -F 'background:transparent;border:0;border-radius:0;padding:0;box-shadow:none' cerebro/runtime/creative-job-runner-v2-live.mjs | wc -l)" -eq 2
           ! grep -F 'background:rgba(255,255,255,.91)' cerebro/runtime/creative-job-runner-v2-live.mjs
           grep -F 'filter:drop-shadow' cerebro/runtime/creative-job-runner-v2-live.mjs >/dev/null
-          echo 'TRANSPARENT_LOGO_INTEGRATION_GREEN'
+          echo 'TRANSPARENT_LOGO_CONTAINER_GREEN'
       - name: Install Chromium and FFmpeg
         run: |
           npx playwright install --with-deps chromium
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends ffmpeg fonts-dejavu-core
+      - name: Verify official logo has physical alpha transparency
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --silent --show-error "$CEREBRO_FENIX_LOGO" -o /tmp/fenix-logo.png
+          test -s /tmp/fenix-logo.png
+          ffmpeg -hide_banner -loglevel error -i /tmp/fenix-logo.png -vf 'alphaextract,signalstats,metadata=print:file=/tmp/logo-alpha.txt' -frames:v 1 -f null -
+          cat /tmp/logo-alpha.txt
+          YMIN="$(sed -n 's/.*lavfi.signalstats.YMIN=//p' /tmp/logo-alpha.txt | head -n 1)"
+          test -n "$YMIN"
+          awk -v v="$YMIN" 'BEGIN { if ((v+0) >= 250) exit 1 }'
+          echo "LOGO_ALPHA_TRANSPARENCY_GREEN:YMIN=$YMIN"
       - name: Cache pinned Piper neural voice
         uses: actions/cache@v4
         with:
