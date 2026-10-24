@@ -28,6 +28,26 @@ export const OUTPUT_PRESETS = Object.freeze({
   INFOGRAPHIC: Object.freeze({ media_kind:'DESIGN', width:1080, height:1920, aspect_ratio:'9:16' })
 });
 
+export const PROD_CORE_CERTIFICATION = Object.freeze({
+  capability_id:'CREATIVE-PROGRAMMATIC-RENDER-V1',
+  status:'PROD_GREEN',
+  provider:'CEREBRO_HTML_CHROMIUM_FFMPEG',
+  execution_plane:'GITHUB_ACTIONS_OIDC_WORKER',
+  queue:'public.cerebro_creative_job_v1',
+  artifact_bucket:'cerebro-creative-assets',
+  heavy_render_outside_supabase:true,
+  additional_cost_eur:0,
+  publish_authorized:false,
+  evidence:Object.freeze({
+    preprod_physical_suite:'GREEN',
+    seo_image_1200x630:'GREEN',
+    carousel_3_pages_plus_pdf:'GREEN',
+    reel_1080x1920_4s:'GREEN',
+    artifact_sha256_manifest:'GREEN',
+    private_storage:'GREEN'
+  })
+});
+
 const SAFE_REF = /^[A-Za-z0-9][A-Za-z0-9:_./-]{0,199}$/;
 
 function text(value, label, max = 200) {
@@ -52,82 +72,43 @@ function number(value, label, min, max) {
 function humanRequired(reason, detail, extra = {}) {
   if (!HUMAN_REQUIRED.has(reason)) throw new Error('NON_CANONICAL_HUMAN_REQUIRED_REASON');
   return Object.freeze({
-    ok:false,
-    status:'HUMAN_REQUIRED',
-    reason,
-    detail,
-    publish_authorized:false,
-    spend_authorized:false,
-    external_side_effect_executed:false,
+    ok:false,status:'HUMAN_REQUIRED',reason,detail,
+    publish_authorized:false,spend_authorized:false,external_side_effect_executed:false,
     ...extra
+  });
+}
+
+function hold(status, detail, base = {}) {
+  return Object.freeze({
+    ok:false,status,detail,...base,
+    publish_authorized:false,send_authorized:false,spend_authorized:false,
+    external_side_effect_executed:false
   });
 }
 
 function multimediaContext(companyId) {
   return Object.freeze({
-    company_id:companyId,
-    engine_id:'FACT-001',
-    capability_id:'DIGITAL-BUILD-MULTIMEDIA',
-    environment:'PREPROD',
-    version:'v0'
+    company_id:companyId,engine_id:'FACT-001',capability_id:'DIGITAL-BUILD-MULTIMEDIA',
+    environment:'PREPROD',version:'v0'
   });
 }
 
-function buildVideoStages(input, base, preset) {
+function buildPreprodVideoStages(input, base, preset) {
   const mmContext = multimediaContext(base.company_id);
   const requestId = base.request_id;
   const stages = [];
 
   if (input.generated_visuals_required === true) {
-    stages.push(planMultimediaTask({
-      context:mmContext,
-      request_id:`${requestId}:visuals`,
-      asset_ref:`${base.asset_ref}:visuals`,
-      adapter:'Z_IMAGE_TURBO',
-      task_type:'IMAGE_GENERATION',
-      confidence:base.confidence
-    }));
+    stages.push(planMultimediaTask({context:mmContext,request_id:`${requestId}:visuals`,asset_ref:`${base.asset_ref}:visuals`,adapter:'Z_IMAGE_TURBO',task_type:'IMAGE_GENERATION',confidence:base.confidence}));
   }
-
   if (input.voice_requested === true) {
-    stages.push(planMultimediaTask({
-      context:mmContext,
-      request_id:`${requestId}:voice`,
-      asset_ref:`${base.asset_ref}:voice`,
-      adapter:'QWEN3_TTS',
-      task_type:'VOICE_SYNTHESIS',
-      confidence:base.confidence
-    }));
+    stages.push(planMultimediaTask({context:mmContext,request_id:`${requestId}:voice`,asset_ref:`${base.asset_ref}:voice`,adapter:'QWEN3_TTS',task_type:'VOICE_SYNTHESIS',confidence:base.confidence}));
   }
-
-  stages.push(planMultimediaTask({
-    context:mmContext,
-    request_id:`${requestId}:video`,
-    asset_ref:`${base.asset_ref}:video`,
-    adapter:'HYPERFRAMES',
-    task_type:'VIDEO_GENERATION',
-    confidence:base.confidence
-  }));
-
+  stages.push(planMultimediaTask({context:mmContext,request_id:`${requestId}:video`,asset_ref:`${base.asset_ref}:video`,adapter:'HYPERFRAMES',task_type:'VIDEO_GENERATION',confidence:base.confidence}));
   if (input.source_clips_present === true) {
-    stages.push(planMultimediaTask({
-      context:mmContext,
-      request_id:`${requestId}:edit`,
-      asset_ref:`${base.asset_ref}:edit`,
-      adapter:'OPENMONTAGE',
-      task_type:'VIDEO_EDITING',
-      confidence:base.confidence
-    }));
+    stages.push(planMultimediaTask({context:mmContext,request_id:`${requestId}:edit`,asset_ref:`${base.asset_ref}:edit`,adapter:'OPENMONTAGE',task_type:'VIDEO_EDITING',confidence:base.confidence}));
   }
-
-  stages.push(buildFfmpegReusePlan({
-    context:mmContext,
-    request_id:`${requestId}:compose`,
-    asset_ref:`${base.asset_ref}:compose`,
-    confidence:base.confidence,
-    binary_presence_verified:input.ffmpeg_binary_verified === true,
-    binary_version_ref:input.ffmpeg_binary_version_ref ?? null
-  }));
+  stages.push(buildFfmpegReusePlan({context:mmContext,request_id:`${requestId}:compose`,asset_ref:`${base.asset_ref}:compose`,confidence:base.confidence,binary_presence_verified:input.ffmpeg_binary_verified === true,binary_version_ref:input.ffmpeg_binary_version_ref ?? null}));
 
   return Object.freeze({
     stages:Object.freeze(stages),
@@ -136,14 +117,24 @@ function buildVideoStages(input, base, preset) {
     voice_requested:input.voice_requested === true,
     generated_visuals_required:input.generated_visuals_required === true,
     source_clips_present:input.source_clips_present === true,
-    render_policy:Object.freeze({
-      deterministic:true,
-      visual_identity_required:true,
-      layout_before_animation:true,
-      no_time_based_randomness:true,
-      finite_timelines_only:true,
-      separate_audio_track:true
-    })
+    render_policy:Object.freeze({deterministic:true,visual_identity_required:true,layout_before_animation:true,no_time_based_randomness:true,finite_timelines_only:true,separate_audio_track:true})
+  });
+}
+
+function buildProdVideoStages(input, base, preset) {
+  const duration = number(input.duration_sec ?? Math.min(preset.default_duration_sec ?? 30,60),'duration_sec',3,60);
+  return Object.freeze({
+    stages:Object.freeze([
+      Object.freeze({adapter:'CEREBRO_HTML_CHROMIUM',task_type:'FRAME_COMPOSITION',status:'PROD_GREEN'}),
+      Object.freeze({adapter:'FFMPEG',task_type:'MEDIA_COMPOSITION',status:'PROD_GREEN'})
+    ]),
+    duration_sec:duration,
+    captions_required:false,
+    voice_requested:false,
+    generated_visuals_required:false,
+    source_clips_present:false,
+    render_policy:Object.freeze({deterministic:true,visual_identity_required:true,layout_before_animation:true,no_time_based_randomness:true,finite_timelines_only:true,separate_audio_track:true}),
+    execution:Object.freeze({...PROD_CORE_CERTIFICATION})
   });
 }
 
@@ -170,74 +161,46 @@ export function buildCreativeOutputPlan(input = {}) {
   if (expectedCost !== 0 || input.paid_provider_requested === true || input.extra_purchase_requested === true) {
     return humanRequired('MONEY_LIMIT','Creative pipeline is zero-additional-cost-first; paid execution requires explicit economic authority.',{expected_cost_eur:expectedCost});
   }
-
   const confidence = number(input.confidence ?? 1,'confidence',0,1);
-  if (confidence < 0.75) return humanRequired('LOW_CONFIDENCE','Creative request confidence below PREPROD threshold.');
+  if (confidence < 0.75) return humanRequired('LOW_CONFIDENCE','Creative request confidence below threshold.');
   if (input.high_risk === true) return humanRequired('HIGH_RISK','High-risk creative request requires human review.');
   if (input.customer_human_request === true) return humanRequired('CUSTOMER_HUMAN_REQUEST','A human was explicitly requested.');
 
-  if (environment === 'PROD' && input.prod_creative_pipeline_green !== true) {
-    return Object.freeze({
-      ok:false,
-      status:'HOLD_CREATIVE_PIPELINE_NOT_PROD_CERTIFIED',
-      company_id:companyId,
-      engine_id:engineId,
-      environment,
-      output_type:outputType,
-      publish_authorized:false,
-      external_side_effect_executed:false
-    });
-  }
-
   let pageCount = 1;
-  if (preset.multi_page === true) {
-    pageCount = number(input.page_count ?? 6,'page_count',preset.min_pages,preset.max_pages);
-  }
+  if (preset.multi_page === true) pageCount = number(input.page_count ?? 6,'page_count',preset.min_pages,preset.max_pages);
 
-  const base = Object.freeze({
-    company_id:companyId,
-    engine_id:engineId,
-    environment,
-    version,
-    request_id:requestId,
-    asset_ref:assetRef,
-    brand_profile_ref:brandProfileRef,
-    brief_ref:briefRef,
-    channel,
-    output_type:outputType,
-    confidence
-  });
+  const base = Object.freeze({company_id:companyId,engine_id:engineId,environment,version,request_id:requestId,asset_ref:assetRef,brand_profile_ref:brandProfileRef,brief_ref:briefRef,channel,output_type:outputType,confidence});
 
-  const route = routeCreativeCapability({
-    company_id:companyId,
-    engine_id:engineId,
-    environment,
-    version,
-    media_kind:preset.media_kind,
-    expected_cost_eur:0,
-    canva_native_required:input.canva_native_required === true,
-    brand_kit_required:input.brand_kit_required === true,
-    brand_template_required:input.brand_template_required === true,
-    canva_binding_green:input.canva_binding_green === true,
-    local_fallback_allowed:input.local_fallback_allowed !== false,
-    prefer_local:input.prefer_local !== false,
-    zero_cost_first:true,
-    local_visual_prod_green:input.local_visual_prod_green === true,
-    interactive_editor_required:input.interactive_editor_required === true
-  });
+  let route;
+  let video = null;
 
-  if (!route.ok) {
-    return Object.freeze({
-      ok:false,
-      status:route.status,
-      route,
-      ...base,
-      publish_authorized:false,
-      external_side_effect_executed:false
+  if (environment === 'PROD') {
+    if (input.canva_native_required === true || input.brand_kit_required === true || input.brand_template_required === true) {
+      if (input.canva_binding_green !== true) return hold('HOLD_CANVA_BINDING_NOT_GREEN','Canva-native execution remains provider-gated until its physical OAuth binding is green.',base);
+      route = Object.freeze({ok:true,status:'AUTHORIZED_PROVIDER_ROUTE',...base,capability_id:'CREATIVE-CANVA-V1',provider:'CANVA',publish_authorized:false});
+    } else if (input.interactive_editor_required === true) {
+      return hold('HOLD_OPENCUT_NOT_PROD_AUTOMATION_CERTIFIED','OpenCut remains LAB until its upstream editor API/MCP/headless automation reaches physical parity.',base);
+    } else {
+      if (preset.media_kind === 'VIDEO') {
+        if (input.voice_requested === true) return hold('HOLD_VOICE_RUNTIME_NOT_PROD_CERTIFIED','The zero-cost voice adapter is not yet physically certified for PROD.',base);
+        if (input.generated_visuals_required === true) return hold('HOLD_GENERATIVE_VISUAL_RUNTIME_NOT_PROD_CERTIFIED','The local generative-visual adapter is not yet physically certified for PROD.',base);
+        if (input.source_clips_present === true) return hold('HOLD_SOURCE_CLIP_EDITOR_NOT_PROD_CERTIFIED','Automated source-clip editing remains gated until a physical editor path is PROD-certified.',base);
+      }
+      route = Object.freeze({ok:true,status:'AUTHORIZED_PROD_CORE_ROUTE',...base,...PROD_CORE_CERTIFICATION});
+      if (preset.media_kind === 'VIDEO') video = buildProdVideoStages(input,base,preset);
+    }
+  } else {
+    route = routeCreativeCapability({
+      company_id:companyId,engine_id:engineId,environment,version,media_kind:preset.media_kind,expected_cost_eur:0,
+      canva_native_required:input.canva_native_required === true,brand_kit_required:input.brand_kit_required === true,
+      brand_template_required:input.brand_template_required === true,canva_binding_green:input.canva_binding_green === true,
+      local_fallback_allowed:input.local_fallback_allowed !== false,prefer_local:input.prefer_local !== false,zero_cost_first:true,
+      local_visual_prod_green:false,interactive_editor_required:input.interactive_editor_required === true
     });
+    if (!route.ok) return Object.freeze({ok:false,status:route.status,route,...base,publish_authorized:false,external_side_effect_executed:false});
+    if (preset.media_kind === 'VIDEO') video = buildPreprodVideoStages(input,base,preset);
   }
 
-  const video = preset.media_kind === 'VIDEO' ? buildVideoStages(input, base, preset) : null;
   const qaGates = Object.freeze([
     'BRAND_CONSISTENCY','FORMAT_DIMENSIONS','SAFE_AREA','TEXT_OVERFLOW','ACCESSIBILITY',
     ...(video?.captions_required ? ['CAPTIONS'] : []),
@@ -245,39 +208,21 @@ export function buildCreativeOutputPlan(input = {}) {
   ]);
 
   return Object.freeze({
-    ok:true,
-    status:'CREATIVE_OUTPUT_PLAN_READY',
-    ...base,
-    preset:Object.freeze({...preset}),
-    page_count:pageCount,
-    route,
-    video,
+    ok:true,status:environment==='PROD'?'CREATIVE_OUTPUT_PROD_PLAN_READY':'CREATIVE_OUTPUT_PLAN_READY',...base,
+    preset:Object.freeze({...preset}),page_count:pageCount,route,video,
     brand_gate:Object.freeze({required:true,brand_profile_ref:brandProfileRef,generic_unbranded_output_forbidden:true}),
-    qa_gates:qaGates,
-    export_required:true,
-    publication:Object.freeze({
-      requested:input.publish_requested === true,
-      authorized:false,
-      authority_owner:engineId,
-      rule:'CREATIVE_PIPELINE_NEVER_GRANTS_PUBLISH_SEND_OR_SPEND_AUTHORITY'
-    }),
-    expected_cost_eur:0,
-    additional_cost_eur:0,
-    paid_provider_authorized:false,
-    publish_authorized:false,
-    send_authorized:false,
-    spend_authorized:false,
-    external_side_effect_executed:false
+    qa_gates:qaGates,export_required:true,
+    publication:Object.freeze({requested:input.publish_requested === true,authorized:false,authority_owner:engineId,rule:'CREATIVE_PIPELINE_NEVER_GRANTS_PUBLISH_SEND_OR_SPEND_AUTHORITY'}),
+    execution:environment==='PROD'?Object.freeze({...PROD_CORE_CERTIFICATION}):null,
+    expected_cost_eur:0,additional_cost_eur:0,paid_provider_authorized:false,
+    publish_authorized:false,send_authorized:false,spend_authorized:false,external_side_effect_executed:false
   });
 }
 
 export function listCreativeOutputCatalog() {
   return Object.freeze({
-    status:'CREATIVE_OUTPUT_CATALOG_READY',
-    channels:Object.freeze([...CHANNELS]),
-    outputs:OUTPUT_PRESETS,
-    shared_capabilities:Object.freeze(['CREATIVE-CANVA-V1','CREATIVE-VISUAL-LOCAL-V1','CREATIVE-VIDEO-EDITOR-V1','DIGITAL-BUILD-MULTIMEDIA']),
-    default_additional_cost_eur:0,
-    publication_authority:false
+    status:'CREATIVE_OUTPUT_CATALOG_READY',channels:Object.freeze([...CHANNELS]),outputs:OUTPUT_PRESETS,
+    shared_capabilities:Object.freeze(['CREATIVE-CANVA-V1','CREATIVE-VISUAL-LOCAL-V1','CREATIVE-VIDEO-EDITOR-V1','DIGITAL-BUILD-MULTIMEDIA','CREATIVE-PROGRAMMATIC-RENDER-V1']),
+    prod_core:PROD_CORE_CERTIFICATION,default_additional_cost_eur:0,publication_authority:false
   });
 }
