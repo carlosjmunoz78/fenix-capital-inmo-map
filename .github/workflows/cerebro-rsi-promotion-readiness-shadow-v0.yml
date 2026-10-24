@@ -21,6 +21,7 @@ on:
       - 'supabase/functions/cerebro-browser-dispatch-v2/**'
       - 'supabase/functions/cerebro-browser-dispatch-v2-prod/**'
       - 'supabase/functions/cerebro-browser-interactive-v3/**'
+      - 'supabase/functions/cerebro-creative-dispatch-v1/**'
       - 'supabase/migrations/20261012132000_cerebro_human_route_control_preprod_v1.sql'
       - 'supabase/migrations/20261013010500_cerebro_multichannel_ana_overlay_v1.sql'
       - 'supabase/migrations/20261013042000_cerebro_channel_access_profiles_v1.sql'
@@ -37,6 +38,9 @@ on:
       - 'supabase/migrations/20261023201600_cerebro_browser_barrier_v2_acl.sql'
       - 'supabase/migrations/20261023201700_cerebro_browser_barrier_v2_functions.sql'
       - 'supabase/migrations/20261023201800_cerebro_browser_lease_benchmark_v2.sql'
+      - 'supabase/migrations/20261024103000_cerebro_creative_job_v1.sql'
+      - 'supabase/migrations/20261024103100_cerebro_creative_job_v1_scope_hardening.sql'
+      - 'supabase/migrations/20261024103200_cerebro_creative_job_v1_explicit_deny_policy.sql'
       - 'supabase/migrations/20261024230000_cerebro_browser_phase3_interactive_v0.sql'
       - 'supabase/migrations/rollback/20261024230000_cerebro_browser_phase3_interactive_v0.rollback.sql'
       - '.github/workflows/cerebro-rsi-*.yml'
@@ -44,6 +48,7 @@ on:
       - '.github/workflows/cerebro-human-intelligence-*.yml'
       - '.github/workflows/cerebro-multichannel-conversation-unification-v1.yml'
       - '.github/workflows/cerebro-browser-*.yml'
+      - '.github/workflows/cerebro-creative-job-runner-v1.yml'
       - '.github/workflows/cerebro-rsi-promotion-readiness-shadow-v0.yml'
   workflow_dispatch:
 
@@ -71,6 +76,8 @@ jobs:
           node-version: 24
       - name: Assert exact PR head checkout
         run: test "$(git rev-parse HEAD)" = "$EXACT_HEAD"
+      - name: Install pinned root runtime dependencies for cross-package contract imports
+        run: npm ci --ignore-scripts
       - name: Validate canonical engine registry
         working-directory: cerebro
         run: npm run validate
@@ -137,7 +144,7 @@ jobs:
               test -f "$file" || { echo "Phase 3 companion missing: $file" >&2; exit 1; }
             done
           fi
-          allowed='^(supabase/functions/(cerebro-human-old-actor-preprod-v0|cerebro-human-new-actor-preprod-v1|cerebro-human-route-control-preprod-v1|cerebro-console-gateway-human-v1-canary|cerebro-console-human-router-zero-v1|cerebro-telegram-gateway-v0|cerebro-telegram-voice-v1|cerebro-browser-dispatch-v2|cerebro-browser-dispatch-v2-prod|cerebro-browser-interactive-v3)/|supabase/functions/cerebro-browser-dispatch-v1/index\.ts$|supabase/functions/_shared/cerebro-(conversation|channel-access)-policy-v1\.ts$|supabase/migrations/(20261012132000_cerebro_human_route_control_preprod_v1|20261013010500_cerebro_multichannel_ana_overlay_v1|20261013042000_cerebro_channel_access_profiles_v1|20261013075000_cerebro_company_registry_preprod_persistence_v1|20261013083000_cerebro_company_onboarding_preprod_persistence_v1|20261013093000_cerebro_scan001_preprod_persistence_v1|20261013101500_cerebro_post_scan_parallel_preprod_v1|20261023093000_cerebro_browser_dispatch_v1|20261023093100_cerebro_browser_credential_broker_v1|20261023180000_cerebro_browser_orchestrator_v2|20261023194500_cerebro_browser_credential_broker_v2|20261023195500_cerebro_browser_credential_broker_v2_scope_fix|20261023201500_cerebro_browser_barrier_v2_table|20261023201600_cerebro_browser_barrier_v2_acl|20261023201700_cerebro_browser_barrier_v2_functions|20261023201800_cerebro_browser_lease_benchmark_v2|20261024230000_cerebro_browser_phase3_interactive_v0)\.sql$|supabase/migrations/rollback/20261024230000_cerebro_browser_phase3_interactive_v0\.rollback\.sql$)'
+          allowed='^(supabase/functions/(cerebro-human-old-actor-preprod-v0|cerebro-human-new-actor-preprod-v1|cerebro-human-route-control-preprod-v1|cerebro-console-gateway-human-v1-canary|cerebro-console-human-router-zero-v1|cerebro-telegram-gateway-v0|cerebro-telegram-voice-v1|cerebro-browser-dispatch-v2|cerebro-browser-dispatch-v2-prod|cerebro-browser-interactive-v3|cerebro-creative-dispatch-v1)/|supabase/functions/cerebro-browser-dispatch-v1/index\.ts$|supabase/functions/_shared/cerebro-(conversation|channel-access)-policy-v1\.ts$|supabase/migrations/(20261012132000_cerebro_human_route_control_preprod_v1|20261013010500_cerebro_multichannel_ana_overlay_v1|20261013042000_cerebro_channel_access_profiles_v1|20261013075000_cerebro_company_registry_preprod_persistence_v1|20261013083000_cerebro_company_onboarding_preprod_persistence_v1|20261013093000_cerebro_scan001_preprod_persistence_v1|20261013101500_cerebro_post_scan_parallel_preprod_v1|20261023093000_cerebro_browser_dispatch_v1|20261023093100_cerebro_browser_credential_broker_v1|20261023180000_cerebro_browser_orchestrator_v2|20261023194500_cerebro_browser_credential_broker_v2|20261023195500_cerebro_browser_credential_broker_v2_scope_fix|20261023201500_cerebro_browser_barrier_v2_table|20261023201600_cerebro_browser_barrier_v2_acl|20261023201700_cerebro_browser_barrier_v2_functions|20261023201800_cerebro_browser_lease_benchmark_v2|20261024103000_cerebro_creative_job_v1|20261024103100_cerebro_creative_job_v1_scope_hardening|20261024103200_cerebro_creative_job_v1_explicit_deny_policy|20261024230000_cerebro_browser_phase3_interactive_v0)\.sql$|supabase/migrations/rollback/20261024230000_cerebro_browser_phase3_interactive_v0\.rollback\.sql$)'
           unexpected_supabase="$(printf '%s\n' "$changed" | grep '^supabase/' | grep -Ev "$allowed" || true)"
           if [ -n "$unexpected_supabase" ]; then
             echo 'Unapproved Supabase surface changed:' >&2
@@ -205,9 +212,37 @@ jobs:
             printf '%s\n' "$unexpected_app" >&2
             exit 1
           fi
-          allowed='^(supabase/functions/(cerebro-human-old-actor-preprod-v0|cerebro-human-new-actor-preprod-v1|cerebro-human-route-control-preprod-v1|cerebro-console-gateway-human-v1-canary|cerebro-console-human-router-zero-v1|cerebro-telegram-gateway-v0|cerebro-telegram-voice-v1|cerebro-browser-dispatch-v2|cerebro-browser-dispatch-v2-prod|cerebro-browser-interactive-v3)/|supabase/functions/cerebro-browser-dispatch-v1/index\.ts$|supabase/functions/_shared/cerebro-(conversation|channel-access)-policy-v1\.ts$|supabase/migrations/(20261012132000_cerebro_human_route_control_preprod_v1|20261013010500_cerebro_multichannel_ana_overlay_v1|20261013042000_cerebro_channel_access_profiles_v1|20261013075000_cerebro_company_registry_preprod_persistence_v1|20261013083000_cerebro_company_onboarding_preprod_persistence_v1|20261013093000_cerebro_scan001_preprod_persistence_v1|20261013101500_cerebro_post_scan_parallel_preprod_v1|20261023093000_cerebro_browser_dispatch_v1|20261023093100_cerebro_browser_credential_broker_v1|20261023180000_cerebro_browser_orchestrator_v2|20261023194500_cerebro_browser_credential_broker_v2|20261023195500_cerebro_browser_credential_broker_v2_scope_fix|20261023201500_cerebro_browser_barrier_v2_table|20261023201600_cerebro_browser_barrier_v2_acl|20261023201700_cerebro_browser_barrier_v2_functions|20261023201800_cerebro_browser_lease_benchmark_v2|20261024230000_cerebro_browser_phase3_interactive_v0)\.sql$|supabase/migrations/rollback/20261024230000_cerebro_browser_phase3_interactive_v0\.rollback\.sql$)'
+          allowed='^(supabase/functions/(cerebro-human-old-actor-preprod-v0|cerebro-human-new-actor-preprod-v1|cerebro-human-route-control-preprod-v1|cerebro-console-gateway-human-v1-canary|cerebro-console-human-router-zero-v1|cerebro-telegram-gateway-v0|cerebro-telegram-voice-v1|cerebro-browser-dispatch-v2|cerebro-browser-dispatch-v2-prod|cerebro-browser-interactive-v3|cerebro-creative-dispatch-v1)/|supabase/functions/cerebro-browser-dispatch-v1/index\.ts$|supabase/functions/_shared/cerebro-(conversation|channel-access)-policy-v1\.ts$|supabase/migrations/(20261012132000_cerebro_human_route_control_preprod_v1|20261013010500_cerebro_multichannel_ana_overlay_v1|20261013042000_cerebro_channel_access_profiles_v1|20261013075000_cerebro_company_registry_preprod_persistence_v1|20261013083000_cerebro_company_onboarding_preprod_persistence_v1|20261013093000_cerebro_scan001_preprod_persistence_v1|20261013101500_cerebro_post_scan_parallel_preprod_v1|20261023093000_cerebro_browser_dispatch_v1|20261023093100_cerebro_browser_credential_broker_v1|20261023180000_cerebro_browser_orchestrator_v2|20261023194500_cerebro_browser_credential_broker_v2|20261023195500_cerebro_browser_credential_broker_v2_scope_fix|20261023201500_cerebro_browser_barrier_v2_table|20261023201600_cerebro_browser_barrier_v2_acl|20261023201700_cerebro_browser_barrier_v2_functions|20261023201800_cerebro_browser_lease_benchmark_v2|20261024103000_cerebro_creative_job_v1|20261024103100_cerebro_creative_job_v1_scope_hardening|20261024103200_cerebro_creative_job_v1_explicit_deny_policy|20261024230000_cerebro_browser_phase3_interactive_v0)\.sql$|supabase/migrations/rollback/20261024230000_cerebro_browser_phase3_interactive_v0\.rollback\.sql$)'
           unexpected_supabase="$(printf '%s\n' "$changed" | grep '^supabase/' | grep -Ev "$allowed" || true)"
           test -z "$unexpected_supabase" || { printf '%s\n' "$unexpected_supabase" >&2; exit 1; }
+      - name: Creative Pipeline bounded-authority contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          edge='supabase/functions/cerebro-creative-dispatch-v1/index.ts'
+          queue='supabase/migrations/20261024103000_cerebro_creative_job_v1.sql'
+          scope='supabase/migrations/20261024103100_cerebro_creative_job_v1_scope_hardening.sql'
+          deny='supabase/migrations/20261024103200_cerebro_creative_job_v1_explicit_deny_policy.sql'
+          runner='cerebro/runtime/creative-job-runner-v1.mjs'
+          for file in "$edge" "$queue" "$scope" "$deny" "$runner"; do test -f "$file"; done
+          grep -F 'const GITHUB_AUDIENCE="cerebro-creative-worker-v1"' "$edge"
+          grep -F 'const GITHUB_REPOSITORY="carlosjmunoz78/fenix-capital-inmo-map"' "$edge"
+          grep -F 'const GITHUB_WORKFLOW=".github/workflows/cerebro-creative-job-runner-v1.yml"' "$edge"
+          grep -F 'else if(ref!=="refs/heads/main")' "$edge"
+          grep -F 'if(!PREPROD)return out(req,404,{ok:false,error:"CANARY_ROUTE_NOT_AVAILABLE"})' "$edge"
+          grep -F 'enable row level security' "$queue"
+          grep -F 'revoke all on table public.cerebro_creative_job_v1 from public, anon, authenticated' "$queue"
+          grep -F 'grant all on table public.cerebro_creative_job_v1 to service_role' "$queue"
+          grep -F 'CREATIVE_JOB_PUBLISH_AUTHORITY_DENIED' "$queue"
+          grep -F 'CREATIVE_JOB_MONEY_LIMIT' "$queue"
+          grep -F 'CREATIVE_JOB_CROSS_COMPANY_DENIED' "$scope"
+          grep -F 'to anon, authenticated' "$deny"
+          grep -F 'using (false)' "$deny"
+          grep -F 'heavy_render_outside_supabase:true' "$runner"
+          grep -F 'publish_authorized:false' "$runner"
+          grep -F 'additional_cost_eur:0' "$runner"
+          ! grep -R -E 'ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]+' "$edge" "$queue" "$scope" "$deny" "$runner"
+          echo 'Creative Pipeline is company-scoped, OIDC-bound, service-role-only, non-publishing, external-rendered and zero-cost.' >> "$GITHUB_STEP_SUMMARY"
       - name: Browser Phase 3 bounded-authority contract
         shell: bash
         run: |
