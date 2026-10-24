@@ -773,11 +773,11 @@
         "binding_count": 5
       },
       "company_id": "fenix",
-      "environment": "PREPROD",
+      "environment": "PROD_CAPABILITY",
       "version": "1.2.0",
-      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
-      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
-      "current_evidence": null,
+      "status": "PROD_CAPABILITY_AVAILABLE_READONLY",
+      "current_scope": "READONLY_ADVISORY_ANALYZE_REVIEW_PLAN_OBSERVE",
+      "current_evidence": "GREEN_DYNAMIC_AWS_COGNITO_24A24757_PROD_READONLY_CANARY",
       "observed_at": "2026-10-24T16:58:33.084Z",
       "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
       "prod_authorized": false,
@@ -791,7 +791,37 @@
       "spend_authorized": false,
       "trading_access": false,
       "additional_cost_eur": 0,
-      "capability_hash": "6f1ca5afa32360e0579c7840398c05a17b9efb78cf550bb0cd4b7177e783e540"
+      "capability_hash": "6f1ca5afa32360e0579c7840398c05a17b9efb78cf550bb0cd4b7177e783e540",
+      "canary": {
+        "status": "GREEN_DYNAMIC_AWS_COGNITO_24A24757_PROD_READONLY_CANARY",
+        "candidate_id": "repo:7151f515ec01a59135f492d4ffdc",
+        "technical_name": "aws-cognito",
+        "head_sha": "e517cf23f878937849d90e3dc8517f80bdc061c8",
+        "run_id": 40114004595,
+        "ref": "refs/heads/main",
+        "checked_bindings": [
+          "APP-001",
+          "ARCH-001",
+          "QA-001",
+          "WAUD-001",
+          "WEB-001"
+        ],
+        "checked_modes": [
+          "ADVISE",
+          "ANALYZE",
+          "REVIEW",
+          "PLAN",
+          "READONLY_OBSERVE"
+        ],
+        "side_effects": false,
+        "external_skill_code_execution": false,
+        "prod_write_authorized": false,
+        "prod_mutation_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": 0,
+        "observed_at": "2026-10-24T16:58:49.441Z"
+      },
+      "promoted_at": "2026-10-24T16:58:49.441Z"
     },
     {
       "candidate_id": "repo:be539f32206970b088329ceaf60b",
@@ -1151,11 +1181,11 @@
         "binding_count": 6
       },
       "company_id": "fenix",
-      "environment": "PREPROD",
+      "environment": "PROD_CAPABILITY",
       "version": "1.2.0",
-      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
-      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
-      "current_evidence": null,
+      "status": "PROD_CAPABILITY_AVAILABLE_READONLY",
+      "current_scope": "READONLY_ADVISORY_ANALYZE_REVIEW_PLAN_OBSERVE",
+      "current_evidence": "GREEN_DYNAMIC_AWS_EC2_2D949EA8_PROD_READONLY_CANARY",
       "observed_at": "2026-10-24T16:58:33.083Z",
       "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
       "prod_authorized": false,
@@ -1169,7 +1199,38 @@
       "spend_authorized": false,
       "trading_access": false,
       "additional_cost_eur": 0,
-      "capability_hash": "d6ad7bbaad3db1cacb807895aa9e187d99b524a279d03effe6555e2d804b0747"
+      "capability_hash": "d6ad7bbaad3db1cacb807895aa9e187d99b524a279d03effe6555e2d804b0747",
+      "canary": {
+        "status": "GREEN_DYNAMIC_AWS_EC2_2D949EA8_PROD_READONLY_CANARY",
+        "candidate_id": "repo:fbf84caeea821e44d4bfc28b2e1e",
+        "technical_name": "aws-ec2",
+        "head_sha": "e517cf23f878937849d90e3dc8517f80bdc061c8",
+        "run_id": 40114004595,
+        "ref": "refs/heads/main",
+        "checked_bindings": [
+          "CMP-002",
+          "DPO-001",
+          "IAM-001",
+          "RED-001",
+          "SEC-001",
+          "SEC-002"
+        ],
+        "checked_modes": [
+          "ADVISE",
+          "ANALYZE",
+          "REVIEW",
+          "PLAN",
+          "READONLY_OBSERVE"
+        ],
+        "side_effects": false,
+        "external_skill_code_execution": false,
+        "prod_write_authorized": false,
+        "prod_mutation_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": 0,
+        "observed_at": "2026-10-24T16:58:49.441Z"
+      },
+      "promoted_at": "2026-10-24T16:58:49.441Z"
     },
     {
       "candidate_id": "repo:e8b780d34bd89779fdb5cfcb903d",
@@ -12080,10 +12141,9 @@
   "adoption_skips": [],
   "summary": {
     "total": 120,
-    "inserted": 2,
-    "updated": 0,
+    "promoted": 2,
     "skipped": 0,
-    "pending_canary": 2,
-    "prod_readonly": 118
+    "pending_canary": 0,
+    "prod_readonly": 120
   }
 }
