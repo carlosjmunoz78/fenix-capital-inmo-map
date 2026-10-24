@@ -6488,6 +6488,106 @@
       "promoted_at": "2026-10-21T00:06:05.748Z"
     },
     {
+      "candidate_id": "repo:d53b3ddb37bc5b2c880d8324cd82",
+      "technical_name": "material-ui",
+      "source_locator": "github://TerminalSkills/skills@20719c32fa1cc0bf4598bd3d2c75c058f8c19ddd/skills/material-ui",
+      "pinned_sha": "20719c32fa1cc0bf4598bd3d2c75c058f8c19ddd",
+      "snapshot_sha256": "d53b3ddb37bc5b2c880d8324cd82e1624fb97743cd1a5607b270bab08c61cc0b",
+      "manifest_sha256": "d4a4dfc55613cdab5c2d17e918636b9dcc5a99cc71b8927566ec285515129a2b",
+      "outcome_hash": "7bcfccfa12e77ac0ab2fe880c35d9b55bce81b8b5d5e36596f30fe5d839097f1",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:d53b3ddb37bc5b2c:cap:1",
+          "technical_name": "material-ui",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PROD_CAPABILITY",
+      "version": "1.2.0",
+      "status": "PROD_CAPABILITY_AVAILABLE_READONLY",
+      "current_scope": "READONLY_ADVISORY_ANALYZE_REVIEW_PLAN_OBSERVE",
+      "current_evidence": "GREEN_DYNAMIC_MATERIAL_UI_47B2F08B_PROD_READONLY_CANARY",
+      "observed_at": "2026-10-24T09:51:06.405Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "2d5ae86853875560f5dbac6081ced02391424056f4acfa03187a9a7b1882abf8",
+      "canary": {
+        "status": "GREEN_DYNAMIC_MATERIAL_UI_47B2F08B_PROD_READONLY_CANARY",
+        "candidate_id": "repo:d53b3ddb37bc5b2c880d8324cd82",
+        "technical_name": "material-ui",
+        "head_sha": "ad89e516e7d68b659c52adf0b8e217964099805f",
+        "run_id": 40083598324,
+        "ref": "refs/heads/main",
+        "checked_bindings": [
+          "APP-001",
+          "ARCH-001",
+          "QA-001",
+          "WAUD-001",
+          "WEB-001"
+        ],
+        "checked_modes": [
+          "ADVISE",
+          "ANALYZE",
+          "REVIEW",
+          "PLAN",
+          "READONLY_OBSERVE"
+        ],
+        "side_effects": false,
+        "external_skill_code_execution": false,
+        "prod_write_authorized": false,
+        "prod_mutation_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": 0,
+        "observed_at": "2026-10-24T09:51:28.785Z"
+      },
+      "promoted_at": "2026-10-24T09:51:28.785Z"
+    },
+    {
       "candidate_id": "repo:47275b92cdf5fc881cbe11dd53dd",
       "technical_name": "matrix",
       "source_locator": "github://bergside/awesome-design-skills@f631a09b4fcc0166f2e2c1a8c81906ef680c57e8/skills/matrix",
@@ -11634,11 +11734,10 @@
   ],
   "adoption_skips": [],
   "summary": {
-    "total": 115,
-    "inserted": 0,
-    "updated": 0,
+    "total": 116,
+    "promoted": 1,
     "skipped": 0,
     "pending_canary": 0,
-    "prod_readonly": 115
+    "prod_readonly": 116
   }
 }
