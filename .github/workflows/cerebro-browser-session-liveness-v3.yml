@@ -7,6 +7,7 @@ on:
       - 'supabase/functions/cerebro-browser-interactive-v3/**'
       - 'cerebro/runtime/browser-session-liveness-v3.test.mjs'
       - 'cerebro/runtime/browser-live-runner-host.test.mjs'
+      - 'cerebro/runtime/browser-oidc-refresh-v2.test.mjs'
       - 'cerebro/runtime/browser-job-runner-v2.mjs'
       - 'cerebro/runtime/browser-interactive-session-v3.mjs'
       - '.github/workflows/cerebro-browser-job-runner-v2-live.yml'
@@ -16,6 +17,7 @@ on:
       - 'supabase/functions/cerebro-browser-interactive-v3/**'
       - 'cerebro/runtime/browser-session-liveness-v3.test.mjs'
       - 'cerebro/runtime/browser-live-runner-host.test.mjs'
+      - 'cerebro/runtime/browser-oidc-refresh-v2.test.mjs'
       - 'cerebro/runtime/browser-job-runner-v2.mjs'
       - 'cerebro/runtime/browser-interactive-session-v3.mjs'
       - '.github/workflows/cerebro-browser-job-runner-v2-live.yml'
@@ -26,7 +28,7 @@ permissions:
 
 jobs:
   session-liveness:
-    name: Stale session recovery and LIVE runtime contract
+    name: Stale session recovery, host runtime and OIDC lifecycle
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -34,5 +36,5 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Validate browser session and LIVE runtime contracts
-        run: node --test cerebro/runtime/browser-session-liveness-v3.test.mjs cerebro/runtime/browser-live-runner-host.test.mjs
+      - name: Validate browser session, LIVE runtime and OIDC refresh contracts
+        run: node --test cerebro/runtime/browser-session-liveness-v3.test.mjs cerebro/runtime/browser-live-runner-host.test.mjs cerebro/runtime/browser-oidc-refresh-v2.test.mjs
