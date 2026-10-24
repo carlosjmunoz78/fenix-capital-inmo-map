@@ -1,0 +1,124 @@
+name: CEREBRO Creative Studio V2.5 Native Cinematic
+
+on:
+  push:
+    branches: [cerebro/creative-quality-v23-2026-10-24]
+    paths:
+      - 'cerebro/runtime/creative-studio-native-cut-v2.mjs'
+      - 'cerebro/runtime/creative-social-audio-v5.mjs'
+      - 'cerebro/runtime/creative-social-finisher-v5.mjs'
+      - 'cerebro/runtime/creative-cinematic-quality-v1.mjs'
+      - 'cerebro/tests/creative-studio-native-showcase-v2.mjs'
+      - '.github/workflows/cerebro-creative-studio-v25-native-cinematic.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'cerebro/runtime/creative-studio-native-cut-v2.mjs'
+      - 'cerebro/runtime/creative-social-audio-v5.mjs'
+      - 'cerebro/runtime/creative-social-finisher-v5.mjs'
+      - 'cerebro/runtime/creative-cinematic-quality-v1.mjs'
+      - 'cerebro/tests/creative-studio-native-showcase-v2.mjs'
+      - '.github/workflows/cerebro-creative-studio-v25-native-cinematic.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PIPER_RELEASE: '2023.11.14-2'
+  PIPER_VOICE_REV: 'b145f2ac26522d6a2ccde0164b7b0e48b1e3199c'
+  CEREBRO_PIPER_BIN: /tmp/cerebro-piper/piper/piper
+  CEREBRO_PIPER_MODEL: /tmp/cerebro-piper/es_ES-sharvard-medium.onnx
+  CEREBRO_PIPER_CONFIG: /tmp/cerebro-piper/es_ES-sharvard-medium.onnx.json
+  CEREBRO_NATIVE_STUDIO_OUT: /tmp/cerebro-creative-studio-v25
+
+jobs:
+  native-cinematic-physical-candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Static contract checks
+        run: |
+          set -euo pipefail
+          node --check cerebro/runtime/creative-studio-native-cut-v2.mjs
+          node --check cerebro/runtime/creative-social-audio-v5.mjs
+          node --check cerebro/runtime/creative-social-finisher-v5.mjs
+          node --check cerebro/runtime/creative-cinematic-quality-v1.mjs
+          node --check cerebro/tests/creative-studio-native-showcase-v2.mjs
+      - name: Install Chromium and FFmpeg
+        run: |
+          npx playwright install --with-deps chromium
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends ffmpeg fonts-dejavu-core
+      - name: Cache pinned Piper voice
+        uses: actions/cache@v4
+        with:
+          path: /tmp/cerebro-piper
+          key: studio-v25-piper-${{ runner.os }}-2023-11-14-2-b145f2a-sharvard-medium
+      - name: Materialize pinned Piper voice
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/cerebro-piper
+          if [ ! -x "$CEREBRO_PIPER_BIN" ]; then
+            curl --fail --location --silent --show-error "https://github.com/rhasspy/piper/releases/download/${PIPER_RELEASE}/piper_linux_x86_64.tar.gz" -o /tmp/cerebro-piper/piper.tar.gz
+            tar -xzf /tmp/cerebro-piper/piper.tar.gz -C /tmp/cerebro-piper
+          fi
+          if [ ! -s "$CEREBRO_PIPER_MODEL" ]; then
+            curl --fail --location --silent --show-error "https://huggingface.co/rhasspy/piper-voices/resolve/${PIPER_VOICE_REV}/es/es_ES/sharvard/medium/es_ES-sharvard-medium.onnx" -o "$CEREBRO_PIPER_MODEL"
+          fi
+          if [ ! -s "$CEREBRO_PIPER_CONFIG" ]; then
+            curl --fail --location --silent --show-error "https://huggingface.co/rhasspy/piper-voices/resolve/${PIPER_VOICE_REV}/es/es_ES/sharvard/medium/es_ES-sharvard-medium.onnx.json" -o "$CEREBRO_PIPER_CONFIG"
+          fi
+          chmod +x "$CEREBRO_PIPER_BIN"
+      - name: Render physical V2.5 native cinematic candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          node cerebro/tests/creative-studio-native-showcase-v2.mjs | tee /tmp/v25-result.json
+          grep -F '"ok":true' /tmp/v25-result.json
+          grep -F '"promotion_eligible":false' /tmp/v25-result.json
+      - name: Verify fail-closed physical contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs');
+          const p='/tmp/cerebro-creative-studio-v25/NATIVE_CINEMATIC_MANIFEST.json';
+          const m=JSON.parse(fs.readFileSync(p,'utf8'));
+          if(m.environment!=='PREPROD'||m.publish_authorized!==false||m.additional_cost_eur!==0) throw new Error('GOVERNANCE');
+          if(m.promotion_eligible!==false||m.human_creative_review_required!==true||m.human_creative_gate!=='PENDING_REVIEW') throw new Error('HUMAN_GATE');
+          if(m.productions.length!==3) throw new Error('PRODUCTION_COUNT');
+          for(const x of m.productions){
+            const q=x.technical_cinematic_qa||{},e=x.physical_evidence||{};
+            if(q.technical_passed!==true||q.promotion_eligible!==false) throw new Error(`TECH_QA:${x.label}`);
+            if(e.music_real_track!==true||e.music_license!=='CC0-1.0'||e.music_peak_db<-8) throw new Error(`MUSIC:${x.label}`);
+            if(e.distinct_voice_count<2) throw new Error(`VOICES:${x.label}`);
+            if(e.per_shot_camera_motion!==true||e.camera_motion_profile_count<5) throw new Error(`CAMERA:${x.label}`);
+            if(e.vfx_profile_count<4) throw new Error(`VFX:${x.label}`);
+            if(x.human_creative_gate!=='PENDING_REVIEW'||x.promotion_eligible!==false) throw new Error(`PROMOTION_GATE:${x.label}`);
+          }
+          console.log('V25_TECHNICAL_CANDIDATE_HUMAN_PENDING');
+          NODE
+      - name: Extract human review contact sheets
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$CEREBRO_NATIVE_STUDIO_OUT/review-frames"
+          for f in story-v25 reel-v25 video-largo-v25; do
+            ffmpeg -hide_banner -loglevel error -i "$CEREBRO_NATIVE_STUDIO_OUT/$f.mp4" -vf 'fps=2,scale=360:-2,tile=8x6:padding=4:margin=4' -frames:v 1 -y "$CEREBRO_NATIVE_STUDIO_OUT/review-frames/$f-contact-sheet.jpg"
+          done
+          sha256sum "$CEREBRO_NATIVE_STUDIO_OUT"/*.mp4 "$CEREBRO_NATIVE_STUDIO_OUT/NATIVE_CINEMATIC_MANIFEST.json" > "$CEREBRO_NATIVE_STUDIO_OUT/SHA256SUMS.txt"
+      - name: Upload PREPROD candidate for human review
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-creative-studio-v25-native-${{ github.sha }}
+          path: /tmp/cerebro-creative-studio-v25
+          retention-days: 7
