@@ -11,6 +11,7 @@ const DEFAULT_STAGE=Number(process.env.CEREBRO_BROWSER_STAGE_CONCURRENCY || 2);
 
 function required(value,name){if(value===undefined||value===null||value==='')throw new Error(`MISSING_${name}`);return value;}
 function plainObject(value){return Boolean(value)&&typeof value==='object'&&!Array.isArray(value)&&Object.getPrototypeOf(value)===Object.prototype;}
+function browserWorkerOptions(){const channel=String(process.env.CEREBRO_BROWSER_CHANNEL||'').trim();return channel?{launch_options:{channel}}:{};}
 async function getGitHubOidcTokenV2({audience=process.env.CEREBRO_BROWSER_OIDC_AUDIENCE||DEFAULT_AUDIENCE,request_url=process.env.ACTIONS_ID_TOKEN_REQUEST_URL,request_token=process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN,fetch_impl=fetch}={}){
   required(request_url,'ACTIONS_ID_TOKEN_REQUEST_URL'); required(request_token,'ACTIONS_ID_TOKEN_REQUEST_TOKEN');
   const url=new URL(request_url); url.searchParams.set('audience',audience);
@@ -45,7 +46,7 @@ export function applyHumanOperatorPacingV2(commands=[]){
   return out;
 }
 
-async function createDefaultBrowser1(){const mod=await import('./browser1-access-v1.mjs');return mod.createBrowser1Tool({sessions:[]});}
+async function createDefaultBrowser1(){const mod=await import('./browser1-access-v1.mjs');return mod.createBrowser1Tool({sessions:[],worker_options:browserWorkerOptions()});}
 function scrub(value,seen=new WeakSet()){
   if(!value||typeof value!=='object'||seen.has(value))return;
   seen.add(value);
@@ -145,7 +146,7 @@ export async function runOneBrowserJobV2({
     const end=resourceSample(); const duration=Date.now()-startMs;
     await callDispatch(endpoint,'complete-v2',oidc,{worker_slot,job_id:job.job_id,lease_id:job.lease_id,outcome:'FAILED',error_code:String(error?.message||error).slice(0,240),retryable:true,result_summary:{ok:false,credential_materialized:credentialMaterialized,secret_material_logged:false}},fetch_impl).catch(()=>null);
     await callDispatch(endpoint,'metrics-v2',oidc,{worker_slot,run_id,stage_concurrency,job_id:job.job_id,company_id:job.company_id,department_id:job.department_id,browser_profile_id:job.browser_profile_id,
-      started_at:start.at,finished_at:end.at,duration_ms:duration,rss_start_bytes:start.rss,rss_end_bytes:end.rss,heap_used_start_bytes:start.heap_used,heap_used_end_bytes:end.heap_used,
+      started_at:start.at,finished_at:end.at,duration_ms:duration,rss_start_bytes:start.rss,rss_end_bytes:end.rss,heap_used_start_bytes:start.heap_used,rss_end_bytes:end.rss,heap_used_end_bytes:end.heap_used,
       cpu_user_micros:Math.max(0,end.cpu_user-start.cpu_user),cpu_system_micros:Math.max(0,end.cpu_system-start.cpu_system),outcome:'FAILED'},fetch_impl).catch(()=>null);
     throw error;
   }finally{
@@ -162,4 +163,4 @@ async function main(){
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href)await main();
 
-export const BROWSER_JOB_RUNNER_V2_CONTRACT=Object.freeze({schema_version:'2.2.0',capability_id:'BROWSER-1',orchestrator:'BROWSER-ORCH-V2',authentication:'GITHUB_ACTIONS_OIDC',worker_pool:true,one_serial_browser1_per_worker:true,raw_credentials_in_queue:false,vault_credential_materialization:true,human_operator_liveness:true,adaptive_ui_settle_pacing:true,interactive_phase3_opt_in:true,interactive_same_v2_queue:true,no_stealth_evasion:true,metrics_without_secrets:true,incremental_cost_eur:0,serial_v1_rollback_preserved:true});
+export const BROWSER_JOB_RUNNER_V2_CONTRACT=Object.freeze({schema_version:'2.3.0',capability_id:'BROWSER-1',orchestrator:'BROWSER-ORCH-V2',authentication:'GITHUB_ACTIONS_OIDC',worker_pool:true,one_serial_browser1_per_worker:true,raw_credentials_in_queue:false,vault_credential_materialization:true,human_operator_liveness:true,adaptive_ui_settle_pacing:true,interactive_phase3_opt_in:true,interactive_same_v2_queue:true,host_browser_channel_supported:true,no_stealth_evasion:true,metrics_without_secrets:true,incremental_cost_eur:0,serial_v1_rollback_preserved:true});
